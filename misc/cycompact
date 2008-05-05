@@ -1,0 +1,36 @@
+#! /usr/bin/env python
+import sys, re
+
+macro = r"""
+#define __Pyx_GoTo(filename, lineno, LABEL) \
+        do {__pyx_filename = __pyx_f[filename]; __pyx_lineno = lineno; __pyx_clineno = __LINE__; goto LABEL;} while(0)
+
+#define __Pyx_FailIf(EXPR, filename, lineno, LABEL) \
+        if (unlikely(EXPR)) __Pyx_GoTo(filename, lineno, LABEL);
+
+"""
+
+t2 = r"{__pyx_filename = __pyx_f\[(\d+)\]; __pyx_lineno = (\d+); __pyx_clineno = __LINE__; goto (__pyx_L\d+);}"
+t1 = r"if \(unlikely\((.*)\)\) " + t2
+
+sub1 = re.compile(t1).sub
+rep1 = '__Pyx_FailIf(\g<1>, \g<2>, \g<3>, \g<4>);'
+
+sub2 = re.compile(t2).sub
+rep2 = '__Pyx_GoTo(\g<1>, \g<2>, \g<3>);'
+
+source = sys.argv[1]
+fi = open(source, 'r')
+fo = open(source + '.sub', 'w')
+
+try:
+    fo.write(fi.readline())
+    fo.write(macro)
+    for line in fi:
+        lineout = line
+        lineout = sub1(rep1, lineout)
+        lineout = sub2(rep2, lineout)
+        fo.write(lineout)
+finally:
+    fi.close()
+    fo.close()

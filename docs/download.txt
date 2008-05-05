@@ -1,0 +1,5 @@
+Availability
+============
+
+The *MPI for Python* package is available for download at the project
+website generously hosted by Google Code http://mpi4py.googlecode.com/
