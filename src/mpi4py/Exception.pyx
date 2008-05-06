@@ -1,33 +1,47 @@
-cdef class Exception(RuntimeError):
+class Exception(RuntimeError):
 
     """
     Exception
     """
 
-    def __cinit__(self, int ierr=0):
+    def __init__(self, int ierr=0):
         if ierr < MPI_SUCCESS:      ierr = MPI_ERR_UNKNOWN
         if ierr > MPI_ERR_LASTCODE: ierr = MPI_ERR_UNKNOWN
         self.ob_mpi = ierr
-        RuntimeError.__init__(self, ierr)
+        RuntimeError.__init__(self, self.ob_mpi)
 
-    def __richcmp__(Exception self, int error, int op):
-        cdef int ierr  = self.ob_mpi
-        if op == 0: return ierr <  error
-        if op == 1: return ierr <= error
-        if op == 2: return ierr == error
-        if op == 3: return ierr != error
-        if op == 4: return ierr >  error
-        if op == 5: return ierr >= error
+    def __eq__(self, int error):
+        cdef int ierr = self.ob_mpi
+        return <bint> (ierr == error)
+    def __ne__(self, int error):
+        cdef int ierr = self.ob_mpi
+        return <bint> (ierr != error)
+    def __lt__(self, int error):
+        cdef int ierr = self.ob_mpi
+        return <bint> (ierr < error)
+    def __le__(self, int error):
+        cdef int ierr = self.ob_mpi
+        return <bint> (ierr <= error)
+    def __gt__(self, int error):
+        cdef int ierr = self.ob_mpi
+        return <bint> (ierr > error)
+    def __ge__(self, int error):
+        cdef int ierr = self.ob_mpi
+        return <bint> (ierr >= error)
 
     def __nonzero__(self):
-        return self.ob_mpi != MPI_SUCCESS
+        cdef int ierr = self.ob_mpi
+        return ierr != MPI_SUCCESS
 
     def __bool__(self):
-        return self.ob_mpi != MPI_SUCCESS
+        cdef int ierr = self.ob_mpi
+        return ierr != MPI_SUCCESS
 
     def __int__(self):
-        if not _mpi_active(): return self.ob_mpi
         return self.Get_error_code()
+
+    def __repr__(self):
+        return 'MPI.Exception(%d)' % self.ob_mpi
 
     def __str__(self):
         if not _mpi_active(): return "error code: %d" % self.ob_mpi
@@ -39,10 +53,7 @@ cdef class Exception(RuntimeError):
         errorcode = self.ob_mpi
         return errorcode
 
-    property error_code:
-        """error code"""
-        def __get__(self):
-            return self.Get_error_code()
+    error_code = property(Get_error_code, doc="error code")
 
     def Get_error_class(self):
         """
@@ -52,10 +63,7 @@ cdef class Exception(RuntimeError):
         CHKERR( MPI_Error_class(self.ob_mpi, &errorclass) )
         return errorclass
 
-    property error_class:
-        """error class"""
-        def __get__(self):
-            return self.Get_error_class()
+    error_class = property(Get_error_class, doc="error class")
 
     def Get_error_string(self):
         """
@@ -66,10 +74,9 @@ cdef class Exception(RuntimeError):
         CHKERR( MPI_Error_string(self.ob_mpi, string, &resultlen) )
         return string
 
-    property error_string:
-        """error string"""
-        def __get__(self):
-            return self.Get_error_string()
+    error_string = property(Get_error_string, doc="error string")
+
+
 
 def Get_error_class(int errorcode):
     """
@@ -87,6 +94,8 @@ def Get_error_string(int errorcode):
     cdef int resultlen = 0
     CHKERR( MPI_Error_string(errorcode, string, &resultlen) )
     return string
+
+
 
 # Actually no errors
 SUCCESS      = MPI_SUCCESS

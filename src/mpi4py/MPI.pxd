@@ -6,10 +6,6 @@
 
 include "mpi.pxi"
 
-cdef extern from "Python.h":
-    ctypedef class __builtin__.RuntimeError [object PyBaseExceptionObject]:
-        pass
-
 # --
 
 ctypedef MPI_Aint   Aint
@@ -75,10 +71,6 @@ cdef class Win:
 
 cdef class File:
     cdef MPI_File ob_mpi
-    cdef int flags
-
-cdef class Exception(RuntimeError):
-    cdef int ob_mpi
     cdef int flags
 
 # --
