@@ -1,41 +1,6 @@
 from mpi4py import MPI
 import mpiunittest as unittest
-
-typemap = dict(h=MPI.SHORT,
-               i=MPI.INT,
-               l=MPI.LONG,
-               f=MPI.FLOAT,
-               d=MPI.DOUBLE)
-
-arrayimpl = []
-
-try:
-    import array
-    def mk_buf_array_1(a, dt=None, c=None):
-        return (a, c or len(a), dt or typemap[a.typecode])
-    def mk_buf_array_2(a, dt=None, c=None):
-        if c is None: return (a, dt or typemap[a.typecode])
-        else:         return (a, c, dt or typemap[a.typecode])
-    mk_buf_array = (mk_buf_array_1, mk_buf_array_2)
-    mk_arr_array = lambda typecode, init: array.array(typecode, init)
-    eq_arr_array = lambda a, b : a == b
-    arrayimpl.append((mk_buf_array, mk_arr_array, eq_arr_array))
-except ImportError:
-    pass
-
-try:
-    import numpy
-    def mk_buf_numpy_1(a, dt=None, c=None):
-        return (a, c or a.size, dt or typemap[a.dtype.char])
-    def mk_buf_numpy_2(a, dt=None, c=None):
-        if c is None: return (a.data, dt or typemap[a.dtype.char])
-        else:         return (a.data, c or a.size, dt or typemap[a.dtype.char])
-    mk_buf_numpy = (mk_buf_numpy_1, mk_buf_numpy_2)
-    mk_arr_numpy = lambda typecode, init: numpy.array(init, dtype=typecode)
-    eq_arr_numpy = lambda a, b : numpy.allclose(a, b)
-    arrayimpl.append((mk_buf_numpy, mk_arr_numpy, eq_arr_numpy))
-except ImportError:
-    pass
+import arrayimpl
 
 
 class TestP2PBufBase(object):
@@ -47,54 +12,53 @@ class TestP2PBufBase(object):
         rank = self.COMM.Get_rank()
         dest = (rank + 1) % size
         source = (rank - 1) % size
-        for mkbufs, array, equal in arrayimpl:
-            for mkbuf in mkbufs:
-                for typecode, datatype in typemap.items():
-                    for s in range(0, size):
-                        sbuf = array(typecode, [s] * s)
-                        rbuf = array(typecode, [-1] * s)
-                        self.COMM.Sendrecv(mkbuf(sbuf, datatype), dest,   0,
-                                           mkbuf(rbuf, datatype), source, 0)
-                        for value in rbuf:
-                            self.assertEqual(value, s)
+        for array in arrayimpl.ArrayTypes:
+            for typecode in arrayimpl.TypeMap:
+                for s in range(0, size):
+                    sbuf = array( s, typecode, s)
+                    rbuf = array(-1, typecode, s+1)
+                    self.COMM.Sendrecv(sbuf.as_mpi(), dest,   0,
+                                       rbuf.as_mpi(), source, 0)
+                    for value in rbuf[:-1]:
+                        self.assertEqual(value, s)
+                    self.assertEqual(rbuf[-1], -1)
 
     def testSendRecv(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
-        for mkbufs, array, equal in arrayimpl:
-            for mkbuf in mkbufs:
-                for typecode, datatype in typemap.items():
-                    for s in range(0, size):
-                        sbuf = array(typecode, [s] * s)
-                        rbuf = array(typecode, [-1] * s)
-                        mem  = array(typecode, [0] * (s+MPI.BSEND_OVERHEAD))
-                        if size == 1:
-                            MPI.Attach_buffer(mem)
-                            rbuf = sbuf
-                            MPI.Detach_buffer()
-                        elif rank == 0:
-                            MPI.Attach_buffer(mem)
-                            self.COMM.Bsend(mkbuf(sbuf, datatype), 1, 0)
-                            MPI.Detach_buffer()
-                            self.COMM.Send(mkbuf(sbuf, datatype), 1, 0)
-                            self.COMM.Ssend(mkbuf(sbuf, datatype), 1, 0)
-                            self.COMM.Recv(mkbuf(rbuf, datatype),  1, 0)
-                            self.COMM.Recv(mkbuf(rbuf, datatype), 1, 0)
-                            self.COMM.Recv(mkbuf(rbuf, datatype), 1, 0)
-                        elif rank == 1:
-                            self.COMM.Recv(mkbuf(rbuf, datatype), 0, 0)
-                            self.COMM.Recv(mkbuf(rbuf, datatype), 0, 0)
-                            self.COMM.Recv(mkbuf(rbuf, datatype), 0, 0)
-                            MPI.Attach_buffer(mem)
-                            self.COMM.Bsend(mkbuf(sbuf, datatype), 0, 0)
-                            MPI.Detach_buffer()
-                            self.COMM.Send(mkbuf(sbuf, datatype), 0, 0)
-                            self.COMM.Ssend(mkbuf(sbuf, datatype), 0, 0)
-                        else:
-                            rbuf = sbuf
+        for array in arrayimpl.ArrayTypes:
+            for typecode in arrayimpl.TypeMap:
+                for s in range(0, size):
+                    sbuf = array( s, typecode, s)
+                    rbuf = array(-1, typecode, s)
+                    mem  = array( 0, typecode, s+MPI.BSEND_OVERHEAD)
+                    if size == 1:
+                        MPI.Attach_buffer(mem)
+                        rbuf = sbuf
+                        MPI.Detach_buffer()
+                    elif rank == 0:
+                        MPI.Attach_buffer(mem)
+                        self.COMM.Bsend(sbuf.as_mpi(), 1, 0)
+                        MPI.Detach_buffer()
+                        self.COMM.Send(sbuf.as_mpi(), 1, 0)
+                        self.COMM.Ssend(sbuf.as_mpi(), 1, 0)
+                        self.COMM.Recv(rbuf.as_mpi(),  1, 0)
+                        self.COMM.Recv(rbuf.as_mpi(), 1, 0)
+                        self.COMM.Recv(rbuf.as_mpi(), 1, 0)
+                    elif rank == 1:
+                        self.COMM.Recv(rbuf.as_mpi(), 0, 0)
+                        self.COMM.Recv(rbuf.as_mpi(), 0, 0)
+                        self.COMM.Recv(rbuf.as_mpi(), 0, 0)
+                        MPI.Attach_buffer(mem)
+                        self.COMM.Bsend(sbuf.as_mpi(), 0, 0)
+                        MPI.Detach_buffer()
+                        self.COMM.Send(sbuf.as_mpi(), 0, 0)
+                        self.COMM.Ssend(sbuf.as_mpi(), 0, 0)
+                    else:
+                        rbuf = sbuf
 
-                        for value in rbuf:
-                            self.assertEqual(value, s)
+                    for value in rbuf:
+                        self.assertEqual(value, s)
 
 
     def testPersistent(self):
@@ -102,15 +66,15 @@ class TestP2PBufBase(object):
         rank = self.COMM.Get_rank()
         dest = (rank + 1) % size
         source = (rank - 1) % size
-        for mkbufs, array, equal in arrayimpl:
-            for mkbuf in mkbufs:
-                for typecode, datatype in typemap.items():
-                    for s in range(size):
+        for array in arrayimpl.ArrayTypes:
+            for typecode in arrayimpl.TypeMap:
+                for s in range(size):
+                    for xs in range(3):
                         #
-                        sbuf = array(typecode, [s]*s)
-                        rbuf = array(typecode, [-1]*s)
-                        sendreq = self.COMM.Send_init(mkbuf(sbuf, datatype), dest, 0)
-                        recvreq = self.COMM.Recv_init(mkbuf(rbuf, datatype), source, 0)
+                        sbuf = array( s, typecode, s)
+                        rbuf = array(-1, typecode, s+xs)
+                        sendreq = self.COMM.Send_init(sbuf.as_mpi(), dest, 0)
+                        recvreq = self.COMM.Recv_init(rbuf.as_mpi(), source, 0)
                         sendreq.Start()
                         recvreq.Start()
                         sendreq.Wait()
@@ -119,23 +83,34 @@ class TestP2PBufBase(object):
                         self.assertNotEqual(recvreq, MPI.REQUEST_NULL)
                         sendreq.Free()
                         recvreq.Free()
+                        for value in rbuf[:s]:
+                            self.assertEqual(value, s)
+                        for value in rbuf[s:]:
+                            self.assertEqual(value, -1)
                         #
-                        sbuf = array(typecode, [s]*s)
-                        rbuf = array(typecode, [-1]*s)
-                        sendreq = self.COMM.Send_init(mkbuf(sbuf, datatype), dest, 0)
-                        recvreq = self.COMM.Recv_init(mkbuf(rbuf, datatype), source, 0)
+                        sbuf = array(s,  typecode, s)
+                        rbuf = array(-1, typecode, s+xs)
+                        sendreq = self.COMM.Send_init(sbuf.as_mpi(), dest, 0)
+                        recvreq = self.COMM.Recv_init(rbuf.as_mpi(), source, 0)
                         reqlist = [sendreq, recvreq]
                         MPI.Prequest.Startall(reqlist)
-                        index = MPI.Prequest.Waitany(reqlist)
-                        self.assertTrue(index in [0, 1])
-                        self.assertNotEqual(reqlist[index], MPI.REQUEST_NULL)
-                        MPI.Prequest.Waitall(reqlist)
+                        index1 = MPI.Prequest.Waitany(reqlist)
+                        self.assertTrue(index1 in [0, 1])
+                        self.assertNotEqual(reqlist[index1], MPI.REQUEST_NULL)
+                        index2 = MPI.Prequest.Waitany(reqlist)
+                        self.assertTrue(index2 in [0, 1])
+                        self.assertNotEqual(reqlist[index2], MPI.REQUEST_NULL)
+                        self.assertTrue(index1 != index2)
+                        index3 = MPI.Prequest.Waitany(reqlist)
+                        self.assertEqual(index3, MPI.UNDEFINED)
                         for preq in reqlist:
                             self.assertNotEqual(preq, MPI.REQUEST_NULL)
                             preq.Free()
                             self.assertEqual(preq, MPI.REQUEST_NULL)
-                        for value in rbuf:
+                        for value in rbuf[:s]:
                             self.assertEqual(value, s)
+                        for value in rbuf[s:]:
+                            self.assertEqual(value, -1)
 
 
 class TestP2PBufSelf(TestP2PBufBase, unittest.TestCase):

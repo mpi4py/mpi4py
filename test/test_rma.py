@@ -1,41 +1,6 @@
 from mpi4py import MPI
 import mpiunittest as unittest
-
-typemap = dict(h=MPI.SHORT,
-               i=MPI.INT,
-               l=MPI.LONG,
-               f=MPI.FLOAT,
-               d=MPI.DOUBLE)
-
-arrayimpl = []
-
-try:
-    import array
-    def mk_buf_array_1(a, dt=None, c=None):
-        return (a, c or len(a), dt or typemap[a.typecode])
-    def mk_buf_array_2(a, dt=None, c=None):
-        if c is None: return (a, dt or typemap[a.typecode])
-        else:         return (a, c, dt or typemap[a.typecode])
-    mk_buf_array = (mk_buf_array_1, mk_buf_array_2)
-    mk_arr_array = lambda typecode, init: array.array(typecode, init)
-    eq_arr_array = lambda a, b : a == b
-    arrayimpl.append((mk_buf_array, mk_arr_array, eq_arr_array))
-except ImportError:
-    pass
-
-try:
-    import numpy
-    def mk_buf_numpy_1(a, dt=None, c=None):
-        return (a, c or a.size, dt or typemap[a.dtype.char])
-    def mk_buf_numpy_2(a, dt=None, c=None):
-        if c is None: return (a.data, dt or typemap[a.dtype.char])
-        else:         return (a.data, c or a.size, dt or typemap[a.dtype.char])
-    mk_buf_numpy = (mk_buf_numpy_1, mk_buf_numpy_2)
-    mk_arr_numpy = lambda typecode, init: numpy.array(init, dtype=typecode)
-    eq_arr_numpy = lambda a, b : numpy.allclose(a, b)
-    arrayimpl.append((mk_buf_numpy, mk_arr_numpy, eq_arr_numpy))
-except ImportError:
-    pass
+import arrayimpl
 
 class TestRMABase(object):
 
@@ -60,43 +25,43 @@ class TestRMABase(object):
         group = self.WIN.Get_group()
         size = group.Get_size()
         group.Free()
-        for mkbufs, array, equal in arrayimpl:
-            for mkbuf in mkbufs:
-                for typecode, datatype in typemap.items():
-                    for count in range(1, 10):
-                        for rank in range(size):
-                            sbuf = array(typecode, range(count))
-                            rbuf = array(typecode, [-1] * (count+1))
-                            self.WIN.Fence()
-                            self.WIN.Put(mkbuf(sbuf, datatype, count), rank)
-                            self.WIN.Fence()
-                            self.WIN.Get(mkbuf(rbuf, datatype, count), rank)
-                            self.WIN.Fence()
-                            for i, value in enumerate(rbuf[:-1]):
-                                self.assertEqual(value, i)
-                            self.assertEqual(rbuf[-1], -1)
+        for array in arrayimpl.ArrayTypes:
+            for typecode in arrayimpl.TypeMap:
+                for count in range(0, 10):
+                    for rank in range(size):
+                        sbuf = array(range(count), typecode)
+                        rbuf = array(-1, typecode, count+1)
+                        self.WIN.Fence()
+                        self.WIN.Put(sbuf.as_mpi(), rank)
+                        self.WIN.Fence()
+                        self.WIN.Get(rbuf.as_mpi_c(count), rank)
+                        self.WIN.Fence()
+                        for i in range(count):
+                            self.assertEqual(sbuf[i], i)
+                            self.assertNotEqual(rbuf[i], -1)
+                        self.assertEqual(rbuf[-1], -1)
 
     def testAccumulate(self):
         group = self.WIN.Get_group()
         size = group.Get_size()
         group.Free()
-        for mkbufs, array, equal in arrayimpl:
-            for mkbuf in mkbufs:
-                for typecode, datatype in typemap.items():
-                    for count in range(1, 10):
-                        for rank in range(size):
-                            sbuf = array(typecode, range(count))
-                            rbuf = array(typecode, [-1] * (count+1))
-                            for op in (MPI.SUM, MPI.PROD, MPI.MAX, MPI.MIN):
-                                self.WIN.Fence()
-                                self.WIN.Accumulate(mkbuf(sbuf, datatype, count), rank, op=op)
-                                self.WIN.Fence()
-                                self.WIN.Get(mkbuf(rbuf, datatype, count), rank)
-                                self.WIN.Fence()
-                                #
-                                self.assertEqual(rbuf[-1], -1)
-                                for i, value in enumerate(rbuf[:-1]):
-                                    self.assertNotEqual(value, -1)
+        for array in arrayimpl.ArrayTypes:
+            for typecode in arrayimpl.TypeMap:
+                for count in range(0, 10):
+                    for rank in range(size):
+                        sbuf = array(range(count), typecode)
+                        rbuf = array(-1, typecode, count+1)
+                        for op in (MPI.SUM, MPI.PROD, MPI.MAX, MPI.MIN):
+                            self.WIN.Fence()
+                            self.WIN.Accumulate(sbuf.as_mpi(), rank, op=op)
+                            self.WIN.Fence()
+                            self.WIN.Get(rbuf.as_mpi_c(count), rank)
+                            self.WIN.Fence()
+                            #
+                            for i in range(count):
+                                self.assertEqual(sbuf[i], i)
+                                self.assertNotEqual(rbuf[i], -1)
+                            self.assertEqual(rbuf[-1], -1)
 
 
     def testPutProcNull(self):
