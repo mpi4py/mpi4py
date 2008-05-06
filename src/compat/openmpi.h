@@ -8,8 +8,18 @@
 /* ---------------------------------------------------------------- */
 
 #if !defined(OPEN_MPI_DLOPEN_LIBMPI)
-#define OPEN_MPI_DLOPEN_LIBMPI 1
+
+#define OPEN_MPI_DLOPEN_LIBMPI 0
+
+#if defined(OMPI_MAJOR_VERSION) && defined(OMPI_MINOR_VERSION) && defined(OMPI_RELEASE_VERSION)
+  #if ((OMPI_MAJOR_VERSION*10000)+(OMPI_MINOR_VERSION*100)+(OMPI_RELEASE_VERSION)) > 10203
+  #undef  OPEN_MPI_DLOPEN_LIBMPI
+  #define OPEN_MPI_DLOPEN_LIBMPI 1
+  #endif
 #endif
+
+#endif /* !defined(OPEN_MPI_DLOPEN_LIBMPI) */
+
 
 #if OPEN_MPI_DLOPEN_LIBMPI
 
