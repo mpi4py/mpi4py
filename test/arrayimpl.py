@@ -63,7 +63,7 @@ else:
                 self.byteswap()
             else:
                 ary = Array(self, self.typecode, self.shape)
-                ary.byteswap()
+                array.array.byteswap(ary)
                 return ary
 
         def allclose(self, ary, rtol=1.e-5, atol=1.e-8):
