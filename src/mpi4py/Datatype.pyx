@@ -227,8 +227,8 @@ cdef class Datatype:
     # Size-specific Datatypes
     # -----------------------
 
-    ## @staticmethod
-    def Match_size(int typeclass, int size):
+    ## @classmethod
+    def Match_size(cls, int typeclass, int size):
         """
         Find a datatype matching a specified size in bytes
         """
@@ -236,7 +236,7 @@ cdef class Datatype:
         CHKERR( MPI_Type_match_size(typeclass, size, &datatype) )
         return _new_Datatype(datatype)
 
-    Match_size = staticmethod(Match_size)
+    Match_size = classmethod(Match_size)
 
     # Use of Derived Datatypes
     # ------------------------
