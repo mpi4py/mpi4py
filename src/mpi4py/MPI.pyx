@@ -27,9 +27,9 @@ include "Request.pyx"       # DONE (except Prequest)
 include "Op.pyx"            # DONE (except user-defined operations)
 include "Info.pyx"          # DONE
 include "Group.pyx"         # DONE
-include "Comm.pyx"          # TODO: all vector collectives
-include "Win.pyx"           # DONE:
-include "File.pyx"          # DONE:
+include "Comm.pyx"          # DONE
+include "Win.pyx"           # DONE
+include "File.pyx"          # DONE
 include "Errhandler.pyx"    # DONE
 include "Exception.pyx"     # DONE
 
