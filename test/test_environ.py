@@ -24,7 +24,9 @@ class TestEnviron(unittest.TestCase):
 
     def testGetProcessorName(self):
         procname = MPI.Get_processor_name()
-        self.assertTrue(isinstance(procname, type('')))
+        try: strtypes = (str, bytes)
+        except NameError: strtypes = str
+        self.assertTrue(isinstance(procname, strtypes))
 
     def testWTime(self):
         time1 = MPI.Wtime()

@@ -31,7 +31,7 @@ def comp_pi(n, myrank=0, nprocs=1):
 
 def prn_pi(pi, PI):
     message = "pi is approximately %.16f, error is %.16f"
-    print  message % (pi, abs(pi - PI))
+    print  (message % (pi, abs(pi - PI)))
 
 comm = MPI.COMM_WORLD
 nprocs = comm.Get_size()

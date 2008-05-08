@@ -42,6 +42,18 @@
 
 /* ---------------------------------------------------------------- */
 
+#if PY_MAJOR_VERSION >= 3
+static PyObject *
+PyBuffer_FromReadWriteMemory(void *ptr, Py_ssize_t len) {
+  Py_buffer info;
+  if (PyBuffer_FillInfo(&info, ptr, len, 0, PyBUF_SIMPLE) < 0)
+    return NULL;
+  return PyMemoryView_FromMemory(&info);
+}
+#endif
+
+/* ---------------------------------------------------------------- */
+
 static PyObject * PyMPI_Get_vendor(void)
 {
   const char* name = "unknown";

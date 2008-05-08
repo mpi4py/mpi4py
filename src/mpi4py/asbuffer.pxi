@@ -4,6 +4,8 @@ cdef extern from "Python.h":
     ctypedef void const_void "const void"
     int PyObject_AsReadBuffer (object, const_void**, Py_ssize_t*) except -1
     int PyObject_AsWriteBuffer(object, void**, Py_ssize_t*) except -1
+
+cdef extern from "Python.h":
     object PyBuffer_FromReadWriteMemory(void*, Py_ssize_t)
 
 #---------------------------------------------------------------------

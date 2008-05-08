@@ -17,9 +17,13 @@ except ImportError:
     pass
 else:
 
-    from operator import mul
-    def product(seq): return reduce(mul, seq, 1)
-    def mkshape(seq): return tuple([int(s) for s in seq])
+    def product(seq):
+        res = 1
+        for s in seq:
+            res = res * s
+        return res
+    def mkshape(seq):
+        return tuple([int(s) for s in seq])
 
     class Array(array.array):
 
