@@ -250,8 +250,9 @@ int main(int argc, char **argv) {
 }
 """
 
-import mpiscanner
-class Configure(mpiscanner.Scanner):
+try: from mpiscanner import Scanner
+except ImportError: Scanner = object
+class Configure(Scanner):
     SRCDIR = os.path.join('src', 'mpi4py')
     SOURCES = ['mpi.pxi']
     DESTDIR = os.path.join('src')
