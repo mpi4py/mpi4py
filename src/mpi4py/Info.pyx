@@ -61,7 +61,7 @@ cdef class Info:
         if not flag: return (None, False)
         else:        return (value, True)
 
-    def Set(self, char key[], char *value):
+    def Set(self, char key[], char value[]):
         """
         Add the (key,value) pair to info, and overrides the value if a
         value for the same key was previously set
@@ -141,7 +141,7 @@ cdef class Info:
         if not haskey: raise KeyError(key)
         return value
 
-    def __setitem__(self, char key[], char *value):
+    def __setitem__(self, char key[], char value[]):
         if not self: raise KeyError(key)
         self.Set(key, value)
 
