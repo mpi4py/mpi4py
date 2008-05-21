@@ -48,7 +48,9 @@ class Exception(RuntimeError):
         return self.Get_error_string()
 
     def Get_error_code(self):
-        """Error code"""
+        """
+        Error code
+        """
         cdef int errorcode = MPI_SUCCESS
         errorcode = self.ob_mpi
         return errorcode
