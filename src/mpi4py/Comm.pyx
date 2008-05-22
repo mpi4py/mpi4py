@@ -632,12 +632,14 @@ cdef class Comm:
         cdef char name[MPI_MAX_OBJECT_NAME+1]
         cdef int nlen = 0
         CHKERR( MPI_Comm_get_name(self.ob_mpi, name, &nlen) )
-        return name
+        return tompistr(name, nlen)
 
-    def Set_name(self, char name[]):
+    def Set_name(self, name):
         """
         """
-        CHKERR( MPI_Comm_set_name(self.ob_mpi, name) )
+        cdef char *cname = NULL
+        name = asmpistr(name, &cname, NULL)
+        CHKERR( MPI_Comm_set_name(self.ob_mpi, cname) )
 
     property name:
         """communicator name"""
@@ -768,11 +770,12 @@ cdef class Intracomm(Comm):
 
     # Starting Processes
 
-    def Spawn(self, char command[], args, int maxprocs,
+    def Spawn(self, command, args, int maxprocs,
               info=None, int root=0, errcodes=None):
         """
         Spawn instances of a single MPI application
         """
+        cdef char *cmd = NULL
         cdef char **argv = MPI_ARGV_NULL
         cdef MPI_Info iinfo = _arg_Info(info)
         cdef int *ierrcodes = MPI_ERRCODES_IGNORE
@@ -781,13 +784,14 @@ cdef class Intracomm(Comm):
         CHKERR( MPI_Comm_rank(self.ob_mpi, &rank) )
         cdef object tmp1 = None, tmp2 = None
         if root == rank:
+            command = asmpistr(command, &cmd, NULL)
             if args is not None:
                 tmp1 = asarray_argv(args, &argv)
             if errcodes is not None:
                 tmp2 = newarray_int(maxprocs, &ierrcodes)
         #
         cdef Intercomm comm = Intercomm()
-        CHKERR( MPI_Comm_spawn(command, argv, maxprocs, iinfo, root,
+        CHKERR( MPI_Comm_spawn(cmd, argv, maxprocs, iinfo, root,
                                self.ob_mpi, &comm.ob_mpi, ierrcodes) )
         #
         cdef int i = 0
@@ -797,25 +801,29 @@ cdef class Intracomm(Comm):
 
     # Server Routines
 
-    def Accept(self, char port_name[], info=None, int root=0):
+    def Accept(self, port_name, info=None, int root=0):
         """
         Accept a request to form a new intercommunicator
         """
+        cdef char *cportname = NULL
+        port_name = asmpistr(port_name, &cportname, NULL)
         cdef MPI_Info iinfo = _arg_Info(info)
         cdef Intercomm comm = Intercomm()
-        CHKERR( MPI_Comm_accept(port_name, iinfo, root,
+        CHKERR( MPI_Comm_accept(cportname, iinfo, root,
                                 self.ob_mpi, &comm.ob_mpi) )
         return comm
 
     # Client Routines
 
-    def Connect(self, char port_name[], info=None, int root=0):
+    def Connect(self, port_name, info=None, int root=0):
         """
         Make a request to form a new intercommunicator
         """
+        cdef char *cportname = NULL
+        port_name = asmpistr(port_name, &cportname, NULL)
         cdef MPI_Info iinfo = _arg_Info(info)
         cdef Intercomm comm = Intercomm()
-        CHKERR( MPI_Comm_connect(port_name, iinfo, root,
+        CHKERR( MPI_Comm_connect(cportname, iinfo, root,
                                  self.ob_mpi, &comm.ob_mpi) )
         return comm
 
@@ -1302,36 +1310,51 @@ def Open_port(info=None):
     connections between groups of MPI processes
     """
     cdef MPI_Info iinfo = _arg_Info(info)
-    cdef char port_name[MPI_MAX_PORT_NAME+1]
-    CHKERR( MPI_Open_port(iinfo, port_name) )
-    return port_name
+    cdef char cportname[MPI_MAX_PORT_NAME+1]
+    CHKERR( MPI_Open_port(iinfo, cportname) )
+    return tompistr(cportname, -1)
 
-def Close_port(char port_name[], info=None):
+def Close_port(port_name, info=None):
     """
     Close a port
     """
+    cdef char *cportname = NULL
+    port_name = asmpistr(port_name, &cportname, NULL)
     cdef MPI_Info iinfo = _arg_Info(info)
-    CHKERR( MPI_Close_port(port_name) )
+    CHKERR( MPI_Close_port(cportname) )
 
 # [5.4.4] Name Publishing
 # -----------------------
 
-def Publish_name(char service_name[], Info info, char port_name[]):
+def Publish_name(service_name, info, port_name):
     """
     Publish a service name
     """
-    CHKERR( MPI_Publish_name(service_name, info.ob_mpi, port_name) )
+    cdef char *csrvcname = NULL
+    service_name = asmpistr(service_name, &csrvcname, NULL)
+    cdef char *cportname = NULL
+    port_name = asmpistr(port_name, &cportname, NULL)
+    cdef MPI_Info iinfo = _arg_Info(info)
+    CHKERR( MPI_Publish_name(csrvcname, iinfo, cportname) )
 
-def Unpublish_name(char service_name[], Info info, char port_name[]):
+def Unpublish_name(service_name, info, port_name):
     """
     Unpublish a service name
     """
-    CHKERR( MPI_Unpublish_name(service_name, info.ob_mpi, port_name) )
+    cdef char *csrvcname = NULL
+    service_name = asmpistr(service_name, &csrvcname, NULL)
+    cdef char *cportname = NULL
+    port_name = asmpistr(port_name, &cportname, NULL)
+    cdef MPI_Info iinfo = _arg_Info(info)
+    CHKERR( MPI_Unpublish_name(csrvcname, iinfo, cportname) )
 
-def Lookup_name(service_name, Info info):
+def Lookup_name(service_name, info=None):
     """
     Lookup a port name given a service name
     """
-    cdef char port_name[MPI_MAX_PORT_NAME+1]
-    CHKERR( MPI_Lookup_name(service_name, info.ob_mpi, port_name) )
-    return port_name
+    cdef char *csrvcname = NULL
+    service_name = asmpistr(service_name, &csrvcname, NULL)
+    cdef MPI_Info iinfo = _arg_Info(info)
+    cdef char cportname[MPI_MAX_PORT_NAME+1]
+    CHKERR( MPI_Lookup_name(csrvcname, iinfo, cportname) )
+    return tompistr(cportname, -1)

@@ -269,14 +269,15 @@ cdef class Win:
         cdef char name[MPI_MAX_OBJECT_NAME+1]
         cdef int nlen = 0
         CHKERR( MPI_Win_get_name(self.ob_mpi, name, &nlen) )
-        name[nlen] = 0
-        return name
+        return tompistr(name, nlen)
 
-    def Set_name(self, char* name):
+    def Set_name(self, name):
         """
         Set the print name associated with the window
         """
-        CHKERR( MPI_Win_set_name(self.ob_mpi, name) )
+        cdef char *cname = NULL
+        name = asmpistr(name, &cname, NULL)
+        CHKERR( MPI_Win_set_name(self.ob_mpi, cname) )
 
     property name:
         """window name"""

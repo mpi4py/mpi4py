@@ -150,6 +150,7 @@ class TestDatatype(unittest.TestCase):
                 name = dtype.Get_name()
                 self.assertTrue(name)
                 dtype.Set_name(name)
+                self.assertEqual(name, dtype.Get_name())
             except NotImplementedError:
                 return
 

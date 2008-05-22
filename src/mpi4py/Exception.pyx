@@ -1,5 +1,5 @@
 include "ExceptionP.pyx"
-##include "ExceptionC.pyx"
+#include "ExceptionC.pyx"
 
 
 def Get_error_class(int errorcode):
@@ -17,7 +17,7 @@ def Get_error_string(int errorcode):
     cdef char string[MPI_MAX_ERROR_STRING+1]
     cdef int resultlen = 0
     CHKERR( MPI_Error_string(errorcode, string, &resultlen) )
-    return string
+    return tompistr(string, resultlen)
 
 
 

@@ -47,32 +47,40 @@ cdef class Info:
         CHKERR( MPI_Info_dup(self.ob_mpi, &info.ob_mpi) )
         return info
 
-    def Get(self, char key[], int maxlen=-1):
+    def Get(self, key, int maxlen=-1):
         """
         Retrieve the value associated with a key
         """
         if maxlen < 0: maxlen = MPI_MAX_INFO_VAL
         if maxlen > MPI_MAX_INFO_VAL: maxlen = MPI_MAX_INFO_VAL
-        cdef char *value = NULL
-        cdef object tmp = allocate((maxlen+1), <void**>&value)
-        cdef int flag = 0
-        CHKERR( MPI_Info_get(self.ob_mpi, key, maxlen, value, &flag) )
-        value[maxlen] = 0 # just in case
-        if not flag: return (None, False)
-        else:        return (value, True)
+        cdef char *ckey = NULL
+        cdef char *cvalue = NULL
+        cdef bint flag = 0
+        key = asmpistr(key, &ckey, NULL)
+        cdef object tmp = allocate((maxlen+1), <void**>&cvalue)
+        CHKERR( MPI_Info_get(self.ob_mpi, ckey, maxlen, cvalue, &flag) )
+        cvalue[maxlen] = 0 # just in case
+        value = tompistr(cvalue, -1) if flag else None
+        return (value, flag)
 
-    def Set(self, char key[], char value[]):
+    def Set(self, key, value):
         """
-        Add the (key,value) pair to info, and overrides the value if a
-        value for the same key was previously set
+        Add the (key, value) pair to info, and overrides the value if
+        a value for the same key was previously set
         """
-        CHKERR( MPI_Info_set(self.ob_mpi, key, value) )
+        cdef char *ckey = NULL
+        cdef char *cvalue = NULL
+        key = asmpistr(key, &ckey, NULL)
+        value = asmpistr(value, &cvalue, NULL)
+        CHKERR( MPI_Info_set(self.ob_mpi, ckey, cvalue) )
 
-    def Delete(self, char key[]):
+    def Delete(self, key):
         """
         Remove a (key,value) pair from info
         """
-        CHKERR( MPI_Info_delete(self.ob_mpi, key) )
+        cdef char *ckey = NULL
+        key = asmpistr(key, &ckey, NULL)
+        CHKERR( MPI_Info_delete(self.ob_mpi, ckey) )
 
     def Get_nkeys(self):
         """
@@ -88,19 +96,22 @@ cdef class Info:
         range [0, N) where N is the value returned by
         `Info.Get_nkeys()`
         """
-        cdef char key[MPI_MAX_INFO_KEY+1]
-        CHKERR( MPI_Info_get_nthkey(self.ob_mpi, n, key) )
-        return key
+        cdef char ckey[MPI_MAX_INFO_KEY+1]
+        CHKERR( MPI_Info_get_nthkey(self.ob_mpi, n, ckey) )
+        ckey[MPI_MAX_INFO_KEY] = 0 # just in case
+        return tompistr(ckey, -1)
 
     def __len__(self):
         if not self: return 0
         return self.Get_nkeys()
 
-    def __contains__(self, char key[]):
+    def __contains__(self, key):
         if not self: return False
+        cdef char *ckey = NULL
         cdef int dummy = 0
         cdef bint haskey = 0
-        CHKERR( MPI_Info_get_valuelen(self.ob_mpi, key,
+        key = asmpistr(key, &ckey, NULL)
+        CHKERR( MPI_Info_get_valuelen(self.ob_mpi, ckey,
                                       &dummy, &haskey) )
         return haskey
 
@@ -135,17 +146,17 @@ cdef class Info:
     def __iter__(self):
         return iter(self.keys())
 
-    def __getitem__(self, char key[]):
+    def __getitem__(self, key):
         if not self: raise KeyError(key)
         value, haskey = self.Get(key)
         if not haskey: raise KeyError(key)
         return value
 
-    def __setitem__(self, char key[], char value[]):
+    def __setitem__(self, key, value):
         if not self: raise KeyError(key)
         self.Set(key, value)
 
-    def __delitem__(self, char key[]):
+    def __delitem__(self, key):
         if not self: raise KeyError(key)
         if key not in self: raise KeyError(key)
         self.Delete(key)

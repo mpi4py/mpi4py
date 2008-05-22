@@ -15,6 +15,7 @@ IN_PLACE = <MPI_Aint>MPI_IN_PLACE
 #"""*In-place* option for collective communications"""
 
 include "allocate.pxi"
+include "asmpistr.pxi"
 include "asbuffer.pxi"
 include "asarray.pxi"
 include "asmemory.pxi"
@@ -174,7 +175,7 @@ def Get_processor_name():
     cdef char name[MPI_MAX_PROCESSOR_NAME+1]
     cdef int nlen = 0
     CHKERR( MPI_Get_processor_name(name, &nlen) )
-    return name
+    return tompistr(name, nlen)
 
 # Timers and Synchronization
 # --------------------------

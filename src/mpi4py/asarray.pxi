@@ -75,16 +75,15 @@ cdef inline object restore_Status(object sequence, MPI_Status **p, Py_ssize_t n)
 
 #---------------------------------------------------------------------
 
-cdef extern from "Python.h":
-     char *PyString_AsString(object)
-
-cdef inline object asarray_argv(sequence, char ***p):
+cdef inline object asarray_argv(object sequence, char ***p):
+     sequence = list(sequence)
      cdef Py_ssize_t i = 0, n = len(sequence)
      cdef char** array = NULL
      cdef object ob = allocate((n+1)*sizeof(char*), <void**>&array)
-     for i from 0 <= i < n: array[i] = PyString_AsString(sequence[i])
+     for i from 0 <= i < n:
+          sequence[i] = asmpistr(sequence[i], &array[i], NULL)
      array[n] = NULL
      p[0] = array
-     return ob
+     return (sequence, ob)
 
 #---------------------------------------------------------------------

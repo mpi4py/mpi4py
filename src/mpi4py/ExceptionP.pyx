@@ -74,6 +74,6 @@ class Exception(RuntimeError):
         cdef char string[MPI_MAX_ERROR_STRING+1]
         cdef int resultlen = 0
         CHKERR( MPI_Error_string(self.ob_mpi, string, &resultlen) )
-        return string
+        return tompistr(string, resultlen)
 
     error_string = property(Get_error_string, doc="error string")

@@ -352,12 +352,13 @@ cdef class Datatype:
     # Canonical Pack and Unpack
     # -------------------------
 
-    def Pack_external(self, char datarep[],
-                      inbuf, outbuf, Aint position):
+    def Pack_external(self, datarep, inbuf, outbuf, Aint position):
         """
         Pack into contiguous memory according to datatype,
         using a portable data representation (**external32**).
         """
+        cdef char *cdatarep = NULL
+        datarep = asmpistr(datarep, &cdatarep, NULL)
         cdef MPI_Aint lb = 0, extent = 0
         CHKERR( MPI_Type_get_extent(self.ob_mpi, &lb, &extent) )
         #
@@ -368,17 +369,18 @@ cdef class Datatype:
         cdef int icount = <int>(iblen/extent)
         cdef MPI_Aint osize = <int>oblen
         #
-        CHKERR( MPI_Pack_external(datarep, ibptr, icount,
+        CHKERR( MPI_Pack_external(cdatarep, ibptr, icount,
                                   self.ob_mpi,
                                   obptr, osize, &position) )
         return position
 
-    def Unpack_external(self, char datarep[],
-                        inbuf, Aint position, outbuf):
+    def Unpack_external(self, datarep, inbuf, Aint position, outbuf):
         """
         Unpack from contiguous memory according to datatype,
         using a portable data representation (**external32**).
         """
+        cdef char *cdatarep = NULL
+        datarep = asmpistr(datarep, &cdatarep, NULL)
         cdef MPI_Aint lb = 0, extent = 0
         CHKERR( MPI_Type_get_extent(self.ob_mpi, &lb, &extent) )
         #
@@ -389,18 +391,20 @@ cdef class Datatype:
         cdef MPI_Aint isize = iblen,
         cdef int ocount = <int>(oblen/extent)
         #
-        CHKERR( MPI_Unpack_external(datarep, ibptr, isize, &position,
+        CHKERR( MPI_Unpack_external(cdatarep, ibptr, isize, &position,
                                     obptr, ocount, self.ob_mpi) )
         return position
 
-    def Pack_external_size(self, char datarep[], int count):
+    def Pack_external_size(self, datarep, int count):
         """
         Returns the upper bound on the amount of space (in bytes)
         needed to pack a message according to datatype,
         using a portable data representation (**external32**).
         """
+        cdef char *cdatarep = NULL
         cdef MPI_Aint size = 0
-        CHKERR( MPI_Pack_external_size(datarep, count,
+        datarep = asmpistr(datarep, &cdatarep, NULL)
+        CHKERR( MPI_Pack_external_size(cdatarep, count,
                                        self.ob_mpi, &size) )
         return size
 
@@ -414,13 +418,15 @@ cdef class Datatype:
         cdef char name[MPI_MAX_OBJECT_NAME+1]
         cdef int nlen = 0
         CHKERR( MPI_Type_get_name(self.ob_mpi, name, &nlen) )
-        return name
+        return tompistr(name, nlen)
 
-    def Set_name(self, char* name):
+    def Set_name(self, name):
         """
         Set the print name for this datatype
         """
-        CHKERR( MPI_Type_set_name(self.ob_mpi, name) )
+        cdef char *cname = NULL
+        name = asmpistr(name, &cname, NULL)
+        CHKERR( MPI_Type_set_name(self.ob_mpi, cname) )
 
     property name:
         """datatype name"""

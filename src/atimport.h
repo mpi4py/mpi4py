@@ -43,13 +43,30 @@
 /* ---------------------------------------------------------------- */
 
 #if PY_MAJOR_VERSION >= 3
-static PyObject *
-PyBuffer_FromReadWriteMemory(void *ptr, Py_ssize_t len) {
+static PyObject * PyBuffer_FromReadWriteMemory(void *p, Py_ssize_t n) 
+{
   Py_buffer info;
-  if (PyBuffer_FillInfo(&info, ptr, len, 0, PyBUF_SIMPLE) < 0)
+  if (PyBuffer_FillInfo(&info, p, n, 0, PyBUF_SIMPLE) < 0)
     return NULL;
   return PyMemoryView_FromMemory(&info);
 }
+#endif
+
+#if PY_MAJOR_VERSION < 3
+static char * PyMPIString_AsStringAndSize(PyObject *ob, Py_ssize_t *n) 
+{
+  char *s = 0;
+  if (PyString_AsStringAndSize(ob, &s, n) < 0) return NULL;
+  return s;
+}
+#define PyMPIString_AsString          PyString_AsString
+#define PyMPIString_FromStringAndSize PyString_FromStringAndSize
+#define PyMPIString_FromString        PyString_FromString
+#else
+#define PyMPIString_AsStringAndSize   PyUnicode_AsStringAndSize
+#define PyMPIString_AsString          PyUnicode_AsString
+#define PyMPIString_FromStringAndSize PyUnicode_FromStringAndSize
+#define PyMPIString_FromString        PyUnicode_FromString
 #endif
 
 /* ---------------------------------------------------------------- */

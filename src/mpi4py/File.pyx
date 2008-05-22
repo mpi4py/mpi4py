@@ -29,14 +29,16 @@ cdef class File:
     # ----------------------
 
     ## @classmethod
-    def Open(cls, Intracomm comm, char filename[],
+    def Open(cls, Intracomm comm, filename,
              int amode, info=None):
         """
         Open a file
         """
+        cdef char *cfilename = NULL
+        filename = asmpistr(filename, &cfilename, NULL)
         cdef MPI_Info iinfo = _arg_Info(info)
         cdef File file = cls()
-        CHKERR( MPI_File_open(comm.ob_mpi, filename,
+        CHKERR( MPI_File_open(comm.ob_mpi, cfilename,
                               amode, iinfo, &file.ob_mpi) )
         # we are in charge or managing MPI errors
         CHKERR( MPI_File_set_errhandler(
@@ -58,12 +60,14 @@ cdef class File:
     # -----------------------
 
     ## @classmethod
-    def Delete(cls, char filename[], info=None):
+    def Delete(cls, filename, info=None):
         """
         Delete a file
         """
+        cdef char *cfilename = NULL
+        filename = asmpistr(filename, &cfilename, NULL)
         cdef MPI_Info iinfo = _arg_Info(info)
-        CHKERR( MPI_File_delete(filename, iinfo) )
+        CHKERR( MPI_File_delete(cfilename, iinfo) )
 
     Delete = classmethod(Delete)
 
@@ -160,10 +164,13 @@ cdef class File:
     # ----------------
 
     def Set_view(self, Offset disp=0, etype=None, ftype=None,
-                 char datarep[]='native', info=None):
+                 datarep=None, info=None):
         """
         Set the file view
         """
+        if datarep is None: datarep = tompistr('native', -1)
+        cdef char *cdatarep = NULL
+        datarep = asmpistr(datarep, &cdatarep, NULL)
         cdef MPI_Datatype ietype = MPI_BYTE
         if etype is not None: ietype = (<Datatype?>etype).ob_mpi
         cdef MPI_Datatype iftype = ietype
@@ -172,7 +179,7 @@ cdef class File:
         if info is not None: iinfo = (<Info?>info).ob_mpi
         CHKERR( MPI_File_set_view(self.ob_mpi, disp,
                                   ietype, iftype,
-                                  datarep, iinfo) )
+                                  cdatarep, iinfo) )
 
     def Get_view(self):
         """
@@ -181,13 +188,14 @@ cdef class File:
         cdef MPI_Offset disp = 0
         cdef Datatype etype = Datatype()
         cdef Datatype ftype = Datatype()
-        cdef char datarep[MPI_MAX_DATAREP_STRING+1]
+        cdef char cdatarep[MPI_MAX_DATAREP_STRING+1]
         CHKERR( MPI_File_get_view(self.ob_mpi, &disp,
                                   &etype.ob_mpi, &ftype.ob_mpi,
-                                  datarep) )
+                                  cdatarep) )
         _fix_Datatype(etype)
         _fix_Datatype(ftype)
-        datarep[MPI_MAX_DATAREP_STRING] = 0
+        cdatarep[MPI_MAX_DATAREP_STRING] = 0 # just in case
+        datarep = tompistr(cdatarep, -1)
         return (disp, etype, ftype, datarep)
 
     # [9.4] Data Access
