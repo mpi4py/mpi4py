@@ -66,7 +66,7 @@ else:
             if inplace:
                 self.byteswap()
             else:
-                ary = Array(self, self.typecode, self.shape)
+                ary = Array(list(self), self.typecode, self.shape)
                 array.array.byteswap(ary)
                 return ary
 
