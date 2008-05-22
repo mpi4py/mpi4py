@@ -6,7 +6,7 @@ class TestFileBase(object):
 
     COMM = MPI.COMM_NULL
     FILE = MPI.FILE_NULL
-    
+
     prefix = 'mpi4py'
 
     def setUp(self):
@@ -17,17 +17,18 @@ class TestFileBase(object):
             self.FILE = MPI.File.Open(self.COMM,
                                       self.fname, self.amode,
                                       MPI.INFO_NULL)
-        except NotImplementedError:
+        except Exception:
             os.close(self.fd)
-            return
+            os.remove(self.fname)
+            raise
 
     def tearDown(self):
         if self.FILE == MPI.FILE_NULL: return
+        os.close(self.fd)
         amode = self.FILE.amode
         self.FILE.Close()
         if not (amode & MPI.MODE_DELETE_ON_CLOSE):
             MPI.File.Delete(self.fname, MPI.INFO_NULL)
-        os.close(self.fd)
 
     def testPreallocate(self):
         # XXX MPICH2 generates a warning
@@ -183,7 +184,11 @@ if _name == 'Open MPI':
         del TestFileBase.testSeekGetPositionShared
 else:
     try:
-        MPI.FILE_NULL.Get_errhandler().Free()
+        dummy = TestFileBase()
+        dummy.COMM = MPI.COMM_SELF
+        dummy.setUp()
+        dummy.tearDown()
+        del dummy
     except NotImplementedError:
         del TestFileNull
         del TestFileBase
