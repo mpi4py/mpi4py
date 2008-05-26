@@ -138,8 +138,13 @@ def _find_mpi_compiler(envvars, executables, path=None):
 
 # --------------------------------------------------------
 
-from ConfigParser import ConfigParser
-from ConfigParser import Error as ConfigParserError
+try:
+    from ConfigParser import ConfigParser
+    from ConfigParser import Error as ConfigParserError
+except ImportError:
+    from configparser import ConfigParser
+    from configparser import Error as ConfigParserError
+
 
 def _config_parser(section, filenames, raw=False, vars=None):
     """
