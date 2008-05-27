@@ -1,7 +1,7 @@
 cdef class Win:
 
     """
-    Win
+    Window
     """
 
     def __cinit__(self):
