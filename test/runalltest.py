@@ -3,7 +3,7 @@ import unittest
 
 try: # use the 'installed' mpi4py
     from mpi4py import MPI
-except ImportError: # or the one no yet installed mpi4py
+except ImportError: # or the no yet installed mpi4py
     from distutils.util import get_platform
     plat_specifier = ".%s-%s" % (get_platform(), sys.version[0:3])
     os.path.split(__file__)[0]
@@ -22,6 +22,15 @@ testpath = os.path.split(__file__)[0]
 sys.path.insert(0, testpath)
 import mpiunittest
 
-for tests in mpiunittest.find_tests(exclude=['test_doc',
-                                             ]):
-    mpiunittest.main(tests)
+alltests = mpiunittest.find_tests(
+    exclude=['test_doc',
+             ]
+    )
+
+def runtests(*args, **kargs):
+    for test in alltests:
+        mpiunittest.main(test, *args, **kargs)
+
+
+if __name__ == '__main__':
+    runtests()
