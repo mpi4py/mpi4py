@@ -2,6 +2,8 @@
 Message Passing Interface
 """
 
+include "mpi.pxi"
+
 include "atimport.pxi"
 
 _init1() # management of MPI initialization
@@ -17,8 +19,8 @@ IN_PLACE = <MPI_Aint>MPI_IN_PLACE
 include "allocate.pxi"
 include "asmpistr.pxi"
 include "asbuffer.pxi"
-include "asarray.pxi"
 include "asmemory.pxi"
+include "asarray.pxi"
 include "helpers.pxi"
 include "message.pxi"
 

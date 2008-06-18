@@ -241,6 +241,7 @@ def _configure(extension, confdict):
 from distutils.command import config as cmd_config
 from distutils.command import build as cmd_build
 from distutils.command import build_ext as cmd_build_ext
+from distutils.command import install_data as cmd_install_data
 from distutils.command import sdist as cmd_sdist
 
 from distutils.errors import DistutilsPlatformError
@@ -259,12 +260,12 @@ try: from mpiscanner import Scanner
 except ImportError: Scanner = object
 class Configure(Scanner):
     SRCDIR = os.path.join('src', 'mpi4py')
-    SOURCES = ['mpi.pxi']
+    SOURCES = [os.path.join('include', 'mpi4py', 'mpi.pxi')]
     DESTDIR = os.path.join('src')
     CONFIG_H = 'config.h'
     MISSING_H = 'missing.h'
     def __init__(self):
-        mpiscanner.Scanner.__init__(self)
+        Scanner.__init__(self)
         for filename in self.SOURCES:
             fullname = os.path.join(self.SRCDIR, filename)
             self.parse_file(fullname)
@@ -548,6 +549,15 @@ class build_ext(cmd_build_ext.build_ext):
     def configure_extension(self, extension, config_info):
         _configure(extension, config_info)
 
+
+class install_data (cmd_install_data.install_data):
+
+    def finalize_options (self):
+        self.set_undefined_options('install',
+                                   ('install_lib', 'install_dir'),
+                                   ('root', 'root'),
+                                   ('force', 'force'),
+                                   )
 
 # --------------------------------------------------------
 

@@ -285,7 +285,7 @@ class Scanner(object):
 
 
 if __name__ == '__main__':
-    sources = ['mpi.pxi']
+    sources = [os.path.join('include', 'mpi4py', 'mpi.pxi')]
     import sys, os
     log = lambda msg: sys.stderr.write(msg + '\n')
     scanner = Scanner()

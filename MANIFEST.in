@@ -4,7 +4,7 @@ include *.py *.cfg *.txt
 recursive-include demo *.py *.txt
 recursive-include docs *.rst *.txt *.conf
 recursive-include conf *.py
-recursive-include src  *.py *.pyx *.px[di] *.c *.h
+recursive-include src  *.py *.pyx *.px[di] *.c *.h *.i
 recursive-include test *.py *.txt
 
 include                [M,m]akefile

@@ -107,9 +107,6 @@ def ext_modules():
                )
     return [MPI]
 
-def headers():
-    return []
-
 def executables():
     import sys, os
     from distutils import sysconfig
@@ -142,7 +139,7 @@ def executables():
 
 from distutils.core import setup
 from conf.mpidistutils import Distribution, Extension, Executable
-from conf.mpidistutils import config, build, build_ext
+from conf.mpidistutils import config, build, build_ext, install_data
 from conf.mpidistutils import build_exe, install_exe, clean_exe
 LibHeader = lambda header: str(header)
 ExtModule = lambda extension: Extension(**extension)
@@ -152,18 +149,24 @@ def main():
     """
     call distutils.setup(*targs, **kwargs)
     """
-    setup(packages    = ['mpi4py'],
-          package_dir = {'mpi4py' : 'src/mpi4py'},
-          headers     = [LibHeader(hdr) for hdr in headers()],
-          ext_modules = [ExtModule(ext) for ext in ext_modules()],
-          executables = [ExeBinary(exe) for exe in executables()],
+    setup(packages     = ['mpi4py'],
+          package_dir  = {'mpi4py' : 'src/mpi4py'},
+          package_data = {'mpi4py' : ['include/*.pxd',
+                                      'include/*.pxi',
+                                      'include/mpi4py/*.h',
+                                      'include/mpi4py/*.pxd',
+                                      'include/mpi4py/*.pxi',
+                                      'include/mpi4py/*.i',]},
+          ext_modules  = [ExtModule(ext) for ext in ext_modules()],
+          executables  = [ExeBinary(exe) for exe in executables()],
           distclass = Distribution,
-          cmdclass = {'config'      : config,
-                      'build'       : build,
-                      'build_ext'   : build_ext,
-                      'build_exe'   : build_exe,
-                      'clean_exe'   : clean_exe,
-                      'install_exe' : install_exe,
+          cmdclass = {'config'       : config,
+                      'build'        : build,
+                      'build_ext'    : build_ext,
+                      'install_data' : install_data,
+                      'build_exe'    : build_exe,
+                      'clean_exe'    : clean_exe,
+                      'install_exe'  : install_exe,
                       },
           **metadata)
 

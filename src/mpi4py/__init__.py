@@ -28,11 +28,33 @@ Modules:
 
 """
 
-__docformat__ = 'reStructuredText'
-
 __author__    = 'Lisandro Dalcin'
 __credits__   = 'MPI Forum, MPICH Team, Open MPI Team.'
 __version__   = '1.0.0'
 __revision__  = '$Id$'
 
+# --------------------------------------------------------------------
+
+__docformat__ = 'reStructuredText'
+
 __all__ = ['MPI',]
+
+# --------------------------------------------------------------------
+
+def get_include():
+    """
+    Return the directory in the package that contains header files.
+
+    Extension modules that need to compile against mpi44py should use
+    this function to locate the appropriate include directory. Using
+    Python distutils (or perhaps NumPy distutils)::
+
+      import mpi4py
+      Extension('extension_name', ...
+                include_dirs=[..., mpi4py.get_include()])
+
+    """
+    from os.path import dirname, join
+    return join(dirname(__file__), 'include')
+
+# --------------------------------------------------------------------
