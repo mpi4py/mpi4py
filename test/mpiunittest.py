@@ -41,10 +41,11 @@ def ErrClsName(ierr):
     if ErrClsMap is None:
         from mpi4py import MPI
         ErrClsMap = {}
+        ErrClsMap[MPI.SUCCESS] = 'SUCCESS'
         for entry in dir(MPI):
             if 'ERR_' in entry:
-                ierr = getattr(MPI, entry)
-                ErrClsMap[ierr] = entry
+                errcls = getattr(MPI, entry)
+                ErrClsMap[errcls] = entry
     try:
         return ErrClsMap[ierr]
     except KeyError:
