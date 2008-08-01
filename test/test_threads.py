@@ -1,9 +1,15 @@
 try:
-    from threading import Thread, currentThread
+    import threading as _threading
     _HAS_THREADING = True
 except ImportError:
-    from dummy_threading import Thread, currentThread
+    import dummy_threading as _threading
     _HAS_THREADING = False
+
+Thread = _threading.Thread
+try:
+    currentThread = _threading.currentThread
+except AttributeError:
+    currentThread = _threading.current_thread
 
 from mpi4py import MPI
 import mpiunittest as unittest

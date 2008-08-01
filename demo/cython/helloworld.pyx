@@ -44,7 +44,6 @@ cdef IntracommType SELF = MPI.COMM_SELF
 cimport mpi4py.mpi_c as mpi
 
 cdef mpi.MPI_Comm world1 = WORLD.ob_mpi
-cdef mpi.MPI_Comm world2 = WORLD.comm
 
 cdef int ierr1=0
 
@@ -73,8 +72,7 @@ print (hwmess % (rank1, size1, pname1))
 
 include "mpi4py/mpi.pxi"
 
-cdef MPI_Comm world3 = WORLD.ob_mpi
-cdef MPI_Comm world4 = WORLD.comm
+cdef MPI_Comm world2 = WORLD.ob_mpi
 
 cdef int ierr2=0
 

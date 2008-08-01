@@ -26,6 +26,22 @@ from distutils.spawn import find_executable
 from distutils import log
 
 
+# --------------------------------------------------------
+# Monkey-Patch Py3K distutils
+# --------------------------------------------------------
+from distutils import filelist
+_FileList = filelist.FileList
+class FileList(_FileList):
+    def _parse_template_line(self, line):
+        (action, patterns, dir, dir_pattern) = \
+                 _FileList._parse_template_line(self, line)
+        if patterns is not None:
+            patterns = list(patterns)
+        return (action, patterns, dir, dir_pattern)
+filelist.FileList = FileList
+# --------------------------------------------------------
+
+
 def customize_compiler(compiler, environ=None):
     """
     Do any platform-specific customization of a CCompiler instance.
@@ -259,7 +275,7 @@ int main(int argc, char **argv) {
 try: from mpiscanner import Scanner
 except ImportError: Scanner = object
 class Configure(Scanner):
-    SRCDIR = os.path.join('src', 'mpi4py')
+    SRCDIR = 'src'
     SOURCES = [os.path.join('include', 'mpi4py', 'mpi.pxi')]
     DESTDIR = os.path.join('src')
     CONFIG_H = 'config.h'

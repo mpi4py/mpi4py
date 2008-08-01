@@ -150,11 +150,12 @@ def main():
     call distutils.setup(*targs, **kwargs)
     """
     setup(packages     = ['mpi4py'],
-          package_dir  = {'mpi4py' : 'src/mpi4py'},
+          package_dir  = {'mpi4py' : 'src'},
           package_data = {'mpi4py' : ['include/*.pxd',
                                       'include/*.pxi',
                                       'include/mpi4py/*.h',
                                       'include/mpi4py/*.pxd',
+                                      'include/mpi4py/*.pyx',
                                       'include/mpi4py/*.pxi',
                                       'include/mpi4py/*.i',]},
           ext_modules  = [ExtModule(ext) for ext in ext_modules()],
