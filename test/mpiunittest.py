@@ -18,11 +18,16 @@ class TestCase(unittest.TestCase):
             else:
                 match = (error_class == IErrClass)
             if not match:
+                if isinstance(IErrClass, (list, tuple)):
+                    IErrClassName = [ErrClsName(e) for e in IErrClass]
+                    IErrClassName = type(IErrClass)(IErrClassName)
+                else:
+                    IErrClassName = ErrClsName(IErrClass)
                 raise self.failureException(
                     "generated error class is '%s' (%d), "
-                    "but expected '%s' (%d)" % \
+                    "but expected '%s' (%s)" % \
                     (ErrClsName(error_class), error_class,
-                     ErrClsName(IErrClass),   IErrClass,)
+                     IErrClassName,  IErrClass,)
                     )
         else:
             if hasattr(excClass,'__name__'): excName = excClass.__name__

@@ -127,8 +127,11 @@ try:
 except NotImplementedError:
     del TestInfoNull, TestInfo
 
+if MPI.Get_version() <= (2, 0):
+    MPI_ERR_INFO = (MPI.ERR_INFO, MPI.ERR_ARG)
+
 _name, _version = MPI.get_vendor()
-if _name == 'MPICH2' and _version <= (1,0,7):
+if _name == 'MPICH2':
     # XXX under discussion
     MPI_ERR_INFO = MPI.ERR_ARG
 
