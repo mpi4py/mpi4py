@@ -70,7 +70,7 @@ cdef class Comm:
             return self.Get_rank()
 
     ## @classmethod
-    def Compare(cls, Comm comm1, Comm comm2):
+    def Compare(cls, Comm comm1 not None, Comm comm2 not None):
         """
         Compare two communicators
         """
@@ -118,7 +118,7 @@ cdef class Comm:
         CHKERR( MPI_Send(smsg.buf, smsg.count, smsg.dtype, dest, tag,
                          self.ob_mpi) )
 
-    def Recv(self, buf, int source=0, int tag=0, status=None):
+    def Recv(self, buf, int source=0, int tag=0, Status status=None):
         """
         Blocking receive
 
@@ -134,7 +134,7 @@ cdef class Comm:
 
     def Sendrecv(self, sendbuf, int dest=0, int sendtag=0,
                  recvbuf=None, int source=0, int recvtag=0,
-                 status=None):
+                 Status status=None):
         """
         Send and receive a message
 
@@ -158,7 +158,7 @@ cdef class Comm:
     def Sendrecv_replace(self, buf,
                          int dest=0,  int sendtag=0,
                          int source=0, int recvtag=0,
-                         status=None):
+                         Status status=None):
         """
         Send and receive a message
 
@@ -207,7 +207,7 @@ cdef class Comm:
     # Probe
     # -----
 
-    def Probe(self, int source=0, int tag=0, status=None):
+    def Probe(self, int source=0, int tag=0, Status status=None):
         """
         Blocking test for a message
 
@@ -216,7 +216,7 @@ cdef class Comm:
         cdef MPI_Status *statusp = _arg_Status(status)
         CHKERR( MPI_Probe(source, tag, self.ob_mpi, statusp) )
 
-    def Iprobe(self, source=0, tag=0, status=None):
+    def Iprobe(self, source=0, tag=0, Status status=None):
         """
         Nonblocking test for a message
         """
@@ -601,7 +601,7 @@ cdef class Comm:
                                         &errhandler.ob_mpi) )
         return errhandler
 
-    def Set_errhandler(self, Errhandler errhandler):
+    def Set_errhandler(self, Errhandler errhandler not None):
         """
         Set the error handler for a communicator
         """
@@ -666,7 +666,7 @@ cdef class Intracomm(Comm):
         CHKERR( MPI_Comm_dup(self.ob_mpi, &comm.ob_mpi) )
         return comm
 
-    def Create(self, Group group):
+    def Create(self, Group group not None):
         """
         Create intracommunicator from group
         """
@@ -723,7 +723,7 @@ cdef class Intracomm(Comm):
 
     def Create_intercomm(self,
                          int local_leader,
-                         Intracomm peer_comm,
+                         Intracomm peer_comm not None,
                          int remote_leader,
                          int tag=0):
         """
@@ -771,13 +771,13 @@ cdef class Intracomm(Comm):
     # Starting Processes
 
     def Spawn(self, command, args, int maxprocs,
-              info=None, int root=0, errcodes=None):
+              Info info=None, int root=0, errcodes=None):
         """
         Spawn instances of a single MPI application
         """
         cdef char *cmd = NULL
         cdef char **argv = MPI_ARGV_NULL
-        cdef MPI_Info iinfo = _arg_Info(info)
+        cdef MPI_Info cinfo = _arg_Info(info)
         cdef int *ierrcodes = MPI_ERRCODES_IGNORE
         #
         cdef int rank = MPI_UNDEFINED
@@ -791,7 +791,7 @@ cdef class Intracomm(Comm):
                 tmp2 = newarray_int(maxprocs, &ierrcodes)
         #
         cdef Intercomm comm = Intercomm()
-        CHKERR( MPI_Comm_spawn(cmd, argv, maxprocs, iinfo, root,
+        CHKERR( MPI_Comm_spawn(cmd, argv, maxprocs, cinfo, root,
                                self.ob_mpi, &comm.ob_mpi, ierrcodes) )
         #
         cdef int i = 0
@@ -801,29 +801,29 @@ cdef class Intracomm(Comm):
 
     # Server Routines
 
-    def Accept(self, port_name, info=None, int root=0):
+    def Accept(self, port_name, Info info=None, int root=0):
         """
         Accept a request to form a new intercommunicator
         """
         cdef char *cportname = NULL
         port_name = asmpistr(port_name, &cportname, NULL)
-        cdef MPI_Info iinfo = _arg_Info(info)
+        cdef MPI_Info cinfo = _arg_Info(info)
         cdef Intercomm comm = Intercomm()
-        CHKERR( MPI_Comm_accept(cportname, iinfo, root,
+        CHKERR( MPI_Comm_accept(cportname, cinfo, root,
                                 self.ob_mpi, &comm.ob_mpi) )
         return comm
 
     # Client Routines
 
-    def Connect(self, port_name, info=None, int root=0):
+    def Connect(self, port_name, Info info=None, int root=0):
         """
         Make a request to form a new intercommunicator
         """
         cdef char *cportname = NULL
         port_name = asmpistr(port_name, &cportname, NULL)
-        cdef MPI_Info iinfo = _arg_Info(info)
+        cdef MPI_Info cinfo = _arg_Info(info)
         cdef Intercomm comm = Intercomm()
-        CHKERR( MPI_Comm_connect(cportname, iinfo, root,
+        CHKERR( MPI_Comm_connect(cportname, cinfo, root,
                                  self.ob_mpi, &comm.ob_mpi) )
         return comm
 
@@ -1226,7 +1226,7 @@ cdef class Intercomm(Comm):
         CHKERR( MPI_Comm_dup(self.ob_mpi, &comm.ob_mpi) )
         return comm
 
-    def Create(self, Group group):
+    def Create(self, Group group not None):
         """
         """
         cdef Intercomm comm = type(self)()
@@ -1304,29 +1304,29 @@ GRAPH = MPI_GRAPH
 # [5.4.2] Server Routines
 # -----------------------
 
-def Open_port(info=None):
+def Open_port(Info info=None):
     """
     Return an address that can be used to establish
     connections between groups of MPI processes
     """
-    cdef MPI_Info iinfo = _arg_Info(info)
+    cdef MPI_Info cinfo = _arg_Info(info)
     cdef char cportname[MPI_MAX_PORT_NAME+1]
-    CHKERR( MPI_Open_port(iinfo, cportname) )
+    CHKERR( MPI_Open_port(cinfo, cportname) )
     return tompistr(cportname, -1)
 
-def Close_port(port_name, info=None):
+def Close_port(port_name, Info info=None):
     """
     Close a port
     """
     cdef char *cportname = NULL
     port_name = asmpistr(port_name, &cportname, NULL)
-    cdef MPI_Info iinfo = _arg_Info(info)
+    cdef MPI_Info cinfo = _arg_Info(info)
     CHKERR( MPI_Close_port(cportname) )
 
 # [5.4.4] Name Publishing
 # -----------------------
 
-def Publish_name(service_name, info, port_name):
+def Publish_name(service_name, Info info, port_name):
     """
     Publish a service name
     """
@@ -1334,10 +1334,10 @@ def Publish_name(service_name, info, port_name):
     service_name = asmpistr(service_name, &csrvcname, NULL)
     cdef char *cportname = NULL
     port_name = asmpistr(port_name, &cportname, NULL)
-    cdef MPI_Info iinfo = _arg_Info(info)
-    CHKERR( MPI_Publish_name(csrvcname, iinfo, cportname) )
+    cdef MPI_Info cinfo = _arg_Info(info)
+    CHKERR( MPI_Publish_name(csrvcname, cinfo, cportname) )
 
-def Unpublish_name(service_name, info, port_name):
+def Unpublish_name(service_name, Info info, port_name):
     """
     Unpublish a service name
     """
@@ -1345,16 +1345,16 @@ def Unpublish_name(service_name, info, port_name):
     service_name = asmpistr(service_name, &csrvcname, NULL)
     cdef char *cportname = NULL
     port_name = asmpistr(port_name, &cportname, NULL)
-    cdef MPI_Info iinfo = _arg_Info(info)
-    CHKERR( MPI_Unpublish_name(csrvcname, iinfo, cportname) )
+    cdef MPI_Info cinfo = _arg_Info(info)
+    CHKERR( MPI_Unpublish_name(csrvcname, cinfo, cportname) )
 
-def Lookup_name(service_name, info=None):
+def Lookup_name(service_name, Info info=None):
     """
     Lookup a port name given a service name
     """
     cdef char *csrvcname = NULL
     service_name = asmpistr(service_name, &csrvcname, NULL)
-    cdef MPI_Info iinfo = _arg_Info(info)
+    cdef MPI_Info cinfo = _arg_Info(info)
     cdef char cportname[MPI_MAX_PORT_NAME+1]
-    CHKERR( MPI_Lookup_name(csrvcname, iinfo, cportname) )
+    CHKERR( MPI_Lookup_name(csrvcname, cinfo, cportname) )
     return tompistr(cportname, -1)

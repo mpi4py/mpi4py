@@ -29,7 +29,7 @@ cdef class Win:
     # -----------------------
 
     ## @classmethod
-    def Create(cls, memory, int disp_unit=1, info=None, comm=None):
+    def Create(cls, memory, int disp_unit=1, Info info=None, Intracomm comm=None):
         """
         Create an window object for one-sided communication
         """
@@ -37,14 +37,14 @@ cdef class Win:
         cdef MPI_Aint size = 0
         if memory is not None:
             memory = asmemory(memory, &base, &size)
-        cdef MPI_Info iinfo = MPI_INFO_NULL
-        if info is not None: iinfo = (<Info?>info).ob_mpi
-        cdef MPI_Comm icomm = MPI_COMM_SELF
-        if comm is not None: icomm = (<Intracomm?>comm).ob_mpi
+        cdef MPI_Info cinfo = MPI_INFO_NULL
+        if info is not None: cinfo = info.ob_mpi
+        cdef MPI_Comm ccomm = MPI_COMM_SELF
+        if comm is not None: ccomm = comm.ob_mpi
         #
         cdef Win win = cls()
         CHKERR( MPI_Win_create(base, size, disp_unit,
-                               iinfo, icomm, &win.ob_mpi) )
+                               cinfo, ccomm, &win.ob_mpi) )
         # we are in charge or managing MPI errors
         CHKERR( MPI_Win_set_errhandler(
             win.ob_mpi, MPI_ERRORS_RETURN) )
@@ -156,19 +156,19 @@ cdef class Win:
     # ----------------------------
 
     def Accumulate(self, origin, int target_rank,
-                   target=None, op=None):
+                   target=None, Op op=None):
         """
         Accumulate data into the target process
         using remote memory access.
         """
         cdef message_rma msg = message_rma()
         msg.for_acc(origin, target_rank, target)
-        cdef MPI_Op iop = MPI_SUM
-        if op is not None: iop = (<Op?>op).ob_mpi
+        cdef MPI_Op cop = MPI_SUM
+        if op is not None: cop = (<Op?>op).ob_mpi
         CHKERR( MPI_Accumulate(msg.oaddr, msg.ocount, msg.otype,
                                target_rank,
                                msg.tdisp, msg.tcount, msg.ttype,
-                               iop, self.ob_mpi) )
+                               cop, self.ob_mpi) )
 
     # [6.4] Synchronization Calls
     # ---------------------------
@@ -185,7 +185,7 @@ cdef class Win:
     # [6.4.2] General Active Target Synchronization
     # ---------------------------------------------
 
-    def Start(self, Group group, int assertion=0):
+    def Start(self, Group group not None, int assertion=0):
         """
         Start an RMA access epoch for MPI
         """
@@ -197,7 +197,7 @@ cdef class Win:
         """
         CHKERR( MPI_Win_complete(self.ob_mpi) )
 
-    def Post(self, Group group, int assertion=0):
+    def Post(self, Group group not None, int assertion=0):
         """
         Start an RMA exposure epoch
         """
@@ -245,7 +245,7 @@ cdef class Win:
                                        &errhandler.ob_mpi) )
         return errhandler
 
-    def Set_errhandler(self, Errhandler errhandler):
+    def Set_errhandler(self, Errhandler errhandler not None):
         """
         Set the error handler for a window
         """

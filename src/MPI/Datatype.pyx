@@ -83,7 +83,7 @@ cdef class Datatype:
         CHKERR( MPI_Type_dup(self.ob_mpi, &datatype.ob_mpi) )
         return datatype
 
-    def Create_contiguous(self, count):
+    def Create_contiguous(self, int count):
         """
         Create a contiguous datatype
         """
@@ -305,7 +305,7 @@ cdef class Datatype:
     # Pack and Unpack
     # ---------------
 
-    def Pack(self, inbuf, outbuf, int position, Comm comm):
+    def Pack(self, inbuf, outbuf, int position, Comm comm not None):
         """
         Pack into contiguous memory according to datatype.
         """
@@ -322,7 +322,7 @@ cdef class Datatype:
                          &position, comm.ob_mpi) )
         return position
 
-    def Unpack(self, inbuf, int position, outbuf, Comm comm):
+    def Unpack(self, inbuf, int position, outbuf, Comm comm not None):
         """
         Unpack from contiguous memory according to datatype.
         """
@@ -339,7 +339,7 @@ cdef class Datatype:
                            self.ob_mpi, comm.ob_mpi) )
         return position
 
-    def Pack_size(self, int count, Comm comm):
+    def Pack_size(self, int count, Comm comm not None):
         """
         Returns the upper bound on the amount of space (in bytes)
         needed to pack a message according to datatype.

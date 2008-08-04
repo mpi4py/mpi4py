@@ -63,8 +63,8 @@ def Alloc_mem(Aint size, info=None):
     Allocate memory for message passing and RMA
     """
     cdef void *base = NULL
-    cdef MPI_Info iinfo = _arg_Info(info)
-    CHKERR( MPI_Alloc_mem(size, iinfo, &base) )
+    cdef MPI_Info cinfo = _arg_Info(info)
+    CHKERR( MPI_Alloc_mem(size, cinfo, &base) )
     return tomemory(base, size)
 
 def Free_mem(memory):
@@ -221,5 +221,3 @@ def get_vendor():
     """
     name, version = PyMPI_Get_vendor()
     return (name, version)
-
-

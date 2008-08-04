@@ -53,12 +53,16 @@ cdef class Group:
             return Group.Get_rank(self)
 
     ## @classmethod
-    def Translate_ranks(cls, Group group1, ranks1, Group group2):
+    def Translate_ranks(cls, Group group1 not None, ranks1,
+                        Group group2=None):
         """
         Translate the ranks of processes in
         one group to those in another group
         """
-        cdef int i, n = len(ranks1)
+        if group2 is None:
+            group2 = Group()
+            CHKERR( MPI_Comm_group(MPI_COMM_WORLD, &group2.ob_mpi) )
+        cdef int i = 0, n = len(ranks1)
         cdef int *iranks1 = NULL, *iranks2 = NULL
         cdef object tmp1 = newarray_int(n, &iranks1)
         cdef object tmp2 = newarray_int(n, &iranks2)
@@ -70,7 +74,9 @@ cdef class Group:
     Translate_ranks = classmethod(Translate_ranks)
 
     ## @classmethod
-    def Compare(cls, Group group1, Group group2):
+    def Compare(cls,
+                Group group1 not None,
+                Group group2 not None):
         """
         Compare two groups
         """
@@ -96,7 +102,9 @@ cdef class Group:
         return group
 
     ## @classmethod
-    def Union(cls, Group group1, Group group2):
+    def Union(cls,
+              Group group1 not None,
+              Group group2 not None):
         """
         Produce a group by combining
         two existing groups
@@ -110,7 +118,9 @@ cdef class Group:
     Union = classmethod(Union)
 
     ## @classmethod
-    def Intersect(cls, Group group1, Group group2):
+    def Intersect(cls,
+                  Group group1 not None,
+                  Group group2 not None):
         """
         Produce a group as the intersection
         of two existing groups
@@ -124,7 +134,9 @@ cdef class Group:
     Intersect = classmethod(Intersect)
 
     ## @classmethod
-    def Difference(cls, Group group1, Group group2):
+    def Difference(cls,
+                   Group group1 not None,
+                   Group group2 not None):
         """
         Produce a group from the difference
         of two existing groups

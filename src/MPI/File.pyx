@@ -29,17 +29,17 @@ cdef class File:
     # ----------------------
 
     ## @classmethod
-    def Open(cls, Intracomm comm, filename,
-             int amode, info=None):
+    def Open(cls, Intracomm comm not None,
+             filename, int amode, Info info=None):
         """
         Open a file
         """
         cdef char *cfilename = NULL
         filename = asmpistr(filename, &cfilename, NULL)
-        cdef MPI_Info iinfo = _arg_Info(info)
+        cdef MPI_Info cinfo = _arg_Info(info)
         cdef File file = cls()
         CHKERR( MPI_File_open(comm.ob_mpi, cfilename,
-                              amode, iinfo, &file.ob_mpi) )
+                              amode, cinfo, &file.ob_mpi) )
         # we are in charge or managing MPI errors
         CHKERR( MPI_File_set_errhandler(
             file.ob_mpi, MPI_ERRORS_RETURN) )
@@ -60,14 +60,14 @@ cdef class File:
     # -----------------------
 
     ## @classmethod
-    def Delete(cls, filename, info=None):
+    def Delete(cls, filename, Info info=None):
         """
         Delete a file
         """
         cdef char *cfilename = NULL
         filename = asmpistr(filename, &cfilename, NULL)
-        cdef MPI_Info iinfo = _arg_Info(info)
-        CHKERR( MPI_File_delete(cfilename, iinfo) )
+        cdef MPI_Info cinfo = _arg_Info(info)
+        CHKERR( MPI_File_delete(cfilename, cinfo) )
 
     Delete = classmethod(Delete)
 
@@ -137,7 +137,7 @@ cdef class File:
     # [9.2.8] File Info
     # -----------------
 
-    def Set_info(self, Info info):
+    def Set_info(self, Info info not None):
         """
         Set new values for the hints
         associated with a file
@@ -163,23 +163,24 @@ cdef class File:
     # [9.3] File Views
     # ----------------
 
-    def Set_view(self, Offset disp=0, etype=None, ftype=None,
-                 datarep=None, info=None):
+    def Set_view(self, Offset disp=0,
+                 Datatype etype=None, Datatype ftype=None,
+                 datarep=None, Info info=None):
         """
         Set the file view
         """
         if datarep is None: datarep = tompistr('native', -1)
         cdef char *cdatarep = NULL
         datarep = asmpistr(datarep, &cdatarep, NULL)
-        cdef MPI_Datatype ietype = MPI_BYTE
-        if etype is not None: ietype = (<Datatype?>etype).ob_mpi
-        cdef MPI_Datatype iftype = ietype
-        if ftype is not None: iftype = (<Datatype?>ftype).ob_mpi
-        cdef MPI_Info iinfo = _arg_Info(info)
-        if info is not None: iinfo = (<Info?>info).ob_mpi
+        cdef MPI_Datatype cetype = MPI_BYTE
+        if etype is not None: cetype = etype.ob_mpi
+        cdef MPI_Datatype cftype = cetype
+        if ftype is not None: cftype = ftype.ob_mpi
+        cdef MPI_Info cinfo = MPI_INFO_NULL
+        if info is not None: cinfo = info.ob_mpi
         CHKERR( MPI_File_set_view(self.ob_mpi, disp,
-                                  ietype, iftype,
-                                  cdatarep, iinfo) )
+                                  cetype, cftype,
+                                  cdatarep, cinfo) )
 
     def Get_view(self):
         """
@@ -196,7 +197,7 @@ cdef class File:
         _fix_Datatype(ftype)
         cdatarep[MPI_MAX_DATAREP_STRING] = 0 # just in case
         datarep = tompistr(cdatarep, -1)
-        return (disp, etype, ftype, datarep)
+        return (disp, etype, ftype, cdatarep)
 
     # [9.4] Data Access
     # -----------------
@@ -204,7 +205,7 @@ cdef class File:
     # [9.4.2] Data Access with Explicit Offsets
     # -----------------------------------------
 
-    def Read_at(self, Offset offset, buf, status=None):
+    def Read_at(self, Offset offset, buf, Status status=None):
         """
         Read using explicit offset
         """
@@ -214,7 +215,7 @@ cdef class File:
                                  m.buf, m.count, m.dtype,
                                  statusp) )
 
-    def Read_at_all(self, Offset offset, buf, status=None):
+    def Read_at_all(self, Offset offset, buf, Status status=None):
         """
         Collective read using explicit offset
         """
@@ -224,7 +225,7 @@ cdef class File:
                                      m.buf, m.count, m.dtype,
                                      statusp) )
 
-    def Write_at(self, Offset offset, buf, status=None):
+    def Write_at(self, Offset offset, buf, Status status=None):
         """
         Write using explicit offset
         """
@@ -234,7 +235,7 @@ cdef class File:
                                   m.buf, m.count, m.dtype,
                                   statusp) )
 
-    def Write_at_all(self, Offset offset, buf, status=None):
+    def Write_at_all(self, Offset offset, buf, Status status=None):
         """
         Collective write using explicit offset
         """
@@ -269,7 +270,7 @@ cdef class File:
     # [9.4.3] Data Access with Individual File Pointers
     # -------------------------------------------------
 
-    def Read(self, buf, status=None):
+    def Read(self, buf, Status status=None):
         """
         Read using individual file pointer
         """
@@ -279,7 +280,7 @@ cdef class File:
                               m.buf, m.count, m.dtype,
                               statusp) )
 
-    def Read_all(self, buf, status=None):
+    def Read_all(self, buf, Status status=None):
         """
         Collective read using individual file pointer
         """
@@ -289,7 +290,7 @@ cdef class File:
                                   m.buf, m.count, m.dtype,
                                   statusp) )
 
-    def Write(self, buf, status=None):
+    def Write(self, buf, Status status=None):
         """
         Write using individual file pointer
         """
@@ -299,7 +300,7 @@ cdef class File:
                                m.buf, m.count, m.dtype,
                                statusp) )
 
-    def Write_all(self, buf, status=None):
+    def Write_all(self, buf, Status status=None):
         """
         Collective write using individual file pointer
         """
@@ -360,7 +361,7 @@ cdef class File:
     # [9.4.4] Data Access with Shared File Pointers
     # ---------------------------------------------
 
-    def Read_shared(self, buf, status=None):
+    def Read_shared(self, buf, Status status=None):
         """
         Read using shared file pointer
         """
@@ -370,7 +371,7 @@ cdef class File:
                                      m.buf, m.count, m.dtype,
                                      statusp) )
 
-    def Write_shared(self, buf, status=None):
+    def Write_shared(self, buf, Status status=None):
         """
         Write using shared file pointer
         """
@@ -402,7 +403,7 @@ cdef class File:
                                        &request.ob_mpi) )
         return request
 
-    def Read_ordered(self, buf, status=None):
+    def Read_ordered(self, buf, Status status=None):
         """
         Collective read using shared file pointer
         """
@@ -412,7 +413,7 @@ cdef class File:
                                       m.buf, m.count, m.dtype,
                                       statusp) )
 
-    def Write_ordered(self, buf, status=None):
+    def Write_ordered(self, buf, Status status=None):
         """
         Collective write using shared file pointer
         """
@@ -452,7 +453,7 @@ cdef class File:
         CHKERR( MPI_File_read_at_all_begin(self.ob_mpi, offset,
                                            m.buf, m.count, m.dtype) )
 
-    def Read_at_all_end(self, buf, status=None):
+    def Read_at_all_end(self, buf, Status status=None):
         """
         Complete a split collective read using explict offset
         """
@@ -469,7 +470,7 @@ cdef class File:
         CHKERR( MPI_File_write_at_all_begin(self.ob_mpi, offset,
                                             m.buf, m.count, m.dtype) )
 
-    def Write_at_all_end(self, buf, status=None):
+    def Write_at_all_end(self, buf, Status status=None):
         """
         Complete a split collective write using explict offset
         """
@@ -489,7 +490,7 @@ cdef class File:
         CHKERR( MPI_File_read_all_begin(self.ob_mpi,
                                         m.buf, m.count, m.dtype) )
 
-    def Read_all_end(self, buf, status=None):
+    def Read_all_end(self, buf, Status status=None):
         """
         Complete a split collective read
         using individual file pointer
@@ -508,7 +509,7 @@ cdef class File:
         CHKERR( MPI_File_write_all_begin(self.ob_mpi,
                                          m.buf, m.count, m.dtype) )
 
-    def Write_all_end(self, buf, status=None):
+    def Write_all_end(self, buf, Status status=None):
         """
         Complete a split collective write
         using individual file pointer
@@ -531,7 +532,7 @@ cdef class File:
                                             m.count,
                                             m.dtype) )
 
-    def Read_ordered_end(self, buf, status=None):
+    def Read_ordered_end(self, buf, Status status=None):
         """
         Complete a split collective read
         using shared file pointer
@@ -552,7 +553,7 @@ cdef class File:
                                              m.count,
                                              m.dtype) )
 
-    def Write_ordered_end(self, buf, status=None):
+    def Write_ordered_end(self, buf, Status status=None):
         """
         Complete a split collective write
         using shared file pointer
@@ -568,7 +569,7 @@ cdef class File:
     # [9.5.1] Datatypes for File Interoperability
     # -------------------------------------------
 
-    def Get_type_extent(self, Datatype datatype):
+    def Get_type_extent(self, Datatype datatype not None):
         """
         Return the extent of datatype in the file
         """
@@ -624,7 +625,7 @@ cdef class File:
                                         &errhandler.ob_mpi) )
         return errhandler
 
-    def Set_errhandler(self, Errhandler errhandler):
+    def Set_errhandler(self, Errhandler errhandler not None):
         """
         Set the error handler for a file
         """

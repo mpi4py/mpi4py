@@ -72,25 +72,23 @@ cdef class Status:
 
         .. note:: `datatype` defaults to `BYTE`.
         """
-        cdef MPI_Datatype itype = MPI_BYTE
-        if datatype is not None: itype = (<Datatype?>datatype).ob_mpi
+        cdef MPI_Datatype ctype = MPI_BYTE
+        if datatype is not None: ctype = datatype.ob_mpi
         cdef int count = MPI_UNDEFINED
-        CHKERR( MPI_Get_count(&self.ob_mpi, itype, &count) )
+        CHKERR( MPI_Get_count(&self.ob_mpi, ctype, &count) )
         return count
 
-    def Get_elements(self, Datatype datatype):
+    def Get_elements(self, Datatype datatype not None):
         """
         Get the number of basic elements in a datatype
 
         .. note:: `datatype` defaults to `BYTE`.
         """
-        cdef MPI_Datatype itype = MPI_BYTE
-        if datatype is not None: itype = (<Datatype?>datatype).ob_mpi
         cdef int elements = MPI_UNDEFINED
-        CHKERR( MPI_Get_elements(&self.ob_mpi, itype, &elements) )
+        CHKERR( MPI_Get_elements(&self.ob_mpi, datatype.ob_mpi, &elements) )
         return elements
 
-    def Set_elements(self, Datatype datatype, int count):
+    def Set_elements(self, Datatype datatype not None, int count):
         """
         Set the number of elements in a status
 

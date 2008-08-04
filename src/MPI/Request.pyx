@@ -28,14 +28,14 @@ cdef class Request:
     # Completion Operations
     # ---------------------
 
-    def Wait(self, status=None):
+    def Wait(self, Status status=None):
         """
         Wait for an MPI send or receive to complete.
         """
         cdef MPI_Status *statusp = _arg_Status(status)
         CHKERR( MPI_Wait(&self.ob_mpi, statusp) )
 
-    def Test(self, status=None):
+    def Test(self, Status status=None):
         """
         Test for the completion of a send or receive.
         """
@@ -50,7 +50,7 @@ cdef class Request:
         """
         CHKERR( MPI_Request_free(&self.ob_mpi) )
 
-    def Get_status(self, status=None):
+    def Get_status(self, Status status=None):
         """
         Non-destructive test for the
         completion of a request
@@ -64,7 +64,7 @@ cdef class Request:
     # --------------------
 
     ## @classmethod
-    def Waitany(cls, requests, status=None):
+    def Waitany(cls, requests, Status status=None):
         """
         Wait for any previously initiated request to complete
         """
@@ -83,7 +83,7 @@ cdef class Request:
     Waitany = classmethod(Waitany)
 
     ## @classmethod
-    def Testany(cls, requests, status=None):
+    def Testany(cls, requests, Status status=None):
         """
         Test for completion of any previously initiated request
         """
