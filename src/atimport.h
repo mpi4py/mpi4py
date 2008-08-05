@@ -43,7 +43,7 @@
 /* ---------------------------------------------------------------- */
 
 #if PY_MAJOR_VERSION >= 3
-static PyObject * PyBuffer_FromReadWriteMemory(void *p, Py_ssize_t n) 
+static PyObject * PyBuffer_FromReadWriteMemory(void *p, Py_ssize_t n)
 {
   Py_buffer info;
   if (PyBuffer_FillInfo(&info, p, n, 0, PyBUF_SIMPLE) < 0)
@@ -53,7 +53,7 @@ static PyObject * PyBuffer_FromReadWriteMemory(void *p, Py_ssize_t n)
 #endif
 
 #if PY_MAJOR_VERSION < 3
-static char * PyMPIString_AsStringAndSize(PyObject *ob, Py_ssize_t *n) 
+static char * PyMPIString_AsStringAndSize(PyObject *ob, Py_ssize_t *n)
 {
   char *s = 0;
   if (PyString_AsStringAndSize(ob, &s, n) < 0) return NULL;
