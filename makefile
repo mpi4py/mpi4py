@@ -52,5 +52,5 @@ CY_SRC_PXI = $(wildcard src/MPI/*.pxi)
 CY_SRC_PYX = $(wildcard src/MPI/*.pyx)
 src/MPI.c: src/mpi4py_MPI.c
 src/mpi4py_MPI.c: ${CY_SRC_PXD} ${CY_SRC_PXI} ${CY_SRC_PYX}
-	cd src && ${CYTHON} ${CYTHON_FLAGS} ${CYTHON_INCLUDE} mpi4py.MPI.pyx -o mpi4py_MPI.c
-	cd src && mv mpi4py_MPI.h mpi4py_MPI_api.h include/mpi4py
+	${CYTHON} ${CYTHON_FLAGS} ${CYTHON_INCLUDE} -w src mpi4py.MPI.pyx -o mpi4py_MPI.c
+	mv src/mpi4py_MPI.h src/mpi4py_MPI_api.h src/include/mpi4py

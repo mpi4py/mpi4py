@@ -101,7 +101,7 @@ def ext_modules():
     # MPI extension module
     MPI = dict(name='mpi4py.MPI',
                sources=['src/MPI.c'],
-               depends=[],
+               depends=['src/mpi4py_MPI.c'],
                )
     return [MPI]
 
