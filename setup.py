@@ -102,8 +102,6 @@ def ext_modules():
     MPI = dict(name='mpi4py.MPI',
                sources=['src/MPI.c'],
                depends=[],
-               define_macros=[('MPICH_SKIP_MPICXX', '1'),
-                              ('OMPI_SKIP_MPICXX',  '1'),],
                )
     return [MPI]
 

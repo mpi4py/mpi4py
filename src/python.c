@@ -1,4 +1,7 @@
-/* $Id: python.c,v 1.1 2006/10/20 22:47:43 dalcinl Exp $ */
+/* Author:  Lisandro Dalcin
+ * Contact: dalcinl@gmail.com
+ * Id:      $Id$
+*/
 
 #include <Python.h>
 
