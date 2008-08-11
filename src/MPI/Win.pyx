@@ -28,7 +28,7 @@ cdef class Win:
     # [6.2.1] Window Creation
     # -----------------------
 
-    ## @classmethod
+    @classmethod
     def Create(cls, memory, int disp_unit=1, Info info=None, Intracomm comm=None):
         """
         Create an window object for one-sided communication
@@ -52,8 +52,6 @@ cdef class Win:
         win.__memory = memory
         # return the created window
         return win
-
-    Create = classmethod(Create)
 
     def Free(self):
         """

@@ -63,7 +63,7 @@ cdef class Request:
     # Multiple Completions
     # --------------------
 
-    ## @classmethod
+    @classmethod
     def Waitany(cls, requests, Status status=None):
         """
         Wait for any previously initiated request to complete
@@ -80,9 +80,7 @@ cdef class Request:
         #
         return index
 
-    Waitany = classmethod(Waitany)
-
-    ## @classmethod
+    @classmethod
     def Testany(cls, requests, Status status=None):
         """
         Test for completion of any previously initiated request
@@ -101,9 +99,7 @@ cdef class Request:
         #
         return (index, flag)
 
-    Testany = classmethod(Testany)
-
-    ## @classmethod
+    @classmethod
     def Waitall(cls, requests, statuses=None):
         """
         Wait for all previously initiated requests to complete
@@ -121,9 +117,7 @@ cdef class Request:
         #
         return None
 
-    Waitall = classmethod(Waitall)
-
-    ## @classmethod
+    @classmethod
     def Testall(cls, requests, statuses=None):
         """
         Test for completion of all previously initiated requests
@@ -143,9 +137,7 @@ cdef class Request:
         #
         return flag
 
-    Testall = classmethod(Testall)
-
-    ## @classmethod
+    @classmethod
     def Waitsome(cls, requests, statuses=None):
         """
         Wait for some previously initiated requests to complete
@@ -172,9 +164,7 @@ cdef class Request:
         tmp3 = None
         return (outcount, indices)
 
-    Waitsome = classmethod(Waitsome)
-
-    ## @classmethod
+    @classmethod
     def Testsome(cls, requests, statuses=None):
         """
         Test for completion of some previously initiated requests
@@ -201,8 +191,6 @@ cdef class Request:
         tmp3 = None
         return (outcount, indices)
 
-    Testsome = classmethod(Testsome)
-
     # Cancel
     # ------
 
@@ -226,7 +214,7 @@ cdef class Prequest(Request):
         """
         CHKERR( MPI_Start(&self.ob_mpi) )
 
-    ## @classmethod
+    @classmethod
     def Startall(cls, requests):
         """
         Start a collection of persistent requests
@@ -239,8 +227,6 @@ cdef class Prequest(Request):
         tmp = restore_Request(requests, &irequests, count)
         CHKERR(ierr) # do error checking here
 
-    Startall = classmethod(Startall)
-
 
 
 cdef class Grequest(Request):
@@ -249,7 +235,7 @@ cdef class Grequest(Request):
     Generalized request
     """
 
-    ## @classmethod
+    @classmethod
     def Start(cls, query_fn, free_fn, cancel_fn, extra_state):
         """
         Create and return a user-defined request
@@ -264,8 +250,6 @@ cdef class Grequest(Request):
         cdef Grequest request = cls()
         CHKERR( MPI_Grequest_start(c_query_fn, c_free_fn, c_cancel_fn,
                                    c_extra_state, &request.ob_mpi) )
-
-    Start = classmethod(Start)
 
     def Complete(self):
         """

@@ -22,6 +22,7 @@ cdef class Info:
     def __bool__(self):
         return self.ob_mpi != MPI_INFO_NULL
 
+    @classmethod
     def Create(cls):
         """
         Create a new, empty info object
@@ -29,8 +30,6 @@ cdef class Info:
         cdef Info info = cls()
         CHKERR( MPI_Info_create(&info.ob_mpi) )
         return info
-
-    Create = classmethod(Create)
 
     def Free(self):
         """

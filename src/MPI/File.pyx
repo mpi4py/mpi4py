@@ -28,7 +28,7 @@ cdef class File:
     # [9.2.1] Opening a File
     # ----------------------
 
-    ## @classmethod
+    @classmethod
     def Open(cls, Intracomm comm not None,
              filename, int amode, Info info=None):
         """
@@ -45,8 +45,6 @@ cdef class File:
             file.ob_mpi, MPI_ERRORS_RETURN) )
         return file
 
-    Open = classmethod(Open)
-
     # [9.2.2] Closing a File
     # ----------------------
 
@@ -59,7 +57,7 @@ cdef class File:
     # [9.2.3] Deleting a File
     # -----------------------
 
-    ## @classmethod
+    @classmethod
     def Delete(cls, filename, Info info=None):
         """
         Delete a file
@@ -68,8 +66,6 @@ cdef class File:
         filename = asmpistr(filename, &cfilename, NULL)
         cdef MPI_Info cinfo = _arg_Info(info)
         CHKERR( MPI_File_delete(cfilename, cinfo) )
-
-    Delete = classmethod(Delete)
 
     # [9.2.4] Resizing a File
     # -----------------------

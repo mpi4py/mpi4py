@@ -52,7 +52,7 @@ cdef class Group:
         def __get__(self):
             return Group.Get_rank(self)
 
-    ## @classmethod
+    @classmethod
     def Translate_ranks(cls, Group group1 not None, ranks1,
                         Group group2=None):
         """
@@ -71,9 +71,7 @@ cdef class Group:
                                           group2.ob_mpi, iranks2) )
         return [iranks2[i] for i from 0 <= i < n]
 
-    Translate_ranks = classmethod(Translate_ranks)
-
-    ## @classmethod
+    @classmethod
     def Compare(cls,
                 Group group1 not None,
                 Group group2 not None):
@@ -85,8 +83,6 @@ cdef class Group:
                                   group2.ob_mpi,
                                   &flag) )
         return flag
-
-    Compare = classmethod(Compare)
 
     # Group Constructors
     # ------------------
@@ -101,7 +97,7 @@ cdef class Group:
                                 &group.ob_mpi) )
         return group
 
-    ## @classmethod
+    @classmethod
     def Union(cls,
               Group group1 not None,
               Group group2 not None):
@@ -115,9 +111,7 @@ cdef class Group:
                                 &group.ob_mpi) )
         return group
 
-    Union = classmethod(Union)
-
-    ## @classmethod
+    @classmethod
     def Intersect(cls,
                   Group group1 not None,
                   Group group2 not None):
@@ -131,9 +125,7 @@ cdef class Group:
                                        &group.ob_mpi) )
         return group
 
-    Intersect = classmethod(Intersect)
-
-    ## @classmethod
+    @classmethod
     def Difference(cls,
                    Group group1 not None,
                    Group group2 not None):
@@ -146,8 +138,6 @@ cdef class Group:
                                      group2.ob_mpi,
                                      &group.ob_mpi) )
         return group
-
-    Difference = classmethod(Difference)
 
     def Incl(self, ranks):
         """

@@ -203,7 +203,7 @@ cdef class Datatype:
                                        &datatype.ob_mpi) )
         return datatype
 
-    ## @classmethod
+    @classmethod
     def Create_struct(cls, blocklengths, displacements, datatypes):
         """
         Create an datatype from a general set of
@@ -222,12 +222,10 @@ cdef class Datatype:
                                        &datatype.ob_mpi) )
         return datatype
 
-    Create_struct = classmethod(Create_struct)
-
     # Size-specific Datatypes
     # -----------------------
 
-    ## @classmethod
+    @classmethod
     def Match_size(cls, int typeclass, int size):
         """
         Find a datatype matching a specified size in bytes
@@ -235,8 +233,6 @@ cdef class Datatype:
         cdef MPI_Datatype datatype = MPI_DATATYPE_NULL
         CHKERR( MPI_Type_match_size(typeclass, size, &datatype) )
         return _new_Datatype(datatype)
-
-    Match_size = classmethod(Match_size)
 
     # Use of Derived Datatypes
     # ------------------------

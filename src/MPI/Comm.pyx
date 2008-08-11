@@ -69,7 +69,7 @@ cdef class Comm:
         def __get__(self):
             return self.Get_rank()
 
-    ## @classmethod
+    @classmethod
     def Compare(cls, Comm comm1 not None, Comm comm2 not None):
         """
         Compare two communicators
@@ -77,8 +77,6 @@ cdef class Comm:
         cdef int flag = MPI_UNEQUAL
         CHKERR( MPI_Comm_compare(comm1.ob_mpi, comm2.ob_mpi, &flag) )
         return flag
-
-    Compare = classmethod(Compare)
 
     # Communicator Constructors
     # -------------------------
@@ -558,7 +556,7 @@ cdef class Comm:
     # Process Creation and Management
     # -------------------------------
 
-    ## @classmethod
+    @classmethod
     def Get_parent(cls):
         """
         Return the parent intercommunicator for this process
@@ -569,15 +567,13 @@ cdef class Comm:
             comm.flags |= PyMPI_SKIP_FREE
         return comm
 
-    Get_parent = classmethod(Get_parent)
-
     def Disconnect(self):
         """
         Disconnect from a communicator
         """
         CHKERR( MPI_Comm_disconnect(&self.ob_mpi) )
 
-    ## @classmethod
+    @classmethod
     def Join(cls, int fd):
         """
         Create a intercommunicator by joining
@@ -586,8 +582,6 @@ cdef class Comm:
         cdef Intercomm comm = Intercomm()
         CHKERR( MPI_Comm_join(fd, &comm.ob_mpi) )
         return comm
-
-    Join = classmethod(Join)
 
     # Error handling
     # --------------
