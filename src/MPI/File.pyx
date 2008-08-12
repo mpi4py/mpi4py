@@ -193,7 +193,7 @@ cdef class File:
         _fix_Datatype(ftype)
         cdatarep[MPI_MAX_DATAREP_STRING] = 0 # just in case
         datarep = tompistr(cdatarep, -1)
-        return (disp, etype, ftype, cdatarep)
+        return (disp, etype, ftype, datarep)
 
     # [9.4] Data Access
     # -----------------
