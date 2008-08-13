@@ -235,27 +235,40 @@ cdef class Grequest(Request):
     Generalized request
     """
 
+    def __cinit__(self):
+        self.ob_grequest = MPI_REQUEST_NULL
+
     @classmethod
-    def Start(cls, query_fn, free_fn, cancel_fn, extra_state):
+    def Start(cls, query_fn, free_fn, cancel_fn,
+              args=None, kargs=None):
         """
         Create and return a user-defined request
         """
-        raise NotImplementedError # XXX implement!
-        #
-        cdef MPI_Grequest_query_function  *c_query_fn    = NULL
-        cdef MPI_Grequest_free_function   *c_free_fn     = NULL
-        cdef MPI_Grequest_cancel_function *c_cancel_fn   = NULL
-        cdef void                         *c_extra_state = NULL
         #
         cdef Grequest request = cls()
-        CHKERR( MPI_Grequest_start(c_query_fn, c_free_fn, c_cancel_fn,
-                                   c_extra_state, &request.ob_mpi) )
+        cdef _p_greq state = \
+             _p_greq(query_fn, free_fn, cancel_fn,
+                     args, kargs)
+        request.ob_context = state
+        CHKERR( MPI_Grequest_start(greq_query_fn,
+                                   greq_free_fn,
+                                   greq_cancel_fn,
+                                   <void*>state,
+                                   &request.ob_mpi) )
+        request.ob_grequest = request.ob_mpi
+        return request
 
     def Complete(self):
         """
         Notify that a user-defined request is complete
         """
-        CHKERR( MPI_Grequest_complete(self.ob_mpi) )
+        if self.ob_mpi != MPI_REQUEST_NULL:
+            if self.ob_mpi != self.ob_grequest:
+                raise Exception(MPI_ERR_REQUEST)
+        cdef MPI_Request grequest = self.ob_grequest
+        self.ob_grequest = self.ob_mpi
+        CHKERR( MPI_Grequest_complete(grequest) )
+
 
 
 # Null request handle

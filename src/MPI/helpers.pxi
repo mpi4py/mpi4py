@@ -45,6 +45,8 @@ cdef void _fix_Datatype(Datatype datatype):
 #---------------------------------------------------------------------
 # Request
 
+include "reqimpl.pxi"
+
 cdef inline Request _new_Request(MPI_Request ob):
     cdef Request request = Request()
     request.ob_mpi = ob
@@ -62,6 +64,7 @@ cdef inline int _del_Request(MPI_Request* ob):
 # Op
 
 include "opimpl.pxi"
+
 cdef inline Op _new_Op(MPI_Op ob):
     cdef Op op = Op()
     op.ob_mpi = ob
