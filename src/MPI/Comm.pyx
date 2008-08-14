@@ -643,6 +643,75 @@ cdef class Comm:
             self.Set_name(value)
 
 
+    # Python Communication
+    # --------------------
+    #
+    def send(self, obj=None, int dest=0, int tag=0):
+        """Send"""
+        cdef MPI_Comm comm = self.ob_mpi
+        return PyMPI_send(obj, dest, tag, comm)
+    #
+    def recv(self, obj=None, int source=0, int tag=0, Status status=None):
+        """Receive"""
+        cdef MPI_Comm comm = self.ob_mpi
+        cdef MPI_Status *statusp = _arg_Status(status)
+        return PyMPI_recv(obj, source, tag, comm, statusp)
+    #
+    def sendrecv(self,
+                 sendobj=None, int dest=0,   int sendtag=0,
+                 recvobj=None, int source=0, int recvtag=0,
+                 Status status=None):
+        """Send and Receive"""
+        cdef MPI_Comm comm = self.ob_mpi
+        cdef MPI_Status *statusp = _arg_Status(status)
+        return PyMPI_sendrecv(sendobj, dest,   sendtag,
+                              recvobj, source, recvtag,
+                              comm, statusp)
+    #
+    def barrier(self):
+        "Barrier"
+        cdef MPI_Comm comm = self.ob_mpi
+        return PyMPI_barrier(comm)
+    #
+    def bcast(self, obj=None, int root=0):
+        """Broadcast"""
+        cdef MPI_Comm comm = self.ob_mpi
+        return PyMPI_bcast(obj, root, comm)
+    #
+    def gather(self, sendobj=None, recvobj=None, int root=0):
+        """Gather"""
+        cdef MPI_Comm comm = self.ob_mpi
+        return PyMPI_gather(sendobj, recvobj, root, comm)
+    #
+    def scatter(self, sendobj=None, recvobj=None, int root=0):
+        """Scatter"""
+        cdef MPI_Comm comm = self.ob_mpi
+        return PyMPI_scatter(sendobj, recvobj, root, comm)
+    #
+    def allgather(self, sendobj=None, recvobj=None):
+        """Gather to All"""
+        cdef MPI_Comm comm = self.ob_mpi
+        return PyMPI_allgather(sendobj, recvobj, comm)
+    #
+    def alltoall(self, sendobj=None, recvobj=None):
+        """All to All Scatter/Gather"""
+        cdef MPI_Comm comm = self.ob_mpi
+        return PyMPI_alltoall(sendobj, recvobj, comm)
+    #
+    def reduce(self, sendobj=None, recvobj=None, op=None, int root=0):
+        """Reduce"""
+        if op is None: op = SUM
+        cdef MPI_Comm comm = self.ob_mpi
+        return PyMPI_reduce(sendobj, recvobj, op, root, comm)
+    #
+    def allreduce(self, sendobj=None, recvobj=None, op=None):
+        """Reduce to All"""
+        if op is None: op = SUM
+        cdef MPI_Comm comm = self.ob_mpi
+        return PyMPI_allreduce(sendobj, recvobj, op, comm)
+
+
+
 cdef class Intracomm(Comm):
 
     """
@@ -746,7 +815,6 @@ cdef class Intracomm(Comm):
         CHKERR( MPI_Scan(m.sbuf, m.rbuf, m.rcount, m.rtype,
                          op.ob_mpi, self.ob_mpi) )
 
-
     # Exclusive Scan
 
     def Exscan(self, sendbuf, recvbuf, Op op=SUM):
@@ -757,6 +825,20 @@ cdef class Intracomm(Comm):
         m.for_exscan(sendbuf, recvbuf, self.ob_mpi)
         CHKERR( MPI_Exscan(m.sbuf, m.rbuf, m.rcount, m.rtype,
                            op.ob_mpi, self.ob_mpi) )
+
+    # Python Communication
+    #
+    def scan(self, sendobj=None, recvobj=None, op=None):
+        """Inclusive Scan"""
+        if op is None: op = SUM
+        cdef MPI_Comm comm = self.ob_mpi
+        return PyMPI_scan(sendobj, recvobj, op, comm)
+    #
+    def exscan(self, sendobj=None, recvobj=None, op=None):
+        """Exclusive Scan"""
+        if op is None: op = SUM
+        cdef MPI_Comm comm = self.ob_mpi
+        return PyMPI_exscan(sendobj, recvobj, op, comm)
 
 
     # Establishing Communication

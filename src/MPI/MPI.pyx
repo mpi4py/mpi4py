@@ -23,6 +23,7 @@ include "asmemory.pxi"
 include "asarray.pxi"
 include "helpers.pxi"
 include "message.pxi"
+include "pickled.pxi"
 
 include "Datatype.pyx"      # DONE
 include "Status.pyx"        # DONE
