@@ -144,19 +144,22 @@ cdef inline int _init3() except -1:
 
 # --------------------------------------------------------------------
 
-# Vile hack for raising a exception and not contaminating traceback
+# Vile hack for raising a exception and not contaminate the traceback
 
 cdef extern from *:
-    void pyx_raise"__Pyx_Raise"(object, void*, void*)
+    void __Pyx_Raise(object, object, void*)
 
-cdef inline int mpi_raise(int ierr) except 0:
-    pyx_raise(Exception(ierr), NULL, NULL)
-    return -1
 
-cdef inline int CHKERR(int ierr) except -1:
+cdef int PyMPI_Raise(int ierr) except -1 with gil:
+    if ierr != -1:
+        __Pyx_Raise(Exception, ierr, NULL)
+    else:
+        __Pyx_Raise(NotImplementedError, None, NULL)
+    return 0
+
+cdef inline int CHKERR(int ierr) nogil except -1:
     if ierr == 0: return 0
-    if ierr >  0: return mpi_raise(ierr)
-    pyx_raise(NotImplementedError, NULL, NULL)
+    PyMPI_Raise(ierr)
     return -1
 
 # --------------------------------------------------------------------
