@@ -48,7 +48,7 @@ CYTHON = cython
 CYTHON_FLAGS = --cleanup 9
 CYTHON_INCLUDE = -I. -Iinclude -Iinclude/mpi4py
 CY_SRC_PXD = $(wildcard src/include/mpi4py/*.pxd)
-CY_SRC_PXI = $(wildcard src/MPI/*.pxi)
+CY_SRC_PXI = $(wildcard src/MPI/*.pxi) $(wildcard src/include/mpi4py/*.pxi)
 CY_SRC_PYX = $(wildcard src/MPI/*.pyx)
 src/MPI.c: src/mpi4py_MPI.c
 src/mpi4py_MPI.c: ${CY_SRC_PXD} ${CY_SRC_PXI} ${CY_SRC_PYX}
