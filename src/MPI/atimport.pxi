@@ -8,7 +8,7 @@ cdef extern from "stdio.h":
     int fflush(FILE *)
 
 cdef extern from "Python.h":
-    int Py_AtExit(void (*)())
+    int Py_AtExit(void (*)()) except -1
 
 cdef extern from "atimport.h":
     object PyMPI_Get_vendor()
@@ -21,6 +21,28 @@ cdef MPI_Errhandler comm_self_eh
 cdef MPI_Errhandler comm_world_eh
 
 # --------------------------------------------------------------------
+
+cdef inline int _mpi_threading(int *level) except -1:
+    try:
+        from mpi4py.rc import thread_level
+    except ImportError:
+        thread_level = None
+    #
+    if thread_level is None:
+        return 0
+    elif thread_level in (0, u'single'):
+        level[0] = MPI_THREAD_SINGLE
+    elif thread_level in (1, u'funneled'):
+        level[0] = MPI_THREAD_FUNNELED
+    elif thread_level in (2, u'serialized'):
+        level[0] = MPI_THREAD_SERIALIZED
+    elif thread_level in (3, u'multiple'):
+        level[0] = MPI_THREAD_MULTIPLE
+    else:
+        from warnings import warn
+        warn("mpi4py.rc: unrecognized thread level")
+        return 0
+    return 1
 
 cdef inline int _mpi_active():
     # shortcut
@@ -90,14 +112,22 @@ cdef inline int _init1() except -1:
         return 0
     # We have to initialize MPI
     cdef int ierr = 0
-    ierr = MPI_Init(NULL, NULL)
-    if ierr: raise RuntimeError("MPI_Init() failed [error code: %d]" % ierr)
-    if ierr: return -1 # not sure if Cython does this automatically
+    cdef int required = MPI_THREAD_SINGLE
+    cdef int provided = MPI_THREAD_SINGLE
+    if _mpi_threading(&required):
+        ierr = MPI_Init_thread(NULL, NULL, required, &provided)
+        if ierr != MPI_SUCCESS: raise RuntimeError(
+            "MPI_Init_thread() failed [error code: %d]" % ierr)
+    else:
+        ierr = MPI_Init(NULL, NULL)
+        if ierr != MPI_SUCCESS: raise RuntimeError(
+            "MPI_Init() failed [error code: %d]" % ierr)
     # We initialized MPI, so it is owned and active at this point
     mpi_is_owned  = 1
     mpi_is_active = 1
     # then finalize it when Python process exits
-    return Py_AtExit(_atexit)
+    Py_AtExit(_atexit)
+    return 0
 
 # --------------------------------------------------------------------
 

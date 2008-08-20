@@ -7,10 +7,12 @@ except ImportError:
 
 Thread = _threading.Thread
 try:
-    currentThread = _threading.currentThread
+    current_thread = _threading.current_thread # Py 3.X
 except AttributeError:
-    currentThread = _threading.current_thread
+    current_thread = _threading.currentThread  # Py 2.X
 
+import mpi4py.rc
+mpi4py.rc.thread_level = 'multiple'
 from mpi4py import MPI
 import mpiunittest as unittest
 
@@ -36,7 +38,7 @@ class TestMPIThreads(unittest.TestCase):
         self.assertEqual(flag, main)
         if _VERBOSE:
             from sys import stderr
-            thread = currentThread()
+            thread = current_thread()
             name = thread.getName()
             log = lambda m: stderr.write(m+'\n')
             log("%s: MPI.Is_thread_main() -> %s" % (name, flag))
