@@ -121,12 +121,12 @@ cdef inline int _init2() except -1:
 
 # Interception of the actual call to MPI_Finalize()
 
-cdef int active_keyval_del(MPI_Comm c,int k, void *v, void *xs):
+cdef int active_keyval_del(MPI_Comm c,int k, void *v, void *xs) nogil:
     # MPI is no longer active
     global mpi_is_active
     mpi_is_active = 0
     # and we are done
-    return 0
+    return MPI_SUCCESS
 
 cdef inline int _init3() except -1:
     if not _mpi_active(): return 0

@@ -2,7 +2,7 @@
 # Contact: dalcinl@gmail.com
 # Id:      $Id$
 
-cdef extern from "mpi.h":
+cdef extern from "mpi.h" nogil:
 
     #-----------------------------------------------------------------
 

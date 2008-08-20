@@ -36,15 +36,16 @@ cdef class _p_greq:
         return MPI_SUCCESS
 
 
-cdef int _p_greq_query(void *extra_state, MPI_Status *status) with gil:
+cdef int greq_query_fn(void *extra_state, MPI_Status *status) with gil:
     cdef _p_greq state = <_p_greq>extra_state
     try:
         return state.query(status)
     except Exception, exc:
         return exc.Get_error_code()
-    except: return MPI_ERR_UNKNOWN
+    except:
+        return MPI_ERR_UNKNOWN
 
-cdef int _p_greq_free(void *extra_state) with gil:
+cdef int greq_free_fn(void *extra_state) with gil:
     cdef _p_greq state = <object>extra_state
     try:
         return state.free()
@@ -53,7 +54,7 @@ cdef int _p_greq_free(void *extra_state) with gil:
     except:
         return MPI_ERR_UNKNOWN
 
-cdef int _p_greq_cancel(void *extra_state, int completed) with gil:
+cdef int greq_cancel_fn(void *extra_state, int completed) with gil:
     cdef _p_greq state = <object>extra_state
     try:
         return state.cancel(completed)
@@ -61,10 +62,3 @@ cdef int _p_greq_cancel(void *extra_state, int completed) with gil:
         return exc.Get_error_code()
     except:
         return MPI_ERR_UNKNOWN
-
-cdef int greq_query_fn(void *extra_state, MPI_Status *status):
-    return _p_greq_query(extra_state, status)
-cdef int greq_free_fn(void *extra_state):
-    return _p_greq_free(extra_state)
-cdef int greq_cancel_fn(void *extra_state, int completed):
-    return _p_greq_cancel(extra_state, completed)
