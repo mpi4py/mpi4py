@@ -33,7 +33,8 @@ cdef class Request:
         Wait for an MPI send or receive to complete.
         """
         cdef MPI_Status *statusp = _arg_Status(status)
-        CHKERR( MPI_Wait(&self.ob_mpi, statusp) )
+        with nogil:
+            CHKERR( MPI_Wait(&self.ob_mpi, statusp) )
 
     def Test(self, Status status=None):
         """
@@ -41,14 +42,16 @@ cdef class Request:
         """
         cdef bint flag = 0
         cdef MPI_Status *statusp = _arg_Status(status)
-        CHKERR( MPI_Test(&self.ob_mpi, &flag, statusp) )
+        with nogil:
+            CHKERR( MPI_Test(&self.ob_mpi, &flag, statusp) )
         return flag
 
     def Free(self):
         """
         Free a communication request
         """
-        CHKERR( MPI_Request_free(&self.ob_mpi) )
+        with nogil:
+            CHKERR( MPI_Request_free(&self.ob_mpi) )
 
     def Get_status(self, Status status=None):
         """
@@ -57,7 +60,8 @@ cdef class Request:
         """
         cdef bint flag = 0
         cdef MPI_Status *statusp = _arg_Status(status)
-        CHKERR( MPI_Request_get_status(self.ob_mpi, &flag, statusp) )
+        with nogil:
+            CHKERR( MPI_Request_get_status(self.ob_mpi, &flag, statusp) )
         return flag
 
     # Multiple Completions
@@ -73,10 +77,13 @@ cdef class Request:
         cdef tmp1 = asarray_Request(requests, &irequests, count)
         cdef MPI_Status *statusp = _arg_Status(status)
         cdef int index = MPI_UNDEFINED
-        # do not use CHKERR() directly !!
-        cdef int ierr = MPI_Waitany(count, irequests, &index, statusp)
-        tmp1 = restore_Request(requests, &irequests, count);
-        CHKERR(ierr) # do error checking here
+        #
+        try:
+            with nogil:
+                CHKERR( MPI_Waitany(count, irequests,
+                                    &index, statusp) )
+        finally:
+            restore_Request(requests, &irequests, count);
         #
         return index
 
@@ -91,11 +98,13 @@ cdef class Request:
         cdef int index = MPI_UNDEFINED
         cdef bint flag = 0
         cdef MPI_Status *statusp = _arg_Status(status)
-        # do not use CHKERR() directly !!
-        cdef int ierr = MPI_Testany(count, irequests,
-                                    &index, &flag, statusp)
-        tmp1 = restore_Request(requests, &irequests, count)
-        CHKERR(ierr) # do error checking here
+        #
+        try:
+            with nogil:
+                CHKERR( MPI_Testany(count, irequests,
+                                    &index, &flag, statusp) )
+        finally:
+            restore_Request(requests, &irequests, count)
         #
         return (index, flag)
 
@@ -109,11 +118,13 @@ cdef class Request:
         cdef tmp1 = asarray_Request(requests, &irequests, count)
         cdef MPI_Status *istatuses = MPI_STATUSES_IGNORE
         cdef tmp2 = asarray_Status(statuses, &istatuses, count)
-        # do not use CHKERR() directly !!
-        cdef int ierr = MPI_Waitall(count, irequests, istatuses)
-        tmp1 = restore_Request(requests, &irequests, count)
-        tmp2 = restore_Status(statuses, &istatuses, count)
-        CHKERR(ierr) # do error checking here
+        #
+        try:
+            with nogil:
+                CHKERR( MPI_Waitall(count, irequests, istatuses) )
+        finally:
+            restore_Request(requests, &irequests, count)
+            restore_Status(statuses, &istatuses, count)
         #
         return None
 
@@ -128,12 +139,14 @@ cdef class Request:
         cdef MPI_Status *istatuses = MPI_STATUSES_IGNORE
         cdef tmp2 = asarray_Status(statuses, &istatuses, count)
         cdef bint flag = 0
-        # do not use CHKERR() directly !!
-        cdef int ierr = MPI_Testall(count, irequests,
-                                    &flag, istatuses)
-        tmp1 = restore_Request(requests, &irequests, count)
-        tmp2 = restore_Status(statuses, &istatuses, count)
-        CHKERR(ierr) # do error checking here
+        #
+        try:
+            with nogil:
+                CHKERR( MPI_Testall(count, irequests,
+                                    &flag, istatuses) )
+        finally:
+            restore_Request(requests, &irequests, count)
+            restore_Status(statuses, &istatuses, count)
         #
         return flag
 
@@ -150,18 +163,19 @@ cdef class Request:
         cdef int outcount = MPI_UNDEFINED
         cdef int *iindices = NULL
         cdef tmp3 = newarray_int(incount, &iindices)
-        # do not use CHKERR() directly !!
-        cdef int ierr = MPI_Waitsome(incount, irequests,
-                                     &outcount, iindices, istatuses)
-        tmp1 = restore_Request(requests, &irequests, incount)
-        tmp2 = restore_Status(statuses, &istatuses, incount)
-        CHKERR(ierr) # do error checking here
+        #
+        try:
+            with nogil:
+                CHKERR( MPI_Waitsome(incount, irequests,
+                                     &outcount, iindices, istatuses) )
+        finally:
+            restore_Request(requests, &irequests, incount)
+            restore_Status(statuses, &istatuses, incount)
         #
         cdef int i = 0
         indices = []
         if outcount != 0 and outcount != MPI_UNDEFINED:
             indices = [iindices[i] for i from 0 <= i < outcount]
-        tmp3 = None
         return (outcount, indices)
 
     @classmethod
@@ -177,18 +191,19 @@ cdef class Request:
         cdef int outcount = MPI_UNDEFINED
         cdef int *iindices = NULL
         cdef tmp3 = newarray_int(incount, &iindices)
-        # do not use CHKERR() directly !!
-        cdef int ierr = MPI_Waitsome(incount, irequests,
-                                     &outcount, iindices, istatuses)
-        tmp1 = restore_Request(requests, &irequests, incount)
-        tmp2 = restore_Status(statuses, &istatuses, incount)
-        CHKERR(ierr) # do error checking here
+        #
+        try:
+            with nogil:
+                CHKERR( MPI_Waitsome(incount, irequests,
+                                     &outcount, iindices, istatuses) )
+        finally:
+            restore_Request(requests, &irequests, incount)
+            restore_Status(statuses, &istatuses, incount)
         #
         cdef int i = 0
         indices = []
         if outcount != 0 and outcount != MPI_UNDEFINED:
             indices = [iindices[i] for i from 0 <= i < outcount]
-        tmp3 = None
         return (outcount, indices)
 
     # Cancel
@@ -198,7 +213,8 @@ cdef class Request:
         """
         Cancel a communication request
         """
-        CHKERR( MPI_Cancel(&self.ob_mpi) )
+        with nogil:
+            CHKERR( MPI_Cancel(&self.ob_mpi) )
 
 
 
@@ -212,7 +228,8 @@ cdef class Prequest(Request):
         """
         Initiate a communication with a persistent request
         """
-        CHKERR( MPI_Start(&self.ob_mpi) )
+        with nogil:
+            CHKERR( MPI_Start(&self.ob_mpi) )
 
     @classmethod
     def Startall(cls, requests):
@@ -222,10 +239,12 @@ cdef class Prequest(Request):
         cdef int count = len(requests)
         cdef MPI_Request *irequests = NULL
         cdef tmp = asarray_Request(requests, &irequests, count)
-        # do not use CHKERR() directly !!
-        cdef int ierr = MPI_Startall(count, irequests)
-        tmp = restore_Request(requests, &irequests, count)
-        CHKERR(ierr) # do error checking here
+        #
+        try:
+            with nogil:
+                CHKERR( MPI_Startall(count, irequests) )
+        finally:
+            restore_Request(requests, &irequests, count)
 
 
 
@@ -250,11 +269,12 @@ cdef class Grequest(Request):
              _p_greq(query_fn, free_fn, cancel_fn,
                      args, kargs)
         request.ob_context = state
-        CHKERR( MPI_Grequest_start(greq_query_fn,
-                                   greq_free_fn,
-                                   greq_cancel_fn,
-                                   <void*>state,
-                                   &request.ob_mpi) )
+        with nogil:
+            CHKERR( MPI_Grequest_start(greq_query_fn,
+                                       greq_free_fn,
+                                       greq_cancel_fn,
+                                       <void*>state,
+                                       &request.ob_mpi) )
         request.ob_grequest = request.ob_mpi
         return request
 
@@ -267,7 +287,8 @@ cdef class Grequest(Request):
                 raise Exception(MPI_ERR_REQUEST)
         cdef MPI_Request grequest = self.ob_grequest
         self.ob_grequest = self.ob_mpi
-        CHKERR( MPI_Grequest_complete(grequest) )
+        with nogil:
+            CHKERR( MPI_Grequest_complete(grequest) )
 
 
 
