@@ -27,7 +27,7 @@ include "pickled.pxi"
 
 include "Datatype.pyx"      # DONE
 include "Status.pyx"        # DONE
-include "Request.pyx"       # DONE (except Prequest)
+include "Request.pyx"       # DONE
 include "Op.pyx"            # DONE (except user-defined operations)
 include "Info.pyx"          # DONE
 include "Group.pyx"         # DONE
