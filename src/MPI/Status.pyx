@@ -104,7 +104,7 @@ cdef class Status:
         Test to see if a request was cancelled
         """
         cdef bint flag = 0
-        CHKERR( MPI_Test_cancelled(&self.ob_mpi,&flag) )
+        CHKERR( MPI_Test_cancelled(&self.ob_mpi, &flag) )
         return flag
 
     def Set_cancelled(self, bint flag):
@@ -114,7 +114,7 @@ cdef class Status:
         .. note:: This should be only used when implementing
            query callback functions for generalized requests
         """
-        CHKERR( MPI_Status_set_cancelled(&self.ob_mpi,flag) )
+        CHKERR( MPI_Status_set_cancelled(&self.ob_mpi, flag) )
 
     property cancelled:
         """
