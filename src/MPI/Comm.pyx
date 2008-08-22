@@ -583,10 +583,9 @@ cdef class Comm:
         """
         Return the parent intercommunicator for this process
         """
-        cdef Intercomm comm = Intercomm()
+        cdef Intercomm comm = __COMM_PARENT__
         with nogil:
             CHKERR( MPI_Comm_get_parent(&comm.ob_mpi) )
-        if comm.ob_mpi != MPI_COMM_NULL:
             comm.flags |= PyMPI_SKIP_FREE
         return comm
 
@@ -1360,21 +1359,23 @@ cdef class Intercomm(Comm):
         return comm
 
 
+cdef Comm      __COMM_NULL__   = _new_Comm      ( MPI_COMM_NULL  )
+cdef Intracomm __COMM_SELF__   = _new_Intracomm ( MPI_COMM_SELF  )
+cdef Intracomm __COMM_WORLD__  = _new_Intracomm ( MPI_COMM_WORLD )
+cdef Intercomm __COMM_PARENT__ = _new_Intercomm ( MPI_COMM_NULL  )
 
 # Null communicator
 # -----------------
 
-COMM_NULL = _new_Comm(MPI_COMM_NULL)
-
+COMM_NULL =  __COMM_NULL__
 
 
 # Predefined communicators
 # ------------------------
 
-COMM_SELF  = _new_Intracomm(MPI_COMM_SELF)
+COMM_SELF  = __COMM_SELF__
 
-COMM_WORLD = _new_Intracomm(MPI_COMM_WORLD)
-
+COMM_WORLD = __COMM_WORLD__
 
 
 # Communicator Comparisons
@@ -1391,7 +1392,6 @@ SIMILAR = MPI_SIMILAR
 
 UNEQUAL = MPI_UNEQUAL
 #: Groups are different
-
 
 
 # Communicator Topologies

@@ -222,7 +222,6 @@ cdef class Group:
 GROUP_NULL = _new_Group(MPI_GROUP_NULL)
 
 
-
 # Predefined empty group handle
 # -----------------------------
 
