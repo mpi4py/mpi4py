@@ -16,8 +16,7 @@ cdef inline MPI_Status *_arg_Status(object status):
 cdef inline Datatype _new_Datatype(MPI_Datatype ob):
     cdef Datatype datatype = Datatype()
     datatype.ob_mpi = ob
-    if ob != MPI_DATATYPE_NULL:
-        datatype.flags |= PyMPI_SKIP_FREE
+    datatype.flags |= PyMPI_SKIP_FREE
     return datatype
 
 cdef inline int _del_Datatype(MPI_Datatype* ob):
@@ -50,6 +49,7 @@ include "reqimpl.pxi"
 cdef inline Request _new_Request(MPI_Request ob):
     cdef Request request = Request()
     request.ob_mpi = ob
+    request.flags |= PyMPI_SKIP_FREE
     return request
 
 cdef inline int _del_Request(MPI_Request* ob):
@@ -68,20 +68,21 @@ include "opimpl.pxi"
 cdef inline Op _new_Op(MPI_Op ob):
     cdef Op op = Op()
     op.ob_mpi = ob
-    if   ob == MPI_OP_NULL : op.op_fun = NULL
-    elif ob == MPI_MAX     : op.op_fun = _op_MAX
-    elif ob == MPI_MIN     : op.op_fun = _op_MIN
-    elif ob == MPI_SUM     : op.op_fun = _op_SUM
-    elif ob == MPI_PROD    : op.op_fun = _op_PROD
-    elif ob == MPI_LAND    : op.op_fun = _op_LAND
-    elif ob == MPI_BAND    : op.op_fun = _op_BAND
-    elif ob == MPI_LOR     : op.op_fun = _op_LOR
-    elif ob == MPI_BOR     : op.op_fun = _op_BOR
-    elif ob == MPI_LXOR    : op.op_fun = _op_LXOR
-    elif ob == MPI_BXOR    : op.op_fun = _op_BXOR
-    elif ob == MPI_MAXLOC  : op.op_fun = _op_MAXLOC
-    elif ob == MPI_MINLOC  : op.op_fun = _op_MINLOC
-    elif ob == MPI_REPLACE : op.op_fun = _op_REPLACE
+    op.flags |= PyMPI_SKIP_FREE
+    if   ob == MPI_OP_NULL : op.ob_func = NULL
+    elif ob == MPI_MAX     : op.ob_func = _op_MAX
+    elif ob == MPI_MIN     : op.ob_func = _op_MIN
+    elif ob == MPI_SUM     : op.ob_func = _op_SUM
+    elif ob == MPI_PROD    : op.ob_func = _op_PROD
+    elif ob == MPI_LAND    : op.ob_func = _op_LAND
+    elif ob == MPI_BAND    : op.ob_func = _op_BAND
+    elif ob == MPI_LOR     : op.ob_func = _op_LOR
+    elif ob == MPI_BOR     : op.ob_func = _op_BOR
+    elif ob == MPI_LXOR    : op.ob_func = _op_LXOR
+    elif ob == MPI_BXOR    : op.ob_func = _op_BXOR
+    elif ob == MPI_MAXLOC  : op.ob_func = _op_MAXLOC
+    elif ob == MPI_MINLOC  : op.ob_func = _op_MINLOC
+    elif ob == MPI_REPLACE : op.ob_func = _op_REPLACE
     return op
 
 cdef inline int _del_Op(MPI_Op* ob):
@@ -111,6 +112,7 @@ cdef inline int _del_Op(MPI_Op* ob):
 cdef inline Info _new_Info(MPI_Info ob):
     cdef Info info = Info()
     info.ob_mpi = ob
+    info.flags |= PyMPI_SKIP_FREE
     return info
 
 cdef inline int _del_Info(MPI_Info* ob):
@@ -129,11 +131,10 @@ cdef inline MPI_Info _arg_Info(object info):
 # Group
 
 cdef inline Group _new_Group(MPI_Group ob):
-     cdef Group group = Group()
-     group.ob_mpi = ob
-     if ob != MPI_GROUP_NULL:
-         group.flags |= PyMPI_SKIP_FREE
-     return group
+    cdef Group group = Group()
+    group.ob_mpi = ob
+    group.flags |= PyMPI_SKIP_FREE
+    return group
 
 
 cdef inline int _del_Group(MPI_Group* ob):
@@ -151,16 +152,19 @@ cdef inline int _del_Group(MPI_Group* ob):
 cdef inline Comm _new_Comm(MPI_Comm ob):
     cdef Comm comm = Comm()
     comm.ob_mpi = ob
+    comm.flags |= PyMPI_SKIP_FREE
     return comm
 
 cdef inline Intracomm _new_Intracomm(MPI_Comm ob):
     cdef Intracomm comm = Intracomm()
     comm.ob_mpi = ob
+    comm.flags |= PyMPI_SKIP_FREE
     return comm
 
 cdef inline Intercomm _new_Intercomm(MPI_Comm ob):
     cdef Intercomm comm = Intercomm()
     comm.ob_mpi = ob
+    comm.flags |= PyMPI_SKIP_FREE
     return comm
 
 cdef inline int _del_Comm(MPI_Comm* ob):
@@ -179,6 +183,7 @@ cdef inline int _del_Comm(MPI_Comm* ob):
 cdef inline Win _new_Win(MPI_Win ob):
     cdef Win win = Win()
     win.ob_mpi = ob
+    win.flags |= PyMPI_SKIP_FREE
     return win
 
 cdef inline int _del_Win(MPI_Win* ob):
@@ -195,6 +200,7 @@ cdef inline int _del_Win(MPI_Win* ob):
 cdef inline File _new_File(MPI_File ob):
     cdef File file = File()
     file.ob_mpi = ob
+    file.flags |= PyMPI_SKIP_FREE
     return file
 
 cdef inline int _del_File(MPI_File* ob):
@@ -211,8 +217,7 @@ cdef inline int _del_File(MPI_File* ob):
 cdef inline Errhandler _new_Errhandler(MPI_Errhandler ob):
     cdef Errhandler errhandler = Errhandler()
     errhandler.ob_mpi = ob
-    if ob != MPI_ERRHANDLER_NULL:
-        errhandler.flags |= PyMPI_SKIP_FREE
+    errhandler.flags |= PyMPI_SKIP_FREE
     return errhandler
 
 cdef inline int _del_Errhandler(MPI_Errhandler* ob):

@@ -49,7 +49,7 @@ cdef class Win:
         CHKERR( MPI_Win_set_errhandler(
             win.ob_mpi, MPI_ERRORS_RETURN) )
         # old a reference to the object exposing memory
-        win.__memory = memory
+        win.ob_memory = memory
         # return the created window
         return win
 

@@ -6,9 +6,6 @@ cdef class Op:
 
     def __cinit__(self):
         self.ob_mpi = MPI_OP_NULL
-        self.op_fun = NULL
-        self.__callable = None
-        self.__commute  = 0
 
     def __dealloc__(self):
         cdef int ierr = 0
@@ -27,10 +24,10 @@ cdef class Op:
         return self.ob_mpi != MPI_OP_NULL
 
     def __call__(self, x, y):
-        if self.op_fun != NULL:
-            return self.op_fun(x, y)
+        if self.ob_func != NULL:
+            return self.ob_func(x, y)
         else:
-            return self.__callable(x, y)
+            return self.ob_callable(x, y)
 
     def Create(cls, function, bint commute=False):
         """
@@ -38,8 +35,8 @@ cdef class Op:
         """
         cdef Op op = cls()
         op.ob_mpi = MPI_OP_NULL
-        op.__callable = function
-        op.__commute  = commute
+        op.ob_callable = function
+        op.ob_commute  = commute
 
     def Free(self):
         """

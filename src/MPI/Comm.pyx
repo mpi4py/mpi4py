@@ -586,7 +586,6 @@ cdef class Comm:
         cdef Intercomm comm = __COMM_PARENT__
         with nogil:
             CHKERR( MPI_Comm_get_parent(&comm.ob_mpi) )
-            comm.flags |= PyMPI_SKIP_FREE
         return comm
 
     def Disconnect(self):
