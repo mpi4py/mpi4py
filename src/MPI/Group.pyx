@@ -211,7 +211,7 @@ cdef class Group:
         if self.ob_mpi != MPI_GROUP_EMPTY:
             CHKERR( MPI_Group_free(&self.ob_mpi) )
             return
-        if self is not GROUP_EMPTY:
+        if self is not __GROUP_EMPTY__:
             self.ob_mpi = MPI_GROUP_NULL
         else: CHKERR( MPI_ERR_GROUP )
 
