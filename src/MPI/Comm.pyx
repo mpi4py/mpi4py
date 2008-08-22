@@ -584,7 +584,8 @@ cdef class Comm:
         Return the parent intercommunicator for this process
         """
         cdef Intercomm comm = Intercomm()
-        CHKERR( MPI_Comm_get_parent(&comm.ob_mpi) )
+        with nogil:
+            CHKERR( MPI_Comm_get_parent(&comm.ob_mpi) )
         if comm.ob_mpi != MPI_COMM_NULL:
             comm.flags |= PyMPI_SKIP_FREE
         return comm
@@ -593,7 +594,8 @@ cdef class Comm:
         """
         Disconnect from a communicator
         """
-        CHKERR( MPI_Comm_disconnect(&self.ob_mpi) )
+        with nogil:
+            CHKERR( MPI_Comm_disconnect(&self.ob_mpi) )
 
     @classmethod
     def Join(cls, int fd):
@@ -602,7 +604,8 @@ cdef class Comm:
         two processes connected by a socket
         """
         cdef Intercomm comm = Intercomm()
-        CHKERR( MPI_Comm_join(fd, &comm.ob_mpi) )
+        with nogil:
+            CHKERR( MPI_Comm_join(fd, &comm.ob_mpi) )
         return comm
 
     # Error handling
@@ -891,12 +894,15 @@ cdef class Intracomm(Comm):
                 tmp2 = newarray_int(maxprocs, &ierrcodes)
         #
         cdef Intercomm comm = Intercomm()
-        CHKERR( MPI_Comm_spawn(cmd, argv, maxprocs, cinfo, root,
-                               self.ob_mpi, &comm.ob_mpi, ierrcodes) )
+        with nogil:
+            CHKERR( MPI_Comm_spawn(cmd, argv, maxprocs, cinfo, root,
+                                   self.ob_mpi, &comm.ob_mpi,
+                                   ierrcodes) )
         #
         cdef int i = 0
         if root == rank and (errcodes is not None):
             errcodes[:] = [ierrcodes[i] for i from 0<=i<maxprocs]
+        #
         return comm
 
     # Server Routines
@@ -909,8 +915,9 @@ cdef class Intracomm(Comm):
         port_name = asmpistr(port_name, &cportname, NULL)
         cdef MPI_Info cinfo = _arg_Info(info)
         cdef Intercomm comm = Intercomm()
-        CHKERR( MPI_Comm_accept(cportname, cinfo, root,
-                                self.ob_mpi, &comm.ob_mpi) )
+        with nogil:
+            CHKERR( MPI_Comm_accept(cportname, cinfo, root,
+                                    self.ob_mpi, &comm.ob_mpi) )
         return comm
 
     # Client Routines
@@ -923,8 +930,9 @@ cdef class Intracomm(Comm):
         port_name = asmpistr(port_name, &cportname, NULL)
         cdef MPI_Info cinfo = _arg_Info(info)
         cdef Intercomm comm = Intercomm()
-        CHKERR( MPI_Comm_connect(cportname, cinfo, root,
-                                 self.ob_mpi, &comm.ob_mpi) )
+        with nogil:
+            CHKERR( MPI_Comm_connect(cportname, cinfo, root,
+                                     self.ob_mpi, &comm.ob_mpi) )
         return comm
 
 
@@ -1411,7 +1419,8 @@ def Open_port(Info info=None):
     """
     cdef MPI_Info cinfo = _arg_Info(info)
     cdef char cportname[MPI_MAX_PORT_NAME+1]
-    CHKERR( MPI_Open_port(cinfo, cportname) )
+    with nogil:
+        CHKERR( MPI_Open_port(cinfo, cportname) )
     return tompistr(cportname, -1)
 
 def Close_port(port_name, Info info=None):
@@ -1421,7 +1430,8 @@ def Close_port(port_name, Info info=None):
     cdef char *cportname = NULL
     port_name = asmpistr(port_name, &cportname, NULL)
     cdef MPI_Info cinfo = _arg_Info(info)
-    CHKERR( MPI_Close_port(cportname) )
+    with nogil:
+        CHKERR( MPI_Close_port(cportname) )
 
 # [5.4.4] Name Publishing
 # -----------------------
@@ -1435,7 +1445,8 @@ def Publish_name(service_name, Info info, port_name):
     cdef char *cportname = NULL
     port_name = asmpistr(port_name, &cportname, NULL)
     cdef MPI_Info cinfo = _arg_Info(info)
-    CHKERR( MPI_Publish_name(csrvcname, cinfo, cportname) )
+    with nogil:
+        CHKERR( MPI_Publish_name(csrvcname, cinfo, cportname) )
 
 def Unpublish_name(service_name, Info info, port_name):
     """
@@ -1446,7 +1457,8 @@ def Unpublish_name(service_name, Info info, port_name):
     cdef char *cportname = NULL
     port_name = asmpistr(port_name, &cportname, NULL)
     cdef MPI_Info cinfo = _arg_Info(info)
-    CHKERR( MPI_Unpublish_name(csrvcname, cinfo, cportname) )
+    with nogil:
+        CHKERR( MPI_Unpublish_name(csrvcname, cinfo, cportname) )
 
 def Lookup_name(service_name, Info info=None):
     """
@@ -1456,5 +1468,6 @@ def Lookup_name(service_name, Info info=None):
     service_name = asmpistr(service_name, &csrvcname, NULL)
     cdef MPI_Info cinfo = _arg_Info(info)
     cdef char cportname[MPI_MAX_PORT_NAME+1]
-    CHKERR( MPI_Lookup_name(csrvcname, cinfo, cportname) )
+    with nogil:
+        CHKERR( MPI_Lookup_name(csrvcname, cinfo, cportname) )
     return tompistr(cportname, -1)
