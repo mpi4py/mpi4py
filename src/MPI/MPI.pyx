@@ -25,6 +25,8 @@ include "helpers.pxi"
 include "message.pxi"
 include "pickled.pxi"
 
+include "CAPI.pxi"
+
 include "Datatype.pyx"      # DONE
 include "Status.pyx"        # DONE
 include "Request.pyx"       # DONE
