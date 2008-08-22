@@ -216,13 +216,18 @@ cdef class Group:
         else: CHKERR( MPI_ERR_GROUP )
 
 
+
+cdef Group __GROUP_NULL__  = _new_Group ( MPI_GROUP_NULL  )
+cdef Group __GROUP_EMPTY__ = _new_Group ( MPI_GROUP_EMPTY )
+
+
 # Null group handle
 # -----------------
 
-GROUP_NULL = _new_Group(MPI_GROUP_NULL)
+GROUP_NULL = __GROUP_NULL__
 
 
 # Predefined empty group handle
 # -----------------------------
 
-GROUP_EMPTY = _new_Group(MPI_GROUP_EMPTY)
+GROUP_EMPTY = __GROUP_EMPTY__
