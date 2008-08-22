@@ -158,7 +158,7 @@ cdef inline Intracomm _new_Intracomm(MPI_Comm ob):
     comm.ob_mpi = ob
     return comm
 
-cdef inline Intracomm _new_Intercomm(MPI_Comm ob):
+cdef inline Intercomm _new_Intercomm(MPI_Comm ob):
     cdef Intercomm comm = Intercomm()
     comm.ob_mpi = ob
     return comm
