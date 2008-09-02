@@ -8,7 +8,7 @@ class TestWinBase(object):
 
     def setUp(self):
         try:
-            zero = str8('\0')
+            zero = bytearray([0])
         except NameError:
             zero = str('\0')
         self.memory = MPI.Alloc_mem(10)

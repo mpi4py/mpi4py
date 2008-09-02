@@ -52,9 +52,10 @@
 static PyObject * PyBuffer_FromReadWriteMemory(void *p, Py_ssize_t n)
 {
   Py_buffer info;
-  if (PyBuffer_FillInfo(&info, p, n, 0, PyBUF_SIMPLE) < 0)
+  if (PyBuffer_FillInfo(&info, NULL, p, n, 0, 
+			PyBUF_ND | PyBUF_STRIDES) < 0)
     return NULL;
-  return PyMemoryView_FromMemory(&info);
+  return PyMemoryView_FromBuffer(&info);
 }
 #endif
 
