@@ -472,15 +472,6 @@ cdef class message_rma:
         self.tcount = 0
         self.ttype  = MPI_DATATYPE_NULL
 
-    cdef for_put(self, object origin, int rank, object target):
-        self.for_rma(1, origin, rank, target)
-
-    cdef for_get(self, object origin, int rank, object target):
-        self.for_rma(0, origin, rank, target)
-
-    cdef for_acc(self, object origin, int rank, object target):
-        self.for_rma(1, origin, rank, target)
-
     cdef for_rma(self, int readonly, object origin,
                  int rank, object target):
         # check arguments
@@ -522,6 +513,30 @@ cdef class message_rma:
         self.ttype  = ttype
         self._origin = origin
         self._target = target
+
+    cdef for_put(self, object origin, int rank, object target):
+        self.for_rma(1, origin, rank, target)
+
+    cdef for_get(self, object origin, int rank, object target):
+        self.for_rma(0, origin, rank, target)
+
+    cdef for_acc(self, object origin, int rank, object target):
+        self.for_rma(1, origin, rank, target)
+
+cdef inline message_rma message_rma_put(object origin, int rank, object target):
+    cdef message_rma msg = <message_rma>message_rma()
+    msg.for_put(origin, rank, target)
+    return msg
+
+cdef inline message_rma message_rma_get(object origin, int rank, object target):
+    cdef message_rma msg = <message_rma>message_rma()
+    msg.for_get(origin, rank, target)
+    return msg
+
+cdef inline message_rma message_rma_acc(object origin, int rank, object target):
+    cdef message_rma msg = <message_rma>message_rma()
+    msg.for_acc(origin, rank, target)
+    return msg
 
 #---------------------------------------------------------------------
 
