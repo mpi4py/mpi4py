@@ -219,8 +219,8 @@ def get_vendor():
     Infomation about the underlying MPI implementation
 
     :Returns:
-    -`name`: implementation name
-    -`version`: integer 3-tuple ``(major, minor, micro)``
+      - a string with the name of the MPI implementation
+      - an integer 3-tuple version ``(major, minor, micro)``
     """
     name, version = PyMPI_Get_vendor()
     return (name, version)

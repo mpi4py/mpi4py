@@ -69,8 +69,6 @@ cdef class Status:
     def Get_count(self, Datatype datatype=None):
         """
         Get the number of *top level* elements
-
-        .. note:: `datatype` defaults to `BYTE`.
         """
         cdef MPI_Datatype ctype = MPI_BYTE
         if datatype is not None: ctype = datatype.ob_mpi
@@ -81,8 +79,6 @@ cdef class Status:
     def Get_elements(self, Datatype datatype not None):
         """
         Get the number of basic elements in a datatype
-
-        .. note:: `datatype` defaults to `BYTE`.
         """
         cdef int elements = MPI_UNDEFINED
         CHKERR( MPI_Get_elements(&self.ob_mpi, datatype.ob_mpi, &elements) )
