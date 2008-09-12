@@ -11,13 +11,13 @@ cdef class Request:
         cdef int ierr = 0
         ierr = _del_Request(&self.ob_mpi); CHKERR(ierr)
 
-    def __richcmp__(Request self, Request other, int op):
-        if op == 2:
-            return (self.ob_mpi == other.ob_mpi)
-        elif op == 3:
-            return (self.ob_mpi != other.ob_mpi)
-        else:
-            raise TypeError("only '==' and '!='")
+    def __richcmp__(self, other, int op):
+        if not isinstance(self,  Request): return NotImplemented
+        if not isinstance(other, Request): return NotImplemented
+        cdef Request s = self, o = other
+        if   op == 2: return (s.ob_mpi == o.ob_mpi)
+        elif op == 3: return (s.ob_mpi != o.ob_mpi)
+        else: raise TypeError("only '==' and '!='")
 
     def __nonzero__(self):
         return self.ob_mpi != MPI_REQUEST_NULL
