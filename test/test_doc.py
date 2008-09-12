@@ -11,14 +11,14 @@ GetSetDescrType = type(MPI.Comm.rank)
 def getdocstr(mc, docstrings):
     if type(mc) in (ModuleType, ClassType):
         name = getattr(mc, '__name__')
-        if name == '__builtin__': return
+        if name in ('__builtin__', 'builtin'): return
         doc = getattr(mc, '__doc__', None)
         docstrings[name] = doc
         for k, v in vars(mc).items():
             getdocstr(v, docstrings)
     elif type(mc) in (FunctionType, MethodDescrType, GetSetDescrType):
         name = getattr(mc, '__name__')
-        if name == '__builtin__': return
+        if name in ('__builtin__', 'builtin'): return
         doc = getattr(mc, '__doc__', None)
         docstrings[name] = doc
 
@@ -32,12 +32,12 @@ class TestDoc(unittest.TestCase):
             if not k.startswith('_'):
                 doc = docs[k]
                 if doc is None:
-                    print "'%s': missing docstring" % k
+                    print ("'%s': missing docstring" % k)
                     missing = True
                 else:
                     doc = doc.strip()
                     if not doc:
-                        print "'%s': empty docstring" % k
+                        print ("'%s': empty docstring" % k)
                         missing = True
         self.assertFalse(missing)
 

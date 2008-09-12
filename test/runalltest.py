@@ -23,7 +23,7 @@ sys.path.insert(0, testpath)
 import mpiunittest
 
 alltests = mpiunittest.find_tests(
-    exclude=['test_doc',
+    exclude=[
              ]
     )
 
