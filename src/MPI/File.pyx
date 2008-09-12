@@ -11,9 +11,12 @@ cdef class File:
         cdef int ierr = 0
         ierr = _del_File(&self.ob_mpi); CHKERR(ierr)
 
-    def __richcmp__(File self, File other, int op):
-        if   op == 2: return (self.ob_mpi == other.ob_mpi)
-        elif op == 3: return (self.ob_mpi != other.ob_mpi)
+    def __richcmp__(self, other, int op):
+        if not isinstance(self,  File): return NotImplemented
+        if not isinstance(other, File): return NotImplemented
+        cdef File s = self, o = other
+        if   op == 2: return (s.ob_mpi == o.ob_mpi)
+        elif op == 3: return (s.ob_mpi != o.ob_mpi)
         else: raise TypeError("only '==' and '!='")
 
     def __nonzero__(self):

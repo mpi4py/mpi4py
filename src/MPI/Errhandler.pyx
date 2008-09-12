@@ -12,9 +12,12 @@ cdef class Errhandler:
         if not (self.flags & PyMPI_SKIP_FREE):
             ierr = _del_Errhandler(&self.ob_mpi); CHKERR(ierr)
 
-    def __richcmp__(Errhandler self, Errhandler other, int op):
-        if   op == 2: return (self.ob_mpi == other.ob_mpi)
-        elif op == 3: return (self.ob_mpi != other.ob_mpi)
+    def __richcmp__(self, other, int op):
+        if not isinstance(self,  Errhandler): return NotImplemented
+        if not isinstance(other, Errhandler): return NotImplemented
+        cdef Errhandler s = self, o = other
+        if   op == 2: return (s.ob_mpi == o.ob_mpi)
+        elif op == 3: return (s.ob_mpi != o.ob_mpi)
         else: raise TypeError("only '==' and '!='")
 
     def __nonzero__(self):

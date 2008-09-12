@@ -12,9 +12,12 @@ cdef class Comm:
         if not (self.flags & PyMPI_SKIP_FREE):
             ierr = _del_Comm(&self.ob_mpi); CHKERR(ierr)
 
-    def __richcmp__(Comm self, Comm other, int op):
-        if   op == 2: return (self.ob_mpi == other.ob_mpi)
-        elif op == 3: return (self.ob_mpi != other.ob_mpi)
+    def __richcmp__(self, other, int op):
+        if not isinstance(self,  Comm): return NotImplemented
+        if not isinstance(other, Comm): return NotImplemented
+        cdef Comm s = self, o = other
+        if   op == 2: return (s.ob_mpi == o.ob_mpi)
+        elif op == 3: return (s.ob_mpi != o.ob_mpi)
         else: raise TypeError("only '==' and '!='")
 
     def __nonzero__(self):

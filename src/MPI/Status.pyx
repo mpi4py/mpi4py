@@ -9,6 +9,16 @@ cdef class Status:
         self.ob_mpi.MPI_TAG    = MPI_ANY_TAG
         self.ob_mpi.MPI_ERROR  = MPI_SUCCESS
 
+    def __richcmp__(self, other, int op):
+        if not isinstance(self,  Status): return NotImplemented
+        if not isinstance(other, Status): return NotImplemented
+        cdef Status s = self, o = other
+        cdef int r = memcmp(&s.ob_mpi, &o.ob_mpi, sizeof(MPI_Status))
+        if   op == 2: return  r == 0
+        elif op == 3: return  r != 0
+        else: raise TypeError("only '==' and '!='")
+
+
     def Get_source(self):
         """
         Get message source

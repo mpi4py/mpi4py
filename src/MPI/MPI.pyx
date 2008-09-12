@@ -2,6 +2,8 @@
 Message Passing Interface
 """
 
+include "stdlibc.pxi"
+
 include "mpi.pxi"
 
 include "atimport.pxi"
