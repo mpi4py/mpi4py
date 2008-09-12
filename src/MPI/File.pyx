@@ -208,7 +208,7 @@ cdef class File:
         """
         Read using explicit offset
         """
-        cdef message_io m = message_io_read(buf)
+        cdef _p_msg_io m = message_io_read(buf)
         cdef MPI_Status *statusp = _arg_Status(status)
         CHKERR( MPI_File_read_at(self.ob_mpi, offset,
                                  m.buf, m.count, m.dtype,
@@ -218,7 +218,7 @@ cdef class File:
         """
         Collective read using explicit offset
         """
-        cdef message_io m = message_io_read(buf)
+        cdef _p_msg_io m = message_io_read(buf)
         cdef MPI_Status *statusp = _arg_Status(status)
         CHKERR( MPI_File_read_at_all(self.ob_mpi, offset,
                                      m.buf, m.count, m.dtype,
@@ -228,7 +228,7 @@ cdef class File:
         """
         Write using explicit offset
         """
-        cdef message_io m = message_io_write(buf)
+        cdef _p_msg_io m = message_io_write(buf)
         cdef MPI_Status *statusp = _arg_Status(status)
         CHKERR( MPI_File_write_at(self.ob_mpi, offset,
                                   m.buf, m.count, m.dtype,
@@ -238,7 +238,7 @@ cdef class File:
         """
         Collective write using explicit offset
         """
-        cdef message_io m = message_io_write(buf)
+        cdef _p_msg_io m = message_io_write(buf)
         cdef MPI_Status *statusp = _arg_Status(status)
         CHKERR( MPI_File_write_at_all(self.ob_mpi, offset,
                                       m.buf, m.count, m.dtype,
@@ -248,7 +248,7 @@ cdef class File:
         """
         Nonblocking read using explicit offset
         """
-        cdef message_io m = message_io_read(buf)
+        cdef _p_msg_io m = message_io_read(buf)
         cdef Request request = Request()
         CHKERR( MPI_File_iread_at(self.ob_mpi, offset,
                                   m.buf, m.count, m.dtype,
@@ -259,7 +259,7 @@ cdef class File:
         """
         Nonblocking write using explicit offset
         """
-        cdef message_io m = message_io_write(buf)
+        cdef _p_msg_io m = message_io_write(buf)
         cdef Request request = Request()
         CHKERR( MPI_File_iwrite_at(self.ob_mpi, offset,
                                    m.buf, m.count, m.dtype,
@@ -273,7 +273,7 @@ cdef class File:
         """
         Read using individual file pointer
         """
-        cdef message_io m = message_io_read(buf)
+        cdef _p_msg_io m = message_io_read(buf)
         cdef MPI_Status *statusp = _arg_Status(status)
         CHKERR( MPI_File_read(self.ob_mpi,
                               m.buf, m.count, m.dtype,
@@ -283,7 +283,7 @@ cdef class File:
         """
         Collective read using individual file pointer
         """
-        cdef message_io m = message_io_read(buf)
+        cdef _p_msg_io m = message_io_read(buf)
         cdef MPI_Status *statusp = _arg_Status(status)
         CHKERR( MPI_File_read_all(self.ob_mpi,
                                   m.buf, m.count, m.dtype,
@@ -293,7 +293,7 @@ cdef class File:
         """
         Write using individual file pointer
         """
-        cdef message_io m = message_io_write(buf)
+        cdef _p_msg_io m = message_io_write(buf)
         cdef MPI_Status *statusp = _arg_Status(status)
         CHKERR( MPI_File_write(self.ob_mpi,
                                m.buf, m.count, m.dtype,
@@ -303,7 +303,7 @@ cdef class File:
         """
         Collective write using individual file pointer
         """
-        cdef message_io m = message_io_write(buf)
+        cdef _p_msg_io m = message_io_write(buf)
         cdef MPI_Status *statusp = _arg_Status(status)
         CHKERR( MPI_File_write_all(self.ob_mpi,
                                    m.buf, m.count, m.dtype,
@@ -313,7 +313,7 @@ cdef class File:
         """
         Nonblocking read using individual file pointer
         """
-        cdef message_io m = message_io_read(buf)
+        cdef _p_msg_io m = message_io_read(buf)
         cdef Request request = Request()
         CHKERR( MPI_File_iread(self.ob_mpi,
                                m.buf, m.count, m.dtype,
@@ -324,7 +324,7 @@ cdef class File:
         """
         Nonblocking write using individual file pointer
         """
-        cdef message_io m = message_io_write(buf)
+        cdef _p_msg_io m = message_io_write(buf)
         cdef Request request = Request()
         CHKERR( MPI_File_iwrite(self.ob_mpi,
                                 m.buf, m.count, m.dtype,
@@ -364,7 +364,7 @@ cdef class File:
         """
         Read using shared file pointer
         """
-        cdef message_io m = message_io_read(buf)
+        cdef _p_msg_io m = message_io_read(buf)
         cdef MPI_Status *statusp = _arg_Status(status)
         CHKERR( MPI_File_read_shared(self.ob_mpi,
                                      m.buf, m.count, m.dtype,
@@ -374,7 +374,7 @@ cdef class File:
         """
         Write using shared file pointer
         """
-        cdef message_io m = message_io_write(buf)
+        cdef _p_msg_io m = message_io_write(buf)
         cdef MPI_Status *statusp = _arg_Status(status)
         CHKERR( MPI_File_write_shared(self.ob_mpi,
                                       m.buf, m.count, m.dtype,
@@ -384,7 +384,7 @@ cdef class File:
         """
         Nonblocking read using shared file pointer
         """
-        cdef message_io m = message_io_read(buf)
+        cdef _p_msg_io m = message_io_read(buf)
         cdef Request request = Request()
         CHKERR( MPI_File_iread_shared(self.ob_mpi,
                                       m.buf, m.count, m.dtype,
@@ -395,7 +395,7 @@ cdef class File:
         """
         Nonblocking write using shared file pointer
         """
-        cdef message_io m = message_io_write(buf)
+        cdef _p_msg_io m = message_io_write(buf)
         cdef Request request = Request()
         CHKERR( MPI_File_iwrite_shared(self.ob_mpi,
                                        m.buf, m.count, m.dtype,
@@ -406,7 +406,7 @@ cdef class File:
         """
         Collective read using shared file pointer
         """
-        cdef message_io m = message_io_read(buf)
+        cdef _p_msg_io m = message_io_read(buf)
         cdef MPI_Status *statusp = _arg_Status(status)
         CHKERR( MPI_File_read_ordered(self.ob_mpi,
                                       m.buf, m.count, m.dtype,
@@ -416,7 +416,7 @@ cdef class File:
         """
         Collective write using shared file pointer
         """
-        cdef message_io m = message_io_write(buf)
+        cdef _p_msg_io m = message_io_write(buf)
         cdef MPI_Status *statusp = _arg_Status(status)
         CHKERR( MPI_File_write_ordered(self.ob_mpi,
                                        m.buf, m.count, m.dtype,
@@ -448,7 +448,7 @@ cdef class File:
         """
         Start a split collective read using explict offset
         """
-        cdef message_io m = message_io_read(buf)
+        cdef _p_msg_io m = message_io_read(buf)
         CHKERR( MPI_File_read_at_all_begin(self.ob_mpi, offset,
                                            m.buf, m.count, m.dtype) )
 
@@ -456,7 +456,7 @@ cdef class File:
         """
         Complete a split collective read using explict offset
         """
-        cdef message_io m = message_io_read(buf)
+        cdef _p_msg_io m = message_io_read(buf)
         cdef MPI_Status *statusp = _arg_Status(status)
         CHKERR( MPI_File_read_at_all_end(self.ob_mpi, m.buf,
                                          statusp) )
@@ -465,7 +465,7 @@ cdef class File:
         """
         Start a split collective write using explict offset
         """
-        cdef message_io m = message_io_write(buf)
+        cdef _p_msg_io m = message_io_write(buf)
         CHKERR( MPI_File_write_at_all_begin(self.ob_mpi, offset,
                                             m.buf, m.count, m.dtype) )
 
@@ -473,7 +473,7 @@ cdef class File:
         """
         Complete a split collective write using explict offset
         """
-        cdef message_io m = message_io_write(buf)
+        cdef _p_msg_io m = message_io_write(buf)
         cdef MPI_Status *statusp = _arg_Status(status)
         CHKERR( MPI_File_write_at_all_end(self.ob_mpi, m.buf,
                                           statusp) )
@@ -485,7 +485,7 @@ cdef class File:
         Start a split collective read
         using individual file pointer
         """
-        cdef message_io m = message_io_read(buf)
+        cdef _p_msg_io m = message_io_read(buf)
         CHKERR( MPI_File_read_all_begin(self.ob_mpi,
                                         m.buf, m.count, m.dtype) )
 
@@ -494,7 +494,7 @@ cdef class File:
         Complete a split collective read
         using individual file pointer
         """
-        cdef message_io m = message_io_read(buf)
+        cdef _p_msg_io m = message_io_read(buf)
         cdef MPI_Status *statusp = _arg_Status(status)
         CHKERR( MPI_File_read_all_end(self.ob_mpi, m.buf,
                                       statusp) )
@@ -504,7 +504,7 @@ cdef class File:
         Start a split collective write
         using individual file pointer
         """
-        cdef message_io m = message_io_write(buf)
+        cdef _p_msg_io m = message_io_write(buf)
         CHKERR( MPI_File_write_all_begin(self.ob_mpi,
                                          m.buf, m.count, m.dtype) )
 
@@ -513,7 +513,7 @@ cdef class File:
         Complete a split collective write
         using individual file pointer
         """
-        cdef message_io m = message_io_write(buf)
+        cdef _p_msg_io m = message_io_write(buf)
         cdef MPI_Status *statusp = _arg_Status(status)
         CHKERR( MPI_File_write_all_end(self.ob_mpi, m.buf,
                                        statusp) )
@@ -525,7 +525,7 @@ cdef class File:
         Start a split collective read
         using shared file pointer
         """
-        cdef message_io m = message_io_read(buf)
+        cdef _p_msg_io m = message_io_read(buf)
         CHKERR( MPI_File_read_ordered_begin(self.ob_mpi,
                                             m.buf,
                                             m.count,
@@ -536,7 +536,7 @@ cdef class File:
         Complete a split collective read
         using shared file pointer
         """
-        cdef message_io m = message_io_read(buf)
+        cdef _p_msg_io m = message_io_read(buf)
         cdef MPI_Status *statusp = _arg_Status(status)
         CHKERR( MPI_File_read_ordered_end(self.ob_mpi, m.buf,
                                           statusp) )
@@ -546,7 +546,7 @@ cdef class File:
         Start a split collective write using
         shared file pointer
         """
-        cdef message_io m = message_io_write(buf)
+        cdef _p_msg_io m = message_io_write(buf)
         CHKERR( MPI_File_write_ordered_begin(self.ob_mpi,
                                              m.buf,
                                              m.count,
@@ -557,7 +557,7 @@ cdef class File:
         Complete a split collective write
         using shared file pointer
         """
-        cdef message_io m = message_io_write(buf)
+        cdef _p_msg_io m = message_io_write(buf)
         cdef MPI_Status *statusp = _arg_Status(status)
         CHKERR( MPI_File_write_ordered_end(self.ob_mpi, m.buf,
                                            statusp) )

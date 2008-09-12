@@ -132,7 +132,7 @@ cdef class Win:
         """
         Put data into a memory window on a remote process.
         """
-        cdef message_rma msg = \
+        cdef _p_msg_rma msg = \
              message_rma_put(origin, target_rank, target)
         CHKERR( MPI_Put(msg.oaddr, msg.ocount, msg.otype,
                         target_rank,
@@ -146,7 +146,7 @@ cdef class Win:
         """
         Get data from a memory window on a remote process.
         """
-        cdef message_rma msg = \
+        cdef _p_msg_rma msg = \
              message_rma_get(origin, target_rank, target)
         CHKERR( MPI_Get(msg.oaddr, msg.ocount, msg.otype,
                         target_rank,
@@ -162,7 +162,7 @@ cdef class Win:
         Accumulate data into the target process
         using remote memory access.
         """
-        cdef message_rma msg = \
+        cdef _p_msg_rma msg = \
              message_rma_acc(origin, target_rank, target)
         cdef MPI_Op cop = MPI_SUM
         if op is not None: cop = (<Op?>op).ob_mpi

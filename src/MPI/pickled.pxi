@@ -44,7 +44,7 @@ cdef inline object _py_exscan(object op, object seq):
 
 # --------------------------------------------------------------------
 
-cdef class Pickler:
+cdef class _p_Pickler:
 
     cdef object dump(self, object obj, void **p, int *n):
         if obj is None:
@@ -111,16 +111,16 @@ cdef class Pickler:
         return items
 
 
-cdef Pickler PyMPI_PICKLER = Pickler()
+cdef _p_Pickler PyMPI_PICKLER = _p_Pickler()
 
-cdef Pickler PyMPI_pickler():
+cdef _p_Pickler PyMPI_pickler():
     return PyMPI_PICKLER
 
 # --------------------------------------------------------------------
 
 cdef object PyMPI_send(object obj, int dest, int tag,
                        MPI_Comm comm):
-    cdef Pickler pickler = PyMPI_pickler()
+    cdef _p_Pickler pickler = PyMPI_pickler()
     #
     cdef void *sbuf = NULL
     cdef int scount = 0
@@ -137,7 +137,7 @@ cdef object PyMPI_send(object obj, int dest, int tag,
 
 cdef object PyMPI_recv(object obj, int source, int tag,
                        MPI_Comm comm, MPI_Status *status):
-    cdef Pickler pickler = PyMPI_pickler()
+    cdef _p_Pickler pickler = PyMPI_pickler()
     #
     cdef void *rbuf = NULL
     cdef int rcount = 0
@@ -162,7 +162,7 @@ cdef object PyMPI_recv(object obj, int source, int tag,
 cdef object PyMPI_sendrecv(object sobj, int dest,   int sendtag,
                            object robj, int source, int recvtag,
                            MPI_Comm comm, MPI_Status *status):
-    cdef Pickler pickler = PyMPI_pickler()
+    cdef _p_Pickler pickler = PyMPI_pickler()
     #
     cdef void *sbuf = NULL
     cdef int scount = 0
@@ -204,7 +204,7 @@ cdef object PyMPI_barrier(MPI_Comm comm):
 
 cdef object PyMPI_bcast(object obj,
                         int root, MPI_Comm comm):
-    cdef Pickler pickler = PyMPI_pickler()
+    cdef _p_Pickler pickler = PyMPI_pickler()
     #
     cdef void *buf = NULL
     cdef int count = 0
@@ -242,7 +242,7 @@ cdef object PyMPI_bcast(object obj,
 
 cdef object PyMPI_gather(object sendobj, object recvobj,
                          int root, MPI_Comm comm):
-    cdef Pickler pickler = PyMPI_pickler()
+    cdef _p_Pickler pickler = PyMPI_pickler()
     #
     cdef void *sbuf = NULL
     cdef int scount = 0
@@ -291,7 +291,7 @@ cdef object PyMPI_gather(object sendobj, object recvobj,
 
 cdef object PyMPI_scatter(object sendobj, object recvobj,
                           int root, MPI_Comm comm):
-    cdef Pickler pickler = PyMPI_pickler()
+    cdef _p_Pickler pickler = PyMPI_pickler()
     #
     cdef void *sbuf = NULL
     cdef int *scounts = NULL
@@ -340,7 +340,7 @@ cdef object PyMPI_scatter(object sendobj, object recvobj,
 
 cdef object PyMPI_allgather(object sendobj, object recvobj,
                             MPI_Comm comm):
-    cdef Pickler pickler = PyMPI_pickler()
+    cdef _p_Pickler pickler = PyMPI_pickler()
     #
     cdef void *sbuf = NULL
     cdef int scount = 0
@@ -374,7 +374,7 @@ cdef object PyMPI_allgather(object sendobj, object recvobj,
 
 cdef object PyMPI_alltoall(object sendobj, object recvobj,
                            MPI_Comm comm):
-    cdef Pickler pickler = PyMPI_pickler()
+    cdef _p_Pickler pickler = PyMPI_pickler()
     #
     cdef void *sbuf = NULL
     cdef int *scounts = NULL

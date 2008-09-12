@@ -165,7 +165,7 @@ cdef inline object message_vector(int readonly,
 
 #---------------------------------------------------------------------
 
-cdef class message_p2p:
+cdef class _p_msg_p2p:
 
     # raw C-side arguments
     cdef void         *buf
@@ -193,19 +193,19 @@ cdef class message_p2p:
                                    &self.count,
                                    &self.dtype)
 
-cdef inline message_p2p message_p2p_send(object sendbuf, int dest):
-    cdef message_p2p msg = <message_p2p>message_p2p()
+cdef inline _p_msg_p2p message_p2p_send(object sendbuf, int dest):
+    cdef _p_msg_p2p msg = <_p_msg_p2p>_p_msg_p2p()
     msg.for_send(sendbuf, dest)
     return msg
 
-cdef inline message_p2p message_p2p_recv(object recvbuf, int source):
-    cdef message_p2p msg = <message_p2p>message_p2p()
+cdef inline _p_msg_p2p message_p2p_recv(object recvbuf, int source):
+    cdef _p_msg_p2p msg = <_p_msg_p2p>_p_msg_p2p()
     msg.for_recv(recvbuf, source)
     return msg
 
 #---------------------------------------------------------------------
 
-cdef class message_cco:
+cdef class _p_msg_cco:
 
     # raw C-side arguments
     cdef void *sbuf, *rbuf
@@ -448,9 +448,14 @@ cdef class message_cco:
         assert self.scount == self.rcount
         assert self.stype  == self.rtype
 
+
+cdef inline _p_msg_cco message_cco():
+    cdef _p_msg_cco msg = <_p_msg_cco>_p_msg_cco()
+    return msg
+
 #---------------------------------------------------------------------
 
-cdef class message_rma:
+cdef class _p_msg_rma:
 
     # raw origin arguments
     cdef void*        oaddr
@@ -523,24 +528,24 @@ cdef class message_rma:
     cdef for_acc(self, object origin, int rank, object target):
         self.for_rma(1, origin, rank, target)
 
-cdef inline message_rma message_rma_put(object origin, int rank, object target):
-    cdef message_rma msg = <message_rma>message_rma()
+cdef inline _p_msg_rma message_rma_put(object origin, int rank, object target):
+    cdef _p_msg_rma msg = <_p_msg_rma>_p_msg_rma()
     msg.for_put(origin, rank, target)
     return msg
 
-cdef inline message_rma message_rma_get(object origin, int rank, object target):
-    cdef message_rma msg = <message_rma>message_rma()
+cdef inline _p_msg_rma message_rma_get(object origin, int rank, object target):
+    cdef _p_msg_rma msg = <_p_msg_rma>_p_msg_rma()
     msg.for_get(origin, rank, target)
     return msg
 
-cdef inline message_rma message_rma_acc(object origin, int rank, object target):
-    cdef message_rma msg = <message_rma>message_rma()
+cdef inline _p_msg_rma message_rma_acc(object origin, int rank, object target):
+    cdef _p_msg_rma msg = <_p_msg_rma>_p_msg_rma()
     msg.for_acc(origin, rank, target)
     return msg
 
 #---------------------------------------------------------------------
 
-cdef class message_io:
+cdef class _p_msg_io:
 
     # raw C-side data
     cdef void         *buf
@@ -568,13 +573,13 @@ cdef class message_io:
                                    &self.count,
                                    &self.dtype)
 
-cdef inline message_io message_io_read(object buf):
-    cdef message_io msg = <message_io>message_io()
+cdef inline _p_msg_io message_io_read(object buf):
+    cdef _p_msg_io msg = <_p_msg_io>_p_msg_io()
     msg.for_read(buf)
     return msg
 
-cdef inline message_io message_io_write(object buf):
-    cdef message_io msg = <message_io>message_io()
+cdef inline _p_msg_io message_io_write(object buf):
+    cdef _p_msg_io msg = <_p_msg_io>_p_msg_io()
     msg.for_write(buf)
     return msg
 

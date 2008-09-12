@@ -115,7 +115,7 @@ cdef class Comm:
            received. Whether or not `Send` blocks depends on
            several factors and is implementation dependent
         """
-        cdef message_p2p smsg = message_p2p_send(buf, dest)
+        cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
         with nogil:
             CHKERR( MPI_Send(smsg.buf, smsg.count, smsg.dtype,
                              dest, tag, self.ob_mpi) )
@@ -126,7 +126,7 @@ cdef class Comm:
 
         .. note:: This function blocks until the message is received
         """
-        cdef message_p2p rmsg = message_p2p_recv(buf, source)
+        cdef _p_msg_p2p rmsg = message_p2p_recv(buf, source)
         cdef MPI_Status *statusp = _arg_Status(status)
         with nogil:
             CHKERR( MPI_Recv(rmsg.buf, rmsg.count, rmsg.dtype,
@@ -149,8 +149,8 @@ cdef class Comm:
            mismatch the tags with the source and destination ranks,
            which can result in deadlock.
         """
-        cdef message_p2p smsg = message_p2p_send(sendbuf, dest)
-        cdef message_p2p rmsg = message_p2p_recv(recvbuf, source)
+        cdef _p_msg_p2p smsg = message_p2p_send(sendbuf, dest)
+        cdef _p_msg_p2p rmsg = message_p2p_recv(recvbuf, source)
         cdef MPI_Status *statusp = _arg_Status(status)
         with nogil:
             CHKERR( MPI_Sendrecv(smsg.buf, smsg.count, smsg.dtype,
@@ -177,7 +177,7 @@ cdef class Comm:
         cdef int rank = MPI_PROC_NULL
         if dest   != MPI_PROC_NULL: rank = dest
         if source != MPI_PROC_NULL: rank = source
-        cdef message_p2p rmsg = message_p2p_recv(buf, rank)
+        cdef _p_msg_p2p rmsg = message_p2p_recv(buf, rank)
         cdef MPI_Status *statusp = _arg_Status(status)
         with nogil:
             CHKERR( MPI_Sendrecv_replace(rmsg.buf, rmsg.count, rmsg.dtype,
@@ -191,7 +191,7 @@ cdef class Comm:
         """
         Nonblocking send
         """
-        cdef message_p2p smsg = message_p2p_send(buf, dest)
+        cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
         cdef Request request = Request()
         CHKERR( MPI_Isend(smsg.buf, smsg.count, smsg.dtype,
                           dest, tag, self.ob_mpi,
@@ -202,7 +202,7 @@ cdef class Comm:
         """
         Nonblocking receive
         """
-        cdef message_p2p rmsg = message_p2p_recv(buf, source)
+        cdef _p_msg_p2p rmsg = message_p2p_recv(buf, source)
         cdef Request request = Request()
         CHKERR( MPI_Irecv(rmsg.buf, rmsg.count, rmsg.dtype,
                           source, tag, self.ob_mpi,
@@ -239,7 +239,7 @@ cdef class Comm:
         """
         Create a persistent request for a standard send
         """
-        cdef message_p2p smsg = message_p2p_send(buf, dest)
+        cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
         cdef Prequest request = Prequest()
         CHKERR( MPI_Send_init(smsg.buf, smsg.count, smsg.dtype,
                               dest, tag, self.ob_mpi,
@@ -250,7 +250,7 @@ cdef class Comm:
         """
         Create a persistent request for a receive
         """
-        cdef message_p2p rmsg = message_p2p_recv(buf, source)
+        cdef _p_msg_p2p rmsg = message_p2p_recv(buf, source)
         cdef Prequest request = Prequest()
         CHKERR( MPI_Recv_init(rmsg.buf, rmsg.count, rmsg.dtype,
                               source, tag, self.ob_mpi,
@@ -266,7 +266,7 @@ cdef class Comm:
         """
         Blocking send in buffered mode
         """
-        cdef message_p2p smsg = message_p2p_send(buf, dest)
+        cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
         with nogil:
             CHKERR( MPI_Bsend(smsg.buf, smsg.count, smsg.dtype,
                               dest, tag, self.ob_mpi) )
@@ -275,7 +275,7 @@ cdef class Comm:
         """
         Blocking send in synchronous mode
         """
-        cdef message_p2p smsg = message_p2p_send(buf, dest)
+        cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
         with nogil:
             CHKERR( MPI_Ssend(smsg.buf, smsg.count, smsg.dtype,
                               dest, tag, self.ob_mpi) )
@@ -284,7 +284,7 @@ cdef class Comm:
         """
         Blocking send in ready mode
         """
-        cdef message_p2p smsg = message_p2p_send(buf, dest)
+        cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
         with nogil:
             CHKERR( MPI_Rsend(smsg.buf, smsg.count, smsg.dtype,
                               dest, tag, self.ob_mpi) )
@@ -295,7 +295,7 @@ cdef class Comm:
         """
         Nonblocking send in buffered mode
         """
-        cdef message_p2p smsg = message_p2p_send(buf, dest)
+        cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
         cdef Request request = Request()
         CHKERR( MPI_Ibsend(smsg.buf, smsg.count, smsg.dtype,
                            dest, tag, self.ob_mpi,
@@ -306,7 +306,7 @@ cdef class Comm:
         """
         Nonblocking send in synchronous mode
         """
-        cdef message_p2p smsg = message_p2p_send(buf, dest)
+        cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
         cdef Request request = Request()
         CHKERR( MPI_Issend(smsg.buf, smsg.count, smsg.dtype,
                            dest, tag, self.ob_mpi,
@@ -317,7 +317,7 @@ cdef class Comm:
         """
         Nonblocking send in ready mode
         """
-        cdef message_p2p smsg = message_p2p_send(buf, dest)
+        cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
         cdef Request request = Request()
         CHKERR( MPI_Irsend(smsg.buf, smsg.count, smsg.dtype,
                            dest, tag, self.ob_mpi,
@@ -330,7 +330,7 @@ cdef class Comm:
         """
         Persistent request for a send in buffered mode
         """
-        cdef message_p2p smsg = message_p2p_send(buf, dest)
+        cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
         cdef Prequest request = Prequest()
         CHKERR( MPI_Bsend_init(smsg.buf, smsg.count, smsg.dtype,
                                dest, tag, self.ob_mpi,
@@ -341,7 +341,7 @@ cdef class Comm:
         """
         Persistent request for a send in synchronous mode
         """
-        cdef message_p2p smsg = message_p2p_send(buf, dest)
+        cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
         cdef Prequest request = Prequest()
         CHKERR( MPI_Ssend_init(smsg.buf, smsg.count, smsg.dtype,
                                dest, tag, self.ob_mpi,
@@ -352,7 +352,7 @@ cdef class Comm:
         """
         Persistent request for a send in ready mode
         """
-        cdef message_p2p smsg = message_p2p_send(buf, dest)
+        cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
         cdef Prequest request = Prequest()
         CHKERR( MPI_Rsend_init(smsg.buf, smsg.count, smsg.dtype,
                                dest, tag, self.ob_mpi,
@@ -380,7 +380,7 @@ cdef class Comm:
         Broadcast a message from one process
         to all other processes in a group
         """
-        cdef message_cco m = message_cco()
+        cdef _p_msg_cco m = message_cco()
         m.for_bcast(buf, root, self.ob_mpi)
         with nogil:
             CHKERR( MPI_Bcast(m.sbuf, m.scount, m.stype,
@@ -390,7 +390,7 @@ cdef class Comm:
         """
         Gather together values from a group of processes
         """
-        cdef message_cco m = message_cco()
+        cdef _p_msg_cco m = message_cco()
         m.for_gather(0, sendbuf, recvbuf, root, self.ob_mpi)
         with nogil:
             CHKERR( MPI_Gather(m.sbuf, m.scount, m.stype,
@@ -403,7 +403,7 @@ cdef class Comm:
         processes in a group providing different amount of data and
         displacements at the receiving sides
         """
-        cdef message_cco m = message_cco()
+        cdef _p_msg_cco m = message_cco()
         m.for_gather(1, sendbuf, recvbuf, root, self.ob_mpi)
         with nogil:
             CHKERR( MPI_Gatherv(m.sbuf, m.scount,             m.stype,
@@ -415,7 +415,7 @@ cdef class Comm:
         Scatter Vector, scatter data from one process
         to all other processes in a group
         """
-        cdef message_cco m = message_cco()
+        cdef _p_msg_cco m = message_cco()
         m.for_scatter(0, sendbuf, recvbuf, root, self.ob_mpi)
         with nogil:
             CHKERR( MPI_Scatter(m.sbuf, m.scount, m.stype,
@@ -428,7 +428,7 @@ cdef class Comm:
         group providing different amount of data and displacements at
         the sending side
         """
-        cdef message_cco m = message_cco()
+        cdef _p_msg_cco m = message_cco()
         m.for_scatter(1, sendbuf, recvbuf, root, self.ob_mpi)
         with nogil:
             CHKERR( MPI_Scatterv(m.sbuf, m.scounts, m.sdispls, m.stype,
@@ -440,7 +440,7 @@ cdef class Comm:
         Gather to All, gather data from all processes and
         distribute it to all other processes in a group
         """
-        cdef message_cco m = message_cco()
+        cdef _p_msg_cco m = message_cco()
         m.for_allgather(0, sendbuf, recvbuf, self.ob_mpi)
         with nogil:
             CHKERR( MPI_Allgather(m.sbuf, m.scount, m.stype,
@@ -453,7 +453,7 @@ cdef class Comm:
         distribute it to all other processes in a group providing
         different amount of data and displacements
         """
-        cdef message_cco m = message_cco()
+        cdef _p_msg_cco m = message_cco()
         m.for_allgather(1, sendbuf, recvbuf, self.ob_mpi)
         with nogil:
             CHKERR( MPI_Allgatherv(m.sbuf, m.scount,             m.stype,
@@ -465,7 +465,7 @@ cdef class Comm:
         All to All Scatter/Gather, send data from all to all
         processes in a group
         """
-        cdef message_cco m = message_cco()
+        cdef _p_msg_cco m = message_cco()
         m.for_alltoall(0, sendbuf, recvbuf, self.ob_mpi)
         with nogil:
             CHKERR( MPI_Alltoall(m.sbuf, m.scount, m.stype,
@@ -478,7 +478,7 @@ cdef class Comm:
         processes in a group providing different amount of data and
         displacements
         """
-        cdef message_cco m = message_cco()
+        cdef _p_msg_cco m = message_cco()
         m.for_alltoall(1, sendbuf, recvbuf, self.ob_mpi)
         with nogil:
             CHKERR( MPI_Alltoallv(m.sbuf, m.scounts, m.sdispls, m.stype,
@@ -508,7 +508,7 @@ cdef class Comm:
         """
         Reduce
         """
-        cdef message_cco m = message_cco()
+        cdef _p_msg_cco m = message_cco()
         m.for_reduce(sendbuf, recvbuf, root, self.ob_mpi)
         with nogil:
             CHKERR( MPI_Reduce(m.sbuf, m.rbuf, m.rcount, m.rtype,
@@ -518,7 +518,7 @@ cdef class Comm:
         """
         All Reduce
         """
-        cdef message_cco m = message_cco()
+        cdef _p_msg_cco m = message_cco()
         m.for_allreduce(sendbuf, recvbuf, self.ob_mpi)
         with nogil:
             CHKERR( MPI_Allreduce(m.sbuf, m.rbuf, m.rcount, m.rtype,
@@ -838,7 +838,7 @@ cdef class Intracomm(Comm):
         """
         Inclusive Scan
         """
-        cdef message_cco m = message_cco()
+        cdef _p_msg_cco m = message_cco()
         m.for_scan(sendbuf, recvbuf, self.ob_mpi)
         with nogil:
             CHKERR( MPI_Scan(m.sbuf, m.rbuf, m.rcount, m.rtype,
@@ -850,7 +850,7 @@ cdef class Intracomm(Comm):
         """
         Exclusive Scan
         """
-        cdef message_cco m = message_cco()
+        cdef _p_msg_cco m = message_cco()
         m.for_exscan(sendbuf, recvbuf, self.ob_mpi)
         with nogil:
             CHKERR( MPI_Exscan(m.sbuf, m.rbuf, m.rcount, m.rtype,
