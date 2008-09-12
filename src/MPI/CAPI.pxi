@@ -20,7 +20,7 @@ cdef api object PyMPIStatus_New(MPI_Status *arg):
     if arg != NULL and \
        arg != MPI_STATUS_IGNORE and \
        arg != MPI_STATUSES_IGNORE:
-        Py_MEMCPY(&obj.ob_mpi, arg, sizeof(MPI_Status))
+        memcpy(&obj.ob_mpi, arg, sizeof(MPI_Status))
     return obj
 
 cdef api MPI_Status* PyMPIStatus_Get(object arg) except NULL:

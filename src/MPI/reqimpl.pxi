@@ -1,6 +1,3 @@
-cdef extern from "Python.h":
-    cdef void Py_MEMCPY(void*,void*,size_t)
-
 cdef class _p_greq:
 
     cdef object query_fn
@@ -20,7 +17,7 @@ cdef class _p_greq:
         cdef Status sts = Status()
         if self.query_fn is not None:
             self.query_fn(sts, *self.args, **self.kargs)
-        Py_MEMCPY(status, &sts.ob_mpi, sizeof(MPI_Status))
+        memcpy(status, &sts.ob_mpi, sizeof(MPI_Status))
         return MPI_SUCCESS
 
     cdef int free(self) except -1:
