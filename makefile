@@ -54,3 +54,12 @@ src/MPI.c: src/mpi4py_MPI.c
 src/mpi4py_MPI.c: ${CY_SRC_PXD} ${CY_SRC_PXI} ${CY_SRC_PYX}
 	${CYTHON} ${CYTHON_FLAGS} ${CYTHON_INCLUDE} -w src mpi4py.MPI.pyx -o mpi4py_MPI.c
 	mv src/mpi4py_MPI.h src/mpi4py_MPI_api.h src/include/mpi4py
+
+
+EPYDOC = ./misc/epydoc-cython.py
+EPYDOC_CONF = ./misc/epydoc.cfg
+EPYDOC_FLAGS =
+EPYDOC_CMD = ${EPYDOC} -v --config=${EPYDOC_CONF} ${EPYDOC_FLAGS}
+EPYDOC_OUT = /tmp/mpi4py-api-doc
+epydoc:
+	${EPYDOC_CMD} -o ${EPYDOC_OUT}
