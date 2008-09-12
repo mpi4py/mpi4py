@@ -648,6 +648,7 @@ cdef class Comm:
 
     def Get_name(self):
         """
+        Get the print name for this communicator
         """
         cdef char name[MPI_MAX_OBJECT_NAME+1]
         cdef int nlen = 0
@@ -656,6 +657,7 @@ cdef class Comm:
 
     def Set_name(self, name):
         """
+        Set the print name for this communicator
         """
         cdef char *cname = NULL
         name = asmpistr(name, &cname, NULL)
@@ -749,7 +751,7 @@ cdef class Intracomm(Comm):
 
     def Dup(self):
         """
-        Duplicate an existing communicator
+        Duplicate an existing intracommunicator
         """
         cdef Intracomm comm = type(self)()
         CHKERR( MPI_Comm_dup(self.ob_mpi, &comm.ob_mpi) )
@@ -1329,7 +1331,7 @@ cdef class Intercomm(Comm):
 
     def Dup(self):
         """
-        Duplicate an existing communicator
+        Duplicate an existing intercommunicator
         """
         cdef Intercomm comm = type(self)()
         CHKERR( MPI_Comm_dup(self.ob_mpi, &comm.ob_mpi) )
@@ -1337,6 +1339,7 @@ cdef class Intercomm(Comm):
 
     def Create(self, Group group not None):
         """
+        Create intercommunicator from group
         """
         cdef Intercomm comm = type(self)()
         CHKERR( MPI_Comm_create(self.ob_mpi, group.ob_mpi,
@@ -1345,6 +1348,7 @@ cdef class Intercomm(Comm):
 
     def Split(self, int color=0, int key=0):
         """
+        Split intercommunicator by color and key
         """
         cdef Intercomm comm = type(self)()
         CHKERR( MPI_Comm_split(self.ob_mpi, color, key,
