@@ -324,9 +324,6 @@ cmd_mpi_opts = [
     ('try-mpi-2', None,
      "test for availability of MPI 2 features"),
 
-    ('thread-level=', None,
-     "initialize MPI with support for threads"),
-
     ]
 
 def _cmd_opts_names(cmd_opts):
@@ -337,19 +334,6 @@ def _cmd_opts_names(cmd_opts):
         option = option.replace('-','_')
         optlist.append(option)
     return optlist
-
-def _thread_level(thread_level):
-    if not thread_level:
-        return None
-    thread_level = thread_level.lower()
-    if thread_level == 'none':
-        return None
-    valid_levels = ['single', 'funneled', 'serialized', 'multiple']
-    if thread_level not in valid_levels:
-        raise DistutilsOptionError(
-            ("thread-level must be one of " + ','.join(valid_levels))
-            )
-    return thread_level
 
 
 class config(cmd_config.config):
@@ -367,7 +351,6 @@ class config(cmd_config.config):
         cmd_config.config.finalize_options(self)
         if not self.noisy:
             self.dump_source = 0
-        self.thread_level = _thread_level(self.thread_level)
 
     def find_mpi_compiler(self, envvars, executables, path=None):
         return _find_mpi_compiler(envvars, executables, path)
@@ -461,7 +444,6 @@ class build(cmd_build.build):
             mpiopts = _cmd_opts_names(cmd_mpi_opts)
             optlist = tuple(zip(mpiopts, mpiopts))
             self.set_undefined_options('config', *optlist)
-        self.thread_level = _thread_level(self.thread_level)
 
 
 class build_ext(cmd_build_ext.build_ext):
@@ -496,7 +478,6 @@ class build_ext(cmd_build_ext.build_ext):
             mpiopts = _cmd_opts_names(cmd_mpi_opts)
             optlist = tuple(zip(mpiopts, mpiopts))
             self.set_undefined_options('build', *optlist)
-        self.thread_level = _thread_level(self.thread_level)
 
     def build_extensions(self):
         # First, sanity-check the 'extensions' list
@@ -516,13 +497,6 @@ class build_ext(cmd_build_ext.build_ext):
             macro = 'PyMPI_HAVE_CONFIG_H'
             self.compiler.define_macro(macro, None)
             log.info("defining preprocessor macro '%s'" % macro)
-        # extra configuration, MPI thread level support
-        if self.thread_level:
-            levels = ['single', 'funneled', 'serialized', 'multiple']
-            mname = 'PyMPI_MPI_THREAD_LEVEL'
-            value = levels.index(self.thread_level)
-            self.compiler.define_macro(mname, value)
-            log.info("defining preprocessor macro '%s=%d'" % (mname, value))
         # and finally build extensions
         for ext in self.extensions:
             self.build_extension(ext)
