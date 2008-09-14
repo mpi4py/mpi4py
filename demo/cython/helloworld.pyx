@@ -22,7 +22,7 @@ print (hwmess % (rank, size, pname))
 
 # Cython-level cimport
 # this make available mpi4py's Python extension types
-# (file:  mpi4py/include/mpi4py.MPI.pxd)
+# (file:  mpi4py/include/mpi4py/MPI.pxd)
 
 from mpi4py.MPI cimport Comm as CommType
 from mpi4py.MPI cimport Intracomm as IntracommType
@@ -39,7 +39,7 @@ cdef IntracommType SELF = MPI.COMM_SELF
 # Cython-level cimport with PXD file
 # this make available the native MPI C API
 # with namespace-protection (stuff accessed as mpi.XXX)
-# (file: mpi4py/include/mpi4py.mpi_c.pxd)
+# (file: mpi4py/include/mpi4py/mpi_c.pxd)
 
 cimport mpi4py.mpi_c as mpi
 
