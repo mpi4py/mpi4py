@@ -200,7 +200,6 @@ def Wtick():
     return MPI_Wtick()
 
 
-
 # Maximum string sizes
 
 # MPI-1
@@ -215,6 +214,11 @@ MAX_DATAREP_STRING = MPI_MAX_DATAREP_STRING
 
 
 
+# --------------------------------------------------------------------
+
+cdef extern from "vendor.h":
+    ctypedef char const_char "const char"
+    int MPI_Get_vendor(const_char**,int*,int*,int*)
 
 def get_vendor():
     """
@@ -224,5 +228,9 @@ def get_vendor():
       - a string with the name of the MPI implementation
       - an integer 3-tuple version ``(major, minor, micro)``
     """
-    name, version = PyMPI_Get_vendor()
-    return (name, version)
+    cdef const_char *name=NULL
+    cdef int major=0, minor=0, micro=0
+    CHKERR( MPI_Get_vendor(&name, &major, &minor, &micro) )
+    return (tompistr(name, -1), (major, minor, micro))
+
+# --------------------------------------------------------------------

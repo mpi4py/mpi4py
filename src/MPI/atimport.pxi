@@ -10,9 +10,6 @@ cdef extern from "stdio.h":
 cdef extern from "Python.h":
     int Py_AtExit(void (*)()) except -1
 
-cdef extern from "atimport.h":
-    object PyMPI_Get_vendor()
-
 # --------------------------------------------------------------------
 
 cdef int mpi_is_owned  = 0
