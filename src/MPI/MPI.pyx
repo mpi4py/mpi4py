@@ -231,6 +231,6 @@ def get_vendor():
     cdef const_char *name=NULL
     cdef int major=0, minor=0, micro=0
     CHKERR( MPI_Get_vendor(&name, &major, &minor, &micro) )
-    return (tompistr(name, -1), (major, minor, micro))
+    return (tompistr(<char*>name, -1), (major, minor, micro))
 
 # --------------------------------------------------------------------
