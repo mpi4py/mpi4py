@@ -1,5 +1,5 @@
-__doc__ = """
-Message Passing Interface
+__doc__ = u"""
+Message Passing Interface.
 """
 
 include "stdlibc.pxi"
