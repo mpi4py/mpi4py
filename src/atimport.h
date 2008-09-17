@@ -9,8 +9,7 @@
 /* XXX describe */
 #if defined(PyMPI_HAVE_CONFIG_H)
 #include "config.h"
-#else
-#if defined(MPICH_NAME) && MPICH_NAME==2
+#elif defined(MPICH_NAME) && MPICH_NAME==2
 #include "config/mpich2.h"
 #elif defined(OPEN_MPI)
 #include "config/openmpi.h"
@@ -21,13 +20,12 @@
 #elif defined(LAM_MPI)
 #include "config/lammpi.h"
 #endif
-#endif
 
 /* XXX describe */
 #include "missing.h"
-#include "compat/anympi.h"
 
 /* XXX describe */
+#include "compat/anympi.h"
 #if   defined(MPICH_NAME) && MPICH_NAME==2
 #include "compat/mpich2.h"
 #elif defined(OPEN_MPI)

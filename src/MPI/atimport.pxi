@@ -93,7 +93,7 @@ cdef inline int _init1() except -1:
     comm_self_eh  = MPI_ERRHANDLER_NULL
     comm_world_eh = MPI_ERRHANDLER_NULL
     # MPI initialized ?
-    cdef int initialized = 0
+    cdef int initialized = 1
     MPI_Initialized(&initialized)
     # MPI finalized ?
     cdef int finalized = 1

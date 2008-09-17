@@ -114,27 +114,27 @@ typedef void *PyMPI_MPI_File;
 #endif
 #endif
 
-#ifdef PyMPI_MISSING_MPI_PROC_NULL
-#if !defined(MPI_PROC_NULL)
-#define MPI_PROC_NULL (MPI_UNDEFINED)
-#endif
-#endif
-
 #ifdef PyMPI_MISSING_MPI_ANY_SOURCE
 #if !defined(MPI_ANY_SOURCE)
-#define MPI_ANY_SOURCE (MPI_UNDEFINED)
+#define MPI_ANY_SOURCE ((MPI_UNDEFINED-1))
 #endif
 #endif
 
 #ifdef PyMPI_MISSING_MPI_ANY_TAG
 #if !defined(MPI_ANY_TAG)
-#define MPI_ANY_TAG (MPI_UNDEFINED)
+#define MPI_ANY_TAG ((MPI_UNDEFINED-2))
+#endif
+#endif
+
+#ifdef PyMPI_MISSING_MPI_PROC_NULL
+#if !defined(MPI_PROC_NULL)
+#define MPI_PROC_NULL ((MPI_UNDEFINED+1))
 #endif
 #endif
 
 #ifdef PyMPI_MISSING_MPI_ROOT
 #if !defined(MPI_ROOT)
-#define MPI_ROOT (MPI_PROC_NULL)
+#define MPI_ROOT ((MPI_UNDEFINED+2))
 #endif
 #endif
 
@@ -1238,13 +1238,13 @@ typedef int (MPI_Grequest_query_function)(void*,MPI_Status*);
 
 #ifdef PyMPI_MISSING_MPI_CART
 #if !defined(MPI_CART)
-#define MPI_CART (MPI_UNDEFINED)
+#define MPI_CART (1)
 #endif
 #endif
 
 #ifdef PyMPI_MISSING_MPI_GRAPH
 #if !defined(MPI_GRAPH)
-#define MPI_GRAPH (MPI_UNDEFINED)
+#define MPI_GRAPH (2)
 #endif
 #endif
 
@@ -1316,43 +1316,43 @@ typedef int (MPI_Grequest_query_function)(void*,MPI_Status*);
 
 #ifdef PyMPI_MISSING_MPI_TAG_UB
 #if !defined(MPI_TAG_UB)
-#define MPI_TAG_UB (MPI_KEYVAL_INVALID)
+#define MPI_TAG_UB ((MPI_KEYVAL_INVALID+1))
 #endif
 #endif
 
 #ifdef PyMPI_MISSING_MPI_HOST
 #if !defined(MPI_HOST)
-#define MPI_HOST (MPI_KEYVAL_INVALID)
+#define MPI_HOST ((MPI_KEYVAL_INVALID+2))
 #endif
 #endif
 
 #ifdef PyMPI_MISSING_MPI_IO
 #if !defined(MPI_IO)
-#define MPI_IO (MPI_KEYVAL_INVALID)
+#define MPI_IO ((MPI_KEYVAL_INVALID+3))
 #endif
 #endif
 
 #ifdef PyMPI_MISSING_MPI_WTIME_IS_GLOBAL
 #if !defined(MPI_WTIME_IS_GLOBAL)
-#define MPI_WTIME_IS_GLOBAL (MPI_KEYVAL_INVALID)
+#define MPI_WTIME_IS_GLOBAL ((MPI_KEYVAL_INVALID+4))
 #endif
 #endif
 
 #ifdef PyMPI_MISSING_MPI_UNIVERSE_SIZE
 #if !defined(MPI_UNIVERSE_SIZE)
-#define MPI_UNIVERSE_SIZE (MPI_KEYVAL_INVALID)
+#define MPI_UNIVERSE_SIZE ((MPI_KEYVAL_INVALID+5))
 #endif
 #endif
 
 #ifdef PyMPI_MISSING_MPI_APPNUM
 #if !defined(MPI_APPNUM)
-#define MPI_APPNUM (MPI_KEYVAL_INVALID)
+#define MPI_APPNUM ((MPI_KEYVAL_INVALID+6))
 #endif
 #endif
 
 #ifdef PyMPI_MISSING_MPI_LASTUSEDCODE
 #if !defined(MPI_LASTUSEDCODE)
-#define MPI_LASTUSEDCODE (MPI_KEYVAL_INVALID)
+#define MPI_LASTUSEDCODE ((MPI_KEYVAL_INVALID+7))
 #endif
 #endif
 
@@ -2102,19 +2102,19 @@ typedef int (MPI_Delete_function)(MPI_Comm,int,void*,void*);
 
 #ifdef PyMPI_MISSING_MPI_WIN_BASE
 #if !defined(MPI_WIN_BASE)
-#define MPI_WIN_BASE (MPI_KEYVAL_INVALID)
+#define MPI_WIN_BASE ((MPI_KEYVAL_INVALID+1))
 #endif
 #endif
 
 #ifdef PyMPI_MISSING_MPI_WIN_SIZE
 #if !defined(MPI_WIN_SIZE)
-#define MPI_WIN_SIZE (MPI_KEYVAL_INVALID)
+#define MPI_WIN_SIZE ((MPI_KEYVAL_INVALID+2))
 #endif
 #endif
 
 #ifdef PyMPI_MISSING_MPI_WIN_DISP_UNIT
 #if !defined(MPI_WIN_DISP_UNIT)
-#define MPI_WIN_DISP_UNIT (MPI_KEYVAL_INVALID)
+#define MPI_WIN_DISP_UNIT ((MPI_KEYVAL_INVALID+3))
 #endif
 #endif
 

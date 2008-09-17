@@ -15,7 +15,7 @@
 
 #ifdef PyMPI_MISSING_MPI_SUBVERSION
 #if !defined(MPI_SUBVERSION)
-#define MPI_SUBVERSION 2
+#define MPI_SUBVERSION 0
 #endif
 #endif
 

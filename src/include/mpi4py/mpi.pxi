@@ -44,10 +44,10 @@ cdef extern from "mpi.h" nogil:
     #-----------------------------------------------------------------
 
     enum: MPI_UNDEFINED      #:= (-32766)
-    enum: MPI_PROC_NULL      #:= MPI_UNDEFINED
-    enum: MPI_ANY_SOURCE     #:= MPI_UNDEFINED
-    enum: MPI_ANY_TAG        #:= MPI_UNDEFINED
-    enum: MPI_ROOT           #:= MPI_PROC_NULL
+    enum: MPI_ANY_SOURCE     #:= (MPI_UNDEFINED-1)
+    enum: MPI_ANY_TAG        #:= (MPI_UNDEFINED-2)
+    enum: MPI_PROC_NULL      #:= (MPI_UNDEFINED+1)
+    enum: MPI_ROOT           #:= (MPI_UNDEFINED+2)
 
     enum: MPI_IDENT      #:= 1
     enum: MPI_CONGRUENT  #:= 2
@@ -293,8 +293,8 @@ cdef extern from "mpi.h" nogil:
 
     int MPI_Comm_compare(MPI_Comm, MPI_Comm, int*)
 
-    enum: MPI_CART  #:= MPI_UNDEFINED
-    enum: MPI_GRAPH #:= MPI_UNDEFINED
+    enum: MPI_CART  #:= 1
+    enum: MPI_GRAPH #:= 2
     int MPI_Topo_test(MPI_Comm, int*)
     int MPI_Comm_test_inter(MPI_Comm, int*)
 
@@ -312,13 +312,13 @@ cdef extern from "mpi.h" nogil:
     int MPI_Comm_get_name(MPI_Comm, char[], int*)
     int MPI_Comm_set_name(MPI_Comm, char[])
 
-    enum: MPI_TAG_UB           #:= MPI_KEYVAL_INVALID
-    enum: MPI_HOST             #:= MPI_KEYVAL_INVALID
-    enum: MPI_IO               #:= MPI_KEYVAL_INVALID
-    enum: MPI_WTIME_IS_GLOBAL  #:= MPI_KEYVAL_INVALID
-    enum: MPI_UNIVERSE_SIZE    #:= MPI_KEYVAL_INVALID
-    enum: MPI_APPNUM           #:= MPI_KEYVAL_INVALID
-    enum: MPI_LASTUSEDCODE     #:= MPI_KEYVAL_INVALID
+    enum: MPI_TAG_UB           #:= (MPI_KEYVAL_INVALID+1)
+    enum: MPI_HOST             #:= (MPI_KEYVAL_INVALID+2)
+    enum: MPI_IO               #:= (MPI_KEYVAL_INVALID+3)
+    enum: MPI_WTIME_IS_GLOBAL  #:= (MPI_KEYVAL_INVALID+4)
+    enum: MPI_UNIVERSE_SIZE    #:= (MPI_KEYVAL_INVALID+5)
+    enum: MPI_APPNUM           #:= (MPI_KEYVAL_INVALID+6)
+    enum: MPI_LASTUSEDCODE     #:= (MPI_KEYVAL_INVALID+7)
     #deprecated! int MPI_Attr_get(MPI_Comm, int, void* , int*)
     #deprecated! int MPI_Attr_put(MPI_Comm, int, void*)
     #deprecated! int MPI_Attr_delete(MPI_Comm, int)
@@ -471,9 +471,9 @@ cdef extern from "mpi.h" nogil:
     int MPI_Win_get_name(MPI_Win, char[], int*)
     int MPI_Win_set_name(MPI_Win, char[])
 
-    enum: MPI_WIN_BASE       #:= MPI_KEYVAL_INVALID
-    enum: MPI_WIN_SIZE       #:= MPI_KEYVAL_INVALID
-    enum: MPI_WIN_DISP_UNIT  #:= MPI_KEYVAL_INVALID
+    enum: MPI_WIN_BASE       #:= (MPI_KEYVAL_INVALID+1)
+    enum: MPI_WIN_SIZE       #:= (MPI_KEYVAL_INVALID+2)
+    enum: MPI_WIN_DISP_UNIT  #:= (MPI_KEYVAL_INVALID+3)
     int MPI_Win_get_attr(MPI_Win, int, void*, int*)
     int MPI_Win_set_attr(MPI_Win, int, void*)
     int MPI_Win_delete_attr(MPI_Win, int)

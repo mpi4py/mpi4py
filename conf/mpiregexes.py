@@ -39,7 +39,7 @@ canylong = join(r'long', r'(?:long)?')
 canyptr  = join(r'\w+', pointer+'?')
 
 annotation = r'\#\:\='
-defval = r'(?:%s)?' % join (annotation, [r'\(?-?[A-Za-z0-9_]+\)?'])
+defval = r'(?:%s)?' % join (annotation, [r'\(?[A-Za-z0-9_+-]+\)?'])
 
 STRUCT_TYPE   = join( struct,  [struct_type] , colon,  eol)
 INTEGRAL_TYPE = join( typedef, canylong, [integral_type], eol)

@@ -285,12 +285,12 @@ class Scanner(object):
 
 
 if __name__ == '__main__':
-    sources = [os.path.join('include', 'mpi4py', 'mpi.pxi')]
     import sys, os
+    sources = [os.path.join('src', 'include', 'mpi4py', 'mpi.pxi')]
     log = lambda msg: sys.stderr.write(msg + '\n')
     scanner = Scanner()
     for filename in sources:
-        filename = os.path.join('src', 'mpi4py', filename)
+        #filename = os.path.join('src', 'mpi4py', filename)
         log('parsing file %s' % filename)
         scanner.parse_file(filename)
     log('processed %d definitions' % len(scanner.nodes))
