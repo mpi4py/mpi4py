@@ -126,6 +126,28 @@ static int PyMPI_Type_dup(MPI_Datatype datatype, MPI_Datatype *newtype)
 #define MPI_Type_dup PyMPI_Type_dup
 #endif
 
+#ifdef PyMPI_MISSING_MPI_TYPE_CREATE_INDEXED_BLOCK
+static int PyMPI_Type_create_indexed_block(int count,
+					   int blocklength,
+					   int displacements[],
+					   MPI_Datatype oldtype,
+					   MPI_Datatype *newtype)
+{
+  int i, *blocklengths = 0;
+  int ierr = MPI_SUCCESS;
+  if (count > 0) {
+    blocklengths = (int *) malloc(count*sizeof(int));
+    if (!blocklengths) return MPI_ERR_NO_MEM;
+  }
+  for (i=0; i<count; i++) blocklengths[i] = blocklength;
+  ierr = MPI_Type_indexed(count,blocklengths,displacements,oldtype,newtype);
+  if (blocklengths) free(blocklengths);
+  return ierr;
+}
+#undef  MPI_Type_create_indexed_block
+#define MPI_Type_create_indexed_block PyMPI_Type_create_indexed_block
+#endif
+
 /*
  * Adapted from the implementation in MPICH2 sources,
  * mpich2-1.0.7/src/mpi/datatype/type_create_subarray.c
