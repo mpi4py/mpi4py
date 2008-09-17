@@ -39,6 +39,11 @@ class TestGrequest(unittest.TestCase):
         greq.Wait()
         self.assertTrue(ctx.free_called)
 
+_name, _version = MPI.get_vendor()
+if _name == 'MPICH1' or _name == 'LAM/MPI' \
+       or _version < (2, 0):
+    del GReqCtx
+    del TestGrequest
 
 if __name__ == '__main__':
     unittest.main()
