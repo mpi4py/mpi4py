@@ -435,9 +435,9 @@ static int PyMPI_Type_create_darray(int size,
     
     /* calculate position in Cartesian grid 
        as MPI would (row-major ordering) */
-    coords  = malloc(ndims*sizeof(int)); 
+    coords  = (int *) malloc(ndims*sizeof(int)); 
     if (coords  == 0) { ierr = MPI_ERR_INTERN; PyMPI_CHKERR(ierr); }
-    offsets = malloc(ndims*sizeof(MPI_Aint));
+    offsets = (MPI_Aint *) malloc(ndims*sizeof(MPI_Aint));
     if (offsets == 0) { ierr = MPI_ERR_INTERN; PyMPI_CHKERR(ierr); }
 
     procs = size;
