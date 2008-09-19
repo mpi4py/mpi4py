@@ -91,6 +91,14 @@ cdef extern from "mpi.h" nogil:
     MPI_Datatype MPI_LONG_LONG            #:= MPI_DATATYPE_NULL
     MPI_Datatype MPI_UNSIGNED_LONG_LONG   #:= MPI_DATATYPE_NULL
     MPI_Datatype MPI_LONG_LONG_INT        #:= MPI_DATATYPE_NULL
+    # Fortran datatypes
+    MPI_Datatype MPI_CHARACTER            #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_LOGICAL              #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_INTEGER              #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_REAL                 #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_DOUBLE_PRECISION     #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_COMPLEX              #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_DOUBLE_COMPLEX       #:= MPI_DATATYPE_NULL
     # Special datatypes
     MPI_Datatype MPI_UB                   #:= MPI_DATATYPE_NULL
     MPI_Datatype MPI_LB                   #:= MPI_DATATYPE_NULL

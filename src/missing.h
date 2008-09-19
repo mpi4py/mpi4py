@@ -336,6 +336,48 @@ typedef void *PyMPI_MPI_File;
 #endif
 #endif
 
+#ifdef PyMPI_MISSING_MPI_CHARACTER
+#if !defined(MPI_CHARACTER)
+#define MPI_CHARACTER ((MPI_Datatype)MPI_DATATYPE_NULL)
+#endif
+#endif
+
+#ifdef PyMPI_MISSING_MPI_LOGICAL
+#if !defined(MPI_LOGICAL)
+#define MPI_LOGICAL ((MPI_Datatype)MPI_DATATYPE_NULL)
+#endif
+#endif
+
+#ifdef PyMPI_MISSING_MPI_INTEGER
+#if !defined(MPI_INTEGER)
+#define MPI_INTEGER ((MPI_Datatype)MPI_DATATYPE_NULL)
+#endif
+#endif
+
+#ifdef PyMPI_MISSING_MPI_REAL
+#if !defined(MPI_REAL)
+#define MPI_REAL ((MPI_Datatype)MPI_DATATYPE_NULL)
+#endif
+#endif
+
+#ifdef PyMPI_MISSING_MPI_DOUBLE_PRECISION
+#if !defined(MPI_DOUBLE_PRECISION)
+#define MPI_DOUBLE_PRECISION ((MPI_Datatype)MPI_DATATYPE_NULL)
+#endif
+#endif
+
+#ifdef PyMPI_MISSING_MPI_COMPLEX
+#if !defined(MPI_COMPLEX)
+#define MPI_COMPLEX ((MPI_Datatype)MPI_DATATYPE_NULL)
+#endif
+#endif
+
+#ifdef PyMPI_MISSING_MPI_DOUBLE_COMPLEX
+#if !defined(MPI_DOUBLE_COMPLEX)
+#define MPI_DOUBLE_COMPLEX ((MPI_Datatype)MPI_DATATYPE_NULL)
+#endif
+#endif
+
 #ifdef PyMPI_MISSING_MPI_UB
 #if !defined(MPI_UB)
 #define MPI_UB ((MPI_Datatype)MPI_DATATYPE_NULL)

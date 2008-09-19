@@ -490,6 +490,15 @@ LONG_LONG          = _new_Datatype(MPI_LONG_LONG)
 UNSIGNED_LONG_LONG = _new_Datatype(MPI_UNSIGNED_LONG_LONG)
 LONG_LONG_INT      = _new_Datatype(MPI_LONG_LONG_INT)
 
+# Fortran datatypes
+CHARACTER        = _new_Datatype(MPI_CHARACTER)
+LOGICAL          = _new_Datatype(MPI_LOGICAL)
+INTEGER          = _new_Datatype(MPI_INTEGER)
+REAL             = _new_Datatype(MPI_REAL)
+DOUBLE_PRECISION = _new_Datatype(MPI_DOUBLE_PRECISION)
+F_COMPLEX        = _new_Datatype(MPI_COMPLEX)
+F_DOUBLE_COMPLEX = _new_Datatype(MPI_DOUBLE_COMPLEX)
+
 # Special datatypes (for constructing derived datatypes)
 UB = _new_Datatype(MPI_UB) #: upper-bound marker (deprecated in MPI-2)
 LB = _new_Datatype(MPI_LB) #: lower-bound marker (deprecated in MPI-2)
@@ -512,6 +521,12 @@ ORDER_FORTRAN = MPI_ORDER_FORTRAN
 ORDER_F       = MPI_ORDER_FORTRAN
 #: Convenience alias for ORDER_FORTRAN
 
+
+# Type classes for Fortran datatype matching
+# ------------------------------------------
+TYPECLASS_INTEGER = MPI_TYPECLASS_INTEGER
+TYPECLASS_REAL    = MPI_TYPECLASS_REAL
+TYPECLASS_COMPLEX = MPI_TYPECLASS_COMPLEX 
 
 
 # Type of distributions (HPF-like arrays)
