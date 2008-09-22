@@ -20,7 +20,7 @@ cdef inline object _py_reduce(object op, object seq):
     if op is MAXLOC or op is MINLOC:
         seq = list(zip(seq, range(n)))
     res = seq[0]
-    for i in range(1, n):
+    for i from 1 <= i < n:
         res = op(res, seq[i])
     return res
 
@@ -30,7 +30,7 @@ cdef inline object _py_scan(object op, object seq):
     cdef int i=0, n=len(seq)
     if op is MAXLOC or op is MINLOC:
         seq = list(zip(seq, range(n)))
-    for i in range(1, n):
+    for i from 1 <= i < n:
         seq[i] = op(seq[i-1], seq[i])
     return seq
 
@@ -74,13 +74,13 @@ cdef class _p_Pickler:
         cdef int i=0, d=0, c=0
         if obj is None:
             p[0] = NULL
-            for i in range(n):
+            for i from 0 <= i < n:
                 cnt[i] = 0
                 dsp[i] = 0
         else:
             obj = list(obj)
             assert len(obj) == n
-            for i in range(n):
+            for i from 0 <= i < n:
                 obj[i] = self.dump(obj[i], p, &c)
                 if c == 0: obj[i] = b''
                 cnt[i] = c
@@ -93,7 +93,7 @@ cdef class _p_Pickler:
     cdef object allocv(self, void **p,
                        int n, int cnt[], int dsp[]):
         cdef int i=0, d=0
-        for i in range(n):
+        for i from 0 <= i < n:
             dsp[i] = d
             d += cnt[i]
         return self.alloc(p, d)
@@ -103,7 +103,7 @@ cdef class _p_Pickler:
         cdef int i=0, d=0, c=0
         cdef object items = [None] * n
         if obj is None: return items
-        for i in range(n):
+        for i from 0 <= i < n:
             c = cnt[i]
             d = dsp[i]
             if c == 0: continue
