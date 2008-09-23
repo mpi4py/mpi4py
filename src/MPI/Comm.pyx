@@ -23,10 +23,6 @@ cdef class Comm:
     def __nonzero__(self):
         return self.ob_mpi != MPI_COMM_NULL
 
-    def __bool__(self):
-        return self.ob_mpi != MPI_COMM_NULL
-
-
     # Group
     # -----
 

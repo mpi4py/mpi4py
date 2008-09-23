@@ -22,9 +22,6 @@ cdef class Win:
     def __nonzero__(self):
         return self.ob_mpi != MPI_WIN_NULL
 
-    def __bool__(self):
-        return self.ob_mpi != MPI_WIN_NULL
-
     # [6.2] Initialization
     # --------------------
 

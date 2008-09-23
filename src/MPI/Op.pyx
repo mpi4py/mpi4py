@@ -23,9 +23,6 @@ cdef class Op:
     def __nonzero__(self):
         return self.ob_mpi != MPI_OP_NULL
 
-    def __bool__(self):
-        return self.ob_mpi != MPI_OP_NULL
-
     def __call__(self, x, y):
         if self.ob_func != NULL:
             return self.ob_func(x, y)

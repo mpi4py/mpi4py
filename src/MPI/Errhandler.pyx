@@ -23,10 +23,6 @@ cdef class Errhandler:
     def __nonzero__(self):
         return self.ob_mpi != MPI_ERRHANDLER_NULL
 
-    def __bool__(self):
-        return self.ob_mpi != MPI_ERRHANDLER_NULL
-
-
     def Free(self):
         """
         Free an error handler

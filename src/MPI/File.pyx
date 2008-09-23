@@ -22,9 +22,6 @@ cdef class File:
     def __nonzero__(self):
         return self.ob_mpi != MPI_FILE_NULL
 
-    def __bool__(self):
-        return self.ob_mpi != MPI_FILE_NULL
-
     # [9.2] File Manipulation
     # -----------------------
 

@@ -22,10 +22,6 @@ cdef class Group:
     def __nonzero__(self):
         return self.ob_mpi != MPI_GROUP_NULL
 
-    def __bool__(self):
-        return self.ob_mpi != MPI_GROUP_NULL
-
-
     # Group Accessors
     # ---------------
 

@@ -22,9 +22,6 @@ cdef class Info:
     def __nonzero__(self):
         return self.ob_mpi != MPI_INFO_NULL
 
-    def __bool__(self):
-        return self.ob_mpi != MPI_INFO_NULL
-
     @classmethod
     def Create(cls):
         """

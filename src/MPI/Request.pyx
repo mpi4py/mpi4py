@@ -22,9 +22,6 @@ cdef class Request:
     def __nonzero__(self):
         return self.ob_mpi != MPI_REQUEST_NULL
 
-    def __bool__(self):
-        return self.ob_mpi != MPI_REQUEST_NULL
-
     # Completion Operations
     # ---------------------
 

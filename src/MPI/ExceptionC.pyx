@@ -28,9 +28,6 @@ cdef class Exception(RuntimeError):
     def __nonzero__(self):
         return self.ob_mpi != MPI_SUCCESS
 
-    def __bool__(self):
-        return self.ob_mpi != MPI_SUCCESS
-
     def __int__(self):
         if not _mpi_active(): return self.ob_mpi
         return self.Get_error_code()
