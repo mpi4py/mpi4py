@@ -8,17 +8,18 @@ FunctionType = type(MPI.Init)
 MethodDescrType = type(MPI.Comm.Get_rank)
 GetSetDescrType = type(MPI.Comm.rank)
 
-def getdocstr(mc, docstrings):
+def getdocstr(mc, docstrings, namespace=None):
+    name = getattr(mc, '__name__', None)
+    if name is None: return
+    if name in ('__builtin__', 'builtins'): return
+    if name.startswith('_'): return
+    if namespace: name = '%s.%s' % (namespace, name)
     if type(mc) in (ModuleType, ClassType):
-        name = getattr(mc, '__name__')
-        if name in ('__builtin__', 'builtin'): return
         doc = getattr(mc, '__doc__', None)
         docstrings[name] = doc
         for k, v in vars(mc).items():
-            getdocstr(v, docstrings)
+            getdocstr(v, docstrings, name)
     elif type(mc) in (FunctionType, MethodDescrType, GetSetDescrType):
-        name = getattr(mc, '__name__')
-        if name in ('__builtin__', 'builtin'): return
         doc = getattr(mc, '__doc__', None)
         docstrings[name] = doc
 
