@@ -40,12 +40,6 @@
 
 /* ---------------------------------------------------------------- */
 
-#if !defined(Py_MEMCPY)
-#define Py_MEMCPY memcpy
-#endif
-
-/* ---------------------------------------------------------------- */
-
 #if PY_MAJOR_VERSION >= 3
 static PyObject * PyBuffer_FromReadWriteMemory(void *p, Py_ssize_t n)
 {
