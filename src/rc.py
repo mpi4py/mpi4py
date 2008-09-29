@@ -9,4 +9,4 @@
 # thread_level = { 2 | "serialized" } -> MPI_THREAD_SERIALIZED
 # thread_level = { 3 | "multiple"   } -> MPI_THREAD_MULTIPLE
 
-thread_level = None
+thread_level = "multiple"
