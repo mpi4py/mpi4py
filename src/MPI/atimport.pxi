@@ -8,6 +8,9 @@ cdef extern from "stdio.h":
     int fflush(FILE *)
 
 cdef extern from "Python.h":
+    int Py_IsInitialized() nogil
+    void Py_INCREF(object) except *
+    void Py_DECREF(object) except *
     int Py_AtExit(void (*)()) except -1
 
 # --------------------------------------------------------------------
@@ -82,11 +85,10 @@ cdef inline void _atexit():
     global mpi_is_owned
     if mpi_is_owned:
         ierr = MPI_Finalize()
-        if not ierr: return
-    # We MUST NOT issue Python API calls at this point
-    fflush(stderr)
-    fprintf(stderr, "MPI_Finalize() failed [error code: %d]\n", ierr)
-    fflush(stderr)
+        if ierr: # We MUST NOT issue Python API calls at this point
+            fflush(stderr)
+            fprintf(stderr, "MPI_Finalize() failed [error code: %d]\n", ierr)
+            fflush(stderr)
 
 cdef inline int _init1() except -1:
     global comm_self_eh, comm_world_eh

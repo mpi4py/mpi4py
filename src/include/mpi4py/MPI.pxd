@@ -103,7 +103,6 @@ cdef public api class Intercomm(Comm) [type PyMPIIntercomm_Type, object PyMPIInt
 cdef public api class Win [type PyMPIWin_Type, object PyMPIWinObject]:
     cdef MPI_Win ob_mpi
     cdef int     flags
-    cdef object  ob_memory
 
 cdef public api class File [type PyMPIFile_Type, object PyMPIFileObject]:
     cdef MPI_File ob_mpi

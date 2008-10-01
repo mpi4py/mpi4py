@@ -29,7 +29,8 @@ cdef class Win:
     # -----------------------
 
     @classmethod
-    def Create(cls, memory, int disp_unit=1, Info info=None, Intracomm comm=None):
+    def Create(cls, memory, int disp_unit=1,
+               Info info=None, Intracomm comm=None):
         """
         Create an window object for one-sided communication
         """
@@ -48,8 +49,8 @@ cdef class Win:
         # we are in charge or managing MPI errors
         CHKERR( MPI_Win_set_errhandler(
             win.ob_mpi, MPI_ERRORS_RETURN) )
-        # old a reference to the object exposing memory
-        win.ob_memory = memory
+        # hold a reference to the object exposing memory
+        PyMPI_Win_set_attr_memory(win.ob_mpi, memory)
         # return the created window
         return win
 

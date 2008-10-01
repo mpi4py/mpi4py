@@ -180,6 +180,8 @@ cdef inline int _del_Comm(MPI_Comm* ob):
 #---------------------------------------------------------------------
 # Win
 
+include "winimpl.pxi"
+
 cdef inline Win _new_Win(MPI_Win ob):
     cdef Win win = Win()
     win.ob_mpi = ob

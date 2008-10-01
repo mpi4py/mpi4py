@@ -1,3 +1,4 @@
+import sys
 from mpi4py import MPI
 import mpiunittest as unittest
 
@@ -13,10 +14,14 @@ class TestWinBase(object):
             zero = str('\0')
         self.memory = MPI.Alloc_mem(10)
         self.memory[:] = zero * len(self.memory)
+        refcnt = sys.getrefcount(self.memory)
         self.WIN = MPI.Win.Create(self.memory, 1, self.INFO, self.COMM)
+        self.assertEqual(sys.getrefcount(self.memory), refcnt+1)
 
     def tearDown(self):
+        refcnt = sys.getrefcount(self.memory)
         self.WIN.Free()
+        self.assertEqual(sys.getrefcount(self.memory), refcnt-1)
         MPI.Free_mem(self.memory)
 
     def testGetMemory(self):
@@ -24,8 +29,9 @@ class TestWinBase(object):
         pointer = MPI.Get_address(memory)
         length = len(memory)
         base, size, dunit = self.WIN.attrs
-        self.assertEqual(pointer, base)
-        self.assertEqual(length,  size)
+        self.assertEqual(base,  pointer)
+        self.assertEqual(size,  length)
+        self.assertEqual(dunit, 1)
 
 
     def testGetAttributes(self):
