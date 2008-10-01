@@ -63,7 +63,6 @@ cdef public api class Prequest(Request) [type PyMPIPrequest_Type, object PyMPIPr
 
 cdef public api class Grequest(Request) [type PyMPIGrequest_Type, object PyMPIGrequestObject]:
     cdef MPI_Request ob_grequest
-    cdef object      ob_context
 
 cdef public api class Op [type PyMPIOp_Type, object PyMPIOpObject]:
     cdef MPI_Op ob_mpi

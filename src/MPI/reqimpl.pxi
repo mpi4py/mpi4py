@@ -1,3 +1,5 @@
+# ---
+
 cdef class _p_greq:
 
     cdef object query_fn
@@ -17,7 +19,8 @@ cdef class _p_greq:
         cdef Status sts = Status()
         if self.query_fn is not None:
             self.query_fn(sts, *self.args, **self.kargs)
-        memcpy(status, &sts.ob_mpi, sizeof(MPI_Status))
+        if status != MPI_STATUS_IGNORE: # just in case ...
+            memcpy(status, &sts.ob_mpi, sizeof(MPI_Status))
         return MPI_SUCCESS
 
     cdef int free(self) except -1:
@@ -32,30 +35,66 @@ cdef class _p_greq:
             return MPI_ERR_PENDING
         return MPI_SUCCESS
 
+# ---
 
-cdef int greq_query_fn(void *extra_state, MPI_Status *status) with gil:
+cdef int greq_query(void *extra_state, MPI_Status *status) with gil:
+    cdef int ierr = MPI_SUCCESS
     cdef _p_greq state = <_p_greq>extra_state
     try:
-        return state.query(status)
+        ierr = state.query(status)
     except Exception, exc:
-        return exc.Get_error_code()
+        ierr = exc.Get_error_code()
     except:
-        return MPI_ERR_UNKNOWN
+        ierr = MPI_ERR_OTHER
+    return ierr
 
-cdef int greq_free_fn(void *extra_state) with gil:
+cdef int greq_free(void *extra_state) with gil:
+    cdef int ierr = MPI_SUCCESS
     cdef _p_greq state = <object>extra_state
     try:
-        return state.free()
+        ierr = state.free()
     except Exception, exc:
-        return exc.Get_error_code()
+        ierr = exc.Get_error_code()
     except:
-        return MPI_ERR_UNKNOWN
+        ierr = MPI_ERR_OTHER
+    Py_DECREF(<object>extra_state)
+    return ierr
 
-cdef int greq_cancel_fn(void *extra_state, int completed) with gil:
+cdef int greq_cancel(void *extra_state, int completed) with gil:
+    cdef int ierr = MPI_SUCCESS
     cdef _p_greq state = <object>extra_state
     try:
-        return state.cancel(completed)
+        ierr = state.cancel(completed)
     except Exception, exc:
-        return exc.Get_error_code()
+        ierr = exc.Get_error_code()
     except:
-        return MPI_ERR_UNKNOWN
+        ierr = MPI_ERR_OTHER
+    return ierr
+
+# ---
+
+cdef int greq_query_fn(void *extra_state, MPI_Status *status) nogil:
+    if Py_IsInitialized():
+        if extra_state == NULL: return MPI_ERR_INTERN
+        return greq_query(extra_state, status)
+    if status != MPI_STATUS_IGNORE: # just in case ...
+        status.MPI_SOURCE = MPI_ANY_SOURCE
+        status.MPI_TAG    = MPI_ANY_TAG
+        status.MPI_ERROR  = MPI_SUCCESS
+        MPI_Status_set_elements(status, MPI_BYTE, 0)
+        MPI_Status_set_cancelled(status, 1)
+    return MPI_SUCCESS # XXX or MPI_ERR_OTHER ?
+
+cdef int greq_free_fn(void *extra_state) nogil:
+    if Py_IsInitialized():
+        if extra_state == NULL: return MPI_ERR_INTERN
+        return greq_free(extra_state)
+    return MPI_SUCCESS # XXX or MPI_ERR_OTHER ?
+
+cdef int greq_cancel_fn(void *extra_state, int completed) nogil:
+    if Py_IsInitialized():
+        if extra_state == NULL: return MPI_ERR_INTERN
+        return greq_cancel(extra_state, completed)
+    return MPI_SUCCESS # XXX or MPI_ERR_OTHER ?
+
+# ---

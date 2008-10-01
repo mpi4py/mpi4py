@@ -9,6 +9,7 @@ cdef extern from "stdio.h":
 
 cdef extern from "Python.h":
     int Py_IsInitialized() nogil
+    Py_ssize_t Py_REFCNT(object)
     void Py_INCREF(object) except *
     void Py_DECREF(object) except *
     int Py_AtExit(void (*)()) except -1

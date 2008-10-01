@@ -1,7 +1,7 @@
 from mpi4py import MPI
 import mpiunittest as unittest
 
-class GReqCtx:
+class GReqCtx(object):
     source = 1
     tag    = 7
     completed = False
@@ -14,7 +14,8 @@ class GReqCtx:
         self.free_called = True
     def cancel(self, completed):
         if completed is not self.completed:
-            raise AssertionError()
+            #raise AssertionError()
+            raise MPI.Exception(MPI.ERR_PENDING)
 
 class TestGrequest(unittest.TestCase):
 
@@ -25,7 +26,6 @@ class TestGrequest(unittest.TestCase):
         self.assertFalse(greq.Test())
         self.assertFalse(ctx.free_called)
 
-        ctx.completed = False
         greq.Cancel()
         greq.Complete()
         ctx.completed = True
@@ -39,9 +39,7 @@ class TestGrequest(unittest.TestCase):
         greq.Wait()
         self.assertTrue(ctx.free_called)
 
-_name, _version = MPI.get_vendor()
-if _name == 'MPICH1' or _name == 'LAM/MPI' \
-       or _version < (2, 0):
+if MPI.Get_version() < (2, 0):
     del GReqCtx
     del TestGrequest
 

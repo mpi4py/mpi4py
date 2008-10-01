@@ -265,13 +265,13 @@ cdef class Grequest(Request):
         cdef _p_greq state = \
              _p_greq(query_fn, free_fn, cancel_fn,
                      args, kargs)
-        request.ob_context = state
         with nogil:
             CHKERR( MPI_Grequest_start(greq_query_fn,
                                        greq_free_fn,
                                        greq_cancel_fn,
                                        <void*>state,
                                        &request.ob_mpi) )
+        Py_INCREF(state)
         request.ob_grequest = request.ob_mpi
         return request
 
@@ -283,7 +283,7 @@ cdef class Grequest(Request):
             if self.ob_mpi != self.ob_grequest:
                 raise Exception(MPI_ERR_REQUEST)
         cdef MPI_Request grequest = self.ob_grequest
-        self.ob_grequest = self.ob_mpi
+        self.ob_grequest = self.ob_mpi # sync handles
         with nogil:
             CHKERR( MPI_Grequest_complete(grequest) )
 
