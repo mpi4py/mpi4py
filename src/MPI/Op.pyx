@@ -43,8 +43,8 @@ cdef class Op:
         Free the operation
         """
         CHKERR( MPI_Op_free(&self.ob_mpi) )
-        op.ob_callable = None
-        op.ob_commute  = False
+        self.ob_callable = None
+        self.ob_commute  = False
 
 
 
