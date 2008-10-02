@@ -1,4 +1,4 @@
-.PHONY: default config src build test install uninstall sdist clean distclean fullclean
+.PHONY: default config src build test install uninstall sdist clean distclean srcclean fullclean
 
 PYTHON = python
 
@@ -13,7 +13,7 @@ build: src
 	${PYTHON} setup.py build ${BUILDOPT}
 
 test:
-	${MPIEXEC} ${PYTHON} test/runalltest.py < /dev/null
+	${MPIEXEC} ${PYTHON} test/runalltest.py
 
 install: build
 	${PYTHON} setup.py install ${INSTALLOPT} --home=${HOME}
@@ -38,11 +38,7 @@ distclean: clean
 	-${RM} `find . -name '*~'`
 	-${RM} `find . -name '*.py[co]'`
 
-fullclean: distclean
-	${RM} src/mpi4py_MPI.c
-	${RM} src/include/mpi4py/mpi4py_MPI.h
-	${RM} src/include/mpi4py/mpi4py_MPI_api.h
-
+fullclean: distclean srcclean
 
 CYTHON = cython
 CYTHON_FLAGS = --cleanup 9
@@ -54,6 +50,11 @@ src/MPI.c: src/mpi4py_MPI.c
 src/mpi4py_MPI.c: ${CY_SRC_PXD} ${CY_SRC_PXI} ${CY_SRC_PYX}
 	${CYTHON} ${CYTHON_FLAGS} ${CYTHON_INCLUDE} -w src mpi4py.MPI.pyx -o mpi4py_MPI.c
 	mv src/mpi4py_MPI.h src/mpi4py_MPI_api.h src/include/mpi4py
+
+srcclean:
+	${RM} src/mpi4py_MPI.c
+	${RM} src/include/mpi4py/mpi4py_MPI.h
+	${RM} src/include/mpi4py/mpi4py_MPI_api.h
 
 
 EPYDOC = ./misc/epydoc-cython.py
