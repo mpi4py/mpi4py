@@ -143,9 +143,9 @@ LibHeader = lambda header: str(header)
 ExtModule = lambda extension: Extension(**extension)
 ExeBinary = lambda executable: Executable(**executable)
 
-def main():
+def run_setup():
     """
-    call distutils.setup(*targs, **kwargs)
+    Call distutils.setup(*targs, **kwargs)
     """
     setup(packages     = ['mpi4py'],
           package_dir  = {'mpi4py' : 'src'},
@@ -169,6 +169,20 @@ def main():
                       },
           **metadata)
 
+def cython_help():
+    import sys, os
+    if not os.path.exists(os.path.join('src', 'mpi4py_MPI.c')):
+        warn = lambda msg='': sys.stderr.write(msg+'\n')
+        warn("*"*70)
+        warn()
+        warn("You need to generate C source files with Cython !!!")
+        warn("Please execute in your shell:")
+        warn()
+        warn("$ python ./conf/cythonize.py")
+        warn()
+        warn("*"*70)
+        warn()
+
 if __name__ == '__main__':
     # hack distutils.sysconfig to eliminate debug flags
     from distutils import sysconfig
@@ -180,6 +194,9 @@ if __name__ == '__main__':
             if flag in cflags:
                 cflags.remove(flag)
         cvars['OPT'] = str.join(' ', cflags)
-    # and now call main
-    main()
+    # show help about cython  ...
+    cython_help()
+    # and call setup
+    run_setup()
+
 # --------------------------------------------------------------------

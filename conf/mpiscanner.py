@@ -4,7 +4,12 @@
 # built, or MPI-1 implementations, perhaps providing a subset of MPI-2
 
 from textwrap import dedent
-import mpiregexes as Re
+
+try:
+    import mpiregexes as Re
+except ImportError:
+    from conf import mpiregexes as Re
+
 
 class Node(object):
 
