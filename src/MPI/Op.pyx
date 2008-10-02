@@ -29,6 +29,7 @@ cdef class Op:
         else:
             return self.ob_callable(x, y)
 
+    @classmethod
     def Create(cls, function, bint commute=False):
         """
         Create a user-defined operation
