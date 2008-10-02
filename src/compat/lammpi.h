@@ -1,8 +1,5 @@
-/* $Id$ */
-
 #ifndef PyMPI_COMPAT_LAMMPI_H
 #define PyMPI_COMPAT_LAMMPI_H
-
 #if defined(LAM_MPI)
 
 /* ---------------------------------------------------------------- */
@@ -286,7 +283,7 @@ static int PyMPI_LAMMPI_MPI_File_get_errhandler(MPI_File file,
   /* check arguments */
   if (file != MPI_FILE_NULL) {
     struct ADIOI_FileD * fh = (struct ADIOI_FileD *) file;
-    if (fh->cookie != ADIOI_FILE_COOKIE)  return MPI_ERR_FILE;
+    if (fh->cookie != ADIOI_FILE_COOKIE)  return MPI_ERR_ARG;
   }
   if (errhandler == 0)  return MPI_ERR_ARG;
   /* get error handler */
@@ -312,7 +309,7 @@ static int PyMPI_LAMMPI_MPI_File_set_errhandler(MPI_File file,
   /* check arguments */
   if (file != MPI_FILE_NULL) {
     struct ADIOI_FileD * fh = (struct ADIOI_FileD *) file;
-    if (fh->cookie != ADIOI_FILE_COOKIE)  return MPI_ERR_FILE;
+    if (fh->cookie != ADIOI_FILE_COOKIE)  return MPI_ERR_ARG;
   }
   if (errhandler == MPI_ERRHANDLER_NULL)  return MPI_ERR_ARG;
   if (errhandler != MPI_ERRORS_RETURN &&
@@ -348,5 +345,4 @@ static int PyMPI_LAMMPI_MPI_File_set_errhandler(MPI_File file,
 /* ---------------------------------------------------------------- */
 
 #endif /* !LAM_MPI */
-
 #endif /* !PyMPI_COMPAT_LAMMPI_H */

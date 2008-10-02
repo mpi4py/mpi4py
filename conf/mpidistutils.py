@@ -405,6 +405,7 @@ class config(cmd_config.config):
         configure = Configure()
         results = []
         for name, code in configure.itertests():
+            log.info("cheking for '%s'" % name)
             ok = self.check_configtest(code)
             results.append((name, ok))
         return configure.write_headers(results)

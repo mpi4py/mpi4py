@@ -1,8 +1,5 @@
-/* $Id$ */
-
 #ifndef PyMPI_CONFIG_LAMMPI_H
 #define PyMPI_CONFIG_LAMMPI_H
-
 #if defined(LAM_MPI)
 
 #define PyMPI_MISSING_MPI_IN_PLACE 1
@@ -62,5 +59,4 @@
 #define PyMPI_MISSING_MPI_ERR_RMA_SYNC 1
 
 #endif /* !LAM_MPI */
-
 #endif /* !PyMPI_CONFIG_LAMMPI_H */

@@ -1,11 +1,21 @@
-/* $Id$ */
-
 #ifndef PyMPI_COMPAT_OPENMPI_H
 #define PyMPI_COMPAT_OPENMPI_H
-
 #if defined(OPEN_MPI) 
 
 /* ---------------------------------------------------------------- */
+
+/*
+ * Open MPI releases 1.2.4 and above are shipped with newer versions
+ * of GNU libtool.  These libtool versions load dynamic libraries in
+ * such a way that library symbols are not globally available by
+ * default. This behavior do not interact well with some interal Open
+ * MPI components, specifically the ones related to one-side
+ * communication operations ('MPI_Win' and related). The vile hackery
+ * below try to fix this issue by intercepting the calls to 'MPI_Init'
+ * and 'MPI_Finalize' in order to manage preloading of the main Open
+ * MPI dynamic library with appropriate flags enablig global
+ * availability of library symbols.
+ */
 
 #if !defined(OPEN_MPI_DLOPEN_LIBMPI)
 
@@ -134,8 +144,7 @@ static int PyMPI_OPENMPI_MPI_Finalize(void)
  * Open MPI 1.1 generates an error when MPI_File_get_errhandler() is
  * called with the MPI_FILE_NULL handle.  The code below try to fix
  * this bug by intercepting the calls to the functions setting and
- * getting the error handlers for files.
- *
+ * getting the error handlers for MPI_File's.
  */
 
 #if !defined(OMPI_MAJOR_VERSION) || OMPI_MAJOR_VERSION==1
@@ -175,5 +184,4 @@ static int PyMPI_OPENMPI_File_set_errhandler(MPI_File file, MPI_Errhandler errha
 /* ---------------------------------------------------------------- */
 
 #endif /* !OPEN_MPI */
-
 #endif /* !PyMPI_COMPAT_OPENMPI_H */

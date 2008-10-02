@@ -13,6 +13,8 @@
 #define OMPI_MINOR_VERSION 1
 #endif
 
+#define OPEN_MPI_DLOPEN_LIBMPI 1
+
 #include "openmpi.h"
 
 #if !defined(MPI_Init)

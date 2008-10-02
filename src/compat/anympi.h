@@ -1,7 +1,9 @@
-/* $Id$ */
-
 #ifndef PyMPI_COMPAT_ANYMPI_H
 #define PyMPI_COMPAT_ANYMPI_H
+
+/* ---------------------------------------------------------------- */
+
+#include <stdlib.h>
 
 /* ---------------------------------------------------------------- */
 
@@ -118,7 +120,7 @@ static int PyMPI_Type_dup(MPI_Datatype datatype, MPI_Datatype *newtype)
   int ierr = MPI_SUCCESS;
   ierr = MPI_Type_contiguous(1, datatype, newtype);
   if (ierr) return ierr;
-  ierr = MPI_Type_commit(newtype); /* the safe path ... */
+  ierr = MPI_Type_commit(newtype); /* the safe way  ... */
   if (ierr) return ierr;
   return MPI_SUCCESS;
 }

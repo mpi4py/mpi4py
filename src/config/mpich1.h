@@ -1,8 +1,5 @@
-/* $Id$ */
-
 #ifndef PyMPI_CONFIG_MPICH1_H
 #define PyMPI_CONFIG_MPICH1_H
-
 #if defined(MPICH_NAME) && MPICH_NAME==1
 
 #define PyMPI_MISSING_MPI_WIN 1
@@ -150,5 +147,4 @@
 #define PyMPI_MISSING_MPI_IS_THREAD_MAIN 1
 
 #endif /* !MPICH_NAME==1 */
-
 #endif /* !PyMPI_CONFIG_MPICH1_H */

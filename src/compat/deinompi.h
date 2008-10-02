@@ -1,8 +1,5 @@
-/* $Id$ */
-
 #ifndef PyMPI_COMPAT_DEINOMPI_H
 #define PyMPI_COMPAT_DEINOMPI_H
-
 #if defined(DEINO_MPI)
 
 /* ---------------------------------------------------------------- */
@@ -50,5 +47,4 @@ static int PyMPI_DEINOMPI_MPI_Init_thread(int *argc, char ***argv,
 /* ---------------------------------------------------------------- */
 
 #endif /* !DEINO_MPI */
-
 #endif /* !PyMPI_COMPAT_DEINOMPI_H */
