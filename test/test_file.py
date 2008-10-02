@@ -171,7 +171,8 @@ class TestFileSelf(TestFileBase, unittest.TestCase):
 
 _name, _version = MPI.get_vendor()
 if _name == 'Open MPI':
-    if MPI.Query_thread() > MPI.THREAD_SINGLE:
+    if (_version < (1,2,7) and \
+        MPI.Query_thread() > MPI.THREAD_SINGLE):
         del TestFileBase.testPreallocate
         del TestFileBase.testGetSetInfo
         del TestFileBase.testGetSetAtomicity

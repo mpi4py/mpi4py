@@ -367,7 +367,7 @@ class TestCCOObjInterDupDup(TestCCOObjInterDup):
 
 
 _name, _version = MPI.get_vendor()
-if _name.replace(' ', '') == 'OpenMPI':
+if _name == 'Open MPI':
     if _version < (1, 2, 4):
         del TestCCOObjInter
         del TestCCOObjInterDup
