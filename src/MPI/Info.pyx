@@ -106,7 +106,7 @@ cdef class Info:
     def py2f(self):
         """
         """
-        return MPI_Comm_c2f(self.ob_mpi)
+        return MPI_Info_c2f(self.ob_mpi)
 
     @classmethod
     def f2py(cls, arg):
