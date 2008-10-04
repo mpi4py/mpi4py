@@ -143,7 +143,6 @@ class EnumValue(NodeValue):
                   ctype='int',
                   calias=calias)
 
-
 class HandleValue(NodeValue):
     REGEX = Re.HANDLE_VALUE
     HEADER = '#define %(cname)s ((%(ctype)s)%(calias)s)'
@@ -161,6 +160,21 @@ class FunctionProto(NodeFuncProto):
     REGEX = Re.FUNCTION_PROTO
 
 
+class FortranIntType(IntegralType):
+    REGEX = Re.FINT_TYPE
+
+class FunctionC2F(NodeFuncProto):
+    REGEX = Re.FUNCTION_C2F
+    HEADER = ' '. join(['#define %(cname)s(%(cargsnamed)s)',
+                        '((%(crett)s)0)'])
+
+class FunctionF2C(NodeFuncProto):
+    REGEX = Re.FUNCTION_F2C
+    HEADER = ' '. join(['#define %(cname)s(%(cargsnamed)s)',
+                        '%(cretv)s'])
+    def __init__(self, *a, **k):
+        NodeFuncProto.__init__(self, *a, **k)
+        self.cretv =  self.crett.upper() + '_NULL'
 
 class Scanner(object):
 
@@ -169,6 +183,7 @@ class Scanner(object):
         HandleValue, EnumValue,
         BasicValuePtr, StructValuePtr,
         FunctionType, FunctionValuePtr,
+        FunctionC2F, FunctionF2C,
         FunctionProto,
         ]
     def __init__(self):

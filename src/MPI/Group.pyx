@@ -213,19 +213,28 @@ cdef class Group:
             self.ob_mpi = MPI_GROUP_NULL
         else: CHKERR( MPI_ERR_GROUP )
 
+    # Fortran Handle
+    # --------------
+
+    def py2f(self):
+        """
+        """
+        return MPI_Group_c2f(self.ob_mpi)
+
+    @classmethod
+    def f2py(cls, arg):
+        """
+        """
+        raise NotImplementedError
+
 
 
 cdef Group __GROUP_NULL__  = _new_Group ( MPI_GROUP_NULL  )
 cdef Group __GROUP_EMPTY__ = _new_Group ( MPI_GROUP_EMPTY )
 
 
-# Null group handle
-# -----------------
+# Predefined group handles
+# ------------------------
 
-GROUP_NULL = __GROUP_NULL__
-
-
-# Predefined empty group handle
-# -----------------------------
-
-GROUP_EMPTY = __GROUP_EMPTY__
+GROUP_NULL  = __GROUP_NULL__  #: Null group handle
+GROUP_EMPTY = __GROUP_EMPTY__ #: Empty group handle

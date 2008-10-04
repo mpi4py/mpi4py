@@ -300,6 +300,21 @@ cdef class Win:
         def __set__(self, value):
             self.Set_name(value)
 
+    # Fortran Handle
+    # --------------
+
+    def py2f(self):
+        """
+        """
+        return MPI_Win_c2f(self.ob_mpi)
+
+    @classmethod
+    def f2py(cls, arg):
+        """
+        """
+        raise NotImplementedError
+
+
 
 # Predefined null window handle
 WIN_NULL = _new_Win(MPI_WIN_NULL)

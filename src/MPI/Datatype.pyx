@@ -431,6 +431,21 @@ cdef class Datatype:
         def __set__(self, value):
             self.Set_name(value)
 
+    # Fortran Handle
+    # --------------
+
+    def py2f(self):
+        """
+        """
+        return MPI_Type_c2f(self.ob_mpi)
+
+    @classmethod
+    def f2py(cls, arg):
+        """
+        """
+        raise NotImplementedError
+
+
 
 # Address Function
 # ----------------
@@ -447,15 +462,11 @@ def Get_address(location):
 
 
 
-# Null datatype handle
-# --------------------
-
-DATATYPE_NULL = _new_Datatype(MPI_DATATYPE_NULL)
-
-
-
 # Predefined datatype handles
 # ---------------------------
+
+# Null datatype handle
+DATATYPE_NULL = _new_Datatype(MPI_DATATYPE_NULL)
 
 # Elementary datatypes
 CHAR            = _new_Datatype(MPI_CHAR)
@@ -523,7 +534,7 @@ ORDER_F       = MPI_ORDER_FORTRAN
 # ------------------------------------------
 TYPECLASS_INTEGER = MPI_TYPECLASS_INTEGER
 TYPECLASS_REAL    = MPI_TYPECLASS_REAL
-TYPECLASS_COMPLEX = MPI_TYPECLASS_COMPLEX 
+TYPECLASS_COMPLEX = MPI_TYPECLASS_COMPLEX
 
 
 # Type of distributions (HPF-like arrays)

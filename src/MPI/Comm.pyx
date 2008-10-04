@@ -666,6 +666,19 @@ cdef class Comm:
         def __set__(self, value):
             self.Set_name(value)
 
+    # Fortran Handle
+    # --------------
+
+    def py2f(self):
+        """
+        """
+        return MPI_Comm_c2f(self.ob_mpi)
+
+    @classmethod
+    def f2py(cls, arg):
+        """
+        """
+        raise NotImplementedError
 
     # Python Communication
     # --------------------
@@ -733,7 +746,6 @@ cdef class Comm:
         if op is None: op = SUM
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_allreduce(sendobj, recvobj, op, comm)
-
 
 
 cdef class Intracomm(Comm):
@@ -1361,23 +1373,19 @@ cdef class Intercomm(Comm):
         return comm
 
 
+
 cdef Comm      __COMM_NULL__   = _new_Comm      ( MPI_COMM_NULL  )
 cdef Intracomm __COMM_SELF__   = _new_Intracomm ( MPI_COMM_SELF  )
 cdef Intracomm __COMM_WORLD__  = _new_Intracomm ( MPI_COMM_WORLD )
 cdef Intercomm __COMM_PARENT__ = _new_Intercomm ( MPI_COMM_NULL  )
 
-# Null communicator
-# -----------------
-
-COMM_NULL =  __COMM_NULL__
-
 
 # Predefined communicators
 # ------------------------
 
-COMM_SELF  = __COMM_SELF__
-
-COMM_WORLD = __COMM_WORLD__
+COMM_NULL =  __COMM_NULL__  #: Null communicator handle
+COMM_SELF  = __COMM_SELF__  #: Self communicator handle
+COMM_WORLD = __COMM_WORLD__ #: World communicator handle
 
 
 # Communicator Comparisons

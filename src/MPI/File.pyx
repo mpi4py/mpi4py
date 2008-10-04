@@ -634,14 +634,30 @@ cdef class File:
         """
         CHKERR( MPI_File_call_errhandler(self.ob_mpi, errorcode) )
 
+    # Fortran Handle
+    # --------------
+
+    def py2f(self):
+        """
+        """
+        return MPI_File_c2f(self.ob_mpi)
+
+    @classmethod
+    def f2py(cls, fint):
+        """
+        """
+        MPI_File handle = MPI_File_f2c(fint)
+        cdef File newobj = File()
+        newobj.ob_mpi  = handle
+        newobj.flags |= PyMPI_SKIP_FREE
+        raise NotImplementedError
 
 
-# Null file handle
-# ----------------
 
-FILE_NULL = _new_File(MPI_FILE_NULL)
-#: Null file handle
+# Predefined file handles
+# -----------------------
 
+FILE_NULL = _new_File(MPI_FILE_NULL) #: Null file handle
 
 
 # Opening modes

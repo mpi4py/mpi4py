@@ -59,6 +59,19 @@ FUNCTION_PROTO = join([ret_type], [camel_name],
                       lparen, [arg_list], rparen,
                       defval, eol)
 
+fint_type = r'MPI_Fint'
+c2f_name  = r'MPI_[A-Z][a-z_]+_c2f'
+f2c_name  = r'MPI_[A-Z][a-z_]+_f2c'
+
+FINT_TYPE    = fint_type
+FUNCTION_C2F = join([fint_type], [c2f_name],
+                    lparen, [opaque_type], rparen,
+                    defval, eol)
+FUNCTION_F2C = join([opaque_type], [f2c_name],
+                    lparen, [fint_type], rparen,
+                    defval, eol)
+
+
 # compile the RE's
 glb = globals()
 all = [key for key in dict(glb) if key.isupper()]

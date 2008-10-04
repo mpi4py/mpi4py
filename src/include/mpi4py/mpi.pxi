@@ -29,9 +29,6 @@ cdef extern from "mpi.h" nogil:
     ctypedef struct _mpi_info_t
     ctypedef _mpi_info_t* MPI_Info
 
-    ctypedef struct _mpi_errhandler_t
-    ctypedef _mpi_errhandler_t* MPI_Errhandler
-
     cdef struct _mpi_comm_t
     ctypedef _mpi_comm_t* MPI_Comm
 
@@ -40,6 +37,10 @@ cdef extern from "mpi.h" nogil:
 
     ctypedef struct _mpi_file_t
     ctypedef _mpi_file_t* MPI_File
+
+    ctypedef struct _mpi_errhandler_t
+    ctypedef _mpi_errhandler_t* MPI_Errhandler
+
 
     #-----------------------------------------------------------------
 
@@ -707,5 +708,37 @@ cdef extern from "mpi.h" nogil:
 
     double MPI_Wtime()
     double MPI_Wtick()
+
+    #-----------------------------------------------------------------
+
+    # Fortran INTEGER
+    ctypedef long MPI_Fint
+
+    MPI_Fint* MPI_F_STATUS_IGNORE   #:= 0
+    MPI_Fint* MPI_F_STATUSES_IGNORE #:= 0
+    int MPI_Status_c2f (MPI_Status*, MPI_Fint*)
+    int MPI_Status_f2c (MPI_Fint*, MPI_Status*)
+
+    # C -> Fortran
+    MPI_Fint MPI_Type_c2f       (MPI_Datatype)
+    MPI_Fint MPI_Request_c2f    (MPI_Request)
+    MPI_Fint MPI_Op_c2f         (MPI_Op)
+    MPI_Fint MPI_Info_c2f       (MPI_Info)
+    MPI_Fint MPI_Group_c2f      (MPI_Group)
+    MPI_Fint MPI_Comm_c2f       (MPI_Comm)
+    MPI_Fint MPI_Win_c2f        (MPI_Win)
+    MPI_Fint MPI_File_c2f       (MPI_File)
+    MPI_Fint MPI_Errhandler_c2f (MPI_Errhandler)
+
+    # Fortran ->C
+    MPI_Datatype   MPI_Type_f2c       (MPI_Fint)
+    MPI_Request    MPI_Request_f2c    (MPI_Fint)
+    MPI_Op         MPI_Op_f2c         (MPI_Fint)
+    MPI_Info       MPI_Info_f2c       (MPI_Fint)
+    MPI_Group      MPI_Group_f2c      (MPI_Fint)
+    MPI_Comm       MPI_Comm_f2c       (MPI_Fint)
+    MPI_Win        MPI_Win_f2c        (MPI_Fint)
+    MPI_File       MPI_File_f2c       (MPI_Fint)
+    MPI_Errhandler MPI_Errhandler_f2c (MPI_Fint)
 
     #-----------------------------------------------------------------

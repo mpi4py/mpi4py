@@ -80,13 +80,6 @@ typedef void *PyMPI_MPI_Info;
 #endif
 #endif
 
-#ifdef PyMPI_MISSING_MPI_ERRHANDLER
-#if !defined(MPI_Errhandler)
-typedef void *PyMPI_MPI_Errhandler;
-#define MPI_Errhandler PyMPI_MPI_Errhandler
-#endif
-#endif
-
 #ifdef PyMPI_MISSING_MPI_COMM
 #if !defined(MPI_Comm)
 typedef void *PyMPI_MPI_Comm;
@@ -105,6 +98,13 @@ typedef void *PyMPI_MPI_Win;
 #if !defined(MPI_File)
 typedef void *PyMPI_MPI_File;
 #define MPI_File PyMPI_MPI_File
+#endif
+#endif
+
+#ifdef PyMPI_MISSING_MPI_ERRHANDLER
+#if !defined(MPI_Errhandler)
+typedef void *PyMPI_MPI_Errhandler;
+#define MPI_Errhandler PyMPI_MPI_Errhandler
 #endif
 #endif
 
@@ -3147,6 +3147,138 @@ typedef int (MPI_Win_delete_attr_function)(MPI_Win,int,void*,void*);
 #ifdef PyMPI_MISSING_MPI_WTICK
 #if !defined(MPI_Wtick)
 #define MPI_Wtick() PyMPI_UNAVAILABLE("MPI_WTICK")
+#endif
+#endif
+
+#ifdef PyMPI_MISSING_MPI_F_STATUS_IGNORE
+#if !defined(MPI_F_STATUS_IGNORE)
+#define MPI_F_STATUS_IGNORE (0)
+#endif
+#endif
+
+#ifdef PyMPI_MISSING_MPI_F_STATUSES_IGNORE
+#if !defined(MPI_F_STATUSES_IGNORE)
+#define MPI_F_STATUSES_IGNORE (0)
+#endif
+#endif
+
+#ifdef PyMPI_MISSING_MPI_STATUS_C2F
+#if !defined(MPI_Status_c2f)
+#define MPI_Status_c2f(a1,a2) PyMPI_UNAVAILABLE("MPI_STATUS_C2F",a1,a2)
+#endif
+#endif
+
+#ifdef PyMPI_MISSING_MPI_STATUS_F2C
+#if !defined(MPI_Status_f2c)
+#define MPI_Status_f2c(a1,a2) PyMPI_UNAVAILABLE("MPI_STATUS_F2C",a1,a2)
+#endif
+#endif
+
+#ifdef PyMPI_MISSING_MPI_TYPE_C2F
+#if !defined(MPI_Type_c2f)
+#define MPI_Type_c2f(a1) ((MPI_Fint)0)
+#endif
+#endif
+
+#ifdef PyMPI_MISSING_MPI_REQUEST_C2F
+#if !defined(MPI_Request_c2f)
+#define MPI_Request_c2f(a1) ((MPI_Fint)0)
+#endif
+#endif
+
+#ifdef PyMPI_MISSING_MPI_OP_C2F
+#if !defined(MPI_Op_c2f)
+#define MPI_Op_c2f(a1) ((MPI_Fint)0)
+#endif
+#endif
+
+#ifdef PyMPI_MISSING_MPI_INFO_C2F
+#if !defined(MPI_Info_c2f)
+#define MPI_Info_c2f(a1) ((MPI_Fint)0)
+#endif
+#endif
+
+#ifdef PyMPI_MISSING_MPI_GROUP_C2F
+#if !defined(MPI_Group_c2f)
+#define MPI_Group_c2f(a1) ((MPI_Fint)0)
+#endif
+#endif
+
+#ifdef PyMPI_MISSING_MPI_COMM_C2F
+#if !defined(MPI_Comm_c2f)
+#define MPI_Comm_c2f(a1) ((MPI_Fint)0)
+#endif
+#endif
+
+#ifdef PyMPI_MISSING_MPI_WIN_C2F
+#if !defined(MPI_Win_c2f)
+#define MPI_Win_c2f(a1) ((MPI_Fint)0)
+#endif
+#endif
+
+#ifdef PyMPI_MISSING_MPI_FILE_C2F
+#if !defined(MPI_File_c2f)
+#define MPI_File_c2f(a1) ((MPI_Fint)0)
+#endif
+#endif
+
+#ifdef PyMPI_MISSING_MPI_ERRHANDLER_C2F
+#if !defined(MPI_Errhandler_c2f)
+#define MPI_Errhandler_c2f(a1) ((MPI_Fint)0)
+#endif
+#endif
+
+#ifdef PyMPI_MISSING_MPI_TYPE_F2C
+#if !defined(MPI_Type_f2c)
+#define MPI_Type_f2c(a1) MPI_DATATYPE_NULL
+#endif
+#endif
+
+#ifdef PyMPI_MISSING_MPI_REQUEST_F2C
+#if !defined(MPI_Request_f2c)
+#define MPI_Request_f2c(a1) MPI_REQUEST_NULL
+#endif
+#endif
+
+#ifdef PyMPI_MISSING_MPI_OP_F2C
+#if !defined(MPI_Op_f2c)
+#define MPI_Op_f2c(a1) MPI_OP_NULL
+#endif
+#endif
+
+#ifdef PyMPI_MISSING_MPI_INFO_F2C
+#if !defined(MPI_Info_f2c)
+#define MPI_Info_f2c(a1) MPI_INFO_NULL
+#endif
+#endif
+
+#ifdef PyMPI_MISSING_MPI_GROUP_F2C
+#if !defined(MPI_Group_f2c)
+#define MPI_Group_f2c(a1) MPI_GROUP_NULL
+#endif
+#endif
+
+#ifdef PyMPI_MISSING_MPI_COMM_F2C
+#if !defined(MPI_Comm_f2c)
+#define MPI_Comm_f2c(a1) MPI_COMM_NULL
+#endif
+#endif
+
+#ifdef PyMPI_MISSING_MPI_WIN_F2C
+#if !defined(MPI_Win_f2c)
+#define MPI_Win_f2c(a1) MPI_WIN_NULL
+#endif
+#endif
+
+#ifdef PyMPI_MISSING_MPI_FILE_F2C
+#if !defined(MPI_File_f2c)
+#define MPI_File_f2c(a1) MPI_FILE_NULL
+#endif
+#endif
+
+#ifdef PyMPI_MISSING_MPI_ERRHANDLER_F2C
+#if !defined(MPI_Errhandler_f2c)
+#define MPI_Errhandler_f2c(a1) MPI_ERRHANDLER_NULL
 #endif
 #endif
 

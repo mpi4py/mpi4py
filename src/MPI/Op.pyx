@@ -47,16 +47,26 @@ cdef class Op:
         self.ob_callable = None
         self.ob_commute  = False
 
+    # Fortran Handle
+    # --------------
+
+    def py2f(self):
+        """
+        """
+        return MPI_Op_c2f(self.ob_mpi)
+
+    @classmethod
+    def f2py(cls, arg):
+        """
+        """
+        raise NotImplementedError
 
 
-# Null operation handle
-# ---------------------
-
-OP_NULL = _new_Op( MPI_OP_NULL )
 
 # Predefined operation handles
 # ----------------------------
 
+OP_NULL = _new_Op( MPI_OP_NULL ) #: Null
 MAX     = _new_Op( MPI_MAX     ) #: Maximum
 MIN     = _new_Op( MPI_MIN     ) #: Minimum
 SUM     = _new_Op( MPI_SUM     ) #: Sum

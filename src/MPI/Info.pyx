@@ -100,6 +100,23 @@ cdef class Info:
         ckey[MPI_MAX_INFO_KEY] = 0 # just in case
         return tompistr(ckey, -1)
 
+    # Fortran Handle
+    # --------------
+
+    def py2f(self):
+        """
+        """
+        return MPI_Comm_c2f(self.ob_mpi)
+
+    @classmethod
+    def f2py(cls, arg):
+        """
+        """
+        raise NotImplementedError
+
+    # Python mapping emulation
+    # ------------------------
+
     def __len__(self):
         if not self: return 0
         return self.Get_nkeys()
@@ -162,7 +179,7 @@ cdef class Info:
 
 
 
-# Null info handle
-# ----------------
+# Predefined info handles
+# -----------------------
 
-INFO_NULL = _new_Info(MPI_INFO_NULL)
+INFO_NULL = _new_Info(MPI_INFO_NULL) #: Null info handle

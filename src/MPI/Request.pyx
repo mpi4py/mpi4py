@@ -213,6 +213,20 @@ cdef class Request:
         with nogil:
             CHKERR( MPI_Cancel(&self.ob_mpi) )
 
+    # Fortran Handle
+    # --------------
+
+    def py2f(self):
+        """
+        """
+        return MPI_Request_c2f(self.ob_mpi)
+
+    @classmethod
+    def f2py(cls, arg):
+        """
+        """
+        raise NotImplementedError
+
 
 
 cdef class Prequest(Request):
@@ -289,8 +303,8 @@ cdef class Grequest(Request):
 
 
 
-# Null request handle
-# -------------------
+# Predefined request handles
+# --------------------------
 
-REQUEST_NULL = _new_Request(MPI_REQUEST_NULL)
+REQUEST_NULL = _new_Request(MPI_REQUEST_NULL) #: Null request handle
 

@@ -29,18 +29,25 @@ cdef class Errhandler:
         """
         CHKERR( MPI_Errhandler_free(&self.ob_mpi) )
 
+    # Fortran Handle
+    # --------------
 
+    def py2f(self):
+        """
+        """
+        return MPI_Errhandler_c2f(self.ob_mpi)
 
-# Null errhandler handle
-# ----------------------
-
-ERRHANDLER_NULL  = _new_Errhandler(MPI_ERRHANDLER_NULL)
+    @classmethod
+    def f2py(cls, arg):
+        """
+        """
+        raise NotImplementedError
 
 
 
 # Predefined errhandler handles
 # -----------------------------
 
-ERRORS_RETURN    = _new_Errhandler(MPI_ERRORS_RETURN)
-
-ERRORS_ARE_FATAL = _new_Errhandler(MPI_ERRORS_ARE_FATAL)
+ERRHANDLER_NULL  = _new_Errhandler(MPI_ERRHANDLER_NULL)  #: Null
+ERRORS_RETURN    = _new_Errhandler(MPI_ERRORS_RETURN)    #: Errors return
+ERRORS_ARE_FATAL = _new_Errhandler(MPI_ERRORS_ARE_FATAL) #: Errors are fatal
