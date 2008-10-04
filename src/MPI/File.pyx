@@ -646,10 +646,6 @@ cdef class File:
     def f2py(cls, fint):
         """
         """
-        MPI_File handle = MPI_File_f2c(fint)
-        cdef File newobj = File()
-        newobj.ob_mpi  = handle
-        newobj.flags |= PyMPI_SKIP_FREE
         raise NotImplementedError
 
 
