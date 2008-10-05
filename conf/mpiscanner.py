@@ -121,7 +121,6 @@ class IntegralType(NodeType):
 
 class OpaqueType(NodeType):
     REGEX = Re.OPAQUE_TYPE
-    HEADER = 'typedef void *PyMPI_%(ctype)s;'
     HEADER = dedent("""\
     typedef void *PyMPI_%(ctype)s;
     #define %(ctype)s PyMPI_%(ctype)s""")
@@ -160,9 +159,15 @@ class FunctionProto(NodeFuncProto):
     REGEX = Re.FUNCTION_PROTO
 
 
-class FortranIntType(IntegralType):
+class FIntType(NodeType):
     REGEX = Re.FINT_TYPE
+    HEADER = dedent("""\
+    typedef int PyMPI_%(ctype)s;
+    #define %(ctype)s PyMPI_%(ctype)s""")
 
+class FIntValuePtr(NodeValue):
+    REGEX = Re.FINTP_VALUE
+    
 class FunctionC2F(NodeFuncProto):
     REGEX = Re.FUNCTION_C2F
     HEADER = ' '. join(['#define %(cname)s(%(cargsnamed)s)',
@@ -179,12 +184,13 @@ class FunctionF2C(NodeFuncProto):
 class Scanner(object):
 
     NODE_TYPES = [
-        IntegralType, FortranIntType,
+        FIntType, FIntValuePtr,
+        FunctionC2F, FunctionF2C,
+        IntegralType, 
         StructType, OpaqueType,
         HandleValue, EnumValue,
         BasicValuePtr, StructValuePtr,
         FunctionType, FunctionValuePtr,
-        FunctionC2F, FunctionF2C,
         FunctionProto,
         ]
     def __init__(self):

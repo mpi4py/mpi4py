@@ -3152,7 +3152,7 @@ typedef int (MPI_Win_delete_attr_function)(MPI_Win,int,void*,void*);
 
 #ifdef PyMPI_MISSING_MPI_FINT
 #if !defined(MPI_Fint)
-typedef long PyMPI_MPI_Fint;
+typedef int PyMPI_MPI_Fint;
 #define MPI_Fint PyMPI_MPI_Fint
 #endif
 #endif
