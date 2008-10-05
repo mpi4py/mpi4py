@@ -63,7 +63,7 @@ fint_type = r'MPI_Fint'
 c2f_name  = r'MPI_[A-Z][a-z_]+_c2f'
 f2c_name  = r'MPI_[A-Z][a-z_]+_f2c'
 
-FINT_TYPE    = fint_type
+FINT_TYPE    = join( typedef, canylong, [fint_type], eol)
 FUNCTION_C2F = join([fint_type], [c2f_name],
                     lparen, [opaque_type], rparen,
                     defval, eol)

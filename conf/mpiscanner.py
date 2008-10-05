@@ -179,7 +179,8 @@ class FunctionF2C(NodeFuncProto):
 class Scanner(object):
 
     NODE_TYPES = [
-        IntegralType, StructType, OpaqueType,
+        IntegralType, FortranIntType,
+        StructType, OpaqueType,
         HandleValue, EnumValue,
         BasicValuePtr, StructValuePtr,
         FunctionType, FunctionValuePtr,
