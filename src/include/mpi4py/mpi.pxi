@@ -180,8 +180,8 @@ cdef extern from "mpi.h" nogil:
     int MPI_Type_set_attr(MPI_Datatype, int, void*)
     int MPI_Type_delete_attr(MPI_Datatype, int)
 
-    ctypedef int (MPI_Type_copy_attr_function)(MPI_Datatype,int,void*,void*,void*,int*)
-    ctypedef int (MPI_Type_delete_attr_function)(MPI_Datatype,int,void*,void*)
+    ctypedef int MPI_Type_copy_attr_function(MPI_Datatype,int,void*,void*,void*,int*)
+    ctypedef int MPI_Type_delete_attr_function(MPI_Datatype,int,void*,void*)
     MPI_Type_copy_attr_function*   MPI_TYPE_NULL_COPY_FN   #:= 0
     MPI_Type_copy_attr_function*   MPI_TYPE_DUP_FN         #:= 0
     MPI_Type_delete_attr_function* MPI_TYPE_NULL_DELETE_FN #:= 0
@@ -220,9 +220,9 @@ cdef extern from "mpi.h" nogil:
     int MPI_Start(MPI_Request*)
     int MPI_Startall(int, MPI_Request*)
 
-    ctypedef int (MPI_Grequest_cancel_function)(void*,int)
-    ctypedef int (MPI_Grequest_free_function)(void*)
-    ctypedef int (MPI_Grequest_query_function)(void*,MPI_Status*)
+    ctypedef int MPI_Grequest_cancel_function(void*,int)
+    ctypedef int MPI_Grequest_free_function(void*)
+    ctypedef int MPI_Grequest_query_function(void*,MPI_Status*)
     int MPI_Grequest_start(MPI_Grequest_query_function*, MPI_Grequest_free_function*, MPI_Grequest_cancel_function*, void*, MPI_Request*)
     int MPI_Grequest_complete(MPI_Request)
 
@@ -245,7 +245,7 @@ cdef extern from "mpi.h" nogil:
 
     int MPI_Op_free(MPI_Op*)
 
-    ctypedef void (MPI_User_function)(void*, void*, int*, MPI_Datatype*)
+    ctypedef void MPI_User_function(void*, void*, int*, MPI_Datatype*)
     int MPI_Op_create(MPI_User_function*, int, MPI_Op*)
 
     #-----------------------------------------------------------------
@@ -311,11 +311,11 @@ cdef extern from "mpi.h" nogil:
 
     #deprecated! int MPI_Errhandler_get(MPI_Comm, MPI_Errhandler*)
     #deprecated! int MPI_Errhandler_set(MPI_Comm, MPI_Errhandler)
-    #deprecated! ctypedef void(MPI_Handler_function)(MPI_Comm*,int*,...)
+    #deprecated! ctypedef void MPI_Handler_function(MPI_Comm*,int*,...)
     int MPI_Comm_get_errhandler(MPI_Comm, MPI_Errhandler*) #:= MPI_Errhandler_get
     int MPI_Comm_set_errhandler(MPI_Comm, MPI_Errhandler)  #:= MPI_Errhandler_set
     int MPI_Comm_call_errhandler(MPI_Comm, int)
-    ctypedef void(MPI_Comm_errhandler_fn)(MPI_Comm*,int*,...)                #:= MPI_Handler_function
+    ctypedef void MPI_Comm_errhandler_fn(MPI_Comm*,int*,...)                 #:= MPI_Handler_function
     int MPI_Comm_create_errhandler(MPI_Comm_errhandler_fn*, MPI_Errhandler*) #:= MPI_Errhandler_create
 
     int MPI_Comm_get_name(MPI_Comm, char[], int*)
@@ -335,13 +335,13 @@ cdef extern from "mpi.h" nogil:
     int MPI_Comm_set_attr(MPI_Comm, int, void*)        #:= MPI_Attr_put
     int MPI_Comm_delete_attr(MPI_Comm, int)            #:= MPI_Attr_delete
 
-    #deprecated! ctypedef int(MPI_Copy_function)(MPI_Comm,int,void*,void*,void*,int*)
-    #deprecated! ctypedef int(MPI_Delete_function)(MPI_Comm,int,void*,void*)
+    #deprecated! ctypedef int MPI_Copy_function(MPI_Comm,int,void*,void*,void*,int*)
+    #deprecated! ctypedef int MPI_Delete_function(MPI_Comm,int,void*,void*)
     #deprecated! MPI_Copy_function*   MPI_DUP_FN         #:= 0
     #deprecated! MPI_Copy_function*   MPI_NULL_COPY_FN   #:= 0
     #deprecated! MPI_Delete_function* MPI_NULL_DELETE_FN #:= 0
-    ctypedef int(MPI_Comm_copy_attr_function)(MPI_Comm,int,void*,void*,void*,int*) #:= MPI_Copy_function
-    ctypedef int(MPI_Comm_delete_attr_function)(MPI_Comm,int,void*,void*)          #:= MPI_Delete_function
+    ctypedef int MPI_Comm_copy_attr_function(MPI_Comm,int,void*,void*,void*,int*) #:= MPI_Copy_function
+    ctypedef int MPI_Comm_delete_attr_function(MPI_Comm,int,void*,void*)          #:= MPI_Delete_function
     MPI_Comm_copy_attr_function*   MPI_COMM_DUP_FN          #:= MPI_DUP_FN
     MPI_Comm_copy_attr_function*   MPI_COMM_NULL_COPY_FN    #:= MPI_NULL_COPY_FN
     MPI_Comm_delete_attr_function* MPI_COMM_NULL_DELETE_FN  #:= MPI_NULL_DELETE_FN
@@ -474,7 +474,7 @@ cdef extern from "mpi.h" nogil:
     int MPI_Win_get_errhandler(MPI_Win, MPI_Errhandler*)
     int MPI_Win_set_errhandler(MPI_Win, MPI_Errhandler)
     int MPI_Win_call_errhandler(MPI_Win, int)
-    ctypedef void(MPI_Win_errhandler_fn)(MPI_Win*,int*,...)
+    ctypedef void MPI_Win_errhandler_fn(MPI_Win*,int*,...)
     int MPI_Win_create_errhandler(MPI_Win_errhandler_fn*, MPI_Errhandler*)
 
     int MPI_Win_get_name(MPI_Win, char[], int*)
@@ -487,8 +487,8 @@ cdef extern from "mpi.h" nogil:
     int MPI_Win_set_attr(MPI_Win, int, void*)
     int MPI_Win_delete_attr(MPI_Win, int)
 
-    ctypedef int(MPI_Win_copy_attr_function)(MPI_Win,int,void*,void*,void*,int*)
-    ctypedef int(MPI_Win_delete_attr_function)(MPI_Win,int,void*,void*)
+    ctypedef int MPI_Win_copy_attr_function(MPI_Win,int,void*,void*,void*,int*)
+    ctypedef int MPI_Win_delete_attr_function(MPI_Win,int,void*,void*)
     MPI_Win_copy_attr_function*   MPI_WIN_DUP_FN         #:= 0
     MPI_Win_copy_attr_function*   MPI_WIN_NULL_COPY_FN   #:= 0
     MPI_Win_delete_attr_function* MPI_WIN_NULL_DELETE_FN #:= 0
@@ -580,7 +580,7 @@ cdef extern from "mpi.h" nogil:
     int MPI_File_get_errhandler(MPI_File, MPI_Errhandler*)
     int MPI_File_set_errhandler(MPI_File, MPI_Errhandler)
     int MPI_File_call_errhandler(MPI_File, int)
-    ctypedef void(MPI_File_errhandler_fn)(MPI_File*,int*,...)
+    ctypedef void MPI_File_errhandler_fn(MPI_File*,int*,...)
     int MPI_File_create_errhandler(MPI_File_errhandler_fn*, MPI_Errhandler*)
 
     #-----------------------------------------------------------------

@@ -44,11 +44,9 @@ defval = r'(?:%s)?' % join (annotation, [r'\(?[A-Za-z0-9_+-]+\)?'])
 STRUCT_TYPE   = join( struct,  [struct_type] , colon,  eol)
 INTEGRAL_TYPE = join( typedef, canylong, [integral_type], eol)
 OPAQUE_TYPE   = join( typedef, canyptr,  [opaque_type],   eol)
-FUNCTION_TYPE = join( typedef, [ret_type],
-                      lparen, [camel_name], rparen,
-                      lparen, [arg_list],   rparen,
-                      defval,
-                      eol)
+FUNCTION_TYPE = join( typedef, [ret_type], [camel_name],
+                      lparen, [arg_list], rparen,
+                      defval, eol)
 
 ENUM_VALUE     = join( enum,          [upper_name], defval, eol)
 HANDLE_VALUE   = join( [opaque_type], [upper_name], defval, eol)
