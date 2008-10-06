@@ -1,3 +1,7 @@
+!
+! $ f2py --f90exec=mpif90 -m helloworld -c helloworld.f90
+!
+
 subroutine sayhello(comm)
   use mpi
   implicit none
