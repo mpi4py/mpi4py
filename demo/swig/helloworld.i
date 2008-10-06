@@ -8,10 +8,13 @@
 #include <mpi.h>
 #include <stdio.h>
 
-void hello(MPI_Comm comm) {
+void sayhello(MPI_Comm comm) {
   int size, rank;
   char pname[MPI_MAX_PROCESSOR_NAME]; int len;
-  if (comm == MPI_COMM_NULL) return;
+  if (comm == MPI_COMM_NULL) {
+    printf("You passed MPI_COMM_NULL !!!\n");
+    return;
+  }
   MPI_Comm_size(comm, &size);
   MPI_Comm_rank(comm, &rank);
   MPI_Get_processor_name(pname, &len);
@@ -26,7 +29,7 @@ void hello(MPI_Comm comm) {
 
 %mpi4py_typemap(Comm, MPI_Comm);
 
-void hello(MPI_Comm comm);
+void sayhello(MPI_Comm comm);
 
 /*
  * Local Variables:

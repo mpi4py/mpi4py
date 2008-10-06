@@ -1,29 +1,34 @@
-.PHONY: all src ext test clean
+.PHONY: default all src build test clean
 
-PYTHON  = python
-SWIG    = swig -python
-MPICC   = mpicc 
-MPIEXEC = mpiexec
-
+PYTHON = python
 PYTHON_INCLUDE = ${shell ${PYTHON} -c 'from distutils import sysconfig; print( sysconfig.get_python_inc() )'}
 MPI4PY_INCLUDE = ${shell ${PYTHON} -c 'import mpi4py; print( mpi4py.get_include() )'}
 
-CFLAGS = -shared -fPIC
-SO = .so
-NP = -n 5
 
+default: build
 all: test
 
+
+SWIG = swig
+SWIG_PY = ${SWIG} -python
 src: _helloworld.c
-ext: _helloworld${SO}
-test: ext
-	${MPIEXEC} ${NP} ${PYTHON} -c 'from mpi4py import MPI; import helloworld as hw; hw.hello(MPI.COMM_WORLD)'
-
-clean:
-	${RM} helloworld.py* _helloworld${SO} _helloworld.c 
-
-
 _helloworld.c: helloworld.i
-	${SWIG} -I${MPI4PY_INCLUDE} -o $@ $< 
+	${SWIG_PY} -I${MPI4PY_INCLUDE} -o $@ $< 
+
+
+MPICC  = mpicc 
+CFLAGS = -shared -fPIC
+SO = .so
+build: _helloworld${SO}
 _helloworld${SO}: _helloworld.c
 	${MPICC} ${CFLAGS} -I${PYTHON_INCLUDE} -I${MPI4PY_INCLUDE} -o $@ $<
+
+
+MPIEXEC = mpiexec
+NP = -n 5
+test: build
+	${MPIEXEC} ${NP} ${PYTHON} test.py
+
+
+clean:
+	${RM} helloworld.py* _helloworld${SO} _helloworld.c
