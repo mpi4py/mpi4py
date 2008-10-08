@@ -145,9 +145,15 @@ class EnumValue(NodeValue):
 class HandleValue(NodeValue):
     REGEX = Re.HANDLE_VALUE
     HEADER = '#define %(cname)s ((%(ctype)s)%(calias)s)'
+    #def __init__(self, *a, **k):
+    #    NodeValue.__init__(self, *a, **k)
+    #    print self.__dict__
+    #    if self.cname.endswith('_NULL'):
+    #        self.HEADER = '#define %(cname)s ((%(ctype)s)%(calias)s)'
 
 class BasicValuePtr(NodeValue):
     REGEX = Re.BASICP_VALUE
+    HEADER = '#define %(cname)s ((%(ctype)s)%(calias)s)'
 
 class StructValuePtr(NodeValue):
     REGEX = Re.STRUCTP_VALUE
@@ -165,9 +171,9 @@ class FIntType(NodeType):
     typedef int PyMPI_%(ctype)s;
     #define %(ctype)s PyMPI_%(ctype)s""")
 
-class FIntValuePtr(NodeValue):
+class FIntValuePtr(BasicValuePtr):
     REGEX = Re.FINTP_VALUE
-    
+
 class FunctionC2F(NodeFuncProto):
     REGEX = Re.FUNCTION_C2F
     HEADER = ' '. join(['#define %(cname)s(%(cargsnamed)s)',
@@ -186,7 +192,7 @@ class Scanner(object):
     NODE_TYPES = [
         FIntType, FIntValuePtr,
         FunctionC2F, FunctionF2C,
-        IntegralType, 
+        IntegralType,
         StructType, OpaqueType,
         HandleValue, EnumValue,
         BasicValuePtr, StructValuePtr,

@@ -164,13 +164,13 @@ typedef void *PyMPI_MPI_Errhandler;
 
 #ifdef PyMPI_MISSING_MPI_BOTTOM
 #if !defined(MPI_BOTTOM)
-#define MPI_BOTTOM (0)
+#define MPI_BOTTOM ((void*)0)
 #endif
 #endif
 
 #ifdef PyMPI_MISSING_MPI_IN_PLACE
 #if !defined(MPI_IN_PLACE)
-#define MPI_IN_PLACE (0)
+#define MPI_IN_PLACE ((void*)0)
 #endif
 #endif
 
@@ -1940,19 +1940,19 @@ typedef int (MPI_Delete_function)(MPI_Comm,int,void*,void*);
 
 #ifdef PyMPI_MISSING_MPI_ARGV_NULL
 #if !defined(MPI_ARGV_NULL)
-#define MPI_ARGV_NULL (0)
+#define MPI_ARGV_NULL ((char**)0)
 #endif
 #endif
 
 #ifdef PyMPI_MISSING_MPI_ARGVS_NULL
 #if !defined(MPI_ARGVS_NULL)
-#define MPI_ARGVS_NULL (0)
+#define MPI_ARGVS_NULL ((char***)0)
 #endif
 #endif
 
 #ifdef PyMPI_MISSING_MPI_ERRCODES_IGNORE
 #if !defined(MPI_ERRCODES_IGNORE)
-#define MPI_ERRCODES_IGNORE (0)
+#define MPI_ERRCODES_IGNORE ((int*)0)
 #endif
 #endif
 
@@ -3159,13 +3159,13 @@ typedef int PyMPI_MPI_Fint;
 
 #ifdef PyMPI_MISSING_MPI_F_STATUS_IGNORE
 #if !defined(MPI_F_STATUS_IGNORE)
-#define MPI_F_STATUS_IGNORE (0)
+#define MPI_F_STATUS_IGNORE ((MPI_Fint*)0)
 #endif
 #endif
 
 #ifdef PyMPI_MISSING_MPI_F_STATUSES_IGNORE
 #if !defined(MPI_F_STATUSES_IGNORE)
-#define MPI_F_STATUSES_IGNORE (0)
+#define MPI_F_STATUSES_IGNORE ((MPI_Fint*)0)
 #endif
 #endif
 
