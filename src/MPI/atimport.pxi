@@ -60,7 +60,7 @@ cdef inline int _mpi_active():
     # MPI should be active
     return 1
 
-cdef inline void _atexit():
+cdef void _atexit():
     cdef int ierr = 0
     global mpi_is_active
     mpi_is_active = 0
@@ -133,7 +133,7 @@ cdef inline int _init1() except -1:
 
 cdef inline int _init2() except -1:
     cdef int ierr = 0
-    if not _mpi_active(): return 0
+    if not mpi_is_active: return 0
     # backup default error handlers for predefined communicators
     global comm_self_eh, comm_world_eh
     ierr = MPI_Comm_get_errhandler(MPI_COMM_SELF,  &comm_self_eh)
@@ -159,7 +159,7 @@ cdef int active_keyval_del(MPI_Comm c,int k, void *v, void *xs) nogil:
     return MPI_SUCCESS
 
 cdef inline int _init3() except -1:
-    if not _mpi_active(): return 0
+    if not mpi_is_active: return 0
     cdef int ierr = 0
     cdef int keyval = MPI_KEYVAL_INVALID
     ierr = MPI_Comm_create_keyval(MPI_COMM_NULL_COPY_FN,
