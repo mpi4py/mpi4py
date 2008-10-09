@@ -132,10 +132,11 @@ cdef class Win:
         """
         cdef _p_msg_rma msg = \
              message_rma_put(origin, target_rank, target)
-        with nogil: CHKERR( MPI_Put(msg.oaddr, msg.ocount, msg.otype,
-                                    target_rank,
-                                    msg.tdisp, msg.tcount, msg.ttype,
-                                    self.ob_mpi) )
+        with nogil: CHKERR( MPI_Put(
+            msg.oaddr, msg.ocount, msg.otype,
+            target_rank,
+            msg.tdisp, msg.tcount, msg.ttype,
+            self.ob_mpi) )
 
     # [6.3.2] Get
     # -----------
