@@ -16,7 +16,7 @@ cdef class Status:
         cdef int r = memcmp(&s.ob_mpi, &o.ob_mpi, sizeof(MPI_Status))
         if   op == 2: return  r == 0
         elif op == 3: return  r != 0
-        else: raise TypeError("only '==' and '!='")
+        else: raise TypeError(mpistr("only '==' and '!='"))
 
 
     def Get_source(self):

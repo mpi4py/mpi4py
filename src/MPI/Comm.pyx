@@ -18,7 +18,7 @@ cdef class Comm:
         cdef Comm s = self, o = other
         if   op == 2: return (s.ob_mpi == o.ob_mpi)
         elif op == 3: return (s.ob_mpi != o.ob_mpi)
-        else: raise TypeError("only '==' and '!='")
+        else: raise TypeError(mpistr("only '==' and '!='"))
 
     def __nonzero__(self):
         return self.ob_mpi != MPI_COMM_NULL
@@ -1450,7 +1450,7 @@ def Open_port(Info info=None):
     cdef char cportname[MPI_MAX_PORT_NAME+1]
     with nogil: CHKERR( MPI_Open_port(
         cinfo, cportname) )
-    return tompistr(cportname, -1)
+    return mpistr(cportname)
 
 def Close_port(port_name, Info info=None):
     """
@@ -1499,4 +1499,4 @@ def Lookup_name(service_name, Info info=None):
     cdef char cportname[MPI_MAX_PORT_NAME+1]
     with nogil: CHKERR( MPI_Lookup_name(
         csrvcname, cinfo, cportname) )
-    return tompistr(cportname, -1)
+    return mpistr(cportname)

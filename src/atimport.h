@@ -55,12 +55,12 @@ static PyObject * PyBuffer_FromReadWriteMemory(void *p, Py_ssize_t n)
 
 #if PY_MAJOR_VERSION >= 3
 static PyObject * PyMPIString_AsStringAndSize(PyObject *ob, 
-					      char **s,
+					      const char **s,
 					      Py_ssize_t *n)
 {
   PyObject *b = PyUnicode_AsASCIIString(ob);
   if (b != NULL &&
-      PyBytes_AsStringAndSize(b, s, n) < 0) {
+      PyBytes_AsStringAndSize(b, (char **)s, n) < 0) {
     Py_DECREF(b);
     b = NULL;
   }
@@ -70,10 +70,10 @@ static PyObject * PyMPIString_AsStringAndSize(PyObject *ob,
 #define PyMPIString_FromStringAndSize PyUnicode_FromStringAndSize
 #else
 static PyObject * PyMPIString_AsStringAndSize(PyObject *ob,
-					      char **s,
+					      const char **s,
 					      Py_ssize_t *n)
 {
-  if (PyString_AsStringAndSize(ob, s, n) < 0) return NULL;
+  if (PyString_AsStringAndSize(ob, (char **)s, n) < 0) return NULL;
   Py_INCREF(ob);
   return ob;
 }

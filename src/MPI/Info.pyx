@@ -17,7 +17,7 @@ cdef class Info:
         cdef Info s = self, o = other
         if   op == 2: return (s.ob_mpi == o.ob_mpi)
         elif op == 3: return (s.ob_mpi != o.ob_mpi)
-        else: raise TypeError("only '==' and '!='")
+        else: raise TypeError(mpistr("only '==' and '!='"))
 
     def __nonzero__(self):
         return self.ob_mpi != MPI_INFO_NULL
@@ -59,7 +59,7 @@ cdef class Info:
         cdef object tmp = allocate((maxlen+1), <void**>&cvalue)
         CHKERR( MPI_Info_get(self.ob_mpi, ckey, maxlen, cvalue, &flag) )
         cvalue[maxlen] = 0 # just in case
-        value = tompistr(cvalue, -1) if flag else None
+        value = mpistr(cvalue) if flag else None
         return (value, flag)
 
     def Set(self, key, value):
@@ -98,7 +98,7 @@ cdef class Info:
         cdef char ckey[MPI_MAX_INFO_KEY+1]
         CHKERR( MPI_Info_get_nthkey(self.ob_mpi, n, ckey) )
         ckey[MPI_MAX_INFO_KEY] = 0 # just in case
-        return tompistr(ckey, -1)
+        return mpistr(ckey)
 
     # Fortran Handle
     # --------------

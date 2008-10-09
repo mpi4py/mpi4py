@@ -17,7 +17,7 @@ cdef class File:
         cdef File s = self, o = other
         if   op == 2: return (s.ob_mpi == o.ob_mpi)
         elif op == 3: return (s.ob_mpi != o.ob_mpi)
-        else: raise TypeError("only '==' and '!='")
+        else: raise TypeError(mpistr("only '==' and '!='"))
 
     def __nonzero__(self):
         return self.ob_mpi != MPI_FILE_NULL
@@ -163,7 +163,7 @@ cdef class File:
         """
         Set the file view
         """
-        if datarep is None: datarep = tompistr('native', -1)
+        if datarep is None: datarep = mpistr('native')
         cdef char *cdatarep = NULL
         datarep = asmpistr(datarep, &cdatarep, NULL)
         cdef MPI_Datatype cetype = MPI_BYTE
@@ -186,7 +186,7 @@ cdef class File:
         _fix_Datatype(etype)
         _fix_Datatype(ftype)
         cdatarep[MPI_MAX_DATAREP_STRING] = 0 # just in case
-        datarep = tompistr(cdatarep, -1)
+        datarep = mpistr(cdatarep)
         return (disp, etype, ftype, datarep)
 
     # [9.4] Data Access

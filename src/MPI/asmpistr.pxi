@@ -1,24 +1,25 @@
 #---------------------------------------------------------------------
 
 cdef extern from *:
-    object PyMPIString_AsStringAndSize(object,char**,Py_ssize_t*)
-    object PyMPIString_FromString(char*)
-    object PyMPIString_FromStringAndSize(char*,Py_ssize_t)
+    ctypedef char const_char "const char"
+    object PyMPIString_AsStringAndSize(object,const_char**,Py_ssize_t*)
+    object PyMPIString_FromString(const_char*)
+    object PyMPIString_FromStringAndSize(const_char*,Py_ssize_t)
 
 #---------------------------------------------------------------------
 
-cdef inline object asmpistr(object ob, char **s, Py_ssize_t *n):
-    cdef char *sbuf = NULL
+cdef inline object asmpistr(object ob, char **s, int *n):
+    cdef const_char *sbuf = NULL
     cdef Py_ssize_t slen = 0
     ob = PyMPIString_AsStringAndSize(ob, &sbuf, &slen)
-    if s: s[0] = sbuf
-    if n: n[0] = slen
+    if s: s[0] = <char*> sbuf
+    if n: n[0] = <int>   slen
     return ob
 
-cdef inline object tompistr(char *s, Py_ssize_t n):
-    if n < 0:
-        return PyMPIString_FromString(s)
-    else:
-        return PyMPIString_FromStringAndSize(s, n)
+cdef inline object tompistr(const_char *s, int n):
+    return PyMPIString_FromStringAndSize(s, n)
+
+cdef inline object mpistr(const_char *s):
+    return PyMPIString_FromString(s)
 
 #---------------------------------------------------------------------
