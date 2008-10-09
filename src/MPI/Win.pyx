@@ -44,11 +44,11 @@ cdef class Win:
         if comm is not None: ccomm = comm.ob_mpi
         #
         cdef Win win = cls()
-        CHKERR( MPI_Win_create(base, size, disp_unit,
-                               cinfo, ccomm, &win.ob_mpi) )
+        with nogil: CHKERR( MPI_Win_create(
+            base, size, disp_unit,
+            cinfo, ccomm, &win.ob_mpi) )
         # we are in charge or managing MPI errors
-        CHKERR( MPI_Win_set_errhandler(
-            win.ob_mpi, MPI_ERRORS_RETURN) )
+        CHKERR( MPI_Win_set_errhandler(win.ob_mpi, MPI_ERRORS_RETURN) )
         # hold a reference to the object exposing memory
         PyMPI_Win_set_attr_memory(win.ob_mpi, memory)
         # return the created window
@@ -58,7 +58,7 @@ cdef class Win:
         """
         Free a window
         """
-        CHKERR( MPI_Win_free(&self.ob_mpi) )
+        with nogil: CHKERR( MPI_Win_free(&self.ob_mpi) )
 
     # [6.2.2] Window Attributes
     # -------------------------
@@ -69,7 +69,7 @@ cdef class Win:
         communicator used to create the window
         """
         cdef Group group = Group()
-        CHKERR( MPI_Win_get_group(self.ob_mpi, &group.ob_mpi) )
+        with nogil: CHKERR( MPI_Win_get_group(self.ob_mpi, &group.ob_mpi) )
         return group
 
     property group:
@@ -132,11 +132,10 @@ cdef class Win:
         """
         cdef _p_msg_rma msg = \
              message_rma_put(origin, target_rank, target)
-        with nogil:
-            CHKERR( MPI_Put(msg.oaddr, msg.ocount, msg.otype,
-                            target_rank,
-                            msg.tdisp, msg.tcount, msg.ttype,
-                            self.ob_mpi) )
+        with nogil: CHKERR( MPI_Put(msg.oaddr, msg.ocount, msg.otype,
+                                    target_rank,
+                                    msg.tdisp, msg.tcount, msg.ttype,
+                                    self.ob_mpi) )
 
     # [6.3.2] Get
     # -----------
@@ -147,11 +146,11 @@ cdef class Win:
         """
         cdef _p_msg_rma msg = \
              message_rma_get(origin, target_rank, target)
-        with nogil:
-            CHKERR( MPI_Get(msg.oaddr, msg.ocount, msg.otype,
-                            target_rank,
-                            msg.tdisp, msg.tcount, msg.ttype,
-                            self.ob_mpi) )
+        with nogil: CHKERR( MPI_Get(
+            msg.oaddr, msg.ocount, msg.otype,
+            target_rank,
+            msg.tdisp, msg.tcount, msg.ttype,
+            self.ob_mpi) )
 
     # [6.3.4] Accumulate Functions
     # ----------------------------
@@ -165,12 +164,12 @@ cdef class Win:
         cdef _p_msg_rma msg = \
              message_rma_acc(origin, target_rank, target)
         cdef MPI_Op cop = MPI_SUM
-        if op is not None: cop = (<Op?>op).ob_mpi
-        with nogil:
-            CHKERR( MPI_Accumulate(msg.oaddr, msg.ocount, msg.otype,
-                                   target_rank,
-                                   msg.tdisp, msg.tcount, msg.ttype,
-                                   cop, self.ob_mpi) )
+        if op is not None: cop = op.ob_mpi
+        with nogil: CHKERR( MPI_Accumulate(
+            msg.oaddr, msg.ocount, msg.otype,
+            target_rank,
+            msg.tdisp, msg.tcount, msg.ttype,
+            cop, self.ob_mpi) )
 
     # [6.4] Synchronization Calls
     # ---------------------------
@@ -182,8 +181,7 @@ cdef class Win:
         """
         Perform an MPI fence synchronization on a window
         """
-        with nogil:
-            CHKERR( MPI_Win_fence(assertion, self.ob_mpi) )
+        with nogil: CHKERR( MPI_Win_fence(assertion, self.ob_mpi) )
 
     # [6.4.2] General Active Target Synchronization
     # ---------------------------------------------
@@ -192,41 +190,32 @@ cdef class Win:
         """
         Start an RMA access epoch for MPI
         """
-        with nogil:
-            CHKERR( MPI_Win_start(group.ob_mpi,
-                                  assertion,
-                                  self.ob_mpi) )
+        with nogil: CHKERR( MPI_Win_start(group.ob_mpi, assertion, self.ob_mpi) )
 
     def Complete(self):
         """
         Completes an RMA operations begun after an `Win.Start()`
         """
-        with nogil:
-            CHKERR( MPI_Win_complete(self.ob_mpi) )
+        with nogil: CHKERR( MPI_Win_complete(self.ob_mpi) )
 
     def Post(self, Group group not None, int assertion=0):
         """
         Start an RMA exposure epoch
         """
-        with nogil:
-            CHKERR( MPI_Win_post(group.ob_mpi,
-                                 assertion,
-                                 self.ob_mpi) )
+        with nogil: CHKERR( MPI_Win_post(group.ob_mpi, assertion, self.ob_mpi) )
 
     def Wait(self):
         """
         Complete an RMA exposure epoch begun with `Win.Post()`
         """
-        with nogil:
-            CHKERR( MPI_Win_wait(self.ob_mpi) )
+        with nogil: CHKERR( MPI_Win_wait(self.ob_mpi) )
 
     def Test(self):
         """
         Test whether an RMA exposure epoch has completed
         """
         cdef bint flag = 0
-        with nogil:
-            CHKERR( MPI_Win_test(self.ob_mpi, &flag) )
+        with nogil: CHKERR( MPI_Win_test(self.ob_mpi, &flag) )
         return flag
 
     # [6.4.3] Lock
@@ -236,16 +225,13 @@ cdef class Win:
         """
         Begin an RMA access epoch at the target process
         """
-        with nogil:
-            CHKERR( MPI_Win_lock(lock_type, rank,
-                                 assertion, self.ob_mpi) )
+        with nogil: CHKERR( MPI_Win_lock(lock_type, rank, assertion, self.ob_mpi) )
 
     def Unlock(self, int rank):
         """
         Complete an RMA access epoch at the target process
         """
-        with nogil:
-            CHKERR( MPI_Win_unlock(rank, self.ob_mpi) )
+        with nogil: CHKERR( MPI_Win_unlock(rank, self.ob_mpi) )
 
     # [6.6] Error Handling
     # --------------------
