@@ -1,11 +1,11 @@
 import mpi4py.MPI as MPI
-import numpy as N
+import numpy
 
 # transpose a matrix a into b
 
-a = N.empty((100, 100), dtype=float, order='fortran')
-b = N.empty((100, 100), dtype=float, order='fortran')
-a.flat = N.arange(a.size, dtype=float)
+a = numpy.empty((100, 100), dtype=float, order='fortran')
+b = numpy.empty((100, 100), dtype=float, order='fortran')
+a.flat = numpy.arange(a.size, dtype=float)
 
 lb, sizeofdouble = MPI.DOUBLE.Get_extent()
 
@@ -27,7 +27,7 @@ myrank = MPI.COMM_WORLD.Get_rank()
 status = MPI.Status()
 MPI.COMM_WORLD.Sendrecv(abuf, myrank, 0, bbuf, myrank, 0, status)
 
-assert N.allclose(a, b.transpose())
+assert numpy.allclose(a, b.transpose())
 assert status.Get_count(xpose) == 1
 assert status.Get_count(MPI.DOUBLE) == b.size
 

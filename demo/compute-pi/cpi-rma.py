@@ -1,4 +1,4 @@
-#!/bin/env python
+#! /usr/bin/env python
 """
 Parallel PI computation using Remote Memory Access (RMA)
 within Python objects exposing memory buffers (requires NumPy).

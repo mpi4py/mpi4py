@@ -1,18 +1,14 @@
-.PHONY: default all build test clean
+.PHONY: build test clean
 
 PYTHON  = python
 
-
-default: build
-all: test
-
-
-F2PY = f2py --fcompiler=gnu95
+F2PY = f2py
+F2PY_FC = --fcompiler=gnu95
 MPIF90 = mpif90
-SO = .so
+SO = ${shell ${PYTHON} -c 'import imp; print (imp.get_suffixes()[0][0])'}
 build: helloworld${SO}
 helloworld${SO}: helloworld.f90
-	${F2PY} --f90exec=${MPIF90} -m helloworld -c $<
+	${F2PY} ${F2PY_FC} --f90exec=${MPIF90} -m helloworld -c $<
 
 
 MPIEXEC = mpiexec
