@@ -818,8 +818,8 @@ cdef class Intracomm(Comm):
         cdef int *iedges = NULL
         cdef tmp2 = asarray_int(edges, &iedges, nedges)
         # extension: 'standard' adjacency arrays
-        if index[0]==0 and index[nnodes-1]==nedges:
-            nnodes -= 1; index += 1;
+        if iindex[0]==0 and iindex[nnodes-1]==nedges:
+            nnodes -= 1; iindex += 1;
         #
         cdef Graphcomm comm = Graphcomm()
         with nogil: CHKERR( MPI_Graph_create(
@@ -1306,8 +1306,8 @@ cdef class Graphcomm(Intracomm):
         cdef int *iedges = NULL
         cdef tmp2 = asarray_int(edges, &iedges, nedges)
         # extension: accept more 'standard' adjacency arrays
-        if index[0]==0 and index[nnodes-1]==nedges:
-            nnodes -= 1; index += 1;
+        if iindex[0]==0 and iindex[nnodes-1]==nedges:
+            nnodes -= 1; iindex += 1;
         cdef int rank = MPI_PROC_NULL
         with nogil: CHKERR( MPI_Graph_map(
             self.ob_mpi, nnodes, iindex, iedges, &rank) )
