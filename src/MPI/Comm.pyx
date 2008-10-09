@@ -195,7 +195,7 @@ cdef class Comm:
         cdef Request request = Request()
         with nogil: CHKERR( MPI_Isend(
             smsg.buf, smsg.count, smsg.dtype,
-            dest, tag, self.ob_mpi, request.ob_mpi) )
+            dest, tag, self.ob_mpi, &request.ob_mpi) )
         return request
 
     def Irecv(self, buf, int source=0, int tag=0):
