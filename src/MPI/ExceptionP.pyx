@@ -58,7 +58,7 @@ class Exception(RuntimeError):
         errorcode = self.ob_mpi
         return errorcode
 
-    error_code = property(Get_error_code, doc=mpmistr("error code"))
+    error_code = property(Get_error_code, doc=mpistr("error code"))
 
     def Get_error_class(self):
         """
