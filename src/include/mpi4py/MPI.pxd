@@ -46,64 +46,64 @@ cdef extern from "mpi.h":
 ctypedef MPI_Aint   Aint
 ctypedef MPI_Offset Offset
 
-cdef public api class Status [type PyMPIStatus_Type, object PyMPIStatusObject]:
+ctypedef public api class Status [type PyMPIStatus_Type, object PyMPIStatusObject]:
     cdef MPI_Status ob_mpi
     cdef int        flags
 
-cdef public api class Datatype [type PyMPIDatatype_Type, object PyMPIDatatypeObject]:
+ctypedef public api class Datatype [type PyMPIDatatype_Type, object PyMPIDatatypeObject]:
     cdef MPI_Datatype ob_mpi
     cdef int          flags
 
-cdef public api class Request [type PyMPIRequest_Type, object PyMPIRequestObject]:
+ctypedef public api class Request [type PyMPIRequest_Type, object PyMPIRequestObject]:
     cdef MPI_Request ob_mpi
     cdef int         flags
 
-cdef public api class Prequest(Request) [type PyMPIPrequest_Type, object PyMPIPrequestObject]:
+ctypedef public api class Prequest(Request) [type PyMPIPrequest_Type, object PyMPIPrequestObject]:
     pass
 
-cdef public api class Grequest(Request) [type PyMPIGrequest_Type, object PyMPIGrequestObject]:
+ctypedef public api class Grequest(Request) [type PyMPIGrequest_Type, object PyMPIGrequestObject]:
     cdef MPI_Request ob_grequest
 
-cdef public api class Op [type PyMPIOp_Type, object PyMPIOpObject]:
+ctypedef public api class Op [type PyMPIOp_Type, object PyMPIOpObject]:
     cdef MPI_Op ob_mpi
     cdef int    flags
     cdef object (*ob_func)(object, object)
     cdef object ob_callable
     cdef bint   ob_commute
 
-cdef public api class Group [type PyMPIGroup_Type, object PyMPIGroupObject]:
+ctypedef public api class Group [type PyMPIGroup_Type, object PyMPIGroupObject]:
     cdef MPI_Group ob_mpi
     cdef int       flags
 
-cdef public api class Info [type PyMPIInfo_Type, object PyMPIInfoObject]:
+ctypedef public api class Info [type PyMPIInfo_Type, object PyMPIInfoObject]:
     cdef MPI_Info ob_mpi
     cdef int      flags
 
-cdef public api class Errhandler [type PyMPIErrhandler_Type, object PyMPIErrhandlerObject]:
+ctypedef public api class Errhandler [type PyMPIErrhandler_Type, object PyMPIErrhandlerObject]:
     cdef MPI_Errhandler ob_mpi
     cdef int            flags
 
-cdef public api class Comm [type PyMPIComm_Type, object PyMPICommObject]:
+ctypedef public api class Comm [type PyMPIComm_Type, object PyMPICommObject]:
     cdef MPI_Comm ob_mpi
     cdef int      flags
 
-cdef public api class Intracomm(Comm) [type PyMPIIntracomm_Type, object PyMPIIntracommObject]:
+ctypedef public api class Intracomm(Comm) [type PyMPIIntracomm_Type, object PyMPIIntracommObject]:
     pass
 
-cdef public api class Cartcomm(Intracomm) [type PyMPICartcomm_Type, object PyMPICartcommObject]:
+ctypedef public api class Cartcomm(Intracomm) [type PyMPICartcomm_Type, object PyMPICartcommObject]:
     pass
 
-cdef public api class Graphcomm(Intracomm) [type PyMPIGraphcomm_Type, object PyMPIGraphcommObject]:
+ctypedef public api class Graphcomm(Intracomm) [type PyMPIGraphcomm_Type, object PyMPIGraphcommObject]:
     pass
 
-cdef public api class Intercomm(Comm) [type PyMPIIntercomm_Type, object PyMPIIntercommObject]:
+ctypedef public api class Intercomm(Comm) [type PyMPIIntercomm_Type, object PyMPIIntercommObject]:
     pass
 
-cdef public api class Win [type PyMPIWin_Type, object PyMPIWinObject]:
+ctypedef public api class Win [type PyMPIWin_Type, object PyMPIWinObject]:
     cdef MPI_Win ob_mpi
     cdef int     flags
 
-cdef public api class File [type PyMPIFile_Type, object PyMPIFileObject]:
+ctypedef public api class File [type PyMPIFile_Type, object PyMPIFileObject]:
     cdef MPI_File ob_mpi
     cdef int      flags
 
