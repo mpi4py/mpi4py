@@ -2640,6 +2640,24 @@ typedef int (MPI_Win_delete_attr_function)(MPI_Win,int,void*,void*);
 #endif
 #endif
 
+#ifdef PyMPI_MISSING_MPI_DATAREP_CONVERSION_FUNCTION
+#if !defined(MPI_Datarep_conversion_function)
+typedef int (MPI_Datarep_conversion_function)(void*,MPI_Datatype,int,void*,MPI_Offset,void*);
+#endif
+#endif
+
+#ifdef PyMPI_MISSING_MPI_DATAREP_EXTENT_FUNCTION
+#if !defined(MPI_Datarep_extent_function)
+typedef int (MPI_Datarep_extent_function)(MPI_Datatype,MPI_Aint*,void*);
+#endif
+#endif
+
+#ifdef PyMPI_MISSING_MPI_REGISTER_DATAREP
+#if !defined(MPI_Register_datarep)
+#define MPI_Register_datarep(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_REGISTER_DATAREP",a1,a2,a3,a4,a5)
+#endif
+#endif
+
 #ifdef PyMPI_MISSING_MPI_ERRHANDLER_NULL
 #if !defined(MPI_ERRHANDLER_NULL)
 #define MPI_ERRHANDLER_NULL ((MPI_Errhandler)0)

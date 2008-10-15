@@ -583,6 +583,10 @@ cdef extern from "mpi.h" nogil:
     ctypedef void MPI_File_errhandler_fn(MPI_File*,int*,...)
     int MPI_File_create_errhandler(MPI_File_errhandler_fn*, MPI_Errhandler*)
 
+    ctypedef int MPI_Datarep_conversion_function(void*,MPI_Datatype,int,void*,MPI_Offset,void*)
+    ctypedef int MPI_Datarep_extent_function(MPI_Datatype,MPI_Aint*,void*)
+    int MPI_Register_datarep(char[], MPI_Datarep_conversion_function*, MPI_Datarep_conversion_function*, MPI_Datarep_extent_function*, void*)
+
     #-----------------------------------------------------------------
 
     MPI_Errhandler MPI_ERRHANDLER_NULL   #:= 0
