@@ -1,18 +1,13 @@
 
 # --------------------------------------------------------------------
 
-cdef extern from "stdio.h":
-    ctypedef struct FILE
-    FILE *stderr
-    int fprintf(FILE *, char *, ...)
-    int fflush(FILE *)
-
 cdef extern from "Python.h":
     int Py_IsInitialized() nogil
     Py_ssize_t Py_REFCNT(object)
     void Py_INCREF(object) except *
     void Py_DECREF(object) except *
-    int Py_AtExit(void (*)()) except -1
+    int Py_AtExit(void (*)())
+    void PySys_WriteStderr(char*,...)
 
 # --------------------------------------------------------------------
 
@@ -86,10 +81,9 @@ cdef void _atexit():
     global mpi_is_owned
     if mpi_is_owned:
         ierr = MPI_Finalize()
-        if ierr: # We MUST NOT issue Python API calls at this point
-            fflush(stderr)
-            fprintf(stderr, "MPI_Finalize() failed [error code: %d]\n", ierr)
-            fflush(stderr)
+        if ierr:
+            PySys_WriteStderr("MPI_Finalize() failed "
+                              "[error code: %d]\n", ierr)
 
 cdef inline int _init1() except -1:
     global comm_self_eh, comm_world_eh
@@ -126,7 +120,9 @@ cdef inline int _init1() except -1:
     mpi_is_owned  = 1
     mpi_is_active = 1
     # then finalize it when Python process exits
-    Py_AtExit(_atexit)
+    if Py_AtExit(_atexit) < 0:
+        PySys_WriteStderr("warning: could not register"
+                          "MPI_Finalize() with Py_AtExit()")
     return 0
 
 # --------------------------------------------------------------------
