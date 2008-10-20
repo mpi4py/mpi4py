@@ -2,7 +2,7 @@ import sys, os
 import unittest
 
 try: # use the 'installed' mpi4py
-    from mpi4py import MPI
+    import mpi4py
 except ImportError: # or the no yet installed mpi4py
     from distutils.util import get_platform
     plat_specifier = ".%s-%s" % (get_platform(), sys.version[0:3])
@@ -11,9 +11,11 @@ except ImportError: # or the no yet installed mpi4py
                         'build', 'lib' + plat_specifier)
     path = os.path.normpath(path)
     sys.path.insert(0, path)
-    from mpi4py import MPI
-    sys.stderr.write("mpi4py imported from '%s'\n" % path)
-    sys.stderr.flush()
+    import mpi4py
+
+from mpi4py import MPI
+sys.stderr.write("mpi4py imported from '%s'\n" % mpi4py.__path__[0])
+sys.stderr.flush()
 
 # make sure we are using the Cython-based version
 assert os.path.splitext(MPI.__file__)[1] not in ('.py', '.pyc', '.pyo')
