@@ -150,5 +150,9 @@
 #define PyMPI_MISSING_MPI_WIN_C2F 1
 #define PyMPI_MISSING_MPI_WIN_F2C 1
 
+#ifndef ROMIO_VERSION
+#include "mpich1io.h"
+#endif /* !ROMIO_VERSION */
+
 #endif /* !MPICH_NAME==1 */
 #endif /* !PyMPI_CONFIG_MPICH1_H */
