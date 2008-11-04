@@ -31,8 +31,7 @@ cdef class Comm:
         Access the group associated with a communicator
         """
         cdef Group group = Group()
-        with nogil: CHKERR( MPI_Comm_group(
-            self.ob_mpi, &group.ob_mpi) )
+        CHKERR( MPI_Comm_group(self.ob_mpi, &group.ob_mpi) )
         return group
 
     property group:
@@ -48,8 +47,7 @@ cdef class Comm:
         Return the size of a communicator
         """
         cdef int size = -1
-        with nogil: CHKERR( MPI_Comm_size(
-            self.ob_mpi, &size) )
+        CHKERR( MPI_Comm_size(self.ob_mpi, &size) )
         return size
 
     property size:
@@ -62,8 +60,7 @@ cdef class Comm:
         Return the rank of this process in a communicator
         """
         cdef int rank = MPI_PROC_NULL
-        with nogil: CHKERR( MPI_Comm_rank(
-            self.ob_mpi, &rank) )
+        CHKERR( MPI_Comm_rank(self.ob_mpi, &rank) )
         return rank
 
     property rank:
@@ -77,8 +74,7 @@ cdef class Comm:
         Compare two communicators
         """
         cdef int flag = MPI_UNEQUAL
-        with nogil: CHKERR( MPI_Comm_compare(
-            comm1.ob_mpi, comm2.ob_mpi, &flag) )
+        CHKERR( MPI_Comm_compare(comm1.ob_mpi, comm2.ob_mpi, &flag) )
         return flag
 
     # Communicator Constructors
@@ -545,8 +541,7 @@ cdef class Comm:
         Test to see if a comm is an intercommunicator
         """
         cdef bint flag = 0
-        with nogil: CHKERR( MPI_Comm_test_inter(
-            self.ob_mpi, &flag) )
+        CHKERR( MPI_Comm_test_inter(self.ob_mpi, &flag) )
         return flag
 
     property is_inter:
@@ -571,8 +566,7 @@ cdef class Comm:
         associated with a communicator
         """
         cdef int topo = MPI_UNDEFINED
-        with nogil: CHKERR( MPI_Topo_test(
-            self.ob_mpi, &topo) )
+        CHKERR( MPI_Topo_test(self.ob_mpi, &topo) )
         return topo
 
     property topology:
@@ -1034,9 +1028,8 @@ cdef class Cartcomm(Intracomm):
         cdef int *icoords = NULL
         cdef tmp3 = newarray_int(ndim, &icoords)
         #
-        with nogil: CHKERR( MPI_Cart_get(
-            self.ob_mpi, ndim,
-            idims, iperiods, icoords) )
+        CHKERR( MPI_Cart_get(self.ob_mpi, ndim,
+                             idims, iperiods, icoords) )
         cdef int i = 0
         dims    = [idims[i]    for i from 0 <= i < ndim]
         periods = [iperiods[i] for i from 0 <= i < ndim]
@@ -1077,8 +1070,7 @@ cdef class Cartcomm(Intracomm):
         cdef int *icoords = NULL
         cdef tmp = asarray_int(coords, &icoords, ndim)
         cdef int rank = MPI_PROC_NULL
-        with nogil: CHKERR( MPI_Cart_rank(
-            self.ob_mpi, icoords, &rank) )
+        CHKERR( MPI_Cart_rank(self.ob_mpi, icoords, &rank) )
         return rank
 
     def Get_coords(self, int rank):
@@ -1090,8 +1082,7 @@ cdef class Cartcomm(Intracomm):
         cdef int *icoords = NULL
         cdef tmp = newarray_int(ndim, &icoords)
         #
-        with nogil: CHKERR( MPI_Cart_coords(
-            self.ob_mpi, rank, ndim, icoords) )
+        CHKERR( MPI_Cart_coords(self.ob_mpi, rank, ndim, icoords) )
         cdef int i = 0
         coords  = [icoords[i] for i from 0 <= i < ndim]
         return coords
@@ -1105,9 +1096,8 @@ cdef class Cartcomm(Intracomm):
         for data shifting with Comm.Sendrecv()
         """
         cdef int source = MPI_PROC_NULL, dest = MPI_PROC_NULL
-        with nogil: CHKERR( MPI_Cart_shift(
-            self.ob_mpi, direction, disp,
-            &source, &dest) )
+        CHKERR( MPI_Cart_shift(self.ob_mpi, direction, disp,
+                               &source, &dest) )
         return (source, dest)
 
     # Cartesian Partition Function
@@ -1146,9 +1136,8 @@ cdef class Cartcomm(Intracomm):
         cdef tmp2 = asarray_int(periods, &iperiods, ndims)
         cdef int rank = MPI_PROC_NULL
         #
-        with nogil: CHKERR( MPI_Cart_map(
-            self.ob_mpi, ndims,
-            idims, iperiods, &rank) )
+        CHKERR( MPI_Cart_map(self.ob_mpi, ndims,
+                             idims, iperiods, &rank) )
         return rank
 
 # Cartesian Convenience Function
@@ -1162,8 +1151,7 @@ def Compute_dims(int nnodes, dims):
     try: ndims = len(dims)
     except: ndims = dims; dims = [0] * ndims
     cdef tmp = asarray_int(dims, &idims, ndims)
-    with nogil: CHKERR( MPI_Dims_create(
-        nnodes, ndims, idims) )
+    CHKERR( MPI_Dims_create(nnodes, ndims, idims) )
     cdef int i = 0
     return [idims[i] for i from 0 <= i < ndims]
 
@@ -1194,8 +1182,7 @@ cdef class Graphcomm(Intracomm):
         Return the number of nodes and edges
         """
         cdef int nnodes = 0, nedges = 0
-        with nogil: CHKERR( MPI_Graphdims_get(
-            self.ob_mpi, &nnodes, &nedges) )
+        CHKERR( MPI_Graphdims_get(self.ob_mpi, &nnodes, &nedges) )
         return (nnodes, nedges)
 
     property dims:
@@ -1224,8 +1211,9 @@ cdef class Graphcomm(Intracomm):
         cdef int *iedges = NULL
         cdef tmp2 = newarray_int(nedges, &iedges)
         #
-        with nogil: CHKERR( MPI_Graph_get(
-            self.ob_mpi, nindex, nedges, iindex, iedges) )
+        CHKERR( MPI_Graph_get(self.ob_mpi,
+                              nindex, nedges,
+                              iindex, iedges) )
         #
         cdef int i = 0
         index = [iindex[i] for i from 0 <= i < nindex]
@@ -1258,8 +1246,8 @@ cdef class Graphcomm(Intracomm):
         Return number of neighbors of a process
         """
         cdef int nneighbors = 0
-        with nogil: CHKERR( MPI_Graph_neighbors_count(
-            self.ob_mpi, rank, &nneighbors) )
+        CHKERR( MPI_Graph_neighbors_count(self.ob_mpi,
+                                          rank, &nneighbors) )
         return nneighbors
 
     property nneighbors:
@@ -1278,8 +1266,8 @@ cdef class Graphcomm(Intracomm):
         cdef int *ineighbors = NULL
         cdef tmp = newarray_int(nneighbors, &ineighbors)
         #
-        with nogil: CHKERR( MPI_Graph_neighbors(
-            self.ob_mpi, rank, nneighbors, ineighbors) )
+        CHKERR( MPI_Graph_neighbors(self.ob_mpi, rank,
+                                    nneighbors, ineighbors) )
         #
         cdef int i = 0
         neighbors = [ineighbors[i] for i from 0 <= i < nneighbors]
@@ -1309,8 +1297,8 @@ cdef class Graphcomm(Intracomm):
         if iindex[0]==0 and iindex[nnodes-1]==nedges:
             nnodes -= 1; iindex += 1;
         cdef int rank = MPI_PROC_NULL
-        with nogil: CHKERR( MPI_Graph_map(
-            self.ob_mpi, nnodes, iindex, iedges, &rank) )
+        CHKERR( MPI_Graph_map(self.ob_mpi, nnodes,
+                              iindex, iedges, &rank) )
         return rank
 
 
@@ -1329,8 +1317,7 @@ cdef class Intercomm(Comm):
         with the inter-communicator
         """
         cdef Group group = Group()
-        with nogil: CHKERR( MPI_Comm_remote_group(
-            self.ob_mpi, &group.ob_mpi) )
+        CHKERR( MPI_Comm_remote_group(self.ob_mpi, &group.ob_mpi) )
         return group
 
     property remote_group:
@@ -1343,8 +1330,7 @@ cdef class Intercomm(Comm):
         Intercommunicator remote size
         """
         cdef int size = -1
-        with nogil: CHKERR( MPI_Comm_remote_size(
-            self.ob_mpi, &size) )
+        CHKERR( MPI_Comm_remote_size(self.ob_mpi, &size) )
         return size
 
     property remote_size:
