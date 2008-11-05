@@ -68,7 +68,11 @@ cdef inline object asarray_Status(object sequence, MPI_Status **p, Py_ssize_t n)
 cdef inline int restore_Status(object sequence, MPI_Status **p, Py_ssize_t n)  except -1:
      if sequence is None: return 0
      cdef Py_ssize_t i = 0, m = n - len(sequence)
-     for i from 0 <= i < m: sequence.append(Status())
+     if m > 0:
+          if isinstance(sequence, list):
+               sequence += [Status() for i from 0 <= i < m]
+          else:
+               n = n - m
      cdef MPI_Status *array = p[0]
      for i from 0 <= i < n: (<Status?>sequence[i]).ob_mpi = array[i]
      return 0
