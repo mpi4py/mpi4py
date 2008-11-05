@@ -131,34 +131,6 @@ cdef class Info:
                                       &dummy, &haskey) )
         return haskey
 
-    def keys(self):
-        """info keys"""
-        if not self: return []
-        cdef int nkeys = self.Get_nkeys()
-        return [self.Get_nthkey(k) for k from 0 <= k < nkeys]
-
-    def values(self):
-        """info values"""
-        if not self: return []
-        cdef int nkeys = self.Get_nkeys()
-        values = []
-        for k from 0 <= k < nkeys:
-            key = self.Get_nthkey(k)
-            val, _ = self.Get(key)
-            values.append(val)
-        return values
-
-    def items(self):
-        """info items"""
-        if not self: return []
-        cdef int nkeys = self.Get_nkeys()
-        items = []
-        for k from 0 <= k < nkeys:
-            key = self.Get_nthkey(k)
-            val, _ = self.Get(key)
-            items.append((key, val))
-        return items
-
     def __iter__(self):
         return iter(self.keys())
 
@@ -176,6 +148,48 @@ cdef class Info:
         if not self: raise KeyError(key)
         if key not in self: raise KeyError(key)
         self.Delete(key)
+
+    def keys(self):
+        """info keys"""
+        if not self: return []
+        cdef int nkeys = self.Get_nkeys()
+        cdef list keys = []
+        for k from 0 <= k < nkeys:
+            key = self.Get_nthkey(k)
+            keys.append(key)
+        return keys
+
+    def values(self):
+        """info values"""
+        if not self: return []
+        cdef int nkeys = self.Get_nkeys()
+        cdef list values = []
+        for k from 0 <= k < nkeys:
+            key = self.Get_nthkey(k)
+            val, _ = self.Get(key)
+            values.append(val)
+        return values
+
+    def items(self):
+        """info items"""
+        if not self: return []
+        cdef int nkeys = self.Get_nkeys()
+        cdef list items = []
+        for k from 0 <= k < nkeys:
+            key = self.Get_nthkey(k)
+            val, _ = self.Get(key)
+            items.append((key, val))
+        return items
+
+    def clear(self):
+        """
+        Remove all (key,value) pair from info
+        """
+        if not self: return None
+        cdef int k = 0, nkeys = self.Get_nkeys()
+        for k from 0 <= k < nkeys:
+            key = self.Get_nthkey(0)
+            self.Delete(key)
 
 
 
