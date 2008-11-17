@@ -431,8 +431,12 @@ class config(cmd_config.config):
                 '  return 0;',
                 '}']
         body = '\n'.join(body) + '\n'
-        return self.try_link(body, headers=['mpi.h'], lang=lang,
-                             include_dirs=self.include_dirs)
+        return self.try_link(body, 
+                             headers=['mpi.h'],
+                             include_dirs=self.include_dirs,
+                             libraries=self.libraries,
+                             library_dirs=self.library_dirs,
+                             lang=lang)
 
 
 class build(cmd_build.build):
