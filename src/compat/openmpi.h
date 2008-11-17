@@ -1,6 +1,5 @@
 #ifndef PyMPI_COMPAT_OPENMPI_H
 #define PyMPI_COMPAT_OPENMPI_H
-#if defined(OPEN_MPI) 
 
 /* ---------------------------------------------------------------- */
 
@@ -183,5 +182,4 @@ static int PyMPI_OPENMPI_File_set_errhandler(MPI_File file, MPI_Errhandler errha
 
 /* ---------------------------------------------------------------- */
 
-#endif /* !OPEN_MPI */
 #endif /* !PyMPI_COMPAT_OPENMPI_H */

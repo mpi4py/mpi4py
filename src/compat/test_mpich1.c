@@ -2,20 +2,7 @@
 
 #include <mpi.h>
 
-#ifndef MPICH_NAME
-#define MPICH_NAME 1
 #define ROMIO 1
-#elif MPICH_NAME != 1
-#undef MPICH_NAME
-#undef ROMIO
-#define MPICH_NAME 1
-#define ROMIO 1
-#endif
-
-#ifndef Py_PYTHON_H
-#define Py_PYTHON_H
-#define Py_GetProgramName() 0
-#endif
 
 #include "mpich1.h"
 

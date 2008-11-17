@@ -2,15 +2,6 @@
 
 #include <mpi.h>
 
-#ifndef DEINO_MPI
-#define DEINO_MPI
-#endif
-
-#ifndef Py_PYTHON_H
-#define Py_PYTHON_H
-#define Py_GetProgramName() 0
-#endif
-
 #include "deinompi.h"
 
 #if !defined(MPI_Init)

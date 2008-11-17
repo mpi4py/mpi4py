@@ -1,9 +1,7 @@
 /* this is just for testing */
 #include <mpi.h>
 
-#ifndef LAM_MPI
-#define LAM_MPI
-#endif
+#define LAM_WANT_ROMIO 1
 
 #include "lammpi.h"
 

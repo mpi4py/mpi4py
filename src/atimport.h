@@ -14,7 +14,7 @@
 /* XXX describe */
 #if defined(PyMPI_HAVE_CONFIG_H)
 #include "config.h"
-#elif defined(MPICH2) && !defined(DEINO_MPI)
+#elif defined(MPICH2)
 #include "config/mpich2.h"
 #elif defined(OPEN_MPI)
 #include "config/openmpi.h"
@@ -33,7 +33,7 @@
 #include "compat/anympi.h"
 
 /* XXX describe */
-#if   defined(MPICH2) && !defined(DEINO_MPI)
+#if   defined(MPICH2)
 #include "compat/mpich2.h"
 #elif defined(OPEN_MPI)
 #include "compat/openmpi.h"

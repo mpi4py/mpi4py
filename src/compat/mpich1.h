@@ -1,6 +1,5 @@
 #ifndef PyMPI_COMPAT_MPICH1_H
 #define PyMPI_COMPAT_MPICH1_H
-#if defined(MPICH_NAME) && MPICH_NAME==1
 
 /* ---------------------------------------------------------------- */
 
@@ -156,5 +155,4 @@ static int PyMPI_MPICH1_MPI_File_set_errhandler(MPI_File file,
 
 /* ---------------------------------------------------------------- */
 
-#endif /* !MPICH_NAME==1 */
 #endif /* !PyMPI_COMPAT_MPICH1_H */

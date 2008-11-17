@@ -17,7 +17,6 @@
 #define PyMPI_MISSING_MPI_ALLOC_MEM
 #define PyMPI_MISSING_MPI_FREE_MEM
 
-#include <stdlib.h>
 #include "anympi.h"
 
 #if !defined(MPI_VERSION)

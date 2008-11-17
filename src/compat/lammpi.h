@@ -1,6 +1,5 @@
 #ifndef PyMPI_COMPAT_LAMMPI_H
 #define PyMPI_COMPAT_LAMMPI_H
-#if defined(LAM_MPI)
 
 /* ---------------------------------------------------------------- */
 
@@ -344,5 +343,4 @@ static int PyMPI_LAMMPI_MPI_File_set_errhandler(MPI_File file,
 
 /* ---------------------------------------------------------------- */
 
-#endif /* !LAM_MPI */
 #endif /* !PyMPI_COMPAT_LAMMPI_H */

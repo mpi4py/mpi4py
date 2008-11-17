@@ -34,4 +34,4 @@ $PYTHON setup.py install --home=$BUILDDIR
 export PYTHONPATH=$BUILDDIR/lib/python:$PYTHONPATH
 $MPISTARTUP
 $PYTHON test/runalltest.py
-$MPISHUTDOWN
+sleep 3 && $MPISHUTDOWN
