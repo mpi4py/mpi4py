@@ -115,9 +115,11 @@ if _name == 'Open MPI':
     from sys import byteorder as sys_byteorder
     if sys_byteorder == 'little':
         TestPackExternalBase.byteswap = True
-if _name == 'MPICH2':
+elif _name == 'MPICH2':
     TestPackExternalBase.skipdtype = ['f', 'd']
-    pass
+elif _name == 'DeinoMPI':
+    TestPackExternalBase.skipdtype = ['f', 'd']
+
 
 
 if __name__ == '__main__':

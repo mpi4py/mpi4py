@@ -378,6 +378,11 @@ elif _name == "MPICH2":
         TestCCOObjInterDupDup.testBarrier   = _SKIPPED
         TestCCOObjInterDupDup.testAllgather = _SKIPPED
         TestCCOObjInterDupDup.testAllreduce = _SKIPPED
+elif _name == "DeinoMPI":
+    def _SKIPPED(*args, **kwargs): pass
+    TestCCOObjInterDupDup.testBarrier   = _SKIPPED
+    TestCCOObjInterDupDup.testAllgather = _SKIPPED
+    TestCCOObjInterDupDup.testAllreduce = _SKIPPED
 elif MPI.ROOT == MPI.PROC_NULL:
     del TestCCOObjInterBase
     del TestCCOObjInter

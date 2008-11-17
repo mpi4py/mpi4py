@@ -98,7 +98,7 @@ if _SKIP_TEST:
 elif _name == 'MPICH2':
     del TestSpawnWorld
     del TestSpawnWorldMany
-    
+
 if __name__ == '__main__':
     unittest.main()
 

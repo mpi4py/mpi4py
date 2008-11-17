@@ -186,7 +186,11 @@ def _config_parser(section, filenames, raw=False, vars=None):
                    'library_dirs',
                    'runtime_library_dirs',):
             pathsep = os.path.pathsep
-            config_info[k] = [p.strip() for p in v.split(pathsep)]
+            pathlist = [p.strip() for p in v.split(pathsep)]
+            expanduser = os.path.expanduser
+            expandvars = os.path.expandvars
+            config_info[k] = [expanduser(expandvars(p))
+                              for p in pathlist if p]
         elif k == 'libraries':
             config_info[k] = [l.strip() for l in v.split()]
         elif k in ('extra_compile_args',
