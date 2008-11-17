@@ -10,7 +10,7 @@ static int MPI_Get_vendor(const char **vendor_name,
   int major=0, minor=0, micro=0;
 
   /* MPICH2 */
-#if defined(MPICH_NAME) && MPICH_NAME==2
+#if defined(MPICH2)
   name = "MPICH2";
   #if defined(MPICH2_VERSION)
   sscanf(MPICH2_VERSION,"%d.%d.%d",&major,&minor,&micro);

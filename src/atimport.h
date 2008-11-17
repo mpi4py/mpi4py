@@ -6,10 +6,15 @@
 
 #include "mpi.h"
 
+/* Hack for DeinoMPI */
+#if defined(DEINO_MPI)
+#undef MPICH2
+#endif
+
 /* XXX describe */
 #if defined(PyMPI_HAVE_CONFIG_H)
 #include "config.h"
-#elif defined(MPICH_NAME) && MPICH_NAME==2
+#elif defined(MPICH2) && !defined(DEINO_MPI)
 #include "config/mpich2.h"
 #elif defined(OPEN_MPI)
 #include "config/openmpi.h"
@@ -26,7 +31,9 @@
 
 /* XXX describe */
 #include "compat/anympi.h"
-#if   defined(MPICH_NAME) && MPICH_NAME==2
+
+/* XXX describe */
+#if   defined(MPICH2) && !defined(DEINO_MPI)
 #include "compat/mpich2.h"
 #elif defined(OPEN_MPI)
 #include "compat/openmpi.h"

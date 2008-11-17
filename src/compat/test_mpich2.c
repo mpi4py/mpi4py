@@ -2,11 +2,8 @@
 
 #include <mpi.h>
 
-#ifndef MPICH_NAME
-#define MPICH_NAME 2
-#elif MPICH_NAME != 2
-#undef MPICH_NAME
-#define MPICH_NAME 2
+#ifndef MPICH2
+#define MPICH2 1
 #endif
 
 #include "mpich2.h"

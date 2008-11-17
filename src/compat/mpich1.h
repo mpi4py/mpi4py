@@ -4,10 +4,6 @@
 
 /* ---------------------------------------------------------------- */
 
-#ifndef Py_PYTHON_H
-#error "this header requires <Python.h> included"
-#endif
-
 /* this does not actually work in parallel, */
 /* but avoids a nasty segfault.             */
 
@@ -18,8 +14,10 @@ static char  *PyMPI_MPICH1_args[2] = {0, 0};
 static int PyMPI_MPICH1_MPI_Init(int *argc, char ***argv)
 {
   if (argc==(int *)0 || argv==(char ***)0) {
+#ifdef Py_PYTHON_H
     PyMPI_MPICH1_args[0] = Py_GetProgramName();
     PyMPI_MPICH1_argc = 1;
+#endif
     PyMPI_MPICH1_argv = PyMPI_MPICH1_args;
     argc = &PyMPI_MPICH1_argc;
     argv = &PyMPI_MPICH1_argv;
@@ -33,8 +31,10 @@ static int PyMPI_MPICH1_MPI_Init_thread(int *argc, char ***argv,
 					int required, int *provided)
 {
   if (argc==(int *)0 || argv==(char ***)0) {
+#ifdef Py_PYTHON_H
     PyMPI_MPICH1_args[0] = Py_GetProgramName();
     PyMPI_MPICH1_argc = 1;
+#endif
     PyMPI_MPICH1_argv = PyMPI_MPICH1_args;
     argc = &PyMPI_MPICH1_argc;
     argv = &PyMPI_MPICH1_argv;
