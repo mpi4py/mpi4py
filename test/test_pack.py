@@ -110,6 +110,7 @@ class TestPackExternal(TestPackExternalBase, unittest.TestCase):
     pass
 
 
+
 _name, _version = MPI.get_vendor()
 if _name == 'Open MPI':
     from sys import byteorder as sys_byteorder

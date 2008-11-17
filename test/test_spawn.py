@@ -76,6 +76,7 @@ class TestSpawnWorldMany(TestSpawnBase, unittest.TestCase):
     MAXPROCS = MPI.COMM_WORLD.Get_size()
 
 
+
 _SKIP_TEST = False
 _name, _version = MPI.get_vendor()
 if _name == 'Open MPI':
@@ -96,9 +97,9 @@ if _SKIP_TEST:
     del TestSpawnSelfMany
     del TestSpawnWorldMany
 elif _name == 'MPICH2':
-    del TestSpawnWorld
-    del TestSpawnWorldMany
+    del TestSpawnBase.testReturnedErrcodes
+
+
 
 if __name__ == '__main__':
     unittest.main()
-

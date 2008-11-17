@@ -31,11 +31,9 @@ class TestFileBase(object):
             MPI.File.Delete(self.fname, MPI.INFO_NULL)
 
     def testPreallocate(self):
-        # XXX MPICH2 generates a warning
-        # about nesting level at finalization
-        ## self.FILE.Preallocate(0)
-        ## size = self.FILE.Get_size()
-        ## self.assertEqual(size, 0)
+        self.FILE.Preallocate(0)
+        size = self.FILE.Get_size()
+        self.assertEqual(size, 0)
         self.FILE.Preallocate(1)
         size = self.FILE.Get_size()
         self.assertEqual(size, 1)
