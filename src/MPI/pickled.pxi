@@ -72,6 +72,7 @@ cdef class _p_Pickler:
     cdef object dumpv(self, object obj, void **p,
                       int n, int cnt[], int dsp[]):
         cdef int i=0, d=0, c=0
+        cdef Py_ssize_t m = 0
         if obj is None:
             p[0] = NULL
             for i from 0 <= i < n:
@@ -79,7 +80,9 @@ cdef class _p_Pickler:
                 dsp[i] = 0
         else:
             obj = list(obj)
-            assert len(obj) == n
+            m = len(obj)
+            if m != n: raise ValueError(mpistr(
+                "expecting %d items, got %d") % (n, m))
             for i from 0 <= i < n:
                 obj[i] = self.dump(obj[i], p, &c)
                 if c == 0: obj[i] = b''

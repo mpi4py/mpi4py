@@ -110,12 +110,12 @@ cdef inline int _init1() except -1:
     cdef int provided = MPI_THREAD_SINGLE
     if _mpi_threading(&required):
         ierr = MPI_Init_thread(NULL, NULL, required, &provided)
-        if ierr != MPI_SUCCESS: raise RuntimeError(
-            "MPI_Init_thread() failed [error code: %d]" % ierr)
+        if ierr != MPI_SUCCESS: raise RuntimeError(mpistr(
+            "MPI_Init_thread() failed [error code: %d]") % ierr)
     else:
         ierr = MPI_Init(NULL, NULL)
-        if ierr != MPI_SUCCESS: raise RuntimeError(
-            "MPI_Init() failed [error code: %d]" % ierr)
+        if ierr != MPI_SUCCESS: raise RuntimeError(mpistr(
+            "MPI_Init() failed [error code: %d]") % ierr)
     # We initialized MPI, so it is owned and active at this point
     mpi_is_owned  = 1
     mpi_is_active = 1
