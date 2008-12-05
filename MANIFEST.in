@@ -1,10 +1,10 @@
 include MANIFEST.in
 include *.py *.cfg *.txt
 
-recursive-include demo *.py *.txt
+recursive-include demo *.py *.txt *.pyx *.i *.c *.f90 
 recursive-include docs *.rst *.txt *.conf
-recursive-include conf *.py
-recursive-include src  *.py *.pyx *.px[di] *.c *.h *.i
+recursive-include conf *.py *.cfg
+recursive-include src  *.py *.pyx *.px[di] *.h *.c *.i
 recursive-include test *.py *.txt
 
 include                [M,m]akefile

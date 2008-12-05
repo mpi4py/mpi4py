@@ -1,30 +1,25 @@
-.PHONY: default config src build test install uninstall sdist clean distclean srcclean fullclean
+.PHONY: default src \
+	config build test install \
+	clean distclean srcclean fullclean uninstall \
+	cython epydoc sdist
 
 PYTHON = python
 
 default: build
 
+src: src/MPI.c
+
 config: 
 	${PYTHON} setup.py config ${CONFIGOPT}
-
-src: src/MPI.c
 
 build: src
 	${PYTHON} setup.py build ${BUILDOPT}
 
 test:
-	${MPIEXEC} ${PYTHON} test/runalltest.py
+	${MPIEXEC} ${VALGRIND} ${PYTHON} test/runalltest.py
 
 install: build
 	${PYTHON} setup.py install ${INSTALLOPT} --home=${HOME}
-
-uninstall:
-	-${RM} -r ${HOME}/lib/python/mpi4py
-	-${RM} -r ${HOME}/lib/python/mpi4py-*-py*.egg-info
-
-sdist: src
-	${PYTHON} setup.py sdist ${SDISTOPT}
-
 
 clean:
 	${PYTHON} setup.py clean --all
@@ -38,29 +33,29 @@ distclean: clean
 	-${RM} `find . -name '*~'`
 	-${RM} `find . -name '*.py[co]'`
 
-fullclean: distclean srcclean
-
-CYTHON = cython
-CYTHON_FLAGS = --cleanup 9
-CYTHON_INCLUDE = -I. -Iinclude -Iinclude/mpi4py
-CY_SRC_PXD = $(wildcard src/include/mpi4py/*.pxd)
-CY_SRC_PXI = $(wildcard src/MPI/*.pxi) $(wildcard src/include/mpi4py/*.pxi)
-CY_SRC_PYX = $(wildcard src/MPI/*.pyx)
-src/MPI.c: src/mpi4py_MPI.c
-src/mpi4py_MPI.c: ${CY_SRC_PXD} ${CY_SRC_PXI} ${CY_SRC_PYX}
-	${CYTHON} ${CYTHON_FLAGS} ${CYTHON_INCLUDE} -w src mpi4py.MPI.pyx -o mpi4py_MPI.c
-	mv src/mpi4py_MPI.h src/mpi4py_MPI_api.h src/include/mpi4py
-
 srcclean:
 	${RM} src/mpi4py_MPI.c
 	${RM} src/include/mpi4py/mpi4py_MPI.h
 	${RM} src/include/mpi4py/mpi4py_MPI_api.h
 
+fullclean: distclean srcclean
 
-EPYDOC = ./misc/epydoc-cython.py
-EPYDOC_CONF = ./misc/epydoc.cfg
-EPYDOC_FLAGS =
-EPYDOC_CMD = ${EPYDOC} -v --config=${EPYDOC_CONF} ${EPYDOC_FLAGS}
-EPYDOC_OUT = /tmp/mpi4py-api-doc
+uninstall:
+	-${RM} -r ${HOME}/lib/python/mpi4py
+	-${RM} -r ${HOME}/lib/python/mpi4py-*-py*.egg-info
+
+CY_SRC_PXD = $(wildcard src/include/mpi4py/*.pxd)
+CY_SRC_PXI = $(wildcard src/MPI/*.pxi) $(wildcard src/include/mpi4py/*.pxi)
+CY_SRC_PYX = $(wildcard src/MPI/*.pyx)
+src/MPI.c: src/mpi4py_MPI.c
+src/mpi4py_MPI.c: ${CY_SRC_PXD} ${CY_SRC_PXI} ${CY_SRC_PYX}
+	${PYTHON} ./conf/cythonize.py
+
+cython:
+	${PYTHON} ./conf/cythonize.py
+
 epydoc:
-	${EPYDOC_CMD} -o ${EPYDOC_OUT}
+	${PYTHON} ./conf/epydocify.py -o /tmp/mpi4py-api-doc
+
+sdist: src
+	${PYTHON} setup.py sdist ${SDISTOPT}

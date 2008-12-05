@@ -14,8 +14,8 @@ SOURCES_TXT  = titlepage.txt \
                links.txt
 
 
-RST2HTML  = rst2html.py
-RST2LATEX = rst2latex.py
+RST2HTML  = rst2html
+RST2LATEX = rst2latex
 
 LATEX     = latex -interaction=batchmode
 PDFLATEX  = pdflatex -interaction=batchmode
