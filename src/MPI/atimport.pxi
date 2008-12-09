@@ -13,8 +13,11 @@ cdef extern from "Python.h":
 
 cdef int mpi_is_owned  = 0
 cdef int mpi_is_active = 0
-cdef MPI_Errhandler comm_self_eh
-cdef MPI_Errhandler comm_world_eh
+
+cdef int PyMPI_KEYVAL_WIN_MEMORY = MPI_KEYVAL_INVALID
+
+cdef MPI_Errhandler comm_self_eh = MPI_ERRHANDLER_NULL
+cdef MPI_Errhandler comm_world_eh = MPI_ERRHANDLER_NULL
 
 # --------------------------------------------------------------------
 
@@ -55,7 +58,7 @@ cdef inline int _mpi_active():
     # MPI should be active
     return 1
 
-cdef void _atexit():
+cdef void _atexit_py():
     cdef int ierr = 0
     global mpi_is_active
     mpi_is_active = 0
@@ -67,10 +70,14 @@ cdef void _atexit():
     cdef int finalized = 1
     MPI_Finalized(&finalized)
     if finalized: return
+    # free windows keyval
+    global PyMPI_KEYVAL_WIN_MEMORY
+    if PyMPI_KEYVAL_WIN_MEMORY != MPI_KEYVAL_INVALID:
+        ierr = MPI_Win_free_keyval(&PyMPI_KEYVAL_WIN_MEMORY)
     # restore default error handlers for predefined communicators
     global comm_self_eh, comm_world_eh
     if comm_self_eh != MPI_ERRHANDLER_NULL:
-        ierr = MPI_Comm_set_errhandler(MPI_COMM_SELF,  comm_self_eh)
+        ierr = MPI_Comm_set_errhandler(MPI_COMM_SELF, comm_self_eh)
         ierr = MPI_Errhandler_free(&comm_self_eh)
         comm_self_eh = MPI_ERRHANDLER_NULL
     if comm_world_eh != MPI_ERRHANDLER_NULL:
@@ -120,7 +127,7 @@ cdef inline int _init1() except -1:
     mpi_is_owned  = 1
     mpi_is_active = 1
     # then finalize it when Python process exits
-    if Py_AtExit(_atexit) < 0:
+    if Py_AtExit(_atexit_py) < 0:
         PySys_WriteStderr("warning: could not register"
                           "MPI_Finalize() with Py_AtExit()")
     return 0
@@ -147,7 +154,7 @@ cdef inline int _init2() except -1:
 
 # Interception of the actual call to MPI_Finalize()
 
-cdef int active_keyval_del(MPI_Comm c,int k, void *v, void *xs) nogil:
+cdef int _atexit_mpi(MPI_Comm c,int k, void *v, void *xs) nogil:
     # MPI is no longer active
     global mpi_is_active
     mpi_is_active = 0
@@ -159,7 +166,7 @@ cdef inline int _init3() except -1:
     cdef int ierr = 0
     cdef int keyval = MPI_KEYVAL_INVALID
     ierr = MPI_Comm_create_keyval(MPI_COMM_NULL_COPY_FN,
-                                  active_keyval_del,
+                                  _atexit_mpi,
                                   &keyval, NULL)
     if ierr: pass # XXX handle error ?
     ierr = MPI_Comm_set_attr(MPI_COMM_SELF, keyval, NULL)
