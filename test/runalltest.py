@@ -14,6 +14,7 @@ except ImportError: # or the no yet installed mpi4py
     import mpi4py
 
 from mpi4py import MPI
+sys.stderr.flush()
 sys.stderr.write("mpi4py imported from '%s'\n" % mpi4py.__path__[0])
 sys.stderr.flush()
 
@@ -31,6 +32,9 @@ alltests = mpiunittest.find_tests(
 
 def runtests(*args, **kargs):
     for test in alltests:
+        sys.stderr.flush()
+        sys.stderr.write("\nrunning %s" % test.__name__)
+        sys.stderr.flush()
         mpiunittest.main(test, *args, **kargs)
 
 
