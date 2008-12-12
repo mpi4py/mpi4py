@@ -16,7 +16,7 @@ build: src
 	${PYTHON} setup.py build ${BUILDOPT}
 
 test:
-	${MPIEXEC} ${VALGRIND} ${PYTHON} test/runalltest.py
+	${MPIEXEC} ${VALGRIND} ${PYTHON} test/runalltest.py < /dev/null
 
 install: build
 	${PYTHON} setup.py install ${INSTALLOPT} --home=${HOME}
