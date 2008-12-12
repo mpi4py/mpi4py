@@ -63,20 +63,36 @@ cdef class Op:
 
 
 
+cdef Op __OP_NULL__ = _new_Op( MPI_OP_NULL )
+cdef Op __MAX__     = _new_Op( MPI_MAX     )
+cdef Op __MIN__     = _new_Op( MPI_MIN     )
+cdef Op __SUM__     = _new_Op( MPI_SUM     )
+cdef Op __PROD__    = _new_Op( MPI_PROD    )
+cdef Op __LAND__    = _new_Op( MPI_LAND    )
+cdef Op __BAND__    = _new_Op( MPI_BAND    )
+cdef Op __LOR__     = _new_Op( MPI_LOR     )
+cdef Op __BOR__     = _new_Op( MPI_BOR     )
+cdef Op __LXOR__    = _new_Op( MPI_LXOR    )
+cdef Op __BXOR__    = _new_Op( MPI_BXOR    )
+cdef Op __MAXLOC__  = _new_Op( MPI_MAXLOC  )
+cdef Op __MINLOC__  = _new_Op( MPI_MINLOC  )
+cdef Op __REPLACE__ = _new_Op( MPI_REPLACE )
+
+
 # Predefined operation handles
 # ----------------------------
 
-OP_NULL = _new_Op( MPI_OP_NULL ) #: Null
-MAX     = _new_Op( MPI_MAX     ) #: Maximum
-MIN     = _new_Op( MPI_MIN     ) #: Minimum
-SUM     = _new_Op( MPI_SUM     ) #: Sum
-PROD    = _new_Op( MPI_PROD    ) #: Product
-LAND    = _new_Op( MPI_LAND    ) #: Logical and
-BAND    = _new_Op( MPI_BAND    ) #: Bit-wise and
-LOR     = _new_Op( MPI_LOR     ) #: Logical or
-BOR     = _new_Op( MPI_BOR     ) #: Bit-wise or
-LXOR    = _new_Op( MPI_LXOR    ) #: Logical xor
-BXOR    = _new_Op( MPI_BXOR    ) #: Bit-wise xor
-MAXLOC  = _new_Op( MPI_MAXLOC  ) #: Maximum and location
-MINLOC  = _new_Op( MPI_MINLOC  ) #: Minimum and location
-REPLACE = _new_Op( MPI_REPLACE ) #: Replace (for RMA)
+OP_NULL = __OP_NULL__  #: Null
+MAX     = __MAX__      #: Maximum
+MIN     = __MIN__      #: Minimum
+SUM     = __SUM__      #: Sum
+PROD    = __PROD__     #: Product
+LAND    = __LAND__     #: Logical and
+BAND    = __BAND__     #: Bit-wise and
+LOR     = __LOR__      #: Logical or
+BOR     = __BOR__      #: Bit-wise or
+LXOR    = __LXOR__     #: Logical xor
+BXOR    = __BXOR__     #: Bit-wise xor
+MAXLOC  = __MAXLOC__   #: Maximum and location
+MINLOC  = __MINLOC__   #: Minimum and location
+REPLACE = __REPLACE__  #: Replace (for RMA)

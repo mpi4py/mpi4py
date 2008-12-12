@@ -45,9 +45,14 @@ cdef class Errhandler:
 
 
 
+cdef Errhandler __ERRHANDLER_NULL__  = _new_Errhandler(MPI_ERRHANDLER_NULL)
+cdef Errhandler __ERRORS_RETURN__    = _new_Errhandler(MPI_ERRORS_RETURN)
+cdef Errhandler __ERRORS_ARE_FATAL__ = _new_Errhandler(MPI_ERRORS_ARE_FATAL)
+
+
 # Predefined errhandler handles
 # -----------------------------
 
-ERRHANDLER_NULL  = _new_Errhandler(MPI_ERRHANDLER_NULL)  #: Null
-ERRORS_RETURN    = _new_Errhandler(MPI_ERRORS_RETURN)    #: Errors return
-ERRORS_ARE_FATAL = _new_Errhandler(MPI_ERRORS_ARE_FATAL) #: Errors are fatal
+ERRHANDLER_NULL  = __ERRHANDLER_NULL__  #: Null error handler
+ERRORS_RETURN    = __ERRORS_RETURN__    #: Errors return error handler
+ERRORS_ARE_FATAL = __ERRORS_ARE_FATAL__ #: Errors are fatal error handler

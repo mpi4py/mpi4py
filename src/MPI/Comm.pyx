@@ -585,6 +585,7 @@ cdef class Comm:
         cdef MPI_Comm comm = MPI_COMM_NULL
         with nogil: CHKERR( MPI_Comm_get_parent(
             &comm) )
+        global __COMM_PARENT__
         cdef Intercomm parent = __COMM_PARENT__
         parent.ob_mpi = comm
         return parent
@@ -1388,35 +1389,25 @@ cdef Intercomm __COMM_PARENT__ = _new_Intercomm ( MPI_COMM_NULL  )
 # Predefined communicators
 # ------------------------
 
-COMM_NULL =  __COMM_NULL__  #: Null communicator handle
-COMM_SELF  = __COMM_SELF__  #: Self communicator handle
-COMM_WORLD = __COMM_WORLD__ #: World communicator handle
+COMM_NULL =  __COMM_NULL__   #: Null communicator handle
+COMM_SELF  = __COMM_SELF__   #: Self communicator handle
+COMM_WORLD = __COMM_WORLD__  #: World communicator handle
 
 
 # Communicator Comparisons
 # ------------------------
 
-IDENT = MPI_IDENT
-#: Groups are identical, communicator contexts are de same
-
-CONGRUENT = MPI_CONGRUENT
-#: Groups are identical, contexts are different
-
-SIMILAR = MPI_SIMILAR
-#: Groups are similar, rank order differs
-
-UNEQUAL = MPI_UNEQUAL
-#: Groups are different
+IDENT     = MPI_IDENT      #: Groups are identical, communicator contexts are de same
+CONGRUENT = MPI_CONGRUENT  #: Groups are identical, contexts are different
+SIMILAR   = MPI_SIMILAR    #: Groups are similar, rank order differs
+UNEQUAL   = MPI_UNEQUAL    #: Groups are different
 
 
 # Communicator Topologies
 # -----------------------
 
-CART = MPI_CART
-#: Cartesian topology
-
-GRAPH = MPI_GRAPH
-#: Graph topology
+CART  = MPI_CART   #: Cartesian topology
+GRAPH = MPI_GRAPH  #: Graph topology
 
 
 

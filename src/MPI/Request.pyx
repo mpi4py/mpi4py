@@ -281,8 +281,11 @@ cdef class Grequest(Request):
 
 
 
+cdef Request __REQUEST_NULL__ = _new_Request(MPI_REQUEST_NULL)
+
+
 # Predefined request handles
 # --------------------------
 
-REQUEST_NULL = _new_Request(MPI_REQUEST_NULL) #: Null request handle
+REQUEST_NULL = __REQUEST_NULL__  #: Null request handle
 

@@ -236,5 +236,5 @@ cdef Group __GROUP_EMPTY__ = _new_Group ( MPI_GROUP_EMPTY )
 # Predefined group handles
 # ------------------------
 
-GROUP_NULL  = __GROUP_NULL__  #: Null group handle
-GROUP_EMPTY = __GROUP_EMPTY__ #: Empty group handle
+GROUP_NULL  = __GROUP_NULL__   #: Null group handle
+GROUP_EMPTY = __GROUP_EMPTY__  #: Empty group handle
