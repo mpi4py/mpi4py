@@ -1,7 +1,7 @@
 #---------------------------------------------------------------------
 
 cdef enum PyMPI_OBJECT_FLAGS:
-    PyMPI_SKIP_FREE = 1<<1
+    PyMPI_OWNED = 1<<1
 
 #---------------------------------------------------------------------
 # Status
@@ -16,7 +16,6 @@ cdef inline MPI_Status *_arg_Status(object status):
 cdef inline Datatype _new_Datatype(MPI_Datatype ob):
     cdef Datatype datatype = Datatype()
     datatype.ob_mpi = ob
-    datatype.flags |= PyMPI_SKIP_FREE
     return datatype
 
 cdef inline int _del_Datatype(MPI_Datatype* ob):
@@ -38,8 +37,7 @@ cdef inline int _named_Datatype(MPI_Datatype ob):
 cdef void _fix_Datatype(Datatype datatype):
     cdef MPI_Datatype ob = datatype.ob_mpi
     if ob == MPI_DATATYPE_NULL: return
-    if _named_Datatype(ob):
-        datatype.flags |= PyMPI_SKIP_FREE
+    if _named_Datatype(ob): pass
 
 #---------------------------------------------------------------------
 # Request
@@ -49,7 +47,6 @@ include "reqimpl.pxi"
 cdef inline Request _new_Request(MPI_Request ob):
     cdef Request request = Request()
     request.ob_mpi = ob
-    request.flags |= PyMPI_SKIP_FREE
     return request
 
 cdef inline int _del_Request(MPI_Request* ob):
@@ -68,7 +65,6 @@ include "opimpl.pxi"
 cdef inline Op _new_Op(MPI_Op ob):
     cdef Op op = Op()
     op.ob_mpi = ob
-    op.flags |= PyMPI_SKIP_FREE
     if   ob == MPI_OP_NULL : op.ob_func = NULL
     elif ob == MPI_MAX     : op.ob_func = _op_MAX
     elif ob == MPI_MIN     : op.ob_func = _op_MIN
@@ -112,7 +108,6 @@ cdef inline int _del_Op(MPI_Op* ob):
 cdef inline Info _new_Info(MPI_Info ob):
     cdef Info info = Info()
     info.ob_mpi = ob
-    info.flags |= PyMPI_SKIP_FREE
     return info
 
 cdef inline int _del_Info(MPI_Info* ob):
@@ -133,7 +128,6 @@ cdef inline MPI_Info _arg_Info(object info):
 cdef inline Group _new_Group(MPI_Group ob):
     cdef Group group = Group()
     group.ob_mpi = ob
-    group.flags |= PyMPI_SKIP_FREE
     return group
 
 
@@ -152,19 +146,16 @@ cdef inline int _del_Group(MPI_Group* ob):
 cdef inline Comm _new_Comm(MPI_Comm ob):
     cdef Comm comm = Comm()
     comm.ob_mpi = ob
-    comm.flags |= PyMPI_SKIP_FREE
     return comm
 
 cdef inline Intracomm _new_Intracomm(MPI_Comm ob):
     cdef Intracomm comm = Intracomm()
     comm.ob_mpi = ob
-    comm.flags |= PyMPI_SKIP_FREE
     return comm
 
 cdef inline Intercomm _new_Intercomm(MPI_Comm ob):
     cdef Intercomm comm = Intercomm()
     comm.ob_mpi = ob
-    comm.flags |= PyMPI_SKIP_FREE
     return comm
 
 cdef inline int _del_Comm(MPI_Comm* ob):
@@ -185,7 +176,6 @@ include "winimpl.pxi"
 cdef inline Win _new_Win(MPI_Win ob):
     cdef Win win = Win()
     win.ob_mpi = ob
-    win.flags |= PyMPI_SKIP_FREE
     return win
 
 cdef inline int _del_Win(MPI_Win* ob):
@@ -202,7 +192,6 @@ cdef inline int _del_Win(MPI_Win* ob):
 cdef inline File _new_File(MPI_File ob):
     cdef File file = File()
     file.ob_mpi = ob
-    file.flags |= PyMPI_SKIP_FREE
     return file
 
 cdef inline int _del_File(MPI_File* ob):
@@ -219,7 +208,6 @@ cdef inline int _del_File(MPI_File* ob):
 cdef inline Errhandler _new_Errhandler(MPI_Errhandler ob):
     cdef Errhandler errhandler = Errhandler()
     errhandler.ob_mpi = ob
-    errhandler.flags |= PyMPI_SKIP_FREE
     return errhandler
 
 cdef inline int _del_Errhandler(MPI_Errhandler* ob):

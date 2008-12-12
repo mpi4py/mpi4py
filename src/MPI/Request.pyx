@@ -8,8 +8,8 @@ cdef class Request:
         self.ob_mpi = MPI_REQUEST_NULL
 
     def __dealloc__(self):
-        cdef int ierr = 0
-        ierr = _del_Request(&self.ob_mpi); CHKERR(ierr)
+        if not (self.flags & PyMPI_OWNED): return
+        CHKERR( _del_Request(&self.ob_mpi) )
 
     def __richcmp__(self, other, int op):
         if not isinstance(self,  Request): return NotImplemented

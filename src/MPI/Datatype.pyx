@@ -8,10 +8,8 @@ cdef class Datatype:
         self.ob_mpi = MPI_DATATYPE_NULL
 
     def __dealloc__(self):
-        cdef int ierr = 0
-        if not (self.flags & PyMPI_SKIP_FREE):
-            ierr = _del_Datatype(&self.ob_mpi); CHKERR(ierr)
-
+        if not (self.flags & PyMPI_OWNED): return
+        CHKERR( _del_Datatype(&self.ob_mpi) )
 
     def __richcmp__(self, other, int op):
         if not isinstance(self,  Datatype): return NotImplemented

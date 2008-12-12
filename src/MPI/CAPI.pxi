@@ -5,7 +5,6 @@
 cdef api object PyMPIDatatype_New(MPI_Datatype arg):
     cdef Datatype obj = Datatype()
     obj.ob_mpi = arg
-    obj.flags |= PyMPI_SKIP_FREE
     return obj
 
 cdef api MPI_Datatype* PyMPIDatatype_Get(object arg) except NULL:
@@ -33,7 +32,6 @@ cdef api MPI_Status* PyMPIStatus_Get(object arg) except NULL:
 cdef api object PyMPIRequest_New(MPI_Request arg):
     cdef Request obj = Request()
     obj.ob_mpi = arg
-    obj.flags |= PyMPI_SKIP_FREE
     return obj
 
 cdef api MPI_Request* PyMPIRequest_Get(object arg) except NULL:
@@ -46,7 +44,6 @@ cdef api MPI_Request* PyMPIRequest_Get(object arg) except NULL:
 cdef api object PyMPIOp_New(MPI_Op arg):
     cdef Op obj = Op()
     obj.ob_mpi = arg
-    obj.flags |= PyMPI_SKIP_FREE
     return obj
 
 cdef api MPI_Op* PyMPIOp_Get(object arg) except NULL:
@@ -59,7 +56,6 @@ cdef api MPI_Op* PyMPIOp_Get(object arg) except NULL:
 cdef api object PyMPIInfo_New(MPI_Info arg):
     cdef Info obj = Info()
     obj.ob_mpi = arg
-    obj.flags |= PyMPI_SKIP_FREE
     return obj
 
 cdef api MPI_Info* PyMPIInfo_Get(object arg) except NULL:
@@ -72,7 +68,6 @@ cdef api MPI_Info* PyMPIInfo_Get(object arg) except NULL:
 cdef api object PyMPIGroup_New(MPI_Group arg):
     cdef Group obj = Group()
     obj.ob_mpi = arg
-    obj.flags |= PyMPI_SKIP_FREE
     return obj
 
 cdef api MPI_Group* PyMPIGroup_Get(object arg) except NULL:
@@ -83,9 +78,9 @@ cdef api MPI_Group* PyMPIGroup_Get(object arg) except NULL:
 # Comm
 
 cdef api object PyMPIComm_New(MPI_Comm arg):
-    cdef object cls = Comm
-    cdef int inter = 0
-    cdef int topo = MPI_UNDEFINED
+    cdef type cls   = Comm
+    cdef int  inter = 0
+    cdef int  topo  = MPI_UNDEFINED
     if arg != MPI_COMM_NULL:
         CHKERR( MPI_Comm_test_inter(arg, &inter) )
         if inter:
@@ -100,7 +95,6 @@ cdef api object PyMPIComm_New(MPI_Comm arg):
                 cls = Graphcomm
     cdef Comm obj = cls()
     obj.ob_mpi = arg
-    obj.flags |= PyMPI_SKIP_FREE
     return obj
 
 cdef api MPI_Comm* PyMPIComm_Get(object arg) except NULL:
@@ -113,7 +107,6 @@ cdef api MPI_Comm* PyMPIComm_Get(object arg) except NULL:
 cdef api object PyMPIWin_New(MPI_Win arg):
     cdef Win obj = Win()
     obj.ob_mpi = arg
-    obj.flags |= PyMPI_SKIP_FREE
     return obj
 
 cdef api MPI_Win* PyMPIWin_Get(object arg) except NULL:
@@ -126,7 +119,6 @@ cdef api MPI_Win* PyMPIWin_Get(object arg) except NULL:
 cdef api object PyMPIFile_New(MPI_File arg):
     cdef File obj = File()
     obj.ob_mpi = arg
-    obj.flags |= PyMPI_SKIP_FREE
     return obj
 
 cdef api MPI_File* PyMPIFile_Get(object arg) except NULL:
@@ -139,7 +131,6 @@ cdef api MPI_File* PyMPIFile_Get(object arg) except NULL:
 cdef api object PyMPIErrhandler_New(MPI_Errhandler arg):
     cdef Errhandler obj = Errhandler()
     obj.ob_mpi = arg
-    obj.flags |= PyMPI_SKIP_FREE
     return obj
 
 cdef api MPI_Errhandler* PyMPIErrhandler_Get(object arg) except NULL:

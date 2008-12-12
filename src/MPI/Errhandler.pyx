@@ -8,9 +8,8 @@ cdef class Errhandler:
         self.ob_mpi = MPI_ERRHANDLER_NULL
 
     def __dealloc__(self):
-        cdef int ierr = 0
-        if not (self.flags & PyMPI_SKIP_FREE):
-            ierr = _del_Errhandler(&self.ob_mpi); CHKERR(ierr)
+        if not (self.flags & PyMPI_OWNED): return
+        CHKERR( _del_Errhandler(&self.ob_mpi) )
 
     def __richcmp__(self, other, int op):
         if not isinstance(self,  Errhandler): return NotImplemented

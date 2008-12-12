@@ -8,8 +8,8 @@ cdef class File:
         self.ob_mpi = MPI_FILE_NULL
 
     def __dealloc__(self):
-        cdef int ierr = 0
-        ierr = _del_File(&self.ob_mpi); CHKERR(ierr)
+        if not (self.flags & PyMPI_OWNED): return
+        CHKERR( _del_File(&self.ob_mpi) )
 
     def __richcmp__(self, other, int op):
         if not isinstance(self,  File): return NotImplemented
@@ -183,8 +183,7 @@ cdef class File:
         cdef Datatype ftype = Datatype()
         cdef char cdatarep[MPI_MAX_DATAREP_STRING+1]
         with nogil: CHKERR( MPI_File_get_view(self.ob_mpi, &disp, &etype.ob_mpi, &ftype.ob_mpi, cdatarep) )
-        _fix_Datatype(etype)
-        _fix_Datatype(ftype)
+        _fix_Datatype(etype); _fix_Datatype(ftype)
         cdatarep[MPI_MAX_DATAREP_STRING] = 0 # just in case
         datarep = mpistr(cdatarep)
         return (disp, etype, ftype, datarep)

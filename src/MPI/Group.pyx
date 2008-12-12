@@ -8,8 +8,8 @@ cdef class Group:
         self.ob_mpi = MPI_GROUP_NULL
 
     def __dealloc__(self):
-        cdef int ierr = 0
-        ierr = _del_Group(&self.ob_mpi); CHKERR(ierr)
+        if not (self.flags & PyMPI_OWNED): return
+        CHKERR( _del_Group(&self.ob_mpi) )
 
     def __richcmp__(self, other, int op):
         if not isinstance(self,  Group): return NotImplemented
