@@ -127,8 +127,7 @@ cdef class Info:
         cdef int dummy = 0
         cdef bint haskey = 0
         key = asmpistr(key, &ckey, NULL)
-        CHKERR( MPI_Info_get_valuelen(self.ob_mpi, ckey,
-                                      &dummy, &haskey) )
+        CHKERR( MPI_Info_get_valuelen(self.ob_mpi, ckey, &dummy, &haskey) )
         return haskey
 
     def __iter__(self):

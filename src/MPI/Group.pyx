@@ -78,9 +78,7 @@ cdef class Group:
         Compare two groups
         """
         cdef int flag = MPI_UNEQUAL
-        CHKERR( MPI_Group_compare(group1.ob_mpi,
-                                  group2.ob_mpi,
-                                  &flag) )
+        CHKERR( MPI_Group_compare(group1.ob_mpi, group2.ob_mpi, &flag) )
         return flag
 
     # Group Constructors
@@ -91,9 +89,7 @@ cdef class Group:
         Duplicate a group
         """
         cdef Group group = type(self)()
-        CHKERR( MPI_Group_union(self.ob_mpi,
-                                MPI_GROUP_EMPTY,
-                                &group.ob_mpi) )
+        CHKERR( MPI_Group_union(self.ob_mpi, MPI_GROUP_EMPTY, &group.ob_mpi) )
         return group
 
     @classmethod
@@ -105,9 +101,7 @@ cdef class Group:
         two existing groups
         """
         cdef Group group = cls()
-        CHKERR( MPI_Group_union(group1.ob_mpi,
-                                group2.ob_mpi,
-                                &group.ob_mpi) )
+        CHKERR( MPI_Group_union(group1.ob_mpi, group2.ob_mpi, &group.ob_mpi) )
         return group
 
     @classmethod
@@ -119,9 +113,7 @@ cdef class Group:
         of two existing groups
         """
         cdef Group group = cls()
-        CHKERR( MPI_Group_intersection(group1.ob_mpi,
-                                       group2.ob_mpi,
-                                       &group.ob_mpi) )
+        CHKERR( MPI_Group_intersection(group1.ob_mpi, group2.ob_mpi, &group.ob_mpi) )
         return group
 
     @classmethod
@@ -133,9 +125,7 @@ cdef class Group:
         of two existing groups
         """
         cdef Group group = cls()
-        CHKERR( MPI_Group_difference(group1.ob_mpi,
-                                     group2.ob_mpi,
-                                     &group.ob_mpi) )
+        CHKERR( MPI_Group_difference(group1.ob_mpi, group2.ob_mpi, &group.ob_mpi) )
         return group
 
     def Incl(self, ranks):
@@ -147,9 +137,7 @@ cdef class Group:
         cdef object tmp = newarray_int(n, &iranks)
         for i from 0 <= i < n: iranks[i] = ranks[i]
         cdef Group group = type(self)()
-        CHKERR( MPI_Group_incl(self.ob_mpi,
-                               n, iranks,
-                               &group.ob_mpi) )
+        CHKERR( MPI_Group_incl(self.ob_mpi, n, iranks, &group.ob_mpi) )
         return group
 
     def Excl(self, ranks):
@@ -161,9 +149,7 @@ cdef class Group:
         cdef object tmp = newarray_int(n, &iranks)
         for i from 0 <= i < n: iranks[i] = ranks[i]
         cdef Group group = type(self)()
-        CHKERR( MPI_Group_excl(self.ob_mpi,
-                               n, iranks,
-                               &group.ob_mpi) )
+        CHKERR( MPI_Group_excl(self.ob_mpi, n, iranks, &group.ob_mpi) )
         return group
 
     def Range_incl(self, ranks):
@@ -178,9 +164,7 @@ cdef class Group:
             p = <int*> ranges[i]
             p[0], p[1], p[2] = ranks[i]
         cdef Group group = type(self)()
-        CHKERR( MPI_Group_range_incl(self.ob_mpi,
-                                     n, ranges,
-                                     &group.ob_mpi) )
+        CHKERR( MPI_Group_range_incl(self.ob_mpi, n, ranges, &group.ob_mpi) )
         return group
 
     def Range_excl(self, ranks):
@@ -195,9 +179,7 @@ cdef class Group:
             p = <int*> ranges[i]
             p[0], p[1], p[2] = ranks[i]
         cdef Group group = type(self)()
-        CHKERR( MPI_Group_range_excl(self.ob_mpi,
-                                     n, ranges,
-                                     &group.ob_mpi) )
+        CHKERR( MPI_Group_range_excl(self.ob_mpi, n, ranges, &group.ob_mpi) )
         return group
 
     # Group Destructor

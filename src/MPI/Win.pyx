@@ -250,8 +250,7 @@ cdef class Win:
         """
         Set the error handler for a window
         """
-        CHKERR( MPI_Win_set_errhandler(self.ob_mpi,
-                                       errhandler.ob_mpi) )
+        CHKERR( MPI_Win_set_errhandler(self.ob_mpi, errhandler.ob_mpi) )
 
     def Call_errhandler(self, int errorcode):
         """

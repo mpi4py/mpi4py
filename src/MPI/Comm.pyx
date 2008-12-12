@@ -85,8 +85,7 @@ cdef class Comm:
         Clone an existing communicator
         """
         cdef Comm comm = type(self)()
-        with nogil: CHKERR( MPI_Comm_dup(
-            self.ob_mpi, &comm.ob_mpi) )
+        with nogil: CHKERR( MPI_Comm_dup(self.ob_mpi, &comm.ob_mpi) )
         return comm
 
     # Communicator Destructor
@@ -96,8 +95,7 @@ cdef class Comm:
         """
         Free a communicator
         """
-        with nogil: CHKERR( MPI_Comm_free(
-            &self.ob_mpi) )
+        with nogil: CHKERR( MPI_Comm_free(&self.ob_mpi) )
 
     # Point to Point communication
     # ----------------------------
@@ -365,8 +363,7 @@ cdef class Comm:
         """
         Barrier synchronization
         """
-        with nogil: CHKERR( MPI_Barrier(
-            self.ob_mpi) )
+        with nogil: CHKERR( MPI_Barrier(self.ob_mpi) )
 
     # Global Communication Functions
     # ------------------------------
@@ -583,8 +580,7 @@ cdef class Comm:
         Return the parent intercommunicator for this process
         """
         cdef MPI_Comm comm = MPI_COMM_NULL
-        with nogil: CHKERR( MPI_Comm_get_parent(
-            &comm) )
+        with nogil: CHKERR( MPI_Comm_get_parent(&comm) )
         global __COMM_PARENT__
         cdef Intercomm parent = __COMM_PARENT__
         parent.ob_mpi = comm
@@ -763,8 +759,7 @@ cdef class Intracomm(Comm):
         Duplicate an existing intracommunicator
         """
         cdef Intracomm comm = type(self)()
-        with nogil: CHKERR( MPI_Comm_dup(
-            self.ob_mpi, &comm.ob_mpi) )
+        with nogil: CHKERR( MPI_Comm_dup(self.ob_mpi, &comm.ob_mpi) )
         return comm
 
     def Create(self, Group group not None):
@@ -772,8 +767,7 @@ cdef class Intracomm(Comm):
         Create intracommunicator from group
         """
         cdef Intracomm comm = type(self)()
-        with nogil: CHKERR( MPI_Comm_create(
-            self.ob_mpi, group.ob_mpi, &comm.ob_mpi) )
+        with nogil: CHKERR( MPI_Comm_create(self.ob_mpi, group.ob_mpi, &comm.ob_mpi) )
         return comm
 
     def Split(self, int color=0, int key=0):
@@ -781,8 +775,7 @@ cdef class Intracomm(Comm):
         Split intracommunicator by color and key
         """
         cdef Intracomm comm = type(self)()
-        with nogil: CHKERR( MPI_Comm_split(
-            self.ob_mpi, color, key, &comm.ob_mpi) )
+        with nogil: CHKERR( MPI_Comm_split(self.ob_mpi, color, key, &comm.ob_mpi) )
         return comm
 
     def Create_cart(self, dims, periods=None, bint reorder=False):
@@ -797,9 +790,7 @@ cdef class Intracomm(Comm):
         cdef tmp2 = asarray_int(periods, &iperiods, ndims)
         #
         cdef Cartcomm comm = Cartcomm()
-        with nogil: CHKERR( MPI_Cart_create(
-            self.ob_mpi, ndims, idims, iperiods,
-            reorder, &comm.ob_mpi) )
+        with nogil: CHKERR( MPI_Cart_create(self.ob_mpi, ndims, idims, iperiods, reorder, &comm.ob_mpi) )
         return comm
 
     def Create_graph(self, index, edges, bint reorder=False):
@@ -817,10 +808,7 @@ cdef class Intracomm(Comm):
             nnodes -= 1; iindex += 1;
         #
         cdef Graphcomm comm = Graphcomm()
-        with nogil: CHKERR( MPI_Graph_create(
-            self.ob_mpi,
-            nnodes, iindex, iedges,
-            reorder, &comm.ob_mpi) )
+        with nogil: CHKERR( MPI_Graph_create(self.ob_mpi, nnodes, iindex, iedges, reorder, &comm.ob_mpi) )
         return comm
 
     def Create_intercomm(self,
@@ -952,7 +940,7 @@ cdef class Intracomm(Comm):
 # ---------------------------
 
 BSEND_OVERHEAD = MPI_BSEND_OVERHEAD
-#"""Upper bound of memory overhead for sending in buffered mode"""
+#: Upper bound of memory overhead for sending in buffered mode
 
 def Attach_buffer(memory):
     """
@@ -962,8 +950,7 @@ def Attach_buffer(memory):
     cdef void *base = NULL
     cdef MPI_Aint size = 0
     asmemory(memory, &base, &size)
-    with nogil: CHKERR( MPI_Buffer_attach(
-        base, <int>size) )
+    with nogil: CHKERR( MPI_Buffer_attach(base, <int>size) )
 
 def Detach_buffer():
     """
@@ -971,8 +958,7 @@ def Detach_buffer():
     """
     cdef void *base = NULL
     cdef int size = 0
-    with nogil: CHKERR( MPI_Buffer_detach(
-        &base, &size) )
+    with nogil: CHKERR( MPI_Buffer_detach(&base, &size) )
     return tomemory(base, <MPI_Aint>size)
 
 
@@ -990,8 +976,7 @@ cdef class Cartcomm(Intracomm):
         Duplicate an existing communicator
         """
         cdef Intracomm comm = type(self)()
-        with nogil: CHKERR( MPI_Comm_dup(
-            self.ob_mpi, &comm.ob_mpi) )
+        with nogil: CHKERR( MPI_Comm_dup(self.ob_mpi, &comm.ob_mpi) )
         return comm
 
     # Cartesian Inquiry Functions
@@ -1021,16 +1006,13 @@ cdef class Cartcomm(Intracomm):
         """
         cdef int ndim = 0
         CHKERR( MPI_Cartdim_get(self.ob_mpi, &ndim) )
-        #
         cdef int *idims = NULL
         cdef tmp1 = newarray_int(ndim, &idims)
         cdef int *iperiods = NULL
         cdef tmp2 = newarray_int(ndim, &iperiods)
         cdef int *icoords = NULL
         cdef tmp3 = newarray_int(ndim, &icoords)
-        #
-        CHKERR( MPI_Cart_get(self.ob_mpi, ndim,
-                             idims, iperiods, icoords) )
+        CHKERR( MPI_Cart_get(self.ob_mpi, ndim, idims, iperiods, icoords) )
         cdef int i = 0
         dims    = [idims[i]    for i from 0 <= i < ndim]
         periods = [iperiods[i] for i from 0 <= i < ndim]
@@ -1082,7 +1064,6 @@ cdef class Cartcomm(Intracomm):
         CHKERR( MPI_Cartdim_get(self.ob_mpi, &ndim) )
         cdef int *icoords = NULL
         cdef tmp = newarray_int(ndim, &icoords)
-        #
         CHKERR( MPI_Cart_coords(self.ob_mpi, rank, ndim, icoords) )
         cdef int i = 0
         coords  = [icoords[i] for i from 0 <= i < ndim]
@@ -1097,8 +1078,7 @@ cdef class Cartcomm(Intracomm):
         for data shifting with Comm.Sendrecv()
         """
         cdef int source = MPI_PROC_NULL, dest = MPI_PROC_NULL
-        CHKERR( MPI_Cart_shift(self.ob_mpi, direction, disp,
-                               &source, &dest) )
+        CHKERR( MPI_Cart_shift(self.ob_mpi, direction, disp, &source, &dest) )
         return (source, dest)
 
     # Cartesian Partition Function
@@ -1111,13 +1091,10 @@ cdef class Cartcomm(Intracomm):
         """
         cdef int ndim = 0
         CHKERR( MPI_Cartdim_get(self.ob_mpi, &ndim) )
-        #
         cdef int *iremdims = NULL
         cdef tmp = asarray_int(remain_dims, &iremdims, ndim)
-        #
         cdef Cartcomm comm = Cartcomm()
-        with nogil: CHKERR( MPI_Cart_sub(
-            self.ob_mpi, iremdims, &comm.ob_mpi) )
+        with nogil: CHKERR( MPI_Cart_sub(self.ob_mpi, iremdims, &comm.ob_mpi) )
         return comm
 
 
@@ -1136,9 +1113,7 @@ cdef class Cartcomm(Intracomm):
         cdef int *iperiods = NULL
         cdef tmp2 = asarray_int(periods, &iperiods, ndims)
         cdef int rank = MPI_PROC_NULL
-        #
-        CHKERR( MPI_Cart_map(self.ob_mpi, ndims,
-                             idims, iperiods, &rank) )
+        CHKERR( MPI_Cart_map(self.ob_mpi, ndims, idims, iperiods, &rank) )
         return rank
 
 # Cartesian Convenience Function
@@ -1211,11 +1186,7 @@ cdef class Graphcomm(Intracomm):
         cdef tmp1 = newarray_int(nindex, &iindex)
         cdef int *iedges = NULL
         cdef tmp2 = newarray_int(nedges, &iedges)
-        #
-        CHKERR( MPI_Graph_get(self.ob_mpi,
-                              nindex, nedges,
-                              iindex, iedges) )
-        #
+        CHKERR( MPI_Graph_get(self.ob_mpi, nindex, nedges, iindex, iedges) )
         cdef int i = 0
         index = [iindex[i] for i from 0 <= i < nindex]
         edges = [iedges[i] for i from 0 <= i < nedges]
@@ -1247,8 +1218,7 @@ cdef class Graphcomm(Intracomm):
         Return number of neighbors of a process
         """
         cdef int nneighbors = 0
-        CHKERR( MPI_Graph_neighbors_count(self.ob_mpi,
-                                          rank, &nneighbors) )
+        CHKERR( MPI_Graph_neighbors_count(self.ob_mpi, rank, &nneighbors) )
         return nneighbors
 
     property nneighbors:
@@ -1266,10 +1236,7 @@ cdef class Graphcomm(Intracomm):
             self.ob_mpi, rank, &nneighbors) )
         cdef int *ineighbors = NULL
         cdef tmp = newarray_int(nneighbors, &ineighbors)
-        #
-        CHKERR( MPI_Graph_neighbors(self.ob_mpi, rank,
-                                    nneighbors, ineighbors) )
-        #
+        CHKERR( MPI_Graph_neighbors(self.ob_mpi, rank, nneighbors, ineighbors) )
         cdef int i = 0
         neighbors = [ineighbors[i] for i from 0 <= i < nneighbors]
         return neighbors
@@ -1298,8 +1265,7 @@ cdef class Graphcomm(Intracomm):
         if iindex[0]==0 and iindex[nnodes-1]==nedges:
             nnodes -= 1; iindex += 1;
         cdef int rank = MPI_PROC_NULL
-        CHKERR( MPI_Graph_map(self.ob_mpi, nnodes,
-                              iindex, iedges, &rank) )
+        CHKERR( MPI_Graph_map(self.ob_mpi, nnodes, iindex, iedges, &rank) )
         return rank
 
 
@@ -1347,8 +1313,7 @@ cdef class Intercomm(Comm):
         Duplicate an existing intercommunicator
         """
         cdef Intercomm comm = type(self)()
-        with nogil: CHKERR( MPI_Comm_dup(
-            self.ob_mpi, &comm.ob_mpi) )
+        with nogil: CHKERR( MPI_Comm_dup(self.ob_mpi, &comm.ob_mpi) )
         return comm
 
     def Create(self, Group group not None):
@@ -1356,8 +1321,7 @@ cdef class Intercomm(Comm):
         Create intercommunicator from group
         """
         cdef Intercomm comm = type(self)()
-        with nogil: CHKERR( MPI_Comm_create(
-            self.ob_mpi, group.ob_mpi, &comm.ob_mpi) )
+        with nogil: CHKERR( MPI_Comm_create(self.ob_mpi, group.ob_mpi, &comm.ob_mpi) )
         return comm
 
     def Split(self, int color=0, int key=0):
@@ -1365,8 +1329,7 @@ cdef class Intercomm(Comm):
         Split intercommunicator by color and key
         """
         cdef Intercomm comm = type(self)()
-        with nogil: CHKERR( MPI_Comm_split(
-            self.ob_mpi, color, key, &comm.ob_mpi) )
+        with nogil: CHKERR( MPI_Comm_split(self.ob_mpi, color, key, &comm.ob_mpi) )
         return comm
 
     def Merge(self, bint high=False):
@@ -1374,8 +1337,7 @@ cdef class Intercomm(Comm):
         Merge intercommunicator
         """
         cdef Intracomm comm = Intracomm()
-        with nogil: CHKERR( MPI_Intercomm_merge(
-            self.ob_mpi, high, &comm.ob_mpi) )
+        with nogil: CHKERR( MPI_Intercomm_merge(self.ob_mpi, high, &comm.ob_mpi) )
         return comm
 
 
@@ -1425,8 +1387,7 @@ def Open_port(Info info=None):
     """
     cdef MPI_Info cinfo = _arg_Info(info)
     cdef char cportname[MPI_MAX_PORT_NAME+1]
-    with nogil: CHKERR( MPI_Open_port(
-        cinfo, cportname) )
+    with nogil: CHKERR( MPI_Open_port(cinfo, cportname) )
     return mpistr(cportname)
 
 def Close_port(port_name, Info info=None):
@@ -1436,8 +1397,7 @@ def Close_port(port_name, Info info=None):
     cdef char *cportname = NULL
     port_name = asmpistr(port_name, &cportname, NULL)
     cdef MPI_Info cinfo = _arg_Info(info)
-    with nogil: CHKERR( MPI_Close_port(
-        cportname) )
+    with nogil: CHKERR( MPI_Close_port(cportname) )
 
 # [5.4.4] Name Publishing
 # -----------------------
@@ -1451,8 +1411,7 @@ def Publish_name(service_name, Info info, port_name):
     cdef char *cportname = NULL
     port_name = asmpistr(port_name, &cportname, NULL)
     cdef MPI_Info cinfo = _arg_Info(info)
-    with nogil: CHKERR( MPI_Publish_name(
-        csrvcname, cinfo, cportname) )
+    with nogil: CHKERR( MPI_Publish_name(csrvcname, cinfo, cportname) )
 
 def Unpublish_name(service_name, Info info, port_name):
     """
@@ -1463,8 +1422,7 @@ def Unpublish_name(service_name, Info info, port_name):
     cdef char *cportname = NULL
     port_name = asmpistr(port_name, &cportname, NULL)
     cdef MPI_Info cinfo = _arg_Info(info)
-    with nogil: CHKERR( MPI_Unpublish_name(
-        csrvcname, cinfo, cportname) )
+    with nogil: CHKERR( MPI_Unpublish_name(csrvcname, cinfo, cportname) )
 
 def Lookup_name(service_name, Info info=None):
     """
@@ -1474,6 +1432,5 @@ def Lookup_name(service_name, Info info=None):
     service_name = asmpistr(service_name, &csrvcname, NULL)
     cdef MPI_Info cinfo = _arg_Info(info)
     cdef char cportname[MPI_MAX_PORT_NAME+1]
-    with nogil: CHKERR( MPI_Lookup_name(
-        csrvcname, cinfo, cportname) )
+    with nogil: CHKERR( MPI_Lookup_name(csrvcname, cinfo, cportname) )
     return mpistr(cportname)

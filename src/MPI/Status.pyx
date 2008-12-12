@@ -101,9 +101,7 @@ cdef class Status:
         .. note:: This should be only used when implementing
            query callback functions for generalized requests
         """
-        CHKERR( MPI_Status_set_elements(&self.ob_mpi,
-                                        datatype.ob_mpi, count) )
-        return count
+        CHKERR( MPI_Status_set_elements(&self.ob_mpi, datatype.ob_mpi, count) )
 
     def Is_cancelled(self):
         """
