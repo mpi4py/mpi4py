@@ -37,6 +37,24 @@ def runtests(*args, **kargs):
         sys.stderr.flush()
         mpiunittest.main(test, *args, **kargs)
 
+def runtestsleak(repeats,*args, **kargs):
+    import gc
+    gc.collect()
+    for i in xrange(repeats):
+        gc.collect()
+        r1 = sys.gettotalrefcount()
+        for test in alltests:
+            mpiunittest.main(test, *args, **kargs)
+        gc.collect()
+        r2 = sys.gettotalrefcount()
+        sys.stderr.flush()
+        sys.stderr.write('\nREF LEAKS -- before: %d, after: %d, diff: [%d]\n' % (r1, r2, r2-r1))
+        sys.stderr.flush()
 
 if __name__ == '__main__':
     runtests()
+    if hasattr(sys, 'gettotalrefcount'):
+        def dummy_write(self,*args): pass
+        unittest._WritelnDecorator.write   = dummy_write
+        unittest._WritelnDecorator.writeln = dummy_write
+        runtestsleak(10)
