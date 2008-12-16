@@ -1,6 +1,5 @@
 # Author:  Lisandro Dalcin
 # Contact: dalcinl@gmail.com
-# Id:      $Id$
 
 """
 This is the **MPI for Python** package.
@@ -31,11 +30,8 @@ Modules:
 __author__    = 'Lisandro Dalcin'
 __credits__   = 'MPI Forum, MPICH Team, Open MPI Team.'
 __version__   = '1.0.0'
-__revision__  = '$Id$'
 
 # --------------------------------------------------------------------
-
-__docformat__ = 'reStructuredText'
 
 __all__ = ['MPI',]
 

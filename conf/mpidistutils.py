@@ -1,6 +1,5 @@
 # Author:  Lisandro Dalcin
 # Contact: dalcinl@gmail.com
-# Id:      $Id$
 
 """
 Support for building mpi4py with distutils.

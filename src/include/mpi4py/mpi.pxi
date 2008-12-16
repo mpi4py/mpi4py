@@ -1,6 +1,5 @@
 # Author:  Lisandro Dalcin
 # Contact: dalcinl@gmail.com
-# Id:      $Id$
 
 cdef extern from "mpi.h" nogil:
 

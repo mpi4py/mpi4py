@@ -1,7 +1,6 @@
 /* Author:  Lisandro Dalcin
  * Contact: dalcinl@gmail.com
- * Id:      $Id$
-*/
+ */
 
 #include <Python.h>
 

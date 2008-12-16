@@ -1,5 +1,3 @@
-# $Id$
-
 import re
 
 def join(*args):

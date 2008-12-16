@@ -1,7 +1,6 @@
 #! /usr/bin/env python
 # Author:  Lisandro Dalcin
 # Contact: dalcinl@gmail.com
-# Id:      $Id$
 
 """
 MPI for Python

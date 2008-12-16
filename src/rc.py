@@ -1,6 +1,5 @@
 # Author:  Lisandro Dalcin
 # Contact: dalcinl@gmail.com
-# Id:      $Id$
 
 
 # thread_level = None                 -> Non-threaded MPI
