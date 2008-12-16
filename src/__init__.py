@@ -45,7 +45,7 @@ def get_include():
     """
     Return the directory in the package that contains header files.
 
-    Extension modules that need to compile against mpi44py should use
+    Extension modules that need to compile against mpi4py should use
     this function to locate the appropriate include directory. Using
     Python distutils (or perhaps NumPy distutils)::
 
