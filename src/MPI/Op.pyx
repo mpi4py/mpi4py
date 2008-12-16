@@ -58,7 +58,9 @@ cdef class Op:
     def f2py(cls, arg):
         """
         """
-        raise NotImplementedError
+        cdef Op op = cls()
+        op.ob_mpi = MPI_Op_f2c(arg)
+        return op
 
 
 

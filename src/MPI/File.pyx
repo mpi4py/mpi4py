@@ -580,10 +580,12 @@ cdef class File:
         return MPI_File_c2f(self.ob_mpi)
 
     @classmethod
-    def f2py(cls, fint):
+    def f2py(cls, arg):
         """
         """
-        raise NotImplementedError
+        cdef File file = cls()
+        file.ob_mpi = MPI_File_f2c(arg)
+        return file
 
 
 

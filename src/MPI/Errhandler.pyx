@@ -40,7 +40,9 @@ cdef class Errhandler:
     def f2py(cls, arg):
         """
         """
-        raise NotImplementedError
+        cdef Errhandler errhandler = cls()
+        errhandler.ob_mpi = MPI_Errhandler_f2c(arg)
+        return errhandler
 
 
 

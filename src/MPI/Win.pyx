@@ -298,7 +298,9 @@ cdef class Win:
     def f2py(cls, arg):
         """
         """
-        raise NotImplementedError
+        cdef Win win = cls()
+        win.ob_mpi = MPI_Win_f2c(arg)
+        return win
 
 
 

@@ -209,7 +209,9 @@ cdef class Request:
     def f2py(cls, arg):
         """
         """
-        raise NotImplementedError
+        cdef Request request = cls()
+        request.ob_mpi = MPI_Request_f2c(arg)
+        return request
 
 
 

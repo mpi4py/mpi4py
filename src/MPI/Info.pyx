@@ -112,7 +112,9 @@ cdef class Info:
     def f2py(cls, arg):
         """
         """
-        raise NotImplementedError
+        cdef Info info = cls()
+        info.ob_mpi = MPI_Info_f2c(arg)
+        return info
 
     # Python mapping emulation
     # ------------------------

@@ -674,7 +674,9 @@ cdef class Comm:
     def f2py(cls, arg):
         """
         """
-        raise NotImplementedError
+        cdef Comm comm = cls()
+        comm.ob_mpi = MPI_Comm_f2c(arg)
+        return comm
 
     # Python Communication
     # --------------------

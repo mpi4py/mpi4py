@@ -207,7 +207,9 @@ cdef class Group:
     def f2py(cls, arg):
         """
         """
-        raise NotImplementedError
+        cdef Group group = cls()
+        group.ob_mpi = MPI_Group_f2c(arg)
+        return group
 
 
 

@@ -441,7 +441,9 @@ cdef class Datatype:
     def f2py(cls, arg):
         """
         """
-        raise NotImplementedError
+        cdef Datatype datatype = cls()
+        datatype.ob_mpi = MPI_Type_f2c(arg)
+        return datatype
 
 
 
@@ -483,7 +485,7 @@ cdef Datatype __TWOINT__             = _new_Datatype( MPI_2INT               )
 cdef Datatype __LONG_INT__           = _new_Datatype( MPI_LONG_INT           )
 cdef Datatype __FLOAT_INT__          = _new_Datatype( MPI_FLOAT_INT          )
 cdef Datatype __DOUBLE_INT__         = _new_Datatype( MPI_DOUBLE_INT         )
-cdef Datatype __LONG_DOUBLE_INT__    = _new_Datatype( MPI_LONG_DOUBLE_INT    )   
+cdef Datatype __LONG_DOUBLE_INT__    = _new_Datatype( MPI_LONG_DOUBLE_INT    )
 
 cdef Datatype __LONG_LONG__          = _new_Datatype( MPI_LONG_LONG          )
 cdef Datatype __UNSIGNED_LONG_LONG__ = _new_Datatype( MPI_UNSIGNED_LONG_LONG )
