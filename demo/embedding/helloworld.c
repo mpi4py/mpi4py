@@ -1,4 +1,10 @@
-#include <stdio.h>
+/* 
+ *  You can use safely use mpi4py between multiple 
+ *  Py_Initialize()/Py_Finalize() calls ...
+ *  but do not blame me for the memory leaks ;-)
+ *
+ */
+
 #include <mpi.h>
 #include <Python.h>
 
@@ -13,30 +19,17 @@ const char helloworld[] = \
 
 int main(int argc, char *argv[])
 {
-  int ierr, rank, size;
+  int i,n=5;
 
-  ierr = MPI_Init(&argc, &argv);
-  ierr = MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-  ierr = MPI_Comm_size(MPI_COMM_WORLD, &size);
+  MPI_Init(&argc, &argv);
 
-  MPI_Barrier(MPI_COMM_WORLD);
-  Py_Initialize();
-  PyRun_SimpleString(helloworld);
-  Py_Finalize();
-  MPI_Barrier(MPI_COMM_WORLD);
-
-  if (rank == 0) {
-    printf("\n");
-    fflush(stdout);
-    fflush(stderr);
+  for (i=0; i<n; i++) {
+    Py_Initialize();
+    PyRun_SimpleString(helloworld);
+    Py_Finalize();
   }
 
-  MPI_Barrier(MPI_COMM_WORLD);
-  Py_Initialize();
-  PyRun_SimpleString(helloworld);
-  Py_Finalize();
-  MPI_Barrier(MPI_COMM_WORLD);
-
-  ierr = MPI_Finalize();
+  MPI_Finalize();
+  
   return 0;
 }
