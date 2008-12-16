@@ -40,7 +40,7 @@ def runtests(*args, **kargs):
 def runtestsleak(repeats,*args, **kargs):
     import gc
     gc.collect()
-    for i in xrange(repeats):
+    for i in range(repeats):
         gc.collect()
         r1 = sys.gettotalrefcount()
         for test in alltests:
