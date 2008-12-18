@@ -39,8 +39,9 @@ def runtests(*args, **kargs):
 
 def runtestsleak(repeats,*args, **kargs):
     import gc
-    gc.collect()
-    for i in range(repeats):
+    test = r1 = r2 = None
+    while repeats:
+        repeats -= 1
         gc.collect()
         r1 = sys.gettotalrefcount()
         for test in alltests:
@@ -57,4 +58,4 @@ if __name__ == '__main__':
         def dummy_write(self,*args): pass
         unittest._WritelnDecorator.write   = dummy_write
         unittest._WritelnDecorator.writeln = dummy_write
-        runtestsleak(10)
+        runtestsleak(5)
