@@ -26,14 +26,15 @@ sys.path.insert(0, testpath)
 import mpiunittest
 
 alltests = mpiunittest.find_tests(
-    exclude=[
+    exclude=[#'test_win',
+             #'test_rma',
              ]
     )
 
 def runtests(*args, **kargs):
     for test in alltests:
         sys.stderr.flush()
-        sys.stderr.write("\nrunning %s" % test.__name__)
+        sys.stderr.write("\nrunning %s\n" % test.__name__)
         sys.stderr.flush()
         mpiunittest.main(test, *args, **kargs)
 
