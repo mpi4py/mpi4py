@@ -112,7 +112,7 @@ class TestPackExternal(TestPackExternalBase, unittest.TestCase):
 
 
 _name, _version = MPI.get_vendor()
-if _name == 'Open MPI':
+if _name == 'Open MPI' and _version < (1, 3, 0):
     from sys import byteorder as sys_byteorder
     if sys_byteorder == 'little':
         TestPackExternalBase.byteswap = True
