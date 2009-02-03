@@ -9,6 +9,11 @@ cdef extern from "Python.h":
     int Py_AtExit(void (*)())
     void PySys_WriteStderr(char*,...)
 
+cdef extern from "stdio.h":
+    ctypedef struct FILE
+    FILE *stderr
+    int fprintf(FILE *, char *, ...) nogil
+
 # --------------------------------------------------------------------
 
 cdef int mpi_is_owned  = 0
@@ -43,7 +48,7 @@ cdef inline int _mpi_threading(int *level) except -1:
         return 0
     return 1
 
-cdef inline int _mpi_active():
+cdef inline int _mpi_active() nogil:
     # shortcut
     global mpi_is_active
     if mpi_is_active: return 1
@@ -58,7 +63,7 @@ cdef inline int _mpi_active():
     # MPI should be active
     return 1
 
-cdef void _atexit_py():
+cdef void _atexit_py() nogil:
     cdef int ierr = 0
     global mpi_is_active
     mpi_is_active = 0
@@ -88,9 +93,9 @@ cdef void _atexit_py():
     global mpi_is_owned
     if mpi_is_owned:
         ierr = MPI_Finalize()
-        if ierr:
-            PySys_WriteStderr("MPI_Finalize() failed "
-                              "[error code: %d]\n", ierr)
+        if ierr != MPI_SUCCESS:
+            fprintf(stderr, "MPI_Finalize() failed "
+                    "[error code: %d]\n", ierr)
 
 cdef inline int _init1() except -1:
     global comm_self_eh, comm_world_eh
