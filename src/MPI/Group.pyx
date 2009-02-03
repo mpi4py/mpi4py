@@ -159,6 +159,7 @@ cdef class Group:
         """
         cdef int i, n = len(ranks), *p = NULL,
         cdef int (*ranges)[3] # = NULL ## XXX cython fails
+        ranges = NULL
         cdef object tmp1 = newarray_int3(n, &ranges)
         for i from 0 <= i < n:
             p = <int*> ranges[i]
@@ -174,6 +175,7 @@ cdef class Group:
         """
         cdef int i, n = len(ranks), *p = NULL,
         cdef int (*ranges)[3] # = NULL ## XXX cython fails
+        ranges = NULL
         cdef object tmp1 = newarray_int3(n, &ranges)
         for i from 0 <= i < n:
             p = <int*> ranges[i]
