@@ -24,17 +24,7 @@ updates.
   about requirements and the building/install process, read the file
   ``docs/install.txt``.
 
-- The project documentation can be found in files ``docs/*.txt``.  It
-  is written reStructuredText_ format. You can use Docutils_ to get
-  HTML or LaTeX output. Basic ``Makefile`` provided in ``docs/``
-  directory; try ``make html`` and ``make pdf`` to obtain HTML output
-  ``docs/mpi4py.html``or PDF output ``docs/mpi4py.pdf``.
-
 
 .. _CIMEC:            http://www.cimec.org.ar/
 
 .. _project website:  http://mpi4py.googlecode.com/
-
-.. _reStructuredText: http://docutils.sourceforge.net/rst.html
-
-.. _Docutils:         http://docutils.sourceforge.net

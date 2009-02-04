@@ -24,12 +24,10 @@ install: build
 clean:
 	${PYTHON} setup.py clean --all
 	-${RM} _configtest.* *.py[co]
-	-${MAKE} -C docs clean
 
 distclean: clean 
 	-${RM} -r build  *.py[co]
 	-${RM} -r MANIFEST dist mpi4py.egg-info
-	-${MAKE} -C docs distclean
 	-${RM} `find . -name '*~'`
 	-${RM} `find . -name '*.py[co]'`
 
