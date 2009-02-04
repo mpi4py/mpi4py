@@ -19,10 +19,10 @@ cdef extern from "stdio.h":
 cdef int mpi_is_owned  = 0
 cdef int mpi_is_active = 0
 
-cdef int PyMPI_KEYVAL_WIN_MEMORY = MPI_KEYVAL_INVALID
-
-cdef MPI_Errhandler comm_self_eh = MPI_ERRHANDLER_NULL
+cdef MPI_Errhandler comm_self_eh  = MPI_ERRHANDLER_NULL
 cdef MPI_Errhandler comm_world_eh = MPI_ERRHANDLER_NULL
+
+cdef int PyMPI_KEYVAL_WIN_MEMORY  = MPI_KEYVAL_INVALID
 
 # --------------------------------------------------------------------
 
@@ -69,22 +69,24 @@ cdef void _atexit_py() nogil:
     mpi_is_active = 0
     # test if MPI was initialized
     cdef int initialized = 0
-    MPI_Initialized(&initialized)
+    ierr = MPI_Initialized(&initialized)
     if not initialized: return
     # test if MPI was finalized
     cdef int finalized = 1
-    MPI_Finalized(&finalized)
+    ierr = MPI_Finalized(&finalized)
     if finalized: return
     # free windows keyval
     global PyMPI_KEYVAL_WIN_MEMORY
     if PyMPI_KEYVAL_WIN_MEMORY != MPI_KEYVAL_INVALID:
         ierr = MPI_Win_free_keyval(&PyMPI_KEYVAL_WIN_MEMORY)
+        PyMPI_KEYVAL_WIN_MEMORY = MPI_KEYVAL_INVALID
     # restore default error handlers for predefined communicators
-    global comm_self_eh, comm_world_eh
+    global comm_self_eh
     if comm_self_eh != MPI_ERRHANDLER_NULL:
         ierr = MPI_Comm_set_errhandler(MPI_COMM_SELF, comm_self_eh)
         ierr = MPI_Errhandler_free(&comm_self_eh)
         comm_self_eh = MPI_ERRHANDLER_NULL
+    global comm_world_eh
     if comm_world_eh != MPI_ERRHANDLER_NULL:
         ierr = MPI_Comm_set_errhandler(MPI_COMM_WORLD, comm_world_eh)
         ierr = MPI_Errhandler_free(&comm_world_eh)
@@ -98,15 +100,13 @@ cdef void _atexit_py() nogil:
                     "[error code: %d]\n", ierr)
 
 cdef inline int _init1() except -1:
-    global comm_self_eh, comm_world_eh
-    comm_self_eh  = MPI_ERRHANDLER_NULL
-    comm_world_eh = MPI_ERRHANDLER_NULL
+    cdef int ierr = 0
     # MPI initialized ?
     cdef int initialized = 1
-    MPI_Initialized(&initialized)
+    ierr = MPI_Initialized(&initialized)
     # MPI finalized ?
     cdef int finalized = 1
-    MPI_Finalized(&finalized)
+    ierr = MPI_Finalized(&finalized)
     # Do we have to initialize MPI?
     global mpi_is_owned
     global mpi_is_active
@@ -117,7 +117,6 @@ cdef inline int _init1() except -1:
             mpi_is_active = 1
         return 0
     # We have to initialize MPI
-    cdef int ierr = 0
     cdef int required = MPI_THREAD_SINGLE
     cdef int provided = MPI_THREAD_SINGLE
     if _mpi_threading(&required):
@@ -144,6 +143,8 @@ cdef inline int _init2() except -1:
     if not mpi_is_active: return 0
     # backup default error handlers for predefined communicators
     global comm_self_eh, comm_world_eh
+    comm_self_eh  = MPI_ERRHANDLER_NULL
+    comm_world_eh = MPI_ERRHANDLER_NULL
     ierr = MPI_Comm_get_errhandler(MPI_COMM_SELF,  &comm_self_eh)
     if ierr: pass # XXX handle error, but unlikely fails
     ierr = MPI_Comm_get_errhandler(MPI_COMM_WORLD, &comm_world_eh)
@@ -167,8 +168,8 @@ cdef int _atexit_mpi(MPI_Comm c,int k, void *v, void *xs) nogil:
     return MPI_SUCCESS
 
 cdef inline int _init3() except -1:
-    if not mpi_is_active: return 0
     cdef int ierr = 0
+    if not mpi_is_active: return 0
     cdef int keyval = MPI_KEYVAL_INVALID
     ierr = MPI_Comm_create_keyval(MPI_COMM_NULL_COPY_FN,
                                   _atexit_mpi,
