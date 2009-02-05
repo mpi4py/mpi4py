@@ -1,7 +1,9 @@
-.PHONY: default src \
+.PHONY: default \
+	src cython \
 	config build test install \
-	clean distclean srcclean fullclean uninstall \
-	cython epydoc sdist
+	docs sphinx epydoc \
+	sdist
+	clean distclean srcclean docsclean fullclean uninstall \
 
 PYTHON = python
 
@@ -21,12 +23,13 @@ test:
 install: build
 	${PYTHON} setup.py install ${INSTALLOPT} --home=${HOME}
 
+docs: sphinx epydoc
+
 clean:
 	${PYTHON} setup.py clean --all
-	-${RM} _configtest.* *.py[co]
 
-distclean: clean 
-	-${RM} -r build  *.py[co]
+distclean:
+	-${RM} -r build  _configtest.* *.py[co]
 	-${RM} -r MANIFEST dist mpi4py.egg-info
 	-${RM} `find . -name '*~'`
 	-${RM} `find . -name '*.py[co]'`
@@ -36,7 +39,10 @@ srcclean:
 	${RM} src/include/mpi4py/mpi4py_MPI.h
 	${RM} src/include/mpi4py/mpi4py_MPI_api.h
 
-fullclean: distclean srcclean
+docsclean:
+	-${RM} -r docs/html
+
+fullclean: distclean srcclean docsclean
 
 uninstall:
 	-${RM} -r ${HOME}/lib/python/mpi4py
@@ -52,8 +58,20 @@ src/mpi4py_MPI.c: ${CY_SRC_PXD} ${CY_SRC_PXI} ${CY_SRC_PYX}
 cython:
 	${PYTHON} ./conf/cythonize.py
 
-epydoc:
-	${PYTHON} ./conf/epydocify.py -o /tmp/mpi4py-api-doc
+SPHINXBUILD = sphinx-build
+SPHINXOPTS  =
+sphinx:
+	mkdir -p build/doctrees docs/html/man
+	${SPHINXBUILD} -d build/doctrees ${SPHINXOPTS} \
+	docs/source docs/html/man
 
-sdist: src
+EPYDOCBUILD = ${PYTHON} ./conf/epydocify.py
+EPYDOCOPTS  =
+epydoc: clean build
+	mkdir -p docs/html
+	PYTHONPATH=`ls -d build/lib.*`:$$PYTHONPATH \
+	${EPYDOCBUILD} ${EPYDOCOPTS} -o docs/html/api 
+
+
+sdist: src docs
 	${PYTHON} setup.py sdist ${SDISTOPT}
