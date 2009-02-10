@@ -13,13 +13,15 @@ class TestFortranBase(object):
             self.assertEqual(handle1, handle2)
 
 class TestFortranDatatype(TestFortranBase, unittest.TestCase):
-    HANDLES = [MPI.CHAR,  MPI.SHORT,
+    HANDLES = [MPI.DATATYPE_NULL,
+               MPI.CHAR,  MPI.SHORT,
                MPI.INT,   MPI.LONG,
                MPI.FLOAT, MPI.DOUBLE,
                ]
 
 class TestFortranOp(TestFortranBase, unittest.TestCase):
-    HANDLES =  [MPI.MAX, MPI.MIN,
+    HANDLES =  [MPI.OP_NULL,
+                MPI.MAX, MPI.MIN,
                 MPI.SUM, MPI.PROD,
                 MPI.LAND, MPI.BAND,
                 MPI.LOR, MPI.BOR,
