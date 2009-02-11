@@ -182,4 +182,21 @@ static int PyMPI_OPENMPI_File_set_errhandler(MPI_File file, MPI_Errhandler errha
 
 /* ---------------------------------------------------------------- */
 
+#if !defined(OMPI_MAJOR_VERSION)   || OMPI_MAJOR_VERSION==1
+#if !defined(OMPI_MINOR_VERSION)   || OMPI_MINOR_VERSION<=3
+#if !defined(OMPI_RELEASE_VERSION) || OMPI_RELEASE_VERSION<1
+
+static MPI_Fint PyMPI_OPENMPI_File_c2f(MPI_File file)
+{
+  if (file == MPI_FILE_NULL) return (MPI_Fint)0;
+  return MPI_File_c2f(file);
+}
+#define MPI_File_c2f PyMPI_OPENMPI_File_c2f
+
+#endif /* !OMPI_RELEASE_VERSION<1 */
+#endif /* !OMPI_MINOR_VERSION<=1  */
+#endif /* !OMPI_MAJOR_VERSION==1  */
+
+/* ---------------------------------------------------------------- */
+
 #endif /* !PyMPI_COMPAT_OPENMPI_H */
