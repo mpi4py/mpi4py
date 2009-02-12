@@ -9,6 +9,8 @@ except ImportError: # or the no yet installed mpi4py
     os.path.split(__file__)[0]
     path = os.path.join(os.path.split(__file__)[0], os.path.pardir,
                         'build', 'lib' + plat_specifier)
+    if not os.path.exists(path) and os.path.exists(path+'-pydebug'):
+        path += '-pydebug'
     path = os.path.normpath(path)
     sys.path.insert(0, path)
     import mpi4py
