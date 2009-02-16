@@ -89,7 +89,7 @@ class TestInfo(unittest.TestCase):
         self.assertEqual(value, None)
         self.assertEqual(flag,  False)
         self.assertRaisesMPI(MPI.ERR_INFO_NOKEY, INFO.Delete, 'key')
-        self.assertRaisesMPI(MPI.ERR_ARG, INFO.Get_nthkey, 0)
+        self.assertRaisesMPI([MPI.ERR_ARG,MPI.ERR_INFO_KEY], INFO.Get_nthkey, 0)
 
     def testPyMethods(self):
         INFO = self.INFO

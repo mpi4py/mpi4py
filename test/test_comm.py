@@ -196,9 +196,13 @@ class TestCommWorldDup(TestCommWorld):
 
 
 _name, _version = MPI.get_vendor()
-_name, _version
 if _name == 'Open MPI':
     del TestCommNull.testAbort
+    if _version < (1,3,1):
+        def testGetErrhandler(self):
+            self.assertRaisesMPI(MPI.ERR_ARG, MPI.COMM_NULL.Get_errhandler)
+        TestCommNull.testGetErrhandler = testGetErrhandler
+        del testGetErrhandler
 elif _name == 'LAM/MPI':
     del TestCommNull.testAbort
 
