@@ -2,8 +2,8 @@
 	src cython \
 	config build test install \
 	docs sphinx epydoc \
-	sdist
-	clean distclean srcclean docsclean fullclean uninstall \
+	sdist \
+	clean distclean srcclean docsclean fullclean uninstall
 
 PYTHON = python
 
