@@ -13,7 +13,9 @@ def cythonize(source, includes=(),
     options = CompilationOptions(default_options)
     options.output_file = output  + '.c'
     options.include_path = includes
-    options.generate_cleanup_code = 9
+    #
+    ## from Cython.Compiler import Options
+    ## Options.generate_cleanup_code = 2
     #
     any_failures = 0
     try:
