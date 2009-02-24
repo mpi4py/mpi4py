@@ -2,12 +2,13 @@
 # --------------------------------------------------------------------
 
 cdef extern from "Python.h":
-    int Py_IsInitialized() nogil
+    struct PyObject
     Py_ssize_t Py_REFCNT(object)
     void Py_INCREF(object) except *
     void Py_DECREF(object) except *
-    int Py_AtExit(void (*)())
+    int Py_IsInitialized() nogil
     void PySys_WriteStderr(char*,...)
+    int Py_AtExit(void (*)())
 
 cdef extern from "stdio.h":
     ctypedef struct FILE
@@ -188,12 +189,20 @@ cdef inline int _init3() except -1:
 cdef extern from *:
     void __Pyx_Raise(object, object, void*)
 
+cdef extern from *:
+    PyObject *PyExc_RuntimeError
+    PyObject *PyExc_NotImplementedError
+
+cdef object MPIException = <object>PyExc_RuntimeError
 
 cdef int PyMPI_Raise(int ierr) except -1 with gil:
     if ierr != -1:
-        __Pyx_Raise(Exception, ierr, NULL)
+        if (<void*>MPIException):
+            __Pyx_Raise(MPIException, ierr, NULL)
+        else:
+            __Pyx_Raise(<object>PyExc_RuntimeError, ierr, NULL)
     else:
-        __Pyx_Raise(NotImplementedError, None, NULL)
+        __Pyx_Raise(<object>PyExc_NotImplementedError, None, NULL)
     return 0
 
 cdef inline int CHKERR(int ierr) nogil except -1:

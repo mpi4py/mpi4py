@@ -1,5 +1,6 @@
 include "ExceptionP.pyx"
 #include "ExceptionC.pyx"
+MPIException = Exception
 
 
 def Get_error_class(int errorcode):
