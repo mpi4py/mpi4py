@@ -2,7 +2,7 @@
 # --------------------------------------------------------------------
 
 cdef extern from "Python.h":
-    struct PyObject
+    ctypedef struct PyObject
     Py_ssize_t Py_REFCNT(object)
     void Py_INCREF(object) except *
     void Py_DECREF(object) except *
