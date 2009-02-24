@@ -10,11 +10,6 @@ cdef extern from "Python.h":
     void PySys_WriteStderr(char*,...)
     int Py_AtExit(void (*)())
 
-cdef extern from "stdio.h":
-    ctypedef struct FILE
-    FILE *stderr
-    int fprintf(FILE *, char *, ...) nogil
-
 # --------------------------------------------------------------------
 
 cdef int mpi_is_owned  = 0

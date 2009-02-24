@@ -2,7 +2,7 @@ __doc__ = u"""
 Message Passing Interface.
 """
 
-include "stdlibc.pxi"
+include "stdlib.pxi"
 
 include "mpi.pxi"
 
