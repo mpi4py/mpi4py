@@ -60,6 +60,26 @@ ROOT = MPI_ROOT
 #"""Root process for collective inter-communications"""
 
 
+# Predefined Attribute Keyvals
+# ----------------------------
+
+KEYVAL_INVALID  = MPI_KEYVAL_INVALID
+
+TAG_UB          = MPI_TAG_UB
+HOST            = MPI_HOST
+IO              = MPI_IO
+WTIME_IS_GLOBAL = MPI_WTIME_IS_GLOBAL
+
+UNIVERSE_SIZE   = MPI_UNIVERSE_SIZE
+APPNUM          = MPI_APPNUM
+
+LASTUSEDCODE    = MPI_LASTUSEDCODE
+
+WIN_BASE        = MPI_WIN_BASE
+WIN_SIZE        = MPI_WIN_SIZE
+WIN_DISP_UNIT   = MPI_WIN_DISP_UNIT
+
+
 # Memory Allocation
 # -----------------
 

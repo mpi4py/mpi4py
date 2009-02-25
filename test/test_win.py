@@ -34,7 +34,7 @@ class TestWinBase(object):
         self.assertEqual(dunit, 1)
 
 
-    def testGetAttributes(self):
+    def testAttributes(self):
         base, size, unit = self.WIN.attrs
         self.assertEqual(base, MPI.Get_address(self.memory))
         self.assertEqual(size, len(self.memory))
@@ -45,6 +45,15 @@ class TestWinBase(object):
         cgroup.Free()
         wgroup.Free()
         self.assertEqual(grpcmp, MPI.IDENT)
+
+    def testGetAttr(self):
+        base = MPI.Get_address(self.memory)
+        size = len(self.memory)
+        unit = 1
+        self.assertEqual(base, self.WIN.Get_attr(MPI.WIN_BASE))
+        self.assertEqual(size, self.WIN.Get_attr(MPI.WIN_SIZE))
+        self.assertEqual(unit, self.WIN.Get_attr(MPI.WIN_DISP_UNIT))
+        self.assertRaisesMPI(MPI_ERR_KEYVAL, self.WIN.Get_attr, MPI.KEYVAL_INVALID)
 
     def testGetSetErrhandler(self):
         self.assertRaisesMPI(MPI.ERR_ARG, self.WIN.Set_errhandler, MPI.ERRHANDLER_NULL)
@@ -91,12 +100,15 @@ class TestWinSelf(TestWinBase, unittest.TestCase):
 class TestWinWorld(TestWinBase, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
-
 try:
     w = MPI.Win.Create(None, 1, MPI.INFO_NULL, MPI.COMM_SELF).Free()
 except NotImplementedError:
     del TestWinNull, TestWinSelf, TestWinWorld
 
+MPI_ERR_KEYVAL = MPI.KEYVAL_INVALID
+_name, _version = MPI.get_vendor()
+if _name == 'Open MPI':
+    MPI_ERR_KEYVAL = MPI.ERR_OTHER
 
 if __name__ == '__main__':
     unittest.main()

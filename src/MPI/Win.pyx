@@ -77,6 +77,40 @@ cdef class Win:
         def __get__(self):
             return self.Get_group()
 
+    def Get_attr(self, int keyval):
+        """
+        Retrieve attribute value by key
+        """
+        cdef void     *pbase = NULL
+        cdef MPI_Aint *psize = NULL
+        cdef int      *pdisp = NULL
+        cdef void     *pattr = NULL
+        cdef int      flag = 0
+        # invalid keyval, should fail immediately
+        if keyval == MPI_KEYVAL_INVALID:
+            CHKERR(MPI_Win_get_attr(self.ob_mpi, keyval, &pattr, &flag) )
+            return None
+        # predefined attributes
+        if keyval == MPI_WIN_BASE:
+            CHKERR(MPI_Win_get_attr(self.ob_mpi, keyval, &pbase, &flag) )
+            if not flag: return None
+            if not pbase: return 0
+            return <MPI_Aint>pbase
+        if keyval == MPI_WIN_SIZE:
+            CHKERR(MPI_Win_get_attr(self.ob_mpi, keyval, &psize, &flag) )
+            if not flag: return None
+            if not psize: return 0
+            return psize[0]
+        if keyval == MPI_WIN_DISP_UNIT:
+            CHKERR(MPI_Win_get_attr(self.ob_mpi, keyval, &pdisp, &flag) )
+            if not flag: return None
+            if not pdisp: return 0
+            return pdisp[0]
+        # likely be a user-defined keyval
+        CHKERR(MPI_Win_get_attr(self.ob_mpi, keyval, &pattr, &flag) )
+        if not flag: return None
+        return PyLong_FromVoidPtr(pattr)
+
     property attrs:
         "window attributes"
         def __get__(self):

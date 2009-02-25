@@ -160,6 +160,9 @@ static int PyMPI_MPICH1_MPI_File_set_errhandler(MPI_File file,
 
 /* ---------------------------------------------------------------- */
 
+#undef  MPI_ERR_KEYVAL
+#define MPI_ERR_KEYVAL MPI_ERR_OTHER
+
 #undef  MPI_MAX_OBJECT_NAME
 #define MPI_MAX_OBJECT_NAME MPI_MAX_NAME_STRING
 

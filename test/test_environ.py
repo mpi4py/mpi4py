@@ -24,9 +24,7 @@ class TestEnviron(unittest.TestCase):
 
     def testGetProcessorName(self):
         procname = MPI.Get_processor_name()
-        try: strtypes = (str, bytes)
-        except NameError: strtypes = str
-        self.assertTrue(isinstance(procname, strtypes))
+        self.assertTrue(isinstance(procname, str))
 
     def testWTime(self):
         time1 = MPI.Wtime()
@@ -41,31 +39,60 @@ class TestEnviron(unittest.TestCase):
         self.assertTrue(tick > 0.0)
 
 
+MPI_ERR_KEYVAL = MPI.ERR_KEYVAL
+
 class TestWorldAttrs(unittest.TestCase):
+
+    def testKeyvalInvalid(self):
+        self.assertRaisesMPI(MPI_ERR_KEYVAL, MPI.COMM_WORLD.Get_attr, MPI.KEYVAL_INVALID)
+
+    def testWTimeIsGlobal(self):
+        wtg = MPI.COMM_WORLD.Get_attr(MPI.WTIME_IS_GLOBAL)
+        if wtg is not None:
+            self.assertTrue(wtg in (True, False))
+
+    def testWTimeIsGlobal(self):
+        wtg = MPI.COMM_WORLD.Get_attr(MPI.WTIME_IS_GLOBAL)
+        if wtg is not None:
+            self.assertTrue(wtg in (True, False))
 
     def testHostPorcessor(self):
         size = MPI.COMM_WORLD.Get_size()
         vals = list(range(size)) + [MPI.PROC_NULL]
-        self.assertTrue(MPI.HOST in vals)
+        hostproc = MPI.COMM_WORLD.Get_attr(MPI.HOST)
+        if hostproc is not None:
+            self.assertTrue(hostproc in vals)
 
     def testIOProcessor(self):
         size = MPI.COMM_WORLD.Get_size()
         vals = list(range(size)) + [MPI.UNDEFINED,
                                     MPI.ANY_SOURCE,
                                     MPI.PROC_NULL]
-        self.assertTrue(MPI.IO in vals)
+        ioproc = MPI.COMM_WORLD.Get_attr(MPI.IO)
+        if ioproc is not None:
+            self.assertTrue(ioproc in vals)
 
     def testAppNum(self):
-        appnum = MPI.APPNUM
-        self.assertTrue(appnum == MPI.UNDEFINED or appnum >= 0)
+        if MPI.APPNUM == MPI.KEYVAL_INVALID: return
+        appnum = MPI.COMM_WORLD.Get_attr(MPI.APPNUM)
+        if appnum is not None:
+            self.assertTrue(appnum == MPI.UNDEFINED or appnum >= 0)
 
     def testUniverseSize(self):
-        univsz = MPI.UNIVERSE_SIZE
-        self.assertTrue(univsz == MPI.UNDEFINED or univsz >= 0)
+        if MPI.UNIVERSE_SIZE == MPI.KEYVAL_INVALID: return
+        univsz = MPI.COMM_WORLD.Get_attr(MPI.UNIVERSE_SIZE)
+        if univsz is not None:
+            self.assertTrue(univsz == MPI.UNDEFINED or univsz >= 0)
+
+    def testLastUsedCode(self):
+        if MPI.LASTUSEDCODE == MPI.KEYVAL_INVALID: return
+        lastuc = MPI.COMM_WORLD.Get_attr(MPI.LASTUSEDCODE)
+        self.assertTrue(lastuc >= 0)
 
 
-del TestWorldAttrs # XXX not implemented
-
+_name, _version = MPI.get_vendor()
+if _name == 'Open MPI':
+    MPI_ERR_KEYVAL = MPI.ERR_OTHER
 
 if __name__ == '__main__':
     unittest.main()

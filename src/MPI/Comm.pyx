@@ -603,6 +603,45 @@ cdef class Comm:
             fd, &comm.ob_mpi) )
         return comm
 
+    # Attributes
+    # ----------
+
+    def Get_attr(self, int keyval):
+        """
+        Retrieve attribute value by key
+        """
+        cdef int  predefined = 0
+        cdef int  *iattr = NULL
+        cdef void *pattr = NULL
+        cdef int  flag = 0
+        # invalid keyval, should fail immediately
+        if (keyval == MPI_KEYVAL_INVALID):
+            CHKERR(MPI_Comm_get_attr(self.ob_mpi, keyval, &pattr, &flag) )
+            return None
+        # MPI-1 predefined attributes
+        predefined = ((keyval == MPI_TAG_UB) or
+                      (keyval == MPI_HOST) or
+                      (keyval == MPI_IO) or
+                      (keyval == MPI_WTIME_IS_GLOBAL))
+        if predefined:
+            CHKERR(MPI_Comm_get_attr(self.ob_mpi, keyval, &iattr, &flag) )
+            if not flag: return None
+            if not iattr: return 0
+            return iattr[0]
+        # MPI-2 predefined attributes
+        predefined = ((keyval == MPI_UNIVERSE_SIZE) or
+                      (keyval == MPI_APPNUM) or
+                      (keyval == MPI_LASTUSEDCODE))
+        if predefined:
+            CHKERR(MPI_Comm_get_attr(self.ob_mpi, keyval, &iattr, &flag) )
+            if not flag: return None
+            if not iattr: return 0
+            return iattr[0]
+        # likely a user-defined keyval
+        CHKERR(MPI_Comm_get_attr(self.ob_mpi, keyval, &pattr, &flag) )
+        if not flag: return None
+        return PyLong_FromVoidPtr(pattr)
+
     # Error handling
     # --------------
 
