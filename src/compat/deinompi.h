@@ -11,8 +11,13 @@ static int PyMPI_DEINOMPI_MPI_Init(int *argc, char ***argv)
 {
   if (argc==(int *)0 || argv==(char ***)0) {
 #ifdef Py_PYTHON_H
-   PyMPI_DEINOMPI_args[0] = Py_GetProgramName();
-   PyMPI_DEINOMPI_argc = 1;
+#if PY_MAJOR_VERSION >= 3
+    /* XXX Need to do better for Python 3 */
+    PyMPI_MPICH1_args[0] = (char *) "python";
+#else
+    PyMPI_MPICH1_args[0] = Py_GetProgramName();
+#endif
+    PyMPI_DEINOMPI_argc = 1;
 #endif
     PyMPI_DEINOMPI_argv = PyMPI_DEINOMPI_args;
     argc = &PyMPI_DEINOMPI_argc;
@@ -28,8 +33,13 @@ static int PyMPI_DEINOMPI_MPI_Init_thread(int *argc, char ***argv,
 {
   if (argc==(int *)0 || argv==(char ***)0) {
 #ifdef Py_PYTHON_H
-   PyMPI_DEINOMPI_args[0] = Py_GetProgramName();
-   PyMPI_DEINOMPI_argc = 1;
+#if PY_MAJOR_VERSION >= 3
+    /* XXX Need to do better for Python 3 */
+    PyMPI_MPICH1_args[0] = (char *) "python";
+#else
+    PyMPI_MPICH1_args[0] = Py_GetProgramName();
+#endif
+    PyMPI_DEINOMPI_argc = 1;
 #endif
     PyMPI_DEINOMPI_argv = PyMPI_DEINOMPI_args;
     argc = &PyMPI_DEINOMPI_argc;
