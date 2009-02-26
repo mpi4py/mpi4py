@@ -13,9 +13,9 @@ static int PyMPI_DEINOMPI_MPI_Init(int *argc, char ***argv)
 #ifdef Py_PYTHON_H
 #if PY_MAJOR_VERSION >= 3
     /* XXX Need to do better for Python 3 */
-    PyMPI_MPICH1_args[0] = (char *) "python";
+    PyMPI_DEINOMPI_args[0] = (char *) "python";
 #else
-    PyMPI_MPICH1_args[0] = Py_GetProgramName();
+    PyMPI_DEINOMPI_args[0] = Py_GetProgramName();
 #endif
     PyMPI_DEINOMPI_argc = 1;
 #endif
@@ -35,9 +35,9 @@ static int PyMPI_DEINOMPI_MPI_Init_thread(int *argc, char ***argv,
 #ifdef Py_PYTHON_H
 #if PY_MAJOR_VERSION >= 3
     /* XXX Need to do better for Python 3 */
-    PyMPI_MPICH1_args[0] = (char *) "python";
+    PyMPI_DEINOMPI_args[0] = (char *) "python";
 #else
-    PyMPI_MPICH1_args[0] = Py_GetProgramName();
+    PyMPI_DEINOMPI_args[0] = Py_GetProgramName();
 #endif
     PyMPI_DEINOMPI_argc = 1;
 #endif
