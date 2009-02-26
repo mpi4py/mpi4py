@@ -105,7 +105,7 @@ try:
 except NotImplementedError:
     del TestWinNull, TestWinSelf, TestWinWorld
 
-MPI_ERR_KEYVAL = MPI.KEYVAL_INVALID
+MPI_ERR_KEYVAL = MPI.ERR_KEYVAL
 _name, _version = MPI.get_vendor()
 if _name == 'Open MPI':
     MPI_ERR_KEYVAL = MPI.ERR_OTHER
