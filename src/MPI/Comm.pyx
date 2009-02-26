@@ -610,37 +610,25 @@ cdef class Comm:
         """
         Retrieve attribute value by key
         """
-        cdef int  predefined = 0
-        cdef int  *iattr = NULL
-        cdef void *pattr = NULL
+        cdef void *attrval = NULL
         cdef int  flag = 0
-        # invalid keyval, should fail immediately
-        if (keyval == MPI_KEYVAL_INVALID):
-            CHKERR(MPI_Comm_get_attr(self.ob_mpi, keyval, &pattr, &flag) )
-            return None
-        # MPI-1 predefined attributes
-        predefined = ((keyval == MPI_TAG_UB) or
-                      (keyval == MPI_HOST) or
-                      (keyval == MPI_IO) or
-                      (keyval == MPI_WTIME_IS_GLOBAL))
-        if predefined:
-            CHKERR(MPI_Comm_get_attr(self.ob_mpi, keyval, &iattr, &flag) )
-            if not flag: return None
-            if not iattr: return 0
-            return iattr[0]
-        # MPI-2 predefined attributes
-        predefined = ((keyval == MPI_UNIVERSE_SIZE) or
-                      (keyval == MPI_APPNUM) or
-                      (keyval == MPI_LASTUSEDCODE))
-        if predefined:
-            CHKERR(MPI_Comm_get_attr(self.ob_mpi, keyval, &iattr, &flag) )
-            if not flag: return None
-            if not iattr: return 0
-            return iattr[0]
-        # likely a user-defined keyval
-        CHKERR(MPI_Comm_get_attr(self.ob_mpi, keyval, &pattr, &flag) )
+        CHKERR(MPI_Comm_get_attr(self.ob_mpi, keyval, &attrval, &flag) )
         if not flag: return None
-        return PyLong_FromVoidPtr(pattr)
+        if not attrval: return 0
+        # MPI-1 predefined attribute keyvals
+        if ((keyval == <int>MPI_TAG_UB) or
+            (keyval == <int>MPI_HOST) or
+            (keyval == <int>MPI_IO) or
+            (keyval == <int>MPI_WTIME_IS_GLOBAL)):
+            return (<int*>attrval)[0]
+        # MPI-2 predefined attribute keyvals
+        elif ((keyval == <int>MPI_UNIVERSE_SIZE) or
+              (keyval == <int>MPI_APPNUM) or
+              (keyval == <int>MPI_LASTUSEDCODE)):
+            return (<int*>attrval)[0]
+        # user-defined attribute keyval
+        else:
+            return PyLong_FromVoidPtr(attrval)
 
     # Error handling
     # --------------

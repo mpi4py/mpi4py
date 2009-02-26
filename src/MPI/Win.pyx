@@ -81,35 +81,21 @@ cdef class Win:
         """
         Retrieve attribute value by key
         """
-        cdef void     *pbase = NULL
-        cdef MPI_Aint *psize = NULL
-        cdef int      *pdisp = NULL
-        cdef void     *pattr = NULL
-        cdef int      flag = 0
-        # invalid keyval, should fail immediately
-        if keyval == MPI_KEYVAL_INVALID:
-            CHKERR(MPI_Win_get_attr(self.ob_mpi, keyval, &pattr, &flag) )
-            return None
-        # predefined attributes
-        if keyval == MPI_WIN_BASE:
-            CHKERR(MPI_Win_get_attr(self.ob_mpi, keyval, &pbase, &flag) )
-            if not flag: return None
-            if not pbase: return 0
-            return <MPI_Aint>pbase
-        if keyval == MPI_WIN_SIZE:
-            CHKERR(MPI_Win_get_attr(self.ob_mpi, keyval, &psize, &flag) )
-            if not flag: return None
-            if not psize: return 0
-            return psize[0]
-        if keyval == MPI_WIN_DISP_UNIT:
-            CHKERR(MPI_Win_get_attr(self.ob_mpi, keyval, &pdisp, &flag) )
-            if not flag: return None
-            if not pdisp: return 0
-            return pdisp[0]
-        # likely be a user-defined keyval
-        CHKERR(MPI_Win_get_attr(self.ob_mpi, keyval, &pattr, &flag) )
+        cdef void *attrval = NULL
+        cdef int flag = 0
+        CHKERR( MPI_Win_get_attr(self.ob_mpi, keyval, &attrval, &flag) )
         if not flag: return None
-        return PyLong_FromVoidPtr(pattr)
+        if not attrval: return 0
+        # handle predefined keyvals
+        if (keyval == <int>MPI_WIN_BASE):
+            return <MPI_Aint>attrval
+        elif (keyval == <int>MPI_WIN_SIZE):
+            return (<MPI_Aint*>attrval)[0]
+        elif (keyval == <int>MPI_WIN_DISP_UNIT):
+            return (<int*>attrval)[0]
+        # likely be a user-defined keyval
+        else:
+            return PyLong_FromVoidPtr(attrval)
 
     property attrs:
         "window attributes"
