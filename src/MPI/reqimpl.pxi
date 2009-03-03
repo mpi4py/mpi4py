@@ -19,8 +19,10 @@ cdef class _p_greq:
         cdef Status sts = Status()
         if self.query_fn is not None:
             self.query_fn(sts, *self.args, **self.kargs)
-        if status != MPI_STATUS_IGNORE: # just in case ...
-            memcpy(status, &sts.ob_mpi, sizeof(MPI_Status))
+        if (status != NULL and
+            status != MPI_STATUS_IGNORE and
+            status != MPI_STATUSES_IGNORE): # just in case ...
+            status[0] = sts.ob_mpi
         return MPI_SUCCESS
 
     cdef int free(self) except -1:

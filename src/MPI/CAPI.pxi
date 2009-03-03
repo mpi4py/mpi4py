@@ -16,10 +16,11 @@ cdef api MPI_Datatype* PyMPIDatatype_Get(object arg) except NULL:
 
 cdef api object PyMPIStatus_New(MPI_Status *arg):
     cdef Status obj = Status()
-    if arg != NULL and \
-       arg != MPI_STATUS_IGNORE and \
-       arg != MPI_STATUSES_IGNORE:
-        memcpy(&obj.ob_mpi, arg, sizeof(MPI_Status))
+    if (arg != NULL and
+        arg != MPI_STATUS_IGNORE and
+        arg != MPI_STATUSES_IGNORE):
+        obj.ob_mpi = arg[0]
+    else: pass  # XXX should fail ?
     return obj
 
 cdef api MPI_Status* PyMPIStatus_Get(object arg) except NULL:
