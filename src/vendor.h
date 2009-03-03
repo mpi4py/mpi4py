@@ -1,5 +1,5 @@
 #include "mpi.h"
-#include "stdio.h"
+#include <stdio.h>
 
 static int MPI_Get_vendor(const char **vendor_name,
 			  int         *version_major,
