@@ -217,9 +217,9 @@ cdef object PyMPI_bcast(object obj,
     cdef int inter=0, rank=0
     CHKERR( MPI_Comm_test_inter(comm, &inter) )
     if inter:
-        if root == MPI_PROC_NULL:
+        if root == <int>MPI_PROC_NULL:
             dosend=0; dorecv=0;
-        elif root == MPI_ROOT:
+        elif root == <int>MPI_ROOT:
             dosend=1; dorecv=0;
         else:
             dosend=0; dorecv=1;
@@ -260,9 +260,9 @@ cdef object PyMPI_gather(object sendobj, object recvobj,
     CHKERR( MPI_Comm_test_inter(comm, &inter) )
     if inter:
         CHKERR( MPI_Comm_remote_size(comm, &size) )
-        if root == MPI_PROC_NULL:
+        if root == <int>MPI_PROC_NULL:
             dosend=0; dorecv=0;
-        elif root == MPI_ROOT:
+        elif root == <int>MPI_ROOT:
             dosend=0; dorecv=1;
         else:
             dosend=1; dorecv=0;
@@ -309,9 +309,9 @@ cdef object PyMPI_scatter(object sendobj, object recvobj,
     CHKERR( MPI_Comm_test_inter(comm, &inter) )
     if inter:
         CHKERR( MPI_Comm_remote_size(comm, &size) )
-        if root == MPI_PROC_NULL:
+        if root == <int>MPI_PROC_NULL:
             dosend=1; dorecv=0;
-        elif root == MPI_ROOT:
+        elif root == <int>MPI_ROOT:
             dosend=1; dorecv=0;
         else:
             dosend=0; dorecv=1;

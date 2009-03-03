@@ -110,31 +110,31 @@ typedef void *PyMPI_MPI_Errhandler;
 
 #ifdef PyMPI_MISSING_MPI_UNDEFINED
 #if !defined(MPI_UNDEFINED)
-#define MPI_UNDEFINED ((-32766))
+#define MPI_UNDEFINED (-32766)
 #endif
 #endif
 
 #ifdef PyMPI_MISSING_MPI_ANY_SOURCE
 #if !defined(MPI_ANY_SOURCE)
-#define MPI_ANY_SOURCE ((MPI_UNDEFINED-1))
+#define MPI_ANY_SOURCE (MPI_UNDEFINED)
 #endif
 #endif
 
 #ifdef PyMPI_MISSING_MPI_ANY_TAG
 #if !defined(MPI_ANY_TAG)
-#define MPI_ANY_TAG ((MPI_UNDEFINED-2))
+#define MPI_ANY_TAG (MPI_UNDEFINED)
 #endif
 #endif
 
 #ifdef PyMPI_MISSING_MPI_PROC_NULL
 #if !defined(MPI_PROC_NULL)
-#define MPI_PROC_NULL ((MPI_UNDEFINED+1))
+#define MPI_PROC_NULL (MPI_UNDEFINED)
 #endif
 #endif
 
 #ifdef PyMPI_MISSING_MPI_ROOT
 #if !defined(MPI_ROOT)
-#define MPI_ROOT ((MPI_UNDEFINED+2))
+#define MPI_ROOT (MPI_UNDEFINED)
 #endif
 #endif
 
