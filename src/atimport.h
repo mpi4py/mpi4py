@@ -22,6 +22,8 @@
 #include "config/mpich1.h"
 #elif defined(LAM_MPI)
 #include "config/lammpi.h"
+#elif defined(SGI_MPI)
+#include "config/sgimpi.h"
 #endif
 
 /* XXX describe */
@@ -41,6 +43,8 @@
 #include "compat/mpich1.h"
 #elif defined(LAM_MPI)
 #include "compat/lammpi.h"
+#elif defined(SGI_MPI)
+#include "compat/sgimpi.h"
 #endif
 
 /* ---------------------------------------------------------------- */

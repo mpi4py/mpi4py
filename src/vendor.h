@@ -68,6 +68,11 @@ static int MPI_Get_vendor(const char **vendor_name,
   #endif
 #endif
 
+  /* SGI */
+#if defined(SGI_MPI)
+  name = "SGI";
+#endif
+
   if (vendor_name)   *vendor_name   = name;
   if (version_major) *version_major = major;
   if (version_minor) *version_minor = minor;

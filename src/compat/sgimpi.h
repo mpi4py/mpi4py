@@ -1,0 +1,5 @@
+#ifndef PyMPI_COMPAT_SGIMPI_H
+#define PyMPI_COMPAT_SGIMPI_H
+
+
+#endif /* !PyMPI_COMPAT_SGIMPI_H */
