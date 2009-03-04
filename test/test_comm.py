@@ -34,9 +34,6 @@ class TestCommNull(unittest.TestCase):
     def testSetErrhandler(self):
         self.assertRaisesMPI(MPI.ERR_COMM, MPI.COMM_NULL.Set_errhandler, MPI.ERRORS_RETURN)
 
-    def testAbort(self):
-        self.assertRaisesMPI(MPI.ERR_COMM, MPI.COMM_NULL.Abort)
-
     def testIntraNull(self):
         comm_null = MPI.Intracomm()
         self.assertFalse(comm_null is MPI.COMM_NULL)
@@ -197,14 +194,11 @@ class TestCommWorldDup(TestCommWorld):
 
 _name, _version = MPI.get_vendor()
 if _name == 'Open MPI':
-    del TestCommNull.testAbort
     if _version < (1,3,1):
         def testGetErrhandler(self):
             self.assertRaisesMPI(MPI.ERR_ARG, MPI.COMM_NULL.Get_errhandler)
         TestCommNull.testGetErrhandler = testGetErrhandler
         del testGetErrhandler
-elif _name == 'LAM/MPI':
-    del TestCommNull.testAbort
 
 if __name__ == '__main__':
     unittest.main()
