@@ -105,27 +105,32 @@ def ext_modules():
     return [MPI]
 
 def executables():
-    import sys, os
+    import sys
     from distutils import sysconfig
     libraries = []
     library_dirs = []
-    comp_args = []
+    compile_args = []
     link_args = []
+    py_version = sysconfig.get_python_version()
+    cfgDict = sysconfig.get_config_vars()
     if not sys.platform.startswith('win'):
-        py_version = sysconfig.get_python_version()
-        cfgDict = sysconfig.get_config_vars()
         if '-pthread' in cfgDict.get('CC', ''):
-            comp_args.append('-pthread')
+            compile_args.append('-pthread')
         libraries = ['python' + py_version]
         for var in ('LIBDIR', 'LIBPL'):
             library_dirs += cfgDict.get(var, '').split()
-        for var in ('LIBS', 'MODLIBS', 'SYSLIBS', 'LDLAST',):
+        if '-pthread' in cfgDict.get('LINKCC', ''):
+            link_args.append('-pthread')
+        for var in ('LDFLAGS',
+                    'LIBS', 'MODLIBS', 'SYSLIBS',
+                    'LDLAST'):
             link_args += cfgDict.get(var, '').split()
-    pyexe = dict(name='mpi4py',
+
+    pyexe = dict(name='mpi4py',#'python%s-mpi' % py_version,
                  sources=['src/python.c'],
                  libraries=libraries,
                  library_dirs=library_dirs,
-                 extra_compile_args=comp_args,
+                 extra_compile_args=compile_args,
                  extra_link_args=link_args)
     return [pyexe]
 
@@ -136,9 +141,10 @@ def executables():
 
 from distutils.core import setup
 from conf.mpidistutils import Distribution, Extension, Executable
-from conf.mpidistutils import config, build, build_ext, install_data
-from conf.mpidistutils import build_exe, install_exe, clean_exe
-LibHeader = lambda header: str(header)
+from conf.mpidistutils import config, build, install, clean
+from conf.mpidistutils import build_ext, build_exe
+from conf.mpidistutils import install_data, install_exe
+
 ExtModule = lambda extension: Extension(**extension)
 ExeBinary = lambda executable: Executable(**executable)
 
@@ -160,10 +166,11 @@ def run_setup():
           distclass = Distribution,
           cmdclass = {'config'       : config,
                       'build'        : build,
+                      'install'      : install,
+                      'clean'        : clean,
                       'build_ext'    : build_ext,
-                      'install_data' : install_data,
                       'build_exe'    : build_exe,
-                      'clean_exe'    : clean_exe,
+                      'install_data' : install_data,
                       'install_exe'  : install_exe,
                       },
           **metadata)
