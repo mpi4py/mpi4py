@@ -10,6 +10,15 @@ cdef inline MPI_Status *_arg_Status(object status):
     if status is None: return MPI_STATUS_IGNORE
     return &((<Status?>status).ob_mpi)
 
+cdef inline int _eq_Status(MPI_Status* s1, MPI_Status* s2) nogil:
+   cdef size_t i=0, n=sizeof(MPI_Status)
+   cdef unsigned char* a = <unsigned char*>s1
+   cdef unsigned char* b = <unsigned char*>s2
+   for i from 0 <= i < n:
+       if a[i] != b[i]:
+           return 0
+   return 1
+
 #---------------------------------------------------------------------
 # Datatype
 
