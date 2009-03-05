@@ -17,11 +17,6 @@
 
 #include <locale.h>
 
-/*
-#define PyMem_Malloc malloc
-#define PyMem_Free   free
-*/
-
 static wchar_t **args_copy = NULL;
 
 static void Py3_Main_DelArgs(wchar_t **args)

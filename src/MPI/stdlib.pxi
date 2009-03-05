@@ -5,13 +5,6 @@ cdef extern from *:
 
 #---------------------------------------------------------------------
 
-cdef extern from * nogil: # "stdlib.h"
-    void* malloc(size_t)
-    void* realloc(void*, size_t)
-    void free(void*)
-
-#---------------------------------------------------------------------
-
 cdef extern from * nogil: # "string.h"
     int memcmp(void*, void*, size_t)
     void* memset(void*, int, size_t)

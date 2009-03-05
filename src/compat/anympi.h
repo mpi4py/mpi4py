@@ -3,7 +3,27 @@
 
 /* ---------------------------------------------------------------- */
 
+#ifdef Py_PYTHON_H
+
+#ifndef PyMPI_MALLOC
+#define PyMPI_MALLOC PyMem_Malloc
+#endif
+#ifndef PyMPI_FREE
+#define PyMPI_FREE PyMem_Free
+#endif
+
+#else
+
 #include <stdlib.h>
+
+#ifndef PyMPI_MALLOC
+#define PyMPI_MALLOC malloc
+#endif
+#ifndef PyMPI_Free
+#define PyMPI_Free free
+#endif
+
+#endif
 
 /* ---------------------------------------------------------------- */
 
@@ -138,12 +158,12 @@ static int PyMPI_Type_create_indexed_block(int count,
   int i, *blocklengths = 0;
   int ierr = MPI_SUCCESS;
   if (count > 0) {
-    blocklengths = (int *) malloc(count*sizeof(int));
+    blocklengths = (int *) PyMPI_MALLOC(count*sizeof(int));
     if (!blocklengths) return MPI_ERR_NO_MEM;
   }
   for (i=0; i<count; i++) blocklengths[i] = blocklength;
   ierr = MPI_Type_indexed(count,blocklengths,displacements,oldtype,newtype);
-  if (blocklengths) free(blocklengths);
+  if (blocklengths) PyMPI_FREE(blocklengths);
   return ierr;
 }
 #undef  MPI_Type_create_indexed_block
@@ -459,9 +479,9 @@ static int PyMPI_Type_create_darray(int size,
     
     /* calculate position in Cartesian grid 
        as MPI would (row-major ordering) */
-    coords  = (int *) malloc(ndims*sizeof(int)); 
+    coords  = (int *) PyMPI_MALLOC(ndims*sizeof(int)); 
     if (coords  == 0) { ierr = MPI_ERR_INTERN; PyMPI_CHKERR(ierr); }
-    offsets = (MPI_Aint *) malloc(ndims*sizeof(MPI_Aint));
+    offsets = (MPI_Aint *) PyMPI_MALLOC(ndims*sizeof(MPI_Aint));
     if (offsets == 0) { ierr = MPI_ERR_INTERN; PyMPI_CHKERR(ierr); }
 
     procs = size;
@@ -551,8 +571,8 @@ static int PyMPI_Type_create_darray(int size,
 
     ierr = MPI_SUCCESS;
  fn_exit:
-    if (coords  != 0) free(coords);
-    if (offsets != 0) free(offsets);
+    if (coords  != 0) PyMPI_FREE(coords);
+    if (offsets != 0) PyMPI_FREE(offsets);
     return ierr;
 }
 #undef PyMPI_MIN
@@ -567,15 +587,8 @@ static int PyMPI_Type_create_darray(int size,
 
 /* Memory Allocation */
 
-#ifdef PyMPI_MISSING_MPI_ALLOC_MEM
-#ifdef PyMPI_MISSING_MPI_FREE_MEM
-
-#ifndef PyMPI_malloc
-#define PyMPI_malloc malloc
-#endif
-#ifndef PyMPI_free
-#define PyMPI_free free
-#endif
+#if (defined(PyMPI_MISSING_MPI_ALLOC_MEM) || \
+     defined(PyMPI_MISSING_MPI_FREE_MEM))
 
 static int PyMPI_Alloc_mem(MPI_Aint size, MPI_Info info, void *baseptr)
 {
@@ -583,7 +596,7 @@ static int PyMPI_Alloc_mem(MPI_Aint size, MPI_Info info, void *baseptr)
   if (size < 0) return MPI_ERR_ARG;
   if (!baseptr) return MPI_ERR_ARG;
   if (size == 0) size = 1;
-  buf = (char *) PyMPI_malloc(size);
+  buf = (char *) PyMPI_MALLOC(size);
   if (!buf) return MPI_ERR_NO_MEM;
   basebuf = (char **) baseptr;
   *basebuf = buf;
@@ -595,13 +608,12 @@ static int PyMPI_Alloc_mem(MPI_Aint size, MPI_Info info, void *baseptr)
 static int PyMPI_Free_mem(void *baseptr)
 {
   if (!baseptr) return MPI_ERR_ARG;
-  PyMPI_free(baseptr);
+  PyMPI_FREE(baseptr);
   return MPI_SUCCESS;
 }
 #undef  MPI_Free_mem
 #define MPI_Free_mem PyMPI_Free_mem
 
-#endif
 #endif
 
 /* ---------------------------------------------------------------- */

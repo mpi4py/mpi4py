@@ -1,16 +1,17 @@
 #---------------------------------------------------------------------
 
 cdef extern from "Python.h":
+    void *PyMem_Malloc(size_t)
+    void PyMem_Free(void *)
     object PyCObject_FromVoidPtr(void *, void (*)(void*))
 
 #---------------------------------------------------------------------
 
 cdef inline void *memnew(size_t n):
-    if n == 0: n = 1
-    return malloc(n)
+    return PyMem_Malloc(n)
 
 cdef inline void memdel(void *p):
-    if p != NULL: free(p)
+    PyMem_Free(p)
 
 cdef inline object allocate(size_t n, void **pp):
     cdef object cob
