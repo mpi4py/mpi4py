@@ -685,6 +685,14 @@ class build_exe(build_ext):
         #
         self._built_objects = objects[:]
 
+        # XXX -- this is a Vile HACK!
+        #
+        # Remove msvcrXX.dll when building executables with MinGW
+        #
+        if self.compiler.compiler_type == 'mingw32':
+            try: del self.compiler.dll_libraries[:]
+            except: pass
+        
         # Now link the object files together into a "shared object" --
         # of course, first we have to figure out all the other things
         # that go into the mix.
