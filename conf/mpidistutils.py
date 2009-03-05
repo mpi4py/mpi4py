@@ -36,9 +36,9 @@ def customize_compiler(compiler, environ=None):
         environ = os.environ
 
     if compiler.compiler_type == 'unix':
-        (cc, cxx, opt,
-         basecflags, cflags, ccshared,
-         ldshared, so_ext) = \
+        (cc, cxx, 
+         basecflags, opt, cflags,
+         ccshared, ldshared, so_ext) = \
             get_config_vars('CC', 'CXX',
                             'BASECFLAGS', 'OPT', 'CFLAGS',
                             'CCSHARED', 'LDSHARED', 'SO')
@@ -71,7 +71,6 @@ def customize_compiler(compiler, environ=None):
             compiler_cxx=cxx,
             linker_so=ldshared,
             linker_exe=cc)
-
         compiler.shared_lib_extension = so_ext
 
 def customize_mpi_environ(mpicc, mpicxx=None, environ=None):
