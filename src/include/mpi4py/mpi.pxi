@@ -47,7 +47,7 @@ cdef extern from "mpi.h" nogil:
     enum: MPI_ANY_SOURCE     #:= MPI_UNDEFINED
     enum: MPI_ANY_TAG        #:= MPI_UNDEFINED
     enum: MPI_PROC_NULL      #:= MPI_UNDEFINED
-    enum: MPI_ROOT           #:= MPI_UNDEFINED
+    enum: MPI_ROOT           #:= MPI_PROC_NULL
 
     enum: MPI_IDENT      #:= 1
     enum: MPI_CONGRUENT  #:= 2

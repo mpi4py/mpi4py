@@ -134,7 +134,7 @@ typedef void *PyMPI_MPI_Errhandler;
 
 #ifdef PyMPI_MISSING_MPI_ROOT
 #if !defined(MPI_ROOT)
-#define MPI_ROOT (MPI_UNDEFINED)
+#define MPI_ROOT (MPI_PROC_NULL)
 #endif
 #endif
 
