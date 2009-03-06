@@ -1,6 +1,6 @@
 # --------------------------------------------------------------------
 
-cdef extern from "atimport.h":
+cdef extern from *:
     char*      PyMPIBytes_AsString(object) except NULL
     Py_ssize_t PyMPIBytes_Size(object) except -1
     object     PyMPIBytes_FromStringAndSize(char*,Py_ssize_t)

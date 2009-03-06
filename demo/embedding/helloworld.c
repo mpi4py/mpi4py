@@ -29,7 +29,14 @@ int main(int argc, char *argv[])
     Py_Finalize();
   }
 
+  Py_Initialize();
+  PyRun_SimpleString(helloworld);
   MPI_Finalize();
+  Py_Finalize();
+
+  Py_Initialize();
+  PyRun_SimpleString("from mpi4py import MPI\n");
+  Py_Finalize();
   
   return 0;
 }

@@ -8,15 +8,8 @@ include "mpi.pxi"
 
 include "atimport.pxi"
 
-_init1() # management of MPI initialization
-_init2() # installation of MPI_ERRORS_RETURN error handler
-_init3() # Interception of call to MPI_Finalize()
-
-BOTTOM = <MPI_Aint>MPI_BOTTOM
-#"""Special address for buffers"""
-
-IN_PLACE = <MPI_Aint>MPI_IN_PLACE
-#"""*In-place* option for collective communications"""
+initialize()
+startup()
 
 include "allocate.pxi"
 include "asmpistr.pxi"
@@ -58,6 +51,13 @@ PROC_NULL = MPI_PROC_NULL
 
 ROOT = MPI_ROOT
 #"""Root process for collective inter-communications"""
+
+BOTTOM = __BOTTOM__
+#"""Special address for buffers"""
+
+IN_PLACE = __IN_PLACE__
+#"""*In-place* option for collective communications"""
+
 
 
 # Predefined Attribute Keyvals

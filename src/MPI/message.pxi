@@ -5,14 +5,14 @@ cdef extern from "Python.h":
     int is_list  "PyList_CheckExact"  (object)
     int is_tuple "PyTuple_CheckExact" (object)
 
-cdef object _bottom   = BOTTOM
-cdef object _in_place = IN_PLACE
+cdef object __BOTTOM__   = <MPI_Aint>MPI_BOTTOM
+cdef object __IN_PLACE__ = <MPI_Aint>MPI_IN_PLACE
 
 cdef inline int is_BOTTOM(object msg):
-    return (msg is None or msg is _bottom)
+    return (msg is None or msg is __BOTTOM__)
 
 cdef inline int is_IN_PLACE(object msg):
-    return (msg is None or msg is _in_place)
+    return (msg is None or msg is __IN_PLACE__)
 
 cdef inline object message_simple(int readonly,
                                   object msg,

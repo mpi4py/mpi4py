@@ -38,7 +38,7 @@ class Exception(RuntimeError):
         return ierr != MPI_SUCCESS
 
     def __int__(self):
-        if not _mpi_active():
+        if not mpi_active():
             return self.ob_mpi
         return self.Get_error_code()
 
@@ -46,7 +46,7 @@ class Exception(RuntimeError):
         return mpistr('MPI.Exception(%d)') % self.ob_mpi
 
     def __str__(self):
-        if not _mpi_active():
+        if not mpi_active():
             return mpistr('error code: %d') % self.ob_mpi
         return self.Get_error_string()
 

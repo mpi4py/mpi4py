@@ -49,6 +49,10 @@
 
 /* ---------------------------------------------------------------- */
 
+static int PyMPI_KEYVAL_ATEXIT_MPI = MPI_KEYVAL_INVALID;
+
+/* ---------------------------------------------------------------- */
+
 #if PY_MAJOR_VERSION >= 3
 static PyObject * PyBuffer_FromReadWriteMemory(void *p, Py_ssize_t n)
 {
