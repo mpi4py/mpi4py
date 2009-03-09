@@ -31,14 +31,14 @@ cdef inline int _del_Datatype(MPI_Datatype* ob):
     #
     if ob    == NULL              : return 0
     if ob[0] == MPI_DATATYPE_NULL : return 0
-    if not _mpi_active()          : return 0
+    if not mpi_active()           : return 0
     #
     return MPI_Type_free(ob)
 
 cdef inline int _named_Datatype(MPI_Datatype ob):
     if ob == MPI_DATATYPE_NULL: return 0
     cdef int ni = 0, na = 0, nt = 0, combiner = MPI_UNDEFINED
-    cdef int ierr = 0
+    cdef int ierr = MPI_SUCCESS
     ierr = MPI_Type_get_envelope(ob, &ni, &na, &nt, &combiner)
     if ierr: return 0 # XXX
     return combiner == MPI_COMBINER_NAMED
@@ -62,7 +62,7 @@ cdef inline int _del_Request(MPI_Request* ob):
     #
     if ob    == NULL             : return 0
     if ob[0] == MPI_REQUEST_NULL : return 0
-    if not _mpi_active()         : return 0
+    if not mpi_active()          : return 0
     #
     return MPI_Request_free(ob)
 
@@ -107,7 +107,7 @@ cdef inline int _del_Op(MPI_Op* ob):
     if ob[0] == MPI_MAXLOC  : return 0
     if ob[0] == MPI_MINLOC  : return 0
     if ob[0] == MPI_REPLACE : return 0
-    if not _mpi_active()    : return 0
+    if not mpi_active()     : return 0
     #
     return MPI_Op_free(ob)
 
@@ -123,7 +123,7 @@ cdef inline int _del_Info(MPI_Info* ob):
     #
     if ob    == NULL          : return 0
     if ob[0] == MPI_INFO_NULL : return 0
-    if not _mpi_active()      : return 0
+    if not mpi_active()       : return 0
     #
     return MPI_Info_free(ob)
 
@@ -145,7 +145,7 @@ cdef inline int _del_Group(MPI_Group* ob):
      if ob    == NULL            : return 0
      if ob[0] == MPI_GROUP_NULL  : return 0
      if ob[0] == MPI_GROUP_EMPTY : return 0
-     if not _mpi_active()        : return 0
+     if not mpi_active()         : return 0
      #
      return MPI_Group_free(ob)
 
@@ -173,7 +173,7 @@ cdef inline int _del_Comm(MPI_Comm* ob):
     if ob[0] == MPI_COMM_NULL  : return 0
     if ob[0] == MPI_COMM_SELF  : return 0
     if ob[0] == MPI_COMM_WORLD : return 0
-    if not _mpi_active()       : return 0
+    if not mpi_active()        : return 0
     #
     return MPI_Comm_free(ob)
 
@@ -191,7 +191,7 @@ cdef inline int _del_Win(MPI_Win* ob):
     #
     if ob    == NULL         : return 0
     if ob[0] == MPI_WIN_NULL : return 0
-    if not _mpi_active()     : return 0
+    if not mpi_active()      : return 0
     #
     return MPI_Win_free(ob)
 
@@ -207,7 +207,7 @@ cdef inline int _del_File(MPI_File* ob):
     #
     if ob    == NULL          : return 0
     if ob[0] == MPI_FILE_NULL : return 0
-    if not _mpi_active()      : return 0
+    if not mpi_active()       : return 0
     #
     return MPI_File_close(ob)
 
@@ -223,7 +223,7 @@ cdef inline int _del_Errhandler(MPI_Errhandler* ob):
     #
     if ob    == NULL                : return 0
     if ob[0] == MPI_ERRHANDLER_NULL : return 0
-    if not _mpi_active()            : return 0
+    if not mpi_active()             : return 0
     #
     return MPI_Errhandler_free(ob)
 

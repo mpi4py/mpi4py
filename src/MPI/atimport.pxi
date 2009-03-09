@@ -17,9 +17,8 @@ cdef extern from "atimport.h":
 
 # --------------------------------------------------------------------
 
-cdef int mpi_is_owned  = 0
-cdef int mpi_is_active = 0
-cdef int cleanup_done  = 0
+cdef int mpi_is_owned = 0
+cdef int cleanup_done = 0
 
 cdef MPI_Errhandler comm_self_eh  = MPI_ERRHANDLER_NULL
 cdef MPI_Errhandler comm_world_eh = MPI_ERRHANDLER_NULL
@@ -38,15 +37,8 @@ cdef inline int mpi_active() nogil:
     # MPI should be active ...
     return 1
 
-# I should get rid of this, but it is faster
-cdef inline int _mpi_active() nogil:
-    global mpi_is_active
-    if mpi_is_active: return 1
-    return mpi_active()
-
 cdef int initialize() except -1:
     global mpi_is_owned
-    global mpi_is_active
     cdef int ierr = MPI_SUCCESS
     # MPI initialized ?
     cdef int initialized = 1
@@ -57,7 +49,6 @@ cdef int initialize() except -1:
     # Do we have to initialize MPI?
     if initialized:
         if not finalized:
-            mpi_is_active = 1
             if Py_AtExit(atexit_py) < 0:
                 PySys_WriteStderr("warning: could not register"
                                   "cleanup with Py_AtExit()")
@@ -75,7 +66,6 @@ cdef int initialize() except -1:
             u"MPI_Init() failed [error code: %d]" % ierr)
     # We initialized MPI, so it is owned and active at this point
     mpi_is_owned  = 1
-    mpi_is_active = 1
     # then finalize it when Python process exits
     if Py_AtExit(atexit_py) < 0:
         PySys_WriteStderr("warning: could not register"
@@ -110,11 +100,12 @@ cdef int startup() except -1:
     return 0
 
 cdef void cleanup() nogil:
+    if not mpi_active(): return
+    #
     global cleanup_done
     if cleanup_done: return
     cleanup_done = 1
     #
-    if not mpi_active(): return
     #DBG:# fprintf(stderr, "cleanup: BEGIN\n"); fflush(stderr)
     cdef int ierr = MPI_SUCCESS
     # free windows keyval
@@ -136,21 +127,20 @@ cdef void cleanup() nogil:
     #DBG:# fprintf(stderr, "cleanup: END\n"); fflush(stderr)
 
 cdef int atexit_mpi(MPI_Comm c,int k, void *v, void *xs) nogil:
-    global mpi_is_active
-    mpi_is_active = 0
+    #DBG:# fprintf(stderr, "atexit_mpi: BEGIN\n"); fflush(stderr)
     cleanup()
+    #DBG:# fprintf(stderr, "atexit_mpi: END\n"); fflush(stderr)
     return MPI_SUCCESS
 
 cdef void atexit_py() nogil:
-    global mpi_is_active
-    mpi_is_active = 0
+    #DBG:# fprintf(stderr, "atexit_py: BEGIN\n"); fflush(stderr)
     cleanup()
-    if not mpi_active(): return
     # try to finalize MPI
-    cdef int ierr = MPI_SUCCESS
     global mpi_is_owned
-    if mpi_is_owned:
+    cdef int ierr = MPI_SUCCESS
+    if mpi_is_owned and mpi_active():
         ierr = MPI_Finalize()
+    #DBG:# fprintf(stderr, "atexit_py: END\n"); fflush(stderr)
 
 # --------------------------------------------------------------------
 
