@@ -157,7 +157,7 @@ cdef class Datatype:
         return datatype
 
     def Create_subarray(self, sizes, subsizes, starts,
-                        int order=MPI_ORDER_C):
+                        order=None):
         """
         Create a datatype for a subarray of
         a regular, multidimensional array
@@ -169,17 +169,19 @@ cdef class Datatype:
         tmp2 = asarray_int(subsizes, &isubsizes, ndims)
         cdef int *istarts = NULL
         tmp3 = asarray_int(starts, &istarts, ndims)
+        cdef int iorder = MPI_ORDER_C
+        if order is not None: iorder = order
         #
         cdef Datatype datatype = type(self)()
         CHKERR( MPI_Type_create_subarray(ndims, isizes,
                                          isubsizes, istarts,
-                                         order, self.ob_mpi,
+                                         iorder, self.ob_mpi,
                                          &datatype.ob_mpi) )
         return datatype
 
     def Create_darray(self, int size, int rank,
                       gsizes, distribs, dargs, psizes,
-                      int order=MPI_ORDER_C):
+                      order=None):
         """
         Create a datatype representing an HPF-like
         distributed array on Cartesian process grids
@@ -193,11 +195,13 @@ cdef class Datatype:
         tmp3 = asarray_int(dargs, &idargs, ndims)
         cdef int *ipsizes=NULL
         tmp4 = asarray_int(psizes, &ipsizes, ndims)
+        cdef int iorder = MPI_ORDER_C
+        if order is not None: iorder = order
         #
         cdef Datatype datatype = type(self)()
         CHKERR( MPI_Type_create_darray(size, rank, ndims, igsizes,
                                        idistribs, idargs, ipsizes,
-                                       order, self.ob_mpi,
+                                       iorder, self.ob_mpi,
                                        &datatype.ob_mpi) )
         return datatype
 
