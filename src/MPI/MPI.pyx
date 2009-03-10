@@ -109,11 +109,13 @@ def Init():
     Initialize the MPI execution environment
     """
     CHKERR( MPI_Init(NULL, NULL) )
+    startup()
 
 def Finalize():
     """
     Terminate the MPI execution environment
     """
+    cleanup()
     CHKERR( MPI_Finalize() )
 
 # Levels of MPI threading support
@@ -137,6 +139,7 @@ def Init_thread(int required):
     """
     cdef int provided = MPI_THREAD_SINGLE
     CHKERR( MPI_Init_thread(NULL, NULL, required, &provided) )
+    startup()
     return provided
 
 def Query_thread():

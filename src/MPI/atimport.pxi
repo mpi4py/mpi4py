@@ -17,12 +17,122 @@ cdef extern from "atimport.h":
 
 # --------------------------------------------------------------------
 
-cdef int mpi_is_owned = 0
+cdef int inited_atimport = 0
+cdef int finalize_atexit = 0
+cdef int startup_done = 0
 cdef int cleanup_done = 0
 
 cdef MPI_Errhandler comm_self_eh  = MPI_ERRHANDLER_NULL
 cdef MPI_Errhandler comm_world_eh = MPI_ERRHANDLER_NULL
 cdef int PyMPI_KEYVAL_WIN_MEMORY  = MPI_KEYVAL_INVALID
+
+ctypedef struct RCParams:
+    int initialize
+    int threaded
+    int thread_level
+    int finalize
+
+cdef int warnRC(object attr, object value) except -1:
+    from warning import warn
+    warn(u"mpi4py.rc: '%s': unexpected value '%r'" % (attr, value))
+
+cdef RCParams getRCParams() except *:
+    cdef RCParams rc
+    rc.initialize = 1
+    rc.threaded = 1
+    rc.thread_level = MPI_THREAD_MULTIPLE
+    rc.finalize = 1
+    #
+    try: from mpi4py import rc as rcmod
+    except: return rc
+    #
+    cdef object initialize = True
+    cdef object threaded = True
+    cdef object thread_level = u'multiple'
+    cdef object finalize = True
+    try: initialize = rcmod.initialize
+    except: pass
+    try: threaded = rcmod.threaded
+    except: pass
+    try: thread_level = rcmod.thread_level
+    except: pass
+    try: finalize = rcmod.finalize
+    except: pass
+    #
+    if initialize in (True, u'yes'):
+        rc.initialize = 1
+    elif initialize in (False, u'no'):
+        rc.initialize = 0
+    else:
+        warnRC(u"initialize", initialize)
+    #
+    if threaded in (True, u'yes'):
+        rc.threaded = 1
+    elif threaded in (False, u'no'):
+        rc.threaded = 0
+    else:
+        warnRC(u"threaded", threaded)
+    #
+    if thread_level == u'single':
+        rc.thread_level = MPI_THREAD_SINGLE
+    elif thread_level == u'funneled':
+        rc.thread_level = MPI_THREAD_FUNNELED
+    elif thread_level == u'serialized':
+        rc.thread_level = MPI_THREAD_SERIALIZED
+    elif thread_level == u'multiple':
+        rc.thread_level = MPI_THREAD_MULTIPLE
+    else:
+        warnRC(u"thread_level", thread_level)
+    #
+    if finalize in (True, u'yes'):
+        rc.finalize = 1
+    elif finalize in (False, u'no'):
+        rc.finalize = 0
+    else:
+        warnRC(u"finalize", finalize)
+    #
+    return rc
+
+cdef int initialize() except -1:
+    global inited_atimport
+    global finalize_atexit
+    cdef int ierr = MPI_SUCCESS
+    # MPI initialized ?
+    cdef int initialized = 1
+    ierr = MPI_Initialized(&initialized)
+    # MPI finalized ?
+    cdef int finalized = 1
+    ierr = MPI_Finalized(&finalized)
+    # Do we have to initialize MPI?
+    if initialized:
+        if not finalized:
+            # cleanup at (the very end of) Python exit
+            if Py_AtExit(atexit_py) < 0:
+                PySys_WriteStderr("warning: could not register"
+                                  "cleanup with Py_AtExit()")
+        return 0
+    # Use user parameters from 'mpi4py.rc' module
+    cdef RCParams rc = getRCParams()
+    cdef int required = MPI_THREAD_SINGLE
+    cdef int provided = MPI_THREAD_SINGLE
+    if rc.initialize: # We have to initialize MPI
+        if rc.threaded:
+            required = rc.thread_level
+            ierr = MPI_Init_thread(NULL, NULL, required, &provided)
+            if ierr != MPI_SUCCESS: raise RuntimeError(
+                u"MPI_Init_thread() failed [error code: %d]" % ierr)
+        else:
+            ierr = MPI_Init(NULL, NULL)
+            if ierr != MPI_SUCCESS: raise RuntimeError(
+                u"MPI_Init() failed [error code: %d]" % ierr)
+        inited_atimport = 1 # We initialized MPI
+        if rc.finalize:     # We have to finalize MPI
+            finalize_atexit = 1
+    # Cleanup at (the very end of) Python exit
+    if Py_AtExit(atexit_py) < 0:
+        PySys_WriteStderr("warning: could not register"
+                          "cleanup with Py_AtExit()")
+    return 0
 
 cdef inline int mpi_active() nogil:
     cdef int ierr = MPI_SUCCESS
@@ -37,46 +147,14 @@ cdef inline int mpi_active() nogil:
     # MPI should be active ...
     return 1
 
-cdef int initialize() except -1:
-    global mpi_is_owned
+cdef void startup() nogil:
     cdef int ierr = MPI_SUCCESS
-    # MPI initialized ?
-    cdef int initialized = 1
-    ierr = MPI_Initialized(&initialized)
-    # MPI finalized ?
-    cdef int finalized = 1
-    ierr = MPI_Finalized(&finalized)
-    # Do we have to initialize MPI?
-    if initialized:
-        if not finalized:
-            if Py_AtExit(atexit_py) < 0:
-                PySys_WriteStderr("warning: could not register"
-                                  "cleanup with Py_AtExit()")
-        return 0
-    # We have to initialize MPI
-    cdef int required = MPI_THREAD_SINGLE
-    cdef int provided = MPI_THREAD_SINGLE
-    if _mpi_threading(&required):
-        ierr = MPI_Init_thread(NULL, NULL, required, &provided)
-        if ierr != MPI_SUCCESS: raise RuntimeError(
-            u"MPI_Init_thread() failed [error code: %d]" % ierr)
-    else:
-        ierr = MPI_Init(NULL, NULL)
-        if ierr != MPI_SUCCESS: raise RuntimeError(
-            u"MPI_Init() failed [error code: %d]" % ierr)
-    # We initialized MPI, so it is owned and active at this point
-    mpi_is_owned  = 1
-    # then finalize it when Python process exits
-    if Py_AtExit(atexit_py) < 0:
-        PySys_WriteStderr("warning: could not register"
-                          "MPI_Finalize() with Py_AtExit()")
-    return 0
-
-cdef int startup() except -1:
-    if not mpi_active(): return 0
+    if not mpi_active(): return
     #
-    #DBG:# fprintf(stderr, "statup: BEGIN\n"); fflush(stderr)
-    cdef int ierr = MPI_SUCCESS
+    global startup_done
+    if startup_done: return
+    startup_done = 1
+    #DBG# fprintf(stderr, "statup: BEGIN\n"); fflush(stderr)
     # change error handlers for predefined communicators
     global comm_world_eh
     if comm_world_eh == MPI_ERRHANDLER_NULL:
@@ -92,22 +170,20 @@ cdef int startup() except -1:
     if keyval == MPI_KEYVAL_INVALID:
         ierr = MPI_Comm_create_keyval(MPI_COMM_NULL_COPY_FN,
                                       atexit_mpi, &keyval, NULL)
+        PyMPI_KEYVAL_ATEXIT_MPI = keyval
         ierr = MPI_Comm_set_attr(MPI_COMM_SELF, keyval, NULL)
         ierr = MPI_Comm_free_keyval(&keyval)
-        PyMPI_KEYVAL_ATEXIT_MPI = keyval
-    #
-    #DBG:# fprintf(stderr, "statup: END\n"); fflush(stderr)
-    return 0
+    #DBG# fprintf(stderr, "statup: END\n"); fflush(stderr)
 
 cdef void cleanup() nogil:
+    cdef int ierr = MPI_SUCCESS
     if not mpi_active(): return
     #
     global cleanup_done
     if cleanup_done: return
     cleanup_done = 1
     #
-    #DBG:# fprintf(stderr, "cleanup: BEGIN\n"); fflush(stderr)
-    cdef int ierr = MPI_SUCCESS
+    #DBG# fprintf(stderr, "cleanup: BEGIN\n"); fflush(stderr)
     # free windows keyval
     global PyMPI_KEYVAL_WIN_MEMORY
     if PyMPI_KEYVAL_WIN_MEMORY != MPI_KEYVAL_INVALID:
@@ -124,47 +200,25 @@ cdef void cleanup() nogil:
         ierr = MPI_Comm_set_errhandler(MPI_COMM_WORLD, comm_world_eh)
         ierr = MPI_Errhandler_free(&comm_world_eh)
         comm_world_eh = MPI_ERRHANDLER_NULL
-    #DBG:# fprintf(stderr, "cleanup: END\n"); fflush(stderr)
+    #DBG# fprintf(stderr, "cleanup: END\n"); fflush(stderr)
 
 cdef int atexit_mpi(MPI_Comm c,int k, void *v, void *xs) nogil:
-    #DBG:# fprintf(stderr, "atexit_mpi: BEGIN\n"); fflush(stderr)
+    #DBG# fprintf(stderr, "atexit_mpi: BEGIN\n"); fflush(stderr)
     cleanup()
-    #DBG:# fprintf(stderr, "atexit_mpi: END\n"); fflush(stderr)
+    #DBG# fprintf(stderr, "atexit_mpi: END\n"); fflush(stderr)
     return MPI_SUCCESS
 
 cdef void atexit_py() nogil:
-    #DBG:# fprintf(stderr, "atexit_py: BEGIN\n"); fflush(stderr)
-    cleanup()
-    # try to finalize MPI
-    global mpi_is_owned
+    global cleanup_done
+    global finalize_atexit
     cdef int ierr = MPI_SUCCESS
-    if mpi_is_owned and mpi_active():
+    if not mpi_active(): return
+    #DBG# fprintf(stderr, "atexit_py: BEGIN\n"); fflush(stderr)
+    if not cleanup_done:
+        cleanup()
+    if finalize_atexit:
         ierr = MPI_Finalize()
-    #DBG:# fprintf(stderr, "atexit_py: END\n"); fflush(stderr)
-
-# --------------------------------------------------------------------
-
-cdef inline int _mpi_threading(int *level) except -1:
-    try:
-        from mpi4py.rc import thread_level
-    except ImportError:
-        thread_level = None
-    #
-    if thread_level is None:
-        return 0
-    elif thread_level in (0, u'single'):
-        level[0] = MPI_THREAD_SINGLE
-    elif thread_level in (1, u'funneled'):
-        level[0] = MPI_THREAD_FUNNELED
-    elif thread_level in (2, u'serialized'):
-        level[0] = MPI_THREAD_SERIALIZED
-    elif thread_level in (3, u'multiple'):
-        level[0] = MPI_THREAD_MULTIPLE
-    else:
-        from warnings import warn
-        warn("mpi4py.rc: unrecognized thread level")
-        return 0
-    return 1
+    #DBG# fprintf(stderr, "atexit_py: END\n"); fflush(stderr)
 
 # --------------------------------------------------------------------
 
