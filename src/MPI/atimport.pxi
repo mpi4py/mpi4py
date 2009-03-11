@@ -33,7 +33,7 @@ ctypedef struct RCParams:
     int finalize
 
 cdef int warnRC(object attr, object value) except -1:
-    from warning import warn
+    from warnings import warn
     warn(u"mpi4py.rc: '%s': unexpected value '%r'" % (attr, value))
 
 cdef int getRCParams(RCParams* rc) except -1:
