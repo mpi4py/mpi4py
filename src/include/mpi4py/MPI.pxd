@@ -5,6 +5,7 @@
 
 cdef extern from "mpi.h":
 
+    ctypedef long      MPI_Fint
     ctypedef long      MPI_Aint
     ctypedef long long MPI_Offset
 
@@ -42,6 +43,7 @@ cdef extern from "mpi.h":
 
 # --
 
+ctypedef MPI_Fint   Fint
 ctypedef MPI_Aint   Aint
 ctypedef MPI_Offset Offset
 
