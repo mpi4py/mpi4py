@@ -166,13 +166,11 @@ cdef void startup() nogil:
         ierr = MPI_Comm_set_errhandler(MPI_COMM_SELF,  MPI_ERRORS_RETURN)
     # make the call to MPI_Finalize() run a cleanup function
     global PyMPI_KEYVAL_ATEXIT_MPI
-    cdef int keyval = PyMPI_KEYVAL_ATEXIT_MPI
-    if keyval == MPI_KEYVAL_INVALID:
+    cdef int* keyval = &PyMPI_KEYVAL_ATEXIT_MPI
+    if keyval[0] == MPI_KEYVAL_INVALID:
         ierr = MPI_Comm_create_keyval(MPI_COMM_NULL_COPY_FN,
-                                      atexit_mpi, &keyval, NULL)
-        PyMPI_KEYVAL_ATEXIT_MPI = keyval
-        ierr = MPI_Comm_set_attr(MPI_COMM_SELF, keyval, NULL)
-        ierr = MPI_Comm_free_keyval(&keyval)
+                                      atexit_mpi, keyval, NULL)
+        ierr = MPI_Comm_set_attr(MPI_COMM_SELF, keyval[0], NULL)
     #DBG# fprintf(stderr, "statup: END\n"); fflush(stderr)
 
 cdef void cleanup() nogil:
@@ -184,6 +182,11 @@ cdef void cleanup() nogil:
     cleanup_done = 1
     #
     #DBG# fprintf(stderr, "cleanup: BEGIN\n"); fflush(stderr)
+    # free cleanup keyval
+    global PyMPI_KEYVAL_ATEXIT_MPI
+    if PyMPI_KEYVAL_ATEXIT_MPI != MPI_KEYVAL_INVALID:
+        ierr = MPI_Comm_free_keyval(&PyMPI_KEYVAL_ATEXIT_MPI)
+        PyMPI_KEYVAL_ATEXIT_MPI = MPI_KEYVAL_INVALID
     # free windows keyval
     global PyMPI_KEYVAL_WIN_MEMORY
     if PyMPI_KEYVAL_WIN_MEMORY != MPI_KEYVAL_INVALID:
