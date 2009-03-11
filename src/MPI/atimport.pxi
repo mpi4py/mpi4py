@@ -36,15 +36,14 @@ cdef int warnRC(object attr, object value) except -1:
     from warning import warn
     warn(u"mpi4py.rc: '%s': unexpected value '%r'" % (attr, value))
 
-cdef RCParams getRCParams() except *:
-    cdef RCParams rc
+cdef int getRCParams(RCParams* rc) except -1:
     rc.initialize = 1
     rc.threaded = 1
     rc.thread_level = MPI_THREAD_MULTIPLE
     rc.finalize = 1
     #
     try: from mpi4py import rc as rcmod
-    except: return rc
+    except: return 0
     #
     cdef object initialize = True
     cdef object threaded = True
@@ -91,7 +90,7 @@ cdef RCParams getRCParams() except *:
     else:
         warnRC(u"finalize", finalize)
     #
-    return rc
+    return 0
 
 cdef int initialize() except -1:
     global inited_atimport
@@ -112,7 +111,8 @@ cdef int initialize() except -1:
                                   "cleanup with Py_AtExit()")
         return 0
     # Use user parameters from 'mpi4py.rc' module
-    cdef RCParams rc = getRCParams()
+    cdef RCParams rc
+    getRCParams(&rc)
     cdef int required = MPI_THREAD_SINGLE
     cdef int provided = MPI_THREAD_SINGLE
     if rc.initialize: # We have to initialize MPI
