@@ -33,9 +33,12 @@ class BaseTestFile(object):
     def testPreallocate(self):
         ## XXX MPICH2 emits a nesting level warning
         ## when preallocating zero size.
-        #self.FILE.Preallocate(0)
-        #size = self.FILE.Get_size()
-        #self.assertEqual(size, 0)
+        name, ver = MPI.get_vendor()
+        if not (name == 'MPICH2' and
+                ver  < (1, 1, 0)):
+            self.FILE.Preallocate(0)
+        size = self.FILE.Get_size()
+        self.assertEqual(size, 0)
         self.FILE.Preallocate(1)
         size = self.FILE.Get_size()
         self.assertEqual(size, 1)
