@@ -3,7 +3,7 @@ import mpiunittest as unittest
 import arrayimpl
 
 
-class TestP2PBufBase(object):
+class BaseTestP2PBuf(object):
 
     COMM = MPI.COMM_NULL
 
@@ -113,27 +113,24 @@ class TestP2PBufBase(object):
                             self.assertEqual(value, -1)
 
 
-class TestP2PBufSelf(TestP2PBufBase, unittest.TestCase):
+class TestP2PBufSelf(BaseTestP2PBuf, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
-class TestP2PBufWorld(TestP2PBufBase, unittest.TestCase):
+class TestP2PBufWorld(BaseTestP2PBuf, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
-class TestP2PBufSelfDup(TestP2PBufBase, unittest.TestCase):
+class TestP2PBufSelfDup(BaseTestP2PBuf, unittest.TestCase):
     def setUp(self):
         self.COMM = MPI.COMM_SELF.Dup()
     def tearDown(self):
         self.COMM.Free()
 
-class TestP2PBufWorldDup(TestP2PBufBase, unittest.TestCase):
+class TestP2PBufWorldDup(BaseTestP2PBuf, unittest.TestCase):
     def setUp(self):
         self.COMM = MPI.COMM_WORLD.Dup()
     def tearDown(self):
         self.COMM.Free()
-        
+
 
 if __name__ == '__main__':
-    try:
-        unittest.main()
-    except SystemExit:
-        pass
+    unittest.main()

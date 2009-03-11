@@ -15,7 +15,7 @@ def maxvalue(a):
         return 2 ** (a.itemsize * 7) - 1
 
 
-class TestCCOBufBase(object):
+class BaseTestCCOBuf(object):
 
     COMM = MPI.COMM_NULL
 
@@ -252,7 +252,7 @@ class TestCCOBufBase(object):
                                 self.assertEqual(value, i)
 
 
-class TestCCOBufInplaceBase(object):
+class BaseTestCCOBufInplace(object):
 
     def testGather(self):
         size = self.COMM.Get_size()
@@ -373,25 +373,25 @@ class TestCCOBufInplaceBase(object):
                             self.assertEqual(value, i)
 
 
-class TestCCOBufSelf(TestCCOBufBase, unittest.TestCase):
+class TestCCOBufSelf(BaseTestCCOBuf, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
-class TestCCOBufWorld(TestCCOBufBase, unittest.TestCase):
+class TestCCOBufWorld(BaseTestCCOBuf, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
-class TestCCOBufInplaceSelf(TestCCOBufInplaceBase, unittest.TestCase):
+class TestCCOBufInplaceSelf(BaseTestCCOBufInplace, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
-class TestCCOBufInplaceWorld(TestCCOBufInplaceBase, unittest.TestCase):
+class TestCCOBufInplaceWorld(BaseTestCCOBufInplace, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
-class TestCCOBufSelfDup(TestCCOBufBase, unittest.TestCase):
+class TestCCOBufSelfDup(BaseTestCCOBuf, unittest.TestCase):
     def setUp(self):
         self.COMM = MPI.COMM_SELF.Dup()
     def tearDown(self):
         self.COMM.Free()
 
-class TestCCOBufWorldDup(TestCCOBufBase, unittest.TestCase):
+class TestCCOBufWorldDup(BaseTestCCOBuf, unittest.TestCase):
     def setUp(self):
         self.COMM = MPI.COMM_WORLD.Dup()
     def tearDown(self):
@@ -401,7 +401,7 @@ class TestCCOBufWorldDup(TestCCOBufBase, unittest.TestCase):
 _name, _version = MPI.get_vendor()
 if _name == 'MPICH1' or _name == 'LAM/MPI' \
        or MPI.BOTTOM == MPI.IN_PLACE:
-    del TestCCOBufInplaceBase
+    del BaseTestCCOBufInplace
     del TestCCOBufInplaceSelf
     del TestCCOBufInplaceWorld
 

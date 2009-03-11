@@ -2,7 +2,7 @@ from mpi4py import MPI
 import mpiunittest as unittest
 import arrayimpl
 
-class TestPackBase(object):
+class BaseTestPack(object):
 
     COMM = MPI.COMM_NULL
 
@@ -44,7 +44,7 @@ class TestPackBase(object):
 
 EXT32 = 'external32'
 
-class TestPackExternalBase(object):
+class BaseTestPackExternal(object):
 
     byteswap = False
     skipdtype = []
@@ -100,13 +100,13 @@ class TestPackExternalBase(object):
                         self.assertTrue(equal(iarray2, oarray2))
 
 
-class TestPackSelf(TestPackBase, unittest.TestCase):
+class TestPackSelf(BaseTestPack, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
-class TestPackWorld(TestPackBase, unittest.TestCase):
+class TestPackWorld(BaseTestPack, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
-class TestPackExternal(TestPackExternalBase, unittest.TestCase):
+class TestPackExternal(BaseTestPackExternal, unittest.TestCase):
     pass
 
 
@@ -115,11 +115,11 @@ _name, _version = MPI.get_vendor()
 if _name == 'Open MPI' and _version < (1, 3, 0):
     from sys import byteorder as sys_byteorder
     if sys_byteorder == 'little':
-        TestPackExternalBase.byteswap = True
+        BaseTestPackExternal.byteswap = True
 elif _name == 'MPICH2':
-    TestPackExternalBase.skipdtype = ['f', 'd']
+    BaseTestPackExternal.skipdtype = ['f', 'd']
 elif _name == 'DeinoMPI':
-    TestPackExternalBase.skipdtype = ['f', 'd']
+    BaseTestPackExternal.skipdtype = ['f', 'd']
 
 
 

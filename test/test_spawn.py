@@ -6,7 +6,7 @@ PYTHONPATH = os.environ.get('PYTHONPATH','').split(os.path.pathsep)
 MPI4PYPATH = os.path.split(mpi4py.__path__[0])[0]
 PYTHONPATH.insert(0, MPI4PYPATH)
 
-class TestSpawnBase(object):
+class BaseTestSpawn(object):
 
     COMM = MPI.COMM_NULL
     COMMAND = sys.executable
@@ -61,17 +61,17 @@ class TestSpawnBase(object):
         child.Barrier()
         child.Disconnect()
 
-class TestSpawnSelf(TestSpawnBase, unittest.TestCase):
+class TestSpawnSelf(BaseTestSpawn, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
-class TestSpawnWorld(TestSpawnBase, unittest.TestCase):
+class TestSpawnWorld(BaseTestSpawn, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
-class TestSpawnSelfMany(TestSpawnBase, unittest.TestCase):
+class TestSpawnSelfMany(BaseTestSpawn, unittest.TestCase):
     COMM = MPI.COMM_SELF
     MAXPROCS = MPI.COMM_WORLD.Get_size()
 
-class TestSpawnWorldMany(TestSpawnBase, unittest.TestCase):
+class TestSpawnWorldMany(BaseTestSpawn, unittest.TestCase):
     COMM = MPI.COMM_WORLD
     MAXPROCS = MPI.COMM_WORLD.Get_size()
 
@@ -91,13 +91,13 @@ elif MPI.Get_version() < (2,0):
     _SKIP_TEST = True
 
 if _SKIP_TEST:
-    del TestSpawnBase
+    del BaseTestSpawn
     del TestSpawnSelf
     del TestSpawnWorld
     del TestSpawnSelfMany
     del TestSpawnWorldMany
 elif _name == 'MPICH2':
-    del TestSpawnBase.testReturnedErrcodes
+    del BaseTestSpawn.testReturnedErrcodes
 
 
 

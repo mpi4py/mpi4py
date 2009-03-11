@@ -2,7 +2,7 @@ from mpi4py import MPI
 import mpiunittest as unittest
 import arrayimpl
 
-class TestRMABase(object):
+class BaseTestRMA(object):
 
     COMM = MPI.COMM_NULL
     INFO = MPI.INFO_NULL
@@ -99,10 +99,10 @@ class TestRMABase(object):
             self.WIN.Fence(assertion)
         self.WIN.Fence()
 
-class TestRMASelf(TestRMABase, unittest.TestCase):
+class TestRMASelf(BaseTestRMA, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
-class TestRMAWorld(TestRMABase, unittest.TestCase):
+class TestRMAWorld(BaseTestRMA, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
 

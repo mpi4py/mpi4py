@@ -26,7 +26,7 @@ messages += [ list(_basic),
                     for key, val in enumerate(_basic)])
               ]
 
-class TestCCOObjBase(object):
+class BaseTestCCOObj(object):
 
     COMM = MPI.COMM_NULL
 
@@ -160,7 +160,7 @@ class TestCCOObjBase(object):
             self.assertEqual(minloc, (0, 0))
             self.assertEqual(maxloc, (rank-1, rank-1))
 
-class TestCCOObjInterBase(object):
+class BaseTestCCOObjInter(object):
 
     BASECOMM  = MPI.COMM_NULL
     INTRACOMM = MPI.COMM_NULL
@@ -322,28 +322,28 @@ class TestCCOObjInterBase(object):
                 self.assertEqual(value, 0)
 
 
-class TestCCOObjSelf(TestCCOObjBase, unittest.TestCase):
+class TestCCOObjSelf(BaseTestCCOObj, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
-class TestCCOObjWorld(TestCCOObjBase, unittest.TestCase):
+class TestCCOObjWorld(BaseTestCCOObj, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
 
-class TestCCOObjDupBase(TestCCOObjBase):
+class BaseTestCCOObjDup(BaseTestCCOObj):
     def setUp(self):
         self.COMM = self.COMM.Dup()
     def tearDown(self):
         self.COMM.Free()
 
-class TestCCOObjSelfDup(TestCCOObjDupBase, unittest.TestCase):
+class TestCCOObjSelfDup(BaseTestCCOObjDup, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
-class TestCCOObjWorldDup(TestCCOObjDupBase, unittest.TestCase):
+class TestCCOObjWorldDup(BaseTestCCOObjDup, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
 
 
-class TestCCOObjInter(TestCCOObjInterBase, unittest.TestCase):
+class TestCCOObjInter(BaseTestCCOObjInter, unittest.TestCase):
     BASECOMM = MPI.COMM_WORLD
 
 class TestCCOObjInterDup(TestCCOObjInter):
@@ -384,7 +384,7 @@ elif _name == "DeinoMPI":
     TestCCOObjInterDupDup.testAllgather = _SKIPPED
     TestCCOObjInterDupDup.testAllreduce = _SKIPPED
 elif MPI.ROOT == MPI.PROC_NULL:
-    del TestCCOObjInterBase
+    del BaseTestCCOObjInter
     del TestCCOObjInter
     del TestCCOObjInterDup
     del TestCCOObjInterDupDup

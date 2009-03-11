@@ -2,18 +2,6 @@ from mpi4py import MPI
 import mpiunittest as unittest
 
 
-class TestRequestNull(unittest.TestCase):
-
-    def testGetStatus(self):
-        self.assertRaisesMPI(MPI.ERR_REQUEST, MPI.REQUEST_NULL.Get_status)
-
-    def testFree(self):
-        self.assertRaisesMPI(MPI.ERR_REQUEST, MPI.REQUEST_NULL.Free)
-
-    def testCancel(self):
-        self.assertRaisesMPI(MPI.ERR_REQUEST, MPI.REQUEST_NULL.Cancel)
-
-
 class TestRequest(unittest.TestCase):
 
     def setUp(self):

@@ -16,7 +16,7 @@ def maxvalue(a):
         return 2 ** (a.itemsize * 7) - 1
 
 
-class TestCCOVecBase(object):
+class BaseTestCCOVec(object):
 
     COMM = MPI.COMM_NULL
 
@@ -193,19 +193,19 @@ class TestCCOVecBase(object):
                                 self.assertEqual(vb, -1)
 
 
-class TestCCOVecSelf(TestCCOVecBase, unittest.TestCase):
+class TestCCOVecSelf(BaseTestCCOVec, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
-class TestCCOVecWorld(TestCCOVecBase, unittest.TestCase):
+class TestCCOVecWorld(BaseTestCCOVec, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
-class TestCCOVecSelfDup(TestCCOVecBase, unittest.TestCase):
+class TestCCOVecSelfDup(BaseTestCCOVec, unittest.TestCase):
     def setUp(self):
         self.COMM = MPI.COMM_SELF.Dup()
     def tearDown(self):
         self.COMM.Free()
 
-class TestCCOVecWorldDup(TestCCOVecBase, unittest.TestCase):
+class TestCCOVecWorldDup(BaseTestCCOVec, unittest.TestCase):
     def setUp(self):
         self.COMM = MPI.COMM_WORLD.Dup()
     def tearDown(self):

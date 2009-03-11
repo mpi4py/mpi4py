@@ -5,8 +5,6 @@ datatypes = (MPI.CHAR,  MPI.SHORT,
              MPI.INT,   MPI.LONG,
              MPI.FLOAT, MPI.DOUBLE)
 
-MPI_ERR_TYPE = MPI.ERR_TYPE
-
 class TestDatatype(unittest.TestCase):
 
     def testGetExtent(self):
@@ -33,8 +31,6 @@ class TestDatatype(unittest.TestCase):
         newtype.Free()
 
     def testDup(self):
-        nulldtype = MPI.DATATYPE_NULL
-        self.assertRaisesMPI(MPI.ERR_TYPE, nulldtype.Dup)
         for dtype in datatypes:
             factory = dtype.Dup
             self._create(factory)
@@ -157,30 +153,8 @@ class TestDatatype(unittest.TestCase):
 
 
     def testCommit(self):
-        nulltype = MPI.DATATYPE_NULL
-        self.assertRaisesMPI(MPI.ERR_TYPE, nulltype.Commit)
         for dtype in datatypes:
             dtype.Commit()
-
-    def testFree(self):
-        nulltype = MPI.DATATYPE_NULL
-        self.assertRaisesMPI(MPI.ERR_TYPE, nulltype.Free)
-        for dtype in (MPI.BYTE, MPI.PACKED,
-                      MPI.CHAR, MPI.WCHAR,
-                      MPI.SIGNED_CHAR,  MPI.UNSIGNED_CHAR,
-                      MPI.SHORT,  MPI.UNSIGNED_SHORT,
-                      MPI.INT,  MPI.UNSIGNED,  MPI.UNSIGNED_INT,
-                      MPI.LONG,  MPI.UNSIGNED_LONG,
-                      MPI.LONG_LONG, MPI.UNSIGNED_LONG_LONG,
-                      MPI.FLOAT,  MPI.DOUBLE, MPI.LONG_DOUBLE,
-                      MPI.SHORT_INT,  MPI.TWOINT,  MPI.INT_INT,
-                      MPI.LONG_INT, MPI.LONG_LONG_INT,
-                      MPI.FLOAT_INT,  MPI.DOUBLE_INT,  MPI.LONG_DOUBLE_INT,
-                      MPI.UB,  MPI.LB,):
-            if dtype == MPI.BYTE: continue ## XXX Open MPI problems !!!
-            if dtype != MPI.DATATYPE_NULL:
-                self.assertRaisesMPI(MPI_ERR_TYPE, dtype.Free)
-                self.assertTrue(dtype != MPI.DATATYPE_NULL)
 
 
 class TestGetAddress(unittest.TestCase):
@@ -192,11 +166,6 @@ class TestGetAddress(unittest.TestCase):
         bufptr, buflen = location.buffer_info()
         self.assertEqual(addr, bufptr)
 
-
-_name, _version = MPI.get_vendor()
-if _name == 'Open MPI':
-    if _version < (1,3,1):
-        MPI_ERR_TYPE = MPI.ERR_INTERN
 
 if __name__ == '__main__':
     unittest.main()

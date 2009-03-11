@@ -7,12 +7,8 @@ class TestErrhandler(unittest.TestCase):
         self.assertFalse(MPI.ERRHANDLER_NULL)
         self.assertTrue(MPI.ERRORS_ARE_FATAL)
         self.assertTrue(MPI.ERRORS_RETURN)
-        self.assertRaisesMPI(MPI.ERR_ARG, MPI.ERRHANDLER_NULL.Free)
-        #self.assertRaisesMPI(MPI.ERR_ARG, MPI.ERRORS_ARE_FATAL.Free)
-        #self.assertRaisesMPI(MPI.ERR_ARG, MPI.ERRORS_RETURN.Free)
 
     def testCommGetSetErrhandler(self):
-        self.assertRaisesMPI(MPI.ERR_ARG, MPI.COMM_WORLD.Set_errhandler, MPI.ERRHANDLER_NULL)
         for COMM in [MPI.COMM_SELF, MPI.COMM_WORLD]:
             for ERRHANDLER in [MPI.ERRORS_ARE_FATAL, MPI.ERRORS_RETURN,
                                MPI.ERRORS_ARE_FATAL, MPI.ERRORS_RETURN, ]:

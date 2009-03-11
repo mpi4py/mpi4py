@@ -1,8 +1,7 @@
 from mpi4py import MPI
 import mpiunittest as unittest
 
-
-class TestErrors(unittest.TestCase):
+class TestErrorCode(unittest.TestCase):
 
     errorclasses = [item[1] for item in vars(MPI).items()
                     if item[0].startswith('ERR_')]

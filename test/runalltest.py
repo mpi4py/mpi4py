@@ -1,3 +1,7 @@
+EXCLUDE = [
+    #'test_exceptions',
+    ]
+
 import sys, os
 import unittest
 
@@ -27,20 +31,16 @@ testpath = os.path.split(__file__)[0]
 sys.path.insert(0, testpath)
 import mpiunittest
 
-alltests = mpiunittest.find_tests(
-    exclude=[#'test_win',
-             #'test_rma',
-             ]
-    )
+alltests = mpiunittest.find_tests(exclude=EXCLUDE[:])
 
 def runtests(*args, **kargs):
     for test in alltests:
         sys.stderr.flush()
-        sys.stderr.write("\nrunning %s\n" % test.__name__)
+        sys.stderr.write("\nRunning %s\n" % test.__name__)
         sys.stderr.flush()
         mpiunittest.main(test, *args, **kargs)
 
-def runtestsleak(repeats,*args, **kargs):
+def runtestsleak(repeats, *args, **kargs):
     import gc
     test = r1 = r2 = None
     while repeats:

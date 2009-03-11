@@ -17,12 +17,10 @@ class TestStatus(unittest.TestCase):
     def testGetCount(self):
         count = self.STATUS.Get_count(MPI.BYTE)
         self.assertEqual(count, 0)
-        self.assertRaisesMPI(MPI.ERR_TYPE, self.STATUS.Get_count, MPI.DATATYPE_NULL)
 
     def testGetElements(self):
         elements = self.STATUS.Get_elements(MPI.BYTE)
         self.assertEqual(elements, 0)
-        self.assertRaisesMPI(MPI.ERR_TYPE, self.STATUS.Get_elements, MPI.DATATYPE_NULL)
 
     def testSetElements(self):
         try:
@@ -31,7 +29,6 @@ class TestStatus(unittest.TestCase):
             self.assertEqual(count, 7)
             elements = self.STATUS.Get_elements(MPI.BYTE)
             self.assertEqual(elements, 7)
-            self.assertRaisesMPI(MPI.ERR_TYPE, self.STATUS.Set_elements, MPI.DATATYPE_NULL, 0)
         except NotImplementedError:
             if MPI.Get_version() >= (2,0): raise
 

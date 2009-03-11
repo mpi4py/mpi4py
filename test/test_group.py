@@ -1,7 +1,7 @@
 from mpi4py import MPI
 import mpiunittest as unittest
 
-class TestGroupBase(object):
+class BaseTestGroup(object):
 
     def testProperties(self):
         group = self.GROUP
@@ -16,7 +16,6 @@ class TestGroupBase(object):
         self.assertTrue(gcmp in results)
         gcmp = MPI.Group.Compare(self.GROUP, self.GROUP)
         self.assertEqual(gcmp, MPI.IDENT)
-        self.assertRaisesMPI(MPI.ERR_GROUP, MPI.Group.Compare, self.GROUP, MPI.GROUP_NULL)
 
     def testUnion(self):
         group = MPI.Group.Union(MPI.GROUP_EMPTY, self.GROUP)
@@ -119,13 +118,8 @@ class TestGroupNull(unittest.TestCase):
         self.assertFalse(GROUP_NULL)
         self.assertFalse(group_null)
         self.assertEqual(group_null, GROUP_NULL)
-        self.assertRaisesMPI(MPI.ERR_GROUP, MPI.Group.Compare, GROUP_NULL, GROUP_NULL)
-        self.assertRaisesMPI(MPI.ERR_GROUP, MPI.Group.Compare, MPI.GROUP_EMPTY, GROUP_NULL)
-        self.assertRaisesMPI(MPI.ERR_GROUP, MPI.Group.Compare, GROUP_NULL, MPI.GROUP_EMPTY)
-        for method in ('Get_size', 'Get_rank', 'Free'):
-            self.assertRaisesMPI(MPI.ERR_GROUP, getattr(GROUP_NULL, method))
 
-class TestGroupEmpty(TestGroupBase, unittest.TestCase):
+class TestGroupEmpty(BaseTestGroup, unittest.TestCase):
     def setUp(self):
         self.GROUP = MPI.GROUP_EMPTY
     def testEmpty(self):
@@ -136,10 +130,8 @@ class TestGroupEmpty(TestGroupBase, unittest.TestCase):
     def testRank(self):
         rank = self.GROUP.Get_rank()
         self.assertEqual(rank, MPI.UNDEFINED)
-    def testFree(self):
-        self.assertRaisesMPI(MPI.ERR_GROUP, MPI.GROUP_EMPTY.Free)
 
-class TestGroupSelf(TestGroupBase, unittest.TestCase):
+class TestGroupSelf(BaseTestGroup, unittest.TestCase):
     def setUp(self):
         self.GROUP = MPI.COMM_SELF.Get_group()
     def tearDown(self):
@@ -151,7 +143,7 @@ class TestGroupSelf(TestGroupBase, unittest.TestCase):
         rank = self.GROUP.Get_rank()
         self.assertEqual(rank, 0)
 
-class TestGroupWorld(TestGroupBase, unittest.TestCase):
+class TestGroupWorld(BaseTestGroup, unittest.TestCase):
     def setUp(self):
         self.GROUP = MPI.COMM_WORLD.Get_group()
     def tearDown(self):
@@ -166,10 +158,10 @@ class TestGroupWorld(TestGroupBase, unittest.TestCase):
 
 _name, _version = MPI.get_vendor()
 if _name == 'MPICH1':
-    del TestGroupBase.testTranslRanksProcNull
+    del BaseTestGroup.testTranslRanksProcNull
     TestGroupEmpty.testTranslRanks = lambda self: None
 if _name == 'LAM/MPI':
-    del TestGroupBase.testTranslRanksProcNull
+    del BaseTestGroup.testTranslRanksProcNull
 
 if __name__ == '__main__':
     unittest.main()

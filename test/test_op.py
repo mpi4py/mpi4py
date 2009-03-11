@@ -33,22 +33,5 @@ class TestOp(unittest.TestCase):
             self._test_call(MPI.REPLACE, (2,3), 2)
             self._test_call(MPI.REPLACE, (3,2), 3)
 
-    def testFree(self):
-        self.assertRaisesMPI(MPI.ERR_OP, MPI.OP_NULL.Free)
-        for op in (MPI.MAX, MPI.MIN,
-                   MPI.SUM, MPI.PROD,
-                   MPI.LAND, MPI.BAND,
-                   MPI.LOR, MPI.BOR,
-                   MPI.LXOR, MPI.BXOR,
-                   MPI.MAXLOC, MPI.MINLOC):
-            self.assertRaisesMPI(MPI_ERR_OP, op.Free)
-        if MPI.REPLACE != MPI.OP_NULL:
-            self.assertRaisesMPI(MPI_ERR_OP, op.Free)
-
-_name, _version = MPI.get_vendor()
-if _name == 'MPICH1':
-    MPI_ERR_OP = MPI.ERR_ARG
-
-
 if __name__ == '__main__':
     unittest.main()

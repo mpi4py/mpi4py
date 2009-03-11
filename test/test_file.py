@@ -2,7 +2,7 @@ from mpi4py import MPI
 import mpiunittest as unittest
 import os, tempfile
 
-class TestFileBase(object):
+class BaseTestFile(object):
 
     COMM = MPI.COMM_NULL
     FILE = MPI.FILE_NULL
@@ -164,36 +164,36 @@ class TestFileNull(unittest.TestCase):
         eh.Free()
 
 
-class TestFileSelf(TestFileBase, unittest.TestCase):
+class TestFileSelf(BaseTestFile, unittest.TestCase):
     COMM = MPI.COMM_SELF
-    prefix = TestFileBase.prefix + ('-%d' % MPI.COMM_WORLD.Get_rank())
+    prefix = BaseTestFile.prefix + ('-%d' % MPI.COMM_WORLD.Get_rank())
 
 
 _name, _version = MPI.get_vendor()
 if _name == 'Open MPI':
     if (_version <= (1,2,8) and \
         MPI.Query_thread() > MPI.THREAD_SINGLE):
-        del TestFileBase.testPreallocate
-        del TestFileBase.testGetSetInfo
-        del TestFileBase.testGetSetAtomicity
-        del TestFileBase.testSync
-        del TestFileBase.testGetAmode
-        del TestFileBase.testGetSetSize
-        del TestFileBase.testGetSetView
-        del TestFileBase.testGetByteOffset
-        del TestFileBase.testGetTypeExtent
-        del TestFileBase.testSeekGetPosition
-        del TestFileBase.testSeekGetPositionShared
+        del BaseTestFile.testPreallocate
+        del BaseTestFile.testGetSetInfo
+        del BaseTestFile.testGetSetAtomicity
+        del BaseTestFile.testSync
+        del BaseTestFile.testGetAmode
+        del BaseTestFile.testGetSetSize
+        del BaseTestFile.testGetSetView
+        del BaseTestFile.testGetByteOffset
+        del BaseTestFile.testGetTypeExtent
+        del BaseTestFile.testSeekGetPosition
+        del BaseTestFile.testSeekGetPositionShared
 else:
     try:
-        dummy = TestFileBase()
+        dummy = BaseTestFile()
         dummy.COMM = MPI.COMM_SELF
         dummy.setUp()
         dummy.tearDown()
         del dummy
     except NotImplementedError:
+        del BaseTestFile
         del TestFileNull
-        del TestFileBase
         del TestFileSelf
 
 if __name__ == '__main__':

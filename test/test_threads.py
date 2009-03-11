@@ -19,6 +19,8 @@ import mpiunittest as unittest
 
 class TestMPIThreads(unittest.TestCase):
 
+    REQUIRED = MPI.THREAD_SERIALIZED
+
     def testThreadLevels(self):
         levels = [MPI.THREAD_SINGLE,
                   MPI.THREAD_FUNNELED,
@@ -34,7 +36,10 @@ class TestMPIThreads(unittest.TestCase):
             pass
 
     def _test_is(self, main=False):
-        flag = MPI.Is_thread_main()
+        try:
+            flag = MPI.Is_thread_main()
+        except NotImplementedError:
+            return
         self.assertEqual(flag, main)
         if _VERBOSE:
             from sys import stderr
@@ -44,12 +49,12 @@ class TestMPIThreads(unittest.TestCase):
             log("%s: MPI.Is_thread_main() -> %s" % (name, flag))
 
     def testIsThreadMain(self):
+        self._test_is(main=True)
         try:
-            self._test_is(main=True)
             provided = MPI.Query_thread()
-            required = MPI.THREAD_SERIALIZED
-            if provided < required: return
         except NotImplementedError:
+            return
+        if provided < self.REQUIRED:
             return
         T = []
         for i in range(5):
@@ -57,12 +62,19 @@ class TestMPIThreads(unittest.TestCase):
                        args = (not _HAS_THREADING,),
                        verbose=_VERBOSE)
             T.append(t)
-        self._test_is(main=True)
-        for t in T:
-            t.start()
-        for t in T:
-            t.join()
+        if provided == MPI.THREAD_MULTIPLE:
+            for t in T:
+                t.start()
+                t.join()
+        else:
+            for t in T:
+                t.start()
+            for t in T:
+                t.join()
 
+_name, _version = MPI.get_vendor()
+if _name == 'LAM/MPI':
+    TestMPIThreads.REQUIRED = MPI.THREAD_MULTIPLE
 
 _VERBOSE = False
 #_VERBOSE = True

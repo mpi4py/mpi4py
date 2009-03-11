@@ -2,7 +2,7 @@ import sys
 from mpi4py import MPI
 import mpiunittest as unittest
 
-class TestWinBase(object):
+class BaseTestWin(object):
 
     COMM = MPI.COMM_NULL
     INFO = MPI.INFO_NULL
@@ -53,10 +53,8 @@ class TestWinBase(object):
         self.assertEqual(base, self.WIN.Get_attr(MPI.WIN_BASE))
         self.assertEqual(size, self.WIN.Get_attr(MPI.WIN_SIZE))
         self.assertEqual(unit, self.WIN.Get_attr(MPI.WIN_DISP_UNIT))
-        self.assertRaisesMPI(MPI_ERR_KEYVAL, self.WIN.Get_attr, MPI.KEYVAL_INVALID)
 
     def testGetSetErrhandler(self):
-        self.assertRaisesMPI(MPI.ERR_ARG, self.WIN.Set_errhandler, MPI.ERRHANDLER_NULL)
         for ERRHANDLER in [MPI.ERRORS_ARE_FATAL, MPI.ERRORS_RETURN,
                            MPI.ERRORS_ARE_FATAL, MPI.ERRORS_RETURN,]:
             errhdl_1 = self.WIN.Get_errhandler()
@@ -80,35 +78,16 @@ class TestWinBase(object):
         except NotImplementedError:
             pass
 
-class TestWinNull(unittest.TestCase):
-
-    def testFree(self):
-        self.assertRaisesMPI(MPI.ERR_WIN, MPI.WIN_NULL.Free)
-
-    def testGetErrhandler(self):
-        self.assertRaisesMPI(MPI.ERR_WIN, MPI.WIN_NULL.Get_errhandler)
-
-    def testSetErrhandler(self):
-        self.assertRaisesMPI(MPI.ERR_WIN, MPI.WIN_NULL.Set_errhandler, MPI.ERRORS_RETURN)
-
-    def testCallErrhandler(self):
-        self.assertRaisesMPI(MPI.ERR_WIN, MPI.WIN_NULL.Call_errhandler, 0)
-
-class TestWinSelf(TestWinBase, unittest.TestCase):
+class TestWinSelf(BaseTestWin, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
-class TestWinWorld(TestWinBase, unittest.TestCase):
+class TestWinWorld(BaseTestWin, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
 try:
     w = MPI.Win.Create(None, 1, MPI.INFO_NULL, MPI.COMM_SELF).Free()
 except NotImplementedError:
-    del TestWinNull, TestWinSelf, TestWinWorld
-
-MPI_ERR_KEYVAL = MPI.ERR_KEYVAL
-_name, _version = MPI.get_vendor()
-if _name == 'Open MPI':
-    MPI_ERR_KEYVAL = MPI.ERR_OTHER
+    del BaseTestWin, TestWinSelf, TestWinWorld
 
 if __name__ == '__main__':
     unittest.main()

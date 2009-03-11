@@ -43,9 +43,6 @@ MPI_ERR_KEYVAL = MPI.ERR_KEYVAL
 
 class TestWorldAttrs(unittest.TestCase):
 
-    def testKeyvalInvalid(self):
-        self.assertRaisesMPI(MPI_ERR_KEYVAL, MPI.COMM_WORLD.Get_attr, MPI.KEYVAL_INVALID)
-
     def testWTimeIsGlobal(self):
         wtg = MPI.COMM_WORLD.Get_attr(MPI.WTIME_IS_GLOBAL)
         if wtg is not None:

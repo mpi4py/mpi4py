@@ -1,33 +1,10 @@
 from mpi4py import MPI
 import mpiunittest as unittest
 
-MPI_ERR_INFO = MPI.ERR_INFO
-
 class TestInfoNull(unittest.TestCase):
 
     def testTruth(self):
         self.assertFalse(bool(MPI.INFO_NULL))
-
-    def testDup(self):
-        self.assertRaisesMPI(MPI_ERR_INFO, MPI.INFO_NULL.Dup)
-
-    def testFree(self):
-        self.assertRaisesMPI(MPI_ERR_INFO, MPI.INFO_NULL.Free)
-
-    def testGet(self):
-        self.assertRaisesMPI(MPI_ERR_INFO, MPI.INFO_NULL.Get, 'key')
-
-    def testSet(self):
-        self.assertRaisesMPI(MPI_ERR_INFO, MPI.INFO_NULL.Set, 'key', 'value')
-
-    def testDelete(self):
-        self.assertRaisesMPI(MPI_ERR_INFO, MPI.INFO_NULL.Delete, 'key')
-
-    def testGetNKeys(self):
-        self.assertRaisesMPI(MPI_ERR_INFO, MPI.INFO_NULL.Get_nkeys)
-
-    def testGetNthKey(self):
-        self.assertRaisesMPI(MPI_ERR_INFO, MPI.INFO_NULL.Get_nthkey, 0)
 
     def testPyMethods(self):
         inull = MPI.INFO_NULL
@@ -88,8 +65,6 @@ class TestInfo(unittest.TestCase):
         value, flag = INFO.Get('key')
         self.assertEqual(value, None)
         self.assertEqual(flag,  False)
-        self.assertRaisesMPI(MPI.ERR_INFO_NOKEY, INFO.Delete, 'key')
-        self.assertRaisesMPI([MPI.ERR_ARG,MPI.ERR_INFO_KEY], INFO.Get_nthkey, 0)
 
     def testPyMethods(self):
         INFO = self.INFO
@@ -126,14 +101,6 @@ try:
     MPI.Info.Create().Free()
 except NotImplementedError:
     del TestInfoNull, TestInfo
-
-if MPI.Get_version() <= (2, 0):
-    MPI_ERR_INFO = (MPI.ERR_INFO, MPI.ERR_ARG)
-
-_name, _version = MPI.get_vendor()
-if _name == 'MPICH2':
-    # XXX under discussion
-    MPI_ERR_INFO = MPI.ERR_ARG
 
 if __name__ == '__main__':
     unittest.main()

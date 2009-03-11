@@ -19,7 +19,7 @@ messages += [ list(_basic),
 
 
 
-class TestP2PObjBase(object):
+class BaseTestP2PObj(object):
 
     COMM = MPI.COMM_NULL
 
@@ -88,28 +88,25 @@ class TestP2PObjBase(object):
                 rmess = smess
             self.assertEqual(rmess, smess)
 
-class TestP2PObjBaseDup(TestP2PObjBase):
+class BaseTestP2PObjDup(BaseTestP2PObj):
     def setUp(self):
         self.COMM = self.COMM.Dup()
     def tearDown(self):
         self.COMM.Free()
 
-class TestP2PObjSelf(TestP2PObjBase, unittest.TestCase):
+class TestP2PObjSelf(BaseTestP2PObj, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
-class TestP2PObjWorld(TestP2PObjBase, unittest.TestCase):
+class TestP2PObjWorld(BaseTestP2PObj, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
-class TestP2PObjSelfDup(TestP2PObjBaseDup, unittest.TestCase):
+class TestP2PObjSelfDup(BaseTestP2PObjDup, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
-class TestP2PObjWorldDup(TestP2PObjBaseDup, unittest.TestCase):
+class TestP2PObjWorldDup(BaseTestP2PObjDup, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
 
 
 if __name__ == '__main__':
-    try:
-        unittest.main()
-    except SystemExit:
-        pass
+    unittest.main()
