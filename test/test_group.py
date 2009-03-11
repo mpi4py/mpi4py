@@ -84,6 +84,7 @@ class BaseTestGroup(object):
         group1 = self.GROUP
         group2 = self.GROUP
         ranks1 = list(range(group1.Get_size())) * 3
+        ranks2 = MPI.Group.Translate_ranks(group1, ranks1)
         ranks2 = MPI.Group.Translate_ranks(group1, ranks1, group2)
         self.assertEqual(ranks1, ranks2)
 

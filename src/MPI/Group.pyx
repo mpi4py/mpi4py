@@ -58,16 +58,26 @@ cdef class Group:
         Translate the ranks of processes in
         one group to those in another group
         """
-        if group2 is None:
-            group2 = Group()
-            CHKERR( MPI_Comm_group(MPI_COMM_WORLD, &group2.ob_mpi) )
+        cdef MPI_Group grp1 = MPI_GROUP_NULL
+        cdef MPI_Group grp2 = MPI_GROUP_NULL
         cdef int i = 0, n = len(ranks1)
         cdef int *iranks1 = NULL, *iranks2 = NULL
         cdef object tmp1 = newarray_int(n, &iranks1)
         cdef object tmp2 = newarray_int(n, &iranks2)
         for i from 0 <= i < n: iranks1[i] = ranks1[i]
-        CHKERR( MPI_Group_translate_ranks(group1.ob_mpi, n, iranks1,
-                                          group2.ob_mpi, iranks2) )
+        #
+        grp1 = group1.ob_mpi
+        if group2 is not None:
+            grp2 = group2.ob_mpi
+        else:
+            CHKERR( MPI_Comm_group(MPI_COMM_WORLD, &grp2) )
+        try:
+            CHKERR( MPI_Group_translate_ranks(grp1, n, iranks1,
+                                              grp2, iranks2) )
+        finally:
+            if group2 is None:
+                CHKERR( MPI_Group_free(&grp2) )
+        #
         return [iranks2[i] for i from 0 <= i < n]
 
     @classmethod
