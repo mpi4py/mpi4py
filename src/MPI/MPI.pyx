@@ -133,7 +133,7 @@ THREAD_SERIALIZED = MPI_THREAD_SERIALIZED
 THREAD_MULTIPLE   = MPI_THREAD_MULTIPLE
 # """Multiple threads may call MPI"""
 
-def Init_thread(int required):
+def Init_thread(int required=THREAD_MULTIPLE):
     """
     Initialize the MPI execution environment
     """
