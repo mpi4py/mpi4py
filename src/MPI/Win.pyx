@@ -30,7 +30,7 @@ cdef class Win:
 
     @classmethod
     def Create(cls, memory, int disp_unit=1,
-               Info info=None, Intracomm comm=None):
+               Info info=INFO_NULL, Intracomm comm=None):
         """
         Create an window object for one-sided communication
         """

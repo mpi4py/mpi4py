@@ -902,7 +902,7 @@ cdef class Intracomm(Comm):
     # Starting Processes
 
     def Spawn(self, command, args, int maxprocs=1,
-              Info info=None, int root=0, errcodes=None):
+              Info info=INFO_NULL, int root=0, errcodes=None):
         """
         Spawn instances of a single MPI application
         """
@@ -935,7 +935,7 @@ cdef class Intracomm(Comm):
 
     # Server Routines
 
-    def Accept(self, port_name, Info info=None, int root=0):
+    def Accept(self, port_name, Info info=INFO_NULL, int root=0):
         """
         Accept a request to form a new intercommunicator
         """
@@ -950,7 +950,7 @@ cdef class Intracomm(Comm):
 
     # Client Routines
 
-    def Connect(self, port_name, Info info=None, int root=0):
+    def Connect(self, port_name, Info info=INFO_NULL, int root=0):
         """
         Make a request to form a new intercommunicator
         """
@@ -1408,7 +1408,7 @@ GRAPH = MPI_GRAPH  #: Graph topology
 # [5.4.2] Server Routines
 # -----------------------
 
-def Open_port(Info info=None):
+def Open_port(Info info=INFO_NULL):
     """
     Return an address that can be used to establish
     connections between groups of MPI processes
@@ -1418,7 +1418,7 @@ def Open_port(Info info=None):
     with nogil: CHKERR( MPI_Open_port(cinfo, cportname) )
     return mpistr(cportname)
 
-def Close_port(port_name, Info info=None):
+def Close_port(port_name, Info info=INFO_NULL):
     """
     Close a port
     """
@@ -1452,7 +1452,7 @@ def Unpublish_name(service_name, Info info, port_name):
     cdef MPI_Info cinfo = _arg_Info(info)
     with nogil: CHKERR( MPI_Unpublish_name(csrvcname, cinfo, cportname) )
 
-def Lookup_name(service_name, Info info=None):
+def Lookup_name(service_name, Info info=INFO_NULL):
     """
     Lookup a port name given a service name
     """

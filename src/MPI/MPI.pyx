@@ -83,7 +83,7 @@ WIN_DISP_UNIT   = MPI_WIN_DISP_UNIT
 # Memory Allocation
 # -----------------
 
-def Alloc_mem(Aint size, info=None):
+def Alloc_mem(Aint size, Info info=INFO_NULL):
     """
     Allocate memory for message passing and RMA
     """

@@ -30,7 +30,7 @@ cdef class File:
 
     @classmethod
     def Open(cls, Intracomm comm not None,
-             filename, int amode, Info info=None):
+             filename, int amode, Info info=INFO_NULL):
         """
         Open a file
         """
@@ -56,7 +56,7 @@ cdef class File:
     # -----------------------
 
     @classmethod
-    def Delete(cls, filename, Info info=None):
+    def Delete(cls, filename, Info info=INFO_NULL):
         """
         Delete a file
         """
@@ -159,7 +159,7 @@ cdef class File:
 
     def Set_view(self, Offset disp=0,
                  Datatype etype=None, Datatype ftype=None,
-                 datarep=None, Info info=None):
+                 datarep=None, Info info=INFO_NULL):
         """
         Set the file view
         """
