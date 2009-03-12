@@ -61,5 +61,18 @@ def run(source, wdir):
     finally:
         os.chdir(cwd)
 
+def docstring_replace(OLD, NEW):
+    try:
+        from Cython.Compiler.AutoDocTransforms import EmbedSignature
+    except ImportError:
+        return
+    _fmt_signature_orig = EmbedSignature._fmt_signature
+    def _fmt_signature(*args, **kwars):
+        sig = _fmt_signature_orig(*args, **kwars)
+        sig = sig.replace(OLD, NEW); #print sig
+        return sig
+    EmbedSignature._fmt_signature = _fmt_signature
+
 if __name__ == "__main__":
+    docstring_replace(OLD='mpi4py.MPI.', NEW='')
     run('mpi4py.MPI.pyx', 'src')
