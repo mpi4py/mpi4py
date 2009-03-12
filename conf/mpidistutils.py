@@ -19,6 +19,15 @@ MPICFG = ('mpi', 'mpi.cfg')
 
 # --------------------------------------------------------------------
 
+import sys
+if sys.version[:3] == '3.0':
+    from distutils import version
+    version.cmp = lambda a, b : (a > b) - (a < b)
+    del version
+del sys
+
+# --------------------------------------------------------------------
+
 import sys, os
 from distutils import sysconfig
 from distutils.spawn import find_executable
