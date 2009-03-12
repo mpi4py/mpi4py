@@ -126,7 +126,7 @@ def executables():
                     'LDLAST'):
             link_args += cfgDict.get(var, '').split()
 
-    pyexe = dict(name='mpi4py',#'python%s-mpi' % py_version,
+    pyexe = dict(name='python%s-mpi' % py_version,
                  sources=['src/python.c'],
                  libraries=libraries,
                  library_dirs=library_dirs,

@@ -776,17 +776,12 @@ class install_exe(cmd_install_lib.install_lib):
         self.skip_build = None
 
     def finalize_options (self):
-        self.set_undefined_options('install',
-                                   ('force', 'force'),
-                                   ('skip_build', 'skip_build'))
         self.set_undefined_options('build_exe',
                                    ('build_exe', 'build_dir'))
-        if os.name == 'posix':
-            bindir = 'install_scripts'
-        else:
-            bindir = 'install_data'
         self.set_undefined_options('install',
-                                   (bindir, 'install_dir'))
+                                   ('force', 'force'),
+                                   ('skip_build', 'skip_build'),
+                                   ('install_scripts', 'install_dir'))
 
     def run (self):
         self.build()
