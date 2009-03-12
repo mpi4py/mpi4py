@@ -33,85 +33,81 @@ from distutils import sysconfig
 from distutils.spawn import find_executable
 from distutils import log
 
-def customize_compiler(compiler, environ=None):
-    """
-    Do any platform-specific customization of a CCompiler instance.
 
-    Mainly needed on Unix, so we can plug in the information that
-    varies across Unices and is stored in Python's Makefile.
-    """
-    from distutils.sysconfig import get_config_vars
+def fix_any_flags(*flags):
+    import re
+    newflags = list(flags)
+    if sys.platform == 'darwin':
+        universal =  os.environ.get('MACOSX_UNIVERSAL_BUILD') or '1'
+        if not int(universal):
+            for i, flg in enumerate(flags):
+                flg = re.sub('-arch\s+\w+\s', ' ', flg)
+                flg = re.sub('-isysroot [^ \t]*', ' ', flg)
+                newflags[i] = flg
+    return newflags
+
+
+def fix_linker_cmd(mpild, ldshared):
+    if not ldshared: return mpild
+    if (sys.platform.startswith('aix')
+        and 'ld_so_aix' in ldshared):
+        ldshared = ldshared.split(' ', 2)
+    else:
+        ldshared = ldshared.split(' ', 1)
+    if len(ldshared) == 1: # just linker, no flags
+        return mpild
+    elif len(ldshared) == 2: # linker and flags
+        return mpild + ' ' + ldshared[1]
+    else: # assume using special linker script
+        return  (ldshared[0] + ' '  +
+                 mpild       + ' '  +
+                 ldshared[2])
+
+
+def customize_compiler(compiler,
+                       mpicc=None, mpicxx=None,
+                       environ=None):
     if environ is None:
         environ = os.environ
-
     if compiler.compiler_type == 'unix':
-        (cc, cxx, 
-         basecflags, opt, cflags,
-         ccshared, ldshared, so_ext) = \
-            get_config_vars('CC', 'CXX',
-                            'BASECFLAGS', 'OPT', 'CFLAGS',
-                            'CCSHARED', 'LDSHARED', 'SO')
-
-        if 'CC' in environ:
-            cc = environ['CC']
-        if 'CXX' in environ:
-            cxx = environ['CXX']
-        if 'LDSHARED' in environ:
-            ldshared = environ['LDSHARED']
-        if 'CPP' in environ:
-            cpp = environ['CPP']
-        else:
-            cpp = cc + " -E"           # not always
+        # Core Python configuration
+        (cc, cxx, cflags, ccshared, ldshared, so) = \
+            sysconfig.get_config_vars('CC', 'CXX', 'CFLAGS',
+                                      'CCSHARED', 'LDSHARED', 'SO')
+        # Do any distutils flags fixup right now
+        (cc, cxx, cflags, ccshared, ldshared, so) = \
+            fix_any_flags(cc, cxx, cflags, ccshared, ldshared, so)
+        # Compiler command overriding
+        if mpicc:
+            cc = mpicc
+        if mpicxx:
+            cxx = mpicxx
+        if mpicc or mpicxx:
+            mpild = mpicc or mpicxx
+            ldshared = fix_linker_cmd(mpild, ldshared)
+        # Environment handling
+        cpp = os.environ.get('CPP') or (cc + ' -E')
         if 'LDFLAGS' in environ:
             ldshared = ldshared + ' ' + environ['LDFLAGS']
         if 'CFLAGS' in environ:
-            cflags = basecflags + ' ' + opt + ' ' + environ['CFLAGS']
+            cflags   = cflags   + ' ' + environ['CFLAGS']
             ldshared = ldshared + ' ' + environ['CFLAGS']
         if 'CPPFLAGS' in environ:
-            cpp = cpp + ' ' + environ['CPPFLAGS']
-            cflags = cflags + ' ' + environ['CPPFLAGS']
+            cpp      = cpp      + ' ' + environ['CPPFLAGS']
+            cflags   = cflags   + ' ' + environ['CPPFLAGS']
             ldshared = ldshared + ' ' + environ['CPPFLAGS']
-
+        # Distutils compiler setup
         cc_cmd = cc + ' ' + cflags
         compiler.set_executables(
-            preprocessor=cpp,
-            compiler=cc_cmd,
-            compiler_so=cc_cmd + ' ' + ccshared,
-            compiler_cxx=cxx,
-            linker_so=ldshared,
-            linker_exe=cc)
-        compiler.shared_lib_extension = so_ext
+            preprocessor = cpp,
+            compiler     = cc  + ' ' + cflags,
+            compiler_so  = cc  + ' ' + cflags + ' ' + ccshared,
+            compiler_cxx = cxx + ' ' + cflags + ' ' + ccshared,
+            linker_so    = ldshared,
+            linker_exe   = cc,
+            )
+        compiler.shared_lib_extension = so
 
-def customize_mpi_environ(mpicc, mpicxx=None, environ=None):
-    """
-    Replace normal compilers with MPI compilers
-    """
-    if environ is None:
-        environ = dict(os.environ)
-    if mpicc: # C compiler
-        environ['CC'] = mpicc
-    if mpicxx: # C++ compiler
-        environ['CXX'] = mpicxx
-    mpild = mpicc or mpicxx
-    if mpild: # linker for shared
-        ldshared = sysconfig.get_config_var('LDSHARED')
-        if not ldshared:
-            environ['LDSHARED'] = mpild
-        else:
-            if sys.platform.startswith('aix') \
-                   and 'ld_so_aix' in ldshared:
-                ldshared = ldshared.split(' ', 2)
-            else:
-                ldshared = ldshared.split(' ', 1)
-            if len(ldshared) == 1: # just linker, no flags
-                environ['LDSHARED'] = mpild
-            elif len(ldshared) == 2: # linker and flags
-                environ['LDSHARED'] = mpild + ' ' + ldshared[1]
-            else: # assume using special linker script
-                environ['LDSHARED'] = ldshared[0] + ' '  + \
-                                      mpild       + ' '  + \
-                                      ldshared[2]
-    return environ
 
 def _find_mpi_compiler(envvars, executables, path=None):
     """
@@ -415,8 +411,7 @@ class config(cmd_config.config):
             log.info("MPI C compiler:    %s", mpicc  or 'not found')
             self.compiler = None
             self._check_compiler()
-            environ = customize_mpi_environ(mpicc, None)
-            customize_compiler(self.compiler, environ)
+            customize_compiler(self.compiler, mpicc=mpicc, mpicxx=None)
             self.try_link(ConfigTest, headers=['mpi.h'], lang='c')
         # test MPI C++ compiler
         mpicxx = self.mpicxx
@@ -426,11 +421,10 @@ class config(cmd_config.config):
             log.info("MPI C++ compiler:  %s", mpicxx or 'not found')
             self.compiler = None
             self._check_compiler()
-            environ = customize_mpi_environ(None, mpicxx)
-            customize_compiler(self.compiler, environ)
+            customize_compiler(self.compiler, mpicc=None, mpicxx=mpicxx)
             if self.compiler.compiler_type in ('unix', 'cygwin', 'mingw32'):
                 self.compiler.compiler_so[0] = mpicxx
-                self.compiler.linker_exe[0] = mpicxx
+                self.compiler.linker_exe[0]  = mpicxx
             self.try_link(ConfigTest, headers=['mpi.h'], lang='c++')
 
     def run_configtests(self, compiler, config_info):
@@ -524,7 +518,7 @@ class build_ext(cmd_build_ext.build_ext):
         config_info = self.configure_extensions()
         mpicc = mpicxx = None
         if config_info:
-            mpicc = config_info.get('mpicc')
+            mpicc  = config_info.get('mpicc')
             mpicxx = config_info.get('mpicxx')
         compiler = self.configure_compiler(mpicc=mpicc, mpicxx=mpicxx)
         # extra configuration, MPI 2 features
@@ -539,26 +533,29 @@ class build_ext(cmd_build_ext.build_ext):
         for ext in self.extensions:
             self.build_extension(ext)
 
-    def configure_compiler(self, compiler=None, mpicc=None, mpicxx=None):
-        mpicc, mpicxx = self.mpicc or mpicc, self.mpicxx or mpicxx
+    def configure_compiler(self, mpicc=None, mpicxx=None, compiler=None):
+        #
+        mpicc = self.mpicc or mpicc
         if mpicc is None:
             mpicc = self.find_mpi_compiler(MPICC_ENV, MPICC)
+        log.info("MPI C compiler:    %s", mpicc  or 'not found')
+        #
+        mpicxx = self.mpicxx or mpicxx
         if mpicxx is None:
             mpicxx = self.find_mpi_compiler(MPICXX_ENV, MPICXX)
-        if compiler is None:
-            compiler = self.compiler
-        log.info("MPI C compiler:    %s", mpicc  or 'not found')
         log.info("MPI C++ compiler:  %s", mpicxx or 'not found')
-        environ = customize_mpi_environ(mpicc, mpicxx)
-        customize_compiler(compiler, environ)
+        #
+        if compiler is None: compiler = self.compiler
+        customize_compiler(compiler, mpicc=mpicc, mpicxx=mpicxx)
         return compiler
 
     def find_mpi_compiler(self, envvars, executables, path=None):
         return _find_mpi_compiler(envvars, executables, path)
 
     def configure_extensions(self):
-        config_info = self.find_mpi_config(self.mpi, self.mpi_cfg,
-                                           MPICFG_ENV, MPICFG)
+        config_info = self.find_mpi_config(
+            self.mpi, self.mpi_cfg,
+            MPICFG_ENV, MPICFG)
         if config_info:
             for ext in self.extensions:
                 self.configure_extension(ext, config_info)
@@ -700,7 +697,7 @@ class build_exe(build_ext):
         if self.compiler.compiler_type == 'mingw32':
             try: del self.compiler.dll_libraries[:]
             except: pass
-        
+
         # Now link the object files together into a "shared object" --
         # of course, first we have to figure out all the other things
         # that go into the mix.
