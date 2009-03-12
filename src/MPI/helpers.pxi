@@ -8,7 +8,7 @@ cdef enum PyMPI_OBJECT_FLAGS:
 
 cdef inline MPI_Status *_arg_Status(object status):
     if status is None: return MPI_STATUS_IGNORE
-    return &((<Status?>status).ob_mpi)
+    return &((<Status>status).ob_mpi)
 
 cdef inline int _eq_Status(MPI_Status* s1, MPI_Status* s2) nogil:
    cdef size_t i=0, n=sizeof(MPI_Status)
@@ -129,7 +129,7 @@ cdef inline int _del_Info(MPI_Info* ob):
 
 cdef inline MPI_Info _arg_Info(object info):
     if info is None: return MPI_INFO_NULL
-    return (<Info?>info).ob_mpi
+    return (<Info>info).ob_mpi
 
 #---------------------------------------------------------------------
 # Group
