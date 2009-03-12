@@ -10,12 +10,11 @@ static int    PyMPI_MPICH1_argc    = 0;
 static char **PyMPI_MPICH1_argv    = 0;
 static char  *PyMPI_MPICH1_args[2] = {0, 0};
 
-static int PyMPI_MPICH1_MPI_Init(int *argc, char ***argv)
+static void PyMPI_MPICH1_FixArgs(int **argc, char ****argv)
 {
-  if (argc==(int *)0 || argv==(char ***)0) {
+  if ((argc[0]==(int *)0) || (argv[0]==(char ***)0)) {
 #ifdef Py_PYTHON_H
 #if PY_MAJOR_VERSION >= 3
-    /* XXX Need to do better for Python 3 */
     PyMPI_MPICH1_args[0] = (char *) "python";
 #else
     PyMPI_MPICH1_args[0] = Py_GetProgramName();
@@ -23,9 +22,14 @@ static int PyMPI_MPICH1_MPI_Init(int *argc, char ***argv)
     PyMPI_MPICH1_argc = 1;
 #endif
     PyMPI_MPICH1_argv = PyMPI_MPICH1_args;
-    argc = &PyMPI_MPICH1_argc;
-    argv = &PyMPI_MPICH1_argv;
+    argc[0] = &PyMPI_MPICH1_argc;
+    argv[0] = &PyMPI_MPICH1_argv;
   }
+}
+
+static int PyMPI_MPICH1_MPI_Init(int *argc, char ***argv)
+{
+  PyMPI_MPICH1_FixArgs(&argc, &argv);
   return MPI_Init(argc, argv);
 }
 #undef  MPI_Init
@@ -34,20 +38,7 @@ static int PyMPI_MPICH1_MPI_Init(int *argc, char ***argv)
 static int PyMPI_MPICH1_MPI_Init_thread(int *argc, char ***argv,
 					int required, int *provided)
 {
-  if (argc==(int *)0 || argv==(char ***)0) {
-#ifdef Py_PYTHON_H
-#if PY_MAJOR_VERSION >= 3
-    /* XXX Need to do better for Python 3 */
-    PyMPI_MPICH1_args[0] = (char *) "python";
-#else
-    PyMPI_MPICH1_args[0] = Py_GetProgramName();
-#endif
-    PyMPI_MPICH1_argc = 1;
-#endif
-    PyMPI_MPICH1_argv = PyMPI_MPICH1_args;
-    argc = &PyMPI_MPICH1_argc;
-    argv = &PyMPI_MPICH1_argv;
-  }
+  PyMPI_MPICH1_FixArgs(&argc, &argv);
   return MPI_Init_thread(argc, argv, required, provided);
 }
 #undef  MPI_Init_thread
