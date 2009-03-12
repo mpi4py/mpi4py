@@ -107,3 +107,31 @@ static PyObject * PyMPIString_AsStringAndSize(PyObject *ob,
 #endif
 
 /* ---------------------------------------------------------------- */
+
+/* Really VILE HACK for Python 2.3 !!
+   Ensure in advance that the GIL was created */
+
+#if PY_VERSION_HEX < 0x02040000 && defined(WITH_THREAD)
+#define PyImport_AddModule(module) \
+  (PyEval_InitThreads(), PyImport_AddModule(mod))
+#endif
+
+
+/* Enable the block below if for any
+   reason you want to disable threads */
+#if 0
+
+#if defined(PyImport_AddModule)
+#undef PyImport_AddModule
+#endif
+
+#define PyGILState_Ensure() (PyGILState_STATE)0)
+#define PyGILState_Release(state) (state)=(PyGILState_STATE)0)
+#undef  Py_BLOCK_THREADS
+#define Py_BLOCK_THREADS (_save)=(PyThreadState*)0;
+#undef  Py_UNBLOCK_THREADS
+#define Py_UNBLOCK_THREADS (_save)=(PyThreadState*)0;
+
+#endif
+
+/* ---------------------------------------------------------------- */
