@@ -53,8 +53,8 @@ cdef class File:
     # ----------------------
 
     @classmethod
-    def Open(cls, Intracomm comm not None,
-             filename, int amode, Info info=INFO_NULL):
+    def Open(cls, Intracomm comm not None, filename,
+             int amode=MODE_RDONLY, Info info=INFO_NULL):
         """
         Open a file
         """
