@@ -1,3 +1,19 @@
+# Assertion modes
+# ---------------
+
+MODE_NOCHECK   = MPI_MODE_NOCHECK
+MODE_NOSTORE   = MPI_MODE_NOSTORE
+MODE_NOPUT     = MPI_MODE_NOPUT
+MODE_NOPRECEDE = MPI_MODE_NOPRECEDE
+MODE_NOSUCCEED = MPI_MODE_NOSUCCEED
+
+# Lock types
+# ----------
+
+LOCK_EXCLUSIVE = MPI_LOCK_EXCLUSIVE
+LOCK_SHARED    = MPI_LOCK_SHARED
+
+
 cdef class Win:
 
     """
@@ -326,19 +342,3 @@ cdef Win __WIN_NULL__ = _new_Win(MPI_WIN_NULL)
 # -------------------------
 
 WIN_NULL = __WIN_NULL__  #: Null window handle
-
-
-# Assertion modes
-# ---------------
-
-MODE_NOCHECK   = MPI_MODE_NOCHECK
-MODE_NOSTORE   = MPI_MODE_NOSTORE
-MODE_NOPUT     = MPI_MODE_NOPUT
-MODE_NOPRECEDE = MPI_MODE_NOPRECEDE
-MODE_NOSUCCEED = MPI_MODE_NOSUCCEED
-
-# Lock types
-# ----------
-
-LOCK_EXCLUSIVE = MPI_LOCK_EXCLUSIVE
-LOCK_SHARED    = MPI_LOCK_SHARED

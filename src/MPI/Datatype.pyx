@@ -1,3 +1,27 @@
+# Storage order for arrays
+# ------------------------
+
+ORDER_C       = MPI_ORDER_C        #: C order (a.k.a. row major)
+ORDER_FORTRAN = MPI_ORDER_FORTRAN  #: Fortran order (a.k.a. column major)
+ORDER_F       = MPI_ORDER_FORTRAN  #: Convenience alias for ORDER_FORTRAN
+
+
+# Type classes for Fortran datatype matching
+# ------------------------------------------
+TYPECLASS_INTEGER = MPI_TYPECLASS_INTEGER
+TYPECLASS_REAL    = MPI_TYPECLASS_REAL
+TYPECLASS_COMPLEX = MPI_TYPECLASS_COMPLEX
+
+
+# Type of distributions (HPF-like arrays)
+# ---------------------------------------
+
+DISTRIBUTE_NONE      = MPI_DISTRIBUTE_NONE       #: Dimension not distributed
+DISTRIBUTE_BLOCK     = MPI_DISTRIBUTE_BLOCK      #: Block distribution
+DISTRIBUTE_CYCLIC    = MPI_DISTRIBUTE_CYCLIC     #: Cyclic distribution
+DISTRIBUTE_DFLT_DARG = MPI_DISTRIBUTE_DFLT_DARG  #: Default distribution argument
+
+
 cdef class Datatype:
 
     """
@@ -157,7 +181,7 @@ cdef class Datatype:
         return datatype
 
     def Create_subarray(self, sizes, subsizes, starts,
-                        order=None):
+                        int order=ORDER_C):
         """
         Create a datatype for a subarray of
         a regular, multidimensional array
@@ -181,7 +205,7 @@ cdef class Datatype:
 
     def Create_darray(self, int size, int rank,
                       gsizes, distribs, dargs, psizes,
-                      order=None):
+                      int order=ORDER_C):
         """
         Create a datatype representing an HPF-like
         distributed array on Cartesian process grids
@@ -552,27 +576,3 @@ LB                 = __LB__  #: lower-bound marker (deprecated in MPI-2)
 # Convenience aliases (not in the MPI-1/MPI-2 stardards)
 UNSIGNED_INT       = __UNSIGNED__
 INT_INT            = __TWOINT__
-
-
-# Storage order for arrays
-# ------------------------
-
-ORDER_C       = MPI_ORDER_C        #: C order (a.k.a. row major)
-ORDER_FORTRAN = MPI_ORDER_FORTRAN  #: Fortran order (a.k.a. column major)
-ORDER_F       = MPI_ORDER_FORTRAN  #: Convenience alias for ORDER_FORTRAN
-
-
-# Type classes for Fortran datatype matching
-# ------------------------------------------
-TYPECLASS_INTEGER = MPI_TYPECLASS_INTEGER
-TYPECLASS_REAL    = MPI_TYPECLASS_REAL
-TYPECLASS_COMPLEX = MPI_TYPECLASS_COMPLEX
-
-
-# Type of distributions (HPF-like arrays)
-# ---------------------------------------
-
-DISTRIBUTE_NONE      = MPI_DISTRIBUTE_NONE       #: Dimension not distributed
-DISTRIBUTE_BLOCK     = MPI_DISTRIBUTE_BLOCK      #: Block distribution
-DISTRIBUTE_CYCLIC    = MPI_DISTRIBUTE_CYCLIC     #: Cyclic distribution
-DISTRIBUTE_DFLT_DARG = MPI_DISTRIBUTE_DFLT_DARG  #: Default distribution argument

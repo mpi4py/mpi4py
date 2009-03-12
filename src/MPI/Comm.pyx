@@ -1,3 +1,19 @@
+# Communicator Comparisons
+# ------------------------
+
+IDENT     = MPI_IDENT      #: Groups are identical, communicator contexts are de same
+CONGRUENT = MPI_CONGRUENT  #: Groups are identical, contexts are different
+SIMILAR   = MPI_SIMILAR    #: Groups are similar, rank order differs
+UNEQUAL   = MPI_UNEQUAL    #: Groups are different
+
+
+# Communicator Topologies
+# -----------------------
+
+CART  = MPI_CART   #: Cartesian topology
+GRAPH = MPI_GRAPH  #: Graph topology
+
+
 cdef class Comm:
 
     """
@@ -964,32 +980,6 @@ cdef class Intracomm(Comm):
         return comm
 
 
-# Buffer Allocation and Usage
-# ---------------------------
-
-BSEND_OVERHEAD = MPI_BSEND_OVERHEAD
-#: Upper bound of memory overhead for sending in buffered mode
-
-def Attach_buffer(memory):
-    """
-    Attach a user-provided buffer for
-    sending in buffered mode
-    """
-    cdef void *base = NULL
-    cdef MPI_Aint size = 0
-    asmemory(memory, &base, &size)
-    with nogil: CHKERR( MPI_Buffer_attach(base, <int>size) )
-
-def Detach_buffer():
-    """
-    Remove an existing attached buffer
-    """
-    cdef void *base = NULL
-    cdef int size = 0
-    with nogil: CHKERR( MPI_Buffer_detach(&base, &size) )
-    return tomemory(base, <MPI_Aint>size)
-
-
 cdef class Cartcomm(Intracomm):
 
     """
@@ -1384,21 +1374,30 @@ COMM_SELF  = __COMM_SELF__   #: Self communicator handle
 COMM_WORLD = __COMM_WORLD__  #: World communicator handle
 
 
-# Communicator Comparisons
-# ------------------------
+# Buffer Allocation and Usage
+# ---------------------------
 
-IDENT     = MPI_IDENT      #: Groups are identical, communicator contexts are de same
-CONGRUENT = MPI_CONGRUENT  #: Groups are identical, contexts are different
-SIMILAR   = MPI_SIMILAR    #: Groups are similar, rank order differs
-UNEQUAL   = MPI_UNEQUAL    #: Groups are different
+BSEND_OVERHEAD = MPI_BSEND_OVERHEAD
+#: Upper bound of memory overhead for sending in buffered mode
 
+def Attach_buffer(memory):
+    """
+    Attach a user-provided buffer for
+    sending in buffered mode
+    """
+    cdef void *base = NULL
+    cdef MPI_Aint size = 0
+    asmemory(memory, &base, &size)
+    with nogil: CHKERR( MPI_Buffer_attach(base, <int>size) )
 
-# Communicator Topologies
-# -----------------------
-
-CART  = MPI_CART   #: Cartesian topology
-GRAPH = MPI_GRAPH  #: Graph topology
-
+def Detach_buffer():
+    """
+    Remove an existing attached buffer
+    """
+    cdef void *base = NULL
+    cdef int size = 0
+    with nogil: CHKERR( MPI_Buffer_detach(&base, &size) )
+    return tomemory(base, <MPI_Aint>size)
 
 
 # --------------------------------------------------------------------
