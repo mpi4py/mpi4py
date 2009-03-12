@@ -30,7 +30,7 @@ cdef class Win:
 
     @classmethod
     def Create(cls, memory, int disp_unit=1,
-               Info info=INFO_NULL, Intracomm comm=None):
+               Info info=INFO_NULL, Intracomm comm not None=COMM_SELF):
         """
         Create an window object for one-sided communication
         """
@@ -38,15 +38,12 @@ cdef class Win:
         cdef MPI_Aint size = 0
         if memory is not None:
             memory = asmemory(memory, &base, &size)
-        cdef MPI_Info cinfo = MPI_INFO_NULL
-        if info is not None: cinfo = info.ob_mpi
-        cdef MPI_Comm ccomm = MPI_COMM_SELF
-        if comm is not None: ccomm = comm.ob_mpi
+        cdef MPI_Info cinfo = _arg_Info(info)
         #
         cdef Win win = cls()
         with nogil: CHKERR( MPI_Win_create(
             base, size, disp_unit,
-            cinfo, ccomm, &win.ob_mpi) )
+            cinfo, comm.ob_mpi, &win.ob_mpi) )
         # we are in charge or managing MPI errors
         CHKERR( MPI_Win_set_errhandler(win.ob_mpi, MPI_ERRORS_RETURN) )
         # hold a reference to the object exposing memory
@@ -177,20 +174,18 @@ cdef class Win:
     # ----------------------------
 
     def Accumulate(self, origin, int target_rank,
-                   target=None, Op op=None):
+                   target=None, Op op not None=SUM):
         """
         Accumulate data into the target process
         using remote memory access.
         """
         cdef _p_msg_rma msg = \
              message_rma_acc(origin, target_rank, target)
-        cdef MPI_Op cop = MPI_SUM
-        if op is not None: cop = op.ob_mpi
         with nogil: CHKERR( MPI_Accumulate(
             msg.oaddr, msg.ocount, msg.otype,
             target_rank,
             msg.tdisp, msg.tcount, msg.ttype,
-            cop, self.ob_mpi) )
+            op.ob_mpi, self.ob_mpi) )
 
     # [6.4] Synchronization Calls
     # ---------------------------

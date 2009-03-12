@@ -496,7 +496,7 @@ cdef class Comm:
     # Global Reduction Operations
     # ---------------------------
 
-    def Reduce(self, sendbuf, recvbuf, Op op=SUM, int root=0):
+    def Reduce(self, sendbuf, recvbuf, Op op not None=SUM, int root=0):
         """
         Reduce
         """
@@ -506,7 +506,7 @@ cdef class Comm:
             m.sbuf, m.rbuf, m.rcount, m.rtype,
             op.ob_mpi, root, self.ob_mpi) )
 
-    def Allreduce(self, sendbuf, recvbuf, Op op=SUM):
+    def Allreduce(self, sendbuf, recvbuf, Op op not None=SUM):
         """
         All Reduce
         """
@@ -516,7 +516,7 @@ cdef class Comm:
             m.sbuf, m.rbuf, m.rcount, m.rtype,
             op.ob_mpi, self.ob_mpi) )
 
-    def Reduce_scatter(self, sendbuf, recvbuf, Op op=SUM):
+    def Reduce_scatter(self, sendbuf, recvbuf, Op op not None=SUM):
         """
         Reduce-Scatter
         """
@@ -760,13 +760,13 @@ cdef class Comm:
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_alltoall(sendobj, recvobj, comm)
     #
-    def reduce(self, sendobj=None, recvobj=None, op=None, int root=0):
+    def reduce(self, sendobj=None, recvobj=None, op=SUM, int root=0):
         """Reduce"""
         if op is None: op = SUM
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_reduce(sendobj, recvobj, op, root, comm)
     #
-    def allreduce(self, sendobj=None, recvobj=None, op=None):
+    def allreduce(self, sendobj=None, recvobj=None, op=SUM):
         """Reduce to All"""
         if op is None: op = SUM
         cdef MPI_Comm comm = self.ob_mpi
@@ -859,7 +859,7 @@ cdef class Intracomm(Comm):
 
     # Inclusive Scan
 
-    def Scan(self, sendbuf, recvbuf, Op op=SUM):
+    def Scan(self, sendbuf, recvbuf, Op op not None=SUM):
         """
         Inclusive Scan
         """
@@ -871,7 +871,7 @@ cdef class Intracomm(Comm):
 
     # Exclusive Scan
 
-    def Exscan(self, sendbuf, recvbuf, Op op=SUM):
+    def Exscan(self, sendbuf, recvbuf, Op op not None=SUM):
         """
         Exclusive Scan
         """
@@ -883,13 +883,13 @@ cdef class Intracomm(Comm):
 
     # Python Communication
     #
-    def scan(self, sendobj=None, recvobj=None, op=None):
+    def scan(self, sendobj=None, recvobj=None, op=SUM):
         """Inclusive Scan"""
         if op is None: op = SUM
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_scan(sendobj, recvobj, op, comm)
     #
-    def exscan(self, sendobj=None, recvobj=None, op=None):
+    def exscan(self, sendobj=None, recvobj=None, op=SUM):
         """Exclusive Scan"""
         if op is None: op = SUM
         cdef MPI_Comm comm = self.ob_mpi

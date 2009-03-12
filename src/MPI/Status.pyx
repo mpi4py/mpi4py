@@ -76,14 +76,12 @@ cdef class Status:
         def __set__(self, value):
             self.Set_error(value)
 
-    def Get_count(self, Datatype datatype=None):
+    def Get_count(self, Datatype datatype not None=BYTE):
         """
         Get the number of *top level* elements
         """
-        cdef MPI_Datatype ctype = MPI_BYTE
-        if datatype is not None: ctype = datatype.ob_mpi
         cdef int count = MPI_UNDEFINED
-        CHKERR( MPI_Get_count(&self.ob_mpi, ctype, &count) )
+        CHKERR( MPI_Get_count(&self.ob_mpi, datatype.ob_mpi, &count) )
         return count
 
     def Get_elements(self, Datatype datatype not None):

@@ -170,8 +170,7 @@ cdef class File:
         if etype is not None: cetype = etype.ob_mpi
         cdef MPI_Datatype cftype = cetype
         if ftype is not None: cftype = ftype.ob_mpi
-        cdef MPI_Info cinfo = MPI_INFO_NULL
-        if info is not None: cinfo = info.ob_mpi
+        cdef MPI_Info cinfo = _arg_Info(info)
         with nogil: CHKERR( MPI_File_set_view(self.ob_mpi, disp, cetype, cftype, cdatarep, cinfo) )
 
     def Get_view(self):
