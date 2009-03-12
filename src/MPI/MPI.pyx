@@ -22,17 +22,17 @@ include "pickled.pxi"
 
 include "CAPI.pxi"
 
+include "Exception.pyx"     # DONE
+include "Errhandler.pyx"    # DONE
 include "Datatype.pyx"      # DONE
 include "Status.pyx"        # DONE
 include "Request.pyx"       # DONE
-include "Op.pyx"            # DONE (except user-defined operations)
 include "Info.pyx"          # DONE
+include "Op.pyx"            # DONE (except user-defined operations)
 include "Group.pyx"         # DONE
 include "Comm.pyx"          # DONE
 include "Win.pyx"           # DONE
 include "File.pyx"          # DONE
-include "Errhandler.pyx"    # DONE
-include "Exception.pyx"     # DONE
 
 # Assorted constants
 # ------------------
@@ -224,6 +224,7 @@ def Wtick():
 
 
 # Maximum string sizes
+# --------------------
 
 # MPI-1
 MAX_PROCESSOR_NAME = MPI_MAX_PROCESSOR_NAME
