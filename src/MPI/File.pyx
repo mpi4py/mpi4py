@@ -182,7 +182,7 @@ cdef class File:
     # ----------------
 
     def Set_view(self, Offset disp=0,
-                 Datatype etype=None, Datatype ftype=None,
+                 Datatype etype=None, Datatype filetype=None,
                  datarep=None, Info info=INFO_NULL):
         """
         Set the file view
@@ -193,7 +193,7 @@ cdef class File:
         cdef MPI_Datatype cetype = MPI_BYTE
         if etype is not None: cetype = etype.ob_mpi
         cdef MPI_Datatype cftype = cetype
-        if ftype is not None: cftype = ftype.ob_mpi
+        if filetype is not None: cftype = filetype.ob_mpi
         cdef MPI_Info cinfo = _arg_Info(info)
         with nogil: CHKERR( MPI_File_set_view(self.ob_mpi, disp, cetype, cftype, cdatarep, cinfo) )
 
