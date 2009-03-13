@@ -38,7 +38,8 @@ name     = 'mpi4py'
 version  = open('VERSION.txt').read().strip()
 descr    = __doc__.split('\n')[1:-1]; del descr[1:3]
 devstat  = ['Development Status :: 5 - Production/Stable']
-download = 'http://pypi.python.org/packages/source/%s/%s/%s-%s.tar.gz'
+url      = 'http://mpi4py.googlecode.com/'
+download = url + 'files/%s-%s.tar.gz'
 
 classifiers = """
 License :: Public Domain
@@ -74,8 +75,8 @@ metadata = {
     'version'          : version,
     'description'      : descr.pop(0),
     'long_description' : '\n'.join(descr),
-    'url'              : 'http://mpi4py.googlecode.com/',
-    'download_url'     : download % (name[0], name, name, version),
+    'url'              : url,
+    'download_url'     : download % (name, version),
     'classifiers'      : [c for c in classifiers.split('\n') if c],
     'keywords'         : [k for k in keywords.split('\n')    if k],
     'platforms'        : [p for p in platforms.split('\n')   if p],
