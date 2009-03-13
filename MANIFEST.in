@@ -10,3 +10,4 @@ recursive-include *    [M,m]akefile
 
 recursive-include docs/html   *
 recursive-include docs/source *
+recursive-exclude docs/source */.svn/*
