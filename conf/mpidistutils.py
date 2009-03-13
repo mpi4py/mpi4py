@@ -244,18 +244,16 @@ def _configure(extension, confdict):
 
 # --------------------------------------------------------------------
 
-ConfigTest = """\
-int main(int argc, char **argv) {
-  MPI_Init(&argc,&argv);
-  MPI_Finalize();
-  return 0;
-}
-"""
-
 try:
     from mpiscanner import Scanner
 except ImportError:
-    from conf.mpiscanner import Scanner
+    try:
+        from conf.mpiscanner import Scanner
+    except ImportError:
+        class Scanner(object):
+            def parse_file(self, *args):
+                raise NotImplementedError(
+                    "You forgot to grab 'mpiscanner.py'")
 
 class Configure(Scanner):
     SRCDIR = 'src'
@@ -332,6 +330,7 @@ def cmd_set_undefined_mpi_options(self, basecmd):
 
 # --------------------------------------------------------------------
 
+from distutils.core import setup as fcn_setup
 from distutils.core import Distribution as cls_Distribution
 from distutils.extension import Extension as cls_Extension
 
@@ -365,7 +364,6 @@ class Distribution(cls_Distribution):
     def has_executables(self):
         return self.executables and len(self.executables) > 0
 
-
 # Extension class
 
 class Extension(cls_Extension):
@@ -376,7 +374,33 @@ class Extension(cls_Extension):
 class Executable(Extension):
     pass
 
+# setup function
+
+def setup(**attrs):
+    if 'distclass' not in attrs:
+        attrs['distclass'] = Distribution
+    if 'cmdclass' not in attrs:
+        attrs['cmdclass'] = {}
+    cmdclass = attrs['cmdclass']
+    for cmd in (config, build, install, clean,
+                build_ext, build_exe,
+                install_data, install_exe,
+                ):
+        if cmd.__name__ not in cmdclass:
+            cmdclass[cmd.__name__] = cmd
+    return fcn_setup(**attrs)
+    
 # --------------------------------------------------------------------
+
+# A minimalistic MPI program :-)
+
+ConfigTest = """\
+int main(int argc, char **argv) {
+  MPI_Init(&argc,&argv);
+  MPI_Finalize();
+  return 0;
+}
+"""
 
 class config(cmd_config.config):
 
@@ -407,24 +431,27 @@ class config(cmd_config.config):
         mpicc = self.mpicc
         if mpicc is None:
             mpicc = self.find_mpi_compiler(MPICC_ENV, MPICC)
-        if mpicc:
-            log.info("MPI C compiler:    %s", mpicc  or 'not found')
-            self.compiler = None
-            self._check_compiler()
-            customize_compiler(self.compiler, mpicc=mpicc, mpicxx=None)
-            self.try_link(ConfigTest, headers=['mpi.h'], lang='c')
+        log.info("MPI C compiler:    %s", mpicc  or 'not found')
+        self.compiler = getattr(self.compiler, 'compiler_type', 
+                                self.compiler)
+        self._check_compiler()
+        customize_compiler(self.compiler, mpicc=mpicc, mpicxx=None)
+        self.try_link(ConfigTest, headers=['mpi.h'], lang='c')
         # test MPI C++ compiler
         mpicxx = self.mpicxx
         if mpicxx is None:
             mpicxx = self.find_mpi_compiler(MPICXX_ENV, MPICXX)
+        log.info("MPI C++ compiler:  %s", mpicxx or 'not found')
         if mpicxx:
-            log.info("MPI C++ compiler:  %s", mpicxx or 'not found')
-            self.compiler = None
+            self.compiler = getattr(self.compiler, 'compiler_type', 
+                                    self.compiler)
             self._check_compiler()
             customize_compiler(self.compiler, mpicc=None, mpicxx=mpicxx)
             if self.compiler.compiler_type in ('unix', 'cygwin', 'mingw32'):
-                self.compiler.compiler_so[0] = mpicxx
-                self.compiler.linker_exe[0]  = mpicxx
+                self.compiler.compiler_so[0] = \
+                    self.compiler.compiler_cxx[0]
+                self.compiler.linker_exe[0]  = \
+                    self.compiler.compiler_cxx[0]
             self.try_link(ConfigTest, headers=['mpi.h'], lang='c++')
 
     def run_configtests(self, compiler, config_info):

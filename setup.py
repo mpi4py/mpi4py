@@ -139,7 +139,7 @@ def executables():
 # Setup
 # --------------------------------------------------------------------
 
-from distutils.core import setup
+from conf.mpidistutils import setup
 from conf.mpidistutils import Distribution, Extension, Executable
 from conf.mpidistutils import config, build, install, clean
 from conf.mpidistutils import build_ext, build_exe
@@ -163,16 +163,6 @@ def run_setup():
                                       'include/mpi4py/*.i',]},
           ext_modules  = [ExtModule(ext) for ext in ext_modules()],
           executables  = [ExeBinary(exe) for exe in executables()],
-          distclass = Distribution,
-          cmdclass = {'config'       : config,
-                      'build'        : build,
-                      'install'      : install,
-                      'clean'        : clean,
-                      'build_ext'    : build_ext,
-                      'build_exe'    : build_exe,
-                      'install_data' : install_data,
-                      'install_exe'  : install_exe,
-                      },
           **metadata)
 
 def cython_help():
