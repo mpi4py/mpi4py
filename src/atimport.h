@@ -113,7 +113,7 @@ static PyObject * PyMPIString_AsStringAndSize(PyObject *ob,
 
 #if PY_VERSION_HEX < 0x02040000 && defined(WITH_THREAD)
 #define PyImport_AddModule(module) \
-  (PyEval_InitThreads(), PyImport_AddModule(mod))
+  (PyEval_InitThreads(), PyImport_AddModule(module))
 #endif
 
 
