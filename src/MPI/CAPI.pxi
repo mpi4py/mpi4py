@@ -23,7 +23,8 @@ cdef api object PyMPIStatus_New(MPI_Status *arg):
     else: pass  # XXX should fail ?
     return obj
 
-cdef api MPI_Status* PyMPIStatus_Get(object arg) except NULL:
+cdef api MPI_Status* PyMPIStatus_Get(object arg) except? NULL:
+    if arg is None: return MPI_STATUS_IGNORE
     return &(<Status?>arg).ob_mpi
 
 # --------------------------------------------------------------------
