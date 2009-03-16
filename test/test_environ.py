@@ -39,8 +39,6 @@ class TestEnviron(unittest.TestCase):
         self.assertTrue(tick > 0.0)
 
 
-MPI_ERR_KEYVAL = MPI.ERR_KEYVAL
-
 class TestWorldAttrs(unittest.TestCase):
 
     def testWTimeIsGlobal(self):
@@ -86,10 +84,6 @@ class TestWorldAttrs(unittest.TestCase):
         lastuc = MPI.COMM_WORLD.Get_attr(MPI.LASTUSEDCODE)
         self.assertTrue(lastuc >= 0)
 
-
-_name, _version = MPI.get_vendor()
-if _name == 'Open MPI':
-    MPI_ERR_KEYVAL = MPI.ERR_OTHER
 
 if __name__ == '__main__':
     unittest.main()
