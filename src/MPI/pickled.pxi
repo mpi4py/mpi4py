@@ -5,18 +5,28 @@ cdef extern from *:
     Py_ssize_t PyMPIBytes_Size(object) except -1
     object     PyMPIBytes_FromStringAndSize(char*,Py_ssize_t)
 
+# --------------------------------------------------------------------
+
 cdef object _Pickle_dumps = None
 cdef object _Pickle_loads = None
 cdef object _Pickle_PROTOCOL = -1
+
 try:
     from cPickle import dumps as _Pickle_dumps
     from cPickle import loads as _Pickle_loads
     from cPickle import HIGHEST_PROTOCOL as _Pickle_PROTOCOL
 except ImportError:
-    from pickle  import dumps as _Pickle_dumps
-    from pickle  import loads as _Pickle_loads
+    from pickle import dumps as _Pickle_dumps
+    from pickle import loads as _Pickle_loads
     from pickle import HIGHEST_PROTOCOL as _Pickle_PROTOCOL
 
+cdef inline object PyMPI_Dump(object obj):
+    return _Pickle_dumps(obj, _Pickle_PROTOCOL)
+
+cdef inline object PyMPI_Load(object obj):
+    return _Pickle_loads(obj)
+
+# --------------------------------------------------------------------
 
 cdef inline object _py_reduce(object op, object seq):
     if seq is None: return None
@@ -55,7 +65,7 @@ cdef class _p_Pickler:
             p[0] = NULL
             n[0] = 0
         else:
-            obj = _Pickle_dumps(obj, _Pickle_PROTOCOL)
+            obj  = PyMPI_Dump(obj)
             p[0] = PyMPIBytes_AsString(obj)
             n[0] = PyMPIBytes_Size(obj)
         return obj
@@ -71,7 +81,7 @@ cdef class _p_Pickler:
 
     cdef object load(self, obj):
         if obj is None: return None
-        return _Pickle_loads(obj)
+        return PyMPI_Load(obj)
 
     cdef object dumpv(self, object obj, void **p,
                       int n, int cnt[], int dsp[]):
@@ -120,7 +130,7 @@ cdef class _p_Pickler:
 
 cdef _p_Pickler PyMPI_PICKLER = _p_Pickler()
 
-cdef _p_Pickler PyMPI_pickler():
+cdef inline _p_Pickler PyMPI_pickler():
     return PyMPI_PICKLER
 
 # --------------------------------------------------------------------
