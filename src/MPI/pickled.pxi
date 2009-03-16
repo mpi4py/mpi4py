@@ -5,19 +5,23 @@ cdef extern from *:
     Py_ssize_t PyMPIBytes_Size(object) except -1
     object     PyMPIBytes_FromStringAndSize(char*,Py_ssize_t)
 
-
+cdef object _Pickle_dumps = None
+cdef object _Pickle_loads = None
+cdef object _Pickle_PROTOCOL = -1
 try:
     from cPickle import dumps as _Pickle_dumps
     from cPickle import loads as _Pickle_loads
+    from cPickle import HIGHEST_PROTOCOL as _Pickle_PROTOCOL
 except ImportError:
     from pickle  import dumps as _Pickle_dumps
     from pickle  import loads as _Pickle_loads
+    from pickle import HIGHEST_PROTOCOL as _Pickle_PROTOCOL
 
 
 cdef inline object _py_reduce(object op, object seq):
     if seq is None: return None
     cdef int i=0, n=len(seq)
-    if op is MAXLOC or op is MINLOC:
+    if op is __MAXLOC__ or op is __MINLOC__:
         seq = list(zip(seq, range(n)))
     res = seq[0]
     for i from 1 <= i < n:
@@ -51,7 +55,7 @@ cdef class _p_Pickler:
             p[0] = NULL
             n[0] = 0
         else:
-            obj = _Pickle_dumps(obj, -1)
+            obj = _Pickle_dumps(obj, _Pickle_PROTOCOL)
             p[0] = PyMPIBytes_AsString(obj)
             n[0] = PyMPIBytes_Size(obj)
         return obj
