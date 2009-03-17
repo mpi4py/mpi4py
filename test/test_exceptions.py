@@ -70,6 +70,10 @@ class TestExcRequestNull(unittest.TestCase):
     def testCancel(self):
         self.assertRaisesMPI(MPI.ERR_REQUEST, MPI.REQUEST_NULL.Cancel)
 
+_name, _version = MPI.get_vendor()
+if _name == 'Open MPI':
+    del TestExcRequestNull
+
 # --------------------------------------------------------------------
 
 class TestExcOpNull(unittest.TestCase):

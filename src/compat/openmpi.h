@@ -194,39 +194,20 @@ static MPI_Fint PyMPI_OPENMPI_File_c2f(MPI_File file)
 #define MPI_File_c2f PyMPI_OPENMPI_File_c2f
 
 #endif /* !OMPI_RELEASE_VERSION<1 */
-#endif /* !OMPI_MINOR_VERSION<=1  */
+#endif /* !OMPI_MINOR_VERSION<=3  */
 #endif /* !OMPI_MAJOR_VERSION==1  */
 
 /* ---------------------------------------------------------------- */
 
-#if !defined(OMPI_MAJOR_VERSION)   || OMPI_MAJOR_VERSION==1
-#if !defined(OMPI_MINOR_VERSION)   || OMPI_MINOR_VERSION<=3
-#if !defined(OMPI_RELEASE_VERSION) || OMPI_RELEASE_VERSION<1
-
-static int PyMPI_OPENMPI_Cancel(MPI_Request *request)
-{
-  if (request && *request == MPI_REQUEST_NULL) return MPI_ERR_REQUEST;
-  return MPI_Cancel(request);
-}
-#define MPI_Cancel PyMPI_OPENMPI_Cancel
-
-static int PyMPI_OPENMPI_Request_get_status(MPI_Request request, int *flag, MPI_Status *status)
-{
-  if (request == MPI_REQUEST_NULL) return MPI_ERR_REQUEST;
-  return MPI_Request_get_status(request, flag, status);
-}
-#define MPI_Request_get_status PyMPI_OPENMPI_Request_get_status
-
-static int PyMPI_OPENMPI_Request_free(MPI_Request *request)
-{
-  if (request && *request == MPI_REQUEST_NULL) return MPI_ERR_REQUEST;
-  return MPI_Request_free(request);
-}
-#define MPI_Request_free PyMPI_OPENMPI_Request_free
+#if !defined(OMPI_MAJOR_VERSION) || OMPI_MAJOR_VERSION==1
+#if !defined(OMPI_MINOR_VERSION) || OMPI_MINOR_VERSION<=3
 
 static int PyMPI_OPENMPI_Win_get_errhandler(MPI_Win win, MPI_Errhandler *errhandler)
 {
-  if (win == MPI_WIN_NULL) return MPI_ERR_WIN;
+  if (win == MPI_WIN_NULL) {
+    MPI_Comm_call_errhandler(MPI_COMM_WORLD, MPI_ERR_WIN);
+    return MPI_ERR_WIN;
+  }
   return MPI_Win_get_errhandler(win, errhandler);
 }
 #undef  MPI_Win_get_errhandler
@@ -234,14 +215,16 @@ static int PyMPI_OPENMPI_Win_get_errhandler(MPI_Win win, MPI_Errhandler *errhand
 
 static int PyMPI_OPENMPI_Win_set_errhandler(MPI_Win win, MPI_Errhandler errhandler)
 {
-  if (win == MPI_WIN_NULL) return MPI_ERR_WIN;
+  if (win == MPI_WIN_NULL) {
+    MPI_Comm_call_errhandler(MPI_COMM_WORLD, MPI_ERR_WIN);
+    return MPI_ERR_WIN;
+  }
   return MPI_Win_set_errhandler(win, errhandler);
 }
 #undef  MPI_Win_set_errhandler
 #define MPI_Win_set_errhandler PyMPI_OPENMPI_Win_set_errhandler
 
-#endif /* !OMPI_RELEASE_VERSION<1 */
-#endif /* !OMPI_MINOR_VERSION<=1  */
+#endif /* !OMPI_MINOR_VERSION<=3  */
 #endif /* !OMPI_MAJOR_VERSION==1  */
 
 /* ---------------------------------------------------------------- */
