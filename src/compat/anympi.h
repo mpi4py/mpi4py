@@ -65,7 +65,7 @@ static int PyMPI_Init_thread(int *argc, char ***argv,
   int ierr = MPI_SUCCESS;
   if (!provided) return MPI_ERR_ARG;
   ierr = MPI_Init(argc, argv);
-  if (ierr) return ierr;
+  if (ierr != MPI_SUCCESS) return ierr;
   *provided = MPI_THREAD_SINGLE;
   return MPI_SUCCESS;
 }
@@ -125,9 +125,9 @@ static int PyMPI_Type_get_extent(MPI_Datatype datatype,
 {
   int ierr = MPI_SUCCESS;
   ierr = MPI_Type_lb(datatype, lb);
-  if (ierr) return ierr;
+  if (ierr != MPI_SUCCESS) return ierr;
   ierr = MPI_Type_extent(datatype, extent);
-  if (ierr) return ierr;
+  if (ierr != MPI_SUCCESS) return ierr;
   return MPI_SUCCESS;
 }
 #undef  MPI_Type_get_extent
@@ -139,9 +139,9 @@ static int PyMPI_Type_dup(MPI_Datatype datatype, MPI_Datatype *newtype)
 {
   int ierr = MPI_SUCCESS;
   ierr = MPI_Type_contiguous(1, datatype, newtype);
-  if (ierr) return ierr;
+  if (ierr != MPI_SUCCESS) return ierr;
   ierr = MPI_Type_commit(newtype); /* the safe way  ... */
-  if (ierr) return ierr;
+  if (ierr != MPI_SUCCESS) return ierr;
   return MPI_SUCCESS;
 }
 #undef  MPI_Type_dup

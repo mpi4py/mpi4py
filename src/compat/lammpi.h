@@ -220,7 +220,7 @@ static int PyMPI_LAMMPI_MPI_Win_free(MPI_Win *win)
 
 /* -- */
 
-#if LAM_WANT_ROMIO
+#if defined(ROMIO_VERSION)
 
 #if defined(__cplusplus)
 extern "C" {

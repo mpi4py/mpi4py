@@ -82,8 +82,7 @@ static int PyMPI_MPICH1_MPI_Sendrecv(void *sendbuf,
 
 /* ---------------------------------------------------------------- */
 
-#if defined(ROMIO) && ROMIO==1
-#if defined(MPIO_INCLUDE)
+#if defined(ROMIO_VERSION)
 
 #if defined(__cplusplus)
 extern "C" {
@@ -146,8 +145,7 @@ static int PyMPI_MPICH1_MPI_File_set_errhandler(MPI_File file,
 #undef  MPI_File_set_errhandler
 #define MPI_File_set_errhandler PyMPI_MPICH1_MPI_File_set_errhandler
 
-#endif /* !ROMIO==1 */
-#endif /* !MPIO_INCLUDE */
+#endif /* !ROMIO_VERSION */
 
 /* ---------------------------------------------------------------- */
 
