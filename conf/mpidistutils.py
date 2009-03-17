@@ -343,6 +343,7 @@ from distutils.command import build_ext as cmd_build_ext
 from distutils.command import install_data as cmd_install_data
 from distutils.command import install_lib as cmd_install_lib
 
+from distutils.errors import DistutilsSetupError
 from distutils.errors import DistutilsPlatformError
 from distutils.errors import DistutilsOptionError
 
@@ -389,7 +390,7 @@ def setup(**attrs):
         if cmd.__name__ not in cmdclass:
             cmdclass[cmd.__name__] = cmd
     return fcn_setup(**attrs)
-    
+
 # --------------------------------------------------------------------
 
 # A minimalistic MPI program :-)
@@ -432,7 +433,7 @@ class config(cmd_config.config):
         if mpicc is None:
             mpicc = self.find_mpi_compiler(MPICC_ENV, MPICC)
         log.info("MPI C compiler:    %s", mpicc  or 'not found')
-        self.compiler = getattr(self.compiler, 'compiler_type', 
+        self.compiler = getattr(self.compiler, 'compiler_type',
                                 self.compiler)
         self._check_compiler()
         customize_compiler(self.compiler, mpicc=mpicc, mpicxx=None)
@@ -443,7 +444,7 @@ class config(cmd_config.config):
             mpicxx = self.find_mpi_compiler(MPICXX_ENV, MPICXX)
         log.info("MPI C++ compiler:  %s", mpicxx or 'not found')
         if mpicxx:
-            self.compiler = getattr(self.compiler, 'compiler_type', 
+            self.compiler = getattr(self.compiler, 'compiler_type',
                                     self.compiler)
             self._check_compiler()
             customize_compiler(self.compiler, mpicc=None, mpicxx=mpicxx)
@@ -468,7 +469,7 @@ class config(cmd_config.config):
         return configure.write_headers(results)
 
     def run_configtest(self, code, lang='c'):
-        body = ['int main(int argc, char **argv) {'
+        body = ['int main(int argc, char **argv) {',
                 '  %s' % code,
                 '  return 0;',
                 '}']

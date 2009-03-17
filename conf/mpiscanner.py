@@ -45,7 +45,7 @@ class Node(object):
         return (head+body+tail) % vars(self)
 
 class NodeType(Node):
-    CONFIG = '%(ctype)s v;'
+    CONFIG = '%(ctype)s v; %(ctype)s *vp=&v; vp=0;'
     def __init__(self, ctype):
         self.init(name=ctype,
                   cname=ctype,
