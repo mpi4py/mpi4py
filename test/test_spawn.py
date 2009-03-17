@@ -2,16 +2,14 @@ import sys, os, mpi4py
 from mpi4py import MPI
 import mpiunittest as unittest
 
-PYTHONPATH = os.environ.get('PYTHONPATH','').split(os.path.pathsep)
-MPI4PYPATH = os.path.split(mpi4py.__path__[0])[0]
-PYTHONPATH.insert(0, MPI4PYPATH)
+MPI4PYPATH = os.path.dirname(mpi4py.__path__[0])
 
 class BaseTestSpawn(object):
 
     COMM = MPI.COMM_NULL
     COMMAND = sys.executable
     ARGS = ['-c', ';'.join([
-        'import sys; sys.path[:] = %s + sys.path' % repr(PYTHONPATH),
+        'import sys; sys.path.append("%s")' % MPI4PYPATH,
         'from mpi4py import MPI',
         'parent = MPI.Comm.Get_parent()',
         'parent.Barrier()',
@@ -54,7 +52,7 @@ class BaseTestSpawn(object):
         rank = self.COMM.Get_rank()
         if rank == self.ROOT:
             child = self.COMM.Spawn(self.COMMAND, self.ARGS, self.MAXPROCS,
-                                        info=self.INFO, root=self.ROOT)
+                                    info=self.INFO, root=self.ROOT)
         else:
             child = self.COMM.Spawn('', None, -1,
                                     info=None, root=self.ROOT)
@@ -97,7 +95,9 @@ if _SKIP_TEST:
     del TestSpawnWorldMany
 elif _name == 'MPICH2':
     del BaseTestSpawn.testReturnedErrcodes
-
+elif _name == 'Open MPI':
+    del TestSpawnSelf
+    del TestSpawnSelfMany
 
 
 if __name__ == '__main__':
