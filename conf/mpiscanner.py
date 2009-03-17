@@ -54,9 +54,10 @@ class NodeType(Node):
 class NodeStruct(NodeType):
     REGEX  = Re.STRUCT_TYPE
     HEADER = """\
-    typedef struct {
+    typedef struct PyMPI_%(ctype)s {
     %(cfields)s
-    } %(ctype)s;"""
+    } PyMPI_%(ctype)s;
+    #define %(ctype)s PyMPI_%(ctype)s"""
 
     def __init__(self, ctype, cfields):
         super(NodeStruct, self).__init__(ctype)
@@ -64,7 +65,10 @@ class NodeStruct(NodeType):
                                   for field in cfields])
 
 class NodeFuncType(NodeType):
-    HEADER = 'typedef %(crett)s (%(cname)s)(%(cargs)s);'
+    HEADER = dedent("""\
+    typedef %(crett)s (PyMPI_%(cname)s)(%(cargs)s);
+    #define %(cname)s PyMPI_%(cname)s""")
+
     def __init__(self, crett, cname, cargs, calias=None):
         self.init(name=cname.upper(),
                   cname=cname,

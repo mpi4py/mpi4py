@@ -30,7 +30,7 @@ camel_name  = r'MPI_[A-Z][a-z0-9_]+'
 usrfun_name = camel_name + r'_(?:function|fn)'
 
 arg_list = r'.*'
-ret_type = r'int|double'
+ret_type = r'void|int|double'
 
 
 canylong = join(r'long', r'(?:long)?')
