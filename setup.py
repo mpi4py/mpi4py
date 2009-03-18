@@ -108,7 +108,6 @@ metadata['requires'] = ['pickle',]
 # --------------------------------------------------------------------
 
 def ext_modules():
-    import sys
     # MPI extension module
     MPI = dict(name='mpi4py.MPI',
                sources=['src/MPI.c'],
@@ -137,7 +136,7 @@ def executables():
                     'LIBS', 'MODLIBS', 'SYSLIBS',
                     'LDLAST'):
             link_args += cfgDict.get(var, '').split()
-
+    # MPI-enabled Python interpreter
     pyexe = dict(name='python%s-mpi' % py_version,
                  sources=['src/python.c'],
                  libraries=libraries,
