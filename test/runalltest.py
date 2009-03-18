@@ -1,5 +1,6 @@
 EXCLUDE = [
     #'test_exceptions',
+    #'test_spawn',
     ]
 
 import sys, os
@@ -19,6 +20,8 @@ except ImportError: # or the no yet installed mpi4py
     sys.path.insert(0, path)
     import mpi4py
 
+from mpi4py import rc
+#rc.threaded = False
 from mpi4py import MPI
 sys.stderr.flush()
 sys.stderr.write("mpi4py imported from '%s'\n" % mpi4py.__path__[0])

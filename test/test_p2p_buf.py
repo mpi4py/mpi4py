@@ -131,6 +131,11 @@ class TestP2PBufWorldDup(BaseTestP2PBuf, unittest.TestCase):
     def tearDown(self):
         self.COMM.Free()
 
+name, version = MPI.get_vendor()
+if name == 'Open MPI':
+    if version < (1, 4, 0):
+        if MPI.Query_thread() > MPI.THREAD_SINGLE:
+            del TestP2PBufWorldDup
 
 if __name__ == '__main__':
     unittest.main()

@@ -38,7 +38,7 @@ class TestExcDatatype(unittest.TestCase):
 
 _name, _version = MPI.get_vendor()
 if _name == 'Open MPI':
-    if _version < (1, 3, 1):
+    if _version < (1, 4, 0):
         TestExcDatatype.ERR_TYPE = MPI.ERR_INTERN
 
 # --------------------------------------------------------------------
@@ -249,7 +249,7 @@ _name, _version = MPI.get_vendor()
 if _name == 'MPICH1':
     TestExcComm.ERR_COMM = MPI.ERR_ARG
 elif _name == 'Open MPI':
-    if _version < (1,3,1):
+    if _version < (1, 4):
         TestExcComm.ERR_KEYVAL = MPI.ERR_OTHER
         del TestExcCommNull.testGetAttr
         del TestExcCommNull.testGetErrhandler

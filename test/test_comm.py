@@ -104,5 +104,12 @@ class TestCommWorldDup(TestCommWorld):
         self.COMM.Free()
 
 
+_name, _version = MPI.get_vendor()
+if _name == 'Open MPI':
+    if _version < (1, 4, 0):
+        if MPI.Query_thread() > MPI.THREAD_SINGLE:
+            del TestCommWorldDup
+
+
 if __name__ == '__main__':
     unittest.main()

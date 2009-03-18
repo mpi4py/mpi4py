@@ -368,10 +368,16 @@ class TestCCOObjInterDupDup(TestCCOObjInterDup):
 
 _name, _version = MPI.get_vendor()
 if _name == 'Open MPI':
-    if _version < (1, 2, 4):
+    if _version < (1, 3, 0):
         del TestCCOObjInter
         del TestCCOObjInterDup
         del TestCCOObjInterDupDup
+    elif _version < (1, 4, 0):
+        if MPI.Query_thread() > MPI.THREAD_SINGLE:
+            del TestCCOObjWorldDup
+            del TestCCOObjInter
+            del TestCCOObjInterDup
+            del TestCCOObjInterDupDup
 elif _name == "MPICH2":
     if _version <= (1, 0, 7):
         def _SKIPPED(*args, **kwargs): pass

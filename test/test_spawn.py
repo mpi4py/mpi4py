@@ -78,13 +78,12 @@ class TestSpawnWorldMany(BaseTestSpawn, unittest.TestCase):
 _SKIP_TEST = False
 _name, _version = MPI.get_vendor()
 if _name == 'Open MPI':
-    if _version < (1,3,0):
-        if MPI.Query_thread() > MPI.THREAD_SINGLE:
-            _SKIP_TEST = True
-elif _name == 'MPICH2':
-    if _version < (1,0,6):
+    if _version < (1, 4, 0):
         _SKIP_TEST = True
-elif MPI.Get_version() < (2,0):
+elif _name == 'MPICH2':
+    if _version < (1, 0, 6):
+        _SKIP_TEST = True
+elif MPI.Get_version() < (2, 0):
     _SKIP_TEST = True
 
 if _SKIP_TEST:
@@ -95,9 +94,6 @@ if _SKIP_TEST:
     del TestSpawnWorldMany
 elif _name == 'MPICH2':
     del BaseTestSpawn.testReturnedErrcodes
-elif _name == 'Open MPI':
-    del TestSpawnSelf
-    del TestSpawnSelfMany
 
 
 if __name__ == '__main__':
