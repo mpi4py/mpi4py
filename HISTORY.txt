@@ -1,0 +1,76 @@
+=======================
+HISTORY: MPI for Python
+=======================
+
+:Author:       Lisandro Dalcin
+:Organization: CIMEC <http://www.cimec.org.ar>
+:Address:      PTLC, 3000 Santa Fe, Argentina
+:Contact:      dalcinl@gmail.com
+:Web Site:     http://mpi4py.googlecode.com/
+
+
+Release 1.0.0
+=============
+
+This is the fist release of the all-new, Cython-based, implementation
+of *MPI for Python*. Unfortunately, this implementation is not
+backward-compatible with the previous one. The list below summarizes
+the more important changes that can impact user codes.
+
+* Some communication calls had *overloaded* functionality. Now there
+  is a clear distinction between communication of general Python
+  object with *pickle*, and (fast, near C-speed) communication of
+  buffer-like objects (e.g., NumPy arrays).
+  
+  - for communicating general Python objects, you have to use
+    all-lowercase methods, like ``send()``, ``recv()``, ``bcast()``,
+    etc.
+
+  - for communicating array data, you have to use ``Send()``,
+    ``Recv()``, ``Bcast()``, etc. methods. Buffer arguments to these
+    calls must be explicitly specified by using a 2/3-list/tuple like
+    ``[data, MPI.DOUBLE]``, or ``[data, count, MPI.DOUBLE]`` (the
+    former one uses the byte-size of ``data`` and the extent of the
+    MPI datatype to define the ``count``).
+
+* Indexing a communicator with an integer returned a special object
+  associating the communication with a target rank, alleviating you
+  from specifying source/destination/root arguments in point-to-point
+  and collective communications. This functionality is no longer
+  available, expressions like::
+  
+     MPI.COMM_WORLD[0].Send(...)
+     MPI.COMM_WORLD[0].Recv(...)
+     MPI.COMM_WORLD[0].Bcast(...)
+   
+  have to be replaced by::
+  
+     MPI.COMM_WORLD.Send(..., dest=0)
+     MPI.COMM_WORLD.Recv(..., source=0)
+     MPI.COMM_WORLD.Bcast(..., root=0)
+
+* Automatic MPI initialization (i.e., at import time) requests the
+  maximum level of MPI thread support (i.e., it is done by calling
+  ``MPI_Init_thread()`` and passing ``MPI_THREAD_MULTIPLE``). In case
+  you need to change this behavior, you can tweak the contents of the
+  ``mpi4py.rc`` module.
+
+* In order to obtain the values of predefined attributes attached to
+  the world communication, now you have to use the ``Get_attr()``
+  method on the ``MPI.COMM_WORLD`` instance::
+  
+     tag_ub = MPI.COMM_WORLD.Get_attr(MPI.TAG_UB)
+
+* In the previous implementation, ``MPI.COMM_WORLD`` and
+  ``MPI.COMM_SELF`` were associated to **duplicates** of the (C-level)
+  ``MPI_COMM_WORLD`` and ``MPI_COMM_SELF`` predefined communicator
+  handles. Now this is no longer the case, ``MPI.COMM_WORLD`` and
+  ``MPI.COMM_SELF`` proxies the **actual** ``MPI_COMM_WORLD`` and
+  ``MPI_COMM_SELF`` handles.
+
+* Convenience aliases ``MPI.WORLD`` and ``MPI.SELF`` were removed. Use
+  instead ``MPI.COMM_WORLD`` and ``MPI.COMM_SELF``.
+
+* Convenience constants ``MPI.WORLD_SIZE`` and ``MPI.WORLD_RANK`` were
+  removed. Use instead ``MPI.COMM_WORLD.Get_size()`` and
+  ``MPI.COMM_WORLD.Get_rank()``.
