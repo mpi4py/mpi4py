@@ -3,6 +3,18 @@
 
 /* ---------------------------------------------------------------- */
 
+#if (defined(OMPI_MAJOR_VERSION) && \
+     defined(OMPI_MINOR_VERSION) && \
+     defined(OMPI_RELEASE_VERSION))
+#define PyMPI_OPENMPI_VERSION ((OMPI_MAJOR_VERSION   * 10000) + \
+			       (OMPI_MINOR_VERSION   * 100)   + \
+			       (OMPI_RELEASE_VERSION * 1))
+#else
+#define PyMPI_OPENMPI_VERSION 10000
+#endif
+
+/* ---------------------------------------------------------------- */
+
 /*
  * Open MPI releases 1.2.4 and above are shipped with newer versions
  * of GNU libtool.  These libtool versions load dynamic libraries in
@@ -17,16 +29,11 @@
  */
 
 #if !defined(OPEN_MPI_DLOPEN_LIBMPI)
-
+#if PyMPI_OPENMPI_VERSION < 10204
 #define OPEN_MPI_DLOPEN_LIBMPI 0
-
-#if defined(OMPI_MAJOR_VERSION) && defined(OMPI_MINOR_VERSION) && defined(OMPI_RELEASE_VERSION)
-  #if ((OMPI_MAJOR_VERSION*10000)+(OMPI_MINOR_VERSION*100)+(OMPI_RELEASE_VERSION)) > 10203
-  #undef  OPEN_MPI_DLOPEN_LIBMPI
-  #define OPEN_MPI_DLOPEN_LIBMPI 1
-  #endif
+#else
+#define OPEN_MPI_DLOPEN_LIBMPI 1
 #endif
-
 #endif /* !defined(OPEN_MPI_DLOPEN_LIBMPI) */
 
 
@@ -146,8 +153,7 @@ static int PyMPI_OPENMPI_MPI_Finalize(void)
  * getting the error handlers for MPI_File's.
  */
 
-#if !defined(OMPI_MAJOR_VERSION) || OMPI_MAJOR_VERSION==1
-#if !defined(OMPI_MINOR_VERSION) || OMPI_MINOR_VERSION<=1
+#if PyMPI_OPENMPI_VERSION < 10200
 
 static MPI_Errhandler PyMPI_OPENMPI_FILE_NULL_ERRHANDLER = (MPI_Errhandler)0;
 
@@ -177,14 +183,11 @@ static int PyMPI_OPENMPI_File_set_errhandler(MPI_File file, MPI_Errhandler errha
 #undef  MPI_File_set_errhandler
 #define MPI_File_set_errhandler PyMPI_OPENMPI_File_set_errhandler
 
-#endif /* !OMPI_MINOR_VERSION<=1 */
-#endif /* !OMPI_MAJOR_VERSION==1 */
+#endif /* !(PyMPI_OPENMPI_VERSION < 10200) */
 
 /* ---------------------------------------------------------------- */
 
-#if !defined(OMPI_MAJOR_VERSION)   || OMPI_MAJOR_VERSION==1
-#if !defined(OMPI_MINOR_VERSION)   || OMPI_MINOR_VERSION<=3
-#if !defined(OMPI_RELEASE_VERSION) || OMPI_RELEASE_VERSION<1
+#if PyMPI_OPENMPI_VERSION < 10301
 
 static MPI_Fint PyMPI_OPENMPI_File_c2f(MPI_File file)
 {
@@ -193,14 +196,11 @@ static MPI_Fint PyMPI_OPENMPI_File_c2f(MPI_File file)
 }
 #define MPI_File_c2f PyMPI_OPENMPI_File_c2f
 
-#endif /* !OMPI_RELEASE_VERSION<1 */
-#endif /* !OMPI_MINOR_VERSION<=3  */
-#endif /* !OMPI_MAJOR_VERSION==1  */
+#endif /* !(PyMPI_OPENMPI_VERSION < 10301) */
 
 /* ---------------------------------------------------------------- */
 
-#if !defined(OMPI_MAJOR_VERSION) || OMPI_MAJOR_VERSION==1
-#if !defined(OMPI_MINOR_VERSION) || OMPI_MINOR_VERSION<=3
+#if PyMPI_OPENMPI_VERSION < 10400
 
 static int PyMPI_OPENMPI_Win_get_errhandler(MPI_Win win, MPI_Errhandler *errhandler)
 {
@@ -224,8 +224,7 @@ static int PyMPI_OPENMPI_Win_set_errhandler(MPI_Win win, MPI_Errhandler errhandl
 #undef  MPI_Win_set_errhandler
 #define MPI_Win_set_errhandler PyMPI_OPENMPI_Win_set_errhandler
 
-#endif /* !OMPI_MINOR_VERSION<=3  */
-#endif /* !OMPI_MAJOR_VERSION==1  */
+#endif /* !(PyMPI_OPENMPI_VERSION < 10400) */
 
 /* ---------------------------------------------------------------- */
 
