@@ -19,17 +19,19 @@ echo Python ---- $PYTHON
 echo MPI ------- $MPIIMP
 echo ---------------------
 
-BUILDDIR=/tmp/mpi4py-buildtest
-VERSION=`cat VERSION.txt`
+NAME=`$PYTHON setup.py --name`
+VERSION=`$PYTHON setup.py --version`
+
+BUILDDIR=/tmp/$NAME-buildtest
 $PYTHON setup.py sdist
 rm -rf $BUILDDIR && mkdir -p $BUILDDIR
-cp dist/mpi4py-$VERSION.tar.gz $BUILDDIR
+cp dist/$NAME-$VERSION.tar.gz $BUILDDIR
 
 
 source misc/$MPIIMP.env
 cd $BUILDDIR
-tar -zxf mpi4py-$VERSION.tar.gz
-cd mpi4py-$VERSION
+tar -zxf $NAME-$VERSION.tar.gz
+cd $NAME-$VERSION
 $PYTHON setup.py install --home=$BUILDDIR
 export PYTHONPATH=$BUILDDIR/lib/python:$PYTHONPATH
 $MPISTARTUP

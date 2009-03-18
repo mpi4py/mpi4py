@@ -34,12 +34,23 @@ name publishing).
 # Metadata
 # --------------------------------------------------------------------
 
-name     = 'mpi4py'
-version  = open('VERSION.txt').read().strip()
+def name():
+    return 'mpi4py'
+
+def version():
+    import os, re
+    data = open(os.path.join('src', '__init__.py')).read()
+    m = re.search(r"__version__\s*=\s*'(.*)'", data)
+    return m.groups()[0]
+
+name    = name()
+version = version()
+
+url      = 'http://%(name)s.googlecode.com/' % vars()
+download = url + 'files/%(name)s-%(version)s.tar.gz' % vars()
+
 descr    = __doc__.split('\n')[1:-1]; del descr[1:3]
 devstat  = ['Development Status :: 5 - Production/Stable']
-url      = 'http://mpi4py.googlecode.com/'
-download = url + 'files/%s-%s.tar.gz'
 
 classifiers = """
 License :: Public Domain
@@ -76,21 +87,21 @@ metadata = {
     'description'      : descr.pop(0),
     'long_description' : '\n'.join(descr),
     'url'              : url,
-    'download_url'     : download % (name, version),
+    'download_url'     : download,
     'classifiers'      : [c for c in classifiers.split('\n') if c],
     'keywords'         : [k for k in keywords.split('\n')    if k],
     'platforms'        : [p for p in platforms.split('\n')   if p],
-    'provides'         : ['mpi4py', 'mpi4py.MPI',],
-    'requires'         : ['pickle'],
     'license'          : 'Public Domain',
     'author'           : 'Lisandro Dalcin',
     'author_email'     : 'dalcinl@gmail.com',
     'maintainer'       : 'Lisandro Dalcin',
     'maintainer_email' : 'dalcinl@gmail.com',
     }
-metadata['classifiers'] += devstat
 
-del name, version, descr, devstat, download
+metadata['classifiers'] += devstat
+metadata['provides'] = ['mpi4py', 'mpi4py.MPI', 'mpi4py.rc',]
+metadata['requires'] = ['pickle',]
+
 
 # --------------------------------------------------------------------
 # Extension modules
@@ -146,7 +157,7 @@ from conf.mpidistutils import config, build, install, clean
 from conf.mpidistutils import build_ext, build_exe
 from conf.mpidistutils import install_data, install_exe
 
-ExtModule = lambda extension: Extension(**extension)
+ExtModule = lambda extension:  Extension(**extension)
 ExeBinary = lambda executable: Executable(**executable)
 
 def run_setup():
@@ -181,17 +192,7 @@ def cython_help():
         warn()
 
 if __name__ == '__main__':
-    # hack distutils.sysconfig to eliminate debug flags
-    from distutils import sysconfig
-    cvars = sysconfig.get_config_vars()
-    cflags = cvars.get('OPT')
-    if cflags:
-        cflags = cflags.split()
-        for flag in ('-g', '-g3'):
-            if flag in cflags:
-                cflags.remove(flag)
-        cvars['OPT'] = str.join(' ', cflags)
-    # show help about cython  ...
+    # show help about cython
     cython_help()
     # and call setup
     run_setup()
