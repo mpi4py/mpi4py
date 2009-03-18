@@ -1213,10 +1213,7 @@ cdef class Graphcomm(Intracomm):
     property topo:
         """topology information"""
         def __get__(self):
-            (index, edges) = self.Get_topo()
-            # XXX Review, non-MPI, but by far convenient
-            index = [0] + index
-            return (index, edges)
+            return self.Get_topo()
 
     property index:
         """index"""
