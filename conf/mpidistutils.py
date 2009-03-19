@@ -155,7 +155,7 @@ def _config_parser(section, filenames, raw=False, vars=None):
     """
     parser = ConfigParser()
     try:
-        parser.read(filenames.split(','))
+        parser.read(filenames.split(os.path.pathsep))
     except ConfigParserError:
         log.error("error: parsing configuration file/s '%s'", filenames)
         return None
@@ -199,16 +199,15 @@ def _config_parser(section, filenames, raw=False, vars=None):
     return config_info
 
 
-def _find_mpi_config(section, filenames,
-                     envvars=None, defaults=None):
-    if not section and not filenames and envvars:
+def _find_mpi_config(section, envvars=None, defaults=None):
+    if not section and envvars:
         # look in environment
         if isinstance(envvars, str):
             envvars = (envvars,)
         for var in envvars:
-            if var in os.environ:
-                section, filenames = os.environ[var], None
-                break
+            section = os.environ.get(var, None)
+            if section: break
+    filenames = ''
     if section and ',' in section:
         section, filenames = section.split(',', 1)
     if defaults:
@@ -281,27 +280,23 @@ class Configure(Scanner):
 
 cmd_mpi_opts = [
 
-    ('mpicc=',   None,
-     "MPI C compiler command, "
-     "overrides environmental variables 'MPICC' "
-     "(defaults to 'mpicc' if available)"),
-
     ('mpicxx=',  None,
      "MPI C++ compiler command, "
      "overrides environmental variables 'MPICXX' "
      "(defaults to 'mpicxx', 'mpiCC', or 'mpic++' if any is available)"),
 
+    ('mpicc=',   None,
+     "MPI C compiler command, "
+     "overrides environmental variables 'MPICC' "
+     "(defaults to 'mpicc' if available)"),
+
     ('mpi=',     None,
      "specify a configuration section, "
-     "and an optional comma-separated list of configuration files "
-     "(e.g. --mpi=section,file1,file2,file3),"
+     "and an optional list of configuration files "
+     + "(e.g. --mpi=section,file1" + os.path.pathsep + "file2), " +
      "to look for MPI includes/libraries, "
      "overrides environmental variables 'MPICFG' "
      "(defaults to section 'mpi' in configuration file 'mpi.cfg')"),
-
-    ('mpi-cfg=', None,
-     "specify a configuration file to look for MPI includes/libraries "
-     "(defaults to 'mpi.cfg')"),
 
     ('configure', None,
      "exhaustive test for checking missing MPI constants/types/functions"),
@@ -422,9 +417,9 @@ class config(cmd_config.config):
 
     def run(self):
         # test configuration in specified section and file
-        if self.mpi or self.mpi_cfg:
-            sct, fn, cfg = _find_mpi_config(self.mpi, self.mpi_cfg,
-                                            MPICFG_ENV, MPICFG)
+        if self.mpi:
+            sct, fn, cfg = _find_mpi_config(
+                self.mpi, MPICFG_ENV, MPICFG)
             log.info("MPI configuration: "
                      "section '%s' from file/s '%s'", sct, fn)
             _configure(self, cfg)
@@ -582,18 +577,16 @@ class build_ext(cmd_build_ext.build_ext):
 
     def configure_extensions(self):
         config_info = self.find_mpi_config(
-            self.mpi, self.mpi_cfg,
-            MPICFG_ENV, MPICFG)
+            self.mpi, MPICFG_ENV, MPICFG)
         if config_info:
             for ext in self.extensions:
                 self.configure_extension(ext, config_info)
         return config_info
 
-    def find_mpi_config(self, section, filenames,
-                        envvars=None, defaults=None):
+    def find_mpi_config(self, section, envvars=None, defaults=None):
         # parse configuration file
-        sect, fnames, cfg_info = _find_mpi_config(section, filenames,
-                                                  envvars, defaults)
+        sect, fnames, cfg_info = _find_mpi_config(
+            section, envvars, defaults)
         if cfg_info:
             log.info("MPI configuration: "
                      "from section '%s' in file/s '%s'", sect, fnames)
