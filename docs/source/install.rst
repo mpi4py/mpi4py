@@ -2,7 +2,7 @@ Installation
 ============
 
 Requirements
-++++++++++++
+------------
 
 You need to have the following software properly installed in order to
 build the MPI module and the companion parallelized version of the
@@ -56,7 +56,7 @@ some distutils commands (like *build*) have additional options:
 
 
 Downloading
-***********
+^^^^^^^^^^^^
 
 The *MPI for Python* package is available for download at the project
 website generously hosted by Google Code. You can use :program:`wget`
@@ -66,7 +66,7 @@ to get a release tarball::
 
 
 Building
-********
+^^^^^^^^
 
 After unpacking the release tarball::
 
@@ -120,7 +120,7 @@ the distribution is ready for building.
 
 
 Installing
-**********
+^^^^^^^^^^
 
 After building, the distribution is ready for install.
 
@@ -144,7 +144,7 @@ your :envvar:`PYTHONPATH` environmental variable
 
 
 Testing
-*******
+^^^^^^^
 
 Issuing at the command line::
 

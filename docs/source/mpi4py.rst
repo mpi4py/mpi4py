@@ -124,7 +124,7 @@ In *MPI for Python*, the :meth:`Send`, :meth:`Recv` and
 :meth:`Sendrecv` methods of communicator objects provide support for
 blocking point-to-point communications within :class:`Intracomm` and
 :class:`Intercomm` instances. These methods can communicate memory
-buffers. The variants :meth:`send`, :meth:`recv` and :meth:sendrecv`
+buffers. The variants :meth:`send`, :meth:`recv` and :meth:`sendrecv`
 can communicate general Python objects.
 
 Nonblocking Communications
@@ -381,7 +381,7 @@ and finalization.
    actually called when you import the :mod:`MPI` module from the
    :mod:`mpi4py` package, but only if MPI is not already
    initialized. In such case, calling :func:`Init`/:func:`Init_thread`
-   from Python is expected to generate an MPI error, and inturn an
+   from Python is expected to generate an MPI error, and in turn an
    exception will be raised.
 
 .. note:: :cfunc:`MPI_Finalize()` is registered (by using Python C/API
