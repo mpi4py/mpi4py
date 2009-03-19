@@ -108,10 +108,10 @@ static PyObject * PyMPIString_AsStringAndSize(PyObject *ob,
 
 /* ---------------------------------------------------------------- */
 
-/* Really VILE HACK for Python 2.3 !!
+/* Really VILE HACK for Python < 2.4.2 !!
    Ensure in advance that the GIL was created */
 
-#if PY_VERSION_HEX < 0x02040000 && defined(WITH_THREAD)
+#if PY_VERSION_HEX < 0x02040200 && defined(WITH_THREAD)
 #define PyImport_AddModule(module) \
   (PyEval_InitThreads(), PyImport_AddModule(module))
 #endif
