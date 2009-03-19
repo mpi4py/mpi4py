@@ -1,4 +1,4 @@
-MPI For Python
+MPI for Python
 ==============
 
 :Author:       Lisandro Dalcín
@@ -33,6 +33,7 @@ Contents
    mpi4py
    install
    tutorial
+   appendix
 
 
 .. Indices and tables

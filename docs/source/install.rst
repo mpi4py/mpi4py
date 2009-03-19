@@ -2,187 +2,168 @@ Installation
 ============
 
 Requirements
-------------
+++++++++++++
 
 You need to have the following software properly installed in order to
 build the MPI module and the companion parallelized version of the
 Python interpreter:
 
-* A Python 2.3/2.4/2.5/2.6/3.0 distribution, with Python library
-  preferably compiled as a dynamic library.
+* A Python 2.3/2.4/2.5/2.6/2.7/3.0/3.1 distribution, with Python
+  library preferably built as a dynamic library.
 
-* A working MPI distribution for your architecture, compiled with
-  shared/dynamic libraries. 
+  .. note:: Some MPI-1 implementations **do require** the actual
+     command line arguments to be passed in :cfunc:`MPI_Init()`. In
+     this case, you will need to use a rebuilt, MPI-enabled, Python
+     interpreter executable. *MPI for Python* has some support for
+     alleviating you from this task, check the instructions at
+     :ref:`python-mpi` in the appendix.
+
+* A working MPI distribution, preferably a MPI-2 one built with
+  shared/dynamic libraries.
+
+  .. note:: If you want to build some MPI implementation from sources,
+     check the instructions at :ref:`building-mpi` in the appendix.
 
 
-+ *MPICH 2* ::
+Using **setuptools**
+--------------------
 
-      $ tar -zxf mpich2-X.X.X.tar.gz
-      $ cd mpich2-X.X.X
-      $ ./configure --enable-sharedlibs=gcc --prefix=/usr/local/mpich2
-      $ make
-      $ make install
+If you already have a working MPI (either if you installed it from
+sources or by using a pre-built package from your favourite GNU/Linux
+distribution) and the :program:`mpicc` compiler wrapper is on your
+search path, you can take advantage of setuptools's
+:program:`easy_install`::
 
-+ *Open MPI* ::
+    $ easy_install mpi4py
 
-      $ tar -zxf openmpi-X.X.X tar.gz
-      $ cd openmpi-X.X.X
-      $ ./configure --prefix=/usr/local/openmpi
-      $ make all
-      $ make install
 
-+ *LAM* ::
+Using **distutils**
+--------------------
 
-      $ tar -zxf lam-X.X.X.tar.gz
-      $ cd lam-X.X.X
-      $ ./configure --enable-shared --prefix=/usr/local/lam
-      $ make
-      $ make install
+*MPI for Python* uses a standard distutils-based buildsystem. However,
+some distutils commands (like *build*) have additional options:
 
-+ *MPICH 1* ::
+* :option:`--mpicc=` : let you specify a special location or name for
+  the :program:`mpicc` compiler wrapper.
 
-      $ tar -zxf mpich-X.X.X.tar.gz
-      $ cd mpich-X.X.X
-      $ ./configure --enable-sharedlib --prefix=/usr/local/mpich1
-      $ make
-      $ make install
+* :option:`--mpi=` : let you pass a section with MPI configuration
+  within a special configuration file.
 
-.. note:: Perhaps the user will have to set the ``LD_LIBRARY_PATH``
-   environmental variable (using ``export``, ``setenv`` or what
-   applies to his system) pointing to the MPI library directory. In
-   case of getting runtime linking error when running MPI programs,
-   the following lines can be added to the user login shell script
-   (``.profile``, ``.bashrc``, etc.).
-    
-   - *MPICH 2* ::
-
-      MPI_DIR=/usr/local/mpich2
-      export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MPI_DIR/lib
-
-   - *Open MPI* ::
-
-      MPI_DIR=/usr/local/openmpi
-      export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MPI_DIR/lib
-
-   - *LAM* ::
-
-      MPI_DIR=/usr/local/lam
-      export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MPI_DIR/lib
-
-   - *MPICH 1* ::
-
-      MPI_DIR=/usr/local/mpich1
-      export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MPI_DIR/lib/shared
-	export MPICH_USE_SHLIB=yes
-
-    .. warning:: MPICH 1 support for dynamic libraries is not
-       completely transparent. Users should set the environmental
-       variable ``MPICH_USE_SHLIB`` to ``yes`` in order to avoid link
-       problems when using the ``mpicc`` compiler wrapper.
+* :option:`--configure` : runs exhaustive tests for checking about
+  missing MPI types/constants/calls. This option should be passed in
+  order to build *MPI for Python* against old MPI-1 implementations,
+  possibly providing a subset of MPI-2.
 
 
 Downloading
------------
+***********
 
 The *MPI for Python* package is available for download at the project
-website generously hosted by Google Code http://mpi4py.googlecode.com/
-::
+website generously hosted by Google Code. You can use :program:`wget`
+to get a release tarball::
 
-   $ wget http://mpi4py.googlecode.com/files/mpi4py-X.X.X.tar.gz
+    $ wget http://mpi4py.googlecode.com/files/mpi4py-X.X.X.tar.gz
 
 
 Building
---------
+********
 
-After unpacking the module distribution::
+After unpacking the release tarball::
 
-   $ tar -zxf mpi4py-X.X.X.tar.gz
-   $ cd mpi4py-X.X.X
+    $ tar -zxf mpi4py-X.X.X.tar.gz
+    $ cd mpi4py-X.X.X
 
 the distribution is ready for building.
 
-- If you use a MPI implementation providing a *mpicc* compiler wrapper
-  (e.g., MPICH, OpenMPI, LAM), it will be used for compilation and
-  linking. This is the preferred and easiest way of building MPI for
-  Python.
+- If you use a MPI implementation providing a :program:`mpicc`
+  compiler wrapper (e.g., MPICH 1/2, Open MPI, LAM), it will be used
+  for compilation and linking. This is the preferred and easiest way
+  of building *MPI for Python*.
 
-  If ``mpicc`` is located somewhere in your search path, simply run
-  the *build* command::
+  If :program:`mpicc` is located somewhere in your search path, simply
+  run the *build* command::
 
-      $ python setup.py build
+    $ python setup.py build
 
-  If ``mpicc`` is not in your search path or the compiler wrapper has
-  a different name, you can run the *build* command specifying its
-  location::
+  If :program:`mpicc` is not in your search path or the compiler
+  wrapper has a different name, you can run the *build* command
+  specifying its location::
 
-      $ python setup.py build --mpicc=/where/you/have/mpicc
+    $ python setup.py build --mpicc=/where/you/have/mpicc
 
 - Alternatively, you can provide all the relevant information about
-  your MPI distribution by editing the file ``mpi.cfg``. You can use
-  the default section ``[mpi]`` or add a new, custom section, for
-  example ``[my_mpi]`` (see the examples provided in ``mpi.cfg``)::
+  your MPI distribution by editing the file called
+  :file:`mpi.cfg`. You can use the default section ``[mpi]`` or add a
+  new, custom section, for example ``[my_mpi]`` (see the examples
+  provided in the :file:`mpi.cfg` file)::
 
-     [mpi]
+    [mpi]
 
-     include_dirs         = /usr/local/mpi/include
-     libraries            = mpi
-     library_dirs         = /usr/local/mpi/lib
-     runtime_library_dirs = /usr/local/mpi/lib
-        
-     [my_mpi]
-        
-     include_dirs         = /opt/mpi/include ...
-     libraries            = mpi ...
-     library_dirs         = /opt/mpi/lib ...
-     runtime_library_dirs = /op/mpi/lib ...
-        
-     ...
+    include_dirs         = /usr/local/mpi/include
+    libraries            = mpi
+    library_dirs         = /usr/local/mpi/lib
+    runtime_library_dirs = /usr/local/mpi/lib
 
-  and run the *build* command, perhaps specifying you custom section::
+    [other_mpi]
 
-      $ python setup.py build --mpi=my_mpi
+    include_dirs         = /opt/mpi/include ...
+    libraries            = mpi ...
+    library_dirs         = /opt/mpi/lib ...
+    runtime_library_dirs = /op/mpi/lib ...
+
+    ...
+
+  and then run the *build* command, perhaps specifying you custom
+  configuration section::
+
+    $ python setup.py build --mpi=other_mpi
 
 
 Installing
-----------
+**********
 
 After building, the distribution is ready for install.
 
-If you have root privileges (either by login as ``root`` user of by
-using ``sudo`` ) and you want to install MPI for Python in your system
-for all users, just do::
+If you have root privileges (either by log-in as the root user of by
+using :command:`sudo`) and you want to install *MPI for Python* in
+your system for all users, just do::
 
-   $ python setup.py install
+    $ python setup.py install
 
-The previous steps will install the ``mpi4py`` package at standard
-location ``<prefix>/lib/python<version>/site-packages``.
+The previous steps will install the :mod:`mpi4py` package at standard
+location :file:`{prefix}/lib/python{X}.{X}/site-packages`.
 
-If you do not have root privileges or you want to install mpi4py in
-your home directory (assumed it is available through the ``$HOME``
-environmental variable) , just do:
+If you do not have root privileges or you want to install *MPI for
+Python* in your home directory (assumed it is available through the
+:envvar:`HOME` environmental variable) , just do::
 
-   $ python setup.py install --home=$HOME
+    $ python setup.py install --home=$HOME
 
-Finally, add ``$HOME/lib/python`` or ``$HOME/lib64/python`` to your
-``$PYTHONPATH`` environmental variable
+Finally, add :file:`$HOME/lib/python` or :file:`$HOME/lib64/python` to
+your :envvar:`PYTHONPATH` environmental variable
 
 
 Testing
--------
+*******
 
 Issuing at the command line::
 
-   $ mpiexec -n 5 python demo/helloworld.py
+    $ mpiexec -n 5 python demo/helloworld.py
 
 or (in the case of older MPI-1 implementations)::
 
-   $ mpirun -np 5 python demo/helloworld.py
+    $ mpirun -np 5 python demo/helloworld.py
 
 will launch a five-process run of the Python interpreter and run the
-test scripts ``demo/helloworld.py``.
+test scripts :file:`demo/helloworld.py`.
 
 
-You can also run the *unittest* scripts located at
-``test/unittest``::
+You can also run all the *unittest* scripts::
 
-   $ mpiexec -n 5 python test/runalltest.py
+    $ mpiexec -n 5 python test/runalltest.py
+
+or, if you have nose_ unit testing framework installed::
+
+    $ mpiexec -n 5 nosetests -w test
+
+.. _nose: http://somethingaboutorange.com/mrl/projects/nose/
