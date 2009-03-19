@@ -21,7 +21,7 @@ the more important changes that can impact user codes.
   is a clear distinction between communication of general Python
   object with *pickle*, and (fast, near C-speed) communication of
   buffer-like objects (e.g., NumPy arrays).
-  
+
   - for communicating general Python objects, you have to use
     all-lowercase methods, like ``send()``, ``recv()``, ``bcast()``,
     etc.
@@ -38,13 +38,13 @@ the more important changes that can impact user codes.
   from specifying source/destination/root arguments in point-to-point
   and collective communications. This functionality is no longer
   available, expressions like::
-  
+
      MPI.COMM_WORLD[0].Send(...)
      MPI.COMM_WORLD[0].Recv(...)
      MPI.COMM_WORLD[0].Bcast(...)
-   
+
   have to be replaced by::
-  
+
      MPI.COMM_WORLD.Send(..., dest=0)
      MPI.COMM_WORLD.Recv(..., source=0)
      MPI.COMM_WORLD.Bcast(..., root=0)
@@ -56,9 +56,9 @@ the more important changes that can impact user codes.
   ``mpi4py.rc`` module.
 
 * In order to obtain the values of predefined attributes attached to
-  the world communication, now you have to use the ``Get_attr()``
+  the world communicator, now you have to use the ``Get_attr()``
   method on the ``MPI.COMM_WORLD`` instance::
-  
+
      tag_ub = MPI.COMM_WORLD.Get_attr(MPI.TAG_UB)
 
 * In the previous implementation, ``MPI.COMM_WORLD`` and
