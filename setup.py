@@ -165,9 +165,7 @@ def run_setup():
     """
     setup(packages     = ['mpi4py'],
           package_dir  = {'mpi4py' : 'src'},
-          package_data = {'mpi4py' : ['include/*.pxd',
-                                      'include/*.pxi',
-                                      'include/mpi4py/*.h',
+          package_data = {'mpi4py' : ['include/mpi4py/*.h',
                                       'include/mpi4py/*.pxd',
                                       'include/mpi4py/*.pyx',
                                       'include/mpi4py/*.pxi',
