@@ -50,10 +50,6 @@ class BaseTestPackExternal(object):
     skipdtype = []
 
     def testPackSize(self):
-        try:
-            MPI.BYTE.Pack_external_size(EXT32, 0)
-        except NotImplementedError:
-            return
         for array in arrayimpl.ArrayTypes:
             for typecode, datatype in arrayimpl.TypeMap.items():
                 itemsize = array(0, typecode).itemsize
@@ -63,10 +59,6 @@ class BaseTestPackExternal(object):
                     real_size = pack_size - overhead
 
     def testPackUnpackExternal(self):
-        try:
-            MPI.BYTE.Pack_external_size(EXT32, 0)
-        except NotImplementedError:
-            return
         for array in arrayimpl.ArrayTypes:
             for typecode1, datatype1 in arrayimpl.TypeMap.items():
                 for typecode2, datatype2 in arrayimpl.TypeMap.items():
@@ -110,17 +102,19 @@ class TestPackExternal(BaseTestPackExternal, unittest.TestCase):
     pass
 
 
-
 _name, _version = MPI.get_vendor()
 if _name == 'Open MPI' and _version < (1, 3, 0):
     from sys import byteorder as sys_byteorder
     if sys_byteorder == 'little':
         BaseTestPackExternal.byteswap = True
-elif _name == 'MPICH2':
-    BaseTestPackExternal.skipdtype = ['f', 'd']
-elif _name == 'DeinoMPI':
-    BaseTestPackExternal.skipdtype = ['f', 'd']
-
+elif _name in ('MPICH2', 'DeinoMPI'):
+    BaseTestPackExternal.skipdtype += ['f', 'd']
+else:
+    try:
+        MPI.BYTE.Pack_external_size(EXT32, 0)
+    except NotImplementedError:
+        del BaseTestPackExternal
+        del TestPackExternal
 
 
 if __name__ == '__main__':
