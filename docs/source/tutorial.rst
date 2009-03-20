@@ -123,7 +123,7 @@ Compute Pi
 Wrapping with SWIG
 ------------------
 
-* C source ::
+* C source::
 
       /* file: helloworld.c */
       void sayhello(MPI_Comm comm)
