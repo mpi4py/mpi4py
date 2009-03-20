@@ -172,7 +172,7 @@ scientific computing and software development with Python.
 
 .. _MPI:       http://www.mpi-forum.org/
 
-.. _MPICH:     http://www-unix.mcs.anl.gov/mpi/mpich/
+.. _MPICH:     http://www.mcs.anl.gov/research/projects/mpich2/
 
 .. _Open MPI:  http://www.open-mpi.org/
 
