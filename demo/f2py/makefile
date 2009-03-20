@@ -1,4 +1,6 @@
-.PHONY: build test clean
+.PHONY: default build test clean
+
+default: build test clean
 
 PYTHON  = python
 

@@ -1,4 +1,6 @@
-.PHONY: build test clean
+.PHONY: default build test clean
+
+default: build test clean
 
 PYTHON = python
 PYTHON_PERFIX = ${shell ${PYTHON} -c 'import sys; print(sys.exec_prefix)'}/bin
