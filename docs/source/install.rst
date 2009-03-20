@@ -5,8 +5,13 @@ Requirements
 ------------
 
 You need to have the following software properly installed in order to
-build the MPI module and the companion parallelized version of the
-Python interpreter:
+build *MPI for Python*:
+
+* A working MPI distribution, preferably a MPI-2 one built with
+  shared/dynamic libraries.
+
+  .. note:: If you want to build some MPI implementation from sources,
+     check the instructions at :ref:`building-mpi` in the appendix.
 
 * A Python 2.3/2.4/2.5/2.6/2.7/3.0/3.1 distribution, with Python
   library preferably built as a dynamic library.
@@ -18,11 +23,12 @@ Python interpreter:
      alleviating you from this task, check the instructions at
      :ref:`python-mpi` in the appendix.
 
-* A working MPI distribution, preferably a MPI-2 one built with
-  shared/dynamic libraries.
+  .. note:: Mac OS X users employing a Python distribution built with
+     universal binaries support may need to temporarily set the
+     environmental variable :envvar:`MACOSX_UNIVERSAL_BUILD` to ``0``
+     in the shell before trying to build/install *MPI for Python*::
 
-  .. note:: If you want to build some MPI implementation from sources,
-     check the instructions at :ref:`building-mpi` in the appendix.
+        $ export MACOSX_UNIVERSAL_BUILD=0
 
 
 Using **setuptools**
@@ -32,9 +38,17 @@ If you already have a working MPI (either if you installed it from
 sources or by using a pre-built package from your favourite GNU/Linux
 distribution) and the :program:`mpicc` compiler wrapper is on your
 search path, you can take advantage of setuptools's
-:program:`easy_install`::
+:program:`easy_install` command::
 
     $ easy_install mpi4py
+
+.. note:: If the :program:`mpicc` compiler wrapper is not on your
+   search path (or if it has a different name) you can try to
+   temporarily set the environmental variable :envvar:`MPICC`
+   providing the full path to the MPI compiler wrapper executable::
+
+      $ export MPICC=/path/to/mpicc
+      $ easy_install mpi4py
 
 
 Using **distutils**

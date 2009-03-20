@@ -123,54 +123,59 @@ Compute Pi
 Wrapping with SWIG
 ------------------
 
-+--------------------------------------+----------------------------------------+
-| ::                                   | ::                                     |
-|                                      |                                        |
-|   // file: helloworld.i              |   /* file: helloworld.c */             |
-|   %module helloworld                 |   void sayhello(MPI_Comm comm)         |
-|   %{                                 |   {                                    |
-|   #include <mpi.h>                   |     int size, rank;                    |
-|   #include "helloworld.c"            |     MPI_Comm_size(comm, &size);        |
-|   }%                                 |     MPI_Comm_rank(comm, &rank);        |
-|                                      |     printf("Hello, World! "            |
-|   %include mpi4py/mpi4py.i           |            "I am process %d of %d.\n", |
-|   %mpi4py_typemap(Comm, MPI_Comm);   |            rank, size);                |
-|   void sayhello(MPI_Comm comm);      |   }                                    |
-|                                      |                                        |
-+--------------------------------------+----------------------------------------+
-| ::                                                                            |
-|                                                                               |
-|   >>> from mpi4py import MPI                                                  |
-|   >>> import helloworld                                                       |
-|   >>> helloworld.sayhello(MPI.COMM_WORLD)                                     |
-|   Hello, World! I am process 0 of 1.                                          |
-|                                                                               |
-+-------------------------------------------------------------------------------+
+* C source ::
+
+      /* file: helloworld.c */
+      void sayhello(MPI_Comm comm)
+      {
+        int size, rank;
+        MPI_Comm_size(comm, &size);
+        MPI_Comm_rank(comm, &rank);
+        printf("Hello, World! "
+               "I am process %d of %d.\n",
+               rank, size);
+      }
+
+* SWIG interface file::
+
+      // file: helloworld.i
+      %module helloworld
+      %{
+      #include <mpi.h>
+      #include "helloworld.c"
+      }%
+
+      %include mpi4py/mpi4py.i
+      %mpi4py_typemap(Comm, MPI_Comm);
+      void sayhello(MPI_Comm comm);
+
+* Try it in the Python prompt::
+
+      >>> from mpi4py import MPI
+      >>> import helloworld
+      >>> helloworld.sayhello(MPI.COMM_WORLD)
+      Hello, World! I am process 0 of 1.
 
 
 Wrapping with F2Py
 ------------------
 
-+---------------------------------------------------------------------------------+
-| ::                                                                              |
-|                                                                                 |
-|   ! file: helloworld.f90                                                        |
-|   subroutine sayhello(comm)                                                     |
-|     use mpi                                                                     |
-|     implicit none                                                               |
-|     integer :: comm, rank, size, ierr                                           |
-|     call MPI_Comm_size(comm, size, ierr)                                        |
-|     call MPI_Comm_rank(comm, rank, ierr)                                        |
-|     print *, 'Hello, World! I am process ',rank,' of ',size,'.'                 |
-|   end subroutine sayhello                                                       |
-|                                                                                 |
-+---------------------------------------------------------------------------------+
-| ::                                                                              |
-|                                                                                 |
-|   >>> from mpi4py import MPI                                                    |
-|   >>> import helloworld                                                         |
-|   >>> fcomm = MPI.COMM_WORLD.py2f()                                             |
-|   >>> helloworld.sayhello(fcomm)                                                |
-|   Hello, World! I am process 0 of 1.                                            |
-|                                                                                 |
-+---------------------------------------------------------------------------------+
+* Fortran 90 source::
+
+      ! file: helloworld.f90
+      subroutine sayhello(comm)
+        use mpi
+        implicit none
+        integer :: comm, rank, size, ierr
+        call MPI_Comm_size(comm, size, ierr)
+        call MPI_Comm_rank(comm, rank, ierr)
+        print *, 'Hello, World! I am process ',rank,' of ',size,'.'
+      end subroutine sayhello
+
+* Try it in the Python prompt::
+
+      >>> from mpi4py import MPI
+      >>> import helloworld
+      >>> fcomm = MPI.COMM_WORLD.py2f()
+      >>> helloworld.sayhello(fcomm)
+      Hello, World! I am process 0 of 1.
