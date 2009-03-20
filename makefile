@@ -67,9 +67,9 @@ sphinx:
 
 EPYDOCBUILD = ${PYTHON} ./conf/epydocify.py
 EPYDOCOPTS  =
-epydoc: clean build
+epydoc:
 	mkdir -p docs/html
-	PYTHONPATH=`ls -d build/lib.*`:$$PYTHONPATH \
+	${PYTHON} -c 'import mpi4py.MPI'
 	${EPYDOCBUILD} ${EPYDOCOPTS} -o docs/html/api 
 
 
