@@ -31,6 +31,6 @@ assert numpy.allclose(a, b.transpose())
 assert status.Get_count(xpose) == 1
 assert status.Get_count(MPI.DOUBLE) == b.size
 
-# row.Free()
-# xpose.Free()
+row.Free()
+xpose.Free()
 

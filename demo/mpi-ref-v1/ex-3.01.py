@@ -26,6 +26,5 @@ MPI.COMM_WORLD.Sendrecv((a, 1, upper), myrank, 0,
 assert numpy.allclose(numpy.triu(b), numpy.triu(a))
 assert numpy.allclose(numpy.tril(b, -1), numpy.zeros((N,N)))
 
-## upper.Free()
-## xpose.Free()
+upper.Free()
 

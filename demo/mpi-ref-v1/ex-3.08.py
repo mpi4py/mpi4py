@@ -26,6 +26,6 @@ assert numpy.allclose(a[::2, ::2], e)
 assert status.Get_count(twoslice) == 1
 assert status.Get_count(MPI.DOUBLE) == e.size
 
-## oneslice.Free()
-## twoslice.Free()
+oneslice.Free()
+twoslice.Free()
 

@@ -9,3 +9,6 @@ B = (2, 1, 3)
 D = (0, 16, 26)
 T = (MPI.FLOAT, type1, MPI.CHAR)
 dtype = MPI.Datatype.Create_struct(B, D, T)
+
+type1.Free()
+dtype.Free()
