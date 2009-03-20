@@ -334,6 +334,7 @@ from distutils.command import build as cmd_build
 from distutils.command import install as cmd_install
 from distutils.command import clean as cmd_clean
 
+from distutils.command import build_py as cmd_build_py
 from distutils.command import build_ext as cmd_build_ext
 from distutils.command import install_data as cmd_install_data
 from distutils.command import install_lib as cmd_install_lib
@@ -349,6 +350,8 @@ from distutils.errors import DistutilsOptionError
 class Distribution(cls_Distribution):
 
     def __init__ (self, attrs=None):
+        # support for pkg data
+        self.package_data = {}
         # PEP 314
         self.provides = None
         self.requires = None
@@ -379,7 +382,7 @@ def setup(**attrs):
         attrs['cmdclass'] = {}
     cmdclass = attrs['cmdclass']
     for cmd in (config, build, install, clean,
-                build_ext, build_exe,
+                build_py, build_ext, build_exe,
                 install_data, install_exe,
                 ):
         if cmd.__name__ not in cmdclass:
@@ -502,6 +505,105 @@ class build(cmd_build.build):
 
     # XXX disable build_exe subcommand !!!
     del sub_commands[-1]
+
+# --------------------------------------------------------------------
+
+class build_py(cmd_build_py.build_py):
+
+    if sys.version[:3] < '2.4':
+
+        def initialize_options(self):
+            self.package_data = None
+            cmd_build_py.build_py.initialize_options(self)
+
+        def finalize_options (self):
+            cmd_build_py.build_py.finalize_options(self)
+            self.package_data = self.distribution.package_data
+            self.data_files = self.get_data_files()
+
+        def run(self):
+            cmd_build_py.build_py.run(self)
+            if self.packages:
+                self.build_package_data()
+
+        def get_data_files (self):
+            """Generate list of '(package,src_dir,build_dir,filenames)' tuples"""
+            data = []
+            if not self.packages:
+                return data
+            for package in self.packages:
+                # Locate package source directory
+                src_dir = self.get_package_dir(package)
+
+                # Compute package build directory
+                build_dir = os.path.join(*([self.build_lib] + package.split('.')))
+
+                # Length of path to strip from found files
+                plen = len(src_dir)+1
+
+                # Strip directory from globbed filenames
+                filenames = [
+                    file[plen:] for file in self.find_data_files(package, src_dir)
+                    ]
+                data.append((package, src_dir, build_dir, filenames))
+            return data
+
+        def find_data_files (self, package, src_dir):
+            """Return filenames for package's data files in 'src_dir'"""
+            from glob import glob
+            from distutils.util import convert_path
+            globs = (self.package_data.get('', [])
+                     + self.package_data.get(package, []))
+            files = []
+            for pattern in globs:
+                # Each pattern has to be converted to a platform-specific path
+                filelist = glob(os.path.join(src_dir, convert_path(pattern)))
+                # Files that match more than one pattern are only added once
+                files.extend([fn for fn in filelist if fn not in files])
+            return files
+
+        def get_package_dir (self, package):
+            """Return the directory, relative to the top of the source
+               distribution, where package 'package' should be found
+               (at least according to the 'package_dir' option, if any)."""
+            import string
+            path = string.split(package, '.')
+
+            if not self.package_dir:
+                if path:
+                    return apply(os.path.join, path)
+                else:
+                    return ''
+            else:
+                tail = []
+                while path:
+                    try:
+                        pdir = self.package_dir[string.join(path, '.')]
+                    except KeyError:
+                        tail.insert(0, path[-1])
+                        del path[-1]
+                    else:
+                        tail.insert(0, pdir)
+                        return apply(os.path.join, tail)
+                else:
+                    pdir = self.package_dir.get('')
+                    if pdir is not None:
+                        tail.insert(0, pdir)
+
+                    if tail:
+                        return apply(os.path.join, tail)
+                    else:
+                        return ''
+
+        def build_package_data (self):
+            """Copy data files into build directory"""
+            lastdir = None
+            for package, src_dir, build_dir, filenames in self.data_files:
+                for filename in filenames:
+                    target = os.path.join(build_dir, filename)
+                    self.mkpath(os.path.dirname(target))
+                    self.copy_file(os.path.join(src_dir, filename), target,
+                                   preserve_mode=False)
 
 # --------------------------------------------------------------------
 
