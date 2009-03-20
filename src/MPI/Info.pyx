@@ -75,7 +75,7 @@ cdef class Info:
 
     def Delete(self, key):
         """
-        Remove a (key,value) pair from info
+        Remove a (key, value) pair from info
         """
         cdef char *ckey = NULL
         key = asmpistr(key, &ckey, NULL)
@@ -150,6 +150,13 @@ cdef class Info:
         if key not in self: raise KeyError(key)
         self.Delete(key)
 
+    def get(self, key, default=None):
+        """info get"""
+        if not self: return default
+        value, haskey = self.Get(key)
+        if not haskey: return default
+        return value
+
     def keys(self):
         """info keys"""
         if not self: return []
@@ -182,10 +189,20 @@ cdef class Info:
             items.append((key, val))
         return items
 
+    def update(self, other=(), **kwds):
+        """info update"""
+        if not self: raise KeyError
+        if hasattr(other, "keys"):
+            for key in other.keys():
+                self.Set(key, other[key])
+        else:
+            for key, value in other:
+                self.Set(key, value)
+        for key, value in kwds.items():
+            self.Set(key, value)
+
     def clear(self):
-        """
-        Remove all (key,value) pair from info
-        """
+        """info clear"""
         if not self: return None
         cdef int k = 0, nkeys = self.Get_nkeys()
         for k from 0 <= k < nkeys:
