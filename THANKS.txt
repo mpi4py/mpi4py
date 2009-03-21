@@ -3,10 +3,10 @@ THANKS: MPI for Python
 ======================
 
 :Author:       Lisandro Dalcin
-:Organization: CIMEC <http://www.cimec.org.ar>
-:Address:      PTLC, 3000 Santa Fe, Argentina
 :Contact:      dalcinl@gmail.com
 :Web Site:     http://mpi4py.googlecode.com/
+:Organization: CIMEC <http://www.cimec.org.ar>
+:Address:      PTLC, 3000 Santa Fe, Argentina
 
 
 I would like to thank everybody who contributed in any way, with code,
@@ -20,3 +20,4 @@ Albert Strasheim
 Frank Eisenmenger
 Fernando Perez
 Wonseok Shin
+Matthew Turk
