@@ -41,19 +41,19 @@ scripts.
 What is MPI?
 ------------
 
-MPI_, [mpi.using]_ [mpi.ref]_ the *Message Passing Interface*, is a
+MPI_, [mpi-using]_ [mpi-ref]_ the *Message Passing Interface*, is a
 standardized and portable message-passing system designed to function
 on a wide variety of parallel computers. The standard defines the
 syntax and semantics of library routines and allows users to write
 portable programs in the main scientific programming languages
 (Fortran, C, or C++).
 
-Since its release, the MPI specification [mpi.std1]_ [mpi.std2]_ has
+Since its release, the MPI specification [mpi-std1]_ [mpi-std2]_ has
 become the leading standard for message-passing libraries for parallel
 computers.  Implementations are available from vendors of
 high-performance computers and from well known open source projects
-like MPICH_ [mpi.mpich]_, `Open MPI`_ [mpi.openmpi]_ or LAM_
-[mpi.lam]_.
+like MPICH_ [mpi-mpich]_, `Open MPI`_ [mpi-openmpi]_ or LAM_
+[mpi-lammpi]_.
 
 
 What is Python?
@@ -205,28 +205,28 @@ scientific computing and software development with Python.
 .. References
 .. ..........
 
-.. [mpi.std1] MPI Forum. MPI: A Message Passing Interface Standard.
+.. [mpi-std1] MPI Forum. MPI: A Message Passing Interface Standard.
    International Journal of Supercomputer Applications, volume 8,
    number 3-4, pages 159-416, 1994.
 
-.. [mpi.std2] MPI Forum. MPI: A Message Passing Interface Standard.
+.. [mpi-std2] MPI Forum. MPI: A Message Passing Interface Standard.
    High Performance Computing Applications, volume 12, number 1-2,
    pages 1-299, 1998.
 
-.. [mpi.using] William Gropp, Ewing Lusk, and Anthony Skjellum.  Using
+.. [mpi-using] William Gropp, Ewing Lusk, and Anthony Skjellum.  Using
    MPI: portable parallel programming with the message-passing
    interface.  MIT Press, 1994.
 
-.. [mpi.ref] Mark Snir, Steve Otto, Steven Huss-Lederman, David
+.. [mpi-ref] Mark Snir, Steve Otto, Steven Huss-Lederman, David
    Walker, and Jack Dongarra.  MPI - The Complete Reference, volume 1,
    The MPI Core.  MIT Press, 2nd. edition, 1998.
 
-.. [mpi.mpich] W. Gropp, E. Lusk, N. Doss, and A. Skjellum.  A
+.. [mpi-mpich] W. Gropp, E. Lusk, N. Doss, and A. Skjellum.  A
    high-performance, portable implementation of the MPI message
    passing interface standard.  Parallel Computing, 22(6):789-828,
    September 1996.
 
-.. [mpi.openmpi] Edgar Gabriel, Graham E. Fagg, George Bosilca, Thara
+.. [mpi-openmpi] Edgar Gabriel, Graham E. Fagg, George Bosilca, Thara
    Angskun, Jack J. Dongarra, Jeffrey M. Squyres, Vishal Sahay,
    Prabhanjan Kambadur, Brian Barrett, Andrew Lumsdaine, Ralph
    H. Castain, David J. Daniel, Richard L. Graham, and Timothy
@@ -234,7 +234,7 @@ scientific computing and software development with Python.
    Generation MPI Implementation. In Proceedings, 11th European
    PVM/MPI Users' Group Meeting, Budapest, Hungary, September 2004.
 
-.. [mpi.lam] Greg Burns, Raja Daoud, and James Vaigl.  LAM: An Open
+.. [mpi-lammpi] Greg Burns, Raja Daoud, and James Vaigl.  LAM: An Open
    Cluster Environment for MPI. In Proceedings of Supercomputing
    Symposium, pages 379-386, 1994.
 

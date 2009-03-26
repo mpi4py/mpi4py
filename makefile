@@ -1,7 +1,7 @@
 .PHONY: default \
 	src cython \
 	config build test install \
-	docs sphinx epydoc \
+	docs sphinx sphinx-html sphinx-pdf epydoc \
 	sdist \
 	clean distclean srcclean docsclean fullclean uninstall
 
@@ -40,7 +40,7 @@ srcclean:
 	${RM} src/include/mpi4py/mpi4py_MPI_api.h
 
 docsclean:
-	-${RM} -r docs/html
+	-${RM} -r docs/html docs/*.pdf
 
 fullclean: distclean srcclean docsclean
 
@@ -60,18 +60,26 @@ cython:
 
 SPHINXBUILD = sphinx-build
 SPHINXOPTS  =
-sphinx:
+sphinx: sphinx-html sphinx-pdf
+sphinx-html:
+	${PYTHON} -c 'import mpi4py.MPI'
 	mkdir -p build/doctrees docs/html/man
-	${SPHINXBUILD} -d build/doctrees ${SPHINXOPTS} \
+	${SPHINXBUILD} -b html -d build/doctrees ${SPHINXOPTS} \
 	docs/source docs/html/man
+sphinx-pdf:
+	${PYTHON} -c 'import mpi4py.MPI'
+	mkdir -p build/doctrees build/latex
+	${SPHINXBUILD} -b latex -d build/doctrees ${SPHINXOPTS} \
+	docs/source build/latex
+	${MAKE} -C build/latex all-pdf > /dev/null
+	mv build/latex/*.pdf docs/
 
 EPYDOCBUILD = ${PYTHON} ./conf/epydocify.py
 EPYDOCOPTS  =
 epydoc:
-	mkdir -p docs/html
 	${PYTHON} -c 'import mpi4py.MPI'
-	${EPYDOCBUILD} ${EPYDOCOPTS} -o docs/html/api 
-
+	mkdir -p docs/html
+	${EPYDOCBUILD} ${EPYDOCOPTS} --html -o docs/html/api 
 
 sdist: src docs
 	${PYTHON} setup.py sdist ${SDISTOPT}

@@ -1,0 +1,34 @@
+\setcounter{tocdepth}{2}
+
+\pagenumbering{arabic}
+
+\makeatletter
+\renewcommand{\theindex}{
+  \cleardoublepage
+  \phantomsection
+  \py@OldTheindex
+  \addcontentsline{toc}{section}{\indexname}
+}
+\makeatother
+
+\makeatletter
+\renewcommand{\thebibliography}[1]{
+  \cleardoublepage
+  \phantomsection
+  \py@OldThebibliography{1}
+  \addcontentsline{toc}{section}{\bibname}
+}
+\makeatother
+
+\makeatletter
+\renewcommand{\tableofcontents}{
+  \begingroup
+    \parskip = 0mm
+    \py@OldTableofcontents
+  \endgroup
+  \vfill
+  \rule{\textwidth}{1pt}
+  \newpage
+}
+\makeatother
+

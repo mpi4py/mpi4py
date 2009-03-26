@@ -426,5 +426,3 @@ interfacing MPI-based parallel libraries, default MPI error handlers
 :const:`ERRORS_RETURN`, :const:`ERRORS_ARE_FATAL` can be assigned to
 and retrieved from communicators, windows and files with methods
 :meth:`{Class}.Set_errhandler` and :meth:`{Class}.Get_errhandler`.
-
-

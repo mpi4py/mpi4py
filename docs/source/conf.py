@@ -160,7 +160,7 @@ html_use_index = False
 #html_file_suffix = ''
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'mpi4py-man'
+htmlhelp_basename = 'mpi4py-docs'
 
 
 # Options for LaTeX output
@@ -176,7 +176,7 @@ latex_paper_size = 'a4'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, document class [howto/manual]).
 latex_documents = [
-  ('index', 'mpi4py-man.tex', ur'MPI for Python',
+  ('manual', 'mpi4py.tex', ur'MPI for Python',
    ur'Lisandro Dalcín', 'howto'),
 ]
 
@@ -196,4 +196,12 @@ latex_documents = [
 
 # If false, no module index is generated.
 #latex_use_modindex = True
-latex_use_modindex = False
+#latex_use_modindex = False
+
+latex_additional_files = ['sphinxfix.sty']
+latex_elements = {
+    'printmodindex': '',
+    'printindex': '',
+    'preamble' : r'\usepackage{sphinxfix}',
+    }
+
