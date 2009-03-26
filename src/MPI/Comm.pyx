@@ -280,7 +280,7 @@ cdef class Comm:
             smsg.buf, smsg.count, smsg.dtype,
             dest, tag, self.ob_mpi) )
 
-    def Ssend(self, buf, dest=0, tag=0):
+    def Ssend(self, buf, int dest=0, int tag=0):
         """
         Blocking send in synchronous mode
         """
