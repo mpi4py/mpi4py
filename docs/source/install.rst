@@ -52,7 +52,7 @@ search path, you can take advantage of setuptools's
 
 
 Using **distutils**
---------------------
+-------------------
 
 *MPI for Python* uses a standard distutils-based buildsystem. However,
 some distutils commands (like *build*) have additional options:
@@ -70,7 +70,7 @@ some distutils commands (like *build*) have additional options:
 
 
 Downloading
-^^^^^^^^^^^^
+^^^^^^^^^^^
 
 The *MPI for Python* package is available for download at the project
 website generously hosted by Google Code. You can use :program:`wget`
