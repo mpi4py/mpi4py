@@ -61,8 +61,10 @@ Operating System :: Microsoft :: Windows
 Intended Audience :: Developers
 Intended Audience :: Science/Research
 Programming Language :: C
-Programming Language :: Python
 Programming Language :: Cython
+Programming Language :: Python
+Programming Language :: Python :: 2
+Programming Language :: Python :: 3
 Topic :: Scientific/Engineering
 Topic :: Software Development :: Libraries :: Python Modules
 """
