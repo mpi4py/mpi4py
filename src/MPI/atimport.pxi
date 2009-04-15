@@ -107,8 +107,8 @@ cdef int initialize() except -1:
         if not finalized:
             # cleanup at (the very end of) Python exit
             if Py_AtExit(atexit_py) < 0:
-                PySys_WriteStderr("warning: could not register"
-                                  "cleanup with Py_AtExit()")
+                PySys_WriteStderr("warning: could not register "
+                                  "cleanup with Py_AtExit()\n")
         return 0
     # Use user parameters from 'mpi4py.rc' module
     cdef RCParams rc
@@ -130,8 +130,8 @@ cdef int initialize() except -1:
             finalize_atexit = 1
     # Cleanup at (the very end of) Python exit
     if Py_AtExit(atexit_py) < 0:
-        PySys_WriteStderr("warning: could not register"
-                          "cleanup with Py_AtExit()")
+        PySys_WriteStderr("warning: could not register "
+                          "cleanup with Py_AtExit()\n")
     return 0
 
 cdef inline int mpi_active() nogil:
