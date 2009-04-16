@@ -1,14 +1,57 @@
 from mpi4py import MPI
 import mpiunittest as unittest
+import array
 
 MPI_ERR_OP = MPI.ERR_OP
 
+try:
+    bytes
+except NameError:
+    bytes = str
+
+def mysum_py(a, b):
+    for i in range(len(a)):
+        b[i] = a[i] + b[i]
+    return b
+
+def mysum(ba, bb, dt):
+    if dt is None:
+        return mysum_py(ba, bb)
+    assert dt == MPI.INT
+    assert len(ba) == len(bb)
+    a = array.array('i', bytes(ba))
+    b = array.array('i', bytes(bb))
+    b = mysum_py(a, b)
+    bb[:] = b.tostring()
+
 class TestOp(unittest.TestCase):
 
-    def testCreate(self):
+    def testConstructor(self):
         op = MPI.Op()
         self.assertFalse(op)
         self.assertEqual(op, MPI.OP_NULL)
+
+    def testCreate(self):
+        for comm in [MPI.COMM_SELF, MPI.COMM_WORLD]:
+            for commute in [True, False]:
+                for N in range(4):
+                    # buffer(empty_array) returns
+                    # the same non-NULL pointer !!!
+                    if N == 0: continue
+                    size = comm.Get_size()
+                    rank = comm.Get_rank()
+                    myop = MPI.Op.Create(mysum, commute)
+                    a = array.array('i', [i*(rank+1) for i in range(N)])
+                    b = array.array('i', [0]*len(a))
+                    comm.Allreduce([a, MPI.INT], [b, MPI.INT], myop)
+                    scale = sum(range(1,size+1))
+                    for i in range(N):
+                        self.assertEqual(b[i], scale*i)
+                    ret = myop(a, b)
+                    self.assertTrue(ret is b)
+                    for i in range(N):
+                        self.assertEqual(b[i], a[i]+scale*i)
+                    myop.Free()
 
     def _test_call(self, op, args, res):
         self.assertEqual(op(*args), res)

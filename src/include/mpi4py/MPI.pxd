@@ -69,8 +69,7 @@ ctypedef public api class Op [type PyMPIOp_Type, object PyMPIOpObject]:
     cdef MPI_Op ob_mpi
     cdef int    flags
     cdef object (*ob_func)(object, object)
-    cdef object ob_callable
-    cdef bint   ob_commute
+    cdef int    ob_usrid
 
 ctypedef public api class Group [type PyMPIGroup_Type, object PyMPIGroupObject]:
     cdef MPI_Group ob_mpi

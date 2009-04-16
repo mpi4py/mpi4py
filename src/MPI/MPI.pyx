@@ -28,7 +28,7 @@ include "Datatype.pyx"      # DONE
 include "Status.pyx"        # DONE
 include "Request.pyx"       # DONE
 include "Info.pyx"          # DONE
-include "Op.pyx"            # DONE (except user-defined operations)
+include "Op.pyx"            # DONE
 include "Group.pyx"         # DONE
 include "Comm.pyx"          # DONE
 include "Win.pyx"           # DONE

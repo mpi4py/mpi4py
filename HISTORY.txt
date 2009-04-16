@@ -9,6 +9,14 @@ HISTORY: MPI for Python
 :Web Site:     http://mpi4py.googlecode.com/
 
 
+Release X.X.X
+=============
+
+* Add support for user-defined reduction operations on memory
+  buffers. However, at most 10 (ten) user-defined reduction operations
+  can be created. Ask the author for more room if you need it.
+
+
 Release 1.0.0
 =============
 

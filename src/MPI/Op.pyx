@@ -10,6 +10,7 @@ cdef class Op:
     def __dealloc__(self):
         if not (self.flags & PyMPI_OWNED): return
         CHKERR( _del_Op(&self.ob_mpi) )
+        op_user_del(&self.ob_usrid)
 
     def __richcmp__(self, other, int op):
         if not isinstance(self,  Op): return NotImplemented
@@ -26,7 +27,7 @@ cdef class Op:
         if self.ob_func != NULL:
             return self.ob_func(x, y)
         else:
-            return self.ob_callable(x, y)
+            return op_user_py(self.ob_usrid, x, y, None)
 
     @classmethod
     def Create(cls, function, bint commute=False):
@@ -34,17 +35,17 @@ cdef class Op:
         Create a user-defined operation
         """
         cdef Op op = cls()
-        op.ob_mpi = MPI_OP_NULL
-        op.ob_callable = function
-        op.ob_commute  = commute
+        cdef MPI_User_function *cfunction = NULL
+        op.ob_usrid = op_user_new(function, &cfunction)
+        CHKERR( MPI_Op_create(cfunction, commute, &op.ob_mpi) )
+        return op
 
     def Free(self):
         """
         Free the operation
         """
         CHKERR( MPI_Op_free(&self.ob_mpi) )
-        self.ob_callable = None
-        self.ob_commute  = False
+        op_user_del(&self.ob_usrid)
 
     # Fortran Handle
     # --------------
