@@ -251,7 +251,7 @@ cdef object PyMPI_bcast(object obj,
     cdef object rmsg = None
     if dorecv and dosend: rmsg = smsg
     elif dorecv: rmsg = pickler.alloc(&buf, count)
-    with nogil: CHKERR( MPI_Bcast(buf, count, MPI_BYTE,
+    with nogil: CHKERR( MPI_Bcast(buf, count, dtype,
                                   root, comm) )
     if dorecv: rmsg = pickler.load(rmsg)
     return rmsg
