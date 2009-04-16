@@ -113,7 +113,7 @@ def ext_modules():
     # MPI extension module
     MPI = dict(name='mpi4py.MPI',
                sources=['src/MPI.c'],
-               depends=['src/mpi4py_MPI.c'],
+               depends=['src/mpi4py.MPI.c'],
                )
     return [MPI]
 
@@ -178,7 +178,7 @@ def run_setup():
 
 def cython_help():
     import sys, os
-    if not os.path.exists(os.path.join('src', 'mpi4py_MPI.c')):
+    if not os.path.exists(os.path.join('src', 'mpi4py.MPI.c')):
         warn = lambda msg='': sys.stderr.write(msg+'\n')
         warn("*"*70)
         warn()

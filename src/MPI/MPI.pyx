@@ -2,10 +2,9 @@ __doc__ = u"""
 Message Passing Interface.
 """
 
+include "mpi4py/mpi.pxi"
+
 include "stdlib.pxi"
-
-include "mpi.pxi"
-
 include "atimport.pxi"
 
 initialize()

@@ -3,7 +3,7 @@
 
 #include "mpi.h"
 
-#include "mpi4py_MPI_api.h"
+#include "mpi4py.MPI_api.h"
 
 static int import_mpi4py(void) {
   if (import_mpi4py__MPI() < 0) goto bad;

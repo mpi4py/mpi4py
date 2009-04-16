@@ -35,9 +35,9 @@ distclean:
 	-${RM} `find . -name '*.py[co]'`
 
 srcclean:
-	${RM} src/mpi4py_MPI.c
-	${RM} src/include/mpi4py/mpi4py_MPI.h
-	${RM} src/include/mpi4py/mpi4py_MPI_api.h
+	${RM} src/mpi4py.MPI.c
+	${RM} src/include/mpi4py/mpi4py.MPI.h
+	${RM} src/include/mpi4py/mpi4py.MPI_api.h
 
 docsclean:
 	-${RM} -r docs/html docs/*.pdf
@@ -51,8 +51,8 @@ uninstall:
 CY_SRC_PXD = $(wildcard src/include/mpi4py/*.pxd)
 CY_SRC_PXI = $(wildcard src/MPI/*.pxi) $(wildcard src/include/mpi4py/*.pxi)
 CY_SRC_PYX = $(wildcard src/MPI/*.pyx)
-src/MPI.c: src/mpi4py_MPI.c
-src/mpi4py_MPI.c: ${CY_SRC_PXD} ${CY_SRC_PXI} ${CY_SRC_PYX}
+src/MPI.c: src/mpi4py.MPI.c
+src/mpi4py.MPI.c: ${CY_SRC_PXD} ${CY_SRC_PXI} ${CY_SRC_PYX}
 	${PYTHON} ./conf/cythonize.py
 
 cython:

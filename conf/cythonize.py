@@ -3,7 +3,7 @@ import sys, os, glob
 def cythonize(source, includes=(),
               output_h=os.curdir):
     name, ext = os.path.splitext(source)
-    output = name.replace('.', '_')
+    output_c = name + '.c'
     #
     from Cython.Compiler.Main import \
          CompilationOptions, default_options, \
@@ -11,7 +11,7 @@ def cythonize(source, includes=(),
          PyrexError
     #
     options = CompilationOptions(default_options)
-    options.output_file = output  + '.c'
+    options.output_file = output_c
     options.include_path = includes
     #
     from Cython.Compiler import Options
@@ -27,12 +27,12 @@ def cythonize(source, includes=(),
         any_failures = 1
     if any_failures:
         try:
-            os.remove(output  + '.c')
+            os.remove(output_c)
         except OSError:
             pass
         sys.exit(1)
     #
-    headers = glob.glob(output+'*.h')
+    headers = glob.glob(name+'*.h')
     for header in headers:
         dest = os.path.join(output_h, header)
         try:
@@ -41,7 +41,7 @@ def cythonize(source, includes=(),
             pass
         os.rename(header, dest)
 
-def run(source, wdir):
+def run(source, wdir=os.curdir):
     name = os.path.splitext(source)[0]
     if name.count('.') == 0:
         package = ''
@@ -54,8 +54,7 @@ def run(source, wdir):
     os.chdir(wdir)
     try:
         cythonize(source,
-                  includes=[os.curdir, 'include',
-                            os.path.join('include', package)],
+                  includes=[os.curdir, 'include'],
                   output_h=os.path.join('include', package),
                   )
     finally:
