@@ -9,7 +9,7 @@ cdef class Errhandler:
 
     def __dealloc__(self):
         if not (self.flags & PyMPI_OWNED): return
-        CHKERR( _del_Errhandler(&self.ob_mpi) )
+        CHKERR( del_Errhandler(&self.ob_mpi) )
 
     def __richcmp__(self, other, int op):
         if not isinstance(self,  Errhandler): return NotImplemented
@@ -46,9 +46,9 @@ cdef class Errhandler:
 
 
 
-cdef Errhandler __ERRHANDLER_NULL__  = _new_Errhandler(MPI_ERRHANDLER_NULL)
-cdef Errhandler __ERRORS_RETURN__    = _new_Errhandler(MPI_ERRORS_RETURN)
-cdef Errhandler __ERRORS_ARE_FATAL__ = _new_Errhandler(MPI_ERRORS_ARE_FATAL)
+cdef Errhandler __ERRHANDLER_NULL__  = new_Errhandler(MPI_ERRHANDLER_NULL)
+cdef Errhandler __ERRORS_RETURN__    = new_Errhandler(MPI_ERRORS_RETURN)
+cdef Errhandler __ERRORS_ARE_FATAL__ = new_Errhandler(MPI_ERRORS_ARE_FATAL)
 
 
 # Predefined errhandler handles

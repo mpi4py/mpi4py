@@ -25,7 +25,7 @@ cdef class Win:
 
     def __dealloc__(self):
         if not (self.flags & PyMPI_OWNED): return
-        CHKERR( _del_Win(&self.ob_mpi) )
+        CHKERR( del_Win(&self.ob_mpi) )
 
     def __richcmp__(self, other, int op):
         if not isinstance(self,  Win): return NotImplemented
@@ -54,7 +54,7 @@ cdef class Win:
         cdef MPI_Aint size = 0
         if memory is not None:
             memory = asmemory(memory, &base, &size)
-        cdef MPI_Info cinfo = _arg_Info(info)
+        cdef MPI_Info cinfo = arg_Info(info)
         #
         cdef Win win = cls()
         with nogil: CHKERR( MPI_Win_create(
@@ -335,7 +335,7 @@ cdef class Win:
 
 
 
-cdef Win __WIN_NULL__ = _new_Win(MPI_WIN_NULL)
+cdef Win __WIN_NULL__ = new_Win(MPI_WIN_NULL)
 
 
 # Predefined window handles

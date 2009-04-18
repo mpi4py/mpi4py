@@ -9,7 +9,7 @@ cdef class Request:
 
     def __dealloc__(self):
         if not (self.flags & PyMPI_OWNED): return
-        CHKERR( _del_Request(&self.ob_mpi) )
+        CHKERR( del_Request(&self.ob_mpi) )
 
     def __richcmp__(self, other, int op):
         if not isinstance(self,  Request): return NotImplemented
@@ -29,7 +29,7 @@ cdef class Request:
         """
         Wait for an MPI send or receive to complete.
         """
-        cdef MPI_Status *statusp = _arg_Status(status)
+        cdef MPI_Status *statusp = arg_Status(status)
         with nogil: CHKERR( MPI_Wait(&self.ob_mpi, statusp) )
 
     def Test(self, Status status=None):
@@ -37,7 +37,7 @@ cdef class Request:
         Test for the completion of a send or receive.
         """
         cdef bint flag = 0
-        cdef MPI_Status *statusp = _arg_Status(status)
+        cdef MPI_Status *statusp = arg_Status(status)
         with nogil: CHKERR( MPI_Test(&self.ob_mpi, &flag, statusp) )
         return flag
 
@@ -53,7 +53,7 @@ cdef class Request:
         completion of a request
         """
         cdef bint flag = 0
-        cdef MPI_Status *statusp = _arg_Status(status)
+        cdef MPI_Status *statusp = arg_Status(status)
         with nogil: CHKERR( MPI_Request_get_status(self.ob_mpi, &flag, statusp) )
         return flag
 
@@ -68,7 +68,7 @@ cdef class Request:
         cdef int count = len(requests)
         cdef MPI_Request *irequests = NULL
         cdef tmp1 = asarray_Request(requests, &irequests, count)
-        cdef MPI_Status *statusp = _arg_Status(status)
+        cdef MPI_Status *statusp = arg_Status(status)
         cdef int index = MPI_UNDEFINED
         #
         try:
@@ -88,7 +88,7 @@ cdef class Request:
         cdef tmp1 = asarray_Request(requests, &irequests, count)
         cdef int index = MPI_UNDEFINED
         cdef bint flag = 0
-        cdef MPI_Status *statusp = _arg_Status(status)
+        cdef MPI_Status *statusp = arg_Status(status)
         #
         try:
             with nogil: CHKERR( MPI_Testany(count, irequests, &index, &flag, statusp) )
@@ -283,7 +283,7 @@ cdef class Grequest(Request):
 
 
 
-cdef Request __REQUEST_NULL__ = _new_Request(MPI_REQUEST_NULL)
+cdef Request __REQUEST_NULL__ = new_Request(MPI_REQUEST_NULL)
 
 
 # Predefined request handles

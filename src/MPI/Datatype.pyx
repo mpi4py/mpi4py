@@ -33,7 +33,7 @@ cdef class Datatype:
 
     def __dealloc__(self):
         if not (self.flags & PyMPI_OWNED): return
-        CHKERR( _del_Datatype(&self.ob_mpi) )
+        CHKERR( del_Datatype(&self.ob_mpi) )
 
     def __richcmp__(self, other, int op):
         if not isinstance(self,  Datatype): return NotImplemented
@@ -490,45 +490,45 @@ def Get_address(location):
 
 
 
-cdef Datatype __DATATYPE_NULL__      = _new_Datatype( MPI_DATATYPE_NULL      )
+cdef Datatype __DATATYPE_NULL__      = new_Datatype( MPI_DATATYPE_NULL      )
 
-cdef Datatype __CHAR__               = _new_Datatype( MPI_CHAR               )
-cdef Datatype __WCHAR__              = _new_Datatype( MPI_WCHAR              )
-cdef Datatype __SIGNED_CHAR__        = _new_Datatype( MPI_SIGNED_CHAR        )
-cdef Datatype __UNSIGNED_CHAR__      = _new_Datatype( MPI_UNSIGNED_CHAR      )
-cdef Datatype __SHORT__              = _new_Datatype( MPI_SHORT              )
-cdef Datatype __UNSIGNED_SHORT__     = _new_Datatype( MPI_UNSIGNED_SHORT     )
-cdef Datatype __INT__                = _new_Datatype( MPI_INT                )
-cdef Datatype __UNSIGNED__           = _new_Datatype( MPI_UNSIGNED           )
-cdef Datatype __LONG__               = _new_Datatype( MPI_LONG               )
-cdef Datatype __UNSIGNED_LONG__      = _new_Datatype( MPI_UNSIGNED_LONG      )
-cdef Datatype __FLOAT__              = _new_Datatype( MPI_FLOAT              )
-cdef Datatype __DOUBLE__             = _new_Datatype( MPI_DOUBLE             )
-cdef Datatype __LONG_DOUBLE__        = _new_Datatype( MPI_LONG_DOUBLE        )
-cdef Datatype __BYTE__               = _new_Datatype( MPI_BYTE               )
-cdef Datatype __PACKED__             = _new_Datatype( MPI_PACKED             )
+cdef Datatype __CHAR__               = new_Datatype( MPI_CHAR               )
+cdef Datatype __WCHAR__              = new_Datatype( MPI_WCHAR              )
+cdef Datatype __SIGNED_CHAR__        = new_Datatype( MPI_SIGNED_CHAR        )
+cdef Datatype __UNSIGNED_CHAR__      = new_Datatype( MPI_UNSIGNED_CHAR      )
+cdef Datatype __SHORT__              = new_Datatype( MPI_SHORT              )
+cdef Datatype __UNSIGNED_SHORT__     = new_Datatype( MPI_UNSIGNED_SHORT     )
+cdef Datatype __INT__                = new_Datatype( MPI_INT                )
+cdef Datatype __UNSIGNED__           = new_Datatype( MPI_UNSIGNED           )
+cdef Datatype __LONG__               = new_Datatype( MPI_LONG               )
+cdef Datatype __UNSIGNED_LONG__      = new_Datatype( MPI_UNSIGNED_LONG      )
+cdef Datatype __FLOAT__              = new_Datatype( MPI_FLOAT              )
+cdef Datatype __DOUBLE__             = new_Datatype( MPI_DOUBLE             )
+cdef Datatype __LONG_DOUBLE__        = new_Datatype( MPI_LONG_DOUBLE        )
+cdef Datatype __BYTE__               = new_Datatype( MPI_BYTE               )
+cdef Datatype __PACKED__             = new_Datatype( MPI_PACKED             )
 
-cdef Datatype __SHORT_INT__          = _new_Datatype( MPI_SHORT_INT          )
-cdef Datatype __TWOINT__             = _new_Datatype( MPI_2INT               )
-cdef Datatype __LONG_INT__           = _new_Datatype( MPI_LONG_INT           )
-cdef Datatype __FLOAT_INT__          = _new_Datatype( MPI_FLOAT_INT          )
-cdef Datatype __DOUBLE_INT__         = _new_Datatype( MPI_DOUBLE_INT         )
-cdef Datatype __LONG_DOUBLE_INT__    = _new_Datatype( MPI_LONG_DOUBLE_INT    )
+cdef Datatype __SHORT_INT__          = new_Datatype( MPI_SHORT_INT          )
+cdef Datatype __TWOINT__             = new_Datatype( MPI_2INT               )
+cdef Datatype __LONG_INT__           = new_Datatype( MPI_LONG_INT           )
+cdef Datatype __FLOAT_INT__          = new_Datatype( MPI_FLOAT_INT          )
+cdef Datatype __DOUBLE_INT__         = new_Datatype( MPI_DOUBLE_INT         )
+cdef Datatype __LONG_DOUBLE_INT__    = new_Datatype( MPI_LONG_DOUBLE_INT    )
 
-cdef Datatype __LONG_LONG__          = _new_Datatype( MPI_LONG_LONG          )
-cdef Datatype __UNSIGNED_LONG_LONG__ = _new_Datatype( MPI_UNSIGNED_LONG_LONG )
-cdef Datatype __LONG_LONG_INT__      = _new_Datatype( MPI_LONG_LONG_INT      )
+cdef Datatype __LONG_LONG__          = new_Datatype( MPI_LONG_LONG          )
+cdef Datatype __UNSIGNED_LONG_LONG__ = new_Datatype( MPI_UNSIGNED_LONG_LONG )
+cdef Datatype __LONG_LONG_INT__      = new_Datatype( MPI_LONG_LONG_INT      )
 
-cdef Datatype __CHARACTER__          = _new_Datatype( MPI_CHARACTER          )
-cdef Datatype __LOGICAL__            = _new_Datatype( MPI_LOGICAL            )
-cdef Datatype __INTEGER__            = _new_Datatype( MPI_INTEGER            )
-cdef Datatype __REAL__               = _new_Datatype( MPI_REAL               )
-cdef Datatype __DOUBLE_PRECISION__   = _new_Datatype( MPI_DOUBLE_PRECISION   )
-cdef Datatype __F_COMPLEX__          = _new_Datatype( MPI_COMPLEX            )
-cdef Datatype __F_DOUBLE_COMPLEX__   = _new_Datatype( MPI_DOUBLE_COMPLEX     )
+cdef Datatype __CHARACTER__          = new_Datatype( MPI_CHARACTER          )
+cdef Datatype __LOGICAL__            = new_Datatype( MPI_LOGICAL            )
+cdef Datatype __INTEGER__            = new_Datatype( MPI_INTEGER            )
+cdef Datatype __REAL__               = new_Datatype( MPI_REAL               )
+cdef Datatype __DOUBLE_PRECISION__   = new_Datatype( MPI_DOUBLE_PRECISION   )
+cdef Datatype __F_COMPLEX__          = new_Datatype( MPI_COMPLEX            )
+cdef Datatype __F_DOUBLE_COMPLEX__   = new_Datatype( MPI_DOUBLE_COMPLEX     )
 
-cdef Datatype __UB__                 = _new_Datatype( MPI_UB                 )
-cdef Datatype __LB__                 = _new_Datatype( MPI_LB                 )
+cdef Datatype __UB__                 = new_Datatype( MPI_UB                 )
+cdef Datatype __LB__                 = new_Datatype( MPI_LB                 )
 
 
 # Predefined datatype handles

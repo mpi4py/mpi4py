@@ -25,7 +25,7 @@ cdef class Comm:
 
     def __dealloc__(self):
         if not (self.flags & PyMPI_OWNED): return
-        CHKERR( _del_Comm(&self.ob_mpi) )
+        CHKERR( del_Comm(&self.ob_mpi) )
 
     def __richcmp__(self, other, int op):
         if not isinstance(self,  Comm): return NotImplemented
@@ -138,7 +138,7 @@ cdef class Comm:
         .. note:: This function blocks until the message is received
         """
         cdef _p_msg_p2p rmsg = message_p2p_recv(buf, source)
-        cdef MPI_Status *statusp = _arg_Status(status)
+        cdef MPI_Status *statusp = arg_Status(status)
         with nogil: CHKERR( MPI_Recv(
             rmsg.buf, rmsg.count, rmsg.dtype,
             source, tag, self.ob_mpi, statusp) )
@@ -162,7 +162,7 @@ cdef class Comm:
         """
         cdef _p_msg_p2p smsg = message_p2p_send(sendbuf, dest)
         cdef _p_msg_p2p rmsg = message_p2p_recv(recvbuf, source)
-        cdef MPI_Status *statusp = _arg_Status(status)
+        cdef MPI_Status *statusp = arg_Status(status)
         with nogil: CHKERR( MPI_Sendrecv(
             smsg.buf, smsg.count, smsg.dtype, dest,   sendtag,
             rmsg.buf, rmsg.count, rmsg.dtype, source, recvtag,
@@ -187,7 +187,7 @@ cdef class Comm:
         if dest   != MPI_PROC_NULL: rank = dest
         if source != MPI_PROC_NULL: rank = source
         cdef _p_msg_p2p rmsg = message_p2p_recv(buf, rank)
-        cdef MPI_Status *statusp = _arg_Status(status)
+        cdef MPI_Status *statusp = arg_Status(status)
         with nogil: CHKERR( MPI_Sendrecv_replace(
                 rmsg.buf, rmsg.count, rmsg.dtype,
                 dest, sendtag, source, recvtag,
@@ -227,7 +227,7 @@ cdef class Comm:
 
         .. note:: This function blocks until the message arrives.
         """
-        cdef MPI_Status *statusp = _arg_Status(status)
+        cdef MPI_Status *statusp = arg_Status(status)
         with nogil: CHKERR( MPI_Probe(
             source, tag, self.ob_mpi, statusp) )
 
@@ -236,7 +236,7 @@ cdef class Comm:
         Nonblocking test for a message
         """
         cdef bint flag = 0
-        cdef MPI_Status *statusp = _arg_Status(status)
+        cdef MPI_Status *statusp = arg_Status(status)
         with nogil: CHKERR( MPI_Iprobe(
             source, tag, self.ob_mpi, &flag, statusp) )
         return flag
@@ -732,7 +732,7 @@ cdef class Comm:
     def recv(self, obj=None, int source=0, int tag=0, Status status=None):
         """Receive"""
         cdef MPI_Comm comm = self.ob_mpi
-        cdef MPI_Status *statusp = _arg_Status(status)
+        cdef MPI_Status *statusp = arg_Status(status)
         return PyMPI_recv(obj, source, tag, comm, statusp)
     #
     def sendrecv(self,
@@ -741,7 +741,7 @@ cdef class Comm:
                  Status status=None):
         """Send and Receive"""
         cdef MPI_Comm comm = self.ob_mpi
-        cdef MPI_Status *statusp = _arg_Status(status)
+        cdef MPI_Status *statusp = arg_Status(status)
         return PyMPI_sendrecv(sendobj, dest,   sendtag,
                               recvobj, source, recvtag,
                               comm, statusp)
@@ -924,7 +924,7 @@ cdef class Intracomm(Comm):
         """
         cdef char *cmd = NULL
         cdef char **argv = MPI_ARGV_NULL
-        cdef MPI_Info cinfo = _arg_Info(info)
+        cdef MPI_Info cinfo = arg_Info(info)
         cdef int *ierrcodes = MPI_ERRCODES_IGNORE
         #
         cdef int rank = MPI_UNDEFINED
@@ -957,7 +957,7 @@ cdef class Intracomm(Comm):
         """
         cdef char *cportname = NULL
         port_name = asmpistr(port_name, &cportname, NULL)
-        cdef MPI_Info cinfo = _arg_Info(info)
+        cdef MPI_Info cinfo = arg_Info(info)
         cdef Intercomm comm = Intercomm()
         with nogil: CHKERR( MPI_Comm_accept(
             cportname, cinfo, root,
@@ -972,7 +972,7 @@ cdef class Intracomm(Comm):
         """
         cdef char *cportname = NULL
         port_name = asmpistr(port_name, &cportname, NULL)
-        cdef MPI_Info cinfo = _arg_Info(info)
+        cdef MPI_Info cinfo = arg_Info(info)
         cdef Intercomm comm = Intercomm()
         with nogil: CHKERR( MPI_Comm_connect(
             cportname, cinfo, root,
@@ -1357,10 +1357,10 @@ cdef class Intercomm(Comm):
 
 
 
-cdef Comm      __COMM_NULL__   = _new_Comm      ( MPI_COMM_NULL  )
-cdef Intracomm __COMM_SELF__   = _new_Intracomm ( MPI_COMM_SELF  )
-cdef Intracomm __COMM_WORLD__  = _new_Intracomm ( MPI_COMM_WORLD )
-cdef Intercomm __COMM_PARENT__ = _new_Intercomm ( MPI_COMM_NULL  )
+cdef Comm      __COMM_NULL__   = new_Comm      ( MPI_COMM_NULL  )
+cdef Intracomm __COMM_SELF__   = new_Intracomm ( MPI_COMM_SELF  )
+cdef Intracomm __COMM_WORLD__  = new_Intracomm ( MPI_COMM_WORLD )
+cdef Intercomm __COMM_PARENT__ = new_Intercomm ( MPI_COMM_NULL  )
 
 
 # Predefined communicators
@@ -1409,7 +1409,7 @@ def Open_port(Info info=INFO_NULL):
     Return an address that can be used to establish
     connections between groups of MPI processes
     """
-    cdef MPI_Info cinfo = _arg_Info(info)
+    cdef MPI_Info cinfo = arg_Info(info)
     cdef char cportname[MPI_MAX_PORT_NAME+1]
     with nogil: CHKERR( MPI_Open_port(cinfo, cportname) )
     return mpistr(cportname)
@@ -1420,7 +1420,7 @@ def Close_port(port_name, Info info=INFO_NULL):
     """
     cdef char *cportname = NULL
     port_name = asmpistr(port_name, &cportname, NULL)
-    cdef MPI_Info cinfo = _arg_Info(info)
+    cdef MPI_Info cinfo = arg_Info(info)
     with nogil: CHKERR( MPI_Close_port(cportname) )
 
 # [5.4.4] Name Publishing
@@ -1434,7 +1434,7 @@ def Publish_name(service_name, Info info, port_name):
     service_name = asmpistr(service_name, &csrvcname, NULL)
     cdef char *cportname = NULL
     port_name = asmpistr(port_name, &cportname, NULL)
-    cdef MPI_Info cinfo = _arg_Info(info)
+    cdef MPI_Info cinfo = arg_Info(info)
     with nogil: CHKERR( MPI_Publish_name(csrvcname, cinfo, cportname) )
 
 def Unpublish_name(service_name, Info info, port_name):
@@ -1445,7 +1445,7 @@ def Unpublish_name(service_name, Info info, port_name):
     service_name = asmpistr(service_name, &csrvcname, NULL)
     cdef char *cportname = NULL
     port_name = asmpistr(port_name, &cportname, NULL)
-    cdef MPI_Info cinfo = _arg_Info(info)
+    cdef MPI_Info cinfo = arg_Info(info)
     with nogil: CHKERR( MPI_Unpublish_name(csrvcname, cinfo, cportname) )
 
 def Lookup_name(service_name, Info info=INFO_NULL):
@@ -1454,7 +1454,7 @@ def Lookup_name(service_name, Info info=INFO_NULL):
     """
     cdef char *csrvcname = NULL
     service_name = asmpistr(service_name, &csrvcname, NULL)
-    cdef MPI_Info cinfo = _arg_Info(info)
+    cdef MPI_Info cinfo = arg_Info(info)
     cdef char cportname[MPI_MAX_PORT_NAME+1]
     with nogil: CHKERR( MPI_Lookup_name(csrvcname, cinfo, cportname) )
     return mpistr(cportname)

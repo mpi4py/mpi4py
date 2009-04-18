@@ -9,7 +9,7 @@ cdef class Op:
 
     def __dealloc__(self):
         if not (self.flags & PyMPI_OWNED): return
-        CHKERR( _del_Op(&self.ob_mpi) )
+        CHKERR( del_Op(&self.ob_mpi) )
         op_user_del(&self.ob_usrid)
 
     def __richcmp__(self, other, int op):
@@ -65,20 +65,20 @@ cdef class Op:
 
 
 
-cdef Op __OP_NULL__ = _new_Op( MPI_OP_NULL )
-cdef Op __MAX__     = _new_Op( MPI_MAX     )
-cdef Op __MIN__     = _new_Op( MPI_MIN     )
-cdef Op __SUM__     = _new_Op( MPI_SUM     )
-cdef Op __PROD__    = _new_Op( MPI_PROD    )
-cdef Op __LAND__    = _new_Op( MPI_LAND    )
-cdef Op __BAND__    = _new_Op( MPI_BAND    )
-cdef Op __LOR__     = _new_Op( MPI_LOR     )
-cdef Op __BOR__     = _new_Op( MPI_BOR     )
-cdef Op __LXOR__    = _new_Op( MPI_LXOR    )
-cdef Op __BXOR__    = _new_Op( MPI_BXOR    )
-cdef Op __MAXLOC__  = _new_Op( MPI_MAXLOC  )
-cdef Op __MINLOC__  = _new_Op( MPI_MINLOC  )
-cdef Op __REPLACE__ = _new_Op( MPI_REPLACE )
+cdef Op __OP_NULL__ = new_Op( MPI_OP_NULL )
+cdef Op __MAX__     = new_Op( MPI_MAX     )
+cdef Op __MIN__     = new_Op( MPI_MIN     )
+cdef Op __SUM__     = new_Op( MPI_SUM     )
+cdef Op __PROD__    = new_Op( MPI_PROD    )
+cdef Op __LAND__    = new_Op( MPI_LAND    )
+cdef Op __BAND__    = new_Op( MPI_BAND    )
+cdef Op __LOR__     = new_Op( MPI_LOR     )
+cdef Op __BOR__     = new_Op( MPI_BOR     )
+cdef Op __LXOR__    = new_Op( MPI_LXOR    )
+cdef Op __BXOR__    = new_Op( MPI_BXOR    )
+cdef Op __MAXLOC__  = new_Op( MPI_MAXLOC  )
+cdef Op __MINLOC__  = new_Op( MPI_MINLOC  )
+cdef Op __REPLACE__ = new_Op( MPI_REPLACE )
 
 
 # Predefined operation handles

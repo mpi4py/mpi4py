@@ -87,7 +87,7 @@ def Alloc_mem(Aint size, Info info=INFO_NULL):
     Allocate memory for message passing and RMA
     """
     cdef void *base = NULL
-    cdef MPI_Info cinfo = _arg_Info(info)
+    cdef MPI_Info cinfo = arg_Info(info)
     CHKERR( MPI_Alloc_mem(size, cinfo, &base) )
     return tomemory(base, size)
 

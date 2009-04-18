@@ -9,7 +9,7 @@ cdef class Info:
 
     def __dealloc__(self):
         if not (self.flags & PyMPI_OWNED): return
-        CHKERR( _del_Info(&self.ob_mpi) )
+        CHKERR( del_Info(&self.ob_mpi) )
 
     def __richcmp__(self, other, int op):
         if not isinstance(self,  Info): return NotImplemented
@@ -211,7 +211,7 @@ cdef class Info:
 
 
 
-cdef Info __INFO_NULL__ = _new_Info(MPI_INFO_NULL)
+cdef Info __INFO_NULL__ = new_Info(MPI_INFO_NULL)
 
 
 # Predefined info handles

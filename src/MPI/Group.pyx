@@ -9,7 +9,7 @@ cdef class Group:
 
     def __dealloc__(self):
         if not (self.flags & PyMPI_OWNED): return
-        CHKERR( _del_Group(&self.ob_mpi) )
+        CHKERR( del_Group(&self.ob_mpi) )
 
     def __richcmp__(self, other, int op):
         if not isinstance(self,  Group): return NotImplemented
@@ -225,8 +225,8 @@ cdef class Group:
 
 
 
-cdef Group __GROUP_NULL__  = _new_Group ( MPI_GROUP_NULL  )
-cdef Group __GROUP_EMPTY__ = _new_Group ( MPI_GROUP_EMPTY )
+cdef Group __GROUP_NULL__  = new_Group ( MPI_GROUP_NULL  )
+cdef Group __GROUP_EMPTY__ = new_Group ( MPI_GROUP_EMPTY )
 
 
 # Predefined group handles
