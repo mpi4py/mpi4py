@@ -22,43 +22,81 @@ class TestDatatype(unittest.TestCase):
             except NotImplementedError:
                 return
 
-    def _create(self, factory, *args):
+    def testGetEnvelope(self):
+        for dtype in datatypes:
+            try:
+                envelope = dtype.Get_envelope()
+            except NotImplementedError:
+                return
+            ni, na, nd, combiner = envelope
+            self.assertEqual(ni, 0)
+            self.assertEqual(na, 0)
+            self.assertEqual(nd, 0)
+            self.assertEqual(combiner, MPI.COMBINER_NAMED)
+
+    def _test_derived_contents(self, oldtype, factory, newtype):
         try:
-            newtype = factory(*args)
+            envelope = newtype.Get_envelope()
+            contents = newtype.Get_contents()
         except NotImplementedError:
             return
+        ni, na, nd, combiner = envelope
+        i, a, d = contents
+        self.assertEqual(ni, len(i))
+        self.assertEqual(na, len(a))
+        self.assertEqual(nd, len(d))
+        self.assertTrue(combiner != MPI.COMBINER_NAMED)
+        name = factory.__name__
+        NAME = name.replace('Create_', '').upper()
+        symbol = getattr(MPI, 'COMBINER_' + NAME)
+        self.assertEqual(symbol, combiner)
+        #if isinstance(oldtype, MPI.Datatype):
+        #    self.assertEqual(oldtype, d[0])
+        #else:
+        #    self.assertEqual(oldtype, d)
+
+    def _test_derived(self, oldtype, factory, *args):
+        try:
+            if isinstance(oldtype, MPI.Datatype):
+                newtype = factory(oldtype, *args)
+            else:
+                newtype = factory(*args)
+        except NotImplementedError:
+            return
+        self._test_derived_contents(oldtype, factory,  newtype)
         newtype.Commit()
+        self._test_derived_contents(oldtype, factory,  newtype)
         newtype.Free()
 
     def testDup(self):
         for dtype in datatypes:
-            factory = dtype.Dup
-            self._create(factory)
+            factory = MPI.Datatype.Dup
+            self._test_derived(dtype, factory)
 
     def testCreateContiguous(self):
         for dtype in datatypes:
             for count in range(5):
-                factory = dtype.Create_contiguous
+                factory = MPI.Datatype.Create_contiguous
                 args = (count, )
-                self._create(factory, *args)
+                self._test_derived(dtype, factory, *args)
 
     def testCreateVector(self):
         for dtype in datatypes:
             for count in range(5):
                 for blocklength in range(5):
                     for stride in range(5):
-                        factory = dtype.Create_vector
+                        factory = MPI.Datatype.Create_vector
                         args = (count, blocklength, stride)
-                        self._create(factory, *args)
+                        self._test_derived(dtype, factory, *args)
 
     def testCreateHvector(self):
         for dtype in datatypes:
             for count in range(5):
                 for blocklength in range(5):
                     for stride in range(5):
-                        factory = dtype.Create_hvector
+                        factory = MPI.Datatype.Create_hvector
                         args = (count, blocklength, stride)
-                        self._create(factory, *args)
+                        self._test_derived(dtype, factory, *args)
 
     def testCreateIndexed(self):
         for dtype in datatypes:
@@ -68,11 +106,11 @@ class TestDatatype(unittest.TestCase):
                 for b in blocklengths[:-1]:
                     stride = displacements[-1] + b * dtype.extent + 1
                     displacements.append(stride)
-                factory = dtype.Create_indexed
+                factory = MPI.Datatype.Create_indexed
                 args = (blocklengths, displacements)
-                self._create(factory, *args)
+                self._test_derived(dtype, factory, *args)
                 #args = (block, displacements) XXX
-                #self._create(factory, *args)  XXX
+                #self._test_derived(dtype, factory, *args)  XXX
 
     def testCreateIndexedBlock(self):
         for dtype in datatypes:
@@ -82,9 +120,9 @@ class TestDatatype(unittest.TestCase):
                 for b in blocklengths[:-1]:
                     stride = displacements[-1] + b * dtype.extent + 1
                     displacements.append(stride)
-                factory = dtype.Create_indexed_block
+                factory = MPI.Datatype.Create_indexed_block
                 args = (block, displacements)
-                self._create(factory, *args)
+                self._test_derived(dtype, factory, *args)
 
     def testCreateHindexed(self):
         for dtype in datatypes:
@@ -95,11 +133,11 @@ class TestDatatype(unittest.TestCase):
                     stride = displacements[-1] + b * dtype.extent + 1
                     displacements.append(stride)
 
-                factory = dtype.Create_hindexed
+                factory = MPI.Datatype.Create_hindexed
                 args = (blocklengths, displacements)
-                self._create(factory, *args)
+                self._test_derived(dtype, factory, *args)
                 #args = (block, displacements) XXX
-                #self._create(factory, *args)  XXX
+                #self._test_derived(dtype, factory, *args)  XXX
 
     def testCreateStruct(self):
         dtypes = datatypes
@@ -114,7 +152,7 @@ class TestDatatype(unittest.TestCase):
                         displacements.append(stride)
                     factory = MPI.Datatype.Create_struct
                     args = (blocklengths, displacements, dtypes)
-                    self._create(factory, *args)
+                    self._test_derived(dtypes, factory, *args)
 
     def testCreateSubarray(self):
         for dtype in datatypes:
@@ -129,17 +167,17 @@ class TestDatatype(unittest.TestCase):
                                 sizes = [size] * ndim
                                 subsizes = [subsize] * ndim
                                 starts = [start] * ndim
-                                factory = dtype.Create_subarray
+                                factory = MPI.Datatype.Create_subarray
                                 args = sizes, subsizes, starts, order
-                                self._create(factory, *args)
+                                self._test_derived(dtype, factory, *args)
 
     def testResized(self):
         for dtype in datatypes:
             for lb in range(-10, 10):
                 for extent in range(1, 10):
-                    factory = dtype.Resized
+                    factory = MPI.Datatype.Create_resized
                     args = lb, extent
-                    self._create(factory, *args)
+                    self._test_derived(dtype, factory, *args)
 
     def testGetSetName(self):
         for dtype in datatypes:

@@ -22,6 +22,28 @@ DISTRIBUTE_CYCLIC    = MPI_DISTRIBUTE_CYCLIC     #: Cyclic distribution
 DISTRIBUTE_DFLT_DARG = MPI_DISTRIBUTE_DFLT_DARG  #: Default distribution argument
 
 
+# Combiner values for datatype decoding
+# -------------------------------------
+COMBINER_NAMED            = MPI_COMBINER_NAMED
+COMBINER_DUP              = MPI_COMBINER_DUP
+COMBINER_CONTIGUOUS       = MPI_COMBINER_CONTIGUOUS
+COMBINER_VECTOR           = MPI_COMBINER_VECTOR
+COMBINER_HVECTOR          = MPI_COMBINER_HVECTOR
+COMBINER_HVECTOR_INTEGER  = MPI_COMBINER_HVECTOR_INTEGER  #: from Fortran call
+COMBINER_INDEXED          = MPI_COMBINER_INDEXED
+COMBINER_HINDEXED_INTEGER = MPI_COMBINER_HINDEXED_INTEGER #: from Fortran call
+COMBINER_HINDEXED         = MPI_COMBINER_HINDEXED
+COMBINER_INDEXED_BLOCK    = MPI_COMBINER_INDEXED_BLOCK
+COMBINER_STRUCT           = MPI_COMBINER_STRUCT
+COMBINER_STRUCT_INTEGER   = MPI_COMBINER_STRUCT_INTEGER   #: from Fortran call
+COMBINER_SUBARRAY         = MPI_COMBINER_SUBARRAY
+COMBINER_DARRAY           = MPI_COMBINER_DARRAY
+COMBINER_RESIZED          = MPI_COMBINER_RESIZED
+COMBINER_F90_REAL         = MPI_COMBINER_F90_REAL
+COMBINER_F90_COMPLEX      = MPI_COMBINER_F90_COMPLEX
+COMBINER_F90_INTEGER      = MPI_COMBINER_F90_INTEGER
+
+
 cdef class Datatype:
 
     """
@@ -323,6 +345,38 @@ cdef class Datatype:
             CHKERR( MPI_Type_get_true_extent(self.ob_mpi, &lb,
                                              &extent) )
             return lb + extent
+
+    # Decoding a Datatype
+    # -------------------
+
+    def Get_envelope(self):
+        """
+        Return information on the number and type of input arguments
+        used in the call that created a datatype
+        """
+        cdef int ni = 0, na = 0, nd = 0, combiner = MPI_UNDEFINED
+        CHKERR( MPI_Type_get_envelope(self.ob_mpi, &ni, &na, &nd, &combiner) )
+        return (ni, na, nd, combiner)
+
+    def Get_contents(self):
+        """
+        Retrieve the actual arguments used in the call that created a
+        datatype
+        """
+        cdef int ni = 0, na = 0, nd = 0, combiner = MPI_UNDEFINED
+        CHKERR( MPI_Type_get_envelope(self.ob_mpi, &ni, &na, &nd, &combiner) )
+        cdef int *i = NULL
+        cdef MPI_Aint *a = NULL
+        cdef MPI_Datatype *d = NULL
+        cdef object tmp1 = allocate(ni*sizeof(int), <void**>&i)
+        cdef object tmp2 = allocate(na*sizeof(MPI_Aint), <void**>&a)
+        cdef object tmp3 = allocate(nd*sizeof(MPI_Datatype), <void**>&d)
+        CHKERR( MPI_Type_get_contents(self.ob_mpi, ni, na, nd, i, a, d) )
+        cdef int k = 0
+        cdef object integers  = [i[k] for k from 0 <= k < ni]
+        cdef object addresses = [a[k] for k from 0 <= k < na]
+        cdef object datatypes = [new_Datatype(d[k]) for k from 0 <= k < nd]
+        return (integers, addresses, datatypes)
 
     # Pack and Unpack
     # ---------------
