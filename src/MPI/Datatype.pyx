@@ -256,9 +256,9 @@ cdef class Datatype:
         """
         Find a datatype matching a specified size in bytes
         """
-        cdef MPI_Datatype datatype = MPI_DATATYPE_NULL
-        CHKERR( MPI_Type_match_size(typeclass, size, &datatype) )
-        return _new_Datatype(datatype)
+        cdef Datatype datatype = cls()
+        CHKERR( MPI_Type_match_size(typeclass, size, &datatype.ob_mpi) )
+        return datatype
 
     # Use of Derived Datatypes
     # ------------------------
