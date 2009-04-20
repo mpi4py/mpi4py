@@ -59,7 +59,7 @@ cdef int greq_free(void *extra_state) with gil:
         ierr = exc.Get_error_code()
     except:
         ierr = MPI_ERR_OTHER
-    Py_DECREF(<object>extra_state)
+    Py_DECREF(<PyObject*>extra_state)
     return ierr
 
 cdef int greq_cancel(void *extra_state, int completed) with gil:

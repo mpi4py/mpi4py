@@ -1,5 +1,5 @@
 cdef void win_memory_pydecref(void *ob) with gil:
-    Py_DECREF(<object>ob)
+    Py_DECREF(<PyObject*>ob)
 
 cdef int PyMPI_Win_memory_del(MPI_Win w, int k, void *v, void *xs) nogil:
     if  v != NULL:
@@ -17,5 +17,5 @@ cdef int PyMPI_Win_set_attr_memory(MPI_Win win, object memory) except -1:
                                       &PyMPI_KEYVAL_WIN_MEMORY, NULL) )
     # hold a reference to the object exposing windows memory
     CHKERR( MPI_Win_set_attr(win, PyMPI_KEYVAL_WIN_MEMORY, <void*>memory) )
-    Py_INCREF(memory)
+    Py_INCREF(<PyObject*>memory)
     return 0

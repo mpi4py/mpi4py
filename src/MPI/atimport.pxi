@@ -3,9 +3,8 @@
 
 cdef extern from "Python.h":
     ctypedef struct PyObject
-    Py_ssize_t Py_REFCNT(object)
-    void Py_INCREF(object) except *
-    void Py_DECREF(object) except *
+    void Py_INCREF(PyObject*)
+    void Py_DECREF(PyObject*)
     int Py_IsInitialized() nogil
     void PySys_WriteStderr(char*,...)
     int Py_AtExit(void (*)())
