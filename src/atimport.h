@@ -71,11 +71,9 @@ static PyObject * PyMPIString_AsStringAndSize(PyObject *ob,
 					      const char **s,
 					      Py_ssize_t *n)
 {
-  PyObject *b = PyUnicode_AsASCIIString(ob);
-  if (b != NULL &&
-      PyBytes_AsStringAndSize(b, (char **)s, n) < 0) {
-    Py_DECREF(b);
-    b = NULL;
+  PyObject *b = PyUnicode_AsUTF8String(ob);
+  if (b != NULL && PyBytes_AsStringAndSize(b, (char **)s, n) < 0) {
+    Py_DECREF(b); b = NULL;
   }
   return b;
 }
