@@ -187,9 +187,8 @@ cdef class File:
         """
         Set the file view
         """
-        if datarep is None: datarep = mpistr('native')
-        cdef char *cdatarep = NULL
-        datarep = asmpistr(datarep, &cdatarep, NULL)
+        cdef char *cdatarep = "native"
+        if datarep is not None: datarep = asmpistr(datarep, &cdatarep, NULL)
         cdef MPI_Datatype cetype = MPI_BYTE
         if etype is not None: cetype = etype.ob_mpi
         cdef MPI_Datatype cftype = cetype
