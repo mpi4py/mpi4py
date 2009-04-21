@@ -356,14 +356,16 @@ class TestCCOObjInterDup(TestCCOObjInter):
 
 class TestCCOObjInterDupDup(TestCCOObjInterDup):
     BASECOMM = MPI.COMM_WORLD
+    INTERCOMM_ORIG = MPI.COMM_NULL
     def setUp(self):
         super(TestCCOObjInterDupDup, self).setUp()
         if self.INTERCOMM == MPI.COMM_NULL: return
+        self.INTERCOMM_ORIG = self.INTERCOMM
         self.INTERCOMM = self.INTERCOMM.Dup()
     def tearDown(self):
         super(TestCCOObjInterDupDup, self).tearDown()
-        if self.INTERCOMM == MPI.COMM_NULL: return
-        self.INTERCOMM = self.INTERCOMM.Dup()
+        if self.INTERCOMM_ORIG == MPI.COMM_NULL: return
+        self.INTERCOMM_ORIG.Free()
 
 
 _name, _version = MPI.get_vendor()
