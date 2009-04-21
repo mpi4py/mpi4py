@@ -973,8 +973,8 @@ class clean(cmd_clean.clean):
                 if os.path.exists(directory):
                     remove_tree(directory, dry_run=self.dry_run)
                 else:
-                    log.warn("'%s' does not exist -- can't clean it",
-                             directory)
+                    log.debug("'%s' does not exist -- can't clean it",
+                              directory)
 
         # just for the heck of it, try to remove the base build directory:
         # we might have emptied it right now, but if not we don't care
