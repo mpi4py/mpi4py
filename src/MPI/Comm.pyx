@@ -231,7 +231,7 @@ cdef class Comm:
         with nogil: CHKERR( MPI_Probe(
             source, tag, self.ob_mpi, statusp) )
 
-    def Iprobe(self, source=0, int tag=0, Status status=None):
+    def Iprobe(self, int source=0, int tag=0, Status status=None):
         """
         Nonblocking test for a message
         """
