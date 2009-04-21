@@ -112,6 +112,23 @@ class BaseTestP2PBuf(object):
                         for value in rbuf[s:]:
                             self.assertEqual(value, -1)
 
+    def testIProbe(self):
+        comm = self.COMM.Dup()
+        try:
+            f = comm.Iprobe()
+            self.assertFalse(f)
+            f = comm.Iprobe(MPI.ANY_SOURCE)
+            self.assertFalse(f)
+            f = comm.Iprobe(MPI.ANY_SOURCE, MPI.ANY_TAG)
+            self.assertFalse(f)
+            status = MPI.Status()
+            f = comm.Iprobe(MPI.ANY_SOURCE, MPI.ANY_TAG, status)
+            self.assertFalse(f)
+            self.assertEqual(status.source, MPI.ANY_SOURCE)
+            self.assertEqual(status.tag,    MPI.ANY_TAG)
+            self.assertEqual(status.error,  MPI.SUCCESS)
+        finally:
+            comm.Free()
 
 class TestP2PBufSelf(BaseTestP2PBuf, unittest.TestCase):
     COMM = MPI.COMM_SELF
