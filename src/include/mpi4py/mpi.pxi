@@ -113,13 +113,13 @@ cdef extern from "mpi.h" nogil:
     int MPI_Type_vector(int, int, int, MPI_Datatype, MPI_Datatype*)
     int MPI_Type_indexed(int, int[], int[], MPI_Datatype, MPI_Datatype*)
     int MPI_Type_create_indexed_block(int, int, int[], MPI_Datatype, MPI_Datatype*)
-    enum: MPI_ORDER_C        #:= 0
-    enum: MPI_ORDER_FORTRAN  #:= 1
+    enum: MPI_ORDER_C        #:= MPI_UNDEFINED
+    enum: MPI_ORDER_FORTRAN  #:= MPI_UNDEFINED
     int MPI_Type_create_subarray(int, int[], int[], int[], int, MPI_Datatype, MPI_Datatype*)
-    enum: MPI_DISTRIBUTE_NONE       #:= 0
-    enum: MPI_DISTRIBUTE_BLOCK      #:= 1
-    enum: MPI_DISTRIBUTE_CYCLIC     #:= 2
-    enum: MPI_DISTRIBUTE_DFLT_DARG  #:= 3
+    enum: MPI_DISTRIBUTE_NONE       #:= MPI_UNDEFINED
+    enum: MPI_DISTRIBUTE_BLOCK      #:= MPI_UNDEFINED
+    enum: MPI_DISTRIBUTE_CYCLIC     #:= MPI_UNDEFINED
+    enum: MPI_DISTRIBUTE_DFLT_DARG  #:= MPI_UNDEFINED
     int MPI_Type_create_darray(int, int, int, int[], int[], int[], int[], int, MPI_Datatype, MPI_Datatype*)
 
     int MPI_Address(void*, MPI_Aint*)
@@ -136,9 +136,9 @@ cdef extern from "mpi.h" nogil:
     int MPI_Type_create_resized(MPI_Datatype, MPI_Aint, MPI_Aint, MPI_Datatype*)
     int MPI_Type_get_true_extent(MPI_Datatype, MPI_Aint*, MPI_Aint*)
 
-    enum: MPI_TYPECLASS_INTEGER  #:= 1
-    enum: MPI_TYPECLASS_REAL     #:= 2
-    enum: MPI_TYPECLASS_COMPLEX  #:= 3
+    enum: MPI_TYPECLASS_INTEGER  #:= MPI_UNDEFINED
+    enum: MPI_TYPECLASS_REAL     #:= MPI_UNDEFINED
+    enum: MPI_TYPECLASS_COMPLEX  #:= MPI_UNDEFINED
     int MPI_Type_match_size(int, int, MPI_Datatype*)
 
     int MPI_Type_commit(MPI_Datatype*)
@@ -152,24 +152,24 @@ cdef extern from "mpi.h" nogil:
     int MPI_Unpack_external(char[], void*, MPI_Aint, MPI_Aint*, void*, int, MPI_Datatype)
     int MPI_Pack_external_size(char[], int, MPI_Datatype, MPI_Aint*)
 
-    enum: MPI_COMBINER_NAMED             #:=  0
-    enum: MPI_COMBINER_DUP               #:=  1
-    enum: MPI_COMBINER_CONTIGUOUS        #:=  2
-    enum: MPI_COMBINER_VECTOR            #:=  3
-    enum: MPI_COMBINER_HVECTOR_INTEGER   #:=  4
-    enum: MPI_COMBINER_HVECTOR           #:=  5
-    enum: MPI_COMBINER_INDEXED           #:=  6
-    enum: MPI_COMBINER_HINDEXED_INTEGER  #:=  7
-    enum: MPI_COMBINER_HINDEXED          #:=  8
-    enum: MPI_COMBINER_INDEXED_BLOCK     #:=  9
-    enum: MPI_COMBINER_STRUCT_INTEGER    #:= 10
-    enum: MPI_COMBINER_STRUCT            #:= 11
-    enum: MPI_COMBINER_SUBARRAY          #:= 12
-    enum: MPI_COMBINER_DARRAY            #:= 13
-    enum: MPI_COMBINER_F90_REAL          #:= 14
-    enum: MPI_COMBINER_F90_COMPLEX       #:= 15
-    enum: MPI_COMBINER_F90_INTEGER       #:= 16
-    enum: MPI_COMBINER_RESIZED           #:= 17
+    enum: MPI_COMBINER_NAMED             #:=  MPI_UNDEFINED
+    enum: MPI_COMBINER_DUP               #:=  MPI_UNDEFINED
+    enum: MPI_COMBINER_CONTIGUOUS        #:=  MPI_UNDEFINED
+    enum: MPI_COMBINER_VECTOR            #:=  MPI_UNDEFINED
+    enum: MPI_COMBINER_HVECTOR_INTEGER   #:=  MPI_UNDEFINED
+    enum: MPI_COMBINER_HVECTOR           #:=  MPI_UNDEFINED
+    enum: MPI_COMBINER_INDEXED           #:=  MPI_UNDEFINED
+    enum: MPI_COMBINER_HINDEXED_INTEGER  #:=  MPI_UNDEFINED
+    enum: MPI_COMBINER_HINDEXED          #:=  MPI_UNDEFINED
+    enum: MPI_COMBINER_INDEXED_BLOCK     #:=  MPI_UNDEFINED
+    enum: MPI_COMBINER_STRUCT_INTEGER    #:=  MPI_UNDEFINED
+    enum: MPI_COMBINER_STRUCT            #:=  MPI_UNDEFINED
+    enum: MPI_COMBINER_SUBARRAY          #:=  MPI_UNDEFINED
+    enum: MPI_COMBINER_DARRAY            #:=  MPI_UNDEFINED
+    enum: MPI_COMBINER_F90_REAL          #:=  MPI_UNDEFINED
+    enum: MPI_COMBINER_F90_COMPLEX       #:=  MPI_UNDEFINED
+    enum: MPI_COMBINER_F90_INTEGER       #:=  MPI_UNDEFINED
+    enum: MPI_COMBINER_RESIZED           #:=  MPI_UNDEFINED
     int MPI_Type_get_envelope(MPI_Datatype, int*, int*, int*, int*)
     int MPI_Type_get_contents(MPI_Datatype, int, int, int, int[], MPI_Aint[], MPI_Datatype[])
 
