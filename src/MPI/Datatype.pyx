@@ -127,6 +127,8 @@ cdef class Datatype:
         CHKERR( MPI_Type_dup(self.ob_mpi, &datatype.ob_mpi) )
         return datatype
 
+    Create_dup = Dup #: convenience alias
+
     def Create_contiguous(self, int count):
         """
         Create a contiguous datatype
@@ -338,7 +340,7 @@ cdef class Datatype:
                                         &datatype.ob_mpi) )
         return datatype
 
-    Resized = Create_resized
+    Resized = Create_resized #: compatibility alias
 
     def Get_true_extent(self):
         """
