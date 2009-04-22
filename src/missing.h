@@ -2070,43 +2070,43 @@ typedef int (PyMPI_MPI_Delete_function)(MPI_Comm,int,void*,void*);
 
 #ifdef PyMPI_MISSING_MPI_MODE_NOCHECK
 #if !defined(MPI_MODE_NOCHECK)
-#define MPI_MODE_NOCHECK (1)
+#define MPI_MODE_NOCHECK (MPI_UNDEFINED)
 #endif
 #endif
 
 #ifdef PyMPI_MISSING_MPI_MODE_NOSTORE
 #if !defined(MPI_MODE_NOSTORE)
-#define MPI_MODE_NOSTORE (2)
+#define MPI_MODE_NOSTORE (MPI_UNDEFINED)
 #endif
 #endif
 
 #ifdef PyMPI_MISSING_MPI_MODE_NOPUT
 #if !defined(MPI_MODE_NOPUT)
-#define MPI_MODE_NOPUT (4)
+#define MPI_MODE_NOPUT (MPI_UNDEFINED)
 #endif
 #endif
 
 #ifdef PyMPI_MISSING_MPI_MODE_NOPRECEDE
 #if !defined(MPI_MODE_NOPRECEDE)
-#define MPI_MODE_NOPRECEDE (8)
+#define MPI_MODE_NOPRECEDE (MPI_UNDEFINED)
 #endif
 #endif
 
 #ifdef PyMPI_MISSING_MPI_MODE_NOSUCCEED
 #if !defined(MPI_MODE_NOSUCCEED)
-#define MPI_MODE_NOSUCCEED (16)
+#define MPI_MODE_NOSUCCEED (MPI_UNDEFINED)
 #endif
 #endif
 
 #ifdef PyMPI_MISSING_MPI_LOCK_EXCLUSIVE
 #if !defined(MPI_LOCK_EXCLUSIVE)
-#define MPI_LOCK_EXCLUSIVE (0)
+#define MPI_LOCK_EXCLUSIVE (MPI_UNDEFINED)
 #endif
 #endif
 
 #ifdef PyMPI_MISSING_MPI_LOCK_SHARED
 #if !defined(MPI_LOCK_SHARED)
-#define MPI_LOCK_SHARED (1)
+#define MPI_LOCK_SHARED (MPI_UNDEFINED)
 #endif
 #endif
 

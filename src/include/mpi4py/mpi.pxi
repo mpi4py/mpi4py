@@ -460,14 +460,14 @@ cdef extern from "mpi.h" nogil:
     int MPI_Put(void*, int, MPI_Datatype, int, MPI_Aint, int, MPI_Datatype, MPI_Win)
     int MPI_Accumulate(void*, int, MPI_Datatype, int, MPI_Aint, int, MPI_Datatype,  MPI_Op, MPI_Win)
 
-    enum: MPI_MODE_NOCHECK    #:=  1
-    enum: MPI_MODE_NOSTORE    #:=  2
-    enum: MPI_MODE_NOPUT      #:=  4
-    enum: MPI_MODE_NOPRECEDE  #:=  8
-    enum: MPI_MODE_NOSUCCEED  #:= 16
+    enum: MPI_MODE_NOCHECK    #:= MPI_UNDEFINED
+    enum: MPI_MODE_NOSTORE    #:= MPI_UNDEFINED
+    enum: MPI_MODE_NOPUT      #:= MPI_UNDEFINED
+    enum: MPI_MODE_NOPRECEDE  #:= MPI_UNDEFINED
+    enum: MPI_MODE_NOSUCCEED  #:= MPI_UNDEFINED
 
-    enum: MPI_LOCK_EXCLUSIVE  #:= 0
-    enum: MPI_LOCK_SHARED     #:= 1
+    enum: MPI_LOCK_EXCLUSIVE  #:= MPI_UNDEFINED
+    enum: MPI_LOCK_SHARED     #:= MPI_UNDEFINED
 
     int MPI_Win_fence(int, MPI_Win)
     int MPI_Win_post(MPI_Group, int, MPI_Win)
