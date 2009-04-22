@@ -136,6 +136,9 @@ cdef extern from "mpi.h" nogil:
     int MPI_Type_create_resized(MPI_Datatype, MPI_Aint, MPI_Aint, MPI_Datatype*)
     int MPI_Type_get_true_extent(MPI_Datatype, MPI_Aint*, MPI_Aint*)
 
+    int MPI_Type_create_f90_integer(int, MPI_Datatype*)
+    int MPI_Type_create_f90_real(int, int, MPI_Datatype*)
+    int MPI_Type_create_f90_complex(int, int, MPI_Datatype*)
     enum: MPI_TYPECLASS_INTEGER  #:= MPI_UNDEFINED
     enum: MPI_TYPECLASS_REAL     #:= MPI_UNDEFINED
     enum: MPI_TYPECLASS_COMPLEX  #:= MPI_UNDEFINED

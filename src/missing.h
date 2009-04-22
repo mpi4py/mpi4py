@@ -559,6 +559,24 @@ typedef void *PyMPI_MPI_Errhandler;
 #endif
 #endif
 
+#ifdef PyMPI_MISSING_MPI_TYPE_CREATE_F90_INTEGER
+#if !defined(MPI_Type_create_f90_integer)
+#define MPI_Type_create_f90_integer(a1,a2) PyMPI_UNAVAILABLE("MPI_TYPE_CREATE_F90_INTEGER",a1,a2)
+#endif
+#endif
+
+#ifdef PyMPI_MISSING_MPI_TYPE_CREATE_F90_REAL
+#if !defined(MPI_Type_create_f90_real)
+#define MPI_Type_create_f90_real(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_TYPE_CREATE_F90_REAL",a1,a2,a3)
+#endif
+#endif
+
+#ifdef PyMPI_MISSING_MPI_TYPE_CREATE_F90_COMPLEX
+#if !defined(MPI_Type_create_f90_complex)
+#define MPI_Type_create_f90_complex(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_TYPE_CREATE_F90_COMPLEX",a1,a2,a3)
+#endif
+#endif
+
 #ifdef PyMPI_MISSING_MPI_TYPECLASS_INTEGER
 #if !defined(MPI_TYPECLASS_INTEGER)
 #define MPI_TYPECLASS_INTEGER (MPI_UNDEFINED)

@@ -270,8 +270,35 @@ cdef class Datatype:
                                        &datatype.ob_mpi) )
         return datatype
 
-    # Size-specific Datatypes
-    # -----------------------
+    # Parametrized and size-specific Fortran Datatypes
+    # ------------------------------------------------
+
+    @classmethod
+    def Create_f90_integer(cls, int r):
+        """
+        Return a bounded integer datatype
+        """
+        cdef Datatype datatype = cls()
+        CHKERR( MPI_Type_create_f90_integer(r, &datatype.ob_mpi) )
+        return datatype
+
+    @classmethod
+    def Create_f90_real(cls, int p, int r):
+        """
+        Return a bounded real datatype
+        """
+        cdef Datatype datatype = cls()
+        CHKERR( MPI_Type_create_f90_real(p, r, &datatype.ob_mpi) )
+        return datatype
+
+    @classmethod
+    def Create_f90_complex(cls, int p, int r):
+        """
+        Return a bounded complex datatype
+        """
+        cdef Datatype datatype = cls()
+        CHKERR( MPI_Type_create_f90_complex(p, r, &datatype.ob_mpi) )
+        return datatype
 
     @classmethod
     def Match_size(cls, int typeclass, int size):
