@@ -1412,6 +1412,7 @@ def Open_port(Info info=INFO_NULL):
     cdef MPI_Info cinfo = arg_Info(info)
     cdef char cportname[MPI_MAX_PORT_NAME+1]
     with nogil: CHKERR( MPI_Open_port(cinfo, cportname) )
+    cportname[MPI_MAX_PORT_NAME] = 0 # just in case
     return mpistr(cportname)
 
 def Close_port(port_name, Info info=INFO_NULL):
@@ -1457,4 +1458,5 @@ def Lookup_name(service_name, Info info=INFO_NULL):
     cdef MPI_Info cinfo = arg_Info(info)
     cdef char cportname[MPI_MAX_PORT_NAME+1]
     with nogil: CHKERR( MPI_Lookup_name(csrvcname, cinfo, cportname) )
+    cportname[MPI_MAX_PORT_NAME] = 0 # just in case
     return mpistr(cportname)
