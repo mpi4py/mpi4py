@@ -5,6 +5,8 @@ datatypes = (MPI.CHAR,  MPI.SHORT,
              MPI.INT,   MPI.LONG,
              MPI.FLOAT, MPI.DOUBLE)
 
+combiner_map = {}
+
 class TestDatatype(unittest.TestCase):
 
     def testGetExtent(self):
@@ -49,6 +51,10 @@ class TestDatatype(unittest.TestCase):
         name = factory.__name__
         NAME = name.replace('Create_', '').upper()
         symbol = getattr(MPI, 'COMBINER_' + NAME)
+        if symbol == MPI.UNDEFINED: return
+        if combiner_map is None: return
+        symbol = combiner_map.get(symbol, symbol)
+        if symbol is None: return
         self.assertEqual(symbol, combiner)
         #if isinstance(oldtype, MPI.Datatype):
         #    self.assertEqual(oldtype, d[0])
@@ -204,6 +210,15 @@ class TestGetAddress(unittest.TestCase):
         bufptr, buflen = location.buffer_info()
         self.assertEqual(addr, bufptr)
 
+_name, _version = MPI.get_vendor()
+if _name == 'LAM/MPI':
+    combiner_map[MPI.COMBINER_INDEXED_BLOCK] = MPI.COMBINER_INDEXED
+elif _name == 'MPICH1':
+    combiner_map[MPI.COMBINER_VECTOR]  = None
+    combiner_map[MPI.COMBINER_HVECTOR] = None
+    combiner_map[MPI.COMBINER_INDEXED] = None
+elif MPI.Get_version() < (2, 0):
+    combiner_map = None
 
 if __name__ == '__main__':
     unittest.main()
