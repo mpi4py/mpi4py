@@ -132,9 +132,10 @@ cdef MPI_User_function *op_user_map(int index) nogil:
 cdef int op_user_new(object function, MPI_User_function **cfunction) except -1:
     # find a free slot in the registry
     cdef int index = 0
-    try: index = op_user_registry.index(None, 1)
-    except ValueError: raise RuntimeError(
-        mpistr("cannot create too many user-defined reduction operations"))
+    try:
+        index = op_user_registry.index(None, 1)
+    except ValueError:
+        raise RuntimeError(S("cannot create too many user-defined reduction operations"))
     # the line below will fail
     # if the function is not callable
     function.__call__

@@ -16,7 +16,7 @@ cdef class Status:
         cdef int r = equal_Status(&s.ob_mpi, &o.ob_mpi)
         if   op == 2: return  r == 0
         elif op == 3: return  r != 0
-        else: raise TypeError(mpistr("only '==' and '!='"))
+        else: raise TypeError(S("only '==' and '!='"))
 
 
     def Get_source(self):

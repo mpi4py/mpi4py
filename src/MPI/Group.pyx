@@ -17,7 +17,7 @@ cdef class Group:
         cdef Group s = self, o = other
         if   op == 2: return (s.ob_mpi == o.ob_mpi)
         elif op == 3: return (s.ob_mpi != o.ob_mpi)
-        else: raise TypeError(mpistr("only '==' and '!='"))
+        else: raise TypeError(S("only '==' and '!='"))
 
     def __nonzero__(self):
         return self.ob_mpi != MPI_GROUP_NULL

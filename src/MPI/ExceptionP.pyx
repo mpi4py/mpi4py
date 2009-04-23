@@ -43,11 +43,11 @@ class Exception(RuntimeError):
         return self.Get_error_code()
 
     def __repr__(self):
-        return mpistr('MPI.Exception(%d)') % self.ob_mpi
+        return S("MPI.Exception(%d)") % self.ob_mpi
 
     def __str__(self):
         if not mpi_active():
-            return mpistr('error code: %d') % self.ob_mpi
+            return S("error code: %d") % self.ob_mpi
         return self.Get_error_string()
 
     def Get_error_code(self):
@@ -58,7 +58,7 @@ class Exception(RuntimeError):
         errorcode = self.ob_mpi
         return errorcode
 
-    error_code = property(Get_error_code, doc=mpistr("error code"))
+    error_code = property(Get_error_code, doc=S("error code"))
 
     def Get_error_class(self):
         """
@@ -68,7 +68,7 @@ class Exception(RuntimeError):
         CHKERR( MPI_Error_class(self.ob_mpi, &errorclass) )
         return errorclass
 
-    error_class = property(Get_error_class, doc=mpistr("error class"))
+    error_class = property(Get_error_class, doc=S("error class"))
 
     def Get_error_string(self):
         """
@@ -79,4 +79,4 @@ class Exception(RuntimeError):
         CHKERR( MPI_Error_string(self.ob_mpi, string, &resultlen) )
         return tompistr(string, resultlen)
 
-    error_string = property(Get_error_string, doc=mpistr("error string"))
+    error_string = property(Get_error_string, doc=S("error string"))

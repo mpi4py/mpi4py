@@ -30,10 +30,10 @@ cdef inline object message_simple(int readonly,
     # check argument containing message
     cdef Py_ssize_t n = 0
     if not is_list(msg) and not is_tuple(msg):
-        raise TypeError(mpistr("message: expecting a list or tuple"))
+        raise TypeError(S("message: expecting a list or tuple"))
     n = len(msg)
     if n < 2 or n > 3:
-        raise ValueError(mpistr("message: expecting 2 or 3 items"))
+        raise ValueError(S("message: expecting 2 or 3 items"))
     # unpack message list/tuple
     cdef object obuf, ocount, odtype
     if n == 2:
@@ -110,10 +110,10 @@ cdef inline object message_vector(int readonly,
     # check argument containing message
     cdef Py_ssize_t n = 0
     if not is_list(msg) and not is_tuple(msg):
-        raise TypeError(mpistr("message: expecting a list or tuple"))
+        raise TypeError(S("message: expecting a list or tuple"))
     n = len(msg)
     if n < 3 or n > 4:
-        raise ValueError(mpistr("message: expecting 3 or 4 items"))
+        raise ValueError(S("message: expecting 3 or 4 items"))
     # unpack message list/tuple
     if n == 4:
         obuf    = msg[0]
@@ -487,16 +487,16 @@ cdef class _p_msg_rma:
         cdef Py_ssize_t no = 0, nt = 0
         if origin is not None:
             if not is_list(origin) and not is_tuple(origin):
-                raise ValueError(mpistr("origin: expecting a list or tuple"))
+                raise ValueError(S("origin: expecting a list or tuple"))
             no = len(origin)
             if no < 2 or no > 3:
-                raise ValueError(mpistr("origin: expecting 2 or 3 items"))
+                raise ValueError(S("origin: expecting 2 or 3 items"))
         if target is not None:
             if not is_list(target) and not is_tuple(target):
-                raise ValueError(mpistr("target: expecting a list or tuple"))
+                raise ValueError(S("target: expecting a list or tuple"))
             nt = len(target)
             if nt > 3:
-                raise ValueError(mpistr("target: expecting at most 3 items"))
+                raise ValueError(S("target: expecting at most 3 items"))
         # ORIGIN
         cdef void *oaddr = NULL
         cdef int ocount = 0
