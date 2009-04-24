@@ -11,7 +11,9 @@ actual command line arguments to be passed at the time
 :cfunc:`MPI_Init()` is called. In this case, you will need to use a
 rebuilt, MPI-enabled, Python interpreter binary executable. A basic
 implementation (targeting Python 2.X) of what is required is shown
-below::
+below:
+
+.. sourcecode:: c
 
     #include <Python.h>
     #include <mpi.h>

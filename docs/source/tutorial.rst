@@ -123,7 +123,9 @@ Compute Pi
 Wrapping with SWIG
 ------------------
 
-* C source::
+* C source:
+
+  .. sourcecode:: c
 
       /* file: helloworld.c */
       void sayhello(MPI_Comm comm)
@@ -136,7 +138,9 @@ Wrapping with SWIG
                rank, size);
       }
 
-* SWIG interface file::
+* SWIG interface file:
+
+  .. sourcecode:: c
 
       // file: helloworld.i
       %module helloworld
@@ -160,7 +164,9 @@ Wrapping with SWIG
 Wrapping with F2Py
 ------------------
 
-* Fortran 90 source::
+* Fortran 90 source:
+
+  .. sourcecode:: fortran
 
       ! file: helloworld.f90
       subroutine sayhello(comm)
