@@ -15,6 +15,7 @@ def cythonize(source, includes=(),
     options.include_path = includes
     #
     from Cython.Compiler import Options
+    Options.optimize_simple_methods = 0
     Options.generate_cleanup_code = 3
     #
     any_failures = 0
