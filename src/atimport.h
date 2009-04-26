@@ -26,6 +26,14 @@
 #include "config/sgimpi.h"
 #endif
 
+/* Quick hack for DeinoMPI and MPICH2 on Windows */
+#if (defined(MS_WINDOWS) && \
+    (defined(DEINO_MPI) || defined(MPICH2)))
+#define PyMPI_MISSING_MPI_TYPE_CREATE_F90_INTEGER 1
+#define PyMPI_MISSING_MPI_TYPE_CREATE_F90_REAL 1
+#define PyMPI_MISSING_MPI_TYPE_CREATE_F90_COMPLEX 1
+#endif
+
 /* XXX describe */
 #include "missing.h"
 
