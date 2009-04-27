@@ -682,89 +682,95 @@ def Get_address(location):
 
 
 
-cdef Datatype __DATATYPE_NULL__      = new_Datatype( MPI_DATATYPE_NULL      )
+cdef Datatype __DATATYPE_NULL__       = new_Datatype( MPI_DATATYPE_NULL         )
 
-cdef Datatype __CHAR__               = new_Datatype( MPI_CHAR               )
-cdef Datatype __WCHAR__              = new_Datatype( MPI_WCHAR              )
-cdef Datatype __SIGNED_CHAR__        = new_Datatype( MPI_SIGNED_CHAR        )
-cdef Datatype __UNSIGNED_CHAR__      = new_Datatype( MPI_UNSIGNED_CHAR      )
-cdef Datatype __SHORT__              = new_Datatype( MPI_SHORT              )
-cdef Datatype __UNSIGNED_SHORT__     = new_Datatype( MPI_UNSIGNED_SHORT     )
-cdef Datatype __INT__                = new_Datatype( MPI_INT                )
-cdef Datatype __UNSIGNED__           = new_Datatype( MPI_UNSIGNED           )
-cdef Datatype __LONG__               = new_Datatype( MPI_LONG               )
-cdef Datatype __UNSIGNED_LONG__      = new_Datatype( MPI_UNSIGNED_LONG      )
-cdef Datatype __FLOAT__              = new_Datatype( MPI_FLOAT              )
-cdef Datatype __DOUBLE__             = new_Datatype( MPI_DOUBLE             )
-cdef Datatype __LONG_DOUBLE__        = new_Datatype( MPI_LONG_DOUBLE        )
-cdef Datatype __BYTE__               = new_Datatype( MPI_BYTE               )
-cdef Datatype __PACKED__             = new_Datatype( MPI_PACKED             )
+cdef Datatype __UB__                  = new_Datatype( MPI_UB                    )
+cdef Datatype __LB__                  = new_Datatype( MPI_LB                    )
 
-cdef Datatype __SHORT_INT__          = new_Datatype( MPI_SHORT_INT          )
-cdef Datatype __TWOINT__             = new_Datatype( MPI_2INT               )
-cdef Datatype __LONG_INT__           = new_Datatype( MPI_LONG_INT           )
-cdef Datatype __FLOAT_INT__          = new_Datatype( MPI_FLOAT_INT          )
-cdef Datatype __DOUBLE_INT__         = new_Datatype( MPI_DOUBLE_INT         )
-cdef Datatype __LONG_DOUBLE_INT__    = new_Datatype( MPI_LONG_DOUBLE_INT    )
+cdef Datatype __PACKED__              = new_Datatype( MPI_PACKED                )
+cdef Datatype __BYTE__                = new_Datatype( MPI_BYTE                  )
 
-cdef Datatype __LONG_LONG__          = new_Datatype( MPI_LONG_LONG          )
-cdef Datatype __UNSIGNED_LONG_LONG__ = new_Datatype( MPI_UNSIGNED_LONG_LONG )
-cdef Datatype __LONG_LONG_INT__      = new_Datatype( MPI_LONG_LONG_INT      )
+cdef Datatype __CHAR__                = new_Datatype( MPI_CHAR                  )
+cdef Datatype __WCHAR__               = new_Datatype( MPI_WCHAR                 )
+cdef Datatype __SIGNED_CHAR__         = new_Datatype( MPI_SIGNED_CHAR           )
+cdef Datatype __UNSIGNED_CHAR__       = new_Datatype( MPI_UNSIGNED_CHAR         )
+cdef Datatype __SHORT__               = new_Datatype( MPI_SHORT                 )
+cdef Datatype __UNSIGNED_SHORT__      = new_Datatype( MPI_UNSIGNED_SHORT        )
+cdef Datatype __INT__                 = new_Datatype( MPI_INT                   )
+cdef Datatype __UNSIGNED__            = new_Datatype( MPI_UNSIGNED              )
+cdef Datatype __LONG__                = new_Datatype( MPI_LONG                  )
+cdef Datatype __UNSIGNED_LONG__       = new_Datatype( MPI_UNSIGNED_LONG         )
+cdef Datatype __LONG_LONG__           = new_Datatype( MPI_LONG_LONG             )
+cdef Datatype __UNSIGNED_LONG_LONG__  = new_Datatype( MPI_UNSIGNED_LONG_LONG    )
+cdef Datatype __LONG_LONG_INT__       = new_Datatype( MPI_LONG_LONG_INT         )
 
-cdef Datatype __CHARACTER__          = new_Datatype( MPI_CHARACTER          )
-cdef Datatype __LOGICAL__            = new_Datatype( MPI_LOGICAL            )
-cdef Datatype __INTEGER__            = new_Datatype( MPI_INTEGER            )
-cdef Datatype __REAL__               = new_Datatype( MPI_REAL               )
-cdef Datatype __DOUBLE_PRECISION__   = new_Datatype( MPI_DOUBLE_PRECISION   )
-cdef Datatype __F_COMPLEX__          = new_Datatype( MPI_COMPLEX            )
-cdef Datatype __F_DOUBLE_COMPLEX__   = new_Datatype( MPI_DOUBLE_COMPLEX     )
+cdef Datatype __FLOAT__               = new_Datatype( MPI_FLOAT                 )
+cdef Datatype __DOUBLE__              = new_Datatype( MPI_DOUBLE                )
+cdef Datatype __LONG_DOUBLE__         = new_Datatype( MPI_LONG_DOUBLE           )
 
-cdef Datatype __UB__                 = new_Datatype( MPI_UB                 )
-cdef Datatype __LB__                 = new_Datatype( MPI_LB                 )
+cdef Datatype __COMPLEX__             = new_Datatype( MPI_COMPLEX               )
+cdef Datatype __DOUBLE_COMPLEX__      = new_Datatype( MPI_DOUBLE_COMPLEX        )
+cdef Datatype __LONG_DOUBLE_COMPLEX__ = new_Datatype( MPI_DATATYPE_NULL         )
+
+cdef Datatype __SHORT_INT__           = new_Datatype( MPI_SHORT_INT             )
+cdef Datatype __TWOINT__              = new_Datatype( MPI_2INT                  )
+cdef Datatype __LONG_INT__            = new_Datatype( MPI_LONG_INT              )
+cdef Datatype __FLOAT_INT__           = new_Datatype( MPI_FLOAT_INT             )
+cdef Datatype __DOUBLE_INT__          = new_Datatype( MPI_DOUBLE_INT            )
+cdef Datatype __LONG_DOUBLE_INT__     = new_Datatype( MPI_LONG_DOUBLE_INT       )
+
+cdef Datatype __LOGICAL__             = new_Datatype( MPI_LOGICAL               )
+cdef Datatype __CHARACTER__           = new_Datatype( MPI_CHARACTER             )
+cdef Datatype __INTEGER__             = new_Datatype( MPI_INTEGER               )
+cdef Datatype __REAL__                = new_Datatype( MPI_REAL                  )
+cdef Datatype __DOUBLE_PRECISION__    = new_Datatype( MPI_DOUBLE_PRECISION      )
+cdef Datatype __F_COMPLEX__           = new_Datatype( MPI_COMPLEX               )
+cdef Datatype __F_DOUBLE_COMPLEX__    = new_Datatype( MPI_DOUBLE_COMPLEX        )
 
 
 # Predefined datatype handles
 # ---------------------------
 
-DATATYPE_NULL      = __DATATYPE_NULL__  #: Null datatype handle
+DATATYPE_NULL       = __DATATYPE_NULL__      #: Null datatype handle
+# Special datatypes (for constructing derived datatypes, deprecated in MPI-2)
+UB                  = __UB__                 #: upper-bound marker
+LB                  = __LB__                 #: lower-bound marker
 # Elementary datatypes
-CHAR               = __CHAR__
-WCHAR              = __WCHAR__
-SIGNED_CHAR        = __SIGNED_CHAR__
-UNSIGNED_CHAR      = __UNSIGNED_CHAR__
-SHORT              = __SHORT__
-UNSIGNED_SHORT     = __UNSIGNED_SHORT__
-INT                = __INT__
-UNSIGNED           = __UNSIGNED__
-LONG               = __LONG__
-UNSIGNED_LONG      = __UNSIGNED_LONG__
-FLOAT              = __FLOAT__
-DOUBLE             = __DOUBLE__
-LONG_DOUBLE        = __LONG_DOUBLE__
-BYTE               = __BYTE__
-PACKED             = __PACKED__
-# Datatypes for reduction operations
-SHORT_INT          = __SHORT_INT__
-TWOINT             = __TWOINT__
-LONG_INT           = __LONG_INT__
-FLOAT_INT          = __FLOAT_INT__
-DOUBLE_INT         = __DOUBLE_INT__
-LONG_DOUBLE_INT    = __LONG_DOUBLE_INT__
-# Optional datatypes
-LONG_LONG          = __LONG_LONG__
-UNSIGNED_LONG_LONG = __UNSIGNED_LONG_LONG__
-LONG_LONG_INT      = __LONG_LONG_INT__
+PACKED              = __PACKED__
+BYTE                = __BYTE__
+CHAR                = __CHAR__
+WCHAR               = __WCHAR__
+SIGNED_CHAR         = __SIGNED_CHAR__
+UNSIGNED_CHAR       = __UNSIGNED_CHAR__
+SHORT               = __SHORT__
+UNSIGNED_SHORT      = __UNSIGNED_SHORT__
+INT                 = __INT__
+UNSIGNED            = __UNSIGNED__
+UNSIGNED_INT        = __UNSIGNED__            #: convenience alias
+LONG                = __LONG__
+UNSIGNED_LONG       = __UNSIGNED_LONG__
+LONG_LONG           = __LONG_LONG__           #: optional datatype
+UNSIGNED_LONG_LONG  = __UNSIGNED_LONG_LONG__  #: optional datatype
+FLOAT               = __FLOAT__
+DOUBLE              = __DOUBLE__
+LONG_DOUBLE         = __LONG_DOUBLE__
+COMPLEX             = __COMPLEX__             #: actually Fortran MPI_COMPLEX
+DOUBLE_COMPLEX      = __DOUBLE_COMPLEX__      #: actually Fortran MPI_DOBLE_COMPLEX
+LONG_DOUBLE_COMPLEX = __LONG_DOUBLE_COMPLEX__ #: placeholder, MPI_DATATYPE_NULL
 # Fortran datatypes
-CHARACTER          = __CHARACTER__
-LOGICAL            = __LOGICAL__
-INTEGER            = __INTEGER__
-REAL               = __REAL__
-DOUBLE_PRECISION   = __DOUBLE_PRECISION__
-F_COMPLEX          = __F_COMPLEX__
-F_DOUBLE_COMPLEX   = __F_DOUBLE_COMPLEX__
-# Special datatypes (for constructing derived datatypes)
-UB                 = __UB__  #: upper-bound marker (deprecated in MPI-2)
-LB                 = __LB__  #: lower-bound marker (deprecated in MPI-2)
-# Convenience aliases (not in the MPI-1/MPI-2 stardards)
-UNSIGNED_INT       = __UNSIGNED__
-INT_INT            = __TWOINT__
+LOGICAL             = __LOGICAL__
+CHARACTER           = __CHARACTER__
+INTEGER             = __INTEGER__
+REAL                = __REAL__
+DOUBLE_PRECISION    = __DOUBLE_PRECISION__
+F_COMPLEX           = __F_COMPLEX__
+F_DOUBLE_COMPLEX    = __F_DOUBLE_COMPLEX__
+# Datatypes for reduction operations
+SHORT_INT           = __SHORT_INT__
+TWOINT              = __TWOINT__
+INT_INT             = __TWOINT__              #: convenience alias
+LONG_INT            = __LONG_INT__
+LONG_LONG_INT       = __LONG_LONG_INT__       #: optional datatype
+FLOAT_INT           = __FLOAT_INT__
+DOUBLE_INT          = __DOUBLE_INT__
+LONG_DOUBLE_INT     = __LONG_DOUBLE_INT__
