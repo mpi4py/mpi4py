@@ -42,6 +42,25 @@ class BaseTestP2PObj(object):
                 self.COMM.send(rmess,  rank+1, 0)
             self.assertEqual(rmess, smess)
 
+    def testSSendAndRecv(self):
+        size = self.COMM.Get_size()
+        rank = self.COMM.Get_rank()
+        for smess in messages:
+            self.COMM.ssend(smess,  MPI.PROC_NULL)
+            rmess = self.COMM.recv(None, MPI.PROC_NULL, 0)
+            self.assertEqual(rmess, None)
+        if size == 1: return
+        for smess in messages:
+            if rank == 0:
+                self.COMM.ssend(smess,  rank+1, 0)
+                rmess = smess
+            elif rank == size - 1:
+                rmess = self.COMM.recv(None, rank-1, 0)
+            else:
+                rmess = self.COMM.recv(None, rank-1, 0)
+                self.COMM.ssend(rmess,  rank+1, 0)
+            self.assertEqual(rmess, smess)
+
     def testSendrecv(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()

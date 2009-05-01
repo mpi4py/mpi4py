@@ -152,6 +152,40 @@ cdef object PyMPI_send(object obj, int dest, int tag,
     return None
 
 
+cdef object PyMPI_bsend(object obj, int dest, int tag,
+                        MPI_Comm comm):
+    cdef _p_Pickler pickler = PyMPI_pickler()
+    #
+    cdef void *sbuf = NULL
+    cdef int scount = 0
+    cdef MPI_Datatype stype = MPI_BYTE
+    #
+    cdef int dosend = (dest != MPI_PROC_NULL)
+    #
+    cdef object smsg = None
+    if dosend: smsg = pickler.dump(obj, &sbuf, &scount)
+    with nogil: CHKERR( MPI_Bsend(sbuf, scount, stype,
+                                  dest, tag, comm) )
+    return None
+
+
+cdef object PyMPI_ssend(object obj, int dest, int tag,
+                        MPI_Comm comm):
+    cdef _p_Pickler pickler = PyMPI_pickler()
+    #
+    cdef void *sbuf = NULL
+    cdef int scount = 0
+    cdef MPI_Datatype stype = MPI_BYTE
+    #
+    cdef int dosend = (dest != MPI_PROC_NULL)
+    #
+    cdef object smsg = None
+    if dosend: smsg = pickler.dump(obj, &sbuf, &scount)
+    with nogil: CHKERR( MPI_Ssend(sbuf, scount, stype,
+                                  dest, tag, comm) )
+    return None
+
+
 cdef object PyMPI_recv(object obj, int source, int tag,
                        MPI_Comm comm, MPI_Status *status):
     cdef _p_Pickler pickler = PyMPI_pickler()

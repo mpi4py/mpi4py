@@ -729,6 +729,16 @@ cdef class Comm:
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_send(obj, dest, tag, comm)
     #
+    def bsend(self, obj=None, int dest=0, int tag=0):
+        """Send in buffered mode"""
+        cdef MPI_Comm comm = self.ob_mpi
+        return PyMPI_bsend(obj, dest, tag, comm)
+    #
+    def ssend(self, obj=None, int dest=0, int tag=0):
+        """Send in synchronous mode"""
+        cdef MPI_Comm comm = self.ob_mpi
+        return PyMPI_ssend(obj, dest, tag, comm)
+    #
     def recv(self, obj=None, int source=0, int tag=0, Status status=None):
         """Receive"""
         cdef MPI_Comm comm = self.ob_mpi
