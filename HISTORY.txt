@@ -12,6 +12,10 @@ HISTORY: MPI for Python
 Release X.X.X
 =============
 
+* Add ``Comm.bsend()`` and ``Comm.ssend()`` for buffered and
+  synchronous send semantics when communicating general Python
+  objects.
+
 * Add support for parametrized Fortran datatypes.
 
 * Fix bug in ``Comm.Iprobe()`` that caused segfaults as Python C-API
