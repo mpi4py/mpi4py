@@ -192,7 +192,7 @@ cdef class Info:
     def update(self, other=(), **kwds):
         """info update"""
         if not self: raise KeyError
-        if hasattr(other, "keys"):
+        if hasattr(other, S('keys')):
             for key in other.keys():
                 self.Set(key, other[key])
         else:
