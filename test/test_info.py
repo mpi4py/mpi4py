@@ -41,9 +41,8 @@ class TestInfo(unittest.TestCase):
         self.assertFalse(info)
 
     def testGet(self):
-        value, flag = self.INFO.Get('key')
+        value = self.INFO.Get('key')
         self.assertEqual(value, None)
-        self.assertEqual(flag,  False)
 
     def testGetNKeys(self):
         self.assertEqual(self.INFO.Get_nkeys(), 0)
@@ -56,15 +55,13 @@ class TestInfo(unittest.TestCase):
         self.assertEqual(nkeys, 1)
         key = INFO.Get_nthkey(0)
         self.assertEqual(key, 'key')
-        value, flag = INFO.Get('key')
+        value = INFO.Get('key')
         self.assertEqual(value, 'value')
-        self.assertEqual(flag,  True)
         INFO.Delete('key')
         nkeys = INFO.Get_nkeys()
         self.assertEqual(nkeys, 0)
-        value, flag = INFO.Get('key')
+        value = INFO.Get('key')
         self.assertEqual(value, None)
-        self.assertEqual(flag,  False)
 
     def testPyMethods(self):
         INFO = self.INFO

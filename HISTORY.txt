@@ -12,6 +12,12 @@ HISTORY: MPI for Python
 Release X.X.X
 =============
 
+* Now the call ``Info.Get(key)`` return a *single* value (i.e, instead
+  of a 2-tuple); this value is ``None`` if ``key`` is not in the
+  ``Info`` object, or a string otherwise. Previously, the call
+  redundantly returned ``(None, False)`` for missing key-value pairs;
+  ``None`` is enough to signal a missing entry.
+
 * Add ``Comm.bsend()`` and ``Comm.ssend()`` for buffered and
   synchronous send semantics when communicating general Python
   objects.

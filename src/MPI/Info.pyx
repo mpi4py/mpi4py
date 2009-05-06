@@ -54,13 +54,13 @@ cdef class Info:
         if maxlen > MPI_MAX_INFO_VAL: maxlen = MPI_MAX_INFO_VAL
         cdef char *ckey = NULL
         cdef char *cvalue = NULL
-        cdef bint flag = 0
+        cdef int flag = 0
         key = asmpistr(key, &ckey, NULL)
         cdef object tmp = allocate((maxlen+1), <void**>&cvalue)
         CHKERR( MPI_Info_get(self.ob_mpi, ckey, maxlen, cvalue, &flag) )
         cvalue[maxlen] = 0 # just in case
-        value = mpistr(cvalue) if flag else None
-        return (value, flag)
+        if not flag: return None
+        return mpistr(cvalue)
 
     def Set(self, key, value):
         """
@@ -137,8 +137,8 @@ cdef class Info:
 
     def __getitem__(self, key):
         if not self: raise KeyError(key)
-        value, haskey = self.Get(key)
-        if not haskey: raise KeyError(key)
+        value = self.Get(key)
+        if value is None: raise KeyError(key)
         return value
 
     def __setitem__(self, key, value):
@@ -153,8 +153,8 @@ cdef class Info:
     def get(self, key, default=None):
         """info get"""
         if not self: return default
-        value, haskey = self.Get(key)
-        if not haskey: return default
+        value = self.Get(key)
+        if value is None: return default
         return value
 
     def keys(self):
@@ -174,7 +174,7 @@ cdef class Info:
         cdef list values = []
         for k from 0 <= k < nkeys:
             key = self.Get_nthkey(k)
-            val, _ = self.Get(key)
+            val = self.Get(key)
             values.append(val)
         return values
 
@@ -185,7 +185,7 @@ cdef class Info:
         cdef list items = []
         for k from 0 <= k < nkeys:
             key = self.Get_nthkey(k)
-            val, _ = self.Get(key)
+            val = self.Get(key)
             items.append((key, val))
         return items
 
