@@ -5,17 +5,20 @@ cdef int PyMPI_Win_memory_del(MPI_Win w, int k, void *v, void *xs) nogil:
     if  v != NULL:
         if Py_IsInitialized():
             win_memory_pydecref(v)
-    return 0
+    return MPI_SUCCESS
 
-cdef int PyMPI_Win_set_attr_memory(MPI_Win win, object memory) except -1:
-    if memory is None: return 0
+cdef int PyMPI_Win_set_attr_memory(MPI_Win win, object memory):
+    cdef int ierr = MPI_SUCCESS
+    if memory is None: return MPI_SUCCESS
     # create keyval for memory object
     global PyMPI_KEYVAL_WIN_MEMORY
     if PyMPI_KEYVAL_WIN_MEMORY == MPI_KEYVAL_INVALID:
-        CHKERR( MPI_Win_create_keyval(MPI_WIN_NULL_COPY_FN,
-                                      PyMPI_Win_memory_del,
-                                      &PyMPI_KEYVAL_WIN_MEMORY, NULL) )
+        ierr = MPI_Win_create_keyval(MPI_WIN_NULL_COPY_FN,
+                                     PyMPI_Win_memory_del,
+                                     &PyMPI_KEYVAL_WIN_MEMORY, NULL)
+        if ierr: return ierr
     # hold a reference to the object exposing windows memory
-    CHKERR( MPI_Win_set_attr(win, PyMPI_KEYVAL_WIN_MEMORY, <void*>memory) )
+    ierr = MPI_Win_set_attr(win, PyMPI_KEYVAL_WIN_MEMORY, <void*>memory)
+    if ierr: return ierr
     Py_INCREF(<PyObject*>memory)
-    return 0
+    return MPI_SUCCESS
