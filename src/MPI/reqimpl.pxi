@@ -75,6 +75,7 @@ cdef int greq_cancel(void *extra_state, int completed) with gil:
 
 # ---
 
+#@cython.callspec("PyMPI_API_CALL")
 cdef int greq_query_fn(void *extra_state, MPI_Status *status) nogil:
     if Py_IsInitialized():
         if extra_state == NULL: return MPI_ERR_INTERN
@@ -87,12 +88,14 @@ cdef int greq_query_fn(void *extra_state, MPI_Status *status) nogil:
         MPI_Status_set_cancelled(status, 1)
     return MPI_SUCCESS # XXX or MPI_ERR_OTHER ?
 
+#@cython.callspec("PyMPI_API_CALL")
 cdef int greq_free_fn(void *extra_state) nogil:
     if Py_IsInitialized():
         if extra_state == NULL: return MPI_ERR_INTERN
         return greq_free(extra_state)
     return MPI_SUCCESS # XXX or MPI_ERR_OTHER ?
 
+#@cython.callspec("PyMPI_API_CALL")
 cdef int greq_cancel_fn(void *extra_state, int completed) nogil:
     if Py_IsInitialized():
         if extra_state == NULL: return MPI_ERR_INTERN

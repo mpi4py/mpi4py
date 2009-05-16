@@ -160,6 +160,8 @@ else:
         TestExcInfoNull.ERR_INFO = (MPI.ERR_INFO, MPI.ERR_ARG)
     elif _name == 'MPICH2': # XXX under discussion
         TestExcInfoNull.ERR_INFO = MPI.ERR_ARG
+    if _name == 'Microsoft MPI': # ???
+        del TestExcInfoNull.testDup
 
 # --------------------------------------------------------------------
 

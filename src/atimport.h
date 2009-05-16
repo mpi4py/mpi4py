@@ -9,6 +9,11 @@
 #undef MPICH2
 #endif
 
+/* Hack for MS MPI */
+#if defined(MS_MPI)
+#undef MPICH2
+#endif
+
 /* XXX describe */
 #if defined(PyMPI_HAVE_CONFIG_H)
 #include "config.h"
@@ -18,20 +23,14 @@
 #include "config/openmpi.h"
 #elif defined(DEINO_MPI)
 #include "config/deinompi.h"
+#elif defined(MS_MPI)
+#include "config/msmpi.h"
 #elif defined(MPICH_NAME) && MPICH_NAME==1
 #include "config/mpich1.h"
 #elif defined(LAM_MPI)
 #include "config/lammpi.h"
 #elif defined(SGI_MPI)
 #include "config/sgimpi.h"
-#endif
-
-/* Quick hack for DeinoMPI and MPICH2 on Windows */
-#if (defined(MS_WINDOWS) && \
-    (defined(DEINO_MPI) || defined(MPICH2)))
-#define PyMPI_MISSING_MPI_TYPE_CREATE_F90_INTEGER 1
-#define PyMPI_MISSING_MPI_TYPE_CREATE_F90_REAL 1
-#define PyMPI_MISSING_MPI_TYPE_CREATE_F90_COMPLEX 1
 #endif
 
 /* XXX describe */
@@ -47,6 +46,8 @@
 #include "compat/openmpi.h"
 #elif defined(DEINO_MPI)
 #include "compat/deinompi.h"
+#elif defined(MS_MPI)
+#include "compat/msmpi.h"
 #elif defined(MPICH_NAME) && MPICH_NAME==1
 #include "compat/mpich1.h"
 #elif defined(LAM_MPI)

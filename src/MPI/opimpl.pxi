@@ -105,15 +105,25 @@ cdef inline void op_user_call(int index, void *a, void *b, int *plen, MPI_Dataty
     # make the actual GIL-safe Python call
     op_user_mpi(index, a, b, n, t)
 
+#@cython.callspec("PyMPI_API_CALL")
 cdef void op_user_01(void *a, void *b, int *n, MPI_Datatype *t) nogil: op_user_call( 1, a, b, n, t)
+#@cython.callspec("PyMPI_API_CALL")
 cdef void op_user_02(void *a, void *b, int *n, MPI_Datatype *t) nogil: op_user_call( 2, a, b, n, t)
+#@cython.callspec("PyMPI_API_CALL")
 cdef void op_user_03(void *a, void *b, int *n, MPI_Datatype *t) nogil: op_user_call( 3, a, b, n, t)
+#@cython.callspec("PyMPI_API_CALL")
 cdef void op_user_04(void *a, void *b, int *n, MPI_Datatype *t) nogil: op_user_call( 4, a, b, n, t)
+#@cython.callspec("PyMPI_API_CALL")
 cdef void op_user_05(void *a, void *b, int *n, MPI_Datatype *t) nogil: op_user_call( 5, a, b, n, t)
+#@cython.callspec("PyMPI_API_CALL")
 cdef void op_user_06(void *a, void *b, int *n, MPI_Datatype *t) nogil: op_user_call( 6, a, b, n, t)
+#@cython.callspec("PyMPI_API_CALL")
 cdef void op_user_07(void *a, void *b, int *n, MPI_Datatype *t) nogil: op_user_call( 7, a, b, n, t)
+#@cython.callspec("PyMPI_API_CALL")
 cdef void op_user_08(void *a, void *b, int *n, MPI_Datatype *t) nogil: op_user_call( 8, a, b, n, t)
+#@cython.callspec("PyMPI_API_CALL")
 cdef void op_user_09(void *a, void *b, int *n, MPI_Datatype *t) nogil: op_user_call( 9, a, b, n, t)
+#@cython.callspec("PyMPI_API_CALL")
 cdef void op_user_10(void *a, void *b, int *n, MPI_Datatype *t) nogil: op_user_call(10, a, b, n, t)
 
 cdef MPI_User_function *op_user_map(int index) nogil:

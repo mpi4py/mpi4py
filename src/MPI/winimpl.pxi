@@ -1,6 +1,7 @@
 cdef void win_memory_pydecref(void *ob) with gil:
     Py_DECREF(<PyObject*>ob)
 
+#@cython.callspec("PyMPI_API_CALL")
 cdef int PyMPI_Win_memory_del(MPI_Win w, int k, void *v, void *xs) nogil:
     if  v != NULL:
         if Py_IsInitialized():

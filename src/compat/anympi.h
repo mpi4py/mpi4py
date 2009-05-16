@@ -3,6 +3,14 @@
 
 /* ---------------------------------------------------------------- */
 
+/* Calling Convention */
+
+#if !defined(PyMPI_API_CALL)
+#define PyMPI_API_CALL
+#endif
+
+/* ---------------------------------------------------------------- */
+
 #ifdef Py_PYTHON_H
 
 #ifndef PyMPI_MALLOC
