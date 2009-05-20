@@ -380,7 +380,7 @@ if _name == 'Open MPI':
             del TestCCOObjInter
             del TestCCOObjInterDup
             del TestCCOObjInterDupDup
-elif _name == "MPICH2":
+elif _name == "MPICH2" or _name == "Microsoft MPI":
     if _version <= (1, 0, 7):
         def _SKIPPED(*args, **kwargs): pass
         TestCCOObjInterDupDup.testBarrier   = _SKIPPED
