@@ -94,6 +94,9 @@ if _name == 'Open MPI':
     if _version < (1, 4, 0):
         if MPI.Query_thread() > MPI.THREAD_SINGLE:
             del TestWinWorld
+elif _name == 'MPICH2':
+    if 'win' in sys.platform:
+        del BaseTestWin.testAttributes
 
 if __name__ == '__main__':
     unittest.main()

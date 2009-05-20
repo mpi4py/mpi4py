@@ -83,6 +83,8 @@ if _name == 'Open MPI':
 elif _name == 'MPICH2':
     if _version < (1, 0, 6):
         _SKIP_TEST = True
+    if 'win' in sys.platform:
+        _SKIP_TEST = True
 elif _name == 'Microsoft MPI':
     _SKIP_TEST = True
 elif MPI.Get_version() < (2, 0):
