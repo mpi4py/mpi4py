@@ -24,7 +24,11 @@ from mpi4py import rc
 #rc.threaded = False
 from mpi4py import MPI
 sys.stderr.flush()
-sys.stderr.write("mpi4py imported from '%s'\n" % mpi4py.__path__[0])
+sys.stderr.write("[%d of %d on %s] mpi4py from '%s'\n" \
+                 % (MPI.COMM_WORLD.Get_rank(),
+                    MPI.COMM_WORLD.Get_size(),
+                    MPI.Get_processor_name(),
+                    mpi4py.__path__[0]))
 sys.stderr.flush()
 
 # make sure we are using the Cython-based version
