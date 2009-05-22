@@ -3238,6 +3238,12 @@ typedef int (PyMPI_MPI_Datarep_extent_function)(MPI_Datatype,MPI_Aint*,void*);
 #endif
 #endif
 
+#ifdef PyMPI_MISSING_MPI_PCONTROL
+#if !defined(MPI_Pcontrol)
+#define MPI_Pcontrol(a1) PyMPI_UNAVAILABLE("MPI_PCONTROL",a1)
+#endif
+#endif
+
 #ifdef PyMPI_MISSING_MPI_FINT
 #if !defined(MPI_Fint)
 typedef int PyMPI_MPI_Fint;

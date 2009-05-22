@@ -721,6 +721,8 @@ cdef extern from "mpi.h" nogil:
     double MPI_Wtime()
     double MPI_Wtick()
 
+    int MPI_Pcontrol(int, ...)
+
     #-----------------------------------------------------------------
 
     # Fortran INTEGER

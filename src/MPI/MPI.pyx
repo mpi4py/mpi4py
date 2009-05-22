@@ -221,6 +221,16 @@ def Wtick():
     """
     return MPI_Wtick()
 
+# Control of Profiling
+# --------------------
+
+def Pcontrol(int level):
+    """
+    Control profiling
+    """
+    if level < 0 or level > 2: CHKERR(MPI_ERR_ARG)
+    CHKERR( MPI_Pcontrol(level) )
+
 
 # Maximum string sizes
 # --------------------

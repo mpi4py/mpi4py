@@ -103,13 +103,17 @@ class NodeFuncProto(Node):
                   cname=cname)
         self.crett = crett
         if cargs == 'void': cargs = ''
-        if cargs: cargs = cargs.split(',')
-        else:     cargs = []
+        if cargs:
+            cargs = cargs.split(',')
+            if cargs[-1].strip() == '...':
+                del cargs[-1]
+        else:
+            cargs = []
         self.cargstype = cargs
         nargs = len(cargs)
         if nargs: self.comma = ','
         else:     self.comma = ''
-        cargscall = ['(%s)0' % ctypefix(a) for a  in cargs]
+        cargscall = ['(%s)0' % ctypefix(a) for a in cargs]
         self.cargscall = ','.join(cargscall)
         cargsnamed = ['a%d' % (a+1) for a in range(nargs)]
         self.cargsnamed = ','.join(cargsnamed)
