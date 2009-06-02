@@ -10,18 +10,18 @@ The *Message Passing Interface*, is a standardized and portable
 message-passing system designed to function on a wide variety of
 parallel computers. The standard defines the syntax and semantics of
 library routines and allows users to write portable programs in the
-main scientific programming languages (Fortran, C, or C++). Since 
-its release, the MPI specification has become the leading standard 
+main scientific programming languages (Fortran, C, or C++). Since
+its release, the MPI specification has become the leading standard
 for message-passing libraries for parallel computers.
 
 What is *MPI for Python*?
 =========================
 
-*MPI for Python* provides MPI bindings for the Python programming 
+*MPI for Python* provides MPI bindings for the Python programming
 language, allowing any Python program to exploit multiple processors.
 This package is constructed on top of the MPI-1/2 specifications and
 provides an object oriented interface which closely follows MPI-2 C++
-bindings. 
+bindings.
 """
 
 __version__   = '1.0.0'
