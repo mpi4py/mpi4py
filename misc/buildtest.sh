@@ -38,6 +38,6 @@ cd $NAME-$VERSION
 $PYTHON setup.py $QUIET install --home=$BUILDDIR
 export PYTHONPATH=$BUILDDIR/lib64/python:$BUILDDIR/lib/python:$PYTHONPATH
 $MPISTARTUP
-$PYTHON test/runalltest.py < /dev/null
+$PYTHON test/runalltest.py $QUIET < /dev/null
 sleep 3
 $MPISHUTDOWN
