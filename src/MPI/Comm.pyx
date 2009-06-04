@@ -927,7 +927,7 @@ cdef class Intracomm(Comm):
 
     # Starting Processes
 
-    def Spawn(self, command, args, int maxprocs=1,
+    def Spawn(self, command, args=None, int maxprocs=1,
               Info info=INFO_NULL, int root=0, errcodes=None):
         """
         Spawn instances of a single MPI application
