@@ -205,7 +205,7 @@ cdef void cleanup() nogil:
     #DBG# fprintf(stderr, "cleanup: END\n"); fflush(stderr)
 
 
-#@cython.callspec("PyMPI_API_CALL")
+@cython.callspec("PyMPI_API_CALL")
 cdef int atexit_mpi(MPI_Comm c,int k, void *v, void *xs) nogil:
     #DBG# fprintf(stderr, "atexit_mpi: BEGIN\n"); fflush(stderr)
     cleanup()
