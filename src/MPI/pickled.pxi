@@ -95,8 +95,8 @@ cdef class _p_Pickler:
         else:
             obj = list(obj)
             m = len(obj)
-            if m != n: raise ValueError(mpistr(
-                "expecting %d items, got %d") % (n, m))
+            if m != n: raise ValueError(
+                S("expecting %d items, got %d") % (n, m))
             for i from 0 <= i < n:
                 obj[i] = self.dump(obj[i], p, &c)
                 if c == 0: obj[i] = b''

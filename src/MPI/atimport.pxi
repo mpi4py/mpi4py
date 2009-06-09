@@ -14,6 +14,9 @@ cdef extern from "Python.h":
 cdef extern from "atimport.h":
     int PyMPI_KEYVAL_ATEXIT_MPI
 
+cdef extern from "atimport.h":
+    object S"PyMPIString_FromString"(char*)
+
 # --------------------------------------------------------------------
 
 cdef int inited_atimport = 0
@@ -33,7 +36,7 @@ ctypedef struct RCParams:
 
 cdef int warnRC(object attr, object value) except -1:
     from warnings import warn
-    warn(u"mpi4py.rc: '%s': unexpected value '%r'" % (attr, value))
+    warn(S("mpi4py.rc: '%s': unexpected value '%r'") % (attr, value))
 
 cdef int getRCParams(RCParams* rc) except -1:
     rc.initialize = 1
@@ -119,11 +122,11 @@ cdef int initialize() except -1:
             required = rc.thread_level
             ierr = MPI_Init_thread(NULL, NULL, required, &provided)
             if ierr != MPI_SUCCESS: raise RuntimeError(
-                u"MPI_Init_thread() failed [error code: %d]" % ierr)
+                S("MPI_Init_thread() failed [error code: %d]") % ierr)
         else:
             ierr = MPI_Init(NULL, NULL)
             if ierr != MPI_SUCCESS: raise RuntimeError(
-                u"MPI_Init() failed [error code: %d]" % ierr)
+                S("MPI_Init() failed [error code: %d]") % ierr)
         inited_atimport = 1 # We initialized MPI
         if rc.finalize:     # We have to finalize MPI
             finalize_atexit = 1

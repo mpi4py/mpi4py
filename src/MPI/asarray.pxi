@@ -19,7 +19,7 @@ cdef inline object newarray_int3(int n, int (**p)[3]):
 cdef inline object asarray_int(object sequence, int **p, Py_ssize_t size):
      cdef int *array = NULL
      cdef Py_ssize_t i = 0, n = len(sequence)
-     if size > 0: assert n == size, "expecting %d items, got %d" % (size, n)
+     if size > 0: assert n == size, S("expecting %d items, got %d") % (size, n)
      cdef object ob = allocate(n*sizeof(int), <void**>&array)
      for i from 0 <= i < n: array[i] = sequence[i]
      p[0] = array
@@ -28,7 +28,7 @@ cdef inline object asarray_int(object sequence, int **p, Py_ssize_t size):
 cdef inline object asarray_Aint(object sequence, MPI_Aint **p, Py_ssize_t size):
      cdef MPI_Aint *array = NULL
      cdef Py_ssize_t i = 0, n = len(sequence)
-     if size > 0: assert n == size, "expecting %d items, got %d" % (size, n)
+     if size > 0: assert n == size, S("expecting %d items, got %d") % (size, n)
      cdef object ob = allocate(n*sizeof(MPI_Aint), <void**>&array)
      for i from 0 <= i < n: array[i] = sequence[i]
      p[0] = array
@@ -37,7 +37,7 @@ cdef inline object asarray_Aint(object sequence, MPI_Aint **p, Py_ssize_t size):
 cdef inline object asarray_Datatype(object sequence, MPI_Datatype **p, Py_ssize_t size):
      cdef MPI_Datatype *array = NULL
      cdef Py_ssize_t i = 0, n = len(sequence)
-     if size >= 0: assert n == size, "expecting %d items, got %d" % (size, n)
+     if size >= 0: assert n == size, S("expecting %d items, got %d") % (size, n)
      cdef object ob = allocate(n*sizeof(MPI_Datatype), <void**>&array)
      for i from 0 <= i < n: array[i] = (<Datatype?>sequence[i]).ob_mpi
      p[0] = array
@@ -46,7 +46,7 @@ cdef inline object asarray_Datatype(object sequence, MPI_Datatype **p, Py_ssize_
 cdef inline object asarray_Request(object sequence, MPI_Request **p, Py_ssize_t size):
      cdef MPI_Request *array = NULL
      cdef Py_ssize_t i = 0, n = len(sequence)
-     if size >= 0: assert n == size, "expecting %d items, got %d" % (size, n)
+     if size >= 0: assert n == size, S("expecting %d items, got %d") % (size, n)
      cdef object ob = allocate(n*sizeof(MPI_Request), <void**>&array)
      for i from 0 <= i < n: array[i] = (<Request?>sequence[i]).ob_mpi
      p[0] = array

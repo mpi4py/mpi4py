@@ -6,9 +6,6 @@ cdef extern from *:
     object PyMPIString_FromString(const_char*)
     object PyMPIString_FromStringAndSize(const_char*,Py_ssize_t)
 
-cdef extern from *:
-    object S"PyMPIString_FromString"(const_char*)
-
 #---------------------------------------------------------------------
 
 cdef inline object asmpistr(object ob, char **s, int *n):

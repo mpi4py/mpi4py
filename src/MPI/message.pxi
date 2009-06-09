@@ -65,19 +65,19 @@ cdef inline object message_simple(int readonly,
     elif blen > 0: # try to guess
         CHKERR( MPI_Type_get_extent(dtype, &lb, &ex) )
         if (blen % ex) != 0:
-            raise ValueError(mpistr(
-                "message: buffer length %d is not a multiple " \
-                "of datatype extent %d (lb:%d, ub:%d)") %  \
-                (blen, ex, lb, lb+ex))
+            raise ValueError(
+                S("message: buffer length %d "
+                  "is not a multiple of datatype extent %d "
+                  "(lb:%d, ub:%d)") %  (blen, ex, lb, lb+ex))
         nitems = blen/ex
         if size <= 1:
             count = <int> nitems
         else:
             if (nitems % size) != 0:
-                raise ValueError(mpistr(
-                    "message: number of datatype items %d is not " \
-                    "a multiple of the required number " \
-                    "of blocks %d") %  (nitems, size))
+                raise ValueError(
+                    S("message: number of datatype items %d "
+                      "is not a multiple of the required "
+                      "number of blocks %d") %  (nitems, size))
             count = <int> (nitems/size)
     # return collected message data
     _buf[0]   = bptr
