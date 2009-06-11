@@ -36,8 +36,8 @@ cd $BUILDDIR
 tar -zxf $NAME-$VERSION.tar.gz
 cd $NAME-$VERSION
 $PYTHON setup.py $QUIET install --home=$BUILDDIR
-export PYTHONPATH=$BUILDDIR/lib64/python:$BUILDDIR/lib/python:$PYTHONPATH
+MPI4PYPATH=$BUILDDIR/lib64/python:$BUILDDIR/lib/python:$PYTHONPATH
 $MPISTARTUP
-$PYTHON test/runalltest.py $QUIET < /dev/null
+$PYTHON test/runalltest.py $QUIET --path=$MPI4PYPATH < /dev/null
 sleep 3
 $MPISHUTDOWN

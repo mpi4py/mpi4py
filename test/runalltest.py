@@ -6,6 +6,14 @@ EXCLUDE = [
 import sys, os
 import unittest
 
+for arg in sys.argv[1:]:
+    if arg.startswith('--path='):
+        sys.argv.remove(arg)
+        path = arg.replace('--path=', '').split(os.path.pathsep)
+        path.reverse()
+        for p in path:
+            sys.path.insert(0, p)
+
 try: # use the 'installed' mpi4py
     import mpi4py
 except ImportError: # or the no yet installed mpi4py
@@ -24,10 +32,12 @@ from mpi4py import rc
 #rc.threaded = False
 from mpi4py import MPI
 sys.stderr.flush()
-sys.stderr.write("[%d of %d on %s] mpi4py from '%s'\n" \
+sys.stderr.write("[%d of %d on %s] Py%d%d - mpi4py from '%s'\n" \
                  % (MPI.COMM_WORLD.Get_rank(),
                     MPI.COMM_WORLD.Get_size(),
                     MPI.Get_processor_name(),
+                    sys.version_info[0],
+                    sys.version_info[1],
                     mpi4py.__path__[0]))
 sys.stderr.flush()
 
