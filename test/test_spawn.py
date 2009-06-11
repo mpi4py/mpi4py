@@ -10,7 +10,7 @@ class BaseTestSpawn(object):
     COMM = MPI.COMM_NULL
     COMMAND = sys.executable
     ARGS = ['-c', ';'.join([
-        'import sys; sys.path.append(r"%s")' % MPI4PYPATH,
+        'import sys; sys.path.insert(0, r"%s")' % MPI4PYPATH,
         'from mpi4py import MPI',
         'parent = MPI.Comm.Get_parent()',
         'parent.Barrier()',
