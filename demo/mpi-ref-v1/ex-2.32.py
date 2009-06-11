@@ -87,5 +87,5 @@ while not converged:
     converged = bool(glb_conv)
 
 # free persintent requests
-## for req in reqlist:
-##     req.Free()
+for req in reqlist:
+    req.Free()
