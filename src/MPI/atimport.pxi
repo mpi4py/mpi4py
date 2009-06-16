@@ -216,15 +216,12 @@ cdef int atexit_mpi(MPI_Comm c,int k, void *v, void *xs) nogil:
     return MPI_SUCCESS
 
 cdef void atexit_py() nogil:
-    global cleanup_done
-    global finalize_atexit
     cdef int ierr = MPI_SUCCESS
     if not mpi_active(): return
     #DBG# fprintf(stderr, "atexit_py: BEGIN\n"); fflush(stderr)
-    if not cleanup_done:
-        cleanup()
-    if finalize_atexit:
-        ierr = MPI_Finalize()
+    cleanup()
+    if not finalize_atexit: return
+    ierr = MPI_Finalize()
     #DBG# fprintf(stderr, "atexit_py: END\n"); fflush(stderr)
 
 # --------------------------------------------------------------------
