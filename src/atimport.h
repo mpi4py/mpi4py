@@ -130,7 +130,8 @@ static int PyMPI_CleanUp(void)
   return MPI_SUCCESS;
 }
 
-static int PyMPI_AtExitMPI(MPI_Comm comm, int k, void *v, void *xs)
+static int PyMPI_API_CALL
+PyMPI_AtExitMPI(MPI_Comm comm, int k, void *v, void *xs)
 { return PyMPI_CleanUp(); }
 
 /* ---------------------------------------------------------------- */
