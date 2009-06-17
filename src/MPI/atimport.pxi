@@ -12,21 +12,9 @@ cdef extern from "Python.h":
 # --------------------------------------------------------------------
 
 cdef extern from "atimport.h":
-    int PyMPI_KEYVAL_ATEXIT_MPI
-
-cdef extern from "atimport.h":
     object S"PyMPIString_FromString"(char*)
 
 # --------------------------------------------------------------------
-
-cdef int inited_atimport = 0
-cdef int finalize_atexit = 0
-cdef int startup_done = 0
-cdef int cleanup_done = 0
-
-cdef MPI_Errhandler comm_self_eh  = MPI_ERRHANDLER_NULL
-cdef MPI_Errhandler comm_world_eh = MPI_ERRHANDLER_NULL
-cdef int PyMPI_KEYVAL_WIN_MEMORY  = MPI_KEYVAL_INVALID
 
 ctypedef struct RCParams:
     int initialize
@@ -34,11 +22,12 @@ ctypedef struct RCParams:
     int thread_level
     int finalize
 
-cdef int warnRC(object attr, object value) except -1:
+cdef int warnRC(char *attr, object value) except -1:
     from warnings import warn
-    warn(S("mpi4py.rc: '%s': unexpected value '%r'") % (attr, value))
+    warn(S("mpi4py.rc: '%s': unexpected value '%r'") % (S(attr), value))
 
 cdef int getRCParams(RCParams* rc) except -1:
+    #
     rc.initialize = 1
     rc.threaded = 1
     rc.thread_level = MPI_THREAD_MULTIPLE
@@ -65,14 +54,14 @@ cdef int getRCParams(RCParams* rc) except -1:
     elif initialize in (False, u'no'):
         rc.initialize = 0
     else:
-        warnRC(u"initialize", initialize)
+        warnRC("initialize", initialize)
     #
     if threaded in (True, u'yes'):
         rc.threaded = 1
     elif threaded in (False, u'no'):
         rc.threaded = 0
     else:
-        warnRC(u"threaded", threaded)
+        warnRC("threaded", threaded)
     #
     if thread_level == u'single':
         rc.thread_level = MPI_THREAD_SINGLE
@@ -83,16 +72,32 @@ cdef int getRCParams(RCParams* rc) except -1:
     elif thread_level == u'multiple':
         rc.thread_level = MPI_THREAD_MULTIPLE
     else:
-        warnRC(u"thread_level", thread_level)
+        warnRC("thread_level", thread_level)
     #
     if finalize in (True, u'yes'):
         rc.finalize = 1
     elif finalize in (False, u'no'):
         rc.finalize = 0
     else:
-        warnRC(u"finalize", finalize)
+        warnRC("finalize", finalize)
     #
     return 0
+
+# --------------------------------------------------------------------
+
+cdef extern from *:
+    #
+    int PyMPI_STARTUP_DONE
+    int PyMPI_StartUp() nogil
+    #
+    int PyMPI_CLEANUP_DONE
+    int PyMPI_CleanUp() nogil
+
+cdef int inited_atimport = 0
+cdef int finalize_atexit = 0
+
+PyMPI_STARTUP_DONE = 0
+PyMPI_CLEANUP_DONE = 0
 
 cdef int initialize() except -1:
     global inited_atimport
@@ -107,8 +112,8 @@ cdef int initialize() except -1:
     # Do we have to initialize MPI?
     if initialized:
         if not finalized:
-            # cleanup at (the very end of) Python exit
-            if Py_AtExit(atexit_py) < 0:
+            # Cleanup at (the very end of) Python exit
+            if Py_AtExit(atexit) < 0:
                 PySys_WriteStderr("warning: could not register "
                                   "cleanup with Py_AtExit()\n")
         return 0
@@ -131,7 +136,7 @@ cdef int initialize() except -1:
         if rc.finalize:     # We have to finalize MPI
             finalize_atexit = 1
     # Cleanup at (the very end of) Python exit
-    if Py_AtExit(atexit_py) < 0:
+    if Py_AtExit(atexit) < 0:
         PySys_WriteStderr("warning: could not register "
                           "cleanup with Py_AtExit()\n")
     return 0
@@ -152,77 +157,25 @@ cdef inline int mpi_active() nogil:
 cdef void startup() nogil:
     cdef int ierr = MPI_SUCCESS
     if not mpi_active(): return
-    #
-    global startup_done
-    if startup_done: return
-    startup_done = 1
     #DBG# fprintf(stderr, "statup: BEGIN\n"); fflush(stderr)
-    # change error handlers for predefined communicators
-    global comm_world_eh
-    if comm_world_eh == MPI_ERRHANDLER_NULL:
-        ierr = MPI_Comm_get_errhandler(MPI_COMM_WORLD, &comm_world_eh)
-        ierr = MPI_Comm_set_errhandler(MPI_COMM_WORLD, MPI_ERRORS_RETURN)
-    global comm_self_eh
-    if comm_self_eh == MPI_ERRHANDLER_NULL:
-        ierr = MPI_Comm_get_errhandler(MPI_COMM_SELF,  &comm_self_eh)
-        ierr = MPI_Comm_set_errhandler(MPI_COMM_SELF,  MPI_ERRORS_RETURN)
-    # make the call to MPI_Finalize() run a cleanup function
-    global PyMPI_KEYVAL_ATEXIT_MPI
-    cdef int* keyval = &PyMPI_KEYVAL_ATEXIT_MPI
-    if keyval[0] == MPI_KEYVAL_INVALID:
-        ierr = MPI_Comm_create_keyval(MPI_COMM_NULL_COPY_FN,
-                                      atexit_mpi, keyval, NULL)
-        ierr = MPI_Comm_set_attr(MPI_COMM_SELF, keyval[0], NULL)
+    ierr = PyMPI_StartUp()
     #DBG# fprintf(stderr, "statup: END\n"); fflush(stderr)
 
 cdef void cleanup() nogil:
     cdef int ierr = MPI_SUCCESS
     if not mpi_active(): return
-    #
-    global cleanup_done
-    if cleanup_done: return
-    cleanup_done = 1
-    #
     #DBG# fprintf(stderr, "cleanup: BEGIN\n"); fflush(stderr)
-    # free cleanup keyval
-    global PyMPI_KEYVAL_ATEXIT_MPI
-    if PyMPI_KEYVAL_ATEXIT_MPI != MPI_KEYVAL_INVALID:
-        ierr = MPI_Comm_free_keyval(&PyMPI_KEYVAL_ATEXIT_MPI)
-        PyMPI_KEYVAL_ATEXIT_MPI = MPI_KEYVAL_INVALID
-    # free windows keyval
-    global PyMPI_KEYVAL_WIN_MEMORY
-    if PyMPI_KEYVAL_WIN_MEMORY != MPI_KEYVAL_INVALID:
-        ierr = MPI_Win_free_keyval(&PyMPI_KEYVAL_WIN_MEMORY)
-        PyMPI_KEYVAL_WIN_MEMORY = MPI_KEYVAL_INVALID
-    # restore default error handlers for predefined communicators
-    global comm_self_eh
-    if comm_self_eh != MPI_ERRHANDLER_NULL:
-        ierr = MPI_Comm_set_errhandler(MPI_COMM_SELF, comm_self_eh)
-        ierr = MPI_Errhandler_free(&comm_self_eh)
-        comm_self_eh = MPI_ERRHANDLER_NULL
-    global comm_world_eh
-    if comm_world_eh != MPI_ERRHANDLER_NULL:
-        ierr = MPI_Comm_set_errhandler(MPI_COMM_WORLD, comm_world_eh)
-        ierr = MPI_Errhandler_free(&comm_world_eh)
-        comm_world_eh = MPI_ERRHANDLER_NULL
+    ierr = PyMPI_CleanUp()
     #DBG# fprintf(stderr, "cleanup: END\n"); fflush(stderr)
 
-
-@cython.callspec("PyMPI_API_CALL")
-cdef int atexit_mpi(MPI_Comm c,int k, void *v, void *xs) nogil:
-    #DBG# fprintf(stderr, "atexit_mpi: BEGIN\n"); fflush(stderr)
-    cleanup()
-    #DBG# fprintf(stderr, "atexit_mpi: END\n"); fflush(stderr)
-    return MPI_SUCCESS
-
-cdef void atexit_py() nogil:
+cdef void atexit() nogil:
     cdef int ierr = MPI_SUCCESS
     if not mpi_active(): return
-    #DBG# fprintf(stderr, "atexit_py: BEGIN\n"); fflush(stderr)
+    #DBG# fprintf(stderr, "atexit: BEGIN\n"); fflush(stderr)
     cleanup()
     if not finalize_atexit: return
     ierr = MPI_Finalize()
-    #DBG# fprintf(stderr, "atexit_py: END\n"); fflush(stderr)
+    #DBG# fprintf(stderr, "atexit: END\n"); fflush(stderr)
 
 # --------------------------------------------------------------------
 
