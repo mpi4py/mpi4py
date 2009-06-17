@@ -966,8 +966,12 @@ cdef class Intracomm(Comm):
         Accept a request to form a new intercommunicator
         """
         cdef char *cportname = NULL
-        port_name = asmpistr(port_name, &cportname, NULL)
-        cdef MPI_Info cinfo = arg_Info(info)
+        cdef MPI_Info cinfo = MPI_INFO_NULL
+        cdef int rank = MPI_UNDEFINED
+        CHKERR( MPI_Comm_rank(self.ob_mpi, &rank) )
+        if root == rank:
+            port_name = asmpistr(port_name, &cportname, NULL)
+            cinfo = arg_Info(info)
         cdef Intercomm comm = Intercomm()
         with nogil: CHKERR( MPI_Comm_accept(
             cportname, cinfo, root,
@@ -981,8 +985,12 @@ cdef class Intracomm(Comm):
         Make a request to form a new intercommunicator
         """
         cdef char *cportname = NULL
-        port_name = asmpistr(port_name, &cportname, NULL)
-        cdef MPI_Info cinfo = arg_Info(info)
+        cdef MPI_Info cinfo = MPI_INFO_NULL
+        cdef int rank = MPI_UNDEFINED
+        CHKERR( MPI_Comm_rank(self.ob_mpi, &rank) )
+        if root == rank:
+            port_name = asmpistr(port_name, &cportname, NULL)
+            cinfo = arg_Info(info)
         cdef Intercomm comm = Intercomm()
         with nogil: CHKERR( MPI_Comm_connect(
             cportname, cinfo, root,
