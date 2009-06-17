@@ -72,7 +72,7 @@ cdef object _op_REPLACE(object x, object y):
 
 # ---
 
-cdef object op_user_registry = [None]*(1+10)
+cdef object op_user_registry = [None]*(1+16)
 
 cdef inline object op_user_py(int index, object x, object y, object dt):
     return op_user_registry[index](x, y, dt)
@@ -125,6 +125,19 @@ cdef void op_user_08(void *a, void *b, int *n, MPI_Datatype *t) nogil: op_user_c
 cdef void op_user_09(void *a, void *b, int *n, MPI_Datatype *t) nogil: op_user_call( 9, a, b, n, t)
 @cython.callspec("PyMPI_API_CALL")
 cdef void op_user_10(void *a, void *b, int *n, MPI_Datatype *t) nogil: op_user_call(10, a, b, n, t)
+@cython.callspec("PyMPI_API_CALL")
+cdef void op_user_11(void *a, void *b, int *n, MPI_Datatype *t) nogil: op_user_call(11, a, b, n, t)
+@cython.callspec("PyMPI_API_CALL")
+cdef void op_user_12(void *a, void *b, int *n, MPI_Datatype *t) nogil: op_user_call(12, a, b, n, t)
+@cython.callspec("PyMPI_API_CALL")
+cdef void op_user_13(void *a, void *b, int *n, MPI_Datatype *t) nogil: op_user_call(13, a, b, n, t)
+@cython.callspec("PyMPI_API_CALL")
+cdef void op_user_14(void *a, void *b, int *n, MPI_Datatype *t) nogil: op_user_call(14, a, b, n, t)
+@cython.callspec("PyMPI_API_CALL")
+cdef void op_user_15(void *a, void *b, int *n, MPI_Datatype *t) nogil: op_user_call(15, a, b, n, t)
+@cython.callspec("PyMPI_API_CALL")
+cdef void op_user_16(void *a, void *b, int *n, MPI_Datatype *t) nogil: op_user_call(15, a, b, n, t)
+
 
 cdef MPI_User_function *op_user_map(int index) nogil:
     if   index ==  1: return op_user_01
@@ -137,6 +150,12 @@ cdef MPI_User_function *op_user_map(int index) nogil:
     elif index ==  8: return op_user_08
     elif index ==  9: return op_user_09
     elif index == 10: return op_user_10
+    elif index == 11: return op_user_11
+    elif index == 12: return op_user_12
+    elif index == 13: return op_user_13
+    elif index == 14: return op_user_14
+    elif index == 15: return op_user_15
+    elif index == 16: return op_user_16
     else:             return NULL
 
 cdef int op_user_new(object function, MPI_User_function **cfunction) except -1:

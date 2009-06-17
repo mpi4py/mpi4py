@@ -30,7 +30,7 @@ Release X.X.X
 * Add support for decoding user-defined datatypes.
 
 * Add support for user-defined reduction operations on memory
-  buffers. However, at most 10 (ten) user-defined reduction operations
+  buffers. However, at most 16 user-defined reduction operations
   can be created. Ask the author for more room if you need it.
 
 
