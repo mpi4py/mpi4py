@@ -1,9 +1,9 @@
 #---------------------------------------------------------------------
 
 cdef extern from "Python.h":
-    int is_int   "PyInt_Check"        (object)
-    int is_list  "PyList_CheckExact"  (object)
-    int is_tuple "PyTuple_CheckExact" (object)
+    int is_int   "PyInt_Check"   (object)
+    int is_list  "PyList_Check"  (object)
+    int is_tuple "PyTuple_Check" (object)
 
 cdef object __BOTTOM__   = <MPI_Aint>MPI_BOTTOM
 cdef object __IN_PLACE__ = <MPI_Aint>MPI_IN_PLACE
@@ -13,6 +13,7 @@ cdef inline int is_BOTTOM(object msg):
 
 cdef inline int is_IN_PLACE(object msg):
     return (msg is None or msg is __IN_PLACE__)
+
 
 cdef inline object message_simple(int readonly,
                                   object msg,
@@ -101,12 +102,6 @@ cdef inline object message_vector(int readonly,
             _displs[0] = NULL
             _dtype[0]  = MPI_BYTE # XXX explain
             return None
-    #
-    cdef void *buf = NULL
-    cdef int *counts = NULL
-    cdef int *displs = NULL
-    cdef MPI_Datatype dtype = MPI_DATATYPE_NULL
-    cdef object obuf, ocounts, odispls, odtype
     # check argument containing message
     cdef Py_ssize_t n = 0
     if not is_list(msg) and not is_tuple(msg):
@@ -115,6 +110,7 @@ cdef inline object message_vector(int readonly,
     if n < 3 or n > 4:
         raise ValueError(S("message: expecting 3 or 4 items"))
     # unpack message list/tuple
+    cdef object obuf, ocounts, odispls, odtype
     if n == 4:
         obuf    = msg[0]
         ocounts = msg[1]
@@ -126,13 +122,19 @@ cdef inline object message_vector(int readonly,
         odispls = msg[1][1]
         odtype  = msg[2]
     # buffer
+    cdef void *bptr = NULL
+    cdef MPI_Aint blen = 0
     if is_BOTTOM(obuf):
-        buf = MPI_BOTTOM
+        bptr = MPI_BOTTOM; blen = 0
     elif readonly:
-        asbuffer_r(obuf, &buf, NULL)
+        asbuffer_r(obuf, &bptr, &blen)
     else:
-        asbuffer_w(obuf, &buf, NULL)
+        asbuffer_w(obuf, &bptr, &blen)
+    # datatype
+    cdef MPI_Datatype dtype = MPI_DATATYPE_NULL
+    dtype = (<Datatype?>odtype).ob_mpi
     # counts
+    cdef int *counts = NULL
     cdef int i=0, val=0
     if is_int(ocounts):
         val = <int> ocounts
@@ -142,6 +144,7 @@ cdef inline object message_vector(int readonly,
     else:
         ocounts = asarray_int(ocounts, &counts, size)
     # displacements
+    cdef int *displs = NULL
     if odispls is None: # contiguous
         val = 0
         odispls = newarray_int(size, &displs)
@@ -154,10 +157,8 @@ cdef inline object message_vector(int readonly,
             displs[i] = val * i
     else: # general
         odispls = asarray_int(odispls, &displs, size)
-    # datatype
-    dtype = (<Datatype?>odtype).ob_mpi
     # return collected message data
-    _buf[0]    = buf
+    _buf[0]    = bptr
     _counts[0] = counts
     _displs[0] = displs
     _dtype[0]  = dtype
