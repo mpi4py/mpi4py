@@ -6,8 +6,8 @@ Tutorial
 .. warning:: Under construction. Contributions very welcome!
 
 
-Point-to-Point
---------------
+Point-to-Point Communication
+----------------------------
 
 * Python objects (:mod:`pickle` under the hood)::
 
@@ -38,8 +38,8 @@ Point-to-Point
       comm.Recv([data, MPI.INT], source=0, tag=77)
 
 
-Collectives
------------
+Collective Communication
+------------------------
 
 * Broadcasting a Python dictionary::
 
