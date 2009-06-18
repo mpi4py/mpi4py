@@ -10,7 +10,7 @@
 
 
 Thank you for downloading the *MPI for Python* project archive. As
-this is a work in progress, please check the `project website`_ for
+this is a work in progress, please check the `project page`_ for
 updates.
 
 .. _project website:  http://mpi4py.googlecode.com/
@@ -18,7 +18,7 @@ updates.
 - To build and install this package, you must meet the following
   requirements.
 
-  + A Python 2.3/2.4/2.5/2.6/2.7/3.0 distribution.
+  + A Python 2.3/2.4/2.5/2.6/2.7/3.0/3.1 distribution.
 
   + A working MPI 1.2/1.3/2.0/2.1 implementation.
 

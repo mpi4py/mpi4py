@@ -13,11 +13,11 @@ I would like to thank everybody who contributed in any way, with code,
 hints, testing, bug reports, ideas, moral support, or even
 complaints....
 
-        -- Lisandro
+   -- Lisandro
 
 Brian Granger
 Albert Strasheim
 Frank Eisenmenger
 Fernando Perez
-Wonseok Shin
 Matthew Turk
+Wonseok Shin
