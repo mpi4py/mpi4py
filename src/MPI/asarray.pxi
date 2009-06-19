@@ -7,13 +7,6 @@ cdef inline object newarray_int(int n, int **p):
      p[0] = array
      return ob
 
-cdef inline object newarray_int3(int n, int (**p)[3]):
-     if n < 0: n = 0
-     cdef int (*array)[3] # = NULL ## XXX
-     cdef object ob = allocate(n*sizeof(int[3]), <void**>&array)
-     p[0] = array
-     return ob
-
 #---------------------------------------------------------------------
 
 cdef inline object asarray_int(object sequence, int **p, Py_ssize_t size):
