@@ -1,5 +1,5 @@
-#ifndef PyMPI_COMPAT_ANYMPI_H
-#define PyMPI_COMPAT_ANYMPI_H
+#ifndef PyMPI_FALLBACK_H
+#define PyMPI_FALLBACK_H
 
 /* ---------------------------------------------------------------- */
 
@@ -626,4 +626,4 @@ static int PyMPI_Free_mem(void *baseptr)
 
 /* ---------------------------------------------------------------- */
 
-#endif /* !PyMPI_COMPAT_ANYMPI_H */
+#endif /* !PyMPI_FALLBACK_H */

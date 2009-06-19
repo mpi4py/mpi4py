@@ -37,9 +37,7 @@
 
 /* XXX describe */
 #include "missing.h"
-
-/* XXX describe */
-#include "compat/anympi.h"
+#include "fallback.h"
 
 /* XXX describe */
 #if   defined(MPICH2)
