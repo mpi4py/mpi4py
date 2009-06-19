@@ -113,13 +113,13 @@ cdef extern from "mpi.h" nogil:
     int MPI_Type_vector(int, int, int, MPI_Datatype, MPI_Datatype*)
     int MPI_Type_indexed(int, int[], int[], MPI_Datatype, MPI_Datatype*)
     int MPI_Type_create_indexed_block(int, int, int[], MPI_Datatype, MPI_Datatype*)
-    enum: MPI_ORDER_C        #:= MPI_UNDEFINED
-    enum: MPI_ORDER_FORTRAN  #:= MPI_UNDEFINED
+    enum: MPI_ORDER_C        #:= 0
+    enum: MPI_ORDER_FORTRAN  #:= 1
     int MPI_Type_create_subarray(int, int[], int[], int[], int, MPI_Datatype, MPI_Datatype*)
-    enum: MPI_DISTRIBUTE_NONE       #:= MPI_UNDEFINED
-    enum: MPI_DISTRIBUTE_BLOCK      #:= MPI_UNDEFINED
-    enum: MPI_DISTRIBUTE_CYCLIC     #:= MPI_UNDEFINED
-    enum: MPI_DISTRIBUTE_DFLT_DARG  #:= MPI_UNDEFINED
+    enum: MPI_DISTRIBUTE_NONE       #:= 0
+    enum: MPI_DISTRIBUTE_BLOCK      #:= 1
+    enum: MPI_DISTRIBUTE_CYCLIC     #:= 2
+    enum: MPI_DISTRIBUTE_DFLT_DARG  #:= 4
     int MPI_Type_create_darray(int, int, int, int[], int[], int[], int[], int, MPI_Datatype, MPI_Datatype*)
 
     int MPI_Address(void*, MPI_Aint*)
