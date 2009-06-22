@@ -23,26 +23,37 @@ except ImportError:
 
 from epydoc.docwriter import dotgraph
 
-DotGraph_to_html = dotgraph.DotGraph.to_html
-DotGraph_run_dot = dotgraph.DotGraph._run_dot
+import re
+dotgraph._DOT_VERSION_RE = \
+    re.compile(r'dot (?:- Graphviz )version ([\d\.]+)')
 
-def to_html(self, image_file, image_url, center=True):
-    if image_file[-4:] == '.gif':
-        image_file = image_file[:-4] + '.png'
-    if image_url[-4:] == '.gif':
-        image_url = image_url[:-4] +  '.png'
-    return DotGraph_to_html(self, image_file, image_url)
+try:
 
-def _run_dot(self, *options):
-    if '-Tgif' in options:
-        opts = list(options)
-        for i, o in enumerate(opts):
-            if o == '-Tgif': opts[i] = '-Tpng'
-        options = type(options)(opts)
-    return DotGraph_run_dot(self, *options)
+    dotgraph.DotGraph.DEFAULT_HTML_IMAGE_FORMAT
+    dotgraph.DotGraph.DEFAULT_HTML_IMAGE_FORMAT = 'png'
 
-dotgraph.DotGraph.to_html = to_html
-dotgraph.DotGraph._run_dot = _run_dot
+except AttributeError:
+
+    DotGraph_to_html = dotgraph.DotGraph.to_html
+    DotGraph_run_dot = dotgraph.DotGraph._run_dot
+
+    def to_html(self, image_file, image_url, center=True):
+        if image_file[-4:] == '.gif':
+            image_file = image_file[:-4] + '.png'
+        if image_url[-4:] == '.gif':
+            image_url = image_url[:-4] +  '.png'
+        return DotGraph_to_html(self, image_file, image_url)
+
+    def _run_dot(self, *options):
+        if '-Tgif' in options:
+            opts = list(options)
+            for i, o in enumerate(opts):
+                if o == '-Tgif': opts[i] = '-Tpng'
+            options = type(options)(opts)
+        return DotGraph_run_dot(self, *options)
+
+    dotgraph.DotGraph.to_html = to_html
+    dotgraph.DotGraph._run_dot = _run_dot
 
 # --------------------------------------------------------------------
 
