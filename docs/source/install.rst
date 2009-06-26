@@ -13,22 +13,22 @@ build *MPI for Python*:
   .. note:: If you want to build some MPI implementation from sources,
      check the instructions at :ref:`building-mpi` in the appendix.
 
-* A Python 2.3/2.4/2.5/2.6/2.7/3.0/3.1 distribution, with Python
-  library preferably built as a dynamic library.
+* A Python 2.3 to 2.7 or 3.0 to 3.1 distribution, with Python
+  library preferably built with shared/dynamic libraries.
+
+  .. note:: **Mac OS X** users employing a Python distribution built
+     with **universal binaries** may need to temporarily set the
+     environmental variable :envvar:`ARCHFLAGS` to an appropriate
+     value in the shell before trying to build/install *MPI for
+     Python*. Check the instructions at :ref:`macosx-universal` in the
+     appendix.
 
   .. note:: Some MPI-1 implementations **do require** the actual
      command line arguments to be passed in :cfunc:`MPI_Init()`. In
      this case, you will need to use a rebuilt, MPI-enabled, Python
      interpreter executable. *MPI for Python* has some support for
-     alleviating you from this task, check the instructions at
+     alleviating you from this task. Check the instructions at
      :ref:`python-mpi` in the appendix.
-
-  .. note:: Mac OS X users employing a Python distribution built with
-     universal binaries support may need to temporarily set the
-     environmental variable :envvar:`MACOSX_UNIVERSAL_BUILD` to ``0``
-     in the shell before trying to build/install *MPI for Python*::
-
-        $ export MACOSX_UNIVERSAL_BUILD=0
 
 
 Using **setuptools**
@@ -40,15 +40,14 @@ distribution) and the :program:`mpicc` compiler wrapper is on your
 search path, you can take advantage of setuptools's
 :program:`easy_install` command::
 
-    $ easy_install mpi4py
+    $ [sudo] easy_install mpi4py
 
 .. note:: If the :program:`mpicc` compiler wrapper is not on your
-   search path (or if it has a different name) you can try to
-   temporarily set the environmental variable :envvar:`MPICC`
+   search path (or if it has a different name) you can use
+   :program:`env` to pass the environmental variable :envvar:`MPICC`
    providing the full path to the MPI compiler wrapper executable::
 
-      $ export MPICC=/path/to/mpicc
-      $ easy_install mpi4py
+      $ [sudo] env MPICC=/path/to/mpicc easy_install mpi4py
 
 
 Using **distutils**
@@ -148,13 +147,20 @@ The previous steps will install the :mod:`mpi4py` package at standard
 location :file:`{prefix}/lib/python{X}.{X}/site-packages`.
 
 If you do not have root privileges or you want to install *MPI for
-Python* in your home directory (assumed it is available through the
-:envvar:`HOME` environmental variable) , just do::
+Python* for your private use, you have two options depending on the
+target Python version.
 
-    $ python setup.py install --home=$HOME
+* For Python 2.6 and up::
 
-Finally, add :file:`$HOME/lib/python` or :file:`$HOME/lib64/python` to
-your :envvar:`PYTHONPATH` environmental variable
+      $ python setup.py install --user
+
+* For Python 2.5 and below (assuming your home directory is available
+  through the :envvar:`HOME` environmental variable)::
+
+      $ python setup.py install --home=$HOME
+
+  Finally, add :file:`$HOME/lib/python` or :file:`$HOME/lib64/python`
+  to your :envvar:`PYTHONPATH` environmental variable
 
 
 Testing

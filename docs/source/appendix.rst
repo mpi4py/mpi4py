@@ -54,10 +54,55 @@ enter your MPI-enabled Python interactively, for example::
     >>>
 
 
+.. _macosx-universal:
+
+Mac OS X and Universal Python
+-----------------------------
+
+Mac OS X users employing a Python distribution built with support for
+`Universal applications <http://www.apple.com/universal/>`_ could have
+trouble building *MPI for Python*, specially if they want to link
+against MPI libraries built without such support.
+
+A workaround is to temporarily set the environmental variable
+:envvar:`ARCHFLAGS` to an appropriate value in the shell before trying
+to build/install *MPI for Python*.  Appropriate values for
+:envvar:`ARCHFLAGS` have the form ``-arch <value>``, where ``<value>``
+should be chosen from the following table:
+
+======= ==========  =========
+   \      Intel      PowerPC
+======= ==========  =========
+32 bits ``i386``    ``ppc``
+64 bits ``x86_64``  ``ppc64``
+======= ==========  =========
+
+For example, assuming your Mac have a 64 bits Intel processor, you can
+build and install *MPI for Python* using any of the alternatives
+below. Note that :envvar:`ARCHFLAGS` should be passed/set both at the
+build step and at the install step (as :program:`mpicc`)
+
+* Alternative 1::
+
+    $ env ARCHFLAGS='-arch x86_64' python setup.py build [OPTIONS]
+
+    $ sudo env ARCHFLAGS='-arch x86_64' python setup.py install [OPTIONS]
+
+* Alternative 2::
+
+    $ export ARCHFLAGS='-arch x86_64'
+    $ python setup.py build [OPTIONS]
+
+    $ sudo -s # enter interactive shell as root
+    $ export ARCHFLAGS='-arch x86_64'
+    $ python setup.py install [OPTIONS]
+    $ exit
+
 .. _building-mpi:
 
-Building MPI
-------------
+
+Building MPI from sources
+-------------------------
 
 In the list below you have some executive instructions for building
 some of the open-source MPI implementations out there with support for

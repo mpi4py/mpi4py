@@ -120,6 +120,7 @@ def ext_modules():
 def executables():
     import sys
     from distutils import sysconfig
+    from distutils.util import split_quoted
     libraries = []
     library_dirs = []
     compile_args = []
@@ -131,13 +132,13 @@ def executables():
             compile_args.append('-pthread')
         libraries = ['python' + py_version]
         for var in ('LIBDIR', 'LIBPL'):
-            library_dirs += cfgDict.get(var, '').split()
+            library_dirs += split_quoted(cfgDict.get(var, ''))
         if '-pthread' in cfgDict.get('LINKCC', ''):
             link_args.append('-pthread')
         for var in ('LDFLAGS',
                     'LIBS', 'MODLIBS', 'SYSLIBS',
                     'LDLAST'):
-            link_args += cfgDict.get(var, '').split()
+            link_args += split_quoted(cfgDict.get(var, ''))
     # MPI-enabled Python interpreter
     pyexe = dict(name='python%s-mpi' % py_version,
                  sources=['src/python.c'],

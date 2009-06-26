@@ -10,11 +10,13 @@ Support for building mpi4py with distutils.
 # Environmental variables to look for configuration
 MPICC_ENV  = ['MPICC']
 MPICXX_ENV = ['MPICXX']
+MPILD_ENV  = ['MPILD']
 MPICFG_ENV = ['MPICFG']
 
 # Default values to use for configuration
 MPICC  = ['mpicc']
 MPICXX = ['mpicxx', 'mpiCC', 'mpic++']
+MPILD  = ['mpicc']
 MPICFG = ('mpi', 'mpi.cfg')
 
 # --------------------------------------------------------------------
@@ -28,85 +30,98 @@ del sys
 
 # --------------------------------------------------------------------
 
-import sys, os
+import sys, os, re
 from distutils import sysconfig
+from distutils.util  import split_quoted
 from distutils.spawn import find_executable
 from distutils import log
 
 
-def fix_any_flags(*flags):
-    import re
-    newflags = list(flags)
-    if sys.platform == 'darwin':
-        universal =  os.environ.get('MACOSX_UNIVERSAL_BUILD') or '1'
-        if not int(universal):
-            for i, flg in enumerate(flags):
-                flg = re.sub('-arch\s+\w+\s', ' ', flg)
-                flg = re.sub('-isysroot [^ \t]*', ' ', flg)
-                newflags[i] = flg
-    return newflags
+def fix_config_vars(names, values):
+    newvalues = list(values)
+    if (sys.platform == 'darwin' and
+        sys.version[:3] < '2.6' and
+        'ARCHFLAGS' in os.environ):
+        ARCHFLAGS = os.environ['ARCHFLAGS']
+        for i, flg in enumerate(values):
+            flg, count = re.subn('-arch\s+\w+\s', ' ', flg)
+            if count and ARCHFLAGS:
+                flg = flg + ' ' + ARCHFLAGS
+            newvalues[i] = flg
+    return newvalues
 
+def get_config_vars(*names):
+    # Core Python configuration
+    values = sysconfig.get_config_vars(*names)
+    # Do any distutils flags fixup right now
+    values = fix_config_vars(names, values)
+    return values
 
-def fix_linker_cmd(mpild, ldshared):
-    if not ldshared: return mpild
+def fix_linker_cmd(mpild, ldcmd):
+    if not ldcmd: return mpild
     if (sys.platform.startswith('aix')
-        and 'ld_so_aix' in ldshared):
-        ldshared = ldshared.split(' ', 2)
+        and 'ld_so_aix' in ldcmd):
+        ldcmd = ldcmd.split(' ', 2)
     else:
-        ldshared = ldshared.split(' ', 1)
-    if len(ldshared) == 1: # just linker, no flags
+        ldcmd = ldcmd.split(' ', 1)
+    #
+    if len(ldcmd) == 1: # just linker, no flags
         return mpild
-    elif len(ldshared) == 2: # linker and flags
-        return mpild + ' ' + ldshared[1]
+    elif len(ldcmd) == 2: # linker and flags
+        return (mpild + ' ' +
+                ldcmd[1])
     else: # assume using special linker script
-        return  (ldshared[0] + ' '  +
-                 mpild       + ' '  +
-                 ldshared[2])
+        return  (ldcmd[0] + ' '  +
+                 mpild    + ' '  +
+                 ldcmd[2])
 
 
 def customize_compiler(compiler,
-                       mpicc=None, mpicxx=None,
+                       mpicc=None, mpicxx=None, mpild=None,
                        environ=None):
     if environ is None:
         environ = os.environ
     if compiler.compiler_type == 'unix':
-        # Core Python configuration
-        (cc, cxx, cflags, ccshared, ldshared, so) = \
-            sysconfig.get_config_vars('CC', 'CXX', 'CFLAGS',
-                                      'CCSHARED', 'LDSHARED', 'SO')
-        # Do any distutils flags fixup right now
-        (cc, cxx, cflags, ccshared, ldshared, so) = \
-            fix_any_flags(cc, cxx, cflags, ccshared, ldshared, so)
+        (cc, cxx, cflags, ccshared, ld_so, so_ext) = \
+            get_config_vars('CC', 'CXX',
+                            'CFLAGS', 'CCSHARED',
+                            'LDSHARED', 'SO')
+        cppflags = ldflags = ''
         # Compiler command overriding
         if mpicc:
             cc = mpicc
         if mpicxx:
             cxx = mpicxx
-        if mpicc or mpicxx:
+        if mpild:
+            ld_so = fix_linker_cmd(mpild, ld_so)
+        elif (mpicc or mpicxx):
             mpild = mpicc or mpicxx
-            ldshared = fix_linker_cmd(mpild, ldshared)
+            ld_so = fix_linker_cmd(mpild, ld_so)
         # Environment handling
-        cpp = os.environ.get('CPP') or (cc + ' -E')
-        if 'LDFLAGS' in environ:
-            ldshared = ldshared + ' ' + environ['LDFLAGS']
-        if 'CFLAGS' in environ:
-            cflags   = cflags   + ' ' + environ['CFLAGS']
-            ldshared = ldshared + ' ' + environ['CFLAGS']
-        if 'CPPFLAGS' in environ:
-            cpp      = cpp      + ' ' + environ['CPPFLAGS']
-            cflags   = cflags   + ' ' + environ['CPPFLAGS']
-            ldshared = ldshared + ' ' + environ['CPPFLAGS']
+        CPPFLAGS = environ.get('CPPFLAGS', '')
+        CFLAGS   = environ.get('CFLAGS',   '')
+        LDFLAGS  = environ.get('LDFLAGS',  '')
+        if CPPFLAGS:
+            cppflags = cppflags + ' ' + CPPFLAGS
+            cflags   = cflags   + ' ' + CPPFLAGS
+            ldflags  = ldflags  + ' ' + CPPFLAGS
+        if CFLAGS:
+            cflags   = cflags   + ' ' + CFLAGS
+            ldflags  = ldflags  + ' ' + CFLAGS
+        if LDFLAGS:
+            ldflags  = ldflags  + ' ' + LDFLAGS
         # Distutils compiler setup
-        cc_cmd = cc + ' ' + cflags
+        cpp = os.environ.get('CPP') or (cc + ' -E')
+        ld_exe = mpild or cc
         compiler.set_executables(
-            preprocessor = cpp,
-            compiler     = cc  + ' ' + cflags,
-            compiler_so  = cc  + ' ' + cflags + ' ' + ccshared,
-            compiler_cxx = cxx + ' ' + cflags + ' ' + ccshared,
-            linker_so    = ldshared,
-            linker_exe   = cc,
+            preprocessor = cpp    + ' ' + cppflags,
+            compiler     = cc     + ' ' + cflags,
+            compiler_so  = cc     + ' ' + cflags + ' ' + ccshared,
+            compiler_cxx = cxx    + ' ' + cflags + ' ' + ccshared,
+            linker_so    = ld_so  + ' ' + ldflags,
+            linker_exe   = ld_exe + ' ' + ldflags,
             )
-        compiler.shared_lib_extension = so
+        compiler.shared_lib_extension = so_ext
 
 
 def _find_mpi_compiler(envvars, executables, path=None):
@@ -126,12 +141,13 @@ def _find_mpi_compiler(envvars, executables, path=None):
             executables = (executables,)
         for exe in executables:
             try:
-                cmd, args = exe.split(' ', 1)
-            except ValueError:
-                cmd, args = exe, None
+                bits = split_quoted(exe)
+                cmd, args = bits[0], ' '.join(bits[1:])
+            except:
+                cmd, args = exe, ''
             cmd = find_executable(cmd, path)
             if cmd is not None:
-                if args is not None:
+                if args:
                     cmd = cmd + ' ' + args
                 return cmd
     # nothing found
@@ -279,6 +295,11 @@ class Configure(Scanner):
 # --------------------------------------------------------------------
 
 cmd_mpi_opts = [
+
+    ('mpild=',   None,
+     "MPI linker command, "
+     "overrides environmental variables 'MPILD' "
+     "(defaults to 'mpicc' if available)"),
 
     ('mpicxx=',  None,
      "MPI C++ compiler command, "
@@ -641,11 +662,14 @@ class build_ext(cmd_build_ext.build_ext):
         self.check_extensions_list(self.extensions)
         # parse configuration file and  configure compiler
         config_info = self.configure_extensions()
-        mpicc = mpicxx = None
+        mpicc = mpicxx = mpild = None
         if config_info:
             mpicc  = config_info.get('mpicc')
             mpicxx = config_info.get('mpicxx')
-        compiler = self.configure_compiler(mpicc=mpicc, mpicxx=mpicxx)
+            mpild  = config_info.get('mpild')
+        compiler = self.configure_compiler(mpicc=mpicc,
+                                           mpicxx=mpicxx,
+                                           mpild=mpild)
         # extra configuration, MPI 2 features
         if self.configure:
             log.info('testing for missing MPI-2 features')
@@ -658,7 +682,9 @@ class build_ext(cmd_build_ext.build_ext):
         for ext in self.extensions:
             self.build_extension(ext)
 
-    def configure_compiler(self, mpicc=None, mpicxx=None, compiler=None):
+    def configure_compiler(self,
+                           mpicc=None, mpicxx=None, mpild=None,
+                           compiler=None):
         #
         mpicc = self.mpicc or mpicc
         if mpicc is None:
@@ -670,8 +696,15 @@ class build_ext(cmd_build_ext.build_ext):
             mpicxx = self.find_mpi_compiler(MPICXX_ENV, MPICXX)
         log.info("MPI C++ compiler:  %s", mpicxx or 'not found')
         #
+        mpild = self.mpild or mpild
+        if mpild is None:
+            mpild = self.find_mpi_compiler(MPILD_ENV, MPILD)
+        log.info("MPI linker:        %s", mpild or 'not found')
+        #
         if compiler is None: compiler = self.compiler
-        customize_compiler(compiler, mpicc=mpicc, mpicxx=mpicxx)
+        customize_compiler(compiler,
+                           mpicc=mpicc, mpicxx=mpicxx,
+                           mpild=mpild)
         return compiler
 
     def find_mpi_compiler(self, envvars, executables, path=None):
@@ -836,7 +869,7 @@ class build_exe(build_ext):
             python_lib = sysconfig.get_python_lib(standard_lib=1)
             python_exp = os.path.join(python_lib, 'config', 'python.exp')
             ldshflag = ldshflag.replace('Modules/python.exp', python_exp)
-        extra_args.extend(ldshflag.split())
+        extra_args.extend(split_quoted(ldshflag))
         # Detect target language, if not provided
         language = exe.language or self.compiler.detect_language(sources)
         self.compiler.link_executable(
