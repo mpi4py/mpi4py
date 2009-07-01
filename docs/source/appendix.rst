@@ -62,10 +62,10 @@ Mac OS X and Universal/SDK Python builds
 Mac OS X users employing a Python distribution built with support for
 `Universal applications <http://www.apple.com/universal/>`_ could have
 trouble building *MPI for Python*, specially if they want to link
-against MPI libraries built without such support. Other source of
+against MPI libraries built without such support. Another source of
 trouble could be a Python build using a specific cross-development SDK
 configuration. Workarounds for such issues are to temporarily set the
-environmental variables :envvar:`ARCHFLAGS` and/or :envvar:`SDKROOT`
+environment variables :envvar:`ARCHFLAGS` and/or :envvar:`SDKROOT`
 to appropriate values in the shell before trying to build/install *MPI
 for Python*.
 
@@ -73,26 +73,26 @@ Appropriate values for :envvar:`ARCHFLAGS` have the form ``-arch
 <value>``, where ``<value>`` should be chosen from the following
 table:
 
-======= ==========  =========
-   \      Intel      PowerPC
-======= ==========  =========
-32 bits ``i386``    ``ppc``
-64 bits ``x86_64``  ``ppc64``
-======= ==========  =========
+====== ==========  =========
+  \      Intel      PowerPC
+====== ==========  =========
+32-bit ``i386``    ``ppc``
+64-bit ``x86_64``  ``ppc64``
+====== ==========  =========
 
-Appropriate values for :envvar:`SDKROOT` are the full path name of any
-of the SDK's you have at :file:`/Developer/SDKs` directory (e.g.,
+An appropriate value for :envvar:`SDKROOT` is the full path name of
+any of the SDK's you have at :file:`/Developer/SDKs` directory (e.g.,
 ``SDKROOT=/Developer/SDKs/MacOSX10.5.sdk``). The safest choice would
-be the one matching your system version; perhaps better it is to use
+be the one matching your system version; perhaps it is better to use
 the root directory (i.e., ``SDKROOT=/``) or even an empty value (i.e.,
 ``SDKROOT=''``).
 
-For example, assuming your Mac have a 64 bits Intel processor and you
-want to override the hard-wired SDK in Python configuration, you can
-build and install *MPI for Python* using any of the alternatives
-below. Note that environmental variables should be passed/set both at
+For example, assuming your Mac has a 64-bit Intel processor and you
+want to override the hard-wired SDK in the Python configuration, you
+can build and install *MPI for Python* using any of the alternatives
+below. Note that environment variables should be passed/set both at
 the build and install steps (because :program:`sudo` does not pass
-environmental variables to subprocesses for security reasons)
+environment variables to subprocesses for security reasons)
 
 * Alternative 1::
 
@@ -155,7 +155,7 @@ shared/dynamic libraries on POSIX environments.
     $ make install
 
 Perhaps you will need to set the :envvar:`LD_LIBRARY_PATH`
-environmental variable (using :command:`export`, :command:`setenv` or
+environment variable (using :command:`export`, :command:`setenv` or
 what applies to your system) pointing to the directory containing the
 MPI libraries . In case of getting runtime linking errors when running
 MPI programs, the following lines can be added to the user login shell
@@ -183,6 +183,6 @@ script (:file:`.profile`, :file:`.bashrc`, etc.).
     export MPICH_USE_SHLIB=yes
 
   .. warning:: MPICH 1 support for dynamic libraries is not completely
-     transparent. Users should set the environmental variable
+     transparent. Users should set the environment variable
      :envvar:`MPICH_USE_SHLIB` to ``yes`` in order to avoid link
      problems when using the :program:`mpicc` compiler wrapper.

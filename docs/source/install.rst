@@ -18,7 +18,7 @@ build *MPI for Python*:
 
   .. note:: **Mac OS X** users employing a Python distribution built
      with **universal binaries** may need to temporarily set the
-     environmental variables :envvar:`ARCHFLAGS` and :envvar:`SDKROOT`
+     environment variables :envvar:`ARCHFLAGS` and :envvar:`SDKROOT`
      to appropriate values in the shell before trying to build/install
      *MPI for Python*. Check the instructions at
      :ref:`macosx-universal-sdk` in the appendix.
@@ -44,7 +44,7 @@ search path, you can take advantage of setuptools's
 
 .. note:: If the :program:`mpicc` compiler wrapper is not on your
    search path (or if it has a different name) you can use
-   :program:`env` to pass the environmental variable :envvar:`MPICC`
+   :program:`env` to pass the environment variable :envvar:`MPICC`
    providing the full path to the MPI compiler wrapper executable::
 
       $ [sudo] env MPICC=/path/to/mpicc easy_install mpi4py
@@ -155,12 +155,12 @@ target Python version.
       $ python setup.py install --user
 
 * For Python 2.5 and below (assuming your home directory is available
-  through the :envvar:`HOME` environmental variable)::
+  through the :envvar:`HOME` environment variable)::
 
       $ python setup.py install --home=$HOME
 
   Finally, add :file:`$HOME/lib/python` or :file:`$HOME/lib64/python`
-  to your :envvar:`PYTHONPATH` environmental variable
+  to your :envvar:`PYTHONPATH` environment variable.
 
 
 Testing
