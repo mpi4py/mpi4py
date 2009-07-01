@@ -54,21 +54,24 @@ enter your MPI-enabled Python interactively, for example::
     >>>
 
 
-.. _macosx-universal:
+.. _macosx-universal-sdk:
 
-Mac OS X and Universal Python
------------------------------
+Mac OS X and Universal/SDK Python builds
+----------------------------------------
 
 Mac OS X users employing a Python distribution built with support for
 `Universal applications <http://www.apple.com/universal/>`_ could have
 trouble building *MPI for Python*, specially if they want to link
-against MPI libraries built without such support.
+against MPI libraries built without such support. Other source of
+trouble could be a Python build using a specific cross-development SDK
+configuration. Workarounds for such issues are to temporarily set the
+environmental variables :envvar:`ARCHFLAGS` and/or :envvar:`SDKROOT`
+to appropriate values in the shell before trying to build/install *MPI
+for Python*.
 
-A workaround is to temporarily set the environmental variable
-:envvar:`ARCHFLAGS` to an appropriate value in the shell before trying
-to build/install *MPI for Python*.  Appropriate values for
-:envvar:`ARCHFLAGS` have the form ``-arch <value>``, where ``<value>``
-should be chosen from the following table:
+Appropriate values for :envvar:`ARCHFLAGS` have the form ``-arch
+<value>``, where ``<value>`` should be chosen from the following
+table:
 
 ======= ==========  =========
    \      Intel      PowerPC
@@ -77,24 +80,35 @@ should be chosen from the following table:
 64 bits ``x86_64``  ``ppc64``
 ======= ==========  =========
 
-For example, assuming your Mac have a 64 bits Intel processor, you can
+Appropriate values for :envvar:`SDKROOT` are the full path name of any
+of the SDK's you have at :file:`/Developer/SDKs` directory (e.g.,
+``SDKROOT=/Developer/SDKs/MacOSX10.5.sdk``). The safest choice would
+be the one matching your system version; perhaps better it is to use
+the root directory (i.e., ``SDKROOT=/``) or even an empty value (i.e.,
+``SDKROOT=''``).
+
+For example, assuming your Mac have a 64 bits Intel processor and you
+want to override the hard-wired SDK in Python configuration, you can
 build and install *MPI for Python* using any of the alternatives
-below. Note that :envvar:`ARCHFLAGS` should be passed/set both at the
-build step and at the install step (as :program:`mpicc`)
+below. Note that environmental variables should be passed/set both at
+the build and install steps (because :program:`sudo` does not pass
+environmental variables to subprocesses for security reasons)
 
 * Alternative 1::
 
-    $ env ARCHFLAGS='-arch x86_64' python setup.py build [OPTIONS]
+    $ env ARCHFLAGS='-arch x86_64' SDKROOT=/ python setup.py build [OPTIONS]
 
-    $ sudo env ARCHFLAGS='-arch x86_64' python setup.py install [OPTIONS]
+    $ sudo env ARCHFLAGS='-arch x86_64' SDKROOT=/ python setup.py install [OPTIONS]
 
 * Alternative 2::
 
     $ export ARCHFLAGS='-arch x86_64'
+    $ export SDKROOT=/
     $ python setup.py build [OPTIONS]
 
     $ sudo -s # enter interactive shell as root
     $ export ARCHFLAGS='-arch x86_64'
+    $ export SDKROOT=/
     $ python setup.py install [OPTIONS]
     $ exit
 

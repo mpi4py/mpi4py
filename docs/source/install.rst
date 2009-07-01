@@ -18,10 +18,10 @@ build *MPI for Python*:
 
   .. note:: **Mac OS X** users employing a Python distribution built
      with **universal binaries** may need to temporarily set the
-     environmental variable :envvar:`ARCHFLAGS` to an appropriate
-     value in the shell before trying to build/install *MPI for
-     Python*. Check the instructions at :ref:`macosx-universal` in the
-     appendix.
+     environmental variables :envvar:`ARCHFLAGS` and :envvar:`SDKROOT`
+     to appropriate values in the shell before trying to build/install
+     *MPI for Python*. Check the instructions at
+     :ref:`macosx-universal-sdk` in the appendix.
 
   .. note:: Some MPI-1 implementations **do require** the actual
      command line arguments to be passed in :cfunc:`MPI_Init()`. In

@@ -38,17 +38,23 @@ from distutils import log
 
 
 def fix_config_vars(names, values):
-    newvalues = list(values)
-    if (sys.platform == 'darwin' and
-        sys.version[:3] < '2.6' and
-        'ARCHFLAGS' in os.environ):
-        ARCHFLAGS = os.environ['ARCHFLAGS']
-        for i, flg in enumerate(values):
-            flg, count = re.subn('-arch\s+\w+\s', ' ', flg)
-            if count and ARCHFLAGS:
-                flg = flg + ' ' + ARCHFLAGS
-            newvalues[i] = flg
-    return newvalues
+    values = list(values)
+    if sys.platform == 'darwin':
+        if 'ARCHFLAGS' in os.environ and sys.version[:3] < '2.6':
+            ARCHFLAGS = os.environ['ARCHFLAGS']
+            for i, flag in enumerate(list(values)):
+                flag, count = re.subn('-arch\s+\w+\s', ' ', flag)
+                if count and ARCHFLAGS:
+                    flag = flag + ' ' + ARCHFLAGS
+                values[i] = flag
+        if 'SDKROOT' in os.environ:
+            SDKROOT = os.environ['SDKROOT']
+            for i, flag in enumerate(list(values)):
+                flag, count = re.subn('-isysroot [^ \t]*', ' ', flag)
+                if count and SDKROOT:
+                    flag = flag + '-isysroot ' + SDKROOT
+                values[i] = flag
+    return values
 
 def get_config_vars(*names):
     # Core Python configuration
