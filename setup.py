@@ -53,7 +53,7 @@ descr    = __doc__.split('\n')[1:-1]; del descr[1:3]
 devstat  = ['Development Status :: 5 - Production/Stable']
 
 classifiers = """
-License :: Public Domain
+License :: OSI Approved :: BSD License
 Operating System :: POSIX
 Operating System :: Unix
 Operating System :: MacOS
@@ -93,7 +93,7 @@ metadata = {
     'classifiers'      : [c for c in classifiers.split('\n') if c],
     'keywords'         : [k for k in keywords.split('\n')    if k],
     'platforms'        : [p for p in platforms.split('\n')   if p],
-    'license'          : 'Public Domain',
+    'license'          : 'BSD',
     'author'           : 'Lisandro Dalcin',
     'author_email'     : 'dalcinl@gmail.com',
     'maintainer'       : 'Lisandro Dalcin',
