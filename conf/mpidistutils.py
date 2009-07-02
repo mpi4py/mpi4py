@@ -52,7 +52,7 @@ def fix_config_vars(names, values):
             for i, flag in enumerate(list(values)):
                 flag, count = re.subn('-isysroot [^ \t]*', ' ', flag)
                 if count and SDKROOT:
-                    flag = flag + '-isysroot ' + SDKROOT
+                    flag = flag + ' ' + '-isysroot ' + SDKROOT
                 values[i] = flag
     return values
 
