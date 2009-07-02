@@ -77,22 +77,30 @@ static lt_dlhandle PyMPI_OPENMPI_handle = 0;
 
 static void dlopen_mpi_lib(void)
 {
-  const char *filename = "libmpi";
   int         ltdlup = PyMPI_OPENMPI_ltdlup;
   lt_dlhandle handle = PyMPI_OPENMPI_handle;
   if (ltdlup == 0) {
     ltdlup = (lt_dlinit() == 0);
   }
-  if (ltdlup != 0 && handle == 0) {
-    lt_dladvise	advise;
-    if (!lt_dladvise_init(&advise) &&
-	!lt_dladvise_ext(&advise)  &&
-	!lt_dladvise_global(&advise))
-      handle = lt_dlopenadvise(filename, advise);
-    lt_dladvise_destroy (&advise);
+  if (ltdlup != 0) { 
+    if (handle == 0) { /* fist round */
+      lt_dladvise advise = 0;
+      if (!lt_dladvise_init(&advise)   &&
+	  !lt_dladvise_global(&advise) &&
+	  !lt_dladvise_ext(&advise))
+	handle = lt_dlopenadvise("libmpi", advise);
+      lt_dladvise_destroy (&advise);
+    }
+    if (handle == 0) { /* second round */
+      lt_dladvise advise = 0;
+      if (!lt_dladvise_init(&advise) &&
+	  !lt_dladvise_global(&advise))
+	handle = lt_dlopenadvise("libmpi.so.0", advise);
+      lt_dladvise_destroy (&advise);
+    }
+    PyMPI_OPENMPI_handle = handle;
   }
   PyMPI_OPENMPI_ltdlup = ltdlup;
-  PyMPI_OPENMPI_handle = handle;
 }
 
 static void dlclose_mpi_lib(void)
