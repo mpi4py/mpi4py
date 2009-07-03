@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/bin/sh
 
 PYTHON=python
 MPIIMP=mpich2

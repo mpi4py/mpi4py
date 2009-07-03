@@ -109,7 +109,7 @@ Compute Pi
 
 * Master (or parent, or client) side::
 
-   #! /usr/bin/env python
+   #!/usr/bin/env python
    from mpi4py import MPI
    import numpy
    import sys
@@ -129,7 +129,7 @@ Compute Pi
 
 * Worker (or child, or server) side::
 
-   #! /usr/bin/env python
+   #!/usr/bin/env python
    from mpi4py import MPI
    import numpy
 

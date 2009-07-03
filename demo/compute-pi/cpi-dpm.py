@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#!/usr/bin/env python
 """
 Parallel PI computation using Dynamic Process Management (DPM)
 within Python objects exposing memory buffers (requires NumPy).
