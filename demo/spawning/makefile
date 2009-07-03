@@ -2,8 +2,8 @@
 
 default: build test clean
 
-MASTERS = cpi-master-py cpi-master-c cpi-master-cxx cpi-master-f90
-WORKERS = cpi-worker-py cpi-worker-c cpi-worker-cxx cpi-worker-f90
+MASTERS = cpi-master-py.exe cpi-master-c.exe cpi-master-cxx.exe cpi-master-f90.exe
+WORKERS = cpi-worker-py.exe cpi-worker-c.exe cpi-worker-cxx.exe cpi-worker-f90.exe
 
 build: ${MASTERS} ${WORKERS}
 
@@ -11,7 +11,7 @@ LANGS=py c cxx f90
 test: build
 	@for i in ${LANGS}; do \
 	    for j in ${LANGS}; do \
-                 ./cpi-master-$$i ./cpi-worker-$$j; \
+                 ./cpi-master-$$i.exe ./cpi-worker-$$j.exe; \
 	    done; \
 	done 
 
@@ -24,29 +24,29 @@ MPICXX=mpicxx
 MPIF90=mpif90
 
 # Python
-cpi-master-py: cpi-master.py
-	echo '#!' `which python` > $@
+cpi-master-py.exe: cpi-master.py
+	echo '#!'`which python` > $@
 	cat $< >> $@
 	chmod +x $@
-cpi-worker-py: cpi-worker.py
-	echo '#!' `which python` > $@
+cpi-worker-py.exe: cpi-worker.py
+	echo '#!'`which python` > $@
 	cat $< >> $@
 	chmod +x $@
 
 # C
-cpi-master-c: cpi-master.c
+cpi-master-c.exe: cpi-master.c
 	${MPICC} $< -o $@
-cpi-worker-c: cpi-worker.c
+cpi-worker-c.exe: cpi-worker.c
 	${MPICC} $< -o $@
 
 # C++
-cpi-master-cxx: cpi-master.cxx
+cpi-master-cxx.exe: cpi-master.cxx
 	${MPICXX} $< -o $@
-cpi-worker-cxx: cpi-worker.cxx
+cpi-worker-cxx.exe: cpi-worker.cxx
 	${MPICXX} $< -o $@
 
 # Fortran 90
-cpi-master-f90: cpi-master.f90
+cpi-master-f90.exe: cpi-master.f90
 	${MPIF90} $< -o $@
-cpi-worker-f90: cpi-worker.f90
+cpi-worker-f90.exe: cpi-worker.f90
 	${MPIF90} $< -o $@

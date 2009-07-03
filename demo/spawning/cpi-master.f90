@@ -18,7 +18,7 @@ PROGRAM main
   call getarg(0, argv(0))
   call getarg(1, argv(1))
 
-  cmd = 'cpi-worker-f90'
+  cmd = 'cpi-worker-f90.exe'
   if (argc > 1) then 
      cmd = argv(1)
   end if

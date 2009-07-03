@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
 {
   MPI::Init();
   
-  char cmd[32] = "cpi-worker-cxx";
+  char cmd[32] = "cpi-worker-cxx.exe";
   if (argc > 1) std::strcpy(cmd, argv[1]);
   std::printf("%s -> %s\n", argv[0], cmd);
 
