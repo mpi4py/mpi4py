@@ -23,11 +23,10 @@ cdef inline object message_simple(int readonly,
                                   MPI_Datatype *_dtype):
     # special case
     if rank == MPI_PROC_NULL:
-        if msg is None:
-            _buf[0]   = NULL
-            _count[0] = 0
-            _dtype[0] = MPI_BYTE # XXX explain
-            return None
+        _buf[0]   = NULL
+        _count[0] = 0
+        _dtype[0] = MPI_BYTE
+        return None
     # check argument containing message
     cdef Py_ssize_t n = 0
     if not is_list(msg) and not is_tuple(msg):
@@ -96,12 +95,11 @@ cdef inline object message_vector(int readonly,
                                   MPI_Datatype *_dtype):
     # special case
     if rank == MPI_PROC_NULL:
-        if msg is None:
-            _buf[0]    = NULL
-            _counts[0] = NULL
-            _displs[0] = NULL
-            _dtype[0]  = MPI_BYTE # XXX explain
-            return None
+        _buf[0]    = NULL
+        _counts[0] = NULL
+        _displs[0] = NULL
+        _dtype[0]  = MPI_BYTE
+        return None
     # check argument containing message
     cdef Py_ssize_t n = 0
     if not is_list(msg) and not is_tuple(msg):
@@ -222,7 +220,7 @@ cdef class _p_msg_cco:
         self.scount  = self.rcount  = 0
         self.scounts = self.rcounts = NULL
         self.sdispls = self.rdispls = NULL
-        self.stype   = self.rtype = MPI_DATATYPE_NULL
+        self.stype   = self.rtype   = MPI_DATATYPE_NULL
 
     # Collective Communication Operations
     # -----------------------------------
@@ -282,7 +280,7 @@ cdef class _p_msg_cco:
                     object smsg, object rmsg,
                     int root, MPI_Comm comm):
         if comm == MPI_COMM_NULL: return
-        cdef int inter=0, size=0, rank=0, null = MPI_PROC_NULL
+        cdef int inter=0, size=0, rank=0, null=MPI_PROC_NULL
         CHKERR( MPI_Comm_test_inter(comm, &inter) )
         if not inter: # intra-communication
             CHKERR( MPI_Comm_size(comm, &size) )
@@ -313,7 +311,7 @@ cdef class _p_msg_cco:
                      object smsg, object rmsg,
                      int root, MPI_Comm comm):
         if comm == MPI_COMM_NULL: return
-        cdef int inter=0, size=0, rank=0, null = MPI_PROC_NULL
+        cdef int inter=0, size=0, rank=0, null=MPI_PROC_NULL
         CHKERR( MPI_Comm_test_inter(comm, &inter) )
         if not inter: # intra-communication
             CHKERR( MPI_Comm_size(comm, &size) )
