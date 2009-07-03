@@ -74,7 +74,7 @@ Appropriate values for :envvar:`ARCHFLAGS` have the form ``-arch
 table:
 
 ====== ==========  =========
-  \      Intel      PowerPC
+  @      Intel      PowerPC
 ====== ==========  =========
 32-bit ``i386``    ``ppc``
 64-bit ``x86_64``  ``ppc64``
