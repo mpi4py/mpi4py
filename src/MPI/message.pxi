@@ -421,7 +421,7 @@ cdef class _p_msg_cco:
         if comm == MPI_COMM_NULL: return
         cdef int inter=0
         CHKERR( MPI_Comm_test_inter(comm, &inter) )
-        #
+        # get send and recv buffers
         self.for_cro_recv(rmsg, 0)
         if not inter and is_IN_PLACE(smsg):
             self.sbuf   = MPI_IN_PLACE
@@ -429,11 +429,19 @@ cdef class _p_msg_cco:
             self.stype  = self.rtype
         else:
             self.for_cro_send(smsg, 0)
-            assert self.scount == self.rcount
-            assert self.stype  == self.rtype
+        # check counts and datatypes
+        if self.scount != self.rcount:
+            raise ValueError(
+                S("mismatch in send count %d and receive count %d") %
+                (self.scount, self.rcount))
+        if self.stype != self.rtype:
+            raise ValueError(
+                S("mismatch in send and receive MPI datatypes"))
 
     cdef for_scan(self, object smsg, object rmsg,
                   MPI_Comm comm):
+        if comm == MPI_COMM_NULL: return
+        # get send and recv buffers
         self.for_cro_recv(rmsg, 0)
         if is_IN_PLACE(smsg):
             self.sbuf   = MPI_IN_PLACE
@@ -441,15 +449,29 @@ cdef class _p_msg_cco:
             self.stype  = self.rtype
         else:
             self.for_cro_send(smsg, 0)
-            assert self.scount == self.rcount
-            assert self.stype  == self.rtype
+        # check counts and datatypes
+        if self.scount != self.rcount:
+            raise ValueError(
+                S("mismatch in send count %d and receive count %d") %
+                (self.scount, self.rcount))
+        if self.stype != self.rtype:
+            raise ValueError(
+                S("mismatch in send and receive MPI datatypes"))
 
     cdef for_exscan(self, object smsg, object rmsg,
                     MPI_Comm comm):
+        if comm == MPI_COMM_NULL: return
+        # get send and recv buffers
         self.for_cro_recv(rmsg, 0)
         self.for_cro_send(smsg, 0)
-        assert self.scount == self.rcount
-        assert self.stype  == self.rtype
+        # check counts and datatypes
+        if self.scount != self.rcount:
+            raise ValueError(
+                S("mismatch in send count %d and receive count %d") %
+                (self.scount, self.rcount))
+        if self.stype != self.rtype:
+            raise ValueError(
+                S("mismatch in send and receive MPI datatypes"))
 
 
 cdef inline _p_msg_cco message_cco():
