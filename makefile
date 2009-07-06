@@ -92,7 +92,7 @@ sphinx-pdf:
 EPYDOCBUILD = ${PYTHON} ./conf/epydocify.py
 EPYDOCOPTS  =
 epydoc: epydoc-html
-epydoc:
+epydoc-html:
 	${PYTHON} -c 'import mpi4py.MPI'
 	mkdir -p docs/apiref
 	${EPYDOCBUILD} ${EPYDOCOPTS} --html -o docs/apiref
