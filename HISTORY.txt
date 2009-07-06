@@ -9,8 +9,15 @@ HISTORY: MPI for Python
 :Web Site:     http://mpi4py.googlecode.com/
 
 
-Release X.X.X
+Release 1.1.0
 =============
+
+* Fix bug in ``Comm.Iprobe()`` that caused segfaults as Python C-API
+  calls were issued with the GIL released (issue #2).
+
+* Add ``Comm.bsend()`` and ``Comm.ssend()`` for buffered and
+  synchronous send semantics when communicating general Python
+  objects.
 
 * Now the call ``Info.Get(key)`` return a *single* value (i.e, instead
   of a 2-tuple); this value is ``None`` if ``key`` is not in the
@@ -18,14 +25,7 @@ Release X.X.X
   redundantly returned ``(None, False)`` for missing key-value pairs;
   ``None`` is enough to signal a missing entry.
 
-* Add ``Comm.bsend()`` and ``Comm.ssend()`` for buffered and
-  synchronous send semantics when communicating general Python
-  objects.
-
 * Add support for parametrized Fortran datatypes.
-
-* Fix bug in ``Comm.Iprobe()`` that caused segfaults as Python C-API
-  calls were issued with the GIL released (issue #2).
 
 * Add support for decoding user-defined datatypes.
 
