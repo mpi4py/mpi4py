@@ -22,8 +22,8 @@ echo Python ---- $PYTHON
 echo MPI ------- $MPIIMP
 echo ---------------------
 
-NAME=`$PYTHON setup.py --name`
-VERSION=`$PYTHON setup.py --version`
+NAME=`$PYTHON setup.py -v --name`
+VERSION=`$PYTHON setup.py -v --version`
 
 BUILDDIR=/tmp/$NAME-buildtest
 $PYTHON setup.py $QUIET sdist
