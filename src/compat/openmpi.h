@@ -155,6 +155,30 @@ static int PyMPI_OPENMPI_MPI_Finalize(void)
 /* ---------------------------------------------------------------- */
 
 /*
+ * Open MPI < 1.1.3 generates an error when MPI_File_get_errhandler()
+ * is called with the predefined error handlers MPI_ERRORS_RETURN and
+ * MPI_ERRORS_ARE_FATAL.
+ */
+
+#if PyMPI_OPENMPI_VERSION < 10103
+
+static int PyMPI_OPENMPI_Errhandler_free(MPI_Errhandler *errhandler)
+{
+  if (errhandler && ((*errhandler == MPI_ERRORS_RETURN) || 
+                     (*errhandler == MPI_ERRORS_ARE_FATAL))) {
+    *errhandler = MPI_ERRHANDLER_NULL;
+    return MPI_SUCCESS;
+  }
+  return MPI_Errhandler_free(errhandler);
+}
+#undef  MPI_Errhandler_free
+#define MPI_Errhandler_free PyMPI_OPENMPI_Errhandler_free
+
+#endif /* !(PyMPI_OPENMPI_VERSION < 10103) */
+
+/* ---------------------------------------------------------------- */
+
+/*
  * Open MPI 1.1 generates an error when MPI_File_get_errhandler() is
  * called with the MPI_FILE_NULL handle.  The code below try to fix
  * this bug by intercepting the calls to the functions setting and
