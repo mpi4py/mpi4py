@@ -74,7 +74,17 @@ class BaseTestRMA(object):
         self.WIN.Get(None, MPI.PROC_NULL, None)
         self.WIN.Fence()
 
-    def testAccumulateProcNull(self):
+    def testAccumulateProcNullReplace(self):
+        self.WIN.Fence()
+        try: zeros = bytearray([0]) * 8
+        except NameError: zeros = str('\0')* 8
+        self.WIN.Fence()
+        self.WIN.Accumulate([zeros, MPI.INT], MPI.PROC_NULL, None, MPI.REPLACE)
+        self.WIN.Fence()
+        self.WIN.Accumulate([zeros, MPI.INT], MPI.PROC_NULL, None, MPI.REPLACE)
+        self.WIN.Fence()
+
+    def testAccumulateProcNullSum(self):
         self.WIN.Fence()
         try: zeros = bytearray([0]) * 8
         except NameError: zeros = str('\0')* 8
