@@ -519,11 +519,14 @@ cdef class _p_msg_rma:
             if nt > 3:
                 raise ValueError(S("target: expecting at most 3 items"))
         # ORIGIN
-        cdef void *oaddr = NULL
-        cdef int ocount = 0
-        cdef MPI_Datatype otype = MPI_DATATYPE_NULL
-        origin = message_simple(readonly, origin, rank, 0,
-                                &oaddr, &ocount, &otype)
+        cdef void         *oaddr = NULL
+        cdef int          ocount = 0
+        cdef MPI_Datatype otype  = MPI_DATATYPE_NULL
+        if rank==MPI_PROC_NULL and origin is not None :
+            otype = (<Datatype?>origin[-1]).ob_mpi
+        else:
+            origin = message_simple(readonly, origin, rank, 0,
+                                    &oaddr, &ocount, &otype)
         # TARGET
         cdef MPI_Aint     tdisp  = 0
         cdef int          tcount = ocount
