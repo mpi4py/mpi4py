@@ -79,7 +79,7 @@ cdef class _p_Pickler:
             p[0] = PyMPIBytes_AsString(obj)
         return obj
 
-    cdef object load(self, obj):
+    cdef object load(self, object obj):
         if obj is None: return None
         return PyMPI_Load(obj)
 
