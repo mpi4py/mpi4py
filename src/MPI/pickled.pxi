@@ -5,10 +5,6 @@ cdef extern from *:
     Py_ssize_t PyMPIBytes_Size(object) except -1
     object     PyMPIBytes_FromStringAndSize(char*,Py_ssize_t)
 
-cdef extern from *:
-     object PySequence_List(object)
-     object PySequence_Fast(PyObject *o, const char* m);
-
 # --------------------------------------------------------------------
 
 cdef object PyPickle_dumps = None
