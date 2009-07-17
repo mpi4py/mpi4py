@@ -455,7 +455,7 @@ cdef inline object _py_scan(object seq, object op):
 
 cdef inline object _py_exscan(object seq, object op):
     if seq is None: return None
-    seq = _py_scan(op, seq)
+    seq = _py_scan(seq, op)
     seq.pop(-1)
     seq.insert(0, None)
     return seq
