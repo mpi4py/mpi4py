@@ -15,8 +15,8 @@ MPICFG_ENV = ['MPICFG']
 
 # Default values to use for configuration
 MPICC  = ['mpicc']
-MPICXX = ['mpicxx', 'mpiCC', 'mpic++']
-MPILD  = ['mpicc']
+MPICXX = ['mpicxx', 'mpic++', 'mpiCC']
+MPILD  = MPICC + MPICXX
 MPICFG = ('mpi', 'mpi.cfg')
 
 # --------------------------------------------------------------------
@@ -130,18 +130,38 @@ def customize_compiler(compiler,
         compiler.shared_lib_extension = so_ext
 
 
-def _find_mpi_compiler(envvars, executables, path=None):
+def find_mpi_compiler(name,
+                      envvars,
+                      command,
+                      config,
+                      default,
+                      executables,
+                      path=None):
     """
-    Find MPI compilers in environment and path.
+    Find MPI compiler wrappers
     """
-    # search in environment
+    # 1.- search in environment
     if envvars:
         if isinstance(envvars, str):
             envvars = (envvars,)
         for var in envvars:
-            cmd = os.environ.get(var)
-            if cmd is not None: return cmd
-    # search in path
+            value = os.environ.get(var)
+            if value:
+                return value
+    # 2.- search in distutils command instance
+    if command:
+        value = getattr(command, name, None)
+        if value:
+            return value
+    # 3.- search in configuration dict
+    if config:
+        value = config.get(name, None)
+        if value:
+            return value
+    # 4.- use default value
+    if default:
+        return default
+    # 5.- search executable in path
     if executables:
         if isinstance(executables, str):
             executables = (executables,)
@@ -158,7 +178,6 @@ def _find_mpi_compiler(envvars, executables, path=None):
                 return cmd
     # nothing found
     return None
-
 
 # --------------------------------------------------------------------
 
@@ -221,7 +240,7 @@ def _config_parser(section, filenames, raw=False, vars=None):
     return config_info
 
 
-def _find_mpi_config(section, envvars=None, defaults=None):
+def find_mpi_config(section, envvars=None, defaults=None):
     if not section and envvars:
         # look in environment
         if isinstance(envvars, str):
@@ -293,9 +312,9 @@ class Configure(Scanner):
             config_h = os.path.join(self.DESTDIR, self.CONFIG_H)
         if missing_h is None:
             missing_h = os.path.join(self.DESTDIR, self.MISSING_H)
-        log.info("writing '%s'" % config_h)
+        log.info("writing '%s'", config_h)
         self.dump_config_h(config_h, results)
-        log.info("writing '%s'" % missing_h)
+        log.info("writing '%s'", missing_h)
         self.dump_missing_h(missing_h, None)
 
 # --------------------------------------------------------------------
@@ -304,17 +323,17 @@ cmd_mpi_opts = [
 
     ('mpild=',   None,
      "MPI linker command, "
-     "overrides environmental variables 'MPILD' "
-     "(defaults to 'mpicc' if available)"),
+     "overridden by environment variable 'MPILD' "
+     "(defaults to 'mpicc' or 'mpicxx' if any is available)"),
 
     ('mpicxx=',  None,
      "MPI C++ compiler command, "
-     "overrides environmental variables 'MPICXX' "
+     "overridden by environment variable 'MPICXX' "
      "(defaults to 'mpicxx', 'mpiCC', or 'mpic++' if any is available)"),
 
     ('mpicc=',   None,
      "MPI C compiler command, "
-     "overrides environmental variables 'MPICC' "
+     "overridden by environment variables 'MPICC' "
      "(defaults to 'mpicc' if available)"),
 
     ('mpi=',     None,
@@ -322,7 +341,7 @@ cmd_mpi_opts = [
      "and an optional list of configuration files "
      + "(e.g. --mpi=section,file1" + os.path.pathsep + "file2), " +
      "to look for MPI includes/libraries, "
-     "overrides environmental variables 'MPICFG' "
+     "overridden by environment variable 'MPICFG' "
      "(defaults to section 'mpi' in configuration file 'mpi.cfg')"),
 
     ('configure', None,
@@ -442,21 +461,20 @@ class config(cmd_config.config):
         if not self.noisy:
             self.dump_source = 0
 
-    def find_mpi_compiler(self, envvars, executables, path=None):
-        return _find_mpi_compiler(envvars, executables, path)
-
     def run(self):
         # test configuration in specified section and file
-        if self.mpi:
-            sct, fn, cfg = _find_mpi_config(
-                self.mpi, MPICFG_ENV, MPICFG)
+        #config = None
+        #if self.mpi:
+        section, filename, config = \
+            find_mpi_config(self.mpi, MPICFG_ENV, MPICFG)
+        if config:
             log.info("MPI configuration: "
-                     "section '%s' from file/s '%s'", sct, fn)
-            _configure(self, cfg)
+                     "section '%s' from file/s '%s'",
+                     section, filename)
+            _configure(self, config)
         # test MPI C compiler
-        mpicc = self.mpicc
-        if mpicc is None:
-            mpicc = self.find_mpi_compiler(MPICC_ENV, MPICC)
+        mpicc = find_mpi_compiler(
+            'mpicc', MPICC_ENV, self, config, None, MPICC)
         log.info("MPI C compiler:    %s", mpicc  or 'not found')
         self.compiler = getattr(self.compiler, 'compiler_type',
                                 self.compiler)
@@ -464,21 +482,19 @@ class config(cmd_config.config):
         customize_compiler(self.compiler, mpicc=mpicc, mpicxx=None)
         self.try_link(ConfigTest, headers=['mpi.h'], lang='c')
         # test MPI C++ compiler
-        mpicxx = self.mpicxx
-        if mpicxx is None:
-            mpicxx = self.find_mpi_compiler(MPICXX_ENV, MPICXX)
+        mpicxx = find_mpi_compiler(
+            'mpicxx', MPICXX_ENV, self, config, None, MPICXX)
         log.info("MPI C++ compiler:  %s", mpicxx or 'not found')
-        if mpicxx:
-            self.compiler = getattr(self.compiler, 'compiler_type',
-                                    self.compiler)
-            self._check_compiler()
-            customize_compiler(self.compiler, mpicc=None, mpicxx=mpicxx)
-            if self.compiler.compiler_type in ('unix', 'cygwin', 'mingw32'):
-                self.compiler.compiler_so[0] = \
-                    self.compiler.compiler_cxx[0]
-                self.compiler.linker_exe[0]  = \
-                    self.compiler.compiler_cxx[0]
-            self.try_link(ConfigTest, headers=['mpi.h'], lang='c++')
+        self.compiler = getattr(self.compiler, 'compiler_type',
+                                self.compiler)
+        self._check_compiler()
+        customize_compiler(self.compiler, mpicc=None, mpicxx=mpicxx)
+        if self.compiler.compiler_type in ('unix', 'cygwin', 'mingw32'):
+            self.compiler.compiler_so[0] = \
+                self.compiler.compiler_cxx[0]
+            self.compiler.linker_exe[0]  = \
+                self.compiler.compiler_cxx[0]
+        self.try_link(ConfigTest, headers=['mpi.h'], lang='c++')
 
     def run_configtests(self, compiler, config_info):
         self.compiler = compiler
@@ -644,7 +660,6 @@ class build_ext(cmd_build_ext.build_ext):
 
     def finalize_options(self):
         cmd_build_ext.build_ext.finalize_options(self)
-        import sys, os
         if (sys.platform.startswith('linux') or \
             sys.platform.startswith('gnu')) and \
             sysconfig.get_config_var('Py_ENABLE_SHARED'):
@@ -668,73 +683,54 @@ class build_ext(cmd_build_ext.build_ext):
         self.check_extensions_list(self.extensions)
         # parse configuration file and  configure compiler
         config_info = self.configure_extensions()
-        mpicc = mpicxx = mpild = None
-        if config_info:
-            mpicc  = config_info.get('mpicc')
-            mpicxx = config_info.get('mpicxx')
-            mpild  = config_info.get('mpild')
-        compiler = self.configure_compiler(mpicc=mpicc,
-                                           mpicxx=mpicxx,
-                                           mpild=mpild)
+        self.configure_compiler(self.compiler, config_info)
         # extra configuration, MPI 2 features
         if self.configure:
-            log.info('testing for missing MPI-2 features')
             config_cmd = self.get_finalized_command('config')
-            config_cmd.run_configtests(compiler, config_info)
-            macro = 'PyMPI_HAVE_CONFIG_H'
-            self.compiler.define_macro(macro, None)
-            log.info("defining preprocessor macro '%s'" % macro)
+            if isinstance(config_cmd, config):
+                log.info('testing for missing MPI-2 features')
+                config_cmd.run_configtests(self.compiler, config_info)
+                macro = 'PyMPI_HAVE_CONFIG_H'
+                log.info("defining preprocessor macro '%s'" % macro)
+                self.compiler.define_macro(macro, None)
         # and finally build extensions
         for ext in self.extensions:
             self.build_extension(ext)
 
-    def configure_compiler(self,
-                           mpicc=None, mpicxx=None, mpild=None,
-                           compiler=None):
+    def configure_compiler(self, compiler, config):
         #
-        mpicc = self.mpicc or mpicc
-        if mpicc is None:
-            mpicc = self.find_mpi_compiler(MPICC_ENV, MPICC)
-        log.info("MPI C compiler:    %s", mpicc  or 'not found')
+        mpicc = find_mpi_compiler(
+            'mpicc', MPICC_ENV, self, config, None, MPICC)
+        log.info("MPI C compiler:    %s", mpicc or 'not found')
         #
-        mpicxx = self.mpicxx or mpicxx
-        if mpicxx is None:
-            mpicxx = self.find_mpi_compiler(MPICXX_ENV, MPICXX)
+        mpicxx = find_mpi_compiler(
+            'mpicxx', MPICXX_ENV, self, config, None, MPICXX)
         log.info("MPI C++ compiler:  %s", mpicxx or 'not found')
         #
-        mpild = self.mpild or mpild
-        if mpild is None:
-            mpild = self.find_mpi_compiler(MPILD_ENV, MPILD)
+        mpild = mpicc or mpicxx # default
+        mpild = find_mpi_compiler(
+            'mpild', MPILD_ENV, self, config, mpild, MPILD)
         log.info("MPI linker:        %s", mpild or 'not found')
         #
-        if compiler is None: compiler = self.compiler
         customize_compiler(compiler,
-                           mpicc=mpicc, mpicxx=mpicxx,
+                           mpicc=mpicc,
+                           mpicxx=mpicxx,
                            mpild=mpild)
         return compiler
 
-    def find_mpi_compiler(self, envvars, executables, path=None):
-        return _find_mpi_compiler(envvars, executables, path)
-
     def configure_extensions(self):
-        config_info = self.find_mpi_config(
-            self.mpi, MPICFG_ENV, MPICFG)
-        if config_info:
-            for ext in self.extensions:
-                self.configure_extension(ext, config_info)
-        return config_info
-
-    def find_mpi_config(self, section, envvars=None, defaults=None):
-        # parse configuration file
-        sect, fnames, cfg_info = _find_mpi_config(
-            section, envvars, defaults)
-        if cfg_info:
+        section, filenames, config = \
+            find_mpi_config(self.mpi, MPICFG_ENV, MPICFG)
+        if config:
             log.info("MPI configuration: "
-                     "from section '%s' in file/s '%s'", sect, fnames)
-        return cfg_info
+                     "from section '%s' in file/s '%s'",
+                     section, filenames)
+            for ext in self.extensions:
+                self.configure_extension(ext, config)
+        return config
 
-    def configure_extension(self, extension, config_info):
-        _configure(extension, config_info)
+    def configure_extension(self, extension, config):
+        _configure(extension, config)
 
 
 # --------------------------------------------------------
