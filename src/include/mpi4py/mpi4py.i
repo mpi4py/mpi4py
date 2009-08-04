@@ -63,7 +63,16 @@ SWIG_From_dec(Type)(Type v) {
 
 /* ---------------------------------------------------------------- */
 
-%define SWIG_TYPECHECK_MPI_Comm  600 %enddef
+%define SWIG_TYPECHECK_MPI_Comm       400 %enddef
+%define SWIG_TYPECHECK_MPI_Datatype   401 %enddef
+%define SWIG_TYPECHECK_MPI_Request    402 %enddef
+%define SWIG_TYPECHECK_MPI_Status     403 %enddef
+%define SWIG_TYPECHECK_MPI_Op         404 %enddef
+%define SWIG_TYPECHECK_MPI_Group      405 %enddef
+%define SWIG_TYPECHECK_MPI_Info       406 %enddef
+%define SWIG_TYPECHECK_MPI_File       407 %enddef
+%define SWIG_TYPECHECK_MPI_Win        408 %enddef
+%define SWIG_TYPECHECK_MPI_Errhandler 409 %enddef
 
 %define %mpi4py_checkcode(Type)
 %checkcode(Type)
