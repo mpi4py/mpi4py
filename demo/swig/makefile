@@ -8,8 +8,8 @@ MPI4PY_INCLUDE = ${shell ${PYTHON} -c 'import mpi4py; print( mpi4py.get_include(
 
 SWIG = swig
 SWIG_PY = ${SWIG} -python
-src: _helloworld.c
-_helloworld.c: helloworld.i
+src: helloworld_wrap.c
+helloworld_wrap.c: helloworld.i
 	${SWIG_PY} -I${MPI4PY_INCLUDE} -o $@ $<
 
 
@@ -17,7 +17,7 @@ MPICC  = mpicc
 CFLAGS = -shared -fPIC
 SO = ${shell ${PYTHON} -c 'import imp; print (imp.get_suffixes()[0][0])'}
 build: _helloworld${SO}
-_helloworld${SO}: _helloworld.c
+_helloworld${SO}: helloworld_wrap.c
 	${MPICC} ${CFLAGS} -I${PYTHON_INCLUDE} -I${MPI4PY_INCLUDE} -o $@ $<
 
 
@@ -28,4 +28,4 @@ test: build
 
 
 clean:
-	${RM} _helloworld.c helloworld.py* _helloworld${SO}
+	${RM} helloworld_wrap.c helloworld.py* _helloworld${SO}

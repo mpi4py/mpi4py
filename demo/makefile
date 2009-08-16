@@ -1,7 +1,7 @@
 .PHONY: default
 
 default:
-#	${MAKE} -C compute-pi
+	${MAKE} -C compute-pi
 	${MAKE} -C cython
 	${MAKE} -C embedding
 	${MAKE} -C f2py

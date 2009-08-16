@@ -1,24 +1,22 @@
-.PHONY: all seq mpi test clean distclean
+.PHONY: default build test clean test_seq test_mpi
+
+default: build test clean
+
+build:
 
 PYTHON  = python
 MPIEXEC = mpiexec
 NP      = -n 3
 
-all: seq
+test_seq:
+	${MAKE} MPIEXEC= NP= test_mpi
 
-
-seq:
-	${MAKE} MPIEXEC= NP= test
-
-mpi:
-	${MAKE} test
-
-test:
+test_mpi:
 	-@for i in `ls ex-*.py`; do \
-	    echo; echo ${MPIEXEC} ${NP} ${PYTHON} $$i; \
+	    echo ${MPIEXEC} ${NP} ${PYTHON} $$i; \
 	    ${MPIEXEC} ${NP} ${PYTHON} $$i; \
 	done
 
-clean:
+test: test_seq test_mpi
 
-distclean: clean
+clean:
