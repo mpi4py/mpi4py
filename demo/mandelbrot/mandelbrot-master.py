@@ -10,10 +10,9 @@ w = 600
 h = 400
 maxit = 255
 
-## import os
-## dirname = os.path.abspath(os.path.dirname(__file__))
-## executable = os.path.join(dirname, 'mandelbrot-worker.exe')
-executable = 'mandelbrot-worker.exe'
+import os
+dirname = os.path.abspath(os.path.dirname(__file__))
+executable = os.path.join(dirname, 'mandelbrot-worker.exe')
 
 # spawn worker
 worker = MPI.COMM_SELF.Spawn(executable, maxprocs=5)
