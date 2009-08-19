@@ -430,11 +430,13 @@ cdef class _p_msg_cco:
         else:
             self.for_cro_send(smsg, 0)
         # check counts and datatypes
-        if self.scount != self.rcount:
+        if (self.sbuf   != MPI_IN_PLACE and
+            self.scount != self.rcount):
             raise ValueError(
                 S("mismatch in send count %d and receive count %d") %
                 (self.scount, self.rcount))
-        if self.stype != self.rtype:
+        if (self.sbuf  != MPI_IN_PLACE and
+            self.stype != self.rtype):
             raise ValueError(
                 S("mismatch in send and receive MPI datatypes"))
 
@@ -450,11 +452,13 @@ cdef class _p_msg_cco:
         else:
             self.for_cro_send(smsg, 0)
         # check counts and datatypes
-        if self.scount != self.rcount:
+        if (self.sbuf   != MPI_IN_PLACE and
+            self.scount != self.rcount):
             raise ValueError(
                 S("mismatch in send count %d and receive count %d") %
                 (self.scount, self.rcount))
-        if self.stype != self.rtype:
+        if (self.sbuf  != MPI_IN_PLACE and
+            self.stype != self.rtype):
             raise ValueError(
                 S("mismatch in send and receive MPI datatypes"))
 
