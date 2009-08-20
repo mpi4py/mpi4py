@@ -151,6 +151,27 @@ class BaseTestCCOBuf(object):
                         elif op == MPI.MIN:
                             self.assertEqual(value, i)
 
+    def testReduceScatter(self):
+        size = self.COMM.Get_size()
+        rank = self.COMM.Get_rank()
+        for array in arrayimpl.ArrayTypes:
+            for typecode in arrayimpl.TypeMap:
+                for op in (MPI.SUM, MPI.MAX, MPI.MIN, MPI.PROD):
+                    rcnt = list(range(size))
+                    sbuf = array([rank]*sum(rcnt), typecode)
+                    rbuf = array(-1, typecode, rank)
+                    self.COMM.Reduce_scatter(sbuf.as_mpi(),
+                                             rbuf.as_mpi(),
+                                             rcnt, op)
+                    for i, value in enumerate(rbuf):
+                        if op == MPI.SUM:
+                            pass # XXX
+                        elif op == MPI.PROD:
+                            pass # XXX
+                        elif op == MPI.MAX:
+                            pass # XXX
+                        elif op == MPI.MIN:
+                            pass # XXX
 
     def testScan(self):
         size = self.COMM.Get_size()
@@ -313,6 +334,12 @@ class BaseTestCCOBufInplace(object):
                         return
                     for value in buf.flat:
                         self.assertEqual(value, count)
+
+    def assertAlmostEqual(self, first, second):
+        num = float(float(second-first))
+        den = float(second+first)/2 or 1.0
+        if (abs(num/den) > 1e-2):
+            raise self.failureException('%r != %r' % (first, second))
 
     def testReduce(self):
         size = self.COMM.Get_size()

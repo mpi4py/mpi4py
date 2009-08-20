@@ -214,6 +214,7 @@ cdef class _p_msg_cco:
     cdef MPI_Datatype stype, rtype
     # python-side arguments
     cdef object _smsg, _rmsg
+    cdef object _rcnt
 
     def __cinit__(self):
         self.sbuf    = self.rbuf    = NULL
@@ -436,6 +437,47 @@ cdef class _p_msg_cco:
                 S("mismatch in send count %d and receive count %d") %
                 (self.scount, self.rcount))
         if (self.sbuf  != MPI_IN_PLACE and
+            self.stype != self.rtype):
+            raise ValueError(
+                S("mismatch in send and receive MPI datatypes"))
+
+    cdef for_reduce_scatter(self, object smsg, object rmsg,
+                            object rcnt, MPI_Comm comm):
+        if comm == MPI_COMM_NULL: return
+        cdef int inter=0, size=0, rank=MPI_UNDEFINED
+        CHKERR( MPI_Comm_test_inter(comm, &inter) )
+        if not inter: # intra-communication
+            CHKERR( MPI_Comm_size(comm, &size) )
+        else:
+            CHKERR( MPI_Comm_remote_size(comm, &size) )
+        CHKERR( MPI_Comm_rank(comm, &rank) )
+        # get receive counts and total sum
+        cdef int i=0, sumrcounts=0
+        self._rcnt = asarray_int(rcnt, &self.rcounts, size)
+        for i from 0 <= i < size:
+            sumrcounts += self.rcounts[i]
+        # get send and recv buffers
+        self.for_cro_recv(rmsg, 0)
+        if not inter and is_IN_PLACE(smsg):
+            # XXX What should the rules be here ??
+            self.sbuf   = MPI_IN_PLACE
+            self.scount = sumrcounts
+            self.stype  = self.rtype
+            if self.rcount == sumrcounts:
+                self.rcount = self.rcounts[rank]
+        else:
+            self.for_cro_send(smsg, 0)
+        # check counts and datatypes
+        if (self.sbuf != MPI_IN_PLACE and
+            self.scount != sumrcounts):
+            raise ValueError(
+                S("mismatch in send count %d and sum(counts) %d") %
+                (self.scount, sumrcounts))
+        if self.rcount != self.rcounts[rank]:
+            raise ValueError(
+                S("mismatch in receive count %d and counts[%d] %d") %
+                (self.rcount, rank, self.rcounts[rank]))
+        if (self.sbuf != MPI_IN_PLACE and
             self.stype != self.rtype):
             raise ValueError(
                 S("mismatch in send and receive MPI datatypes"))

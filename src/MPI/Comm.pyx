@@ -532,17 +532,16 @@ cdef class Comm:
             m.sbuf, m.rbuf, m.rcount, m.rtype,
             op.ob_mpi, self.ob_mpi) )
 
-    def Reduce_scatter(self, sendbuf, recvbuf, Op op not None=SUM):
+    def Reduce_scatter(self, sendbuf, recvbuf,
+                       recvcounts, Op op not None=SUM):
         """
         Reduce-Scatter
         """
-        raise NotImplementedError # XXX implement!
-        cdef void *sbuf = NULL
-        cdef void *rbuf = NULL
-        cdef int *rcounts = NULL
-        cdef MPI_Datatype rtype = MPI_DATATYPE_NULL
+        cdef _p_msg_cco m = message_cco()
+        m.for_reduce_scatter(sendbuf, recvbuf,
+                             recvcounts, self.ob_mpi)
         with nogil: CHKERR( MPI_Reduce_scatter(
-            sbuf, rbuf, rcounts, rtype,
+            m.sbuf, m.rbuf, m.rcounts, m.rtype,
             op.ob_mpi, self.ob_mpi) )
 
     # Tests
