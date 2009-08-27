@@ -295,7 +295,7 @@ cdef class _p_msg_cco:
                 else:
                     self.for_cco_send(0, smsg, 0, 0)
             else:
-                self.for_cco_recv(v, rmsg, null, 0)
+                self.for_cco_recv(v, rmsg, null, size)
                 self.for_cco_send(0, smsg, root, 0)
         else: # inter-communication
             CHKERR( MPI_Comm_remote_size(comm, &size) )
@@ -304,7 +304,7 @@ cdef class _p_msg_cco:
                 self.for_cco_recv(v, rmsg, root, size)
                 self.for_cco_send(0, smsg, null, 0)
             else:
-                self.for_cco_recv(v, rmsg, null, 0)
+                self.for_cco_recv(v, rmsg, null, size)
                 self.for_cco_send(0, smsg, root, 0)
 
     # scatter/scatterv
@@ -326,7 +326,7 @@ cdef class _p_msg_cco:
                 else:
                     self.for_cco_recv(0, rmsg, root, 0)
             else:
-                self.for_cco_send(v, smsg, null, 0)
+                self.for_cco_send(v, smsg, null, size)
                 self.for_cco_recv(0, rmsg, root, 0)
         else: # inter-communication
             CHKERR( MPI_Comm_remote_size(comm, &size) )
@@ -335,7 +335,7 @@ cdef class _p_msg_cco:
                 self.for_cco_send(v, smsg, root, size)
                 self.for_cco_recv(0, rmsg, null,  0)
             else:
-                self.for_cco_send(v, smsg, null, 0)
+                self.for_cco_send(v, smsg, null, size)
                 self.for_cco_recv(0, rmsg, root, 0)
 
     # allgather/allgatherv
