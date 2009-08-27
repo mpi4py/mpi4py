@@ -395,17 +395,23 @@ cdef class _p_msg_cco:
     cdef for_reduce(self, object smsg, object rmsg,
                     int root, MPI_Comm comm):
         if comm == MPI_COMM_NULL: return
-        cdef int inter=0, rank=0
+        cdef int inter=0, rank=0, null=MPI_PROC_NULL
         CHKERR( MPI_Comm_test_inter(comm, &inter) )
         if not inter: # intra-communication
-            self.for_cro_recv(rmsg, root)
             CHKERR( MPI_Comm_rank(comm, &rank) )
-            if root == rank and is_IN_PLACE(smsg):
-                self.sbuf   = MPI_IN_PLACE
-                self.scount = self.rcount
-                self.stype  = self.rtype
+            if root == rank:
+                self.for_cro_recv(rmsg, root)
+                if is_IN_PLACE(smsg):
+                    self.sbuf   = MPI_IN_PLACE
+                    self.scount = self.rcount
+                    self.stype  = self.rtype
+                else:
+                    self.for_cro_send(smsg, root)
             else:
+                self.for_cro_recv(rmsg, null)
                 self.for_cro_send(smsg, root)
+                self.rcount = self.scount
+                self.rtype  = self.stype
         else: # inter-communication
             if ((root == <int>MPI_ROOT) or
                 (root == <int>MPI_PROC_NULL)):
