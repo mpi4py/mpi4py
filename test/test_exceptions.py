@@ -251,9 +251,10 @@ _name, _version = MPI.get_vendor()
 if _name == 'MPICH1':
     TestExcComm.ERR_COMM = MPI.ERR_ARG
 elif _name == 'Open MPI':
-    if _version < (1, 4):
+    if _version < (1, 5):
         TestExcComm.ERR_KEYVAL = MPI.ERR_OTHER
         del TestExcCommNull.testGetAttr
+    if _version < (1, 4):
         del TestExcCommNull.testGetErrhandler
 
 # --------------------------------------------------------------------
