@@ -103,10 +103,11 @@ class TestPackExternal(BaseTestPackExternal, unittest.TestCase):
 
 
 _name, _version = MPI.get_vendor()
-if _name == 'Open MPI' and _version < (1, 3, 0):
-    from sys import byteorder as sys_byteorder
-    if sys_byteorder == 'little':
-        BaseTestPackExternal.byteswap = True
+if _name == 'Open MPI':
+    if _version < (1, 3, 0):
+        from sys import byteorder as sys_byteorder
+        if sys_byteorder == 'little':
+            BaseTestPackExternal.byteswap = True
 elif _name in ('MPICH2', 'DeinoMPI'):
     BaseTestPackExternal.skipdtype += ['f', 'd']
 else:

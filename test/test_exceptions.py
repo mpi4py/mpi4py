@@ -16,22 +16,23 @@ class TestExcDatatypeNull(unittest.TestCase):
 
 class TestExcDatatype(unittest.TestCase):
 
+    DATATYPES = (MPI.BYTE, MPI.PACKED,
+                 MPI.CHAR, MPI.WCHAR,
+                 MPI.SIGNED_CHAR,  MPI.UNSIGNED_CHAR,
+                 MPI.SHORT,  MPI.UNSIGNED_SHORT,
+                 MPI.INT,  MPI.UNSIGNED,  MPI.UNSIGNED_INT,
+                 MPI.LONG,  MPI.UNSIGNED_LONG,
+                 MPI.LONG_LONG, MPI.UNSIGNED_LONG_LONG,
+                 MPI.FLOAT,  MPI.DOUBLE, MPI.LONG_DOUBLE,
+                 MPI.SHORT_INT,  MPI.TWOINT,  MPI.INT_INT,
+                 MPI.LONG_INT, MPI.LONG_LONG_INT,
+                 MPI.FLOAT_INT,  MPI.DOUBLE_INT,  MPI.LONG_DOUBLE_INT,
+                 MPI.UB,  MPI.LB,)
+
     ERR_TYPE = MPI.ERR_TYPE
 
     def testFreePredefined(self):
-        for dtype in (MPI.BYTE, MPI.PACKED,
-                      MPI.CHAR, MPI.WCHAR,
-                      MPI.SIGNED_CHAR,  MPI.UNSIGNED_CHAR,
-                      MPI.SHORT,  MPI.UNSIGNED_SHORT,
-                      MPI.INT,  MPI.UNSIGNED,  MPI.UNSIGNED_INT,
-                      MPI.LONG,  MPI.UNSIGNED_LONG,
-                      MPI.LONG_LONG, MPI.UNSIGNED_LONG_LONG,
-                      MPI.FLOAT,  MPI.DOUBLE, MPI.LONG_DOUBLE,
-                      MPI.SHORT_INT,  MPI.TWOINT,  MPI.INT_INT,
-                      MPI.LONG_INT, MPI.LONG_LONG_INT,
-                      MPI.FLOAT_INT,  MPI.DOUBLE_INT,  MPI.LONG_DOUBLE_INT,
-                      MPI.UB,  MPI.LB,):
-            if dtype == MPI.BYTE: continue ## XXX Open MPI problems !!!
+        for dtype in self.DATATYPES:
             if dtype != MPI.DATATYPE_NULL:
                 self.assertRaisesMPI(self.ERR_TYPE, dtype.Free)
                 self.assertTrue(dtype != MPI.DATATYPE_NULL)
@@ -39,6 +40,7 @@ class TestExcDatatype(unittest.TestCase):
 _name, _version = MPI.get_vendor()
 if _name == 'Open MPI':
     if _version < (1, 4, 0):
+        TestExcDatatype.DATATYPES = TestExcDatatype.DATATYPES[1:]
         TestExcDatatype.ERR_TYPE = MPI.ERR_INTERN
 
 # --------------------------------------------------------------------
@@ -296,7 +298,8 @@ except NotImplementedError:
 else:
     _name, _version = MPI.get_vendor()
     if _name == 'Open MPI':
-        TestExcWin.ERR_KEYVAL = MPI.ERR_OTHER
+        if _version < (1, 5, 0):
+            TestExcWin.ERR_KEYVAL = MPI.ERR_OTHER
 
 
 # --------------------------------------------------------------------

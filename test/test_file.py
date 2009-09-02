@@ -174,19 +174,19 @@ class TestFileSelf(BaseTestFile, unittest.TestCase):
 
 _name, _version = MPI.get_vendor()
 if _name == 'Open MPI':
-    if (_version <= (1, 2, 8) and 
-        MPI.Query_thread() > MPI.THREAD_SINGLE):
-        del BaseTestFile.testPreallocate
-        del BaseTestFile.testGetSetInfo
-        del BaseTestFile.testGetSetAtomicity
-        del BaseTestFile.testSync
-        del BaseTestFile.testGetAmode
-        del BaseTestFile.testGetSetSize
-        del BaseTestFile.testGetSetView
-        del BaseTestFile.testGetByteOffset
-        del BaseTestFile.testGetTypeExtent
-        del BaseTestFile.testSeekGetPosition
-        del BaseTestFile.testSeekGetPositionShared
+    if _version <= (1, 2, 8):
+        if MPI.Query_thread() > MPI.THREAD_SINGLE:
+            del BaseTestFile.testPreallocate
+            del BaseTestFile.testGetSetInfo
+            del BaseTestFile.testGetSetAtomicity
+            del BaseTestFile.testSync
+            del BaseTestFile.testGetAmode
+            del BaseTestFile.testGetSetSize
+            del BaseTestFile.testGetSetView
+            del BaseTestFile.testGetByteOffset
+            del BaseTestFile.testGetTypeExtent
+            del BaseTestFile.testSeekGetPosition
+            del BaseTestFile.testSeekGetPositionShared
 else:
     try:
         dummy = BaseTestFile()
