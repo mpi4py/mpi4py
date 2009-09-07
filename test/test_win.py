@@ -85,7 +85,7 @@ class TestWinWorld(BaseTestWin, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
 try:
-    w = MPI.Win.Create(None, 1, MPI.INFO_NULL, MPI.COMM_SELF).Free()
+    w = MPI.Win.Create(MPI.BOTTOM, 1, MPI.INFO_NULL, MPI.COMM_SELF).Free()
 except NotImplementedError:
     del BaseTestWin, TestWinSelf, TestWinWorld
 

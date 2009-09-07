@@ -52,6 +52,9 @@ cdef class Win:
         """
         cdef void*    base = MPI_BOTTOM
         cdef MPI_Aint size = 0
+        #
+        if is_BOTTOM(memory): 
+            memory = None
         if memory is not None:
             memory = asmemory(memory, &base, &size)
         cdef MPI_Info cinfo = arg_Info(info)
