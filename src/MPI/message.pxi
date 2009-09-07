@@ -1,10 +1,5 @@
 #---------------------------------------------------------------------
 
-cdef extern from "Python.h":
-    int is_int   "PyInt_Check"   (object)
-    int is_list  "PyList_Check"  (object)
-    int is_tuple "PyTuple_Check" (object)
-
 cdef object __BOTTOM__   = <MPI_Aint>MPI_BOTTOM
 cdef object __IN_PLACE__ = <MPI_Aint>MPI_IN_PLACE
 
@@ -14,6 +9,12 @@ cdef inline int is_BOTTOM(object msg):
 cdef inline int is_IN_PLACE(object msg):
     return (msg is None or msg is __IN_PLACE__)
 
+#---------------------------------------------------------------------
+
+cdef extern from "Python.h":
+    int is_int   "PyInt_Check"   (object)
+    int is_list  "PyList_Check"  (object)
+    int is_tuple "PyTuple_Check" (object)
 
 cdef inline object message_simple(int readonly,
                                   object msg,
