@@ -36,7 +36,7 @@ cdef class Group:
     property size:
         """number of processes in group"""
         def __get__(self):
-            return Group.Get_size(self)
+            return self.Get_size()
 
     def Get_rank(self):
         """
@@ -49,7 +49,7 @@ cdef class Group:
     property rank:
         """rank of this process in group"""
         def __get__(self):
-            return Group.Get_rank(self)
+            return self.Get_rank()
 
     @classmethod
     def Translate_ranks(cls, Group group1 not None, ranks1,
