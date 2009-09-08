@@ -555,49 +555,35 @@ cdef class _p_msg_rma:
         self.tcount = 0
         self.ttype  = MPI_DATATYPE_NULL
 
-    cdef for_rma(self, int readonly, object origin,
-                 int rank, object target):
-        # check arguments
-        cdef Py_ssize_t no = 0, nt = 0
-        if origin is not None:
-            if not is_list(origin) and not is_tuple(origin):
-                raise ValueError(S("origin: expecting a list or tuple"))
-            no = len(origin)
-            if no < 2 or no > 3:
-                raise ValueError(S("origin: expecting 2 or 3 items"))
-        if target is not None:
-            if not is_list(target) and not is_tuple(target):
-                raise ValueError(S("target: expecting a list or tuple"))
-            nt = len(target)
-            if nt > 3:
-                raise ValueError(S("target: expecting at most 3 items"))
+    cdef for_rma(self, int readonly,
+                 object origin, int rank, object target):
         # ORIGIN
-        cdef void         *oaddr = NULL
-        cdef int          ocount = 0
-        cdef MPI_Datatype otype  = MPI_DATATYPE_NULL
-        if rank==MPI_PROC_NULL and origin is not None :
-            otype = (<Datatype?>origin[-1]).ob_mpi
-        else:
-            origin = message_simple(readonly, origin, rank, 0,
-                                    &oaddr, &ocount, &otype)
+        self._origin = message_simple(
+            readonly, origin, rank, 0,
+            &self.oaddr,  &self.ocount,  &self.otype)
+        if ((rank == MPI_PROC_NULL) and 
+            (origin is not None) and
+            (is_list(origin) or is_tuple(origin)) and
+            (len(origin) > 0 and isinstance(origin[-1], Datatype))):
+            self.otype  = (<Datatype>origin[-1]).ob_mpi
+            self._origin = origin
         # TARGET
-        cdef MPI_Aint     tdisp  = 0
-        cdef int          tcount = ocount
-        cdef MPI_Datatype ttype  = otype
-        if nt > 0:
-            tdisp  = <MPI_Aint>target[0]
-        if nt > 1:
-            tcount = <int>target[1]
-        if nt > 2:
-            ttype  = (<Datatype?>target[2]).ob_mpi
-        # save collected data
-        self.oaddr  = oaddr
-        self.ocount = ocount
-        self.otype  = otype
-        self.tdisp  = tdisp
-        self.tcount = tcount
-        self.ttype  = ttype
-        self._origin = origin
+        if target is None:
+            self.tdisp  = 0
+            self.tcount = self.ocount
+            self.ttype  = self.otype
+        elif is_int(target):
+            self.tdisp  = <MPI_Aint>target
+            self.tcount = self.ocount
+            self.ttype  = self.otype
+        elif is_list(target) or is_tuple(target):
+            if len(target) != 3:
+                raise ValueError(S("target: expecting 3 items"))
+            self.tdisp  = <MPI_Aint>target[0]
+            self.tcount = <int>target[1]
+            self.ttype  = (<Datatype?>target[2]).ob_mpi
+        else:
+            raise ValueError(S("target: expecting integral or list/tuple"))
         self._target = target
 
     cdef for_put(self, object origin, int rank, object target):
