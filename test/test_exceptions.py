@@ -29,7 +29,8 @@ class TestExcDatatype(unittest.TestCase):
                  MPI.FLOAT_INT,  MPI.DOUBLE_INT,  MPI.LONG_DOUBLE_INT,
                  MPI.UB,  MPI.LB,)
 
-    ERR_TYPE = MPI.ERR_TYPE
+    ERR_TYPE   = MPI.ERR_TYPE
+    ERR_KEYVAL = MPI.ERR_KEYVAL
 
     def testFreePredefined(self):
         for dtype in self.DATATYPES:
@@ -37,11 +38,22 @@ class TestExcDatatype(unittest.TestCase):
                 self.assertRaisesMPI(self.ERR_TYPE, dtype.Free)
                 self.assertTrue(dtype != MPI.DATATYPE_NULL)
 
+    def testKeyvalInvalid(self):
+        for dtype in self.DATATYPES:
+            if dtype != MPI.DATATYPE_NULL:
+                try:
+                    self.assertRaisesMPI(self.ERR_KEYVAL,
+                                         dtype.Get_attr,
+                                         MPI.KEYVAL_INVALID)
+                except NotImplementedError: 
+                    return
+
 _name, _version = MPI.get_vendor()
 if _name == 'Open MPI':
     if _version < (1, 4, 0):
         TestExcDatatype.DATATYPES = TestExcDatatype.DATATYPES[1:]
         TestExcDatatype.ERR_TYPE = MPI.ERR_INTERN
+        TestExcDatatype.ERR_KEYVAL = MPI.ERR_OTHER
 
 # --------------------------------------------------------------------
 

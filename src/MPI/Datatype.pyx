@@ -622,6 +622,21 @@ cdef class Datatype:
                                        self.ob_mpi, &size) )
         return size
 
+    # Attributes
+    # ----------
+
+    def Get_attr(self, int keyval):
+        """
+        Retrieve attribute value by key
+        """
+        cdef void *attrval = NULL
+        cdef int  flag = 0
+        CHKERR( MPI_Type_get_attr(self.ob_mpi, keyval, &attrval, &flag) )
+        if not flag: return None
+        if not attrval: return 0
+        # user-defined attribute keyval
+        return PyLong_FromVoidPtr(attrval)
+
     # Naming Objects
     # --------------
 
