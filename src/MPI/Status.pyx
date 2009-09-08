@@ -25,7 +25,7 @@ cdef class Status:
         """
         return self.ob_mpi.MPI_SOURCE
 
-    def Set_source(self, source):
+    def Set_source(self, int source):
         """
         Set message source
         """
@@ -44,7 +44,7 @@ cdef class Status:
         """
         return self.ob_mpi.MPI_TAG
 
-    def Set_tag(self, tag):
+    def Set_tag(self, int tag):
         """
         Set message tag
         """
@@ -63,7 +63,7 @@ cdef class Status:
         """
         return self.ob_mpi.MPI_ERROR
 
-    def Set_error(self, error):
+    def Set_error(self, int error):
         """
         Set message error
         """
