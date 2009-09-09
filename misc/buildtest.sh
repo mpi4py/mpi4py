@@ -31,7 +31,7 @@ rm -rf $BUILDDIR && mkdir -p $BUILDDIR
 cp dist/$NAME-$VERSION.tar.gz $BUILDDIR
 
 
-source misc/$MPIIMP.env
+source misc/env-$MPIIMP.sh
 cd $BUILDDIR
 tar -zxf $NAME-$VERSION.tar.gz
 cd $NAME-$VERSION
