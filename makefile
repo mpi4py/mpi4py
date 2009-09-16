@@ -68,10 +68,10 @@ docsclean:
 RST2HTML = rst2html
 RST2HTMLOPTS = --no-compact-lists --cloak-email-addresses
 rst2html:
-	${RST2HTML} ${RST2HTMLOPTS} ./LICENSE.txt  > docs/LICENSE.html
-	${RST2HTML} ${RST2HTMLOPTS} ./HISTORY.txt  > docs/HISTORY.html
-	${RST2HTML} ${RST2HTMLOPTS} ./THANKS.txt   > docs/THANKS.html
-	${RST2HTML} ${RST2HTMLOPTS} docs/index.rst > docs/index.html
+	${RST2HTML} ${RST2HTMLOPTS} ./LICENSE.txt > docs/LICENSE.html
+	${RST2HTML} ${RST2HTMLOPTS} ./HISTORY.txt > docs/HISTORY.html
+	${RST2HTML} ${RST2HTMLOPTS} ./THANKS.txt  > docs/THANKS.html
+	${RST2HTML} ${RST2HTMLOPTS} docs/source/index.rst > docs/index.html
 
 SPHINXBUILD = sphinx-build
 SPHINXOPTS  =
@@ -80,12 +80,12 @@ sphinx-html:
 	${PYTHON} -c 'import mpi4py.MPI'
 	mkdir -p build/doctrees docs/usrman
 	${SPHINXBUILD} -b html -d build/doctrees ${SPHINXOPTS} \
-	docs/source docs/usrman
+	docs/source/usrman docs/usrman
 sphinx-pdf:
 	${PYTHON} -c 'import mpi4py.MPI'
 	mkdir -p build/doctrees build/latex
 	${SPHINXBUILD} -b latex -d build/doctrees ${SPHINXOPTS} \
-	docs/source build/latex
+	docs/source/usrman build/latex
 	${MAKE} -C build/latex all-pdf > /dev/null
 	mv build/latex/*.pdf docs/
 

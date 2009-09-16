@@ -10,7 +10,7 @@
 
 
 Thank you for downloading the *MPI for Python* project archive. As
-this is a work in progress, please check the `project page`_ for
+this is a work in progress, please check the `project website`_ for
 updates.
 
 .. _project website:  http://mpi4py.googlecode.com/
@@ -24,4 +24,4 @@ updates.
 
 - This package uses standard `distutils`. For detailed instructions
   about requirements and the building/install process, read the file
-  ``docs/source/install.rst``.
+  ``docs/source/usrman/install.rst``.
