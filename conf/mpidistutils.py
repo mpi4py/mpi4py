@@ -32,6 +32,7 @@ del sys
 
 import sys, os, re
 from distutils import sysconfig
+from distutils.util  import convert_path
 from distutils.util  import split_quoted
 from distutils.spawn import find_executable
 from distutils import log
@@ -298,7 +299,7 @@ except ImportError:
 class Configure(Scanner):
     SRCDIR = 'src'
     SOURCES = [os.path.join('include', 'mpi4py', 'mpi.pxi')]
-    DESTDIR = os.path.join('src')
+    DESTDIR = 'src'
     CONFIG_H = 'config.h'
     MISSING_H = 'missing.h'
     def __init__(self):
@@ -307,11 +308,10 @@ class Configure(Scanner):
             fullname = os.path.join(self.SRCDIR, filename)
             self.parse_file(fullname)
 
-    def write_headers(self, results, config_h=None, missing_h=None):
-        if config_h is None:
-            config_h = os.path.join(self.DESTDIR, self.CONFIG_H)
-        if missing_h is None:
-            missing_h = os.path.join(self.DESTDIR, self.MISSING_H)
+    def write_headers(self, results):
+        destdir = self.DESTDIR
+        config_h  = os.path.join(destdir, self.CONFIG_H)
+        missing_h = os.path.join(destdir, self.MISSING_H)
         log.info("writing '%s'", config_h)
         self.dump_config_h(config_h, results)
         log.info("writing '%s'", missing_h)
@@ -502,19 +502,38 @@ class config(cmd_config.config):
         configure = Configure()
         results = []
         for name, code in configure.itertests():
-            log.info("checking for '%s'" % name)
-            ok = self.run_configtest(code)
+            log.info("checking for '%s' ..." % name)
+            body = self.gen_configtest(configure, results, code)
+            ok = self.run_configtest(body)
             if not ok:
-                log.info("**** failed check for %s" % name)
+                log.info("**** failed check for '%s'" % name)
             results.append((name, ok))
-        return configure.write_headers(results)
+        configure.write_headers(results)
 
-    def run_configtest(self, code, lang='c'):
-        body = ['int main(int argc, char **argv) {',
+    def gen_configtest(self, configure, results, code):
+        # 
+        configtest_h = "_configtest.h"
+        self.temp_files.append(configtest_h)
+        fh = open(configtest_h, "w")
+        try:
+            sep = "/* " + ('-'*72)+ " */\n"
+            fh.write(sep)
+            configure.dump_config_h(fh, results)
+            fh.write(sep)
+            configure.dump_missing_h(fh, results)
+            fh.write(sep)
+        finally:
+            fh.close()
+        #
+        body = ['#include "%s"' % configtest_h,
+                'int main(int argc, char **argv) {',
                 '  %s' % code,
                 '  return 0;',
                 '}']
         body = '\n'.join(body) + '\n'
+        return body
+
+    def run_configtest(self, body, lang='c'):
         return self.try_link(body,
                              headers=['mpi.h'],
                              include_dirs=self.include_dirs,
@@ -594,7 +613,6 @@ class build_py(cmd_build_py.build_py):
         def find_data_files (self, package, src_dir):
             """Return filenames for package's data files in 'src_dir'"""
             from glob import glob
-            from distutils.util import convert_path
             globs = (self.package_data.get('', [])
                      + self.package_data.get(package, []))
             files = []

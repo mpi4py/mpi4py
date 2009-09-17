@@ -744,7 +744,7 @@ cdef extern from "mpi.h" nogil:
     MPI_Fint MPI_File_c2f       (MPI_File)
     MPI_Fint MPI_Errhandler_c2f (MPI_Errhandler)
 
-    # Fortran ->C
+    # Fortran -> C
     MPI_Datatype   MPI_Type_f2c       (MPI_Fint)
     MPI_Request    MPI_Request_f2c    (MPI_Fint)
     MPI_Op         MPI_Op_f2c         (MPI_Fint)

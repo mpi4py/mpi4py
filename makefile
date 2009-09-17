@@ -22,7 +22,7 @@ clean:
 	${PYTHON} setup.py clean --all
 
 distclean:
-	-${RM} -r build  _configtest.* *.py[co]
+	-${RM} -r build  _configtest* *.py[co]
 	-${RM} -r MANIFEST dist mpi4py.egg-info
 	-${RM} `find . -name '*.py[co]'`
 	-${RM} `find . -name '*~'`
