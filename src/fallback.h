@@ -50,7 +50,6 @@
 #endif
 
 #ifdef PyMPI_MISSING_MPI_GET_VERSION
-#undef MPI_Get_version
 static int PyMPI_Get_version(int *version, int* subversion)
 {
   if (!version)    return MPI_ERR_ARG;
@@ -59,6 +58,7 @@ static int PyMPI_Get_version(int *version, int* subversion)
   *subversion = MPI_SUBVERSION;
   return MPI_SUCCESS;
 }
+#undef  MPI_Get_version
 #define MPI_Get_version PyMPI_Get_version
 #endif
 
