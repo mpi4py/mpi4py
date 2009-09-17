@@ -3,25 +3,6 @@ include "ExceptionP.pyx"
 MPIException = Exception
 
 
-def Get_error_class(int errorcode):
-    """
-    Convert an error code into an error class
-    """
-    cdef int errorclass = MPI_SUCCESS
-    CHKERR( MPI_Error_class(errorcode, &errorclass) )
-    return errorclass
-
-def Get_error_string(int errorcode):
-    """
-    Return a string for a given error code
-    """
-    cdef char string[MPI_MAX_ERROR_STRING+1]
-    cdef int resultlen = 0
-    CHKERR( MPI_Error_string(errorcode, string, &resultlen) )
-    return tompistr(string, resultlen)
-
-
-
 # Actually no errors
 SUCCESS      = MPI_SUCCESS
 ERR_LASTCODE = MPI_ERR_LASTCODE
@@ -96,3 +77,48 @@ ERR_RMA_SYNC               = MPI_ERR_RMA_SYNC
 ERR_SIZE                   = MPI_ERR_SIZE
 ERR_DISP                   = MPI_ERR_DISP
 ERR_ASSERT                 = MPI_ERR_ASSERT
+
+
+def Get_error_class(int errorcode):
+    """
+    Convert an *error code* into an *error class*
+    """
+    cdef int errorclass = MPI_SUCCESS
+    CHKERR( MPI_Error_class(errorcode, &errorclass) )
+    return errorclass
+
+def Get_error_string(int errorcode):
+    """
+    Return the *error string* for a given 
+    *error class* or *error code*
+    """
+    cdef char string[MPI_MAX_ERROR_STRING+1]
+    cdef int resultlen = 0
+    CHKERR( MPI_Error_string(errorcode, string, &resultlen) )
+    return tompistr(string, resultlen)
+
+
+def Add_error_class():
+    """
+    Add an *error class* to the known error classes
+    """
+    cdef int errorclass = MPI_SUCCESS
+    CHKERR( MPI_Add_error_class(&errorclass) )
+    return errorclass
+
+def Add_error_code(int errorclass):
+    """
+    Add an *error code* to an *error class*
+    """
+    cdef int errorcode = MPI_SUCCESS
+    CHKERR( MPI_Add_error_code(errorclass, &errorcode) )
+    return errorcode
+
+def Add_error_string(int errorcode, string):
+    """
+    Associate an *error string* with an
+    *error class* or *errorcode*
+    """
+    cdef char *cstring = NULL
+    string = asmpistr(string, &cstring, NULL)
+    CHKERR( MPI_Add_error_string(errorcode, cstring) )
