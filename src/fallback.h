@@ -49,7 +49,7 @@
 #endif
 #endif
 
-#ifdef PyMPI_MISSING_MPI_GET_VERSION
+#ifdef PyMPI_MISSING_MPI_Get_version
 static int PyMPI_Get_version(int *version, int* subversion)
 {
   if (!version)    return MPI_ERR_ARG;
@@ -66,7 +66,7 @@ static int PyMPI_Get_version(int *version, int* subversion)
 
 /* Threading Support */
 
-#ifdef PyMPI_MISSING_MPI_INIT_THREAD
+#ifdef PyMPI_MISSING_MPI_Init_thread
 static int PyMPI_Init_thread(int *argc, char ***argv,
                              int required, int *provided)
 {
@@ -81,7 +81,7 @@ static int PyMPI_Init_thread(int *argc, char ***argv,
 #define MPI_Init_thread PyMPI_Init_thread
 #endif
 
-#ifdef PyMPI_MISSING_MPI_QUERY_THREAD
+#ifdef PyMPI_MISSING_MPI_Query_thread
 static int PyMPI_Query_thread(int *provided)
 {
   if (!provided) return MPI_ERR_ARG;
@@ -92,7 +92,7 @@ static int PyMPI_Query_thread(int *provided)
 #define MPI_Query_thread PyMPI_Query_thread
 #endif
 
-#ifdef PyMPI_MISSING_MPI_IS_THREAD_MAIN
+#ifdef PyMPI_MISSING_MPI_Is_thread_main
 static int PyMPI_Is_thread_main(int *flag)
 {
   if (!flag) return MPI_ERR_ARG;
@@ -115,8 +115,10 @@ static MPI_Status PyMPI_STATUS_IGNORE;
 
 #ifdef PyMPI_MISSING_MPI_STATUSES_IGNORE
 #ifndef PyMPI_MPI_STATUSES_IGNORE_SIZE
-#define PyMPI_MPI_STATUSES_IGNORE_SIZE 4096
+#if defined(__GNUC__) || defined(__ICC) || defined(__INTEL_COMPILER)
 #warning "MPI_STATUSES_IGNORE will use static storage of size 4096"
+#endif
+#define PyMPI_MPI_STATUSES_IGNORE_SIZE 4096
 #endif
 static MPI_Status PyMPI_STATUSES_IGNORE[PyMPI_MPI_STATUSES_IGNORE_SIZE];
 #undef  MPI_STATUSES_IGNORE
@@ -132,7 +134,7 @@ static MPI_Status PyMPI_STATUSES_IGNORE[PyMPI_MPI_STATUSES_IGNORE_SIZE];
 #define MPI_LONG_LONG MPI_LONG_LONG_INT
 #endif
 
-#ifdef PyMPI_MISSING_MPI_TYPE_GET_EXTENT
+#ifdef PyMPI_MISSING_MPI_Type_get_extent
 static int PyMPI_Type_get_extent(MPI_Datatype datatype,
                                  MPI_Aint *lb, MPI_Aint *extent)
 {
@@ -147,7 +149,7 @@ static int PyMPI_Type_get_extent(MPI_Datatype datatype,
 #define MPI_Type_get_extent PyMPI_Type_get_extent
 #endif
 
-#ifdef PyMPI_MISSING_MPI_TYPE_DUP
+#ifdef PyMPI_MISSING_MPI_Type_dup
 static int PyMPI_Type_dup(MPI_Datatype datatype, MPI_Datatype *newtype)
 {
   int ierr = MPI_SUCCESS;
@@ -161,7 +163,7 @@ static int PyMPI_Type_dup(MPI_Datatype datatype, MPI_Datatype *newtype)
 #define MPI_Type_dup PyMPI_Type_dup
 #endif
 
-#ifdef PyMPI_MISSING_MPI_TYPE_CREATE_INDEXED_BLOCK
+#ifdef PyMPI_MISSING_MPI_Type_create_indexed_block
 static int PyMPI_Type_create_indexed_block(int count,
                                            int blocklength,
                                            int displacements[],
@@ -188,7 +190,7 @@ static int PyMPI_Type_create_indexed_block(int count,
  * mpich2-1.0.7/src/mpi/datatype/type_create_subarray.c
  *
  */
-#ifdef PyMPI_MISSING_MPI_TYPE_CREATE_SUBARRAY
+#ifdef PyMPI_MISSING_MPI_Type_create_subarray
 
 #undef  PyMPI_CHKARG
 #define PyMPI_CHKARG(EXPR) if (!(EXPR)) return MPI_ERR_ARG
@@ -298,7 +300,7 @@ static int PyMPI_Type_create_subarray(int ndims,
  * mpich2-1.0.7/src/mpi/datatype/type_create_darray.c
  *
  */
-#ifdef PyMPI_MISSING_MPI_TYPE_CREATE_DARRAY
+#ifdef PyMPI_MISSING_MPI_Type_create_darray
 
 #undef  PyMPI_MIN
 #define PyMPI_MIN(__a, __b) (((__a) < (__b)) ? (__a) : (__b))
@@ -600,8 +602,8 @@ static int PyMPI_Type_create_darray(int size,
 
 /* Memory Allocation */
 
-#if (defined(PyMPI_MISSING_MPI_ALLOC_MEM) ||    \
-     defined(PyMPI_MISSING_MPI_FREE_MEM))
+#if (defined(PyMPI_MISSING_MPI_Alloc_mem) || \
+     defined(PyMPI_MISSING_MPI_Free_mem))
 
 static int PyMPI_Alloc_mem(MPI_Aint size, MPI_Info info, void *baseptr)
 {

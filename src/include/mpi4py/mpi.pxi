@@ -318,9 +318,9 @@ cdef extern from "mpi.h" nogil:
 
     ctypedef void MPI_Comm_errhandler_fn(MPI_Comm*,int*,...)                 #:= MPI_Handler_function
     int MPI_Comm_create_errhandler(MPI_Comm_errhandler_fn*, MPI_Errhandler*) #:= MPI_Errhandler_create
+    int MPI_Comm_call_errhandler(MPI_Comm, int)
     int MPI_Comm_get_errhandler(MPI_Comm, MPI_Errhandler*)                   #:= MPI_Errhandler_get
     int MPI_Comm_set_errhandler(MPI_Comm, MPI_Errhandler)                    #:= MPI_Errhandler_set
-    int MPI_Comm_call_errhandler(MPI_Comm, int)
 
     int MPI_Comm_get_name(MPI_Comm, char[], int*)
     int MPI_Comm_set_name(MPI_Comm, char[])
@@ -480,9 +480,9 @@ cdef extern from "mpi.h" nogil:
 
     ctypedef void MPI_Win_errhandler_fn(MPI_Win*,int*,...)
     int MPI_Win_create_errhandler(MPI_Win_errhandler_fn*, MPI_Errhandler*)
+    int MPI_Win_call_errhandler(MPI_Win, int)
     int MPI_Win_get_errhandler(MPI_Win, MPI_Errhandler*)
     int MPI_Win_set_errhandler(MPI_Win, MPI_Errhandler)
-    int MPI_Win_call_errhandler(MPI_Win, int)
 
     int MPI_Win_get_name(MPI_Win, char[], int*)
     int MPI_Win_set_name(MPI_Win, char[])
@@ -586,9 +586,9 @@ cdef extern from "mpi.h" nogil:
 
     ctypedef void MPI_File_errhandler_fn(MPI_File*,int*,...)
     int MPI_File_create_errhandler(MPI_File_errhandler_fn*, MPI_Errhandler*)
+    int MPI_File_call_errhandler(MPI_File, int)
     int MPI_File_get_errhandler(MPI_File, MPI_Errhandler*)
     int MPI_File_set_errhandler(MPI_File, MPI_Errhandler)
-    int MPI_File_call_errhandler(MPI_File, int)
 
     ctypedef int MPI_Datarep_conversion_function(void*,MPI_Datatype,int,void*,MPI_Offset,void*)
     ctypedef int MPI_Datarep_extent_function(MPI_Datatype,MPI_Aint*,void*)

@@ -32,9 +32,9 @@ class Node(object):
 
     """
 
-    def init(self, name=None, **kargs):
-        if name is not None:
-            self.name = name.upper()
+    def init(self, name, **kargs):
+        assert name is not None
+        self.name = name
         self.__dict__.update(kargs)
     def config(self):
         return self.CONFIG % vars(self)
@@ -70,7 +70,7 @@ class NodeFuncType(NodeType):
     #define %(cname)s PyMPI_%(cname)s""")
 
     def __init__(self, crett, cname, cargs, calias=None):
-        self.init(name=cname.upper(),
+        self.init(name=cname,
                   cname=cname,
                   ctype=cname+'*',)
         self.crett = crett
@@ -99,7 +99,7 @@ class NodeFuncProto(Node):
     HEADER = ' '. join(['#define %(cname)s(%(cargsnamed)s)',
                         'PyMPI_UNAVAILABLE("%(name)s"%(comma)s%(cargsnamed)s)'])
     def __init__(self, crett, cname, cargs, calias=None):
-        self.init(name=cname.upper(),
+        self.init(name=cname,
                   cname=cname)
         self.crett = crett
         if cargs == 'void': cargs = ''
@@ -227,7 +227,7 @@ class Scanner(object):
             args = nodetype.match(line)
             if args:
                 node = nodetype(*args)
-                assert node.name not in nodemap
+                assert node.name not in nodemap, node.name
                 nodemap[node.name] = len(nodelist)
                 nodelist.append(node)
                 break
@@ -311,7 +311,7 @@ class Scanner(object):
             nodelist = self.nodes
             nodemap = self.nodemap
             for name, result in suite:
-                assert name in nodemap
+                assert name in nodemap, name
                 if not result:
                     node = nodelist[nodemap[name]]
                     fileobj.write(node.header())

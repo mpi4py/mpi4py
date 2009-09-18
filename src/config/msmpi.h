@@ -3,10 +3,10 @@
 
 #define PyMPI_API_CALL MPIAPI
 
-#define PyMPI_MISSING_MPI_TYPE_CREATE_F90_INTEGER 1
-#define PyMPI_MISSING_MPI_TYPE_CREATE_F90_REAL 1
-#define PyMPI_MISSING_MPI_TYPE_CREATE_F90_COMPLEX 1
-#define PyMPI_MISSING_MPI_FILE_C2F 1
-#define PyMPI_MISSING_MPI_FILE_F2C 1
+#define PyMPI_MISSING_MPI_Type_create_f90_integer 1
+#define PyMPI_MISSING_MPI_Type_create_f90_real 1
+#define PyMPI_MISSING_MPI_Type_create_f90_complex 1
+#define PyMPI_MISSING_MPI_File_c2f 1
+#define PyMPI_MISSING_MPI_File_f2c 1
 
 #endif /* !PyMPI_CONFIG_MSMPI_H */
