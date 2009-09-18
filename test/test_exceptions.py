@@ -24,8 +24,7 @@ class TestExcDatatype(unittest.TestCase):
                  MPI.LONG,  MPI.UNSIGNED_LONG,
                  MPI.LONG_LONG, MPI.UNSIGNED_LONG_LONG,
                  MPI.FLOAT,  MPI.DOUBLE, MPI.LONG_DOUBLE,
-                 MPI.SHORT_INT,  MPI.TWOINT,  MPI.INT_INT,
-                 MPI.LONG_INT, MPI.LONG_LONG_INT,
+                 MPI.SHORT_INT,  MPI.TWOINT,  MPI.INT_INT, MPI.LONG_INT,
                  MPI.FLOAT_INT,  MPI.DOUBLE_INT,  MPI.LONG_DOUBLE_INT,
                  MPI.UB,  MPI.LB,)
 
