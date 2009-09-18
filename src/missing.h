@@ -189,6 +189,18 @@ typedef void *PyMPI_MPI_Errhandler;
 #endif
 #endif
 
+#ifdef PyMPI_MISSING_MPI_PACKED
+#if !defined(MPI_PACKED)
+#define MPI_PACKED ((MPI_Datatype)MPI_DATATYPE_NULL)
+#endif
+#endif
+
+#ifdef PyMPI_MISSING_MPI_BYTE
+#if !defined(MPI_BYTE)
+#define MPI_BYTE ((MPI_Datatype)MPI_DATATYPE_NULL)
+#endif
+#endif
+
 #ifdef PyMPI_MISSING_MPI_CHAR
 #if !defined(MPI_CHAR)
 #define MPI_CHAR ((MPI_Datatype)MPI_DATATYPE_NULL)
@@ -249,6 +261,24 @@ typedef void *PyMPI_MPI_Errhandler;
 #endif
 #endif
 
+#ifdef PyMPI_MISSING_MPI_LONG_LONG_INT
+#if !defined(MPI_LONG_LONG_INT)
+#define MPI_LONG_LONG_INT ((MPI_Datatype)MPI_DATATYPE_NULL)
+#endif
+#endif
+
+#ifdef PyMPI_MISSING_MPI_LONG_LONG
+#if !defined(MPI_LONG_LONG)
+#define MPI_LONG_LONG ((MPI_Datatype)MPI_DATATYPE_NULL)
+#endif
+#endif
+
+#ifdef PyMPI_MISSING_MPI_UNSIGNED_LONG_LONG
+#if !defined(MPI_UNSIGNED_LONG_LONG)
+#define MPI_UNSIGNED_LONG_LONG ((MPI_Datatype)MPI_DATATYPE_NULL)
+#endif
+#endif
+
 #ifdef PyMPI_MISSING_MPI_FLOAT
 #if !defined(MPI_FLOAT)
 #define MPI_FLOAT ((MPI_Datatype)MPI_DATATYPE_NULL)
@@ -264,18 +294,6 @@ typedef void *PyMPI_MPI_Errhandler;
 #ifdef PyMPI_MISSING_MPI_LONG_DOUBLE
 #if !defined(MPI_LONG_DOUBLE)
 #define MPI_LONG_DOUBLE ((MPI_Datatype)MPI_DATATYPE_NULL)
-#endif
-#endif
-
-#ifdef PyMPI_MISSING_MPI_BYTE
-#if !defined(MPI_BYTE)
-#define MPI_BYTE ((MPI_Datatype)MPI_DATATYPE_NULL)
-#endif
-#endif
-
-#ifdef PyMPI_MISSING_MPI_PACKED
-#if !defined(MPI_PACKED)
-#define MPI_PACKED ((MPI_Datatype)MPI_DATATYPE_NULL)
 #endif
 #endif
 
@@ -312,24 +330,6 @@ typedef void *PyMPI_MPI_Errhandler;
 #ifdef PyMPI_MISSING_MPI_LONG_DOUBLE_INT
 #if !defined(MPI_LONG_DOUBLE_INT)
 #define MPI_LONG_DOUBLE_INT ((MPI_Datatype)MPI_DATATYPE_NULL)
-#endif
-#endif
-
-#ifdef PyMPI_MISSING_MPI_LONG_LONG
-#if !defined(MPI_LONG_LONG)
-#define MPI_LONG_LONG ((MPI_Datatype)MPI_DATATYPE_NULL)
-#endif
-#endif
-
-#ifdef PyMPI_MISSING_MPI_UNSIGNED_LONG_LONG
-#if !defined(MPI_UNSIGNED_LONG_LONG)
-#define MPI_UNSIGNED_LONG_LONG ((MPI_Datatype)MPI_DATATYPE_NULL)
-#endif
-#endif
-
-#ifdef PyMPI_MISSING_MPI_LONG_LONG_INT
-#if !defined(MPI_LONG_LONG_INT)
-#define MPI_LONG_LONG_INT ((MPI_Datatype)MPI_DATATYPE_NULL)
 #endif
 #endif
 

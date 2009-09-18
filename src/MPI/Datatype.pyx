@@ -717,7 +717,6 @@ cdef Datatype __LONG__                = new_Datatype( MPI_LONG                  
 cdef Datatype __UNSIGNED_LONG__       = new_Datatype( MPI_UNSIGNED_LONG         )
 cdef Datatype __LONG_LONG__           = new_Datatype( MPI_LONG_LONG             )
 cdef Datatype __UNSIGNED_LONG_LONG__  = new_Datatype( MPI_UNSIGNED_LONG_LONG    )
-cdef Datatype __LONG_LONG_INT__       = new_Datatype( MPI_LONG_LONG_INT         )
 
 cdef Datatype __FLOAT__               = new_Datatype( MPI_FLOAT                 )
 cdef Datatype __DOUBLE__              = new_Datatype( MPI_DOUBLE                )
@@ -785,7 +784,6 @@ SHORT_INT           = __SHORT_INT__
 TWOINT              = __TWOINT__
 INT_INT             = __TWOINT__              #: convenience alias
 LONG_INT            = __LONG_INT__
-LONG_LONG_INT       = __LONG_LONG_INT__       #: optional datatype
 FLOAT_INT           = __FLOAT_INT__
 DOUBLE_INT          = __DOUBLE_INT__
 LONG_DOUBLE_INT     = __LONG_DOUBLE_INT__

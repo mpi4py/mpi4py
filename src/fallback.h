@@ -127,6 +127,11 @@ static MPI_Status PyMPI_STATUSES_IGNORE[PyMPI_MPI_STATUSES_IGNORE_SIZE];
 
 /* Datatypes */
 
+#ifdef PyMPI_MISSING_MPI_LONG_LONG
+#undef  MPI_LONG_LONG
+#define MPI_LONG_LONG MPI_LONG_LONG_INT
+#endif
+
 #ifdef PyMPI_MISSING_MPI_TYPE_GET_EXTENT
 static int PyMPI_Type_get_extent(MPI_Datatype datatype,
                                  MPI_Aint *lb, MPI_Aint *extent)

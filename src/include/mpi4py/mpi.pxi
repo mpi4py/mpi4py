@@ -64,7 +64,12 @@ cdef extern from "mpi.h" nogil:
 
     # Null datatype
     MPI_Datatype MPI_DATATYPE_NULL        #:= 0
+    # Special datatypes
+    MPI_Datatype MPI_UB                   #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_LB                   #:= MPI_DATATYPE_NULL
     # Elementary datatypes
+    MPI_Datatype MPI_PACKED               #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_BYTE                 #:= MPI_DATATYPE_NULL
     MPI_Datatype MPI_CHAR                 #:= MPI_DATATYPE_NULL
     MPI_Datatype MPI_WCHAR                #:= MPI_DATATYPE_NULL
     MPI_Datatype MPI_SIGNED_CHAR          #:= MPI_DATATYPE_NULL
@@ -75,11 +80,12 @@ cdef extern from "mpi.h" nogil:
     MPI_Datatype MPI_UNSIGNED             #:= MPI_DATATYPE_NULL
     MPI_Datatype MPI_LONG                 #:= MPI_DATATYPE_NULL
     MPI_Datatype MPI_UNSIGNED_LONG        #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_LONG_LONG_INT        #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_LONG_LONG            #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_UNSIGNED_LONG_LONG   #:= MPI_DATATYPE_NULL
     MPI_Datatype MPI_FLOAT                #:= MPI_DATATYPE_NULL
     MPI_Datatype MPI_DOUBLE               #:= MPI_DATATYPE_NULL
     MPI_Datatype MPI_LONG_DOUBLE          #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_BYTE                 #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_PACKED               #:= MPI_DATATYPE_NULL
     # Datatypes for reduction operations
     MPI_Datatype MPI_SHORT_INT            #:= MPI_DATATYPE_NULL
     MPI_Datatype MPI_2INT                 #:= MPI_DATATYPE_NULL
@@ -87,10 +93,6 @@ cdef extern from "mpi.h" nogil:
     MPI_Datatype MPI_FLOAT_INT            #:= MPI_DATATYPE_NULL
     MPI_Datatype MPI_DOUBLE_INT           #:= MPI_DATATYPE_NULL
     MPI_Datatype MPI_LONG_DOUBLE_INT      #:= MPI_DATATYPE_NULL
-    # Optional datatypes
-    MPI_Datatype MPI_LONG_LONG            #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_UNSIGNED_LONG_LONG   #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_LONG_LONG_INT        #:= MPI_DATATYPE_NULL
     # Fortran datatypes
     MPI_Datatype MPI_CHARACTER            #:= MPI_DATATYPE_NULL
     MPI_Datatype MPI_LOGICAL              #:= MPI_DATATYPE_NULL
@@ -99,9 +101,6 @@ cdef extern from "mpi.h" nogil:
     MPI_Datatype MPI_DOUBLE_PRECISION     #:= MPI_DATATYPE_NULL
     MPI_Datatype MPI_COMPLEX              #:= MPI_DATATYPE_NULL
     MPI_Datatype MPI_DOUBLE_COMPLEX       #:= MPI_DATATYPE_NULL
-    # Special datatypes
-    MPI_Datatype MPI_UB                   #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_LB                   #:= MPI_DATATYPE_NULL
 
     int MPI_Type_size(MPI_Datatype, int*)
     int MPI_Type_extent(MPI_Datatype, MPI_Aint*)
