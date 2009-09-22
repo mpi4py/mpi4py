@@ -1372,6 +1372,12 @@ typedef void (PyMPI_MPI_Handler_function)(MPI_Comm*,int*,...);
 #endif
 #endif
 
+#ifdef PyMPI_MISSING_MPI_Comm_call_errhandler
+#if !defined(MPI_Comm_call_errhandler)
+#define MPI_Comm_call_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_Comm_call_errhandler",a1,a2)
+#endif
+#endif
+
 #ifdef PyMPI_MISSING_MPI_Comm_get_errhandler
 #if !defined(MPI_Comm_get_errhandler)
 #define MPI_Comm_get_errhandler MPI_Errhandler_get
@@ -1381,12 +1387,6 @@ typedef void (PyMPI_MPI_Handler_function)(MPI_Comm*,int*,...);
 #ifdef PyMPI_MISSING_MPI_Comm_set_errhandler
 #if !defined(MPI_Comm_set_errhandler)
 #define MPI_Comm_set_errhandler MPI_Errhandler_set
-#endif
-#endif
-
-#ifdef PyMPI_MISSING_MPI_Comm_call_errhandler
-#if !defined(MPI_Comm_call_errhandler)
-#define MPI_Comm_call_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_Comm_call_errhandler",a1,a2)
 #endif
 #endif
 
@@ -2167,6 +2167,12 @@ typedef void (PyMPI_MPI_Win_errhandler_fn)(MPI_Win*,int*,...);
 #endif
 #endif
 
+#ifdef PyMPI_MISSING_MPI_Win_call_errhandler
+#if !defined(MPI_Win_call_errhandler)
+#define MPI_Win_call_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_Win_call_errhandler",a1,a2)
+#endif
+#endif
+
 #ifdef PyMPI_MISSING_MPI_Win_get_errhandler
 #if !defined(MPI_Win_get_errhandler)
 #define MPI_Win_get_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_Win_get_errhandler",a1,a2)
@@ -2176,12 +2182,6 @@ typedef void (PyMPI_MPI_Win_errhandler_fn)(MPI_Win*,int*,...);
 #ifdef PyMPI_MISSING_MPI_Win_set_errhandler
 #if !defined(MPI_Win_set_errhandler)
 #define MPI_Win_set_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_Win_set_errhandler",a1,a2)
-#endif
-#endif
-
-#ifdef PyMPI_MISSING_MPI_Win_call_errhandler
-#if !defined(MPI_Win_call_errhandler)
-#define MPI_Win_call_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_Win_call_errhandler",a1,a2)
 #endif
 #endif
 
@@ -2686,6 +2686,12 @@ typedef void (PyMPI_MPI_File_errhandler_fn)(MPI_File*,int*,...);
 #endif
 #endif
 
+#ifdef PyMPI_MISSING_MPI_File_call_errhandler
+#if !defined(MPI_File_call_errhandler)
+#define MPI_File_call_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_File_call_errhandler",a1,a2)
+#endif
+#endif
+
 #ifdef PyMPI_MISSING_MPI_File_get_errhandler
 #if !defined(MPI_File_get_errhandler)
 #define MPI_File_get_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_File_get_errhandler",a1,a2)
@@ -2695,12 +2701,6 @@ typedef void (PyMPI_MPI_File_errhandler_fn)(MPI_File*,int*,...);
 #ifdef PyMPI_MISSING_MPI_File_set_errhandler
 #if !defined(MPI_File_set_errhandler)
 #define MPI_File_set_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_File_set_errhandler",a1,a2)
-#endif
-#endif
-
-#ifdef PyMPI_MISSING_MPI_File_call_errhandler
-#if !defined(MPI_File_call_errhandler)
-#define MPI_File_call_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_File_call_errhandler",a1,a2)
 #endif
 #endif
 

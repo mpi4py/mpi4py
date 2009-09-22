@@ -57,9 +57,9 @@
 #define PyMPI_MISSING_MPI_REPLACE 1
 #define PyMPI_MISSING_MPI_Comm_errhandler_fn 1
 #define PyMPI_MISSING_MPI_Comm_create_errhandler 1
+#define PyMPI_MISSING_MPI_Comm_call_errhandler 1
 #define PyMPI_MISSING_MPI_Comm_get_errhandler 1
 #define PyMPI_MISSING_MPI_Comm_set_errhandler 1
-#define PyMPI_MISSING_MPI_Comm_call_errhandler 1
 #define PyMPI_MISSING_MPI_UNIVERSE_SIZE 1
 #define PyMPI_MISSING_MPI_APPNUM 1
 #define PyMPI_MISSING_MPI_LASTUSEDCODE 1
@@ -111,9 +111,9 @@
 #define PyMPI_MISSING_MPI_Win_test 1
 #define PyMPI_MISSING_MPI_Win_errhandler_fn 1
 #define PyMPI_MISSING_MPI_Win_create_errhandler 1
+#define PyMPI_MISSING_MPI_Win_call_errhandler 1
 #define PyMPI_MISSING_MPI_Win_get_errhandler 1
 #define PyMPI_MISSING_MPI_Win_set_errhandler 1
-#define PyMPI_MISSING_MPI_Win_call_errhandler 1
 #define PyMPI_MISSING_MPI_Win_get_name 1
 #define PyMPI_MISSING_MPI_Win_set_name 1
 #define PyMPI_MISSING_MPI_WIN_BASE 1
