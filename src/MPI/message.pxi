@@ -372,7 +372,14 @@ cdef class _p_msg_cco:
             CHKERR( MPI_Comm_remote_size(comm, &size) )
         #
         self.for_cco_recv(v, rmsg, 0, size)
-        self.for_cco_send(v, smsg, 0, size)
+        if not inter and is_IN_PLACE(smsg):
+            self.sbuf    = MPI_IN_PLACE
+            self.scount  = self.rcount
+            self.scounts = self.rcounts
+            self.sdispls = self.rdispls
+            self.stype   = self.rtype
+        else:
+            self.for_cco_send(v, smsg, 0, size)
 
 
     # Collective Reductions Operations
