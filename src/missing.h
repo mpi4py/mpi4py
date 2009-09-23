@@ -1084,6 +1084,11 @@ typedef void (PyMPI_MPI_User_function)(void*, void*, int*, MPI_Datatype*);
 #define MPI_Op_create(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Op_create",a1,a2,a3)
 #endif
 
+#ifdef  PyMPI_MISSING_MPI_Op_commutative
+#undef  MPI_Op_commutative
+#define MPI_Op_commutative(a1,a2) PyMPI_UNAVAILABLE("MPI_Op_commutative",a1,a2)
+#endif
+
 #ifdef  PyMPI_MISSING_MPI_INFO_NULL
 #undef  MPI_INFO_NULL
 #define MPI_INFO_NULL ((MPI_Info)0)
@@ -1640,6 +1645,11 @@ typedef int (PyMPI_MPI_Delete_function)(MPI_Comm,int,void*,void*);
 #ifdef  PyMPI_MISSING_MPI_Alltoallw
 #undef  MPI_Alltoallw
 #define MPI_Alltoallw(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Alltoallw",a1,a2,a3,a4,a5,a6,a7,a8,a9)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Reduce_local
+#undef  MPI_Reduce_local
+#define MPI_Reduce_local(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Reduce_local",a1,a2,a3,a4,a5)
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_Reduce

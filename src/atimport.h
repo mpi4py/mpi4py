@@ -77,6 +77,9 @@
 #define PyMPI_MISSING_MPI_COMPLEX16 1
 #define PyMPI_MISSING_MPI_COMPLEX32 1
 
+#define PyMPI_MISSING_MPI_Op_commutative 1
+#define PyMPI_MISSING_MPI_Reduce_local 1
+
 #endif
 #endif
 

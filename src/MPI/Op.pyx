@@ -47,6 +47,42 @@ cdef class Op:
         CHKERR( MPI_Op_free(&self.ob_mpi) )
         op_user_del(&self.ob_usrid)
 
+    # Process-local reduction
+    # -----------------------
+
+    def Is_commutative(self):
+        """
+        Query reduction operations for their commutativity
+        """
+        cdef bint flag = 0
+        CHKERR( MPI_Op_commutative(self.ob_mpi, &flag) )
+        return flag
+
+    property is_commutative:
+        """is commutative"""
+        def __get__(self):
+            return self.Is_commutative()
+        
+    def Reduce_local(self, inbuf, inoutbuf):
+        """
+        Apply a reduction operator to local data
+        """
+        # get *in* and *inout* buffers
+        cdef _p_msg_cco m = message_cco()
+        m.for_cro_send(inbuf, 0)
+        m.for_cro_recv(inoutbuf, 0)
+        # check counts and datatypes
+        if self.scount != self.rcount:
+            raise ValueError(
+                S("mismatch in inbuf count %d and inoutbuf count %d") %
+                (self.scount, self.rcount))
+        if (self.stype != self.rtype):
+            raise ValueError(
+                S("mismatch in inbuf and inoutbuf MPI datatypes"))
+        # do local reduction
+        with nogil: CHKERR( MPI_Reduce_local(
+                m.sbuf, m.rbuf, m.rcount, m.rtype, self.ob_mpi) )
+
     # Fortran Handle
     # --------------
 

@@ -47,9 +47,11 @@
 #define PyMPI_MISSING_MPI_Grequest_query_function 1
 #define PyMPI_MISSING_MPI_Grequest_start 1
 #define PyMPI_MISSING_MPI_Grequest_complete 1
+#define PyMPI_MISSING_MPI_Op_commutative 1
 #define PyMPI_MISSING_MPI_Comm_errhandler_function 1
 #define PyMPI_MISSING_MPI_Comm_call_errhandler 1
 #define PyMPI_MISSING_MPI_LASTUSEDCODE 1
+#define PyMPI_MISSING_MPI_Reduce_local 1
 #define PyMPI_MISSING_MPI_LOCK_EXCLUSIVE 1
 #define PyMPI_MISSING_MPI_LOCK_SHARED 1
 #define PyMPI_MISSING_MPI_Win_lock 1

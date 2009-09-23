@@ -31,7 +31,7 @@
 #endif
 
 #if !OMPI_HAVE_FORTRAN_REAL2
-#define PyMPI_MISSING_MPI_REAL2
+#define PyMPI_MISSING_MPI_REAL2 1
 #define PyMPI_MISSING_MPI_COMPLEX4 1
 #endif
 #if !OMPI_HAVE_FORTRAN_REAL4
@@ -50,5 +50,8 @@
 #if MPI_VERSION==2 && MPI_SUBVERSION<2
 #define PyMPI_MISSING_MPI_COMPLEX4 1
 #endif
+
+#define PyMPI_MISSING_MPI_Op_commutative 1
+#define PyMPI_MISSING_MPI_Reduce_local 1
 
 #endif /* !PyMPI_CONFIG_OPENMPI_H */

@@ -210,6 +210,7 @@
 #define PyMPI_MISSING_MPI_Op_free 1
 #define PyMPI_MISSING_MPI_User_function 1
 #define PyMPI_MISSING_MPI_Op_create 1
+#define PyMPI_MISSING_MPI_Op_commutative 1
 #define PyMPI_MISSING_MPI_INFO_NULL 1
 #define PyMPI_MISSING_MPI_Info_free 1
 #define PyMPI_MISSING_MPI_Info_create 1
@@ -321,6 +322,7 @@
 #define PyMPI_MISSING_MPI_Alltoall 1
 #define PyMPI_MISSING_MPI_Alltoallv 1
 #define PyMPI_MISSING_MPI_Alltoallw 1
+#define PyMPI_MISSING_MPI_Reduce_local 1
 #define PyMPI_MISSING_MPI_Reduce 1
 #define PyMPI_MISSING_MPI_Allreduce 1
 #define PyMPI_MISSING_MPI_Reduce_scatter 1

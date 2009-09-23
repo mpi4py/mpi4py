@@ -87,6 +87,7 @@
 #define PyMPI_MISSING_MPI_Grequest_start 1
 #define PyMPI_MISSING_MPI_Grequest_complete 1
 #define PyMPI_MISSING_MPI_REPLACE 1
+#define PyMPI_MISSING_MPI_Op_commutative 1
 #define PyMPI_MISSING_MPI_Comm_errhandler_fn 1
 #define PyMPI_MISSING_MPI_Comm_create_errhandler 1
 #define PyMPI_MISSING_MPI_Comm_call_errhandler 1
@@ -102,6 +103,7 @@
 #define PyMPI_MISSING_MPI_Comm_delete_attr_function 1
 #define PyMPI_MISSING_MPI_Comm_create_keyval 1
 #define PyMPI_MISSING_MPI_Comm_free_keyval 1
+#define PyMPI_MISSING_MPI_Reduce_local 1
 #define PyMPI_MISSING_MPI_Alltoallw 1
 #define PyMPI_MISSING_MPI_Exscan 1
 #define PyMPI_MISSING_MPI_Open_port 1

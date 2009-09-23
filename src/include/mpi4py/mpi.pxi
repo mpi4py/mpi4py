@@ -284,6 +284,7 @@ cdef extern from "mpi.h" nogil:
 
     ctypedef void MPI_User_function(void*, void*, int*, MPI_Datatype*)
     int MPI_Op_create(MPI_User_function*, int, MPI_Op*)
+    int MPI_Op_commutative(MPI_Op, int*)
 
     #-----------------------------------------------------------------
 
@@ -432,6 +433,7 @@ cdef extern from "mpi.h" nogil:
     int MPI_Alltoallv(void* , int*, int*, MPI_Datatype, void*, int*, int*, MPI_Datatype, MPI_Comm)
     int MPI_Alltoallw(void*, int*, int*, MPI_Datatype*, void*, int*, int*, MPI_Datatype*, MPI_Comm)
 
+    int MPI_Reduce_local(void*, void*, int, MPI_Datatype, MPI_Op)
     int MPI_Reduce(void* , void*, int, MPI_Datatype, MPI_Op, int, MPI_Comm)
     int MPI_Allreduce(void* , void*, int, MPI_Datatype, MPI_Op, MPI_Comm)
     int MPI_Reduce_scatter(void* , void*, int*, MPI_Datatype, MPI_Op, MPI_Comm)

@@ -14,6 +14,8 @@
 #define PyMPI_MISSING_MPI_Type_create_f90_real 1
 #define PyMPI_MISSING_MPI_Type_create_f90_complex 1
 #endif /* MPICH2 < 1.1.0 */
+#define PyMPI_MISSING_MPI_Op_commutative 1
+#define PyMPI_MISSING_MPI_Reduce_local 1
 #define PyMPI_MISSING_MPI_File_c2f 1
 #define PyMPI_MISSING_MPI_File_f2c 1
 
