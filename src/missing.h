@@ -1366,6 +1366,12 @@ typedef void (PyMPI_MPI_Handler_function)(MPI_Comm*,int*,...);
 #endif
 #endif
 
+#ifdef PyMPI_MISSING_MPI_Comm_errhandler_function
+#if !defined(MPI_Comm_errhandler_function)
+#define MPI_Comm_errhandler_function MPI_Comm_errhandler_fn
+#endif
+#endif
+
 #ifdef PyMPI_MISSING_MPI_Comm_create_errhandler
 #if !defined(MPI_Comm_create_errhandler)
 #define MPI_Comm_create_errhandler MPI_Errhandler_create
@@ -2161,6 +2167,12 @@ typedef void (PyMPI_MPI_Win_errhandler_fn)(MPI_Win*,int*,...);
 #endif
 #endif
 
+#ifdef PyMPI_MISSING_MPI_Win_errhandler_function
+#if !defined(MPI_Win_errhandler_function)
+#define MPI_Win_errhandler_function MPI_Win_errhandler_fn
+#endif
+#endif
+
 #ifdef PyMPI_MISSING_MPI_Win_create_errhandler
 #if !defined(MPI_Win_create_errhandler)
 #define MPI_Win_create_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_Win_create_errhandler",a1,a2)
@@ -2677,6 +2689,12 @@ typedef int (PyMPI_MPI_Win_delete_attr_function)(MPI_Win,int,void*,void*);
 #if !defined(MPI_File_errhandler_fn)
 typedef void (PyMPI_MPI_File_errhandler_fn)(MPI_File*,int*,...);
 #define MPI_File_errhandler_fn PyMPI_MPI_File_errhandler_fn
+#endif
+#endif
+
+#ifdef PyMPI_MISSING_MPI_File_errhandler_function
+#if !defined(MPI_File_errhandler_function)
+#define MPI_File_errhandler_function MPI_File_errhandler_fn
 #endif
 #endif
 

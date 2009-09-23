@@ -39,6 +39,10 @@
 #if (10*MPI_VERSION+MPI_SUBVERSION) < 22
 #if !defined(PyMPI_HAVE_CONFIG_H)
 
+#define PyMPI_MISSING_MPI_Comm_errhandler_function 1
+#define PyMPI_MISSING_MPI_Win_errhandler_function 1
+#define PyMPI_MISSING_MPI_File_errhandler_function 1
+
 #endif
 #endif
 
