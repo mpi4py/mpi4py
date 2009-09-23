@@ -3,9 +3,17 @@
 
 #define PyMPI_API_CALL MPIAPI
 
+#define PyMPI_MISSING_MPI_LOGICAL1 1
+#define PyMPI_MISSING_MPI_LOGICAL2 1
+#define PyMPI_MISSING_MPI_LOGICAL4 1
+#define PyMPI_MISSING_MPI_LOGICAL8 1
+#define PyMPI_MISSING_MPI_REAL2 1
+#define PyMPI_MISSING_MPI_COMPLEX4 1
+#if !defined(MPICH2_NUMVERSION) || (MPICH2_NUMVERSION < 10100000)
 #define PyMPI_MISSING_MPI_Type_create_f90_integer 1
 #define PyMPI_MISSING_MPI_Type_create_f90_real 1
 #define PyMPI_MISSING_MPI_Type_create_f90_complex 1
+#endif /* MPICH2 < 1.1.0 */
 #define PyMPI_MISSING_MPI_File_c2f 1
 #define PyMPI_MISSING_MPI_File_f2c 1
 

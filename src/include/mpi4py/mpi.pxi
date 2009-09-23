@@ -63,44 +63,79 @@ cdef extern from "mpi.h" nogil:
     #-----------------------------------------------------------------
 
     # Null datatype
-    MPI_Datatype MPI_DATATYPE_NULL        #:= 0
-    # Special datatypes
-    MPI_Datatype MPI_UB                   #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_LB                   #:= MPI_DATATYPE_NULL
-    # Elementary datatypes
-    MPI_Datatype MPI_PACKED               #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_BYTE                 #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_CHAR                 #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_WCHAR                #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_SIGNED_CHAR          #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_UNSIGNED_CHAR        #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_SHORT                #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_UNSIGNED_SHORT       #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_INT                  #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_UNSIGNED             #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_LONG                 #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_UNSIGNED_LONG        #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_LONG_LONG_INT        #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_LONG_LONG            #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_UNSIGNED_LONG_LONG   #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_FLOAT                #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_DOUBLE               #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_LONG_DOUBLE          #:= MPI_DATATYPE_NULL
-    # Datatypes for reduction operations
-    MPI_Datatype MPI_SHORT_INT            #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_2INT                 #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_LONG_INT             #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_FLOAT_INT            #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_DOUBLE_INT           #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_LONG_DOUBLE_INT      #:= MPI_DATATYPE_NULL
-    # Fortran datatypes
-    MPI_Datatype MPI_CHARACTER            #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_LOGICAL              #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_INTEGER              #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_REAL                 #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_DOUBLE_PRECISION     #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_COMPLEX              #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_DOUBLE_COMPLEX       #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_DATATYPE_NULL #:= 0
+    # Deprecated datatypes (since MPI-2)
+    MPI_Datatype MPI_UB #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_LB #:= MPI_DATATYPE_NULL
+    # MPI datatypes
+    MPI_Datatype MPI_PACKED #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_BYTE   #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_AINT   #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_OFFSET #:= MPI_DATATYPE_NULL
+    # Elementary C datatypes
+    MPI_Datatype MPI_CHAR               #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_WCHAR              #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_SIGNED_CHAR        #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_SHORT              #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_INT                #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_LONG               #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_LONG_LONG          #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_LONG_LONG_INT      #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_UNSIGNED_CHAR      #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_UNSIGNED_SHORT     #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_UNSIGNED           #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_UNSIGNED_LONG      #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_UNSIGNED_LONG_LONG #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_FLOAT              #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_DOUBLE             #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_LONG_DOUBLE        #:= MPI_DATATYPE_NULL
+    # C99 datatypes
+    MPI_Datatype MPI_C_BOOL                #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_INT8_T                #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_INT16_T               #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_INT32_T               #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_INT64_T               #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_UINT8_T               #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_UINT16_T              #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_UINT32_T              #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_UINT64_T              #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_C_COMPLEX             #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_C_FLOAT_COMPLEX       #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_C_DOUBLE_COMPLEX      #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_C_LONG_DOUBLE_COMPLEX #:= MPI_DATATYPE_NULL
+    # C datatypes for reduction operations
+    MPI_Datatype MPI_SHORT_INT       #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_2INT            #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_LONG_INT        #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_FLOAT_INT       #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_DOUBLE_INT      #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_LONG_DOUBLE_INT #:= MPI_DATATYPE_NULL
+    # Elementary Fortran datatypes
+    MPI_Datatype MPI_CHARACTER        #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_LOGICAL          #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_INTEGER          #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_REAL             #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_DOUBLE_PRECISION #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_COMPLEX          #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_DOUBLE_COMPLEX   #:= MPI_DATATYPE_NULL
+    # Size-specific Fortran datatypes
+    MPI_Datatype MPI_LOGICAL1  #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_LOGICAL2  #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_LOGICAL4  #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_LOGICAL8  #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_INTEGER1  #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_INTEGER2  #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_INTEGER4  #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_INTEGER8  #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_INTEGER16 #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_REAL2     #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_REAL4     #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_REAL8     #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_REAL16    #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_COMPLEX4  #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_COMPLEX8  #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_COMPLEX16 #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_COMPLEX32 #:= MPI_DATATYPE_NULL
 
     int MPI_Type_size(MPI_Datatype, int*)
     int MPI_Type_extent(MPI_Datatype, MPI_Aint*)

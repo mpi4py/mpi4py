@@ -2,7 +2,32 @@
 #define PyMPI_CONFIG_LAMMPI_H
 
 #define PyMPI_MISSING_MPI_IN_PLACE 1
+#define PyMPI_MISSING_MPI_AINT 1
+#define PyMPI_MISSING_MPI_OFFSET 1
 #define PyMPI_MISSING_MPI_SIGNED_CHAR 1
+#define PyMPI_MISSING_MPI_C_BOOL 1
+#define PyMPI_MISSING_MPI_INT8_T 1
+#define PyMPI_MISSING_MPI_INT16_T 1
+#define PyMPI_MISSING_MPI_INT32_T 1
+#define PyMPI_MISSING_MPI_INT64_T 1
+#define PyMPI_MISSING_MPI_UINT8_T 1
+#define PyMPI_MISSING_MPI_UINT16_T 1
+#define PyMPI_MISSING_MPI_UINT32_T 1
+#define PyMPI_MISSING_MPI_UINT64_T 1
+#define PyMPI_MISSING_MPI_C_COMPLEX 1
+#define PyMPI_MISSING_MPI_C_FLOAT_COMPLEX 1
+#define PyMPI_MISSING_MPI_C_DOUBLE_COMPLEX 1
+#define PyMPI_MISSING_MPI_C_LONG_DOUBLE_COMPLEX 1
+#define PyMPI_MISSING_MPI_LOGICAL1 1
+#define PyMPI_MISSING_MPI_LOGICAL2 1
+#define PyMPI_MISSING_MPI_LOGICAL4 1
+#define PyMPI_MISSING_MPI_LOGICAL8 1
+#define PyMPI_MISSING_MPI_INTEGER16 1
+#define PyMPI_MISSING_MPI_REAL2 1
+#define PyMPI_MISSING_MPI_COMPLEX4 1
+#define PyMPI_MISSING_MPI_COMPLEX8 1
+#define PyMPI_MISSING_MPI_COMPLEX16 1
+#define PyMPI_MISSING_MPI_COMPLEX32 1
 #define PyMPI_MISSING_MPI_Type_create_indexed_block 1
 #define PyMPI_MISSING_MPI_Type_create_f90_integer 1
 #define PyMPI_MISSING_MPI_Type_create_f90_real 1
@@ -22,6 +47,7 @@
 #define PyMPI_MISSING_MPI_Grequest_query_function 1
 #define PyMPI_MISSING_MPI_Grequest_start 1
 #define PyMPI_MISSING_MPI_Grequest_complete 1
+#define PyMPI_MISSING_MPI_Comm_errhandler_function 1
 #define PyMPI_MISSING_MPI_Comm_call_errhandler 1
 #define PyMPI_MISSING_MPI_LASTUSEDCODE 1
 #define PyMPI_MISSING_MPI_LOCK_EXCLUSIVE 1
@@ -29,8 +55,10 @@
 #define PyMPI_MISSING_MPI_Win_lock 1
 #define PyMPI_MISSING_MPI_Win_unlock 1
 #define PyMPI_MISSING_MPI_Win_test 1
+#define PyMPI_MISSING_MPI_Win_errhandler_function 1
 #define PyMPI_MISSING_MPI_Win_call_errhandler 1
 #define PyMPI_MISSING_MPI_File_errhandler_fn 1
+#define PyMPI_MISSING_MPI_File_errhandler_function 1
 #define PyMPI_MISSING_MPI_File_create_errhandler 1
 #define PyMPI_MISSING_MPI_File_call_errhandler 1
 #define PyMPI_MISSING_MPI_Datarep_conversion_function 1

@@ -3,6 +3,12 @@
 
 #define PyMPI_API_CALL MPI_CALL
 
+#define PyMPI_MISSING_MPI_LOGICAL1 1
+#define PyMPI_MISSING_MPI_LOGICAL2 1
+#define PyMPI_MISSING_MPI_LOGICAL4 1
+#define PyMPI_MISSING_MPI_LOGICAL8 1
+#define PyMPI_MISSING_MPI_REAL2 1
+#define PyMPI_MISSING_MPI_COMPLEX4 1
 #define PyMPI_MISSING_MPI_Type_create_f90_integer 1
 #define PyMPI_MISSING_MPI_Type_create_f90_real 1
 #define PyMPI_MISSING_MPI_Type_create_f90_complex 1

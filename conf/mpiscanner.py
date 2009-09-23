@@ -23,11 +23,10 @@ class Node(object):
     HEADER = None
 
     HEADER_HEAD = """\
-    #ifdef PyMPI_MISSING_%(name)s
-    #if !defined(%(cname)s)
+    #ifdef  PyMPI_MISSING_%(name)s
+    #undef  %(cname)s
     """
     HEADER_TAIL = """
-    #endif
     #endif
 
     """
