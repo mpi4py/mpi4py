@@ -36,6 +36,13 @@
 #endif
 
 /* XXX describe */
+#if (10*MPI_VERSION+MPI_SUBVERSION) < 22
+#if !defined(PyMPI_HAVE_CONFIG_H)
+
+#endif
+#endif
+
+/* XXX describe */
 #include "missing.h"
 #include "fallback.h"
 

@@ -223,9 +223,9 @@
 #define PyMPI_MISSING_MPI_Errhandler_set 1
 #define PyMPI_MISSING_MPI_Comm_errhandler_fn 1
 #define PyMPI_MISSING_MPI_Comm_create_errhandler 1
+#define PyMPI_MISSING_MPI_Comm_call_errhandler 1
 #define PyMPI_MISSING_MPI_Comm_get_errhandler 1
 #define PyMPI_MISSING_MPI_Comm_set_errhandler 1
-#define PyMPI_MISSING_MPI_Comm_call_errhandler 1
 #define PyMPI_MISSING_MPI_Comm_get_name 1
 #define PyMPI_MISSING_MPI_Comm_set_name 1
 #define PyMPI_MISSING_MPI_TAG_UB 1
@@ -355,9 +355,9 @@
 #define PyMPI_MISSING_MPI_Win_test 1
 #define PyMPI_MISSING_MPI_Win_errhandler_fn 1
 #define PyMPI_MISSING_MPI_Win_create_errhandler 1
+#define PyMPI_MISSING_MPI_Win_call_errhandler 1
 #define PyMPI_MISSING_MPI_Win_get_errhandler 1
 #define PyMPI_MISSING_MPI_Win_set_errhandler 1
-#define PyMPI_MISSING_MPI_Win_call_errhandler 1
 #define PyMPI_MISSING_MPI_Win_get_name 1
 #define PyMPI_MISSING_MPI_Win_set_name 1
 #define PyMPI_MISSING_MPI_WIN_BASE 1
@@ -441,9 +441,9 @@
 #define PyMPI_MISSING_MPI_File_sync 1
 #define PyMPI_MISSING_MPI_File_errhandler_fn 1
 #define PyMPI_MISSING_MPI_File_create_errhandler 1
+#define PyMPI_MISSING_MPI_File_call_errhandler 1
 #define PyMPI_MISSING_MPI_File_get_errhandler 1
 #define PyMPI_MISSING_MPI_File_set_errhandler 1
-#define PyMPI_MISSING_MPI_File_call_errhandler 1
 #define PyMPI_MISSING_MPI_Datarep_conversion_function 1
 #define PyMPI_MISSING_MPI_Datarep_extent_function 1
 #define PyMPI_MISSING_MPI_Register_datarep 1
