@@ -16,8 +16,8 @@ static void sayhello(MPI_Comm comm)
   std::cout <<
     "Hello, World! " <<
     "I am process " << rank  <<
-    " of "          << size  << 
-    " on  "         << pname << 
+    " of "          << size  <<
+    " on  "         << pname <<
     "."             << std::endl;
 }
 
@@ -30,7 +30,7 @@ static void hw_sayhello(object py_comm)
 {
   PyObject* py_obj = py_comm.ptr();
   MPI_Comm *comm_p = PyMPIComm_Get(py_obj);
-  if (comm_p == NULL)  throw_error_already_set();
+  if (comm_p == NULL) throw_error_already_set();
   sayhello(*comm_p);
 }
 

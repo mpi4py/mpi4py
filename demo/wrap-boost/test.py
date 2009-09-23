@@ -7,9 +7,9 @@ hw.sayhello(null)
 comm = MPI.COMM_WORLD
 hw.sayhello(comm)
 
-try:    
+try:
     hw.sayhello(list())
-except: 
+except:
     pass
-else:   
+else:
     assert 0, "exception not raised"
