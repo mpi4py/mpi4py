@@ -455,15 +455,37 @@ cdef class _p_msg_cco:
             raise ValueError(
                 S("mismatch in send and receive MPI datatypes"))
 
+    cdef for_reduce_scatter_block(self, object smsg, object rmsg,
+                                  MPI_Comm comm):
+        if comm == MPI_COMM_NULL: return
+        cdef int inter=0, size=0
+        CHKERR( MPI_Comm_test_inter(comm, &inter) )
+        CHKERR( MPI_Comm_size(comm, &size) )
+        # get send and recv buffers
+        self.for_cro_recv(rmsg, 0)
+        if not inter and is_IN_PLACE(smsg):
+            self.sbuf   = MPI_IN_PLACE
+            self.scount = self.rcount*size
+            self.stype  = self.rtype
+        else:
+            self.for_cro_send(smsg, 0)
+        # check counts and datatypes
+        if (self.sbuf   != MPI_IN_PLACE and
+            self.scount != self.rcount*size):
+            raise ValueError(
+                S("mismatch in send count %d receive count %d") %
+                (self.scount,self.rcount*size))
+        if (self.sbuf  != MPI_IN_PLACE and
+            self.stype != self.rtype):
+            raise ValueError(
+                S("mismatch in send and receive MPI datatypes"))
+
     cdef for_reduce_scatter(self, object smsg, object rmsg,
                             object rcnt, MPI_Comm comm):
         if comm == MPI_COMM_NULL: return
         cdef int inter=0, size=0, rank=MPI_UNDEFINED
         CHKERR( MPI_Comm_test_inter(comm, &inter) )
-        if not inter: # intra-communication
-            CHKERR( MPI_Comm_size(comm, &size) )
-        else:
-            CHKERR( MPI_Comm_remote_size(comm, &size) )
+        CHKERR( MPI_Comm_size(comm, &size) )
         CHKERR( MPI_Comm_rank(comm, &rank) )
         # get receive counts and total sum
         cdef int i=0, sumrcounts=0
@@ -482,7 +504,7 @@ cdef class _p_msg_cco:
         else:
             self.for_cro_send(smsg, 0)
         # check counts and datatypes
-        if (self.sbuf != MPI_IN_PLACE and
+        if (self.sbuf   != MPI_IN_PLACE and
             self.scount != sumrcounts):
             raise ValueError(
                 S("mismatch in send count %d and sum(counts) %d") %
@@ -491,7 +513,7 @@ cdef class _p_msg_cco:
             raise ValueError(
                 S("mismatch in receive count %d and counts[%d] %d") %
                 (self.rcount, rank, self.rcounts[rank]))
-        if (self.sbuf != MPI_IN_PLACE and
+        if (self.sbuf  != MPI_IN_PLACE and
             self.stype != self.rtype):
             raise ValueError(
                 S("mismatch in send and receive MPI datatypes"))

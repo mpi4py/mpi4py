@@ -433,9 +433,10 @@ cdef extern from "mpi.h" nogil:
     int MPI_Alltoallv(void* , int*, int*, MPI_Datatype, void*, int*, int*, MPI_Datatype, MPI_Comm)
     int MPI_Alltoallw(void*, int*, int*, MPI_Datatype*, void*, int*, int*, MPI_Datatype*, MPI_Comm)
 
-    int MPI_Reduce_local(void*, void*, int, MPI_Datatype, MPI_Op)
     int MPI_Reduce(void* , void*, int, MPI_Datatype, MPI_Op, int, MPI_Comm)
     int MPI_Allreduce(void* , void*, int, MPI_Datatype, MPI_Op, MPI_Comm)
+    int MPI_Reduce_local(void*, void*, int, MPI_Datatype, MPI_Op)
+    int MPI_Reduce_scatter_block(void* , void*, int, MPI_Datatype, MPI_Op, MPI_Comm)
     int MPI_Reduce_scatter(void* , void*, int*, MPI_Datatype, MPI_Op, MPI_Comm)
     int MPI_Scan(void* , void*, int, MPI_Datatype, MPI_Op, MPI_Comm )
     int MPI_Exscan(void*, void*, int, MPI_Datatype, MPI_Op, MPI_Comm)

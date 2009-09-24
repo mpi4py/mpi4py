@@ -173,6 +173,38 @@ class BaseTestCCOBuf(object):
                         elif op == MPI.MIN:
                             pass # XXX
 
+    def testReduceScatterBlock(self):
+        size = self.COMM.Get_size()
+        rank = self.COMM.Get_rank()
+        for array in arrayimpl.ArrayTypes:
+            for typecode in arrayimpl.TypeMap:
+                for op in (MPI.SUM, MPI.MAX, MPI.MIN, MPI.PROD):
+                    for rcnt in range(size):
+                        sbuf = array([rank]*rcnt*size, typecode)
+                        rbuf = array(-1, typecode, rcnt)
+                        if op == MPI.PROD:
+                            sbuf = array([rank+1]*rcnt*size, typecode)
+                        self.COMM.Reduce_scatter_block(sbuf.as_mpi(),
+                                                       rbuf.as_mpi(),
+                                                       op)
+                        max_val = maxvalue(rbuf)
+                        v_sum  = (size*(size-1))/2
+                        v_prod = 1
+                        for i in range(1,size+1): v_prod *= i
+                        v_max  = size-1
+                        v_min  = 0
+                        for i, value in enumerate(rbuf):
+                            if op == MPI.SUM:
+                                if v_sum <= max_val:
+                                    self.assertAlmostEqual(value, v_sum)
+                            elif op == MPI.PROD:
+                                if v_prod <= max_val:
+                                    self.assertAlmostEqual(value, v_prod)
+                            elif op == MPI.MAX:
+                                self.assertAlmostEqual(value, v_max)
+                            elif op == MPI.MIN:
+                                self.assertAlmostEqual(value, v_min)
+
     def testScan(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()

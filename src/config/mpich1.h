@@ -104,6 +104,7 @@
 #define PyMPI_MISSING_MPI_Comm_create_keyval 1
 #define PyMPI_MISSING_MPI_Comm_free_keyval 1
 #define PyMPI_MISSING_MPI_Reduce_local 1
+#define PyMPI_MISSING_MPI_Reduce_scatter_block 1
 #define PyMPI_MISSING_MPI_Alltoallw 1
 #define PyMPI_MISSING_MPI_Exscan 1
 #define PyMPI_MISSING_MPI_Open_port 1

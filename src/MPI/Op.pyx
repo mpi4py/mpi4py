@@ -81,7 +81,7 @@ cdef class Op:
                 S("mismatch in inbuf and inoutbuf MPI datatypes"))
         # do local reduction
         with nogil: CHKERR( MPI_Reduce_local(
-                m.sbuf, m.rbuf, m.rcount, m.rtype, self.ob_mpi) )
+            m.sbuf, m.rbuf, m.rcount, m.rtype, self.ob_mpi) )
 
     # Fortran Handle
     # --------------

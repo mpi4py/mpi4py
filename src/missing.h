@@ -1647,11 +1647,6 @@ typedef int (PyMPI_MPI_Delete_function)(MPI_Comm,int,void*,void*);
 #define MPI_Alltoallw(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Alltoallw",a1,a2,a3,a4,a5,a6,a7,a8,a9)
 #endif
 
-#ifdef  PyMPI_MISSING_MPI_Reduce_local
-#undef  MPI_Reduce_local
-#define MPI_Reduce_local(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Reduce_local",a1,a2,a3,a4,a5)
-#endif
-
 #ifdef  PyMPI_MISSING_MPI_Reduce
 #undef  MPI_Reduce
 #define MPI_Reduce(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Reduce",a1,a2,a3,a4,a5,a6,a7)
@@ -1660,6 +1655,16 @@ typedef int (PyMPI_MPI_Delete_function)(MPI_Comm,int,void*,void*);
 #ifdef  PyMPI_MISSING_MPI_Allreduce
 #undef  MPI_Allreduce
 #define MPI_Allreduce(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_Allreduce",a1,a2,a3,a4,a5,a6)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Reduce_local
+#undef  MPI_Reduce_local
+#define MPI_Reduce_local(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Reduce_local",a1,a2,a3,a4,a5)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Reduce_scatter_block
+#undef  MPI_Reduce_scatter_block
+#define MPI_Reduce_scatter_block(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_Reduce_scatter_block",a1,a2,a3,a4,a5,a6)
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_Reduce_scatter

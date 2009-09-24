@@ -174,7 +174,7 @@ static int PyMPI_Type_create_indexed_block(int count,
   int ierr = MPI_SUCCESS;
   if (count > 0) {
     blocklengths = (int *) PyMPI_MALLOC(count*sizeof(int));
-    if (!blocklengths) return MPI_ERR_NO_MEM;
+    if (!blocklengths) return MPI_ERR_INTERN;
   }
   for (i=0; i<count; i++) blocklengths[i] = blocklength;
   ierr = MPI_Type_indexed(count,blocklengths,displacements,oldtype,newtype);
@@ -596,6 +596,31 @@ static int PyMPI_Type_create_darray(int size,
 
 #undef  MPI_Type_create_darray
 #define MPI_Type_create_darray PyMPI_Type_create_darray
+#endif
+
+/* ---------------------------------------------------------------- */
+
+#ifdef PyMPI_MISSING_MPI_Reduce_scatter_block
+static int PyMPI_Reduce_scatter_block(void *sendbuf, void *recvbuf,
+                                      int recvcount, MPI_Datatype datatype,
+                                      MPI_Op op, MPI_Comm comm)
+{
+  int ierr = MPI_SUCCESS;
+  int n = 1, *recvcounts = 0;
+  ierr = MPI_Comm_size(comm, &n);
+  if (ierr != MPI_SUCCESS) return ierr;
+  recvcounts = (int *) PyMPI_MALLOC(n*sizeof(int));
+  if (!recvcounts) return MPI_ERR_INTERN;
+  while (n-- > 0) recvcounts[n] = recvcount;
+  ierr = MPI_Reduce_scatter(sendbuf, recvbuf,
+                            recvcounts, datatype,
+                            op, comm);
+  PyMPI_FREE(recvcounts);
+  return ierr;
+}
+
+#undef  MPI_Reduce_scatter_block
+#define MPI_Reduce_scatter_block PyMPI_Reduce_scatter_block
 #endif
 
 /* ---------------------------------------------------------------- */

@@ -50,6 +50,7 @@
 #define PyMPI_MISSING_MPI_Comm_set_errhandler 1
 #define PyMPI_MISSING_MPI_LASTUSEDCODE 1
 #define PyMPI_MISSING_MPI_Reduce_local 1
+#define PyMPI_MISSING_MPI_Reduce_scatter_block 1
 #define PyMPI_MISSING_MPI_Alltoallw 1
 #define PyMPI_MISSING_MPI_Exscan 1
 #define PyMPI_MISSING_MPI_Comm_join 1

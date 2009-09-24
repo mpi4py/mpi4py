@@ -322,9 +322,10 @@
 #define PyMPI_MISSING_MPI_Alltoall 1
 #define PyMPI_MISSING_MPI_Alltoallv 1
 #define PyMPI_MISSING_MPI_Alltoallw 1
-#define PyMPI_MISSING_MPI_Reduce_local 1
 #define PyMPI_MISSING_MPI_Reduce 1
 #define PyMPI_MISSING_MPI_Allreduce 1
+#define PyMPI_MISSING_MPI_Reduce_local 1
+#define PyMPI_MISSING_MPI_Reduce_scatter_block 1
 #define PyMPI_MISSING_MPI_Reduce_scatter 1
 #define PyMPI_MISSING_MPI_Scan 1
 #define PyMPI_MISSING_MPI_Exscan 1

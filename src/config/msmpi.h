@@ -16,6 +16,7 @@
 #endif /* MPICH2 < 1.1.0 */
 #define PyMPI_MISSING_MPI_Op_commutative 1
 #define PyMPI_MISSING_MPI_Reduce_local 1
+#define PyMPI_MISSING_MPI_Reduce_scatter_block 1
 #define PyMPI_MISSING_MPI_File_c2f 1
 #define PyMPI_MISSING_MPI_File_f2c 1
 

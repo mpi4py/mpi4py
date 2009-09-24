@@ -79,6 +79,7 @@
 
 #define PyMPI_MISSING_MPI_Op_commutative 1
 #define PyMPI_MISSING_MPI_Reduce_local 1
+#define PyMPI_MISSING_MPI_Reduce_scatter_block 1
 
 #endif
 #endif

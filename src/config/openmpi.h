@@ -51,7 +51,10 @@
 #define PyMPI_MISSING_MPI_COMPLEX4 1
 #endif
 
+#if MPI_VERSION==2 && MPI_SUBVERSION<2
 #define PyMPI_MISSING_MPI_Op_commutative 1
 #define PyMPI_MISSING_MPI_Reduce_local 1
+#define PyMPI_MISSING_MPI_Reduce_scatter_block 1
+#endif
 
 #endif /* !PyMPI_CONFIG_OPENMPI_H */

@@ -52,6 +52,7 @@
 #define PyMPI_MISSING_MPI_Comm_call_errhandler 1
 #define PyMPI_MISSING_MPI_LASTUSEDCODE 1
 #define PyMPI_MISSING_MPI_Reduce_local 1
+#define PyMPI_MISSING_MPI_Reduce_scatter_block 1
 #define PyMPI_MISSING_MPI_LOCK_EXCLUSIVE 1
 #define PyMPI_MISSING_MPI_LOCK_SHARED 1
 #define PyMPI_MISSING_MPI_Win_lock 1

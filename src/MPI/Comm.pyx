@@ -532,10 +532,21 @@ cdef class Comm:
             m.sbuf, m.rbuf, m.rcount, m.rtype,
             op.ob_mpi, self.ob_mpi) )
 
+    def Reduce_scatter_block(self, sendbuf, recvbuf,
+                             Op op not None=SUM):
+        """
+        Reduce-Scatter Block (regular, non-vector version)
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_reduce_scatter_block(sendbuf, recvbuf, self.ob_mpi)
+        with nogil: CHKERR( MPI_Reduce_scatter_block(
+            m.sbuf, m.rbuf, m.rcount, m.rtype,
+            op.ob_mpi, self.ob_mpi) )
+
     def Reduce_scatter(self, sendbuf, recvbuf,
                        recvcounts, Op op not None=SUM):
         """
-        Reduce-Scatter
+        Reduce-Scatter (vector version)
         """
         cdef _p_msg_cco m = message_cco()
         m.for_reduce_scatter(sendbuf, recvbuf,
