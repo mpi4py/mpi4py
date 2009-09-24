@@ -9,7 +9,7 @@ MPI-enabled Python interpreter
 Some MPI-1 implementations (notably, MPICH 1) **do require** the
 actual command line arguments to be passed at the time
 :cfunc:`MPI_Init()` is called. In this case, you will need to use a
-rebuilt, MPI-enabled, Python interpreter binary executable. A basic
+re-built, MPI-enabled, Python interpreter binary executable. A basic
 implementation (targeting Python 2.X) of what is required is shown
 below:
 
@@ -32,25 +32,27 @@ The source code above is straightforward; compiling it should also
 be. However, the linking step is more tricky: special flags have to be
 passed to the linker depending on your platform. In order to alleviate
 you for such low-level details, *MPI for Python* provides some
-pure-distutils based support to build and install a MPI-enabled Python
-interpreter executable::
+pure-distutils based support to build and install an MPI-enabled
+Python interpreter executable::
 
     $ cd mpi4py-X.X.X
-    $ python setup.py build_exe [--home=$HOME]
-    $ [sudo] python setup.py install_exe
+    $ python setup.py build_exe [--mpi=<name>|--mpicc=/path/to/mpicc]
+    $ [sudo] python setup.py install_exe [--install-dir=$HOME/bin]
 
-After the above steps you should have the re-built interpreter
-installed as :file:`{prefix}/bin/python{X}.{X}-mpi`. Assuming that
-:file:`{prefix}/bin` in on your :envvar:`PATH`, you should be able to
-enter your MPI-enabled Python interactively, for example::
+After the above steps you should have the MPI-enabled interpreter
+installed as :file:`{prefix}/bin/python{X}.{X}-mpi` (or
+:file:`$HOME/bin/python{X}.{X}-mpi`). Assuming that
+:file:`{prefix}/bin` (or :file:`$HOME/bin`) is listed on your
+:envvar:`PATH`, you should be able to enter your MPI-enabled Python
+interactively, for example::
 
-    $ python2.5-mpi
-    Python 2.5.2 (r252:60911, Sep 30 2008, 15:41:38)
-    [GCC 4.3.2 20080917 (Red Hat 4.3.2-4)] on linux2
+    $ python2.6-mpi
+    Python 2.6 (r26:66714, Jun  8 2009, 16:07:26)
+    [GCC 4.4.0 20090506 (Red Hat 4.4.0-4)] on linux2
     Type "help", "copyright", "credits" or "license" for more information.
     >>> import sys
     >>> sys.executable
-    '/usr/bin/python2.5-mpi'
+    '/usr/bin/python2.6-mpi'
     >>>
 
 
