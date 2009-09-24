@@ -600,6 +600,33 @@ static int PyMPI_Type_create_darray(int size,
 
 /* ---------------------------------------------------------------- */
 
+#ifndef PyMPI_MISSING_MPI_Request_get_status
+#if (10*MPI_VERSION+MPI_SUBVERSION) < 22
+static int PyMPI_Request_get_status(MPI_Request request,
+                                    int *flag, MPI_Status *status)
+{
+  if (request == MPI_REQUEST_NULL &&
+      flag && status &&
+      status != MPI_STATUS_IGNORE &&
+      status != MPI_STATUSES_IGNORE) {
+    int n = (int) sizeof(MPI_Status);
+    unsigned char *p = (unsigned char *)status;
+    while (n-- > 0) p[n] = 0;
+    status->MPI_SOURCE = MPI_ANY_SOURCE;
+    status->MPI_TAG    = MPI_ANY_TAG;
+    status->MPI_ERROR  = MPI_SUCCESS;
+    *flag = 1;
+    return MPI_SUCCESS;
+  }
+  return MPI_Request_get_status(request, flag, status);
+}
+#undef  MPI_Request_get_status
+#define MPI_Request_get_status PyMPI_Request_get_status
+#endif
+#endif
+
+/* ---------------------------------------------------------------- */
+
 #ifdef PyMPI_MISSING_MPI_Reduce_scatter_block
 static int PyMPI_Reduce_scatter_block(void *sendbuf, void *recvbuf,
                                       int recvcount, MPI_Datatype datatype,
