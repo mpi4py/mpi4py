@@ -177,24 +177,28 @@ def run_setup():
           executables  = [ExeBinary(exe) for exe in executables()],
           **metadata)
 
-def cython_help():
+def chk_cython(*C_SOURCE):
     import sys, os
-    if not os.path.exists(os.path.join('src', 'mpi4py.MPI.c')):
-        warn = lambda msg='': sys.stderr.write(msg+'\n')
-        warn("*"*70)
-        warn()
-        warn("You need to generate C source files with Cython !!!")
-        warn("Please execute in your shell:")
-        warn()
-        warn("$ python ./conf/cythonize.py")
-        warn()
-        warn("*"*70)
-        warn()
+    if os.path.exists(os.path.join(*C_SOURCE)):
+        return
+    warn = lambda msg='': sys.stderr.write(msg+'\n')
+    warn("*"*80)
+    warn()
+    warn(" You need to generate C source files with Cython!!")
+    warn(" Download and install Cython <http://www.cython.org>")
+    warn(" and next execute in your shell:")
+    warn()
+    warn("   $ python ./conf/cythonize.py")
+    warn()
+    warn("*"*80)
 
 if __name__ == '__main__':
-    # show help about cython
-    cython_help()
-    # and call setup
-    run_setup()
+    try:
+        run_setup()
+    except:
+        try:
+            chk_cython('src', 'mpi4py.MPI.c')
+        finally:
+            raise
 
 # --------------------------------------------------------------------
