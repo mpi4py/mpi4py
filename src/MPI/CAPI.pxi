@@ -95,6 +95,8 @@ cdef api object PyMPIComm_New(MPI_Comm arg):
                 cls = Cartcomm
             elif topo == <int>MPI_GRAPH:
                 cls = Graphcomm
+            else:
+                cls = Intracomm
     cdef Comm obj = cls()
     obj.ob_mpi = arg
     return obj
