@@ -523,7 +523,12 @@ cdef class _p_msg_cco:
         if comm == MPI_COMM_NULL: return
         # get send and recv buffers
         self.for_cro_recv(rmsg, 0)
-        self.for_cro_send(smsg, 0)
+        if is_IN_PLACE(smsg):
+            self.sbuf   = MPI_IN_PLACE
+            self.scount = self.rcount
+            self.stype  = self.rtype
+        else:
+            self.for_cro_send(smsg, 0)
         # check counts and datatypes
         if self.scount != self.rcount:
             raise ValueError(
