@@ -1,5 +1,5 @@
-__doc__ = u"""
-Message Passing Interface.
+__doc__ = """
+Message Passing Interface
 """
 
 include "mpi4py/mpi.pxi"
@@ -181,6 +181,9 @@ def Is_finalized():
 # MPI Version Number
 # -----------------
 
+VERSION    = MPI_VERSION
+SUBVERSION = MPI_SUBVERSION
+
 def Get_version():
     """
     Obtain the version number of the MPI standard supported
@@ -190,9 +193,6 @@ def Get_version():
     cdef int subversion = 0
     CHKERR( MPI_Get_version(&version, &subversion) )
     return (version, subversion)
-
-VERSION    = MPI_VERSION
-SUBVERSION = MPI_SUBVERSION
 
 # Environmental Inquires
 # ----------------------
