@@ -347,53 +347,6 @@ cdef extern from "mpi.h" nogil:
 
     int MPI_Abort(MPI_Comm, int)
 
-    ctypedef void MPI_Handler_function(MPI_Comm*,int*,...)
-    int MPI_Errhandler_create(MPI_Handler_function*, MPI_Errhandler*)
-    int MPI_Errhandler_get(MPI_Comm, MPI_Errhandler*)
-    int MPI_Errhandler_set(MPI_Comm, MPI_Errhandler)
-
-    ctypedef void MPI_Comm_errhandler_fn(MPI_Comm*,int*,...)                       #:= MPI_Handler_function
-    ctypedef void MPI_Comm_errhandler_function(MPI_Comm*,int*,...)                 #:= MPI_Comm_errhandler_fn
-    int MPI_Comm_create_errhandler(MPI_Comm_errhandler_function*, MPI_Errhandler*) #:= MPI_Errhandler_create
-    int MPI_Comm_call_errhandler(MPI_Comm, int)
-    int MPI_Comm_get_errhandler(MPI_Comm, MPI_Errhandler*) #:= MPI_Errhandler_get
-    int MPI_Comm_set_errhandler(MPI_Comm, MPI_Errhandler)  #:= MPI_Errhandler_set
-
-    int MPI_Comm_get_name(MPI_Comm, char[], int*)
-    int MPI_Comm_set_name(MPI_Comm, char[])
-
-    enum: MPI_TAG_UB           #:= MPI_KEYVAL_INVALID
-    enum: MPI_HOST             #:= MPI_KEYVAL_INVALID
-    enum: MPI_IO               #:= MPI_KEYVAL_INVALID
-    enum: MPI_WTIME_IS_GLOBAL  #:= MPI_KEYVAL_INVALID
-    enum: MPI_UNIVERSE_SIZE    #:= MPI_KEYVAL_INVALID
-    enum: MPI_APPNUM           #:= MPI_KEYVAL_INVALID
-    enum: MPI_LASTUSEDCODE     #:= MPI_KEYVAL_INVALID
-
-    int MPI_Attr_get(MPI_Comm, int, void* , int*)
-    int MPI_Attr_put(MPI_Comm, int, void*)
-    int MPI_Attr_delete(MPI_Comm, int)
-
-    int MPI_Comm_get_attr(MPI_Comm, int, void* , int*) #:= MPI_Attr_get
-    int MPI_Comm_set_attr(MPI_Comm, int, void*)        #:= MPI_Attr_put
-    int MPI_Comm_delete_attr(MPI_Comm, int)            #:= MPI_Attr_delete
-
-    ctypedef int MPI_Copy_function(MPI_Comm,int,void*,void*,void*,int*)
-    ctypedef int MPI_Delete_function(MPI_Comm,int,void*,void*)
-    MPI_Copy_function*   MPI_DUP_FN         #:= 0
-    MPI_Copy_function*   MPI_NULL_COPY_FN   #:= 0
-    MPI_Delete_function* MPI_NULL_DELETE_FN #:= 0
-    int MPI_Keyval_create(MPI_Copy_function*, MPI_Delete_function*, int*, void*)
-    int MPI_Keyval_free(int*)
-
-    ctypedef int MPI_Comm_copy_attr_function(MPI_Comm,int,void*,void*,void*,int*) #:= MPI_Copy_function
-    ctypedef int MPI_Comm_delete_attr_function(MPI_Comm,int,void*,void*)          #:= MPI_Delete_function
-    MPI_Comm_copy_attr_function*   MPI_COMM_DUP_FN          #:= MPI_DUP_FN
-    MPI_Comm_copy_attr_function*   MPI_COMM_NULL_COPY_FN    #:= MPI_NULL_COPY_FN
-    MPI_Comm_delete_attr_function* MPI_COMM_NULL_DELETE_FN  #:= MPI_NULL_DELETE_FN
-    int MPI_Comm_create_keyval(MPI_Comm_copy_attr_function*, MPI_Comm_delete_attr_function*, int*, void*) #:= MPI_Keyval_create
-    int MPI_Comm_free_keyval(int*)                                                                        #:= MPI_Keyval_free
-
     int MPI_Send(void*, int, MPI_Datatype, int, int, MPI_Comm)
     int MPI_Recv(void*, int, MPI_Datatype, int, int, MPI_Comm, MPI_Status*)
     int MPI_Sendrecv(void*, int, MPI_Datatype,int, int, void*, int, MPI_Datatype, int, int, MPI_Comm, MPI_Status*)
@@ -470,6 +423,7 @@ cdef extern from "mpi.h" nogil:
     enum: MPI_MAX_PORT_NAME #:= 1
     int MPI_Open_port(MPI_Info, char[])
     int MPI_Close_port(char[])
+
     int MPI_Publish_name(char[], MPI_Info, char[])
     int MPI_Unpublish_name(char[], MPI_Info, char[])
     int MPI_Lookup_name(char[], MPI_Info, char[])
@@ -485,6 +439,52 @@ cdef extern from "mpi.h" nogil:
     int MPI_Comm_spawn(char[], char*[], int, MPI_Info, int, MPI_Comm, MPI_Comm*, int[])
     int MPI_Comm_spawn_multiple(int, char*[], char**[], int[], MPI_Info[], int, MPI_Comm, MPI_Comm*, int[])
     int MPI_Comm_get_parent(MPI_Comm*)
+
+    int MPI_Errhandler_get(MPI_Comm, MPI_Errhandler*)
+    int MPI_Errhandler_set(MPI_Comm, MPI_Errhandler)
+    ctypedef void MPI_Handler_function(MPI_Comm*,int*,...)
+    int MPI_Errhandler_create(MPI_Handler_function*, MPI_Errhandler*)
+
+    enum: MPI_TAG_UB          #:= MPI_KEYVAL_INVALID
+    enum: MPI_HOST            #:= MPI_KEYVAL_INVALID
+    enum: MPI_IO              #:= MPI_KEYVAL_INVALID
+    enum: MPI_WTIME_IS_GLOBAL #:= MPI_KEYVAL_INVALID
+    int MPI_Attr_get(MPI_Comm, int, void* , int*)
+    int MPI_Attr_put(MPI_Comm, int, void*)
+    int MPI_Attr_delete(MPI_Comm, int)
+
+    ctypedef int MPI_Copy_function(MPI_Comm,int,void*,void*,void*,int*)
+    ctypedef int MPI_Delete_function(MPI_Comm,int,void*,void*)
+    MPI_Copy_function*   MPI_DUP_FN         #:= 0
+    MPI_Copy_function*   MPI_NULL_COPY_FN   #:= 0
+    MPI_Delete_function* MPI_NULL_DELETE_FN #:= 0
+    int MPI_Keyval_create(MPI_Copy_function*, MPI_Delete_function*, int*, void*)
+    int MPI_Keyval_free(int*)
+
+    int MPI_Comm_get_errhandler(MPI_Comm, MPI_Errhandler*)                         #:= MPI_Errhandler_get
+    int MPI_Comm_set_errhandler(MPI_Comm, MPI_Errhandler)                          #:= MPI_Errhandler_set
+    ctypedef void MPI_Comm_errhandler_fn(MPI_Comm*,int*,...)                       #:= MPI_Handler_function
+    ctypedef void MPI_Comm_errhandler_function(MPI_Comm*,int*,...)                 #:= MPI_Comm_errhandler_fn
+    int MPI_Comm_create_errhandler(MPI_Comm_errhandler_function*, MPI_Errhandler*) #:= MPI_Errhandler_create
+    int MPI_Comm_call_errhandler(MPI_Comm, int)
+
+    int MPI_Comm_get_name(MPI_Comm, char[], int*)
+    int MPI_Comm_set_name(MPI_Comm, char[])
+
+    enum: MPI_UNIVERSE_SIZE #:= MPI_KEYVAL_INVALID
+    enum: MPI_APPNUM        #:= MPI_KEYVAL_INVALID
+    enum: MPI_LASTUSEDCODE  #:= MPI_KEYVAL_INVALID
+    int MPI_Comm_get_attr(MPI_Comm, int, void* , int*) #:= MPI_Attr_get
+    int MPI_Comm_set_attr(MPI_Comm, int, void*)        #:= MPI_Attr_put
+    int MPI_Comm_delete_attr(MPI_Comm, int)            #:= MPI_Attr_delete
+
+    ctypedef int MPI_Comm_copy_attr_function(MPI_Comm,int,void*,void*,void*,int*)                         #:= MPI_Copy_function
+    ctypedef int MPI_Comm_delete_attr_function(MPI_Comm,int,void*,void*)                                  #:= MPI_Delete_function
+    MPI_Comm_copy_attr_function*   MPI_COMM_DUP_FN                                                        #:= MPI_DUP_FN
+    MPI_Comm_copy_attr_function*   MPI_COMM_NULL_COPY_FN                                                  #:= MPI_NULL_COPY_FN
+    MPI_Comm_delete_attr_function* MPI_COMM_NULL_DELETE_FN                                                #:= MPI_NULL_DELETE_FN  
+    int MPI_Comm_create_keyval(MPI_Comm_copy_attr_function*, MPI_Comm_delete_attr_function*, int*, void*) #:= MPI_Keyval_create
+    int MPI_Comm_free_keyval(int*)                                                                        #:= MPI_Keyval_free
 
     #-----------------------------------------------------------------
 
@@ -503,26 +503,24 @@ cdef extern from "mpi.h" nogil:
     enum: MPI_MODE_NOPUT      #:= MPI_UNDEFINED
     enum: MPI_MODE_NOPRECEDE  #:= MPI_UNDEFINED
     enum: MPI_MODE_NOSUCCEED  #:= MPI_UNDEFINED
-
-    enum: MPI_LOCK_EXCLUSIVE  #:= MPI_UNDEFINED
-    enum: MPI_LOCK_SHARED     #:= MPI_UNDEFINED
-
     int MPI_Win_fence(int, MPI_Win)
     int MPI_Win_post(MPI_Group, int, MPI_Win)
     int MPI_Win_start(MPI_Group, int, MPI_Win)
     int MPI_Win_complete(MPI_Win)
-    int MPI_Win_lock(int, int, int, MPI_Win)
-    int MPI_Win_unlock(int, MPI_Win)
     int MPI_Win_wait(MPI_Win)
     int MPI_Win_test(MPI_Win, int*)
 
+    enum: MPI_LOCK_EXCLUSIVE  #:= MPI_UNDEFINED
+    enum: MPI_LOCK_SHARED     #:= MPI_UNDEFINED
+    int MPI_Win_lock(int, int, int, MPI_Win)
+    int MPI_Win_unlock(int, MPI_Win)
 
+    int MPI_Win_get_errhandler(MPI_Win, MPI_Errhandler*)
+    int MPI_Win_set_errhandler(MPI_Win, MPI_Errhandler)
     ctypedef void MPI_Win_errhandler_fn(MPI_Win*,int*,...)
     ctypedef void MPI_Win_errhandler_function(MPI_Comm*,int*,...) #:= MPI_Win_errhandler_fn
     int MPI_Win_create_errhandler(MPI_Win_errhandler_function*, MPI_Errhandler*)
     int MPI_Win_call_errhandler(MPI_Win, int)
-    int MPI_Win_get_errhandler(MPI_Win, MPI_Errhandler*)
-    int MPI_Win_set_errhandler(MPI_Win, MPI_Errhandler)
 
     int MPI_Win_get_name(MPI_Win, char[], int*)
     int MPI_Win_set_name(MPI_Win, char[])
@@ -624,12 +622,12 @@ cdef extern from "mpi.h" nogil:
     int MPI_File_get_atomicity(MPI_File, int*)
     int MPI_File_sync(MPI_File)
 
+    int MPI_File_get_errhandler(MPI_File, MPI_Errhandler*)
+    int MPI_File_set_errhandler(MPI_File, MPI_Errhandler)
     ctypedef void MPI_File_errhandler_fn(MPI_File*,int*,...)
     ctypedef void MPI_File_errhandler_function(MPI_File*,int*,...) #:= MPI_File_errhandler_fn
     int MPI_File_create_errhandler(MPI_File_errhandler_function*, MPI_Errhandler*)
     int MPI_File_call_errhandler(MPI_File, int)
-    int MPI_File_get_errhandler(MPI_File, MPI_Errhandler*)
-    int MPI_File_set_errhandler(MPI_File, MPI_Errhandler)
 
     ctypedef int MPI_Datarep_conversion_function(void*,MPI_Datatype,int,void*,MPI_Offset,void*)
     ctypedef int MPI_Datarep_extent_function(MPI_Datatype,MPI_Aint*,void*)
@@ -653,12 +651,11 @@ cdef extern from "mpi.h" nogil:
     int MPI_Add_error_code(int,int*)
     int MPI_Add_error_string(int,char[])
 
+    # MPI-1 Error classes
+    # -------------------
     # Actually no errors
     enum: MPI_SUCCESS        #:= 0
     enum: MPI_ERR_LASTCODE   #:= 1
-
-    # MPI-1 Error classes
-    # -------------------
     # MPI-1 Objects
     enum: MPI_ERR_COMM       #:= MPI_ERR_LASTCODE
     enum: MPI_ERR_GROUP      #:= MPI_ERR_LASTCODE
@@ -684,46 +681,47 @@ cdef extern from "mpi.h" nogil:
     enum: MPI_ERR_OTHER      #:= MPI_ERR_LASTCODE
     enum: MPI_ERR_UNKNOWN    #:= MPI_ERR_LASTCODE
     enum: MPI_ERR_INTERN     #:= MPI_ERR_LASTCODE
+
     # MPI-2 Error classes
     # -------------------
-    # MPI-2 Objects
-    enum: MPI_ERR_INFO                   #:= MPI_ERR_ARG
-    enum: MPI_ERR_FILE                   #:= MPI_ERR_ARG
-    enum: MPI_ERR_WIN                    #:= MPI_ERR_ARG
     # Attributes
     enum: MPI_ERR_KEYVAL                 #:= MPI_ERR_ARG
+    # Memory Allocation
+    enum: MPI_ERR_NO_MEM                 #:= MPI_ERR_UNKNOWN
     # Info Object
+    enum: MPI_ERR_INFO                   #:= MPI_ERR_ARG
     enum: MPI_ERR_INFO_KEY               #:= MPI_ERR_UNKNOWN
     enum: MPI_ERR_INFO_VALUE             #:= MPI_ERR_UNKNOWN
     enum: MPI_ERR_INFO_NOKEY             #:= MPI_ERR_UNKNOWN
+    # Dynamic Process Management
+    enum: MPI_ERR_SPAWN                  #:= MPI_ERR_UNKNOWN
+    enum: MPI_ERR_PORT                   #:= MPI_ERR_UNKNOWN
+    enum: MPI_ERR_SERVICE                #:= MPI_ERR_UNKNOWN
+    enum: MPI_ERR_NAME                   #:= MPI_ERR_UNKNOWN
     # Input/Ouput
-    enum: MPI_ERR_ACCESS                 #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_AMODE                  #:= MPI_ERR_UNKNOWN
+    enum: MPI_ERR_FILE                   #:= MPI_ERR_ARG
+    enum: MPI_ERR_NOT_SAME               #:= MPI_ERR_UNKNOWN
     enum: MPI_ERR_BAD_FILE               #:= MPI_ERR_UNKNOWN
+    enum: MPI_ERR_NO_SUCH_FILE           #:= MPI_ERR_UNKNOWN
     enum: MPI_ERR_FILE_EXISTS            #:= MPI_ERR_UNKNOWN
     enum: MPI_ERR_FILE_IN_USE            #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_NO_SPACE               #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_NO_SUCH_FILE           #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_IO                     #:= MPI_ERR_UNKNOWN
+    enum: MPI_ERR_AMODE                  #:= MPI_ERR_UNKNOWN
+    enum: MPI_ERR_ACCESS                 #:= MPI_ERR_UNKNOWN
     enum: MPI_ERR_READ_ONLY              #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_CONVERSION             #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_DUP_DATAREP            #:= MPI_ERR_UNKNOWN
+    enum: MPI_ERR_NO_SPACE               #:= MPI_ERR_UNKNOWN
+    enum: MPI_ERR_QUOTA                  #:= MPI_ERR_UNKNOWN
     enum: MPI_ERR_UNSUPPORTED_DATAREP    #:= MPI_ERR_UNKNOWN
     enum: MPI_ERR_UNSUPPORTED_OPERATION  #:= MPI_ERR_UNKNOWN
-    # Dynamic Process Management
-    enum: MPI_ERR_NAME                   #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_NO_MEM                 #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_NOT_SAME               #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_PORT                   #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_QUOTA                  #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_SERVICE                #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_SPAWN                  #:= MPI_ERR_UNKNOWN
-    # Window
+    enum: MPI_ERR_CONVERSION             #:= MPI_ERR_UNKNOWN
+    enum: MPI_ERR_DUP_DATAREP            #:= MPI_ERR_UNKNOWN
+    enum: MPI_ERR_IO                     #:= MPI_ERR_UNKNOWN
+    # One-Sided Communications
+    enum: MPI_ERR_WIN                    #:= MPI_ERR_ARG
     enum: MPI_ERR_BASE                   #:= MPI_ERR_UNKNOWN
     enum: MPI_ERR_SIZE                   #:= MPI_ERR_UNKNOWN
     enum: MPI_ERR_DISP                   #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_LOCKTYPE               #:= MPI_ERR_UNKNOWN
     enum: MPI_ERR_ASSERT                 #:= MPI_ERR_UNKNOWN
+    enum: MPI_ERR_LOCKTYPE               #:= MPI_ERR_UNKNOWN
     enum: MPI_ERR_RMA_CONFLICT           #:= MPI_ERR_UNKNOWN
     enum: MPI_ERR_RMA_SYNC               #:= MPI_ERR_UNKNOWN
 
