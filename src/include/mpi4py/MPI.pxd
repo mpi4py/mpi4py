@@ -96,6 +96,9 @@ ctypedef public api class Cartcomm(Intracomm) [type PyMPICartcomm_Type, object P
 ctypedef public api class Graphcomm(Intracomm) [type PyMPIGraphcomm_Type, object PyMPIGraphcommObject]:
     pass
 
+ctypedef public api class Distgraphcomm(Intracomm) [type PyMPIDistgraphcomm_Type, object PyMPIDistgraphcommObject]:
+    pass
+
 ctypedef public api class Intercomm(Comm) [type PyMPIIntercomm_Type, object PyMPIIntercommObject]:
     pass
 

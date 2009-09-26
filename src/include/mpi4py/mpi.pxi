@@ -339,9 +339,6 @@ cdef extern from "mpi.h" nogil:
     int MPI_Comm_rank(MPI_Comm, int*)
 
     int MPI_Comm_compare(MPI_Comm, MPI_Comm, int*)
-
-    enum: MPI_CART  #:= 1
-    enum: MPI_GRAPH #:= 2
     int MPI_Topo_test(MPI_Comm, int*)
     int MPI_Comm_test_inter(MPI_Comm, int*)
 
@@ -397,10 +394,9 @@ cdef extern from "mpi.h" nogil:
     int MPI_Comm_dup(MPI_Comm, MPI_Comm*)
     int MPI_Comm_create(MPI_Comm, MPI_Group, MPI_Comm*)
     int MPI_Comm_split(MPI_Comm, int, int, MPI_Comm*)
-    int MPI_Cart_create(MPI_Comm, int, int[], int[], int, MPI_Comm*)
-    int MPI_Graph_create(MPI_Comm, int, int[], int[], int, MPI_Comm*)
-    int MPI_Intercomm_create(MPI_Comm, int, MPI_Comm, int, int, MPI_Comm*)
 
+    enum: MPI_CART #:= MPI_UNDEFINED
+    int MPI_Cart_create(MPI_Comm, int, int[], int[], int, MPI_Comm*)
     int MPI_Cartdim_get(MPI_Comm, int*)
     int MPI_Cart_get(MPI_Comm, int, int[], int[], int[])
     int MPI_Cart_rank(MPI_Comm, int[], int*)
@@ -410,12 +406,22 @@ cdef extern from "mpi.h" nogil:
     int MPI_Cart_map(MPI_Comm, int, int[], int[], int*)
     int MPI_Dims_create(int, int, int[])
 
+    enum: MPI_GRAPH #:= MPI_UNDEFINED
+    int MPI_Graph_create(MPI_Comm, int, int[], int[], int, MPI_Comm*)
     int MPI_Graphdims_get(MPI_Comm, int*, int*)
     int MPI_Graph_get(MPI_Comm, int, int, int[], int[])
     int MPI_Graph_map(MPI_Comm, int, int[], int[], int*)
     int MPI_Graph_neighbors_count(MPI_Comm, int, int*)
     int MPI_Graph_neighbors(MPI_Comm, int, int, int[])
 
+    enum: MPI_DIST_GRAPH #:= MPI_UNDEFINED
+    int* MPI_UNWEIGHTED #:= 0
+    int MPI_Dist_graph_create_adjacent(MPI_Comm, int, int[], int[], int, int[], int[], MPI_Info, int, MPI_Comm*)
+    int MPI_Dist_graph_create(MPI_Comm, int, int[], int[], int[], int[], MPI_Info, int, MPI_Comm*)
+    int MPI_Dist_graph_neighbors_count(MPI_Comm, int*, int*, int*)
+    int MPI_Dist_graph_neighbors(MPI_Comm comm,int, int[], int[], int, int[], int[])
+
+    int MPI_Intercomm_create(MPI_Comm, int, MPI_Comm, int, int, MPI_Comm*)
     int MPI_Comm_remote_group(MPI_Comm, MPI_Group*)
     int MPI_Comm_remote_size(MPI_Comm, int*)
     int MPI_Intercomm_merge(MPI_Comm, int, MPI_Comm*)

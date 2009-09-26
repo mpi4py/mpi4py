@@ -875,6 +875,63 @@ cdef class Intracomm(Comm):
         with nogil: CHKERR( MPI_Graph_create(self.ob_mpi, nnodes, iindex, iedges, reorder, &comm.ob_mpi) )
         return comm
 
+    def Create_dist_graph_adjacent(self, sources, destinations,
+                                   sourceweights=None, destweights=None,
+                                   Info info=INFO_NULL, bint reorder=False):
+        """
+        Create distributed graph communicator
+        """
+        cdef int indegree  = 0, *isource = NULL
+        cdef int outdegree = 0, *idest   = NULL
+        cdef int *isourceweight = MPI_UNWEIGHTED
+        cdef int *idestweight   = MPI_UNWEIGHTED
+        cdef object tmp1, tmp2, tmp3, tmp4
+        if sources is not None:
+            indegree = len(sources)
+            tmp1 = asarray_int(sources, &isource, indegree)
+        if sourceweights is not None:
+            tmp2 = asarray_int(sourceweights, &isourceweight, indegree)
+        if destinations is not None:
+            outdegree = len(destinations)
+            tmp3 = asarray_int(destinations, &idest, outdegree)
+        if destweights is not None:
+            tmp4 = asarray_int(destweights, &idestweight, outdegree)
+        cdef MPI_Info cinfo = arg_Info(info)
+        #
+        cdef Distgraphcomm comm = Graphcomm()
+        CHKERR( MPI_Dist_graph_create_adjacent(
+                self.ob_mpi,
+                indegree,  isource, isourceweight,
+                outdegree, idest,   idestweight,
+                cinfo, reorder, &comm.ob_mpi) )
+        return comm
+
+
+    def Create_dist_graph(self, sources, degrees, destinations, weights=None,
+                          Info info=INFO_NULL, bint reorder=False):
+        """
+        Create distributed graph communicator
+        """
+        cdef int nv = 0, ne = 0, i = 0
+        cdef int *isource = NULL, *idegree = NULL, *idest = NULL
+        cdef int *iweight = MPI_UNWEIGHTED
+        cdef object tmp1, tmp2, tmp3, tmp4
+        nv = len(sources)
+        tmp1 = asarray_int(sources, &isource, nv)
+        tmp2 = asarray_int(degrees, &idegree, nv)
+        for i from 0 <= i < nv: ne += idegree[i]
+        tmp3 = asarray_int(destinations, &idest, ne)
+        if weights is not None:
+            tmp4 = asarray_int(weights, &iweight, ne)
+        cdef MPI_Info cinfo = arg_Info(info)
+        #
+        cdef Distgraphcomm comm = Graphcomm()
+        CHKERR( MPI_Dist_graph_create(
+                self.ob_mpi,
+                nv, isource, idegree, idest, iweight,
+                cinfo, reorder, &comm.ob_mpi) )
+        return comm
+
     def Create_intercomm(self,
                          int local_leader,
                          Intracomm peer_comm not None,
@@ -1310,6 +1367,73 @@ cdef class Graphcomm(Intracomm):
         cdef int rank = MPI_PROC_NULL
         CHKERR( MPI_Graph_map(self.ob_mpi, nnodes, iindex, iedges, &rank) )
         return rank
+
+
+cdef class Distgraphcomm(Intracomm):
+
+    """
+    Distributed graph topology intracommunicator
+    """
+
+    # Communicator Constructors
+    # -------------------------
+
+    def Dup(self):
+        """
+        Duplicate an existing communicator
+        """
+        cdef Distgraphcomm comm = type(self)()
+        with nogil: CHKERR( MPI_Comm_dup(
+            self.ob_mpi, &comm.ob_mpi) )
+        return comm
+
+    # Topology Inquiry Functions
+    # --------------------------
+
+    def Get_dist_neighbors_count(self):
+        """
+        Return adjacency information for a distributed graph topology
+        """
+        cdef int indegree = 0
+        cdef int outdegree = 0
+        cdef bint weighted = 0
+        CHKERR( MPI_Dist_graph_neighbors_count(
+                self.ob_mpi, &indegree, &outdegree, &weighted) )
+        return (indegree, outdegree, weighted)
+
+    def Get_dist_neighbors(self):
+        """
+        Return adjacency information for a distributed graph topology
+        """
+        cdef int maxindegree = 0, maxoutdegree = 0, weighted = 0
+        CHKERR( MPI_Dist_graph_neighbors_count(
+                self.ob_mpi, &maxindegree, &maxoutdegree, &weighted) )
+        #
+        cdef int *sources = NULL, *destinations = NULL
+        cdef int *sourceweights = MPI_UNWEIGHTED
+        cdef int *destweights   = MPI_UNWEIGHTED
+        cdef tmp1, tmp2, tmp3, tmp4
+        tmp1 = newarray_int(maxindegree,  &sources)
+        tmp2 = newarray_int(maxoutdegree, &destinations)
+        cdef int i = 0
+        if weighted:
+            tmp3 = newarray_int(maxindegree,  &sourceweights)
+            for i from 0 <= i < maxindegree:  sourceweights[i] = 1
+            tmp4 = newarray_int(maxoutdegree, &destweights)
+            for i from 0 <= i < maxoutdegree: destweights[i]   = 1
+        #
+        CHKERR( MPI_Dist_graph_neighbors(
+                self.ob_mpi,
+                maxindegree,  sources,      sourceweights,
+                maxoutdegree, destinations, destweights) )
+        #
+        cdef object src = [sources[i]      for i from 0 <= i < maxindegree]
+        cdef object dst = [destinations[i] for i from 0 <= i < maxoutdegree]
+        if not weighted: return (src, dst, None)
+        #
+        cdef object sweights = [sourceweights[i] for i from 0 <= i < maxindegree]
+        cdef object dweights = [destweights[i]   for i from 0 <= i < maxoutdegree]
+        return (src, dst, (sweights, dweights))
 
 
 cdef class Intercomm(Comm):

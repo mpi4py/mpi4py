@@ -1259,16 +1259,6 @@ typedef void (PyMPI_MPI_User_function)(void*, void*, int*, MPI_Datatype*);
 #define MPI_Comm_compare(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Comm_compare",a1,a2,a3)
 #endif
 
-#ifdef  PyMPI_MISSING_MPI_CART
-#undef  MPI_CART
-#define MPI_CART (1)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_GRAPH
-#undef  MPI_GRAPH
-#define MPI_GRAPH (2)
-#endif
-
 #ifdef  PyMPI_MISSING_MPI_Topo_test
 #undef  MPI_Topo_test
 #define MPI_Topo_test(a1,a2) PyMPI_UNAVAILABLE("MPI_Topo_test",a1,a2)
@@ -1282,204 +1272,6 @@ typedef void (PyMPI_MPI_User_function)(void*, void*, int*, MPI_Datatype*);
 #ifdef  PyMPI_MISSING_MPI_Abort
 #undef  MPI_Abort
 #define MPI_Abort(a1,a2) PyMPI_UNAVAILABLE("MPI_Abort",a1,a2)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_Handler_function
-#undef  MPI_Handler_function
-typedef void (PyMPI_MPI_Handler_function)(MPI_Comm*,int*,...);
-#define MPI_Handler_function PyMPI_MPI_Handler_function
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_Errhandler_create
-#undef  MPI_Errhandler_create
-#define MPI_Errhandler_create(a1,a2) PyMPI_UNAVAILABLE("MPI_Errhandler_create",a1,a2)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_Errhandler_get
-#undef  MPI_Errhandler_get
-#define MPI_Errhandler_get(a1,a2) PyMPI_UNAVAILABLE("MPI_Errhandler_get",a1,a2)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_Errhandler_set
-#undef  MPI_Errhandler_set
-#define MPI_Errhandler_set(a1,a2) PyMPI_UNAVAILABLE("MPI_Errhandler_set",a1,a2)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_Comm_errhandler_fn
-#undef  MPI_Comm_errhandler_fn
-#define MPI_Comm_errhandler_fn MPI_Handler_function
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_Comm_errhandler_function
-#undef  MPI_Comm_errhandler_function
-#define MPI_Comm_errhandler_function MPI_Comm_errhandler_fn
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_Comm_create_errhandler
-#undef  MPI_Comm_create_errhandler
-#define MPI_Comm_create_errhandler MPI_Errhandler_create
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_Comm_call_errhandler
-#undef  MPI_Comm_call_errhandler
-#define MPI_Comm_call_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_Comm_call_errhandler",a1,a2)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_Comm_get_errhandler
-#undef  MPI_Comm_get_errhandler
-#define MPI_Comm_get_errhandler MPI_Errhandler_get
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_Comm_set_errhandler
-#undef  MPI_Comm_set_errhandler
-#define MPI_Comm_set_errhandler MPI_Errhandler_set
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_Comm_get_name
-#undef  MPI_Comm_get_name
-#define MPI_Comm_get_name(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Comm_get_name",a1,a2,a3)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_Comm_set_name
-#undef  MPI_Comm_set_name
-#define MPI_Comm_set_name(a1,a2) PyMPI_UNAVAILABLE("MPI_Comm_set_name",a1,a2)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_TAG_UB
-#undef  MPI_TAG_UB
-#define MPI_TAG_UB (MPI_KEYVAL_INVALID)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_HOST
-#undef  MPI_HOST
-#define MPI_HOST (MPI_KEYVAL_INVALID)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_IO
-#undef  MPI_IO
-#define MPI_IO (MPI_KEYVAL_INVALID)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_WTIME_IS_GLOBAL
-#undef  MPI_WTIME_IS_GLOBAL
-#define MPI_WTIME_IS_GLOBAL (MPI_KEYVAL_INVALID)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_UNIVERSE_SIZE
-#undef  MPI_UNIVERSE_SIZE
-#define MPI_UNIVERSE_SIZE (MPI_KEYVAL_INVALID)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_APPNUM
-#undef  MPI_APPNUM
-#define MPI_APPNUM (MPI_KEYVAL_INVALID)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_LASTUSEDCODE
-#undef  MPI_LASTUSEDCODE
-#define MPI_LASTUSEDCODE (MPI_KEYVAL_INVALID)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_Attr_get
-#undef  MPI_Attr_get
-#define MPI_Attr_get(a1,a2,a3,a4) PyMPI_UNAVAILABLE("MPI_Attr_get",a1,a2,a3,a4)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_Attr_put
-#undef  MPI_Attr_put
-#define MPI_Attr_put(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Attr_put",a1,a2,a3)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_Attr_delete
-#undef  MPI_Attr_delete
-#define MPI_Attr_delete(a1,a2) PyMPI_UNAVAILABLE("MPI_Attr_delete",a1,a2)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_Comm_get_attr
-#undef  MPI_Comm_get_attr
-#define MPI_Comm_get_attr MPI_Attr_get
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_Comm_set_attr
-#undef  MPI_Comm_set_attr
-#define MPI_Comm_set_attr MPI_Attr_put
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_Comm_delete_attr
-#undef  MPI_Comm_delete_attr
-#define MPI_Comm_delete_attr MPI_Attr_delete
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_Copy_function
-#undef  MPI_Copy_function
-typedef int (PyMPI_MPI_Copy_function)(MPI_Comm,int,void*,void*,void*,int*);
-#define MPI_Copy_function PyMPI_MPI_Copy_function
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_Delete_function
-#undef  MPI_Delete_function
-typedef int (PyMPI_MPI_Delete_function)(MPI_Comm,int,void*,void*);
-#define MPI_Delete_function PyMPI_MPI_Delete_function
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_DUP_FN
-#undef  MPI_DUP_FN
-#define MPI_DUP_FN (0)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_NULL_COPY_FN
-#undef  MPI_NULL_COPY_FN
-#define MPI_NULL_COPY_FN (0)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_NULL_DELETE_FN
-#undef  MPI_NULL_DELETE_FN
-#define MPI_NULL_DELETE_FN (0)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_Keyval_create
-#undef  MPI_Keyval_create
-#define MPI_Keyval_create(a1,a2,a3,a4) PyMPI_UNAVAILABLE("MPI_Keyval_create",a1,a2,a3,a4)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_Keyval_free
-#undef  MPI_Keyval_free
-#define MPI_Keyval_free(a1) PyMPI_UNAVAILABLE("MPI_Keyval_free",a1)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_Comm_copy_attr_function
-#undef  MPI_Comm_copy_attr_function
-#define MPI_Comm_copy_attr_function MPI_Copy_function
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_Comm_delete_attr_function
-#undef  MPI_Comm_delete_attr_function
-#define MPI_Comm_delete_attr_function MPI_Delete_function
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_COMM_DUP_FN
-#undef  MPI_COMM_DUP_FN
-#define MPI_COMM_DUP_FN (MPI_DUP_FN)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_COMM_NULL_COPY_FN
-#undef  MPI_COMM_NULL_COPY_FN
-#define MPI_COMM_NULL_COPY_FN (MPI_NULL_COPY_FN)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_COMM_NULL_DELETE_FN
-#undef  MPI_COMM_NULL_DELETE_FN
-#define MPI_COMM_NULL_DELETE_FN (MPI_NULL_DELETE_FN)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_Comm_create_keyval
-#undef  MPI_Comm_create_keyval
-#define MPI_Comm_create_keyval MPI_Keyval_create
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_Comm_free_keyval
-#undef  MPI_Comm_free_keyval
-#define MPI_Comm_free_keyval MPI_Keyval_free
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_Send
@@ -1697,19 +1489,14 @@ typedef int (PyMPI_MPI_Delete_function)(MPI_Comm,int,void*,void*);
 #define MPI_Comm_split(a1,a2,a3,a4) PyMPI_UNAVAILABLE("MPI_Comm_split",a1,a2,a3,a4)
 #endif
 
+#ifdef  PyMPI_MISSING_MPI_CART
+#undef  MPI_CART
+#define MPI_CART (MPI_UNDEFINED)
+#endif
+
 #ifdef  PyMPI_MISSING_MPI_Cart_create
 #undef  MPI_Cart_create
 #define MPI_Cart_create(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_Cart_create",a1,a2,a3,a4,a5,a6)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_Graph_create
-#undef  MPI_Graph_create
-#define MPI_Graph_create(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_Graph_create",a1,a2,a3,a4,a5,a6)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_Intercomm_create
-#undef  MPI_Intercomm_create
-#define MPI_Intercomm_create(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_Intercomm_create",a1,a2,a3,a4,a5,a6)
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_Cartdim_get
@@ -1752,6 +1539,16 @@ typedef int (PyMPI_MPI_Delete_function)(MPI_Comm,int,void*,void*);
 #define MPI_Dims_create(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Dims_create",a1,a2,a3)
 #endif
 
+#ifdef  PyMPI_MISSING_MPI_GRAPH
+#undef  MPI_GRAPH
+#define MPI_GRAPH (MPI_UNDEFINED)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Graph_create
+#undef  MPI_Graph_create
+#define MPI_Graph_create(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_Graph_create",a1,a2,a3,a4,a5,a6)
+#endif
+
 #ifdef  PyMPI_MISSING_MPI_Graphdims_get
 #undef  MPI_Graphdims_get
 #define MPI_Graphdims_get(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Graphdims_get",a1,a2,a3)
@@ -1775,6 +1572,41 @@ typedef int (PyMPI_MPI_Delete_function)(MPI_Comm,int,void*,void*);
 #ifdef  PyMPI_MISSING_MPI_Graph_neighbors
 #undef  MPI_Graph_neighbors
 #define MPI_Graph_neighbors(a1,a2,a3,a4) PyMPI_UNAVAILABLE("MPI_Graph_neighbors",a1,a2,a3,a4)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_DIST_GRAPH
+#undef  MPI_DIST_GRAPH
+#define MPI_DIST_GRAPH (MPI_UNDEFINED)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_UNWEIGHTED
+#undef  MPI_UNWEIGHTED
+#define MPI_UNWEIGHTED ((int*)0)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Dist_graph_create_adjacent
+#undef  MPI_Dist_graph_create_adjacent
+#define MPI_Dist_graph_create_adjacent(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10) PyMPI_UNAVAILABLE("MPI_Dist_graph_create_adjacent",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Dist_graph_create
+#undef  MPI_Dist_graph_create
+#define MPI_Dist_graph_create(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Dist_graph_create",a1,a2,a3,a4,a5,a6,a7,a8,a9)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Dist_graph_neighbors_count
+#undef  MPI_Dist_graph_neighbors_count
+#define MPI_Dist_graph_neighbors_count(a1,a2,a3,a4) PyMPI_UNAVAILABLE("MPI_Dist_graph_neighbors_count",a1,a2,a3,a4)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Dist_graph_neighbors
+#undef  MPI_Dist_graph_neighbors
+#define MPI_Dist_graph_neighbors(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Dist_graph_neighbors",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Intercomm_create
+#undef  MPI_Intercomm_create
+#define MPI_Intercomm_create(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_Intercomm_create",a1,a2,a3,a4,a5,a6)
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_Comm_remote_group
@@ -1872,6 +1704,204 @@ typedef int (PyMPI_MPI_Delete_function)(MPI_Comm,int,void*,void*);
 #define MPI_Comm_get_parent(a1) PyMPI_UNAVAILABLE("MPI_Comm_get_parent",a1)
 #endif
 
+#ifdef  PyMPI_MISSING_MPI_Errhandler_get
+#undef  MPI_Errhandler_get
+#define MPI_Errhandler_get(a1,a2) PyMPI_UNAVAILABLE("MPI_Errhandler_get",a1,a2)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Errhandler_set
+#undef  MPI_Errhandler_set
+#define MPI_Errhandler_set(a1,a2) PyMPI_UNAVAILABLE("MPI_Errhandler_set",a1,a2)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Handler_function
+#undef  MPI_Handler_function
+typedef void (PyMPI_MPI_Handler_function)(MPI_Comm*,int*,...);
+#define MPI_Handler_function PyMPI_MPI_Handler_function
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Errhandler_create
+#undef  MPI_Errhandler_create
+#define MPI_Errhandler_create(a1,a2) PyMPI_UNAVAILABLE("MPI_Errhandler_create",a1,a2)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_TAG_UB
+#undef  MPI_TAG_UB
+#define MPI_TAG_UB (MPI_KEYVAL_INVALID)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_HOST
+#undef  MPI_HOST
+#define MPI_HOST (MPI_KEYVAL_INVALID)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_IO
+#undef  MPI_IO
+#define MPI_IO (MPI_KEYVAL_INVALID)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_WTIME_IS_GLOBAL
+#undef  MPI_WTIME_IS_GLOBAL
+#define MPI_WTIME_IS_GLOBAL (MPI_KEYVAL_INVALID)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Attr_get
+#undef  MPI_Attr_get
+#define MPI_Attr_get(a1,a2,a3,a4) PyMPI_UNAVAILABLE("MPI_Attr_get",a1,a2,a3,a4)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Attr_put
+#undef  MPI_Attr_put
+#define MPI_Attr_put(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Attr_put",a1,a2,a3)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Attr_delete
+#undef  MPI_Attr_delete
+#define MPI_Attr_delete(a1,a2) PyMPI_UNAVAILABLE("MPI_Attr_delete",a1,a2)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Copy_function
+#undef  MPI_Copy_function
+typedef int (PyMPI_MPI_Copy_function)(MPI_Comm,int,void*,void*,void*,int*);
+#define MPI_Copy_function PyMPI_MPI_Copy_function
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Delete_function
+#undef  MPI_Delete_function
+typedef int (PyMPI_MPI_Delete_function)(MPI_Comm,int,void*,void*);
+#define MPI_Delete_function PyMPI_MPI_Delete_function
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_DUP_FN
+#undef  MPI_DUP_FN
+#define MPI_DUP_FN (0)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_NULL_COPY_FN
+#undef  MPI_NULL_COPY_FN
+#define MPI_NULL_COPY_FN (0)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_NULL_DELETE_FN
+#undef  MPI_NULL_DELETE_FN
+#define MPI_NULL_DELETE_FN (0)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Keyval_create
+#undef  MPI_Keyval_create
+#define MPI_Keyval_create(a1,a2,a3,a4) PyMPI_UNAVAILABLE("MPI_Keyval_create",a1,a2,a3,a4)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Keyval_free
+#undef  MPI_Keyval_free
+#define MPI_Keyval_free(a1) PyMPI_UNAVAILABLE("MPI_Keyval_free",a1)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Comm_get_errhandler
+#undef  MPI_Comm_get_errhandler
+#define MPI_Comm_get_errhandler MPI_Errhandler_get
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Comm_set_errhandler
+#undef  MPI_Comm_set_errhandler
+#define MPI_Comm_set_errhandler MPI_Errhandler_set
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Comm_errhandler_fn
+#undef  MPI_Comm_errhandler_fn
+#define MPI_Comm_errhandler_fn MPI_Handler_function
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Comm_errhandler_function
+#undef  MPI_Comm_errhandler_function
+#define MPI_Comm_errhandler_function MPI_Comm_errhandler_fn
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Comm_create_errhandler
+#undef  MPI_Comm_create_errhandler
+#define MPI_Comm_create_errhandler MPI_Errhandler_create
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Comm_call_errhandler
+#undef  MPI_Comm_call_errhandler
+#define MPI_Comm_call_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_Comm_call_errhandler",a1,a2)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Comm_get_name
+#undef  MPI_Comm_get_name
+#define MPI_Comm_get_name(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Comm_get_name",a1,a2,a3)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Comm_set_name
+#undef  MPI_Comm_set_name
+#define MPI_Comm_set_name(a1,a2) PyMPI_UNAVAILABLE("MPI_Comm_set_name",a1,a2)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_UNIVERSE_SIZE
+#undef  MPI_UNIVERSE_SIZE
+#define MPI_UNIVERSE_SIZE (MPI_KEYVAL_INVALID)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_APPNUM
+#undef  MPI_APPNUM
+#define MPI_APPNUM (MPI_KEYVAL_INVALID)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_LASTUSEDCODE
+#undef  MPI_LASTUSEDCODE
+#define MPI_LASTUSEDCODE (MPI_KEYVAL_INVALID)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Comm_get_attr
+#undef  MPI_Comm_get_attr
+#define MPI_Comm_get_attr MPI_Attr_get
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Comm_set_attr
+#undef  MPI_Comm_set_attr
+#define MPI_Comm_set_attr MPI_Attr_put
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Comm_delete_attr
+#undef  MPI_Comm_delete_attr
+#define MPI_Comm_delete_attr MPI_Attr_delete
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Comm_copy_attr_function
+#undef  MPI_Comm_copy_attr_function
+#define MPI_Comm_copy_attr_function MPI_Copy_function
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Comm_delete_attr_function
+#undef  MPI_Comm_delete_attr_function
+#define MPI_Comm_delete_attr_function MPI_Delete_function
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_COMM_DUP_FN
+#undef  MPI_COMM_DUP_FN
+#define MPI_COMM_DUP_FN (MPI_DUP_FN)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_COMM_NULL_COPY_FN
+#undef  MPI_COMM_NULL_COPY_FN
+#define MPI_COMM_NULL_COPY_FN (MPI_NULL_COPY_FN)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_COMM_NULL_DELETE_FN
+#undef  MPI_COMM_NULL_DELETE_FN
+#define MPI_COMM_NULL_DELETE_FN (MPI_NULL_DELETE_FN)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Comm_create_keyval
+#undef  MPI_Comm_create_keyval
+#define MPI_Comm_create_keyval MPI_Keyval_create
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Comm_free_keyval
+#undef  MPI_Comm_free_keyval
+#define MPI_Comm_free_keyval MPI_Keyval_free
+#endif
+
 #ifdef  PyMPI_MISSING_MPI_WIN_NULL
 #undef  MPI_WIN_NULL
 #define MPI_WIN_NULL ((MPI_Win)0)
@@ -1932,16 +1962,6 @@ typedef int (PyMPI_MPI_Delete_function)(MPI_Comm,int,void*,void*);
 #define MPI_MODE_NOSUCCEED (MPI_UNDEFINED)
 #endif
 
-#ifdef  PyMPI_MISSING_MPI_LOCK_EXCLUSIVE
-#undef  MPI_LOCK_EXCLUSIVE
-#define MPI_LOCK_EXCLUSIVE (MPI_UNDEFINED)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_LOCK_SHARED
-#undef  MPI_LOCK_SHARED
-#define MPI_LOCK_SHARED (MPI_UNDEFINED)
-#endif
-
 #ifdef  PyMPI_MISSING_MPI_Win_fence
 #undef  MPI_Win_fence
 #define MPI_Win_fence(a1,a2) PyMPI_UNAVAILABLE("MPI_Win_fence",a1,a2)
@@ -1962,6 +1982,26 @@ typedef int (PyMPI_MPI_Delete_function)(MPI_Comm,int,void*,void*);
 #define MPI_Win_complete(a1) PyMPI_UNAVAILABLE("MPI_Win_complete",a1)
 #endif
 
+#ifdef  PyMPI_MISSING_MPI_Win_wait
+#undef  MPI_Win_wait
+#define MPI_Win_wait(a1) PyMPI_UNAVAILABLE("MPI_Win_wait",a1)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Win_test
+#undef  MPI_Win_test
+#define MPI_Win_test(a1,a2) PyMPI_UNAVAILABLE("MPI_Win_test",a1,a2)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_LOCK_EXCLUSIVE
+#undef  MPI_LOCK_EXCLUSIVE
+#define MPI_LOCK_EXCLUSIVE (MPI_UNDEFINED)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_LOCK_SHARED
+#undef  MPI_LOCK_SHARED
+#define MPI_LOCK_SHARED (MPI_UNDEFINED)
+#endif
+
 #ifdef  PyMPI_MISSING_MPI_Win_lock
 #undef  MPI_Win_lock
 #define MPI_Win_lock(a1,a2,a3,a4) PyMPI_UNAVAILABLE("MPI_Win_lock",a1,a2,a3,a4)
@@ -1972,14 +2012,14 @@ typedef int (PyMPI_MPI_Delete_function)(MPI_Comm,int,void*,void*);
 #define MPI_Win_unlock(a1,a2) PyMPI_UNAVAILABLE("MPI_Win_unlock",a1,a2)
 #endif
 
-#ifdef  PyMPI_MISSING_MPI_Win_wait
-#undef  MPI_Win_wait
-#define MPI_Win_wait(a1) PyMPI_UNAVAILABLE("MPI_Win_wait",a1)
+#ifdef  PyMPI_MISSING_MPI_Win_get_errhandler
+#undef  MPI_Win_get_errhandler
+#define MPI_Win_get_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_Win_get_errhandler",a1,a2)
 #endif
 
-#ifdef  PyMPI_MISSING_MPI_Win_test
-#undef  MPI_Win_test
-#define MPI_Win_test(a1,a2) PyMPI_UNAVAILABLE("MPI_Win_test",a1,a2)
+#ifdef  PyMPI_MISSING_MPI_Win_set_errhandler
+#undef  MPI_Win_set_errhandler
+#define MPI_Win_set_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_Win_set_errhandler",a1,a2)
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_Win_errhandler_fn
@@ -2001,16 +2041,6 @@ typedef void (PyMPI_MPI_Win_errhandler_fn)(MPI_Win*,int*,...);
 #ifdef  PyMPI_MISSING_MPI_Win_call_errhandler
 #undef  MPI_Win_call_errhandler
 #define MPI_Win_call_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_Win_call_errhandler",a1,a2)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_Win_get_errhandler
-#undef  MPI_Win_get_errhandler
-#define MPI_Win_get_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_Win_get_errhandler",a1,a2)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_Win_set_errhandler
-#undef  MPI_Win_set_errhandler
-#define MPI_Win_set_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_Win_set_errhandler",a1,a2)
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_Win_get_name
@@ -2420,6 +2450,16 @@ typedef int (PyMPI_MPI_Win_delete_attr_function)(MPI_Win,int,void*,void*);
 #define MPI_File_sync(a1) PyMPI_UNAVAILABLE("MPI_File_sync",a1)
 #endif
 
+#ifdef  PyMPI_MISSING_MPI_File_get_errhandler
+#undef  MPI_File_get_errhandler
+#define MPI_File_get_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_File_get_errhandler",a1,a2)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_File_set_errhandler
+#undef  MPI_File_set_errhandler
+#define MPI_File_set_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_File_set_errhandler",a1,a2)
+#endif
+
 #ifdef  PyMPI_MISSING_MPI_File_errhandler_fn
 #undef  MPI_File_errhandler_fn
 typedef void (PyMPI_MPI_File_errhandler_fn)(MPI_File*,int*,...);
@@ -2439,16 +2479,6 @@ typedef void (PyMPI_MPI_File_errhandler_fn)(MPI_File*,int*,...);
 #ifdef  PyMPI_MISSING_MPI_File_call_errhandler
 #undef  MPI_File_call_errhandler
 #define MPI_File_call_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_File_call_errhandler",a1,a2)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_File_get_errhandler
-#undef  MPI_File_get_errhandler
-#define MPI_File_get_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_File_get_errhandler",a1,a2)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_File_set_errhandler
-#undef  MPI_File_set_errhandler
-#define MPI_File_set_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_File_set_errhandler",a1,a2)
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_Datarep_conversion_function
@@ -2623,24 +2653,19 @@ typedef int (PyMPI_MPI_Datarep_extent_function)(MPI_Datatype,MPI_Aint*,void*);
 #define MPI_ERR_INTERN (MPI_ERR_LASTCODE)
 #endif
 
-#ifdef  PyMPI_MISSING_MPI_ERR_INFO
-#undef  MPI_ERR_INFO
-#define MPI_ERR_INFO (MPI_ERR_ARG)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_ERR_FILE
-#undef  MPI_ERR_FILE
-#define MPI_ERR_FILE (MPI_ERR_ARG)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_ERR_WIN
-#undef  MPI_ERR_WIN
-#define MPI_ERR_WIN (MPI_ERR_ARG)
-#endif
-
 #ifdef  PyMPI_MISSING_MPI_ERR_KEYVAL
 #undef  MPI_ERR_KEYVAL
 #define MPI_ERR_KEYVAL (MPI_ERR_ARG)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_ERR_NO_MEM
+#undef  MPI_ERR_NO_MEM
+#define MPI_ERR_NO_MEM (MPI_ERR_UNKNOWN)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_ERR_INFO
+#undef  MPI_ERR_INFO
+#define MPI_ERR_INFO (MPI_ERR_ARG)
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_ERR_INFO_KEY
@@ -2658,19 +2683,44 @@ typedef int (PyMPI_MPI_Datarep_extent_function)(MPI_Datatype,MPI_Aint*,void*);
 #define MPI_ERR_INFO_NOKEY (MPI_ERR_UNKNOWN)
 #endif
 
-#ifdef  PyMPI_MISSING_MPI_ERR_ACCESS
-#undef  MPI_ERR_ACCESS
-#define MPI_ERR_ACCESS (MPI_ERR_UNKNOWN)
+#ifdef  PyMPI_MISSING_MPI_ERR_SPAWN
+#undef  MPI_ERR_SPAWN
+#define MPI_ERR_SPAWN (MPI_ERR_UNKNOWN)
 #endif
 
-#ifdef  PyMPI_MISSING_MPI_ERR_AMODE
-#undef  MPI_ERR_AMODE
-#define MPI_ERR_AMODE (MPI_ERR_UNKNOWN)
+#ifdef  PyMPI_MISSING_MPI_ERR_PORT
+#undef  MPI_ERR_PORT
+#define MPI_ERR_PORT (MPI_ERR_UNKNOWN)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_ERR_SERVICE
+#undef  MPI_ERR_SERVICE
+#define MPI_ERR_SERVICE (MPI_ERR_UNKNOWN)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_ERR_NAME
+#undef  MPI_ERR_NAME
+#define MPI_ERR_NAME (MPI_ERR_UNKNOWN)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_ERR_FILE
+#undef  MPI_ERR_FILE
+#define MPI_ERR_FILE (MPI_ERR_ARG)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_ERR_NOT_SAME
+#undef  MPI_ERR_NOT_SAME
+#define MPI_ERR_NOT_SAME (MPI_ERR_UNKNOWN)
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_ERR_BAD_FILE
 #undef  MPI_ERR_BAD_FILE
 #define MPI_ERR_BAD_FILE (MPI_ERR_UNKNOWN)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_ERR_NO_SUCH_FILE
+#undef  MPI_ERR_NO_SUCH_FILE
+#define MPI_ERR_NO_SUCH_FILE (MPI_ERR_UNKNOWN)
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_ERR_FILE_EXISTS
@@ -2683,19 +2733,14 @@ typedef int (PyMPI_MPI_Datarep_extent_function)(MPI_Datatype,MPI_Aint*,void*);
 #define MPI_ERR_FILE_IN_USE (MPI_ERR_UNKNOWN)
 #endif
 
-#ifdef  PyMPI_MISSING_MPI_ERR_NO_SPACE
-#undef  MPI_ERR_NO_SPACE
-#define MPI_ERR_NO_SPACE (MPI_ERR_UNKNOWN)
+#ifdef  PyMPI_MISSING_MPI_ERR_AMODE
+#undef  MPI_ERR_AMODE
+#define MPI_ERR_AMODE (MPI_ERR_UNKNOWN)
 #endif
 
-#ifdef  PyMPI_MISSING_MPI_ERR_NO_SUCH_FILE
-#undef  MPI_ERR_NO_SUCH_FILE
-#define MPI_ERR_NO_SUCH_FILE (MPI_ERR_UNKNOWN)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_ERR_IO
-#undef  MPI_ERR_IO
-#define MPI_ERR_IO (MPI_ERR_UNKNOWN)
+#ifdef  PyMPI_MISSING_MPI_ERR_ACCESS
+#undef  MPI_ERR_ACCESS
+#define MPI_ERR_ACCESS (MPI_ERR_UNKNOWN)
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_ERR_READ_ONLY
@@ -2703,14 +2748,14 @@ typedef int (PyMPI_MPI_Datarep_extent_function)(MPI_Datatype,MPI_Aint*,void*);
 #define MPI_ERR_READ_ONLY (MPI_ERR_UNKNOWN)
 #endif
 
-#ifdef  PyMPI_MISSING_MPI_ERR_CONVERSION
-#undef  MPI_ERR_CONVERSION
-#define MPI_ERR_CONVERSION (MPI_ERR_UNKNOWN)
+#ifdef  PyMPI_MISSING_MPI_ERR_NO_SPACE
+#undef  MPI_ERR_NO_SPACE
+#define MPI_ERR_NO_SPACE (MPI_ERR_UNKNOWN)
 #endif
 
-#ifdef  PyMPI_MISSING_MPI_ERR_DUP_DATAREP
-#undef  MPI_ERR_DUP_DATAREP
-#define MPI_ERR_DUP_DATAREP (MPI_ERR_UNKNOWN)
+#ifdef  PyMPI_MISSING_MPI_ERR_QUOTA
+#undef  MPI_ERR_QUOTA
+#define MPI_ERR_QUOTA (MPI_ERR_UNKNOWN)
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_ERR_UNSUPPORTED_DATAREP
@@ -2723,39 +2768,24 @@ typedef int (PyMPI_MPI_Datarep_extent_function)(MPI_Datatype,MPI_Aint*,void*);
 #define MPI_ERR_UNSUPPORTED_OPERATION (MPI_ERR_UNKNOWN)
 #endif
 
-#ifdef  PyMPI_MISSING_MPI_ERR_NAME
-#undef  MPI_ERR_NAME
-#define MPI_ERR_NAME (MPI_ERR_UNKNOWN)
+#ifdef  PyMPI_MISSING_MPI_ERR_CONVERSION
+#undef  MPI_ERR_CONVERSION
+#define MPI_ERR_CONVERSION (MPI_ERR_UNKNOWN)
 #endif
 
-#ifdef  PyMPI_MISSING_MPI_ERR_NO_MEM
-#undef  MPI_ERR_NO_MEM
-#define MPI_ERR_NO_MEM (MPI_ERR_UNKNOWN)
+#ifdef  PyMPI_MISSING_MPI_ERR_DUP_DATAREP
+#undef  MPI_ERR_DUP_DATAREP
+#define MPI_ERR_DUP_DATAREP (MPI_ERR_UNKNOWN)
 #endif
 
-#ifdef  PyMPI_MISSING_MPI_ERR_NOT_SAME
-#undef  MPI_ERR_NOT_SAME
-#define MPI_ERR_NOT_SAME (MPI_ERR_UNKNOWN)
+#ifdef  PyMPI_MISSING_MPI_ERR_IO
+#undef  MPI_ERR_IO
+#define MPI_ERR_IO (MPI_ERR_UNKNOWN)
 #endif
 
-#ifdef  PyMPI_MISSING_MPI_ERR_PORT
-#undef  MPI_ERR_PORT
-#define MPI_ERR_PORT (MPI_ERR_UNKNOWN)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_ERR_QUOTA
-#undef  MPI_ERR_QUOTA
-#define MPI_ERR_QUOTA (MPI_ERR_UNKNOWN)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_ERR_SERVICE
-#undef  MPI_ERR_SERVICE
-#define MPI_ERR_SERVICE (MPI_ERR_UNKNOWN)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_ERR_SPAWN
-#undef  MPI_ERR_SPAWN
-#define MPI_ERR_SPAWN (MPI_ERR_UNKNOWN)
+#ifdef  PyMPI_MISSING_MPI_ERR_WIN
+#undef  MPI_ERR_WIN
+#define MPI_ERR_WIN (MPI_ERR_ARG)
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_ERR_BASE
@@ -2773,14 +2803,14 @@ typedef int (PyMPI_MPI_Datarep_extent_function)(MPI_Datatype,MPI_Aint*,void*);
 #define MPI_ERR_DISP (MPI_ERR_UNKNOWN)
 #endif
 
-#ifdef  PyMPI_MISSING_MPI_ERR_LOCKTYPE
-#undef  MPI_ERR_LOCKTYPE
-#define MPI_ERR_LOCKTYPE (MPI_ERR_UNKNOWN)
-#endif
-
 #ifdef  PyMPI_MISSING_MPI_ERR_ASSERT
 #undef  MPI_ERR_ASSERT
 #define MPI_ERR_ASSERT (MPI_ERR_UNKNOWN)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_ERR_LOCKTYPE
+#undef  MPI_ERR_LOCKTYPE
+#define MPI_ERR_LOCKTYPE (MPI_ERR_UNKNOWN)
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_ERR_RMA_CONFLICT

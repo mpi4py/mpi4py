@@ -39,10 +39,6 @@
 #if (10*MPI_VERSION+MPI_SUBVERSION) < 22
 #if !defined(PyMPI_HAVE_CONFIG_H)
 
-#define PyMPI_MISSING_MPI_Comm_errhandler_function 1
-#define PyMPI_MISSING_MPI_Win_errhandler_function 1
-#define PyMPI_MISSING_MPI_File_errhandler_function 1
-
 #define PyMPI_MISSING_MPI_AINT 1
 #define PyMPI_MISSING_MPI_OFFSET 1
 #define PyMPI_MISSING_MPI_C_BOOL 1
@@ -80,6 +76,17 @@
 #define PyMPI_MISSING_MPI_Op_commutative 1
 #define PyMPI_MISSING_MPI_Reduce_local 1
 #define PyMPI_MISSING_MPI_Reduce_scatter_block 1
+
+#define PyMPI_MISSING_MPI_DIST_GRAPH 1
+#define PyMPI_MISSING_MPI_UNWEIGHTED 1
+#define PyMPI_MISSING_MPI_Dist_graph_create_adjacent 1
+#define PyMPI_MISSING_MPI_Dist_graph_create 1 
+#define PyMPI_MISSING_MPI_Dist_graph_neighbors_count 1
+#define PyMPI_MISSING_MPI_Dist_graph_neighbors 1
+
+#define PyMPI_MISSING_MPI_Comm_errhandler_function 1
+#define PyMPI_MISSING_MPI_Win_errhandler_function 1
+#define PyMPI_MISSING_MPI_File_errhandler_function 1
 
 #endif
 #endif
