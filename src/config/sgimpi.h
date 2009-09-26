@@ -43,16 +43,22 @@
 #define PyMPI_MISSING_MPI_Pack_external_size 1
 #define PyMPI_MISSING_MPI_REPLACE 1
 #define PyMPI_MISSING_MPI_Op_commutative 1
+#define PyMPI_MISSING_MPI_Comm_get_errhandler 1
+#define PyMPI_MISSING_MPI_Comm_set_errhandler 1
 #define PyMPI_MISSING_MPI_Comm_errhandler_fn 1
 #define PyMPI_MISSING_MPI_Comm_create_errhandler 1
 #define PyMPI_MISSING_MPI_Comm_call_errhandler 1
-#define PyMPI_MISSING_MPI_Comm_get_errhandler 1
-#define PyMPI_MISSING_MPI_Comm_set_errhandler 1
 #define PyMPI_MISSING_MPI_LASTUSEDCODE 1
 #define PyMPI_MISSING_MPI_Reduce_local 1
 #define PyMPI_MISSING_MPI_Reduce_scatter_block 1
 #define PyMPI_MISSING_MPI_Alltoallw 1
 #define PyMPI_MISSING_MPI_Exscan 1
+#define PyMPI_MISSING_MPI_DIST_GRAPH 1
+#define PyMPI_MISSING_MPI_UNWEIGHTED 1
+#define PyMPI_MISSING_MPI_Dist_graph_create_adjacent 1
+#define PyMPI_MISSING_MPI_Dist_graph_create 1
+#define PyMPI_MISSING_MPI_Dist_graph_neighbors_count 1
+#define PyMPI_MISSING_MPI_Dist_graph_neighbors 1
 #define PyMPI_MISSING_MPI_Comm_join 1
 /*#define PyMPI_MISSING_MPI_ARGV_NULL 1*/
 /*#define PyMPI_MISSING_MPI_ARGVS_NULL 1*/
@@ -77,6 +83,7 @@
 #define PyMPI_MISSING_MPI_Errhandler_f2c 1
 
 #if defined(_ABIN32) && _ABIN32
+#define PyMPI_MISSING_MPI_Win 1
 #define PyMPI_MISSING_MPI_WIN_NULL 1
 #define PyMPI_MISSING_MPI_Win_free 1
 #define PyMPI_MISSING_MPI_Win_create 1
@@ -93,6 +100,8 @@
 #define PyMPI_MISSING_MPI_Win_post 1
 #define PyMPI_MISSING_MPI_Win_start 1
 #define PyMPI_MISSING_MPI_Win_complete 1
+#define PyMPI_MISSING_MPI_LOCK_EXCLUSIVE 1
+#define PyMPI_MISSING_MPI_LOCK_SHARED 1
 #define PyMPI_MISSING_MPI_Win_lock 1
 #define PyMPI_MISSING_MPI_Win_unlock 1
 #define PyMPI_MISSING_MPI_Win_wait 1
