@@ -1,5 +1,0 @@
-#ifndef PyMPI_COMPAT_DEINOMPI_H
-#define PyMPI_COMPAT_DEINOMPI_H
-
-
-#endif /* !PyMPI_COMPAT_DEINOMPI_H */

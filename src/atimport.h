@@ -6,14 +6,12 @@
 
 /* ---------------------------------------------------------------- */
 
-/* Hack for DeinoMPI */
-#if defined(DEINO_MPI)
-#undef MPICH2
+#if defined(MPICH_NAME) && (MPICH_NAME==1)
+#define MPICH1 1
 #endif
 
-/* Hack for MS MPI */
-#if defined(MS_MPI)
-#undef MPICH2
+#if defined(DEINO_MPI) && !defined(MPICH2)
+#define MPICH2 1
 #endif
 
 /* XXX describe */
@@ -23,11 +21,7 @@
 #include "config/mpich2.h"
 #elif defined(OPEN_MPI)
 #include "config/openmpi.h"
-#elif defined(DEINO_MPI)
-#include "config/deinompi.h"
-#elif defined(MS_MPI)
-#include "config/msmpi.h"
-#elif defined(MPICH_NAME) && MPICH_NAME==1
+#elif defined(MPICH1)
 #include "config/mpich1.h"
 #elif defined(LAM_MPI)
 #include "config/lammpi.h"
@@ -80,7 +74,7 @@
 #define PyMPI_MISSING_MPI_DIST_GRAPH 1
 #define PyMPI_MISSING_MPI_UNWEIGHTED 1
 #define PyMPI_MISSING_MPI_Dist_graph_create_adjacent 1
-#define PyMPI_MISSING_MPI_Dist_graph_create 1 
+#define PyMPI_MISSING_MPI_Dist_graph_create 1
 #define PyMPI_MISSING_MPI_Dist_graph_neighbors_count 1
 #define PyMPI_MISSING_MPI_Dist_graph_neighbors 1
 
@@ -100,11 +94,7 @@
 #include "compat/mpich2.h"
 #elif defined(OPEN_MPI)
 #include "compat/openmpi.h"
-#elif defined(DEINO_MPI)
-#include "compat/deinompi.h"
-#elif defined(MS_MPI)
-#include "compat/msmpi.h"
-#elif defined(MPICH_NAME) && MPICH_NAME==1
+#elif defined(MPICH1)
 #include "compat/mpich1.h"
 #elif defined(LAM_MPI)
 #include "compat/lammpi.h"
@@ -113,6 +103,20 @@
 #endif
 
 /* ---------------------------------------------------------------- */
+
+#if defined(MS_WINDOWS) && !defined(PyMPI_API_CALL)
+  #if defined(MPI_CALL)   /* DeinoMPI */
+    #define PyMPI_API_CALL MPI_CALL
+  #elif defined(MPIAPI)   /* Microsoft MPI */
+    #define PyMPI_API_CALL MPIAPI
+  #else
+    #define PyMPI_API_CALL
+  #endif
+#endif
+
+#if !defined(PyMPI_API_CALL)
+#define PyMPI_API_CALL
+#endif
 
 static int PyMPI_KEYVAL_MPI_ATEXIT = MPI_KEYVAL_INVALID;
 static int PyMPI_KEYVAL_WIN_MEMORY = MPI_KEYVAL_INVALID;

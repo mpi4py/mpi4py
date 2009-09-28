@@ -30,6 +30,11 @@ static int MPI_Get_vendor(const char **vendor_name,
   #if defined(MPICH2_VERSION)
   myVersionParser(MPICH2_VERSION,major,minor,micro);
   #endif
+  #if defined(DEINO_MPI)
+  name = "DeinoMPI";
+  #elif defined(MS_MPI)
+  name = "Microsoft MPI";
+  #endif
 #endif
 
   /* Open MPI */
@@ -53,20 +58,6 @@ static int MPI_Get_vendor(const char **vendor_name,
   minor = HP_MPI%100;
   #if defined(HP_MPI_MINOR)
   micro = HP_MPI_MINOR;
-  #endif
-#endif
-
-  /* DeinoMPI */
-#if defined(DEINO_MPI)
-  name = "DeinoMPI";
-  myVersionParser("1.1.0",major,minor,micro);
-#endif
-
-  /* Microsoft MPI */
-#if defined(MS_MPI)
-  name = "Microsoft MPI";
-  #if defined(MPICH2_VERSION)
-  myVersionParser(MPICH2_VERSION,major,minor,micro);
   #endif
 #endif
 
