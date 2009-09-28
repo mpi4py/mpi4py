@@ -60,26 +60,39 @@ cdef inline object message_simple(int readonly,
     dtype = (<Datatype?>odtype).ob_mpi
     # number of entries
     cdef int count = 0
-    cdef MPI_Aint nitems = 0
+    cdef MPI_Aint nitems = 0, nblocks = 1
     if ocount is not None: # user-provided
         count = <int> ocount
     elif blen > 0: # try to guess
+        if dtype == MPI_DATATYPE_NULL:
+            raise ValueError(
+                S("message: cannot guess count, "
+                  "datatype is null"))
         CHKERR( MPI_Type_get_extent(dtype, &lb, &ex) )
+        if ex <= 0:
+            raise ValueError(
+                S("message: cannot guess count, "
+                  "datatype extent %d "
+                  "(lb:%d, ub:%d)") %  (ex, lb, lb+ex))
         if (blen % ex) != 0:
             raise ValueError(
-                S("message: buffer length %d "
-                  "is not a multiple of datatype extent %d "
+                S("message: cannot guess count, "
+                  "buffer length %d "
+                  "is not a multiple of "
+                  "datatype extent %d "
                   "(lb:%d, ub:%d)") %  (blen, ex, lb, lb+ex))
         nitems = blen/ex
-        if size <= 1:
-            count = <int> nitems
+        nblocks = size
+        if nblocks <= 1:
+            count = <int> nitems # XXX overflow?
         else:
-            if (nitems % size) != 0:
+            if (nitems % nblocks) != 0:
                 raise ValueError(
-                    S("message: number of datatype items %d "
+                    S("message: cannot guess count, "
+                      "number of datatype items %d "
                       "is not a multiple of the required "
-                      "number of blocks %d") %  (nitems, size))
-            count = <int> (nitems/size)
+                      "number of blocks %d") %  (nitems, nblocks))
+            count = <int> (nitems/nblocks) # XXX overflow?
     # return collected message data
     _buf[0]   = bptr
     _count[0] = count
@@ -133,8 +146,8 @@ cdef inline object message_vector(int readonly,
     cdef MPI_Datatype dtype = MPI_DATATYPE_NULL
     dtype = (<Datatype?>odtype).ob_mpi
     # counts
-    cdef int *counts = NULL
     cdef int i=0, val=0
+    cdef int *counts = NULL
     if is_int(ocounts):
         val = <int> ocounts
         ocounts = newarray_int(size, &counts)
@@ -148,7 +161,8 @@ cdef inline object message_vector(int readonly,
         val = 0
         odispls = newarray_int(size, &displs)
         for i from 0 <= i < size:
-            displs[i] = val; val += counts[i]
+            displs[i] = val
+            val += counts[i]
     elif is_int(odispls): # strided
         val = <int> odispls
         odispls = newarray_int(size, &displs)
