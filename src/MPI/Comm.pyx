@@ -10,8 +10,9 @@ UNEQUAL   = MPI_UNEQUAL    #: Groups are different
 # Communicator Topologies
 # -----------------------
 
-CART  = MPI_CART   #: Cartesian topology
-GRAPH = MPI_GRAPH  #: Graph topology
+CART       = MPI_CART       #: Cartesian topology
+GRAPH      = MPI_GRAPH      #: General graph topology
+DIST_GRAPH = MPI_DIST_GRAPH #: Distributed graph topology
 
 
 cdef class Comm:
