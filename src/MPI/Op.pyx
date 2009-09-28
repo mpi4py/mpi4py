@@ -62,7 +62,7 @@ cdef class Op:
         """is commutative"""
         def __get__(self):
             return self.Is_commutative()
-        
+
     def Reduce_local(self, inbuf, inoutbuf):
         """
         Apply a reduction operator to local data

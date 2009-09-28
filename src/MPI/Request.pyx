@@ -30,7 +30,8 @@ cdef class Request:
         Wait for an MPI send or receive to complete.
         """
         cdef MPI_Status *statusp = arg_Status(status)
-        with nogil: CHKERR( MPI_Wait(&self.ob_mpi, statusp) )
+        with nogil: CHKERR( MPI_Wait(
+            &self.ob_mpi, statusp) )
 
     def Test(self, Status status=None):
         """
@@ -38,7 +39,8 @@ cdef class Request:
         """
         cdef bint flag = 0
         cdef MPI_Status *statusp = arg_Status(status)
-        with nogil: CHKERR( MPI_Test(&self.ob_mpi, &flag, statusp) )
+        with nogil: CHKERR( MPI_Test(
+            &self.ob_mpi, &flag, statusp) )
         return flag
 
     def Free(self):
@@ -54,7 +56,8 @@ cdef class Request:
         """
         cdef bint flag = 0
         cdef MPI_Status *statusp = arg_Status(status)
-        with nogil: CHKERR( MPI_Request_get_status(self.ob_mpi, &flag, statusp) )
+        with nogil: CHKERR( MPI_Request_get_status(
+            self.ob_mpi, &flag, statusp) )
         return flag
 
     # Multiple Completions
@@ -72,7 +75,8 @@ cdef class Request:
         cdef int index = MPI_UNDEFINED
         #
         try:
-            with nogil: CHKERR( MPI_Waitany(count, irequests, &index, statusp) )
+            with nogil: CHKERR( MPI_Waitany(
+                count, irequests, &index, statusp) )
         finally:
             restore_Request(requests, &irequests, count);
         #
@@ -91,7 +95,8 @@ cdef class Request:
         cdef MPI_Status *statusp = arg_Status(status)
         #
         try:
-            with nogil: CHKERR( MPI_Testany(count, irequests, &index, &flag, statusp) )
+            with nogil: CHKERR( MPI_Testany(
+                count, irequests, &index, &flag, statusp) )
         finally:
             restore_Request(requests, &irequests, count)
         #
@@ -109,7 +114,8 @@ cdef class Request:
         cdef tmp2 = asarray_Status(statuses, &istatuses, count)
         #
         try:
-            with nogil: CHKERR( MPI_Waitall(count, irequests, istatuses) )
+            with nogil: CHKERR( MPI_Waitall(
+                count, irequests, istatuses) )
         finally:
             restore_Request(requests, &irequests, count)
             restore_Status(statuses, &istatuses, count)
@@ -129,7 +135,8 @@ cdef class Request:
         cdef bint flag = 0
         #
         try:
-            with nogil: CHKERR( MPI_Testall(count, irequests, &flag, istatuses) )
+            with nogil: CHKERR( MPI_Testall(
+                count, irequests, &flag, istatuses) )
         finally:
             restore_Request(requests, &irequests, count)
             restore_Status(statuses, &istatuses, count)
@@ -151,7 +158,8 @@ cdef class Request:
         cdef tmp3 = newarray_int(incount, &iindices)
         #
         try:
-            with nogil: CHKERR( MPI_Waitsome(incount, irequests, &outcount, iindices, istatuses) )
+            with nogil: CHKERR( MPI_Waitsome(
+                incount, irequests, &outcount, iindices, istatuses) )
         finally:
             restore_Request(requests, &irequests, incount)
             restore_Status(statuses, &istatuses, incount)
@@ -177,7 +185,8 @@ cdef class Request:
         cdef tmp3 = newarray_int(incount, &iindices)
         #
         try:
-            with nogil: CHKERR( MPI_Waitsome(incount, irequests, &outcount, iindices, istatuses) )
+            with nogil: CHKERR( MPI_Waitsome(
+                incount, irequests, &outcount, iindices, istatuses) )
         finally:
             restore_Request(requests, &irequests, incount)
             restore_Status(statuses, &istatuses, incount)
@@ -290,4 +299,3 @@ cdef Request __REQUEST_NULL__ = new_Request(MPI_REQUEST_NULL)
 # --------------------------
 
 REQUEST_NULL = __REQUEST_NULL__  #: Null request handle
-

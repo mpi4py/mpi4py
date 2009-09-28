@@ -165,7 +165,8 @@ cdef int op_user_new(object function, MPI_User_function **cfunction) except -1:
     try:
         index = op_user_registry.index(None, 1)
     except ValueError:
-        raise RuntimeError(S("cannot create too many user-defined reduction operations"))
+        raise RuntimeError(S("cannot create too many "
+                             "user-defined reduction operations"))
     # the line below will fail
     # if the function is not callable
     function.__call__

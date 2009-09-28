@@ -53,7 +53,7 @@ cdef class Win:
         cdef void*    base = MPI_BOTTOM
         cdef MPI_Aint size = 0
         #
-        if is_BOTTOM(memory): 
+        if is_BOTTOM(memory):
             memory = None
         if memory is not None:
             memory = asmemory(memory, &base, &size)
@@ -225,7 +225,8 @@ cdef class Win:
         """
         Start an RMA access epoch for MPI
         """
-        with nogil: CHKERR( MPI_Win_start(group.ob_mpi, assertion, self.ob_mpi) )
+        with nogil: CHKERR( MPI_Win_start(
+            group.ob_mpi, assertion, self.ob_mpi) )
 
     def Complete(self):
         """
@@ -237,7 +238,8 @@ cdef class Win:
         """
         Start an RMA exposure epoch
         """
-        with nogil: CHKERR( MPI_Win_post(group.ob_mpi, assertion, self.ob_mpi) )
+        with nogil: CHKERR( MPI_Win_post(
+            group.ob_mpi, assertion, self.ob_mpi) )
 
     def Wait(self):
         """
@@ -260,7 +262,8 @@ cdef class Win:
         """
         Begin an RMA access epoch at the target process
         """
-        with nogil: CHKERR( MPI_Win_lock(lock_type, rank, assertion, self.ob_mpi) )
+        with nogil: CHKERR( MPI_Win_lock(
+            lock_type, rank, assertion, self.ob_mpi) )
 
     def Unlock(self, int rank):
         """

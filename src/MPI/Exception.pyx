@@ -89,7 +89,7 @@ def Get_error_class(int errorcode):
 
 def Get_error_string(int errorcode):
     """
-    Return the *error string* for a given 
+    Return the *error string* for a given
     *error class* or *error code*
     """
     cdef char string[MPI_MAX_ERROR_STRING+1]

@@ -21,17 +21,17 @@ include "pickled.pxi"
 
 include "CAPI.pxi"
 
-include "Exception.pyx"     # DONE
-include "Errhandler.pyx"    # DONE
-include "Datatype.pyx"      # DONE
-include "Status.pyx"        # DONE
-include "Request.pyx"       # DONE
-include "Info.pyx"          # DONE
-include "Op.pyx"            # DONE
-include "Group.pyx"         # DONE
-include "Comm.pyx"          # DONE
-include "Win.pyx"           # DONE
-include "File.pyx"          # DONE
+include "Exception.pyx"
+include "Errhandler.pyx"
+include "Datatype.pyx"
+include "Status.pyx"
+include "Request.pyx"
+include "Info.pyx"
+include "Op.pyx"
+include "Group.pyx"
+include "Comm.pyx"
+include "Win.pyx"
+include "File.pyx"
 
 # Assorted constants
 # ------------------

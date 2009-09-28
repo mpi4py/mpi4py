@@ -111,7 +111,8 @@ cdef class Group:
         two existing groups
         """
         cdef Group group = cls()
-        CHKERR( MPI_Group_union(group1.ob_mpi, group2.ob_mpi, &group.ob_mpi) )
+        CHKERR( MPI_Group_union(
+                group1.ob_mpi, group2.ob_mpi, &group.ob_mpi) )
         return group
 
     @classmethod
@@ -123,7 +124,8 @@ cdef class Group:
         of two existing groups
         """
         cdef Group group = cls()
-        CHKERR( MPI_Group_intersection(group1.ob_mpi, group2.ob_mpi, &group.ob_mpi) )
+        CHKERR( MPI_Group_intersection(
+                group1.ob_mpi, group2.ob_mpi, &group.ob_mpi) )
         return group
 
     @classmethod
@@ -135,7 +137,8 @@ cdef class Group:
         of two existing groups
         """
         cdef Group group = cls()
-        CHKERR( MPI_Group_difference(group1.ob_mpi, group2.ob_mpi, &group.ob_mpi) )
+        CHKERR( MPI_Group_difference(
+                group1.ob_mpi, group2.ob_mpi, &group.ob_mpi) )
         return group
 
     def Incl(self, ranks):

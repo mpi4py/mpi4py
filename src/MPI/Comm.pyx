@@ -1,10 +1,10 @@
 # Communicator Comparisons
 # ------------------------
 
-IDENT     = MPI_IDENT      #: Groups are identical, communicator contexts are de same
-CONGRUENT = MPI_CONGRUENT  #: Groups are identical, contexts are different
-SIMILAR   = MPI_SIMILAR    #: Groups are similar, rank order differs
-UNEQUAL   = MPI_UNEQUAL    #: Groups are different
+IDENT     = MPI_IDENT     #: Groups are identical, communicator contexts de same
+CONGRUENT = MPI_CONGRUENT #: Groups are identical, contexts are different
+SIMILAR   = MPI_SIMILAR   #: Groups are similar, rank order differs
+UNEQUAL   = MPI_UNEQUAL   #: Groups are different
 
 
 # Communicator Topologies
@@ -832,7 +832,8 @@ cdef class Intracomm(Comm):
         Create intracommunicator from group
         """
         cdef Intracomm comm = type(self)()
-        with nogil: CHKERR( MPI_Comm_create(self.ob_mpi, group.ob_mpi, &comm.ob_mpi) )
+        with nogil: CHKERR( MPI_Comm_create(
+            self.ob_mpi, group.ob_mpi, &comm.ob_mpi) )
         return comm
 
     def Split(self, int color=0, int key=0):
@@ -840,7 +841,8 @@ cdef class Intracomm(Comm):
         Split intracommunicator by color and key
         """
         cdef Intracomm comm = type(self)()
-        with nogil: CHKERR( MPI_Comm_split(self.ob_mpi, color, key, &comm.ob_mpi) )
+        with nogil: CHKERR( MPI_Comm_split(
+            self.ob_mpi, color, key, &comm.ob_mpi) )
         return comm
 
     def Create_cart(self, dims, periods=None, bint reorder=False):
@@ -855,7 +857,8 @@ cdef class Intracomm(Comm):
         cdef tmp2 = asarray_int(periods, &iperiods, ndims)
         #
         cdef Cartcomm comm = Cartcomm()
-        with nogil: CHKERR( MPI_Cart_create(self.ob_mpi, ndims, idims, iperiods, reorder, &comm.ob_mpi) )
+        with nogil: CHKERR( MPI_Cart_create(
+            self.ob_mpi, ndims, idims, iperiods, reorder, &comm.ob_mpi) )
         return comm
 
     def Create_graph(self, index, edges, bint reorder=False):
@@ -873,7 +876,8 @@ cdef class Intracomm(Comm):
             nnodes -= 1; iindex += 1;
         #
         cdef Graphcomm comm = Graphcomm()
-        with nogil: CHKERR( MPI_Graph_create(self.ob_mpi, nnodes, iindex, iedges, reorder, &comm.ob_mpi) )
+        with nogil: CHKERR( MPI_Graph_create(
+            self.ob_mpi, nnodes, iindex, iedges, reorder, &comm.ob_mpi) )
         return comm
 
     def Create_dist_graph_adjacent(self, sources, destinations,
@@ -1432,9 +1436,9 @@ cdef class Distgraphcomm(Intracomm):
         cdef object dst = [destinations[i] for i from 0 <= i < maxoutdegree]
         if not weighted: return (src, dst, None)
         #
-        cdef object sweights = [sourceweights[i] for i from 0 <= i < maxindegree]
-        cdef object dweights = [destweights[i]   for i from 0 <= i < maxoutdegree]
-        return (src, dst, (sweights, dweights))
+        cdef object sw = [sourceweights[i] for i from 0 <= i < maxindegree]
+        cdef object dw = [destweights[i]   for i from 0 <= i < maxoutdegree]
+        return (src, dst, (sw, dw))
 
 
 cdef class Intercomm(Comm):
@@ -1489,7 +1493,8 @@ cdef class Intercomm(Comm):
         Create intercommunicator from group
         """
         cdef Intercomm comm = type(self)()
-        with nogil: CHKERR( MPI_Comm_create(self.ob_mpi, group.ob_mpi, &comm.ob_mpi) )
+        with nogil: CHKERR( MPI_Comm_create(
+            self.ob_mpi, group.ob_mpi, &comm.ob_mpi) )
         return comm
 
     def Split(self, int color=0, int key=0):
@@ -1497,7 +1502,8 @@ cdef class Intercomm(Comm):
         Split intercommunicator by color and key
         """
         cdef Intercomm comm = type(self)()
-        with nogil: CHKERR( MPI_Comm_split(self.ob_mpi, color, key, &comm.ob_mpi) )
+        with nogil: CHKERR( MPI_Comm_split(
+            self.ob_mpi, color, key, &comm.ob_mpi) )
         return comm
 
     def Merge(self, bint high=False):
@@ -1505,7 +1511,8 @@ cdef class Intercomm(Comm):
         Merge intercommunicator
         """
         cdef Intracomm comm = Intracomm()
-        with nogil: CHKERR( MPI_Intercomm_merge(self.ob_mpi, high, &comm.ob_mpi) )
+        with nogil: CHKERR( MPI_Intercomm_merge(
+            self.ob_mpi, high, &comm.ob_mpi) )
         return comm
 
 
