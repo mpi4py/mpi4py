@@ -96,7 +96,6 @@ static int MPI_Get_vendor(const char **vendor_name,
   return 0;
 }
 
-
 /*
    Local variables:
    c-basic-offset: 2

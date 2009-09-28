@@ -58,7 +58,7 @@ struct _errhdl {
 static int PyMPI_LAMMPI_Errhandler_free(MPI_Errhandler *errhandler)
 {
   if (errhandler == 0) return MPI_ERR_ARG;
-  if (*errhandler == MPI_ERRORS_RETURN || 
+  if (*errhandler == MPI_ERRORS_RETURN ||
       *errhandler == MPI_ERRORS_ARE_FATAL) {
     struct _errhdl *eh = (struct _errhdl *) (*errhandler);
     eh->eh_refcount--;
@@ -73,8 +73,8 @@ static int PyMPI_LAMMPI_Errhandler_free(MPI_Errhandler *errhandler)
 
 /* -- */
 
-static int PyMPI_LAMMPI_MPI_Comm_get_errhandler(MPI_Comm comm, 
-						MPI_Errhandler *errhandler)
+static int PyMPI_LAMMPI_MPI_Comm_get_errhandler(MPI_Comm comm,
+                                                MPI_Errhandler *errhandler)
 {
   int ierr = MPI_SUCCESS;
   if (comm == MPI_COMM_NULL) return MPI_ERR_COMM;
@@ -89,8 +89,8 @@ static int PyMPI_LAMMPI_MPI_Comm_get_errhandler(MPI_Comm comm,
 #undef MPI_Comm_get_errhandler
 #define MPI_Comm_get_errhandler PyMPI_LAMMPI_MPI_Comm_get_errhandler
 
-static int PyMPI_LAMMPI_MPI_Comm_set_errhandler(MPI_Comm comm, 
-						MPI_Errhandler errhandler)
+static int PyMPI_LAMMPI_MPI_Comm_set_errhandler(MPI_Comm comm,
+                                                MPI_Errhandler errhandler)
 {
   int ierr = MPI_SUCCESS, ierr2 = MPI_SUCCESS;
   MPI_Errhandler previous = MPI_ERRHANDLER_NULL;
@@ -126,8 +126,8 @@ static int PyMPI_LAMMPI_MPI_Comm_set_errhandler(MPI_Comm comm,
 
 /* -- */
 
-static int PyMPI_LAMMPI_MPI_Win_get_errhandler(MPI_Win win, 
-					       MPI_Errhandler *errhandler)
+static int PyMPI_LAMMPI_MPI_Win_get_errhandler(MPI_Win win,
+                                               MPI_Errhandler *errhandler)
 {
   int ierr = MPI_SUCCESS;
   if (win == MPI_WIN_NULL) return MPI_ERR_WIN;
@@ -145,8 +145,8 @@ static int PyMPI_LAMMPI_MPI_Win_get_errhandler(MPI_Win win,
 #undef  MPI_Win_get_errhandler
 #define MPI_Win_get_errhandler PyMPI_LAMMPI_MPI_Win_get_errhandler
 
-static int PyMPI_LAMMPI_MPI_Win_set_errhandler(MPI_Win win, 
-					       MPI_Errhandler errhandler)
+static int PyMPI_LAMMPI_MPI_Win_set_errhandler(MPI_Win win,
+                                               MPI_Errhandler errhandler)
 {
   int ierr = MPI_SUCCESS, ierr2 = MPI_SUCCESS;
   MPI_Errhandler previous = MPI_ERRHANDLER_NULL;
@@ -178,14 +178,15 @@ static int PyMPI_LAMMPI_MPI_Win_set_errhandler(MPI_Win win,
 #undef  MPI_Win_set_errhandler
 #define MPI_Win_set_errhandler PyMPI_LAMMPI_MPI_Win_set_errhandler
 
-static int PyMPI_LAMMPI_MPI_Win_create(void *base, MPI_Aint size, int disp_unit, 
-				       MPI_Info info, MPI_Comm comm, MPI_Win *win)
+static int PyMPI_LAMMPI_MPI_Win_create(void *base, MPI_Aint size, int disp_unit,
+                                       MPI_Info info, MPI_Comm comm,
+                                       MPI_Win *win)
 {
   int ierr = MPI_SUCCESS;
   MPI_Errhandler errhandler = MPI_ERRHANDLER_NULL;
   ierr = MPI_Win_create(base, size, disp_unit, info, comm, win);
   if (ierr != MPI_SUCCESS) return ierr;
-  ierr = MPI_Win_get_errhandler(*win, &errhandler); 
+  ierr = MPI_Win_get_errhandler(*win, &errhandler);
   if (ierr != MPI_SUCCESS) return ierr;
   return MPI_SUCCESS;
 }
@@ -237,7 +238,7 @@ struct ADIOI_FileD {
     int cookie;              /* for error checking */
     FDTYPE fd_sys;              /* system file descriptor */
 #ifdef XFS
-    int fd_direct;           /* On XFS, this is used for direct I/O; 
+    int fd_direct;           /* On XFS, this is used for direct I/O;
                                 fd_sys is used for buffered I/O */
     int direct_read;         /* flag; 1 means use direct read */
     int direct_write;        /* flag; 1 means use direct write  */
@@ -252,9 +253,9 @@ struct ADIOI_FileD {
                                 in bytes */
     ADIOI_Fns *fns;          /* struct of I/O functions to use */
     MPI_Comm comm;           /* communicator indicating who called open */
-    char *filename;          
+    char *filename;
     int file_system;         /* type of file system */
-    int access_mode;         
+    int access_mode;
     ADIO_Offset disp;        /* reqd. for MPI-IO */
     MPI_Datatype etype;      /* reqd. for MPI-IO */
     MPI_Datatype filetype;   /* reqd. for MPI-IO */
@@ -263,7 +264,7 @@ struct ADIOI_FileD {
     MPI_Info info;
     int split_coll_count;    /* count of outstanding split coll. ops. */
     char *shared_fp_fname;   /* name of file containing shared file pointer */
-    struct ADIOI_FileD *shared_fp_fd;  /* file handle of file 
+    struct ADIOI_FileD *shared_fp_fd;  /* file handle of file
                                          containing shared fp */
     int async_count;         /* count of outstanding nonblocking operations */
     int perm;
@@ -276,8 +277,8 @@ struct ADIOI_FileD {
 }
 #endif
 
-static int PyMPI_LAMMPI_MPI_File_get_errhandler(MPI_File file, 
-						MPI_Errhandler *errhandler)
+static int PyMPI_LAMMPI_MPI_File_get_errhandler(MPI_File file,
+                                                MPI_Errhandler *errhandler)
 {
   /* check arguments */
   if (file != MPI_FILE_NULL) {
@@ -302,8 +303,8 @@ static int PyMPI_LAMMPI_MPI_File_get_errhandler(MPI_File file,
 #undef  MPI_File_get_errhandler
 #define MPI_File_get_errhandler PyMPI_LAMMPI_MPI_File_get_errhandler
 
-static int PyMPI_LAMMPI_MPI_File_set_errhandler(MPI_File file, 
-						MPI_Errhandler errhandler)
+static int PyMPI_LAMMPI_MPI_File_set_errhandler(MPI_File file,
+                                                MPI_Errhandler errhandler)
 {
   /* check arguments */
   if (file != MPI_FILE_NULL) {
@@ -329,7 +330,7 @@ static int PyMPI_LAMMPI_MPI_File_set_errhandler(MPI_File file,
     fh->err_handler = errhandler;
     errhandler = tmp;
   }
-  /* decrement reference counter */ 
+  /* decrement reference counter */
   if (errhandler != MPI_ERRHANDLER_NULL ) {
     struct _errhdl *eh = (struct _errhdl *) errhandler;
     eh->eh_refcount--;
@@ -344,3 +345,10 @@ static int PyMPI_LAMMPI_MPI_File_set_errhandler(MPI_File file,
 /* ---------------------------------------------------------------- */
 
 #endif /* !PyMPI_COMPAT_LAMMPI_H */
+
+/*
+  Local variables:
+  c-basic-offset: 2
+  indent-tabs-mode: nil
+  End:
+*/

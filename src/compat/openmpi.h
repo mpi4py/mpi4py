@@ -98,7 +98,7 @@ LT_END_C_DECLS
 #endif
 
 static int         OPENMPI_ltdlup = 0;
-static lt_dlhandle OPENMPI_libmpi = 0; 
+static lt_dlhandle OPENMPI_libmpi = 0;
 
 static void OPENMPI_dlopen_libmpi(void)
 {
@@ -140,7 +140,7 @@ static void OPENMPI_dlclose_libmpi(void)
     libmpi = 0;
   }
   if (ltdlup) {
-    (void)lt_dlexit(); 
+    (void)lt_dlexit();
     ltdlup = 0;
   }
   OPENMPI_libmpi = libmpi;
@@ -192,7 +192,7 @@ static int PyMPI_OPENMPI_MPI_Finalize(void)
 
 static int PyMPI_OPENMPI_Errhandler_free(MPI_Errhandler *errhandler)
 {
-  if (errhandler && ((*errhandler == MPI_ERRORS_RETURN) || 
+  if (errhandler && ((*errhandler == MPI_ERRORS_RETURN) ||
                      (*errhandler == MPI_ERRORS_ARE_FATAL))) {
     *errhandler = MPI_ERRHANDLER_NULL;
     return MPI_SUCCESS;
@@ -217,7 +217,8 @@ static int PyMPI_OPENMPI_Errhandler_free(MPI_Errhandler *errhandler)
 
 static MPI_Errhandler PyMPI_OPENMPI_FILE_NULL_ERRHANDLER = (MPI_Errhandler)0;
 
-static int PyMPI_OPENMPI_File_get_errhandler(MPI_File file, MPI_Errhandler *errhandler)
+static int PyMPI_OPENMPI_File_get_errhandler(MPI_File file,
+                                             MPI_Errhandler *errhandler)
 {
   if (file == MPI_FILE_NULL) {
     if (PyMPI_OPENMPI_FILE_NULL_ERRHANDLER == (MPI_Errhandler)0) {
@@ -231,7 +232,8 @@ static int PyMPI_OPENMPI_File_get_errhandler(MPI_File file, MPI_Errhandler *errh
 #undef  MPI_File_get_errhandler
 #define MPI_File_get_errhandler PyMPI_OPENMPI_File_get_errhandler
 
-static int PyMPI_OPENMPI_File_set_errhandler(MPI_File file, MPI_Errhandler errhandler)
+static int PyMPI_OPENMPI_File_set_errhandler(MPI_File file,
+                                             MPI_Errhandler errhandler)
 {
   int ierr = MPI_File_set_errhandler(file, errhandler);
   if (ierr != MPI_SUCCESS) return ierr;
@@ -262,7 +264,8 @@ static MPI_Fint PyMPI_OPENMPI_File_c2f(MPI_File file)
 
 #if PyMPI_OPENMPI_VERSION < 10400
 
-static int PyMPI_OPENMPI_Win_get_errhandler(MPI_Win win, MPI_Errhandler *errhandler)
+static int PyMPI_OPENMPI_Win_get_errhandler(MPI_Win win,
+                                            MPI_Errhandler *errhandler)
 {
   if (win == MPI_WIN_NULL) {
     MPI_Comm_call_errhandler(MPI_COMM_WORLD, MPI_ERR_WIN);
@@ -273,7 +276,8 @@ static int PyMPI_OPENMPI_Win_get_errhandler(MPI_Win win, MPI_Errhandler *errhand
 #undef  MPI_Win_get_errhandler
 #define MPI_Win_get_errhandler PyMPI_OPENMPI_Win_get_errhandler
 
-static int PyMPI_OPENMPI_Win_set_errhandler(MPI_Win win, MPI_Errhandler errhandler)
+static int PyMPI_OPENMPI_Win_set_errhandler(MPI_Win win,
+                                            MPI_Errhandler errhandler)
 {
   if (win == MPI_WIN_NULL) {
     MPI_Comm_call_errhandler(MPI_COMM_WORLD, MPI_ERR_WIN);
@@ -289,3 +293,10 @@ static int PyMPI_OPENMPI_Win_set_errhandler(MPI_Win win, MPI_Errhandler errhandl
 /* ---------------------------------------------------------------- */
 
 #endif /* !PyMPI_COMPAT_OPENMPI_H */
+
+/*
+  Local variables:
+  c-basic-offset: 2
+  indent-tabs-mode: nil
+  End:
+*/
