@@ -616,24 +616,33 @@ static int PyMPI_Type_create_darray(int size,
 /* ---------------------------------------------------------------- */
 
 #ifndef PyMPI_MISSING_MPI_Request_get_status
-#if (10*MPI_VERSION+MPI_SUBVERSION) < 22
+#if ((10 * MPI_VERSION + MPI_SUBVERSION) < 22) && !defined(OPEN_MPI)
 static int PyMPI_Request_get_status(MPI_Request request,
                                     int *flag, MPI_Status *status)
 {
-  if (request == MPI_REQUEST_NULL &&
-      flag && status &&
-      status != MPI_STATUS_IGNORE &&
+  if (request != MPI_REQUEST_NULL || !flag)
+    return MPI_Request_get_status(request, flag, status);
+  *flag = 1;
+  if (status && 
+      status != MPI_STATUS_IGNORE && 
       status != MPI_STATUSES_IGNORE) {
+    #if defined(PyMPI_MISSING_MPI_Status_set_cancelled) ||  \
+        defined(PyMPI_MISSING_MPI_Status_set_elements)
     int n = (int) sizeof(MPI_Status);
     unsigned char *p = (unsigned char *)status;
     while (n-- > 0) p[n] = 0;
+    #endif
     status->MPI_SOURCE = MPI_ANY_SOURCE;
     status->MPI_TAG    = MPI_ANY_TAG;
     status->MPI_ERROR  = MPI_SUCCESS;
-    *flag = 1;
-    return MPI_SUCCESS;
+    #ifndef PyMPI_MISSING_MPI_Status_set_elements
+    MPI_Status_set_elements(status, MPI_BYTE, 0);
+    #endif
+    #ifndef PyMPI_MISSING_MPI_Status_set_cancelled
+    MPI_Status_set_cancelled(status, 0);
+    #endif
   }
-  return MPI_Request_get_status(request, flag, status);
+  return MPI_SUCCESS;
 }
 #undef  MPI_Request_get_status
 #define MPI_Request_get_status PyMPI_Request_get_status

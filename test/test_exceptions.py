@@ -74,9 +74,6 @@ class TestExcStatus(unittest.TestCase):
 
 class TestExcRequestNull(unittest.TestCase):
 
-    def testGetStatus(self):
-        self.assertRaisesMPI(MPI.ERR_REQUEST, MPI.REQUEST_NULL.Get_status)
-
     def testFree(self):
         self.assertRaisesMPI(MPI.ERR_REQUEST, MPI.REQUEST_NULL.Free)
 

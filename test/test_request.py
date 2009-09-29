@@ -18,6 +18,18 @@ class TestRequest(unittest.TestCase):
         self.REQUEST.Wait(None)
         self.REQUEST.Test(self.STATUS)
 
+    def testGetStatus(self):
+        flag = self.REQUEST.Get_status()
+        self.assertTrue(flag)
+        flag = self.REQUEST.Get_status(self.STATUS)
+        self.assertTrue(flag)
+        self.assertEqual(self.STATUS.Get_source(), MPI.ANY_SOURCE)
+        self.assertEqual(self.STATUS.Get_tag(),    MPI.ANY_TAG)
+        self.assertEqual(self.STATUS.Get_error(),  MPI.SUCCESS)
+        self.assertEqual(self.STATUS.Get_count(MPI.BYTE),    0)
+        self.assertEqual(self.STATUS.Get_elements(MPI.BYTE), 0)
+        try: self.assertFalse(self.STATUS.Is_cancelled())
+        except NotImplementedError: pass
 
 class TestRequestArray(unittest.TestCase):
 
