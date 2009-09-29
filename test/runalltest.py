@@ -53,9 +53,13 @@ alltests = mpiunittest.find_tests(exclude=EXCLUDE[:])
 def runtests(*args, **kargs):
     quiet = '-q' in args or '-q' in sys.argv
     if quiet:
-        def dummy_write(self,*args): pass
-        unittest._WritelnDecorator.write   = dummy_write
-        unittest._WritelnDecorator.writeln = dummy_write
+        try:
+            from unittest.runner import _WritelnDecorator
+        except ImportError:
+            from unittest import _WritelnDecorator
+        def dummy_write(self, *args): pass
+        _WritelnDecorator.write   = dummy_write
+        _WritelnDecorator.writeln = dummy_write
     for test in alltests:
         if not quiet:
             sys.stderr.flush()
@@ -81,7 +85,11 @@ def runtestsleak(repeats, *args, **kargs):
 if __name__ == '__main__':
     runtests()
     if hasattr(sys, 'gettotalrefcount'):
-        def dummy_write(self,*args): pass
-        unittest._WritelnDecorator.write   = dummy_write
-        unittest._WritelnDecorator.writeln = dummy_write
+        try:
+            from unittest.runner import _WritelnDecorator
+        except ImportError:
+            from unittest import _WritelnDecorator
+        def dummy_write(self, *args): pass
+        _WritelnDecorator.write   = dummy_write
+        _WritelnDecorator.writeln = dummy_write
         runtestsleak(5)
