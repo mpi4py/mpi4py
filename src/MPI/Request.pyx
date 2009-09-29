@@ -285,7 +285,7 @@ cdef class Grequest(Request):
         """
         if self.ob_mpi != MPI_REQUEST_NULL:
             if self.ob_mpi != self.ob_grequest:
-                raise Exception(MPI_ERR_REQUEST)
+                raise MPIException(MPI_ERR_REQUEST)
         cdef MPI_Request grequest = self.ob_grequest
         self.ob_grequest = self.ob_mpi # sync handles
         with nogil: CHKERR( MPI_Grequest_complete(grequest) )
