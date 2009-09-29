@@ -259,7 +259,7 @@ cdef class Grequest(Request):
     """
 
     def __cinit__(self):
-        self.ob_grequest = MPI_REQUEST_NULL
+        self.ob_grequest = self.ob_mpi
 
     @classmethod
     def Start(cls, query_fn, free_fn, cancel_fn,
@@ -270,8 +270,7 @@ cdef class Grequest(Request):
         #
         cdef Grequest request = cls()
         cdef _p_greq state = \
-             _p_greq(query_fn, free_fn, cancel_fn,
-                     args, kargs)
+             _p_greq(query_fn, free_fn, cancel_fn, args, kargs)
         with nogil: CHKERR( MPI_Grequest_start(
             greq_query_fn, greq_free_fn, greq_cancel_fn,
             <void*>state, &request.ob_mpi) )
@@ -287,8 +286,9 @@ cdef class Grequest(Request):
             if self.ob_mpi != self.ob_grequest:
                 raise MPIException(MPI_ERR_REQUEST)
         cdef MPI_Request grequest = self.ob_grequest
-        self.ob_grequest = self.ob_mpi # sync handles
+        self.ob_grequest = self.ob_mpi ## or MPI_REQUEST_NULL ??
         with nogil: CHKERR( MPI_Grequest_complete(grequest) )
+        self.ob_grequest = self.ob_mpi ## or MPI_REQUEST_NULL ??
 
 
 
