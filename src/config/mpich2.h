@@ -48,6 +48,12 @@
 #define PyMPI_MISSING_MPI_Dist_graph_neighbors 1
 #endif
 
+#if MPI_VERSION==2 && MPI_SUBVERSION<2
+#define PyMPI_MISSING_MPI_Comm_errhandler_function 1
+#define PyMPI_MISSING_MPI_Win_errhandler_function 1
+#define PyMPI_MISSING_MPI_File_errhandler_function 1
+#endif
+
 #ifndef ROMIO_VERSION
 #include "mpich2io.h"
 #endif /* !ROMIO_VERSION */
