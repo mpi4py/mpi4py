@@ -6,9 +6,12 @@ default:
 	${MAKE} -C mandelbrot
 	${MAKE} -C spawning
 
+	${MAKE} -C wrap-c
+	${MAKE} -C wrap-f2py
+	${MAKE} -C wrap-swig
+	${MAKE} -C wrap-boost
+
 	${MAKE} -C cython
-	${MAKE} -C f2py
-	${MAKE} -C swig
 	${MAKE} -C embedding
 
 	${MAKE} -C mpi-ref-v1
