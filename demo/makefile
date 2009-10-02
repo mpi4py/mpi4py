@@ -10,6 +10,7 @@ default:
 	${MAKE} -C wrap-f2py
 	${MAKE} -C wrap-swig
 	${MAKE} -C wrap-boost
+	${MAKE} -C wrap-cython
 
 	${MAKE} -C cython
 	${MAKE} -C embedding
