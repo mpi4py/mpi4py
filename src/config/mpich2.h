@@ -59,8 +59,10 @@
 #endif /* !ROMIO_VERSION */
 
 #ifdef MS_MPI
-#define PyMPI_MISSING_MPI_File_c2f 1
-#define PyMPI_MISSING_MPI_File_f2c 1
+#undef  MPI_File_c2f
+#define MPI_File_c2f PMPI_File_c2f
+#undef  MPI_File_f2c
+#define MPI_File_f2c PMPI_File_f2c
 #endif
 
 #endif /* !PyMPI_CONFIG_MPICH2_H */
