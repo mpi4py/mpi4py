@@ -1,4 +1,4 @@
-#---------------------------------------------------------------------
+#------------------------------------------------------------------------------
 
 cdef object __BOTTOM__   = <MPI_Aint>MPI_BOTTOM
 cdef object __IN_PLACE__ = <MPI_Aint>MPI_IN_PLACE
@@ -9,7 +9,7 @@ cdef inline int is_BOTTOM(object msg):
 cdef inline int is_IN_PLACE(object msg):
     return (msg is None or msg is __IN_PLACE__)
 
-#---------------------------------------------------------------------
+#------------------------------------------------------------------------------
 
 cdef extern from "Python.h":
     int is_int   "PyInt_Check"   (object)
@@ -18,10 +18,13 @@ cdef extern from "Python.h":
 
 cdef inline object message_simple(int readonly,
                                   object msg,
-                                  int rank, int size,
-                                  void **_buf,
-                                  int *_count,
-                                  MPI_Datatype *_dtype):
+                                  int rank,
+                                  int size,
+                                  #
+                                  void         **_buf,
+                                  int          *_count,
+                                  MPI_Datatype *_dtype,
+                                  ):
     # special case
     if rank == MPI_PROC_NULL:
         _buf[0]   = NULL
@@ -36,77 +39,99 @@ cdef inline object message_simple(int readonly,
     if n < 2 or n > 3:
         raise ValueError(S("message: expecting 2 or 3 items"))
     # unpack message list/tuple
-    cdef object obuf, ocount, odtype
+    cdef object o_buf   = None
+    cdef object o_dtype = None
+    cdef object o_count = None
+    cdef object o_displ = None
+    cdef object msg1   = None
     if n == 2:
-        obuf   = msg[0]
-        ocount = None
-        odtype = msg[1]
-    else:
-        obuf   = msg[0]
-        ocount = msg[1]
-        odtype = msg[2]
+        o_buf   = msg[0]
+        o_dtype = msg[1]
+    elif n == 3:
+        o_buf   = msg[0]
+        o_dtype = msg[2]
+        msg1 = msg[1]
+        if not is_int(msg1):
+            try:
+                o_count, o_displ = msg1
+            except:
+                o_count, o_displ = msg1, None
+        else:
+            o_count, o_displ = msg1, None
     # buffer pointer and length
     cdef void *bptr = NULL
     cdef MPI_Aint blen = 0
-    if is_BOTTOM(obuf):
+    if is_BOTTOM(o_buf):
         bptr = MPI_BOTTOM; blen = 0
     elif readonly:
-        asbuffer_r(obuf, &bptr, &blen)
+        asbuffer_r(o_buf, &bptr, &blen)
     else:
-        asbuffer_w(obuf, &bptr, &blen)
+        asbuffer_w(o_buf, &bptr, &blen)
     # datatype
     cdef MPI_Datatype dtype = MPI_DATATYPE_NULL
-    cdef MPI_Aint lb = 0, ex = 0
-    dtype = (<Datatype?>odtype).ob_mpi
-    # number of entries
-    cdef int count = 0
-    cdef MPI_Aint nitems = 0, nblocks = 1
-    if ocount is not None: # user-provided
-        count = <int> ocount
-    elif blen > 0: # try to guess
+    cdef MPI_Aint extent = 0, lb = 0, ub = 0
+    dtype = (<Datatype?>o_dtype).ob_mpi
+    # count  and displacement
+    cdef int count = 0 # number of datatype entries
+    cdef int displ = 0 # from base buffer, in datatype entries
+    if o_count is not None:
+        count = <int> o_count
+        if o_displ is not None:
+            displ = <int> o_displ
+            if displ != 0:
+                if dtype == MPI_DATATYPE_NULL:
+                    raise ValueError(
+                        S("message: cannot handle diplacement, "
+                          "datatype is null"))
+                CHKERR( MPI_Type_get_extent(dtype, &lb, &extent) )
+    elif blen > 0:
+        if o_displ is not None:
+            raise ValueError(
+                S("message: cannot handle displacement, "
+                  "explicit count required"))
         if dtype == MPI_DATATYPE_NULL:
             raise ValueError(
                 S("message: cannot guess count, "
                   "datatype is null"))
-        CHKERR( MPI_Type_get_extent(dtype, &lb, &ex) )
-        if ex <= 0:
+        CHKERR( MPI_Type_get_extent(dtype, &lb, &extent) )
+        if extent <= 0:
+            ub = lb + extent
             raise ValueError(
                 S("message: cannot guess count, "
-                  "datatype extent %d "
-                  "(lb:%d, ub:%d)") %  (ex, lb, lb+ex))
-        if (blen % ex) != 0:
+                  "datatype extent %d (lb:%d, ub:%d)"
+                  ) %  (extent, lb, ub))
+        if (blen % extent) != 0:
+            ub = lb + extent
             raise ValueError(
                 S("message: cannot guess count, "
-                  "buffer length %d "
-                  "is not a multiple of "
-                  "datatype extent %d "
-                  "(lb:%d, ub:%d)") %  (blen, ex, lb, lb+ex))
-        nitems = blen/ex
-        nblocks = size
-        if nblocks <= 1:
-            count = <int> nitems # XXX overflow?
-        else:
-            if (nitems % nblocks) != 0:
-                raise ValueError(
-                    S("message: cannot guess count, "
-                      "number of datatype items %d "
-                      "is not a multiple of the required "
-                      "number of blocks %d") %  (nitems, nblocks))
-            count = <int> (nitems/nblocks) # XXX overflow?
+                  "buffer length %d is not a multiple of "
+                  "datatype extent %d (lb:%d, ub:%d)"
+                  ) % (blen, extent, lb, ub))
+        if size > 1 and ((blen/extent) % size) != 0:
+            raise ValueError(
+                S("message: cannot guess count, "
+                  "number of datatype items %d is not a multiple of"
+                  "the required number of blocks %d"
+                  ) %  (blen/extent, size))
+        if size < 1: size = 1
+        count = <int> ((blen/extent) / size) # XXX overflow?
     # return collected message data
-    _buf[0]   = bptr
+    _buf[0]   = <void*>(<char*>bptr + displ*extent)
     _count[0] = count
     _dtype[0] = dtype
-    return (obuf, ocount, odtype)
+    return (o_buf, (o_count, o_displ), o_dtype)
 
 
 cdef inline object message_vector(int readonly,
                                   object msg,
-                                  int rank, int size,
-                                  void **_buf,
-                                  int **_counts,
-                                  int **_displs,
-                                  MPI_Datatype *_dtype):
+                                  int rank,
+                                  int size,
+                                  #
+                                  void         **_buf,
+                                  int          **_counts,
+                                  int          **_displs,
+                                  MPI_Datatype *_dtype,
+                                  ):
     # special case
     if rank == MPI_PROC_NULL:
         _buf[0]    = NULL
@@ -122,62 +147,65 @@ cdef inline object message_vector(int readonly,
     if n < 3 or n > 4:
         raise ValueError(S("message: expecting 3 or 4 items"))
     # unpack message list/tuple
-    cdef object obuf, ocounts, odispls, odtype
+    cdef object o_buf    = None
+    cdef object o_counts = None
+    cdef object o_displs = None
+    cdef object o_dtype  = None
     if n == 4:
-        obuf    = msg[0]
-        ocounts = msg[1]
-        odispls = msg[2]
-        odtype  = msg[3]
+        o_buf    = msg[0]
+        o_counts = msg[1]
+        o_displs = msg[2]
+        o_dtype  = msg[3]
     else:
-        obuf    = msg[0]
-        ocounts = msg[1][0]
-        odispls = msg[1][1]
-        odtype  = msg[2]
+        o_buf    = msg[0]
+        o_counts = msg[1][0]
+        o_displs = msg[1][1]
+        o_dtype  = msg[2]
     # buffer
     cdef void *bptr = NULL
     cdef MPI_Aint blen = 0
-    if is_BOTTOM(obuf):
+    if is_BOTTOM(o_buf):
         bptr = MPI_BOTTOM; blen = 0
     elif readonly:
-        asbuffer_r(obuf, &bptr, &blen)
+        asbuffer_r(o_buf, &bptr, &blen)
     else:
-        asbuffer_w(obuf, &bptr, &blen)
+        asbuffer_w(o_buf, &bptr, &blen)
     # datatype
     cdef MPI_Datatype dtype = MPI_DATATYPE_NULL
-    dtype = (<Datatype?>odtype).ob_mpi
+    dtype = (<Datatype?>o_dtype).ob_mpi
     # counts
     cdef int i=0, val=0
     cdef int *counts = NULL
-    if is_int(ocounts):
-        val = <int> ocounts
-        ocounts = newarray_int(size, &counts)
+    if is_int(o_counts):
+        val = <int> o_counts
+        o_counts = newarray_int(size, &counts)
         for i from 0 <= i < size:
             counts[i] = val
     else:
-        ocounts = asarray_int(ocounts, &counts, size)
+        o_counts = asarray_int(o_counts, &counts, size)
     # displacements
     cdef int *displs = NULL
-    if odispls is None: # contiguous
+    if o_displs is None: # contiguous
         val = 0
-        odispls = newarray_int(size, &displs)
+        o_displs = newarray_int(size, &displs)
         for i from 0 <= i < size:
             displs[i] = val
             val += counts[i]
-    elif is_int(odispls): # strided
-        val = <int> odispls
-        odispls = newarray_int(size, &displs)
+    elif is_int(o_displs): # strided
+        val = <int> o_displs
+        o_displs = newarray_int(size, &displs)
         for i from 0 <= i < size:
             displs[i] = val * i
     else: # general
-        odispls = asarray_int(odispls, &displs, size)
+        o_displs = asarray_int(o_displs, &displs, size)
     # return collected message data
     _buf[0]    = bptr
     _counts[0] = counts
     _displs[0] = displs
     _dtype[0]  = dtype
-    return (obuf, (ocounts, odispls), odtype)
+    return (o_buf, (o_counts, o_displs), o_dtype)
 
-#---------------------------------------------------------------------
+#------------------------------------------------------------------------------
 
 cdef class _p_msg_p2p:
 
@@ -219,7 +247,7 @@ cdef inline _p_msg_p2p message_p2p_recv(object recvbuf, int source):
     msg.for_recv(recvbuf, source)
     return msg
 
-#---------------------------------------------------------------------
+#------------------------------------------------------------------------------
 
 cdef class _p_msg_cco:
 
@@ -609,7 +637,7 @@ cdef inline _p_msg_cco message_cco():
     cdef _p_msg_cco msg = <_p_msg_cco>_p_msg_cco()
     return msg
 
-#---------------------------------------------------------------------
+#------------------------------------------------------------------------------
 
 cdef class _p_msg_rma:
 
@@ -643,7 +671,7 @@ cdef class _p_msg_rma:
             (origin is not None) and
             (is_list(origin) or is_tuple(origin)) and
             (len(origin) > 0 and isinstance(origin[-1], Datatype))):
-            self.otype  = (<Datatype>origin[-1]).ob_mpi
+            self.otype  = (<Datatype?>origin[-1]).ob_mpi
             self._origin = origin
         # TARGET
         if target is None:
@@ -693,7 +721,7 @@ cdef inline _p_msg_rma message_rma_acc(object origin, int rank, object target):
     msg.for_acc(origin, rank, target)
     return msg
 
-#---------------------------------------------------------------------
+#------------------------------------------------------------------------------
 
 cdef class _p_msg_io:
 
@@ -735,4 +763,4 @@ cdef inline _p_msg_io message_io_write(object buf):
     msg.for_write(buf)
     return msg
 
-#---------------------------------------------------------------------
+#------------------------------------------------------------------------------
