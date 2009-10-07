@@ -64,24 +64,35 @@ def get_config_vars(*names):
     values = fix_config_vars(names, values)
     return values
 
-def fix_linker_cmd(mpild, ldcmd):
-    if not ldcmd: return mpild
-    if (sys.platform.startswith('aix')
-        and 'ld_so_aix' in ldcmd):
-        ldcmd = ldcmd.split(' ', 2)
-    else:
-        ldcmd = ldcmd.split(' ', 1)
-    #
-    if len(ldcmd) == 1: # just linker, no flags
-        return mpild
-    elif len(ldcmd) == 2: # linker and flags
-        return (mpild + ' ' +
-                ldcmd[1])
-    else: # assume using special linker script
-        return  (ldcmd[0] + ' '  +
-                 mpild    + ' '  +
-                 ldcmd[2])
+def fix_compiler_cmd(mpicc, pycc):
+    if not pycc:  return mpicc
+    if not mpicc: return pycc
+    pycc = split_quoted(pycc)
+    i = 0
+    if os.path.basename(pycc[0]) == 'env':
+        i = 1
+        while '=' in pycc[i]:
+            i = i + 1
+    pycc[i] = mpicc
+    mpicc   = ' '.join(pycc)
+    return mpicc
 
+def fix_linker_cmd(mpild, pyld):
+    if not pyld:  return mpild
+    if not mpild: return pyld
+    aix_fixup = (sys.platform.startswith('aix') and
+                 'ld_so_aix' in pyld)
+    pyld = split_quoted(pyld)
+    i = 0
+    if os.path.basename(pyld[0]) == 'env':
+        i = 1
+        while '=' in pyld[i]:
+            i = i + 1
+    if aix_fixup:
+        i = i + 1
+    pyld[i] = mpild
+    mpild   = ' '.join(pyld)
+    return mpild
 
 def customize_compiler(compiler,
                        mpicc=None, mpicxx=None, mpild=None,
@@ -89,18 +100,27 @@ def customize_compiler(compiler,
     if environ is None:
         environ = os.environ
     if compiler.compiler_type == 'unix':
-        (cc, cxx, cflags, ccshared, ld_so, so_ext) = \
-            get_config_vars('CC', 'CXX',
-                            'CFLAGS', 'CCSHARED',
-                            'LDSHARED', 'SO')
-        cppflags = ldflags = ''
+        # Distutils configuration, actually obtained by parsing
+        # :file:{prefix}/lib[32|64]/python{X}.{Y}/config/Makefile
+        (cc, cxx, ccshared, 
+         basecflags, optcflags,
+         ld_so, so_ext) = \
+         get_config_vars('CC', 'CXX', 'CCSHARED',
+                         'BASECFLAGS', 'OPT',
+                         'LDSHARED', 'SO')
+        cc    = cc    .replace('-pthread', '')
+        cxx   = cxx   .replace('-pthread', '')
+        ld_so = ld_so .replace('-pthread', '')
+        cppflags = ''
+        cflags   = ''
+        ldflags  = ''
         # Compiler command overriding
         if mpicc:
-            cc = mpicc
+            cc  = fix_compiler_cmd(mpicc,  cc)
         if mpicxx:
-            cxx = mpicxx
+            cxx = fix_compiler_cmd(mpicxx, cxx)
         if mpild:
-            ld_so = fix_linker_cmd(mpild, ld_so)
+            ld_so = fix_linker_cmd(mpild,  ld_so)
         elif (mpicc or mpicxx):
             mpild = mpicc or mpicxx
             ld_so = fix_linker_cmd(mpild, ld_so)
@@ -117,14 +137,21 @@ def customize_compiler(compiler,
             ldflags  = ldflags  + ' ' + CFLAGS
         if LDFLAGS:
             ldflags  = ldflags  + ' ' + LDFLAGS
+        basecflags = environ.get('BASECFLAGS', basecflags)
+        optcflags  = environ.get('OPTCFLAGS',  optcflags)
+        cflags     = (basecflags + ' ' + 
+                      optcflags  + ' ' + 
+                      cflags)
         # Distutils compiler setup
-        cpp = os.environ.get('CPP') or (cc + ' -E')
+        cpp    = os.environ.get('CPP') or (cc + ' -E')
+        cc_so  = cc  + ' ' + ccshared
+        cxx_so = cxx + ' ' + ccshared
         ld_exe = mpild or cc
         compiler.set_executables(
             preprocessor = cpp    + ' ' + cppflags,
             compiler     = cc     + ' ' + cflags,
-            compiler_so  = cc     + ' ' + cflags + ' ' + ccshared,
-            compiler_cxx = cxx    + ' ' + cflags + ' ' + ccshared,
+            compiler_so  = cc_so  + ' ' + cflags,
+            compiler_cxx = cxx_so + ' ' + cflags,
             linker_so    = ld_so  + ' ' + ldflags,
             linker_exe   = ld_exe + ' ' + ldflags,
             )
@@ -232,7 +259,7 @@ def _config_parser(section, filenames, raw=False, vars=None):
         macros = []
         for m in config_info['define_macros'] :
             try: # "-DFOO=blah"
-                idx = m.index("=")
+                idx = m.index('=')
                 macro = (m[:idx], m[idx+1:] or None)
             except ValueError: # bare "-DFOO"
                 macro = (m, None)
@@ -352,7 +379,7 @@ cmd_mpi_opts = [
 def cmd_get_mpi_options(cmd_opts):
     optlist = []
     for (option, _, _) in cmd_opts:
-        if option[-1] == "=":
+        if option[-1] == '=':
             option = option[:-1]
         option = option.replace('-','_')
         optlist.append(option)
@@ -511,7 +538,7 @@ class config(cmd_config.config):
         configure.write_headers(results)
 
     def gen_configtest(self, configure, results, code):
-        # 
+        #
         configtest_h = "_configtest.h"
         self.temp_files.append(configtest_h)
         fh = open(configtest_h, "w")
