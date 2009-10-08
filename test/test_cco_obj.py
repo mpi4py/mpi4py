@@ -391,6 +391,11 @@ elif _name == "DeinoMPI":
     TestCCOObjInterDupDup.testBarrier   = _SKIPPED
     TestCCOObjInterDupDup.testAllgather = _SKIPPED
     TestCCOObjInterDupDup.testAllreduce = _SKIPPED
+elif _name == "MPICH1":
+    del BaseTestCCOObjInter
+    del TestCCOObjInter
+    del TestCCOObjInterDup
+    del TestCCOObjInterDupDup
 elif MPI.ROOT == MPI.PROC_NULL:
     del BaseTestCCOObjInter
     del TestCCOObjInter

@@ -66,7 +66,10 @@ class BaseTestPackExternal(object):
                         if typecode1 in self.skipdtype: continue
                         if typecode2 in self.skipdtype: continue
                         # input and output arrays
-                        iarray1 = array(255, typecode1, items)
+                        if typecode1 == 'b':
+                            iarray1 = array(127, typecode1, items)
+                        else:
+                            iarray1 = array(255, typecode1, items)
                         iarray2 = array(range(items), typecode2)
                         oarray1 = array(-1, typecode1, items)
                         oarray2 = array(-1, typecode2, items)

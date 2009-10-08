@@ -19,7 +19,8 @@ class TestRequest(unittest.TestCase):
         self.REQUEST.Test(self.STATUS)
 
     def testGetStatus(self):
-        flag = self.REQUEST.Get_status()
+        try: flag = self.REQUEST.Get_status()
+        except NotImplementedError: return
         self.assertTrue(flag)
         flag = self.REQUEST.Get_status(self.STATUS)
         self.assertTrue(flag)
@@ -83,6 +84,10 @@ class TestRequestArray(unittest.TestCase):
             self.assertEqual(ret, out)
             self.assertEqual(len(statuses), len(self.REQUESTS))
 
+_name, _version = MPI.get_vendor()
+if (_name == 'MPICH1' or
+    _name == 'LAM/MPI'):
+    del TestRequest.testGetStatus
 
 if __name__ == '__main__':
     unittest.main()

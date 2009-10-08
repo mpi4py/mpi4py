@@ -11,7 +11,7 @@ config:
 build: src
 	${PYTHON} setup.py build ${BUILDOPT}
 test:
-	${MPIEXEC} ${VALGRIND} ${PYTHON} test/runalltest.py < /dev/null
+	${MPIEXEC} ${VALGRIND} ${PYTHON} ${PWD}/test/runalltest.py < /dev/null
 
 .PHONY: clean distclean fullclean
 clean:

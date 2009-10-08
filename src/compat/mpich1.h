@@ -46,6 +46,11 @@ static int PyMPI_MPICH1_MPI_Init_thread(int *argc, char ***argv,
 
 /* ---------------------------------------------------------------- */
 
+#undef  MPI_SIGNED_CHAR
+#define MPI_SIGNED_CHAR MPI_CHAR
+
+/* ---------------------------------------------------------------- */
+
 static int PyMPI_MPICH1_MPI_Status_set_elements(MPI_Status *status,
                                                 MPI_Datatype datatype,
                                                 int count)

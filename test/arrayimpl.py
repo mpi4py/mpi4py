@@ -2,11 +2,16 @@ from mpi4py import MPI
 
 __all__ = ['TypeMap', 'ArrayTypes']
 
-TypeMap = dict(h=MPI.SHORT,
+TypeMap = dict(b=MPI.SIGNED_CHAR,
+               h=MPI.SHORT,
                i=MPI.INT,
                l=MPI.LONG,
+               #q=MPI.LONG_LONG,
                f=MPI.FLOAT,
                d=MPI.DOUBLE)
+
+if MPI.SIGNED_CHAR == MPI.DATATYPE_NULL:
+    del TypeMap['b']
 
 ArrayTypes = []
 

@@ -157,9 +157,9 @@ class BaseTestCCOBuf(object):
         for array in arrayimpl.ArrayTypes:
             for typecode in arrayimpl.TypeMap:
                 for op in (MPI.SUM, MPI.MAX, MPI.MIN, MPI.PROD):
-                    rcnt = list(range(size))
+                    rcnt = list(range(1,size+1))
                     sbuf = array([rank]*sum(rcnt), typecode)
-                    rbuf = array(-1, typecode, rank)
+                    rbuf = array(-1, typecode, rank+1)
                     self.COMM.Reduce_scatter(sbuf.as_mpi(),
                                              rbuf.as_mpi(),
                                              rcnt, op)
@@ -179,7 +179,7 @@ class BaseTestCCOBuf(object):
         for array in arrayimpl.ArrayTypes:
             for typecode in arrayimpl.TypeMap:
                 for op in (MPI.SUM, MPI.MAX, MPI.MIN, MPI.PROD):
-                    for rcnt in range(size):
+                    for rcnt in range(1,size):
                         sbuf = array([rank]*rcnt*size, typecode)
                         rbuf = array(-1, typecode, rcnt)
                         if op == MPI.PROD:
