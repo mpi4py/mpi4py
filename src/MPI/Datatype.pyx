@@ -867,3 +867,9 @@ F_DOUBLE              = __DOUBLE_PRECISION__
 F_COMPLEX             = __COMPLEX__
 F_FLOAT_COMPLEX       = __COMPLEX__
 F_DOUBLE_COMPLEX      = __DOUBLE_COMPLEX__
+
+
+# -----------------------
+include "typemap.pxi"   #
+__DTypeMap__ = DTypeMap #
+# -----------------------
