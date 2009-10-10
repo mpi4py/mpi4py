@@ -1,10 +1,10 @@
-/* ---------------------------------------------------------------- */
+/* ------------------------------------------------------------------------- */
 
 #include "Python.h"
 
 #include "mpi.h"
 
-/* ---------------------------------------------------------------- */
+/* ------------------------------------------------------------------------- */
 
 #if defined(MPICH_NAME) && (MPICH_NAME==1)
 #define MPICH1 1
@@ -102,7 +102,7 @@
 #include "compat/sgimpi.h"
 #endif
 
-/* ---------------------------------------------------------------- */
+/* ------------------------------------------------------------------------- */
 
 #if defined(MS_WINDOWS) && !defined(PyMPI_API_CALL)
   #if defined(MPI_CALL)   /* DeinoMPI */
@@ -192,40 +192,54 @@ static int PyMPI_API_CALL
 PyMPI_AtExitMPI(MPI_Comm comm, int k, void *v, void *xs)
 { return PyMPI_CleanUp(); }
 
-/* ---------------------------------------------------------------- */
+/* ------------------------------------------------------------------------- */
 
-#if PY_MAJOR_VERSION >= 3
-static PyObject * PyBuffer_FromReadWriteMemory(void *p, Py_ssize_t n)
+static PyObject *
+PyMPIMemory_AsMemory(PyObject *ob, void **p, Py_ssize_t *n)
 {
+  if (PyObject_AsWriteBuffer(ob, p, n) < 0)
+    return NULL;
+  Py_INCREF(ob);
+  return ob;
+}
+
+static PyObject *
+PyMPIMemory_FromMemory(void *p, Py_ssize_t n)
+{
+#if PY_MAJOR_VERSION >= 3
   Py_buffer info;
   if (PyBuffer_FillInfo(&info, NULL, p, n, 0,
                         PyBUF_ND | PyBUF_STRIDES) < 0)
     return NULL;
   return PyMemoryView_FromBuffer(&info);
-}
+#else
+  return PyBuffer_FromReadWriteMemory(p, n);
 #endif
+}
 
-/* ---------------------------------------------------------------- */
+/* ------------------------------------------------------------------------- */
 
 #if PY_MAJOR_VERSION >= 3
-static PyObject * PyMPIString_AsStringAndSize(PyObject *ob,
-                                              const char **s,
-                                              Py_ssize_t *n)
+static PyObject *
+PyMPIString_AsStringAndSize(PyObject *ob, const char **s, Py_ssize_t *n)
 {
   PyObject *b = PyUnicode_AsUTF8String(ob);
-  if (b != NULL && PyBytes_AsStringAndSize(b, (char **)s, n) < 0) {
-    Py_DECREF(b); b = NULL;
+  if (b == NULL)
+    return NULL;
+  if (PyBytes_AsStringAndSize(b, (char **)s, n) < 0) {
+    Py_DECREF(b);
+    return NULL;
   }
   return b;
 }
 #define PyMPIString_FromString        PyUnicode_FromString
 #define PyMPIString_FromStringAndSize PyUnicode_FromStringAndSize
 #else
-static PyObject * PyMPIString_AsStringAndSize(PyObject *ob,
-                                              const char **s,
-                                              Py_ssize_t *n)
+static PyObject *
+PyMPIString_AsStringAndSize(PyObject *ob, const char **s, Py_ssize_t *n)
 {
-  if (PyString_AsStringAndSize(ob, (char **)s, n) < 0) return NULL;
+  if (PyString_AsStringAndSize(ob, (char **)s, n) < 0)
+    return NULL;
   Py_INCREF(ob);
   return ob;
 }
@@ -233,19 +247,20 @@ static PyObject * PyMPIString_AsStringAndSize(PyObject *ob,
 #define PyMPIString_FromStringAndSize PyString_FromStringAndSize
 #endif
 
-/* ---------------------------------------------------------------- */
 
 #if PY_MAJOR_VERSION >= 3
 #define PyMPIBytes_AsString          PyBytes_AsString
 #define PyMPIBytes_Size              PyBytes_Size
+#define PyMPIBytes_AsStringAndSize   PyBytes_AsStringAndSize
 #define PyMPIBytes_FromStringAndSize PyBytes_FromStringAndSize
 #else
 #define PyMPIBytes_AsString          PyString_AsString
 #define PyMPIBytes_Size              PyString_Size
+#define PyMPIBytes_AsStringAndSize   PyString_AsStringAndSize
 #define PyMPIBytes_FromStringAndSize PyString_FromStringAndSize
 #endif
 
-/* ---------------------------------------------------------------- */
+/* ------------------------------------------------------------------------- */
 
 /* Enable the block below if for any
    reason you want to disable threads */
@@ -261,7 +276,7 @@ static PyObject * PyMPIString_AsStringAndSize(PyObject *ob,
 
 #endif
 
-/* ---------------------------------------------------------------- */
+/* ------------------------------------------------------------------------- */
 
 /*
   Local variables:
