@@ -1,3 +1,5 @@
+# -----------------------------------------------------------------------------
+
 cdef object _op_MAX(object x, object y):
     """maximum"""
     return max(x, y)
@@ -70,7 +72,7 @@ cdef object _op_REPLACE(object x, object y):
     """replace,  (x, y) -> x"""
     return x
 
-# ---
+# -----------------------------------------------------------------------------
 
 cdef object op_user_registry = [None]*(1+16)
 
@@ -82,7 +84,8 @@ cdef inline void op_user_mpi_report_error():
     traceback.print_exc()
     sys.stderr.flush()
 
-cdef inline void op_user_mpi(int index, void *a, void *b, MPI_Aint n, MPI_Datatype *t) with gil:
+cdef inline void op_user_mpi(
+    int index, void *a, void *b, MPI_Aint n, MPI_Datatype *t) with gil:
     # errors in user-defined reduction operations are unrecoverable
     try:
         op_user_py(index, tomemory(a, n), tomemory(b, n), new_Datatype(t[0]))
@@ -93,8 +96,8 @@ cdef inline void op_user_mpi(int index, void *a, void *b, MPI_Aint n, MPI_Dataty
         op_user_mpi_report_error()
         MPI_Abort(MPI_COMM_WORLD, 1)
 
-
-cdef inline void op_user_call(int index, void *a, void *b, int *plen, MPI_Datatype *t) nogil:
+cdef inline void op_user_call(
+    int index, void *a, void *b, int *plen, MPI_Datatype *t) nogil:
     # make it abort if Python has finalized
     if not Py_IsInitialized(): MPI_Abort(MPI_COMM_WORLD, 1)
     # make it abort if module clenaup has been done
@@ -107,37 +110,53 @@ cdef inline void op_user_call(int index, void *a, void *b, int *plen, MPI_Dataty
     op_user_mpi(index, a, b, n, t)
 
 @cython.callspec("PyMPI_API_CALL")
-cdef void op_user_01(void *a, void *b, int *n, MPI_Datatype *t) nogil: op_user_call( 1, a, b, n, t)
+cdef void op_user_01(void *a, void *b, int *n, MPI_Datatype *t) nogil:
+    op_user_call( 1, a, b, n, t)
 @cython.callspec("PyMPI_API_CALL")
-cdef void op_user_02(void *a, void *b, int *n, MPI_Datatype *t) nogil: op_user_call( 2, a, b, n, t)
+cdef void op_user_02(void *a, void *b, int *n, MPI_Datatype *t) nogil:
+    op_user_call( 2, a, b, n, t)
 @cython.callspec("PyMPI_API_CALL")
-cdef void op_user_03(void *a, void *b, int *n, MPI_Datatype *t) nogil: op_user_call( 3, a, b, n, t)
+cdef void op_user_03(void *a, void *b, int *n, MPI_Datatype *t) nogil:
+    op_user_call( 3, a, b, n, t)
 @cython.callspec("PyMPI_API_CALL")
-cdef void op_user_04(void *a, void *b, int *n, MPI_Datatype *t) nogil: op_user_call( 4, a, b, n, t)
+cdef void op_user_04(void *a, void *b, int *n, MPI_Datatype *t) nogil:
+    op_user_call( 4, a, b, n, t)
 @cython.callspec("PyMPI_API_CALL")
-cdef void op_user_05(void *a, void *b, int *n, MPI_Datatype *t) nogil: op_user_call( 5, a, b, n, t)
+cdef void op_user_05(void *a, void *b, int *n, MPI_Datatype *t) nogil:
+    op_user_call( 5, a, b, n, t)
 @cython.callspec("PyMPI_API_CALL")
-cdef void op_user_06(void *a, void *b, int *n, MPI_Datatype *t) nogil: op_user_call( 6, a, b, n, t)
+cdef void op_user_06(void *a, void *b, int *n, MPI_Datatype *t) nogil:
+    op_user_call( 6, a, b, n, t)
 @cython.callspec("PyMPI_API_CALL")
-cdef void op_user_07(void *a, void *b, int *n, MPI_Datatype *t) nogil: op_user_call( 7, a, b, n, t)
+cdef void op_user_07(void *a, void *b, int *n, MPI_Datatype *t) nogil:
+    op_user_call( 7, a, b, n, t)
 @cython.callspec("PyMPI_API_CALL")
-cdef void op_user_08(void *a, void *b, int *n, MPI_Datatype *t) nogil: op_user_call( 8, a, b, n, t)
+cdef void op_user_08(void *a, void *b, int *n, MPI_Datatype *t) nogil:
+    op_user_call( 8, a, b, n, t)
 @cython.callspec("PyMPI_API_CALL")
-cdef void op_user_09(void *a, void *b, int *n, MPI_Datatype *t) nogil: op_user_call( 9, a, b, n, t)
+cdef void op_user_09(void *a, void *b, int *n, MPI_Datatype *t) nogil:
+    op_user_call( 9, a, b, n, t)
 @cython.callspec("PyMPI_API_CALL")
-cdef void op_user_10(void *a, void *b, int *n, MPI_Datatype *t) nogil: op_user_call(10, a, b, n, t)
+cdef void op_user_10(void *a, void *b, int *n, MPI_Datatype *t) nogil:
+    op_user_call(10, a, b, n, t)
 @cython.callspec("PyMPI_API_CALL")
-cdef void op_user_11(void *a, void *b, int *n, MPI_Datatype *t) nogil: op_user_call(11, a, b, n, t)
+cdef void op_user_11(void *a, void *b, int *n, MPI_Datatype *t) nogil:
+    op_user_call(11, a, b, n, t)
 @cython.callspec("PyMPI_API_CALL")
-cdef void op_user_12(void *a, void *b, int *n, MPI_Datatype *t) nogil: op_user_call(12, a, b, n, t)
+cdef void op_user_12(void *a, void *b, int *n, MPI_Datatype *t) nogil:
+    op_user_call(12, a, b, n, t)
 @cython.callspec("PyMPI_API_CALL")
-cdef void op_user_13(void *a, void *b, int *n, MPI_Datatype *t) nogil: op_user_call(13, a, b, n, t)
+cdef void op_user_13(void *a, void *b, int *n, MPI_Datatype *t) nogil:
+    op_user_call(13, a, b, n, t)
 @cython.callspec("PyMPI_API_CALL")
-cdef void op_user_14(void *a, void *b, int *n, MPI_Datatype *t) nogil: op_user_call(14, a, b, n, t)
+cdef void op_user_14(void *a, void *b, int *n, MPI_Datatype *t) nogil:
+    op_user_call(14, a, b, n, t)
 @cython.callspec("PyMPI_API_CALL")
-cdef void op_user_15(void *a, void *b, int *n, MPI_Datatype *t) nogil: op_user_call(15, a, b, n, t)
+cdef void op_user_15(void *a, void *b, int *n, MPI_Datatype *t) nogil:
+    op_user_call(15, a, b, n, t)
 @cython.callspec("PyMPI_API_CALL")
-cdef void op_user_16(void *a, void *b, int *n, MPI_Datatype *t) nogil: op_user_call(15, a, b, n, t)
+cdef void op_user_16(void *a, void *b, int *n, MPI_Datatype *t) nogil:
+    op_user_call(15, a, b, n, t)
 
 
 cdef MPI_User_function *op_user_map(int index) nogil:
@@ -165,8 +184,8 @@ cdef int op_user_new(object function, MPI_User_function **cfunction) except -1:
     try:
         index = op_user_registry.index(None, 1)
     except ValueError:
-        raise RuntimeError(S("cannot create too many "
-                             "user-defined reduction operations"))
+        raise RuntimeError("cannot create too many "
+                           "user-defined reduction operations")
     # the line below will fail
     # if the function is not callable
     function.__call__
@@ -184,4 +203,4 @@ cdef int op_user_del(int *index) except -1:
     if idx > 0: op_user_registry[idx] = None
     return 0
 
-# ---
+# -----------------------------------------------------------------------------

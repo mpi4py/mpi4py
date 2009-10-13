@@ -1,11 +1,11 @@
-# --------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 cdef extern from *:
     char*      PyMPIBytes_AsString(object) except NULL
     Py_ssize_t PyMPIBytes_Size(object) except -1
     object     PyMPIBytes_FromStringAndSize(char*,Py_ssize_t)
 
-# --------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 cdef object PyPickle_dumps = None
 cdef object PyPickle_loads = None
@@ -67,7 +67,7 @@ cdef class _p_Pickle:
         cdef object items = list(obj)
         m = len(items)
         if m != n: raise ValueError(
-            S("expecting %d items, got %d") % (n, m))
+            "expecting %d items, got %d" % (n, m))
         cdef int d=0, c=0
         for i from 0 <= i < m:
             items[i] = self.dump(items[i], p, &c)
@@ -106,7 +106,7 @@ cdef _p_Pickle PyMPI_PICKLE = _p_Pickle()
 cdef inline _p_Pickle PyMPI_pickle():
     return PyMPI_PICKLE
 
-# --------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 cdef object PyMPI_send(object obj, int dest, int tag,
                        MPI_Comm comm):
@@ -432,7 +432,7 @@ cdef object PyMPI_alltoall(object sendobj, object recvobj,
     rmsg = pickle.loadv(rmsg, size, rcounts, rdispls)
     return rmsg
 
-# --------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 cdef inline object _py_reduce(object seq, object op):
     if seq is None: return None
@@ -486,4 +486,4 @@ cdef object PyMPI_exscan(object sendobj, object recvobj,
     items = _py_exscan(items, op)
     return PyMPI_scatter(items, None, 0, comm)
 
-# --------------------------------------------------------------------
+# -----------------------------------------------------------------------------

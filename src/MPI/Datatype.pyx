@@ -19,7 +19,7 @@ TYPECLASS_COMPLEX = MPI_TYPECLASS_COMPLEX
 DISTRIBUTE_NONE      = MPI_DISTRIBUTE_NONE      #: Dimension not distributed
 DISTRIBUTE_BLOCK     = MPI_DISTRIBUTE_BLOCK     #: Block distribution
 DISTRIBUTE_CYCLIC    = MPI_DISTRIBUTE_CYCLIC    #: Cyclic distribution
-DISTRIBUTE_DFLT_DARG = MPI_DISTRIBUTE_DFLT_DARG #: Default distribution argument
+DISTRIBUTE_DFLT_DARG = MPI_DISTRIBUTE_DFLT_DARG #: Default distribution
 
 
 # Combiner values for datatype decoding
@@ -63,7 +63,7 @@ cdef class Datatype:
         cdef Datatype s = self, o = other
         if   op == 2: return (s.ob_mpi == o.ob_mpi)
         elif op == 3: return (s.ob_mpi != o.ob_mpi)
-        else: raise TypeError(S("only '==' and '!='"))
+        else: raise TypeError("only '==' and '!='")
 
     def __nonzero__(self):
         return self.ob_mpi != MPI_DATATYPE_NULL
@@ -436,84 +436,84 @@ cdef class Datatype:
             oldtype = new_Datatype(d[0])
         # dispatch depending on the combiner value
         if combiner == <int>MPI_COMBINER_DUP:
-            return (oldtype, S("DUP"), {})
+            return (oldtype, ('DUP'), {})
         elif combiner == <int>MPI_COMBINER_CONTIGUOUS:
-            return (oldtype, S("CONTIGUOUS"),
-                    {S("count") : i[0]})
+            return (oldtype, ('CONTIGUOUS'),
+                    {('count') : i[0]})
         elif combiner == <int>MPI_COMBINER_VECTOR:
-            return (oldtype, S("VECTOR"),
-                    {S("count")       : i[0],
-                     S("blocklength") : i[1],
-                     S("stride")      : i[2]})
+            return (oldtype, ('VECTOR'),
+                    {('count')       : i[0],
+                     ('blocklength') : i[1],
+                     ('stride')      : i[2]})
         elif (combiner == <int>MPI_COMBINER_HVECTOR or
               combiner == <int>MPI_COMBINER_HVECTOR_INTEGER):
-            return (oldtype, S("HVECTOR"),
-                    {S("count")       : i[0],
-                     S("blocklength") : i[1],
-                     S("stride")      : a[0]})
+            return (oldtype, ('HVECTOR'),
+                    {('count')       : i[0],
+                     ('blocklength') : i[1],
+                     ('stride')      : a[0]})
         elif combiner == <int>MPI_COMBINER_INDEXED:
             s1 =      1; e1 =   i[0]
             s2 = i[0]+1; e2 = 2*i[0]
-            return (oldtype, S("INDEXED"),
-                    {S("blocklengths")  : [i[k] for k from s1 <= k <= e1],
-                     S("displacements") : [i[k] for k from s2 <= k <= e2]})
+            return (oldtype, ('INDEXED'),
+                    {('blocklengths')  : [i[k] for k from s1 <= k <= e1],
+                     ('displacements') : [i[k] for k from s2 <= k <= e2]})
         elif (combiner == <int>MPI_COMBINER_HINDEXED or
               combiner == <int>MPI_COMBINER_HINDEXED_INTEGER):
             s1 = 1; e1 = i[0]
             s2 = 0; e2 = i[0]-1
-            return (oldtype, S("HINDEXED"),
-                    {S("blocklengths")  : [i[k] for k from s1 <= k <= e1],
-                     S("displacements") : [a[k] for k from s2 <= k <= e2]})
+            return (oldtype, ('HINDEXED'),
+                    {('blocklengths')  : [i[k] for k from s1 <= k <= e1],
+                     ('displacements') : [a[k] for k from s2 <= k <= e2]})
         elif combiner == <int>MPI_COMBINER_INDEXED_BLOCK:
             s2 = 2; e2 = i[0]+1
-            return (oldtype, S("INDEXED_BLOCK"),
-                    {S("blocklength")   : i[1],
-                     S("displacements") : [i[k] for k from s2 <= k <= e2]})
+            return (oldtype, ('INDEXED_BLOCK'),
+                    {('blocklength')   : i[1],
+                     ('displacements') : [i[k] for k from s2 <= k <= e2]})
         elif (combiner == <int>MPI_COMBINER_STRUCT or
               combiner == <int>MPI_COMBINER_STRUCT_INTEGER):
             s1 = 1; e1 = i[0]
             s2 = 0; e2 = i[0]-1
-            return (Datatype, S("STRUCT"),
-                    {S("blocklengths")  : [i[k] for k from s1 <= k <= e1],
-                     S("displacements") : [a[k] for k from s2 <= k <= e2],
-                     S("datatypes")     : oldtype})
+            return (Datatype, ('STRUCT'),
+                    {('blocklengths')  : [i[k] for k from s1 <= k <= e1],
+                     ('displacements') : [a[k] for k from s2 <= k <= e2],
+                     ('datatypes')     : oldtype})
         elif combiner == <int>MPI_COMBINER_SUBARRAY:
             s1 =        1; e1 =   i[0]
             s2 =   i[0]+1; e2 = 2*i[0]
             s3 = 2*i[0]+1; e3 = 3*i[0]
-            return (oldtype, S("SUBARRAY"),
-                    {S("sizes")    : [i[k] for k from s1 <= k <= e1],
-                     S("subsizes") : [i[k] for k from s2 <= k <= e2],
-                     S("starts")   : [i[k] for k from s3 <= k <= e3],
-                     S("order")    : i[3*i[0]+1]})
+            return (oldtype, ('SUBARRAY'),
+                    {('sizes')    : [i[k] for k from s1 <= k <= e1],
+                     ('subsizes') : [i[k] for k from s2 <= k <= e2],
+                     ('starts')   : [i[k] for k from s3 <= k <= e3],
+                     ('order')    : i[3*i[0]+1]})
         elif combiner == <int>MPI_COMBINER_DARRAY:
             s1 =        3; e1 =   i[2]+2
             s2 =   i[2]+3; e2 = 2*i[2]+2
             s3 = 2*i[2]+3; e3 = 3*i[2]+2
             s4 = 3*i[2]+3; e4 = 4*i[2]+2
-            return (oldtype, S("DARRAY"),
-                    {S("size")     : i[0],
-                     S("rank")     : i[1],
-                     S("gsizes")   : [i[k] for k from s1 <= k <= e1],
-                     S("distribs") : [i[k] for k from s2 <= k <= e2],
-                     S("dargs")    : [i[k] for k from s3 <= k <= e3],
-                     S("psizes")   : [i[k] for k from s4 <= k <= e4],
-                     S("order")    : i[4*i[2]+3]})
+            return (oldtype, ('DARRAY'),
+                    {('size')     : i[0],
+                     ('rank')     : i[1],
+                     ('gsizes')   : [i[k] for k from s1 <= k <= e1],
+                     ('distribs') : [i[k] for k from s2 <= k <= e2],
+                     ('dargs')    : [i[k] for k from s3 <= k <= e3],
+                     ('psizes')   : [i[k] for k from s4 <= k <= e4],
+                     ('order')    : i[4*i[2]+3]})
         elif combiner == <int>MPI_COMBINER_RESIZED:
-            return (oldtype, S("RESIZED"),
-                    {S("lb")     : a[0],
-                     S("extent") : a[1]})
+            return (oldtype, ('RESIZED'),
+                    {('lb')     : a[0],
+                     ('extent') : a[1]})
         elif combiner == <int>MPI_COMBINER_F90_INTEGER:
-            return (Datatype, S("F90_INTEGER"),
-                    {S("r") : i[0]})
+            return (Datatype, ('F90_INTEGER'),
+                    {('r') : i[0]})
         elif combiner == <int>MPI_COMBINER_F90_REAL:
-            return (Datatype, S("F90_REAL"),
-                    {S("p") : i[0],
-                     S("r") : i[1]})
+            return (Datatype, ('F90_REAL'),
+                    {('p') : i[0],
+                     ('r') : i[1]})
         elif combiner == <int>MPI_COMBINER_F90_COMPLEX:
-            return (Datatype, S("F90_COMPLEX"),
-                    {S("p") : i[0],
-                     S("r") : i[1]})
+            return (Datatype, ('F90_COMPLEX'),
+                    {('p') : i[0],
+                     ('r') : i[1]})
 
 
     # Pack and Unpack

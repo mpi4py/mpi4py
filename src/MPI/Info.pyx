@@ -17,7 +17,7 @@ cdef class Info:
         cdef Info s = self, o = other
         if   op == 2: return (s.ob_mpi == o.ob_mpi)
         elif op == 3: return (s.ob_mpi != o.ob_mpi)
-        else: raise TypeError(S("only '==' and '!='"))
+        else: raise TypeError("only '==' and '!='")
 
     def __nonzero__(self):
         return self.ob_mpi != MPI_INFO_NULL
@@ -192,7 +192,7 @@ cdef class Info:
     def update(self, other=(), **kwds):
         """info update"""
         if not self: raise KeyError
-        if hasattr(other, S('keys')):
+        if hasattr(other, 'keys'):
             for key in other.keys():
                 self.Set(key, other[key])
         else:

@@ -1,4 +1,4 @@
-# --------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 cdef extern from "Python.h":
     ctypedef struct PyObject
@@ -8,12 +8,12 @@ cdef extern from "Python.h":
     void PySys_WriteStderr(char*,...)
     int Py_AtExit(void (*)())
 
-# --------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 cdef extern from "atimport.h":
-    object S"PyMPIString_FromString"(char*)
+    pass
 
-# --------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 ctypedef struct RCParams:
     int initialize
@@ -21,9 +21,9 @@ ctypedef struct RCParams:
     int thread_level
     int finalize
 
-cdef int warnRC(char *attr, object value) except -1:
+cdef int warnRC(object attr, object value) except -1:
     from warnings import warn
-    warn(S("mpi4py.rc: '%s': unexpected value '%r'") % (S(attr), value))
+    warn("mpi4py.rc: '%s': unexpected value '%r'" % (attr, value))
 
 cdef int getRCParams(RCParams* rc) except -1:
     #
@@ -37,7 +37,7 @@ cdef int getRCParams(RCParams* rc) except -1:
     #
     cdef object initialize = True
     cdef object threaded = True
-    cdef object thread_level = u'multiple'
+    cdef object thread_level = 'multiple'
     cdef object finalize = True
     try: initialize = rcmod.initialize
     except: pass
@@ -48,41 +48,41 @@ cdef int getRCParams(RCParams* rc) except -1:
     try: finalize = rcmod.finalize
     except: pass
     #
-    if initialize in (True, u'yes'):
+    if initialize in (True, 'yes'):
         rc.initialize = 1
-    elif initialize in (False, u'no'):
+    elif initialize in (False, 'no'):
         rc.initialize = 0
     else:
         warnRC("initialize", initialize)
     #
-    if threaded in (True, u'yes'):
+    if threaded in (True, 'yes'):
         rc.threaded = 1
-    elif threaded in (False, u'no'):
+    elif threaded in (False, 'no'):
         rc.threaded = 0
     else:
         warnRC("threaded", threaded)
     #
-    if thread_level == u'single':
+    if thread_level == 'single':
         rc.thread_level = MPI_THREAD_SINGLE
-    elif thread_level == u'funneled':
+    elif thread_level == 'funneled':
         rc.thread_level = MPI_THREAD_FUNNELED
-    elif thread_level == u'serialized':
+    elif thread_level == 'serialized':
         rc.thread_level = MPI_THREAD_SERIALIZED
-    elif thread_level == u'multiple':
+    elif thread_level == 'multiple':
         rc.thread_level = MPI_THREAD_MULTIPLE
     else:
         warnRC("thread_level", thread_level)
     #
-    if finalize in (True, u'yes'):
+    if finalize in (True, 'yes'):
         rc.finalize = 1
-    elif finalize in (False, u'no'):
+    elif finalize in (False, 'no'):
         rc.finalize = 0
     else:
         warnRC("finalize", finalize)
     #
     return 0
 
-# --------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 cdef extern from *:
     #
@@ -126,11 +126,11 @@ cdef int initialize() except -1:
             required = rc.thread_level
             ierr = MPI_Init_thread(NULL, NULL, required, &provided)
             if ierr != MPI_SUCCESS: raise RuntimeError(
-                S("MPI_Init_thread() failed [error code: %d]") % ierr)
+                "MPI_Init_thread() failed [error code: %d]" % ierr)
         else:
             ierr = MPI_Init(NULL, NULL)
             if ierr != MPI_SUCCESS: raise RuntimeError(
-                S("MPI_Init() failed [error code: %d]") % ierr)
+                "MPI_Init() failed [error code: %d]" % ierr)
         inited_atimport = 1 # We initialized MPI
         if rc.finalize:     # We have to finalize MPI
             finalize_atexit = 1
@@ -176,7 +176,7 @@ cdef void atexit() nogil:
     ierr = MPI_Finalize()
     #DBG# fprintf(stderr, "atexit: END\n"); fflush(stderr)
 
-# --------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # Vile hack for raising a exception and not contaminate the traceback
 
@@ -204,4 +204,4 @@ cdef inline int CHKERR(int ierr) nogil except -1:
     PyMPI_Raise(ierr)
     return -1
 
-# --------------------------------------------------------------------
+# -----------------------------------------------------------------------------

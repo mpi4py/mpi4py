@@ -18,7 +18,7 @@ cdef class Op:
         cdef Op s = self, o = other
         if   op == 2: return (s.ob_mpi == o.ob_mpi)
         elif op == 3: return (s.ob_mpi != o.ob_mpi)
-        else: raise TypeError(S("only '==' and '!='"))
+        else: raise TypeError("only '==' and '!='")
 
     def __nonzero__(self):
         return self.ob_mpi != MPI_OP_NULL
@@ -74,11 +74,11 @@ cdef class Op:
         # check counts and datatypes
         if self.scount != self.rcount:
             raise ValueError(
-                S("mismatch in inbuf count %d and inoutbuf count %d") %
+                "mismatch in inbuf count %d and inoutbuf count %d" %
                 (self.scount, self.rcount))
         if (self.stype != self.rtype):
             raise ValueError(
-                S("mismatch in inbuf and inoutbuf MPI datatypes"))
+                "mismatch in inbuf and inoutbuf MPI datatypes")
         # do local reduction
         with nogil: CHKERR( MPI_Reduce_local(
             m.sbuf, m.rbuf, m.rcount, m.rtype, self.ob_mpi) )

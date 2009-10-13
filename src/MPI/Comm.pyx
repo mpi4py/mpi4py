@@ -1,7 +1,7 @@
 # Communicator Comparisons
 # ------------------------
 
-IDENT     = MPI_IDENT     #: Groups are identical, communicator contexts de same
+IDENT     = MPI_IDENT     #: Groups are identical, contexts are the same
 CONGRUENT = MPI_CONGRUENT #: Groups are identical, contexts are different
 SIMILAR   = MPI_SIMILAR   #: Groups are similar, rank order differs
 UNEQUAL   = MPI_UNEQUAL   #: Groups are different
@@ -34,7 +34,7 @@ cdef class Comm:
         cdef Comm s = self, o = other
         if   op == 2: return (s.ob_mpi == o.ob_mpi)
         elif op == 3: return (s.ob_mpi != o.ob_mpi)
-        else: raise TypeError(S("only '==' and '!='"))
+        else: raise TypeError("only '==' and '!='")
 
     def __nonzero__(self):
         return self.ob_mpi != MPI_COMM_NULL

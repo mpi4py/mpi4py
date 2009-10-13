@@ -34,11 +34,11 @@ cdef class Exception(RuntimeError):
         return self.Get_error_code()
 
     def __repr__(self):
-        return S("MPI.Exception(%d)") % self.ob_mpi
+        return "MPI.Exception(%d)" % self.ob_mpi
 
     def __str__(self):
         if not mpi_active():
-            return S("error code: %d") % self.ob_mpi
+            return "error code: %d" % self.ob_mpi
         return self.Get_error_string()
 
     def Get_error_code(self):

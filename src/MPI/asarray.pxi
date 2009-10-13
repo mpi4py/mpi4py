@@ -1,4 +1,4 @@
-#---------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 cdef inline object newarray_int(int n, int **p):
      if n < 0: n = 0
@@ -7,58 +7,65 @@ cdef inline object newarray_int(int n, int **p):
      p[0] = array
      return ob
 
-#---------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
-cdef inline object asarray_int(object sequence, int **p, Py_ssize_t size):
+cdef inline object asarray_int(object sequence, 
+                               int **p, Py_ssize_t size):
      cdef int *array = NULL
      cdef Py_ssize_t i = 0, n = len(sequence)
-     if size > 0: assert n == size, S("expecting %d items, got %d") % (size, n)
+     if size > 0: assert n == size, "expecting %d items, got %d" % (size, n)
      cdef object ob = allocate(n*sizeof(int), <void**>&array)
      for i from 0 <= i < n: array[i] = sequence[i]
      p[0] = array
      return ob
 
-cdef inline object asarray_Aint(object sequence, MPI_Aint **p, Py_ssize_t size):
+cdef inline object asarray_Aint(object sequence, 
+                                MPI_Aint **p, Py_ssize_t size):
      cdef MPI_Aint *array = NULL
      cdef Py_ssize_t i = 0, n = len(sequence)
-     if size > 0: assert n == size, S("expecting %d items, got %d") % (size, n)
+     if size > 0: assert n == size, "expecting %d items, got %d" % (size, n)
      cdef object ob = allocate(n*sizeof(MPI_Aint), <void**>&array)
      for i from 0 <= i < n: array[i] = sequence[i]
      p[0] = array
      return ob
 
-cdef inline object asarray_Datatype(object sequence, MPI_Datatype **p, Py_ssize_t size):
+cdef inline object asarray_Datatype(object sequence, 
+                                    MPI_Datatype **p, Py_ssize_t size):
      cdef MPI_Datatype *array = NULL
      cdef Py_ssize_t i = 0, n = len(sequence)
-     if size >= 0: assert n == size, S("expecting %d items, got %d") % (size, n)
+     if size >= 0: assert n == size, "expecting %d items, got %d" % (size, n)
      cdef object ob = allocate(n*sizeof(MPI_Datatype), <void**>&array)
      for i from 0 <= i < n: array[i] = (<Datatype?>sequence[i]).ob_mpi
      p[0] = array
      return ob
 
-cdef inline object asarray_Request(object sequence, MPI_Request **p, Py_ssize_t size):
+cdef inline object asarray_Request(object sequence, 
+                                   MPI_Request **p, Py_ssize_t size):
      cdef MPI_Request *array = NULL
      cdef Py_ssize_t i = 0, n = len(sequence)
-     if size >= 0: assert n == size, S("expecting %d items, got %d") % (size, n)
+     if size >= 0: assert n == size, "expecting %d items, got %d" % (size, n)
      cdef object ob = allocate(n*sizeof(MPI_Request), <void**>&array)
      for i from 0 <= i < n: array[i] = (<Request?>sequence[i]).ob_mpi
      p[0] = array
      return ob
 
-cdef inline int restore_Request(object sequence, MPI_Request **p, Py_ssize_t size) except -1:
+cdef inline int restore_Request(object sequence, 
+                                MPI_Request **p, Py_ssize_t size) except -1:
      cdef Py_ssize_t i
      cdef MPI_Request *array = p[0]
      for i from 0 <= i < size: (<Request?>sequence[i]).ob_mpi = array[i]
      return 0
 
-cdef inline object asarray_Status(object sequence, MPI_Status **p, Py_ssize_t n):
+cdef inline object asarray_Status(object sequence, 
+                                  MPI_Status **p, Py_ssize_t n):
      if sequence is None: return None
      cdef MPI_Status *array = NULL
      cdef object ob = allocate(n*sizeof(MPI_Status), <void**>&array)
      p[0] = array
      return ob
 
-cdef inline int restore_Status(object sequence, MPI_Status **p, Py_ssize_t n)  except -1:
+cdef inline int restore_Status(object sequence, 
+                               MPI_Status **p, Py_ssize_t n) except -1:
      if sequence is None: return 0
      cdef Py_ssize_t i = 0, m = n - len(sequence)
      if m > 0:
@@ -70,7 +77,7 @@ cdef inline int restore_Status(object sequence, MPI_Status **p, Py_ssize_t n)  e
      for i from 0 <= i < n: (<Status?>sequence[i]).ob_mpi = array[i]
      return 0
 
-#---------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 cdef inline object asarray_argv(object sequence, char ***p):
      sequence = list(sequence)
@@ -83,4 +90,4 @@ cdef inline object asarray_argv(object sequence, char ***p):
      p[0] = array
      return (sequence, ob)
 
-#---------------------------------------------------------------------
+# -----------------------------------------------------------------------------
