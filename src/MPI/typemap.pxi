@@ -6,40 +6,46 @@ cdef inline int AddTypeMap(key, Datatype dtype) except -1:
         DTypeMap[key] = dtype
     return 0
 
-AddTypeMap( "c"  , __CHAR__ ) # PEP-3118 & NumPy
-AddTypeMap( "S"  , __CHAR__ ) # NumPy
-
-AddTypeMap( "?"  , __C_BOOL__ )
-
-AddTypeMap( "b" , __SIGNED_CHAR__ )
+# character
+AddTypeMap( "c"  , __CHAR__ )  # PEP-3118 & NumPy
+## XXX this requires special handling
+## AddTypeMap( "u"  , __????__  ) # PEP-3118
+## AddTypeMap( "w"  , __????__  ) # PEP-3118
+# boolean
+AddTypeMap( "?"  , __CHAR__   ) # emulation
+AddTypeMap( "?"  , __C_BOOL__ ) # C99 _Bool
+# (signed) integer
+AddTypeMap( "b" , __SIGNED_CHAR__ ) # MPI-2
 AddTypeMap( "h" , __SHORT__       )
 AddTypeMap( "i" , __INT__         )
 AddTypeMap( "l" , __LONG__        )
 AddTypeMap( "q" , __LONG_LONG__   )
-AddTypeMap( "p" , __LONG__        ) # LP64
-AddTypeMap( "p" , __AINT__        )
-
+# unsigned integer
 AddTypeMap( "B" , __UNSIGNED_CHAR__     )
 AddTypeMap( "H" , __UNSIGNED_SHORT__    )
 AddTypeMap( "I" , __UNSIGNED__          )
 AddTypeMap( "L" , __UNSIGNED_LONG__     )
 AddTypeMap( "Q" , __UNSIGNED_LONG_LONG__)
-AddTypeMap( "P" , __UNSIGNED_LONG__     ) # LP64
-
+# (real) floating
 AddTypeMap( "f" , __FLOAT__       )
 AddTypeMap( "d" , __DOUBLE__      )
 AddTypeMap( "g" , __LONG_DOUBLE__ ) # PEP-3118 & NumPy
-
-## AddTypeMap( "Zf" , __COMPLEX__        ) # PEP-3118
-## AddTypeMap( "F"  , __COMPLEX__        ) # NumPy
-## AddTypeMap( "Zd" , __DOUBLE_COMPLEX__ ) # PEP-3118
-## AddTypeMap( "D"  , __DOUBLE_COMPLEX__ ) # NumPy
-
+# complex floating (F77)
+AddTypeMap( "Zf" , __COMPLEX__        ) # PEP-3118
+AddTypeMap( "Zd" , __DOUBLE_COMPLEX__ ) # PEP-3118
+AddTypeMap( "F"  , __COMPLEX__        ) # NumPy
+AddTypeMap( "D"  , __DOUBLE_COMPLEX__ ) # NumPy
+# complex floating (F90)
+AddTypeMap( "Zf" , __COMPLEX8__       ) # PEP-3118
+AddTypeMap( "Zd" , __COMPLEX16__      ) # PEP-3118
+AddTypeMap( "F"  , __COMPLEX8__       ) # NumPy
+AddTypeMap( "D"  , __COMPLEX16__      ) # NumPy
+# complex floating (C99)
 AddTypeMap( "Zf" , __C_FLOAT_COMPLEX__       ) # PEP-3118
-AddTypeMap( "F"  , __C_FLOAT_COMPLEX__       ) # NumPy
 AddTypeMap( "Zd" , __C_DOUBLE_COMPLEX__      ) # PEP-3118
-AddTypeMap( "D"  , __C_DOUBLE_COMPLEX__      ) # NumPy
 AddTypeMap( "Zg" , __C_LONG_DOUBLE_COMPLEX__ ) # PEP-3118
+AddTypeMap( "F"  , __C_FLOAT_COMPLEX__       ) # NumPy
+AddTypeMap( "D"  , __C_DOUBLE_COMPLEX__      ) # NumPy
 AddTypeMap( "G"  , __C_LONG_DOUBLE_COMPLEX__ ) # NumPy
 
 ## AddTypeMap( "i1" , __INT8_T__   )
@@ -52,17 +58,20 @@ AddTypeMap( "G"  , __C_LONG_DOUBLE_COMPLEX__ ) # NumPy
 ## AddTypeMap( "u8" , __UINT64_T__ )
 ## if 4 == sizeof(float):
 ##     AddTypeMap( "f4"  , __FLOAT__            )
-##     AddTypeMap( "c8"  , __COMPLEX__          ) # XXX
+##     AddTypeMap( "c8"  , __COMPLEX__          )
+##     AddTypeMap( "c8"  , __COMPLEX8__         )
 ##     AddTypeMap( "c8"  , __C_FLOAT_COMPLEX__  )
 ## if 8 == sizeof(double):
 ##     AddTypeMap( "f8"  , __DOUBLE__           )
-##     AddTypeMap( "c16" , __DOUBLE_COMPLEX__   ) # XXX
+##     AddTypeMap( "c16" , __DOUBLE_COMPLEX__   )
+##     AddTypeMap( "c16" , __COMPLEX16__        )
 ##     AddTypeMap( "c16" , __C_DOUBLE_COMPLEX__ )
 ## if 12 == sizeof(long double):  # XXX Linux32
 ##     AddTypeMap( "f12" , __LONG_DOUBLE__           )
 ##     AddTypeMap( "c24" , __C_LONG_DOUBLE_COMPLEX__ )
 ## if 16 == sizeof(long double):  # XXX Linux64
 ##     AddTypeMap( "f16" , __LONG_DOUBLE__           )
+##     AddTypeMap( "c32" , __COMPLEX32__             )
 ##     AddTypeMap( "c32" , __C_LONG_DOUBLE_COMPLEX__ )
 
 # -----------------------------------------------------------------------------
