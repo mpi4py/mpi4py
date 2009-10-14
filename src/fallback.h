@@ -108,7 +108,8 @@ static MPI_Status PyMPI_STATUS_IGNORE;
 #ifdef PyMPI_MISSING_MPI_STATUSES_IGNORE
 #ifndef PyMPI_MPI_STATUSES_IGNORE_SIZE
 #if defined(__GNUC__) || defined(__ICC) || defined(__INTEL_COMPILER)
-#warning "MPI_STATUSES_IGNORE will use static storage of size 4096"
+#warning MPI_STATUSES_IGNORE will use static storage of size 4096
+#warning Buffer overruns may occur. You were warned !!!
 #endif
 #define PyMPI_MPI_STATUSES_IGNORE_SIZE 4096
 #endif
