@@ -79,7 +79,7 @@ def runtestsleak(repeats, *args, **kargs):
         gc.collect()
         r2 = sys.gettotalrefcount()
         sys.stderr.flush()
-        sys.stderr.write('\nREF LEAKS -- before: %d, after: %d, diff: [%d]\n' % (r1, r2, r2-r1))
+        sys.stderr.write('REF LEAKS -- before: %d, after: %d, diff: [%d]\n' % (r1, r2, r2-r1))
         sys.stderr.flush()
 
 if __name__ == '__main__':

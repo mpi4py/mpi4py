@@ -506,7 +506,8 @@ class config(cmd_config.config):
         self.compiler = getattr(self.compiler, 'compiler_type',
                                 self.compiler)
         self._check_compiler()
-        customize_compiler(self.compiler, mpicc=mpicc, mpicxx=None)
+        compiler_obj = self.compiler
+        customize_compiler(compiler_obj, mpicc=mpicc, mpicxx=None)
         self.try_link(ConfigTest, headers=['mpi.h'], lang='c')
         # test MPI C++ compiler
         mpicxx = find_mpi_compiler(
@@ -515,12 +516,15 @@ class config(cmd_config.config):
         self.compiler = getattr(self.compiler, 'compiler_type',
                                 self.compiler)
         self._check_compiler()
-        customize_compiler(self.compiler, mpicc=None, mpicxx=mpicxx)
-        if self.compiler.compiler_type in ('unix', 'cygwin', 'mingw32'):
-            self.compiler.compiler_so[0] = \
-                self.compiler.compiler_cxx[0]
-            self.compiler.linker_exe[0]  = \
-                self.compiler.compiler_cxx[0]
+        compiler_obj = self.compiler
+        customize_compiler(compiler_obj, mpicc=None, mpicxx=mpicxx)
+        if compiler_obj.compiler_type in ('unix', 'cygwin', 'mingw32'):
+            try: compiler_obj.compiler_cxx.remove('-Wstrict-prototypes')
+            except: pass
+            try: compiler_obj.compiler_so.remove('-Wstrict-prototypes')
+            except: pass
+            compiler_obj.compiler_so[0] = compiler_obj.compiler_cxx[0]
+            compiler_obj.linker_exe[0]  = compiler_obj.compiler_cxx[0]
         self.try_link(ConfigTest, headers=['mpi.h'], lang='c++')
 
     def run_configtests(self, compiler, config_info):
@@ -728,16 +732,20 @@ class build_ext(cmd_build_ext.build_ext):
         self.check_extensions_list(self.extensions)
         # parse configuration file and  configure compiler
         config_info = self.configure_extensions()
-        self.configure_compiler(self.compiler, config_info)
+        try: # Py2.7+ & Py3.2+ 
+            compiler_obj = self.compiler_obj
+        except AttributeError:
+            compiler_obj = self.compiler
+        self.configure_compiler(compiler_obj, config_info)
         # extra configuration, MPI 2 features
         if self.configure:
             config_cmd = self.get_finalized_command('config')
             if isinstance(config_cmd, config):
                 log.info('testing for missing MPI-2 features')
-                config_cmd.run_configtests(self.compiler, config_info)
+                config_cmd.run_configtests(compiler_obj, config_info)
                 macro = 'PyMPI_HAVE_CONFIG_H'
                 log.info("defining preprocessor macro '%s'" % macro)
-                self.compiler.define_macro(macro, None)
+                compiler_obj.define_macro(macro, None)
         # and finally build extensions
         for ext in self.extensions:
             self.build_extension(ext)
@@ -855,6 +863,11 @@ class build_exe(build_ext):
 
         # Next, compile the source code to object files.
 
+        try: # Py2.7+ & Py3.2+ 
+            compiler_obj = self.compiler_obj
+        except AttributeError:
+            compiler_obj = self.compiler
+
         # XXX not honouring 'define_macros' or 'undef_macros' -- the
         # CCompiler API needs to change to accommodate this, and I
         # want to do one thing at a time!
@@ -874,7 +887,7 @@ class build_exe(build_ext):
         extra_args = exe.extra_compile_args or []
         extra_args = extra_args[:]
 
-        objects = self.compiler.compile(sources,
+        objects =  compiler_obj.compile(sources,
                                         output_dir=self.build_temp,
                                         macros=macros,
                                         include_dirs=exe.include_dirs,
@@ -897,8 +910,8 @@ class build_exe(build_ext):
         #
         # Remove msvcrXX.dll when building executables with MinGW
         #
-        if self.compiler.compiler_type == 'mingw32':
-            try: del self.compiler.dll_libraries[:]
+        if compiler_obj.compiler_type == 'mingw32':
+            try: del compiler_obj.dll_libraries[:]
             except: pass
 
         # Now link the object files together into a "shared object" --
@@ -919,7 +932,7 @@ class build_exe(build_ext):
         extra_args.extend(split_quoted(ldshflag))
         # Detect target language, if not provided
         language = exe.language or self.compiler.detect_language(sources)
-        self.compiler.link_executable(
+        compiler_obj.link_executable(
             objects, exe_filename,
             output_dir=None,
             libraries=self.get_libraries(exe),

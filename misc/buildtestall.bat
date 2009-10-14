@@ -3,7 +3,7 @@ setlocal ENABLEEXTENSIONS
 
 set PATH=C:\MinGW\bin;%PATH%
 
-set TEST_PY=25,26,30,31
+set TEST_PY=25,26,27,30,31,32
 set TEST_MPI=mpich2_win,deinompi,msmpi
 set TEST_CC=msvc,mingw32
 
