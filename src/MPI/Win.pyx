@@ -125,15 +125,15 @@ cdef class Win:
             #
             attr = MPI_WIN_BASE
             CHKERR( MPI_Win_get_attr(win, attr, &pbase, &flag) )
-            if flag and pbase: base = pbase
+            if flag and pbase != NULL: base = pbase
             #
             attr = MPI_WIN_SIZE
             CHKERR( MPI_Win_get_attr(win, attr, &psize, &flag) )
-            if flag and psize: size = psize[0]
+            if flag and psize != NULL: size = psize[0]
             #
             attr = MPI_WIN_DISP_UNIT
             CHKERR( MPI_Win_get_attr(win, attr, &pdisp, &flag) )
-            if flag and pdisp: disp = pdisp[0]
+            if flag and pdisp != NULL: disp = pdisp[0]
             #
             return (<MPI_Aint>base, size, disp)
 
@@ -148,11 +148,11 @@ cdef class Win:
             #
             attr = MPI_WIN_BASE
             CHKERR( MPI_Win_get_attr(win, attr, &pbase, &flag) )
-            if flag and pbase: base = pbase
+            if flag and pbase != NULL: base = pbase
             #
             attr = MPI_WIN_SIZE
             CHKERR( MPI_Win_get_attr(win, attr, &psize, &flag) )
-            if flag and psize: size = psize[0]
+            if flag and psize != NULL: size = psize[0]
             #
             return tomemory(base, size)
 
