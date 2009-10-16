@@ -114,25 +114,33 @@ cdef object message_simple(object msg,
     cdef int displ = 0 # from base buffer, in datatype entries
     cdef MPI_Aint offset = 0 # from base buffer, in bytes
     cdef MPI_Aint extent = 0, lb = 0, ub = 0
-    if o_count is not None:
-        count = <int> o_count
-        if o_displ is not None:
-            displ = <int> o_displ
-            if displ < 0:
-                raise ValueError(
-                    "message: negative diplacement %d" % displ)
-            if displ != 0:
-                if btype == MPI_DATATYPE_NULL:
-                    raise ValueError(
-                        "message: cannot handle diplacement, "
-                        "datatype is null")
-                CHKERR( MPI_Type_get_extent(btype, &lb, &extent) )
-                offset = displ*extent # XXX overflow?
-    elif bsize > 0:
-        if o_displ is not None:
+
+    if o_displ is not None:
+        if o_count is None:
             raise ValueError(
                 "message: cannot handle displacement, "
                 "explicit count required")
+        count = <int> o_count
+        if count < 0:
+            raise ValueError(
+                "message: negative count %d" % count)
+        displ = <int> o_displ
+        if displ < 0:
+            raise ValueError(
+                "message: negative diplacement %d" % displ)
+        if displ != 0:
+            if btype == MPI_DATATYPE_NULL:
+                raise ValueError(
+                    "message: cannot handle diplacement, "
+                    "datatype is null")
+            CHKERR( MPI_Type_get_extent(btype, &lb, &extent) )
+            offset = displ*extent # XXX overflow?
+    elif o_count is not None:
+        count = <int> o_count
+        if count < 0:
+            raise ValueError(
+                "message: negative count %d" % count)
+    elif bsize > 0:
         if btype == MPI_DATATYPE_NULL:
             raise ValueError(
                 "message: cannot guess count, "
@@ -160,10 +168,11 @@ cdef object message_simple(object msg,
         if blocks < 1: blocks = 1
         count = <int> ((bsize/extent) / blocks) # XXX overflow?
     # return collected message data
-    o_count = count; o_displ = displ;
     _addr[0]  = <void*>(<char*>baddr + offset)
     _count[0] = count
     _type[0]  = btype
+    if o_count is None: o_count = count
+    if o_displ is None: o_displ = displ
     return (o_buf, (o_count, o_displ), o_type)
 
 
