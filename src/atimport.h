@@ -140,36 +140,66 @@ PyMPI_AtExitMPI(MPI_Comm comm, int k, void *v, void *xs)
 
 /* ------------------------------------------------------------------------- */
 
-#if PY_VERSION_HEX < 0x02060000
-#define PyObject_CheckBuffer(ob) (0)
-#define PyObject_GetBuffer(ob,view,flags) \
-        (PyErr_SetString(PyExc_NotImplementedError, \
-                        "new buffer interface is not available"), -1)
-#define PyBuffer_Release(view)
-#endif
 
 /* ------------------------------------------------------------------------- */
 
-static PyObject *
-PyMPIMemory_AsMemory(PyObject *ob, void **p, Py_ssize_t *n)
+
+#if PY_VERSION_HEX >= 0x03010000
+static void
+py_mpi_dealloc(PyObject *ob)
 {
-  if (PyObject_AsWriteBuffer(ob, p, n) < 0)
-    return NULL;
-  Py_INCREF(ob);
+  void *p = PyCapsule_GetPointer(ob, 0);
+  if (p) PyMem_Free(p);
+  else   PyErr_Clear();
+}
+#endif
+
+static PyObject *
+PyMPI_Allocate(size_t n, void **pp)
+{
+  PyObject *ob = 0;
+  void *p = PyMem_Malloc(n);
+  if (!p)
+    return PyErr_NoMemory();
+#if PY_VERSION_HEX >= 0x03010000
+  ob = PyCapsule_New(p, 0, py_mpi_dealloc);
+#else
+  ob = PyCObject_FromVoidPtr(p, PyMem_Free);
+#endif
+  if (!ob)
+    PyMem_Free(p);
+  else if (pp)
+    *pp = p;
   return ob;
 }
 
+/* ------------------------------------------------------------------------- */
+
+static int
+PyMPIMemory_AsMemory(PyObject *ob, void **base, MPI_Aint *size)
+{
+  void *p;
+  Py_ssize_t n;
+  if (PyObject_AsWriteBuffer(ob, &p, &n) < 0)
+    return -1;
+  if (base)
+    *base = p;
+  if (size)
+    *size = (MPI_Aint)n;
+  return 0;
+}
+
 static PyObject *
-PyMPIMemory_FromMemory(void *p, Py_ssize_t n)
+PyMPIMemory_FromMemory(void *p, MPI_Aint n)
 {
 #if PY_MAJOR_VERSION >= 3
   Py_buffer info;
-  if (PyBuffer_FillInfo(&info, NULL, p, n, 0,
+  if (PyBuffer_FillInfo(&info, NULL, p, (Py_ssize_t)n, 0,
                         PyBUF_ND | PyBUF_STRIDES) < 0)
     return NULL;
   return PyMemoryView_FromBuffer(&info);
 #else
-  return PyBuffer_FromReadWriteMemory(p, n);
+  return PyBuffer_FromReadWriteMemory(p, (Py_ssize_t)n);
 #endif
 }
 
@@ -214,6 +244,16 @@ PyMPIString_AsStringAndSize(PyObject *ob, const char **s, Py_ssize_t *n)
 #define PyMPIBytes_Size              PyString_Size
 #define PyMPIBytes_AsStringAndSize   PyString_AsStringAndSize
 #define PyMPIBytes_FromStringAndSize PyString_FromStringAndSize
+#endif
+
+/* ------------------------------------------------------------------------- */
+
+#if PY_VERSION_HEX < 0x02060000
+#define PyObject_CheckBuffer(ob) (0)
+#define PyObject_GetBuffer(ob,view,flags) \
+        (PyErr_SetString(PyExc_NotImplementedError, \
+                        "new buffer interface is not available"), -1)
+#define PyBuffer_Release(view)
 #endif
 
 /* ------------------------------------------------------------------------- */

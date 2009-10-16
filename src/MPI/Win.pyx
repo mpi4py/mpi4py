@@ -56,7 +56,7 @@ cdef class Win:
         if is_BOTTOM(memory):
             memory = None
         if memory is not None:
-            memory = asmemory(memory, &base, &size)
+            asmemory(memory, &base, &size)
         cdef MPI_Info cinfo = arg_Info(info)
         #
         cdef Win win = cls()
