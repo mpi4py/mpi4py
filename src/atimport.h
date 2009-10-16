@@ -140,6 +140,16 @@ PyMPI_AtExitMPI(MPI_Comm comm, int k, void *v, void *xs)
 
 /* ------------------------------------------------------------------------- */
 
+#if PY_VERSION_HEX < 0x02060000
+#define PyObject_CheckBuffer(ob) (0)
+#define PyObject_GetBuffer(ob,view,flags) \
+        (PyErr_SetString(PyExc_NotImplementedError, \
+                        "new buffer interface is not available"), -1)
+#define PyBuffer_Release(view)
+#endif
+
+/* ------------------------------------------------------------------------- */
+
 static PyObject *
 PyMPIMemory_AsMemory(PyObject *ob, void **p, Py_ssize_t *n)
 {

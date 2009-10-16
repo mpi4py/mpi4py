@@ -1,6 +1,12 @@
 #------------------------------------------------------------------------------
 
 cdef extern from "Python.h":
+    object PyLong_FromVoidPtr(void *)
+    void*  PyLong_AsVoidPtr(object)
+
+#------------------------------------------------------------------------------
+
+cdef extern from "Python.h":
     object PyMPIMemory_AsMemory(object, void **, Py_ssize_t *)
     object PyMPIMemory_FromMemory(void *, Py_ssize_t)
 

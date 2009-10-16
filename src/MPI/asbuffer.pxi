@@ -1,32 +1,74 @@
 #------------------------------------------------------------------------------
 
+# Python 3 buffer interface (PEP 3118)
 cdef extern from "Python.h":
-    object PyLong_FromVoidPtr(void *)
-    void*  PyLong_AsVoidPtr(object)
+    ctypedef struct Py_buffer:
+        void *buf
+        Py_ssize_t len
+        char *format
+    cdef enum:
+        PyBUF_SIMPLE
+        PyBUF_WRITABLE
+        PyBUF_FORMAT
+        PyBUF_ANY_CONTIGUOUS
+    int  PyObject_CheckBuffer(object)
+    int  PyObject_GetBuffer(object, Py_buffer *, int) except -1
+    void PyBuffer_Release(Py_buffer *)
 
-#------------------------------------------------------------------------------
-
+# Python 2 buffer interface (legacy)
 cdef extern from "Python.h":
     ctypedef void const_void "const void"
+    int PyObject_CheckReadBuffer(object)
     int PyObject_AsReadBuffer (object, const_void **, Py_ssize_t *) except -1
     int PyObject_AsWriteBuffer(object, void **, Py_ssize_t *) except -1
 
+
 #------------------------------------------------------------------------------
 
-cdef inline object asbuffer_r(object ob, void **bptr, MPI_Aint *blen):
-    cdef const_void *p = NULL
-    cdef Py_ssize_t n = 0
-    PyObject_AsReadBuffer(ob, &p, &n)
-    if bptr: bptr[0] = <void *>p
-    if blen: blen[0] = <MPI_Aint>n
+cdef extern from *:
+    cdef object Str"PyMPIString_FromString"(char *)
+
+cdef inline int is_buffer(object ob):
+    return (PyObject_CheckBuffer(ob) or
+            PyObject_CheckReadBuffer(ob))
+
+cdef object asbuffer(object ob,
+                     int writable, int format,
+                     void **base, MPI_Aint *size):
+
+    cdef void *bptr = NULL
+    cdef Py_ssize_t blen = 0
+    cdef object bfmt = None
+    cdef Py_buffer view
+    cdef int flags = PyBUF_SIMPLE
+    if PyObject_CheckBuffer(ob):
+        flags = PyBUF_ANY_CONTIGUOUS
+        if writable: 
+            flags |= PyBUF_WRITABLE
+        if format: 
+            flags |= PyBUF_FORMAT
+        PyObject_GetBuffer(ob, &view, flags)
+        bptr = view.buf
+        blen = view.len
+        if format:
+            if view.format != NULL:
+                bfmt = Str(view.format)
+        PyBuffer_Release(&view)
+    else:
+        if writable:
+            PyObject_AsWriteBuffer(ob, &bptr, &blen)
+        else:
+            PyObject_AsReadBuffer(ob, <const_void **>&bptr, &blen)
+    if base: base[0] = <void *>bptr
+    if size: size[0] = <MPI_Aint>blen
+    return bfmt
+
+cdef inline object asbuffer_r(object ob, void **base, MPI_Aint *size):
+    asbuffer(ob, 0, 0, base, size)
     return ob
 
-cdef inline object asbuffer_w(object ob, void **bptr, MPI_Aint *blen):
-    cdef void *p = NULL
-    cdef Py_ssize_t n = 0
-    PyObject_AsWriteBuffer(ob, &p, &n)
-    if bptr: bptr[0] = <void *>p
-    if blen: blen[0] = <MPI_Aint>n
+cdef inline object asbuffer_w(object ob, void **base, MPI_Aint *size):
+    asbuffer(ob, 1, 0, base, size)
     return ob
 
 #------------------------------------------------------------------------------
