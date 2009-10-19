@@ -1,18 +1,21 @@
+from mpi4py import MPI
+import sys
+
+if MPI.Query_thread() < MPI.THREAD_MULTIPLE:
+    sys.stderr.write("MPI does not provide enough thread support\n")
+    sys.exit(0)
+
 try:
     import threading
 except ImportError:
-    raise SystemExit(
-        "threading module not available")
+    sys.stderr.write("threading module not available\n")
+    sys.exit(0)
+
 try:
     import numpy
 except ImportError:
-    raise SystemExit(
-        "NumPy package not available")
-
-from mpi4py import MPI
-if MPI.Query_thread() < MPI.THREAD_MULTIPLE:
-    raise SystemExit(
-        "MPI does not provide enough thread support")
+    sys.stderr.write("NumPy package not available\n")
+    sys.exit(0)
 
 send_msg = numpy.arange(1000000, dtype='i')
 recv_msg = numpy.zeros_like(send_msg)

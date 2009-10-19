@@ -1,4 +1,4 @@
-# --------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 from mpi4py import MPI
 from array import array
@@ -49,7 +49,16 @@ class Counter(object):
         nxtval = ival[0]
         return nxtval
 
-# --------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+
+def test_thread_level():
+    import sys
+    flag = (MPI.Query_thread() == MPI.THREAD_MULTIPLE)
+    flag = MPI.COMM_WORLD.bcast(flag, root=0)
+    if not flag:
+        if MPI.COMM_WORLD.Get_rank() == 0:
+            sys.stderr.write("MPI does not provide enough thread support\n")
+        sys.exit(0)
 
 def test():
     vals = []
@@ -63,6 +72,7 @@ def test():
     assert sorted(vals) == list(range(len(vals)))
 
 if __name__ == '__main__':
+    test_thread_level()
     test()
 
-# --------------------------------------------------------------------
+# -----------------------------------------------------------------------------

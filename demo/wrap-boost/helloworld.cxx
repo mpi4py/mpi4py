@@ -15,10 +15,10 @@ static void sayhello(MPI_Comm comm)
   MPI_Get_processor_name(pname, &plen);
   std::cout <<
     "Hello, World! " <<
-    "I am process " << rank  <<
-    " of "          << size  <<
-    " on  "         << pname <<
-    "."             << std::endl;
+    "I am process "  << rank  <<
+    " of "           << size  <<
+    " on  "          << pname <<
+    "."              << std::endl;
 }
 
 
