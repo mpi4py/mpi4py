@@ -23,8 +23,10 @@ cdef inline int is_IN_PLACE(object msg):
 
 cdef dict DTypeMap = { }
 
-cdef inline object lookup_datatype(object key):
-    return DTypeMap.get(key, __DATATYPE_NULL__)
+cdef inline Datatype lookup_datatype(object key):
+     cdef Datatype o_type = DTypeMap[key]
+     assert o_type is not None # XXX just in case
+     return o_type
 
 cdef inline object lookup_format(object o_buf):
     # numpy.ndarray
@@ -54,10 +56,10 @@ cdef object message_basic(object o_buf,
     # get buffer base address, length, and format
     cdef bint w = (not readonly), f = (o_type is None)
     cdef object o_fmt = asbuffer(o_buf, w, f, baddr, bsize)
+    if f and o_fmt is None:
+        o_fmt = lookup_format(o_buf)
     # lookup datatype if not provided or not a Datatype
     if o_type is None:
-        if o_fmt is None:
-            o_fmt = lookup_format(o_buf)
         o_type = lookup_datatype(o_fmt)
     elif not isinstance(o_type, Datatype):
         o_type = lookup_datatype(o_type)
@@ -75,7 +77,7 @@ cdef object message_simple(object msg,
                            int          *_count,
                            MPI_Datatype *_type,
                            ):
-    # special-case a PROC_NULL target rank
+    # special-case PROC_NULL target rank
     if rank == MPI_PROC_NULL:
         _addr[0]  = NULL
         _count[0] = 0
@@ -186,35 +188,31 @@ cdef object message_vector(object msg,
                            int         **_displs,
                            MPI_Datatype *_type,
                            ):
-    # special case
+    # special-case PROC_NULL target rank
     if rank == MPI_PROC_NULL:
         _addr[0]   = NULL
         _counts[0] = NULL
         _displs[0] = NULL
         _type[0]   = MPI_BYTE
         return None
-    # check argument containing message
-    cdef Py_ssize_t n = 0
-    if not is_list(msg) and not is_tuple(msg):
-        raise TypeError("message: expecting a list or tuple")
-    n = len(msg)
-    if n < 3 or n > 4:
-        raise ValueError("message: expecting 3 or 4 items")
     # unpack message list/tuple
+    cdef Py_ssize_t nargs = 0
     cdef object o_buf    = None
     cdef object o_counts = None
     cdef object o_displs = None
     cdef object o_type   = None
-    if n == 4:
-        o_buf    = msg[0]
-        o_counts = msg[1]
-        o_displs = msg[2]
-        o_type   = msg[3]
+    if is_list(msg) or is_tuple(msg):
+        n = len(msg)
+        if n == 2:
+            (o_buf, (o_counts, o_displs)) = msg
+        elif n == 3:
+            (o_buf, (o_counts, o_displs), o_type) = msg
+        elif n == 4:
+            (o_buf,  o_counts, o_displs,  o_type) = msg
+        else:
+            raise ValueError("message: expecting 2 to 4 items")
     else:
-        o_buf    = msg[0]
-        o_counts = msg[1][0]
-        o_displs = msg[1][1]
-        o_type   = msg[2]
+        raise TypeError("message: expecting a list/tuple")
     # buffer: address, length, and datatype
     cdef void *baddr = NULL
     cdef MPI_Aint bsize = 0
