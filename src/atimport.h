@@ -143,33 +143,30 @@ PyMPI_AtExitMPI(MPI_Comm comm, int k, void *v, void *xs)
 
 /* ------------------------------------------------------------------------- */
 
-
-#if PY_VERSION_HEX >= 0x03010000
-static void
-py_mpi_dealloc(PyObject *ob)
-{
-  void *p = PyCapsule_GetPointer(ob, 0);
-  if (p) PyMem_Free(p);
-  else   PyErr_Clear();
-}
-#endif
-
 static PyObject *
-PyMPI_Allocate(size_t n, void **pp)
+PyMPI_Allocate(Py_ssize_t n, void **pp)
 {
-  PyObject *ob = 0;
-  void *p = PyMem_Malloc(n);
-  if (!p)
+  PyObject *ob;
+  if (n > PY_SSIZE_T_MAX)
     return PyErr_NoMemory();
-#if PY_VERSION_HEX >= 0x03010000
-  ob = PyCapsule_New(p, 0, py_mpi_dealloc);
+  else if (n < 0)
+    return PyErr_BadInternalCall(), NULL;
+#if PY_VERSION_HEX >= 0x02060000
+  ob = PyByteArray_FromStringAndSize(NULL, n);
+  if (ob && pp)
+    *pp = (void *)PyByteArray_AS_STRING(ob);
 #else
-  ob = PyCObject_FromVoidPtr(p, PyMem_Free);
+  {
+    void *p = PyMem_Malloc(n);
+    if (!p)
+      return PyErr_NoMemory();
+    ob = PyCObject_FromVoidPtr(p, PyMem_Free);
+    if (!ob)
+      PyMem_Free(p);
+    else if (pp)
+      *pp = p;
+  }
 #endif
-  if (!ob)
-    PyMem_Free(p);
-  else if (pp)
-    *pp = p;
   return ob;
 }
 

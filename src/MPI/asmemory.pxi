@@ -12,7 +12,7 @@ cdef extern from "Python.h":
 #------------------------------------------------------------------------------
 
 cdef extern from *:
-    object allocate"PyMPI_Allocate"(size_t, void **)
+    object allocate"PyMPI_Allocate"(Py_ssize_t, void **)
 
 cdef extern from *:
     int asmemory"PyMPIMemory_AsMemory"(object, void **, MPI_Aint *) except -1
