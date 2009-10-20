@@ -1,6 +1,6 @@
 # -*- shell-script -*-
 MPI_VENDOR_NAME=mpich2
-MPI_VENDOR_VERSION=1.1.1
+MPI_VENDOR_VERSION=1.2.0
 export MPI_DIR=/usr/local/$MPI_VENDOR_NAME/$MPI_VENDOR_VERSION
 export PATH=$MPI_DIR/bin:$PATH
 export LD_LIBRARY_PATH=$MPI_DIR/lib:$MPI_DIR/lib/shared:$LD_LIBRARY_PATH
