@@ -4,14 +4,11 @@
 
 /* -------------------------------------------------------------------------- */
 
-
-/* -------------------------------------------------------------------------- */
-
-#define MPICH_IGNORE_CXX_SEEK
-#define OMPI_IGNORE_CXX_SEEK
-#include <mpi.h>
-
 #include <Python.h>
+
+#define MPICH_IGNORE_CXX_SEEK 1
+#define OMPI_IGNORE_CXX_SEEK 1
+#include <mpi.h>
 
 #ifdef __FreeBSD__
 #include <floatingpoint.h>
@@ -23,7 +20,8 @@
 
 /* -------------------------------------------------------------------------- */
 
-static int        PyMPI_Main(int, char **);
+static int PyMPI_Main(int, char **);
+
 #if PY_MAJOR_VERSION >= 3
 static wchar_t *  char2wchar(char *);
 static wchar_t ** mk_wargs(int, char **);
