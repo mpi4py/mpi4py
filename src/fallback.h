@@ -617,7 +617,7 @@ static int PyMPI_Type_create_darray(int size,
 /* ---------------------------------------------------------------- */
 
 #ifndef PyMPI_MISSING_MPI_Request_get_status
-#if ((10 * MPI_VERSION + MPI_SUBVERSION) < 22) && !defined(OPEN_MPI)
+#if ((10 * MPI_VERSION + MPI_SUBVERSION) < 22)
 static int PyMPI_Request_get_status(MPI_Request request,
                                     int *flag, MPI_Status *status)
 {
