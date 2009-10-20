@@ -149,8 +149,11 @@ PyMPI_Allocate(Py_ssize_t n, void **pp)
   PyObject *ob;
   if (n > PY_SSIZE_T_MAX)
     return PyErr_NoMemory();
-  else if (n < 0)
-    return PyErr_BadInternalCall(), NULL;
+  else if (n < 0) {
+    PyErr_SetString(PyExc_RuntimeError,
+                    "memory allocation with negative size");
+    return NULL;
+  }
 #if PY_VERSION_HEX >= 0x02060000
   ob = PyByteArray_FromStringAndSize(NULL, n);
   if (ob && pp)
