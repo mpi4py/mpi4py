@@ -2,7 +2,7 @@ cdef extern from *:
     int PyMPI_KEYVAL_WIN_MEMORY
 
 cdef void win_memory_decref(void *ob) with gil:
-    Py_DECREF(<PyObject*>ob)
+    Py_DECREF(<object>ob)
 
 @cython.callspec("PyMPI_API_CALL")
 cdef int win_memory_del(MPI_Win w, int k, void *v, void *xs) nogil:
@@ -24,5 +24,5 @@ cdef int PyMPI_Win_memory_set(MPI_Win win, object memory):
     # hold a reference to the object exposing windows memory
     ierr = MPI_Win_set_attr(win, PyMPI_KEYVAL_WIN_MEMORY, <void*>memory)
     if ierr: return ierr
-    Py_INCREF(<PyObject*>memory)
+    Py_INCREF(memory)
     return MPI_SUCCESS

@@ -1,12 +1,11 @@
 # -----------------------------------------------------------------------------
 
 cdef extern from "Python.h":
-    ctypedef struct PyObject
-    void Py_INCREF(PyObject*)
-    void Py_DECREF(PyObject*)
     int Py_IsInitialized() nogil
     void PySys_WriteStderr(char*,...)
     int Py_AtExit(void (*)())
+    void Py_INCREF(object)
+    void Py_DECREF(object)
 
 # -----------------------------------------------------------------------------
 
@@ -184,8 +183,8 @@ cdef extern from *:
     void __Pyx_Raise(object, object, void*)
 
 cdef extern from *:
-    PyObject *PyExc_RuntimeError
-    PyObject *PyExc_NotImplementedError
+    void *PyExc_RuntimeError
+    void *PyExc_NotImplementedError
 
 cdef object MPIException = <object>PyExc_RuntimeError
 

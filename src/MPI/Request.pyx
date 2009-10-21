@@ -274,7 +274,7 @@ cdef class Grequest(Request):
         with nogil: CHKERR( MPI_Grequest_start(
             greq_query_fn, greq_free_fn, greq_cancel_fn,
             <void*>state, &request.ob_mpi) )
-        Py_INCREF(<PyObject*>state)
+        Py_INCREF(state)
         request.ob_grequest = request.ob_mpi
         return request
 
