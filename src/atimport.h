@@ -155,7 +155,11 @@ PyMPI_Allocate(Py_ssize_t n, void **pp)
     return NULL;
   }
 #if PY_VERSION_HEX >= 0x02060000
-  ob = PyByteArray_FromStringAndSize(NULL, n);
+  ob = PyByteArray_FromStringAndSize(NULL, (n==0) ? 1 : n);
+  if (ob && n==0 && (PyByteArray_Resize(ob, 0) < 0)) {
+    Py_DECREF(ob);
+    return NULL;
+  }
   if (ob && pp)
     *pp = (void *)PyByteArray_AS_STRING(ob);
 #else
