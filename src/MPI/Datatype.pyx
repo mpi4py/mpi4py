@@ -161,11 +161,9 @@ cdef class Datatype:
         """
         Create an indexed datatype
         """
-        cdef int count = len(displacements)
-        cdef int *iblen=NULL
-        tmp1 = asarray_int(blocklengths,  &iblen, count)
-        cdef int *idisp=NULL
-        tmp2 = asarray_int(displacements, &idisp, count)
+        cdef int count = 0, *iblen = NULL, *idisp = NULL
+        blocklengths  = getarray_int(blocklengths,  &count, &iblen)
+        displacements = chkarray_int(displacements,  count, &idisp)
         #
         cdef Datatype datatype = type(self)()
         CHKERR( MPI_Type_indexed(count, iblen, idisp,
@@ -177,9 +175,8 @@ cdef class Datatype:
         Create an indexed datatype
         with constant-sized blocks
         """
-        cdef int count = len(displacements)
-        cdef int *idisp=NULL
-        tmp2 = asarray_int(displacements, &idisp, count)
+        cdef int count = 0, *idisp = NULL
+        displacements = getarray_int(displacements, &count, &idisp)
         #
         cdef Datatype datatype = type(self)()
         CHKERR( MPI_Type_create_indexed_block(count, blocklength,
@@ -192,11 +189,10 @@ cdef class Datatype:
         Create an indexed datatype
         with displacements in bytes
         """
-        cdef int count = len(displacements)
-        cdef int *iblen=NULL
-        tmp1 = asarray_int(blocklengths, &iblen, count)
-        cdef MPI_Aint *idisp=NULL
-        tmp2 = asarray_Aint(displacements, &idisp, count)
+        cdef int count = 0, *iblen = NULL
+        blocklengths = getarray_int(blocklengths, &count, &iblen)
+        cdef MPI_Aint *idisp = NULL
+        displacements = asarray_Aint(displacements, &idisp, count)
         #
         cdef Datatype datatype = type(self)()
         CHKERR( MPI_Type_create_hindexed(count, iblen, idisp,
@@ -210,13 +206,11 @@ cdef class Datatype:
         Create a datatype for a subarray of
         a regular, multidimensional array
         """
-        cdef int ndims = len(sizes)
-        cdef int *isizes = NULL
-        tmp1 = asarray_int(sizes, &isizes, ndims)
-        cdef int *isubsizes = NULL
-        tmp2 = asarray_int(subsizes, &isubsizes, ndims)
-        cdef int *istarts = NULL
-        tmp3 = asarray_int(starts, &istarts, ndims)
+        cdef int ndims = 0, *isizes = NULL
+        cdef int *isubsizes = NULL, *istarts = NULL
+        sizes    = getarray_int(sizes,    &ndims, &isizes   )
+        subsizes = chkarray_int(subsizes,  ndims, &isubsizes)
+        starts   = chkarray_int(starts,    ndims, &istarts  )
         cdef int iorder = MPI_ORDER_C
         if order is not None: iorder = order
         #
@@ -234,15 +228,12 @@ cdef class Datatype:
         Create a datatype representing an HPF-like
         distributed array on Cartesian process grids
         """
-        cdef int ndims = len(gsizes)
-        cdef int *igsizes=NULL
-        tmp1 = asarray_int(gsizes, &igsizes, ndims)
-        cdef int *idistribs=NULL
-        tmp2 = asarray_int(distribs, &idistribs, ndims)
-        cdef int *idargs=NULL
-        tmp3 = asarray_int(dargs, &idargs, ndims)
-        cdef int *ipsizes=NULL
-        tmp4 = asarray_int(psizes, &ipsizes, ndims)
+        cdef int ndims = 0, *igsizes = NULL
+        cdef int *idistribs = NULL, *idargs = NULL, *ipsizes = NULL
+        gsizes   = getarray_int(gsizes,  &ndims, &igsizes   )
+        distribs = chkarray_int(distribs, ndims, &idistribs )
+        dargs    = chkarray_int(dargs,    ndims, &idargs    )
+        psizes   = chkarray_int(psizes,   ndims, &ipsizes   )
         cdef int iorder = MPI_ORDER_C
         if order is not None: iorder = order
         #
@@ -259,16 +250,15 @@ cdef class Datatype:
         Create an datatype from a general set of
         block sizes, displacements and datatypes
         """
-        cdef int count = len(displacements)
-        cdef int *iblen=NULL
-        tmp1 = asarray_int(blocklengths, &iblen, count)
-        cdef MPI_Aint *idisp=NULL
-        tmp2 = asarray_Aint(displacements, &idisp, count)
-        cdef MPI_Datatype *itype=NULL
-        tmp3 = asarray_Datatype(datatypes, &itype, count)
+        cdef int count = 0, *iblen = NULL
+        blocklengths = getarray_int(blocklengths, &count, &iblen)
+        cdef MPI_Aint *idisp = NULL
+        displacements = asarray_Aint(displacements, &idisp, count)
+        cdef MPI_Datatype *ptype = NULL
+        datatypes = asarray_Datatype(datatypes, &ptype, count)
         #
         cdef Datatype datatype = cls()
-        CHKERR( MPI_Type_create_struct(count, iblen, idisp, itype,
+        CHKERR( MPI_Type_create_struct(count, iblen, idisp, ptype,
                                        &datatype.ob_mpi) )
         return datatype
 
@@ -397,9 +387,9 @@ cdef class Datatype:
         cdef int *i = NULL
         cdef MPI_Aint *a = NULL
         cdef MPI_Datatype *d = NULL
-        cdef object tmp1 = allocate(ni*sizeof(int), <void**>&i)
-        cdef object tmp2 = allocate(na*sizeof(MPI_Aint), <void**>&a)
-        cdef object tmp3 = allocate(nd*sizeof(MPI_Datatype), <void**>&d)
+        cdef tmp1 = allocate(ni*sizeof(int), <void**>&i)
+        cdef tmp2 = allocate(na*sizeof(MPI_Aint), <void**>&a)
+        cdef tmp3 = allocate(nd*sizeof(MPI_Datatype), <void**>&d)
         CHKERR( MPI_Type_get_contents(self.ob_mpi, ni, na, nd, i, a, d) )
         cdef int k = 0
         cdef object integers  = [i[k] for k from 0 <= k < ni]
@@ -420,9 +410,9 @@ cdef class Datatype:
         cdef int *i = NULL
         cdef MPI_Aint *a = NULL
         cdef MPI_Datatype *d = NULL
-        cdef object tmp1 = allocate(ni*sizeof(int), <void**>&i)
-        cdef object tmp2 = allocate(na*sizeof(MPI_Aint), <void**>&a)
-        cdef object tmp3 = allocate(nd*sizeof(MPI_Datatype), <void**>&d)
+        cdef tmp1 = allocate(ni*sizeof(int), <void**>&i)
+        cdef tmp2 = allocate(na*sizeof(MPI_Aint), <void**>&a)
+        cdef tmp3 = allocate(nd*sizeof(MPI_Datatype), <void**>&d)
         CHKERR( MPI_Type_get_contents(self.ob_mpi, ni, na, nd, i, a, d) )
         # manage in advance the contained datatypes
         cdef int k = 0, s1, e1, s2, e2, s3, e3, s4, e4
@@ -580,8 +570,8 @@ cdef class Datatype:
         cdef MPI_Aint iblen = 0, oblen = 0
         cdef ob1 = asbuffer_r(inbuf,  &ibptr, &iblen)
         cdef ob2 = asbuffer_w(outbuf, &obptr, &oblen)
-        cdef int icount = <int>(iblen/extent)
-        cdef MPI_Aint osize = <int>oblen
+        cdef int icount = <int>(iblen/extent) # XXX overflow?
+        cdef MPI_Aint osize = oblen
         #
         CHKERR( MPI_Pack_external(cdatarep, ibptr, icount,
                                   self.ob_mpi,
@@ -603,7 +593,7 @@ cdef class Datatype:
         cdef ob1 = asbuffer_r(inbuf,  &ibptr, &iblen)
         cdef ob2 = asbuffer_w(outbuf, &obptr, &oblen)
         cdef MPI_Aint isize = iblen,
-        cdef int ocount = <int>(oblen/extent)
+        cdef int ocount = <int>(oblen/extent) # XXX overflow?
         #
         CHKERR( MPI_Unpack_external(cdatarep, ibptr, isize, &position,
                                     obptr, ocount, self.ob_mpi) )

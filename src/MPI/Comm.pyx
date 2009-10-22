@@ -849,12 +849,11 @@ cdef class Intracomm(Comm):
         """
         Create cartesian communicator
         """
-        cdef int ndims = len(dims)
-        cdef int *idims = NULL
-        cdef tmp1 = asarray_int(dims, &idims, ndims)
+        cdef int ndims = 0, *idims = NULL
+        dims = getarray_int(dims, &ndims, &idims)
         if periods is None: periods = [False] * ndims
         cdef int *iperiods = NULL
-        cdef tmp2 = asarray_int(periods, &iperiods, ndims)
+        periods = chkarray_int(periods, ndims, &iperiods)
         #
         cdef Cartcomm comm = Cartcomm()
         with nogil: CHKERR( MPI_Cart_create(
@@ -865,12 +864,10 @@ cdef class Intracomm(Comm):
         """
         Create graph communicator
         """
-        cdef int nnodes = len(index)
-        cdef int *iindex = NULL
-        cdef tmp1 = asarray_int(index, &iindex, nnodes)
-        cdef int nedges = len(edges)
-        cdef int *iedges = NULL
-        cdef tmp2 = asarray_int(edges, &iedges, nedges)
+        cdef int nnodes = 0, *iindex = NULL
+        index = getarray_int(index, &nnodes, &iindex)
+        cdef int nedges = 0, *iedges = NULL
+        edges = getarray_int(edges, &nedges, &iedges)
         # extension: 'standard' adjacency arrays
         if iindex[0]==0 and iindex[nnodes-1]==nedges:
             nnodes -= 1; iindex += 1;
@@ -890,17 +887,15 @@ cdef class Intracomm(Comm):
         cdef int outdegree = 0, *idest   = NULL
         cdef int *isourceweight = MPI_UNWEIGHTED
         cdef int *idestweight   = MPI_UNWEIGHTED
-        cdef object tmp1, tmp2, tmp3, tmp4
         if sources is not None:
-            indegree = len(sources)
-            tmp1 = asarray_int(sources, &isource, indegree)
+            sources = getarray_int(sources, &indegree, &isource)
         if sourceweights is not None:
-            tmp2 = asarray_int(sourceweights, &isourceweight, indegree)
+            sourceweights = chkarray_int(
+                sourceweights, indegree, &isourceweight)
         if destinations is not None:
-            outdegree = len(destinations)
-            tmp3 = asarray_int(destinations, &idest, outdegree)
+            destinations = getarray_int(destinations, &outdegree, &idest)
         if destweights is not None:
-            tmp4 = asarray_int(destweights, &idestweight, outdegree)
+            destweights = chkarray_int(destweights, outdegree, &idestweight)
         cdef MPI_Info cinfo = arg_Info(info)
         #
         cdef Distgraphcomm comm = Graphcomm()
@@ -918,16 +913,14 @@ cdef class Intracomm(Comm):
         Create distributed graph communicator
         """
         cdef int nv = 0, ne = 0, i = 0
-        cdef int *isource = NULL, *idegree = NULL, *idest = NULL
-        cdef int *iweight = MPI_UNWEIGHTED
-        cdef object tmp1, tmp2, tmp3, tmp4
-        nv = len(sources)
-        tmp1 = asarray_int(sources, &isource, nv)
-        tmp2 = asarray_int(degrees, &idegree, nv)
+        cdef int *isource = NULL, *idegree = NULL,
+        cdef int *idest = NULL, *iweight = MPI_UNWEIGHTED
+        sources = getarray_int(sources, &nv, &isource)
+        degrees = chkarray_int(degrees,  nv, &idegree)
         for i from 0 <= i < nv: ne += idegree[i]
-        tmp3 = asarray_int(destinations, &idest, ne)
+        destinations = chkarray_int(destinations, ne, &idest)
         if weights is not None:
-            tmp4 = asarray_int(weights, &iweight, ne)
+            weights = chkarray_int(weights, ne, &iweight)
         cdef MPI_Info cinfo = arg_Info(info)
         #
         cdef Distgraphcomm comm = Graphcomm()
@@ -1011,7 +1004,7 @@ cdef class Intracomm(Comm):
         #
         cdef int rank = MPI_UNDEFINED
         CHKERR( MPI_Comm_rank(self.ob_mpi, &rank) )
-        cdef object tmp1 = None, tmp2 = None
+        cdef tmp1 = None, tmp2 = None
         if root == rank:
             command = asmpistr(command, &cmd, NULL)
             if args is not None:
@@ -1155,11 +1148,9 @@ cdef class Cartcomm(Intracomm):
         """
         Translate logical coordinates to ranks
         """
-        cdef int ndim = 0
+        cdef int ndim = 0, *icoords = NULL
         CHKERR( MPI_Cartdim_get( self.ob_mpi, &ndim) )
-        #
-        cdef int *icoords = NULL
-        cdef tmp = asarray_int(coords, &icoords, ndim)
+        coords = chkarray_int(coords, ndim, &icoords)
         cdef int rank = MPI_PROC_NULL
         CHKERR( MPI_Cart_rank(self.ob_mpi, icoords, &rank) )
         return rank
@@ -1168,13 +1159,10 @@ cdef class Cartcomm(Intracomm):
         """
         Translate ranks to logical coordinates
         """
-        cdef int ndim = 0
+        cdef int ndim = 0, *icoords = NULL
         CHKERR( MPI_Cartdim_get(self.ob_mpi, &ndim) )
-        cdef int *icoords = NULL
-        cdef tmp = newarray_int(ndim, &icoords)
+        cdef object coords = newarray_int(ndim, &icoords)
         CHKERR( MPI_Cart_coords(self.ob_mpi, rank, ndim, icoords) )
-        cdef int i = 0
-        coords  = [icoords[i] for i from 0 <= i < ndim]
         return coords
 
     # Cartesian Shift Function
@@ -1197,10 +1185,9 @@ cdef class Cartcomm(Intracomm):
         Return cartesian communicators
         that form lower-dimensional subgrids
         """
-        cdef int ndim = 0
+        cdef int ndim = 0, *iremdims = NULL
         CHKERR( MPI_Cartdim_get(self.ob_mpi, &ndim) )
-        cdef int *iremdims = NULL
-        cdef tmp = asarray_int(remain_dims, &iremdims, ndim)
+        remain_dims = chkarray_int(remain_dims, ndim, &iremdims)
         cdef Cartcomm comm = Cartcomm()
         with nogil: CHKERR( MPI_Cart_sub(self.ob_mpi, iremdims, &comm.ob_mpi) )
         return comm
@@ -1214,15 +1201,14 @@ cdef class Cartcomm(Intracomm):
         Return an optimal placement for the
         calling process on the physical machine
         """
-        cdef int ndims = len(dims)
-        cdef int *idims = NULL
-        cdef tmp1 = asarray_int(dims, &idims, ndims)
+        cdef int ndims = 0, *idims = NULL, *iperiods = NULL
+        dims = getarray_int(dims, &ndims, &idims)
         if periods is None: periods = [False] * ndims
-        cdef int *iperiods = NULL
-        cdef tmp2 = asarray_int(periods, &iperiods, ndims)
+        periods = chkarray_int(periods, ndims, &iperiods)
         cdef int rank = MPI_PROC_NULL
         CHKERR( MPI_Cart_map(self.ob_mpi, ndims, idims, iperiods, &rank) )
         return rank
+
 
 # Cartesian Convenience Function
 
@@ -1231,13 +1217,15 @@ def Compute_dims(int nnodes, dims):
     Return a balanced distribution of
     processes per coordinate direction
     """
-    cdef int ndims, *idims = NULL
-    try: ndims = len(dims)
-    except: ndims = dims; dims = [0] * ndims
-    cdef tmp = asarray_int(dims, &idims, ndims)
+    cdef int ndims=0, *idims = NULL
+    try:
+        ndims = len(dims)
+    except:
+        ndims = dims
+        dims = [0] * ndims
+    dims = chkarray_int(dims, ndims, &idims)
     CHKERR( MPI_Dims_create(nnodes, ndims, idims) )
-    cdef int i = 0
-    return [idims[i] for i from 0 <= i < ndims]
+    return dims
 
 
 cdef class Graphcomm(Intracomm):
@@ -1360,12 +1348,10 @@ cdef class Graphcomm(Intracomm):
         Return an optimal placement for the
         calling process on the physical machine
         """
-        cdef int nnodes = len(index)
-        cdef int *iindex = NULL
-        cdef tmp1 = asarray_int(index, &iindex, nnodes)
-        cdef int nedges = len(edges)
-        cdef int *iedges = NULL
-        cdef tmp2 = asarray_int(edges, &iedges, nedges)
+        cdef int nnodes = 0, *iindex = NULL
+        index = getarray_int(index, &nnodes, &iindex)
+        cdef int nedges = 0, *iedges = NULL
+        edges = getarray_int(edges, &nedges, &iedges)
         # extension: accept more 'standard' adjacency arrays
         if iindex[0]==0 and iindex[nnodes-1]==nedges:
             nnodes -= 1; iindex += 1;

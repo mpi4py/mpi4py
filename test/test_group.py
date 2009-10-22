@@ -86,7 +86,7 @@ class BaseTestGroup(object):
         ranks1 = list(range(group1.Get_size())) * 3
         ranks2 = MPI.Group.Translate_ranks(group1, ranks1)
         ranks2 = MPI.Group.Translate_ranks(group1, ranks1, group2)
-        self.assertEqual(ranks1, ranks2)
+        self.assertEqual(list(ranks1), list(ranks2))
 
     def testTranslRanksProcNull(self):
         if self.GROUP == MPI.GROUP_EMPTY: return
@@ -94,7 +94,7 @@ class BaseTestGroup(object):
         group2 = self.GROUP
         ranks1 = [MPI.PROC_NULL] * 10
         ranks2 = MPI.Group.Translate_ranks(group1, ranks1, group2)
-        self.assertEqual(ranks1, ranks2)
+        self.assertEqual(list(ranks1), list(ranks2))
 
     def testTranslRanksGroupEmpty(self):
         if self.GROUP == MPI.GROUP_EMPTY: return

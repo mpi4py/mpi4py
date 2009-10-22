@@ -37,8 +37,8 @@ cdef class _p_Pickle:
             n[0] = 0
             return None
         cdef object buf = self.ob_dumps(obj, self.ob_PROTOCOL)
-        p[0] = PyMPIBytes_AsString(buf)
-        n[0] = PyMPIBytes_Size(buf) # XXX check overflow !!!
+        p[0] = <void*> PyMPIBytes_AsString(buf)
+        n[0] = <int>   PyMPIBytes_Size(buf) # XXX overflow?
         return buf
 
     cdef object alloc(self, void **p, int n):
@@ -295,9 +295,9 @@ cdef object PyMPI_gather(object sendobj, object recvobj,
         else:
             dosend=1; dorecv=0;
     #
-    cdef object tmp1=None, tmp2=None
-    if dorecv: tmp1 = newarray_int(size, &rcounts)
-    if dorecv: tmp2 = newarray_int(size, &rdispls)
+    cdef tmp1=None, tmp2=None
+    if dorecv: tmp1 = allocate_int(size, &rcounts)
+    if dorecv: tmp2 = allocate_int(size, &rdispls)
     #
     cdef object smsg = None
     if dosend: smsg = pickle.dump(sendobj, &sbuf, &scount)
@@ -344,9 +344,9 @@ cdef object PyMPI_scatter(object sendobj, object recvobj,
         else:
             dosend=0; dorecv=1;
     #
-    cdef object tmp1=None, tmp2=None
-    if dosend: tmp1 = newarray_int(size, &scounts)
-    if dosend: tmp2 = newarray_int(size, &sdispls)
+    cdef tmp1=None, tmp2=None
+    if dosend: tmp1 = allocate_int(size, &scounts)
+    if dosend: tmp2 = allocate_int(size, &sdispls)
     #
     cdef object smsg = None
     if dosend: smsg = pickle.dumpv(sendobj, &sbuf, size, scounts, sdispls)
@@ -381,8 +381,8 @@ cdef object PyMPI_allgather(object sendobj, object recvobj,
     else:
         CHKERR( MPI_Comm_size(comm, &size) )
     #
-    cdef object tmp1 = newarray_int(size, &rcounts)
-    cdef object tmp2 = newarray_int(size, &rdispls)
+    cdef tmp1 = allocate_int(size, &rcounts)
+    cdef tmp2 = allocate_int(size, &rdispls)
     #
     cdef object smsg = pickle.dump(sendobj, &sbuf, &scount)
     with nogil: CHKERR( MPI_Allgather(&scount, 1, MPI_INT,
@@ -416,10 +416,10 @@ cdef object PyMPI_alltoall(object sendobj, object recvobj,
     else:
         CHKERR( MPI_Comm_size(comm, &size) )
     #
-    cdef object stmp1 = newarray_int(size, &scounts)
-    cdef object stmp2 = newarray_int(size, &sdispls)
-    cdef object rtmp1 = newarray_int(size, &rcounts)
-    cdef object rtmp2 = newarray_int(size, &rdispls)
+    cdef object stmp1 = allocate_int(size, &scounts)
+    cdef object stmp2 = allocate_int(size, &sdispls)
+    cdef object rtmp1 = allocate_int(size, &rcounts)
+    cdef object rtmp2 = allocate_int(size, &rdispls)
     #
     cdef object smsg = pickle.dumpv(sendobj, &sbuf, size, scounts, sdispls)
     with nogil: CHKERR( MPI_Alltoall(scounts, 1, MPI_INT,

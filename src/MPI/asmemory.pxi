@@ -19,3 +19,11 @@ cdef extern from *:
     object tomemory"PyMPIMemory_FromMemory"(void *, MPI_Aint)
 
 #------------------------------------------------------------------------------
+
+cdef inline object allocate_int(int n, int **p):
+     cdef int *array = NULL
+     cdef object ob = allocate(n*sizeof(int), <void**>&array)
+     p[0] = array
+     return ob
+
+#------------------------------------------------------------------------------

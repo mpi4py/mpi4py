@@ -153,9 +153,8 @@ cdef class Request:
         cdef tmp1 = asarray_Request(requests, &irequests, incount)
         cdef MPI_Status *istatuses = MPI_STATUSES_IGNORE
         cdef tmp2 = asarray_Status(statuses, &istatuses, incount)
-        cdef int outcount = MPI_UNDEFINED
-        cdef int *iindices = NULL
-        cdef tmp3 = newarray_int(incount, &iindices)
+        cdef int outcount = MPI_UNDEFINED, *iindices = NULL
+        cdef object indices = newarray_int(incount, &iindices)
         #
         try:
             with nogil: CHKERR( MPI_Waitsome(
@@ -164,10 +163,10 @@ cdef class Request:
             restore_Request(requests, &irequests, incount)
             restore_Status(statuses, &istatuses, incount)
         #
-        cdef int i = 0
-        indices = []
-        if outcount != 0 and outcount != MPI_UNDEFINED:
-            indices = [iindices[i] for i from 0 <= i < outcount]
+        if outcount == MPI_UNDEFINED:
+            del indices[:]
+        else:
+            del indices[outcount:]
         return (outcount, indices)
 
     @classmethod
@@ -180,9 +179,8 @@ cdef class Request:
         cdef tmp1 = asarray_Request(requests, &irequests, incount)
         cdef MPI_Status *istatuses = MPI_STATUSES_IGNORE
         cdef tmp2 = asarray_Status(statuses, &istatuses, incount)
-        cdef int outcount = MPI_UNDEFINED
-        cdef int *iindices = NULL
-        cdef tmp3 = newarray_int(incount, &iindices)
+        cdef int outcount = MPI_UNDEFINED, *iindices = NULL
+        cdef object indices = newarray_int(incount, &iindices)
         #
         try:
             with nogil: CHKERR( MPI_Waitsome(
@@ -191,10 +189,10 @@ cdef class Request:
             restore_Request(requests, &irequests, incount)
             restore_Status(statuses, &istatuses, incount)
         #
-        cdef int i = 0
-        indices = []
-        if outcount != 0 and outcount != MPI_UNDEFINED:
-            indices = [iindices[i] for i from 0 <= i < outcount]
+        if outcount == MPI_UNDEFINED:
+            del indices[:]
+        else:
+            del indices[outcount:]
         return (outcount, indices)
 
     # Cancel

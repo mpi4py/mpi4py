@@ -56,7 +56,7 @@ cdef class Info:
         cdef char *cvalue = NULL
         cdef int flag = 0
         key = asmpistr(key, &ckey, NULL)
-        cdef object tmp = allocate((maxlen+1), <void**>&cvalue)
+        cdef tmp = allocate((maxlen+1), <void**>&cvalue)
         CHKERR( MPI_Info_get(self.ob_mpi, ckey, maxlen, cvalue, &flag) )
         cvalue[maxlen] = 0 # just in case
         if not flag: return None

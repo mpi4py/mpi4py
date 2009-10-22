@@ -229,7 +229,7 @@ cdef object message_vector(object msg,
         for i from 0 <= i < blocks:
             counts[i] = val
     else:
-        o_counts = asarray_int(o_counts, &counts, blocks)
+        o_counts = chkarray_int(o_counts, blocks, &counts)
     if o_displs is None: # contiguous
         val = 0
         o_displs = newarray_int(blocks, &displs)
@@ -242,7 +242,7 @@ cdef object message_vector(object msg,
         for i from 0 <= i < blocks:
             displs[i] = val * i
     else: # general
-        o_displs = asarray_int(o_displs, &displs, blocks)
+        o_displs = chkarray_int(o_displs, blocks, &displs)
     # return collected message data
     _addr[0]   = baddr
     _counts[0] = counts
@@ -601,7 +601,7 @@ cdef class _p_msg_cco:
         CHKERR( MPI_Comm_rank(comm, &rank) )
         # get receive counts and total sum
         cdef int i=0, sumrcounts=0
-        self._rcnt = asarray_int(rcnt, &self.rcounts, size)
+        self._rcnt = chkarray_int(rcnt, size, &self.rcounts)
         for i from 0 <= i < size:
             sumrcounts += self.rcounts[i]
         # get send and recv buffers

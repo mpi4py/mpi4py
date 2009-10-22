@@ -60,11 +60,9 @@ cdef class Group:
         """
         cdef MPI_Group grp1 = MPI_GROUP_NULL
         cdef MPI_Group grp2 = MPI_GROUP_NULL
-        cdef int i=0, n=len(ranks1)
-        cdef int *iranks1=NULL, *iranks2=NULL
-        cdef object tmp1 = newarray_int(n, &iranks1)
-        cdef object tmp2 = newarray_int(n, &iranks2)
-        for i from 0 <= i < n: iranks1[i] = ranks1[i]
+        cdef int n = 0, *iranks1 = NULL, *iranks2 = NULL
+        cdef object ranks_ = getarray_int(ranks1, &n, &iranks1)
+        cdef object ranks2 = newarray_int(n, &iranks2)
         #
         grp1 = group1.ob_mpi
         if group2 is not None:
@@ -78,7 +76,7 @@ cdef class Group:
             if group2 is None:
                 CHKERR( MPI_Group_free(&grp2) )
         #
-        return [iranks2[i] for i from 0 <= i < n]
+        return ranks2
 
     @classmethod
     def Compare(cls,
@@ -146,10 +144,8 @@ cdef class Group:
         Produce a group by reordering an existing
         group and taking only listed members
         """
-        cdef int *iranks=NULL
-        cdef int i=0, n=len(ranks)
-        cdef object tmp = newarray_int(n, &iranks)
-        for i from 0 <= i < n: iranks[i] = ranks[i]
+        cdef int n = 0, *iranks = NULL
+        ranks = getarray_int(ranks, &n, &iranks)
         cdef Group group = type(self)()
         CHKERR( MPI_Group_incl(self.ob_mpi, n, iranks, &group.ob_mpi) )
         return group
@@ -159,10 +155,8 @@ cdef class Group:
         Produce a group by reordering an existing
         group and taking only unlisted members
         """
-        cdef int *iranks=NULL
-        cdef int i=0, n=len(ranks)
-        cdef object tmp = newarray_int(n, &iranks)
-        for i from 0 <= i < n: iranks[i] = ranks[i]
+        cdef int n = 0, *iranks = NULL
+        ranks = getarray_int(ranks, &n, &iranks)
         cdef Group group = type(self)()
         CHKERR( MPI_Group_excl(self.ob_mpi, n, iranks, &group.ob_mpi) )
         return group
@@ -172,10 +166,10 @@ cdef class Group:
         Create a new group from ranges of
         of ranks in an existing group
         """
-        cdef int *p=NULL, (*ranges)[3]#= NULL ## XXX cython fails
+        cdef int *p = NULL, (*ranges)[3]# = NULL ## XXX cython fails
         ranges = NULL
-        cdef int i=0, n=len(ranks)
-        cdef object tmp1 = allocate(n*sizeof(int[3]), <void**>&ranges)
+        cdef int i = 0, n = len(ranks)
+        cdef tmp1 = allocate(n*sizeof(int[3]), <void**>&ranges)
         for i from 0 <= i < n:
             p = <int*> ranges[i]
             p[0], p[1], p[2] = ranks[i]
@@ -188,10 +182,10 @@ cdef class Group:
         Create a new group by excluding ranges
         of processes from an existing group
         """
-        cdef int *p=NULL, (*ranges)[3]#= NULL ## XXX cython fails
+        cdef int *p = NULL, (*ranges)[3]# = NULL ## XXX cython fails
         ranges = NULL
-        cdef int i=0, n=len(ranks)
-        cdef object tmp1 = allocate(n*sizeof(int[3]), <void**>&ranges)
+        cdef int i = 0, n = len(ranks)
+        cdef tmp1 = allocate(n*sizeof(int[3]), <void**>&ranges)
         for i from 0 <= i < n:
             p = <int*> ranges[i]
             p[0], p[1], p[2] = ranks[i]
