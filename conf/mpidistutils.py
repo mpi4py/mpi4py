@@ -5,7 +5,7 @@
 Support for building mpi4py with distutils.
 """
 
-# --------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # Environmental variables to look for configuration
 MPICC_ENV  = ['MPICC']
@@ -19,7 +19,7 @@ MPICXX = ['mpicxx', 'mpic++', 'mpiCC']
 MPILD  = MPICC + MPICXX
 MPICFG = ('mpi', 'mpi.cfg')
 
-# --------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 import sys
 if sys.version[:3] == '3.0':
@@ -28,7 +28,7 @@ if sys.version[:3] == '3.0':
     del version
 del sys
 
-# --------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 import sys, os, re
 from distutils import sysconfig
@@ -36,7 +36,6 @@ from distutils.util  import convert_path
 from distutils.util  import split_quoted
 from distutils.spawn import find_executable
 from distutils import log
-
 
 def fix_config_vars(names, values):
     values = list(values)
@@ -102,7 +101,7 @@ def customize_compiler(compiler,
     if compiler.compiler_type == 'unix':
         # Distutils configuration, actually obtained by parsing
         # :file:{prefix}/lib[32|64]/python{X}.{Y}/config/Makefile
-        (cc, cxx, ccshared, 
+        (cc, cxx, ccshared,
          basecflags, optcflags,
          ld_so, so_ext) = \
          get_config_vars('CC', 'CXX', 'CCSHARED',
@@ -139,8 +138,8 @@ def customize_compiler(compiler,
             ldflags  = ldflags  + ' ' + LDFLAGS
         basecflags = environ.get('BASECFLAGS', basecflags)
         optcflags  = environ.get('OPTCFLAGS',  optcflags)
-        cflags     = (basecflags + ' ' + 
-                      optcflags  + ' ' + 
+        cflags     = (basecflags + ' ' +
+                      optcflags  + ' ' +
                       cflags)
         # Distutils compiler setup
         cpp    = os.environ.get('CPP') or (cc + ' -E')
@@ -156,7 +155,6 @@ def customize_compiler(compiler,
             linker_exe   = ld_exe + ' ' + ldflags,
             )
         compiler.shared_lib_extension = so_ext
-
 
 def find_mpi_compiler(name,
                       envvars,
@@ -207,7 +205,7 @@ def find_mpi_compiler(name,
     # nothing found
     return None
 
-# --------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 try:
     from ConfigParser import ConfigParser
@@ -293,7 +291,6 @@ def find_mpi_config(section, envvars=None, defaults=None):
     else:
         return section, filenames, None
 
-
 def _configure(extension, confdict):
     if confdict is None: return
     for key, value in confdict.items():
@@ -309,6 +306,42 @@ def _configure(extension, confdict):
                         item.append(value)
             else:
                 setattr(extension, key, value)
+
+# -----------------------------------------------------------------------------
+
+def configuration(command, verbose=True):
+        section, filenames, config_info = \
+            find_mpi_config(command.mpi, MPICFG_ENV, MPICFG)
+        if config_info and verbose:
+            log.info("MPI configuration: "
+                     "from section '%s' in file/s '%s'",
+                     section, filenames)
+        return config_info
+
+
+def configure_compiler(compiler, command, config_info, verbose=True):
+    #
+    mpicc = find_mpi_compiler(
+        'mpicc', MPICC_ENV, command, config_info, None, MPICC)
+    if verbose:
+        log.info("MPI C compiler:    %s", mpicc or 'not found')
+    #
+    mpicxx = find_mpi_compiler(
+        'mpicxx', MPICXX_ENV, command, config_info, None, MPICXX)
+    if verbose:
+        log.info("MPI C++ compiler:  %s", mpicxx or 'not found')
+    #
+    mpild = mpicc or mpicxx # default
+    mpild = find_mpi_compiler(
+        'mpild', MPILD_ENV, command, config_info, mpild, MPILD)
+    if verbose:
+        log.info("MPI linker:        %s", mpild or 'not found')
+    #
+    customize_compiler(compiler,
+                       mpicc=mpicc,
+                       mpicxx=mpicxx,
+                       mpild=mpild)
+    return compiler
 
 # --------------------------------------------------------------------
 
@@ -344,7 +377,7 @@ class Configure(Scanner):
         log.info("writing '%s'", missing_h)
         self.dump_missing_h(missing_h, None)
 
-# --------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 cmd_mpi_opts = [
 
@@ -385,18 +418,17 @@ def cmd_get_mpi_options(cmd_opts):
         optlist.append(option)
     return optlist
 
-
-def cmd_initialize_mpi_options(self):
+def cmd_initialize_mpi_options(cmd):
     mpiopts = cmd_get_mpi_options(cmd_mpi_opts)
     for op in mpiopts:
-        setattr(self, op, None)
+        setattr(cmd, op, None)
 
-def cmd_set_undefined_mpi_options(self, basecmd):
+def cmd_set_undefined_mpi_options(cmd, basecmd):
     mpiopts = cmd_get_mpi_options(cmd_mpi_opts)
     optlist = tuple(zip(mpiopts, mpiopts))
-    self.set_undefined_options(basecmd, *optlist)
+    cmd.set_undefined_options(basecmd, *optlist)
 
-# --------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 from distutils.core import setup as fcn_setup
 from distutils.core import Distribution as cls_Distribution
@@ -416,7 +448,7 @@ from distutils.errors import DistutilsSetupError
 from distutils.errors import DistutilsPlatformError
 from distutils.errors import DistutilsOptionError
 
-# --------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # Distribution class supporting a 'executables' keyword
 
@@ -462,7 +494,7 @@ def setup(**attrs):
             cmdclass[cmd.__name__] = cmd
     return fcn_setup(**attrs)
 
-# --------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # A minimalistic MPI program :-)
 
@@ -492,16 +524,11 @@ class config(cmd_config.config):
         # test configuration in specified section and file
         #config = None
         #if self.mpi:
-        section, filename, config = \
-            find_mpi_config(self.mpi, MPICFG_ENV, MPICFG)
-        if config:
-            log.info("MPI configuration: "
-                     "section '%s' from file/s '%s'",
-                     section, filename)
-            _configure(self, config)
+        config_info = configuration(self, verbose=True)
+        _configure(self, config_info)
         # test MPI C compiler
         mpicc = find_mpi_compiler(
-            'mpicc', MPICC_ENV, self, config, None, MPICC)
+            'mpicc', MPICC_ENV, self, config_info, None, MPICC)
         log.info("MPI C compiler:    %s", mpicc  or 'not found')
         self.compiler = getattr(self.compiler, 'compiler_type',
                                 self.compiler)
@@ -511,7 +538,7 @@ class config(cmd_config.config):
         self.try_link(ConfigTest, headers=['mpi.h'], lang='c')
         # test MPI C++ compiler
         mpicxx = find_mpi_compiler(
-            'mpicxx', MPICXX_ENV, self, config, None, MPICXX)
+            'mpicxx', MPICXX_ENV, self, config_info, None, MPICXX)
         log.info("MPI C++ compiler:  %s", mpicxx or 'not found')
         self.compiler = getattr(self.compiler, 'compiler_type',
                                 self.compiler)
@@ -572,7 +599,7 @@ class config(cmd_config.config):
                              library_dirs=self.library_dirs,
                              lang=lang)
 
-# --------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 class build(cmd_build.build):
 
@@ -599,105 +626,105 @@ class build(cmd_build.build):
     # XXX disable build_exe subcommand !!!
     del sub_commands[-1]
 
-# --------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 class build_py(cmd_build_py.build_py):
 
-    if sys.version[:3] < '2.4':
+  if sys.version[:3] < '2.4':
 
-        def initialize_options(self):
-            self.package_data = None
-            cmd_build_py.build_py.initialize_options(self)
+    def initialize_options(self):
+        self.package_data = None
+        cmd_build_py.build_py.initialize_options(self)
 
-        def finalize_options (self):
-            cmd_build_py.build_py.finalize_options(self)
-            self.package_data = self.distribution.package_data
-            self.data_files = self.get_data_files()
+    def finalize_options (self):
+        cmd_build_py.build_py.finalize_options(self)
+        self.package_data = self.distribution.package_data
+        self.data_files = self.get_data_files()
 
-        def run(self):
-            cmd_build_py.build_py.run(self)
-            if self.packages:
-                self.build_package_data()
+    def run(self):
+        cmd_build_py.build_py.run(self)
+        if self.packages:
+            self.build_package_data()
 
-        def get_data_files (self):
-            """Generate list of '(package,src_dir,build_dir,filenames)' tuples"""
-            data = []
-            if not self.packages:
-                return data
-            for package in self.packages:
-                # Locate package source directory
-                src_dir = self.get_package_dir(package)
-
-                # Compute package build directory
-                build_dir = os.path.join(*([self.build_lib] + package.split('.')))
-
-                # Length of path to strip from found files
-                plen = len(src_dir)+1
-
-                # Strip directory from globbed filenames
-                filenames = [
-                    file[plen:] for file in self.find_data_files(package, src_dir)
-                    ]
-                data.append((package, src_dir, build_dir, filenames))
+    def get_data_files (self):
+        """Generate list of '(package,src_dir,build_dir,filenames)' tuples"""
+        data = []
+        if not self.packages:
             return data
+        for package in self.packages:
+            # Locate package source directory
+            src_dir = self.get_package_dir(package)
 
-        def find_data_files (self, package, src_dir):
-            """Return filenames for package's data files in 'src_dir'"""
-            from glob import glob
-            globs = (self.package_data.get('', [])
-                     + self.package_data.get(package, []))
-            files = []
-            for pattern in globs:
-                # Each pattern has to be converted to a platform-specific path
-                filelist = glob(os.path.join(src_dir, convert_path(pattern)))
-                # Files that match more than one pattern are only added once
-                files.extend([fn for fn in filelist if fn not in files])
-            return files
+            # Compute package build directory
+            build_dir = os.path.join(*([self.build_lib] + package.split('.')))
 
-        def get_package_dir (self, package):
-            """Return the directory, relative to the top of the source
-               distribution, where package 'package' should be found
-               (at least according to the 'package_dir' option, if any)."""
-            import string
-            path = string.split(package, '.')
+            # Length of path to strip from found files
+            plen = len(src_dir)+1
 
-            if not self.package_dir:
-                if path:
-                    return apply(os.path.join, path)
+            # Strip directory from globbed filenames
+            filenames = [
+                file[plen:] for file in self.find_data_files(package, src_dir)
+                ]
+            data.append((package, src_dir, build_dir, filenames))
+        return data
+
+    def find_data_files (self, package, src_dir):
+        """Return filenames for package's data files in 'src_dir'"""
+        from glob import glob
+        globs = (self.package_data.get('', [])
+                 + self.package_data.get(package, []))
+        files = []
+        for pattern in globs:
+            # Each pattern has to be converted to a platform-specific path
+            filelist = glob(os.path.join(src_dir, convert_path(pattern)))
+            # Files that match more than one pattern are only added once
+            files.extend([fn for fn in filelist if fn not in files])
+        return files
+
+    def get_package_dir (self, package):
+        """Return the directory, relative to the top of the source
+           distribution, where package 'package' should be found
+           (at least according to the 'package_dir' option, if any)."""
+        import string
+        path = string.split(package, '.')
+
+        if not self.package_dir:
+            if path:
+                return apply(os.path.join, path)
+            else:
+                return ''
+        else:
+            tail = []
+            while path:
+                try:
+                    pdir = self.package_dir[string.join(path, '.')]
+                except KeyError:
+                    tail.insert(0, path[-1])
+                    del path[-1]
+                else:
+                    tail.insert(0, pdir)
+                    return apply(os.path.join, tail)
+            else:
+                pdir = self.package_dir.get('')
+                if pdir is not None:
+                    tail.insert(0, pdir)
+
+                if tail:
+                    return apply(os.path.join, tail)
                 else:
                     return ''
-            else:
-                tail = []
-                while path:
-                    try:
-                        pdir = self.package_dir[string.join(path, '.')]
-                    except KeyError:
-                        tail.insert(0, path[-1])
-                        del path[-1]
-                    else:
-                        tail.insert(0, pdir)
-                        return apply(os.path.join, tail)
-                else:
-                    pdir = self.package_dir.get('')
-                    if pdir is not None:
-                        tail.insert(0, pdir)
 
-                    if tail:
-                        return apply(os.path.join, tail)
-                    else:
-                        return ''
+    def build_package_data (self):
+        """Copy data files into build directory"""
+        lastdir = None
+        for package, src_dir, build_dir, filenames in self.data_files:
+            for filename in filenames:
+                target = os.path.join(build_dir, filename)
+                self.mkpath(os.path.dirname(target))
+                self.copy_file(os.path.join(src_dir, filename), target,
+                               preserve_mode=False)
 
-        def build_package_data (self):
-            """Copy data files into build directory"""
-            lastdir = None
-            for package, src_dir, build_dir, filenames in self.data_files:
-                for filename in filenames:
-                    target = os.path.join(build_dir, filename)
-                    self.mkpath(os.path.dirname(target))
-                    self.copy_file(os.path.join(src_dir, filename), target,
-                                   preserve_mode=False)
-
-# --------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 class build_ext(cmd_build_ext.build_ext):
 
@@ -709,34 +736,35 @@ class build_ext(cmd_build_ext.build_ext):
 
     def finalize_options(self):
         cmd_build_ext.build_ext.finalize_options(self)
-        if (sys.platform.startswith('linux') or \
-            sys.platform.startswith('gnu')) and \
-            sysconfig.get_config_var('Py_ENABLE_SHARED'):
-            try:
-                py_version = sysconfig.get_python_version()
-                bad_pylib_dir = os.path.join(sys.prefix, "lib",
-                                             "python" + py_version,
-                                             "config")
-                self.library_dirs.remove(bad_pylib_dir)
-            except ValueError:
-                pass
-            pylib_dir = sysconfig.get_config_var("LIBDIR")
-            if pylib_dir not in self.library_dirs:
-                self.library_dirs.append(pylib_dir)
         build_cmd = self.get_finalized_command('build')
         if isinstance(build_cmd,  build):
             cmd_set_undefined_mpi_options(self, 'build')
+        #
+        if ((sys.platform.startswith('linux') or
+             sys.platform.startswith('gnu')) and
+            sysconfig.get_config_var('Py_ENABLE_SHARED')):
+            py_version = sysconfig.get_python_version()
+            bad_pylib_dir = os.path.join(sys.prefix, "lib",
+                                         "python" + py_version,
+                                         "config")
+            pylib_dir = sysconfig.get_config_var("LIBDIR")
+            try:
+                self.library_dirs.remove(bad_pylib_dir)
+            except ValueError:
+                pass
+            if pylib_dir not in self.library_dirs:
+                self.library_dirs.append(pylib_dir)
 
     def build_extensions(self):
         # First, sanity-check the 'extensions' list
         self.check_extensions_list(self.extensions)
-        # parse configuration file and  configure compiler
-        config_info = self.configure_extensions()
-        try: # Py2.7+ & Py3.2+ 
+        # parse configuration file and configure compiler
+        config_info = configuration(self)
+        try: # Py2.7+ & Py3.2+
             compiler_obj = self.compiler_obj
         except AttributeError:
             compiler_obj = self.compiler
-        self.configure_compiler(compiler_obj, config_info)
+        configure_compiler(compiler_obj, self, config_info)
         # extra configuration, MPI 2 features
         if self.configure:
             config_cmd = self.get_finalized_command('config')
@@ -748,45 +776,13 @@ class build_ext(cmd_build_ext.build_ext):
                 compiler_obj.define_macro(macro, None)
         # and finally build extensions
         for ext in self.extensions:
+            self.config_extension(ext, config_info)
             self.build_extension(ext)
 
-    def configure_compiler(self, compiler, config):
-        #
-        mpicc = find_mpi_compiler(
-            'mpicc', MPICC_ENV, self, config, None, MPICC)
-        log.info("MPI C compiler:    %s", mpicc or 'not found')
-        #
-        mpicxx = find_mpi_compiler(
-            'mpicxx', MPICXX_ENV, self, config, None, MPICXX)
-        log.info("MPI C++ compiler:  %s", mpicxx or 'not found')
-        #
-        mpild = mpicc or mpicxx # default
-        mpild = find_mpi_compiler(
-            'mpild', MPILD_ENV, self, config, mpild, MPILD)
-        log.info("MPI linker:        %s", mpild or 'not found')
-        #
-        customize_compiler(compiler,
-                           mpicc=mpicc,
-                           mpicxx=mpicxx,
-                           mpild=mpild)
-        return compiler
+    def config_extension(self, ext, config_info):
+        _configure(ext, config_info)
 
-    def configure_extensions(self):
-        section, filenames, config = \
-            find_mpi_config(self.mpi, MPICFG_ENV, MPICFG)
-        if config:
-            log.info("MPI configuration: "
-                     "from section '%s' in file/s '%s'",
-                     section, filenames)
-            for ext in self.extensions:
-                self.configure_extension(ext, config)
-        return config
-
-    def configure_extension(self, extension, config):
-        _configure(extension, config)
-
-
-# --------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # Command class to build executables
 
@@ -863,7 +859,7 @@ class build_exe(build_ext):
 
         # Next, compile the source code to object files.
 
-        try: # Py2.7+ & Py3.2+ 
+        try: # Py2.7+ & Py3.2+
             compiler_obj = self.compiler_obj
         except AttributeError:
             compiler_obj = self.compiler
@@ -943,7 +939,7 @@ class build_exe(build_ext):
             debug=self.debug,
             target_lang=language)
 
-# --------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 class install(cmd_install.install):
 
@@ -958,7 +954,7 @@ class install(cmd_install.install):
     # XXX disable install_exe subcommand !!!
     del sub_commands[-1]
 
-# --------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 class install_data (cmd_install_data.install_data):
 
@@ -969,7 +965,7 @@ class install_data (cmd_install_data.install_data):
                                    ('force', 'force'),
                                    )
 
-# --------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 class install_exe(cmd_install_lib.install_lib):
 
@@ -1026,7 +1022,7 @@ class install_exe(cmd_install_lib.install_lib):
             inputs.extend(build_exe.get_outputs())
         return inputs
 
-# --------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 class clean(cmd_clean.clean):
 
@@ -1049,6 +1045,7 @@ class clean(cmd_clean.clean):
 
     def run(self):
         from distutils.dir_util import remove_tree
+
         # remove the build/temp.<plat> directory
         # (unless it's already gone)
         if os.path.exists(self.build_temp):
