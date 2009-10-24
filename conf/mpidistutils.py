@@ -233,8 +233,9 @@ def _config_parser(section, filenames, raw=False, vars=None):
     config_info = {}
     for k, v in parser.items(section, raw, vars):
         if k in ('define_macros',
-                 'undef_macros',):
-            config_info[k] = [m.strip() for m in v.split()]
+                 'undef_macros',
+                 'libraries'):
+            config_info[k] = [e.strip() for e in split_quoted(v)]
         elif k in ('include_dirs',
                    'library_dirs',
                    'runtime_library_dirs',):
@@ -244,19 +245,20 @@ def _config_parser(section, filenames, raw=False, vars=None):
             expandvars = os.path.expandvars
             config_info[k] = [expanduser(expandvars(p))
                               for p in pathlist if p]
-        elif k == 'libraries':
-            config_info[k] = [l.strip() for l in v.split()]
+        elif k == 'extra_objects':
+            expanduser = os.path.expanduser
+            expandvars = os.path.expandvars
+            config_info[k] = [expanduser(expandvars(e))
+                              for e in split_quoted(v)]
         elif k in ('extra_compile_args',
-                   'extra_link_args',
-                   'extra_objects',):
-            config_info[k] = [e.strip() for e in v.split()]
+                   'extra_link_args'):
+            config_info[k] = split_quoted(v)
         else:
             config_info[k] = v.strip()
-        #config_info[k] = v.replace('\\',' ').split()
     if 'define_macros' in config_info:
         macros = []
         for m in config_info['define_macros'] :
-            try: # "-DFOO=blah"
+            try: # "-DFOO=bar"
                 idx = m.index('=')
                 macro = (m[:idx], m[idx+1:] or None)
             except ValueError: # bare "-DFOO"
@@ -291,56 +293,55 @@ def find_mpi_config(section, envvars=None, defaults=None):
     else:
         return section, filenames, None
 
-def _configure(extension, confdict):
-    if confdict is None: return
-    for key, value in confdict.items():
-        if hasattr(extension, key):
-            item = getattr(extension, key)
-            if type(item) is list:
-                if type(value) is list:
-                    for v in value:
-                        if v not in item:
-                            item.append(v)
-                else:
-                    if value not in item:
-                        item.append(value)
-            else:
-                setattr(extension, key, value)
-
 # -----------------------------------------------------------------------------
 
-def configuration(command, verbose=True):
+def configuration(command_obj, verbose=True):
         section, filenames, config_info = \
-            find_mpi_config(command.mpi, MPICFG_ENV, MPICFG)
+            find_mpi_config(command_obj.mpi, MPICFG_ENV, MPICFG)
         if config_info and verbose:
             log.info("MPI configuration: "
-                     "from section '%s' in file/s '%s'",
+                     "from section '[%s]' in file/s '%s'",
                      section, filenames)
+        if config_info is None:
+            config_info = {}
         return config_info
 
 
-def configure_compiler(compiler, command, config_info, verbose=True):
+def configure_compiler(compiler, config_info, command_obj=None, verbose=True):
     #
     mpicc = find_mpi_compiler(
-        'mpicc', MPICC_ENV, command, config_info, None, MPICC)
+        'mpicc', MPICC_ENV, command_obj, config_info, None, MPICC)
     if verbose:
         log.info("MPI C compiler:    %s", mpicc or 'not found')
     #
     mpicxx = find_mpi_compiler(
-        'mpicxx', MPICXX_ENV, command, config_info, None, MPICXX)
+        'mpicxx', MPICXX_ENV, command_obj, config_info, None, MPICXX)
     if verbose:
         log.info("MPI C++ compiler:  %s", mpicxx or 'not found')
     #
     mpild = mpicc or mpicxx # default
     mpild = find_mpi_compiler(
-        'mpild', MPILD_ENV, command, config_info, mpild, MPILD)
+        'mpild', MPILD_ENV, command_obj, config_info, mpild, MPILD)
     if verbose:
         log.info("MPI linker:        %s", mpild or 'not found')
     #
-    customize_compiler(compiler,
-                       mpicc=mpicc,
-                       mpicxx=mpicxx,
-                       mpild=mpild)
+    customize_compiler(compiler, mpicc=mpicc, mpicxx=mpicxx, mpild=mpild)
+    #
+    if config_info:
+        for k, v in config_info.get('define_macros', []):
+            compiler.define_macro(k, v)
+        for v in config_info.get('undef_macros', []):
+            compiler.undefine_macro(v)
+        for v in config_info.get('include_dirs', []):
+            compiler.add_include_dir(v)
+        for v in config_info.get('libraries', []):
+            compiler.add_library(v)
+        for v in config_info.get('library_dirs', []):
+            compiler.add_library_dir(v)
+        for v in config_info.get('runtime_library_dirs', []):
+            compiler.add_runtime_library_dir(v)
+        for v in config_info.get('extra_objects', []):
+            compiler.add_link_object(v)
     return compiler
 
 # --------------------------------------------------------------------
@@ -513,8 +514,8 @@ class config(cmd_config.config):
 
     def initialize_options(self):
         cmd_config.config.initialize_options(self)
-        self.noisy = 0
         cmd_initialize_mpi_options(self)
+        self.noisy = 0
 
     def finalize_options(self):
         cmd_config.config.finalize_options(self)
@@ -558,7 +559,6 @@ class config(cmd_config.config):
         self._check_compiler()
         self.compiler = compiler_obj
         self._check_compiler()
-        _configure(self, config_info)
 
     def run(self):
         ## self._check_compiler()
@@ -568,9 +568,9 @@ class config(cmd_config.config):
         ##     'mpicc', MPICC_ENV, self, config_info, None, MPICC)
         ## log.info("MPI C compiler:    %s", mpicc  or 'not found')
         ## customize_compiler(compiler_obj, mpicc=mpicc, mpicxx=None)
-        ## 
+        ##
         ## self.compiler = compiler_obj.compiler_type
-        ## 
+        ##
         ## self.setup_compiler(compiler_obj, config_info)
         ## #self.check_header('mpe.h')
         ## #self.check_lib('mpe')
@@ -580,10 +580,7 @@ class config(cmd_config.config):
         ## return
 
         # test configuration in specified section and file
-        #config = None
-        #if self.mpi:
         config_info = configuration(self, verbose=True)
-        _configure(self, config_info)
         # test MPI C compiler
         mpicc = find_mpi_compiler(
             'mpicc', MPICC_ENV, self, config_info, None, MPICC)
@@ -614,7 +611,6 @@ class config(cmd_config.config):
 
     def run_configtests(self, compiler, config_info):
         self.compiler = compiler
-        _configure(self, config_info)
         configure = Configure()
         results = []
         for name, code in configure.itertests():
@@ -811,19 +807,22 @@ class build_clib(cmd_build_clib.build_clib):
         #
         self.library_dirs = []
         self.runtime_library_dirs = []
-        #
         self.set_undefined_options('build',
                                    ('build_lib', 'build_clib_so'))
+        #
+        self.check_library_list (self.libraries)
         for library in self.libraries:
             lib_name, build_info = library
             if not build_info.get('shared'):
                 self.libraries_a.append(library)
             else:
                 self.libraries_so.append(library)
+         # XXX This is a hack
         self.libraries[:] = self.libraries_a
 
     def run (self):
         if (not self.libraries and
+            not self.libraries_a and
             not self.libraries_so):
             return
         #
@@ -831,13 +830,6 @@ class build_clib(cmd_build_clib.build_clib):
         self.compiler = new_compiler(compiler=self.compiler,
                                      dry_run=self.dry_run,
                                      force=self.force)
-        #
-        config_info = configuration(self)
-        try: # Py2.7+ & Py3.2+
-            compiler_obj = self.compiler_obj
-        except AttributeError:
-            compiler_obj = self.compiler
-        configure_compiler(compiler_obj, self, config_info)
         #
         if self.define is not None:
             for (name,value) in self.define:
@@ -852,10 +844,19 @@ class build_clib(cmd_build_clib.build_clib):
             self.compiler.set_library_dirs(self.library_dirs)
         for lib_dir in self.get_library_dirs():
             self.compiler.add_library_dir(lib_dir)
-
+        #
+        config_info = configuration(self)
+        try: # Py2.7+ & Py3.2+
+            compiler_obj = self.compiler_obj
+        except AttributeError:
+            compiler_obj = self.compiler
+        configure_compiler(compiler_obj, config_info, self)
+        #
         if self.libraries:
+            self.config_static_libraries(self.libraries, config_info)
             self.build_static_libraries(self.libraries)
         if self.libraries_so:
+            self.config_shared_libraries(self.libraries_so, config_info)
             self.build_shared_libraries(self.libraries_so)
 
     def get_library_dirs (self):
@@ -879,19 +880,34 @@ class build_clib(cmd_build_clib.build_clib):
                     "'sources' must be present and must be " +
                     "a list of source filenames") % lib_name
 
+    def config_static_libraries (self, libraries):
+        for (lib_name, build_info) in libraries:
+            for attr in ('extra_compile_args',):
+                extra_args = config_info.get(attr)
+                if extra_args:
+                    build_info.setdefault(attr,[]).extend(extra_args)
+
+    def config_shared_libraries (self, libraries, config_info):
+        for (lib_name, build_info) in libraries:
+            for attr in ('extra_compile_args',
+                         'extra_link_args'):
+                extra_args = config_info.get(attr)
+                if extra_args:
+                    build_info.setdefault(attr,[]).extend(extra_args)
+
     def build_static_libraries (self, libraries):
         cmd_build_clib.build_clib.build_libraries(self, libraries)
 
+
     def build_shared_libraries (self, libraries):
         from distutils.dep_util import newer_group
-        ListType, TupleType = type([]), type(())
+
+        try: # Py2.7+ & Py3.2+
+            compiler_obj = self.compiler_obj
+        except AttributeError:
+            compiler_obj = self.compiler
+
         for (lib_name, build_info) in libraries:
-
-            try: # Py2.7+ & Py3.2+
-                compiler_obj = self.compiler_obj
-            except AttributeError:
-                compiler_obj = self.compiler
-
             sources = list(build_info.get('sources',[]))
             depends = sources + list(build_info.get('depends',[]))
             target_dir = build_info.get('target_dir', '')
@@ -987,7 +1003,7 @@ class build_ext(cmd_build_ext.build_ext):
             compiler_obj = self.compiler_obj
         except AttributeError:
             compiler_obj = self.compiler
-        configure_compiler(compiler_obj, self, config_info)
+        configure_compiler(compiler_obj, config_info, self)
         # extra configuration, MPI 2 features
         if self.configure:
             config_cmd = self.get_finalized_command('config')
@@ -1003,7 +1019,12 @@ class build_ext(cmd_build_ext.build_ext):
             self.build_extension(ext)
 
     def config_extension(self, ext, config_info):
-        _configure(ext, config_info)
+        extra_args = config_info.get('extra_compile_args')
+        if extra_args:
+            ext.extra_compile_args.extend(extra_args)
+        extra_args = config_info.get('extra_link_args')
+        if extra_args:
+            ext.extra_link_args.extend(extra_args)
 
 # -----------------------------------------------------------------------------
 
@@ -1037,7 +1058,7 @@ class build_exe(build_ext):
             self.build_exe = os.path.join(self.build_base,
                                           'exe' + plat_specifier)
         self.executables = self.distribution.executables
-        # a bit of hack
+        # XXX This is a hack
         self.extensions  = self.distribution.executables
         self.check_extensions_list = self.check_executables_list
         self.build_extension = self.build_executable
