@@ -122,7 +122,7 @@ def ext_modules():
                libraries=['_mpe'],
                runtime_library_dirs=["${ORIGIN}/lib"],
                )
-    return [MPI, MPE]#[:1]
+    return [MPI, MPE][:1]
 
 def libraries():
     mpe = dict(name='_mpe', shared=True,
@@ -145,7 +145,7 @@ def libraries():
                 )
     mpe  = ( mpe['name'],  mpe)
     lmpe = (lmpe['name'], lmpe)
-    return [mpe, lmpe]#[:0]
+    return [mpe, lmpe][:0]
 
 def executables():
     import sys
