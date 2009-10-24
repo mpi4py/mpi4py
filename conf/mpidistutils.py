@@ -440,6 +440,7 @@ from distutils.command import install as cmd_install
 from distutils.command import clean as cmd_clean
 
 from distutils.command import build_py as cmd_build_py
+from distutils.command import build_clib as cmd_build_clib
 from distutils.command import build_ext as cmd_build_ext
 from distutils.command import install_data as cmd_install_data
 from distutils.command import install_lib as cmd_install_lib
@@ -487,7 +488,7 @@ def setup(**attrs):
         attrs['cmdclass'] = {}
     cmdclass = attrs['cmdclass']
     for cmd in (config, build, install, clean,
-                build_py, build_ext, build_exe,
+                build_py, build_clib, build_ext, build_exe,
                 install_data, install_exe,
                 ):
         if cmd.__name__ not in cmdclass:
@@ -520,7 +521,64 @@ class config(cmd_config.config):
         if not self.noisy:
             self.dump_source = 0
 
+    def check_header (self, header, include_dirs=None, lang="c"):
+        log.info("checking for header '%s' ..." % header)
+        body = "int main(int n, char**v) { return 0; }"
+        return self.try_compile(body, [header], include_dirs, lang=lang)
+
+    def check_lib (self, library, library_dirs=None,
+                   headers=None, include_dirs=None,
+                   other_libraries=[], lang="c"):
+        log.info("checking for library '%s' ..." % library)
+        body = "int main(int n, char**v) { return 0; }"
+        return self.try_link(body,  headers, include_dirs,
+                             [library]+other_libraries, library_dirs,
+                             lang=lang)
+
+    def check_func (self, func,
+                    headers=None, include_dirs=None,
+                    libraries=None, library_dirs=None,
+                    decl=0, call=0, lang="c"):
+        log.info("checking for function '%s' ..." % func)
+        body = []
+        if decl:
+            body.append("int %s ();" % func)
+        body.append(    "int main (int n, char**v) {")
+        if call:
+            body.append("  (void)%s();" % func)
+        else:
+            body.append("  %s;" % func)
+        body.append(    "  return 0;")
+        body.append(    "}")
+        body = "\n".join(body) + "\n"
+        return self.try_link(body, headers, include_dirs,
+                             libraries, library_dirs, lang=lang)
+
+    def setup_compiler(self, compiler_obj, config_info=None):
+        self._check_compiler()
+        self.compiler = compiler_obj
+        self._check_compiler()
+        _configure(self, config_info)
+
     def run(self):
+        ## self._check_compiler()
+        ## config_info = configuration(self, verbose=True)
+        ## compiler_obj = self.compiler
+        ## mpicc = find_mpi_compiler(
+        ##     'mpicc', MPICC_ENV, self, config_info, None, MPICC)
+        ## log.info("MPI C compiler:    %s", mpicc  or 'not found')
+        ## customize_compiler(compiler_obj, mpicc=mpicc, mpicxx=None)
+        ## 
+        ## self.compiler = compiler_obj.compiler_type
+        ## 
+        ## self.setup_compiler(compiler_obj, config_info)
+        ## #self.check_header('mpe.h')
+        ## #self.check_lib('mpe')
+        ## self.check_func('MPE_Initialized_logging',
+        ##                 headers=['mpe.h'], libraries=['mpe'],
+        ##                 decl=1, call=1)
+        ## return
+
         # test configuration in specified section and file
         #config = None
         #if self.mpi:
@@ -726,6 +784,166 @@ class build_py(cmd_build_py.build_py):
 
 # -----------------------------------------------------------------------------
 
+class build_clib(cmd_build_clib.build_clib):
+
+    user_options = [
+        ('build-clib-so', 'l',
+         "directory to build C/C++ shared libraries to"),
+        ]
+
+    user_options += cmd_build_clib.build_clib.user_options + cmd_mpi_opts
+
+    def initialize_options (self):
+        self.libraries_a = []
+        self.libraries_so = []
+        self.library_dirs = None
+        self.runtime_library_dirs = None
+
+        self.build_clib_so = None
+        cmd_build_clib.build_clib.initialize_options(self)
+        cmd_initialize_mpi_options(self)
+
+    def finalize_options (self):
+        cmd_build_clib.build_clib.finalize_options(self)
+        build_cmd = self.get_finalized_command('build')
+        if isinstance(build_cmd,  build):
+            cmd_set_undefined_mpi_options(self, 'build')
+        #
+        self.library_dirs = []
+        self.runtime_library_dirs = []
+        #
+        self.set_undefined_options('build',
+                                   ('build_lib', 'build_clib_so'))
+        for library in self.libraries:
+            lib_name, build_info = library
+            if not build_info.get('shared'):
+                self.libraries_a.append(library)
+            else:
+                self.libraries_so.append(library)
+        self.libraries[:] = self.libraries_a
+
+    def run (self):
+        if (not self.libraries and
+            not self.libraries_so):
+            return
+        #
+        from distutils.ccompiler import new_compiler
+        self.compiler = new_compiler(compiler=self.compiler,
+                                     dry_run=self.dry_run,
+                                     force=self.force)
+        #
+        config_info = configuration(self)
+        try: # Py2.7+ & Py3.2+
+            compiler_obj = self.compiler_obj
+        except AttributeError:
+            compiler_obj = self.compiler
+        configure_compiler(compiler_obj, self, config_info)
+        #
+        if self.define is not None:
+            for (name,value) in self.define:
+                self.compiler.define_macro(name, value)
+        if self.undef is not None:
+            for macro in self.undef:
+                self.compiler.undefine_macro(macro)
+        if self.include_dirs is not None:
+            self.compiler.set_include_dirs(self.include_dirs)
+
+        if self.library_dirs is not None:
+            self.compiler.set_library_dirs(self.library_dirs)
+        for lib_dir in self.get_library_dirs():
+            self.compiler.add_library_dir(lib_dir)
+
+        if self.libraries:
+            self.build_static_libraries(self.libraries)
+        if self.libraries_so:
+            self.build_shared_libraries(self.libraries_so)
+
+    def get_library_dirs (self):
+        library_dirs = []
+        for (lib_name, build_info) in self.libraries_so:
+            target_dir = build_info.get('target_dir', '')
+            target_dir = convert_path(target_dir)
+            target_dir = os.path.join(self.build_clib_so, target_dir)
+            if target_dir not in library_dirs:
+                library_dirs.append(target_dir)
+        return library_dirs
+
+    def check_library_list (self, libraries):
+        cmd_build_clib.build_clib.check_library_list(self, libraries)
+        ListType, TupleType = type([]), type(())
+        for (lib_name, build_info) in libraries:
+            sources = build_info.get('sources')
+            if sources is None or type(sources) not in (ListType, TupleType):
+                raise DistutilsSetupError, (
+                    "in 'libraries' option (library '%s'), " +
+                    "'sources' must be present and must be " +
+                    "a list of source filenames") % lib_name
+
+    def build_static_libraries (self, libraries):
+        cmd_build_clib.build_clib.build_libraries(self, libraries)
+
+    def build_shared_libraries (self, libraries):
+        from distutils.dep_util import newer_group
+        ListType, TupleType = type([]), type(())
+        for (lib_name, build_info) in libraries:
+
+            try: # Py2.7+ & Py3.2+
+                compiler_obj = self.compiler_obj
+            except AttributeError:
+                compiler_obj = self.compiler
+
+            sources = list(build_info.get('sources',[]))
+            depends = sources + list(build_info.get('depends',[]))
+            target_dir = build_info.get('target_dir', '')
+            target_dir = os.path.join(self.build_clib_so,
+                                      convert_path(target_dir))
+            lib_filename = compiler_obj.library_filename(
+                lib_name, lib_type='shared', output_dir=target_dir)
+            if not (self.force or
+                    newer_group(depends, lib_filename, 'newer')):
+                log.debug("skipping '%s' shared library (up-to-date)",
+                          lib_name)
+                continue
+            else:
+                log.info("building '%s' shared library", lib_name)
+
+            # First, compile the source code to object files in the library
+            # directory.  (This should probably change to putting object
+            # files in a temporary build directory.)
+            objects = compiler_obj.compile(
+                sources,
+                depends=build_info.get('depends'),
+                output_dir=self.build_temp,
+                macros=build_info.get('macros', []),
+                include_dirs=build_info.get('include_dirs'),
+                extra_preargs=None,
+                extra_postargs=build_info.get('extra_compile_args'),
+                debug=self.debug,
+                )
+
+            extra_objects = build_info.get('extra_objects')
+            if extra_objects:
+                objects.extend(extra_objects)
+
+            #compiler_obj.add_library_dir(output_dir)
+
+            # Now "link" the object files together into a shared library.
+            compiler_obj.link_shared_lib(
+                objects, lib_name,
+                output_dir=target_dir,
+                #
+                libraries=build_info.get('libraries'),
+                library_dirs=build_info.get('library_dirs'),
+                runtime_library_dirs=build_info.get('runtime_library_dirs'),
+                export_symbols=None,
+                extra_preargs=None,
+                extra_postargs=build_info.get('extra_link_args'),
+                debug=self.debug,
+                )
+
+
+# --------------------------------------------------------------------
+
 class build_ext(cmd_build_ext.build_ext):
 
     user_options = cmd_build_ext.build_ext.user_options + cmd_mpi_opts
@@ -754,6 +972,11 @@ class build_ext(cmd_build_ext.build_ext):
                 pass
             if pylib_dir not in self.library_dirs:
                 self.library_dirs.append(pylib_dir)
+        #
+        build_clib_cmd = self.get_finalized_command('build_clib')
+        if isinstance(build_clib_cmd, build_clib):
+            library_dirs = build_clib_cmd.get_library_dirs()
+            self.library_dirs.extend(library_dirs)
 
     def build_extensions(self):
         # First, sanity-check the 'extensions' list

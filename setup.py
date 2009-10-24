@@ -115,7 +115,37 @@ def ext_modules():
                sources=['src/MPI.c'],
                depends=['src/mpi4py.MPI.c'],
                )
-    return [MPI]
+    MPE = dict(name='mpi4py.MPE',
+               sources=['src/MPE.c'],
+               depends=['src/mpi4py.MPE.c'],
+               #
+               libraries=['_mpe'],
+               runtime_library_dirs=["${ORIGIN}/lib"],
+               )
+    return [MPI, MPE][:1]
+
+def libraries():
+    mpe = dict(name='_mpe', shared=True,
+               sources=['src/MPE/mpelog.c'],
+               target_dir='mpi4py/lib',
+               #
+               depends=['src/MPE/mpelog.h'],
+               macros=[('HAVE_MPE', 1)],
+               libraries=['mpe'],
+               )
+    lmpe = dict(name='_lmpe', shared=True,
+                sources=[],
+                target_dir='mpi4py/lib',
+                libraries=[mpe['name']],
+                runtime_library_dirs=["${ORIGIN}"],
+                #
+                extra_link_args= ['-Wl,-whole-archive',
+                                  '-llmpe',
+                                  '-Wl,-no-whole-archive'],
+                )
+    mpe  = ( mpe['name'],  mpe)
+    lmpe = (lmpe['name'], lmpe)
+    return [mpe, lmpe][:0]
 
 def executables():
     import sys
@@ -148,7 +178,6 @@ def executables():
                  extra_link_args=link_args)
     return [pyexe]
 
-
 # --------------------------------------------------------------------
 # Setup
 # --------------------------------------------------------------------
@@ -160,6 +189,7 @@ from conf.mpidistutils import build_ext, build_exe
 from conf.mpidistutils import install_data, install_exe
 
 ExtModule = lambda extension:  Extension(**extension)
+ShLibrary = lambda library:    library
 ExeBinary = lambda executable: Executable(**executable)
 
 def run_setup():
@@ -174,6 +204,7 @@ def run_setup():
                                       'include/mpi4py/*.pxi',
                                       'include/mpi4py/*.i',]},
           ext_modules  = [ExtModule(ext) for ext in ext_modules()],
+          libraries    = [ShLibrary(lib) for lib in libraries()  ],
           executables  = [ExeBinary(exe) for exe in executables()],
           **metadata)
 
@@ -198,6 +229,7 @@ if __name__ == '__main__':
     except:
         try:
             chk_cython('src', 'mpi4py.MPI.c')
+            chk_cython('src', 'mpi4py.MPE.c')
         finally:
             raise
 

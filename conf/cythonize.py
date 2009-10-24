@@ -75,3 +75,4 @@ def docstring_replace(OLD, NEW):
 if __name__ == "__main__":
     docstring_replace(OLD='mpi4py.MPI.', NEW='')
     run('mpi4py.MPI.pyx', 'src')
+    run('mpi4py.MPE.pyx', 'src')
