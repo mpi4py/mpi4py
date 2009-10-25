@@ -1,4 +1,4 @@
-cdef extern from "MPE/mpelog.h" nogil:
+cdef extern from "MPE/mpe-log.h" nogil:
 
     ctypedef struct PyMPELogAPI:
         int (*Init)() nogil

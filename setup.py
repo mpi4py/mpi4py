@@ -111,41 +111,77 @@ metadata['requires'] = ['pickle',]
 
 def ext_modules():
     # MPI extension module
-    MPI = dict(name='mpi4py.MPI',
-               sources=['src/MPI.c'],
-               depends=['src/mpi4py.MPI.c'],
-               )
-    MPE = dict(name='mpi4py.MPE',
-               sources=['src/MPE.c'],
-               depends=['src/mpi4py.MPE.c'],
-               #
-               libraries=['_mpe'],
-               runtime_library_dirs=["${ORIGIN}/lib"],
-               )
+    MPI = dict(
+        name='mpi4py.MPI',
+        sources=['src/MPI.c'],
+        depends=['src/mpi4py.MPI.c'],
+        )
+    # MPE extension module
+    MPE = dict(
+        name='mpi4py.MPE',
+        sources=['src/MPE.c'],
+        depends=['src/mpi4py.MPE.c',
+                 'src/MPE/mpe-log.h'],
+        libraries=['mpe-log'],
+        runtime_library_dirs=["${ORIGIN}"],
+        )
+    #
     return [MPI, MPE][:1]
 
 def libraries():
-    mpe = dict(name='_mpe', shared=True,
-               sources=['src/MPE/mpelog.c'],
-               target_dir='mpi4py/lib',
-               #
-               depends=['src/MPE/mpelog.h'],
-               macros=[('HAVE_MPE', 1)],
-               libraries=['mpe'],
-               )
-    lmpe = dict(name='_lmpe', shared=True,
-                sources=[],
-                target_dir='mpi4py/lib',
-                libraries=[mpe['name']],
-                runtime_library_dirs=["${ORIGIN}"],
-                #
-                extra_link_args= ['-Wl,-whole-archive',
-                                  '-llmpe',
-                                  '-Wl,-no-whole-archive'],
-                )
-    mpe  = ( mpe['name'],  mpe)
-    lmpe = (lmpe['name'], lmpe)
-    return [mpe, lmpe][:0]
+    mpe_log = dict(
+        name='mpe-log', shared=True,
+        target_dir='mpi4py',
+        sources=['src/MPE/mpe-log.c'],
+        depends=['src/MPE/mpe-log.h'],
+        macros=[('HAVE_MPE', 1)],
+        libraries=['mpe'],
+        )
+    pmpi_lmpe = dict(
+        name='pmpi-lmpe', shared=True,
+        target_dir='mpi4py',
+        sources=['src/MPE/pmpi-lmpe.c'],
+        libraries=[mpe_log['name']],
+        runtime_library_dirs=["${ORIGIN}"],
+        extra_link_args= [
+            '-Wl,-whole-archive',
+            '-llmpe',
+            '-Wl,-no-whole-archive',
+            ],
+        )
+    pmpi_tmpe = dict(
+        name='pmpi-tmpe', shared=True,
+        target_dir='mpi4py',
+        sources=['src/MPE/pmpi-tmpe.c'],
+        #libraries=[],
+        #runtime_library_dirs=["${ORIGIN}"],
+        extra_link_args= [
+            '-Wl,-whole-archive',
+            '-ltmpe',
+            '-Wl,-no-whole-archive',
+            ],
+        )
+    pmpi_ampe = dict(
+        name='pmpi-ampe', shared=True,
+        target_dir='mpi4py',
+        sources=['src/MPE/pmpi-ampe.c'],
+        libraries=['X11'],
+        runtime_library_dirs=["${ORIGIN}"],
+        extra_link_args= [
+            '-Wl,-whole-archive',
+            '-lampe', '-lmpe',
+            '-Wl,-no-whole-archive',
+            ],
+        )
+    #
+    libs =[
+        mpe_log,
+        pmpi_lmpe,
+        pmpi_tmpe,
+        #pmpi_ampe, # XXX disabled
+        ]
+    libs = [(lib['name'], lib) for lib in libs]
+    return libs[:0]
 
 def executables():
     import sys

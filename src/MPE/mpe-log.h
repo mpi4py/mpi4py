@@ -1,5 +1,5 @@
-#ifndef PyMPI_MPELOG_H
-#define PyMPI_MPELOG_H
+#ifndef PyMPI_MPE_LOG_H
+#define PyMPI_MPE_LOG_H
 
 typedef struct PyMPELogAPI {
   int (*Init)(void);
@@ -28,4 +28,4 @@ typedef struct PyMPELogAPI {
 
 extern PyMPELogAPI *PyMPELog;
 
-#endif /*! PyMPI_MPELOG_H */
+#endif /*! PyMPI_MPE_LOG_H */

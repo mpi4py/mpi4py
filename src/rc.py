@@ -40,3 +40,44 @@ Automatic MPI finalization at exit time
 * Any of ``{True  | 1 | "yes" }``: call ``MPI_Finalize()`` at exit time
 * Any of ``{False | 0 | "no"  }``: do not call ``MPI_Finalize()`` at exit time
 """
+
+
+def profile(name='mpe-log',**kargs):
+    """
+    
+    """
+    import sys, os
+    #
+    try:
+        from ctypes import CDLL as dlopen, RTLD_GLOBAL
+    except ImportError:
+        try:
+            from dl import open as dlopen,  RTLD_GLOBAL
+        except ImportError:
+            raise #
+    try:
+        from dl import RTLD_NODELETE
+    except ImportError:
+        try:
+            from DLFCN import RTLD_NODELETE
+        except ImportError:
+            if sys.platform == 'darwin':
+                RTLD_NODELETE = 0x80
+            else:
+                RTLD_NODELETE = 0
+    #
+    name2lib = {
+        'mpe-log':   'pmpi-lmpe',
+        'mpe-trace': 'pmpi-tmpe',
+        #'mpe-anim':  'pmpi-ampe', # XXX disabled
+        }
+    libname = name2lib[name]
+    #
+    prefix = os.path.dirname(__file__)
+    lib, _so ='lib', '.so'
+    filename = os.path.join(prefix, lib+libname+_so)
+    #
+    handle = dlopen(filename, RTLD_GLOBAL|RTLD_NODELETE)
+    global libpmpi; libpmpi = (filename, handle)
+    return filename
+    

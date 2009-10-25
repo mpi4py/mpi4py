@@ -1,4 +1,4 @@
-#include "mpelog.h"
+#include "mpe-log.h"
 
 #if (HAVE_MPE)
   #include "mpe.h"
