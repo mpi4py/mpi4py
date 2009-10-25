@@ -875,7 +875,7 @@ class build_clib(cmd_build_clib.build_clib):
         for (lib_name, build_info) in libraries:
             sources = build_info.get('sources')
             if sources is None or type(sources) not in (ListType, TupleType):
-                raise DistutilsSetupError, (
+                raise DistutilsSetupError(
                     "in 'libraries' option (library '%s'), " +
                     "'sources' must be present and must be " +
                     "a list of source filenames") % lib_name
