@@ -908,11 +908,11 @@ class build_clib(cmd_build_clib.build_clib):
             compiler_obj = self.compiler
 
         for (lib_name, build_info) in libraries:
-            sources = list(build_info.get('sources',[]))
-            depends = sources + list(build_info.get('depends',[]))
-            target_dir = build_info.get('target_dir', '')
-            target_dir = os.path.join(self.build_clib_so,
-                                      convert_path(target_dir))
+            sources = [convert_path(p) for p in build_info.get('sources',[])]
+            depends = [convert_path(p) for p in build_info.get('depends',[])]
+            depends = sources + depends
+            target_dir = convert_path(build_info.get('target_dir', ''))
+            target_dir = os.path.join(self.build_clib_so,target_dir)
             lib_filename = compiler_obj.library_filename(
                 lib_name, lib_type='shared', output_dir=target_dir)
             if not (self.force or
@@ -937,12 +937,16 @@ class build_clib(cmd_build_clib.build_clib):
                 debug=self.debug,
                 )
 
-            extra_objects = build_info.get('extra_objects')
-            if extra_objects:
-                objects.extend(extra_objects)
-
-            #compiler_obj.add_library_dir(output_dir)
-
+            extra_objects = build_info.get('extra_objects', [])
+            objects.extend(extra_objects)
+            export_symbols = build_info.get('export_symbols')
+            extra_link_args = build_info.get('extra_link_args', [])
+            if (compiler_obj.compiler_type == 'msvc' and
+                export_symbols is not None):
+                lib_filename = compiler_obj.library_filename(lib_name)
+                implib_file = os.path.join(target_dir, lib_filename)
+                extra_link_args.append ('/IMPLIB:' + implib_file)
+                
             # Now "link" the object files together into a shared library.
             compiler_obj.link_shared_lib(
                 objects, lib_name,
@@ -951,9 +955,9 @@ class build_clib(cmd_build_clib.build_clib):
                 libraries=build_info.get('libraries'),
                 library_dirs=build_info.get('library_dirs'),
                 runtime_library_dirs=build_info.get('runtime_library_dirs'),
-                export_symbols=None,
+                export_symbols=export_symbols,
                 extra_preargs=None,
-                extra_postargs=build_info.get('extra_link_args'),
+                extra_postargs=extra_link_args,
                 debug=self.debug,
                 )
 

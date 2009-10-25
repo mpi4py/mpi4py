@@ -110,6 +110,7 @@ metadata['requires'] = ['pickle',]
 # --------------------------------------------------------------------
 
 def ext_modules():
+    import sys; WIN = sys.platform.startswith('win')
     # MPI extension module
     MPI = dict(
         name='mpi4py.MPI',
@@ -125,18 +126,23 @@ def ext_modules():
         libraries=['mpe-log'],
         runtime_library_dirs=["${ORIGIN}"],
         )
+    if WIN: del MPE['runtime_library_dirs']
     #
     return [MPI, MPE][:1]
 
 def libraries():
+    import sys; WIN = sys.platform.startswith('win')
+    #
     mpe_log = dict(
         name='mpe-log', shared=True,
         target_dir='mpi4py',
+        export_symbols=['PyMPELog'],
         sources=['src/MPE/mpe-log.c'],
         depends=['src/MPE/mpe-log.h'],
         macros=[('HAVE_MPE', 1)],
         libraries=['mpe'],
         )
+    #
     pmpi_lmpe = dict(
         name='pmpi-lmpe', shared=True,
         target_dir='mpi4py',
@@ -149,18 +155,22 @@ def libraries():
             '-Wl,-no-whole-archive',
             ],
         )
+    if WIN: del pmpi_lmpe['runtime_library_dirs']
+    if WIN: del pmpi_lmpe['extra_link_args']
+    #
     pmpi_tmpe = dict(
         name='pmpi-tmpe', shared=True,
         target_dir='mpi4py',
         sources=['src/MPE/pmpi-tmpe.c'],
-        #libraries=[],
-        #runtime_library_dirs=["${ORIGIN}"],
         extra_link_args= [
             '-Wl,-whole-archive',
             '-ltmpe',
             '-Wl,-no-whole-archive',
             ],
         )
+    if WIN: del pmpi_tmpe['extra_link_args']
+    if WIN: pmpi_tmpe = None
+    #
     pmpi_ampe = dict(
         name='pmpi-ampe', shared=True,
         target_dir='mpi4py',
@@ -173,14 +183,16 @@ def libraries():
             '-Wl,-no-whole-archive',
             ],
         )
+    if WIN: pmpi_ampe = None
+    pmpi_ampe = None # XXX disabled !
     #
     libs =[
         mpe_log,
         pmpi_lmpe,
         pmpi_tmpe,
-        #pmpi_ampe, # XXX disabled
+        pmpi_ampe, 
         ]
-    libs = [(lib['name'], lib) for lib in libs]
+    libs = [(lib['name'], lib) for lib in libs if lib]
     return libs[:0]
 
 def executables():
