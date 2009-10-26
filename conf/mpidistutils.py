@@ -813,7 +813,8 @@ class build_clib(cmd_build_clib.build_clib):
         self.check_library_list (self.libraries)
         for library in self.libraries:
             lib_name, build_info = library
-            if not build_info.get('shared'):
+            lib_type = build_info.get('kind', 'static')
+            if lib_type == 'static':
                 self.libraries_a.append(library)
             else:
                 self.libraries_so.append(library)
@@ -862,17 +863,24 @@ class build_clib(cmd_build_clib.build_clib):
     def get_library_dirs (self):
         library_dirs = []
         for (lib_name, build_info) in self.libraries_so:
-            target_dir = build_info.get('target_dir', '')
-            target_dir = convert_path(target_dir)
-            target_dir = os.path.join(self.build_clib_so, target_dir)
-            if target_dir not in library_dirs:
-                library_dirs.append(target_dir)
+            output_dir = build_info.get('output_dir', '')
+            output_dir = convert_path(output_dir)
+            if not os.path.isabs(output_dir):
+                output_dir = os.path.join(self.build_clib_so, output_dir)
+            if output_dir not in library_dirs:
+                library_dirs.append(output_dir)
         return library_dirs
 
     def check_library_list (self, libraries):
         cmd_build_clib.build_clib.check_library_list(self, libraries)
         ListType, TupleType = type([]), type(())
         for (lib_name, build_info) in libraries:
+            kind = build_info.get('kind', 'static')
+            if kind not in ('static', 'shared', 'dylib'):
+                raise DistutilsSetupError(
+                    "in 'kind' option (library '%s'), " +
+                    "'kind' must be one of " +
+                    " \"static\", \"shared\", \"dylib\"") % lib_name
             sources = build_info.get('sources')
             if sources is None or type(sources) not in (ListType, TupleType):
                 raise DistutilsSetupError(
@@ -898,7 +906,6 @@ class build_clib(cmd_build_clib.build_clib):
     def build_static_libraries (self, libraries):
         cmd_build_clib.build_clib.build_libraries(self, libraries)
 
-
     def build_shared_libraries (self, libraries):
         from distutils.dep_util import newer_group
 
@@ -911,10 +918,18 @@ class build_clib(cmd_build_clib.build_clib):
             sources = [convert_path(p) for p in build_info.get('sources',[])]
             depends = [convert_path(p) for p in build_info.get('depends',[])]
             depends = sources + depends
-            target_dir = convert_path(build_info.get('target_dir', ''))
-            target_dir = os.path.join(self.build_clib_so,target_dir)
+
+            output_dir = convert_path(build_info.get('output_dir', ''))
+            if not os.path.isabs(output_dir):
+                output_dir = os.path.join(self.build_clib_so, output_dir)
+
+            lib_type = build_info['kind']
+            if sys.platform != 'darwin':
+                if lib_type == 'dylib':
+                    lib_type = 'shared'
             lib_filename = compiler_obj.library_filename(
-                lib_name, lib_type='shared', output_dir=target_dir)
+                lib_name, lib_type=lib_type, output_dir=output_dir)
+
             if not (self.force or
                     newer_group(depends, lib_filename, 'newer')):
                 log.debug("skipping '%s' shared library (up-to-date)",
@@ -943,14 +958,18 @@ class build_clib(cmd_build_clib.build_clib):
             extra_link_args = build_info.get('extra_link_args', [])
             if (compiler_obj.compiler_type == 'msvc' and
                 export_symbols is not None):
-                lib_filename = compiler_obj.library_filename(lib_name)
-                implib_file = os.path.join(target_dir, lib_filename)
+                implib_filename = compiler_obj.library_filename(lib_name)
+                implib_file = os.path.join(output_dir, implib_filename)
                 extra_link_args.append ('/IMPLIB:' + implib_file)
-                
+
+            # Detect target language, if not provided
+            language = (build_info.get('language') or
+                        self.compiler.detect_language(sources))
+
             # Now "link" the object files together into a shared library.
-            compiler_obj.link_shared_lib(
-                objects, lib_name,
-                output_dir=target_dir,
+            compiler_obj.link(
+                compiler_obj.SHARED_LIBRARY,
+                objects, lib_filename,
                 #
                 libraries=build_info.get('libraries'),
                 library_dirs=build_info.get('library_dirs'),
@@ -959,6 +978,7 @@ class build_clib(cmd_build_clib.build_clib):
                 extra_preargs=None,
                 extra_postargs=extra_link_args,
                 debug=self.debug,
+                target_lang=language,
                 )
 
 

@@ -134,8 +134,8 @@ def libraries():
     import sys; WIN = sys.platform.startswith('win')
     #
     mpe_log = dict(
-        name='mpe-log', shared=True,
-        target_dir='mpi4py',
+        name='mpe-log', kind='shared',
+        output_dir='mpi4py',
         export_symbols=['PyMPELog'],
         sources=['src/MPE/mpe-log.c'],
         depends=['src/MPE/mpe-log.h'],
@@ -144,8 +144,8 @@ def libraries():
         )
     #
     pmpi_lmpe = dict(
-        name='pmpi-lmpe', shared=True,
-        target_dir='mpi4py',
+        name='pmpi-lmpe', kind='dylib',
+        output_dir='mpi4py',
         sources=['src/MPE/pmpi-lmpe.c'],
         libraries=[mpe_log['name']],
         runtime_library_dirs=["${ORIGIN}"],
@@ -159,8 +159,8 @@ def libraries():
     if WIN: del pmpi_lmpe['extra_link_args']
     #
     pmpi_tmpe = dict(
-        name='pmpi-tmpe', shared=True,
-        target_dir='mpi4py',
+        name='pmpi-tmpe', kind='dylib',
+        output_dir='mpi4py',
         sources=['src/MPE/pmpi-tmpe.c'],
         extra_link_args= [
             '-Wl,-whole-archive',
@@ -172,8 +172,8 @@ def libraries():
     if WIN: pmpi_tmpe = None
     #
     pmpi_ampe = dict(
-        name='pmpi-ampe', shared=True,
-        target_dir='mpi4py',
+        name='pmpi-ampe', kind='dylib',
+        output_dir='mpi4py',
         sources=['src/MPE/pmpi-ampe.c'],
         libraries=['X11'],
         runtime_library_dirs=["${ORIGIN}"],
@@ -190,7 +190,7 @@ def libraries():
         mpe_log,
         pmpi_lmpe,
         pmpi_tmpe,
-        pmpi_ampe, 
+        pmpi_ampe,
         ]
     libs = [(lib['name'], lib) for lib in libs if lib]
     return libs[:0]
