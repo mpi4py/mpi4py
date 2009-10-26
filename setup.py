@@ -110,7 +110,7 @@ metadata['requires'] = ['pickle',]
 # --------------------------------------------------------------------
 
 def ext_modules():
-    import sys; WIN = sys.platform.startswith('win')
+    import sys
     # MPI extension module
     MPI = dict(
         name='mpi4py.MPI',
@@ -122,78 +122,77 @@ def ext_modules():
         name='mpi4py.MPE',
         sources=['src/MPE.c'],
         depends=['src/mpi4py.MPE.c',
-                 'src/MPE/mpe-log.h'],
-        libraries=['mpe-log'],
-        runtime_library_dirs=["${ORIGIN}"],
-        )
-    if WIN: del MPE['runtime_library_dirs']
-    #
-    return [MPI, MPE][:1]
-
-def libraries():
-    import sys; WIN = sys.platform.startswith('win')
-    #
-    mpe_log = dict(
-        name='mpe-log', kind='shared',
-        output_dir='mpi4py',
-        export_symbols=['PyMPELog'],
-        sources=['src/MPE/mpe-log.c'],
-        depends=['src/MPE/mpe-log.h'],
-        macros=[('HAVE_MPE', 1)],
+                 'src/MPE/mpe-log.h',
+                 'src/MPE/mpe-log.c',
+                 ],
+        define_macros=[('HAVE_MPE', 1)],
         libraries=['mpe'],
-        )
-    #
-    pmpi_lmpe = dict(
-        name='pmpi-lmpe', kind='dylib',
-        output_dir='mpi4py',
-        sources=['src/MPE/pmpi-lmpe.c'],
-        libraries=[mpe_log['name']],
-        runtime_library_dirs=["${ORIGIN}"],
         extra_link_args= [
             '-Wl,-whole-archive',
             '-llmpe',
             '-Wl,-no-whole-archive',
+            '-lmpe',
             ],
         )
-    if WIN: del pmpi_lmpe['runtime_library_dirs']
-    if WIN: del pmpi_lmpe['extra_link_args']
+    if sys.platform.startswith('win'):
+        del MPE['extra_link_args']
     #
-    pmpi_tmpe = dict(
-        name='pmpi-tmpe', kind='dylib',
-        output_dir='mpi4py',
+    return [MPI,
+            #MPE,
+            ]
+
+def libraries():
+    import sys
+    # MPE logging
+    pmpi_mpe_log = dict(
+        name='mpe-log', kind='dylib',
+        output_dir='mpi4py/lib-pmpi',
+        sources=['src/MPE/pmpi-lmpe.c'],
+        libraries=['mpe'],
+        extra_link_args= [
+            '-Wl,-whole-archive',
+            '-llmpe',
+            '-Wl,-no-whole-archive',
+            '-lmpe',
+            ],
+        )
+    if sys.platform.startswith('win'):
+        pmpi_mpe_log['extra_link_args'] = []
+    # MPE tracing
+    pmpi_mpe_trace = dict(
+        name='mpe-trace', kind='dylib',
+        output_dir='mpi4py/lib-pmpi',
         sources=['src/MPE/pmpi-tmpe.c'],
+        libraries=['mpe'],
         extra_link_args= [
             '-Wl,-whole-archive',
             '-ltmpe',
             '-Wl,-no-whole-archive',
             ],
         )
-    if WIN: del pmpi_tmpe['extra_link_args']
-    if WIN: pmpi_tmpe = None
-    #
-    pmpi_ampe = dict(
-        name='pmpi-ampe', kind='dylib',
-        output_dir='mpi4py',
+    if sys.platform.startswith('win'):
+        pmpi_mpe_trace['extra_link_args'] = []
+    # MPE animations
+    pmpi_mpe_anim = dict(
+        name='mpe-anim', kind='dylib',
+        output_dir='mpi4py/lib-pmpi',
         sources=['src/MPE/pmpi-ampe.c'],
-        libraries=['X11'],
-        runtime_library_dirs=["${ORIGIN}"],
+        libraries=['mpe', 'X11'],
         extra_link_args= [
             '-Wl,-whole-archive',
-            '-lampe', '-lmpe',
+            '-lampe',
             '-Wl,-no-whole-archive',
+            '-lmpe',
             ],
         )
-    if WIN: pmpi_ampe = None
-    pmpi_ampe = None # XXX disabled !
+    if sys.platform.startswith('win'):
+        pmpi_mpe_anim['extra_link_args'] = []
+        pmpi_mpe_anim['libraries'].remove('X11')
     #
-    libs =[
-        mpe_log,
-        pmpi_lmpe,
-        pmpi_tmpe,
-        pmpi_ampe,
-        ]
-    libs = [(lib['name'], lib) for lib in libs if lib]
-    return libs[:0]
+    return [#pmpi_mpe_log,
+            #pmpi_mpe_trace, # XXX disabled !
+            #pmpi_mpe_anim,  # XXX disabled !
+            ]
 
 def executables():
     import sys
@@ -237,7 +236,7 @@ from conf.mpidistutils import build_ext, build_exe
 from conf.mpidistutils import install_data, install_exe
 
 ExtModule = lambda extension:  Extension(**extension)
-ShLibrary = lambda library:    library
+Library   = lambda library:    (library['name'], library)
 ExeBinary = lambda executable: Executable(**executable)
 
 def run_setup():
@@ -252,7 +251,7 @@ def run_setup():
                                       'include/mpi4py/*.pxi',
                                       'include/mpi4py/*.i',]},
           ext_modules  = [ExtModule(ext) for ext in ext_modules()],
-          libraries    = [ShLibrary(lib) for lib in libraries()  ],
+          libraries    = [Library(lib)   for lib in libraries()  ],
           executables  = [ExeBinary(exe) for exe in executables()],
           **metadata)
 

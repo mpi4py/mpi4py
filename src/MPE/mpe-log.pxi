@@ -1,5 +1,4 @@
 cdef extern from "MPE/mpe-log.h" nogil:
-
     ctypedef struct PyMPELogAPI:
         int (*Init)() nogil
         int (*Finish)(char[]) nogil
@@ -12,9 +11,8 @@ cdef extern from "MPE/mpe-log.h" nogil:
         int (*logEvent)(int, int, char[]) nogil
         int (*packBytes)(char[], int *, char, int, void *) nogil
 
+cdef extern from "MPE/mpe-log.c" nogil:
     PyMPELogAPI *MPELog"(PyMPELog)"
-
-assert MPELog!=NULL
 
 cdef int MPELog_INIT = (MPELog.Initialized()==0)
 cdef int MPELog_EXIT = 0

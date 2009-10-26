@@ -42,11 +42,11 @@ Automatic MPI finalization at exit time
 """
 
 
-def profile(name='mpe-log',**kargs):
+def profile(name='MPE', *args, **kargs):
     """
-    
+    MPI profiling interface
     """
-    import sys, os
+    import sys, os, imp
     #
     try:
         from ctypes import CDLL as dlopen, RTLD_GLOBAL
@@ -61,23 +61,50 @@ def profile(name='mpe-log',**kargs):
         try:
             from DLFCN import RTLD_NODELETE
         except ImportError:
-            if sys.platform == 'darwin':
+            platform = sys.platform[:6]
+            if platform == 'linux2':
+                RTLD_NODELETE = 0x01000
+            elif platform == 'darwin':
                 RTLD_NODELETE = 0x80
             else:
                 RTLD_NODELETE = 0
-    #
-    name2lib = {
-        'mpe-log':   'pmpi-lmpe',
-        'mpe-trace': 'pmpi-tmpe',
-        #'mpe-anim':  'pmpi-ampe', # XXX disabled
-        }
-    libname = name2lib[name]
+    try:
+        from dl import RTLD_NOW
+    except ImportError:
+        try:
+            from DLFCN import RTLD_NOW
+        except ImportError:
+            platform = sys.platform[:6]
+            if platform in ('linux2', 'darwin', "cygwin"):
+                RTLD_NOW = 2
+            else:
+                RTLD_NOW = 0
     #
     prefix = os.path.dirname(__file__)
-    lib, _so ='lib', '.so'
-    filename = os.path.join(prefix, lib+libname+_so)
+    so = imp.get_suffixes()[0][0]
+    if name == 'MPE': # special case
+        filename = os.path.join(prefix, name + so)
+    else:
+        format = [('', so)]
+        if sys.platform.startswith('win'):
+            format.append(('', '.dll'))
+        elif sys.platform == 'darwin':
+            format.append(('lib', '.dylib'))
+        elif os.name == 'posix':
+            format.append(('lib', '.so'))
+        for (lib, so) in format:
+            basename = lib + name + so
+            filename = os.path.join(prefix, 'lib-pmpi', basename)
+            if os.path.isfile(filename):
+                break
+            else:
+                filename = None
+        if filename is None:
+            relpath = os.path.join(os.path.basename(prefix), 'lib-pmpi')
+            raise ValueError(
+                "profiler '%s' not found in '%s'" % (name, relpath))
     #
-    handle = dlopen(filename, RTLD_GLOBAL|RTLD_NODELETE)
-    global libpmpi; libpmpi = (filename, handle)
+    handle = dlopen(filename, RTLD_NOW|RTLD_GLOBAL|RTLD_NODELETE)
+    global libpmpi
+    libpmpi = (filename, handle)
     return filename
-    

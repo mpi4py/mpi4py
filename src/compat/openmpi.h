@@ -22,23 +22,26 @@
   #include <dlfcn.h>
 #else
   #if defined(__CYGWIN__)
-    #define RTLD_LAZY   1
-    #define RTLD_NOW    2
-    #define RTLD_LOCAL  0
-    #define RTLD_GLOBAL 4
-    #define RTLD_NOLOAD 0
+    #define RTLD_LAZY     1
+    #define RTLD_NOW      2
+    #define RTLD_LOCAL    0
+    #define RTLD_GLOBAL   4
+    #define RTLD_NOLOAD   0
+    #define RTLD_NODELETE 0
   #elif defined(__APPLE__)
-    #define RTLD_LAZY   0x1
-    #define RTLD_NOW    0x2
-    #define RTLD_LOCAL  0x4
-    #define RTLD_GLOBAL 0x8
-    #define RTLD_NOLOAD 0x10
+    #define RTLD_LAZY     0x1
+    #define RTLD_NOW      0x2
+    #define RTLD_LOCAL    0x4
+    #define RTLD_GLOBAL   0x8
+    #define RTLD_NOLOAD   0x10
+    #define RTLD_NODELETE 0x80
   #elif defined(__linux__)
-    #define RTLD_LAZY	0x00001
-    #define RTLD_NOW	0x00002
-    #define RTLD_LOCAL	0x00000
-    #define RTLD_GLOBAL	0x00100
-    #define RTLD_NOLOAD	0x00004
+    #define RTLD_LAZY     0x00001
+    #define RTLD_NOW      0x00002
+    #define RTLD_LOCAL    0x00000
+    #define RTLD_GLOBAL   0x00100
+    #define RTLD_NOLOAD   0x00004
+    #define RTLD_NODELETE 0x01000
   #endif
   #if defined(c_plusplus) || defined(__cplusplus)
   extern "C" {
@@ -274,7 +277,7 @@ static int PyMPI_OPENMPI_Win_set_errhandler(MPI_Win win,
 #endif /* !PyMPI_COMPAT_OPENMPI_H */
 
 /*
-  Local variables:
+  Local Variables:
   c-basic-offset: 2
   indent-tabs-mode: nil
   End:

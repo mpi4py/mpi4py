@@ -52,11 +52,11 @@ cdef class Log:
         #
         cdef char *cname = NULL
         cdef char *ccolor = b"red"
-        if name  is not None: 
+        if name  is not None:
             if not isinstance(name, bytes):
                 name = name.encode()
             cname = name
-        if color is not None: 
+        if color is not None:
             if not isinstance(color, bytes):
                 color = color.encode()
             ccolor = color
@@ -78,11 +78,11 @@ cdef class Log:
         #
         cdef char *cname = NULL
         cdef char *ccolor = b"blue"
-        if name  is not None: 
+        if name  is not None:
             if not isinstance(name, bytes):
                 name = name.encode()
             cname = name
-        if color is not None: 
+        if color is not None:
             if not isinstance(color, bytes):
                 color = color.encode()
             ccolor = color

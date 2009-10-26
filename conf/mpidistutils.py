@@ -840,13 +840,10 @@ class build_clib(cmd_build_clib.build_clib):
                 self.compiler.undefine_macro(macro)
         if self.include_dirs is not None:
             self.compiler.set_include_dirs(self.include_dirs)
-
         if self.library_dirs is not None:
             self.compiler.set_library_dirs(self.library_dirs)
-        for lib_dir in self.get_library_dirs():
-            self.compiler.add_library_dir(lib_dir)
         #
-        config_info = configuration(self)
+        config_info = configuration(self, verbose=True)
         try: # Py2.7+ & Py3.2+
             compiler_obj = self.compiler_obj
         except AttributeError:
@@ -859,17 +856,6 @@ class build_clib(cmd_build_clib.build_clib):
         if self.libraries_so:
             self.config_shared_libraries(self.libraries_so, config_info)
             self.build_shared_libraries(self.libraries_so)
-
-    def get_library_dirs (self):
-        library_dirs = []
-        for (lib_name, build_info) in self.libraries_so:
-            output_dir = build_info.get('output_dir', '')
-            output_dir = convert_path(output_dir)
-            if not os.path.isabs(output_dir):
-                output_dir = os.path.join(self.build_clib_so, output_dir)
-            if output_dir not in library_dirs:
-                library_dirs.append(output_dir)
-        return library_dirs
 
     def check_library_list (self, libraries):
         cmd_build_clib.build_clib.check_library_list(self, libraries)
@@ -895,16 +881,16 @@ class build_clib(cmd_build_clib.build_clib):
                 if extra_args:
                     build_info.setdefault(attr,[]).extend(extra_args)
 
+    def build_static_libraries (self, libraries):
+        cmd_build_clib.build_clib.build_libraries(self, libraries)
+
     def config_shared_libraries (self, libraries, config_info):
         for (lib_name, build_info) in libraries:
             for attr in ('extra_compile_args',
-                         'extra_link_args'):
+                         'extra_link_args',):
                 extra_args = config_info.get(attr)
                 if extra_args:
-                    build_info.setdefault(attr,[]).extend(extra_args)
-
-    def build_static_libraries (self, libraries):
-        cmd_build_clib.build_clib.build_libraries(self, libraries)
+                    build_info.setdefault(attr, []).extend(extra_args)
 
     def build_shared_libraries (self, libraries):
         from distutils.dep_util import newer_group
@@ -1012,17 +998,12 @@ class build_ext(cmd_build_ext.build_ext):
                 pass
             if pylib_dir not in self.library_dirs:
                 self.library_dirs.append(pylib_dir)
-        #
-        build_clib_cmd = self.get_finalized_command('build_clib')
-        if isinstance(build_clib_cmd, build_clib):
-            library_dirs = build_clib_cmd.get_library_dirs()
-            self.library_dirs.extend(library_dirs)
 
     def build_extensions(self):
         # First, sanity-check the 'extensions' list
         self.check_extensions_list(self.extensions)
         # parse configuration file and configure compiler
-        config_info = configuration(self)
+        config_info = configuration(self, verbose=True)
         try: # Py2.7+ & Py3.2+
             compiler_obj = self.compiler_obj
         except AttributeError:
@@ -1107,8 +1088,8 @@ class build_exe(build_ext):
         return outputs
 
     def build_executable (self, exe):
-        ListType, TupleType = type([]), type(())
         from distutils.dep_util import newer_group
+        ListType, TupleType = type([]), type(())
         sources = exe.sources
         if sources is None or type(sources) not in (ListType, TupleType):
             raise DistutilsSetupError(
