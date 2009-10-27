@@ -42,7 +42,7 @@ Automatic MPI finalization at exit time
 """
 
 
-def profile(name='MPE', *args, **kargs):
+def profile(name='MPE', **kargs):
     """
     MPI profiling interface
     """
@@ -54,7 +54,7 @@ def profile(name='MPE', *args, **kargs):
         try:
             from dl import open as dlopen,  RTLD_GLOBAL
         except ImportError:
-            raise #
+            raise # XXX better message ?
     try:
         from dl import RTLD_NODELETE
     except ImportError:
@@ -66,6 +66,8 @@ def profile(name='MPE', *args, **kargs):
                 RTLD_NODELETE = 0x01000
             elif platform == 'darwin':
                 RTLD_NODELETE = 0x80
+            elif platform == 'sunos5':
+                RTLD_NODELETE = 0x01000
             else:
                 RTLD_NODELETE = 0
     try:
@@ -75,7 +77,8 @@ def profile(name='MPE', *args, **kargs):
             from DLFCN import RTLD_NOW
         except ImportError:
             platform = sys.platform[:6]
-            if platform in ('linux2', 'darwin', "cygwin"):
+            if platform in ('linux2', 'darwin',
+                            'sunos5', 'cygwin',):
                 RTLD_NOW = 2
             else:
                 RTLD_NOW = 0
@@ -104,7 +107,14 @@ def profile(name='MPE', *args, **kargs):
             raise ValueError(
                 "profiler '%s' not found in '%s'" % (name, relpath))
     #
-    handle = dlopen(filename, RTLD_NOW|RTLD_GLOBAL|RTLD_NODELETE)
     global libpmpi
+    handle = dlopen(filename, RTLD_NOW|RTLD_GLOBAL|RTLD_NODELETE)
     libpmpi = (filename, handle)
+    #
+    if name == 'MPE':
+        if 'MPE_LOGFILE_PREFIX' not in os.environ:
+            logfile = kargs.pop('logfile', None)
+            if logfile:
+                os.environ['MPE_LOGFILE_PREFIX'] = logfile
+    #
     return filename
