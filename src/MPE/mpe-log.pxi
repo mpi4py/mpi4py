@@ -13,6 +13,3 @@ cdef extern from "MPE/mpe-log.h" nogil:
 
 cdef extern from "MPE/mpe-log.c" nogil:
     PyMPELogAPI *MPELog"(PyMPELog)"
-
-cdef int MPELog_INIT = (MPELog.Initialized()==0)
-cdef int MPELog_EXIT = 0

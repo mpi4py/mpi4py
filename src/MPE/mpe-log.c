@@ -22,6 +22,8 @@ static int PyMPELog_Init(void)
 static int PyMPELog_Finish(const char filename[])
 {
   int ierr = 0;
+  if (filename == 0 || filename[0] == 0)
+    filename = "Unknown";
 #if (HAVE_MPE)
   if (MPE_Initialized_logging() == 1)
   #if MPE_VERSION==2
@@ -77,10 +79,9 @@ static int PyMPELog_Stop(void)
 static MPI_Comm PyMPELog_GetComm(int commID)
 {
   switch (commID) {
-  case 0:  return MPI_COMM_NULL;
-  case 1:  return MPI_COMM_SELF;
-  case 2:  return MPI_COMM_WORLD;
-  default: return MPI_COMM_NULL;
+  case 0:  return MPI_COMM_SELF;
+  case 1:  return MPI_COMM_WORLD;
+  default: return MPI_COMM_WORLD;
   }
 }
 #endif
@@ -94,7 +95,7 @@ static int PyMPELog_newState(int commID,
   int ierr = 0;
 #if (HAVE_MPE)
   MPI_Comm comm = PyMPELog_GetComm(commID);
-  if (comm == MPI_COMM_NULL) return 0;
+  if (comm == MPI_COMM_NULL) return 0; /* XXX should fail */
   #if MPE_VERSION==2
   ierr = MPE_Log_get_state_eventIDs(&stateID[0], &stateID[1]);
   if (ierr == -99999) { ierr = 0; stateID[0] = stateID[1] = -99999; }
@@ -120,7 +121,7 @@ static int PyMPELog_newEvent(int commID,
   int ierr = 0;
 #if (HAVE_MPE)
   MPI_Comm comm = PyMPELog_GetComm(commID);
-  if (comm == MPI_COMM_NULL) return 0;
+  if (comm == MPI_COMM_NULL) return 0; /* XXX should fail */
   #if MPE_VERSION==2
   ierr = MPE_Log_get_solo_eventID(&eventID[0]);
   if (ierr == -99999) { ierr = 0; eventID[0] = -99999; }
@@ -142,7 +143,7 @@ static int PyMPELog_logEvent(int commID,
   int ierr = 0;
 #if (HAVE_MPE)
   MPI_Comm comm = PyMPELog_GetComm(commID);
-  if (comm == MPI_COMM_NULL) return 0;
+  if (comm == MPI_COMM_NULL) return 0; /* XXX should fail */
   #if MPE_VERSION==2
   ierr = MPE_Log_comm_event(comm, eventID, bytebuf);
   #else
@@ -181,3 +182,10 @@ static PyMPELogAPI PyMPELog_ = {
 };
 
 PyMPELogAPI *PyMPELog = &PyMPELog_;
+
+/*
+  Local Variables:
+  c-basic-offset: 2
+  indent-tabs-mode: nil
+  End:
+*/

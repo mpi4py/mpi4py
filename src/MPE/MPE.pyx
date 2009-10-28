@@ -12,61 +12,50 @@ include "helpers.pxi"
 cdef class Log:
 
     @classmethod
-    def Init(cls, filename=None):
-        global MPELog_INIT
-        global MPELog_EXIT
-        cdef char *cfilename = NULL
-        cfilename = LogFileName(filename)
-        if MPELog_INIT:
-            CHKERR( MPELog.Init() )
-            if not MPELog_EXIT:
-                import atexit
-                atexit.register(Log.Finish)
-                MPELog_EXIT = 1
+    def init(cls, filename=None):
+        initialize()
+        cls.setFileName(filename)
 
     @classmethod
-    def Finish(cls):
-        cdef char *cfilename = NULL
-        cfilename = LogFileName(None)
-        if MPELog_INIT:
-            CHKERR( MPELog.Finish(cfilename) )
+    def finish(cls):
+        CHKERR( finalize() )
 
     @classmethod
-    def Start(cls):
-        assert_ready()
-        CHKERR( MPELog.Start() )
+    def setFileName(cls, filename):
+        cdef char *cfilename = b"Unknown"
+        filename = toBytes(filename,  &cfilename)
+        strncpy(logFileName, cfilename, 255)[255] = 0
 
     @classmethod
-    def Stop(cls):
-        assert_ready()
-        CHKERR( MPELog.Stop() )
-
-    @classmethod
-    def Sync(cls):
-        assert_ready()
+    def syncClocks(cls):
+        checkReady()
         CHKERR( MPELog.SyncClocks() )
 
     @classmethod
+    def start(cls):
+        checkReady()
+        CHKERR( MPELog.Start() )
+
+    @classmethod
+    def stop(cls):
+        checkReady()
+        CHKERR( MPELog.Stop() )
+
+    @classmethod
     def State(cls, name=None, color=None):
-        cdef LogState state = LogState()
-        #
         cdef char *cname = NULL
         cdef char *ccolor = b"red"
-        if name  is not None:
-            if not isinstance(name, bytes):
-                name = name.encode()
-            cname = name
-        if color is not None:
-            if not isinstance(color, bytes):
-                color = color.encode()
-            ccolor = color
+        cdef char *cformat = NULL
+        name  = toBytes(name,  &cname)
+        color = toBytes(color, &ccolor)
         #
-        assert_ready()
+        checkReady()
         #
-        if 1: state.commID = 2
-        else: state.commID = 1
+        cdef LogState state = LogState()
+        if 1: state.commID = 1 # MPI_COMM_WORLD
+        else: state.commID = 0 # MPI_COMM_SELF
         CHKERR( MPELog.newState(state.commID,
-                                cname, ccolor, NULL,
+                                cname, ccolor, cformat,
                                 state.stateID) )
         state.isActive = 1
         #
@@ -74,25 +63,19 @@ cdef class Log:
 
     @classmethod
     def Event(cls, name=None, color=None):
-        cdef LogEvent event = LogEvent()
-        #
         cdef char *cname = NULL
         cdef char *ccolor = b"blue"
-        if name  is not None:
-            if not isinstance(name, bytes):
-                name = name.encode()
-            cname = name
-        if color is not None:
-            if not isinstance(color, bytes):
-                color = color.encode()
-            ccolor = color
+        cdef char *cformat = NULL
+        name  = toBytes(name,  &cname)
+        color = toBytes(color, &ccolor)
         #
-        assert_ready()
+        checkReady()
         #
-        if 1: event.commID = 2
-        else: event.commID = 1
+        cdef LogEvent event = LogEvent()
+        if 1: event.commID = 1 # MPI_COMM_WORLD
+        else: event.commID = 0 # MPI_COMM_SELF
         CHKERR( MPELog.newEvent(event.commID,
-                                cname, ccolor, NULL,
+                                cname, ccolor, cformat,
                                 event.eventID) )
         event.isActive = 1
         #
@@ -120,13 +103,11 @@ cdef class LogState:
 
     def enter(self):
         if not isReady(): return
-        if not self.commID: return
         if not self.isActive: return
         CHKERR( MPELog.logEvent(self.commID, self.stateID[0], NULL) )
 
     def exit(self):
         if not isReady(): return
-        if not self.commID: return
         if not self.isActive: return
         CHKERR( MPELog.logEvent(self.commID, self.stateID[1], NULL) )
 
@@ -157,7 +138,6 @@ cdef class LogEvent:
 
     def log(self):
         if not isReady(): return
-        if not self.commID: return
         if not self.isActive: return
         CHKERR( MPELog.logEvent(self.commID, self.eventID[0], NULL) )
 
