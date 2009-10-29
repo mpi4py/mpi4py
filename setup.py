@@ -49,17 +49,18 @@ version = version()
 url      = 'http://%(name)s.googlecode.com/' % vars()
 download = url + 'files/%(name)s-%(version)s.tar.gz' % vars()
 
-descr    = __doc__.split('\n')[1:-1]; del descr[1:3]
-devstat  = ['Development Status :: 5 - Production/Stable']
+description = __doc__.split('\n')[1:-1]; del description[1:3]
 
 classifiers = """
-License :: OSI Approved :: BSD License
-Operating System :: POSIX
-Operating System :: Unix
-Operating System :: MacOS
-Operating System :: Microsoft :: Windows
+Development Status :: 5 - Production/Stable
 Intended Audience :: Developers
 Intended Audience :: Science/Research
+License :: OSI Approved :: BSD License
+Operating System :: MacOS :: MacOS X
+Operating System :: Microsoft :: Windows
+Operating System :: POSIX
+Operating System :: POSIX :: Linux
+Operating System :: Unix
 Programming Language :: C
 Programming Language :: Cython
 Programming Language :: Python
@@ -67,6 +68,7 @@ Programming Language :: Python :: 2
 Programming Language :: Python :: 3
 Topic :: Scientific/Engineering
 Topic :: Software Development :: Libraries :: Python Modules
+Topic :: System :: Distributed Computing
 """
 
 keywords = """
@@ -77,17 +79,17 @@ MPI
 """
 
 platforms = """
+Mac OS X
 Linux
 Unix
-Mac OS X
 Windows
 """
 
 metadata = {
     'name'             : name,
     'version'          : version,
-    'description'      : descr.pop(0),
-    'long_description' : '\n'.join(descr),
+    'description'      : description.pop(0),
+    'long_description' : '\n'.join(description),
     'url'              : url,
     'download_url'     : download,
     'classifiers'      : [c for c in classifiers.split('\n') if c],
@@ -100,14 +102,12 @@ metadata = {
     'maintainer_email' : 'dalcinl@gmail.com',
     }
 
-metadata['classifiers'] += devstat
+metadata['requires'] = ['pickle',]
 metadata['provides'] = ['mpi4py',
                         'mpi4py.rc',
                         'mpi4py.MPI',
                         'mpi4py.MPE',
                         ]
-metadata['requires'] = ['pickle',]
-
 
 # --------------------------------------------------------------------
 # Extension modules
