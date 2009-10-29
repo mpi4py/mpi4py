@@ -1,18 +1,23 @@
-#include "mpe-log.h"
-
-#if (HAVE_MPE)
-  #include "mpe.h"
+#if HAVE_MPE
+/*#if HAVE_MPE_H*/
+    #include "mpe.h"
+/*#endif*/
   #if defined(MPE_LOG_OK)
     #define MPE_VERSION 2
-  #else
+  #elif defined(MPE_Log_OK)
     #define MPE_VERSION 1
+  #else
+    #undef  HAVE_MPE
+    #define HAVE_MPE 0
   #endif
 #endif
+
+#include "mpe-log.h"
 
 static int PyMPELog_Init(void)
 {
   int ierr = 0;
-#if (HAVE_MPE)
+#if HAVE_MPE
   if (MPE_Initialized_logging() != 1)
     ierr = MPE_Init_log();
 #endif
@@ -24,7 +29,7 @@ static int PyMPELog_Finish(const char filename[])
   int ierr = 0;
   if (filename == 0 || filename[0] == 0)
     filename = "Unknown";
-#if (HAVE_MPE)
+#if HAVE_MPE
   if (MPE_Initialized_logging() == 1)
   #if MPE_VERSION==2
     ierr = MPE_Finish_log(filename);
@@ -38,7 +43,7 @@ static int PyMPELog_Finish(const char filename[])
 static int PyMPELog_Initialized(void)
 {
   int status = 1;
-#if (HAVE_MPE)
+#if HAVE_MPE
   status = MPE_Initialized_logging();
 #else
   /* XXX */
@@ -49,7 +54,7 @@ static int PyMPELog_Initialized(void)
 static int PyMPELog_SyncClocks(void)
 {
   int ierr = 0;
-#if (HAVE_MPE)
+#if HAVE_MPE
   #if MPE_VERSION==2
   ierr = MPE_Log_sync_clocks();
   #endif
@@ -60,7 +65,7 @@ static int PyMPELog_SyncClocks(void)
 static int PyMPELog_Start(void)
 {
   int ierr = 0;
-#if (HAVE_MPE)
+#if HAVE_MPE
   ierr = MPE_Start_log();
 #endif /* !(HAVE_MPE) */
   return ierr;
@@ -69,13 +74,13 @@ static int PyMPELog_Start(void)
 static int PyMPELog_Stop(void)
 {
   int ierr = 0;
-#if (HAVE_MPE)
+#if HAVE_MPE
   ierr = MPE_Stop_log();
 #endif /* !(HAVE_MPE) */
   return ierr;
 }
 
-#if (HAVE_MPE)
+#if HAVE_MPE
 static MPI_Comm PyMPELog_GetComm(int commID)
 {
   switch (commID) {
@@ -93,7 +98,7 @@ static int PyMPELog_newState(int commID,
                              int stateID[2])
 {
   int ierr = 0;
-#if (HAVE_MPE)
+#if HAVE_MPE
   MPI_Comm comm = PyMPELog_GetComm(commID);
   if (comm == MPI_COMM_NULL) return 0; /* XXX should fail */
   #if MPE_VERSION==2
@@ -119,7 +124,7 @@ static int PyMPELog_newEvent(int commID,
                              int eventID[1])
 {
   int ierr = 0;
-#if (HAVE_MPE)
+#if HAVE_MPE
   MPI_Comm comm = PyMPELog_GetComm(commID);
   if (comm == MPI_COMM_NULL) return 0; /* XXX should fail */
   #if MPE_VERSION==2
@@ -141,7 +146,7 @@ static int PyMPELog_logEvent(int commID,
                              const char bytebuf[])
 {
   int ierr = 0;
-#if (HAVE_MPE)
+#if HAVE_MPE
   MPI_Comm comm = PyMPELog_GetComm(commID);
   if (comm == MPI_COMM_NULL) return 0; /* XXX should fail */
   #if MPE_VERSION==2
@@ -158,7 +163,7 @@ static int PyMPELog_packBytes(char bytebuf[], int *position,
                               const void *data)
 {
   int ierr = 0;
-#if (HAVE_MPE)
+#if HAVE_MPE
   #if MPE_VERSION==2
   if (((unsigned)*position) <= sizeof(MPE_LOG_BYTES))
     ierr = MPE_Log_pack(bytebuf, position,

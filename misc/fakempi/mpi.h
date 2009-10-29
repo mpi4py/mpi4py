@@ -8,4 +8,7 @@
 #define MPI_VERSION    0
 #define MPI_SUBVERSION 0
 
+#define MPI_Init(a,b)  0
+#define MPI_Finalize() 0
+
 #endif /*!PyMPI_FAKE_MPI_H */

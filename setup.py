@@ -101,7 +101,11 @@ metadata = {
     }
 
 metadata['classifiers'] += devstat
-metadata['provides'] = ['mpi4py', 'mpi4py.MPI', 'mpi4py.rc',]
+metadata['provides'] = ['mpi4py',
+                        'mpi4py.rc',
+                        'mpi4py.MPI',
+                        'mpi4py.MPE',
+                        ]
 metadata['requires'] = ['pickle',]
 
 
@@ -110,7 +114,6 @@ metadata['requires'] = ['pickle',]
 # --------------------------------------------------------------------
 
 def ext_modules():
-    import sys
     # MPI extension module
     MPI = dict(
         name='mpi4py.MPI',
@@ -120,6 +123,7 @@ def ext_modules():
     # MPE extension module
     MPE = dict(
         name='mpi4py.MPE',
+        optional=True,
         sources=['src/MPE.c'],
         depends=['src/mpi4py.MPE.c',
                  'src/MPE/mpe-log.h',
@@ -127,19 +131,15 @@ def ext_modules():
                  ],
         define_macros=[('HAVE_MPE', 1)],
         libraries=['mpe'],
-        extra_link_args= [
+        extra_link_args=[
             '-Wl,-whole-archive',
             '-llmpe',
             '-Wl,-no-whole-archive',
             '-lmpe',
             ],
         )
-    if sys.platform.startswith('win'):
-        del MPE['extra_link_args']
     #
-    return [MPI,
-            #MPE,
-            ]
+    return [MPI, MPE]
 
 def libraries():
     import sys
@@ -148,8 +148,7 @@ def libraries():
         name='mpe-log', kind='dylib',
         output_dir='mpi4py/lib-pmpi',
         sources=['src/MPE/pmpi-lmpe.c'],
-        libraries=['mpe'],
-        extra_link_args= [
+        extra_link_args=[
             '-Wl,-whole-archive',
             '-llmpe',
             '-Wl,-no-whole-archive',
@@ -157,6 +156,7 @@ def libraries():
             ],
         )
     if sys.platform.startswith('win'):
+        MPE['libraries'] = ['mpe']
         pmpi_mpe_log['extra_link_args'] = []
     # MPE tracing
     pmpi_mpe_trace = dict(
@@ -178,7 +178,7 @@ def libraries():
         output_dir='mpi4py/lib-pmpi',
         sources=['src/MPE/pmpi-ampe.c'],
         libraries=['mpe', 'X11'],
-        extra_link_args= [
+        extra_link_args=[
             '-Wl,-whole-archive',
             '-lampe',
             '-Wl,-no-whole-archive',
@@ -189,7 +189,7 @@ def libraries():
         pmpi_mpe_anim['extra_link_args'] = []
         pmpi_mpe_anim['libraries'].remove('X11')
     #
-    return [#pmpi_mpe_log,
+    return [#pmpi_mpe_log,   # XXX disabled !
             #pmpi_mpe_trace, # XXX disabled !
             #pmpi_mpe_anim,  # XXX disabled !
             ]

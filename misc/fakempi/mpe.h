@@ -5,6 +5,4 @@
 #warning "Using a fake "mpe.h" include file, just for testing!!!"
 #endif
 
-#undef HAVE_MPE
-
 #endif /*!PyMPI_FAKE_MPE_H */
