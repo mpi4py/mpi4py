@@ -35,8 +35,8 @@ if 0: raise RuntimeError # DO NOT REMOVE this line !!
 
 # -----------------------------------------------------------------------------
 
-cdef int logInitAtImport = 0 # initialized at import time
-cdef int logFinishAtExit = 0 # going to be finalized at exit time
+cdef int logInitedAtImport = 0 # initialized at import time
+cdef int logDoFinishAtExit = 0 # going to be finalized at exit time
 cdef char logFileName[256]   # name
 
 cdef inline int initialize() except -1:
@@ -50,13 +50,13 @@ cdef inline int initialize() except -1:
         "MPE logging initialization failed "
         "[error code: %d]" % ierr)
     # Register cleanup at Python exit
-    global logFinishAtExit
-    if not logFinishAtExit:
+    global logDoFinishAtExit
+    if not logDoFinishAtExit:
         if Py_AtExit(atexit) < 0:
             PySys_WriteStderr(
                 "warning: could not register "
                 "cleanup with Py_AtExit()\n", 0)
-        logFinishAtExit = 1
+        logDoFinishAtExit = 1
     return 1
 
 cdef int finalize() nogil:
@@ -64,8 +64,8 @@ cdef int finalize() nogil:
     if MPELog.Initialized() != 1:
         return 0
     # Do we ever initialized logging?
-    global logInitAtImport
-    if not logInitAtImport:
+    global logInitedAtImport
+    if not logInitedAtImport:
         return 0
     # Finalize logging library
     cdef int ierr = 0
@@ -79,27 +79,12 @@ cdef void atexit() nogil:
         stderr, "error: in MPE finalization "
         "[code: %d]", ierr); fflush(stderr)
 
-logInitAtImport = initialize()
-logFinishAtExit = 0
+logInitedAtImport = initialize()
+logDoFinishAtExit = 0
 strncpy(logFileName, b"", 256)
 
 cdef inline int isReady() nogil:
     return (MPELog.Initialized() == 1)
-
-cdef inline int checkReady() except -1:
-    cdef initialized = MPELog.Initialized()
-    if initialized == 1:
-        return 1
-    elif initialized == 0:
-        __Pyx_Raise(RuntimeError, ("MPE logging is not initialized"), NULL)
-        return -1
-    elif initialized == 2:
-        __Pyx_Raise(RuntimeError, ("MPE logging has finalized"), NULL)
-        return -1
-    else:
-        __Pyx_Raise(RuntimeError, ("Unknown MPE logging state"), NULL)
-        return -1
-    return 0
 
 # -----------------------------------------------------------------------------
 

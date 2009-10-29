@@ -1,7 +1,5 @@
 #if HAVE_MPE
-/*#if HAVE_MPE_H*/
     #include "mpe.h"
-/*#endif*/
   #if defined(MPE_LOG_OK)
     #define MPE_VERSION 2
   #elif defined(MPE_Log_OK)
@@ -27,9 +25,9 @@ static int PyMPELog_Init(void)
 static int PyMPELog_Finish(const char filename[])
 {
   int ierr = 0;
+#if HAVE_MPE
   if (filename == 0 || filename[0] == 0)
     filename = "Unknown";
-#if HAVE_MPE
   if (MPE_Initialized_logging() == 1)
   #if MPE_VERSION==2
     ierr = MPE_Finish_log(filename);
@@ -46,8 +44,8 @@ static int PyMPELog_Initialized(void)
 #if HAVE_MPE
   status = MPE_Initialized_logging();
 #else
-  /* XXX */
-#endif /* !(HAVE_MPE) */
+  status = 1;
+#endif /* HAVE_MPE */
   return status;
 }
 
@@ -58,7 +56,7 @@ static int PyMPELog_SyncClocks(void)
   #if MPE_VERSION==2
   ierr = MPE_Log_sync_clocks();
   #endif
-#endif /* !(HAVE_MPE) */
+#endif /* HAVE_MPE */
   return ierr;
 }
 
@@ -67,7 +65,7 @@ static int PyMPELog_Start(void)
   int ierr = 0;
 #if HAVE_MPE
   ierr = MPE_Start_log();
-#endif /* !(HAVE_MPE) */
+#endif /* HAVE_MPE */
   return ierr;
 }
 
@@ -76,7 +74,7 @@ static int PyMPELog_Stop(void)
   int ierr = 0;
 #if HAVE_MPE
   ierr = MPE_Stop_log();
-#endif /* !(HAVE_MPE) */
+#endif /* HAVE_MPE */
   return ierr;
 }
 
@@ -84,8 +82,9 @@ static int PyMPELog_Stop(void)
 static MPI_Comm PyMPELog_GetComm(int commID)
 {
   switch (commID) {
-  case 0:  return MPI_COMM_SELF;
-  case 1:  return MPI_COMM_WORLD;
+  case 0:  return MPI_COMM_NULL;
+  case 1:  return MPI_COMM_SELF;
+  case 2:  return MPI_COMM_WORLD;
   default: return MPI_COMM_WORLD;
   }
 }
@@ -100,7 +99,7 @@ static int PyMPELog_newState(int commID,
   int ierr = 0;
 #if HAVE_MPE
   MPI_Comm comm = PyMPELog_GetComm(commID);
-  if (comm == MPI_COMM_NULL) return 0; /* XXX should fail */
+  if (comm == MPI_COMM_NULL) return 0;
   #if MPE_VERSION==2
   ierr = MPE_Log_get_state_eventIDs(&stateID[0], &stateID[1]);
   if (ierr == -99999) { ierr = 0; stateID[0] = stateID[1] = -99999; }
@@ -113,7 +112,7 @@ static int PyMPELog_newState(int commID,
   ierr = MPE_Describe_state(stateID[0], stateID[1],
                             (char *)name, (char *)color);
   #endif
-#endif /* !(HAVE_MPE) */
+#endif /* HAVE_MPE */
   return ierr;
 }
 
@@ -126,7 +125,7 @@ static int PyMPELog_newEvent(int commID,
   int ierr = 0;
 #if HAVE_MPE
   MPI_Comm comm = PyMPELog_GetComm(commID);
-  if (comm == MPI_COMM_NULL) return 0; /* XXX should fail */
+  if (comm == MPI_COMM_NULL) return 0;
   #if MPE_VERSION==2
   ierr = MPE_Log_get_solo_eventID(&eventID[0]);
   if (ierr == -99999) { ierr = 0; eventID[0] = -99999; }
@@ -137,7 +136,7 @@ static int PyMPELog_newEvent(int commID,
   eventID[0] = MPE_Log_get_event_number();
   MPE_Describe_event (eventID[0], (char *)name);
   #endif
-#endif /* !(HAVE_MPE) */
+#endif /* HAVE_MPE */
   return ierr;
 }
 
@@ -148,13 +147,13 @@ static int PyMPELog_logEvent(int commID,
   int ierr = 0;
 #if HAVE_MPE
   MPI_Comm comm = PyMPELog_GetComm(commID);
-  if (comm == MPI_COMM_NULL) return 0; /* XXX should fail */
+  if (comm == MPI_COMM_NULL) return 0;
   #if MPE_VERSION==2
   ierr = MPE_Log_comm_event(comm, eventID, bytebuf);
   #else
   ierr = MPE_Log_event(eventID, 0, /*NULL*/0);
   #endif
-#endif /* !(HAVE_MPE) */
+#endif /* HAVE_MPE */
   return ierr;
 }
 
@@ -169,7 +168,7 @@ static int PyMPELog_packBytes(char bytebuf[], int *position,
     ierr = MPE_Log_pack(bytebuf, position,
                         tokentype, count, data);
   #endif
-#endif /* !(HAVE_MPE) */
+#endif /* HAVE_MPE */
   return ierr;
 }
 

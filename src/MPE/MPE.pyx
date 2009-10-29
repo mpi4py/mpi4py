@@ -28,57 +28,51 @@ cdef class Log:
 
     @classmethod
     def syncClocks(cls):
-        checkReady()
+        if not isReady(): return
         CHKERR( MPELog.SyncClocks() )
 
     @classmethod
     def start(cls):
-        checkReady()
+        if not isReady(): return
         CHKERR( MPELog.Start() )
 
     @classmethod
     def stop(cls):
-        checkReady()
+        if not isReady(): return
         CHKERR( MPELog.Stop() )
 
     @classmethod
     def State(cls, name=None, color=None):
+        cdef LogState state = LogState()
         cdef char *cname = NULL
         cdef char *ccolor = b"red"
-        cdef char *cformat = NULL
         name  = toBytes(name,  &cname)
         color = toBytes(color, &ccolor)
         #
-        checkReady()
-        #
-        cdef LogState state = LogState()
-        if 1: state.commID = 1 # MPI_COMM_WORLD
-        else: state.commID = 0 # MPI_COMM_SELF
+        if not isReady(): return state
+        if 1: state.commID = 2 # MPI_COMM_WORLD
+        else: state.commID = 1 # MPI_COMM_SELF
         CHKERR( MPELog.newState(state.commID,
-                                cname, ccolor, cformat,
+                                cname, ccolor, NULL,
                                 state.stateID) )
         state.isActive = 1
-        #
         return state
 
     @classmethod
     def Event(cls, name=None, color=None):
+        cdef LogEvent event = LogEvent()
         cdef char *cname = NULL
         cdef char *ccolor = b"blue"
-        cdef char *cformat = NULL
         name  = toBytes(name,  &cname)
         color = toBytes(color, &ccolor)
         #
-        checkReady()
-        #
-        cdef LogEvent event = LogEvent()
-        if 1: event.commID = 1 # MPI_COMM_WORLD
-        else: event.commID = 0 # MPI_COMM_SELF
+        if not isReady(): return
+        if 1: event.commID = 2 # MPI_COMM_WORLD
+        else: event.commID = 1 # MPI_COMM_SELF
         CHKERR( MPELog.newEvent(event.commID,
-                                cname, ccolor, cformat,
+                                cname, ccolor, NULL,
                                 event.eventID) )
         event.isActive = 1
-        #
         return event
 
 
@@ -103,11 +97,13 @@ cdef class LogState:
 
     def enter(self):
         if not isReady(): return
+        if not self.commID: return
         if not self.isActive: return
         CHKERR( MPELog.logEvent(self.commID, self.stateID[0], NULL) )
 
     def exit(self):
         if not isReady(): return
+        if not self.commID: return
         if not self.isActive: return
         CHKERR( MPELog.logEvent(self.commID, self.stateID[1], NULL) )
 
@@ -138,6 +134,7 @@ cdef class LogEvent:
 
     def log(self):
         if not isReady(): return
+        if not self.commID: return
         if not self.isActive: return
         CHKERR( MPELog.logEvent(self.commID, self.eventID[0], NULL) )
 
