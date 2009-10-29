@@ -156,7 +156,7 @@ def libraries():
             ],
         )
     if sys.platform.startswith('win'):
-        MPE['libraries'] = ['mpe']
+        pmpi_mpe_log['libraries'] = ['mpe']
         pmpi_mpe_log['extra_link_args'] = []
     # MPE tracing
     pmpi_mpe_trace = dict(

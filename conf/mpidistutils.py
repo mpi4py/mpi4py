@@ -589,6 +589,13 @@ class config(cmd_config.config):
         if not self.noisy:
             self.dump_source = 0
 
+    def _clean(self, *a, **kw):
+        if sys.platform.startswith('win'):
+            for fn in ('_configtest.exe.manifest', ):
+                if os.path.exists(fn):
+                    self.temp_files.append(fn)
+        cmd_config.config._clean(self, *a, **kw)
+
     def check_header (self, header, include_dirs=None, lang="c"):
         log.info("checking for header '%s' ..." % header)
         body = "int main(int n, char**v) { return 0; }"
@@ -606,7 +613,6 @@ class config(cmd_config.config):
         ok = self.try_cpp(body, headers, include_dirs, lang)
         return ok
 
-
     def check_library (self, library, library_dirs=None,
                    headers=None, include_dirs=None,
                    other_libraries=[], lang="c"):
@@ -616,7 +622,6 @@ class config(cmd_config.config):
                            [library]+other_libraries, library_dirs,
                            lang=lang)
         return ok
-
 
     def check_function (self, function,
                         headers=None, include_dirs=None,
@@ -1080,6 +1085,8 @@ class build_ext(cmd_build_ext.build_ext):
             self.config_extension (ext, config_info)
 
     def config_extension (self, ext, config_info):
+        ext.sources[:] = [convert_path(p) for p in ext.sources]
+        ext.depends[:] = [convert_path(p) for p in ext.depends]
         try:
             compiler_obj = self.compiler_obj
         except AttributeError:
