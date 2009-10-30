@@ -30,6 +30,8 @@ except ImportError: # or the no yet installed mpi4py
 
 from mpi4py import rc
 #rc.threaded = False
+#rc.profile('MPE', logfile='runalltests')
+
 from mpi4py import MPI
 sys.stderr.flush()
 sys.stderr.write("[%d of %d on %s] Py%d%d - mpi4py from '%s'\n" \
