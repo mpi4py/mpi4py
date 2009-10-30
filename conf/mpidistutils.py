@@ -1095,6 +1095,7 @@ class build_ext(cmd_build_ext.build_ext):
         config_cmd.compiler = compiler_obj # fix compiler
         #
         if ext.name == 'mpi4py.MPI':
+            log.info("checking for MPI compile and link ...")
             ok = config_cmd.try_link(ConfigTest, headers=['mpi.h'])
             if not ok:
                 raise DistutilsPlatformError(
@@ -1102,6 +1103,7 @@ class build_ext(cmd_build_ext.build_ext):
                    "Check your configuration!!!")
         #
         if ext.name == 'mpi4py.MPE':
+            log.info("checking for MPE availability ...")
             ok = config_cmd.check_header("mpe.h")
             if ok:
                 ok = config_cmd.check_lib("mpe")
