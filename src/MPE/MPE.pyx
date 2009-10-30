@@ -12,9 +12,9 @@ include "helpers.pxi"
 cdef class Log:
 
     @classmethod
-    def init(cls, filename=None):
+    def init(cls, logfile=None):
         initialize()
-        cls.setFileName(filename)
+        cls.setFileName(logfile)
 
     @classmethod
     def finish(cls):
@@ -23,13 +23,14 @@ cdef class Log:
     @classmethod
     def setFileName(cls, filename):
         cdef char *cfilename = b"Unknown"
-        filename = toBytes(filename,  &cfilename)
-        strncpy(logFileName, cfilename, 255)[255] = 0
+        filename = toBytes(filename, &cfilename)
+        strncpy(logFileName, cfilename, MPE_MAX_LOGFILENAME)
+        logFileName[MPE_MAX_LOGFILENAME-1] = 0
 
     @classmethod
     def syncClocks(cls):
         if not isReady(): return
-        CHKERR( MPELog.SyncClocks() )
+        CHKERR( MPELog.syncClocks() )
 
     @classmethod
     def start(cls):
@@ -88,12 +89,16 @@ cdef class LogState:
         self.stateID[1] = 0
         self.isActive = 0
 
+    def __call__(self):
+        return self
+
     def __enter__(self):
         self.enter()
         return self
 
     def __exit__(self, *exc):
         self.exit()
+        return None
 
     def enter(self):
         if not isReady(): return
@@ -130,7 +135,14 @@ cdef class LogEvent:
         self.isActive = 0
 
     def __call__(self):
+        return self
+
+    def __enter__(self):
         self.log()
+        return self
+
+    def __exit__(self, *exc):
+        return None
 
     def log(self):
         if not isReady(): return

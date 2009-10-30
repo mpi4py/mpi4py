@@ -49,7 +49,7 @@ static int PyMPELog_Initialized(void)
   return status;
 }
 
-static int PyMPELog_SyncClocks(void)
+static int PyMPELog_syncClocks(void)
 {
   int ierr = 0;
 #if HAVE_MPE
@@ -176,7 +176,7 @@ static PyMPELogAPI PyMPELog_ = {
   PyMPELog_Init,
   PyMPELog_Finish,
   PyMPELog_Initialized,
-  PyMPELog_SyncClocks,
+  PyMPELog_syncClocks,
   PyMPELog_Start,
   PyMPELog_Stop,
   PyMPELog_newState,

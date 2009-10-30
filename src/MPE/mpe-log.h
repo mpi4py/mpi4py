@@ -5,7 +5,7 @@ typedef struct PyMPELogAPI {
   int (*Init)(void);
   int (*Finish)(const char[]);
   int (*Initialized)(void);
-  int (*SyncClocks)(void);
+  int (*syncClocks)(void);
   int (*Start)(void);
   int (*Stop)(void);
   int (*newState)(int,

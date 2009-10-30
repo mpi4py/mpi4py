@@ -37,7 +37,7 @@ if 0: raise RuntimeError # DO NOT REMOVE this line !!
 
 cdef int logInitedAtImport = 0 # initialized at import time
 cdef int logDoFinishAtExit = 0 # going to be finalized at exit time
-cdef char logFileName[256]   # name
+cdef char logFileName[MPE_MAX_LOGFILENAME] # log file name
 
 cdef inline int initialize() except -1:
     # Is logging active?
@@ -81,7 +81,7 @@ cdef void atexit() nogil:
 
 logInitedAtImport = initialize()
 logDoFinishAtExit = 0
-strncpy(logFileName, b"", 256)
+strncpy(logFileName, b"", MPE_MAX_LOGFILENAME)
 
 cdef inline int isReady() nogil:
     return (MPELog.Initialized() == 1)
