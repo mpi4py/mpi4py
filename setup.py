@@ -163,11 +163,11 @@ def libraries():
         name='mpe-trace', kind='dylib',
         output_dir='mpi4py/lib-pmpi',
         sources=['src/MPE/pmpi-tmpe.c'],
-        libraries=['mpe'],
         extra_link_args= [
             '-Wl,-whole-archive',
             '-ltmpe',
             '-Wl,-no-whole-archive',
+            '-lmpe',
             ],
         )
     if sys.platform.startswith('win'):
@@ -177,17 +177,16 @@ def libraries():
         name='mpe-anim', kind='dylib',
         output_dir='mpi4py/lib-pmpi',
         sources=['src/MPE/pmpi-ampe.c'],
-        libraries=['mpe', 'X11'],
         extra_link_args=[
             '-Wl,-whole-archive',
             '-lampe',
             '-Wl,-no-whole-archive',
             '-lmpe',
+            '-lX11'
             ],
         )
     if sys.platform.startswith('win'):
         pmpi_mpe_anim['extra_link_args'] = []
-        pmpi_mpe_anim['libraries'].remove('X11')
     #
     return [#pmpi_mpe_log,   # XXX disabled !
             #pmpi_mpe_trace, # XXX disabled !
