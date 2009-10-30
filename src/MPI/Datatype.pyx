@@ -861,5 +861,5 @@ F_DOUBLE_COMPLEX      = __DOUBLE_COMPLEX__
 
 # -----------------------
 include "typemap.pxi"   #
-__DTypeMap__ = DTypeMap #
+__TypeDict__ = TypeDict #
 # -----------------------

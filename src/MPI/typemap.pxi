@@ -1,9 +1,11 @@
 # -----------------------------------------------------------------------------
 
-cdef inline int AddTypeMap(key, Datatype dtype) except -1:
-    global DTypeMap
-    if dtype.ob_mpi != MPI_DATATYPE_NULL:
-        DTypeMap[key] = dtype
+cdef dict TypeDict = { }
+
+cdef inline int AddTypeMap(object key, Datatype dataype) except -1:
+    global TypeDict
+    if dataype.ob_mpi != MPI_DATATYPE_NULL:
+        TypeDict[key] = dataype
     return 0
 
 # character
@@ -76,11 +78,11 @@ AddTypeMap( "G"  , __C_LONG_DOUBLE_COMPLEX__ ) # NumPy
 
 # -----------------------------------------------------------------------------
 
-##cdef dict FDTypeMap = { }
+##cdef dict FTypeDict = { }
 ##
 ##cdef inline int AddFTypeMap(key, Datatype dtype) except -1:
 ##    if dtype.ob_mpi != MPI_DATATYPE_NULL:
-##        FDTypeMap[key] = dtype
+##        FTypeDict[key] = dtype
 ##    return 0
 
 ## AddFTypeMap( "i"   , __INTEGER__          )
@@ -107,7 +109,7 @@ AddTypeMap( "G"  , __C_LONG_DOUBLE_COMPLEX__ ) # NumPy
 
 # -----------------------------------------------------------------------------
 
-## cdef inline const_char* DType2Str(MPI_Datatype datatype) nogil:
+## cdef inline const_char* Type2Str(MPI_Datatype datatype) nogil:
 ##
 ##     if datatype == MPI_DATATYPE_NULL: return NULL
 ##

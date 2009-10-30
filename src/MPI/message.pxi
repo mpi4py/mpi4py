@@ -21,23 +21,6 @@ cdef inline int is_IN_PLACE(object msg):
 
 #------------------------------------------------------------------------------
 
-cdef dict DTypeMap = { }
-
-cdef inline Datatype lookup_datatype(object key):
-     cdef Datatype o_type = DTypeMap[key]
-     assert o_type is not None # XXX just in case
-     return o_type
-
-cdef inline object lookup_format(object o_buf):
-    # numpy.ndarray
-    try: return o_buf.dtype.char
-    except AttributeError: pass
-    # array.array
-    try: return o_buf.typecode
-    except AttributeError: pass
-    # nothing found
-    return None
-
 cdef object message_basic(object o_buf,
                           object o_type,
                           int readonly,
@@ -56,17 +39,15 @@ cdef object message_basic(object o_buf,
     # get buffer base address, length, and format
     cdef bint w = (not readonly), f = (o_type is None)
     cdef object o_fmt = asbuffer(o_buf, w, f, baddr, bsize)
-    if f and o_fmt is None:
-        o_fmt = lookup_format(o_buf)
     # lookup datatype if not provided or not a Datatype
+    global TypeDict
     if o_type is None:
-        o_type = lookup_datatype(o_fmt)
+        o_type = TypeDict[o_fmt]
     elif not isinstance(o_type, Datatype):
-        o_type = lookup_datatype(o_type)
+        o_type = TypeDict[o_type]
     # and we are done ...
     btype[0] = (<Datatype?>o_type).ob_mpi
     return o_type
-
 
 cdef object message_simple(object msg,
                            int readonly,
@@ -116,7 +97,6 @@ cdef object message_simple(object msg,
     cdef int displ = 0 # from base buffer, in datatype entries
     cdef MPI_Aint offset = 0 # from base buffer, in bytes
     cdef MPI_Aint extent = 0, lb = 0, ub = 0
-
     if o_displ is not None:
         if o_count is None:
             raise ValueError(

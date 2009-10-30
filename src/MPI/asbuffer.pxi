@@ -26,7 +26,7 @@ cdef extern from "Python.h":
 #------------------------------------------------------------------------------
 
 cdef extern from *:
-    cdef object Str"PyMPIString_FromString"(char *)
+    cdef object toString"PyMPIString_FromString"(char *)
 
 cdef inline int is_buffer(object ob):
     return (PyObject_CheckBuffer(ob) or
@@ -43,22 +43,31 @@ cdef object asbuffer(object ob,
     cdef int flags = PyBUF_SIMPLE
     if PyObject_CheckBuffer(ob):
         flags = PyBUF_ANY_CONTIGUOUS
-        if writable: 
+        if writable:
             flags |= PyBUF_WRITABLE
-        if format: 
+        if format:
             flags |= PyBUF_FORMAT
         PyObject_GetBuffer(ob, &view, flags)
         bptr = view.buf
         blen = view.len
         if format:
             if view.format != NULL:
-                bfmt = Str(view.format)
+                bfmt = toString(view.format)
         PyBuffer_Release(&view)
     else:
         if writable:
             PyObject_AsWriteBuffer(ob, &bptr, &blen)
         else:
             PyObject_AsReadBuffer(ob, <const_void **>&bptr, &blen)
+        if format:
+            try: # numpy.ndarray
+                bfmt = ob.dtype.char
+            except AttributeError:
+                try: # array.array
+                    bfmt = ob.typecode
+                except AttributeError:
+                    # nothing found
+                    bfmt = None
     if base: base[0] = <void *>bptr
     if size: size[0] = <MPI_Aint>blen
     return bfmt
