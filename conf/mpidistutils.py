@@ -142,8 +142,8 @@ def customize_compiler(compiler,
             ldflags  = ldflags  + ' ' + CXXFLAGS
         if LDFLAGS:
             ldflags  = ldflags  + ' ' + LDFLAGS
-        basecflags = environ.get('BASECFLAGS', basecflags)
-        optcflags  = environ.get('OPTCFLAGS',  optcflags)
+        basecflags = environ.get('BASECFLAGS', basecflags or '')
+        optcflags  = environ.get('OPTCFLAGS',  optcflags  or '')
         cflags     = (basecflags + ' ' +
                       optcflags  + ' ' +
                       cflags)
@@ -167,6 +167,10 @@ def customize_compiler(compiler,
         compiler.shared_lib_extension = so_ext
         try: compiler.compiler_cxx.remove('-Wstrict-prototypes')
         except: pass
+    if compiler.compiler_type == 'mingw32':
+        compiler.set_executables(
+            preprocessor = 'gcc -mno-cygwin -E',
+            )
 
 def find_mpi_compiler(name,
                       envvars,
@@ -596,21 +600,20 @@ class config(cmd_config.config):
                     self.temp_files.append(fn)
         cmd_config.config._clean(self, *a, **kw)
 
-    def check_header (self, header, include_dirs=None, lang="c"):
+    def check_header (self, header, include_dirs=None):
         log.info("checking for header '%s' ..." % header)
         body = "int main(int n, char**v) { return 0; }"
-        ok = self.try_compile(body, [header], include_dirs, lang=lang)
+        ok = self.try_cpp(body, [header], include_dirs)
+        log.info(ok and 'succes!' or 'failure.')
         return ok
 
-    def check_macro (self, macro,
-                     headers=None, include_dirs=None,
-                     lang="c"):
+    def check_macro (self, macro, headers=None, include_dirs=None):
         log.info("checking for macro '%s' ..." % macro)
         body = ("#ifndef %s\n"
                 "#error macro '%s' not defined\n"
                 "#endif\n") % (macro, macro)
         body += "int main(int n, char**v) { return 0; }\n"
-        ok = self.try_cpp(body, headers, include_dirs, lang)
+        ok = self.try_cpp(body, headers, include_dirs)
         return ok
 
     def check_library (self, library, library_dirs=None,
@@ -1110,9 +1113,8 @@ class build_ext(cmd_build_ext.build_ext):
                 if ok:
                     ok = config_cmd.check_func(
                         "MPE_Init_log",
-                        headers=['mpe.h'],
                         libraries=['mpe'],
-                        decl=0, call=1)
+                        decl=1, call=1)
             if not ok:
                 ext.define_macros[:] = []
                 ext.libraries[:] = []

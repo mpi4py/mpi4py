@@ -1,4 +1,8 @@
 #if HAVE_MPE
+    #if defined(_WIN32) && defined(__GNUC__)
+      #include <stdint.h>
+      #include <inttypes.h>
+    #endif
     #include "mpe.h"
   #if defined(MPE_LOG_OK)
     #define MPE_VERSION 2
