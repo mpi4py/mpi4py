@@ -14,6 +14,15 @@
   #endif
 #endif
 
+#if HAVE_MPE
+  /* This is a hack for outdated MPE API's */
+  #if !defined(MPICH2_NUMVERSION) || defined(DEINO_MPI)
+    #define _getThreadID_ 0,
+  #else
+    #define _getThreadID_
+  #endif
+#endif
+
 #include "mpe-log.h"
 
 static int PyMPELog_Init(void)
@@ -108,7 +117,9 @@ static int PyMPELog_newState(int commID,
   ierr = MPE_Log_get_state_eventIDs(&stateID[0], &stateID[1]);
   if (ierr == -99999) { ierr = 0; stateID[0] = stateID[1] = -99999; }
   if (ierr != 0) return ierr;
-  ierr = MPE_Describe_comm_state(comm, stateID[0], stateID[1],
+  ierr = MPE_Describe_comm_state(comm,
+                                 _getThreadID_
+                                 stateID[0], stateID[1],
                                  name, color, format);
   #else
   stateID[0] = MPE_Log_get_event_number();
@@ -134,7 +145,9 @@ static int PyMPELog_newEvent(int commID,
   ierr = MPE_Log_get_solo_eventID(&eventID[0]);
   if (ierr == -99999) { ierr = 0; eventID[0] = -99999; }
   if (ierr != 0) return ierr;
-  ierr = MPE_Describe_comm_event(comm, eventID[0],
+  ierr = MPE_Describe_comm_event(comm,
+                                 _getThreadID_
+                                 eventID[0],
                                  name, color, format);
   #else
   eventID[0] = MPE_Log_get_event_number();
@@ -153,7 +166,9 @@ static int PyMPELog_logEvent(int commID,
   MPI_Comm comm = PyMPELog_GetComm(commID);
   if (comm == MPI_COMM_NULL) return 0;
   #if MPE_VERSION==2
-  ierr = MPE_Log_comm_event(comm, eventID, bytebuf);
+  ierr = MPE_Log_comm_event(comm,
+                            _getThreadID_
+                            eventID, bytebuf);
   #else
   ierr = MPE_Log_event(eventID, 0, /*NULL*/0);
   #endif
