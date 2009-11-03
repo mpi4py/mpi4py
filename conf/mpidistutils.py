@@ -242,10 +242,10 @@ def _config_parser(section, filenames, raw=False, vars=None):
     except ConfigParserError:
         log.error("error: parsing configuration file/s '%s'", filenames)
         return None
-    if sys.platfrom.startswith('win'):
+    if sys.platform.startswith('win'):
         if parser.has_section(section+'-win'):
             section = section+'-win'
-    elif sys.platfrom.startswith('darwin'):
+    elif sys.platform.startswith('darwin'):
         if parser.has_section(section+'-osx'):
             section = section+'-osx'
     if not parser.has_section(section):
