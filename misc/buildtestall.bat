@@ -4,7 +4,7 @@ setlocal ENABLEEXTENSIONS
 set PATH=C:\MinGW\bin;%PATH%
 
 set TEST_PY=25,26,27,30,31,32
-set TEST_MPI=mpich2_win,deinompi,msmpi
+set TEST_MPI=mpich2,deinompi,msmpi
 set TEST_CC=msvc,mingw32
 
 for %%A in (%TEST_PY%)  do (
@@ -26,9 +26,9 @@ set COMPILER=%3
 set PYTHONDIR=C:\Python%PYVERSION%
 set PYTHON="%PYTHONDIR%\python.exe"
 set MPIDIR=
-if %MPICONF%==deinompi   set MPIDIR=%ProgramFiles%\DeinoMPI
-if %MPICONF%==mpich2_win set MPIDIR=%ProgramFiles%\MPICH2
-if %MPICONF%==msmpi      set MPIDIR=%ProgramFiles%\Microsoft HPC Pack 2008 SDK
+if %MPICONF%==deinompi set MPIDIR=%ProgramFiles%\DeinoMPI
+if %MPICONF%==mpich2   set MPIDIR=%ProgramFiles%\MPICH2
+if %MPICONF%==msmpi    set MPIDIR=%ProgramFiles%\Microsoft HPC Pack 2008 SDK
 set MPIEXEC="%MPIDIR%\bin\mpiexec.exe"
 
 echo Py: %PYVERSION% - MPI: %MPICONF% - CC: %COMPILER%
