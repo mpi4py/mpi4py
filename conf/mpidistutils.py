@@ -600,10 +600,11 @@ class config(cmd_config.config):
                     self.temp_files.append(fn)
         cmd_config.config._clean(self, *a, **kw)
 
-    def check_header (self, header, include_dirs=None):
+    def check_header (self, header, headers=None, include_dirs=None):
+        if headers is None: headers = []
         log.info("checking for header '%s' ..." % header)
         body = "int main(int n, char**v) { return 0; }"
-        ok = self.try_cpp(body, [header], include_dirs)
+        ok = self.try_compile(body, list(headers) + [header], include_dirs)
         log.info(ok and 'succes!' or 'failure.')
         return ok
 
@@ -613,7 +614,7 @@ class config(cmd_config.config):
                 "#error macro '%s' not defined\n"
                 "#endif\n") % (macro, macro)
         body += "int main(int n, char**v) { return 0; }\n"
-        ok = self.try_cpp(body, headers, include_dirs)
+        ok = self.try_compile(body, headers, include_dirs)
         return ok
 
     def check_library (self, library, library_dirs=None,
@@ -1088,8 +1089,8 @@ class build_ext(cmd_build_ext.build_ext):
             self.config_extension (ext, config_info)
 
     def config_extension (self, ext, config_info):
-        ext.sources[:] = [convert_path(p) for p in ext.sources]
-        ext.depends[:] = [convert_path(p) for p in ext.depends]
+        ## ext.sources[:] = [convert_path(p) for p in ext.sources]
+        ## ext.depends[:] = [convert_path(p) for p in ext.depends]
         try:
             compiler_obj = self.compiler_obj
         except AttributeError:
@@ -1099,7 +1100,8 @@ class build_ext(cmd_build_ext.build_ext):
         #
         if ext.name == 'mpi4py.MPI':
             log.info("checking for MPI compile and link ...")
-            ok = config_cmd.try_link(ConfigTest, headers=['mpi.h'])
+            ok = config_cmd.try_link(ConfigTest,
+                                     headers=['stdlib.h', 'mpi.h'])
             if not ok:
                 raise DistutilsPlatformError(
                    "Cannot compile/link MPI programs. "
@@ -1107,14 +1109,14 @@ class build_ext(cmd_build_ext.build_ext):
         #
         if ext.name == 'mpi4py.MPE':
             log.info("checking for MPE availability ...")
-            ok = config_cmd.check_header("mpe.h")
-            if ok:
-                ok = config_cmd.check_lib("mpe")
-                if ok:
-                    ok = config_cmd.check_func(
-                        "MPE_Init_log",
-                        libraries=['mpe'],
-                        decl=1, call=1)
+            ok = (config_cmd.check_header("mpe.h",
+                                          headers=["stdlib.h"])
+                  and
+                  config_cmd.check_func("MPE_Init_log",
+                                        headers=["stdlib.h"],
+                                        libraries=['mpe'],
+                                        decl=1, call=1)
+                  )
             if not ok:
                 ext.define_macros[:] = []
                 ext.libraries[:] = []
