@@ -583,9 +583,9 @@ cdef class File:
         """
         Return the atomicity mode
         """
-        cdef bint flag = 0
+        cdef int flag = 0
         with nogil: CHKERR( MPI_File_get_atomicity(self.ob_mpi, &flag) )
-        return flag
+        return <bint>flag
 
     property atomicity:
         """atomicity"""

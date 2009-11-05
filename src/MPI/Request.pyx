@@ -37,11 +37,11 @@ cdef class Request:
         """
         Test for the completion of a send or receive.
         """
-        cdef bint flag = 0
+        cdef int flag = 0
         cdef MPI_Status *statusp = arg_Status(status)
         with nogil: CHKERR( MPI_Test(
             &self.ob_mpi, &flag, statusp) )
-        return flag
+        return <bint>flag
 
     def Free(self):
         """
@@ -54,11 +54,11 @@ cdef class Request:
         Non-destructive test for the
         completion of a request
         """
-        cdef bint flag = 0
+        cdef int flag = 0
         cdef MPI_Status *statusp = arg_Status(status)
         with nogil: CHKERR( MPI_Request_get_status(
             self.ob_mpi, &flag, statusp) )
-        return flag
+        return <bint>flag
 
     # Multiple Completions
     # --------------------
@@ -91,7 +91,7 @@ cdef class Request:
         cdef MPI_Request *irequests = NULL
         cdef tmp1 = asarray_Request(requests, &irequests, count)
         cdef int index = MPI_UNDEFINED
-        cdef bint flag = 0
+        cdef int flag = 0
         cdef MPI_Status *statusp = arg_Status(status)
         #
         try:
@@ -100,7 +100,7 @@ cdef class Request:
         finally:
             restore_Request(requests, &irequests, count)
         #
-        return (index, flag)
+        return (index, <bint>flag)
 
     @classmethod
     def Waitall(cls, requests, statuses=None):
@@ -132,7 +132,7 @@ cdef class Request:
         cdef tmp1 = asarray_Request(requests, &irequests, count)
         cdef MPI_Status *istatuses = MPI_STATUSES_IGNORE
         cdef tmp2 = asarray_Status(statuses, &istatuses, count)
-        cdef bint flag = 0
+        cdef int flag = 0
         #
         try:
             with nogil: CHKERR( MPI_Testall(
@@ -141,7 +141,7 @@ cdef class Request:
             restore_Request(requests, &irequests, count)
             restore_Status(statuses, &istatuses, count)
         #
-        return flag
+        return <bint>flag
 
     @classmethod
     def Waitsome(cls, requests, statuses=None):

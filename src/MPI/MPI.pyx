@@ -154,25 +154,25 @@ def Is_thread_main():
     Indicate whether this thread called
     ``Init`` or ``Init_thread``
     """
-    cdef bint flag = 1
+    cdef int flag = 1
     CHKERR( MPI_Is_thread_main(&flag) )
-    return flag
+    return <bint>flag
 
 def Is_initialized():
     """
     Indicates whether ``Init`` has been called
     """
-    cdef bint flag = 0
+    cdef int flag = 0
     CHKERR( MPI_Initialized(&flag) )
-    return flag
+    return <bint>flag
 
 def Is_finalized():
     """
     Indicates whether ``Finalize`` has completed
     """
-    cdef bint flag = 0
+    cdef int flag = 0
     CHKERR( MPI_Finalized(&flag) )
-    return flag
+    return <bint>flag
 
 # Implementation Information
 # --------------------------

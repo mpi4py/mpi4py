@@ -127,10 +127,10 @@ cdef class Info:
         if not self: return False
         cdef char *ckey = NULL
         cdef int dummy = 0
-        cdef bint haskey = 0
+        cdef int haskey = 0
         key = asmpistr(key, &ckey, NULL)
         CHKERR( MPI_Info_get_valuelen(self.ob_mpi, ckey, &dummy, &haskey) )
-        return haskey
+        return <bint>haskey
 
     def __iter__(self):
         return iter(self.keys())

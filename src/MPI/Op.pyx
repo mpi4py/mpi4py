@@ -54,9 +54,9 @@ cdef class Op:
         """
         Query reduction operations for their commutativity
         """
-        cdef bint flag = 0
+        cdef int flag = 0
         CHKERR( MPI_Op_commutative(self.ob_mpi, &flag) )
-        return flag
+        return <bint>flag
 
     property is_commutative:
         """is commutative"""

@@ -105,9 +105,9 @@ cdef class Status:
         """
         Test to see if a request was cancelled
         """
-        cdef bint flag = 0
+        cdef int flag = 0
         CHKERR( MPI_Test_cancelled(&self.ob_mpi, &flag) )
-        return flag
+        return <bint>flag
 
     def Set_cancelled(self, bint flag):
         """

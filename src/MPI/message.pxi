@@ -37,7 +37,7 @@ cdef object message_basic(object o_buf,
         btype[0] = (<Datatype?>o_type).ob_mpi
         return o_type
     # get buffer base address, length, and format
-    cdef bint w = (not readonly), f = (o_type is None)
+    cdef int w = (not readonly), f = (o_type is None)
     cdef object o_fmt = asbuffer(o_buf, w, f, baddr, bsize)
     # lookup datatype if not provided or not a Datatype
     global TypeDict

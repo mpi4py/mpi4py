@@ -236,11 +236,11 @@ cdef class Comm:
         """
         Nonblocking test for a message
         """
-        cdef bint flag = 0
+        cdef int flag = 0
         cdef MPI_Status *statusp = arg_Status(status)
         with nogil: CHKERR( MPI_Iprobe(
             source, tag, self.ob_mpi, &flag, statusp) )
-        return flag
+        return <bint>flag
 
     # Persistent Communication
     # ------------------------
@@ -563,9 +563,9 @@ cdef class Comm:
         """
         Test to see if a comm is an intercommunicator
         """
-        cdef bint flag = 0
+        cdef int flag = 0
         CHKERR( MPI_Comm_test_inter(self.ob_mpi, &flag) )
-        return flag
+        return <bint>flag
 
     property is_inter:
         """is intercommunicator"""
@@ -1387,10 +1387,10 @@ cdef class Distgraphcomm(Intracomm):
         """
         cdef int indegree = 0
         cdef int outdegree = 0
-        cdef bint weighted = 0
+        cdef int weighted = 0
         CHKERR( MPI_Dist_graph_neighbors_count(
                 self.ob_mpi, &indegree, &outdegree, &weighted) )
-        return (indegree, outdegree, weighted)
+        return (indegree, outdegree, <bint>weighted)
 
     def Get_dist_neighbors(self):
         """
