@@ -1,7 +1,31 @@
 # -----------------------------------------------------------------------------
 
-cdef extern from "string.h" nogil:
-    char *strncpy(char *, char *, size_t)
+cdef inline object toBytes(object ob, char *p[]):
+    if ob is None:
+        return None
+    if not isinstance(ob, bytes):
+        ob = ob.encode()
+    if p:
+        p[0] = ob
+    return ob
+
+# -----------------------------------------------------------------------------
+
+cdef extern from *:
+    void __Pyx_Raise(object, object, void*)
+if 0: raise RuntimeError # DO NOT REMOVE this line !!
+
+cdef int PyMPE_Raise(int ierr) except -1 with gil:
+    __Pyx_Raise(RuntimeError, "MPE logging error [code: %d]" % ierr, NULL)
+    return 0
+
+cdef inline int CHKERR(int ierr) nogil except -1:
+    if ierr == 0:
+        return 0
+    PyMPE_Raise(ierr)
+    return -1
+
+# -----------------------------------------------------------------------------
 
 cdef extern from "stdio.h" nogil:
     ctypedef struct FILE
@@ -16,28 +40,8 @@ cdef extern from "Python.h":
     void PySys_WriteStderr(char*,...)
     int Py_AtExit(void (*)())
 
-cdef extern from *:
-    void __Pyx_Raise(object, object, void*)
-
-# -----------------------------------------------------------------------------
-
-cdef int PyMPE_Raise(int ierr) except -1 with gil:
-    __Pyx_Raise(RuntimeError, "MPE logging error [code: %d]" % ierr, NULL)
-    return 0
-
-cdef inline int CHKERR(int ierr) nogil except -1:
-    if ierr == 0:
-        return 0
-    PyMPE_Raise(ierr)
-    return -1
-
-if 0: raise RuntimeError # DO NOT REMOVE this line !!
-
-# -----------------------------------------------------------------------------
-
 cdef int logInitedAtImport = 0 # initialized at import time
 cdef int logDoFinishAtExit = 0 # going to be finalized at exit time
-cdef char logFileName[MPE_MAX_LOGFILENAME] # log file name
 
 cdef inline int initialize() except -1:
     # Is logging active?
@@ -69,7 +73,7 @@ cdef int finalize() nogil:
         return 0
     # Finalize logging library
     cdef int ierr = 0
-    ierr = MPELog.Finish(logFileName)
+    ierr = MPELog.Finish()
     return ierr
 
 cdef void atexit() nogil:
@@ -81,21 +85,9 @@ cdef void atexit() nogil:
 
 logInitedAtImport = initialize()
 logDoFinishAtExit = 0
-strncpy(logFileName, b"", MPE_MAX_LOGFILENAME)
 
 cdef inline int isReady() nogil:
     return (MPELog.Initialized() == 1)
-
-# -----------------------------------------------------------------------------
-
-cdef inline object toBytes(object ob, char *p[]):
-    if ob is None:
-        return None
-    if not isinstance(ob, bytes):
-        ob = ob.encode()
-    if p:
-        p[0] = ob
-    return ob
 
 # -----------------------------------------------------------------------------
 
@@ -125,7 +117,7 @@ cdef inline int packArgs(object arglist, char bytebuf[]) except -1:
             fdata = arg
             count = 1
             data = <char*>&fdata
-        elif isinstance(arg, str):
+        elif isinstance(arg, bytes):
             token = c's'
             sdata = arg
             count = <int>len(arg)
@@ -136,7 +128,7 @@ cdef inline int packArgs(object arglist, char bytebuf[]) except -1:
             data  = NULL
             continue
         #
-        CHKERR( MPELog.packBytes(bytebuf, &pos, token, count, data) )
+        CHKERR( MPELog.PackBytes(bytebuf, &pos, token, count, data) )
     return 0
 
 # -----------------------------------------------------------------------------

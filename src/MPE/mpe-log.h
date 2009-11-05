@@ -3,29 +3,28 @@
 
 typedef struct PyMPELogAPI {
   int (*Init)(void);
-  int (*Finish)(const char[]);
+  int (*Finish)();
   int (*Initialized)(void);
-  int (*syncClocks)(void);
+  int (*SetFileName)(const char[]);
+  int (*SyncClocks)(void);
   int (*Start)(void);
   int (*Stop)(void);
-  int (*newState)(int,
+  int (*NewState)(int,
 		  const char[],
 		  const char[],
 		  const char[],
 		  int[2]);
-  int (*newEvent)(int,
+  int (*NewEvent)(int,
 		  const char[],
 		  const char[],
 		  const char[],
 		  int[1]);
-  int (*logEvent)(int,
+  int (*LogEvent)(int,
 		  int,
 		  const char[]);
-  int (*packBytes)(char[], int *,
+  int (*PackBytes)(char[], int *,
 		   char, int,
 		   const void *);
 } PyMPELogAPI;
-
-extern PyMPELogAPI *PyMPELog;
 
 #endif /*! PyMPI_MPE_LOG_H */

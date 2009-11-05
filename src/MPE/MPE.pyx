@@ -9,72 +9,64 @@ include "helpers.pxi"
 
 # -----------------------------------------------------------------------------
 
-cdef class Log:
+cdef class LogEvent:
 
-    @classmethod
-    def init(cls, logfile=None):
-        initialize()
-        cls.setFileName(logfile)
+    cdef int commID
+    cdef int eventID[1]
+    cdef int isActive
+    cdef object name
+    cdef object color
 
-    @classmethod
-    def finish(cls):
-        CHKERR( finalize() )
-
-    @classmethod
-    def setFileName(cls, filename):
-        cdef char *cfilename = b"Unknown"
-        filename = toBytes(filename, &cfilename)
-        strncpy(logFileName, cfilename, MPE_MAX_LOGFILENAME)
-        logFileName[MPE_MAX_LOGFILENAME-1] = 0
-
-    @classmethod
-    def syncClocks(cls):
-        if not isReady(): return
-        CHKERR( MPELog.syncClocks() )
-
-    @classmethod
-    def start(cls):
-        if not isReady(): return
-        CHKERR( MPELog.Start() )
-
-    @classmethod
-    def stop(cls):
-        if not isReady(): return
-        CHKERR( MPELog.Stop() )
-
-    @classmethod
-    def State(cls, name=None, color=None):
-        cdef LogState state = LogState()
-        cdef char *cname = NULL
-        cdef char *ccolor = b"red"
-        name  = toBytes(name,  &cname)
-        color = toBytes(color, &ccolor)
+    def __cinit__(self, name, color=None):
+        self.commID = 0
+        self.eventID[0] = 0
+        self.isActive = 0
         #
-        if not isReady(): return state
-        if 1: state.commID = 2 # MPI_COMM_WORLD
-        else: state.commID = 1 # MPI_COMM_SELF
-        CHKERR( MPELog.newState(state.commID,
-                                cname, ccolor, NULL,
-                                state.stateID) )
-        state.isActive = 1
-        return state
-
-    @classmethod
-    def Event(cls, name=None, color=None):
-        cdef LogEvent event = LogEvent()
+        cdef int commID = 2 # MPI_COMM_WORLD
         cdef char *cname = NULL
         cdef char *ccolor = b"blue"
+        cdef char *cformat = NULL
         name  = toBytes(name,  &cname)
         color = toBytes(color, &ccolor)
-        #
         if not isReady(): return
-        if 1: event.commID = 2 # MPI_COMM_WORLD
-        else: event.commID = 1 # MPI_COMM_SELF
-        CHKERR( MPELog.newEvent(event.commID,
-                                cname, ccolor, NULL,
-                                event.eventID) )
-        event.isActive = 1
-        return event
+        CHKERR( MPELog.NewEvent(commID,
+                                cname, ccolor, cformat,
+                                self.eventID) )
+        #
+        self.commID = commID
+        self.isActive = 1
+        self.name  = name
+        self.color = color
+
+    def __call__(self):
+        return self
+
+    def __enter__(self):
+        self.log()
+        return self
+
+    def __exit__(self, *exc):
+        return None
+
+    def log(self):
+        if not self.isActive: return
+        if not self.commID: return
+        if not isReady(): return
+        CHKERR( MPELog.LogEvent(self.commID, self.eventID[0], NULL) )
+
+    property name:
+        def __get__(self):
+            return self.name
+
+    property active:
+        def __get__(self):
+            return <bint> self.isActive
+        def __set__(self, bint active):
+            self.isActive = active
+
+    property eventID:
+        def __get__(self):
+            return self.eventID[0]
 
 
 cdef class LogState:
@@ -82,12 +74,30 @@ cdef class LogState:
     cdef int commID
     cdef int stateID[2]
     cdef int isActive
+    cdef object name
+    cdef object color
 
-    def __cinit__(self):
+    def __cinit__(self, name, color=None):
         self.commID = 0
         self.stateID[0] = 0
         self.stateID[1] = 0
         self.isActive = 0
+        #
+        cdef int commID = 2 # MPI_COMM_WORLD
+        cdef char *cname = NULL
+        cdef char *ccolor = b"red"
+        cdef char *cformat = NULL
+        name  = toBytes(name,  &cname)
+        color = toBytes(color, &ccolor)
+        if not isReady(): return
+        CHKERR( MPELog.NewState(commID,
+                                cname, ccolor, cformat,
+                                self.stateID) )
+        #
+        self.commID = commID
+        self.isActive = 1
+        self.name  = name
+        self.color = color
 
     def __call__(self):
         return self
@@ -101,63 +111,63 @@ cdef class LogState:
         return None
 
     def enter(self):
-        if not isReady(): return
-        if not self.commID: return
         if not self.isActive: return
-        CHKERR( MPELog.logEvent(self.commID, self.stateID[0], NULL) )
+        if not self.commID: return
+        if not isReady(): return
+        CHKERR( MPELog.LogEvent(self.commID, self.stateID[0], NULL) )
 
     def exit(self):
-        if not isReady(): return
-        if not self.commID: return
         if not self.isActive: return
-        CHKERR( MPELog.logEvent(self.commID, self.stateID[1], NULL) )
+        if not self.commID: return
+        if not isReady(): return
+        CHKERR( MPELog.LogEvent(self.commID, self.stateID[1], NULL) )
+
+    property name:
+        def __get__(self):
+            return self.name
+
+    property active:
+        def __get__(self):
+            return <bint> self.isActive
+        def __set__(self, bint active):
+            self.isActive = active
 
     property stateID:
         def __get__(self):
             return (self.stateID[0], self.stateID[1])
 
-    property active:
-        def __get__(self):
-            return <bint> self.isActive
-        def __set__(self, bint active):
-            self.isActive = active
+# -----------------------------------------------------------------------------
 
+def initLog(logfile=None):
+    initialize()
+    setLogFileName(logfile)
 
-cdef class LogEvent:
+def finishLog():
+    CHKERR( finalize() )
 
-    cdef int commID
-    cdef int eventID[1]
-    cdef int isActive
+def setLogFileName(filename):
+    cdef char *cfilename = NULL
+    filename = toBytes(filename, &cfilename)
+    CHKERR( MPELog.SetFileName(cfilename) )
 
-    def __cinit__(self):
-        self.commID = 0
-        self.eventID[0] = 0
-        self.isActive = 0
+def syncClocks():
+    if not isReady(): return
+    CHKERR( MPELog.SyncClocks() )
 
-    def __call__(self):
-        return self
+def startLog():
+    if not isReady(): return
+    CHKERR( MPELog.Start() )
 
-    def __enter__(self):
-        self.log()
-        return self
+def stopLog():
+    if not isReady(): return
+    CHKERR( MPELog.Stop() )
 
-    def __exit__(self, *exc):
-        return None
+def newLogEvent(name, color=None):
+    cdef LogEvent event = LogEvent(name, color)
+    return event
 
-    def log(self):
-        if not isReady(): return
-        if not self.commID: return
-        if not self.isActive: return
-        CHKERR( MPELog.logEvent(self.commID, self.eventID[0], NULL) )
-
-    property eventID:
-        def __get__(self):
-            return self.eventID[0]
-
-    property active:
-        def __get__(self):
-            return <bint> self.isActive
-        def __set__(self, bint active):
-            self.isActive = active
+def newLogState(name, color=None):
+    cdef LogState state = LogState(name, color)
+    return state
 
 # -----------------------------------------------------------------------------

@@ -47,7 +47,7 @@ char *** argv;
 int required;
 int * provided;
 {
-  int  returnVal;
+  int returnVal;
   int llrank;
 
 /*

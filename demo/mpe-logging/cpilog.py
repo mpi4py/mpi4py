@@ -13,7 +13,6 @@ if 0: # <- use '1' to disable MPI logging
 
 # Import the MPE extension module
 from mpi4py import MPE
-MPE.Log.setFileName('cpilog')
 
 # Import the 'array' module
 from array import array
@@ -22,13 +21,16 @@ from array import array
 # output a bit more interesting
 from time import sleep
 
+# Set the log file name (note: no extension)
+MPE.setLogFileName('cpilog')
+
 # User-defined MPE events
-cpi_begin = MPE.Log.Event("ComputePi-Begin", "yellow")
-cpi_end   = MPE.Log.Event("ComputePi-End",   "pink")
+cpi_begin = MPE.newLogEvent("ComputePi-Begin", "yellow")
+cpi_end   = MPE.newLogEvent("ComputePi-End",   "pink")
 # User-defined MPE states
-synchronization = MPE.Log.State("Synchronize", "orange")
-communication   = MPE.Log.State("Comunicate",  "red")
-computation     = MPE.Log.State("Compute",     "green")
+synchronization = MPE.newLogState("Synchronize", "orange")
+communication   = MPE.newLogState("Comunicate",  "red")
+computation     = MPE.newLogState("Compute",     "green")
 
 comm = MPI.COMM_WORLD
 nprocs = comm.Get_size()

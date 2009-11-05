@@ -1,9 +1,10 @@
 #if HAVE_MPE
-    #if defined(_WIN32) && defined(__GNUC__)
-      #include <stdint.h>
-      #include <inttypes.h>
-    #endif
-    #include "mpe.h"
+  #include <string.h>
+  #if defined(_WIN32) && defined(__GNUC__)
+    #include <stdint.h>
+    #include <inttypes.h>
+  #endif
+  #include "mpe.h"
   #if defined(MPE_LOG_OK)
     #define MPE_VERSION 2
   #elif defined(MPE_Log_OK)
@@ -17,13 +18,15 @@
 #if HAVE_MPE
   /* This is a hack for outdated MPE API's */
   #if !defined(MPICH2_NUMVERSION) || defined(DEINO_MPI)
-    #define _getThreadID_ 0,
+    #define _ThreadID_ 0,
   #else
-    #define _getThreadID_
+    #define _ThreadID_
   #endif
 #endif
 
 #include "mpe-log.h"
+
+static char logFileName[256] = { 0 };
 
 static int PyMPELog_Init(void)
 {
@@ -35,18 +38,14 @@ static int PyMPELog_Init(void)
   return ierr;
 }
 
-static int PyMPELog_Finish(const char filename[])
+static int PyMPELog_Finish()
 {
   int ierr = 0;
 #if HAVE_MPE
-  if (filename == 0 || filename[0] == 0)
-    filename = "Unknown";
+  const char *filename = logFileName;
+  if (!filename[0]) filename = "Unknown";
   if (MPE_Initialized_logging() == 1)
-  #if MPE_VERSION==2
-    ierr = MPE_Finish_log(filename);
-  #else
     ierr = MPE_Finish_log((char *)filename);
-  #endif
 #endif
   return ierr;
 }
@@ -62,7 +61,18 @@ static int PyMPELog_Initialized(void)
   return status;
 }
 
-static int PyMPELog_syncClocks(void)
+static int PyMPELog_SetFileName(const char filename[])
+{
+  int ierr = 0;
+#if HAVE_MPE
+  if (!filename) return ierr;
+  strncpy(logFileName, filename, sizeof(logFileName));
+  logFileName[sizeof(logFileName)-1] = 0;
+#endif
+  return ierr;
+}
+
+static int PyMPELog_SyncClocks(void)
 {
   int ierr = 0;
 #if HAVE_MPE
@@ -103,7 +113,7 @@ static MPI_Comm PyMPELog_GetComm(int commID)
 }
 #endif
 
-static int PyMPELog_newState(int commID,
+static int PyMPELog_NewState(int commID,
                              const char name[],
                              const char color[],
                              const char format[],
@@ -117,8 +127,7 @@ static int PyMPELog_newState(int commID,
   ierr = MPE_Log_get_state_eventIDs(&stateID[0], &stateID[1]);
   if (ierr == -99999) { ierr = 0; stateID[0] = stateID[1] = -99999; }
   if (ierr != 0) return ierr;
-  ierr = MPE_Describe_comm_state(comm,
-                                 _getThreadID_
+  ierr = MPE_Describe_comm_state(comm, _ThreadID_
                                  stateID[0], stateID[1],
                                  name, color, format);
   #else
@@ -131,7 +140,7 @@ static int PyMPELog_newState(int commID,
   return ierr;
 }
 
-static int PyMPELog_newEvent(int commID,
+static int PyMPELog_NewEvent(int commID,
                              const char name[],
                              const char color[],
                              const char format[],
@@ -145,8 +154,7 @@ static int PyMPELog_newEvent(int commID,
   ierr = MPE_Log_get_solo_eventID(&eventID[0]);
   if (ierr == -99999) { ierr = 0; eventID[0] = -99999; }
   if (ierr != 0) return ierr;
-  ierr = MPE_Describe_comm_event(comm,
-                                 _getThreadID_
+  ierr = MPE_Describe_comm_event(comm, _ThreadID_
                                  eventID[0],
                                  name, color, format);
   #else
@@ -157,7 +165,7 @@ static int PyMPELog_newEvent(int commID,
   return ierr;
 }
 
-static int PyMPELog_logEvent(int commID,
+static int PyMPELog_LogEvent(int commID,
                              const int eventID,
                              const char bytebuf[])
 {
@@ -166,8 +174,7 @@ static int PyMPELog_logEvent(int commID,
   MPI_Comm comm = PyMPELog_GetComm(commID);
   if (comm == MPI_COMM_NULL) return 0;
   #if MPE_VERSION==2
-  ierr = MPE_Log_comm_event(comm,
-                            _getThreadID_
+  ierr = MPE_Log_comm_event(comm, _ThreadID_
                             eventID, bytebuf);
   #else
   ierr = MPE_Log_event(eventID, 0, /*NULL*/0);
@@ -176,7 +183,7 @@ static int PyMPELog_logEvent(int commID,
   return ierr;
 }
 
-static int PyMPELog_packBytes(char bytebuf[], int *position,
+static int PyMPELog_PackBytes(char bytebuf[], int *position,
                               char tokentype, int count,
                               const void *data)
 {
@@ -195,16 +202,17 @@ static PyMPELogAPI PyMPELog_ = {
   PyMPELog_Init,
   PyMPELog_Finish,
   PyMPELog_Initialized,
-  PyMPELog_syncClocks,
+  PyMPELog_SetFileName,
+  PyMPELog_SyncClocks,
   PyMPELog_Start,
   PyMPELog_Stop,
-  PyMPELog_newState,
-  PyMPELog_newEvent,
-  PyMPELog_logEvent,
-  PyMPELog_packBytes
+  PyMPELog_NewState,
+  PyMPELog_NewEvent,
+  PyMPELog_LogEvent,
+  PyMPELog_PackBytes
 };
 
-PyMPELogAPI *PyMPELog = &PyMPELog_;
+static PyMPELogAPI *PyMPELog = &PyMPELog_;
 
 /*
   Local Variables:
