@@ -219,7 +219,7 @@ cdef object PyMPI_sendrecv(object sobj, int dest,   int sendtag,
     if dorecv: rmsg = pickle.load(rmsg)
     return rmsg
 
-# --------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 cdef object PyMPI_barrier(MPI_Comm comm):
     with nogil: CHKERR( MPI_Barrier(comm) )

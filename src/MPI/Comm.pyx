@@ -60,7 +60,7 @@ cdef class Comm:
 
     def Get_size(self):
         """
-        Return the size of a communicator
+        Return the number of processes in a communicator
         """
         cdef int size = -1
         CHKERR( MPI_Comm_size(self.ob_mpi, &size) )

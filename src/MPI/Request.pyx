@@ -27,7 +27,7 @@ cdef class Request:
 
     def Wait(self, Status status=None):
         """
-        Wait for an MPI send or receive to complete.
+        Wait for a send or receive to complete
         """
         cdef MPI_Status *statusp = arg_Status(status)
         with nogil: CHKERR( MPI_Wait(
@@ -35,7 +35,7 @@ cdef class Request:
 
     def Test(self, Status status=None):
         """
-        Test for the completion of a send or receive.
+        Test for the completion of a send or receive
         """
         cdef int flag = 0
         cdef MPI_Status *statusp = arg_Status(status)
@@ -51,8 +51,7 @@ cdef class Request:
 
     def Get_status(self, Status status=None):
         """
-        Non-destructive test for the
-        completion of a request
+        Non-destructive test for the completion of a request
         """
         cdef int flag = 0
         cdef MPI_Status *statusp = arg_Status(status)
