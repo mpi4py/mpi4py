@@ -3,7 +3,7 @@
 
 typedef struct PyMPELogAPI {
   int (*Init)(void);
-  int (*Finish)();
+  int (*Finish)(void);
   int (*Initialized)(void);
   int (*SetFileName)(const char[]);
   int (*SyncClocks)(void);

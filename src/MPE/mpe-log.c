@@ -26,7 +26,9 @@
 
 #include "mpe-log.h"
 
+#if HAVE_MPE
 static char logFileName[256] = { 0 };
+#endif
 
 static int PyMPELog_Init(void)
 {
@@ -38,7 +40,7 @@ static int PyMPELog_Init(void)
   return ierr;
 }
 
-static int PyMPELog_Finish()
+static int PyMPELog_Finish(void)
 {
   int ierr = 0;
 #if HAVE_MPE

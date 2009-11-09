@@ -640,7 +640,7 @@ class config(cmd_config.config):
         log.info("checking for function '%s' ..." % function)
         body = []
         if decl:
-            if call: proto = "int %s ();"
+            if call: proto = "int %s (void);"
             else:    proto = "int %s;"
             body.append(proto % function)
         body.append(    "int main (int n, char**v) {")
