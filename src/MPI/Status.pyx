@@ -84,6 +84,11 @@ cdef class Status:
         CHKERR( MPI_Get_count(&self.ob_mpi, datatype.ob_mpi, &count) )
         return count
 
+    property count:
+        """byte count"""
+        def __get__(self):
+            return self.Get_count(__BYTE__)
+
     def Get_elements(self, Datatype datatype not None):
         """
         Get the number of basic elements in a datatype
