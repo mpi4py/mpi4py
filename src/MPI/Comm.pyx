@@ -46,7 +46,7 @@ cdef class Comm:
         """
         Access the group associated with a communicator
         """
-        cdef Group group = Group()
+        cdef Group group = <Group>Group.__new__(Group)
         CHKERR( MPI_Comm_group(self.ob_mpi, &group.ob_mpi) )
         return group
 
@@ -100,7 +100,7 @@ cdef class Comm:
         """
         Clone an existing communicator
         """
-        cdef Comm comm = type(self)()
+        cdef Comm comm = <Comm>type(self)()
         with nogil: CHKERR( MPI_Comm_dup(self.ob_mpi, &comm.ob_mpi) )
         return comm
 
@@ -202,7 +202,7 @@ cdef class Comm:
         Nonblocking send
         """
         cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
-        cdef Request request = Request()
+        cdef Request request = <Request>Request.__new__(Request)
         with nogil: CHKERR( MPI_Isend(
             smsg.buf, smsg.count, smsg.dtype,
             dest, tag, self.ob_mpi, &request.ob_mpi) )
@@ -213,7 +213,7 @@ cdef class Comm:
         Nonblocking receive
         """
         cdef _p_msg_p2p rmsg = message_p2p_recv(buf, source)
-        cdef Request request = Request()
+        cdef Request request = <Request>Request.__new__(Request)
         with nogil: CHKERR( MPI_Irecv(
             rmsg.buf, rmsg.count, rmsg.dtype,
             source, tag, self.ob_mpi, &request.ob_mpi) )
@@ -250,7 +250,7 @@ cdef class Comm:
         Create a persistent request for a standard send
         """
         cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
-        cdef Prequest request = Prequest()
+        cdef Prequest request = <Prequest>Prequest.__new__(Prequest)
         with nogil: CHKERR( MPI_Send_init(
             smsg.buf, smsg.count, smsg.dtype,
             dest, tag, self.ob_mpi, &request.ob_mpi) )
@@ -261,7 +261,7 @@ cdef class Comm:
         Create a persistent request for a receive
         """
         cdef _p_msg_p2p rmsg = message_p2p_recv(buf, source)
-        cdef Prequest request = Prequest()
+        cdef Prequest request = <Prequest>Prequest.__new__(Prequest)
         with nogil: CHKERR( MPI_Recv_init(
             rmsg.buf, rmsg.count, rmsg.dtype,
             source, tag, self.ob_mpi, &request.ob_mpi) )
@@ -306,7 +306,7 @@ cdef class Comm:
         Nonblocking send in buffered mode
         """
         cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
-        cdef Request request = Request()
+        cdef Request request = <Request>Request.__new__(Request)
         with nogil: CHKERR( MPI_Ibsend(
             smsg.buf, smsg.count, smsg.dtype,
             dest, tag, self.ob_mpi, &request.ob_mpi) )
@@ -317,7 +317,7 @@ cdef class Comm:
         Nonblocking send in synchronous mode
         """
         cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
-        cdef Request request = Request()
+        cdef Request request = <Request>Request.__new__(Request)
         with nogil: CHKERR( MPI_Issend(
             smsg.buf, smsg.count, smsg.dtype,
             dest, tag, self.ob_mpi, &request.ob_mpi) )
@@ -328,7 +328,7 @@ cdef class Comm:
         Nonblocking send in ready mode
         """
         cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
-        cdef Request request = Request()
+        cdef Request request = <Request>Request.__new__(Request)
         with nogil: CHKERR( MPI_Irsend(
             smsg.buf, smsg.count, smsg.dtype,
             dest, tag, self.ob_mpi, &request.ob_mpi) )
@@ -341,7 +341,7 @@ cdef class Comm:
         Persistent request for a send in buffered mode
         """
         cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
-        cdef Prequest request = Prequest()
+        cdef Prequest request = <Prequest>Prequest.__new__(Prequest)
         with nogil: CHKERR( MPI_Bsend_init(
             smsg.buf, smsg.count, smsg.dtype,
             dest, tag, self.ob_mpi, &request.ob_mpi) )
@@ -352,7 +352,7 @@ cdef class Comm:
         Persistent request for a send in synchronous mode
         """
         cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
-        cdef Prequest request = Prequest()
+        cdef Prequest request = <Prequest>Prequest.__new__(Prequest)
         with nogil: CHKERR( MPI_Ssend_init(
             smsg.buf, smsg.count, smsg.dtype,
             dest, tag, self.ob_mpi, &request.ob_mpi) )
@@ -363,7 +363,7 @@ cdef class Comm:
         Persistent request for a send in ready mode
         """
         cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
-        cdef Prequest request = Prequest()
+        cdef Prequest request = <Prequest>Prequest.__new__(Prequest)
         with nogil: CHKERR( MPI_Rsend_init(
             smsg.buf, smsg.count, smsg.dtype,
             dest, tag, self.ob_mpi, &request.ob_mpi) )
@@ -625,7 +625,7 @@ cdef class Comm:
         Create a intercommunicator by joining
         two processes connected by a socket
         """
-        cdef Intercomm comm = Intercomm()
+        cdef Intercomm comm = <Intercomm>Intercomm.__new__(Intercomm)
         with nogil: CHKERR( MPI_Comm_join(
             fd, &comm.ob_mpi) )
         return comm
@@ -664,7 +664,7 @@ cdef class Comm:
         """
         Get the error handler for a communicator
         """
-        cdef Errhandler errhandler = Errhandler()
+        cdef Errhandler errhandler = <Errhandler>Errhandler.__new__(Errhandler)
         CHKERR( MPI_Comm_get_errhandler(self.ob_mpi, &errhandler.ob_mpi) )
         return errhandler
 
@@ -725,10 +725,10 @@ cdef class Comm:
         return MPI_Comm_c2f(self.ob_mpi)
 
     @classmethod
-    def f2py(cls, arg):
+    def f2py(type cls, arg):
         """
         """
-        cdef Comm comm = cls()
+        cdef Comm comm = <Comm>cls()
         comm.ob_mpi = MPI_Comm_f2c(arg)
         return comm
 
@@ -770,21 +770,21 @@ cdef class Comm:
     def isend(self, obj=None, int dest=0, int tag=0):
         """Nonblocking send"""
         cdef MPI_Comm comm = self.ob_mpi
-        cdef Request request = Request()
+        cdef Request request = <Request>Request.__new__(Request)
         request.ob_buf = PyMPI_isend(obj, dest, tag, comm, &request.ob_mpi)
         return request
     #
     def ibsend(self, obj=None, int dest=0, int tag=0):
         """Nonblocking send in buffered mode"""
         cdef MPI_Comm comm = self.ob_mpi
-        cdef Request request = Request()
+        cdef Request request = <Request>Request.__new__(Request)
         request.ob_buf = PyMPI_ibsend(obj, dest, tag, comm, &request.ob_mpi)
         return request
     #
     def issend(self, obj=None, int dest=0, int tag=0):
         """Nonblocking send in synchronous mode"""
         cdef MPI_Comm comm = self.ob_mpi
-        cdef Request request = Request()
+        cdef Request request = <Request>Request.__new__(Request)
         request.ob_buf = PyMPI_issend(obj, dest, tag, comm, &request.ob_mpi)
         return request
     #
@@ -844,7 +844,7 @@ cdef class Intracomm(Comm):
         """
         Duplicate an existing intracommunicator
         """
-        cdef Intracomm comm = type(self)()
+        cdef Intracomm comm = <Intracomm>type(self)()
         with nogil: CHKERR( MPI_Comm_dup(self.ob_mpi, &comm.ob_mpi) )
         return comm
 
@@ -852,7 +852,7 @@ cdef class Intracomm(Comm):
         """
         Create intracommunicator from group
         """
-        cdef Intracomm comm = type(self)()
+        cdef Intracomm comm = <Intracomm>type(self)()
         with nogil: CHKERR( MPI_Comm_create(
             self.ob_mpi, group.ob_mpi, &comm.ob_mpi) )
         return comm
@@ -861,7 +861,7 @@ cdef class Intracomm(Comm):
         """
         Split intracommunicator by color and key
         """
-        cdef Intracomm comm = type(self)()
+        cdef Intracomm comm = <Intracomm>type(self)()
         with nogil: CHKERR( MPI_Comm_split(
             self.ob_mpi, color, key, &comm.ob_mpi) )
         return comm
@@ -876,7 +876,7 @@ cdef class Intracomm(Comm):
         cdef int *iperiods = NULL
         periods = chkarray_int(periods, ndims, &iperiods)
         #
-        cdef Cartcomm comm = Cartcomm()
+        cdef Cartcomm comm = <Cartcomm>Cartcomm.__new__(Cartcomm)
         with nogil: CHKERR( MPI_Cart_create(
             self.ob_mpi, ndims, idims, iperiods, reorder, &comm.ob_mpi) )
         return comm
@@ -893,7 +893,7 @@ cdef class Intracomm(Comm):
         if iindex[0]==0 and iindex[nnodes-1]==nedges:
             nnodes -= 1; iindex += 1;
         #
-        cdef Graphcomm comm = Graphcomm()
+        cdef Graphcomm comm = <Graphcomm>Graphcomm.__new__(Graphcomm)
         with nogil: CHKERR( MPI_Graph_create(
             self.ob_mpi, nnodes, iindex, iedges, reorder, &comm.ob_mpi) )
         return comm
@@ -919,7 +919,8 @@ cdef class Intracomm(Comm):
             destweights = chkarray_int(destweights, outdegree, &idestweight)
         cdef MPI_Info cinfo = arg_Info(info)
         #
-        cdef Distgraphcomm comm = Graphcomm()
+        cdef Distgraphcomm comm = \
+            <Distgraphcomm>Distgraphcomm.__new__(Distgraphcomm)
         CHKERR( MPI_Dist_graph_create_adjacent(
                 self.ob_mpi,
                 indegree,  isource, isourceweight,
@@ -944,7 +945,8 @@ cdef class Intracomm(Comm):
             weights = chkarray_int(weights, ne, &iweight)
         cdef MPI_Info cinfo = arg_Info(info)
         #
-        cdef Distgraphcomm comm = Graphcomm()
+        cdef Distgraphcomm comm = \
+            <Distgraphcomm>Distgraphcomm.__new__(Distgraphcomm)
         CHKERR( MPI_Dist_graph_create(
                 self.ob_mpi,
                 nv, isource, idegree, idest, iweight,
@@ -959,7 +961,7 @@ cdef class Intracomm(Comm):
         """
         Create intercommunicator
         """
-        cdef Intercomm comm = Intercomm()
+        cdef Intercomm comm = <Intercomm>Intercomm.__new__(Intercomm)
         with nogil: CHKERR( MPI_Intercomm_create(
             self.ob_mpi, local_leader,
             peer_comm.ob_mpi, remote_leader,
@@ -1033,7 +1035,7 @@ cdef class Intracomm(Comm):
             if errcodes is not None:
                 tmp2 = newarray_int(maxprocs, &ierrcodes)
         #
-        cdef Intercomm comm = Intercomm()
+        cdef Intercomm comm = <Intercomm>Intercomm.__new__(Intercomm)
         with nogil: CHKERR( MPI_Comm_spawn(
             cmd, argv, maxprocs, cinfo, root,
             self.ob_mpi, &comm.ob_mpi,
@@ -1058,7 +1060,7 @@ cdef class Intracomm(Comm):
         if root == rank:
             port_name = asmpistr(port_name, &cportname, NULL)
             cinfo = arg_Info(info)
-        cdef Intercomm comm = Intercomm()
+        cdef Intercomm comm = <Intercomm>Intercomm.__new__(Intercomm)
         with nogil: CHKERR( MPI_Comm_accept(
             cportname, cinfo, root,
             self.ob_mpi, &comm.ob_mpi) )
@@ -1077,7 +1079,7 @@ cdef class Intracomm(Comm):
         if root == rank:
             port_name = asmpistr(port_name, &cportname, NULL)
             cinfo = arg_Info(info)
-        cdef Intercomm comm = Intercomm()
+        cdef Intercomm comm = <Intercomm>Intercomm.__new__(Intercomm)
         with nogil: CHKERR( MPI_Comm_connect(
             cportname, cinfo, root,
             self.ob_mpi, &comm.ob_mpi) )
@@ -1097,7 +1099,7 @@ cdef class Cartcomm(Intracomm):
         """
         Duplicate an existing communicator
         """
-        cdef Intracomm comm = type(self)()
+        cdef Cartcomm comm = <Cartcomm>type(self)()
         with nogil: CHKERR( MPI_Comm_dup(self.ob_mpi, &comm.ob_mpi) )
         return comm
 
@@ -1209,7 +1211,7 @@ cdef class Cartcomm(Intracomm):
         cdef int ndim = 0, *iremdims = NULL
         CHKERR( MPI_Cartdim_get(self.ob_mpi, &ndim) )
         remain_dims = chkarray_int(remain_dims, ndim, &iremdims)
-        cdef Cartcomm comm = Cartcomm()
+        cdef Cartcomm comm = <Cartcomm>Cartcomm.__new__(Cartcomm)
         with nogil: CHKERR( MPI_Cart_sub(self.ob_mpi, iremdims, &comm.ob_mpi) )
         return comm
 
@@ -1262,7 +1264,7 @@ cdef class Graphcomm(Intracomm):
         """
         Duplicate an existing communicator
         """
-        cdef Intracomm comm = type(self)()
+        cdef Graphcomm comm = <Graphcomm>type(self)()
         with nogil: CHKERR( MPI_Comm_dup(
             self.ob_mpi, &comm.ob_mpi) )
         return comm
@@ -1394,7 +1396,7 @@ cdef class Distgraphcomm(Intracomm):
         """
         Duplicate an existing communicator
         """
-        cdef Distgraphcomm comm = type(self)()
+        cdef Distgraphcomm comm = <Distgraphcomm>type(self)()
         with nogil: CHKERR( MPI_Comm_dup(
             self.ob_mpi, &comm.ob_mpi) )
         return comm
@@ -1462,7 +1464,7 @@ cdef class Intercomm(Comm):
         Access the remote group associated
         with the inter-communicator
         """
-        cdef Group group = Group()
+        cdef Group group = <Group>Group.__new__(Group)
         CHKERR( MPI_Comm_remote_group(self.ob_mpi, &group.ob_mpi) )
         return group
 
@@ -1491,7 +1493,7 @@ cdef class Intercomm(Comm):
         """
         Duplicate an existing intercommunicator
         """
-        cdef Intercomm comm = type(self)()
+        cdef Intercomm comm = <Intercomm>type(self)()
         with nogil: CHKERR( MPI_Comm_dup(self.ob_mpi, &comm.ob_mpi) )
         return comm
 
@@ -1499,7 +1501,7 @@ cdef class Intercomm(Comm):
         """
         Create intercommunicator from group
         """
-        cdef Intercomm comm = type(self)()
+        cdef Intercomm comm = <Intercomm>type(self)()
         with nogil: CHKERR( MPI_Comm_create(
             self.ob_mpi, group.ob_mpi, &comm.ob_mpi) )
         return comm
@@ -1508,7 +1510,7 @@ cdef class Intercomm(Comm):
         """
         Split intercommunicator by color and key
         """
-        cdef Intercomm comm = type(self)()
+        cdef Intercomm comm = <Intercomm>type(self)()
         with nogil: CHKERR( MPI_Comm_split(
             self.ob_mpi, color, key, &comm.ob_mpi) )
         return comm
@@ -1517,7 +1519,7 @@ cdef class Intercomm(Comm):
         """
         Merge intercommunicator
         """
-        cdef Intracomm comm = Intracomm()
+        cdef Intracomm comm = <Intracomm>Intracomm.__new__(Intracomm)
         with nogil: CHKERR( MPI_Intercomm_merge(
             self.ob_mpi, high, &comm.ob_mpi) )
         return comm

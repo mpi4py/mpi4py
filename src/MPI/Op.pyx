@@ -30,11 +30,11 @@ cdef class Op:
             return op_user_py(self.ob_usrid, x, y, None)
 
     @classmethod
-    def Create(cls, function, bint commute=False):
+    def Create(type cls, function, bint commute=False):
         """
         Create a user-defined operation
         """
-        cdef Op op = cls()
+        cdef Op op = <Op>cls()
         cdef MPI_User_function *cfunction = NULL
         op.ob_usrid = op_user_new(function, &cfunction)
         CHKERR( MPI_Op_create(cfunction, commute, &op.ob_mpi) )
@@ -92,10 +92,10 @@ cdef class Op:
         return MPI_Op_c2f(self.ob_mpi)
 
     @classmethod
-    def f2py(cls, arg):
+    def f2py(type cls, arg):
         """
         """
-        cdef Op op = cls()
+        cdef Op op = <Op>cls()
         op.ob_mpi = MPI_Op_f2c(arg)
         return op
 

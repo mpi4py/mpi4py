@@ -42,7 +42,8 @@ cdef int release_rs(object requests,
         ns = len(statuses)
         if nr > ns :
             if isinstance(statuses, list):
-                statuses += [Status() for i from ns <= i < nr]
+                statuses += [Status.__new__(Status)
+                             for i from ns <= i < nr]
                 ns = nr
         for i from 0 <= i < ns:
             (<Status?>statuses[i]).ob_mpi = sp[i]
@@ -70,7 +71,7 @@ cdef class _p_greq:
         status.MPI_TAG = MPI_ANY_TAG
         MPI_Status_set_elements(status, MPI_BYTE, 0)
         MPI_Status_set_cancelled(status, 0)
-        cdef Status sts = Status()
+        cdef Status sts = <Status>Status.__new__(Status)
         if self.query_fn is not None:
             sts.ob_mpi = status[0]
             self.query_fn(sts, *self.args, **self.kargs)
@@ -103,7 +104,7 @@ cdef int greq_query(void *extra_state, MPI_Status *status) with gil:
     return ierr
 
 cdef int greq_free(void *extra_state) with gil:
-    cdef _p_greq state = <object>extra_state
+    cdef _p_greq state = <_p_greq>extra_state
     cdef int ierr = MPI_SUCCESS
     try:
         ierr = state.free()
@@ -115,7 +116,7 @@ cdef int greq_free(void *extra_state) with gil:
     return ierr
 
 cdef int greq_cancel(void *extra_state, int completed) with gil:
-    cdef _p_greq state = <object>extra_state
+    cdef _p_greq state = <_p_greq>extra_state
     cdef int ierr = MPI_SUCCESS
     try:
         ierr = state.cancel(completed)

@@ -209,10 +209,10 @@ cdef class Request:
         return MPI_Request_c2f(self.ob_mpi)
 
     @classmethod
-    def f2py(cls, arg):
+    def f2py(type cls, arg):
         """
         """
-        cdef Request request = cls()
+        cdef Request request = <Request>cls()
         request.ob_mpi = MPI_Request_f2c(arg)
         return request
 
@@ -256,12 +256,12 @@ cdef class Grequest(Request):
         self.ob_grequest = self.ob_mpi
 
     @classmethod
-    def Start(cls, query_fn, free_fn, cancel_fn,
+    def Start(type cls, query_fn, free_fn, cancel_fn,
               args=None, kargs=None):
         """
         Create and return a user-defined request
         """
-        cdef Grequest request = cls()
+        cdef Grequest request = <Grequest>cls()
         cdef _p_greq state = \
              _p_greq(query_fn, free_fn, cancel_fn, args, kargs)
         with nogil: CHKERR( MPI_Grequest_start(

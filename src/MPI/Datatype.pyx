@@ -123,7 +123,7 @@ cdef class Datatype:
         """
         Duplicate a datatype
         """
-        cdef Datatype datatype = type(self)()
+        cdef Datatype datatype = <Datatype>type(self)()
         CHKERR( MPI_Type_dup(self.ob_mpi, &datatype.ob_mpi) )
         return datatype
 
@@ -133,7 +133,7 @@ cdef class Datatype:
         """
         Create a contiguous datatype
         """
-        cdef Datatype datatype = type(self)()
+        cdef Datatype datatype = <Datatype>type(self)()
         CHKERR( MPI_Type_contiguous(count, self.ob_mpi,
                                     &datatype.ob_mpi) )
         return datatype
@@ -142,7 +142,7 @@ cdef class Datatype:
         """
         Create a vector (strided) datatype
         """
-        cdef Datatype datatype = type(self)()
+        cdef Datatype datatype = <Datatype>type(self)()
         CHKERR( MPI_Type_vector(count, blocklength, stride,
                                 self.ob_mpi, &datatype.ob_mpi) )
         return datatype
@@ -151,7 +151,7 @@ cdef class Datatype:
         """
         Create a vector (strided) datatype
         """
-        cdef Datatype datatype = type(self)()
+        cdef Datatype datatype = <Datatype>type(self)()
         CHKERR( MPI_Type_create_hvector(count, blocklength, stride,
                                         self.ob_mpi,
                                         &datatype.ob_mpi) )
@@ -165,7 +165,7 @@ cdef class Datatype:
         blocklengths  = getarray_int(blocklengths,  &count, &iblen)
         displacements = chkarray_int(displacements,  count, &idisp)
         #
-        cdef Datatype datatype = type(self)()
+        cdef Datatype datatype = <Datatype>type(self)()
         CHKERR( MPI_Type_indexed(count, iblen, idisp,
                                  self.ob_mpi, &datatype.ob_mpi) )
         return datatype
@@ -178,7 +178,7 @@ cdef class Datatype:
         cdef int count = 0, *idisp = NULL
         displacements = getarray_int(displacements, &count, &idisp)
         #
-        cdef Datatype datatype = type(self)()
+        cdef Datatype datatype = <Datatype>type(self)()
         CHKERR( MPI_Type_create_indexed_block(count, blocklength,
                                               idisp, self.ob_mpi,
                                               &datatype.ob_mpi) )
@@ -194,7 +194,7 @@ cdef class Datatype:
         cdef MPI_Aint *idisp = NULL
         displacements = asarray_Aint(displacements, &idisp, count)
         #
-        cdef Datatype datatype = type(self)()
+        cdef Datatype datatype = <Datatype>type(self)()
         CHKERR( MPI_Type_create_hindexed(count, iblen, idisp,
                                          self.ob_mpi,
                                          &datatype.ob_mpi) )
@@ -214,7 +214,7 @@ cdef class Datatype:
         cdef int iorder = MPI_ORDER_C
         if order is not None: iorder = order
         #
-        cdef Datatype datatype = type(self)()
+        cdef Datatype datatype = <Datatype>type(self)()
         CHKERR( MPI_Type_create_subarray(ndims, isizes,
                                          isubsizes, istarts,
                                          iorder, self.ob_mpi,
@@ -237,7 +237,7 @@ cdef class Datatype:
         cdef int iorder = MPI_ORDER_C
         if order is not None: iorder = order
         #
-        cdef Datatype datatype = type(self)()
+        cdef Datatype datatype = <Datatype>type(self)()
         CHKERR( MPI_Type_create_darray(size, rank, ndims, igsizes,
                                        idistribs, idargs, ipsizes,
                                        iorder, self.ob_mpi,
@@ -245,7 +245,7 @@ cdef class Datatype:
         return datatype
 
     @classmethod
-    def Create_struct(cls, blocklengths, displacements, datatypes):
+    def Create_struct(type cls, blocklengths, displacements, datatypes):
         """
         Create an datatype from a general set of
         block sizes, displacements and datatypes
@@ -257,7 +257,7 @@ cdef class Datatype:
         cdef MPI_Datatype *ptype = NULL
         datatypes = asarray_Datatype(datatypes, &ptype, count)
         #
-        cdef Datatype datatype = cls()
+        cdef Datatype datatype = <Datatype>cls()
         CHKERR( MPI_Type_create_struct(count, iblen, idisp, ptype,
                                        &datatype.ob_mpi) )
         return datatype
@@ -266,38 +266,38 @@ cdef class Datatype:
     # ------------------------------------------------
 
     @classmethod
-    def Create_f90_integer(cls, int r):
+    def Create_f90_integer(type cls, int r):
         """
         Return a bounded integer datatype
         """
-        cdef Datatype datatype = cls()
+        cdef Datatype datatype = <Datatype>cls()
         CHKERR( MPI_Type_create_f90_integer(r, &datatype.ob_mpi) )
         return datatype
 
     @classmethod
-    def Create_f90_real(cls, int p, int r):
+    def Create_f90_real(type cls, int p, int r):
         """
         Return a bounded real datatype
         """
-        cdef Datatype datatype = cls()
+        cdef Datatype datatype = <Datatype>cls()
         CHKERR( MPI_Type_create_f90_real(p, r, &datatype.ob_mpi) )
         return datatype
 
     @classmethod
-    def Create_f90_complex(cls, int p, int r):
+    def Create_f90_complex(type cls, int p, int r):
         """
         Return a bounded complex datatype
         """
-        cdef Datatype datatype = cls()
+        cdef Datatype datatype = <Datatype>cls()
         CHKERR( MPI_Type_create_f90_complex(p, r, &datatype.ob_mpi) )
         return datatype
 
     @classmethod
-    def Match_size(cls, int typeclass, int size):
+    def Match_size(type cls, int typeclass, int size):
         """
         Find a datatype matching a specified size in bytes
         """
-        cdef Datatype datatype = cls()
+        cdef Datatype datatype = <Datatype>cls()
         CHKERR( MPI_Type_match_size(typeclass, size, &datatype.ob_mpi) )
         return datatype
 
@@ -324,7 +324,7 @@ cdef class Datatype:
         """
         Create a datatype with a new lower bound and extent
         """
-        cdef Datatype datatype = type(self)()
+        cdef Datatype datatype = <Datatype>type(self)()
         CHKERR( MPI_Type_create_resized(self.ob_mpi,
                                         lb, extent,
                                         &datatype.ob_mpi) )
@@ -663,10 +663,10 @@ cdef class Datatype:
         return MPI_Type_c2f(self.ob_mpi)
 
     @classmethod
-    def f2py(cls, arg):
+    def f2py(type cls, arg):
         """
         """
-        cdef Datatype datatype = cls()
+        cdef Datatype datatype = <Datatype>cls()
         datatype.ob_mpi = MPI_Type_f2c(arg)
         return datatype
 

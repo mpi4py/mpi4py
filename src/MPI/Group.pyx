@@ -96,45 +96,45 @@ cdef class Group:
         """
         Duplicate a group
         """
-        cdef Group group = type(self)()
+        cdef Group group = <Group>type(self)()
         CHKERR( MPI_Group_union(self.ob_mpi, MPI_GROUP_EMPTY, &group.ob_mpi) )
         return group
 
     @classmethod
-    def Union(cls,
+    def Union(type cls,
               Group group1 not None,
               Group group2 not None):
         """
         Produce a group by combining
         two existing groups
         """
-        cdef Group group = cls()
+        cdef Group group = <Group>cls()
         CHKERR( MPI_Group_union(
                 group1.ob_mpi, group2.ob_mpi, &group.ob_mpi) )
         return group
 
     @classmethod
-    def Intersect(cls,
+    def Intersect(type cls,
                   Group group1 not None,
                   Group group2 not None):
         """
         Produce a group as the intersection
         of two existing groups
         """
-        cdef Group group = cls()
+        cdef Group group = <Group>cls()
         CHKERR( MPI_Group_intersection(
                 group1.ob_mpi, group2.ob_mpi, &group.ob_mpi) )
         return group
 
     @classmethod
-    def Difference(cls,
+    def Difference(type cls,
                    Group group1 not None,
                    Group group2 not None):
         """
         Produce a group from the difference
         of two existing groups
         """
-        cdef Group group = cls()
+        cdef Group group = <Group>cls()
         CHKERR( MPI_Group_difference(
                 group1.ob_mpi, group2.ob_mpi, &group.ob_mpi) )
         return group
@@ -146,7 +146,7 @@ cdef class Group:
         """
         cdef int n = 0, *iranks = NULL
         ranks = getarray_int(ranks, &n, &iranks)
-        cdef Group group = type(self)()
+        cdef Group group = <Group>type(self)()
         CHKERR( MPI_Group_incl(self.ob_mpi, n, iranks, &group.ob_mpi) )
         return group
 
@@ -157,7 +157,7 @@ cdef class Group:
         """
         cdef int n = 0, *iranks = NULL
         ranks = getarray_int(ranks, &n, &iranks)
-        cdef Group group = type(self)()
+        cdef Group group = <Group>type(self)()
         CHKERR( MPI_Group_excl(self.ob_mpi, n, iranks, &group.ob_mpi) )
         return group
 
@@ -173,7 +173,7 @@ cdef class Group:
         for i from 0 <= i < n:
             p = <int*> ranges[i]
             p[0], p[1], p[2] = ranks[i]
-        cdef Group group = type(self)()
+        cdef Group group = <Group>type(self)()
         CHKERR( MPI_Group_range_incl(self.ob_mpi, n, ranges, &group.ob_mpi) )
         return group
 
@@ -189,7 +189,7 @@ cdef class Group:
         for i from 0 <= i < n:
             p = <int*> ranges[i]
             p[0], p[1], p[2] = ranks[i]
-        cdef Group group = type(self)()
+        cdef Group group = <Group>type(self)()
         CHKERR( MPI_Group_range_excl(self.ob_mpi, n, ranges, &group.ob_mpi) )
         return group
 
@@ -215,10 +215,10 @@ cdef class Group:
         return MPI_Group_c2f(self.ob_mpi)
 
     @classmethod
-    def f2py(cls, arg):
+    def f2py(type cls, arg):
         """
         """
-        cdef Group group = cls()
+        cdef Group group = <Group>cls()
         group.ob_mpi = MPI_Group_f2c(arg)
         return group
 

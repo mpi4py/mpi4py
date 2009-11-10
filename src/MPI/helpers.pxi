@@ -1,9 +1,9 @@
-#---------------------------------------------------------------------
+#------------------------------------------------------------------------------
 
 cdef enum PyMPI_OBJECT_FLAGS:
     PyMPI_OWNED = 1<<1
 
-#---------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # Status
 
 cdef inline MPI_Status *arg_Status(object status):
@@ -19,11 +19,11 @@ cdef inline int equal_Status(MPI_Status* s1, MPI_Status* s2) nogil:
            return 0
    return 1
 
-#---------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # Datatype
 
 cdef inline Datatype new_Datatype(MPI_Datatype ob):
-    cdef Datatype datatype = Datatype()
+    cdef Datatype datatype = <Datatype>Datatype.__new__(Datatype)
     datatype.ob_mpi = ob
     return datatype
 
@@ -48,13 +48,13 @@ cdef void fix_fileview_Datatype(Datatype datatype):
     if ob == MPI_DATATYPE_NULL: return
     if named_Datatype(ob): pass
 
-#---------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # Request
 
 include "reqimpl.pxi"
 
 cdef inline Request new_Request(MPI_Request ob):
-    cdef Request request = Request()
+    cdef Request request = <Request>Request.__new__(Request)
     request.ob_mpi = ob
     return request
 
@@ -66,13 +66,13 @@ cdef inline int del_Request(MPI_Request* ob):
     #
     return MPI_Request_free(ob)
 
-#---------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # Op
 
 include "opimpl.pxi"
 
 cdef inline Op new_Op(MPI_Op ob):
-    cdef Op op = Op()
+    cdef Op op = <Op>Op.__new__(Op)
     op.ob_mpi = ob
     if   ob == MPI_OP_NULL : op.ob_func = NULL
     elif ob == MPI_MAX     : op.ob_func = _op_MAX
@@ -111,11 +111,11 @@ cdef inline int del_Op(MPI_Op* ob):
     #
     return MPI_Op_free(ob)
 
-#---------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # Info
 
 cdef inline Info new_Info(MPI_Info ob):
-    cdef Info info = Info()
+    cdef Info info = <Info>Info.__new__(Info)
     info.ob_mpi = ob
     return info
 
@@ -131,11 +131,11 @@ cdef inline MPI_Info arg_Info(object info):
     if info is None: return MPI_INFO_NULL
     return (<Info>info).ob_mpi
 
-#---------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # Group
 
 cdef inline Group new_Group(MPI_Group ob):
-    cdef Group group = Group()
+    cdef Group group = <Group>Group.__new__(Group)
     group.ob_mpi = ob
     return group
 
@@ -149,21 +149,21 @@ cdef inline int del_Group(MPI_Group* ob):
      #
      return MPI_Group_free(ob)
 
-#---------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # Comm
 
 cdef inline Comm new_Comm(MPI_Comm ob):
-    cdef Comm comm = Comm()
+    cdef Comm comm = <Comm>Comm.__new__(Comm)
     comm.ob_mpi = ob
     return comm
 
 cdef inline Intracomm new_Intracomm(MPI_Comm ob):
-    cdef Intracomm comm = Intracomm()
+    cdef Intracomm comm = <Intracomm>Intracomm.__new__(Intracomm)
     comm.ob_mpi = ob
     return comm
 
 cdef inline Intercomm new_Intercomm(MPI_Comm ob):
-    cdef Intercomm comm = Intercomm()
+    cdef Intercomm comm = <Intercomm>Intercomm.__new__(Intercomm)
     comm.ob_mpi = ob
     return comm
 
@@ -177,13 +177,13 @@ cdef inline int del_Comm(MPI_Comm* ob):
     #
     return MPI_Comm_free(ob)
 
-#---------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # Win
 
 include "winimpl.pxi"
 
 cdef inline Win new_Win(MPI_Win ob):
-    cdef Win win = Win()
+    cdef Win win = <Win>Win.__new__(Win)
     win.ob_mpi = ob
     return win
 
@@ -195,11 +195,11 @@ cdef inline int del_Win(MPI_Win* ob):
     #
     return MPI_Win_free(ob)
 
-#---------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # File
 
 cdef inline File new_File(MPI_File ob):
-    cdef File file = File()
+    cdef File file = <File>File.__new__(File)
     file.ob_mpi = ob
     return file
 
@@ -211,11 +211,11 @@ cdef inline int del_File(MPI_File* ob):
     #
     return MPI_File_close(ob)
 
-#---------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # Errhandler
 
 cdef inline Errhandler new_Errhandler(MPI_Errhandler ob):
-    cdef Errhandler errhandler = Errhandler()
+    cdef Errhandler errhandler = <Errhandler>Errhandler.__new__(Errhandler)
     errhandler.ob_mpi = ob
     return errhandler
 
@@ -227,4 +227,4 @@ cdef inline int del_Errhandler(MPI_Errhandler* ob):
     #
     return MPI_Errhandler_free(ob)
 
-#---------------------------------------------------------------------
+#------------------------------------------------------------------------------

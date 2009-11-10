@@ -23,11 +23,11 @@ cdef class Info:
         return self.ob_mpi != MPI_INFO_NULL
 
     @classmethod
-    def Create(cls):
+    def Create(type cls):
         """
         Create a new, empty info object
         """
-        cdef Info info = cls()
+        cdef Info info = <Info>cls()
         CHKERR( MPI_Info_create(&info.ob_mpi) )
         return info
 
@@ -42,7 +42,7 @@ cdef class Info:
         Duplicate an existing info object, creating a new object, with
         the same (key, value) pairs and the same ordering of keys
         """
-        cdef Info info = Info()
+        cdef Info info = <Info>type(self)()
         CHKERR( MPI_Info_dup(self.ob_mpi, &info.ob_mpi) )
         return info
 
@@ -109,10 +109,10 @@ cdef class Info:
         return MPI_Info_c2f(self.ob_mpi)
 
     @classmethod
-    def f2py(cls, arg):
+    def f2py(type cls, arg):
         """
         """
-        cdef Info info = cls()
+        cdef Info info = <Info>cls()
         info.ob_mpi = MPI_Info_f2c(arg)
         return info
 

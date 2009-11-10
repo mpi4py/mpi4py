@@ -45,7 +45,7 @@ cdef class Win:
     # -----------------------
 
     @classmethod
-    def Create(cls, memory, int disp_unit=1,
+    def Create(type cls, memory, int disp_unit=1,
                Info info=INFO_NULL, Intracomm comm not None=COMM_SELF):
         """
         Create an window object for one-sided communication
@@ -59,7 +59,7 @@ cdef class Win:
             asmemory(memory, &base, &size)
         cdef MPI_Info cinfo = arg_Info(info)
         #
-        cdef Win win = cls()
+        cdef Win win = <Win>cls()
         with nogil: CHKERR( MPI_Win_create(
             base, size, disp_unit,
             cinfo, comm.ob_mpi, &win.ob_mpi) )
@@ -166,8 +166,8 @@ cdef class Win:
         """
         Put data into a memory window on a remote process.
         """
-        cdef _p_msg_rma msg = \
-             message_rma_put(origin, target_rank, target)
+        cdef _p_msg_rma msg = message_rma()
+        msg.for_put(origin, target_rank, target)
         with nogil: CHKERR( MPI_Put(
             msg.oaddr, msg.ocount, msg.otype,
             target_rank,
@@ -181,8 +181,8 @@ cdef class Win:
         """
         Get data from a memory window on a remote process.
         """
-        cdef _p_msg_rma msg = \
-             message_rma_get(origin, target_rank, target)
+        cdef _p_msg_rma msg = message_rma()
+        msg.for_get(origin, target_rank, target)
         with nogil: CHKERR( MPI_Get(
             msg.oaddr, msg.ocount, msg.otype,
             target_rank,
@@ -198,8 +198,8 @@ cdef class Win:
         Accumulate data into the target process
         using remote memory access.
         """
-        cdef _p_msg_rma msg = \
-             message_rma_acc(origin, target_rank, target)
+        cdef _p_msg_rma msg = message_rma()
+        msg.for_acc(origin, target_rank, target)
         with nogil: CHKERR( MPI_Accumulate(
             msg.oaddr, msg.ocount, msg.otype,
             target_rank,
@@ -278,9 +278,8 @@ cdef class Win:
         """
         Get the error handler for a window
         """
-        cdef Errhandler errhandler = Errhandler()
-        CHKERR( MPI_Win_get_errhandler(self.ob_mpi,
-                                       &errhandler.ob_mpi) )
+        cdef Errhandler errhandler = <Errhandler>Errhandler.__new__(Errhandler)
+        CHKERR( MPI_Win_get_errhandler(self.ob_mpi, &errhandler.ob_mpi) )
         return errhandler
 
     def Set_errhandler(self, Errhandler errhandler not None):
@@ -332,10 +331,10 @@ cdef class Win:
         return MPI_Win_c2f(self.ob_mpi)
 
     @classmethod
-    def f2py(cls, arg):
+    def f2py(type cls, arg):
         """
         """
-        cdef Win win = cls()
+        cdef Win win = <Win>cls()
         win.ob_mpi = MPI_Win_f2c(arg)
         return win
 

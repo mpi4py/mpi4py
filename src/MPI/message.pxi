@@ -263,12 +263,12 @@ cdef class _p_msg_p2p:
         return 0
 
 cdef inline _p_msg_p2p message_p2p_send(object sendbuf, int dest):
-    cdef _p_msg_p2p msg = <_p_msg_p2p>_p_msg_p2p()
+    cdef _p_msg_p2p msg = <_p_msg_p2p>_p_msg_p2p.__new__(_p_msg_p2p)
     msg.for_send(sendbuf, dest)
     return msg
 
 cdef inline _p_msg_p2p message_p2p_recv(object recvbuf, int source):
-    cdef _p_msg_p2p msg = <_p_msg_p2p>_p_msg_p2p()
+    cdef _p_msg_p2p msg = <_p_msg_p2p>_p_msg_p2p.__new__(_p_msg_p2p)
     msg.for_recv(recvbuf, source)
     return msg
 
@@ -659,7 +659,7 @@ cdef class _p_msg_cco:
 
 
 cdef inline _p_msg_cco message_cco():
-    cdef _p_msg_cco msg = <_p_msg_cco>_p_msg_cco()
+    cdef _p_msg_cco msg = <_p_msg_cco>_p_msg_cco.__new__(_p_msg_cco)
     return msg
 
 #------------------------------------------------------------------------------
@@ -718,7 +718,6 @@ cdef class _p_msg_rma:
         self._target = target
         return 0
 
-
     cdef int for_put(self, object origin, int rank, object target) except -1:
         self.for_rma(1, origin, rank, target)
         return 0
@@ -731,19 +730,8 @@ cdef class _p_msg_rma:
         self.for_rma(1, origin, rank, target)
         return 0
 
-cdef inline _p_msg_rma message_rma_put(object origin, int rank, object target):
-    cdef _p_msg_rma msg = <_p_msg_rma>_p_msg_rma()
-    msg.for_put(origin, rank, target)
-    return msg
-
-cdef inline _p_msg_rma message_rma_get(object origin, int rank, object target):
-    cdef _p_msg_rma msg = <_p_msg_rma>_p_msg_rma()
-    msg.for_get(origin, rank, target)
-    return msg
-
-cdef inline _p_msg_rma message_rma_acc(object origin, int rank, object target):
-    cdef _p_msg_rma msg = <_p_msg_rma>_p_msg_rma()
-    msg.for_acc(origin, rank, target)
+cdef inline _p_msg_rma message_rma():
+    cdef _p_msg_rma msg = <_p_msg_rma>_p_msg_rma.__new__(_p_msg_rma)
     return msg
 
 #------------------------------------------------------------------------------
@@ -779,12 +767,12 @@ cdef class _p_msg_io:
         return 0
 
 cdef inline _p_msg_io message_io_read(object buf):
-    cdef _p_msg_io msg = <_p_msg_io>_p_msg_io()
+    cdef _p_msg_io msg = <_p_msg_io>_p_msg_io.__new__(_p_msg_io)
     msg.for_read(buf)
     return msg
 
 cdef inline _p_msg_io message_io_write(object buf):
-    cdef _p_msg_io msg = <_p_msg_io>_p_msg_io()
+    cdef _p_msg_io msg = <_p_msg_io>_p_msg_io.__new__(_p_msg_io)
     msg.for_write(buf)
     return msg
 
