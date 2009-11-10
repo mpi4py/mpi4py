@@ -11,7 +11,7 @@ THANKS: MPI for Python
 
 I would like to thank everybody who contributed in any way, with code,
 hints, testing, bug reports, ideas, moral support, or even
-complaints....
+complaints...
 
    -- Lisandro
 
@@ -24,3 +24,4 @@ Wonseok Shin
 Sam Skillman
 Greg Tener
 Amir Khosrowshahi
+Andreas Klöckner

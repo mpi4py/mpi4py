@@ -58,6 +58,7 @@ ctypedef public api class Datatype [type PyMPIDatatype_Type, object PyMPIDatatyp
 ctypedef public api class Request [type PyMPIRequest_Type, object PyMPIRequestObject]:
     cdef MPI_Request ob_mpi
     cdef int         flags
+    cdef object      ob_buf
 
 ctypedef public api class Prequest(Request) [type PyMPIPrequest_Type, object PyMPIPrequestObject]:
     pass

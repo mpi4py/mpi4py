@@ -1,4 +1,54 @@
-# ---
+# -----------------------------------------------------------------------------
+
+cdef MPI_Status empty_status
+empty_status.MPI_SOURCE = MPI_ANY_SOURCE
+empty_status.MPI_TAG = MPI_ANY_TAG
+empty_status.MPI_ERROR  = MPI_SUCCESS
+
+cdef object acquire_rs(object requests,
+                       object statuses,
+                       int         *count,
+                       MPI_Request *rp[],
+                       MPI_Status  *sp[]):
+     cdef MPI_Request *array_r = NULL
+     cdef MPI_Status  *array_s = NULL
+     cdef object ob_r = None, ob_s = None
+     cdef Py_ssize_t i = 0, n = len(requests)
+     count[0] = <int>n # XXX overflow ?
+     ob_r = allocate(n*sizeof(MPI_Request), <void**>&array_r)
+     for i from 0 <= i < n:
+         array_r[i] = (<Request?>requests[i]).ob_mpi
+     rp[0] = array_r
+     if statuses is not None:
+         ob_s = allocate(n*sizeof(MPI_Status), <void**>&array_s)
+         for i from 0 <= i < n:
+             array_s[i] = empty_status
+         sp[0] = array_s
+     return (ob_r, ob_s)
+
+cdef int release_rs(object requests,
+                    object statuses,
+                    int         count,
+                    MPI_Request rp[],
+                    MPI_Status  sp[]) except -1:
+    cdef Py_ssize_t i = 0, nr = count, ns = 0
+    cdef Request req = None
+    for i from 0 <= i < nr:
+        req = <Request>requests[i]
+        req.ob_mpi = rp[i]
+        if rp[i] == MPI_REQUEST_NULL:
+            req.ob_buf = None
+    if statuses is not None:
+        ns = len(statuses)
+        if nr > ns :
+            if isinstance(statuses, list):
+                statuses += [Status() for i from ns <= i < nr]
+                ns = nr
+        for i from 0 <= i < ns:
+            (<Status?>statuses[i]).ob_mpi = sp[i]
+    return 0
+
+# -----------------------------------------------------------------------------
 
 cdef class _p_greq:
 
@@ -103,4 +153,4 @@ cdef int greq_cancel_fn(void *extra_state, int completed) nogil:
         return MPI_ERR_INTERN
     return greq_cancel(extra_state, completed)
 
-# ---
+# -----------------------------------------------------------------------------

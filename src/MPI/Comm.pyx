@@ -767,6 +767,27 @@ cdef class Comm:
                               recvobj, source, recvtag,
                               comm, statusp)
     #
+    def isend(self, obj=None, int dest=0, int tag=0):
+        """Nonblocking send"""
+        cdef MPI_Comm comm = self.ob_mpi
+        cdef Request request = Request()
+        request.ob_buf = PyMPI_isend(obj, dest, tag, comm, &request.ob_mpi)
+        return request
+    #
+    def ibsend(self, obj=None, int dest=0, int tag=0):
+        """Nonblocking send in buffered mode"""
+        cdef MPI_Comm comm = self.ob_mpi
+        cdef Request request = Request()
+        request.ob_buf = PyMPI_ibsend(obj, dest, tag, comm, &request.ob_mpi)
+        return request
+    #
+    def issend(self, obj=None, int dest=0, int tag=0):
+        """Nonblocking send in synchronous mode"""
+        cdef MPI_Comm comm = self.ob_mpi
+        cdef Request request = Request()
+        request.ob_buf = PyMPI_issend(obj, dest, tag, comm, &request.ob_mpi)
+        return request
+    #
     def barrier(self):
         "Barrier"
         cdef MPI_Comm comm = self.ob_mpi

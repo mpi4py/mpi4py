@@ -32,6 +32,8 @@ cdef class Request:
         cdef MPI_Status *statusp = arg_Status(status)
         with nogil: CHKERR( MPI_Wait(
             &self.ob_mpi, statusp) )
+        if self.ob_mpi == MPI_REQUEST_NULL:
+            self.ob_buf = None
 
     def Test(self, Status status=None):
         """
@@ -41,6 +43,8 @@ cdef class Request:
         cdef MPI_Status *statusp = arg_Status(status)
         with nogil: CHKERR( MPI_Test(
             &self.ob_mpi, &flag, statusp) )
+        if self.ob_mpi == MPI_REQUEST_NULL:
+            self.ob_buf = None
         return <bint>flag
 
     def Free(self):
@@ -67,18 +71,17 @@ cdef class Request:
         """
         Wait for any previously initiated request to complete
         """
-        cdef int count = len(requests)
+        cdef int count = 0
         cdef MPI_Request *irequests = NULL
-        cdef tmp1 = asarray_Request(requests, &irequests, count)
-        cdef MPI_Status *statusp = arg_Status(status)
         cdef int index = MPI_UNDEFINED
+        cdef MPI_Status *statusp = arg_Status(status)
         #
+        cdef tmp = acquire_rs(requests, None, &count, &irequests, NULL)
         try:
             with nogil: CHKERR( MPI_Waitany(
                 count, irequests, &index, statusp) )
         finally:
-            restore_Request(requests, &irequests, count);
-        #
+            release_rs(requests, None, count, irequests, NULL)
         return index
 
     @classmethod
@@ -86,18 +89,18 @@ cdef class Request:
         """
         Test for completion of any previously initiated request
         """
-        cdef int count = len(requests)
+        cdef int count = 0
         cdef MPI_Request *irequests = NULL
-        cdef tmp1 = asarray_Request(requests, &irequests, count)
         cdef int index = MPI_UNDEFINED
         cdef int flag = 0
         cdef MPI_Status *statusp = arg_Status(status)
         #
+        cdef tmp = acquire_rs(requests, None, &count, &irequests, NULL)
         try:
             with nogil: CHKERR( MPI_Testany(
                 count, irequests, &index, &flag, statusp) )
         finally:
-            restore_Request(requests, &irequests, count)
+            release_rs(requests, None, count, irequests, NULL)
         #
         return (index, <bint>flag)
 
@@ -106,19 +109,17 @@ cdef class Request:
         """
         Wait for all previously initiated requests to complete
         """
-        cdef int count = len(requests)
+        cdef int count = 0
         cdef MPI_Request *irequests = NULL
-        cdef tmp1 = asarray_Request(requests, &irequests, count)
         cdef MPI_Status *istatuses = MPI_STATUSES_IGNORE
-        cdef tmp2 = asarray_Status(statuses, &istatuses, count)
         #
+        cdef tmp = acquire_rs(requests, statuses,
+                              &count, &irequests, &istatuses)
         try:
             with nogil: CHKERR( MPI_Waitall(
                 count, irequests, istatuses) )
         finally:
-            restore_Request(requests, &irequests, count)
-            restore_Status(statuses, &istatuses, count)
-        #
+            release_rs(requests, statuses, count, irequests, istatuses)
         return None
 
     @classmethod
@@ -126,20 +127,18 @@ cdef class Request:
         """
         Test for completion of all previously initiated requests
         """
-        cdef int count = len(requests)
+        cdef int count = 0
         cdef MPI_Request *irequests = NULL
-        cdef tmp1 = asarray_Request(requests, &irequests, count)
-        cdef MPI_Status *istatuses = MPI_STATUSES_IGNORE
-        cdef tmp2 = asarray_Status(statuses, &istatuses, count)
         cdef int flag = 0
+        cdef MPI_Status *istatuses = MPI_STATUSES_IGNORE
         #
+        cdef tmp = acquire_rs(requests, statuses,
+                              &count, &irequests, &istatuses)
         try:
             with nogil: CHKERR( MPI_Testall(
                 count, irequests, &flag, istatuses) )
         finally:
-            restore_Request(requests, &irequests, count)
-            restore_Status(statuses, &istatuses, count)
-        #
+            release_rs(requests, statuses, count, irequests, istatuses)
         return <bint>flag
 
     @classmethod
@@ -147,20 +146,19 @@ cdef class Request:
         """
         Wait for some previously initiated requests to complete
         """
-        cdef int incount = len(requests)
+        cdef int incount = 0
         cdef MPI_Request *irequests = NULL
-        cdef tmp1 = asarray_Request(requests, &irequests, incount)
-        cdef MPI_Status *istatuses = MPI_STATUSES_IGNORE
-        cdef tmp2 = asarray_Status(statuses, &istatuses, incount)
         cdef int outcount = MPI_UNDEFINED, *iindices = NULL
-        cdef object indices = newarray_int(incount, &iindices)
+        cdef MPI_Status *istatuses = MPI_STATUSES_IGNORE
         #
+        cdef tmp = acquire_rs(requests, statuses,
+                              &incount, &irequests, &istatuses)
+        cdef object indices = newarray_int(incount, &iindices)
         try:
             with nogil: CHKERR( MPI_Waitsome(
                 incount, irequests, &outcount, iindices, istatuses) )
         finally:
-            restore_Request(requests, &irequests, incount)
-            restore_Status(statuses, &istatuses, incount)
+            release_rs(requests, statuses, incount, irequests, istatuses)
         #
         if outcount == MPI_UNDEFINED:
             del indices[:]
@@ -175,18 +173,17 @@ cdef class Request:
         """
         cdef int incount = len(requests)
         cdef MPI_Request *irequests = NULL
-        cdef tmp1 = asarray_Request(requests, &irequests, incount)
-        cdef MPI_Status *istatuses = MPI_STATUSES_IGNORE
-        cdef tmp2 = asarray_Status(statuses, &istatuses, incount)
         cdef int outcount = MPI_UNDEFINED, *iindices = NULL
-        cdef object indices = newarray_int(incount, &iindices)
+        cdef MPI_Status *istatuses = MPI_STATUSES_IGNORE
         #
+        cdef tmp = acquire_rs(requests, statuses,
+                              &incount, &irequests, &istatuses)
+        cdef object indices = newarray_int(incount, &iindices)
         try:
-            with nogil: CHKERR( MPI_Waitsome(
+            with nogil: CHKERR( MPI_Testsome(
                 incount, irequests, &outcount, iindices, istatuses) )
         finally:
-            restore_Request(requests, &irequests, incount)
-            restore_Status(statuses, &istatuses, incount)
+            release_rs(requests, statuses, incount, irequests, istatuses)
         #
         if outcount == MPI_UNDEFINED:
             del indices[:]
@@ -238,14 +235,14 @@ cdef class Prequest(Request):
         """
         Start a collection of persistent requests
         """
-        cdef int count = len(requests)
+        cdef int count = 0
         cdef MPI_Request *irequests = NULL
-        cdef tmp = asarray_Request(requests, &irequests, count)
+        cdef tmp = acquire_rs(requests, None, &count, &irequests, NULL)
         #
         try:
             with nogil: CHKERR( MPI_Startall(count, irequests) )
         finally:
-            restore_Request(requests, &irequests, count)
+            release_rs(requests, None, count, irequests, NULL)
 
 
 
@@ -264,7 +261,6 @@ cdef class Grequest(Request):
         """
         Create and return a user-defined request
         """
-        #
         cdef Grequest request = cls()
         cdef _p_greq state = \
              _p_greq(query_fn, free_fn, cancel_fn, args, kargs)
