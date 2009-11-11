@@ -5,9 +5,11 @@
 
 # --------------------------------------------------------------------
 
-import mpi4py.MPI as MPI
-
-import numpy
+from mpi4py import MPI
+try:
+    import numpy
+except ImportError:
+    raise SystemExit
 
 # --------------------------------------------------------------------
 

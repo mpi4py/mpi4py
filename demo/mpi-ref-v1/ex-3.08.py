@@ -1,5 +1,8 @@
-import numpy
-import mpi4py.MPI as MPI
+from mpi4py import MPI
+try:
+    import numpy
+except ImportError:
+    raise SystemExit
 
 # extract the section a[0:6:2, 0:5:2] and store it in e[:,:]
 

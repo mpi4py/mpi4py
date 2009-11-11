@@ -1,7 +1,10 @@
 # Jacobi computation, using persitent requests
 
-import mpi4py.MPI as MPI
-import numpy
+from mpi4py import MPI
+try:
+    import numpy
+except ImportError:
+    raise SystemExit
 
 
 n = 5 * MPI.COMM_WORLD.Get_size()

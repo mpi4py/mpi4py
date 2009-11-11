@@ -1,4 +1,4 @@
-import mpi4py.MPI as MPI
+from mpi4py import MPI
 
 blens = (1, 1)
 disps = (0, MPI.DOUBLE.size)

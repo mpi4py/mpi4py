@@ -1,4 +1,4 @@
-import mpi4py.MPI as MPI
+from mpi4py import MPI
 
 # Type = { (double, 0), (char, 8) }
 

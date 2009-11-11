@@ -4,22 +4,23 @@
 
 # --------------------------------------------------------------------
 
-import mpi4py.MPI as MPI
-if MPI.COMM_WORLD.Get_size() < 2 : raise SystemExit
+from mpi4py import MPI
+import array
 
-import numpy
+if MPI.COMM_WORLD.Get_size() < 2:
+    raise SystemExit
 
 # --------------------------------------------------------------------
 
-sendbuf = numpy.empty(10, dtype=float)
-recvbuf = numpy.empty(10, dtype=float)
+sendbuf = array.array('d', [0]*10)
+recvbuf = array.array('d', [0]*10)
 tag = 0
 status = MPI.Status()
 
 myrank = MPI.COMM_WORLD.Get_rank()
 
 if myrank == 0:
-    sendbuf[:] = numpy.arange(len(sendbuf))
+    sendbuf[:] = array.array('d', range(len(sendbuf)))
     MPI.COMM_WORLD.Send([sendbuf, MPI.DOUBLE], 1, tag)
     MPI.COMM_WORLD.Recv([recvbuf, MPI.DOUBLE], 1, tag, status)
 elif myrank == 1:
@@ -34,12 +35,12 @@ if myrank == 0:
     assert status.tag == tag
     assert status.error == MPI.SUCCESS
     assert status.Get_count(MPI.DOUBLE) == len(recvbuf)
-    assert (sendbuf == recvbuf).all()
+    assert sendbuf == recvbuf
 elif myrank == 1:
     assert status.source == 0
     assert status.tag == tag
     assert status.error == MPI.SUCCESS
     assert status.Get_count(MPI.DOUBLE) == len(recvbuf)
-    assert (sendbuf == recvbuf).all()
+    assert sendbuf == recvbuf
 
 # --------------------------------------------------------------------

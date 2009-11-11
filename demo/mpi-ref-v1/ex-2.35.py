@@ -4,14 +4,19 @@
 
 # --------------------------------------------------------------------
 
-import mpi4py.MPI as MPI
-import numpy
+from mpi4py import MPI
+try:
+    from numpy import empty
+except ImportError:
+    from array import array
+    def empty(size, dtype): 
+        return array(dtype, [0]*size)
 
 # --------------------------------------------------------------------
 
-BUFSISE = 10000
+BUFSISE = 10000 + MPI.BSEND_OVERHEAD
 
-buff = numpy.empty(BUFSISE, dtype='b')
+buff = empty(BUFSISE, dtype='b')
 
 MPI.Attach_buffer(buff)
 

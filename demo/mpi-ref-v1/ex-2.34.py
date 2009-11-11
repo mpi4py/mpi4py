@@ -4,10 +4,14 @@
 
 # --------------------------------------------------------------------
 
-import mpi4py.MPI as MPI
-if MPI.COMM_WORLD.Get_size() < 2 : raise SystemExit
+from mpi4py import MPI
+try:
+    import numpy
+except ImportError:
+    raise SystemExit
 
-import numpy
+if MPI.COMM_WORLD.Get_size() < 2:
+    raise SystemExit
 
 # --------------------------------------------------------------------
 
