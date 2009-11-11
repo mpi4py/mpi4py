@@ -24,12 +24,12 @@ print (hwmess % (rank, size, pname))
 # this make available mpi4py's Python extension types
 # (file:  mpi4py/include/mpi4py/MPI.pxd)
 
-from mpi4py.MPI cimport Comm as CommType
+from mpi4py cimport MPI
 from mpi4py.MPI cimport Intracomm as IntracommType
 
 # C-level cdef, typed, Python objects
 
-cdef CommType WORLD = MPI.COMM_WORLD
+cdef MPI.Comm WORLD = MPI.COMM_WORLD
 cdef IntracommType SELF = MPI.COMM_SELF
 
 
@@ -41,7 +41,7 @@ cdef IntracommType SELF = MPI.COMM_SELF
 # with namespace-protection (stuff accessed as mpi.XXX)
 # (file: mpi4py/include/mpi4py/mpi_c.pxd)
 
-cimport mpi4py.mpi_c as mpi
+from mpi4py cimport mpi_c as mpi
 
 cdef mpi.MPI_Comm world1 = WORLD.ob_mpi
 
