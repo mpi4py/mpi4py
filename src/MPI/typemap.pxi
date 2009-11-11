@@ -14,7 +14,6 @@ AddTypeMap( "c"  , __CHAR__ )  # PEP-3118 & NumPy
 ## AddTypeMap( "u"  , __????__  ) # PEP-3118
 ## AddTypeMap( "w"  , __????__  ) # PEP-3118
 # boolean
-AddTypeMap( "?"  , __CHAR__   ) # emulation
 AddTypeMap( "?"  , __C_BOOL__ ) # C99 _Bool
 # (signed) integer
 AddTypeMap( "b" , __SIGNED_CHAR__ ) # MPI-2
