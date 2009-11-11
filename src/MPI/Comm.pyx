@@ -206,6 +206,7 @@ cdef class Comm:
         with nogil: CHKERR( MPI_Isend(
             smsg.buf, smsg.count, smsg.dtype,
             dest, tag, self.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = smsg
         return request
 
     def Irecv(self, buf, int source=0, int tag=0):
@@ -217,6 +218,7 @@ cdef class Comm:
         with nogil: CHKERR( MPI_Irecv(
             rmsg.buf, rmsg.count, rmsg.dtype,
             source, tag, self.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = rmsg
         return request
 
     # Probe
@@ -254,6 +256,7 @@ cdef class Comm:
         with nogil: CHKERR( MPI_Send_init(
             smsg.buf, smsg.count, smsg.dtype,
             dest, tag, self.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = smsg
         return request
 
     def Recv_init(self, buf, int source=0, int tag=0):
@@ -265,6 +268,7 @@ cdef class Comm:
         with nogil: CHKERR( MPI_Recv_init(
             rmsg.buf, rmsg.count, rmsg.dtype,
             source, tag, self.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = rmsg
         return request
 
     # Communication Modes
@@ -310,6 +314,7 @@ cdef class Comm:
         with nogil: CHKERR( MPI_Ibsend(
             smsg.buf, smsg.count, smsg.dtype,
             dest, tag, self.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = smsg
         return request
 
     def Issend(self, buf, int dest=0, int tag=0):
@@ -321,6 +326,7 @@ cdef class Comm:
         with nogil: CHKERR( MPI_Issend(
             smsg.buf, smsg.count, smsg.dtype,
             dest, tag, self.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = smsg
         return request
 
     def Irsend(self, buf, int dest=0, int tag=0):
@@ -332,6 +338,7 @@ cdef class Comm:
         with nogil: CHKERR( MPI_Irsend(
             smsg.buf, smsg.count, smsg.dtype,
             dest, tag, self.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = smsg
         return request
 
     # Persistent Requests
@@ -345,6 +352,7 @@ cdef class Comm:
         with nogil: CHKERR( MPI_Bsend_init(
             smsg.buf, smsg.count, smsg.dtype,
             dest, tag, self.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = smsg
         return request
 
     def Ssend_init(self, buf, int dest=0, int tag=0):
@@ -356,6 +364,7 @@ cdef class Comm:
         with nogil: CHKERR( MPI_Ssend_init(
             smsg.buf, smsg.count, smsg.dtype,
             dest, tag, self.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = smsg
         return request
 
     def Rsend_init(self, buf, int dest=0, int tag=0):
@@ -367,6 +376,7 @@ cdef class Comm:
         with nogil: CHKERR( MPI_Rsend_init(
             smsg.buf, smsg.count, smsg.dtype,
             dest, tag, self.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = smsg
         return request
 
     # Collective Communications

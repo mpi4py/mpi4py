@@ -263,6 +263,7 @@ cdef class File:
         cdef Request request = <Request>Request.__new__(Request)
         with nogil: CHKERR( MPI_File_iread_at(
             self.ob_mpi, offset, m.buf, m.count, m.dtype, &request.ob_mpi) )
+        request.ob_buf = m
         return request
 
     def Iwrite_at(self, Offset offset, buf):
@@ -273,6 +274,7 @@ cdef class File:
         cdef Request request = <Request>Request.__new__(Request)
         with nogil: CHKERR( MPI_File_iwrite_at(
             self.ob_mpi, offset, m.buf, m.count, m.dtype, &request.ob_mpi) )
+        request.ob_buf = m
         return request
 
     # [9.4.3] Data Access with Individual File Pointers
@@ -322,6 +324,7 @@ cdef class File:
         cdef Request request = <Request>Request.__new__(Request)
         with nogil: CHKERR( MPI_File_iread(
             self.ob_mpi, m.buf, m.count, m.dtype, &request.ob_mpi) )
+        request.ob_buf = m
         return request
 
     def Iwrite(self, buf):
@@ -332,6 +335,7 @@ cdef class File:
         cdef Request request = <Request>Request.__new__(Request)
         with nogil: CHKERR( MPI_File_iwrite(
             self.ob_mpi, m.buf, m.count, m.dtype, &request.ob_mpi) )
+        request.ob_buf = m
         return request
 
     def Seek(self, Offset offset, int whence=SEEK_SET):
@@ -388,6 +392,7 @@ cdef class File:
         cdef Request request = <Request>Request.__new__(Request)
         with nogil: CHKERR( MPI_File_iread_shared(
             self.ob_mpi, m.buf, m.count, m.dtype, &request.ob_mpi) )
+        request.ob_buf = m
         return request
 
     def Iwrite_shared(self, buf):
@@ -398,6 +403,7 @@ cdef class File:
         cdef Request request = <Request>Request.__new__(Request)
         with nogil: CHKERR( MPI_File_iwrite_shared(
             self.ob_mpi, m.buf, m.count, m.dtype, &request.ob_mpi) )
+        request.ob_buf = m
         return request
 
     def Read_ordered(self, buf, Status status=None):
