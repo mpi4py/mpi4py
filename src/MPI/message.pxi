@@ -27,18 +27,19 @@ cdef object message_basic(object o_buf,
                           #
                           void        **baddr,
                           MPI_Aint     *bsize,
+                          MPI_Aint     *bitemsize,
                           MPI_Datatype *btype,
                           ):
     # special-case the constant MPI_BOTTOM,
     # an explicit datatype is required
     if is_BOTTOM(o_buf):
         baddr[0] = MPI_BOTTOM
-        bsize[0] = 0
+        bsize[0] = bitemsize[0] = 0
         btype[0] = (<Datatype?>o_type).ob_mpi
         return o_type
     # get buffer base address, length, and format
     cdef int w = (not readonly), f = (o_type is None)
-    cdef object o_fmt = asbuffer(o_buf, w, f, baddr, bsize)
+    cdef object o_fmt = asbuffer(o_buf, w, f, baddr, bsize, bitemsize)
     # lookup datatype if not provided or not a Datatype
     global TypeDict
     if o_type is None:
@@ -88,10 +89,10 @@ cdef object message_simple(object msg,
         raise TypeError("message: expecting buffer or list/tuple")
     # buffer: address, length, and datatype
     cdef void *baddr = NULL
-    cdef MPI_Aint bsize = 0
+    cdef MPI_Aint bsize = 0, bitemsize = 0
     cdef MPI_Datatype btype = MPI_DATATYPE_NULL
     o_type = message_basic(o_buf, o_type, readonly,
-                           &baddr, &bsize, &btype)
+                           &baddr, &bsize, &bitemsize, &btype)
     # buffer: count and displacement
     cdef int count = 0 # number of datatype entries
     cdef int displ = 0 # from base buffer, in datatype entries
@@ -195,10 +196,10 @@ cdef object message_vector(object msg,
         raise TypeError("message: expecting a list/tuple")
     # buffer: address, length, and datatype
     cdef void *baddr = NULL
-    cdef MPI_Aint bsize = 0
+    cdef MPI_Aint bsize = 0, bitemsize = 0
     cdef MPI_Datatype btype = MPI_DATATYPE_NULL
     o_type = message_basic(o_buf, o_type, readonly,
-                           &baddr, &bsize, &btype)
+                           &baddr, &bsize, &bitemsize, &btype)
     # counts and displacements
     cdef int *counts = NULL
     cdef int *displs = NULL

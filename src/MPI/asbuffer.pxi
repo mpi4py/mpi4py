@@ -5,6 +5,7 @@ cdef extern from "Python.h":
     ctypedef struct Py_buffer:
         void *buf
         Py_ssize_t len
+        Py_ssize_t itemsize
         char *format
     cdef enum:
         PyBUF_SIMPLE
@@ -32,13 +33,12 @@ cdef inline int is_buffer(object ob):
     return (PyObject_CheckBuffer(ob) or
             PyObject_CheckReadBuffer(ob))
 
-cdef object asbuffer(object ob,
-                     int writable, int format,
-                     void **base, MPI_Aint *size):
+cdef object asbuffer(object ob, int writable, int format,
+                     void **base, MPI_Aint *size, MPI_Aint *itemsize):
 
     cdef void *bptr = NULL
-    cdef Py_ssize_t blen = 0
-    cdef object bfmt = None
+    cdef Py_ssize_t blen = 0, bitemlen = 0
+    cdef str bfmt = None
     cdef Py_buffer view
     cdef int flags = PyBUF_SIMPLE
     if PyObject_CheckBuffer(ob):
@@ -53,6 +53,7 @@ cdef object asbuffer(object ob,
         if format:
             if view.format != NULL:
                 bfmt = toString(view.format)
+                bitemlen = view.itemsize
         PyBuffer_Release(&view)
     else:
         if writable:
@@ -61,23 +62,32 @@ cdef object asbuffer(object ob,
             PyObject_AsReadBuffer(ob, <const_void **>&bptr, &blen)
         if format:
             try: # numpy.ndarray
-                bfmt = ob.dtype.char
+                dtype = ob.dtype
+                bfmt = dtype.char
+                bitemlen = dtype.itemsize
             except AttributeError:
                 try: # array.array
                     bfmt = ob.typecode
+                    bitemlen = ob.itemsize
                 except AttributeError:
-                    # nothing found
-                    bfmt = None
+                    if isinstance(ob, bytes):
+                        bfmt = "B"
+                        bitemlen = 1
+                    else:
+                        # nothing found
+                        bfmt = None
+                        bitemlen = 0
     if base: base[0] = <void *>bptr
     if size: size[0] = <MPI_Aint>blen
+    if itemsize: itemsize[0] = <MPI_Aint>bitemlen
     return bfmt
 
 cdef inline object asbuffer_r(object ob, void **base, MPI_Aint *size):
-    asbuffer(ob, 0, 0, base, size)
+    asbuffer(ob, 0, 0, base, size, NULL)
     return ob
 
 cdef inline object asbuffer_w(object ob, void **base, MPI_Aint *size):
-    asbuffer(ob, 1, 0, base, size)
+    asbuffer(ob, 1, 0, base, size, NULL)
     return ob
 
 #------------------------------------------------------------------------------
