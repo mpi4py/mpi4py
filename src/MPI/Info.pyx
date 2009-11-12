@@ -14,7 +14,7 @@ cdef class Info:
     def __richcmp__(self, other, int op):
         if not isinstance(self,  Info): return NotImplemented
         if not isinstance(other, Info): return NotImplemented
-        cdef Info s = self, o = other
+        cdef Info s = <Info>self, o = <Info>other
         if   op == 2: return (s.ob_mpi == o.ob_mpi)
         elif op == 3: return (s.ob_mpi != o.ob_mpi)
         else: raise TypeError("only '==' and '!='")

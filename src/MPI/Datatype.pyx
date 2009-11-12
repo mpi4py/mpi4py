@@ -60,7 +60,7 @@ cdef class Datatype:
     def __richcmp__(self, other, int op):
         if not isinstance(self,  Datatype): return NotImplemented
         if not isinstance(other, Datatype): return NotImplemented
-        cdef Datatype s = self, o = other
+        cdef Datatype s = <Datatype>self, o = <Datatype>other
         if   op == 2: return (s.ob_mpi == o.ob_mpi)
         elif op == 3: return (s.ob_mpi != o.ob_mpi)
         else: raise TypeError("only '==' and '!='")

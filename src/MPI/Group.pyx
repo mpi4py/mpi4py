@@ -14,7 +14,7 @@ cdef class Group:
     def __richcmp__(self, other, int op):
         if not isinstance(self,  Group): return NotImplemented
         if not isinstance(other, Group): return NotImplemented
-        cdef Group s = self, o = other
+        cdef Group s = <Group>self, o = <Group>other
         if   op == 2: return (s.ob_mpi == o.ob_mpi)
         elif op == 3: return (s.ob_mpi != o.ob_mpi)
         else: raise TypeError("only '==' and '!='")

@@ -31,7 +31,7 @@ cdef class Comm:
     def __richcmp__(self, other, int op):
         if not isinstance(self,  Comm): return NotImplemented
         if not isinstance(other, Comm): return NotImplemented
-        cdef Comm s = self, o = other
+        cdef Comm s = <Comm>self, o = <Comm>other
         if   op == 2: return (s.ob_mpi == o.ob_mpi)
         elif op == 3: return (s.ob_mpi != o.ob_mpi)
         else: raise TypeError("only '==' and '!='")

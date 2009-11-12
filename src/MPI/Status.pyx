@@ -12,7 +12,7 @@ cdef class Status:
     def __richcmp__(self, other, int op):
         if not isinstance(self,  Status): return NotImplemented
         if not isinstance(other, Status): return NotImplemented
-        cdef Status s = self, o = other
+        cdef Status s = <Status>self, o = <Status>other
         cdef int r = equal_Status(&s.ob_mpi, &o.ob_mpi)
         if   op == 2: return  r == 0
         elif op == 3: return  r != 0
