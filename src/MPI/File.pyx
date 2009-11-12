@@ -64,8 +64,6 @@ cdef class File:
         cdef File file = <File>cls()
         with nogil: CHKERR( MPI_File_open(
             comm.ob_mpi, cfilename, amode, cinfo, &file.ob_mpi) )
-        # we are in charge or managing MPI errors
-        CHKERR( MPI_File_set_errhandler( file.ob_mpi, MPI_ERRORS_RETURN) )
         return file
 
     # [9.2.2] Closing a File
