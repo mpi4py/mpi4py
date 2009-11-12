@@ -61,7 +61,8 @@ cdef class Win:
         with nogil: CHKERR( MPI_Win_create(
             base, size, disp_unit,
             cinfo, comm.ob_mpi, &win.ob_mpi) )
-        CHKERR( PyMPI_Win_setup(win.ob_mpi, memory) )
+        cdef MPI_Errhandler errhandler = MPI_ERRORS_RETURN
+        CHKERR( PyMPI_Win_setup(win.ob_mpi, memory, errhandler) )
         return win
 
     def Free(self):
