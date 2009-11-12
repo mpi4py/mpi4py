@@ -69,26 +69,25 @@ comm.Gatherv(sendbuf=[C, MPI.INT],
              root=0)
 
 
-if rank != 0: raise SystemExit
+if MPI.COMM_WORLD.Get_rank() == 0:
 
-M = np.zeros([h,w], dtype='i')
-M[indices, :] = cdata
+    M = np.zeros([h,w], dtype='i')
+    M[indices, :] = cdata
 
-try:
-    from matplotlib import pyplot as plt
-except ImportError:
-    pass
-else:
-    plt.imshow(M, aspect='equal')
-    plt.spectral()
     try:
-        import sys, signal
-    except ImportError:
+        from matplotlib import pyplot as plt
+        plt.imshow(M, aspect='equal')
+        plt.spectral()
+        try:
+            import sys, signal
+            def action(*args):
+                raise SystemExit
+            signal.signal(signal.SIGALRM, action)
+            signal.alarm(2)
+        except:
+            pass
+        plt.show()
+    except:
         pass
-    else:
-        def action(*args):
-            raise SystemExit
-        signal.signal(signal.SIGALRM, action)
-        signal.alarm(2)
-        try: plt.show()
-        except: pass
+
+MPI.COMM_WORLD.Barrier()

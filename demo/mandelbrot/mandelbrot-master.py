@@ -46,19 +46,16 @@ M[indices, :] = cdata
 
 try:
     from matplotlib import pyplot as plt
-except ImportError:
-    pass
-else:
     plt.imshow(M, aspect='equal')
     plt.spectral()
     try:
         import sys, signal
-    except ImportError:
-        pass
-    else:
         def action(*args):
             raise SystemExit
         signal.signal(signal.SIGALRM, action)
         signal.alarm(2)
-        try: plt.show()
-        except: pass
+    except:
+        pass
+    plt.show()
+except:
+    pass
