@@ -52,22 +52,16 @@ cdef class Win:
         """
         cdef void*    base = MPI_BOTTOM
         cdef MPI_Aint size = 0
-        #
         if is_BOTTOM(memory):
             memory = None
         if memory is not None:
             asmemory(memory, &base, &size)
         cdef MPI_Info cinfo = arg_Info(info)
-        #
         cdef Win win = <Win>cls()
         with nogil: CHKERR( MPI_Win_create(
             base, size, disp_unit,
             cinfo, comm.ob_mpi, &win.ob_mpi) )
-        # we are in charge or managing MPI errors
-        CHKERR( MPI_Win_set_errhandler(win.ob_mpi, MPI_ERRORS_RETURN) )
-        # hold a reference to the object exposing memory
-        CHKERR( PyMPI_Win_memory_set(win.ob_mpi, memory) )
-        # return the created window
+        CHKERR( PyMPI_Win_setup(win.ob_mpi, memory) )
         return win
 
     def Free(self):

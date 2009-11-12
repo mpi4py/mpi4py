@@ -11,18 +11,20 @@ cdef int win_memory_del(MPI_Win w, int k, void *v, void *xs) nogil:
             win_memory_decref(v)
     return MPI_SUCCESS
 
-cdef int PyMPI_Win_memory_set(MPI_Win win, object memory):
+cdef int PyMPI_Win_setup(MPI_Win win, object memory):
     cdef int ierr = MPI_SUCCESS
-    if memory is None: return MPI_SUCCESS
-    # create keyval for memory object
-    global PyMPI_KEYVAL_WIN_MEMORY
-    if PyMPI_KEYVAL_WIN_MEMORY == MPI_KEYVAL_INVALID:
-        ierr = MPI_Win_create_keyval(MPI_WIN_NULL_COPY_FN,
-                                     win_memory_del,
-                                     &PyMPI_KEYVAL_WIN_MEMORY, NULL)
-        if ierr: return ierr
-    # hold a reference to the object exposing windows memory
-    ierr = MPI_Win_set_attr(win, PyMPI_KEYVAL_WIN_MEMORY, <void*>memory)
+    # we are in charge or managing MPI errors
+    ierr = MPI_Win_set_errhandler(win, MPI_ERRORS_RETURN)
     if ierr: return ierr
-    Py_INCREF(memory)
+    # hold a reference to the object exposing memory
+    global PyMPI_KEYVAL_WIN_MEMORY
+    if memory is not None:
+        if PyMPI_KEYVAL_WIN_MEMORY == MPI_KEYVAL_INVALID:
+            ierr = MPI_Win_create_keyval(MPI_WIN_NULL_COPY_FN, win_memory_del,
+                                         &PyMPI_KEYVAL_WIN_MEMORY, NULL)
+            if ierr: return ierr
+        ierr = MPI_Win_set_attr(win, PyMPI_KEYVAL_WIN_MEMORY, <void*>memory)
+        if ierr: return ierr
+        Py_INCREF(memory)
+    #
     return MPI_SUCCESS
