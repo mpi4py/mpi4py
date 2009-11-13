@@ -44,6 +44,7 @@ def view(pi, np=None, wt=None):
         prn("computing units: %d processes\n" % np)
     if wt is not None:
         prn("wall clock time: %g seconds\n" % wt)
+    sys.stdout.flush()
 
 def comp_pi(n, comm, root=0):
     nprocs = comm.Get_size()
