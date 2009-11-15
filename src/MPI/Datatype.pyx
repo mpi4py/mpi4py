@@ -761,6 +761,8 @@ cdef Datatype __COMPLEX8__  = new_Datatype( MPI_COMPLEX8  )
 cdef Datatype __COMPLEX16__ = new_Datatype( MPI_COMPLEX16 )
 cdef Datatype __COMPLEX32__ = new_Datatype( MPI_COMPLEX32 )
 
+include "typemap.pxi"
+
 
 # Predefined datatype handles
 # ---------------------------
@@ -857,9 +859,3 @@ F_DOUBLE              = __DOUBLE_PRECISION__
 F_COMPLEX             = __COMPLEX__
 F_FLOAT_COMPLEX       = __COMPLEX__
 F_DOUBLE_COMPLEX      = __DOUBLE_COMPLEX__
-
-
-# -----------------------
-include "typemap.pxi"   #
-__TypeDict__ = TypeDict #
-# -----------------------
