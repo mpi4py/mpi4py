@@ -21,8 +21,10 @@ cdef class Comm:
     Communicator
     """
 
-    def __cinit__(self):
+    def __cinit__(self, Comm comm=None):
         self.ob_mpi = MPI_COMM_NULL
+        if comm is not None:
+            self.ob_mpi = comm.ob_mpi
 
     def __dealloc__(self):
         if not (self.flags & PyMPI_OWNED): return
@@ -847,6 +849,13 @@ cdef class Intracomm(Comm):
     Intracommunicator
     """
 
+    def __cinit__(self, Comm comm=None):
+        cdef int inter = 0
+        if self.ob_mpi != MPI_COMM_NULL:
+            CHKERR( MPI_Comm_test_inter(self.ob_mpi, &inter) )
+            if inter: raise TypeError(
+                "expecting an intracommunicator")
+
     # Communicator Constructors
     # -------------------------
 
@@ -1102,6 +1111,13 @@ cdef class Cartcomm(Intracomm):
     Cartesian topology intracommunicator
     """
 
+    def __cinit__(self, Comm comm=None):
+        cdef int topo = MPI_CART
+        if self.ob_mpi != MPI_COMM_NULL:
+            CHKERR( MPI_Topo_test(self.ob_mpi, &topo) )
+            if topo != MPI_CART: raise TypeError(
+                "expecting a Cartesian communicator")
+
     # Communicator Constructors
     # -------------------------
 
@@ -1264,8 +1280,15 @@ def Compute_dims(int nnodes, dims):
 cdef class Graphcomm(Intracomm):
 
     """
-    Graph topology intracommunicator
+    General graph topology intracommunicator
     """
+
+    def __cinit__(self, Comm comm=None):
+        cdef int topo = MPI_GRAPH
+        if self.ob_mpi != MPI_COMM_NULL:
+            CHKERR( MPI_Topo_test(self.ob_mpi, &topo) )
+            if topo != MPI_GRAPH: raise TypeError(
+                "expecting a general graph communicator")
 
     # Communicator Constructors
     # -------------------------
@@ -1399,6 +1422,13 @@ cdef class Distgraphcomm(Intracomm):
     Distributed graph topology intracommunicator
     """
 
+    def __cinit__(self, Comm comm=None):
+        cdef int topo = MPI_DIST_GRAPH
+        if self.ob_mpi != MPI_COMM_NULL:
+            CHKERR( MPI_Topo_test(self.ob_mpi, &topo) )
+            if topo != MPI_DIST_GRAPH: raise TypeError(
+                "expecting a distributed graph communicator")
+
     # Communicator Constructors
     # -------------------------
 
@@ -1465,6 +1495,13 @@ cdef class Intercomm(Comm):
     """
     Intercommunicator
     """
+
+    def __cinit__(self, Comm comm=None):
+        cdef int inter = 1
+        if self.ob_mpi != MPI_COMM_NULL:
+            CHKERR( MPI_Comm_test_inter(self.ob_mpi, &inter) )
+            if not inter: raise TypeError(
+                "expecting an intercommunicator")
 
     # Intercommunicator Accessors
     # ---------------------------
