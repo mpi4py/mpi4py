@@ -15,6 +15,13 @@ class BaseTestBaseComm(object):
         self.comm = self.CommType(self.COMM_BASE)
 
     def testSubType(self):
+        self.assertTrue(type(self.comm) not in [
+                MPI.Comm,
+                MPI.Intracomm,
+                MPI.Cartcomm,
+                MPI.Graphcomm,
+                MPI.Distgraphcomm,
+                MPI.Intercomm])
         self.assertTrue(isinstance(self.comm, self.CommType))
 
     def testCloneFree(self):
@@ -22,6 +29,7 @@ class BaseTestBaseComm(object):
             comm = self.comm.Clone()
         else:
             comm = self.CommType()
+        self.assertTrue(isinstance(comm, MPI.Comm))
         self.assertTrue(isinstance(comm, self.CommType))
         comm.free()
 
@@ -118,6 +126,100 @@ class TestMyGraphcommSELF(BaseTestMyGraphcomm, unittest.TestCase):
 
 class TestMyGraphcommWORLD(BaseTestMyGraphcomm, unittest.TestCase):
     COMM_BASE = MPI.COMM_WORLD
+
+# ---
+
+class MyWin(MPI.Win):
+
+    def __new__(cls, win=None):
+        return MPI.Win.__new__(cls, win)
+
+    def free(self):
+        MPI.Win.Free(self)
+
+class BaseTestMyWin(object):
+
+    def setUp(self):
+        w = MPI.Win.Create(MPI.BOTTOM)
+        self.win = MyWin(w)
+
+    def tearDown(self):
+        if self.win:
+            self.win.Free()
+
+    def testSubType(self):
+        self.assertTrue(type(self.win) is not MPI.Win)
+        self.assertTrue(isinstance(self.win, MPI.Win))
+        self.assertTrue(isinstance(self.win, MyWin))
+
+    def testFree(self):
+        self.assertTrue(self.win)
+        self.win.free()
+        self.assertFalse(self.win)
+
+class TestMyWin(BaseTestMyWin, unittest.TestCase):
+    pass
+
+try:
+    w = MPI.Win.Create(MPI.BOTTOM).Free()
+except NotImplementedError:
+    del TestMyWin
+
+# ---
+
+import os, tempfile
+
+class MyFile(MPI.File):
+
+    def __new__(cls, file=None):
+        return MPI.File.__new__(cls, file)
+
+    def close(self):
+        MPI.File.Close(self)
+
+
+class BaseTestMyFile(object):
+
+    def setUp(self):
+        self.file = MyFile(MPI.FILE_NULL)
+    def setUp(self):
+        self.fd, fname = tempfile.mkstemp(prefix='mpi4py')
+        amode = MPI.MODE_RDWR | MPI.MODE_CREATE | MPI.MODE_DELETE_ON_CLOSE
+        try:
+            f = MPI.File.Open(MPI.COMM_SELF,
+                              fname, amode,
+                              MPI.INFO_NULL)
+            self.file = MyFile(f)
+        except Exception:
+            os.close(self.fd)
+            os.remove(fname)
+            raise
+
+    def tearDown(self):
+        os.close(self.fd)
+        if self.file:
+            self.file.Close()
+
+    def testSubType(self):
+        self.assertTrue(type(self.file) is not MPI.File)
+        self.assertTrue(isinstance(self.file, MPI.File))
+        self.assertTrue(isinstance(self.file, MyFile))
+
+    def testFree(self):
+        self.assertTrue(self.file)
+        self.file.close()
+        self.assertFalse(self.file)
+
+class TestMyFile(BaseTestMyFile, unittest.TestCase):
+    pass
+
+try:
+    dummy = BaseTestMyFile()
+    dummy.setUp()
+    dummy.tearDown()
+    del dummy
+except NotImplementedError:
+    del TestMyFile
 
 # ---
 

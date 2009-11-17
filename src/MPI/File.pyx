@@ -28,8 +28,10 @@ cdef class File:
     File
     """
 
-    def __cinit__(self):
+    def __cinit__(self, File file=None):
         self.ob_mpi = MPI_FILE_NULL
+        if file is not None:
+            self.ob_mpi = file.ob_mpi
 
     def __dealloc__(self):
         if not (self.flags & PyMPI_OWNED): return
