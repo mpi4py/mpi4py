@@ -1116,12 +1116,15 @@ class build_ext(cmd_build_ext.build_ext):
         if ext.name == 'mpi4py.MPE':
             log.info("checking for MPE availability ...")
             ok = (config_cmd.check_header("mpe.h",
-                                          headers=["stdlib.h"])
+                                          headers=["stdlib.h", 
+                                                   "mpi.h",])
                   and
                   config_cmd.check_func("MPE_Init_log",
-                                        headers=["stdlib.h"],
+                                        headers=["stdlib.h",
+                                                 "mpi.h",
+                                                 "mpe.h"],
                                         libraries=['mpe'],
-                                        decl=1, call=1)
+                                        decl=0, call=1)
                   )
             if not ok:
                 ext.define_macros[:] = []
