@@ -33,13 +33,14 @@ if rank == 0:
 comm.Bcast([rmsg, MPI.FLOAT], root=0)
 comm.Bcast([imsg, MPI.INT], root=0)
 
-x1, x2, y1, y2 = rmsg
-w, h, maxit    = imsg
+x1, x2, y1, y2 = [float(r) for r in rmsg]
+w, h, maxit    = [int(i) for i in imsg]
 dx = (x2 - x1) / w
 dy = (y2 - y1) / h
 
 # number of lines to compute here
 N = h // size + (h % size > rank)
+N = np.array(N, dtype='i')
 # indices of lines to compute here
 I = np.arange(rank, h, size, dtype='i')
 # compute local lines
@@ -68,12 +69,14 @@ comm.Gatherv(sendbuf=[C, MPI.INT],
              recvbuf=[cdata, (counts*w, None), MPI.INT],
              root=0)
 
-
-if MPI.COMM_WORLD.Get_rank() == 0:
-
+# reconstruct full result at root
+if rank == 0:
     M = np.zeros([h,w], dtype='i')
     M[indices, :] = cdata
 
+
+# eye candy (requires matplotlib)
+if rank == 0:
     try:
         from matplotlib import pyplot as plt
         plt.imshow(M, aspect='equal')
@@ -89,5 +92,4 @@ if MPI.COMM_WORLD.Get_rank() == 0:
         plt.show()
     except:
         pass
-
 MPI.COMM_WORLD.Barrier()

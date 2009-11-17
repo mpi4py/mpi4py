@@ -41,9 +41,11 @@ worker.Gatherv(sendbuf=None,
 # disconnect worker
 worker.Disconnect()
 
-M = np.zeros([h,w], dtype='i')
+# reconstruct full result
+M = np.zeros([h, w], dtype='i')
 M[indices, :] = cdata
 
+# eye candy (requires matplotlib)
 try:
     from matplotlib import pyplot as plt
     plt.imshow(M, aspect='equal')
