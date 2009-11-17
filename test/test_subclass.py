@@ -129,6 +129,83 @@ class TestMyGraphcommWORLD(BaseTestMyGraphcomm, unittest.TestCase):
 
 # ---
 
+class MyRequest(MPI.Request):
+    def __new__(cls, request=None):
+        return super(MyRequest, cls).__new__(cls, request)
+    def test(self):
+        return super(type(self), self).Test()
+    def wait(self):
+        return super(type(self), self).Wait()
+
+class MyPrequest(MPI.Prequest):
+    def __new__(cls, request=None):
+        return super(MyPrequest, cls).__new__(cls, request)
+    def test(self):
+        return super(type(self), self).Test()
+    def wait(self):
+        return super(type(self), self).Wait()
+    def start(self):
+        return super(type(self), self).Start()
+
+class MyGrequest(MPI.Grequest):
+    def __new__(cls, request=None):
+        return super(MyGrequest, cls).__new__(cls, request)
+    def test(self):
+        return super(type(self), self).Test()
+    def wait(self):
+        return super(type(self), self).Wait()
+
+class BaseTestMyRequest(object):
+
+    def setUp(self):
+        self.req = self.MyRequestType(MPI.REQUEST_NULL)
+
+    def testSubType(self):
+        self.assertTrue(type(self.req) is not self.MPIRequestType)
+        self.assertTrue(isinstance(self.req, self.MPIRequestType))
+        self.assertTrue(isinstance(self.req, self.MyRequestType))
+        self.req.test()
+
+class TestMyRequest(BaseTestMyRequest, unittest.TestCase):
+    MPIRequestType = MPI.Request
+    MyRequestType = MyRequest
+
+class TestMyPrequest(BaseTestMyRequest, unittest.TestCase):
+    MPIRequestType = MPI.Prequest
+    MyRequestType = MyPrequest
+
+class TestMyGrequest(BaseTestMyRequest, unittest.TestCase):
+    MPIRequestType = MPI.Grequest
+    MyRequestType = MyGrequest
+
+class TestMyRequest2(TestMyRequest):
+
+    def setUp(self):
+        req = MPI.COMM_SELF.Isend(
+            [MPI.BOTTOM, 0, MPI.BYTE],
+            dest=MPI.PROC_NULL, tag=0)
+        self.req = MyRequest(req)
+
+class TestMyPrequest2(TestMyPrequest):
+
+    def setUp(self):
+        req = MPI.COMM_SELF.Send_init(
+            [MPI.BOTTOM, 0, MPI.BYTE],
+            dest=MPI.PROC_NULL, tag=0)
+        self.req = MyPrequest(req)
+
+    def tearDown(self):
+        self.req.Free()
+
+    def testStart(self):
+        for i in range(5):
+            self.req.start()
+            self.req.test()
+            self.req.start()
+            self.req.wait()
+
+# ---
+
 class MyWin(MPI.Win):
 
     def __new__(cls, win=None):
