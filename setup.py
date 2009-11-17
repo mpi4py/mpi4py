@@ -139,7 +139,14 @@ def ext_modules():
             ],
         )
     #
-    return [MPI, MPE]
+    dl = dict(
+        name='mpi4py.dl',
+        optional=True,
+        sources=['src/dynload.c'],
+        depends=['src/dynload.h'],
+        )
+    #
+    return [MPI, MPE, dl]
 
 def libraries():
     import sys
