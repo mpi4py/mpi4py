@@ -1,6 +1,8 @@
 from mpi4py import MPI
 import numpy as np
 
+tic = MPI.Wtime()
+
 x1 = -2.0
 x2 =  1.0
 y1 = -1.0
@@ -50,7 +52,6 @@ for k in np.arange(N):
     for j in np.arange(w):
         x = x1 + j * dx
         C[k, j] = mandelbrot(x, y, maxit)
-
 # gather results at root
 counts = 0
 indices = None
@@ -68,12 +69,21 @@ comm.Gatherv(sendbuf=[I, MPI.INT],
 comm.Gatherv(sendbuf=[C, MPI.INT],
              recvbuf=[cdata, (counts*w, None), MPI.INT],
              root=0)
-
 # reconstruct full result at root
 if rank == 0:
     M = np.zeros([h,w], dtype='i')
     M[indices, :] = cdata
 
+toc = MPI.Wtime()
+wct = comm.gather(toc-tic, root=0)
+if rank == 0:
+    for task, time in enumerate(wct):
+        print('wall clock time: %8.2f seconds (task %d)' % (time, task))
+    def mean(seq): return sum(seq)/len(seq)
+    print    ('all tasks, mean: %8.2f seconds' % mean(wct))
+    print    ('all tasks, min:  %8.2f seconds' % min(wct))
+    print    ('all tasks, max:  %8.2f seconds' % max(wct))
+    print    ('all tasks, sum:  %8.2f seconds' % sum(wct))
 
 # eye candy (requires matplotlib)
 if rank == 0:

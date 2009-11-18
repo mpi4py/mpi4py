@@ -15,7 +15,7 @@ dirname = os.path.abspath(os.path.dirname(__file__))
 executable = os.path.join(dirname, 'mandelbrot-worker.exe')
 
 # spawn worker
-worker = MPI.COMM_SELF.Spawn(executable, maxprocs=5)
+worker = MPI.COMM_SELF.Spawn(executable, maxprocs=7)
 size = worker.Get_remote_size()
 
 # send parameters

@@ -16,6 +16,7 @@ NPFLAG= -n
 test: build
 	${MPIEXEC} ${NPFLAG} 1 ${PYTHON} mandelbrot-master.py
 	${MPIEXEC} ${NPFLAG} 7 ${PYTHON} mandelbrot.py
+	${PYTHON} mandelbrot-seq.py
 
 clean:
 	${RM} mandelbrot-worker.exe
