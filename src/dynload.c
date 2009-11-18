@@ -84,6 +84,10 @@ static struct PyModuleDef dl_module = {
   PyModule_AddIntConstant(m, (char *)#c, c)
 #endif
 
+#define PyModule_AddPtrMacro(m, c) \
+  PyModule_AddObject(m, (char *)#c, PyLong_FromVoidPtr((void *)c))
+
+
 #if PY_MAJOR_VERSION >= 3
 PyMODINIT_FUNC PyInit_dl(void)
 #else
@@ -99,10 +103,11 @@ PyMODINIT_FUNC initdl(void)
 #endif
   if (!m) goto bad;
 
-  if (PyModule_AddIntMacro(m, RTLD_LAZY     ) < 0) goto bad;
-  if (PyModule_AddIntMacro(m, RTLD_NOW      ) < 0) goto bad;
-  if (PyModule_AddIntMacro(m, RTLD_LOCAL    ) < 0) goto bad;
-  if (PyModule_AddIntMacro(m, RTLD_GLOBAL   ) < 0) goto bad;
+  if (PyModule_AddIntMacro(m, RTLD_LAZY   ) < 0) goto bad;
+  if (PyModule_AddIntMacro(m, RTLD_NOW    ) < 0) goto bad;
+  if (PyModule_AddIntMacro(m, RTLD_LOCAL  ) < 0) goto bad;
+  if (PyModule_AddIntMacro(m, RTLD_GLOBAL ) < 0) goto bad;
+
 #ifdef RTLD_NOLOAD
   if (PyModule_AddIntMacro(m, RTLD_NOLOAD   ) < 0) goto bad;
 #endif
@@ -117,20 +122,10 @@ PyMODINIT_FUNC initdl(void)
 #endif
 
 #ifdef RTLD_DEFAULT
-  {
-    PyObject *a = PyLong_FromVoidPtr((void *)RTLD_DEFAULT);
-    if (!a) goto bad;
-    if (PyModule_AddObject(m, (char *)"RTLD_DEFAULT", a) < 0)
-      { Py_DECREF(a); goto bad; }
-  }
+  if (PyModule_AddPtrMacro(m, RTLD_DEFAULT) < 0) goto bad;
 #endif
 #ifdef RTLD_NEXT
-  {
-    PyObject *a = PyLong_FromVoidPtr((void *)RTLD_NEXT);
-    if (!a) goto bad;
-    if (PyModule_AddObject(m, (char *)"RTLD_NEXT", a) < 0)
-      { Py_DECREF(a); goto bad; }
-  }
+  if (PyModule_AddPtrMacro(m, RTLD_NEXT)    < 0) goto bad;
 #endif
 
  finally:

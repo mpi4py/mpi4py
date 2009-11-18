@@ -8,12 +8,14 @@
 #if HAVE_DLFCN_H
   #include <dlfcn.h>
 #else
-
-  #if defined(__CYGWIN__)
-    #define RTLD_LAZY     1
-    #define RTLD_NOW      2
-    #define RTLD_LOCAL    0
-    #define RTLD_GLOBAL   4
+  #if defined(__linux__)
+    #define RTLD_LAZY     0x00001
+    #define RTLD_NOW      0x00002
+    #define RTLD_LOCAL    0x00000
+    #define RTLD_GLOBAL   0x00100
+    #define RTLD_NOLOAD   0x00004
+    #define RTLD_NODELETE 0x01000
+    #define RTLD_DEEPBIND 0x00008
   #elif defined(__APPLE__)
     #define RTLD_LAZY     0x1
     #define RTLD_NOW      0x2
@@ -22,27 +24,22 @@
     #define RTLD_NOLOAD   0x10
     #define RTLD_NODELETE 0x80
     #define RTLD_FIRST    0x100
-  #elif defined(__linux__)
-    #define RTLD_LAZY     0x00001
-    #define RTLD_NOW      0x00002
-    #define RTLD_LOCAL    0x00000
-    #define RTLD_GLOBAL   0x00100
-    #define RTLD_NOLOAD   0x00004
-    #define RTLD_NODELETE 0x01000
-    #define RTLD_DEEPBIND 0x00008
+  #elif defined(__CYGWIN__)
+    #define RTLD_LAZY     1
+    #define RTLD_NOW      2
+    #define RTLD_LOCAL    0
+    #define RTLD_GLOBAL   4
   #endif
-
-  #if defined(c_plusplus) || defined(__cplusplus)
+  #if defined(__cplusplus) || defined(c_plusplus)
   extern "C" {
   #endif
   extern void *dlopen(const char *, int);
-  extern char *dlerror(void);
   extern void *dlsym(void *, const char *);
-  extern int dlclose(void *);
-  #if defined(c_plusplus) || defined(__cplusplus)
+  extern int   dlclose(void *);
+  extern char *dlerror(void);
+  #if defined(__cplusplus) || defined(c_plusplus)
   }
   #endif
-
 #endif
 
 #ifndef RTLD_LAZY
