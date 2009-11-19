@@ -52,11 +52,12 @@ cdef class Win:
         """
         Create an window object for one-sided communication
         """
-        cdef void *base = MPI_BOTTOM
+        cdef void *base = NULL
         cdef MPI_Aint size = 0
         if memory is __BOTTOM__:
+            base = MPI_BOTTOM
             memory = None
-        if memory is not None:
+        elif memory is not None:
             asmemory(memory, &base, &size)
         cdef MPI_Info cinfo = arg_Info(info)
         cdef Win win = <Win>cls()
