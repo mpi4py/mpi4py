@@ -34,6 +34,8 @@ static int MPI_Get_vendor(const char **vendor_name,
   name = "DeinoMPI";
   #elif defined(MS_MPI)
   name = "Microsoft MPI";
+  #elif defined(__SICORTEX__)
+  name = "SiCortex MPI";
   #endif
 #endif
 
