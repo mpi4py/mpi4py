@@ -2,6 +2,12 @@ from mpi4py import MPI
 import mpiunittest as unittest
 import arrayimpl
 
+try:
+    _reduce = reduce
+except NameError:
+    from functools import reduce as _reduce
+prod = lambda sequence,start=1: _reduce(lambda x, y: x*y, sequence, start)
+
 def maxvalue(a):
     try:
         typecode = a.typecode
@@ -158,20 +164,43 @@ class BaseTestCCOBuf(object):
             for typecode in arrayimpl.TypeMap:
                 for op in (MPI.SUM, MPI.MAX, MPI.MIN, MPI.PROD):
                     rcnt = list(range(1,size+1))
-                    sbuf = array([rank]*sum(rcnt), typecode)
+                    sbuf = array([rank+1]*sum(rcnt), typecode)
+                    rbuf = array(-1, typecode, rank+1)
+                    self.COMM.Reduce_scatter(sbuf.as_mpi(),
+                                             rbuf.as_mpi(),
+                                             None, op)
+                    max_val = maxvalue(rbuf)
+                    for i, value in enumerate(rbuf):
+                        if op == MPI.SUM:
+                            redval = sum(range(size))+size
+                            if redval < max_val:
+                                self.assertEqual(value, redval)
+                        elif op == MPI.PROD:
+                            redval = prod(range(1,size+1))
+                            if redval < max_val:
+                                self.assertEqual(value, redval)
+                        elif op == MPI.MAX:
+                            self.assertEqual(value, size)
+                        elif op == MPI.MIN:
+                            self.assertEqual(value, 1)
                     rbuf = array(-1, typecode, rank+1)
                     self.COMM.Reduce_scatter(sbuf.as_mpi(),
                                              rbuf.as_mpi(),
                                              rcnt, op)
+                    max_val = maxvalue(rbuf)
                     for i, value in enumerate(rbuf):
                         if op == MPI.SUM:
-                            pass # XXX
+                            redval = sum(range(size))+size
+                            if redval < max_val:
+                                self.assertEqual(value, redval)
                         elif op == MPI.PROD:
-                            pass # XXX
+                            redval = prod(range(1,size+1))
+                            if redval < max_val:
+                                self.assertEqual(value, redval)
                         elif op == MPI.MAX:
-                            pass # XXX
+                            self.assertEqual(value, size)
                         elif op == MPI.MIN:
-                            pass # XXX
+                            self.assertEqual(value, 1)
 
     def testReduceScatterBlock(self):
         size = self.COMM.Get_size()
@@ -317,7 +346,8 @@ class BaseTestCCOBufInplace(object):
                     if rank == root:
                         sbuf = MPI.IN_PLACE
                         buf = array(-1, typecode, (size, count))
-                        buf.flat[(rank*count):((rank+1)*count)] = array(root, typecode, count)
+                        buf.flat[(rank*count):((rank+1)*count)] = \
+                            array(root, typecode, count)
                         rbuf = buf.as_mpi()
                     else:
                         buf = array(root, typecode, count)
@@ -359,7 +389,8 @@ class BaseTestCCOBufInplace(object):
             for typecode in arrayimpl.TypeMap:
                 for count in range(1, 10):
                     buf = array(-1, typecode, (size, count))
-                    buf.flat[(rank*count):((rank+1)*count)] = array(count, typecode, count)
+                    buf.flat[(rank*count):((rank+1)*count)] = \
+                        array(count, typecode, count)
                     try:
                         self.COMM.Allgather(MPI.IN_PLACE, buf.as_mpi())
                     except NotImplementedError:
@@ -430,6 +461,77 @@ class BaseTestCCOBufInplace(object):
                             self.assertEqual(value, i)
                         elif op == MPI.MIN:
                             self.assertEqual(value, i)
+
+    def testReduceScatterBlock(self):
+        size = self.COMM.Get_size()
+        rank = self.COMM.Get_rank()
+        for array in arrayimpl.ArrayTypes:
+            for typecode in arrayimpl.TypeMap:
+                for op in (MPI.SUM, MPI.MAX, MPI.MIN, MPI.PROD):
+                    for rcnt in range(size):
+                        if op == MPI.PROD:
+                            rbuf = array([rank+1]*rcnt*size, typecode)
+                        else:
+                            rbuf = array([rank]*rcnt*size, typecode)
+                        self.COMM.Reduce_scatter_block(MPI.IN_PLACE,
+                                                       rbuf.as_mpi(),
+                                                       op)
+                        max_val = maxvalue(rbuf)
+                        for i, value in enumerate(rbuf):
+                            if i >= rcnt:
+                                if op == MPI.PROD:
+                                    self.assertEqual(value, rank+1)
+                                else:
+                                    self.assertEqual(value, rank)
+                            else:
+                                if op == MPI.SUM:
+                                    redval = sum(range(size))
+                                    if redval < max_val:
+                                        self.assertEqual(value, redval)
+                                elif op == MPI.PROD:
+                                    redval = prod(range(1,size+1))
+                                    if redval < max_val:
+                                        self.assertEqual(value, redval)
+                                elif op == MPI.MAX:
+                                    self.assertEqual(value, size-1)
+                                elif op == MPI.MIN:
+                                    self.assertEqual(value, 0)
+
+    def testReduceScatter(self):
+        size = self.COMM.Get_size()
+        rank = self.COMM.Get_rank()
+        for array in arrayimpl.ArrayTypes:
+            for typecode in arrayimpl.TypeMap:
+                for op in (MPI.SUM, MPI.MAX, MPI.MIN, MPI.PROD):
+                    #rcnt = list(range(0, size)) # Open MPI fails !!!
+                    rcnt = list(range(1, size+1))
+                    if op == MPI.PROD:
+                        rbuf = array([rank+1]*sum(rcnt), typecode)
+                    else:
+                        rbuf = array([rank]*sum(rcnt), typecode)
+                    self.COMM.Reduce_scatter(MPI.IN_PLACE,
+                                             rbuf.as_mpi(),
+                                             rcnt, op)
+                    max_val = maxvalue(rbuf)
+                    for i, value in enumerate(rbuf):
+                        if i >= rcnt[rank]:
+                            if op == MPI.PROD:
+                                self.assertEqual(value, rank+1)
+                            else:
+                                self.assertEqual(value, rank)
+                        else:
+                            if op == MPI.SUM:
+                                redval = sum(range(size))
+                                if redval < max_val:
+                                    self.assertEqual(value, redval)
+                            elif op == MPI.PROD:
+                                redval = prod(range(1,size+1))
+                                if redval < max_val:
+                                    self.assertEqual(value, redval)
+                            elif op == MPI.MAX:
+                                self.assertEqual(value, size-1)
+                            elif op == MPI.MIN:
+                                self.assertEqual(value, 0)
 
 
 class TestCCOBufSelf(BaseTestCCOBuf, unittest.TestCase):

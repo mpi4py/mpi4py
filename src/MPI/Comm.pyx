@@ -556,8 +556,8 @@ cdef class Comm:
             m.sbuf, m.rbuf, m.rcount, m.rtype,
             op.ob_mpi, self.ob_mpi) )
 
-    def Reduce_scatter(self, sendbuf, recvbuf,
-                       recvcounts, Op op not None=SUM):
+    def Reduce_scatter(self, sendbuf, recvbuf, recvcounts=None,
+                       Op op not None=SUM):
         """
         Reduce-Scatter (vector version)
         """
