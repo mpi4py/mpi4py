@@ -10,3 +10,4 @@ test:
 	${MPIEXEC_NP} ${PYTHON} nxtval-threads.py
 	${MPIEXEC_NP} ${PYTHON} nxtval-dynproc.py
 	${MPIEXEC_NP} ${PYTHON} nxtval-onesided.py
+	${MPIEXEC_NP} ${PYTHON} nxtval-scalable.py

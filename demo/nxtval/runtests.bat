@@ -18,7 +18,8 @@ set PYTHON=C:\Python32\python.exe
 set PYTHON=python
 
 @echo on
+%MPIEXEC% %NP% %PYTHON% nxtval-threads.py
 %MPIEXEC% %NP% %PYTHON% nxtval-dynproc.py
 %MPIEXEC% %NP% %PYTHON% nxtval-onesided.py
-%MPIEXEC% %NP% %PYTHON% nxtval-threads.py
+%MPIEXEC% %NP% %PYTHON% nxtval-scalable.py
  
