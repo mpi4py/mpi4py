@@ -23,15 +23,22 @@ cdef object message_basic(object o_buf,
                           MPI_Datatype *btype,
                           ):
     # special-case the constant MPI_BOTTOM,
-    # an explicit datatype is required
+    # an explicit MPI datatype is required
     if o_buf is __BOTTOM__:
         baddr[0] = MPI_BOTTOM
-        bsize[0] = bitemsize[0] = 0
+        bsize[0] = 0
+        bitemsize[0] = 0
         btype[0] = (<Datatype?>o_type).ob_mpi
         return o_type
     # get buffer base address, length, and format
     cdef int w = (not readonly), f = (o_type is None)
-    cdef object o_fmt = asbuffer(o_buf, w, f, baddr, bsize, bitemsize)
+    cdef object o_fmt = None
+    if o_buf is None:
+        baddr[0] = NULL
+        bsize[0] = 0
+        bitemsize[0] = 0
+    else:
+        o_fmt = asbuffer(o_buf, w, f, baddr, bsize, bitemsize)
     # lookup datatype if not provided or not a Datatype
     global TypeDict
     if o_type is None:
@@ -142,6 +149,14 @@ cdef object message_simple(object msg,
                  ) %  (bsize/extent, blocks))
         if blocks < 1: blocks = 1
         count = <int> ((bsize/extent) / blocks) # XXX overflow?
+    # sanity-check zero-sized messages
+    if o_buf is None:
+        if count != 0:
+            raise ValueError(
+                "message: buffer is None but count is %d" % count)
+        if displ != 0:
+            raise ValueError(
+                "message: buffer is None but displacement is %d" % displ)
     # return collected message data
     _addr[0]  = <void*>(<char*>baddr + offset)
     _count[0] = count
