@@ -138,7 +138,7 @@ def ext_modules():
             '-lmpe',
             ],
         )
-    #
+    # custom dl extension module
     dl = dict(
         name='mpi4py.dl',
         optional=True,
@@ -146,7 +146,11 @@ def ext_modules():
         depends=['src/dynload.h'],
         )
     #
-    return [MPI, MPE, dl]
+    import sys
+    modules = [MPI, MPE]
+    if not sys.platform.startswith('win'):
+        modules.append(dl)
+    return modules
 
 def libraries():
     import sys
