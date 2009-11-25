@@ -1033,7 +1033,8 @@ class build_ext(cmd_build_ext.build_ext):
             cmd_set_undefined_mpi_options(self, 'build')
         #
         if ((sys.platform.startswith('linux') or
-             sys.platform.startswith('gnu')) and
+             sys.platform.startswith('gnu') or
+             sys.platform.startswith('sunos')) and
             sysconfig.get_config_var('Py_ENABLE_SHARED')):
             py_version = sysconfig.get_python_version()
             bad_pylib_dir = os.path.join(sys.prefix, "lib",
