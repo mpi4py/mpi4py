@@ -231,34 +231,38 @@ PyMPIMemory_FromMemory(void *p, MPI_Aint n)
 
 /* ------------------------------------------------------------------------- */
 
-#if PY_MAJOR_VERSION >= 3
 static PyObject *
 PyMPIString_AsStringAndSize(PyObject *ob, const char **s, Py_ssize_t *n)
 {
-  PyObject *b = PyUnicode_AsUTF8String(ob);
-  if (b == NULL)
-    return NULL;
+  PyObject *b = NULL;
+  if (PyUnicode_Check(ob)) {
+#if PY_MAJOR_VERSION >= 3
+    b = PyUnicode_AsUTF8String(ob);
+#else
+    b = PyUnicode_AsASCIIString(ob);
+#endif
+    if (!b) return NULL;
+  } else {
+    b = ob; Py_INCREF(ob);
+  }
+#if PY_MAJOR_VERSION >= 3
   if (PyBytes_AsStringAndSize(b, (char **)s, n) < 0) {
+#else
+  if (PyString_AsStringAndSize(b, (char **)s, n) < 0) {
+#endif
     Py_DECREF(b);
     return NULL;
   }
   return b;
 }
+
+#if PY_MAJOR_VERSION >= 3
 #define PyMPIString_FromString        PyUnicode_FromString
 #define PyMPIString_FromStringAndSize PyUnicode_FromStringAndSize
 #else
-static PyObject *
-PyMPIString_AsStringAndSize(PyObject *ob, const char **s, Py_ssize_t *n)
-{
-  if (PyString_AsStringAndSize(ob, (char **)s, n) < 0)
-    return NULL;
-  Py_INCREF(ob);
-  return ob;
-}
 #define PyMPIString_FromString        PyString_FromString
 #define PyMPIString_FromStringAndSize PyString_FromStringAndSize
 #endif
-
 
 #if PY_MAJOR_VERSION >= 3
 #define PyMPIBytes_AsString          PyBytes_AsString
