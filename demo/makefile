@@ -1,9 +1,9 @@
 .PHONY: default
-
 default:
 	${MAKE} -C compute-pi
-	${MAKE} -C nxtval
 	${MAKE} -C mandelbrot
+	${MAKE} -C nxtval
+	${MAKE} -C sequential
 	${MAKE} -C spawning
 
 	${MAKE} -C wrap-c
