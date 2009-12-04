@@ -8,11 +8,16 @@ mpi4py.rc.profile('MPE', logfile='cpilog')
 
 # Import the MPI extension module
 from mpi4py import MPI
-if 0: # <- use '1' to disable MPI logging
+if 0: # <- use '1' to disable logging of MPI calls
     MPI.Pcontrol(0)
 
 # Import the MPE extension module
 from mpi4py import MPE
+if 1: # <- use '0' to disable user-defined logging
+    # This has to be explicitly called !
+    MPE.initLog(logfile='cpilog')
+    # Set the log file name (note: no extension)
+    MPE.setLogFileName('cpilog')
 
 # Import the 'array' module
 from array import array
@@ -21,8 +26,6 @@ from array import array
 # output a bit more interesting
 from time import sleep
 
-# Set the log file name (note: no extension)
-MPE.setLogFileName('cpilog')
 
 # User-defined MPE events
 cpi_begin = MPE.newLogEvent("ComputePi-Begin", "yellow")

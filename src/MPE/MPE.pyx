@@ -1,6 +1,10 @@
-__doc__ = u"""
+__doc__ = """
 Multi-Processing Environment
 """
+
+# -----------------------------------------------------------------------------
+
+from mpi4py import MPI; del MPI;
 
 # -----------------------------------------------------------------------------
 
@@ -136,7 +140,6 @@ cdef class LogState:
         def __get__(self):
             return (self.stateID[0], self.stateID[1])
 
-# -----------------------------------------------------------------------------
 
 def initLog(logfile=None):
     initialize()

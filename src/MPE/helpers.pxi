@@ -40,36 +40,38 @@ cdef extern from "Python.h":
     void PySys_WriteStderr(char*,...)
     int Py_AtExit(void (*)())
 
-cdef int logInitedAtImport = 0 # initialized at import time
-cdef int logDoFinishAtExit = 0 # going to be finalized at exit time
+cdef int logInitedHere = 0 # initialized from this module
+cdef int logFinishAtExit = 0 # finalize at Python process exit
 
 cdef inline int initialize() except -1:
     # Is logging active?
     if MPELog.Initialized() == 1:
         return 0
     # Initialize logging library
+    global logInitedHere
     cdef int ierr = 0
     ierr = MPELog.Init()
     if ierr != 0: raise RuntimeError(
         "MPE logging initialization failed "
         "[error code: %d]" % ierr)
+    logInitedHere = 1
     # Register cleanup at Python exit
-    global logDoFinishAtExit
-    if not logDoFinishAtExit:
+    global logFinishAtExit
+    if not logFinishAtExit:
         if Py_AtExit(atexit) < 0:
             PySys_WriteStderr(
                 "warning: could not register "
                 "cleanup with Py_AtExit()\n", 0)
-        logDoFinishAtExit = 1
+        logFinishAtExit = 1
     return 1
 
 cdef int finalize() nogil:
     # Is logging active?
     if MPELog.Initialized() != 1:
         return 0
-    # Do we ever initialized logging?
-    global logInitedAtImport
-    if not logInitedAtImport:
+    # Do we initialized logging?
+    global logInitedHere
+    if not logInitedHere:
         return 0
     # Finalize logging library
     cdef int ierr = 0
@@ -82,9 +84,6 @@ cdef void atexit() nogil:
     if ierr != 0: fprintf(
         stderr, "error: in MPE finalization "
         "[code: %d]", ierr); fflush(stderr)
-
-logInitedAtImport = initialize()
-logDoFinishAtExit = 0
 
 cdef inline int isReady() nogil:
     return (MPELog.Initialized() == 1)
@@ -137,3 +136,5 @@ cdef inline int packArgs(object arglist, char bytebuf[]) except -1:
 #                   "cyan", "blue", "magenta", "aquamarine",
 #                   "forestgreen", "orange", "maroon", "brown",
 #                   "pink", "coral", "gray" ]
+#
+# -----------------------------------------------------------------------------
