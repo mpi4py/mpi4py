@@ -30,7 +30,7 @@ cdef class Op:
             return op_user_py(self.ob_usrid, x, y, None)
 
     @classmethod
-    def Create(type cls, function, bint commute=False):
+    def Create(cls, function, bint commute=False):
         """
         Create a user-defined operation
         """
@@ -92,7 +92,7 @@ cdef class Op:
         return MPI_Op_c2f(self.ob_mpi)
 
     @classmethod
-    def f2py(type cls, arg):
+    def f2py(cls, arg):
         """
         """
         cdef Op op = <Op>cls()

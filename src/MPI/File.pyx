@@ -55,7 +55,7 @@ cdef class File:
     # ----------------------
 
     @classmethod
-    def Open(type cls, Intracomm comm not None, filename,
+    def Open(cls, Intracomm comm not None, filename,
              int amode=MODE_RDONLY, Info info=INFO_NULL):
         """
         Open a file
@@ -639,7 +639,7 @@ cdef class File:
         return MPI_File_c2f(self.ob_mpi)
 
     @classmethod
-    def f2py(type cls, arg):
+    def f2py(cls, arg):
         """
         """
         cdef File file = <File>cls()

@@ -37,7 +37,7 @@ cdef class Errhandler:
         return MPI_Errhandler_c2f(self.ob_mpi)
 
     @classmethod
-    def f2py(type cls, arg):
+    def f2py(cls, arg):
         """
         """
         cdef Errhandler errhandler = <Errhandler>cls()

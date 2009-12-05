@@ -212,7 +212,7 @@ cdef class Request:
         return MPI_Request_c2f(self.ob_mpi)
 
     @classmethod
-    def f2py(type cls, arg):
+    def f2py(cls, arg):
         """
         """
         cdef Request request = <Request>cls()
@@ -265,7 +265,7 @@ cdef class Grequest(Request):
             <void>(<Grequest?>request)
 
     @classmethod
-    def Start(type cls, query_fn, free_fn, cancel_fn,
+    def Start(cls, query_fn, free_fn, cancel_fn,
               args=None, kargs=None):
         """
         Create and return a user-defined request

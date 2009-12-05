@@ -52,7 +52,8 @@ cdef class Group:
             return self.Get_rank()
 
     @classmethod
-    def Translate_ranks(cls, Group group1 not None, ranks1,
+    def Translate_ranks(cls,
+                        Group group1 not None, ranks1,
                         Group group2=None):
         """
         Translate the ranks of processes in
@@ -101,7 +102,7 @@ cdef class Group:
         return group
 
     @classmethod
-    def Union(type cls,
+    def Union(cls,
               Group group1 not None,
               Group group2 not None):
         """
@@ -114,7 +115,7 @@ cdef class Group:
         return group
 
     @classmethod
-    def Intersect(type cls,
+    def Intersect(cls,
                   Group group1 not None,
                   Group group2 not None):
         """
@@ -127,7 +128,7 @@ cdef class Group:
         return group
 
     @classmethod
-    def Difference(type cls,
+    def Difference(cls,
                    Group group1 not None,
                    Group group2 not None):
         """
@@ -215,7 +216,7 @@ cdef class Group:
         return MPI_Group_c2f(self.ob_mpi)
 
     @classmethod
-    def f2py(type cls, arg):
+    def f2py(cls, arg):
         """
         """
         cdef Group group = <Group>cls()

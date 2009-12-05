@@ -47,7 +47,7 @@ cdef class Win:
     # -----------------------
 
     @classmethod
-    def Create(type cls, memory, int disp_unit=1,
+    def Create(cls, memory, int disp_unit=1,
                Info info=INFO_NULL, Intracomm comm not None=COMM_SELF):
         """
         Create an window object for one-sided communication
@@ -329,7 +329,7 @@ cdef class Win:
         return MPI_Win_c2f(self.ob_mpi)
 
     @classmethod
-    def f2py(type cls, arg):
+    def f2py(cls, arg):
         """
         """
         cdef Win win = <Win>cls()

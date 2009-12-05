@@ -245,7 +245,7 @@ cdef class Datatype:
         return datatype
 
     @classmethod
-    def Create_struct(type cls, blocklengths, displacements, datatypes):
+    def Create_struct(cls, blocklengths, displacements, datatypes):
         """
         Create an datatype from a general set of
         block sizes, displacements and datatypes
@@ -266,7 +266,7 @@ cdef class Datatype:
     # ------------------------------------------------
 
     @classmethod
-    def Create_f90_integer(type cls, int r):
+    def Create_f90_integer(cls, int r):
         """
         Return a bounded integer datatype
         """
@@ -275,7 +275,7 @@ cdef class Datatype:
         return datatype
 
     @classmethod
-    def Create_f90_real(type cls, int p, int r):
+    def Create_f90_real(cls, int p, int r):
         """
         Return a bounded real datatype
         """
@@ -284,7 +284,7 @@ cdef class Datatype:
         return datatype
 
     @classmethod
-    def Create_f90_complex(type cls, int p, int r):
+    def Create_f90_complex(cls, int p, int r):
         """
         Return a bounded complex datatype
         """
@@ -293,7 +293,7 @@ cdef class Datatype:
         return datatype
 
     @classmethod
-    def Match_size(type cls, int typeclass, int size):
+    def Match_size(cls, int typeclass, int size):
         """
         Find a datatype matching a specified size in bytes
         """
@@ -663,7 +663,7 @@ cdef class Datatype:
         return MPI_Type_c2f(self.ob_mpi)
 
     @classmethod
-    def f2py(type cls, arg):
+    def f2py(cls, arg):
         """
         """
         cdef Datatype datatype = <Datatype>cls()

@@ -23,7 +23,7 @@ cdef class Info:
         return self.ob_mpi != MPI_INFO_NULL
 
     @classmethod
-    def Create(type cls):
+    def Create(cls):
         """
         Create a new, empty info object
         """
@@ -109,7 +109,7 @@ cdef class Info:
         return MPI_Info_c2f(self.ob_mpi)
 
     @classmethod
-    def f2py(type cls, arg):
+    def f2py(cls, arg):
         """
         """
         cdef Info info = <Info>cls()
