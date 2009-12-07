@@ -112,7 +112,9 @@ if _name == 'Open MPI':
         if sys_byteorder == 'little':
             BaseTestPackExternal.byteswap = True
 elif _name in ('MPICH2', 'DeinoMPI'):
-    BaseTestPackExternal.skipdtype += ['f', 'd']
+    BaseTestPackExternal.skipdtype += ['l']
+    BaseTestPackExternal.skipdtype += ['d']
+    pass
 else:
     try:
         MPI.BYTE.Pack_external_size(EXT32, 0)
