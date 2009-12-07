@@ -329,5 +329,33 @@ class TestExcErrhandler(unittest.TestCase):
 
 # --------------------------------------------------------------------
 
+name, version = MPI.get_vendor()
+if name == 'MPICH2':
+    try:
+        MPI.DATATYPE_NULL.Get_size()
+    except MPI.Exception:
+        pass
+    else:
+        del TestExcDatatypeNull
+        del TestExcDatatype
+        del TestExcStatus
+        del TestExcRequestNull
+        del TestExcOpNull
+        del TestExcOp
+        del TestExcInfoNull
+        del TestExcInfo
+        del TestExcGroupNull
+        del TestExcGroup
+        del TestExcCommNull
+        del TestExcComm
+        del TestExcWinNull
+        del TestExcWin
+        del TestExcErrhandlerNull
+        del TestExcErrhandler
+
+# --------------------------------------------------------------------
+
 if __name__ == '__main__':
     unittest.main()
+
+# --------------------------------------------------------------------
