@@ -14,7 +14,6 @@ class GReqCtx(object):
         self.free_called = True
     def cancel(self, completed):
         if completed is not self.completed:
-            #raise AssertionError()
             raise MPI.Exception(MPI.ERR_PENDING)
 
 class TestGrequest(unittest.TestCase):
