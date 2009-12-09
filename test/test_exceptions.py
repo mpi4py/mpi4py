@@ -49,7 +49,7 @@ class TestExcDatatype(unittest.TestCase):
 
 _name, _version = MPI.get_vendor()
 if _name == 'Open MPI':
-    if _version < (1, 4, 0):
+    if _version < (1, 4, 1):
         TestExcDatatype.DATATYPES = TestExcDatatype.DATATYPES[1:]
         TestExcDatatype.ERR_TYPE = MPI.ERR_INTERN
         TestExcDatatype.ERR_KEYVAL = MPI.ERR_OTHER
@@ -305,7 +305,7 @@ except NotImplementedError:
 else:
     _name, _version = MPI.get_vendor()
     if _name == 'Open MPI':
-        if _version < (1, 4, 0):
+        if _version < (1, 4, 1):
             TestExcWin.ERR_KEYVAL = MPI.ERR_OTHER
 
 
