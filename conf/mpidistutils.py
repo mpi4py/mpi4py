@@ -107,9 +107,9 @@ def customize_compiler(compiler,
          get_config_vars('CC', 'CXX', 'CCSHARED',
                          'BASECFLAGS', 'OPT',
                          'LDSHARED', 'SO')
-        ## cc    = cc    .replace('-pthread', '')
-        ## cxx   = cxx   .replace('-pthread', '')
-        ## ld_so = ld_so .replace('-pthread', '')
+        cc    = cc    .replace('-pthread', '')
+        cxx   = cxx   .replace('-pthread', '')
+        ld_so = ld_so .replace('-pthread', '')
         cppflags = ''
         cflags   = ''
         cxxflags = ''
@@ -127,7 +127,7 @@ def customize_compiler(compiler,
         # Environment handling
         CPPFLAGS = environ.get('CPPFLAGS', '')
         CFLAGS   = environ.get('CFLAGS',   '')
-        CXXFLAGS = environ.get('CXXFLAGS',   '')
+        CXXFLAGS = environ.get('CXXFLAGS', '')
         LDFLAGS  = environ.get('LDFLAGS',  '')
         if CPPFLAGS:
             cppflags = cppflags + ' ' + CPPFLAGS
@@ -142,6 +142,7 @@ def customize_compiler(compiler,
             ldflags  = ldflags  + ' ' + CXXFLAGS
         if LDFLAGS:
             ldflags  = ldflags  + ' ' + LDFLAGS
+        ccshared   = environ.get('CCSHARED',   ccshared   or '')
         basecflags = environ.get('BASECFLAGS', basecflags or '')
         optcflags  = environ.get('OPTCFLAGS',  optcflags  or '')
         cflags     = (basecflags + ' ' +
@@ -1117,7 +1118,7 @@ class build_ext(cmd_build_ext.build_ext):
         if ext.name == 'mpi4py.MPE':
             log.info("checking for MPE availability ...")
             ok = (config_cmd.check_header("mpe.h",
-                                          headers=["stdlib.h", 
+                                          headers=["stdlib.h",
                                                    "mpi.h",])
                   and
                   config_cmd.check_func("MPE_Init_log",
@@ -1284,6 +1285,7 @@ class build_exe(build_ext):
         # bundled Python library, also fix location of needed
         # python.exp file on AIX
         ldshflag = sysconfig.get_config_var('LINKFORSHARED') or ''
+        ldshflag = ldshflag.replace('-Xlinker ', '-Wl,')
         if sys.platform.startswith('aix'):
             python_lib = sysconfig.get_python_lib(standard_lib=1)
             python_exp = os.path.join(python_lib, 'config', 'python.exp')
