@@ -1132,11 +1132,6 @@ class build_ext(cmd_build_ext.build_ext):
                 ext.define_macros[:] = []
                 ext.libraries[:] = []
                 ext.extra_link_args[:] = []
-            else:
-                if sys.platform.startswith('win'):
-                    ext.extra_link_args[:] = []
-                else:
-                    ext.libraries[:] = []
         #
         extra_args = config_info.get('extra_compile_args')
         if extra_args:

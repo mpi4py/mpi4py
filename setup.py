@@ -114,12 +114,15 @@ metadata['provides'] = ['mpi4py',
 # --------------------------------------------------------------------
 
 def ext_modules():
+    import sys, os
+    modules = []
     # MPI extension module
     MPI = dict(
         name='mpi4py.MPI',
         sources=['src/MPI.c'],
         depends=['src/mpi4py.MPI.c'],
         )
+    modules.append(MPI)
     # MPE extension module
     MPE = dict(
         name='mpi4py.MPE',
@@ -138,6 +141,11 @@ def ext_modules():
             '-lmpe',
             ],
         )
+    if sys.platform.startswith('darwin'):
+        MPE['extra_link_args'] = []
+    if sys.platform.startswith('win'):
+        MPE['extra_link_args'] = []
+    modules.append(MPE)
     # custom dl extension module
     dl = dict(
         name='mpi4py.dl',
@@ -145,11 +153,9 @@ def ext_modules():
         sources=['src/dynload.c'],
         depends=['src/dynload.h'],
         )
-    #
-    import sys
-    modules = [MPI, MPE]
-    if not sys.platform.startswith('win'):
+    if os.name == 'posix':
         modules.append(dl)
+    #
     return modules
 
 def libraries():
