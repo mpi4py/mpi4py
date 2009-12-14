@@ -1041,13 +1041,18 @@ class build_ext(cmd_build_ext.build_ext):
             bad_pylib_dir = os.path.join(sys.prefix, "lib",
                                          "python" + py_version,
                                          "config")
-            pylib_dir = sysconfig.get_config_var("LIBDIR")
             try:
                 self.library_dirs.remove(bad_pylib_dir)
             except ValueError:
                 pass
+            pylib_dir = sysconfig.get_config_var("LIBDIR")
             if pylib_dir not in self.library_dirs:
                 self.library_dirs.append(pylib_dir)
+            if pylib_dir not in self.rpath:
+                self.rpath.append(pylib_dir)
+            if sys.exec_prefix == '/usr':
+                self.library_dirs.remove(pylib_dir)
+                self.rpath.remove(pylib_dir)
 
     def build_extensions(self):
         # First, sanity-check the 'extensions' list
