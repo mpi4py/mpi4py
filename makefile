@@ -66,7 +66,9 @@ docs-html: rst2html sphinx-html epydoc-html
 docs-pdf: sphinx-pdf epydoc-pdf
 
 RST2HTML = rst2html
-RST2HTMLOPTS = --no-compact-lists --cloak-email-addresses
+RST2HTMLOPTS  = --input-encoding=utf-8
+RST2HTMLOPTS += --no-compact-lists
+RST2HTMLOPTS += --cloak-email-addresses
 .PHONY: rst2html
 rst2html:
 	${RST2HTML} ${RST2HTMLOPTS} ./LICENSE.txt > docs/LICENSE.html
