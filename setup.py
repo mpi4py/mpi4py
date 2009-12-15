@@ -219,14 +219,17 @@ def executables():
     compile_args = []
     link_args = []
     py_version = sysconfig.get_python_version()
-    cfgDict = sysconfig.get_config_vars()
     if not sys.platform.startswith('win'):
+        cfgDict = sysconfig.get_config_vars()
         ## if '-pthread' in cfgDict.get('CC', ''):
         ##     compile_args.append('-pthread')
         ## if '-pthread' in cfgDict.get('LINKCC', ''):
         ##     link_args.append('-pthread')
         libraries = ['python' + py_version]
-        for var in ('LIBDIR', 'LIBPL'):
+        for var in (
+            'LIBDIR', 
+            'LIBPL',
+            ):
             library_dirs += split_quoted(cfgDict.get(var, ''))
         for var in (
             'LDFLAGS',
@@ -236,6 +239,7 @@ def executables():
             link_args += split_quoted(cfgDict.get(var, ''))
     # MPI-enabled Python interpreter
     pyexe = dict(name='python%s-mpi' % py_version,
+                 optional=True,
                  sources=['src/python.c'],
                  libraries=libraries,
                  library_dirs=library_dirs,
