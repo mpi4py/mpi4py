@@ -715,9 +715,6 @@ class build(cmd_build.build):
         [('build_exe', has_executables),
          ]
 
-    # XXX disable build_exe subcommand !!!
-    del sub_commands[-1]
-
 # -----------------------------------------------------------------------------
 
 class build_py(cmd_build_py.build_py):
