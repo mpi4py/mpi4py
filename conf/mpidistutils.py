@@ -99,7 +99,7 @@ def rpath_option(compiler, dir):
     option = rpath_option_orig(compiler, dir)
     if (option.startswith('-R') and
         sys.platform[:5] == 'linux'):
-        option =  option.replace('-R', '-rpath', 1)
+        option =  option.replace('-R', '-Wl,-rpath', 1)
     return option
 UnixCCompiler.runtime_library_dir_option = rpath_option
 
