@@ -7,7 +7,7 @@
 #define OMPI_SKIP_MPICXX  1
 #include <mpi.h>
 
-#if defined(c_plusplus) || defined(__cplusplus)
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -70,6 +70,6 @@ int * provided;
 #endif /* MPI_VERSION > 1 */
 
 
-#if defined(c_plusplus) || defined(__cplusplus)
+#if defined(__cplusplus)
 }  /* extern "C" */
 #endif

@@ -30,14 +30,14 @@
     #define RTLD_LOCAL    0
     #define RTLD_GLOBAL   4
   #endif
-  #if defined(__cplusplus) || defined(c_plusplus)
+  #if defined(__cplusplus)
   extern "C" {
   #endif
   extern void *dlopen(const char *, int);
   extern void *dlsym(void *, const char *);
   extern int   dlclose(void *);
   extern char *dlerror(void);
-  #if defined(__cplusplus) || defined(c_plusplus)
+  #if defined(__cplusplus)
   }
   #endif
 #endif
