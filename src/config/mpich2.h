@@ -48,6 +48,11 @@
 #define PyMPI_MISSING_MPI_File_errhandler_function 1
 #endif
 
+#if defined(MPI_UNWEIGHTED) && (MPICH2_NUMVERSION < 10300000)
+#undef  MPI_UNWEIGHTED
+#define MPI_UNWEIGHTED ((int *)0)
+#endif
+
 #if !defined(MPICH2_NUMVERSION) || (MPICH2_NUMVERSION < 10100000)
 #define PyMPI_MISSING_MPI_Type_create_f90_integer 1
 #define PyMPI_MISSING_MPI_Type_create_f90_real 1
