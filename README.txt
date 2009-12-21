@@ -18,9 +18,9 @@ updates.
 - To build and install this package, you must meet the following
   requirements.
 
-  + A Python 2.3/2.4/2.5/2.6/2.7/3.0/3.1 distribution.
+  + A Python 2.3/2.4/2.5/2.6/2.7/3.0/3.1/3.2 distribution.
 
-  + A working MPI 1.2/1.3/2.0/2.1 implementation.
+  + A working MPI 1.2/1.3/2.0/2.1/2.2 implementation.
 
 - This package uses standard `distutils`. For detailed instructions
   about requirements and the building/install process, read the file
