@@ -1164,9 +1164,9 @@ cdef class Cartcomm(Intracomm):
         cdef tmp3 = newarray_int(ndim, &icoords)
         CHKERR( MPI_Cart_get(self.ob_mpi, ndim, idims, iperiods, icoords) )
         cdef int i = 0
-        dims    = [idims[i]    for i from 0 <= i < ndim]
-        periods = [iperiods[i] for i from 0 <= i < ndim]
-        coords  = [icoords[i]  for i from 0 <= i < ndim]
+        cdef object dims    = [idims[i]    for i from 0 <= i < ndim]
+        cdef object periods = [iperiods[i] for i from 0 <= i < ndim]
+        cdef object coords  = [icoords[i]  for i from 0 <= i < ndim]
         return (dims, periods, coords)
 
     property topo:
@@ -1340,8 +1340,8 @@ cdef class Graphcomm(Intracomm):
         cdef tmp2 = newarray_int(nedges, &iedges)
         CHKERR( MPI_Graph_get(self.ob_mpi, nindex, nedges, iindex, iedges) )
         cdef int i = 0
-        index = [iindex[i] for i from 0 <= i < nindex]
-        edges = [iedges[i] for i from 0 <= i < nedges]
+        cdef object index = [iindex[i] for i from 0 <= i < nindex]
+        cdef object edges = [iedges[i] for i from 0 <= i < nedges]
         return (index, edges)
 
     property topo:
@@ -1387,7 +1387,7 @@ cdef class Graphcomm(Intracomm):
         cdef tmp = newarray_int(nneighbors, &ineighbors)
         CHKERR( MPI_Graph_neighbors(self.ob_mpi, rank, nneighbors, ineighbors) )
         cdef int i = 0
-        neighbors = [ineighbors[i] for i from 0 <= i < nneighbors]
+        cdef object neighbors = [ineighbors[i] for i from 0 <= i < nneighbors]
         return neighbors
 
     property neighbors:

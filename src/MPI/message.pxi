@@ -190,12 +190,12 @@ cdef object message_vector(object msg,
     cdef object o_displs = None
     cdef object o_type   = None
     if is_list(msg) or is_tuple(msg):
-        n = len(msg)
-        if n == 2:
+        nargs = len(msg)
+        if nargs == 2:
             (o_buf, (o_counts, o_displs)) = msg
-        elif n == 3:
+        elif nargs == 3:
             (o_buf, (o_counts, o_displs), o_type) = msg
-        elif n == 4:
+        elif nargs == 4:
             (o_buf,  o_counts, o_displs,  o_type) = msg
         else:
             raise ValueError("message: expecting 2 to 4 items")
