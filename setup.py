@@ -134,17 +134,16 @@ def ext_modules():
                  ],
         define_macros=[('HAVE_MPE', 1)],
         libraries=['mpe'],
-        extra_link_args=[
+        extra_link_args=[],
+        )
+    if sys.platform.startswith('linux'):
+        MPE['libraries'] = []
+        MPE['extra_link_args'] = [
             '-Wl,-whole-archive',
             '-llmpe',
             '-Wl,-no-whole-archive',
             '-lmpe',
-            ],
-        )
-    if sys.platform.startswith('darwin'):
-        MPE['extra_link_args'] = []
-    if sys.platform.startswith('win'):
-        MPE['extra_link_args'] = []
+            ]
     modules.append(MPE)
     # custom dl extension module
     dl = dict(
