@@ -8,7 +8,7 @@
 #if HAVE_DLFCN_H
   #include <dlfcn.h>
 #else
-  #if defined(__linux__)
+  #if defined(__linux) || defined(__linux__)
     #define RTLD_LAZY     0x00001
     #define RTLD_NOW      0x00002
     #define RTLD_LOCAL    0x00000
@@ -16,6 +16,14 @@
     #define RTLD_NOLOAD   0x00004
     #define RTLD_NODELETE 0x01000
     #define RTLD_DEEPBIND 0x00008
+  #elif defined(__sun) || defined(__sun__)
+    #define RTLD_LAZY     0x00001
+    #define RTLD_NOW      0x00002
+    #define RTLD_LOCAL    0x00000
+    #define RTLD_GLOBAL   0x00100
+    #define RTLD_NOLOAD   0x00004
+    #define RTLD_NODELETE 0x01000
+    #define RTLD_FIRST    0x02000
   #elif defined(__APPLE__)
     #define RTLD_LAZY     0x1
     #define RTLD_NOW      0x2

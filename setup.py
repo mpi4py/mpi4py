@@ -60,6 +60,7 @@ Operating System :: MacOS :: MacOS X
 Operating System :: Microsoft :: Windows
 Operating System :: POSIX
 Operating System :: POSIX :: Linux
+Operating System :: POSIX :: SunOS/Solaris
 Operating System :: Unix
 Programming Language :: C
 Programming Language :: Cython
@@ -81,6 +82,7 @@ MPI
 platforms = """
 Mac OS X
 Linux
+Solaris
 Unix
 Windows
 """
