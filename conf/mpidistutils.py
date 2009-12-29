@@ -1301,7 +1301,7 @@ class build_exe(build_ext):
             ldshflag = ldshflag.replace('Modules/python.exp', python_exp)
         extra_args.extend(split_quoted(ldshflag))
         # Detect target language, if not provided
-        language = exe.language or self.compiler.detect_language(sources)
+        language = exe.language or compiler_obj.detect_language(sources)
         compiler_obj.link_executable(
             objects, exe_filename,
             output_dir=None,
