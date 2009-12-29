@@ -106,6 +106,7 @@ metadata = {
 
 metadata['requires'] = ['pickle',]
 metadata['provides'] = ['mpi4py',
+                        'mpi4py.dl',
                         'mpi4py.rc',
                         'mpi4py.MPI',
                         'mpi4py.MPE',
@@ -228,7 +229,7 @@ def executables():
         ##     link_args.append('-pthread')
         libraries = ['python' + py_version]
         for var in (
-            'LIBDIR', 
+            'LIBDIR',
             'LIBPL',
             ):
             library_dirs += split_quoted(cfgDict.get(var, ''))

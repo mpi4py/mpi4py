@@ -9,8 +9,44 @@ HISTORY: MPI for Python
 :Address:      PTLC, 3000 Santa Fe, Argentina
 
 
-Release 1.1.0
-=============
+Release 1.2 [2009-12-29]
+========================
+
+* Automatic MPI datatype discovery for NumPy arrays and PEP-3118
+  buffers. Now buffer-like objects can be messaged directly, it is no
+  longer required to explicitly pass a 2/3-list/tuple like ``[data,
+  MPI.DOUBLE]``, or ``[data, count, MPI.DOUBLE]``. Only basic types
+  are supported, i.e., all C/C99-native signed/unsigned integral types
+  and single/double precision real/complex floating types. Many thanks
+  to Eilif Muller for the initial feedback.
+
+* Nonblocking send of pickled Python objects. Many thanks to Andreas
+  Kloeckner for the initial patch and enlightening discussion about
+  this enhancement.
+
+* ``Request`` instances now hold a reference to the Python object
+  exposing the buffer involved in point-to-point communication or
+  parallel I/O. Many thanks to Andreas Kloeckner for the initial
+  feedback.
+
+* Support for logging of user-defined states and events using `MPE
+  <http://www.mcs.anl.gov/research/projects/perfvis/>`_. Runtime
+  (i.e., without requiring a recompile!)  activation of logging of all
+  MPI calls is supported in POSIX platforms implementing ``dlopen()``.
+
+* Support for all the new features in MPI-2.2 (new C99 and F90
+  datatypes, distributed graph topology, local reduction operation,
+  and other minor enhancements).
+
+* Fix the annoying issues related to Open MPI and Python dynamic
+  loading of extension modules in platforms supporting ``dlopen()``.
+
+* Fix SLURM dynamic loading issues on SiCortex. Many thanks to Ian
+  Langmore for providing me shell access.
+
+
+Release 1.1.0 [2009-06-06]
+==========================
 
 * Fix bug in ``Comm.Iprobe()`` that caused segfaults as Python C-API
   calls were issued with the GIL released (issue #2).
@@ -34,8 +70,8 @@ Release 1.1.0
   can be created. Ask the author for more room if you need it.
 
 
-Release 1.0.0
-=============
+Release 1.0.0 [2009-03-20]
+==========================
 
 This is the fist release of the all-new, Cython-based, implementation
 of *MPI for Python*. Unfortunately, this implementation is not
