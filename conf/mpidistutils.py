@@ -40,10 +40,10 @@ from distutils import log
 def fix_config_vars(names, values):
     values = list(values)
     if sys.platform == 'darwin':
-        if 'ARCHFLAGS' in os.environ and sys.version[:3] < '2.6':
+        if 'ARCHFLAGS' in os.environ:
             ARCHFLAGS = os.environ['ARCHFLAGS']
             for i, flag in enumerate(list(values)):
-                flag, count = re.subn('-arch\s+\w+\s', ' ', flag)
+                flag, count = re.subn('-arch\s+\w+', ' ', flag)
                 if count and ARCHFLAGS:
                     flag = flag + ' ' + ARCHFLAGS
                 values[i] = flag
