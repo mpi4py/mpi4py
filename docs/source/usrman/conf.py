@@ -46,7 +46,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'MPI for Python'
-copyright = u'2009, Lisandro Dalcín'
+copyright = u'2009, Lisandro Dalcin'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -177,7 +177,7 @@ latex_paper_size = 'a4'
 # (source start file, target name, title, author, document class [howto/manual]).
 latex_documents = [
   ('manual', 'mpi4py.tex', ur'MPI for Python',
-   ur'Lisandro Dalcín', 'howto'),
+   ur'Lisandro Dalcin', 'howto'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of

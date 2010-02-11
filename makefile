@@ -85,6 +85,7 @@ sphinx-html:
 	mkdir -p build/doctrees docs/usrman
 	${SPHINXBUILD} -b html -d build/doctrees ${SPHINXOPTS} \
 	docs/source/usrman docs/usrman
+	${RM} docs/usrman/.buildinfo
 sphinx-pdf:
 	${PYTHON} -c 'import mpi4py.MPI'
 	mkdir -p build/doctrees build/latex

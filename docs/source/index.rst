@@ -2,7 +2,7 @@
 MPI for Python
 ==============
 
-:Author:       Lisandro Dalcín
+:Author:       Lisandro Dalcin
 :Contact:      dalcinl@gmail.com
 :Organization: `CIMEC <http://www.cimec.org.ar/>`_
 :Address:      PTLC, 3000 Santa Fe, Argentina

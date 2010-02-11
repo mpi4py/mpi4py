@@ -44,5 +44,9 @@ class TestMessageZeroSelf(BaseTestMessageZero, unittest.TestCase):
 class TestMessageZeroWorld(BaseTestMessageZero, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
+_name, _version = MPI.get_vendor()
+if (_name == 'Open MPI'):
+    del BaseTestMessageZero.testReductions
+
 if __name__ == '__main__':
     unittest.main()
