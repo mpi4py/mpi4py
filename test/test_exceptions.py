@@ -49,9 +49,9 @@ class TestExcDatatype(unittest.TestCase):
 
 _name, _version = MPI.get_vendor()
 if _name == 'Open MPI':
-    if _version < (1, 4, 1):
-        TestExcDatatype.DATATYPES = TestExcDatatype.DATATYPES[1:]
-        TestExcDatatype.ERR_TYPE = MPI.ERR_INTERN
+    if _version < (1, 4, 2):
+        TestExcDatatype.DATATYPES  = TestExcDatatype.DATATYPES[1:]
+        TestExcDatatype.ERR_TYPE   = MPI.ERR_INTERN
         TestExcDatatype.ERR_KEYVAL = MPI.ERR_OTHER
 
 # --------------------------------------------------------------------
@@ -82,7 +82,8 @@ class TestExcRequestNull(unittest.TestCase):
 
 _name, _version = MPI.get_vendor()
 if _name == 'Open MPI':
-    del TestExcRequestNull
+    if _version < (1, 4, 2):
+        del TestExcRequestNull
 
 # --------------------------------------------------------------------
 
@@ -222,7 +223,8 @@ class TestExcCommNull(unittest.TestCase):
         self.assertRaisesMPI(MPI.ERR_COMM, MPI.COMM_NULL.Get_attr, MPI.TAG_UB)
 
     def testGetErrhandler(self):
-        self.assertRaisesMPI(MPI.ERR_COMM, MPI.COMM_NULL.Get_errhandler)
+        self.assertRaisesMPI([MPI.ERR_COMM, MPI.ERR_ARG], 
+                             MPI.COMM_NULL.Get_errhandler)
 
     def testSetErrhandler(self):
         self.assertRaisesMPI(MPI.ERR_COMM, MPI.COMM_NULL.Set_errhandler, MPI.ERRORS_RETURN)
@@ -261,9 +263,10 @@ _name, _version = MPI.get_vendor()
 if _name == 'MPICH1':
     TestExcComm.ERR_COMM = MPI.ERR_ARG
 elif _name == 'Open MPI':
-    if _version < (1, 4, 1):
+    if _version < (1, 4, 2):
         TestExcComm.ERR_KEYVAL = MPI.ERR_OTHER
         del TestExcCommNull.testGetAttr
+    if _version < (1, 4, 1):
         del TestExcCommNull.testGetErrhandler
 
 # --------------------------------------------------------------------
@@ -305,7 +308,7 @@ except NotImplementedError:
 else:
     _name, _version = MPI.get_vendor()
     if _name == 'Open MPI':
-        if _version < (1, 4, 1):
+        if _version < (1, 4, 2):
             TestExcWin.ERR_KEYVAL = MPI.ERR_OTHER
 
 

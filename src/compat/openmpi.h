@@ -198,7 +198,7 @@ static MPI_Fint PyMPI_OPENMPI_File_c2f(MPI_File file)
 
 /* ------------------------------------------------------------------------- */
 
-#if PyMPI_OPENMPI_VERSION < 10401
+#if PyMPI_OPENMPI_VERSION < 10500
 
 static int PyMPI_OPENMPI_Win_get_errhandler(MPI_Win win,
                                             MPI_Errhandler *errhandler)
@@ -224,7 +224,7 @@ static int PyMPI_OPENMPI_Win_set_errhandler(MPI_Win win,
 #undef  MPI_Win_set_errhandler
 #define MPI_Win_set_errhandler PyMPI_OPENMPI_Win_set_errhandler
 
-#endif /* !(PyMPI_OPENMPI_VERSION < 10400) */
+#endif /* !(PyMPI_OPENMPI_VERSION < 10500) */
 
 /* ------------------------------------------------------------------------- */
 
