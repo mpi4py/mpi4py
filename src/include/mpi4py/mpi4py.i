@@ -1,5 +1,11 @@
 /* ---------------------------------------------------------------- */
 
+#if SWIG_VERSION < 0x010328
+%warn "SWIG version < 1.3.28 is not supported"
+#endif
+
+/* ---------------------------------------------------------------- */
+
 %header %{#include "mpi4py/mpi4py.h"%}
 %init   %{if (import_mpi4py() < 0) return;%}
 
