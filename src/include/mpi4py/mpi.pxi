@@ -419,7 +419,7 @@ cdef extern from "mpi.h" nogil:
     int MPI_Dist_graph_create_adjacent(MPI_Comm, int, int[], int[], int, int[], int[], MPI_Info, int, MPI_Comm*)
     int MPI_Dist_graph_create(MPI_Comm, int, int[], int[], int[], int[], MPI_Info, int, MPI_Comm*)
     int MPI_Dist_graph_neighbors_count(MPI_Comm, int*, int*, int*)
-    int MPI_Dist_graph_neighbors(MPI_Comm comm,int, int[], int[], int, int[], int[])
+    int MPI_Dist_graph_neighbors(MPI_Comm, int, int[], int[], int, int[], int[])
 
     int MPI_Intercomm_create(MPI_Comm, int, MPI_Comm, int, int, MPI_Comm*)
     int MPI_Comm_remote_group(MPI_Comm, MPI_Group*)
