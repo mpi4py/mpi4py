@@ -6,8 +6,18 @@
 
 /* ---------------------------------------------------------------- */
 
-%header %{#include "mpi4py/mpi4py.h"%}
-%init   %{if (import_mpi4py() < 0) return;%}
+%header %{
+#include "mpi4py/mpi4py.h"
+%}
+
+%init %{
+if (import_mpi4py() < 0)
+#if PY_VERSION_HEX >= 0x03000000
+  return NULL;
+#else
+  return;
+#endif
+%}
 
 /* ---------------------------------------------------------------- */
 
