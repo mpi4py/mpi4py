@@ -1,31 +1,22 @@
 /* ---------------------------------------------------------------- */
 
-%header %{#include "mpi4py/mpi4py.h"%}
-%init   %{if (import_mpi4py() < 0) return;%}
+#if SWIG_VERSION < 0x010328
+%warn "SWIG version < 1.3.28 is not supported"
+#endif
 
 /* ---------------------------------------------------------------- */
 
-%runtime %{
-SWIGINTERNINLINE PyObject*
-SWIG_getattr_this(PyObject* obj) {
-  if (!obj) return NULL;
-  obj = PyObject_GetAttr(obj, SWIG_This());
-  if (!obj) PyErr_Clear();
-  return obj;
-}
-SWIGINTERNINLINE int
-SWIG_convert_ptr(PyObject *obj, void **ptr, swig_type_info *ty, int flags) {
-  int res = SWIG_ConvertPtr(obj, ptr, ty, flags);
-  if (!SWIG_IsOK(res)) {
-    PyObject* _this = SWIG_getattr_this(obj);
-    res = SWIG_ConvertPtr(_this, ptr, ty, flags);
-    Py_XDECREF(_this);
-  }
-  return res;
-}
-#undef  SWIG_ConvertPtr
-#define SWIG_ConvertPtr(obj, pptr, type, flags) \
-        SWIG_convert_ptr(obj, pptr, type, flags)
+%header %{
+#include "mpi4py/mpi4py.h"
+%}
+
+%init %{
+if (import_mpi4py() < 0)
+#if PY_VERSION_HEX >= 0x03000000
+  return NULL;
+#else
+  return;
+#endif
 %}
 
 /* ---------------------------------------------------------------- */
