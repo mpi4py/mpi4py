@@ -198,10 +198,32 @@ static MPI_Fint PyMPI_OPENMPI_File_c2f(MPI_File file)
 
 /* ------------------------------------------------------------------------- */
 
-#if PyMPI_OPENMPI_VERSION < 10500
+#if PyMPI_OPENMPI_VERSION < 10402
 
-static int PyMPI_OPENMPI_Win_get_errhandler(MPI_Win win,
-                                            MPI_Errhandler *errhandler)
+static int PyMPI_OPENMPI_MPI_Cancel(MPI_Request *request)
+{
+  if (request && *request == MPI_REQUEST_NULL) {
+    MPI_Comm_call_errhandler(MPI_COMM_WORLD, MPI_ERR_REQUEST);
+    return MPI_ERR_REQUEST;
+  }
+  return MPI_Cancel(request);
+}
+#undef  MPI_Cancel
+#define MPI_Cancel PyMPI_OPENMPI_MPI_Cancel
+
+static int PyMPI_OPENMPI_MPI_Request_free(MPI_Request *request)
+{
+  if (request && *request == MPI_REQUEST_NULL) {
+    MPI_Comm_call_errhandler(MPI_COMM_WORLD, MPI_ERR_REQUEST);
+    return MPI_ERR_REQUEST;
+  }
+  return MPI_Request_free(request);
+}
+#undef  MPI_Request_free
+#define MPI_Request_free PyMPI_OPENMPI_MPI_Request_free
+
+static int PyMPI_OPENMPI_MPI_Win_get_errhandler(MPI_Win win,
+                                                MPI_Errhandler *errhandler)
 {
   if (win == MPI_WIN_NULL) {
     MPI_Comm_call_errhandler(MPI_COMM_WORLD, MPI_ERR_WIN);
@@ -210,10 +232,10 @@ static int PyMPI_OPENMPI_Win_get_errhandler(MPI_Win win,
   return MPI_Win_get_errhandler(win, errhandler);
 }
 #undef  MPI_Win_get_errhandler
-#define MPI_Win_get_errhandler PyMPI_OPENMPI_Win_get_errhandler
+#define MPI_Win_get_errhandler PyMPI_OPENMPI_MPI_Win_get_errhandler
 
-static int PyMPI_OPENMPI_Win_set_errhandler(MPI_Win win,
-                                            MPI_Errhandler errhandler)
+static int PyMPI_OPENMPI_MPI_Win_set_errhandler(MPI_Win win,
+                                                MPI_Errhandler errhandler)
 {
   if (win == MPI_WIN_NULL) {
     MPI_Comm_call_errhandler(MPI_COMM_WORLD, MPI_ERR_WIN);
@@ -222,9 +244,9 @@ static int PyMPI_OPENMPI_Win_set_errhandler(MPI_Win win,
   return MPI_Win_set_errhandler(win, errhandler);
 }
 #undef  MPI_Win_set_errhandler
-#define MPI_Win_set_errhandler PyMPI_OPENMPI_Win_set_errhandler
+#define MPI_Win_set_errhandler PyMPI_OPENMPI_MPI_Win_set_errhandler
 
-#endif /* !(PyMPI_OPENMPI_VERSION < 10500) */
+#endif /* !(PyMPI_OPENMPI_VERSION < 10402) */
 
 /* ------------------------------------------------------------------------- */
 
