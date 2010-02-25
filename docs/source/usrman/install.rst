@@ -73,10 +73,10 @@ Downloading
 ^^^^^^^^^^^
 
 The *MPI for Python* package is available for download at the project
-website generously hosted by Google Code. You can use :program:`wget`
+website generously hosted by Google Code. You can use :program:`curl`
 to get a release tarball::
 
-    $ wget http://mpi4py.googlecode.com/files/mpi4py-X.X.X.tar.gz
+    $ curl -O http://mpi4py.googlecode.com/files/mpi4py-X.X.X.tar.gz
 
 
 Building
