@@ -9,6 +9,24 @@ HISTORY: MPI for Python
 :Address:      PTLC, 3000 Santa Fe, Argentina
 
 
+Release 1.2.1 [2010-02-26]
+==========================
+
+* Fix declaration in Cython include file. This declaration, while
+  valid for Cython, broke the simple-minded parsing used in
+  conf/mpidistutils.py to implement configure-tests for availability
+  of MPI symbols.
+
+* Update SWIG support and make it compatible with Python 3. Also
+  generate an warning for SWIG < 1.3.28.
+
+* Fix distutils-related issues in Mac OS X. Now ARCHFLAGS environment
+  variable is honored of all Python's ``config/Makefile`` variables.
+
+* Fix issues with Open MPI < 1.4.2 releated to error checking and
+  ``MPI_XXX_NULL`` handles.
+
+
 Release 1.2 [2009-12-29]
 ========================
 
