@@ -31,6 +31,24 @@ cdef class _p_Pickle:
         self.ob_loads = PyPickle_loads
         self.ob_PROTOCOL = PyPickle_PROTOCOL
 
+    property dumps:
+        def __get__(self):
+            return self.ob_dumps
+        def __set__(self, dumps):
+            self.ob_dumps = dumps
+
+    property loads:
+        def __get__(self):
+            return self.ob_loads
+        def __set__(self, loads):
+            self.ob_loads = loads
+
+    property PROTOCOL:
+        def __get__(self):
+            return self.ob_PROTOCOL
+        def __set__(self, PROTOCOL):
+            self.ob_PROTOCOL = PROTOCOL
+
     cdef object dump(self, object obj, void **p, int *n):
         if obj is None:
             p[0] = NULL
@@ -105,6 +123,8 @@ cdef _p_Pickle PyMPI_PICKLE = _p_Pickle()
 
 cdef inline _p_Pickle PyMPI_pickle():
     return PyMPI_PICKLE
+
+_p_pickle = PyMPI_PICKLE
 
 # -----------------------------------------------------------------------------
 
