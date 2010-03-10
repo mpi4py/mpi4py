@@ -1,7 +1,8 @@
+#!/usr/bin/env python
 import sys, os, glob
 
 def cythonize(source, includes=(),
-              output_h=os.curdir):
+              output_h=os.path.curdir):
     name, ext = os.path.splitext(source)
     output_c = name + '.c'
     #
@@ -41,7 +42,7 @@ def cythonize(source, includes=(),
             pass
         os.rename(header, dest)
 
-def run(source, wdir=os.curdir):
+def run(source, includes=(), wdir=os.path.curdir):
     name = os.path.splitext(source)[0]
     if name.count('.') == 0:
         package = ''
@@ -54,12 +55,12 @@ def run(source, wdir=os.curdir):
     os.chdir(wdir)
     try:
         cythonize(source,
-                  includes=[os.curdir, 'include'],
+                  includes=['include'] + list(includes),
                   output_h=os.path.join('include', package),
                   )
     finally:
         os.chdir(cwd)
 
 if __name__ == "__main__":
-    run('mpi4py.MPI.pyx', 'src')
-    run('mpi4py.MPE.pyx', 'src')
+    run('mpi4py.MPI.pyx', wdir='src')
+    run('mpi4py.MPE.pyx', wdir='src')
