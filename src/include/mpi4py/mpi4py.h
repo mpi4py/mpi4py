@@ -1,3 +1,6 @@
+/* Author:  Lisandro Dalcin   */
+/* Contact: dalcinl@gmail.com */
+
 #ifndef MPI4PY_H
 #define MPI4PY_H
 

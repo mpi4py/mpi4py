@@ -1,3 +1,6 @@
+/* Author:  Lisandro Dalcin   */
+/* Contact: dalcinl@gmail.com */
+
 /* ---------------------------------------------------------------- */
 
 #if SWIG_VERSION < 0x010328
