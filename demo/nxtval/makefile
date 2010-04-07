@@ -1,13 +1,12 @@
-PYTHON=python
-
 MPIEXEC=mpiexec
-NP_FLAG= -n
-NP_ARG= 5
-MPIEXEC_NP=${MPIEXEC} ${NP_FLAG} ${NP_ARG}
+NP_FLAG=-n
+NP=5
+
+PYTHON=python
 
 .PHONY: test
 test:
-	${MPIEXEC_NP} ${PYTHON} nxtval-threads.py
-	${MPIEXEC_NP} ${PYTHON} nxtval-dynproc.py
-	${MPIEXEC_NP} ${PYTHON} nxtval-onesided.py
-	${MPIEXEC_NP} ${PYTHON} nxtval-scalable.py
+	${MPIEXEC} ${NP_FLAG} ${NP} ${PYTHON} nxtval-threads.py
+	${MPIEXEC} ${NP_FLAG} ${NP} ${PYTHON} nxtval-dynproc.py
+	${MPIEXEC} ${NP_FLAG} ${NP} ${PYTHON} nxtval-onesided.py
+	${MPIEXEC} ${NP_FLAG} ${NP} ${PYTHON} nxtval-scalable.py

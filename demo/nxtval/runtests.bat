@@ -4,10 +4,11 @@ setlocal ENABLEEXTENSIONS
 set MPI=Microsoft HPC Pack 2008 SDK
 set MPI=DeinoMPI
 set MPI=MPICH2
+set PATH="%ProgramFiles%\%MPI%\bin";%PATH%
 
-set MPIDIR=%ProgramFiles%\%MPI%
-set MPIEXEC="%MPIDIR%\bin\mpiexec.exe"
-set NP=-n 5
+set MPIEXEC=mpiexec
+set NP_FLAG=-n
+set NP=5
 
 set PYTHON=C:\Python25\python.exe
 set PYTHON=C:\Python26\python.exe
@@ -18,8 +19,7 @@ set PYTHON=C:\Python32\python.exe
 set PYTHON=python
 
 @echo on
-%MPIEXEC% %NP% %PYTHON% nxtval-threads.py
-%MPIEXEC% %NP% %PYTHON% nxtval-dynproc.py
-%MPIEXEC% %NP% %PYTHON% nxtval-onesided.py
-%MPIEXEC% %NP% %PYTHON% nxtval-scalable.py
- 
+%MPIEXEC% %NP_FLAG% %NP% %PYTHON% nxtval-threads.py
+%MPIEXEC% %NP_FLAG% %NP% %PYTHON% nxtval-dynproc.py
+%MPIEXEC% %NP_FLAG% %NP% %PYTHON% nxtval-onesided.py
+%MPIEXEC% %NP_FLAG% %NP% %PYTHON% nxtval-scalable.py

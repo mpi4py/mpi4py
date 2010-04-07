@@ -6,7 +6,8 @@ build:
 
 PYTHON  = python
 MPIEXEC = mpiexec
-NP      = -n 3
+NP_FLAG = -n
+NP      = 3
 
 test_seq:
 	${MAKE} MPIEXEC= NP= test_mpi
@@ -14,7 +15,7 @@ test_seq:
 test_mpi:
 	-@for i in `ls ex-*.py`; do \
 	    echo ${MPIEXEC} ${NP} ${PYTHON} $$i; \
-	    ${MPIEXEC} ${NP} ${PYTHON} $$i; \
+	    ${MPIEXEC} ${NP_FLAG} ${NP} ${PYTHON} $$i; \
 	done
 
 test: test_seq test_mpi
