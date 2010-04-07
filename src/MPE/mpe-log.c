@@ -16,8 +16,8 @@
 #endif
 
 #if HAVE_MPE
-  /* This is a hack for outdated MPE API's */
-  #if !defined(MPICH2_NUMVERSION) || defined(DEINO_MPI)
+  /* This is a hack for old MPE's distributed with MPICH2 < 1.0.6 */
+#if (defined(MPICH2) && !defined(MPICH2_NUMVERSION)) || defined(DEINO_MPI)
     #define _ThreadID_ 0,
   #else
     #define _ThreadID_
