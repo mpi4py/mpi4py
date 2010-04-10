@@ -18,12 +18,12 @@ cdef class Exception(RuntimeError):
 
     def __richcmp__(Exception self, int error, int op):
         cdef int ierr  = self.ob_mpi
-        if op == 0: return ierr <  error
-        if op == 1: return ierr <= error
-        if op == 2: return ierr == error
-        if op == 3: return ierr != error
-        if op == 4: return ierr >  error
-        if op == 5: return ierr >= error
+        if op == Py_LT: return ierr <  error
+        if op == Py_LE: return ierr <= error
+        if op == Py_EQ: return ierr == error
+        if op == Py_NE: return ierr != error
+        if op == Py_GT: return ierr >  error
+        if op == Py_GE: return ierr >= error
 
     def __nonzero__(self):
         return self.ob_mpi != MPI_SUCCESS

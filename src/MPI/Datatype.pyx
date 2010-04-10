@@ -61,8 +61,8 @@ cdef class Datatype:
         if not isinstance(self,  Datatype): return NotImplemented
         if not isinstance(other, Datatype): return NotImplemented
         cdef Datatype s = <Datatype>self, o = <Datatype>other
-        if   op == 2: return (s.ob_mpi == o.ob_mpi)
-        elif op == 3: return (s.ob_mpi != o.ob_mpi)
+        if   op == Py_EQ: return (s.ob_mpi == o.ob_mpi)
+        elif op == Py_NE: return (s.ob_mpi != o.ob_mpi)
         else: raise TypeError("only '==' and '!='")
 
     def __nonzero__(self):

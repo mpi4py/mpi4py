@@ -1,5 +1,15 @@
 #------------------------------------------------------------------------------
 
+cdef extern from "Python.h":
+    enum: Py_LT
+    enum: Py_LE
+    enum: Py_EQ
+    enum: Py_NE
+    enum: Py_GT
+    enum: Py_GE
+
+#------------------------------------------------------------------------------
+
 cdef enum PyMPI_OBJECT_FLAGS:
     PyMPI_OWNED = 1<<1
 

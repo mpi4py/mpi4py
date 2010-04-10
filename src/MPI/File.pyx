@@ -41,8 +41,8 @@ cdef class File:
         if not isinstance(self,  File): return NotImplemented
         if not isinstance(other, File): return NotImplemented
         cdef File s = <File>self, o = <File>other
-        if   op == 2: return (s.ob_mpi == o.ob_mpi)
-        elif op == 3: return (s.ob_mpi != o.ob_mpi)
+        if   op == Py_EQ: return (s.ob_mpi == o.ob_mpi)
+        elif op == Py_NE: return (s.ob_mpi != o.ob_mpi)
         else: raise TypeError("only '==' and '!='")
 
     def __nonzero__(self):

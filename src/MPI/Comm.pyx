@@ -34,8 +34,8 @@ cdef class Comm:
         if not isinstance(self,  Comm): return NotImplemented
         if not isinstance(other, Comm): return NotImplemented
         cdef Comm s = <Comm>self, o = <Comm>other
-        if   op == 2: return (s.ob_mpi == o.ob_mpi)
-        elif op == 3: return (s.ob_mpi != o.ob_mpi)
+        if   op == Py_EQ: return (s.ob_mpi == o.ob_mpi)
+        elif op == Py_NE: return (s.ob_mpi != o.ob_mpi)
         else: raise TypeError("only '==' and '!='")
 
     def __nonzero__(self):
