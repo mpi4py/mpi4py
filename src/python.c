@@ -52,7 +52,7 @@ PyMPI_Main(int argc, char **argv)
   /* MPI initalization */
   MPI_Initialized(&flag_i);
   if (!flag_i) {
-#if 1 && (defined(MPI_VERSION) && (MPI_VERSION > 1))
+#if (defined(MPI_VERSION) && (MPI_VERSION > 1))
     int required = MPI_THREAD_MULTIPLE;
     int provided = MPI_THREAD_SINGLE;
     MPI_Init_thread(&argc, &argv, required, &provided);
