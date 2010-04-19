@@ -46,6 +46,8 @@
 #include "compat/lammpi.h"
 #elif defined(SGI_MPI)
 #include "compat/sgimpi.h"
+#elif defined(HP_MPI)
+#include "compat/hpmpi.h"
 #endif
 
 /* ------------------------------------------------------------------------- */

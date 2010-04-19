@@ -417,12 +417,12 @@ cdef class Datatype:
         # manage in advance the contained datatypes
         cdef int k = 0, s1, e1, s2, e2, s3, e3, s4, e4
         cdef object oldtype
-        if (combiner == MPI_COMBINER_STRUCT or
-            combiner == MPI_COMBINER_STRUCT_INTEGER):
+        if (combiner == <int>MPI_COMBINER_STRUCT or
+            combiner == <int>MPI_COMBINER_STRUCT_INTEGER):
             oldtype = [new_Datatype(d[k]) for k from 0 <= k < nd]
-        elif (combiner != MPI_COMBINER_F90_INTEGER and
-              combiner != MPI_COMBINER_F90_REAL and
-              combiner != MPI_COMBINER_F90_COMPLEX):
+        elif (combiner != <int>MPI_COMBINER_F90_INTEGER and
+              combiner != <int>MPI_COMBINER_F90_REAL and
+              combiner != <int>MPI_COMBINER_F90_COMPLEX):
             oldtype = new_Datatype(d[0])
         # dispatch depending on the combiner value
         if combiner == <int>MPI_COMBINER_DUP:
