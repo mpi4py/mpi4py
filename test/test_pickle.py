@@ -44,7 +44,7 @@ class TestPickle(unittest.TestCase):
          pickle.loads,
          pickle.PROTOCOL) = self._backup
 
-    def do_test(self, obj, pickle):
+    def do_pickle(self, obj, pickle):
         comm = MPI.COMM_SELF
         o = comm.sendrecv(obj)
         self.assertEqual(obj, o)
@@ -61,8 +61,8 @@ class TestPickle(unittest.TestCase):
         for protocol in protocols:
             pickle.PROTOCOL = protocol
             for obj in OBJS:
-                self.do_test(obj, pickle)
-            self.do_test(OBJS, pickle)
+                self.do_pickle(obj, pickle)
+            self.do_pickle(OBJS, pickle)
 
     if marshal is not None:
         def testMarshal(self):
@@ -79,8 +79,8 @@ class TestPickle(unittest.TestCase):
             for protocol in protocols:
                 pickle.PROTOCOL = protocol
                 for obj in OBJS:
-                    self.do_test(obj, pickle)
-                self.do_test(OBJS, pickle)
+                    self.do_pickle(obj, pickle)
+                self.do_pickle(OBJS, pickle)
 
     if json is not None:
         def testJson(self):
@@ -90,8 +90,8 @@ class TestPickle(unittest.TestCase):
             OBJS2 = [o for o in OBJS if not 
                      isinstance(o, (complex, tuple))]
             for obj in OBJS2:
-                self.do_test(obj, pickle)
-            self.do_test(OBJS2, pickle)
+                self.do_pickle(obj, pickle)
+            self.do_pickle(OBJS2, pickle)
             
 
 if __name__ == '__main__':
