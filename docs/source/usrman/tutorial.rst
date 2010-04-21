@@ -5,6 +5,45 @@ Tutorial
 
 .. warning:: Under construction. Contributions very welcome!
 
+*MPI for Python* supports convenient, *pickle*-based communication of
+generic Python object as well as fast, near C-speed, direct array data
+communication of buffer-provider objects (e.g., NumPy arrays).
+
+* Communication of general Python objects
+
+  You have to use **all-lowercase** methods (of the :class:`Comm`
+  class), like :meth:`send()`, :meth:`recv()`, :meth:`bcast()`. Note
+  that :meth:`isend()` is available, but :meth:`irecv()` is not.
+
+  Collective calls like :meth:`scatter()`, :meth:`gather()`,
+  :meth:`allgather()`, :meth:`alltoall()` expect/return a sequence of
+  :attr:`Comm.size` elements at the root or all process. They return a
+  single value, a list of :attr:`Comm.size` elements, or
+  :const:`None`.
+
+  Global reduction operations :meth:`reduce()` and :meth:`allreduce()`
+  are naively implemented, the reduction is actually done at the
+  designated root process or all processes.
+
+* Communication of buffer-provider objects
+
+  You have to use **start-case** methods (of the :class:`Comm` class),
+  like :meth:`Send()`, :meth:`Recv()`, :meth:`Bcast()`.
+
+  In general, buffer arguments to these calls must be explicitly
+  specified by using a 2/3-list/tuple like ``[data, MPI.DOUBLE]``, or
+  ``[data, count, MPI.DOUBLE]`` (the former one uses the byte-size of
+  ``data`` and the extent of the MPI datatype to define the
+  ``count``).
+
+  Automatic MPI datatype discovery for NumPy arrays and PEP-3118
+  buffers is supported, but limited to basic C types (all C/C99-native
+  signed/unsigned integral types and single/double precision
+  real/complex floating types) and availability of matching datatypes
+  in the underlying MPI implementation. In this case, the
+  buffer-provider object can be passed directly as a buffer argument,
+  the count and MPI datatype will be inferred.
+
 
 Point-to-Point Communication
 ----------------------------
@@ -30,15 +69,6 @@ Point-to-Point Communication
    comm = MPI.COMM_WORLD
    rank = comm.Get_rank()
 
-   # automatic MPI datatype discovery
-   # for NumPy arrays and PEP-3118 buffers
-   if rank == 0:
-      data = numpy.arange(100, dtype=numpy.float64)
-      comm.Send(data, dest=1, tag=13)
-   elif rank == 1:
-      data = numpy.empty(100, dtype=numpy.float64)
-      comm.Recv(data, source=0, tag=13)
-
    # pass explicit MPI datatypes
    if rank == 0:
       data = numpy.arange(1000, dtype='i')
@@ -46,6 +76,15 @@ Point-to-Point Communication
    elif rank == 1:
       data = numpy.empty(1000, dtype='i')
       comm.Recv([data, MPI.INT], source=0, tag=77)
+
+   # automatic MPI datatype discovery
+   if rank == 0:
+      data = numpy.arange(100, dtype=numpy.float64)
+      comm.Send(data, dest=1, tag=13)
+   elif rank == 1:
+      data = numpy.empty(100, dtype=numpy.float64)
+      comm.Recv(data, source=0, tag=13)
+
 
 
 Collective Communication
@@ -65,7 +104,7 @@ Collective Communication
       data = None
    data = comm.bcast(data, root=0)
 
-* Scattering Python integers::
+* Scattering Python objects::
 
    from mpi4py import MPI
 
@@ -80,7 +119,7 @@ Collective Communication
    data = comm.scatter(data, root=0)
    assert data == (rank+1)**2
 
-* Gathering Python integers::
+* Gathering Python objects::
 
    from mpi4py import MPI
 
