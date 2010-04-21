@@ -154,6 +154,8 @@ def ext_modules():
         optional=True,
         sources=['src/dynload.c'],
         depends=['src/dynload.h'],
+        define_macros=[('HAVE_DLFCN_H', 1)],
+        libraries=['dl'],
         )
     if os.name == 'posix':
         modules.append(dl)

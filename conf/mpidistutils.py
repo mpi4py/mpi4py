@@ -1147,6 +1147,15 @@ class build_ext(cmd_build_ext.build_ext):
                 ext.libraries[:] = []
                 ext.extra_link_args[:] = []
         #
+        if ext.name == 'mpi4py.dl':
+            log.info("checking for dlopen availability ...")
+            ok = config_cmd.check_header("dlfcn.h")
+            if not ok :
+                ext.define_macros[:] = []
+            ok = config_cmd.check_library('dl')
+            if not ok:
+                ext.libraries[:] = []
+        #
         extra_args = config_info.get('extra_compile_args')
         if extra_args:
             ext.extra_compile_args.extend(extra_args)

@@ -61,11 +61,11 @@ dl_dlerror(PyObject *self, PyObject *args)
 }
 
 static PyMethodDef dl_methods[] = {
-  { (char *)"dlopen",  dl_dlopen,  METH_VARARGS },
-  { (char *)"dlsym",   dl_dlsym,   METH_VARARGS },
-  { (char *)"dlclose", dl_dlclose, METH_O       },
-  { (char *)"dlerror", dl_dlerror, METH_NOARGS  },
-  { (char *)NULL,      NULL,       0            } /* sentinel */
+  { (char *)"dlopen",  dl_dlopen,  METH_VARARGS, NULL },
+  { (char *)"dlsym",   dl_dlsym,   METH_VARARGS, NULL },
+  { (char *)"dlclose", dl_dlclose, METH_O,       NULL },
+  { (char *)"dlerror", dl_dlerror, METH_NOARGS,  NULL },
+  { (char *)NULL,      NULL,       0,            NULL } /* sentinel */
 };
 
 #if PY_MAJOR_VERSION >= 3
