@@ -89,6 +89,6 @@ def profile(name='MPE', **kargs):
     #
     global _pmpi_
     handle = dlopen(filename, RTLD_NOW|RTLD_GLOBAL)
-    _pmpi_.append( (handle, filename) )
+    _pmpi_.append( (name, (handle, filename)) )
     #
     return filename
