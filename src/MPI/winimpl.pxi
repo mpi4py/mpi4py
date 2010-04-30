@@ -4,7 +4,7 @@ cdef extern from *:
 cdef void win_memory_decref(void *ob) with gil:
     Py_DECREF(<object>ob)
 
-@cython.callspec("PyMPI_API_CALL")
+@cython.callspec("PyMPIAPI")
 cdef int win_memory_del(MPI_Win w, int k, void *v, void *xs) nogil:
     if  v != NULL:
         if Py_IsInitialized():
