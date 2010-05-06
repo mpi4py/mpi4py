@@ -503,7 +503,6 @@ class BaseTestCCOBufInplace(object):
         for array in arrayimpl.ArrayTypes:
             for typecode in arrayimpl.TypeMap:
                 for op in (MPI.SUM, MPI.MAX, MPI.MIN, MPI.PROD):
-                    #rcnt = list(range(0, size)) # Open MPI fails !!!
                     rcnt = list(range(1, size+1))
                     if op == MPI.PROD:
                         rbuf = array([rank+1]*sum(rcnt), typecode)
