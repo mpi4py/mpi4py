@@ -19,6 +19,22 @@ try:
 except ImportError:
     pass
 
+try: # epydoc 3.0.1 + docutils 0.6
+    from docutils.nodes import Text
+    from UserString import UserString
+    if not isinstance(Text, UserString):
+        def Text_get_data(s):
+            try:
+                return s._data
+            except AttributeError:
+                return s.astext()
+        def Text_set_data(s, d):
+            s.astext = lambda: d
+            s._data = d
+        Text.data = property(Text_get_data, Text_set_data)
+except ImportError:
+    pass
+
 # --------------------------------------------------------------------
 
 from epydoc.docwriter import dotgraph
