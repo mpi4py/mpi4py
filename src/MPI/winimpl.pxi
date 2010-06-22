@@ -11,12 +11,8 @@ cdef int win_memory_del(MPI_Win w, int k, void *v, void *xs) nogil:
             win_memory_decref(v)
     return MPI_SUCCESS
 
-cdef int PyMPI_Win_setup(MPI_Win win, object memory, MPI_Errhandler errhdl):
+cdef int PyMPI_Win_setup(MPI_Win win, object memory):
     cdef int ierr = MPI_SUCCESS
-    # set error handler
-    if errhdl != MPI_ERRHANDLER_NULL:
-        ierr = MPI_Win_set_errhandler(win, errhdl)
-        if ierr: return ierr
     # hold a reference to memory
     global PyMPI_KEYVAL_WIN_MEMORY
     if memory is not None:

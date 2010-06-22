@@ -61,11 +61,13 @@ cdef class Win:
             asmemory(memory, &base, &size)
         cdef MPI_Info cinfo = arg_Info(info)
         cdef Win win = <Win>cls()
-        with nogil: CHKERR( MPI_Win_create(
-            base, size, disp_unit,
-            cinfo, comm.ob_mpi, &win.ob_mpi) )
-        cdef MPI_Errhandler errhandler = MPI_ERRORS_RETURN
-        CHKERR( PyMPI_Win_setup(win.ob_mpi, memory, errhandler) )
+        with nogil:
+            CHKERR( MPI_Win_create(
+                    base, size, disp_unit,
+                    cinfo, comm.ob_mpi, &win.ob_mpi) )
+            CHKERR( MPI_Win_set_errhandler(
+                    win.ob_mpi, MPI_ERRORS_RETURN) )
+        CHKERR( PyMPI_Win_setup(win.ob_mpi, memory) )
         return win
 
     def Free(self):
