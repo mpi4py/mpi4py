@@ -64,8 +64,12 @@ cdef class File:
         filename = asmpistr(filename, &cfilename, NULL)
         cdef MPI_Info cinfo = arg_Info(info)
         cdef File file = <File>cls()
-        with nogil: CHKERR( MPI_File_open(
-            comm.ob_mpi, cfilename, amode, cinfo, &file.ob_mpi) )
+        with nogil:
+            CHKERR( MPI_File_open(
+                    comm.ob_mpi, cfilename, amode,
+                    cinfo, &file.ob_mpi) )
+            CHKERR( MPI_File_set_errhandler(
+                    file.ob_mpi, MPI_ERRORS_RETURN) )
         return file
 
     # [9.2.2] Closing a File
