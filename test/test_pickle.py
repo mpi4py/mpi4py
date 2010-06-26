@@ -85,8 +85,8 @@ class TestPickle(unittest.TestCase):
     if json is not None:
         def testJson(self):
             pickle = MPI._p_pickle
-            pickle.dumps = lambda o,p: json.dumps(o)
-            pickle.loads = json.loads
+            pickle.dumps = lambda o,p: json.dumps(o).encode()
+            pickle.loads = lambda s: json.loads(s.decode())
             OBJS2 = [o for o in OBJS if not 
                      isinstance(o, (complex, tuple))]
             for obj in OBJS2:
