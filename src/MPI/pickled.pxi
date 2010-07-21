@@ -364,7 +364,7 @@ cdef object PyMPI_gather(object sendobj, object recvobj,
         else:
             dosend=1; dorecv=0;
     #
-    cdef tmp1=None, tmp2=None
+    cdef object tmp1=None, tmp2=None
     if dorecv: tmp1 = allocate_int(size, &rcounts)
     if dorecv: tmp2 = allocate_int(size, &rdispls)
     #
@@ -413,7 +413,7 @@ cdef object PyMPI_scatter(object sendobj, object recvobj,
         else:
             dosend=0; dorecv=1;
     #
-    cdef tmp1=None, tmp2=None
+    cdef object tmp1=None, tmp2=None
     if dosend: tmp1 = allocate_int(size, &scounts)
     if dosend: tmp2 = allocate_int(size, &sdispls)
     #
@@ -450,8 +450,8 @@ cdef object PyMPI_allgather(object sendobj, object recvobj,
     else:
         CHKERR( MPI_Comm_size(comm, &size) )
     #
-    cdef tmp1 = allocate_int(size, &rcounts)
-    cdef tmp2 = allocate_int(size, &rdispls)
+    cdef object tmp1 = allocate_int(size, &rcounts)
+    cdef object tmp2 = allocate_int(size, &rdispls)
     #
     cdef object smsg = pickle.dump(sendobj, &sbuf, &scount)
     with nogil: CHKERR( MPI_Allgather(&scount, 1, MPI_INT,
