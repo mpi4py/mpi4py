@@ -21,6 +21,7 @@ ctypedef struct RCParams:
     int finalize
 
 cdef int warnRC(object attr, object value) except -1:
+    cdef object warn
     from warnings import warn
     warn("mpi4py.rc: '%s': unexpected value '%r'" % (attr, value))
 
@@ -31,6 +32,7 @@ cdef int getRCParams(RCParams* rc) except -1:
     rc.thread_level = MPI_THREAD_MULTIPLE
     rc.finalize = 1
     #
+    cdef object rcmod
     try: from mpi4py import rc as rcmod
     except: return 0
     #

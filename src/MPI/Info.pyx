@@ -46,7 +46,7 @@ cdef class Info:
         CHKERR( MPI_Info_dup(self.ob_mpi, &info.ob_mpi) )
         return info
 
-    def Get(self, key, int maxlen=-1):
+    def Get(self, object key, int maxlen=-1):
         """
         Retrieve the value associated with a key
         """
@@ -62,7 +62,7 @@ cdef class Info:
         if not flag: return None
         return mpistr(cvalue)
 
-    def Set(self, key, value):
+    def Set(self, object key, object value):
         """
         Add the (key, value) pair to info, and overrides the value if
         a value for the same key was previously set
@@ -73,7 +73,7 @@ cdef class Info:
         value = asmpistr(value, &cvalue, NULL)
         CHKERR( MPI_Info_set(self.ob_mpi, ckey, cvalue) )
 
-    def Delete(self, key):
+    def Delete(self, object key):
         """
         Remove a (key, value) pair from info
         """
@@ -123,7 +123,7 @@ cdef class Info:
         if not self: return 0
         return self.Get_nkeys()
 
-    def __contains__(self, key):
+    def __contains__(self, object key):
         if not self: return False
         cdef char *ckey = NULL
         cdef int dummy = 0
@@ -135,25 +135,25 @@ cdef class Info:
     def __iter__(self):
         return iter(self.keys())
 
-    def __getitem__(self, key):
+    def __getitem__(self, object key):
         if not self: raise KeyError(key)
-        value = self.Get(key)
+        cdef object value = self.Get(key)
         if value is None: raise KeyError(key)
         return value
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, object key, object value):
         if not self: raise KeyError(key)
         self.Set(key, value)
 
-    def __delitem__(self, key):
+    def __delitem__(self, object key):
         if not self: raise KeyError(key)
         if key not in self: raise KeyError(key)
         self.Delete(key)
 
-    def get(self, key, default=None):
+    def get(self, object key, object default=None):
         """info get"""
         if not self: return default
-        value = self.Get(key)
+        cdef object value = self.Get(key)
         if value is None: return default
         return value
 
@@ -162,6 +162,7 @@ cdef class Info:
         if not self: return []
         cdef list keys = []
         cdef int k = 0, nkeys = self.Get_nkeys()
+        cdef object key
         for k from 0 <= k < nkeys:
             key = self.Get_nthkey(k)
             keys.append(key)
@@ -172,6 +173,7 @@ cdef class Info:
         if not self: return []
         cdef list values = []
         cdef int k = 0, nkeys = self.Get_nkeys()
+        cdef object key, val
         for k from 0 <= k < nkeys:
             key = self.Get_nthkey(k)
             val = self.Get(key)
@@ -183,15 +185,17 @@ cdef class Info:
         if not self: return []
         cdef list items = []
         cdef int k = 0, nkeys = self.Get_nkeys()
+        cdef object key, value
         for k from 0 <= k < nkeys:
             key = self.Get_nthkey(k)
-            val = self.Get(key)
-            items.append((key, val))
+            value = self.Get(key)
+            items.append((key, value))
         return items
 
     def update(self, other=(), **kwds):
         """info update"""
         if not self: raise KeyError
+        cdef object key, value
         if hasattr(other, 'keys'):
             for key in other.keys():
                 self.Set(key, other[key])
@@ -205,6 +209,7 @@ cdef class Info:
         """info clear"""
         if not self: return None
         cdef int k = 0, nkeys = self.Get_nkeys()
+        cdef object key
         for k from 0 <= k < nkeys:
             key = self.Get_nthkey(0)
             self.Delete(key)

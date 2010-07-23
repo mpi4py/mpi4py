@@ -95,6 +95,7 @@ cdef class _p_greq:
 cdef int greq_query(void *extra_state, MPI_Status *status) with gil:
     cdef _p_greq state = <_p_greq>extra_state
     cdef int ierr = MPI_SUCCESS
+    cdef object exc
     try:
         ierr = state.query(status)
     except MPIException, exc:
@@ -106,6 +107,7 @@ cdef int greq_query(void *extra_state, MPI_Status *status) with gil:
 cdef int greq_free(void *extra_state) with gil:
     cdef _p_greq state = <_p_greq>extra_state
     cdef int ierr = MPI_SUCCESS
+    cdef object exc
     try:
         ierr = state.free()
     except MPIException, exc:
@@ -118,6 +120,7 @@ cdef int greq_free(void *extra_state) with gil:
 cdef int greq_cancel(void *extra_state, int completed) with gil:
     cdef _p_greq state = <_p_greq>extra_state
     cdef int ierr = MPI_SUCCESS
+    cdef object exc
     try:
         ierr = state.cancel(completed)
     except MPIException, exc:

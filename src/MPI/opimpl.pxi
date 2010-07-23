@@ -42,6 +42,7 @@ cdef object _op_LXOR(object x, object y):
 
 cdef object _op_MAXLOC(object x, object y):
     """maximum and location"""
+    cdef object i, j, u, v, w, k
     u, i = x
     v, j = y
     w = max(u, v)
@@ -56,6 +57,7 @@ cdef object _op_MAXLOC(object x, object y):
 
 cdef object _op_MINLOC(object x, object y):
     """minimum and location"""
+    cdef object i, j, u, v, w, k
     u, i = x
     v, j = y
     w = min(u, v)
@@ -80,6 +82,7 @@ cdef inline object op_user_py(int index, object x, object y, object dt):
     return op_user_registry[index](x, y, dt)
 
 cdef inline void op_user_mpi_report_error():
+    cdef object sys, traceback
     import sys, traceback
     traceback.print_exc()
     sys.stderr.flush()

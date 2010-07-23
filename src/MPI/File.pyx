@@ -184,7 +184,7 @@ cdef class File:
 
     def Set_view(self, Offset disp=0,
                  Datatype etype=None, Datatype filetype=None,
-                 datarep=None, Info info=INFO_NULL):
+                 object datarep=None, Info info=INFO_NULL):
         """
         Set the file view
         """
@@ -210,7 +210,7 @@ cdef class File:
             self.ob_mpi, &disp, &etype.ob_mpi, &ftype.ob_mpi, cdatarep) )
         fix_fileview_Datatype(etype); fix_fileview_Datatype(ftype)
         cdatarep[MPI_MAX_DATAREP_STRING] = 0 # just in case
-        datarep = mpistr(cdatarep)
+        cdef object datarep = mpistr(cdatarep)
         return (disp, etype, ftype, datarep)
 
     # [9.4] Data Access

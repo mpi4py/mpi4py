@@ -508,7 +508,7 @@ cdef inline object _py_reduce(object seq, object op):
     cdef Py_ssize_t i=0, n=len(seq)
     if op is __MAXLOC__ or op is __MINLOC__:
         seq = list(zip(seq, range(n)))
-    res = seq[0]
+    cdef object res = seq[0]
     for i from 1 <= i < n:
         res = op(res, seq[i])
     return res
