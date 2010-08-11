@@ -2,24 +2,14 @@ import sys, os, mpi4py
 from mpi4py import MPI
 import mpiunittest as unittest
 
-MPI4PYPATH = os.path.dirname(mpi4py.__path__[0])
-MPI4PYPATH = os.path.abspath(MPI4PYPATH)
+CHILDSCRIPT = os.path.splitext(os.path.abspath(__file__))[0] + '.child'
+MPI4PYPATH = os.path.abspath(os.path.dirname(mpi4py.__path__[0]))
 
 class BaseTestSpawn(object):
 
     COMM = MPI.COMM_NULL
     COMMAND = sys.executable
-    ARGS = ['-c', ';'.join([
-        'import sys; sys.path.insert(0, r"%s")' % MPI4PYPATH,
-        'from mpi4py import MPI',
-        'parent = MPI.Comm.Get_parent()',
-        'parent.Barrier()',
-        'parent.Disconnect()',
-        'assert parent == MPI.COMM_NULL',
-        'parent = MPI.Comm.Get_parent()',
-        'assert parent == MPI.COMM_NULL',
-        ])]
-
+    ARGS = [CHILDSCRIPT, MPI4PYPATH]
     MAXPROCS = 1
     INFO = MPI.INFO_NULL
     ROOT = 0
@@ -50,6 +40,7 @@ class BaseTestSpawn(object):
             self.assertEqual(errcodes, [])
 
     def testArgsOnlyAtRoot(self):
+        self.COMM.Barrier()
         rank = self.COMM.Get_rank()
         if rank == self.ROOT:
             child = self.COMM.Spawn(self.COMMAND, self.ARGS, self.MAXPROCS,
@@ -59,6 +50,7 @@ class BaseTestSpawn(object):
                                     info=None, root=self.ROOT)
         child.Barrier()
         child.Disconnect()
+        self.COMM.Barrier()
 
 class TestSpawnSelf(BaseTestSpawn, unittest.TestCase):
     COMM = MPI.COMM_SELF
