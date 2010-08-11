@@ -167,51 +167,22 @@ def libraries():
     # MPE logging
     pmpi_mpe_log = dict(
         name='mpe-log', kind='dylib',
+        optional=True,
         output_dir='mpi4py/lib-pmpi',
         sources=['src/MPE/pmpi-lmpe.c'],
-        extra_link_args=[
+        libraries=['mpe'],
+        extra_link_args=[],
+        )
+    if sys.platform.startswith('linux'):
+        pmpi_mpe_log['libraries'] = []
+        pmpi_mpe_log['extra_link_args'] = [
             '-Wl,-whole-archive',
             '-llmpe',
             '-Wl,-no-whole-archive',
             '-lmpe',
-            ],
-        )
-    if sys.platform.startswith('win'):
-        pmpi_mpe_log['libraries'] = ['mpe']
-        pmpi_mpe_log['extra_link_args'] = []
-    # MPE tracing
-    pmpi_mpe_trace = dict(
-        name='mpe-trace', kind='dylib',
-        output_dir='mpi4py/lib-pmpi',
-        sources=['src/MPE/pmpi-tmpe.c'],
-        extra_link_args= [
-            '-Wl,-whole-archive',
-            '-ltmpe',
-            '-Wl,-no-whole-archive',
-            '-lmpe',
-            ],
-        )
-    if sys.platform.startswith('win'):
-        pmpi_mpe_trace['extra_link_args'] = []
-    # MPE animations
-    pmpi_mpe_anim = dict(
-        name='mpe-anim', kind='dylib',
-        output_dir='mpi4py/lib-pmpi',
-        sources=['src/MPE/pmpi-ampe.c'],
-        extra_link_args=[
-            '-Wl,-whole-archive',
-            '-lampe',
-            '-Wl,-no-whole-archive',
-            '-lmpe',
-            '-lX11'
-            ],
-        )
-    if sys.platform.startswith('win'):
-        pmpi_mpe_anim['extra_link_args'] = []
+            ]
     #
-    return [#pmpi_mpe_log,   # XXX disabled !
-            #pmpi_mpe_trace, # XXX disabled !
-            #pmpi_mpe_anim,  # XXX disabled !
+    return [#pmpi_mpe_log, # XXX disabled !
             ]
 
 def executables():

@@ -897,9 +897,9 @@ class build_clib(cmd_build_clib.build_clib):
             compiler_obj = self.compiler
         configure_compiler(compiler_obj, config_info, self)
         #
-        if self.libraries:
-            self.config_static_libraries(self.libraries, config_info)
-            self.build_static_libraries(self.libraries)
+        if self.libraries_a:
+            self.config_static_libraries(self.libraries_a, config_info)
+            self.build_static_libraries(self.libraries_a)
         if self.libraries_so:
             self.config_shared_libraries(self.libraries_so, config_info)
             self.build_shared_libraries(self.libraries_so)
@@ -949,7 +949,14 @@ class build_clib(cmd_build_clib.build_clib):
     def build_shared_libraries (self, libraries):
         for (lib_name, build_info) in libraries:
             library = (lib_name, build_info)
-            self.build_shared_library(library)
+            try:
+                self.build_shared_library(library)
+            except (DistutilsError, CCompilerError):
+                if not build_info.get('optional'):
+                    raise
+                e = sys.exc_info()[1]
+                self.warn('building shared library "%s" failed' % lib_name)
+                self.warn('%s' % e)
 
     def build_shared_library (self, library):
         from distutils.dep_util import newer_group
