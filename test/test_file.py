@@ -10,28 +10,28 @@ class BaseTestFile(object):
     prefix = 'mpi4py'
 
     def setUp(self):
-        self.fd, self.fname = tempfile.mkstemp(prefix=self.prefix)
+        fd, self.fname = tempfile.mkstemp(prefix=self.prefix)
+        os.close(fd)
         self.amode = MPI.MODE_RDWR | MPI.MODE_CREATE
         #self.amode |= MPI.MODE_DELETE_ON_CLOSE
         try:
             self.FILE = MPI.File.Open(self.COMM,
                                       self.fname, self.amode,
                                       MPI.INFO_NULL)
+            #self.fname=None
         except Exception:
-            os.close(self.fd)
             os.remove(self.fname)
             raise
 
     def tearDown(self):
         if self.FILE == MPI.FILE_NULL: return
-        os.close(self.fd)
         amode = self.FILE.amode
         self.FILE.Close()
         if not (amode & MPI.MODE_DELETE_ON_CLOSE):
             MPI.File.Delete(self.fname, MPI.INFO_NULL)
 
     def testPreallocate(self):
-        ## XXX MPICH2 emits a nesting level warning
+        ## MPICH2 1.0.x emits a nesting level warning
         ## when preallocating zero size.
         name, ver = MPI.get_vendor()
         if not (name == 'MPICH2' and
@@ -147,11 +147,11 @@ class BaseTestFile(object):
 class TestFileNull(unittest.TestCase):
 
     def setUp(self):
-        self.eh_bak = MPI.FILE_NULL.Get_errhandler()
+        self.eh_save = MPI.FILE_NULL.Get_errhandler()
 
     def tearDown(self):
-        MPI.FILE_NULL.Set_errhandler(self.eh_bak)
-        self.eh_bak.Free()
+        MPI.FILE_NULL.Set_errhandler(self.eh_save)
+        self.eh_save.Free()
 
     def testGetSetErrhandler(self):
         eh = MPI.FILE_NULL.Get_errhandler()
