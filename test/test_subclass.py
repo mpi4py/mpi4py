@@ -258,9 +258,8 @@ class MyFile(MPI.File):
 class BaseTestMyFile(object):
 
     def setUp(self):
-        self.file = MyFile(MPI.FILE_NULL)
-    def setUp(self):
-        self.fd, fname = tempfile.mkstemp(prefix='mpi4py')
+        fd, fname = tempfile.mkstemp(prefix='mpi4py')
+        os.close(fd)
         amode = MPI.MODE_RDWR | MPI.MODE_CREATE | MPI.MODE_DELETE_ON_CLOSE
         try:
             f = MPI.File.Open(MPI.COMM_SELF,
@@ -268,12 +267,10 @@ class BaseTestMyFile(object):
                               MPI.INFO_NULL)
             self.file = MyFile(f)
         except Exception:
-            os.close(self.fd)
             os.remove(fname)
             raise
 
     def tearDown(self):
-        os.close(self.fd)
         if self.file:
             self.file.Close()
 
