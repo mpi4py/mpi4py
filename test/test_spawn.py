@@ -2,8 +2,10 @@ import sys, os, mpi4py
 from mpi4py import MPI
 import mpiunittest as unittest
 
-CHILDSCRIPT = os.path.splitext(os.path.abspath(__file__))[0] + '.child'
 MPI4PYPATH = os.path.abspath(os.path.dirname(mpi4py.__path__[0]))
+CHILDSCRIPT = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), 'spawn_child.py')
+    )
 
 class BaseTestSpawn(object):
 
