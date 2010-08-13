@@ -8,7 +8,3 @@ parent.Disconnect()
 assert parent == MPI.COMM_NULL
 parent = MPI.Comm.Get_parent()
 assert parent == MPI.COMM_NULL
-
-# Local Variables:
-# mode: Python
-# End:
