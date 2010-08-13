@@ -165,25 +165,44 @@ def ext_modules():
 def libraries():
     import sys
     # MPE logging
-    pmpi_mpe_log = dict(
-        name='mpe-log', kind='dylib',
+    pmpi_mpe = dict(
+        name='mpe', kind='dylib',
         optional=True,
         output_dir='mpi4py/lib-pmpi',
-        sources=['src/MPE/pmpi-lmpe.c'],
+        sources=['src/pmpi-mpe.c'],
         libraries=['mpe'],
         extra_link_args=[],
         )
     if sys.platform.startswith('linux'):
-        pmpi_mpe_log['libraries'] = []
-        pmpi_mpe_log['extra_link_args'] = [
+        pmpi_mpe['libraries'] = []
+        pmpi_mpe['extra_link_args'] = [
             '-Wl,-whole-archive',
             '-llmpe',
             '-Wl,-no-whole-archive',
             '-lmpe',
             ]
-    #
-    return [#pmpi_mpe_log, # XXX disabled !
+    # VampirTrace logging
+    pmpi_vt = dict(
+        name='vt', kind='dylib',
+        optional=True,
+        output_dir='mpi4py/lib-pmpi',
+        sources=['src/pmpi-vt.c'],
+        libraries=['vt.mpi', 'otf', 'z', 'dl'],
+        extra_link_args=[],
+        )
+    if sys.platform.startswith('linux'):
+        pmpi_vt['libraries'] = []
+        pmpi_vt['extra_link_args'] = [
+            '-Wl,-whole-archive',
+            '-lvt.mpi',
+            '-Wl,-no-whole-archive',
+            '-lotf', '-lz', '-ldl',
             ]
+    #
+    return [
+        pmpi_mpe,
+        pmpi_vt,
+        ]
 
 def executables():
     import sys

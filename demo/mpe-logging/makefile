@@ -6,7 +6,7 @@ N = 8
 default: build test clean
 
 
-.PHONY: run run-cpilog run-ring run-threads
+.PHONY: run-cpilog run-ring run-threads run
 run:    run-cpilog run-ring run-threads
 run-cpilog:
 	${MPIEXEC} -n ${N} ${PYTHON} cpilog.py
@@ -15,8 +15,8 @@ run-ring:
 run-threads:
 	${MPIEXEC} -n ${N} ${PYTHON} threads.py
 
-.PHONY: view view-cpilog view-ring view-threads
-view:        view-cpilog view-ring view-threads
+.PHONY: view-cpilog view-ring view-threads view
+view:   view-cpilog view-ring view-threads
 view-cpilog: cpilog.slog2
 	jumpshot $<
 view-ring: ring.slog2

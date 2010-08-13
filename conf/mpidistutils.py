@@ -939,7 +939,8 @@ class build_clib(cmd_build_clib.build_clib):
         cmd_build_clib.build_clib.build_libraries(self, libraries)
 
     def config_shared_libraries (self, libraries, config_info):
-        for (lib_name, build_info) in libraries:
+        for library in libraries:
+            (lib_name, build_info) = library
             for attr in ('extra_compile_args',
                          'extra_link_args',):
                 extra_args = config_info.get(attr)
@@ -949,14 +950,31 @@ class build_clib(cmd_build_clib.build_clib):
     def build_shared_libraries (self, libraries):
         for (lib_name, build_info) in libraries:
             library = (lib_name, build_info)
+            optional = build_info.get('optional')
             try:
                 self.build_shared_library(library)
             except (DistutilsError, CCompilerError):
-                if not build_info.get('optional'):
+                if not optional:
                     raise
                 e = sys.exc_info()[1]
                 self.warn('building shared library "%s" failed' % lib_name)
                 self.warn('%s' % e)
+
+    def config_shared_library(self, library):
+        (lib_name, build_info) = library
+        try:
+            compiler_obj = self.compiler_obj
+        except AttributeError:
+            compiler_obj = self.compiler
+        config_cmd = self.get_finalized_command('config')
+        config_cmd.compiler = compiler_obj # fix compiler
+        if lib_name == 'mpe':
+            ok = config_cmd.check_library('mpe')
+        if lib_name == 'vt':
+            ok = config_cmd.check_library('vt.mpi')
+        if not ok:
+            build_info['libraries'] = []
+            build_info['extra_link_args'] = []
 
     def build_shared_library (self, library):
         from distutils.dep_util import newer_group
@@ -986,8 +1004,9 @@ class build_clib(cmd_build_clib.build_clib):
         if not (self.force or newer_group(depends, lib_filename, 'newer')):
             log.debug("skipping '%s' shared library (up-to-date)", lib_name)
             return
-        else:
-            log.info("building '%s' shared library", lib_name)
+
+        self.config_shared_library(library)
+        log.info("building '%s' shared library", lib_name)
 
         # First, compile the source code to object files in the library
         # directory.  (This should probably change to putting object
@@ -1118,8 +1137,6 @@ class build_ext(cmd_build_ext.build_ext):
             self.config_extension (ext, config_info)
 
     def config_extension (self, ext, config_info):
-        ## ext.sources[:] = [convert_path(p) for p in ext.sources]
-        ## ext.depends[:] = [convert_path(p) for p in ext.depends]
         try:
             compiler_obj = self.compiler_obj
         except AttributeError:

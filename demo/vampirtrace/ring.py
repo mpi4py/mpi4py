@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 import os
-os.environ['MPE_LOGFILE_PREFIX'] = 'ring'
+os.environ['VT_FILE_PREFIX'] = 'ring'
 import mpi4py.rc
-mpi4py.rc.profile('mpe')
+mpi4py.rc.profile('vt')
 
 from mpi4py import MPI
-from array import array
 
 comm = MPI.COMM_WORLD
 size = comm.Get_size()
