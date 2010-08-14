@@ -147,6 +147,14 @@ def ext_modules():
             '-Wl,-no-whole-archive',
             '-lmpe',
             ]
+    elif sys.platform.startswith('sunos'):
+        MPE['libraries'] = []
+        MPE['extra_link_args'] = [
+            '-Wl,-zallextract',
+            '-llmpe',
+            '-Wl,-zdefaultextract',
+            '-lmpe',
+            ]
     modules.append(MPE)
     # custom dl extension module
     dl = dict(
@@ -164,6 +172,29 @@ def ext_modules():
 
 def libraries():
     import sys
+    linux   = sys.platform.startswith('linux')
+    solaris = sys.platform.startswith('sunos')
+    darwin  = sys.platform.startswith('darwin')
+    if linux:
+        def whole_archive(name):
+            return ['-Wl,-whole-archive',
+                    '-l%s' % name,
+                    '-Wl,-no-whole-archive',
+                    ]
+    elif darwin:
+        def whole_archive(name):
+            return [#'-Wl,-force_load',
+                    '-l%s' % name,
+                    ]
+    elif solaris:
+        def whole_archive(name):
+            return ['-Wl,-zallextract',
+                    '-l%s' % name,
+                    '-Wl,-zdefaultextract',
+                    ]
+    else:
+        def whole_archive(name):
+            return ['-l%s' % name]
     # MPE logging
     pmpi_mpe = dict(
         name='mpe', kind='dylib',
@@ -173,14 +204,10 @@ def libraries():
         libraries=['mpe'],
         extra_link_args=[],
         )
-    if sys.platform.startswith('linux'):
+    if linux or darwin or solaris:
         pmpi_mpe['libraries'] = []
-        pmpi_mpe['extra_link_args'] = [
-            '-Wl,-whole-archive',
-            '-llmpe',
-            '-Wl,-no-whole-archive',
-            '-lmpe',
-            ]
+        pmpi_mpe['extra_link_args']  = whole_archive('lmpe')
+        pmpi_mpe['extra_link_args'] += ['-lmpe']
     # VampirTrace logging
     pmpi_vt = dict(
         name='vt', kind='dylib',
@@ -190,14 +217,10 @@ def libraries():
         libraries=['vt.mpi', 'otf', 'z', 'dl'],
         extra_link_args=[],
         )
-    if sys.platform.startswith('linux'):
+    if linux or darwin or solaris:
         pmpi_vt['libraries'] = []
-        pmpi_vt['extra_link_args'] = [
-            '-Wl,-whole-archive',
-            '-lvt.mpi',
-            '-Wl,-no-whole-archive',
-            '-lotf', '-lz', '-ldl',
-            ]
+        pmpi_vt['extra_link_args']  = whole_archive('vt.mpi') 
+        pmpi_vt['extra_link_args'] += ['-lotf', '-lz', '-ldl']
     #
     return [
         pmpi_mpe,

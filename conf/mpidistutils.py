@@ -968,6 +968,7 @@ class build_clib(cmd_build_clib.build_clib):
             compiler_obj = self.compiler
         config_cmd = self.get_finalized_command('config')
         config_cmd.compiler = compiler_obj # fix compiler
+        ok = True
         if lib_name == 'mpe':
             ok = config_cmd.check_library('mpe')
         if lib_name == 'vt':
