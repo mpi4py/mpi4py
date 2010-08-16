@@ -22,7 +22,7 @@ struct ompregdescr* pomp_rd_table[] = { 0 };
 
 #if defined(OPENMPI_VERSION_NUMBER)
 #if ((OPENMPI_VERSION_NUMBER >= 10300) && \
-     (OPENMPI_VERSION_NUMBER <  10500))
+     (OPENMPI_VERSION_NUMBER <  10403))
 int MPI_Init_thread(int *argc, char ***argv,
                     int required, int *provided)
 {
