@@ -1304,11 +1304,18 @@ class build_exe(build_ext):
         # python.exp file on AIX
         ldshflag = sysconfig.get_config_var('LINKFORSHARED') or ''
         ldshflag = ldshflag.replace('-Xlinker ', '-Wl,')
+        if sys.platform == 'darwin': # fix wrong framework paths
+            fwkprefix = sysconfig.get_config_var('PYTHONFRAMEWORKPREFIX')
+            fwkdir = sysconfig.get_config_var('PYTHONFRAMEWORKDIR')
+            if fwkprefix and fwkdir and fwkdir != 'no-framework':
+                for flag in split_quoted(ldshflag):
+                    if flag.startswith(fwkdir):
+                        fwkpath = os.path.join(fwkprefix, flag)
+                        ldshflag = ldshflag.replace(fwkdir, fwkpath)
         if sys.platform.startswith('aix'):
             python_lib = sysconfig.get_python_lib(standard_lib=1)
             python_exp = os.path.join(python_lib, 'config', 'python.exp')
             ldshflag = ldshflag.replace('Modules/python.exp', python_exp)
-        extra_args.extend(split_quoted(ldshflag))
         # Detect target language, if not provided
         language = exe.language or compiler_obj.detect_language(sources)
         compiler_obj.link_executable(
@@ -1317,7 +1324,7 @@ class build_exe(build_ext):
             libraries=self.get_libraries(exe),
             library_dirs=exe.library_dirs,
             runtime_library_dirs=exe.runtime_library_dirs,
-            extra_preargs=None,
+            extra_preargs=split_quoted(ldshflag),
             extra_postargs=extra_args,
             debug=self.debug,
             target_lang=language)

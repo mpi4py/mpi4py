@@ -225,21 +225,18 @@ def executables():
     py_version = sysconfig.get_python_version()
     if not sys.platform.startswith('win'):
         cfgDict = sysconfig.get_config_vars()
-        ## if '-pthread' in cfgDict.get('CC', ''):
-        ##     compile_args.append('-pthread')
-        ## if '-pthread' in cfgDict.get('LINKCC', ''):
-        ##     link_args.append('-pthread')
-        libraries = ['python' + py_version]
-        for var in (
-            'LIBDIR',
-            'LIBPL',
-            ):
+        if not sysconfig.get_config_var('Py_ENABLE_SHARED'):
+            libraries = ['python' + py_version]
+        if sys.platform == 'darwin':
+            fwkdir = cfgDict.get('PYTHONFRAMEWORKDIR')
+            if (fwkdir and fwkdir != 'no-framework' and
+                fwkdir in cfgDict.get('LINKFORSHARED', '')):
+                del libraries[:]
+        for var in ('LIBDIR', 'LIBPL'):
             library_dirs += split_quoted(cfgDict.get(var, ''))
-        for var in (
-            'LDFLAGS',
-            'LIBS', 'MODLIBS', 'SYSLIBS',
-            'LDLAST',
-            ):
+        for var in ('LDFLAGS',
+                    'LIBS', 'MODLIBS', 'SYSLIBS',
+                    'LDLAST'):
             link_args += split_quoted(cfgDict.get(var, ''))
     # MPI-enabled Python interpreter
     pyexe = dict(name='python%s-mpi' % py_version,
