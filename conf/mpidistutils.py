@@ -30,7 +30,7 @@ del sys
 
 # -----------------------------------------------------------------------------
 
-import sys, os, re
+import sys, os, platform, re
 from distutils import sysconfig
 from distutils.util  import convert_path
 from distutils.util  import split_quoted
@@ -321,7 +321,7 @@ def find_mpi_config(section, envvars=None, defaults=None):
             fname = defaults[1]
             if os.path.exists(fname):
                 filenames = fname
-    # parse configuraration
+    # parse configuration
     if section and filenames:
         config_info = _config_parser(section, filenames)
         return section, filenames, config_info
@@ -331,16 +331,49 @@ def find_mpi_config(section, envvars=None, defaults=None):
 # -----------------------------------------------------------------------------
 
 def configuration(command_obj, verbose=True):
-        section, filenames, config_info = \
-            find_mpi_config(getattr(command_obj, 'mpi', None),
-                            MPICFG_ENV, MPICFG)
-        if config_info and verbose:
+    # user-provided
+    section, filenames, config_info = \
+        find_mpi_config(getattr(command_obj, 'mpi', None),
+                        MPICFG_ENV, MPICFG)
+    if config_info:
+        if verbose:
             log.info("MPI configuration: "
                      "from section '[%s]' in file/s '%s'",
                      section, filenames)
-        if config_info is None:
-            config_info = {}
         return config_info
+    # Windows
+    if sys.platform.startswith('win'):
+        ProgramFiles = os.environ.get('ProgramFiles', '')
+        for (name, install_suffix) in (
+            ('mpich2', 'MPICH2'),
+            #('openmpi', 'OpenMPI'),
+            ('deinompi', 'DeinoMPI'),
+            ('msmpi', 'Microsoft HPC Pack 2008 SDK'),
+            ):
+            mpi_dir = os.path.join(ProgramFiles, install_suffix)
+            if os.path.isdir(mpi_dir):
+                if verbose:
+                    log.info("MPI configuration: "
+                             "directory '%s'", mpi_dir)
+                define_macros = []
+                include_dir = os.path.join(mpi_dir, 'include')
+                library = 'mpi'
+                library_dir = os.path.join(mpi_dir, 'lib')
+                if name == 'msmpi':
+                    define_macros = [('MS_MPI', 1)]
+                    library = 'msmpi'
+                    bits = platform.architecture()[0]
+                    if bits == '32bit':
+                        library_dir = os.path.join(library_dir, 'i386')
+                    elif bits == '64bit':
+                        library_dir = os.path.join(library_dir, 'amd64')
+                config_info = dict(define_macros=define_macros,
+                                   include_dirs=[include_dir],
+                                   libraries=[library],
+                                   library_dirs=[library_dir],)
+                return config_info
+    # nothing found
+    return {}
 
 
 def configure_compiler(compiler, config_info, command_obj=None, verbose=True):
@@ -1212,12 +1245,11 @@ class build_exe(build_ext):
                     "'executables' items must be Executable instances")
 
     def get_outputs (self):
-        exe_ext = sysconfig.get_config_var('EXE') or ''
-        if exe_ext: exe_ext = os.path.extsep + exe_ext
+        exe_extension = sysconfig.get_config_var('EXE') or ''
         outputs = []
         for exe in self.executables:
-            exe_filename = os.path.join(self.build_exe, exe.name) + exe_ext
-            outputs.append(exe_filename)
+            exe_filename = os.path.join(self.build_exe, exe.name)
+            outputs.append(exe_filename + exe_extension)
         return outputs
 
     def build_executable (self, exe):
@@ -1232,8 +1264,10 @@ class build_exe(build_ext):
                 )
         sources = list(sources)
         exe_filename = os.path.join(self.build_exe, exe.name)
+        exe_extension = sysconfig.get_config_var('EXE') or ''
         depends = sources + exe.depends
-        if not (self.force or newer_group(depends, exe_filename, 'newer')):
+        if not (self.force or
+                newer_group(depends, exe_filename+exe_extension, 'newer')):
             log.debug("skipping '%s' executable (up-to-date)", exe.name)
             return
         else:
