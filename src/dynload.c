@@ -89,8 +89,10 @@ static struct PyModuleDef dl_module = {
 
 
 #if PY_MAJOR_VERSION >= 3
+PyMODINIT_FUNC PyInit_dl(void);
 PyMODINIT_FUNC PyInit_dl(void)
 #else
+PyMODINIT_FUNC initdl(void);
 PyMODINIT_FUNC initdl(void)
 #endif
 {
