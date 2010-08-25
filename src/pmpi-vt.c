@@ -1,3 +1,4 @@
+#include "stdlib.h"
 #include "mpi.h"
 
 #if (defined(OMPI_MAJOR_VERSION) && \
