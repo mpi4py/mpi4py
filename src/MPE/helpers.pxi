@@ -60,8 +60,8 @@ cdef inline int initialize() except -1:
     if not logFinishAtExit:
         if Py_AtExit(atexit) < 0:
             PySys_WriteStderr(
-                "warning: could not register "
-                "cleanup with Py_AtExit()\n", 0)
+                b"warning: could not register "
+                b"cleanup with Py_AtExit()\n", 0)
         logFinishAtExit = 1
     return 1
 
@@ -81,9 +81,9 @@ cdef int finalize() nogil:
 cdef void atexit() nogil:
     cdef int ierr = 0
     ierr = finalize()
-    if ierr != 0: fprintf(
-        stderr, "error: in MPE finalization "
-        "[code: %d]", ierr); fflush(stderr)
+    if ierr != 0: fprintf(stderr,
+        b"error: in MPE finalization "
+        b"[code: %d]", ierr); fflush(stderr)
 
 cdef inline int isReady() nogil:
     return (MPELog.Initialized() == 1)
