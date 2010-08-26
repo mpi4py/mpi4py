@@ -112,8 +112,8 @@ cdef int initialize() except -1:
         if not finalized:
             # Cleanup at (the very end of) Python exit
             if Py_AtExit(atexit) < 0:
-                PySys_WriteStderr("warning: could not register "
-                                  "cleanup with Py_AtExit()\n", 0)
+                PySys_WriteStderr(b"warning: could not register "
+                                  b"cleanup with Py_AtExit()\n", 0)
         return 0
     # Use user parameters from 'mpi4py.rc' module
     cdef RCParams rc
@@ -135,8 +135,8 @@ cdef int initialize() except -1:
             finalize_atexit = 1
     # Cleanup at (the very end of) Python exit
     if Py_AtExit(atexit) < 0:
-        PySys_WriteStderr("warning: could not register "
-                          "cleanup with Py_AtExit()\n", 0)
+        PySys_WriteStderr(b"warning: could not register "
+                          b"cleanup with Py_AtExit()\n", 0)
     return 0
 
 cdef inline int mpi_active() nogil:
@@ -155,25 +155,25 @@ cdef inline int mpi_active() nogil:
 cdef void startup() nogil:
     cdef int ierr = MPI_SUCCESS
     if not mpi_active(): return
-    #DBG# fprintf(stderr, "statup: BEGIN\n"); fflush(stderr)
+    #DBG# fprintf(stderr, b"statup: BEGIN\n"); fflush(stderr)
     ierr = PyMPI_StartUp()
-    #DBG# fprintf(stderr, "statup: END\n"); fflush(stderr)
+    #DBG# fprintf(stderr, b"statup: END\n"); fflush(stderr)
 
 cdef void cleanup() nogil:
     cdef int ierr = MPI_SUCCESS
     if not mpi_active(): return
-    #DBG# fprintf(stderr, "cleanup: BEGIN\n"); fflush(stderr)
+    #DBG# fprintf(stderr, b"cleanup: BEGIN\n"); fflush(stderr)
     ierr = PyMPI_CleanUp()
-    #DBG# fprintf(stderr, "cleanup: END\n"); fflush(stderr)
+    #DBG# fprintf(stderr, b"cleanup: END\n"); fflush(stderr)
 
 cdef void atexit() nogil:
     cdef int ierr = MPI_SUCCESS
     if not mpi_active(): return
-    #DBG# fprintf(stderr, "atexit: BEGIN\n"); fflush(stderr)
+    #DBG# fprintf(stderr, b"atexit: BEGIN\n"); fflush(stderr)
     cleanup()
     if not finalize_atexit: return
     ierr = MPI_Finalize()
-    #DBG# fprintf(stderr, "atexit: END\n"); fflush(stderr)
+    #DBG# fprintf(stderr, b"atexit: END\n"); fflush(stderr)
 
 # -----------------------------------------------------------------------------
 
