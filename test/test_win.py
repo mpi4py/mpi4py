@@ -9,11 +9,17 @@ class BaseTestWin(object):
 
     def setUp(self):
         try:
-            zero = bytearray([0])
-        except NameError:
-            zero = str('\0')
-        self.memory = MPI.Alloc_mem(10)
-        self.memory[:] = zero * len(self.memory)
+            self.mpi_memory = MPI.Alloc_mem(10)
+            self.memory = self.mpi_memory
+            try:
+                zero = bytearray([0])
+            except NameError:
+                zero = str('\0')
+            self.memory[:] = zero * len(self.memory)
+        except MPI.Exception:
+            from array import array
+            self.mpi_memory = None
+            self.memory = array('B',[0]*10)
         refcnt = sys.getrefcount(self.memory)
         self.WIN = MPI.Win.Create(self.memory, 1, self.INFO, self.COMM)
         self.assertEqual(sys.getrefcount(self.memory), refcnt+1)
@@ -22,37 +28,38 @@ class BaseTestWin(object):
         refcnt = sys.getrefcount(self.memory)
         self.WIN.Free()
         self.assertEqual(sys.getrefcount(self.memory), refcnt-1)
-        MPI.Free_mem(self.memory)
+        if self.mpi_memory:
+            MPI.Free_mem(self.mpi_memory)
 
     def testGetMemory(self):
         memory = self.WIN.memory
         pointer = MPI.Get_address(memory)
         length = len(memory)
         base, size, dunit = self.WIN.attrs
-        self.assertEqual(base,  pointer)
         self.assertEqual(size,  length)
         self.assertEqual(dunit, 1)
+        self.assertEqual(base,  pointer)
 
 
     def testAttributes(self):
-        base, size, unit = self.WIN.attrs
-        self.assertEqual(base, MPI.Get_address(self.memory))
-        self.assertEqual(size, len(self.memory))
-        self.assertEqual(unit, 1)
         cgroup = self.COMM.Get_group()
         wgroup = self.WIN.Get_group()
         grpcmp = MPI.Group.Compare(cgroup, wgroup)
         cgroup.Free()
         wgroup.Free()
         self.assertEqual(grpcmp, MPI.IDENT)
+        base, size, unit = self.WIN.attrs
+        self.assertEqual(size, len(self.memory))
+        self.assertEqual(unit, 1)
+        self.assertEqual(base, MPI.Get_address(self.memory))
 
     def testGetAttr(self):
         base = MPI.Get_address(self.memory)
         size = len(self.memory)
         unit = 1
-        self.assertEqual(base, self.WIN.Get_attr(MPI.WIN_BASE))
         self.assertEqual(size, self.WIN.Get_attr(MPI.WIN_SIZE))
         self.assertEqual(unit, self.WIN.Get_attr(MPI.WIN_DISP_UNIT))
+        self.assertEqual(base, self.WIN.Get_attr(MPI.WIN_BASE))
 
     def testGetSetErrhandler(self):
         for ERRHANDLER in [MPI.ERRORS_ARE_FATAL, MPI.ERRORS_RETURN,

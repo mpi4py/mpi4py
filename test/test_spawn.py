@@ -84,6 +84,8 @@ elif _name == 'MPICH2':
         _SKIP_TEST = True
 elif _name == 'Microsoft MPI':
     _SKIP_TEST = True
+elif _name == 'HP MPI':
+    _SKIP_TEST = True
 elif MPI.Get_version() < (2, 0):
     _SKIP_TEST = True
 

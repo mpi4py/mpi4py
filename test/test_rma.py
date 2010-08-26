@@ -7,19 +7,28 @@ class BaseTestRMA(object):
     COMM = MPI.COMM_NULL
     INFO = MPI.INFO_NULL
 
+    COUNT_MIN = 0
+
     def setUp(self):
+        nbytes = 100*MPI.DOUBLE.size
         try:
-            zero = bytearray([0])
-        except NameError:
-            zero = str('\0')
-        self.memory = MPI.Alloc_mem(100*MPI.DOUBLE.size)
-        self.memory[:] = zero * len(self.memory)
-        self.WIN = MPI.Win.Create(self.memory, 1,
-                                  self.INFO, self.COMM)
+            self.mpi_memory = MPI.Alloc_mem(nbytes)
+            self.memory = self.mpi_memory
+            try:
+                zero = bytearray([0])
+            except NameError:
+                zero = str('\0')
+            self.memory[:] = zero * len(self.memory)
+        except MPI.Exception:
+            from array import array
+            self.mpi_memory = None
+            self.memory = array('B',[0]*nbytes)
+        self.WIN = MPI.Win.Create(self.memory, 1, self.INFO, self.COMM)
 
     def tearDown(self):
         self.WIN.Free()
-        MPI.Free_mem(self.memory)
+        if self.mpi_memory:
+            MPI.Free_mem(self.mpi_memory)
 
     def testPutGet(self):
         group = self.WIN.Get_group()
@@ -27,7 +36,7 @@ class BaseTestRMA(object):
         group.Free()
         for array in arrayimpl.ArrayTypes:
             for typecode in arrayimpl.TypeMap:
-                for count in range(0, 10):
+                for count in range(self.COUNT_MIN, 10):
                     for rank in range(size):
                         sbuf = array(range(count), typecode)
                         rbuf = array(-1, typecode, count+1)
@@ -47,7 +56,7 @@ class BaseTestRMA(object):
         group.Free()
         for array in arrayimpl.ArrayTypes:
             for typecode in arrayimpl.TypeMap:
-                for count in range(0, 10):
+                for count in range(self.COUNT_MIN, 10):
                     for rank in range(size):
                         sbuf = array(range(count), typecode)
                         rbuf = array(-1, typecode, count+1)
@@ -126,6 +135,8 @@ if _name == 'Open MPI':
     if _version < (1, 4, 0):
         if MPI.Query_thread() > MPI.THREAD_SINGLE:
             del TestRMAWorld
+elif _name == 'HP MPI':
+    BaseTestRMA.COUNT_MIN = 1
 
 if __name__ == '__main__':
     unittest.main()
