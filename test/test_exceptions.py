@@ -349,6 +349,23 @@ if name == 'MPICH2':
         del TestExcWin
         del TestExcErrhandlerNull
         del TestExcErrhandler
+elif name == 'HP MPI':
+        del TestExcDatatypeNull
+        del TestExcDatatype
+        del TestExcStatus
+        del TestExcRequestNull
+        del TestExcOpNull
+        del TestExcOp
+        del TestExcInfoNull
+        del TestExcInfo
+        del TestExcGroupNull
+        del TestExcGroup
+        del TestExcCommNull
+        del TestExcComm
+        del TestExcWinNull
+        del TestExcWin
+        del TestExcErrhandlerNull
+        del TestExcErrhandler
 
 # --------------------------------------------------------------------
 
