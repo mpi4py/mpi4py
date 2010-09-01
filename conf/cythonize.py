@@ -41,8 +41,15 @@ def cythonize(source, includes=(),
             pass
         os.rename(header, dest)
 
-def run(source, wdir=os.curdir):
-    name = os.path.splitext(source)[0]
+def run(source, wdir=None):
+    dirname = os.path.dirname(source)
+    if wdir is None:
+        if dirname:
+            wdir = dirname
+        else:
+            wdir = os.curdir
+    filename = os.path.basename(source)
+    name = os.path.splitext(filename)[0]
     if name.count('.') == 0:
         package = ''
         module  = name
@@ -53,7 +60,7 @@ def run(source, wdir=os.curdir):
     cwd = os.getcwd()
     os.chdir(wdir)
     try:
-        cythonize(source,
+        cythonize(filename,
                   includes=[os.curdir, 'include'],
                   output_h=os.path.join('include', package),
                   )
@@ -61,5 +68,5 @@ def run(source, wdir=os.curdir):
         os.chdir(cwd)
 
 if __name__ == "__main__":
-    run('mpi4py.MPI.pyx', 'src')
-    run('mpi4py.MPE.pyx', 'src')
+    run(os.path.join('src', 'mpi4py.MPI.pyx'))
+    run(os.path.join('src', 'mpi4py.MPE.pyx'))
