@@ -40,6 +40,8 @@ class TestDoc(unittest.TestCase):
                     if not doc:
                         print ("'%s': empty docstring" % k)
                         missing = True
+                    if 'mpi4py.MPI' in doc:
+                        print ("'%s': bad format docstring" % k)
         self.assertFalse(missing)
 
 
