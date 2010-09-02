@@ -1392,6 +1392,19 @@ class build_exe(build_ext):
 
 class install(cmd_install.install):
 
+    user_options = cmd_install.install.user_options + [
+        ('single-version-externally-managed', None,
+         "setuptools compatibility option"),
+    ]
+    boolean_options = cmd_install.install.boolean_options + [
+        'single-version-externally-managed',
+    ]
+
+    def initialize_options(self):
+        cmd_install.install.initialize_options(self)
+        self.single_version_externally_managed = None
+        self.no_compile = None
+
     def has_exe (self):
         return self.distribution.has_executables()
 
