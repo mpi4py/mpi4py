@@ -290,18 +290,15 @@ PyMPIString_AsStringAndSize(PyObject *ob, const char **s, Py_ssize_t *n)
 
 /* ------------------------------------------------------------------------- */
 
-/* Enable the block below if for any
-   reason you want to disable threads */
-
-#if 0
-
-#define PyGILState_Ensure() (PyGILState_STATE)0)
-#define PyGILState_Release(state) (state)=(PyGILState_STATE)0)
+#if !defined(WITH_THREAD)
+#undef  PyGILState_Ensure
+#define PyGILState_Ensure() ((PyGILState_STATE)0)
+#undef  PyGILState_Release
+#define PyGILState_Release(state) (state)=((PyGILState_STATE)0)
 #undef  Py_BLOCK_THREADS
 #define Py_BLOCK_THREADS (_save)=(PyThreadState*)0;
 #undef  Py_UNBLOCK_THREADS
 #define Py_UNBLOCK_THREADS (_save)=(PyThreadState*)0;
-
 #endif
 
 /* ------------------------------------------------------------------------- */
