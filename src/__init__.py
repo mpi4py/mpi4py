@@ -51,3 +51,18 @@ def get_include():
     return join(dirname(__file__), 'include')
 
 # --------------------------------------------------------------------
+
+def get_config():
+    """
+    Return a dictionary with information about MPI.
+    """
+    from os.path import dirname, join
+    try:
+        from configparser import ConfigParser
+    except ImportError:
+        from ConfigParser import ConfigParser
+    parser = ConfigParser()
+    parser.read(join(dirname(__file__), 'mpi.cfg'))
+    return dict(parser.items('mpi'))
+
+# --------------------------------------------------------------------
