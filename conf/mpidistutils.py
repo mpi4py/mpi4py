@@ -185,6 +185,15 @@ def customize_compiler(compiler,
             preprocessor = 'gcc -mno-cygwin -E',
             )
 
+def find_command_executable(exe, path=None):
+    bits = split_quoted(exe)
+    cmd = bits[0]
+    args = bits[1:]
+    cmd = find_executable(cmd, path)
+    if cmd is not None and args:
+        cmd = ' '.join([cmd]+args)
+    return cmd    
+
 def find_mpi_compiler(name,
                       envvars,
                       command,
@@ -221,18 +230,35 @@ def find_mpi_compiler(name,
         if isinstance(executables, str):
             executables = (executables,)
         for exe in executables:
-            try:
-                bits = split_quoted(exe)
-                cmd, args = bits[0], ' '.join(bits[1:])
-            except:
-                cmd, args = exe, ''
-            cmd = find_executable(cmd, path)
+            cmd = find_command_executable(exe, path)
             if cmd is not None:
-                if args:
-                    cmd = cmd + ' ' + args
                 return cmd
     # nothing found
     return None
+
+def find_mpi_compilers(command_obj, config_info, path=None):
+    def fix_path(cmd, path):
+        if cmd:
+            if not os.path.isabs(cmd):
+                cmd = find_command_executable(cmd, path)
+        if cmd and not path:
+            path = os.path.dirname(cmd)
+        return cmd, path
+    #
+    mpicc = find_mpi_compiler(
+        'mpicc', MPICC_ENV, command_obj, config_info, None, MPICC, path)
+    mpicc, path = fix_path(mpicc, path)
+    #
+    mpicxx = find_mpi_compiler(
+        'mpicxx', MPICXX_ENV, command_obj, config_info, None, MPICXX, path)
+    mpicxx, path = fix_path(mpicxx, path)
+    #
+    mpild = mpicc or mpicxx # default
+    mpild = find_mpi_compiler(
+        'mpild', MPILD_ENV, command_obj, config_info, mpild, MPILD, path)
+    mpild, path = fix_path(mpild, path)
+    #
+    return (mpicc, mpicxx, mpild)
 
 # -----------------------------------------------------------------------------
 
@@ -376,22 +402,15 @@ def configuration(command_obj, verbose=True):
     return {}
 
 
-def configure_compiler(compiler, config_info, command_obj=None, verbose=True):
+def configure_compiler(compiler, command_obj, config_info, verbose=True):
+    mpicc, mpicxx, mpild = find_mpi_compilers(command_obj, config_info)
+    if mpicc:  config_info['mpicc']  = mpicc
+    if mpicxx: config_info['mpicxx'] = mpicxx
+    if mpild:  config_info['mpild']  = mpild
     #
-    mpicc = find_mpi_compiler(
-        'mpicc', MPICC_ENV, command_obj, config_info, None, MPICC)
     if verbose:
         log.info("MPI C compiler:    %s", mpicc or 'not found')
-    #
-    mpicxx = find_mpi_compiler(
-        'mpicxx', MPICXX_ENV, command_obj, config_info, None, MPICXX)
-    if verbose:
         log.info("MPI C++ compiler:  %s", mpicxx or 'not found')
-    #
-    mpild = mpicc or mpicxx # default
-    mpild = find_mpi_compiler(
-        'mpild', MPILD_ENV, command_obj, config_info, mpild, MPILD)
-    if verbose:
         log.info("MPI linker:        %s", mpild or 'not found')
     #
     customize_compiler(compiler, mpicc=mpicc, mpicxx=mpicxx, mpild=mpild)
@@ -708,9 +727,8 @@ class config(cmd_config.config):
     def run (self):
         # test configuration in specified section and file
         config_info = configuration(self, verbose=True)
+        mpicc, mpicxx, mpild = find_mpi_compilers(self, config_info)
         # test MPI C compiler
-        mpicc = find_mpi_compiler(
-            'mpicc', MPICC_ENV, self, config_info, None, MPICC)
         log.info("MPI C compiler:    %s", mpicc  or 'not found')
         self.compiler = getattr(self.compiler, 'compiler_type',
                                 self.compiler)
@@ -719,8 +737,6 @@ class config(cmd_config.config):
         customize_compiler(compiler_obj, mpicc=mpicc)
         self.try_link(ConfigTest, headers=['mpi.h'], lang='c')
         # test MPI C++ compiler
-        mpicxx = find_mpi_compiler(
-            'mpicxx', MPICXX_ENV, self, config_info, None, MPICXX)
         log.info("MPI C++ compiler:  %s", mpicxx or 'not found')
         self.compiler = getattr(self.compiler, 'compiler_type',
                                 self.compiler)
@@ -928,7 +944,7 @@ class build_clib(cmd_build_clib.build_clib):
             compiler_obj = self.compiler_obj
         except AttributeError:
             compiler_obj = self.compiler
-        configure_compiler(compiler_obj, config_info, self)
+        configure_compiler(compiler_obj, self, config_info)
         #
         if self.libraries_a:
             self.config_static_libraries(self.libraries_a, config_info)
@@ -1132,7 +1148,7 @@ class build_ext(cmd_build_ext.build_ext):
             compiler_obj = self.compiler_obj
         except AttributeError:
             compiler_obj = self.compiler
-        configure_compiler(compiler_obj, config_info, self)
+        configure_compiler(compiler_obj, self, config_info)
         config_cmd = self.get_finalized_command('config')
         config_cmd.compiler = compiler_obj # fix compiler
         # extra configuration, check for all MPI symbols
@@ -1146,10 +1162,11 @@ class build_ext(cmd_build_ext.build_ext):
             log.info("defining preprocessor macro '%s'" % macro)
             compiler_obj.define_macro(macro, 1)
         # configure extensions
-        self.config_extensions(config_info)
+        #self.config_extensions(config_info)
         # and finally build extensions
         for ext in self.extensions:
             try:
+                self.config_extension(ext, config_info)
                 self.build_extension(ext)
             except (DistutilsError, CCompilerError):
                 if not ext.optional:
@@ -1158,19 +1175,15 @@ class build_ext(cmd_build_ext.build_ext):
                 self.warn('building extension "%s" failed' % ext.name)
                 self.warn('%s' % e)
 
-    def config_extensions (self, config_info):
-        from distutils.dep_util import newer_group
-        for ext in self.extensions:
-            fullname = self.get_ext_fullname(ext.name)
-            ext_filename = os.path.join(
-                self.build_lib, self.get_ext_filename(fullname))
-            depends = ext.sources + ext.depends
-            if not (self.force or
-                    newer_group(depends, ext_filename, 'newer')):
-                    continue
-            self.config_extension (ext, config_info)
-
     def config_extension (self, ext, config_info):
+        from distutils.dep_util import newer_group
+        fullname = self.get_ext_fullname(ext.name)
+        filename = os.path.join(
+            self.build_lib, self.get_ext_filename(fullname))
+        depends = ext.sources + ext.depends
+        if not (self.force or
+                newer_group(depends, filename, 'newer')):
+            return
         try:
             compiler_obj = self.compiler_obj
         except AttributeError:
@@ -1258,6 +1271,8 @@ class build_exe(build_ext):
         self.extensions  = self.distribution.executables
         self.check_extensions_list = self.check_executables_list
         self.build_extension = self.build_executable
+        self.get_ext_filename = self.get_exe_filename
+        self.build_lib = self.build_exe
 
     def check_executables_list (self, executables):
         ListType = type([])
@@ -1269,12 +1284,15 @@ class build_exe(build_ext):
                 raise DistutilsSetupError(
                     "'executables' items must be Executable instances")
 
+    def get_exe_filename(self, exe_name):
+        exe_ext = sysconfig.get_config_var('EXE') or ''
+        return exe_name + exe_ext
+
     def get_outputs (self):
-        exe_extension = sysconfig.get_config_var('EXE') or ''
         outputs = []
         for exe in self.executables:
-            exe_filename = os.path.join(self.build_exe, exe.name)
-            outputs.append(exe_filename + exe_extension)
+            exe_filename = get_exe_filename(exe.name)
+            outputs.append(os.path.join(self.build_exe, exe_filename))
         return outputs
 
     def build_executable (self, exe):
