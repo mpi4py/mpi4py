@@ -192,7 +192,7 @@ def find_command_executable(exe, path=None):
     cmd = find_executable(cmd, path)
     if cmd is not None and args:
         cmd = ' '.join([cmd]+args)
-    return cmd    
+    return cmd
 
 def find_mpi_compiler(name,
                       envvars,
@@ -237,37 +237,53 @@ def find_mpi_compiler(name,
     return None
 
 def find_mpi_compilers(command_obj, config_info, path=None):
-    def fix_path(cmd, path):
-        if cmd:
-            if not os.path.isabs(cmd):
-                cmd = find_command_executable(cmd, path)
+    def ensure_abspath(cmd, path):
+        if cmd and not os.path.isabs(cmd):
+            cmd = find_command_executable(cmd, path)
         if cmd and not path:
             path = os.path.dirname(cmd)
         return cmd, path
-    #
+    # C
     mpicc = find_mpi_compiler(
         'mpicc', MPICC_ENV, command_obj, config_info, None, MPICC, path)
-    mpicc, path = fix_path(mpicc, path)
-    #
+    mpicc, path = ensure_abspath(mpicc, path)
+    # C++
     mpicxx = find_mpi_compiler(
         'mpicxx', MPICXX_ENV, command_obj, config_info, None, MPICXX, path)
-    mpicxx, path = fix_path(mpicxx, path)
-    #
+    mpicxx, path = ensure_abspath(mpicxx, path)
+    # Fortran 77
+    mpif77 = find_mpi_compiler(
+        'mpif77', 'MPIF77', command_obj, config_info, None, 'mpif77', path)
+    mpif77, path = ensure_abspath(mpif77, path)
+    # Fortran 90
+    mpif90 = find_mpi_compiler(
+        'mpif90', 'MPIF90', command_obj, config_info, None, 'mpif90', path)
+    mpif90, path = ensure_abspath(mpif90, path)
+    # Fortran 95
+    mpif95 = find_mpi_compiler(
+        'mpif95', 'MPIF95', command_obj, config_info, None, 'mpif95', path)
+    mpif95, path = ensure_abspath(mpif95, path)
+    # Linker
     mpild = mpicc or mpicxx # default
     mpild = find_mpi_compiler(
         'mpild', MPILD_ENV, command_obj, config_info, mpild, MPILD, path)
-    mpild, path = fix_path(mpild, path)
+    mpild, path = ensure_abspath(mpild, path)
     #
+    if mpicc:  config_info['mpicc']  = mpicc
+    if mpicxx: config_info['mpicxx'] = mpicxx
+    if mpif77: config_info['mpif77'] = mpif77
+    if mpif90: config_info['mpif90'] = mpif90
+    if mpif95: config_info['mpif95'] = mpif95
     return (mpicc, mpicxx, mpild)
 
 # -----------------------------------------------------------------------------
 
 try:
-    from ConfigParser import ConfigParser
-    from ConfigParser import Error as ConfigParserError
-except ImportError:
     from configparser import ConfigParser
     from configparser import Error as ConfigParserError
+except ImportError:
+    from ConfigParser import ConfigParser
+    from ConfigParser import Error as ConfigParserError
 
 
 def _config_parser(section, filenames, raw=False, vars=None):
@@ -275,7 +291,12 @@ def _config_parser(section, filenames, raw=False, vars=None):
     Returns a dictionary of options obtained by parsing configuration
     files.
     """
-    parser = ConfigParser()
+    try:
+        from collections import OrderedDict
+        parser = ConfigParser(dict_type=OrderedDict)
+    except ImportError:
+        OrderedDict = dict
+        parser = ConfigParser()
     try:
         parser.read(filenames.split(os.path.pathsep))
     except ConfigParserError:
@@ -291,12 +312,11 @@ def _config_parser(section, filenames, raw=False, vars=None):
         log.error("error: section '%s' not found "
                   "in configuration file/s '%s'", section, filenames)
         return None
-    config_info = {}
+    config_info = OrderedDict()
     for k, v in parser.items(section, raw, vars):
         if k in ('define_macros',
-                 'undef_macros',
-                 'libraries'):
-            config_info[k] = [e.strip() for e in split_quoted(v)]
+                 'undef_macros',):
+            config_info[k] = [e.strip() for e in v.split(',')]
         elif k in ('include_dirs',
                    'library_dirs',
                    'runtime_library_dirs',):
@@ -306,6 +326,8 @@ def _config_parser(section, filenames, raw=False, vars=None):
             expandvars = os.path.expandvars
             config_info[k] = [expanduser(expandvars(p))
                               for p in pathlist if p]
+        elif k == 'libraries':
+            config_info[k] = [e.strip() for e in split_quoted(v)]
         elif k == 'extra_objects':
             expanduser = os.path.expanduser
             expandvars = os.path.expandvars
@@ -329,7 +351,7 @@ def _config_parser(section, filenames, raw=False, vars=None):
     return config_info
 
 
-def find_mpi_config(section, envvars=None, defaults=None):
+def load_mpi_config(section, envvars=None, defaults=None):
     if not section and envvars:
         # look in environment
         if isinstance(envvars, str):
@@ -354,12 +376,50 @@ def find_mpi_config(section, envvars=None, defaults=None):
     else:
         return section, filenames, None
 
+def save_mpi_config(config_info, filename):
+    # prepare configuration values
+    config_info = config_info.copy()
+    for k in config_info:
+        if k in ('include_dirs',
+                 'library_dirs',
+                 'runtime_library_dirs'):
+            config_info[k] = os.path.pathsep.join(config_info[k])
+        elif k == 'define_macros':
+            macros = []
+            for m, v in config_info[k]:
+                if v is None:
+                    macros.append(m)
+                else:
+                    macros.append('%s=%s' % (m,v))
+            config_info[k] = ','.join(macros)
+        elif k == 'undef_macros':
+            config_info[k] = ','.join(config_info[k])
+        elif isinstance(config_info[k], list):
+            config_info[k] = ' '.join(config_info[k])
+    # fill configuration parser
+    try:
+        from collections import OrderedDict
+        parser = ConfigParser(dict_type=OrderedDict)
+    except ImportError:
+        OrderedDict = dict
+        parser = ConfigParser()
+    parser.add_section('mpi')
+    for option, value in config_info.items():
+        if not value: continue
+        parser.set('mpi', option, value)
+    # save configuration file
+    f = open(filename, 'wt')
+    try:
+        parser.write(f)
+    finally:
+        f.close()
+
 # -----------------------------------------------------------------------------
 
 def configuration(command_obj, verbose=True):
     # user-provided
     section, filenames, config_info = \
-        find_mpi_config(getattr(command_obj, 'mpi', None),
+        load_mpi_config(getattr(command_obj, 'mpi', None),
                         MPICFG_ENV, MPICFG)
     if config_info:
         if verbose:
@@ -404,9 +464,6 @@ def configuration(command_obj, verbose=True):
 
 def configure_compiler(compiler, command_obj, config_info, verbose=True):
     mpicc, mpicxx, mpild = find_mpi_compilers(command_obj, config_info)
-    if mpicc:  config_info['mpicc']  = mpicc
-    if mpicxx: config_info['mpicxx'] = mpicxx
-    if mpild:  config_info['mpild']  = mpild
     #
     if verbose:
         log.info("MPI C compiler:    %s", mpicc or 'not found')
@@ -1199,6 +1256,12 @@ class build_ext(cmd_build_ext.build_ext):
                 raise DistutilsPlatformError(
                    "Cannot compile/link MPI programs. "
                    "Check your configuration!!!")
+        if ext.name == 'mpi4py.MPI':
+            dest_dir = os.path.dirname(filename)
+            mpi_cfg = os.path.join(dest_dir, 'mpi.cfg')
+            log.info("writing %s" % mpi_cfg)
+            if not self.dry_run:
+                save_mpi_config(config_info, mpi_cfg)
         #
         if ext.name == 'mpi4py.MPE':
             log.info("checking for MPE availability ...")
