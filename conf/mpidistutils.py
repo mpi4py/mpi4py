@@ -997,10 +997,7 @@ class build_clib(cmd_build_clib.build_clib):
             self.compiler.set_library_dirs(self.library_dirs)
         #
         config_info = configuration(self, verbose=True)
-        try: # Py2.7+ & Py3.2+
-            compiler_obj = self.compiler_obj
-        except AttributeError:
-            compiler_obj = self.compiler
+        compiler_obj = self.compiler
         configure_compiler(compiler_obj, self, config_info)
         #
         if self.libraries:
@@ -1060,17 +1057,12 @@ class build_clib(cmd_build_clib.build_clib):
     def build_shared_library (self, library):
         from distutils.dep_util import newer_group
 
-        try: # Py2.7+ & Py3.2+
-            compiler_obj = self.compiler_obj
-        except AttributeError:
-            compiler_obj = self.compiler
+        compiler_obj = self.compiler
 
         (lib_name, build_info) = library
-
         sources = [convert_path(p) for p in build_info.get('sources',[])]
         depends = [convert_path(p) for p in build_info.get('depends',[])]
         depends = sources + depends
-
         output_dir = convert_path(build_info.get('output_dir', ''))
         if not os.path.isabs(output_dir):
             output_dir = os.path.join(self.build_clib_so, output_dir)
@@ -1174,10 +1166,7 @@ class build_ext(cmd_build_ext.build_ext):
         self.check_extensions_list(self.extensions)
         # parse configuration file and configure compiler
         config_info = configuration(self, verbose=True)
-        try: # Py2.7+ & Py3.2+
-            compiler_obj = self.compiler_obj
-        except AttributeError:
-            compiler_obj = self.compiler
+        compiler_obj = self.compiler
         configure_compiler(compiler_obj, self, config_info)
         config_cmd = self.get_finalized_command('config')
         config_cmd.compiler = compiler_obj # fix compiler
@@ -1216,10 +1205,7 @@ class build_ext(cmd_build_ext.build_ext):
             return
         ## ext.sources[:] = [convert_path(p) for p in ext.sources]
         ## ext.depends[:] = [convert_path(p) for p in ext.depends]
-        try:
-            compiler_obj = self.compiler_obj
-        except AttributeError:
-            compiler_obj = self.compiler
+        compiler_obj = self.compiler
         config_cmd = self.get_finalized_command('config')
         config_cmd.compiler = compiler_obj # fix compiler
         #
@@ -1355,11 +1341,7 @@ class build_exe(build_ext):
             log.info("building '%s' executable", exe.name)
 
         # Next, compile the source code to object files.
-
-        try: # Py2.7+ & Py3.2+
-            compiler_obj = self.compiler_obj
-        except AttributeError:
-            compiler_obj = self.compiler
+        compiler_obj = self.compiler
 
         # XXX not honouring 'define_macros' or 'undef_macros' -- the
         # CCompiler API needs to change to accommodate this, and I
