@@ -32,14 +32,17 @@ build *MPI for Python*:
      :ref:`python-mpi` in the appendix.
 
 
-Using **setuptools**
---------------------
+Using **pip** or **easy_install**
+---------------------------------
 
 If you already have a working MPI (either if you installed it from
 sources or by using a pre-built package from your favourite GNU/Linux
 distribution) and the :program:`mpicc` compiler wrapper is on your
-search path, you can take advantage of setuptools's
-:program:`easy_install` command::
+search path, you can use :program:`pip`::
+
+    $ [sudo] pip install mpi4py
+
+or alternatively *setuptools* :program:`easy_install` (deprecated)::
 
     $ [sudo] easy_install mpi4py
 
@@ -47,6 +50,8 @@ search path, you can take advantage of setuptools's
    search path (or if it has a different name) you can use
    :program:`env` to pass the environment variable :envvar:`MPICC`
    providing the full path to the MPI compiler wrapper executable::
+
+      $ [sudo] env MPICC=/path/to/mpicc pip install mpi4py
 
       $ [sudo] env MPICC=/path/to/mpicc easy_install mpi4py
 
@@ -73,8 +78,10 @@ Downloading
 ^^^^^^^^^^^
 
 The *MPI for Python* package is available for download at the project
-website generously hosted by Google Code. You can use :program:`wget`
-to get a release tarball::
+website generously hosted by Google Code. You can use :program:`curl`
+o :program:`wget` to get a release tarball::
+
+    $ curl -O http://mpi4py.googlecode.com/files/mpi4py-X.X.X.tar.gz
 
     $ wget http://mpi4py.googlecode.com/files/mpi4py-X.X.X.tar.gz
 
