@@ -9,7 +9,7 @@ HISTORY: MPI for Python
 :Address:      CCT CONICET, 3000 Santa Fe, Argentina
 
 
-Release 1.2.2 [2010-09-11]
+Release 1.2.2 [2010-09-13]
 ==========================
 
 * Add ``mpi4py.get_config()`` to retrieve information (compiler
@@ -31,7 +31,7 @@ Release 1.2.2 [2010-09-11]
 * Many distutils-related fixes, cleanup, and enhancements, better
   logics to find MPI compiler wrappers.
 
-* Support for 'pip install mpi4py'.
+* Support for ``pip install mpi4py``.
 
 
 Release 1.2.1 [2010-02-26]
