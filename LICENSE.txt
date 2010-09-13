@@ -6,7 +6,7 @@ LICENSE: MPI for Python
 :Contact:      dalcinl@gmail.com
 :Web Site:     http://mpi4py.googlecode.com/
 :Organization: CIMEC <http://www.cimec.org.ar>
-:Address:      PTLC, 3000 Santa Fe, Argentina
+:Address:      CCT CONICET, 3000 Santa Fe, Argentina
 
 
 Copyright (c) 2009, Lisandro Dalcin.

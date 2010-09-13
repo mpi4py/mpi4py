@@ -6,7 +6,32 @@ HISTORY: MPI for Python
 :Contact:      dalcinl@gmail.com
 :Web Site:     http://mpi4py.googlecode.com/
 :Organization: CIMEC <http://www.cimec.org.ar>
-:Address:      PTLC, 3000 Santa Fe, Argentina
+:Address:      CCT CONICET, 3000 Santa Fe, Argentina
+
+
+Release 1.2.2 [2010-09-13]
+==========================
+
+* Add ``mpi4py.get_config()`` to retrieve information (compiler
+  wrappers, includes, libraries, etc) about the MPI implementation
+  employed to build mpi4py.
+
+* Workaround Python libraries with missing GILState-related API calls
+  in case of non-threaded Python builds.
+
+* Windows: look for MPICH2, DeinoMPI, Microsoft HPC Pack at their
+  default install locations under %ProgramFiles.
+
+* MPE: fix hacks related to old API's, these hacks are broken when MPE
+  is built with a MPI implementations other than MPICH2.
+
+* HP-MPI: fix for missing Fortran datatypes, use dlopen() to load the
+  MPI shared library before MPI_Init()
+
+* Many distutils-related fixes, cleanup, and enhancements, better
+  logics to find MPI compiler wrappers.
+
+* Support for ``pip install mpi4py``.
 
 
 Release 1.2.1 [2010-02-26]
