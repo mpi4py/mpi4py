@@ -1601,3 +1601,17 @@ class clean(cmd_clean.clean):
                 pass
 
 # -----------------------------------------------------------------------------
+
+try:
+    import msilib
+    Directory_make_short = msilib.Directory.make_short
+    def make_short(self, file):
+        parts = file.split('.')
+        if len(parts) > 1:
+            file = '_'.join(parts[:-1])+'.'+parts[-1]
+        return Directory_make_short(self, file)
+    msilib.Directory.make_short = make_short
+except:
+    pass
+
+# -----------------------------------------------------------------------------
