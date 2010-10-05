@@ -93,9 +93,10 @@ def print_banner(options, package):
     rank, name = getprocessorinfo()
     x, y = sys.version_info[:2]
     if options.verbose:
-        writeln("[%d@%s] Py%d%d (%s) - mpi4py (%s)"
+        writeln("[%d@%s] Py%d%d (%s) - %s (%s)"
                 % (rank, name, x, y,
                    sys.executable,
+                   package.__name__,
                    package.__path__[0]))
 
 def load_tests(options, args):
