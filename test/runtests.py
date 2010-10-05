@@ -11,17 +11,17 @@ def getoptionparser():
     parser.add_option("-v", "--verbose",
                       action="store_const", const=2, dest="verbose", default=1,
                       help="print status messages to stdout")
-    parser.add_option("-i", "--include",
+    parser.add_option("-i", "--include", type="string",
                       action="append",  dest="include", default=[],
                       help="include tests matching PATTERN", metavar="PATTERN")
-    parser.add_option("-e", "--exclude",
+    parser.add_option("-e", "--exclude", type="string",
                       action="append", dest="exclude", default=[],
                       help="exclude tests matching PATTERN", metavar="PATTERN")
-    parser.add_option("--path",
+    parser.add_option("--path", type="string",
                       action="append", dest="path", default=[],
                       help="prepend PATH to sys.path", metavar="PATH")
-    parser.add_option("--refleaks",
-                      type="int", dest="repeats", default=3,
+    parser.add_option("--refleaks", type="int",
+                      action="store", dest="repeats", default=3,
                       help="run tests REPEAT times in a loop to catch refleaks",
                       metavar="REPEAT")
     parser.add_option("--mpe",
@@ -67,7 +67,9 @@ def setup_unittest(options):
         except: pass
     _WritelnDecorator.writeln = writeln
 
-def import_package(options):
+def import_package(options, pkgname):
+    package = __import__(pkgname)
+    #
     import mpi4py.rc
     #if not options.threaded:
     #    mpi4py.rc.threaded = False
@@ -75,8 +77,7 @@ def import_package(options):
         mpi4py.rc.profile('MPE', logfile='runtests-mpi4py')
     import mpi4py.MPI
     #
-    import mpi4py
-    return mpi4py
+    return package
 
 def getprocessorinfo():
     from mpi4py import MPI
@@ -153,12 +154,12 @@ def run_tests_leaks(options, testsuite):
         writeln('[%d@%s] refleaks:  (%d - %d) --> %d'
                 % (rank, name, r2, r1, r2-r1))
 
-def main():
+def main(pkgname):
     parser = getoptionparser()
     (options, args) = parser.parse_args()
     setup_python(options)
     setup_unittest(options)
-    package = import_package(options)
+    package = import_package(options, pkgname)
     print_banner(options, package)
     testsuite = load_tests(options, args)
     success = run_tests(options, testsuite)
@@ -167,4 +168,4 @@ def main():
     sys.exit(not success)
 
 if __name__ == '__main__':
-    main()
+    main('mpi4py')
