@@ -116,8 +116,8 @@ def load_tests(options, args):
             testname in options.exclude):
             continue
         if (options.include and
-            (modname  not in options.include or
-             testname not in options.include)):
+            not (modname  in options.include or
+                 testname in options.include)):
             continue
         module = __import__(modname)
         loader = unittest.TestLoader()
