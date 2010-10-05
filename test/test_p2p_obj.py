@@ -231,6 +231,7 @@ class BaseTestP2PObjDup(BaseTestP2PObj):
         self.COMM = self.COMM.Dup()
     def tearDown(self):
         self.COMM.Free()
+        del self.COMM
 
 class TestP2PObjSelf(BaseTestP2PObj, unittest.TestCase):
     COMM = MPI.COMM_SELF

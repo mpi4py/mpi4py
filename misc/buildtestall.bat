@@ -36,10 +36,12 @@ if "%PYVERSION%-%COMPILER%"=="25-msvc" goto :eof
 if not exist %PYTHON%  goto :eof
 if not exist %MPIEXEC% goto :eof
 
+set INSTALLDIR=%TEMP%\mpi4py-buildtest
 %PYTHON% setup.py -q clean --all
-%PYTHON% setup.py -q build  --mpi=%MPICONF% --compiler=%COMPILER% install --home=%TEMP%
+%PYTHON% setup.py -q build  --mpi=%MPICONF% --compiler=%COMPILER% install --home=%INSTALLDIR%
 %PYTHON% setup.py -q clean --all
-%MPIEXEC% -n 2 %PYTHON% test\runalltest.py -q --path=%TEMP%\lib\python
-del /S /Q %TEMP%\lib\python > NUL
-rmdir /S /Q %TEMP%\lib\python\mpi4py
+%MPIEXEC% -n 2 %PYTHON% test\runtests.py -q --path=%INSTALLDIR%
+del   /S /Q %INSTALLDIR%\lib\python > NUL
+rmdir /S /Q %INSTALLDIR%\lib\python\mpi4py > NUL
+rmdir /S /Q %INSTALLDIR%
 goto :eof

@@ -187,8 +187,10 @@ class BaseTestCCOObjInter(object):
     def tearDown(self):
         if self.INTRACOMM != MPI.COMM_NULL:
             self.INTRACOMM.Free()
+            del self.INTRACOMM
         if self.INTERCOMM != MPI.COMM_NULL:
             self.INTERCOMM.Free()
+            del self.INTERCOMM
 
     def testBarrier(self):
         if self.INTRACOMM == MPI.COMM_NULL: return
@@ -334,6 +336,7 @@ class BaseTestCCOObjDup(BaseTestCCOObj):
         self.COMM = self.COMM.Dup()
     def tearDown(self):
         self.COMM.Free()
+        del self.COMM
 
 class TestCCOObjSelfDup(BaseTestCCOObjDup, unittest.TestCase):
     COMM = MPI.COMM_SELF
@@ -352,6 +355,7 @@ class TestCCOObjInterDup(TestCCOObjInter):
         super(TestCCOObjInterDup, self).setUp()
     def tearDown(self):
         self.BASECOMM.Free()
+        del self.BASECOMM
         super(TestCCOObjInterDup, self).tearDown()
 
 class TestCCOObjInterDupDup(TestCCOObjInterDup):

@@ -4,7 +4,7 @@ PYTHON=python
 MPIIMP=mpich2
 
 for arg in "$@" ; do
-    case "$arg" in 
+    case "$arg" in
     -q)
     QUIET=-q
     ;;
@@ -30,7 +30,6 @@ $PYTHON setup.py $QUIET sdist
 rm -rf $BUILDDIR && mkdir -p $BUILDDIR
 cp dist/$NAME-$VERSION.tar.gz $BUILDDIR
 
-
 source misc/env-$MPIIMP.sh
 cd $BUILDDIR
 tar -zxf $NAME-$VERSION.tar.gz
@@ -38,6 +37,7 @@ cd $NAME-$VERSION
 $PYTHON setup.py $QUIET install --home=$BUILDDIR
 MPI4PYPATH=$BUILDDIR/lib64/python:$BUILDDIR/lib/python
 $MPISTARTUP
-$PYTHON test/runalltest.py $QUIET --path=$MPI4PYPATH < /dev/null
+$PYTHON test/runtests.py $QUIET --path=$MPI4PYPATH < /dev/null
 sleep 3
+rm -rf $BUILDDIR
 $MPISHUTDOWN
