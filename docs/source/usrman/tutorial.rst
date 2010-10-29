@@ -27,8 +27,9 @@ communication of buffer-provider objects (e.g., NumPy arrays).
 
 * Communication of buffer-provider objects
 
-  You have to use **start-case** methods (of the :class:`Comm` class),
-  like :meth:`Send()`, :meth:`Recv()`, :meth:`Bcast()`.
+  You have to use method names starting with an **upper-case** letter
+  (of the :class:`Comm` class), like :meth:`Send()`, :meth:`Recv()`,
+  :meth:`Bcast()`.
 
   In general, buffer arguments to these calls must be explicitly
   specified by using a 2/3-list/tuple like ``[data, MPI.DOUBLE]``, or

@@ -98,7 +98,7 @@ groups.
 Point-to-Point Communications
 -----------------------------
 
-Point to point communication is a fundamental capability of massage
+Point to point communication is a fundamental capability of message
 passing systems. This mechanism enables the transmittal of data
 between a pair of processes, one side sending, the other, receiving.
 
@@ -206,7 +206,7 @@ In *MPI for Python*, the :meth:`Bcast`, :meth:`Scatter`,
 of memory buffers. The variants :meth:`bcast`, :meth:`scatter`,
 :meth:`gather`, :meth:`allgather` and :meth:`alltoall` can communicate
 general Python objects.  The vector variants (which can communicate
-different amounts of data at each process) :meth:`Scatterv`,
+different amounts of data to each process) :meth:`Scatterv`,
 :meth:`Gatherv`, :meth:`Allgatherv` and :meth:`Alltoallv` are also
 supported, they can only communicate objects exposing memory buffers.
 
