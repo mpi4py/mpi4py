@@ -518,8 +518,8 @@ cdef class Datatype:
         #
         cdef void *ibptr = NULL, *obptr = NULL
         cdef MPI_Aint iblen = 0, oblen = 0
-        cdef ob1 = asbuffer_r(inbuf,  &ibptr, &iblen)
-        cdef ob2 = asbuffer_w(outbuf, &obptr, &oblen)
+        cdef ob1 = getbuffer_r(inbuf,  &ibptr, &iblen)
+        cdef ob2 = getbuffer_w(outbuf, &obptr, &oblen)
         cdef int icount = <int>(iblen/extent), osize = <int>oblen
         #
         CHKERR( MPI_Pack(ibptr, icount, self.ob_mpi, obptr, osize,
@@ -535,8 +535,8 @@ cdef class Datatype:
         #
         cdef void *ibptr = NULL, *obptr = NULL
         cdef MPI_Aint iblen = 0, oblen = 0
-        cdef ob1 = asbuffer_r(inbuf,  &ibptr, &iblen)
-        cdef ob2 = asbuffer_w(outbuf, &obptr, &oblen)
+        cdef ob1 = getbuffer_r(inbuf,  &ibptr, &iblen)
+        cdef ob2 = getbuffer_w(outbuf, &obptr, &oblen)
         cdef int isize = <int>iblen, ocount = <int>(oblen/extent)
         #
         CHKERR( MPI_Unpack(ibptr, isize, &position, obptr, ocount,
@@ -568,8 +568,8 @@ cdef class Datatype:
         #
         cdef void *ibptr = NULL, *obptr = NULL
         cdef MPI_Aint iblen = 0, oblen = 0
-        cdef ob1 = asbuffer_r(inbuf,  &ibptr, &iblen)
-        cdef ob2 = asbuffer_w(outbuf, &obptr, &oblen)
+        cdef ob1 = getbuffer_r(inbuf,  &ibptr, &iblen)
+        cdef ob2 = getbuffer_w(outbuf, &obptr, &oblen)
         cdef int icount = <int>(iblen/extent) # XXX overflow?
         cdef MPI_Aint osize = oblen
         #
@@ -590,8 +590,8 @@ cdef class Datatype:
         #
         cdef void *ibptr = NULL, *obptr = NULL
         cdef MPI_Aint iblen = 0, oblen = 0
-        cdef ob1 = asbuffer_r(inbuf,  &ibptr, &iblen)
-        cdef ob2 = asbuffer_w(outbuf, &obptr, &oblen)
+        cdef ob1 = getbuffer_r(inbuf,  &ibptr, &iblen)
+        cdef ob2 = getbuffer_w(outbuf, &obptr, &oblen)
         cdef MPI_Aint isize = iblen,
         cdef int ocount = <int>(oblen/extent) # XXX overflow?
         #

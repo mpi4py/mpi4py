@@ -13,51 +13,56 @@ cdef object __IN_PLACE__ = <MPI_Aint>MPI_IN_PLACE
 
 #------------------------------------------------------------------------------
 
-cdef object message_basic(object o_buf,
-                          object o_type,
-                          int readonly,
-                          #
-                          void        **baddr,
-                          MPI_Aint     *bsize,
-                          MPI_Aint     *bitemsize,
-                          MPI_Datatype *btype,
-                          ):
+cdef class _p_message:
+    cdef _p_buffer buf
+    cdef object count
+    cdef object displ
+    cdef Datatype type
+
+cdef _p_message message_basic(object o_buf,
+                              object o_type,
+                              int readonly,
+                              #
+                              void        **baddr,
+                              MPI_Aint     *bsize,
+                              MPI_Datatype *btype,
+                              ):
+    cdef _p_message m = _p_message.__new__(_p_message)
+    cdef int w = (not readonly), f = (o_type is None)
     # special-case the constant MPI_BOTTOM,
     # an explicit MPI datatype is required
     if o_buf is __BOTTOM__:
+        m.buf = getbuffer(None, w, f)
+        m.type = <Datatype?>o_type
         baddr[0] = MPI_BOTTOM
         bsize[0] = 0
-        bitemsize[0] = 0
-        btype[0] = (<Datatype?>o_type).ob_mpi
-        return o_type
-    # get buffer base address, length, and format
-    cdef int w = (not readonly), f = (o_type is None)
-    cdef object o_fmt = None
-    if o_buf is None:
-        baddr[0] = NULL
-        bsize[0] = 0
-        bitemsize[0] = 0
-    else:
-        o_fmt = asbuffer(o_buf, w, f, baddr, bsize, bitemsize)
+        btype[0] = m.type.ob_mpi
+        return m
+    # get buffer base address and length
+    m.buf = getbuffer(o_buf, w, f)
+    baddr[0] = <void*>    m.buf.base
+    bsize[0] = <MPI_Aint> m.buf.size
     # lookup datatype if not provided or not a Datatype
     global TypeDict
-    if o_type is None:
-        o_type = TypeDict[o_fmt]
-    elif not isinstance(o_type, Datatype):
-        o_type = TypeDict[o_type]
+    if isinstance(o_type, Datatype):
+        m.type = <Datatype>o_type
+    elif o_type is None:
+        m.type = TypeDict[m.buf.format]
+    else:
+        m.type = TypeDict[o_type]
+    btype[0] = m.type.ob_mpi
     # and we are done ...
-    btype[0] = (<Datatype?>o_type).ob_mpi
-    return o_type
+    return m
 
-cdef object message_simple(object msg,
-                           int readonly,
-                           int rank,
-                           int blocks,
-                           #
-                           void         **_addr,
-                           int          *_count,
-                           MPI_Datatype *_type,
-                           ):
+cdef _p_message message_simple(object msg,
+                               int readonly,
+                               int rank,
+                               int blocks,
+                               #
+                               void         **_addr,
+                               int          *_count,
+                               MPI_Datatype *_type,
+                               ):
     # special-case PROC_NULL target rank
     if rank == MPI_PROC_NULL:
         _addr[0]  = NULL
@@ -70,7 +75,7 @@ cdef object message_simple(object msg,
     cdef object o_count = None
     cdef object o_displ = None
     cdef object o_type  = None
-    if is_buffer(msg):
+    if checkbuffer(msg):
         o_buf = msg
     elif is_list(msg) or is_tuple(msg):
         nargs = len(msg)
@@ -88,10 +93,10 @@ cdef object message_simple(object msg,
         raise TypeError("message: expecting buffer or list/tuple")
     # buffer: address, length, and datatype
     cdef void *baddr = NULL
-    cdef MPI_Aint bsize = 0, bitemsize = 0
+    cdef MPI_Aint bsize = 0
     cdef MPI_Datatype btype = MPI_DATATYPE_NULL
-    o_type = message_basic(o_buf, o_type, readonly,
-                           &baddr, &bsize, &bitemsize, &btype)
+    cdef _p_message m = message_basic(o_buf, o_type, readonly,
+                                      &baddr, &bsize, &btype)
     # buffer: count and displacement
     cdef int count = 0 # number of datatype entries
     cdef int displ = 0 # from base buffer, in datatype entries
@@ -149,6 +154,10 @@ cdef object message_simple(object msg,
                  ) %  (bsize/extent, blocks))
         if blocks < 1: blocks = 1
         count = <int> ((bsize/extent) / blocks) # XXX overflow?
+    if o_count is None: o_count = count
+    if o_displ is None: o_displ = displ
+    m.count = o_count
+    m.displ = o_displ
     # sanity-check zero-sized messages
     if o_buf is None:
         if count != 0:
@@ -161,21 +170,18 @@ cdef object message_simple(object msg,
     _addr[0]  = <void*>(<char*>baddr + offset)
     _count[0] = count
     _type[0]  = btype
-    if o_count is None: o_count = count
-    if o_displ is None: o_displ = displ
-    return (o_buf, (o_count, o_displ), o_type)
+    return m
 
-
-cdef object message_vector(object msg,
-                           int readonly,
-                           int rank,
-                           int blocks,
-                           #
-                           void        **_addr,
-                           int         **_counts,
-                           int         **_displs,
-                           MPI_Datatype *_type,
-                           ):
+cdef _p_message message_vector(object msg,
+                               int readonly,
+                               int rank,
+                               int blocks,
+                               #
+                               void        **_addr,
+                               int         **_counts,
+                               int         **_displs,
+                               MPI_Datatype *_type,
+                               ):
     # special-case PROC_NULL target rank
     if rank == MPI_PROC_NULL:
         _addr[0]   = NULL
@@ -203,10 +209,10 @@ cdef object message_vector(object msg,
         raise TypeError("message: expecting a list/tuple")
     # buffer: address, length, and datatype
     cdef void *baddr = NULL
-    cdef MPI_Aint bsize = 0, bitemsize = 0
+    cdef MPI_Aint bsize = 0
     cdef MPI_Datatype btype = MPI_DATATYPE_NULL
-    o_type = message_basic(o_buf, o_type, readonly,
-                           &baddr, &bsize, &bitemsize, &btype)
+    cdef _p_message m = message_basic(o_buf, o_type, readonly,
+                                      &baddr, &bsize, &btype)
     # counts and displacements
     cdef int *counts = NULL
     cdef int *displs = NULL
@@ -231,12 +237,14 @@ cdef object message_vector(object msg,
             displs[i] = val * i
     else: # general
         o_displs = chkarray_int(o_displs, blocks, &displs)
+    m.count = o_counts
+    m.displ = o_displs
     # return collected message data
     _addr[0]   = baddr
     _counts[0] = counts
     _displs[0] = displs
     _type[0]   = btype
-    return (o_buf, (o_counts, o_displs), o_type)
+    return m
 
 #------------------------------------------------------------------------------
 

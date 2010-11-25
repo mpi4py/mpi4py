@@ -23,71 +23,73 @@ cdef extern from "Python.h":
     int PyObject_AsReadBuffer (object, const_void **, Py_ssize_t *) except -1
     int PyObject_AsWriteBuffer(object, void **, Py_ssize_t *) except -1
 
-
-#------------------------------------------------------------------------------
-
 cdef extern from *:
     cdef object toString"PyMPIString_FromString"(char *)
 
-cdef inline int is_buffer(object ob):
+#------------------------------------------------------------------------------
+
+cdef class _p_buffer:
+    cdef object obj
+    cdef void *base
+    cdef Py_ssize_t size
+    cdef object format
+    cdef Py_buffer view
+    def __dealloc__(self):
+        PyBuffer_Release(&self.view)
+
+cdef inline int checkbuffer(object ob):
     return (PyObject_CheckBuffer(ob) or
             PyObject_CheckReadBuffer(ob))
 
-cdef object asbuffer(object ob, int writable, int format,
-                     void **base, MPI_Aint *size, MPI_Aint *itemsize):
-
-    cdef void *bptr = NULL
-    cdef Py_ssize_t blen = 0, bitemlen = 0
-    cdef str bfmt = None
-    cdef Py_buffer view
+cdef _p_buffer getbuffer(object ob, int writable, int format):
+    cdef _p_buffer buf = _p_buffer.__new__(_p_buffer)
+    if ob is None: return buf
+    cdef Py_buffer *view = &buf.view
     cdef int flags = PyBUF_SIMPLE
     if PyObject_CheckBuffer(ob):
+        # Python 3 buffer interface (PEP 3118)
         flags = PyBUF_ANY_CONTIGUOUS
         if writable:
             flags |= PyBUF_WRITABLE
         if format:
             flags |= PyBUF_FORMAT
-        PyObject_GetBuffer(ob, &view, flags)
-        bptr = view.buf
-        blen = view.len
-        if format:
-            if view.format != NULL:
-                bfmt = toString(view.format)
-                bitemlen = view.itemsize
-        PyBuffer_Release(&view)
+        PyObject_GetBuffer(ob, view, flags)
+        buf.obj  = ob
+        buf.base = view.buf
+        buf.size = view.len
+        if format and view.format != NULL:
+            buf.format = toString(view.format)
     else:
+        # Python 2 buffer interface (legacy)
         if writable:
-            PyObject_AsWriteBuffer(ob, &bptr, &blen)
+            PyObject_AsWriteBuffer(ob, &buf.base, &buf.size)
         else:
-            PyObject_AsReadBuffer(ob, <const_void **>&bptr, &blen)
+            PyObject_AsReadBuffer(ob, <const_void **>&buf.base, &buf.size)
+        buf.obj  = ob
         if format:
             try: # numpy.ndarray
                 dtype = ob.dtype
-                bfmt = dtype.char
-                bitemlen = dtype.itemsize
+                buf.format = dtype.char
             except AttributeError:
                 try: # array.array
-                    bfmt = ob.typecode
-                    bitemlen = ob.itemsize
+                    buf.format = ob.typecode
                 except AttributeError:
                     if isinstance(ob, bytes):
-                        bfmt = "B"
-                        bitemlen = 1
+                        buf.format = "B"
                     else:
-                        # nothing found
-                        bfmt = None
-                        bitemlen = 0
-    if base: base[0] = <void *>bptr
-    if size: size[0] = <MPI_Aint>blen
-    if itemsize: itemsize[0] = <MPI_Aint>bitemlen
-    return bfmt
+                        buf.format = None
+    return buf
 
-cdef inline object asbuffer_r(object ob, void **base, MPI_Aint *size):
-    asbuffer(ob, 0, 0, base, size, NULL)
-    return ob
+cdef inline _p_buffer getbuffer_r(object ob, void **base, MPI_Aint *size):
+    cdef _p_buffer buf = getbuffer(ob, 0, 0)
+    if base: base[0] = <void*>    buf.base
+    if size: size[0] = <MPI_Aint> buf.size
+    return buf
 
-cdef inline object asbuffer_w(object ob, void **base, MPI_Aint *size):
-    asbuffer(ob, 1, 0, base, size, NULL)
-    return ob
+cdef inline _p_buffer getbuffer_w(object ob, void **base, MPI_Aint *size):
+    cdef _p_buffer buf = getbuffer(ob, 1, 0)
+    if base: base[0] = <void*>    buf.base
+    if size: size[0] = <MPI_Aint> buf.size
+    return buf
 
 #------------------------------------------------------------------------------
