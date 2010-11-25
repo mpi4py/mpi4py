@@ -22,10 +22,17 @@ def getoptionparser():
                       help="prepend PATH to sys.path", metavar="PATH")
     parser.add_option("--refleaks", type="int",
                       action="store", dest="repeats", default=3,
-                      help="run tests REPEAT times in a loop to catch refleaks",
+                      help="run tests REPEAT times in a loop to catch leaks",
                       metavar="REPEAT")
+    parser.add_option("--no-threads",
+                      action="store_false", dest="threaded", default=True,
+                      help="initialize MPI without thread support")
+    parser.add_option("--thread-level", type="choice",
+                      choices=["single", "funneled", "serialized", "multiple"],
+                      action="store", dest="thread_level", default="multiple",
+                      help="initialize MPI with required thread support")
     parser.add_option("--mpe",
-                      action="store_true", dest="mpe", default=[],
+                      action="store_true", dest="mpe", default=False,
                       help="use MPE for MPI profiling")
     return parser
 
@@ -71,8 +78,8 @@ def import_package(options, pkgname):
     package = __import__(pkgname)
     #
     import mpi4py.rc
-    #if not options.threaded:
-    #    mpi4py.rc.threaded = False
+    mpi4py.rc.threaded = options.threaded
+    mpi4py.rc.thread_level = options.thread_level
     if options.mpe:
         mpi4py.rc.profile('MPE', logfile='runtests-mpi4py')
     import mpi4py.MPI
