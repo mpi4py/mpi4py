@@ -52,12 +52,14 @@ def profile(name='MPE', **kargs):
     #
     try:
         from mpi4py.dl import dlopen, RTLD_NOW, RTLD_GLOBAL
+        from mpi4py.dl import dlerror
     except ImportError:
         from ctypes import CDLL as dlopen, RTLD_GLOBAL
         try:
             from DLFCN import RTLD_NOW
         except ImportError:
             RTLD_NOW = 2
+        dlerror = None
     #
     logfile = kargs.pop('logfile', None)
     if logfile:
@@ -92,6 +94,10 @@ def profile(name='MPE', **kargs):
     #
     global _pmpi_
     handle = dlopen(filename, RTLD_NOW|RTLD_GLOBAL)
-    _pmpi_.append( (name, (handle, filename)) )
+    if handle:
+        _pmpi_.append( (name, (handle, filename)) )
+    elif dlerror:
+        from warnings import warn
+        warn(dlerror())
     #
     return filename
