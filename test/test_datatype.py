@@ -257,6 +257,11 @@ elif _name == 'MPICH1':
     combiner_map[MPI.COMBINER_INDEXED] = None
 elif MPI.Get_version() < (2, 0):
     combiner_map = None
+if _name == 'Open MPI':
+    if _version == (1, 5, 0):
+        for t in datatypes_f90[-4:]:
+            if t != MPI.DATATYPE_NULL:
+                datatypes.remove(t)
 
 import sys
 if sys.version_info[0] >=3:
