@@ -1075,7 +1075,14 @@ class build_clib(cmd_build_clib.build_clib):
         if lib_name == 'mpe':
             ok = config_cmd.check_library('mpe')
         if lib_name == 'vt':
-            ok = config_cmd.check_library('vt.mpi')
+            ok = config_cmd.check_library('vt-mpi')
+            if not ok:
+                ok = config_cmd.check_library('vt.mpi')
+                if ok:
+                    for lst in (build_info['libraries'],
+                                build_info['extra_link_args']):
+                        for i, val in enumerate(lst):
+                            lst[i] = val.replace('vt-mpi', 'vt.mpi')
         if not ok:
             build_info['libraries'] = []
             build_info['extra_link_args'] = []

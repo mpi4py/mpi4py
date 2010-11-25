@@ -221,7 +221,7 @@ def libraries():
         )
     if linux or darwin or solaris:
         pmpi_vt['libraries'] = []
-        pmpi_vt['extra_link_args']  = whole_archive('vt.mpi') 
+        pmpi_vt['extra_link_args']  = whole_archive('vt-mpi')
         pmpi_vt['extra_link_args'] += ['-lotf', '-lz', '-ldl']
     #
     return [
