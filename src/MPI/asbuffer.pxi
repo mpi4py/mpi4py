@@ -42,7 +42,7 @@ cdef inline int checkbuffer(object ob):
             PyObject_CheckReadBuffer(ob))
 
 cdef _p_buffer getbuffer(object ob, int writable, int format):
-    cdef _p_buffer buf = _p_buffer.__new__(_p_buffer)
+    cdef _p_buffer buf = <_p_buffer>_p_buffer.__new__(_p_buffer)
     if ob is None: return buf
     cdef Py_buffer *view = &buf.view
     cdef int flags = PyBUF_SIMPLE

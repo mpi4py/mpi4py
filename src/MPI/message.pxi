@@ -27,7 +27,7 @@ cdef _p_message message_basic(object o_buf,
                               MPI_Aint     *bsize,
                               MPI_Datatype *btype,
                               ):
-    cdef _p_message m = _p_message.__new__(_p_message)
+    cdef _p_message m = <_p_message>_p_message.__new__(_p_message)
     cdef int w = (not readonly), f = (o_type is None)
     # special-case the constant MPI_BOTTOM,
     # an explicit MPI datatype is required
