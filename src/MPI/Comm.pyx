@@ -433,7 +433,7 @@ cdef class Comm:
 
     def Scatter(self, sendbuf, recvbuf, int root=0):
         """
-        Scatter Vector, scatter data from one process
+        Scatter catter data from one process
         to all other processes in a group
         """
         cdef _p_msg_cco m = message_cco()
@@ -445,9 +445,9 @@ cdef class Comm:
 
     def Scatterv(self, sendbuf, recvbuf, int root=0):
         """
-        Scatter data from one process to all other processes in a
-        group providing different amount of data and displacements at
-        the sending side
+        Scatter Vector, scatter data from one process to all other
+        processes in a group providing different amount of data and
+        displacements at the sending side
         """
         cdef _p_msg_cco m = message_cco()
         m.for_scatter(1, sendbuf, recvbuf, root, self.ob_mpi)
