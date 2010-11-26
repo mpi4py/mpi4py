@@ -433,7 +433,7 @@ cdef class Comm:
 
     def Scatter(self, sendbuf, recvbuf, int root=0):
         """
-        Scatter catter data from one process
+        Scatter data from one process
         to all other processes in a group
         """
         cdef _p_msg_cco m = message_cco()
