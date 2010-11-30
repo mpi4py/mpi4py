@@ -64,6 +64,8 @@ static void OPENMPI_dlopen_libmpi(void)
 #elif defined(__APPLE__)
   /* Mac OS X */
   if (!handle)
+    handle = dlopen("libmpi.2.dylib", mode);
+  if (!handle)
     handle = dlopen("libmpi.1.dylib", mode);
   if (!handle)
     handle = dlopen("libmpi.0.dylib", mode);
@@ -71,6 +73,8 @@ static void OPENMPI_dlopen_libmpi(void)
     handle = dlopen("libmpi.dylib", mode);
 #else
   /* GNU/Linux and others*/
+  if (!handle)
+    handle = dlopen("libmpi.so.2", mode);
   if (!handle)
     handle = dlopen("libmpi.so.1", mode);
   if (!handle)
