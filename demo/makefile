@@ -3,6 +3,7 @@ default:
 	${MAKE} -C compute-pi
 	${MAKE} -C mandelbrot
 	${MAKE} -C nxtval
+	${MAKE} -C reductions
 	${MAKE} -C sequential
 	${MAKE} -C spawning
 
