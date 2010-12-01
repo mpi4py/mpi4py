@@ -1,5 +1,3 @@
-# -----------------------------------------------------------------------------
-
 class Seq(object):
 
     """
@@ -52,22 +50,3 @@ class Seq(object):
             comm.Send([None, 'B'], (rank + 1) % size, tag)
         if rank == 0:
             comm.Recv([None, 'B'], size - 1, tag)
-
-# -----------------------------------------------------------------------------
-
-if __name__ == "__main__":
-
-    from mpi4py import MPI
-
-    def test():
-        size = MPI.COMM_WORLD.Get_size()
-        rank = MPI.COMM_WORLD.Get_rank()
-        name = MPI.Get_processor_name()
-        with Seq(MPI.COMM_WORLD, 1, 10):
-            print(
-                "Hello, World! I am process %d of %d on %s."
-                % (rank, size, name))
-
-    test()
-
-# -----------------------------------------------------------------------------

@@ -6,4 +6,5 @@ PYTHON=python
 
 .PHONY: test
 test:
-	${MPIEXEC} ${NP_FLAG} ${NP} ${PYTHON} seq.py
+	${MPIEXEC} ${NP_FLAG} ${NP} ${PYTHON} test_seq.py
+	${RM} -r *.py[co] __pycache__

@@ -7,4 +7,4 @@ NP=5
 PYTHON=python
 
 set -x
-$MPIEXEC $NP_FLAG $NP $PYTHON seq.py
+$MPIEXEC $NP_FLAG $NP $PYTHON test_seq.py

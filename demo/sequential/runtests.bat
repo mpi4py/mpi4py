@@ -19,4 +19,4 @@ set PYTHON=C:\Python32\python.exe
 set PYTHON=python
 
 @echo on
-%MPIEXEC% %NP_FLAG% %NP% %PYTHON% seq.py
+%MPIEXEC% %NP_FLAG% %NP% %PYTHON% test_seq.py
