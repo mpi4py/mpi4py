@@ -97,7 +97,14 @@ if _SKIP_TEST:
     del TestSpawnWorldMany
 elif _name == 'MPICH2':
     del BaseTestSpawn.testReturnedErrcodes
-
+    if _version > (1, 2):
+        # Up to mpich2-1.3.1 when running under Hydra process manager,
+        # spawn fails for the singleton init case
+        if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
+            del TestSpawnSelf
+            del TestSpawnWorld
+            del TestSpawnSelfMany
+            del TestSpawnWorldMany
 
 if __name__ == '__main__':
     unittest.main()
