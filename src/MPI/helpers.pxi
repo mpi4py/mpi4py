@@ -162,6 +162,8 @@ cdef inline int del_Group(MPI_Group* ob):
 #------------------------------------------------------------------------------
 # Comm
 
+include "commimpl.pxi"
+
 cdef inline Comm new_Comm(MPI_Comm ob):
     cdef Comm comm = <Comm>Comm.__new__(Comm)
     comm.ob_mpi = ob

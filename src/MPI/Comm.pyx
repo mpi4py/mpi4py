@@ -653,7 +653,7 @@ cdef class Comm:
         cdef int  flag = 0
         CHKERR(MPI_Comm_get_attr(self.ob_mpi, keyval, &attrval, &flag) )
         if not flag: return None
-        if not attrval: return 0
+        if attrval == NULL: return 0
         # MPI-1 predefined attribute keyvals
         if ((keyval == <int>MPI_TAG_UB) or
             (keyval == <int>MPI_HOST) or
@@ -666,8 +666,54 @@ cdef class Comm:
               (keyval == <int>MPI_LASTUSEDCODE)):
             return (<int*>attrval)[0]
         # user-defined attribute keyval
+        elif keyval in comm_keyval:
+            return <object>attrval
         else:
             return PyLong_FromVoidPtr(attrval)
+
+    def Set_attr(self, int keyval, object attrval):
+        """
+        Store attribute value associated with a key
+        """
+        cdef void *ptrval = NULL
+        cdef int incref = 0
+        if keyval in comm_keyval:
+            ptrval = <void*>attrval
+            incref = 1
+        else:
+            ptrval = PyLong_AsVoidPtr(attrval)
+            incref = 0
+        CHKERR(MPI_Comm_set_attr(self.ob_mpi, keyval, ptrval) )
+        if incref: Py_INCREF(attrval)
+
+    def Del_attr(self, int keyval):
+        """
+        Delete attribute value associated with a key
+        """
+        CHKERR(MPI_Comm_delete_attr(self.ob_mpi, keyval) )
+
+    @classmethod
+    def Create_keyval(cls, copy_fn=None, delete_fn=None):
+        """
+        Create a new attribute key for communicators
+        """
+        cdef int keyval = MPI_KEYVAL_INVALID
+        cdef MPI_Comm_copy_attr_function *_copy = comm_attr_copy_fn
+        cdef MPI_Comm_delete_attr_function *_del = comm_attr_delete_fn
+        cdef void *extra_state = NULL
+        CHKERR( MPI_Comm_create_keyval(_copy, _del, &keyval, extra_state) )
+        comm_keyval_new(keyval, copy_fn, delete_fn)
+        return keyval
+
+    @classmethod
+    def Free_keyval(cls, int keyval):
+        """
+        Free and attribute key for communicators
+        """
+        cdef int keyval_save = keyval
+        CHKERR( MPI_Comm_free_keyval (&keyval) )
+        comm_keyval_del(keyval_save)
+        return keyval
 
     # Error handling
     # --------------
