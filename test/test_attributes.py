@@ -43,7 +43,7 @@ class TestCommWorldAttr(unittest.TestCase):
         o = None
 
         self.assertEqual(getrc(attrval), rc+1)
-        self.comm.Del_attr(self.keyval)
+        self.comm.Delete_attr(self.keyval)
         self.assertEqual(getrc(attrval), rc)
 
         o = self.comm.Get_attr(self.keyval)
@@ -79,7 +79,7 @@ class TestCommWorldAttr(unittest.TestCase):
         self.assertTrue(getrc(dupcomm1), rc+1)
         self.assertTrue(getrc(dupcomm2), 2)
 
-        self.comm.Del_attr(self.keyval)
+        self.comm.Delete_attr(self.keyval)
         self.assertTrue(dupcomm1 == MPI.COMM_NULL)
         self.assertTrue(getrc(dupcomm1), rc)
 

@@ -686,7 +686,7 @@ cdef class Comm:
         CHKERR(MPI_Comm_set_attr(self.ob_mpi, keyval, ptrval) )
         if incref: Py_INCREF(attrval)
 
-    def Del_attr(self, int keyval):
+    def Delete_attr(self, int keyval):
         """
         Delete attribute value associated with a key
         """
