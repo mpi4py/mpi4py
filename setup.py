@@ -216,7 +216,7 @@ def libraries():
         optional=True,
         output_dir='mpi4py/lib-pmpi',
         sources=['src/pmpi-vt.c'],
-        libraries=['vt.mpi', 'otf', 'z', 'dl'],
+        libraries=['vt-mpi', 'otf', 'z', 'dl'],
         extra_link_args=[],
         )
     if linux or darwin or solaris:
@@ -293,39 +293,76 @@ def run_setup():
           executables  = [ExeBinary(exe) for exe in executables()],
           **metadata)
 
-def run_cython(source):
+def chk_cython(CYTHON_VERSION_REQUIRED):
     import sys, os
-    source_c = os.path.splitext(source)[0] + '.c'
-    if (os.path.exists(source_c)):
-        return False
+    from distutils.version import StrictVersion as Version
+    warn = lambda msg='': sys.stderr.write(msg+'\n')
+    #
     try:
         import Cython
     except ImportError:
-        warn = lambda msg='': sys.stderr.write(msg+'\n')
         warn("*"*80)
         warn()
         warn(" You need to generate C source files with Cython!!")
         warn(" Download and install Cython <http://www.cython.org>")
         warn()
         warn("*"*80)
-        raise SystemExit
-    from distutils import log
-    from conf.cythonize import run as cythonize
-    log.info("cythonizing '%s' source" % source)
-    cythonize(source)
+        return False
+    #
+    try:
+        CYTHON_VERSION = Cython.__version__
+    except AttributeError:
+        from Cython.Compiler.Version import version as CYTHON_VERSION
+    CYTHON_VERSION = CYTHON_VERSION.split('+', 1)[0]
+    for s in ('.alpha', 'alpha'):
+        CYTHON_VERSION = CYTHON_VERSION.replace(s, 'a')
+    for s in ('.beta',  'beta', '.rc', 'rc', '.c', 'c'):
+        CYTHON_VERSION = CYTHON_VERSION.replace(s, 'b')
+    if Version(CYTHON_VERSION) < Version(CYTHON_VERSION_REQUIRED):
+        warn("*"*80)
+        warn()
+        warn(" You need to install Cython %s (you have version %s)"
+             % (CYTHON_VERSION_REQUIRED, CYTHON_VERSION))
+        warn(" Download and install Cython <http://www.cython.org>")
+        warn()
+        warn("*"*80)
+        return False
+    #
     return True
 
+def run_cython(source):
+    from conf.cythonize import run as cythonize
+    from distutils import log
+    log.set_verbosity(1)
+    log.info("cythonizing '%s' source" % source)
+    cythonize(source)
+
 def main():
-    import os
-    try:
-        run_setup()
-    except:
-        done  = run_cython(os.path.join('src', 'mpi4py.MPI.pyx'))
-        done |= run_cython(os.path.join('src', 'mpi4py.MPE.pyx'))
-        if done:
-            run_setup()
-        else:
-            raise
+    CYTHON_VERSION_REQUIRED = '0.13'
+    import sys, os, glob
+    from distutils import dep_util
+    if os.path.isdir('.svn') or os.path.isdir('.git'):
+        # mpi4py.MPI
+        source = os.path.join('src', 'mpi4py.MPI.pyx')
+        target = os.path.splitext(source)[0]+".c"
+        depends = (glob.glob("src/include/*/*.pxi") +
+                   glob.glob("src/include/*/*.pxd") +
+                   glob.glob("src/MPI/*.pyx") +
+                   glob.glob("src/MPI/*.pxi"))
+        if dep_util.newer_group([source]+depends, target):
+            if not chk_cython(CYTHON_VERSION_REQUIRED):
+                sys.exit(1)
+            run_cython(source)
+        # mpi4py.MPE
+        source = os.path.join('src', 'mpi4py.MPE.pyx')
+        target = os.path.splitext(source)[0]+".c"
+        depends = (glob.glob("src/MPE/*.pyx") +
+                   glob.glob("src/MPE/*.pxi"))
+        if dep_util.newer_group([source]+depends, target):
+            if not chk_cython(CYTHON_VERSION_REQUIRED):
+                sys.exit(1)
+            run_cython(source)
+    run_setup()
 
 if __name__ == '__main__':
     main()
