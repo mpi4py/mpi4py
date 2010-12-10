@@ -234,13 +234,11 @@ cdef class Datatype:
         distribs = chkarray_int(distribs, ndims, &idistribs )
         dargs    = chkarray_int(dargs,    ndims, &idargs    )
         psizes   = chkarray_int(psizes,   ndims, &ipsizes   )
-        cdef int iorder = MPI_ORDER_C
-        if order is not None: iorder = order
         #
         cdef Datatype datatype = <Datatype>type(self)()
         CHKERR( MPI_Type_create_darray(size, rank, ndims, igsizes,
                                        idistribs, idargs, ipsizes,
-                                       iorder, self.ob_mpi,
+                                       order, self.ob_mpi,
                                        &datatype.ob_mpi) )
         return datatype
 
