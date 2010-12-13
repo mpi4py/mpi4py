@@ -1211,7 +1211,7 @@ class build_ext(cmd_build_ext.build_ext):
             results = config_obj.run()
             config_obj.dump(results)
             #
-            macro = 'PyMPI_HAVE_CONFIG_H'
+            macro = 'HAVE_CONFIG_H'
             log.info("defining preprocessor macro '%s'" % macro)
             compiler_obj.define_macro(macro, 1)
         # configure extensions

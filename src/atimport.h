@@ -15,7 +15,7 @@
 #endif
 
 /* XXX describe */
-#if defined(PyMPI_HAVE_CONFIG_H)
+#if defined(HAVE_CONFIG_H)
 #include "config.h"
 #elif defined(MPICH2)
 #include "config/mpich2.h"
