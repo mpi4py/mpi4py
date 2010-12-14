@@ -66,7 +66,7 @@ def profile(name='MPE', **kargs):
         if name in ('mpe', 'MPE'):
             if 'MPE_LOGFILE_PREFIX' not in os.environ:
                 os.environ['MPE_LOGFILE_PREFIX'] = logfile
-        if name in ('vt',):
+        if name in ('vt', 'vt-mpi', 'vt-hyb'):
             if 'VT_FILE_PREFIX' not in os.environ:
                 os.environ['VT_FILE_PREFIX'] = logfile
     #

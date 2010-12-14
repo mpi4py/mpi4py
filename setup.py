@@ -223,10 +223,28 @@ def libraries():
         pmpi_vt['libraries'] = []
         pmpi_vt['extra_link_args']  = whole_archive('vt-mpi')
         pmpi_vt['extra_link_args'] += ['-lotf', '-lz', '-ldl']
+    pmpi_vt_mpi = dict(
+        name='vt-mpi', kind='dylib',
+        optional=True,
+        output_dir='mpi4py/lib-pmpi',
+        sources=['src/pmpi-vt-mpi.c'],
+        libraries=['vt-mpi'],
+        extra_link_args=[],
+        )
+    pmpi_vt_hyb = dict(
+        name='vt-hyb', kind='dylib',
+        optional=True,
+        output_dir='mpi4py/lib-pmpi',
+        sources=['src/pmpi-vt-hyb.c'],
+        libraries=['vt-hyb'],
+        extra_link_args=[],
+        )
     #
     return [
         pmpi_mpe,
         pmpi_vt,
+        pmpi_vt_mpi,
+        pmpi_vt_hyb,
         ]
 
 def executables():

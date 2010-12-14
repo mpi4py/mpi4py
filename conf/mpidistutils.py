@@ -1083,6 +1083,10 @@ class build_clib(cmd_build_clib.build_clib):
                                 build_info['extra_link_args']):
                         for i, val in enumerate(lst):
                             lst[i] = val.replace('vt-mpi', 'vt.mpi')
+        if lib_name == 'vt-mpi':
+            ok = config_cmd.check_library('vt-mpi')
+        if lib_name == 'vt-hyb':
+            ok = config_cmd.check_library('vt-hyb')
         if not ok:
             build_info['libraries'] = []
             build_info['extra_link_args'] = []

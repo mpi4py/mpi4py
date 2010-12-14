@@ -26,3 +26,4 @@ Greg Tener
 Amir Khosrowshahi
 Eilif Muller
 Andreas Klöckner
+Christoph Statz
