@@ -25,7 +25,7 @@ cdef class Exception(RuntimeError):
         if op == Py_GT: return ierr >  error
         if op == Py_GE: return ierr >= error
 
-    def __nonzero__(self):
+    def __bool__(self):
         return self.ob_mpi != MPI_SUCCESS
 
     def __int__(self):

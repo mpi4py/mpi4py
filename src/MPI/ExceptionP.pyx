@@ -29,7 +29,7 @@ class Exception(RuntimeError):
         cdef int ierr = self.ob_mpi
         return <bint> (ierr >= error)
 
-    def __nonzero__(self):
+    def __bool__(self):
         cdef int ierr = self.ob_mpi
         return ierr != MPI_SUCCESS
 

@@ -19,7 +19,7 @@ cdef class Info:
         elif op == Py_NE: return (s.ob_mpi != o.ob_mpi)
         else: raise TypeError("only '==' and '!='")
 
-    def __nonzero__(self):
+    def __bool__(self):
         return self.ob_mpi != MPI_INFO_NULL
 
     @classmethod

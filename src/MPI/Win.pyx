@@ -37,7 +37,7 @@ cdef class Win:
         elif op == Py_NE: return (s.ob_mpi != o.ob_mpi)
         else: raise TypeError("only '==' and '!='")
 
-    def __nonzero__(self):
+    def __bool__(self):
         return self.ob_mpi != MPI_WIN_NULL
 
     # [6.2] Initialization
