@@ -15,18 +15,18 @@ from numpy  import array
 def get_n():
     prompt  = "Enter the number of intervals: (0 quits) "
     try:
-        n = int(raw_input(prompt));
+        n = int(input(prompt))
         if n < 0: n = 0
     except:
         n = 0
     return n
 
 def comp_pi(n, myrank=0, nprocs=1):
-    h = 1.0 / n;
-    s = 0.0;
-    for i in xrange(myrank + 1, n + 1, nprocs):
-        x = h * (i - 0.5);
-        s += 4.0 / (1.0 + x**2);
+    h = 1.0 / n
+    s = 0.0
+    for i in range(myrank + 1, n + 1, nprocs):
+        x = h * (i - 0.5)
+        s += 4.0 / (1.0 + x**2)
     return s * h
 
 def prn_pi(pi, PI):

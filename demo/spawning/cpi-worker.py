@@ -11,7 +11,7 @@ n = n[0]
 
 h = 1.0 / n
 s = 0.0
-for i in xrange(myrank+1, n+1, nprocs):
+for i in range(myrank+1, n+1, nprocs):
     x = h * (i - 0.5)
     s += 4.0 / (1.0 + x**2)
 pi = s * h

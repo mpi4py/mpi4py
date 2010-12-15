@@ -25,7 +25,7 @@ elif rank == 2:
     i = array.array('i', [0]*5)
     x = array.array('f', [0]*5)
     status = MPI.Status()
-    for j in xrange(2):
+    for j in range(2):
         comm.Probe(MPI.ANY_SOURCE, 0, status)
         if status.Get_source() == 0:
             comm.Recv([i, MPI.INT], 0, 0, status)

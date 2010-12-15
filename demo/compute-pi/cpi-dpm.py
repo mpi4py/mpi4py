@@ -54,9 +54,7 @@ def comp_pi(n, comm, root=0):
     if n == 0: return 0.0
     h = 1.0 / n;
     s = 0.0;
-    try:    irange = xrange
-    except: irange = range
-    for i in irange(myrank, n, nprocs):
+    for i in range(myrank, n, nprocs):
         x = h * (i + 0.5);
         s += 4.0 / (1.0 + x**2);
     mypi = s * h

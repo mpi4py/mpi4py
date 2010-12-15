@@ -51,9 +51,8 @@ try:
     plt.imshow(M, aspect='equal')
     plt.spectral()
     try:
-        import sys, signal
-        def action(*args):
-            raise SystemExit
+        import signal
+        def action(*args): raise SystemExit
         signal.signal(signal.SIGALRM, action)
         signal.alarm(2)
     except:
