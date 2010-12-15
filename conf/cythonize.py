@@ -23,7 +23,8 @@ def cythonize(source, includes=(),
         result = compile(source, options)
         if result.num_errors > 0:
             any_failures = 1
-    except (EnvironmentError, PyrexError), e:
+    except (EnvironmentError, PyrexError):
+        e = sys.exc_info()[1]
         sys.stderr.write(str(e) + '\n')
         any_failures = 1
     if any_failures:
