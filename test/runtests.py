@@ -34,6 +34,9 @@ def getoptionparser():
     parser.add_option("--mpe",
                       action="store_true", dest="mpe", default=False,
                       help="use MPE for MPI profiling")
+    parser.add_option("--vt",
+                      action="store_true", dest="vt", default=False,
+                      help="use VampirTrace for MPI profiling")
     return parser
 
 def getbuilddir():
@@ -81,7 +84,9 @@ def import_package(options, pkgname):
     mpi4py.rc.threaded = options.threaded
     mpi4py.rc.thread_level = options.thread_level
     if options.mpe:
-        mpi4py.rc.profile('MPE', logfile='runtests-mpi4py')
+        mpi4py.rc.profile('mpe', logfile='runtests-mpi4py')
+    if options.vt:
+        mpi4py.rc.profile('vt', logfile='runtests-mpi4py')
     import mpi4py.MPI
     #
     return package
