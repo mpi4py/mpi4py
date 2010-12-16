@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 
-cdef extern from *:
+cdef extern from "Python.h":
     char*      PyBytes_AsString(object) except NULL
     Py_ssize_t PyBytes_Size(object) except -1
     object     PyBytes_FromStringAndSize(char*,Py_ssize_t)

@@ -207,10 +207,8 @@ PyMPIMemory_AsMemory(PyObject *ob, void **base, MPI_Aint *size)
   Py_ssize_t n;
   if (PyObject_AsWriteBuffer(ob, &p, &n) < 0)
     return -1;
-  if (base)
-    *base = p;
-  if (size)
-    *size = (MPI_Aint)n;
+  if (base) *base = p;
+  if (size) *size = (MPI_Aint)n;
   return 0;
 }
 
@@ -218,9 +216,8 @@ static PyObject *
 PyMPIMemory_FromMemory(void *p, MPI_Aint n)
 {
 #if PY_MAJOR_VERSION >= 3
-  Py_buffer info;
-  if (PyBuffer_FillInfo(&info, NULL, p, (Py_ssize_t)n, 0,
-                        PyBUF_ND | PyBUF_STRIDES) < 0)
+  Py_buffer info; int flags = PyBUF_ND|PyBUF_STRIDES;
+  if (PyBuffer_FillInfo(&info, NULL, p, (Py_ssize_t)n, 0, flags) < 0)
     return NULL;
   return PyMemoryView_FromBuffer(&info);
 #else
