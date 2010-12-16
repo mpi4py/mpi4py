@@ -1,8 +1,10 @@
 #!/usr/bin/env python
-import os
-os.environ['VT_FILE_PREFIX'] = 'ring'
+
+# If you want VampirTrace to log MPI calls, you have to add the two
+# lines below at the very beginning of your main bootstrap script.
 import mpi4py.rc
-mpi4py.rc.profile('vt')
+mpi4py.rc.threaded = False
+mpi4py.rc.profile('vt-mpi', logfile='ring')
 
 from mpi4py import MPI
 

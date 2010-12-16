@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 
 import mpi4py.rc
+mpi4py.rc.threaded = True
 mpi4py.rc.thread_level = "funneled"
 mpi4py.rc.profile('vt-hyb', logfile='threads')
 
 from mpi4py import MPI
 from threading import Thread
+
+MPI.COMM_WORLD.Barrier()
 
 # Understanding the Python GIL
 # David Beazley, http://www.dabeaz.com
