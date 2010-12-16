@@ -1008,9 +1008,26 @@ class build_clib(cmd_build_clib.build_clib):
             self.build_shared_libraries(self.libraries_so)
 
     def check_library_list (self, libraries):
-        cmd_build_clib.build_clib.check_library_list(self, libraries)
         ListType, TupleType = type([]), type(())
-        for (lib_name, build_info) in libraries:
+        if not isinstance(libraries, ListType):
+            raise DistutilsSetupError(
+                  "'libraries' option must be a list of tuples")
+        for lib in libraries:
+            if not isinstance(lib, TupleType) and len(lib) != 2:
+                raise DistutilsSetupError(
+                    "each element of 'libraries' must a 2-tuple")
+            lib_name, build_info = lib
+            if not isinstance(lib_name, str):
+                raise DistutilsSetupError(
+                      "first element of each tuple in 'libraries' "
+                      "must be a string (the library name)")
+            if '/' in lib_name or (os.sep != '/' and os.sep in lib_name):
+                raise DistutilsSetupError("bad library name '%s': "
+                       "may not contain directory separators" % lib[0])
+            if not isinstance(build_info, dict):
+                raise DistutilsSetupError(
+                      "second element of each tuple in 'libraries' "
+                      "must be a dictionary (build info)")
             kind = build_info.get('kind', 'static')
             if kind not in ('static', 'shared', 'dylib'):
                 raise DistutilsSetupError(
