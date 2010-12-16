@@ -258,7 +258,7 @@ elif _name == 'MPICH1':
 elif MPI.Get_version() < (2, 0):
     combiner_map = None
 if _name == 'Open MPI':
-    if _version == (1, 5, 0):
+    if _version <= (1, 5, 1):
         for t in datatypes_f90[-4:]:
             if t != MPI.DATATYPE_NULL:
                 datatypes.remove(t)

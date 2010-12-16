@@ -88,5 +88,11 @@ class TestCommSelfAttr(TestCommWorldAttr):
     def setUp(self):
         self.comm = MPI.COMM_SELF.Dup()
 
+_name, _version = MPI.get_vendor()
+if (_name == 'Open MPI' and
+    _version <= (1, 5, 1)):
+    if MPI.Query_thread() > MPI.THREAD_SINGLE:
+        del TestCommWorldAttr.testAttrCopyDelete
+
 if __name__ == '__main__':
     unittest.main()
