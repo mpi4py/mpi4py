@@ -263,18 +263,6 @@ PyMPIString_AsStringAndSize(PyObject *ob, const char **s, Py_ssize_t *n)
 #define PyMPIString_FromStringAndSize PyString_FromStringAndSize
 #endif
 
-#if PY_MAJOR_VERSION >= 3
-#define PyMPIBytes_AsString          PyBytes_AsString
-#define PyMPIBytes_Size              PyBytes_Size
-#define PyMPIBytes_AsStringAndSize   PyBytes_AsStringAndSize
-#define PyMPIBytes_FromStringAndSize PyBytes_FromStringAndSize
-#else
-#define PyMPIBytes_AsString          PyString_AsString
-#define PyMPIBytes_Size              PyString_Size
-#define PyMPIBytes_AsStringAndSize   PyString_AsStringAndSize
-#define PyMPIBytes_FromStringAndSize PyString_FromStringAndSize
-#endif
-
 /* ------------------------------------------------------------------------- */
 
 #if PY_VERSION_HEX < 0x02060000

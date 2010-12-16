@@ -1,9 +1,9 @@
 # -----------------------------------------------------------------------------
 
 cdef extern from *:
-    char*      PyMPIBytes_AsString(object) except NULL
-    Py_ssize_t PyMPIBytes_Size(object) except -1
-    object     PyMPIBytes_FromStringAndSize(char*,Py_ssize_t)
+    char*      PyBytes_AsString(object) except NULL
+    Py_ssize_t PyBytes_Size(object) except -1
+    object     PyBytes_FromStringAndSize(char*,Py_ssize_t)
 
 # -----------------------------------------------------------------------------
 
@@ -55,16 +55,16 @@ cdef class _p_Pickle:
             n[0] = 0
             return None
         cdef object buf = self.ob_dumps(obj, self.ob_PROTOCOL)
-        p[0] = <void*> PyMPIBytes_AsString(buf)
-        n[0] = <int>   PyMPIBytes_Size(buf) # XXX overflow?
+        p[0] = <void*> PyBytes_AsString(buf)
+        n[0] = <int>   PyBytes_Size(buf) # XXX overflow?
         return buf
 
     cdef object alloc(self, void **p, int n):
         if n == 0:
             p[0] = NULL
             return None
-        cdef object buf = PyMPIBytes_FromStringAndSize(NULL, n)
-        p[0] = PyMPIBytes_AsString(buf)
+        cdef object buf = PyBytes_FromStringAndSize(NULL, n)
+        p[0] = PyBytes_AsString(buf)
         return buf
 
     cdef object load(self, object buf):
@@ -94,7 +94,7 @@ cdef class _p_Pickle:
             dsp[i] = d
             d += c
         cdef object buf = b''.join(items) # XXX use _PyBytes_Join() ?
-        p[0] = PyMPIBytes_AsString(buf)
+        p[0] = PyBytes_AsString(buf)
         return buf
 
     cdef object allocv(self, void **p,
