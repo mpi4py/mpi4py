@@ -33,10 +33,6 @@ class Exception(RuntimeError):
         cdef int ierr = self.ob_mpi
         return ierr != MPI_SUCCESS
 
-    def __bool__(self):
-        cdef int ierr = self.ob_mpi
-        return ierr != MPI_SUCCESS
-
     def __int__(self):
         if not mpi_active():
             return self.ob_mpi
