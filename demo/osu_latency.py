@@ -60,14 +60,17 @@ def osu_latency(
             print ('%10d%20.2f' % (size, latency))
 
 
-try:
-    from numpy import zeros as _zeros
-    def allocate(n):
-        return _zeros(n, 'B')
-except ImportError:
-    from array import array as _array
-    def allocate(n):
-        return _array('B', [0]) * n
+def allocate(n):
+    try:
+        import mmap
+        return mmap.mmap(-1, n)
+    except (ImportError, EnvironmentError):
+        try:
+            from numpy import zeros
+            return zeros(n, 'B')
+        except ImportError:
+            from array import array
+            return array('B', [0]) * n
 
 
 if __name__ == '__main__':
