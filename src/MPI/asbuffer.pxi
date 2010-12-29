@@ -68,8 +68,7 @@ cdef _p_buffer getbuffer(object ob, int writable, int format):
         buf.obj  = ob
         if format:
             try: # numpy.ndarray
-                dtype = ob.dtype
-                buf.format = dtype.char
+                buf.format = ob.dtype.char
             except AttributeError:
                 try: # array.array
                     buf.format = ob.typecode

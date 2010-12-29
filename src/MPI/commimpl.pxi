@@ -67,7 +67,7 @@ cdef int comm_attr_copy_fn(MPI_Comm comm,
         return MPI_ERR_INTERN
     if attrval_out == NULL:
         return MPI_ERR_INTERN
-    cdef int ierr = MPI_SUCCESS
+    cdef object exc
     try:
         comm_attr_copy(comm, keyval, extra_state,
                        attrval_in, attrval_out, flag)
@@ -88,6 +88,7 @@ cdef int comm_attr_delete_fn(MPI_Comm comm,
         return MPI_SUCCESS
     if attrval == NULL:
         return MPI_ERR_INTERN
+    cdef object exc
     try:
         comm_attr_delete(comm, keyval, attrval, extra_state)
     except MPIException, exc:
