@@ -18,7 +18,7 @@ updates.
 - To build and install this package, you must meet the following
   requirements.
 
-  + A Python 2.3/2.4/2.5/2.6/2.7/3.0/3.1/3.2 distribution.
+  + A Python 2.3 to 2.7 and 3.0 to 3.2 distribution.
 
   + A working MPI 1.2/1.3/2.0/2.1/2.2 implementation.
 
