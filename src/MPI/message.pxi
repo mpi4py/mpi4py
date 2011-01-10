@@ -81,7 +81,8 @@ cdef _p_message message_simple(object msg,
         nargs = len(msg)
         if nargs == 2:
             o_buf, o_type = msg
-            if is_int(o_type):
+            if not (isinstance(o_type, Datatype) or
+                    isinstance(o_type, str)):
                 o_count, o_type = o_type, None
                 if is_tuple(o_count) or is_list(o_count):
                     o_count, o_displ = o_count
