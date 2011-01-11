@@ -517,9 +517,12 @@ cdef inline object _py_scan(object seq, object op):
     if seq is None: return None
     cdef Py_ssize_t i=0, n=len(seq)
     if op is __MAXLOC__ or op is __MINLOC__:
-        seq = list(zip(seq, range(n)))
-    for i from 1 <= i < n:
-        seq[i] = op(seq[i-1], seq[i])
+        seq[0] = (seq[0], 0)
+        for i from 1 <= i < n:
+            seq[i] = op(seq[i-1], (seq[i], i))
+    else:
+        for i from 1 <= i < n:
+            seq[i] = op(seq[i-1], seq[i])
     return seq
 
 cdef inline object _py_exscan(object seq, object op):
