@@ -59,6 +59,7 @@ PyMPI_Main(int argc, char **argv)
 #else
     MPI_Init(&argc, &argv);
 #endif
+    flag_i = 1;
   }
 
   /* Python main */
