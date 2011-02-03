@@ -81,9 +81,7 @@ PyMPI_Main(int argc, char **argv)
   /* MPI finalization */
   MPI_Finalized(&flag_f);
   if (!flag_f) {
-#if 0
     if (sts != 0) MPI_Abort(MPI_COMM_WORLD, sts);
-#endif
     if (flag_i) MPI_Finalize();
   }
 
