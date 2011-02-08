@@ -1408,10 +1408,12 @@ cdef class Graphcomm(Intracomm):
     # Graph Information Functions
     # ---------------------------
 
-    def Get_neighbors_count(self, int rank):
+    def Get_neighbors_count(self, int rank=UNDEFINED):
         """
         Return number of neighbors of a process
         """
+        if rank == UNDEFINED:
+            CHKERR( MPI_Comm_rank(self.ob_mpi, &rank) )
         cdef int nneighbors = 0
         CHKERR( MPI_Graph_neighbors_count(self.ob_mpi, rank, &nneighbors) )
         return nneighbors
@@ -1419,13 +1421,14 @@ cdef class Graphcomm(Intracomm):
     property nneighbors:
         """number of neighbors"""
         def __get__(self):
-            cdef int rank = self.Get_rank()
-            return self.Get_neighbors_count(rank)
+            return self.Get_neighbors_count(self.Get_rank())
 
-    def Get_neighbors(self, int rank):
+    def Get_neighbors(self, int rank=UNDEFINED):
         """
         Return list of neighbors of a process
         """
+        if rank == UNDEFINED:
+            CHKERR( MPI_Comm_rank(self.ob_mpi, &rank) )
         cdef int nneighbors = 0
         with nogil: CHKERR( MPI_Graph_neighbors_count(
             self.ob_mpi, rank, &nneighbors) )
@@ -1439,8 +1442,7 @@ cdef class Graphcomm(Intracomm):
     property neighbors:
         """neighbors"""
         def __get__(self):
-            cdef int rank = self.Get_rank()
-            return self.Get_neighbors(rank)
+            return self.Get_neighbors(self.Get_rank())
 
     # Graph Low-Level Functions
     # -------------------------
