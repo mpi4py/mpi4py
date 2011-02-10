@@ -372,7 +372,7 @@ cdef extern from "mpi.h" nogil:
     int MPI_Iprobe(int, int, MPI_Comm, int*, MPI_Status*)
 
     int MPI_Barrier(MPI_Comm)
-    int MPI_Bcast(void*, int, MPI_Datatype, int, MPI_Comm )
+    int MPI_Bcast(void*, int, MPI_Datatype, int, MPI_Comm)
     int MPI_Gather(void* , int, MPI_Datatype, void*, int, MPI_Datatype, int, MPI_Comm)
     int MPI_Gatherv(void* , int, MPI_Datatype, void*, int*, int*, MPI_Datatype, int, MPI_Comm)
     int MPI_Scatter(void* , int, MPI_Datatype, void*, int, MPI_Datatype, int, MPI_Comm)
@@ -388,7 +388,7 @@ cdef extern from "mpi.h" nogil:
     int MPI_Reduce_local(void*, void*, int, MPI_Datatype, MPI_Op)
     int MPI_Reduce_scatter_block(void* , void*, int, MPI_Datatype, MPI_Op, MPI_Comm)
     int MPI_Reduce_scatter(void* , void*, int*, MPI_Datatype, MPI_Op, MPI_Comm)
-    int MPI_Scan(void* , void*, int, MPI_Datatype, MPI_Op, MPI_Comm )
+    int MPI_Scan(void* , void*, int, MPI_Datatype, MPI_Op, MPI_Comm)
     int MPI_Exscan(void*, void*, int, MPI_Datatype, MPI_Op, MPI_Comm)
 
     int MPI_Comm_dup(MPI_Comm, MPI_Comm*)
