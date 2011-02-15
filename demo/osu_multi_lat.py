@@ -61,7 +61,7 @@ def osu_multi_lat(
         total_lat = comm.reduce(latency, root=0, op=MPI.SUM)
         if myid == 0:
             avg_lat = total_lat/(pairs * 2)
-            print ('%10d%20.2f' % (size, avg_lat))
+            print ('%-10d%20.2f' % (size, avg_lat))
 
 
 def allocate(n):
