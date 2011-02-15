@@ -114,6 +114,7 @@ def print_banner(options, package):
 
 def load_tests(options, args):
     from glob import glob
+    import re
     testsuitedir = os.path.dirname(__file__)
     sys.path.insert(0, testsuitedir)
     pattern = 'test_*.py'
@@ -121,27 +122,27 @@ def load_tests(options, args):
     testfiles = glob(wildcard)
     testfiles.sort()
     testsuite = unittest.TestSuite()
+    testloader = unittest.TestLoader()
+    include = exclude = None
+    if options.include:
+        include = re.compile('|'.join(options.include)).search
+    if options.exclude:
+        exclude = re.compile('|'.join(options.exclude)).search
     for testfile in testfiles:
         filename = os.path.basename(testfile)
-        modname = os.path.splitext(filename)[0]
-        testname = modname.replace('test_','')
-        if (modname in options.exclude or
-            testname in options.exclude):
+        testname = os.path.splitext(filename)[0]
+        if ((exclude and exclude(testname)) or
+            (include and not include(testname))):
             continue
-        if (options.include and
-            not (modname  in options.include or
-                 testname in options.include)):
-            continue
-        module = __import__(modname)
-        loader = unittest.TestLoader()
+        module = __import__(testname)
         for arg in args:
             try:
-                cases = loader.loadTestsFromNames((arg,), module)
+                cases = testloader.loadTestsFromNames((arg,), module)
                 testsuite.addTests(cases)
             except AttributeError:
                 pass
         if not args:
-            cases = loader.loadTestsFromModule(module)
+            cases = testloader.loadTestsFromModule(module)
             testsuite.addTests(cases)
     return testsuite
 
