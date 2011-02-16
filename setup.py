@@ -259,7 +259,8 @@ def executables():
     if not sys.platform.startswith('win'):
         cfgDict = sysconfig.get_config_vars()
         if not sysconfig.get_config_var('Py_ENABLE_SHARED'):
-            libraries = ['python' + py_version]
+            py_abiflags = getattr(sys, 'abiflags', '')
+            libraries = ['python' + py_version + py_abiflags]
         if sys.platform == 'darwin':
             fwkdir = cfgDict.get('PYTHONFRAMEWORKDIR')
             if (fwkdir and fwkdir != 'no-framework' and
