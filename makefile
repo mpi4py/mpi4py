@@ -8,21 +8,26 @@ PYTHON = python
 .PHONY:	config build test
 config:
 	${PYTHON} setup.py config ${CONFIGOPT}
-build: src
+build:
 	${PYTHON} setup.py build ${BUILDOPT}
 test:
 	${MPIEXEC} ${VALGRIND} ${PYTHON} ${PWD}/test/runtests.py < /dev/null
 
-.PHONY: clean distclean fullclean
+.PHONY: clean distclean srcclean fullclean
 clean:
 	${PYTHON} setup.py clean --all
-distclean:
+distclean: clean
 	-${RM} -r build  _configtest* *.py[co]
 	-${RM} -r MANIFEST dist mpi4py.egg-info
 	-${RM} -r conf/__pycache__ test/__pycache__
 	-find conf -name '*.py[co]' -exec rm -f {} ';'
 	-find test -name '*.py[co]' -exec rm -f {} ';'
 	-find src  -name '*.py[co]' -exec rm -f {} ';'
+srcclean:
+	${RM} src/mpi4py.MPI.c
+	${RM} src/include/mpi4py/mpi4py.MPI.h
+	${RM} src/include/mpi4py/mpi4py.MPI_api.h
+	${RM} src/mpi4py.MPE.c
 fullclean: distclean srcclean docsclean
 	-find .    -name '*~' -exec rm -f {} ';'
 
@@ -34,30 +39,6 @@ install: build
 uninstall:
 	-${RM} -r ${HOME}/lib/python/mpi4py
 	-${RM} -r ${HOME}/lib/python/mpi4py-*-py*.egg-info
-
-# ----
-
-.PHONY: src
-src: src/mpi4py.MPI.c src/mpi4py.MPE.c
-
-CY_SRC_PXD = $(wildcard src/include/mpi4py/*.pxd)
-CY_SRC_PXI = $(wildcard src/MPI/*.pxi) $(wildcard src/include/mpi4py/*.pxi)
-CY_SRC_PYX = $(wildcard src/MPI/*.pyx)
-src/mpi4py.MPI.c: ${CY_SRC_PXD} ${CY_SRC_PXI} ${CY_SRC_PYX}
-	${PYTHON} ./conf/cythonize.py
-src/mpi4py.MPE.c: $(wildcard src/MPE/*.pxi) $(wildcard src/MPE/*.pyx)
-	${PYTHON} ./conf/cythonize.py
-
-.PHONY: cython
-cython:
-	${PYTHON} ./conf/cythonize.py
-
-.PHONY:
-srcclean:
-	${RM} src/mpi4py.MPI.c
-	${RM} src/include/mpi4py/mpi4py.MPI.h
-	${RM} src/include/mpi4py/mpi4py.MPI_api.h
-	${RM} src/mpi4py.MPE.c
 
 # ----
 
