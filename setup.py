@@ -30,6 +30,14 @@ complete support for dynamic process creation and management (spawn,
 name publishing).
 """
 
+## try:
+##     import setuptools
+## except ImportError:
+##     pass
+
+import sys
+sys.dont_write_bytecode = True
+
 # --------------------------------------------------------------------
 # Metadata
 # --------------------------------------------------------------------
