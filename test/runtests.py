@@ -97,6 +97,15 @@ def getprocessorinfo():
     name = MPI.Get_processor_name()
     return (rank, name)
 
+def getpythoninfo():
+    x, y = sys.version_info[:2]
+    return ("Python %d.%d (%s)" % (x, y, sys.executable))
+
+def getpackageinfo(pkg):
+    return ("%s %s (%s)" % (pkg.__name__,
+                            pkg.__version__,
+                            pkg.__path__[0]))
+
 def writeln(message='', endl='\n'):
     sys.stderr.flush()
     sys.stderr.write(message+endl)
@@ -104,13 +113,11 @@ def writeln(message='', endl='\n'):
 
 def print_banner(options, package):
     rank, name = getprocessorinfo()
-    x, y = sys.version_info[:2]
     if options.verbose:
-        writeln("[%d@%s] Py%d%d (%s) - %s (%s)"
-                % (rank, name, x, y,
-                   sys.executable,
-                   package.__name__,
-                   package.__path__[0]))
+        writeln("[%d@%s] %s"
+                % (rank, name, getpythoninfo()))
+        writeln("[%d@%s] %s"
+                % (rank, name, getpackageinfo(package)))
 
 def load_tests(options, args):
     from glob import glob
