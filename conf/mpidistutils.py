@@ -630,6 +630,7 @@ from distutils.extension import Extension as cls_Extension
 from distutils.command import config as cmd_config
 from distutils.command import build as cmd_build
 from distutils.command import install as cmd_install
+from distutils.command import sdist as cmd_sdist
 from distutils.command import clean as cmd_clean
 
 from distutils.command import build_py as cmd_build_py
@@ -685,7 +686,7 @@ def setup(**attrs):
     if 'cmdclass' not in attrs:
         attrs['cmdclass'] = {}
     cmdclass = attrs['cmdclass']
-    for cmd in (config, build, install, clean,
+    for cmd in (config, build, install, clean, sdist,
                 build_src, build_py, build_clib, build_ext, build_exe,
                 install_data, install_exe,
                 ):
@@ -1591,6 +1592,15 @@ class install_exe(cmd_install_lib.install_lib):
             build_exe = self.get_finalized_command('build_exe')
             inputs.extend(build_exe.get_outputs())
         return inputs
+
+# -----------------------------------------------------------------------------
+
+class sdist(cmd_sdist.sdist):
+
+    def run (self):
+        build_src = self.get_finalized_command('build_src')
+        build_src.run()
+        cmd_sdist.sdist.run(self)
 
 # -----------------------------------------------------------------------------
 
