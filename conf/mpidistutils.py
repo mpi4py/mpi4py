@@ -686,7 +686,7 @@ def setup(**attrs):
         attrs['cmdclass'] = {}
     cmdclass = attrs['cmdclass']
     for cmd in (config, build, install, clean,
-                build_py, build_clib, build_ext, build_exe,
+                build_src, build_py, build_clib, build_ext, build_exe,
                 install_data, install_exe,
                 ):
         if cmd.__name__ not in cmdclass:
@@ -829,9 +829,26 @@ class build(cmd_build.build):
         return self.distribution.has_executables()
 
     sub_commands = \
+        [('build_src', lambda *args: True)] + \
         cmd_build.build.sub_commands + \
         [('build_exe', has_executables),
          ]
+
+# -----------------------------------------------------------------------------
+
+from distutils.core import Command
+class build_src(Command):
+    description = "build C sources from Cython files"
+    user_options = [
+        ('force', 'f',
+         "forcibly build everything (ignore file timestamps)"),
+        ]
+    def initialize_options(self):
+        self.force = False
+    def finalize_options(self):
+        pass
+    def run(self):
+        pass
 
 # -----------------------------------------------------------------------------
 

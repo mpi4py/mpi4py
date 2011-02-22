@@ -289,7 +289,7 @@ def executables():
 from conf.mpidistutils import setup
 from conf.mpidistutils import Distribution, Extension, Executable
 from conf.mpidistutils import config, build, install, clean
-from conf.mpidistutils import build_ext, build_exe
+from conf.mpidistutils import build_src, build_ext, build_exe
 from conf.mpidistutils import install_data, install_exe
 
 ExtModule = lambda extension:  Extension(**extension)
@@ -349,38 +349,50 @@ def chk_cython(CYTHON_VERSION_REQUIRED):
     #
     return True
 
-def run_cython(source):
-    from conf.cythonize import run as cythonize
+def run_cython(source, target, depends=(), force=False,
+               CYTHON_VERSION_REQUIRED=None):
     from distutils import log
-    log.set_verbosity(1)
-    log.info("cythonizing '%s' source" % source)
+    from distutils import dep_util
+    from distutils.errors import DistutilsError
+    depends = [source] + list(depends)
+    if not (force or dep_util.newer_group(depends, target)):
+        log.debug("skipping '%s' -> '%s' (up-to-date)", 
+                  source, target)
+        return
+    if (CYTHON_VERSION_REQUIRED and not 
+        chk_cython(CYTHON_VERSION_REQUIRED)):
+        raise DistutilsError('requires Cython>=%s' 
+                             % CYTHON_VERSION_REQUIRED)
+    log.info("cythonizing '%s' -> '%s'", source, target)
+    from conf.cythonize import run as cythonize
     cythonize(source)
 
-def main():
+def build_sources(cmd):
     CYTHON_VERSION_REQUIRED = '0.13'
-    import sys, os, glob
-    from distutils import dep_util
-    if os.path.isdir('.svn') or os.path.isdir('.git'):
-        # mpi4py.MPI
-        source = os.path.join('src', 'mpi4py.MPI.pyx')
-        target = os.path.splitext(source)[0]+".c"
-        depends = (glob.glob("src/include/*/*.pxi") +
-                   glob.glob("src/include/*/*.pxd") +
-                   glob.glob("src/MPI/*.pyx") +
-                   glob.glob("src/MPI/*.pxi"))
-        if dep_util.newer_group([source]+depends, target):
-            if not chk_cython(CYTHON_VERSION_REQUIRED):
-                sys.exit(1)
-            run_cython(source)
-        # mpi4py.MPE
-        source = os.path.join('src', 'mpi4py.MPE.pyx')
-        target = os.path.splitext(source)[0]+".c"
-        depends = (glob.glob("src/MPE/*.pyx") +
-                   glob.glob("src/MPE/*.pxi"))
-        if dep_util.newer_group([source]+depends, target):
-            if not chk_cython(CYTHON_VERSION_REQUIRED):
-                sys.exit(1)
-            run_cython(source)
+    import os, glob
+    if not (os.path.isdir('.svn') or 
+            os.path.isdir('.git') or
+            cmd.force): return
+    # mpi4py.MPI
+    source = os.path.join('src', 'mpi4py.MPI.pyx')
+    target = os.path.splitext(source)[0]+".c"
+    depends = (glob.glob("src/include/*/*.pxi") +
+               glob.glob("src/include/*/*.pxd") +
+               glob.glob("src/MPI/*.pyx") +
+               glob.glob("src/MPI/*.pxi"))
+    run_cython(source, target, depends, cmd.force,
+               CYTHON_VERSION_REQUIRED)
+    # mpi4py.MPE
+    source = os.path.join('src', 'mpi4py.MPE.pyx')
+    target = os.path.splitext(source)[0]+".c"
+    depends = (glob.glob("src/MPE/*.pyx") +
+               glob.glob("src/MPE/*.pxi"))
+    run_cython(source, target, depends, cmd.force,
+               CYTHON_VERSION_REQUIRED)
+
+build_src.run = build_sources
+
+def main():
     run_setup()
 
 if __name__ == '__main__':
