@@ -35,9 +35,6 @@ name publishing).
 ## except ImportError:
 ##     pass
 
-import sys
-sys.dont_write_bytecode = True
-
 # --------------------------------------------------------------------
 # Metadata
 # --------------------------------------------------------------------
