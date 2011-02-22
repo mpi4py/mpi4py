@@ -23,10 +23,23 @@
 static int PyMPI_Main(int, char **);
 
 #if PY_MAJOR_VERSION >= 3
-static wchar_t *  char2wchar(char *);
 static wchar_t ** mk_wargs(int, char **);
 static wchar_t ** cp_wargs(int, wchar_t **);
 static void       rm_wargs(wchar_t **, int);
+#endif
+
+#if PY_MAJOR_VERSION >= 3
+#if PY_VERSION_HEX < 0x03020000
+static wchar_t *_Py_char2wchar(const char *, size_t *);
+#elif defined(__APPLE__)
+#ifdef __cplusplus
+extern "C" {
+#endif
+extern wchar_t* _Py_DecodeUTF8_surrogateescape(const char *s, Py_ssize_t size);
+#ifdef __cplusplus
+}
+#endif
+#endif
 #endif
 
 /* -------------------------------------------------------------------------- */
@@ -98,7 +111,7 @@ mk_wargs(int argc, char **argv)
   int i; char *saved_locale = NULL;
   wchar_t **args = NULL;
 
-  args = (wchar_t **)malloc((argc+1)*sizeof(wchar_t *));
+  args = (wchar_t **)PyMem_Malloc((argc+1)*sizeof(wchar_t *));
   if (!args) goto oom;
 
   saved_locale = strdup(setlocale(LC_ALL, NULL));
@@ -106,7 +119,11 @@ mk_wargs(int argc, char **argv)
   setlocale(LC_ALL, "");
 
   for (i=0; i<argc; i++) {
-    args[i] = char2wchar(argv[i]);
+#if defined(__APPLE__) && PY_VERSION_HEX >= 0x03020000
+    args[i] = _Py_DecodeUTF8_surrogateescape(argv[i], strlen(argv[i]));
+#else
+    args[i] = _Py_char2wchar(argv[i], NULL);
+#endif
     if (!args[i]) goto oom;
   }
   args[argc] = NULL;
@@ -132,7 +149,7 @@ cp_wargs(int argc, wchar_t **args)
 {
   int i; wchar_t **args_copy = NULL;
   if (!args) return NULL;
-  args_copy = (wchar_t **)malloc((argc+1)*sizeof(wchar_t *));
+  args_copy = (wchar_t **)PyMem_Malloc((argc+1)*sizeof(wchar_t *));
   if (!args_copy) goto oom;
   for (i=0; i<(argc+1); i++) { args_copy[i] = args[i]; }
   return args_copy;
@@ -147,13 +164,16 @@ rm_wargs(wchar_t **args, int deep)
   int i = 0;
   if (args && deep)
     while (args[i])
-      free(args[i++]);
+      PyMem_Free(args[i++]);
   if (args)
-    free(args);
+    PyMem_Free(args);
 }
 
+#endif /* !(PY_MAJOR_VERSION >= 3) */
+
+#if PY_MAJOR_VERSION >= 3 && PY_VERSION_HEX < 0x03020000
 static wchar_t *
-char2wchar(char* arg)
+_Py_char2wchar(const char* arg, size_t *size)
 {
   wchar_t *res;
 #ifdef HAVE_BROKEN_MBSTOWCS
@@ -172,7 +192,7 @@ char2wchar(char* arg)
   mbstate_t mbs;
 #endif
   if (argsize != (size_t)-1) {
-    res = (wchar_t *)malloc((argsize+1)*sizeof(wchar_t));
+    res = (wchar_t *)PyMem_Malloc((argsize+1)*sizeof(wchar_t));
     if (!res)
       goto oom;
     count = mbstowcs(res, arg, argsize+1);
@@ -183,10 +203,13 @@ char2wchar(char* arg)
       for (tmp = res; *tmp != 0 &&
              (*tmp < 0xd800 || *tmp > 0xdfff); tmp++)
         ;
-      if (*tmp == 0)
+      if (*tmp == 0) {
+        if (size != NULL)
+          *size = count;
         return res;
+      }
     }
-    free(res);
+    PyMem_Free(res);
   }
   /* Conversion failed. Fall back to escaping with surrogateescape. */
 #ifdef HAVE_MBRTOWC
@@ -195,7 +218,7 @@ char2wchar(char* arg)
   /* Overallocate; as multi-byte characters are in the argument, the
      actual output could use less memory. */
   argsize = strlen(arg) + 1;
-  res = (wchar_t *)malloc(argsize*sizeof(wchar_t));
+  res = (wchar_t *)PyMem_Malloc(argsize*sizeof(wchar_t));
   if (!res) goto oom;
   in = (unsigned char*)arg;
   out = res;
@@ -238,7 +261,7 @@ char2wchar(char* arg)
   /* Cannot use C locale for escaping; manually escape as if charset
      is ASCII (i.e. escape all bytes > 128. This will still roundtrip
      correctly in the locale's charset, which must be an ASCII superset. */
-  res = (wchar_t *)malloc((strlen(arg)+1)*sizeof(wchar_t));
+  res = (wchar_t *)PyMem_Malloc((strlen(arg)+1)*sizeof(wchar_t));
   if (!res) goto oom;
   in = (unsigned char*)arg;
   out = res;
@@ -249,6 +272,8 @@ char2wchar(char* arg)
       *out++ = 0xdc00 + *in++;
   *out = 0;
 #endif
+  if (size != NULL)
+    *size = out - res;
   return res;
  oom:
   fprintf(stderr, "out of memory\n");
