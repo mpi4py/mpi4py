@@ -248,6 +248,7 @@ class TestGetAddress(unittest.TestCase):
         bufptr, buflen = location.buffer_info()
         self.assertEqual(addr, bufptr)
 
+import sys
 _name, _version = MPI.get_vendor()
 if _name == 'LAM/MPI':
     combiner_map[MPI.COMBINER_INDEXED_BLOCK] = MPI.COMBINER_INDEXED
@@ -262,8 +263,11 @@ if _name == 'Open MPI':
         for t in datatypes_f90[-4:]:
             if t != MPI.DATATYPE_NULL:
                 datatypes.remove(t)
+    if 'win' in sys.platform:
+        del TestDatatype.testCommit
+        del TestDatatype.testDup
+        del TestDatatype.testResized
 
-import sys
 if sys.version_info[0] >=3:
     del TestGetAddress
 

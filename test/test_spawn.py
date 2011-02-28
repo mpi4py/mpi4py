@@ -77,6 +77,8 @@ if _name == 'Open MPI':
         _SKIP_TEST = True
     elif _version < (1, 4, 0):
         _SKIP_TEST = True
+    if 'win' in sys.platform:
+        _SKIP_TEST = True
 elif _name == 'MPICH2':
     if _version < (1, 0, 6):
         _SKIP_TEST = True
@@ -105,6 +107,6 @@ elif _name == 'MPICH2':
             del TestSpawnWorld
             del TestSpawnSelfMany
             del TestSpawnWorldMany
-
+    
 if __name__ == '__main__':
     unittest.main()

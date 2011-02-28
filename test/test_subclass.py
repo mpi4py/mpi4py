@@ -287,6 +287,12 @@ class BaseTestMyFile(object):
 class TestMyFile(BaseTestMyFile, unittest.TestCase):
     pass
 
+import sys
+_name, _version = MPI.get_vendor()
+if _name == 'Open MPI':
+    if 'win' in sys.platform:
+        def _dummy(*args): raise NotImplementedError
+        BaseTestMyFile.setUp = _dummy
 try:
     dummy = BaseTestMyFile()
     dummy.setUp()

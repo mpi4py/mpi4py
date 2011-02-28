@@ -172,6 +172,7 @@ class TestFileSelf(BaseTestFile, unittest.TestCase):
     prefix = BaseTestFile.prefix + ('-%d' % MPI.COMM_WORLD.Get_rank())
 
 
+import sys
 _name, _version = MPI.get_vendor()
 if _name == 'Open MPI':
     if _version <= (1, 2, 8):
@@ -187,6 +188,10 @@ if _name == 'Open MPI':
             del BaseTestFile.testGetTypeExtent
             del BaseTestFile.testSeekGetPosition
             del BaseTestFile.testSeekGetPositionShared
+    if 'win' in sys.platform:
+        del BaseTestFile
+        del TestFileNull
+        del TestFileSelf
 else:
     try:
         dummy = BaseTestFile()
