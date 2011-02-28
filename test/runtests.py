@@ -97,6 +97,14 @@ def getprocessorinfo():
     name = MPI.Get_processor_name()
     return (rank, name)
 
+def getlibraryinfo():
+    from mpi4py import MPI
+    info = "MPI %d.%d" % MPI.Get_version()
+    name, version = MPI.get_vendor()
+    if name != "unknown":
+        info += (" (%s %s)" % (name, '%d.%d.%d' % version))
+    return info
+
 def getpythoninfo():
     x, y = sys.version_info[:2]
     return ("Python %d.%d (%s)" % (x, y, sys.executable))
@@ -116,6 +124,8 @@ def print_banner(options, package):
     if options.verbose:
         writeln("[%d@%s] %s"
                 % (rank, name, getpythoninfo()))
+        writeln("[%d@%s] %s"
+                % (rank, name, getlibraryinfo()))
         writeln("[%d@%s] %s"
                 % (rank, name, getpackageinfo(package)))
 
