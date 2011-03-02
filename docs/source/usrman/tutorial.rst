@@ -128,7 +128,7 @@ Collective Communication
    size = comm.Get_size()
    rank = comm.Get_rank()
 
-   data == (rank+1)**2
+   data = (rank+1)**2
    data = comm.gather(data, root=0)
    if rank == 0:
       for i in range(size):
