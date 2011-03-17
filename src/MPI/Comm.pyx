@@ -993,7 +993,6 @@ cdef class Intracomm(Comm):
                 cinfo, reorder, &comm.ob_mpi) )
         return comm
 
-
     def Create_dist_graph(self, sources, degrees, destinations, weights=None,
                           Info info=INFO_NULL, bint reorder=False):
         """
@@ -1092,25 +1091,71 @@ cdef class Intracomm(Comm):
         #
         cdef int rank = MPI_UNDEFINED
         CHKERR( MPI_Comm_rank(self.ob_mpi, &rank) )
-        cdef tmp1 = None, tmp2 = None
+        cdef tmp1, tmp2
         if root == rank:
             command = asmpistr(command, &cmd, NULL)
             if args is not None:
                 tmp1 = asarray_argv(args, &argv)
-            if errcodes is not None:
-                tmp2 = newarray_int(maxprocs, &ierrcodes)
+        if errcodes is not None:
+            tmp2 = newarray_int(maxprocs, &ierrcodes)
         #
         cdef Intercomm comm = <Intercomm>Intercomm.__new__(Intercomm)
         with nogil: CHKERR( MPI_Comm_spawn(
             cmd, argv, maxprocs, cinfo, root,
-            self.ob_mpi, &comm.ob_mpi,
-            ierrcodes) )
+            self.ob_mpi, &comm.ob_mpi, ierrcodes) )
         #
-        cdef int i = 0
-        if root == rank and (errcodes is not None):
+        cdef int i=0
+        if errcodes is not None:
             errcodes[:] = [ierrcodes[i] for i from 0<=i<maxprocs]
         #
         return comm
+
+    def Spawn_multiple(self, command, args=None, maxprocs=None,
+                       info=INFO_NULL, int root=0, errcodes=None):
+        """
+        Spawn instances of multiple MPI applications
+        """
+        cdef int count = 0
+        cdef char **cmds = NULL
+        cdef char ***argvs = MPI_ARGVS_NULL
+        cdef MPI_Info *infos = NULL
+        cdef int *imaxprocs = NULL
+        cdef int *ierrcodes = MPI_ERRCODES_IGNORE
+        #
+        cdef int rank = MPI_UNDEFINED
+        CHKERR( MPI_Comm_rank(self.ob_mpi, &rank) )
+        cdef object tmp1, tmp2, tmp3, tmp4, tmp5
+        cdef Py_ssize_t i=0, n=0
+        if root == rank:
+            count = <int>len(command)
+            tmp1 = asarray_str(command, count, &cmds)
+            tmp2 = asarray_argvs(args, count, &argvs)
+            tmp3 = asarray_nprocs(maxprocs, count, &imaxprocs)
+            tmp4 = asarray_Info(info, count, &infos)
+        if errcodes is not None:
+            if root != rank:
+                count = <int>len(maxprocs)
+                tmp3 = asarray_nprocs(maxprocs, count, &imaxprocs)
+            for i from 0 <= i < count:
+                n += imaxprocs[i]
+            tmp5 = newarray_int(n, &ierrcodes)
+        #
+        cdef Intercomm comm = <Intercomm>Intercomm.__new__(Intercomm)
+        with nogil: CHKERR( MPI_Comm_spawn_multiple(
+            count, cmds, argvs, imaxprocs, infos, root,
+            self.ob_mpi, &comm.ob_mpi, ierrcodes) )
+        #
+        cdef Py_ssize_t j=0, p=0
+        if errcodes is not None:
+            errcodes[:] = [[]] * count
+            for i from 0 <= i < count:
+                n = imaxprocs[i]
+                errcodes[i] = \
+                    [ierrcodes[j] for j from p<=j<(p+n)]
+                p += n
+        #
+        return comm
+
 
     # Server Routines
 

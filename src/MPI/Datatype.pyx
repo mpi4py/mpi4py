@@ -192,7 +192,7 @@ cdef class Datatype:
         cdef int count = 0, *iblen = NULL
         blocklengths = getarray_int(blocklengths, &count, &iblen)
         cdef MPI_Aint *idisp = NULL
-        displacements = asarray_Aint(displacements, &idisp, count)
+        displacements = asarray_Aint(displacements, count, &idisp)
         #
         cdef Datatype datatype = <Datatype>type(self)()
         CHKERR( MPI_Type_create_hindexed(count, iblen, idisp,
@@ -251,9 +251,9 @@ cdef class Datatype:
         cdef int count = 0, *iblen = NULL
         blocklengths = getarray_int(blocklengths, &count, &iblen)
         cdef MPI_Aint *idisp = NULL
-        displacements = asarray_Aint(displacements, &idisp, count)
+        displacements = asarray_Aint(displacements, count, &idisp)
         cdef MPI_Datatype *ptype = NULL
-        datatypes = asarray_Datatype(datatypes, &ptype, count)
+        datatypes = asarray_Datatype(datatypes, count, &ptype)
         #
         cdef Datatype datatype = <Datatype>cls()
         CHKERR( MPI_Type_create_struct(count, iblen, idisp, ptype,
