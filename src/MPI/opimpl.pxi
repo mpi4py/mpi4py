@@ -81,12 +81,6 @@ cdef object op_user_registry = [None]*(1+16)
 cdef inline object op_user_py(int index, object x, object y, object dt):
     return op_user_registry[index](x, y, dt)
 
-cdef inline void op_user_mpi_report_error():
-    cdef object sys, traceback
-    import sys, traceback
-    traceback.print_exc()
-    sys.stderr.flush()
-
 cdef inline void op_user_mpi(
     int index, void *a, void *b, MPI_Aint n, MPI_Datatype *t) with gil:
     # errors in user-defined reduction operations are unrecoverable
@@ -96,7 +90,7 @@ cdef inline void op_user_mpi(
         # print the full exception traceback and abort.
         PySys_WriteStderr(b"Fatal Python error: exception in "
                           b"user-defined reduction operation\n", 0)
-        op_user_mpi_report_error()
+        print_traceback()
         MPI_Abort(MPI_COMM_WORLD, 1)
 
 cdef inline void op_user_call(

@@ -1,11 +1,3 @@
-
-cdef inline void print_traceback():
-    cdef object sys, traceback
-    import sys, traceback
-    traceback.print_exc()
-    try: sys.stderr.flush()
-    except: pass
-
 # -----------------------------------------------------------------------------
 
 cdef dict comm_keyval = {}

@@ -205,4 +205,12 @@ cdef inline int CHKERR(int ierr) nogil except -1:
     PyMPI_Raise(ierr)
     return -1
 
+
+cdef inline void print_traceback():
+    cdef object sys, traceback
+    import sys, traceback
+    traceback.print_exc()
+    try: sys.stderr.flush()
+    except: pass
+
 # -----------------------------------------------------------------------------
