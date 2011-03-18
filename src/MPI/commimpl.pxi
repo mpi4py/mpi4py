@@ -1,3 +1,11 @@
+
+cdef inline void print_traceback():
+    cdef object sys, traceback
+    import sys, traceback
+    traceback.print_exc()
+    try: sys.stderr.flush()
+    except: pass
+
 # -----------------------------------------------------------------------------
 
 cdef dict comm_keyval = {}
@@ -11,15 +19,6 @@ cdef int comm_keyval_del(int keyval) except -1:
     try: del comm_keyval[keyval]
     except KeyError: pass
     return 0
-
-# ---
-
-cdef inline void print_traceback():
-    cdef object sys, traceback
-    import sys, traceback
-    traceback.print_exc()
-    try: sys.stderr.flush()
-    except: pass
 
 cdef int comm_attr_copy(MPI_Comm comm,
                         int keyval,

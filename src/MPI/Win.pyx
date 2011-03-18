@@ -110,8 +110,54 @@ cdef class Win:
         elif (keyval == <int>MPI_WIN_DISP_UNIT):
             return (<int*>attrval)[0]
         # likely be a user-defined keyval
+        elif keyval in win_keyval:
+            return <object>attrval
         else:
             return PyLong_FromVoidPtr(attrval)
+
+    def Set_attr(self, int keyval, object attrval):
+        """
+        Store attribute value associated with a key
+        """
+        cdef void *ptrval = NULL
+        cdef int incref = 0
+        if keyval in win_keyval:
+            ptrval = <void*>attrval
+            incref = 1
+        else:
+            ptrval = PyLong_AsVoidPtr(attrval)
+            incref = 0
+        CHKERR(MPI_Win_set_attr(self.ob_mpi, keyval, ptrval) )
+        if incref: Py_INCREF(attrval)
+
+    def Delete_attr(self, int keyval):
+        """
+        Delete attribute value associated with a key
+        """
+        CHKERR(MPI_Win_delete_attr(self.ob_mpi, keyval) )
+
+    @classmethod
+    def Create_keyval(cls, copy_fn=None, delete_fn=None):
+        """
+        Create a new attribute key for windows
+        """
+        cdef int keyval = MPI_KEYVAL_INVALID
+        cdef MPI_Win_copy_attr_function *_copy = win_attr_copy_fn
+        cdef MPI_Win_delete_attr_function *_del = win_attr_delete_fn
+        cdef void *extra_state = NULL
+        CHKERR( MPI_Win_create_keyval(_copy, _del, &keyval, extra_state) )
+        win_keyval_new(keyval, copy_fn, delete_fn)
+        return keyval
+
+    @classmethod
+    def Free_keyval(cls, int keyval):
+        """
+        Free and attribute key for windows
+        """
+        cdef int keyval_save = keyval
+        CHKERR( MPI_Win_free_keyval (&keyval) )
+        win_keyval_del(keyval_save)
+        return keyval
 
     property attrs:
         "window attributes"
