@@ -26,7 +26,7 @@ class BaseTestCommAttr(object):
         self.assertEqual(getrc(attrval), rc+2)
         o = None
 
-        dupcomm = self.comm.Dup()
+        dupcomm = self.comm.Clone()
         if copy_fn is True:
             self.assertEqual(getrc(attrval), rc+2)
         o = dupcomm.Get_attr(self.keyval)
@@ -59,7 +59,7 @@ class BaseTestCommAttr(object):
         self.assertNotEqual(self.keyval, MPI.KEYVAL_INVALID)
 
         comm1 = self.comm
-        dupcomm1 = comm1.Dup()
+        dupcomm1 = comm1.Clone()
         rc = getrc(dupcomm1)
 
         comm1.Set_attr(self.keyval, dupcomm1)
@@ -80,14 +80,101 @@ class BaseTestCommAttr(object):
         self.assertTrue(dupcomm1 == MPI.COMM_NULL)
         self.assertTrue(getrc(dupcomm1), rc)
 
-class TestCommWorldAttr(BaseTestCommAttr, unittest.TestCase):
+class TestCommAttrWorld(BaseTestCommAttr, unittest.TestCase):
     def setUp(self):
         self.comm = MPI.COMM_WORLD.Dup()
-
-class TestCommSelfAttr(BaseTestCommAttr, unittest.TestCase):
+class TestCommAttrSelf(BaseTestCommAttr, unittest.TestCase):
     def setUp(self):
         self.comm = MPI.COMM_SELF.Dup()
 
+
+class BaseTestDatatypeAttr(object):
+
+    keyval = MPI.KEYVAL_INVALID
+
+    def tearDown(self):
+        self.datatype.Free()
+        if self.keyval != MPI.KEYVAL_INVALID:
+            self.keyval = MPI.Datatype.Free_keyval(self.keyval)
+            self.assertEqual(self.keyval, MPI.KEYVAL_INVALID)
+
+    def testAttr(self, copy_fn=None, delete_fn=None):
+        self.keyval = MPI.Datatype.Create_keyval(copy_fn, delete_fn)
+        self.assertNotEqual(self.keyval, MPI.KEYVAL_INVALID)
+
+        attrval = [1,2,3]
+        rc = getrc(attrval)
+        self.datatype.Set_attr(self.keyval, attrval)
+        self.assertEqual(getrc(attrval), rc+1)
+
+        o = self.datatype.Get_attr(self.keyval)
+        self.assertTrue(o is attrval)
+        self.assertEqual(getrc(attrval), rc+2)
+        o = None
+
+        dupdatatype = self.datatype.Dup()
+        if copy_fn is True:
+            self.assertEqual(getrc(attrval), rc+2)
+        o = dupdatatype.Get_attr(self.keyval)
+        if copy_fn is True:
+            self.assertTrue(o is attrval)
+            self.assertEqual(getrc(attrval), rc+3)
+        elif not copy_fn:
+            self.assertTrue(o is None)
+            self.assertEqual(getrc(attrval), rc+1)
+        dupdatatype.Free()
+        o = None
+
+        self.assertEqual(getrc(attrval), rc+1)
+        self.datatype.Delete_attr(self.keyval)
+        self.assertEqual(getrc(attrval), rc)
+
+        o = self.datatype.Get_attr(self.keyval)
+        self.assertTrue(o is None)
+
+    def testAttrCopyFalse(self):
+        self.testAttr(False)
+
+    def testAttrCopyTrue(self):
+        self.testAttr(True)
+
+    def testAttrCopyDelete(self):
+        self.keyval = MPI.Datatype.Create_keyval(
+            copy_fn=MPI.Datatype.Dup,
+            delete_fn=MPI.Datatype.Free)
+        self.assertNotEqual(self.keyval, MPI.KEYVAL_INVALID)
+
+        datatype1 = self.datatype
+        dupdatatype1 = datatype1.Dup()
+        rc = getrc(dupdatatype1)
+
+        datatype1.Set_attr(self.keyval, dupdatatype1)
+        self.assertTrue(dupdatatype1 != MPI.DATATYPE_NULL)
+        self.assertTrue(getrc(dupdatatype1), rc+1)
+
+        datatype2 = datatype1.Dup()
+        dupdatatype2 = datatype2.Get_attr(self.keyval)
+        self.assertTrue(dupdatatype1 != dupdatatype2)
+        self.assertTrue(getrc(dupdatatype1), rc+1)
+        self.assertTrue(getrc(dupdatatype2), 3)
+        datatype2.Free()
+        self.assertTrue(dupdatatype2 == MPI.DATATYPE_NULL)
+        self.assertTrue(getrc(dupdatatype1), rc+1)
+        self.assertTrue(getrc(dupdatatype2), 2)
+
+        self.datatype.Delete_attr(self.keyval)
+        self.assertTrue(dupdatatype1 == MPI.DATATYPE_NULL)
+        self.assertTrue(getrc(dupdatatype1), rc)
+
+class TestDatatypeAttrBYTE(BaseTestDatatypeAttr, unittest.TestCase):
+    def setUp(self):
+        self.datatype = MPI.BYTE.Dup()
+class TestDatatypeAttrINT(BaseTestDatatypeAttr, unittest.TestCase):
+    def setUp(self):
+        self.datatype = MPI.INT.Dup()
+class TestDatatypeAttrFLOAT(BaseTestDatatypeAttr, unittest.TestCase):
+    def setUp(self):
+        self.datatype = MPI.FLOAT.Dup()
 
 class TestWinAttr(unittest.TestCase):
 
@@ -143,7 +230,16 @@ class TestWinAttr(unittest.TestCase):
 
 
 try:
-    MPI.Win.Create(MPI.BOTTOM, 1, MPI.INFO_NULL, MPI.COMM_SELF).Free()
+    k = MPI.Datatype.Create_keyval()
+    k = MPI.Datatype.Free_keyval(k)
+except NotImplementedError:
+    del TestDatatypeAttrBYTE
+    del TestDatatypeAttrINT
+    del TestDatatypeAttrFLOAT
+
+try:
+    k = MPI.Win.Create_keyval()
+    k = MPI.Win.Free_keyval(k)
 except NotImplementedError:
     del TestWinAttr
 

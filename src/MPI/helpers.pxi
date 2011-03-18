@@ -32,6 +32,8 @@ cdef inline int equal_Status(MPI_Status* s1, MPI_Status* s2) nogil:
 #------------------------------------------------------------------------------
 # Datatype
 
+include "typeimpl.pxi"
+
 cdef inline Datatype new_Datatype(MPI_Datatype ob):
     cdef Datatype datatype = <Datatype>Datatype.__new__(Datatype)
     datatype.ob_mpi = ob
