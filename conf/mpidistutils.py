@@ -7,20 +7,6 @@ Support for building mpi4py with distutils.
 
 # -----------------------------------------------------------------------------
 
-# Environmental variables to look for configuration
-MPICC_ENV  = ['MPICC']
-MPICXX_ENV = ['MPICXX']
-MPILD_ENV  = ['MPILD']
-MPICFG_ENV = ['MPICFG']
-
-# Default values to use for configuration
-MPICC  = ['mpicc']
-MPICXX = ['mpicxx', 'mpic++', 'mpiCC']
-MPILD  = MPICC + MPICXX
-MPICFG = ('mpi', 'mpi.cfg')
-
-# -----------------------------------------------------------------------------
-
 import sys
 if sys.version[:3] == '3.0':
     from distutils import version
@@ -100,12 +86,12 @@ def rpath_option(compiler, dir):
     if sys.platform.startswith('linux'):
         if option.startswith('-R'):
             option =  option.replace('-R', '-Wl,-rpath,', 1)
-        elif option.startswith('-Wl,-R'):
-            option =  option.replace('-Wl,-R', '-Wl,-rpath,', 1)
+        elif option.startswith('-Wl,-R,'):
+            option =  option.replace('-Wl,-R,', '-Wl,-rpath,', 1)
     return option
 UnixCCompiler.runtime_library_dir_option = rpath_option
 
-def customize_compiler(compiler,
+def customize_compiler(compiler, lang=None,
                        mpicc=None, mpicxx=None, mpild=None,
                        environ=None):
     if environ is None:
@@ -134,7 +120,12 @@ def customize_compiler(compiler,
         if mpild:
             ld_so = fix_linker_cmd(mpild,  ld_so)
         elif (mpicc or mpicxx):
-            mpild = mpicc or mpicxx
+            if lang == 'c':
+                mpild = mpicc
+            elif lang == 'c++':
+                mpild = mpicxx
+            else:
+                mpild = mpicc or mpicxx
             ld_so = fix_linker_cmd(mpild, ld_so)
         # Environment handling
         CPPFLAGS = environ.get('CPPFLAGS', '')
@@ -184,309 +175,61 @@ def customize_compiler(compiler,
         compiler.set_executables(
             preprocessor = 'gcc -mno-cygwin -E',
             )
-
-def find_command_executable(exe, path=None):
-    bits = split_quoted(exe)
-    cmd = bits[0]
-    args = bits[1:]
-    cmd = find_executable(cmd, path)
-    if cmd is not None and args:
-        cmd = ' '.join([cmd]+args)
-    return cmd
-
-def find_mpi_compiler(name,
-                      envvars,
-                      command,
-                      config,
-                      default,
-                      executables,
-                      path=None):
-    """
-    Find MPI compiler wrappers
-    """
-    # 1.- search in environment
-    if envvars:
-        if isinstance(envvars, str):
-            envvars = (envvars,)
-        for var in envvars:
-            value = os.environ.get(var)
-            if value:
-                return value
-    # 2.- search in distutils command instance
-    if command:
-        value = getattr(command, name, None)
-        if value:
-            return value
-    # 3.- search in configuration dict
-    if config:
-        value = config.get(name, None)
-        if value:
-            return value
-    # 4.- use default value
-    if default:
-        return default
-    # 5.- search executable in path
-    if executables:
-        if isinstance(executables, str):
-            executables = (executables,)
-        for exe in executables:
-            cmd = find_command_executable(exe, path)
-            if cmd is not None:
-                return cmd
-    # nothing found
-    return None
-
-def find_mpi_compilers(command_obj, config_info, path=None):
-    def ensure_abspath(cmd, path):
-        if cmd and not os.path.isabs(cmd):
-            cmd = find_command_executable(cmd, path)
-        if cmd and not path:
-            path = os.path.dirname(cmd)
-        return cmd, path
-    # C
-    mpicc = find_mpi_compiler(
-        'mpicc', MPICC_ENV, command_obj, config_info, None, MPICC, path)
-    mpicc, path = ensure_abspath(mpicc, path)
-    # C++
-    mpicxx = find_mpi_compiler(
-        'mpicxx', MPICXX_ENV, command_obj, config_info, None, MPICXX, path)
-    mpicxx, path = ensure_abspath(mpicxx, path)
-    # Fortran 77
-    mpif77 = find_mpi_compiler(
-        'mpif77', 'MPIF77', command_obj, config_info, None, 'mpif77', path)
-    mpif77, path = ensure_abspath(mpif77, path)
-    # Fortran 90
-    mpif90 = find_mpi_compiler(
-        'mpif90', 'MPIF90', command_obj, config_info, None, 'mpif90', path)
-    mpif90, path = ensure_abspath(mpif90, path)
-    # Fortran 95
-    mpif95 = find_mpi_compiler(
-        'mpif95', 'MPIF95', command_obj, config_info, None, 'mpif95', path)
-    mpif95, path = ensure_abspath(mpif95, path)
-    # Linker
-    mpild = mpicc or mpicxx # default
-    mpild = find_mpi_compiler(
-        'mpild', MPILD_ENV, command_obj, config_info, mpild, MPILD, path)
-    mpild, path = ensure_abspath(mpild, path)
-    #
-    if mpicc:  config_info['mpicc']  = mpicc
-    if mpicxx: config_info['mpicxx'] = mpicxx
-    if mpif77: config_info['mpif77'] = mpif77
-    if mpif90: config_info['mpif90'] = mpif90
-    if mpif95: config_info['mpif95'] = mpif95
-    return (mpicc, mpicxx, mpild)
+    if compiler.compiler_type in ('unix', 'cygwin', 'mingw32'):
+        if lang == 'c++':
+            def find_cmd_pos(cmd):
+                pos = 0
+                if os.path.basename(cmd[pos]) == "env":
+                    pos = 1
+                    while '=' in cmd[pos]:
+                        pos = pos + 1
+                return pos
+            i = find_cmd_pos(compiler.compiler_so)
+            j = find_cmd_pos(compiler.compiler_cxx)
+            compiler.compiler_so[i] = compiler.compiler_cxx[j]
+            try: compiler.compiler_so.remove('-Wstrict-prototypes')
+            except: pass
 
 # -----------------------------------------------------------------------------
 
 try:
-    from configparser import ConfigParser
-    from configparser import Error as ConfigParserError
+    from mpiconfig import Config
 except ImportError:
-    from ConfigParser import ConfigParser
-    from ConfigParser import Error as ConfigParserError
-
-
-def _config_parser(section, filenames, raw=False, vars=None):
-    """
-    Returns a dictionary of options obtained by parsing configuration
-    files.
-    """
-    try:
-        from collections import OrderedDict
-        parser = ConfigParser(dict_type=OrderedDict)
-    except ImportError:
-        OrderedDict = dict
-        parser = ConfigParser()
-    try:
-        parser.read(filenames.split(os.path.pathsep))
-    except ConfigParserError:
-        log.error("error: parsing configuration file/s '%s'", filenames)
-        return None
-    if sys.platform.startswith('win'):
-        if parser.has_section(section+'-win'):
-            section = section+'-win'
-    elif sys.platform.startswith('darwin'):
-        if parser.has_section(section+'-osx'):
-            section = section+'-osx'
-    if not parser.has_section(section):
-        log.error("error: section '%s' not found "
-                  "in configuration file/s '%s'", section, filenames)
-        return None
-    config_info = OrderedDict()
-    for k, v in parser.items(section, raw, vars):
-        if k in ('define_macros',
-                 'undef_macros',):
-            config_info[k] = [e.strip() for e in v.split(',')]
-        elif k in ('include_dirs',
-                   'library_dirs',
-                   'runtime_library_dirs',):
-            pathsep = os.path.pathsep
-            pathlist = [p.strip() for p in v.split(pathsep)]
-            expanduser = os.path.expanduser
-            expandvars = os.path.expandvars
-            config_info[k] = [expanduser(expandvars(p))
-                              for p in pathlist if p]
-        elif k == 'libraries':
-            config_info[k] = [e.strip() for e in split_quoted(v)]
-        elif k == 'extra_objects':
-            expanduser = os.path.expanduser
-            expandvars = os.path.expandvars
-            config_info[k] = [expanduser(expandvars(e))
-                              for e in split_quoted(v)]
-        elif k in ('extra_compile_args',
-                   'extra_link_args'):
-            config_info[k] = split_quoted(v)
-        else:
-            config_info[k] = v.strip()
-    if 'define_macros' in config_info:
-        macros = []
-        for m in config_info['define_macros'] :
-            try: # "-DFOO=bar"
-                idx = m.index('=')
-                macro = (m[:idx], m[idx+1:] or None)
-            except ValueError: # bare "-DFOO"
-                macro = (m, None)
-            macros.append(macro)
-        config_info['define_macros'] = macros
-    return config_info
-
-
-def load_mpi_config(section, envvars=None, defaults=None):
-    if not section and envvars:
-        # look in environment
-        if isinstance(envvars, str):
-            envvars = (envvars,)
-        for var in envvars:
-            section = os.environ.get(var, None)
-            if section: break
-    filenames = ''
-    if section and ',' in section:
-        section, filenames = section.split(',', 1)
-    if defaults:
-        if not section:
-            section = defaults[0]
-        if not filenames:
-            fname = defaults[1]
-            if os.path.exists(fname):
-                filenames = fname
-    # parse configuration
-    if section and filenames:
-        config_info = _config_parser(section, filenames)
-        return section, filenames, config_info
-    else:
-        return section, filenames, None
-
-def save_mpi_config(config_info, filename):
-    # prepare configuration values
-    config_info = config_info.copy()
-    for k in config_info:
-        if k in ('include_dirs',
-                 'library_dirs',
-                 'runtime_library_dirs'):
-            config_info[k] = os.path.pathsep.join(config_info[k])
-        elif k == 'define_macros':
-            macros = []
-            for m, v in config_info[k]:
-                if v is None:
-                    macros.append(m)
-                else:
-                    macros.append('%s=%s' % (m,v))
-            config_info[k] = ','.join(macros)
-        elif k == 'undef_macros':
-            config_info[k] = ','.join(config_info[k])
-        elif isinstance(config_info[k], list):
-            config_info[k] = ' '.join(config_info[k])
-    # fill configuration parser
-    try:
-        from collections import OrderedDict
-        parser = ConfigParser(dict_type=OrderedDict)
-    except ImportError:
-        OrderedDict = dict
-        parser = ConfigParser()
-    parser.add_section('mpi')
-    for option, value in config_info.items():
-        if not value: continue
-        parser.set('mpi', option, value)
-    # save configuration file
-    f = open(filename, 'wt')
-    try:
-        parser.write(f)
-    finally:
-        f.close()
-
-# -----------------------------------------------------------------------------
+    from conf.mpiconfig import Config
 
 def configuration(command_obj, verbose=True):
-    # user-provided
-    section, filenames, config_info = \
-        load_mpi_config(getattr(command_obj, 'mpi', None),
-                        MPICFG_ENV, MPICFG)
-    if config_info:
-        if verbose:
+    config = Config()
+    config.setup(command_obj)
+    if verbose:
+        if config.section and config.filename:
             log.info("MPI configuration: "
                      "from section '[%s]' in file/s '%s'",
-                     section, filenames)
-        return config_info
-    # Windows
-    if sys.platform.startswith('win'):
-        ProgramFiles = os.environ.get('ProgramFiles', '')
-        for (name, install_suffix) in (
-            ('mpich2', 'MPICH2'),
-            #('openmpi', 'OpenMPI'),
-            ('deinompi', 'DeinoMPI'),
-            ('msmpi', 'Microsoft HPC Pack 2008 SDK'),
-            ):
-            mpi_dir = os.path.join(ProgramFiles, install_suffix)
-            if os.path.isdir(mpi_dir):
-                if verbose:
-                    log.info("MPI configuration: "
-                             "directory '%s'", mpi_dir)
-                define_macros = []
-                include_dir = os.path.join(mpi_dir, 'include')
-                library = 'mpi'
-                library_dir = os.path.join(mpi_dir, 'lib')
-                if name == 'msmpi':
-                    define_macros = [('MS_MPI', 1)]
-                    library = 'msmpi'
-                    bits = platform.architecture()[0]
-                    if bits == '32bit':
-                        library_dir = os.path.join(library_dir, 'i386')
-                    elif bits == '64bit':
-                        library_dir = os.path.join(library_dir, 'amd64')
-                config_info = dict(define_macros=define_macros,
-                                   include_dirs=[include_dir],
-                                   libraries=[library],
-                                   library_dirs=[library_dir],)
-                return config_info
-    # nothing found
-    return {}
+                     config.section, ','.join(config.filename))
+            config.info(log)
+    return config
 
-
-def configure_compiler(compiler, command_obj, config_info, verbose=True):
-    mpicc, mpicxx, mpild = find_mpi_compilers(command_obj, config_info)
+def configure_compiler(compiler, config, lang=None):
     #
-    if verbose:
-        log.info("MPI C compiler:    %s", mpicc or 'not found')
-        log.info("MPI C++ compiler:  %s", mpicxx or 'not found')
-        log.info("MPI linker:        %s", mpild or 'not found')
+    mpicc  = config.get('mpicc')
+    mpicxx = config.get('mpicxx')
+    mpild  = config.get('mpild')
+    customize_compiler(compiler, lang,
+                       mpicc=mpicc, mpicxx=mpicxx, mpild=mpild)
     #
-    customize_compiler(compiler, mpicc=mpicc, mpicxx=mpicxx, mpild=mpild)
-    #
-    if config_info:
-        for k, v in config_info.get('define_macros', []):
-            compiler.define_macro(k, v)
-        for v in config_info.get('undef_macros', []):
-            compiler.undefine_macro(v)
-        for v in config_info.get('include_dirs', []):
-            compiler.add_include_dir(v)
-        for v in config_info.get('libraries', []):
-            compiler.add_library(v)
-        for v in config_info.get('library_dirs', []):
-            compiler.add_library_dir(v)
-        for v in config_info.get('runtime_library_dirs', []):
-            compiler.add_runtime_library_dir(v)
-        for v in config_info.get('extra_objects', []):
-            compiler.add_link_object(v)
+    for k, v in config.get('define_macros', []):
+        compiler.define_macro(k, v)
+    for v in config.get('undef_macros', []):
+        compiler.undefine_macro(v)
+    for v in config.get('include_dirs', []):
+        compiler.add_include_dir(v)
+    for v in config.get('libraries', []):
+        compiler.add_library(v)
+    for v in config.get('library_dirs', []):
+        compiler.add_library_dir(v)
+    for v in config.get('runtime_library_dirs', []):
+        compiler.add_runtime_library_dir(v)
+    for v in config.get('extra_objects', []):
+        compiler.add_link_object(v)
     return compiler
 
 # -----------------------------------------------------------------------------
@@ -578,6 +321,21 @@ cmd_mpi_opts = [
      "MPI linker command, "
      "overridden by environment variable 'MPILD' "
      "(defaults to 'mpicc' or 'mpicxx' if any is available)"),
+
+    ('mpif77=',  None,
+     "MPI F77 compiler command, "
+     "overridden by environment variable 'MPIF77' "
+     "(defaults to 'mpif77' if available)"),
+
+    ('mpif90=',  None,
+     "MPI F90 compiler command, "
+     "overridden by environment variable 'MPIF90' "
+     "(defaults to 'mpif90' if available)"),
+
+    ('mpif95=',  None,
+     "MPI F95 compiler command, "
+     "overridden by environment variable 'MPIF95' "
+     "(defaults to 'mpif95' if available)"),
 
     ('mpicxx=',  None,
      "MPI C++ compiler command, "
@@ -783,31 +541,21 @@ class config(cmd_config.config):
     check_func = check_function
 
     def run (self):
-        # test configuration in specified section and file
-        config_info = configuration(self, verbose=True)
-        mpicc, mpicxx, mpild = find_mpi_compilers(self, config_info)
+        #
+        config = configuration(self, verbose=True)
         # test MPI C compiler
-        log.info("MPI C compiler:    %s", mpicc  or 'not found')
-        self.compiler = getattr(self.compiler, 'compiler_type',
-                                self.compiler)
+        self.compiler = getattr(
+            self.compiler, 'compiler_type', self.compiler)
         self._check_compiler()
         compiler_obj = self.compiler
-        customize_compiler(compiler_obj, mpicc=mpicc)
+        configure_compiler(compiler_obj, config, lang='c')
         self.try_link(ConfigTest, headers=['mpi.h'], lang='c')
         # test MPI C++ compiler
-        log.info("MPI C++ compiler:  %s", mpicxx or 'not found')
         self.compiler = getattr(self.compiler, 'compiler_type',
                                 self.compiler)
         self._check_compiler()
         compiler_obj = self.compiler
-        customize_compiler(compiler_obj, mpicxx=mpicxx)
-        if compiler_obj.compiler_type in ('unix', 'cygwin', 'mingw32'):
-            try: compiler_obj.compiler_cxx.remove('-Wstrict-prototypes')
-            except: pass
-            try: compiler_obj.compiler_so.remove('-Wstrict-prototypes')
-            except: pass
-            compiler_obj.compiler_so[0] = compiler_obj.compiler_cxx[0]
-            compiler_obj.linker_exe[0]  = compiler_obj.compiler_cxx[0]
+        configure_compiler(compiler_obj, config, lang='c++')
         self.try_link(ConfigTest, headers=['mpi.h'], lang='c++')
 
 # -----------------------------------------------------------------------------
@@ -838,6 +586,7 @@ class build(cmd_build.build):
 # -----------------------------------------------------------------------------
 
 from distutils.core import Command
+
 class build_src(Command):
     description = "build C sources from Cython files"
     user_options = [
@@ -1014,15 +763,15 @@ class build_clib(cmd_build_clib.build_clib):
         if self.library_dirs is not None:
             self.compiler.set_library_dirs(self.library_dirs)
         #
-        config_info = configuration(self, verbose=True)
+        config = configuration(self, verbose=True)
         compiler_obj = self.compiler
-        configure_compiler(compiler_obj, self, config_info)
+        configure_compiler(compiler_obj, config)
         #
         if self.libraries_a:
-            self.config_static_libraries(self.libraries_a, config_info)
+            self.config_static_libraries(self.libraries_a, config)
             self.build_static_libraries(self.libraries_a)
         if self.libraries_so:
-            self.config_shared_libraries(self.libraries_so, config_info)
+            self.config_shared_libraries(self.libraries_so, config)
             self.build_shared_libraries(self.libraries_so)
 
     def check_library_list (self, libraries):
@@ -1066,22 +815,22 @@ class build_clib(cmd_build_clib.build_clib):
                         "'depends' must be a list "
                         "of source filenames" % lib_name)
 
-    def config_static_libraries (self, libraries):
+    def config_static_libraries (self, libraries, config):
         for (lib_name, build_info) in libraries:
             for attr in ('extra_compile_args',):
-                extra_args = config_info.get(attr)
+                extra_args = config.get(attr)
                 if extra_args:
                     build_info.setdefault(attr,[]).extend(extra_args)
 
     def build_static_libraries (self, libraries):
         cmd_build_clib.build_clib.build_libraries(self, libraries)
 
-    def config_shared_libraries (self, libraries, config_info):
+    def config_shared_libraries (self, libraries, config):
         for library in libraries:
             (lib_name, build_info) = library
             for attr in ('extra_compile_args',
                          'extra_link_args',):
-                extra_args = config_info.get(attr)
+                extra_args = config.get(attr)
                 if extra_args:
                     build_info.setdefault(attr, []).extend(extra_args)
 
@@ -1238,27 +987,26 @@ class build_ext(cmd_build_ext.build_ext):
         # First, sanity-check the 'extensions' list
         self.check_extensions_list(self.extensions)
         # parse configuration file and configure compiler
-        config_info = configuration(self, verbose=True)
+        config = configuration(self, verbose=True)
         compiler_obj = self.compiler
-        configure_compiler(compiler_obj, self, config_info)
-        config_cmd = self.get_finalized_command('config')
-        config_cmd.compiler = compiler_obj # fix compiler
+        configure_compiler(compiler_obj, config)
         # extra configuration, check for all MPI symbols
         if self.configure:
             log.info('testing for missing MPI symbols')
-            config_obj = Configure(config_cmd)
-            results = config_obj.run()
-            config_obj.dump(results)
+            config_cmd = self.get_finalized_command('config')
+            config_cmd.compiler = compiler_obj # fix compiler
+            configure = Configure(config_cmd)
+            results = configure.run()
+            configure.dump(results)
             #
             macro = 'HAVE_CONFIG_H'
             log.info("defining preprocessor macro '%s'" % macro)
             compiler_obj.define_macro(macro, 1)
         # configure extensions
-        #self.config_extensions(config_info)
         # and finally build extensions
         for ext in self.extensions:
             try:
-                self.config_extension(ext, config_info)
+                self.config_extension(ext, config)
                 self.build_extension(ext)
             except (DistutilsError, CCompilerError):
                 if not ext.optional:
@@ -1267,7 +1015,7 @@ class build_ext(cmd_build_ext.build_ext):
                 self.warn('building extension "%s" failed' % ext.name)
                 self.warn('%s' % e)
 
-    def config_extension (self, ext, config_info):
+    def config_extension (self, ext, config):
         from distutils.dep_util import newer_group
         fullname = self.get_ext_fullname(ext.name)
         filename = os.path.join(
@@ -1293,7 +1041,7 @@ class build_ext(cmd_build_ext.build_ext):
             mpi_cfg = os.path.join(dest_dir, 'mpi.cfg')
             log.info("writing %s" % mpi_cfg)
             if not self.dry_run:
-                save_mpi_config(config_info, mpi_cfg)
+                config.dump(filename=mpi_cfg)
         #
         if ext.name == 'mpi4py.MPE':
             log.info("checking for MPE availability ...")
@@ -1322,10 +1070,10 @@ class build_ext(cmd_build_ext.build_ext):
             if not ok:
                 ext.libraries[:] = []
         #
-        extra_args = config_info.get('extra_compile_args')
+        extra_args = config.get('extra_compile_args')
         if extra_args:
             ext.extra_compile_args.extend(extra_args)
-        extra_args = config_info.get('extra_link_args')
+        extra_args = config.get('extra_link_args')
         if extra_args:
             ext.extra_link_args.extend(extra_args)
 
