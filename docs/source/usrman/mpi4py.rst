@@ -23,11 +23,10 @@ objects using a binary format specific to Python, but independent of
 machine architecture issues.
 
 *MPI for Python* can communicate any built-in or used-defined Python
-object taking advantage of the features provided by the
-mod:`pickle`/:mod:`cPickle` modules. These facilities will be
-routinely used to build binary representations of objects to
-communicate (at sending processes), and restoring them back (at
-receiving processes).
+object taking advantage of the features provided by the mod:`pickle`
+module. These facilities will be routinely used to build binary
+representations of objects to communicate (at sending processes), and
+restoring them back (at receiving processes).
 
 Although simple and general, the serialization approach (i.e.,
 *pickling* and *unpickling*) previously discussed imposes important
