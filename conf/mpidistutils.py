@@ -202,8 +202,7 @@ def configuration(command_obj, verbose=True):
     config.setup(command_obj)
     if verbose:
         if config.section and config.filename:
-            log.info("MPI configuration: "
-                     "from section '[%s]' in file/s '%s'",
+            log.info("MPI configuration: [%s] from '%s'",
                      config.section, ','.join(config.filename))
             config.info(log)
     return config

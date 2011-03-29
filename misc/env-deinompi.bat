@@ -1,3 +1,3 @@
 @echo off
 set MPIDIR=%ProgramFiles%\DeinoMPI
-set PATH="%MPIDIR%\bin";%PATH%
+set PATH=%MPIDIR%\bin;%PATH%

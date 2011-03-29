@@ -117,14 +117,20 @@ class Config(object):
         sections = [section+"-"+sys.platform, section]
         self.load(filename, sections)
         if not self:
+            if os.name == 'posix':
+                self._setup_posix()
             if sys.platform == 'win32':
                 self._setup_windows()
+
+    def _setup_posix(self):
+        pass
 
     def _setup_windows(self):
         from glob import glob
         ProgramFiles = os.environ.get('ProgramFiles', '')
         for (name, install_suffix) in (
-            ('mpich2',   'MPICH2'),
+            #('mpich2',   'MPICH2'),
+            ('openmpi',  'OpenMPI'),
             ('openmpi',  'OpenMPI*'),
             ('deinompi', 'DeinoMPI'),
             ('msmpi',    'Microsoft HPC Pack 2008 SDK'),
@@ -141,6 +147,7 @@ class Config(object):
             library = 'mpi'
             library_dir = os.path.join(mpi_dir, 'lib')
             if name == 'openmpi':
+                define_macros.append(('OMPI_IMPORTS', None))
                 library = 'libmpi'
             if name == 'msmpi':
                 define_macros = [('MS_MPI', 1)]
@@ -157,7 +164,7 @@ class Config(object):
                 library_dirs=[library_dir],
                 )
             self.section = name
-            self.filename = mpi_dir
+            self.filename = [mpi_dir]
             break
 
 
