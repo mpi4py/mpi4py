@@ -445,7 +445,7 @@ def setup(**attrs):
     cmdclass = attrs['cmdclass']
     for cmd in (config, build, install, clean, sdist,
                 build_src, build_py, build_clib, build_ext, build_exe,
-                install_data, install_exe,
+                install_lib, install_data, install_exe,
                 ):
         if cmd.__name__ not in cmdclass:
             cmdclass[cmd.__name__] = cmd
@@ -874,31 +874,33 @@ class build_clib(cmd_build_clib.build_clib):
             build_info['libraries'] = []
             build_info['extra_link_args'] = []
 
+
+    def get_clib_so_filename(self, library):
+        (lib_name, build_info) = library
+        output_dir = convert_path(build_info.get('output_dir', ''))
+        if not os.path.isabs(output_dir):
+            output_dir = os.path.join(self.build_clib_so, output_dir)
+        lib_type = build_info['kind']
+        if sys.platform != 'darwin':
+            if lib_type == 'dylib':
+                lib_type = 'shared'
+        lib_filename = self.compiler.library_filename(
+            lib_name, lib_type=lib_type, output_dir=output_dir)
+        return lib_filename
+
     def build_shared_library (self, library):
         from distutils.dep_util import newer_group
-
-        compiler_obj = self.compiler
 
         (lib_name, build_info) = library
         sources = [convert_path(p) for p in build_info.get('sources',[])]
         depends = [convert_path(p) for p in build_info.get('depends',[])]
         depends = sources + depends
         output_dir = convert_path(build_info.get('output_dir', ''))
-        if not os.path.isabs(output_dir):
-            output_dir = os.path.join(self.build_clib_so, output_dir)
-
-        lib_type = build_info['kind']
-        if sys.platform != 'darwin':
-            if lib_type == 'dylib':
-                lib_type = 'shared'
-        lib_filename = compiler_obj.library_filename(
-            lib_name, lib_type=lib_type, output_dir=output_dir)
-
-        if not (self.force or newer_group(depends, lib_filename, 'newer')):
-            log.debug("skipping '%s' shared library (up-to-date)", lib_name)
-            return
+        lib_filename = self.get_clib_so_filename(library)
 
         self.config_shared_library(library)
+
+        compiler_obj = self.compiler
         log.info("building '%s' shared library", lib_name)
 
         # First, compile the source code to object files in the library
@@ -944,6 +946,14 @@ class build_clib(cmd_build_clib.build_clib):
             target_lang=language,
             )
 
+    def get_outputs(self):
+        outputs = []
+        for (lib_name, build_info) in self.libraries_a:
+            pass
+        for library in self.libraries_so:
+            lib_filename = self.get_clib_so_filename(library)
+            outputs.append(lib_filename)
+        return outputs
 
 # --------------------------------------------------------------------
 
@@ -1076,6 +1086,14 @@ class build_ext(cmd_build_ext.build_ext):
         if extra_args:
             ext.extra_link_args.extend(extra_args)
 
+    def get_outputs(self):
+        outputs = cmd_build_ext.build_ext.get_outputs(self)
+        for ext in self.extensions:
+            if ext.name == 'mpi4py.MPI':
+                dest_dir = os.path.join(self.build_lib, 'mpi4py')
+                mpi_cfg = os.path.join(dest_dir, 'mpi.cfg')
+                outputs.append(mpi_cfg)
+        return outputs
 
 # -----------------------------------------------------------------------------
 
@@ -1271,6 +1289,18 @@ class install(cmd_install.install):
 
     # XXX disable install_exe subcommand !!!
     del sub_commands[-1]
+
+# -----------------------------------------------------------------------------
+
+class install_lib(cmd_install_lib.install_lib):
+
+    def get_outputs(self):
+        outputs = cmd_install_lib.install_lib.get_outputs(self)
+        clib_so_outputs = \
+            self._mutate_outputs(1, 'build_clib', 'build_clib_so',
+                                 self.install_dir)
+        outputs.extend(clib_so_outputs)
+        return outputs
 
 # -----------------------------------------------------------------------------
 
