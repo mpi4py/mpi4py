@@ -848,10 +848,7 @@ class build_clib(cmd_build_clib.build_clib):
 
     def config_shared_library(self, library):
         (lib_name, build_info) = library
-        try:
-            compiler_obj = self.compiler_obj
-        except AttributeError:
-            compiler_obj = self.compiler
+        compiler_obj = self.compiler
         config_cmd = self.get_finalized_command('config')
         config_cmd.compiler = compiler_obj # fix compiler
         ok = True
@@ -874,13 +871,14 @@ class build_clib(cmd_build_clib.build_clib):
             build_info['libraries'] = []
             build_info['extra_link_args'] = []
 
-
-    def get_clib_so_filename(self, library):
+    def get_lib_filename(self, library):
         (lib_name, build_info) = library
-        output_dir = convert_path(build_info.get('output_dir', ''))
-        if not os.path.isabs(output_dir):
-            output_dir = os.path.join(self.build_clib_so, output_dir)
-        lib_type = build_info['kind']
+        package_dir = build_info.get('package', '').split('.')
+        dest_dir = build_info.get('dest_dir', '')
+        dest_dir = convert_path(dest_dir)
+        output_dir = os.path.join(
+            self.build_clib_so, *package_dir+[dest_dir])
+        lib_type = build_info.get('kind', 'dylib')
         if sys.platform != 'darwin':
             if lib_type == 'dylib':
                 lib_type = 'shared'
@@ -895,13 +893,16 @@ class build_clib(cmd_build_clib.build_clib):
         sources = [convert_path(p) for p in build_info.get('sources',[])]
         depends = [convert_path(p) for p in build_info.get('depends',[])]
         depends = sources + depends
-        output_dir = convert_path(build_info.get('output_dir', ''))
-        lib_filename = self.get_clib_so_filename(library)
+        lib_filename = self.get_lib_filename(library)
+
+        if not (self.force or newer_group(depends, lib_filename, 'newer')):
+            log.debug("skipping '%s' shared library (up-to-date)", lib_name)
+            return
 
         self.config_shared_library(library)
+        log.info("building '%s' shared library", lib_name)
 
         compiler_obj = self.compiler
-        log.info("building '%s' shared library", lib_name)
 
         # First, compile the source code to object files in the library
         # directory.  (This should probably change to putting object
@@ -923,6 +924,7 @@ class build_clib(cmd_build_clib.build_clib):
         extra_link_args = build_info.get('extra_link_args', [])
         if (compiler_obj.compiler_type == 'msvc' and
             export_symbols is not None):
+            output_dir = os.path.dirname(lib_filename)
             implib_filename = compiler_obj.library_filename(lib_name)
             implib_file = os.path.join(output_dir, implib_filename)
             extra_link_args.append ('/IMPLIB:' + implib_file)
@@ -951,7 +953,7 @@ class build_clib(cmd_build_clib.build_clib):
         for (lib_name, build_info) in self.libraries_a:
             pass
         for library in self.libraries_so:
-            lib_filename = self.get_clib_so_filename(library)
+            lib_filename = self.get_lib_filename(library)
             outputs.append(lib_filename)
         return outputs
 
@@ -1296,10 +1298,10 @@ class install_lib(cmd_install_lib.install_lib):
 
     def get_outputs(self):
         outputs = cmd_install_lib.install_lib.get_outputs(self)
-        clib_so_outputs = \
+        lib_outputs = \
             self._mutate_outputs(1, 'build_clib', 'build_clib_so',
                                  self.install_dir)
-        outputs.extend(clib_so_outputs)
+        outputs.extend(lib_outputs)
         return outputs
 
 # -----------------------------------------------------------------------------

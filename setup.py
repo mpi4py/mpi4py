@@ -206,7 +206,8 @@ def libraries():
     pmpi_mpe = dict(
         name='mpe', kind='dylib',
         optional=True,
-        output_dir='mpi4py/lib-pmpi',
+        package='mpi4py',
+        dest_dir='lib-pmpi',
         sources=['src/pmpi-mpe.c'],
         libraries=['mpe'],
         extra_link_args=[],
@@ -219,7 +220,8 @@ def libraries():
     pmpi_vt = dict(
         name='vt', kind='dylib',
         optional=True,
-        output_dir='mpi4py/lib-pmpi',
+        package='mpi4py',
+        dest_dir='lib-pmpi',
         sources=['src/pmpi-vt.c'],
         libraries=['vt-mpi', 'otf', 'z', 'dl'],
         extra_link_args=[],
@@ -231,7 +233,8 @@ def libraries():
     pmpi_vt_mpi = dict(
         name='vt-mpi', kind='dylib',
         optional=True,
-        output_dir='mpi4py/lib-pmpi',
+        package='mpi4py',
+        dest_dir='lib-pmpi',
         sources=['src/pmpi-vt-mpi.c'],
         libraries=['vt-mpi'],
         extra_link_args=[],
@@ -239,7 +242,8 @@ def libraries():
     pmpi_vt_hyb = dict(
         name='vt-hyb', kind='dylib',
         optional=True,
-        output_dir='mpi4py/lib-pmpi',
+        package='mpi4py',
+        dest_dir='lib-pmpi',
         sources=['src/pmpi-vt-hyb.c'],
         libraries=['vt-hyb'],
         extra_link_args=[],
