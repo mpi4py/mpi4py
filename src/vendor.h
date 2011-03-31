@@ -27,7 +27,12 @@ static int MPI_Get_vendor(const char **vendor_name,
   /* MPICH2 */
 #if defined(MPICH2)
   name = "MPICH2";
-  #if defined(MPICH2_VERSION)
+  #if defined(MPICH2_NUMVERSION)
+  int version = MPICH2_NUMVERSION/1000;
+  major = version/10000; version -= major*10000;
+  minor = version/100;   version -= minor*100;
+  micro = version/1;     version -= micro*1;
+  #elif defined(MPICH2_VERSION)
   myVersionParser(MPICH2_VERSION,major,minor,micro);
   #endif
   #if defined(DEINO_MPI)
@@ -97,6 +102,9 @@ static int MPI_Get_vendor(const char **vendor_name,
 
   return 0;
 }
+
+#undef myAtoI
+#undef myVersionParser
 
 /*
    Local variables:
