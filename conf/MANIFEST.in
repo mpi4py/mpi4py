@@ -1,7 +1,7 @@
 include *.py *.cfg *.txt
 
 recursive-include demo *.py *.txt *.pyx *.i *.c *.cxx *.f90
-recursive-include conf *.py *.cfg
+recursive-include conf *.py *.txt *.cfg *.in *.sh *.bat
 recursive-include src  *.py *.pyx *.px[di] *.h *.c *.i
 recursive-include test *.py
 recursive-include *    [M,m]akefile
