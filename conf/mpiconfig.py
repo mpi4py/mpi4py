@@ -190,9 +190,10 @@ class Config(object):
         compiler_info = {}
         PATH = environ.get('PATH', '')
         for name, _ in COMPILERS:
-            cmd = (self.compiler_info.get(name) or
+            cmd = (environ.get(name.upper()) or
                    getattr(options, name, None) or
-                   environ.get(name.upper()) or None)
+                   self.compiler_info.get(name) or
+                   None)
             if cmd:
                 exe = find_exe(cmd, path=PATH)
                 if exe:
