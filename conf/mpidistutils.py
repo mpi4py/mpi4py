@@ -724,6 +724,8 @@ class build_clib(cmd_build_clib.build_clib):
         if isinstance(build_cmd,  build):
             cmd_set_undefined_mpi_options(self, 'build')
         #
+        if self.libraries is None:
+            self.libraries = []
         self.library_dirs = []
         self.runtime_library_dirs = []
         self.set_undefined_options('build',
