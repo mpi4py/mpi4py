@@ -194,7 +194,7 @@ scientific computing and software development with Python.
 
 .. _OOMPI:     http://www.osl.iu.edu/research/oompi/
 
-.. _Pypar:     http://datamining.anu.edu.au/~ole/pypar/
+.. _Pypar:     http://pypar.googlecode.com/
 
 .. _pyMPI:     http://sourceforge.net/projects/pympi/
 
