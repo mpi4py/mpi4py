@@ -11,17 +11,18 @@ MPI for Python
 Online Documentation
 --------------------
 
-Hosted at SciPy servers (many thanks to Enthought_):
+Hosted at SciPy servers [http://mpi4py.scipy.org/]:
 
-+ `User Manual`_, also available as `PDF`_ (generated with Sphinx_).
+Hosted at PyPI  servers [http://packages.python.org/mpi4py]:
 
++ `User Manual (HTML)`_ (generated with Sphinx_).
++ `User Manual (PDF)`_  (generated with Sphinx_).
 + `API Reference`_ (generated with Epydoc_).
 
-.. _User Manual: http://mpi4py.scipy.org/docs/usrman/index.html
-.. _PDF:  http://mpi4py.scipy.org/docs/mpi4py.pdf
-.. _API Reference: http://mpi4py.scipy.org/docs/apiref/index.html
+.. _User Manual (HTML): usrman/index.html
+.. _User Manual (PDF):  mpi4py.pdf
+.. _API Reference: apiref/index.html
 
-.. _Enthought: http://www.enthought.com/
 .. _Sphinx:    http://sphinx.pocoo.org/
 .. _Epydoc:    http://epydoc.sourceforge.net/
 
@@ -29,7 +30,7 @@ Hosted at SciPy servers (many thanks to Enthought_):
 Discussion and Support
 ----------------------
 
-Hosted at Google Groups: 
+Hosted at Google Groups:
 
 + Group Page: http://groups.google.com/group/mpi4py
 + Mailing List: mpi4py@googlegroups.com
