@@ -60,19 +60,24 @@ Communicators
 -------------
 
 In *MPI for Python*, :class:`Comm` is the base class of
-communicators.  Communicator size and calling process rank can be
-respectively obtained with methods :meth:`Get_size` and
-:meth:`Get_rank`.
-
-The :class:`Intracomm` and :class:`Intercomm` classes are sublcasses
-of the :class:`Comm` class.  The :meth:`Is_inter` method (and
-:meth:`Is_intra`, provided for convenience, it is not part of the MPI
-specification) is defined for communicator objects and can be used to
-determine the particular communicator class.
+communicators. The :class:`Intracomm` and :class:`Intercomm` classes
+are sublcasses of the :class:`Comm` class.  The :meth:`Is_inter`
+method (and :meth:`Is_intra`, provided for convenience, it is not part
+of the MPI specification) is defined for communicator objects and can
+be used to determine the particular communicator class.
 
 The two predefined intracommunicator instances are available:
-:const:`COMM_WORLD` and :const:`COMM_SELF`.  From them, new
+:const:`COMM_SELF` and :const:`COMM_WORLD`. From them, new
 communicators can be created as needed.
+
+The number of processes in a communicator and the calling process rank
+can be respectively obtained with methods :meth:`Get_size` and
+:meth:`Get_rank`. The associated process group can be retrieved from a
+communicator by calling the :meth:`Get_group` method, which returns an
+instance of the :class:`Group` class. Set operations with
+:class:`Group` objects like like :meth:`Union`, :meth:`Intersect` and
+:meth:`Difference` are fully supported, as well as the creation of new
+communicators from these groups using :meth:`Create`.
 
 New communicator instances can be obtained with the :meth:`Clone`
 method of :class:`Comm` objects, the :meth:`Dup` and :meth:`Split`
@@ -80,18 +85,12 @@ methods of :class:`Intracomm` and :class:`Intercomm` objects, and
 methods :meth:`Create_intercomm` and :meth:`Merge` of
 :class:`Intracomm` and :class:`Intercomm` objects respectively.
 
-Virtual topologies (:class:`Cartcomm` and :class:`Graphcomm` classes,
-both being a specialization of :class:`Intracomm` class) are fully
-supported. New instances can be obtained from intracommunicator
-instances with factory methods :meth:`Create_cart` and
-:meth:`Create_graph` of :class:`Intracomm` class.
-
-The associated process group can be retrieved from a communicator by
-calling the :meth:`Get_group` method, which returns an instance of the
-:class:`Group` class. Set operations with :class:`Group` objects like
-like :meth:`Union`, :meth:`Intersect` and :meth:`Difference` are fully
-supported, as well as the creation of new communicators from these
-groups.
+Virtual topologies (:class:`Cartcomm`, :class:`Graphcomm`, and
+:class:`Distgraphcomm` classes, being them specializations of
+:class:`Intracomm` class) are fully supported. New instances can be
+obtained from intracommunicator instances with factory methods
+:meth:`Create_cart` and :meth:`Create_graph` of :class:`Intracomm`
+class.
 
 
 Point-to-Point Communications
@@ -151,6 +150,9 @@ communication requires a careful, rather low-level coordination. Users
 must ensure that objects exposing their memory buffers are not
 accessed at the Python level while they are involved in nonblocking
 message-passing operations.
+
+Persistent Communications
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Often a communication with the same argument list is repeatedly
 executed within an inner loop. In such cases, communication can be
