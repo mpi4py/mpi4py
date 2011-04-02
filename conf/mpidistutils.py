@@ -168,7 +168,6 @@ def customize_compiler(compiler, lang=None,
             linker_so    = ld_so  + ' ' + ldflags,
             linker_exe   = ld_exe + ' ' + ldflags,
             )
-        compiler.shared_lib_extension = so_ext
         try: compiler.compiler_cxx.remove('-Wstrict-prototypes')
         except: pass
     if compiler.compiler_type == 'mingw32':
@@ -1037,9 +1036,11 @@ class build_ext(cmd_build_ext.build_ext):
         self.check_extensions_list(self.extensions)
         # parse configuration file and configure compiler
         config = configuration(self, verbose=True)
-        compiler_obj = self.compiler
-        configure_compiler(compiler_obj, config)
-        self.config = config
+        configure_compiler(self.compiler, config)
+        if self.compiler.compiler_type == "unix":
+            so_ext = sysconfig.get_config_var('SO')
+            self.compiler.shared_lib_extension = so_ext
+        self.config = config # XXX
         # extra configuration, check for all MPI symbols
         if self.configure:
             log.info('testing for missing MPI symbols')
@@ -1051,7 +1052,7 @@ class build_ext(cmd_build_ext.build_ext):
             #
             macro = 'HAVE_CONFIG_H'
             log.info("defining preprocessor macro '%s'" % macro)
-            compiler_obj.define_macro(macro, 1)
+            self.compiler.define_macro(macro, 1)
         # configure extensions
         for ext in self.extensions:
             extra_args = config.get('extra_compile_args', [])
