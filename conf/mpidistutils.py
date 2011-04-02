@@ -380,21 +380,22 @@ def cmd_set_undefined_mpi_options(cmd, basecmd):
 
 # -----------------------------------------------------------------------------
 
-from distutils.core import setup as fcn_setup
+from distutils.core import setup        as fcn_setup
 from distutils.core import Distribution as cls_Distribution
-from distutils.extension import Extension as cls_Extension
+from distutils.core import Extension    as cls_Extension
+from distutils.core import Command
 
-from distutils.command import config as cmd_config
-from distutils.command import build as cmd_build
+from distutils.command import config  as cmd_config
+from distutils.command import build   as cmd_build
 from distutils.command import install as cmd_install
-from distutils.command import sdist as cmd_sdist
-from distutils.command import clean as cmd_clean
+from distutils.command import sdist   as cmd_sdist
+from distutils.command import clean   as cmd_clean
 
-from distutils.command import build_py as cmd_build_py
-from distutils.command import build_clib as cmd_build_clib
-from distutils.command import build_ext as cmd_build_ext
+from distutils.command import build_py     as cmd_build_py
+from distutils.command import build_clib   as cmd_build_clib
+from distutils.command import build_ext    as cmd_build_ext
 from distutils.command import install_data as cmd_install_data
-from distutils.command import install_lib as cmd_install_lib
+from distutils.command import install_lib  as cmd_install_lib
 
 from distutils.errors import DistutilsError
 from distutils.errors import DistutilsSetupError
@@ -427,7 +428,7 @@ class Distribution(cls_Distribution):
 class Extension(cls_Extension):
     def __init__ (self, **kw):
         optional = kw.pop('optional', None)
-        configure = kw.pop('configure', None) 
+        configure = kw.pop('configure', None)
         cls_Extension.__init__(self, **kw)
         self.optional = optional
         self.configure = configure
@@ -577,7 +578,6 @@ class config(cmd_config.config):
         configure_compiler(compiler_obj, config, lang='c++')
         self.try_link(ConfigTest, headers=['mpi.h'], lang='c++')
 
-# -----------------------------------------------------------------------------
 
 class build(cmd_build.build):
 
@@ -602,9 +602,6 @@ class build(cmd_build.build):
         [('build_exe', has_executables),
          ]
 
-# -----------------------------------------------------------------------------
-
-from distutils.core import Command
 
 class build_src(Command):
     description = "build C sources from Cython files"
@@ -619,7 +616,6 @@ class build_src(Command):
     def run(self):
         pass
 
-# -----------------------------------------------------------------------------
 
 class build_py(cmd_build_py.build_py):
 
@@ -717,11 +713,14 @@ class build_py(cmd_build_py.build_py):
                 self.copy_file(os.path.join(src_dir, filename), target,
                                preserve_mode=False)
 
-# -----------------------------------------------------------------------------
+
+# Command class to build libraries
 
 class build_clib(cmd_build_clib.build_clib):
 
     user_options = [
+        ('build-clib-a', 'l',
+         "directory to build C/C++ static libraries to"),
         ('build-clib-so', 'l',
          "directory to build C/C++ shared libraries to"),
         ]
@@ -737,6 +736,7 @@ class build_clib(cmd_build_clib.build_clib):
         self.rpath = None
         self.link_objects = None
 
+        self.build_lib = None
         self.build_clib_a = None
         self.build_clib_so = None
         cmd_build_clib.build_clib.initialize_options(self)
@@ -749,6 +749,7 @@ class build_clib(cmd_build_clib.build_clib):
             cmd_set_undefined_mpi_options(self, 'build')
         #
         self.set_undefined_options('build',
+                                   ('build_lib', 'build_lib'),
                                    ('build_lib', 'build_clib_a'),
                                    ('build_lib', 'build_clib_so'))
         #
@@ -861,11 +862,11 @@ class build_clib(cmd_build_clib.build_clib):
 
     def build_libraries (self, libraries):
         for lib in libraries:
-            # old-style 
+            # old-style
             if not isinstance(lib, Library):
                 cmd_build_clib.build_clib.build_libraries(self, [lib])
                 continue
-            # new-style 
+            # new-style
             try:
                 self.build_library(lib)
             except (DistutilsError, CCompilerError):
@@ -985,12 +986,16 @@ class build_clib(cmd_build_clib.build_clib):
 
     def get_outputs (self):
         outputs = []
-        for lib in self.libraries_a + self.libraries_so:
-            lib_fullpath = self.get_lib_fullpath(lib)
+        for lib in self.libraries_a:
+            lib_fullpath = self.get_lib_fullpath(lib, self.build_clib_a)
+            outputs.append(lib_fullpath)
+        for lib in self.libraries_so:
+            lib_fullpath = self.get_lib_fullpath(lib, self.build_clib_so)
             outputs.append(lib_fullpath)
         return outputs
 
-# --------------------------------------------------------------------
+
+# Command class to build extension modules
 
 class build_ext(cmd_build_ext.build_ext):
 
@@ -1099,14 +1104,13 @@ class build_ext(cmd_build_ext.build_ext):
             if ext.name == 'mpi4py.MPI':
                 fullname = self.get_ext_fullname(ext.name)
                 filename = os.path.join(
-                    self.build_lib, 
+                    self.build_lib,
                     self.get_ext_filename(fullname))
                 dest_dir = os.path.dirname(filename)
                 mpi_cfg = os.path.join(dest_dir, 'mpi.cfg')
                 outputs.append(mpi_cfg)
         return outputs
 
-# -----------------------------------------------------------------------------
 
 # Command class to build executables
 
@@ -1129,14 +1133,15 @@ class build_exe(build_ext):
         build_ext.finalize_options(self)
         self.configure = None
         self.set_undefined_options('build',
-                                   ('build_base','build_base'))
-        from distutils.util import get_platform
-        plat_specifier = ".%s-%s" % (get_platform(), sys.version[0:3])
-        if hasattr(sys, 'gettotalrefcount') and sys.version[0:3] > '2.5':
-            plat_specifier += '-pydebug'
-        if self.build_exe is None:
-            self.build_exe = os.path.join(self.build_base,
-                                          'exe' + plat_specifier)
+                                   ('build_base','build_base'),
+                                   ('build_lib', 'build_exe'))
+        #from distutils.util import get_platform
+        #plat_specifier = ".%s-%s" % (get_platform(), sys.version[0:3])
+        #if hasattr(sys, 'gettotalrefcount') and sys.version[0:3] > '2.5':
+        #    plat_specifier += '-pydebug'
+        #if self.build_exe is None:
+        #    self.build_exe = os.path.join(self.build_base,
+        #                                  'exe' + plat_specifier)
         self.executables = self.distribution.executables
         # XXX This is a hack
         self.extensions  = self.distribution.executables
@@ -1154,7 +1159,7 @@ class build_exe(build_ext):
             if not isinstance(exe, Executable):
                 raise DistutilsSetupError(
                     "'executables' items must be Executable instances")
-            if (exe.sources is None or 
+            if (exe.sources is None or
                 type(exe.sources) not in (ListType, TupleType)):
                 raise DistutilsSetupError(
                     ("in 'executables' option (executable '%s'), " +
@@ -1267,12 +1272,9 @@ class build_exe(build_ext):
     def get_outputs (self):
         outputs = []
         for exe in self.executables:
-            exe_fullpath = self.get_exe_fullpath(exe)
-            outputs.append(exe_fullpath)
+            outputs.append(self.get_exe_fullpath(exe))
         return outputs
 
-
-# -----------------------------------------------------------------------------
 
 class install(cmd_install.install):
 
@@ -1288,6 +1290,10 @@ class install(cmd_install.install):
         cmd_install.install.initialize_options(self)
         self.single_version_externally_managed = None
         self.no_compile = None
+
+    def has_lib (self):
+        return (cmd_install.install.has_lib(self) and
+                self.has_exe())
 
     def has_exe (self):
         return self.distribution.has_executables()
@@ -1305,10 +1311,13 @@ class install_lib(cmd_install_lib.install_lib):
 
     def get_outputs(self):
         outputs = cmd_install_lib.install_lib.get_outputs(self)
-        lib_outputs = \
-            self._mutate_outputs(1, 'build_clib', 'build_clib_so',
-                                 self.install_dir)
-        outputs.extend(lib_outputs)
+        for (build_cmd, build_dir) in (('build_clib', 'build_lib'),
+                                       ('build_exe',  'build_exe')):
+            outs = self._mutate_outputs(1, build_cmd, build_dir,
+                                        self.install_dir)
+            build_cmd = self.get_finalized_command(build_cmd)
+            build_files = build_cmd.get_outputs()
+            outputs.extend(outs)
         return outputs
 
 
@@ -1360,12 +1369,25 @@ class install_exe(cmd_install_lib.install_lib):
                 self.run_command('build_exe')
 
     def install (self):
-        if os.path.isdir(self.build_dir):
-            self.outfiles = self.copy_tree(self.build_dir, self.install_dir)
-        else:
-            self.warn("'%s' does not exist -- no executables to install" %
-                      self.build_dir)
-            self.outfiles = None
+        self.outfiles = []
+        if self.distribution.has_executables():
+            build_exe = self.get_finalized_command('build_exe')
+            for exe in build_exe.executables:
+                exe_fullpath = build_exe.get_exe_fullpath(exe)
+                exe_filename = os.path.basename(exe_fullpath)
+                if (os.name == "posix" and
+                    exe_filename.startswith("python-")):
+                    install_name = exe_filename.replace(
+                        "python-","python%s-" % sys.version[:3])
+                    link = None
+                else:
+                    install_name = exe_fullpath
+                    link = None
+                source = exe_fullpath
+                target = os.path.join(self.install_dir, install_name)
+                self.mkpath(self.install_dir)
+                out, done = self.copy_file(source, target, link=link)
+                self.outfiles.append(out)
 
     def get_outputs (self):
         return self.outfiles
@@ -1377,7 +1399,6 @@ class install_exe(cmd_install_lib.install_lib):
             inputs.extend(build_exe.get_outputs())
         return inputs
 
-# -----------------------------------------------------------------------------
 
 class sdist(cmd_sdist.sdist):
 
@@ -1386,7 +1407,6 @@ class sdist(cmd_sdist.sdist):
         build_src.run()
         cmd_sdist.sdist.run(self)
 
-# -----------------------------------------------------------------------------
 
 class clean(cmd_clean.clean):
 
@@ -1422,8 +1442,9 @@ class clean(cmd_clean.clean):
             # remove build directories
             for directory in (self.build_lib,
                               self.build_exe,
+                              self.build_scripts,
                               self.bdist_base,
-                              self.build_scripts):
+                              ):
                 if os.path.exists(directory):
                     remove_tree(directory, dry_run=self.dry_run)
                 else:

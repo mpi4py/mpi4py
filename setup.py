@@ -158,12 +158,15 @@ def ext_modules():
         depends=['src/mpi4py.MPI.c'],
         )
     def configure_mpi(ext, config_cmd):
+        from textwrap import dedent
         from distutils import log
         log.info("checking for MPI compile and link ...")
         config_cmd.check_header("mpi.h", headers=["stdlib.h"])
-        config_cmd.check_function("MPI_Finalize", decl=0, call=1,
+        config_cmd.check_function("MPI_Init(0,0)", decl=0, call=0,
                                   headers=['stdlib.h', 'mpi.h'])
-        ConfigTest = """\
+        config_cmd.check_function("MPI_Finalize()", decl=0, call=0,
+                                  headers=['stdlib.h', 'mpi.h'])
+        ConfigTest = dedent("""\
         int main(int argc, char **argv)
         {
           int ierr;
@@ -171,14 +174,13 @@ def ext_modules():
           ierr = MPI_Finalize();
           return 0;
         }
-        """
+        """)
         ok = config_cmd.try_link(ConfigTest,
                                  headers=['stdlib.h', 'mpi.h'])
         if not ok:
             raise DistutilsPlatformError(
                 "Cannot compile/link MPI programs. "
                 "Check your configuration!!!")
-    
     MPI['configure'] = configure_mpi
     modules.append(MPI)
     # MPE extension module
@@ -234,7 +236,7 @@ def ext_modules():
         ok = config_cmd.check_function("dlopen",
                                        libraries=['dl'],
                                        decl=1, call=1)
-        #if ok : ext.define_macros += [('HAVE_DLOPEN', 1)]
+        #if ok: ext.define_macros += [('HAVE_DLOPEN', 1)]
     dl['configure'] = configure_dl
     if os.name == 'posix':
         modules.append(dl)
@@ -316,10 +318,10 @@ def libraries():
 def executables():
     import sys
     # MPI-enabled Python interpreter
-    pyexe = dict(name='python%s-mpi' % sys.version[:3],
+    pyexe = dict(name='python-mpi',
                  optional=True,
-                 #package='mpi4py',
-                 #dest_dir='bin',
+                 package='mpi4py',
+                 dest_dir='bin',
                  sources=['src/python.c'],
                  )
     def configure_exe(exe, config_cmd):
@@ -343,11 +345,11 @@ def executables():
                 del libraries[:]
         for var in ('LIBDIR', 'LIBPL'):
             library_dirs += split_quoted(cfg_vars.get(var, ''))
-        for var in ('LDFLAGS', 
+        for var in ('LDFLAGS',
                     'LIBS', 'MODLIBS', 'SYSLIBS',
                     'LDLAST'):
             link_args += split_quoted(cfg_vars.get(var, ''))
-            
+
         exe.libraries += libraries
         exe.library_dirs += library_dirs
         exe.extra_link_args += link_args
@@ -430,12 +432,12 @@ def run_cython(source, target, depends=(), force=False,
     from distutils.errors import DistutilsError
     depends = [source] + list(depends)
     if not (force or dep_util.newer_group(depends, target)):
-        log.debug("skipping '%s' -> '%s' (up-to-date)", 
+        log.debug("skipping '%s' -> '%s' (up-to-date)",
                   source, target)
         return
-    if (CYTHON_VERSION_REQUIRED and not 
+    if (CYTHON_VERSION_REQUIRED and not
         chk_cython(CYTHON_VERSION_REQUIRED)):
-        raise DistutilsError('requires Cython>=%s' 
+        raise DistutilsError('requires Cython>=%s'
                              % CYTHON_VERSION_REQUIRED)
     log.info("cythonizing '%s' -> '%s'", source, target)
     from conf.cythonize import run as cythonize
@@ -444,7 +446,7 @@ def run_cython(source, target, depends=(), force=False,
 def build_sources(cmd):
     CYTHON_VERSION_REQUIRED = '0.13'
     import os, glob
-    if not (os.path.isdir('.svn') or 
+    if not (os.path.isdir('.svn') or
             os.path.isdir('.git') or
             cmd.force): return
     # mpi4py.MPI
