@@ -123,6 +123,31 @@ metadata['provides'] = ['mpi4py',
 # Extension modules
 # --------------------------------------------------------------------
 
+import sys
+linux   = sys.platform.startswith('linux')
+solaris = sys.platform.startswith('sunos')
+darwin  = sys.platform.startswith('darwin')
+if linux:
+    def whole_archive(name):
+        return ['-Wl,-whole-archive',
+                '-l%s' % name,
+                '-Wl,-no-whole-archive',
+                ]
+elif darwin:
+    def whole_archive(name):
+        return [#'-Wl,-force_load',
+                '-l%s' % name,
+                ]
+elif solaris:
+    def whole_archive(name):
+        return ['-Wl,-zallextract',
+                '-l%s' % name,
+                '-Wl,-zdefaultextract',
+                ]
+else:
+    def whole_archive(name):
+        return ['-l%s' % name]
+
 def ext_modules():
     import sys, os
     modules = []
@@ -132,6 +157,29 @@ def ext_modules():
         sources=['src/MPI.c'],
         depends=['src/mpi4py.MPI.c'],
         )
+    def configure_mpi(ext, config_cmd):
+        from distutils import log
+        log.info("checking for MPI compile and link ...")
+        config_cmd.check_header("mpi.h", headers=["stdlib.h"])
+        config_cmd.check_function("MPI_Finalize", decl=0, call=1,
+                                  headers=['stdlib.h', 'mpi.h'])
+        ConfigTest = """\
+        int main(int argc, char **argv)
+        {
+          int ierr;
+          ierr = MPI_Init(&argc, &argv);
+          ierr = MPI_Finalize();
+          return 0;
+        }
+        """
+        ok = config_cmd.try_link(ConfigTest,
+                                 headers=['stdlib.h', 'mpi.h'])
+        if not ok:
+            raise DistutilsPlatformError(
+                "Cannot compile/link MPI programs. "
+                "Check your configuration!!!")
+    
+    MPI['configure'] = configure_mpi
     modules.append(MPI)
     # MPE extension module
     MPE = dict(
@@ -142,26 +190,32 @@ def ext_modules():
                  'src/MPE/mpe-log.h',
                  'src/MPE/mpe-log.c',
                  ],
-        define_macros=[('HAVE_MPE', 1)],
-        libraries=['mpe'],
-        extra_link_args=[],
         )
-    if sys.platform.startswith('linux'):
-        MPE['libraries'] = []
-        MPE['extra_link_args'] = [
-            '-Wl,-whole-archive',
-            '-llmpe',
-            '-Wl,-no-whole-archive',
-            '-lmpe',
-            ]
-    elif sys.platform.startswith('sunos'):
-        MPE['libraries'] = []
-        MPE['extra_link_args'] = [
-            '-Wl,-zallextract',
-            '-llmpe',
-            '-Wl,-zdefaultextract',
-            '-lmpe',
-            ]
+    def configure_mpe(ext, config_cmd):
+        from distutils import log
+        log.info("checking for MPE availability ...")
+        ok = (config_cmd.check_header("mpe.h",
+                                      headers=["stdlib.h",
+                                               "mpi.h",])
+              and
+              config_cmd.check_library('mpe')
+              and
+              config_cmd.check_function("MPE_Init_log",
+                                        headers=["stdlib.h",
+                                                 "mpi.h",
+                                                 "mpe.h"],
+                                        libraries=['mpe'],
+                                        decl=0, call=1)
+              )
+        if ok:
+            ext.define_macros += [('HAVE_MPE', 1)]
+            if linux or darwin or solaris:
+                ext.extra_link_args +=  whole_archive('lmpe')
+                ext.extra_link_args +=  ['-lmpe']
+            else:
+                ext.libraries += ['mpe']
+            return None
+    MPE['configure'] = configure_mpe
     modules.append(MPE)
     # custom dl extension module
     dl = dict(
@@ -169,39 +223,25 @@ def ext_modules():
         optional=True,
         sources=['src/dynload.c'],
         depends=['src/dynload.h'],
-        define_macros=[('HAVE_DLFCN_H', 1)],
-        libraries=['dl'],
         )
+    def configure_dl(ext, config_cmd):
+        from distutils import log
+        log.info("checking for dlopen() availability ...")
+        ok = config_cmd.check_header("dlfcn.h")
+        if ok : ext.define_macros += [('HAVE_DLFCN_H', 1)]
+        ok = config_cmd.check_library('dl')
+        if ok: ext.libraries += ['dl']
+        ok = config_cmd.check_function("dlopen",
+                                       libraries=['dl'],
+                                       decl=1, call=1)
+        #if ok : ext.define_macros += [('HAVE_DLOPEN', 1)]
+    dl['configure'] = configure_dl
     if os.name == 'posix':
         modules.append(dl)
     #
     return modules
 
 def libraries():
-    import sys
-    linux   = sys.platform.startswith('linux')
-    solaris = sys.platform.startswith('sunos')
-    darwin  = sys.platform.startswith('darwin')
-    if linux:
-        def whole_archive(name):
-            return ['-Wl,-whole-archive',
-                    '-l%s' % name,
-                    '-Wl,-no-whole-archive',
-                    ]
-    elif darwin:
-        def whole_archive(name):
-            return [#'-Wl,-force_load',
-                    '-l%s' % name,
-                    ]
-    elif solaris:
-        def whole_archive(name):
-            return ['-Wl,-zallextract',
-                    '-l%s' % name,
-                    '-Wl,-zdefaultextract',
-                    ]
-    else:
-        def whole_archive(name):
-            return ['-l%s' % name]
     # MPE logging
     pmpi_mpe = dict(
         name='mpe', kind='dylib',
@@ -209,13 +249,18 @@ def libraries():
         package='mpi4py',
         dest_dir='lib-pmpi',
         sources=['src/pmpi-mpe.c'],
-        libraries=['mpe'],
-        extra_link_args=[],
         )
-    if linux or darwin or solaris:
-        pmpi_mpe['libraries'] = []
-        pmpi_mpe['extra_link_args']  = whole_archive('lmpe')
-        pmpi_mpe['extra_link_args'] += ['-lmpe']
+    def configure_mpe(lib, config_cmd):
+        (name, build_info) = lib
+        ok = config_cmd.check_library('mpe')
+        if ok:
+            if linux or darwin or solaris:
+                build_info['extra_link_args']  = whole_archive('lmpe')
+                build_info['extra_link_args'] += ['-lmpe']
+            else:
+                build_info['libraries'] = ['mpe']
+        return None
+    pmpi_mpe['configure'] = configure_mpe
     # VampirTrace logging
     pmpi_vt = dict(
         name='vt', kind='dylib',
@@ -223,21 +268,13 @@ def libraries():
         package='mpi4py',
         dest_dir='lib-pmpi',
         sources=['src/pmpi-vt.c'],
-        libraries=['vt-mpi', 'otf', 'z', 'dl'],
-        extra_link_args=[],
         )
-    if linux or darwin or solaris:
-        pmpi_vt['libraries'] = []
-        pmpi_vt['extra_link_args']  = whole_archive('vt-mpi')
-        pmpi_vt['extra_link_args'] += ['-lotf', '-lz', '-ldl']
     pmpi_vt_mpi = dict(
         name='vt-mpi', kind='dylib',
         optional=True,
         package='mpi4py',
         dest_dir='lib-pmpi',
         sources=['src/pmpi-vt-mpi.c'],
-        libraries=['vt-mpi'],
-        extra_link_args=[],
         )
     pmpi_vt_hyb = dict(
         name='vt-hyb', kind='dylib',
@@ -245,9 +282,31 @@ def libraries():
         package='mpi4py',
         dest_dir='lib-pmpi',
         sources=['src/pmpi-vt-hyb.c'],
-        libraries=['vt-hyb'],
-        extra_link_args=[],
         )
+    def configure_vt(lib, config_cmd):
+        (name, build_info) = lib
+        if name == 'vt':
+            ok = False
+            for vt_lib in ('vt-mpi', 'vt.mpi'):
+                ok = config_cmd.check_library(vt_lib)
+                if ok: break
+            if ok:
+                if linux or darwin or solaris:
+                    build_info['extra_link_args']  = \
+                        whole_archive(vt_lib)
+                    build_info['extra_link_args'] += \
+                        ['-lotf', '-lz', '-ldl']
+                else:
+                    build_info['libraries'] = \
+                        [vt_lib, 'otf', 'z', 'dl'],
+        elif name in ('vt-mpi', 'vt-hyb'):
+            vt_lib = name
+            ok = config_cmd.check_library(vt_lib)
+            if ok: build_info['libraries'] = [vt_lib]
+        return None
+    pmpi_vt['configure']     = configure_vt
+    pmpi_vt_mpi['configure'] = configure_vt
+    pmpi_vt_hyb['configure'] = configure_vt
     #
     return [
         pmpi_mpe,

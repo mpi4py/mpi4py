@@ -427,8 +427,10 @@ class Distribution(cls_Distribution):
 class Extension(cls_Extension):
     def __init__ (self, **kw):
         optional = kw.pop('optional', None)
+        configure = kw.pop('configure', None) 
         cls_Extension.__init__(self, **kw)
         self.optional = optional
+        self.configure = configure
 
 # Executable class
 
@@ -849,29 +851,12 @@ class build_clib(cmd_build_clib.build_clib):
                 self.warn('%s' % e)
 
     def config_shared_library(self, library):
-        (lib_name, build_info) = library
-        compiler_obj = self.compiler
         config_cmd = self.get_finalized_command('config')
-        config_cmd.compiler = compiler_obj # fix compiler
-        ok = True
-        if lib_name == 'mpe':
-            ok = config_cmd.check_library('mpe')
-        if lib_name == 'vt':
-            ok = config_cmd.check_library('vt-mpi')
-            if not ok:
-                ok = config_cmd.check_library('vt.mpi')
-                if ok:
-                    for lst in (build_info['libraries'],
-                                build_info['extra_link_args']):
-                        for i, val in enumerate(lst):
-                            lst[i] = val.replace('vt-mpi', 'vt.mpi')
-        if lib_name == 'vt-mpi':
-            ok = config_cmd.check_library('vt-mpi')
-        if lib_name == 'vt-hyb':
-            ok = config_cmd.check_library('vt-hyb')
-        if not ok:
-            build_info['libraries'] = []
-            build_info['extra_link_args'] = []
+        config_cmd.compiler = self.compiler # fix compiler
+        (lib_name, build_info) = library
+        configure = build_info.get('configure')
+        if configure:
+            return configure(library, config_cmd)
 
     def get_lib_filename(self, library):
         (lib_name, build_info) = library
@@ -900,16 +885,14 @@ class build_clib(cmd_build_clib.build_clib):
         if not (self.force or newer_group(depends, lib_filename, 'newer')):
             log.debug("skipping '%s' shared library (up-to-date)", lib_name)
             return
-
-        self.config_shared_library(library)
+        
+        ok = self.config_shared_library(library)
         log.info("building '%s' shared library", lib_name)
-
-        compiler_obj = self.compiler
 
         # First, compile the source code to object files in the library
         # directory.  (This should probably change to putting object
         # files in a temporary build directory.)
-        objects = compiler_obj.compile(
+        objects = self.compiler.compile(
             sources,
             depends=build_info.get('depends'),
             output_dir=self.build_temp,
@@ -924,10 +907,10 @@ class build_clib(cmd_build_clib.build_clib):
         objects.extend(extra_objects)
         export_symbols = build_info.get('export_symbols')
         extra_link_args = build_info.get('extra_link_args', [])
-        if (compiler_obj.compiler_type == 'msvc' and
+        if (self.compiler.compiler_type == 'msvc' and
             export_symbols is not None):
             output_dir = os.path.dirname(lib_filename)
-            implib_filename = compiler_obj.library_filename(lib_name)
+            implib_filename = self.compiler.library_filename(lib_name)
             implib_file = os.path.join(output_dir, implib_filename)
             extra_link_args.append ('/IMPLIB:' + implib_file)
 
@@ -936,8 +919,8 @@ class build_clib(cmd_build_clib.build_clib):
                     self.compiler.detect_language(sources))
 
         # Now "link" the object files together into a shared library.
-        compiler_obj.link(
-            compiler_obj.SHARED_LIBRARY,
+        self.compiler.link(
+            self.compiler.SHARED_LIBRARY,
             objects, lib_filename,
             #
             libraries=build_info.get('libraries'),
@@ -1037,51 +1020,21 @@ class build_ext(cmd_build_ext.build_ext):
         if not (self.force or
                 newer_group(depends, filename, 'newer')):
             return
-        compiler_obj = self.compiler
+        #
         config_cmd = self.get_finalized_command('config')
-        config_cmd.compiler = compiler_obj # fix compiler
+        config_cmd.compiler = self.compiler # fix compiler
+        configure = getattr(ext, 'configure', None)
+        if configure:
+            configure(ext, config_cmd)
         #
         if ext.name == 'mpi4py.MPI':
-            log.info("checking for MPI compile and link ...")
-            ok = config_cmd.try_link(ConfigTest,
-                                     headers=['stdlib.h', 'mpi.h'])
-            if not ok:
-                raise DistutilsPlatformError(
-                   "Cannot compile/link MPI programs. "
-                   "Check your configuration!!!")
-        if ext.name == 'mpi4py.MPI':
             dest_dir = os.path.dirname(filename)
+            self.mkpath(dest_dir)
             mpi_cfg = os.path.join(dest_dir, 'mpi.cfg')
             log.info("writing %s" % mpi_cfg)
             if not self.dry_run:
                 config.dump(filename=mpi_cfg)
         #
-        if ext.name == 'mpi4py.MPE':
-            log.info("checking for MPE availability ...")
-            ok = (config_cmd.check_header("mpe.h",
-                                          headers=["stdlib.h",
-                                                   "mpi.h",])
-                  and
-                  config_cmd.check_func("MPE_Init_log",
-                                        headers=["stdlib.h",
-                                                 "mpi.h",
-                                                 "mpe.h"],
-                                        libraries=['mpe'],
-                                        decl=0, call=1)
-                  )
-            if not ok:
-                ext.define_macros[:] = []
-                ext.libraries[:] = []
-                ext.extra_link_args[:] = []
-        #
-        if ext.name == 'mpi4py.dl':
-            log.info("checking for dlopen availability ...")
-            ok = config_cmd.check_header("dlfcn.h")
-            if not ok :
-                ext.define_macros[:] = []
-            ok = config_cmd.check_library('dl')
-            if not ok:
-                ext.libraries[:] = []
         #
         extra_args = config.get('extra_compile_args')
         if extra_args:
