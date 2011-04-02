@@ -432,10 +432,27 @@ class Extension(cls_Extension):
         self.optional = optional
         self.configure = configure
 
+# Library class
+
+class Library(Extension):
+    def __init__ (self, **kw):
+        kind = kw.pop('kind', "static")
+        package = kw.pop('package', None)
+        dest_dir = kw.pop('dest_dir', None)
+        Extension.__init__(self, **kw)
+        self.kind = kind
+        self.package = package
+        self.dest_dir = dest_dir
+
 # Executable class
 
 class Executable(Extension):
-    pass
+    def __init__ (self, **kw):
+        package = kw.pop('package', None)
+        dest_dir = kw.pop('dest_dir', None)
+        Extension.__init__(self, **kw)
+        self.package = package
+        self.dest_dir = dest_dir
 
 # setup function
 
@@ -446,7 +463,8 @@ def setup(**attrs):
         attrs['cmdclass'] = {}
     cmdclass = attrs['cmdclass']
     for cmd in (config, build, install, clean, sdist,
-                build_src, build_py, build_clib, build_ext, build_exe,
+                build_src, build_py,
+                build_clib, build_ext, build_exe,
                 install_lib, install_data, install_exe,
                 ):
         if cmd.__name__ not in cmdclass:
@@ -711,11 +729,15 @@ class build_clib(cmd_build_clib.build_clib):
     user_options += cmd_build_clib.build_clib.user_options + cmd_mpi_opts
 
     def initialize_options (self):
+        self.libraries = None
         self.libraries_a = []
         self.libraries_so = []
-        self.library_dirs = None
-        self.runtime_library_dirs = None
 
+        self.library_dirs = None
+        self.rpath = None
+        self.link_objects = None
+
+        self.build_clib_a = None
         self.build_clib_so = None
         cmd_build_clib.build_clib.initialize_options(self)
         cmd_initialize_mpi_options(self)
@@ -726,27 +748,77 @@ class build_clib(cmd_build_clib.build_clib):
         if isinstance(build_cmd,  build):
             cmd_set_undefined_mpi_options(self, 'build')
         #
-        if self.libraries is None:
-            self.libraries = []
-        self.library_dirs = []
-        self.runtime_library_dirs = []
         self.set_undefined_options('build',
+                                   ('build_lib', 'build_clib_a'),
                                    ('build_lib', 'build_clib_so'))
         #
-        self.check_library_list (self.libraries)
-        for library in self.libraries:
-            lib_name, build_info = library
-            lib_type = build_info.get('kind', 'static')
-            if lib_type == 'static':
-                self.libraries_a.append(library)
+        if self.libraries:
+            libraries = self.libraries
+            self.libraries = []
+            self.check_library_list (libraries)
+            for i, lib in enumerate(libraries):
+                if isinstance(lib, Library):
+                    if lib.kind == "static":
+                        self.libraries_a.append(lib)
+                    else:
+                        self.libraries_so.append(lib)
+                else:
+                    self.libraries.append(lib)
+
+    def check_library_list (self, libraries):
+        ListType, TupleType = type([]), type(())
+        if not isinstance(libraries, ListType):
+            raise DistutilsSetupError(
+                "'libraries' option must be a list of "
+                "Library instances or 2-tuples")
+        for lib in libraries:
+            #
+            if isinstance(lib, Library):
+                lib_name = lib.name
+                build_info = lib.__dict__
+            elif isinstance(lib, TupleType) and len(lib) == 2:
+                lib_name, build_info = lib
             else:
-                self.libraries_so.append(library)
-         # XXX This is a hack
-        self.libraries[:] = self.libraries_a
+                raise DistutilsSetupError(
+                    "each element of 'libraries' option must be an "
+                    "Library instance or 2-tuple")
+            #
+            if not isinstance(lib_name, str):
+                raise DistutilsSetupError(
+                    "first element of each tuple in 'libraries' "
+                    "must be a string (the library name)")
+            if '/' in lib_name or (os.sep != '/' and os.sep in lib_name):
+                raise DistutilsSetupError(
+                    "bad library name '%s': "
+                    "may not contain directory separators" % lib[0])
+            if not isinstance(build_info, dict):
+                raise DistutilsSetupError(
+                    "second element of each tuple in 'libraries' "
+                    "must be a dictionary (build info)")
+            lib_type = build_info.get('kind', 'static')
+            if lib_type not in ('static', 'shared', 'dylib'):
+                raise DistutilsSetupError(
+                    "in 'kind' option (library '%s'), "
+                    "'kind' must be one of "
+                    " \"static\", \"shared\", \"dylib\"" % lib_name)
+            sources = build_info.get('sources')
+            if (sources is None or
+                type(sources) not in (ListType, TupleType)):
+                raise DistutilsSetupError(
+                    "in 'libraries' option (library '%s'), "
+                    "'sources' must be present and must be "
+                    "a list of source filenames" % lib_name)
+            depends = build_info.get('depends')
+            if (depends is not None and
+                type(depends) not in (ListType, TupleType)):
+                raise DistutilsSetupError(
+                    "in 'libraries' option (library '%s'), "
+                    "'depends' must be a list "
+                    "of source filenames" % lib_name)
 
     def run (self):
-        if (not self.libraries and
-            not self.libraries_a and
+        cmd_build_clib.build_clib.run(self)
+        if (not self.libraries_a and
             not self.libraries_so):
             return
         #
@@ -756,7 +828,7 @@ class build_clib(cmd_build_clib.build_clib):
                                      force=self.force)
         #
         if self.define is not None:
-            for (name,value) in self.define:
+            for (name, value) in self.define:
                 self.compiler.define_macro(name, value)
         if self.undef is not None:
             for macro in self.undef:
@@ -765,181 +837,157 @@ class build_clib(cmd_build_clib.build_clib):
             self.compiler.set_include_dirs(self.include_dirs)
         if self.library_dirs is not None:
             self.compiler.set_library_dirs(self.library_dirs)
+        if self.rpath is not None:
+            self.compiler.set_runtime_library_dirs(self.rpath)
+        if self.link_objects is not None:
+            self.compiler.set_link_objects(self.link_objects)
         #
         config = configuration(self, verbose=True)
         compiler_obj = self.compiler
         configure_compiler(compiler_obj, config)
         #
-        if self.libraries_a:
-            self.config_static_libraries(self.libraries_a, config)
-            self.build_static_libraries(self.libraries_a)
-        if self.libraries_so:
-            self.config_shared_libraries(self.libraries_so, config)
-            self.build_shared_libraries(self.libraries_so)
+        for lib in self.libraries_a:
+            extra_args = config.get('extra_compile_args', [])
+            lib.extra_compile_args.extend(extra_args)
+        for lib in self.libraries_so:
+            extra_args = config.get('extra_compile_args', [])
+            lib.extra_compile_args.extend(extra_args)
+            extra_args = config.get('extra_link_args', [])
+            lib.extra_link_args.extend(extra_args)
+        #
+        self.build_libraries(self.libraries)
+        self.build_libraries(self.libraries_a)
+        self.build_libraries(self.libraries_so)
 
-    def check_library_list (self, libraries):
-        ListType, TupleType = type([]), type(())
-        if not isinstance(libraries, ListType):
-            raise DistutilsSetupError(
-                  "'libraries' option must be a list of tuples")
+    def build_libraries (self, libraries):
         for lib in libraries:
-            if not isinstance(lib, TupleType) and len(lib) != 2:
-                raise DistutilsSetupError(
-                    "each element of 'libraries' must a 2-tuple")
-            lib_name, build_info = lib
-            if not isinstance(lib_name, str):
-                raise DistutilsSetupError(
-                      "first element of each tuple in 'libraries' "
-                      "must be a string (the library name)")
-            if '/' in lib_name or (os.sep != '/' and os.sep in lib_name):
-                raise DistutilsSetupError("bad library name '%s': "
-                       "may not contain directory separators" % lib[0])
-            if not isinstance(build_info, dict):
-                raise DistutilsSetupError(
-                      "second element of each tuple in 'libraries' "
-                      "must be a dictionary (build info)")
-            kind = build_info.get('kind', 'static')
-            if kind not in ('static', 'shared', 'dylib'):
-                raise DistutilsSetupError(
-                    "in 'kind' option (library '%s'), "
-                    "'kind' must be one of "
-                    " \"static\", \"shared\", \"dylib\"" % lib_name)
-            sources = build_info.get('sources')
-            if sources is None or type(sources) not in (ListType, TupleType):
-                raise DistutilsSetupError(
-                    "in 'libraries' option (library '%s'), "
-                    "'sources' must be present and must be "
-                    "a list of source filenames" % lib_name)
-            depends = build_info.get('depends')
-            if depends is not None:
-                if type(depends) not in (ListType, TupleType):
-                    raise DistutilsSetupError(
-                        "in 'libraries' option (library '%s'), "
-                        "'depends' must be a list "
-                        "of source filenames" % lib_name)
-
-    def config_static_libraries (self, libraries, config):
-        for (lib_name, build_info) in libraries:
-            for attr in ('extra_compile_args',):
-                extra_args = config.get(attr)
-                if extra_args:
-                    build_info.setdefault(attr,[]).extend(extra_args)
-
-    def build_static_libraries (self, libraries):
-        cmd_build_clib.build_clib.build_libraries(self, libraries)
-
-    def config_shared_libraries (self, libraries, config):
-        for library in libraries:
-            (lib_name, build_info) = library
-            for attr in ('extra_compile_args',
-                         'extra_link_args',):
-                extra_args = config.get(attr)
-                if extra_args:
-                    build_info.setdefault(attr, []).extend(extra_args)
-
-    def build_shared_libraries (self, libraries):
-        for (lib_name, build_info) in libraries:
-            library = (lib_name, build_info)
-            optional = build_info.get('optional')
+            # old-style 
+            if not isinstance(lib, Library):
+                cmd_build_clib.build_clib.build_libraries(self, [lib])
+                continue
+            # new-style 
             try:
-                self.build_shared_library(library)
+                self.build_library(lib)
             except (DistutilsError, CCompilerError):
-                if not optional:
-                    raise
-                e = sys.exc_info()[1]
-                self.warn('building shared library "%s" failed' % lib_name)
+                if lib.optional: raise
+                self.warn('building library "%s" failed' % lib.name)
                 self.warn('%s' % e)
 
-    def config_shared_library(self, library):
-        config_cmd = self.get_finalized_command('config')
-        config_cmd.compiler = self.compiler # fix compiler
-        (lib_name, build_info) = library
-        configure = build_info.get('configure')
-        if configure:
-            return configure(library, config_cmd)
+    def config_library (self, lib):
+        if lib.configure:
+            config_cmd = self.get_finalized_command('config')
+            config_cmd.compiler = self.compiler # fix compiler
+            return lib.configure(lib, config_cmd)
 
-    def get_lib_filename(self, library):
-        (lib_name, build_info) = library
-        package_dir = build_info.get('package', '').split('.')
-        dest_dir = build_info.get('dest_dir', '')
-        dest_dir = convert_path(dest_dir)
-        output_dir = os.path.join(
-            self.build_clib_so, *package_dir+[dest_dir])
-        lib_type = build_info.get('kind', 'dylib')
-        if sys.platform != 'darwin':
-            if lib_type == 'dylib':
-                lib_type = 'shared'
-        lib_filename = self.compiler.library_filename(
-            lib_name, lib_type=lib_type, output_dir=output_dir)
-        return lib_filename
-
-    def build_shared_library (self, library):
+    def build_library(self, lib):
         from distutils.dep_util import newer_group
 
-        (lib_name, build_info) = library
-        sources = [convert_path(p) for p in build_info.get('sources',[])]
-        depends = [convert_path(p) for p in build_info.get('depends',[])]
+        sources = [convert_path(p) for p in lib.sources]
+        depends = [convert_path(p) for p in lib.depends]
         depends = sources + depends
-        lib_filename = self.get_lib_filename(library)
 
-        if not (self.force or newer_group(depends, lib_filename, 'newer')):
-            log.debug("skipping '%s' shared library (up-to-date)", lib_name)
+        if lib.kind == "static":
+            build_dir = self.build_clib_a
+        else:
+            build_dir = self.build_clib_so
+        lib_fullpath = self.get_lib_fullpath(lib, build_dir)
+
+        if not (self.force or newer_group(depends, lib_fullpath, 'newer')):
+            log.debug("skipping '%s' %s library (up-to-date)",
+                      lib.name, lib.kind)
             return
-        
-        ok = self.config_shared_library(library)
-        log.info("building '%s' shared library", lib_name)
+
+        ok = self.config_library(lib)
+        log.info("building '%s' %s library", lib.name, lib.kind)
 
         # First, compile the source code to object files in the library
         # directory.  (This should probably change to putting object
         # files in a temporary build directory.)
+        macros = lib.define_macros[:]
+        for undef in lib.undef_macros:
+            macros.append((undef,))
+
         objects = self.compiler.compile(
             sources,
-            depends=build_info.get('depends'),
+            depends=lib.depends,
             output_dir=self.build_temp,
-            macros=build_info.get('macros', []),
-            include_dirs=build_info.get('include_dirs'),
+            macros=macros,
+            include_dirs=lib.include_dirs,
             extra_preargs=None,
-            extra_postargs=build_info.get('extra_compile_args'),
+            extra_postargs=lib.extra_compile_args,
             debug=self.debug,
             )
 
-        extra_objects = build_info.get('extra_objects', [])
-        objects.extend(extra_objects)
-        export_symbols = build_info.get('export_symbols')
-        extra_link_args = build_info.get('extra_link_args', [])
-        if (self.compiler.compiler_type == 'msvc' and
-            export_symbols is not None):
-            output_dir = os.path.dirname(lib_filename)
-            implib_filename = self.compiler.library_filename(lib_name)
-            implib_file = os.path.join(output_dir, implib_filename)
-            extra_link_args.append ('/IMPLIB:' + implib_file)
+        if lib.kind == "static":
+            # Now "link" the object files together
+            # into a static library.
+            self.compiler.create_static_lib(
+                objects,
+                lib.name,
+                output_dir=os.path.dirname(lib_fullpath),
+                debug=self.debug,
+                )
+        else:
+            extra_objects = lib.extra_objects[:]
+            export_symbols = lib.export_symbols[:]
+            extra_link_args = lib.extra_link_args[:]
+            objects.extend(extra_objects)
+            if (self.compiler.compiler_type == 'msvc' and
+                export_symbols is not None):
+                output_dir = os.path.dirname(lib_fullpath)
+                implib_filename = self.compiler.library_filename(lib.name)
+                implib_file = os.path.join(output_dir, lib_fullpath)
+                extra_link_args.append ('/IMPLIB:' + implib_file)
+            # Detect target language, if not provided
+            src_language = self.compiler.detect_language(sources)
+            language = (lib.language or src_language)
+            # Now "link" the object files together
+            # into a shared library.
+            self.compiler.link(
+                self.compiler.SHARED_LIBRARY,
+                objects, lib_fullpath,
+                #
+                libraries=lib.libraries,
+                library_dirs=lib.library_dirs,
+                runtime_library_dirs=lib.runtime_library_dirs,
+                export_symbols=export_symbols,
+                extra_preargs=None,
+                extra_postargs=extra_link_args,
+                debug=self.debug,
+                target_lang=language,
+                )
+        return
 
-        # Detect target language, if not provided
-        language = (build_info.get('language') or
-                    self.compiler.detect_language(sources))
+    def get_lib_fullpath (self, lib, build_dir=None):
+        build_dir = build_dir or self.build_clib
+        package_dir = (lib.package or '').split('.')
+        dest_dir = convert_path(lib.dest_dir or '')
+        output_dir = os.path.join(build_dir, *package_dir+[dest_dir])
+        lib_type =  lib.kind
+        if sys.platform != 'darwin':
+            if lib_type == 'dylib':
+                lib_type = 'shared'
+        compiler = self.compiler # XXX
+        lib_fullpath = compiler.library_filename(
+            lib.name, lib_type=lib_type, output_dir=output_dir)
+        return lib_fullpath
 
-        # Now "link" the object files together into a shared library.
-        self.compiler.link(
-            self.compiler.SHARED_LIBRARY,
-            objects, lib_filename,
-            #
-            libraries=build_info.get('libraries'),
-            library_dirs=build_info.get('library_dirs'),
-            runtime_library_dirs=build_info.get('runtime_library_dirs'),
-            export_symbols=export_symbols,
-            extra_preargs=None,
-            extra_postargs=extra_link_args,
-            debug=self.debug,
-            target_lang=language,
-            )
+    def get_source_files (self):
+        filenames = cmd_build_clib.build_clib.get_source_files(self)
+        self.check_library_list(self.libraries)
+        self.check_library_list(self.libraries_a)
+        self.check_library_list(self.libraries_so)
+        for (lib_name, build_info) in self.libraries:
+            filenames.extend(build_info.get(sources, []))
+        for lib in self.libraries_so + self.libraries_a:
+            filenames.extend(lib.sources)
+        return filenames
 
-    def get_outputs(self):
+    def get_outputs (self):
         outputs = []
-        for (lib_name, build_info) in self.libraries_a:
-            pass
-        for library in self.libraries_so:
-            lib_filename = self.get_lib_filename(library)
-            outputs.append(lib_filename)
+        for lib in self.libraries_a + self.libraries_so:
+            lib_fullpath = self.get_lib_fullpath(lib)
+            outputs.append(lib_fullpath)
         return outputs
 
 # --------------------------------------------------------------------
@@ -986,6 +1034,7 @@ class build_ext(cmd_build_ext.build_ext):
         config = configuration(self, verbose=True)
         compiler_obj = self.compiler
         configure_compiler(compiler_obj, config)
+        self.config = config
         # extra configuration, check for all MPI symbols
         if self.configure:
             log.info('testing for missing MPI symbols')
@@ -999,55 +1048,60 @@ class build_ext(cmd_build_ext.build_ext):
             log.info("defining preprocessor macro '%s'" % macro)
             compiler_obj.define_macro(macro, 1)
         # configure extensions
-        # and finally build extensions
+        for ext in self.extensions:
+            extra_args = config.get('extra_compile_args', [])
+            ext.extra_compile_args.extend(extra_args)
+            extra_args = config.get('extra_link_args', [])
+            ext.extra_link_args.extend(extra_args)
+        # build extensions
         for ext in self.extensions:
             try:
-                self.config_extension(ext, config)
                 self.build_extension(ext)
             except (DistutilsError, CCompilerError):
-                if not ext.optional:
-                    raise
+                if not ext.optional: raise
                 e = sys.exc_info()[1]
                 self.warn('building extension "%s" failed' % ext.name)
                 self.warn('%s' % e)
 
-    def config_extension (self, ext, config):
+    def config_extension (self, ext):
+        configure = getattr(ext, 'configure', None)
+        if configure:
+            config_cmd = self.get_finalized_command('config')
+            config_cmd.compiler = self.compiler # fix compiler
+            configure(ext, config_cmd)
+
+    def build_extension (self, ext):
         from distutils.dep_util import newer_group
         fullname = self.get_ext_fullname(ext.name)
         filename = os.path.join(
             self.build_lib, self.get_ext_filename(fullname))
         depends = ext.sources + ext.depends
-        if not (self.force or
-                newer_group(depends, filename, 'newer')):
+        if not (self.force or newer_group(depends, filename, 'newer')):
+            log.debug("skipping '%s' extension (up-to-date)", ext.name)
             return
         #
-        config_cmd = self.get_finalized_command('config')
-        config_cmd.compiler = self.compiler # fix compiler
-        configure = getattr(ext, 'configure', None)
-        if configure:
-            configure(ext, config_cmd)
+        self.config_extension(ext)
+        cmd_build_ext.build_ext.build_extension(self, ext)
         #
+        # XXX -- this is a Vile HACK!
         if ext.name == 'mpi4py.MPI':
             dest_dir = os.path.dirname(filename)
             self.mkpath(dest_dir)
             mpi_cfg = os.path.join(dest_dir, 'mpi.cfg')
             log.info("writing %s" % mpi_cfg)
             if not self.dry_run:
-                config.dump(filename=mpi_cfg)
-        #
-        #
-        extra_args = config.get('extra_compile_args')
-        if extra_args:
-            ext.extra_compile_args.extend(extra_args)
-        extra_args = config.get('extra_link_args')
-        if extra_args:
-            ext.extra_link_args.extend(extra_args)
+                self.config.dump(filename=mpi_cfg)
 
     def get_outputs(self):
         outputs = cmd_build_ext.build_ext.get_outputs(self)
         for ext in self.extensions:
+            # XXX -- this is a Vile HACK!
             if ext.name == 'mpi4py.MPI':
-                dest_dir = os.path.join(self.build_lib, 'mpi4py')
+                fullname = self.get_ext_fullname(ext.name)
+                filename = os.path.join(
+                    self.build_lib, 
+                    self.get_ext_filename(fullname))
+                dest_dir = os.path.dirname(filename)
                 mpi_cfg = os.path.join(dest_dir, 'mpi.cfg')
                 outputs.append(mpi_cfg)
         return outputs
@@ -1092,7 +1146,7 @@ class build_exe(build_ext):
         self.build_lib = self.build_exe
 
     def check_executables_list (self, executables):
-        ListType = type([])
+        ListType, TupleType = type([]), type(())
         if type(executables) is not ListType:
             raise DistutilsSetupError(
                 "'executables' option must be a list of Executable instances")
@@ -1100,38 +1154,40 @@ class build_exe(build_ext):
             if not isinstance(exe, Executable):
                 raise DistutilsSetupError(
                     "'executables' items must be Executable instances")
+            if (exe.sources is None or 
+                type(exe.sources) not in (ListType, TupleType)):
+                raise DistutilsSetupError(
+                    ("in 'executables' option (executable '%s'), " +
+                     "'sources' must be present and must be " +
+                     "a list of source filenames") % exe.name)
 
     def get_exe_filename(self, exe_name):
         exe_ext = sysconfig.get_config_var('EXE') or ''
         return exe_name + exe_ext
 
-    def get_outputs (self):
-        outputs = []
-        for exe in self.executables:
-            exe_filename = get_exe_filename(exe.name)
-            outputs.append(os.path.join(self.build_exe, exe_filename))
-        return outputs
+    def get_exe_fullpath(self, exe, build_dir=None):
+        build_dir = build_dir or self.build_exe
+        package_dir = (exe.package or '').split('.')
+        dest_dir = convert_path(exe.dest_dir or '')
+        output_dir = os.path.join(build_dir, *package_dir+[dest_dir])
+        exe_filename = self.get_exe_filename(exe.name)
+        return os.path.join(output_dir, exe_filename)
+
+    def config_executable (self, exe):
+        build_ext.config_extension(self, exe)
 
     def build_executable (self, exe):
         from distutils.dep_util import newer_group
-        ListType, TupleType = type([]), type(())
-        sources = exe.sources
-        if sources is None or type(sources) not in (ListType, TupleType):
-            raise DistutilsSetupError(
-                ("in 'executables' option (executable '%s'), " +
-                 "'sources' must be present and must be " +
-                 "a list of source filenames") % exe.name
-                )
-        sources = list(sources)
-        exe_filename = os.path.join(self.build_exe, exe.name)
-        exe_extension = sysconfig.get_config_var('EXE') or ''
-        depends = sources + exe.depends
-        if not (self.force or
-                newer_group(depends, exe_filename+exe_extension, 'newer')):
+        sources = list(exe.sources)
+        depends = list(exe.depends)
+        exe_fullpath = self.get_exe_fullpath(exe)
+        depends = sources + depends
+        if not (self.force or newer_group(depends, exe_fullpath, 'newer')):
             log.debug("skipping '%s' executable (up-to-date)", exe.name)
             return
-        else:
-            log.info("building '%s' executable", exe.name)
+
+        self.config_executable(exe)
+        log.info("building '%s' executable", exe.name)
 
         # Next, compile the source code to object files.
         compiler_obj = self.compiler
@@ -1152,26 +1208,16 @@ class build_exe(build_ext):
         # The environment variable should take precedence, and
         # any sensible compiler will give precedence to later
         # command line args.  Hence we combine them in order:
-        extra_args = exe.extra_compile_args or []
-        extra_args = extra_args[:]
+        extra_args = exe.extra_compile_args[:]
 
-        objects =  compiler_obj.compile(sources,
-                                        output_dir=self.build_temp,
-                                        macros=macros,
-                                        include_dirs=exe.include_dirs,
-                                        debug=self.debug,
-                                        extra_postargs=extra_args,
-                                        depends=exe.depends)
-
-        # XXX -- this is a Vile HACK!
-        #
-        # The setup.py script for Python on Unix needs to be able to
-        # get this list so it can perform all the clean up needed to
-        # avoid keeping object files around when cleaning out a failed
-        # build of an extension module.  Since Distutils does not
-        # track dependencies, we have to get rid of intermediates to
-        # ensure all the intermediates will be properly re-built.
-        #
+        objects =  self.compiler.compile(
+            sources,
+            output_dir=self.build_temp,
+            macros=macros,
+            include_dirs=exe.include_dirs,
+            debug=self.debug,
+            extra_postargs=extra_args,
+            depends=exe.depends)
         self._built_objects = objects[:]
 
         # XXX -- this is a Vile HACK!
@@ -1187,8 +1233,7 @@ class build_exe(build_ext):
         # that go into the mix.
         if exe.extra_objects:
             objects.extend(exe.extra_objects)
-        extra_args = exe.extra_link_args or []
-        extra_args = extra_args[:]
+        extra_args = exe.extra_link_args[:]
         # Get special linker flags for building a executable with
         # bundled Python library, also fix location of needed
         # python.exp file on AIX
@@ -1208,8 +1253,8 @@ class build_exe(build_ext):
             ldshflag = ldshflag.replace('Modules/python.exp', python_exp)
         # Detect target language, if not provided
         language = exe.language or compiler_obj.detect_language(sources)
-        compiler_obj.link_executable(
-            objects, exe_filename,
+        self.compiler.link_executable(
+            objects, exe_fullpath,
             output_dir=None,
             libraries=self.get_libraries(exe),
             library_dirs=exe.library_dirs,
@@ -1218,6 +1263,14 @@ class build_exe(build_ext):
             extra_postargs=extra_args,
             debug=self.debug,
             target_lang=language)
+
+    def get_outputs (self):
+        outputs = []
+        for exe in self.executables:
+            exe_fullpath = self.get_exe_fullpath(exe)
+            outputs.append(exe_fullpath)
+        return outputs
+
 
 # -----------------------------------------------------------------------------
 
@@ -1247,7 +1300,6 @@ class install(cmd_install.install):
     # XXX disable install_exe subcommand !!!
     del sub_commands[-1]
 
-# -----------------------------------------------------------------------------
 
 class install_lib(cmd_install_lib.install_lib):
 
@@ -1259,7 +1311,6 @@ class install_lib(cmd_install_lib.install_lib):
         outputs.extend(lib_outputs)
         return outputs
 
-# -----------------------------------------------------------------------------
 
 class install_data (cmd_install_data.install_data):
 
@@ -1270,7 +1321,6 @@ class install_data (cmd_install_data.install_data):
                                    ('force', 'force'),
                                    )
 
-# -----------------------------------------------------------------------------
 
 class install_exe(cmd_install_lib.install_lib):
 

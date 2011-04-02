@@ -251,14 +251,13 @@ def libraries():
         sources=['src/pmpi-mpe.c'],
         )
     def configure_mpe(lib, config_cmd):
-        (name, build_info) = lib
         ok = config_cmd.check_library('mpe')
         if ok:
             if linux or darwin or solaris:
-                build_info['extra_link_args']  = whole_archive('lmpe')
-                build_info['extra_link_args'] += ['-lmpe']
+                lib.extra_link_args += whole_archive('lmpe')
+                lib.extra_link_args += ['-lmpe']
             else:
-                build_info['libraries'] = ['mpe']
+                lib.libraries += ['mpe']
         return None
     pmpi_mpe['configure'] = configure_mpe
     # VampirTrace logging
@@ -284,25 +283,24 @@ def libraries():
         sources=['src/pmpi-vt-hyb.c'],
         )
     def configure_vt(lib, config_cmd):
-        (name, build_info) = lib
-        if name == 'vt':
+        if lib.name == 'vt':
             ok = False
             for vt_lib in ('vt-mpi', 'vt.mpi'):
                 ok = config_cmd.check_library(vt_lib)
                 if ok: break
             if ok:
                 if linux or darwin or solaris:
-                    build_info['extra_link_args']  = \
+                    lib.extra_link_args += \
                         whole_archive(vt_lib)
-                    build_info['extra_link_args'] += \
+                    lib.extra_link_args += \
                         ['-lotf', '-lz', '-ldl']
                 else:
-                    build_info['libraries'] = \
+                    lib.libraries += \
                         [vt_lib, 'otf', 'z', 'dl'],
-        elif name in ('vt-mpi', 'vt-hyb'):
-            vt_lib = name
+        elif lib.name in ('vt-mpi', 'vt-hyb'):
+            vt_lib = lib.name
             ok = config_cmd.check_library(vt_lib)
-            if ok: build_info['libraries'] = [vt_lib]
+            if ok: lib.libraries = [vt_lib]
         return None
     pmpi_vt['configure']     = configure_vt
     pmpi_vt_mpi['configure'] = configure_vt
@@ -317,37 +315,44 @@ def libraries():
 
 def executables():
     import sys
-    from distutils import sysconfig
-    from distutils.util import split_quoted
-    libraries = []
-    library_dirs = []
-    compile_args = []
-    link_args = []
-    py_version = sysconfig.get_python_version()
-    if not sys.platform.startswith('win'):
-        cfgDict = sysconfig.get_config_vars()
+    # MPI-enabled Python interpreter
+    pyexe = dict(name='python%s-mpi' % sys.version[:3],
+                 optional=True,
+                 #package='mpi4py',
+                 #dest_dir='bin',
+                 sources=['src/python.c'],
+                 )
+    def configure_exe(exe, config_cmd):
+        import sys
+        from distutils import sysconfig
+        from distutils.util import split_quoted
+        if sys.platform.startswith('win'):
+            return
+        libraries = []
+        library_dirs = []
+        link_args = []
         if not sysconfig.get_config_var('Py_ENABLE_SHARED'):
+            py_version = sysconfig.get_python_version()
             py_abiflags = getattr(sys, 'abiflags', '')
             libraries = ['python' + py_version + py_abiflags]
+        cfg_vars = sysconfig.get_config_vars()
         if sys.platform == 'darwin':
-            fwkdir = cfgDict.get('PYTHONFRAMEWORKDIR')
+            fwkdir = cfg_vars.get('PYTHONFRAMEWORKDIR')
             if (fwkdir and fwkdir != 'no-framework' and
-                fwkdir in cfgDict.get('LINKFORSHARED', '')):
+                fwkdir in cfg_vars.get('LINKFORSHARED', '')):
                 del libraries[:]
         for var in ('LIBDIR', 'LIBPL'):
-            library_dirs += split_quoted(cfgDict.get(var, ''))
-        for var in ('LDFLAGS',
+            library_dirs += split_quoted(cfg_vars.get(var, ''))
+        for var in ('LDFLAGS', 
                     'LIBS', 'MODLIBS', 'SYSLIBS',
                     'LDLAST'):
-            link_args += split_quoted(cfgDict.get(var, ''))
-    # MPI-enabled Python interpreter
-    pyexe = dict(name='python%s-mpi' % py_version,
-                 optional=True,
-                 sources=['src/python.c'],
-                 libraries=libraries,
-                 library_dirs=library_dirs,
-                 extra_compile_args=compile_args,
-                 extra_link_args=link_args)
+            link_args += split_quoted(cfg_vars.get(var, ''))
+            
+        exe.libraries += libraries
+        exe.library_dirs += library_dirs
+        exe.extra_link_args += link_args
+    #
+    pyexe['configure'] = configure_exe
     return [pyexe]
 
 # --------------------------------------------------------------------
@@ -355,14 +360,15 @@ def executables():
 # --------------------------------------------------------------------
 
 from conf.mpidistutils import setup
-from conf.mpidistutils import Distribution, Extension, Executable
+from conf.mpidistutils import Distribution, Extension
+from conf.mpidistutils import Library, Executable
 from conf.mpidistutils import config, build, install, clean
 from conf.mpidistutils import build_src, build_ext, build_exe
 from conf.mpidistutils import install_data, install_exe
 
-ExtModule = lambda extension:  Extension(**extension)
-Library   = lambda library:    (library['name'], library)
-ExeBinary = lambda executable: Executable(**executable)
+Ext = Extension
+Lib = Library
+Exe = Executable
 
 def run_setup():
     """
@@ -375,9 +381,9 @@ def run_setup():
                                       'include/mpi4py/*.pyx',
                                       'include/mpi4py/*.pxi',
                                       'include/mpi4py/*.i',]},
-          ext_modules  = [ExtModule(ext) for ext in ext_modules()],
-          libraries    = [Library(lib)   for lib in libraries()  ],
-          executables  = [ExeBinary(exe) for exe in executables()],
+          ext_modules  = [Ext(**ext) for ext in ext_modules()],
+          libraries    = [Lib(**lib) for lib in libraries()  ],
+          executables  = [Exe(**exe) for exe in executables()],
           **metadata)
 
 def chk_cython(CYTHON_VERSION_REQUIRED):
