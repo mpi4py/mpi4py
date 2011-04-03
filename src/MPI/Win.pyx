@@ -58,7 +58,7 @@ cdef class Win:
             base = MPI_BOTTOM
             memory = None
         elif memory is not None:
-            asmemory(memory, &base, &size)
+            memory = getbuffer_w(memory, &base, &size)
         cdef MPI_Info cinfo = arg_Info(info)
         cdef Win win = <Win>cls()
         with nogil:
