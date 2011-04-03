@@ -869,7 +869,8 @@ class build_clib(cmd_build_clib.build_clib):
             try:
                 self.build_library(lib)
             except (DistutilsError, CCompilerError):
-                if lib.optional: raise
+                if not lib.optional: raise
+                e = sys.exc_info()[1]
                 self.warn('building library "%s" failed' % lib.name)
                 self.warn('%s' % e)
 

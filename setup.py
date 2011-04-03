@@ -160,12 +160,9 @@ def ext_modules():
     def configure_mpi(ext, config_cmd):
         from textwrap import dedent
         from distutils import log
+        from distutils.errors import DistutilsPlatformError
         log.info("checking for MPI compile and link ...")
-        config_cmd.check_header("mpi.h", headers=["stdlib.h"])
-        config_cmd.check_function("MPI_Init(0,0)", decl=0, call=0,
-                                  headers=['stdlib.h', 'mpi.h'])
-        config_cmd.check_function("MPI_Finalize()", decl=0, call=0,
-                                  headers=['stdlib.h', 'mpi.h'])
+        ok = config_cmd.check_header("mpi.h", headers=["stdlib.h"])
         ConfigTest = dedent("""\
         int main(int argc, char **argv)
         {
@@ -175,12 +172,12 @@ def ext_modules():
           return 0;
         }
         """)
-        ok = config_cmd.try_link(ConfigTest,
-                                 headers=['stdlib.h', 'mpi.h'])
-        if not ok:
-            raise DistutilsPlatformError(
-                "Cannot compile/link MPI programs. "
-                "Check your configuration!!!")
+        headers = ["stdlib.h", "mpi.h"]
+        errmsg = "Cannot %s MPI programs. Check your configuration!!!"
+        ok = config_cmd.try_compile(ConfigTest, headers=headers)
+        if not ok: raise DistutilsPlatformError(errmsg % "compile")
+        ok = config_cmd.try_link(ConfigTest, headers=headers)
+        if not ok: raise DistutilsPlatformError(errmsg % "link")
     MPI['configure'] = configure_mpi
     modules.append(MPI)
     # MPE extension module
@@ -260,7 +257,6 @@ def libraries():
                 lib.extra_link_args += ['-lmpe']
             else:
                 lib.libraries += ['mpe']
-        return None
     pmpi_mpe['configure'] = configure_mpe
     # VampirTrace logging
     pmpi_vt = dict(
@@ -362,15 +358,9 @@ def executables():
 # --------------------------------------------------------------------
 
 from conf.mpidistutils import setup
-from conf.mpidistutils import Distribution, Extension
-from conf.mpidistutils import Library, Executable
-from conf.mpidistutils import config, build, install, clean
-from conf.mpidistutils import build_src, build_ext, build_exe
-from conf.mpidistutils import install_data, install_exe
-
-Ext = Extension
-Lib = Library
-Exe = Executable
+from conf.mpidistutils import Extension  as Ext
+from conf.mpidistutils import Library    as Lib
+from conf.mpidistutils import Executable as Exe
 
 def run_setup():
     """
@@ -466,6 +456,7 @@ def build_sources(cmd):
     run_cython(source, target, depends, cmd.force,
                CYTHON_VERSION_REQUIRED)
 
+from conf.mpidistutils import build_src
 build_src.run = build_sources
 
 def main():
