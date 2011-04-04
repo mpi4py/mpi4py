@@ -4,7 +4,9 @@ Multi-Processing Environment
 
 # -----------------------------------------------------------------------------
 
-from mpi4py import MPI; del MPI;
+cdef object MPI
+from mpi4py import MPI
+MPI = None
 
 # -----------------------------------------------------------------------------
 

@@ -100,6 +100,7 @@ cdef inline int packArgs(object arglist, char bytebuf[]) except -1:
     cdef double fdata = 0
     cdef char*  sdata = NULL
     #
+    cdef arg = None
     bytebuf[0] = 0
     for arg in arglist:
         #
