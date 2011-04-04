@@ -462,7 +462,8 @@ def setup(**attrs):
     if 'cmdclass' not in attrs:
         attrs['cmdclass'] = {}
     cmdclass = attrs['cmdclass']
-    for cmd in (config, build, install, clean, sdist,
+    for cmd in (config, build, install,
+                test, clean, sdist,
                 build_src, build_py,
                 build_clib, build_ext, build_exe,
                 install_lib, install_data, install_exe,
@@ -1401,6 +1402,17 @@ class install_exe(cmd_install_lib.install_lib):
             build_exe = self.get_finalized_command('build_exe')
             inputs.extend(build_exe.get_outputs())
         return inputs
+
+
+class test(Command):
+    description = "run the test suite"
+    user_options = []
+    def initialize_options(self):
+        pass
+    def finalize_options(self):
+        pass
+    def run(self):
+        pass
 
 
 class sdist(cmd_sdist.sdist):
