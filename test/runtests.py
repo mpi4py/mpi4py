@@ -184,9 +184,10 @@ def run_tests_leaks(options, testsuite):
         writeln('[%d@%s] refleaks:  (%d - %d) --> %d'
                 % (rank, name, r2, r1, r2-r1))
 
-def main(pkgname):
+def main(args=None):
+    pkgname = 'mpi4py'
     parser = getoptionparser()
-    (options, args) = parser.parse_args()
+    (options, args) = parser.parse_args(args)
     setup_python(options)
     setup_unittest(options)
     package = import_package(options, pkgname)
@@ -200,4 +201,4 @@ def main(pkgname):
 if __name__ == '__main__':
     import sys
     sys.dont_write_bytecode = True
-    main('mpi4py')
+    main()

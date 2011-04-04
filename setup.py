@@ -35,6 +35,8 @@ name publishing).
 ## except ImportError:
 ##     pass
 
+import sys, os
+
 # --------------------------------------------------------------------
 # Metadata
 # --------------------------------------------------------------------
@@ -43,7 +45,7 @@ def name():
     return 'mpi4py'
 
 def version():
-    import os, re
+    import re
     fh = open(os.path.join('src', '__init__.py'))
     try: data = fh.read()
     finally: fh.close()
@@ -123,7 +125,6 @@ metadata['provides'] = ['mpi4py',
 # Extension modules
 # --------------------------------------------------------------------
 
-import sys
 linux   = sys.platform.startswith('linux')
 solaris = sys.platform.startswith('sunos')
 darwin  = sys.platform.startswith('darwin')
@@ -149,7 +150,6 @@ else:
         return ['-l%s' % name]
 
 def ext_modules():
-    import sys, os
     modules = []
     # MPI extension module
     MPI = dict(
@@ -312,7 +312,6 @@ def libraries():
         ]
 
 def executables():
-    import sys
     # MPI-enabled Python interpreter
     pyexe = dict(name='python-mpi',
                  optional=True,
@@ -321,7 +320,6 @@ def executables():
                  sources=['src/python.c'],
                  )
     def configure_exe(exe, config_cmd):
-        import sys
         from distutils import sysconfig
         from distutils.util import split_quoted
         if sys.platform.startswith('win'):
@@ -379,7 +377,6 @@ def run_setup():
           **metadata)
 
 def chk_cython(CYTHON_VERSION_REQUIRED):
-    import sys, os
     from distutils.version import StrictVersion as Version
     warn = lambda msg='': sys.stderr.write(msg+'\n')
     #
@@ -435,29 +432,40 @@ def run_cython(source, target, depends=(), force=False,
 
 def build_sources(cmd):
     CYTHON_VERSION_REQUIRED = '0.13'
-    import os, glob
+    from glob import glob
     if not (os.path.isdir('.svn') or
             os.path.isdir('.git') or
             cmd.force): return
     # mpi4py.MPI
     source = os.path.join('src', 'mpi4py.MPI.pyx')
     target = os.path.splitext(source)[0]+".c"
-    depends = (glob.glob("src/include/*/*.pxi") +
-               glob.glob("src/include/*/*.pxd") +
-               glob.glob("src/MPI/*.pyx") +
-               glob.glob("src/MPI/*.pxi"))
+    depends = (glob("src/include/*/*.pxi") +
+               glob("src/include/*/*.pxd") +
+               glob("src/MPI/*.pyx") +
+               glob("src/MPI/*.pxi"))
     run_cython(source, target, depends, cmd.force,
                CYTHON_VERSION_REQUIRED)
     # mpi4py.MPE
     source = os.path.join('src', 'mpi4py.MPE.pyx')
     target = os.path.splitext(source)[0]+".c"
-    depends = (glob.glob("src/MPE/*.pyx") +
-               glob.glob("src/MPE/*.pxi"))
+    depends = (glob("src/MPE/*.pyx") +
+               glob("src/MPE/*.pxi"))
     run_cython(source, target, depends, cmd.force,
                CYTHON_VERSION_REQUIRED)
 
 from conf.mpidistutils import build_src
 build_src.run = build_sources
+
+def run_testsuite(cmd):
+    sys.path.append('test')
+    try:
+        from runtests import main
+    finally:
+        del sys.path[-1]
+    main([])
+
+from conf.mpidistutils import test
+test.run = run_testsuite
 
 def main():
     run_setup()
