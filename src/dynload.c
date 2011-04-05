@@ -124,10 +124,17 @@ PyMODINIT_FUNC initdl(void)
 #endif
 
 #ifdef RTLD_DEFAULT
-  if (PyModule_AddPtrMacro(m, RTLD_DEFAULT) < 0) goto bad;
+  if (PyModule_AddPtrMacro(m, RTLD_DEFAULT)   < 0) goto bad;
 #endif
 #ifdef RTLD_NEXT
-  if (PyModule_AddPtrMacro(m, RTLD_NEXT)    < 0) goto bad;
+  if (PyModule_AddPtrMacro(m, RTLD_NEXT)      < 0) goto bad;
+#endif
+
+#ifdef RTLD_SELF
+  if (PyModule_AddPtrMacro(m, RTLD_SELF)      < 0) goto bad;
+#endif
+#ifdef RTLD_MAIN_ONLY
+  if (PyModule_AddPtrMacro(m, RTLD_MAIN_ONLY) < 0) goto bad;
 #endif
 
  finally:
