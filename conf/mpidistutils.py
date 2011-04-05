@@ -422,6 +422,10 @@ class Distribution(cls_Distribution):
     def has_executables(self):
         return self.executables and len(self.executables) > 0
 
+    def is_pure (self):
+        return (cls_Distribution.is_pure(self) and
+                not self.has_executables())
+
 # Extension class
 
 class Extension(cls_Extension):
@@ -719,9 +723,9 @@ class build_py(cmd_build_py.build_py):
 class build_clib(cmd_build_clib.build_clib):
 
     user_options = [
-        ('build-clib-a', 'l',
+        ('build-clib-a=', 's',
          "directory to build C/C++ static libraries to"),
-        ('build-clib-so', 'l',
+        ('build-clib-so=', 's',
          "directory to build C/C++ shared libraries to"),
         ]
 
@@ -754,7 +758,7 @@ class build_clib(cmd_build_clib.build_clib):
                                    ('build_lib', 'build_clib_so'))
         #
         if self.libraries:
-            libraries = self.libraries
+            libraries = self.libraries[:]
             self.libraries = []
             self.check_library_list (libraries)
             for i, lib in enumerate(libraries):
@@ -960,8 +964,7 @@ class build_clib(cmd_build_clib.build_clib):
                 )
         return
 
-    def get_lib_fullpath (self, lib, build_dir=None):
-        build_dir = build_dir or self.build_clib
+    def get_lib_fullpath (self, lib, build_dir):
         package_dir = (lib.package or '').split('.')
         dest_dir = convert_path(lib.dest_dir or '')
         output_dir = os.path.join(build_dir, *package_dir+[dest_dir])
@@ -1032,6 +1035,13 @@ class build_ext(cmd_build_ext.build_ext):
             if sys.exec_prefix == '/usr':
                 self.library_dirs.remove(pylib_dir)
                 self.rpath.remove(pylib_dir)
+
+    def run (self):
+        if self.distribution.has_c_libraries():
+            build_clib = self.get_finalized_command('build_clib')
+            if build_clib.libraries:
+                build_clib.run()
+        cmd_build_ext.build_ext.run(self)
 
     def build_extensions(self):
         # First, sanity-check the 'extensions' list
