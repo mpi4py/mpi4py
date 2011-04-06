@@ -469,7 +469,6 @@ def run_testsuite(cmd):
         raise DistutilsError("test")
 
 from conf.mpidistutils import test
-print test.__dict__
 test.run = run_testsuite
 
 
