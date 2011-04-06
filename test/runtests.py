@@ -120,14 +120,12 @@ def writeln(message='', endl='\n'):
     sys.stderr.flush()
 
 def print_banner(options, package):
-    rank, name = getprocessorinfo()
+    r, n = getprocessorinfo()
+    fmt = "[%d@%s] %s"
     if options.verbose:
-        writeln("[%d@%s] %s"
-                % (rank, name, getpythoninfo()))
-        writeln("[%d@%s] %s"
-                % (rank, name, getlibraryinfo()))
-        writeln("[%d@%s] %s"
-                % (rank, name, getpackageinfo(package)))
+        writeln(fmt % (r, n, getpythoninfo()))
+        writeln(fmt % (r, n, getlibraryinfo()))
+        writeln(fmt % (r, n, getpackageinfo(package)))
 
 def load_tests(options, args):
     from glob import glob
