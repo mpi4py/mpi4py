@@ -194,11 +194,11 @@ def main(args=None):
     print_banner(options, package)
     testsuite = load_tests(options, args)
     success = run_tests(options, testsuite)
-    if hasattr(sys, 'gettotalrefcount'):
+    if success and hasattr(sys, 'gettotalrefcount'):
         run_tests_leaks(options, testsuite)
-    sys.exit(not success)
+    return not success
 
 if __name__ == '__main__':
     import sys
     sys.dont_write_bytecode = True
-    main()
+    sys.exit(main())

@@ -456,16 +456,22 @@ def build_sources(cmd):
 from conf.mpidistutils import build_src
 build_src.run = build_sources
 
+
 def run_testsuite(cmd):
-    sys.path.append('test')
+    from distutils.errors import DistutilsError
+    sys.path.insert(0, 'test')
     try:
         from runtests import main
     finally:
         del sys.path[-1]
-    main([])
+    err = main(cmd.args or [])
+    if err:
+        raise DistutilsError("test")
 
 from conf.mpidistutils import test
+print test.__dict__
 test.run = run_testsuite
+
 
 def main():
     run_setup()

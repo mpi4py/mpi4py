@@ -1416,11 +1416,17 @@ class install_exe(cmd_install_lib.install_lib):
 
 class test(Command):
     description = "run the test suite"
-    user_options = []
+    user_options = [
+        ('args=', None, "options"),
+        ]
+
     def initialize_options(self):
-        pass
+        self.args = None
     def finalize_options(self):
-        pass
+        if self.args:
+            self.args = split_quoted(self.args)
+        else:
+            self.args = []
     def run(self):
         pass
 
