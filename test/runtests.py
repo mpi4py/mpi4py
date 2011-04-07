@@ -37,6 +37,9 @@ def getoptionparser():
     parser.add_option("--vt",
                       action="store_true", dest="vt", default=False,
                       help="use VampirTrace for MPI profiling")
+    parser.add_option("--no-numpy",
+                      action="store_false", dest="numpy", default=True,
+                      help="disable testing with NumPy arrays")
     return parser
 
 def getbuilddir():
@@ -143,6 +146,8 @@ def load_tests(options, args):
         include = re.compile('|'.join(options.include)).search
     if options.exclude:
         exclude = re.compile('|'.join(options.exclude)).search
+    if not options.numpy:
+        sys.modules['numpy'] = None
     for testfile in testfiles:
         filename = os.path.basename(testfile)
         testname = os.path.splitext(filename)[0]
