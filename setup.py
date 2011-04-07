@@ -152,10 +152,15 @@ else:
 def ext_modules():
     modules = []
     # MPI extension module
+    from glob import glob
     MPI = dict(
         name='mpi4py.MPI',
         sources=['src/MPI.c'],
-        depends=['src/mpi4py.MPI.c'],
+        depends=(['src/mpi4py.MPI.c'] + 
+                 glob('src/*.h') +
+                 glob('src/config/*.h') +
+                 glob('src/compat/*.h')
+                 ),
         )
     def configure_mpi(ext, config_cmd):
         from textwrap import dedent
