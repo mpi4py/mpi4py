@@ -27,3 +27,5 @@ Amir Khosrowshahi
 Eilif Muller
 Andreas Klöckner
 Christoph Statz
+Thomas Spura
+Yaroslav Halchenko
