@@ -10,9 +10,9 @@ include "atimport.pxi"
 initialize()
 startup()
 
-include "asmemory.pxi"
 include "asmpistr.pxi"
 include "asbuffer.pxi"
+include "asmemory.pxi"
 include "asarray.pxi"
 include "helpers.pxi"
 include "message.pxi"

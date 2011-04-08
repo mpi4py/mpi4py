@@ -1690,10 +1690,9 @@ def Attach_buffer(memory):
     sending in buffered mode
     """
     cdef void *base = NULL
-    cdef MPI_Aint size = 0
-    global _buffer
-    _buffer = getbuffer_w(memory, &base, &size)
-    with nogil: CHKERR( MPI_Buffer_attach(base, <int>size) )
+    cdef int size = 0
+    attach_buffer(memory, &base, &size)
+    with nogil: CHKERR( MPI_Buffer_attach(base, size) )
 
 def Detach_buffer():
     """
@@ -1702,20 +1701,7 @@ def Detach_buffer():
     cdef void *base = NULL
     cdef int size = 0
     with nogil: CHKERR( MPI_Buffer_detach(&base, &size) )
-    global _buffer
-    cdef object memory = None
-    try:
-        if (_buffer is not None and
-            _buffer.base == base and
-            _buffer.size == <Py_ssize_t>size):
-            memory = _buffer.obj
-        else:
-            memory = tomemory(base, <MPI_Aint>size)
-    finally:
-        _buffer = None
-    return memory
-
-cdef _p_buffer _buffer = None
+    return detach_buffer(base, size)
 
 
 # --------------------------------------------------------------------

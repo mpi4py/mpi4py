@@ -11,14 +11,21 @@ cdef extern from "Python.h":
 
 #------------------------------------------------------------------------------
 
-cdef extern from *:
-    object allocate"PyMPI_Allocate"(Py_ssize_t, void **)
+cdef extern from "Python.h":
+    object PyMemoryView_FromObject(object)
 
-cdef extern from *:
-    int asmemory"PyMPIMemory_AsMemory"(object, void **, MPI_Aint *) except -1
-    object tomemory"PyMPIMemory_FromMemory"(void *, MPI_Aint)
+cdef inline object asmemory(object ob, void **base, MPI_Aint *size):
+    cdef _p_buffer buf = getbuffer_w(ob, base, size)
+    return buf
+
+cdef inline object tomemory(void *base, MPI_Aint size):
+    cdef _p_buffer buf = tobuffer(base, size, 0)
+    return PyMemoryView_FromObject(buf)
 
 #------------------------------------------------------------------------------
+
+cdef extern from *:
+    object allocate"PyMPI_Allocate"(Py_ssize_t, void **)
 
 cdef inline object allocate_int(int n, int **p):
      cdef int *array = NULL

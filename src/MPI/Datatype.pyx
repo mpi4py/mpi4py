@@ -727,8 +727,7 @@ def Get_address(location):
     Get the address of a location in memory
     """
     cdef void *baseptr = NULL
-    cdef Py_ssize_t buflen = 0
-    PyObject_AsReadBuffer(location, <const_void **>&baseptr, &buflen)
+    cdef tmp = getbuffer_r(location, &baseptr, NULL)
     cdef MPI_Aint address = 0
     CHKERR( MPI_Get_address(baseptr, &address) )
     return address

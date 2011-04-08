@@ -8,18 +8,21 @@ for arg in "$@" ; do
     case "$arg" in
     -v)
     QUIET=
+    shift
     ;;
     --py=*)
     PYVER=`echo A$arg | sed -e 's/A--py=//g'`
+    shift
     ;;
     --mpi=*)
     MPIIMPL=`echo A$arg | sed -e 's/A--mpi=//g'`
+    shift
     ;;
     esac
 done
 
 for py in $PYVER; do
     for mpi in $MPIIMPL; do
-        ./misc/buildtest.sh $QUIET --py="$py" --mpi="$mpi"
+        ./misc/buildtest.sh $QUIET --py="$py" --mpi="$mpi" $@
     done
 done

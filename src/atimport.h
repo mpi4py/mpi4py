@@ -204,33 +204,6 @@ PyMPI_Allocate(Py_ssize_t n, void **pp)
 
 /* ------------------------------------------------------------------------- */
 
-static int
-PyMPIMemory_AsMemory(PyObject *ob, void **base, MPI_Aint *size)
-{
-  void *p;
-  Py_ssize_t n;
-  if (PyObject_AsWriteBuffer(ob, &p, &n) < 0)
-    return -1;
-  if (base) *base = p;
-  if (size) *size = (MPI_Aint)n;
-  return 0;
-}
-
-static PyObject *
-PyMPIMemory_FromMemory(void *p, MPI_Aint n)
-{
-#if PY_MAJOR_VERSION >= 3
-  Py_buffer info; int flags = PyBUF_ND|PyBUF_STRIDES;
-  if (PyBuffer_FillInfo(&info, NULL, p, (Py_ssize_t)n, 0, flags) < 0)
-    return NULL;
-  return PyMemoryView_FromBuffer(&info);
-#else
-  return PyBuffer_FromReadWriteMemory(p, (Py_ssize_t)n);
-#endif
-}
-
-/* ------------------------------------------------------------------------- */
-
 static PyObject *
 PyMPIString_AsStringAndSize(PyObject *ob, const char **s, Py_ssize_t *n)
 {
@@ -266,12 +239,103 @@ PyMPIString_AsStringAndSize(PyObject *ob, const char **s, Py_ssize_t *n)
 
 /* ------------------------------------------------------------------------- */
 
+#if PY_VERSION_HEX < 0x02040000
+#ifndef Py_CLEAR
+#define Py_CLEAR(op)                        \
+  do {                                      \
+    if (op) {                               \
+      PyObject *_py_tmp = (PyObject *)(op); \
+      (op) = NULL;                          \
+      Py_DECREF(_py_tmp);                   \
+    }                                       \
+  } while (0)
+#endif
+#endif
+
 #if PY_VERSION_HEX < 0x02060000
+
+#ifndef PyExc_BufferError
+#define PyExc_BufferError PyExc_TypeError
+#endif/*PyExc_BufferError*/
+
+#ifndef PyBuffer_FillInfo
+static int
+PyBuffer_FillInfo(Py_buffer *view, PyObject *obj,
+                  void *buf, Py_ssize_t len,
+                  int readonly, int flags)
+{
+  if (view == NULL) return 0;
+  if (((flags & PyBUF_WRITABLE) == PyBUF_WRITABLE) &&
+      (readonly == 1)) {
+    PyErr_SetString(PyExc_BufferError,
+                    "Object is not writable.");
+    return -1;
+  }
+
+  view->obj = obj;
+  if (obj)
+    Py_INCREF(obj);
+
+  view->buf = buf;
+  view->len = len;
+  view->itemsize = 1;
+  view->readonly = readonly;
+  view->format = NULL;
+  if ((flags & PyBUF_FORMAT) == PyBUF_FORMAT)
+    view->format = "B";
+
+  view->ndim = 1;
+  view->shape = NULL;
+  if ((flags & PyBUF_ND) == PyBUF_ND)
+    view->shape = &(view->len);
+  view->strides = NULL;
+  if ((flags & PyBUF_STRIDES) == PyBUF_STRIDES)
+    view->strides = &(view->itemsize);
+  view->suboffsets = NULL;
+
+  view->internal = NULL;
+  return 0;
+}
+#endif/*PyBuffer_FillInfo*/
+
+#ifndef PyBuffer_Release
+static void
+PyBuffer_Release(Py_buffer *view)
+{
+  PyObject *obj = view->obj;
+  Py_XDECREF(obj);
+  view->obj = NULL;
+}
+#endif/*PyBuffer_Release*/
+
+#ifndef PyObject_CheckBuffer
 #define PyObject_CheckBuffer(ob) (0)
+#endif/*PyObject_CheckBuffer*/
+
+#ifndef PyObject_GetBuffer
 #define PyObject_GetBuffer(ob,view,flags) \
         (PyErr_SetString(PyExc_NotImplementedError, \
                         "new buffer interface is not available"), -1)
-#define PyBuffer_Release(view)
+#endif/*PyObject_GetBuffer*/
+
+#endif
+
+#if PY_VERSION_HEX < 0x02070000
+static PyObject *
+PyMemoryView_FromObject(PyObject *base)
+{
+  PyObject *buf;
+  if (!PyObject_CheckReadBuffer(base)) {
+    PyErr_SetString(PyExc_TypeError, "buffer object expected");
+    return NULL;
+  }
+  buf = PyBuffer_FromReadWriteObject(base, 0, Py_END_OF_BUFFER);
+  if (!buf && PyErr_ExceptionMatches(PyExc_TypeError)) {
+    PyErr_Clear();
+    buf = PyBuffer_FromObject(base, 0, Py_END_OF_BUFFER);
+  }
+  return buf;
+}
 #endif
 
 /* ------------------------------------------------------------------------- */

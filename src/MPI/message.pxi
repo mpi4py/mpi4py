@@ -5,6 +5,10 @@ cdef extern from "Python.h":
     int is_list   "PyList_Check" (object)
     int is_tuple  "PyTuple_Check" (object)
 
+cdef inline bint is_buffer(object ob):
+    return (PyObject_CheckBuffer(ob) or
+            PyObject_CheckReadBuffer(ob))
+
 #------------------------------------------------------------------------------
 
 cdef object __BOTTOM__ = <MPI_Aint>MPI_BOTTOM
@@ -21,33 +25,34 @@ cdef class _p_message:
 
 cdef _p_message message_basic(object o_buf,
                               object o_type,
-                              int readonly,
+                              bint readonly,
                               #
                               void        **baddr,
                               MPI_Aint     *bsize,
                               MPI_Datatype *btype,
                               ):
     cdef _p_message m = <_p_message>_p_message.__new__(_p_message)
-    cdef int w = (not readonly), f = (o_type is None)
-    # special-case the constant MPI_BOTTOM,
+    cdef int f = (o_type is None)
+    # special-case for BOTTOM or None,
     # an explicit MPI datatype is required
-    if o_buf is __BOTTOM__:
-        m.buf = getbuffer(None, w, f)
+    if o_buf is __BOTTOM__ or o_buf is None:
+        m.buf = newbuffer()
         m.type = <Datatype?>o_type
         baddr[0] = MPI_BOTTOM
         bsize[0] = 0
         btype[0] = m.type.ob_mpi
         return m
+    #elif obuf
     # get buffer base address and length
-    m.buf = getbuffer(o_buf, w, f)
-    baddr[0] = <void*>    m.buf.base
-    bsize[0] = <MPI_Aint> m.buf.size
+    m.buf = getbuffer(o_buf, readonly, f)
+    baddr[0] = <void*>    m.buf.view.buf
+    bsize[0] = <MPI_Aint> m.buf.view.len
     # lookup datatype if not provided or not a Datatype
     global TypeDict
     if isinstance(o_type, Datatype):
         m.type = <Datatype>o_type
     elif o_type is None:
-        m.type = TypeDict[m.buf.format]
+        m.type = TypeDict[getformat(m.buf)]
     else:
         m.type = TypeDict[o_type]
     btype[0] = m.type.ob_mpi
@@ -75,7 +80,7 @@ cdef _p_message message_simple(object msg,
     cdef object o_count = None
     cdef object o_displ = None
     cdef object o_type  = None
-    if checkbuffer(msg):
+    if is_buffer(msg):
         o_buf = msg
     elif is_list(msg) or is_tuple(msg):
         nargs = len(msg)

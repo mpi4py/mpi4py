@@ -22,12 +22,18 @@ class BaseTestWin(object):
             self.memory = array('B',[0]*10)
         refcnt = sys.getrefcount(self.memory)
         self.WIN = MPI.Win.Create(self.memory, 1, self.INFO, self.COMM)
-        self.assertEqual(sys.getrefcount(self.memory), refcnt+1)
+        if type(self.memory).__name__ == 'buffer':
+            self.assertEqual(sys.getrefcount(self.memory), refcnt+1)
+        else:
+            self.assertEqual(sys.getrefcount(self.memory), refcnt)
 
     def tearDown(self):
         refcnt = sys.getrefcount(self.memory)
         self.WIN.Free()
-        self.assertEqual(sys.getrefcount(self.memory), refcnt-1)
+        if type(self.memory).__name__ == 'buffer':
+            self.assertEqual(sys.getrefcount(self.memory), refcnt-1)
+        else:
+            self.assertEqual(sys.getrefcount(self.memory), refcnt)
         if self.mpi_memory:
             MPI.Free_mem(self.mpi_memory)
 

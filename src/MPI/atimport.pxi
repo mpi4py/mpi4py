@@ -4,8 +4,10 @@ cdef extern from "Python.h":
     int Py_IsInitialized() nogil
     void PySys_WriteStderr(char*,...)
     int Py_AtExit(void (*)())
+
     void Py_INCREF(object)
     void Py_DECREF(object)
+    void Py_CLEAR(void*)
 
 # -----------------------------------------------------------------------------
 
