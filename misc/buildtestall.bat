@@ -21,18 +21,23 @@ set MPICONF=%3
 
 set PYTHONDIR=C:\Python%PYVERSION%
 set PYTHON="%PYTHONDIR%\python.exe"
+
+set MINGWDIR=C:\MinGW
+set GCC=%MINGWDIR%\bin\gcc.exe
+
 set MPIDIR==%ProgramFiles%\MPI
 if %MPICONF%==mpich2   set MPIDIR=%ProgramFiles%\MPICH2
 if %MPICONF%==openmpi  set MPIDIR=%ProgramFiles%\OpenMPI_v1.5.3-win32
 if %MPICONF%==deinompi set MPIDIR=%ProgramFiles%\DeinoMPI
 if %MPICONF%==msmpi    set MPIDIR=%ProgramFiles%\Microsoft HPC Pack 2008 SDK
 set MPIEXEC="%MPIDIR%\bin\mpiexec.exe"
-rem if %COMPILER%==mingw32 set PATH=C:\MinGW\bin;%PATH%
 
 echo Py: %PYVERSION% - CC: %COMPILER% - MPI: %MPICONF%
 if "%PYVERSION%-%COMPILER%"=="25-msvc" goto :eof
 if not exist %PYTHON%  goto :eof
 if not exist %MPIEXEC% goto :eof
+if not exist %GCC% if %COMPILER%==mingw32 goto :eof
+if %COMPILER%==mingw32 set PATH=%MINGWDIR%\bin;%PATH%
 
 set INSTALLDIR=%TEMP%\mpi4py-buildtest
 set PYPATHDIR=%INSTALLDIR%\lib\python
@@ -42,7 +47,7 @@ set PYPATHDIR=%INSTALLDIR%\lib\python
 
 set PATH_ORIG=%PATH%
 set PATH=%MPIDIR%\bin;%PATH%
-%MPIEXEC% -n 2 %PYTHON% test\runtests.py --path=%PYPATHDIR% %*
+%MPIEXEC% -n 2 %PYTHON% test\runtests.py --path=%PYPATHDIR%
 set PATH=%PATH_ORIG%
 
 rmdir /S /Q %INSTALLDIR% > NUL
