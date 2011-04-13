@@ -11,21 +11,16 @@ FIND_PACKAGE(MPI)
 SET(mpi4py_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 SET(mpi4py_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/mpi4py")
 
-SET(mpi4py_PYTHON_FILES
-  __init__.py
-  rc.py
-  )
-SET(mpi4py_HEADER_FILES
-  include/mpi4py/__init__.pxd
-  include/mpi4py/__init__.pyx
-  include/mpi4py/MPI.pxd
-  include/mpi4py/mpi.pxi
-  include/mpi4py/mpi_c.pxd
-  include/mpi4py/mpi4py.h
-  include/mpi4py/mpi4py.MPI.h
-  include/mpi4py/mpi4py.MPI_api.h
-  include/mpi4py/mpi4py.i
-  )
+FILE(GLOB mpi4py_PYTHON_FILES 
+     RELATIVE ${mpi4py_SOURCE_DIR}
+     ${mpi4py_SOURCE_DIR}/*.py)
+
+FILE(GLOB mpi4py_HEADER_FILES 
+     RELATIVE ${mpi4py_SOURCE_DIR}
+     ${mpi4py_SOURCE_DIR}/include/mpi4py/*.px[di]
+     ${mpi4py_SOURCE_DIR}/include/mpi4py/*.pyx
+     ${mpi4py_SOURCE_DIR}/include/mpi4py/*.[hi]
+    )
 
 FOREACH(file
         ${mpi4py_PYTHON_FILES}
@@ -42,7 +37,6 @@ FOREACH(file
   SET(mpi4py_OUTPUT_FILES ${mpi4py_OUTPUT_FILES} ${tgt})
 ENDFOREACH(file)
 
-
 FOREACH(file ${mpi4py_PYTHON_FILES})
   SET(mpi4py_py  ${mpi4py_py}  "${mpi4py_BINARY_DIR}/${file}")
   SET(mpi4py_pyc ${mpi4py_pyc} "${mpi4py_BINARY_DIR}/${file}c")
@@ -50,7 +44,7 @@ FOREACH(file ${mpi4py_PYTHON_FILES})
 ENDFOREACH(file)
 ADD_CUSTOM_COMMAND(
   COMMAND ${CMAKE_COMMAND} ARGS -E echo 'from compileall import compile_dir'     > compile_py
-  COMMAND ${CMAKE_COMMAND} ARGS -E echo 'compile_dir(\"${mpi4py_BINARY_DIR}\")' >> "compile_py"
+  COMMAND ${CMAKE_COMMAND} ARGS -E echo 'compile_dir(\"${mpi4py_BINARY_DIR}\")' >> compile_py
   COMMAND ${PYTHON_EXECUTABLE} ARGS compile_py
   COMMAND ${PYTHON_EXECUTABLE} ARGS -O compile_py
   COMMAND ${CMAKE_COMMAND} ARGS -E remove compile_py
@@ -148,3 +142,40 @@ SET_TARGET_PROPERTIES(
 )
 TARGET_LINK_LIBRARIES(mpi4py.dl ${PYTHON_LIBRARY})
 TARGET_LINK_LIBRARIES(mpi4py.dl ${CMAKE_DL_LIBS})
+
+
+# --- mpi4py/bin/python-mpi ---
+ADD_EXECUTABLE(python-mpi "${mpi4py_SOURCE_DIR}/python.c")
+SET_TARGET_PROPERTIES(
+  python-mpi PROPERTIES
+  COMPILE_FLAGS "${MPI_COMPILE_FLAGS}"
+  LINK_FLAGS "${MPI_LINK_FLAGS}"
+  RUNTIME_OUTPUT_DIRECTORY "${mpi4py_BINARY_DIR}/bin"
+  LINKER_LANGUAGE C
+)
+TARGET_LINK_LIBRARIES(python-mpi ${PYTHON_LIBRARY})
+TARGET_LINK_LIBRARIES(python-mpi ${MPI_LIBRARIES})
+
+# --- mpi4py/lib-pmpi/libmpe.so ---
+ADD_LIBRARY(pmpi-mpe MODULE "${mpi4py_SOURCE_DIR}/pmpi-mpe.c")
+SET_TARGET_PROPERTIES(
+  pmpi-mpe PROPERTIES
+  OUTPUT_NAME "mpe"
+  LIBRARY_OUTPUT_DIRECTORY "${mpi4py_BINARY_DIR}/lib-pmpi"
+  RUNTIME_OUTPUT_DIRECTORY "${mpi4py_BINARY_DIR}/lib-pmpi"
+  LINKER_LANGUAGE C
+)
+TARGET_LINK_LIBRARIES(pmpi-mpe ${MPE_LIBRARIES})
+TARGET_LINK_LIBRARIES(pmpi-mpe ${MPI_LIBRARIES})
+
+# --- mpi4py/lib-pmpi/libvt.so ---
+ADD_LIBRARY(pmpi-vt MODULE "${mpi4py_SOURCE_DIR}/pmpi-vt.c")
+SET_TARGET_PROPERTIES(
+  pmpi-vt PROPERTIES
+  OUTPUT_NAME "vt"
+  LIBRARY_OUTPUT_DIRECTORY "${mpi4py_BINARY_DIR}/lib-pmpi"
+  RUNTIME_OUTPUT_DIRECTORY "${mpi4py_BINARY_DIR}/lib-pmpi"
+  LINKER_LANGUAGE C
+)
+TARGET_LINK_LIBRARIES(pmpi-vt ${VT_LIBRARIES})
+TARGET_LINK_LIBRARIES(pmpi-vt ${MPI_LIBRARIES})
