@@ -184,9 +184,7 @@ cdef void atexit() nogil:
 # Vile hack for raising a exception and not contaminate the traceback
 
 cdef extern from *:
-    void __Pyx_Raise(object, object, void*)
-
-cdef extern from *:
+    void PyErr_SetObject(void*, object)
     void *PyExc_RuntimeError
     void *PyExc_NotImplementedError
 
@@ -195,18 +193,17 @@ cdef object MPIException = <object>PyExc_RuntimeError
 cdef int PyMPI_Raise(int ierr) except -1 with gil:
     if ierr != -1:
         if (<void*>MPIException) != NULL:
-            __Pyx_Raise(MPIException, ierr, NULL)
+            PyErr_SetObject(<void*>MPIException, <long>ierr)
         else:
-            __Pyx_Raise(<object>PyExc_RuntimeError, ierr, NULL)
+            PyErr_SetObject(PyExc_RuntimeError, <long>ierr)
     else:
-        __Pyx_Raise(<object>PyExc_NotImplementedError, None, NULL)
+        PyErr_SetObject(PyExc_NotImplementedError, None)
     return 0
 
 cdef inline int CHKERR(int ierr) nogil except -1:
     if ierr == 0: return 0
     PyMPI_Raise(ierr)
     return -1
-
 
 cdef inline void print_traceback():
     cdef object sys, traceback
