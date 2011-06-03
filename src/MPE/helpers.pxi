@@ -12,16 +12,14 @@ cdef inline object toBytes(object ob, char *p[]):
 # -----------------------------------------------------------------------------
 
 cdef extern from *:
-    void __Pyx_Raise(object, object, void*)
-if 0: raise RuntimeError # DO NOT REMOVE this line !!
+    void PyErr_SetObject(object, object)
 
 cdef int PyMPE_Raise(int ierr) except -1 with gil:
-    __Pyx_Raise(RuntimeError, "MPE logging error [code: %d]" % ierr, NULL)
+    PyErr_SetObject(RuntimeError, <long>ierr)
     return 0
 
 cdef inline int CHKERR(int ierr) nogil except -1:
-    if ierr == 0:
-        return 0
+    if ierr == 0: return 0
     PyMPE_Raise(ierr)
     return -1
 
