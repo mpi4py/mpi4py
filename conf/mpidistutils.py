@@ -516,7 +516,7 @@ class config(cmd_config.config):
         log.info("checking for header '%s' ..." % header)
         body = "int main(int n, char**v) { return 0; }"
         ok = self.try_compile(body, list(headers) + [header], include_dirs)
-        log.info(ok and 'succes!' or 'failure.')
+        log.info(ok and 'success!' or 'failure.')
         return ok
 
     def check_macro (self, macro, headers=None, include_dirs=None):
@@ -560,9 +560,27 @@ class config(cmd_config.config):
                            libraries, library_dirs, lang=lang)
         return ok
 
+    def check_symbol (self, symbol, type="int",
+                      headers=None, include_dirs=None,
+                      libraries=None, library_dirs=None,
+                      decl=0, lang="c"):
+        log.info("checking for symbol '%s' ..." % symbol)
+        body = []
+        if decl:
+            body.append("%s %s;" % (type, symbol))
+        body.append("int main (int n, char**v) {")
+        body.append("  %s v; v = %s;" % (type, symbol))
+        body.append("  return 0;")
+        body.append("}")
+        body = "\n".join(body) + "\n"
+        ok = self.try_link(body, headers, include_dirs,
+                           libraries, library_dirs, lang=lang)
+        return ok
+
     check_hdr  = check_header
     check_lib  = check_library
     check_func = check_function
+    check_sym  = check_symbol
 
     def run (self):
         #

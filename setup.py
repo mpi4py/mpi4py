@@ -162,12 +162,18 @@ def ext_modules():
                  glob('src/compat/*.h')
                  ),
         )
+    modules.append(MPI)
     def configure_mpi(ext, config_cmd):
         from textwrap import dedent
         from distutils import log
         from distutils.errors import DistutilsPlatformError
+        #
         log.info("checking for MPI compile and link ...")
+        errmsg = ("Cannot found 'mpi.h' header. "
+                  "Check your configuration!!!")
         ok = config_cmd.check_header("mpi.h", headers=["stdlib.h"])
+        if not ok: raise DistutilsPlatformError(errmsg)
+        headers = ["stdlib.h", "mpi.h"]
         ConfigTest = dedent("""\
         int main(int argc, char **argv)
         {
@@ -177,14 +183,25 @@ def ext_modules():
           return 0;
         }
         """)
-        headers = ["stdlib.h", "mpi.h"]
-        errmsg = "Cannot %s MPI programs. Check your configuration!!!"
+        errmsg = ("Cannot %s MPI programs. "
+                  "Check your configuration!!!")
         ok = config_cmd.try_compile(ConfigTest, headers=headers)
         if not ok: raise DistutilsPlatformError(errmsg % "compile")
         ok = config_cmd.try_link(ConfigTest, headers=headers)
         if not ok: raise DistutilsPlatformError(errmsg % "link")
+        #
+        log.info("checking for missing MPI functions ...")
+        for prefix, suffixes in (
+            ("MPI_Type_create_f90_", ("integer", "real", "complex")),
+            ):
+            for suffix in suffixes:
+                function = prefix + suffix
+                ok = config_cmd.check_function(
+                    function, decl=1, call=1)
+                if not ok:
+                    macro = "PyMPI_MISSING_" + function
+                    ext.define_macros += [(macro, 1)]
     MPI['configure'] = configure_mpi
-    modules.append(MPI)
     # MPE extension module
     MPE = dict(
         name='mpi4py.MPE',
@@ -195,6 +212,7 @@ def ext_modules():
                  'src/MPE/mpe-log.c',
                  ],
         )
+    modules.append(MPE)
     def configure_mpe(ext, config_cmd):
         from distutils import log
         log.info("checking for MPE availability ...")
@@ -220,7 +238,6 @@ def ext_modules():
                 ext.libraries += ['mpe']
             return None
     MPE['configure'] = configure_mpe
-    modules.append(MPE)
     # custom dl extension module
     dl = dict(
         name='mpi4py.dl',
@@ -228,6 +245,8 @@ def ext_modules():
         sources=['src/dynload.c'],
         depends=['src/dynload.h'],
         )
+    if os.name == 'posix':
+        modules.append(dl)
     def configure_dl(ext, config_cmd):
         from distutils import log
         log.info("checking for dlopen() availability ...")
@@ -238,10 +257,8 @@ def ext_modules():
         ok = config_cmd.check_function("dlopen",
                                        libraries=['dl'],
                                        decl=1, call=1)
-        #if ok: ext.define_macros += [('HAVE_DLOPEN', 1)]
+        if ok: ext.define_macros += [('HAVE_DLOPEN', 1)]
     dl['configure'] = configure_dl
-    if os.name == 'posix':
-        modules.append(dl)
     #
     return modules
 
