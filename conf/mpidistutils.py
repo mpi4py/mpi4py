@@ -188,6 +188,11 @@ def customize_compiler(compiler, lang=None,
             compiler.compiler_so[i] = compiler.compiler_cxx[j]
             try: compiler.compiler_so.remove('-Wstrict-prototypes')
             except: pass
+    if compiler.compiler_type == 'msvc':
+        if not compiler.initialized:
+            compiler.initialize()
+        compiler.ldflags_shared.append('/MANIFEST')
+        compiler.ldflags_shared_debug.append('/MANIFEST')
 
 # -----------------------------------------------------------------------------
 
