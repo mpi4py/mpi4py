@@ -385,9 +385,9 @@ cdef class Datatype:
         cdef int *i = NULL
         cdef MPI_Aint *a = NULL
         cdef MPI_Datatype *d = NULL
-        cdef tmp1 = allocate(ni*sizeof(int), <void**>&i)
-        cdef tmp2 = allocate(na*sizeof(MPI_Aint), <void**>&a)
-        cdef tmp3 = allocate(nd*sizeof(MPI_Datatype), <void**>&d)
+        cdef tmp1 = allocate(ni, sizeof(int), <void**>&i)
+        cdef tmp2 = allocate(na, sizeof(MPI_Aint), <void**>&a)
+        cdef tmp3 = allocate(nd, sizeof(MPI_Datatype), <void**>&d)
         CHKERR( MPI_Type_get_contents(self.ob_mpi, ni, na, nd, i, a, d) )
         cdef int k = 0
         cdef object integers  = [i[k] for k from 0 <= k < ni]
@@ -408,9 +408,9 @@ cdef class Datatype:
         cdef int *i = NULL
         cdef MPI_Aint *a = NULL
         cdef MPI_Datatype *d = NULL
-        cdef tmp1 = allocate(ni*sizeof(int), <void**>&i)
-        cdef tmp2 = allocate(na*sizeof(MPI_Aint), <void**>&a)
-        cdef tmp3 = allocate(nd*sizeof(MPI_Datatype), <void**>&d)
+        cdef tmp1 = allocate(ni, sizeof(int), <void**>&i)
+        cdef tmp2 = allocate(na, sizeof(MPI_Aint), <void**>&a)
+        cdef tmp3 = allocate(nd, sizeof(MPI_Datatype), <void**>&d)
         CHKERR( MPI_Type_get_contents(self.ob_mpi, ni, na, nd, i, a, d) )
         # manage in advance the contained datatypes
         cdef int k = 0, s1, e1, s2, e2, s3, e3, s4, e4

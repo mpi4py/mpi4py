@@ -169,9 +169,10 @@ PyMPI_AtExitMPI(MPI_Comm comm, int k, void *v, void *xs)
 /* ------------------------------------------------------------------------- */
 
 static PyObject *
-PyMPI_Allocate(Py_ssize_t n, void **pp)
+PyMPI_Allocate(Py_ssize_t m, size_t b, void **pp)
 {
   PyObject *ob;
+  Py_ssize_t n = m * (Py_ssize_t)b;
   if (n > PY_SSIZE_T_MAX)
     return PyErr_NoMemory();
   else if (n < 0) {

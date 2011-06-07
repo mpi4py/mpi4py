@@ -44,7 +44,7 @@ cdef inline object asarray_int(object sequence,
      cdef Py_ssize_t i = 0, n = len(sequence)
      if size != n: raise ValueError(
          "expecting %d items, got %d" % (size, n))
-     cdef object ob = allocate(n*sizeof(int), <void**>&array)
+     cdef object ob = allocate(n, sizeof(int), <void**>&array)
      for i from 0 <= i < n:
          array[i] = sequence[i]
      p[0] = array
@@ -56,7 +56,7 @@ cdef inline object asarray_Aint(object sequence,
      cdef Py_ssize_t i = 0, n = len(sequence)
      if size != n: raise ValueError(
          "expecting %d items, got %d" % (size, n))
-     cdef object ob = allocate(n*sizeof(MPI_Aint), <void**>&array)
+     cdef object ob = allocate(n, sizeof(MPI_Aint), <void**>&array)
      for i from 0 <= i < n:
          array[i] = sequence[i]
      p[0] = array
@@ -68,7 +68,7 @@ cdef inline object asarray_Datatype(object sequence,
      cdef Py_ssize_t i = 0, n = len(sequence)
      if size != n: raise ValueError(
          "expecting %d items, got %d" % (size, n))
-     cdef object ob = allocate(n*sizeof(MPI_Datatype), <void**>&array)
+     cdef object ob = allocate(n, sizeof(MPI_Datatype), <void**>&array)
      for i from 0 <= i < n:
          array[i] = (<Datatype?>sequence[i]).ob_mpi
      p[0] = array
@@ -83,14 +83,14 @@ cdef inline object asarray_Info(object sequence,
      if sequence is None or isinstance(sequence, Info):
          if sequence is not None:
              info = (<Info?>sequence).ob_mpi
-         ob = allocate(size*sizeof(MPI_Info), <void**>&array)
+         ob = allocate(size, sizeof(MPI_Info), <void**>&array)
          for i from 0 <= i < size:
              array[i] = info
      else:
          n = len(sequence)
          if size != n: raise ValueError(
              "expecting %d items, got %d" % (size, n))
-         ob = allocate(size*sizeof(MPI_Datatype), <void**>&array)
+         ob = allocate(size, sizeof(MPI_Datatype), <void**>&array)
          for i from 0 <= i < size:
              array[i] = (<Info?>sequence[i]).ob_mpi
      p[0] = array
@@ -104,7 +104,7 @@ cdef inline object asarray_str(object sequence,
      if size != n: raise ValueError(
          "expecting %d items, got %d" % (size, n))
      cdef char** array = NULL
-     cdef object ob = allocate((n+1)*sizeof(char*), <void**>&array)
+     cdef object ob = allocate((n+1), sizeof(char*), <void**>&array)
      for i from 0 <= i < n:
          sequence[i] = asmpistr(sequence[i], &array[i], NULL)
      array[n] = NULL
@@ -127,7 +127,7 @@ cdef inline object asarray_argvs(object sequence,
      if size != n: raise ValueError(
          "expecting %d items, got %d" % (size, n))
      cdef char*** array = NULL
-     cdef object ob = allocate((n+1)*sizeof(char**), <void**>&array)
+     cdef object ob = allocate((n+1), sizeof(char**), <void**>&array)
      for i from 0 <= i < n:
          sequence[i] = asarray_argv(sequence[i], &array[i])
      array[n] = NULL

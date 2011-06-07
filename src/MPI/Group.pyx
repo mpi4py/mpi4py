@@ -169,8 +169,8 @@ cdef class Group:
         """
         cdef int *p = NULL, (*ranges)[3]# = NULL ## XXX cython fails
         ranges = NULL
-        cdef int i = 0, n = len(ranks)
-        cdef tmp1 = allocate(n*sizeof(int[3]), <void**>&ranges)
+        cdef int i = 0, n = <int>len(ranks)
+        cdef tmp1 = allocate(n, sizeof(int[3]), <void**>&ranges)
         for i from 0 <= i < n:
             p = <int*> ranges[i]
             p[0], p[1], p[2] = ranks[i]
@@ -185,8 +185,8 @@ cdef class Group:
         """
         cdef int *p = NULL, (*ranges)[3]# = NULL ## XXX cython fails
         ranges = NULL
-        cdef int i = 0, n = len(ranks)
-        cdef tmp1 = allocate(n*sizeof(int[3]), <void**>&ranges)
+        cdef int i = 0, n = <int>len(ranks)
+        cdef tmp1 = allocate(n, sizeof(int[3]), <void**>&ranges)
         for i from 0 <= i < n:
             p = <int*> ranges[i]
             p[0], p[1], p[2] = ranks[i]

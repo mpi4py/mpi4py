@@ -174,7 +174,7 @@ cdef class Request:
         """
         Test for completion of some previously initiated requests
         """
-        cdef int incount = len(requests)
+        cdef int incount = <int>len(requests)
         cdef MPI_Request *irequests = NULL
         cdef int outcount = MPI_UNDEFINED, *iindices = NULL
         cdef MPI_Status *istatuses = MPI_STATUSES_IGNORE

@@ -1359,7 +1359,7 @@ def Compute_dims(int nnodes, dims):
     """
     cdef int ndims=0, *idims = NULL
     try:
-        ndims = len(dims)
+        ndims = <int>len(dims)
     except:
         ndims = dims
         dims = [0] * ndims
