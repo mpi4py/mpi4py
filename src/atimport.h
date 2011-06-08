@@ -190,7 +190,7 @@ PyMPI_Allocate(Py_ssize_t m, size_t b, void **pp)
     *pp = (void *)PyByteArray_AS_STRING(ob);
 #else
   {
-    void *p = PyMem_Malloc(n);
+    void *p = PyMem_Malloc((size_t)n);
     if (!p)
       return PyErr_NoMemory();
     ob = PyCObject_FromVoidPtr(p, PyMem_Free);

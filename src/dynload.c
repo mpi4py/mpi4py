@@ -70,12 +70,15 @@ static PyMethodDef dl_methods[] = {
 
 #if PY_MAJOR_VERSION >= 3
 static struct PyModuleDef dl_module = {
-  PyModuleDef_HEAD_INIT, /* m_base    */
-  (char *)"dl",          /* m_name    */
-  NULL,                  /* m_doc     */
-  -1,                    /* m_size    */
-  dl_methods,            /* m_methods */
-  NULL,
+  PyModuleDef_HEAD_INIT, /* m_base     */
+  (char *)"dl",          /* m_name     */
+  NULL,                  /* m_doc      */
+  -1,                    /* m_size     */
+  dl_methods,            /* m_methods  */
+  NULL,                  /* m_reload   */
+  NULL,                  /* m_traverse */
+  NULL,                  /* m_clear    */
+  NULL                   /* m_free     */
 };
 #endif
 
