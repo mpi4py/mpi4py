@@ -1,6 +1,5 @@
-/* Author:  Lisandro Dalcin
- * Contact: dalcinl@gmail.com
- */
+/* Author:  Lisandro Dalcin   */
+/* Contact: dalcinl@gmail.com */
 
 /* -------------------------------------------------------------------------- */
 
@@ -14,32 +13,11 @@
 #include <floatingpoint.h>
 #endif
 
-#if PY_MAJOR_VERSION >= 3
-#include <locale.h>
-#endif
-
-/* -------------------------------------------------------------------------- */
-
 static int PyMPI_Main(int, char **);
-
 #if PY_MAJOR_VERSION >= 3
-static wchar_t ** mk_wargs(int, char **);
-static wchar_t ** cp_wargs(int, wchar_t **);
-static void       rm_wargs(wchar_t **, int);
-#endif
-
-#if PY_MAJOR_VERSION >= 3
-#if PY_VERSION_HEX < 0x03020000
-static wchar_t *_Py_char2wchar(const char *, size_t *);
-#elif defined(__APPLE__)
-#ifdef __cplusplus
-extern "C" {
-#endif
-extern wchar_t* _Py_DecodeUTF8_surrogateescape(const char *s, Py_ssize_t size);
-#ifdef __cplusplus
-}
-#endif
-#endif
+static int Py3_Main(int, char **);
+#else
+static int Py2_Main(int, char **);
 #endif
 
 /* -------------------------------------------------------------------------- */
@@ -55,47 +33,36 @@ main(int argc, char **argv)
   return PyMPI_Main(argc, argv);
 }
 
-/* -------------------------------------------------------------------------- */
-
 static int
 PyMPI_Main(int argc, char **argv)
 {
-  int sts=0, flag_i=1, flag_f=1;
+  int sts=0, flag=1, finalize=0;
 
   /* MPI initalization */
-  MPI_Initialized(&flag_i);
-  if (!flag_i) {
+  (void)MPI_Initialized(&flag);
+  if (!flag) {
 #if (defined(MPI_VERSION) && (MPI_VERSION > 1))
     int required = MPI_THREAD_MULTIPLE;
     int provided = MPI_THREAD_SINGLE;
-    MPI_Init_thread(&argc, &argv, required, &provided);
+    (void)MPI_Init_thread(&argc, &argv, required, &provided);
 #else
-    MPI_Init(&argc, &argv);
+    (void)MPI_Init(&argc, &argv);
 #endif
-    flag_i = 1;
+    finalize = 1;
   }
 
   /* Python main */
 #if PY_MAJOR_VERSION >= 3
-  {
-    wchar_t **wargv  = mk_wargs(argc, argv);
-    wchar_t **wargv2 = cp_wargs(argc, wargv);
-    if (wargv && wargv2)
-      sts = Py_Main(argc, wargv);
-    else
-      sts = 1;
-    rm_wargs(wargv2, 1);
-    rm_wargs(wargv,  0);
-  }
+  sts = Py3_Main(argc, argv);
 #else
-  sts = Py_Main(argc, argv);
+  sts = Py2_Main(argc, argv);
 #endif
 
   /* MPI finalization */
-  MPI_Finalized(&flag_f);
-  if (!flag_f) {
-    if (sts != 0) MPI_Abort(MPI_COMM_WORLD, sts);
-    if (flag_i) MPI_Finalize();
+  (void)MPI_Finalized(&flag);
+  if (!flag) {
+    if (sts != 0) (void)MPI_Abort(MPI_COMM_WORLD, sts);
+    if (finalize) (void)MPI_Finalize();
   }
 
   return sts;
@@ -103,7 +70,46 @@ PyMPI_Main(int argc, char **argv)
 
 /* -------------------------------------------------------------------------- */
 
+#if PY_MAJOR_VERSION <= 2
+static int
+Py2_Main(int argc, char **argv)
+{
+  return Py_Main(argc,argv);
+}
+#endif
+
 #if PY_MAJOR_VERSION >= 3
+#include <locale.h>
+static wchar_t **mk_wargs(int, char **);
+static wchar_t **cp_wargs(int, wchar_t **);
+static void rm_wargs(wchar_t **, int);
+
+static int
+Py3_Main(int argc, char **argv)
+{
+  int sts = 0;
+  wchar_t **wargv  = mk_wargs(argc, argv);
+  wchar_t **wargv2 = cp_wargs(argc, wargv);
+  if (wargv && wargv2)
+    sts = Py_Main(argc, wargv);
+  else
+    sts = 1;
+  rm_wargs(wargv2, 1);
+  rm_wargs(wargv,  0);
+  return sts;
+}
+
+#if PY_VERSION_HEX < 0x03020000
+static wchar_t *_Py_char2wchar(const char *, size_t *);
+#elif defined(__APPLE__)
+#ifdef __cplusplus
+extern "C" {
+#endif
+extern wchar_t* _Py_DecodeUTF8_surrogateescape(const char *, Py_ssize_t);
+#ifdef __cplusplus
+}
+#endif
+#endif
 
 static wchar_t **
 mk_wargs(int argc, char **argv)
@@ -169,9 +175,7 @@ rm_wargs(wchar_t **args, int deep)
     PyMem_Free(args);
 }
 
-#endif /* !(PY_MAJOR_VERSION >= 3) */
-
-#if PY_MAJOR_VERSION >= 3 && PY_VERSION_HEX < 0x03020000
+#if PY_VERSION_HEX < 0x03020000
 static wchar_t *
 _Py_char2wchar(const char* arg, size_t *size)
 {
@@ -279,6 +283,7 @@ _Py_char2wchar(const char* arg, size_t *size)
   fprintf(stderr, "out of memory\n");
   return NULL;
 }
+#endif
 
 #endif /* !(PY_MAJOR_VERSION >= 3) */
 
