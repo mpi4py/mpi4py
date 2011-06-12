@@ -17,7 +17,8 @@ MPI.C_DOUBLE_COMPLEX, MPI.C_LONG_DOUBLE_COMPLEX,
 ]
 datatypes_f = [
 MPI.CHARACTER, MPI.LOGICAL, MPI.INTEGER,
-MPI.REAL, MPI.DOUBLE_PRECISION, MPI.COMPLEX, MPI.DOUBLE_COMPLEX,
+MPI.REAL, MPI.DOUBLE_PRECISION,
+MPI.COMPLEX, MPI.DOUBLE_COMPLEX,
 ]
 datatypes_f90 = [
 MPI.LOGICAL1, MPI.LOGICAL2, MPI.LOGICAL4, MPI.LOGICAL8,
@@ -62,11 +63,13 @@ class TestDatatype(unittest.TestCase):
                 envelope = dtype.Get_envelope()
             except NotImplementedError:
                 return
+            if ('LAM/MPI' == MPI.get_vendor()[0] and
+                "COMPLEX" in dtype.name): continue
             ni, na, nd, combiner = envelope
+            self.assertEqual(combiner, MPI.COMBINER_NAMED)
             self.assertEqual(ni, 0)
             self.assertEqual(na, 0)
             self.assertEqual(nd, 0)
-            self.assertEqual(combiner, MPI.COMBINER_NAMED)
 
     def _test_derived_contents(self, oldtype, factory, newtype):
         try:
@@ -256,6 +259,7 @@ elif _name == 'MPICH1':
     combiner_map[MPI.COMBINER_VECTOR]  = None
     combiner_map[MPI.COMBINER_HVECTOR] = None
     combiner_map[MPI.COMBINER_INDEXED] = None
+    for t in datatypes_f: datatypes.remove(t)
 elif MPI.Get_version() < (2, 0):
     combiner_map = None
 if _name == 'Open MPI':

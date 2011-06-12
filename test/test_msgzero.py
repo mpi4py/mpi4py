@@ -34,9 +34,12 @@ class BaseTestMessageZero(object):
         comm.Reduce(self.null_b, self.null_b)
         comm.Allreduce(self.null_b, self.null_b)
         comm.Reduce_scatter_block(self.null_b, self.null_b)
-        comm.Reduce_scatter(self.null_b, self.null_b)
-        comm.Scan(self.null_b, self.null_b)
-        comm.Exscan(self.null_b, self.null_b)
+        rcnt = [0]*comm.Get_size()
+        comm.Reduce_scatter(self.null_b, self.null_b, rcnt)
+        try: comm.Scan(self.null_b, self.null_b)
+        except NotImplementedError: pass
+        try: comm.Exscan(self.null_b, self.null_b)
+        except NotImplementedError: pass
 
 class TestMessageZeroSelf(BaseTestMessageZero, unittest.TestCase):
     COMM = MPI.COMM_SELF
