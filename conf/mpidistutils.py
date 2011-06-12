@@ -1290,7 +1290,7 @@ class build_exe(build_ext):
                 for flag in split_quoted(ldshflag):
                     if flag.startswith(fwkdir):
                         fwkpath = os.path.join(fwkprefix, flag)
-                        ldshflag = ldshflag.replace(fwkdir, fwkpath)
+                        ldshflag = ldshflag.replace(flag, fwkpath)
         if sys.platform.startswith('aix'):
             python_lib = sysconfig.get_python_lib(standard_lib=1)
             python_exp = os.path.join(python_lib, 'config', 'python.exp')
