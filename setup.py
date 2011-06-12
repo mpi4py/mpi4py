@@ -149,6 +149,137 @@ else:
     def whole_archive(name):
         return ['-l%s' % name]
 
+def configure_mpi(ext, config_cmd):
+    from textwrap import dedent
+    from distutils import log
+    from distutils.errors import DistutilsPlatformError
+    #
+    log.info("checking for MPI compile and link ...")
+    errmsg = ("Cannot found 'mpi.h' header. "
+              "Check your configuration!!!")
+    ok = config_cmd.check_header("mpi.h", headers=["stdlib.h"])
+    if not ok: raise DistutilsPlatformError(errmsg)
+    headers = ["stdlib.h", "mpi.h"]
+    ConfigTest = dedent("""\
+    int main(int argc, char **argv)
+    {
+      int ierr;
+      ierr = MPI_Init(&argc, &argv);
+      ierr = MPI_Finalize();
+      return 0;
+    }
+    """)
+    errmsg = ("Cannot %s MPI programs. "
+              "Check your configuration!!!")
+    ok = config_cmd.try_compile(ConfigTest, headers=headers)
+    if not ok: raise DistutilsPlatformError(errmsg % "compile")
+    ok = config_cmd.try_link(ConfigTest, headers=headers)
+    if not ok: raise DistutilsPlatformError(errmsg % "link")
+    #
+    log.info("checking for missing MPI functions ...")
+    for prefix, suffixes in (
+        ("MPI_Type_create_f90_", ("integer", "real", "complex")),
+        ):
+        for suffix in suffixes:
+            function = prefix + suffix
+            ok = config_cmd.check_function(
+                function, decl=1, call=1)
+            if not ok:
+                macro = "PyMPI_MISSING_" + function
+                ext.define_macros += [(macro, 1)]
+
+def configure_mpe(ext, config_cmd):
+    from distutils import log
+    log.info("checking for MPE availability ...")
+    ok = (config_cmd.check_header("mpe.h",
+                                  headers=["stdlib.h",
+                                           "mpi.h",])
+          and
+          config_cmd.check_library('mpe')
+          and
+          config_cmd.check_function("MPE_Init_log",
+                                    headers=["stdlib.h",
+                                             "mpi.h",
+                                             "mpe.h"],
+                                    libraries=['mpe'],
+                                    decl=0, call=1)
+          )
+    if ok:
+        ext.define_macros += [('HAVE_MPE', 1)]
+        if linux or darwin or solaris:
+            ext.extra_link_args +=  whole_archive('lmpe')
+            ext.extra_link_args +=  ['-lmpe']
+        else:
+            ext.libraries += ['mpe']
+
+def configure_dl(ext, config_cmd):
+    from distutils import log
+    log.info("checking for dlopen() availability ...")
+    ok = config_cmd.check_header("dlfcn.h")
+    if ok : ext.define_macros += [('HAVE_DLFCN_H', 1)]
+    ok = config_cmd.check_library('dl')
+    if ok: ext.libraries += ['dl']
+    ok = config_cmd.check_function("dlopen",
+                                   libraries=['dl'],
+                                   decl=1, call=1)
+    if ok: ext.define_macros += [('HAVE_DLOPEN', 1)]
+
+def configure_libmpe(lib, config_cmd):
+    ok = config_cmd.check_library('mpe')
+    if ok:
+        if linux or darwin or solaris:
+            lib.extra_link_args += whole_archive('lmpe')
+            lib.extra_link_args += ['-lmpe']
+        else:
+            lib.libraries += ['mpe']
+
+def configure_libvt(lib, config_cmd):
+    if lib.name == 'vt':
+        ok = False
+        for vt_lib in ('vt-mpi', 'vt.mpi'):
+            ok = config_cmd.check_library(vt_lib)
+            if ok: break
+        if ok:
+            if linux or darwin or solaris:
+                lib.extra_link_args += whole_archive(vt_lib)
+                lib.extra_link_args += ['-lotf', '-lz', '-ldl']
+            else:
+                lib.libraries += [vt_lib, 'otf', 'z', 'dl'],
+    elif lib.name in ('vt-mpi', 'vt-hyb'):
+        vt_lib = lib.name
+        ok = config_cmd.check_library(vt_lib)
+        if ok: lib.libraries = [vt_lib]
+
+def configure_pyexe(exe, config_cmd):
+    from distutils import sysconfig
+    from distutils.util import split_quoted
+    if sys.platform.startswith('win'):
+        return
+    libraries = []
+    library_dirs = []
+    link_args = []
+    if not sysconfig.get_config_var('Py_ENABLE_SHARED'):
+        py_version = sysconfig.get_python_version()
+        py_abiflags = getattr(sys, 'abiflags', '')
+        libraries = ['python' + py_version + py_abiflags]
+    cfg_vars = sysconfig.get_config_vars()
+    if sys.platform == 'darwin':
+        fwkdir = cfg_vars.get('PYTHONFRAMEWORKDIR')
+        if (fwkdir and fwkdir != 'no-framework' and
+            fwkdir in cfg_vars.get('LINKFORSHARED', '')):
+            del libraries[:]
+    for var in ('LIBDIR', 'LIBPL'):
+        library_dirs += split_quoted(cfg_vars.get(var, ''))
+    for var in ('LDFLAGS',
+                'LIBS', 'MODLIBS', 'SYSLIBS',
+                'LDLAST'):
+        link_args += split_quoted(cfg_vars.get(var, ''))
+
+    exe.libraries += libraries
+    exe.library_dirs += library_dirs
+    exe.extra_link_args += link_args
+
+
 def ext_modules():
     modules = []
     # MPI extension module
@@ -161,47 +292,9 @@ def ext_modules():
                  glob('src/config/*.h') +
                  glob('src/compat/*.h')
                  ),
+        configure=configure_mpi,
         )
     modules.append(MPI)
-    def configure_mpi(ext, config_cmd):
-        from textwrap import dedent
-        from distutils import log
-        from distutils.errors import DistutilsPlatformError
-        #
-        log.info("checking for MPI compile and link ...")
-        errmsg = ("Cannot found 'mpi.h' header. "
-                  "Check your configuration!!!")
-        ok = config_cmd.check_header("mpi.h", headers=["stdlib.h"])
-        if not ok: raise DistutilsPlatformError(errmsg)
-        headers = ["stdlib.h", "mpi.h"]
-        ConfigTest = dedent("""\
-        int main(int argc, char **argv)
-        {
-          int ierr;
-          ierr = MPI_Init(&argc, &argv);
-          ierr = MPI_Finalize();
-          return 0;
-        }
-        """)
-        errmsg = ("Cannot %s MPI programs. "
-                  "Check your configuration!!!")
-        ok = config_cmd.try_compile(ConfigTest, headers=headers)
-        if not ok: raise DistutilsPlatformError(errmsg % "compile")
-        ok = config_cmd.try_link(ConfigTest, headers=headers)
-        if not ok: raise DistutilsPlatformError(errmsg % "link")
-        #
-        log.info("checking for missing MPI functions ...")
-        for prefix, suffixes in (
-            ("MPI_Type_create_f90_", ("integer", "real", "complex")),
-            ):
-            for suffix in suffixes:
-                function = prefix + suffix
-                ok = config_cmd.check_function(
-                    function, decl=1, call=1)
-                if not ok:
-                    macro = "PyMPI_MISSING_" + function
-                    ext.define_macros += [(macro, 1)]
-    MPI['configure'] = configure_mpi
     # MPE extension module
     MPE = dict(
         name='mpi4py.MPE',
@@ -211,54 +304,19 @@ def ext_modules():
                  'src/MPE/mpe-log.h',
                  'src/MPE/mpe-log.c',
                  ],
+        configure=configure_mpe,
         )
     modules.append(MPE)
-    def configure_mpe(ext, config_cmd):
-        from distutils import log
-        log.info("checking for MPE availability ...")
-        ok = (config_cmd.check_header("mpe.h",
-                                      headers=["stdlib.h",
-                                               "mpi.h",])
-              and
-              config_cmd.check_library('mpe')
-              and
-              config_cmd.check_function("MPE_Init_log",
-                                        headers=["stdlib.h",
-                                                 "mpi.h",
-                                                 "mpe.h"],
-                                        libraries=['mpe'],
-                                        decl=0, call=1)
-              )
-        if ok:
-            ext.define_macros += [('HAVE_MPE', 1)]
-            if linux or darwin or solaris:
-                ext.extra_link_args +=  whole_archive('lmpe')
-                ext.extra_link_args +=  ['-lmpe']
-            else:
-                ext.libraries += ['mpe']
-            return None
-    MPE['configure'] = configure_mpe
     # custom dl extension module
     dl = dict(
         name='mpi4py.dl',
         optional=True,
         sources=['src/dynload.c'],
         depends=['src/dynload.h'],
+        configure=configure_dl,
         )
     if os.name == 'posix':
         modules.append(dl)
-    def configure_dl(ext, config_cmd):
-        from distutils import log
-        log.info("checking for dlopen() availability ...")
-        ok = config_cmd.check_header("dlfcn.h")
-        if ok : ext.define_macros += [('HAVE_DLFCN_H', 1)]
-        ok = config_cmd.check_library('dl')
-        if ok: ext.libraries += ['dl']
-        ok = config_cmd.check_function("dlopen",
-                                       libraries=['dl'],
-                                       decl=1, call=1)
-        if ok: ext.define_macros += [('HAVE_DLOPEN', 1)]
-    dl['configure'] = configure_dl
     #
     return modules
 
@@ -270,16 +328,8 @@ def libraries():
         package='mpi4py',
         dest_dir='lib-pmpi',
         sources=['src/pmpi-mpe.c'],
+        configure=configure_libmpe,
         )
-    def configure_mpe(lib, config_cmd):
-        ok = config_cmd.check_library('mpe')
-        if ok:
-            if linux or darwin or solaris:
-                lib.extra_link_args += whole_archive('lmpe')
-                lib.extra_link_args += ['-lmpe']
-            else:
-                lib.libraries += ['mpe']
-    pmpi_mpe['configure'] = configure_mpe
     # VampirTrace logging
     pmpi_vt = dict(
         name='vt', kind='dylib',
@@ -287,6 +337,7 @@ def libraries():
         package='mpi4py',
         dest_dir='lib-pmpi',
         sources=['src/pmpi-vt.c'],
+        configure=configure_libvt,
         )
     pmpi_vt_mpi = dict(
         name='vt-mpi', kind='dylib',
@@ -294,6 +345,7 @@ def libraries():
         package='mpi4py',
         dest_dir='lib-pmpi',
         sources=['src/pmpi-vt-mpi.c'],
+        configure=configure_libvt,
         )
     pmpi_vt_hyb = dict(
         name='vt-hyb', kind='dylib',
@@ -301,30 +353,8 @@ def libraries():
         package='mpi4py',
         dest_dir='lib-pmpi',
         sources=['src/pmpi-vt-hyb.c'],
+        configure=configure_libvt,
         )
-    def configure_vt(lib, config_cmd):
-        if lib.name == 'vt':
-            ok = False
-            for vt_lib in ('vt-mpi', 'vt.mpi'):
-                ok = config_cmd.check_library(vt_lib)
-                if ok: break
-            if ok:
-                if linux or darwin or solaris:
-                    lib.extra_link_args += \
-                        whole_archive(vt_lib)
-                    lib.extra_link_args += \
-                        ['-lotf', '-lz', '-ldl']
-                else:
-                    lib.libraries += \
-                        [vt_lib, 'otf', 'z', 'dl'],
-        elif lib.name in ('vt-mpi', 'vt-hyb'):
-            vt_lib = lib.name
-            ok = config_cmd.check_library(vt_lib)
-            if ok: lib.libraries = [vt_lib]
-        return None
-    pmpi_vt['configure']     = configure_vt
-    pmpi_vt_mpi['configure'] = configure_vt
-    pmpi_vt_hyb['configure'] = configure_vt
     #
     return [
         pmpi_mpe,
@@ -340,37 +370,9 @@ def executables():
                  package='mpi4py',
                  dest_dir='bin',
                  sources=['src/python.c'],
+                 configure=configure_pyexe,
                  )
-    def configure_exe(exe, config_cmd):
-        from distutils import sysconfig
-        from distutils.util import split_quoted
-        if sys.platform.startswith('win'):
-            return
-        libraries = []
-        library_dirs = []
-        link_args = []
-        if not sysconfig.get_config_var('Py_ENABLE_SHARED'):
-            py_version = sysconfig.get_python_version()
-            py_abiflags = getattr(sys, 'abiflags', '')
-            libraries = ['python' + py_version + py_abiflags]
-        cfg_vars = sysconfig.get_config_vars()
-        if sys.platform == 'darwin':
-            fwkdir = cfg_vars.get('PYTHONFRAMEWORKDIR')
-            if (fwkdir and fwkdir != 'no-framework' and
-                fwkdir in cfg_vars.get('LINKFORSHARED', '')):
-                del libraries[:]
-        for var in ('LIBDIR', 'LIBPL'):
-            library_dirs += split_quoted(cfg_vars.get(var, ''))
-        for var in ('LDFLAGS',
-                    'LIBS', 'MODLIBS', 'SYSLIBS',
-                    'LDLAST'):
-            link_args += split_quoted(cfg_vars.get(var, ''))
-
-        exe.libraries += libraries
-        exe.library_dirs += library_dirs
-        exe.extra_link_args += link_args
     #
-    pyexe['configure'] = configure_exe
     return [pyexe]
 
 # --------------------------------------------------------------------
