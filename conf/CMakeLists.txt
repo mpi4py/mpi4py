@@ -179,3 +179,27 @@ SET_TARGET_PROPERTIES(
 )
 TARGET_LINK_LIBRARIES(pmpi-vt ${VT_LIBRARIES})
 TARGET_LINK_LIBRARIES(pmpi-vt ${MPI_LIBRARIES})
+
+# --- mpi4py/lib-pmpi/libvt-mpi.so ---
+ADD_LIBRARY(pmpi-vt-mpi MODULE "${mpi4py_SOURCE_DIR}/pmpi-vt-mpi.c")
+SET_TARGET_PROPERTIES(
+  pmpi-vt PROPERTIES
+  OUTPUT_NAME "vt-mpi"
+  LIBRARY_OUTPUT_DIRECTORY "${mpi4py_BINARY_DIR}/lib-pmpi"
+  RUNTIME_OUTPUT_DIRECTORY "${mpi4py_BINARY_DIR}/lib-pmpi"
+  LINKER_LANGUAGE C
+)
+TARGET_LINK_LIBRARIES(pmpi-vt-mpi ${VT_MPI_LIBRARIES})
+TARGET_LINK_LIBRARIES(pmpi-vt-mpi ${MPI_LIBRARIES})
+
+# --- mpi4py/lib-pmpi/libvt-hyb.so ---
+ADD_LIBRARY(pmpi-vt-hyb MODULE "${mpi4py_SOURCE_DIR}/pmpi-vt-hyb.c")
+SET_TARGET_PROPERTIES(
+  pmpi-vt PROPERTIES
+  OUTPUT_NAME "vt-hyb"
+  LIBRARY_OUTPUT_DIRECTORY "${mpi4py_BINARY_DIR}/lib-pmpi"
+  RUNTIME_OUTPUT_DIRECTORY "${mpi4py_BINARY_DIR}/lib-pmpi"
+  LINKER_LANGUAGE C
+)
+TARGET_LINK_LIBRARIES(pmpi-vt-hyb ${VT_HYB_LIBRARIES})
+TARGET_LINK_LIBRARIES(pmpi-vt-hyb ${MPI_LIBRARIES})
