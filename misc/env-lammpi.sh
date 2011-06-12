@@ -1,7 +1,5 @@
 # -*- shell-script -*-
-MPI_VENDOR_NAME=lam
-MPI_VENDOR_VERSION=7.1.4
-export MPI_DIR=/usr/local/$MPI_VENDOR_NAME/$MPI_VENDOR_VERSION
+export MPI_DIR=/home/devel/mpi/lam-7.1.4
 export PATH=$MPI_DIR/bin:$PATH
 export LD_LIBRARY_PATH=$MPI_DIR/lib:$LD_LIBRARY_PATH
 MPISTARTUP=lamboot

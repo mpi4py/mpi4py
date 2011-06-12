@@ -1,6 +1,4 @@
 # -*- shell-script -*-
-MPI_VENDOR_NAME=openmpi
-MPI_VENDOR_VERSION=1.5.1
-export MPI_DIR=/usr/local/$MPI_VENDOR_NAME/$MPI_VENDOR_VERSION
+export MPI_DIR=/home/devel/mpi/openmpi-1.4.3
 export PATH=$MPI_DIR/bin:$PATH
 export LD_LIBRARY_PATH=$MPI_DIR/lib:$LD_LIBRARY_PATH
