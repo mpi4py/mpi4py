@@ -1722,13 +1722,12 @@ def Open_port(Info info=INFO_NULL):
     cportname[MPI_MAX_PORT_NAME] = 0 # just in case
     return mpistr(cportname)
 
-def Close_port(port_name, Info info=INFO_NULL):
+def Close_port(port_name):
     """
     Close a port
     """
     cdef char *cportname = NULL
     port_name = asmpistr(port_name, &cportname, NULL)
-    cdef MPI_Info cinfo = arg_Info(info)
     with nogil: CHKERR( MPI_Close_port(cportname) )
 
 # [5.4.4] Name Publishing
