@@ -163,9 +163,8 @@ def configure_mpi(ext, config_cmd):
     ConfigTest = dedent("""\
     int main(int argc, char **argv)
     {
-      int ierr;
-      ierr = MPI_Init(&argc, &argv);
-      ierr = MPI_Finalize();
+      (void)MPI_Init(&argc, &argv);
+      (void)MPI_Finalize();
       return 0;
     }
     """)

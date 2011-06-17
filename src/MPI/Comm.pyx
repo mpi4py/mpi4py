@@ -511,6 +511,7 @@ cdef class Comm:
         Generalized All-to-All communication allowing different
         counts, displacements and datatypes for each partner
         """
+        sendbuf = recvbuf = None
         raise NotImplementedError # XXX implement!
         cdef void *sbuf = NULL, *rbuf = NULL
         cdef int  *scounts = NULL, *rcounts = NULL

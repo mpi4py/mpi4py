@@ -148,11 +148,11 @@ cdef inline int mpi_active() nogil:
     # MPI initialized ?
     cdef int initialized = 0
     ierr = MPI_Initialized(&initialized)
-    if not initialized: return 0
+    if not initialized or ierr: return 0
     # MPI finalized ?
     cdef int finalized = 1
     ierr = MPI_Finalized(&finalized)
-    if finalized: return 0
+    if finalized or ierr: return 0
     # MPI should be active ...
     return 1
 
@@ -160,7 +160,8 @@ cdef void startup() nogil:
     cdef int ierr = MPI_SUCCESS
     if not mpi_active(): return
     #DBG# fprintf(stderr, b"statup: BEGIN\n"); fflush(stderr)
-    ierr = PyMPI_StartUp()
+    ierr = PyMPI_StartUp();
+    if ierr: pass
     #DBG# fprintf(stderr, b"statup: END\n"); fflush(stderr)
 
 cdef void cleanup() nogil:
@@ -168,6 +169,7 @@ cdef void cleanup() nogil:
     if not mpi_active(): return
     #DBG# fprintf(stderr, b"cleanup: BEGIN\n"); fflush(stderr)
     ierr = PyMPI_CleanUp()
+    if ierr: pass
     #DBG# fprintf(stderr, b"cleanup: END\n"); fflush(stderr)
 
 cdef void atexit() nogil:
@@ -177,6 +179,7 @@ cdef void atexit() nogil:
     cleanup()
     if not finalize_atexit: return
     ierr = MPI_Finalize()
+    if ierr: pass
     #DBG# fprintf(stderr, b"atexit: END\n"); fflush(stderr)
 
 # -----------------------------------------------------------------------------

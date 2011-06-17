@@ -99,28 +99,27 @@ static int PyMPIAPI PyMPI_AtExitMPI(MPI_Comm,int,void*,void*);
 static int PyMPI_STARTUP_DONE = 0;
 static int PyMPI_StartUp(void)
 {
-  int ierr = MPI_SUCCESS;
   if (PyMPI_STARTUP_DONE) return MPI_SUCCESS;
   PyMPI_STARTUP_DONE = 1;
   /* change error handlers for predefined communicators */
   if (PyMPI_ERRHDL_COMM_WORLD == (MPI_Errhandler)0)
     PyMPI_ERRHDL_COMM_WORLD = MPI_ERRHANDLER_NULL;
   if (PyMPI_ERRHDL_COMM_WORLD == MPI_ERRHANDLER_NULL) {
-    ierr = P_MPI_Comm_get_errhandler(MPI_COMM_WORLD, &PyMPI_ERRHDL_COMM_WORLD);
-    ierr = P_MPI_Comm_set_errhandler(MPI_COMM_WORLD, MPI_ERRORS_RETURN);
+    (void)P_MPI_Comm_get_errhandler(MPI_COMM_WORLD, &PyMPI_ERRHDL_COMM_WORLD);
+    (void)P_MPI_Comm_set_errhandler(MPI_COMM_WORLD, MPI_ERRORS_RETURN);
   }
   if (PyMPI_ERRHDL_COMM_SELF == (MPI_Errhandler)0)
     PyMPI_ERRHDL_COMM_SELF = MPI_ERRHANDLER_NULL;
   if (PyMPI_ERRHDL_COMM_SELF == MPI_ERRHANDLER_NULL) {
-    ierr = P_MPI_Comm_get_errhandler(MPI_COMM_SELF, &PyMPI_ERRHDL_COMM_SELF);
-    ierr = P_MPI_Comm_set_errhandler(MPI_COMM_SELF, MPI_ERRORS_RETURN);
+    (void)P_MPI_Comm_get_errhandler(MPI_COMM_SELF, &PyMPI_ERRHDL_COMM_SELF);
+    (void)P_MPI_Comm_set_errhandler(MPI_COMM_SELF, MPI_ERRORS_RETURN);
   }
   /* make the call to MPI_Finalize() run a cleanup function */
   if (PyMPI_KEYVAL_MPI_ATEXIT == MPI_KEYVAL_INVALID) {
     int keyval = MPI_KEYVAL_INVALID;
-    ierr = P_MPI_Comm_create_keyval(MPI_COMM_NULL_COPY_FN,
+    (void)P_MPI_Comm_create_keyval(MPI_COMM_NULL_COPY_FN,
                                     PyMPI_AtExitMPI, &keyval, 0);
-    ierr = P_MPI_Comm_set_attr(MPI_COMM_SELF, keyval, 0);
+    (void)P_MPI_Comm_set_attr(MPI_COMM_SELF, keyval, 0);
     PyMPI_KEYVAL_MPI_ATEXIT = keyval;
   }
   return MPI_SUCCESS;
@@ -129,28 +128,27 @@ static int PyMPI_StartUp(void)
 static int PyMPI_CLEANUP_DONE = 0;
 static int PyMPI_CleanUp(void)
 {
-  int ierr = MPI_SUCCESS;
   if (PyMPI_CLEANUP_DONE) return MPI_SUCCESS;
   PyMPI_CLEANUP_DONE = 1;
   /* free atexit keyval */
   if (PyMPI_KEYVAL_MPI_ATEXIT != MPI_KEYVAL_INVALID) {
-    ierr = P_MPI_Comm_free_keyval(&PyMPI_KEYVAL_MPI_ATEXIT);
+    (void)P_MPI_Comm_free_keyval(&PyMPI_KEYVAL_MPI_ATEXIT);
     PyMPI_KEYVAL_MPI_ATEXIT = MPI_KEYVAL_INVALID;
   }
   /* free windows keyval */
   if (PyMPI_KEYVAL_WIN_MEMORY != MPI_KEYVAL_INVALID) {
-    ierr = P_MPI_Win_free_keyval(&PyMPI_KEYVAL_WIN_MEMORY);
+    (void)P_MPI_Win_free_keyval(&PyMPI_KEYVAL_WIN_MEMORY);
     PyMPI_KEYVAL_WIN_MEMORY = MPI_KEYVAL_INVALID;
   }
   /* restore default error handlers for predefined communicators */
   if (PyMPI_ERRHDL_COMM_SELF != MPI_ERRHANDLER_NULL) {
-    ierr = P_MPI_Comm_set_errhandler(MPI_COMM_SELF, PyMPI_ERRHDL_COMM_SELF);
-    ierr = P_MPI_Errhandler_free(&PyMPI_ERRHDL_COMM_SELF);
+    (void)P_MPI_Comm_set_errhandler(MPI_COMM_SELF, PyMPI_ERRHDL_COMM_SELF);
+    (void)P_MPI_Errhandler_free(&PyMPI_ERRHDL_COMM_SELF);
     PyMPI_ERRHDL_COMM_SELF = MPI_ERRHANDLER_NULL;
   }
   if (PyMPI_ERRHDL_COMM_WORLD != MPI_ERRHANDLER_NULL) {
-    ierr = P_MPI_Comm_set_errhandler(MPI_COMM_WORLD, PyMPI_ERRHDL_COMM_WORLD);
-    ierr = P_MPI_Errhandler_free(&PyMPI_ERRHDL_COMM_WORLD);
+    (void)P_MPI_Comm_set_errhandler(MPI_COMM_WORLD, PyMPI_ERRHDL_COMM_WORLD);
+    (void)P_MPI_Errhandler_free(&PyMPI_ERRHDL_COMM_WORLD);
     PyMPI_ERRHDL_COMM_WORLD = MPI_ERRHANDLER_NULL;
   }
   return MPI_SUCCESS;
