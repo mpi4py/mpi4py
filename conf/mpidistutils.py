@@ -49,35 +49,49 @@ def get_config_vars(*names):
     values = fix_config_vars(names, values)
     return values
 
-def fix_compiler_cmd(mpicc, pycc):
-    if not pycc:  return mpicc
-    if not mpicc: return pycc
-    pycc = split_quoted(pycc)
+def fix_compiler_cmd(cc, mpicc):
+    if not mpicc: return cc
+    if not cc:    return mpicc
+    from os.path import basename
+    cc = split_quoted(cc)
     i = 0
-    if os.path.basename(pycc[0]) == 'env':
+    while basename(cc[i]) == 'env':
         i = 1
-        while '=' in pycc[i]:
+        while '=' in cc[i]:
             i = i + 1
-    pycc[i] = mpicc
-    mpicc   = ' '.join(pycc)
-    return mpicc
+    cc[i] = mpicc
+    return ' '.join(cc)
 
-def fix_linker_cmd(mpild, pyld):
-    if not pyld:  return mpild
-    if not mpild: return pyld
-    aix_fixup = (sys.platform.startswith('aix') and
-                 'ld_so_aix' in pyld)
-    pyld = split_quoted(pyld)
+def fix_linker_cmd(ld, mpild):
+    if not mpild: return ld
+    if not ld:    return mpild
+    from os.path import basename
+    ld = split_quoted(ld)
     i = 0
-    if os.path.basename(pyld[0]) == 'env':
-        i = 1
-        while '=' in pyld[i]:
-            i = i + 1
-    if aix_fixup:
+    if (sys.platform.startswith('aix') and
+        basename(ld[i]) == 'ld_so_aix'):
         i = i + 1
-    pyld[i] = mpild
-    mpild   = ' '.join(pyld)
-    return mpild
+    while basename(ld[i]) == 'env':
+        i = i + 1
+        while '=' in ld[i]:
+            i = i + 1
+    ld[i] = mpild
+    return ' '.join(ld)
+
+def split_linker_cmd(ld):
+    from os.path import basename
+    ld = split_quoted(ld)
+    i = 0
+    if (sys.platform.startswith('aix') and
+        basename(pyld[i]) == 'ld_so_aix'):
+        i = i + 1
+    while basename(ld[i]) == 'env':
+        i = i + 1
+        while '=' in ld[i]:
+            i = i + 1
+    p = i + 1
+    ld, flags = ' '.join(ld[:p]), ' '.join(ld[p:])
+    return ld, flags
 
 from distutils.unixccompiler import UnixCCompiler
 rpath_option_orig = UnixCCompiler.runtime_library_dir_option
@@ -99,35 +113,33 @@ def customize_compiler(compiler, lang=None,
     if compiler.compiler_type == 'unix':
         # Distutils configuration, actually obtained by parsing
         # :file:{prefix}/lib[32|64]/python{X}.{Y}/config/Makefile
-        (cc, cxx, ccshared,
-         basecflags, optcflags,
-         ld_so, so_ext) = \
-         get_config_vars('CC', 'CXX', 'CCSHARED',
-                         'BASECFLAGS', 'OPT',
-                         'LDSHARED', 'SO')
-        cc    = cc    .replace('-pthread', '')
-        cxx   = cxx   .replace('-pthread', '')
-        ld_so = ld_so .replace('-pthread', '')
-        cppflags = ''
-        cflags   = ''
-        cxxflags = ''
-        ldflags  = ''
+        (cc, cxx, ccshared, ld,
+         basecflags, opt) = get_config_vars (
+            'CC', 'CXX', 'CCSHARED', 'LDSHARED',
+            'BASECFLAGS', 'OPT')
+        cc  = cc  .replace('-pthread', '')
+        cxx = cxx .replace('-pthread', '')
+        ld  = ld  .replace('-pthread', '')
+        ld, ldshared = split_linker_cmd(ld)
+        basecflags, opt = basecflags or '', opt or ''
+        ccshared = ccshared or ''
+        ldshared = ldshared or ''
         # Compiler command overriding
-        if mpicc:
-            cc  = fix_compiler_cmd(mpicc,  cc)
-        if mpicxx:
-            cxx = fix_compiler_cmd(mpicxx, cxx)
-        if mpild:
-            ld_so = fix_linker_cmd(mpild,  ld_so)
-        elif (mpicc or mpicxx):
+        if not mpild and (mpicc or mpicxx):
             if lang == 'c':
                 mpild = mpicc
             elif lang == 'c++':
                 mpild = mpicxx
             else:
                 mpild = mpicc or mpicxx
-            ld_so = fix_linker_cmd(mpild, ld_so)
+        if mpicc:
+            cc = fix_compiler_cmd(cc, mpicc)
+        if mpicxx:
+            cxx = fix_compiler_cmd(cxx, mpicxx)
+        if mpild:
+            ld = fix_linker_cmd(ld, mpild)
         # Environment handling
+        cppflags = cflags = cxxflags = ldflags = ''
         CPPFLAGS = environ.get('CPPFLAGS', '')
         CFLAGS   = environ.get('CFLAGS',   '')
         CXXFLAGS = environ.get('CXXFLAGS', '')
@@ -145,28 +157,25 @@ def customize_compiler(compiler, lang=None,
             ldflags  = ldflags  + ' ' + CXXFLAGS
         if LDFLAGS:
             ldflags  = ldflags  + ' ' + LDFLAGS
-        ccshared   = environ.get('CCSHARED',   ccshared   or '')
-        basecflags = environ.get('BASECFLAGS', basecflags or '')
-        optcflags  = environ.get('OPTCFLAGS',  optcflags  or '')
-        cflags     = (basecflags + ' ' +
-                      optcflags  + ' ' +
-                      cflags)
-        cxxflags   = (basecflags + ' ' +
-                      optcflags  + ' ' +
-                      cxxflags)
+        basecflags = environ.get('BASECFLAGS', basecflags)
+        opt        = environ.get('OPT',        opt       )
+        ccshared   = environ.get('CCSHARED', ccshared)
+        ldshared   = environ.get('LDSHARED', ldshared)
+        cflags     = ' '.join((basecflags, opt, cflags))
+        cxxflags   = ' '.join((basecflags, opt, cxxflags))
         cxxflags = cxxflags.replace('-Wstrict-prototypes', '')
         # Distutils compiler setup
         cpp    = os.environ.get('CPP') or (cc + ' -E')
         cc_so  = cc  + ' ' + ccshared
         cxx_so = cxx + ' ' + ccshared
-        ld_exe = mpild or cc
+        ld_so  = ld  + ' ' + ldshared
         compiler.set_executables(
             preprocessor = cpp    + ' ' + cppflags,
             compiler     = cc     + ' ' + cflags,
             compiler_so  = cc_so  + ' ' + cflags,
             compiler_cxx = cxx_so + ' ' + cxxflags,
             linker_so    = ld_so  + ' ' + ldflags,
-            linker_exe   = ld_exe + ' ' + ldflags,
+            linker_exe   = ld     + ' ' + ldflags,
             )
         try: compiler.compiler_cxx.remove('-Wstrict-prototypes')
         except: pass
