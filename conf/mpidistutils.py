@@ -499,7 +499,9 @@ int main(int argc, char **argv)
 {
   int ierr;
   ierr = MPI_Init(&argc, &argv);
+  if (ierr) return -1;
   ierr = MPI_Finalize();
+  if (ierr) return -1;
   return 0;
 }
 """
@@ -603,15 +605,13 @@ class config(cmd_config.config):
         self.compiler = getattr(
             self.compiler, 'compiler_type', self.compiler)
         self._check_compiler()
-        compiler_obj = self.compiler
-        configure_compiler(compiler_obj, config, lang='c')
+        configure_compiler(self.compiler, config, lang='c')
         self.try_link(ConfigTest, headers=['mpi.h'], lang='c')
         # test MPI C++ compiler
-        self.compiler = getattr(self.compiler, 'compiler_type',
-                                self.compiler)
+        self.compiler = getattr(
+            self.compiler, 'compiler_type', self.compiler)
         self._check_compiler()
-        compiler_obj = self.compiler
-        configure_compiler(compiler_obj, config, lang='c++')
+        configure_compiler(self.compiler, config, lang='c++')
         self.try_link(ConfigTest, headers=['mpi.h'], lang='c++')
 
 
@@ -883,8 +883,7 @@ class build_clib(cmd_build_clib.build_clib):
             self.compiler.set_link_objects(self.link_objects)
         #
         config = configuration(self, verbose=True)
-        compiler_obj = self.compiler
-        configure_compiler(compiler_obj, config)
+        configure_compiler(self.compiler, config)
         #
         for lib in self.libraries_a:
             extra_args = config.get('extra_compile_args', [])
@@ -1092,7 +1091,7 @@ class build_ext(cmd_build_ext.build_ext):
         if self.configure:
             log.info('testing for missing MPI symbols')
             config_cmd = self.get_finalized_command('config')
-            config_cmd.compiler = compiler_obj # fix compiler
+            config_cmd.compiler = self.compiler # fix compiler
             configure = Configure(config_cmd)
             results = configure.run()
             configure.dump(results)
@@ -1243,7 +1242,6 @@ class build_exe(build_ext):
         log.info("building '%s' executable", exe.name)
 
         # Next, compile the source code to object files.
-        compiler_obj = self.compiler
 
         # XXX not honouring 'define_macros' or 'undef_macros' -- the
         # CCompiler API needs to change to accommodate this, and I
@@ -1277,8 +1275,8 @@ class build_exe(build_ext):
         #
         # Remove msvcrXX.dll when building executables with MinGW
         #
-        if compiler_obj.compiler_type == 'mingw32':
-            try: del compiler_obj.dll_libraries[:]
+        if self.compiler.compiler_type == 'mingw32':
+            try: del self.compiler.dll_libraries[:]
             except: pass
 
         # Now link the object files together into a "shared object" --
@@ -1305,7 +1303,7 @@ class build_exe(build_ext):
             python_exp = os.path.join(python_lib, 'config', 'python.exp')
             ldshflag = ldshflag.replace('Modules/python.exp', python_exp)
         # Detect target language, if not provided
-        language = exe.language or compiler_obj.detect_language(sources)
+        language = exe.language or self.compiler.detect_language(sources)
         self.compiler.link(
             self.compiler.EXECUTABLE,
             objects, exe_fullpath,
