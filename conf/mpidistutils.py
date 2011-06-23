@@ -234,6 +234,10 @@ def configure_compiler(compiler, config, lang=None):
         compiler.undefine_macro(v)
     for v in config.get('include_dirs', []):
         compiler.add_include_dir(v)
+    cc_args = config.get('extra_compile_args', [])
+    compiler.compiler += cc_args
+    compiler.compiler_so += cc_args
+    compiler.compiler_cxx += cc_args
     for v in config.get('libraries', []):
         compiler.add_library(v)
     for v in config.get('library_dirs', []):
@@ -242,6 +246,9 @@ def configure_compiler(compiler, config, lang=None):
         compiler.add_runtime_library_dir(v)
     for v in config.get('extra_objects', []):
         compiler.add_link_object(v)
+    ld_args = config.get('extra_link_args', [])
+    compiler.linker_so += ld_args
+    compiler.linker_exe += ld_args
     return compiler
 
 # -----------------------------------------------------------------------------
@@ -885,15 +892,6 @@ class build_clib(cmd_build_clib.build_clib):
         config = configuration(self, verbose=True)
         configure_compiler(self.compiler, config)
         #
-        for lib in self.libraries_a:
-            extra_args = config.get('extra_compile_args', [])
-            lib.extra_compile_args.extend(extra_args)
-        for lib in self.libraries_so:
-            extra_args = config.get('extra_compile_args', [])
-            lib.extra_compile_args.extend(extra_args)
-            extra_args = config.get('extra_link_args', [])
-            lib.extra_link_args.extend(extra_args)
-        #
         self.build_libraries(self.libraries)
         self.build_libraries(self.libraries_a)
         self.build_libraries(self.libraries_so)
@@ -1099,12 +1097,6 @@ class build_ext(cmd_build_ext.build_ext):
             macro = 'HAVE_CONFIG_H'
             log.info("defining preprocessor macro '%s'" % macro)
             self.compiler.define_macro(macro, 1)
-        # configure extensions
-        for ext in self.extensions:
-            extra_args = config.get('extra_compile_args', [])
-            ext.extra_compile_args.extend(extra_args)
-            extra_args = config.get('extra_link_args', [])
-            ext.extra_link_args.extend(extra_args)
         # build extensions
         for ext in self.extensions:
             try:
