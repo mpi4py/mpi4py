@@ -155,7 +155,7 @@ def configure_mpi(ext, config_cmd):
     from distutils.errors import DistutilsPlatformError
     #
     log.info("checking for MPI compile and link ...")
-    errmsg = ("Cannot found 'mpi.h' header. "
+    errmsg = ("Cannot find 'mpi.h' header. "
               "Check your configuration!!!")
     ok = config_cmd.check_header("mpi.h", headers=["stdlib.h"])
     if not ok: raise DistutilsPlatformError(errmsg)
