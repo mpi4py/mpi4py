@@ -234,10 +234,6 @@ def configure_compiler(compiler, config, lang=None):
         compiler.undefine_macro(v)
     for v in config.get('include_dirs', []):
         compiler.add_include_dir(v)
-    cc_args = config.get('extra_compile_args', [])
-    compiler.compiler += cc_args
-    compiler.compiler_so += cc_args
-    compiler.compiler_cxx += cc_args
     for v in config.get('libraries', []):
         compiler.add_library(v)
     for v in config.get('library_dirs', []):
@@ -246,9 +242,15 @@ def configure_compiler(compiler, config, lang=None):
         compiler.add_runtime_library_dir(v)
     for v in config.get('extra_objects', []):
         compiler.add_link_object(v)
-    ld_args = config.get('extra_link_args', [])
-    compiler.linker_so += ld_args
-    compiler.linker_exe += ld_args
+    if compiler.compiler_type in \
+        ('unix', 'intel', 'cygwin', 'mingw32'):
+        cc_args = config.get('extra_compile_args', [])
+        ld_args = config.get('extra_link_args', [])
+        compiler.compiler += cc_args
+        compiler.compiler_so += cc_args
+        compiler.compiler_cxx += cc_args
+        compiler.linker_so += ld_args
+        compiler.linker_exe += ld_args
     return compiler
 
 # -----------------------------------------------------------------------------
