@@ -9,6 +9,24 @@ try:
 except NameError:
     bytes = str
 
+try:
+    tobytes = array.array.tobytes
+except AttributeError:
+    tobytes = array.array.tostring
+
+def frombytes(typecode, data):
+    a = array.array(typecode,[])
+    try: 
+        data = data.tobytes()
+    except AttributeError:
+        pass
+    try:
+        _frombytes = array.array.frombytes
+    except AttributeError:
+        _frombytes = array.array.fromstring
+    _frombytes(a, data)
+    return a
+
 def mysum_py(a, b):
     for i in range(len(a)):
         b[i] = a[i] + b[i]
@@ -19,10 +37,10 @@ def mysum(ba, bb, dt):
         return mysum_py(ba, bb)
     assert dt == MPI.INT
     assert len(ba) == len(bb)
-    a = array.array('i', bytes(ba))
-    b = array.array('i', bytes(bb))
+    a = frombytes('i', ba)
+    b = frombytes('i', bb)
     b = mysum_py(a, b)
-    bb[:] = b.tostring()
+    bb[:] = tobytes(b)
 
 class TestOp(unittest.TestCase):
 
