@@ -85,18 +85,18 @@ cdef _p_message message_simple(object msg,
     elif is_list(msg) or is_tuple(msg):
         nargs = len(msg)
         if nargs == 2:
-            o_buf, o_type = msg
-            if not (isinstance(o_type, Datatype) or
-                    isinstance(o_type, str)):
-                o_count, o_type = o_type, None
-                if is_tuple(o_count) or is_list(o_count):
-                    o_count, o_displ = o_count
+            (o_buf, o_count) = msg
+            if (isinstance(o_count, Datatype) or
+                isinstance(o_count, str)):
+                (o_count, o_type) = None, o_count
+            elif is_tuple(o_count) or is_list(o_count):
+                (o_count, o_displ) = o_count
         elif nargs == 3:
-            o_buf, o_count, o_type = msg
+            (o_buf, o_count, o_type) = msg
             if is_tuple(o_count) or is_list(o_count):
-                o_count, o_displ = o_count
+                (o_count, o_displ) = o_count
         elif nargs == 4:
-            o_buf, o_count, o_displ, o_type = msg
+            (o_buf, o_count, o_displ, o_type) = msg
         else:
             raise ValueError("message: expecting 2 to 4 items")
     else:
@@ -111,25 +111,21 @@ cdef _p_message message_simple(object msg,
     cdef int count = 0 # number of datatype entries
     cdef int displ = 0 # from base buffer, in datatype entries
     cdef MPI_Aint offset = 0 # from base buffer, in bytes
-    cdef MPI_Aint extent = 0, lb = 0, ub = 0
+    cdef MPI_Aint extent = 0, lb = 0
     if o_displ is not None:
-        if o_count is None:
-            raise ValueError(
-                "message: cannot handle displacement, "
-                "explicit count required")
+        if o_count is None: raise ValueError(
+            "message: cannot handle displacement, "
+            "explicit count required")
         count = <int> o_count
-        if count < 0:
-            raise ValueError(
-                "message: negative count %d" % count)
+        if count < 0: raise ValueError(
+            "message: negative count %d" % count)
         displ = <int> o_displ
-        if displ < 0:
-            raise ValueError(
-                "message: negative diplacement %d" % displ)
+        if displ < 0: raise ValueError(
+            "message: negative diplacement %d" % displ)
         if displ != 0:
-            if btype == MPI_DATATYPE_NULL:
-                raise ValueError(
-                    "message: cannot handle diplacement, "
-                    "datatype is null")
+            if btype == MPI_DATATYPE_NULL: raise ValueError(
+                "message: cannot handle diplacement, "
+                "datatype is null")
             CHKERR( MPI_Type_get_extent(btype, &lb, &extent) )
             offset = displ*extent # XXX overflow?
     elif o_count is not None:
@@ -138,32 +134,26 @@ cdef _p_message message_simple(object msg,
             raise ValueError(
                 "message: negative count %d" % count)
     elif bsize > 0:
-        if btype == MPI_DATATYPE_NULL:
-            raise ValueError(
-                "message: cannot guess count, "
-                "datatype is null")
+        if btype == MPI_DATATYPE_NULL: raise ValueError(
+            "message: cannot guess count, "
+            "datatype is null")
         CHKERR( MPI_Type_get_extent(btype, &lb, &extent) )
-        if extent <= 0:
-            ub = lb + extent
-            raise ValueError(
-                ("message: cannot guess count, "
-                 "datatype extent %d (lb:%d, ub:%d)"
-                 ) % (extent, lb, ub))
-        if (bsize % extent) != 0:
-            ub = lb + extent
-            raise ValueError(
-                ("message: cannot guess count, "
-                "buffer length %d is not a multiple of "
-                "datatype extent %d (lb:%d, ub:%d)"
-                ) % (bsize, extent, lb, ub))
-        if blocks > 1 and ((bsize/extent) % blocks) != 0:
-            raise ValueError(
-                ("message: cannot guess count, "
-                 "number of datatype items %d is not a multiple of"
-                 "the required number of blocks %d"
-                 ) %  (bsize/extent, blocks))
+        if extent <= 0: raise ValueError(
+            ("message: cannot guess count, "
+             "datatype extent %d (lb:%d, ub:%d)"
+             ) % (extent, lb, lb+extent))
+        if (bsize % extent) != 0: raise ValueError(
+            ("message: cannot guess count, "
+             "buffer length %d is not a multiple of "
+             "datatype extent %d (lb:%d, ub:%d)"
+             ) % (bsize, extent, lb, lb+extent))
         if blocks < 1: blocks = 1
-        count = <int> ((bsize/extent) / blocks) # XXX overflow?
+        if ((bsize // extent) % blocks) != 0: raise ValueError(
+            ("message: cannot guess count, "
+             "number of datatype items %d is not a multiple of"
+             "the required number of blocks %d"
+             ) %  (bsize//extent, blocks))
+        count = <int> ((bsize // extent) // blocks) # XXX overflow?
     if o_count is None: o_count = count
     if o_displ is None: o_displ = displ
     m.count = o_count
@@ -205,18 +195,27 @@ cdef _p_message message_vector(object msg,
     cdef object o_counts = None
     cdef object o_displs = None
     cdef object o_type   = None
-    if is_list(msg) or is_tuple(msg):
+    if is_buffer(msg):
+        o_buf = msg
+    elif is_list(msg) or is_tuple(msg):
         nargs = len(msg)
         if nargs == 2:
-            (o_buf, (o_counts, o_displs)) = msg
+            (o_buf, o_counts) = msg
+            if (isinstance(o_counts, Datatype) or
+                isinstance(o_counts, str)):
+                (o_counts, o_type) = None, o_counts
+            elif is_tuple(o_counts):
+                (o_counts, o_displs) = o_counts
         elif nargs == 3:
-            (o_buf, (o_counts, o_displs), o_type) = msg
+            (o_buf, o_counts, o_type) = msg
+            if is_tuple(o_counts):
+                (o_counts, o_displs) = o_counts
         elif nargs == 4:
-            (o_buf,  o_counts, o_displs,  o_type) = msg
+            (o_buf, o_counts, o_displs, o_type) = msg
         else:
             raise ValueError("message: expecting 2 to 4 items")
     else:
-        raise TypeError("message: expecting a list/tuple")
+        raise TypeError("message: expecting buffer or list/tuple")
     # buffer: address, length, and datatype
     cdef void *baddr = NULL
     cdef MPI_Aint bsize = 0
@@ -227,7 +226,30 @@ cdef _p_message message_vector(object msg,
     cdef int *counts = NULL
     cdef int *displs = NULL
     cdef int i=0, val=0
-    if is_int(o_counts):
+    cdef MPI_Aint extent=0, lb=0
+    cdef MPI_Aint asize=0, aval=0
+    if o_counts is None:
+        if bsize > 0:
+            if btype == MPI_DATATYPE_NULL:
+                raise ValueError(
+                    "message: cannot guess count, "
+                    "datatype is null")
+            CHKERR( MPI_Type_get_extent(btype, &lb, &extent) )
+            if extent <= 0: raise ValueError(
+                ("message: cannot guess count, "
+                 "datatype extent %d (lb:%d, ub:%d)"
+                 ) % (extent, lb, lb+extent))
+            if (bsize % extent) != 0: raise ValueError(
+                ("message: cannot guess count, "
+                 "buffer length %d is not a multiple of "
+                 "datatype extent %d (lb:%d, ub:%d)"
+                 ) % (bsize, extent, lb, lb+extent))
+            asize = bsize // extent
+        o_counts = newarray_int(blocks, &counts)
+        for i from 0 <= i < blocks:
+            aval = (asize // blocks) + (asize % blocks > i)
+            counts[i] = <int> aval # XXX overflow?
+    elif is_int(o_counts):
         val = <int> o_counts
         o_counts = newarray_int(blocks, &counts)
         for i from 0 <= i < blocks:
