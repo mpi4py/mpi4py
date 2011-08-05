@@ -90,9 +90,7 @@ cdef class _p_Pickle:
         for i from 0 <= i < m:
             items[i] = self.dump(items[i], p, &c)
             if c == 0: items[i] = b''
-            cnt[i] = c
-            dsp[i] = d
-            d += c
+            cnt[i] = c; dsp[i] = d; d += c
         cdef object buf = b''.join(items) # XXX use _PyBytes_Join() ?
         p[0] = PyBytes_AsString(buf)
         return buf
@@ -110,12 +108,12 @@ cdef class _p_Pickle:
         cdef Py_ssize_t i=0, m=n
         cdef object items = [None] * m
         if obj is None: return items
-        cdef Py_ssize_t d=0, c=0
+        cdef char *p = PyBytes_AsString(obj)
+        cdef object buf = None
         for i from 0 <= i < m:
-            c = cnt[i]
-            d = dsp[i]
-            if c == 0: continue
-            items[i] = self.load(obj[d:d+c])
+            if cnt[i] == 0: continue
+            buf = PyBytes_FromStringAndSize(p+dsp[i], cnt[i])
+            items[i] = self.load(buf)
         return items
 
 
