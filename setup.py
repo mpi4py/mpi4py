@@ -6,28 +6,52 @@
 MPI for Python
 ==============
 
-This package provides MPI support for Python scripting in parallel
-environments. It is constructed on top of the MPI-1/MPI-2
-specification, but provides an object oriented interface which closely
-follows the MPI-2 C++ bindings.
+This package provides Python bindings for the **Message Passing
+Interface** (MPI) standard. It is implemented on top of the
+MPI-1/MPI-2 specification and exposes an API which grounds on the
+standard MPI-2 C++ bindings.
 
-This module supports point-to-point (send, receive) and collective
-(broadcast, scatter, gather, reduction) communications of any
-*picklable* Python object.
+This package supports:
 
-For objects exporting single-segment buffer interface (strings, NumPy
-arrays, etc.), blocking/nonbloking/persistent point-to-point,
-collective and one-sided (put, get, accumulate) communications are
-fully supported, as well as parallel I/O (blocking and nonbloking,
-collective and noncollective read and write operations using explicit
-file offsets, individual file pointers and shared file
-pointers).
++ Convenient communication of any *picklable* Python object
 
-There is also full support for group and communicator (inter, intra,
-Cartesian and graph topologies) creation and management, as well as
-creating user-defined datatypes. Additionally, there is almost
-complete support for dynamic process creation and management (spawn,
-name publishing).
+  - point-to-point (send & receive)
+  - collective (broadcast, scatter & gather, reduction)
+
++ Fast communication of Python object exposing the *Python buffer
+  interface* (NumPy arrays, builtin bytes/string/array objects)
+
+  - point-to-point (blocking/nonbloking/persistent send & receive)
+  - collective (broadcast, block/vector scatter & gather, reduction)
+
++ Process groups and communication domains
+
+  - Creation of new intra/inter communicators
+  - Cartesian & graph topologies
+
++ Parallel input/output:
+
+  - read & write
+  - blocking/nonbloking & collective/noncollective
+  - individual/shared file pointers & explicit offset
+
++ Dynamic process management
+
+  - spawn & spawn multiple
+  - accept/connect
+  - name publishing & lookup
+
++ One-sided operations (put, get, accumulate)
+
+You can install the `in-development version
+<https://mpi4py.googlecode.com/svn/trunk#egg=mpi4py-dev>`_
+of mpi4py with::
+
+  $ pip install mpi4py==dev
+
+or::
+
+  $ easy_install mpi4py==dev
 """
 
 ## try:
@@ -383,10 +407,18 @@ from conf.mpidistutils import Extension  as Ext
 from conf.mpidistutils import Library    as Lib
 from conf.mpidistutils import Executable as Exe
 
+CYTHON = '0.13'
+
 def run_setup():
     """
     Call distutils.setup(*targs, **kwargs)
     """
+    from glob import glob
+    if ('setuptools' in sys.modules):
+        metadata['zip_safe'] = False
+        if not glob(os.path.join('src', 'mpi4py.*.c')):
+            metadata['install_requires'] = ['Cython>='+CYTHON]
+    #
     setup(packages     = ['mpi4py'],
           package_dir  = {'mpi4py' : 'src'},
           package_data = {'mpi4py' : ['include/mpi4py/*.h',
@@ -399,7 +431,8 @@ def run_setup():
           executables  = [Exe(**exe) for exe in executables()],
           **metadata)
 
-def chk_cython(CYTHON_VERSION_REQUIRED):
+def chk_cython(VERSION):
+    CYTHON_VERSION_REQUIRED = VERSION
     from distutils import log
     from distutils.version import StrictVersion as Version
     warn = lambda msg='': sys.stderr.write(msg+'\n')
@@ -478,9 +511,9 @@ def run_cython(source, depends=(), includes=(),
             "Cython failure: '%s' -> '%s'" % (source, target))
 
 def build_sources(cmd):
-    CYTHON_VERSION_REQUIRED = '0.13'
     if not (os.path.isdir('.svn') or
             os.path.isdir('.git') or
+            os.path.isdir('.hg')  or
             cmd.force): return
     # mpi4py.MPI
     source = 'mpi4py.MPI.pyx'
@@ -492,7 +525,7 @@ def build_sources(cmd):
     destdir_h = os.path.join('include', 'mpi4py')
     run_cython(source, depends, includes,
                destdir_c=None, destdir_h=destdir_h, wdir='src',
-               force=cmd.force, VERSION=CYTHON_VERSION_REQUIRED)
+               force=cmd.force, VERSION=CYTHON)
     # mpi4py.MPE
     source = 'mpi4py.MPE.pyx'
     depends = ("MPE/*.pyx",
@@ -500,7 +533,7 @@ def build_sources(cmd):
     includes = ['include']
     run_cython(source, depends, includes,
                destdir_c=None, destdir_h=None, wdir='src',
-               force=cmd.force, VERSION=CYTHON_VERSION_REQUIRED)
+               force=cmd.force, VERSION=CYTHON)
 
 from conf.mpidistutils import build_src
 build_src.run = build_sources
