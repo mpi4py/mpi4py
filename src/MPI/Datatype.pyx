@@ -414,7 +414,7 @@ cdef class Datatype:
         CHKERR( MPI_Type_get_contents(self.ob_mpi, ni, na, nd, i, a, d) )
         # manage in advance the contained datatypes
         cdef int k = 0, s1, e1, s2, e2, s3, e3, s4, e4
-        cdef object oldtype
+        cdef object oldtype = None
         if (combiner == <int>MPI_COMBINER_STRUCT or
             combiner == <int>MPI_COMBINER_STRUCT_INTEGER):
             oldtype = [new_Datatype(d[k]) for k from 0 <= k < nd]
