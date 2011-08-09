@@ -174,11 +174,11 @@ class BaseTestCCOBuf(object):
                         if op == MPI.SUM:
                             redval = sum(range(size))+size
                             if redval < max_val:
-                                self.assertEqual(value, redval)
+                                self.assertAlmostEqual(value, redval)
                         elif op == MPI.PROD:
                             redval = prod(range(1,size+1))
                             if redval < max_val:
-                                self.assertEqual(value, redval)
+                                self.assertAlmostEqual(value, redval)
                         elif op == MPI.MAX:
                             self.assertEqual(value, size)
                         elif op == MPI.MIN:
@@ -192,11 +192,11 @@ class BaseTestCCOBuf(object):
                         if op == MPI.SUM:
                             redval = sum(range(size))+size
                             if redval < max_val:
-                                self.assertEqual(value, redval)
+                                self.assertAlmostEqual(value, redval)
                         elif op == MPI.PROD:
                             redval = prod(range(1,size+1))
                             if redval < max_val:
-                                self.assertEqual(value, redval)
+                                self.assertAlmostEqual(value, redval)
                         elif op == MPI.MAX:
                             self.assertEqual(value, size)
                         elif op == MPI.MIN:
@@ -230,9 +230,9 @@ class BaseTestCCOBuf(object):
                                 if v_prod <= max_val:
                                     self.assertAlmostEqual(value, v_prod)
                             elif op == MPI.MAX:
-                                self.assertAlmostEqual(value, v_max)
+                                self.assertEqual(value, v_max)
                             elif op == MPI.MIN:
-                                self.assertAlmostEqual(value, v_min)
+                                self.assertEqual(value, v_min)
 
     def testScan(self):
         size = self.COMM.Get_size()
@@ -487,11 +487,11 @@ class BaseTestCCOBufInplace(object):
                                 if op == MPI.SUM:
                                     redval = sum(range(size))
                                     if redval < max_val:
-                                        self.assertEqual(value, redval)
+                                        self.assertAlmostEqual(value, redval)
                                 elif op == MPI.PROD:
                                     redval = prod(range(1,size+1))
                                     if redval < max_val:
-                                        self.assertEqual(value, redval)
+                                        self.assertAlmostEqual(value, redval)
                                 elif op == MPI.MAX:
                                     self.assertEqual(value, size-1)
                                 elif op == MPI.MIN:
@@ -522,11 +522,11 @@ class BaseTestCCOBufInplace(object):
                             if op == MPI.SUM:
                                 redval = sum(range(size))
                                 if redval < max_val:
-                                    self.assertEqual(value, redval)
+                                    self.assertAlmostEqual(value, redval)
                             elif op == MPI.PROD:
                                 redval = prod(range(1,size+1))
                                 if redval < max_val:
-                                    self.assertEqual(value, redval)
+                                    self.assertAlmostEqual(value, redval)
                             elif op == MPI.MAX:
                                 self.assertEqual(value, size-1)
                             elif op == MPI.MIN:
