@@ -57,30 +57,20 @@ static void OPENMPI_dlopen_libmpi(void)
   mode |= RTLD_NOLOAD;
   #endif
 #if defined(__CYGWIN__)
-  if (!handle)
-    handle = dlopen("cygmpi.dll", mode);
-  if (!handle)
-    handle = dlopen("mpi.dll", mode);
+  if (!handle) handle = dlopen("cygmpi.dll", mode);
+  if (!handle) handle = dlopen("mpi.dll",    mode);
 #elif defined(__APPLE__)
   /* Mac OS X */
-  if (!handle)
-    handle = dlopen("libmpi.2.dylib", mode);
-  if (!handle)
-    handle = dlopen("libmpi.1.dylib", mode);
-  if (!handle)
-    handle = dlopen("libmpi.0.dylib", mode);
-  if (!handle)
-    handle = dlopen("libmpi.dylib", mode);
+  if (!handle) handle = dlopen("libmpi.2.dylib", mode);
+  if (!handle) handle = dlopen("libmpi.1.dylib", mode);
+  if (!handle) handle = dlopen("libmpi.0.dylib", mode);
+  if (!handle) handle = dlopen("libmpi.dylib",   mode);
 #else
   /* GNU/Linux and others*/
-  if (!handle)
-    handle = dlopen("libmpi.so.2", mode);
-  if (!handle)
-    handle = dlopen("libmpi.so.1", mode);
-  if (!handle)
-    handle = dlopen("libmpi.so.0", mode);
-  if (!handle)
-    handle = dlopen("libmpi.so", mode);
+  if (!handle) handle = dlopen("libmpi.so.2", mode);
+  if (!handle) handle = dlopen("libmpi.so.1", mode);
+  if (!handle) handle = dlopen("libmpi.so.0", mode);
+  if (!handle) handle = dlopen("libmpi.so",   mode);
 #endif
 }
 

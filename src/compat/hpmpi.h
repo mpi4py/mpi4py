@@ -39,24 +39,16 @@ static void HPMPI_dlopen_libmpi(void)
   #endif
 #if defined(__APPLE__)
   /* Mac OS X */
-  if (!handle)
-    handle = dlopen("libhpmpi.2.dylib", mode);
-  if (!handle)
-    handle = dlopen("libhpmpi.1.dylib", mode);
-  if (!handle)
-    handle = dlopen("libhpmpi.0.dylib", mode);
-  if (!handle)
-    handle = dlopen("libhpmpi.dylib", mode);
+  if (!handle) handle = dlopen("libhpmpi.2.dylib", mode);
+  if (!handle) handle = dlopen("libhpmpi.1.dylib", mode);
+  if (!handle) handle = dlopen("libhpmpi.0.dylib", mode);
+  if (!handle) handle = dlopen("libhpmpi.dylib",   mode);
 #else
   /* GNU/Linux and others*/
-  if (!handle)
-    handle = dlopen("libhpmpi.so.2", mode);
-  if (!handle)
-    handle = dlopen("libhpmpi.so.1", mode);
-  if (!handle)
-    handle = dlopen("libhpmpi.so.0", mode);
-  if (!handle)
-    handle = dlopen("libhpmpi.so", mode);
+  if (!handle) handle = dlopen("libhpmpi.so.2", mode);
+  if (!handle) handle = dlopen("libhpmpi.so.1", mode);
+  if (!handle) handle = dlopen("libhpmpi.so.0", mode);
+  if (!handle) handle = dlopen("libhpmpi.so",   mode);
 #endif
 }
 
