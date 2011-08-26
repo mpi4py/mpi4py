@@ -199,17 +199,32 @@ def configure_mpi(ext, config_cmd):
     ok = config_cmd.try_link(ConfigTest, headers=headers)
     if not ok: raise DistutilsPlatformError(errmsg % "link")
     #
-    log.info("checking for missing MPI functions ...")
-    for prefix, suffixes in (
-        ("MPI_Type_create_f90_", ("integer", "real", "complex")),
-        ):
-        for suffix in suffixes:
-            function = prefix + suffix
-            ok = config_cmd.check_function(
-                function, decl=1, call=1)
-            if not ok:
-                macro = "PyMPI_MISSING_" + function
-                ext.define_macros += [(macro, 1)]
+    log.info("checking for missing MPI functions/symbols ...")
+    macros = ("MPICH2 OPEN_MPI DEINO_MPI "
+              "MPICH_NAME LAM_MPI "
+              ).strip().split()
+    ConfigTest = dedent('''\
+    #if !(%s)
+    #error "Unknown MPI"
+    #endif ''') % "||".join(["defined(%s)" % m for m in macros])
+    ok = config_cmd.try_compile(ConfigTest, headers=headers)
+    if not ok:
+        from conf.mpidistutils import ConfigureMPI
+        configure = ConfigureMPI(config_cmd)
+        results = configure.run()
+        configure.dump(results)
+        ext.define_macros += [('HAVE_CONFIG_H', 1)]
+    else:
+        for prefix, suffixes in (
+            ("MPI_Type_create_f90_", ("integer", "real", "complex")),
+            ):
+            for suffix in suffixes:
+                function = prefix + suffix
+                ok = config_cmd.check_function(
+                    function, decl=1, call=1)
+                if not ok:
+                    macro = "PyMPI_MISSING_" + function
+                    ext.define_macros += [(macro, 1)]
 
 def configure_mpe(ext, config_cmd):
     from distutils import log

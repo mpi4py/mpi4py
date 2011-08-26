@@ -10,7 +10,11 @@
 #define MPICH1 1
 #endif
 
-#if defined(DEINO_MPI) && !defined(MPICH2)
+#if defined(MS_WINDOWS) && defined(MPICH2) && defined(MPIAPI)
+#define MS_MPI 1
+#endif
+
+#if defined(MS_WINDOWS) && defined(DEINO_MPI) && !defined(MPICH2)
 #define MPICH2 1
 #endif
 
@@ -25,8 +29,6 @@
 #include "config/mpich1.h"
 #elif defined(LAM_MPI)
 #include "config/lammpi.h"
-#elif defined(SGI_MPI)
-#include "config/sgimpi.h"
 #else /* Unknown MPI*/
 #include "config/unknown.h"
 #endif
@@ -44,8 +46,6 @@
 #include "compat/mpich1.h"
 #elif defined(LAM_MPI)
 #include "compat/lammpi.h"
-#elif defined(SGI_MPI)
-#include "compat/sgimpi.h"
 #elif defined(HP_MPI)
 #include "compat/hpmpi.h"
 #endif

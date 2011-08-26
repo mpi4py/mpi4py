@@ -44,7 +44,8 @@ class Node(object):
         return (head+body+tail) % vars(self)
 
 class NodeType(Node):
-    CONFIG = '%(ctype)s v; %(ctype)s *vp=&v; vp=0;'
+    CONFIG = ('%(ctype)s v;\n'
+              '%(ctype)s *p = &v; *p=v;')
     def __init__(self, ctype):
         self.init(name=ctype,
                   cname=ctype,
@@ -79,7 +80,8 @@ class NodeFuncType(NodeType):
             self.calias = calias
 
 class NodeValue(Node):
-    CONFIG = '%(ctype)s v; v = %(cname)s;'
+    CONFIG = ('%(ctype)s v; v = %(cname)s;\n'
+              '%(ctype)s *p = &v; *p = %(cname)s;')
     HEADER = '#define %(cname)s (%(calias)s)'
     def __init__(self, ctype, cname, calias):
         self.init(name=cname,
@@ -94,7 +96,7 @@ def ctypefix(ct):
     return ct
 
 class NodeFuncProto(Node):
-    CONFIG = '%(crett)s v; v = %(cname)s(%(cargscall)s);'
+    CONFIG = '%(crett)s v; v = %(cname)s(%(cargscall)s); if(v)v=(%(crett)s)0;'
     HEADER = ' '. join(['#define %(cname)s(%(cargsnamed)s)',
                         'PyMPI_UNAVAILABLE("%(name)s"%(comma)s%(cargsnamed)s)'])
     def __init__(self, crett, cname, cargs, calias=None):

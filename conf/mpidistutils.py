@@ -266,7 +266,7 @@ except ImportError:
                 raise NotImplementedError(
                     "You forgot to grab 'mpiscanner.py'")
 
-class Configure(object):
+class ConfigureMPI(object):
 
     SRCDIR = 'src'
     SOURCES = [os.path.join('include', 'mpi4py', 'mpi.pxi')]
@@ -274,24 +274,21 @@ class Configure(object):
     CONFIG_H = 'config.h'
     MISSING_H = 'missing.h'
 
-    def __init__(self, config_cmd, verbose=True):
+    def __init__(self, config_cmd):
         self.scanner = Scanner()
         for filename in self.SOURCES:
             fullname = os.path.join(self.SRCDIR, filename)
             self.scanner.parse_file(fullname)
         self.config_cmd = config_cmd
-        self.verbose = verbose
 
     def run(self):
         results = []
         for name, code in self.scanner.itertests():
-            if self.verbose:
-                log.info("checking for '%s' ..." % name)
+            log.info("checking for '%s' ..." % name)
             body = self.gen_one(results, code)
             ok   = self.run_one(body)
             if not ok:
-                if self.verbose:
-                    log.info("**** failed check for '%s'" % name)
+                log.info("**** failed check for '%s'" % name)
             results.append((name, ok))
         return results
 
@@ -299,13 +296,10 @@ class Configure(object):
         destdir = self.DESTDIR
         config_h  = os.path.join(destdir, self.CONFIG_H)
         missing_h = os.path.join(destdir, self.MISSING_H)
-        if self.verbose:
-            log.info("writing '%s'", config_h)
+        log.info("writing '%s'", config_h)
         self.scanner.dump_config_h(config_h, results)
-        if self.verbose:
-            log.info("writing '%s'", missing_h)
+        log.info("writing '%s'", missing_h)
         self.scanner.dump_missing_h(missing_h, None)
-
 
     def gen_one(self, results, code):
         #
@@ -1092,7 +1086,7 @@ class build_ext(cmd_build_ext.build_ext):
             log.info('testing for missing MPI symbols')
             config_cmd = self.get_finalized_command('config')
             config_cmd.compiler = self.compiler # fix compiler
-            configure = Configure(config_cmd)
+            configure = ConfigureMPI(config_cmd)
             results = configure.run()
             configure.dump(results)
             #

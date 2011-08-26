@@ -150,7 +150,6 @@ class Config(object):
                 define_macros.append(('OMPI_IMPORTS', None))
                 library = 'libmpi'
             if name == 'msmpi':
-                define_macros = [('MS_MPI', 1)]
                 library = 'msmpi'
                 bits = platform.architecture()[0]
                 if bits == '32bit':
