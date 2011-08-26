@@ -524,6 +524,7 @@ def run_cython(source, depends=(), includes=(),
             "Cython failure: '%s' -> '%s'" % (source, target))
 
 def build_sources(cmd):
+    from distutils.errors import DistutilsError
     from os.path import exists, isdir, join
     has_src = (exists(join('src', 'mpi4py.MPI.c')) and
                exists(join('src', 'mpi4py.MPE.c')))
