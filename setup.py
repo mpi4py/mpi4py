@@ -422,16 +422,16 @@ from conf.mpidistutils import Extension  as Ext
 from conf.mpidistutils import Library    as Lib
 from conf.mpidistutils import Executable as Exe
 
-CYTHON = '0.13'
+CYTHON = '0.15'
 
 def run_setup():
     """
     Call distutils.setup(*targs, **kwargs)
     """
-    from glob import glob
     if ('setuptools' in sys.modules):
+        from os.path import exists, join
         metadata['zip_safe'] = False
-        if not glob(os.path.join('src', 'mpi4py.*.c')):
+        if not exists(join('src', 'mpi4py.MPI.c')):
             metadata['install_requires'] = ['Cython>='+CYTHON]
     #
     setup(packages     = ['mpi4py'],
@@ -494,7 +494,7 @@ def chk_cython(VERSION):
 
 def run_cython(source, depends=(), includes=(),
                destdir_c=None, destdir_h=None,
-               wdir=None, force=False):
+               wdir=None, force=False, VERSION=None):
     from glob import glob
     from distutils import log
     from distutils import dep_util
@@ -512,6 +512,8 @@ def run_cython(source, depends=(), includes=(),
             return
     finally:
         os.chdir(cwd)
+    if not chk_cython(VERSION):
+        raise DistutilsError('requires Cython>=%s' % VERSION)
     log.info("cythonizing '%s' -> '%s'", source, target)
     from conf.cythonize import cythonize
     err = cythonize(source,
@@ -530,8 +532,6 @@ def build_sources(cmd):
                exists(join('src', 'mpi4py.MPE.c')))
     has_vcs = (isdir('.svn') or isdir('.git') or isdir('.hg'))
     if (has_src and not has_vcs and not cmd.force): return
-    if not chk_cython(CYTHON):
-        raise DistutilsError('requires Cython>=%s' % CYTHON)
     # mpi4py.MPI
     source = 'mpi4py.MPI.pyx'
     depends = ("include/*/*.pxi",
@@ -542,7 +542,7 @@ def build_sources(cmd):
     destdir_h = os.path.join('include', 'mpi4py')
     run_cython(source, depends, includes,
                destdir_c=None, destdir_h=destdir_h,
-               wdir='src', force=cmd.force)
+               wdir='src', force=cmd.force, VERSION=CYTHON)
     # mpi4py.MPE
     source = 'mpi4py.MPE.pyx'
     depends = ("MPE/*.pyx",
@@ -550,7 +550,7 @@ def build_sources(cmd):
     includes = ['include']
     run_cython(source, depends, includes,
                destdir_c=None, destdir_h=None,
-               wdir='src', force=cmd.force)
+               wdir='src', force=cmd.force, VERSION=CYTHON)
 
 from conf.mpidistutils import build_src
 build_src.run = build_sources
@@ -561,7 +561,7 @@ def run_testsuite(cmd):
     try:
         from runtests import main
     finally:
-        del sys.path[-1]
+        del sys.path[0]
     err = main(cmd.args or [])
     if err:
         raise DistutilsError("test")
