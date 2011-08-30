@@ -2,6 +2,7 @@ from mpi4py import MPI
 
 # -----------------------------------------------------------------------------
 
+import struct as _struct
 try:
     from numpy import empty as _empty
     def _array_new(size, typecode, init=0):
@@ -31,7 +32,8 @@ class Counter(object):
         size = comm.Get_size()
         rank = comm.Get_rank()
         mask = 1
-        while mask < size: mask <<= 1
+        while mask < size:
+            mask <<= 1
         mask >>= 1
         idx = 0
         get_idx = []
@@ -50,16 +52,17 @@ class Counter(object):
             rank = rank % mask
             mask >>= 1
         #
-        datatype = MPI.INT
         typecode = 'i'
-        #
-        rank = comm.Get_rank()
+        datatype = MPI.INT
         itemsize = datatype.Get_size()
-        if rank == 0:
+        #
+        root = 0
+        rank = comm.Get_rank()
+        if rank == root:
             nlevels = len(get_idx) + 1
             nentries = (1<<nlevels) - 1
             self.mem = MPI.Alloc_mem(nentries*itemsize, MPI.INFO_NULL)
-            self.mem[:] = _array_new(nentries, typecode, init)
+            self.mem[:] = _struct.pack(typecode, init) * nentries
         else:
             self.mem = None
         #
@@ -82,9 +85,8 @@ class Counter(object):
             self.acc_type.Free()
 
     def next(self, increment=1):
-        root = 0
-        #
         _array_set(self.acc_buf, increment)
+        root = 0
         self.win.Lock(MPI.LOCK_EXCLUSIVE, root, 0)
         self.win.Get(self.get_buf, root, [0, 1, self.get_type])
         self.win.Accumulate(self.acc_buf, root, [0, 1, self.acc_type], MPI.SUM)

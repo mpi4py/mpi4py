@@ -1,7 +1,8 @@
 # --------------------------------------------------------------------
 
 from mpi4py import MPI
-from array import array
+from array import array as _array
+import struct as _struct
 
 class Counter(object):
 
@@ -13,7 +14,7 @@ class Counter(object):
         itemsize = MPI.INT.Get_size()
         if rank == 0:
             mem = MPI.Alloc_mem(itemsize*size, MPI.INFO_NULL)
-            mem[:] = array('i', [0])*size
+            mem[:] = _struct.pack('i', 0) * size
         else:
             mem = MPI.BOTTOM
         self.win = MPI.Win.Create(mem, itemsize, MPI.INFO_NULL, comm)
@@ -37,8 +38,8 @@ class Counter(object):
         rank = group.Get_rank()
         group.Free()
         #
-        incr = array('i', [1])
-        vals = array('i', [0])*size
+        incr = _array('i', [1])
+        vals = _array('i', [0])*size
         self.win.Lock(MPI.LOCK_EXCLUSIVE, 0, 0)
         self.win.Accumulate([incr, 1, MPI.INT], 0,
                             [rank, 1, MPI.INT], MPI.SUM)

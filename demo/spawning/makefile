@@ -1,5 +1,7 @@
 .PHONY: default build test clean
 
+MPIEXEC=mpiexec -n 1
+
 default: build test clean
 
 MASTERS = cpi-master-py.exe cpi-master-c.exe cpi-master-cxx.exe cpi-master-f90.exe
@@ -11,7 +13,7 @@ LANGS=py c cxx f90
 test: build
 	@for i in ${LANGS}; do \
 	    for j in ${LANGS}; do \
-                 ./cpi-master-$$i.exe ./cpi-worker-$$j.exe; \
+                 ${MPIEXEC} ./cpi-master-$$i.exe ./cpi-worker-$$j.exe; \
 	    done; \
 	done 
 
