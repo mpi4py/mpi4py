@@ -19,18 +19,12 @@ import sys
 from mpi4py import MPI
 import numpy as N
 
-def raw_input(prompt):
-    sys.stdout.write(prompt)
-    sys.stdout.flush()
-    return sys.stdin.readline()
-
 def get_n():
     prompt = "Enter the number of intervals: (0 quits) "
     try:
-        usr = raw_input(prompt)
-        n = int(usr)
+        n = int(input(prompt))
         if n < 0: n = 0
-    except Exception:
+    except:
         n = 0
     return n
 

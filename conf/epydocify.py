@@ -21,7 +21,10 @@ except ImportError:
 
 try: # epydoc 3.0.1 + docutils 0.6
     from docutils.nodes import Text
-    from UserString import UserString
+    try:
+        from collections import UserString
+    except ImportError:
+        from UserString import UserString
     if not isinstance(Text, UserString):
         def Text_get_data(s):
             try:

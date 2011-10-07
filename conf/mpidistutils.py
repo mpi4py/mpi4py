@@ -721,7 +721,7 @@ class build_py(cmd_build_py.build_py):
 
         if not self.package_dir:
             if path:
-                return apply(os.path.join, path)
+                return os.path.join(*path)
             else:
                 return ''
         else:
@@ -734,14 +734,14 @@ class build_py(cmd_build_py.build_py):
                     del path[-1]
                 else:
                     tail.insert(0, pdir)
-                    return apply(os.path.join, tail)
+                    return os.path.join(*tail)
             else:
                 pdir = self.package_dir.get('')
                 if pdir is not None:
                     tail.insert(0, pdir)
 
                 if tail:
-                    return apply(os.path.join, tail)
+                    return os.path.join(*tail)
                 else:
                     return ''
 

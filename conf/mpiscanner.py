@@ -137,7 +137,7 @@ class OpaqueType(NodeType):
 class StructType(NodeStruct):
     def __init__(self, ctype):
         cnames = ['MPI_SOURCE', 'MPI_TAG', 'MPI_ERROR']
-        cfields = zip(['int']*3, cnames)
+        cfields = list(zip(['int']*3, cnames))
         super(StructType, self).__init__(ctype, cfields)
 
 class FunctionType(NodeFuncType):

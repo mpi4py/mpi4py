@@ -55,8 +55,7 @@ class Config(object):
                 return True
         return False
 
-    def __nonzero__(self):
-        return self.__bool__()
+    __nonzero__ = __bool__
 
     def get(self, k, d=None):
         if k in self.compiler_info:

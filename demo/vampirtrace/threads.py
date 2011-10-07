@@ -25,7 +25,7 @@ COUNT = 10000000 # 10 millon
 tic = MPI.Wtime()
 countdown(COUNT)
 toc = MPI.Wtime()
-print "sequential: %f seconds" % (toc-tic)
+print ("sequential: %f seconds" % (toc-tic))
 
 # Now, subdivide the work across two threads
 t1 = Thread(target=countdown, args=(COUNT//2,))
@@ -34,4 +34,4 @@ tic = MPI.Wtime()
 for t in (t1, t2): t.start()
 for t in (t1, t2): t.join()
 toc = MPI.Wtime()
-print "threaded:   %f seconds" % (toc-tic)
+print ("threaded:   %f seconds" % (toc-tic))

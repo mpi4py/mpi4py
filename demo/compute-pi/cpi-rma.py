@@ -15,7 +15,7 @@ from numpy  import array
 def get_n():
     prompt  = "Enter the number of intervals: (0 quits) "
     try:
-        n = int(raw_input(prompt));
+        n = int(input(prompt));
         if n < 0: n = 0
     except:
         n = 0
