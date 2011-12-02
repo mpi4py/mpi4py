@@ -12,7 +12,7 @@ cdef extern from "Python.h":
 #------------------------------------------------------------------------------
 
 cdef extern from "Python.h":
-    object PyMemoryView_FromObject(object)
+    object PyMemoryView_FromBuffer(Py_buffer *)
 
 cdef inline object asmemory(object ob, void **base, MPI_Aint *size):
     cdef _p_buffer buf = getbuffer_w(ob, base, size)
@@ -20,7 +20,7 @@ cdef inline object asmemory(object ob, void **base, MPI_Aint *size):
 
 cdef inline object tomemory(void *base, MPI_Aint size):
     cdef _p_buffer buf = tobuffer(base, size, 0)
-    return PyMemoryView_FromObject(buf)
+    return PyMemoryView_FromBuffer(&buf.view)
 
 #------------------------------------------------------------------------------
 

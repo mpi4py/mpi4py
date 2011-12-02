@@ -321,19 +321,19 @@ PyBuffer_Release(Py_buffer *view)
 
 #if PY_VERSION_HEX < 0x02070000
 static PyObject *
-PyMemoryView_FromObject(PyObject *base)
+PyMemoryView_FromBuffer(Py_buffer *view)
 {
-  PyObject *buf;
-  if (!PyObject_CheckReadBuffer(base)) {
-    PyErr_SetString(PyExc_TypeError, "buffer object expected");
-    return NULL;
+  if (view->obj) {
+    if (view->readonly)
+      return PyBuffer_FromObject(view->obj, 0, view->len);
+    else
+      return PyBuffer_FromReadWriteObject(view->obj, 0, view->len);
+  } else {
+    if (view->readonly)
+      return PyBuffer_FromMemory(view->buf,view->len);
+    else
+      return PyBuffer_FromReadWriteMemory(view->buf,view->len);
   }
-  buf = PyBuffer_FromReadWriteObject(base, 0, Py_END_OF_BUFFER);
-  if (!buf && PyErr_ExceptionMatches(PyExc_TypeError)) {
-    PyErr_Clear();
-    buf = PyBuffer_FromObject(base, 0, Py_END_OF_BUFFER);
-  }
-  return buf;
 }
 #endif
 
