@@ -1,7 +1,7 @@
 # Author:  Lisandro Dalcin
 # Contact: dalcinl@gmail.com
 """
-Runtime configuration parameters.
+Runtime configuration parameters
 """
 
 initialize = True

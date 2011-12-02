@@ -68,11 +68,14 @@ static PyMethodDef dl_methods[] = {
   { (char *)NULL,      NULL,       0,            NULL } /* sentinel */
 };
 
+PyDoc_STRVAR(dl_doc,
+"POSIX dynamic linking loader");
+
 #if PY_MAJOR_VERSION >= 3
 static struct PyModuleDef dl_module = {
   PyModuleDef_HEAD_INIT, /* m_base     */
   (char *)"dl",          /* m_name     */
-  NULL,                  /* m_doc      */
+  dl_doc,                /* m_doc      */
   -1,                    /* m_size     */
   dl_methods,            /* m_methods  */
   NULL,                  /* m_reload   */
@@ -104,7 +107,7 @@ PyMODINIT_FUNC initdl(void)
 #if PY_MAJOR_VERSION >= 3
   m = PyModule_Create(&dl_module);
 #else
-  m = Py_InitModule((char *)"dl", dl_methods);
+  m = Py_InitModule3((char *)"dl", dl_methods, (char *)dl_doc);
 #endif
   if (!m) goto bad;
 
