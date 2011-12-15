@@ -41,7 +41,7 @@ Downloads and Development
 
 Hosted at Google Code:
 
-+ Project Page: http://mpi4py.googlecode.com/
++ Project Site: http://mpi4py.googlecode.com/
 + Source Releases: http://code.google.com/p/mpi4py/downloads/
 + Issue Tracker: http://code.google.com/p/mpi4py/issues/
-+ SVN Repository: http://mpi4py.googlecode.com/svn/trunk/
++ Mercurial Repository: http://code.google.com/p/mpi4py
