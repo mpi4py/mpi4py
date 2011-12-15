@@ -143,7 +143,7 @@ shared/dynamic libraries on POSIX environments.
 
     $ tar -zxf mpich2-X.X.X.tar.gz
     $ cd mpich2-X.X.X
-    $ ./configure --enable-sharedlibs=gcc --prefix=/usr/local/mpich2
+    $ ./configure --enable-shared --prefix=/usr/local/mpich2
     $ make
     $ make install
 
