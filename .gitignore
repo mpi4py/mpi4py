@@ -1,0 +1,15 @@
+syntax: glob
+build
+docs/*.html
+docs/*.pdf
+docs/apiref
+docs/usrman
+dist
+MANIFEST
+__pycache__
+*.pyc
+*.pyo
+#src/mpi4py.MPE.c
+#src/mpi4py.MPI.c
+#src/include/mpi4py/mpi4py.MPI.h
+#src/include/mpi4py/mpi4py.MPI_api.h
