@@ -44,7 +44,7 @@ This package supports:
 + One-sided operations (put, get, accumulate)
 
 You can install the `in-development version
-<https://mpi4py.googlecode.com/svn/trunk#egg=mpi4py-dev>`_
+<hg+http://code.google.com/p/mpi4py#egg=mpi4py-dev>`_
 of mpi4py with::
 
   $ pip install mpi4py==dev
@@ -542,7 +542,7 @@ def build_sources(cmd):
     from os.path import exists, isdir, join
     has_src = (exists(join('src', 'mpi4py.MPI.c')) and
                exists(join('src', 'mpi4py.MPE.c')))
-    has_vcs = (isdir('.svn') or isdir('.git') or isdir('.hg'))
+    has_vcs = (isdir('.hg') or isdir('.git') or isdir('.svn'))
     if (has_src and not has_vcs and not cmd.force): return
     # mpi4py.MPI
     source = 'mpi4py.MPI.pyx'
