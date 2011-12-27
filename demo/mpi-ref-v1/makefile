@@ -10,11 +10,11 @@ NP_FLAG = -n
 NP      = 3
 
 test_seq:
-	${MAKE} MPIEXEC= NP= test_mpi
+	${MAKE} MPIEXEC= NP_FLAG= NP= test_mpi
 
 test_mpi:
 	-@for i in `ls ex-*.py`; do \
-	    echo ${MPIEXEC} ${NP} ${PYTHON} $$i; \
+	    echo ${MPIEXEC} ${NP_FLAG} ${NP} ${PYTHON} $$i; \
 	    ${MPIEXEC} ${NP_FLAG} ${NP} ${PYTHON} $$i; \
 	done
 
