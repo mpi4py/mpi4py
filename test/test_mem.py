@@ -2,7 +2,7 @@ import unittest
 from mpi4py import MPI
 
 class TestMemory(unittest.TestCase):
-    
+
     def testMemory1(self):
         for size in range(0, 10000, 100):
             if size == 0: size = 1

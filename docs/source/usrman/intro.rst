@@ -198,7 +198,7 @@ scientific computing and software development with Python.
 
 .. _pyMPI:     http://sourceforge.net/projects/pympi/
 
-.. _Scientific Python: 
+.. _Scientific Python:
                http://dirac.cnrs-orleans.fr/plone/software/scientificpython/
 
 

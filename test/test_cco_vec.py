@@ -290,7 +290,7 @@ class BaseTestCCOVec(object):
                         self.COMM.Alltoallv(sbuf, rbuf)
                         for v in rbuf:
                             self.assertEqual(v, root)
-                        
+
 
 class TestCCOVecSelf(BaseTestCCOVec, unittest.TestCase):
     COMM = MPI.COMM_SELF

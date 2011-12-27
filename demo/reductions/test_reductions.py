@@ -17,7 +17,7 @@ class BaseTest(object):
         for root in range(size):
             msg = rank
             res = self.comm.reduce(sendobj=msg, root=root)
-            if self.comm.rank == root: 
+            if self.comm.rank == root:
                 self.assertEqual(res, sum(range(size)))
             else:
                 self.assertEqual(res, None)
@@ -28,7 +28,7 @@ class BaseTest(object):
         for root in range(size):
             msg = rank
             res = self.comm.reduce(sendobj=msg, op=MPI.MIN, root=root)
-            if self.comm.rank == root: 
+            if self.comm.rank == root:
                 self.assertEqual(res, 0)
             else:
                 self.assertEqual(res, None)
@@ -39,7 +39,7 @@ class BaseTest(object):
         for root in range(size):
             msg = rank
             res = self.comm.reduce(sendobj=msg, op=MPI.MAX, root=root)
-            if self.comm.rank == root: 
+            if self.comm.rank == root:
                 self.assertEqual(res, size-1)
             else:
                 self.assertEqual(res, None)
@@ -50,7 +50,7 @@ class BaseTest(object):
         for root in range(size):
             msg = rank
             res = self.comm.reduce(sendobj=msg, op=MPI.MINLOC, root=root)
-            if self.comm.rank == root: 
+            if self.comm.rank == root:
                 self.assertEqual(res, (0, 0))
             else:
                 self.assertEqual(res, None)
@@ -61,7 +61,7 @@ class BaseTest(object):
         for root in range(size):
             msg = rank
             res = self.comm.reduce(sendobj=msg, op=MPI.MAXLOC, root=root)
-            if self.comm.rank == root: 
+            if self.comm.rank == root:
                 self.assertEqual(res, (size-1, size-1))
             else:
                 self.assertEqual(res, None)

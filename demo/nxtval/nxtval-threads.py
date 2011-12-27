@@ -67,7 +67,7 @@ def test():
         c = counter.next()
         vals.append(c)
     counter.free()
-    
+
     vals = MPI.COMM_WORLD.allreduce(vals)
     assert sorted(vals) == list(range(len(vals)))
 

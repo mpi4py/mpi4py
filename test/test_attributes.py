@@ -181,7 +181,7 @@ class TestWinAttr(unittest.TestCase):
     keyval = MPI.KEYVAL_INVALID
 
     def setUp(self):
-        self.win = MPI.Win.Create(MPI.BOTTOM, 1, 
+        self.win = MPI.Win.Create(MPI.BOTTOM, 1,
                                   MPI.INFO_NULL, MPI.COMM_SELF)
 
     def tearDown(self):
@@ -215,8 +215,8 @@ class TestWinAttr(unittest.TestCase):
     def testAttrCopyDelete(self):
         self.keyval = MPI.Win.Create_keyval(delete_fn=MPI.Win.Free)
         self.assertNotEqual(self.keyval, MPI.KEYVAL_INVALID)
-        
-        newwin = MPI.Win.Create(MPI.BOTTOM, 1, 
+
+        newwin = MPI.Win.Create(MPI.BOTTOM, 1,
                                 MPI.INFO_NULL, MPI.COMM_SELF)
         rc = getrc(newwin)
         #

@@ -87,12 +87,12 @@ class TestPickle(unittest.TestCase):
             pickle = MPI._p_pickle
             pickle.dumps = lambda o,p: json.dumps(o).encode()
             pickle.loads = lambda s: json.loads(s.decode())
-            OBJS2 = [o for o in OBJS if not 
+            OBJS2 = [o for o in OBJS if not
                      isinstance(o, (complex, tuple))]
             for obj in OBJS2:
                 self.do_pickle(obj, pickle)
             self.do_pickle(OBJS2, pickle)
-            
+
 
 if __name__ == '__main__':
     try:

@@ -91,6 +91,6 @@ if (_name == 'MPICH2' and
     # getting the universe size fails for the singleton init case
     if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
         del TestWorldAttrs.testUniverseSize
-    
+
 if __name__ == '__main__':
     unittest.main()

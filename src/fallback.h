@@ -624,8 +624,8 @@ static int PyMPI_Request_get_status(MPI_Request request,
   if (request != MPI_REQUEST_NULL || !flag)
     return MPI_Request_get_status(request, flag, status);
   *flag = 1;
-  if (status && 
-      status != MPI_STATUS_IGNORE && 
+  if (status &&
+      status != MPI_STATUS_IGNORE &&
       status != MPI_STATUSES_IGNORE) {
     #if defined(PyMPI_MISSING_MPI_Status_set_cancelled) ||  \
         defined(PyMPI_MISSING_MPI_Status_set_elements)

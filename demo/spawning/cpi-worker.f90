@@ -6,13 +6,13 @@ PROGRAM main
   integer ierr
   integer n, i, master, myrank, nprocs
   real (kind=8) h, s, x, cpi
-  
+
   call MPI_INIT(ierr)
   call MPI_COMM_GET_PARENT(master, ierr)
   call MPI_COMM_SIZE(master, nprocs, ierr)
   call MPI_COMM_RANK(master, myrank, ierr)
 
-  call MPI_BCAST(n, 1, MPI_INTEGER, & 
+  call MPI_BCAST(n, 1, MPI_INTEGER, &
                  0, master, ierr)
 
   h = 1 / DFLOAT(n)

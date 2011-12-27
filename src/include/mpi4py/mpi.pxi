@@ -488,7 +488,7 @@ cdef extern from "mpi.h" nogil:
     ctypedef int MPI_Comm_delete_attr_function(MPI_Comm,int,void*,void*)                                  #:= MPI_Delete_function
     MPI_Comm_copy_attr_function*   MPI_COMM_DUP_FN                                                        #:= MPI_DUP_FN
     MPI_Comm_copy_attr_function*   MPI_COMM_NULL_COPY_FN                                                  #:= MPI_NULL_COPY_FN
-    MPI_Comm_delete_attr_function* MPI_COMM_NULL_DELETE_FN                                                #:= MPI_NULL_DELETE_FN  
+    MPI_Comm_delete_attr_function* MPI_COMM_NULL_DELETE_FN                                                #:= MPI_NULL_DELETE_FN
     int MPI_Comm_create_keyval(MPI_Comm_copy_attr_function*, MPI_Comm_delete_attr_function*, int*, void*) #:= MPI_Keyval_create
     int MPI_Comm_free_keyval(int*)                                                                        #:= MPI_Keyval_free
 

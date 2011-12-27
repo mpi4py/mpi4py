@@ -4,7 +4,7 @@
    Python* provides bindings of the *Message Passing Interface* (MPI)
    standard for the Python programming language, allowing any Python
    program to exploit multiple processors.
-	       
+
    This package is constructed on top of the MPI-1/2 specifications
    and provides an object oriented interface which closely follows
    MPI-2 C++ bindings. It supports point-to-point (sends, receives)

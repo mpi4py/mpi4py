@@ -11,11 +11,11 @@ FIND_PACKAGE(MPI)
 SET(mpi4py_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 SET(mpi4py_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/mpi4py")
 
-FILE(GLOB mpi4py_PYTHON_FILES 
+FILE(GLOB mpi4py_PYTHON_FILES
      RELATIVE ${mpi4py_SOURCE_DIR}
      ${mpi4py_SOURCE_DIR}/*.py)
 
-FILE(GLOB mpi4py_HEADER_FILES 
+FILE(GLOB mpi4py_HEADER_FILES
      RELATIVE ${mpi4py_SOURCE_DIR}
      ${mpi4py_SOURCE_DIR}/include/mpi4py/*.px[di]
      ${mpi4py_SOURCE_DIR}/include/mpi4py/*.pyx

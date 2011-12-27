@@ -17,7 +17,7 @@ sayhello(MPI_Comm comm) {
   MPI_Get_processor_name(pname, &len);
   pname[len] = 0;
   printf("Hello, World! I am process %d of %d on %s.\n",
-	 rank, size, pname);
+         rank, size, pname);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -78,7 +78,7 @@ static struct PyModuleDef hw_module = {
   NULL,         /* m_reload */
   NULL,         /* m_traverse */
   NULL,         /* m_clear */
-  NULL		/* m_free */
+  NULL          /* m_free */
 };
 
 PyMODINIT_FUNC

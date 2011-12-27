@@ -6,9 +6,9 @@ int main(int argc, char *argv[])
   int n, i;
   double h, s, pi;
   MPI_Comm master;
-  
+
   MPI_Init(&argc, &argv);
-  
+
   MPI_Comm_get_parent(&master);
   MPI_Comm_size(master, &nprocs);
   MPI_Comm_rank(master, &myrank);
@@ -24,10 +24,10 @@ int main(int argc, char *argv[])
   pi = s * h;
 
   MPI_Reduce(&pi, MPI_BOTTOM, 1, MPI_DOUBLE,
-	     MPI_SUM, 0, master);
+             MPI_SUM, 0, master);
 
   MPI_Comm_disconnect(&master);
-  
+
   MPI_Finalize();
   return 0;
 }

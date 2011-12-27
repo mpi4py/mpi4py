@@ -9,7 +9,7 @@ try:
     from numpy import empty
 except ImportError:
     from array import array
-    def empty(size, dtype): 
+    def empty(size, dtype):
         return array(dtype, [0]*size)
 
 # --------------------------------------------------------------------

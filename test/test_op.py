@@ -16,7 +16,7 @@ except AttributeError:
 
 def frombytes(typecode, data):
     a = array.array(typecode,[])
-    try: 
+    try:
         data = data.tobytes()
     except AttributeError:
         pass

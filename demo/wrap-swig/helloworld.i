@@ -20,7 +20,7 @@ void sayhello(MPI_Comm comm) {
   MPI_Get_processor_name(pname, &len);
   pname[len] = 0;
   printf("Hello, World! I am process %d of %d on %s.\n",
-	 rank, size, pname);
+         rank, size, pname);
 }
 
 %}

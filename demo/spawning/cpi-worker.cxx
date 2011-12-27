@@ -3,7 +3,7 @@
 int main(int argc, char *argv[])
 {
   MPI::Init();
-  
+
   MPI::Intercomm master = MPI::Comm::Get_parent();
   int nprocs = master.Get_size();
   int myrank = master.Get_rank();
@@ -20,10 +20,10 @@ int main(int argc, char *argv[])
   double pi = s * h;
 
   master.Reduce(&pi, MPI_BOTTOM, 1, MPI_DOUBLE,
-		MPI_SUM, 0);
+                MPI_SUM, 0);
 
   master.Disconnect();
-  
+
   MPI::Finalize();
   return 0;
 }

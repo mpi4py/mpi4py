@@ -39,7 +39,7 @@ program main
   if (modulo(h, nprocs) > myrank) then
      N = N + 1
   end if
-  
+
   ! indices of lines to compute here
   allocate( I(0:N-1) )
   I = (/ (k, k=myrank, h-1, nprocs) /)
@@ -63,7 +63,7 @@ program main
   call MPI_Gatherv(I, N, MPI_INTEGER, &
                    MPI_BOTTOM, MPI_BOTTOM, MPI_BOTTOM, MPI_BYTE, &
                    0, master, ierr)
-  
+
   ! send data of lines computed here
   call MPI_Gatherv(C, N*w, MPI_INTEGER, &
                    MPI_BOTTOM, MPI_BOTTOM, MPI_BOTTOM, MPI_BYTE, &
@@ -77,7 +77,7 @@ program main
   call MPI_Finalize(ierr)
 
 contains
-  
+
   function mandelbrot(x, y, maxit) result (it)
     implicit none
     real,    intent(in) :: x, y
@@ -92,5 +92,5 @@ contains
        it = it + 1
     end do
   end function mandelbrot
-  
+
 end program main
