@@ -219,6 +219,59 @@ cdef class Request:
         request.ob_mpi = MPI_Request_f2c(arg)
         return request
 
+    # Python Communication
+    # --------------------
+    #
+    def wait(self, Status status=None):
+        """
+        Wait for a send or receive to complete
+        """
+        cdef msg = PyMPI_wait(self, status)
+        return msg
+    #
+    def test(self, Status status=None):
+        """
+        Test for the completion of a send or receive
+        """
+        cdef int flag = 0
+        cdef msg = PyMPI_test(self, &flag, status)
+        return (<bint>flag, msg)
+    #
+    @classmethod
+    def waitany(cls, requests, Status status=None):
+        """
+        Wait for any previously initiated request to complete
+        """
+        cdef int index = MPI_UNDEFINED
+        cdef msg = PyMPI_waitany(requests, &index, status)
+        return (index, msg)
+    #
+    @classmethod
+    def testany(cls, requests, Status status=None):
+        """
+        Test for completion of any previously initiated request
+        """
+        cdef int index = MPI_UNDEFINED
+        cdef int flag  = 0
+        cdef msg = PyMPI_testany(requests, &index, &flag, status)
+        return (index, <bint>flag, msg)
+    #
+    @classmethod
+    def waitall(cls, requests, statuses=None):
+        """
+        Wait for all previously initiated requests to complete
+        """
+        cdef msg = PyMPI_waitall(requests, statuses)
+        return msg
+    #
+    @classmethod
+    def testall(cls, requests, statuses=None):
+        """
+        Test for completion of all previously initiated requests
+        """
+        cdef int flag = 0
+        cdef msg = PyMPI_testall(requests, &flag, statuses)
+        return (<bint>flag, msg)
 
 
 cdef class Prequest(Request):

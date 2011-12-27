@@ -9,7 +9,7 @@ _basic = [None,
           1+2j, 2-3j,
           'mpi4py',
           ]
-messages = _basic
+messages = list(_basic)
 messages += [ list(_basic),
               tuple(_basic),
               dict([('k%d' % key, val)
@@ -73,6 +73,90 @@ class BaseTestP2PObj(object):
             req.Wait()
             self.assertFalse(req)
             self.assertEqual(rmess, smess)
+
+    def testIRecvAndSend(self):
+        comm = self.COMM
+        size = comm.Get_size()
+        rank = comm.Get_rank()
+        for smess in messages:
+            req = comm.irecv(0, MPI.PROC_NULL)
+            self.assertTrue(req)
+            comm.send(smess,  MPI.PROC_NULL)
+            rmess = req.wait()
+            self.assertFalse(req)
+            self.assertEqual(rmess, None)
+        for smess in messages:
+            try:
+                buf = bytearray(512)
+            except NameError:
+                from array import array
+                buf = array('B', [0]) * 512
+            req = comm.irecv(buf,  rank, 0)
+            self.assertTrue(req)
+            flag, rmess = req.test()
+            self.assertTrue(req)
+            self.assertFalse(flag)
+            self.assertEqual(rmess, None)
+            comm.send(smess, rank, 0)
+            self.assertTrue(req)
+            flag, rmess = req.test()
+            self.assertTrue(flag)
+            self.assertFalse(req)
+            self.assertEqual(rmess, smess)
+        try:
+            tmp = bytearray(1024)
+        except NameError:
+            from array import array
+            tmp = array('B', [0]) * 1024
+        for buf in (None, tmp):
+            for smess in messages:
+                dst = (rank+1)%size
+                src = (rank-1)%size
+                req = comm.irecv(buf, src, 0)
+                self.assertTrue(req)
+                comm.send(smess, dst, 0)
+                rmess = req.wait()
+                self.assertFalse(req)
+                self.assertEqual(rmess, smess)
+
+    def testIRecvAndISend(self):
+        comm = self.COMM
+        size = comm.Get_size()
+        rank = comm.Get_rank()
+        try:
+            tmp = bytearray(512)
+        except NameError:
+            from array import array
+            tmp = array('B', [0]) * 512
+        for buf in (None, tmp):
+            for smess in messages:
+                dst = (rank+1)%size
+                src = (rank-1)%size
+                rreq = comm.irecv(buf, src, 0)
+                self.assertTrue(rreq)
+                sreq = comm.isend(smess, dst, 0)
+                self.assertTrue(sreq)
+                dummy, rmess = MPI.Request.waitall([sreq,rreq])
+                self.assertFalse(sreq)
+                self.assertFalse(rreq)
+                self.assertEqual(dummy, None)
+                self.assertEqual(rmess, smess)
+        for buf in (None, tmp):
+            for smess in messages:
+                rreq = comm.irecv(buf, src, 1)
+                flag, msg = MPI.Request.testall([rreq])
+                self.assertEqual(flag, False)
+                self.assertEqual(msg, None)
+                sreq = comm.isend(smess, dst, 1)
+                while True:
+                    flag, msg = MPI.Request.testall([sreq,rreq])
+                    if not flag:
+                        self.assertEqual(msg, None)
+                        continue
+                    (dummy, rmess) = msg
+                    self.assertEqual(dummy, None)
+                    self.assertEqual(rmess, smess)
+                    break
 
     def testManyISendAndRecv(self):
         size = self.COMM.Get_size()
