@@ -566,6 +566,11 @@ class config(cmd_config.config):
         if decl:
             if call: proto = "int %s (void);"
             else:    proto = "int %s;"
+            if lang == "c":
+                proto = "\n".join([
+                        "#ifdef __cplusplus",
+                        "extern \"C\"",
+                        "#endif", proto])
             body.append(proto % function)
         body.append(    "int main (int n, char**v) {")
         if call:
