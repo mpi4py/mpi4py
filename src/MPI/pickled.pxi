@@ -724,12 +724,16 @@ cdef object PyMPI_alltoall(object sendobj, object recvobj,
 
 cdef inline object _py_reduce(object seq, object op):
     if seq is None: return None
+    cdef object res
     cdef Py_ssize_t i=0, n=len(seq)
     if op is __MAXLOC__ or op is __MINLOC__:
-        seq = list(zip(seq, range(n)))
-    cdef object res = seq[0]
-    for i from 1 <= i < n:
-        res = op(res, seq[i])
+        res = (seq[0], 0)
+        for i from 1 <= i < n:
+            res = op(res, (seq[i], i))
+    else:
+        res = seq[0]
+        for i from 1 <= i < n:
+            res = op(res, seq[i])
     return res
 
 cdef inline object _py_scan(object seq, object op):
