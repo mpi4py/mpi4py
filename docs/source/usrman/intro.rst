@@ -27,13 +27,13 @@ time-consuming lines of code to write and debug in the whole
 development process.  Interpreted high-level languages can be really
 advantageous for this kind of tasks.
 
-For implementing general numerical computations, MATLAB [#]_ is the
-dominant interpreted programming language; in the open source side,
-Octave and Scilab are well known, freely distributed software packages
-providing compatibility with MATLAB language. In this work, we present
-MPI for Python, a new package enabling general applications to exploit
-multiple processors using standard MPI "look and feel" in Python
-scripts.
+For implementing general-purpose numerical computations, MATLAB [#]_
+is the dominant interpreted programming language. In the open source
+side, Octave and Scilab are well known, freely distributed software
+packages providing compatibility with the MATLAB language. In this
+work, we present MPI for Python, a new package enabling applications
+to exploit multiple processors using standard MPI "look and feel" in
+Python scripts.
 
 .. [#] MATLAB is a registered trademark of The MathWorks, Inc.
 

@@ -9,7 +9,7 @@ Tutorial
 generic Python object as well as fast, near C-speed, direct array data
 communication of buffer-provider objects (e.g., NumPy arrays).
 
-* Communication of general Python objects
+* Communication of generic Python objects
 
   You have to use **all-lowercase** methods (of the :class:`Comm`
   class), like :meth:`send()`, :meth:`recv()`, :meth:`bcast()`. Note

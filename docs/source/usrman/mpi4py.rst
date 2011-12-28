@@ -17,7 +17,7 @@ persistence. Many of them rely on disk storage, but *pickling* and
 
 The :mod:`pickle` (slower, written in pure Python) and :mod:`cPickle`
 (faster, written in C) modules provide user-extensible facilities to
-serialize general Python objects using ASCII or binary formats. The
+serialize generic Python objects using ASCII or binary formats. The
 :mod:`marshal` module provides facilities to serialize built-in Python
 objects using a binary format specific to Python, but independent of
 machine architecture issues.
@@ -32,7 +32,7 @@ Although simple and general, the serialization approach (i.e.,
 *pickling* and *unpickling*) previously discussed imposes important
 overheads in memory as well as processor usage, especially in the
 scenario of objects with large memory footprints being
-communicated. Pickling general Python objects, ranging from primitive
+communicated. Pickling generic Python objects, ranging from primitive
 or container built-in types to user-defined classes, necessarily
 requires computer resources.  Processing is also needed for
 dispatching the appropriate serialization method (that depends on the
@@ -123,7 +123,7 @@ In *MPI for Python*, the :meth:`Send`, :meth:`Recv` and
 blocking point-to-point communications within :class:`Intracomm` and
 :class:`Intercomm` instances. These methods can communicate memory
 buffers. The variants :meth:`send`, :meth:`recv` and :meth:`sendrecv`
-can communicate general Python objects.
+can communicate generic Python objects.
 
 Nonblocking Communications
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -206,7 +206,7 @@ In *MPI for Python*, the :meth:`Bcast`, :meth:`Scatter`,
 :class:`Comm` instances provide support for collective communications
 of memory buffers. The variants :meth:`bcast`, :meth:`scatter`,
 :meth:`gather`, :meth:`allgather` and :meth:`alltoall` can communicate
-general Python objects.  The vector variants (which can communicate
+generic Python objects.  The vector variants (which can communicate
 different amounts of data to each process) :meth:`Scatterv`,
 :meth:`Gatherv`, :meth:`Allgatherv` and :meth:`Alltoallv` are also
 supported, they can only communicate objects exposing memory buffers.
@@ -214,7 +214,7 @@ supported, they can only communicate objects exposing memory buffers.
 Global reduction operations on memory buffers are accessible through
 the :meth:`Reduce`, :meth:`Allreduce`, :meth:`Scan` and :meth:`Exscan`
 methods. The variants :meth:`reduce`, :meth:`allreduce`, :meth:`scan`
-and :meth:`exscan` can communicate general Python objects; however,
+and :meth:`exscan` can communicate generic Python objects; however,
 the actual required reduction computations are performed sequentially
 at some process. All the predefined (i.e., :const:`SUM`,
 :const:`PROD`, :const:`MAX`, etc.)  reduction operations can be
