@@ -143,6 +143,7 @@ class BaseTestP2PObj(object):
                 self.assertEqual(rmess, smess)
         for buf in (None, tmp):
             for smess in messages:
+                src = dst = rank
                 rreq = comm.irecv(buf, src, 1)
                 flag, msg = MPI.Request.testall([rreq])
                 self.assertEqual(flag, False)
