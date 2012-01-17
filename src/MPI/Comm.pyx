@@ -49,7 +49,7 @@ cdef class Comm:
         Access the group associated with a communicator
         """
         cdef Group group = <Group>Group.__new__(Group)
-        CHKERR( MPI_Comm_group(self.ob_mpi, &group.ob_mpi) )
+        with nogil: CHKERR( MPI_Comm_group(self.ob_mpi, &group.ob_mpi) )
         return group
 
     property group:
@@ -92,7 +92,7 @@ cdef class Comm:
         Compare two communicators
         """
         cdef int flag = MPI_UNEQUAL
-        CHKERR( MPI_Comm_compare(comm1.ob_mpi, comm2.ob_mpi, &flag) )
+        with nogil: CHKERR( MPI_Comm_compare(comm1.ob_mpi, comm2.ob_mpi, &flag) )
         return flag
 
     # Communicator Constructors
@@ -993,7 +993,7 @@ cdef class Intracomm(Comm):
         #
         cdef Distgraphcomm comm = \
             <Distgraphcomm>Distgraphcomm.__new__(Distgraphcomm)
-        CHKERR( MPI_Dist_graph_create_adjacent(
+        with nogil: CHKERR( MPI_Dist_graph_create_adjacent(
                 self.ob_mpi,
                 indegree,  isource, isourceweight,
                 outdegree, idest,   idestweight,
@@ -1018,7 +1018,7 @@ cdef class Intracomm(Comm):
         #
         cdef Distgraphcomm comm = \
             <Distgraphcomm>Distgraphcomm.__new__(Distgraphcomm)
-        CHKERR( MPI_Dist_graph_create(
+        with nogil: CHKERR( MPI_Dist_graph_create(
                 self.ob_mpi,
                 nv, isource, idegree, idest, iweight,
                 cinfo, reorder, &comm.ob_mpi) )
@@ -1479,11 +1479,12 @@ cdef class Graphcomm(Intracomm):
         Return list of neighbors of a process
         """
         cdef int nneighbors = 0
-        with nogil: CHKERR( MPI_Graph_neighbors_count(
-            self.ob_mpi, rank, &nneighbors) )
+        CHKERR( MPI_Graph_neighbors_count(
+                self.ob_mpi, rank, &nneighbors) )
         cdef int *ineighbors = NULL
         cdef tmp = newarray_int(nneighbors, &ineighbors)
-        CHKERR( MPI_Graph_neighbors(self.ob_mpi, rank, nneighbors, ineighbors) )
+        CHKERR( MPI_Graph_neighbors(
+                self.ob_mpi, rank, nneighbors, ineighbors) )
         cdef int i = 0
         cdef object neighbors = [ineighbors[i] for i from 0 <= i < nneighbors]
         return neighbors
