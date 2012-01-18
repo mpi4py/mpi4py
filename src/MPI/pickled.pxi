@@ -227,14 +227,22 @@ cdef object PyMPI_recv(object obj, int source, int tag,
     #
     cdef int dorecv = (source != MPI_PROC_NULL)
     #
-    cdef MPI_Status rsts
-    with nogil: CHKERR( MPI_Probe(source, tag, comm, &rsts) )
-    with nogil: CHKERR( MPI_Get_count(&rsts, rtype, &rcount) )
-    source = rsts.MPI_SOURCE
-    tag = rsts.MPI_TAG
-    #
     cdef object rmsg = None
-    if dorecv: rmsg = pickle.alloc(&rbuf, rcount)
+    cdef MPI_Status rsts
+    cdef _p_buffer m
+    if dorecv:
+        if obj is None:
+            with nogil:
+                CHKERR( MPI_Probe(source, tag, comm, &rsts) )
+                CHKERR( MPI_Get_count(&rsts, rtype, &rcount) )
+            rmsg = pickle.alloc(&rbuf, rcount)
+            source = rsts.MPI_SOURCE
+            tag = rsts.MPI_TAG
+        else:
+            rmsg = m = getbuffer(obj, 0, 0)
+            rbuf = m.view.buf
+            rcount = <int> m.view.len # XXX overflow?
+    #
     with nogil: CHKERR( MPI_Recv(rbuf, rcount, rtype,
                                  source, tag, comm, status) )
     if dorecv: rmsg = pickle.load(rmsg)
@@ -262,18 +270,26 @@ cdef object PyMPI_sendrecv(object sobj, int dest,   int sendtag,
     with nogil: CHKERR( MPI_Isend(sbuf, scount, stype,
                                   dest, sendtag, comm, &sreq) )
     #
-    cdef MPI_Status rsts
-    with nogil: CHKERR( MPI_Probe(source, recvtag, comm, &rsts) )
-    with nogil: CHKERR( MPI_Get_count(&rsts, rtype, &rcount) )
-    source  = rsts.MPI_SOURCE
-    recvtag = rsts.MPI_TAG
-    #
     cdef object rmsg = None
-    if dorecv: rmsg = pickle.alloc(&rbuf, rcount)
-    with nogil: CHKERR( MPI_Recv(rbuf, rcount, rtype,
-                                 source, recvtag, comm, status) )
+    cdef MPI_Status rsts
+    cdef _p_buffer m
+    if dorecv: 
+        if robj is None:
+            with nogil: 
+                CHKERR( MPI_Probe(source, recvtag, comm, &rsts) )
+                CHKERR( MPI_Get_count(&rsts, rtype, &rcount) )
+            rmsg = pickle.alloc(&rbuf, rcount)
+            source = rsts.MPI_SOURCE
+            recvtag = rsts.MPI_TAG
+        else:
+            rmsg = m = getbuffer(robj, 0, 0)
+            rbuf = m.view.buf
+            rcount = <int> m.view.len # XXX overflow?
     #
-    with nogil: CHKERR( MPI_Wait(&sreq, MPI_STATUS_IGNORE) )
+    with nogil:
+        CHKERR( MPI_Recv(rbuf, rcount, rtype,
+                         source, recvtag, comm, status) )
+        CHKERR( MPI_Wait(&sreq, MPI_STATUS_IGNORE) )
     if dorecv: rmsg = pickle.load(rmsg)
     return rmsg
 
