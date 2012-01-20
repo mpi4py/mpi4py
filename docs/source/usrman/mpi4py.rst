@@ -378,18 +378,18 @@ respectively. Module functions :func:`Is_initialized()` and
 :func:`Is_finalized()` provide the respective tests for initialization
 and finalization.
 
-.. caution:: :cfunc:`MPI_Init()` or :cfunc:`MPI_Init_thread()` is
+.. caution:: :c:func:`MPI_Init()` or :c:func:`MPI_Init_thread()` is
    actually called when you import the :mod:`MPI` module from the
    :mod:`mpi4py` package, but only if MPI is not already
    initialized. In such case, calling :func:`Init`/:func:`Init_thread`
    from Python is expected to generate an MPI error, and in turn an
    exception will be raised.
 
-.. note:: :cfunc:`MPI_Finalize()` is registered (by using Python C/API
-   function :cfunc:`Py_AtExit()`) for being automatically called when
-   Python processes exit, but only if :mod:`mpi4py` actually
-   initialized Therefore, there is no need to call :func:`Finalize()`
-   from Python to ensure MPI finalization.
+.. note:: :c:func:`MPI_Finalize()` is registered (by using Python
+   C/API function :c:func:`Py_AtExit()`) for being automatically
+   called when Python processes exit, but only if :mod:`mpi4py`
+   actually initialized Therefore, there is no need to call
+   :func:`Finalize()` from Python to ensure MPI finalization.
 
 Implementation Information
 ^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -25,7 +25,7 @@ build *MPI for Python*:
      the appendix.
 
   .. note:: Some MPI-1 implementations **do require** the actual
-     command line arguments to be passed in :cfunc:`MPI_Init()`. In
+     command line arguments to be passed in :c:func:`MPI_Init()`. In
      this case, you will need to use a rebuilt, MPI-enabled, Python
      interpreter executable. *MPI for Python* has some support for
      alleviating you from this task. Check the instructions at
