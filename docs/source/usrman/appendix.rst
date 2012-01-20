@@ -199,7 +199,9 @@ script (:file:`.profile`, :file:`.bashrc`, etc.).
     export LD_LIBRARY_PATH=$MPI_DIR/lib/shared:$LD_LIBRARY_PATH:
     export MPICH_USE_SHLIB=yes
 
-  .. warning:: MPICH 1 support for dynamic libraries is not completely
+  .. warning::
+
+     MPICH 1 support for dynamic libraries is not completely
      transparent. Users should set the environment variable
      :envvar:`MPICH_USE_SHLIB` to ``yes`` in order to avoid link
      problems when using the :program:`mpicc` compiler wrapper.

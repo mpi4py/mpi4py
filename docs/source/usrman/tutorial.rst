@@ -3,7 +3,9 @@
 Tutorial
 ========
 
-.. warning:: Under construction. Contributions very welcome!
+.. warning::
+
+   Under construction. Contributions very welcome!
 
 *MPI for Python* supports convenient, *pickle*-based communication of
 generic Python object as well as fast, near C-speed, direct array data
