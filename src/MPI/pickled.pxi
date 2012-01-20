@@ -273,9 +273,9 @@ cdef object PyMPI_sendrecv(object sobj, int dest,   int sendtag,
     cdef object rmsg = None
     cdef MPI_Status rsts
     cdef _p_buffer m
-    if dorecv: 
+    if dorecv:
         if robj is None:
-            with nogil: 
+            with nogil:
                 CHKERR( MPI_Probe(source, recvtag, comm, &rsts) )
                 CHKERR( MPI_Get_count(&rsts, rtype, &rcount) )
             rmsg = pickle.alloc(&rbuf, rcount)

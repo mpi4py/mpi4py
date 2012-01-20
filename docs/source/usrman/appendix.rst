@@ -8,7 +8,7 @@ MPI-enabled Python interpreter
 
 Some MPI-1 implementations (notably, MPICH 1) **do require** the
 actual command line arguments to be passed at the time
-:cfunc:`MPI_Init()` is called. In this case, you will need to use a
+:c:func:`MPI_Init()` is called. In this case, you will need to use a
 re-built, MPI-enabled, Python interpreter binary executable. A basic
 implementation (targeting Python 2.X) of what is required is shown
 below:
@@ -199,7 +199,9 @@ script (:file:`.profile`, :file:`.bashrc`, etc.).
     export LD_LIBRARY_PATH=$MPI_DIR/lib/shared:$LD_LIBRARY_PATH:
     export MPICH_USE_SHLIB=yes
 
-  .. warning:: MPICH 1 support for dynamic libraries is not completely
+  .. warning::
+
+     MPICH 1 support for dynamic libraries is not completely
      transparent. Users should set the environment variable
      :envvar:`MPICH_USE_SHLIB` to ``yes`` in order to avoid link
      problems when using the :program:`mpicc` compiler wrapper.

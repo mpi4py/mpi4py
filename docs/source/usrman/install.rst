@@ -10,13 +10,17 @@ build *MPI for Python*:
 * A working MPI distribution, preferably a MPI-2 one built with
   shared/dynamic libraries.
 
-  .. note:: If you want to build some MPI implementation from sources,
+  .. note::
+
+     If you want to build some MPI implementation from sources,
      check the instructions at :ref:`building-mpi` in the appendix.
 
 * A Python 2.3 to 2.7 or 3.0 to 3.1 distribution, with Python
   library preferably built with shared/dynamic libraries.
 
-  .. note:: **Mac OS X** users employing a Python distribution built
+  .. note::
+
+     **Mac OS X** users employing a Python distribution built
      with **universal binaries** may need to temporarily set the
      environment variables :envvar:`MACOSX_DEPLOYMENT_TARGET`,
      :envvar:`SDKROOT`, and :envvar:`ARCHFLAGS` to appropriate values
@@ -24,8 +28,10 @@ build *MPI for Python*:
      Python*. Check the instructions at :ref:`macosx-universal-sdk` in
      the appendix.
 
-  .. note:: Some MPI-1 implementations **do require** the actual
-     command line arguments to be passed in :cfunc:`MPI_Init()`. In
+  .. note::
+
+     Some MPI-1 implementations **do require** the actual
+     command line arguments to be passed in :c:func:`MPI_Init()`. In
      this case, you will need to use a rebuilt, MPI-enabled, Python
      interpreter executable. *MPI for Python* has some support for
      alleviating you from this task. Check the instructions at
@@ -46,7 +52,9 @@ or alternatively *setuptools* :program:`easy_install` (deprecated)::
 
     $ [sudo] easy_install mpi4py
 
-.. note:: If the :program:`mpicc` compiler wrapper is not on your
+.. note::
+
+   If the :program:`mpicc` compiler wrapper is not on your
    search path (or if it has a different name) you can use
    :program:`env` to pass the environment variable :envvar:`MPICC`
    providing the full path to the MPI compiler wrapper executable::

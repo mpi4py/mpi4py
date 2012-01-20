@@ -9,6 +9,26 @@ HISTORY: MPI for Python
 :Address:      CCT CONICET, 3000 Santa Fe, Argentina
 
 
+Release 1.3 [2012-01-20]
+========================
+
+* Now ``Comm.recv()`` accept a buffer to receive the message.
+
+* Add ``Comm.irecv()`` and ``Request.{wait|test}[any|all]()``.
+
+* Add ``Intracomm.Spawn_multiple()``.
+
+* Better buffer handling for PEP 3118 and legacy buffer interfaces.
+
+* Add support for attribute attribute caching on communicators,
+  datatypes and windows.
+
+* Install MPI-enabled Python interpreter as
+  ``<path>/mpi4py/bin/python-mpi``.
+
+* Windows: Support for building with Open MPI.
+
+
 Release 1.2.2 [2010-09-13]
 ==========================
 
