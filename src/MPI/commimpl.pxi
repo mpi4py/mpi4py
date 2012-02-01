@@ -12,12 +12,13 @@ cdef int comm_keyval_del(int keyval) except -1:
     except KeyError: pass
     return 0
 
-cdef int comm_attr_copy(MPI_Comm comm,
-                        int keyval,
-                        void *extra_state,
-                        void *attrval_in,
-                        void *attrval_out,
-                        int *flag) except -1:
+cdef int comm_attr_copy(
+    MPI_Comm comm,
+    int keyval,
+    void *extra_state,
+    void *attrval_in,
+    void *attrval_out,
+    int *flag) except -1:
     cdef tuple entry = comm_keyval.get(keyval)
     cdef object copy_fn = None
     if entry is not None: copy_fn = entry[0]
@@ -33,31 +34,13 @@ cdef int comm_attr_copy(MPI_Comm comm,
     flag[0] = 1
     return 0
 
-cdef int comm_attr_delete(MPI_Comm comm,
-                          int keyval,
-                          void *attrval,
-                          void *extra_state) except -1:
-    cdef tuple entry = comm_keyval.get(keyval)
-    cdef object delete_fn = None
-    if entry is not None: delete_fn = entry[1]
-    if delete_fn is not None:
-        delete_fn(<object>attrval)
-    Py_DECREF(<object>attrval)
-    return 0
-
-@cython.callspec("PyMPIAPI")
-cdef int comm_attr_copy_fn(MPI_Comm comm,
-                           int keyval,
-                           void *extra_state,
-                           void *attrval_in,
-                           void *attrval_out,
-                           int *flag) with gil:
-    if not Py_IsInitialized():
-        return MPI_SUCCESS
-    if attrval_in == NULL:
-        return MPI_ERR_INTERN
-    if attrval_out == NULL:
-        return MPI_ERR_INTERN
+cdef int comm_attr_copy_cb(
+    MPI_Comm comm,
+    int keyval,
+    void *extra_state,
+    void *attrval_in,
+    void *attrval_out,
+    int *flag) with gil:
     cdef object exc
     try:
         comm_attr_copy(comm, keyval, extra_state,
@@ -70,15 +53,24 @@ cdef int comm_attr_copy_fn(MPI_Comm comm,
         return MPI_ERR_OTHER
     return MPI_SUCCESS
 
-@cython.callspec("PyMPIAPI")
-cdef int comm_attr_delete_fn(MPI_Comm comm,
-                             int keyval,
-                             void *attrval,
-                             void *extra_state) with gil:
-    if not Py_IsInitialized():
-        return MPI_SUCCESS
-    if attrval == NULL:
-        return MPI_ERR_INTERN
+cdef int comm_attr_delete(
+    MPI_Comm comm,
+    int keyval,
+    void *attrval,
+    void *extra_state) except -1:
+    cdef tuple entry = comm_keyval.get(keyval)
+    cdef object delete_fn = None
+    if entry is not None: delete_fn = entry[1]
+    if delete_fn is not None:
+        delete_fn(<object>attrval)
+    Py_DECREF(<object>attrval)
+    return 0
+
+cdef int comm_attr_delete_cb(
+    MPI_Comm comm,
+    int keyval,
+    void *attrval,
+    void *extra_state) with gil:
     cdef object exc
     try:
         comm_attr_delete(comm, keyval, attrval, extra_state)
@@ -89,6 +81,28 @@ cdef int comm_attr_delete_fn(MPI_Comm comm,
         print_traceback()
         return MPI_ERR_OTHER
     return MPI_SUCCESS
+
+@cython.callspec("PyMPIAPI")
+cdef int comm_attr_copy_fn(MPI_Comm comm,
+                           int keyval,
+                           void *extra_state,
+                           void *attrval_in,
+                           void *attrval_out,
+                           int *flag) nogil:
+    if attrval_in == NULL:  return MPI_ERR_INTERN
+    if attrval_out == NULL: return MPI_ERR_INTERN
+    if not Py_IsInitialized(): return MPI_SUCCESS
+    return comm_attr_copy_cb(comm, keyval, extra_state,
+                             attrval_in, attrval_out, flag)
+
+@cython.callspec("PyMPIAPI")
+cdef int comm_attr_delete_fn(MPI_Comm comm,
+                             int keyval,
+                             void *attrval,
+                             void *extra_state) nogil:
+    if attrval == NULL: return MPI_ERR_INTERN
+    if not Py_IsInitialized(): return MPI_SUCCESS
+    return comm_attr_delete_cb(comm, keyval, attrval, extra_state)
 
 # -----------------------------------------------------------------------------
 
