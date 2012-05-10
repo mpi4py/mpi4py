@@ -229,13 +229,11 @@ def configure_mpi(ext, config_cmd):
 def configure_mpe(ext, config_cmd):
     from distutils import log
     log.info("checking for MPE availability ...")
-    lmpe = config_cmd.check_library('lmpe')
-    mpe  = config_cmd.check_library('mpe')
-    pth  = config_cmd.check_library('pthread')
     libraries = []
-    if lmpe: libraries += ['lmpe']
-    if mpe:  libraries += ['mpe']
-    if pth:  libraries += ['pthread']
+    for libname in ('pthread', 'mpe', 'lmpe'):
+        if config_cmd.check_library(
+            libname, other_libraries=libraries):
+            libraries.insert(0, libname)
     ok = (config_cmd.check_header("mpe.h",
                                   headers=["stdlib.h",
                                            "mpi.h"])
@@ -249,11 +247,11 @@ def configure_mpe(ext, config_cmd):
           )
     if ok:
         ext.define_macros += [('HAVE_MPE', 1)]
-        if (linux or darwin or solaris) and lmpe:
-            del libraries[0]
+        if ((linux or darwin or solaris) and 
+            libraries[0] == 'lmpe'):
             ext.extra_link_args += whole_archive('lmpe')
-            ext.extra_link_args += ['-l' + lib
-                                    for lib in libraries]
+            for libname in libraries[1:]:
+                ext.extra_link_args += ['-l' + libname]
         else:
             ext.libraries += libraries
 
@@ -270,18 +268,19 @@ def configure_dl(ext, config_cmd):
     if ok: ext.define_macros += [('HAVE_DLOPEN', 1)]
 
 def configure_libmpe(lib, config_cmd):
-    mpe = config_cmd.check_library('mpe')
-    if mpe:
-        log = config_cmd.check_library('lmpe')
-        pth = config_cmd.check_library('pthread')
-        if (linux or darwin or solaris) and log:
-            if log: lib.extra_link_args += whole_archive('lmpe')
-            if mpe: lib.extra_link_args += ['-lmpe']
-            if pth: lib.extra_link_args += ['-lpthread']
+    libraries = []
+    for libname in ('pthread', 'mpe', 'lmpe'):
+        if config_cmd.check_library(
+            libname, other_libraries=libraries):
+            libraries.insert(0, libname)
+    if 'mpe' in libraries:
+        if ((linux or darwin or solaris) and 
+            libraries[0] == 'lmpe'):
+            lib.extra_link_args += whole_archive('lmpe')
+            for libname in libraries[1:]:
+                lib.extra_link_args += ['-l' + libname]
         else:
-            if log: lib.libraries += ['lmpe']
-            if mpe: lib.libraries += ['mpe']
-            if pth: lib.libraries += ['pthread']
+            lib.libraries += libraries
 
 def configure_libvt(lib, config_cmd):
     if lib.name == 'vt':
