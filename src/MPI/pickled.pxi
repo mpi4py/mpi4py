@@ -12,23 +12,25 @@ cdef extern from "Python.h":
 cdef object PyPickle_dumps = None
 cdef object PyPickle_loads = None
 cdef object PyPickle_PROTOCOL = -1
-
-try:
-    from cPickle import dumps as PyPickle_dumps
-    from cPickle import loads as PyPickle_loads
-    from cPickle import HIGHEST_PROTOCOL as PyPickle_PROTOCOL
-except ImportError:
+if PY_MAJOR_VERSION >= 3:
     from pickle import dumps as PyPickle_dumps
     from pickle import loads as PyPickle_loads
-    from pickle import HIGHEST_PROTOCOL as PyPickle_PROTOCOL
+else:
+    try:
+        from cPickle import dumps as PyPickle_dumps
+        from cPickle import loads as PyPickle_loads
+    except ImportError:
+        from pickle  import dumps as PyPickle_dumps
+        from pickle  import loads as PyPickle_loads
 
 cdef object PyStringIO_New = None
-cdef object PyPickle_loadf  = None
-try:
-    from cStringIO import StringIO as PyStringIO_New
-    from cPickle import load as PyPickle_loadf
-except ImportError:
-    pass
+cdef object PyPickle_loadf = None
+if PY_MAJOR_VERSION == 2:
+    try:
+        from cStringIO import StringIO as PyStringIO_New
+        from cPickle   import load     as PyPickle_loadf
+    except ImportError:
+        pass
 
 cdef class _p_Pickle:
 
