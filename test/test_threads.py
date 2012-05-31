@@ -59,8 +59,7 @@ class TestMPIThreads(unittest.TestCase):
         T = []
         for i in range(5):
             t = Thread(target=self._test_is,
-                       args = (not _HAS_THREADING,),
-                       verbose=_VERBOSE)
+                       args = (not _HAS_THREADING,))
             T.append(t)
         if provided == MPI.THREAD_MULTIPLE:
             for t in T:
