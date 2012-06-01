@@ -66,3 +66,99 @@ def get_config():
     return dict(parser.items('mpi'))
 
 # --------------------------------------------------------------------
+
+def profile(name='MPE', **kargs):
+    """
+    Support for the MPI profiling interface.
+
+    Parameters
+    ----------
+    name : str, optional
+       Name of the profiler to load.
+    path : list of str, optional
+       Additional paths to search for the profiler.
+    logfile : str, optional
+       Filename prefix for dumping profiler output.
+    """
+    import sys, os, imp
+    try:
+        from mpi4py.dl import dlopen, RTLD_NOW, RTLD_GLOBAL
+        from mpi4py.dl import dlerror
+    except ImportError:
+        from ctypes import CDLL as dlopen, RTLD_GLOBAL
+        try:
+            from DLFCN import RTLD_NOW
+        except ImportError:
+            RTLD_NOW = 2
+        dlerror = None
+    #
+    def lookup_pymod(name, path):
+        for pth in path:
+            for suffix, _, kind in imp.get_suffixes():
+                if kind == imp.C_EXTENSION:
+                    filename = os.path.join(pth, name + suffix)
+                    if os.path.isfile(filename):
+                        return filename
+        return None
+    #
+    def lookup_dylib(name, path):
+        format = []
+        for suffix, _, kind in imp.get_suffixes():
+            if kind == imp.C_EXTENSION:
+                format.append(('', suffix))
+        if sys.platform.startswith('win'):
+            format.append(('', '.dll'))
+        elif sys.platform == 'darwin':
+            format.append(('lib', '.dylib'))
+        elif os.name == 'posix':
+            format.append(('lib', '.so'))
+        format.append(('', ''))
+        for pth in path:
+            for (lib, so) in format:
+                filename = os.path.join(pth, lib + name + so)
+                if os.path.isfile(filename):
+                    return filename
+        return None
+    #
+    logfile = kargs.pop('logfile', None)
+    if logfile:
+        if name in ('mpe', 'MPE'):
+            if 'MPE_LOGFILE_PREFIX' not in os.environ:
+                os.environ['MPE_LOGFILE_PREFIX'] = logfile
+        if name in ('vt', 'vt-mpi', 'vt-hyb'):
+            if 'VT_FILE_PREFIX' not in os.environ:
+                os.environ['VT_FILE_PREFIX'] = logfile
+    path = kargs.pop('path', None)
+    if path is None:
+        path = []
+    elif isinstance(path, str):
+        path = [path]
+    else:
+        path = list(path)
+    #
+    if name in ('MPE',):
+        path.append(os.path.dirname(__file__))
+        filename = lookup_pymod(name, path)
+    else:
+        prefix = os.path.dirname(__file__)
+        path.append(os.path.join(prefix, 'lib-pmpi'))
+        filename = lookup_dylib(name, path)
+    if filename is None:
+        raise ValueError("profiler '%s' not found" % name)
+    else:
+        filename = os.path.abspath(filename)
+    #
+    handle = dlopen(filename, RTLD_NOW|RTLD_GLOBAL)
+    if handle:
+        profile.cache.append((name, (handle, filename)))
+    else:
+        from warnings import warn
+        if dlerror:
+            message = dlerror()
+        else:
+            message = "error loading '%s'" % filename
+        warn(message)
+
+profile.cache = []
+
+# --------------------------------------------------------------------
