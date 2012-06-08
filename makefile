@@ -37,8 +37,8 @@ fullclean: distclean srcclean docsclean
 install: build
 	${PYTHON} setup.py install ${INSTALLOPT} --home=${HOME}
 uninstall:
-	-${RM} -r ${HOME}/lib/python/mpi4py
-	-${RM} -r ${HOME}/lib/python/mpi4py-*-py*.egg-info
+	-${RM} -r ${HOME}/lib{,64}/python/mpi4py
+	-${RM} -r ${HOME}/lib{,64}/python/mpi4py-*-py*.egg-info
 
 # ----
 
