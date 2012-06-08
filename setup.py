@@ -293,7 +293,7 @@ def configure_libvt(lib, config_cmd):
                 lib.extra_link_args += whole_archive(vt_lib)
                 lib.extra_link_args += ['-lotf', '-lz', '-ldl']
             else:
-                lib.libraries += [vt_lib, 'otf', 'z', 'dl'],
+                lib.libraries += [vt_lib, 'otf', 'z', 'dl']
     elif lib.name in ('vt-mpi', 'vt-hyb'):
         vt_lib = lib.name
         ok = config_cmd.check_library(vt_lib)
