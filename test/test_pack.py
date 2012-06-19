@@ -46,7 +46,6 @@ EXT32 = 'external32'
 
 class BaseTestPackExternal(object):
 
-    byteswap = False
     skipdtype = []
 
     def testPackSize(self):
@@ -86,10 +85,6 @@ class BaseTestPackExternal(object):
                         position = datatype1.Unpack_external(EXT32, tmpbuf, position, oarray1)
                         position = datatype2.Unpack_external(EXT32, tmpbuf, position, oarray2)
                         # test result
-                        if self.byteswap:
-                            oarray1 = oarray1.byteswap()
-                            oarray2 = oarray2.byteswap()
-                        #return
                         equal = array.allclose
                         self.assertTrue(equal(iarray1, oarray1))
                         self.assertTrue(equal(iarray2, oarray2))
@@ -107,14 +102,12 @@ class TestPackExternal(BaseTestPackExternal, unittest.TestCase):
 
 _name, _version = MPI.get_vendor()
 if _name == 'Open MPI':
-    if _version < (1, 3, 0):
-        from sys import byteorder as sys_byteorder
-        if sys_byteorder == 'little':
-            BaseTestPackExternal.byteswap = True
+    if _version < (1, 5, 0):
+        del BaseTestPackExternal
+        del TestPackExternal
 elif _name in ('MPICH2', 'DeinoMPI'):
     BaseTestPackExternal.skipdtype += ['l']
     BaseTestPackExternal.skipdtype += ['d']
-    pass
 else:
     try:
         MPI.BYTE.Pack_external_size(EXT32, 0)
