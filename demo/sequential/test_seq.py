@@ -1,4 +1,5 @@
-#mpi4py.rc.profile("mpe")
+#import mpi4py
+#mpi4py.profile("mpe")
 from mpi4py import MPI
 
 import unittest

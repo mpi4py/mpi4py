@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 import os
 os.environ['MPE_LOGFILE_PREFIX'] = 'ring'
-mpi4py.rc.profile('mpe')
+import mpi4py
+mpi4py.profile('mpe')
 
 from mpi4py import MPI
 from array import array

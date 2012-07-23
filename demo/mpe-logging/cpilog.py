@@ -3,7 +3,8 @@ from __future__ import with_statement # Python 2.5 and later
 
 # If you want MPE to log MPI calls, you have to add the two lines
 # below at the very beginning of your main bootstrap script.
-mpi4py.rc.profile('MPE', logfile='cpilog')
+import mpi4py
+mpi4py.profile('MPE', logfile='cpilog')
 
 # Import the MPI extension module
 from mpi4py import MPI
