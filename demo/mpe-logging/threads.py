@@ -1,5 +1,4 @@
 import sys
-import mpi4py.rc
 mpi4py.rc.profile('MPE', logfile='threads')
 
 from mpi4py import MPI

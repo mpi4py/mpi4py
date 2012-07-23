@@ -1,4 +1,3 @@
-#import mpi4py.rc
 #mpi4py.rc.profile("mpe")
 from mpi4py import MPI
 

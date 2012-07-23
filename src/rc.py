@@ -40,6 +40,3 @@ Automatic MPI finalization at exit time
 * Any of ``{True  | 1 | "yes" }``: call ``MPI_Finalize()`` at exit time
 * Any of ``{False | 0 | "no"  }``: do not call ``MPI_Finalize()`` at exit time
 """
-
-
-from mpi4py import profile

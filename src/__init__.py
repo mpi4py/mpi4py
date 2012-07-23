@@ -150,7 +150,7 @@ def profile(name='MPE', **kargs):
     #
     handle = dlopen(filename, RTLD_NOW|RTLD_GLOBAL)
     if handle:
-        profile.cache.append((name, (handle, filename)))
+        profile._registry.append((name, (handle, filename)))
     else:
         from warnings import warn
         if dlerror:
@@ -159,6 +159,11 @@ def profile(name='MPE', **kargs):
             message = "error loading '%s'" % filename
         warn(message)
 
-profile.cache = []
+profile._registry = []
+
+# --------------------------------------------------------------------
+
+from mpi4py import rc
+rc.profile = profile
 
 # --------------------------------------------------------------------
