@@ -132,6 +132,7 @@ class Config(object):
             ('openmpi',  'OpenMPI'),
             ('openmpi',  'OpenMPI*'),
             ('deinompi', 'DeinoMPI'),
+            ('msmpi',    'Microsoft HPC Pack 2008 R2'),
             ('msmpi',    'Microsoft HPC Pack 2008 SDK'),
             ):
             mpi_dir = os.path.join(ProgramFiles, install_suffix)
@@ -142,13 +143,14 @@ class Config(object):
             if not os.path.isdir(mpi_dir):
                 continue
             define_macros = []
-            include_dir = os.path.join(mpi_dir, 'include')
+            include_dirs = [os.path.join(mpi_dir, 'include')]
             library = 'mpi'
             library_dir = os.path.join(mpi_dir, 'lib')
             if name == 'openmpi':
                 define_macros.append(('OMPI_IMPORTS', None))
                 library = 'libmpi'
             if name == 'msmpi':
+                include_dirs.append(os.path.join(mpi_dir, 'inc'))
                 library = 'msmpi'
                 bits = platform.architecture()[0]
                 if bits == '32bit':
@@ -157,7 +159,7 @@ class Config(object):
                     library_dir = os.path.join(library_dir, 'amd64')
             self.library_info.update(
                 define_macros=define_macros,
-                include_dirs=[include_dir],
+                include_dirs=include_dirs,
                 libraries=[library],
                 library_dirs=[library_dir],
                 )

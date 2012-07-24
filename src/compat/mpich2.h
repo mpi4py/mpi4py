@@ -5,7 +5,7 @@
 #include "sicortex.h"
 #endif
 
-#if defined(MS_MPI)
+#if defined(MS_MPI) && !defined(MSMPI_VER)
 #undef  MPI_File_c2f
 #define MPI_File_c2f PMPI_File_c2f
 #undef  MPI_File_f2c

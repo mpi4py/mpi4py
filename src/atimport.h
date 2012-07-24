@@ -10,11 +10,19 @@
 #define MPICH1 1
 #endif
 
-#if defined(MS_WINDOWS) && defined(MPICH2) && defined(MPIAPI)
+#if defined(MS_WINDOWS) && defined(MSMPI_VER)
+#define MS_MPI 1
+#endif
+
+#if defined(MS_WINDOWS) && (defined(MPICH2) && defined(MPIAPI))
 #define MS_MPI 1
 #endif
 
 #if defined(MS_WINDOWS) && defined(DEINO_MPI) && !defined(MPICH2)
+#define MPICH2 1
+#endif
+
+#if defined(MS_WINDOWS) && defined(MS_MPI) && !defined(MPICH2)
 #define MPICH2 1
 #endif
 
