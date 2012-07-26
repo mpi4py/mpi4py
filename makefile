@@ -42,10 +42,11 @@ uninstall:
 
 # ----
 
-.PHONY: docs docs-html docs-pdf
-docs: docs-html docs-pdf
+.PHONY: docs docs-html docs-pdf docs-misc
+docs: docs-html docs-pdf docs-misc
 docs-html: rst2html sphinx-html epydoc-html
-docs-pdf: sphinx-pdf epydoc-pdf
+docs-pdf:  sphinx-pdf epydoc-pdf
+docs-misc: sphinx-man sphinx-info
 
 RST2HTML = rst2html
 RST2HTMLOPTS  = --input-encoding=utf-8
@@ -60,8 +61,8 @@ rst2html:
 
 SPHINXBUILD = sphinx-build
 SPHINXOPTS  =
-.PHONY: sphinx sphinx-html sphinx-pdf
-sphinx: sphinx-html sphinx-pdf
+.PHONY: sphinx sphinx-html sphinx-pdf sphinx-man sphinx-info
+sphinx: sphinx-html sphinx-pdf sphinx-man sphinx-info
 sphinx-html:
 	${PYTHON} -c 'import mpi4py.MPI'
 	mkdir -p build/doctrees docs/usrman
@@ -75,6 +76,19 @@ sphinx-pdf:
 	docs/source/usrman build/latex
 	${MAKE} -C build/latex all-pdf > /dev/null
 	mv build/latex/*.pdf docs/
+sphinx-man:
+	${PYTHON} -c 'import mpi4py.MPI'
+	mkdir -p build/doctrees build/man
+	${SPHINXBUILD} -b man -d build/doctrees ${SPHINXOPTS} \
+	docs/source/usrman build/man
+	mv build/man/*.[137] docs/
+sphinx-info:
+	${PYTHON} -c 'import mpi4py.MPI'
+	mkdir -p build/doctrees build/texinfo
+	${SPHINXBUILD} -b texinfo -d build/doctrees ${SPHINXOPTS} \
+	docs/source/usrman build/texinfo
+	${MAKE} -C build/texinfo info > /dev/null
+	mv build/texinfo/*.info docs/
 
 EPYDOCBUILD = ${PYTHON} ./conf/epydocify.py
 EPYDOCOPTS  =
@@ -88,6 +102,7 @@ epydoc-pdf:
 
 .PHONY:
 docsclean:
+	-${RM} docs/*.info docs/*.[137]
 	-${RM} docs/*.html docs/*.pdf
 	-${RM} -r docs/usrman docs/apiref
 

@@ -2,6 +2,8 @@ syntax: glob
 build
 docs/*.html
 docs/*.pdf
+docs/*.info
+docs/*.[137]
 docs/apiref
 docs/usrman
 dist

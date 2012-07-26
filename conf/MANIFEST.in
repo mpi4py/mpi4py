@@ -8,6 +8,8 @@ recursive-include test *.py
 
 include docs/*.html
 include docs/*.pdf
+include docs/*.info
+include docs/*.[137]
 recursive-include docs/usrman *
 recursive-include docs/apiref *
 recursive-include docs/source *

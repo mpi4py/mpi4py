@@ -156,10 +156,7 @@ Collective Communication
 Dynamic Process Management
 --------------------------
 
-Compute Pi
-++++++++++
-
-* Master (or parent, or client) side::
+* Compute Pi - Master (or parent, or client) side::
 
    #!/usr/bin/env python
    from mpi4py import MPI
@@ -179,7 +176,7 @@ Compute Pi
 
    comm.Disconnect()
 
-* Worker (or child, or server) side::
+* Compute Pi - Worker (or child, or server) side::
 
    #!/usr/bin/env python
    from mpi4py import MPI
