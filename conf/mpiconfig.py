@@ -113,7 +113,24 @@ class Config(object):
         if not filename: filename = "mpi.cfg"
         if not section:  section  = "mpi"
 
-        sections = [section+"-"+sys.platform, section]
+        mach = platform.machine()
+        arch = platform.architecture()[0]
+        plat = sys.platform
+        osnm = os.name
+        if   'linux' == plat[:5]: plat = 'linux'
+        elif 'sunos' == plat[:5]: plat = 'solaris'
+        elif 'win'   == plat[:3]: plat = 'windows'
+        suffixes = []
+        suffixes.append(plat+'-'+mach)
+        suffixes.append(plat+'-'+arch)
+        suffixes.append(plat)
+        suffixes.append(osnm+'-'+mach)
+        suffixes.append(osnm+'-'+arch)
+        suffixes.append(osnm)
+        suffixes.append(mach)
+        suffixes.append(arch)
+        sections  = [section+"-"+s for s in suffixes]
+        sections += [section]
         self.load(filename, sections)
         if not self:
             if os.name == 'posix':
