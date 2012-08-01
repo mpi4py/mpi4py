@@ -579,7 +579,14 @@ def run_testsuite(cmd):
         from runtests import main
     finally:
         del sys.path[0]
-    err = main(cmd.args or [])
+    if cmd.dry_run: 
+        return
+    args = cmd.args[:] or []
+    if cmd.verbose < 1:
+        args.insert(0,'-q')
+    if cmd.verbose > 1:
+        args.insert(0,'-v')
+    err = main(args)
     if err:
         raise DistutilsError("test")
 
