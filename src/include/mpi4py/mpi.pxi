@@ -213,7 +213,7 @@ cdef extern from "mpi.h" nogil:
     int MPI_Type_get_name(MPI_Datatype, char[], int*)
     int MPI_Type_set_name(MPI_Datatype, char[])
 
-    int MPI_Type_get_attr(MPI_Datatype, int, void* , int*)
+    int MPI_Type_get_attr(MPI_Datatype, int, void*, int*)
     int MPI_Type_set_attr(MPI_Datatype, int, void*)
     int MPI_Type_delete_attr(MPI_Datatype, int)
 
@@ -373,22 +373,22 @@ cdef extern from "mpi.h" nogil:
 
     int MPI_Barrier(MPI_Comm)
     int MPI_Bcast(void*, int, MPI_Datatype, int, MPI_Comm)
-    int MPI_Gather(void* , int, MPI_Datatype, void*, int, MPI_Datatype, int, MPI_Comm)
-    int MPI_Gatherv(void* , int, MPI_Datatype, void*, int*, int*, MPI_Datatype, int, MPI_Comm)
-    int MPI_Scatter(void* , int, MPI_Datatype, void*, int, MPI_Datatype, int, MPI_Comm)
-    int MPI_Scatterv(void* , int*, int*,  MPI_Datatype, void*, int, MPI_Datatype, int, MPI_Comm)
-    int MPI_Allgather(void* , int, MPI_Datatype, void*, int, MPI_Datatype, MPI_Comm)
-    int MPI_Allgatherv(void* , int, MPI_Datatype, void*, int*, int*, MPI_Datatype, MPI_Comm)
-    int MPI_Alltoall(void* , int, MPI_Datatype, void*, int, MPI_Datatype, MPI_Comm)
-    int MPI_Alltoallv(void* , int*, int*, MPI_Datatype, void*, int*, int*, MPI_Datatype, MPI_Comm)
+    int MPI_Gather(void*, int, MPI_Datatype, void*, int, MPI_Datatype, int, MPI_Comm)
+    int MPI_Gatherv(void*, int, MPI_Datatype, void*, int*, int*, MPI_Datatype, int, MPI_Comm)
+    int MPI_Scatter(void*, int, MPI_Datatype, void*, int, MPI_Datatype, int, MPI_Comm)
+    int MPI_Scatterv(void*, int*, int*,  MPI_Datatype, void*, int, MPI_Datatype, int, MPI_Comm)
+    int MPI_Allgather(void*, int, MPI_Datatype, void*, int, MPI_Datatype, MPI_Comm)
+    int MPI_Allgatherv(void*, int, MPI_Datatype, void*, int*, int*, MPI_Datatype, MPI_Comm)
+    int MPI_Alltoall(void*, int, MPI_Datatype, void*, int, MPI_Datatype, MPI_Comm)
+    int MPI_Alltoallv(void*, int*, int*, MPI_Datatype, void*, int*, int*, MPI_Datatype, MPI_Comm)
     int MPI_Alltoallw(void*, int*, int*, MPI_Datatype*, void*, int*, int*, MPI_Datatype*, MPI_Comm)
 
-    int MPI_Reduce(void* , void*, int, MPI_Datatype, MPI_Op, int, MPI_Comm)
-    int MPI_Allreduce(void* , void*, int, MPI_Datatype, MPI_Op, MPI_Comm)
+    int MPI_Reduce(void*, void*, int, MPI_Datatype, MPI_Op, int, MPI_Comm)
+    int MPI_Allreduce(void*, void*, int, MPI_Datatype, MPI_Op, MPI_Comm)
     int MPI_Reduce_local(void*, void*, int, MPI_Datatype, MPI_Op)
-    int MPI_Reduce_scatter_block(void* , void*, int, MPI_Datatype, MPI_Op, MPI_Comm)
-    int MPI_Reduce_scatter(void* , void*, int*, MPI_Datatype, MPI_Op, MPI_Comm)
-    int MPI_Scan(void* , void*, int, MPI_Datatype, MPI_Op, MPI_Comm)
+    int MPI_Reduce_scatter_block(void*, void*, int, MPI_Datatype, MPI_Op, MPI_Comm)
+    int MPI_Reduce_scatter(void*, void*, int*, MPI_Datatype, MPI_Op, MPI_Comm)
+    int MPI_Scan(void*, void*, int, MPI_Datatype, MPI_Op, MPI_Comm)
     int MPI_Exscan(void*, void*, int, MPI_Datatype, MPI_Op, MPI_Comm)
 
     int MPI_Comm_dup(MPI_Comm, MPI_Comm*)
@@ -455,7 +455,7 @@ cdef extern from "mpi.h" nogil:
     enum: MPI_HOST            #:= MPI_KEYVAL_INVALID
     enum: MPI_IO              #:= MPI_KEYVAL_INVALID
     enum: MPI_WTIME_IS_GLOBAL #:= MPI_KEYVAL_INVALID
-    int MPI_Attr_get(MPI_Comm, int, void* , int*)
+    int MPI_Attr_get(MPI_Comm, int, void*, int*)
     int MPI_Attr_put(MPI_Comm, int, void*)
     int MPI_Attr_delete(MPI_Comm, int)
 
@@ -480,7 +480,7 @@ cdef extern from "mpi.h" nogil:
     enum: MPI_UNIVERSE_SIZE #:= MPI_KEYVAL_INVALID
     enum: MPI_APPNUM        #:= MPI_KEYVAL_INVALID
     enum: MPI_LASTUSEDCODE  #:= MPI_KEYVAL_INVALID
-    int MPI_Comm_get_attr(MPI_Comm, int, void* , int*) #:= MPI_Attr_get
+    int MPI_Comm_get_attr(MPI_Comm, int, void*, int*)  #:= MPI_Attr_get
     int MPI_Comm_set_attr(MPI_Comm, int, void*)        #:= MPI_Attr_put
     int MPI_Comm_delete_attr(MPI_Comm, int)            #:= MPI_Attr_delete
 
