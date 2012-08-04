@@ -197,6 +197,14 @@ def customize_compiler(compiler, lang=None,
             compiler.compiler_so[i] = compiler.compiler_cxx[j]
             try: compiler.compiler_so.remove('-Wstrict-prototypes')
             except: pass
+    if (compiler.compiler_type == 'mingw32' and
+        compiler.gcc_version >= '4.4'):
+        # http://bugs.python.org/issue12641
+        for attr in (
+            'preprocessor', 'compiler', 'compiler_cxx',
+            'compiler_so','linker_so', 'linker_exe'):
+            try: getattr(compiler, attr).remove('-mno-cygwin')
+            except: pass
     if compiler.compiler_type == 'msvc':
         if not compiler.initialized:
             compiler.initialize()
