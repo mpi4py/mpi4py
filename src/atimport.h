@@ -6,24 +6,16 @@
 
 /* ------------------------------------------------------------------------- */
 
+#if defined(MS_WINDOWS)
+#if defined(MSMPI_VER) || (defined(MPICH2) && defined(MPIAPI))
+  #define MS_MPI 1
+#endif
+#if (defined(MS_MPI) || defined(DEINO_MPI)) && !defined(MPICH2)
+  #define MPICH2 1
+#endif
+#endif
 #if defined(MPICH_NAME) && (MPICH_NAME==1)
-#define MPICH1 1
-#endif
-
-#if defined(MS_WINDOWS) && defined(MSMPI_VER)
-#define MS_MPI 1
-#endif
-
-#if defined(MS_WINDOWS) && (defined(MPICH2) && defined(MPIAPI))
-#define MS_MPI 1
-#endif
-
-#if defined(MS_WINDOWS) && defined(DEINO_MPI) && !defined(MPICH2)
-#define MPICH2 1
-#endif
-
-#if defined(MS_WINDOWS) && defined(MS_MPI) && !defined(MPICH2)
-#define MPICH2 1
+  #define MPICH1 1
 #endif
 
 /* XXX describe */
@@ -33,10 +25,6 @@
 #include "config/mpich2.h"
 #elif defined(OPEN_MPI)
 #include "config/openmpi.h"
-#elif defined(MPICH1)
-#include "config/mpich1.h"
-#elif defined(LAM_MPI)
-#include "config/lammpi.h"
 #else /* Unknown MPI*/
 #include "config/unknown.h"
 #endif
@@ -50,12 +38,12 @@
 #include "compat/mpich2.h"
 #elif defined(OPEN_MPI)
 #include "compat/openmpi.h"
+#elif defined(HP_MPI)
+#include "compat/hpmpi.h"
 #elif defined(MPICH1)
 #include "compat/mpich1.h"
 #elif defined(LAM_MPI)
 #include "compat/lammpi.h"
-#elif defined(HP_MPI)
-#include "compat/hpmpi.h"
 #endif
 
 /* ------------------------------------------------------------------------- */

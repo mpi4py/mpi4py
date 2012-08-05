@@ -200,9 +200,7 @@ def configure_mpi(ext, config_cmd):
     if not ok: raise DistutilsPlatformError(errmsg % "link")
     #
     log.info("checking for missing MPI functions/symbols ...")
-    macros = ("MPICH2 OPEN_MPI DEINO_MPI MSMPI_VER "
-              "MPICH_NAME LAM_MPI "
-              ).strip().split()
+    macros = ("MPICH2", "OPEN_MPI", "DEINO_MPI", "MSMPI_VER",)
     ConfigTest = dedent('''\
     #if !(%s)
     #error "Unknown MPI"
