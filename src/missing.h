@@ -1474,6 +1474,91 @@ typedef void (PyMPI_MPI_User_function)(void*, void*, int*, MPI_Datatype*);
 #define MPI_Exscan(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_Exscan",a1,a2,a3,a4,a5,a6)
 #endif
 
+#ifdef  PyMPI_MISSING_MPI_Ibarrier
+#undef  MPI_Ibarrier
+#define MPI_Ibarrier(a1,a2) PyMPI_UNAVAILABLE("MPI_Ibarrier",a1,a2)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Ibcast
+#undef  MPI_Ibcast
+#define MPI_Ibcast(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_Ibcast",a1,a2,a3,a4,a5,a6)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Igather
+#undef  MPI_Igather
+#define MPI_Igather(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Igather",a1,a2,a3,a4,a5,a6,a7,a8,a9)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Igatherv
+#undef  MPI_Igatherv
+#define MPI_Igatherv(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10) PyMPI_UNAVAILABLE("MPI_Igatherv",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Iscatter
+#undef  MPI_Iscatter
+#define MPI_Iscatter(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Iscatter",a1,a2,a3,a4,a5,a6,a7,a8,a9)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Iscatterv
+#undef  MPI_Iscatterv
+#define MPI_Iscatterv(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10) PyMPI_UNAVAILABLE("MPI_Iscatterv",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Iallgather
+#undef  MPI_Iallgather
+#define MPI_Iallgather(a1,a2,a3,a4,a5,a6,a7,a8) PyMPI_UNAVAILABLE("MPI_Iallgather",a1,a2,a3,a4,a5,a6,a7,a8)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Iallgatherv
+#undef  MPI_Iallgatherv
+#define MPI_Iallgatherv(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Iallgatherv",a1,a2,a3,a4,a5,a6,a7,a8,a9)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Ialltoall
+#undef  MPI_Ialltoall
+#define MPI_Ialltoall(a1,a2,a3,a4,a5,a6,a7,a8) PyMPI_UNAVAILABLE("MPI_Ialltoall",a1,a2,a3,a4,a5,a6,a7,a8)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Ialltoallv
+#undef  MPI_Ialltoallv
+#define MPI_Ialltoallv(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10) PyMPI_UNAVAILABLE("MPI_Ialltoallv",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Ialltoallw
+#undef  MPI_Ialltoallw
+#define MPI_Ialltoallw(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10) PyMPI_UNAVAILABLE("MPI_Ialltoallw",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Ireduce
+#undef  MPI_Ireduce
+#define MPI_Ireduce(a1,a2,a3,a4,a5,a6,a7,a8) PyMPI_UNAVAILABLE("MPI_Ireduce",a1,a2,a3,a4,a5,a6,a7,a8)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Iallreduce
+#undef  MPI_Iallreduce
+#define MPI_Iallreduce(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Iallreduce",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Ireduce_scatter_block
+#undef  MPI_Ireduce_scatter_block
+#define MPI_Ireduce_scatter_block(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Ireduce_scatter_block",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Ireduce_scatter
+#undef  MPI_Ireduce_scatter
+#define MPI_Ireduce_scatter(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Ireduce_scatter",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Iscan
+#undef  MPI_Iscan
+#define MPI_Iscan(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Iscan",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Iexscan
+#undef  MPI_Iexscan
+#define MPI_Iexscan(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Iexscan",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
 #ifdef  PyMPI_MISSING_MPI_Comm_dup
 #undef  MPI_Comm_dup
 #define MPI_Comm_dup(a1,a2) PyMPI_UNAVAILABLE("MPI_Comm_dup",a1,a2)

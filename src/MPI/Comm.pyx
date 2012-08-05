@@ -569,6 +569,209 @@ cdef class Comm:
             m.sbuf, m.rbuf, m.rcounts, m.rtype,
             op.ob_mpi, self.ob_mpi) )
 
+    # Nonblocking Collectives
+    # -----------------------
+
+    def Ibarrier(self):
+        """
+        Nonblocking Barrier
+        """
+        cdef Request request = <Request>Request.__new__(Request)
+        with nogil: CHKERR( MPI_Ibarrier(self.ob_mpi, &request.ob_mpi) )
+        return request
+
+    def Ibcast(self, buf, int root=0):
+        """
+        Nonblocking Broadcast
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_bcast(buf, root, self.ob_mpi)
+        cdef Request request = <Request>Request.__new__(Request)
+        with nogil: CHKERR( MPI_Ibcast(
+            m.sbuf, m.scount, m.stype,
+            root, self.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = m
+        return request
+
+    def Igather(self, sendbuf, recvbuf, int root=0):
+        """
+        Nonblocking Gather
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_gather(0, sendbuf, recvbuf, root, self.ob_mpi)
+        cdef Request request = <Request>Request.__new__(Request)
+        with nogil: CHKERR( MPI_Igather(
+            m.sbuf, m.scount, m.stype,
+            m.rbuf, m.rcount, m.rtype,
+            root, self.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = m
+        return request
+
+    def Igatherv(self, sendbuf, recvbuf, int root=0):
+        """
+        Nonblocking Gather Vector
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_gather(1, sendbuf, recvbuf, root, self.ob_mpi)
+        cdef Request request = <Request>Request.__new__(Request)
+        with nogil: CHKERR( MPI_Igatherv(
+            m.sbuf, m.scount,             m.stype,
+            m.rbuf, m.rcounts, m.rdispls, m.rtype,
+            root, self.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = m
+        return request
+
+    def Iscatter(self, sendbuf, recvbuf, int root=0):
+        """
+        Nonblocking Scatter
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_scatter(0, sendbuf, recvbuf, root, self.ob_mpi)
+        cdef Request request = <Request>Request.__new__(Request)
+        with nogil: CHKERR( MPI_Iscatter(
+            m.sbuf, m.scount, m.stype,
+            m.rbuf, m.rcount, m.rtype,
+            root, self.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = m
+        return request
+
+    def Iscatterv(self, sendbuf, recvbuf, int root=0):
+        """
+        Nonblocking Scatter Vector
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_scatter(1, sendbuf, recvbuf, root, self.ob_mpi)
+        cdef Request request = <Request>Request.__new__(Request)
+        with nogil: CHKERR( MPI_Iscatterv(
+            m.sbuf, m.scounts, m.sdispls, m.stype,
+            m.rbuf, m.rcount,             m.rtype,
+            root, self.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = m
+        return request
+
+    def Iallgather(self, sendbuf, recvbuf):
+        """
+        Nonblocking Gather to All
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_allgather(0, sendbuf, recvbuf, self.ob_mpi)
+        cdef Request request = <Request>Request.__new__(Request)
+        with nogil: CHKERR( MPI_Iallgather(
+            m.sbuf, m.scount, m.stype,
+            m.rbuf, m.rcount, m.rtype,
+            self.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = m
+        return request
+
+    def Iallgatherv(self, sendbuf, recvbuf):
+        """
+        Nonblocking Gather to All Vector
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_allgather(1, sendbuf, recvbuf, self.ob_mpi)
+        cdef Request request = <Request>Request.__new__(Request)
+        with nogil: CHKERR( MPI_Iallgatherv(
+            m.sbuf, m.scount,             m.stype,
+            m.rbuf, m.rcounts, m.rdispls, m.rtype,
+            self.ob_mpi, &request.ob_mpi) )
+        return request
+
+    def Ialltoall(self, sendbuf, recvbuf):
+        """
+        Nonblocking All to All Scatter/Gather
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_alltoall(0, sendbuf, recvbuf, self.ob_mpi)
+        cdef Request request = <Request>Request.__new__(Request)
+        with nogil: CHKERR( MPI_Ialltoall(
+            m.sbuf, m.scount, m.stype,
+            m.rbuf, m.rcount, m.rtype,
+            self.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = m
+        return request
+
+    def Ialltoallv(self, sendbuf, recvbuf):
+        """
+        Nonblocking All to All Scatter/Gather Vector
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_alltoall(1, sendbuf, recvbuf, self.ob_mpi)
+        cdef Request request = <Request>Request.__new__(Request)
+        with nogil: CHKERR( MPI_Ialltoallv(
+            m.sbuf, m.scounts, m.sdispls, m.stype,
+            m.rbuf, m.rcounts, m.rdispls, m.rtype,
+            self.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = m
+        return request
+
+    def Ialltoallw(self, sendbuf, recvbuf):
+        """
+        Nonblocking Generalized All-to-All
+        """
+        raise NotImplementedError # XXX implement!
+        cdef void *sbuf = NULL, *rbuf = NULL
+        cdef int  *scounts = NULL, *rcounts = NULL
+        cdef int  *sdispls = NULL, *rdispls = NULL
+        cdef MPI_Datatype *stypes = NULL, *rtypes = NULL
+        cdef Request request = <Request>Request.__new__(Request)
+        with nogil: CHKERR( MPI_Ialltoallw(
+            sbuf, scounts, sdispls, stypes,
+            rbuf, rcounts, rdispls, rtypes,
+            self.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = None
+        return request
+
+    def Ireduce(self, sendbuf, recvbuf, Op op not None=SUM, int root=0):
+        """
+        Nonblocking Reduce
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_reduce(sendbuf, recvbuf, root, self.ob_mpi)
+        cdef Request request = <Request>Request.__new__(Request)
+        with nogil: CHKERR( MPI_Ireduce(
+            m.sbuf, m.rbuf, m.rcount, m.rtype,
+            op.ob_mpi, root, self.ob_mpi, &request.ob_mpi) )
+        return request
+
+    def Iallreduce(self, sendbuf, recvbuf, Op op not None=SUM):
+        """
+        Nonblocking All Reduce
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_allreduce(sendbuf, recvbuf, self.ob_mpi)
+        cdef Request request = <Request>Request.__new__(Request)
+        with nogil: CHKERR( MPI_Iallreduce(
+            m.sbuf, m.rbuf, m.rcount, m.rtype,
+            op.ob_mpi, self.ob_mpi, &request.ob_mpi) )
+        return request
+
+    def Ireduce_scatter_block(self, sendbuf, recvbuf,
+                             Op op not None=SUM):
+        """
+        Nonblocking Reduce-Scatter Block (regular, non-vector version)
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_reduce_scatter_block(sendbuf, recvbuf, self.ob_mpi)
+        cdef Request request = <Request>Request.__new__(Request)
+        with nogil: CHKERR( MPI_Ireduce_scatter_block(
+            m.sbuf, m.rbuf, m.rcount, m.rtype,
+            op.ob_mpi, self.ob_mpi, &request.ob_mpi) )
+        return request
+
+    def Ireduce_scatter(self, sendbuf, recvbuf, recvcounts=None,
+                       Op op not None=SUM):
+        """
+        Nonblocking Reduce-Scatter (vector version)
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_reduce_scatter(sendbuf, recvbuf,
+                             recvcounts, self.ob_mpi)
+        cdef Request request = <Request>Request.__new__(Request)
+        with nogil: CHKERR( MPI_Ireduce_scatter(
+            m.sbuf, m.rbuf, m.rcounts, m.rtype,
+            op.ob_mpi, self.ob_mpi, &request.ob_mpi) )
+        return request
+
     # Tests
     # -----
 
@@ -1065,6 +1268,32 @@ cdef class Intracomm(Comm):
         with nogil: CHKERR( MPI_Exscan(
             m.sbuf, m.rbuf, m.rcount, m.rtype,
             op.ob_mpi, self.ob_mpi) )
+
+    # Nonblocking
+
+    def Iscan(self, sendbuf, recvbuf, Op op not None=SUM):
+        """
+        Inclusive Scan
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_scan(sendbuf, recvbuf, self.ob_mpi)
+        cdef Request request = <Request>Request.__new__(Request)
+        with nogil: CHKERR( MPI_Iscan(
+            m.sbuf, m.rbuf, m.rcount, m.rtype,
+            op.ob_mpi, self.ob_mpi, &request.ob_mpi) )
+        return request
+
+    def Iexscan(self, sendbuf, recvbuf, Op op not None=SUM):
+        """
+        Inclusive Scan
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_exscan(sendbuf, recvbuf, self.ob_mpi)
+        cdef Request request = <Request>Request.__new__(Request)
+        with nogil: CHKERR( MPI_Iexscan(
+            m.sbuf, m.rbuf, m.rcount, m.rtype,
+            op.ob_mpi, self.ob_mpi, &request.ob_mpi) )
+        return request
 
     # Python Communication
     #

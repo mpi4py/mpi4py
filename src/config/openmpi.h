@@ -2,6 +2,7 @@
 #define PyMPI_CONFIG_OPENMPI_H
 
 #include "mpi-22.h"
+#include "mpi-30.h"
 
 #ifndef OMPI_HAVE_FORTRAN_LOGICAL1
 #define OMPI_HAVE_FORTRAN_LOGICAL1 0

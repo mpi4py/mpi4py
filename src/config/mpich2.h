@@ -2,6 +2,7 @@
 #define PyMPI_CONFIG_MPICH2_H
 
 #include "mpi-22.h"
+#include "mpi-30.h"
 
 /* These types are Open MPI extensions */
 #define PyMPI_MISSING_MPI_LOGICAL1 1
@@ -27,5 +28,44 @@
 #ifndef ROMIO_VERSION
 #include "mpich2io.h"
 #endif /* !ROMIO_VERSION */
+
+#if MPICH2_NUMVERSION >= 10500000
+/**/
+#undef  PyMPI_MISSING_MPI_Ibarrier
+#undef  PyMPI_MISSING_MPI_Ibcast
+#undef  PyMPI_MISSING_MPI_Igather
+#undef  PyMPI_MISSING_MPI_Igatherv
+#undef  PyMPI_MISSING_MPI_Iscatter
+#undef  PyMPI_MISSING_MPI_Iscatterv
+#undef  PyMPI_MISSING_MPI_Iallgather
+#undef  PyMPI_MISSING_MPI_Iallgatherv
+#undef  PyMPI_MISSING_MPI_Ialltoall
+#undef  PyMPI_MISSING_MPI_Ialltoallv
+#undef  PyMPI_MISSING_MPI_Ialltoallw
+#undef  PyMPI_MISSING_MPI_Ireduce
+#undef  PyMPI_MISSING_MPI_Iallreduce
+#undef  PyMPI_MISSING_MPI_Ireduce_scatter_block
+#undef  PyMPI_MISSING_MPI_Ireduce_scatter
+#undef  PyMPI_MISSING_MPI_Iscan
+#undef  PyMPI_MISSING_MPI_Iexscan
+#define MPI_Ibarrier              MPIX_Ibarrier
+#define MPI_Ibcast                MPIX_Ibcast
+#define MPI_Igather               MPIX_Igather
+#define MPI_Igatherv              MPIX_Igatherv
+#define MPI_Iscatter              MPIX_Iscatter
+#define MPI_Iscatterv             MPIX_Iscatterv
+#define MPI_Iallgather            MPIX_Iallgather
+#define MPI_Iallgatherv           MPIX_Iallgatherv
+#define MPI_Ialltoall             MPIX_Ialltoall
+#define MPI_Ialltoallv            MPIX_Ialltoallv
+#define MPI_Ialltoallw            MPIX_Ialltoallw
+#define MPI_Ireduce               MPIX_Ireduce
+#define MPI_Iallreduce            MPIX_Iallreduce
+#define MPI_Ireduce_scatter_block MPIX_Ireduce_scatter_block
+#define MPI_Ireduce_scatter       MPIX_Ireduce_scatter
+#define MPI_Iscan                 MPIX_Iscan
+#define MPI_Iexscan               MPIX_Iexscan
+/**/
+#endif
 
 #endif /* !PyMPI_CONFIG_MPICH2_H */
