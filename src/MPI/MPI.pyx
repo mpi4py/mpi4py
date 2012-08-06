@@ -193,6 +193,15 @@ def Get_version():
     CHKERR( MPI_Get_version(&version, &subversion) )
     return (version, subversion)
 
+def Get_library_version():
+    """
+    Obtain the version string of the MPI library
+    """
+    cdef char name[MPI_MAX_LIBRARY_VERSION_STRING+1]
+    cdef int nlen = 0
+    CHKERR( MPI_Get_library_version(name, &nlen) )
+    return tompistr(name, nlen)
+
 # Environmental Inquires
 # ----------------------
 
@@ -243,8 +252,8 @@ MAX_INFO_KEY       = MPI_MAX_INFO_KEY
 MAX_INFO_VAL       = MPI_MAX_INFO_VAL
 MAX_OBJECT_NAME    = MPI_MAX_OBJECT_NAME
 MAX_DATAREP_STRING = MPI_MAX_DATAREP_STRING
-
-
+# MPI-3
+MAX_LIBRARY_VERSION_STRING = MPI_MAX_LIBRARY_VERSION_STRING
 
 # --------------------------------------------------------------------
 

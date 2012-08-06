@@ -22,6 +22,17 @@ class TestEnviron(unittest.TestCase):
         self.assertTrue(type(minor) is int)
         self.assertTrue(minor >= 0)
 
+    def testGetLibraryVersion(self):
+        try:
+            version = MPI.Get_library_version()
+        except NotImplementedError:
+            if MPI.Get_version() < (3, 0):
+                return
+            else:
+                raise
+        self.assertTrue(isinstance(version, str))
+        self.assertTrue(len(version) > 0)
+
     def testGetProcessorName(self):
         procname = MPI.Get_processor_name()
         self.assertTrue(isinstance(procname, str))

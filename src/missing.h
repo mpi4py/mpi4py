@@ -2988,6 +2988,16 @@ typedef int (PyMPI_MPI_Datarep_extent_function)(MPI_Datatype,MPI_Aint*,void*);
 #define MPI_Get_version(a1,a2) PyMPI_UNAVAILABLE("MPI_Get_version",a1,a2)
 #endif
 
+#ifdef  PyMPI_MISSING_MPI_MAX_LIBRARY_VERSION_STRING
+#undef  MPI_MAX_LIBRARY_VERSION_STRING
+#define MPI_MAX_LIBRARY_VERSION_STRING (1)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Get_library_version
+#undef  MPI_Get_library_version
+#define MPI_Get_library_version(a1,a2) PyMPI_UNAVAILABLE("MPI_Get_library_version",a1,a2)
+#endif
+
 #ifdef  PyMPI_MISSING_MPI_MAX_PROCESSOR_NAME
 #undef  MPI_MAX_PROCESSOR_NAME
 #define MPI_MAX_PROCESSOR_NAME (1)

@@ -18,4 +18,7 @@
 #define PyMPI_MISSING_MPI_Iscan 1
 #define PyMPI_MISSING_MPI_Iexscan 1
 
+#define PyMPI_MISSING_MPI_MAX_LIBRARY_VERSION_STRING 1
+#define PyMPI_MISSING_MPI_Get_library_version 1
+
 #endif /* MPI < 3.0 */

@@ -775,6 +775,9 @@ cdef extern from "mpi.h" nogil:
     enum: MPI_SUBVERSION  #:= 0
     int MPI_Get_version(int*, int*)
 
+    enum: MPI_MAX_LIBRARY_VERSION_STRING #:= 1
+    int MPI_Get_library_version(char[], int *)
+
     enum: MPI_MAX_PROCESSOR_NAME  #:= 1
     int MPI_Get_processor_name(char[], int*)
 
