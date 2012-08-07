@@ -111,6 +111,13 @@
 /* #define MPI_Comm_set_info         MPIX_Comm_set_info */
 /* #define MPI_Comm_get_info         MPIX_Comm_get_info */
 /**/
+/* #undef  PyMPI_MISSING_MPI_MAX_LIBRARY_VERSION_STRING */
+/* #undef  PyMPI_MISSING_MPI_Get_library_version */
+/* #undef  PyMPI_MISSING_MPI_INFO_ENV */
+/* #define MPI_MAX_LIBRARY_VERSION_STRING MPIX_MAX_LIBRARY_VERSION_STRING */
+/* #define MPI_Get_library_version        MPIX_Get_library_version */
+/* #define MPI_INFO_ENV                   MPIX_INFO_ENV */
+/**/
 #endif
 
 #endif /* !PyMPI_CONFIG_MPICH2_H */

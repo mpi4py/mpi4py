@@ -153,6 +153,7 @@ cdef inline int del_Info(MPI_Info* ob):
     #
     if ob    == NULL          : return 0
     if ob[0] == MPI_INFO_NULL : return 0
+    if ob[0] == MPI_INFO_ENV  : return 0
     if not mpi_active()       : return 0
     #
     return MPI_Info_free(ob)

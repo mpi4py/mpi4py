@@ -293,6 +293,7 @@ cdef extern from "mpi.h" nogil:
     #-----------------------------------------------------------------
 
     MPI_Info MPI_INFO_NULL #:= 0
+    MPI_Info MPI_INFO_ENV  #:= MPI_INFO_NULL
 
     int MPI_Info_free(MPI_Info*)
     int MPI_Info_create(MPI_Info*)

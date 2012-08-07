@@ -1110,6 +1110,11 @@ typedef void (PyMPI_MPI_User_function)(void*, void*, int*, MPI_Datatype*);
 #define MPI_INFO_NULL ((MPI_Info)0)
 #endif
 
+#ifdef  PyMPI_MISSING_MPI_INFO_ENV
+#undef  MPI_INFO_ENV
+#define MPI_INFO_ENV ((MPI_Info)MPI_INFO_NULL)
+#endif
+
 #ifdef  PyMPI_MISSING_MPI_Info_free
 #undef  MPI_Info_free
 #define MPI_Info_free(a1) PyMPI_UNAVAILABLE("MPI_Info_free",a1)

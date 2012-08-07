@@ -20,6 +20,25 @@ class TestInfoNull(unittest.TestCase):
         self.assertEqual(inull.values(), [])
         self.assertEqual(inull.items(), [])
 
+class TestInfoEnv(unittest.TestCase):
+
+    def testTruth(self):
+        self.assertTrue(bool(MPI.INFO_ENV))
+
+    def testPyMethods(self):
+        ienv = MPI.INFO_NULL
+        def getitem(): return inull['k']
+        def setitem(): inull['k'] = 'v'
+        def delitem(): del inull['k']
+        self.assertEqual(len(inull), 0)
+        self.assertFalse('key' in inull)
+        self.assertRaises(KeyError, getitem)
+        self.assertRaises(KeyError, setitem)
+        self.assertRaises(KeyError, delitem)
+        self.assertEqual(inull.keys(), [])
+        self.assertEqual(inull.values(), [])
+        self.assertEqual(inull.items(), [])
+
 class TestInfo(unittest.TestCase):
 
     def setUp(self):
@@ -134,7 +153,12 @@ class TestInfo(unittest.TestCase):
 try:
     MPI.Info.Create().Free()
 except NotImplementedError:
-    del TestInfoNull, TestInfo
+    del TestInfoNull
+    del TestInfo
+if (MPI.VERSION < 3 and
+    MPI.INFO_ENV == MPI.INFO_NULL):
+    del TestInfoEnv
+
 
 if __name__ == '__main__':
     unittest.main()

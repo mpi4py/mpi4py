@@ -217,9 +217,11 @@ cdef class Info:
 
 
 cdef Info __INFO_NULL__ = new_Info(MPI_INFO_NULL)
+cdef Info __INFO_ENV__  = new_Info(MPI_INFO_ENV)
 
 
 # Predefined info handles
 # -----------------------
 
 INFO_NULL = __INFO_NULL__  #: Null info handle
+INFO_ENV  = __INFO_ENV__   #: Environment info handle
