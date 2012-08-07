@@ -28,6 +28,14 @@
 #define PyMPI_MISSING_MPI_Iscan 1
 #define PyMPI_MISSING_MPI_Iexscan 1
 
+#define PyMPI_MISSING_MPI_Comm_dup_with_info 1
+#define PyMPI_MISSING_MPI_Comm_idup 1
+#define PyMPI_MISSING_MPI_Comm_create_group 1
+#define PyMPI_MISSING_MPI_COMM_TYPE_SHARED 1
+#define PyMPI_MISSING_MPI_Comm_split_type 1
+#define PyMPI_MISSING_MPI_Comm_set_info 1
+#define PyMPI_MISSING_MPI_Comm_get_info 1
+
 #define PyMPI_MISSING_MPI_MAX_LIBRARY_VERSION_STRING 1
 #define PyMPI_MISSING_MPI_Get_library_version 1
 

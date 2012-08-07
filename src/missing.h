@@ -1600,14 +1600,49 @@ typedef void (PyMPI_MPI_User_function)(void*, void*, int*, MPI_Datatype*);
 #define MPI_Comm_dup(a1,a2) PyMPI_UNAVAILABLE("MPI_Comm_dup",a1,a2)
 #endif
 
+#ifdef  PyMPI_MISSING_MPI_Comm_dup_with_info
+#undef  MPI_Comm_dup_with_info
+#define MPI_Comm_dup_with_info(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Comm_dup_with_info",a1,a2,a3)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Comm_idup
+#undef  MPI_Comm_idup
+#define MPI_Comm_idup(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Comm_idup",a1,a2,a3)
+#endif
+
 #ifdef  PyMPI_MISSING_MPI_Comm_create
 #undef  MPI_Comm_create
 #define MPI_Comm_create(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Comm_create",a1,a2,a3)
 #endif
 
+#ifdef  PyMPI_MISSING_MPI_Comm_create_group
+#undef  MPI_Comm_create_group
+#define MPI_Comm_create_group(a1,a2,a3,a4) PyMPI_UNAVAILABLE("MPI_Comm_create_group",a1,a2,a3,a4)
+#endif
+
 #ifdef  PyMPI_MISSING_MPI_Comm_split
 #undef  MPI_Comm_split
 #define MPI_Comm_split(a1,a2,a3,a4) PyMPI_UNAVAILABLE("MPI_Comm_split",a1,a2,a3,a4)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_COMM_TYPE_SHARED
+#undef  MPI_COMM_TYPE_SHARED
+#define MPI_COMM_TYPE_SHARED (MPI_UNDEFINED)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Comm_split_type
+#undef  MPI_Comm_split_type
+#define MPI_Comm_split_type(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Comm_split_type",a1,a2,a3,a4,a5)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Comm_set_info
+#undef  MPI_Comm_set_info
+#define MPI_Comm_set_info(a1,a2) PyMPI_UNAVAILABLE("MPI_Comm_set_info",a1,a2)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Comm_get_info
+#undef  MPI_Comm_get_info
+#define MPI_Comm_get_info(a1,a2) PyMPI_UNAVAILABLE("MPI_Comm_get_info",a1,a2)
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_CART

@@ -91,6 +91,21 @@
 #define MPI_Iscan                 MPIX_Iscan
 #define MPI_Iexscan               MPIX_Iexscan
 /**/
+/* #undef  PyMPI_MISSING_MPI_Comm_dup_with_info */
+#undef  PyMPI_MISSING_MPI_Comm_idup
+#undef  PyMPI_MISSING_MPI_Comm_create_group
+#undef  PyMPI_MISSING_MPI_COMM_TYPE_SHARED
+#undef  PyMPI_MISSING_MPI_Comm_split_type
+/* #define MPI_Comm_dup_with_info    MPIX_Comm_dup_with_info */
+#define MPI_Comm_idup             MPIX_Comm_idup
+#define MPI_Comm_create_group     MPIX_Comm_create_group
+#define MPI_COMM_TYPE_SHARED      MPIX_COMM_TYPE_SHARED
+#define MPI_Comm_split_type       MPIX_Comm_split_type
+/* #undef  PyMPI_MISSING_MPI_Comm_set_info */
+/* #undef  PyMPI_MISSING_MPI_Comm_get_info */
+/* #define MPI_Comm_set_info         MPIX_Comm_set_info */
+/* #define MPI_Comm_get_info         MPIX_Comm_get_info */
+/**/
 #endif
 
 #endif /* !PyMPI_CONFIG_MPICH2_H */

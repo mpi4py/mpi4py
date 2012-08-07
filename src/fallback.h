@@ -670,9 +670,55 @@ static int PyMPI_Reduce_scatter_block(void *sendbuf, void *recvbuf,
   PyMPI_FREE(recvcounts);
   return ierr;
 }
-
 #undef  MPI_Reduce_scatter_block
 #define MPI_Reduce_scatter_block PyMPI_Reduce_scatter_block
+#endif
+
+/* ---------------------------------------------------------------- */
+
+/* Communicator Info */
+
+#ifdef PyMPI_MISSING_MPI_Comm_dup_with_info
+static int PyMPI_Comm_dup_with_info(MPI_Comm comm, MPI_Info info,
+                                    MPI_Comm *newcomm)
+{
+  int dummy, ierr;
+  if (info != MPI_INFO_NULL) {
+    ierr = MPI_Info_get_nkeys(info, &dummy);
+    if (ierr != MPI_SUCCESS) return ierr;
+  }
+  return MPI_Comm_dup(comm, &newcomm);
+}
+#undef  MPI_Comm_dup_with_info
+#define MPI_Comm_dup_with_info PyMPI_Comm_dup_with_info
+#endif
+
+#ifdef PyMPI_MISSING_MPI_Comm_set_info
+static int PyMPI_Comm_set_info(MPI_Comm comm, MPI_Info info)
+{
+  int dummy, ierr;
+  ierr = MPI_Comm_size(comm, &dummy);
+  if (ierr != MPI_SUCCESS) return ierr;
+  if (info != MPI_INFO_NULL) {
+    ierr = MPI_Info_get_nkeys(info, &dummy);
+    if (ierr != MPI_SUCCESS) return ierr;
+  }
+  return MPI_SUCCESS;
+}
+#undef  MPI_Comm_set_info
+#define MPI_Comm_set_info PyMPI_Comm_set_info
+#endif
+
+#ifdef PyMPI_MISSING_MPI_Comm_get_info
+static int PyMPI_Comm_get_info(MPI_Comm comm, MPI_Info *info)
+{
+  int dummy, ierr;
+  ierr = MPI_Comm_size(comm, &dummy);
+  if (ierr != MPI_SUCCESS) return ierr;
+  return MPI_Info_create(info);
+}
+#undef  MPI_Comm_get_info
+#define MPI_Comm_get_info PyMPI_Comm_get_info
 #endif
 
 /* ---------------------------------------------------------------- */

@@ -15,6 +15,12 @@ GRAPH      = MPI_GRAPH      #: General graph topology
 DIST_GRAPH = MPI_DIST_GRAPH #: Distributed graph topology
 
 
+# Communicator Split Type
+# -----------------------
+
+COMM_TYPE_SHARED = MPI_COMM_TYPE_SHARED
+
+
 cdef class Comm:
 
     """
@@ -106,6 +112,77 @@ cdef class Comm:
         with nogil: CHKERR( MPI_Comm_dup(self.ob_mpi, &comm.ob_mpi) )
         return comm
 
+    def Dup(self, Info info=None):
+        """
+        Duplicate an existing communicator
+        """
+        cdef MPI_Info cinfo = arg_Info(info)
+        cdef Comm comm = <Comm>type(self)()
+        if info is None:
+            with nogil: CHKERR( MPI_Comm_dup(
+                self.ob_mpi, &comm.ob_mpi) )
+        else:
+            with nogil: CHKERR( MPI_Comm_dup_with_info(
+                self.ob_mpi, cinfo, &comm.ob_mpi) )
+        return comm
+
+    def Dup_with_info(self, Info info not None):
+        """
+        Duplicate an existing communicator
+        """
+        cdef Comm comm = <Comm>type(self)()
+        with nogil: CHKERR( MPI_Comm_dup_with_info(
+            self.ob_mpi, info.ob_mpi, &comm.ob_mpi) )
+        return comm
+
+    def Idup(self):
+        """
+        Nonblocking duplicate an existing communicator
+        """
+        cdef Comm comm = <Comm>type(self)()
+        cdef Request request = <Request>Request.__new__(Request)
+        with nogil: CHKERR( MPI_Comm_idup(
+            self.ob_mpi, &comm.ob_mpi, &request.ob_mpi) )
+        return (comm, request)
+
+    def Create(self, Group group not None):
+        """
+        Create communicator from group
+        """
+        cdef Comm comm = <Comm>type(self)()
+        with nogil: CHKERR( MPI_Comm_create(
+            self.ob_mpi, group.ob_mpi, &comm.ob_mpi) )
+        return comm
+
+    def Create_group(self, Group group not None, int tag=0):
+        """
+        Create communicator from group
+        """
+        cdef Comm comm = <Comm>type(self)()
+        with nogil: CHKERR( MPI_Comm_create_group(
+            self.ob_mpi, group.ob_mpi, tag, &comm.ob_mpi) )
+        return comm
+
+    def Split(self, int color=0, int key=0):
+        """
+        Split intracommunicator by color and key
+        """
+        cdef Comm comm = <Comm>type(self)()
+        with nogil: CHKERR( MPI_Comm_split(
+            self.ob_mpi, color, key, &comm.ob_mpi) )
+        return comm
+
+    def Split_type(self, int split_type, int key=0,
+                   Info info=INFO_NULL):
+        """
+        Split intracommunicator by color and key
+        """
+        cdef MPI_Info cinfo = arg_Info(info)
+        cdef Comm comm = <Comm>type(self)()
+        with nogil: CHKERR( MPI_Comm_split_type(
+            self.ob_mpi, split_type, key, cinfo, &comm.ob_mpi) )
+        return comm
+
     # Communicator Destructor
     # -----------------------
 
@@ -114,6 +191,27 @@ cdef class Comm:
         Free a communicator
         """
         with nogil: CHKERR( MPI_Comm_free(&self.ob_mpi) )
+
+    # Communicator Info
+    # -----------------
+
+    def Set_info(self, Info info not None):
+        """
+        Set new values for the hints
+        associated with a communicator
+        """
+        with nogil: CHKERR( MPI_Comm_set_info(
+            self.ob_mpi, info.ob_mpi) )
+
+    def Get_info(self):
+        """
+        Return the hints for a communicator
+        that are currently being used by MPI
+        """
+        cdef Info info = <Info>Info.__new__(Info)
+        with nogil: CHKERR( MPI_Comm_get_info(
+            self.ob_mpi, &info.ob_mpi) )
+        return info
 
     # Point to Point communication
     # ----------------------------
@@ -1146,32 +1244,6 @@ cdef class Intracomm(Comm):
     # Communicator Constructors
     # -------------------------
 
-    def Dup(self):
-        """
-        Duplicate an existing intracommunicator
-        """
-        cdef Intracomm comm = <Intracomm>type(self)()
-        with nogil: CHKERR( MPI_Comm_dup(self.ob_mpi, &comm.ob_mpi) )
-        return comm
-
-    def Create(self, Group group not None):
-        """
-        Create intracommunicator from group
-        """
-        cdef Intracomm comm = <Intracomm>type(self)()
-        with nogil: CHKERR( MPI_Comm_create(
-            self.ob_mpi, group.ob_mpi, &comm.ob_mpi) )
-        return comm
-
-    def Split(self, int color=0, int key=0):
-        """
-        Split intracommunicator by color and key
-        """
-        cdef Intracomm comm = <Intracomm>type(self)()
-        with nogil: CHKERR( MPI_Comm_split(
-            self.ob_mpi, color, key, &comm.ob_mpi) )
-        return comm
-
     def Create_cart(self, dims, periods=None, bint reorder=False):
         """
         Create cartesian communicator
@@ -1476,17 +1548,6 @@ cdef class Cartcomm(Intracomm):
             if topo != MPI_CART: raise TypeError(
                 "expecting a Cartesian communicator")
 
-    # Communicator Constructors
-    # -------------------------
-
-    def Dup(self):
-        """
-        Duplicate an existing communicator
-        """
-        cdef Cartcomm comm = <Cartcomm>type(self)()
-        with nogil: CHKERR( MPI_Comm_dup(self.ob_mpi, &comm.ob_mpi) )
-        return comm
-
     # Cartesian Inquiry Functions
     # ---------------------------
 
@@ -1648,18 +1709,6 @@ cdef class Graphcomm(Intracomm):
             if topo != MPI_GRAPH: raise TypeError(
                 "expecting a general graph communicator")
 
-    # Communicator Constructors
-    # -------------------------
-
-    def Dup(self):
-        """
-        Duplicate an existing communicator
-        """
-        cdef Graphcomm comm = <Graphcomm>type(self)()
-        with nogil: CHKERR( MPI_Comm_dup(
-            self.ob_mpi, &comm.ob_mpi) )
-        return comm
-
     # Graph Inquiry Functions
     # -----------------------
 
@@ -1788,18 +1837,6 @@ cdef class Distgraphcomm(Intracomm):
             if topo != MPI_DIST_GRAPH: raise TypeError(
                 "expecting a distributed graph communicator")
 
-    # Communicator Constructors
-    # -------------------------
-
-    def Dup(self):
-        """
-        Duplicate an existing communicator
-        """
-        cdef Distgraphcomm comm = <Distgraphcomm>type(self)()
-        with nogil: CHKERR( MPI_Comm_dup(
-            self.ob_mpi, &comm.ob_mpi) )
-        return comm
-
     # Topology Inquiry Functions
     # --------------------------
 
@@ -1894,32 +1931,6 @@ cdef class Intercomm(Comm):
 
     # Communicator Constructors
     # -------------------------
-
-    def Dup(self):
-        """
-        Duplicate an existing intercommunicator
-        """
-        cdef Intercomm comm = <Intercomm>type(self)()
-        with nogil: CHKERR( MPI_Comm_dup(self.ob_mpi, &comm.ob_mpi) )
-        return comm
-
-    def Create(self, Group group not None):
-        """
-        Create intercommunicator from group
-        """
-        cdef Intercomm comm = <Intercomm>type(self)()
-        with nogil: CHKERR( MPI_Comm_create(
-            self.ob_mpi, group.ob_mpi, &comm.ob_mpi) )
-        return comm
-
-    def Split(self, int color=0, int key=0):
-        """
-        Split intercommunicator by color and key
-        """
-        cdef Intercomm comm = <Intercomm>type(self)()
-        with nogil: CHKERR( MPI_Comm_split(
-            self.ob_mpi, color, key, &comm.ob_mpi) )
-        return comm
 
     def Merge(self, bint high=False):
         """

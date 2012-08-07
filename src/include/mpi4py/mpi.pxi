@@ -420,8 +420,15 @@ cdef extern from "mpi.h" nogil:
     int MPI_Iexscan(void*, void*, int, MPI_Datatype, MPI_Op, MPI_Comm, MPI_Request*)
 
     int MPI_Comm_dup(MPI_Comm, MPI_Comm*)
+    int MPI_Comm_dup_with_info(MPI_Comm, MPI_Info, MPI_Comm*)
+    int MPI_Comm_idup(MPI_Comm, MPI_Comm*, MPI_Request*)
     int MPI_Comm_create(MPI_Comm, MPI_Group, MPI_Comm*)
+    int MPI_Comm_create_group(MPI_Comm, MPI_Group, int, MPI_Comm*)
     int MPI_Comm_split(MPI_Comm, int, int, MPI_Comm*)
+    enum: MPI_COMM_TYPE_SHARED #:= MPI_UNDEFINED
+    int MPI_Comm_split_type(MPI_Comm, int, int, MPI_Info, MPI_Comm*)
+    int MPI_Comm_set_info(MPI_Comm, MPI_Info)
+    int MPI_Comm_get_info(MPI_Comm, MPI_Info*)
 
     enum: MPI_CART #:= MPI_UNDEFINED
     int MPI_Cart_create(MPI_Comm, int, int[], int[], int, MPI_Comm*)
