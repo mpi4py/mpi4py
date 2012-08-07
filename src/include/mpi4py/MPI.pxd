@@ -19,6 +19,9 @@ cdef extern from "mpi.h":
     ctypedef struct _mpi_request_t
     ctypedef _mpi_request_t* MPI_Request
 
+    ctypedef struct _mpi_message_t
+    ctypedef _mpi_message_t* MPI_Message
+
     ctypedef struct _mpi_op_t
     ctypedef _mpi_op_t* MPI_Op
 
@@ -79,6 +82,13 @@ ctypedef public api class Grequest(Request) [
     object PyMPIGrequestObject,
     ]:
     cdef MPI_Request ob_grequest
+
+ctypedef public api class Message [
+    type   PyMPIMessage_Type,
+    object PyMPIMessageObject,
+    ]:
+    cdef MPI_Message ob_mpi     
+    cdef int         flags
 
 ctypedef public api class Op [
     type   PyMPIOp_Type,

@@ -33,6 +33,11 @@ class TestFortranRequest(BaseTestFortran, unittest.TestCase):
     HANDLES = [MPI.REQUEST_NULL,
                ]
 
+class TestFortranMessage(BaseTestFortran, unittest.TestCase):
+    HANDLES = [MPI.MESSAGE_NULL,
+               MPI.MESSAGE_NO_PROC,
+               ]
+
 class TestFortranErrhandler(BaseTestFortran, unittest.TestCase):
     HANDLES = [MPI.ERRHANDLER_NULL,
                MPI.ERRORS_RETURN,

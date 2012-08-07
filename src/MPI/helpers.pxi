@@ -79,6 +79,24 @@ cdef inline int del_Request(MPI_Request* ob):
     return MPI_Request_free(ob)
 
 #------------------------------------------------------------------------------
+# Message
+
+cdef inline Message new_Message(MPI_Message ob):
+    cdef Message message = <Message>Message.__new__(Message)
+    message.ob_mpi = ob
+    return message
+
+cdef inline int del_Message(MPI_Message* ob):
+    #
+    if ob    == NULL                : return 0
+    if ob[0] == MPI_MESSAGE_NULL    : return 0
+    if ob[0] == MPI_MESSAGE_NO_PROC : return 0
+    if not mpi_active()             : return 0
+    #
+    # ob[0] = MPI_MESSAGE_NULL
+    return 0
+
+#------------------------------------------------------------------------------
 # Op
 
 include "opimpl.pxi"

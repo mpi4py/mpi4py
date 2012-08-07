@@ -19,6 +19,9 @@ cdef extern from "mpi.h" nogil:
     ctypedef struct _mpi_request_t
     ctypedef _mpi_request_t* MPI_Request
 
+    ctypedef struct _mpi_message_t
+    ctypedef _mpi_message_t* MPI_Message
+
     ctypedef struct _mpi_op_t
     ctypedef _mpi_op_t* MPI_Op
 
@@ -369,6 +372,13 @@ cdef extern from "mpi.h" nogil:
 
     int MPI_Probe(int, int, MPI_Comm, MPI_Status*)
     int MPI_Iprobe(int, int, MPI_Comm, int*, MPI_Status*)
+
+    MPI_Message MPI_MESSAGE_NULL    #:= 0
+    MPI_Message MPI_MESSAGE_NO_PROC #:= MPI_MESSAGE_NULL
+    int MPI_Mprobe(int, int, MPI_Comm, MPI_Message*, MPI_Status*)
+    int MPI_Improbe(int, int, MPI_Comm, int*, MPI_Message*, MPI_Status*)
+    int MPI_Mrecv(void*, int, MPI_Datatype, MPI_Message*, MPI_Status*)
+    int MPI_Imrecv(void*, int, MPI_Datatype, MPI_Message*, MPI_Request*)
 
     int MPI_Barrier(MPI_Comm)
     int MPI_Bcast(void*, int, MPI_Datatype, int, MPI_Comm)
@@ -776,7 +786,7 @@ cdef extern from "mpi.h" nogil:
     int MPI_Get_version(int*, int*)
 
     enum: MPI_MAX_LIBRARY_VERSION_STRING #:= 1
-    int MPI_Get_library_version(char[], int *)
+    int MPI_Get_library_version(char[], int*)
 
     enum: MPI_MAX_PROCESSOR_NAME  #:= 1
     int MPI_Get_processor_name(char[], int*)
@@ -801,6 +811,7 @@ cdef extern from "mpi.h" nogil:
     # C -> Fortran
     MPI_Fint MPI_Type_c2f       (MPI_Datatype)
     MPI_Fint MPI_Request_c2f    (MPI_Request)
+    MPI_Fint MPI_Message_c2f    (MPI_Message)
     MPI_Fint MPI_Op_c2f         (MPI_Op)
     MPI_Fint MPI_Info_c2f       (MPI_Info)
     MPI_Fint MPI_Group_c2f      (MPI_Group)
@@ -812,6 +823,7 @@ cdef extern from "mpi.h" nogil:
     # Fortran -> C
     MPI_Datatype   MPI_Type_f2c       (MPI_Fint)
     MPI_Request    MPI_Request_f2c    (MPI_Fint)
+    MPI_Message    MPI_Message_f2c    (MPI_Fint)
     MPI_Op         MPI_Op_f2c         (MPI_Fint)
     MPI_Info       MPI_Info_f2c       (MPI_Fint)
     MPI_Group      MPI_Group_f2c      (MPI_Fint)

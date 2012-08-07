@@ -41,6 +41,18 @@ cdef api MPI_Request* PyMPIRequest_Get(object arg) except NULL:
 
 # -----------------------------------------------------------------------------
 
+#  Message
+
+cdef api object PyMPIMessage_New(MPI_Message arg):
+    cdef Message obj = <Message>Message.__new__(Message)
+    obj.ob_mpi = arg
+    return obj
+
+cdef api MPI_Message* PyMPIMessage_Get(object arg) except NULL:
+    return &(<Message?>arg).ob_mpi
+
+# -----------------------------------------------------------------------------
+
 #  Op
 
 cdef api object PyMPIOp_New(MPI_Op arg):

@@ -246,6 +246,37 @@ cdef class Comm:
             source, tag, self.ob_mpi, &flag, statusp) )
         return <bint>flag
 
+    # Matching Probe
+    # --------------
+
+    def Mprobe(self, int source=0, int tag=0, Status status=None):
+        """
+        Blocking test for a message
+
+        .. note:: This function blocks until the message arrives.
+        """
+        cdef MPI_Message cmessage = MPI_MESSAGE_NULL
+        cdef MPI_Status *statusp = arg_Status(status)
+        with nogil: CHKERR( MPI_Mprobe(
+            source, tag, self.ob_mpi, &cmessage, statusp) )
+        cdef Message message = <Message>Message.__new__(Message)
+        message.ob_mpi = cmessage
+        return message
+
+    def Improbe(self, int source=0, int tag=0, Status status=None):
+        """
+        Nonblocking test for a message
+        """
+        cdef int flag = 0
+        cdef MPI_Message cmessage = MPI_MESSAGE_NULL
+        cdef MPI_Status *statusp = arg_Status(status)
+        with nogil: CHKERR( MPI_Improbe(
+             source, tag, self.ob_mpi, &flag, &cmessage, statusp) )
+        if flag == 0: return None
+        cdef Message message = <Message>Message.__new__(Message)
+        message.ob_mpi = cmessage
+        return message
+
     # Persistent Communication
     # ------------------------
 

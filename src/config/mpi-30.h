@@ -1,5 +1,15 @@
 #if defined(MPI_VERSION) && (MPI_VERSION < 3)
 
+#define PyMPI_MISSING_MPI_Message 1
+#define PyMPI_MISSING_MPI_MESSAGE_NULL 1
+#define PyMPI_MISSING_MPI_MESSAGE_NO_PROC 1
+#define PyMPI_MISSING_MPI_Message_c2f 1
+#define PyMPI_MISSING_MPI_Message_f2c 1
+#define PyMPI_MISSING_MPI_Mprobe 1
+#define PyMPI_MISSING_MPI_Improbe 1
+#define PyMPI_MISSING_MPI_Mrecv 1
+#define PyMPI_MISSING_MPI_Imrecv 1
+
 #define PyMPI_MISSING_MPI_Ibarrier 1
 #define PyMPI_MISSING_MPI_Ibcast 1
 #define PyMPI_MISSING_MPI_Igather 1

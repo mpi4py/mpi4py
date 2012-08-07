@@ -31,6 +31,31 @@
 
 #if MPICH2_NUMVERSION >= 10500000
 /**/
+#undef  PyMPI_MISSING_MPI_Message
+#undef  PyMPI_MISSING_MPI_MESSAGE_NULL
+#undef  PyMPI_MISSING_MPI_MESSAGE_NO_PROC
+#undef  PyMPI_MISSING_MPI_Message_c2f
+#undef  PyMPI_MISSING_MPI_Message_f2c
+#undef  PyMPI_MISSING_MPI_Mprobe
+#undef  PyMPI_MISSING_MPI_Improbe
+#undef  PyMPI_MISSING_MPI_Mrecv
+#undef  PyMPI_MISSING_MPI_Imrecv
+#define MPI_Message         MPIX_Message
+#define MPI_MESSAGE_NULL    MPIX_MESSAGE_NULL
+#define MPI_MESSAGE_NO_PROC MPIX_MESSAGE_NO_PROC
+#define MPI_Message_c2f     MPIX_Message_c2f
+#define MPI_Message_f2c     MPIX_Message_f2c
+#define MPI_Mprobe          MPIX_Mprobe
+#define MPI_Improbe         MPIX_Improbe
+#define MPI_Mrecv           MPIX_Mrecv
+#define MPI_Imrecv          MPIX_Imrecv
+#ifndef MPIX_Message_c2f
+#define MPIX_Message_c2f(message) (MPI_Fint)(message)
+#endif
+#ifndef MPIX_Message_f2c
+#define MPIX_Message_f2c(message) (MPI_Message)(message)
+#endif
+/**/
 #undef  PyMPI_MISSING_MPI_Ibarrier
 #undef  PyMPI_MISSING_MPI_Ibcast
 #undef  PyMPI_MISSING_MPI_Igather

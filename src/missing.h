@@ -41,55 +41,61 @@ typedef struct PyMPI_MPI_Status {
 
 #ifdef  PyMPI_MISSING_MPI_Datatype
 #undef  MPI_Datatype
-typedef void *PyMPI_MPI_Datatype;
+typedef void* PyMPI_MPI_Datatype;
 #define MPI_Datatype PyMPI_MPI_Datatype
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_Request
 #undef  MPI_Request
-typedef void *PyMPI_MPI_Request;
+typedef void* PyMPI_MPI_Request;
 #define MPI_Request PyMPI_MPI_Request
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Message
+#undef  MPI_Message
+typedef void* PyMPI_MPI_Message;
+#define MPI_Message PyMPI_MPI_Message
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_Op
 #undef  MPI_Op
-typedef void *PyMPI_MPI_Op;
+typedef void* PyMPI_MPI_Op;
 #define MPI_Op PyMPI_MPI_Op
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_Group
 #undef  MPI_Group
-typedef void *PyMPI_MPI_Group;
+typedef void* PyMPI_MPI_Group;
 #define MPI_Group PyMPI_MPI_Group
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_Info
 #undef  MPI_Info
-typedef void *PyMPI_MPI_Info;
+typedef void* PyMPI_MPI_Info;
 #define MPI_Info PyMPI_MPI_Info
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_Comm
 #undef  MPI_Comm
-typedef void *PyMPI_MPI_Comm;
+typedef void* PyMPI_MPI_Comm;
 #define MPI_Comm PyMPI_MPI_Comm
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_Win
 #undef  MPI_Win
-typedef void *PyMPI_MPI_Win;
+typedef void* PyMPI_MPI_Win;
 #define MPI_Win PyMPI_MPI_Win
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_File
 #undef  MPI_File
-typedef void *PyMPI_MPI_File;
+typedef void* PyMPI_MPI_File;
 #define MPI_File PyMPI_MPI_File
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_Errhandler
 #undef  MPI_Errhandler
-typedef void *PyMPI_MPI_Errhandler;
+typedef void* PyMPI_MPI_Errhandler;
 #define MPI_Errhandler PyMPI_MPI_Errhandler
 #endif
 
@@ -1382,6 +1388,36 @@ typedef void (PyMPI_MPI_User_function)(void*, void*, int*, MPI_Datatype*);
 #ifdef  PyMPI_MISSING_MPI_Iprobe
 #undef  MPI_Iprobe
 #define MPI_Iprobe(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Iprobe",a1,a2,a3,a4,a5)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_MESSAGE_NULL
+#undef  MPI_MESSAGE_NULL
+#define MPI_MESSAGE_NULL ((MPI_Message)0)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_MESSAGE_NO_PROC
+#undef  MPI_MESSAGE_NO_PROC
+#define MPI_MESSAGE_NO_PROC ((MPI_Message)MPI_MESSAGE_NULL)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Mprobe
+#undef  MPI_Mprobe
+#define MPI_Mprobe(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Mprobe",a1,a2,a3,a4,a5)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Improbe
+#undef  MPI_Improbe
+#define MPI_Improbe(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_Improbe",a1,a2,a3,a4,a5,a6)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Mrecv
+#undef  MPI_Mrecv
+#define MPI_Mrecv(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Mrecv",a1,a2,a3,a4,a5)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Imrecv
+#undef  MPI_Imrecv
+#define MPI_Imrecv(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Imrecv",a1,a2,a3,a4,a5)
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_Barrier
@@ -3059,6 +3095,11 @@ typedef int PyMPI_MPI_Fint;
 #define MPI_Request_c2f(a1) ((MPI_Fint)0)
 #endif
 
+#ifdef  PyMPI_MISSING_MPI_Message_c2f
+#undef  MPI_Message_c2f
+#define MPI_Message_c2f(a1) ((MPI_Fint)0)
+#endif
+
 #ifdef  PyMPI_MISSING_MPI_Op_c2f
 #undef  MPI_Op_c2f
 #define MPI_Op_c2f(a1) ((MPI_Fint)0)
@@ -3102,6 +3143,11 @@ typedef int PyMPI_MPI_Fint;
 #ifdef  PyMPI_MISSING_MPI_Request_f2c
 #undef  MPI_Request_f2c
 #define MPI_Request_f2c(a1) MPI_REQUEST_NULL
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Message_f2c
+#undef  MPI_Message_f2c
+#define MPI_Message_f2c(a1) MPI_MESSAGE_NULL
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_Op_f2c
