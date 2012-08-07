@@ -188,6 +188,18 @@ class TestDatatype(unittest.TestCase):
                 #args = (block, displacements) XXX
                 #self._test_derived(dtype, factory, *args)  XXX
 
+    def testCreateHindexedBlock(self):
+        for dtype in datatypes:
+            for block in range(5):
+                blocklengths = list(range(block, block+5))
+                displacements = [0]
+                for b in blocklengths[:-1]:
+                    stride = displacements[-1] + b * dtype.extent + 1
+                    displacements.append(stride)
+                factory = MPI.Datatype.Create_hindexed_block
+                args = (block, displacements)
+                self._test_derived(dtype, factory, *args)
+
     def testCreateStruct(self):
         for dtype1 in datatypes:
             for dtype2 in datatypes:

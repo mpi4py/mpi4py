@@ -166,6 +166,7 @@ cdef extern from "mpi.h" nogil:
     int MPI_Get_address(void*, MPI_Aint*)                                             #:= MPI_Address
     int MPI_Type_create_hvector(int, int, MPI_Aint, MPI_Datatype, MPI_Datatype*)      #:= MPI_Type_hvector
     int MPI_Type_create_hindexed(int, int[], MPI_Aint[], MPI_Datatype, MPI_Datatype*) #:= MPI_Type_hindexed
+    int MPI_Type_create_hindexed_block(int, int, MPI_Aint[], MPI_Datatype, MPI_Datatype*)
     int MPI_Type_create_struct(int, int[], MPI_Aint[], MPI_Datatype[], MPI_Datatype*) #:= MPI_Type_struct
 
     int MPI_Type_get_extent(MPI_Datatype, MPI_Aint*, MPI_Aint*)
@@ -195,14 +196,15 @@ cdef extern from "mpi.h" nogil:
     enum: MPI_COMBINER_DUP               #:=  MPI_UNDEFINED
     enum: MPI_COMBINER_CONTIGUOUS        #:=  MPI_UNDEFINED
     enum: MPI_COMBINER_VECTOR            #:=  MPI_UNDEFINED
-    enum: MPI_COMBINER_HVECTOR_INTEGER   #:=  MPI_UNDEFINED
     enum: MPI_COMBINER_HVECTOR           #:=  MPI_UNDEFINED
+    enum: MPI_COMBINER_HVECTOR_INTEGER   #:=  MPI_UNDEFINED
     enum: MPI_COMBINER_INDEXED           #:=  MPI_UNDEFINED
-    enum: MPI_COMBINER_HINDEXED_INTEGER  #:=  MPI_UNDEFINED
     enum: MPI_COMBINER_HINDEXED          #:=  MPI_UNDEFINED
+    enum: MPI_COMBINER_HINDEXED_INTEGER  #:=  MPI_UNDEFINED
     enum: MPI_COMBINER_INDEXED_BLOCK     #:=  MPI_UNDEFINED
-    enum: MPI_COMBINER_STRUCT_INTEGER    #:=  MPI_UNDEFINED
+    enum: MPI_COMBINER_HINDEXED_BLOCK    #:=  MPI_UNDEFINED
     enum: MPI_COMBINER_STRUCT            #:=  MPI_UNDEFINED
+    enum: MPI_COMBINER_STRUCT_INTEGER    #:=  MPI_UNDEFINED
     enum: MPI_COMBINER_SUBARRAY          #:=  MPI_UNDEFINED
     enum: MPI_COMBINER_DARRAY            #:=  MPI_UNDEFINED
     enum: MPI_COMBINER_F90_REAL          #:=  MPI_UNDEFINED

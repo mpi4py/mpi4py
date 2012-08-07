@@ -1,5 +1,8 @@
 #if defined(MPI_VERSION) && (MPI_VERSION < 3)
 
+#define PyMPI_MISSING_MPI_COMBINER_HINDEXED_BLOCK
+#define PyMPI_MISSING_MPI_Type_create_hindexed_block 1
+
 #define PyMPI_MISSING_MPI_Message 1
 #define PyMPI_MISSING_MPI_MESSAGE_NULL 1
 #define PyMPI_MISSING_MPI_MESSAGE_NO_PROC 1

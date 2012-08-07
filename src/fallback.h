@@ -163,8 +163,7 @@ static int PyMPI_Type_create_indexed_block(int count,
                                            MPI_Datatype oldtype,
                                            MPI_Datatype *newtype)
 {
-  int i, *blocklengths = 0;
-  int ierr = MPI_SUCCESS;
+  int i, *blocklengths = 0, ierr = MPI_SUCCESS;
   if (count > 0) {
     blocklengths = (int *) PyMPI_MALLOC(count*sizeof(int));
     if (!blocklengths) return MPI_ERR_INTERN;
@@ -176,6 +175,31 @@ static int PyMPI_Type_create_indexed_block(int count,
 }
 #undef  MPI_Type_create_indexed_block
 #define MPI_Type_create_indexed_block PyMPI_Type_create_indexed_block
+#undef  MPI_COMBINER_INDEXED_BLOCK
+#define MPI_COMBINER_INDEXED_BLOCK MPI_COMBINER_INDEXED
+#endif
+
+#ifdef PyMPI_MISSING_MPI_Type_create_hindexed_block
+static int PyMPI_Type_create_hindexed_block(int count,
+                                            int blocklength,
+                                            MPI_Aint displacements[],
+                                            MPI_Datatype oldtype,
+                                            MPI_Datatype *newtype)
+{
+  int i, *blocklengths = 0, ierr = MPI_SUCCESS;
+  if (count > 0) {
+    blocklengths = (int *) PyMPI_MALLOC(count*sizeof(int));
+    if (!blocklengths) return MPI_ERR_INTERN;
+  }
+  for (i=0; i<count; i++) blocklengths[i] = blocklength;
+  ierr = MPI_Type_create_hindexed(count,blocklengths,displacements,oldtype,newtype);
+  if (blocklengths) PyMPI_FREE(blocklengths);
+  return ierr;
+}
+#undef  MPI_Type_create_hindexed_block
+#define MPI_Type_create_hindexed_block PyMPI_Type_create_hindexed_block
+#undef  MPI_COMBINER_HINDEXED_BLOCK
+#define MPI_COMBINER_HINDEXED_BLOCK MPI_COMBINER_HINDEXED
 #endif
 
 /*

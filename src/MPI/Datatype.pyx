@@ -34,6 +34,7 @@ COMBINER_INDEXED          = MPI_COMBINER_INDEXED
 COMBINER_HINDEXED_INTEGER = MPI_COMBINER_HINDEXED_INTEGER #: from Fortran call
 COMBINER_HINDEXED         = MPI_COMBINER_HINDEXED
 COMBINER_INDEXED_BLOCK    = MPI_COMBINER_INDEXED_BLOCK
+COMBINER_HINDEXED_BLOCK   = MPI_COMBINER_HINDEXED_BLOCK
 COMBINER_STRUCT           = MPI_COMBINER_STRUCT
 COMBINER_STRUCT_INTEGER   = MPI_COMBINER_STRUCT_INTEGER   #: from Fortran call
 COMBINER_SUBARRAY         = MPI_COMBINER_SUBARRAY
@@ -170,20 +171,6 @@ cdef class Datatype:
                                  self.ob_mpi, &datatype.ob_mpi) )
         return datatype
 
-    def Create_indexed_block(self, int blocklength, displacements):
-        """
-        Create an indexed datatype
-        with constant-sized blocks
-        """
-        cdef int count = 0, *idisp = NULL
-        displacements = getarray_int(displacements, &count, &idisp)
-        #
-        cdef Datatype datatype = <Datatype>type(self)()
-        CHKERR( MPI_Type_create_indexed_block(count, blocklength,
-                                              idisp, self.ob_mpi,
-                                              &datatype.ob_mpi) )
-        return datatype
-
     def Create_hindexed(self, blocklengths, displacements):
         """
         Create an indexed datatype
@@ -199,6 +186,58 @@ cdef class Datatype:
                                          self.ob_mpi,
                                          &datatype.ob_mpi) )
         return datatype
+
+    def Create_indexed_block(self, int blocklength, displacements):
+        """
+        Create an indexed datatype
+        with constant-sized blocks
+        """
+        cdef int count = 0, *idisp = NULL
+        displacements = getarray_int(displacements, &count, &idisp)
+        #
+        cdef Datatype datatype = <Datatype>type(self)()
+        CHKERR( MPI_Type_create_indexed_block(count, blocklength,
+                                              idisp, self.ob_mpi,
+                                              &datatype.ob_mpi) )
+        return datatype
+
+    def Create_hindexed_block(self, int blocklength, displacements):
+        """
+        Create an indexed datatype
+        with constant-sized blocks
+        and displacements in bytes
+        """
+        cdef int count = 0
+        cdef MPI_Aint *idisp = NULL
+        count = <int>len(displacements) # XXX Overflow ?
+        displacements = asarray_Aint(displacements, count, &idisp)
+        #
+        cdef Datatype datatype = <Datatype>type(self)()
+        CHKERR( MPI_Type_create_hindexed_block(count, blocklength,
+                                               idisp, self.ob_mpi,
+                                               &datatype.ob_mpi) )
+        return datatype
+
+    @classmethod
+    def Create_struct(cls, blocklengths, displacements, datatypes):
+        """
+        Create an datatype from a general set of
+        block sizes, displacements and datatypes
+        """
+        cdef int count = 0, *iblen = NULL
+        blocklengths = getarray_int(blocklengths, &count, &iblen)
+        cdef MPI_Aint *idisp = NULL
+        displacements = asarray_Aint(displacements, count, &idisp)
+        cdef MPI_Datatype *ptype = NULL
+        datatypes = asarray_Datatype(datatypes, count, &ptype)
+        #
+        cdef Datatype datatype = <Datatype>cls()
+        CHKERR( MPI_Type_create_struct(count, iblen, idisp, ptype,
+                                       &datatype.ob_mpi) )
+        return datatype
+
+    # Subarray Datatype Constructor
+    # -----------------------------
 
     def Create_subarray(self, sizes, subsizes, starts,
                         int order=ORDER_C):
@@ -221,6 +260,9 @@ cdef class Datatype:
                                          &datatype.ob_mpi) )
         return datatype
 
+    # Distributed Array Datatype Constructor
+    # --------------------------------------
+
     def Create_darray(self, int size, int rank,
                       gsizes, distribs, dargs, psizes,
                       int order=ORDER_C):
@@ -239,24 +281,6 @@ cdef class Datatype:
         CHKERR( MPI_Type_create_darray(size, rank, ndims, igsizes,
                                        idistribs, idargs, ipsizes,
                                        order, self.ob_mpi,
-                                       &datatype.ob_mpi) )
-        return datatype
-
-    @classmethod
-    def Create_struct(cls, blocklengths, displacements, datatypes):
-        """
-        Create an datatype from a general set of
-        block sizes, displacements and datatypes
-        """
-        cdef int count = 0, *iblen = NULL
-        blocklengths = getarray_int(blocklengths, &count, &iblen)
-        cdef MPI_Aint *idisp = NULL
-        displacements = asarray_Aint(displacements, count, &idisp)
-        cdef MPI_Datatype *ptype = NULL
-        datatypes = asarray_Datatype(datatypes, count, &ptype)
-        #
-        cdef Datatype datatype = <Datatype>cls()
-        CHKERR( MPI_Type_create_struct(count, iblen, idisp, ptype,
                                        &datatype.ob_mpi) )
         return datatype
 
@@ -457,6 +481,11 @@ cdef class Datatype:
             return (oldtype, ('INDEXED_BLOCK'),
                     {('blocklength')   : i[1],
                      ('displacements') : [i[k] for k from s2 <= k <= e2]})
+        elif combiner == <int>MPI_COMBINER_HINDEXED_BLOCK:
+            s2 = 0; e2 = i[0]-1
+            return (oldtype, ('HINDEXED_BLOCK'),
+                    {('blocklength')   : i[1],
+                     ('displacements') : [a[k] for k from s2 <= k <= e2]})
         elif (combiner == <int>MPI_COMBINER_STRUCT or
               combiner == <int>MPI_COMBINER_STRUCT_INTEGER):
             s1 = 1; e1 = i[0]

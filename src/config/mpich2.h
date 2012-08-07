@@ -31,6 +31,11 @@
 
 #if MPICH2_NUMVERSION >= 10500000
 /**/
+#undef  PyMPI_MISSING_MPI_COMBINER_HINDEXED_BLOCK
+#undef  PyMPI_MISSING_MPI_Type_create_hindexed_block
+#define MPI_COMBINER_HINDEXED_BLOCK    MPIX_COMBINER_HINDEXED_BLOCK
+#define MPI_Type_create_hindexed_block MPIX_Type_create_hindexed_block
+/**/
 #undef  PyMPI_MISSING_MPI_Message
 #undef  PyMPI_MISSING_MPI_MESSAGE_NULL
 #undef  PyMPI_MISSING_MPI_MESSAGE_NO_PROC
