@@ -164,6 +164,17 @@ PyMPI_AtExitMPI(PyMPI_UNUSED MPI_Comm comm,
 
 /* ------------------------------------------------------------------------- */
 
+#if !defined(PyMPI_USE_MATCHED_RECV)
+  #if defined(PyMPI_MISSING_MPI_Mprobe) || \
+      defined(PyMPI_MISSING_MPI_Mrecv)
+    #define PyMPI_USE_MATCHED_RECV 0
+  #else
+    #define PyMPI_USE_MATCHED_RECV 1
+  #endif
+#endif
+#if !defined(PyMPI_USE_MATCHED_RECV)
+  #define PyMPI_USE_MATCHED_RECV 0
+#endif
 
 /* ------------------------------------------------------------------------- */
 
