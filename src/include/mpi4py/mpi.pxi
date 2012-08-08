@@ -6,7 +6,7 @@ cdef extern from "mpi.h" nogil:
     #-----------------------------------------------------------------
 
     ctypedef long      MPI_Aint
-    ctypedef long long MPI_Offset
+    ctypedef long long MPI_Offset #:= long
 
     ctypedef struct MPI_Status:
         int MPI_SOURCE
@@ -28,7 +28,7 @@ cdef extern from "mpi.h" nogil:
     ctypedef struct _mpi_info_t
     ctypedef _mpi_info_t* MPI_Info
 
-    cdef struct _mpi_comm_t
+    ctypedef struct _mpi_comm_t
     ctypedef _mpi_comm_t* MPI_Comm
 
     ctypedef struct _mpi_win_t
@@ -39,7 +39,6 @@ cdef extern from "mpi.h" nogil:
 
     ctypedef struct _mpi_errhandler_t
     ctypedef _mpi_errhandler_t* MPI_Errhandler
-
 
     #-----------------------------------------------------------------
 
@@ -770,7 +769,7 @@ cdef extern from "mpi.h" nogil:
     #-----------------------------------------------------------------
 
     # Fortran INTEGER
-    ctypedef long MPI_Fint
+    ctypedef int MPI_Fint
 
     MPI_Fint* MPI_F_STATUS_IGNORE   #:= 0
     MPI_Fint* MPI_F_STATUSES_IGNORE #:= 0

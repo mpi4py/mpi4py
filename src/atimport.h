@@ -150,10 +150,15 @@ static int PyMPI_CleanUp(void)
   return MPI_SUCCESS;
 }
 
+#ifndef PyMPI_UNUSED
+#define PyMPI_UNUSED
+#endif
 static int PyMPIAPI
-PyMPI_AtExitMPI(MPI_Comm comm, int k, void *v, void *xs)
+PyMPI_AtExitMPI(PyMPI_UNUSED MPI_Comm comm, 
+                PyMPI_UNUSED int k,
+                PyMPI_UNUSED void *v,
+                PyMPI_UNUSED void *xs)
 {
-  comm=MPI_COMM_NULL; k=0; v=0; xs=0;
   return PyMPI_CleanUp();
 }
 

@@ -31,7 +31,7 @@ cdef extern from "mpi.h":
     ctypedef struct _mpi_errhandler_t
     ctypedef _mpi_errhandler_t* MPI_Errhandler
 
-    cdef struct _mpi_comm_t
+    ctypedef struct _mpi_comm_t
     ctypedef _mpi_comm_t* MPI_Comm
 
     ctypedef struct _mpi_win_t

@@ -4,6 +4,7 @@
 # built, or MPI-1 implementations, perhaps providing a subset of MPI-2
 
 from textwrap import dedent
+from warnings import warn
 
 try:
     import mpiregexes as Re
@@ -36,7 +37,7 @@ class Node(object):
         self.name = name
         self.__dict__.update(kargs)
     def config(self):
-        return self.CONFIG % vars(self)
+        return dedent(self.CONFIG) % vars(self)
     def header(self):
         head = dedent(self.HEADER_HEAD)
         body = dedent(self.HEADER)
@@ -44,15 +45,18 @@ class Node(object):
         return (head+body+tail) % vars(self)
 
 class NodeType(Node):
-    CONFIG = ('%(ctype)s v;\n'
-              '%(ctype)s *p = &v; *p=v;')
+    CONFIG = """\
+    %(ctype)s v; %(ctype)s* p;
+    char* c = (char*)&v; c[0] = 0;
+    p = &v; *p = v;"""
+
     def __init__(self, ctype):
         self.init(name=ctype,
                   cname=ctype,
                   ctype=ctype,)
 
-class NodeStruct(NodeType):
-    REGEX  = Re.STRUCT_TYPE
+class NodeStructType(NodeType):
+    REGEX = Re.STRUCT_TYPE
     HEADER = """\
     typedef struct PyMPI_%(ctype)s {
     %(cfields)s
@@ -60,14 +64,14 @@ class NodeStruct(NodeType):
     #define %(ctype)s PyMPI_%(ctype)s"""
 
     def __init__(self, ctype, cfields):
-        super(NodeStruct, self).__init__(ctype)
+        super(NodeStructType, self).__init__(ctype)
         self.cfields = '\n'.join(['  %s %s;' % field
                                   for field in cfields])
 
 class NodeFuncType(NodeType):
-    HEADER = dedent("""\
+    HEADER = """\
     typedef %(crett)s (PyMPI_%(cname)s)(%(cargs)s);
-    #define %(cname)s PyMPI_%(cname)s""")
+    #define %(cname)s PyMPI_%(cname)s"""
 
     def __init__(self, crett, cname, cargs, calias=None):
         self.init(name=cname,
@@ -80,12 +84,14 @@ class NodeFuncType(NodeType):
             self.calias = calias
 
 class NodeValue(Node):
-    CONFIG = ('%(ctype)s v; v = %(cname)s;\n'
-              '%(ctype)s *p = &v; *p = %(cname)s;')
+    CONFIG = """\
+    %(ctype)s v; %(ctype)s* p;
+    v = %(cname)s; p = &v; *p = %(cname)s;"""
+
     HEADER = '#define %(cname)s (%(calias)s)'
     def __init__(self, ctype, cname, calias):
         self.init(name=cname,
-                  cname=cname,
+                 cname=cname,
                   ctype=ctype,
                   calias=calias)
 
@@ -96,7 +102,10 @@ def ctypefix(ct):
     return ct
 
 class NodeFuncProto(Node):
-    CONFIG = '%(crett)s v; v = %(cname)s(%(cargscall)s); if(v)v=(%(crett)s)0;'
+    CONFIG = """\
+    %(crett)s v;
+    v = %(cname)s(%(cargscall)s);
+    if (v) v= (%(crett)s) 0;"""
     HEADER = ' '. join(['#define %(cname)s(%(cargsnamed)s)',
                         'PyMPI_UNAVAILABLE("%(name)s"%(comma)s%(cargsnamed)s)'])
     def __init__(self, crett, cname, cargs, calias=None):
@@ -124,21 +133,28 @@ class NodeFuncProto(Node):
 
 class IntegralType(NodeType):
     REGEX = Re.INTEGRAL_TYPE
-    HEADER = dedent("""\
-    typedef long PyMPI_%(ctype)s;
-    #define %(ctype)s PyMPI_%(ctype)s""")
+    HEADER = """\
+    typedef %(cbase)s PyMPI_%(ctype)s;
+    #define %(ctype)s PyMPI_%(ctype)s"""
 
-class OpaqueType(NodeType):
-    REGEX = Re.OPAQUE_TYPE
-    HEADER = dedent("""\
-    typedef void *PyMPI_%(ctype)s;
-    #define %(ctype)s PyMPI_%(ctype)s""")
+    def __init__(self, cbase, ctype, calias=None):
+        super(IntegralType, self).__init__(ctype)
+        if calias is not None:
+            self.cbase = calias
+        else:
+            self.cbase = cbase
 
-class StructType(NodeStruct):
+class StructType(NodeStructType):
     def __init__(self, ctype):
         cnames = ['MPI_SOURCE', 'MPI_TAG', 'MPI_ERROR']
         cfields = list(zip(['int']*3, cnames))
         super(StructType, self).__init__(ctype, cfields)
+
+class OpaqueType(NodeType):
+    REGEX = Re.OPAQUE_TYPE
+    HEADER = """\
+    typedef void *PyMPI_%(ctype)s;
+    #define %(ctype)s PyMPI_%(ctype)s"""
 
 class FunctionType(NodeFuncType):
     REGEX = Re.FUNCTION_TYPE
@@ -154,44 +170,33 @@ class EnumValue(NodeValue):
 class HandleValue(NodeValue):
     REGEX = Re.HANDLE_VALUE
     HEADER = '#define %(cname)s ((%(ctype)s)%(calias)s)'
-    #def __init__(self, *a, **k):
-    #    NodeValue.__init__(self, *a, **k)
-    #    print self.__dict__
-    #    if self.cname.endswith('_NULL'):
-    #        self.HEADER = '#define %(cname)s ((%(ctype)s)%(calias)s)'
 
-class BasicValuePtr(NodeValue):
-    REGEX = Re.BASICP_VALUE
+class BasicPtrVal(NodeValue):
+    REGEX = Re.BASIC_PTRVAL
     HEADER = '#define %(cname)s ((%(ctype)s)%(calias)s)'
 
-class StructValuePtr(NodeValue):
-    REGEX = Re.STRUCTP_VALUE
+class IntegralPtrVal(NodeValue):
+    REGEX = Re.INTEGRAL_PTRVAL
+    HEADER = '#define %(cname)s ((%(ctype)s)%(calias)s)'
 
-class FunctionValuePtr(NodeValue):
-    REGEX = Re.FUNCTP_VALUE
+class StructPtrVal(NodeValue):
+    REGEX = Re.STRUCT_PTRVAL
+
+class FunctionPtrVal(NodeValue):
+    REGEX = Re.FUNCT_PTRVAL
 
 class FunctionProto(NodeFuncProto):
     REGEX = Re.FUNCTION_PROTO
 
-
-class FIntType(NodeType):
-    REGEX = Re.FINT_TYPE
-    HEADER = dedent("""\
-    typedef int PyMPI_%(ctype)s;
-    #define %(ctype)s PyMPI_%(ctype)s""")
-
-class FIntValuePtr(BasicValuePtr):
-    REGEX = Re.FINTP_VALUE
-
 class FunctionC2F(NodeFuncProto):
     REGEX = Re.FUNCTION_C2F
-    HEADER = ' '. join(['#define %(cname)s(%(cargsnamed)s)',
-                        '((%(crett)s)0)'])
+    HEADER = ' '.join(['#define %(cname)s(%(cargsnamed)s)',
+                       '((%(crett)s)0)'])
 
 class FunctionF2C(NodeFuncProto):
     REGEX = Re.FUNCTION_F2C
-    HEADER = ' '. join(['#define %(cname)s(%(cargsnamed)s)',
-                        '%(cretv)s'])
+    HEADER = ' '.join(['#define %(cname)s(%(cargsnamed)s)',
+                       '%(cretv)s'])
     def __init__(self, *a, **k):
         NodeFuncProto.__init__(self, *a, **k)
         self.cretv =  self.crett.upper() + '_NULL'
@@ -199,14 +204,13 @@ class FunctionF2C(NodeFuncProto):
 class Scanner(object):
 
     NODE_TYPES = [
-        FIntType, FIntValuePtr,
-        FunctionC2F, FunctionF2C,
         IntegralType,
         StructType, OpaqueType,
         HandleValue, EnumValue,
-        BasicValuePtr, StructValuePtr,
-        FunctionType, FunctionValuePtr,
-        FunctionProto,
+        BasicPtrVal,
+        IntegralPtrVal, StructPtrVal,
+        FunctionType, FunctionPtrVal,
+        FunctionProto, FunctionC2F, FunctionF2C,
         ]
     def __init__(self):
         self.nodes = []
@@ -222,6 +226,7 @@ class Scanner(object):
             self.parse_line(line)
 
     def parse_line(self, line):
+        if Re.IGNORE.match(line): return
         nodemap  = self.nodemap
         nodelist = self.nodes
         for nodetype in self.NODE_TYPES:
@@ -232,6 +237,8 @@ class Scanner(object):
                 nodemap[node.name] = len(nodelist)
                 nodelist.append(node)
                 break
+        if not args:
+            warn('unmatched line:\n%s' % line)
 
     def __iter__(self):
         return iter(self.nodes)

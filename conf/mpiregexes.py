@@ -1,5 +1,8 @@
 import re
 
+def anyof(*args):
+    return r'(?:%s)' % '|'.join(args)
+
 def join(*args):
     tokens = []
     for tok in args:
@@ -12,6 +15,8 @@ lparen   = r'\('
 rparen   = r'\)'
 colon    = r'\:'
 asterisk = r'\*'
+ws       = r'\s*'
+sol      = r'^'
 eol      = r'$'
 
 enum    = join('enum', colon)
@@ -20,8 +25,8 @@ pointer = asterisk
 struct  = join(typedef, 'struct')
 
 basic_type    = r'(?:void|int|char\s*\*{1,3})'
+integral_type = r'MPI_(?:Aint|Offset|Fint)'
 struct_type   = r'MPI_(?:Status)'
-integral_type = r'MPI_(?:Aint|Offset)'
 opaque_type   = r'MPI_(?:Datatype|Request|Op|Info|Group|Errhandler|Comm|Win|File)'
 any_mpi_type  = r'(?:%s|%s|%s)' % (struct_type, integral_type, opaque_type)
 
@@ -32,42 +37,40 @@ usrfun_name = camel_name + r'_(?:function|fn)'
 arg_list = r'.*'
 ret_type = r'void|int|double'
 
-
-canylong = join(r'long', r'(?:long)?')
-canyptr  = join(r'\w+', pointer+'?')
+canyint = anyof(r'int', r'long(?:\s+long)?')
+canyptr = join(r'\w+', pointer+'?')
 
 annotation = r'\#\:\='
-defval = r'(?:%s)?' % join (annotation, [r'\(?[A-Za-z0-9_\+\-\(\)\*]+\)?'])
+fallback_value = r'\(?[A-Za-z0-9_\+\-\(\)\*]+\)?'
+fallback = r'(?:%s)?' % join (annotation, [fallback_value])
 
-STRUCT_TYPE   = join( struct,  [struct_type] , colon,  eol)
-INTEGRAL_TYPE = join( typedef, canylong, [integral_type], eol)
-OPAQUE_TYPE   = join( typedef, canyptr,  [opaque_type],   eol)
-FUNCTION_TYPE = join( typedef, [ret_type], [camel_name],
-                      lparen, [arg_list], rparen,
-                      defval, eol)
+INTEGRAL_TYPE = join( typedef, [canyint], [integral_type], fallback, eol)
+STRUCT_TYPE   = join( struct,  [struct_type], colon,  eol)
+OPAQUE_TYPE   = join( typedef, canyptr,  [opaque_type], eol)
+FUNCTION_TYPE = join( typedef, [ret_type], [camel_name], lparen, [arg_list], rparen, fallback, eol)
 
-ENUM_VALUE     = join( enum,          [upper_name], defval, eol)
-HANDLE_VALUE   = join( [opaque_type], [upper_name], defval, eol)
-BASICP_VALUE   = join( [basic_type,  pointer], [upper_name], defval , eol)
-STRUCTP_VALUE  = join( [struct_type, pointer], [upper_name], defval , eol)
-FUNCTP_VALUE   = join( [usrfun_name, pointer], [upper_name], defval , eol)
-FUNCTION_PROTO = join([ret_type], [camel_name],
-                      lparen, [arg_list], rparen,
-                      defval, eol)
+ENUM_VALUE      = join(sol, enum, [upper_name], fallback, eol)
+HANDLE_VALUE    = join(sol, [opaque_type], [upper_name], fallback, eol)
+BASIC_PTRVAL    = join(sol, [basic_type,  pointer], [upper_name], fallback, eol)
+INTEGRAL_PTRVAL = join(sol, [integral_type, pointer], [upper_name], fallback, eol)
+STRUCT_PTRVAL   = join(sol, [struct_type, pointer], [upper_name], fallback, eol)
+FUNCT_PTRVAL    = join(sol, [usrfun_name, pointer], [upper_name], fallback, eol)
+FUNCTION_PROTO  = join(sol, [ret_type], [camel_name], lparen, [arg_list], rparen, fallback, eol)
 
 fint_type = r'MPI_Fint'
-c2f_name  = r'MPI_[A-Z][a-z_]+_c2f'
-f2c_name  = r'MPI_[A-Z][a-z_]+_f2c'
+fmpi_type = opaque_type.replace('Datatype', 'Type')
+c2f_name  = fmpi_type+'_c2f'
+f2c_name  = fmpi_type+'_f2c'
 
-FINT_TYPE    = join( typedef, canylong, [fint_type], eol)
-FINTP_VALUE  = join( [fint_type, pointer], [upper_name], defval , eol)
-FUNCTION_C2F = join([fint_type], [c2f_name],
-                    lparen, [opaque_type], rparen,
-                    defval, eol)
-FUNCTION_F2C = join([opaque_type], [f2c_name],
-                    lparen, [fint_type], rparen,
-                    defval, eol)
+FUNCTION_C2F = join(sol, [fint_type],   [c2f_name], lparen, [opaque_type], rparen, fallback, eol)
+FUNCTION_F2C = join(sol, [opaque_type], [f2c_name], lparen, [fint_type],   rparen, fallback, eol)
 
+
+IGNORE = anyof(join(sol, r'cdef.*', eol),
+               join(sol, struct, r'_mpi_\w+_t', eol),
+               join(sol, 'int', r'MPI_(?:SOURCE|TAG|ERROR)', eol),
+               join(sol, r'#.*', eol),
+               join(sol, eol))
 
 # compile the RE's
 glb = globals()
