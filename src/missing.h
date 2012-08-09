@@ -29,6 +29,12 @@ typedef long PyMPI_MPI_Offset;
 #define MPI_Offset PyMPI_MPI_Offset
 #endif
 
+#ifdef  PyMPI_MISSING_MPI_Count
+#undef  MPI_Count
+typedef long PyMPI_MPI_Count;
+#define MPI_Count PyMPI_MPI_Count
+#endif
+
 #ifdef  PyMPI_MISSING_MPI_Status
 #undef  MPI_Status
 typedef struct PyMPI_MPI_Status {
@@ -41,61 +47,61 @@ typedef struct PyMPI_MPI_Status {
 
 #ifdef  PyMPI_MISSING_MPI_Datatype
 #undef  MPI_Datatype
-typedef void* PyMPI_MPI_Datatype;
+typedef void *PyMPI_MPI_Datatype;
 #define MPI_Datatype PyMPI_MPI_Datatype
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_Request
 #undef  MPI_Request
-typedef void* PyMPI_MPI_Request;
+typedef void *PyMPI_MPI_Request;
 #define MPI_Request PyMPI_MPI_Request
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_Message
 #undef  MPI_Message
-typedef void* PyMPI_MPI_Message;
+typedef void *PyMPI_MPI_Message;
 #define MPI_Message PyMPI_MPI_Message
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_Op
 #undef  MPI_Op
-typedef void* PyMPI_MPI_Op;
+typedef void *PyMPI_MPI_Op;
 #define MPI_Op PyMPI_MPI_Op
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_Group
 #undef  MPI_Group
-typedef void* PyMPI_MPI_Group;
+typedef void *PyMPI_MPI_Group;
 #define MPI_Group PyMPI_MPI_Group
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_Info
 #undef  MPI_Info
-typedef void* PyMPI_MPI_Info;
+typedef void *PyMPI_MPI_Info;
 #define MPI_Info PyMPI_MPI_Info
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_Comm
 #undef  MPI_Comm
-typedef void* PyMPI_MPI_Comm;
+typedef void *PyMPI_MPI_Comm;
 #define MPI_Comm PyMPI_MPI_Comm
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_Win
 #undef  MPI_Win
-typedef void* PyMPI_MPI_Win;
+typedef void *PyMPI_MPI_Win;
 #define MPI_Win PyMPI_MPI_Win
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_File
 #undef  MPI_File
-typedef void* PyMPI_MPI_File;
+typedef void *PyMPI_MPI_File;
 #define MPI_File PyMPI_MPI_File
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_Errhandler
 #undef  MPI_Errhandler
-typedef void* PyMPI_MPI_Errhandler;
+typedef void *PyMPI_MPI_Errhandler;
 #define MPI_Errhandler PyMPI_MPI_Errhandler
 #endif
 
@@ -169,16 +175,6 @@ typedef void* PyMPI_MPI_Errhandler;
 #define MPI_DATATYPE_NULL ((MPI_Datatype)0)
 #endif
 
-#ifdef  PyMPI_MISSING_MPI_UB
-#undef  MPI_UB
-#define MPI_UB ((MPI_Datatype)MPI_DATATYPE_NULL)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_LB
-#undef  MPI_LB
-#define MPI_LB ((MPI_Datatype)MPI_DATATYPE_NULL)
-#endif
-
 #ifdef  PyMPI_MISSING_MPI_PACKED
 #undef  MPI_PACKED
 #define MPI_PACKED ((MPI_Datatype)MPI_DATATYPE_NULL)
@@ -197,6 +193,11 @@ typedef void* PyMPI_MPI_Errhandler;
 #ifdef  PyMPI_MISSING_MPI_OFFSET
 #undef  MPI_OFFSET
 #define MPI_OFFSET ((MPI_Datatype)MPI_DATATYPE_NULL)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_COUNT
+#undef  MPI_COUNT
+#define MPI_COUNT ((MPI_Datatype)MPI_DATATYPE_NULL)
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_CHAR
@@ -494,14 +495,14 @@ typedef void* PyMPI_MPI_Errhandler;
 #define MPI_COMPLEX32 ((MPI_Datatype)MPI_DATATYPE_NULL)
 #endif
 
-#ifdef  PyMPI_MISSING_MPI_Type_size
-#undef  MPI_Type_size
-#define MPI_Type_size(a1,a2) PyMPI_UNAVAILABLE("MPI_Type_size",a1,a2)
+#ifdef  PyMPI_MISSING_MPI_UB
+#undef  MPI_UB
+#define MPI_UB ((MPI_Datatype)MPI_DATATYPE_NULL)
 #endif
 
-#ifdef  PyMPI_MISSING_MPI_Type_extent
-#undef  MPI_Type_extent
-#define MPI_Type_extent(a1,a2) PyMPI_UNAVAILABLE("MPI_Type_extent",a1,a2)
+#ifdef  PyMPI_MISSING_MPI_LB
+#undef  MPI_LB
+#define MPI_LB ((MPI_Datatype)MPI_DATATYPE_NULL)
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_Type_lb
@@ -512,6 +513,31 @@ typedef void* PyMPI_MPI_Errhandler;
 #ifdef  PyMPI_MISSING_MPI_Type_ub
 #undef  MPI_Type_ub
 #define MPI_Type_ub(a1,a2) PyMPI_UNAVAILABLE("MPI_Type_ub",a1,a2)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Type_extent
+#undef  MPI_Type_extent
+#define MPI_Type_extent(a1,a2) PyMPI_UNAVAILABLE("MPI_Type_extent",a1,a2)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Address
+#undef  MPI_Address
+#define MPI_Address(a1,a2) PyMPI_UNAVAILABLE("MPI_Address",a1,a2)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Type_hvector
+#undef  MPI_Type_hvector
+#define MPI_Type_hvector(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Type_hvector",a1,a2,a3,a4,a5)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Type_hindexed
+#undef  MPI_Type_hindexed
+#define MPI_Type_hindexed(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Type_hindexed",a1,a2,a3,a4,a5)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Type_struct
+#undef  MPI_Type_struct
+#define MPI_Type_struct(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Type_struct",a1,a2,a3,a4,a5)
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_Type_dup
@@ -579,26 +605,6 @@ typedef void* PyMPI_MPI_Errhandler;
 #define MPI_Type_create_darray(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10) PyMPI_UNAVAILABLE("MPI_Type_create_darray",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)
 #endif
 
-#ifdef  PyMPI_MISSING_MPI_Address
-#undef  MPI_Address
-#define MPI_Address(a1,a2) PyMPI_UNAVAILABLE("MPI_Address",a1,a2)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_Type_hvector
-#undef  MPI_Type_hvector
-#define MPI_Type_hvector(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Type_hvector",a1,a2,a3,a4,a5)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_Type_hindexed
-#undef  MPI_Type_hindexed
-#define MPI_Type_hindexed(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Type_hindexed",a1,a2,a3,a4,a5)
-#endif
-
-#ifdef  PyMPI_MISSING_MPI_Type_struct
-#undef  MPI_Type_struct
-#define MPI_Type_struct(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Type_struct",a1,a2,a3,a4,a5)
-#endif
-
 #ifdef  PyMPI_MISSING_MPI_Get_address
 #undef  MPI_Get_address
 #define MPI_Get_address MPI_Address
@@ -624,19 +630,39 @@ typedef void* PyMPI_MPI_Errhandler;
 #define MPI_Type_create_struct MPI_Type_struct
 #endif
 
-#ifdef  PyMPI_MISSING_MPI_Type_get_extent
-#undef  MPI_Type_get_extent
-#define MPI_Type_get_extent(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Type_get_extent",a1,a2,a3)
-#endif
-
 #ifdef  PyMPI_MISSING_MPI_Type_create_resized
 #undef  MPI_Type_create_resized
 #define MPI_Type_create_resized(a1,a2,a3,a4) PyMPI_UNAVAILABLE("MPI_Type_create_resized",a1,a2,a3,a4)
 #endif
 
+#ifdef  PyMPI_MISSING_MPI_Type_size
+#undef  MPI_Type_size
+#define MPI_Type_size(a1,a2) PyMPI_UNAVAILABLE("MPI_Type_size",a1,a2)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Type_size_x
+#undef  MPI_Type_size_x
+#define MPI_Type_size_x(a1,a2) PyMPI_UNAVAILABLE("MPI_Type_size_x",a1,a2)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Type_get_extent
+#undef  MPI_Type_get_extent
+#define MPI_Type_get_extent(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Type_get_extent",a1,a2,a3)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Type_get_extent_x
+#undef  MPI_Type_get_extent_x
+#define MPI_Type_get_extent_x(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Type_get_extent_x",a1,a2,a3)
+#endif
+
 #ifdef  PyMPI_MISSING_MPI_Type_get_true_extent
 #undef  MPI_Type_get_true_extent
 #define MPI_Type_get_true_extent(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Type_get_true_extent",a1,a2,a3)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Type_get_true_extent_x
+#undef  MPI_Type_get_true_extent_x
+#define MPI_Type_get_true_extent_x(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Type_get_true_extent_x",a1,a2,a3)
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_Type_create_f90_integer
@@ -901,9 +927,19 @@ typedef int (PyMPI_MPI_Type_delete_attr_function)(MPI_Datatype,int,void*,void*);
 #define MPI_Get_elements(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Get_elements",a1,a2,a3)
 #endif
 
+#ifdef  PyMPI_MISSING_MPI_Get_elements_x
+#undef  MPI_Get_elements_x
+#define MPI_Get_elements_x(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Get_elements_x",a1,a2,a3)
+#endif
+
 #ifdef  PyMPI_MISSING_MPI_Status_set_elements
 #undef  MPI_Status_set_elements
 #define MPI_Status_set_elements(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Status_set_elements",a1,a2,a3)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Status_set_elements_x
+#undef  MPI_Status_set_elements_x
+#define MPI_Status_set_elements_x(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Status_set_elements_x",a1,a2,a3)
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_Test_cancelled

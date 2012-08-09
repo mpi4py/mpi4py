@@ -25,7 +25,7 @@ pointer = asterisk
 struct  = join(typedef, 'struct')
 
 basic_type    = r'(?:void|int|char\s*\*{1,3})'
-integral_type = r'MPI_(?:Aint|Offset|Fint)'
+integral_type = r'MPI_(?:Aint|Offset|Count|Fint)'
 struct_type   = r'MPI_(?:Status)'
 opaque_type   = r'MPI_(?:Datatype|Request|Message|Op|Info|Group|Errhandler|Comm|Win|File)'
 any_mpi_type  = r'(?:%s|%s|%s)' % (struct_type, integral_type, opaque_type)

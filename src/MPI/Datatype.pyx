@@ -72,50 +72,50 @@ cdef class Datatype:
     # Datatype Accessors
     # ------------------
 
-    def Get_extent(self):
-        """
-        Return lower bound and extent of datatype
-        """
-        cdef MPI_Aint lb = 0, extent = 0
-        CHKERR( MPI_Type_get_extent(self.ob_mpi, &lb, &extent) )
-        return (lb, extent)
-
-    property extent:
-        """extent"""
-        def __get__(self):
-            cdef MPI_Aint lb = 0, extent = 0
-            CHKERR( MPI_Type_get_extent(self.ob_mpi, &lb, &extent) )
-            return extent
-
-    property lb:
-        """lower bound"""
-        def __get__(self):
-            cdef MPI_Aint lb = 0, extent = 0
-            CHKERR( MPI_Type_get_extent(self.ob_mpi, &lb, &extent) )
-            return lb
-
-    property ub:
-        """upper bound"""
-        def __get__(self):
-            cdef MPI_Aint lb = 0, extent = 0
-            CHKERR( MPI_Type_get_extent(self.ob_mpi, &lb, &extent) )
-            return lb + extent
-
     def Get_size(self):
         """
         Return the number of bytes occupied
         by entries in the datatype
         """
-        cdef int size = 0
-        CHKERR( MPI_Type_size(self.ob_mpi, &size) )
+        cdef MPI_Count size = 0
+        CHKERR( MPI_Type_size_x(self.ob_mpi, &size) )
         return size
 
     property size:
         """size (in bytes)"""
         def __get__(self):
-            cdef int size = 0
-            CHKERR( MPI_Type_size(self.ob_mpi, &size) )
+            cdef MPI_Count size = 0
+            CHKERR( MPI_Type_size_x(self.ob_mpi, &size) )
             return size
+
+    def Get_extent(self):
+        """
+        Return lower bound and extent of datatype
+        """
+        cdef MPI_Count lb = 0, extent = 0
+        CHKERR( MPI_Type_get_extent_x(self.ob_mpi, &lb, &extent) )
+        return (lb, extent)
+
+    property extent:
+        """extent"""
+        def __get__(self):
+            cdef MPI_Count lb = 0, extent = 0
+            CHKERR( MPI_Type_get_extent_x(self.ob_mpi, &lb, &extent) )
+            return extent
+
+    property lb:
+        """lower bound"""
+        def __get__(self):
+            cdef MPI_Count lb = 0, extent = 0
+            CHKERR( MPI_Type_get_extent_x(self.ob_mpi, &lb, &extent) )
+            return lb
+
+    property ub:
+        """upper bound"""
+        def __get__(self):
+            cdef MPI_Count lb = 0, extent = 0
+            CHKERR( MPI_Type_get_extent_x(self.ob_mpi, &lb, &extent) )
+            return lb + extent
 
     # Datatype Constructors
     # ---------------------
@@ -358,33 +358,33 @@ cdef class Datatype:
         """
         Return the true lower bound and extent of a datatype
         """
-        cdef MPI_Aint lb = 0, extent = 0
-        CHKERR( MPI_Type_get_true_extent(self.ob_mpi,
-                                         &lb, &extent) )
+        cdef MPI_Count lb = 0, extent = 0
+        CHKERR( MPI_Type_get_true_extent_x(self.ob_mpi,
+                                           &lb, &extent) )
         return (lb, extent)
 
     property true_extent:
         """true extent"""
         def __get__(self):
-            cdef MPI_Aint lb = 0, extent = 0
-            CHKERR( MPI_Type_get_true_extent(self.ob_mpi,
-                                             &lb, &extent) )
+            cdef MPI_Count lb = 0, extent = 0
+            CHKERR( MPI_Type_get_true_extent_x(self.ob_mpi,
+                                               &lb, &extent) )
             return extent
 
     property true_lb:
         """true lower bound"""
         def __get__(self):
-            cdef MPI_Aint lb = 0, extent = 0
-            CHKERR( MPI_Type_get_true_extent(self.ob_mpi,
-                                             &lb, &extent) )
+            cdef MPI_Count lb = 0, extent = 0
+            CHKERR( MPI_Type_get_true_extent_x(self.ob_mpi,
+                                               &lb, &extent) )
             return lb
 
     property true_ub:
         """true upper bound"""
         def __get__(self):
-            cdef MPI_Aint lb = 0, extent = 0
-            CHKERR( MPI_Type_get_true_extent(self.ob_mpi, &lb,
-                                             &extent) )
+            cdef MPI_Count lb = 0, extent = 0
+            CHKERR( MPI_Type_get_true_extent_x(self.ob_mpi,
+                                               &lb, &extent) )
             return lb + extent
 
     # Decoding a Datatype
@@ -772,6 +772,7 @@ cdef Datatype __PACKED__ = new_Datatype( MPI_PACKED )
 cdef Datatype __BYTE__   = new_Datatype( MPI_BYTE   )
 cdef Datatype __AINT__   = new_Datatype( MPI_AINT   )
 cdef Datatype __OFFSET__ = new_Datatype( MPI_OFFSET )
+cdef Datatype __COUNT__  = new_Datatype( MPI_COUNT  )
 
 cdef Datatype __CHAR__               = new_Datatype( MPI_CHAR               )
 cdef Datatype __WCHAR__              = new_Datatype( MPI_WCHAR              )
@@ -852,6 +853,7 @@ PACKED = __PACKED__
 BYTE   = __BYTE__
 AINT   = __AINT__
 OFFSET = __OFFSET__
+COUNT  = __COUNT__
 # Elementary C datatypes
 CHAR                = __CHAR__
 WCHAR               = __WCHAR__

@@ -31,6 +31,23 @@
 
 #if MPICH2_NUMVERSION >= 10500000
 /**/
+#if 0 /*XXX*/
+#undef  PyMPI_MISSING_MPI_Count
+#undef  PyMPI_MISSING_MPI_COUNT
+#undef  PyMPI_MISSING_MPI_Type_size_x
+#undef  PyMPI_MISSING_MPI_Type_get_extent_x
+#undef  PyMPI_MISSING_MPI_Type_get_true_extent_x
+#undef  PyMPI_MISSING_MPI_Get_elements_x
+#undef  PyMPI_MISSING_MPI_Status_set_elements_x
+#define MPI_Count                  MPIX_Count
+#define MPI_COUNT                  MPIX_COUNT
+#define MPI_Type_size_x            MPIX_Type_size_x
+#define MPI_Type_get_extent_x      MPIX_Type_get_extent_x
+#define MPI_Type_get_true_extent_x MPIX_Type_get_true_extent_x
+#define MPI_Get_elements_x         MPIX_Get_elements_x
+#define MPI_Status_set_elements_x  MPIX_Status_set_elements_x
+#endif
+/**/
 #undef  PyMPI_MISSING_MPI_COMBINER_HINDEXED_BLOCK
 #undef  PyMPI_MISSING_MPI_Type_create_hindexed_block
 #define MPI_COMBINER_HINDEXED_BLOCK    MPIX_COMBINER_HINDEXED_BLOCK
@@ -54,12 +71,6 @@
 #define MPI_Improbe         MPIX_Improbe
 #define MPI_Mrecv           MPIX_Mrecv
 #define MPI_Imrecv          MPIX_Imrecv
-#ifndef MPIX_Message_c2f
-#define MPIX_Message_c2f(message) (MPI_Fint)(message)
-#endif
-#ifndef MPIX_Message_f2c
-#define MPIX_Message_f2c(message) (MPI_Message)(message)
-#endif
 /**/
 #undef  PyMPI_MISSING_MPI_Ibarrier
 #undef  PyMPI_MISSING_MPI_Ibcast
@@ -96,27 +107,32 @@
 #define MPI_Iscan                 MPIX_Iscan
 #define MPI_Iexscan               MPIX_Iexscan
 /**/
-/* #undef  PyMPI_MISSING_MPI_Comm_dup_with_info */
 #undef  PyMPI_MISSING_MPI_Comm_idup
 #undef  PyMPI_MISSING_MPI_Comm_create_group
 #undef  PyMPI_MISSING_MPI_COMM_TYPE_SHARED
 #undef  PyMPI_MISSING_MPI_Comm_split_type
-/* #define MPI_Comm_dup_with_info    MPIX_Comm_dup_with_info */
 #define MPI_Comm_idup             MPIX_Comm_idup
 #define MPI_Comm_create_group     MPIX_Comm_create_group
 #define MPI_COMM_TYPE_SHARED      MPIX_COMM_TYPE_SHARED
 #define MPI_Comm_split_type       MPIX_Comm_split_type
-/* #undef  PyMPI_MISSING_MPI_Comm_set_info */
-/* #undef  PyMPI_MISSING_MPI_Comm_get_info */
-/* #define MPI_Comm_set_info         MPIX_Comm_set_info */
-/* #define MPI_Comm_get_info         MPIX_Comm_get_info */
 /**/
-/* #undef  PyMPI_MISSING_MPI_MAX_LIBRARY_VERSION_STRING */
-/* #undef  PyMPI_MISSING_MPI_Get_library_version */
-/* #undef  PyMPI_MISSING_MPI_INFO_ENV */
-/* #define MPI_MAX_LIBRARY_VERSION_STRING MPIX_MAX_LIBRARY_VERSION_STRING */
-/* #define MPI_Get_library_version        MPIX_Get_library_version */
-/* #define MPI_INFO_ENV                   MPIX_INFO_ENV */
+#if 0 /*XXX*/
+#undef  PyMPI_MISSING_MPI_Comm_dup_with_info
+#undef  PyMPI_MISSING_MPI_Comm_set_info
+#undef  PyMPI_MISSING_MPI_Comm_get_info
+#define MPI_Comm_dup_with_info    MPIX_Comm_dup_with_info
+#define MPI_Comm_set_info         MPIX_Comm_set_info
+#define MPI_Comm_get_info         MPIX_Comm_get_info
+#endif
+/**/
+#if 0 /*XXX*/
+#undef  PyMPI_MISSING_MPI_MAX_LIBRARY_VERSION_STRING
+#undef  PyMPI_MISSING_MPI_Get_library_version
+#undef  PyMPI_MISSING_MPI_INFO_ENV
+#define MPI_MAX_LIBRARY_VERSION_STRING MPIX_MAX_LIBRARY_VERSION_STRING
+#define MPI_Get_library_version        MPIX_Get_library_version
+#define MPI_INFO_ENV                   MPIX_INFO_ENV
+#endif
 /**/
 #endif
 

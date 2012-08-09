@@ -638,6 +638,90 @@ static int PyMPI_Type_create_darray(int size,
 #define MPI_Type_create_darray PyMPI_Type_create_darray
 #endif
 
+#ifdef PyMPI_MISSING_MPI_Type_size_x
+static int PyMPI_Type_size_x(MPI_Datatype datatype,
+                             MPI_Count *size)
+{
+  int ierr = MPI_SUCCESS;
+  int size_ = MPI_UNDEFINED;
+  ierr = MPI_Type_size(datatype, &size_);
+  if (ierr != MPI_SUCCESS) return ierr;
+  if (size == 0) return MPI_ERR_ARG; /* XXX */
+  *size = (MPI_Count) size_;
+  return MPI_SUCCESS;
+}
+#undef  MPI_Type_size_x
+#define MPI_Type_size_x PyMPI_Type_size_x
+#endif
+
+#ifdef PyMPI_MISSING_MPI_Type_get_extent_x
+static int PyMPI_Type_get_extent_x(MPI_Datatype datatype,
+                                   MPI_Count *lb,
+                                   MPI_Count *extent)
+{
+  int ierr = MPI_SUCCESS;
+  MPI_Aint lb_ = MPI_UNDEFINED, extent_ = MPI_UNDEFINED;
+  ierr = MPI_Type_get_extent(datatype, &lb_, &extent_);
+  if (ierr != MPI_SUCCESS) return ierr;
+  if (lb     == 0) return MPI_ERR_ARG; /* XXX */
+  if (extent == 0) return MPI_ERR_ARG; /* XXX */
+  *lb     = (MPI_Count) lb_;
+  *extent = (MPI_Count) extent_;
+  return MPI_SUCCESS;
+}
+#undef  MPI_Type_get_extent_x
+#define MPI_Type_get_extent_x PyMPI_Type_get_extent_x
+#endif
+
+#ifdef PyMPI_MISSING_MPI_Type_get_true_extent_x
+static int PyMPI_Type_get_true_extent_x(MPI_Datatype datatype,
+                                        MPI_Count *lb,
+                                        MPI_Count *extent)
+{
+  int ierr = MPI_SUCCESS;
+  MPI_Aint lb_ = MPI_UNDEFINED, extent_ = MPI_UNDEFINED;
+  ierr = MPI_Type_get_true_extent(datatype, &lb_, &extent_);
+  if (ierr != MPI_SUCCESS) return ierr;
+  if (lb     == 0) return MPI_ERR_ARG; /* XXX */
+  if (extent == 0) return MPI_ERR_ARG; /* XXX */
+  *lb     = (MPI_Count) lb_;
+  *extent = (MPI_Count) extent_;
+  return MPI_SUCCESS;
+}
+#undef  MPI_Type_get_true_extent_x
+#define MPI_Type_get_true_extent_x PyMPI_Type_get_true_extent_x
+#endif
+
+#ifdef PyMPI_MISSING_MPI_Get_elements_x
+static int PyMPI_Get_elements_x(MPI_Status *status,
+                                MPI_Datatype datatype,
+                                MPI_Count *elements)
+{
+  int ierr = MPI_SUCCESS;
+  int elements_ = MPI_UNDEFINED;
+  ierr = MPI_Get_elements(status, datatype, &elements_);
+  if (ierr != MPI_SUCCESS) return ierr;
+  if (elements == 0) return MPI_ERR_ARG; /* XXX */
+  *elements = (MPI_Count) elements_;
+  return MPI_SUCCESS;
+}
+#undef  MPI_Get_elements_x
+#define MPI_Get_elements_x PyMPI_Get_elements_x
+#endif
+
+#ifdef PyMPI_MISSING_MPI_Status_set_elements_x
+static int PyMPI_Status_set_elements_x(MPI_Status *status,
+                                       MPI_Datatype datatype,
+                                       MPI_Count elements)
+{
+  int elements_ = (int) elements;
+  if (elements != (MPI_Count) elements_) return MPI_ERR_ARG; /* XXX */
+  return MPI_Status_set_elements(status, datatype, elements_);
+}
+#undef  MPI_Status_set_elements_x
+#define MPI_Status_set_elements_x PyMPI_Status_set_elements_x
+#endif
+
 /* ---------------------------------------------------------------- */
 
 #ifndef PyMPI_MISSING_MPI_Request_get_status
@@ -711,7 +795,7 @@ static int PyMPI_Comm_dup_with_info(MPI_Comm comm, MPI_Info info,
     ierr = MPI_Info_get_nkeys(info, &dummy);
     if (ierr != MPI_SUCCESS) return ierr;
   }
-  return MPI_Comm_dup(comm, &newcomm);
+  return MPI_Comm_dup(comm, newcomm);
 }
 #undef  MPI_Comm_dup_with_info
 #define MPI_Comm_dup_with_info PyMPI_Comm_dup_with_info

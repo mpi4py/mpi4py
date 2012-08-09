@@ -7,6 +7,7 @@ cdef extern from "mpi.h":
 
     ctypedef long      MPI_Aint
     ctypedef long long MPI_Offset
+    ctypedef long long MPI_Count
 
     ctypedef struct MPI_Status:
         int MPI_SOURCE
@@ -48,6 +49,7 @@ cdef extern from "mpi.h":
 cdef extern from *:
     ctypedef MPI_Aint   Aint   "MPI_Aint"
     ctypedef MPI_Offset Offset "MPI_Offset"
+    ctypedef MPI_Count  Count  "MPI_Count"
 
 ctypedef public api class Status [
     type   PyMPIStatus_Type,

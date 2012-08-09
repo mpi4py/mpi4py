@@ -7,6 +7,7 @@ cdef extern from "mpi.h" nogil:
 
     ctypedef long      MPI_Aint
     ctypedef long long MPI_Offset #:= long
+    ctypedef long long MPI_Count  #:= long
 
     ctypedef struct MPI_Status:
         int MPI_SOURCE
@@ -66,14 +67,12 @@ cdef extern from "mpi.h" nogil:
 
     # Null datatype
     MPI_Datatype MPI_DATATYPE_NULL #:= 0
-    # Deprecated datatypes (since MPI-2)
-    MPI_Datatype MPI_UB #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_LB #:= MPI_DATATYPE_NULL
     # MPI datatypes
     MPI_Datatype MPI_PACKED #:= MPI_DATATYPE_NULL
     MPI_Datatype MPI_BYTE   #:= MPI_DATATYPE_NULL
     MPI_Datatype MPI_AINT   #:= MPI_DATATYPE_NULL
     MPI_Datatype MPI_OFFSET #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_COUNT  #:= MPI_DATATYPE_NULL
     # Elementary C datatypes
     MPI_Datatype MPI_CHAR               #:= MPI_DATATYPE_NULL
     MPI_Datatype MPI_WCHAR              #:= MPI_DATATYPE_NULL
@@ -139,10 +138,16 @@ cdef extern from "mpi.h" nogil:
     MPI_Datatype MPI_COMPLEX16 #:= MPI_DATATYPE_NULL
     MPI_Datatype MPI_COMPLEX32 #:= MPI_DATATYPE_NULL
 
-    int MPI_Type_size(MPI_Datatype, int*)
-    int MPI_Type_extent(MPI_Datatype, MPI_Aint*)
+    # Deprecated since MPI-2, removed in MPI-3
+    MPI_Datatype MPI_UB #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_LB #:= MPI_DATATYPE_NULL
     int MPI_Type_lb(MPI_Datatype, MPI_Aint*)
     int MPI_Type_ub(MPI_Datatype, MPI_Aint*)
+    int MPI_Type_extent(MPI_Datatype, MPI_Aint*)
+    int MPI_Address(void*, MPI_Aint*)
+    int MPI_Type_hvector(int, int, MPI_Aint, MPI_Datatype, MPI_Datatype*)
+    int MPI_Type_hindexed(int, int[], MPI_Aint[], MPI_Datatype, MPI_Datatype*)
+    int MPI_Type_struct(int, int[], MPI_Aint[], MPI_Datatype[], MPI_Datatype*)
 
     int MPI_Type_dup(MPI_Datatype, MPI_Datatype*)
     int MPI_Type_contiguous(int, MPI_Datatype, MPI_Datatype*)
@@ -158,20 +163,19 @@ cdef extern from "mpi.h" nogil:
     enum: MPI_DISTRIBUTE_DFLT_DARG  #:= 4
     int MPI_Type_create_darray(int, int, int, int[], int[], int[], int[], int, MPI_Datatype, MPI_Datatype*)
 
-    int MPI_Address(void*, MPI_Aint*)
-    int MPI_Type_hvector(int, int, MPI_Aint, MPI_Datatype, MPI_Datatype*)
-    int MPI_Type_hindexed(int, int[], MPI_Aint[], MPI_Datatype, MPI_Datatype*)
-    int MPI_Type_struct(int, int[], MPI_Aint[], MPI_Datatype[], MPI_Datatype*)
-
     int MPI_Get_address(void*, MPI_Aint*)                                             #:= MPI_Address
     int MPI_Type_create_hvector(int, int, MPI_Aint, MPI_Datatype, MPI_Datatype*)      #:= MPI_Type_hvector
     int MPI_Type_create_hindexed(int, int[], MPI_Aint[], MPI_Datatype, MPI_Datatype*) #:= MPI_Type_hindexed
     int MPI_Type_create_hindexed_block(int, int, MPI_Aint[], MPI_Datatype, MPI_Datatype*)
     int MPI_Type_create_struct(int, int[], MPI_Aint[], MPI_Datatype[], MPI_Datatype*) #:= MPI_Type_struct
-
-    int MPI_Type_get_extent(MPI_Datatype, MPI_Aint*, MPI_Aint*)
     int MPI_Type_create_resized(MPI_Datatype, MPI_Aint, MPI_Aint, MPI_Datatype*)
+
+    int MPI_Type_size(MPI_Datatype, int*)
+    int MPI_Type_size_x(MPI_Datatype, MPI_Count*)
+    int MPI_Type_get_extent(MPI_Datatype, MPI_Aint*, MPI_Aint*)
+    int MPI_Type_get_extent_x(MPI_Datatype, MPI_Count*, MPI_Count*)
     int MPI_Type_get_true_extent(MPI_Datatype, MPI_Aint*, MPI_Aint*)
+    int MPI_Type_get_true_extent_x(MPI_Datatype, MPI_Count*, MPI_Count*)
 
     int MPI_Type_create_f90_integer(int, MPI_Datatype*)
     int MPI_Type_create_f90_real(int, int, MPI_Datatype*)
@@ -236,7 +240,9 @@ cdef extern from "mpi.h" nogil:
 
     int MPI_Get_count(MPI_Status*, MPI_Datatype, int*)
     int MPI_Get_elements(MPI_Status*, MPI_Datatype, int*)
+    int MPI_Get_elements_x(MPI_Status*, MPI_Datatype, MPI_Count*)
     int MPI_Status_set_elements(MPI_Status*, MPI_Datatype, int)
+    int MPI_Status_set_elements_x(MPI_Status*, MPI_Datatype, MPI_Count)
 
     int MPI_Test_cancelled(MPI_Status*, int*)
     int MPI_Status_set_cancelled(MPI_Status*, int)

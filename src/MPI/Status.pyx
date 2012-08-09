@@ -93,18 +93,18 @@ cdef class Status:
         """
         Get the number of basic elements in a datatype
         """
-        cdef int elements = MPI_UNDEFINED
-        CHKERR( MPI_Get_elements(&self.ob_mpi, datatype.ob_mpi, &elements) )
+        cdef MPI_Count elements = MPI_UNDEFINED
+        CHKERR( MPI_Get_elements_x(&self.ob_mpi, datatype.ob_mpi, &elements) )
         return elements
 
-    def Set_elements(self, Datatype datatype not None, int count):
+    def Set_elements(self, Datatype datatype not None, Count count):
         """
         Set the number of elements in a status
 
         .. note:: This should be only used when implementing
            query callback functions for generalized requests
         """
-        CHKERR( MPI_Status_set_elements(&self.ob_mpi, datatype.ob_mpi, count) )
+        CHKERR( MPI_Status_set_elements_x(&self.ob_mpi, datatype.ob_mpi, count) )
 
     def Is_cancelled(self):
         """
