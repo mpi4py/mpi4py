@@ -1,6 +1,8 @@
-#ifndef PyMPI_CONFIG_MPICH2IO_H
-#define PyMPI_CONFIG_MPICH2IO_H
+#ifndef PyMPI_CONFIG_MPICH2_IO_H
+#define PyMPI_CONFIG_MPICH2_IO_H
 
+#define PyMPI_MISSING_MPI_File 1
+#define PyMPI_MISSING_MPI_FILE_NULL 1
 #define PyMPI_MISSING_MPI_MODE_RDONLY 1
 #define PyMPI_MISSING_MPI_MODE_RDWR 1
 #define PyMPI_MISSING_MPI_MODE_WRONLY 1
@@ -20,7 +22,6 @@
 #define PyMPI_MISSING_MPI_File_get_amode 1
 #define PyMPI_MISSING_MPI_File_set_info 1
 #define PyMPI_MISSING_MPI_File_get_info 1
-#define PyMPI_MISSING_MPI_MAX_DATAREP_STRING 1
 #define PyMPI_MISSING_MPI_File_get_view 1
 #define PyMPI_MISSING_MPI_File_set_view 1
 #define PyMPI_MISSING_MPI_File_read_at 1
@@ -66,8 +67,39 @@
 #define PyMPI_MISSING_MPI_File_set_atomicity 1
 #define PyMPI_MISSING_MPI_File_get_atomicity 1
 #define PyMPI_MISSING_MPI_File_sync 1
+#define PyMPI_MISSING_MPI_File_get_errhandler 1
+#define PyMPI_MISSING_MPI_File_set_errhandler 1
+#define PyMPI_MISSING_MPI_File_errhandler_fn 1
+#define PyMPI_MISSING_MPI_File_errhandler_function 1
+#define PyMPI_MISSING_MPI_File_create_errhandler 1
+#define PyMPI_MISSING_MPI_File_call_errhandler 1
+
+#define PyMPI_MISSING_MPI_Datarep_conversion_function 1
+#define PyMPI_MISSING_MPI_Datarep_extent_function 1
+#define PyMPI_MISSING_MPI_CONVERSION_FN_NULL 1
+#define PyMPI_MISSING_MPI_MAX_DATAREP_STRING 1
 #define PyMPI_MISSING_MPI_Register_datarep 1
+
 #define PyMPI_MISSING_MPI_File_c2f 1
 #define PyMPI_MISSING_MPI_File_f2c 1
 
-#endif /* !PyMPI_CONFIG_MPICH2IO_H */
+#if !defined(MPI_ERR_FILE)
+#define PyMPI_MISSING_MPI_ERR_FILE 1
+#define PyMPI_MISSING_MPI_ERR_NOT_SAME 1
+#define PyMPI_MISSING_MPI_ERR_BAD_FILE 1
+#define PyMPI_MISSING_MPI_ERR_NO_SUCH_FILE 1
+#define PyMPI_MISSING_MPI_ERR_FILE_EXISTS 1
+#define PyMPI_MISSING_MPI_ERR_FILE_IN_USE 1
+#define PyMPI_MISSING_MPI_ERR_AMODE 1
+#define PyMPI_MISSING_MPI_ERR_ACCESS 1
+#define PyMPI_MISSING_MPI_ERR_READ_ONLY 1
+#define PyMPI_MISSING_MPI_ERR_NO_SPACE 1
+#define PyMPI_MISSING_MPI_ERR_QUOTA 1
+#define PyMPI_MISSING_MPI_ERR_UNSUPPORTED_DATAREP 1
+#define PyMPI_MISSING_MPI_ERR_UNSUPPORTED_OPERATION 1
+#define PyMPI_MISSING_MPI_ERR_CONVERSION 1
+#define PyMPI_MISSING_MPI_ERR_DUP_DATAREP 1
+#define PyMPI_MISSING_MPI_ERR_IO 1
+#endif
+
+#endif /* !PyMPI_CONFIG_MPICH2_IO_H */

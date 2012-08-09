@@ -188,21 +188,20 @@ if _name == 'Open MPI':
             del BaseTestFile.testGetTypeExtent
             del BaseTestFile.testSeekGetPosition
             del BaseTestFile.testSeekGetPositionShared
-    if 'win' in sys.platform:
-        del BaseTestFile
+    if sys.platform.startswith('win'):
         del TestFileNull
         del TestFileSelf
-else:
-    try:
-        dummy = BaseTestFile()
-        dummy.COMM = MPI.COMM_SELF
-        dummy.setUp()
-        dummy.tearDown()
-        del dummy
-    except NotImplementedError:
-        del BaseTestFile
-        del TestFileNull
-        del TestFileSelf
+try:
+    dummy = BaseTestFile()
+    dummy.COMM = MPI.COMM_SELF
+    dummy.setUp()
+    dummy.tearDown()
+    del dummy
+except NotImplementedError:
+    try: del TestFileNull
+    except NameError: pass
+    try: del TestFileSelf
+    except NameError: pass
 
 if __name__ == '__main__':
     unittest.main()

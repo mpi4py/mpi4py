@@ -616,7 +616,6 @@ cdef extern from "mpi.h" nogil:
     int MPI_File_set_info(MPI_File, MPI_Info)
     int MPI_File_get_info(MPI_File, MPI_Info*)
 
-    enum: MPI_MAX_DATAREP_STRING  #:= 1
     int MPI_File_get_view(MPI_File, MPI_Offset*, MPI_Datatype*, MPI_Datatype*, char[])
     int MPI_File_set_view(MPI_File, MPI_Offset, MPI_Datatype, MPI_Datatype, char[], MPI_Info)
 
@@ -681,6 +680,8 @@ cdef extern from "mpi.h" nogil:
 
     ctypedef int MPI_Datarep_conversion_function(void*,MPI_Datatype,int,void*,MPI_Offset,void*)
     ctypedef int MPI_Datarep_extent_function(MPI_Datatype,MPI_Aint*,void*)
+    MPI_Datarep_conversion_function* MPI_CONVERSION_FN_NULL #:= 0
+    enum: MPI_MAX_DATAREP_STRING #:= 1
     int MPI_Register_datarep(char[], MPI_Datarep_conversion_function*, MPI_Datarep_conversion_function*, MPI_Datarep_extent_function*, void*)
 
     #-----------------------------------------------------------------

@@ -67,6 +67,12 @@
 #define PyMPI_MISSING_MPI_File_errhandler_function 1
 #endif
 
+#ifdef OMPI_PROVIDE_MPI_FILE_INTERFACE
+#if OMPI_PROVIDE_MPI_FILE_INTERFACE == 0
+#include "openmpi-io.h"
+#endif
+#endif
+
 #if MPI_VERSION < 3
 #if (defined(OMPI_MAJOR_VERSION)    && \
      defined(OMPI_MINOR_VERSION)    && \

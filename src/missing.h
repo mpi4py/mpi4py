@@ -2427,11 +2427,6 @@ typedef int (PyMPI_MPI_Win_delete_attr_function)(MPI_Win,int,void*,void*);
 #define MPI_File_get_info(a1,a2) PyMPI_UNAVAILABLE("MPI_File_get_info",a1,a2)
 #endif
 
-#ifdef  PyMPI_MISSING_MPI_MAX_DATAREP_STRING
-#undef  MPI_MAX_DATAREP_STRING
-#define MPI_MAX_DATAREP_STRING (1)
-#endif
-
 #ifdef  PyMPI_MISSING_MPI_File_get_view
 #undef  MPI_File_get_view
 #define MPI_File_get_view(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_File_get_view",a1,a2,a3,a4,a5)
@@ -2698,6 +2693,16 @@ typedef int (PyMPI_MPI_Datarep_conversion_function)(void*,MPI_Datatype,int,void*
 #undef  MPI_Datarep_extent_function
 typedef int (PyMPI_MPI_Datarep_extent_function)(MPI_Datatype,MPI_Aint*,void*);
 #define MPI_Datarep_extent_function PyMPI_MPI_Datarep_extent_function
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_CONVERSION_FN_NULL
+#undef  MPI_CONVERSION_FN_NULL
+#define MPI_CONVERSION_FN_NULL (0)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_MAX_DATAREP_STRING
+#undef  MPI_MAX_DATAREP_STRING
+#define MPI_MAX_DATAREP_STRING (1)
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_Register_datarep

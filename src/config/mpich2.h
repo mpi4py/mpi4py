@@ -26,8 +26,8 @@
 #endif /* MPICH2 < 1.1.0 */
 
 #ifndef ROMIO_VERSION
-#include "mpich2io.h"
-#endif /* !ROMIO_VERSION */
+#include "mpich2-io.h"
+#endif
 
 #if MPI_VERSION < 3
 #if defined(MPICH2_NUMVERSION) && MPICH2_NUMVERSION >= 10500000
