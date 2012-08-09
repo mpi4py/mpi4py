@@ -326,7 +326,7 @@ class ConfigureMPI(object):
         #
         body = ['#include "%s"' % configtest_h,
                 'int main(int argc, char **argv) {',
-                '\n'.join('  ' + line for line in code.split('\n')),
+                '\n'.join(['  ' + line for line in code.split('\n')]),
                 '  return 0;',
                 '}']
         body = '\n'.join(body) + '\n'
