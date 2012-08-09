@@ -67,4 +67,46 @@
 #define PyMPI_MISSING_MPI_File_errhandler_function 1
 #endif
 
+#if MPI_VERSION < 3
+#if (defined(OMPI_MAJOR_VERSION)    && \
+     defined(OMPI_MINOR_VERSION)    && \
+     defined(OMPI_RELEASE_VERSION)) && \
+     ((OMPI_MAJOR_VERSION   * 10000) + \
+      (OMPI_MINOR_VERSION   *   100) + \
+      (OMPI_RELEASE_VERSION *     1)) >= 10900
+/**/
+#undef  PyMPI_MISSING_MPI_Message
+#undef  PyMPI_MISSING_MPI_MESSAGE_NULL
+#undef  PyMPI_MISSING_MPI_MESSAGE_NO_PROC
+#undef  PyMPI_MISSING_MPI_Message_c2f
+#undef  PyMPI_MISSING_MPI_Message_f2c
+#undef  PyMPI_MISSING_MPI_Mprobe
+#undef  PyMPI_MISSING_MPI_Improbe
+#undef  PyMPI_MISSING_MPI_Mrecv
+#undef  PyMPI_MISSING_MPI_Imrecv
+/**/
+#undef  PyMPI_MISSING_MPI_Ibarrier
+#undef  PyMPI_MISSING_MPI_Ibcast
+#undef  PyMPI_MISSING_MPI_Igather
+#undef  PyMPI_MISSING_MPI_Igatherv
+#undef  PyMPI_MISSING_MPI_Iscatter
+#undef  PyMPI_MISSING_MPI_Iscatterv
+#undef  PyMPI_MISSING_MPI_Iallgather
+#undef  PyMPI_MISSING_MPI_Iallgatherv
+#undef  PyMPI_MISSING_MPI_Ialltoall
+#undef  PyMPI_MISSING_MPI_Ialltoallv
+#undef  PyMPI_MISSING_MPI_Ialltoallw
+#undef  PyMPI_MISSING_MPI_Ireduce
+#undef  PyMPI_MISSING_MPI_Iallreduce
+#undef  PyMPI_MISSING_MPI_Ireduce_scatter_block
+#undef  PyMPI_MISSING_MPI_Ireduce_scatter
+#undef  PyMPI_MISSING_MPI_Iscan
+#undef  PyMPI_MISSING_MPI_Iexscan
+/**/
+#undef  PyMPI_MISSING_MPI_MAX_LIBRARY_VERSION_STRING
+#undef  PyMPI_MISSING_MPI_Get_library_version
+/**/
+#endif /* OMPI < 1.9*/
+#endif /* MPI  < 3.0*/
+
 #endif /* !PyMPI_CONFIG_OPENMPI_H */
