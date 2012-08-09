@@ -5,6 +5,10 @@
 
 #ifdef Py_PYTHON_H
 
+#ifndef PyMPI_snprintf
+#define PyMPI_snprintf PyOS_snprintf
+#endif
+
 #ifndef PyMPI_MALLOC
 #define PyMPI_MALLOC PyMem_Malloc
 #endif
@@ -15,12 +19,17 @@
 #else
 
 #include <stdlib.h>
+#include <stdio.h>
+
+#ifndef PyMPI_snprintf
+#define PyMPI_snprintf snprintf
+#endif
 
 #ifndef PyMPI_MALLOC
 #define PyMPI_MALLOC malloc
 #endif
-#ifndef PyMPI_Free
-#define PyMPI_Free free
+#ifndef PyMPI_FREE
+#define PyMPI_FREE free
 #endif
 
 #endif
@@ -52,6 +61,27 @@ static int PyMPI_Get_version(int *version, int* subversion)
 }
 #undef  MPI_Get_version
 #define MPI_Get_version PyMPI_Get_version
+#endif
+
+#ifdef PyMPI_MISSING_MPI_Get_library_version
+#define PyMPI_MAX_LIBRARY_VERSION_STRING 8
+static int PyMPI_Get_library_version(char version[], int *rlen)
+{
+  size_t l, n = PyMPI_MAX_LIBRARY_VERSION_STRING;
+  if (!version) return MPI_ERR_ARG; /* XXX */
+  if (!rlen)    return MPI_ERR_ARG; /* XXX */
+  l = PyMPI_snprintf(version, n, "MPI %d.%d",
+                     MPI_VERSION, MPI_SUBVERSION);
+  if (l >= n) return MPI_ERR_INTERN; /* XXX */
+  *rlen = (int) l;
+  return MPI_SUCCESS;
+}
+#undef  MPI_MAX_LIBRARY_VERSION_STRING
+#define MPI_MAX_LIBRARY_VERSION_STRING \
+        PyMPI_MAX_LIBRARY_VERSION_STRING
+#undef  MPI_Get_library_version
+#define MPI_Get_library_version \
+        PyMPI_Get_library_version
 #endif
 
 /* ---------------------------------------------------------------- */
@@ -646,7 +676,7 @@ static int PyMPI_Type_size_x(MPI_Datatype datatype,
   int size_ = MPI_UNDEFINED;
   ierr = MPI_Type_size(datatype, &size_);
   if (ierr != MPI_SUCCESS) return ierr;
-  if (size == 0) return MPI_ERR_ARG; /* XXX */
+  if (!size) return MPI_ERR_ARG; /* XXX */
   *size = (MPI_Count) size_;
   return MPI_SUCCESS;
 }
@@ -663,8 +693,8 @@ static int PyMPI_Type_get_extent_x(MPI_Datatype datatype,
   MPI_Aint lb_ = MPI_UNDEFINED, extent_ = MPI_UNDEFINED;
   ierr = MPI_Type_get_extent(datatype, &lb_, &extent_);
   if (ierr != MPI_SUCCESS) return ierr;
-  if (lb     == 0) return MPI_ERR_ARG; /* XXX */
-  if (extent == 0) return MPI_ERR_ARG; /* XXX */
+  if (!lb)     return MPI_ERR_ARG; /* XXX */
+  if (!extent) return MPI_ERR_ARG; /* XXX */
   *lb     = (MPI_Count) lb_;
   *extent = (MPI_Count) extent_;
   return MPI_SUCCESS;
@@ -682,8 +712,8 @@ static int PyMPI_Type_get_true_extent_x(MPI_Datatype datatype,
   MPI_Aint lb_ = MPI_UNDEFINED, extent_ = MPI_UNDEFINED;
   ierr = MPI_Type_get_true_extent(datatype, &lb_, &extent_);
   if (ierr != MPI_SUCCESS) return ierr;
-  if (lb     == 0) return MPI_ERR_ARG; /* XXX */
-  if (extent == 0) return MPI_ERR_ARG; /* XXX */
+  if (!lb)     return MPI_ERR_ARG; /* XXX */
+  if (!extent) return MPI_ERR_ARG; /* XXX */
   *lb     = (MPI_Count) lb_;
   *extent = (MPI_Count) extent_;
   return MPI_SUCCESS;
