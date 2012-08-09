@@ -29,7 +29,8 @@
 #include "mpich2io.h"
 #endif /* !ROMIO_VERSION */
 
-#if MPICH2_NUMVERSION >= 10500000
+#if MPI_VERSION < 3
+#if defined(MPICH2_NUMVERSION) && MPICH2_NUMVERSION >= 10500000
 /**/
 #if 0 /*XXX*/
 #undef  PyMPI_MISSING_MPI_Count
@@ -134,6 +135,7 @@
 #define MPI_INFO_ENV                   MPIX_INFO_ENV
 #endif
 /**/
-#endif
+#endif /* MPICH2 < 1.5*/
+#endif /* MPI    < 3.0*/
 
 #endif /* !PyMPI_CONFIG_MPICH2_H */
