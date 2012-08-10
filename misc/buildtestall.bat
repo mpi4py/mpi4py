@@ -27,9 +27,9 @@ set GCC=%MINGWDIR%\bin\gcc.exe
 
 set MPIDIR==%ProgramFiles%\MPI
 if %MPICONF%==mpich2   set MPIDIR=%ProgramFiles%\MPICH2
-if %MPICONF%==openmpi  set MPIDIR=%ProgramFiles%\OpenMPI_v1.5.3-win32
+if %MPICONF%==openmpi  set MPIDIR=%ProgramFiles%\OpenMPI_v1.6-win32
 if %MPICONF%==deinompi set MPIDIR=%ProgramFiles%\DeinoMPI
-if %MPICONF%==msmpi    set MPIDIR=%ProgramFiles%\Microsoft HPC Pack 2008 SDK
+if %MPICONF%==msmpi    set MPIDIR=%ProgramFiles%\Microsoft HPC Pack 2008 R2
 set MPIEXEC="%MPIDIR%\bin\mpiexec.exe"
 
 echo Py: %PYVERSION% - CC: %COMPILER% - MPI: %MPICONF%
@@ -42,7 +42,8 @@ if %COMPILER%==mingw32 set PATH=%MINGWDIR%\bin;%PATH%
 set INSTALLDIR=%TEMP%\mpi4py-buildtest
 set PYPATHDIR=%INSTALLDIR%\lib\python
 %PYTHON% setup.py -q clean --all
-%PYTHON% setup.py -q build --mpi=%MPICONF% --compiler=%COMPILER% install --home=%INSTALLDIR%
+%PYTHON% setup.py -q build --mpi=%MPICONF% --compiler=%COMPILER%
+%PYTHON% setup.py -q install --home=%INSTALLDIR%
 %PYTHON% setup.py -q clean --all
 
 set PATH_ORIG=%PATH%
