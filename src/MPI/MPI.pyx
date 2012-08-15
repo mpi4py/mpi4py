@@ -15,8 +15,8 @@ include "asbuffer.pxi"
 include "asmemory.pxi"
 include "asarray.pxi"
 include "helpers.pxi"
-include "message.pxi"
-include "pickled.pxi"
+include "msgbuffer.pxi"
+include "msgpickle.pxi"
 
 include "CAPI.pxi"
 
