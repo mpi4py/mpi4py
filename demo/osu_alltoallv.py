@@ -1,9 +1,10 @@
 # http://mvapich.cse.ohio-state.edu/benchmarks/
 
 from mpi4py import MPI
+from array import array
 
 def osu_alltoall(
-    BENCHMARH = "MPI All-to-All Latency Test",
+    BENCHMARH = "MPI Alltoallv Latency Test",
     skip = 200,
     loop = 1000,
     skip_large = 10,
@@ -18,6 +19,11 @@ def osu_alltoall(
 
     s_buf = allocate(MAX_MSG_SIZE*numprocs)
     r_buf = allocate(MAX_MSG_SIZE*numprocs)
+    array_int = lambda n: array('i', [0]*n) 
+    s_counts = array_int(numprocs) 
+    s_displs = array_int(numprocs)
+    r_counts = array_int(numprocs)
+    r_displs = array_int(numprocs)
 
     if myid == 0:
         print ('# %s' % (BENCHMARH,))
@@ -29,14 +35,19 @@ def osu_alltoall(
             skip = skip_large
             loop = loop_large
         iterations = list(range(loop+skip))
-        s_msg = [s_buf, size, MPI.BYTE]
-        r_msg = [r_buf, size, MPI.BYTE]
+        disp = 0
+        for i in range (numprocs):
+            s_counts[i] = r_counts[i] = size
+            s_displs[i] = r_displs[i] = disp
+            disp += size
+        s_msg = [s_buf, (s_counts, s_displs), MPI.BYTE]
+        r_msg = [r_buf, (r_counts, r_displs), MPI.BYTE]
         #
         comm.Barrier()
         for i in iterations:
             if i == skip:
                 t_start = MPI.Wtime()
-            comm.Alltoall(s_msg, r_msg)
+            comm.Alltoallv(s_msg, r_msg)
         t_end = MPI.Wtime()
         comm.Barrier()
         #

@@ -2,10 +2,10 @@
 
 from mpi4py import MPI
 
-def osu_alltoall(
-    BENCHMARH = "MPI All-to-All Latency Test",
-    skip = 200,
-    loop = 1000,
+def osu_bcast(
+    BENCHMARH = "MPI Gather Latency Test",
+    skip = 1000,
+    loop = 10000,
     skip_large = 10,
     loop_large = 100,
     large_message_size = 8192,
@@ -16,8 +16,17 @@ def osu_alltoall(
     myid = comm.Get_rank()
     numprocs = comm.Get_size()
 
-    s_buf = allocate(MAX_MSG_SIZE*numprocs)
-    r_buf = allocate(MAX_MSG_SIZE*numprocs)
+    if numprocs < 2:
+        if myid == 0:
+            errmsg = "This test requires at least two processes"
+        else:
+            errmsg = None
+        raise SystemExit(errmsg)
+
+    if myid == 0:
+        r_buf = allocate(MAX_MSG_SIZE*numprocs)
+    else:
+        s_buf = allocate(MAX_MSG_SIZE)
 
     if myid == 0:
         print ('# %s' % (BENCHMARH,))
@@ -29,14 +38,18 @@ def osu_alltoall(
             skip = skip_large
             loop = loop_large
         iterations = list(range(loop+skip))
-        s_msg = [s_buf, size, MPI.BYTE]
-        r_msg = [r_buf, size, MPI.BYTE]
+        if myid == 0:
+            s_msg = MPI.IN_PLACE
+            r_msg = [r_buf, size, MPI.BYTE]
+        else:
+            s_msg = [s_buf, size, MPI.BYTE]
+            r_msg = None
         #
         comm.Barrier()
         for i in iterations:
             if i == skip:
                 t_start = MPI.Wtime()
-            comm.Alltoall(s_msg, r_msg)
+            comm.Gather(s_msg, r_msg, 0)
         t_end = MPI.Wtime()
         comm.Barrier()
         #
@@ -63,4 +76,4 @@ def allocate(n):
 
 
 if __name__ == '__main__':
-    osu_alltoall()
+    osu_bcast()
