@@ -108,8 +108,11 @@ class TestOp(unittest.TestCase):
             self._test_call(MPI.BOR,   (x,y), x  |  y)
             self._test_call(MPI.LXOR,  (x,y), x  ^  y)
         if MPI.REPLACE:
-            self._test_call(MPI.REPLACE, (2,3), 2)
-            self._test_call(MPI.REPLACE, (3,2), 3)
+            self._test_call(MPI.REPLACE, (2,3), 3)
+            self._test_call(MPI.REPLACE, (3,2), 2)
+        if MPI.NO_OP:
+            self._test_call(MPI.NO_OP, (2,3), 2)
+            self._test_call(MPI.NO_OP, (3,2), 3)
 
 if __name__ == '__main__':
     unittest.main()

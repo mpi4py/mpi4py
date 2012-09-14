@@ -1,6 +1,17 @@
+# Create flavors
+# --------------
+WIN_FLAVOR_CREATE   = MPI_WIN_FLAVOR_CREATE
+WIN_FLAVOR_ALLOCATE = MPI_WIN_FLAVOR_ALLOCATE
+WIN_FLAVOR_DYNAMIC  = MPI_WIN_FLAVOR_DYNAMIC
+WIN_FLAVOR_SHARED   = MPI_WIN_FLAVOR_SHARED
+
+# Memory model
+# ------------
+WIN_SEPARATE = MPI_WIN_SEPARATE
+WIN_UNIFIED  = MPI_WIN_UNIFIED
+
 # Assertion modes
 # ---------------
-
 MODE_NOCHECK   = MPI_MODE_NOCHECK
 MODE_NOSTORE   = MPI_MODE_NOSTORE
 MODE_NOPUT     = MPI_MODE_NOPUT
@@ -9,7 +20,6 @@ MODE_NOSUCCEED = MPI_MODE_NOSUCCEED
 
 # Lock types
 # ----------
-
 LOCK_EXCLUSIVE = MPI_LOCK_EXCLUSIVE
 LOCK_SHARED    = MPI_LOCK_SHARED
 
@@ -70,11 +80,116 @@ cdef class Win:
         CHKERR( PyMPI_Win_setup(win.ob_mpi, memory) )
         return win
 
+    @classmethod
+    def Allocate(cls, Aint size, int disp_unit=1,
+                 Info info=INFO_NULL,
+                 Intracomm comm not None=COMM_SELF):
+        """
+        Create an window object for one-sided communication
+        """
+        cdef void *base = NULL
+        cdef MPI_Info cinfo = arg_Info(info)
+        cdef Win win = <Win>cls()
+        with nogil:
+            CHKERR( MPI_Win_allocate(
+                    size, disp_unit, cinfo,
+                    comm.ob_mpi, &base, &win.ob_mpi) )
+            CHKERR( MPI_Win_set_errhandler(
+                    win.ob_mpi, MPI_ERRORS_RETURN) )
+        return win
+
+    @classmethod
+    def Allocate_shared(cls, Aint size, int disp_unit=1,
+                        Info info=INFO_NULL,
+                        Intracomm comm not None=COMM_SELF):
+        """
+        Create an window object for one-sided communication
+        """
+        cdef void *base = NULL
+        cdef MPI_Info cinfo = arg_Info(info)
+        cdef Win win = <Win>cls()
+        with nogil:
+            CHKERR( MPI_Win_allocate_shared(
+                    size, disp_unit, cinfo,
+                    comm.ob_mpi, &base, &win.ob_mpi) )
+            CHKERR( MPI_Win_set_errhandler(
+                    win.ob_mpi, MPI_ERRORS_RETURN) )
+        return win
+
+    def Shared_query(self, int rank):
+        """
+        Query the process-local address
+        for  remote memory segments
+        created with `Win.Allocate_shared()`
+        """
+        cdef void *base = NULL
+        cdef MPI_Aint size = 0
+        cdef int disp_unit = 1
+        CHKERR( MPI_Win_shared_query(
+                self.ob_mpi, rank,
+                &size, &disp_unit, &base) )
+        return (tomemory(base, size), disp_unit)
+
+    @classmethod
+    def Create_dynamic(cls,
+                       Info info=INFO_NULL,
+                       Intracomm comm not None=COMM_SELF):
+        """
+        Create an window object for one-sided communication
+        """
+        cdef MPI_Info cinfo = arg_Info(info)
+        cdef Win win = <Win>cls()
+        with nogil:
+            CHKERR( MPI_Win_create_dynamic(
+                    cinfo, comm.ob_mpi, &win.ob_mpi) )
+            CHKERR( MPI_Win_set_errhandler(
+                    win.ob_mpi, MPI_ERRORS_RETURN) )
+        return win
+
+    def Attach(self, memory):
+        """
+        Attach a local memory region
+        """
+        cdef void *base = NULL
+        cdef MPI_Aint size = 0
+        memory = getbuffer_w(memory, &base, &size)
+        CHKERR( MPI_Win_attach(self.ob_mpi, base, size) )
+
+    def Detach(self, memory):
+        """
+        Detach a local memory region
+        """
+        cdef void *base = NULL
+        memory = getbuffer_w(memory, &base, NULL)
+        CHKERR( MPI_Win_detach(self.ob_mpi, base) )
+
     def Free(self):
         """
         Free a window
         """
         with nogil: CHKERR( MPI_Win_free(&self.ob_mpi) )
+
+
+    # [6.2.2] Window Info
+    # -------------------
+
+    def Set_info(self, Info info not None):
+        """
+        Set new values for the hints
+        associated with a window
+        """
+        with nogil: CHKERR( MPI_Win_set_info(
+            self.ob_mpi, info.ob_mpi) )
+
+    def Get_info(self):
+        """
+        Return the hints for a windows
+        that are currently in use
+        """
+        cdef Info info = <Info>Info.__new__(Info)
+        with nogil: CHKERR( MPI_Win_get_info(
+            self.ob_mpi, &info.ob_mpi) )
+        return info
 
     # [6.2.2] Window Attributes
     # -------------------------
@@ -85,7 +200,8 @@ cdef class Win:
         communicator used to create the window
         """
         cdef Group group = Group()
-        with nogil: CHKERR( MPI_Win_get_group(self.ob_mpi, &group.ob_mpi) )
+        with nogil: CHKERR( MPI_Win_get_group(
+                self.ob_mpi, &group.ob_mpi) )
         return group
 
     property group:
@@ -108,6 +224,10 @@ cdef class Win:
         elif (keyval == <int>MPI_WIN_SIZE):
             return (<MPI_Aint*>attrval)[0]
         elif (keyval == <int>MPI_WIN_DISP_UNIT):
+            return (<int*>attrval)[0]
+        elif (keyval == <int>MPI_WIN_CREATE_FLAVOR):
+            return (<int*>attrval)[0]
+        elif (keyval == <int>MPI_WIN_MODEL):
             return (<int*>attrval)[0]
         # likely be a user-defined keyval
         elif keyval in win_keyval:
@@ -165,7 +285,7 @@ cdef class Win:
             cdef MPI_Win win = self.ob_mpi
             cdef void *base = NULL, *pbase = NULL
             cdef MPI_Aint size = 0, *psize = NULL
-            cdef int      disp = 0, *pdisp = NULL
+            cdef int      disp = 1, *pdisp = NULL
             cdef int attr = MPI_KEYVAL_INVALID
             cdef int flag = 0
             #
@@ -242,7 +362,6 @@ cdef class Win:
                    target=None, Op op not None=SUM):
         """
         Accumulate data into the target process
-        using remote memory access.
         """
         cdef _p_msg_rma msg = message_rma()
         msg.for_acc(origin, target_rank, target)
@@ -251,6 +370,90 @@ cdef class Win:
             target_rank,
             msg.tdisp, msg.tcount, msg.ttype,
             op.ob_mpi, self.ob_mpi) )
+
+    # [X.X.X] Get Accumulate Function
+    # -------------------------------
+
+    def Get_accumulate(self, origin, result, int target_rank,
+                       target=None, Op op not None=SUM):
+        """
+        Fetch-and-accumulate data into the target process
+        """
+        cdef _p_msg_rma msg = message_rma()
+        msg.for_get_acc(origin, result, target_rank, target)
+        with nogil: CHKERR( MPI_Get_accumulate(
+            msg.oaddr, msg.ocount, msg.otype,
+            msg.raddr, msg.rcount, msg.rtype,
+            target_rank,
+            msg.tdisp, msg.tcount, msg.ttype,
+            op.ob_mpi, self.ob_mpi) )
+
+    # [X.X.X] Request-based RMA Communication Operations
+    # --------------------------------------------------
+
+    def Rput(self, origin, int target_rank, target=None):
+        """
+        Put data into a memory window on a remote process.
+        """
+        cdef _p_msg_rma msg = message_rma()
+        msg.for_put(origin, target_rank, target)
+        cdef Request request = <Request>Request.__new__(Request)
+        with nogil: CHKERR( MPI_Rput(
+            msg.oaddr, msg.ocount, msg.otype,
+            target_rank,
+            msg.tdisp, msg.tcount, msg.ttype,
+            self.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = msg
+        return request
+
+    def Rget(self, origin, int target_rank, target=None):
+        """
+        Get data from a memory window on a remote process.
+        """
+        cdef _p_msg_rma msg = message_rma()
+        msg.for_get(origin, target_rank, target)
+        cdef Request request = <Request>Request.__new__(Request)
+        with nogil: CHKERR( MPI_Rget(
+            msg.oaddr, msg.ocount, msg.otype,
+            target_rank,
+            msg.tdisp, msg.tcount, msg.ttype,
+            self.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = msg
+        return request
+
+    def Raccumulate(self, origin, int target_rank,
+                   target=None, Op op not None=SUM):
+        """
+        Fetch-and-accumulate data into the target process
+        """
+        cdef _p_msg_rma msg = message_rma()
+        msg.for_acc(origin, target_rank, target)
+        cdef Request request = <Request>Request.__new__(Request)
+        with nogil: CHKERR( MPI_Raccumulate(
+            msg.oaddr, msg.ocount, msg.otype,
+            target_rank,
+            msg.tdisp, msg.tcount, msg.ttype,
+            op.ob_mpi, self.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = msg
+        return request
+
+    def Rget_accumulate(self, origin, result, int target_rank,
+                        target=None, Op op not None=SUM):
+        """
+        Accumulate data into the target process
+        using remote memory access.
+        """
+        cdef _p_msg_rma msg = message_rma()
+        msg.for_get_acc(origin, result, target_rank, target)
+        cdef Request request = <Request>Request.__new__(Request)
+        with nogil: CHKERR( MPI_Rget_accumulate(
+            msg.oaddr, msg.ocount, msg.otype,
+            msg.raddr, msg.rcount, msg.rtype,
+            target_rank,
+            msg.tdisp, msg.tcount, msg.ttype,
+            op.ob_mpi, self.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = msg
+        return request
 
     # [6.4] Synchronization Calls
     # ---------------------------
@@ -316,6 +519,38 @@ cdef class Win:
         Complete an RMA access epoch at the target process
         """
         with nogil: CHKERR( MPI_Win_unlock(rank, self.ob_mpi) )
+
+    def Lock_all(self, int assertion=0):
+        """
+        Begin an RMA access epoch at all processes
+        """
+        with nogil: CHKERR( MPI_Win_lock_all(
+            assertion, self.ob_mpi) )
+
+    def Unlock_all(self):
+        """
+        Complete an RMA access epoch at all processes
+        """
+        with nogil: CHKERR( MPI_Win_unlock_all(self.ob_mpi) )
+
+    # [X.X] Flush and Sync
+    # --------------------
+
+    def Flush(self, int rank):
+        with nogil: CHKERR( MPI_Win_flush(rank, self.ob_mpi) )
+
+    def Flush_all(self):
+        with nogil: CHKERR( MPI_Win_flush_all(self.ob_mpi) )
+
+    def Flush_local(self, int rank):
+        with nogil: CHKERR( MPI_Win_flush_local(rank, self.ob_mpi) )
+
+    def Flush_local_all(self):
+        with nogil: CHKERR( MPI_Win_flush_local_all(self.ob_mpi) )
+
+    def Sync(self):
+        with nogil: CHKERR( MPI_Win_sync(self.ob_mpi) )
+
 
     # [6.6] Error Handling
     # --------------------

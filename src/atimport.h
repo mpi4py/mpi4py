@@ -18,6 +18,17 @@
   #define MPICH1 1
 #endif
 
+#if defined(MS_WINDOWS) && !defined(PyMPIAPI)
+  #if defined(MPI_CALL)   /* DeinoMPI */
+    #define PyMPIAPI MPI_CALL
+  #elif defined(MPIAPI)   /* Microsoft MPI */
+    #define PyMPIAPI MPIAPI
+  #endif
+#endif
+#if !defined(PyMPIAPI)
+  #define PyMPIAPI
+#endif
+
 /* XXX describe */
 #if defined(HAVE_CONFIG_H)
 #include "config.h"
@@ -44,19 +55,6 @@
 #include "compat/mpich1.h"
 #elif defined(LAM_MPI)
 #include "compat/lammpi.h"
-#endif
-
-/* ------------------------------------------------------------------------- */
-
-#if defined(MS_WINDOWS) && !defined(PyMPIAPI)
-  #if defined(MPI_CALL)   /* DeinoMPI */
-    #define PyMPIAPI MPI_CALL
-  #elif defined(MPIAPI)   /* Microsoft MPI */
-    #define PyMPIAPI MPIAPI
-  #endif
-#endif
-#if !defined(PyMPIAPI)
-  #define PyMPIAPI
 #endif
 
 /* ------------------------------------------------------------------------- */
@@ -114,7 +112,7 @@ static int PyMPI_StartUp(void)
   if (PyMPI_KEYVAL_MPI_ATEXIT == MPI_KEYVAL_INVALID) {
     int keyval = MPI_KEYVAL_INVALID;
     (void)P_MPI_Comm_create_keyval(MPI_COMM_NULL_COPY_FN,
-                                    PyMPI_AtExitMPI, &keyval, 0);
+                                   PyMPI_AtExitMPI, &keyval, 0);
     (void)P_MPI_Comm_set_attr(MPI_COMM_SELF, keyval, 0);
     PyMPI_KEYVAL_MPI_ATEXIT = keyval;
   }

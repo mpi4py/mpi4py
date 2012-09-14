@@ -71,7 +71,11 @@ cdef object _op_MINLOC(object x, object y):
     return (w, k)
 
 cdef object _op_REPLACE(object x, object y):
-    """replace,  (x, y) -> x"""
+    """replace,  (x, y) -> y"""
+    return y
+
+cdef object _op_NO_OP(object x, object y):
+    """no-op,  (x, y) -> x"""
     return x
 
 # -----------------------------------------------------------------------------

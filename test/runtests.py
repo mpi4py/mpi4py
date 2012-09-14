@@ -184,8 +184,10 @@ def run_tests_leaks(options, testsuite):
         run_tests(options, testsuite)
         collect()
         r2 = gettotalrefcount()
-        writeln('[%d@%s] refleaks:  (%d - %d) --> %d'
-                % (rank, name, r2, r1, r2-r1))
+        leaks = r2-r1
+        if leaks:
+            writeln('[%d@%s] refleaks:  (%d - %d) --> %d'
+                    % (rank, name, r2, r1, leaks))
 
 def main(args=None):
     pkgname = 'mpi4py'

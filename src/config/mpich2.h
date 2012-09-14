@@ -54,6 +54,9 @@
 #define MPI_COMBINER_HINDEXED_BLOCK    MPIX_COMBINER_HINDEXED_BLOCK
 #define MPI_Type_create_hindexed_block MPIX_Type_create_hindexed_block
 /**/
+#undef  PyMPI_MISSING_MPI_NO_OP
+#define MPI_NO_OP MPIX_NO_OP
+/**/
 #undef  PyMPI_MISSING_MPI_Message
 #undef  PyMPI_MISSING_MPI_MESSAGE_NULL
 #undef  PyMPI_MISSING_MPI_MESSAGE_NO_PROC
@@ -117,6 +120,78 @@
 #define MPI_COMM_TYPE_SHARED      MPIX_COMM_TYPE_SHARED
 #define MPI_Comm_split_type       MPIX_Comm_split_type
 /**/
+#undef  PyMPI_MISSING_MPI_WIN_CREATE_FLAVOR
+#undef  PyMPI_MISSING_MPI_WIN_FLAVOR_CREATE
+#undef  PyMPI_MISSING_MPI_WIN_FLAVOR_ALLOCATE
+#undef  PyMPI_MISSING_MPI_WIN_FLAVOR_DYNAMIC
+#undef  PyMPI_MISSING_MPI_WIN_FLAVOR_SHARED
+#define MPI_WIN_CREATE_FLAVOR   MPIX_WIN_CREATE_FLAVOR
+#define MPI_WIN_FLAVOR_CREATE   MPIX_WIN_FLAVOR_CREATE
+#define MPI_WIN_FLAVOR_ALLOCATE MPIX_WIN_FLAVOR_ALLOCATE
+#define MPI_WIN_FLAVOR_DYNAMIC  MPIX_WIN_FLAVOR_DYNAMIC
+#define MPI_WIN_FLAVOR_SHARED   MPIX_WIN_FLAVOR_SHARED
+#undef  PyMPI_MISSING_MPI_WIN_MODEL
+#undef  PyMPI_MISSING_MPI_WIN_SEPARATE
+#undef  PyMPI_MISSING_MPI_WIN_UNIFIED
+#define MPI_WIN_MODEL    MPIX_WIN_MODEL
+#define MPI_WIN_SEPARATE MPIX_WIN_SEPARATE
+#define MPI_WIN_UNIFIED  MPIX_WIN_UNIFIED
+#undef  PyMPI_MISSING_MPI_Win_allocate
+#define MPI_Win_allocate MPIX_Win_allocate
+#undef  PyMPI_MISSING_MPI_Win_allocate_shared
+#undef  PyMPI_MISSING_MPI_Win_shared_query
+#define MPI_Win_allocate_shared MPIX_Win_allocate_shared
+#define MPI_Win_shared_query    MPIX_Win_shared_query
+#undef  PyMPI_MISSING_MPI_Win_create_dynamic
+#undef  PyMPI_MISSING_MPI_Win_attach
+#undef  PyMPI_MISSING_MPI_Win_detach
+#define MPI_Win_create_dynamic  MPIX_Win_create_dynamic
+#define MPI_Win_attach          MPIX_Win_attach
+#define MPI_Win_detach          MPIX_Win_detach
+
+#if 0 /*XXX*/
+#undef  PyMPI_MISSING_MPI_Win_set_info
+#undef  PyMPI_MISSING_MPI_Win_get_info
+#define MPI_Win_set_info MPIX_Win_set_info
+#define MPI_Win_get_info MPIX_Win_get_info
+#endif/*XXX*/
+#undef  PyMPI_MISSING_MPI_Get_accumulate
+#undef  PyMPI_MISSING_MPI_Fetch_and_op
+#undef  PyMPI_MISSING_MPI_Compare_and_swap
+#define MPI_Get_accumulate   MPIX_Get_accumulate
+#define MPI_Fetch_and_op     MPIX_Fetch_and_op
+#define MPI_Compare_and_swap MPIX_Compare_and_swap
+#undef  PyMPI_MISSING_MPI_Rget
+#undef  PyMPI_MISSING_MPI_Rput
+#undef  PyMPI_MISSING_MPI_Raccumulate
+#undef  PyMPI_MISSING_MPI_Rget_accumulate
+#define MPI_Rget            MPIX_Rget
+#define MPI_Rput            MPIX_Rput
+#define MPI_Raccumulate     MPIX_Raccumulate
+#define MPI_Rget_accumulate MPIX_Rget_accumulate
+#undef  PyMPI_MISSING_MPI_Win_lock_all
+#undef  PyMPI_MISSING_MPI_Win_unlock_all
+#undef  PyMPI_MISSING_MPI_Win_flush
+#undef  PyMPI_MISSING_MPI_Win_flush_all
+#undef  PyMPI_MISSING_MPI_Win_flush_local
+#undef  PyMPI_MISSING_MPI_Win_flush_local_all
+#undef  PyMPI_MISSING_MPI_Win_sync
+#define MPI_Win_lock_all        MPIX_Win_lock_all
+#define MPI_Win_unlock_all      MPIX_Win_unlock_all
+#define MPI_Win_flush           MPIX_Win_flush
+#define MPI_Win_flush_all       MPIX_Win_flush_all
+#define MPI_Win_flush_local     MPIX_Win_flush_local
+#define MPI_Win_flush_local_all MPIX_Win_flush_local_all
+#define MPI_Win_sync            MPIX_Win_sync
+#undef  PyMPI_MISSING_MPI_ERR_RMA_RANGE
+#undef  PyMPI_MISSING_MPI_ERR_RMA_ATTACH
+#undef  PyMPI_MISSING_MPI_ERR_RMA_SHARED
+#undef  PyMPI_MISSING_MPI_ERR_RMA_WRONG_FLAVOR
+#define MPI_ERR_RMA_RANGE        MPIX_ERR_RMA_RANGE
+#define MPI_ERR_RMA_ATTACH       MPIX_ERR_RMA_ATTACH
+#define MPI_ERR_RMA_SHARED       MPIX_ERR_RMA_SHARED
+#define MPI_ERR_RMA_WRONG_FLAVOR MPIX_ERR_RMA_WRONG_FLAVOR
+/**/
 #if 0 /*XXX*/
 #undef  PyMPI_MISSING_MPI_Comm_dup_with_info
 #undef  PyMPI_MISSING_MPI_Comm_set_info
@@ -124,7 +199,7 @@
 #define MPI_Comm_dup_with_info    MPIX_Comm_dup_with_info
 #define MPI_Comm_set_info         MPIX_Comm_set_info
 #define MPI_Comm_get_info         MPIX_Comm_get_info
-#endif
+#endif/*XXX*/
 /**/
 #if 0 /*XXX*/
 #undef  PyMPI_MISSING_MPI_MAX_LIBRARY_VERSION_STRING
@@ -133,7 +208,7 @@
 #define MPI_MAX_LIBRARY_VERSION_STRING MPIX_MAX_LIBRARY_VERSION_STRING
 #define MPI_Get_library_version        MPIX_Get_library_version
 #define MPI_INFO_ENV                   MPIX_INFO_ENV
-#endif
+#endif/*XXX*/
 /**/
 #endif /* MPICH2 < 1.5*/
 #endif /* MPI    < 3.0*/

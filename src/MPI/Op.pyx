@@ -115,6 +115,7 @@ cdef Op __BXOR__    = new_Op( MPI_BXOR    )
 cdef Op __MAXLOC__  = new_Op( MPI_MAXLOC  )
 cdef Op __MINLOC__  = new_Op( MPI_MINLOC  )
 cdef Op __REPLACE__ = new_Op( MPI_REPLACE )
+cdef Op __NO_OP__   = new_Op( MPI_NO_OP   )
 
 
 # Predefined operation handles
@@ -134,3 +135,4 @@ BXOR    = __BXOR__     #: Bit-wise xor
 MAXLOC  = __MAXLOC__   #: Maximum and location
 MINLOC  = __MINLOC__   #: Minimum and location
 REPLACE = __REPLACE__  #: Replace (for RMA)
+NO_OP   = __NO_OP__    #: No-op   (for RMA)

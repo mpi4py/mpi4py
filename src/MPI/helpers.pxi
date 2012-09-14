@@ -118,6 +118,7 @@ cdef inline Op new_Op(MPI_Op ob):
     elif ob == MPI_MAXLOC  : op.ob_func = _op_MAXLOC
     elif ob == MPI_MINLOC  : op.ob_func = _op_MINLOC
     elif ob == MPI_REPLACE : op.ob_func = _op_REPLACE
+    elif ob == MPI_NO_OP   : op.ob_func = _op_NO_OP
     return op
 
 cdef inline int del_Op(MPI_Op* ob):

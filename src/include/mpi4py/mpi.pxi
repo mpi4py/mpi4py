@@ -289,6 +289,7 @@ cdef extern from "mpi.h" nogil:
     MPI_Op MPI_MAXLOC   #:= MPI_OP_NULL
     MPI_Op MPI_MINLOC   #:= MPI_OP_NULL
     MPI_Op MPI_REPLACE  #:= MPI_OP_NULL
+    MPI_Op MPI_NO_OP    #:= MPI_OP_NULL
 
     int MPI_Op_free(MPI_Op*)
 
@@ -542,11 +543,27 @@ cdef extern from "mpi.h" nogil:
 
     int MPI_Win_free(MPI_Win*)
     int MPI_Win_create(void*, MPI_Aint, int, MPI_Info, MPI_Comm, MPI_Win*)
+    int MPI_Win_allocate(MPI_Aint, int, MPI_Info, MPI_Comm, void*, MPI_Win*)
+    int MPI_Win_allocate_shared(MPI_Aint, int, MPI_Info, MPI_Comm, void*, MPI_Win*)
+    int MPI_Win_shared_query(MPI_Win, int, MPI_Aint*,int*, void*)
+    int MPI_Win_create_dynamic(MPI_Info, MPI_Comm, MPI_Win*)
+    int MPI_Win_attach(MPI_Win, void*, MPI_Aint)
+    int MPI_Win_detach(MPI_Win, void*)
+    int MPI_Win_set_info(MPI_Win,MPI_Info)
+    int MPI_Win_get_info(MPI_Win,MPI_Info*)
     int MPI_Win_get_group(MPI_Win, MPI_Group*)
 
     int MPI_Get(void*, int, MPI_Datatype, int, MPI_Aint, int, MPI_Datatype, MPI_Win)
     int MPI_Put(void*, int, MPI_Datatype, int, MPI_Aint, int, MPI_Datatype, MPI_Win)
-    int MPI_Accumulate(void*, int, MPI_Datatype, int, MPI_Aint, int, MPI_Datatype,  MPI_Op, MPI_Win)
+    int MPI_Accumulate(void*, int, MPI_Datatype, int, MPI_Aint, int, MPI_Datatype, MPI_Op, MPI_Win)
+    int MPI_Get_accumulate(void*, int, MPI_Datatype, void*, int,MPI_Datatype, int, MPI_Aint, int, MPI_Datatype, MPI_Op, MPI_Win)
+    int MPI_Fetch_and_op(void*, void*, MPI_Datatype, int, MPI_Aint, MPI_Op, MPI_Win)
+    int MPI_Compare_and_swap(void*, void*, void*, MPI_Datatype, int, MPI_Aint, MPI_Op, MPI_Win)
+
+    int MPI_Rget(void*, int, MPI_Datatype, int, MPI_Aint, int, MPI_Datatype, MPI_Win, MPI_Request*)
+    int MPI_Rput(void*, int, MPI_Datatype, int, MPI_Aint, int, MPI_Datatype, MPI_Win, MPI_Request*)
+    int MPI_Raccumulate(void*, int, MPI_Datatype, int, MPI_Aint, int, MPI_Datatype, MPI_Op, MPI_Win, MPI_Request*)
+    int MPI_Rget_accumulate(void*, int, MPI_Datatype, void*, int,MPI_Datatype, int, MPI_Aint, int, MPI_Datatype, MPI_Op, MPI_Win, MPI_Request*)
 
     enum: MPI_MODE_NOCHECK    #:= MPI_UNDEFINED
     enum: MPI_MODE_NOSTORE    #:= MPI_UNDEFINED
@@ -564,6 +581,13 @@ cdef extern from "mpi.h" nogil:
     enum: MPI_LOCK_SHARED     #:= MPI_UNDEFINED
     int MPI_Win_lock(int, int, int, MPI_Win)
     int MPI_Win_unlock(int, MPI_Win)
+    int MPI_Win_lock_all(int, MPI_Win)
+    int MPI_Win_unlock_all(MPI_Win)
+    int MPI_Win_flush(int, MPI_Win)
+    int MPI_Win_flush_all(MPI_Win)
+    int MPI_Win_flush_local(int, MPI_Win)
+    int MPI_Win_flush_local_all(MPI_Win)
+    int MPI_Win_sync(MPI_Win)
 
     int MPI_Win_get_errhandler(MPI_Win, MPI_Errhandler*)
     int MPI_Win_set_errhandler(MPI_Win, MPI_Errhandler)
@@ -575,9 +599,20 @@ cdef extern from "mpi.h" nogil:
     int MPI_Win_get_name(MPI_Win, char[], int*)
     int MPI_Win_set_name(MPI_Win, char[])
 
-    enum: MPI_WIN_BASE       #:= MPI_KEYVAL_INVALID
-    enum: MPI_WIN_SIZE       #:= MPI_KEYVAL_INVALID
-    enum: MPI_WIN_DISP_UNIT  #:= MPI_KEYVAL_INVALID
+    enum: MPI_WIN_BASE          #:= MPI_KEYVAL_INVALID
+    enum: MPI_WIN_SIZE          #:= MPI_KEYVAL_INVALID
+    enum: MPI_WIN_DISP_UNIT     #:= MPI_KEYVAL_INVALID
+    enum: MPI_WIN_CREATE_FLAVOR #:= MPI_KEYVAL_INVALID
+    enum: MPI_WIN_MODEL         #:= MPI_KEYVAL_INVALID
+
+    enum: MPI_WIN_FLAVOR_CREATE   #:= MPI_UNDEFINED
+    enum: MPI_WIN_FLAVOR_ALLOCATE #:= MPI_UNDEFINED
+    enum: MPI_WIN_FLAVOR_DYNAMIC  #:= MPI_UNDEFINED
+    enum: MPI_WIN_FLAVOR_SHARED   #:= MPI_UNDEFINED
+
+    enum: MPI_WIN_SEPARATE #:= MPI_UNDEFINED
+    enum: MPI_WIN_UNIFIED  #:= MPI_UNDEFINED
+
     int MPI_Win_get_attr(MPI_Win, int, void*, int*)
     int MPI_Win_set_attr(MPI_Win, int, void*)
     int MPI_Win_delete_attr(MPI_Win, int)
@@ -775,6 +810,10 @@ cdef extern from "mpi.h" nogil:
     enum: MPI_ERR_LOCKTYPE               #:= MPI_ERR_UNKNOWN
     enum: MPI_ERR_RMA_CONFLICT           #:= MPI_ERR_UNKNOWN
     enum: MPI_ERR_RMA_SYNC               #:= MPI_ERR_UNKNOWN
+    enum: MPI_ERR_RMA_RANGE              #:= MPI_ERR_UNKNOWN
+    enum: MPI_ERR_RMA_ATTACH             #:= MPI_ERR_UNKNOWN
+    enum: MPI_ERR_RMA_SHARED             #:= MPI_ERR_UNKNOWN
+    enum: MPI_ERR_RMA_WRONG_FLAVOR       #:= MPI_ERR_UNKNOWN
 
     #-----------------------------------------------------------------
 

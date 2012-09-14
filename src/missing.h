@@ -1120,6 +1120,11 @@ typedef int (PyMPI_MPI_Grequest_query_function)(void*,MPI_Status*);
 #define MPI_REPLACE ((MPI_Op)MPI_OP_NULL)
 #endif
 
+#ifdef  PyMPI_MISSING_MPI_NO_OP
+#undef  MPI_NO_OP
+#define MPI_NO_OP ((MPI_Op)MPI_OP_NULL)
+#endif
+
 #ifdef  PyMPI_MISSING_MPI_Op_free
 #undef  MPI_Op_free
 #define MPI_Op_free(a1) PyMPI_UNAVAILABLE("MPI_Op_free",a1)
@@ -2124,6 +2129,46 @@ typedef int (PyMPI_MPI_Delete_function)(MPI_Comm,int,void*,void*);
 #define MPI_Win_create(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_Win_create",a1,a2,a3,a4,a5,a6)
 #endif
 
+#ifdef  PyMPI_MISSING_MPI_Win_allocate
+#undef  MPI_Win_allocate
+#define MPI_Win_allocate(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_Win_allocate",a1,a2,a3,a4,a5,a6)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Win_allocate_shared
+#undef  MPI_Win_allocate_shared
+#define MPI_Win_allocate_shared(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_Win_allocate_shared",a1,a2,a3,a4,a5,a6)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Win_shared_query
+#undef  MPI_Win_shared_query
+#define MPI_Win_shared_query(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Win_shared_query",a1,a2,a3,a4,a5)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Win_create_dynamic
+#undef  MPI_Win_create_dynamic
+#define MPI_Win_create_dynamic(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Win_create_dynamic",a1,a2,a3)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Win_attach
+#undef  MPI_Win_attach
+#define MPI_Win_attach(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Win_attach",a1,a2,a3)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Win_detach
+#undef  MPI_Win_detach
+#define MPI_Win_detach(a1,a2) PyMPI_UNAVAILABLE("MPI_Win_detach",a1,a2)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Win_set_info
+#undef  MPI_Win_set_info
+#define MPI_Win_set_info(a1,a2) PyMPI_UNAVAILABLE("MPI_Win_set_info",a1,a2)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Win_get_info
+#undef  MPI_Win_get_info
+#define MPI_Win_get_info(a1,a2) PyMPI_UNAVAILABLE("MPI_Win_get_info",a1,a2)
+#endif
+
 #ifdef  PyMPI_MISSING_MPI_Win_get_group
 #undef  MPI_Win_get_group
 #define MPI_Win_get_group(a1,a2) PyMPI_UNAVAILABLE("MPI_Win_get_group",a1,a2)
@@ -2142,6 +2187,41 @@ typedef int (PyMPI_MPI_Delete_function)(MPI_Comm,int,void*,void*);
 #ifdef  PyMPI_MISSING_MPI_Accumulate
 #undef  MPI_Accumulate
 #define MPI_Accumulate(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Accumulate",a1,a2,a3,a4,a5,a6,a7,a8,a9)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Get_accumulate
+#undef  MPI_Get_accumulate
+#define MPI_Get_accumulate(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12) PyMPI_UNAVAILABLE("MPI_Get_accumulate",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Fetch_and_op
+#undef  MPI_Fetch_and_op
+#define MPI_Fetch_and_op(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Fetch_and_op",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Compare_and_swap
+#undef  MPI_Compare_and_swap
+#define MPI_Compare_and_swap(a1,a2,a3,a4,a5,a6,a7,a8) PyMPI_UNAVAILABLE("MPI_Compare_and_swap",a1,a2,a3,a4,a5,a6,a7,a8)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Rget
+#undef  MPI_Rget
+#define MPI_Rget(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Rget",a1,a2,a3,a4,a5,a6,a7,a8,a9)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Rput
+#undef  MPI_Rput
+#define MPI_Rput(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Rput",a1,a2,a3,a4,a5,a6,a7,a8,a9)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Raccumulate
+#undef  MPI_Raccumulate
+#define MPI_Raccumulate(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10) PyMPI_UNAVAILABLE("MPI_Raccumulate",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Rget_accumulate
+#undef  MPI_Rget_accumulate
+#define MPI_Rget_accumulate(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13) PyMPI_UNAVAILABLE("MPI_Rget_accumulate",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13)
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_MODE_NOCHECK
@@ -2219,6 +2299,41 @@ typedef int (PyMPI_MPI_Delete_function)(MPI_Comm,int,void*,void*);
 #define MPI_Win_unlock(a1,a2) PyMPI_UNAVAILABLE("MPI_Win_unlock",a1,a2)
 #endif
 
+#ifdef  PyMPI_MISSING_MPI_Win_lock_all
+#undef  MPI_Win_lock_all
+#define MPI_Win_lock_all(a1,a2) PyMPI_UNAVAILABLE("MPI_Win_lock_all",a1,a2)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Win_unlock_all
+#undef  MPI_Win_unlock_all
+#define MPI_Win_unlock_all(a1) PyMPI_UNAVAILABLE("MPI_Win_unlock_all",a1)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Win_flush
+#undef  MPI_Win_flush
+#define MPI_Win_flush(a1,a2) PyMPI_UNAVAILABLE("MPI_Win_flush",a1,a2)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Win_flush_all
+#undef  MPI_Win_flush_all
+#define MPI_Win_flush_all(a1) PyMPI_UNAVAILABLE("MPI_Win_flush_all",a1)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Win_flush_local
+#undef  MPI_Win_flush_local
+#define MPI_Win_flush_local(a1,a2) PyMPI_UNAVAILABLE("MPI_Win_flush_local",a1,a2)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Win_flush_local_all
+#undef  MPI_Win_flush_local_all
+#define MPI_Win_flush_local_all(a1) PyMPI_UNAVAILABLE("MPI_Win_flush_local_all",a1)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Win_sync
+#undef  MPI_Win_sync
+#define MPI_Win_sync(a1) PyMPI_UNAVAILABLE("MPI_Win_sync",a1)
+#endif
+
 #ifdef  PyMPI_MISSING_MPI_Win_get_errhandler
 #undef  MPI_Win_get_errhandler
 #define MPI_Win_get_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_Win_get_errhandler",a1,a2)
@@ -2273,6 +2388,46 @@ typedef void (PyMPI_MPI_Win_errhandler_fn)(MPI_Win*,int*,...);
 #ifdef  PyMPI_MISSING_MPI_WIN_DISP_UNIT
 #undef  MPI_WIN_DISP_UNIT
 #define MPI_WIN_DISP_UNIT (MPI_KEYVAL_INVALID)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_WIN_CREATE_FLAVOR
+#undef  MPI_WIN_CREATE_FLAVOR
+#define MPI_WIN_CREATE_FLAVOR (MPI_KEYVAL_INVALID)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_WIN_MODEL
+#undef  MPI_WIN_MODEL
+#define MPI_WIN_MODEL (MPI_KEYVAL_INVALID)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_WIN_FLAVOR_CREATE
+#undef  MPI_WIN_FLAVOR_CREATE
+#define MPI_WIN_FLAVOR_CREATE (MPI_UNDEFINED)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_WIN_FLAVOR_ALLOCATE
+#undef  MPI_WIN_FLAVOR_ALLOCATE
+#define MPI_WIN_FLAVOR_ALLOCATE (MPI_UNDEFINED)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_WIN_FLAVOR_DYNAMIC
+#undef  MPI_WIN_FLAVOR_DYNAMIC
+#define MPI_WIN_FLAVOR_DYNAMIC (MPI_UNDEFINED)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_WIN_FLAVOR_SHARED
+#undef  MPI_WIN_FLAVOR_SHARED
+#define MPI_WIN_FLAVOR_SHARED (MPI_UNDEFINED)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_WIN_SEPARATE
+#undef  MPI_WIN_SEPARATE
+#define MPI_WIN_SEPARATE (MPI_UNDEFINED)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_WIN_UNIFIED
+#undef  MPI_WIN_UNIFIED
+#define MPI_WIN_UNIFIED (MPI_UNDEFINED)
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_Win_get_attr
@@ -3033,6 +3188,26 @@ typedef int (PyMPI_MPI_Datarep_extent_function)(MPI_Datatype,MPI_Aint*,void*);
 #ifdef  PyMPI_MISSING_MPI_ERR_RMA_SYNC
 #undef  MPI_ERR_RMA_SYNC
 #define MPI_ERR_RMA_SYNC (MPI_ERR_UNKNOWN)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_ERR_RMA_RANGE
+#undef  MPI_ERR_RMA_RANGE
+#define MPI_ERR_RMA_RANGE (MPI_ERR_UNKNOWN)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_ERR_RMA_ATTACH
+#undef  MPI_ERR_RMA_ATTACH
+#define MPI_ERR_RMA_ATTACH (MPI_ERR_UNKNOWN)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_ERR_RMA_SHARED
+#undef  MPI_ERR_RMA_SHARED
+#define MPI_ERR_RMA_SHARED (MPI_ERR_UNKNOWN)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_ERR_RMA_WRONG_FLAVOR
+#undef  MPI_ERR_RMA_WRONG_FLAVOR
+#define MPI_ERR_RMA_WRONG_FLAVOR (MPI_ERR_UNKNOWN)
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_Alloc_mem

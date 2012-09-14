@@ -71,12 +71,17 @@ ERR_SERVICE                = MPI_ERR_SERVICE
 ERR_SPAWN                  = MPI_ERR_SPAWN
 # Windows
 ERR_BASE                   = MPI_ERR_BASE
-ERR_LOCKTYPE               = MPI_ERR_LOCKTYPE
-ERR_RMA_CONFLICT           = MPI_ERR_RMA_CONFLICT
-ERR_RMA_SYNC               = MPI_ERR_RMA_SYNC
 ERR_SIZE                   = MPI_ERR_SIZE
 ERR_DISP                   = MPI_ERR_DISP
 ERR_ASSERT                 = MPI_ERR_ASSERT
+ERR_LOCKTYPE               = MPI_ERR_LOCKTYPE
+ERR_RMA_CONFLICT           = MPI_ERR_RMA_CONFLICT
+ERR_RMA_SYNC               = MPI_ERR_RMA_SYNC
+ERR_RMA_RANGE              = MPI_ERR_RMA_RANGE
+ERR_RMA_ATTACH             = MPI_ERR_RMA_ATTACH
+ERR_RMA_SHARED             = MPI_ERR_RMA_SHARED
+ERR_RMA_WRONG_FLAVOR       = MPI_ERR_RMA_WRONG_FLAVOR
+
 
 
 def Get_error_class(int errorcode):

@@ -778,10 +778,10 @@ cdef inline object _py_scan(object seq, object op):
     if op is __MAXLOC__ or op is __MINLOC__:
         seq[0] = (seq[0], 0)
         for i from 1 <= i < n:
-            seq[i] = op(seq[i-1], (seq[i], i))
+            seq[i] = op((seq[i], i), seq[i-1])
     else:
         for i from 1 <= i < n:
-            seq[i] = op(seq[i-1], seq[i])
+            seq[i] = op(seq[i], seq[i-1])
     return seq
 
 cdef inline object _py_exscan(object seq, object op):

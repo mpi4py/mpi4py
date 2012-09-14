@@ -724,18 +724,26 @@ cdef class _p_msg_rma:
     cdef void*        oaddr
     cdef int          ocount
     cdef MPI_Datatype otype
+    # raw result arguments
+    cdef void*        raddr
+    cdef int          rcount
+    cdef MPI_Datatype rtype
     # raw target arguments
     cdef MPI_Aint     tdisp
     cdef int          tcount
     cdef MPI_Datatype ttype
     # python-side arguments
     cdef object _origin
+    cdef object _result
     cdef object _target
 
     def __cinit__(self):
         self.oaddr  = NULL
         self.ocount = 0
         self.otype  = MPI_DATATYPE_NULL
+        self.raddr  = NULL
+        self.rcount = 0
+        self.rtype  = MPI_DATATYPE_NULL
         self.tdisp  = 0
         self.tcount = 0
         self.ttype  = MPI_DATATYPE_NULL
@@ -782,6 +790,16 @@ cdef class _p_msg_rma:
 
     cdef int for_acc(self, object origin, int rank, object target) except -1:
         self.for_rma(1, origin, rank, target)
+        return 0
+
+    cdef int for_get_acc(self, object origin, object result,
+                         int rank, object target) except -1:
+        # ORIGIN & TARGET
+        self.for_rma(0, origin, rank, target)
+        # RESULT
+        self._result = message_simple(
+            result, 0, rank, 0,
+            &self.raddr,  &self.rcount,  &self.rtype)
         return 0
 
 cdef inline _p_msg_rma message_rma():
