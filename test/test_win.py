@@ -25,7 +25,10 @@ class BaseTestWin(object):
         if type(self.memory).__name__ == 'buffer':
             self.assertEqual(sys.getrefcount(self.memory), refcnt+1)
         else:
-            self.assertEqual(sys.getrefcount(self.memory), refcnt)
+            if sys.version_info[:3] < (3, 3):
+                self.assertEqual(sys.getrefcount(self.memory), refcnt)
+            else:
+                self.assertEqual(sys.getrefcount(self.memory), refcnt+1)
 
     def tearDown(self):
         refcnt = sys.getrefcount(self.memory)
@@ -33,7 +36,10 @@ class BaseTestWin(object):
         if type(self.memory).__name__ == 'buffer':
             self.assertEqual(sys.getrefcount(self.memory), refcnt-1)
         else:
-            self.assertEqual(sys.getrefcount(self.memory), refcnt)
+            if sys.version_info[:3] < (3, 3):
+                self.assertEqual(sys.getrefcount(self.memory), refcnt)
+            else:
+                self.assertEqual(sys.getrefcount(self.memory), refcnt-1)
         if self.mpi_memory:
             MPI.Free_mem(self.mpi_memory)
 
@@ -45,7 +51,6 @@ class BaseTestWin(object):
         self.assertEqual(size,  length)
         self.assertEqual(dunit, 1)
         self.assertEqual(base,  pointer)
-
 
     def testAttributes(self):
         cgroup = self.COMM.Get_group()
