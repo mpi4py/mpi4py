@@ -1,6 +1,16 @@
 import sys
 from mpi4py import MPI
 import mpiunittest as unittest
+try:
+    from sys import getrefcount
+except ImportError:
+    class getrefcount(object):
+        def __init__(self, arg):
+            pass
+        def __eq__(self, other):
+            return True
+        def __add__(self, other):
+            return self
 
 class BaseTestWin(object):
 
@@ -20,26 +30,26 @@ class BaseTestWin(object):
             from array import array
             self.mpi_memory = None
             self.memory = array('B',[0]*10)
-        refcnt = sys.getrefcount(self.memory)
+        refcnt = getrefcount(self.memory)
         self.WIN = MPI.Win.Create(self.memory, 1, self.INFO, self.COMM)
         if type(self.memory).__name__ == 'buffer':
-            self.assertEqual(sys.getrefcount(self.memory), refcnt+1)
+            self.assertEqual(getrefcount(self.memory), refcnt+1)
         else:
             if sys.version_info[:3] < (3, 3):
-                self.assertEqual(sys.getrefcount(self.memory), refcnt)
+                self.assertEqual(getrefcount(self.memory), refcnt)
             else:
-                self.assertEqual(sys.getrefcount(self.memory), refcnt+1)
+                self.assertEqual(getrefcount(self.memory), refcnt+1)
 
     def tearDown(self):
-        refcnt = sys.getrefcount(self.memory)
+        refcnt = getrefcount(self.memory)
         self.WIN.Free()
         if type(self.memory).__name__ == 'buffer':
-            self.assertEqual(sys.getrefcount(self.memory), refcnt-1)
+            self.assertEqual(getrefcount(self.memory), refcnt-1)
         else:
             if sys.version_info[:3] < (3, 3):
-                self.assertEqual(sys.getrefcount(self.memory), refcnt)
+                self.assertEqual(getrefcount(self.memory), refcnt)
             else:
-                self.assertEqual(sys.getrefcount(self.memory), refcnt-1)
+                self.assertEqual(getrefcount(self.memory), refcnt-1)
         if self.mpi_memory:
             MPI.Free_mem(self.mpi_memory)
 

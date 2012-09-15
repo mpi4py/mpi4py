@@ -33,6 +33,8 @@ cdef extern from "Python.h":
     int PyObject_CheckReadBuffer(object)
     int PyObject_AsReadBuffer (object, const_void **, Py_ssize_t *) except -1
     int PyObject_AsWriteBuffer(object, void **, Py_ssize_t *) except -1
+    object PyBuffer_FromObject(object, Py_ssize_t, Py_ssize_t)
+    object PyBuffer_FromReadWriteObject(object, Py_ssize_t, Py_ssize_t)
 
 #------------------------------------------------------------------------------
 

@@ -81,9 +81,10 @@ def fix_linker_cmd(ld, mpild):
 def split_linker_cmd(ld):
     from os.path import basename
     ld = split_quoted(ld)
+    if not ld: return '', ''
     i = 0
     if (sys.platform.startswith('aix') and
-        basename(pyld[i]) == 'ld_so_aix'):
+        basename(ld[i]) == 'ld_so_aix'):
         i = i + 1
     while basename(ld[i]) == 'env':
         i = i + 1
@@ -117,13 +118,17 @@ def customize_compiler(compiler, lang=None,
          basecflags, opt) = get_config_vars (
             'CC', 'CXX', 'CCSHARED', 'LDSHARED',
             'BASECFLAGS', 'OPT')
-        cc  = cc  .replace('-pthread', '')
-        cxx = cxx .replace('-pthread', '')
-        ld  = ld  .replace('-pthread', '')
+        cc  = (cc  or '').replace('-pthread', '')
+        cxx = (cxx or '').replace('-pthread', '')
+        ld  = (ld  or '').replace('-pthread', '')
         ld, ldshared = split_linker_cmd(ld)
         basecflags, opt = basecflags or '', opt or ''
         ccshared = ccshared or ''
         ldshared = ldshared or ''
+        if '__pypy__' in sys.builtin_module_names:
+            basecflags =  ' -Wall -Wimplicit'
+            if not ccshared: ccshared = '-fPIC'
+            if not ldshared: ldshared = '-shared'
         # Compiler command overriding
         if not mpild and (mpicc or mpicxx):
             if lang == 'c':

@@ -1,6 +1,15 @@
 from mpi4py import MPI
 import mpiunittest as unittest
-from sys import getrefcount as getrc
+try:
+    from sys import getrefcount
+except ImportError:
+    class getrefcount(object):
+        def __init__(self, arg):
+            pass
+        def __eq__(self, other):
+            return True
+        def __add__(self, other):
+            return self
 
 class BaseTestCommAttr(object):
 
@@ -17,31 +26,31 @@ class BaseTestCommAttr(object):
         self.assertNotEqual(self.keyval, MPI.KEYVAL_INVALID)
 
         attrval = [1,2,3]
-        rc = getrc(attrval)
+        rc = getrefcount(attrval)
         self.comm.Set_attr(self.keyval, attrval)
-        self.assertEqual(getrc(attrval), rc+1)
+        self.assertEqual(getrefcount(attrval), rc+1)
 
         o = self.comm.Get_attr(self.keyval)
         self.assertTrue(o is attrval)
-        self.assertEqual(getrc(attrval), rc+2)
+        self.assertEqual(getrefcount(attrval), rc+2)
         o = None
 
         dupcomm = self.comm.Clone()
         if copy_fn is True:
-            self.assertEqual(getrc(attrval), rc+2)
+            self.assertEqual(getrefcount(attrval), rc+2)
         o = dupcomm.Get_attr(self.keyval)
         if copy_fn is True:
             self.assertTrue(o is attrval)
-            self.assertEqual(getrc(attrval), rc+3)
+            self.assertEqual(getrefcount(attrval), rc+3)
         elif not copy_fn:
             self.assertTrue(o is None)
-            self.assertEqual(getrc(attrval), rc+1)
+            self.assertEqual(getrefcount(attrval), rc+1)
         dupcomm.Free()
         o = None
 
-        self.assertEqual(getrc(attrval), rc+1)
+        self.assertEqual(getrefcount(attrval), rc+1)
         self.comm.Delete_attr(self.keyval)
-        self.assertEqual(getrc(attrval), rc)
+        self.assertEqual(getrefcount(attrval), rc)
 
         o = self.comm.Get_attr(self.keyval)
         self.assertTrue(o is None)
@@ -60,25 +69,25 @@ class BaseTestCommAttr(object):
 
         comm1 = self.comm
         dupcomm1 = comm1.Clone()
-        rc = getrc(dupcomm1)
+        rc = getrefcount(dupcomm1)
 
         comm1.Set_attr(self.keyval, dupcomm1)
         self.assertTrue(dupcomm1 != MPI.COMM_NULL)
-        self.assertTrue(getrc(dupcomm1), rc+1)
+        self.assertTrue(getrefcount(dupcomm1), rc+1)
 
         comm2 = comm1.Clone()
         dupcomm2 = comm2.Get_attr(self.keyval)
         self.assertTrue(dupcomm1 != dupcomm2)
-        self.assertTrue(getrc(dupcomm1), rc+1)
-        self.assertTrue(getrc(dupcomm2), 3)
+        self.assertTrue(getrefcount(dupcomm1), rc+1)
+        self.assertTrue(getrefcount(dupcomm2), 3)
         comm2.Free()
         self.assertTrue(dupcomm2 == MPI.COMM_NULL)
-        self.assertTrue(getrc(dupcomm1), rc+1)
-        self.assertTrue(getrc(dupcomm2), 2)
+        self.assertTrue(getrefcount(dupcomm1), rc+1)
+        self.assertTrue(getrefcount(dupcomm2), 2)
 
         self.comm.Delete_attr(self.keyval)
         self.assertTrue(dupcomm1 == MPI.COMM_NULL)
-        self.assertTrue(getrc(dupcomm1), rc)
+        self.assertTrue(getrefcount(dupcomm1), rc)
 
 class TestCommAttrWorld(BaseTestCommAttr, unittest.TestCase):
     def setUp(self):
@@ -103,31 +112,31 @@ class BaseTestDatatypeAttr(object):
         self.assertNotEqual(self.keyval, MPI.KEYVAL_INVALID)
 
         attrval = [1,2,3]
-        rc = getrc(attrval)
+        rc = getrefcount(attrval)
         self.datatype.Set_attr(self.keyval, attrval)
-        self.assertEqual(getrc(attrval), rc+1)
+        self.assertEqual(getrefcount(attrval), rc+1)
 
         o = self.datatype.Get_attr(self.keyval)
         self.assertTrue(o is attrval)
-        self.assertEqual(getrc(attrval), rc+2)
+        self.assertEqual(getrefcount(attrval), rc+2)
         o = None
 
         dupdatatype = self.datatype.Dup()
         if copy_fn is True:
-            self.assertEqual(getrc(attrval), rc+2)
+            self.assertEqual(getrefcount(attrval), rc+2)
         o = dupdatatype.Get_attr(self.keyval)
         if copy_fn is True:
             self.assertTrue(o is attrval)
-            self.assertEqual(getrc(attrval), rc+3)
+            self.assertEqual(getrefcount(attrval), rc+3)
         elif not copy_fn:
             self.assertTrue(o is None)
-            self.assertEqual(getrc(attrval), rc+1)
+            self.assertEqual(getrefcount(attrval), rc+1)
         dupdatatype.Free()
         o = None
 
-        self.assertEqual(getrc(attrval), rc+1)
+        self.assertEqual(getrefcount(attrval), rc+1)
         self.datatype.Delete_attr(self.keyval)
-        self.assertEqual(getrc(attrval), rc)
+        self.assertEqual(getrefcount(attrval), rc)
 
         o = self.datatype.Get_attr(self.keyval)
         self.assertTrue(o is None)
@@ -146,25 +155,25 @@ class BaseTestDatatypeAttr(object):
 
         datatype1 = self.datatype
         dupdatatype1 = datatype1.Dup()
-        rc = getrc(dupdatatype1)
+        rc = getrefcount(dupdatatype1)
 
         datatype1.Set_attr(self.keyval, dupdatatype1)
         self.assertTrue(dupdatatype1 != MPI.DATATYPE_NULL)
-        self.assertTrue(getrc(dupdatatype1), rc+1)
+        self.assertTrue(getrefcount(dupdatatype1), rc+1)
 
         datatype2 = datatype1.Dup()
         dupdatatype2 = datatype2.Get_attr(self.keyval)
         self.assertTrue(dupdatatype1 != dupdatatype2)
-        self.assertTrue(getrc(dupdatatype1), rc+1)
-        self.assertTrue(getrc(dupdatatype2), 3)
+        self.assertTrue(getrefcount(dupdatatype1), rc+1)
+        self.assertTrue(getrefcount(dupdatatype2), 3)
         datatype2.Free()
         self.assertTrue(dupdatatype2 == MPI.DATATYPE_NULL)
-        self.assertTrue(getrc(dupdatatype1), rc+1)
-        self.assertTrue(getrc(dupdatatype2), 2)
+        self.assertTrue(getrefcount(dupdatatype1), rc+1)
+        self.assertTrue(getrefcount(dupdatatype2), 2)
 
         self.datatype.Delete_attr(self.keyval)
         self.assertTrue(dupdatatype1 == MPI.DATATYPE_NULL)
-        self.assertTrue(getrc(dupdatatype1), rc)
+        self.assertTrue(getrefcount(dupdatatype1), rc)
 
 class TestDatatypeAttrBYTE(BaseTestDatatypeAttr, unittest.TestCase):
     def setUp(self):
@@ -195,18 +204,18 @@ class TestWinAttr(unittest.TestCase):
         self.assertNotEqual(self.keyval, MPI.KEYVAL_INVALID)
 
         attrval = [1,2,3]
-        rc = getrc(attrval)
+        rc = getrefcount(attrval)
         self.win.Set_attr(self.keyval, attrval)
-        self.assertEqual(getrc(attrval), rc+1)
+        self.assertEqual(getrefcount(attrval), rc+1)
 
         o = self.win.Get_attr(self.keyval)
         self.assertTrue(o is attrval)
-        self.assertEqual(getrc(attrval), rc+2)
+        self.assertEqual(getrefcount(attrval), rc+2)
         o = None
 
-        self.assertEqual(getrc(attrval), rc+1)
+        self.assertEqual(getrefcount(attrval), rc+1)
         self.win.Delete_attr(self.keyval)
-        self.assertEqual(getrc(attrval), rc)
+        self.assertEqual(getrefcount(attrval), rc)
 
 
         o = self.win.Get_attr(self.keyval)
@@ -218,15 +227,15 @@ class TestWinAttr(unittest.TestCase):
 
         newwin = MPI.Win.Create(MPI.BOTTOM, 1,
                                 MPI.INFO_NULL, MPI.COMM_SELF)
-        rc = getrc(newwin)
+        rc = getrefcount(newwin)
         #
         self.win.Set_attr(self.keyval, newwin)
         self.assertTrue(newwin != MPI.WIN_NULL)
-        self.assertTrue(getrc(newwin), rc+1)
+        self.assertTrue(getrefcount(newwin), rc+1)
         #
         self.win.Delete_attr(self.keyval)
         self.assertTrue(newwin == MPI.WIN_NULL)
-        self.assertTrue(getrc(newwin), rc)
+        self.assertTrue(getrefcount(newwin), rc)
 
 
 try:

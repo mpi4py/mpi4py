@@ -177,43 +177,6 @@ PyMPI_AtExitMPI(PyMPI_UNUSED MPI_Comm comm,
 /* ------------------------------------------------------------------------- */
 
 static PyObject *
-PyMPI_Allocate(Py_ssize_t m, size_t b, void **pp)
-{
-  PyObject *ob;
-  Py_ssize_t n = m * (Py_ssize_t)b;
-  if (n > PY_SSIZE_T_MAX)
-    return PyErr_NoMemory();
-  else if (n < 0) {
-    PyErr_SetString(PyExc_RuntimeError,
-                    "memory allocation with negative size");
-    return NULL;
-  }
-#if PY_VERSION_HEX >= 0x02060000
-  ob = PyByteArray_FromStringAndSize(NULL, (n==0) ? 1 : n);
-  if (ob && n==0 && (PyByteArray_Resize(ob, 0) < 0)) {
-    Py_DECREF(ob);
-    return NULL;
-  }
-  if (ob && pp)
-    *pp = (void *)PyByteArray_AS_STRING(ob);
-#else
-  {
-    void *p = PyMem_Malloc((size_t)n);
-    if (!p)
-      return PyErr_NoMemory();
-    ob = PyCObject_FromVoidPtr(p, PyMem_Free);
-    if (!ob)
-      PyMem_Free(p);
-    else if (pp)
-      *pp = p;
-  }
-#endif
-  return ob;
-}
-
-/* ------------------------------------------------------------------------- */
-
-static PyObject *
 PyMPIString_AsStringAndSize(PyObject *ob, const char **s, Py_ssize_t *n)
 {
   PyObject *b = NULL;
@@ -345,6 +308,38 @@ PyMemoryView_FromBuffer(Py_buffer *view)
       return PyBuffer_FromReadWriteMemory(view->buf,view->len);
   }
 }
+#endif
+
+/* ------------------------------------------------------------------------- */
+
+#if defined(PYPY_VERSION)
+
+static int
+_PyLong_AsByteArray(PyLongObject* v,
+                    unsigned char* bytes, size_t n,
+                    int little_endian, int is_signed)
+{
+  PyErr_SetString(PyExc_RuntimeError,
+                  "PyPy: _PyLong_AsByteArray() not available");
+  return -1;
+}
+
+static PyObject *
+PyMemoryView_FromBuffer(Py_buffer *view)
+{
+  if (view->obj) {
+    if (view->readonly)
+      return PyBuffer_FromObject(view->obj, 0, view->len);
+    else
+      return PyBuffer_FromReadWriteObject(view->obj, 0, view->len);
+  } else {
+    if (view->readonly)
+      return PyBuffer_FromMemory(view->buf,view->len);
+    else
+      return PyBuffer_FromReadWriteMemory(view->buf,view->len);
+  }
+}
+
 #endif
 
 /* ------------------------------------------------------------------------- */

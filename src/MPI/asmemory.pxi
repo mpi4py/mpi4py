@@ -1,6 +1,7 @@
 #------------------------------------------------------------------------------
 
 cdef extern from "Python.h":
+    enum: PY_SSIZE_T_MAX
     void *PyMem_Malloc(size_t)
     void *PyMem_Realloc(void *, size_t)
     void PyMem_Free(void *)
@@ -24,13 +25,29 @@ cdef inline object tomemory(void *base, MPI_Aint size):
 
 #------------------------------------------------------------------------------
 
-cdef extern from *:
-    object allocate"PyMPI_Allocate"(Py_ssize_t, size_t, void **)
+#@cython.internal
+cdef class _p_mem:
+    cdef void   *buf
+    def __cinit__(self):
+        self.buf = NULL
+    def __dealloc__(self):
+        PyMem_Free(self.buf)
 
-cdef inline object allocate_int(int n, int **p):
-     cdef int *array = NULL
-     cdef object ob = allocate(n, sizeof(int), <void**>&array)
-     p[0] = array
+cdef inline _p_mem allocate(Py_ssize_t m, size_t b, void **buf):
+  cdef Py_ssize_t n = m * <Py_ssize_t>b
+  if n > PY_SSIZE_T_MAX:
+      raise MemoryError("memory allocation size too large")
+  if n < 0:
+      raise RuntimeError("memory allocation with negative size")
+  cdef _p_mem ob = <_p_mem>_p_mem.__new__(_p_mem)
+  ob.buf = PyMem_Malloc(<size_t>n)
+  if ob.buf == NULL: raise MemoryError
+  if buf != NULL: buf[0] = ob.buf
+  return ob
+
+cdef inline _p_mem allocate_int(int n, int **p):
+     cdef _p_mem ob = allocate(n, sizeof(int), NULL)
+     p[0] = <int*>ob.buf
      return ob
 
 #------------------------------------------------------------------------------

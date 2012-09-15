@@ -3,16 +3,10 @@
 cdef type arraytype
 from array import array as arraytype
 
-cdef extern from "Python.h":
-    int PySequence_DelItem(object, Py_ssize_t) except -1
-    object PySequence_InPlaceRepeat(object, Py_ssize_t)
-
 cdef inline object newarray_int(Py_ssize_t n, int **p):
     cdef object ary = arraytype('i', [0])
-    if n <= 0:
-        PySequence_DelItem(ary, 0)
-    elif n > 1:
-        ary = PySequence_InPlaceRepeat(ary, n)
+    if n < 1: del ary[0]
+    if n > 1: ary *= n
     cdef int *base = NULL
     cdef Py_ssize_t size = 0
     PyObject_AsWriteBuffer(ary, <void**>&base, &size)
