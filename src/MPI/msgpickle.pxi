@@ -368,24 +368,24 @@ cdef object PyMPI_irecv(object obj, int dest, int tag,
     cdef _p_Pickle pickle = PyMPI_pickle()
     #
     cdef void *rbuf = NULL
+    cdef MPI_Aint rlen = 0
     cdef int rcount = 0
     cdef MPI_Datatype rtype = MPI_BYTE
     #
-    cdef _p_buffer rmsg = None
+    cdef object rmsg = None
     cdef int dorecv = (dest != MPI_PROC_NULL)
     if dorecv:
         if obj is None:
             rcount = <int>(1<<15)
             obj = pickle.alloc(&rbuf, rcount)
-            rmsg = getbuffer(obj, 1, 0)
+            rmsg = getbuffer_r(obj, NULL, NULL)
         #elif is_int(obj):
         #    rcount = <int> obj
         #    obj = pickle.alloc(&rbuf, rcount)
-        #    rmsg = getbuffer(obj, 1, 0)
+        #    rmsg = getbuffer_r(obj, NULL, NULL)
         else:
-            rmsg = getbuffer(obj, 0, 0)
-            rbuf = rmsg.view.buf
-            rcount = <int> rmsg.view.len # XXX overflow?
+            rmsg = getbuffer_w(obj, &rbuf, &rlen)
+            rcount = <int> rlen # XXX overflow?
     with nogil: CHKERR( MPI_Irecv(rbuf, rcount, rtype,
                                   dest, tag, comm, request) )
     return rmsg

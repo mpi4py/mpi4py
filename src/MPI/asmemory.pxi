@@ -13,6 +13,9 @@ cdef extern from "Python.h":
 #------------------------------------------------------------------------------
 
 cdef extern from "Python.h":
+    int PyBuffer_FillInfo(Py_buffer *, object,
+                          void *, Py_ssize_t,
+                          bint, int) except -1
     object PyMemoryView_FromBuffer(Py_buffer *)
 
 cdef inline object asmemory(object ob, void **base, MPI_Aint *size):
@@ -20,8 +23,10 @@ cdef inline object asmemory(object ob, void **base, MPI_Aint *size):
     return buf
 
 cdef inline object tomemory(void *base, MPI_Aint size):
-    cdef _p_buffer buf = tobuffer(base, size, 0)
-    return PyMemoryView_FromBuffer(&buf.view)
+    cdef Py_buffer view
+    PyBuffer_FillInfo(&view, <object>NULL, base, <Py_ssize_t>size,
+                      0, PyBUF_FORMAT|PyBUF_STRIDES)
+    return PyMemoryView_FromBuffer(&view)
 
 #------------------------------------------------------------------------------
 
@@ -42,7 +47,7 @@ cdef inline _p_mem allocate(Py_ssize_t m, size_t b, void **buf):
   cdef _p_mem ob = <_p_mem>_p_mem.__new__(_p_mem)
   ob.buf = PyMem_Malloc(<size_t>n)
   if ob.buf == NULL: raise MemoryError
-  if buf != NULL: buf[0] = ob.buf
+  if buf: buf[0] = ob.buf
   return ob
 
 cdef inline _p_mem allocate_int(int n, int **p):

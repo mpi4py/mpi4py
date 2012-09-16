@@ -252,6 +252,7 @@ PyBuffer_FillInfo(Py_buffer *view, PyObject *obj,
   view->len = len;
   view->itemsize = 1;
   view->readonly = readonly;
+
   view->format = NULL;
   if ((flags & PyBUF_FORMAT) == PyBUF_FORMAT)
     view->format = "B";

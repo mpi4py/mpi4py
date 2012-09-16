@@ -69,10 +69,9 @@ cdef class _p_buffer:
         if self.view.obj != NULL:
             PyObject_GetBufferEx(<object>self.view.obj, view, flags)
         else:
-            PyBuffer_FillInfo(view, None,
+            PyBuffer_FillInfo(view, <object>NULL,
                               self.view.buf, self.view.len,
                               self.view.readonly, flags)
-            Py_CLEAR(view.obj)
 
     def __releasebuffer__(self, Py_buffer *view):
         if view == NULL: return
@@ -138,9 +137,8 @@ cdef inline object getformat(_p_buffer buf):
 cdef inline _p_buffer tobuffer(void *p, Py_ssize_t n, bint ro):
     cdef _p_buffer buf = newbuffer()
     cdef Py_buffer *view = &buf.view
-    PyBuffer_FillInfo(view, None, p, n, ro,
+    PyBuffer_FillInfo(view, <object>NULL, p, n, ro,
                       PyBUF_FORMAT|PyBUF_STRIDES)
-    Py_CLEAR(view.obj)
     return buf
 
 #------------------------------------------------------------------------------
