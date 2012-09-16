@@ -47,13 +47,13 @@ except -1:
         return PyObject_GetBuffer(obj, view, flags)
     # Python 2 buffer interface (legacy)
     if (flags & PyBUF_WRITABLE) == PyBUF_WRITABLE:
+        view.readonly = 0
         PyObject_AsWriteBuffer(obj, &view.buf, &view.len)
     else:
-        PyObject_AsReadBuffer(obj, <const_void**>
-                              &view.buf, &view.len)
-    PyBuffer_FillInfo(view, obj, view.buf, view.len, 0, flags)
-    if (flags & PyBUF_FORMAT) == PyBUF_FORMAT:
-        view.format = b"B"
+        view.readonly = 1
+        PyObject_AsReadBuffer(obj, <const_void**> &view.buf, &view.len)
+    PyBuffer_FillInfo(view, obj, view.buf, view.len, view.readonly, flags)
+    if (flags & PyBUF_FORMAT) == PyBUF_FORMAT: view.format = b"B"
     return 0
 
 cdef class _p_buffer:
