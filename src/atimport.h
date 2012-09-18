@@ -313,7 +313,15 @@ PyMemoryView_FromBuffer(Py_buffer *view)
 
 /* ------------------------------------------------------------------------- */
 
-#if defined(PYPY_VERSION)
+#ifdef PYPY_VERSION
+  #define PyMPI_RUNTIME_PYPY    1
+  #define PyMPI_RUNTIME_CPYTHON 0
+#else
+  #define PyMPI_RUNTIME_PYPY    0
+  #define PyMPI_RUNTIME_CPYTHON 1
+#endif
+
+#ifdef PYPY_VERSION
 
 static int
 _PyLong_AsByteArray(PyLongObject* v,
@@ -325,8 +333,27 @@ _PyLong_AsByteArray(PyLongObject* v,
   return -1;
 }
 
+static int
+PyBuffer_FillInfo_PyPy(Py_buffer *view, PyObject *obj,
+                       void *buf, Py_ssize_t len,
+                       int readonly, int flags)
+{
+  if (view == NULL) return 0;
+  if (((flags & PyBUF_WRITABLE) == PyBUF_WRITABLE) &&
+      (readonly == 1)) {
+    PyErr_SetString(PyExc_BufferError,
+                    "Object is not writable.");
+    return -1;
+  }
+  if (PyBuffer_FillInfo(view, obj, buf, len, readonly, flags) < 0)
+    return -1;
+  view->readonly = readonly;
+  return 0;
+}
+#define PyBuffer_FillInfo PyBuffer_FillInfo_PyPy
+
 static PyObject *
-PyMemoryView_FromBuffer(Py_buffer *view)
+PyMemoryView_FromBuffer_PyPy(Py_buffer *view)
 {
   if (view->obj) {
     if (view->readonly)
@@ -340,8 +367,9 @@ PyMemoryView_FromBuffer(Py_buffer *view)
       return PyBuffer_FromReadWriteMemory(view->buf,view->len);
   }
 }
+#define PyMemoryView_FromBuffer PyMemoryView_FromBuffer_PyPy
 
-#endif
+#endif/*PYPY_VERSION*/
 
 /* ------------------------------------------------------------------------- */
 

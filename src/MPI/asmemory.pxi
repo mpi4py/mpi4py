@@ -13,9 +13,6 @@ cdef extern from "Python.h":
 #------------------------------------------------------------------------------
 
 cdef extern from "Python.h":
-    int PyBuffer_FillInfo(Py_buffer *, object,
-                          void *, Py_ssize_t,
-                          bint, int) except -1
     object PyMemoryView_FromBuffer(Py_buffer *)
 
 cdef inline object asmemory(object ob, void **base, MPI_Aint *size):
@@ -23,10 +20,8 @@ cdef inline object asmemory(object ob, void **base, MPI_Aint *size):
     return buf
 
 cdef inline object tomemory(void *base, MPI_Aint size):
-    cdef Py_buffer view
-    PyBuffer_FillInfo(&view, <object>NULL, base, <Py_ssize_t>size,
-                      0, PyBUF_FORMAT|PyBUF_STRIDES)
-    return PyMemoryView_FromBuffer(&view)
+    cdef _p_buffer buf = tobuffer(base, size, 0)
+    return PyMemoryView_FromBuffer(&buf.view)
 
 #------------------------------------------------------------------------------
 

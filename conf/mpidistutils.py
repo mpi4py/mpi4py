@@ -42,6 +42,12 @@ def fix_config_vars(names, values):
                 values[i] = flag
     return values
 
+if hasattr(sys, 'pypy_version_info'):
+    config_vars = sysconfig.get_config_vars()
+    for name in ('prefix', 'exec_prefix'):
+        if name not in config_vars:
+            config_vars[name] = os.path.normpath(getattr(sys, name))
+
 def get_config_vars(*names):
     # Core Python configuration
     values = sysconfig.get_config_vars(*names)
@@ -125,8 +131,8 @@ def customize_compiler(compiler, lang=None,
         basecflags, opt = basecflags or '', opt or ''
         ccshared = ccshared or ''
         ldshared = ldshared or ''
-        if '__pypy__' in sys.builtin_module_names:
-            basecflags =  ' -Wall -Wimplicit'
+        if hasattr(sys, 'pypy_version_info'):
+            basecflags =  '-Wall -Wimplicit'
             if not ccshared: ccshared = '-fPIC'
             if not ldshared: ldshared = '-shared'
         # Compiler command overriding

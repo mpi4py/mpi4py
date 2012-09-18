@@ -38,10 +38,50 @@ cdef extern from "Python.h":
 
 #------------------------------------------------------------------------------
 
+cdef extern from *:
+    enum: PYPY "PyMPI_RUNTIME_PYPY"
+
+cdef inline int \
+PyPy_GetBuffer(object obj, Py_buffer *view, int flags) \
+except -1:
+    cdef Py_ssize_t addr = 0
+    cdef Py_ssize_t size = 0
+    cdef bint readonly = 0
+    if isinstance(obj, bytes):
+        addr = <Py_ssize_t> PyBytes_AsString(obj)
+        size = PyBytes_Size(obj)
+        readonly = 1
+    #elif isinstance(obj, bytearray):
+    #    addr = <Py_ssize_t> PyByteArray_AsString(obj)
+    #    size = PyByteArray_Size(obj)
+    #    readonly = 0
+    elif (type(obj).__module__ == 'array' and
+          type(obj).__name__   == 'array'):
+        addr, size = obj.buffer_info()
+        size *= obj.itemsize
+        readonly = 0
+    elif (type(obj).__module__ == 'numpypy' and
+          type(obj).__name__   == 'ndarray'):
+        addr, readonly = obj.__array_interface__['data']
+        size =  obj.size
+        size *= obj.itemsize
+    else:
+        if (flags & PyBUF_WRITABLE) == PyBUF_WRITABLE:
+            readonly = 0
+            PyObject_AsWriteBuffer(obj, <void**>&addr, &size)
+        else:
+            readonly = 1
+            PyObject_AsReadBuffer(obj, <const_void**>&addr, &size)
+    PyBuffer_FillInfo(view, obj, <void*>addr, size, readonly, flags)
+    if (flags & PyBUF_FORMAT) == PyBUF_FORMAT: view.format = b"B"
+    return 0
+
 cdef int \
 PyObject_GetBufferEx(object obj, Py_buffer *view, int flags) \
 except -1:
     if view == NULL: return 0
+    if PYPY: # special-case PyPy runtime
+        return PyPy_GetBuffer(obj, view, flags)
     # Python 3 buffer interface (PEP 3118)
     if PyObject_CheckBuffer(obj):
         return PyObject_GetBuffer(obj, view, flags)
@@ -51,7 +91,7 @@ except -1:
         PyObject_AsWriteBuffer(obj, &view.buf, &view.len)
     else:
         view.readonly = 1
-        PyObject_AsReadBuffer(obj, <const_void**> &view.buf, &view.len)
+        PyObject_AsReadBuffer(obj, <const_void**>&view.buf, &view.len)
     PyBuffer_FillInfo(view, obj, view.buf, view.len, view.readonly, flags)
     if (flags & PyBUF_FORMAT) == PyBUF_FORMAT: view.format = b"B"
     return 0

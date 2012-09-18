@@ -102,6 +102,8 @@ cdef _p_message message_simple(object msg,
             (o_buf, o_count, o_displ, o_type) = msg
         else:
             raise ValueError("message: expecting 2 to 4 items")
+    elif PYPY:
+        o_buf = msg
     else:
         raise TypeError("message: expecting buffer or list/tuple")
     # buffer: address, length, and datatype
@@ -217,6 +219,8 @@ cdef _p_message message_vector(object msg,
             (o_buf, o_counts, o_displs, o_type) = msg
         else:
             raise ValueError("message: expecting 2 to 4 items")
+    elif PYPY:
+        o_buf = msg
     else:
         raise TypeError("message: expecting buffer or list/tuple")
     # buffer: address, length, and datatype
