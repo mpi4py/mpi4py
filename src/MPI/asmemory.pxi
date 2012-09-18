@@ -47,7 +47,7 @@ cdef inline _p_mem allocate(Py_ssize_t m, size_t b, void **buf):
   cdef _p_mem ob = <_p_mem>_p_mem.__new__(_p_mem)
   ob.buf = PyMem_Malloc(<size_t>n)
   if ob.buf == NULL: raise MemoryError
-  if buf: buf[0] = ob.buf
+  if buf != NULL: buf[0] = ob.buf
   return ob
 
 cdef inline _p_mem allocate_int(int n, int **p):

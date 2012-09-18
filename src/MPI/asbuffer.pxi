@@ -145,14 +145,14 @@ cdef inline _p_buffer tobuffer(void *p, Py_ssize_t n, bint ro):
 
 cdef inline _p_buffer getbuffer_r(object ob, void **base, MPI_Aint *size):
     cdef _p_buffer buf = getbuffer(ob, 1, 0)
-    if base: base[0] = <void*>    buf.view.buf
-    if size: size[0] = <MPI_Aint> buf.view.len
+    if base != NULL: base[0] = <void*>    buf.view.buf
+    if size != NULL: size[0] = <MPI_Aint> buf.view.len
     return buf
 
 cdef inline _p_buffer getbuffer_w(object ob, void **base, MPI_Aint *size):
     cdef _p_buffer buf = getbuffer(ob, 0, 0)
-    if base: base[0] = <void*>    buf.view.buf
-    if size: size[0] = <MPI_Aint> buf.view.len
+    if base != NULL: base[0] = <void*>    buf.view.buf
+    if size != NULL: size[0] = <MPI_Aint> buf.view.len
     return buf
 
 #------------------------------------------------------------------------------
