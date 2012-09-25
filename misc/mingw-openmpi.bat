@@ -4,7 +4,7 @@ setlocal ENABLEEXTENSIONS
 rem MinGW   -> http://www.mingw.org/wiki/Getting_Started
 rem OpenMPI -> http://www.open-mpi.org/software/ompi/v1.6/
 
-set MPIDIR="%ProgramFiles%\OpenMPI_v1.6-win32"
+set MPIDIR="%ProgramFiles%\OpenMPI_v1.6.1-win32"
 set MPILIBDIR=%MPIDIR%\lib
 set MPIDLLDIR=%MPIDIR%\bin
 set LIBNAME=libmpi
