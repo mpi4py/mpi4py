@@ -79,7 +79,7 @@ def main(*args, **kargs):
 if hasattr(sys, 'pypy_version_info'):
     def pypy_setup(module):
         for entry in dir(module):
-            entry = getattr(MPI, entry)
+            entry = getattr(module, entry)
             if isinstance(entry, type):
                 namespace = entry.__dict__
                 for name in namespace:
