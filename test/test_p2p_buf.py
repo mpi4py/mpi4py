@@ -31,7 +31,7 @@ class BaseTestP2PBuf(object):
                 for s in range(0, size):
                     sbuf = array( s, typecode, s)
                     rbuf = array(-1, typecode, s)
-                    mem  = array( 0, typecode, s+MPI.BSEND_OVERHEAD)
+                    mem  = array( 0, typecode, s+MPI.BSEND_OVERHEAD).as_raw()
                     if size == 1:
                         MPI.Attach_buffer(mem)
                         rbuf = sbuf

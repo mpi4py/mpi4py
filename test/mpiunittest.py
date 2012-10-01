@@ -75,3 +75,17 @@ def main(*args, **kargs):
         unittest.main(*args, **kargs)
     except SystemExit:
         pass
+
+if hasattr(sys, 'pypy_version_info'):
+    def pypy_setup(module):
+        for entry in dir(module):
+            entry = getattr(MPI, entry)
+            if isinstance(entry, type):
+                namespace = entry.__dict__
+                for name in namespace:
+                    attr = namespace[name]
+                    if isinstance(attr, classmethod):
+                        assert hasattr(entry, name)
+    from mpi4py import MPI
+    pypy_setup(MPI)
+    del MPI, pypy_setup

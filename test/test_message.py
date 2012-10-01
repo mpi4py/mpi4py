@@ -1,5 +1,6 @@
 from mpi4py import MPI
 import mpiunittest as unittest
+from arrayimpl import allclose
 
 try:
     import numpy
@@ -95,13 +96,12 @@ class TestMessage(unittest.TestCase):
     if HAVE_NUMPY:
         def _testNumPy(self, test):
             from numpy import zeros, arange, empty
-            from numpy import allclose as equal
             for t in tuple(self.TYPECODES):
                 for n in range(10):
                     z = zeros (n, dtype=t)
                     s = arange(n, dtype=t)
                     r = empty (n, dtype=t)
-                    test(equal, z, s, r, t)
+                    test(allclose, z, s, r, t)
         def testNumPy1(self):
             self._testNumPy(self._test1)
         def testNumPy2(self):

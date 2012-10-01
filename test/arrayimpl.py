@@ -1,6 +1,6 @@
 from mpi4py import MPI
 
-__all__ = ['TypeMap', 'ArrayTypes']
+__all__ = ['TypeMap', 'ArrayTypes', 'allclose']
 
 TypeMap = dict(b=MPI.SIGNED_CHAR,
                h=MPI.SHORT,
@@ -14,7 +14,6 @@ if MPI.SIGNED_CHAR == MPI.DATATYPE_NULL:
     del TypeMap['b']
 
 ArrayTypes = []
-
 
 try:
     import array
@@ -62,33 +61,8 @@ else:
             return self
         flat = property(flat)
 
-
-        def fill(self, value):
-            self[:] = array.array(self.typecode,
-                                  [value]*len(self))
-
-        def byteswap(self, inplace=False):
-            if inplace:
-                self.byteswap()
-            else:
-                ary = Array(list(self), self.typecode, self.shape)
-                array.array.byteswap(ary)
-                return ary
-
-        def allclose(self, ary, rtol=1.e-5, atol=1.e-8):
-            for x, y in zip(self, ary):
-                if abs(x-y) > (atol + rtol * abs(y)):
-                    return False
-            return True
-
-        def max(self):
-            return max(self)
-
-        def min(self):
-            return min(self)
-
-        def sum(self):
-            return sum(self)
+        def as_raw(self):
+            return self
 
         def as_mpi(self):
             return (self, self.mpidtype)
@@ -108,38 +82,57 @@ except ImportError:
     pass
 else:
 
-    class NumPy(numpy.ndarray):
+    class NumPy(object):
 
         TypeMap = TypeMap
 
-        def __new__(cls, arg, typecode, shape=None):
+        def __init__(self, arg, typecode, shape=None):
             if isinstance(arg, (int, float, complex)):
                 if shape is None: shape = ()
             else:
                 if shape is None: shape = len(arg)
-            ary = numpy.ndarray.__new__(cls, shape, typecode)
-            ary.flat[:] = arg
+            self.array = ary = numpy.zeros(shape, typecode)
+            if isinstance(arg, (int, float, complex)):
+                ary.fill(arg)
+            else:
+                ary[:] = arg
             try:
-                ary.mpidtype = Array.TypeMap[typecode]
+                self.mpidtype = Array.TypeMap[typecode]
             except KeyError:
-                ary.mpidtype = MPI.DATATYPE_NULL
-            return ary
+                self.mpidtype = MPI.DATATYPE_NULL
 
-        def typecode(self):
-            return self.dtype.char
+        def __len__(self): return len(self.array)
+        def __getitem__(self, i): return self.array[i]
+        def __setitem__(self, i, v): self.array[i] = v
+        def typecode(self): return self.array.dtype.char
         typecode = property(typecode)
+        def itemsize(self): return self.array.itemsize
+        itemsize = property(itemsize)
+        def flat(self): return self.array.flat
+        flat = property(flat)
 
-        def allclose(self, ary, rtol=1.e-5, atol=1.e-8):
-            return numpy.allclose(self, ary, rtol, atol)
+        def as_raw(self):
+            return self.array
 
         def as_mpi(self):
-            return (self, self.mpidtype)
+            return (self.array, self.mpidtype)
 
         def as_mpi_c(self, count):
-            return (self, count, self.mpidtype)
+            return (self.array, count, self.mpidtype)
 
         def as_mpi_v(self, cnt, dsp):
-            return (self, (cnt, dsp), self.mpidtype)
+            return (self.array, (cnt, dsp), self.mpidtype)
+
 
     ArrayTypes.append(NumPy)
     __all__.append('NumPy')
+
+
+try:
+    from numpy import allclose
+except ImportError:
+    def allclose(a, b, rtol=1.e-5, atol=1.e-8):
+        for x, y in zip(a, b):
+            if abs(x-y) > (atol + rtol * abs(y)):
+                return False
+        return True

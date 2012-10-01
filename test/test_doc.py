@@ -1,4 +1,4 @@
-import types
+import sys, types
 from mpi4py import MPI
 import mpiunittest as unittest
 
@@ -44,6 +44,8 @@ class TestDoc(unittest.TestCase):
                         print ("'%s': bad format docstring" % k)
         self.assertFalse(missing)
 
+if hasattr(sys, 'pypy_version_info'):
+    del TestDoc.testDoc
 
 if __name__ == '__main__':
     unittest.main()

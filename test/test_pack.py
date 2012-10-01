@@ -1,6 +1,7 @@
 from mpi4py import MPI
 import mpiunittest as unittest
 import arrayimpl
+import struct
 
 class BaseTestPack(object):
 
@@ -9,7 +10,7 @@ class BaseTestPack(object):
     def testPackSize(self):
         for array in arrayimpl.ArrayTypes:
             for typecode, datatype in arrayimpl.TypeMap.items():
-                itemsize = array(0, typecode).itemsize
+                itemsize = struct.calcsize(typecode)
                 overhead = datatype.Pack_size(0, self.COMM)
                 for count in range(10):
                     pack_size = datatype.Pack_size(count, self.COMM)
@@ -21,14 +22,14 @@ class BaseTestPack(object):
                 for typecode2, datatype2 in arrayimpl.TypeMap.items():
                     for items in range(10):
                         # input and output arrays
-                        iarray1 = array(range(items), typecode1)
-                        iarray2 = array(range(items), typecode2)
-                        oarray1 = array(items, typecode1, items)
-                        oarray2 = array(items, typecode2, items)
+                        iarray1 = array(range(items), typecode1).as_raw()
+                        iarray2 = array(range(items), typecode2).as_raw()
+                        oarray1 = array(items, typecode1, items).as_raw()
+                        oarray2 = array(items, typecode2, items).as_raw()
                         # temp array for packing
                         size1 = datatype1.Pack_size(len(iarray1), self.COMM)
                         size2 = datatype2.Pack_size(len(iarray2), self.COMM)
-                        tmpbuf = array(0, 'b', size1 + size2 + 1)
+                        tmpbuf = array(0, 'b', size1 + size2 + 1).as_raw()
                         # pack input arrays
                         position = 0
                         position = datatype1.Pack(iarray1, tmpbuf, position, self.COMM)
@@ -38,7 +39,7 @@ class BaseTestPack(object):
                         position = datatype1.Unpack(tmpbuf, position, oarray1, self.COMM)
                         position = datatype2.Unpack(tmpbuf, position, oarray2, self.COMM)
                         # test
-                        equal = array.allclose
+                        equal = arrayimpl.allclose
                         self.assertTrue(equal(iarray1, oarray1))
                         self.assertTrue(equal(iarray2, oarray2))
 
@@ -51,7 +52,7 @@ class BaseTestPackExternal(object):
     def testPackSize(self):
         for array in arrayimpl.ArrayTypes:
             for typecode, datatype in arrayimpl.TypeMap.items():
-                itemsize = array(0, typecode).itemsize
+                itemsize = struct.calcsize(typecode)
                 overhead = datatype.Pack_external_size(EXT32, 0)
                 for count in range(10):
                     pack_size = datatype.Pack_external_size(EXT32, count)
@@ -66,16 +67,16 @@ class BaseTestPackExternal(object):
                         if typecode2 in self.skipdtype: continue
                         # input and output arrays
                         if typecode1 == 'b':
-                            iarray1 = array(127, typecode1, items)
+                            iarray1 = array(127, typecode1, items).as_raw()
                         else:
-                            iarray1 = array(255, typecode1, items)
-                        iarray2 = array(range(items), typecode2)
-                        oarray1 = array(-1, typecode1, items)
-                        oarray2 = array(-1, typecode2, items)
+                            iarray1 = array(255, typecode1, items).as_raw()
+                        iarray2 = array(range(items), typecode2).as_raw()
+                        oarray1 = array(-1, typecode1, items).as_raw()
+                        oarray2 = array(-1, typecode2, items).as_raw()
                         # temp array for packing
                         size1 = datatype1.Pack_external_size(EXT32, iarray1.size)
                         size2 = datatype2.Pack_external_size(EXT32, iarray2.size)
-                        tmpbuf = array(0, 'b', size1 + size2 + 1)
+                        tmpbuf = array(0, 'b', size1 + size2 + 1).as_raw()
                         # pack input arrays
                         position = 0
                         position = datatype1.Pack_external(EXT32, iarray1, tmpbuf, position)
@@ -85,7 +86,7 @@ class BaseTestPackExternal(object):
                         position = datatype1.Unpack_external(EXT32, tmpbuf, position, oarray1)
                         position = datatype2.Unpack_external(EXT32, tmpbuf, position, oarray2)
                         # test result
-                        equal = array.allclose
+                        equal = arrayimpl.allclose
                         self.assertTrue(equal(iarray1, oarray1))
                         self.assertTrue(equal(iarray2, oarray2))
 

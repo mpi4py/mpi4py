@@ -1,5 +1,15 @@
+import sys
 from mpi4py import MPI
 import mpiunittest as unittest
+
+def allocate(n):
+    if not hasattr(sys, 'pypy_version_info'):
+        try:
+            return bytearray(n)
+        except NameError:
+            pass
+    from array import array
+    return array('B', [0]) * n
 
 _basic = [None,
           True, False,
@@ -15,9 +25,6 @@ messages += [ list(_basic),
               dict([('k%d' % key, val)
                     for key, val in enumerate(_basic)])
               ]
-
-
-
 
 class BaseTestP2PObj(object):
 
@@ -86,11 +93,7 @@ class BaseTestP2PObj(object):
             self.assertFalse(req)
             self.assertEqual(rmess, None)
         for smess in messages:
-            try:
-                buf = bytearray(512)
-            except NameError:
-                from array import array
-                buf = array('B', [0]) * 512
+            buf = allocate(512)
             req = comm.irecv(buf,  rank, 0)
             self.assertTrue(req)
             flag, rmess = req.test()
@@ -103,11 +106,7 @@ class BaseTestP2PObj(object):
             self.assertTrue(flag)
             self.assertFalse(req)
             self.assertEqual(rmess, smess)
-        try:
-            tmp = bytearray(1024)
-        except NameError:
-            from array import array
-            tmp = array('B', [0]) * 1024
+        tmp = allocate(1024)
         for buf in (None, tmp):
             for smess in messages:
                 dst = (rank+1)%size
@@ -123,11 +122,7 @@ class BaseTestP2PObj(object):
         comm = self.COMM
         size = comm.Get_size()
         rank = comm.Get_rank()
-        try:
-            tmp = bytearray(512)
-        except NameError:
-            from array import array
-            tmp = array('B', [0]) * 512
+        tmp = allocate(512)
         for buf in (None, tmp):
             for smess in messages:
                 dst = (rank+1)%size

@@ -11,6 +11,20 @@ except ImportError:
             return True
         def __add__(self, other):
             return self
+        def __sub__(self, other):
+            return self
+
+def memzero(m):
+    n = len(m)
+    if n == 0: return
+    try:
+        zero = '\0'.encode('ascii')
+        m[0] = zero
+    except TypeError:
+        zero = 0
+        m[0] = zero
+    for i in range(n):
+        m[i] = zero
 
 class BaseTestWin(object):
 
@@ -21,11 +35,7 @@ class BaseTestWin(object):
         try:
             self.mpi_memory = MPI.Alloc_mem(10)
             self.memory = self.mpi_memory
-            try:
-                zero = bytearray([0])
-            except NameError:
-                zero = str('\0')
-            self.memory[:] = zero * len(self.memory)
+            memzero(self.memory)
         except MPI.Exception:
             from array import array
             self.mpi_memory = None
