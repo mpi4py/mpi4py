@@ -41,7 +41,12 @@ cdef extern from "Python.h":
 cdef extern from *:
     enum: PYPY "PyMPI_RUNTIME_PYPY"
 
-cdef inline int \
+cdef type array_array
+cdef type numpy_array
+if PYPY: from array   import array   as array_array
+if PYPY: from numpypy import ndarray as numpy_array
+
+cdef int \
 PyPy_GetBuffer(object obj, Py_buffer *view, int flags) \
 except -1:
     cdef Py_ssize_t addr = 0
@@ -55,13 +60,11 @@ except -1:
     #    addr = <Py_ssize_t> PyByteArray_AsString(obj)
     #    size = PyByteArray_Size(obj)
     #    readonly = 0
-    elif (type(obj).__module__ == 'array' and
-          type(obj).__name__   == 'array'):
+    elif isinstance(obj, array_array):
         addr, size = obj.buffer_info()
         size *= obj.itemsize
         readonly = 0
-    elif (type(obj).__module__ == 'numpypy' and
-          type(obj).__name__   == 'ndarray'):
+    elif isinstance(obj, numpy_array):
         addr, readonly = obj.__array_interface__['data']
         size =  obj.size
         size *= obj.itemsize
@@ -75,6 +78,8 @@ except -1:
     PyBuffer_FillInfo(view, obj, <void*>addr, size, readonly, flags)
     if (flags & PyBUF_FORMAT) == PyBUF_FORMAT: view.format = b"B"
     return 0
+
+#---------------------------------------------------------------------
 
 cdef int \
 PyObject_GetBufferEx(object obj, Py_buffer *view, int flags) \
@@ -95,6 +100,8 @@ except -1:
     PyBuffer_FillInfo(view, obj, view.buf, view.len, view.readonly, flags)
     if (flags & PyBUF_FORMAT) == PyBUF_FORMAT: view.format = b"B"
     return 0
+
+#---------------------------------------------------------------------
 
 cdef class _p_buffer:
     cdef Py_buffer view
@@ -139,7 +146,7 @@ cdef class _p_buffer:
 cdef inline _p_buffer newbuffer():
     return <_p_buffer>_p_buffer.__new__(_p_buffer)
 
-cdef _p_buffer getbuffer(object ob, bint readonly, bint format):
+cdef inline _p_buffer getbuffer(object ob, bint readonly, bint format):
     cdef _p_buffer buf = newbuffer()
     cdef int flags = PyBUF_ANY_CONTIGUOUS
     if not readonly:

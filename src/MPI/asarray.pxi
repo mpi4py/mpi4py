@@ -9,7 +9,10 @@ cdef inline object newarray_int(Py_ssize_t n, int **p):
     if n > 1: ary *= n
     cdef int *base = NULL
     cdef Py_ssize_t size = 0
-    PyObject_AsWriteBuffer(ary, <void**>&base, &size)
+    if PYPY:
+        getbuffer_w(ary, <void**>&base, NULL)
+    else:
+        PyObject_AsWriteBuffer(ary, <void**>&base, &size)
     if p != NULL: p[0] = base
     return ary
 
@@ -17,8 +20,7 @@ cdef inline object getarray_int(object ob, int *n, int **p):
     cdef int *base = NULL
     cdef Py_ssize_t i = 0, size = len(ob)
     cdef object ary = newarray_int(size, &base)
-    for i from 0 <= i < size:
-        base[i] = ob[i]
+    for i from 0 <= i < size: base[i] = ob[i]
     if n != NULL: n[0] = <int> size # XXX overflow?
     if p != NULL: p[0] = base
     return ary
