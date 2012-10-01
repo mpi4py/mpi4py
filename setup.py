@@ -100,6 +100,8 @@ Programming Language :: Cython
 Programming Language :: Python
 Programming Language :: Python :: 2
 Programming Language :: Python :: 3
+Programming Language :: Python :: Implementation :: CPython
+Programming Language :: Python :: Implementation :: PyPy
 Topic :: Scientific/Engineering
 Topic :: Software Development :: Libraries :: Python Modules
 Topic :: System :: Distributed Computing
