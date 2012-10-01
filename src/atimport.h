@@ -369,6 +369,8 @@ PyMemoryView_FromBuffer_PyPy(Py_buffer *view)
 }
 #define PyMemoryView_FromBuffer PyMemoryView_FromBuffer_PyPy
 
+#define PyCode_GetNumFree(o) PyCode_GetNumFree((PyObject *)(o))
+
 #endif/*PYPY_VERSION*/
 
 /* ------------------------------------------------------------------------- */

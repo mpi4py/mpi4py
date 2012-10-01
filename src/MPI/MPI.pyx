@@ -276,3 +276,29 @@ def get_vendor():
     return (mpistr(name), (major, minor, micro))
 
 # --------------------------------------------------------------------
+
+if PYPY: exec """
+def _pypy_setup():
+    for klass in (
+        Status,
+        Datatype,
+        Request,
+        Message,
+        Op,
+        Group,
+        Info,
+        Errhandler,
+        Comm,
+        Win,
+        File,
+        ):
+        for name in klass.__dict__:
+            meth = klass.__dict__[name]
+            if (isinstance(meth, classmethod) or
+                isinstance(meth, staticmethod)):
+                hasattr(klass, name)
+_pypy_setup()
+del _pypy_setup
+"""
+
+# --------------------------------------------------------------------
