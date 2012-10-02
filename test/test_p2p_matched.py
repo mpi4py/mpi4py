@@ -80,7 +80,7 @@ class BaseTestP2PMatched(object):
                         self.assertTrue(m)
                         n = comm.Improbe(1, 0)
                         self.assertEqual(n, None)
-                        rr = m.Irecv(rbuf)
+                        rr = m.Irecv(rbuf.as_raw())
                         self.assertFalse(m)
                         self.assertTrue(rr)
                         MPI.Request.Waitall([sr,rr])
@@ -92,7 +92,7 @@ class BaseTestP2PMatched(object):
                         self.assertTrue(m)
                         n = MPI.Message.Iprobe(comm, 0, 0)
                         self.assertEqual(n, None)
-                        m.Recv(rbuf)
+                        m.Recv(rbuf.as_raw())
                         self.assertFalse(m)
                         r.Wait()
                     elif rank == 0:
@@ -101,14 +101,14 @@ class BaseTestP2PMatched(object):
                         self.assertTrue(m)
                         n = comm.Improbe(1, 0)
                         self.assertEqual(n, None)
-                        m.Recv(rbuf)
+                        m.Recv(rbuf.as_raw())
                         self.assertFalse(m)
                         #
                         comm.Send(sbuf.as_mpi(), 1, 1)
                         m = None
                         while not m:
                             m = comm.Improbe(1, 1)
-                        m.Irecv(rbuf).Wait()
+                        m.Irecv(rbuf.as_raw()).Wait()
                         n = comm.Improbe(1, 1)
                         self.assertEqual(n, None)
                     elif rank == 1:
@@ -116,7 +116,7 @@ class BaseTestP2PMatched(object):
                         self.assertTrue(m)
                         n = comm.Improbe(1, 0)
                         self.assertEqual(n, None)
-                        m.Recv(rbuf)
+                        m.Recv(rbuf.as_raw())
                         self.assertFalse(m)
                         comm.Send(sbuf.as_mpi(), 0, 0)
                         #

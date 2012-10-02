@@ -296,9 +296,9 @@ class BaseTestCCOBuf(object):
                 for root in range(size):
                     #
                     if rank == root:
-                        buf = array(range(10), typecode)
+                        buf = array(range(10), typecode).as_raw()
                     else:
-                        buf = array(-1, typecode, 10)
+                        buf = array(-1, typecode, 10).as_raw()
                     indices = range(0, len(buf), 2)
                     newtype = datatype.Create_indexed_block(1, indices)
                     newtype.Commit()
@@ -314,9 +314,9 @@ class BaseTestCCOBuf(object):
 
                     #
                     if rank == root:
-                        buf = array(range(10), typecode)
+                        buf = array(range(10), typecode).as_raw()
                     else:
-                        buf = array(-1, typecode, 10)
+                        buf = array(-1, typecode, 10).as_raw()
                     indices = range(1, len(buf), 2)
                     newtype = datatype.Create_indexed_block(1, indices)
                     newtype.Commit()

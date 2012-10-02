@@ -73,8 +73,8 @@ class BaseTestCCOVec(object):
                 for root in range(size):
                     for count in range(size+1):
                         #
-                        sbuf = array(root, typecode, count)
-                        rbuf = array(  -1, typecode, count*size)
+                        sbuf = array(root, typecode, count).as_raw()
+                        rbuf = array(  -1, typecode, count*size).as_raw()
                         sendbuf = sbuf
                         recvbuf = [rbuf, count]
                         if rank != root: recvbuf=None
@@ -83,9 +83,9 @@ class BaseTestCCOVec(object):
                             for v in rbuf:
                                 self.assertEqual(v, root)
                         #
-                        sbuf = array(root, typecode, count)
+                        sbuf = array(root, typecode, count).as_raw()
                         if rank == root:
-                            rbuf = array(  -1, typecode, count*size)
+                            rbuf = array(  -1, typecode, count*size).as_raw()
                         else:
                             rbuf = None
                         self.COMM.Gatherv(sbuf, rbuf, root)
@@ -139,8 +139,8 @@ class BaseTestCCOVec(object):
                 for root in range(size):
                     for count in range(size+1):
                         #
-                        sbuf = array(root, typecode, count*size)
-                        rbuf = array(  -1, typecode, count)
+                        sbuf = array(root, typecode, count*size).as_raw()
+                        rbuf = array(  -1, typecode, count).as_raw()
                         sendbuf = [sbuf, count]
                         recvbuf = rbuf
                         if rank != root: sendbuf = None
@@ -149,10 +149,10 @@ class BaseTestCCOVec(object):
                             self.assertEqual(v, root)
                         #
                         if rank == root:
-                            sbuf = array(root, typecode, count*size)
+                            sbuf = array(root, typecode, count*size).as_raw()
                         else:
                             sbuf = None
-                        rbuf = array(  -1, typecode, count)
+                        rbuf = array(  -1, typecode, count).as_raw()
                         self.COMM.Scatterv(sbuf, rbuf, root)
                         for v in rbuf:
                             self.assertEqual(v, root)
@@ -207,16 +207,16 @@ class BaseTestCCOVec(object):
                 for root in range(size):
                     for count in range(size+1):
                         #
-                        sbuf = array(root, typecode, count)
-                        rbuf = array(  -1, typecode, count*size)
+                        sbuf = array(root, typecode, count).as_raw()
+                        rbuf = array(  -1, typecode, count*size).as_raw()
                         sendbuf = sbuf
                         recvbuf = [rbuf, count]
                         self.COMM.Iallgatherv(sendbuf, recvbuf).Wait()
                         for v in rbuf:
                             self.assertEqual(v, root)
                         #
-                        sbuf = array(root, typecode, count)
-                        rbuf = array(  -1, typecode, count*size)
+                        sbuf = array(root, typecode, count).as_raw()
+                        rbuf = array(  -1, typecode, count*size).as_raw()
                         self.COMM.Iallgatherv(sbuf, rbuf).Wait()
                         for v in rbuf:
                             self.assertEqual(v, root)
@@ -271,16 +271,16 @@ class BaseTestCCOVec(object):
                 for root in range(size):
                     for count in range(size+1):
                         #
-                        sbuf = array(root, typecode, count*size)
-                        rbuf = array(  -1, typecode, count*size)
+                        sbuf = array(root, typecode, count*size).as_raw()
+                        rbuf = array(  -1, typecode, count*size).as_raw()
                         sendbuf = [sbuf, count]
                         recvbuf = [rbuf, count]
                         self.COMM.Ialltoallv(sendbuf, recvbuf).Wait()
                         for v in rbuf:
                             self.assertEqual(v, root)
                         #
-                        sbuf = array(root, typecode, count*size)
-                        rbuf = array(  -1, typecode, count*size)
+                        sbuf = array(root, typecode, count*size).as_raw()
+                        rbuf = array(  -1, typecode, count*size).as_raw()
                         self.COMM.Ialltoallv(sbuf, rbuf).Wait()
                         for v in rbuf:
                             self.assertEqual(v, root)
