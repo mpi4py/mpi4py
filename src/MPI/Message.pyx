@@ -66,7 +66,7 @@ cdef class Message:
         """
         Blocking receive of matched message
         """
-        cdef MPI_Message message = self.ob_mpi 
+        cdef MPI_Message message = self.ob_mpi
         cdef int source = MPI_ANY_SOURCE
         if message == MPI_MESSAGE_NO_PROC:
             source = MPI_PROC_NULL
@@ -77,12 +77,12 @@ cdef class Message:
             &message, statusp) )
         if self is not __MESSAGE_NO_PROC__:
             self.ob_mpi = message
-        
+
     def Irecv(self, buf):
         """
         Nonblocking receive of matched message
         """
-        cdef MPI_Message message = self.ob_mpi 
+        cdef MPI_Message message = self.ob_mpi
         cdef int source = MPI_ANY_SOURCE
         if message == MPI_MESSAGE_NO_PROC:
             source = MPI_PROC_NULL
@@ -95,7 +95,54 @@ cdef class Message:
             self.ob_mpi = message
         request.ob_buf = rmsg
         return request
-    
+
+    # Python Communication
+    # --------------------
+    #
+    @classmethod
+    def probe(cls, Comm comm not None,
+              int source=0, int tag=0, Status status=None):
+        cdef Message message = <Message>Message.__new__(cls)
+        cdef MPI_Status *statusp = arg_Status(status)
+        message.ob_buf = PyMPI_mprobe(source, tag, comm.ob_mpi,
+                                      &message.ob_mpi, statusp)
+        return message
+    #
+    @classmethod
+    def iprobe(cls, Comm comm not None,
+               int source=0, int tag=0, Status status=None):
+        cdef int flag = 0
+        cdef Message message = <Message>Message.__new__(cls)
+        cdef MPI_Status *statusp = arg_Status(status)
+        message.ob_buf = PyMPI_improbe(source, tag, comm.ob_mpi, &flag,
+                                       &message.ob_mpi, statusp)
+        if flag == 0: return None
+        return message
+    #
+    def recv(self, obj=None, Status status=None):
+        """
+        Blocking receive of matched message
+        """
+        cdef MPI_Message message = self.ob_mpi
+        cdef object rmsg = self.ob_buf # if obj is None else obj
+        cdef MPI_Status *statusp = arg_Status(status)
+        rmsg = PyMPI_mrecv(rmsg, &message, statusp)
+        if self is not __MESSAGE_NO_PROC__: self.ob_mpi = message
+        if self.ob_mpi == MPI_MESSAGE_NULL: self.ob_buf = None
+        return rmsg
+    #
+    def irecv(self, obj=None, Status status=None):
+        """
+        Nonblocking receive of matched message
+        """
+        cdef MPI_Message message = self.ob_mpi
+        cdef object rmsg = self.ob_buf # if obj is None else obj
+        cdef Request request = <Request>Request.__new__(Request)
+        request.ob_buf = PyMPI_imrecv(rmsg, &message, &request.ob_mpi)
+        if self is not __MESSAGE_NO_PROC__: self.ob_mpi = message
+        if self.ob_mpi == MPI_MESSAGE_NULL: self.ob_buf = None
+        return request
+
     # Fortran Handle
     # --------------
 

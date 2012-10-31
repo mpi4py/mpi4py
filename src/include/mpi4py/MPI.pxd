@@ -91,6 +91,7 @@ ctypedef public api class Message [
     ]:
     cdef MPI_Message ob_mpi     
     cdef int         flags
+    cdef object      ob_buf
 
 ctypedef public api class Op [
     type   PyMPIOp_Type,

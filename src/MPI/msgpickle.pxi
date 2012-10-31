@@ -545,6 +545,76 @@ cdef object PyMPI_testall(requests, int *flag, statuses):
 
 # -----------------------------------------------------------------------------
 
+cdef object PyMPI_mprobe(int source, int tag, MPI_Comm comm,
+                         MPI_Message *message, MPI_Status *status):
+    cdef _p_Pickle pickle = PyMPI_pickle()
+    cdef void* rbuf = NULL
+    cdef int rcount = 0
+    cdef MPI_Datatype rtype = MPI_BYTE
+    cdef MPI_Status rsts
+    if (status == MPI_STATUS_IGNORE): status = &rsts
+    with nogil: CHKERR( MPI_Mprobe(
+        source, tag, comm, message, status) )
+    CHKERR( MPI_Get_count(status, rtype, &rcount) )
+    cdef object rmsg = pickle.alloc(&rbuf, rcount)
+    return rmsg
+
+cdef object PyMPI_improbe(int source, int tag, MPI_Comm comm,
+                          int *flag, MPI_Message *message, MPI_Status *status):
+    cdef _p_Pickle pickle = PyMPI_pickle()
+    cdef void* rbuf = NULL
+    cdef int rcount = 0
+    cdef MPI_Datatype rtype = MPI_BYTE
+    cdef MPI_Status rsts
+    if (status == MPI_STATUS_IGNORE): status = &rsts
+    with nogil: CHKERR( MPI_Improbe(
+        source, tag, comm, flag, message, status) )
+    if flag[0] == 0: return None
+    CHKERR( MPI_Get_count(status, rtype, &rcount) )
+    cdef object rmsg = pickle.alloc(&rbuf, rcount)
+    return rmsg
+
+cdef object PyMPI_mrecv(object rmsg, MPI_Message *message, MPI_Status *status):
+    cdef _p_Pickle pickle = PyMPI_pickle()
+    cdef void* rbuf = NULL
+    cdef MPI_Aint rlen = 0
+    cdef MPI_Datatype rtype = MPI_BYTE
+    if message[0] == MPI_MESSAGE_NO_PROC: pass
+    elif rmsg is None: pass
+        #rmsg = pickle.alloc(&rbuf, <int>(1<<15))
+        #getbuffer_r(rmsg, &rbuf, &rlen)
+    elif PyBytes_CheckExact(rmsg):
+        getbuffer_r(rmsg, &rbuf, &rlen)
+        #assert (<char*>rbuf)[0] == 0
+    else:
+        rmsg = getbuffer_w(rmsg, &rbuf, &rlen)
+    cdef int rcount = <int> rlen # XXX overflow?
+    with nogil: CHKERR( MPI_Mrecv(
+        rbuf, rcount, rtype, message, status) )
+    rmsg = pickle.load(rmsg)
+    return rmsg
+
+cdef object PyMPI_imrecv(object rmsg, MPI_Message *message, MPI_Request *request):
+    cdef _p_Pickle pickle = PyMPI_pickle()
+    cdef void* rbuf = NULL
+    cdef MPI_Aint rlen = 0
+    cdef MPI_Datatype rtype = MPI_BYTE
+    if message[0] == MPI_MESSAGE_NO_PROC: pass
+    elif rmsg is None: pass
+        #rmsg = pickle.alloc(&rbuf, <int>(1<<15))
+        #getbuffer_r(rmsg, &rbuf, &rlen)
+    elif PyBytes_CheckExact(rmsg):
+        rmsg = getbuffer_r(rmsg, &rbuf, &rlen)
+        #assert (<char*>rbuf)[0] == 0
+    else:
+        rmsg = getbuffer_w(rmsg, &rbuf, &rlen)
+    cdef int rcount = <int> rlen # XXX overflow?
+    with nogil: CHKERR( MPI_Imrecv(
+        rbuf, rcount, rtype, message, request) )
+    return rmsg
+
+# -----------------------------------------------------------------------------
+
 cdef object PyMPI_barrier(MPI_Comm comm):
     with nogil: CHKERR( MPI_Barrier(comm) )
     return None
