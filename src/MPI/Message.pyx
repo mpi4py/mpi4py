@@ -32,8 +32,6 @@ cdef class Message:
               int source=0, int tag=0, Status status=None):
         """
         Blocking test for a message
-
-        .. note:: This function blocks until the message arrives.
         """
         cdef MPI_Message cmessage = MPI_MESSAGE_NULL
         cdef MPI_Status *statusp = arg_Status(status)
@@ -160,8 +158,8 @@ cdef class Message:
         return message
 
 
-cdef Message  __MESSAGE_NULL__    = new_Message ( MPI_MESSAGE_NULL    )
-cdef Message  __MESSAGE_NO_PROC__ = new_Message ( MPI_MESSAGE_NO_PROC )
+cdef Message __MESSAGE_NULL__    = new_Message ( MPI_MESSAGE_NULL    )
+cdef Message __MESSAGE_NO_PROC__ = new_Message ( MPI_MESSAGE_NO_PROC )
 
 
 # Predefined message handles
