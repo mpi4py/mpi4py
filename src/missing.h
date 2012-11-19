@@ -2201,7 +2201,7 @@ typedef int (PyMPI_MPI_Delete_function)(MPI_Comm,int,void*,void*);
 
 #ifdef  PyMPI_MISSING_MPI_Compare_and_swap
 #undef  MPI_Compare_and_swap
-#define MPI_Compare_and_swap(a1,a2,a3,a4,a5,a6,a7,a8) PyMPI_UNAVAILABLE("MPI_Compare_and_swap",a1,a2,a3,a4,a5,a6,a7,a8)
+#define MPI_Compare_and_swap(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Compare_and_swap",a1,a2,a3,a4,a5,a6,a7)
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_Rget

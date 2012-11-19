@@ -558,7 +558,7 @@ cdef extern from "mpi.h" nogil:
     int MPI_Accumulate(void*, int, MPI_Datatype, int, MPI_Aint, int, MPI_Datatype, MPI_Op, MPI_Win)
     int MPI_Get_accumulate(void*, int, MPI_Datatype, void*, int,MPI_Datatype, int, MPI_Aint, int, MPI_Datatype, MPI_Op, MPI_Win)
     int MPI_Fetch_and_op(void*, void*, MPI_Datatype, int, MPI_Aint, MPI_Op, MPI_Win)
-    int MPI_Compare_and_swap(void*, void*, void*, MPI_Datatype, int, MPI_Aint, MPI_Op, MPI_Win)
+    int MPI_Compare_and_swap(void*, void*, void*, MPI_Datatype, int, MPI_Aint, MPI_Win)
 
     int MPI_Rget(void*, int, MPI_Datatype, int, MPI_Aint, int, MPI_Datatype, MPI_Win, MPI_Request*)
     int MPI_Rput(void*, int, MPI_Datatype, int, MPI_Aint, int, MPI_Datatype, MPI_Win, MPI_Request*)
