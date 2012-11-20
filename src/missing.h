@@ -1796,6 +1796,11 @@ typedef void (PyMPI_MPI_User_function)(void*, void*, int*, MPI_Datatype*);
 #define MPI_UNWEIGHTED ((int*)0)
 #endif
 
+#ifdef  PyMPI_MISSING_MPI_WEIGHTS_EMPTY
+#undef  MPI_WEIGHTS_EMPTY
+#define MPI_WEIGHTS_EMPTY ((int*)MPI_UNWEIGHTED)
+#endif
+
 #ifdef  PyMPI_MISSING_MPI_Dist_graph_create_adjacent
 #undef  MPI_Dist_graph_create_adjacent
 #define MPI_Dist_graph_create_adjacent(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10) PyMPI_UNAVAILABLE("MPI_Dist_graph_create_adjacent",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)

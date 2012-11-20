@@ -41,6 +41,8 @@
 #define PyMPI_MISSING_MPI_Iscan 1
 #define PyMPI_MISSING_MPI_Iexscan 1
 
+#define PyMPI_MISSING_MPI_WEIGHTS_EMPTY 1
+
 #define PyMPI_MISSING_MPI_Comm_dup_with_info 1
 #define PyMPI_MISSING_MPI_Comm_idup 1
 #define PyMPI_MISSING_MPI_Comm_create_group 1

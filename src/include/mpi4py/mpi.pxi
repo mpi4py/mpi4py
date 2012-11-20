@@ -461,6 +461,7 @@ cdef extern from "mpi.h" nogil:
 
     enum: MPI_DIST_GRAPH #:= MPI_UNDEFINED
     int* MPI_UNWEIGHTED #:= 0
+    int* MPI_WEIGHTS_EMPTY #:= MPI_UNWEIGHTED
     int MPI_Dist_graph_create_adjacent(MPI_Comm, int, int[], int[], int, int[], int[], MPI_Info, int, MPI_Comm*)
     int MPI_Dist_graph_create(MPI_Comm, int, int[], int[], int[], int[], MPI_Info, int, MPI_Comm*)
     int MPI_Dist_graph_neighbors_count(MPI_Comm, int*, int*, int*)

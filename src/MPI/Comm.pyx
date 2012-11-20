@@ -1304,13 +1304,12 @@ cdef class Intracomm(Comm):
         cdef int *idestweight   = MPI_UNWEIGHTED
         if sources is not None:
             sources = getarray_int(sources, &indegree, &isource)
-        if sourceweights is not None:
-            sourceweights = chkarray_int(
-                sourceweights, indegree, &isourceweight)
+        sourceweights = asarray_weights(
+            sourceweights, indegree, &isourceweight)
         if destinations is not None:
             destinations = getarray_int(destinations, &outdegree, &idest)
-        if destweights is not None:
-            destweights = chkarray_int(destweights, outdegree, &idestweight)
+        destweights = asarray_weights(
+            destweights, outdegree, &idestweight)
         cdef MPI_Info cinfo = arg_Info(info)
         #
         cdef Distgraphcomm comm = \
@@ -1334,8 +1333,7 @@ cdef class Intracomm(Comm):
         degrees = chkarray_int(degrees,  nv, &idegree)
         for i from 0 <= i < nv: ne += idegree[i]
         destinations = chkarray_int(destinations, ne, &idest)
-        if weights is not None:
-            weights = chkarray_int(weights, ne, &iweight)
+        weights = asarray_weights(weights, ne, &iweight)
         cdef MPI_Info cinfo = arg_Info(info)
         #
         cdef Distgraphcomm comm = \

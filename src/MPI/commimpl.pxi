@@ -133,3 +133,28 @@ cdef inline object detach_buffer(void *p, int n):
     return ob
 
 # -----------------------------------------------------------------------------
+
+cdef object __UNWEIGHTED__    = <MPI_Aint>MPI_UNWEIGHTED
+
+cdef object __WEIGHTS_EMPTY__ = <MPI_Aint>MPI_WEIGHTS_EMPTY
+
+cdef object asarray_weights(object weights, int nweight, int **iweight):
+    #
+    if weights is None:
+        iweight[0] = MPI_UNWEIGHTED
+        return None
+    #
+    if weights is __WEIGHTS_EMPTY__:
+        if MPI_WEIGHTS_EMPTY != MPI_UNWEIGHTED:
+            iweight[0] = MPI_WEIGHTS_EMPTY
+            return None
+        else:
+            return newarray_int(nweight, iweight)
+    #
+    if weights is __UNWEIGHTED__:
+        iweight[0] = MPI_UNWEIGHTED
+        return None
+    #
+    return chkarray_int(weights, nweight, iweight)
+
+# -----------------------------------------------------------------------------
