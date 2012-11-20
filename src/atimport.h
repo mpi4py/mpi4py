@@ -323,7 +323,7 @@ PyMemoryView_FromBuffer(Py_buffer *view)
 
 #ifdef PYPY_VERSION
 
-static int
+static int PyMPI_UNUSED
 _PyLong_AsByteArray(PyLongObject* v,
                     unsigned char* bytes, size_t n,
                     int little_endian, int is_signed)

@@ -287,6 +287,8 @@ def _pypy_setup():
         Status,
         Datatype,
         Request,
+        Prequest,
+        Grequest,
         Message,
         Op,
         Group,
