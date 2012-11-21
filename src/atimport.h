@@ -14,6 +14,9 @@
   #define MPICH2 1
 #endif
 #endif
+#if defined(MPICH_NAME) && (MPICH_NAME==3)
+  #define MPICH3 1
+#endif
 #if defined(MPICH_NAME) && (MPICH_NAME==1)
   #define MPICH1 1
 #endif
@@ -32,6 +35,8 @@
 /* XXX describe */
 #if defined(HAVE_CONFIG_H)
 #include "config.h"
+#elif defined(MPICH3)
+#include "config/mpich3.h"
 #elif defined(MPICH2)
 #include "config/mpich2.h"
 #elif defined(OPEN_MPI)
@@ -45,7 +50,9 @@
 #include "fallback.h"
 
 /* XXX describe */
-#if   defined(MPICH2)
+#if   defined(MPICH3)
+#include "compat/mpich3.h"
+#elif defined(MPICH2)
 #include "compat/mpich2.h"
 #elif defined(OPEN_MPI)
 #include "compat/openmpi.h"

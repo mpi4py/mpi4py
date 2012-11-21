@@ -57,7 +57,10 @@ class BaseTestComm(object):
         self.assertTrue(type(is_inter) is bool)
 
     def testGetSetName(self):
-        name = self.COMM.Get_name()
+        try:
+            name = self.COMM.Get_name()
+        except NotImplementedError:
+            return
         self.COMM.Set_name('comm')
         self.assertEqual(self.COMM.Get_name(), 'comm')
         self.COMM.Set_name(name)

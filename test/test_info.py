@@ -26,18 +26,14 @@ class TestInfoEnv(unittest.TestCase):
         self.assertTrue(bool(MPI.INFO_ENV))
 
     def testPyMethods(self):
-        ienv = MPI.INFO_NULL
-        def getitem(): return inull['k']
-        def setitem(): inull['k'] = 'v'
-        def delitem(): del inull['k']
-        self.assertEqual(len(inull), 0)
-        self.assertFalse('key' in inull)
-        self.assertRaises(KeyError, getitem)
-        self.assertRaises(KeyError, setitem)
-        self.assertRaises(KeyError, delitem)
-        self.assertEqual(inull.keys(), [])
-        self.assertEqual(inull.values(), [])
-        self.assertEqual(inull.items(), [])
+        env = MPI.INFO_ENV
+        if env == MPI.INFO_NULL: return
+        for key in ("command", "argv",
+                    "maxprocs", "soft",
+                    "host", "arch",
+                    "wdir", "file",
+                    "thread_level"):
+            v = env.Get(key)
 
 class TestInfo(unittest.TestCase):
 

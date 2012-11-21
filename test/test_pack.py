@@ -106,7 +106,7 @@ if _name == 'Open MPI':
     if _version < (1, 5, 0):
         del BaseTestPackExternal
         del TestPackExternal
-elif _name in ('MPICH2', 'DeinoMPI'):
+elif _name in ('MPICH', 'MPICH2', 'DeinoMPI'):
     BaseTestPackExternal.skipdtype += ['l']
     BaseTestPackExternal.skipdtype += ['d']
 else:

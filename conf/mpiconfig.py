@@ -145,6 +145,7 @@ class Config(object):
         from glob import glob
         ProgramFiles = os.environ.get('ProgramFiles', '')
         for (name, install_suffix) in (
+            ('mpich3',   'MPICH'),
             ('mpich2',   'MPICH2'),
             ('openmpi',  'OpenMPI'),
             ('openmpi',  'OpenMPI*'),

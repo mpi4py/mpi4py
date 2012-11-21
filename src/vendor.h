@@ -24,6 +24,24 @@ static int MPI_Get_vendor(const char **vendor_name,
   const char* name="unknown";
   int major=0, minor=0, micro=0;
 
+  /* MPICH3 */
+#if defined(MPICH3)
+  #if defined(MPICH_NUMVERSION)
+  {int version = MPICH_NUMVERSION/1000;
+  major = version/10000; version -= major*10000;
+  minor = version/100;   version -= minor*100;
+  micro = version/1;     version -= micro*1;}
+  #elif defined(MPICH_VERSION)
+  myVersionParser(MPICH_VERSION,major,minor,micro);
+  #endif
+  name = "MPICH";
+  #if defined(DEINO_MPI)
+  name = "DeinoMPI";
+  #elif defined(MS_MPI)
+  name = "Microsoft MPI";
+  #endif
+#endif
+
   /* MPICH2 */
 #if defined(MPICH2)
   #if defined(MPICH2_NUMVERSION)

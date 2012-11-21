@@ -202,12 +202,14 @@ def configure_mpi(ext, config_cmd):
     if not ok: raise DistutilsPlatformError(errmsg % "link")
     #
     log.info("checking for missing MPI functions/symbols ...")
-    macros = ("MPICH2", "OPEN_MPI", "DEINO_MPI", "MSMPI_VER",)
+    tests  = ["defined(%s)" % macro for macro in 
+              ("OPEN_MPI", "MPICH2", "DEINO_MPI", "MSMPI_VER",)]
+    tests += ["(defined(MPICH_NAME)&&(MPICH_NAME==3))"]
     ConfigTest = dedent('''\
     #if !(%s)
     #error "Unknown MPI"
     #endif
-    ''') % "||".join(["defined(%s)" % m for m in macros])
+    ''') % "||".join(tests)
     ok = config_cmd.try_compile(ConfigTest, headers=headers)
     if not ok:
         from conf.mpidistutils import ConfigureMPI

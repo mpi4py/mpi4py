@@ -1,0 +1,4 @@
+#ifndef PyMPI_COMPAT_MPICH3_H
+#define PyMPI_COMPAT_MPICH3_H
+
+#endif /* !PyMPI_COMPAT_MPICH3_H */
