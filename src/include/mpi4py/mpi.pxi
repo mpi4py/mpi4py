@@ -7,7 +7,7 @@ cdef extern from "mpi.h" nogil:
 
     ctypedef long      MPI_Aint
     ctypedef long long MPI_Offset #:= long
-    ctypedef long long MPI_Count  #:= long
+    ctypedef long long MPI_Count  #:= MPI_Aint
 
     ctypedef struct MPI_Status:
         int MPI_SOURCE
