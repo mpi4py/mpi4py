@@ -139,11 +139,11 @@ In the list below you have some executive instructions for building
 some of the open-source MPI implementations out there with support for
 shared/dynamic libraries on POSIX environments.
 
-+ *MPICH 2* ::
++ *MPICH* ::
 
-    $ tar -zxf mpich2-X.X.X.tar.gz
-    $ cd mpich2-X.X.X
-    $ ./configure --enable-shared --prefix=/usr/local/mpich2
+    $ tar -zxf mpich-X.X.X.tar.gz
+    $ cd mpich-X.X.X
+    $ ./configure --enable-shared --prefix=/usr/local/mpich
     $ make
     $ make install
 
@@ -178,9 +178,9 @@ MPI libraries . In case of getting runtime linking errors when running
 MPI programs, the following lines can be added to the user login shell
 script (:file:`.profile`, :file:`.bashrc`, etc.).
 
-- *MPICH 2* ::
+- *MPICH* ::
 
-    MPI_DIR=/usr/local/mpich2
+    MPI_DIR=/usr/local/mpich
     export LD_LIBRARY_PATH=$MPI_DIR/lib:$LD_LIBRARY_PATH
 
 - *Open MPI* ::

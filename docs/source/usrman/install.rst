@@ -105,7 +105,7 @@ After unpacking the release tarball::
 the distribution is ready for building.
 
 - If you use a MPI implementation providing a :program:`mpicc`
-  compiler wrapper (e.g., MPICH 1/2, Open MPI, LAM), it will be used
+  compiler wrapper (e.g., MPICH, Open MPI, LAM), it will be used
   for compilation and linking. This is the preferred and easiest way
   of building *MPI for Python*.
 
