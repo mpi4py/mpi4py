@@ -1,3 +1,5 @@
+cdef extern from "mpi-compat.h": pass
+
 cimport mpi4py.MPI as MPI
 from mpi4py.mpi_c cimport *
 
