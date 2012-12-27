@@ -3210,9 +3210,9 @@ typedef int (PyMPI_MPI_Datarep_extent_function)(MPI_Datatype,MPI_Aint*,void*);
 #define MPI_ERR_RMA_SHARED (MPI_ERR_UNKNOWN)
 #endif
 
-#ifdef  PyMPI_MISSING_MPI_ERR_RMA_WRONG_FLAVOR
-#undef  MPI_ERR_RMA_WRONG_FLAVOR
-#define MPI_ERR_RMA_WRONG_FLAVOR (MPI_ERR_UNKNOWN)
+#ifdef  PyMPI_MISSING_MPI_ERR_RMA_FLAVOR
+#undef  MPI_ERR_RMA_FLAVOR
+#define MPI_ERR_RMA_FLAVOR (MPI_ERR_UNKNOWN)
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_Alloc_mem

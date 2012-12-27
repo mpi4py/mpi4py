@@ -814,7 +814,7 @@ cdef extern from "mpi.h" nogil:
     enum: MPI_ERR_RMA_RANGE              #:= MPI_ERR_UNKNOWN
     enum: MPI_ERR_RMA_ATTACH             #:= MPI_ERR_UNKNOWN
     enum: MPI_ERR_RMA_SHARED             #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_RMA_WRONG_FLAVOR       #:= MPI_ERR_UNKNOWN
+    enum: MPI_ERR_RMA_FLAVOR             #:= MPI_ERR_UNKNOWN
 
     #-----------------------------------------------------------------
 
