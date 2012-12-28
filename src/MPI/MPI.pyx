@@ -305,6 +305,6 @@ def _pypy_setup():
                 hasattr(klass, name)
 _pypy_setup()
 del _pypy_setup
-"""
+""" in globals()
 
 # --------------------------------------------------------------------
