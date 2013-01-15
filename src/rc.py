@@ -33,7 +33,7 @@ Level of thread support to request at MPI initialization
 """
 
 
-finalize = True
+finalize = None
 """
 Automatic MPI finalization at exit time
 

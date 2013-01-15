@@ -41,7 +41,7 @@ cdef int getRCParams(RCParams* rc) except -1:
     cdef object initialize = True
     cdef object threaded = True
     cdef object thread_level = 'multiple'
-    cdef object finalize = True
+    cdef object finalize = None
     try: initialize = rcmod.initialize
     except: pass
     try: threaded = rcmod.threaded
@@ -76,7 +76,9 @@ cdef int getRCParams(RCParams* rc) except -1:
     else:
         warnRC("thread_level", thread_level)
     #
-    if finalize in (True, 'yes'):
+    if finalize is None:
+        rc.finalize = rc.initialize
+    elif finalize in (True, 'yes'):
         rc.finalize = 1
     elif finalize in (False, 'no'):
         rc.finalize = 0
@@ -135,8 +137,8 @@ cdef int initialize() except -1:
             if ierr != MPI_SUCCESS: raise RuntimeError(
                 "MPI_Init() failed [error code: %d]" % ierr)
         inited_atimport = 1 # We initialized MPI
-        if rc.finalize:     # We have to finalize MPI
-            finalize_atexit = 1
+    if rc.finalize: # We have to finalize MPI
+        finalize_atexit = 1
     # Cleanup at (the very end of) Python exit
     if Py_AtExit(atexit) < 0:
         PySys_WriteStderr(b"warning: could not register "
