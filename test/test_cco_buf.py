@@ -346,8 +346,10 @@ class BaseTestCCOBufInplace(object):
                     if rank == root:
                         sbuf = MPI.IN_PLACE
                         buf = array(-1, typecode, (size, count))
-                        buf.flat[(rank*count):((rank+1)*count)] = \
-                            array(root, typecode, count)
+                        #buf.flat[(rank*count):((rank+1)*count)] = \
+                        #    array(root, typecode, count)
+                        s, e = rank*count, (rank+1)*count
+                        for i in range(s, e): buf.flat[i] = root
                         rbuf = buf.as_mpi()
                     else:
                         buf = array(root, typecode, count)
@@ -389,8 +391,10 @@ class BaseTestCCOBufInplace(object):
             for typecode in arrayimpl.TypeMap:
                 for count in range(1, 10):
                     buf = array(-1, typecode, (size, count))
-                    buf.flat[(rank*count):((rank+1)*count)] = \
-                        array(count, typecode, count)
+                    #buf.flat[(rank*count):((rank+1)*count)] = \
+                    #    array(count, typecode, count)
+                    s, e = rank*count, (rank+1)*count
+                    for i in range(s, e): buf.flat[i] = count
                     try:
                         self.COMM.Allgather(MPI.IN_PLACE, buf.as_mpi())
                     except NotImplementedError:
