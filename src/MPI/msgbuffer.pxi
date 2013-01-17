@@ -17,6 +17,7 @@ cdef object __IN_PLACE__ = <MPI_Aint>MPI_IN_PLACE
 
 #------------------------------------------------------------------------------
 
+#@cython.internal
 cdef class _p_message:
     cdef _p_buffer buf
     cdef object count
@@ -287,6 +288,7 @@ cdef _p_message message_vector(object msg,
 
 #------------------------------------------------------------------------------
 
+#@cython.internal
 cdef class _p_msg_p2p:
 
     # raw C-side arguments
@@ -329,6 +331,7 @@ cdef inline _p_msg_p2p message_p2p_recv(object recvbuf, int source):
 
 #------------------------------------------------------------------------------
 
+#@cython.internal
 cdef class _p_msg_cco:
 
     # raw C-side arguments
@@ -722,6 +725,7 @@ cdef inline _p_msg_cco message_cco():
 
 #------------------------------------------------------------------------------
 
+#@cython.internal
 cdef class _p_msg_rma:
 
     # raw origin arguments
@@ -812,6 +816,7 @@ cdef inline _p_msg_rma message_rma():
 
 #------------------------------------------------------------------------------
 
+#@cython.internal
 cdef class _p_msg_io:
 
     # raw C-side data

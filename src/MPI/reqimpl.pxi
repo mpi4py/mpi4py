@@ -51,6 +51,7 @@ cdef int release_rs(object requests,
 
 # -----------------------------------------------------------------------------
 
+#@cython.internal
 cdef class _p_greq:
 
     cdef object query_fn

@@ -27,7 +27,7 @@ cdef inline object tomemory(void *base, MPI_Aint size):
 
 #@cython.internal
 cdef class _p_mem:
-    cdef void   *buf
+    cdef void *buf
     def __cinit__(self):
         self.buf = NULL
     def __dealloc__(self):

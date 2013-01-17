@@ -103,6 +103,7 @@ except -1:
 
 #---------------------------------------------------------------------
 
+#@cython.internal
 cdef class _p_buffer:
     cdef Py_buffer view
 

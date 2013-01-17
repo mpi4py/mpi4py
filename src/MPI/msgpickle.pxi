@@ -35,6 +35,7 @@ if PY_MAJOR_VERSION == 2:
     except ImportError:
         pass
 
+#@cython.internal
 cdef class _p_Pickle:
 
     cdef object ob_dumps
