@@ -29,6 +29,12 @@ cdef inline int equal_Status(MPI_Status* s1, MPI_Status* s2) nogil:
            return 0
    return 1
 
+cdef inline void copy_Status(MPI_Status* si, MPI_Status* so) nogil:
+   cdef size_t i=0, n=sizeof(MPI_Status)
+   cdef unsigned char* a = <unsigned char*>si
+   cdef unsigned char* b = <unsigned char*>so
+   for i from 0 <= i < n: b[i] = a[i]
+
 #------------------------------------------------------------------------------
 # Datatype
 

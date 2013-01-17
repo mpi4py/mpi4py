@@ -56,6 +56,35 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(self.STATUS.tag,    2)
         self.assertEqual(self.STATUS.error,  MPI.ERR_ARG)
 
+    def testCopyConstructor(self):
+        self.STATUS.source = 1
+        self.STATUS.tag    = 2
+        self.STATUS.error  = MPI.ERR_ARG
+        try:
+            self.STATUS.Set_elements(MPI.BYTE, 7)
+        except NotImplementedError:
+            pass
+        try:
+            self.STATUS.Set_cancelled(True)
+        except NotImplementedError:
+            pass
+        status = MPI.Status(self.STATUS)
+        self.assertEqual(status.source, 1)
+        self.assertEqual(status.tag,    2)
+        self.assertEqual(status.error,  MPI.ERR_ARG)
+        try:
+            count = status.Get_count(MPI.BYTE)
+            elems = status.Get_elements(MPI.BYTE)
+            self.assertEqual(count, 7)
+            self.assertEqual(elems, 7)
+        except NotImplementedError:
+            pass
+        try:
+            flag = status.Is_cancelled()
+            self.assertTrue(flag)
+        except NotImplementedError:
+            pass
+
 
 if __name__ == '__main__':
     unittest.main()
