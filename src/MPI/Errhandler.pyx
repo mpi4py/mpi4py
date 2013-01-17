@@ -4,8 +4,10 @@ cdef class Errhandler:
     Error Handler
     """
 
-    def __cinit__(self):
+    def __cinit__(self, Errhandler errhandler=None):
         self.ob_mpi = MPI_ERRHANDLER_NULL
+        if errhandler is not None:
+            self.ob_mpi = errhandler.ob_mpi
 
     def __dealloc__(self):
         if not (self.flags & PyMPI_OWNED): return
