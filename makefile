@@ -35,10 +35,10 @@ fullclean: distclean srcclean docsclean
 
 .PHONY: install uninstall
 install: build
-	${PYTHON} setup.py install ${INSTALLOPT} --home=${HOME}
+	${PYTHON} setup.py install --user ${INSTALLOPT}
 uninstall:
-	-${RM} -r ${HOME}/lib{,64}/python/mpi4py
-	-${RM} -r ${HOME}/lib{,64}/python/mpi4py-*-py*.egg-info
+	-${RM} -r $(shell ${PYTHON} -m site --user-site)/mpi4py
+	-${RM} -r $(shell ${PYTHON} -m site --user-site)/mpi4py-*-py*.egg-info
 
 # ----
 
