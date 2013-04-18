@@ -67,7 +67,7 @@ or alternatively *setuptools* :program:`easy_install` (deprecated)::
 Using **distutils**
 -------------------
 
-*MPI for Python* uses a standard distutils-based buildsystem. However,
+*MPI for Python* uses a standard distutils-based build system. However,
 some distutils commands (like *build*) have additional options:
 
 * :option:`--mpicc=` : let you specify a special location or name for

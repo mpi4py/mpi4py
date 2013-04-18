@@ -199,7 +199,7 @@ following.
 
 *MPI for Python* provides support for almost all collective
 calls. Unfortunately, the :meth:`Alltoallw` and :meth:`Reduce_scatter`
-methods are curently unimplemented.
+methods are currently unimplemented.
 
 In *MPI for Python*, the :meth:`Bcast`, :meth:`Scatter`,
 :meth:`Gather`, :meth:`Allgather` and :meth:`Alltoall` methods of
@@ -345,7 +345,7 @@ offsets, individual file pointers, and shared file pointers),
 coordination (non-collective and collective), and synchronism
 (blocking, nonblocking, and split collective with begin/end phases).
 
-In *MPI forPython*, all MPI input/output operations are performed
+In *MPI for Python*, all MPI input/output operations are performed
 through instances of the :class:`File` class. File handles are
 obtained by calling the :meth:`Open` method at all processes within a
 communicator and providing a file name and the intended access mode.
