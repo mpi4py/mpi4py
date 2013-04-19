@@ -731,7 +731,7 @@ static int PyMPI_Get_elements_x(MPI_Status *status,
   int elements_ = MPI_UNDEFINED;
   ierr = MPI_Get_elements(status, datatype, &elements_);
   if (ierr != MPI_SUCCESS) return ierr;
-  if (elements == 0) return MPI_ERR_ARG; /* XXX */
+  if (!elements) return MPI_ERR_ARG; /* XXX */
   *elements = (MPI_Count) elements_;
   return MPI_SUCCESS;
 }
