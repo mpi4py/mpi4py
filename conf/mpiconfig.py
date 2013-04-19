@@ -144,21 +144,26 @@ class Config(object):
     def _setup_windows(self):
         from glob import glob
         ProgramFiles = os.environ.get('ProgramFiles', '')
-        for (name, install_suffix) in (
-            ('mpich3',   'MPICH'),
-            ('mpich2',   'MPICH2'),
-            ('openmpi',  'OpenMPI'),
-            ('openmpi',  'OpenMPI*'),
-            ('deinompi', 'DeinoMPI'),
-            ('msmpi',    'Microsoft HPC Pack 2008 R2'),
-            ('msmpi',    'Microsoft HPC Pack 2008 SDK'),
+        CCP_HOME = os.environ.get('CCP_HOME', '')
+        for (name, prefix, suffix) in (
+            ('mpich3',   ProgramFiles, 'MPICH'),
+            ('mpich2',   ProgramFiles, 'MPICH2'),
+            ('openmpi',  ProgramFiles, 'OpenMPI'),
+            ('openmpi',  ProgramFiles, 'OpenMPI*'),
+            ('deinompi', ProgramFiles, 'DeinoMPI'),
+            ('msmpi',    CPP_HOME,     ''),
+            ('msmpi',    ProgramFiles, 'Microsoft HPC Pack 2012'),
+            ('msmpi',    ProgramFiles, 'Microsoft HPC Pack 2012 SDK'),
+            ('msmpi',    ProgramFiles, 'Microsoft HPC Pack 2008 R2'),
+            ('msmpi',    ProgramFiles, 'Microsoft HPC Pack 2008'),
+            ('msmpi',    ProgramFiles, 'Microsoft HPC Pack 2008 SDK'),
             ):
-            mpi_dir = os.path.join(ProgramFiles, install_suffix)
+            mpi_dir = os.path.join(prefix, suffix)
             if '*' in mpi_dir:
                 dirs = glob(mpi_dir)
                 if dirs:
                     mpi_dir = max(dirs)
-            if not os.path.isdir(mpi_dir):
+            if not (mpi_dir and os.path.isdir(mpi_dir)):
                 continue
             define_macros = []
             include_dirs = [os.path.join(mpi_dir, 'include')]
