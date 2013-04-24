@@ -31,8 +31,8 @@ int main(int argc, char *argv[])
 
   Py_Initialize();
   PyRun_SimpleString(helloworld);
-  MPI_Finalize();
-  Py_Finalize();
+  MPI_Finalize(); /* MPI should be finalized */
+  Py_Finalize();  /* after finalizing Python */
 
   Py_Initialize();
   PyRun_SimpleString("from mpi4py import MPI\n");
