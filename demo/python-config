@@ -1,0 +1,80 @@
+#!/usr/bin/env python
+# -*- python -*-
+
+import sys, os
+import getopt
+try:
+    import sysconfig
+except ImportError:
+    from distutils import sysconfig
+
+valid_opts = ['help', 'prefix', 'exec-prefix', 'includes', 'libs', 'cflags',
+              'ldflags', 'extension-suffix', 'abiflags', 'configdir']
+
+def exit_with_usage(code=1):
+    sys.stderr.write("Usage: %s [%s]\n" % (
+        sys.argv[0], '|'.join('--'+opt for opt in valid_opts)))
+    sys.exit(code)
+
+try:
+    opts, args = getopt.getopt(sys.argv[1:], '', valid_opts)
+except getopt.error:
+    exit_with_usage()
+
+if not opts:
+    exit_with_usage()
+
+getvar = sysconfig.get_config_var
+pyver = getvar('VERSION')
+try:
+    abiflags = sys.abiflags
+except AttributeError:
+    abiflags = ''
+
+opt_flags = [flag for (flag, val) in opts]
+
+if '--help' in opt_flags:
+    exit_with_usage(code=0)
+
+for opt in opt_flags:
+    if opt == '--prefix':
+        print(getvar('prefix'))
+
+    elif opt == '--exec-prefix':
+        print(getvar('exec_prefix'))
+
+    elif opt in ('--includes', '--cflags'):
+        try:
+            include = sysconfig.get_path('include')
+            platinclude = sysconfig.get_path('platinclude')
+        except AttributeError:
+            include = sysconfig.get_python_inc()
+            platinclude = sysconfig.get_python_inc(plat_specific=True)
+        flags = ['-I' + include]
+        if include != platinclude:
+            flags.append('-I' + platinclude)
+        if opt == '--cflags':
+            flags.extend(getvar('CFLAGS').split())
+        print(' '.join(flags))
+
+    elif opt in ('--libs', '--ldflags'):
+        libs = getvar('LIBS').split() + getvar('SYSLIBS').split()
+        libs.append('-lpython' + pyver + abiflags)
+        if opt == '--ldflags':
+            if not getvar('Py_ENABLE_SHARED'):
+                libs.insert(0, '-L' + getvar('LIBPL'))
+            if not getvar('PYTHONFRAMEWORK'):
+                libs.extend(getvar('LINKFORSHARED').split())
+        print(' '.join(libs))
+
+    elif opt == '--extension-suffix':
+        ext_suffix = getvar('EXT_SUFFIX')
+        if ext_suffix is None:
+            ext_suffix = getvar('SO')
+        print(ext_suffix)
+
+    elif opt == '--abiflags':
+        print(abiflags)
+
+    elif opt == '--configdir':
+        print(getvar('LIBPL'))

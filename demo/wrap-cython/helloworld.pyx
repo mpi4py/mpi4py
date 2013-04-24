@@ -10,12 +10,12 @@ cdef void c_sayhello(MPI_Comm comm):
     cdef int size, rank, plen
     cdef char pname[MPI_MAX_PROCESSOR_NAME]
     if comm == MPI_COMM_NULL:
-        printf("You passed MPI_COMM_NULL !!!\n")
+        printf(b"You passed MPI_COMM_NULL !!!\n",0)
         return
     MPI_Comm_size(comm, &size)
     MPI_Comm_rank(comm, &rank)
     MPI_Get_processor_name(pname, &plen)
-    printf("Hello, World! I am process %d of %d on %s.\n",
+    printf(b"Hello, World! I am process %d of %d on %s.\n",
            rank, size, pname)
 
 def sayhello(MPI.Comm comm not None ):

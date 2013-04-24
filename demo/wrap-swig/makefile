@@ -2,8 +2,9 @@
 default: build test clean
 
 PYTHON = python
-PYTHON_INCLUDE = ${shell ${PYTHON} -c 'from distutils import sysconfig; print( sysconfig.get_python_inc() )'}
+PYTHON_CONFIG = ${PYTHON} ../python-config
 MPI4PY_INCLUDE = ${shell ${PYTHON} -c 'import mpi4py; print( mpi4py.get_include() )'}
+
 
 SWIG = swig
 SWIG_PY = ${SWIG} -python
@@ -12,21 +13,22 @@ src: helloworld_wrap.c
 helloworld_wrap.c: helloworld.i
 	${SWIG_PY} -I${MPI4PY_INCLUDE} -o $@ $<
 
-
-MPICC  = mpicc
-CFLAGS = -shared -fPIC
-SO = ${shell ${PYTHON} -c 'import imp; print (imp.get_suffixes()[0][0])'}
+MPICC = mpicc
+CFLAGS = -fPIC ${shell ${PYTHON_CONFIG} --includes}
+LDFLAGS = -shared ${shell ${PYTHON_CONFIG} --libs}
+SO = ${shell ${PYTHON_CONFIG} --extension-suffix}
 .PHONY: build
 build: _helloworld${SO}
 _helloworld${SO}: helloworld_wrap.c
-	${MPICC} ${CFLAGS} -I${PYTHON_INCLUDE} -I${MPI4PY_INCLUDE} -o $@ $<
+	${MPICC} ${CFLAGS} -I${MPI4PY_INCLUDE} -o $@ $< ${LDFLAGS}
 
 
 MPIEXEC = mpiexec
-NP = -n 5
+NP_FLAG = -n
+NP = 5
 .PHONY: test
 test: build
-	${MPIEXEC} ${NP} ${PYTHON} test.py
+	${MPIEXEC} ${NP_FLAG} ${NP} ${PYTHON} test.py
 
 
 .PHONY: clean
