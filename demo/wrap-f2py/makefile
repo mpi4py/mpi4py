@@ -16,7 +16,7 @@ helloworld${SO}: helloworld.f90
 
 MPIEXEC = mpiexec
 NP_FLAG = -n
-NP = -n 5
+NP = 5
 .PHONY: test
 test: build
 	${MPIEXEC} ${NP_FLAG} ${NP} ${PYTHON} test.py

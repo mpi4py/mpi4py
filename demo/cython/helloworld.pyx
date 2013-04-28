@@ -1,3 +1,5 @@
+cdef extern from "mpi-compat.h": pass
+
 # ---------
 
 
