@@ -35,12 +35,15 @@ def ringtest(comm, args=None, verbose=True):
     parser = OptionParser(prog="mpi4py ringtest")
     parser.add_option("-q","--quiet", action="store_false",
                       dest="verbose", default=verbose)
-    parser.add_option("-n", "--size",  type="int", default=1, dest="size")
-    parser.add_option("-l", "--loop",  type="int", default=1, dest="loop")
-    parser.add_option("-s", "--skip",  type="int", default=0, dest="skip")
+    parser.add_option("-n", "--size", type="int", default=1, dest="size",
+                      help="message size")
+    parser.add_option("-s", "--skip", type="int", default=0, dest="skip",
+                      help="number of warm-up iterations")
+    parser.add_option("-l", "--loop", type="int", default=1, dest="loop",
+                      help="number of iterations")
     (options, args) = parser.parse_args(args)
-    def ring(comm, n=1, loops=1, skip=0):
-        iterations = list(range((loops+skip)))
+    def ring(comm, n=1, loop=1, skip=0):
+        iterations = list(range((loop+skip)))
         size = comm.Get_size()
         rank = comm.Get_rank()
         source  = (rank - 1) % size
@@ -80,14 +83,14 @@ def ringtest(comm, args=None, verbose=True):
                 traceback.print_exc()
                 comm.Abort(2)
         return toc - tic
-    size  = getattr(options, 'size',  1)
-    loops = getattr(options, 'loops', 1)
-    skip  = getattr(options, 'skip',  0)
+    size = getattr(options, 'size', 1)
+    loop = getattr(options, 'loop', 1)
+    skip = getattr(options, 'skip', 0)
     comm.Barrier()
-    elapsed = ring(comm, size, loops, skip)
+    elapsed = ring(comm, size, loop, skip)
     if options.verbose and comm.rank == 0:
         _println("time for %d loops = %g seconds (%d processes, %d bytes)"
-                 % (loops, elapsed, comm.size, size),
+                 % (loop, elapsed, comm.size, size),
                  stream=_stdout)
     return elapsed
 
@@ -117,7 +120,7 @@ _commands = {
     'ringtest'   : ringtest,
     }
 
-def _main(args=None):
+def main(args=None):
     from optparse import OptionParser
     from mpi4py import __name__    as prog
     from mpi4py import __version__ as version
@@ -163,4 +166,4 @@ def _main(args=None):
     parser.exit()
 
 if __name__ == '__main__':
-    _main()
+    main()
