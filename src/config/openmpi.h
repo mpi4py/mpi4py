@@ -73,13 +73,13 @@
 #endif
 #endif
 
-#if MPI_VERSION < 3
-#if (defined(OMPI_MAJOR_VERSION)    && \
-     defined(OMPI_MINOR_VERSION)    && \
-     defined(OMPI_RELEASE_VERSION)) && \
-     ((OMPI_MAJOR_VERSION   * 10000) + \
-      (OMPI_MINOR_VERSION   *   100) + \
-      (OMPI_RELEASE_VERSION *     1)) >= 10900
+#if MPI_VERSION < 3 && (defined(OMPI_MAJOR_VERSION) && \
+                        defined(OMPI_MINOR_VERSION) && \
+                        defined(OMPI_RELEASE_VERSION))
+
+#if ((OMPI_MAJOR_VERSION   * 10000) + \
+     (OMPI_MINOR_VERSION   *   100) + \
+     (OMPI_RELEASE_VERSION *     1)) >= 10700
 /**/
 #undef  PyMPI_MISSING_MPI_Message
 #undef  PyMPI_MISSING_MPI_MESSAGE_NULL
@@ -112,7 +112,23 @@
 #undef  PyMPI_MISSING_MPI_MAX_LIBRARY_VERSION_STRING
 #undef  PyMPI_MISSING_MPI_Get_library_version
 /**/
-#endif /* OMPI < 1.9*/
-#endif /* MPI  < 3.0*/
+#endif /* OMPI < 1.7*/
+
+#if 0
+/**/
+#undef PyMPI_MISSING_MPI_Neighbor_allgather
+#undef PyMPI_MISSING_MPI_Neighbor_allgatherv
+#undef PyMPI_MISSING_MPI_Neighbor_alltoall
+#undef PyMPI_MISSING_MPI_Neighbor_alltoallv
+#undef PyMPI_MISSING_MPI_Neighbor_alltoallw
+#undef PyMPI_MISSING_MPI_Ineighbor_allgather
+#undef PyMPI_MISSING_MPI_Ineighbor_allgatherv
+#undef PyMPI_MISSING_MPI_Ineighbor_alltoall
+#undef PyMPI_MISSING_MPI_Ineighbor_alltoallv
+#undef PyMPI_MISSING_MPI_Ineighbor_alltoallw
+/**/
+#endif /* */
+
+#endif /* MPI < 3.0*/
 
 #endif /* !PyMPI_CONFIG_OPENMPI_H */
