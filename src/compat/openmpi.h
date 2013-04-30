@@ -246,6 +246,23 @@ static int PyMPI_OPENMPI_MPI_Win_set_errhandler(MPI_Win win,
 
 /* ------------------------------------------------------------------------- */
 
+/*
+ * Open MPI 1.7 tries to set status even in the case of MPI_STATUS_IGNORE.
+ */
+
+#if PyMPI_OPENMPI_VERSION >= 10700
+static int PyMPI_OPENMPI_MPI_Mrecv(void *buf, int count, MPI_Datatype type,
+                                   MPI_Message *message, MPI_Status *status)
+{
+  MPI_Status sts; if (status == MPI_STATUS_IGNORE) status = &sts;
+  return MPI_Mrecv(buf, count, type, message, status);
+}
+#undef  MPI_Mrecv
+#define MPI_Mrecv PyMPI_OPENMPI_MPI_Mrecv
+#endif  /* !(PyMPI_OPENMPI_VERSION > 10700) */
+
+/* ------------------------------------------------------------------------- */
+
 #endif /* !PyMPI_COMPAT_OPENMPI_H */
 
 /*
