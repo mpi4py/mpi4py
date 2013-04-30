@@ -835,6 +835,7 @@ cdef class Comm:
         """
         Nonblocking Generalized All-to-All
         """
+        sendbuf = recvbuf = None
         raise NotImplementedError # XXX implement!
         cdef void *sbuf = NULL, *rbuf = NULL
         cdef int  *scounts = NULL, *rcounts = NULL
@@ -1426,6 +1427,155 @@ cdef class Intracomm(Comm):
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_exscan(sendobj, recvobj, op, comm)
 
+    # Neighborhood Collectives
+    # ------------------------
+
+    def Neighbor_allgather(self, sendbuf, recvbuf):
+        """
+        Neighbor Gather to All
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_neighbor_allgather(0, sendbuf, recvbuf, self.ob_mpi)
+        with nogil: CHKERR( MPI_Neighbor_allgather(
+            m.sbuf, m.scount, m.stype,
+            m.rbuf, m.rcount, m.rtype,
+            self.ob_mpi) )
+
+    def Neighbor_allgatherv(self, sendbuf, recvbuf):
+        """
+        Neighbor Gather to All Vector
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_neighbor_allgather(1, sendbuf, recvbuf, self.ob_mpi)
+        with nogil: CHKERR( MPI_Neighbor_allgatherv(
+            m.sbuf, m.scount, m.stype,
+            m.rbuf, m.rcounts, m.rdispls, m.rtype,
+            self.ob_mpi) )
+
+    def Neighbor_alltoall(self, sendbuf, recvbuf):
+        """
+        Neighbor All-to-All
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_neighbor_alltoall(0, sendbuf, recvbuf, self.ob_mpi)
+        with nogil: CHKERR( MPI_Neighbor_alltoall(
+            m.sbuf, m.scount, m.stype,
+            m.rbuf, m.rcount, m.rtype,
+            self.ob_mpi) )
+
+    def Neighbor_alltoallv(self, sendbuf, recvbuf):
+        """
+        Neighbor All-to-All Vector
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_neighbor_alltoall(1, sendbuf, recvbuf, self.ob_mpi)
+        with nogil: CHKERR( MPI_Neighbor_alltoallv(
+            m.sbuf, m.scounts, m.sdispls, m.stype,
+            m.rbuf, m.rcounts, m.rdispls, m.rtype,
+            self.ob_mpi) )
+
+    def Neighbor_alltoallw(self, sendbuf, recvbuf):
+        """
+        Neighbor All-to-All Generalized
+        """
+        sendbuf = recvbuf = None
+        raise NotImplementedError # XXX implement!
+        cdef void *sbuf = NULL, *rbuf = NULL
+        cdef int  *scounts = NULL, *rcounts = NULL
+        cdef int  *sdispls = NULL, *rdispls = NULL
+        cdef MPI_Datatype *stypes = NULL, *rtypes = NULL
+        with nogil: CHKERR( MPI_Neighbor_alltoallw(
+            sbuf, scounts, sdispls, stypes,
+            rbuf, rcounts, rdispls, rtypes,
+            self.ob_mpi) )
+
+    # Nonblocking Neighborhood Collectives
+
+    def Ineighbor_allgather(self, sendbuf, recvbuf):
+        """
+        Nonblocking Neighbor Gather to All
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_neighbor_allgather(0, sendbuf, recvbuf, self.ob_mpi)
+        cdef Request request = <Request>Request.__new__(Request)
+        with nogil: CHKERR( MPI_Ineighbor_allgather(
+            m.sbuf, m.scount, m.stype,
+            m.rbuf, m.rcount, m.rtype,
+            self.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = m
+        return request
+
+    def Ineighbor_allgatherv(self, sendbuf, recvbuf):
+        """
+        Nonblocking Neighbor Gather to All Vector
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_neighbor_allgather(1, sendbuf, recvbuf, self.ob_mpi)
+        cdef Request request = <Request>Request.__new__(Request)
+        with nogil: CHKERR( MPI_Ineighbor_allgatherv(
+            m.sbuf, m.scount, m.stype,
+            m.rbuf, m.rcounts, m.rdispls, m.rtype,
+            self.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = m
+        return request
+
+    def Ineighbor_alltoall(self, sendbuf, recvbuf):
+        """
+        Nonblocking Neighbor All-to-All
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_neighbor_alltoall(0, sendbuf, recvbuf, self.ob_mpi)
+        cdef Request request = <Request>Request.__new__(Request)
+        with nogil: CHKERR( MPI_Ineighbor_alltoall(
+            m.sbuf, m.scount, m.stype,
+            m.rbuf, m.rcount, m.rtype,
+            self.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = m
+        return request
+
+    def Ineighbor_alltoallv(self, sendbuf, recvbuf):
+        """
+        Nonblocking Neighbor All-to-All Vector
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_neighbor_alltoall(1, sendbuf, recvbuf, self.ob_mpi)
+        cdef Request request = <Request>Request.__new__(Request)
+        with nogil: CHKERR( MPI_Ineighbor_alltoallv(
+            m.sbuf, m.scounts, m.sdispls, m.stype,
+            m.rbuf, m.rcounts, m.rdispls, m.rtype,
+            self.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = m
+        return request
+
+    def Ineighbor_alltoallw(self, sendbuf, recvbuf):
+        """
+        Nonblocking Neighbor All-to-All Generalized
+        """
+        sendbuf = recvbuf = None
+        raise NotImplementedError # XXX implement!
+        cdef void *sbuf = NULL, *rbuf = NULL
+        cdef int  *scounts = NULL, *rcounts = NULL
+        cdef int  *sdispls = NULL, *rdispls = NULL
+        cdef MPI_Datatype *stypes = NULL, *rtypes = NULL
+        cdef Request request = <Request>Request.__new__(Request)
+        with nogil: CHKERR( MPI_Ineighbor_alltoallw(
+            sbuf, scounts, sdispls, stypes,
+            rbuf, rcounts, rdispls, rtypes,
+            self.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = None
+        return request
+
+    # Python Communication
+    #
+    def neighbor_allgather(self, sendobj=None, recvobj=None):
+        """Neighbor Gather to All"""
+        cdef MPI_Comm comm = self.ob_mpi
+        return PyMPI_neighbor_allgather(sendobj, recvobj, comm)
+    #
+    def neighbor_alltoall(self, sendobj=None, recvobj=None):
+        """Neighbor All to All Scatter/Gather"""
+        cdef MPI_Comm comm = self.ob_mpi
+        return PyMPI_neighbor_alltoall(sendobj, recvobj, comm)
 
     # Establishing Communication
     # --------------------------

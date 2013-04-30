@@ -1566,6 +1566,31 @@ typedef void (PyMPI_MPI_User_function)(void*, void*, int*, MPI_Datatype*);
 #define MPI_Exscan(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_Exscan",a1,a2,a3,a4,a5,a6)
 #endif
 
+#ifdef  PyMPI_MISSING_MPI_Neighbor_allgather
+#undef  MPI_Neighbor_allgather
+#define MPI_Neighbor_allgather(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Neighbor_allgather",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Neighbor_allgatherv
+#undef  MPI_Neighbor_allgatherv
+#define MPI_Neighbor_allgatherv(a1,a2,a3,a4,a5,a6,a7,a8) PyMPI_UNAVAILABLE("MPI_Neighbor_allgatherv",a1,a2,a3,a4,a5,a6,a7,a8)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Neighbor_alltoall
+#undef  MPI_Neighbor_alltoall
+#define MPI_Neighbor_alltoall(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Neighbor_alltoall",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Neighbor_alltoallv
+#undef  MPI_Neighbor_alltoallv
+#define MPI_Neighbor_alltoallv(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Neighbor_alltoallv",a1,a2,a3,a4,a5,a6,a7,a8,a9)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Neighbor_alltoallw
+#undef  MPI_Neighbor_alltoallw
+#define MPI_Neighbor_alltoallw(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Neighbor_alltoallw",a1,a2,a3,a4,a5,a6,a7,a8,a9)
+#endif
+
 #ifdef  PyMPI_MISSING_MPI_Ibarrier
 #undef  MPI_Ibarrier
 #define MPI_Ibarrier(a1,a2) PyMPI_UNAVAILABLE("MPI_Ibarrier",a1,a2)
@@ -1649,6 +1674,31 @@ typedef void (PyMPI_MPI_User_function)(void*, void*, int*, MPI_Datatype*);
 #ifdef  PyMPI_MISSING_MPI_Iexscan
 #undef  MPI_Iexscan
 #define MPI_Iexscan(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Iexscan",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Ineighbor_allgather
+#undef  MPI_Ineighbor_allgather
+#define MPI_Ineighbor_allgather(a1,a2,a3,a4,a5,a6,a7,a8) PyMPI_UNAVAILABLE("MPI_Ineighbor_allgather",a1,a2,a3,a4,a5,a6,a7,a8)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Ineighbor_allgatherv
+#undef  MPI_Ineighbor_allgatherv
+#define MPI_Ineighbor_allgatherv(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Ineighbor_allgatherv",a1,a2,a3,a4,a5,a6,a7,a8,a9)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Ineighbor_alltoall
+#undef  MPI_Ineighbor_alltoall
+#define MPI_Ineighbor_alltoall(a1,a2,a3,a4,a5,a6,a7,a8) PyMPI_UNAVAILABLE("MPI_Ineighbor_alltoall",a1,a2,a3,a4,a5,a6,a7,a8)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Ineighbor_alltoallv
+#undef  MPI_Ineighbor_alltoallv
+#define MPI_Ineighbor_alltoallv(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10) PyMPI_UNAVAILABLE("MPI_Ineighbor_alltoallv",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)
+#endif
+
+#ifdef  PyMPI_MISSING_MPI_Ineighbor_alltoallw
+#undef  MPI_Ineighbor_alltoallw
+#define MPI_Ineighbor_alltoallw(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10) PyMPI_UNAVAILABLE("MPI_Ineighbor_alltoallw",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)
 #endif
 
 #ifdef  PyMPI_MISSING_MPI_Comm_dup

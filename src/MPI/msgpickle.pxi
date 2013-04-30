@@ -35,6 +35,7 @@ if PY_MAJOR_VERSION == 2:
     except ImportError:
         pass
 
+#@cython.final
 #@cython.internal
 cdef class _p_Pickle:
 
@@ -822,6 +823,69 @@ cdef object PyMPI_alltoall(object sendobj, object recvobj,
                                       rbuf, rcounts, rdispls, rtype,
                                       comm) )
     rmsg = pickle.loadv(rmsg, size, rcounts, rdispls)
+    return rmsg
+
+
+cdef object PyMPI_neighbor_allgather(object sendobj, object recvobj,
+                                     MPI_Comm comm):
+    cdef _p_Pickle pickle = PyMPI_pickle()
+    #
+    cdef void *sbuf = NULL
+    cdef int scount = 0
+    cdef MPI_Datatype stype = MPI_BYTE
+    cdef void *rbuf = NULL
+    cdef int *rcounts = NULL
+    cdef int *rdispls = NULL
+    cdef MPI_Datatype rtype = MPI_BYTE
+    #
+    cdef int rsize=0
+    comm_neighbors_count(comm, &rsize, NULL)
+    #
+    cdef object tmp1 = allocate_int(rsize, &rcounts)
+    cdef object tmp2 = allocate_int(rsize, &rdispls)
+    #
+    cdef object smsg = pickle.dump(sendobj, &sbuf, &scount)
+    with nogil: CHKERR( MPI_Neighbor_allgather(&scount, 1, MPI_INT,
+                                               rcounts, 1, MPI_INT,
+                                               comm) )
+    cdef object rmsg = pickle.allocv(&rbuf, rsize, rcounts, rdispls)
+    with nogil: CHKERR( MPI_Neighbor_allgatherv(sbuf, scount, stype,
+                                                rbuf, rcounts, rdispls, rtype,
+                                                comm) )
+    rmsg = pickle.loadv(rmsg, rsize, rcounts, rdispls)
+    return rmsg
+
+
+cdef object PyMPI_neighbor_alltoall(object sendobj, object recvobj,
+                                    MPI_Comm comm):
+    cdef _p_Pickle pickle = PyMPI_pickle()
+    #
+    cdef void *sbuf = NULL
+    cdef int *scounts = NULL
+    cdef int *sdispls = NULL
+    cdef MPI_Datatype stype = MPI_BYTE
+    cdef void *rbuf = NULL
+    cdef int *rcounts = NULL
+    cdef int *rdispls = NULL
+    cdef MPI_Datatype rtype = MPI_BYTE
+    #
+    cdef int ssize=0, rsize=0
+    comm_neighbors_count(comm, &rsize, &ssize)
+    #
+    cdef object stmp1 = allocate_int(ssize, &scounts)
+    cdef object stmp2 = allocate_int(ssize, &sdispls)
+    cdef object rtmp1 = allocate_int(rsize, &rcounts)
+    cdef object rtmp2 = allocate_int(rsize, &rdispls)
+    #
+    cdef object smsg = pickle.dumpv(sendobj, &sbuf, ssize, scounts, sdispls)
+    with nogil: CHKERR( MPI_Neighbor_alltoall(scounts, 1, MPI_INT,
+                                              rcounts, 1, MPI_INT,
+                                              comm) )
+    cdef object rmsg = pickle.allocv(&rbuf, rsize, rcounts, rdispls)
+    with nogil: CHKERR( MPI_Neighbor_alltoallv(sbuf, scounts, sdispls, stype,
+                                               rbuf, rcounts, rdispls, rtype,
+                                               comm) )
+    rmsg = pickle.loadv(rmsg, rsize, rcounts, rdispls)
     return rmsg
 
 # -----------------------------------------------------------------------------

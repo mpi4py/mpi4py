@@ -23,6 +23,12 @@
 #define PyMPI_MISSING_MPI_Mrecv 1
 #define PyMPI_MISSING_MPI_Imrecv 1
 
+#define PyMPI_MISSING_MPI_Neighbor_allgather 1
+#define PyMPI_MISSING_MPI_Neighbor_allgatherv 1
+#define PyMPI_MISSING_MPI_Neighbor_alltoall 1
+#define PyMPI_MISSING_MPI_Neighbor_alltoallv 1
+#define PyMPI_MISSING_MPI_Neighbor_alltoallw 1
+
 #define PyMPI_MISSING_MPI_Ibarrier 1
 #define PyMPI_MISSING_MPI_Ibcast 1
 #define PyMPI_MISSING_MPI_Igather 1
@@ -40,6 +46,12 @@
 #define PyMPI_MISSING_MPI_Ireduce_scatter 1
 #define PyMPI_MISSING_MPI_Iscan 1
 #define PyMPI_MISSING_MPI_Iexscan 1
+
+#define PyMPI_MISSING_MPI_Ineighbor_allgather 1
+#define PyMPI_MISSING_MPI_Ineighbor_allgatherv 1
+#define PyMPI_MISSING_MPI_Ineighbor_alltoall 1
+#define PyMPI_MISSING_MPI_Ineighbor_alltoallv 1
+#define PyMPI_MISSING_MPI_Ineighbor_alltoallw 1
 
 #define PyMPI_MISSING_MPI_WEIGHTS_EMPTY 1
 

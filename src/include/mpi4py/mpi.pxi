@@ -410,6 +410,12 @@ cdef extern from "mpi.h" nogil:
     int MPI_Scan(void*, void*, int, MPI_Datatype, MPI_Op, MPI_Comm)
     int MPI_Exscan(void*, void*, int, MPI_Datatype, MPI_Op, MPI_Comm)
 
+    int MPI_Neighbor_allgather(void*, int, MPI_Datatype, void*, int, MPI_Datatype, MPI_Comm)
+    int MPI_Neighbor_allgatherv(void*, int, MPI_Datatype, void*, int[], int[], MPI_Datatype, MPI_Comm)
+    int MPI_Neighbor_alltoall(void*, int, MPI_Datatype, void*, int, MPI_Datatype, MPI_Comm)
+    int MPI_Neighbor_alltoallv(void*, int[], int[],MPI_Datatype, void*, int[],int[], MPI_Datatype, MPI_Comm)
+    int MPI_Neighbor_alltoallw(void *, int[], MPI_Aint[],MPI_Datatype[], void*, int[],MPI_Aint[], MPI_Datatype[], MPI_Comm)
+
     int MPI_Ibarrier(MPI_Comm, MPI_Request*)
     int MPI_Ibcast(void*, int, MPI_Datatype, int, MPI_Comm, MPI_Request*)
     int MPI_Igather(void*, int, MPI_Datatype, void*, int, MPI_Datatype, int, MPI_Comm, MPI_Request*)
@@ -428,6 +434,12 @@ cdef extern from "mpi.h" nogil:
     int MPI_Ireduce_scatter(void*, void*, int*, MPI_Datatype, MPI_Op, MPI_Comm, MPI_Request*)
     int MPI_Iscan(void*, void*, int, MPI_Datatype, MPI_Op, MPI_Comm, MPI_Request*)
     int MPI_Iexscan(void*, void*, int, MPI_Datatype, MPI_Op, MPI_Comm, MPI_Request*)
+
+    int MPI_Ineighbor_allgather(void*, int, MPI_Datatype, void*, int, MPI_Datatype, MPI_Comm, MPI_Request*)
+    int MPI_Ineighbor_allgatherv(void*, int, MPI_Datatype, void*, int[], int[], MPI_Datatype, MPI_Comm, MPI_Request*)
+    int MPI_Ineighbor_alltoall(void*, int, MPI_Datatype, void*, int, MPI_Datatype, MPI_Comm, MPI_Request*)
+    int MPI_Ineighbor_alltoallv(void*, int[], int[],MPI_Datatype, void*, int[],int[], MPI_Datatype, MPI_Comm, MPI_Request*)
+    int MPI_Ineighbor_alltoallw(void *, int[], MPI_Aint[],MPI_Datatype[], void*, int[],MPI_Aint[], MPI_Datatype[], MPI_Comm, MPI_Request*)
 
     int MPI_Comm_dup(MPI_Comm, MPI_Comm*)
     int MPI_Comm_dup_with_info(MPI_Comm, MPI_Info, MPI_Comm*)

@@ -113,6 +113,27 @@
 #define MPI_Iscan                 MPIX_Iscan
 #define MPI_Iexscan               MPIX_Iexscan
 /**/
+#undef PyMPI_MISSING_MPI_Neighbor_allgather
+#undef PyMPI_MISSING_MPI_Neighbor_allgatherv
+#undef PyMPI_MISSING_MPI_Neighbor_alltoall
+#undef PyMPI_MISSING_MPI_Neighbor_alltoallv
+#undef PyMPI_MISSING_MPI_Neighbor_alltoallw
+#define MPI_Neighbor_allgather  MPIX_Neighbor_allgather
+#define MPI_Neighbor_allgatherv MPIX_Neighbor_allgatherv
+#define MPI_Neighbor_alltoall   MPIX_Neighbor_alltoall
+#define MPI_Neighbor_alltoallv  MPIX_Neighbor_alltoallv
+#define MPI_Neighbor_alltoallw  MPIX_Neighbor_alltoallw
+#undef PyMPI_MISSING_MPI_Ineighbor_allgather
+#undef PyMPI_MISSING_MPI_Ineighbor_allgatherv
+#undef PyMPI_MISSING_MPI_Ineighbor_alltoall
+#undef PyMPI_MISSING_MPI_Ineighbor_alltoallv
+#undef PyMPI_MISSING_MPI_Ineighbor_alltoallw
+#define MPI_Ineighbor_allgather  MPIX_Ineighbor_allgather
+#define MPI_Ineighbor_allgatherv MPIX_Ineighbor_allgatherv
+#define MPI_Ineighbor_alltoall   MPIX_Ineighbor_alltoall
+#define MPI_Ineighbor_alltoallv  MPIX_Ineighbor_alltoallv
+#define MPI_Ineighbor_alltoallw  MPIX_Ineighbor_alltoallw
+/**/
 #undef  PyMPI_MISSING_MPI_Comm_idup
 #undef  PyMPI_MISSING_MPI_Comm_create_group
 #undef  PyMPI_MISSING_MPI_COMM_TYPE_SHARED
