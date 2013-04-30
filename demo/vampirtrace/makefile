@@ -34,3 +34,4 @@ test: run
 .PHONY: clean
 clean:
 	${RM} *.otf *.uctl *.*.def.z *.*.events.z *.*.marker.z
+	${RM} *.thumb *.*.def *.*.events
