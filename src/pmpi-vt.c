@@ -1,13 +1,14 @@
 #include "stdlib.h"
 #include "mpi.h"
+static const char name[] = "vt";
 
 #if (defined(OMPI_MAJOR_VERSION) && \
      defined(OMPI_MINOR_VERSION) && \
      defined(OMPI_RELEASE_VERSION))
 #define OPENMPI_VERSION_NUMBER \
-           ((OMPI_MAJOR_VERSION   * 10000) + \
-            (OMPI_MINOR_VERSION   * 100)   + \
-            (OMPI_RELEASE_VERSION * 1))
+        ((OMPI_MAJOR_VERSION   * 10000) + \
+         (OMPI_MINOR_VERSION   * 100)   + \
+         (OMPI_RELEASE_VERSION * 1))
 #endif
 
 #ifdef __cplusplus
