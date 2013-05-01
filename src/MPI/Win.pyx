@@ -216,8 +216,8 @@ cdef class Win:
         cdef void *attrval = NULL
         cdef int flag = 0
         CHKERR( MPI_Win_get_attr(self.ob_mpi, keyval, &attrval, &flag) )
-        if not flag: return None
-        if not attrval: return 0
+        if flag == 0: return None
+        if attrval == NULL: return 0
         # handle predefined keyvals
         if (keyval == <int>MPI_WIN_BASE):
             return <MPI_Aint>attrval
@@ -500,9 +500,9 @@ cdef class Win:
         """
         Test whether an RMA exposure epoch has completed
         """
-        cdef bint flag = 0
+        cdef int flag = 0
         with nogil: CHKERR( MPI_Win_test(self.ob_mpi, &flag) )
-        return flag
+        return <bint>flag
 
     # [6.4.3] Lock
     # ------------
