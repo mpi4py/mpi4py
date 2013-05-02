@@ -3,50 +3,24 @@
 
 # --
 
-cdef extern from "mpi.h":
-
-    ctypedef long      MPI_Aint
-    ctypedef long long MPI_Offset
-    ctypedef long long MPI_Count
-
-    ctypedef struct MPI_Status:
-        int MPI_SOURCE
-        int MPI_TAG
-        int MPI_ERROR
-
-    ctypedef struct _mpi_datatype_t
-    ctypedef _mpi_datatype_t* MPI_Datatype
-
-    ctypedef struct _mpi_request_t
-    ctypedef _mpi_request_t* MPI_Request
-
-    ctypedef struct _mpi_message_t
-    ctypedef _mpi_message_t* MPI_Message
-
-    ctypedef struct _mpi_op_t
-    ctypedef _mpi_op_t* MPI_Op
-
-    ctypedef struct _mpi_group_t
-    ctypedef _mpi_group_t* MPI_Group
-
-    ctypedef struct _mpi_info_t
-    ctypedef _mpi_info_t* MPI_Info
-
-    ctypedef struct _mpi_errhandler_t
-    ctypedef _mpi_errhandler_t* MPI_Errhandler
-
-    ctypedef struct _mpi_comm_t
-    ctypedef _mpi_comm_t* MPI_Comm
-
-    ctypedef struct _mpi_win_t
-    ctypedef _mpi_win_t* MPI_Win
-
-    ctypedef struct _mpi_file_t
-    ctypedef _mpi_file_t* MPI_File
+from mpi4py.libmpi cimport MPI_Aint
+from mpi4py.libmpi cimport MPI_Offset
+from mpi4py.libmpi cimport MPI_Count
+from mpi4py.libmpi cimport MPI_Status
+from mpi4py.libmpi cimport MPI_Datatype
+from mpi4py.libmpi cimport MPI_Request
+from mpi4py.libmpi cimport MPI_Message
+from mpi4py.libmpi cimport MPI_Op
+from mpi4py.libmpi cimport MPI_Group
+from mpi4py.libmpi cimport MPI_Info
+from mpi4py.libmpi cimport MPI_Errhandler
+from mpi4py.libmpi cimport MPI_Comm
+from mpi4py.libmpi cimport MPI_Win
+from mpi4py.libmpi cimport MPI_File
 
 # --
 
-cdef extern from *:
+cdef import from *:
     ctypedef MPI_Aint   Aint   "MPI_Aint"
     ctypedef MPI_Offset Offset "MPI_Offset"
     ctypedef MPI_Count  Count  "MPI_Count"

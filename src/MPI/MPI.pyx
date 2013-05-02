@@ -2,7 +2,7 @@ __doc__ = """
 Message Passing Interface
 """
 
-include "mpi4py/mpi.pxi"
+from mpi4py.libmpi cimport *
 
 include "stdlib.pxi"
 include "atimport.pxi"

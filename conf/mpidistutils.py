@@ -290,7 +290,7 @@ except ImportError:
 class ConfigureMPI(object):
 
     SRCDIR = 'src'
-    SOURCES = [os.path.join('include', 'mpi4py', 'mpi.pxi')]
+    SOURCES = [os.path.join('include', 'mpi4py', 'libmpi.pxd')]
     DESTDIR = 'src'
     CONFIG_H = 'config.h'
     MISSING_H = 'missing.h'

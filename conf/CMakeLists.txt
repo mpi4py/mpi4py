@@ -20,6 +20,7 @@ FILE(GLOB mpi4py_HEADER_FILES
      ${mpi4py_SOURCE_DIR}/include/mpi4py/*.px[di]
      ${mpi4py_SOURCE_DIR}/include/mpi4py/*.pyx
      ${mpi4py_SOURCE_DIR}/include/mpi4py/*.[hi]
+     ${mpi4py_SOURCE_DIR}/*.pxd
     )
 
 FOREACH(file

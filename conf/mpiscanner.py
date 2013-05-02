@@ -331,7 +331,7 @@ class Scanner(object):
 
 if __name__ == '__main__':
     import sys, os
-    sources = [os.path.join('src', 'include', 'mpi4py', 'mpi.pxi')]
+    sources = [os.path.join('src', 'include', 'mpi4py', 'libmpi.pxd')]
     log = lambda msg: sys.stderr.write(msg + '\n')
     scanner = Scanner()
     for filename in sources:

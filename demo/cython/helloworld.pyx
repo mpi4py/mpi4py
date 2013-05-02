@@ -43,7 +43,7 @@ cdef IntracommType SELF = MPI.COMM_SELF
 # with namespace-protection (stuff accessed as mpi.XXX)
 # (file: mpi4py/include/mpi4py/mpi_c.pxd)
 
-from mpi4py cimport mpi_c as mpi
+from mpi4py cimport libmpi as mpi
 
 cdef mpi.MPI_Comm world1 = WORLD.ob_mpi
 
