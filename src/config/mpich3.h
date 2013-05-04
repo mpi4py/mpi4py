@@ -1,15 +1,15 @@
 #ifndef PyMPI_CONFIG_MPICH2_H
 #define PyMPI_CONFIG_MPICH2_H
 
-/* These types are Open MPI extensions */
-#define PyMPI_MISSING_MPI_LOGICAL1 1
-#define PyMPI_MISSING_MPI_LOGICAL2 1
-#define PyMPI_MISSING_MPI_LOGICAL4 1
-#define PyMPI_MISSING_MPI_LOGICAL8 1
+#include "mpi-11.h"
+#include "mpi-12.h"
+#include "mpi-20.h"
+#include "mpi-22.h"
+#include "mpi-30.h"
 
 /* These types are difficult to implement portably */
-#define PyMPI_MISSING_MPI_REAL2 1
-#define PyMPI_MISSING_MPI_COMPLEX4 1
+#undef PyMPI_HAVE_MPI_REAL2
+#undef PyMPI_HAVE_MPI_COMPLEX4
 
 #ifndef ROMIO_VERSION
 #include "mpich3-io.h"

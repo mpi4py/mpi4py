@@ -1,6 +1,9 @@
 #ifndef PyMPI_CONFIG_OPENMPI_H
 #define PyMPI_CONFIG_OPENMPI_H
 
+#include "mpi-11.h"
+#include "mpi-12.h"
+#include "mpi-20.h"
 #include "mpi-22.h"
 #include "mpi-30.h"
 
@@ -17,54 +20,55 @@
 #define OMPI_HAVE_FORTRAN_LOGICAL8 0
 #endif
 
-#if !OMPI_HAVE_FORTRAN_LOGICAL1
-#define PyMPI_MISSING_MPI_LOGICAL1 1
+#if OMPI_HAVE_FORTRAN_LOGICAL1
+#define PyMPI_HAVE_MPI_LOGICAL1 1
 #endif
-#if !OMPI_HAVE_FORTRAN_LOGICAL2
-#define PyMPI_MISSING_MPI_LOGICAL2 1
+#if OMPI_HAVE_FORTRAN_LOGICAL2
+#define PyMPI_HAVE_MPI_LOGICAL2 1
 #endif
-#if !OMPI_HAVE_FORTRAN_LOGICAL4
-#define PyMPI_MISSING_MPI_LOGICAL4 1
+#if OMPI_HAVE_FORTRAN_LOGICAL4
+#define PyMPI_HAVE_MPI_LOGICAL4 1
 #endif
-#if !OMPI_HAVE_FORTRAN_LOGICAL8
-#define PyMPI_MISSING_MPI_LOGICAL8 1
+#if OMPI_HAVE_FORTRAN_LOGICAL8
+#define PyMPI_HAVE_MPI_LOGICAL8 1
 #endif
+
 #if !OMPI_HAVE_FORTRAN_INTEGER1
-#define PyMPI_MISSING_MPI_INTEGER1 1
+#undef PyMPI_HAVE_MPI_INTEGER1
 #endif
 #if !OMPI_HAVE_FORTRAN_INTEGER2
-#define PyMPI_MISSING_MPI_INTEGER2 1
+#undef PyMPI_HAVE_MPI_INTEGER2
 #endif
 #if !OMPI_HAVE_FORTRAN_INTEGER4
-#define PyMPI_MISSING_MPI_INTEGER4 1
+#undef PyMPI_HAVE_MPI_INTEGER4
 #endif
 #if !OMPI_HAVE_FORTRAN_INTEGER8
-#define PyMPI_MISSING_MPI_INTEGER8 1
+#undef PyMPI_HAVE_MPI_INTEGER8
 #endif
 #if !OMPI_HAVE_FORTRAN_INTEGER16
-#define PyMPI_MISSING_MPI_INTEGER16 1
+#undef PyMPI_HAVE_MPI_INTEGER16
 #endif
 #if !OMPI_HAVE_FORTRAN_REAL2
-#define PyMPI_MISSING_MPI_REAL2 1
-#define PyMPI_MISSING_MPI_COMPLEX4 1
+#undef PyMPI_HAVE_MPI_REAL2
+#undef PyMPI_HAVE_MPI_COMPLEX4
 #endif
 #if !OMPI_HAVE_FORTRAN_REAL4
-#define PyMPI_MISSING_MPI_REAL4 1
-#define PyMPI_MISSING_MPI_COMPLEX8 1
+#undef PyMPI_HAVE_MPI_REAL4
+#undef PyMPI_HAVE_MPI_COMPLEX8
 #endif
 #if !OMPI_HAVE_FORTRAN_REAL8
-#define PyMPI_MISSING_MPI_REAL8 1
-#define PyMPI_MISSING_MPI_COMPLEX16 1
+#undef PyMPI_HAVE_MPI_REAL8
+#undef PyMPI_HAVE_MPI_COMPLEX16
 #endif
 #if !OMPI_HAVE_FORTRAN_REAL16
-#define PyMPI_MISSING_MPI_REAL16 1
-#define PyMPI_MISSING_MPI_COMPLEX32 1
+#undef PyMPI_HAVE_MPI_REAL16
+#undef PyMPI_HAVE_MPI_COMPLEX32
 #endif
 
 #if MPI_VERSION==2 && MPI_SUBVERSION<2
-#define PyMPI_MISSING_MPI_Comm_errhandler_function 1
-#define PyMPI_MISSING_MPI_Win_errhandler_function 1
-#define PyMPI_MISSING_MPI_File_errhandler_function 1
+#undef PyMPI_HAVE_MPI_Comm_errhandler_function
+#undef PyMPI_HAVE_MPI_Win_errhandler_function
+#undef PyMPI_HAVE_MPI_File_errhandler_function
 #endif
 
 #ifdef OMPI_PROVIDE_MPI_FILE_INTERFACE
@@ -80,54 +84,52 @@
 #if ((OMPI_MAJOR_VERSION   * 10000) + \
      (OMPI_MINOR_VERSION   *   100) + \
      (OMPI_RELEASE_VERSION *     1)) >= 10700
-/**/
-#undef  PyMPI_MISSING_MPI_Message
-#undef  PyMPI_MISSING_MPI_MESSAGE_NULL
-#undef  PyMPI_MISSING_MPI_MESSAGE_NO_PROC
-#undef  PyMPI_MISSING_MPI_Message_c2f
-#undef  PyMPI_MISSING_MPI_Message_f2c
-#undef  PyMPI_MISSING_MPI_Mprobe
-#undef  PyMPI_MISSING_MPI_Improbe
-#undef  PyMPI_MISSING_MPI_Mrecv
-#undef  PyMPI_MISSING_MPI_Imrecv
-/**/
-#undef  PyMPI_MISSING_MPI_Ibarrier
-#undef  PyMPI_MISSING_MPI_Ibcast
-#undef  PyMPI_MISSING_MPI_Igather
-#undef  PyMPI_MISSING_MPI_Igatherv
-#undef  PyMPI_MISSING_MPI_Iscatter
-#undef  PyMPI_MISSING_MPI_Iscatterv
-#undef  PyMPI_MISSING_MPI_Iallgather
-#undef  PyMPI_MISSING_MPI_Iallgatherv
-#undef  PyMPI_MISSING_MPI_Ialltoall
-#undef  PyMPI_MISSING_MPI_Ialltoallv
-#undef  PyMPI_MISSING_MPI_Ialltoallw
-#undef  PyMPI_MISSING_MPI_Ireduce
-#undef  PyMPI_MISSING_MPI_Iallreduce
-#undef  PyMPI_MISSING_MPI_Ireduce_scatter_block
-#undef  PyMPI_MISSING_MPI_Ireduce_scatter
-#undef  PyMPI_MISSING_MPI_Iscan
-#undef  PyMPI_MISSING_MPI_Iexscan
-/**/
-#undef  PyMPI_MISSING_MPI_MAX_LIBRARY_VERSION_STRING
-#undef  PyMPI_MISSING_MPI_Get_library_version
-/**/
+
+#define PyMPI_HAVE_MPI_Message 1
+#define PyMPI_HAVE_MPI_MESSAGE_NULL 1
+#define PyMPI_HAVE_MPI_MESSAGE_NO_PROC 1
+#define PyMPI_HAVE_MPI_Message_c2f 1
+#define PyMPI_HAVE_MPI_Message_f2c 1
+#define PyMPI_HAVE_MPI_Mprobe 1
+#define PyMPI_HAVE_MPI_Improbe 1
+#define PyMPI_HAVE_MPI_Mrecv 1
+#define PyMPI_HAVE_MPI_Imrecv 1
+
+#define PyMPI_HAVE_MPI_Ibarrier 1
+#define PyMPI_HAVE_MPI_Ibcast 1
+#define PyMPI_HAVE_MPI_Igather 1
+#define PyMPI_HAVE_MPI_Igatherv 1
+#define PyMPI_HAVE_MPI_Iscatter 1
+#define PyMPI_HAVE_MPI_Iscatterv 1
+#define PyMPI_HAVE_MPI_Iallgather 1
+#define PyMPI_HAVE_MPI_Iallgatherv 1
+#define PyMPI_HAVE_MPI_Ialltoall 1
+#define PyMPI_HAVE_MPI_Ialltoallv 1
+#define PyMPI_HAVE_MPI_Ialltoallw 1
+#define PyMPI_HAVE_MPI_Ireduce 1
+#define PyMPI_HAVE_MPI_Iallreduce 1
+#define PyMPI_HAVE_MPI_Ireduce_scatter_block 1
+#define PyMPI_HAVE_MPI_Ireduce_scatter 1
+#define PyMPI_HAVE_MPI_Iscan 1
+#define PyMPI_HAVE_MPI_Iexscan 1
+
+#define PyMPI_HAVE_MPI_MAX_LIBRARY_VERSION_STRING 1
+#define PyMPI_HAVE_MPI_Get_library_version 1
+
 #endif /* OMPI < 1.7*/
 
-#if 0
-/**/
-#undef PyMPI_MISSING_MPI_Neighbor_allgather
-#undef PyMPI_MISSING_MPI_Neighbor_allgatherv
-#undef PyMPI_MISSING_MPI_Neighbor_alltoall
-#undef PyMPI_MISSING_MPI_Neighbor_alltoallv
-#undef PyMPI_MISSING_MPI_Neighbor_alltoallw
-#undef PyMPI_MISSING_MPI_Ineighbor_allgather
-#undef PyMPI_MISSING_MPI_Ineighbor_allgatherv
-#undef PyMPI_MISSING_MPI_Ineighbor_alltoall
-#undef PyMPI_MISSING_MPI_Ineighbor_alltoallv
-#undef PyMPI_MISSING_MPI_Ineighbor_alltoallw
-/**/
-#endif /* */
+#if 0 /*XXX*/
+#define PyMPI_HAVE_MPI_Neighbor_allgather 1
+#define PyMPI_HAVE_MPI_Neighbor_allgatherv 1
+#define PyMPI_HAVE_MPI_Neighbor_alltoall 1
+#define PyMPI_HAVE_MPI_Neighbor_alltoallv 1
+#define PyMPI_HAVE_MPI_Neighbor_alltoallw 1
+#define PyMPI_HAVE_MPI_Ineighbor_allgather 1
+#define PyMPI_HAVE_MPI_Ineighbor_allgatherv 1
+#define PyMPI_HAVE_MPI_Ineighbor_alltoall 1
+#define PyMPI_HAVE_MPI_Ineighbor_alltoallv 1
+#define PyMPI_HAVE_MPI_Ineighbor_alltoallw 1
+#endif/*XXX*/
 
 #endif /* MPI < 3.0*/
 

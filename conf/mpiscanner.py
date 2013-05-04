@@ -24,7 +24,7 @@ class Node(object):
     HEADER = None
 
     HEADER_HEAD = """\
-    #ifdef  PyMPI_MISSING_%(name)s
+    #ifndef PyMPI_HAVE_%(name)s
     #undef  %(cname)s
     """
     HEADER_TAIL = """
@@ -253,7 +253,7 @@ class Scanner(object):
     #define PyMPI_CONFIG_H
 
     """
-    CONFIG_MACRO = '#define PyMPI_MISSING_%s 1\n'
+    CONFIG_MACRO = 'PyMPI_HAVE_%s'
     CONFIG_TAIL = """\
 
     #endif /* !PyMPI_CONFIG_H */
@@ -270,12 +270,16 @@ class Scanner(object):
         fileobj.write(head)
         if suite is None:
             for node in self:
-                fileobj.write(macro % node.name)
+                line = "#undef %s\n" % ((macro % node.name))
+                fileobj.write(line)
         else:
             for name, result in suite:
                 assert name in self.nodemap
-                if not result:
-                    fileobj.write(macro % name)
+                if result:
+                    line = "#define %s 1\n" % ((macro % name))
+                else:
+                    line = "#undef  %s\n" % ((macro % name))
+                fileobj.write(line)
         fileobj.write(tail)
 
     MISSING_HEAD = """\

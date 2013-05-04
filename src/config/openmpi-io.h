@@ -1,105 +1,105 @@
 #ifndef PyMPI_CONFIG_OPENMPI_IO_H
 #define PyMPI_CONFIG_OPENMPI_IO_H
 
-#define PyMPI_MISSING_MPI_File 1
-#define PyMPI_MISSING_MPI_FILE_NULL 1
-#define PyMPI_MISSING_MPI_MODE_RDONLY 1
-#define PyMPI_MISSING_MPI_MODE_RDWR 1
-#define PyMPI_MISSING_MPI_MODE_WRONLY 1
-#define PyMPI_MISSING_MPI_MODE_CREATE 1
-#define PyMPI_MISSING_MPI_MODE_EXCL 1
-#define PyMPI_MISSING_MPI_MODE_DELETE_ON_CLOSE 1
-#define PyMPI_MISSING_MPI_MODE_UNIQUE_OPEN 1
-#define PyMPI_MISSING_MPI_MODE_APPEND 1
-#define PyMPI_MISSING_MPI_MODE_SEQUENTIAL 1
-#define PyMPI_MISSING_MPI_File_open 1
-#define PyMPI_MISSING_MPI_File_close 1
-#define PyMPI_MISSING_MPI_File_delete 1
-#define PyMPI_MISSING_MPI_File_set_size 1
-#define PyMPI_MISSING_MPI_File_preallocate 1
-#define PyMPI_MISSING_MPI_File_get_size 1
-#define PyMPI_MISSING_MPI_File_get_group 1
-#define PyMPI_MISSING_MPI_File_get_amode 1
-#define PyMPI_MISSING_MPI_File_set_info 1
-#define PyMPI_MISSING_MPI_File_get_info 1
-#define PyMPI_MISSING_MPI_File_get_view 1
-#define PyMPI_MISSING_MPI_File_set_view 1
-#define PyMPI_MISSING_MPI_File_read_at 1
-#define PyMPI_MISSING_MPI_File_read_at_all 1
-#define PyMPI_MISSING_MPI_File_write_at 1
-#define PyMPI_MISSING_MPI_File_write_at_all 1
-#define PyMPI_MISSING_MPI_File_iread_at 1
-#define PyMPI_MISSING_MPI_File_iwrite_at 1
-#define PyMPI_MISSING_MPI_SEEK_SET 1
-#define PyMPI_MISSING_MPI_SEEK_CUR 1
-#define PyMPI_MISSING_MPI_SEEK_END 1
-#define PyMPI_MISSING_MPI_DISPLACEMENT_CURRENT 1
-#define PyMPI_MISSING_MPI_File_seek 1
-#define PyMPI_MISSING_MPI_File_get_position 1
-#define PyMPI_MISSING_MPI_File_get_byte_offset 1
-#define PyMPI_MISSING_MPI_File_read 1
-#define PyMPI_MISSING_MPI_File_read_all 1
-#define PyMPI_MISSING_MPI_File_write 1
-#define PyMPI_MISSING_MPI_File_write_all 1
-#define PyMPI_MISSING_MPI_File_iread 1
-#define PyMPI_MISSING_MPI_File_iwrite 1
-#define PyMPI_MISSING_MPI_File_read_shared 1
-#define PyMPI_MISSING_MPI_File_write_shared 1
-#define PyMPI_MISSING_MPI_File_iread_shared 1
-#define PyMPI_MISSING_MPI_File_iwrite_shared 1
-#define PyMPI_MISSING_MPI_File_read_ordered 1
-#define PyMPI_MISSING_MPI_File_write_ordered 1
-#define PyMPI_MISSING_MPI_File_seek_shared 1
-#define PyMPI_MISSING_MPI_File_get_position_shared 1
-#define PyMPI_MISSING_MPI_File_read_at_all_begin 1
-#define PyMPI_MISSING_MPI_File_read_at_all_end 1
-#define PyMPI_MISSING_MPI_File_write_at_all_begin 1
-#define PyMPI_MISSING_MPI_File_write_at_all_end 1
-#define PyMPI_MISSING_MPI_File_read_all_begin 1
-#define PyMPI_MISSING_MPI_File_read_all_end 1
-#define PyMPI_MISSING_MPI_File_write_all_begin 1
-#define PyMPI_MISSING_MPI_File_write_all_end 1
-#define PyMPI_MISSING_MPI_File_read_ordered_begin 1
-#define PyMPI_MISSING_MPI_File_read_ordered_end 1
-#define PyMPI_MISSING_MPI_File_write_ordered_begin 1
-#define PyMPI_MISSING_MPI_File_write_ordered_end 1
-#define PyMPI_MISSING_MPI_File_get_type_extent 1
-#define PyMPI_MISSING_MPI_File_set_atomicity 1
-#define PyMPI_MISSING_MPI_File_get_atomicity 1
-#define PyMPI_MISSING_MPI_File_sync 1
-#define PyMPI_MISSING_MPI_File_get_errhandler 1
-#define PyMPI_MISSING_MPI_File_set_errhandler 1
-#define PyMPI_MISSING_MPI_File_errhandler_fn 1
-#define PyMPI_MISSING_MPI_File_errhandler_function 1
-#define PyMPI_MISSING_MPI_File_create_errhandler 1
-#define PyMPI_MISSING_MPI_File_call_errhandler 1
+#undef PyMPI_HAVE_MPI_File
+#undef PyMPI_HAVE_MPI_FILE_NULL
+#undef PyMPI_HAVE_MPI_MODE_RDONLY
+#undef PyMPI_HAVE_MPI_MODE_RDWR
+#undef PyMPI_HAVE_MPI_MODE_WRONLY
+#undef PyMPI_HAVE_MPI_MODE_CREATE
+#undef PyMPI_HAVE_MPI_MODE_EXCL
+#undef PyMPI_HAVE_MPI_MODE_DELETE_ON_CLOSE
+#undef PyMPI_HAVE_MPI_MODE_UNIQUE_OPEN
+#undef PyMPI_HAVE_MPI_MODE_APPEND
+#undef PyMPI_HAVE_MPI_MODE_SEQUENTIAL
+#undef PyMPI_HAVE_MPI_File_open
+#undef PyMPI_HAVE_MPI_File_close
+#undef PyMPI_HAVE_MPI_File_delete
+#undef PyMPI_HAVE_MPI_File_set_size
+#undef PyMPI_HAVE_MPI_File_preallocate
+#undef PyMPI_HAVE_MPI_File_get_size
+#undef PyMPI_HAVE_MPI_File_get_group
+#undef PyMPI_HAVE_MPI_File_get_amode
+#undef PyMPI_HAVE_MPI_File_set_info
+#undef PyMPI_HAVE_MPI_File_get_info
+#undef PyMPI_HAVE_MPI_File_get_view
+#undef PyMPI_HAVE_MPI_File_set_view
+#undef PyMPI_HAVE_MPI_File_read_at
+#undef PyMPI_HAVE_MPI_File_read_at_all
+#undef PyMPI_HAVE_MPI_File_write_at
+#undef PyMPI_HAVE_MPI_File_write_at_all
+#undef PyMPI_HAVE_MPI_File_iread_at
+#undef PyMPI_HAVE_MPI_File_iwrite_at
+#undef PyMPI_HAVE_MPI_SEEK_SET
+#undef PyMPI_HAVE_MPI_SEEK_CUR
+#undef PyMPI_HAVE_MPI_SEEK_END
+#undef PyMPI_HAVE_MPI_DISPLACEMENT_CURRENT
+#undef PyMPI_HAVE_MPI_File_seek
+#undef PyMPI_HAVE_MPI_File_get_position
+#undef PyMPI_HAVE_MPI_File_get_byte_offset
+#undef PyMPI_HAVE_MPI_File_read
+#undef PyMPI_HAVE_MPI_File_read_all
+#undef PyMPI_HAVE_MPI_File_write
+#undef PyMPI_HAVE_MPI_File_write_all
+#undef PyMPI_HAVE_MPI_File_iread
+#undef PyMPI_HAVE_MPI_File_iwrite
+#undef PyMPI_HAVE_MPI_File_read_shared
+#undef PyMPI_HAVE_MPI_File_write_shared
+#undef PyMPI_HAVE_MPI_File_iread_shared
+#undef PyMPI_HAVE_MPI_File_iwrite_shared
+#undef PyMPI_HAVE_MPI_File_read_ordered
+#undef PyMPI_HAVE_MPI_File_write_ordered
+#undef PyMPI_HAVE_MPI_File_seek_shared
+#undef PyMPI_HAVE_MPI_File_get_position_shared
+#undef PyMPI_HAVE_MPI_File_read_at_all_begin
+#undef PyMPI_HAVE_MPI_File_read_at_all_end
+#undef PyMPI_HAVE_MPI_File_write_at_all_begin
+#undef PyMPI_HAVE_MPI_File_write_at_all_end
+#undef PyMPI_HAVE_MPI_File_read_all_begin
+#undef PyMPI_HAVE_MPI_File_read_all_end
+#undef PyMPI_HAVE_MPI_File_write_all_begin
+#undef PyMPI_HAVE_MPI_File_write_all_end
+#undef PyMPI_HAVE_MPI_File_read_ordered_begin
+#undef PyMPI_HAVE_MPI_File_read_ordered_end
+#undef PyMPI_HAVE_MPI_File_write_ordered_begin
+#undef PyMPI_HAVE_MPI_File_write_ordered_end
+#undef PyMPI_HAVE_MPI_File_get_type_extent
+#undef PyMPI_HAVE_MPI_File_set_atomicity
+#undef PyMPI_HAVE_MPI_File_get_atomicity
+#undef PyMPI_HAVE_MPI_File_sync
+#undef PyMPI_HAVE_MPI_File_get_errhandler
+#undef PyMPI_HAVE_MPI_File_set_errhandler
+#undef PyMPI_HAVE_MPI_File_errhandler_fn
+#undef PyMPI_HAVE_MPI_File_errhandler_function
+#undef PyMPI_HAVE_MPI_File_create_errhandler
+#undef PyMPI_HAVE_MPI_File_call_errhandler
 
-#define PyMPI_MISSING_MPI_Datarep_conversion_function 1
-#define PyMPI_MISSING_MPI_Datarep_extent_function 1
-#define PyMPI_MISSING_MPI_CONVERSION_FN_NULL 1
-#define PyMPI_MISSING_MPI_MAX_DATAREP_STRING 1
-#define PyMPI_MISSING_MPI_Register_datarep 1
+#undef PyMPI_HAVE_MPI_Datarep_conversion_function
+#undef PyMPI_HAVE_MPI_Datarep_extent_function
+#undef PyMPI_HAVE_MPI_CONVERSION_FN_NULL
+#undef PyMPI_HAVE_MPI_MAX_DATAREP_STRING
+#undef PyMPI_HAVE_MPI_Register_datarep
 
-#define PyMPI_MISSING_MPI_File_c2f 1
-#define PyMPI_MISSING_MPI_File_f2c 1
+#undef PyMPI_HAVE_MPI_File_c2f
+#undef PyMPI_HAVE_MPI_File_f2c
 
 #if !defined(MPI_ERR_FILE)
-#define PyMPI_MISSING_MPI_ERR_FILE 1
-#define PyMPI_MISSING_MPI_ERR_NOT_SAME 1
-#define PyMPI_MISSING_MPI_ERR_BAD_FILE 1
-#define PyMPI_MISSING_MPI_ERR_NO_SUCH_FILE 1
-#define PyMPI_MISSING_MPI_ERR_FILE_EXISTS 1
-#define PyMPI_MISSING_MPI_ERR_FILE_IN_USE 1
-#define PyMPI_MISSING_MPI_ERR_AMODE 1
-#define PyMPI_MISSING_MPI_ERR_ACCESS 1
-#define PyMPI_MISSING_MPI_ERR_READ_ONLY 1
-#define PyMPI_MISSING_MPI_ERR_NO_SPACE 1
-#define PyMPI_MISSING_MPI_ERR_QUOTA 1
-#define PyMPI_MISSING_MPI_ERR_UNSUPPORTED_DATAREP 1
-#define PyMPI_MISSING_MPI_ERR_UNSUPPORTED_OPERATION 1
-#define PyMPI_MISSING_MPI_ERR_CONVERSION 1
-#define PyMPI_MISSING_MPI_ERR_DUP_DATAREP 1
-#define PyMPI_MISSING_MPI_ERR_IO 1
+#undef PyMPI_HAVE_MPI_ERR_FILE
+#undef PyMPI_HAVE_MPI_ERR_NOT_SAME
+#undef PyMPI_HAVE_MPI_ERR_BAD_FILE
+#undef PyMPI_HAVE_MPI_ERR_NO_SUCH_FILE
+#undef PyMPI_HAVE_MPI_ERR_FILE_EXISTS
+#undef PyMPI_HAVE_MPI_ERR_FILE_IN_USE
+#undef PyMPI_HAVE_MPI_ERR_AMODE
+#undef PyMPI_HAVE_MPI_ERR_ACCESS
+#undef PyMPI_HAVE_MPI_ERR_READ_ONLY
+#undef PyMPI_HAVE_MPI_ERR_NO_SPACE
+#undef PyMPI_HAVE_MPI_ERR_QUOTA
+#undef PyMPI_HAVE_MPI_ERR_UNSUPPORTED_DATAREP
+#undef PyMPI_HAVE_MPI_ERR_UNSUPPORTED_OPERATION
+#undef PyMPI_HAVE_MPI_ERR_CONVERSION
+#undef PyMPI_HAVE_MPI_ERR_DUP_DATAREP
+#undef PyMPI_HAVE_MPI_ERR_IO
 #endif
 
 #endif /* !PyMPI_CONFIG_OPENMPI_IO_H */

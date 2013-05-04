@@ -1,7 +1,8 @@
 #ifndef PyMPI_COMPAT_MPICH3_H
 #define PyMPI_COMPAT_MPICH3_H
 
-#if defined(MPICH_NUMVERSION) && (MPICH_NUMVERSION < 30100000)
+#if defined(MPICH_NUMVERSION)
+#if (MPICH_NUMVERSION < 30100000)
 
 static int PyMPI_MPICH3_MPI_Type_size_x(MPI_Datatype datatype, MPI_Count *size)
 {
@@ -24,6 +25,7 @@ static int PyMPI_MPICH3_MPI_Type_get_true_extent_x(MPI_Datatype datatype, MPI_Co
 }
 #define MPI_Type_get_true_extent_x PyMPI_MPICH3_MPI_Type_get_true_extent_x
 
+#endif
 #endif
 
 #endif /* !PyMPI_COMPAT_MPICH3_H */

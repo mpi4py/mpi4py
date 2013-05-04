@@ -99,7 +99,7 @@ struct MPIR_Errhandler {
   MPI_Handler_function *routine;
   int                  ref_count;
 };
-void *MPIR_ToPointer(int);
+extern void *MPIR_ToPointer(int);
 
 #if defined(__cplusplus)
 }

@@ -49,7 +49,7 @@ static void * my_dlopen(const char *name, int mode) {
 #define dlopen my_dlopen
 */
 
-static void OPENMPI_dlopen_libmpi(void)
+static void PyMPI_OPENMPI_dlopen_libmpi(void)
 {
   void *handle = 0;
   int mode = RTLD_NOW | RTLD_GLOBAL;
@@ -78,7 +78,7 @@ static void OPENMPI_dlopen_libmpi(void)
 
 static int PyMPI_OPENMPI_MPI_Init(int *argc, char ***argv)
 {
-  OPENMPI_dlopen_libmpi();
+  PyMPI_OPENMPI_dlopen_libmpi();
   return MPI_Init(argc, argv);
 }
 #undef  MPI_Init
@@ -87,7 +87,7 @@ static int PyMPI_OPENMPI_MPI_Init(int *argc, char ***argv)
 static int PyMPI_OPENMPI_MPI_Init_thread(int *argc, char ***argv,
                                          int required, int *provided)
 {
-  OPENMPI_dlopen_libmpi();
+  PyMPI_OPENMPI_dlopen_libmpi();
   return MPI_Init_thread(argc, argv, required, provided);
 }
 #undef  MPI_Init_thread

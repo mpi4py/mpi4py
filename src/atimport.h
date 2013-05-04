@@ -45,6 +45,16 @@
 #include "config/unknown.h"
 #endif
 
+#ifdef PyMPI_MISSING_MPI_Type_create_f90_integer
+#undef PyMPI_HAVE_MPI_Type_create_f90_integer
+#endif
+#ifdef PyMPI_MISSING_MPI_Type_create_f90_real
+#undef PyMPI_HAVE_MPI_Type_create_f90_real
+#endif
+#ifdef PyMPI_MISSING_MPI_Type_create_f90_complex
+#undef PyMPI_HAVE_MPI_Type_create_f90_complex
+#endif
+
 /* XXX describe */
 #include "missing.h"
 #include "fallback.h"
@@ -167,11 +177,11 @@ PyMPI_AtExitMPI(PyMPI_UNUSED MPI_Comm comm,
 /* ------------------------------------------------------------------------- */
 
 #if !defined(PyMPI_USE_MATCHED_RECV)
-  #if defined(PyMPI_MISSING_MPI_Mprobe) || \
-      defined(PyMPI_MISSING_MPI_Mrecv)
-    #define PyMPI_USE_MATCHED_RECV 0
-  #else
+  #if defined(PyMPI_HAVE_MPI_Mprobe) && \
+      defined(PyMPI_HAVE_MPI_Mrecv)
     #define PyMPI_USE_MATCHED_RECV 1
+  #else
+    #define PyMPI_USE_MATCHED_RECV 0
   #endif
 #endif
 #if !defined(PyMPI_USE_MATCHED_RECV)

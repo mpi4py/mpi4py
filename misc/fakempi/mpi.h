@@ -5,8 +5,6 @@
 #warning Using a fake "mpi.h" include file, just for testing!!!
 #endif
 
-#define PyMPI_MISSING_MPI 1
-
 #define MPI_Init(a,b)  0
 #define MPI_Finalize() 0
 #define MPI_Initialized(a) ((*(a)=1),0)

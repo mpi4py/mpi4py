@@ -185,6 +185,7 @@ def configure_mpi(ext, config_cmd):
               "Check your configuration!!!")
     ok = config_cmd.check_header("mpi.h", headers=["stdlib.h"])
     if not ok: raise DistutilsPlatformError(errmsg)
+    #
     headers = ["stdlib.h", "mpi.h"]
     ConfigTest = dedent("""\
     int main(int argc, char **argv)
