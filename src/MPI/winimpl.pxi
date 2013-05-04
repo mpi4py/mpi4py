@@ -6,7 +6,7 @@ cdef extern from *:
 cdef void win_memory_decref(void *ob) with gil:
     Py_DECREF(<object>ob)
 
-@cython.callspec("PyMPIAPI")
+@cython.callspec("MPIAPI")
 cdef int win_memory_del(MPI_Win w, int k, void *v, void *xs) nogil:
     if  v != NULL:
         if Py_IsInitialized():
@@ -112,7 +112,7 @@ cdef int win_attr_delete_cb(
         return MPI_ERR_OTHER
     return MPI_SUCCESS
 
-@cython.callspec("PyMPIAPI")
+@cython.callspec("MPIAPI")
 cdef int win_attr_copy_fn(MPI_Win win,
                           int keyval,
                           void *extra_state,
@@ -125,7 +125,7 @@ cdef int win_attr_copy_fn(MPI_Win win,
     return win_attr_copy_cb(win, keyval, extra_state,
                             attrval_in, attrval_out, flag)
 
-@cython.callspec("PyMPIAPI")
+@cython.callspec("MPIAPI")
 cdef int win_attr_delete_fn(MPI_Win win,
                             int keyval,
                             void *attrval,

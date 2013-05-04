@@ -21,15 +21,13 @@
   #define MPICH1 1
 #endif
 
-#if defined(MS_WINDOWS) && !defined(PyMPIAPI)
-  #if defined(MPI_CALL)   /* DeinoMPI */
-    #define PyMPIAPI MPI_CALL
-  #elif defined(MPIAPI)   /* Microsoft MPI */
-    #define PyMPIAPI MPIAPI
-  #endif
+#if defined(MS_WINDOWS) && !defined(MPIAPI)
+#if defined(MPI_CALL) /* DeinoMPI */
+  #define MPIAPI MPI_CALL
 #endif
-#if !defined(PyMPIAPI)
-  #define PyMPIAPI
+#endif
+#if !defined(MPIAPI)
+  #define MPIAPI
 #endif
 
 /* XXX describe */
@@ -105,7 +103,7 @@ static int PyMPI_KEYVAL_WIN_MEMORY = MPI_KEYVAL_INVALID;
 
 static int PyMPI_StartUp(void);
 static int PyMPI_CleanUp(void);
-static int PyMPIAPI PyMPI_AtExitMPI(MPI_Comm,int,void*,void*);
+static int MPIAPI PyMPI_AtExitMPI(MPI_Comm,int,void*,void*);
 
 static int PyMPI_STARTUP_DONE = 0;
 static int PyMPI_StartUp(void)
@@ -165,7 +163,7 @@ static int PyMPI_CleanUp(void)
   return MPI_SUCCESS;
 }
 
-static int PyMPIAPI
+static int MPIAPI
 PyMPI_AtExitMPI(PyMPI_UNUSED MPI_Comm comm, 
                 PyMPI_UNUSED int k,
                 PyMPI_UNUSED void *v,

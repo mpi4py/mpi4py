@@ -82,7 +82,7 @@ cdef int comm_attr_delete_cb(
         return MPI_ERR_OTHER
     return MPI_SUCCESS
 
-@cython.callspec("PyMPIAPI")
+@cython.callspec("MPIAPI")
 cdef int comm_attr_copy_fn(MPI_Comm comm,
                            int keyval,
                            void *extra_state,
@@ -95,7 +95,7 @@ cdef int comm_attr_copy_fn(MPI_Comm comm,
     return comm_attr_copy_cb(comm, keyval, extra_state,
                              attrval_in, attrval_out, flag)
 
-@cython.callspec("PyMPIAPI")
+@cython.callspec("MPIAPI")
 cdef int comm_attr_delete_fn(MPI_Comm comm,
                              int keyval,
                              void *attrval,
