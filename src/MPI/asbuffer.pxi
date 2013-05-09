@@ -103,6 +103,7 @@ except -1:
 
 #---------------------------------------------------------------------
 
+#@cython.final
 #@cython.internal
 cdef class _p_buffer:
     cdef Py_buffer view
@@ -176,7 +177,7 @@ cdef inline object getformat(_p_buffer buf):
         format = ob.dtype.char
     except (AttributeError, TypeError):
         try: # array.array
-            format =  ob.typecode
+            format = ob.typecode
         except (AttributeError, TypeError):
             if view.format != NULL:
                 format = mpistr(view.format)
