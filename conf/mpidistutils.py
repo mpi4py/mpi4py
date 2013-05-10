@@ -137,6 +137,8 @@ def customize_compiler(compiler, lang=None,
             basecflags =  '-Wall -Wimplicit'
             if not ccshared: ccshared = '-fPIC'
             if not ldshared: ldshared = '-shared'
+            if sys.platform == 'darwin':
+                ldshared += ' -Wl,-undefined,dynamic_lookup'
         # Compiler command overriding
         if not mpild and (mpicc or mpicxx):
             if lang == 'c':
