@@ -54,7 +54,7 @@ except -1:
     cdef Py_ssize_t size = 0
     cdef bint readonly = 0
     if isinstance(obj, bytes):
-        buf = <void*> PyBytes_AsString(obj)
+        buf  = PyBytes_AsString(obj)
         size = PyBytes_Size(obj)
         readonly = 1
     #elif isinstance(obj, bytearray):

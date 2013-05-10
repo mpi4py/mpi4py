@@ -586,7 +586,7 @@ cdef object PyMPI_mrecv(object rmsg,
     elif rmsg is None:
         pass
     elif PyBytes_CheckExact(rmsg):
-        getbuffer_r(rmsg, &rbuf, &rlen)
+        rmsg = getbuffer_r(rmsg, &rbuf, &rlen)
     else:
         rmsg = getbuffer_w(rmsg, &rbuf, &rlen)
     cdef int rcount = <int> rlen # XXX overflow?
