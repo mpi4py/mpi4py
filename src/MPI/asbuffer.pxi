@@ -49,33 +49,35 @@ if PYPY: from numpypy import ndarray as numpy_array
 cdef int \
 PyPy_GetBuffer(object obj, Py_buffer *view, int flags) \
 except -1:
-    cdef Py_ssize_t addr = 0
+    cdef object addr
+    cdef void *buf = NULL
     cdef Py_ssize_t size = 0
     cdef bint readonly = 0
     if isinstance(obj, bytes):
-        addr = <Py_ssize_t> PyBytes_AsString(obj)
+        buf = <void*> PyBytes_AsString(obj)
         size = PyBytes_Size(obj)
         readonly = 1
     #elif isinstance(obj, bytearray):
-    #    addr = <Py_ssize_t> PyByteArray_AsString(obj)
+    #    buf = <void*> PyByteArray_AsString(obj)
     #    size = PyByteArray_Size(obj)
     #    readonly = 0
     elif isinstance(obj, array_array):
         addr, size = obj.buffer_info()
+        buf = PyLong_AsVoidPtr(addr)
         size *= obj.itemsize
         readonly = 0
     elif isinstance(obj, numpy_array):
         addr, readonly = obj.__array_interface__['data']
-        size =  obj.size
-        size *= obj.itemsize
+        buf = PyLong_AsVoidPtr(addr)
+        size = obj.nbytes
     else:
         if (flags & PyBUF_WRITABLE) == PyBUF_WRITABLE:
             readonly = 0
-            PyObject_AsWriteBuffer(obj, <void**>&addr, &size)
+            PyObject_AsWriteBuffer(obj, &buf, &size)
         else:
             readonly = 1
-            PyObject_AsReadBuffer(obj, <const_void**>&addr, &size)
-    PyBuffer_FillInfo(view, obj, <void*>addr, size, readonly, flags)
+            PyObject_AsReadBuffer(obj, <const_void**>&buf, &size)
+    PyBuffer_FillInfo(view, obj, buf, size, readonly, flags)
     if (flags & PyBUF_FORMAT) == PyBUF_FORMAT: view.format = b"B"
     return 0
 
