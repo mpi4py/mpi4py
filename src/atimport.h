@@ -345,16 +345,15 @@ _PyLong_AsByteArray(PyLongObject* v,
   return -1;
 }
 
+#if PY_VERSION_HEX < 0x02070300 /* PyPy < 2.0 */
 static int
 PyBuffer_FillInfo_PyPy(Py_buffer *view, PyObject *obj,
                        void *buf, Py_ssize_t len,
                        int readonly, int flags)
 {
   if (view == NULL) return 0;
-  if (((flags & PyBUF_WRITABLE) == PyBUF_WRITABLE) &&
-      (readonly == 1)) {
-    PyErr_SetString(PyExc_BufferError,
-                    "Object is not writable.");
+  if ((flags & PyBUF_WRITABLE) && readonly) {
+    PyErr_SetString(PyExc_BufferError, "Object is not writable.");
     return -1;
   }
   if (PyBuffer_FillInfo(view, obj, buf, len, readonly, flags) < 0)
@@ -363,6 +362,7 @@ PyBuffer_FillInfo_PyPy(Py_buffer *view, PyObject *obj,
   return 0;
 }
 #define PyBuffer_FillInfo PyBuffer_FillInfo_PyPy
+#endif
 
 static PyObject *
 PyMemoryView_FromBuffer_PyPy(Py_buffer *view)
