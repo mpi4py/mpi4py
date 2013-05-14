@@ -30,21 +30,21 @@ ctypedef public api class Status [
     object PyMPIStatusObject,
     ]:
     cdef MPI_Status ob_mpi
-    cdef int        flags
+    cdef unsigned   flags
 
 ctypedef public api class Datatype [
     type   PyMPIDatatype_Type,
     object PyMPIDatatypeObject,
     ]:
     cdef MPI_Datatype ob_mpi
-    cdef int          flags
+    cdef unsigned     flags
 
 ctypedef public api class Request [
     type   PyMPIRequest_Type,
     object PyMPIRequestObject,
     ]:
     cdef MPI_Request ob_mpi
-    cdef int         flags
+    cdef unsigned    flags
     cdef object      ob_buf
 
 ctypedef public api class Prequest(Request) [
@@ -64,7 +64,7 @@ ctypedef public api class Message [
     object PyMPIMessageObject,
     ]:
     cdef MPI_Message ob_mpi     
-    cdef int         flags
+    cdef unsigned    flags
     cdef object      ob_buf
 
 ctypedef public api class Op [
@@ -81,28 +81,28 @@ ctypedef public api class Group [
     object PyMPIGroupObject,
     ]:
     cdef MPI_Group ob_mpi
-    cdef int       flags
+    cdef unsigned  flags
 
 ctypedef public api class Info [
     type   PyMPIInfo_Type,
     object PyMPIInfoObject,
     ]:
     cdef MPI_Info ob_mpi
-    cdef int      flags
+    cdef unsigned flags
 
 ctypedef public api class Errhandler [
     type   PyMPIErrhandler_Type,
     object PyMPIErrhandlerObject,
     ]:
     cdef MPI_Errhandler ob_mpi
-    cdef int            flags
+    cdef unsigned       flags
 
 ctypedef public api class Comm [
     type   PyMPIComm_Type,
     object PyMPICommObject,
     ]:
     cdef MPI_Comm ob_mpi
-    cdef int      flags
+    cdef unsigned flags
 
 ctypedef public api class Intracomm(Comm) [
     type   PyMPIIntracomm_Type,
@@ -138,14 +138,14 @@ ctypedef public api class Win [
     type   PyMPIWin_Type,
     object PyMPIWinObject,
     ]:
-    cdef MPI_Win ob_mpi
-    cdef int     flags
+    cdef MPI_Win  ob_mpi
+    cdef unsigned flags
 
 ctypedef public api class File [
     type   PyMPIFile_Type,
     object PyMPIFileObject,
     ]:
     cdef MPI_File ob_mpi
-    cdef int      flags
+    cdef unsigned flags
 
 # --
