@@ -87,15 +87,18 @@ cdef inline object op_user_py(int index, object x, object y, object dt):
 
 cdef inline void op_user_mpi(
     int index, void *a, void *b, MPI_Aint n, MPI_Datatype *t) with gil:
+    cdef Datatype datatype
     # errors in user-defined reduction operations are unrecoverable
     try:
-        op_user_py(index, tomemory(a, n), tomemory(b, n), new_Datatype(t[0]))
+        datatype = <Datatype>Datatype.__new__(Datatype)
+        datatype.ob_mpi = t[0]
+        op_user_py(index, tomemory(a, n), tomemory(b, n), datatype)
     except:
         # print the full exception traceback and abort.
         PySys_WriteStderr(b"Fatal Python error: exception in "
                           b"user-defined reduction operation\n", 0)
-        print_traceback()
-        MPI_Abort(MPI_COMM_WORLD, 1)
+        try: print_traceback()
+        finally: MPI_Abort(MPI_COMM_WORLD, 1)
 
 cdef inline void op_user_call(
     int index, void *a, void *b, int *plen, MPI_Datatype *t) nogil:
