@@ -144,12 +144,15 @@ cdef object asarray_weights(object weights, int nweight, int **iweight):
         iweight[0] = MPI_UNWEIGHTED
         return None
     #
+    cdef int i = 0
     if weights is __WEIGHTS_EMPTY__:
         if MPI_WEIGHTS_EMPTY != MPI_UNWEIGHTED:
             iweight[0] = MPI_WEIGHTS_EMPTY
             return None
         else:
-            return mkarray_int(nweight, iweight)
+            weights = mkarray_int(nweight, iweight)
+            for i from 0 <= i < nweight: iweight[0][i] = 0
+            return weights
     #
     if weights is __UNWEIGHTED__:
         iweight[0] = MPI_UNWEIGHTED
