@@ -17,6 +17,9 @@ def getoptionparser():
     parser.add_option("-e", "--exclude", type="string",
                       action="append", dest="exclude", default=[],
                       help="exclude tests matching PATTERN", metavar="PATTERN")
+    parser.add_option("--no-builddir",
+                      action="store_false", dest="builddir", default=True,
+                      help="disable testing from build directory")
     parser.add_option("--path", type="string",
                       action="append", dest="path", default=[],
                       help="prepend PATH to sys.path", metavar="PATH")
@@ -56,7 +59,7 @@ def getbuilddir():
 def setup_python(options):
     rootdir = os.path.dirname(os.path.dirname(__file__))
     builddir = os.path.join(rootdir, getbuilddir())
-    if os.path.exists(builddir):
+    if options.builddir and os.path.exists(builddir):
         sys.path.insert(0, builddir)
     if options.path:
         path = options.path[:]
