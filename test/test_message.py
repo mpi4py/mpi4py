@@ -3,6 +3,11 @@ import mpiunittest as unittest
 from arrayimpl import allclose
 
 try:
+    import array
+    HAVE_ARRAY = True
+except ImportError:
+    HAVE_ARRAY = False
+try:
     import numpy
     HAVE_NUMPY = True
 except ImportError:
@@ -73,25 +78,26 @@ class TestMessage(unittest.TestCase):
                     self.assertTrue(equal(z[:p], r[:p]))
                     self.assertTrue(equal(z[q:], r[q:]))
 
-    def _testArray(self, test):
-        from array import array
-        from operator import eq as equal
-        for t in tuple(self.TYPECODES):
-            for n in range(1, 10):
-                z = array(t, [0]*n)
-                s = array(t, list(range(n)))
-                r = array(t, [0]*n)
-                test(equal, z, s, r, t)
-    def testArray1(self):
-        self._testArray(self._test1)
-    def testArray2(self):
-        self._testArray(self._test2)
-    def testArray31(self):
-        self._testArray(self._test31)
-    def testArray32(self):
-        self._testArray(self._test32)
-    def testArray4(self):
-        self._testArray(self._test4)
+    if HAVE_ARRAY:
+        def _testArray(self, test):
+            from array import array
+            from operator import eq as equal
+            for t in tuple(self.TYPECODES):
+                for n in range(1, 10):
+                    z = array(t, [0]*n)
+                    s = array(t, list(range(n)))
+                    r = array(t, [0]*n)
+                    test(equal, z, s, r, t)
+        def testArray1(self):
+            self._testArray(self._test1)
+        def testArray2(self):
+            self._testArray(self._test2)
+        def testArray31(self):
+            self._testArray(self._test31)
+        def testArray32(self):
+            self._testArray(self._test32)
+        def testArray4(self):
+            self._testArray(self._test4)
 
     if HAVE_NUMPY:
         def _testNumPy(self, test):

@@ -63,9 +63,9 @@ cdef class Group:
         """
         cdef MPI_Group grp1 = MPI_GROUP_NULL
         cdef MPI_Group grp2 = MPI_GROUP_NULL
-        cdef int n = 0, *iranks1 = NULL, *iranks2 = NULL
-        cdef object ranks_ = getarray_int(ranks1, &n, &iranks1)
-        cdef object ranks2 = newarray_int(n, &iranks2)
+        cdef int i = 0, n = 0, *iranks1 = NULL, *iranks2 = NULL
+        cdef tmp1 = getarray_int(ranks1, &n, &iranks1)
+        cdef tmp2 = newarray_int(n, &iranks2)
         #
         grp1 = group1.ob_mpi
         if group2 is not None:
@@ -79,6 +79,7 @@ cdef class Group:
             if group2 is None:
                 CHKERR( MPI_Group_free(&grp2) )
         #
+        cdef object ranks2 = [iranks2[i] for i from 0 <= i < n]
         return ranks2
 
     @classmethod

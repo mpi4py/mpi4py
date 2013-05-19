@@ -6,9 +6,13 @@ TypeMap = dict(b=MPI.SIGNED_CHAR,
                h=MPI.SHORT,
                i=MPI.INT,
                l=MPI.LONG,
-               #q=MPI.LONG_LONG,
+               q=MPI.LONG_LONG,
                f=MPI.FLOAT,
                d=MPI.DOUBLE)
+
+import sys
+if sys.version_info[:2] < (3,3):
+    del TypeMap['q']
 
 if MPI.SIGNED_CHAR == MPI.DATATYPE_NULL:
     del TypeMap['b']
@@ -31,7 +35,7 @@ else:
 
     class Array(array.array):
 
-        TypeMap = TypeMap
+        TypeMap = dict(TypeMap)
 
         def __new__(cls, arg, typecode, shape=None):
             if isinstance(arg, (int, float)):
@@ -84,7 +88,7 @@ else:
 
     class NumPy(object):
 
-        TypeMap = TypeMap
+        TypeMap = dict(TypeMap)
 
         def __init__(self, arg, typecode, shape=None):
             if isinstance(arg, (int, float, complex)):
@@ -97,7 +101,7 @@ else:
             else:
                 ary[:] = arg
             try:
-                self.mpidtype = Array.TypeMap[typecode]
+                self.mpidtype = NumPy.TypeMap[typecode]
             except KeyError:
                 self.mpidtype = MPI.DATATYPE_NULL
 

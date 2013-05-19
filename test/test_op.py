@@ -1,18 +1,23 @@
 from mpi4py import MPI
 import mpiunittest as unittest
-import array
 
 MPI_ERR_OP = MPI.ERR_OP
+
+try:
+    import array
+except ImportError:
+    array = None
 
 try:
     bytes
 except NameError:
     bytes = str
 
-try:
-    tobytes = array.array.tobytes
-except AttributeError:
-    tobytes = array.array.tostring
+if array:
+    try:
+        tobytes = array.array.tobytes
+    except AttributeError:
+        tobytes = array.array.tostring
 
 def frombytes(typecode, data):
     a = array.array(typecode,[])
@@ -113,6 +118,9 @@ class TestOp(unittest.TestCase):
         if MPI.NO_OP:
             self._test_call(MPI.NO_OP, (2,3), 2)
             self._test_call(MPI.NO_OP, (3,2), 3)
+
+if not array:
+    del TestOp.testCreate
 
 if __name__ == '__main__':
     unittest.main()

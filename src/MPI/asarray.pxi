@@ -1,38 +1,28 @@
 # -----------------------------------------------------------------------------
 
-cdef type arraytype
-from array import array as arraytype
-
 cdef inline object newarray_int(Py_ssize_t n, int **p):
-    cdef object ary = arraytype('i', [0])
-    if n < 1: del ary[0]
-    if n > 1: ary *= n
-    cdef int *base = NULL
-    cdef Py_ssize_t size = 0
-    if PYPY:
-        getbuffer_w(ary, <void**>&base, NULL)
-    else:
-        PyObject_AsWriteBuffer(ary, <void**>&base, &size)
-    if p != NULL: p[0] = base
-    return ary
+    return allocate(n, sizeof(int), <void**>p)
 
 cdef inline object getarray_int(object ob, int *n, int **p):
     cdef int *base = NULL
     cdef Py_ssize_t i = 0, size = len(ob)
-    cdef object ary = newarray_int(size, &base)
+    cdef object mem = newarray_int(size, &base)
     for i from 0 <= i < size: base[i] = ob[i]
-    if n != NULL: n[0] = <int> size # XXX overflow?
-    if p != NULL: p[0] = base
-    return ary
+    n[0] = <int>  size # XXX overflow?
+    p[0] = <int*> base
+    return mem
 
 cdef inline object chkarray_int(object ob, Py_ssize_t size, int **p):
     cdef int n = 0
-    cdef object ary = getarray_int(ob, &n, p)
+    cdef object mem = getarray_int(ob, &n, p)
     if size != <Py_ssize_t>n: raise ValueError(
         "expecting %d items, got %d" % (size, n))
-    return ary
+    return mem
 
 # -----------------------------------------------------------------------------
+
+cdef inline object mkarray_int(Py_ssize_t size, int **p):
+     return allocate(size, sizeof(int), <void**>p)
 
 cdef inline object asarray_int(object sequence,
                                Py_ssize_t size, int **p):

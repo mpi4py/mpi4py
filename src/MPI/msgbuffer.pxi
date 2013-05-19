@@ -254,30 +254,30 @@ cdef _p_message message_vector(object msg,
                  "datatype extent %d (lb:%d, ub:%d)"
                  ) % (bsize, extent, lb, lb+extent))
             asize = bsize // extent
-        o_counts = newarray_int(blocks, &counts)
+        o_counts = mkarray_int(blocks, &counts)
         for i from 0 <= i < blocks:
             aval = (asize // blocks) + (asize % blocks > i)
             counts[i] = <int> aval # XXX overflow?
     elif is_int(o_counts):
         val = <int> o_counts
-        o_counts = newarray_int(blocks, &counts)
+        o_counts = mkarray_int(blocks, &counts)
         for i from 0 <= i < blocks:
             counts[i] = val
     else:
-        o_counts = chkarray_int(o_counts, blocks, &counts)
+        o_counts = asarray_int(o_counts, blocks, &counts)
     if o_displs is None: # contiguous
         val = 0
-        o_displs = newarray_int(blocks, &displs)
+        o_displs = mkarray_int(blocks, &displs)
         for i from 0 <= i < blocks:
             displs[i] = val
             val += counts[i]
     elif is_int(o_displs): # strided
         val = <int> o_displs
-        o_displs = newarray_int(blocks, &displs)
+        o_displs = mkarray_int(blocks, &displs)
         for i from 0 <= i < blocks:
             displs[i] = val * i
     else: # general
-        o_displs = chkarray_int(o_displs, blocks, &displs)
+        o_displs = asarray_int(o_displs, blocks, &displs)
     m.count = o_counts
     m.displ = o_displs
     # return collected message data
@@ -674,11 +674,11 @@ cdef class _p_msg_cco:
             self.for_cro_send(smsg, 0)
         # get receive counts
         if rcnt is None and not inter and self.sbuf != MPI_IN_PLACE:
-            self._rcnt = newarray_int(size, &self.rcounts)
+            self._rcnt = mkarray_int(size, &self.rcounts)
             CHKERR( MPI_Allgather(&self.rcount, 1, MPI_INT,
                                   self.rcounts, 1, MPI_INT, comm) )
         else:
-            self._rcnt = chkarray_int(rcnt, size, &self.rcounts)
+            self._rcnt = asarray_int(rcnt, size, &self.rcounts)
         # total sum or receive counts
         cdef int i=0, sumrcounts=0
         for i from 0 <= i < size:

@@ -256,11 +256,22 @@ class TestDatatype(unittest.TestCase):
 class TestGetAddress(unittest.TestCase):
 
     def testGetAddress(self):
-        from array import array
-        location = array('i', range(10))
-        addr = MPI.Get_address(location)
-        bufptr, buflen = location.buffer_info()
-        self.assertEqual(addr, bufptr)
+        try:
+            from array import array
+            location = array('i', range(10))
+            bufptr, _ = location.buffer_info()
+            addr = MPI.Get_address(location)
+            self.assertEqual(addr, bufptr)
+        except ImportError:
+            pass
+        try:
+            from numpy import asarray
+            location = asarray(range(10), dtype='i')
+            bufptr, _ = location.__array_interface__['data']
+            addr = MPI.Get_address(location)
+            self.assertEqual(addr, bufptr)
+        except ImportError:
+            pass
 
 import sys
 _name, _version = MPI.get_vendor()

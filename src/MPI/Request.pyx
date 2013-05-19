@@ -154,19 +154,21 @@ cdef class Request:
         cdef int outcount = MPI_UNDEFINED, *iindices = NULL
         cdef MPI_Status *istatuses = MPI_STATUSES_IGNORE
         #
-        cdef tmp = acquire_rs(requests, statuses,
-                              &incount, &irequests, &istatuses)
-        cdef object indices = newarray_int(incount, &iindices)
+        cdef tmp1 = acquire_rs(requests, statuses,
+                               &incount, &irequests, &istatuses)
+        cdef tmp2 = mkarray_int(incount, &iindices)
         try:
             with nogil: CHKERR( MPI_Waitsome(
                 incount, irequests, &outcount, iindices, istatuses) )
         finally:
             release_rs(requests, statuses, incount, irequests, istatuses)
         #
+        cdef int i = 0
+        cdef object indices
         if outcount == MPI_UNDEFINED:
-            del indices[:]
+            indices = []
         else:
-            del indices[outcount:]
+            indices = [iindices[i] for i from 0 <= i < outcount]
         return (outcount, indices)
 
     @classmethod
@@ -174,24 +176,26 @@ cdef class Request:
         """
         Test for completion of some previously initiated requests
         """
-        cdef int incount = <int>len(requests)
+        cdef int incount = 0
         cdef MPI_Request *irequests = NULL
         cdef int outcount = MPI_UNDEFINED, *iindices = NULL
         cdef MPI_Status *istatuses = MPI_STATUSES_IGNORE
         #
-        cdef tmp = acquire_rs(requests, statuses,
-                              &incount, &irequests, &istatuses)
-        cdef object indices = newarray_int(incount, &iindices)
+        cdef tmp1 = acquire_rs(requests, statuses,
+                               &incount, &irequests, &istatuses)
+        cdef tmp2 = mkarray_int(incount, &iindices)
         try:
             with nogil: CHKERR( MPI_Testsome(
                 incount, irequests, &outcount, iindices, istatuses) )
         finally:
             release_rs(requests, statuses, incount, irequests, istatuses)
         #
+        cdef int i = 0
+        cdef object indices
         if outcount == MPI_UNDEFINED:
-            del indices[:]
+            indices = []
         else:
-            del indices[outcount:]
+            indices = [iindices[i] for i from 0 <= i < outcount]
         return (outcount, indices)
 
     # Cancel

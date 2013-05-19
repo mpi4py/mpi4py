@@ -149,13 +149,13 @@ cdef object asarray_weights(object weights, int nweight, int **iweight):
             iweight[0] = MPI_WEIGHTS_EMPTY
             return None
         else:
-            return newarray_int(nweight, iweight)
+            return mkarray_int(nweight, iweight)
     #
     if weights is __UNWEIGHTED__:
         iweight[0] = MPI_UNWEIGHTED
         return None
     #
-    return chkarray_int(weights, nweight, iweight)
+    return asarray_int(weights, nweight, iweight)
 
 # -----------------------------------------------------------------------------
 

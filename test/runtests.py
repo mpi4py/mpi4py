@@ -40,6 +40,9 @@ def getoptionparser():
     parser.add_option("--no-numpy",
                       action="store_false", dest="numpy", default=True,
                       help="disable testing with NumPy arrays")
+    parser.add_option("--no-array",
+                      action="store_false", dest="array", default=True,
+                      help="disable testing with builtin array.array")
     return parser
 
 def getbuilddir():
@@ -81,6 +84,12 @@ def setup_unittest(options):
     _WritelnDecorator.writeln = writeln
 
 def import_package(options, pkgname):
+    #
+    if not options.numpy:
+        sys.modules['numpy'] = None
+    if not options.array:
+        sys.modules['array'] = None
+    #
     package = __import__(pkgname)
     #
     import mpi4py.rc
@@ -148,6 +157,8 @@ def load_tests(options, args):
         exclude = re.compile('|'.join(options.exclude)).search
     if not options.numpy:
         sys.modules['numpy'] = None
+    if not options.array:
+        sys.modules['array'] = None
     for testfile in testfiles:
         filename = os.path.basename(testfile)
         testname = os.path.splitext(filename)[0]
