@@ -287,6 +287,56 @@ cdef _p_message message_vector(object msg,
     _type[0]   = btype
     return m
 
+cdef tuple message_vecw_I(object msg,
+                          int readonly,
+                          int blocks,
+                          #
+                          void         **_addr,
+                          int          **_counts,
+                          int          **_displs,
+                          MPI_Datatype **_types,
+                          ):
+    cdef Py_ssize_t nargs = len(msg)
+    if nargs == 3:
+        o_buffer, (o_counts, o_displs), o_types = msg
+    elif nargs == 4:
+        o_buffer,  o_counts, o_displs,  o_types = msg
+    else:
+        raise ValueError("message: expecting 3 to 4 items")
+    if readonly:
+        o_buffer = getbuffer_r(o_buffer, _addr, NULL)
+    else:
+        o_buffer = getbuffer_w(o_buffer, _addr, NULL)
+    o_counts = asarray_int(o_counts, blocks, _counts)
+    o_displs = asarray_int(o_displs, blocks, _displs)
+    o_types  = asarray_Datatype(o_types, blocks, _types)
+    return (o_buffer, o_counts, o_displs, o_types)
+
+cdef tuple message_vecw_A(object msg,
+                          int readonly,
+                          int blocks,
+                          #
+                          void         **_addr,
+                          int          **_counts,
+                          MPI_Aint     **_displs,
+                          MPI_Datatype **_types,
+                          ):
+    cdef Py_ssize_t nargs = len(msg)
+    if nargs == 3:
+        o_buffer, (o_counts, o_displs), o_types = msg
+    elif nargs == 4:
+        o_buffer,  o_counts, o_displs,  o_types = msg
+    else:
+        raise ValueError("message: expecting 3 to 4 items")
+    if readonly:
+        o_buffer = getbuffer_r(o_buffer, _addr, NULL)
+    else:
+        o_buffer = getbuffer_w(o_buffer, _addr, NULL)
+    o_counts = asarray_int(o_counts, blocks, _counts)
+    o_displs = asarray_Aint(o_displs, blocks, _displs)
+    o_types  = asarray_Datatype(o_types, blocks, _types)
+    return (o_buffer, o_counts, o_displs, o_types)
+
 #------------------------------------------------------------------------------
 
 #@cython.final
@@ -403,6 +453,7 @@ cdef class _p_msg_cco:
                 sending = 1
             else:
                 self.for_cco_recv(0, msg, root, 0)
+                sending = 0
         else: # inter-communication
             if ((root == <int>MPI_ROOT) or
                 (root == <int>MPI_PROC_NULL)):
@@ -410,6 +461,7 @@ cdef class _p_msg_cco:
                 sending = 1
             else:
                 self.for_cco_recv(0, msg, root, 0)
+                sending = 0
         if sending:
             self.rbuf   = self.sbuf
             self.rcount = self.scount
@@ -752,6 +804,79 @@ cdef class _p_msg_cco:
 
 cdef inline _p_msg_cco message_cco():
     cdef _p_msg_cco msg = <_p_msg_cco>_p_msg_cco.__new__(_p_msg_cco)
+    return msg
+
+#------------------------------------------------------------------------------
+
+#@cython.final
+#@cython.internal
+cdef class _p_msg_ccow:
+
+    # raw C-side arguments
+    cdef void *sbuf, *rbuf
+    cdef int *scounts, *rcounts
+    cdef int *sdispls, *rdispls
+    cdef MPI_Aint *sdisplsA, *rdisplsA
+    cdef MPI_Datatype *stypes, *rtypes
+    # python-side arguments
+    cdef object _smsg, _rmsg
+
+    def __cinit__(self):
+        self.sbuf     = self.rbuf     = NULL
+        self.scounts  = self.rcounts  = NULL
+        self.sdispls  = self.rdispls  = NULL
+        self.sdisplsA = self.rdisplsA = NULL
+        self.stypes   = self.rtypes   = NULL
+
+    # alltoallw
+    cdef int for_alltoallw(self,
+                          object smsg, object rmsg,
+                          MPI_Comm comm) except -1:
+        if comm == MPI_COMM_NULL: return 0
+        cdef int inter=0, size=0
+        CHKERR( MPI_Comm_test_inter(comm, &inter) )
+        if not inter: # intra-communication
+            CHKERR( MPI_Comm_size(comm, &size) )
+        else: # inter-communication
+            CHKERR( MPI_Comm_remote_size(comm, &size) )
+        #
+        self._rmsg = message_vecw_I(
+            rmsg, 0, size,
+            &self.rbuf, &self.rcounts,
+            &self.rdispls, &self.rtypes)
+        if not inter and smsg is __IN_PLACE__:
+            self.sbuf    = MPI_IN_PLACE
+            self.scount  = self.rcount
+            self.scounts = self.rcounts
+            self.sdispls = self.rdispls
+            self.stypes  = self.rtypes
+            return 0
+        self._smsg = message_vecw_I(
+            smsg, 1, size,
+            &self.sbuf, &self.scounts,
+            &self.sdispls, &self.stypes)
+        return 0
+
+    # neighbor alltoallw
+    cdef int for_neighbor_alltoallw(self,
+                                    object smsg, object rmsg,
+                                    MPI_Comm comm) except -1:
+        if comm == MPI_COMM_NULL: return 0
+        cdef int sendsize=0, recvsize=0
+        comm_neighbors_count(comm, &recvsize, &sendsize)
+        self._rmsg = message_vecw_A(
+            rmsg, 0, recvsize,
+            &self.rbuf, &self.rcounts,
+            &self.rdisplsA, &self.rtypes)
+        self._smsg = message_vecw_A(
+            smsg, 1, sendsize,
+            &self.sbuf, &self.scounts,
+            &self.sdisplsA, &self.stypes)
+        return 0
+
+
+cdef inline _p_msg_ccow message_ccow():
+    cdef _p_msg_ccow msg = <_p_msg_ccow>_p_msg_ccow.__new__(_p_msg_ccow)
     return msg
 
 #------------------------------------------------------------------------------

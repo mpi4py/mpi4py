@@ -638,15 +638,11 @@ cdef class Comm:
         Generalized All-to-All communication allowing different
         counts, displacements and datatypes for each partner
         """
-        sendbuf = recvbuf = None
-        raise NotImplementedError # XXX implement!
-        cdef void *sbuf = NULL, *rbuf = NULL
-        cdef int  *scounts = NULL, *rcounts = NULL
-        cdef int  *sdispls = NULL, *rdispls = NULL
-        cdef MPI_Datatype *stypes = NULL, *rtypes = NULL
+        cdef _p_msg_ccow m = message_ccow()
+        m.for_alltoallw(sendbuf, recvbuf, self.ob_mpi)
         with nogil: CHKERR( MPI_Alltoallw(
-            sbuf, scounts, sdispls, stypes,
-            rbuf, rcounts, rdispls, rtypes,
+            m.sbuf, m.scounts, m.sdispls, m.stypes,
+            m.rbuf, m.rcounts, m.rdispls, m.rtypes,
             self.ob_mpi) )
 
 
@@ -835,18 +831,14 @@ cdef class Comm:
         """
         Nonblocking Generalized All-to-All
         """
-        sendbuf = recvbuf = None
-        raise NotImplementedError # XXX implement!
-        cdef void *sbuf = NULL, *rbuf = NULL
-        cdef int  *scounts = NULL, *rcounts = NULL
-        cdef int  *sdispls = NULL, *rdispls = NULL
-        cdef MPI_Datatype *stypes = NULL, *rtypes = NULL
+        cdef _p_msg_ccow m = message_ccow()
+        m.for_alltoallw(sendbuf, recvbuf, self.ob_mpi)
         cdef Request request = <Request>Request.__new__(Request)
         with nogil: CHKERR( MPI_Ialltoallw(
-            sbuf, scounts, sdispls, stypes,
-            rbuf, rcounts, rdispls, rtypes,
+            m.sbuf, m.scounts, m.sdispls, m.stypes,
+            m.rbuf, m.rcounts, m.rdispls, m.rtypes,
             self.ob_mpi, &request.ob_mpi) )
-        request.ob_buf = None
+        request.ob_buf = m
         return request
 
     def Ireduce(self, sendbuf, recvbuf, Op op not None=SUM, int root=0):
@@ -1481,15 +1473,11 @@ cdef class Intracomm(Comm):
         """
         Neighbor All-to-All Generalized
         """
-        sendbuf = recvbuf = None
-        raise NotImplementedError # XXX implement!
-        cdef void *sbuf = NULL, *rbuf = NULL
-        cdef int  *scounts = NULL, *rcounts = NULL
-        cdef int  *sdispls = NULL, *rdispls = NULL
-        cdef MPI_Datatype *stypes = NULL, *rtypes = NULL
+        cdef _p_msg_ccow m = message_ccow()
+        m.for_neighbor_alltoallw(sendbuf, recvbuf, self.ob_mpi)
         with nogil: CHKERR( MPI_Neighbor_alltoallw(
-            sbuf, scounts, sdispls, stypes,
-            rbuf, rcounts, rdispls, rtypes,
+            m.sbuf, m.scounts, m.sdisplsA, m.stypes,
+            m.rbuf, m.rcounts, m.rdisplsA, m.rtypes,
             self.ob_mpi) )
 
     # Nonblocking Neighborhood Collectives
@@ -1554,18 +1542,14 @@ cdef class Intracomm(Comm):
         """
         Nonblocking Neighbor All-to-All Generalized
         """
-        sendbuf = recvbuf = None
-        raise NotImplementedError # XXX implement!
-        cdef void *sbuf = NULL, *rbuf = NULL
-        cdef int  *scounts = NULL, *rcounts = NULL
-        cdef int  *sdispls = NULL, *rdispls = NULL
-        cdef MPI_Datatype *stypes = NULL, *rtypes = NULL
+        cdef _p_msg_ccow m = message_ccow()
+        m.for_neighbor_alltoallw(sendbuf, recvbuf, self.ob_mpi)
         cdef Request request = <Request>Request.__new__(Request)
         with nogil: CHKERR( MPI_Ineighbor_alltoallw(
-            sbuf, scounts, sdispls, stypes,
-            rbuf, rcounts, rdispls, rtypes,
+            m.sbuf, m.scounts, m.sdisplsA, m.stypes,
+            m.rbuf, m.rcounts, m.rdisplsA, m.rtypes,
             self.ob_mpi, &request.ob_mpi) )
-        request.ob_buf = None
+        request.ob_buf = m
         return request
 
     # Python Communication

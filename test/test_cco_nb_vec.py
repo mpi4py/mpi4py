@@ -285,6 +285,26 @@ class BaseTestCCOVec(object):
                         for v in rbuf:
                             self.assertEqual(v, root)
 
+    def testAlltoallw(self):
+        size = self.COMM.Get_size()
+        rank = self.COMM.Get_rank()
+        for array in arrayimpl.ArrayTypes:
+            for typecode in arrayimpl.TypeMap:
+                for n in range(1, size+1):
+                    sbuf = array( n, typecode, (size, n))
+                    rbuf = array(-1, typecode, (size, n))
+                    sdt, rdt = sbuf.mpidtype, rbuf.mpidtype
+                    sdsp = list(range(0, size*n*sdt.extent, n*sdt.extent))
+                    rdsp = list(range(0, size*n*rdt.extent, n*rdt.extent))
+                    smsg = (sbuf.as_raw(), ([n]*size, sdsp), [sdt]*size)
+                    rmsg = (rbuf.as_raw(), ([n]*size, rdsp), [rdt]*size)
+                    try:
+                        self.COMM.Ialltoallw(smsg, rmsg).Wait()
+                    except NotImplementedError:
+                        return
+                    for v in rbuf.flat:
+                        self.assertEqual(v, n)
+
 
 class TestCCOVecSelf(BaseTestCCOVec, unittest.TestCase):
     COMM = MPI.COMM_SELF
