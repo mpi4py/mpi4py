@@ -151,7 +151,7 @@ class Config(object):
             ('openmpi',  ProgramFiles, 'OpenMPI'),
             ('openmpi',  ProgramFiles, 'OpenMPI*'),
             ('deinompi', ProgramFiles, 'DeinoMPI'),
-            ('msmpi',    CPP_HOME,     ''),
+            ('msmpi',    CCP_HOME,     ''),
             ('msmpi',    ProgramFiles, 'Microsoft HPC Pack 2012'),
             ('msmpi',    ProgramFiles, 'Microsoft HPC Pack 2012 SDK'),
             ('msmpi',    ProgramFiles, 'Microsoft HPC Pack 2008 R2'),
