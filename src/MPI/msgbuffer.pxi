@@ -35,7 +35,6 @@ cdef _p_message message_basic(object o_buf,
                               ):
     global TypeDict
     cdef _p_message m = <_p_message>_p_message.__new__(_p_message)
-    cdef int f = (o_type is None)
     # special-case for BOTTOM or None,
     # an explicit MPI datatype is required
     if o_buf is __BOTTOM__ or o_buf is None:
@@ -48,9 +47,9 @@ cdef _p_message message_basic(object o_buf,
         bsize[0] = 0
         btype[0] = m.type.ob_mpi
         return m
-    #elif obuf
     # get buffer base address and length
-    m.buf = getbuffer(o_buf, readonly, f)
+    cdef bint fmt = (o_type is None)
+    m.buf = getbuffer(o_buf, readonly, fmt)
     baddr[0] = <void*>    m.buf.view.buf
     bsize[0] = <MPI_Aint> m.buf.view.len
     # lookup datatype if not provided or not a Datatype
