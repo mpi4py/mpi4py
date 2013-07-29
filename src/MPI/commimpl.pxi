@@ -175,7 +175,7 @@ cdef inline int comm_neighbors_count(MPI_Comm comm,
         indegree = outdegree = size
     elif topo == <int>MPI_CART:
         CHKERR( MPI_Cartdim_get(comm, &ndims) )
-        indegree = outdegree = 2*ndims
+        indegree = outdegree = <int>2*ndims
     elif topo == <int>MPI_GRAPH:
         CHKERR( MPI_Comm_rank(comm, &rank) )
         CHKERR( MPI_Graph_neighbors_count(

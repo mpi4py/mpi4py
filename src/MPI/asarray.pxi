@@ -12,11 +12,11 @@ cdef inline object getarray_int(object ob, int *n, int **p):
     p[0] = <int*> base
     return mem
 
-cdef inline object chkarray_int(object ob, Py_ssize_t size, int **p):
-    cdef int n = 0
-    cdef object mem = getarray_int(ob, &n, p)
-    if size != <Py_ssize_t>n: raise ValueError(
-        "expecting %d items, got %d" % (size, n))
+cdef inline object chkarray_int(object ob, int n, int **p):
+    cdef int size = 0
+    cdef object mem = getarray_int(ob, &size, p)
+    if n != size: raise ValueError(
+        "expecting %d items, got %d" % (n, size))
     return mem
 
 # -----------------------------------------------------------------------------

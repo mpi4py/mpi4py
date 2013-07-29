@@ -300,7 +300,7 @@ class Scanner(object):
     # endif
     #endif
 
-    static PyMPI_UNUSED int PyMPI_UNAVAILABLE(const char *name,...) { return -1; }
+    static PyMPI_UNUSED int PyMPI_UNAVAILABLE(PyMPI_UNUSED const char *name,...) { return -1; }
 
     """
     MISSING_TAIL = """\

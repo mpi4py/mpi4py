@@ -15,7 +15,7 @@
 # endif
 #endif
 
-static PyMPI_UNUSED int PyMPI_UNAVAILABLE(const char *name,...) { return -1; }
+static PyMPI_UNUSED int PyMPI_UNAVAILABLE(PyMPI_UNUSED const char *name,...) { return -1; }
 
 #ifndef PyMPI_HAVE_MPI_Aint
 #undef  MPI_Aint
