@@ -431,6 +431,8 @@ def executables():
                  configure=configure_pyexe,
                  )
     #
+    if hasattr(sys, 'pypy_version_info'):
+        return []
     return [pyexe]
 
 # --------------------------------------------------------------------
