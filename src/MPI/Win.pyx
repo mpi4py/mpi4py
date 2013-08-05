@@ -297,9 +297,9 @@ cdef class Win:
         """
         Test whether an RMA exposure epoch has completed
         """
-        cdef bint flag = 0
+        cdef int flag = 0
         with nogil: CHKERR( MPI_Win_test(self.ob_mpi, &flag) )
-        return flag
+        return <bint>flag
 
     # [6.4.3] Lock
     # ------------
