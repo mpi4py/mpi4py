@@ -9,6 +9,7 @@ static int PyMPI_MPICH3_MPI_Type_size_x(MPI_Datatype datatype, MPI_Count *size)
   int ierr = MPI_Type_commit(&datatype); if (ierr) return ierr;
   return MPI_Type_size_x(datatype,size);
 }
+#undef  MPI_Type_size_x
 #define MPI_Type_size_x PyMPI_MPICH3_MPI_Type_size_x
 
 static int PyMPI_MPICH3_MPI_Type_get_extent_x(MPI_Datatype datatype, MPI_Count *lb, MPI_Count *extent)
@@ -16,6 +17,7 @@ static int PyMPI_MPICH3_MPI_Type_get_extent_x(MPI_Datatype datatype, MPI_Count *
   int ierr = MPI_Type_commit(&datatype); if (ierr) return ierr;
   return MPI_Type_get_extent_x(datatype,lb,extent);
 }
+#undef  MPI_Type_get_extent_x
 #define MPI_Type_get_extent_x PyMPI_MPICH3_MPI_Type_get_extent_x
 
 static int PyMPI_MPICH3_MPI_Type_get_true_extent_x(MPI_Datatype datatype, MPI_Count *lb, MPI_Count *extent)
@@ -23,6 +25,7 @@ static int PyMPI_MPICH3_MPI_Type_get_true_extent_x(MPI_Datatype datatype, MPI_Co
   int ierr = MPI_Type_commit(&datatype); if (ierr) return ierr;
   return MPI_Type_get_true_extent_x(datatype,lb,extent);
 }
+#undef  MPI_Type_get_true_extent_x
 #define MPI_Type_get_true_extent_x PyMPI_MPICH3_MPI_Type_get_true_extent_x
 
 #endif
