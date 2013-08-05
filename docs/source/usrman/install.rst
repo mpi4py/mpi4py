@@ -196,7 +196,7 @@ test scripts :file:`demo/helloworld.py`.
 
 You can also run all the *unittest* scripts::
 
-    $ mpiexec -n 5 python test/runalltest.py
+    $ mpiexec -n 5 python test/runtests.py
 
 or, if you have nose_ unit testing framework installed::
 
