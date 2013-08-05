@@ -294,7 +294,7 @@ class ConfigureMPI(object):
     SRCDIR = 'src'
     SOURCES = [os.path.join('include', 'mpi4py', 'libmpi.pxd')]
     DESTDIR = 'src'
-    CONFIG_H = 'config.h'
+    CONFIG_H = os.path.join('config', 'config.h')
     MISSING_H = 'missing.h'
 
     def __init__(self, config_cmd):

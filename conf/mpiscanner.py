@@ -344,7 +344,7 @@ if __name__ == '__main__':
         log('parsing file %s' % filename)
         scanner.parse_file(filename)
     log('processed %d definitions' % len(scanner.nodes))
-    config_h  = os.path.join('src', 'config.h')
+    config_h  = os.path.join('src', 'config', 'config.h')
     missing_h = os.path.join('src', 'missing.h')
     log('writing file %s' % config_h)
     scanner.dump_config_h(config_h, None)
