@@ -21,13 +21,13 @@ class Node(object):
     match = classmethod(match)
 
     CONFIG = None
-    HEADER = None
+    MISSING = None
 
-    HEADER_HEAD = """\
+    MISSING_HEAD = """\
     #ifndef PyMPI_HAVE_%(name)s
     #undef  %(cname)s
     """
-    HEADER_TAIL = """
+    MISSING_TAIL = """
     #endif
 
     """
@@ -38,10 +38,10 @@ class Node(object):
         self.__dict__.update(kargs)
     def config(self):
         return dedent(self.CONFIG) % vars(self)
-    def header(self):
-        head = dedent(self.HEADER_HEAD)
-        body = dedent(self.HEADER)
-        tail = dedent(self.HEADER_TAIL)
+    def missing(self):
+        head = dedent(self.MISSING_HEAD)
+        body = dedent(self.MISSING)
+        tail = dedent(self.MISSING_TAIL)
         return (head+body+tail) % vars(self)
 
 class NodeType(Node):
@@ -56,8 +56,7 @@ class NodeType(Node):
                   ctype=ctype,)
 
 class NodeStructType(NodeType):
-    REGEX = Re.STRUCT_TYPE
-    HEADER = """\
+    MISSING = """\
     typedef struct PyMPI_%(ctype)s {
     %(cfields)s
     } PyMPI_%(ctype)s;
@@ -69,7 +68,7 @@ class NodeStructType(NodeType):
                                   for field in cfields])
 
 class NodeFuncType(NodeType):
-    HEADER = """\
+    MISSING = """\
     typedef %(crett)s (PyMPI_%(cname)s)(%(cargs)s);
     #define %(cname)s PyMPI_%(cname)s"""
 
@@ -80,15 +79,15 @@ class NodeFuncType(NodeType):
         self.crett = crett
         self.cargs = cargs or 'void'
         if calias is not None:
-            self.HEADER = '#define %(cname)s %(calias)s'
+            self.MISSING = '#define %(cname)s %(calias)s'
             self.calias = calias
 
 class NodeValue(Node):
     CONFIG = """\
     %(ctype)s v; %(ctype)s* p;
     v = %(cname)s; p = &v; *p = %(cname)s;"""
+    MISSING = '#define %(cname)s (%(calias)s)'
 
-    HEADER = '#define %(cname)s (%(calias)s)'
     def __init__(self, ctype, cname, calias):
         self.init(name=cname,
                  cname=cname,
@@ -106,12 +105,13 @@ class NodeFuncProto(Node):
     %(crett)s v;
     v = %(cname)s(%(cargscall)s);
     if (v) v= (%(crett)s) 0;"""
-    HEADER = ' '. join(['#define %(cname)s(%(cargsnamed)s)',
+    MISSING = ' '. join(['#define %(cname)s(%(cargsnamed)s)',
                         'PyMPI_UNAVAILABLE("%(name)s"%(comma)s%(cargsnamed)s)'])
     def __init__(self, crett, cname, cargs, calias=None):
         self.init(name=cname,
                   cname=cname)
         self.crett = crett
+        self.cargs = cargs or 'void'
         if cargs == 'void': cargs = ''
         if cargs:
             cargs = cargs.split(',')
@@ -128,15 +128,14 @@ class NodeFuncProto(Node):
         cargsnamed = ['a%d' % (a+1) for a in range(nargs)]
         self.cargsnamed = ','.join(cargsnamed)
         if calias is not None:
-            self.HEADER = '#define %(cname)s %(calias)s'
+            self.MISSING = '#define %(cname)s %(calias)s'
             self.calias = calias
 
 class IntegralType(NodeType):
     REGEX = Re.INTEGRAL_TYPE
-    HEADER = """\
+    MISSING = """\
     typedef %(cbase)s PyMPI_%(ctype)s;
     #define %(ctype)s PyMPI_%(ctype)s"""
-
     def __init__(self, cbase, ctype, calias=None):
         super(IntegralType, self).__init__(ctype)
         if calias is not None:
@@ -145,6 +144,7 @@ class IntegralType(NodeType):
             self.cbase = cbase
 
 class StructType(NodeStructType):
+    REGEX = Re.STRUCT_TYPE
     def __init__(self, ctype):
         cnames = ['MPI_SOURCE', 'MPI_TAG', 'MPI_ERROR']
         cfields = list(zip(['int']*3, cnames))
@@ -152,7 +152,7 @@ class StructType(NodeStructType):
 
 class OpaqueType(NodeType):
     REGEX = Re.OPAQUE_TYPE
-    HEADER = """\
+    MISSING = """\
     typedef void *PyMPI_%(ctype)s;
     #define %(ctype)s PyMPI_%(ctype)s"""
 
@@ -169,15 +169,15 @@ class EnumValue(NodeValue):
 
 class HandleValue(NodeValue):
     REGEX = Re.HANDLE_VALUE
-    HEADER = '#define %(cname)s ((%(ctype)s)%(calias)s)'
+    MISSING = '#define %(cname)s ((%(ctype)s)%(calias)s)'
 
 class BasicPtrVal(NodeValue):
     REGEX = Re.BASIC_PTRVAL
-    HEADER = '#define %(cname)s ((%(ctype)s)%(calias)s)'
+    MISSING = '#define %(cname)s ((%(ctype)s)%(calias)s)'
 
 class IntegralPtrVal(NodeValue):
     REGEX = Re.INTEGRAL_PTRVAL
-    HEADER = '#define %(cname)s ((%(ctype)s)%(calias)s)'
+    MISSING = '#define %(cname)s ((%(ctype)s)%(calias)s)'
 
 class StructPtrVal(NodeValue):
     REGEX = Re.STRUCT_PTRVAL
@@ -190,12 +190,12 @@ class FunctionProto(NodeFuncProto):
 
 class FunctionC2F(NodeFuncProto):
     REGEX = Re.FUNCTION_C2F
-    HEADER = ' '.join(['#define %(cname)s(%(cargsnamed)s)',
+    MISSING = ' '.join(['#define %(cname)s(%(cargsnamed)s)',
                        '((%(crett)s)0)'])
 
 class FunctionF2C(NodeFuncProto):
     REGEX = Re.FUNCTION_F2C
-    HEADER = ' '.join(['#define %(cname)s(%(cargsnamed)s)',
+    MISSING = ' '.join(['#define %(cname)s(%(cargsnamed)s)',
                        '%(cretv)s'])
     def __init__(self, *a, **k):
         NodeFuncProto.__init__(self, *a, **k)
@@ -212,6 +212,7 @@ class Scanner(object):
         FunctionType, FunctionPtrVal,
         FunctionProto, FunctionC2F, FunctionF2C,
         ]
+
     def __init__(self):
         self.nodes = []
         self.nodemap = {}
@@ -318,7 +319,7 @@ class Scanner(object):
         fileobj.write(head)
         if suite is None:
             for node in self:
-                fileobj.write(node.header())
+                fileobj.write(node.missing())
         else:
             nodelist = self.nodes
             nodemap = self.nodemap
@@ -326,7 +327,7 @@ class Scanner(object):
                 assert name in nodemap, name
                 if not result:
                     node = nodelist[nodemap[name]]
-                    fileobj.write(node.header())
+                    fileobj.write(node.missing())
         fileobj.write(tail)
 
 
