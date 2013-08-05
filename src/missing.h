@@ -31,7 +31,7 @@ typedef long PyMPI_MPI_Offset;
 
 #ifndef PyMPI_HAVE_MPI_Count
 #undef  MPI_Count
-typedef MPI_Aint PyMPI_MPI_Count;
+typedef MPI_Offset PyMPI_MPI_Count;
 #define MPI_Count PyMPI_MPI_Count
 #endif
 
