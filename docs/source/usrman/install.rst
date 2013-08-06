@@ -15,7 +15,7 @@ build *MPI for Python*:
      If you want to build some MPI implementation from sources,
      check the instructions at :ref:`building-mpi` in the appendix.
 
-* A Python 2.3 to 2.7 or 3.0 to 3.1 distribution, with Python
+* A Python 2.4 to 2.7 or 3.0 to 3.3 distribution, with Python
   library preferably built with shared/dynamic libraries.
 
   .. note::

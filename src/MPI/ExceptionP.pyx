@@ -29,6 +29,9 @@ class Exception(RuntimeError):
         cdef int ierr = self.ob_mpi
         return <bint> (ierr >= error)
 
+    def __hash__(self):
+        return RuntimeError.__hash__(self)
+
     def __bool__(self):
         cdef int ierr = self.ob_mpi
         return ierr != MPI_SUCCESS
