@@ -1,20 +1,29 @@
 from mpi4py import MPI
+try:
+    from collections import OrderedDict
+except ImportError:
+    OrderedDict = dict
 
 __all__ = ['TypeMap', 'ArrayTypes']
 
-TypeMap = dict(b=MPI.SIGNED_CHAR,
-               h=MPI.SHORT,
-               i=MPI.INT,
-               l=MPI.LONG,
-               #q=MPI.LONG_LONG,
-               f=MPI.FLOAT,
-               d=MPI.DOUBLE)
+TypeMap = OrderedDict([
+    ('b', MPI.SIGNED_CHAR),
+    ('h', MPI.SHORT),
+    ('i', MPI.INT),
+    ('l', MPI.LONG),
+    ('q', MPI.LONG_LONG),
+    ('f', MPI.FLOAT),
+    ('d', MPI.DOUBLE),
+])
+
+import sys
+if sys.version_info[:2] < (3,3):
+    del TypeMap['q']
 
 if MPI.SIGNED_CHAR == MPI.DATATYPE_NULL:
     del TypeMap['b']
 
 ArrayTypes = []
-
 
 try:
     import array
@@ -32,7 +41,7 @@ else:
 
     class Array(array.array):
 
-        TypeMap = TypeMap
+        TypeMap = TypeMap.copy()
 
         def __new__(cls, arg, typecode, shape=None):
             if isinstance(arg, (int, float)):
@@ -110,7 +119,7 @@ else:
 
     class NumPy(numpy.ndarray):
 
-        TypeMap = TypeMap
+        TypeMap = TypeMap.copy()
 
         def __new__(cls, arg, typecode, shape=None):
             if isinstance(arg, (int, float, complex)):
