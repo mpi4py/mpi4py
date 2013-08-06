@@ -1,14 +1,20 @@
 from mpi4py import MPI
+try:
+    from collections import OrderedDict
+except ImportError:
+    OrderedDict = dict
 
 __all__ = ['TypeMap', 'ArrayTypes', 'allclose']
 
-TypeMap = dict(b=MPI.SIGNED_CHAR,
-               h=MPI.SHORT,
-               i=MPI.INT,
-               l=MPI.LONG,
-               q=MPI.LONG_LONG,
-               f=MPI.FLOAT,
-               d=MPI.DOUBLE)
+TypeMap = OrderedDict([
+    ('b', MPI.SIGNED_CHAR),
+    ('h', MPI.SHORT),
+    ('i', MPI.INT),
+    ('l', MPI.LONG),
+    ('q', MPI.LONG_LONG),
+    ('f', MPI.FLOAT),
+    ('d', MPI.DOUBLE),
+])
 
 import sys
 if sys.version_info[:2] < (3,3):
@@ -35,7 +41,7 @@ else:
 
     class Array(array.array):
 
-        TypeMap = dict(TypeMap)
+        TypeMap = TypeMap.copy()
 
         def __new__(cls, arg, typecode, shape=None):
             if isinstance(arg, (int, float)):
@@ -88,7 +94,7 @@ else:
 
     class NumPy(object):
 
-        TypeMap = dict(TypeMap)
+        TypeMap = TypeMap.copy()
 
         def __init__(self, arg, typecode, shape=None):
             if isinstance(arg, (int, float, complex)):
