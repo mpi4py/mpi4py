@@ -605,7 +605,7 @@ cdef import from "mpi.h" nogil:
     int MPI_Win_get_errhandler(MPI_Win, MPI_Errhandler*)
     int MPI_Win_set_errhandler(MPI_Win, MPI_Errhandler)
     ctypedef void MPI_Win_errhandler_fn(MPI_Win*,int*,...)
-    ctypedef void MPI_Win_errhandler_function(MPI_Comm*,int*,...) #:= MPI_Win_errhandler_fn
+    ctypedef void MPI_Win_errhandler_function(MPI_Win*,int*,...) #:= MPI_Win_errhandler_fn
     int MPI_Win_create_errhandler(MPI_Win_errhandler_function*, MPI_Errhandler*)
     int MPI_Win_call_errhandler(MPI_Win, int)
 
