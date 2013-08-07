@@ -24,7 +24,7 @@ provides an object oriented interface which closely follows MPI-2 C++
 bindings.
 """
 
-__version__   = '1.3'
+__version__   = '1.3.1'
 __author__    = 'Lisandro Dalcin'
 __credits__   = 'MPI Forum, MPICH Team, Open MPI Team.'
 
