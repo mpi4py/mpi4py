@@ -9,6 +9,20 @@ HISTORY: MPI for Python
 :Address:      CCT CONICET, 3000 Santa Fe, Argentina
 
 
+Release 1.3.1 [2013-08-07]
+==========================
+
+* Regenerate C wrappers with Cython 0.19.1 to support Python 3.3.
+
+* Install ``*.pxd`` files in ``<site-packages>/mpi4py`` to ease the
+  support for Cython's ``cimport`` statement in code requiring to
+  access mpi4py internals.
+
+* As a side-effect of using Cython 0.19.1, ancient Python 2.3 is no
+  longer supported. If you really need it, you can install an older
+  Cython and run ``python setup.py build_src --force``.
+
+
 Release 1.3 [2012-01-20]
 ========================
 
