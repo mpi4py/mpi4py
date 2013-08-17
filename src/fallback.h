@@ -131,7 +131,7 @@ static int PyMPI_Is_thread_main(int *flag)
 
 #ifndef PyMPI_HAVE_MPI_STATUS_IGNORE
 static MPI_Status PyMPI_STATUS_IGNORE;
-#undef MPI_STATUS_IGNORE
+#undef  MPI_STATUS_IGNORE
 #define MPI_STATUS_IGNORE ((MPI_Status*)(&PyMPI_STATUS_IGNORE))
 #endif
 
@@ -775,10 +775,10 @@ static int PyMPI_Request_get_status(MPI_Request request,
     status->MPI_TAG    = MPI_ANY_TAG;
     status->MPI_ERROR  = MPI_SUCCESS;
     #ifdef PyMPI_HAVE_MPI_Status_set_elements
-    MPI_Status_set_elements(status, MPI_BYTE, 0);
+    (void)MPI_Status_set_elements(status, MPI_BYTE, 0);
     #endif
     #ifdef PyMPI_HAVE_MPI_Status_set_cancelled
-    MPI_Status_set_cancelled(status, 0);
+    (void)MPI_Status_set_cancelled(status, 0);
     #endif
   }
   return MPI_SUCCESS;
