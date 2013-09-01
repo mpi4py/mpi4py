@@ -25,6 +25,9 @@ cdef class Exception(RuntimeError):
         if op == Py_GT: return ierr >  error
         if op == Py_GE: return ierr >= error
 
+    def __hash__(self):
+        return RuntimeError.__hash__(self)
+
     def __bool__(self):
         return self.ob_mpi != MPI_SUCCESS
 
