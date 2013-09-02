@@ -6,37 +6,38 @@ Runtime configuration parameters
 
 initialize = True
 """
-Automatic MPI initialization at import time
+Automatic MPI initialization at import.
 
-* Any of ``{True  | 1 | "yes" }``: initialize MPI at import time
-* Any of ``{False | 0 | "no"  }``: do not initialize MPI at import time
+* Any of ``{True, "yes", 1}``: initialize MPI at import.
+* Any of ``{False, "no", 0}``: do not initialize MPI at import.
 """
 
 
 threaded = True
 """
-Request for thread support at MPI initialization
+Request for thread support at MPI initialization.
 
-* Any of ``{True  | 1 | "yes" }``: initialize MPI with ``MPI_Init_thread()``
-* Any of ``{False | 0 | "no"  }``: initialize MPI with ``MPI_Init()``
+* Any of ``{True, "yes", 1}``: initialize MPI with ``MPI_Init_thread()``.
+* Any of ``{False, "no", 0}``: initialize MPI with ``MPI_Init()``.
 """
 
 
 thread_level = "multiple"
 """
-Level of thread support to request at MPI initialization
+Level of thread support to request at MPI initialization.
 
-* ``"single"``     : use ``MPI_THREAD_SINGLE``
-* ``"funneled"``   : use ``MPI_THREAD_FUNNELED``
-* ``"serialized"`` : use ``MPI_THREAD_SERIALIZED``
-* ``"multiple"``   : use ``MPI_THREAD_MULTIPLE``
+* ``"single"``     : use ``MPI_THREAD_SINGLE``.
+* ``"funneled"``   : use ``MPI_THREAD_FUNNELED``.
+* ``"serialized"`` : use ``MPI_THREAD_SERIALIZED``.
+* ``"multiple"``   : use ``MPI_THREAD_MULTIPLE``.
 """
 
 
 finalize = None
 """
-Automatic MPI finalization at exit time
+Automatic MPI finalization at exit.
 
-* Any of ``{True  | 1 | "yes" }``: call ``MPI_Finalize()`` at exit time
-* Any of ``{False | 0 | "no"  }``: do not call ``MPI_Finalize()`` at exit time
+* ``None``: Finalize MPI  at exit iff it was initialized at import.
+* Any of ``{True, "yes", 1}``: call ``MPI_Finalize()`` at exit.
+* Any of ``{False, "no", 0}``: do not call ``MPI_Finalize()`` at exit.
 """
