@@ -982,7 +982,7 @@ cdef class Comm:
         """
         cdef void *attrval = NULL
         cdef int  flag = 0
-        CHKERR(MPI_Comm_get_attr(self.ob_mpi, keyval, &attrval, &flag) )
+        CHKERR( MPI_Comm_get_attr(self.ob_mpi, keyval, &attrval, &flag) )
         if not flag: return None
         if attrval == NULL: return 0
         # MPI-1 predefined attribute keyvals
@@ -1014,14 +1014,14 @@ cdef class Comm:
         else:
             ptrval = PyLong_AsVoidPtr(attrval)
             incref = 0
-        CHKERR(MPI_Comm_set_attr(self.ob_mpi, keyval, ptrval) )
+        CHKERR( MPI_Comm_set_attr(self.ob_mpi, keyval, ptrval) )
         if incref: Py_INCREF(attrval)
 
     def Delete_attr(self, int keyval):
         """
         Delete attribute value associated with a key
         """
-        CHKERR(MPI_Comm_delete_attr(self.ob_mpi, keyval) )
+        CHKERR( MPI_Comm_delete_attr(self.ob_mpi, keyval) )
 
     @classmethod
     def Create_keyval(cls, copy_fn=None, delete_fn=None):

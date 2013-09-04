@@ -673,14 +673,14 @@ cdef class Datatype:
         else:
             ptrval = PyLong_AsVoidPtr(attrval)
             incref = 0
-        CHKERR(MPI_Type_set_attr(self.ob_mpi, keyval, ptrval) )
+        CHKERR( MPI_Type_set_attr(self.ob_mpi, keyval, ptrval) )
         if incref: Py_INCREF(attrval)
 
     def Delete_attr(self, int keyval):
         """
         Delete attribute value associated with a key
         """
-        CHKERR(MPI_Type_delete_attr(self.ob_mpi, keyval) )
+        CHKERR( MPI_Type_delete_attr(self.ob_mpi, keyval) )
 
     @classmethod
     def Create_keyval(cls, copy_fn=None, delete_fn=None):
