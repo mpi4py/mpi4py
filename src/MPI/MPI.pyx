@@ -275,7 +275,10 @@ def get_vendor():
 
 # --------------------------------------------------------------------
 
-if PYPY: exec """
+cdef extern from *:
+    enum: PY_VERSION_HEX
+
+if PYPY and PY_VERSION_HEX < 0x02070300: exec """
 def _pypy_setup():
     for klass in (
         Status,

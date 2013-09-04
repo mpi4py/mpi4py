@@ -284,6 +284,10 @@ _PyLong_AsByteArray(PyLongObject* v,
 }
 
 #if PY_VERSION_HEX < 0x02070300 /* PyPy < 2.0 */
+#define PyCode_GetNumFree(o) PyCode_GetNumFree((PyObject *)(o))
+#endif
+
+#if PY_VERSION_HEX < 0x02070300 /* PyPy < 2.0 */
 static int
 PyBuffer_FillInfo_PyPy(Py_buffer *view, PyObject *obj,
                        void *buf, Py_ssize_t len,
@@ -318,10 +322,6 @@ PyMemoryView_FromBuffer_PyPy(Py_buffer *view)
   }
 }
 #define PyMemoryView_FromBuffer PyMemoryView_FromBuffer_PyPy
-
-#if PY_VERSION_HEX < 0x02070300 /* PyPy < 2.0 */
-#define PyCode_GetNumFree(o) PyCode_GetNumFree((PyObject *)(o))
-#endif
 
 #endif/*PYPY_VERSION*/
 
