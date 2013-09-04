@@ -61,17 +61,19 @@ class TestMPIThreads(unittest.TestCase):
             t = Thread(target=self._test_is,
                        args = (not _HAS_THREADING,))
             T.append(t)
-        if provided == MPI.THREAD_MULTIPLE:
+        if provided == MPI.THREAD_SERIALIZED:
             for t in T:
                 t.start()
                 t.join()
-        else:
+        elif provided == MPI.THREAD_MULTIPLE:
             for t in T:
                 t.start()
             for t in T:
                 t.join()
 
 _name, _version = MPI.get_vendor()
+if _name == 'Open MPI':
+    TestMPIThreads.REQUIRED = MPI.THREAD_MULTIPLE
 if _name == 'LAM/MPI':
     TestMPIThreads.REQUIRED = MPI.THREAD_MULTIPLE
 
