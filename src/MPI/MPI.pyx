@@ -57,12 +57,6 @@ BOTTOM = __BOTTOM__
 IN_PLACE = __IN_PLACE__
 #"""*In-place* option for collective communications"""
 
-UNWEIGHTED    = __UNWEIGHTED__
-#"""Unweighted graph"""
-
-WEIGHTS_EMPTY = __WEIGHTS_EMPTY__
-#"""Empty graph weights"""
-
 
 # Predefined Attribute Keyvals
 # ----------------------------

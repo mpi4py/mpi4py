@@ -11,7 +11,7 @@ cdef inline bint is_buffer(object ob):
 
 #------------------------------------------------------------------------------
 
-cdef object __BOTTOM__ = <MPI_Aint>MPI_BOTTOM
+cdef object __BOTTOM__   = <MPI_Aint>MPI_BOTTOM
 
 cdef object __IN_PLACE__ = <MPI_Aint>MPI_IN_PLACE
 

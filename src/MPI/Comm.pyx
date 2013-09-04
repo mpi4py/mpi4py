@@ -15,6 +15,13 @@ GRAPH      = MPI_GRAPH      #: General graph topology
 DIST_GRAPH = MPI_DIST_GRAPH #: Distributed graph topology
 
 
+# Graph Communicator Weights
+# --------------------------
+
+UNWEIGHTED    = __UNWEIGHTED__     #:"""Unweighted graph"""
+WEIGHTS_EMPTY = __WEIGHTS_EMPTY__  #:"""Empty graph weights"""
+
+
 # Communicator Split Type
 # -----------------------
 
