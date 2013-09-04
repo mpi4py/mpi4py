@@ -20,6 +20,7 @@ class Node(object):
         if m: return m.groups()
     match = classmethod(match)
 
+    HEADER = None
     CONFIG = None
     MISSING = None
 
@@ -36,6 +37,11 @@ class Node(object):
         assert name is not None
         self.name = name
         self.__dict__.update(kargs)
+    def header(self):
+        line = dedent(self.HEADER) % vars(self)
+        line = line.replace('\n', '')
+        line = line.replace('  ', ' ')
+        return line + '\n'
     def config(self):
         return dedent(self.CONFIG) % vars(self)
     def missing(self):
@@ -56,6 +62,8 @@ class NodeType(Node):
                   ctype=ctype,)
 
 class NodeStructType(NodeType):
+    HEADER = """\
+    typedef struct {%(cfields)s ...; } %(ctype)s;"""
     MISSING = """\
     typedef struct PyMPI_%(ctype)s {
     %(cfields)s
@@ -68,6 +76,8 @@ class NodeStructType(NodeType):
                                   for field in cfields])
 
 class NodeFuncType(NodeType):
+    HEADER = """\
+    typedef %(crett)s (%(cname)s)(%(cargs)s);"""
     MISSING = """\
     typedef %(crett)s (PyMPI_%(cname)s)(%(cargs)s);
     #define %(cname)s PyMPI_%(cname)s"""
@@ -83,6 +93,8 @@ class NodeFuncType(NodeType):
             self.calias = calias
 
 class NodeValue(Node):
+    HEADER = """\
+    const %(ctype)s %(cname)s;"""
     CONFIG = """\
     %(ctype)s v; %(ctype)s* p;
     v = %(cname)s; p = &v; *p = %(cname)s;"""
@@ -90,9 +102,12 @@ class NodeValue(Node):
 
     def __init__(self, ctype, cname, calias):
         self.init(name=cname,
-                 cname=cname,
+                  cname=cname,
                   ctype=ctype,
                   calias=calias)
+        if ctype.endswith('*'):
+            self.HEADER = "%(ctype)s const %(cname)s;"
+            
 
 def ctypefix(ct):
     ct = ct.strip()
@@ -101,6 +116,8 @@ def ctypefix(ct):
     return ct
 
 class NodeFuncProto(Node):
+    HEADER = """\
+    %(crett)s %(cname)s(%(cargs)s);"""
     CONFIG = """\
     %(crett)s v;
     v = %(cname)s(%(cargscall)s);
@@ -133,15 +150,18 @@ class NodeFuncProto(Node):
 
 class IntegralType(NodeType):
     REGEX = Re.INTEGRAL_TYPE
+    HEADER = """\
+    typedef %(cbase)s %(ctype)s;"""
     MISSING = """\
-    typedef %(cbase)s PyMPI_%(ctype)s;
+    typedef %(ctdef)s PyMPI_%(ctype)s;
     #define %(ctype)s PyMPI_%(ctype)s"""
     def __init__(self, cbase, ctype, calias=None):
         super(IntegralType, self).__init__(ctype)
+        self.cbase = cbase
         if calias is not None:
-            self.cbase = calias
+            self.ctdef = calias
         else:
-            self.cbase = cbase
+            self.ctdef = cbase
 
 class StructType(NodeStructType):
     REGEX = Re.STRUCT_TYPE
@@ -152,6 +172,8 @@ class StructType(NodeStructType):
 
 class OpaqueType(NodeType):
     REGEX = Re.OPAQUE_TYPE
+    HEADER = """\
+    typedef struct{...;} %(ctype)s;"""
     MISSING = """\
     typedef void *PyMPI_%(ctype)s;
     #define %(ctype)s PyMPI_%(ctype)s"""
@@ -248,6 +270,15 @@ class Scanner(object):
         for node in self:
             yield (node.name, node.config())
 
+    def dump_header_h(self, fileobj):
+        if isinstance(fileobj, str):
+            fileobj = open(fileobj, 'w')
+            try: self.dump_header_h(fileobj)
+            finally: fileobj.close()
+            return
+        for node in self:
+            fileobj.write(node.header())
+
 
     CONFIG_HEAD = """\
     #ifndef PyMPI_CONFIG_H
@@ -340,15 +371,20 @@ if __name__ == '__main__':
     log = lambda msg: sys.stderr.write(msg + '\n')
     scanner = Scanner()
     for filename in sources:
-        #filename = os.path.join('src', 'mpi4py', filename)
         log('parsing file %s' % filename)
         scanner.parse_file(filename)
     log('processed %d definitions' % len(scanner.nodes))
+
     config_h  = os.path.join('src', 'config', 'config.h')
-    missing_h = os.path.join('src', 'missing.h')
     log('writing file %s' % config_h)
     scanner.dump_config_h(config_h, None)
+
+    missing_h = os.path.join('src', 'missing.h')
     log('writing file %s' % missing_h)
     scanner.dump_missing_h(missing_h, None)
+
+    libmpi_h = os.path.join('.', 'libmpi.h')
+    log('writing file %s' % libmpi_h)
+    scanner.dump_header_h(libmpi_h)
 
 # -----------------------------------------
