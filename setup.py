@@ -44,7 +44,7 @@ This package supports:
 + One-sided operations (put, get, accumulate)
 
 You can install the `in-development version
-<hg+http://code.google.com/p/mpi4py#egg=mpi4py-dev>`_
+<https://bitbucket.org/mpi4py/mpi4py/get/master.tar.gz#egg=mpi4py-dev>`_
 of mpi4py with::
 
   $ pip install mpi4py==dev
@@ -79,8 +79,8 @@ def version():
 name    = name()
 version = version()
 
-url      = 'http://%(name)s.googlecode.com/' % vars()
-download = url + 'files/%(name)s-%(version)s.tar.gz' % vars()
+url      = 'https://bitbucket.org/mpi4py/%(name)s/' % vars()
+download = url + 'downloads/%(name)s-%(version)s.tar.gz' % vars()
 
 description = __doc__.split('\n')[1:-1]; del description[1:3]
 

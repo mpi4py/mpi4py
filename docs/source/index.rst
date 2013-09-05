@@ -13,18 +13,18 @@ Online Documentation
 
 Hosted at SciPy servers [http://mpi4py.scipy.org/]:
 
-Hosted at PyPI  servers [http://packages.python.org/mpi4py]:
+Hosted at PyPI  servers [http://pythonhosted.org/mpi4py/]:
 
 + `User Manual (HTML)`_ (generated with Sphinx_).
 + `User Manual (PDF)`_  (generated with Sphinx_).
-+ `API Reference`_ (generated with Epydoc_).
++ `API Reference`_      (generated with Epydoc_).
 
 .. _User Manual (HTML): usrman/index.html
 .. _User Manual (PDF):  mpi4py.pdf
-.. _API Reference: apiref/index.html
+.. _API Reference:      apiref/index.html
 
-.. _Sphinx:    http://sphinx.pocoo.org/
-.. _Epydoc:    http://epydoc.sourceforge.net/
+.. _Sphinx: http://sphinx-doc.org/
+.. _Epydoc: http://epydoc.sourceforge.net/
 
 
 Discussion and Support
@@ -32,16 +32,25 @@ Discussion and Support
 
 Hosted at Google Groups:
 
-+ Group Page: http://groups.google.com/group/mpi4py
++ Group Page:   http://groups.google.com/group/mpi4py
 + Mailing List: mpi4py@googlegroups.com
 
 
 Downloads and Development
 -------------------------
 
-Hosted at Google Code:
+Hosted at Bitbucket:
 
-+ Project Site: http://mpi4py.googlecode.com/
-+ Source Releases: http://code.google.com/p/mpi4py/downloads/
-+ Issue Tracker: http://code.google.com/p/mpi4py/issues/
-+ Mercurial Repository: http://code.google.com/p/mpi4py
++ Project Site:    https://bitbucket.org/mpi4py/mpi4py
++ Source Releases: https://bitbucket.org/mpi4py/mpi4py/downloads
++ Issue Tracker:   https://bitbucket.org/mpi4py/mpi4py/issues
++ Git Repository:  https://bitbucket.org/mpi4py/mpi4py.git
+
+
+Acknowledgments
+---------------
+
+This project was partially supported by the Center for Numerical
+Porous Media, Division of Computer, Electrical, and Mathematical
+Sciences & Engineering, King Abdullah University of Science and
+Technology (KAUST).

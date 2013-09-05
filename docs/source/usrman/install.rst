@@ -46,11 +46,11 @@ sources or by using a pre-built package from your favourite GNU/Linux
 distribution) and the :program:`mpicc` compiler wrapper is on your
 search path, you can use :program:`pip`::
 
-    $ [sudo] pip install mpi4py
+  $ [sudo] pip install mpi4py
 
 or alternatively *setuptools* :program:`easy_install` (deprecated)::
 
-    $ [sudo] easy_install mpi4py
+  $ [sudo] easy_install mpi4py
 
 .. note::
 
@@ -59,9 +59,9 @@ or alternatively *setuptools* :program:`easy_install` (deprecated)::
    :program:`env` to pass the environment variable :envvar:`MPICC`
    providing the full path to the MPI compiler wrapper executable::
 
-      $ [sudo] env MPICC=/path/to/mpicc pip install mpi4py
+     $ [sudo] env MPICC=/path/to/mpicc pip install mpi4py
 
-      $ [sudo] env MPICC=/path/to/mpicc easy_install mpi4py
+     $ [sudo] env MPICC=/path/to/mpicc easy_install mpi4py
 
 
 Using **distutils**
@@ -87,11 +87,15 @@ Downloading
 
 The *MPI for Python* package is available for download at the project
 website generously hosted by Google Code. You can use :program:`curl`
-or :program:`wget` to get a release tarball::
+or :program:`wget` to get a release tarball.
 
-    $ curl -O http://mpi4py.googlecode.com/files/mpi4py-X.X.X.tar.gz
+* Using :program:`curl`::
 
-    $ wget http://mpi4py.googlecode.com/files/mpi4py-X.X.X.tar.gz
+    $ curl -O https://bitbucket.org/mpi4py/mpi4py/downloads/mpi4py-X.Y.tar.gz
+
+* Using :program:`wget`::
+
+    $ wget https://bitbucket.org/mpi4py/mpi4py/downloads/mpi4py-X.Y.tar.gz
 
 
 Building
@@ -99,8 +103,8 @@ Building
 
 After unpacking the release tarball::
 
-    $ tar -zxf mpi4py-X.X.X.tar.gz
-    $ cd mpi4py-X.X.X
+  $ tar -zxf mpi4py-X.Y.tar.gz
+  $ cd mpi4py-X.Y
 
 the distribution is ready for building.
 
@@ -157,7 +161,7 @@ If you have root privileges (either by log-in as the root user of by
 using :command:`sudo`) and you want to install *MPI for Python* in
 your system for all users, just do::
 
-    $ python setup.py install
+  $ python setup.py install
 
 The previous steps will install the :mod:`mpi4py` package at standard
 location :file:`{prefix}/lib/python{X}.{X}/site-packages`.
@@ -168,12 +172,12 @@ target Python version.
 
 * For Python 2.6 and up::
 
-      $ python setup.py install --user
+    $ python setup.py install --user
 
 * For Python 2.5 and below (assuming your home directory is available
   through the :envvar:`HOME` environment variable)::
 
-      $ python setup.py install --home=$HOME
+    $ python setup.py install --home=$HOME
 
   Finally, add :file:`$HOME/lib/python` or :file:`$HOME/lib64/python`
   to your :envvar:`PYTHONPATH` environment variable.
@@ -184,36 +188,36 @@ Testing
 
 To quickly test the installation (Python 2.5 and up)::
 
-    $ mpiexec -n 5 python -m mpi4py helloworld
-    Hello, World! I am process 0 of 5 on localhost.
-    Hello, World! I am process 1 of 5 on localhost.
-    Hello, World! I am process 2 of 5 on localhost.
-    Hello, World! I am process 3 of 5 on localhost.
-    Hello, World! I am process 4 of 5 on localhost.
+  $ mpiexec -n 5 python -m mpi4py helloworld
+  Hello, World! I am process 0 of 5 on localhost.
+  Hello, World! I am process 1 of 5 on localhost.
+  Hello, World! I am process 2 of 5 on localhost.
+  Hello, World! I am process 3 of 5 on localhost.
+  Hello, World! I am process 4 of 5 on localhost.
 
 If you installed from source, issuing at the command line::
 
-    $ mpiexec -n 5 python demo/helloworld.py
+  $ mpiexec -n 5 python demo/helloworld.py
 
 or (in the case of ancient MPI-1 implementations)::
 
-    $ mpirun -np 5 python demo/helloworld.py
+  $ mpirun -np 5 python demo/helloworld.py
 
 will launch a five-process run of the Python interpreter and run the
 test script :file:`demo/helloworld.py` from the source distribution.
 
 You can also run all the *unittest* scripts::
 
-    $ mpiexec -n 5 python test/runtests.py
+  $ mpiexec -n 5 python test/runtests.py
 
 or, if you have nose_ unit testing framework installed::
 
-    $ mpiexec -n 5 nosetests -w test
+  $ mpiexec -n 5 nosetests -w test
 
 .. _nose: http://nose.readthedocs.org/
 
 or, if you have `py.test`_ unit testing framework installed::
 
-    $ mpiexec -n 5 py.test test/
+  $ mpiexec -n 5 py.test test/
 
 .. _py.test: http://pytest.org/
