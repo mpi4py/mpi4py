@@ -1,7 +1,6 @@
-import os.path as _pth
+import os   as _os
+import sys  as _sys
 import cffi as _cffi
-
-_wdir = _pth.abspath(_pth.dirname(__file__))
 
 def _ffi_create(header, source, **kargs):
     ffi = _cffi.FFI()
@@ -26,22 +25,22 @@ def _ffi_verify(ffi, csource, **kargs):
 def _ffi_verify_push(cc, ld):
     from distutils import sysconfig
     from distutils.spawn import find_executable
-    global customize_compiler_orig
-    customize_compiler_orig = sysconfig.customize_compiler
+    global _customize_compiler_orig
+    _customize_compiler_orig = sysconfig.customize_compiler
     if not cc and not ld: return
+    if cc: cc = find_executable(cc)
+    if ld: ld = find_executable(ld)
     def customize_compiler(compiler):
-        customize_compiler_orig(compiler)
-        if cc:
-            compiler.compiler_so[0] = find_executable(cc)
-        if ld:
-            compiler.linker_so[0]= find_executable(ld)
+        _customize_compiler_orig(compiler)
+        if cc: compiler.compiler_so[0] = cc
+        if ld: compiler.linker_so[0]   = ld
     sysconfig.customize_compiler = customize_compiler
 
 def _ffi_verify_pop():
     from distutils import sysconfig
-    global customize_compiler_orig
-    sysconfig.customize_compiler = customize_compiler_orig
-    del customize_compiler_orig
+    global _customize_compiler_orig
+    sysconfig.customize_compiler = _customize_compiler_orig
+    del _customize_compiler_orig
 
 def _read(filename):
     f = open(filename)
@@ -50,30 +49,23 @@ def _read(filename):
     finally:
         f.close()
 
+_wdir  = _os.path.abspath(_os.path.dirname(__file__))
+_mpicc = _os.getenv('MPICC', "mpicc")
+_mpild = _os.getenv('MPILD', _mpicc)
+
 ffi, mpi = _ffi_create(
-_read(_pth.join(_wdir, "libmpi.h")),
-_read(_pth.join(_wdir, "libmpi.c")),
-compiler='mpicc', linker='mpicc',
-#ext_package='mpi4py',
+_read(_os.path.join(_wdir, "libmpi.h")),
+_read(_os.path.join(_wdir, "libmpi.c")),
+compiler=_mpicc, linker=_mpild,
 #modulename='_cffi_mpi',
-#tmpdir=_wdir,
-#tmpdir='build'
 )
 
-import sys as _sys
 _sys.modules[__name__+'.mpi'] = mpi
-del _sys
 
 #new = ffi.new
 #cast = ffi.cast
 #asbuffer = ffi.buffer
 #globals().update(mpi.__dict__)
-
-#del _sys, _cffi
-#del _ffi_setup
-#del _ffi_verify
-#del _ffi_verify_enter
-#del _ffi_verify_exit
 
 if __name__ == '__main__':
     mpi.MPI_Init(ffi.NULL, ffi.NULL);

@@ -383,8 +383,8 @@ if __name__ == '__main__':
     log('writing file %s' % missing_h)
     scanner.dump_missing_h(missing_h, None)
 
-    libmpi_h = os.path.join('.', 'libmpi.h')
-    log('writing file %s' % libmpi_h)
-    scanner.dump_header_h(libmpi_h)
+    #libmpi_h = os.path.join('.', 'libmpi.h')
+    #log('writing file %s' % libmpi_h)
+    #scanner.dump_header_h(libmpi_h)
 
 # -----------------------------------------
