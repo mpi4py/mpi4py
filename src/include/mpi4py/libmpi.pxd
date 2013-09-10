@@ -293,7 +293,7 @@ cdef import from "mpi.h" nogil:
 
     int MPI_Op_free(MPI_Op*)
 
-    ctypedef void MPI_User_function(void*, void*, int*, MPI_Datatype*)
+    ctypedef void MPI_User_function(void*,void*,int*,MPI_Datatype*)
     int MPI_Op_create(MPI_User_function*, int, MPI_Op*)
     int MPI_Op_commutative(MPI_Op, int*)
 
@@ -308,7 +308,7 @@ cdef import from "mpi.h" nogil:
 
     enum: MPI_MAX_INFO_KEY  #:= 1
     enum: MPI_MAX_INFO_VAL  #:= 1
-    int MPI_Info_get(MPI_Info, char[], int, char[],int*)
+    int MPI_Info_get(MPI_Info, char[], int, char[], int*)
     int MPI_Info_set(MPI_Info, char[], char[])
     int MPI_Info_delete(MPI_Info, char[])
 
@@ -414,7 +414,7 @@ cdef import from "mpi.h" nogil:
     int MPI_Neighbor_allgatherv(void*, int, MPI_Datatype, void*, int[], int[], MPI_Datatype, MPI_Comm)
     int MPI_Neighbor_alltoall(void*, int, MPI_Datatype, void*, int, MPI_Datatype, MPI_Comm)
     int MPI_Neighbor_alltoallv(void*, int[], int[],MPI_Datatype, void*, int[],int[], MPI_Datatype, MPI_Comm)
-    int MPI_Neighbor_alltoallw(void *, int[], MPI_Aint[],MPI_Datatype[], void*, int[],MPI_Aint[], MPI_Datatype[], MPI_Comm)
+    int MPI_Neighbor_alltoallw(void*, int[], MPI_Aint[],MPI_Datatype[], void*, int[],MPI_Aint[], MPI_Datatype[], MPI_Comm)
 
     int MPI_Ibarrier(MPI_Comm, MPI_Request*)
     int MPI_Ibcast(void*, int, MPI_Datatype, int, MPI_Comm, MPI_Request*)
@@ -439,7 +439,7 @@ cdef import from "mpi.h" nogil:
     int MPI_Ineighbor_allgatherv(void*, int, MPI_Datatype, void*, int[], int[], MPI_Datatype, MPI_Comm, MPI_Request*)
     int MPI_Ineighbor_alltoall(void*, int, MPI_Datatype, void*, int, MPI_Datatype, MPI_Comm, MPI_Request*)
     int MPI_Ineighbor_alltoallv(void*, int[], int[],MPI_Datatype, void*, int[],int[], MPI_Datatype, MPI_Comm, MPI_Request*)
-    int MPI_Ineighbor_alltoallw(void *, int[], MPI_Aint[],MPI_Datatype[], void*, int[],MPI_Aint[], MPI_Datatype[], MPI_Comm, MPI_Request*)
+    int MPI_Ineighbor_alltoallw(void*, int[], MPI_Aint[],MPI_Datatype[], void*, int[],MPI_Aint[], MPI_Datatype[], MPI_Comm, MPI_Request*)
 
     int MPI_Comm_dup(MPI_Comm, MPI_Comm*)
     int MPI_Comm_dup_with_info(MPI_Comm, MPI_Info, MPI_Comm*)
