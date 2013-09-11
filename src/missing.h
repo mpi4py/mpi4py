@@ -1132,7 +1132,7 @@ typedef int (PyMPI_MPI_Grequest_query_function)(void*,MPI_Status*);
 
 #ifndef PyMPI_HAVE_MPI_User_function
 #undef  MPI_User_function
-typedef void (PyMPI_MPI_User_function)(void*, void*, int*, MPI_Datatype*);
+typedef void (PyMPI_MPI_User_function)(void*,void*,int*,MPI_Datatype*);
 #define MPI_User_function PyMPI_MPI_User_function
 #endif
 
