@@ -18,31 +18,10 @@ del sys
 
 import sys, os, platform, re
 from distutils import sysconfig
-from distutils.util  import convert_path
-from distutils.util  import split_quoted
+from distutils.util import convert_path
+from distutils.util import split_quoted
 from distutils.spawn import find_executable
 from distutils import log
-
-def fix_config_vars(names, values):
-    values = list(values)
-    if sys.platform == 'darwin':
-        if 'ARCHFLAGS' in os.environ:
-            ARCHFLAGS = os.environ['ARCHFLAGS']
-            for i, flag in enumerate(list(values)):
-                if flag is None: continue
-                flag, count = re.subn('-arch\s+\w+', ' ', flag)
-                if count and ARCHFLAGS:
-                    flag = flag + ' ' + ARCHFLAGS
-                values[i] = flag
-        if 'SDKROOT' in os.environ:
-            SDKROOT = os.environ['SDKROOT']
-            for i, flag in enumerate(list(values)):
-                if flag is None: continue
-                flag, count = re.subn('-isysroot [^ \t]*', ' ', flag)
-                if count and SDKROOT:
-                    flag = flag + ' ' + '-isysroot ' + SDKROOT
-                values[i] = flag
-    return values
 
 if hasattr(sys, 'pypy_version_info'):
     config_vars = sysconfig.get_config_vars()
@@ -50,57 +29,26 @@ if hasattr(sys, 'pypy_version_info'):
         if name not in config_vars:
             config_vars[name] = os.path.normpath(getattr(sys, name))
 
-def get_config_vars(*names):
-    # Core Python configuration
-    values = sysconfig.get_config_vars(*names)
-    # Do any distutils flags fixup right now
-    values = fix_config_vars(names, values)
-    return values
-
 def fix_compiler_cmd(cc, mpicc):
-    if not mpicc: return cc
-    if not cc:    return mpicc
-    from os.path import basename
-    cc = split_quoted(cc)
+    if not mpicc: return
     i = 0
-    while basename(cc[i]) == 'env':
-        i = 1
+    while os.path.basename(cc[i]) == 'env':
+        i = i + 1
         while '=' in cc[i]:
             i = i + 1
     cc[i] = mpicc
-    return ' '.join(cc)
 
 def fix_linker_cmd(ld, mpild):
-    if not mpild: return ld
-    if not ld:    return mpild
-    from os.path import basename
-    ld = split_quoted(ld)
+    if not mpild: return
     i = 0
     if (sys.platform.startswith('aix') and
-        basename(ld[i]) == 'ld_so_aix'):
-        i = i + 1
-    while basename(ld[i]) == 'env':
+        os.path.basename(ld[i]) == 'ld_so_aix'):
+        i = 1
+    while os.path.basename(ld[i]) == 'env':
         i = i + 1
         while '=' in ld[i]:
             i = i + 1
     ld[i] = mpild
-    return ' '.join(ld)
-
-def split_linker_cmd(ld):
-    from os.path import basename
-    ld = split_quoted(ld)
-    if not ld: return '', ''
-    i = 0
-    if (sys.platform.startswith('aix') and
-        basename(ld[i]) == 'ld_so_aix'):
-        i = i + 1
-    while basename(ld[i]) == 'env':
-        i = i + 1
-        while '=' in ld[i]:
-            i = i + 1
-    p = i + 1
-    ld, flags = ' '.join(ld[:p]), ' '.join(ld[p:])
-    return ld, flags
 
 from distutils.unixccompiler import UnixCCompiler
 rpath_option_orig = UnixCCompiler.runtime_library_dir_option
@@ -116,102 +64,39 @@ UnixCCompiler.runtime_library_dir_option = rpath_option
 
 def customize_compiler(compiler, lang=None,
                        mpicc=None, mpicxx=None, mpild=None,
-                       environ=None):
-    if environ is None:
-        environ = os.environ
+                       ):
+    sysconfig.customize_compiler(compiler)
     if compiler.compiler_type == 'unix':
-        # Distutils configuration, actually obtained by parsing
-        # :file:{prefix}/lib[32|64]/python{X}.{Y}/config/Makefile
-        (cc, cxx, ccshared, ld,
-         basecflags, opt) = get_config_vars (
-            'CC', 'CXX', 'CCSHARED', 'LDSHARED',
-            'BASECFLAGS', 'OPT')
-        cc  = (cc  or '').replace('-pthread', '')
-        cxx = (cxx or '').replace('-pthread', '')
-        ld  = (ld  or '').replace('-pthread', '')
-        ld, ldshared = split_linker_cmd(ld)
-        basecflags, opt = basecflags or '', opt or ''
-        ccshared = ccshared or ''
-        ldshared = ldshared or ''
-        if hasattr(sys, 'pypy_version_info'):
-            basecflags =  '-Wall -Wimplicit'
-            if not ccshared: ccshared = '-fPIC'
-            if not ldshared: ldshared = '-shared'
-            if sys.platform == 'darwin':
-                ldshared += ' -Wl,-undefined,dynamic_lookup'
         # Compiler command overriding
-        if not mpild and (mpicc or mpicxx):
-            if lang == 'c':
-                mpild = mpicc
-            elif lang == 'c++':
-                mpild = mpicxx
-            else:
-                mpild = mpicc or mpicxx
         if mpicc:
-            cc = fix_compiler_cmd(cc, mpicc)
+            fix_compiler_cmd(compiler.compiler, mpicc)
+            if lang in ('c', None):
+                fix_compiler_cmd(compiler.compiler_so, mpicc)
         if mpicxx:
-            cxx = fix_compiler_cmd(cxx, mpicxx)
+            fix_compiler_cmd(compiler.compiler_cxx, mpicxx)
+            if lang == 'c++':
+                fix_compiler_cmd(compiler.compiler_so, mpicxx)
         if mpild:
-            ld = fix_linker_cmd(ld, mpild)
-        # Environment handling
-        cppflags = cflags = cxxflags = ldflags = ''
-        CPPFLAGS = environ.get('CPPFLAGS', '')
-        CFLAGS   = environ.get('CFLAGS',   '')
-        CXXFLAGS = environ.get('CXXFLAGS', '')
-        LDFLAGS  = environ.get('LDFLAGS',  '')
-        if CPPFLAGS:
-            cppflags = cppflags + ' ' + CPPFLAGS
-            cflags   = cflags   + ' ' + CPPFLAGS
-            cxxflags = cxxflags + ' ' + CPPFLAGS
-            ldflags  = ldflags  + ' ' + CPPFLAGS
-        if CFLAGS:
-            cflags   = cflags   + ' ' + CFLAGS
-            ldflags  = ldflags  + ' ' + CFLAGS
-        if CXXFLAGS:
-            cxxflags = cxxflags + ' ' + CXXFLAGS
-            ldflags  = ldflags  + ' ' + CXXFLAGS
-        if LDFLAGS:
-            ldflags  = ldflags  + ' ' + LDFLAGS
-        basecflags = environ.get('BASECFLAGS', basecflags)
-        opt        = environ.get('OPT',        opt       )
-        ccshared   = environ.get('CCSHARED', ccshared)
-        ldshared   = environ.get('LDSHARED', ldshared)
-        cflags     = ' '.join((basecflags, opt, cflags))
-        cxxflags   = ' '.join((basecflags, opt, cxxflags))
-        cxxflags = cxxflags.replace('-Wstrict-prototypes', '')
-        # Distutils compiler setup
-        cpp    = os.environ.get('CPP') or (cc + ' -E')
-        cc_so  = cc  + ' ' + ccshared
-        cxx_so = cxx + ' ' + ccshared
-        ld_so  = ld  + ' ' + ldshared
-        compiler.set_executables(
-            preprocessor = cpp    + ' ' + cppflags,
-            compiler     = cc     + ' ' + cflags,
-            compiler_so  = cc_so  + ' ' + cflags,
-            compiler_cxx = cxx_so + ' ' + cxxflags,
-            linker_so    = ld_so  + ' ' + ldflags,
-            linker_exe   = ld     + ' ' + ldflags,
-            )
-        try: compiler.compiler_cxx.remove('-Wstrict-prototypes')
+            for ld in [compiler.linker_so, compiler.linker_exe]:
+                fix_linker_cmd(ld, mpild)
+        try: del compiler.shared_lib_extension
         except: pass
+    if compiler.compiler_type == 'cygwin':
+        compiler.set_executables(
+            preprocessor = 'gcc -mcygwin -E',
+            )
     if compiler.compiler_type == 'mingw32':
         compiler.set_executables(
             preprocessor = 'gcc -mno-cygwin -E',
             )
     if compiler.compiler_type in ('unix', 'cygwin', 'mingw32'):
-        if lang == 'c++':
-            def find_cmd_pos(cmd):
-                pos = 0
-                if os.path.basename(cmd[pos]) == "env":
-                    pos = 1
-                    while '=' in cmd[pos]:
-                        pos = pos + 1
-                return pos
-            i = find_cmd_pos(compiler.compiler_so)
-            j = find_cmd_pos(compiler.compiler_cxx)
-            compiler.compiler_so[i] = compiler.compiler_cxx[j]
-            try: compiler.compiler_so.remove('-Wstrict-prototypes')
-            except: pass
+        badcxxflags = [ '-Wimplicit', '-Wstrict-prototypes']
+        for flag in badcxxflags:
+            while flag in compiler.compiler_cxx:
+                compiler.compiler_cxx.remove(flag)
+            if lang == 'c++':
+                while flag in compiler.compiler_so:
+                    compiler.compiler_so.remove(flag)
     if (compiler.compiler_type == 'mingw32' and
         compiler.gcc_version >= '4.4'):
         # http://bugs.python.org/issue12641
@@ -248,6 +133,11 @@ def configure_compiler(compiler, config, lang=None):
     mpicc  = config.get('mpicc')
     mpicxx = config.get('mpicxx')
     mpild  = config.get('mpild')
+    if not mpild and (mpicc or mpicxx):
+        if lang == 'c':   mpild = mpicc
+        if lang == 'c++': mpild = mpicxx
+        if not mpild:     mpild = mpicc or mpicxx
+    #
     customize_compiler(compiler, lang,
                        mpicc=mpicc, mpicxx=mpicxx, mpild=mpild)
     #
