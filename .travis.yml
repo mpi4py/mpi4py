@@ -1,0 +1,37 @@
+# http://travis-ci.org/mpi4py/mpi4py
+
+language: python
+python:
+    - 2.5
+    - 2.6
+    - 2.7
+    - 3.2
+    - 3.3
+#   - pypy
+
+env:
+    - MPI=mpich2
+    - MPI=openmpi
+
+branches:
+  only:
+    - master
+
+before_install:
+    - test $MPI == mpich2  && PACKAGES='mpich2 libmpich2-3 libmpich2-dev' || true
+    - test $MPI == openmpi && PACKAGES='openmpi-bin openmpi-dev'          || true
+    - sudo apt-get update -qq && sudo apt-get install -qq $PACKAGES
+    - pip install -qq --use-mirrors Cython
+install:
+    - pip install .
+
+before_script:
+    - MPIEXEC='mpiexec'
+    - test $MPI == mpich2 && sudo hostname localhost || true
+    - test $MPI == mpich2 && MPIEXEC='mpiexec -launcher fork' || true
+script:
+    - $MPIEXEC -n 1 python $PWD/test/runtests.py -v --no-builddir --exclude=spawn
+    - $MPIEXEC -n 5 python $PWD/test/runtests.py -v --no-builddir --exclude=spawn
+
+#notifications:
+#  email: false
