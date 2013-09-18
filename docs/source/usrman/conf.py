@@ -11,10 +11,20 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys, os
+import sys, os, re
+
+def get_version():
+    here = os.path.dirname(__file__)
+    pardir = [os.path.pardir] * 3
+    topdir = os.path.join(here, *pardir)
+    fh = open(os.path.join(topdir, 'src', '__init__.py'))
+    try: data = fh.read()
+    finally: fh.close()
+    m = re.search(r"__version__\s*=\s*'(.*)'", data)
+    return m.groups()[0]
 
 try: from mpi4py import __version__ as mpi4py_version
-except: mpi4py_version = 'X.X.X'
+except: mpi4py_version = get_version()
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
