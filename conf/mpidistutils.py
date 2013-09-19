@@ -20,14 +20,44 @@ import sys, os, platform, re
 from distutils import sysconfig
 from distutils.util import convert_path
 from distutils.util import split_quoted
-from distutils.spawn import find_executable
 from distutils import log
 
+# Fix missing variables PyPy's  distutils.sysconfig
 if hasattr(sys, 'pypy_version_info'):
     config_vars = sysconfig.get_config_vars()
     for name in ('prefix', 'exec_prefix'):
         if name not in config_vars:
             config_vars[name] = os.path.normpath(getattr(sys, name))
+
+# Workaround distutils.cygwinccompiler.get_versions()
+# failing when the compiler path contains spaces
+from distutils import cygwinccompiler as cygcc
+cygcc_get_versions = cygcc.get_versions
+def get_versions():
+    import distutils.spawn
+    find_executable_orig  = distutils.spawn.find_executable
+    def find_executable(exe):
+        exe = find_executable_orig(exe)
+        if exe and ' ' in exe: exe = '"' + exe + '"'
+        return exe
+    distutils.spawn.find_executable = find_executable
+    versions = cygcc_get_versions()
+    distutils.spawn.find_executable = find_executable_orig
+    return versions
+cygcc.get_versions = get_versions
+
+# Normalize linker flags for runtime library dirs
+from distutils.unixccompiler import UnixCCompiler
+rpath_option_orig = UnixCCompiler.runtime_library_dir_option
+def rpath_option(compiler, dir):
+    option = rpath_option_orig(compiler, dir)
+    if sys.platform.startswith('linux'):
+        if option.startswith('-R'):
+            option =  option.replace('-R', '-Wl,-rpath,', 1)
+        elif option.startswith('-Wl,-R,'):
+            option =  option.replace('-Wl,-R,', '-Wl,-rpath,', 1)
+    return option
+UnixCCompiler.runtime_library_dir_option = rpath_option
 
 def fix_compiler_cmd(cc, mpicc):
     if not mpicc: return
@@ -49,18 +79,6 @@ def fix_linker_cmd(ld, mpild):
         while '=' in ld[i]:
             i = i + 1
     ld[i] = mpild
-
-from distutils.unixccompiler import UnixCCompiler
-rpath_option_orig = UnixCCompiler.runtime_library_dir_option
-def rpath_option(compiler, dir):
-    option = rpath_option_orig(compiler, dir)
-    if sys.platform.startswith('linux'):
-        if option.startswith('-R'):
-            option =  option.replace('-R', '-Wl,-rpath,', 1)
-        elif option.startswith('-Wl,-R,'):
-            option =  option.replace('-Wl,-R,', '-Wl,-rpath,', 1)
-    return option
-UnixCCompiler.runtime_library_dir_option = rpath_option
 
 def customize_compiler(compiler, lang=None,
                        mpicc=None, mpicxx=None, mpild=None,
@@ -97,14 +115,25 @@ def customize_compiler(compiler, lang=None,
             if lang == 'c++':
                 while flag in compiler.compiler_so:
                     compiler.compiler_so.remove(flag)
-    if (compiler.compiler_type == 'mingw32' and
-        compiler.gcc_version >= '4.4'):
+    if compiler.compiler_type == 'mingw32':
+        # Remove msvcrXX.dll
+        del compiler.dll_libraries[:]
         # http://bugs.python.org/issue12641
-        for attr in (
-            'preprocessor', 'compiler', 'compiler_cxx',
-            'compiler_so','linker_so', 'linker_exe'):
-            try: getattr(compiler, attr).remove('-mno-cygwin')
-            except: pass
+        if compiler.gcc_version >= '4.4':
+            for attr in (
+                'preprocessor',
+                'compiler', 'compiler_cxx', 'compiler_so',
+                'linker_so', 'linker_exe'):
+                try: getattr(compiler, attr).remove('-mno-cygwin')
+                except: pass
+        # Add required define and compiler flags for AMD64
+        if platform.architecture()[0] == '64bit':
+            for attr in (
+                'preprocessor',
+                'compiler', 'compiler_cxx', 'compiler_so',
+                'linker_so', 'linker_exe'):
+                getattr(compiler, attr).insert(1, '-DMS_WIN64')
+                getattr(compiler, attr).insert(1, '-m64')
     if compiler.compiler_type == 'msvc':
         if not compiler.initialized:
             compiler.initialize()
@@ -1176,14 +1205,6 @@ class build_exe(build_ext):
             extra_postargs=extra_args,
             depends=exe.depends)
         self._built_objects = objects[:]
-
-        # XXX -- this is a Vile HACK!
-        #
-        # Remove msvcrXX.dll when building executables with MinGW
-        #
-        if self.compiler.compiler_type == 'mingw32':
-            try: del self.compiler.dll_libraries[:]
-            except: pass
 
         # Now link the object files together into a "shared object" --
         # of course, first we have to figure out all the other things
