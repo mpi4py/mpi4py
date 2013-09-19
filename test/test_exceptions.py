@@ -187,17 +187,19 @@ class TestExcGroup(unittest.TestCase):
 
 class TestExcCommNull(unittest.TestCase):
 
+    ERR_COMM = MPI.ERR_COMM
+
     def testCompare(self):
         self.assertRaisesMPI(
-            MPI.ERR_COMM, MPI.Comm.Compare, MPI.COMM_NULL,  MPI.COMM_NULL)
+            self.ERR_COMM, MPI.Comm.Compare, MPI.COMM_NULL,  MPI.COMM_NULL)
         self.assertRaisesMPI(
-            MPI.ERR_COMM, MPI.Comm.Compare, MPI.COMM_SELF,  MPI.COMM_NULL)
+            self.ERR_COMM, MPI.Comm.Compare, MPI.COMM_SELF,  MPI.COMM_NULL)
         self.assertRaisesMPI(
-            MPI.ERR_COMM, MPI.Comm.Compare, MPI.COMM_WORLD, MPI.COMM_NULL)
+            self.ERR_COMM, MPI.Comm.Compare, MPI.COMM_WORLD, MPI.COMM_NULL)
         self.assertRaisesMPI(
-            MPI.ERR_COMM, MPI.Comm.Compare, MPI.COMM_NULL,  MPI.COMM_SELF)
+            self.ERR_COMM, MPI.Comm.Compare, MPI.COMM_NULL,  MPI.COMM_SELF)
         self.assertRaisesMPI(
-            MPI.ERR_COMM, MPI.Comm.Compare, MPI.COMM_NULL,  MPI.COMM_WORLD)
+            self.ERR_COMM, MPI.Comm.Compare, MPI.COMM_NULL,  MPI.COMM_WORLD)
 
     def testAccessors(self):
         for method in ('Get_size', 'Get_rank',
@@ -368,6 +370,9 @@ elif name == 'Open MPI':
         del TestExcWin
         del TestExcErrhandlerNull
         del TestExcErrhandler
+elif name == 'Microsoft MPI':
+        del TestExcStatus
+        TestExcCommNull.ERR_COMM = (MPI.ERR_COMM, MPI.ERR_ARG)
 elif name == 'HP MPI':
         del TestExcDatatypeNull
         del TestExcDatatype

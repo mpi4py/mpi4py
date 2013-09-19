@@ -47,10 +47,11 @@ else:
             if isinstance(arg, (int, float)):
                 if shape is None:
                     shape = ()
-                elif isinstance(shape, int):
-                    shape = (shape,)
                 else:
-                    shape = mkshape(shape)
+                    try:
+                        shape = mkshape(shape)
+                    except TypeError:
+                        shape = (int(shape),)
                 size = product(shape)
                 arg = [arg] * size
             else:
