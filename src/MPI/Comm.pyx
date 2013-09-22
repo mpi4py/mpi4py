@@ -1177,10 +1177,10 @@ cdef class Comm:
         request.ob_buf = PyMPI_issend(obj, dest, tag, comm, &request.ob_mpi)
         return request
     #
-    def irecv(self, obj=None, int dest=0, int tag=0):
+    def irecv(self, obj=None, int source=0, int tag=0):
         cdef MPI_Comm comm = self.ob_mpi
         cdef Request request = <Request>Request.__new__(Request)
-        request.ob_buf = PyMPI_irecv(obj, dest, tag, comm, &request.ob_mpi)
+        request.ob_buf = PyMPI_irecv(obj, source, tag, comm, &request.ob_mpi)
         return request
     #
     def mprobe(self, int source=0, int tag=0, Status status=None):
