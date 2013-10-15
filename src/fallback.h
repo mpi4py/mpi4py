@@ -240,9 +240,8 @@ static int PyMPI_Type_create_hindexed_block(int count,
 #ifndef PyMPI_HAVE_MPI_Type_create_subarray
 
 #undef  PyMPI_CHKARG
-#define PyMPI_CHKARG(EXPR) if (!(EXPR)) return MPI_ERR_ARG
-#undef  PyMPI_CHKERR
-#define PyMPI_CHKERR(IERR) if (IERR) return IERR
+#define PyMPI_CHKARG(expr) if (!(expr)) return MPI_ERR_ARG
+
 static int PyMPI_Type_create_subarray(int ndims,
                                       int sizes[],
                                       int subsizes[],
@@ -258,36 +257,38 @@ static int PyMPI_Type_create_subarray(int ndims,
   int ierr = MPI_SUCCESS;
   tmp1 = tmp2 = types[0] = types[1] = types[2] = MPI_DATATYPE_NULL;
 
-  PyMPI_CHKARG( ndims > 0 );
-  PyMPI_CHKARG( sizes );
-  PyMPI_CHKARG( subsizes );
-  PyMPI_CHKARG( starts );
-  PyMPI_CHKARG( newtype );
+  PyMPI_CHKARG(ndims > 0);
+  PyMPI_CHKARG(sizes);
+  PyMPI_CHKARG(subsizes);
+  PyMPI_CHKARG(starts);
+  PyMPI_CHKARG(newtype);
   for (i=0; i<ndims; i++) {
-    PyMPI_CHKARG( sizes[i] >  0 );
-    PyMPI_CHKARG( subsizes[i] >  0 );
-    PyMPI_CHKARG( starts[i] >= 0 );
-    PyMPI_CHKARG( sizes[i] >= subsizes[i] );
-    PyMPI_CHKARG( starts[i] <= (sizes[i] - subsizes[i]) );
+    PyMPI_CHKARG(sizes[i] >  0);
+    PyMPI_CHKARG(subsizes[i] >  0);
+    PyMPI_CHKARG(starts[i] >= 0);
+    PyMPI_CHKARG(sizes[i] >= subsizes[i]);
+    PyMPI_CHKARG(starts[i] <= (sizes[i] - subsizes[i]));
   }
-  PyMPI_CHKARG( (order==MPI_ORDER_C) || (order==MPI_ORDER_FORTRAN) );
+  PyMPI_CHKARG((order==MPI_ORDER_C) || (order==MPI_ORDER_FORTRAN));
 
-  ierr = MPI_Type_extent(oldtype, &extent); PyMPI_CHKERR(ierr);
+  ierr = MPI_Type_extent(oldtype, &extent);
+  if (ierr != MPI_SUCCESS) return ierr;
 
   if (order == MPI_ORDER_FORTRAN) {
-    if (ndims == 1)
-      ierr = MPI_Type_contiguous(subsizes[0],
-                                 oldtype,
-                                 &tmp1); PyMPI_CHKERR(ierr);
-    else {
-      ierr = MPI_Type_vector(subsizes[1], subsizes[0], sizes[0],
-                             oldtype, &tmp1); PyMPI_CHKERR(ierr);
+    if (ndims == 1) {
+      ierr = MPI_Type_contiguous(subsizes[0], oldtype, &tmp1);
+      if (ierr != MPI_SUCCESS) return ierr;
+    } else {
+      ierr = MPI_Type_vector(subsizes[1], subsizes[0],
+                             sizes[0], oldtype, &tmp1);
+      if (ierr != MPI_SUCCESS) return ierr;
       size = sizes[0]*extent;
       for (i=2; i<ndims; i++) {
         size *= sizes[i-1];
-        ierr = MPI_Type_hvector(subsizes[i], 1, size,
-                                tmp1, &tmp2); PyMPI_CHKERR(ierr);
-        ierr = MPI_Type_free(&tmp1); PyMPI_CHKERR(ierr);
+        ierr = MPI_Type_hvector(subsizes[i], 1, size, tmp1, &tmp2);
+        if (ierr != MPI_SUCCESS) return ierr;
+        ierr = MPI_Type_free(&tmp1);
+        if (ierr != MPI_SUCCESS) return ierr;
         tmp1 = tmp2;
       }
     }
@@ -301,18 +302,19 @@ static int PyMPI_Type_create_subarray(int ndims,
   } else /* MPI_ORDER_C */ {
     /* dimension ndims-1 changes fastest */
     if (ndims == 1) {
-      ierr = MPI_Type_contiguous(subsizes[0],
-                                 oldtype, &tmp1); PyMPI_CHKERR(ierr);
+      ierr = MPI_Type_contiguous(subsizes[0], oldtype, &tmp1);
+      if (ierr != MPI_SUCCESS) return ierr;
     } else {
       ierr = MPI_Type_vector(subsizes[ndims-2], subsizes[ndims-1],
-                             sizes[ndims-1],
-                             oldtype, &tmp1); PyMPI_CHKERR(ierr);
+                             sizes[ndims-1], oldtype, &tmp1);
+      if (ierr != MPI_SUCCESS) return ierr;
       size = sizes[ndims-1]*extent;
       for (i=ndims-3; i>=0; i--) {
         size *= sizes[i+1];
-        ierr = MPI_Type_hvector(subsizes[i], 1, size,
-                                tmp1, &tmp2); PyMPI_CHKERR(ierr);
-        ierr = MPI_Type_free(&tmp1); PyMPI_CHKERR(ierr);
+        ierr = MPI_Type_hvector(subsizes[i], 1, size, tmp1, &tmp2);
+        if (ierr != MPI_SUCCESS) return ierr;
+        ierr = MPI_Type_free(&tmp1);
+        if (ierr != MPI_SUCCESS) return ierr;
         tmp1 = tmp2;
       }
     }
@@ -334,14 +336,15 @@ static int PyMPI_Type_create_subarray(int ndims,
   types[1] = tmp1;
   types[2] = MPI_UB;
 
-  ierr = MPI_Type_struct(3, blklens, disps, types,
-                         newtype); PyMPI_CHKERR(ierr);
-  ierr = MPI_Type_free(&tmp1); PyMPI_CHKERR(ierr);
+  ierr = MPI_Type_struct(3, blklens, disps, types, newtype);
+  if (ierr != MPI_SUCCESS) return ierr;
+  ierr = MPI_Type_free(&tmp1);
+  if (ierr != MPI_SUCCESS) return ierr;
 
   return MPI_SUCCESS;
 }
+
 #undef PyMPI_CHKARG
-#undef PyMPI_CHKERR
 
 #undef  MPI_Type_create_subarray
 #define MPI_Type_create_subarray PyMPI_Type_create_subarray
@@ -354,12 +357,9 @@ static int PyMPI_Type_create_subarray(int ndims,
  */
 #ifndef PyMPI_HAVE_MPI_Type_create_darray
 
-#undef  PyMPI_MIN
-#define PyMPI_MIN(__a, __b) (((__a) < (__b)) ? (__a) : (__b))
 #undef  PyMPI_CHKARG
-#define PyMPI_CHKARG(EXPR) if (!(EXPR)) return MPI_ERR_ARG
-#undef  PyMPI_CHKERR
-#define PyMPI_CHKERR(IERR) if (IERR) goto fn_exit
+#define PyMPI_CHKARG(expr) if (!(expr)) return MPI_ERR_ARG
+
 static int PyMPI_Type_block(int *gsizes,
                             int dim,
                             int ndims,
@@ -386,26 +386,26 @@ static int PyMPI_Type_block(int *gsizes,
   }
 
   j = global_size - blksize*rank;
-  mysize = PyMPI_MIN(blksize, j);
+  mysize = (blksize < j) ? blksize : j;
   if (mysize < 0) mysize = 0;
   stride = orig_extent;
   if (order == MPI_ORDER_FORTRAN) {
     if (dim == 0) {
-      ierr = MPI_Type_contiguous(mysize,
-                                 type_old, type_new); PyMPI_CHKERR(ierr);
+      ierr = MPI_Type_contiguous(mysize, type_old, type_new);
+      if (ierr != MPI_SUCCESS) goto fn_exit;
     } else {
       for (i=0; i<dim; i++) stride *= gsizes[i];
-      ierr = MPI_Type_hvector(mysize, 1, stride,
-                              type_old, type_new); PyMPI_CHKERR(ierr);
+      ierr = MPI_Type_hvector(mysize, 1, stride, type_old, type_new);
+      if (ierr != MPI_SUCCESS) goto fn_exit;
     }
   } else { /* order == MPI_ORDER_C */
     if (dim == ndims-1) {
-      ierr = MPI_Type_contiguous(mysize,
-                                 type_old, type_new); PyMPI_CHKERR(ierr);
+      ierr = MPI_Type_contiguous(mysize, type_old, type_new);
+      if (ierr != MPI_SUCCESS) goto fn_exit;
     } else {
       for (i=ndims-1; i>dim; i--) stride *= gsizes[i];
-      ierr = MPI_Type_hvector(mysize, 1, stride,
-                              type_old, type_new); PyMPI_CHKERR(ierr);
+      ierr = MPI_Type_hvector(mysize, 1, stride, type_old, type_new);
+      if (ierr != MPI_SUCCESS) goto fn_exit;
     }
   }
 
@@ -450,7 +450,7 @@ static int PyMPI_Type_cyclic(int *gsizes,
   else {
     local_size = ((end_index - st_index + 1)/(nprocs*blksize))*blksize;
     rem = (end_index - st_index + 1) % (nprocs*blksize);
-    local_size += PyMPI_MIN(rem, blksize);
+    local_size += (rem < blksize) ? rem : blksize;
   }
 
   count = local_size/blksize;
@@ -462,8 +462,8 @@ static int PyMPI_Type_cyclic(int *gsizes,
   else
     for (i=ndims-1; i>dim; i--) stride *= gsizes[i];
 
-  ierr = MPI_Type_hvector(count, blksize, stride,
-                          type_old, type_new);PyMPI_CHKERR(ierr);
+  ierr = MPI_Type_hvector(count, blksize, stride, type_old, type_new);
+  if (ierr != MPI_SUCCESS) goto fn_exit;
   /* if the last block is of size less than blksize,
      include it separately using MPI_Type_struct */
   if (rem) {
@@ -473,9 +473,10 @@ static int PyMPI_Type_cyclic(int *gsizes,
     disps[1] = count*stride;
     blklens[0] = 1;
     blklens[1] = rem;
-    ierr = MPI_Type_struct(2, blklens, disps, types,
-                           &type_tmp); PyMPI_CHKERR(ierr);
-    ierr = MPI_Type_free(type_new); PyMPI_CHKERR(ierr);
+    ierr = MPI_Type_struct(2, blklens, disps, types, &type_tmp);
+    if (ierr != MPI_SUCCESS) goto fn_exit;
+    ierr = MPI_Type_free(type_new);
+    if (ierr != MPI_SUCCESS) goto fn_exit;
     *type_new = type_tmp;
   }
   /* In the first iteration, we need to set the
@@ -490,9 +491,10 @@ static int PyMPI_Type_cyclic(int *gsizes,
       types[2] = MPI_UB;
       disps[2] = orig_extent * gsizes[dim];
       blklens[0] = blklens[1] = blklens[2] = 1;
-      ierr = MPI_Type_struct(3, blklens, disps, types,
-                             &type_tmp); PyMPI_CHKERR(ierr);
-      ierr = MPI_Type_free(type_new); PyMPI_CHKERR(ierr);
+      ierr = MPI_Type_struct(3, blklens, disps, types, &type_tmp);
+      if (ierr != MPI_SUCCESS) goto fn_exit;
+      ierr = MPI_Type_free(type_new);
+      if (ierr != MPI_SUCCESS) goto fn_exit;
       *type_new = type_tmp;
       *offset = 0;
     } else {
@@ -525,38 +527,39 @@ static int PyMPI_Type_create_darray(int size,
   MPI_Aint *offsets = 0;
 
   orig_extent=0;
-  type_old = type_new = MPI_DATATYPE_NULL;;
+  type_old = type_new = MPI_DATATYPE_NULL;
   types[0] = types[1] = types[2] = MPI_DATATYPE_NULL;
 
-  ierr = MPI_Type_extent(oldtype, &orig_extent); PyMPI_CHKERR(ierr);
+  ierr = MPI_Type_extent(oldtype, &orig_extent);
+  if (ierr != MPI_SUCCESS) goto fn_exit;
 
-  PyMPI_CHKARG(rank     >= 0);
-  PyMPI_CHKARG(size     >  0);
-  PyMPI_CHKARG(ndims    >  0);
-  PyMPI_CHKARG(gsizes   != 0);
-  PyMPI_CHKARG(distribs != 0);
-  PyMPI_CHKARG(dargs    != 0);
-  PyMPI_CHKARG(psizes   != 0);
-  PyMPI_CHKARG((order == MPI_ORDER_C) ||
-               (order == MPI_ORDER_FORTRAN));
-  for (i=0; ierr == MPI_SUCCESS && i < ndims; i++) {
-    PyMPI_CHKARG(gsizes[1] >  0);
-    PyMPI_CHKARG(psizes[1] >  0);
+  PyMPI_CHKARG(rank >= 0);
+  PyMPI_CHKARG(size > 0);
+  PyMPI_CHKARG(ndims > 0);
+  PyMPI_CHKARG(gsizes);
+  PyMPI_CHKARG(distribs);
+  PyMPI_CHKARG(dargs);
+  PyMPI_CHKARG(psizes);
+  PyMPI_CHKARG((order==MPI_ORDER_C) ||
+               (order==MPI_ORDER_FORTRAN) );
+  for (i=0; i < ndims; i++) {
+    PyMPI_CHKARG(gsizes[1] > 0);
+    PyMPI_CHKARG(psizes[1] > 0);
     PyMPI_CHKARG((distribs[i] == MPI_DISTRIBUTE_NONE)  ||
                  (distribs[i] == MPI_DISTRIBUTE_BLOCK) ||
                  (distribs[i] == MPI_DISTRIBUTE_CYCLIC));
     PyMPI_CHKARG((dargs[i] == MPI_DISTRIBUTE_DFLT_DARG) ||
                  (dargs[i] > 0));
-    PyMPI_CHKARG (!((distribs[i] == MPI_DISTRIBUTE_NONE) &&
-                    (psizes[i] != 1)));
+    PyMPI_CHKARG(!((distribs[i] == MPI_DISTRIBUTE_NONE) &&
+                   (psizes[i] != 1)));
   }
 
   /* calculate position in Cartesian grid
      as MPI would (row-major ordering) */
   coords  = (int *) PyMPI_MALLOC(ndims*sizeof(int));
-  if (coords  == 0) { ierr = MPI_ERR_INTERN; PyMPI_CHKERR(ierr); }
+  if (!coords)  { ierr = MPI_ERR_INTERN; goto fn_exit; }
   offsets = (MPI_Aint *) PyMPI_MALLOC(ndims*sizeof(MPI_Aint));
-  if (offsets == 0) { ierr = MPI_ERR_INTERN; PyMPI_CHKERR(ierr); }
+  if (!offsets) { ierr = MPI_ERR_INTERN; goto fn_exit; }
 
   procs = size;
   tmp_rank = rank;
@@ -576,23 +579,27 @@ static int PyMPI_Type_create_darray(int size,
                                 psizes[i], coords[i], dargs[i],
                                 order, orig_extent,
                                 type_old,  &type_new,
-                                offsets+i); PyMPI_CHKERR(ierr);
+                                offsets+i);
+        if (ierr != MPI_SUCCESS) goto fn_exit;
       } else if (distribs[i] == MPI_DISTRIBUTE_CYCLIC) {
         ierr = PyMPI_Type_cyclic(gsizes, i, ndims,
                                  psizes[i], coords[i], dargs[i],
                                  order, orig_extent,
                                  type_old, &type_new,
-                                 offsets+i); PyMPI_CHKERR(ierr);
+                                 offsets+i);
+        if (ierr != MPI_SUCCESS) goto fn_exit;
       } else if (distribs[i] == MPI_DISTRIBUTE_NONE) {
         /* treat it as a block distribution on 1 process */
         ierr = PyMPI_Type_block(gsizes, i, ndims,
-                                1, 0,  MPI_DISTRIBUTE_DFLT_DARG,
+                                1, 0, MPI_DISTRIBUTE_DFLT_DARG,
                                 order, orig_extent,
                                 type_old, &type_new,
-                                offsets+i); PyMPI_CHKERR(ierr);
+                                offsets+i);
+        if (ierr != MPI_SUCCESS) goto fn_exit;
       }
       if (i != 0) {
-        ierr = MPI_Type_free(&type_old); PyMPI_CHKERR(ierr);
+        ierr = MPI_Type_free(&type_old);
+        if (ierr != MPI_SUCCESS) goto fn_exit;
       }
       type_old = type_new;
     }
@@ -612,23 +619,28 @@ static int PyMPI_Type_create_darray(int size,
                                 psizes[i], coords[i], dargs[i],
                                 order, orig_extent,
                                 type_old, &type_new,
-                                offsets+i); PyMPI_CHKERR(ierr);
+                                offsets+i);
+        if (ierr != MPI_SUCCESS) goto fn_exit;
       } else if (distribs[i] == MPI_DISTRIBUTE_CYCLIC) {
         ierr = PyMPI_Type_cyclic(gsizes, i, ndims,
                                  psizes[i], coords[i], dargs[i],
                                  order,  orig_extent,
                                  type_old, &type_new,
-                                 offsets+i); PyMPI_CHKERR(ierr);
+                                 offsets+i);
+        if (ierr != MPI_SUCCESS) goto fn_exit;
       } else if (distribs[i] == MPI_DISTRIBUTE_NONE) {
         /* treat it as a block distribution on 1 process */
         ierr = PyMPI_Type_block(gsizes, i, ndims,
-                                psizes[i], coords[i], MPI_DISTRIBUTE_DFLT_DARG,
+                                psizes[i], coords[i],
+                                MPI_DISTRIBUTE_DFLT_DARG,
                                 order, orig_extent,
                                 type_old, &type_new,
-                                offsets+i); PyMPI_CHKERR(ierr);
+                                offsets+i);
+        if (ierr != MPI_SUCCESS) goto fn_exit;
       }
       if (i != ndims-1) {
-        ierr = MPI_Type_free(&type_old); PyMPI_CHKERR(ierr);
+        ierr = MPI_Type_free(&type_old);
+        if (ierr != MPI_SUCCESS) goto fn_exit;
       }
       type_old = type_new;
     }
@@ -642,27 +654,27 @@ static int PyMPI_Type_create_darray(int size,
     /* rest done below for both Fortran and C order */
   }
 
+  disps[0] = 0;
   disps[1] *= orig_extent;
   disps[2] = orig_extent;
   for (i=0; i<ndims; i++) disps[2] *= gsizes[i];
-  disps[0] = 0;
   blklens[0] = blklens[1] = blklens[2] = 1;
   types[0] = MPI_LB;
   types[1] = type_new;
   types[2] = MPI_UB;
-  ierr = MPI_Type_struct(3, blklens, disps, types,
-                         newtype);PyMPI_CHKERR(ierr);
-  ierr = MPI_Type_free(&type_new);PyMPI_CHKERR(ierr);
+  ierr = MPI_Type_struct(3, blklens, disps, types, newtype);
+  if (ierr != MPI_SUCCESS) goto fn_exit;
+  ierr = MPI_Type_free(&type_new);
+  if (ierr != MPI_SUCCESS) goto fn_exit;
 
   ierr = MPI_SUCCESS;
  fn_exit:
-  if (coords  != 0) PyMPI_FREE(coords);
-  if (offsets != 0) PyMPI_FREE(offsets);
+  if (coords)  PyMPI_FREE(coords);
+  if (offsets) PyMPI_FREE(offsets);
   return ierr;
 }
-#undef PyMPI_MIN
+
 #undef PyMPI_CHKARG
-#undef PyMPI_CHKERR
 
 #undef  MPI_Type_create_darray
 #define MPI_Type_create_darray PyMPI_Type_create_darray
