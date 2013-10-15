@@ -25,6 +25,7 @@ def _ffi_verify(ffi, csource, **kargs):
 def _ffi_verify_push(cc, ld):
     from distutils import sysconfig
     from distutils.spawn import find_executable
+    from distutils.util import split_quoted
     global _customize_compiler_orig
     _customize_compiler_orig = sysconfig.customize_compiler
     if not cc and not ld: return
@@ -32,8 +33,8 @@ def _ffi_verify_push(cc, ld):
     if ld: ld = find_executable(ld)
     def customize_compiler(compiler):
         _customize_compiler_orig(compiler)
-        if cc: compiler.compiler_so[0] = cc
-        if ld: compiler.linker_so[0]   = ld
+        if cc: compiler.compiler_so[0:1] = split_quoted(cc)
+        if ld: compiler.linker_so[0:1]   = split_quoted(ld)
     sysconfig.customize_compiler = customize_compiler
 
 def _ffi_verify_pop():
