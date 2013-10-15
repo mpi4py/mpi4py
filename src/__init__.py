@@ -67,6 +67,39 @@ def get_config():
 
 # --------------------------------------------------------------------
 
+def rc(**kargs):
+    """
+    Runtime configuration options.
+
+    Parameters
+    ----------
+    initialize : bool
+        Automatic MPI initialization at import (default: True).
+    threaded : bool
+        Request for thread support (default: True).
+    thread_level : {'multiple', 'serialized', 'funneled', 'single'}
+        Level of requested thread support (default: 'multiple').
+    finalize : None or bool
+        Automatic MPI finalization at exit (default: None).
+
+    """
+    for key in kargs:
+        if not hasattr(rc, key):
+            raise TypeError("unexpected argument '%s'" % key)
+        for key, value in kargs.items():
+            setattr(rc, key, value)
+
+rc.initialize = True
+rc.threaded = True
+rc.thread_level = "multiple"
+rc.finalize = None
+
+import sys
+sys.modules[__name__+'.rc'] = rc
+del sys
+
+# --------------------------------------------------------------------
+
 def profile(name='MPE', **kargs):
     """
     Support for the MPI profiling interface.
@@ -160,11 +193,6 @@ def profile(name='MPE', **kargs):
         warn(message)
 
 profile._registry = []
-
-# --------------------------------------------------------------------
-
-from mpi4py import rc
-rc.profile = profile
 
 # --------------------------------------------------------------------
 

@@ -99,9 +99,9 @@ def import_package(options, pkgname):
     mpi4py.rc.threaded = options.threaded
     mpi4py.rc.thread_level = options.thread_level
     if options.mpe:
-        mpi4py.rc.profile('mpe', logfile='runtests-mpi4py')
+        mpi4py.profile('mpe', logfile='runtests-mpi4py')
     if options.vt:
-        mpi4py.rc.profile('vt', logfile='runtests-mpi4py')
+        mpi4py.profile('vt', logfile='runtests-mpi4py')
     import mpi4py.MPI
     #
     return package

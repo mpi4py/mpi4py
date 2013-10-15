@@ -142,7 +142,6 @@ metadata = {
 metadata['requires'] = ['pickle',]
 metadata['provides'] = ['mpi4py',
                         'mpi4py.dl',
-                        'mpi4py.rc',
                         'mpi4py.MPI',
                         'mpi4py.MPE',
                         ]
