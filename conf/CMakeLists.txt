@@ -41,21 +41,21 @@ FOREACH(file
   SET(mpi4py_OUTPUT_FILES ${mpi4py_OUTPUT_FILES} ${tgt})
 ENDFOREACH(file)
 
-FOREACH(file ${mpi4py_PYTHON_FILES})
-  SET(mpi4py_py  ${mpi4py_py}  "${mpi4py_BINARY_DIR}/${file}")
-  SET(mpi4py_pyc ${mpi4py_pyc} "${mpi4py_BINARY_DIR}/${file}c")
-  SET(mpi4py_pyo ${mpi4py_pyo} "${mpi4py_BINARY_DIR}/${file}o")
-ENDFOREACH(file)
-ADD_CUSTOM_COMMAND(
-  COMMAND ${CMAKE_COMMAND} ARGS -E echo 'from compileall import compile_dir'     > compile_py
-  COMMAND ${CMAKE_COMMAND} ARGS -E echo 'compile_dir(\"${mpi4py_BINARY_DIR}\")' >> compile_py
-  COMMAND ${PYTHON_EXECUTABLE} ARGS compile_py
-  COMMAND ${PYTHON_EXECUTABLE} ARGS -O compile_py
-  COMMAND ${CMAKE_COMMAND} ARGS -E remove compile_py
-  DEPENDS ${mpi4py_py}
-  OUTPUT  ${mpi4py_pyc} ${mpi4py_pyo}
-  )
-SET(mpi4py_OUTPUT_FILES ${mpi4py_OUTPUT_FILES} ${mpi4py_pyc} ${mpi4py_pyo})
+##FOREACH(file ${mpi4py_PYTHON_FILES})
+##  SET(mpi4py_py  ${mpi4py_py}  "${mpi4py_BINARY_DIR}/${file}")
+##  SET(mpi4py_pyc ${mpi4py_pyc} "${mpi4py_BINARY_DIR}/${file}c")
+##  SET(mpi4py_pyo ${mpi4py_pyo} "${mpi4py_BINARY_DIR}/${file}o")
+##ENDFOREACH(file)
+##ADD_CUSTOM_COMMAND(
+##  COMMAND ${CMAKE_COMMAND} ARGS -E echo 'from compileall import compile_dir'     > compile_py
+##  COMMAND ${CMAKE_COMMAND} ARGS -E echo 'compile_dir(\"${mpi4py_BINARY_DIR}\")' >> compile_py
+##  COMMAND ${PYTHON_EXECUTABLE} ARGS compile_py
+##  COMMAND ${PYTHON_EXECUTABLE} ARGS -O compile_py
+##  COMMAND ${CMAKE_COMMAND} ARGS -E remove compile_py
+##  DEPENDS ${mpi4py_py}
+##  OUTPUT  ${mpi4py_pyc} ${mpi4py_pyo}
+##  )
+##SET(mpi4py_OUTPUT_FILES ${mpi4py_OUTPUT_FILES} ${mpi4py_pyc} ${mpi4py_pyo})
 
 
 FIND_PROGRAM(MPI_COMPILER_CC
