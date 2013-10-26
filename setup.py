@@ -154,25 +154,42 @@ linux   = sys.platform.startswith('linux')
 solaris = sys.platform.startswith('sunos')
 darwin  = sys.platform.startswith('darwin')
 if linux:
-    def whole_archive(name):
+    def whole_archive(compiler, name):
         return ['-Wl,-whole-archive',
                 '-l%s' % name,
                 '-Wl,-no-whole-archive',
                 ]
 elif darwin:
-    def whole_archive(name):
-        return [#'-Wl,-force_load',
-                '-l%s' % name,
-                ]
+    def darwin_linker_dirs(compiler):
+        from distutils.util import split_quoted
+        linker_cmd = compiler.linker_so + ['-show']
+        try:
+            fd = os.popen(' '.join(linker_cmd))
+            output = fd.read(); fd.close()
+            linker_cmd = split_quoted(output)
+        except:
+            pass
+        library_dirs  = [flag[2:] for flag in linker_cmd
+                         if flag.startswith('-L')]
+        library_dirs += ["/usr/lib"]
+        library_dirs += ["/usr/local/lib"]
+        return library_dirs
+    def whole_archive(compiler, name):
+        library_dirs  = compiler.library_dirs[:]
+        library_dirs += darwin_linker_dirs(compiler)
+        for libdir in library_dirs:
+            libpath = os.path.join(libdir, "lib%s.a" % name)
+            if os.path.isfile(libpath):
+                return ['-force_load', libpath]
+        return ['-l%s' % name,]
 elif solaris:
-    def whole_archive(name):
+    def whole_archive(compiler, name):
         return ['-Wl,-zallextract',
                 '-l%s' % name,
                 '-Wl,-zdefaultextract',
                 ]
 else:
-    def whole_archive(name):
-        return ['-l%s' % name]
+    whole_archive = None
 
 def configure_mpi(ext, config_cmd):
     from textwrap import dedent
@@ -250,9 +267,9 @@ def configure_mpe(ext, config_cmd):
           )
     if ok:
         ext.define_macros += [('HAVE_MPE', 1)]
-        if ((linux or darwin or solaris) and
-            libraries[0] == 'lmpe'):
-            ext.extra_link_args += whole_archive('lmpe')
+        if (whole_archive and libraries[0] == 'lmpe'):
+            cc = config_cmd.compiler
+            ext.extra_link_args += whole_archive(cc, 'lmpe')
             for libname in libraries[1:]:
                 ext.extra_link_args += ['-l' + libname]
         else:
@@ -277,9 +294,9 @@ def configure_libmpe(lib, config_cmd):
             libname, other_libraries=libraries):
             libraries.insert(0, libname)
     if 'mpe' in libraries:
-        if ((linux or darwin or solaris) and
-            libraries[0] == 'lmpe'):
-            lib.extra_link_args += whole_archive('lmpe')
+        if (whole_archive and libraries[0] == 'lmpe'):
+            cc = config_cmd.compiler
+            lib.extra_link_args += whole_archive(cc, 'lmpe')
             for libname in libraries[1:]:
                 lib.extra_link_args += ['-l' + libname]
         else:
@@ -296,8 +313,9 @@ def configure_libvt(lib, config_cmd):
         for libname in ('otf', 'z', 'dl'):
             ok = config_cmd.check_library(libname)
             if ok: libraries.append(libname)
-        if linux or darwin or solaris:
-            lib.extra_link_args += whole_archive(vt_lib)
+        if whole_archive:
+            cc = config_cmd.compiler
+            lib.extra_link_args += whole_archive(cc, vt_lib)
             lib.extra_link_args += ['-l%s' % libname
                                     for libname in libraries]
         else:
