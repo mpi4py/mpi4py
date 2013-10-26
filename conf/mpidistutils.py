@@ -16,7 +16,7 @@ del sys
 
 # -----------------------------------------------------------------------------
 
-import sys, os, platform, re
+import sys, os, platform, copy
 from distutils import sysconfig
 from distutils.util import convert_path
 from distutils.util import split_quoted
@@ -97,8 +97,6 @@ def customize_compiler(compiler, lang=None,
         if mpild:
             for ld in [compiler.linker_so, compiler.linker_exe]:
                 fix_linker_cmd(ld, mpild)
-        try: del compiler.shared_lib_extension
-        except: pass
     if compiler.compiler_type == 'cygwin':
         compiler.set_executables(
             preprocessor = 'gcc -mcygwin -E',
@@ -834,6 +832,9 @@ class build_clib(cmd_build_clib.build_clib):
         #
         config = configuration(self, verbose=True)
         configure_compiler(self.compiler, config)
+        if self.compiler.compiler_type == "unix":
+            try: del compiler.shared_lib_extension
+            except: pass
         #
         self.build_libraries(self.libraries)
         self.build_libraries(self.libraries_a)
@@ -1026,13 +1027,13 @@ class build_ext(cmd_build_ext.build_ext):
     def build_extensions(self):
         # First, sanity-check the 'extensions' list
         self.check_extensions_list(self.extensions)
+        # customize compiler
+        self.compiler_sys = copy.deepcopy(self.compiler)
+        customize_compiler(self.compiler_sys)
         # parse configuration file and configure compiler
-        config = configuration(self, verbose=True)
-        configure_compiler(self.compiler, config)
-        if self.compiler.compiler_type == "unix":
-            so_ext = sysconfig.get_config_var('SO')
-            self.compiler.shared_lib_extension = so_ext
-        self.config = config # XXX
+        self.compiler_mpi = self.compiler
+        self.config = configuration(self, verbose=True)
+        configure_compiler(self.compiler, self.config)
         # extra configuration, check for all MPI symbols
         if self.configure:
             log.info('testing for missing MPI symbols')
@@ -1071,6 +1072,11 @@ class build_ext(cmd_build_ext.build_ext):
         if not (self.force or newer_group(depends, filename, 'newer')):
             log.debug("skipping '%s' extension (up-to-date)", ext.name)
             return
+        #
+        # XXX -- this is a Vile HACK!
+        self.compiler = self.compiler_mpi
+        if ext.name == 'mpi4py.dl':
+            self.compiler = self.compiler_sys
         #
         self.config_extension(ext)
         cmd_build_ext.build_ext.build_extension(self, ext)
