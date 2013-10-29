@@ -27,7 +27,6 @@ srcclean:
 	${RM} src/mpi4py.MPI.c
 	${RM} src/include/mpi4py/mpi4py.MPI.h
 	${RM} src/include/mpi4py/mpi4py.MPI_api.h
-	${RM} src/mpi4py.MPE.c
 fullclean: distclean srcclean docsclean
 	-find .    -name '*~' -exec rm -f {} ';'
 

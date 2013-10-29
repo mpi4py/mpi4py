@@ -100,7 +100,7 @@ del sys
 
 # --------------------------------------------------------------------
 
-def profile(name='MPE', **kargs):
+def profile(name='mpe', **kargs):
     """
     Support for the MPI profiling interface.
 
@@ -125,15 +125,6 @@ def profile(name='MPE', **kargs):
             RTLD_NOW = 2
         dlerror = None
     #
-    def lookup_pymod(name, path):
-        for pth in path:
-            for suffix, _, kind in imp.get_suffixes():
-                if kind == imp.C_EXTENSION:
-                    filename = os.path.join(pth, name + suffix)
-                    if os.path.isfile(filename):
-                        return filename
-        return None
-    #
     def lookup_dylib(name, path):
         format = []
         for suffix, _, kind in imp.get_suffixes():
@@ -155,7 +146,7 @@ def profile(name='MPE', **kargs):
     #
     logfile = kargs.pop('logfile', None)
     if logfile:
-        if name in ('mpe', 'MPE'):
+        if name in ('mpe',):
             if 'MPE_LOGFILE_PREFIX' not in os.environ:
                 os.environ['MPE_LOGFILE_PREFIX'] = logfile
         if name in ('vt', 'vt-mpi', 'vt-hyb'):
@@ -169,13 +160,9 @@ def profile(name='MPE', **kargs):
     else:
         path = list(path)
     #
-    if name in ('MPE',):
-        path.append(os.path.dirname(__file__))
-        filename = lookup_pymod(name, path)
-    else:
-        prefix = os.path.dirname(__file__)
-        path.append(os.path.join(prefix, 'lib-pmpi'))
-        filename = lookup_dylib(name, path)
+    prefix = os.path.dirname(__file__)
+    path.append(os.path.join(prefix, 'lib-pmpi'))
+    filename = lookup_dylib(name, path)
     if filename is None:
         raise ValueError("profiler '%s' not found" % name)
     else:

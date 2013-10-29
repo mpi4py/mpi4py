@@ -1,6 +1,6 @@
 import sys
 import mpi4py
-mpi4py.profile('MPE', logfile='threads')
+mpi4py.profile('mpe', logfile='threads')
 
 from mpi4py import MPI
 from array import array

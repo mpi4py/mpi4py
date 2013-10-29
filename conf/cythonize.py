@@ -65,8 +65,4 @@ if __name__ == "__main__":
                   includes=['include'],
                   destdir_h=os.path.join('include', 'mpi4py'),
                   wdir='src')
-        or
-        cythonize('mpi4py.MPE.pyx',
-                  includes=['include'],
-                  wdir='src')
         )

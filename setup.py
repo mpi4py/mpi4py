@@ -141,9 +141,8 @@ metadata = {
 
 metadata['requires'] = ['pickle',]
 metadata['provides'] = ['mpi4py',
-                        'mpi4py.dl',
                         'mpi4py.MPI',
-                        'mpi4py.MPE',
+                        'mpi4py.dl',
                         ]
 
 # --------------------------------------------------------------------
@@ -246,35 +245,6 @@ def configure_mpi(ext, config_cmd):
                     macro = "PyMPI_MISSING_" + function
                     ext.define_macros += [(macro, 1)]
 
-def configure_mpe(ext, config_cmd):
-    from distutils import log
-    log.info("checking for MPE availability ...")
-    libraries = []
-    for libname in ('pthread', 'mpe', 'lmpe'):
-        if config_cmd.check_library(
-            libname, other_libraries=libraries):
-            libraries.insert(0, libname)
-    ok = (config_cmd.check_header("mpe.h",
-                                  headers=["stdlib.h",
-                                           "mpi.h"])
-          and
-          config_cmd.check_function("MPE_Init_log",
-                                    headers=["stdlib.h",
-                                             "mpi.h",
-                                             "mpe.h"],
-                                    libraries=libraries,
-                                    decl=0, call=1)
-          )
-    if ok:
-        ext.define_macros += [('HAVE_MPE', 1)]
-        if (whole_archive and libraries[0] == 'lmpe'):
-            cc = config_cmd.compiler
-            ext.extra_link_args += whole_archive(cc, 'lmpe')
-            for libname in libraries[1:]:
-                ext.extra_link_args += ['-l' + libname]
-        else:
-            ext.libraries += libraries
-
 def configure_dl(ext, config_cmd):
     from distutils import log
     log.info("checking for dlopen() availability ...")
@@ -370,18 +340,6 @@ def ext_modules():
         configure=configure_mpi,
         )
     modules.append(MPI)
-    # MPE extension module
-    MPE = dict(
-        name='mpi4py.MPE',
-        optional=True,
-        sources=['src/MPE.c'],
-        depends=['src/mpi4py.MPE.c',
-                 'src/MPE/mpe-log.h',
-                 'src/MPE/mpe-log.c',
-                 ],
-        configure=configure_mpe,
-        )
-    modules.append(MPE)
     # custom dl extension module
     dl = dict(
         name='mpi4py.dl',
@@ -573,8 +531,7 @@ def run_cython(source, depends=(), includes=(),
 def build_sources(cmd):
     from distutils.errors import DistutilsError
     from os.path import exists, isdir, join
-    has_src = (exists(join('src', 'mpi4py.MPI.c')) and
-               exists(join('src', 'mpi4py.MPE.c')))
+    has_src = exists(join('src', 'mpi4py.MPI.c'))
     has_vcs = (isdir('.hg') or isdir('.git') or isdir('.svn'))
     if (has_src and not has_vcs and not cmd.force): return
     # mpi4py.MPI
@@ -587,14 +544,6 @@ def build_sources(cmd):
     destdir_h = os.path.join('include', 'mpi4py')
     run_cython(source, depends, includes,
                destdir_c=None, destdir_h=destdir_h,
-               wdir='src', force=cmd.force, VERSION=CYTHON)
-    # mpi4py.MPE
-    source = 'mpi4py.MPE.pyx'
-    depends = ("MPE/*.pyx",
-               "MPE/*.pxi",)
-    includes = ['include']
-    run_cython(source, depends, includes,
-               destdir_c=None, destdir_h=None,
                wdir='src', force=cmd.force, VERSION=CYTHON)
 
 from conf.mpidistutils import build_src
