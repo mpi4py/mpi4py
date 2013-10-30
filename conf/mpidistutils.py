@@ -490,11 +490,17 @@ class config(cmd_config.config):
     def check_library (self, library, library_dirs=None,
                    headers=None, include_dirs=None,
                    other_libraries=[], lang="c"):
+        if sys.platform == "darwin":
+            self.compiler.linker_exe.append('-undefined')
+            self.compiler.linker_exe.append('suppress')
         log.info("checking for library '%s' ..." % library)
         body = "int main(int n, char**v) { return 0; }"
         ok = self.try_link(body,  headers, include_dirs,
                            [library]+other_libraries, library_dirs,
                            lang=lang)
+        if sys.platform == "darwin":
+            self.compiler.linker_exe.remove('-undefined')
+            self.compiler.linker_exe.remove('suppress')
         return ok
 
     def check_function (self, function,
