@@ -149,42 +149,53 @@ metadata['provides'] = ['mpi4py',
 # Extension modules
 # --------------------------------------------------------------------
 
+def run_command(exe, args):
+    from distutils.spawn import find_executable
+    from distutils.util  import split_quoted
+    cmd = find_executable(exe)
+    if not cmd: return []
+    if not isinstance(args, str):
+        args = ' '.join(args)
+    try:
+        fd = os.popen(cmd + ' ' + args)
+        output = fd.read(); fd.close()
+        return split_quoted(output)
+    except:
+        return []
+
 linux   = sys.platform.startswith('linux')
 solaris = sys.platform.startswith('sunos')
 darwin  = sys.platform.startswith('darwin')
+
 if linux:
-    def whole_archive(compiler, name):
+    def whole_archive(compiler, name, library_dirs=[]):
         return ['-Wl,-whole-archive',
-                '-l%s' % name,
+                '-l' + name,
                 '-Wl,-no-whole-archive',
                 ]
 elif darwin:
     def darwin_linker_dirs(compiler):
         from distutils.util import split_quoted
         linker_cmd = compiler.linker_so + ['-show']
-        try:
-            fd = os.popen(' '.join(linker_cmd))
-            output = fd.read(); fd.close()
-            linker_cmd = split_quoted(output)
-        except:
-            pass
-        library_dirs  = [flag[2:] for flag in linker_cmd
+        linker_cmd = run_command(linker_cmd[0], linker_cmd[1:])
+        library_dirs  = compiler.library_dirs[:]
+        library_dirs += [flag[2:] for flag in linker_cmd
                          if flag.startswith('-L')]
         library_dirs += ["/usr/lib"]
         library_dirs += ["/usr/local/lib"]
         return library_dirs
-    def whole_archive(compiler, name):
-        library_dirs  = compiler.library_dirs[:]
+    def whole_archive(compiler, name, library_dirs=[]):
+        library_dirs = library_dirs[:]
         library_dirs += darwin_linker_dirs(compiler)
         for libdir in library_dirs:
             libpath = os.path.join(libdir, "lib%s.a" % name)
             if os.path.isfile(libpath):
                 return ['-force_load', libpath]
-        return ['-l%s' % name,]
+        return ['-l%s' % name]
 elif solaris:
-    def whole_archive(compiler, name):
+    def whole_archive(compiler, name, library_dirs=[]):
         return ['-Wl,-zallextract',
-                '-l%s' % name,
+                '-l' + name,
                 '-Wl,-zdefaultextract',
                 ]
 else:
@@ -258,42 +269,78 @@ def configure_dl(ext, config_cmd):
     if ok: ext.define_macros += [('HAVE_DLOPEN', 1)]
 
 def configure_libmpe(lib, config_cmd):
+    #
+    mpecc = os.environ.get('MPECC') or 'mpecc'
+    command = run_command(mpecc, '-mpilog -show')
+    for arg in command:
+        if arg.startswith('-L'):
+            libdir = arg[2:]
+            lib.library_dirs.append(libdir)
+            lib.runtime_library_dirs.append(libdir)
+    #
+    log_lib  = 'lmpe'
+    dep_libs = ('pthread', 'mpe')
+    ok = config_cmd.check_library(log_lib, lib.library_dirs)
+    if not ok: return
     libraries = []
-    for libname in ('pthread', 'mpe', 'lmpe'):
+    for libname in dep_libs:
         if config_cmd.check_library(
-            libname, other_libraries=libraries):
+            libname, lib.library_dirs,
+            other_libraries=libraries):
             libraries.insert(0, libname)
-    if 'mpe' in libraries:
-        if (whole_archive and libraries[0] == 'lmpe'):
-            cc = config_cmd.compiler
-            lib.extra_link_args += whole_archive(cc, 'lmpe')
-            for libname in libraries[1:]:
-                lib.extra_link_args += ['-l' + libname]
-        else:
-            lib.libraries += libraries
+    if whole_archive:
+        cc = config_cmd.compiler
+        dirs = lib.library_dirs[:]
+        lib.extra_link_args += whole_archive(cc, log_lib, dirs)
+        lib.extra_link_args += ['-l' + libname
+                                for libname in libraries]
+    else:
+        lib.libraries += [log_lib] + libraries
 
 def configure_libvt(lib, config_cmd):
-    if lib.name == 'vt':
-        ok = False
-        for vt_lib in ('vt-mpi', 'vt.mpi'):
-            ok = config_cmd.check_library(vt_lib)
-            if ok: break
-        if not ok: return
-        libraries = []
-        for libname in ('otf', 'z', 'dl'):
-            ok = config_cmd.check_library(libname)
-            if ok: libraries.append(libname)
-        if whole_archive:
-            cc = config_cmd.compiler
-            lib.extra_link_args += whole_archive(cc, vt_lib)
-            lib.extra_link_args += ['-l%s' % libname
-                                    for libname in libraries]
-        else:
-            lib.libraries += [vt_lib] + libraries
-    elif lib.name in ('vt-mpi', 'vt-hyb'):
-        vt_lib = lib.name
-        ok = config_cmd.check_library(vt_lib)
-        if ok: lib.libraries = [vt_lib]
+    #
+    vtcc = os.environ.get('VTCC') or 'vtcc'
+    command = run_command(vtcc, '-vt:showme')
+    for arg in command:
+        if arg.startswith('-L'):
+            libdir = arg[2:]
+            lib.library_dirs.append(libdir)
+            lib.runtime_library_dirs.append(libdir)
+    # modern VampirTrace
+    if lib.name == 'vt': 
+        log_lib = 'vt-mpi'
+    else:
+        log_lib = lib.name
+    ok = config_cmd.check_library(log_lib, lib.library_dirs)
+    if ok: lib.libraries = [log_lib]
+    if ok: return
+    # older VampirTrace, Open MPI <= 1.4
+    if lib.name == 'vt-hyb':
+        log_lib = 'vt.ompi'
+    else:
+        log_lib = 'vt.mpi'
+    dep_libs = ('dl', 'z', 'otf',)
+    ok = config_cmd.check_library(log_lib, lib.library_dirs)
+    if not ok: return
+    libraries = []
+    for libname in dep_libs:
+        if config_cmd.check_library(
+            libname, lib.library_dirs,
+            other_libraries=libraries):
+            libraries.insert(0, libname)
+    if whole_archive:
+        cc = config_cmd.compiler
+        dirs = lib.library_dirs[:]
+        lib.extra_link_args += whole_archive(cc, log_lib, dirs)
+        lib.extra_link_args += ['-l' + libname
+                                for libname in libraries]
+    else:
+        lib.libraries += [log_lib] + libraries
+    lib.define_macros.append(('LIBVT_LEGACY', 1))
+    if lib.name == 'vt-hyb':
+        openmp_flag = '-fopenmp' # GCC, Intel
+        lib.extra_compile_args.append(openmp_flag)
+        lib.extra_link_args.append(openmp_flag)
 
 def configure_pyexe(exe, config_cmd):
     from distutils import sysconfig

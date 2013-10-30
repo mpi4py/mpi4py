@@ -1,3 +1,2 @@
-#include "stdlib.h"
-#include "mpi.h"
+#include "pmpi-vt.h"
 static const char name[] = "vt-hyb";

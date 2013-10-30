@@ -4,7 +4,7 @@
 # lines below at the very beginning of your main bootstrap script.
 import mpi4py
 mpi4py.rc.threaded = False
-mpi4py.profile('vt-mpi', logfile='cpilog')
+mpi4py.profile('vt', logfile='cpilog')
 
 # Import the MPI extension module
 from mpi4py import MPI
