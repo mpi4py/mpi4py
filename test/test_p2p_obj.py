@@ -131,7 +131,7 @@ class BaseTestP2PObj(object):
                 self.assertTrue(rreq)
                 sreq = comm.isend(smess, dst, 0)
                 self.assertTrue(sreq)
-                dummy, rmess = MPI.Request.waitall([sreq,rreq])
+                dummy, rmess = MPI.Request.waitall([sreq,rreq], [])
                 self.assertFalse(sreq)
                 self.assertFalse(rreq)
                 self.assertEqual(dummy, None)
@@ -145,7 +145,7 @@ class BaseTestP2PObj(object):
                 self.assertEqual(msg, None)
                 sreq = comm.isend(smess, dst, 1)
                 while True:
-                    flag, msg = MPI.Request.testall([sreq,rreq])
+                    flag, msg = MPI.Request.testall([sreq,rreq], [])
                     if not flag:
                         self.assertEqual(msg, None)
                         continue
