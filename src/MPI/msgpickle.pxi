@@ -504,7 +504,7 @@ cdef object PyMPI_waitall(requests, statuses):
         with nogil: CHKERR( MPI_Waitall(count, irequests, istatuses) )
         bufs = [(<Request>requests[i]).ob_buf for i from 0 <= i < count]
     finally:
-        release_rs(requests, statuses, count, irequests, NULL)
+        release_rs(requests, statuses, count, irequests, istatuses)
     #
     cdef int rcount = 0
     cdef MPI_Datatype rtype = MPI_BYTE
@@ -532,7 +532,7 @@ cdef object PyMPI_testall(requests, int *flag, statuses):
         if flag[0]:
             bufs = [(<Request>requests[i]).ob_buf for i from 0 <= i < count]
     finally:
-        release_rs(requests, statuses, count, irequests, NULL)
+        release_rs(requests, statuses, count, irequests, istatuses)
     #
     if not flag[0]: return None
     cdef int rcount = 0
