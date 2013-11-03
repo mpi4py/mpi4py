@@ -447,7 +447,7 @@ cdef object PyMPI_waitany(requests, int *index, Status status):
     try:
         with nogil: CHKERR( MPI_Waitany(count, irequests, index, &rsts) )
         if index[0] != MPI_UNDEFINED:
-            buf = (<Request>requests[<Py_ssize_t>index[0]]).ob_buf
+            buf = (<Request>requests[index[0]]).ob_buf
         if status is not None:
             status.ob_mpi = rsts
     finally:
@@ -474,7 +474,7 @@ cdef object PyMPI_testany(requests, int *index, int *flag, Status status):
     try:
         with nogil: CHKERR( MPI_Testany(count, irequests, index, flag, &rsts) )
         if index[0] != MPI_UNDEFINED:
-            buf = (<Request>requests[<Py_ssize_t>index[0]]).ob_buf
+            buf = (<Request>requests[index[0]]).ob_buf
         if status is not None:
             status.ob_mpi = rsts
     finally:
