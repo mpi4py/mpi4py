@@ -114,8 +114,11 @@ cdef inline object asarray_argvs(object sequence,
          "expecting %d items, got %d" % (size, n))
      cdef char*** array = NULL
      cdef object ob = allocate((n+1), sizeof(char**), <void**>&array)
+     cdef object argv
      for i from 0 <= i < n:
-         sequence[i] = asarray_argv(sequence[i], &array[i])
+         argv = sequence[i]
+         if argv is None: argv = []
+         sequence[i] = asarray_argv(argv, &array[i])
      array[n] = NULL
      p[0] = array
      return (sequence, ob)

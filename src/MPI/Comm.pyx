@@ -1622,34 +1622,32 @@ cdef class Intracomm(Comm):
         cdef int rank = MPI_UNDEFINED
         CHKERR( MPI_Comm_rank(self.ob_mpi, &rank) )
         cdef tmp1, tmp2, tmp3, tmp4, tmp5
-        cdef Py_ssize_t i=0, n=0
         if root == rank:
             count = <int>len(command)
             tmp1 = asarray_str(command, count, &cmds)
             tmp2 = asarray_argvs(args, count, &argvs)
             tmp3 = asarray_nprocs(maxprocs, count, &imaxprocs)
             tmp4 = asarray_Info(info, count, &infos)
+        cdef int i=0, np=0
         if errcodes is not None:
             if root != rank:
                 count = <int>len(maxprocs)
                 tmp3 = asarray_nprocs(maxprocs, count, &imaxprocs)
-            for i from 0 <= i < count:
-                n += imaxprocs[i]
-            tmp5 = mkarray_int(n, &ierrcodes)
+            for i from 0 <= i < count: np += imaxprocs[i]
+            tmp5 = mkarray_int(np, &ierrcodes)
         #
         cdef Intercomm comm = <Intercomm>Intercomm.__new__(Intercomm)
         with nogil: CHKERR( MPI_Comm_spawn_multiple(
             count, cmds, argvs, imaxprocs, infos, root,
             self.ob_mpi, &comm.ob_mpi, ierrcodes) )
         #
-        cdef Py_ssize_t j=0, p=0
+        cdef int j=0, p=0, q=0
         if errcodes is not None:
             errcodes[:] = [[]] * count
             for i from 0 <= i < count:
-                n = imaxprocs[i]
-                errcodes[i] = \
-                    [ierrcodes[j] for j from p<=j<(p+n)]
-                p += n
+                q = p + imaxprocs[i]
+                errcodes[i] = [ierrcodes[j] for j from p <= j < q]
+                p = q
         #
         return comm
 
