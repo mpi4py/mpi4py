@@ -15,6 +15,10 @@ except ImportError:
         import simplejson as json
     except ImportError:
         json = None
+try:
+    import yaml
+except ImportError:
+    yaml = None
 
 OBJS = [
     None,
@@ -92,6 +96,15 @@ class TestPickle(unittest.TestCase):
             for obj in OBJS2:
                 self.do_pickle(obj, pickle)
             self.do_pickle(OBJS2, pickle)
+
+    if yaml is not None:
+        def testYAML(self):
+            pickle = MPI._p_pickle
+            pickle.dumps = lambda o,p: yaml.dump(o).encode()
+            pickle.loads = lambda s: yaml.load(s.decode())
+            for obj in OBJS:
+                self.do_pickle(obj, pickle)
+            self.do_pickle(OBJS, pickle)
 
 
 if __name__ == '__main__':
