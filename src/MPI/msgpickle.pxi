@@ -59,6 +59,8 @@ cdef class _p_Pickle:
                 self.ob_dumps = None
             else:
                 self.ob_dumps = dumps
+        def __del__(self):
+            self.ob_dumps = None
 
     property loads:
         def __get__(self):
@@ -71,12 +73,16 @@ cdef class _p_Pickle:
                 self.ob_loads = None
             else:
                 self.ob_loads = loads
+        def __del__(self):
+            self.ob_loads = None
 
     property PROTOCOL:
         def __get__(self):
             return self.ob_PROTOCOL
         def __set__(self, PROTOCOL):
             self.ob_PROTOCOL = PROTOCOL
+        def __del__(self):
+            self.ob_PROTOCOL = PyPickle_PROTOCOL
 
     cdef object dump(self, object obj, void **p, int *n):
         if obj is None:
