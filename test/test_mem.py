@@ -1,5 +1,5 @@
-import unittest
 from mpi4py import MPI
+import mpiunittest as unittest
 
 class TestMemory(unittest.TestCase):
 
