@@ -165,7 +165,12 @@ class BaseTestP2PObj(object):
             flag = MPI.Request.Testall(reqs)
             if not flag:
                 index, flag = MPI.Request.Testany(reqs)
-                count, indices = MPI.Request.Testsome(reqs)
+                indices = MPI.Request.Testsome(reqs)
+                if indices is None:
+                    count = MPI.UNDEFINED
+                    indices = []
+                else:
+                    count = len(indices)
                 self.assertTrue(count in  [0, MPI.UNDEFINED])
             for k in range(3):
                 rmess = self.COMM.recv(None, rank, 0)
@@ -175,7 +180,12 @@ class BaseTestP2PObj(object):
                 index, flag = MPI.Request.Testany(reqs)
                 self.assertEqual(index,  0)
                 self.assertTrue(flag)
-                count, indices = MPI.Request.Testsome(reqs)
+                indices = MPI.Request.Testsome(reqs)
+                if indices is None:
+                    count = MPI.UNDEFINED
+                    indices = []
+                else:
+                    count = len(indices)
                 self.assertTrue(count >= 2)
                 indices = list(indices)
                 indices.sort()
@@ -196,11 +206,21 @@ class BaseTestP2PObj(object):
             index = MPI.Request.Waitany(reqs)
             self.assertTrue(index == 0)
             self.assertTrue(flag)
-            count1, indices1 = MPI.Request.Waitsome(reqs)
+            indices1 = MPI.Request.Waitsome(reqs)
+            if indices1 is None:
+                count1 = MPI.UNDEFINED
+                indices1 = []
+            else:
+                count1 = len(indices1)
             for k in range(3):
                 rmess = self.COMM.recv(None, rank, 0)
                 self.assertEqual(rmess, smess)
-            count2, indices2 = MPI.Request.Waitsome(reqs)
+            indices2 = MPI.Request.Waitsome(reqs)
+            if indices2 is None:
+                count2 = MPI.UNDEFINED
+                indices2 = []
+            else:
+                count2 = len(indices2)
             if count1 == MPI.UNDEFINED: count1 = 0
             if count2 == MPI.UNDEFINED: count2 = 0
             self.assertEqual(6, 1+count1+count2)

@@ -164,12 +164,10 @@ cdef class Request:
             release_rs(requests, statuses, incount, irequests, istatuses)
         #
         cdef int i = 0
-        cdef object indices
-        if outcount == MPI_UNDEFINED:
-            indices = []
-        else:
+        cdef object indices = None
+        if outcount != MPI_UNDEFINED:
             indices = [iindices[i] for i from 0 <= i < outcount]
-        return (outcount, indices)
+        return indices
 
     @classmethod
     def Testsome(cls, requests, statuses=None):
@@ -191,12 +189,10 @@ cdef class Request:
             release_rs(requests, statuses, incount, irequests, istatuses)
         #
         cdef int i = 0
-        cdef object indices
-        if outcount == MPI_UNDEFINED:
-            indices = []
-        else:
+        cdef object indices = None
+        if outcount != MPI_UNDEFINED:
             indices = [iindices[i] for i from 0 <= i < outcount]
-        return (outcount, indices)
+        return indices
 
     # Cancel
     # ------

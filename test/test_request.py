@@ -63,25 +63,23 @@ class TestRequestArray(unittest.TestCase):
             self.assertEqual(len(statuses), len(self.REQUESTS))
 
     def testWaitsome(self):
-        out = (MPI.UNDEFINED, [])
         ret = MPI.Request.Waitsome(self.REQUESTS)
-        self.assertEqual((ret[0],list(ret[1])), out)
+        self.assertEqual(ret, None)
         ret = MPI.Request.Waitsome(self.REQUESTS, None)
-        self.assertEqual((ret[0],list(ret[1])), out)
+        self.assertEqual(ret, None)
         for statuses in (self.STATUSES, []):
             ret = MPI.Request.Waitsome(self.REQUESTS, statuses)
-            self.assertEqual((ret[0],list(ret[1])), out)
+            self.assertEqual(ret, None)
             self.assertEqual(len(statuses), len(self.REQUESTS))
 
     def testTestsome(self):
-        out = (MPI.UNDEFINED, [])
         ret = MPI.Request.Testsome(self.REQUESTS)
-        self.assertEqual((ret[0],list(ret[1])), out)
+        self.assertEqual(ret, None)
         ret = MPI.Request.Testsome(self.REQUESTS, None)
-        self.assertEqual((ret[0],list(ret[1])), out)
+        self.assertEqual(ret, None)
         for statuses in (self.STATUSES, []):
             ret = MPI.Request.Testsome(self.REQUESTS, statuses)
-            self.assertEqual((ret[0],list(ret[1])), out)
+            self.assertEqual(ret, None)
             self.assertEqual(len(statuses), len(self.REQUESTS))
 
 _name, _version = MPI.get_vendor()
