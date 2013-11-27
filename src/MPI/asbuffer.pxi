@@ -43,8 +43,18 @@ cdef extern from *:
 
 cdef type array_array
 cdef type numpy_array
-if PYPY: from array   import array   as array_array
-if PYPY: from numpypy import ndarray as numpy_array
+if PYPY:
+    from array import array as array_array
+    try:
+        from _numpypy.multiarray import ndarray as numpy_array
+    except ImportError:
+        try:
+            from numpypy import ndarray as numpy_array
+        except ImportError:
+            try:
+                from numpy import ndarray as numpy_array
+            except ImportError:
+                pass
 
 cdef int \
 PyPy_GetBuffer(object obj, Py_buffer *view, int flags) \
