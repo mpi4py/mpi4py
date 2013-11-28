@@ -106,8 +106,8 @@ class NodeValue(Node):
                   ctype=ctype,
                   calias=calias)
         if ctype.endswith('*'):
-            self.HEADER = "%(ctype)s const %(cname)s;"
-            
+            ctype = ctype.replace('*', "* const")
+            self.HEADER = ctype + " %(cname)s;" 
 
 def ctypefix(ct):
     ct = ct.strip()
