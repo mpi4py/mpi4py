@@ -296,6 +296,7 @@ cdef tuple message_vecw_I(object msg,
                           MPI_Datatype **_types,
                           ):
     cdef Py_ssize_t nargs = len(msg)
+    cdef object o_buffer, o_counts, o_displs, o_types
     if nargs == 3:
         o_buffer, (o_counts, o_displs), o_types = msg
     elif nargs == 4:
@@ -321,6 +322,7 @@ cdef tuple message_vecw_A(object msg,
                           MPI_Datatype **_types,
                           ):
     cdef Py_ssize_t nargs = len(msg)
+    cdef object o_buffer, o_counts, o_displs, o_types
     if nargs == 3:
         o_buffer, (o_counts, o_displs), o_types = msg
     elif nargs == 4:
