@@ -589,8 +589,10 @@ class build(cmd_build.build):
     sub_commands = \
         [('build_src', lambda *args: True)] + \
         cmd_build.build.sub_commands + \
-        [('build_exe', has_executables),
-         ]
+        [('build_exe', has_executables)]
+
+    # XXX disable build_exe subcommand !!!
+    del sub_commands[-1]
 
 
 class build_src(Command):
@@ -1291,8 +1293,7 @@ class install(cmd_install.install):
 
     sub_commands = \
         cmd_install.install.sub_commands[:] + \
-        [('install_exe', has_exe),
-         ]
+        [('install_exe', has_exe)]
 
     # XXX disable install_exe subcommand !!!
     del sub_commands[-1]
