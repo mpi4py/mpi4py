@@ -129,7 +129,7 @@ cdef class Message:
         if self.ob_mpi == MPI_MESSAGE_NULL: self.ob_buf = None
         return rmsg
     #
-    def irecv(self, obj=None, Status status=None):
+    def irecv(self, obj=None):
         """
         Nonblocking receive of matched message
         """
