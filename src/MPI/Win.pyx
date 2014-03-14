@@ -537,18 +537,33 @@ cdef class Win:
     # --------------------
 
     def Flush(self, int rank):
+        """
+        Complete all outstanding RMA operations at the given target
+        """
         with nogil: CHKERR( MPI_Win_flush(rank, self.ob_mpi) )
 
     def Flush_all(self):
+        """
+        Complete  all  outstanding RMA operations at all targets
+        """
         with nogil: CHKERR( MPI_Win_flush_all(self.ob_mpi) )
 
     def Flush_local(self, int rank):
+        """
+        Complete locally all outstanding RMA operations at the given target
+        """
         with nogil: CHKERR( MPI_Win_flush_local(rank, self.ob_mpi) )
 
     def Flush_local_all(self):
+        """
+        Complete locally all outstanding RMA opera- tions at all targets
+        """
         with nogil: CHKERR( MPI_Win_flush_local_all(self.ob_mpi) )
 
     def Sync(self):
+        """
+        Synchronize public and private copies of the given window
+        """
         with nogil: CHKERR( MPI_Win_sync(self.ob_mpi) )
 
 

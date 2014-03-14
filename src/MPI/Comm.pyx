@@ -1202,7 +1202,7 @@ cdef class Comm:
         return message
     #
     def barrier(self):
-        "Barrier"
+        """Barrier"""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_barrier(comm)
     #
