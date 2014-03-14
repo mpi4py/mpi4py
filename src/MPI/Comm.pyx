@@ -1651,7 +1651,6 @@ cdef class Intracomm(Comm):
         #
         return comm
 
-
     # Server Routines
 
     def Accept(self, port_name, Info info=INFO_NULL, int root=0):
@@ -1882,17 +1881,17 @@ cdef class Graphcomm(Intracomm):
     property dims:
         """number of nodes and edges"""
         def __get__(self):
-            return self.Get_topo()
+            return self.Get_dims()
 
     property nnodes:
         """number of nodes"""
         def __get__(self):
-            return self.Get_topo()[0]
+            return self.Get_dims()[0]
 
     property nedges:
         """number of edges"""
         def __get__(self):
-            return self.Get_topo()[1]
+            return self.Get_dims()[1]
 
     def Get_topo(self):
         """
