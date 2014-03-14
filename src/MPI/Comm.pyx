@@ -1178,12 +1178,14 @@ cdef class Comm:
         return request
     #
     def irecv(self, obj=None, int source=0, int tag=0):
+        """Nonblocking receive"""
         cdef MPI_Comm comm = self.ob_mpi
         cdef Request request = <Request>Request.__new__(Request)
         request.ob_buf = PyMPI_irecv(obj, source, tag, comm, &request.ob_mpi)
         return request
     #
     def mprobe(self, int source=0, int tag=0, Status status=None):
+        """Blocking test for a message"""
         cdef MPI_Comm comm = self.ob_mpi
         cdef MPI_Status *statusp = arg_Status(status)
         cdef Message message = <Message>Message.__new__(Message)
@@ -1192,6 +1194,7 @@ cdef class Comm:
         return message
     #
     def improbe(self, int source=0, int tag=0, Status status=None):
+        """Nonblocking test for a message"""
         cdef int flag = 0
         cdef MPI_Comm comm = self.ob_mpi
         cdef MPI_Status *statusp = arg_Status(status)
