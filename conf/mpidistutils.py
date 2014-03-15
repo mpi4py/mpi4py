@@ -84,6 +84,14 @@ def customize_compiler(compiler, lang=None,
                        mpicc=None, mpicxx=None, mpild=None,
                        ):
     sysconfig.customize_compiler(compiler)
+    if (sys.platform == 'darwin' and
+        compiler.compiler[0] == 'clang'):
+        for attr in ('preprocessor',
+                     'compiler', 'compiler_cxx', 'compiler_so',
+                     'linker_so', 'linker_exe'):
+            compiler_cmd = getattr(compiler, attr, [])
+            while '-mno-fused-madd' in compiler_cmd:
+                compiler_cmd.remove('-mno-fused-madd')
     if compiler.compiler_type == 'unix':
         # Compiler command overriding
         if mpicc:
@@ -133,8 +141,7 @@ def customize_compiler(compiler, lang=None,
                 getattr(compiler, attr).insert(1, '-DMS_WIN64')
                 getattr(compiler, attr).insert(1, '-m64')
     if compiler.compiler_type == 'msvc':
-        if not compiler.initialized:
-            compiler.initialize()
+        if not compiler.initialized: compiler.initialize()
         compiler.ldflags_shared.append('/MANIFEST')
         compiler.ldflags_shared_debug.append('/MANIFEST')
 
