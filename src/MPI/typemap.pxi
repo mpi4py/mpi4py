@@ -1,9 +1,8 @@
 # -----------------------------------------------------------------------------
 
-cdef inline int AddTypeMap(dict TD, object key, Datatype dataype) except -1:
-    global TypeDict
-    if dataype.ob_mpi != MPI_DATATYPE_NULL:
-        TD[key] = dataype
+cdef inline int AddTypeMap(dict TD, object key, Datatype datatype) except -1:
+    if datatype.ob_mpi != MPI_DATATYPE_NULL:
+        TD[key] = datatype
         return 1
     return 0
 
