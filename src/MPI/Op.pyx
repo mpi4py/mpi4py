@@ -76,13 +76,11 @@ cdef class Op:
         m.for_cro_send(inbuf, 0)
         m.for_cro_recv(inoutbuf, 0)
         # check counts and datatypes
-        if self.scount != self.rcount:
-            raise ValueError(
-                "mismatch in inbuf count %d and inoutbuf count %d" %
-                (self.scount, self.rcount))
-        if (self.stype != self.rtype):
-            raise ValueError(
-                "mismatch in inbuf and inoutbuf MPI datatypes")
+        if m.scount != m.rcount: raise ValueError(
+            "mismatch in inbuf count %d and inoutbuf count %d" %
+            (self.scount, self.rcount))
+        if (m.stype != m.rtype): raise ValueError(
+            "mismatch in inbuf and inoutbuf MPI datatypes")
         # do local reduction
         with nogil: CHKERR( MPI_Reduce_local(
             m.sbuf, m.rbuf, m.rcount, m.rtype, self.ob_mpi) )
