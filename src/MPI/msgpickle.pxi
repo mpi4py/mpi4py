@@ -730,7 +730,7 @@ cdef object PyMPI_scatter(object sendobj, object recvobj,
     if inter:
         CHKERR( MPI_Comm_remote_size(comm, &size) )
         if root == <int>MPI_PROC_NULL:
-            dosend=1; dorecv=0;
+            dosend=0; dorecv=0;
         elif root == <int>MPI_ROOT:
             dosend=1; dorecv=0;
         else:
