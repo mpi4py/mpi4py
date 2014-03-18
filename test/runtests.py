@@ -17,6 +17,9 @@ def getoptionparser():
     parser.add_option("-e", "--exclude", type="string",
                       action="append", dest="exclude", default=[],
                       help="exclude tests matching PATTERN", metavar="PATTERN")
+    parser.add_option("-f", "--failfast",
+                      action="store_true", dest="failfast", default=False,
+                      help="Stop on first failure")
     parser.add_option("--no-builddir",
                       action="store_false", dest="builddir", default=True,
                       help="disable testing from build directory")
@@ -182,6 +185,7 @@ def load_tests(options, args):
 
 def run_tests(options, testsuite):
     runner = unittest.TextTestRunner(verbosity=options.verbose)
+    runner.failfast = options.failfast
     result = runner.run(testsuite)
     return result.wasSuccessful()
 
