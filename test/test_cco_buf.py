@@ -322,7 +322,7 @@ class BaseTestCCOBuf(object):
                         buf = array(range(10), typecode).as_raw()
                     else:
                         buf = array(-1, typecode, 10).as_raw()
-                    indices = range(0, len(buf), 2)
+                    indices = list(range(0, len(buf), 2))
                     newtype = datatype.Create_indexed_block(1, indices)
                     newtype.Commit()
                     newbuf = (buf, 1, newtype)
@@ -340,7 +340,7 @@ class BaseTestCCOBuf(object):
                         buf = array(range(10), typecode).as_raw()
                     else:
                         buf = array(-1, typecode, 10).as_raw()
-                    indices = range(1, len(buf), 2)
+                    indices = list(range(1, len(buf), 2))
                     newtype = datatype.Create_indexed_block(1, indices)
                     newtype.Commit()
                     newbuf = (buf, 1, newtype)

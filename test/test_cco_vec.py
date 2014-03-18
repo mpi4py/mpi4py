@@ -2,7 +2,6 @@ from mpi4py import MPI
 import mpiunittest as unittest
 import arrayimpl
 
-
 def maxvalue(a):
     try:
         typecode = a.typecode
@@ -30,7 +29,7 @@ class BaseTestCCOVec(object):
                         sbuf = array(root, typecode, count)
                         rbuf = array(  -1, typecode, size*size)
                         counts = [count] * size
-                        displs = range(0, size*size, size)
+                        displs = list(range(0, size*size, size))
                         recvbuf = rbuf.as_mpi_v(counts, displs)
                         if rank != root: recvbuf=None
                         self.COMM.Barrier()
@@ -111,7 +110,7 @@ class BaseTestCCOVec(object):
                         sbuf = array(root, typecode, size*size)
                         rbuf = array(  -1, typecode, count)
                         counts = [count] * size
-                        displs = range(0, size*size, size)
+                        displs = list(range(0, size*size, size))
                         sendbuf = sbuf.as_mpi_v(counts, displs)
                         if rank != root: sendbuf = None
                         self.COMM.Scatterv(sendbuf, rbuf.as_mpi(), root)
@@ -173,7 +172,7 @@ class BaseTestCCOVec(object):
                         sbuf = array(root, typecode, count)
                         rbuf = array(  -1, typecode, size*size)
                         counts = [count] * size
-                        displs = range(0, size*size, size)
+                        displs = list(range(0, size*size, size))
                         sendbuf = sbuf.as_mpi()
                         recvbuf = rbuf.as_mpi_v(counts, displs)
                         self.COMM.Allgatherv(sendbuf, recvbuf)
@@ -237,7 +236,7 @@ class BaseTestCCOVec(object):
                         sbuf = array(root, typecode, size*size)
                         rbuf = array(  -1, typecode, size*size)
                         counts = [count] * size
-                        displs = range(0, size*size, size)
+                        displs = list(range(0, size*size, size))
                         sendbuf = sbuf.as_mpi_v(counts, displs)
                         recvbuf = rbuf.as_mpi_v(counts, displs)
                         self.COMM.Alltoallv(sendbuf, recvbuf)
