@@ -172,7 +172,7 @@ cdef class Comm:
 
     def Split(self, int color=0, int key=0):
         """
-        Split intracommunicator by color and key
+        Split communicator by color and key
         """
         cdef Comm comm = <Comm>type(self)()
         with nogil: CHKERR( MPI_Comm_split(
@@ -182,7 +182,7 @@ cdef class Comm:
     def Split_type(self, int split_type, int key=0,
                    Info info=INFO_NULL):
         """
-        Split intracommunicator by color and key
+        Split communicator by color and key
         """
         cdef MPI_Info cinfo = arg_Info(info)
         cdef Comm comm = <Comm>type(self)()
