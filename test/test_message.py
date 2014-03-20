@@ -2,6 +2,8 @@ from mpi4py import MPI
 import mpiunittest as unittest
 from arrayimpl import allclose
 
+typemap = MPI.__TypeDict__
+
 try:
     import array
     HAVE_ARRAY = True
@@ -28,7 +30,7 @@ class TestMessage(unittest.TestCase):
         self.assertTrue(equal(s, r))
 
     def _test2(self, equal, zero, s, r, typecode):
-        datatype = MPI.__TypeDict__[typecode]
+        datatype = typemap[typecode]
         for type in (None, typecode, datatype):
             r[:] = zero
             Sendrecv([s, type],
@@ -36,7 +38,7 @@ class TestMessage(unittest.TestCase):
             self.assertTrue(equal(s, r))
 
     def _test31(self, equal, z, s, r, typecode):
-        datatype = MPI.__TypeDict__[typecode]
+        datatype = typemap[typecode]
         for count in (None, len(s)):
             for type in (None, typecode, datatype):
                 r[:] = z
@@ -45,7 +47,7 @@ class TestMessage(unittest.TestCase):
                 self.assertTrue(equal(s, r))
 
     def _test32(self, equal, z, s, r, typecode):
-        datatype = MPI.__TypeDict__[typecode]
+        datatype = typemap[typecode]
         for type in (None, typecode, datatype):
             for p in range(0, len(s)):
                 r[:] = z
@@ -62,7 +64,7 @@ class TestMessage(unittest.TestCase):
                     self.assertTrue(equal(z[q:], r[q:]))
 
     def _test4(self, equal, z, s, r, typecode):
-        datatype = MPI.__TypeDict__[typecode]
+        datatype = typemap[typecode]
         for type in (None, typecode, datatype):
             for p in range(0, len(s)):
                 r[:] = z
