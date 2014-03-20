@@ -1432,148 +1432,6 @@ cdef class Intracomm(Comm):
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_exscan(sendobj, recvobj, op, comm)
 
-    # Neighborhood Collectives
-    # ------------------------
-
-    def Neighbor_allgather(self, sendbuf, recvbuf):
-        """
-        Neighbor Gather to All
-        """
-        cdef _p_msg_cco m = message_cco()
-        m.for_neighbor_allgather(0, sendbuf, recvbuf, self.ob_mpi)
-        with nogil: CHKERR( MPI_Neighbor_allgather(
-            m.sbuf, m.scount, m.stype,
-            m.rbuf, m.rcount, m.rtype,
-            self.ob_mpi) )
-
-    def Neighbor_allgatherv(self, sendbuf, recvbuf):
-        """
-        Neighbor Gather to All Vector
-        """
-        cdef _p_msg_cco m = message_cco()
-        m.for_neighbor_allgather(1, sendbuf, recvbuf, self.ob_mpi)
-        with nogil: CHKERR( MPI_Neighbor_allgatherv(
-            m.sbuf, m.scount, m.stype,
-            m.rbuf, m.rcounts, m.rdispls, m.rtype,
-            self.ob_mpi) )
-
-    def Neighbor_alltoall(self, sendbuf, recvbuf):
-        """
-        Neighbor All-to-All
-        """
-        cdef _p_msg_cco m = message_cco()
-        m.for_neighbor_alltoall(0, sendbuf, recvbuf, self.ob_mpi)
-        with nogil: CHKERR( MPI_Neighbor_alltoall(
-            m.sbuf, m.scount, m.stype,
-            m.rbuf, m.rcount, m.rtype,
-            self.ob_mpi) )
-
-    def Neighbor_alltoallv(self, sendbuf, recvbuf):
-        """
-        Neighbor All-to-All Vector
-        """
-        cdef _p_msg_cco m = message_cco()
-        m.for_neighbor_alltoall(1, sendbuf, recvbuf, self.ob_mpi)
-        with nogil: CHKERR( MPI_Neighbor_alltoallv(
-            m.sbuf, m.scounts, m.sdispls, m.stype,
-            m.rbuf, m.rcounts, m.rdispls, m.rtype,
-            self.ob_mpi) )
-
-    def Neighbor_alltoallw(self, sendbuf, recvbuf):
-        """
-        Neighbor All-to-All Generalized
-        """
-        cdef _p_msg_ccow m = message_ccow()
-        m.for_neighbor_alltoallw(sendbuf, recvbuf, self.ob_mpi)
-        with nogil: CHKERR( MPI_Neighbor_alltoallw(
-            m.sbuf, m.scounts, m.sdisplsA, m.stypes,
-            m.rbuf, m.rcounts, m.rdisplsA, m.rtypes,
-            self.ob_mpi) )
-
-    # Nonblocking Neighborhood Collectives
-
-    def Ineighbor_allgather(self, sendbuf, recvbuf):
-        """
-        Nonblocking Neighbor Gather to All
-        """
-        cdef _p_msg_cco m = message_cco()
-        m.for_neighbor_allgather(0, sendbuf, recvbuf, self.ob_mpi)
-        cdef Request request = <Request>Request.__new__(Request)
-        with nogil: CHKERR( MPI_Ineighbor_allgather(
-            m.sbuf, m.scount, m.stype,
-            m.rbuf, m.rcount, m.rtype,
-            self.ob_mpi, &request.ob_mpi) )
-        request.ob_buf = m
-        return request
-
-    def Ineighbor_allgatherv(self, sendbuf, recvbuf):
-        """
-        Nonblocking Neighbor Gather to All Vector
-        """
-        cdef _p_msg_cco m = message_cco()
-        m.for_neighbor_allgather(1, sendbuf, recvbuf, self.ob_mpi)
-        cdef Request request = <Request>Request.__new__(Request)
-        with nogil: CHKERR( MPI_Ineighbor_allgatherv(
-            m.sbuf, m.scount, m.stype,
-            m.rbuf, m.rcounts, m.rdispls, m.rtype,
-            self.ob_mpi, &request.ob_mpi) )
-        request.ob_buf = m
-        return request
-
-    def Ineighbor_alltoall(self, sendbuf, recvbuf):
-        """
-        Nonblocking Neighbor All-to-All
-        """
-        cdef _p_msg_cco m = message_cco()
-        m.for_neighbor_alltoall(0, sendbuf, recvbuf, self.ob_mpi)
-        cdef Request request = <Request>Request.__new__(Request)
-        with nogil: CHKERR( MPI_Ineighbor_alltoall(
-            m.sbuf, m.scount, m.stype,
-            m.rbuf, m.rcount, m.rtype,
-            self.ob_mpi, &request.ob_mpi) )
-        request.ob_buf = m
-        return request
-
-    def Ineighbor_alltoallv(self, sendbuf, recvbuf):
-        """
-        Nonblocking Neighbor All-to-All Vector
-        """
-        cdef _p_msg_cco m = message_cco()
-        m.for_neighbor_alltoall(1, sendbuf, recvbuf, self.ob_mpi)
-        cdef Request request = <Request>Request.__new__(Request)
-        with nogil: CHKERR( MPI_Ineighbor_alltoallv(
-            m.sbuf, m.scounts, m.sdispls, m.stype,
-            m.rbuf, m.rcounts, m.rdispls, m.rtype,
-            self.ob_mpi, &request.ob_mpi) )
-        request.ob_buf = m
-        return request
-
-    def Ineighbor_alltoallw(self, sendbuf, recvbuf):
-        """
-        Nonblocking Neighbor All-to-All Generalized
-        """
-        cdef _p_msg_ccow m = message_ccow()
-        m.for_neighbor_alltoallw(sendbuf, recvbuf, self.ob_mpi)
-        cdef Request request = <Request>Request.__new__(Request)
-        with nogil: CHKERR( MPI_Ineighbor_alltoallw(
-            m.sbuf, m.scounts, m.sdisplsA, m.stypes,
-            m.rbuf, m.rcounts, m.rdisplsA, m.rtypes,
-            self.ob_mpi, &request.ob_mpi) )
-        request.ob_buf = m
-        return request
-
-    # Python Communication
-    #
-    def neighbor_allgather(self, sendobj=None, recvobj=None):
-        """Neighbor Gather to All"""
-        cdef MPI_Comm comm = self.ob_mpi
-        return PyMPI_neighbor_allgather(sendobj, recvobj, comm)
-    #
-    def neighbor_alltoall(self, sendobj=None, recvobj=None):
-        """Neighbor All to All Scatter/Gather"""
-        cdef MPI_Comm comm = self.ob_mpi
-        return PyMPI_neighbor_alltoall(sendobj, recvobj, comm)
-
     # Establishing Communication
     # --------------------------
 
@@ -1693,7 +1551,218 @@ cdef class Intracomm(Comm):
         return comm
 
 
-cdef class Cartcomm(Intracomm):
+cdef class Topocomm(Intracomm):
+
+    """
+    Topology intracommunicator
+    """
+
+    def __cinit__(self, Comm comm=None):
+        cdef int topo = MPI_UNDEFINED
+        if self.ob_mpi != MPI_COMM_NULL:
+            CHKERR( MPI_Topo_test(self.ob_mpi, &topo) )
+            if topo == MPI_UNDEFINED: raise TypeError(
+                "expecting a topology communicator")
+
+    property degrees:
+        "number of incoming and outgoing neighbors"
+        def __get__(self):
+            if isinstance(self, Cartcomm):
+                dim = self.Get_dim()
+                return (2*dim, 2*dim)
+            if isinstance(self, Graphcomm):
+                rank = self.Get_rank()
+                nneighbors = self.Get_neighbors_count(rank)
+                return (nneighbors, nneighbors)
+            if isinstance(self, Distgraphcomm):
+                indeg, outdeg = self.Get_dist_neighbors_count()[:2]
+                return (indeg, outdeg)
+            raise TypeError("Not a topology communicator")
+
+    property indegree:
+        "number of incoming neighbors"
+        def __get__(self):
+            return self.degrees[0]
+
+    property outdegree:
+        "number of outgoing neighbors"
+        def __get__(self):
+            return self.degrees[1]
+
+    property inoutedges:
+        "incoming and outgoing neighbors"
+        def __get__(self):
+            if isinstance(self, Cartcomm):
+                neighbors = []
+                for direction in range(self.Get_dim()):
+                    source, dest = self.Shift(direction, 1)
+                    neighbors.append(source)
+                    neighbors.append(dest)
+                return (neighbors, neighbors)
+            if isinstance(self, Graphcomm):
+                rank = self.Get_rank()
+                neighbors = self.Get_neighbors(rank)
+                return (neighbors, neighbors)
+            if isinstance(self, Distgraphcomm):
+                sources, destinations = self.Get_dist_neighbors()[:2]
+                return (sources, destinations)
+            raise TypeError("Not a topology communicator")
+
+    property inedges:
+        "incoming neighbors"
+        def __get__(self):
+            return self.inoutedges[0]
+
+    property outedges:
+        "outgoing neighbors"
+        def __get__(self):
+            return self.inoutedges[1]
+
+    # Neighborhood Collectives
+    # ------------------------
+
+    def Neighbor_allgather(self, sendbuf, recvbuf):
+        """
+        Neighbor Gather to All
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_neighbor_allgather(0, sendbuf, recvbuf, self.ob_mpi)
+        with nogil: CHKERR( MPI_Neighbor_allgather(
+            m.sbuf, m.scount, m.stype,
+            m.rbuf, m.rcount, m.rtype,
+            self.ob_mpi) )
+
+    def Neighbor_allgatherv(self, sendbuf, recvbuf):
+        """
+        Neighbor Gather to All Vector
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_neighbor_allgather(1, sendbuf, recvbuf, self.ob_mpi)
+        with nogil: CHKERR( MPI_Neighbor_allgatherv(
+            m.sbuf, m.scount, m.stype,
+            m.rbuf, m.rcounts, m.rdispls, m.rtype,
+            self.ob_mpi) )
+
+    def Neighbor_alltoall(self, sendbuf, recvbuf):
+        """
+        Neighbor All-to-All
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_neighbor_alltoall(0, sendbuf, recvbuf, self.ob_mpi)
+        with nogil: CHKERR( MPI_Neighbor_alltoall(
+            m.sbuf, m.scount, m.stype,
+            m.rbuf, m.rcount, m.rtype,
+            self.ob_mpi) )
+
+    def Neighbor_alltoallv(self, sendbuf, recvbuf):
+        """
+        Neighbor All-to-All Vector
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_neighbor_alltoall(1, sendbuf, recvbuf, self.ob_mpi)
+        with nogil: CHKERR( MPI_Neighbor_alltoallv(
+            m.sbuf, m.scounts, m.sdispls, m.stype,
+            m.rbuf, m.rcounts, m.rdispls, m.rtype,
+            self.ob_mpi) )
+
+    def Neighbor_alltoallw(self, sendbuf, recvbuf):
+        """
+        Neighbor All-to-All Generalized
+        """
+        cdef _p_msg_ccow m = message_ccow()
+        m.for_neighbor_alltoallw(sendbuf, recvbuf, self.ob_mpi)
+        with nogil: CHKERR( MPI_Neighbor_alltoallw(
+            m.sbuf, m.scounts, m.sdisplsA, m.stypes,
+            m.rbuf, m.rcounts, m.rdisplsA, m.rtypes,
+            self.ob_mpi) )
+
+    # Nonblocking Neighborhood Collectives
+    # ------------------------------------
+
+    def Ineighbor_allgather(self, sendbuf, recvbuf):
+        """
+        Nonblocking Neighbor Gather to All
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_neighbor_allgather(0, sendbuf, recvbuf, self.ob_mpi)
+        cdef Request request = <Request>Request.__new__(Request)
+        with nogil: CHKERR( MPI_Ineighbor_allgather(
+            m.sbuf, m.scount, m.stype,
+            m.rbuf, m.rcount, m.rtype,
+            self.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = m
+        return request
+
+    def Ineighbor_allgatherv(self, sendbuf, recvbuf):
+        """
+        Nonblocking Neighbor Gather to All Vector
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_neighbor_allgather(1, sendbuf, recvbuf, self.ob_mpi)
+        cdef Request request = <Request>Request.__new__(Request)
+        with nogil: CHKERR( MPI_Ineighbor_allgatherv(
+            m.sbuf, m.scount, m.stype,
+            m.rbuf, m.rcounts, m.rdispls, m.rtype,
+            self.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = m
+        return request
+
+    def Ineighbor_alltoall(self, sendbuf, recvbuf):
+        """
+        Nonblocking Neighbor All-to-All
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_neighbor_alltoall(0, sendbuf, recvbuf, self.ob_mpi)
+        cdef Request request = <Request>Request.__new__(Request)
+        with nogil: CHKERR( MPI_Ineighbor_alltoall(
+            m.sbuf, m.scount, m.stype,
+            m.rbuf, m.rcount, m.rtype,
+            self.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = m
+        return request
+
+    def Ineighbor_alltoallv(self, sendbuf, recvbuf):
+        """
+        Nonblocking Neighbor All-to-All Vector
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_neighbor_alltoall(1, sendbuf, recvbuf, self.ob_mpi)
+        cdef Request request = <Request>Request.__new__(Request)
+        with nogil: CHKERR( MPI_Ineighbor_alltoallv(
+            m.sbuf, m.scounts, m.sdispls, m.stype,
+            m.rbuf, m.rcounts, m.rdispls, m.rtype,
+            self.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = m
+        return request
+
+    def Ineighbor_alltoallw(self, sendbuf, recvbuf):
+        """
+        Nonblocking Neighbor All-to-All Generalized
+        """
+        cdef _p_msg_ccow m = message_ccow()
+        m.for_neighbor_alltoallw(sendbuf, recvbuf, self.ob_mpi)
+        cdef Request request = <Request>Request.__new__(Request)
+        with nogil: CHKERR( MPI_Ineighbor_alltoallw(
+            m.sbuf, m.scounts, m.sdisplsA, m.stypes,
+            m.rbuf, m.rcounts, m.rdisplsA, m.rtypes,
+            self.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = m
+        return request
+
+    # Python Communication
+    #
+    def neighbor_allgather(self, sendobj=None, recvobj=None):
+        """Neighbor Gather to All"""
+        cdef MPI_Comm comm = self.ob_mpi
+        return PyMPI_neighbor_allgather(sendobj, recvobj, comm)
+    #
+    def neighbor_alltoall(self, sendobj=None, recvobj=None):
+        """Neighbor All to All Scatter/Gather"""
+        cdef MPI_Comm comm = self.ob_mpi
+        return PyMPI_neighbor_alltoall(sendobj, recvobj, comm)
+
+
+cdef class Cartcomm(Topocomm):
 
     """
     Cartesian topology intracommunicator
@@ -1857,7 +1926,7 @@ def Compute_dims(int nnodes, dims):
     return dims
 
 
-cdef class Graphcomm(Intracomm):
+cdef class Graphcomm(Topocomm):
 
     """
     General graph topology intracommunicator
@@ -1983,7 +2052,7 @@ cdef class Graphcomm(Intracomm):
         return rank
 
 
-cdef class Distgraphcomm(Intracomm):
+cdef class Distgraphcomm(Topocomm):
 
     """
     Distributed graph topology intracommunicator
