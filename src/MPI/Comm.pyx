@@ -2240,35 +2240,39 @@ def Close_port(port_name):
 # [5.4.4] Name Publishing
 # -----------------------
 
-def Publish_name(service_name, Info info, port_name):
+def Publish_name(service_name, port_name, info=INFO_NULL):
     """
     Publish a service name
     """
+    if isinstance(port_name, Info): # backward compatibility
+        port_name, info = info, port_name
     cdef char *csrvcname = NULL
     service_name = asmpistr(service_name, &csrvcname, NULL)
     cdef char *cportname = NULL
     port_name = asmpistr(port_name, &cportname, NULL)
-    cdef MPI_Info cinfo = arg_Info(info)
+    cdef MPI_Info cinfo = arg_Info(<Info?>info)
     with nogil: CHKERR( MPI_Publish_name(csrvcname, cinfo, cportname) )
 
-def Unpublish_name(service_name, Info info, port_name):
+def Unpublish_name(service_name, port_name, info=INFO_NULL):
     """
     Unpublish a service name
     """
+    if isinstance(port_name, Info): # backward compatibility
+        port_name, info = info, port_name
     cdef char *csrvcname = NULL
     service_name = asmpistr(service_name, &csrvcname, NULL)
     cdef char *cportname = NULL
     port_name = asmpistr(port_name, &cportname, NULL)
-    cdef MPI_Info cinfo = arg_Info(info)
+    cdef MPI_Info cinfo = arg_Info(<Info?>info)
     with nogil: CHKERR( MPI_Unpublish_name(csrvcname, cinfo, cportname) )
 
-def Lookup_name(service_name, Info info=INFO_NULL):
+def Lookup_name(service_name, info=INFO_NULL):
     """
     Lookup a port name given a service name
     """
     cdef char *csrvcname = NULL
     service_name = asmpistr(service_name, &csrvcname, NULL)
-    cdef MPI_Info cinfo = arg_Info(info)
+    cdef MPI_Info cinfo = arg_Info(<Info?>info)
     cdef char cportname[MPI_MAX_PORT_NAME+1]
     with nogil: CHKERR( MPI_Lookup_name(csrvcname, cinfo, cportname) )
     cportname[MPI_MAX_PORT_NAME] = 0 # just in case

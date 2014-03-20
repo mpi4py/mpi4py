@@ -112,7 +112,7 @@ def main_server(COMM):
         port = MPI.Open_port(info)
         log(COMM, "open port '%s'", port)
         service = 'cpi'
-        MPI.Publish_name(service, info, port)
+        MPI.Publish_name(service, port, info)
         log(COMM, "service '%s' published.", service)
     else:
         port = ''
@@ -128,7 +128,7 @@ def main_server(COMM):
     log(COMM, "client disconnected.")
 
     if myrank == 0:
-        MPI.Unpublish_name(service, info, port)
+        MPI.Unpublish_name(service, port, info)
         log(COMM, "service '%s' unpublished", port)
         MPI.Close_port(port)
         log(COMM, "closed  port '%s' ", port)
