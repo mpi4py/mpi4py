@@ -119,6 +119,41 @@ class TestOp(unittest.TestCase):
             self._test_call(MPI.NO_OP, (2,3), 2)
             self._test_call(MPI.NO_OP, (3,2), 3)
 
+    def testMinMax(self):
+        x = [1]; y = [1]
+        res = MPI.MIN(x, y)
+        self.assertTrue(res is x)
+        res = MPI.MAX(x, y)
+        self.assertTrue(res is x)
+
+    def testMinMaxLoc(self):
+        x = [1]; i = [2]; u = [x, i]
+        y = [2]; j = [1]; v = [y, j]
+        res = MPI.MINLOC(u, v)
+        self.assertTrue(res[0] is x)
+        self.assertTrue(res[1] is i)
+        res = MPI.MAXLOC(u, v)
+        self.assertTrue(res[0] is y)
+        self.assertTrue(res[1] is j)
+        #
+        x = [1]; i = 1; u = [x, i]
+        y = [1]; j = 0; v = [y, j]
+        res = MPI.MINLOC(u, v)
+        self.assertTrue(res[0] is y)
+        self.assertTrue(res[1] is j)
+        res = MPI.MAXLOC(u, v)
+        self.assertTrue(res[0] is y)
+        self.assertTrue(res[1] is j)
+        #
+        x = [1]; i = [1]; u = [x, i]
+        y = [1]; j = [0]; v = [y, j]
+        res = MPI.MINLOC(u, v)
+        self.assertTrue(res[0] is y)
+        self.assertTrue(res[1] is j)
+        res = MPI.MAXLOC(u, v)
+        self.assertTrue(res[0] is y)
+        self.assertTrue(res[1] is j)
+
 if not array:
     del TestOp.testCreate
 

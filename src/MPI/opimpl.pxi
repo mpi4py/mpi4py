@@ -2,11 +2,17 @@
 
 cdef object _op_MAX(object x, object y):
     """maximum"""
-    return max(x, y)
+    if y > x:
+        return y
+    else:
+        return x
 
 cdef object _op_MIN(object x, object y):
     """minimum"""
-    return min(x, y)
+    if y < x:
+        return y
+    else:
+        return x
 
 cdef object _op_SUM(object x, object y):
     """sum"""
@@ -42,33 +48,31 @@ cdef object _op_LXOR(object x, object y):
 
 cdef object _op_MAXLOC(object x, object y):
     """maximum and location"""
-    cdef object i, j, u, v, w, k
+    cdef object i, j, u, v
     u, i = x
     v, j = y
-    w = max(u, v)
-    k = None
-    if u == v:
-        k = min(i, j)
-    elif u <  v:
-        k = j
+    if u > v:
+        return u, i
+    elif v > u:
+        return v, j
+    elif j < i:
+        return v, j
     else:
-        k = i
-    return (w, k)
+        return u, i
 
 cdef object _op_MINLOC(object x, object y):
     """minimum and location"""
-    cdef object i, j, u, v, w, k
+    cdef object i, j, u, v
     u, i = x
     v, j = y
-    w = min(u, v)
-    k = None
-    if u == v:
-        k = min(i, j)
-    elif u <  v:
-        k = i
+    if u < v:
+        return u, i
+    elif v < u:
+        return v, j
+    elif j < i:
+        return v, j
     else:
-        k = j
-    return (w, k)
+        return u, i
 
 cdef object _op_REPLACE(object x, object y):
     """replace,  (x, y) -> y"""
