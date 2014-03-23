@@ -30,9 +30,9 @@ class TestMessage(unittest.TestCase):
         #
         noproc = MPI.MESSAGE_NO_PROC
         self.assertTrue(noproc)
-        noproc.recv(None)
+        noproc.recv()
         self.assertTrue(noproc)
-        noproc.irecv(None).wait()
+        noproc.irecv().wait()
         self.assertTrue(noproc)
         #
         noproc2 = MPI.Message(MPI.MESSAGE_NO_PROC)
@@ -41,11 +41,11 @@ class TestMessage(unittest.TestCase):
         self.assertNotEqual(noproc, MPI.MESSAGE_NULL)
         #
         message = MPI.Message(MPI.MESSAGE_NO_PROC)
-        message.recv(None)
+        message.recv()
         self.assertEqual(message, MPI.MESSAGE_NULL)
         #
         message = MPI.Message(MPI.MESSAGE_NO_PROC)
-        request = message.irecv(None)
+        request = message.irecv()
         self.assertEqual(message, MPI.MESSAGE_NULL)
         self.assertNotEqual(request, MPI.REQUEST_NULL)
         request.wait()
