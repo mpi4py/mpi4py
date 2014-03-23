@@ -154,6 +154,24 @@ class TestOp(unittest.TestCase):
         self.assertTrue(res[0] is y)
         self.assertTrue(res[1] is j)
 
+    def testIsCommutative(self):
+        ops = [MPI.MAX,    MPI.MIN,
+               MPI.SUM,    MPI.PROD,
+               MPI.LAND,   MPI.BAND,
+               MPI.LOR,    MPI.BOR,
+               MPI.LXOR,   MPI.BXOR,
+               MPI.MAXLOC, MPI.MINLOC,]
+        for op in ops:
+            flag = op.Is_commutative()
+            self.assertEqual(flag, op.is_commutative)
+            self.assertTrue(flag)
+        ops =  [MPI.REPLACE, MPI.NO_OP]
+        for op in ops:
+            if not op: continue
+            flag = op.Is_commutative()
+            self.assertEqual(flag, op.is_commutative)
+            #self.assertFalse(flag)
+
 if not array:
     del TestOp.testCreate
 
