@@ -155,6 +155,8 @@ class TestOp(unittest.TestCase):
         self.assertTrue(res[1] is j)
 
     def testIsCommutative(self):
+        try: MPI.SUM.Is_commutative()
+        except NotImplementedError: return
         ops = [MPI.MAX,    MPI.MIN,
                MPI.SUM,    MPI.PROD,
                MPI.LAND,   MPI.BAND,
