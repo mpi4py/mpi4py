@@ -22,6 +22,8 @@ class TestErrorCode(unittest.TestCase):
 
     def testException(self):
         from sys import version_info as py_version
+        success = MPI.Exception(MPI.SUCCESS)
+        lasterr = MPI.Exception(MPI.ERR_LASTCODE)
         for ierr in self.errorclasses:
             errstr = MPI.Get_error_string(ierr)
             errcls = MPI.Get_error_class(ierr)
@@ -30,12 +32,42 @@ class TestErrorCode(unittest.TestCase):
                 self.assertEqual(errexc.error_code,   ierr)
                 self.assertEqual(errexc.error_class,  ierr)
                 self.assertEqual(errexc.error_string, errstr)
+            self.assertEqual(repr(errexc), "MPI.Exception(%d)" % ierr)
             self.assertEqual(str(errexc), errstr)
             self.assertEqual(int(errexc), ierr)
+            self.assertEqual(hash(errexc), RuntimeError.__hash__(errexc))
             self.assertTrue(errexc == ierr)
             self.assertTrue(errexc == errexc)
             self.assertFalse(errexc != ierr)
             self.assertFalse(errexc != errexc)
+            self.assertTrue(success <= ierr   < lasterr)
+            self.assertTrue(success <= errexc < lasterr)
+            self.assertTrue(errexc >= ierr)
+            self.assertTrue(errexc >= success)
+            self.assertTrue(lasterr > ierr)
+            self.assertTrue(lasterr > errexc)
+            if errexc == success:
+                self.assertFalse(errexc)
+            else:
+                self.assertTrue(errexc)
+        exc = MPI.Exception(MPI.SUCCESS-1)
+        self.assertTrue(exc, MPI.ERR_UNKNOWN)
+        exc = MPI.Exception(MPI.ERR_LASTCODE+1)
+        self.assertTrue(exc, MPI.ERR_UNKNOWN)
+
+    def testAddClassCodeString(self):
+        try:
+            errclass  = MPI.Add_error_class()
+        except NotImplementedError:
+            return
+        errcode1 = MPI.Add_error_code(errclass)
+        MPI.Add_error_string(errcode1, "error code 1")
+        self.assertEqual(MPI.Get_error_class(errcode1), errclass)
+        self.assertEqual(MPI.Get_error_string(errcode1), "error code 1")
+        errcode2 = MPI.Add_error_code(errclass)
+        MPI.Add_error_string(errcode2, "error code 2")
+        self.assertEqual(MPI.Get_error_class(errcode2), errclass)
+        self.assertEqual(MPI.Get_error_string(errcode2), "error code 2")
 
 if __name__ == '__main__':
     unittest.main()
