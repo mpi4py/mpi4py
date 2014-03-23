@@ -43,10 +43,17 @@ cdef class _p_Pickle:
     cdef object ob_loads
     cdef object ob_PROTOCOL
 
-    def __cinit__(self):
+    def __cinit__(self, *args, **kwargs):
         self.ob_dumps = None
         self.ob_loads = None
         self.ob_PROTOCOL = PyPickle_PROTOCOL
+
+    def __init__(self, dumps=None, loads=None, protocol=None):
+        if dumps is None and protocol is None:
+            protocol = PyPickle_PROTOCOL
+        self.ob_dumps = dumps
+        self.ob_loads = loads
+        self.ob_PROTOCOL = protocol
 
     property dumps:
         def __get__(self):
@@ -93,7 +100,10 @@ cdef class _p_Pickle:
         if self.ob_dumps is None:
             buf = PyPickle_dumps(obj, self.ob_PROTOCOL)
         else:
-            buf = self.ob_dumps(obj, self.ob_PROTOCOL)
+            if self.ob_PROTOCOL is None:
+                buf = self.ob_dumps(obj)
+            else:
+                buf = self.ob_dumps(obj, self.ob_PROTOCOL)
         p[0] = <void*> PyBytes_AsString(buf)
         n[0] = <int>   PyBytes_Size(buf) # XXX overflow?
         return buf
