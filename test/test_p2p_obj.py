@@ -117,6 +117,43 @@ class BaseTestP2PObj(object):
                 rmess = req.wait()
                 self.assertFalse(req)
                 self.assertEqual(rmess, smess)
+        for smess in messages:
+            src = dst = rank
+            rreq1 = comm.irecv(None, src, 1)
+            rreq2 = comm.irecv(None, src, 1)
+            rreq3 = comm.irecv(None, src, 1)
+            rreqs = [rreq1, rreq2, rreq3]
+            for i in range(len(rreqs)):
+                comm.send(smess, dst, 1)
+                index, obj = MPI.Request.waitany(rreqs)
+                self.assertEqual(index, i)
+                self.assertEqual(obj, smess)
+                self.assertFalse(rreqs[index])
+            index, obj = MPI.Request.waitany(rreqs)
+            self.assertEqual(index, MPI.UNDEFINED)
+            self.assertEqual(obj, None)
+        for smess in messages:
+            src = dst = rank
+            rreq1 = comm.irecv(None, src, 1)
+            rreq2 = comm.irecv(None, src, 1)
+            rreq3 = comm.irecv(None, src, 1)
+            rreqs = [rreq1, rreq2, rreq3]
+            index, flag, obj = MPI.Request.testany(rreqs)
+            self.assertEqual(index, MPI.UNDEFINED)
+            self.assertEqual(flag, False)
+            self.assertEqual(obj, None)
+            for i in range(len(rreqs)):
+                self.assertTrue(rreqs[i])
+                comm.send(smess, dst, 1)
+                index, flag, obj = MPI.Request.testany(rreqs)
+                self.assertEqual(index, i)
+                self.assertEqual(flag, True)
+                self.assertEqual(obj, smess)
+                self.assertFalse(rreqs[i])
+            index, flag, obj = MPI.Request.testany(rreqs)
+            self.assertEqual(index, MPI.UNDEFINED)
+            self.assertEqual(flag, True)
+            self.assertEqual(obj, None)
 
     def testIRecvAndISend(self):
         comm = self.COMM
