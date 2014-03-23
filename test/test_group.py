@@ -17,6 +17,11 @@ class BaseTestGroup(object):
         gcmp = MPI.Group.Compare(self.GROUP, self.GROUP)
         self.assertEqual(gcmp, MPI.IDENT)
 
+    def testDup(self):
+        group = self.GROUP.Dup()
+        self.assertEqual(MPI.Group.Compare(group, self.GROUP), MPI.IDENT)
+        group.Free()
+
     def testUnion(self):
         group = MPI.Group.Union(MPI.GROUP_EMPTY, self.GROUP)
         self.assertEqual(MPI.Group.Compare(group, self.GROUP), MPI.IDENT)
