@@ -42,18 +42,31 @@ combiner_map = {}
 
 class TestDatatype(unittest.TestCase):
 
+    def testBoolEqNe(self):
+        for dtype in datatypes:
+            self.assertTrue (not not dtype)
+            self.assertTrue (dtype == MPI.Datatype(dtype))
+            self.assertFalse(dtype != MPI.Datatype(dtype))
+
     def testGetExtent(self):
         for dtype in datatypes:
             lb, ext = dtype.Get_extent()
+            self.assertEqual(dtype.lb, lb)
+            self.assertEqual(dtype.ub, lb+ext)
+            self.assertEqual(dtype.extent, ext)
 
     def testGetSize(self):
         for dtype in datatypes:
             size = dtype.Get_size()
+            self.assertTrue(dtype.size, size)
 
     def testGetTrueExtent(self):
         for dtype in datatypes:
             try:
                 lb, ext = dtype.Get_true_extent()
+                self.assertEqual(dtype.true_lb, lb)
+                self.assertEqual(dtype.true_ub, lb+ext)
+                self.assertEqual(dtype.true_extent, ext)
             except NotImplementedError:
                 return
 
@@ -246,7 +259,6 @@ class TestDatatype(unittest.TestCase):
                 self.assertEqual(name, dtype.Get_name())
             except NotImplementedError:
                 return
-
 
     def testCommit(self):
         for dtype in datatypes:
