@@ -115,7 +115,10 @@ class TestDatatype(unittest.TestCase):
         decoded2 = newtype2.decode()
         self.assertEqual(decoded[1], decoded2[1])
         self.assertEqual(decoded[2], decoded2[2])
-        newtype2.Free()
+        if combiner not in (MPI.COMBINER_F90_INTEGER,
+                            MPI.COMBINER_F90_REAL,
+                            MPI.COMBINER_F90_COMPLEX,):
+            newtype2.Free()
 
     def _test_derived(self, oldtype, factory, *args):
         try:
@@ -128,7 +131,11 @@ class TestDatatype(unittest.TestCase):
         self._test_derived_contents(oldtype, factory,  newtype)
         newtype.Commit()
         self._test_derived_contents(oldtype, factory,  newtype)
-        newtype.Free()
+        combiner = newtype.Get_envelope()[-1]
+        if combiner not in (MPI.COMBINER_F90_INTEGER,
+                            MPI.COMBINER_F90_REAL,
+                            MPI.COMBINER_F90_COMPLEX,):
+            newtype.Free()
 
     def testDup(self):
         for dtype in datatypes:
@@ -242,7 +249,50 @@ class TestDatatype(unittest.TestCase):
                                 args = sizes, subsizes, starts, order
                                 self._test_derived(dtype, factory, *args)
 
-    def testResized(self):
+    def testCreateDarray(self):
+        for dtype in datatypes:
+            for ndim in range(1, 3+1):
+                for size in (4, 8, 9, 27):
+                    for rank in (0, size-1):
+                        for dist in [MPI.DISTRIBUTE_BLOCK, MPI.DISTRIBUTE_CYCLIC]:
+                            for order in [MPI.ORDER_C, MPI.ORDER_F]:
+                                gsizes = [size]*ndim
+                                distribs = [dist]*ndim
+                                dargs = [MPI.DISTRIBUTE_DFLT_DARG]*ndim
+                                psizes = MPI.Compute_dims(size, [0]*ndim)
+                                factory = MPI.Datatype.Create_darray
+                                args = size, rank, gsizes, distribs, dargs, psizes, order
+                                self._test_derived(dtype, factory, *args)
+
+    def testCreateF90(self):
+        for r in (1, 2, 4):
+            factory = MPI.Datatype.Create_f90_integer
+            args = (r,)
+            self._test_derived(None, factory, *args)
+        for (p, r) in ((6, 30), (15, 300)):
+            factory = MPI.Datatype.Create_f90_real
+            args = (p, r)
+            self._test_derived(None, factory, *args)
+        for (p, r) in ((6, 30), (15, 300)):
+            factory = MPI.Datatype.Create_f90_complex
+            args = (p, r)
+            self._test_derived(None, factory, *args)
+
+    def testMatchSize(self):
+        typeclass = MPI.TYPECLASS_INTEGER
+        for size in (1, 2, 4, 8):
+            datatype = MPI.Datatype.Match_size(typeclass, size)
+            self.assertEqual(size, datatype.size)
+        typeclass = MPI.TYPECLASS_REAL
+        for size in (4, 8):
+            datatype = MPI.Datatype.Match_size(typeclass, size)
+            self.assertEqual(size, datatype.size)
+        typeclass  = MPI.TYPECLASS_COMPLEX
+        for size in (8, 16):
+            datatype = MPI.Datatype.Match_size(typeclass, size)
+            self.assertEqual(size, datatype.size)
+
+    def testCreateResized(self):
         for dtype in datatypes:
             for lb in range(-10, 10):
                 for extent in range(1, 10):
