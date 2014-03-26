@@ -264,19 +264,35 @@ class TestDatatype(unittest.TestCase):
                                 args = size, rank, gsizes, distribs, dargs, psizes, order
                                 self._test_derived(dtype, factory, *args)
 
-    def testCreateF90(self):
+    def testCreateF90Integer(self):
         for r in (1, 2, 4):
             factory = MPI.Datatype.Create_f90_integer
             args = (r,)
             self._test_derived(None, factory, *args)
-        for (p, r) in ((6, 30), (15, 300)):
-            factory = MPI.Datatype.Create_f90_real
-            args = (p, r)
-            self._test_derived(None, factory, *args)
-        for (p, r) in ((6, 30), (15, 300)):
-            factory = MPI.Datatype.Create_f90_complex
-            args = (p, r)
-            self._test_derived(None, factory, *args)
+
+    def testCreateF90RealSingle(self):
+        (p, r) = (6, 30)
+        factory = MPI.Datatype.Create_f90_real
+        args = (p, r)
+        self._test_derived(None, factory, *args)
+
+    def testCreateF90RealDouble(self):
+        (p, r) = (15, 300)
+        factory = MPI.Datatype.Create_f90_real
+        args = (p, r)
+        self._test_derived(None, factory, *args)
+
+    def testCreateF90ComplexSingle(self):
+        (p, r) = (6, 30)
+        factory = MPI.Datatype.Create_f90_complex
+        args = (p, r)
+        self._test_derived(None, factory, *args)
+
+    def testCreateF90ComplexDouble(self):
+        (p, r) = (15, 300)
+        factory = MPI.Datatype.Create_f90_complex
+        args = (p, r)
+        self._test_derived(None, factory, *args)
 
     def testMatchSize(self):
         typeclass = MPI.TYPECLASS_INTEGER
