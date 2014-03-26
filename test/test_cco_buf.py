@@ -556,6 +556,29 @@ class BaseTestCCOBufInplace(object):
                             elif op == MPI.MIN:
                                 self.assertEqual(value, 0)
 
+class TestReduceLocal(unittest.TestCase):
+
+    def testReduceLocal(self):
+        for array in arrayimpl.ArrayTypes:
+            for typecode in arrayimpl.TypeMap:
+                for op in (MPI.SUM, MPI.PROD, MPI.MAX, MPI.MIN):
+                    size = 5
+                    sbuf = array(range(1,size+1), typecode)
+                    rbuf = array(range(0,size+0), typecode)
+                    try:
+                        op.Reduce_local(sbuf.as_mpi(), rbuf.as_mpi())
+                    except NotImplementedError:
+                        return
+                    for i, value in enumerate(rbuf):
+                        self.assertEqual(sbuf[i], i+1)
+                        if op == MPI.SUM:
+                            self.assertAlmostEqual(value, i+(i+1))
+                        elif op == MPI.PROD:
+                            self.assertAlmostEqual(value, i*(i+1))
+                        elif op == MPI.MAX:
+                            self.assertEqual(value, i+1)
+                        elif op == MPI.MIN:
+                            self.assertEqual(value, i)
 
 class TestCCOBufSelf(BaseTestCCOBuf, unittest.TestCase):
     COMM = MPI.COMM_SELF
