@@ -909,7 +909,7 @@ static int PyMPI_Free_mem(void *baseptr)
 #ifndef PyMPI_HAVE_MPI_Win_allocate
 #ifdef  PyMPI_HAVE_MPI_Win_create
 
-static int PyMPI_KEYVAL_WIN_MPIMEM = MPI_KEYVAL_INVALID;
+static int PyMPI_WIN_KEYVAL_MPIMEM = MPI_KEYVAL_INVALID;
 
 static int MPIAPI
 PyMPI_win_free_mpimem(PyMPI_UNUSED MPI_Win win,
@@ -920,7 +920,7 @@ PyMPI_win_free_mpimem(PyMPI_UNUSED MPI_Win win,
 }
 
 static int MPIAPI
-PyMPI_free_keyval_win(PyMPI_UNUSED MPI_Comm comm,
+PyMPI_win_free_keyval(PyMPI_UNUSED MPI_Comm comm,
                       PyMPI_UNUSED int k, void *v,
                       PyMPI_UNUSED void *xs)
 {
@@ -939,24 +939,26 @@ static int PyMPI_Win_allocate(MPI_Aint size, int disp_unit,
   int ierr = MPI_SUCCESS;
   void *baseptr = MPI_BOTTOM;
   MPI_Win win = MPI_WIN_NULL;
+  if (!baseptr_) return MPI_ERR_ARG;
+  if (!win_)     return MPI_ERR_ARG;
   ierr = MPI_Alloc_mem(size?size:1, info, &baseptr);
   if (ierr != MPI_SUCCESS) goto error;
   ierr = MPI_Win_create(baseptr, size, disp_unit, info, comm, &win);
   if (ierr != MPI_SUCCESS) goto error;
 #if defined(PyMPI_HAVE_MPI_Win_create_keyval) && \
     defined(PyMPI_HAVE_MPI_Win_set_attr)
-  if (PyMPI_KEYVAL_WIN_MPIMEM == MPI_KEYVAL_INVALID) {
+  if (PyMPI_WIN_KEYVAL_MPIMEM == MPI_KEYVAL_INVALID) {
     int comm_keyval = MPI_KEYVAL_INVALID;
     ierr = MPI_Win_create_keyval(MPI_WIN_NULL_COPY_FN,
                                  PyMPI_win_free_mpimem,
-                                 &PyMPI_KEYVAL_WIN_MPIMEM, NULL);
+                                 &PyMPI_WIN_KEYVAL_MPIMEM, NULL);
     if (ierr != MPI_SUCCESS) goto error;
     ierr = MPI_Comm_create_keyval(MPI_COMM_NULL_COPY_FN,
-                                  PyMPI_free_keyval_win,
+                                  PyMPI_win_free_keyval,
                                   &comm_keyval, NULL);
     if (ierr == MPI_SUCCESS)
       (void)MPI_Comm_set_attr(MPI_COMM_SELF, comm_keyval,
-                              &PyMPI_KEYVAL_WIN_MPIMEM);
+                              &PyMPI_WIN_KEYVAL_MPIMEM);
   }
   ierr = MPI_Win_set_attr(win, PyMPI_KEYVAL_WIN_MPIMEM, baseptr);
   if (ierr != MPI_SUCCESS) goto error;
