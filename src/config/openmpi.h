@@ -77,14 +77,19 @@
 #endif
 #endif
 
-#if MPI_VERSION < 3 && (defined(OMPI_MAJOR_VERSION) && \
-                        defined(OMPI_MINOR_VERSION) && \
-                        defined(OMPI_RELEASE_VERSION))
+#if (defined(OMPI_MAJOR_VERSION) && \
+     defined(OMPI_MINOR_VERSION) && \
+     defined(OMPI_RELEASE_VERSION))
+#define OMPI_NUMVERSION (OMPI_MAJOR_VERSION*10000 + \
+                         OMPI_MINOR_VERSION*100 + \
+                         OMPI_RELEASE_VERSION)
+#else
+#define OMPI_NUMVERSION (10100)
+#endif
 
-#if ((OMPI_MAJOR_VERSION   * 10000) + \
-     (OMPI_MINOR_VERSION   *   100) + \
-     (OMPI_RELEASE_VERSION *     1)) >= 10700
+#if MPI_VERSION < 3
 
+#if OMPI_NUMVERSION >= 10700
 #define PyMPI_HAVE_MPI_Message 1
 #define PyMPI_HAVE_MPI_MESSAGE_NULL 1
 #define PyMPI_HAVE_MPI_MESSAGE_NO_PROC 1
@@ -94,7 +99,6 @@
 #define PyMPI_HAVE_MPI_Improbe 1
 #define PyMPI_HAVE_MPI_Mrecv 1
 #define PyMPI_HAVE_MPI_Imrecv 1
-
 #define PyMPI_HAVE_MPI_Ibarrier 1
 #define PyMPI_HAVE_MPI_Ibcast 1
 #define PyMPI_HAVE_MPI_Igather 1
@@ -112,13 +116,11 @@
 #define PyMPI_HAVE_MPI_Ireduce_scatter 1
 #define PyMPI_HAVE_MPI_Iscan 1
 #define PyMPI_HAVE_MPI_Iexscan 1
-
 #define PyMPI_HAVE_MPI_MAX_LIBRARY_VERSION_STRING 1
 #define PyMPI_HAVE_MPI_Get_library_version 1
+#endif /* OMPI >= 1.7.0 */
 
-#endif /* OMPI < 1.7*/
-
-#if 0 /*XXX*/
+#if OMPI_NUMVERSION >= 10704
 #define PyMPI_HAVE_MPI_Neighbor_allgather 1
 #define PyMPI_HAVE_MPI_Neighbor_allgatherv 1
 #define PyMPI_HAVE_MPI_Neighbor_alltoall 1
@@ -129,8 +131,19 @@
 #define PyMPI_HAVE_MPI_Ineighbor_alltoall 1
 #define PyMPI_HAVE_MPI_Ineighbor_alltoallv 1
 #define PyMPI_HAVE_MPI_Ineighbor_alltoallw 1
-#endif/*XXX*/
+#endif /* OMPI >= 1.7.4 */
 
-#endif /* MPI < 3.0*/
+#endif
+
+#if MPI_VERSION == 3
+
+#if OMPI_NUMVERSION <= 10705
+#undef PyMPI_HAVE_MPI_Comm_set_info
+#undef PyMPI_HAVE_MPI_Comm_get_info
+#undef PyMPI_HAVE_MPI_WEIGHTS_EMPTY
+#undef PyMPI_HAVE_MPI_ERR_RMA_SHARED
+#endif /* OMPI <= 1.7.5 */
+
+#endif
 
 #endif /* !PyMPI_CONFIG_OPENMPI_H */
