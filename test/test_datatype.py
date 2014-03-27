@@ -374,7 +374,7 @@ if _name == 'Open MPI':
     if 'win' in sys.platform:
         del TestDatatype.testCommit
         del TestDatatype.testDup
-        del TestDatatype.testResized
+        del TestDatatype.testCreateResized
 
 if sys.version_info[0] >=3:
     del TestGetAddress
