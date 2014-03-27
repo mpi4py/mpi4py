@@ -960,7 +960,7 @@ static int PyMPI_Win_allocate(MPI_Aint size, int disp_unit,
       (void)MPI_Comm_set_attr(MPI_COMM_SELF, comm_keyval,
                               &PyMPI_WIN_KEYVAL_MPIMEM);
   }
-  ierr = MPI_Win_set_attr(win, PyMPI_KEYVAL_WIN_MPIMEM, baseptr);
+  ierr = MPI_Win_set_attr(win, PyMPI_WIN_KEYVAL_MPIMEM, baseptr);
   if (ierr != MPI_SUCCESS) goto error;
 #endif
   *((void**)baseptr_) = baseptr;
