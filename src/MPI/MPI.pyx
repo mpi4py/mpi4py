@@ -258,7 +258,7 @@ MAX_LIBRARY_VERSION_STRING = MPI_MAX_LIBRARY_VERSION_STRING
 # --------------------------------------------------------------------
 
 cdef extern from "vendor.h":
-    int MPI_Get_vendor(const_char**,int*,int*,int*)
+    int PyMPI_Get_vendor(const_char**,int*,int*,int*)
 
 def get_vendor():
     """
@@ -270,7 +270,7 @@ def get_vendor():
     """
     cdef const_char *name=NULL
     cdef int major=0, minor=0, micro=0
-    CHKERR( MPI_Get_vendor(&name, &major, &minor, &micro) )
+    CHKERR( PyMPI_Get_vendor(&name, &major, &minor, &micro) )
     return (mpistr(name), (major, minor, micro))
 
 # --------------------------------------------------------------------

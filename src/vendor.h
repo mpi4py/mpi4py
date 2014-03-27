@@ -1,25 +1,26 @@
-#include "mpi.h"
+/* Author:  Lisandro Dalcin   */
+/* Contact: dalcinl@gmail.com */
 
-#define myAtoI(p, i)                \
+#define pympiAtoI(p, i)                \
   do {                              \
     i = 0;                          \
     while (*p >= '0' && *p <= '9')  \
       { i *= 10; i += *p++ - '0'; } \
   } while(0)
 
-#define myVersionParser(S, a, b, c)      \
+#define pympiVersionParser(S, a, b, c)      \
   do {                                   \
     const char *s = S;                   \
     a = b = c = 0;                       \
-    myAtoI(s, a); if(*s++ != '.') break; \
-    myAtoI(s, b); if(*s++ != '.') break; \
-    myAtoI(s, c); if(*s++ != '.') break; \
+    pympiAtoI(s, a); if(*s++ != '.') break; \
+    pympiAtoI(s, b); if(*s++ != '.') break; \
+    pympiAtoI(s, c); if(*s++ != '.') break; \
   } while(0)
 
-static int MPI_Get_vendor(const char **vendor_name,
-                          int         *version_major,
-                          int         *version_minor,
-                          int         *version_micro)
+static int PyMPI_Get_vendor(const char **vendor_name,
+                            int         *version_major,
+                            int         *version_minor,
+                            int         *version_micro)
 {
   const char* name="unknown";
   int major=0, minor=0, micro=0;
@@ -32,7 +33,7 @@ static int MPI_Get_vendor(const char **vendor_name,
   minor = version/100;   version -= minor*100;
   micro = version/1;     version -= micro*1;}
   #elif defined(MPICH_VERSION)
-  myVersionParser(MPICH_VERSION,major,minor,micro);
+  pympiVersionParser(MPICH_VERSION,major,minor,micro);
   #endif
   name = "MPICH";
   #if defined(DEINO_MPI)
@@ -50,7 +51,7 @@ static int MPI_Get_vendor(const char **vendor_name,
   minor = version/100;   version -= minor*100;
   micro = version/1;     version -= micro*1;}
   #elif defined(MPICH2_VERSION)
-  myVersionParser(MPICH2_VERSION,major,minor,micro);
+  pympiVersionParser(MPICH2_VERSION,major,minor,micro);
   #endif
   name = "MPICH2";
   #if defined(DEINO_MPI)
@@ -90,7 +91,7 @@ static int MPI_Get_vendor(const char **vendor_name,
 #if defined(MPICH_NAME) && MPICH_NAME==1
   name = "MPICH1";
   #if defined(MPICH_VERSION)
-  myVersionParser(MPICH_VERSION,major,minor,micro);
+  pympiVersionParser(MPICH_VERSION,major,minor,micro);
   #endif
 #endif
 
@@ -121,8 +122,8 @@ static int MPI_Get_vendor(const char **vendor_name,
   return 0;
 }
 
-#undef myAtoI
-#undef myVersionParser
+#undef pympiAtoI
+#undef pympiVersionParser
 
 /*
    Local variables:
