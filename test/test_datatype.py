@@ -363,6 +363,10 @@ elif _name == 'MPICH1':
 elif MPI.Get_version() < (2, 0):
     combiner_map = None
 if _name == 'Open MPI':
+    del TestDatatype.testCreateF90RealSingle
+    del TestDatatype.testCreateF90RealDouble
+    del TestDatatype.testCreateF90ComplexSingle
+    del TestDatatype.testCreateF90ComplexDouble
     if _version <= (1, 5, 1):
         for t in datatypes_f90[-4:]:
             if t != MPI.DATATYPE_NULL:
