@@ -807,6 +807,11 @@ cdef Datatype __C_DOUBLE_COMPLEX__      = new_Datatype( MPI_C_DOUBLE_COMPLEX )
 cdef Datatype __C_LONG_DOUBLE_COMPLEX__ = new_Datatype(
                                               MPI_C_LONG_DOUBLE_COMPLEX      )
 
+cdef Datatype __CXX_BOOL__                = new_Datatype( MPI_CXX_BOOL                )
+cdef Datatype __CXX_FLOAT_COMPLEX__       = new_Datatype( MPI_CXX_FLOAT_COMPLEX       )
+cdef Datatype __CXX_DOUBLE_COMPLEX__      = new_Datatype( MPI_CXX_DOUBLE_COMPLEX      )
+cdef Datatype __CXX_LONG_DOUBLE_COMPLEX__ = new_Datatype( MPI_CXX_LONG_DOUBLE_COMPLEX )
+
 cdef Datatype __SHORT_INT__        = new_Datatype( MPI_SHORT_INT       )
 cdef Datatype __TWOINT__           = new_Datatype( MPI_2INT            )
 cdef Datatype __LONG_INT__         = new_Datatype( MPI_LONG_INT        )
@@ -886,6 +891,11 @@ C_COMPLEX             = __C_COMPLEX__
 C_FLOAT_COMPLEX       = __C_FLOAT_COMPLEX__
 C_DOUBLE_COMPLEX      = __C_DOUBLE_COMPLEX__
 C_LONG_DOUBLE_COMPLEX = __C_LONG_DOUBLE_COMPLEX__
+# C++ datatypes
+CXX_BOOL                = __CXX_BOOL__
+CXX_FLOAT_COMPLEX       = __CXX_FLOAT_COMPLEX__
+CXX_DOUBLE_COMPLEX      = __CXX_DOUBLE_COMPLEX__
+CXX_LONG_DOUBLE_COMPLEX = __CXX_LONG_DOUBLE_COMPLEX__
 # C Datatypes for reduction operations
 SHORT_INT        = __SHORT_INT__
 INT_INT = TWOINT = __TWOINT__

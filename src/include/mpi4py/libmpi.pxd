@@ -104,6 +104,11 @@ cdef import from "mpi.h" nogil:
     MPI_Datatype MPI_C_FLOAT_COMPLEX       #:= MPI_DATATYPE_NULL
     MPI_Datatype MPI_C_DOUBLE_COMPLEX      #:= MPI_DATATYPE_NULL
     MPI_Datatype MPI_C_LONG_DOUBLE_COMPLEX #:= MPI_DATATYPE_NULL
+    # C++ datatypes
+    MPI_Datatype MPI_CXX_BOOL                #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_CXX_FLOAT_COMPLEX       #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_CXX_DOUBLE_COMPLEX      #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_CXX_LONG_DOUBLE_COMPLEX #:= MPI_DATATYPE_NULL
     # C datatypes for reduction operations
     MPI_Datatype MPI_SHORT_INT       #:= MPI_DATATYPE_NULL
     MPI_Datatype MPI_2INT            #:= MPI_DATATYPE_NULL

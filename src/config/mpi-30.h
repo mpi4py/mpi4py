@@ -3,12 +3,15 @@
 
 #define PyMPI_HAVE_MPI_Count 1
 #define PyMPI_HAVE_MPI_COUNT 1
+#define PyMPI_HAVE_MPI_CXX_BOOL 1
+#define PyMPI_HAVE_MPI_CXX_FLOAT_COMPLEX 1
+#define PyMPI_HAVE_MPI_CXX_DOUBLE_COMPLEX 1
+#define PyMPI_HAVE_MPI_CXX_LONG_DOUBLE_COMPLEX 1
 #define PyMPI_HAVE_MPI_Type_size_x 1
 #define PyMPI_HAVE_MPI_Type_get_extent_x 1
 #define PyMPI_HAVE_MPI_Type_get_true_extent_x 1
 #define PyMPI_HAVE_MPI_Get_elements_x 1
 #define PyMPI_HAVE_MPI_Status_set_elements_x 1
-
 #define PyMPI_HAVE_MPI_COMBINER_HINDEXED_BLOCK
 #define PyMPI_HAVE_MPI_Type_create_hindexed_block 1
 
