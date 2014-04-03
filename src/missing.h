@@ -540,6 +540,21 @@ typedef void *PyMPI_MPI_Errhandler;
 #define MPI_Type_struct(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Type_struct",a1,a2,a3,a4,a5)
 #endif
 
+#ifndef PyMPI_HAVE_MPI_COMBINER_HVECTOR_INTEGER
+#undef  MPI_COMBINER_HVECTOR_INTEGER
+#define MPI_COMBINER_HVECTOR_INTEGER (MPI_UNDEFINED)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_COMBINER_HINDEXED_INTEGER
+#undef  MPI_COMBINER_HINDEXED_INTEGER
+#define MPI_COMBINER_HINDEXED_INTEGER (MPI_UNDEFINED)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_COMBINER_STRUCT_INTEGER
+#undef  MPI_COMBINER_STRUCT_INTEGER
+#define MPI_COMBINER_STRUCT_INTEGER (MPI_UNDEFINED)
+#endif
+
 #ifndef PyMPI_HAVE_MPI_Type_dup
 #undef  MPI_Type_dup
 #define MPI_Type_dup(a1,a2) PyMPI_UNAVAILABLE("MPI_Type_dup",a1,a2)
@@ -765,11 +780,6 @@ typedef void *PyMPI_MPI_Errhandler;
 #define MPI_COMBINER_HVECTOR (MPI_UNDEFINED)
 #endif
 
-#ifndef PyMPI_HAVE_MPI_COMBINER_HVECTOR_INTEGER
-#undef  MPI_COMBINER_HVECTOR_INTEGER
-#define MPI_COMBINER_HVECTOR_INTEGER (MPI_UNDEFINED)
-#endif
-
 #ifndef PyMPI_HAVE_MPI_COMBINER_INDEXED
 #undef  MPI_COMBINER_INDEXED
 #define MPI_COMBINER_INDEXED (MPI_UNDEFINED)
@@ -778,11 +788,6 @@ typedef void *PyMPI_MPI_Errhandler;
 #ifndef PyMPI_HAVE_MPI_COMBINER_HINDEXED
 #undef  MPI_COMBINER_HINDEXED
 #define MPI_COMBINER_HINDEXED (MPI_UNDEFINED)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_COMBINER_HINDEXED_INTEGER
-#undef  MPI_COMBINER_HINDEXED_INTEGER
-#define MPI_COMBINER_HINDEXED_INTEGER (MPI_UNDEFINED)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_COMBINER_INDEXED_BLOCK
@@ -798,11 +803,6 @@ typedef void *PyMPI_MPI_Errhandler;
 #ifndef PyMPI_HAVE_MPI_COMBINER_STRUCT
 #undef  MPI_COMBINER_STRUCT
 #define MPI_COMBINER_STRUCT (MPI_UNDEFINED)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_COMBINER_STRUCT_INTEGER
-#undef  MPI_COMBINER_STRUCT_INTEGER
-#define MPI_COMBINER_STRUCT_INTEGER (MPI_UNDEFINED)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_COMBINER_SUBARRAY
@@ -1992,26 +1992,6 @@ typedef void (PyMPI_MPI_Handler_function)(MPI_Comm*,int*,...);
 #define MPI_Errhandler_create(a1,a2) PyMPI_UNAVAILABLE("MPI_Errhandler_create",a1,a2)
 #endif
 
-#ifndef PyMPI_HAVE_MPI_TAG_UB
-#undef  MPI_TAG_UB
-#define MPI_TAG_UB (MPI_KEYVAL_INVALID)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_HOST
-#undef  MPI_HOST
-#define MPI_HOST (MPI_KEYVAL_INVALID)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_IO
-#undef  MPI_IO
-#define MPI_IO (MPI_KEYVAL_INVALID)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_WTIME_IS_GLOBAL
-#undef  MPI_WTIME_IS_GLOBAL
-#define MPI_WTIME_IS_GLOBAL (MPI_KEYVAL_INVALID)
-#endif
-
 #ifndef PyMPI_HAVE_MPI_Attr_get
 #undef  MPI_Attr_get
 #define MPI_Attr_get(a1,a2,a3,a4) PyMPI_UNAVAILABLE("MPI_Attr_get",a1,a2,a3,a4)
@@ -2102,6 +2082,26 @@ typedef int (PyMPI_MPI_Delete_function)(MPI_Comm,int,void*,void*);
 #ifndef PyMPI_HAVE_MPI_Comm_set_name
 #undef  MPI_Comm_set_name
 #define MPI_Comm_set_name(a1,a2) PyMPI_UNAVAILABLE("MPI_Comm_set_name",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_TAG_UB
+#undef  MPI_TAG_UB
+#define MPI_TAG_UB (MPI_KEYVAL_INVALID)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_HOST
+#undef  MPI_HOST
+#define MPI_HOST (MPI_KEYVAL_INVALID)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_IO
+#undef  MPI_IO
+#define MPI_IO (MPI_KEYVAL_INVALID)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_WTIME_IS_GLOBAL
+#undef  MPI_WTIME_IS_GLOBAL
+#define MPI_WTIME_IS_GLOBAL (MPI_KEYVAL_INVALID)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_UNIVERSE_SIZE

@@ -148,6 +148,9 @@ cdef import from "mpi.h" nogil:
     int MPI_Type_hvector(int, int, MPI_Aint, MPI_Datatype, MPI_Datatype*)
     int MPI_Type_hindexed(int, int[], MPI_Aint[], MPI_Datatype, MPI_Datatype*)
     int MPI_Type_struct(int, int[], MPI_Aint[], MPI_Datatype[], MPI_Datatype*)
+    enum: MPI_COMBINER_HVECTOR_INTEGER   #:= MPI_UNDEFINED
+    enum: MPI_COMBINER_HINDEXED_INTEGER  #:= MPI_UNDEFINED
+    enum: MPI_COMBINER_STRUCT_INTEGER    #:= MPI_UNDEFINED
 
     int MPI_Type_dup(MPI_Datatype, MPI_Datatype*)
     int MPI_Type_contiguous(int, MPI_Datatype, MPI_Datatype*)
@@ -196,25 +199,22 @@ cdef import from "mpi.h" nogil:
     int MPI_Unpack_external(char[], void*, MPI_Aint, MPI_Aint*, void*, int, MPI_Datatype)
     int MPI_Pack_external_size(char[], int, MPI_Datatype, MPI_Aint*)
 
-    enum: MPI_COMBINER_NAMED             #:=  MPI_UNDEFINED
-    enum: MPI_COMBINER_DUP               #:=  MPI_UNDEFINED
-    enum: MPI_COMBINER_CONTIGUOUS        #:=  MPI_UNDEFINED
-    enum: MPI_COMBINER_VECTOR            #:=  MPI_UNDEFINED
-    enum: MPI_COMBINER_HVECTOR           #:=  MPI_UNDEFINED
-    enum: MPI_COMBINER_HVECTOR_INTEGER   #:=  MPI_UNDEFINED
-    enum: MPI_COMBINER_INDEXED           #:=  MPI_UNDEFINED
-    enum: MPI_COMBINER_HINDEXED          #:=  MPI_UNDEFINED
-    enum: MPI_COMBINER_HINDEXED_INTEGER  #:=  MPI_UNDEFINED
-    enum: MPI_COMBINER_INDEXED_BLOCK     #:=  MPI_UNDEFINED
-    enum: MPI_COMBINER_HINDEXED_BLOCK    #:=  MPI_UNDEFINED
-    enum: MPI_COMBINER_STRUCT            #:=  MPI_UNDEFINED
-    enum: MPI_COMBINER_STRUCT_INTEGER    #:=  MPI_UNDEFINED
-    enum: MPI_COMBINER_SUBARRAY          #:=  MPI_UNDEFINED
-    enum: MPI_COMBINER_DARRAY            #:=  MPI_UNDEFINED
-    enum: MPI_COMBINER_F90_REAL          #:=  MPI_UNDEFINED
-    enum: MPI_COMBINER_F90_COMPLEX       #:=  MPI_UNDEFINED
-    enum: MPI_COMBINER_F90_INTEGER       #:=  MPI_UNDEFINED
-    enum: MPI_COMBINER_RESIZED           #:=  MPI_UNDEFINED
+    enum: MPI_COMBINER_NAMED           #:= MPI_UNDEFINED
+    enum: MPI_COMBINER_DUP             #:= MPI_UNDEFINED
+    enum: MPI_COMBINER_CONTIGUOUS      #:= MPI_UNDEFINED
+    enum: MPI_COMBINER_VECTOR          #:= MPI_UNDEFINED
+    enum: MPI_COMBINER_HVECTOR         #:= MPI_UNDEFINED
+    enum: MPI_COMBINER_INDEXED         #:= MPI_UNDEFINED
+    enum: MPI_COMBINER_HINDEXED        #:= MPI_UNDEFINED
+    enum: MPI_COMBINER_INDEXED_BLOCK   #:= MPI_UNDEFINED
+    enum: MPI_COMBINER_HINDEXED_BLOCK  #:= MPI_UNDEFINED
+    enum: MPI_COMBINER_STRUCT          #:= MPI_UNDEFINED
+    enum: MPI_COMBINER_SUBARRAY        #:= MPI_UNDEFINED
+    enum: MPI_COMBINER_DARRAY          #:= MPI_UNDEFINED
+    enum: MPI_COMBINER_F90_REAL        #:= MPI_UNDEFINED
+    enum: MPI_COMBINER_F90_COMPLEX     #:= MPI_UNDEFINED
+    enum: MPI_COMBINER_F90_INTEGER     #:= MPI_UNDEFINED
+    enum: MPI_COMBINER_RESIZED         #:= MPI_UNDEFINED
     int MPI_Type_get_envelope(MPI_Datatype, int*, int*, int*, int*)
     int MPI_Type_get_contents(MPI_Datatype, int, int, int, int[], MPI_Aint[], MPI_Datatype[])
 
@@ -504,19 +504,16 @@ cdef import from "mpi.h" nogil:
     int MPI_Comm_spawn_multiple(int, char*[], char**[], int[], MPI_Info[], int, MPI_Comm, MPI_Comm*, int[])
     int MPI_Comm_get_parent(MPI_Comm*)
 
+    # Deprecated since MPI-2, removed in MPI-3
     int MPI_Errhandler_get(MPI_Comm, MPI_Errhandler*)
     int MPI_Errhandler_set(MPI_Comm, MPI_Errhandler)
     ctypedef void MPI_Handler_function(MPI_Comm*,int*,...)
     int MPI_Errhandler_create(MPI_Handler_function*, MPI_Errhandler*)
 
-    enum: MPI_TAG_UB          #:= MPI_KEYVAL_INVALID
-    enum: MPI_HOST            #:= MPI_KEYVAL_INVALID
-    enum: MPI_IO              #:= MPI_KEYVAL_INVALID
-    enum: MPI_WTIME_IS_GLOBAL #:= MPI_KEYVAL_INVALID
+    # Deprecated since MPI-2
     int MPI_Attr_get(MPI_Comm, int, void*, int*)
     int MPI_Attr_put(MPI_Comm, int, void*)
     int MPI_Attr_delete(MPI_Comm, int)
-
     ctypedef int MPI_Copy_function(MPI_Comm,int,void*,void*,void*,int*)
     ctypedef int MPI_Delete_function(MPI_Comm,int,void*,void*)
     MPI_Copy_function*   MPI_DUP_FN         #:= 0
@@ -535,9 +532,15 @@ cdef import from "mpi.h" nogil:
     int MPI_Comm_get_name(MPI_Comm, char[], int*)
     int MPI_Comm_set_name(MPI_Comm, char[])
 
+    enum: MPI_TAG_UB          #:= MPI_KEYVAL_INVALID
+    enum: MPI_HOST            #:= MPI_KEYVAL_INVALID
+    enum: MPI_IO              #:= MPI_KEYVAL_INVALID
+    enum: MPI_WTIME_IS_GLOBAL #:= MPI_KEYVAL_INVALID
+
     enum: MPI_UNIVERSE_SIZE #:= MPI_KEYVAL_INVALID
     enum: MPI_APPNUM        #:= MPI_KEYVAL_INVALID
     enum: MPI_LASTUSEDCODE  #:= MPI_KEYVAL_INVALID
+
     int MPI_Comm_get_attr(MPI_Comm, int, void*, int*)  #:= MPI_Attr_get
     int MPI_Comm_set_attr(MPI_Comm, int, void*)        #:= MPI_Attr_put
     int MPI_Comm_delete_attr(MPI_Comm, int)            #:= MPI_Attr_delete
