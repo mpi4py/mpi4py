@@ -29,6 +29,7 @@ class BaseTestTopo(object):
             self.assertEqual(outedges, neighbors)
             topo.Free()
         if size > 1: return
+        if MPI.VERSION < 2: return
         topo = comm.Create_cart([])
         self.assertEqual(topo.dim, 0)
         self.assertEqual(topo.dims, [])

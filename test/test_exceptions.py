@@ -330,7 +330,9 @@ class TestExcErrhandler(unittest.TestCase):
 
 import sys
 name, version = MPI.get_vendor()
-if name == 'MPICH2':
+if name == 'MPICH1':
+    del TestExcStatus.testSetElements
+elif name == 'MPICH2':
     try:
         MPI.DATATYPE_NULL.Get_size()
     except MPI.Exception:

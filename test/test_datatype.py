@@ -359,9 +359,12 @@ elif _name == 'MPICH1':
     combiner_map[MPI.COMBINER_VECTOR]  = None
     combiner_map[MPI.COMBINER_HVECTOR] = None
     combiner_map[MPI.COMBINER_INDEXED] = None
+    combiner_map[MPI.COMBINER_HINDEXED_BLOCK] = None
     for t in datatypes_f: datatypes.remove(t)
 elif MPI.Get_version() < (2, 0):
     combiner_map = None
+if MPI.Get_version() < (2, 0):
+    del TestDatatype.testMatchSize
 if _name == 'Open MPI':
     del TestDatatype.testCreateF90RealSingle
     del TestDatatype.testCreateF90RealDouble

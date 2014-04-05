@@ -60,6 +60,10 @@ class TestStatus(unittest.TestCase):
         self.STATUS.source = 1
         self.STATUS.tag    = 2
         self.STATUS.error  = MPI.ERR_ARG
+        status = MPI.Status(self.STATUS)
+        self.assertEqual(status.source, 1)
+        self.assertEqual(status.tag,    2)
+        self.assertEqual(status.error,  MPI.ERR_ARG)
         try:
             self.STATUS.Set_elements(MPI.BYTE, 7)
         except NotImplementedError:
@@ -69,9 +73,6 @@ class TestStatus(unittest.TestCase):
         except NotImplementedError:
             pass
         status = MPI.Status(self.STATUS)
-        self.assertEqual(status.source, 1)
-        self.assertEqual(status.tag,    2)
-        self.assertEqual(status.error,  MPI.ERR_ARG)
         try:
             count = status.Get_count(MPI.BYTE)
             elems = status.Get_elements(MPI.BYTE)
