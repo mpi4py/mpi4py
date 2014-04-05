@@ -33,5 +33,23 @@ class TestErrhandler(unittest.TestCase):
         for e in errhdls:
             self.assertEqual(e, MPI.ERRHANDLER_NULL)
 
+    def testCommCallErrhandler(self):
+        MPI.COMM_SELF.Call_errhandler(MPI.SUCCESS)
+
+    def testWinCallErrhandler(self):
+        win = MPI.Win.Create(MPI.BOTTOM, 1, MPI.INFO_NULL, MPI.COMM_SELF)
+        win.Call_errhandler(MPI.SUCCESS)
+        win.Free()
+
+    def testFileCallErrhandler(self):
+        import os, tempfile
+        rank = MPI.COMM_WORLD.Get_rank()
+        fd, filename = tempfile.mkstemp(prefix='mpi4py-', suffix="-%d"%rank)
+        os.close(fd)
+        amode = MPI.MODE_WRONLY | MPI.MODE_CREATE | MPI.MODE_DELETE_ON_CLOSE
+        file = MPI.File.Open(MPI.COMM_SELF, filename, amode, MPI.INFO_NULL)
+        file.Call_errhandler(MPI.SUCCESS)
+        file.Close()
+
 if __name__ == '__main__':
     unittest.main()
