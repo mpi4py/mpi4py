@@ -30,7 +30,7 @@ class BaseTestCCOVec(object):
                         sbuf = array(root, typecode, count)
                         rbuf = array(  -1, typecode, size*size)
                         counts = [count] * size
-                        displs = range(0, size*size, size)
+                        displs = list(range(0, size*size, size))
                         recvbuf = rbuf.as_mpi_v(counts, displs)
                         if rank != root: recvbuf=None
                         self.COMM.Igatherv(sbuf.as_mpi(), recvbuf, root).Wait()
@@ -105,7 +105,7 @@ class BaseTestCCOVec(object):
                         sbuf = array(root, typecode, size*size)
                         rbuf = array(  -1, typecode, count)
                         counts = [count] * size
-                        displs = range(0, size*size, size)
+                        displs = list(range(0, size*size, size))
                         sendbuf = sbuf.as_mpi_v(counts, displs)
                         if rank != root: sendbuf = None
                         self.COMM.Iscatterv(sendbuf, rbuf.as_mpi(), root).Wait()
@@ -167,7 +167,7 @@ class BaseTestCCOVec(object):
                         sbuf = array(root, typecode, count)
                         rbuf = array(  -1, typecode, size*size)
                         counts = [count] * size
-                        displs = range(0, size*size, size)
+                        displs = list(range(0, size*size, size))
                         sendbuf = sbuf.as_mpi()
                         recvbuf = rbuf.as_mpi_v(counts, displs)
                         self.COMM.Iallgatherv(sendbuf, recvbuf).Wait()
@@ -231,7 +231,7 @@ class BaseTestCCOVec(object):
                         sbuf = array(root, typecode, size*size)
                         rbuf = array(  -1, typecode, size*size)
                         counts = [count] * size
-                        displs = range(0, size*size, size)
+                        displs = list(range(0, size*size, size))
                         sendbuf = sbuf.as_mpi_v(counts, displs)
                         recvbuf = rbuf.as_mpi_v(counts, displs)
                         self.COMM.Ialltoallv(sendbuf, recvbuf).Wait()
