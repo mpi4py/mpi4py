@@ -112,6 +112,24 @@ class BaseTestP2PBuf(object):
                         for value in rbuf[s:]:
                             self.assertEqual(value, -1)
 
+    def testProbeCancel(self):
+        comm = self.COMM.Dup()
+        try:
+            request = comm.Issend([None, 0, MPI.BYTE], comm.rank, 123)
+            status = MPI.Status()
+            comm.Probe(MPI.ANY_SOURCE, MPI.ANY_TAG, status)
+            self.assertEqual(status.source, comm.rank)
+            self.assertEqual(status.tag, 123)
+            request.Cancel()
+            status = MPI.Status()
+            flag = request.Get_status(status)
+            self.assertTrue(flag)
+            cancelled = status.Is_cancelled()
+            self.assertTrue(cancelled)
+            request.Free()
+        finally:
+            comm.Free()
+
     def testIProbe(self):
         comm = self.COMM.Dup()
         try:
