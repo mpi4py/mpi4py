@@ -55,6 +55,27 @@ class BaseTestCCOObjInter(object):
             self.INTERCOMM.Free()
             del self.INTERCOMM
 
+    def testRemoteGroupSize(self):
+        if self.INTRACOMM == MPI.COMM_NULL: return
+        if self.INTERCOMM == MPI.COMM_NULL: return
+        group = self.INTERCOMM.Get_remote_group()
+        self.assertEqual(self.INTERCOMM.remote_size, group.size)
+        group.Free()
+
+    def testMerge(self):
+        if self.INTRACOMM == MPI.COMM_NULL: return
+        if self.INTERCOMM == MPI.COMM_NULL: return
+        basecomm = self.BASECOMM
+        intercomm = self.INTERCOMM
+        if basecomm.rank < basecomm.size // 2:
+            high = False
+        else:
+            high = True
+        intracomm = intercomm.Merge(high)
+        self.assertEqual(intracomm.size, basecomm.size)
+        self.assertEqual(intracomm.rank, basecomm.rank)
+        intracomm.Free()
+
     def testBarrier(self):
         if self.INTRACOMM == MPI.COMM_NULL: return
         if self.INTERCOMM == MPI.COMM_NULL: return
