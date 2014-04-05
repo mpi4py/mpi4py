@@ -72,6 +72,55 @@ class BaseTestComm(object):
         except NotImplementedError:
             return
 
+    def testDupWithInfo(self):
+        info = None
+        self.COMM.Dup(info).Free()
+        info = MPI.INFO_NULL
+        self.COMM.Dup(info).Free()
+        self.COMM.Dup_with_info(info).Free()
+        info = MPI.Info.Create()
+        self.COMM.Dup(info).Free()
+        self.COMM.Dup_with_info(info).Free()
+        info.Free()
+
+    def testIDup(self):
+        try:
+            comm, request = self.COMM.Idup()
+        except NotImplementedError:
+            return
+        request.Wait()
+        ccmp = MPI.Comm.Compare(self.COMM, comm)
+        comm.Free()
+        self.assertEqual(ccmp, MPI.CONGRUENT)
+
+    def testGetSetInfo(self):
+        info = MPI.INFO_NULL
+        self.COMM.Set_info(info)
+        info = MPI.Info.Create()
+        self.COMM.Set_info(info)
+        info.Free()
+        info = self.COMM.Get_info()
+        info.Free()
+
+    def testCreate(self):
+        group = self.COMM.Get_group()
+        comm = self.COMM.Create(group)
+        ccmp = MPI.Comm.Compare(self.COMM, comm)
+        self.assertEqual(ccmp, MPI.CONGRUENT)
+        comm.Free()
+        group.Free()
+
+    def testCreateGroup(self):
+        group = self.COMM.Get_group()
+        try:
+            comm = self.COMM.Create_group(group)
+            ccmp = MPI.Comm.Compare(self.COMM, comm)
+            self.assertEqual(ccmp, MPI.CONGRUENT)
+            comm.Free()
+        except NotImplementedError:
+            return
+        finally:
+            group.Free()
 
 class TestCommSelf(BaseTestComm, unittest.TestCase):
     def setUp(self):
