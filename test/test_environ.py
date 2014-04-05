@@ -43,6 +43,10 @@ class TestEnviron(unittest.TestCase):
         self.assertTrue(type(tick) is float)
         self.assertTrue(tick > 0.0)
 
+    def testPControl(self):
+        for level in (2, 1, 0):
+            MPI.Pcontrol(level)
+        MPI.Pcontrol(1)
 
 class TestWorldAttrs(unittest.TestCase):
 
