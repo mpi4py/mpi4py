@@ -17,16 +17,30 @@ class BaseTestTopo(object):
             dim = topo.dim
             self.assertEqual(dim, len(dims))
             coordinates = topo.coords
+            self.assertEqual(coordinates, topo.Get_coords(topo.rank))
             neighbors = []
             for i in range(dim):
                 for d in (-1, +1):
                     coord = list(coordinates)
                     coord[i] = (coord[i]+d) % dims[i]
                     neigh = topo.Get_cart_rank(coord)
+                    self.assertEqual(coord, topo.Get_coords(neigh))
+                    source, dest = topo.Shift(i, d)
+                    self.assertEqual(neigh, dest)
                     neighbors.append(neigh)
             inedges, outedges = topo.inoutedges
             self.assertEqual(inedges, neighbors)
             self.assertEqual(outedges, neighbors)
+            for i in range(ndim):
+                rem_dims = [1]*ndim
+                rem_dims[i] = 0
+                sub = topo.Sub(rem_dims)
+                if sub != MPI.COMM_NULL:
+                    self.assertEqual(sub.dim, ndim-1)
+                    dims = topo.dims
+                    del dims[i]
+                    self.assertEqual(sub.dims, dims)
+                    sub.Free()
             topo.Free()
         if size > 1: return
         if MPI.VERSION < 2: return
@@ -53,25 +67,81 @@ class BaseTestTopo(object):
             edges.append((i-1)%size)
             edges.append((i+1)%size)
         topo = comm.Create_graph(index, edges)
+        self.assertEqual(topo.dims, (len(index)-1, len(edges)))
+        self.assertEqual(topo.index, index[1:])
+        self.assertEqual(topo.edges, edges)
         neighbors = edges[index[rank]:index[rank+1]]
+        self.assertEqual(neighbors, topo.neighbors)
+        for rank in range(size):
+            neighs = topo.Get_neighbors(rank)
+            self.assertEqual(neighs, [(rank-1)%size, (rank+1)%size])
         inedges, outedges = topo.inoutedges
         self.assertEqual(inedges, neighbors)
         self.assertEqual(outedges, neighbors)
+        topo.Free()
+
+    def testDistgraphcommAdjacent(self):
+        comm = self.COMM
+        size = comm.Get_size()
+        rank = comm.Get_rank()
+        try:
+            topo = comm.Create_dist_graph_adjacent(None, None)
+            topo.Free()
+        except NotImplementedError:
+            return
+        #
+        sources = [(rank-2)%size, (rank-1)%size]
+        destinations = [(rank+1)%size, (rank+2)%size]
+        topo = comm.Create_dist_graph_adjacent(sources, destinations)
+        self.assertEqual(topo.Get_dist_neighbors_count(), (2, 2, False))
+        self.assertEqual(topo.Get_dist_neighbors(), (sources, destinations, None))
+        inedges, outedges = topo.inoutedges
+        self.assertEqual(inedges, sources)
+        self.assertEqual(outedges, destinations)
+        topo.Free()
+        #
+        sourceweights = [1, 2]
+        destweights   = [3, 4]
+        weights = (sourceweights, destweights)
+        topo = comm.Create_dist_graph_adjacent(sources, destinations,
+                                               sourceweights, destweights)
+        self.assertEqual(topo.Get_dist_neighbors_count(), (2, 2, True))
+        self.assertEqual(topo.Get_dist_neighbors(), (sources, destinations, weights))
+        topo.Free()
+        #
+        topo = comm.Create_dist_graph_adjacent(sources, None, MPI.UNWEIGHTED, None)
+        self.assertEqual(topo.Get_dist_neighbors_count(), (2, 0, False))
+        self.assertEqual(topo.Get_dist_neighbors(), (sources, [], None))
+        topo.Free()
+        topo = comm.Create_dist_graph_adjacent(None, destinations, None, MPI.UNWEIGHTED)
+        self.assertEqual(topo.Get_dist_neighbors_count(), (0, 2, False))
+        self.assertEqual(topo.Get_dist_neighbors(), ([], destinations, None))
+        topo.Free()
+        topo = comm.Create_dist_graph_adjacent([], [], MPI.WEIGHTS_EMPTY, MPI.WEIGHTS_EMPTY)
+        self.assertEqual(topo.Get_dist_neighbors_count(), (0, 0, True))
+        self.assertEqual(topo.Get_dist_neighbors(), ([], [], ([], [])))
         topo.Free()
 
     def testDistgraphcomm(self):
         comm = self.COMM
         size = comm.Get_size()
         rank = comm.Get_rank()
-        sources = [(rank-2)%size, (rank-1)%size]
-        destinations = [(rank+1)%size, (rank+2)%size]
+        #
         try:
-            topo = comm.Create_dist_graph_adjacent(sources, destinations)
+            topo = comm.Create_dist_graph([], [], [], MPI.UNWEIGHTED)
+            topo.Free()
         except NotImplementedError:
             return
-        inedges, outedges = topo.inoutedges
-        self.assertEqual(inedges, sources)
-        self.assertEqual(outedges, destinations)
+        #
+        sources = [rank]
+        degrees = [3]
+        destinations = [(rank-1)%size, rank, (rank+1)%size]
+        topo = comm.Create_dist_graph(sources, degrees, destinations, MPI.UNWEIGHTED)
+        self.assertEqual(topo.Get_dist_neighbors_count(), (3, 3, False))
+        topo.Free()
+        weights = list(range(1,4))
+        topo = comm.Create_dist_graph(sources, degrees, destinations, weights)
+        self.assertEqual(topo.Get_dist_neighbors_count(), (3, 3, True))
         topo.Free()
 
 
