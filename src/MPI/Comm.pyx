@@ -1994,7 +1994,7 @@ cdef class Graphcomm(Topocomm):
     property edges:
         """edges"""
         def __get__(self):
-            return self.Get_topo()
+            return self.Get_topo()[1]
 
     # Graph Information Functions
     # ---------------------------
