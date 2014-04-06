@@ -121,12 +121,15 @@ class BaseTestP2PBuf(object):
             self.assertEqual(status.source, comm.rank)
             self.assertEqual(status.tag, 123)
             request.Cancel()
+            self.assertTrue(request)
             status = MPI.Status()
-            flag = request.Get_status(status)
-            self.assertTrue(flag)
+            request.Get_status(status)
             cancelled = status.Is_cancelled()
-            self.assertTrue(cancelled)
-            request.Free()
+            if not cancelled:
+                comm.Recv([None, 0, MPI.BYTE], comm.rank, 123)
+                request.Wait()
+            else:
+                request.Free()
         finally:
             comm.Free()
 
