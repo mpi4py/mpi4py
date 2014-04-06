@@ -35,7 +35,7 @@ class TestErrorCode(unittest.TestCase):
             self.assertEqual(repr(errexc), "MPI.Exception(%d)" % ierr)
             self.assertEqual(str(errexc), errstr)
             self.assertEqual(int(errexc), ierr)
-            self.assertEqual(hash(errexc), RuntimeError.__hash__(errexc))
+            self.assertEqual(hash(errexc), hash(errexc.error_code))
             self.assertTrue(errexc == ierr)
             self.assertTrue(errexc == errexc)
             self.assertFalse(errexc != ierr)
