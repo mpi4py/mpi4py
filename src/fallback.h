@@ -3,35 +3,21 @@
 
 /* ---------------------------------------------------------------- */
 
-#ifdef Py_PYTHON_H
-
-#ifndef PyMPI_snprintf
-#define PyMPI_snprintf PyOS_snprintf
-#endif
-
-#ifndef PyMPI_MALLOC
-#define PyMPI_MALLOC PyMem_Malloc
-#endif
-#ifndef PyMPI_FREE
-#define PyMPI_FREE PyMem_Free
-#endif
-
-#else
-
 #include <stdlib.h>
-#include <stdio.h>
-
-#ifndef PyMPI_snprintf
-#define PyMPI_snprintf snprintf
-#endif
-
 #ifndef PyMPI_MALLOC
-#define PyMPI_MALLOC malloc
+  #define PyMPI_MALLOC malloc
 #endif
 #ifndef PyMPI_FREE
-#define PyMPI_FREE free
+  #define PyMPI_FREE free
 #endif
 
+#ifndef PyMPI_snprintf
+  #ifdef Py_PYTHON_H
+    #define PyMPI_snprintf PyOS_snprintf
+  #else
+    #include <stdio.h>
+    #define PyMPI_snprintf snprintf
+  #endif
 #endif
 
 /* ---------------------------------------------------------------- */
