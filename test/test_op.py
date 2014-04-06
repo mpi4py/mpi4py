@@ -111,7 +111,7 @@ class TestOp(unittest.TestCase):
             self._test_call(MPI.LXOR,  (x,y), xor(x, y))
             self._test_call(MPI.BAND,  (x,y), x  &  y)
             self._test_call(MPI.BOR,   (x,y), x  |  y)
-            self._test_call(MPI.LXOR,  (x,y), x  ^  y)
+            self._test_call(MPI.BXOR,  (x,y), x  ^  y)
         if MPI.REPLACE:
             self._test_call(MPI.REPLACE, (2,3), 3)
             self._test_call(MPI.REPLACE, (3,2), 2)
