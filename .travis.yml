@@ -9,16 +9,22 @@ python:
 #   - pypy
 
 env:
+    - MPI=mpich1
     - MPI=mpich2
     - MPI=openmpi
+
+matrix:
+  allow_failures:
+    - env: MPI=mpich1
 
 branches:
   only:
     - master
 
 before_install:
+    - test $MPI == mpich1  && PACKAGES='mpich-shmem-bin libmpich-shmem1.0-dev' || true
     - test $MPI == mpich2  && PACKAGES='mpich2 libmpich2-3 libmpich2-dev' || true
-    - test $MPI == openmpi && PACKAGES='openmpi-bin openmpi-dev'          || true
+    - test $MPI == openmpi && PACKAGES='openmpi-bin openmpi-dev' || true
     - sudo apt-get update -qq && sudo apt-get install -qq $PACKAGES
     - pip install -qq --use-mirrors Cython
 install:
@@ -26,6 +32,7 @@ install:
 
 before_script:
     - MPIEXEC='mpiexec'
+    - test $MPI == mpich1 && MPIEXEC='/bin/echo' || true
     - test $MPI == mpich2 && sudo hostname localhost || true
     - test $MPI == mpich2 && MPIEXEC='mpiexec -launcher fork' || true
 script:
