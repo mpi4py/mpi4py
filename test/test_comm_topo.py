@@ -117,6 +117,7 @@ class BaseTestTopo(object):
         self.assertEqual(topo.Get_dist_neighbors_count(), (0, 2, False))
         self.assertEqual(topo.Get_dist_neighbors(), ([], destinations, None))
         topo.Free()
+        if MPI.VERSION < 3: return
         topo = comm.Create_dist_graph_adjacent([], [], MPI.WEIGHTS_EMPTY, MPI.WEIGHTS_EMPTY)
         self.assertEqual(topo.Get_dist_neighbors_count(), (0, 0, True))
         self.assertEqual(topo.Get_dist_neighbors(), ([], [], ([], [])))

@@ -873,6 +873,15 @@ static int PyMPI_Comm_get_info(MPI_Comm comm, MPI_Info *info)
 
 /* ---------------------------------------------------------------- */
 
+#if !defined(PyMPI_HAVE_MPI_WEIGHTS_EMPTY)
+static const int PyMPI_WEIGHTS_EMPTY_ARRAY[1] = {MPI_UNDEFINED};
+static int * const PyMPI_WEIGHTS_EMPTY = (int*)PyMPI_WEIGHTS_EMPTY_ARRAY;
+#undef  MPI_WEIGHTS_EMPTY
+#define MPI_WEIGHTS_EMPTY PyMPI_WEIGHTS_EMPTY
+#endif
+
+/* ---------------------------------------------------------------- */
+
 /* Memory Allocation */
 
 #if !defined(PyMPI_HAVE_MPI_Alloc_mem) || \

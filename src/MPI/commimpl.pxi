@@ -139,25 +139,16 @@ cdef object __UNWEIGHTED__    = <MPI_Aint>MPI_UNWEIGHTED
 cdef object __WEIGHTS_EMPTY__ = <MPI_Aint>MPI_WEIGHTS_EMPTY
 
 cdef object asarray_weights(object weights, int nweight, int **iweight):
-    #
     if weights is None:
         iweight[0] = MPI_UNWEIGHTED
         return None
-    #
-    cdef int i = 0
-    if weights is __WEIGHTS_EMPTY__:
-        if MPI_WEIGHTS_EMPTY != MPI_UNWEIGHTED:
-            iweight[0] = MPI_WEIGHTS_EMPTY
-            return None
-        else:
-            weights = mkarray_int(nweight, iweight)
-            for i from 0 <= i < nweight: iweight[0][i] = 0
-            return weights
-    #
     if weights is __UNWEIGHTED__:
         iweight[0] = MPI_UNWEIGHTED
         return None
-    #
+    if weights is __WEIGHTS_EMPTY__:
+        if nweight > 0: raise ValueError("empty weights but nonzero degree")
+        iweight[0] = MPI_WEIGHTS_EMPTY
+        return None
     return asarray_int(weights, nweight, iweight)
 
 # -----------------------------------------------------------------------------
