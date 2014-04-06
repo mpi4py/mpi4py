@@ -1,6 +1,5 @@
 # Storage order for arrays
 # ------------------------
-
 ORDER_C       = MPI_ORDER_C       #: C order (a.k.a. row major)
 ORDER_FORTRAN = MPI_ORDER_FORTRAN #: Fortran order (a.k.a. column major)
 ORDER_F       = MPI_ORDER_FORTRAN #: Convenience alias for ORDER_FORTRAN
@@ -15,7 +14,6 @@ TYPECLASS_COMPLEX = MPI_TYPECLASS_COMPLEX
 
 # Type of distributions (HPF-like arrays)
 # ---------------------------------------
-
 DISTRIBUTE_NONE      = MPI_DISTRIBUTE_NONE      #: Dimension not distributed
 DISTRIBUTE_BLOCK     = MPI_DISTRIBUTE_BLOCK     #: Block distribution
 DISTRIBUTE_CYCLIC    = MPI_DISTRIBUTE_CYCLIC    #: Cyclic distribution
@@ -29,14 +27,11 @@ COMBINER_DUP              = MPI_COMBINER_DUP
 COMBINER_CONTIGUOUS       = MPI_COMBINER_CONTIGUOUS
 COMBINER_VECTOR           = MPI_COMBINER_VECTOR
 COMBINER_HVECTOR          = MPI_COMBINER_HVECTOR
-COMBINER_HVECTOR_INTEGER  = MPI_COMBINER_HVECTOR_INTEGER  #: from Fortran call
 COMBINER_INDEXED          = MPI_COMBINER_INDEXED
-COMBINER_HINDEXED_INTEGER = MPI_COMBINER_HINDEXED_INTEGER #: from Fortran call
 COMBINER_HINDEXED         = MPI_COMBINER_HINDEXED
 COMBINER_INDEXED_BLOCK    = MPI_COMBINER_INDEXED_BLOCK
 COMBINER_HINDEXED_BLOCK   = MPI_COMBINER_HINDEXED_BLOCK
 COMBINER_STRUCT           = MPI_COMBINER_STRUCT
-COMBINER_STRUCT_INTEGER   = MPI_COMBINER_STRUCT_INTEGER   #: from Fortran call
 COMBINER_SUBARRAY         = MPI_COMBINER_SUBARRAY
 COMBINER_DARRAY           = MPI_COMBINER_DARRAY
 COMBINER_RESIZED          = MPI_COMBINER_RESIZED
@@ -441,8 +436,7 @@ cdef class Datatype:
         # manage in advance the contained datatypes
         cdef int k = 0, s1, e1, s2, e2, s3, e3, s4, e4
         cdef object oldtype = None
-        if (combiner == <int>MPI_COMBINER_STRUCT or
-            combiner == <int>MPI_COMBINER_STRUCT_INTEGER):
+        if combiner == <int>MPI_COMBINER_STRUCT:
             oldtype = [new_Datatype(d[k]) for k from 0 <= k < nd]
         elif (combiner != <int>MPI_COMBINER_F90_INTEGER and
               combiner != <int>MPI_COMBINER_F90_REAL and
@@ -459,8 +453,7 @@ cdef class Datatype:
                     {('count')       : i[0],
                      ('blocklength') : i[1],
                      ('stride')      : i[2]})
-        elif (combiner == <int>MPI_COMBINER_HVECTOR or
-              combiner == <int>MPI_COMBINER_HVECTOR_INTEGER):
+        elif combiner == <int>MPI_COMBINER_HVECTOR:
             return (oldtype, ('HVECTOR'),
                     {('count')       : i[0],
                      ('blocklength') : i[1],
@@ -471,8 +464,7 @@ cdef class Datatype:
             return (oldtype, ('INDEXED'),
                     {('blocklengths')  : [i[k] for k from s1 <= k <= e1],
                      ('displacements') : [i[k] for k from s2 <= k <= e2]})
-        elif (combiner == <int>MPI_COMBINER_HINDEXED or
-              combiner == <int>MPI_COMBINER_HINDEXED_INTEGER):
+        elif combiner == <int>MPI_COMBINER_HINDEXED:
             s1 = 1; e1 = i[0]
             s2 = 0; e2 = i[0]-1
             return (oldtype, ('HINDEXED'),
@@ -488,8 +480,7 @@ cdef class Datatype:
             return (oldtype, ('HINDEXED_BLOCK'),
                     {('blocklength')   : i[1],
                      ('displacements') : [a[k] for k from s2 <= k <= e2]})
-        elif (combiner == <int>MPI_COMBINER_STRUCT or
-              combiner == <int>MPI_COMBINER_STRUCT_INTEGER):
+        elif combiner == <int>MPI_COMBINER_STRUCT:
             s1 = 1; e1 = i[0]
             s2 = 0; e2 = i[0]-1
             return (Datatype, ('STRUCT'),

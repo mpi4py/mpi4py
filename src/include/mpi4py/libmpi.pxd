@@ -153,9 +153,9 @@ cdef import from "mpi.h" nogil:
     int MPI_Type_hvector(int, int, MPI_Aint, MPI_Datatype, MPI_Datatype*)
     int MPI_Type_hindexed(int, int[], MPI_Aint[], MPI_Datatype, MPI_Datatype*)
     int MPI_Type_struct(int, int[], MPI_Aint[], MPI_Datatype[], MPI_Datatype*)
-    enum: MPI_COMBINER_HVECTOR_INTEGER   #:= MPI_UNDEFINED
-    enum: MPI_COMBINER_HINDEXED_INTEGER  #:= MPI_UNDEFINED
-    enum: MPI_COMBINER_STRUCT_INTEGER    #:= MPI_UNDEFINED
+    enum: MPI_COMBINER_HVECTOR_INTEGER  #:= MPI_UNDEFINED
+    enum: MPI_COMBINER_HINDEXED_INTEGER #:= MPI_UNDEFINED
+    enum: MPI_COMBINER_STRUCT_INTEGER   #:= MPI_UNDEFINED
 
     int MPI_Type_dup(MPI_Datatype, MPI_Datatype*)
     int MPI_Type_contiguous(int, MPI_Datatype, MPI_Datatype*)
