@@ -56,6 +56,10 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(self.STATUS.tag,    2)
         self.assertEqual(self.STATUS.error,  MPI.ERR_ARG)
 
+    def testConstructor(self):
+        self.assertRaises(TypeError, MPI.Status, 123)
+        self.assertRaises(TypeError, MPI.Status, "abc")
+        
     def testCopyConstructor(self):
         self.STATUS.source = 1
         self.STATUS.tag    = 2
