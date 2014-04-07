@@ -122,6 +122,35 @@ class BaseTestComm(object):
         finally:
             group.Free()
 
+    def testSplitType(self):
+        try:
+            comm = self.COMM.Split_type(MPI.UNDEFINED)
+        except NotImplementedError:
+            return
+        self.assertEqual(comm, MPI.COMM_NULL)
+        comm = self.COMM.Split_type(MPI.COMM_TYPE_SHARED)
+        self.assertNotEqual(comm, MPI.COMM_NULL)
+        size = self.COMM.Get_size()
+        rank = self.COMM.Get_rank()
+        if size == 1:
+            self.assertEqual(comm.size, 1)
+            self.assertEqual(comm.rank, 0)
+        comm.Free()
+        for root in range(size):
+            if rank == root:
+                split_type = MPI.COMM_TYPE_SHARED
+            else:
+                split_type = MPI.UNDEFINED
+            comm = self.COMM.Split_type(split_type)
+            if rank == root:
+                self.assertNotEqual(comm, MPI.COMM_NULL)
+                self.assertEqual(comm.size, 1)
+                self.assertEqual(comm.rank, 0)
+                comm.Free()
+            else:
+                self.assertEqual(comm, MPI.COMM_NULL)
+
+
 class TestCommSelf(BaseTestComm, unittest.TestCase):
     def setUp(self):
         self.COMM = MPI.COMM_SELF
