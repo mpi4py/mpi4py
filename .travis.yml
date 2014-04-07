@@ -31,13 +31,14 @@ install:
     - pip install .
 
 before_script:
-    - MPIEXEC='mpiexec'
-    - test $MPI == mpich1 && MPIEXEC='/bin/echo' || true
+    - MPIEXEC='mpiexec'; PYTHON='python';
+    - test $MPI == mpich1 && MPIEXEC='mpirun' || true
+    - test $MPI == mpich1 && PYTHON=$(which python) || true
     - test $MPI == mpich2 && sudo hostname localhost || true
     - test $MPI == mpich2 && MPIEXEC='mpiexec -launcher fork' || true
 script:
-    - $MPIEXEC -n 1 python $PWD/test/runtests.py -v --no-builddir --exclude=spawn
-    - $MPIEXEC -n 5 python $PWD/test/runtests.py -v --no-builddir --exclude=spawn
+    - $MPIEXEC -n 1 $PYTHON $PWD/test/runtests.py -v --no-builddir --exclude=spawn
+    - $MPIEXEC -n 5 $PYTHON $PWD/test/runtests.py -v --no-builddir --exclude=spawn
 
 #notifications:
 #  email: false
