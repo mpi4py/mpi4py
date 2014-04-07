@@ -102,14 +102,14 @@ cdef inline void op_user_mpi(
         PySys_WriteStderr(b"Fatal Python error: exception in "
                           b"user-defined reduction operation\n", 0)
         try: print_traceback()
-        finally: MPI_Abort(MPI_COMM_WORLD, 1)
+        finally: <void>MPI_Abort(MPI_COMM_WORLD, 1)
 
 cdef inline void op_user_call(
     int index, void *a, void *b, int *plen, MPI_Datatype *t) nogil:
     # make it abort if Python has finalized
-    if not Py_IsInitialized(): MPI_Abort(MPI_COMM_WORLD, 1)
+    if not Py_IsInitialized(): <void>MPI_Abort(MPI_COMM_WORLD, 1)
     # make it abort if module clenaup has been done
-    if (<void*>op_user_registry) == NULL: MPI_Abort(MPI_COMM_WORLD, 1)
+    if (<void*>op_user_registry) == NULL: <void>MPI_Abort(MPI_COMM_WORLD, 1)
     # compute the byte-size of memory buffers
     cdef MPI_Aint lb=0, extent=0
     MPI_Type_get_extent(t[0], &lb, &extent)
