@@ -279,7 +279,6 @@ class Scanner(object):
         for node in self:
             fileobj.write(node.header())
 
-
     CONFIG_HEAD = """\
     #ifndef PyMPI_CONFIG_H
     #define PyMPI_CONFIG_H
@@ -361,9 +360,7 @@ class Scanner(object):
                     fileobj.write(node.missing())
         fileobj.write(tail)
 
-
 # -----------------------------------------
-
 
 if __name__ == '__main__':
     import sys, os

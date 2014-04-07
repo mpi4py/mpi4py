@@ -232,12 +232,24 @@ class ConfigureMPI(object):
         results = []
         for name, code in self.scanner.itertests():
             log.info("checking for '%s' ..." % name)
-            body = self.gen_one(results, code)
-            ok   = self.run_one(body)
+            ok = self.run_test(code)
             if not ok:
                 log.info("**** failed check for '%s'" % name)
             results.append((name, ok))
         return results
+
+    def gen_test(self, code):
+        body = ['int main(int argc, char **argv) {',
+                '\n'.join(['  ' + line for line in code.split('\n')]),
+                '  return 0;',
+                '}']
+        body = '\n'.join(body) + '\n'
+        return body
+
+    def run_test(self, code, lang='c'):
+        body = self.gen_test(code)
+        ok = self.config_cmd.try_link(body, headers=['mpi.h'], lang=lang)
+        return ok
 
     def dump(self, results):
         destdir = self.DESTDIR
@@ -247,33 +259,6 @@ class ConfigureMPI(object):
         self.scanner.dump_config_h(config_h, results)
         log.info("writing '%s'", missing_h)
         self.scanner.dump_missing_h(missing_h, None)
-
-    def gen_one(self, results, code):
-        #
-        configtest_h = "_configtest.h"
-        self.config_cmd.temp_files.insert(0, configtest_h)
-        fh = open(configtest_h, "w")
-        try:
-            sep = "/* " + ('-'*72)+ " */\n"
-            fh.write(sep)
-            self.scanner.dump_config_h(fh, results)
-            fh.write(sep)
-            self.scanner.dump_missing_h(fh, results)
-            fh.write(sep)
-        finally:
-            fh.close()
-        #
-        body = ['#include "%s"' % configtest_h,
-                'int main(int argc, char **argv) {',
-                '\n'.join(['  ' + line for line in code.split('\n')]),
-                '  return 0;',
-                '}']
-        body = '\n'.join(body) + '\n'
-        return body
-
-    def run_one(self, body, lang='c'):
-        ok = self.config_cmd.try_link(body, headers=['mpi.h'], lang=lang)
-        return ok
 
 # -----------------------------------------------------------------------------
 
