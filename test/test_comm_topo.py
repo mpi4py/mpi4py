@@ -14,12 +14,12 @@ class BaseTestTopo(object):
             dims = MPI.Compute_dims(size, [0]*ndim)
             periods = [True] * len(dims)
             topo = comm.Create_cart(dims, periods=periods)
-            dim = topo.dim
-            self.assertEqual(dim, len(dims))
+            self.assertEqual(topo.dim, len(dims))
+            self.assertEqual(topo.ndim, len(dims))
             coordinates = topo.coords
             self.assertEqual(coordinates, topo.Get_coords(topo.rank))
             neighbors = []
-            for i in range(dim):
+            for i in range(ndim):
                 for d in (-1, +1):
                     coord = list(coordinates)
                     coord[i] = (coord[i]+d) % dims[i]
@@ -31,6 +31,9 @@ class BaseTestTopo(object):
             inedges, outedges = topo.inoutedges
             self.assertEqual(inedges, neighbors)
             self.assertEqual(outedges, neighbors)
+            if ndim == 1:
+                topo.Free()
+                continue
             for i in range(ndim):
                 rem_dims = [1]*ndim
                 rem_dims[i] = 0

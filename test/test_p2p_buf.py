@@ -15,7 +15,6 @@ class BaseTestP2PBuf(object):
         for array in arrayimpl.ArrayTypes:
             for typecode in arrayimpl.TypeMap:
                 for s in range(0, size):
-                    #
                     sbuf = array( s, typecode, s)
                     rbuf = array(-1, typecode, s+1)
                     self.COMM.Sendrecv(sbuf.as_mpi(), dest,   0,
@@ -23,7 +22,15 @@ class BaseTestP2PBuf(object):
                     for value in rbuf[:-1]:
                         self.assertEqual(value, s)
                     self.assertEqual(rbuf[-1], -1)
-                    #
+
+    def testSendrecvReplace(self):
+        size = self.COMM.Get_size()
+        rank = self.COMM.Get_rank()
+        dest = (rank + 1) % size
+        source = (rank - 1) % size
+        for array in arrayimpl.ArrayTypes:
+            for typecode in arrayimpl.TypeMap:
+                for s in range(1, size):
                     buf = array(rank, typecode, s+1); buf[s] = -1
                     self.COMM.Sendrecv_replace(buf.as_mpi(), dest, 0, source, 0)
                     for value in buf[:-1]:
@@ -200,6 +207,27 @@ class BaseTestP2PBuf(object):
                         for value in rbuf[s:]:
                             self.assertEqual(value, -1)
 
+    def testProbe(self):
+        comm = self.COMM.Dup()
+        try:
+            request = comm.Issend([None, 0, MPI.BYTE], comm.rank, 123)
+            self.assertTrue(request)
+            status = MPI.Status()
+            comm.Probe(MPI.ANY_SOURCE, MPI.ANY_TAG, status)
+            self.assertEqual(status.source, comm.rank)
+            self.assertEqual(status.tag, 123)
+            self.assertTrue(request)
+            flag = request.Test()
+            self.assertTrue(request)
+            self.assertFalse(flag)
+            comm.Recv([None, 0, MPI.BYTE], comm.rank, 123)
+            self.assertTrue(request)
+            flag = request.Test()
+            self.assertFalse(request)
+            self.assertTrue(flag)
+        finally:
+            comm.Free()
+
     def testProbeCancel(self):
         comm = self.COMM.Dup()
         try:
@@ -258,6 +286,8 @@ class TestP2PBufWorldDup(BaseTestP2PBuf, unittest.TestCase):
         self.COMM.Free()
 
 name, version = MPI.get_vendor()
+if name == 'MPICH1' or name == 'LAM/MPI':
+    del BaseTestP2PBuf.testProbeCancel
 if name == 'Open MPI':
     if version < (1, 4, 0):
         if MPI.Query_thread() > MPI.THREAD_SINGLE:
