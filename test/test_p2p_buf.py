@@ -30,12 +30,11 @@ class BaseTestP2PBuf(object):
         source = (rank - 1) % size
         for array in arrayimpl.ArrayTypes:
             for typecode in arrayimpl.TypeMap:
-                for s in range(1, size):
-                    buf = array(rank, typecode, s+1); buf[s] = -1
+                for s in range(0, size):
+                    buf = array(rank, typecode, s);
                     self.COMM.Sendrecv_replace(buf.as_mpi(), dest, 0, source, 0)
-                    for value in buf[:-1]:
+                    for value in buf:
                         self.assertEqual(value, source)
-                    self.assertEqual(buf[-1], -1)
 
     def testSendRecv(self):
         size = self.COMM.Get_size()

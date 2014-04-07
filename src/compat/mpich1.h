@@ -71,6 +71,25 @@ static int PyMPI_MPICH1_MPI_Sendrecv(void *sendbuf,
 #undef  MPI_Sendrecv
 #define MPI_Sendrecv PyMPI_MPICH1_MPI_Sendrecv
 
+static int PyMPI_MPICH1_MPI_Sendrecv_replace(void *buf,
+                                             int count,
+                                             MPI_Datatype datatype,
+                                             int dest,
+                                             int sendtag,
+                                             int source,
+                                             int recvtag,
+                                             MPI_Comm comm,
+                                             MPI_Status *status)
+{
+  MPI_Status dummy;
+  if (status == MPI_STATUS_IGNORE) status = &dummy;
+  return MPI_Sendrecv_replace(buf, count, datatype,
+                              dest, sendtag, source, recvtag,
+                              comm, status);
+}
+#undef  MPI_Sendrecv_replace
+#define MPI_Sendrecv_replace PyMPI_MPICH1_MPI_Sendrecv_replace
+
 /* ---------------------------------------------------------------- */
 
 #ifndef PyMPI_HAVE_MPI_Win
