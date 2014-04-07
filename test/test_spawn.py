@@ -69,7 +69,7 @@ class BaseTestSpawn(object):
     def testReturnedErrcodesMultiple(self):
         COMMAND = [self.COMMAND]*3
         ARGS = [self.ARGS]*len(COMMAND)
-        MAXPROCS = range(1, len(COMMAND)+1)
+        MAXPROCS = list(range(1, len(COMMAND)+1))
         INFO = MPI.INFO_NULL
         errcodelist = []
         child = self.COMM.Spawn_multiple(
@@ -91,7 +91,7 @@ class BaseTestSpawn(object):
         if rank == self.ROOT:
             COMMAND = [self.COMMAND] * 3
             ARGS = [self.ARGS] * len(COMMAND)
-            MAXPROCS = range(2, len(COMMAND)+2)
+            MAXPROCS = list(range(2, len(COMMAND)+2))
             INFO = [MPI.INFO_NULL] * len(COMMAND)
             child = self.COMM.Spawn_multiple(
                 COMMAND, ARGS, MAXPROCS,
