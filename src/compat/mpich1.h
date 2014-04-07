@@ -3,28 +3,14 @@
 
 /* ---------------------------------------------------------------- */
 
-/* this does not actually work in parallel, */
-/* but avoids a nasty segfault.             */
-
 static int    PyMPI_MPICH1_argc    = 0;
-static char **PyMPI_MPICH1_argv    = 0;
-static char  *PyMPI_MPICH1_args[2] = {0, 0};
+static char  *PyMPI_MPICH1_argv[1] = {(char*)0};
 
 static void PyMPI_MPICH1_FixArgs(int **argc, char ****argv)
 {
-  if ((argc[0]==(int *)0) || (argv[0]==(char ***)0)) {
-#ifdef Py_PYTHON_H
-#if PY_MAJOR_VERSION >= 3
-    PyMPI_MPICH1_args[0] = (char *) "python";
-#else
-    PyMPI_MPICH1_args[0] = Py_GetProgramName();
-#endif
-    PyMPI_MPICH1_argc = 1;
-#endif
-    PyMPI_MPICH1_argv = PyMPI_MPICH1_args;
-    argc[0] = &PyMPI_MPICH1_argc;
-    argv[0] = &PyMPI_MPICH1_argv;
-  }
+  if (argc[0] && argv[0]) return;
+  argc[0] = (int *)    &PyMPI_MPICH1_argc;
+  argv[0] = (char ***) &PyMPI_MPICH1_argv;
 }
 
 static int PyMPI_MPICH1_MPI_Init(int *argc, char ***argv)
@@ -87,19 +73,34 @@ static int PyMPI_MPICH1_MPI_Sendrecv(void *sendbuf,
 
 /* ---------------------------------------------------------------- */
 
+#ifndef PyMPI_HAVE_MPI_Win
+#undef  MPI_Win_c2f
+#define MPI_Win_c2f(win) ((MPI_Fint)0)
+#undef  MPI_Win_f2c
+#define MPI_Win_f2c(win) MPI_WIN_NULL
+#endif
+
+/* ---------------------------------------------------------------- */
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+extern void *MPIR_ToPointer(int);
+#if defined(__cplusplus)
+}
+#endif
+
 #if defined(ROMIO_VERSION)
 
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
-#define MPIR_COOKIE unsigned long cookie;
 struct MPIR_Errhandler {
-  MPIR_COOKIE
+  unsigned long        cookie;
   MPI_Handler_function *routine;
   int                  ref_count;
 };
-extern void *MPIR_ToPointer(int);
 
 #if defined(__cplusplus)
 }
