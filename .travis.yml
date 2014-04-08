@@ -14,11 +14,6 @@ env:
     - MPI=mpich3
     - MPI=openmpi
 
-matrix:
-  allow_failures:
-    - env: MPI=mpich1
-    - env: MPI=mpich3
-
 branches:
   only:
     - master
