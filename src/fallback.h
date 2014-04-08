@@ -967,6 +967,31 @@ static int PyMPI_Win_allocate(MPI_Aint size, int disp_unit,
 #endif
 #endif
 
+#ifndef PyMPI_HAVE_MPI_Win_set_info
+static int PyMPI_Win_set_info(MPI_Win win, MPI_Info info)
+{
+  int dummy, ierr;
+  if (win == MPI_WIN_NULL) return MPI_ERR_WIN;
+  if (info != MPI_INFO_NULL) {
+    ierr = MPI_Info_get_nkeys(info, &dummy);
+    if (ierr != MPI_SUCCESS) return ierr;
+  }
+  return MPI_SUCCESS;
+}
+#undef  MPI_Win_set_info
+#define MPI_Win_set_info PyMPI_Win_set_info
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Win_get_info
+static int PyMPI_Win_get_info(MPI_Win win, MPI_Info *info)
+{
+  if (win == MPI_WIN_NULL) return MPI_ERR_WIN;
+  return MPI_Info_create(info);
+}
+#undef  MPI_Win_get_info
+#define MPI_Win_get_info PyMPI_Win_get_info
+#endif
+
 /* ---------------------------------------------------------------- */
 
 #endif /* !PyMPI_FALLBACK_H */
