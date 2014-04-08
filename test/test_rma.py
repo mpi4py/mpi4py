@@ -185,7 +185,7 @@ except NotImplementedError:
 else:
     name, version = MPI.get_vendor()
     if name == 'Open MPI':
-        if _version < (1, 4, 0):
+        if version < (1, 4, 0):
             if MPI.Query_thread() > MPI.THREAD_SINGLE:
                 del TestRMAWorld
     if name == 'HP MPI':
