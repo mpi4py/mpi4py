@@ -90,6 +90,44 @@ class BaseTestRMA(object):
                             self.assertEqual(rbuf[-1], -1)
 
 
+    def testGetAccumulate(self):
+        group = self.WIN.Get_group()
+        size = group.Get_size()
+        rank = group.Get_rank()
+        group.Free()
+        try:
+            buf = mkzeros(1)
+            self.WIN.Lock(MPI.LOCK_EXCLUSIVE, rank)
+            self.WIN.Get_accumulate([buf, 0, MPI.BYTE], [buf, 0, MPI.BYTE], rank)
+            self.WIN.Unlock(rank)
+        except NotImplementedError:
+            return
+        for array in arrayimpl.ArrayTypes:
+            for typecode in arrayimpl.TypeMap:
+                for count in range(1, 10): # XXX MPICH fails with buf=NULL
+                    for rank in range(size):
+                        ones = array([1]*count, typecode)
+                        sbuf = array(range(count), typecode)
+                        rbuf = array(-1, typecode, count+1)
+                        gbuf = array(-1, typecode, count+1)
+                        for op in (MPI.SUM, MPI.PROD,
+                                   MPI.MAX, MPI.MIN,
+                                   MPI.REPLACE, MPI.NO_OP):
+                            self.WIN.Lock(MPI.LOCK_EXCLUSIVE, rank)
+                            self.WIN.Put(ones.as_mpi(), rank)
+                            self.WIN.Get_accumulate(sbuf.as_mpi(),
+                                                    rbuf.as_mpi_c(count),
+                                                    rank, op=op)
+                            self.WIN.Get(gbuf.as_mpi_c(count), rank)
+                            self.WIN.Unlock(rank)
+                            #
+                            for i in range(count):
+                                self.assertEqual(sbuf[i], i)
+                                self.assertEqual(rbuf[i], 1)
+                                self.assertEqual(gbuf[i], op(1, i))
+                            self.assertEqual(rbuf[-1], -1)
+                            self.assertEqual(gbuf[-1], -1)
+
     def testPutProcNull(self):
         self.WIN.Fence()
         self.WIN.Put(None, MPI.PROC_NULL, None)
@@ -144,14 +182,14 @@ try:
     w = MPI.Win.Create(None, 1, MPI.INFO_NULL, MPI.COMM_SELF).Free()
 except NotImplementedError:
     del TestRMASelf, TestRMAWorld
-
-_name, _version = MPI.get_vendor()
-if _name == 'Open MPI':
-    if _version < (1, 4, 0):
-        if MPI.Query_thread() > MPI.THREAD_SINGLE:
-            del TestRMAWorld
-elif _name == 'HP MPI':
-    BaseTestRMA.COUNT_MIN = 1
+else:
+    name, version = MPI.get_vendor()
+    if name == 'Open MPI':
+        if _version < (1, 4, 0):
+            if MPI.Query_thread() > MPI.THREAD_SINGLE:
+                del TestRMAWorld
+    if name == 'HP MPI':
+        BaseTestRMA.COUNT_MIN = 1
 
 if __name__ == '__main__':
     unittest.main()

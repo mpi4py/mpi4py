@@ -55,18 +55,17 @@ class BaseTestRMA(object):
             for typecode in arrayimpl.TypeMap:
                 for count in range(self.COUNT_MIN, 10):
                     for rank in range(size):
-                        sbuf = array(range(count), typecode)
+                        sbuf = array([rank]*count, typecode)
                         rbuf = array(-1, typecode, count+1)
-                        self.WIN.Fence()
+                        self.WIN.Lock(MPI.LOCK_EXCLUSIVE, rank)
                         r = self.WIN.Rput(sbuf.as_mpi(), rank)
                         r.Wait()
-                        self.WIN.Fence()
                         r = self.WIN.Rget(rbuf.as_mpi_c(count), rank)
                         r.Wait()
-                        self.WIN.Fence()
+                        self.WIN.Unlock(rank)
                         for i in range(count):
-                            self.assertEqual(sbuf[i], i)
-                            self.assertNotEqual(rbuf[i], -1)
+                            self.assertEqual(sbuf[i], rank)
+                            self.assertEqual(rbuf[i], rank)
                         self.assertEqual(rbuf[-1], -1)
 
     def testAccumulate(self):
@@ -77,55 +76,84 @@ class BaseTestRMA(object):
             for typecode in arrayimpl.TypeMap:
                 for count in range(self.COUNT_MIN, 10):
                     for rank in range(size):
+                        ones = array([1]*count, typecode)
                         sbuf = array(range(count), typecode)
                         rbuf = array(-1, typecode, count+1)
-                        for op in (MPI.SUM, MPI.PROD, MPI.MAX, MPI.MIN):
-                            self.WIN.Fence()
+                        for op in (MPI.SUM, MPI.PROD,
+                                   MPI.MAX, MPI.MIN,
+                                   MPI.REPLACE):
+                            self.WIN.Lock(MPI.LOCK_EXCLUSIVE, rank)
+                            self.WIN.Put(ones.as_mpi(), rank)
                             r = self.WIN.Raccumulate(sbuf.as_mpi(), rank, op=op)
                             r.Wait()
-                            self.WIN.Fence()
                             self.WIN.Get(rbuf.as_mpi_c(count), rank)
-                            self.WIN.Fence()
+                            self.WIN.Unlock(rank)
                             #
                             for i in range(count):
                                 self.assertEqual(sbuf[i], i)
-                                self.assertNotEqual(rbuf[i], -1)
+                                self.assertEqual(rbuf[i], op(1,i))
                             self.assertEqual(rbuf[-1], -1)
 
+    def testGetAccumulate(self):
+        group = self.WIN.Get_group()
+        size = group.Get_size()
+        group.Free()
+        for array in arrayimpl.ArrayTypes:
+            for typecode in arrayimpl.TypeMap:
+                for count in range(1, 10): # XXX MPICH fails with buf=NULL
+                    for rank in range(size):
+                        ones = array([1]*count, typecode)
+                        sbuf = array(range(count), typecode)
+                        rbuf = array(-1, typecode, count+1)
+                        gbuf = array(-1, typecode, count+1)
+                        for op in (MPI.SUM, MPI.PROD,
+                                   MPI.MAX, MPI.MIN,
+                                   MPI.REPLACE, MPI.NO_OP):
+                            self.WIN.Lock(MPI.LOCK_EXCLUSIVE, rank)
+                            self.WIN.Put(ones.as_mpi(), rank)
+                            r = self.WIN.Rget_accumulate(sbuf.as_mpi(),
+                                                         rbuf.as_mpi_c(count),
+                                                         rank, op=op)
+                            r.Wait()
+                            self.WIN.Get(gbuf.as_mpi_c(count), rank)
+                            self.WIN.Unlock(rank)
+                            #
+                            for i in range(count):
+                                self.assertEqual(sbuf[i], i)
+                                self.assertEqual(rbuf[i], 1)
+                                self.assertEqual(gbuf[i], op(1, i))
+                            self.assertEqual(rbuf[-1], -1)
+                            self.assertEqual(gbuf[-1], -1)
 
     def testPutProcNull(self):
-        self.WIN.Fence()
+        self.WIN.Lock_all()
         r = self.WIN.Rput(None, MPI.PROC_NULL, None)
         r.Wait()
-        self.WIN.Fence()
+        self.WIN.Unlock_all()
 
     def testGetProcNull(self):
-        self.WIN.Fence()
+        self.WIN.Lock_all()
         r = self.WIN.Rget(None, MPI.PROC_NULL, None)
         r.Wait()
-        self.WIN.Fence()
+        self.WIN.Unlock_all()
 
     def testAccumulateProcNullReplace(self):
-        self.WIN.Fence()
         zeros = mkzeros(8)
-        self.WIN.Fence()
+        self.WIN.Lock_all()
         r = self.WIN.Raccumulate([zeros, MPI.INT], MPI.PROC_NULL, None, MPI.REPLACE)
         r.Wait()
-        self.WIN.Fence()
         r = self.WIN.Raccumulate([zeros, MPI.INT], MPI.PROC_NULL, None, MPI.REPLACE)
         r.Wait()
-        self.WIN.Fence()
+        self.WIN.Unlock_all()
 
     def testAccumulateProcNullSum(self):
-        self.WIN.Fence()
         zeros = mkzeros(8)
-        self.WIN.Fence()
+        self.WIN.Lock_all()
         r = self.WIN.Raccumulate([zeros, MPI.INT], MPI.PROC_NULL, None, MPI.SUM)
         r.Wait()
-        self.WIN.Fence()
         r = self.WIN.Raccumulate([None, MPI.INT], MPI.PROC_NULL, None, MPI.SUM)
         r.Wait()
-        self.WIN.Fence()
+        self.WIN.Unlock_all()
 
 class TestRMASelf(BaseTestRMA, unittest.TestCase):
     COMM = MPI.COMM_SELF
@@ -138,17 +166,16 @@ try:
     w = MPI.Win.Create(None, 1, MPI.INFO_NULL, MPI.COMM_SELF).Free()
 except NotImplementedError:
     del TestRMASelf, TestRMAWorld
-
-_name, _version = MPI.get_vendor()
-if _name == 'Open MPI':
-    del TestRMASelf, TestRMAWorld
-if _name == 'MPICH2':
-    del TestRMASelf, TestRMAWorld
 else:
-    try:
+    name, version = MPI.get_vendor()
+    if name == 'Open MPI':
+        if version < (1, 8, 0):
+            del TestRMASelf, TestRMAWorld
+    elif name == 'MPICH2':
+        if version < (1, 5, 0):
+            del TestRMASelf, TestRMAWorld
+    elif MPI.Get_version() < (3, 0):
         del TestRMASelf, TestRMAWorld
-    except NameError:
-        pass
 
 if __name__ == '__main__':
     unittest.main()
