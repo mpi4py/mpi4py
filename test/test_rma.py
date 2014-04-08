@@ -95,13 +95,13 @@ class BaseTestRMA(object):
         size = group.Get_size()
         rank = group.Get_rank()
         group.Free()
+        self.WIN.Fence()
         try:
-            buf = mkzeros(1)
-            self.WIN.Lock(MPI.LOCK_EXCLUSIVE, rank)
-            self.WIN.Get_accumulate([buf, 0, MPI.BYTE], [buf, 0, MPI.BYTE], rank)
-            self.WIN.Unlock(rank)
+            obuf = mkzeros(1); rbuf = mkzeros(1)
+            self.WIN.Get_accumulate([obuf, 0, MPI.BYTE], [rbuf, 0, MPI.BYTE], rank)
         except NotImplementedError:
             return
+        self.WIN.Fence()
         for array in arrayimpl.ArrayTypes:
             for typecode in arrayimpl.TypeMap:
                 for count in range(1, 10): # XXX MPICH fails with buf=NULL
