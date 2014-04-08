@@ -30,38 +30,7 @@ class BaseTestWin(object):
 
     COMM = MPI.COMM_NULL
     INFO = MPI.INFO_NULL
-
-    def setUp(self):
-        try:
-            self.mpi_memory = MPI.Alloc_mem(10)
-            self.memory = self.mpi_memory
-            memzero(self.memory)
-        except MPI.Exception:
-            from array import array
-            self.mpi_memory = None
-            self.memory = array('B',[0]*10)
-        refcnt = getrefcount(self.memory)
-        self.WIN = MPI.Win.Create(self.memory, 1, self.INFO, self.COMM)
-        if type(self.memory).__name__ == 'buffer':
-            self.assertEqual(getrefcount(self.memory), refcnt+1)
-        else:
-            if sys.version_info[:3] < (3, 3):
-                self.assertEqual(getrefcount(self.memory), refcnt)
-            else:
-                self.assertEqual(getrefcount(self.memory), refcnt+1)
-
-    def tearDown(self):
-        refcnt = getrefcount(self.memory)
-        self.WIN.Free()
-        if type(self.memory).__name__ == 'buffer':
-            self.assertEqual(getrefcount(self.memory), refcnt-1)
-        else:
-            if sys.version_info[:3] < (3, 3):
-                self.assertEqual(getrefcount(self.memory), refcnt)
-            else:
-                self.assertEqual(getrefcount(self.memory), refcnt-1)
-        if self.mpi_memory:
-            MPI.Free_mem(self.mpi_memory)
+    CREATE_FLAVOR = MPI.UNDEFINED
 
     def testGetMemory(self):
         memory = self.WIN.memory
@@ -125,23 +94,153 @@ class BaseTestWin(object):
         except NotImplementedError:
             pass
 
-class TestWinSelf(BaseTestWin, unittest.TestCase):
+    def testCreateFlavor(self):
+        if MPI.WIN_CREATE_FLAVOR == MPI.KEYVAL_INVALID: return
+        flavor = self.WIN.Get_attr(MPI.WIN_CREATE_FLAVOR)
+        self.assertEqual(flavor, self.CREATE_FLAVOR)
+
+class BaseTestWinCreate(BaseTestWin):
+
+    CREATE_FLAVOR = MPI.WIN_FLAVOR_CREATE
+
+    def setUp(self):
+        self.memory = MPI.Alloc_mem(10)
+        memzero(self.memory)
+        self.WIN = MPI.Win.Create(self.memory, 1, self.INFO, self.COMM)
+
+    def tearDown(self):
+        self.WIN.Free()
+        MPI.Free_mem(self.memory)
+
+class BaseTestWinAllocate(BaseTestWin):
+
+    CREATE_FLAVOR = MPI.WIN_FLAVOR_ALLOCATE
+
+    def setUp(self):
+        self.WIN = MPI.Win.Allocate(10, 1, self.INFO, self.COMM)
+        self.memory = self.WIN.memory
+        memzero(self.memory)
+
+    def tearDown(self):
+        self.WIN.Free()
+
+class BaseTestWinAllocateShared(BaseTestWin):
+
+    CREATE_FLAVOR = MPI.WIN_FLAVOR_SHARED
+
+    def setUp(self):
+        self.WIN = MPI.Win.Allocate_shared(10, 1, self.INFO, self.COMM)
+        self.memory = self.WIN.memory
+        memzero(self.memory)
+
+    def tearDown(self):
+        self.WIN.Free()
+
+    def testSharedQuery(self):
+        memory = self.WIN.memory
+        address = MPI.Get_address(memory)
+        length = len(memory)
+        memories = self.COMM.allgather((address, length))
+        rank = self.COMM.Get_rank()
+        size = self.COMM.Get_size()
+        for i in range(size):
+            mem, disp = self.WIN.Shared_query(rank)
+            base = MPI.Get_address(mem)
+            size = len(mem)
+            if i == rank:
+                self.assertEqual(base, memories[i][0])
+            self.assertEqual(size, memories[i][1])
+            self.assertEqual(disp, 1)
+
+class BaseTestWinCreateDynamic(BaseTestWin):
+
+    #INFO = MPI.INFO_NULL
+    CREATE_FLAVOR = MPI.WIN_FLAVOR_DYNAMIC
+
+    def setUp(self):
+        self.WIN = MPI.Win.Create_dynamic(self.INFO, self.COMM)
+        self.memory = self.WIN.memory
+
+    def tearDown(self):
+        self.WIN.Free()
+
+    def testEmptyMemory(self):
+        memory = self.WIN.memory
+        base = MPI.Get_address(memory)
+        size = len(memory)
+        self.assertEqual(base, 0)
+        self.assertEqual(size, 0)
+
+    def testAttachDetach(self):
+        mem1 = MPI.Alloc_mem(8)
+        mem2 = MPI.Alloc_mem(16)
+        mem3 = MPI.Alloc_mem(32)
+        for mem in (mem1, mem2, mem3):
+            self.WIN.Attach(mem)
+            self.testEmptyMemory()
+            self.WIN.Detach(mem)
+        for mem in (mem1, mem2, mem3):
+            self.WIN.Attach(mem)
+        self.testEmptyMemory()
+        for mem in (mem1, mem2, mem3):
+            self.WIN.Detach(mem)
+        for mem in (mem1, mem2, mem3):
+            self.WIN.Attach(mem)
+        self.testEmptyMemory()
+        for mem in (mem3, mem2, mem1):
+            self.WIN.Detach(mem)
+        MPI.Free_mem(mem1)
+        MPI.Free_mem(mem2)
+        MPI.Free_mem(mem3)
+        
+class TestWinCreateSelf(BaseTestWinCreate, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
-class TestWinWorld(BaseTestWin, unittest.TestCase):
+class TestWinCreateWorld(BaseTestWinCreate, unittest.TestCase):
+    COMM = MPI.COMM_WORLD
+
+class TestWinAllocateSelf(BaseTestWinAllocate, unittest.TestCase):
+    COMM = MPI.COMM_SELF
+
+class TestWinAllocateWorld(BaseTestWinAllocate, unittest.TestCase):
+    COMM = MPI.COMM_WORLD
+
+class TestWinAllocateSharedSelf(BaseTestWinAllocateShared, unittest.TestCase):
+    COMM = MPI.COMM_SELF
+
+class TestWinAllocateSharedWorld(BaseTestWinAllocateShared, unittest.TestCase):
+    COMM = MPI.COMM_WORLD
+
+class TestWinCreateDynamicSelf(BaseTestWinCreateDynamic, unittest.TestCase):
+    COMM = MPI.COMM_SELF
+
+class TestWinCreateDynamicWorld(BaseTestWinCreateDynamic, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
 try:
     w = MPI.Win.Create(MPI.BOTTOM, 1, MPI.INFO_NULL, MPI.COMM_SELF).Free()
 except NotImplementedError:
-    del BaseTestWin, TestWinSelf, TestWinWorld
+    del TestWinCreateSelf, TestWinCreateWorld
+try:
+    w = MPI.Win.Allocate(1, 1, MPI.INFO_NULL, MPI.COMM_SELF).Free()
+except NotImplementedError:
+    del TestWinAllocateSelf, TestWinAllocateWorld
+try:
+    w = MPI.Win.Allocate_shared(1, 1, MPI.INFO_NULL, MPI.COMM_SELF).Free()
+except NotImplementedError:
+    del TestWinAllocateSharedSelf, TestWinAllocateSharedWorld
+try:
+    w = MPI.Win.Create_dynamic(MPI.INFO_NULL, MPI.COMM_SELF).Free()
+except NotImplementedError:
+    del TestWinCreateDynamicSelf, TestWinCreateDynamicWorld
 
-_name, _version = MPI.get_vendor()
-if _name == 'Open MPI':
-    if _version < (1, 4, 0):
+name, version = MPI.get_vendor()
+if name == 'Open MPI':
+    if version < (1, 4, 0):
         if MPI.Query_thread() > MPI.THREAD_SINGLE:
-            del TestWinWorld
-elif _name == 'MPICH2':
+            del TestWinCreateWorld
+            del TestWinAllocateWorld
+if name == 'MPICH2':
     if 'win' in sys.platform:
         del BaseTestWin.testAttributes
 
