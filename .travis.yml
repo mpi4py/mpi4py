@@ -26,7 +26,7 @@ branches:
 before_install:
     - sudo apt-get update -q
     - sh ./conf/travis-install-mpi.sh $MPI
-    - pip install -q --use-mirrors Cython
+    - pip install -q Cython
 install:
     - pip install .
 
