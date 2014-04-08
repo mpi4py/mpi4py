@@ -85,8 +85,8 @@ class BaseTestWin(object):
         self.assertEqual(base, MPI.Get_address(self.memory))
 
     def testGetSetInfo(self):
-        info = MPI.INFO_NULL
-        self.WIN.Set_info(info)
+        #info = MPI.INFO_NULL
+        #self.WIN.Set_info(info)
         info = MPI.Info.Create()
         self.WIN.Set_info(info)
         info.Free()

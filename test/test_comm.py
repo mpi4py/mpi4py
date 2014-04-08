@@ -94,8 +94,8 @@ class BaseTestComm(object):
         self.assertEqual(ccmp, MPI.CONGRUENT)
 
     def testGetSetInfo(self):
-        info = MPI.INFO_NULL
-        self.COMM.Set_info(info)
+        #info = MPI.INFO_NULL
+        #self.COMM.Set_info(info)
         info = MPI.Info.Create()
         self.COMM.Set_info(info)
         info.Free()
