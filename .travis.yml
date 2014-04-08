@@ -11,22 +11,22 @@ python:
 env:
     - MPI=mpich1
     - MPI=mpich2
+    - MPI=mpich3
     - MPI=openmpi
 
 matrix:
   allow_failures:
     - env: MPI=mpich1
+    - env: MPI=mpich3
 
 branches:
   only:
     - master
 
 before_install:
-    - test $MPI == mpich1  && PACKAGES='mpich-shmem-bin libmpich-shmem1.0-dev' || true
-    - test $MPI == mpich2  && PACKAGES='mpich2 libmpich2-3 libmpich2-dev' || true
-    - test $MPI == openmpi && PACKAGES='openmpi-bin openmpi-dev' || true
-    - sudo apt-get update -qq && sudo apt-get install -qq $PACKAGES
-    - pip install -qq --use-mirrors Cython
+    - sudo apt-get update -q
+    - sh ./conf/travis-install-mpi.sh $MPI
+    - pip install -q --use-mirrors Cython
 install:
     - pip install .
 
@@ -36,6 +36,8 @@ before_script:
     - test $MPI == mpich1 && PYTHON=$(which python) || true
     - test $MPI == mpich2 && sudo hostname localhost || true
     - test $MPI == mpich2 && MPIEXEC='mpiexec -launcher fork' || true
+    - test $MPI == mpich3 && sudo hostname localhost || true
+    - test $MPI == mpich3 && MPIEXEC='mpiexec -launcher fork' || true
 script:
     - $MPIEXEC -n 1 $PYTHON $PWD/test/runtests.py -v --no-builddir --exclude=spawn
     - $MPIEXEC -n 5 $PYTHON $PWD/test/runtests.py -v --no-builddir --exclude=spawn
