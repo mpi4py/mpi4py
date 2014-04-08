@@ -124,6 +124,9 @@ class TestDPM(unittest.TestCase):
 name, version = MPI.get_vendor()
 if name == 'Open MPI':
     del TestDPM
+elif name in ('MPICH', 'MPICH2'):
+    if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
+        del TestDPM.testNamePublishing
 else:
     try:
         MPI.Close_port(MPI.Open_port())
