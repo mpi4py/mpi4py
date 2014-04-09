@@ -352,25 +352,25 @@ class TestGetAddress(unittest.TestCase):
             pass
 
 import sys
-_name, _version = MPI.get_vendor()
-if _name == 'LAM/MPI':
+name, version = MPI.get_vendor()
+if name == 'LAM/MPI':
     combiner_map[MPI.COMBINER_INDEXED_BLOCK] = MPI.COMBINER_INDEXED
-elif _name == 'MPICH1':
+elif name == 'MPICH1':
     combiner_map[MPI.COMBINER_VECTOR]  = None
     combiner_map[MPI.COMBINER_HVECTOR] = None
     combiner_map[MPI.COMBINER_INDEXED] = None
     combiner_map[MPI.COMBINER_HINDEXED_BLOCK] = None
     for t in datatypes_f: datatypes.remove(t)
-elif MPI.Get_version() < (2, 0):
+elif MPI.Get_version() < (2,0):
     combiner_map = None
-if MPI.Get_version() < (2, 0):
+if MPI.Get_version() < (2,0):
     del TestDatatype.testMatchSize
-if _name == 'Open MPI':
+if name == 'Open MPI':
     del TestDatatype.testCreateF90RealSingle
     del TestDatatype.testCreateF90RealDouble
     del TestDatatype.testCreateF90ComplexSingle
     del TestDatatype.testCreateF90ComplexDouble
-    if _version <= (1, 5, 1):
+    if version <= (1,5,1):
         for t in datatypes_f90[-4:]:
             if t != MPI.DATATYPE_NULL:
                 datatypes.remove(t)

@@ -82,10 +82,11 @@ class TestRequestArray(unittest.TestCase):
             self.assertEqual(ret, None)
             self.assertEqual(len(statuses), len(self.REQUESTS))
 
-_name, _version = MPI.get_vendor()
-if (_name == 'MPICH1' or
-    _name == 'LAM/MPI'):
+
+name, version = MPI.get_vendor()
+if name == 'MPICH1' or name == 'LAM/MPI':
     del TestRequest.testGetStatus
+
 
 if __name__ == '__main__':
     unittest.main()

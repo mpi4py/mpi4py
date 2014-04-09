@@ -119,34 +119,34 @@ class TestSpawnWorldMany(BaseTestSpawn, unittest.TestCase):
     MAXPROCS = MPI.COMM_WORLD.Get_size()
 
 
-_SKIP_TEST = False
-_name, _version = MPI.get_vendor()
-if _name == 'Open MPI':
-    if _version < (1, 5, 0):
-        _SKIP_TEST = True
-    elif _version < (1, 4, 0):
-        _SKIP_TEST = True
+SKIP_TEST = False
+name, version = MPI.get_vendor()
+if name == 'Open MPI':
+    if version < (1,5,0):
+        SKIP_TEST = True
+    elif version < (1,4,0):
+        SKIP_TEST = True
     if 'win' in sys.platform:
-        _SKIP_TEST = True
-elif _name == 'MPICH2':
-    if _version < (1, 0, 6):
-        _SKIP_TEST = True
+        SKIP_TEST = True
+if name == 'MPICH2':
+    if version < (1,0,6):
+        SKIP_TEST = True
     if 'win' in sys.platform:
-        _SKIP_TEST = True
-elif _name == 'Microsoft MPI':
-    _SKIP_TEST = True
-elif _name == 'HP MPI':
-    _SKIP_TEST = True
-elif MPI.Get_version() < (2, 0):
-    _SKIP_TEST = True
+        SKIP_TEST = True
+if name == 'Microsoft MPI':
+    SKIP_TEST = True
+if name == 'HP MPI':
+    SKIP_TEST = True
+if MPI.Get_version() < (2,0):
+    SKIP_TEST = True
 
-if _SKIP_TEST:
+if SKIP_TEST:
     del BaseTestSpawn
     del TestSpawnSelf
     del TestSpawnWorld
     del TestSpawnSelfMany
     del TestSpawnWorldMany
-elif (_name in ('MPICH', 'MPICH2') and _version > (1, 2)):
+elif name == 'MPICH' or (name == 'MPICH2' and version > (1,2,0)):
     # Up to mpich2-1.3.1 when running under Hydra process manager,
     # spawn fails for the singleton init case
     if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
@@ -154,6 +154,7 @@ elif (_name in ('MPICH', 'MPICH2') and _version > (1, 2)):
         del TestSpawnWorld
         del TestSpawnSelfMany
         del TestSpawnWorldMany
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -46,11 +46,11 @@ class TestExcDatatype(unittest.TestCase):
                 except NotImplementedError:
                     return
 
-_name, _version = MPI.get_vendor()
-if _name == 'Open MPI':
-    if _version < (1, 4, 3):
-        TestExcDatatype.DATATYPES  = TestExcDatatype.DATATYPES[1:]
-        TestExcDatatype.ERR_TYPE   = MPI.ERR_INTERN
+name, version = MPI.get_vendor()
+if name == 'Open MPI':
+    if version < (1,4,3):
+        TestExcDatatype.DATATYPES = TestExcDatatype.DATATYPES[1:]
+        TestExcDatatype.ERR_TYPE  = MPI.ERR_INTERN
 
 # --------------------------------------------------------------------
 
@@ -158,7 +158,8 @@ try:
 except NotImplementedError:
     del TestExcInfoNull, TestExcInfo
 else:
-    if _name == 'Microsoft MPI': # ???
+    name, version = MPI.get_vendor()
+    if name == 'Microsoft MPI': # ???
         del TestExcInfoNull.testDup
 
 # --------------------------------------------------------------------
@@ -257,11 +258,11 @@ class TestExcComm(unittest.TestCase):
             [MPI.ERR_KEYVAL, MPI.ERR_OTHER],
             MPI.COMM_SELF.Get_attr, MPI.KEYVAL_INVALID)
 
-_name, _version = MPI.get_vendor()
-if _name == 'Open MPI':
-    if _version < (1, 4, 2):
+name, version = MPI.get_vendor()
+if name == 'Open MPI':
+    if version < (1,4,2):
         del TestExcCommNull.testGetAttr
-    if _version < (1, 4, 1):
+    if version < (1,4,1):
         del TestExcCommNull.testGetErrhandler
 
 # --------------------------------------------------------------------
@@ -332,7 +333,7 @@ import sys
 name, version = MPI.get_vendor()
 if name == 'MPICH1':
     del TestExcStatus.testSetElements
-elif name == 'MPICH2':
+if name == 'MPICH2':
     try:
         MPI.DATATYPE_NULL.Get_size()
     except MPI.Exception:
@@ -354,7 +355,7 @@ elif name == 'MPICH2':
         del TestExcWin
         del TestExcErrhandlerNull
         del TestExcErrhandler
-elif name == 'Open MPI':
+if name == 'Open MPI':
     if 'win' in sys.platform:
         del TestExcDatatypeNull
         del TestExcDatatype
@@ -372,10 +373,10 @@ elif name == 'Open MPI':
         del TestExcWin
         del TestExcErrhandlerNull
         del TestExcErrhandler
-elif name == 'Microsoft MPI':
+if name == 'Microsoft MPI':
         del TestExcStatus
         TestExcCommNull.ERR_COMM = (MPI.ERR_COMM, MPI.ERR_ARG)
-elif name == 'HP MPI':
+if name == 'HP MPI':
         del TestExcDatatypeNull
         del TestExcDatatype
         del TestExcStatus

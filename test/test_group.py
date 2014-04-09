@@ -162,12 +162,14 @@ class TestGroupWorld(BaseTestGroup, unittest.TestCase):
         rank = self.GROUP.Get_rank()
         self.assertTrue(rank >= 0 and rank < size)
 
-_name, _version = MPI.get_vendor()
-if _name == 'MPICH1':
+
+name, version = MPI.get_vendor()
+if name == 'MPICH1':
     del BaseTestGroup.testTranslRanksProcNull
     TestGroupEmpty.testTranslRanks = lambda self: None
-if _name == 'LAM/MPI':
+if name == 'LAM/MPI':
     del BaseTestGroup.testTranslRanksProcNull
+
 
 if __name__ == '__main__':
     unittest.main()

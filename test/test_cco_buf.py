@@ -605,14 +605,13 @@ class TestCCOBufWorldDup(BaseTestCCOBuf, unittest.TestCase):
         self.COMM.Free()
 
 
-_name, _version = MPI.get_vendor()
-if (_name == 'MPICH1' or _name == 'LAM/MPI'
-    or MPI.BOTTOM == MPI.IN_PLACE):
+name, version = MPI.get_vendor()
+if name == 'MPICH1' or name == 'LAM/MPI' or MPI.BOTTOM == MPI.IN_PLACE:
     del BaseTestCCOBufInplace
     del TestCCOBufInplaceSelf
     del TestCCOBufInplaceWorld
-elif _name == 'Open MPI':
-    if _version < (1, 4, 0):
+elif name == 'Open MPI':
+    if version < (1,4,0):
         if MPI.Query_thread() > MPI.THREAD_SINGLE:
             del TestCCOBufWorldDup
 

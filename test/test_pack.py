@@ -101,14 +101,14 @@ class TestPackExternal(BaseTestPackExternal, unittest.TestCase):
     pass
 
 
-_name, _version = MPI.get_vendor()
-if _name == 'Open MPI':
-    if _version < (1, 5, 0):
-        del BaseTestPackExternal
-        del TestPackExternal
-elif _name in ('MPICH', 'MPICH2', 'DeinoMPI'):
+name, version = MPI.get_vendor()
+if name =='MPICH' or name == 'MPICH2' or name == 'DeinoMPI':
     BaseTestPackExternal.skipdtype += ['l']
     BaseTestPackExternal.skipdtype += ['d']
+elif name == 'Open MPI':
+    if version < (1,5,0):
+        del BaseTestPackExternal
+        del TestPackExternal
 else:
     try:
         MPI.BYTE.Pack_external_size(EXT32, 0)

@@ -234,25 +234,25 @@ class TestCCOObjInterDupDup(TestCCOObjInterDup):
         self.INTERCOMM_ORIG.Free()
 
 
-_name, _version = MPI.get_vendor()
-if _name == 'Open MPI':
-    if _version < (1, 6, 0):
+name, version = MPI.get_vendor()
+if name == 'Open MPI':
+    if version < (1,6,0):
         del BaseTestCCOObjInter
         del TestCCOObjInter
         del TestCCOObjInterDup
         del TestCCOObjInterDupDup
-elif _name == "MPICH2" or _name == "Microsoft MPI":
-    if _version <= (1, 0, 7):
+elif name == "MPICH2" or name == "Microsoft MPI":
+    if version <= (1,0,7):
         def _SKIPPED(*args, **kwargs): pass
         TestCCOObjInterDupDup.testBarrier   = _SKIPPED
         TestCCOObjInterDupDup.testAllgather = _SKIPPED
         TestCCOObjInterDupDup.testAllreduce = _SKIPPED
-elif _name == "DeinoMPI":
+elif name == "DeinoMPI":
     def _SKIPPED(*args, **kwargs): pass
     TestCCOObjInterDupDup.testBarrier   = _SKIPPED
     TestCCOObjInterDupDup.testAllgather = _SKIPPED
     TestCCOObjInterDupDup.testAllreduce = _SKIPPED
-elif _name == "MPICH1":
+elif name == "MPICH1":
     del BaseTestCCOObjInter
     del TestCCOObjInter
     del TestCCOObjInterDup

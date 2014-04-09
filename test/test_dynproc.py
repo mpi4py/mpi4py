@@ -121,17 +121,19 @@ class TestDPM(unittest.TestCase):
             self.assertEqual(message, TestDPM.message)
         intercomm.Free()
 
+
 name, version = MPI.get_vendor()
-if name == 'Open MPI':
-    del TestDPM
-elif name in ('MPICH', 'MPICH2'):
+if name == 'MPICH' or name == 'MPICH2':
     if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
         del TestDPM.testNamePublishing
+elif name == 'Open MPI':
+    del TestDPM
 else:
     try:
         MPI.Close_port(MPI.Open_port())
     except NotImplementedError:
         del TestDPM
+
 
 if __name__ == '__main__':
     unittest.main()

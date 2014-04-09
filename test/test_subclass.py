@@ -287,9 +287,10 @@ class BaseTestMyFile(object):
 class TestMyFile(BaseTestMyFile, unittest.TestCase):
     pass
 
+
 import sys
-_name, _version = MPI.get_vendor()
-if _name == 'Open MPI':
+name, version = MPI.get_vendor()
+if name == 'Open MPI':
     if sys.platform.startswith('win'):
         del TestMyFile
 try:
@@ -300,7 +301,7 @@ try:
 except NotImplementedError:
     try: del TestMyFile
     except NameError: pass
-# ---
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -225,6 +225,7 @@ class TestWinCreateDynamicSelf(BaseTestWinCreateDynamic, unittest.TestCase):
 class TestWinCreateDynamicWorld(BaseTestWinCreateDynamic, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
+
 try:
     MPI.Win.Create(MPI.BOTTOM, 1, MPI.INFO_NULL, MPI.COMM_SELF).Free()
 except NotImplementedError:
@@ -251,6 +252,7 @@ if name == 'Open MPI':
 if name == 'MPICH2':
     if 'win' in sys.platform:
         del BaseTestWin.testAttributes
+
 
 if __name__ == '__main__':
     unittest.main()

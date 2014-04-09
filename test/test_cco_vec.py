@@ -309,11 +309,13 @@ class TestCCOVecWorldDup(BaseTestCCOVec, unittest.TestCase):
     def tearDown(self):
         self.COMM.Free()
 
-_name, _version = MPI.get_vendor()
-if _name == 'Open MPI':
-    if _version < (1, 4, 0):
+
+name, version = MPI.get_vendor()
+if name == 'Open MPI':
+    if version < (1,4,0):
         if MPI.Query_thread() > MPI.THREAD_SINGLE:
             del TestCCOVecWorldDup
+
 
 if __name__ == '__main__':
     unittest.main()

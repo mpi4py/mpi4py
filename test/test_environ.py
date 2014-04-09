@@ -93,12 +93,14 @@ class TestWorldAttrs(unittest.TestCase):
         lastuc = MPI.COMM_WORLD.Get_attr(MPI.LASTUSEDCODE)
         self.assertTrue(lastuc >= 0)
 
-_name, _version = MPI.get_vendor()
-if (_name in ('MPICH', 'MPICH2') and _version > (1, 2)):
+
+name, version = MPI.get_vendor()
+if name == 'MPICH' or (name == 'MPICH2' and version > (1,2,0)):
     # Up to mpich2-1.3.1 when running under Hydra process manager,
     # getting the universe size fails for the singleton init case
     if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
         del TestWorldAttrs.testUniverseSize
+
 
 if __name__ == '__main__':
     unittest.main()

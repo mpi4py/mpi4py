@@ -34,8 +34,7 @@ class BaseTestFile(object):
         ## MPICH2 1.0.x emits a nesting level warning
         ## when preallocating zero size.
         name, ver = MPI.get_vendor()
-        if not (name == 'MPICH2' and
-                ver  < (1, 1, 0)):
+        if not (name == 'MPICH2' and ver  < (1,1,0)):
             self.FILE.Preallocate(0)
         size = self.FILE.Get_size()
         self.assertEqual(size, 0)
@@ -178,9 +177,9 @@ class TestFileSelf(BaseTestFile, unittest.TestCase):
 
 
 import sys
-_name, _version = MPI.get_vendor()
-if _name == 'Open MPI':
-    if _version <= (1, 2, 8):
+name, version = MPI.get_vendor()
+if name == 'Open MPI':
+    if version <= (1,2,8):
         if MPI.Query_thread() > MPI.THREAD_SINGLE:
             del BaseTestFile.testPreallocate
             del BaseTestFile.testGetSetInfo

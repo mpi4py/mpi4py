@@ -71,15 +71,16 @@ class TestMPIThreads(unittest.TestCase):
             for t in T:
                 t.join()
 
-_name, _version = MPI.get_vendor()
-if _name == 'Open MPI':
+
+name, version = MPI.get_vendor()
+if name == 'Open MPI':
     TestMPIThreads.REQUIRED = MPI.THREAD_MULTIPLE
-if _name == 'LAM/MPI':
+if name == 'LAM/MPI':
     TestMPIThreads.REQUIRED = MPI.THREAD_MULTIPLE
+
 
 _VERBOSE = False
 #_VERBOSE = True
-
 if __name__ == '__main__':
     import sys
     if '-v' in sys.argv:

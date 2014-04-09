@@ -253,12 +253,13 @@ except NotImplementedError:
     del TestWinAttr
 
 
-_name, _version = MPI.get_vendor()
-if (_name == 'Open MPI' and
-    _version <= (1, 5, 1)):
-    if MPI.Query_thread() > MPI.THREAD_SINGLE:
-        del BaseTestCommAttr.testAttrCopyDelete
-        del TestWinAttr.testAttrCopyDelete
+name, version = MPI.get_vendor()
+if name == 'Open MPI':
+    if version <= (1,5,1):
+        if MPI.Query_thread() > MPI.THREAD_SINGLE:
+            del BaseTestCommAttr.testAttrCopyDelete
+            del TestWinAttr.testAttrCopyDelete
+
 
 if __name__ == '__main__':
     unittest.main()

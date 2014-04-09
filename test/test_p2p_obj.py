@@ -440,11 +440,12 @@ class TestP2PObjWorldDup(BaseTestP2PObjDup, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
 
-_name, _version = MPI.get_vendor()
-if _name == 'Open MPI':
-    if _version < (1, 4, 0):
+name, version = MPI.get_vendor()
+if name == 'Open MPI':
+    if version < (1,4,0):
         if MPI.Query_thread() > MPI.THREAD_SINGLE:
             del TestP2PObjWorldDup
+
 
 if __name__ == '__main__':
     unittest.main()

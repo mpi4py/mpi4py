@@ -169,13 +169,14 @@ except NotImplementedError:
 else:
     name, version = MPI.get_vendor()
     if name == 'Open MPI':
-        if version < (1, 8, 0):
+        if version < (1,8,0):
             del TestRMASelf, TestRMAWorld
     elif name == 'MPICH2':
-        if version < (1, 5, 0):
+        if version < (1,5,0):
             del TestRMASelf, TestRMAWorld
-    elif MPI.Get_version() < (3, 0):
+    elif MPI.Get_version() < (3,0):
         del TestRMASelf, TestRMAWorld
+
 
 if __name__ == '__main__':
     unittest.main()
