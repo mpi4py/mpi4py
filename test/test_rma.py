@@ -161,26 +161,50 @@ class BaseTestRMA(object):
         self.WIN.Fence()
 
     def testFence(self):
-        self.WIN.Fence()
+        win = self.WIN
+        win.Fence()
         assertion = 0
         modes = [0,
                  MPI.MODE_NOSTORE,
                  MPI.MODE_NOPUT,
                  MPI.MODE_NOPRECEDE,
                  MPI.MODE_NOSUCCEED]
-        self.WIN.Fence()
+        win.Fence()
         for mode in modes:
-            self.WIN.Fence(mode)
+            win.Fence(mode)
             assertion |= mode
-            self.WIN.Fence(assertion)
-        self.WIN.Fence()
+            win.Fence(assertion)
+        win.Fence()
+
+    def testFlushSync(self):
+        size = self.COMM.Get_size()
+        win = self.WIN
+        try:
+            win.Lock_all()
+            win.Sync()
+            win.Unlock_all()
+        except NotImplementedError:
+            return
+        for rank in range(size):
+            win.Lock(rank)
+            win.Flush(rank)
+            win.Unlock(rank)
+        win.Lock_all()
+        win.Flush_all()
+        win.Unlock_all()
+        for rank in range(size):
+            win.Lock(rank)
+            win.Flush_local(rank)
+            win.Unlock(rank)
+        win.Lock_all()
+        win.Flush_local_all()
+        win.Unlock_all()
 
 class TestRMASelf(BaseTestRMA, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
 class TestRMAWorld(BaseTestRMA, unittest.TestCase):
     COMM = MPI.COMM_WORLD
-
 
 try:
     MPI.Win.Create(None, 1, MPI.INFO_NULL, MPI.COMM_SELF).Free()
