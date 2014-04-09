@@ -160,7 +160,7 @@ class TestPickle(unittest.TestCase):
             loads = lambda s: simplejson.loads(s.decode())
             pickle.__init__(dumps, loads)
             OBJS2 = [o for o in OBJS
-                     if not isinstance(o, (complex, tuple))]
+                     if not isinstance(o, (float, complex, tuple))]
             for obj in OBJS2:
                 self.do_pickle(obj, pickle)
             self.do_pickle(OBJS2, pickle)
@@ -172,7 +172,7 @@ class TestPickle(unittest.TestCase):
             loads = lambda s: json.loads(s.decode())
             pickle.__init__(dumps, loads)
             OBJS2 = [o for o in OBJS
-                     if not isinstance(o, (complex, tuple))]
+                     if not isinstance(o, (float, complex, tuple))]
             for obj in OBJS2:
                 self.do_pickle(obj, pickle)
             self.do_pickle(OBJS2, pickle)
@@ -185,7 +185,9 @@ class TestPickle(unittest.TestCase):
             pickle.__init__(dumps, loads)
             OBJS2 = [o for o in OBJS
                      if not isinstance(o, (complex, tuple))]
-            self.do_pickle(OBJS, pickle)
+            for obj in OBJS2:
+                self.do_pickle(obj, pickle)
+            self.do_pickle(OBJS2, pickle)
 
 
 if __name__ == '__main__':
