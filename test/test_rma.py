@@ -108,7 +108,7 @@ class BaseTestRMA(object):
         self.WIN.Fence()
         for array in arrayimpl.ArrayTypes:
             for typecode in arrayimpl.TypeMap:
-                for count in range(1, 10): # XXX MPICH fails with buf=NULL
+                for count in range(self.COUNT_MIN, 10):
                     for rank in range(size):
                         ones = array([1]*count, typecode)
                         sbuf = array(range(count), typecode)
