@@ -137,6 +137,7 @@ class BaseTestCCONghBuf(object):
                                 return
                             for value in rbuf.flat:
                                 self.assertEqual(value, v+1)
+            comm.Free()
 
 class TestCCONghBufSelf(BaseTestCCONghBuf, unittest.TestCase):
     COMM = MPI.COMM_SELF
