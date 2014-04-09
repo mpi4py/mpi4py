@@ -179,7 +179,7 @@ class TestRMAWorld(BaseTestRMA, unittest.TestCase):
 
 
 try:
-    w = MPI.Win.Create(None, 1, MPI.INFO_NULL, MPI.COMM_SELF).Free()
+    MPI.Win.Create(None, 1, MPI.INFO_NULL, MPI.COMM_SELF).Free()
 except NotImplementedError:
     del TestRMASelf, TestRMAWorld
 else:
