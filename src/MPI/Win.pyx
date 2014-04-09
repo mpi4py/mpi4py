@@ -507,7 +507,7 @@ cdef class Win:
     # [6.4.3] Lock
     # ------------
 
-    def Lock(self, int lock_type, int rank, int assertion=0):
+    def Lock(self, int rank, int lock_type=LOCK_EXCLUSIVE, int assertion=0):
         """
         Begin an RMA access epoch at the target process
         """

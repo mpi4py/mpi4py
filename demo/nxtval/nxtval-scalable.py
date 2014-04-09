@@ -87,7 +87,7 @@ class Counter(object):
     def next(self, increment=1):
         _array_set(self.acc_buf, increment)
         root = 0
-        self.win.Lock(MPI.LOCK_EXCLUSIVE, root, 0)
+        self.win.Lock(root)
         self.win.Get(self.get_buf, root, [0, 1, self.get_type])
         self.win.Accumulate(self.acc_buf, root, [0, 1, self.acc_type], MPI.SUM)
         self.win.Unlock(root)

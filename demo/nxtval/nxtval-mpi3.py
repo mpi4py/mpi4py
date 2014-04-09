@@ -25,7 +25,7 @@ class Counter(object):
     def next(self, increment=1):
         incr = _array('i', [increment])
         nval = _array('i', [0])
-        self.win.Lock(MPI.LOCK_EXCLUSIVE, 0, 0)
+        self.win.Lock(0)
         self.win.Get_accumulate([incr, 1, MPI.INT], 
                                 [nval, 1, MPI.INT],
                                 0, op=MPI.SUM)

@@ -57,7 +57,7 @@ class BaseTestRMA(object):
                     for rank in range(size):
                         sbuf = array([rank]*count, typecode)
                         rbuf = array(-1, typecode, count+1)
-                        self.WIN.Lock(MPI.LOCK_EXCLUSIVE, rank)
+                        self.WIN.Lock(rank)
                         r = self.WIN.Rput(sbuf.as_mpi(), rank)
                         r.Wait()
                         r = self.WIN.Rget(rbuf.as_mpi_c(count), rank)
@@ -82,7 +82,7 @@ class BaseTestRMA(object):
                         for op in (MPI.SUM, MPI.PROD,
                                    MPI.MAX, MPI.MIN,
                                    MPI.REPLACE):
-                            self.WIN.Lock(MPI.LOCK_EXCLUSIVE, rank)
+                            self.WIN.Lock(rank)
                             self.WIN.Put(ones.as_mpi(), rank)
                             r = self.WIN.Raccumulate(sbuf.as_mpi(), rank, op=op)
                             r.Wait()
@@ -109,7 +109,7 @@ class BaseTestRMA(object):
                         for op in (MPI.SUM, MPI.PROD,
                                    MPI.MAX, MPI.MIN,
                                    MPI.REPLACE, MPI.NO_OP):
-                            self.WIN.Lock(MPI.LOCK_EXCLUSIVE, rank)
+                            self.WIN.Lock(rank)
                             self.WIN.Put(ones.as_mpi(), rank)
                             r = self.WIN.Rget_accumulate(sbuf.as_mpi(),
                                                          rbuf.as_mpi_c(count),

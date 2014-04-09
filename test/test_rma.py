@@ -117,7 +117,7 @@ class BaseTestRMA(object):
                         for op in (MPI.SUM, MPI.PROD,
                                    MPI.MAX, MPI.MIN,
                                    MPI.REPLACE, MPI.NO_OP):
-                            self.WIN.Lock(MPI.LOCK_EXCLUSIVE, rank)
+                            self.WIN.Lock(rank)
                             self.WIN.Put(ones.as_mpi(), rank)
                             self.WIN.Get_accumulate(sbuf.as_mpi(),
                                                     rbuf.as_mpi_c(count),

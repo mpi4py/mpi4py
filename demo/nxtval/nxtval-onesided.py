@@ -40,7 +40,7 @@ class Counter(object):
         #
         incr = _array('i', [1])
         vals = _array('i', [0])*size
-        self.win.Lock(MPI.LOCK_EXCLUSIVE, 0, 0)
+        self.win.Lock(0)
         self.win.Accumulate([incr, 1, MPI.INT], 0,
                             [rank, 1, MPI.INT], MPI.SUM)
         self.win.Get([vals, 1, self.dt_get], 0,
