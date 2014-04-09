@@ -70,6 +70,7 @@ class BaseTestWin(object):
         self.WIN.Set_info(info)
         info.Free()
         info = self.WIN.Get_info()
+        self.WIN.Set_info(info)
         info.Free()
 
     def testGetSetErrhandler(self):

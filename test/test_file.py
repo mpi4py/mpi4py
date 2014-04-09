@@ -77,6 +77,11 @@ class BaseTestFile(object):
         self.assertEqual(self.FILE.amode, self.amode)
 
     def testGetSetInfo(self):
+        #info = MPI.INFO_NULL
+        #self.FILE.Set_info(info)
+        info = MPI.Info.Create()
+        self.FILE.Set_info(info)
+        info.Free()
         info = self.FILE.Get_info()
         self.FILE.Set_info(info)
         info.Free()

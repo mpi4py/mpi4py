@@ -100,6 +100,7 @@ class BaseTestComm(object):
         self.COMM.Set_info(info)
         info.Free()
         info = self.COMM.Get_info()
+        self.COMM.Set_info(info)
         info.Free()
 
     def testCreate(self):
