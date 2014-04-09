@@ -96,11 +96,15 @@ class BaseTestRMA(object):
         rank = group.Get_rank()
         group.Free()
         self.WIN.Fence()
+        obuf = MPI.Alloc_mem(1); memzero(obuf)
+        rbuf = MPI.Alloc_mem(1); memzero(rbuf)
         try:
-            obuf = mkzeros(1); rbuf = mkzeros(1)
             self.WIN.Get_accumulate([obuf, 0, MPI.BYTE], [rbuf, 0, MPI.BYTE], rank)
         except NotImplementedError:
             return
+        finally:
+            MPI.Free_mem(obuf)
+            MPI.Free_mem(rbuf)
         self.WIN.Fence()
         for array in arrayimpl.ArrayTypes:
             for typecode in arrayimpl.TypeMap:

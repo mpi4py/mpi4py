@@ -6,6 +6,7 @@ cdef extern from "Python.h":
     char*      PyBytes_AsString(object) except NULL
     Py_ssize_t PyBytes_Size(object) except -1
     object     PyBytes_FromStringAndSize(char*,Py_ssize_t)
+    object     PyBytes_Join"_PyBytes_Join"(object,object)
 
 cdef extern from *:
     enum: USE_MATCHED_RECV "PyMPI_USE_MATCHED_RECV"
@@ -154,7 +155,7 @@ cdef class _p_Pickle:
             items[i] = self.dump(items[i], p, &c)
             if c == 0: items[i] = b''
             cnt[i] = c; dsp[i] = d; d += c
-        cdef object buf = b''.join(items) # XXX use _PyBytes_Join() ?
+        cdef object buf = PyBytes_Join(b'', items)
         p[0] = PyBytes_AsString(buf)
         return buf
 

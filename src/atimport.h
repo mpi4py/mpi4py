@@ -175,6 +175,12 @@ PyMPIString_AsStringAndSize(PyObject *ob, const char **s, Py_ssize_t *n)
 #endif
 
 #if PY_VERSION_HEX < 0x02060000
+#ifndef _PyBytes_Join
+#define _PyBytes_Join _PyString_Join
+#endif
+#endif
+
+#if PY_VERSION_HEX < 0x02060000
 
 #ifndef PyExc_BufferError
 #define PyExc_BufferError PyExc_TypeError
@@ -272,6 +278,14 @@ PyMemoryView_FromBuffer(Py_buffer *view)
 #endif
 
 #ifdef PYPY_VERSION
+
+#ifndef PyByteArray_Check
+#define PyByteArray_Check(self) PyObject_TypeCheck(self, &PyByteArray_Type)
+#endif
+#ifndef PyByteArray_AS_STRING
+#define PyByteArray_GET_SIZE(self)  0
+#define PyByteArray_AS_STRING(self) NULL
+#endif
 
 static int PyMPI_UNUSED
 _PyLong_AsByteArray(PyLongObject* v,
