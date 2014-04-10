@@ -176,6 +176,36 @@ class BaseTestRMA(object):
             win.Fence(assertion)
         win.Fence()
 
+    def testStartComplete(self):
+        self.WIN.Start(MPI.GROUP_EMPTY)
+        self.WIN.Complete()
+
+    def testPostWait(self):
+        self.WIN.Post(MPI.GROUP_EMPTY)
+        self.WIN.Wait()
+
+    def testStartCompletePostWait(self):
+        win = self.WIN
+        wingroup = win.Get_group()
+        size = wingroup.Get_size()
+        rank = wingroup.Get_rank()
+        if size < 2: return wingroup.Free()
+        if rank == 0:
+            group = wingroup.Excl([0])
+            win.Start(group)
+            win.Complete()
+            win.Post(group)
+            win.Wait()
+            group.Free()
+        else:
+            group = wingroup.Incl([0])
+            win.Post(group)
+            win.Wait()
+            win.Start(group)
+            win.Complete()
+            group.Free()
+        wingroup.Free()
+
     def testFlushSync(self):
         size = self.COMM.Get_size()
         win = self.WIN
