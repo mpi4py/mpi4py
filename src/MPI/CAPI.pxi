@@ -111,7 +111,7 @@ cdef api object PyMPIComm_New(MPI_Comm arg):
                 cls = Distgraphcomm
             else:
                 cls = Intracomm
-    cdef Comm obj = <Comm>cls()
+    cdef Comm obj = <Comm>cls.__new__(cls)
     obj.ob_mpi = arg
     return obj
 

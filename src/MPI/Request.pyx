@@ -215,7 +215,7 @@ cdef class Request:
     def f2py(cls, arg):
         """
         """
-        cdef Request request = <Request>cls()
+        cdef Request request = <Request>Request.__new__(Request)
         request.ob_mpi = MPI_Request_f2c(arg)
         return request
 
@@ -323,7 +323,7 @@ cdef class Grequest(Request):
         """
         Create and return a user-defined request
         """
-        cdef Grequest request = <Grequest>cls()
+        cdef Grequest request = <Grequest>Grequest.__new__(Grequest)
         cdef _p_greq state = \
              _p_greq(query_fn, free_fn, cancel_fn, args, kargs)
         with nogil: CHKERR( MPI_Grequest_start(

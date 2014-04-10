@@ -38,7 +38,7 @@ cdef class Op:
         """
         Create a user-defined operation
         """
-        cdef Op op = <Op>cls()
+        cdef Op op = <Op>Op.__new__(Op)
         cdef MPI_User_function *cfunction = NULL
         op.ob_usrid = op_user_new(function, &cfunction)
         CHKERR( MPI_Op_create(cfunction, commute, &op.ob_mpi) )
@@ -97,7 +97,7 @@ cdef class Op:
     def f2py(cls, arg):
         """
         """
-        cdef Op op = <Op>cls()
+        cdef Op op = <Op>Op.__new__(Op)
         op.ob_mpi = MPI_Op_f2c(arg)
         return op
 

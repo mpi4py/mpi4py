@@ -70,7 +70,7 @@ cdef class Win:
         elif memory is not None:
             memory = getbuffer_w(memory, &base, &size)
         cdef MPI_Info cinfo = arg_Info(info)
-        cdef Win win = <Win>cls()
+        cdef Win win = <Win>Win.__new__(Win)
         with nogil:
             CHKERR( MPI_Win_create(
                     base, size, disp_unit,
@@ -89,7 +89,7 @@ cdef class Win:
         """
         cdef void *base = NULL
         cdef MPI_Info cinfo = arg_Info(info)
-        cdef Win win = <Win>cls()
+        cdef Win win = <Win>Win.__new__(Win)
         with nogil:
             CHKERR( MPI_Win_allocate(
                     size, disp_unit, cinfo,
@@ -107,7 +107,7 @@ cdef class Win:
         """
         cdef void *base = NULL
         cdef MPI_Info cinfo = arg_Info(info)
-        cdef Win win = <Win>cls()
+        cdef Win win = <Win>Win.__new__(Win)
         with nogil:
             CHKERR( MPI_Win_allocate_shared(
                     size, disp_unit, cinfo,
@@ -138,7 +138,7 @@ cdef class Win:
         Create an window object for one-sided communication
         """
         cdef MPI_Info cinfo = arg_Info(info)
-        cdef Win win = <Win>cls()
+        cdef Win win = <Win>Win.__new__(Win)
         with nogil:
             CHKERR( MPI_Win_create_dynamic(
                     cinfo, comm.ob_mpi, &win.ob_mpi) )
@@ -630,7 +630,7 @@ cdef class Win:
     def f2py(cls, arg):
         """
         """
-        cdef Win win = <Win>cls()
+        cdef Win win = <Win>Win.__new__(Win)
         win.ob_mpi = MPI_Win_f2c(arg)
         return win
 

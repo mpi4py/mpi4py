@@ -63,7 +63,7 @@ cdef class File:
         cdef char *cfilename = NULL
         filename = asmpistr(filename, &cfilename, NULL)
         cdef MPI_Info cinfo = arg_Info(info)
-        cdef File file = <File>cls()
+        cdef File file = <File>File.__new__(File)
         with nogil: CHKERR( MPI_File_open(
             comm.ob_mpi, cfilename, amode, cinfo, &file.ob_mpi) )
         return file
@@ -642,7 +642,7 @@ cdef class File:
     def f2py(cls, arg):
         """
         """
-        cdef File file = <File>cls()
+        cdef File file = <File>File.__new__(File)
         file.ob_mpi = MPI_File_f2c(arg)
         return file
 

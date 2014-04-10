@@ -100,7 +100,7 @@ cdef class Group:
         """
         Duplicate a group
         """
-        cdef Group group = <Group>type(self)()
+        cdef Group group = <Group>Group.__new__(Group)
         CHKERR( MPI_Group_union(self.ob_mpi, MPI_GROUP_EMPTY, &group.ob_mpi) )
         return group
 
@@ -112,7 +112,7 @@ cdef class Group:
         Produce a group by combining
         two existing groups
         """
-        cdef Group group = <Group>cls()
+        cdef Group group = <Group>Group.__new__(Group)
         CHKERR( MPI_Group_union(
                 group1.ob_mpi, group2.ob_mpi, &group.ob_mpi) )
         return group
@@ -125,7 +125,7 @@ cdef class Group:
         Produce a group as the intersection
         of two existing groups
         """
-        cdef Group group = <Group>cls()
+        cdef Group group = <Group>Group.__new__(Group)
         CHKERR( MPI_Group_intersection(
                 group1.ob_mpi, group2.ob_mpi, &group.ob_mpi) )
         return group
@@ -138,7 +138,7 @@ cdef class Group:
         Produce a group from the difference
         of two existing groups
         """
-        cdef Group group = <Group>cls()
+        cdef Group group = <Group>Group.__new__(Group)
         CHKERR( MPI_Group_difference(
                 group1.ob_mpi, group2.ob_mpi, &group.ob_mpi) )
         return group
@@ -150,7 +150,7 @@ cdef class Group:
         """
         cdef int n = 0, *iranks = NULL
         ranks = getarray_int(ranks, &n, &iranks)
-        cdef Group group = <Group>type(self)()
+        cdef Group group = <Group>Group.__new__(Group)
         CHKERR( MPI_Group_incl(self.ob_mpi, n, iranks, &group.ob_mpi) )
         return group
 
@@ -161,7 +161,7 @@ cdef class Group:
         """
         cdef int n = 0, *iranks = NULL
         ranks = getarray_int(ranks, &n, &iranks)
-        cdef Group group = <Group>type(self)()
+        cdef Group group = <Group>Group.__new__(Group)
         CHKERR( MPI_Group_excl(self.ob_mpi, n, iranks, &group.ob_mpi) )
         return group
 
@@ -177,7 +177,7 @@ cdef class Group:
         for i from 0 <= i < n:
             p = <int*> ranges[i]
             p[0], p[1], p[2] = ranks[i]
-        cdef Group group = <Group>type(self)()
+        cdef Group group = <Group>Group.__new__(Group)
         CHKERR( MPI_Group_range_incl(self.ob_mpi, n, ranges, &group.ob_mpi) )
         return group
 
@@ -193,7 +193,7 @@ cdef class Group:
         for i from 0 <= i < n:
             p = <int*> ranges[i]
             p[0], p[1], p[2] = ranks[i]
-        cdef Group group = <Group>type(self)()
+        cdef Group group = <Group>Group.__new__(Group)
         CHKERR( MPI_Group_range_excl(self.ob_mpi, n, ranges, &group.ob_mpi) )
         return group
 
@@ -222,7 +222,7 @@ cdef class Group:
     def f2py(cls, arg):
         """
         """
-        cdef Group group = <Group>cls()
+        cdef Group group = <Group>Group.__new__(Group)
         group.ob_mpi = MPI_Group_f2c(arg)
         return group
 

@@ -156,7 +156,10 @@ cdef class Comm:
         """
         Create communicator from group
         """
-        cdef Comm comm = <Comm>type(self)()
+        cdef type comm_type = Comm
+        if   isinstance(self, Intracomm): comm_type = Intracomm
+        elif isinstance(self, Intercomm): comm_type = Intercomm
+        cdef Comm comm = <Comm>comm_type.__new__(comm_type)
         with nogil: CHKERR( MPI_Comm_create(
             self.ob_mpi, group.ob_mpi, &comm.ob_mpi) )
         return comm
@@ -165,7 +168,10 @@ cdef class Comm:
         """
         Create communicator from group
         """
-        cdef Comm comm = <Comm>type(self)()
+        cdef type comm_type = Comm
+        if   isinstance(self, Intracomm): comm_type = Intracomm
+        elif isinstance(self, Intercomm): comm_type = Intercomm
+        cdef Comm comm = <Comm>comm_type.__new__(comm_type)
         with nogil: CHKERR( MPI_Comm_create_group(
             self.ob_mpi, group.ob_mpi, tag, &comm.ob_mpi) )
         return comm
@@ -174,7 +180,10 @@ cdef class Comm:
         """
         Split communicator by color and key
         """
-        cdef Comm comm = <Comm>type(self)()
+        cdef type comm_type = Comm
+        if   isinstance(self, Intracomm): comm_type = Intracomm
+        elif isinstance(self, Intercomm): comm_type = Intercomm
+        cdef Comm comm = <Comm>comm_type.__new__(comm_type)
         with nogil: CHKERR( MPI_Comm_split(
             self.ob_mpi, color, key, &comm.ob_mpi) )
         return comm
@@ -184,8 +193,11 @@ cdef class Comm:
         """
         Split communicator by color and key
         """
+        cdef type comm_type = Comm
+        if   isinstance(self, Intracomm): comm_type = Intracomm
+        elif isinstance(self, Intercomm): comm_type = Intercomm
         cdef MPI_Info cinfo = arg_Info(info)
-        cdef Comm comm = <Comm>type(self)()
+        cdef Comm comm = <Comm>comm_type.__new__(comm_type)
         with nogil: CHKERR( MPI_Comm_split_type(
             self.ob_mpi, split_type, key, cinfo, &comm.ob_mpi) )
         return comm
@@ -1117,9 +1129,8 @@ cdef class Comm:
     def f2py(cls, arg):
         """
         """
-        cdef Comm comm = <Comm>cls()
-        comm.ob_mpi = MPI_Comm_f2c(arg)
-        return comm
+        cdef MPI_Comm comm = MPI_Comm_f2c(arg)
+        return PyMPIComm_New(comm)
 
     # Python Communication
     # --------------------

@@ -153,7 +153,7 @@ cdef class Message:
     def f2py(cls, arg):
         """
         """
-        cdef Message message = <Message>cls()
+        cdef Message message = <Message>Message.__new__(Message)
         message.ob_mpi = MPI_Message_f2c(arg)
         return message
 
