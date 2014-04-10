@@ -5,6 +5,12 @@ class BaseTestTopo(object):
 
     COMM = MPI.COMM_NULL
 
+    def checkFortran(self, oldcomm):
+        fint = oldcomm.py2f()
+        newcomm = MPI.Comm.f2py(fint)
+        self.assertEqual(newcomm, oldcomm)
+        self.assertEqual(type(newcomm), type(oldcomm))
+
     def testCartcomm(self):
         comm = self.COMM
         size = comm.Get_size()
@@ -14,6 +20,7 @@ class BaseTestTopo(object):
             dims = MPI.Compute_dims(size, [0]*ndim)
             periods = [True] * len(dims)
             topo = comm.Create_cart(dims, periods=periods)
+            self.checkFortran(topo)
             self.assertEqual(topo.dim, len(dims))
             self.assertEqual(topo.ndim, len(dims))
             coordinates = topo.coords
@@ -70,6 +77,7 @@ class BaseTestTopo(object):
             edges.append((i-1)%size)
             edges.append((i+1)%size)
         topo = comm.Create_graph(index, edges)
+        self.checkFortran(topo)
         self.assertEqual(topo.dims, (len(index)-1, len(edges)))
         self.assertEqual(topo.index, index[1:])
         self.assertEqual(topo.edges, edges)
@@ -96,6 +104,7 @@ class BaseTestTopo(object):
         sources = [(rank-2)%size, (rank-1)%size]
         destinations = [(rank+1)%size, (rank+2)%size]
         topo = comm.Create_dist_graph_adjacent(sources, destinations)
+        self.checkFortran(topo)
         self.assertEqual(topo.Get_dist_neighbors_count(), (2, 2, False))
         self.assertEqual(topo.Get_dist_neighbors(), (sources, destinations, None))
         inedges, outedges = topo.inoutedges
@@ -141,6 +150,7 @@ class BaseTestTopo(object):
         degrees = [3]
         destinations = [(rank-1)%size, rank, (rank+1)%size]
         topo = comm.Create_dist_graph(sources, degrees, destinations, MPI.UNWEIGHTED)
+        self.checkFortran(topo)
         self.assertEqual(topo.Get_dist_neighbors_count(), (3, 3, False))
         topo.Free()
         weights = list(range(1,4))
