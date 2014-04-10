@@ -165,7 +165,6 @@ class TestDPM(unittest.TestCase):
                 self.assertEqual(message, TestDPM.message)
             intercomm.Free()
         if server:
-            server.shutdown(socket.SHUT_RDWR)
             server.close()
         MPI.COMM_WORLD.Barrier()
 
