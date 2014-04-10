@@ -174,7 +174,7 @@ class BaseTestWinCreateDynamic(BaseTestWin):
         #self.assertEqual(disp, 1)
 
     def testMemory(self):
-        self.testGetAttr()
+        self.assertTrue(self.WIN.memory is None)
 
     def testAttributes(self):
         pass

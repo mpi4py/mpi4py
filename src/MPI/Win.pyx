@@ -307,10 +307,18 @@ cdef class Win:
         """window memory buffer"""
         def __get__(self):
             cdef MPI_Win win = self.ob_mpi
+            cdef int *flavor = NULL
             cdef void *base = NULL, *pbase = NULL
             cdef MPI_Aint size = 0, *psize = NULL
             cdef int attr = MPI_KEYVAL_INVALID
             cdef int flag = 0
+            #
+            attr = MPI_WIN_CREATE_FLAVOR
+            if attr != MPI_KEYVAL_INVALID:
+                CHKERR( MPI_Win_get_attr(win, attr, &flavor, &flag) )
+                if flag and flavor != NULL:
+                    if flavor[0] == MPI_WIN_FLAVOR_DYNAMIC:
+                        return None
             #
             attr = MPI_WIN_BASE
             CHKERR( MPI_Win_get_attr(win, attr, &pbase, &flag) )
