@@ -16,9 +16,11 @@ class TestInfoNull(unittest.TestCase):
         self.assertRaises(KeyError, getitem)
         self.assertRaises(KeyError, setitem)
         self.assertRaises(KeyError, delitem)
+        self.assertEqual(inull.get('key', None), None)
         self.assertEqual(inull.keys(), [])
         self.assertEqual(inull.values(), [])
         self.assertEqual(inull.items(), [])
+        inull.clear()
 
 class TestInfoEnv(unittest.TestCase):
 

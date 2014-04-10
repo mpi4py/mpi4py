@@ -50,7 +50,14 @@ class TestMessage(unittest.TestCase):
         self.assertNotEqual(request, MPI.REQUEST_NULL)
         request.wait()
         self.assertEqual(request, MPI.REQUEST_NULL)
-
+        #
+        comm = MPI.COMM_SELF
+        message = comm.mprobe(MPI.PROC_NULL)
+        self.assertNotEqual(message, MPI.MESSAGE_NULL)
+        self.assertEqual(message, MPI.MESSAGE_NO_PROC)
+        noproc = comm.improbe(MPI.PROC_NULL)
+        self.assertNotEqual(message, MPI.MESSAGE_NULL)
+        self.assertEqual(message, MPI.MESSAGE_NO_PROC)
 
 class BaseTestP2PMatched(object):
 

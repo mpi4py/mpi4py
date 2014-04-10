@@ -83,8 +83,10 @@ class TestDatatype(unittest.TestCase):
             self.assertEqual(ni, 0)
             self.assertEqual(na, 0)
             self.assertEqual(nd, 0)
+            otype = dtype.decode()
+            self.assertTrue(dtype is otype)
 
-    def _test_derived_contents(self, oldtype, factory, newtype):
+    def check_datatype_contents(self, oldtype, factory, newtype):
         try:
             envelope = newtype.Get_envelope()
             contents = newtype.Get_contents()
@@ -120,7 +122,7 @@ class TestDatatype(unittest.TestCase):
                             MPI.COMBINER_F90_COMPLEX,):
             newtype2.Free()
 
-    def _test_derived(self, oldtype, factory, *args):
+    def check_datatype(self, oldtype, factory, *args):
         try:
             if isinstance(oldtype, MPI.Datatype):
                 newtype = factory(oldtype, *args)
@@ -128,9 +130,9 @@ class TestDatatype(unittest.TestCase):
                 newtype = factory(*args)
         except NotImplementedError:
             return
-        self._test_derived_contents(oldtype, factory,  newtype)
+        self.check_datatype_contents(oldtype, factory,  newtype)
         newtype.Commit()
-        self._test_derived_contents(oldtype, factory,  newtype)
+        self.check_datatype_contents(oldtype, factory,  newtype)
         combiner = newtype.Get_envelope()[-1]
         if combiner not in (MPI.COMBINER_F90_INTEGER,
                             MPI.COMBINER_F90_REAL,
@@ -140,14 +142,14 @@ class TestDatatype(unittest.TestCase):
     def testDup(self):
         for dtype in datatypes:
             factory = MPI.Datatype.Dup
-            self._test_derived(dtype, factory)
+            self.check_datatype(dtype, factory)
 
     def testCreateContiguous(self):
         for dtype in datatypes:
             for count in range(5):
                 factory = MPI.Datatype.Create_contiguous
                 args = (count, )
-                self._test_derived(dtype, factory, *args)
+                self.check_datatype(dtype, factory, *args)
 
     def testCreateVector(self):
         for dtype in datatypes:
@@ -156,7 +158,7 @@ class TestDatatype(unittest.TestCase):
                     for stride in range(5):
                         factory = MPI.Datatype.Create_vector
                         args = (count, blocklength, stride)
-                        self._test_derived(dtype, factory, *args)
+                        self.check_datatype(dtype, factory, *args)
 
     def testCreateHvector(self):
         for dtype in datatypes:
@@ -165,7 +167,7 @@ class TestDatatype(unittest.TestCase):
                     for stride in range(5):
                         factory = MPI.Datatype.Create_hvector
                         args = (count, blocklength, stride)
-                        self._test_derived(dtype, factory, *args)
+                        self.check_datatype(dtype, factory, *args)
 
     def testCreateIndexed(self):
         for dtype in datatypes:
@@ -177,9 +179,9 @@ class TestDatatype(unittest.TestCase):
                     displacements.append(stride)
                 factory = MPI.Datatype.Create_indexed
                 args = (blocklengths, displacements)
-                self._test_derived(dtype, factory, *args)
+                self.check_datatype(dtype, factory, *args)
                 #args = (block, displacements) XXX
-                #self._test_derived(dtype, factory, *args)  XXX
+                #self.check_datatype(dtype, factory, *args)  XXX
 
     def testCreateIndexedBlock(self):
         for dtype in datatypes:
@@ -191,7 +193,7 @@ class TestDatatype(unittest.TestCase):
                     displacements.append(stride)
                 factory = MPI.Datatype.Create_indexed_block
                 args = (block, displacements)
-                self._test_derived(dtype, factory, *args)
+                self.check_datatype(dtype, factory, *args)
 
     def testCreateHindexed(self):
         for dtype in datatypes:
@@ -204,9 +206,9 @@ class TestDatatype(unittest.TestCase):
 
                 factory = MPI.Datatype.Create_hindexed
                 args = (blocklengths, displacements)
-                self._test_derived(dtype, factory, *args)
+                self.check_datatype(dtype, factory, *args)
                 #args = (block, displacements) XXX
-                #self._test_derived(dtype, factory, *args)  XXX
+                #self.check_datatype(dtype, factory, *args)  XXX
 
     def testCreateHindexedBlock(self):
         for dtype in datatypes:
@@ -217,7 +219,7 @@ class TestDatatype(unittest.TestCase):
                     displacements.append(stride)
                 factory = MPI.Datatype.Create_hindexed_block
                 args = (block, displacements)
-                self._test_derived(dtype, factory, *args)
+                self.check_datatype(dtype, factory, *args)
 
     def testCreateStruct(self):
         for dtype1 in datatypes:
@@ -230,7 +232,7 @@ class TestDatatype(unittest.TestCase):
                     displacements.append(stride)
                 factory = MPI.Datatype.Create_struct
                 args = (blocklengths, displacements, dtypes)
-                self._test_derived(dtypes, factory, *args)
+                self.check_datatype(dtypes, factory, *args)
 
     def testCreateSubarray(self):
         for dtype in datatypes:
@@ -247,7 +249,7 @@ class TestDatatype(unittest.TestCase):
                                 starts = [start] * ndim
                                 factory = MPI.Datatype.Create_subarray
                                 args = sizes, subsizes, starts, order
-                                self._test_derived(dtype, factory, *args)
+                                self.check_datatype(dtype, factory, *args)
 
     def testCreateDarray(self):
         for dtype in datatypes:
@@ -262,37 +264,37 @@ class TestDatatype(unittest.TestCase):
                                 psizes = MPI.Compute_dims(size, [0]*ndim)
                                 factory = MPI.Datatype.Create_darray
                                 args = size, rank, gsizes, distribs, dargs, psizes, order
-                                self._test_derived(dtype, factory, *args)
+                                self.check_datatype(dtype, factory, *args)
 
     def testCreateF90Integer(self):
         for r in (1, 2, 4):
             factory = MPI.Datatype.Create_f90_integer
             args = (r,)
-            self._test_derived(None, factory, *args)
+            self.check_datatype(None, factory, *args)
 
     def testCreateF90RealSingle(self):
         (p, r) = (6, 30)
         factory = MPI.Datatype.Create_f90_real
         args = (p, r)
-        self._test_derived(None, factory, *args)
+        self.check_datatype(None, factory, *args)
 
     def testCreateF90RealDouble(self):
         (p, r) = (15, 300)
         factory = MPI.Datatype.Create_f90_real
         args = (p, r)
-        self._test_derived(None, factory, *args)
+        self.check_datatype(None, factory, *args)
 
     def testCreateF90ComplexSingle(self):
         (p, r) = (6, 30)
         factory = MPI.Datatype.Create_f90_complex
         args = (p, r)
-        self._test_derived(None, factory, *args)
+        self.check_datatype(None, factory, *args)
 
     def testCreateF90ComplexDouble(self):
         (p, r) = (15, 300)
         factory = MPI.Datatype.Create_f90_complex
         args = (p, r)
-        self._test_derived(None, factory, *args)
+        self.check_datatype(None, factory, *args)
 
     def testMatchSize(self):
         typeclass = MPI.TYPECLASS_INTEGER
@@ -314,7 +316,7 @@ class TestDatatype(unittest.TestCase):
                 for extent in range(1, 10):
                     factory = MPI.Datatype.Create_resized
                     args = lb, extent
-                    self._test_derived(dtype, factory, *args)
+                    self.check_datatype(dtype, factory, *args)
 
     def testGetSetName(self):
         for dtype in datatypes:
