@@ -35,6 +35,10 @@ class BaseTestTopo(object):
                     source, dest = topo.Shift(i, d)
                     self.assertEqual(neigh, dest)
                     neighbors.append(neigh)
+            self.assertEqual(topo.indegree, len(neighbors))
+            self.assertEqual(topo.outdegree, len(neighbors))
+            self.assertEqual(topo.inedges, neighbors)
+            self.assertEqual(topo.outedges, neighbors)
             inedges, outedges = topo.inoutedges
             self.assertEqual(inedges, neighbors)
             self.assertEqual(outedges, neighbors)
@@ -81,6 +85,8 @@ class BaseTestTopo(object):
         topo.Free()
         topo = comm.Create_graph(index, edges)
         self.assertEqual(topo.dims, (len(index)-1, len(edges)))
+        self.assertEqual(topo.nnodes, len(index)-1)
+        self.assertEqual(topo.nedges, len(edges))
         self.assertEqual(topo.index, index[1:])
         self.assertEqual(topo.edges, edges)
         neighbors = edges[index[rank]:index[rank+1]]
@@ -88,6 +94,10 @@ class BaseTestTopo(object):
         for rank in range(size):
             neighs = topo.Get_neighbors(rank)
             self.assertEqual(neighs, [(rank-1)%size, (rank+1)%size])
+        self.assertEqual(topo.indegree, len(neighbors))
+        self.assertEqual(topo.outdegree, len(neighbors))
+        self.assertEqual(topo.inedges, neighbors)
+        self.assertEqual(topo.outedges, neighbors)
         inedges, outedges = topo.inoutedges
         self.assertEqual(inedges, neighbors)
         self.assertEqual(outedges, neighbors)
@@ -109,6 +119,10 @@ class BaseTestTopo(object):
         self.checkFortran(topo)
         self.assertEqual(topo.Get_dist_neighbors_count(), (2, 2, False))
         self.assertEqual(topo.Get_dist_neighbors(), (sources, destinations, None))
+        self.assertEqual(topo.indegree, len(sources))
+        self.assertEqual(topo.outdegree, len(destinations))
+        self.assertEqual(topo.inedges, sources)
+        self.assertEqual(topo.outedges, destinations)
         inedges, outedges = topo.inoutedges
         self.assertEqual(inedges, sources)
         self.assertEqual(outedges, destinations)
