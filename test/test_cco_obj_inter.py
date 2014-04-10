@@ -30,51 +30,29 @@ class BaseTestCCOObjInter(object):
     INTERCOMM = MPI.COMM_NULL
 
     def setUp(self):
-        BASE_SIZE = self.BASECOMM.Get_size()
-        BASE_RANK = self.BASECOMM.Get_rank()
-        if BASE_SIZE < 2:
-            return
-        if BASE_RANK < BASE_SIZE // 2 :
+        size = self.BASECOMM.Get_size()
+        rank = self.BASECOMM.Get_rank()
+        if size < 2: return
+        if rank < size // 2 :
             self.COLOR = 0
             self.LOCAL_LEADER = 0
-            self.REMOTE_LEADER = BASE_SIZE // 2
+            self.REMOTE_LEADER = size // 2
         else:
             self.COLOR = 1
             self.LOCAL_LEADER = 0
             self.REMOTE_LEADER = 0
         self.INTRACOMM = self.BASECOMM.Split(self.COLOR, key=0)
-        self.INTERCOMM = self.INTRACOMM.Create_intercomm(self.LOCAL_LEADER,
-                                                         self.BASECOMM,
-                                                         self.REMOTE_LEADER)
+        Create_intercomm = MPI.Intracomm.Create_intercomm
+        self.INTERCOMM = Create_intercomm(self.INTRACOMM,
+                                          self.LOCAL_LEADER,
+                                          self.BASECOMM,
+                                          self.REMOTE_LEADER)
 
     def tearDown(self):
         if self.INTRACOMM != MPI.COMM_NULL:
             self.INTRACOMM.Free()
-            del self.INTRACOMM
         if self.INTERCOMM != MPI.COMM_NULL:
             self.INTERCOMM.Free()
-            del self.INTERCOMM
-
-    def testRemoteGroupSize(self):
-        if self.INTRACOMM == MPI.COMM_NULL: return
-        if self.INTERCOMM == MPI.COMM_NULL: return
-        group = self.INTERCOMM.Get_remote_group()
-        self.assertEqual(self.INTERCOMM.remote_size, group.size)
-        group.Free()
-
-    def testMerge(self):
-        if self.INTRACOMM == MPI.COMM_NULL: return
-        if self.INTERCOMM == MPI.COMM_NULL: return
-        basecomm = self.BASECOMM
-        intercomm = self.INTERCOMM
-        if basecomm.rank < basecomm.size // 2:
-            high = False
-        else:
-            high = True
-        intracomm = intercomm.Merge(high)
-        self.assertEqual(intracomm.size, basecomm.size)
-        self.assertEqual(intracomm.rank, basecomm.rank)
-        intracomm.Free()
 
     def testBarrier(self):
         if self.INTRACOMM == MPI.COMM_NULL: return
@@ -217,7 +195,6 @@ class TestCCOObjInterDup(TestCCOObjInter):
         super(TestCCOObjInterDup, self).setUp()
     def tearDown(self):
         self.BASECOMM.Free()
-        del self.BASECOMM
         super(TestCCOObjInterDup, self).tearDown()
 
 class TestCCOObjInterDupDup(TestCCOObjInterDup):
@@ -237,7 +214,6 @@ class TestCCOObjInterDupDup(TestCCOObjInterDup):
 name, version = MPI.get_vendor()
 if name == 'Open MPI':
     if version < (1,6,0):
-        del BaseTestCCOObjInter
         del TestCCOObjInter
         del TestCCOObjInterDup
         del TestCCOObjInterDupDup
@@ -253,12 +229,10 @@ elif name == "DeinoMPI":
     TestCCOObjInterDupDup.testAllgather = _SKIPPED
     TestCCOObjInterDupDup.testAllreduce = _SKIPPED
 elif name == "MPICH1":
-    del BaseTestCCOObjInter
     del TestCCOObjInter
     del TestCCOObjInterDup
     del TestCCOObjInterDupDup
 elif MPI.ROOT == MPI.PROC_NULL:
-    del BaseTestCCOObjInter
     del TestCCOObjInter
     del TestCCOObjInterDup
     del TestCCOObjInterDupDup
