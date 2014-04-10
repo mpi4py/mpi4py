@@ -52,7 +52,8 @@ class BaseTestSpawn(object):
         self.COMM.Barrier()
 
     def testCommSpawnMultiple(self):
-        COMMAND = [self.COMMAND] * 3
+        count = 2 + (self.COMM.Get_size() == 0)
+        COMMAND = [self.COMMAND] * count
         ARGS = [self.ARGS] * len(COMMAND)
         MAXPROCS = [self.MAXPROCS] * len(COMMAND)
         INFO = [self.INFO] * len(COMMAND)
@@ -67,7 +68,8 @@ class BaseTestSpawn(object):
         self.assertEqual(remote_size, sum(MAXPROCS))
 
     def testReturnedErrcodesMultiple(self):
-        COMMAND = [self.COMMAND]*3
+        count = 2 + (self.COMM.Get_size() == 0)
+        COMMAND = [self.COMMAND] * count
         ARGS = [self.ARGS]*len(COMMAND)
         MAXPROCS = list(range(1, len(COMMAND)+1))
         INFO = MPI.INFO_NULL
@@ -89,9 +91,10 @@ class BaseTestSpawn(object):
         self.COMM.Barrier()
         rank = self.COMM.Get_rank()
         if rank == self.ROOT:
-            COMMAND = [self.COMMAND] * 3
+            count = 2 + (self.COMM.Get_size() == 0)
+            COMMAND = [self.COMMAND] * count
             ARGS = [self.ARGS] * len(COMMAND)
-            MAXPROCS = list(range(2, len(COMMAND)+2))
+            MAXPROCS = list(range(1, len(COMMAND)+1))
             INFO = [MPI.INFO_NULL] * len(COMMAND)
             child = self.COMM.Spawn_multiple(
                 COMMAND, ARGS, MAXPROCS,
