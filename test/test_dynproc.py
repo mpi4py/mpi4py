@@ -147,7 +147,6 @@ class TestDPM(unittest.TestCase):
         if client:
             fd = client.fileno()
             intercomm = MPI.COMM_SELF.Join(fd)
-            client.shutdown(socket.SHUT_RDWR)
             client.close()
             self.assertEqual(intercomm.remote_size, 1)
             self.assertEqual(intercomm.size, 1)
