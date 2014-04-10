@@ -206,6 +206,9 @@ def run_tests_leaks(options, testsuite):
         if leaks:
             writeln('[%d@%s] refleaks:  (%d - %d) --> %d'
                     % (rank, name, r2, r1, leaks))
+def abort(code=1):
+    from mpi4py import MPI
+    MPI.COMM_WORLD.Abort(code)
 
 def main(args=None):
     pkgname = 'mpi4py'
@@ -217,6 +220,7 @@ def main(args=None):
     print_banner(options, package)
     testsuite = load_tests(options, args)
     success = run_tests(options, testsuite)
+    if not success and options.failfast: abort()
     if success and hasattr(sys, 'gettotalrefcount'):
         run_tests_leaks(options, testsuite)
     return not success
