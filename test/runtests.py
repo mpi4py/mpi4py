@@ -210,6 +210,12 @@ def abort(code=1):
     from mpi4py import MPI
     MPI.COMM_WORLD.Abort(code)
 
+def shutdown():
+    from mpi4py import MPI
+    if 'TRAVIS' in os.environ:
+        name, version = MPI.get_vendor()
+        if name == 'Open MPI': MPI.Finalize()
+
 def main(args=None):
     pkgname = 'mpi4py'
     parser = getoptionparser()
@@ -223,6 +229,7 @@ def main(args=None):
     if not success and options.failfast: abort()
     if success and hasattr(sys, 'gettotalrefcount'):
         run_tests_leaks(options, testsuite)
+    shutdown()
     return not success
 
 if __name__ == '__main__':
