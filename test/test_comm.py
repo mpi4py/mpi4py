@@ -5,8 +5,10 @@ class TestCommNull(unittest.TestCase):
 
     def testContructor(self):
         comm = MPI.Comm()
-        self.assertFalse(comm is MPI.COMM_NULL)
         self.assertEqual(comm, MPI.COMM_NULL)
+        self.assertFalse(comm is MPI.COMM_NULL)
+        def construct(): MPI.Comm((1,2,3))
+        self.assertRaises(TypeError, construct)
 
     def testContructorIntra(self):
         comm_null = MPI.Intracomm()
@@ -19,6 +21,11 @@ class TestCommNull(unittest.TestCase):
         self.assertEqual(comm_null, MPI.COMM_NULL)
 
 class BaseTestComm(object):
+
+    def testContructor(self):
+        comm = MPI.Comm(self.COMM)
+        self.assertEqual(comm, self.COMM)
+        self.assertFalse(comm is self.COMM)
 
     def testPyProps(self):
         comm = self.COMM
