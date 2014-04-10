@@ -1,5 +1,9 @@
 from mpi4py import MPI
 import mpiunittest as unittest
+try:
+    import socket
+except ImportError:
+    socket = None
 
 class TestDPM(unittest.TestCase):
 
@@ -120,6 +124,50 @@ class TestDPM(unittest.TestCase):
         else:
             self.assertEqual(message, TestDPM.message)
         intercomm.Free()
+
+    def testJoin(self):
+        if not socket: return
+        size = MPI.COMM_WORLD.Get_size()
+        rank = MPI.COMM_WORLD.Get_rank()
+        if size < 2: return
+        server = client = address = None
+        MPI.COMM_WORLD.Barrier()
+        if rank == 0: # server
+            server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            server.bind(('', 0))
+            address = server.getsockname()
+        address = MPI.COMM_WORLD.bcast(address, root=0)
+        if rank == 0: # server
+            server.listen(0)
+            client = server.accept()[0]
+        if rank == 1: # client
+            client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            client.connect(address)
+        MPI.COMM_WORLD.Barrier()
+        if client:
+            fd = client.fileno()
+            intercomm = MPI.COMM_SELF.Join(fd)
+            client.shutdown(socket.SHUT_RDWR)
+            client.close()
+            self.assertEqual(intercomm.remote_size, 1)
+            self.assertEqual(intercomm.size, 1)
+            self.assertEqual(intercomm.rank, 0)
+            if rank == 0:
+                message = TestDPM.message
+                root = MPI.ROOT
+            else:
+                message = None
+                root = 0
+            message = intercomm.bcast(message, root)
+            if rank == 0:
+                self.assertEqual(message, None)
+            else:
+                self.assertEqual(message, TestDPM.message)
+            intercomm.Free()
+        if server:
+            server.shutdown(socket.SHUT_RDWR)
+            server.close()
+        MPI.COMM_WORLD.Barrier()
 
 
 name, version = MPI.get_vendor()
