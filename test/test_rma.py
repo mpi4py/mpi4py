@@ -206,6 +206,32 @@ class BaseTestRMA(object):
             group.Free()
         wingroup.Free()
 
+    def testStartCompletePostTest(self):
+        comm = self.COMM
+        win = self.WIN
+        wingroup = win.Get_group()
+        size = wingroup.Get_size()
+        rank = wingroup.Get_rank()
+        if size < 2: return wingroup.Free()
+        if rank == 0:
+            group = wingroup.Excl([0])
+            win.Start(group)
+            comm.Barrier()
+            win.Complete()
+            comm.Barrier()
+            group.Free()
+        else:
+            group = wingroup.Incl([0])
+            win.Post(group)
+            flag = win.Test()
+            self.assertFalse(flag)
+            comm.Barrier()
+            comm.Barrier()
+            flag = win.Test()
+            self.assertTrue(flag)
+            group.Free()
+        wingroup.Free()
+
     def testFlushSync(self):
         size = self.COMM.Get_size()
         win = self.WIN
