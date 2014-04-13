@@ -14,7 +14,6 @@ cdef class Info:
         CHKERR( del_Info(&self.ob_mpi) )
 
     def __richcmp__(self, other, int op):
-        if not isinstance(self,  Info): return NotImplemented
         if not isinstance(other, Info): return NotImplemented
         cdef Info s = <Info>self, o = <Info>other
         if   op == Py_EQ: return (s.ob_mpi == o.ob_mpi)

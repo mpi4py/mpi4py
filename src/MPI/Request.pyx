@@ -15,7 +15,6 @@ cdef class Request:
         CHKERR( del_Request(&self.ob_mpi) )
 
     def __richcmp__(self, other, int op):
-        if not isinstance(self,  Request): return NotImplemented
         if not isinstance(other, Request): return NotImplemented
         cdef Request s = <Request>self, o = <Request>other
         if   op == Py_EQ: return (s.ob_mpi == o.ob_mpi)

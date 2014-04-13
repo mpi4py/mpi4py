@@ -14,7 +14,6 @@ cdef class Group:
         CHKERR( del_Group(&self.ob_mpi) )
 
     def __richcmp__(self, other, int op):
-        if not isinstance(self,  Group): return NotImplemented
         if not isinstance(other, Group): return NotImplemented
         cdef Group s = <Group>self, o = <Group>other
         if   op == Py_EQ: return (s.ob_mpi == o.ob_mpi)

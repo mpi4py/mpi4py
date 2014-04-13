@@ -38,7 +38,6 @@ cdef class File:
         CHKERR( del_File(&self.ob_mpi) )
 
     def __richcmp__(self, other, int op):
-        if not isinstance(self,  File): return NotImplemented
         if not isinstance(other, File): return NotImplemented
         cdef File s = <File>self, o = <File>other
         if   op == Py_EQ: return (s.ob_mpi == o.ob_mpi)

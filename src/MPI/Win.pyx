@@ -40,7 +40,6 @@ cdef class Win:
         CHKERR( del_Win(&self.ob_mpi) )
 
     def __richcmp__(self, other, int op):
-        if not isinstance(self,  Win): return NotImplemented
         if not isinstance(other, Win): return NotImplemented
         cdef Win s = <Win>self, o = <Win>other
         if   op == Py_EQ: return (s.ob_mpi == o.ob_mpi)

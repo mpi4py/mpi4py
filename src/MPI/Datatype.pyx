@@ -56,7 +56,6 @@ cdef class Datatype:
         CHKERR( del_Datatype(&self.ob_mpi) )
 
     def __richcmp__(self, other, int op):
-        if not isinstance(self,  Datatype): return NotImplemented
         if not isinstance(other, Datatype): return NotImplemented
         cdef Datatype s = <Datatype>self, o = <Datatype>other
         if   op == Py_EQ: return (s.ob_mpi == o.ob_mpi)

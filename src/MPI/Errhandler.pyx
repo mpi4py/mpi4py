@@ -14,7 +14,6 @@ cdef class Errhandler:
         CHKERR( del_Errhandler(&self.ob_mpi) )
 
     def __richcmp__(self, other, int op):
-        if not isinstance(self,  Errhandler): return NotImplemented
         if not isinstance(other, Errhandler): return NotImplemented
         cdef Errhandler s = <Errhandler>self, o = <Errhandler>other
         if   op == Py_EQ: return (s.ob_mpi == o.ob_mpi)

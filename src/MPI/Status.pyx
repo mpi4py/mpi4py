@@ -12,7 +12,6 @@ cdef class Status:
             copy_Status(&status.ob_mpi, &self.ob_mpi)
 
     def __richcmp__(self, other, int op):
-        if not isinstance(self,  Status): return NotImplemented
         if not isinstance(other, Status): return NotImplemented
         cdef Status s = <Status>self, o = <Status>other
         cdef int r = equal_Status(&s.ob_mpi, &o.ob_mpi)

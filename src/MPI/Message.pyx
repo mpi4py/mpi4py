@@ -14,7 +14,6 @@ cdef class Message:
         CHKERR( del_Message(&self.ob_mpi) )
 
     def __richcmp__(self, other, int op):
-        if not isinstance(self,  Message): return NotImplemented
         if not isinstance(other, Message): return NotImplemented
         cdef Message s = <Message>self, o = <Message>other
         if   op == Py_EQ: return (s.ob_mpi == o.ob_mpi)

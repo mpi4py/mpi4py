@@ -17,7 +17,6 @@ cdef class Op:
         op_user_del(&self.ob_usrid)
 
     def __richcmp__(self, other, int op):
-        if not isinstance(self,  Op): return NotImplemented
         if not isinstance(other, Op): return NotImplemented
         cdef Op s = <Op>self, o = <Op>other
         if   op == Py_EQ: return (s.ob_mpi == o.ob_mpi)

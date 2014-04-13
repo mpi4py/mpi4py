@@ -44,7 +44,6 @@ cdef class Comm:
         CHKERR( del_Comm(&self.ob_mpi) )
 
     def __richcmp__(self, other, int op):
-        if not isinstance(self,  Comm): return NotImplemented
         if not isinstance(other, Comm): return NotImplemented
         cdef Comm s = <Comm>self, o = <Comm>other
         if   op == Py_EQ: return (s.ob_mpi == o.ob_mpi)
