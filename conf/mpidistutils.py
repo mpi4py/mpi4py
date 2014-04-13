@@ -1301,7 +1301,9 @@ class install_lib(cmd_install_lib.install_lib):
                                         self.install_dir)
             build_cmd = self.get_finalized_command(build_cmd)
             build_files = build_cmd.get_outputs()
-            outputs.extend(outs)
+            for out in outs:
+                if os.path.exists(out):
+                    outputs.append(out)
         return outputs
 
 

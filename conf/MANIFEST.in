@@ -1,4 +1,4 @@
-include setup*.py *.cfg *.txt tox.ini
+include setup*.py *.cfg *.rst *.txt tox.ini
 
 recursive-include demo *.py *.txt *.pyx *.i *.c *.cxx *.f90
 recursive-include demo [M,m]akefile  *.sh *.bat
