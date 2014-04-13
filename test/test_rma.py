@@ -99,12 +99,13 @@ class BaseTestRMA(object):
         obuf = MPI.Alloc_mem(1); memzero(obuf)
         rbuf = MPI.Alloc_mem(1); memzero(rbuf)
         try:
-            self.WIN.Get_accumulate([obuf, 0, MPI.BYTE], [rbuf, 0, MPI.BYTE], rank)
+            try:
+                self.WIN.Get_accumulate([obuf, 0, MPI.BYTE], [rbuf, 0, MPI.BYTE], rank)
+            finally:
+                MPI.Free_mem(obuf)
+                MPI.Free_mem(rbuf)
         except NotImplementedError:
             return
-        finally:
-            MPI.Free_mem(obuf)
-            MPI.Free_mem(rbuf)
         self.WIN.Fence()
         for array in arrayimpl.ArrayTypes:
             for typecode in arrayimpl.TypeMap:

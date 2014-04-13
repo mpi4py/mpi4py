@@ -195,6 +195,7 @@ class TestCCOObjInterDup(TestCCOObjInter):
         super(TestCCOObjInterDup, self).setUp()
     def tearDown(self):
         self.BASECOMM.Free()
+        del self.BASECOMM
         super(TestCCOObjInterDup, self).tearDown()
 
 class TestCCOObjInterDupDup(TestCCOObjInterDup):
@@ -209,6 +210,8 @@ class TestCCOObjInterDupDup(TestCCOObjInterDup):
         super(TestCCOObjInterDupDup, self).tearDown()
         if self.INTERCOMM_ORIG == MPI.COMM_NULL: return
         self.INTERCOMM_ORIG.Free()
+        del self.INTERCOMM
+        del self.INTERCOMM_ORIG
 
 
 name, version = MPI.get_vendor()

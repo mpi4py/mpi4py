@@ -121,14 +121,15 @@ class BaseTestComm(object):
     def testCreateGroup(self):
         group = self.COMM.Get_group()
         try:
-            comm = self.COMM.Create_group(group)
-            ccmp = MPI.Comm.Compare(self.COMM, comm)
-            self.assertEqual(ccmp, MPI.CONGRUENT)
-            comm.Free()
+            try:
+                comm = self.COMM.Create_group(group)
+                ccmp = MPI.Comm.Compare(self.COMM, comm)
+                self.assertEqual(ccmp, MPI.CONGRUENT)
+                comm.Free()
+            finally:
+                group.Free()
         except NotImplementedError:
-            return
-        finally:
-            group.Free()
+            pass
 
     def testSplitType(self):
         try:

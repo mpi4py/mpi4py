@@ -101,15 +101,17 @@ class TestCCONghObjWorldDup(BaseTestCCONghObj, unittest.TestCase):
 
 cartcomm = MPI.COMM_SELF.Create_cart([1], periods=[1])
 try:
-    cartcomm.neighbor_allgather(None)
+    try:
+        cartcomm.neighbor_allgather(None)
+    finally:
+        cartcomm.Free()
 except NotImplementedError:
     del BaseTestCCONghObj
     del TestCCONghObjSelf
     del TestCCONghObjWorld
     del TestCCONghObjSelfDup
     del TestCCONghObjWorldDup
-finally:
-    cartcomm.Free()
+
 
 if __name__ == '__main__':
     unittest.main()

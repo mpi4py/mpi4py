@@ -157,17 +157,20 @@ class TestCCONghBufWorldDup(BaseTestCCONghBuf, unittest.TestCase):
     def tearDown(self):
         self.COMM.Free()
 
+
 cartcomm = MPI.COMM_SELF.Create_cart([1], periods=[1])
 try:
-    cartcomm.neighbor_allgather(None)
+    try:
+        cartcomm.neighbor_allgather(None)
+    finally:
+        cartcomm.Free()
 except NotImplementedError:
     del BaseTestCCONghBuf
     del TestCCONghBufSelf
     del TestCCONghBufWorld
     del TestCCONghBufSelfDup
     del TestCCONghBufWorldDup
-finally:
-    cartcomm.Free()
+
 
 if __name__ == '__main__':
     unittest.main()
