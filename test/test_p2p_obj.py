@@ -160,6 +160,62 @@ class BaseTestP2PObj(object):
         size = comm.Get_size()
         rank = comm.Get_rank()
         tmp = allocate(512)
+        for smess in messages:
+            dst = (rank+1)%size
+            src = (rank-1)%size
+            rreq = comm.irecv(None, src, 0)
+            self.assertTrue(rreq)
+            sreq = comm.isend(smess, dst, 0)
+            self.assertTrue(sreq)
+            index1, mess1 = MPI.Request.waitany([sreq,rreq])
+            self.assertTrue(index1 in (0, 1))
+            if index1 == 0:
+                self.assertFalse(sreq)
+                self.assertTrue (rreq)
+                self.assertEqual(mess1, None)
+            else:
+                self.assertTrue (sreq)
+                self.assertFalse(rreq)
+                self.assertEqual(mess1, smess)
+            index2, mess2 = MPI.Request.waitany([sreq,rreq])
+            self.assertTrue(index2 in (0, 1))
+            self.assertNotEqual(index2, index1)
+            self.assertFalse(sreq)
+            self.assertFalse(rreq)
+            if index2 == 0:
+                self.assertEqual(mess2, None)
+            else:
+                self.assertEqual(mess2, smess)
+        for smess in messages:
+            dst = (rank+1)%size
+            src = (rank-1)%size
+            rreq = comm.irecv(None, src, 0)
+            self.assertTrue(rreq)
+            sreq = comm.isend(smess, dst, 0)
+            self.assertTrue(sreq)
+            index1, flag1, mess1 = MPI.Request.testany([sreq,rreq])
+            while not flag1:
+                index1, flag1, mess1 = MPI.Request.testany([sreq,rreq])
+            self.assertTrue(index1 in (0, 1))
+            if index1 == 0:
+                self.assertFalse(sreq)
+                self.assertTrue (rreq)
+                self.assertEqual(mess1, None)
+            else:
+                self.assertTrue (sreq)
+                self.assertFalse(rreq)
+                self.assertEqual(mess1, smess)
+            index2, flag2, mess2 = MPI.Request.testany([sreq,rreq])
+            while not flag2:
+                index2, flag2, mess2 = MPI.Request.testany([sreq,rreq])
+            self.assertTrue(index2 in (0, 1))
+            self.assertNotEqual(index2, index1)
+            self.assertFalse(sreq)
+            self.assertFalse(rreq)
+            if index2 == 0:
+                self.assertEqual(mess2, None)
+            else:
+                self.assertEqual(mess2, smess)
         for buf in (None, tmp):
             for smess in messages:
                 dst = (rank+1)%size
