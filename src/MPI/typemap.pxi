@@ -9,12 +9,14 @@ cdef inline int AddTypeMap(dict TD, object key, Datatype datatype) except -1:
 # -----------------------------------------------------------------------------
 
 cdef dict TypeDict = { }
-__TypeDict__ = TypeDict
+_typedict = TypeDict
 
+# boolean (C++)
+AddTypeMap(TypeDict, "?"  , __CXX_BOOL__ ) # PEP-3118 & NumPy
 # boolean (C99)
-AddTypeMap(TypeDict, "?"  , __C_BOOL__ ) # PEP-3118 & NumPy
+AddTypeMap(TypeDict, "?"  , __C_BOOL__   ) # PEP-3118 & NumPy
 # character
-AddTypeMap(TypeDict, "c"  , __CHAR__   ) # PEP-3118 & NumPy
+AddTypeMap(TypeDict, "c"  , __CHAR__     ) # PEP-3118 & NumPy
 ## XXX this requires special handling
 ## AddTypeMap(TypeDict, "u"  , __????__   ) # PEP-3118
 ## AddTypeMap(TypeDict, "w"  , __????__   ) # PEP-3118
@@ -24,6 +26,7 @@ AddTypeMap(TypeDict, "h" , __SHORT__       )
 AddTypeMap(TypeDict, "i" , __INT__         )
 AddTypeMap(TypeDict, "l" , __LONG__        )
 AddTypeMap(TypeDict, "q" , __LONG_LONG__   )
+AddTypeMap(TypeDict, "p" , __AINT__        ), # NumPy
 # unsigned integer
 AddTypeMap(TypeDict, "B" , __UNSIGNED_CHAR__     )
 AddTypeMap(TypeDict, "H" , __UNSIGNED_SHORT__    )
@@ -44,18 +47,25 @@ AddTypeMap(TypeDict, "Zf" , __COMPLEX8__       ) # PEP-3118
 AddTypeMap(TypeDict, "Zd" , __COMPLEX16__      ) # PEP-3118
 AddTypeMap(TypeDict, "F"  , __COMPLEX8__       ) # NumPy
 AddTypeMap(TypeDict, "D"  , __COMPLEX16__      ) # NumPy
+# complex floating (C++)
+AddTypeMap(TypeDict, "Zf" , __CXX_FLOAT_COMPLEX__       ) # PEP-3118
+AddTypeMap(TypeDict, "Zd" , __CXX_DOUBLE_COMPLEX__      ) # PEP-3118
+AddTypeMap(TypeDict, "Zg" , __CXX_LONG_DOUBLE_COMPLEX__ ) # PEP-3118
+AddTypeMap(TypeDict, "F"  , __CXX_FLOAT_COMPLEX__       ) # NumPy
+AddTypeMap(TypeDict, "D"  , __CXX_DOUBLE_COMPLEX__      ) # NumPy
+AddTypeMap(TypeDict, "G"  , __CXX_LONG_DOUBLE_COMPLEX__ ) # NumPy
 # complex floating (C99)
-AddTypeMap(TypeDict, "Zf" , __C_FLOAT_COMPLEX__       ) # PEP-3118
-AddTypeMap(TypeDict, "Zd" , __C_DOUBLE_COMPLEX__      ) # PEP-3118
-AddTypeMap(TypeDict, "Zg" , __C_LONG_DOUBLE_COMPLEX__ ) # PEP-3118
-AddTypeMap(TypeDict, "F"  , __C_FLOAT_COMPLEX__       ) # NumPy
-AddTypeMap(TypeDict, "D"  , __C_DOUBLE_COMPLEX__      ) # NumPy
-AddTypeMap(TypeDict, "G"  , __C_LONG_DOUBLE_COMPLEX__ ) # NumPy
+AddTypeMap(TypeDict, "Zf" , __C_FLOAT_COMPLEX__         ) # PEP-3118
+AddTypeMap(TypeDict, "Zd" , __C_DOUBLE_COMPLEX__        ) # PEP-3118
+AddTypeMap(TypeDict, "Zg" , __C_LONG_DOUBLE_COMPLEX__   ) # PEP-3118
+AddTypeMap(TypeDict, "F"  , __C_FLOAT_COMPLEX__         ) # NumPy
+AddTypeMap(TypeDict, "D"  , __C_DOUBLE_COMPLEX__        ) # NumPy
+AddTypeMap(TypeDict, "G"  , __C_LONG_DOUBLE_COMPLEX__   ) # NumPy
 
 # -----------------------------------------------------------------------------
 
 cdef dict CTypeDict = { }
-__CTypeDict__ = CTypeDict
+_typedict_c = CTypeDict
 
 AddTypeMap(CTypeDict, "?"  , __C_BOOL__ )
 AddTypeMap(CTypeDict, "c"  , __CHAR__   )
@@ -93,15 +103,19 @@ AddTypeMap(CTypeDict, "u8" , __UINT64_T__ )
 # -----------------------------------------------------------------------------
 
 cdef dict FTypeDict = { }
-__FTypeDict__ = FTypeDict
+_typedict_f = FTypeDict
 
 AddTypeMap(FTypeDict, "?"   , __LOGICAL__          )
-AddTypeMap(FTypeDict, "c"   , __CHARACTER__        )
 AddTypeMap(FTypeDict, "i"   , __INTEGER__          )
-AddTypeMap(FTypeDict, "f"   , __REAL__             )
+AddTypeMap(FTypeDict, "s"   , __REAL__             )
 AddTypeMap(FTypeDict, "d"   , __DOUBLE_PRECISION__ )
-AddTypeMap(FTypeDict, "F"   , __COMPLEX__          )
-AddTypeMap(FTypeDict, "D"   , __DOUBLE_COMPLEX__   )
+AddTypeMap(FTypeDict, "c"   , __COMPLEX__          )
+AddTypeMap(FTypeDict, "z"   , __DOUBLE_COMPLEX__   )
+
+AddTypeMap(FTypeDict, "?1"  , __LOGICAL1__  )
+AddTypeMap(FTypeDict, "?2"  , __LOGICAL2__  )
+AddTypeMap(FTypeDict, "?4"  , __LOGICAL4__  )
+AddTypeMap(FTypeDict, "?8"  , __LOGICAL8__  )
 
 AddTypeMap(FTypeDict, "i1"  , __INTEGER1__  )
 AddTypeMap(FTypeDict, "i2"  , __INTEGER2__  )

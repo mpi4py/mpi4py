@@ -2,7 +2,7 @@ from mpi4py import MPI
 import mpiunittest as unittest
 from arrayimpl import allclose
 
-typemap = MPI.__TypeDict__
+typemap = MPI._typedict
 
 try:
     import array
