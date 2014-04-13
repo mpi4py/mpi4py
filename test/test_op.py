@@ -77,20 +77,18 @@ class TestOp(unittest.TestCase):
                     myop.Free()
 
     def testCreateMany(self):
-        N = 16 # max user-defined operations
+        N = 32 # max user-defined operations
         #
         ops = []
         for i in range(N):
             o = MPI.Op.Create(mysum)
             ops.append(o)
-        self.assertRaises(RuntimeError, MPI.Op.Create, mysum)
         for o in ops: o.Free() # cleanup
-        # other round
+        # another round
         ops = []
         for i in range(N):
             o = MPI.Op.Create(mysum)
             ops.append(o)
-        self.assertRaises(RuntimeError, MPI.Op.Create, mysum)
         for o in ops: o.Free() # cleanup
 
     def _test_call(self, op, args, res):

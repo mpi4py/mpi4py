@@ -84,7 +84,7 @@ cdef object _op_NO_OP(object x, object y):
 
 # -----------------------------------------------------------------------------
 
-cdef list op_user_registry = [None]*(1+16)
+cdef list op_user_registry = [None]*(1+32)
 
 cdef inline object op_user_py(int index, object x, object y, object dt):
     return op_user_registry[index](x, y, dt)
@@ -164,8 +164,55 @@ cdef void op_user_15(void *a, void *b, int *n, MPI_Datatype *t) nogil:
     op_user_call(15, a, b, n, t)
 @cython.callspec("MPIAPI")
 cdef void op_user_16(void *a, void *b, int *n, MPI_Datatype *t) nogil:
-    op_user_call(15, a, b, n, t)
-
+    op_user_call(16, a, b, n, t)
+@cython.callspec("MPIAPI")
+cdef void op_user_17(void *a, void *b, int *n, MPI_Datatype *t) nogil:
+    op_user_call(17, a, b, n, t)
+@cython.callspec("MPIAPI")
+cdef void op_user_18(void *a, void *b, int *n, MPI_Datatype *t) nogil:
+    op_user_call(18, a, b, n, t)
+@cython.callspec("MPIAPI")
+cdef void op_user_19(void *a, void *b, int *n, MPI_Datatype *t) nogil:
+    op_user_call(19, a, b, n, t)
+@cython.callspec("MPIAPI")
+cdef void op_user_20(void *a, void *b, int *n, MPI_Datatype *t) nogil:
+    op_user_call(20, a, b, n, t)
+@cython.callspec("MPIAPI")
+cdef void op_user_21(void *a, void *b, int *n, MPI_Datatype *t) nogil:
+    op_user_call(21, a, b, n, t)
+@cython.callspec("MPIAPI")
+cdef void op_user_22(void *a, void *b, int *n, MPI_Datatype *t) nogil:
+    op_user_call(22, a, b, n, t)
+@cython.callspec("MPIAPI")
+cdef void op_user_23(void *a, void *b, int *n, MPI_Datatype *t) nogil:
+    op_user_call(23, a, b, n, t)
+@cython.callspec("MPIAPI")
+cdef void op_user_24(void *a, void *b, int *n, MPI_Datatype *t) nogil:
+    op_user_call(24, a, b, n, t)
+@cython.callspec("MPIAPI")
+cdef void op_user_25(void *a, void *b, int *n, MPI_Datatype *t) nogil:
+    op_user_call(25, a, b, n, t)
+@cython.callspec("MPIAPI")
+cdef void op_user_26(void *a, void *b, int *n, MPI_Datatype *t) nogil:
+    op_user_call(26, a, b, n, t)
+@cython.callspec("MPIAPI")
+cdef void op_user_27(void *a, void *b, int *n, MPI_Datatype *t) nogil:
+    op_user_call(27, a, b, n, t)
+@cython.callspec("MPIAPI")
+cdef void op_user_28(void *a, void *b, int *n, MPI_Datatype *t) nogil:
+    op_user_call(28, a, b, n, t)
+@cython.callspec("MPIAPI")
+cdef void op_user_29(void *a, void *b, int *n, MPI_Datatype *t) nogil:
+    op_user_call(29, a, b, n, t)
+@cython.callspec("MPIAPI")
+cdef void op_user_30(void *a, void *b, int *n, MPI_Datatype *t) nogil:
+    op_user_call(30, a, b, n, t)
+@cython.callspec("MPIAPI")
+cdef void op_user_31(void *a, void *b, int *n, MPI_Datatype *t) nogil:
+    op_user_call(31, a, b, n, t)
+@cython.callspec("MPIAPI")
+cdef void op_user_32(void *a, void *b, int *n, MPI_Datatype *t) nogil:
+    op_user_call(32, a, b, n, t)
 
 cdef MPI_User_function *op_user_map(int index) nogil:
     if   index ==  1: return op_user_01
@@ -184,6 +231,22 @@ cdef MPI_User_function *op_user_map(int index) nogil:
     elif index == 14: return op_user_14
     elif index == 15: return op_user_15
     elif index == 16: return op_user_16
+    elif index == 17: return op_user_17
+    elif index == 18: return op_user_18
+    elif index == 19: return op_user_19
+    elif index == 20: return op_user_20
+    elif index == 21: return op_user_21
+    elif index == 22: return op_user_22
+    elif index == 23: return op_user_23
+    elif index == 24: return op_user_24
+    elif index == 25: return op_user_25
+    elif index == 26: return op_user_26
+    elif index == 27: return op_user_27
+    elif index == 28: return op_user_28
+    elif index == 29: return op_user_29
+    elif index == 30: return op_user_30
+    elif index == 31: return op_user_31
+    elif index == 32: return op_user_32
     else:             return NULL
 
 cdef int op_user_new(object function, MPI_User_function **cfunction) except -1:
