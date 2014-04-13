@@ -62,9 +62,6 @@ class BaseTestP2PObj(object):
         for smess in messages:
             req = self.COMM.isend(smess,  rank, 0)
             self.assertTrue(req)
-            #flag = req.Test()
-            #self.assertFalse(flag)
-            #self.assertTrue(req)
             rmess = self.COMM.recv(None, rank, 0)
             self.assertTrue(req)
             flag = req.Test()
@@ -103,6 +100,7 @@ class BaseTestP2PObj(object):
             comm.send(smess, rank, 0)
             self.assertTrue(req)
             flag, rmess = req.test()
+            while not flag: flag, rmess = req.test()
             self.assertTrue(flag)
             self.assertFalse(req)
             self.assertEqual(rmess, smess)
@@ -146,6 +144,8 @@ class BaseTestP2PObj(object):
                 self.assertTrue(rreqs[i])
                 comm.send(smess, dst, 1)
                 index, flag, obj = MPI.Request.testany(rreqs)
+                while not flag:
+                    index, flag, obj = MPI.Request.testany(rreqs)
                 self.assertEqual(index, i)
                 self.assertEqual(flag, True)
                 self.assertEqual(obj, smess)
