@@ -41,7 +41,7 @@ cdef IntracommType SELF = MPI.COMM_SELF
 # Cython-level cimport with PXD file
 # this make available the native MPI C API
 # with namespace-protection (stuff accessed as mpi.XXX)
-# (file: mpi4py/include/mpi4py/mpi_c.pxd)
+# (file: mpi4py/include/mpi4py/libmpi.pxd)
 
 from mpi4py cimport libmpi as mpi
 

@@ -11,7 +11,7 @@ CYTHON = cython
 .PHONY: src
 src: helloworld.c
 helloworld.c: helloworld.pyx
-	${CYTHON} ${MPI4PY_INCLUDE} $<
+	${CYTHON} $<
 
 
 MPICC = mpicc

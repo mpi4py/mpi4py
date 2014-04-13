@@ -5,7 +5,7 @@ PYTHON = python
 PYTHON_CONFIG = ${PYTHON} ../python-config
 MPI4PY_INCLUDE = ${shell ${PYTHON} -c 'import mpi4py; print( mpi4py.get_include() )'}
 BOOST_INCS = 
-BOOST_LIBS = -lboost_python -lboost_python-mt
+BOOST_LIBS = -lboost_python
 
 
 MPICXX = mpicxx
