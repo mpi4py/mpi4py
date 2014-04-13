@@ -607,7 +607,6 @@ class TestCCOBufWorldDup(BaseTestCCOBuf, unittest.TestCase):
 
 name, version = MPI.get_vendor()
 if name == 'MPICH1' or name == 'LAM/MPI' or MPI.BOTTOM == MPI.IN_PLACE:
-    del BaseTestCCOBufInplace
     del TestCCOBufInplaceSelf
     del TestCCOBufInplaceWorld
 elif name == 'Open MPI':

@@ -106,7 +106,6 @@ try:
     finally:
         cartcomm.Free()
 except NotImplementedError:
-    del BaseTestCCONghObj
     del TestCCONghObjSelf
     del TestCCONghObjWorld
     del TestCCONghObjSelfDup

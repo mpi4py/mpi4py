@@ -550,7 +550,6 @@ class TestCCOBufWorldDup(BaseTestCCOBuf, unittest.TestCase):
 try:
     MPI.COMM_SELF.Ibarrier().Wait()
 except NotImplementedError:
-    del BaseTestCCOBuf
     del TestCCOBufSelf
     del TestCCOBufWorld
     del TestCCOBufInplaceSelf

@@ -327,7 +327,6 @@ class TestCCOVecWorldDup(BaseTestCCOVec, unittest.TestCase):
 try:
     MPI.COMM_SELF.Ibarrier().Wait()
 except NotImplementedError:
-    del BaseTestCCOVec
     del TestCCOVecSelf
     del TestCCOVecWorld
     del TestCCOVecSelfDup

@@ -144,7 +144,6 @@ if MPI.Get_version() < (2,0):
     SKIP_TEST = True
 
 if SKIP_TEST:
-    del BaseTestSpawn
     del TestSpawnSelf
     del TestSpawnWorld
     del TestSpawnSelfMany

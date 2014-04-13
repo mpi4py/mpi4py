@@ -170,7 +170,6 @@ class TestP2PMatchedWorldDup(BaseTestP2PMatched, unittest.TestCase):
 
 if MPI.MESSAGE_NULL == MPI.MESSAGE_NO_PROC:
     del TestMessage
-    del BaseTestP2PMatched
     del TestP2PMatchedSelf
     del TestP2PMatchedWorld
     del TestP2PMatchedSelfDup
