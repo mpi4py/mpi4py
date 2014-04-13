@@ -448,7 +448,6 @@ def run_setup():
           **metadata)
 
 def chk_cython(VERSION):
-    import re
     from distutils import log
     from distutils.version import LooseVersion
     from distutils.version import StrictVersion
@@ -532,16 +531,18 @@ def run_cython(source, depends=(), includes=(),
 
 def build_sources(cmd):
     from distutils.errors import DistutilsError
-    from os.path import exists, isdir, join
-    has_src = exists(join('src', 'mpi4py.MPI.c'))
-    has_vcs = (isdir('.hg') or isdir('.git') or isdir('.svn'))
+    has_src = os.path.exists(os.path.join(
+        topdir, 'src', 'mpi4py.MPI.c'))
+    has_vcs = (os.path.isdir(os.path.join(topdir, '.git')) or
+               os.path.isdir(os.path.join(topdir, '.hg' )) or 
+               os.path.isdir(os.path.join(topdir, '.svn')))
     if (has_src and not has_vcs and not cmd.force): return
     # mpi4py.MPI
     source = 'mpi4py.MPI.pyx'
-    depends = ("include/*/*.pxi",
+    depends = ["include/*/*.pxi",
                "include/*/*.pxd",
                "MPI/*.pyx",
-               "MPI/*.pxi",)
+               "MPI/*.pxi",]
     includes = ['include']
     destdir_h = os.path.join('include', 'mpi4py')
     run_cython(source, depends, includes,
