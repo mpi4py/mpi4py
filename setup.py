@@ -3,55 +3,7 @@
 # Contact: dalcinl@gmail.com
 
 """
-MPI for Python
-==============
-
-This package provides Python bindings for the **Message Passing
-Interface** (MPI) standard. It is implemented on top of the
-MPI-1/MPI-2 specification and exposes an API which grounds on the
-standard MPI-2 C++ bindings.
-
-This package supports:
-
-+ Convenient communication of any *picklable* Python object
-
-  - point-to-point (send & receive)
-  - collective (broadcast, scatter & gather, reduction)
-
-+ Fast communication of Python object exposing the *Python buffer
-  interface* (NumPy arrays, builtin bytes/string/array objects)
-
-  - point-to-point (blocking/nonbloking/persistent send & receive)
-  - collective (broadcast, block/vector scatter & gather, reduction)
-
-+ Process groups and communication domains
-
-  - Creation of new intra/inter communicators
-  - Cartesian & graph topologies
-
-+ Parallel input/output:
-
-  - read & write
-  - blocking/nonbloking & collective/noncollective
-  - individual/shared file pointers & explicit offset
-
-+ Dynamic process management
-
-  - spawn & spawn multiple
-  - accept/connect
-  - name publishing & lookup
-
-+ One-sided operations (put, get, accumulate)
-
-You can install the `in-development version
-<https://bitbucket.org/mpi4py/mpi4py/get/master.tar.gz#egg=mpi4py-dev>`_
-of mpi4py with::
-
-  $ pip install mpi4py==dev
-
-or::
-
-  $ easy_install mpi4py==dev
+"Python bindings for MPI"
 """
 
 ## try:
@@ -65,24 +17,30 @@ import sys, os
 # Metadata
 # --------------------------------------------------------------------
 
+topdir = os.path.abspath(os.path.dirname(__file__))
+
 def name():
     return 'mpi4py'
 
 def version():
     import re
-    fh = open(os.path.join('src', '__init__.py'))
-    try: data = fh.read()
-    finally: fh.close()
+    f = open(os.path.join(topdir, 'src', '__init__.py'))
+    try: data = f.read()
+    finally: f.close()
     m = re.search(r"__version__\s*=\s*'(.*)'", data)
     return m.groups()[0]
+
+def description():
+    f = open(os.path.join(topdir, 'DESCRIPTION.rst'))
+    try: data = f.read()
+    finally: f.close()
+    return data
 
 name    = name()
 version = version()
 
 url      = 'https://bitbucket.org/mpi4py/%(name)s/' % vars()
 download = url + 'downloads/%(name)s-%(version)s.tar.gz' % vars()
-
-description = __doc__.split('\n')[1:-1]; del description[1:3]
 
 classifiers = """
 Development Status :: 5 - Production/Stable
@@ -110,7 +68,7 @@ Topic :: System :: Distributed Computing
 keywords = """
 scientific computing
 parallel computing
-message passing
+message passing interface
 MPI
 """
 
@@ -125,8 +83,8 @@ Windows
 metadata = {
     'name'             : name,
     'version'          : version,
-    'description'      : description.pop(0),
-    'long_description' : '\n'.join(description),
+    'description'      : __doc__.strip(),
+    'long_description' : description(),
     'url'              : url,
     'download_url'     : download,
     'classifiers'      : [c for c in classifiers.split('\n') if c],
@@ -307,7 +265,7 @@ def configure_libvt(lib, config_cmd):
             lib.library_dirs.append(libdir)
             lib.runtime_library_dirs.append(libdir)
     # modern VampirTrace
-    if lib.name == 'vt': 
+    if lib.name == 'vt':
         log_lib = 'vt-mpi'
     else:
         log_lib = lib.name
@@ -475,7 +433,7 @@ def run_setup():
     if ('setuptools' in sys.modules):
         from os.path import exists, join
         metadata['zip_safe'] = False
-        if not exists(join('src', 'mpi4py.MPI.c')):
+        if not exists(join(topdir, 'src', 'mpi4py.MPI.c')):
             metadata['install_requires'] = ['Cython>='+CYTHON]
     #
     setup(packages     = ['mpi4py'],
