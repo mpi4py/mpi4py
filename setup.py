@@ -6,12 +6,13 @@
 "Python bindings for MPI"
 """
 
-## try:
-##     import setuptools
-## except ImportError:
-##     pass
-
-import sys, os
+import sys
+import os
+import re
+try:
+    import setuptools
+except ImportError:
+    pass
 
 # --------------------------------------------------------------------
 # Metadata
@@ -23,7 +24,6 @@ def name():
     return 'mpi4py'
 
 def version():
-    import re
     f = open(os.path.join(topdir, 'src', '__init__.py'))
     try: data = f.read()
     finally: f.close()
@@ -97,11 +97,8 @@ metadata = {
     'maintainer_email' : 'dalcinl@gmail.com',
     }
 
-metadata['requires'] = ['pickle',]
-metadata['provides'] = ['mpi4py',
-                        'mpi4py.MPI',
-                        'mpi4py.dl',
-                        ]
+metadata['requires'] = ['pickle']
+metadata['provides'] = ['mpi4py', 'mpi4py.MPI']
 
 # --------------------------------------------------------------------
 # Extension modules
@@ -430,10 +427,10 @@ def run_setup():
     """
     Call distutils.setup(*targs, **kwargs)
     """
-    if ('setuptools' in sys.modules):
-        from os.path import exists, join
+    if 'setuptools' in sys.modules:
         metadata['zip_safe'] = False
-        if not exists(join(topdir, 'src', 'mpi4py.MPI.c')):
+        csource = os.path.join(topdir, 'src', 'mpi4py.MPI.c')
+        if not os.path.exists(csource):
             metadata['install_requires'] = ['Cython>='+CYTHON]
     #
     setup(packages     = ['mpi4py'],
