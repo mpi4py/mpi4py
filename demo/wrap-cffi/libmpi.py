@@ -15,51 +15,55 @@ def _ffi_define(ffi, csource, **kargs):
 def _ffi_verify(ffi, csource, **kargs):
     cc = kargs.pop('compiler', None)
     ld = kargs.pop('linker',   None)
-    _ffi_verify_push(cc, ld)
+    _compiler_push(cc, ld)
     try:
         lib =  ffi.verify(csource, **kargs)
     finally:
-        _ffi_verify_pop()
+        _compiler_pop()
     return lib
 
-def _ffi_verify_push(cc, ld):
+def _compiler_push(cc, ld):
     from distutils import sysconfig
     from distutils.spawn import find_executable
-    from distutils.util import split_quoted
-    global _customize_compiler_orig
-    _customize_compiler_orig = sysconfig.customize_compiler
     if not cc and not ld: return
     if cc: cc = find_executable(cc)
     if ld: ld = find_executable(ld)
     def customize_compiler(compiler):
-        _customize_compiler_orig(compiler)
-        if cc: compiler.compiler_so[0:1] = split_quoted(cc)
-        if ld: compiler.linker_so[0:1]   = split_quoted(ld)
+        _compiler_push.customize_compiler(compiler)
+        if cc: compiler.compiler_so[0] = cc
+        if ld: compiler.linker_so[0]   = ld
+        if _sys.platform == 'darwin':
+            while '-mno-fused-madd' in compiler.compiler_so:
+                compiler.compiler_so.remove('-mno-fused-madd')
+            while '-mno-fused-madd' in compiler.linker_so:
+                compiler.linker_so.remove('-mno-fused-madd')
+    sysconfig.get_config_vars()
+    _compiler_push.customize_compiler = sysconfig.customize_compiler
     sysconfig.customize_compiler = customize_compiler
 
-def _ffi_verify_pop():
+def _compiler_pop():
     from distutils import sysconfig
-    global _customize_compiler_orig
-    sysconfig.customize_compiler = _customize_compiler_orig
-    del _customize_compiler_orig
+    sysconfig.customize_compiler = _compiler_push.customize_compiler
 
 def _read(filename):
-    f = open(filename)
+    srcdir = _os.path.abspath(_os.path.dirname(__file__))
+    f = open(_os.path.join(srcdir, filename))
     try:
         return f.read()
     finally:
         f.close()
 
-_wdir  = _os.path.abspath(_os.path.dirname(__file__))
+
 _mpicc = _os.getenv('MPICC', "mpicc")
 _mpild = _os.getenv('MPILD', _mpicc)
 
 ffi, mpi = _ffi_create(
-_read(_os.path.join(_wdir, "libmpi.h")),
-_read(_os.path.join(_wdir, "libmpi.c")),
-compiler=_mpicc, linker=_mpild,
-#modulename='_cffi_mpi',
+_read("libmpi.h"),
+_read("libmpi.c"),
+compiler=_mpicc,
+linker=_mpild,
 )
+
 
 _sys.modules[__name__+'.mpi'] = mpi
 
