@@ -55,7 +55,7 @@ OBJS = [
 class TestPickle(unittest.TestCase):
 
     def setUp(self):
-        self.pickle = MPI._p_pickle
+        self.pickle = MPI.pickle
 
     def tearDown(self):
         self.pickle.__init__()

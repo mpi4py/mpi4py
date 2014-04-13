@@ -41,7 +41,11 @@ if PY_MAJOR_VERSION == 2:
 
 @cython.final
 @cython.internal
-cdef class _p_Pickle:
+cdef class Pickle:
+
+    """
+    Pickle/unpickle Python objects
+    """
 
     cdef object ob_dumps
     cdef object ob_loads
@@ -60,6 +64,7 @@ cdef class _p_Pickle:
         self.ob_PROTOCOL = protocol
 
     property dumps:
+        "dumps(obj) -> bytes"
         def __get__(self):
             if self.ob_dumps is None:
                 return PyPickle_dumps
@@ -74,6 +79,7 @@ cdef class _p_Pickle:
             self.ob_dumps = None
 
     property loads:
+        "loads(input) -> object"
         def __get__(self):
             if self.ob_loads is None:
                 return PyPickle_loads
@@ -88,6 +94,7 @@ cdef class _p_Pickle:
             self.ob_loads = None
 
     property PROTOCOL:
+        "protocol"
         def __get__(self):
             return self.ob_PROTOCOL
         def __set__(self, PROTOCOL):
@@ -184,18 +191,14 @@ cdef class _p_Pickle:
         return items
 
 
-cdef _p_Pickle PyMPI_PICKLE = _p_Pickle()
-
-cdef inline _p_Pickle PyMPI_pickle():
-    return PyMPI_PICKLE
-
-_p_pickle = PyMPI_PICKLE
+cdef Pickle PyMPI_PICKLE = Pickle()
+pickle = PyMPI_PICKLE
 
 # -----------------------------------------------------------------------------
 
 cdef object PyMPI_send(object obj, int dest, int tag,
                        MPI_Comm comm):
-    cdef _p_Pickle pickle = PyMPI_pickle()
+    cdef Pickle pickle = PyMPI_PICKLE
     #
     cdef void *sbuf = NULL
     cdef int scount = 0
@@ -212,7 +215,7 @@ cdef object PyMPI_send(object obj, int dest, int tag,
 
 cdef object PyMPI_bsend(object obj, int dest, int tag,
                         MPI_Comm comm):
-    cdef _p_Pickle pickle = PyMPI_pickle()
+    cdef Pickle pickle = PyMPI_PICKLE
     #
     cdef void *sbuf = NULL
     cdef int scount = 0
@@ -229,7 +232,7 @@ cdef object PyMPI_bsend(object obj, int dest, int tag,
 
 cdef object PyMPI_ssend(object obj, int dest, int tag,
                         MPI_Comm comm):
-    cdef _p_Pickle pickle = PyMPI_pickle()
+    cdef Pickle pickle = PyMPI_PICKLE
     #
     cdef void *sbuf = NULL
     cdef int scount = 0
@@ -246,7 +249,7 @@ cdef object PyMPI_ssend(object obj, int dest, int tag,
 
 cdef object PyMPI_recv(object obj, int source, int tag,
                        MPI_Comm comm, MPI_Status *status):
-    cdef _p_Pickle pickle = PyMPI_pickle()
+    cdef Pickle pickle = PyMPI_PICKLE
     #
     cdef void *rbuf = NULL
     cdef int rcount = 0
@@ -287,7 +290,7 @@ cdef object PyMPI_recv(object obj, int source, int tag,
 cdef object PyMPI_sendrecv(object sobj, int dest,   int sendtag,
                            object robj, int source, int recvtag,
                            MPI_Comm comm, MPI_Status *status):
-    cdef _p_Pickle pickle = PyMPI_pickle()
+    cdef Pickle pickle = PyMPI_PICKLE
     #
     cdef void *sbuf = NULL
     cdef int scount = 0
@@ -339,7 +342,7 @@ cdef object PyMPI_sendrecv(object sobj, int dest,   int sendtag,
 
 cdef object PyMPI_isend(object obj, int dest, int tag,
                         MPI_Comm comm, MPI_Request *request):
-    cdef _p_Pickle pickle = PyMPI_pickle()
+    cdef Pickle pickle = PyMPI_PICKLE
     #
     cdef void *sbuf = NULL
     cdef int scount = 0
@@ -355,7 +358,7 @@ cdef object PyMPI_isend(object obj, int dest, int tag,
 
 cdef object PyMPI_ibsend(object obj, int dest, int tag,
                          MPI_Comm comm, MPI_Request *request):
-    cdef _p_Pickle pickle = PyMPI_pickle()
+    cdef Pickle pickle = PyMPI_PICKLE
     #
     cdef void *sbuf = NULL
     cdef int scount = 0
@@ -371,7 +374,7 @@ cdef object PyMPI_ibsend(object obj, int dest, int tag,
 
 cdef object PyMPI_issend(object obj, int dest, int tag,
                          MPI_Comm comm, MPI_Request *request):
-    cdef _p_Pickle pickle = PyMPI_pickle()
+    cdef Pickle pickle = PyMPI_PICKLE
     #
     cdef void *sbuf = NULL
     cdef int scount = 0
@@ -387,7 +390,7 @@ cdef object PyMPI_issend(object obj, int dest, int tag,
 
 cdef object PyMPI_irecv(object obj, int dest, int tag,
                         MPI_Comm comm, MPI_Request *request):
-    cdef _p_Pickle pickle = PyMPI_pickle()
+    cdef Pickle pickle = PyMPI_PICKLE
     #
     cdef void *rbuf = NULL
     cdef MPI_Aint rlen = 0
@@ -414,7 +417,7 @@ cdef object PyMPI_irecv(object obj, int dest, int tag,
 
 
 cdef object PyMPI_wait(Request request, Status status):
-    cdef _p_Pickle pickle = PyMPI_pickle()
+    cdef Pickle pickle = PyMPI_PICKLE
     cdef object buf
     #
     cdef MPI_Status rsts
@@ -434,7 +437,7 @@ cdef object PyMPI_wait(Request request, Status status):
 
 
 cdef object PyMPI_test(Request request, int *flag, Status status):
-    cdef _p_Pickle pickle = PyMPI_pickle()
+    cdef Pickle pickle = PyMPI_PICKLE
     cdef object buf
     #
     cdef MPI_Status rsts
@@ -456,7 +459,7 @@ cdef object PyMPI_test(Request request, int *flag, Status status):
 
 
 cdef object PyMPI_waitany(requests, int *index, Status status):
-    cdef _p_Pickle pickle = PyMPI_pickle()
+    cdef Pickle pickle = PyMPI_PICKLE
     cdef object buf
     #
     cdef int count = 0
@@ -483,7 +486,7 @@ cdef object PyMPI_waitany(requests, int *index, Status status):
 
 
 cdef object PyMPI_testany(requests, int *index, int *flag, Status status):
-    cdef _p_Pickle pickle = PyMPI_pickle()
+    cdef Pickle pickle = PyMPI_PICKLE
     cdef object buf
     #
     cdef int count = 0
@@ -511,7 +514,7 @@ cdef object PyMPI_testany(requests, int *index, int *flag, Status status):
 
 
 cdef object PyMPI_waitall(requests, statuses):
-    cdef _p_Pickle pickle = PyMPI_pickle()
+    cdef Pickle pickle = PyMPI_PICKLE
     cdef object buf, bufs
     #
     cdef Py_ssize_t i = 0
@@ -538,7 +541,7 @@ cdef object PyMPI_waitall(requests, statuses):
 
 
 cdef object PyMPI_testall(requests, int *flag, statuses):
-    cdef _p_Pickle pickle = PyMPI_pickle()
+    cdef Pickle pickle = PyMPI_PICKLE
     cdef object buf, bufs
     #
     cdef Py_ssize_t i = 0
@@ -569,7 +572,7 @@ cdef object PyMPI_testall(requests, int *flag, statuses):
 
 cdef object PyMPI_mprobe(int source, int tag, MPI_Comm comm,
                          MPI_Message *message, MPI_Status *status):
-    cdef _p_Pickle pickle = PyMPI_pickle()
+    cdef Pickle pickle = PyMPI_PICKLE
     cdef void* rbuf = NULL
     cdef int rcount = 0
     cdef MPI_Datatype rtype = MPI_BYTE
@@ -583,7 +586,7 @@ cdef object PyMPI_mprobe(int source, int tag, MPI_Comm comm,
 
 cdef object PyMPI_improbe(int source, int tag, MPI_Comm comm, int *flag,
                           MPI_Message *message, MPI_Status *status):
-    cdef _p_Pickle pickle = PyMPI_pickle()
+    cdef Pickle pickle = PyMPI_PICKLE
     cdef void* rbuf = NULL
     cdef int rcount = 0
     cdef MPI_Datatype rtype = MPI_BYTE
@@ -597,7 +600,7 @@ cdef object PyMPI_improbe(int source, int tag, MPI_Comm comm, int *flag,
 
 cdef object PyMPI_mrecv(object rmsg,
                         MPI_Message *message, MPI_Status *status):
-    cdef _p_Pickle pickle = PyMPI_pickle()
+    cdef Pickle pickle = PyMPI_PICKLE
     cdef void* rbuf = NULL
     cdef MPI_Aint rlen = 0
     cdef MPI_Datatype rtype = MPI_BYTE
@@ -616,7 +619,7 @@ cdef object PyMPI_mrecv(object rmsg,
 
 cdef object PyMPI_imrecv(object rmsg,
                          MPI_Message *message, MPI_Request *request):
-    cdef _p_Pickle pickle = PyMPI_pickle()
+    cdef Pickle pickle = PyMPI_PICKLE
     cdef void* rbuf = NULL
     cdef MPI_Aint rlen = 0
     cdef MPI_Datatype rtype = MPI_BYTE
@@ -641,7 +644,7 @@ cdef object PyMPI_barrier(MPI_Comm comm):
 
 cdef object PyMPI_bcast(object obj,
                         int root, MPI_Comm comm):
-    cdef _p_Pickle pickle = PyMPI_pickle()
+    cdef Pickle pickle = PyMPI_PICKLE
     #
     cdef void *buf = NULL
     cdef int count = 0
@@ -679,7 +682,7 @@ cdef object PyMPI_bcast(object obj,
 
 cdef object PyMPI_gather(object sendobj, object recvobj,
                          int root, MPI_Comm comm):
-    cdef _p_Pickle pickle = PyMPI_pickle()
+    cdef Pickle pickle = PyMPI_PICKLE
     #
     cdef void *sbuf = NULL
     cdef int scount = 0
@@ -728,7 +731,7 @@ cdef object PyMPI_gather(object sendobj, object recvobj,
 
 cdef object PyMPI_scatter(object sendobj, object recvobj,
                           int root, MPI_Comm comm):
-    cdef _p_Pickle pickle = PyMPI_pickle()
+    cdef Pickle pickle = PyMPI_PICKLE
     #
     cdef void *sbuf = NULL
     cdef int *scounts = NULL
@@ -777,7 +780,7 @@ cdef object PyMPI_scatter(object sendobj, object recvobj,
 
 cdef object PyMPI_allgather(object sendobj, object recvobj,
                             MPI_Comm comm):
-    cdef _p_Pickle pickle = PyMPI_pickle()
+    cdef Pickle pickle = PyMPI_PICKLE
     #
     cdef void *sbuf = NULL
     cdef int scount = 0
@@ -811,7 +814,7 @@ cdef object PyMPI_allgather(object sendobj, object recvobj,
 
 cdef object PyMPI_alltoall(object sendobj, object recvobj,
                            MPI_Comm comm):
-    cdef _p_Pickle pickle = PyMPI_pickle()
+    cdef Pickle pickle = PyMPI_PICKLE
     #
     cdef void *sbuf = NULL
     cdef int *scounts = NULL
@@ -848,7 +851,7 @@ cdef object PyMPI_alltoall(object sendobj, object recvobj,
 
 cdef object PyMPI_neighbor_allgather(object sendobj, object recvobj,
                                      MPI_Comm comm):
-    cdef _p_Pickle pickle = PyMPI_pickle()
+    cdef Pickle pickle = PyMPI_PICKLE
     #
     cdef void *sbuf = NULL
     cdef int scount = 0
@@ -878,7 +881,7 @@ cdef object PyMPI_neighbor_allgather(object sendobj, object recvobj,
 
 cdef object PyMPI_neighbor_alltoall(object sendobj, object recvobj,
                                     MPI_Comm comm):
-    cdef _p_Pickle pickle = PyMPI_pickle()
+    cdef Pickle pickle = PyMPI_PICKLE
     #
     cdef void *sbuf = NULL
     cdef int *scounts = NULL
