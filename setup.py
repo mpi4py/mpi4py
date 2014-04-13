@@ -421,7 +421,7 @@ from conf.mpidistutils import Extension  as Ext
 from conf.mpidistutils import Library    as Lib
 from conf.mpidistutils import Executable as Exe
 
-CYTHON = '0.15'
+CYTHON = '0.18'
 
 def run_setup():
     """

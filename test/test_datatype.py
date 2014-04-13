@@ -109,11 +109,7 @@ class TestDatatype(unittest.TestCase):
         decoded = newtype.decode()
         oldtype, constructor, kargs = decoded
         constructor = 'Create_' + constructor.lower()
-        if combiner in [MPI.COMBINER_CONTIGUOUS]:
-            # Cython could optimize one-arg methods
-            newtype2 = getattr(oldtype, constructor)(kargs['count'])
-        else:
-            newtype2 = getattr(oldtype, constructor)(**kargs)
+        newtype2 = getattr(oldtype, constructor)(**kargs)
         decoded2 = newtype2.decode()
         self.assertEqual(decoded[1], decoded2[1])
         self.assertEqual(decoded[2], decoded2[2])
