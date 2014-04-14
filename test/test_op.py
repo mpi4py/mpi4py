@@ -134,6 +134,15 @@ class TestOp(unittest.TestCase):
         self.assertTrue(res[0] is y)
         self.assertTrue(res[1] is j)
         #
+        x = [1]; i = 0; u = [x, i]
+        y = [1]; j = 1; v = [y, j]
+        res = MPI.MINLOC(u, v)
+        self.assertTrue(res[0] is x)
+        self.assertTrue(res[1] is i)
+        res = MPI.MAXLOC(u, v)
+        self.assertTrue(res[0] is x)
+        self.assertTrue(res[1] is i)
+        #
         x = [1]; i = 1; u = [x, i]
         y = [1]; j = 0; v = [y, j]
         res = MPI.MINLOC(u, v)
@@ -142,6 +151,15 @@ class TestOp(unittest.TestCase):
         res = MPI.MAXLOC(u, v)
         self.assertTrue(res[0] is y)
         self.assertTrue(res[1] is j)
+        #
+        x = [1]; i = [0]; u = [x, i]
+        y = [1]; j = [1]; v = [y, j]
+        res = MPI.MINLOC(u, v)
+        self.assertTrue(res[0] is x)
+        self.assertTrue(res[1] is i)
+        res = MPI.MAXLOC(u, v)
+        self.assertTrue(res[0] is x)
+        self.assertTrue(res[1] is i)
         #
         x = [1]; i = [1]; u = [x, i]
         y = [1]; j = [0]; v = [y, j]
