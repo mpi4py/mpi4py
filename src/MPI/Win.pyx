@@ -285,22 +285,44 @@ cdef class Win:
             cdef void *base = NULL, *pbase = NULL
             cdef MPI_Aint size = 0, *psize = NULL
             cdef int      disp = 1, *pdisp = NULL
-            cdef int attr = MPI_KEYVAL_INVALID
+            cdef int keyval = MPI_KEYVAL_INVALID
             cdef int flag = 0
             #
-            attr = MPI_WIN_BASE
-            CHKERR( MPI_Win_get_attr(win, attr, &pbase, &flag) )
+            keyval = MPI_WIN_BASE
+            CHKERR( MPI_Win_get_attr(win, keyval, &pbase, &flag) )
             if flag and pbase != NULL: base = pbase
             #
-            attr = MPI_WIN_SIZE
-            CHKERR( MPI_Win_get_attr(win, attr, &psize, &flag) )
+            keyval = MPI_WIN_SIZE
+            CHKERR( MPI_Win_get_attr(win, keyval, &psize, &flag) )
             if flag and psize != NULL: size = psize[0]
             #
-            attr = MPI_WIN_DISP_UNIT
-            CHKERR( MPI_Win_get_attr(win, attr, &pdisp, &flag) )
+            keyval = MPI_WIN_DISP_UNIT
+            CHKERR( MPI_Win_get_attr(win, keyval, &pdisp, &flag) )
             if flag and pdisp != NULL: disp = pdisp[0]
             #
             return (<MPI_Aint>base, size, disp)
+
+    property flavor:
+        """window create flavor"""
+        def __get__(self):
+            cdef int keyval = MPI_WIN_CREATE_FLAVOR
+            cdef int *flavor = NULL
+            cdef int flag = 0
+            if keyval == MPI_KEYVAL_INVALID: return MPI_WIN_FLAVOR_CREATE
+            CHKERR( MPI_Win_get_attr(self.ob_mpi, keyval, <void*>&flavor, &flag) )
+            if flag and flavor != NULL: return flavor[0]
+            return MPI_WIN_FLAVOR_CREATE
+
+    property model:
+        """window memory model"""
+        def __get__(self):
+            cdef int keyval = MPI_WIN_MODEL
+            cdef int *model = NULL
+            cdef int flag = 0
+            if keyval == MPI_KEYVAL_INVALID: return MPI_WIN_SEPARATE
+            CHKERR( MPI_Win_get_attr(self.ob_mpi, keyval, <void*>&model, &flag) )
+            if flag and model != NULL: return model[0]
+            return MPI_WIN_SEPARATE
 
     property memory:
         """window memory buffer"""
@@ -309,22 +331,22 @@ cdef class Win:
             cdef int *flavor = NULL
             cdef void *base = NULL, *pbase = NULL
             cdef MPI_Aint size = 0, *psize = NULL
-            cdef int attr = MPI_KEYVAL_INVALID
+            cdef int keyval = MPI_KEYVAL_INVALID
             cdef int flag = 0
             #
-            attr = MPI_WIN_CREATE_FLAVOR
-            if attr != MPI_KEYVAL_INVALID:
-                CHKERR( MPI_Win_get_attr(win, attr, &flavor, &flag) )
+            keyval = MPI_WIN_CREATE_FLAVOR
+            if keyval != MPI_KEYVAL_INVALID:
+                CHKERR( MPI_Win_get_attr(win, keyval, &flavor, &flag) )
                 if flag and flavor != NULL:
                     if flavor[0] == MPI_WIN_FLAVOR_DYNAMIC:
                         return None
             #
-            attr = MPI_WIN_BASE
-            CHKERR( MPI_Win_get_attr(win, attr, &pbase, &flag) )
+            keyval = MPI_WIN_BASE
+            CHKERR( MPI_Win_get_attr(win, keyval, &pbase, &flag) )
             if flag and pbase != NULL: base = pbase
             #
-            attr = MPI_WIN_SIZE
-            CHKERR( MPI_Win_get_attr(win, attr, &psize, &flag) )
+            keyval = MPI_WIN_SIZE
+            CHKERR( MPI_Win_get_attr(win, keyval, &psize, &flag) )
             if flag and psize != NULL: size = psize[0]
             #
             return tomemory(base, size)

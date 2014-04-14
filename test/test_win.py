@@ -99,8 +99,21 @@ class BaseTestWin(object):
 
     def testCreateFlavor(self):
         if MPI.WIN_CREATE_FLAVOR == MPI.KEYVAL_INVALID: return
+        flavors = (MPI.WIN_FLAVOR_CREATE,
+                   MPI.WIN_FLAVOR_ALLOCATE,
+                   MPI.WIN_FLAVOR_DYNAMIC,
+                   MPI.WIN_FLAVOR_SHARED,)
         flavor = self.WIN.Get_attr(MPI.WIN_CREATE_FLAVOR)
+        self.assertTrue (flavor in flavors)
+        self.assertEqual(flavor, self.WIN.flavor)
         self.assertEqual(flavor, self.CREATE_FLAVOR)
+
+    def testMemoryModel(self):
+        if MPI.WIN_MODEL == MPI.KEYVAL_INVALID: return
+        models = (MPI.WIN_SEPARATE, MPI.WIN_UNIFIED)
+        model = self.WIN.Get_attr(MPI.WIN_MODEL)
+        self.assertTrue (model in models)
+        self.assertEqual(model, self.WIN.model)
 
 class BaseTestWinCreate(BaseTestWin):
 
