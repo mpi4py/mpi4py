@@ -29,13 +29,35 @@ class TestMessage(unittest.TestCase):
         Sendrecv(s, r)
         self.assertTrue(equal(s, r))
 
-    def _test2(self, equal, zero, s, r, typecode):
+    def _test21(self, equal, zero, s, r, typecode):
         datatype = typemap[typecode]
         for type in (None, typecode, datatype):
             r[:] = zero
             Sendrecv([s, type],
                      [r, type])
             self.assertTrue(equal(s, r))
+
+    def _test22(self, equal, zero, s, r, typecode):
+        size = len(r)
+        for count in range(size):
+            r[:] = zero
+            Sendrecv([s, (count, None)],
+                     [r, (count, None)])
+            for i in range(count):
+                self.assertTrue(equal(r[i], s[i]))
+            for i in range(count, size):
+                self.assertTrue(equal(r[i], zero[0]))
+        for disp in range(size):
+            for count in range(size-disp):
+                r[:] = zero
+                Sendrecv([s, (count, disp)],
+                         [r, (count, disp)])
+                for i in range(0, disp):
+                    self.assertTrue(equal(r[i], zero[0]))
+                for i in range(disp, disp+count):
+                    self.assertTrue(equal(r[i], s[i]))
+                for i in range(disp+count, size):
+                    self.assertTrue(equal(r[i], zero[0]))
 
     def _test31(self, equal, z, s, r, typecode):
         datatype = typemap[typecode]
@@ -80,6 +102,16 @@ class TestMessage(unittest.TestCase):
                     self.assertTrue(equal(z[:p], r[:p]))
                     self.assertTrue(equal(z[q:], r[q:]))
 
+    def testBadMessage(self):
+        def f(): Sendrecv([None, None, None, None, None], None)
+        self.assertRaises(ValueError, f)
+        def f(): Sendrecv([None, 0, "abcxyz"], None)
+        self.assertRaises(KeyError, f)
+        def f(): Sendrecv([None, -1, "i"], None)
+        self.assertRaises(ValueError, f)
+        def f(): Sendrecv([None, 0, -1, "i"], None)
+        self.assertRaises(ValueError, f)
+
     if HAVE_ARRAY:
         def _testArray(self, test):
             from array import array
@@ -92,8 +124,10 @@ class TestMessage(unittest.TestCase):
                     test(equal, z, s, r, t)
         def testArray1(self):
             self._testArray(self._test1)
-        def testArray2(self):
-            self._testArray(self._test2)
+        def testArray21(self):
+            self._testArray(self._test21)
+        def testArray22(self):
+            self._testArray(self._test22)
         def testArray31(self):
             self._testArray(self._test31)
         def testArray32(self):
@@ -112,8 +146,10 @@ class TestMessage(unittest.TestCase):
                     test(allclose, z, s, r, t)
         def testNumPy1(self):
             self._testNumPy(self._test1)
-        def testNumPy2(self):
-            self._testNumPy(self._test2)
+        def testNumPy21(self):
+            self._testNumPy(self._test21)
+        def testNumPy22(self):
+            self._testNumPy(self._test22)
         def testNumPy31(self):
             self._testNumPy(self._test31)
         def testNumPy32(self):
