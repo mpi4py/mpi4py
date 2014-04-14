@@ -847,7 +847,6 @@ cdef class _p_msg_ccow:
             &self.rdispls, &self.rtypes)
         if not inter and smsg is __IN_PLACE__:
             self.sbuf    = MPI_IN_PLACE
-            self.scount  = self.rcount
             self.scounts = self.rcounts
             self.sdispls = self.rdispls
             self.stypes  = self.rtypes

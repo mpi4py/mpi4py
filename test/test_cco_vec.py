@@ -290,6 +290,101 @@ class BaseTestCCOVec(object):
                         for v in rbuf:
                             self.assertEqual(v, root)
 
+    def testAlltoallw(self):
+        size = self.COMM.Get_size()
+        rank = self.COMM.Get_rank()
+        for array in arrayimpl.ArrayTypes:
+            for typecode in arrayimpl.TypeMap:
+                for n in range(1,size+1):
+                    sbuf = array( n, typecode, (size, n))
+                    rbuf = array(-1, typecode, (size, n))
+                    sdt, rdt = sbuf.mpidtype, rbuf.mpidtype
+                    sdsp = list(range(0, size*n*sdt.extent, n*sdt.extent))
+                    rdsp = list(range(0, size*n*rdt.extent, n*rdt.extent))
+                    smsg = (sbuf.as_raw(), ([n]*size, sdsp), [sdt]*size)
+                    rmsg = (rbuf.as_raw(), ([n]*size, rdsp), [rdt]*size)
+                    try:
+                        self.COMM.Alltoallw(smsg, rmsg)
+                    except NotImplementedError:
+                        return
+                    for value in rbuf.flat:
+                        self.assertEqual(value, n)
+
+class BaseTestCCOVecInplace(object):
+
+    COMM = MPI.COMM_NULL
+
+    def testAlltoallv(self):
+        size = self.COMM.Get_size()
+        rank = self.COMM.Get_rank()
+        for array in arrayimpl.ArrayTypes:
+            for typecode in arrayimpl.TypeMap:
+                for count in range(size):
+                    rbuf = array(-1, typecode, size*size)
+                    counts = [count] * size
+                    displs = list(range(0, size*size, size))
+                    for i in range(size):
+                        for j in range(count):
+                            rbuf[i*size+j] = rank
+                    recvbuf = rbuf.as_mpi_v(counts, displs)
+                    self.COMM.Alltoallv(MPI.IN_PLACE, recvbuf)
+                    for i in range(size):
+                        row = rbuf[i*size:(i+1)*size]
+                        a, b = row[:count], row[count:]
+                        for va in a:
+                            self.assertEqual(va, i)
+                        for vb in b:
+                            self.assertEqual(vb, -1)
+
+    def testAlltoallw(self):
+        size = self.COMM.Get_size()
+        rank = self.COMM.Get_rank()
+        for array in arrayimpl.ArrayTypes:
+            for typecode in arrayimpl.TypeMap:
+                for count in range(size):
+                    rbuf = array(-1, typecode, size*size)
+                    for i in range(size):
+                        for j in range(count):
+                            rbuf[i*size+j] = rank
+                    rdt = rbuf.mpidtype
+                    rdsp = list(range(0, size*size*rdt.extent, size*rdt.extent))
+                    rmsg = (rbuf.as_raw(), ([count]*size, rdsp), [rdt]*size)
+                    try:
+                        self.COMM.Alltoallw(MPI.IN_PLACE, rmsg)
+                    except NotImplementedError:
+                        return
+                    for i in range(size):
+                        row = rbuf[i*size:(i+1)*size]
+                        a, b = row[:count], row[count:]
+                        for va in a:
+                            self.assertEqual(va, i)
+                        for vb in b:
+                            self.assertEqual(vb, -1)
+
+    def testAlltoallw2(self):
+        size = self.COMM.Get_size()
+        rank = self.COMM.Get_rank()
+        for array in arrayimpl.ArrayTypes:
+            for typecode in arrayimpl.TypeMap:
+                for count in range(size):
+                    rbuf = array(-1, typecode, size*size)
+                    for i in range(size):
+                        for j in range(count):
+                            rbuf[i*size+j] = rank
+                    rdt = rbuf.mpidtype
+                    rdsp = list(range(0, size*size*rdt.extent, size*rdt.extent))
+                    rmsg = (rbuf.as_raw(), [count]*size, rdsp, [rdt]*size)
+                    try:
+                        self.COMM.Alltoallw(MPI.IN_PLACE, rmsg)
+                    except NotImplementedError:
+                        return
+                    for i in range(size):
+                        row = rbuf[i*size:(i+1)*size]
+                        a, b = row[:count], row[count:]
+                        for va in a:
+                            self.assertEqual(va, i)
+                        for vb in b:
+                            self.assertEqual(vb, -1)
 
 class TestCCOVecSelf(BaseTestCCOVec, unittest.TestCase):
     COMM = MPI.COMM_SELF
@@ -309,12 +404,31 @@ class TestCCOVecWorldDup(BaseTestCCOVec, unittest.TestCase):
     def tearDown(self):
         self.COMM.Free()
 
+class TestCCOVecInplaceSelf(BaseTestCCOVecInplace, unittest.TestCase):
+    COMM = MPI.COMM_SELF
+
+class TestCCOVecInplaceWorld(BaseTestCCOVecInplace, unittest.TestCase):
+    COMM = MPI.COMM_WORLD
+
+class TestCCOVecInplaceSelfDup(BaseTestCCOVecInplace, unittest.TestCase):
+    def setUp(self):
+        self.COMM = MPI.COMM_SELF.Dup()
+    def tearDown(self):
+        self.COMM.Free()
+
+class TestCCOVecInplaceWorldDup(BaseTestCCOVecInplace, unittest.TestCase):
+    def setUp(self):
+        self.COMM = MPI.COMM_WORLD.Dup()
+    def tearDown(self):
+        self.COMM.Free()
+
 
 name, version = MPI.get_vendor()
 if name == 'Open MPI':
     if version < (1,4,0):
         if MPI.Query_thread() > MPI.THREAD_SINGLE:
             del TestCCOVecWorldDup
+            del TestCCOVecInplaceWorldDup
 
 
 if __name__ == '__main__':
