@@ -425,6 +425,11 @@ class TestCCOVecInplaceWorldDup(BaseTestCCOVecInplace, unittest.TestCase):
 
 name, version = MPI.get_vendor()
 if name == 'Open MPI':
+    if version < (1,6,0):
+        del TestCCOVecInplaceSelf
+        del TestCCOVecInplaceWorld
+        del TestCCOVecInplaceSelfDup
+        del TestCCOVecInplaceWorldDup
     if version < (1,4,0):
         if MPI.Query_thread() > MPI.THREAD_SINGLE:
             del TestCCOVecWorldDup
