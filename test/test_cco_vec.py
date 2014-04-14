@@ -410,30 +410,18 @@ class TestCCOVecInplaceSelf(BaseTestCCOVecInplace, unittest.TestCase):
 class TestCCOVecInplaceWorld(BaseTestCCOVecInplace, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
-class TestCCOVecInplaceSelfDup(BaseTestCCOVecInplace, unittest.TestCase):
-    def setUp(self):
-        self.COMM = MPI.COMM_SELF.Dup()
-    def tearDown(self):
-        self.COMM.Free()
-
-class TestCCOVecInplaceWorldDup(BaseTestCCOVecInplace, unittest.TestCase):
-    def setUp(self):
-        self.COMM = MPI.COMM_WORLD.Dup()
-    def tearDown(self):
-        self.COMM.Free()
-
 
 name, version = MPI.get_vendor()
+if name == 'MPICH1' or name == 'LAM/MPI' or MPI.BOTTOM == MPI.IN_PLACE:
+    del TestCCOVecInplaceSelf
+    del TestCCOVecInplaceWorld
 if name == 'Open MPI':
     if version < (1,6,0):
         del TestCCOVecInplaceSelf
         del TestCCOVecInplaceWorld
-        del TestCCOVecInplaceSelfDup
-        del TestCCOVecInplaceWorldDup
     if version < (1,4,0):
         if MPI.Query_thread() > MPI.THREAD_SINGLE:
             del TestCCOVecWorldDup
-            del TestCCOVecInplaceWorldDup
 
 
 if __name__ == '__main__':
