@@ -20,7 +20,7 @@ def Sendrecv(smsg, rmsg):
     sts = MPI.Status()
     comm.Sendrecv(sendbuf=smsg, recvbuf=rmsg, status=sts)
 
-class TestMessage(unittest.TestCase):
+class TestMessageP2P(unittest.TestCase):
 
     TYPECODES = "hil"+"HIL"+"fd"
 
@@ -41,12 +41,28 @@ class TestMessage(unittest.TestCase):
         size = len(r)
         for count in range(size):
             r[:] = zero
+            Sendrecv([s, count],
+                     [r, count])
+            for i in range(count):
+                self.assertTrue(equal(r[i], s[i]))
+            for i in range(count, size):
+                self.assertTrue(equal(r[i], zero[0]))
+        for count in range(size):
+            r[:] = zero
             Sendrecv([s, (count, None)],
                      [r, (count, None)])
             for i in range(count):
                 self.assertTrue(equal(r[i], s[i]))
             for i in range(count, size):
                 self.assertTrue(equal(r[i], zero[0]))
+        for disp in range(size):
+            r[:] = zero
+            Sendrecv([s, (None, disp)],
+                     [r, (None, disp)])
+            for i in range(disp):
+                self.assertTrue(equal(r[i], zero[0]))
+            for i in range(disp, size):
+                self.assertTrue(equal(r[i], s[i]))
         for disp in range(size):
             for count in range(size-disp):
                 r[:] = zero
@@ -61,8 +77,8 @@ class TestMessage(unittest.TestCase):
 
     def _test31(self, equal, z, s, r, typecode):
         datatype = typemap[typecode]
-        for count in (None, len(s)):
-            for type in (None, typecode, datatype):
+        for type in (None, typecode, datatype):
+            for count in (None, len(s)):
                 r[:] = z
                 Sendrecv([s, count, type],
                          [r, count, type])
@@ -103,14 +119,21 @@ class TestMessage(unittest.TestCase):
                     self.assertTrue(equal(z[q:], r[q:]))
 
     def testBadMessage(self):
-        def f(): Sendrecv([None, None, None, None, None], None)
+        buf = MPI.Alloc_mem(4)
+        empty = [None, 0, "B"]
+        def f(): Sendrecv([buf, 0, 0, "i", None], empty)
         self.assertRaises(ValueError, f)
-        def f(): Sendrecv([None, 0, "abcxyz"], None)
+        def f(): Sendrecv([buf,  0, "\0"], empty)
         self.assertRaises(KeyError, f)
-        def f(): Sendrecv([None, -1, "i"], None)
+        def f(): Sendrecv([buf, -1, "i"], empty)
         self.assertRaises(ValueError, f)
-        def f(): Sendrecv([None, 0, -1, "i"], None)
+        def f(): Sendrecv([buf, 0, -1, "i"], empty)
         self.assertRaises(ValueError, f)
+        def f(): Sendrecv([buf, 0, +2, "i"], empty)
+        self.assertRaises(ValueError, f)
+        def f(): Sendrecv([None, 1,  0, "i"], empty)
+        self.assertRaises(ValueError, f)
+        MPI.Free_mem(buf)
 
     if HAVE_ARRAY:
         def _testArray(self, test):

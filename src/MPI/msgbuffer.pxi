@@ -116,63 +116,59 @@ cdef _p_message message_simple(object msg,
     # buffer: count and displacement
     cdef int count = 0 # number of datatype entries
     cdef int displ = 0 # from base buffer, in datatype entries
-    cdef MPI_Aint offset = 0 # from base buffer, in bytes
-    cdef MPI_Aint extent = 0, lb = 0
+    cdef MPI_Aint extent = 0, lb = 0 # datatype extent
+    cdef MPI_Aint length = bsize     # in bytes
+    cdef MPI_Aint offset = 0         # from base buffer, in bytes
     if o_displ is not None:
-        if o_count is None: raise ValueError(
-            "message: cannot handle displacement, "
-            "explicit count required")
-        count = <int> o_count
-        if count < 0: raise ValueError(
-            "message: negative count %d" % count)
         displ = <int> o_displ
         if displ < 0: raise ValueError(
             "message: negative diplacement %d" % displ)
-        if displ != 0:
+        if displ > 0:
             if btype == MPI_DATATYPE_NULL: raise ValueError(
-                "message: cannot handle diplacement, "
-                "datatype is null")
+                "message: cannot handle diplacement, datatype is null")
             CHKERR( MPI_Type_get_extent(btype, &lb, &extent) )
-            offset = displ*extent # XXX overflow?
-    elif o_count is not None:
+            if extent <= 0: raise ValueError(
+                ("message: cannot handle diplacement, "
+                 "datatype extent %d (lb:%d, ub:%d)"
+                 ) % (extent, lb, lb+extent))
+            if displ*extent > length: raise ValueError(
+                ("message: displacement %d out of bounds, "
+                 "number of datatype entries %d"
+                 ) % (displ, length//extent))
+            offset = displ*extent
+            length -= offset
+    if o_count is not None:
         count = <int> o_count
-        if count < 0:
-            raise ValueError(
-                "message: negative count %d" % count)
-    elif bsize > 0:
-        if btype == MPI_DATATYPE_NULL: raise ValueError(
-            "message: cannot guess count, "
-            "datatype is null")
-        CHKERR( MPI_Type_get_extent(btype, &lb, &extent) )
-        if extent <= 0: raise ValueError(
-            ("message: cannot guess count, "
-             "datatype extent %d (lb:%d, ub:%d)"
-             ) % (extent, lb, lb+extent))
-        if (bsize % extent) != 0: raise ValueError(
-            ("message: cannot guess count, "
+        if count < 0: raise ValueError(
+            "message: negative count %d" % count)
+        if count > 0 and o_buf is None: raise ValueError(
+            "message: buffer is None but count is %d" % count)
+    elif length > 0:
+        if extent == 0:
+            if btype == MPI_DATATYPE_NULL: raise ValueError(
+                "message: cannot infer count, datatype is null")
+            CHKERR( MPI_Type_get_extent(btype, &lb, &extent) )
+            if extent <= 0: raise ValueError(
+                ("message: cannot infer count, "
+                 "datatype extent %d (lb:%d, ub:%d)"
+                 ) % (extent, lb, lb+extent))
+        if (length % extent) != 0: raise ValueError(
+            ("message: cannot infer count, "
              "buffer length %d is not a multiple of "
              "datatype extent %d (lb:%d, ub:%d)"
-             ) % (bsize, extent, lb, lb+extent))
-        if blocks < 1: blocks = 1
-        if ((bsize // extent) % blocks) != 0: raise ValueError(
-            ("message: cannot guess count, "
-             "number of datatype items %d is not a multiple of "
-             "the required number of blocks %d"
-             ) %  (bsize//extent, blocks))
-        count = <int> ((bsize // extent) // blocks) # XXX overflow?
-    if o_count is None: o_count = count
-    if o_displ is None: o_displ = displ
-    m.count = o_count
-    m.displ = o_displ
-    # sanity-check zero-sized messages
-    if o_buf is None:
-        if count != 0:
-            raise ValueError(
-                "message: buffer is None but count is %d" % count)
-        if displ != 0:
-            raise ValueError(
-                "message: buffer is None but displacement is %d" % displ)
+             ) % (length, extent, lb, lb+extent))
+        if blocks < 2:
+            count = <int> (length // extent) # XXX overflow?
+        else:
+            if ((length // extent) % blocks) != 0: raise ValueError(
+                ("message: cannot infer count, "
+                 "number of entries %d is not a multiple of "
+                 "required number of blocks %d"
+                 ) %  (length//extent, blocks))
+            count = <int> ((length // extent) // blocks) # XXX overflow?
     # return collected message data
+    m.count = o_count if o_count is not None else count
+    m.displ = o_displ if o_displ is not None else displ
     _addr[0]  = <void*>(<char*>baddr + offset)
     _count[0] = count
     _type[0]  = btype
@@ -238,17 +234,16 @@ cdef _p_message message_vector(object msg,
     cdef MPI_Aint asize=0, aval=0
     if o_counts is None:
         if bsize > 0:
-            if btype == MPI_DATATYPE_NULL:
-                raise ValueError(
-                    "message: cannot guess count, "
-                    "datatype is null")
+            if btype == MPI_DATATYPE_NULL: raise ValueError(
+                "message: cannot infer count, "
+                "datatype is null")
             CHKERR( MPI_Type_get_extent(btype, &lb, &extent) )
             if extent <= 0: raise ValueError(
-                ("message: cannot guess count, "
+                ("message: cannot infer count, "
                  "datatype extent %d (lb:%d, ub:%d)"
                  ) % (extent, lb, lb+extent))
             if (bsize % extent) != 0: raise ValueError(
-                ("message: cannot guess count, "
+                ("message: cannot infer count, "
                  "buffer length %d is not a multiple of "
                  "datatype extent %d (lb:%d, ub:%d)"
                  ) % (bsize, extent, lb, lb+extent))
@@ -277,9 +272,9 @@ cdef _p_message message_vector(object msg,
             displs[i] = val * i
     else: # general
         o_displs = asarray_int(o_displs, blocks, &displs)
+    # return collected message data
     m.count = o_counts
     m.displ = o_displs
-    # return collected message data
     _addr[0]   = baddr
     _counts[0] = counts
     _displs[0] = displs
