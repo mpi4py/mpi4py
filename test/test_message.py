@@ -20,7 +20,7 @@ def Sendrecv(smsg, rmsg):
     sts = MPI.Status()
     comm.Sendrecv(sendbuf=smsg, recvbuf=rmsg, status=sts)
 
-class TestMessageP2P(unittest.TestCase):
+class TestMessageSimple(unittest.TestCase):
 
     TYPECODES = "hil"+"HIL"+"fd"
 
@@ -118,7 +118,7 @@ class TestMessageP2P(unittest.TestCase):
                     self.assertTrue(equal(z[:p], r[:p]))
                     self.assertTrue(equal(z[q:], r[q:]))
 
-    def testBadMessage(self):
+    def testMessageBad(self):
         buf = MPI.Alloc_mem(4)
         empty = [None, 0, "B"]
         def f(): Sendrecv([buf, 0, 0, "i", None], empty)
@@ -134,6 +134,34 @@ class TestMessageP2P(unittest.TestCase):
         def f(): Sendrecv([None, 1,  0, "i"], empty)
         self.assertRaises(ValueError, f)
         MPI.Free_mem(buf)
+        buf = [1,2,3,4]
+        def f(): Sendrecv([buf, 4,  0, "i"], empty)
+        self.assertRaises(TypeError, f)
+        buf = {1:2,3:4}
+        def f(): Sendrecv([buf, 4,  0, "i"], empty)
+        self.assertRaises(TypeError, f)
+
+    def testMessageNone(self):
+        empty = [None, 0, "B"]
+        Sendrecv(empty, empty)
+        empty = [None, "B"]
+        Sendrecv(empty, empty)
+
+    def testMessageBottom(self):
+        empty = [MPI.BOTTOM, 0, "B"]
+        Sendrecv(empty, empty)
+        empty = [MPI.BOTTOM, "B"]
+        Sendrecv(empty, empty)
+
+    def testMessageBytearray(self):
+        try:
+            bytearray
+        except NameError:
+            return
+        sbuf = bytearray("abc".encode('ascii'))
+        rbuf = bytearray(3)
+        Sendrecv([sbuf, "c"], [rbuf, MPI.CHAR])
+        self.assertEqual(sbuf, rbuf)
 
     if HAVE_ARRAY:
         def _testArray(self, test):
