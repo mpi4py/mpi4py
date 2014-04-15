@@ -643,6 +643,8 @@ if name == 'MPICH1' or name == 'LAM/MPI' or MPI.BOTTOM == MPI.IN_PLACE:
     del TestCCOBufInplaceSelf
     del TestCCOBufInplaceWorld
 elif name == 'Open MPI':
+    del BaseTestCCOBufInplace.testScan
+    del BaseTestCCOBufInplace.testExscan
     if version < (1,4,0):
         if MPI.Query_thread() > MPI.THREAD_SINGLE:
             del TestCCOBufWorldDup
