@@ -24,12 +24,12 @@ class TestMessageSimple(unittest.TestCase):
 
     TYPECODES = "hil"+"HIL"+"fd"
 
-    def _test1(self, equal, zero, s, r, t):
+    def check1(self, equal, zero, s, r, t):
         r[:] = zero
         Sendrecv(s, r)
         self.assertTrue(equal(s, r))
 
-    def _test21(self, equal, zero, s, r, typecode):
+    def check21(self, equal, zero, s, r, typecode):
         datatype = typemap[typecode]
         for type in (None, typecode, datatype):
             r[:] = zero
@@ -37,7 +37,7 @@ class TestMessageSimple(unittest.TestCase):
                      [r, type])
             self.assertTrue(equal(s, r))
 
-    def _test22(self, equal, zero, s, r, typecode):
+    def check22(self, equal, zero, s, r, typecode):
         size = len(r)
         for count in range(size):
             r[:] = zero
@@ -75,7 +75,7 @@ class TestMessageSimple(unittest.TestCase):
                 for i in range(disp+count, size):
                     self.assertTrue(equal(r[i], zero[0]))
 
-    def _test31(self, equal, z, s, r, typecode):
+    def check31(self, equal, z, s, r, typecode):
         datatype = typemap[typecode]
         for type in (None, typecode, datatype):
             for count in (None, len(s)):
@@ -84,7 +84,7 @@ class TestMessageSimple(unittest.TestCase):
                          [r, count, type])
                 self.assertTrue(equal(s, r))
 
-    def _test32(self, equal, z, s, r, typecode):
+    def check32(self, equal, z, s, r, typecode):
         datatype = typemap[typecode]
         for type in (None, typecode, datatype):
             for p in range(0, len(s)):
@@ -101,7 +101,7 @@ class TestMessageSimple(unittest.TestCase):
                     self.assertTrue(equal(z[:p], r[:p]))
                     self.assertTrue(equal(z[q:], r[q:]))
 
-    def _test4(self, equal, z, s, r, typecode):
+    def check4(self, equal, z, s, r, typecode):
         datatype = typemap[typecode]
         for type in (None, typecode, datatype):
             for p in range(0, len(s)):
@@ -164,7 +164,7 @@ class TestMessageSimple(unittest.TestCase):
         self.assertEqual(sbuf, rbuf)
 
     if HAVE_ARRAY:
-        def _testArray(self, test):
+        def checkArray(self, test):
             from array import array
             from operator import eq as equal
             for t in tuple(self.TYPECODES):
@@ -174,20 +174,20 @@ class TestMessageSimple(unittest.TestCase):
                     r = array(t, [0]*n)
                     test(equal, z, s, r, t)
         def testArray1(self):
-            self._testArray(self._test1)
+            self.checkArray(self.check1)
         def testArray21(self):
-            self._testArray(self._test21)
+            self.checkArray(self.check21)
         def testArray22(self):
-            self._testArray(self._test22)
+            self.checkArray(self.check22)
         def testArray31(self):
-            self._testArray(self._test31)
+            self.checkArray(self.check31)
         def testArray32(self):
-            self._testArray(self._test32)
+            self.checkArray(self.check32)
         def testArray4(self):
-            self._testArray(self._test4)
+            self.checkArray(self.check4)
 
     if HAVE_NUMPY:
-        def _testNumPy(self, test):
+        def checkNumPy(self, test):
             from numpy import zeros, arange, empty
             for t in tuple(self.TYPECODES):
                 for n in range(10):
@@ -196,17 +196,195 @@ class TestMessageSimple(unittest.TestCase):
                     r = empty (n, dtype=t)
                     test(allclose, z, s, r, t)
         def testNumPy1(self):
-            self._testNumPy(self._test1)
+            self.checkNumPy(self.check1)
         def testNumPy21(self):
-            self._testNumPy(self._test21)
+            self.checkNumPy(self.check21)
         def testNumPy22(self):
-            self._testNumPy(self._test22)
+            self.checkNumPy(self.check22)
         def testNumPy31(self):
-            self._testNumPy(self._test31)
+            self.checkNumPy(self.check31)
         def testNumPy32(self):
-            self._testNumPy(self._test32)
+            self.checkNumPy(self.check32)
         def testNumPy4(self):
-            self._testNumPy(self._test4)
+            self.checkNumPy(self.check4)
+
+def Alltoallv(smsg, rmsg):
+    comm = MPI.COMM_SELF
+    comm.Alltoallv(smsg, rmsg)
+
+class TestMessageVector(unittest.TestCase):
+
+    TYPECODES = "hil"+"HIL"+"fd"
+
+    def check1(self, equal, zero, s, r, t):
+        r[:] = zero
+        Alltoallv(s, r)
+        self.assertTrue(equal(s, r))
+
+    def check21(self, equal, zero, s, r, typecode):
+        datatype = typemap[typecode]
+        for type in (None, typecode, datatype):
+            r[:] = zero
+            Alltoallv([s, type],
+                      [r, type])
+            self.assertTrue(equal(s, r))
+
+    def check22(self, equal, zero, s, r, typecode):
+        size = len(r)
+        for count in range(size):
+            r[:] = zero
+            Alltoallv([s, count],
+                      [r, count])
+            for i in range(count):
+                self.assertTrue(equal(r[i], s[i]))
+            for i in range(count, size):
+                self.assertTrue(equal(r[i], zero[0]))
+        for count in range(size):
+            r[:] = zero
+            Alltoallv([s, (count, None)],
+                      [r, (count, None)])
+            for i in range(count):
+                self.assertTrue(equal(r[i], s[i]))
+            for i in range(count, size):
+                self.assertTrue(equal(r[i], zero[0]))
+        for disp in range(size):
+            for count in range(size-disp):
+                r[:] = zero
+                Alltoallv([s, ([count], [disp])],
+                          [r, ([count], [disp])])
+                for i in range(0, disp):
+                    self.assertTrue(equal(r[i], zero[0]))
+                for i in range(disp, disp+count):
+                    self.assertTrue(equal(r[i], s[i]))
+                for i in range(disp+count, size):
+                    self.assertTrue(equal(r[i], zero[0]))
+
+    def check31(self, equal, z, s, r, typecode):
+        datatype = typemap[typecode]
+        for type in (None, typecode, datatype):
+            for count in (None, len(s)):
+                r[:] = z
+                Alltoallv([s, count, type],
+                          [r, count, type])
+                self.assertTrue(equal(s, r))
+
+    def check32(self, equal, z, s, r, typecode):
+        datatype = typemap[typecode]
+        for type in (None, typecode, datatype):
+            for p in range(len(s)):
+                r[:] = z
+                Alltoallv([s, (p, None), type],
+                          [r, (p, None), type])
+                self.assertTrue(equal(s[:p], r[:p]))
+                for q in range(p, len(s)):
+                    count, displ = q-p, p
+                    r[:] = z
+                    Alltoallv([s, (count, [displ]), type],
+                              [r, (count, [displ]), type])
+                    self.assertTrue(equal(s[p:q], r[p:q]))
+                    self.assertTrue(equal(z[:p], r[:p]))
+                    self.assertTrue(equal(z[q:], r[q:]))
+
+    def check4(self, equal, z, s, r, typecode):
+        datatype = typemap[typecode]
+        for type in (None, typecode, datatype):
+            for p in range(0, len(s)):
+                r[:] = z
+                Alltoallv([s, p, None, type],
+                          [r, p, None, type])
+                self.assertTrue(equal(s[:p], r[:p]))
+                for q in range(p, len(s)):
+                    count, displ = q-p, p
+                    r[:] = z
+                    Alltoallv([s, count, [displ], type],
+                              [r, count, [displ], type])
+                    self.assertTrue(equal(s[p:q], r[p:q]))
+                    self.assertTrue(equal(z[:p], r[:p]))
+                    self.assertTrue(equal(z[q:], r[q:]))
+
+    def testMessageBad(self):
+        buf = MPI.Alloc_mem(4)
+        empty = [None, 0, [0], "B"]
+        def f(): Alltoallv([buf, 0, [0], "i", None], empty)
+        self.assertRaises(ValueError, f)
+        def f(): Alltoallv([buf, 0, [0], "\0"], empty)
+        self.assertRaises(KeyError, f)
+        MPI.Free_mem(buf)
+        buf = [1,2,3,4]
+        def f(): Alltoallv([buf, 0,  0, "i"], empty)
+        self.assertRaises(TypeError, f)
+        buf = {1:2,3:4}
+        def f(): Alltoallv([buf, 0,  0, "i"], empty)
+        self.assertRaises(TypeError, f)
+
+    def testMessageNone(self):
+        empty = [None, 0, "B"]
+        Alltoallv(empty, empty)
+        empty = [None, "B"]
+        Alltoallv(empty, empty)
+
+    def testMessageBottom(self):
+        empty = [MPI.BOTTOM, 0, [0], "B"]
+        Alltoallv(empty, empty)
+        empty = [MPI.BOTTOM, 0, "B"]
+        Alltoallv(empty, empty)
+        empty = [MPI.BOTTOM, "B"]
+        Alltoallv(empty, empty)
+
+    def testMessageBytearray(self):
+        try:
+            bytearray
+        except NameError:
+            return
+        sbuf = bytearray("abc".encode('ascii'))
+        rbuf = bytearray(3)
+        Alltoallv([sbuf, "c"], [rbuf, MPI.CHAR])
+        self.assertEqual(sbuf, rbuf)
+
+    if HAVE_ARRAY:
+        def checkArray(self, test):
+            from array import array
+            from operator import eq as equal
+            for t in tuple(self.TYPECODES):
+                for n in range(1, 10):
+                    z = array(t, [0]*n)
+                    s = array(t, list(range(n)))
+                    r = array(t, [0]*n)
+                    test(equal, z, s, r, t)
+        def testArray1(self):
+            self.checkArray(self.check1)
+        def testArray21(self):
+            self.checkArray(self.check21)
+        def testArray22(self):
+            self.checkArray(self.check22)
+        def testArray31(self):
+            self.checkArray(self.check31)
+        def testArray32(self):
+            self.checkArray(self.check32)
+        def testArray4(self):
+            self.checkArray(self.check4)
+
+    if HAVE_NUMPY:
+        def checkNumPy(self, test):
+            from numpy import zeros, arange, empty
+            for t in tuple(self.TYPECODES):
+                for n in range(10):
+                    z = zeros (n, dtype=t)
+                    s = arange(n, dtype=t)
+                    r = empty (n, dtype=t)
+                    test(allclose, z, s, r, t)
+        def testNumPy1(self):
+            self.checkNumPy(self.check1)
+        def testNumPy21(self):
+            self.checkNumPy(self.check21)
+        def testNumPy22(self):
+            self.checkNumPy(self.check22)
+        def testNumPy31(self):
+            self.checkNumPy(self.check31)
+        def testNumPy32(self):
+            self.checkNumPy(self.check32)
+        def testNumPy4(self):
+            self.checkNumPy(self.check4)
 
 
 if __name__ == '__main__':
