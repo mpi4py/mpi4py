@@ -290,7 +290,6 @@ class BaseTestCCOBuf(object):
                             elif op == MPI.MIN:
                                 self.assertEqual(value, i)
 
-
     def testBcastTypeIndexed(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
@@ -535,6 +534,60 @@ class BaseTestCCOBufInplace(object):
                                 self.assertEqual(value, size-1)
                             elif op == MPI.MIN:
                                 self.assertEqual(value, 0)
+
+    def testScan(self):
+        size = self.COMM.Get_size()
+        rank = self.COMM.Get_rank()
+        # --
+        for array in arrayimpl.ArrayTypes:
+            for typecode in arrayimpl.TypeMap:
+                for op in (MPI.SUM, MPI.PROD, MPI.MAX, MPI.MIN):
+                    buf = array(range(size), typecode)
+                    self.COMM.Scan(MPI.IN_PLACE,
+                                   buf.as_mpi(),
+                                   op)
+                    max_val = maxvalue(buf)
+                    for i, value in enumerate(buf):
+                        if op == MPI.SUM:
+                            if (i * (rank + 1)) < max_val:
+                                self.assertAlmostEqual(value, i * (rank + 1))
+                        elif op == MPI.PROD:
+                            if (i ** (rank + 1)) < max_val:
+                                self.assertAlmostEqual(value, i ** (rank + 1))
+                        elif op == MPI.MAX:
+                            self.assertEqual(value, i)
+                        elif op == MPI.MIN:
+                            self.assertEqual(value, i)
+
+    def testExscan(self):
+        size = self.COMM.Get_size()
+        rank = self.COMM.Get_rank()
+        for array in arrayimpl.ArrayTypes:
+            for typecode in arrayimpl.TypeMap:
+                for op in (MPI.SUM, MPI.PROD, MPI.MAX, MPI.MIN):
+                    buf = array(range(size), typecode)
+                    try:
+                        self.COMM.Exscan(MPI.IN_PLACE,
+                                         buf.as_mpi(),
+                                         op)
+                    except NotImplementedError:
+                        return
+                    if rank == 1:
+                        for i, value in enumerate(buf):
+                            self.assertEqual(value, i)
+                    elif rank > 1:
+                        max_val = maxvalue(buf)
+                        for i, value in enumerate(buf):
+                            if op == MPI.SUM:
+                                if (i * rank) < max_val:
+                                    self.assertAlmostEqual(value, i * rank)
+                            elif op == MPI.PROD:
+                                if (i ** rank) < max_val:
+                                    self.assertAlmostEqual(value, i ** rank)
+                            elif op == MPI.MAX:
+                                self.assertEqual(value, i)
+                            elif op == MPI.MIN:
+                                self.assertEqual(value, i)
 
 class TestReduceLocal(unittest.TestCase):
 
