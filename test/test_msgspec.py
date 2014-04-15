@@ -386,6 +386,72 @@ class TestMessageVector(unittest.TestCase):
         def testNumPy4(self):
             self.checkNumPy(self.check4)
 
+def PutGet(smsg, rmsg, target):
+    try: win =  MPI.Win.Allocate(8, 1, MPI.INFO_NULL, MPI.COMM_SELF)
+    except NotImplementedError: win = MPI.WIN_NULL
+    try:
+        try: win.Fence()
+        except NotImplementedError: pass
+        try: win.Put(smsg, 0, target)
+        except NotImplementedError: pass
+        try: win.Fence()
+        except NotImplementedError: pass
+        try: win.Get(rmsg, 0, target)
+        except NotImplementedError: rmsg[:] = smsg
+        try: win.Fence()
+        except NotImplementedError: pass
+    finally:
+        if win != MPI.WIN_NULL: win.Free()
+
+class TestMessageRMA(unittest.TestCase):
+
+    def testMessageBad(self):
+        sbuf = [None, 0, 0, "B", None] 
+        rbuf = [None, 0, 0, "B"]
+        target = (0, 0, MPI.BYTE)
+        def f(): PutGet(sbuf, rbuf, target)
+        self.assertRaises(ValueError, f)
+        sbuf = [None, 0, 0, "B"] 
+        rbuf = [None, 0, 0, "B", None]
+        target = (0, 0, MPI.BYTE)
+        def f(): PutGet(sbuf, rbuf, target)
+        self.assertRaises(ValueError, f)
+        sbuf = [None, 0, "B"] 
+        rbuf = [None, 0, "B"]
+        target = (0, 0, MPI.BYTE, None)
+        def f(): PutGet(sbuf, rbuf, target)
+        self.assertRaises(ValueError, f)
+        sbuf = [None, 0, "B"] 
+        rbuf = [None, 0, "B"]
+        target = {1:2,3:4}
+        def f(): PutGet(sbuf, rbuf, target)
+        self.assertRaises(ValueError, f)
+
+    def testMessageNone(self):
+        for empty in ([None, 0, 0, MPI.BYTE],
+                      [None, 0, MPI.BYTE],
+                      [None, MPI.BYTE]):
+            for target in (None, 0, [0, 0, MPI.BYTE]):
+                PutGet(empty, empty, target)
+
+    def testMessageBottom(self):
+        for empty in ([MPI.BOTTOM, 0, 0, MPI.BYTE],
+                      [MPI.BOTTOM, 0, MPI.BYTE],
+                      [MPI.BOTTOM, MPI.BYTE]):
+            for target in (None, 0, [0, 0, MPI.BYTE]):
+                PutGet(empty, empty, target)
+
+    def testMessageBytearray(self):
+        try:
+            bytearray
+        except NameError:
+            return
+        for target in (None, 0, [0, 3, MPI.BYTE]):
+            sbuf = bytearray("abc".encode('ascii'))
+            rbuf = bytearray(3)
+            PutGet(sbuf, rbuf, target)
+            self.assertEqual(sbuf, rbuf)
+
 
 if __name__ == '__main__':
     unittest.main()
