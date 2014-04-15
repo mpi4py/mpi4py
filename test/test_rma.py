@@ -2,6 +2,8 @@ from mpi4py import MPI
 import mpiunittest as unittest
 import arrayimpl
 
+typemap = MPI._typedict
+
 def mkzeros(n):
     import sys
     if not hasattr(sys, 'pypy_version_info'):
@@ -57,10 +59,38 @@ class BaseTestRMA(object):
                     for rank in range(size):
                         sbuf = array(range(count), typecode)
                         rbuf = array(-1, typecode, count+1)
+                        #
                         self.WIN.Fence()
                         self.WIN.Put(sbuf.as_mpi(), rank)
                         self.WIN.Fence()
                         self.WIN.Get(rbuf.as_mpi_c(count), rank)
+                        self.WIN.Fence()
+                        for i in range(count):
+                            self.assertEqual(sbuf[i], i)
+                            self.assertNotEqual(rbuf[i], -1)
+                        self.assertEqual(rbuf[-1], -1)
+                        #
+                        sbuf = array(range(count), typecode)
+                        rbuf = array(-1, typecode, count+1)
+                        target  = sbuf.itemsize
+                        self.WIN.Fence()
+                        self.WIN.Put(sbuf.as_mpi(), rank, target)
+                        self.WIN.Fence()
+                        self.WIN.Get(rbuf.as_mpi_c(count), rank, target)
+                        self.WIN.Fence()
+                        for i in range(count):
+                            self.assertEqual(sbuf[i], i)
+                            self.assertNotEqual(rbuf[i], -1)
+                        self.assertEqual(rbuf[-1], -1)
+                        #
+                        sbuf = array(range(count), typecode)
+                        rbuf = array(-1, typecode, count+1)
+                        datatype = typemap[typecode]
+                        target  = (sbuf.itemsize, count, datatype)
+                        self.WIN.Fence()
+                        self.WIN.Put(sbuf.as_mpi(), rank, target)
+                        self.WIN.Fence()
+                        self.WIN.Get(rbuf.as_mpi_c(count), rank, target)
                         self.WIN.Fence()
                         for i in range(count):
                             self.assertEqual(sbuf[i], i)
@@ -83,12 +113,10 @@ class BaseTestRMA(object):
                             self.WIN.Fence()
                             self.WIN.Get(rbuf.as_mpi_c(count), rank)
                             self.WIN.Fence()
-                            #
                             for i in range(count):
                                 self.assertEqual(sbuf[i], i)
                                 self.assertNotEqual(rbuf[i], -1)
                             self.assertEqual(rbuf[-1], -1)
-
 
     def testGetAccumulate(self):
         group = self.WIN.Get_group()
