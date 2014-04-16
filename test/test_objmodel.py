@@ -1,5 +1,7 @@
 from mpi4py import MPI
 import mpiunittest as unittest
+import sys
+pypy = '__pypy__' in sys.builtin_module_names
 
 
 class TestObjModel(unittest.TestCase):
@@ -63,6 +65,12 @@ class TestObjModel(unittest.TestCase):
             self.assertFalse(obj)
 
     def testHash(self):
+        try:
+            hash(MPI.COMM_NULL)
+        except TypeError:
+            pass
+        else:
+            if pypy: return
         for obj in self.objects:
             ob_hash = lambda: hash(obj)
             self.assertRaises(TypeError, ob_hash)

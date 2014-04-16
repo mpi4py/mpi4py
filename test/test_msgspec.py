@@ -1,6 +1,8 @@
 from mpi4py import MPI
 import mpiunittest as unittest
 from arrayimpl import allclose
+import sys
+pypy = '__pypy__' in sys.builtin_module_names
 
 typemap = MPI._typedict
 
@@ -154,6 +156,7 @@ class TestMessageSimple(unittest.TestCase):
         Sendrecv(empty, empty)
 
     def testMessageBytearray(self):
+        if pypy: return
         try:
             bytearray
         except NameError:
@@ -332,6 +335,7 @@ class TestMessageVector(unittest.TestCase):
         Alltoallv(empty, empty)
 
     def testMessageBytearray(self):
+        if pypy: return
         try:
             bytearray
         except NameError:
@@ -442,6 +446,7 @@ class TestMessageRMA(unittest.TestCase):
                 PutGet(empty, empty, target)
 
     def testMessageBytearray(self):
+        if pypy: return
         try:
             bytearray
         except NameError:
