@@ -390,6 +390,40 @@ class TestMessageVector(unittest.TestCase):
         def testNumPy4(self):
             self.checkNumPy(self.check4)
 
+def Alltoallw(smsg, rmsg):
+    comm = MPI.COMM_SELF
+    try:
+        comm.Alltoallw(smsg, rmsg)
+    except NotImplementedError:
+        smsg[:] = rmsg
+
+class TestMessageVectorW(unittest.TestCase):
+
+    def testMessageBad(self):
+        sbuf = MPI.Alloc_mem(4)
+        rbuf = MPI.Alloc_mem(4)
+        def f(): Alltoallw([sbuf, [0], [0], [MPI.BYTE], None],
+                           [sbuf, [0], [0], [MPI.BYTE]])
+        self.assertRaises(ValueError, f)
+        def f(): Alltoallw([sbuf, [0], [0], [MPI.BYTE]],
+                           [sbuf, [0], [0], [MPI.BYTE], None])
+        self.assertRaises(ValueError, f)
+        MPI.Free_mem(sbuf)
+        MPI.Free_mem(rbuf)
+
+    def testMessageBytearray(self):
+        if pypy: return
+        try:
+            bytearray
+        except NameError:
+            return
+        sbuf = bytearray("abc".encode('ascii'))
+        rbuf = bytearray(3)
+        smsg = [sbuf, [3], [0], [MPI.CHAR]]
+        rmsg = [rbuf, ([3], [0]), [MPI.CHAR]]
+        Alltoallw(smsg, rmsg)
+        self.assertEqual(sbuf, rbuf)
+
 def PutGet(smsg, rmsg, target):
     try: win =  MPI.Win.Allocate(8, 1, MPI.INFO_NULL, MPI.COMM_SELF)
     except NotImplementedError: win = MPI.WIN_NULL
