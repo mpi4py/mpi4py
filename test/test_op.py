@@ -1,5 +1,8 @@
 from mpi4py import MPI
 import mpiunittest as unittest
+import sys
+pypy = '__pypy__' in sys.builtin_module_names
+
 
 MPI_ERR_OP = MPI.ERR_OP
 
@@ -58,23 +61,26 @@ class TestOp(unittest.TestCase):
         for comm in [MPI.COMM_SELF, MPI.COMM_WORLD]:
             for commute in [True, False]:
                 for N in range(4):
-                    # buffer(empty_array) returns
-                    # the same non-NULL pointer !!!
-                    if N == 0: continue
-                    size = comm.Get_size()
-                    rank = comm.Get_rank()
                     myop = MPI.Op.Create(mysum, commute)
-                    a = array.array('i', [i*(rank+1) for i in range(N)])
-                    b = array.array('i', [0]*len(a))
-                    comm.Allreduce([a, MPI.INT], [b, MPI.INT], myop)
-                    scale = sum(range(1,size+1))
-                    for i in range(N):
-                        self.assertEqual(b[i], scale*i)
-                    ret = myop(a, b)
-                    self.assertTrue(ret is b)
-                    for i in range(N):
-                        self.assertEqual(b[i], a[i]+scale*i)
-                    myop.Free()
+                    try:
+                        if pypy and comm.size > 1: continue
+                        # buffer(empty_array) returns
+                        # the same non-NULL pointer !!!
+                        if N == 0: continue
+                        size = comm.Get_size()
+                        rank = comm.Get_rank()
+                        a = array.array('i', [i*(rank+1) for i in range(N)])
+                        b = array.array('i', [0]*len(a))
+                        comm.Allreduce([a, MPI.INT], [b, MPI.INT], myop)
+                        scale = sum(range(1,size+1))
+                        for i in range(N):
+                            self.assertEqual(b[i], scale*i)
+                        ret = myop(a, b)
+                        self.assertTrue(ret is b)
+                        for i in range(N):
+                            self.assertEqual(b[i], a[i]+scale*i)
+                    finally:
+                        myop.Free()
 
     def testCreateMany(self):
         N = 32 # max user-defined operations
