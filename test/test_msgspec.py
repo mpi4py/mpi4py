@@ -18,9 +18,7 @@ except ImportError:
     HAVE_NUMPY = False
 
 def Sendrecv(smsg, rmsg):
-    comm = MPI.COMM_SELF
-    sts = MPI.Status()
-    comm.Sendrecv(sendbuf=smsg, recvbuf=rmsg, status=sts)
+    MPI.COMM_SELF.Sendrecv(sendbuf=smsg, recvbuf=rmsg, status=MPI.Status())
 
 class TestMessageSimple(unittest.TestCase):
 
@@ -391,11 +389,13 @@ class TestMessageVector(unittest.TestCase):
             self.checkNumPy(self.check4)
 
 def Alltoallw(smsg, rmsg):
-    comm = MPI.COMM_SELF
     try:
-        comm.Alltoallw(smsg, rmsg)
+        MPI.COMM_SELF.Alltoallw(smsg, rmsg)
     except NotImplementedError:
-        smsg[:] = rmsg
+        if isinstance(smsg, (list, tuple)): smsg = smsg[0]
+        if isinstance(rmsg, (list, tuple)): rmsg = rmsg[0]
+        try: rmsg[:] = smsg
+        except: pass
 
 class TestMessageVectorW(unittest.TestCase):
 
@@ -435,7 +435,11 @@ def PutGet(smsg, rmsg, target):
         try: win.Fence()
         except NotImplementedError: pass
         try: win.Get(rmsg, 0, target)
-        except NotImplementedError: rmsg[:] = smsg
+        except NotImplementedError:
+            if isinstance(smsg, (list, tuple)): smsg = smsg[0]
+            if isinstance(rmsg, (list, tuple)): rmsg = rmsg[0]
+            try: rmsg[:] = smsg
+            except: pass
         try: win.Fence()
         except NotImplementedError: pass
     finally:
@@ -444,22 +448,22 @@ def PutGet(smsg, rmsg, target):
 class TestMessageRMA(unittest.TestCase):
 
     def testMessageBad(self):
-        sbuf = [None, 0, 0, "B", None] 
+        sbuf = [None, 0, 0, "B", None]
         rbuf = [None, 0, 0, "B"]
         target = (0, 0, MPI.BYTE)
         def f(): PutGet(sbuf, rbuf, target)
         self.assertRaises(ValueError, f)
-        sbuf = [None, 0, 0, "B"] 
+        sbuf = [None, 0, 0, "B"]
         rbuf = [None, 0, 0, "B", None]
         target = (0, 0, MPI.BYTE)
         def f(): PutGet(sbuf, rbuf, target)
         self.assertRaises(ValueError, f)
-        sbuf = [None, 0, "B"] 
+        sbuf = [None, 0, "B"]
         rbuf = [None, 0, "B"]
         target = (0, 0, MPI.BYTE, None)
         def f(): PutGet(sbuf, rbuf, target)
         self.assertRaises(ValueError, f)
-        sbuf = [None, 0, "B"] 
+        sbuf = [None, 0, "B"]
         rbuf = [None, 0, "B"]
         target = {1:2,3:4}
         def f(): PutGet(sbuf, rbuf, target)
