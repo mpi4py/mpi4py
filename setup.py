@@ -156,6 +156,18 @@ elif solaris:
 else:
     whole_archive = None
 
+def configure_dl(ext, config_cmd):
+    from distutils import log
+    log.info("checking for dlopen() availability ...")
+    ok = config_cmd.check_header("dlfcn.h")
+    if ok : ext.define_macros += [('HAVE_DLFCN_H', 1)]
+    ok = config_cmd.check_library('dl')
+    if ok: ext.libraries += ['dl']
+    ok = config_cmd.check_function("dlopen",
+                                   libraries=['dl'],
+                                   decl=1, call=1)
+    if ok: ext.define_macros += [('HAVE_DLOPEN', 1)]
+
 def configure_mpi(ext, config_cmd):
     from textwrap import dedent
     from distutils import log
@@ -189,7 +201,7 @@ def configure_mpi(ext, config_cmd):
     tests += ["(defined(MPICH_NAME)&&(MPICH_NAME==3))"]
     ConfigTest = dedent('''\
     #if !(%s)
-    #error "Unknown MPI"
+    #error "Unknown MPI implementation"
     #endif
     ''') % "||".join(tests)
     ok = config_cmd.try_compile(ConfigTest, headers=headers)
@@ -210,18 +222,9 @@ def configure_mpi(ext, config_cmd):
                 if not ok:
                     macro = "PyMPI_MISSING_" + function
                     ext.define_macros += [(macro, 1)]
-
-def configure_dl(ext, config_cmd):
-    from distutils import log
-    log.info("checking for dlopen() availability ...")
-    ok = config_cmd.check_header("dlfcn.h")
-    if ok : ext.define_macros += [('HAVE_DLFCN_H', 1)]
-    ok = config_cmd.check_library('dl')
-    if ok: ext.libraries += ['dl']
-    ok = config_cmd.check_function("dlopen",
-                                   libraries=['dl'],
-                                   decl=1, call=1)
-    if ok: ext.define_macros += [('HAVE_DLOPEN', 1)]
+    #
+    if os.name == 'posix':
+        configure_dl(ext, config_cmd)
 
 def configure_libmpe(lib, config_cmd):
     #
