@@ -6,7 +6,7 @@ python:
     - 2.7
     - 3.2
     - 3.3
-#   - pypy
+    - pypy
 
 env:
     - MPI=mpich3
@@ -16,6 +16,7 @@ env:
 
 matrix:
   allow_failures:
+    - python: pypy
     - env: MPI=mpich1
 
 branches:
@@ -26,13 +27,15 @@ before_install:
     - sudo apt-get update -q
     - sh ./conf/travis-install-mpi.sh $MPI
     - pip install -q Cython
+    - cython --version
 install:
     - pip install .
 
 before_script:
     - MPIEXEC='mpiexec'; PYTHON='python';
+    - test $TRAVIS_PYTHON_VERSION == pypy && PYTHON='pypy' || true
     - test $MPI == mpich1 && MPIEXEC='mpirun' || true
-    - test $MPI == mpich1 && PYTHON=$(which python) || true
+    - test $MPI == mpich1 && PYTHON=$(command -v $PYTHON) || true
     - test $MPI == mpich2 && sudo hostname localhost || true
     - test $MPI == mpich2 && MPIEXEC='mpiexec -launcher fork' || true
     - test $MPI == mpich3 && sudo hostname localhost || true
