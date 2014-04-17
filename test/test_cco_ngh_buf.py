@@ -122,7 +122,7 @@ class BaseTestCCONghBuf(object):
                             sdt, rdt = sbuf.mpidtype, rbuf.mpidtype
                             sdsp = list(range(0, ssize*n*sdt.extent, n*sdt.extent))
                             rdsp = list(range(0, rsize*n*rdt.extent, n*rdt.extent))
-                            smsg = (sbuf.as_raw(), ([n]*ssize, sdsp), [sdt]*ssize)
+                            smsg = [sbuf.as_raw(), ([n]*ssize, sdsp), [sdt]*ssize]
                             rmsg = (rbuf.as_raw(), ([n]*rsize, rdsp), [rdt]*rsize)
                             try:
                                 comm.Neighbor_alltoallw(smsg, rmsg)
@@ -130,7 +130,7 @@ class BaseTestCCONghBuf(object):
                                 return
                             for value in rbuf.flat:
                                 self.assertEqual(value, v)
-                            sbuf[:] = array( v+1, typecode, (ssize, n))
+                            smsg[0] = array(v+1, typecode, (ssize, n)).as_raw()
                             try:
                                 comm.Ineighbor_alltoallw(smsg, rmsg).Wait()
                             except NotImplementedError:

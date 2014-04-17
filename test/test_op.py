@@ -1,7 +1,6 @@
 from mpi4py import MPI
 import mpiunittest as unittest
 import sys
-pypy = '__pypy__' in sys.builtin_module_names
 
 
 MPI_ERR_OP = MPI.ERR_OP
@@ -63,7 +62,8 @@ class TestOp(unittest.TestCase):
                 for N in range(4):
                     myop = MPI.Op.Create(mysum, commute)
                     try:
-                        if pypy and comm.size > 1: continue
+                        if hasattr(sys, 'pypy_version_info'):
+                            if comm.size > 1: continue
                         # buffer(empty_array) returns
                         # the same non-NULL pointer !!!
                         if N == 0: continue

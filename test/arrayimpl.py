@@ -16,14 +16,21 @@ TypeMap = OrderedDict([
     ('d', MPI.DOUBLE),
 ])
 
-import sys
-if sys.version_info[:2] < (3,3):
-    del TypeMap['q']
-
 if MPI.SIGNED_CHAR == MPI.DATATYPE_NULL:
     del TypeMap['b']
 
+import sys
+if sys.version_info[:2] < (3,3):
+    del TypeMap['q']
+del sys
+
 ArrayTypes = []
+
+def allclose(a, b, rtol=1.e-5, atol=1.e-8):
+    for x, y in zip(a, b):
+        if abs(x-y) > (atol + rtol * abs(y)):
+            return False
+    return True
 
 try:
     import array
@@ -68,8 +75,7 @@ else:
                 ary.mpidtype = MPI.DATATYPE_NULL
             return ary
 
-        def flat(self):
-            return self
+        def flat(self): return self
         flat = property(flat)
 
         def as_raw(self):
@@ -137,13 +143,3 @@ else:
 
     ArrayTypes.append(NumPy)
     __all__.append('NumPy')
-
-
-try:
-    from numpy import allclose
-except ImportError:
-    def allclose(a, b, rtol=1.e-5, atol=1.e-8):
-        for x, y in zip(a, b):
-            if abs(x-y) > (atol + rtol * abs(y)):
-                return False
-        return True
