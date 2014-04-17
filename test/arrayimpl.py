@@ -27,6 +27,10 @@ del sys
 ArrayTypes = []
 
 def allclose(a, b, rtol=1.e-5, atol=1.e-8):
+    try: iter(a)
+    except TypeError: a = [a]
+    try: iter(b)
+    except TypeError: b = [b]
     for x, y in zip(a, b):
         if abs(x-y) > (atol + rtol * abs(y)):
             return False
