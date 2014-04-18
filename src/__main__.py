@@ -8,6 +8,7 @@ def helloworld(comm, args=None, verbose=True):
     """
     Hello, World! using MPI
     """
+    from sys import stdout
     from mpi4py import MPI
     from optparse import OptionParser
     parser = OptionParser(prog="mpi4py helloworld")
@@ -21,7 +22,7 @@ def helloworld(comm, args=None, verbose=True):
                % (len(str(size-1)), rank, size, name) )
     _seq_begin(comm)
     if options.verbose:
-        _println(message, stream=_stdout)
+        _println(message, stream=stdout)
     _seq_end(comm)
     return message
 
@@ -29,6 +30,9 @@ def ringtest(comm, args=None, verbose=True):
     """
     Time a message going around the ring of processes
     """
+    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-branches
+    from sys import stdout
     from array import array
     from mpi4py import MPI
     from optparse import OptionParser
@@ -91,11 +95,8 @@ def ringtest(comm, args=None, verbose=True):
     if options.verbose and comm.rank == 0:
         _println("time for %d loops = %g seconds (%d processes, %d bytes)"
                  % (loop, elapsed, comm.size, size),
-                 stream=_stdout)
+                 stream=stdout)
     return elapsed
-
-from sys import stdout as _stdout
-from sys import stderr as _stderr
 
 def _println(message, stream):
     stream.write(message+'\n')
@@ -103,7 +104,6 @@ def _println(message, stream):
 
 def _seq_begin(comm):
     comm.Barrier()
-    size = comm.Get_size()
     rank = comm.Get_rank()
     if rank > 0:
         comm.Recv([None, 'B'], rank - 1)
