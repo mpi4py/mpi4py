@@ -58,8 +58,10 @@ def get_config():
     """
     from os.path import dirname, join
     try:
+        # pylint: disable=import-error
         from configparser import ConfigParser
     except ImportError:
+        # pylint: disable=import-error
         from ConfigParser import ConfigParser
     parser = ConfigParser()
     parser.read(join(dirname(__file__), 'mpi.cfg'))
@@ -94,9 +96,9 @@ rc.threaded = True
 rc.thread_level = "multiple"
 rc.finalize = None
 
-import sys
-sys.modules[__name__+'.rc'] = rc
-del sys
+from sys import modules
+modules[__name__+'.rc'] = rc
+del modules
 
 # --------------------------------------------------------------------
 
@@ -113,6 +115,8 @@ def profile(name='mpe', **kargs):
     logfile : str, optional
        Filename prefix for dumping profiler output.
     """
+    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-branches
     import sys, os, imp
     try:
         from mpi4py.dl import dlopen, RTLD_NOW, RTLD_GLOBAL
@@ -120,25 +124,26 @@ def profile(name='mpe', **kargs):
     except ImportError:
         from ctypes import CDLL as dlopen, RTLD_GLOBAL
         try:
+            # pylint: disable=import-error
             from DLFCN import RTLD_NOW
         except ImportError:
             RTLD_NOW = 2
         dlerror = None
     #
     def lookup_dylib(name, path):
-        format = []
+        pattern = []
         for suffix, _, kind in imp.get_suffixes():
             if kind == imp.C_EXTENSION:
-                format.append(('', suffix))
+                pattern.append(('', suffix))
         if sys.platform.startswith('win'):
-            format.append(('', '.dll'))
+            pattern.append(('', '.dll'))
         elif sys.platform == 'darwin':
-            format.append(('lib', '.dylib'))
+            pattern.append(('lib', '.dylib'))
         elif os.name == 'posix':
-            format.append(('lib', '.so'))
-        format.append(('', ''))
+            pattern.append(('lib', '.so'))
+        pattern.append(('', ''))
         for pth in path:
-            for (lib, so) in format:
+            for (lib, so) in pattern:
                 filename = os.path.join(pth, lib + name + so)
                 if os.path.isfile(filename):
                     return filename
@@ -170,7 +175,7 @@ def profile(name='mpe', **kargs):
     #
     handle = dlopen(filename, RTLD_NOW|RTLD_GLOBAL)
     if handle:
-        profile._registry.append((name, (handle, filename)))
+        profile.registry.append((name, (handle, filename)))
     else:
         from warnings import warn
         if dlerror:
@@ -179,7 +184,7 @@ def profile(name='mpe', **kargs):
             message = "error loading '%s'" % filename
         warn(message)
 
-profile._registry = []
+profile.registry = []
 
 # --------------------------------------------------------------------
 
