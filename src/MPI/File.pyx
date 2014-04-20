@@ -47,11 +47,8 @@ cdef class File:
     def __bool__(self):
         return self.ob_mpi != MPI_FILE_NULL
 
-    # [9.2] File Manipulation
-    # -----------------------
-
-    # [9.2.1] Opening a File
-    # ----------------------
+    # File Manipulation
+    # -----------------
 
     @classmethod
     def Open(cls, Intracomm comm not None, filename,
@@ -67,17 +64,11 @@ cdef class File:
             comm.ob_mpi, cfilename, amode, cinfo, &file.ob_mpi) )
         return file
 
-    # [9.2.2] Closing a File
-    # ----------------------
-
     def Close(self):
         """
         Close a file
         """
         with nogil: CHKERR( MPI_File_close(&self.ob_mpi) )
-
-    # [9.2.3] Deleting a File
-    # -----------------------
 
     @classmethod
     def Delete(cls, filename, Info info=INFO_NULL):
@@ -89,17 +80,11 @@ cdef class File:
         cdef MPI_Info cinfo = arg_Info(info)
         with nogil: CHKERR( MPI_File_delete(cfilename, cinfo) )
 
-    # [9.2.4] Resizing a File
-    # -----------------------
-
     def Set_size(self, Offset size):
         """
         Sets the file size
         """
         with nogil: CHKERR( MPI_File_set_size(self.ob_mpi, size) )
-
-    # [9.2.5] Preallocating Space for a File
-    # --------------------------------------
 
     def Preallocate(self, Offset size):
         """
@@ -107,8 +92,6 @@ cdef class File:
         """
         with nogil: CHKERR( MPI_File_preallocate(self.ob_mpi, size) )
 
-    # [9.2.6] Querying the Size of a File
-    # -----------------------------------
     def Get_size(self):
         """
         Return the file size
@@ -122,8 +105,21 @@ cdef class File:
         def __get__(self):
             return self.Get_size()
 
-    # [9.2.7] Querying File Parameters
-    # --------------------------------
+    def Get_amode(self):
+        """
+        Return the file access mode
+        """
+        cdef int amode = 0
+        with nogil: CHKERR( MPI_File_get_amode(self.ob_mpi, &amode) )
+        return amode
+
+    property amode:
+        """file access mode"""
+        def __get__(self):
+            return self.Get_amode()
+
+    # File Group
+    # ----------
 
     def Get_group(self):
         """
@@ -139,21 +135,8 @@ cdef class File:
         def __get__(self):
             return self.Get_group()
 
-    def Get_amode(self):
-        """
-        Return the file access mode
-        """
-        cdef int amode = 0
-        with nogil: CHKERR( MPI_File_get_amode(self.ob_mpi, &amode) )
-        return amode
-
-    property amode:
-        """file access mode"""
-        def __get__(self):
-            return self.Get_amode()
-
-    # [9.2.8] File Info
-    # -----------------
+    # File Info
+    # ---------
 
     def Set_info(self, Info info not None):
         """
@@ -178,8 +161,8 @@ cdef class File:
         def __set__(self, info):
             self.Set_info(info)
 
-    # [9.3] File Views
-    # ----------------
+    # File Views
+    # ----------
 
     def Set_view(self, Offset disp=0,
                  Datatype etype=None, Datatype filetype=None,
@@ -212,11 +195,11 @@ cdef class File:
         cdef object datarep = mpistr(cdatarep)
         return (disp, etype, ftype, datarep)
 
-    # [9.4] Data Access
-    # -----------------
+    # Data Access
+    # -----------
 
-    # [9.4.2] Data Access with Explicit Offsets
-    # -----------------------------------------
+    # Data Access with Explicit Offsets
+    # ---------------------------------
 
     def Read_at(self, Offset offset, buf, Status status=None):
         """
@@ -276,8 +259,8 @@ cdef class File:
         request.ob_buf = m
         return request
 
-    # [9.4.3] Data Access with Individual File Pointers
-    # -------------------------------------------------
+    # Data Access with Individual File Pointers
+    # -----------------------------------------
 
     def Read(self, buf, Status status=None):
         """
@@ -362,8 +345,8 @@ cdef class File:
             self.ob_mpi, offset, &disp) )
         return disp
 
-    # [9.4.4] Data Access with Shared File Pointers
-    # ---------------------------------------------
+    # Data Access with Shared File Pointers
+    # -------------------------------------
 
     def Read_shared(self, buf, Status status=None):
         """
@@ -438,8 +421,8 @@ cdef class File:
         with nogil: CHKERR( MPI_File_get_position_shared(self.ob_mpi, &offset) )
         return offset
 
-    # [9.4.5] Split Collective Data Access Routines
-    # ---------------------------------------------
+    # Split Collective Data Access Routines
+    # -------------------------------------
 
     # explicit offset
 
@@ -557,11 +540,8 @@ cdef class File:
         with nogil: CHKERR( MPI_File_write_ordered_end(
             self.ob_mpi, m.buf, statusp) )
 
-    # [9.5] File Interoperability
-    # ---------------------------
-
-    # [9.5.1] Datatypes for File Interoperability
-    # -------------------------------------------
+    # File Interoperability
+    # ---------------------
 
     def Get_type_extent(self, Datatype datatype not None):
         """
@@ -572,11 +552,8 @@ cdef class File:
             self.ob_mpi, datatype.ob_mpi, &extent) )
         return extent
 
-    # [9.6] Consistency and Semantics
-    # -------------------------------
-
-    # [9.6.1] File Consistency
-    # ------------------------
+    # Consistency and Semantics
+    # -------------------------
 
     def Set_atomicity(self, bint flag):
         """
@@ -606,8 +583,8 @@ cdef class File:
         """
         with nogil: CHKERR( MPI_File_sync(self.ob_mpi) )
 
-    # [9.7] I/O Error Handling
-    # ------------------------
+    # Error Handling
+    # --------------
 
     def Get_errhandler(self):
         """

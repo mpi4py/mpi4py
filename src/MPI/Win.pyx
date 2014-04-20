@@ -49,11 +49,8 @@ cdef class Win:
     def __bool__(self):
         return self.ob_mpi != MPI_WIN_NULL
 
-    # [6.2] Initialization
-    # --------------------
-
-    # [6.2.1] Window Creation
-    # -----------------------
+    # Window Creation
+    # ---------------
 
     @classmethod
     def Create(cls, memory, int disp_unit=1,
@@ -169,8 +166,8 @@ cdef class Win:
         with nogil: CHKERR( MPI_Win_free(&self.ob_mpi) )
 
 
-    # [6.2.2] Window Info
-    # -------------------
+    # Window Info
+    # -----------
 
     def Set_info(self, Info info not None):
         """
@@ -190,8 +187,8 @@ cdef class Win:
             self.ob_mpi, &info.ob_mpi) )
         return info
 
-    # [6.2.2] Window Attributes
-    # -------------------------
+    # Window Group
+    # -------------
 
     def Get_group(self):
         """
@@ -207,6 +204,9 @@ cdef class Win:
         """window group"""
         def __get__(self):
             return self.Get_group()
+
+    # Window Attributes
+    # -----------------
 
     def Get_attr(self, int keyval):
         """
@@ -351,11 +351,8 @@ cdef class Win:
             #
             return tomemory(base, size)
 
-    # [6.3] Communication Calls
-    # -------------------------
-
-    # [6.3.1] Put
-    # -----------
+    # Communication Operations
+    # ------------------------
 
     def Put(self, origin, int target_rank, target=None):
         """
@@ -369,9 +366,6 @@ cdef class Win:
             msg.tdisp, msg.tcount, msg.ttype,
             self.ob_mpi) )
 
-    # [6.3.2] Get
-    # -----------
-
     def Get(self, origin, int target_rank, target=None):
         """
         Get data from a memory window on a remote process.
@@ -383,9 +377,6 @@ cdef class Win:
             target_rank,
             msg.tdisp, msg.tcount, msg.ttype,
             self.ob_mpi) )
-
-    # [6.3.4] Accumulate Functions
-    # ----------------------------
 
     def Accumulate(self, origin, int target_rank,
                    target=None, Op op not None=SUM):
@@ -399,9 +390,6 @@ cdef class Win:
             target_rank,
             msg.tdisp, msg.tcount, msg.ttype,
             op.ob_mpi, self.ob_mpi) )
-
-    # [X.X.X] Get Accumulate Function
-    # -------------------------------
 
     def Get_accumulate(self, origin, result, int target_rank,
                        target=None, Op op not None=SUM):
@@ -417,8 +405,8 @@ cdef class Win:
             msg.tdisp, msg.tcount, msg.ttype,
             op.ob_mpi, self.ob_mpi) )
 
-    # [X.X.X] Request-based RMA Communication Operations
-    # --------------------------------------------------
+    # Request-based RMA Communication Operations
+    # ------------------------------------------
 
     def Rput(self, origin, int target_rank, target=None):
         """
@@ -484,11 +472,11 @@ cdef class Win:
         request.ob_buf = msg
         return request
 
-    # [6.4] Synchronization Calls
-    # ---------------------------
+    # Synchronization Calls
+    # ---------------------
 
-    # [6.4.1] Fence
-    # -------------
+    # Fence
+    # -----
 
     def Fence(self, int assertion=0):
         """
@@ -496,8 +484,8 @@ cdef class Win:
         """
         with nogil: CHKERR( MPI_Win_fence(assertion, self.ob_mpi) )
 
-    # [6.4.2] General Active Target Synchronization
-    # ---------------------------------------------
+    # General Active Target Synchronization
+    # -------------------------------------
 
     def Start(self, Group group not None, int assertion=0):
         """
@@ -533,8 +521,8 @@ cdef class Win:
         with nogil: CHKERR( MPI_Win_test(self.ob_mpi, &flag) )
         return <bint>flag
 
-    # [6.4.3] Lock
-    # ------------
+    # Lock
+    # ----
 
     def Lock(self, int rank, int lock_type=LOCK_EXCLUSIVE, int assertion=0):
         """
@@ -562,8 +550,8 @@ cdef class Win:
         """
         with nogil: CHKERR( MPI_Win_unlock_all(self.ob_mpi) )
 
-    # [X.X] Flush and Sync
-    # --------------------
+    # Flush and Sync
+    # --------------
 
     def Flush(self, int rank):
         """
@@ -596,8 +584,8 @@ cdef class Win:
         with nogil: CHKERR( MPI_Win_sync(self.ob_mpi) )
 
 
-    # [6.6] Error Handling
-    # --------------------
+    # Error Handling
+    # --------------
 
     def Get_errhandler(self):
         """
@@ -620,8 +608,8 @@ cdef class Win:
         CHKERR( MPI_Win_call_errhandler(self.ob_mpi, errorcode) )
 
 
-    # [8.4] Naming Objects
-    # --------------------
+    # Naming Objects
+    # --------------
 
     def Get_name(self):
         """

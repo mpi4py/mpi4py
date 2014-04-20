@@ -2222,11 +2222,11 @@ def Detach_buffer():
 
 
 # --------------------------------------------------------------------
-# [5] Process Creation and Management
+# Process Creation and Management
 # --------------------------------------------------------------------
 
-# [5.4.2] Server Routines
-# -----------------------
+# Server Routines
+# ---------------
 
 def Open_port(Info info=INFO_NULL):
     """
@@ -2247,8 +2247,8 @@ def Close_port(port_name):
     port_name = asmpistr(port_name, &cportname, NULL)
     with nogil: CHKERR( MPI_Close_port(cportname) )
 
-# [5.4.4] Name Publishing
-# -----------------------
+# Name Publishing
+# ---------------
 
 def Publish_name(service_name, port_name, info=INFO_NULL):
     """
