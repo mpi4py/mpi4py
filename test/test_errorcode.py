@@ -60,6 +60,11 @@ class TestErrorCode(unittest.TestCase):
             errclass  = MPI.Add_error_class()
         except NotImplementedError:
             return
+        self.assertTrue(errclass >= MPI.ERR_LASTCODE)
+        lastused = MPI.COMM_WORLD.Get_attr(MPI.LASTUSEDCODE)
+        self.assertTrue(errclass == lastused)
+        MPI.Add_error_string(errclass, "error class")
+        self.assertEqual(MPI.Get_error_string(errclass), "error class")
         errcode1 = MPI.Add_error_code(errclass)
         MPI.Add_error_string(errcode1, "error code 1")
         self.assertEqual(MPI.Get_error_class(errcode1), errclass)

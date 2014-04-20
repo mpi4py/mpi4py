@@ -11,8 +11,7 @@ cdef class Exception(RuntimeError):
     cdef int ob_mpi
 
     def __cinit__(self, int ierr=0):
-        if ierr < MPI_SUCCESS:      ierr = MPI_ERR_UNKNOWN
-        if ierr > MPI_ERR_LASTCODE: ierr = MPI_ERR_UNKNOWN
+        if ierr < MPI_SUCCESS: ierr = MPI_ERR_UNKNOWN
         self.ob_mpi = ierr
         RuntimeError.__init__(self, ierr)
 

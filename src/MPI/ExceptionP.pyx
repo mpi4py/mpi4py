@@ -5,8 +5,7 @@ class Exception(RuntimeError):
     """
 
     def __init__(self, int ierr=0):
-        if ierr < MPI_SUCCESS:      ierr = MPI_ERR_UNKNOWN
-        if ierr > MPI_ERR_LASTCODE: ierr = MPI_ERR_UNKNOWN
+        if ierr < MPI_SUCCESS: ierr = MPI_ERR_UNKNOWN
         self.ob_mpi = ierr
         RuntimeError.__init__(self, self.ob_mpi)
 
