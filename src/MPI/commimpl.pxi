@@ -12,6 +12,11 @@ cdef int comm_keyval_del(int keyval) except -1:
     except KeyError: pass
     return 0
 
+cdef inline Comm newcomm(MPI_Comm ob):
+    cdef Comm comm = <Comm>Comm.__new__(Comm)
+    comm.ob_mpi = ob
+    return comm
+
 cdef int comm_attr_copy(
     MPI_Comm comm,
     int keyval,
@@ -28,7 +33,7 @@ cdef int comm_attr_copy(
     cdef object attrval = <object>attrval_in
     cdef void **aptr = <void **>attrval_out
     if copy_fn is not True:
-        attrval = copy_fn(attrval)
+        attrval = copy_fn(newcomm(comm), keyval, attrval)
     Py_INCREF(attrval)
     aptr[0] = <void*>attrval
     flag[0] = 1
@@ -62,7 +67,7 @@ cdef int comm_attr_delete(
     cdef object delete_fn = None
     if entry is not None: delete_fn = entry[1]
     if delete_fn is not None:
-        delete_fn(<object>attrval)
+        delete_fn(newcomm(comm), keyval, <object>attrval)
     Py_DECREF(<object>attrval)
     return 0
 
@@ -91,7 +96,9 @@ cdef int comm_attr_copy_fn(MPI_Comm comm,
                            int *flag) nogil:
     if attrval_in == NULL:  return MPI_ERR_INTERN
     if attrval_out == NULL: return MPI_ERR_INTERN
-    if not Py_IsInitialized(): return MPI_SUCCESS
+    if not Py_IsInitialized():
+        flag[0] = 0
+        return MPI_SUCCESS
     return comm_attr_copy_cb(comm, keyval, extra_state,
                              attrval_in, attrval_out, flag)
 

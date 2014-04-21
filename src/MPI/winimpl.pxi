@@ -42,6 +42,11 @@ cdef inline int win_keyval_del(int keyval) except -1:
     except KeyError: pass
     return 0
 
+cdef inline Win newwin(MPI_Win ob):
+    cdef Win win = <Win>Win.__new__(Win)
+    win.ob_mpi = ob
+    return win
+
 cdef int win_attr_copy(
     MPI_Win win,
     int keyval,
@@ -58,7 +63,7 @@ cdef int win_attr_copy(
     cdef object attrval = <object>attrval_in
     cdef void **aptr = <void **>attrval_out
     if copy_fn is not True:
-        attrval = copy_fn(attrval)
+        attrval = copy_fn(newwin(win), keyval, attrval)
     Py_INCREF(attrval)
     aptr[0] = <void*>attrval
     flag[0] = 1
@@ -92,7 +97,7 @@ cdef int win_attr_delete(
     cdef object delete_fn = None
     if entry is not None: delete_fn = entry[1]
     if delete_fn is not None:
-        delete_fn(<object>attrval)
+        delete_fn(newwin(win), keyval, <object>attrval)
     Py_DECREF(<object>attrval)
     return 0
 
@@ -121,7 +126,9 @@ cdef int win_attr_copy_fn(MPI_Win win,
                           int *flag) nogil:
     if attrval_in  == NULL: return MPI_ERR_INTERN
     if attrval_out == NULL: return MPI_ERR_INTERN
-    if not Py_IsInitialized(): return MPI_SUCCESS
+    if not Py_IsInitialized():
+        flag[0] = 0
+        return MPI_SUCCESS
     return win_attr_copy_cb(win, keyval, extra_state,
                             attrval_in, attrval_out, flag)
 

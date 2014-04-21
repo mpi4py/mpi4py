@@ -63,8 +63,8 @@ class BaseTestCommAttr(object):
 
     def testAttrCopyDelete(self):
         self.keyval = MPI.Comm.Create_keyval(
-            copy_fn=MPI.Comm.Clone,
-            delete_fn=MPI.Comm.Free)
+            copy_fn=lambda o, k, a: MPI.Comm.Clone(a),
+            delete_fn=lambda o, k, a: MPI.Comm.Free(a))
         self.assertNotEqual(self.keyval, MPI.KEYVAL_INVALID)
 
         comm1 = self.comm
@@ -149,8 +149,8 @@ class BaseTestDatatypeAttr(object):
 
     def testAttrCopyDelete(self):
         self.keyval = MPI.Datatype.Create_keyval(
-            copy_fn=MPI.Datatype.Dup,
-            delete_fn=MPI.Datatype.Free)
+            copy_fn=lambda o, k, a: MPI.Datatype.Dup(a),
+            delete_fn=lambda o, k, a: MPI.Datatype.Free(a))
         self.assertNotEqual(self.keyval, MPI.KEYVAL_INVALID)
 
         datatype1 = self.datatype
@@ -222,7 +222,8 @@ class TestWinAttr(unittest.TestCase):
         self.assertTrue(o is None)
 
     def testAttrCopyDelete(self):
-        self.keyval = MPI.Win.Create_keyval(delete_fn=MPI.Win.Free)
+        self.keyval = MPI.Win.Create_keyval(
+            delete_fn=lambda o, k, a: MPI.Win.Free(a))
         self.assertNotEqual(self.keyval, MPI.KEYVAL_INVALID)
 
         newwin = MPI.Win.Create(MPI.BOTTOM, 1,
