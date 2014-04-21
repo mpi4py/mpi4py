@@ -8,17 +8,15 @@ FunctionType = type(MPI.Init)
 MethodDescrType = type(MPI.Comm.Get_rank)
 GetSetDescrType = type(MPI.Comm.rank)
 
-ignore = ()
-
 def getdocstr(mc, docstrings, namespace=None):
     name = getattr(mc, '__name__', None)
     if name is None: return
     if name in ('__builtin__', 'builtins'): return
     if name.startswith('_'): return
-    if name in ignore: return
     if namespace: name = '%s.%s' % (namespace, name)
     if type(mc) in (ModuleType, ClassType):
         doc = getattr(mc, '__doc__', None)
+        if doc == "<undocumented>": return
         docstrings[name] = doc
         for k, v in vars(mc).items():
             if isinstance(v, staticmethod):
@@ -26,6 +24,7 @@ def getdocstr(mc, docstrings, namespace=None):
             getdocstr(v, docstrings, name)
     elif type(mc) in (FunctionType, MethodDescrType, GetSetDescrType):
         doc = getattr(mc, '__doc__', None)
+        if doc == "<undocumented>": return
         docstrings[name] = doc
 
 class TestDoc(unittest.TestCase):
