@@ -196,6 +196,10 @@ class TestOp(unittest.TestCase):
             self.assertEqual(flag, op.is_commutative)
             #self.assertFalse(flag)
 
+name, version = MPI.get_vendor()
+if name == 'Open MPI' and version <= (1,8,0):
+    del TestOp.testIsCommutative
+
 if not array:
     del TestOp.testCreate
 

@@ -430,6 +430,23 @@ class BaseTestP2PObj(object):
             self.assertEqual(smess, req1.wait())
             comm.ssend(smess, MPI.PROC_NULL, 3)
 
+    def testIRecvAndISSend(self):
+        comm = self.COMM
+        rank = comm.Get_rank()
+        for smess in messages:
+            src = dst = rank
+            req1 = comm.irecv(None, src, 1)
+            req2 = comm.irecv(None, src, 2)
+            req3 = comm.irecv(None, src, 3)
+            req4 = comm.issend(smess, dst, 3)
+            req5 = comm.issend(smess, dst, 2)
+            req6 = comm.issend(smess, dst, 1)
+            MPI.Request.waitall([req4, req5, req6])
+            self.assertEqual(smess, req3.wait())
+            self.assertEqual(smess, req2.wait())
+            self.assertEqual(smess, req1.wait())
+            comm.issend(smess, MPI.PROC_NULL, 3).wait()
+
     def testSendrecv(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()

@@ -191,7 +191,18 @@ class BaseTestRMA(object):
 
     def testFence(self):
         win = self.WIN
+        LMODE = [0, MPI.MODE_NOSTORE, MPI.MODE_NOPUT,
+                 MPI.MODE_NOSTORE|MPI.MODE_NOPUT]
+        GMODE = [0, MPI.MODE_NOPRECEDE, MPI.MODE_NOSUCCEED]
         win.Fence()
+        for lmode in LMODE:
+            for gmode in GMODE:
+                assertion =  lmode | gmode
+                win.Fence(assertion)
+        win.Fence()
+
+    def testFenceAll(self):
+        win = self.WIN
         assertion = 0
         modes = [0,
                  MPI.MODE_NOSTORE,
@@ -298,6 +309,8 @@ except NotImplementedError:
 else:
     name, version = MPI.get_vendor()
     if name == 'Open MPI':
+        if version == (1,8,0):
+            del BaseTestRMA.testFenceAll
         if version < (1,4,0):
             if MPI.Query_thread() > MPI.THREAD_SINGLE:
                 del TestRMAWorld

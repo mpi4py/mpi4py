@@ -55,12 +55,18 @@ class TestErrorCode(unittest.TestCase):
         exc = MPI.Exception(MPI.ERR_LASTCODE+1)
         self.assertTrue(exc, MPI.ERR_UNKNOWN)
 
-    def testAddClassCodeString(self):
+    def testAddErrorClass(self):
         try:
             errclass  = MPI.Add_error_class()
         except NotImplementedError:
             return
         self.assertTrue(errclass >= MPI.ERR_LASTCODE)
+
+    def testAddErrorClassCodeString(self):
+        try:
+            errclass  = MPI.Add_error_class()
+        except NotImplementedError:
+            return
         lastused = MPI.COMM_WORLD.Get_attr(MPI.LASTUSEDCODE)
         self.assertTrue(errclass == lastused)
         MPI.Add_error_string(errclass, "error class")
@@ -73,6 +79,18 @@ class TestErrorCode(unittest.TestCase):
         MPI.Add_error_string(errcode2, "error code 2")
         self.assertEqual(MPI.Get_error_class(errcode2), errclass)
         self.assertEqual(MPI.Get_error_string(errcode2), "error code 2")
+
+
+name, version = MPI.get_vendor()
+if name == 'Open MPI':
+    if version <= (1,8,0) and MPI.VERSION >= 3:
+        del TestErrorCode.testAddErrorClass
+        for errcls in [MPI.ERR_RMA_RANGE,
+                       MPI.ERR_RMA_ATTACH,
+                       MPI.ERR_RMA_FLAVOR,
+                       MPI.ERR_RMA_SHARED]:
+            TestErrorCode.errorclasses.remove(errcls)
+
 
 if __name__ == '__main__':
     unittest.main()

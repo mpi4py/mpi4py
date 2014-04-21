@@ -391,7 +391,7 @@ class BaseTestCCOBufInplace(object):
                         self.assertEqual(value, count)
 
     def assertAlmostEqual(self, first, second):
-        num = float(float(second-first))
+        num = float(second-first)
         den = float(second+first)/2 or 1.0
         if (abs(num/den) > 1e-2):
             raise self.failureException('%r != %r' % (first, second))
@@ -547,6 +547,10 @@ class TestCCOBufWorldDup(BaseTestCCOBuf, unittest.TestCase):
         self.COMM.Free()
 
 
+name, version = MPI.get_vendor()
+if name == 'Open MPI':
+    if version == (1,8,0):
+        del BaseTestCCOBufInplace.testReduceScatter
 try:
     MPI.COMM_SELF.Ibarrier().Wait()
 except NotImplementedError:

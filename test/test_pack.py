@@ -106,8 +106,7 @@ if name =='MPICH' or name == 'MPICH2' or name == 'DeinoMPI':
     BaseTestPackExternal.skipdtype += ['l']
     BaseTestPackExternal.skipdtype += ['d']
 elif name == 'Open MPI':
-    if version < (1,5,0):
-        del TestPackExternal
+    del TestPackExternal
 else:
     try:
         MPI.BYTE.Pack_external_size(EXT32, 0)
