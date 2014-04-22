@@ -1,7 +1,29 @@
 #ifndef PyMPI_COMPAT_MPICH3_H
 #define PyMPI_COMPAT_MPICH3_H
-
 #if defined(MPICH_NUMVERSION)
+
+#if (MPICH_NUMVERSION < 30100301)
+
+static int PyMPI_MPICH3_MPI_Add_error_class(int *errorclass)
+{
+  int ierr; char errstr[1] = {0};
+  ierr = MPI_Add_error_class(errorclass); if (ierr) return ierr;
+  return MPI_Add_error_string(*errorclass,errstr);
+}
+#undef  MPI_Add_error_class
+#define MPI_Add_error_class PyMPI_MPICH3_MPI_Add_error_class
+
+static int PyMPI_MPICH3_MPI_Add_error_code(int errorclass,int *errorcode)
+{
+  int ierr; char errstr[1] = {0};
+  ierr = MPI_Add_error_code(errorclass,errorcode); if (ierr) return ierr;
+  return MPI_Add_error_string(*errorcode,errstr);
+}
+#undef  MPI_Add_error_code
+#define MPI_Add_error_code PyMPI_MPICH3_MPI_Add_error_code
+
+#endif
+
 #if (MPICH_NUMVERSION < 30100000)
 
 static int PyMPI_MPICH3_MPI_Type_size_x(MPI_Datatype datatype, MPI_Count *size)
@@ -64,6 +86,6 @@ static int PyMPI_MPICH3_MPI_Rget_accumulate(const void *origin_addr, int origin_
 #define MPI_Rget_accumulate PyMPI_MPICH3_MPI_Rget_accumulate
 
 #endif
-#endif
 
+#endif /* !MPICH_NUMVERSION      */
 #endif /* !PyMPI_COMPAT_MPICH3_H */
