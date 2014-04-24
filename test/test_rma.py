@@ -309,7 +309,7 @@ except NotImplementedError:
 else:
     name, version = MPI.get_vendor()
     if name == 'Open MPI':
-        if version == (1,8,0):
+        if version == (1,8,1):
             del BaseTestRMA.testFenceAll
         if version < (1,4,0):
             if MPI.Query_thread() > MPI.THREAD_SINGLE:

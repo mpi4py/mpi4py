@@ -200,7 +200,7 @@ if name == 'MPICH':
         if MPI.Query_thread() > MPI.THREAD_SINGLE:
             del BaseTestComm.testIDup
 if name == 'Open MPI':
-    if version == (1,8,0):
+    if version <= (1,8,1):
         del BaseTestComm.testCreateGroup
     if version < (1,4,0):
         if MPI.Query_thread() > MPI.THREAD_SINGLE:

@@ -549,7 +549,7 @@ class TestCCOBufWorldDup(BaseTestCCOBuf, unittest.TestCase):
 
 name, version = MPI.get_vendor()
 if name == 'Open MPI':
-    if version == (1,8,0):
+    if version == (1,8,1):
         del BaseTestCCOBufInplace.testReduceScatter
 try:
     MPI.COMM_SELF.Ibarrier().Wait()
