@@ -206,8 +206,8 @@ cdef object PyMPI_send(object obj, int dest, int tag,
     #
     cdef int dosend = (dest != MPI_PROC_NULL)
     #
-    cdef object smsg = None
-    if dosend: smsg = pickle.dump(obj, &sbuf, &scount)
+    cdef object tmps = None
+    if dosend: tmps = pickle.dump(obj, &sbuf, &scount)
     with nogil: CHKERR( MPI_Send(sbuf, scount, stype,
                                  dest, tag, comm) )
     return None
@@ -223,8 +223,8 @@ cdef object PyMPI_bsend(object obj, int dest, int tag,
     #
     cdef int dosend = (dest != MPI_PROC_NULL)
     #
-    cdef object smsg = None
-    if dosend: smsg = pickle.dump(obj, &sbuf, &scount)
+    cdef object tmps = None
+    if dosend: tmps = pickle.dump(obj, &sbuf, &scount)
     with nogil: CHKERR( MPI_Bsend(sbuf, scount, stype,
                                   dest, tag, comm) )
     return None
@@ -240,8 +240,8 @@ cdef object PyMPI_ssend(object obj, int dest, int tag,
     #
     cdef int dosend = (dest != MPI_PROC_NULL)
     #
-    cdef object smsg = None
-    if dosend: smsg = pickle.dump(obj, &sbuf, &scount)
+    cdef object tmps = None
+    if dosend: tmps = pickle.dump(obj, &sbuf, &scount)
     with nogil: CHKERR( MPI_Ssend(sbuf, scount, stype,
                                   dest, tag, comm) )
     return None
@@ -302,8 +302,8 @@ cdef object PyMPI_sendrecv(object sobj, int dest,   int sendtag,
     cdef int dosend = (dest   != MPI_PROC_NULL)
     cdef int dorecv = (source != MPI_PROC_NULL)
     #
-    cdef object smsg = None
-    if dosend: smsg = pickle.dump(sobj, &sbuf, &scount)
+    cdef object tmps = None
+    if dosend: tmps = pickle.dump(sobj, &sbuf, &scount)
     cdef MPI_Request sreq = MPI_REQUEST_NULL
     with nogil: CHKERR( MPI_Isend(sbuf, scount, stype,
                                   dest, sendtag, comm, &sreq) )
@@ -438,7 +438,7 @@ cdef object PyMPI_wait(Request request, Status status):
 
 cdef object PyMPI_test(Request request, int *flag, Status status):
     cdef Pickle pickle = PyMPI_PICKLE
-    cdef object buf
+    cdef object buf = None
     #
     cdef MPI_Status rsts
     with nogil: CHKERR( MPI_Test(&request.ob_mpi, flag, &rsts) )
@@ -460,7 +460,7 @@ cdef object PyMPI_test(Request request, int *flag, Status status):
 
 cdef object PyMPI_waitany(requests, int *index, Status status):
     cdef Pickle pickle = PyMPI_PICKLE
-    cdef object buf
+    cdef object buf = None
     #
     cdef int count = 0
     cdef MPI_Request *irequests = NULL
@@ -487,7 +487,7 @@ cdef object PyMPI_waitany(requests, int *index, Status status):
 
 cdef object PyMPI_testany(requests, int *index, int *flag, Status status):
     cdef Pickle pickle = PyMPI_PICKLE
-    cdef object buf
+    cdef object buf = None
     #
     cdef int count = 0
     cdef MPI_Request *irequests = NULL
@@ -515,7 +515,7 @@ cdef object PyMPI_testany(requests, int *index, int *flag, Status status):
 
 cdef object PyMPI_waitall(requests, statuses):
     cdef Pickle pickle = PyMPI_PICKLE
-    cdef object buf, bufs
+    cdef object buf, bufs = None
     #
     cdef Py_ssize_t i = 0
     cdef int count = 0
@@ -542,7 +542,7 @@ cdef object PyMPI_waitall(requests, statuses):
 
 cdef object PyMPI_testall(requests, int *flag, statuses):
     cdef Pickle pickle = PyMPI_PICKLE
-    cdef object buf, bufs
+    cdef object buf, bufs = None
     #
     cdef Py_ssize_t i = 0
     cdef int count = 0
@@ -619,7 +619,6 @@ cdef object PyMPI_mrecv(object rmsg,
 
 cdef object PyMPI_imrecv(object rmsg,
                          MPI_Message *message, MPI_Request *request):
-    cdef Pickle pickle = PyMPI_PICKLE
     cdef void* rbuf = NULL
     cdef MPI_Aint rlen = 0
     cdef MPI_Datatype rtype = MPI_BYTE
@@ -711,12 +710,12 @@ cdef object PyMPI_gather(object sendobj, object recvobj,
         else:
             dosend=1; dorecv=0;
     #
-    cdef object tmp1=None, tmp2=None
+    cdef object tmp1 = None, tmp2 = None
     if dorecv: tmp1 = allocate_int(size, &rcounts)
     if dorecv: tmp2 = allocate_int(size, &rdispls)
     #
-    cdef object smsg = None
-    if dosend: smsg = pickle.dump(sendobj, &sbuf, &scount)
+    cdef object tmps = None
+    if dosend: tmps = pickle.dump(sendobj, &sbuf, &scount)
     with nogil: CHKERR( MPI_Gather(&scount, 1, MPI_INT,
                                    rcounts, 1, MPI_INT,
                                    root, comm) )
@@ -760,12 +759,12 @@ cdef object PyMPI_scatter(object sendobj, object recvobj,
         else:
             dosend=0; dorecv=1;
     #
-    cdef object tmp1=None, tmp2=None
+    cdef object tmp1 = None, tmp2 = None
     if dosend: tmp1 = allocate_int(size, &scounts)
     if dosend: tmp2 = allocate_int(size, &sdispls)
     #
-    cdef object smsg = None
-    if dosend: smsg = pickle.dumpv(sendobj, &sbuf, size, scounts, sdispls)
+    cdef object tmps = None
+    if dosend: tmps = pickle.dumpv(sendobj, &sbuf, size, scounts, sdispls)
     with nogil: CHKERR( MPI_Scatter(scounts, 1, MPI_INT,
                                     &rcount, 1, MPI_INT,
                                     root, comm) )
@@ -800,7 +799,7 @@ cdef object PyMPI_allgather(object sendobj, object recvobj,
     cdef object tmp1 = allocate_int(size, &rcounts)
     cdef object tmp2 = allocate_int(size, &rdispls)
     #
-    cdef object smsg = pickle.dump(sendobj, &sbuf, &scount)
+    cdef object tmps = pickle.dump(sendobj, &sbuf, &scount)
     with nogil: CHKERR( MPI_Allgather(&scount, 1, MPI_INT,
                                       rcounts, 1, MPI_INT,
                                       comm) )
@@ -832,12 +831,12 @@ cdef object PyMPI_alltoall(object sendobj, object recvobj,
     else:
         CHKERR( MPI_Comm_size(comm, &size) )
     #
-    cdef object stmp1 = allocate_int(size, &scounts)
-    cdef object stmp2 = allocate_int(size, &sdispls)
-    cdef object rtmp1 = allocate_int(size, &rcounts)
-    cdef object rtmp2 = allocate_int(size, &rdispls)
+    cdef object tmps1 = allocate_int(size, &scounts)
+    cdef object tmps2 = allocate_int(size, &sdispls)
+    cdef object tmpr1 = allocate_int(size, &rcounts)
+    cdef object tmpr2 = allocate_int(size, &rdispls)
     #
-    cdef object smsg = pickle.dumpv(sendobj, &sbuf, size, scounts, sdispls)
+    cdef object tmps = pickle.dumpv(sendobj, &sbuf, size, scounts, sdispls)
     with nogil: CHKERR( MPI_Alltoall(scounts, 1, MPI_INT,
                                      rcounts, 1, MPI_INT,
                                      comm) )
@@ -867,7 +866,7 @@ cdef object PyMPI_neighbor_allgather(object sendobj, object recvobj,
     cdef object tmp1 = allocate_int(rsize, &rcounts)
     cdef object tmp2 = allocate_int(rsize, &rdispls)
     #
-    cdef object smsg = pickle.dump(sendobj, &sbuf, &scount)
+    cdef object tmps = pickle.dump(sendobj, &sbuf, &scount)
     with nogil: CHKERR( MPI_Neighbor_allgather(&scount, 1, MPI_INT,
                                                rcounts, 1, MPI_INT,
                                                comm) )
@@ -895,12 +894,12 @@ cdef object PyMPI_neighbor_alltoall(object sendobj, object recvobj,
     cdef int ssize=0, rsize=0
     comm_neighbors_count(comm, &rsize, &ssize)
     #
-    cdef object stmp1 = allocate_int(ssize, &scounts)
-    cdef object stmp2 = allocate_int(ssize, &sdispls)
-    cdef object rtmp1 = allocate_int(rsize, &rcounts)
-    cdef object rtmp2 = allocate_int(rsize, &rdispls)
+    cdef object tmps1 = allocate_int(ssize, &scounts)
+    cdef object tmps2 = allocate_int(ssize, &sdispls)
+    cdef object tmpr1 = allocate_int(rsize, &rcounts)
+    cdef object tmpr2 = allocate_int(rsize, &rdispls)
     #
-    cdef object smsg = pickle.dumpv(sendobj, &sbuf, ssize, scounts, sdispls)
+    cdef object tmps = pickle.dumpv(sendobj, &sbuf, ssize, scounts, sdispls)
     with nogil: CHKERR( MPI_Neighbor_alltoall(scounts, 1, MPI_INT,
                                               rcounts, 1, MPI_INT,
                                               comm) )

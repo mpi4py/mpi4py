@@ -209,11 +209,12 @@ cdef class Info:
     def clear(self):
         """info clear"""
         if not self: return None
-        cdef int k = 0, nkeys = self.Get_nkeys()
         cdef object key
-        for k from 0 <= k < nkeys:
+        cdef int k = 0, nkeys = self.Get_nkeys()
+        while k < nkeys:
             key = self.Get_nthkey(0)
             self.Delete(key)
+            k += 1
 
 
 

@@ -1577,6 +1577,8 @@ cdef class Topocomm(Intracomm):
     property degrees:
         "number of incoming and outgoing neighbors"
         def __get__(self):
+            cdef object dim, rank
+            cdef object nneighbors
             if isinstance(self, Cartcomm):
                 dim = self.Get_dim()
                 return (2*dim, 2*dim)
@@ -1585,8 +1587,8 @@ cdef class Topocomm(Intracomm):
                 nneighbors = self.Get_neighbors_count(rank)
                 return (nneighbors, nneighbors)
             if isinstance(self, Distgraphcomm):
-                indeg, outdeg = self.Get_dist_neighbors_count()[:2]
-                return (indeg, outdeg)
+                nneighbors = self.Get_dist_neighbors_count()[:2]
+                return nneighbors
             raise TypeError("Not a topology communicator")
 
     property indegree:
@@ -1602,6 +1604,8 @@ cdef class Topocomm(Intracomm):
     property inoutedges:
         "incoming and outgoing neighbors"
         def __get__(self):
+            cdef object direction, source, dest, rank
+            cdef object neighbors
             if isinstance(self, Cartcomm):
                 neighbors = []
                 for direction in range(self.Get_dim()):
@@ -1614,8 +1618,8 @@ cdef class Topocomm(Intracomm):
                 neighbors = self.Get_neighbors(rank)
                 return (neighbors, neighbors)
             if isinstance(self, Distgraphcomm):
-                sources, destinations = self.Get_dist_neighbors()[:2]
-                return (sources, destinations)
+                neighbors = self.Get_dist_neighbors()[:2]
+                return neighbors
             raise TypeError("Not a topology communicator")
 
     property inedges:
