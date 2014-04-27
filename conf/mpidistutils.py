@@ -241,6 +241,7 @@ class ConfigureMPI(object):
     def gen_test(self, code):
         body = ['int main(int argc, char **argv) {',
                 '\n'.join(['  ' + line for line in code.split('\n')]),
+                '  (void)argc; (void)argv;',
                 '  return 0;',
                 '}']
         body = '\n'.join(body) + '\n'
@@ -433,6 +434,7 @@ ConfigTest = """\
 int main(int argc, char **argv)
 {
   int ierr;
+  (void)argc; (void)argv;
   ierr = MPI_Init(&argc, &argv);
   if (ierr) return -1;
   ierr = MPI_Finalize();
@@ -465,7 +467,7 @@ class config(cmd_config.config):
     def check_header (self, header, headers=None, include_dirs=None):
         if headers is None: headers = []
         log.info("checking for header '%s' ..." % header)
-        body = "int main(int n, char**v) { return 0; }"
+        body = "int main(int n, char**v) { (void)n; (void)v; return 0; }"
         ok = self.try_compile(body, list(headers) + [header], include_dirs)
         log.info(ok and 'success!' or 'failure.')
         return ok
@@ -475,7 +477,7 @@ class config(cmd_config.config):
         body = ("#ifndef %s\n"
                 "#error macro '%s' not defined\n"
                 "#endif\n") % (macro, macro)
-        body += "int main(int n, char**v) { return 0; }\n"
+        body += "int main(int n, char**v) { (void)n; (void)v; return 0; }"
         ok = self.try_compile(body, headers, include_dirs)
         return ok
 
@@ -486,7 +488,7 @@ class config(cmd_config.config):
             self.compiler.linker_exe.append('-undefined')
             self.compiler.linker_exe.append('suppress')
         log.info("checking for library '%s' ..." % library)
-        body = "int main(int n, char**v) { return 0; }"
+        body = "int main(int n, char**v) { (void)n; (void)v; return 0; }"
         ok = self.try_link(body,  headers, include_dirs,
                            [library]+other_libraries, library_dirs,
                            lang=lang)
@@ -515,6 +517,7 @@ class config(cmd_config.config):
             body.append("  (void)%s();" % function)
         else:
             body.append("  %s;" % function)
+        body.append(    "  (void)n; (void)v;")
         body.append(    "  return 0;")
         body.append(    "}")
         body = "\n".join(body) + "\n"
@@ -532,6 +535,7 @@ class config(cmd_config.config):
             body.append("%s %s;" % (type, symbol))
         body.append("int main (int n, char**v) {")
         body.append("  %s v; v = %s;" % (type, symbol))
+        body.append("  (void)n; (void)v;")
         body.append("  return 0;")
         body.append("}")
         body = "\n".join(body) + "\n"
