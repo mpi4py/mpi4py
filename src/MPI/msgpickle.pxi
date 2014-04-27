@@ -641,8 +641,7 @@ cdef object PyMPI_barrier(MPI_Comm comm):
     return None
 
 
-cdef object PyMPI_bcast(object obj,
-                        int root, MPI_Comm comm):
+cdef object PyMPI_bcast(object obj, int root, MPI_Comm comm):
     cdef Pickle pickle = PyMPI_PICKLE
     #
     cdef void *buf = NULL
@@ -679,8 +678,7 @@ cdef object PyMPI_bcast(object obj,
     return rmsg
 
 
-cdef object PyMPI_gather(object sendobj, object recvobj,
-                         int root, MPI_Comm comm):
+cdef object PyMPI_gather(object sendobj, int root, MPI_Comm comm):
     cdef Pickle pickle = PyMPI_PICKLE
     #
     cdef void *sbuf = NULL
@@ -728,8 +726,7 @@ cdef object PyMPI_gather(object sendobj, object recvobj,
     return rmsg
 
 
-cdef object PyMPI_scatter(object sendobj, object recvobj,
-                          int root, MPI_Comm comm):
+cdef object PyMPI_scatter(object sendobj, int root, MPI_Comm comm):
     cdef Pickle pickle = PyMPI_PICKLE
     #
     cdef void *sbuf = NULL
@@ -777,8 +774,7 @@ cdef object PyMPI_scatter(object sendobj, object recvobj,
     return rmsg
 
 
-cdef object PyMPI_allgather(object sendobj, object recvobj,
-                            MPI_Comm comm):
+cdef object PyMPI_allgather(object sendobj, MPI_Comm comm):
     cdef Pickle pickle = PyMPI_PICKLE
     #
     cdef void *sbuf = NULL
@@ -811,8 +807,7 @@ cdef object PyMPI_allgather(object sendobj, object recvobj,
     return rmsg
 
 
-cdef object PyMPI_alltoall(object sendobj, object recvobj,
-                           MPI_Comm comm):
+cdef object PyMPI_alltoall(object sendobj, MPI_Comm comm):
     cdef Pickle pickle = PyMPI_PICKLE
     #
     cdef void *sbuf = NULL
@@ -848,8 +843,7 @@ cdef object PyMPI_alltoall(object sendobj, object recvobj,
     return rmsg
 
 
-cdef object PyMPI_neighbor_allgather(object sendobj, object recvobj,
-                                     MPI_Comm comm):
+cdef object PyMPI_neighbor_allgather(object sendobj, MPI_Comm comm):
     cdef Pickle pickle = PyMPI_PICKLE
     #
     cdef void *sbuf = NULL
@@ -878,8 +872,7 @@ cdef object PyMPI_neighbor_allgather(object sendobj, object recvobj,
     return rmsg
 
 
-cdef object PyMPI_neighbor_alltoall(object sendobj, object recvobj,
-                                    MPI_Comm comm):
+cdef object PyMPI_neighbor_alltoall(object sendobj, MPI_Comm comm):
     cdef Pickle pickle = PyMPI_PICKLE
     #
     cdef void *sbuf = NULL
@@ -946,29 +939,25 @@ cdef inline object _py_exscan(object seq, object op):
     return seq
 
 
-cdef object PyMPI_reduce(object sendobj, object recvobj,
-                         object op, int root, MPI_Comm comm):
-    cdef object items = PyMPI_gather(sendobj, recvobj, root, comm)
+cdef object PyMPI_reduce(object sendobj, object op, int root, MPI_Comm comm):
+    cdef object items = PyMPI_gather(sendobj, root, comm)
     return _py_reduce(items, op)
 
 
-cdef object PyMPI_allreduce(object sendobj, object recvobj,
-                            object op, MPI_Comm comm):
-    cdef object items = PyMPI_allgather(sendobj, recvobj, comm)
+cdef object PyMPI_allreduce(object sendobj, object op, MPI_Comm comm):
+    cdef object items = PyMPI_allgather(sendobj, comm)
     return _py_reduce(items, op)
 
 
-cdef object PyMPI_scan(object sendobj, object recvobj,
-                       object op, MPI_Comm comm):
-    cdef object items = PyMPI_gather(sendobj, None, 0, comm)
+cdef object PyMPI_scan(object sendobj, object op, MPI_Comm comm):
+    cdef object items = PyMPI_gather(sendobj, 0, comm)
     items = _py_scan(items, op)
-    return PyMPI_scatter(items, None, 0, comm)
+    return PyMPI_scatter(items, 0, comm)
 
 
-cdef object PyMPI_exscan(object sendobj, object recvobj,
-                         object op, MPI_Comm comm):
-    cdef object items = PyMPI_gather(sendobj, None, 0, comm)
+cdef object PyMPI_exscan(object sendobj, object op, MPI_Comm comm):
+    cdef object items = PyMPI_gather(sendobj, 0, comm)
     items = _py_exscan(items, op)
-    return PyMPI_scatter(items, None, 0, comm)
+    return PyMPI_scatter(items, 0, comm)
 
 # -----------------------------------------------------------------------------
