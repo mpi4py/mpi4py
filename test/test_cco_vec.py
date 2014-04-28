@@ -416,7 +416,7 @@ if name == 'MPICH1' or name == 'LAM/MPI' or MPI.BOTTOM == MPI.IN_PLACE:
     del TestCCOVecInplaceSelf
     del TestCCOVecInplaceWorld
 if name == 'Open MPI':
-    if version < (1,6,0):
+    if version < (1,8,0):
         del TestCCOVecInplaceSelf
         del TestCCOVecInplaceWorld
     if version < (1,4,0):

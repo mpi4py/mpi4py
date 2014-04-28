@@ -256,7 +256,7 @@ except NotImplementedError:
 
 name, version = MPI.get_vendor()
 if name == 'Open MPI':
-    if version <= (1,5,1):
+    if version < (1,5,2):
         if MPI.Query_thread() > MPI.THREAD_SINGLE:
             del BaseTestCommAttr.testAttrCopyDelete
             del TestWinAttr.testAttrCopyDelete

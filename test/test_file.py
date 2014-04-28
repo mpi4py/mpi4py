@@ -179,7 +179,7 @@ class TestFileSelf(BaseTestFile, unittest.TestCase):
 import sys
 name, version = MPI.get_vendor()
 if name == 'Open MPI':
-    if version <= (1,2,8):
+    if version < (1,2,9):
         if MPI.Query_thread() > MPI.THREAD_SINGLE:
             del BaseTestFile.testPreallocate
             del BaseTestFile.testGetSetInfo

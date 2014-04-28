@@ -160,7 +160,7 @@ class TestCCONghBufWorldDup(BaseTestCCONghBuf, unittest.TestCase):
 
 name, version = MPI.get_vendor()
 if name == 'Open MPI':
-    if version <= (1,8,1):
+    if version < (1,8,2):
         del TestCCONghBufSelf
         del TestCCONghBufWorld
         del TestCCONghBufSelfDup
