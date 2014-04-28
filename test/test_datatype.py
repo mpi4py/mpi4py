@@ -292,20 +292,20 @@ class TestDatatype(unittest.TestCase):
         args = (p, r)
         self.check_datatype(None, factory, *args)
 
-    integer_sizes = [1, 2, 4, 8]
-    real_sizes = [4, 8]
-    complex_sizes = [4, 8]
+    match_size_integer = [1, 2, 4, 8]
+    match_size_real    = [4, 8]
+    match_size_complex = [8, 16]
     def testMatchSize(self):
         typeclass = MPI.TYPECLASS_INTEGER
-        for size in self.integer_sizes:
+        for size in self.match_size_integer:
             datatype = MPI.Datatype.Match_size(typeclass, size)
             self.assertEqual(size, datatype.size)
         typeclass = MPI.TYPECLASS_REAL
-        for size in self.real_sizes:
+        for size in self.match_size_real:
             datatype = MPI.Datatype.Match_size(typeclass, size)
             self.assertEqual(size, datatype.size)
         typeclass  = MPI.TYPECLASS_COMPLEX
-        for size in self.complex_sizes:
+        for size in self.match_size_complex:
             datatype = MPI.Datatype.Match_size(typeclass, size)
             self.assertEqual(size, datatype.size)
 
@@ -374,7 +374,7 @@ if name == 'Open MPI':
     if version < (1,8,2) and MPI.VERSION == 3:
         del TestDatatype.testCreateHindexedBlock
     if (1,6,0) < version < (1,7,0):
-        del TestDatatype.complex_sizes[:]
+        del TestDatatype.match_size_complex[:]
     if version < (1,5,2):
         for t in datatypes_f90[-4:]:
             if t != MPI.DATATYPE_NULL:
