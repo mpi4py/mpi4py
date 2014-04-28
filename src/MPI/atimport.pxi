@@ -21,12 +21,14 @@ ctypedef struct Options:
     int threaded
     int thread_level
     int finalize
+    int fast_reduce
 
 cdef Options options
 options.initialize = 1
 options.threaded = 1
 options.thread_level = MPI_THREAD_MULTIPLE
 options.finalize = 1
+options.fast_reduce = 1
 
 cdef int warnOpt(object name, object value) except -1:
     cdef object warn
@@ -39,6 +41,7 @@ cdef int getOptions(Options* opts) except -1:
     opts.threaded = 1
     opts.thread_level = MPI_THREAD_MULTIPLE
     opts.finalize = 1
+    opts.fast_reduce = 1
     try: from mpi4py import rc
     except: return 0
     #
@@ -46,6 +49,7 @@ cdef int getOptions(Options* opts) except -1:
     cdef object threaded = True
     cdef object thread_level = 'multiple'
     cdef object finalize = None
+    cdef object fast_reduce = True
     try: initialize = rc.initialize
     except: pass
     try: threaded = rc.threaded
@@ -53,6 +57,8 @@ cdef int getOptions(Options* opts) except -1:
     try: thread_level = rc.thread_level
     except: pass
     try: finalize = rc.finalize
+    except: pass
+    try: fast_reduce = rc.fast_reduce
     except: pass
     #
     if initialize in (True, 'yes'):
@@ -88,6 +94,13 @@ cdef int getOptions(Options* opts) except -1:
         opts.finalize = 0
     else:
         warnOpt("finalize", finalize)
+    #
+    if fast_reduce in (True, 'yes'):
+        opts.fast_reduce = 1
+    elif fast_reduce in (False, 'no'):
+        opts.fast_reduce = 0
+    else:
+        warnOpt("fast_reduce", fast_reduce)
     #
     return 0
 
