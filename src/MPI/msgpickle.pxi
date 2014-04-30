@@ -959,146 +959,192 @@ cdef object PyMPI_exscan_naive(object sendobj, object op, MPI_Comm comm):
 
 # -----
 
-cdef inline object _py_copy(object obj):
+cdef inline object PyMPI_copy(object obj):
     cdef Pickle pickle = PyMPI_PICKLE
     cdef void *buf = NULL
     cdef int count = 0
-    return pickle.load(pickle.dump(obj, &buf, &count))
+    obj = pickle.dump(obj, &buf, &count)
+    return pickle.load(obj)
 
-cdef object PyMPI_reduce_intra_p2p(object sendobj, object op, int root,
-                                   MPI_Comm comm, int tag):
-        # Get communicator size and rank and check root
-        cdef int size = -1, rank = -1
-        CHKERR( MPI_Comm_size(comm, &size) )
-        CHKERR( MPI_Comm_rank(comm, &rank) )
-        if root < 0 or root >= size:
-            <void>MPI_Comm_call_errhandler(comm, MPI_ERR_ROOT)
-            raise MPIException(MPI_ERR_ROOT)
-        # Special-case MAXLOC and MINLOC
-        if op is __MAXLOC__ or op is __MINLOC__:
-            sendobj = (sendobj, <long> rank)
-        cdef object tmp, recvobj = sendobj
-        if size == 1:
-            recvobj = _py_copy(recvobj)
-        # Compute reduction at process 0
-        cdef unsigned int umask = <unsigned int> 1
-        cdef unsigned int usize = <unsigned int> size
-        cdef unsigned int urank = <unsigned int> rank
-        cdef int target = 0
-        while umask < usize:
-            if (umask & urank) != 0:
-                target = <int> ((urank & ~umask) % usize)
-                PyMPI_send(recvobj, target, tag, comm)
-            else:
-                target = <int> (urank | umask)
-                if target < size:
-                    tmp = PyMPI_recv(None, target, tag, comm, MPI_STATUS_IGNORE)
-                    recvobj = op(recvobj, tmp)
-            umask <<= 1
-        # Send reduction to root
-        if root != 0:
-            if rank == 0:
-                recvobj = PyMPI_send(recvobj, root, tag, comm)
-            elif rank == root:
-                recvobj = PyMPI_recv(None, 0, tag, comm, MPI_STATUS_IGNORE)
-        if rank != root:
-            recvobj = None
-        #
-        return recvobj
+cdef object PyMPI_send_p2p(object obj, int dst, int tag, MPI_Comm comm):
+    cdef Pickle pickle = PyMPI_PICKLE
+    cdef void *buf = NULL
+    cdef int count = 0
+    cdef MPI_Datatype dtype = MPI_BYTE
+    obj = pickle.dump(obj, &buf, &count)
+    with nogil:
+        CHKERR( MPI_Send(&count, 1, MPI_INT, dst, tag, comm) )
+    with nogil:
+        CHKERR( MPI_Send(buf, count, dtype, dst, tag, comm) )
+    return None
 
-cdef object PyMPI_reduce_inter_p2p(object sendobj, object op, int root,
-                                   MPI_Comm comm, int tag,
-                                   MPI_Comm localcomm):
-    if root == MPI_PROC_NULL:
-        return None
-    if root == MPI_ROOT:
-        return PyMPI_recv(None, 0, tag, comm, MPI_STATUS_IGNORE)
-    cdef int size = -1, rank = -1
-    CHKERR( MPI_Comm_remote_size(comm, &size) )
+cdef object PyMPI_recv_p2p(int src, int tag, MPI_Comm comm):
+    cdef Pickle pickle = PyMPI_PICKLE
+    cdef void *buf = NULL
+    cdef int count = 0
+    cdef MPI_Datatype dtype = MPI_BYTE
+    cdef MPI_Status *status = MPI_STATUS_IGNORE
+    cdef object obj
+    with nogil:
+        CHKERR( MPI_Recv(&count, 1, MPI_INT, src, tag, comm, status) )
+    obj = pickle.alloc(&buf, count)
+    with nogil:
+        CHKERR( MPI_Recv(buf, count, dtype, src, tag, comm, status) )
+    return pickle.load(obj)
+
+cdef object PyMPI_sendrecv_p2p(object obj,
+                               int dst, int stag,
+                               int src, int rtag,
+                               MPI_Comm comm):
+    cdef Pickle pickle = PyMPI_PICKLE
+    cdef void *sbuf = NULL, *rbuf = NULL
+    cdef int scount = 0, rcount = 0
+    cdef MPI_Datatype dtype = MPI_BYTE
+    cdef object sobj, rboj
+    sobj = pickle.dump(obj, &sbuf, &scount)
+    with nogil:
+        CHKERR( MPI_Sendrecv(&scount, 1, MPI_INT, dst, stag,
+                             &rcount, 1, MPI_INT, src, rtag,
+                             comm, MPI_STATUS_IGNORE) )
+    robj = pickle.alloc(&rbuf, rcount)
+    with nogil:
+        CHKERR( MPI_Sendrecv(sbuf, scount, dtype, dst, stag,
+                             rbuf, rcount, dtype, src, rtag,
+                             comm, MPI_STATUS_IGNORE) )
+    return pickle.load(robj)
+
+cdef object PyMPI_bcast_p2p(object obj, int root, MPI_Comm comm):
+    cdef Pickle pickle = PyMPI_PICKLE
+    cdef void *buf = NULL
+    cdef int count = 0
+    cdef MPI_Datatype dtype = MPI_BYTE
+    cdef int rank = MPI_PROC_NULL
     CHKERR( MPI_Comm_rank(comm, &rank) )
+    if root == rank: obj = pickle.dump(obj, &buf, &count)
+    with nogil: CHKERR( MPI_Bcast(&count, 1, MPI_INT, root, comm) )
+    if root != rank: obj = pickle.alloc(&buf, count)
+    with nogil: CHKERR( MPI_Bcast(buf, count, dtype, root, comm) )
+    return pickle.load(obj)
+
+cdef object PyMPI_reduce_p2p(object sendobj, object op, int root,
+                             MPI_Comm comm, int tag):
+    # Get communicator size and rank
+    cdef int size = MPI_UNDEFINED
+    cdef int rank = MPI_PROC_NULL
+    CHKERR( MPI_Comm_size(comm, &size) )
+    CHKERR( MPI_Comm_rank(comm, &rank) )
+    # Check root argument
     if root < 0 or root >= size:
         <void>MPI_Comm_call_errhandler(comm, MPI_ERR_ROOT)
         raise MPIException(MPI_ERR_ROOT)
-    sendobj = PyMPI_reduce_intra_p2p(sendobj, op, 0, localcomm, tag)
-    if rank == 0:
-        sendobj = PyMPI_send(sendobj, root, tag, comm)
-    return None
+    # Special-case MAXLOC and MINLOC
+    if op is __MAXLOC__ or op is __MINLOC__:
+        sendobj = (sendobj, <long> rank)
+    if size == 1: sendobj = PyMPI_copy(sendobj)
+    #
+    cdef object result = sendobj
+    cdef object tmp
+    # Compute reduction at process 0
+    cdef unsigned int umask = <unsigned int> 1
+    cdef unsigned int usize = <unsigned int> size
+    cdef unsigned int urank = <unsigned int> rank
+    cdef int target = 0
+    while umask < usize:
+        if (umask & urank) != 0:
+            target = <int> ((urank & ~umask) % usize)
+            PyMPI_send_p2p(result, target, tag, comm)
+        else:
+            target = <int> (urank | umask)
+            if target < size:
+                tmp = PyMPI_recv_p2p(target, tag, comm)
+                result = op(result, tmp)
+        umask <<= 1
+    # Send reduction to root
+    if root != 0:
+        if rank == 0:
+            result = PyMPI_send_p2p(result, root, tag, comm)
+        elif rank == root:
+            result = PyMPI_recv_p2p(0, tag, comm)
+    if rank != root:
+        result = None
+    #
+    return result
 
 cdef object PyMPI_scan_p2p(object sendobj, object op,
                            MPI_Comm comm, int tag):
-        # Get communicator size and rank
-        cdef int size = -1, rank = -1
-        CHKERR( MPI_Comm_size(comm, &size) )
-        CHKERR( MPI_Comm_rank(comm, &rank) )
-        # Special-case MAXLOC and MINLOC
-        if op is __MAXLOC__ or op is __MINLOC__:
-            sendobj = (sendobj, <long> rank)
-        #
-        cdef object recvobj = sendobj
-        cdef object partial = sendobj
-        cdef object tmp
-        if size == 1:
-            recvobj = _py_copy(recvobj)
-        # Compute prefix op
-        cdef unsigned int umask = <unsigned int> 1
-        cdef unsigned int usize = <unsigned int> size
-        cdef unsigned int urank = <unsigned int> rank
-        cdef int target = 0
-        while umask < usize:
-            target = <int> (urank ^ umask)
-            if target < size:
-                tmp = PyMPI_sendrecv(partial, target, tag,
-                                     None,    target, tag,
-                                     comm, MPI_STATUS_IGNORE)
-                if rank > target:
-                    partial = op(tmp, partial)
-                    recvobj = op(tmp, recvobj)
-                else:
-                    tmp = op(partial, tmp)
-                    partial = tmp
-            umask <<= 1
-        #
-        return recvobj
+    # Get communicator size and rank
+    cdef int size = MPI_UNDEFINED
+    cdef int rank = MPI_PROC_NULL
+    CHKERR( MPI_Comm_size(comm, &size) )
+    CHKERR( MPI_Comm_rank(comm, &rank) )
+    # Special-case MAXLOC and MINLOC
+    if op is __MAXLOC__ or op is __MINLOC__:
+        sendobj = (sendobj, <long> rank)
+    if size == 1: sendobj = PyMPI_copy(sendobj)
+    #
+    cdef object result  = sendobj
+    cdef object partial = result
+    cdef object tmp
+    # Compute prefix op
+    cdef unsigned int umask = <unsigned int> 1
+    cdef unsigned int usize = <unsigned int> size
+    cdef unsigned int urank = <unsigned int> rank
+    cdef int target = 0
+    while umask < usize:
+        target = <int> (urank ^ umask)
+        if target < size:
+            tmp = PyMPI_sendrecv_p2p(partial, target, tag,
+                                     target, tag, comm)
+            if rank > target:
+                partial = op(tmp, partial)
+                result = op(tmp, result)
+            else:
+                tmp = op(partial, tmp)
+                partial = tmp
+        umask <<= 1
+    #
+    return result
 
 cdef object PyMPI_exscan_p2p(object sendobj, object op,
                              MPI_Comm comm, int tag):
-        # Get communicator size and rank
-        cdef int size = -1, rank = -1
-        CHKERR( MPI_Comm_size(comm, &size) )
-        CHKERR( MPI_Comm_rank(comm, &rank) )
-        # Special-case MAXLOC and MINLOC
-        if op is __MAXLOC__ or op is __MINLOC__:
-            sendobj = (sendobj, <long> rank)
-        cdef object recvobj = sendobj
-        cdef object partial = sendobj
-        cdef object tmp
-        # Compute prefix reduction
-        cdef unsigned int umask = <unsigned int> 1
-        cdef unsigned int usize = <unsigned int> size
-        cdef unsigned int urank = <unsigned int> rank
-        cdef unsigned int uflag = <unsigned int> 0
-        cdef int target = 0
-        while umask < usize:
-            target = <int> (urank ^ umask)
-            if target < size:
-                tmp = PyMPI_sendrecv(partial, target, tag,
-                                     None,    target, tag,
-                                     comm, MPI_STATUS_IGNORE)
-                if rank > target:
-                    partial = op(tmp, partial)
-                    if rank != 0:
-                        if uflag == 0:
-                            recvobj = tmp; uflag = 1
-                        else:
-                            recvobj = op(tmp, recvobj)
-                else:
-                    tmp = op(partial, tmp)
-                    partial = tmp
-            umask <<= 1
-        #
-        if rank == 0:
-            recvobj = None
-        return recvobj
+    # Get communicator size and rank
+    cdef int size = MPI_UNDEFINED
+    cdef int rank = MPI_PROC_NULL
+    CHKERR( MPI_Comm_size(comm, &size) )
+    CHKERR( MPI_Comm_rank(comm, &rank) )
+    # Special-case MAXLOC and MINLOC
+    if op is __MAXLOC__ or op is __MINLOC__:
+        sendobj = (sendobj, <long> rank)
+    #
+    cdef object result  = sendobj
+    cdef object partial = result
+    cdef object tmp
+    # Compute prefix reduction
+    cdef unsigned int umask = <unsigned int> 1
+    cdef unsigned int usize = <unsigned int> size
+    cdef unsigned int urank = <unsigned int> rank
+    cdef unsigned int uflag = <unsigned int> 0
+    cdef int target = 0
+    while umask < usize:
+        target = <int> (urank ^ umask)
+        if target < size:
+            tmp = PyMPI_sendrecv_p2p(partial, target, tag,
+                                     target, tag, comm)
+            if rank > target:
+                partial = op(tmp, partial)
+                if rank != 0:
+                    if uflag == 0:
+                        result = tmp; uflag = 1
+                    else:
+                        result = op(tmp, result)
+            else:
+                tmp = op(partial, tmp)
+                partial = tmp
+        umask <<= 1
+    #
+    if rank == 0:
+        result = None
+    return result
 
 # -----
 
@@ -1110,37 +1156,48 @@ cdef object PyMPI_reduce_intra(object sendobj, object op,
                                int root, MPI_Comm comm):
     cdef int tag = MPI_UNDEFINED
     CHKERR( PyMPI_Commctx_intra(comm, &comm, &tag) )
-    return PyMPI_reduce_intra_p2p(sendobj, op, root, comm, tag)
+    return PyMPI_reduce_p2p(sendobj, op, root, comm, tag)
 
 cdef object PyMPI_reduce_inter(object sendobj, object op,
                                int root, MPI_Comm comm):
     cdef int tag = MPI_UNDEFINED
     cdef MPI_Comm localcomm = MPI_COMM_NULL
     CHKERR( PyMPI_Commctx_inter(comm, &comm, &tag, &localcomm, NULL) )
-    return PyMPI_reduce_inter_p2p(sendobj, op, root, comm, tag, localcomm)
+    # Get communicator remote size and rank
+    cdef int size = MPI_UNDEFINED
+    cdef int rank = MPI_PROC_NULL
+    CHKERR( MPI_Comm_remote_size(comm, &size) )
+    CHKERR( MPI_Comm_rank(comm, &rank) )
+    if root >= 0 and root < size:
+        # Reduce in local group and send to remote root
+        sendobj = PyMPI_reduce_p2p(sendobj, op, 0, localcomm, tag)
+        if rank == 0: PyMPI_send_p2p(sendobj, root, tag, comm)
+        return None
+    elif root == MPI_ROOT: # Receive from remote group
+        return PyMPI_recv_p2p(0, tag, comm)
+    elif root == MPI_PROC_NULL: # This process does nothing
+        return None
+    else: # Wrong root argument
+        <void>MPI_Comm_call_errhandler(comm, MPI_ERR_ROOT)
+        raise MPIException(MPI_ERR_ROOT)
 
 cdef object PyMPI_allreduce_intra(object sendobj, object op, MPI_Comm comm):
     cdef int tag = MPI_UNDEFINED
-    cdef object red
     CHKERR( PyMPI_Commctx_intra(comm, &comm, &tag) )
-    red = PyMPI_reduce_intra_p2p(sendobj, op, 0, comm, tag)
-    return PyMPI_bcast(red, 0, comm)
+    sendobj = PyMPI_reduce_p2p(sendobj, op, 0, comm, tag)
+    return PyMPI_bcast_p2p(sendobj, 0, comm)
 
 cdef object PyMPI_allreduce_inter(object sendobj, object op, MPI_Comm comm):
-    cdef int tag = MPI_UNDEFINED, low_group = MPI_UNDEFINED
-    cdef int rank = MPI_PROC_NULL, root = MPI_PROC_NULL, zero = 0
+    cdef int tag = MPI_UNDEFINED
+    cdef int rank = MPI_PROC_NULL
     cdef MPI_Comm localcomm = MPI_COMM_NULL
-    cdef object tmp, red
-    CHKERR( PyMPI_Commctx_inter(comm, &comm, &tag, &localcomm, &low_group) )
+    CHKERR( PyMPI_Commctx_inter(comm, &comm, &tag, &localcomm, NULL) )
     CHKERR( MPI_Comm_rank(comm, &rank) )
-    if rank == 0: root = MPI_ROOT
-    if low_group:
-        tmp = PyMPI_reduce_inter_p2p(sendobj, op, zero, comm, tag, localcomm)
-        red = PyMPI_reduce_inter_p2p(sendobj, op, root, comm, tag, localcomm)
-    else:
-        red = PyMPI_reduce_inter_p2p(sendobj, op, root, comm, tag, localcomm)
-        tmp = PyMPI_reduce_inter_p2p(sendobj, op, zero, comm, tag, localcomm)
-    return PyMPI_bcast(red, 0, localcomm)
+    # Reduce in local group, exchange, and broadcast in local group
+    sendobj = PyMPI_reduce_p2p(sendobj, op, 0, localcomm, tag)
+    if rank == 0:
+        sendobj = PyMPI_sendrecv_p2p(sendobj, 0, tag, 0, tag, comm)
+    return PyMPI_bcast_p2p(sendobj, 0, localcomm)
 
 cdef object PyMPI_scan_intra(object sendobj, object op, MPI_Comm comm):
     cdef int tag = MPI_UNDEFINED
