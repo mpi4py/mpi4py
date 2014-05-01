@@ -89,7 +89,8 @@ def customize_compiler(compiler, lang=None,
         for attr in ('preprocessor',
                      'compiler', 'compiler_cxx', 'compiler_so',
                      'linker_so', 'linker_exe'):
-            compiler_cmd = getattr(compiler, attr, [])
+            compiler_cmd = getattr(compiler, attr, None)
+            if compiler_cmd is None: continue
             for flag in badcflags:
                 while flag in compiler_cmd:
                     compiler_cmd.remove(flag)
