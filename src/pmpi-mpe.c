@@ -1,1 +1,1 @@
-static const char name[] = "mpe";
+char pympi_pmpi_name[] = "mpe";

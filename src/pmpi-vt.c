@@ -1,2 +1,2 @@
 #include "pmpi-vt.h"
-static const char name[] = "vt";
+char pympi_pmpi_name[] = "vt";
