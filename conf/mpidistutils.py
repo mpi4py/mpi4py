@@ -487,6 +487,7 @@ class config(cmd_config.config):
                    headers=None, include_dirs=None,
                    other_libraries=[], lang="c"):
         if sys.platform == "darwin":
+            self.compiler.linker_exe.append('-flat_namespace')
             self.compiler.linker_exe.append('-undefined')
             self.compiler.linker_exe.append('suppress')
         log.info("checking for library '%s' ..." % library)
