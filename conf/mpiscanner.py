@@ -52,9 +52,7 @@ class Node(object):
 
 class NodeType(Node):
     CONFIG = """\
-    %(ctype)s v; %(ctype)s* p;
-    char* c = (char*)&v; c[0] = 0;
-    p = &v; *p = v;"""
+    %(ctype)s v; %(ctype)s* p; (void)v; (void)p;"""
 
     def __init__(self, ctype):
         self.init(name=ctype,
@@ -96,8 +94,7 @@ class NodeValue(Node):
     HEADER = """\
     const %(ctype)s %(cname)s;"""
     CONFIG = """\
-    %(ctype)s v; %(ctype)s* p;
-    v = %(cname)s; p = &v; *p = %(cname)s;"""
+    %(ctype)s v; v = %(cname)s; (void)v;"""
     MISSING = '#define %(cname)s (%(calias)s)'
 
     def __init__(self, ctype, cname, calias):
@@ -119,9 +116,7 @@ class NodeFuncProto(Node):
     HEADER = """\
     %(crett)s %(cname)s(%(cargs)s);"""
     CONFIG = """\
-    %(crett)s v;
-    v = %(cname)s(%(cargscall)s);
-    if (v) v= (%(crett)s) 0;"""
+    %(crett)s v; v = %(cname)s(%(cargscall)s); (void)v;"""
     MISSING = ' '. join(['#define %(cname)s(%(cargsnamed)s)',
                         'PyMPI_UNAVAILABLE("%(name)s"%(comma)s%(cargsnamed)s)'])
     def __init__(self, crett, cname, cargs, calias=None):
