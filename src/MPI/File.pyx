@@ -631,3 +631,23 @@ cdef File __FILE_NULL__ = new_File(MPI_FILE_NULL)
 # -----------------------
 
 FILE_NULL = __FILE_NULL__  #: Null file handle
+
+
+# User-defined data representations
+# ---------------------------------
+
+def Register_datatrep(datarep, read_fn, write_fn, extent_fn):
+    """
+    Register user-defined data representations
+    """
+    cdef char *cdatarep = NULL
+    datarep = asmpistr(datarep, &cdatarep, NULL)
+    cdef object state = _p_datarep(read_fn, write_fn, extent_fn)
+    cdef MPI_Datarep_conversion_function *rd = MPI_CONVERSION_FN_NULL
+    cdef MPI_Datarep_conversion_function *wr = MPI_CONVERSION_FN_NULL
+    cdef MPI_Datarep_extent_function     *ex = datarep_extent_fn
+    cdef void* xs = <void*>state
+    if read_fn  is not None: rd = datarep_read_fn
+    if write_fn is not None: wr = datarep_write_fn
+    CHKERR ( MPI_Register_datarep(cdatarep, rd, wr, ex, xs) )
+    datarep_registry[datarep] = state

@@ -238,6 +238,8 @@ cdef inline int del_Win(MPI_Win* ob):
 #------------------------------------------------------------------------------
 # File
 
+include "drepimpl.pxi"
+
 cdef inline File new_File(MPI_File ob):
     cdef File file = <File>File.__new__(File)
     file.ob_mpi = ob
