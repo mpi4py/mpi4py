@@ -164,6 +164,8 @@ class TestGroupWorld(BaseTestGroup, unittest.TestCase):
 
 
 name, version = MPI.get_vendor()
+if name == 'Platform MPI':
+    del BaseTestGroup.testTranslRanksProcNull
 if name == 'MPICH1':
     del BaseTestGroup.testTranslRanksProcNull
     TestGroupEmpty.testTranslRanks = lambda self: None

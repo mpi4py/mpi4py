@@ -174,6 +174,8 @@ if name == 'MPICH' or name == 'MPICH2':
         del TestDPM.testNamePublishing
 elif name == 'Open MPI':
     del TestDPM
+elif name == 'Platform MPI':
+    del TestDPM.testNamePublishing
 else:
     try:
         MPI.Close_port(MPI.Open_port())

@@ -138,6 +138,8 @@ if name == 'MPICH2':
         SKIP_TEST = True
 if name == 'Microsoft MPI':
     SKIP_TEST = True
+if name == 'Platform MPI':
+    SKIP_TEST = True
 if name == 'HP MPI':
     SKIP_TEST = True
 if MPI.Get_version() < (2,0):

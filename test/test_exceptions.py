@@ -376,6 +376,23 @@ if name == 'Open MPI':
 if name == 'Microsoft MPI':
         del TestExcStatus
         TestExcCommNull.ERR_COMM = (MPI.ERR_COMM, MPI.ERR_ARG)
+if name == 'Platform MPI':
+        del TestExcDatatypeNull
+        del TestExcDatatype
+        del TestExcStatus
+        del TestExcRequestNull
+        del TestExcOpNull
+        del TestExcOp
+        del TestExcInfoNull
+        del TestExcInfo
+        del TestExcGroupNull
+        del TestExcGroup
+        del TestExcCommNull
+        del TestExcComm
+        del TestExcWinNull
+        del TestExcWin
+        del TestExcErrhandlerNull
+        del TestExcErrhandler
 if name == 'HP MPI':
         del TestExcDatatypeNull
         del TestExcDatatype

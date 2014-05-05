@@ -77,8 +77,17 @@ static int PyMPI_Get_vendor(const char **vendor_name,
   #endif
 #endif
 
+  /* Platform MPI */
+#if defined(PLATFORM_MPI)
+  name = "Platform MPI";
+  major = (PLATFORM_MPI>>24)&0xff;
+  minor = (PLATFORM_MPI>>16)&0xff;
+  micro = (PLATFORM_MPI>> 8)&0xff;
+  major = (major/16)*10+(major%16);
+#endif
+
   /* HP MPI */
-#if defined(HP_MPI)
+#if defined(HP_MPI) && !defined(PLATFORM_MPI)
   name = "HP MPI";
   major = HP_MPI/100;
   minor = HP_MPI%100;

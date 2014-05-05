@@ -383,6 +383,11 @@ if name == 'Open MPI':
         del TestDatatype.testCommit
         del TestDatatype.testDup
         del TestDatatype.testCreateResized
+if name == 'Platform MPI':
+    combiner_map[MPI.COMBINER_INDEXED_BLOCK] = MPI.COMBINER_INDEXED
+    combiner_map[MPI.COMBINER_DARRAY] = MPI.COMBINER_STRUCT
+    combiner_map[MPI.COMBINER_SUBARRAY] = MPI.COMBINER_STRUCT
+    del TestDatatype.match_size_complex[:]
 
 if sys.version_info[0] >=3:
     del TestGetAddress

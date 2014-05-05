@@ -260,6 +260,8 @@ if name == 'Open MPI':
         if MPI.Query_thread() > MPI.THREAD_SINGLE:
             del BaseTestCommAttr.testAttrCopyDelete
             del TestWinAttr.testAttrCopyDelete
+if name == 'Platform MPI':
+    del TestWinAttr.testAttrCopyDelete
 
 
 if __name__ == '__main__':
