@@ -30,7 +30,7 @@
 #if MPICH2_NUMVERSION >= 10500000 && \
     MPICH2_NUMVERSION <  20000000
 
-#if 0 /*XXX*/
+/*
 #define PyMPI_HAVE_MPI_Count 1
 #define PyMPI_HAVE_MPI_COUNT 1
 #define PyMPI_HAVE_MPI_Type_size_x 1
@@ -45,7 +45,7 @@
 #define MPI_Type_get_true_extent_x MPIX_Type_get_true_extent_x
 #define MPI_Get_elements_x         MPIX_Get_elements_x
 #define MPI_Status_set_elements_x  MPIX_Status_set_elements_x
-#endif
+*/
 
 #define PyMPI_HAVE_MPI_COMBINER_HINDEXED_BLOCK 1
 #define PyMPI_HAVE_MPI_Type_create_hindexed_block 1
@@ -138,6 +138,14 @@
 #define MPI_Comm_create_group     MPIX_Comm_create_group
 #define MPI_COMM_TYPE_SHARED      MPIX_COMM_TYPE_SHARED
 #define MPI_Comm_split_type       MPIX_Comm_split_type
+/*
+#define PyMPI_HAVE_MPI_Comm_dup_with_info 1
+#define PyMPI_HAVE_MPI_Comm_set_info 1
+#define PyMPI_HAVE_MPI_Comm_get_info 1
+#define MPI_Comm_dup_with_info    MPIX_Comm_dup_with_info
+#define MPI_Comm_set_info         MPIX_Comm_set_info
+#define MPI_Comm_get_info         MPIX_Comm_get_info
+*/
 
 #define PyMPI_HAVE_MPI_WIN_CREATE_FLAVOR 1
 #define PyMPI_HAVE_MPI_WIN_FLAVOR_CREATE 1
@@ -167,14 +175,12 @@
 #define MPI_Win_create_dynamic  MPIX_Win_create_dynamic
 #define MPI_Win_attach          MPIX_Win_attach
 #define MPI_Win_detach          MPIX_Win_detach
-
-#if 0 /*XXX*/
+/*
 #define PyMPI_HAVE_MPI_Win_set_info 1
 #define PyMPI_HAVE_MPI_Win_get_info 1
 #define MPI_Win_set_info MPIX_Win_set_info
 #define MPI_Win_get_info MPIX_Win_get_info
-#endif/*XXX*/
-
+*/
 #define PyMPI_HAVE_MPI_Get_accumulate 1
 #define PyMPI_HAVE_MPI_Fetch_and_op 1
 #define PyMPI_HAVE_MPI_Compare_and_swap 1
@@ -212,23 +218,14 @@
 #define MPI_ERR_RMA_SHARED MPIX_ERR_RMA_SHARED
 #define MPI_ERR_RMA_FLAVOR MPIX_ERR_RMA_WRONG_FLAVOR
 
-#if 0 /*XXX*/
-#define PyMPI_HAVE_MPI_Comm_dup_with_info 1
-#define PyMPI_HAVE_MPI_Comm_set_info 1
-#define PyMPI_HAVE_MPI_Comm_get_info 1
-#define MPI_Comm_dup_with_info    MPIX_Comm_dup_with_info
-#define MPI_Comm_set_info         MPIX_Comm_set_info
-#define MPI_Comm_get_info         MPIX_Comm_get_info
-#endif/*XXX*/
-
-#if 0 /*XXX*/
+/*
 #define PyMPI_HAVE_MPI_MAX_LIBRARY_VERSION_STRING 1
 #define PyMPI_HAVE_MPI_Get_library_version 1
 #define PyMPI_HAVE_MPI_INFO_ENV 1
 #define MPI_MAX_LIBRARY_VERSION_STRING MPIX_MAX_LIBRARY_VERSION_STRING
 #define MPI_Get_library_version        MPIX_Get_library_version
 #define MPI_INFO_ENV                   MPIX_INFO_ENV
-#endif/*XXX*/
+*/
 
 #endif /* MPICH2 < 1.5*/
 #endif /* MPI    < 3.0*/
