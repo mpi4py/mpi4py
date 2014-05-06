@@ -76,23 +76,17 @@ def rc(**kargs):
     Parameters
     ----------
     initialize : bool
-        Automatic MPI initialization at import
-       (default: True).
+        Automatic MPI initialization at import (default: True).
     threaded : bool
-        Request for thread support at MPI initialization
-        (default: True).
+        Request for thread support (default: True).
     thread_level : {'multiple', 'serialized', 'funneled', 'single'}
-        Level of thread support to request
-        (default: 'multiple').
+        Level of thread support to request (default: 'multiple').
     finalize : None or bool
-        Automatic MPI finalization at exit
-        (default: None).
+        Automatic MPI finalization at exit (default: None).
     fast_reduce : bool
-        Use tree-based reductions for Python objects
-        (default: True).
+        Use tree-based reductions for objects (default: True).
     recv_mprobe : bool
-        Use matched probes to receive for Python objects
-        (default: True).
+        Use matched probes to receive objects (default: True).
 
     """
     for key in kargs:
