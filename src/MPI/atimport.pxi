@@ -12,7 +12,8 @@ cdef extern from "Python.h":
 # -----------------------------------------------------------------------------
 
 cdef extern from "atimport.h":
-    pass
+    enum: USE_MATCHED_RECV "PyMPI_USE_MATCHED_RECV"
+
 
 # -----------------------------------------------------------------------------
 
@@ -22,6 +23,7 @@ ctypedef struct Options:
     int thread_level
     int finalize
     int fast_reduce
+    int recv_mprobe
 
 cdef Options options
 options.initialize = 1
@@ -29,6 +31,7 @@ options.threaded = 1
 options.thread_level = MPI_THREAD_MULTIPLE
 options.finalize = 1
 options.fast_reduce = 1
+options.recv_mprobe = 1
 
 cdef int warnOpt(object name, object value) except -1:
     cdef object warn
@@ -42,6 +45,7 @@ cdef int getOptions(Options* opts) except -1:
     opts.thread_level = MPI_THREAD_MULTIPLE
     opts.finalize = 1
     opts.fast_reduce = 1
+    opts.recv_mprobe = 1
     try: from mpi4py import rc
     except: return 0
     #
@@ -50,6 +54,7 @@ cdef int getOptions(Options* opts) except -1:
     cdef object thread_level = 'multiple'
     cdef object finalize = None
     cdef object fast_reduce = True
+    cdef object recv_mprobe = True
     try: initialize = rc.initialize
     except: pass
     try: threaded = rc.threaded
@@ -59,6 +64,8 @@ cdef int getOptions(Options* opts) except -1:
     try: finalize = rc.finalize
     except: pass
     try: fast_reduce = rc.fast_reduce
+    except: pass
+    try: recv_mprobe = rc.recv_mprobe
     except: pass
     #
     if initialize in (True, 'yes'):
@@ -101,6 +108,13 @@ cdef int getOptions(Options* opts) except -1:
         opts.fast_reduce = 0
     else:
         warnOpt("fast_reduce", fast_reduce)
+    #
+    if recv_mprobe in (True, 'yes'):
+        opts.recv_mprobe = 1 and USE_MATCHED_RECV
+    elif recv_mprobe in (False, 'no'):
+        opts.recv_mprobe = 0
+    else:
+        warnOpt("recv_mprobe", recv_mprobe)
     #
     return 0
 

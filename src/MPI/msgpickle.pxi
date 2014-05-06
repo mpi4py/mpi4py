@@ -8,9 +8,6 @@ cdef extern from "Python.h":
     object     PyBytes_FromStringAndSize(char*,Py_ssize_t)
     object     PyBytes_Join"_PyBytes_Join"(object,object)
 
-cdef extern from *:
-    enum: USE_MATCHED_RECV "PyMPI_USE_MATCHED_RECV"
-
 # -----------------------------------------------------------------------------
 
 cdef object PyPickle_dumps = None
@@ -264,7 +261,7 @@ cdef object PyMPI_recv(object obj, int source, int tag,
     if dorecv:
         if obj is None:
             with nogil:
-                if USE_MATCHED_RECV:
+                if options.recv_mprobe:
                     CHKERR( MPI_Mprobe(source, tag, comm, &match, &rsts) )
                 else:
                     CHKERR( MPI_Probe(source, tag, comm, &rsts) )
@@ -315,7 +312,7 @@ cdef object PyMPI_sendrecv(object sobj, int dest,   int sendtag,
     if dorecv:
         if robj is None:
             with nogil:
-                if USE_MATCHED_RECV:
+                if options.recv_mprobe:
                     CHKERR( MPI_Mprobe(source, recvtag, comm, &match, &rsts) )
                 else:
                     CHKERR( MPI_Probe(source, recvtag, comm, &rsts) )
