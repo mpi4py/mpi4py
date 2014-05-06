@@ -66,7 +66,7 @@ def fix_compiler_cmd(cc, mpicc):
         i = i + 1
         while '=' in cc[i]:
             i = i + 1
-    cc[i] = mpicc
+    cc[i:i+1] = split_quoted(mpicc)
 
 def fix_linker_cmd(ld, mpild):
     if not mpild: return
@@ -78,7 +78,7 @@ def fix_linker_cmd(ld, mpild):
         i = i + 1
         while '=' in ld[i]:
             i = i + 1
-    ld[i] = mpild
+    ld[i:i+1] = split_quoted(mpild)
 
 def customize_compiler(compiler, lang=None,
                        mpicc=None, mpicxx=None, mpild=None,
