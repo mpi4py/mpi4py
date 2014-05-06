@@ -38,6 +38,8 @@ Release 2.0 [2014-XX-XX]
 
   + Change ``Request.Waitsome()`` and ``Request.Testsome()``
     to return ``None`` or ``list``.
+  + Change signature of lowercase collectives, ``sendobj`` arguments
+    are now mandatory and unused ``recvobj`` arguments were removed.
   + Change signature of name publishing functions.
     The new signatures are
     ``Publish_name(service_name, port_name, info=INFO_NULL)`` and

@@ -175,7 +175,7 @@ class BaseTestCCOObjInter(object):
         size = self.INTERCOMM.Get_size()
         rsize = self.INTERCOMM.Get_remote_size()
         for op in (MPI.SUM, MPI.MAX, MPI.MIN, MPI.PROD):
-            value = self.INTERCOMM.allreduce(rank, None, op)
+            value = self.INTERCOMM.allreduce(rank, op)
             if op == MPI.SUM:
                 self.assertEqual(value, cumsum(range(rsize)))
             elif op == MPI.PROD:

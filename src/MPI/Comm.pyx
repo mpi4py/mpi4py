@@ -1219,38 +1219,38 @@ cdef class Comm:
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_barrier(comm)
     #
-    def bcast(self, obj=None, int root=0):
+    def bcast(self, obj, int root=0):
         """Broadcast"""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_bcast(obj, root, comm)
     #
-    def gather(self, sendobj=None, recvobj=None, int root=0):
+    def gather(self, sendobj, int root=0):
         """Gather"""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_gather(sendobj, root, comm)
     #
-    def scatter(self, sendobj=None, recvobj=None, int root=0):
+    def scatter(self, sendobj, int root=0):
         """Scatter"""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_scatter(sendobj, root, comm)
     #
-    def allgather(self, sendobj=None, recvobj=None):
+    def allgather(self, sendobj):
         """Gather to All"""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_allgather(sendobj, comm)
     #
-    def alltoall(self, sendobj=None, recvobj=None):
+    def alltoall(self, sendobj):
         """All to All Scatter/Gather"""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_alltoall(sendobj, comm)
     #
-    def reduce(self, sendobj=None, recvobj=None, op=SUM, int root=0):
+    def reduce(self, sendobj, op=SUM, int root=0):
         """Reduce"""
         if op is None: op = SUM
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_reduce(sendobj, op, root, comm)
     #
-    def allreduce(self, sendobj=None, recvobj=None, op=SUM):
+    def allreduce(self, sendobj, op=SUM):
         """Reduce to All"""
         if op is None: op = SUM
         cdef MPI_Comm comm = self.ob_mpi
@@ -1430,13 +1430,13 @@ cdef class Intracomm(Comm):
 
     # Python Communication
     #
-    def scan(self, sendobj=None, recvobj=None, op=SUM):
+    def scan(self, sendobj, op=SUM):
         """Inclusive Scan"""
         if op is None: op = SUM
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_scan(sendobj, op, comm)
     #
-    def exscan(self, sendobj=None, recvobj=None, op=SUM):
+    def exscan(self, sendobj, op=SUM):
         """Exclusive Scan"""
         if op is None: op = SUM
         cdef MPI_Comm comm = self.ob_mpi
@@ -1765,12 +1765,12 @@ cdef class Topocomm(Intracomm):
 
     # Python Communication
     #
-    def neighbor_allgather(self, sendobj=None, recvobj=None):
+    def neighbor_allgather(self, sendobj):
         """Neighbor Gather to All"""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_neighbor_allgather(sendobj, comm)
     #
-    def neighbor_alltoall(self, sendobj=None, recvobj=None):
+    def neighbor_alltoall(self, sendobj):
         """Neighbor All to All Scatter/Gather"""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_neighbor_alltoall(sendobj, comm)

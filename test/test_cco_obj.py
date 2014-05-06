@@ -62,14 +62,14 @@ class BaseTestCCOObj(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for smess in messages + [messages]:
-            rmess = self.COMM.allgather(smess, None)
+            rmess = self.COMM.allgather(smess)
             self.assertEqual(rmess, [smess] * size)
 
     def testAlltoall(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for smess in messages + [messages]:
-            rmess = self.COMM.alltoall([smess] * size, None)
+            rmess = self.COMM.alltoall([smess] * size)
             self.assertEqual(rmess, [smess] * size)
 
     def testReduce(self):
@@ -79,7 +79,7 @@ class BaseTestCCOObj(object):
             for op in (MPI.SUM, MPI.PROD,
                        MPI.MAX, MPI.MIN,
                        MPI.MAXLOC, MPI.MINLOC):
-                value = self.COMM.reduce(rank, None, op=op, root=root)
+                value = self.COMM.reduce(rank, op=op, root=root)
                 if rank != root:
                     self.assertTrue(value is None)
                 else:
@@ -102,7 +102,7 @@ class BaseTestCCOObj(object):
         for op in (MPI.SUM, MPI.PROD,
                    MPI.MAX, MPI.MIN,
                    MPI.MAXLOC, MPI.MINLOC):
-            value = self.COMM.allreduce(rank, None, op)
+            value = self.COMM.allreduce(rank, op)
             if op == MPI.SUM:
                 self.assertEqual(value, cumsum(range(size)))
             elif op == MPI.PROD:
