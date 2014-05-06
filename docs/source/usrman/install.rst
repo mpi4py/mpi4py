@@ -7,15 +7,15 @@ Requirements
 You need to have the following software properly installed in order to
 build *MPI for Python*:
 
-* A working MPI distribution, preferably a MPI-2 one built with
-  shared/dynamic libraries.
+* A working MPI implementation, preferably supporting MPI-3 and built
+  with shared/dynamic libraries.
 
   .. note::
 
      If you want to build some MPI implementation from sources,
      check the instructions at :ref:`building-mpi` in the appendix.
 
-* A Python 2.4 to 2.7 or 3.0 to 3.3 distribution, with Python
+* A Python 2.4 to 2.7 or 3.0 to 3.4 distribution, with Python
   library preferably built with shared/dynamic libraries.
 
   .. note::
@@ -78,15 +78,15 @@ some distutils commands (like *build*) have additional options:
 
 * :option:`--configure` : runs exhaustive tests for checking about
   missing MPI types/constants/calls. This option should be passed in
-  order to build *MPI for Python* against old MPI-1 implementations,
-  possibly providing a subset of MPI-2.
+  order to build *MPI for Python* against old MPI-1 or MPI-2
+  implementations, possibly providing a subset of MPI-3.
 
 
 Downloading
 ^^^^^^^^^^^
 
 The *MPI for Python* package is available for download at the project
-website generously hosted by Google Code. You can use :program:`curl`
+website generously hosted by Bitbucket. You can use :program:`curl`
 or :program:`wget` to get a release tarball.
 
 * Using :program:`curl`::

@@ -5,8 +5,8 @@
    standard for the Python programming language, allowing any Python
    program to exploit multiple processors.
 
-   This package is constructed on top of the MPI-1/2 specifications
-   and provides an object oriented interface which closely follows
+   This package is constructed on top of the MPI-1/2/3 specifications
+   and provides an object oriented interface which resembles the
    MPI-2 C++ bindings. It supports point-to-point (sends, receives)
    and collective (broadcasts, scatters, gathers) communications of
    any *picklable* Python object, as well as optimized communications
