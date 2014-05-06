@@ -2,8 +2,6 @@
 default: build test clean
 
 PYTHON = python
-
-PYTHON = python
 PYTHON_CONFIG = ${PYTHON} ../python-config
 MPI4PY_INCLUDE = -I${shell ${PYTHON} -c 'import mpi4py; print( mpi4py.get_include() )'}
 
@@ -11,7 +9,7 @@ CYTHON = cython
 .PHONY: src
 src: helloworld.c
 helloworld.c: helloworld.pyx
-	${CYTHON} $<
+	${CYTHON} ${MPI4PY_INCLUDE} $<
 
 
 MPICC = mpicc
@@ -21,7 +19,7 @@ SO = ${shell ${PYTHON_CONFIG} --extension-suffix}
 .PHONY: build
 build: helloworld${SO}
 helloworld${SO}: helloworld.c
-	${MPICC} ${CFLAGS} -I${MPI4PY_INCLUDE} -o $@ $< ${LDFLAGS}
+	${MPICC} ${CFLAGS} ${MPI4PY_INCLUDE} -o $@ $< ${LDFLAGS}
 
 
 .PHONY: test
