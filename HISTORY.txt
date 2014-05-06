@@ -8,6 +8,48 @@ HISTORY: MPI for Python
 :Address:      CCT CONICET, 3000 Santa Fe, Argentina
 
 
+Release 2.0 [2014-XX-XX]
+========================
+
+* Support for MPI-3 features.
+
+  + Matched probes and receives.
+  + Nonblocking collectives.
+  + Neighborhood collectives.
+  + New communicator constructors.
+  + Request-based RMA operations.
+  + New RMA communication and synchronisation calls.
+  + New window constructors.
+  + New datatype constructor.
+  + New C++ boolean and floating complex datatypes.
+
+* Support for MPI-2 features not included in previous releases.
+
+  + Generalized All-to-All collective (``Comm.Alltoallw()``)
+  + User-defined data representations (``Register_datarep()``)
+
+* New scalable implementation of reduction operations for Python
+  objects. This code is based on binomial tree algorithms using
+  point-to-point communication and duplicated communicator
+  contexts. To disable this feature, use
+  ``mpi4py.rc.fast_reduce = False``.
+
+* Backward-incompatible changes:
+
+  + Change ``Request.Waitsome()`` and ``Request.Testsome()``
+    to return ``None`` or ``list``.
+  + Change signature of name publishing functions.
+    The new signatures are
+    ``Publish_name(service_name, port_name, info=INFO_NULL)`` and
+    ``Unpublish_name(service_name, port_name, info=INFO_NULL)```
+  + Change signature of ``Win.Lock()``.
+    The new signature is
+    ``Win.Lock(rank, lock_type=LOCK_EXCLUSIVE, assertion=0)``
+  + Remove the ``mpi4py.MPE`` module.
+  + Rename the Cython definition file for use with ``cimport``
+    statement from ``mpi_c.pxd`` to ``libmpi.pxd``.
+
+
 Release 1.3.1 [2013-08-07]
 ==========================
 
