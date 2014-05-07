@@ -271,8 +271,15 @@ cdef object PyMPI_recv(object obj, int source, int tag,
             source = rsts.MPI_SOURCE
             tag = rsts.MPI_TAG
         else:
-            rmsg = getbuffer_w(obj, &rbuf, &rlen)
-            rcount = clipcount(rlen)
+            if is_int(obj):
+                rcount = <int> obj
+                rmsg = pickle.alloc(&rbuf, rcount)
+                rlen = <MPI_Aint> rcount
+            else:
+                rmsg = getbuffer_w(obj, &rbuf, &rlen)
+                rcount = clipcount(rlen)
+            if status == MPI_STATUS_IGNORE:
+                status = &rsts
     #
     with nogil:
         if match != MPI_MESSAGE_NULL:
@@ -281,60 +288,11 @@ cdef object PyMPI_recv(object obj, int source, int tag,
         else:
             CHKERR( MPI_Recv(rbuf, rcount, rtype,
                              source, tag, comm, status) )
-    if dorecv: rmsg = pickle.load(rmsg)
-    return rmsg
-
-
-cdef object PyMPI_sendrecv(object sobj, int dest,   int sendtag,
-                           object robj, int source, int recvtag,
-                           MPI_Comm comm, MPI_Status *status):
-    cdef Pickle pickle = PyMPI_PICKLE
+        if rcount > 0 and rlen > 0:
+            CHKERR( MPI_Get_count(status, rtype, &rcount) )
     #
-    cdef void *sbuf = NULL
-    cdef int scount = 0
-    cdef MPI_Datatype stype = MPI_BYTE
-    cdef void *rbuf = NULL
-    cdef int rcount = 0
-    cdef MPI_Datatype rtype = MPI_BYTE
-    #
-    cdef int dosend = (dest   != MPI_PROC_NULL)
-    cdef int dorecv = (source != MPI_PROC_NULL)
-    #
-    cdef object tmps = None
-    if dosend: tmps = pickle.dump(sobj, &sbuf, &scount)
-    cdef MPI_Request sreq = MPI_REQUEST_NULL
-    with nogil: CHKERR( MPI_Isend(sbuf, scount, stype,
-                                  dest, sendtag, comm, &sreq) )
-    #
-    cdef object rmsg = None
-    cdef MPI_Message match = MPI_MESSAGE_NULL
-    cdef MPI_Status rsts
-    cdef MPI_Aint rlen = 0
-    if dorecv:
-        if robj is None:
-            with nogil:
-                if options.recv_mprobe:
-                    CHKERR( MPI_Mprobe(source, recvtag, comm, &match, &rsts) )
-                else:
-                    CHKERR( MPI_Probe(source, recvtag, comm, &rsts) )
-                CHKERR( MPI_Get_count(&rsts, rtype, &rcount) )
-            rmsg = pickle.alloc(&rbuf, rcount)
-            source = rsts.MPI_SOURCE
-            recvtag = rsts.MPI_TAG
-        else:
-            rmsg = getbuffer_w(robj, &rbuf, &rlen)
-            rcount = clipcount(rlen)
-    #
-    with nogil:
-        if match != MPI_MESSAGE_NULL:
-            CHKERR( MPI_Mrecv(rbuf, rcount, rtype,
-                              &match, status) )
-        else:
-            CHKERR( MPI_Recv(rbuf, rcount, rtype,
-                             source, recvtag, comm, status) )
-        CHKERR( MPI_Wait(&sreq, MPI_STATUS_IGNORE) )
-    if dorecv: rmsg = pickle.load(rmsg)
-    return rmsg
+    if rcount <= 0: rmsg = None
+    return pickle.load(rmsg)
 
 # -----------------------------------------------------------------------------
 
@@ -402,10 +360,10 @@ cdef object PyMPI_irecv(object obj, int dest, int tag,
             rcount = <int>(1<<15)
             obj = pickle.alloc(&rbuf, rcount)
             rmsg = getbuffer_r(obj, NULL, NULL)
-        #elif is_int(obj):
-        #    rcount = <int> obj
-        #    obj = pickle.alloc(&rbuf, rcount)
-        #    rmsg = getbuffer_r(obj, NULL, NULL)
+        elif is_int(obj):
+            rcount = <int> obj
+            obj = pickle.alloc(&rbuf, rcount)
+            rmsg = getbuffer_r(obj, NULL, NULL)
         else:
             rmsg = getbuffer_w(obj, &rbuf, &rlen)
             rcount = clipcount(rlen)
@@ -413,6 +371,18 @@ cdef object PyMPI_irecv(object obj, int dest, int tag,
                                   dest, tag, comm, request) )
     return rmsg
 
+# -----------------------------------------------------------------------------
+
+cdef object PyMPI_sendrecv(object sobj, int dest,   int sendtag,
+                           object robj, int source, int recvtag,
+                           MPI_Comm comm, MPI_Status *status):
+    cdef MPI_Request request = MPI_REQUEST_NULL
+    sobj = PyMPI_isend(sobj, dest,   sendtag, comm, &request)
+    robj = PyMPI_recv (robj, source, recvtag, comm, status)
+    CHKERR( MPI_Wait(&request, MPI_STATUS_IGNORE) )
+    return robj
+
+# -----------------------------------------------------------------------------
 
 cdef object PyMPI_wait(Request request, Status status):
     cdef Pickle pickle = PyMPI_PICKLE
