@@ -1134,17 +1134,17 @@ cdef class Comm:
     # Python Communication
     # --------------------
     #
-    def send(self, obj=None, int dest=0, int tag=0):
+    def send(self, obj, int dest=0, int tag=0):
         """Send"""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_send(obj, dest, tag, comm)
     #
-    def bsend(self, obj=None, int dest=0, int tag=0):
+    def bsend(self, obj, int dest=0, int tag=0):
         """Send in buffered mode"""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_bsend(obj, dest, tag, comm)
     #
-    def ssend(self, obj=None, int dest=0, int tag=0):
+    def ssend(self, obj, int dest=0, int tag=0):
         """Send in synchronous mode"""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_ssend(obj, dest, tag, comm)
@@ -1156,7 +1156,7 @@ cdef class Comm:
         return PyMPI_recv(obj, source, tag, comm, statusp)
     #
     def sendrecv(self,
-                 sendobj=None, int dest=0,   int sendtag=0,
+                 sendobj,      int dest=0,   int sendtag=0,
                  recvobj=None, int source=0, int recvtag=0,
                  Status status=None):
         """Send and Receive"""
@@ -1166,21 +1166,21 @@ cdef class Comm:
                               recvobj, source, recvtag,
                               comm, statusp)
     #
-    def isend(self, obj=None, int dest=0, int tag=0):
+    def isend(self, obj, int dest=0, int tag=0):
         """Nonblocking send"""
         cdef MPI_Comm comm = self.ob_mpi
         cdef Request request = <Request>Request.__new__(Request)
         request.ob_buf = PyMPI_isend(obj, dest, tag, comm, &request.ob_mpi)
         return request
     #
-    def ibsend(self, obj=None, int dest=0, int tag=0):
+    def ibsend(self, obj, int dest=0, int tag=0):
         """Nonblocking send in buffered mode"""
         cdef MPI_Comm comm = self.ob_mpi
         cdef Request request = <Request>Request.__new__(Request)
         request.ob_buf = PyMPI_ibsend(obj, dest, tag, comm, &request.ob_mpi)
         return request
     #
-    def issend(self, obj=None, int dest=0, int tag=0):
+    def issend(self, obj, int dest=0, int tag=0):
         """Nonblocking send in synchronous mode"""
         cdef MPI_Comm comm = self.ob_mpi
         cdef Request request = <Request>Request.__new__(Request)
