@@ -11,6 +11,22 @@ cdef inline int is_buffer(object ob):
 
 #------------------------------------------------------------------------------
 
+cdef inline int downcast(MPI_Aint value) except? -1:
+    cdef int ivalue = <int>value
+    if <MPI_Aint>ivalue == value: return ivalue
+    raise OverflowError("integer %d does not fit in 'int'" % value)
+
+cdef extern from *:
+    int INT_MAX
+
+cdef inline int clipcount(MPI_Aint value):
+    if value > <MPI_Aint>INT_MAX:
+        return INT_MAX
+    else:
+        return <int>value
+
+#------------------------------------------------------------------------------
+
 cdef object __BOTTOM__   = <MPI_Aint>MPI_BOTTOM
 
 cdef object __IN_PLACE__ = <MPI_Aint>MPI_IN_PLACE
@@ -158,14 +174,14 @@ cdef _p_message message_simple(object msg,
              "datatype extent %d (lb:%d, ub:%d)"
              ) % (length, extent, lb, lb+extent))
         if blocks < 2:
-            count = <int> (length // extent) # XXX overflow?
+            count = downcast(length // extent)
         else:
             if ((length // extent) % blocks) != 0: raise ValueError(
                 ("message: cannot infer count, "
                  "number of entries %d is not a multiple of "
                  "required number of blocks %d"
                  ) %  (length//extent, blocks))
-            count = <int> ((length // extent) // blocks) # XXX overflow?
+            count = downcast((length // extent) // blocks)
     # return collected message data
     m.count = o_count if o_count is not None else count
     m.displ = o_displ if o_displ is not None else displ
@@ -251,7 +267,7 @@ cdef _p_message message_vector(object msg,
         o_counts = mkarray_int(blocks, &counts)
         for i from 0 <= i < blocks:
             aval = (asize // blocks) + (asize % blocks > i)
-            counts[i] = <int> aval # XXX overflow?
+            counts[i] = downcast(aval)
     elif is_int(o_counts):
         val = <int> o_counts
         o_counts = mkarray_int(blocks, &counts)

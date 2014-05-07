@@ -14,7 +14,7 @@ cdef object acquire_rs(object requests,
      cdef MPI_Status  *array_s = NULL
      cdef object ob_r = None, ob_s = None
      cdef Py_ssize_t i = 0, n = len(requests)
-     count[0] = <int>n # XXX overflow ?
+     count[0] = <int>n
      ob_r = allocate(n, sizeof(MPI_Request), <void**>&array_r)
      for i from 0 <= i < n:
          array_r[i] = (<Request?>requests[i]).ob_mpi

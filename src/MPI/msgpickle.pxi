@@ -112,8 +112,8 @@ cdef class Pickle:
                 buf = self.ob_dumps(obj)
             else:
                 buf = self.ob_dumps(obj, self.ob_PROTOCOL)
-        p[0] = <void*> PyBytes_AsString(buf)
-        n[0] = <int>   PyBytes_Size(buf) # XXX overflow?
+        p[0] = <void*>PyBytes_AsString(buf)
+        n[0] = downcast(PyBytes_Size(buf))
         return buf
 
     cdef object alloc(self, void **p, int n):
@@ -161,7 +161,8 @@ cdef class Pickle:
         for i from 0 <= i < m:
             items[i] = self.dump(items[i], p, &c)
             if c == 0: items[i] = b''
-            cnt[i] = c; dsp[i] = d; d += c
+            cnt[i] = c; dsp[i] = d
+            d = downcast(<MPI_Aint>d + <MPI_Aint>c)
         cdef object buf = PyBytes_Join(b'', items)
         p[0] = PyBytes_AsString(buf)
         return buf
@@ -271,7 +272,7 @@ cdef object PyMPI_recv(object obj, int source, int tag,
             tag = rsts.MPI_TAG
         else:
             rmsg = getbuffer_w(obj, &rbuf, &rlen)
-            rcount = <int> rlen # XXX overflow?
+            rcount = clipcount(rlen)
     #
     with nogil:
         if match != MPI_MESSAGE_NULL:
@@ -322,7 +323,7 @@ cdef object PyMPI_sendrecv(object sobj, int dest,   int sendtag,
             recvtag = rsts.MPI_TAG
         else:
             rmsg = getbuffer_w(robj, &rbuf, &rlen)
-            rcount = <int> rlen # XXX overflow?
+            rcount = clipcount(rlen)
     #
     with nogil:
         if match != MPI_MESSAGE_NULL:
@@ -407,7 +408,7 @@ cdef object PyMPI_irecv(object obj, int dest, int tag,
         #    rmsg = getbuffer_r(obj, NULL, NULL)
         else:
             rmsg = getbuffer_w(obj, &rbuf, &rlen)
-            rcount = <int> rlen # XXX overflow?
+            rcount = clipcount(rlen)
     with nogil: CHKERR( MPI_Irecv(rbuf, rcount, rtype,
                                   dest, tag, comm, request) )
     return rmsg
@@ -609,7 +610,7 @@ cdef object PyMPI_mrecv(object rmsg,
         rmsg = getbuffer_r(rmsg, &rbuf, &rlen)
     else:
         rmsg = getbuffer_w(rmsg, &rbuf, &rlen)
-    cdef int rcount = <int> rlen # XXX overflow?
+    cdef int rcount = clipcount(rlen)
     with nogil: CHKERR( MPI_Mrecv(rbuf, rcount, rtype, message, status) )
     rmsg = pickle.load(rmsg)
     return rmsg
@@ -627,7 +628,7 @@ cdef object PyMPI_imrecv(object rmsg,
         rmsg = getbuffer_r(rmsg, &rbuf, &rlen)
     else:
         rmsg = getbuffer_w(rmsg, &rbuf, &rlen)
-    cdef int rcount = <int> rlen # XXX overflow?
+    cdef int rcount = clipcount(rlen)
     with nogil: CHKERR( MPI_Imrecv(rbuf, rcount, rtype, message, request) )
     return rmsg
 

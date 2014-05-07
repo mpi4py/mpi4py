@@ -121,7 +121,7 @@ cdef inline int attach_buffer(ob, void **p, int *n) except -1:
     cdef MPI_Aint blen = 0
     _buffer = getbuffer_w(ob, &bptr, &blen)
     p[0] = bptr
-    n[0] = <int>blen # XXX Overflow ?
+    n[0] = clipcount(blen)
     return 0
 
 cdef inline object detach_buffer(void *p, int n):
@@ -130,7 +130,6 @@ cdef inline object detach_buffer(void *p, int n):
     try:
         if (_buffer is not None and
             _buffer.view.buf == p and
-            _buffer.view.len == <Py_ssize_t>n and
             _buffer.view.obj != NULL):
             ob = <object>_buffer.view.obj
         else:

@@ -8,8 +8,8 @@ cdef inline object getarray_int(object ob, int *n, int **p):
     cdef Py_ssize_t i = 0, size = len(ob)
     cdef object mem = newarray_int(size, &base)
     for i from 0 <= i < size: base[i] = ob[i]
-    n[0] = <int>  size # XXX overflow?
-    p[0] = <int*> base
+    p[0] = base
+    n[0] = downcast(size)
     return mem
 
 cdef inline object chkarray_int(object ob, int n, int **p):

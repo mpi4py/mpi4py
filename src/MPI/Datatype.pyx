@@ -205,7 +205,7 @@ cdef class Datatype:
         """
         cdef int count = 0
         cdef MPI_Aint *idisp = NULL
-        count = <int>len(displacements) # XXX Overflow ?
+        count = <int>len(displacements)
         displacements = asarray_Aint(displacements, count, &idisp)
         #
         cdef Datatype datatype = <Datatype>Datatype.__new__(Datatype)
@@ -539,7 +539,8 @@ cdef class Datatype:
         cdef MPI_Aint iblen = 0, oblen = 0
         cdef tmp1 = getbuffer_r(inbuf,  &ibptr, &iblen)
         cdef tmp2 = getbuffer_w(outbuf, &obptr, &oblen)
-        cdef int icount = <int>(iblen/extent), osize = <int>oblen
+        cdef int icount = downcast(iblen//extent)
+        cdef int osize  = clipcount(oblen)
         #
         CHKERR( MPI_Pack(ibptr, icount, self.ob_mpi, obptr, osize,
                          &position, comm.ob_mpi) )
@@ -556,7 +557,8 @@ cdef class Datatype:
         cdef MPI_Aint iblen = 0, oblen = 0
         cdef tmp1 = getbuffer_r(inbuf,  &ibptr, &iblen)
         cdef tmp2 = getbuffer_w(outbuf, &obptr, &oblen)
-        cdef int isize = <int>iblen, ocount = <int>(oblen/extent)
+        cdef int isize  = clipcount(iblen)
+        cdef int ocount = downcast(oblen//extent)
         #
         CHKERR( MPI_Unpack(ibptr, isize, &position, obptr, ocount,
                            self.ob_mpi, comm.ob_mpi) )
@@ -589,12 +591,11 @@ cdef class Datatype:
         cdef MPI_Aint iblen = 0, oblen = 0
         cdef tmp1 = getbuffer_r(inbuf,  &ibptr, &iblen)
         cdef tmp2 = getbuffer_w(outbuf, &obptr, &oblen)
-        cdef int icount = <int>(iblen/extent) # XXX overflow?
-        cdef MPI_Aint osize = oblen
+        cdef int icount = downcast(iblen//extent)
         #
         CHKERR( MPI_Pack_external(cdatarep, ibptr, icount,
                                   self.ob_mpi,
-                                  obptr, osize, &position) )
+                                  obptr, oblen, &position) )
         return position
 
     def Unpack_external(self, datarep, inbuf, Aint position, outbuf):
@@ -611,10 +612,9 @@ cdef class Datatype:
         cdef MPI_Aint iblen = 0, oblen = 0
         cdef tmp1 = getbuffer_r(inbuf,  &ibptr, &iblen)
         cdef tmp2 = getbuffer_w(outbuf, &obptr, &oblen)
-        cdef MPI_Aint isize = iblen,
-        cdef int ocount = <int>(oblen/extent) # XXX overflow?
+        cdef int ocount = downcast(oblen//extent)
         #
-        CHKERR( MPI_Unpack_external(cdatarep, ibptr, isize, &position,
+        CHKERR( MPI_Unpack_external(cdatarep, ibptr, iblen, &position,
                                     obptr, ocount, self.ob_mpi) )
         return position
 
