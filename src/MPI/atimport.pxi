@@ -14,7 +14,6 @@ cdef extern from "Python.h":
 cdef extern from "atimport.h":
     enum: USE_MATCHED_RECV "PyMPI_USE_MATCHED_RECV"
 
-
 # -----------------------------------------------------------------------------
 
 ctypedef struct Options:

@@ -1,11 +1,11 @@
 #------------------------------------------------------------------------------
 
 cdef extern from "Python.h":
-    int is_int    "PyInt_Check" (object)
+    int is_int    "PyIndex_Check" (object)
     int is_list   "PyList_Check" (object)
     int is_tuple  "PyTuple_Check" (object)
 
-cdef inline bint is_buffer(object ob):
+cdef inline int is_buffer(object ob):
     return (PyObject_CheckBuffer(ob) or
             PyObject_CheckReadBuffer(ob))
 
