@@ -288,7 +288,7 @@ cdef class Comm:
             self.ob_mpi, statusp) )
 
     def Sendrecv_replace(self, buf,
-                         int dest=0,  int sendtag=0,
+                         int dest=0,   int sendtag=0,
                          int source=0, int recvtag=0,
                          Status status=None):
         """
