@@ -38,6 +38,8 @@ Release 2.0 [2014-XX-XX]
 
   + Change signature of send lowercase-spelling methods,
     ``obj`` arguments are not mandatory.
+  + Change signature of recv lowercase-spelling methods,
+    renamed 'obj' arguments to 'buf'.
   + Change ``Request.Waitsome()`` and ``Request.Testsome()``
     to return ``None`` or ``list``.
   + Change signature of all lowercase-spelling collectives,

@@ -1149,21 +1149,21 @@ cdef class Comm:
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_ssend(obj, dest, tag, comm)
     #
-    def recv(self, obj=None, int source=0, int tag=0, Status status=None):
+    def recv(self, buf=None, int source=0, int tag=0, Status status=None):
         """Receive"""
         cdef MPI_Comm comm = self.ob_mpi
         cdef MPI_Status *statusp = arg_Status(status)
-        return PyMPI_recv(obj, source, tag, comm, statusp)
+        return PyMPI_recv(buf, source, tag, comm, statusp)
     #
     def sendrecv(self,
                  sendobj,      int dest=0,   int sendtag=0,
-                 recvobj=None, int source=0, int recvtag=0,
+                 recvbuf=None, int source=0, int recvtag=0,
                  Status status=None):
         """Send and Receive"""
         cdef MPI_Comm comm = self.ob_mpi
         cdef MPI_Status *statusp = arg_Status(status)
         return PyMPI_sendrecv(sendobj, dest,   sendtag,
-                              recvobj, source, recvtag,
+                              recvbuf, source, recvtag,
                               comm, statusp)
     #
     def isend(self, obj, int dest=0, int tag=0):
@@ -1187,11 +1187,11 @@ cdef class Comm:
         request.ob_buf = PyMPI_issend(obj, dest, tag, comm, &request.ob_mpi)
         return request
     #
-    def irecv(self, obj=None, int source=0, int tag=0):
+    def irecv(self, buf=None, int source=0, int tag=0):
         """Nonblocking receive"""
         cdef MPI_Comm comm = self.ob_mpi
         cdef Request request = <Request>Request.__new__(Request)
-        request.ob_buf = PyMPI_irecv(obj, source, tag, comm, &request.ob_mpi)
+        request.ob_buf = PyMPI_irecv(buf, source, tag, comm, &request.ob_mpi)
         return request
     #
     def mprobe(self, int source=0, int tag=0, Status status=None):
