@@ -369,7 +369,7 @@ cdef class Comm:
 
     def Mprobe(self, int source=0, int tag=0, Status status=None):
         """
-        Blocking test for a message
+        Blocking test for a matched message
         """
         cdef MPI_Message cmessage = MPI_MESSAGE_NULL
         cdef MPI_Status *statusp = arg_Status(status)
@@ -381,7 +381,7 @@ cdef class Comm:
 
     def Improbe(self, int source=0, int tag=0, Status status=None):
         """
-        Nonblocking test for a message
+        Nonblocking test for a matched message
         """
         cdef int flag = 0
         cdef MPI_Message cmessage = MPI_MESSAGE_NULL
@@ -1209,7 +1209,7 @@ cdef class Comm:
         return PyMPI_iprobe(source, tag, comm, statusp)
     #
     def mprobe(self, int source=0, int tag=0, Status status=None):
-        """Matched blocking test for a message"""
+        """Blocking test for a matched message"""
         cdef MPI_Comm comm = self.ob_mpi
         cdef MPI_Status *statusp = arg_Status(status)
         cdef Message message = <Message>Message.__new__(Message)
@@ -1218,7 +1218,7 @@ cdef class Comm:
         return message
     #
     def improbe(self, int source=0, int tag=0, Status status=None):
-        """Matched nonblocking test for a message"""
+        """Nonblocking test for a matched message"""
         cdef int flag = 0
         cdef MPI_Comm comm = self.ob_mpi
         cdef MPI_Status *statusp = arg_Status(status)

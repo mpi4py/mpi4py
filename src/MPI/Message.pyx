@@ -32,7 +32,7 @@ cdef class Message:
     def Probe(cls, Comm comm not None,
               int source=0, int tag=0, Status status=None):
         """
-        Blocking test for a message
+        Blocking test for a matched message
         """
         cdef MPI_Message cmessage = MPI_MESSAGE_NULL
         cdef MPI_Status *statusp = arg_Status(status)
@@ -46,7 +46,7 @@ cdef class Message:
     def Iprobe(cls, Comm comm not None,
                int source=0, int tag=0, Status status=None):
         """
-        Nonblocking test for a message
+        Nonblocking test for a matched message
         """
         cdef int flag = 0
         cdef MPI_Message cmessage = MPI_MESSAGE_NULL
@@ -101,6 +101,7 @@ cdef class Message:
     @classmethod
     def probe(cls, Comm comm not None,
               int source=0, int tag=0, Status status=None):
+        """Blocking test for a matched message"""
         cdef Message message = <Message>Message.__new__(cls)
         cdef MPI_Status *statusp = arg_Status(status)
         message.ob_buf = PyMPI_mprobe(source, tag, comm.ob_mpi,
@@ -110,6 +111,7 @@ cdef class Message:
     @classmethod
     def iprobe(cls, Comm comm not None,
                int source=0, int tag=0, Status status=None):
+        """Nonblocking test for a matched message"""
         cdef int flag = 0
         cdef Message message = <Message>Message.__new__(cls)
         cdef MPI_Status *statusp = arg_Status(status)
@@ -119,9 +121,7 @@ cdef class Message:
         return message
     #
     def recv(self, Status status=None):
-        """
-        Blocking receive of matched message
-        """
+        """Blocking receive of matched message"""
         cdef object rmsg = self.ob_buf
         cdef MPI_Message message = self.ob_mpi
         cdef MPI_Status *statusp = arg_Status(status)
@@ -131,9 +131,7 @@ cdef class Message:
         return rmsg
     #
     def irecv(self):
-        """
-        Nonblocking receive of matched message
-        """
+        """Nonblocking receive of matched message"""
         cdef object rmsg = self.ob_buf
         cdef MPI_Message message = self.ob_mpi
         cdef Request request = <Request>Request.__new__(Request)
