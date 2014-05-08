@@ -202,10 +202,9 @@ cdef object PyMPI_send(object obj, int dest, int tag,
     cdef int scount = 0
     cdef MPI_Datatype stype = MPI_BYTE
     #
-    cdef int dosend = (dest != MPI_PROC_NULL)
-    #
     cdef object tmps = None
-    if dosend: tmps = pickle.dump(obj, &sbuf, &scount)
+    if dest != MPI_PROC_NULL:
+        tmps = pickle.dump(obj, &sbuf, &scount)
     with nogil: CHKERR( MPI_Send(sbuf, scount, stype,
                                  dest, tag, comm) )
     return None
@@ -219,10 +218,9 @@ cdef object PyMPI_bsend(object obj, int dest, int tag,
     cdef int scount = 0
     cdef MPI_Datatype stype = MPI_BYTE
     #
-    cdef int dosend = (dest != MPI_PROC_NULL)
-    #
     cdef object tmps = None
-    if dosend: tmps = pickle.dump(obj, &sbuf, &scount)
+    if dest != MPI_PROC_NULL:
+        tmps = pickle.dump(obj, &sbuf, &scount)
     with nogil: CHKERR( MPI_Bsend(sbuf, scount, stype,
                                   dest, tag, comm) )
     return None
@@ -236,10 +234,9 @@ cdef object PyMPI_ssend(object obj, int dest, int tag,
     cdef int scount = 0
     cdef MPI_Datatype stype = MPI_BYTE
     #
-    cdef int dosend = (dest != MPI_PROC_NULL)
-    #
     cdef object tmps = None
-    if dosend: tmps = pickle.dump(obj, &sbuf, &scount)
+    if dest != MPI_PROC_NULL:
+        tmps = pickle.dump(obj, &sbuf, &scount)
     with nogil: CHKERR( MPI_Ssend(sbuf, scount, stype,
                                   dest, tag, comm) )
     return None
@@ -253,13 +250,11 @@ cdef object PyMPI_recv(object obj, int source, int tag,
     cdef int rcount = 0
     cdef MPI_Datatype rtype = MPI_BYTE
     #
-    cdef int dorecv = (source != MPI_PROC_NULL)
-    #
     cdef object rmsg = None
     cdef MPI_Message match = MPI_MESSAGE_NULL
     cdef MPI_Status rsts
     cdef MPI_Aint rlen = 0
-    if dorecv:
+    if source != MPI_PROC_NULL:
         if obj is None:
             with nogil:
                 if options.recv_mprobe:
@@ -290,8 +285,7 @@ cdef object PyMPI_recv(object obj, int source, int tag,
                              source, tag, comm, status) )
         if rcount > 0 and rlen > 0:
             CHKERR( MPI_Get_count(status, rtype, &rcount) )
-    #
-    if rcount <= 0: rmsg = None
+    if rcount <= 0: return None
     return pickle.load(rmsg)
 
 # -----------------------------------------------------------------------------
@@ -305,8 +299,8 @@ cdef object PyMPI_isend(object obj, int dest, int tag,
     cdef MPI_Datatype stype = MPI_BYTE
     #
     cdef object smsg = None
-    cdef int dosend = (dest != MPI_PROC_NULL)
-    if dosend: smsg = pickle.dump(obj, &sbuf, &scount)
+    if dest != MPI_PROC_NULL:
+        smsg = pickle.dump(obj, &sbuf, &scount)
     with nogil: CHKERR( MPI_Isend(sbuf, scount, stype,
                                   dest, tag, comm, request) )
     return smsg
@@ -321,8 +315,8 @@ cdef object PyMPI_ibsend(object obj, int dest, int tag,
     cdef MPI_Datatype stype = MPI_BYTE
     #
     cdef object smsg = None
-    cdef int dosend = (dest != MPI_PROC_NULL)
-    if dosend: smsg = pickle.dump(obj, &sbuf, &scount)
+    if dest != MPI_PROC_NULL:
+        smsg = pickle.dump(obj, &sbuf, &scount)
     with nogil: CHKERR( MPI_Ibsend(sbuf, scount, stype,
                                    dest, tag, comm, request) )
     return smsg
@@ -337,14 +331,14 @@ cdef object PyMPI_issend(object obj, int dest, int tag,
     cdef MPI_Datatype stype = MPI_BYTE
     #
     cdef object smsg = None
-    cdef int dosend = (dest != MPI_PROC_NULL)
-    if dosend: smsg = pickle.dump(obj, &sbuf, &scount)
+    if dest != MPI_PROC_NULL:
+        smsg = pickle.dump(obj, &sbuf, &scount)
     with nogil: CHKERR( MPI_Issend(sbuf, scount, stype,
                                    dest, tag, comm, request) )
     return smsg
 
 
-cdef object PyMPI_irecv(object obj, int dest, int tag,
+cdef object PyMPI_irecv(object obj, int source, int tag,
                         MPI_Comm comm, MPI_Request *request):
     cdef Pickle pickle = PyMPI_PICKLE
     #
@@ -354,8 +348,7 @@ cdef object PyMPI_irecv(object obj, int dest, int tag,
     cdef MPI_Datatype rtype = MPI_BYTE
     #
     cdef object rmsg = None
-    cdef int dorecv = (dest != MPI_PROC_NULL)
-    if dorecv:
+    if source != MPI_PROC_NULL:
         if obj is None:
             rcount = <int>(1<<15)
             obj = pickle.alloc(&rbuf, rcount)
@@ -368,7 +361,7 @@ cdef object PyMPI_irecv(object obj, int dest, int tag,
             rmsg = getbuffer_w(obj, &rbuf, &rlen)
             rcount = clipcount(rlen)
     with nogil: CHKERR( MPI_Irecv(rbuf, rcount, rtype,
-                                  dest, tag, comm, request) )
+                                  source, tag, comm, request) )
     return rmsg
 
 # -----------------------------------------------------------------------------

@@ -265,8 +265,8 @@ cdef class Comm:
     # Send-Receive
     # ------------
 
-    def Sendrecv(self, sendbuf, int dest=0, int sendtag=0,
-                 recvbuf=None, int source=0, int recvtag=0,
+    def Sendrecv(self, sendbuf, int dest=0,   int sendtag=0,
+                 recvbuf=None,  int source=0, int recvtag=0,
                  Status status=None):
         """
         Send and receive a message
