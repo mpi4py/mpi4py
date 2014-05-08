@@ -538,6 +538,17 @@ cdef object PyMPI_testall(requests, int *flag, statuses):
 
 # -----------------------------------------------------------------------------
 
+cdef object PyMPI_probe(int source, int tag,
+                        MPI_Comm comm, MPI_Status *status):
+    with nogil: CHKERR( MPI_Probe(source, tag, comm, status) )
+    return None
+
+cdef object PyMPI_iprobe(int source, int tag,
+                         MPI_Comm comm, MPI_Status *status):
+    cdef int flag = 0
+    with nogil: CHKERR( MPI_Iprobe(source, tag, comm, &flag, status) )
+    return <bint>flag
+
 cdef object PyMPI_mprobe(int source, int tag, MPI_Comm comm,
                          MPI_Message *message, MPI_Status *status):
     cdef Pickle pickle = PyMPI_PICKLE
