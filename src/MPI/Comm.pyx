@@ -2217,7 +2217,7 @@ cdef Intercomm __COMM_PARENT__ = new_Intercomm ( MPI_COMM_NULL  )
 # Predefined communicators
 # ------------------------
 
-COMM_NULL =  __COMM_NULL__   #: Null communicator handle
+COMM_NULL  = __COMM_NULL__   #: Null communicator handle
 COMM_SELF  = __COMM_SELF__   #: Self communicator handle
 COMM_WORLD = __COMM_WORLD__  #: World communicator handle
 

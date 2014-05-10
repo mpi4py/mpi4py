@@ -318,7 +318,8 @@ cdef class Win:
             cdef int *flavor = NULL
             cdef int flag = 0
             if keyval == MPI_KEYVAL_INVALID: return MPI_WIN_FLAVOR_CREATE
-            CHKERR( MPI_Win_get_attr(self.ob_mpi, keyval, <void*>&flavor, &flag) )
+            CHKERR( MPI_Win_get_attr(self.ob_mpi, keyval,
+                                     <void*>&flavor, &flag) )
             if flag and flavor != NULL: return flavor[0]
             return MPI_WIN_FLAVOR_CREATE
 
@@ -329,7 +330,8 @@ cdef class Win:
             cdef int *model = NULL
             cdef int flag = 0
             if keyval == MPI_KEYVAL_INVALID: return MPI_WIN_SEPARATE
-            CHKERR( MPI_Win_get_attr(self.ob_mpi, keyval, <void*>&model, &flag) )
+            CHKERR( MPI_Win_get_attr(self.ob_mpi, keyval,
+                                     <void*>&model, &flag) )
             if flag and model != NULL: return model[0]
             return MPI_WIN_SEPARATE
 

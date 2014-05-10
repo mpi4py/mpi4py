@@ -24,25 +24,25 @@ include "CAPI.pxi"
 # ------------------
 
 UNDEFINED = MPI_UNDEFINED
-#"""Undefined integer value"""
+#: Undefined integer value
 
 ANY_SOURCE = MPI_ANY_SOURCE
-#"""Wildcard source value for receives"""
+#: Wildcard source value for receives
 
 ANY_TAG = MPI_ANY_TAG
-#"""Wildcard tag value for receives"""
+#: Wildcard tag value for receives
 
 PROC_NULL = MPI_PROC_NULL
-#"""Special process rank for send/receive"""
+#: Special process rank for send/receive
 
 ROOT = MPI_ROOT
-#"""Root process for collective inter-communications"""
+#: Root process for collective inter-communications
 
 BOTTOM = __BOTTOM__
-#"""Special address for buffers"""
+#: Special address for buffers
 
 IN_PLACE = __IN_PLACE__
-#"""*In-place* option for collective communications"""
+#: *In-place* option for collective communications
 
 
 # Predefined Attribute Keyvals
@@ -64,6 +64,7 @@ WIN_BASE          = MPI_WIN_BASE
 WIN_SIZE          = MPI_WIN_SIZE
 WIN_DISP_UNIT     = MPI_WIN_DISP_UNIT
 WIN_CREATE_FLAVOR = MPI_WIN_CREATE_FLAVOR
+WIN_FLAVOR        = MPI_WIN_CREATE_FLAVOR
 WIN_MODEL         = MPI_WIN_MODEL
 
 
@@ -122,16 +123,16 @@ def Finalize():
 # -------------------------------
 
 THREAD_SINGLE     = MPI_THREAD_SINGLE
-# """Only one thread will execute"""
+#: Only one thread will execute
 
 THREAD_FUNNELED   = MPI_THREAD_FUNNELED
-# """MPI calls are *funneled* to the main thread"""
+#: MPI calls are *funneled* to the main thread
 
 THREAD_SERIALIZED = MPI_THREAD_SERIALIZED
-# """MPI calls are *serialized*"""
+#: MPI calls are *serialized*
 
 THREAD_MULTIPLE   = MPI_THREAD_MULTIPLE
-# """Multiple threads may call MPI"""
+#: Multiple threads may call MPI
 
 def Init_thread(int required=THREAD_MULTIPLE):
     """

@@ -799,10 +799,14 @@ cdef Datatype __C_DOUBLE_COMPLEX__      = new_Datatype( MPI_C_DOUBLE_COMPLEX )
 cdef Datatype __C_LONG_DOUBLE_COMPLEX__ = new_Datatype(
                                               MPI_C_LONG_DOUBLE_COMPLEX      )
 
-cdef Datatype __CXX_BOOL__                = new_Datatype( MPI_CXX_BOOL                )
-cdef Datatype __CXX_FLOAT_COMPLEX__       = new_Datatype( MPI_CXX_FLOAT_COMPLEX       )
-cdef Datatype __CXX_DOUBLE_COMPLEX__      = new_Datatype( MPI_CXX_DOUBLE_COMPLEX      )
-cdef Datatype __CXX_LONG_DOUBLE_COMPLEX__ = new_Datatype( MPI_CXX_LONG_DOUBLE_COMPLEX )
+cdef Datatype __CXX_BOOL__ = \
+              new_Datatype( MPI_CXX_BOOL )
+cdef Datatype __CXX_FLOAT_COMPLEX__ = \
+              new_Datatype( MPI_CXX_FLOAT_COMPLEX )
+cdef Datatype __CXX_DOUBLE_COMPLEX__      = \
+              new_Datatype( MPI_CXX_DOUBLE_COMPLEX )
+cdef Datatype __CXX_LONG_DOUBLE_COMPLEX__ = \
+              new_Datatype( MPI_CXX_LONG_DOUBLE_COMPLEX )
 
 cdef Datatype __SHORT_INT__        = new_Datatype( MPI_SHORT_INT       )
 cdef Datatype __TWOINT__           = new_Datatype( MPI_2INT            )

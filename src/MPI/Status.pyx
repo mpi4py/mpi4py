@@ -82,8 +82,9 @@ cdef class Status:
         """
         Get the number of *top level* elements
         """
+        cdef MPI_Datatype dtype = datatype.ob_mpi
         cdef int count = MPI_UNDEFINED
-        CHKERR( MPI_Get_count(&self.ob_mpi, datatype.ob_mpi, &count) )
+        CHKERR( MPI_Get_count(&self.ob_mpi, dtype, &count) )
         return count
 
     property count:
@@ -95,8 +96,9 @@ cdef class Status:
         """
         Get the number of basic elements in a datatype
         """
+        cdef MPI_Datatype dtype = datatype.ob_mpi
         cdef MPI_Count elements = MPI_UNDEFINED
-        CHKERR( MPI_Get_elements_x(&self.ob_mpi, datatype.ob_mpi, &elements) )
+        CHKERR( MPI_Get_elements_x(&self.ob_mpi, dtype, &elements) )
         return elements
 
     def Set_elements(self, Datatype datatype not None, Count count):
@@ -106,7 +108,8 @@ cdef class Status:
         .. note:: This should be only used when implementing
            query callback functions for generalized requests
         """
-        CHKERR( MPI_Status_set_elements_x(&self.ob_mpi, datatype.ob_mpi, count) )
+        cdef MPI_Datatype dtype = datatype.ob_mpi
+        CHKERR( MPI_Status_set_elements_x(&self.ob_mpi, dtype, count) )
 
     def Is_cancelled(self):
         """

@@ -1,25 +1,51 @@
 # Opening modes
 # -------------
 
-MODE_RDONLY          = MPI_MODE_RDONLY           #: Read only
-MODE_WRONLY          = MPI_MODE_WRONLY           #: Write only
-MODE_RDWR            = MPI_MODE_RDWR             #: Reading and writing
-MODE_CREATE          = MPI_MODE_CREATE           #: Create the file if it does not exist
-MODE_EXCL            = MPI_MODE_EXCL             #: Error if creating file that already exists
-MODE_DELETE_ON_CLOSE = MPI_MODE_DELETE_ON_CLOSE  #: Delete file on close
-MODE_UNIQUE_OPEN     = MPI_MODE_UNIQUE_OPEN      #: File will not be concurrently opened elsewhere
-MODE_SEQUENTIAL      = MPI_MODE_SEQUENTIAL       #: File will only be accessed sequentially
-MODE_APPEND          = MPI_MODE_APPEND           #: Set initial position of all file pointers to end of file
+MODE_RDONLY = MPI_MODE_RDONLY
+#: Read only
+
+MODE_WRONLY = MPI_MODE_WRONLY
+#: Write only
+
+MODE_RDWR  = MPI_MODE_RDWR
+#: Reading and writing
+
+MODE_CREATE = MPI_MODE_CREATE
+#: Create the file if it does not exist
+
+MODE_EXCL = MPI_MODE_EXCL
+#: Error if creating file that already exists
+
+MODE_DELETE_ON_CLOSE = MPI_MODE_DELETE_ON_CLOSE
+#: Delete file on close
+
+MODE_UNIQUE_OPEN = MPI_MODE_UNIQUE_OPEN
+#: File will not be concurrently opened elsewhere
+
+MODE_SEQUENTIAL = MPI_MODE_SEQUENTIAL
+#: File will only be accessed sequentially
+
+MODE_APPEND = MPI_MODE_APPEND
+#: Set initial position of all file pointers to end of file
 
 
 # Positioning
 # -----------
 
-SEEK_SET = MPI_SEEK_SET  #: File pointer is set to offset
-SEEK_CUR = MPI_SEEK_CUR  #: File pointer is set to the current position plus offset
-SEEK_END = MPI_SEEK_END  #: File pointer is set to the end plus offset
-DISPLACEMENT_CURRENT = MPI_DISPLACEMENT_CURRENT  #: Special displacement value for files opened in sequential mode
-DISP_CUR             = MPI_DISPLACEMENT_CURRENT  #: Convenience alias for `DISPLACEMENT_CURRENT`
+SEEK_SET = MPI_SEEK_SET
+#: File pointer is set to offset
+
+SEEK_CUR = MPI_SEEK_CUR
+#: File pointer is set to the current position plus offset
+
+SEEK_END = MPI_SEEK_END
+#: File pointer is set to the end plus offset
+
+DISPLACEMENT_CURRENT = MPI_DISPLACEMENT_CURRENT
+#: Special displacement value for files opened in sequential mode
+
+DISP_CUR = MPI_DISPLACEMENT_CURRENT
+#: Convenience alias for `DISPLACEMENT_CURRENT`
 
 
 cdef class File:
@@ -412,7 +438,8 @@ cdef class File:
         """
         Update the shared file pointer
         """
-        with nogil: CHKERR( MPI_File_seek_shared(self.ob_mpi, offset, whence) )
+        with nogil: CHKERR( MPI_File_seek_shared(
+            self.ob_mpi, offset, whence) )
 
     def Get_position_shared(self):
         """
@@ -420,7 +447,8 @@ cdef class File:
         in etype units relative to the current view
         """
         cdef MPI_Offset offset = 0
-        with nogil: CHKERR( MPI_File_get_position_shared(self.ob_mpi, &offset) )
+        with nogil: CHKERR( MPI_File_get_position_shared(
+            self.ob_mpi, &offset) )
         return offset
 
     # Split Collective Data Access Routines

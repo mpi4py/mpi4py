@@ -91,7 +91,7 @@ except -1:
     if (flags & PyBUF_FORMAT) == PyBUF_FORMAT: view.format = b"B"
     return 0
 
-#---------------------------------------------------------------------
+#------------------------------------------------------------------------------
 
 cdef int \
 PyObject_GetBufferEx(object obj, Py_buffer *view, int flags) \
@@ -113,7 +113,7 @@ except -1:
     if (flags & PyBUF_FORMAT) == PyBUF_FORMAT: view.format = b"B"
     return 0
 
-#---------------------------------------------------------------------
+#------------------------------------------------------------------------------
 
 @cython.final
 @cython.internal

@@ -10,7 +10,8 @@ static int PyMPI_MPICH2_MPI_Add_error_class(int *errorclass)
 #undef  MPI_Add_error_class
 #define MPI_Add_error_class PyMPI_MPICH2_MPI_Add_error_class
 
-static int PyMPI_MPICH2_MPI_Add_error_code(int errorclass,int *errorcode)
+static int PyMPI_MPICH2_MPI_Add_error_code(int errorclass,
+                                           int *errorcode)
 {
   int ierr; char errstr[1] = {0};
   ierr = MPI_Add_error_code(errorclass,errorcode); if (ierr) return ierr;

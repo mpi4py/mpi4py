@@ -178,8 +178,11 @@ static int PyMPI_LAMMPI_MPI_Win_set_errhandler(MPI_Win win,
 #undef  MPI_Win_set_errhandler
 #define MPI_Win_set_errhandler PyMPI_LAMMPI_MPI_Win_set_errhandler
 
-static int PyMPI_LAMMPI_MPI_Win_create(void *base, MPI_Aint size, int disp_unit,
-                                       MPI_Info info, MPI_Comm comm,
+static int PyMPI_LAMMPI_MPI_Win_create(void *base,
+                                       MPI_Aint size,
+                                       int disp_unit,
+                                       MPI_Info info,
+                                       MPI_Comm comm,
                                        MPI_Win *win)
 {
   int ierr = MPI_SUCCESS;

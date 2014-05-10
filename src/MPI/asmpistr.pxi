@@ -1,4 +1,4 @@
-#---------------------------------------------------------------------
+#------------------------------------------------------------------------------
 
 cdef extern from *:
     ctypedef char const_char "const char"
@@ -6,7 +6,7 @@ cdef extern from *:
     object PyMPIString_FromString(const_char*)
     object PyMPIString_FromStringAndSize(const_char*,Py_ssize_t)
 
-#---------------------------------------------------------------------
+#------------------------------------------------------------------------------
 
 cdef inline object asmpistr(object ob, char **s, int *n):
     cdef const_char *sbuf = NULL
@@ -23,4 +23,4 @@ cdef inline object tompistr(const_char *s, int n):
 cdef inline object mpistr(const_char *s):
     return PyMPIString_FromString(s)
 
-#---------------------------------------------------------------------
+#------------------------------------------------------------------------------
