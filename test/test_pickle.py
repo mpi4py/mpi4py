@@ -62,7 +62,7 @@ class TestPickle(unittest.TestCase):
 
     def do_pickle(self, obj, pickle):
         comm = MPI.COMM_SELF
-        o = comm.sendrecv(obj)
+        o = comm.sendrecv(obj, 0, 0, None, 0, 0)
         self.assertEqual(obj, o)
         s = pickle.dumps(obj)
         o = pickle.loads(s)

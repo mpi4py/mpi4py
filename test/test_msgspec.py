@@ -17,7 +17,9 @@ except ImportError:
     HAVE_NUMPY = False
 
 def Sendrecv(smsg, rmsg):
-    MPI.COMM_SELF.Sendrecv(sendbuf=smsg, recvbuf=rmsg, status=MPI.Status())
+    MPI.COMM_SELF.Sendrecv(sendbuf=smsg, dest=0,   sendtag=0,
+                           recvbuf=rmsg, source=0, recvtag=0,
+                           status=MPI.Status())
 
 class TestMessageSimple(unittest.TestCase):
 
