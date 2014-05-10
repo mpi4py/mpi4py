@@ -36,6 +36,9 @@ Release 2.0 [2014-XX-XX]
 
 * Backward-incompatible changes:
 
+  + Change signature of all receive and probe methods,
+    ``source`` defaults to ``ANY_SOURCE``,
+    ``tag`` defaults to ``ANY_TAG``.
   + Change signature of send lowercase-spelling methods,
     ``obj`` arguments are not mandatory.
   + Change signature of recv lowercase-spelling methods,

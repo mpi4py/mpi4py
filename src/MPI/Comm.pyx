@@ -106,7 +106,8 @@ cdef class Comm:
         Compare two communicators
         """
         cdef int flag = MPI_UNEQUAL
-        with nogil: CHKERR( MPI_Comm_compare(comm1.ob_mpi, comm2.ob_mpi, &flag) )
+        with nogil: CHKERR( MPI_Comm_compare(
+            comm1.ob_mpi, comm2.ob_mpi, &flag) )
         return flag
 
     # Communicator Constructors
@@ -252,7 +253,8 @@ cdef class Comm:
             smsg.buf, smsg.count, smsg.dtype,
             dest, tag, self.ob_mpi) )
 
-    def Recv(self, buf, int source=0, int tag=0, Status status=None):
+    def Recv(self, buf, int source=ANY_SOURCE, int tag=ANY_TAG,
+             Status status=None):
         """
         Blocking receive
 
@@ -267,8 +269,8 @@ cdef class Comm:
     # Send-Receive
     # ------------
 
-    def Sendrecv(self, sendbuf, int dest=0,   int sendtag=0,
-                 recvbuf=None,  int source=0, int recvtag=0,
+    def Sendrecv(self, sendbuf, int dest=0, int sendtag=0,
+                 recvbuf=None, int source=ANY_SOURCE, int recvtag=ANY_TAG,
                  Status status=None):
         """
         Send and receive a message
@@ -289,9 +291,8 @@ cdef class Comm:
             rmsg.buf, rmsg.count, rmsg.dtype, source, recvtag,
             self.ob_mpi, statusp) )
 
-    def Sendrecv_replace(self, buf,
-                         int dest=0,   int sendtag=0,
-                         int source=0, int recvtag=0,
+    def Sendrecv_replace(self, buf, int dest=0, int sendtag=0,
+                         int source=ANY_SOURCE, int recvtag=ANY_TAG,
                          Status status=None):
         """
         Send and receive a message
@@ -329,7 +330,7 @@ cdef class Comm:
         request.ob_buf = smsg
         return request
 
-    def Irecv(self, buf, int source=0, int tag=0):
+    def Irecv(self, buf, int source=ANY_SOURCE, int tag=ANY_TAG):
         """
         Nonblocking receive
         """
@@ -344,7 +345,8 @@ cdef class Comm:
     # Probe
     # -----
 
-    def Probe(self, int source=0, int tag=0, Status status=None):
+    def Probe(self, int source=ANY_SOURCE, int tag=ANY_TAG,
+              Status status=None):
         """
         Blocking test for a message
 
@@ -354,7 +356,8 @@ cdef class Comm:
         with nogil: CHKERR( MPI_Probe(
             source, tag, self.ob_mpi, statusp) )
 
-    def Iprobe(self, int source=0, int tag=0, Status status=None):
+    def Iprobe(self, int source=ANY_SOURCE, int tag=ANY_TAG,
+               Status status=None):
         """
         Nonblocking test for a message
         """
@@ -367,7 +370,8 @@ cdef class Comm:
     # Matching Probe
     # --------------
 
-    def Mprobe(self, int source=0, int tag=0, Status status=None):
+    def Mprobe(self, int source=ANY_SOURCE, int tag=ANY_TAG,
+               Status status=None):
         """
         Blocking test for a matched message
         """
@@ -379,7 +383,8 @@ cdef class Comm:
         message.ob_mpi = cmessage
         return message
 
-    def Improbe(self, int source=0, int tag=0, Status status=None):
+    def Improbe(self, int source=ANY_SOURCE, int tag=ANY_TAG,
+                Status status=None):
         """
         Nonblocking test for a matched message
         """
@@ -408,7 +413,7 @@ cdef class Comm:
         request.ob_buf = smsg
         return request
 
-    def Recv_init(self, buf, int source=0, int tag=0):
+    def Recv_init(self, buf, int source=ANY_SOURCE, int tag=ANY_TAG):
         """
         Create a persistent request for a receive
         """
@@ -1151,15 +1156,15 @@ cdef class Comm:
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_ssend(obj, dest, tag, comm)
     #
-    def recv(self, buf=None, int source=0, int tag=0, Status status=None):
+    def recv(self, buf=None, int source=ANY_SOURCE, int tag=ANY_TAG,
+             Status status=None):
         """Receive"""
         cdef MPI_Comm comm = self.ob_mpi
         cdef MPI_Status *statusp = arg_Status(status)
         return PyMPI_recv(buf, source, tag, comm, statusp)
     #
-    def sendrecv(self,
-                 sendobj,      int dest=0,   int sendtag=0,
-                 recvbuf=None, int source=0, int recvtag=0,
+    def sendrecv(self, sendobj, int dest=0, int sendtag=0,
+                 recvbuf=None, int source=ANY_SOURCE, int recvtag=ANY_TAG,
                  Status status=None):
         """Send and Receive"""
         cdef MPI_Comm comm = self.ob_mpi
@@ -1189,26 +1194,29 @@ cdef class Comm:
         request.ob_buf = PyMPI_issend(obj, dest, tag, comm, &request.ob_mpi)
         return request
     #
-    def irecv(self, buf=None, int source=0, int tag=0):
+    def irecv(self, buf=None, int source=ANY_SOURCE, int tag=ANY_TAG):
         """Nonblocking receive"""
         cdef MPI_Comm comm = self.ob_mpi
         cdef Request request = <Request>Request.__new__(Request)
         request.ob_buf = PyMPI_irecv(buf, source, tag, comm, &request.ob_mpi)
         return request
     #
-    def probe(self, int source=0, int tag=0, Status status=None):
+    def probe(self, int source=ANY_SOURCE, int tag=ANY_TAG,
+              Status status=None):
         """Blocking test for a message"""
         cdef MPI_Comm comm = self.ob_mpi
         cdef MPI_Status *statusp = arg_Status(status)
         return PyMPI_probe(source, tag, comm, statusp)
     #
-    def iprobe(self, int source=0, int tag=0, Status status=None):
+    def iprobe(self, int source=ANY_SOURCE, int tag=ANY_TAG,
+               Status status=None):
         """Nonblocking test for a message"""
         cdef MPI_Comm comm = self.ob_mpi
         cdef MPI_Status *statusp = arg_Status(status)
         return PyMPI_iprobe(source, tag, comm, statusp)
     #
-    def mprobe(self, int source=0, int tag=0, Status status=None):
+    def mprobe(self, int source=ANY_SOURCE, int tag=ANY_TAG,
+               Status status=None):
         """Blocking test for a matched message"""
         cdef MPI_Comm comm = self.ob_mpi
         cdef MPI_Status *statusp = arg_Status(status)
@@ -1217,7 +1225,8 @@ cdef class Comm:
                                       &message.ob_mpi, statusp)
         return message
     #
-    def improbe(self, int source=0, int tag=0, Status status=None):
+    def improbe(self, int source=ANY_SOURCE, int tag=ANY_TAG,
+                Status status=None):
         """Nonblocking test for a matched message"""
         cdef int flag = 0
         cdef MPI_Comm comm = self.ob_mpi

@@ -30,7 +30,7 @@ cdef class Message:
 
     @classmethod
     def Probe(cls, Comm comm not None,
-              int source=0, int tag=0, Status status=None):
+              int source=ANY_SOURCE, int tag=ANY_TAG, Status status=None):
         """
         Blocking test for a matched message
         """
@@ -44,7 +44,7 @@ cdef class Message:
 
     @classmethod
     def Iprobe(cls, Comm comm not None,
-               int source=0, int tag=0, Status status=None):
+               int source=ANY_SOURCE, int tag=ANY_TAG, Status status=None):
         """
         Nonblocking test for a matched message
         """
@@ -100,7 +100,7 @@ cdef class Message:
     #
     @classmethod
     def probe(cls, Comm comm not None,
-              int source=0, int tag=0, Status status=None):
+              int source=ANY_SOURCE, int tag=ANY_TAG, Status status=None):
         """Blocking test for a matched message"""
         cdef Message message = <Message>Message.__new__(cls)
         cdef MPI_Status *statusp = arg_Status(status)
@@ -110,7 +110,7 @@ cdef class Message:
     #
     @classmethod
     def iprobe(cls, Comm comm not None,
-               int source=0, int tag=0, Status status=None):
+               int source=ANY_SOURCE, int tag=ANY_TAG, Status status=None):
         """Nonblocking test for a matched message"""
         cdef int flag = 0
         cdef Message message = <Message>Message.__new__(cls)

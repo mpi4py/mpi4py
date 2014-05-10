@@ -972,13 +972,12 @@ cdef object PyMPI_sendrecv_p2p(object obj,
     cdef void *sbuf = NULL, *rbuf = NULL
     cdef int scount = 0, rcount = 0
     cdef MPI_Datatype dtype = MPI_BYTE
-    cdef object sobj, rboj
-    sobj = pickle.dump(obj, &sbuf, &scount)
+    cdef object tmps = pickle.dump(obj, &sbuf, &scount)
     with nogil:
         CHKERR( MPI_Sendrecv(&scount, 1, MPI_INT, dst, stag,
                              &rcount, 1, MPI_INT, src, rtag,
                              comm, MPI_STATUS_IGNORE) )
-    robj = pickle.alloc(&rbuf, rcount)
+    cdef object robj = pickle.alloc(&rbuf, rcount)
     with nogil:
         CHKERR( MPI_Sendrecv(sbuf, scount, dtype, dst, stag,
                              rbuf, rcount, dtype, src, rtag,

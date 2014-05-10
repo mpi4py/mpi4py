@@ -17,21 +17,8 @@ include "asarray.pxi"
 include "helpers.pxi"
 include "msgbuffer.pxi"
 include "msgpickle.pxi"
-
 include "CAPI.pxi"
 
-include "Exception.pyx"
-include "Errhandler.pyx"
-include "Datatype.pyx"
-include "Status.pyx"
-include "Request.pyx"
-include "Message.pyx"
-include "Info.pyx"
-include "Op.pyx"
-include "Group.pyx"
-include "Comm.pyx"
-include "Win.pyx"
-include "File.pyx"
 
 # Assorted constants
 # ------------------
@@ -61,23 +48,38 @@ IN_PLACE = __IN_PLACE__
 # Predefined Attribute Keyvals
 # ----------------------------
 
-KEYVAL_INVALID  = MPI_KEYVAL_INVALID
+KEYVAL_INVALID    = MPI_KEYVAL_INVALID
 
-TAG_UB          = MPI_TAG_UB
-HOST            = MPI_HOST
-IO              = MPI_IO
-WTIME_IS_GLOBAL = MPI_WTIME_IS_GLOBAL
+TAG_UB            = MPI_TAG_UB
+HOST              = MPI_HOST
+IO                = MPI_IO
+WTIME_IS_GLOBAL   = MPI_WTIME_IS_GLOBAL
 
-UNIVERSE_SIZE   = MPI_UNIVERSE_SIZE
-APPNUM          = MPI_APPNUM
+UNIVERSE_SIZE     = MPI_UNIVERSE_SIZE
+APPNUM            = MPI_APPNUM
 
-LASTUSEDCODE    = MPI_LASTUSEDCODE
+LASTUSEDCODE      = MPI_LASTUSEDCODE
 
 WIN_BASE          = MPI_WIN_BASE
 WIN_SIZE          = MPI_WIN_SIZE
 WIN_DISP_UNIT     = MPI_WIN_DISP_UNIT
 WIN_CREATE_FLAVOR = MPI_WIN_CREATE_FLAVOR
 WIN_MODEL         = MPI_WIN_MODEL
+
+
+include "Exception.pyx"
+include "Errhandler.pyx"
+include "Datatype.pyx"
+include "Status.pyx"
+include "Request.pyx"
+include "Message.pyx"
+include "Info.pyx"
+include "Op.pyx"
+include "Group.pyx"
+include "Comm.pyx"
+include "Win.pyx"
+include "File.pyx"
+
 
 # Memory Allocation
 # -----------------
