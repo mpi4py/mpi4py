@@ -1025,15 +1025,15 @@ cdef class Comm:
         Store attribute value associated with a key
         """
         cdef void *ptrval = NULL
-        cdef int incref = 0
-        if keyval in comm_keyval:
-            ptrval = <void*>attrval
-            incref = 1
+        cdef object state = comm_keyval.get(keyval)
+        if state is not None:
+            ptrval = <void *>attrval
         else:
             ptrval = PyLong_AsVoidPtr(attrval)
-            incref = 0
         CHKERR( MPI_Comm_set_attr(self.ob_mpi, keyval, ptrval) )
-        if incref: Py_INCREF(attrval)
+        if state is None: return
+        Py_INCREF(attrval)
+        Py_INCREF(state)
 
     def Delete_attr(self, int keyval):
         """
@@ -1046,12 +1046,13 @@ cdef class Comm:
         """
         Create a new attribute key for communicators
         """
+        cdef object state = (copy_fn, delete_fn)
         cdef int keyval = MPI_KEYVAL_INVALID
         cdef MPI_Comm_copy_attr_function *_copy = comm_attr_copy_fn
         cdef MPI_Comm_delete_attr_function *_del = comm_attr_delete_fn
-        cdef void *extra_state = NULL
+        cdef void *extra_state = <void *>state
         CHKERR( MPI_Comm_create_keyval(_copy, _del, &keyval, extra_state) )
-        comm_keyval_new(keyval, copy_fn, delete_fn)
+        comm_keyval[keyval] = state
         return keyval
 
     @classmethod
@@ -1060,8 +1061,9 @@ cdef class Comm:
         Free and attribute key for communicators
         """
         cdef int keyval_save = keyval
-        CHKERR( MPI_Comm_free_keyval (&keyval) )
-        comm_keyval_del(keyval_save)
+        CHKERR( MPI_Comm_free_keyval(&keyval) )
+        try: del comm_keyval[keyval_save]
+        except KeyError: pass
         return keyval
 
     # Error handling
