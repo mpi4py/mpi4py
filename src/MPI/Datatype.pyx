@@ -679,7 +679,7 @@ cdef class Datatype:
         """
         Create a new attribute key for datatypes
         """
-        cdef object state = (copy_fn, delete_fn)
+        cdef object state = _p_keyval(copy_fn, delete_fn)
         cdef int keyval = MPI_KEYVAL_INVALID
         cdef MPI_Type_copy_attr_function *_copy = type_attr_copy_fn
         cdef MPI_Type_delete_attr_function *_del = type_attr_delete_fn

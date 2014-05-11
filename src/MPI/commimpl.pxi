@@ -14,9 +14,9 @@ cdef int comm_attr_copy(
     void *attrval_in,
     void *attrval_out,
     int *flag) except -1:
-    cdef tuple state = <tuple>extra_state
-    cdef object copy_fn = state[0]
-    if copy_fn is None or copy_fn is False:
+    cdef _p_keyval state = <_p_keyval>extra_state
+    cdef object copy_fn = state.copy_fn
+    if copy_fn is None:
         flag[0] = 0
         return 0
     cdef object attrval = <object>attrval_in
@@ -53,8 +53,8 @@ cdef int comm_attr_delete(
     int keyval,
     void *attrval,
     void *extra_state) except -1:
-    cdef tuple state = <tuple>extra_state
-    cdef object delete_fn = state[1]
+    cdef _p_keyval state = <_p_keyval>extra_state
+    cdef object delete_fn = state.delete_fn
     if delete_fn is not None:
         delete_fn(newcomm(comm), keyval, <object>attrval)
     Py_DECREF(<object>attrval)

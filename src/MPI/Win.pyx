@@ -269,7 +269,7 @@ cdef class Win:
         """
         Create a new attribute key for windows
         """
-        cdef object state = (copy_fn, delete_fn)
+        cdef object state = _p_keyval(copy_fn, delete_fn)
         cdef int keyval = MPI_KEYVAL_INVALID
         cdef MPI_Win_copy_attr_function *_copy = win_attr_copy_fn
         cdef MPI_Win_delete_attr_function *_del = win_attr_delete_fn
