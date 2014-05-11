@@ -1484,13 +1484,12 @@ cdef class Intracomm(Comm):
         #
         cdef int rank = MPI_UNDEFINED
         CHKERR( MPI_Comm_rank(self.ob_mpi, &rank) )
-        cdef tmp1, tmp2
+        cdef tmp1, tmp2, tmp3
         if root == rank:
-            command = asmpistr(command, &cmd, NULL)
-            if args is not None:
-                tmp1 = asarray_argv(args, &argv)
+            tmp1 = asmpistr(command, &cmd, NULL)
+            tmp2 = asarray_argv(args, &argv)
         if errcodes is not None:
-            tmp2 = mkarray_int(maxprocs, &ierrcodes)
+            tmp3 = mkarray_int(maxprocs, &ierrcodes)
         #
         cdef Intercomm comm = <Intercomm>Intercomm.__new__(Intercomm)
         with nogil: CHKERR( MPI_Comm_spawn(
@@ -1519,8 +1518,7 @@ cdef class Intracomm(Comm):
         CHKERR( MPI_Comm_rank(self.ob_mpi, &rank) )
         cdef tmp1, tmp2, tmp3, tmp4, tmp5
         if root == rank:
-            count = <int>len(command)
-            tmp1 = asarray_str(command, count, &cmds)
+            tmp1 = asarray_cmds(command, &count, &cmds)
             tmp2 = asarray_argvs(args, count, &argvs)
             tmp3 = asarray_nprocs(maxprocs, count, &imaxprocs)
             tmp4 = asarray_Info(info, count, &infos)
