@@ -377,8 +377,17 @@ cdef object PyMPI_sendrecv(object sobj, int dest,   int sendtag,
 
 # -----------------------------------------------------------------------------
 
-cdef object PyMPI_wait(Request request, Status status):
+cdef object PyMPI_load(MPI_Status *status, object buf):
+    cdef int rcount = 0
+    cdef MPI_Datatype rtype = MPI_BYTE
+    if type(buf) is not _p_buffer: return None
+    CHKERR( MPI_Get_count(status, rtype, &rcount) )
+    if rcount <= 0: return None
     cdef Pickle pickle = PyMPI_PICKLE
+    return pickle.load(buf)
+
+
+cdef object PyMPI_wait(Request request, Status status):
     cdef object buf
     #
     cdef MPI_Status rsts
@@ -389,16 +398,10 @@ cdef object PyMPI_wait(Request request, Status status):
     if request.ob_mpi == MPI_REQUEST_NULL:
         request.ob_buf = None
     #
-    cdef int rcount = 0
-    cdef MPI_Datatype rtype = MPI_BYTE
-    if type(buf) is not _p_buffer: return None
-    CHKERR( MPI_Get_count(&rsts, rtype, &rcount) )
-    if rcount <= 0: return None
-    return pickle.load(buf)
+    return PyMPI_load(&rsts, buf)
 
 
 cdef object PyMPI_test(Request request, int *flag, Status status):
-    cdef Pickle pickle = PyMPI_PICKLE
     cdef object buf = None
     #
     cdef MPI_Status rsts
@@ -411,16 +414,10 @@ cdef object PyMPI_test(Request request, int *flag, Status status):
         request.ob_buf = None
     #
     if not flag[0]: return None
-    cdef int rcount = 0
-    cdef MPI_Datatype rtype = MPI_BYTE
-    if type(buf) is not _p_buffer: return None
-    CHKERR( MPI_Get_count(&rsts, rtype, &rcount) )
-    if rcount <= 0: return None
-    return pickle.load(buf)
+    return PyMPI_load(&rsts, buf)
 
 
 cdef object PyMPI_waitany(requests, int *index, Status status):
-    cdef Pickle pickle = PyMPI_PICKLE
     cdef object buf = None
     #
     cdef int count = 0
@@ -438,16 +435,10 @@ cdef object PyMPI_waitany(requests, int *index, Status status):
         release_rs(requests, None, count, irequests, NULL)
     #
     if index[0] == MPI_UNDEFINED: return None
-    cdef int rcount = 0
-    cdef MPI_Datatype rtype = MPI_BYTE
-    if type(buf) is not _p_buffer: return None
-    CHKERR( MPI_Get_count(&rsts, rtype, &rcount) )
-    if rcount <= 0: return None
-    return pickle.load(buf)
+    return PyMPI_load(&rsts, buf)
 
 
 cdef object PyMPI_testany(requests, int *index, int *flag, Status status):
-    cdef Pickle pickle = PyMPI_PICKLE
     cdef object buf = None
     #
     cdef int count = 0
@@ -466,17 +457,11 @@ cdef object PyMPI_testany(requests, int *index, int *flag, Status status):
     #
     if index[0] == MPI_UNDEFINED: return None
     if not flag[0]: return None
-    cdef int rcount = 0
-    cdef MPI_Datatype rtype = MPI_BYTE
-    if type(buf) is not _p_buffer: return None
-    CHKERR( MPI_Get_count(&rsts, rtype, &rcount) )
-    if rcount <= 0: return None
-    return pickle.load(buf)
+    return PyMPI_load(&rsts, buf)
 
 
 cdef object PyMPI_waitall(requests, statuses):
-    cdef Pickle pickle = PyMPI_PICKLE
-    cdef object buf, bufs = None
+    cdef object bufs = None
     #
     cdef Py_ssize_t i = 0
     cdef int count = 0
@@ -490,20 +475,11 @@ cdef object PyMPI_waitall(requests, statuses):
     finally:
         release_rs(requests, statuses, count, irequests, istatuses)
     #
-    cdef int rcount = 0
-    cdef MPI_Datatype rtype = MPI_BYTE
-    for i from 0 <= i < count:
-        if type(bufs[i]) is not _p_buffer:
-            bufs[i] = None; continue
-        rcount = 0
-        CHKERR( MPI_Get_count(&istatuses[i], rtype, &rcount) )
-        if rcount <= 0: bufs[i] = None
-    return [pickle.load(buf) for buf in bufs]
+    return [PyMPI_load(&istatuses[i], bufs[i]) for i from 0 <= i < count]
 
 
 cdef object PyMPI_testall(requests, int *flag, statuses):
-    cdef Pickle pickle = PyMPI_PICKLE
-    cdef object buf, bufs = None
+    cdef object bufs = None
     #
     cdef Py_ssize_t i = 0
     cdef int count = 0
@@ -519,15 +495,7 @@ cdef object PyMPI_testall(requests, int *flag, statuses):
         release_rs(requests, statuses, count, irequests, istatuses)
     #
     if not flag[0]: return None
-    cdef int rcount = 0
-    cdef MPI_Datatype rtype = MPI_BYTE
-    for i from 0 <= i < count:
-        if type(bufs[i]) is not _p_buffer:
-            bufs[i] = None; continue
-        rcount = 0
-        CHKERR( MPI_Get_count(&istatuses[i], rtype, &rcount) )
-        if rcount <= 0: bufs[i] = None
-    return [pickle.load(buf) for buf in bufs]
+    return [PyMPI_load(&istatuses[i], bufs[i]) for i from 0 <= i < count]
 
 # -----------------------------------------------------------------------------
 
