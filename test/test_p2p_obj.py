@@ -500,6 +500,35 @@ class BaseTestP2PObj(object):
                 rmess = smess
             self.assertEqual(rmess, smess)
 
+    def testProbe(self):
+        comm = self.COMM.Dup()
+        try:
+            status = MPI.Status()
+            flag = comm.iprobe(MPI.ANY_SOURCE, MPI.ANY_TAG, status)
+            self.assertFalse(flag)
+            for smess in messages:
+                request = comm.issend(smess, comm.rank, 123)
+                self.assertTrue(request)
+                flag = comm.iprobe(MPI.ANY_SOURCE, MPI.ANY_TAG, status)
+                self.assertEqual(status.source, comm.rank)
+                self.assertEqual(status.tag, 123)
+                self.assertTrue(flag)
+                comm.probe(MPI.ANY_SOURCE, MPI.ANY_TAG, status)
+                self.assertEqual(status.source, comm.rank)
+                self.assertEqual(status.tag, 123)
+                self.assertTrue(request)
+                flag = request.Test()
+                self.assertTrue(request)
+                self.assertFalse(flag)
+                obj = comm.recv(None, comm.rank, 123)
+                self.assertEqual(obj, smess)
+                self.assertTrue(request)
+                flag = request.Test()
+                self.assertFalse(request)
+                self.assertTrue(flag)
+        finally:
+            comm.Free()
+
 class BaseTestP2PObjDup(BaseTestP2PObj):
     def setUp(self):
         self.COMM = self.COMM.Dup()
