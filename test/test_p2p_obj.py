@@ -509,11 +509,11 @@ class BaseTestP2PObj(object):
             for smess in messages:
                 request = comm.issend(smess, comm.rank, 123)
                 self.assertTrue(request)
-                flag = comm.iprobe(MPI.ANY_SOURCE, MPI.ANY_TAG, status)
+                flag = comm.iprobe(comm.rank, 123, status)
                 self.assertEqual(status.source, comm.rank)
                 self.assertEqual(status.tag, 123)
                 self.assertTrue(flag)
-                comm.probe(MPI.ANY_SOURCE, MPI.ANY_TAG, status)
+                comm.probe(comm.rank, 123, status)
                 self.assertEqual(status.source, comm.rank)
                 self.assertEqual(status.tag, 123)
                 self.assertTrue(request)
