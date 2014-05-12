@@ -509,11 +509,11 @@ class BaseTestP2PObj(object):
             for smess in messages:
                 request = comm.issend(smess, comm.rank, 123)
                 self.assertTrue(request)
-                flag = comm.iprobe(comm.rank, 123, status)
+                flag = comm.iprobe(MPI.ANY_SOURCE, MPI.ANY_TAG, status)
                 self.assertEqual(status.source, comm.rank)
                 self.assertEqual(status.tag, 123)
                 self.assertTrue(flag)
-                comm.probe(comm.rank, 123, status)
+                comm.probe(MPI.ANY_SOURCE, MPI.ANY_TAG, status)
                 self.assertEqual(status.source, comm.rank)
                 self.assertEqual(status.tag, 123)
                 self.assertTrue(request)
@@ -552,6 +552,8 @@ class TestP2PObjWorldDup(BaseTestP2PObjDup, unittest.TestCase):
 
 
 name, version = MPI.get_vendor()
+if name == 'MPICH1':
+    BaseTestP2PObj.testProbe
 if name == 'Open MPI':
     if version < (1,4,0):
         if MPI.Query_thread() > MPI.THREAD_SINGLE:
