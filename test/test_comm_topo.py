@@ -84,7 +84,7 @@ class BaseTestTopo(object):
             edges.append((i+1)%size)
         topo = comm.Create_graph(index[1:], edges)
         self.assertTrue(topo.is_topo)
-            self.assertTrue(topo.topology, MPI.GRAPH)
+        self.assertTrue(topo.topology, MPI.GRAPH)
         self.checkFortran(topo)
         topo.Free()
         topo = comm.Create_graph(index, edges)
