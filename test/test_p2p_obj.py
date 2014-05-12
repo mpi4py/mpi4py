@@ -553,7 +553,7 @@ class TestP2PObjWorldDup(BaseTestP2PObjDup, unittest.TestCase):
 
 name, version = MPI.get_vendor()
 if name == 'MPICH1':
-    BaseTestP2PObj.testProbe
+    del BaseTestP2PObj.testProbe
 if name == 'Open MPI':
     if version < (1,4,0):
         if MPI.Query_thread() > MPI.THREAD_SINGLE:
