@@ -20,6 +20,8 @@ class BaseTestTopo(object):
             dims = MPI.Compute_dims(size, [0]*ndim)
             periods = [True] * len(dims)
             topo = comm.Create_cart(dims, periods=periods)
+            self.assertTrue(topo.is_topo)
+            self.assertTrue(topo.topology, MPI.CART)
             self.checkFortran(topo)
             self.assertEqual(topo.dim, len(dims))
             self.assertEqual(topo.ndim, len(dims))
@@ -81,6 +83,8 @@ class BaseTestTopo(object):
             edges.append((i-1)%size)
             edges.append((i+1)%size)
         topo = comm.Create_graph(index[1:], edges)
+        self.assertTrue(topo.is_topo)
+            self.assertTrue(topo.topology, MPI.GRAPH)
         self.checkFortran(topo)
         topo.Free()
         topo = comm.Create_graph(index, edges)
@@ -116,6 +120,8 @@ class BaseTestTopo(object):
         sources = [(rank-2)%size, (rank-1)%size]
         destinations = [(rank+1)%size, (rank+2)%size]
         topo = comm.Create_dist_graph_adjacent(sources, destinations)
+        self.assertTrue(topo.is_topo)
+        self.assertTrue(topo.topology, MPI.DIST_GRAPH)
         self.checkFortran(topo)
         self.assertEqual(topo.Get_dist_neighbors_count(), (2, 2, False))
         self.assertEqual(topo.Get_dist_neighbors(), (sources, destinations, None))
@@ -166,6 +172,8 @@ class BaseTestTopo(object):
         degrees = [3]
         destinations = [(rank-1)%size, rank, (rank+1)%size]
         topo = comm.Create_dist_graph(sources, degrees, destinations, MPI.UNWEIGHTED)
+        self.assertTrue(topo.is_topo)
+        self.assertTrue(topo.topology, MPI.DIST_GRAPH)
         self.checkFortran(topo)
         self.assertEqual(topo.Get_dist_neighbors_count(), (3, 3, False))
         topo.Free()
