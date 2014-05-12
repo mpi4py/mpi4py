@@ -397,6 +397,11 @@ cdef class Datatype:
         CHKERR( MPI_Type_get_envelope(self.ob_mpi, &ni, &na, &nd, &combiner) )
         return (ni, na, nd, combiner)
 
+    property envelope:
+        """datatype envelope"""
+        def __get__(self):
+            return self.Get_envelope()
+
     def Get_contents(self):
         """
         Retrieve the actual arguments used in the call that created a
@@ -416,6 +421,11 @@ cdef class Datatype:
         cdef object addresses = [a[k] for k from 0 <= k < na]
         cdef object datatypes = [new_Datatype(d[k]) for k from 0 <= k < nd]
         return (integers, addresses, datatypes)
+
+    property contents:
+        """datatype contents"""
+        def __get__(self):
+            return self.Get_contents()
 
     def decode(self):
         """
@@ -525,7 +535,28 @@ cdef class Datatype:
             return (Datatype, ('F90_COMPLEX'),
                     {('p') : i[0],
                      ('r') : i[1]})
+        else:
+            return None
 
+    property combiner:
+        """datatype combiner"""
+        def __get__(self):
+            return self.Get_envelope()[3]
+
+    property is_named:
+        """is a named datatype"""
+        def __get__(self):
+            cdef int combiner = self.Get_envelope()[3]
+            return combiner == MPI_COMBINER_NAMED
+
+    property is_predefined:
+        """is a predefined datatype"""
+        def __get__(self):
+            cdef int combiner = self.Get_envelope()[3]
+            return (combiner == <int>MPI_COMBINER_NAMED or
+                    combiner == <int>MPI_COMBINER_F90_INTEGER or
+                    combiner == <int>MPI_COMBINER_F90_REAL or
+                    combiner == <int>MPI_COMBINER_F90_COMPLEX)
 
     # Pack and Unpack
     # ---------------

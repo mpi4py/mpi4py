@@ -83,6 +83,10 @@ class TestDatatype(unittest.TestCase):
             self.assertEqual(ni, 0)
             self.assertEqual(na, 0)
             self.assertEqual(nd, 0)
+            self.assertEqual(dtype.envelope, envelope)
+            self.assertEqual(dtype.combiner, combiner)
+            self.assertTrue(dtype.is_named)
+            self.assertTrue(dtype.is_predefined)
             otype = dtype.decode()
             self.assertTrue(dtype is otype)
 
@@ -98,6 +102,16 @@ class TestDatatype(unittest.TestCase):
         self.assertEqual(na, len(a))
         self.assertEqual(nd, len(d))
         self.assertTrue(combiner != MPI.COMBINER_NAMED)
+        self.assertEqual(newtype.envelope, envelope)
+        self.assertEqual(newtype.contents, contents)
+        self.assertEqual(newtype.combiner, combiner)
+        self.assertFalse(newtype.is_named)
+        if combiner in (MPI.COMBINER_F90_INTEGER,
+                        MPI.COMBINER_F90_REAL,
+                        MPI.COMBINER_F90_COMPLEX,):
+            self.assertTrue(newtype.is_predefined)
+        else:
+            self.assertFalse(newtype.is_predefined)
         name = factory.__name__
         NAME = name.replace('Create_', '').upper()
         symbol = getattr(MPI, 'COMBINER_' + NAME)
@@ -116,7 +130,10 @@ class TestDatatype(unittest.TestCase):
         if combiner not in (MPI.COMBINER_F90_INTEGER,
                             MPI.COMBINER_F90_REAL,
                             MPI.COMBINER_F90_COMPLEX,):
+            self.assertFalse(newtype2.is_predefined)
             newtype2.Free()
+        else:
+            self.assertTrue(newtype2.is_predefined)
 
     def check_datatype(self, oldtype, factory, *args):
         try:
