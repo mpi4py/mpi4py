@@ -174,7 +174,6 @@ cdef class Win:
         """
         with nogil: CHKERR( MPI_Win_free(&self.ob_mpi) )
 
-
     # Window Info
     # -----------
 
@@ -195,6 +194,13 @@ cdef class Win:
         with nogil: CHKERR( MPI_Win_get_info(
             self.ob_mpi, &info.ob_mpi) )
         return info
+
+    property info:
+        """window info"""
+        def __get__(self):
+            return self.Get_info()
+        def __set__(self, info):
+            self.Set_info(info)
 
     # Window Group
     # -------------

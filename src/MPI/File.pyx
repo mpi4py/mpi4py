@@ -176,7 +176,7 @@ cdef class File:
     def Get_info(self):
         """
         Return the hints for a file that
-        are actually being used by MPI
+        that are currently in use
         """
         cdef Info info = <Info>Info.__new__(Info)
         with nogil: CHKERR( MPI_File_get_info(self.ob_mpi, &info.ob_mpi) )

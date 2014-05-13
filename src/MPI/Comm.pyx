@@ -227,12 +227,19 @@ cdef class Comm:
     def Get_info(self):
         """
         Return the hints for a communicator
-        that are currently being used by MPI
+        that are currently in use
         """
         cdef Info info = <Info>Info.__new__(Info)
         with nogil: CHKERR( MPI_Comm_get_info(
             self.ob_mpi, &info.ob_mpi) )
         return info
+
+    property info:
+        """communicator info"""
+        def __get__(self):
+            return self.Get_info()
+        def __set__(self, info):
+            self.Set_info(info)
 
     # Point to Point communication
     # ----------------------------
