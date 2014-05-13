@@ -21,8 +21,11 @@ cdef inline int type_attr_copy(
         return 0
     cdef object attrval = <object>attrval_in
     cdef void **aptr = <void **>attrval_out
+    cdef Datatype handle
     if copy_fn is not True:
-        attrval = copy_fn(newtype(datatype), keyval, attrval)
+        handle = newtype(datatype)
+        try: attrval = copy_fn(handle, keyval, attrval)
+        finally: handle.ob_mpi = MPI_DATATYPE_NULL
     Py_INCREF(attrval)
     Py_INCREF(state)
     aptr[0] = <void*>attrval
@@ -55,8 +58,11 @@ cdef inline int type_attr_delete(
     void *extra_state) except -1:
     cdef _p_keyval state = <_p_keyval>extra_state
     cdef object delete_fn = state.delete_fn
+    cdef Datatype handle
     if delete_fn is not None:
-        delete_fn(newtype(datatype), keyval, <object>attrval)
+        handle = newtype(datatype)
+        try: delete_fn(handle, keyval, <object>attrval)
+        finally: handle.ob_mpi = MPI_DATATYPE_NULL
     Py_DECREF(<object>attrval)
     Py_DECREF(<object>extra_state)
     return 0

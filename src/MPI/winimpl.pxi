@@ -57,8 +57,11 @@ cdef int win_attr_copy(
         return 0
     cdef object attrval = <object>attrval_in
     cdef void **aptr = <void **>attrval_out
+    cdef Win handle
     if copy_fn is not True:
-        attrval = copy_fn(newwin(win), keyval, attrval)
+        handle = newwin(win)
+        try: attrval = copy_fn(handle, keyval, attrval)
+        finally: handle.ob_mpi = MPI_WIN_NULL
     Py_INCREF(attrval)
     Py_INCREF(state)
     aptr[0] = <void*>attrval
@@ -91,8 +94,11 @@ cdef int win_attr_delete(
     void *extra_state) except -1:
     cdef _p_keyval state = <_p_keyval>extra_state
     cdef object delete_fn = state.delete_fn
+    cdef Win handle
     if delete_fn is not None:
-        delete_fn(newwin(win), keyval, <object>attrval)
+        handle = newwin(win)
+        try: delete_fn(handle, keyval, <object>attrval)
+        finally: handle.ob_mpi = MPI_WIN_NULL
     Py_DECREF(<object>attrval)
     Py_DECREF(<object>extra_state)
     return 0
