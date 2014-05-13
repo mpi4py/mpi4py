@@ -15,7 +15,11 @@
 # endif
 #endif
 
-static PyMPI_UNUSED int PyMPI_UNAVAILABLE(PyMPI_UNUSED const char *name,...) { return -1; }
+#define PyMPI_ERR_UNAVAILABLE (-1431655766) /*0xaaaaaaaa*/
+
+static PyMPI_UNUSED
+int PyMPI_UNAVAILABLE(const char *name,...)
+{ (void)name; return PyMPI_ERR_UNAVAILABLE; }
 
 #ifndef PyMPI_HAVE_MPI_Aint
 #undef  MPI_Aint

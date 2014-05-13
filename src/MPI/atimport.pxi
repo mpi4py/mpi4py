@@ -207,6 +207,9 @@ cdef void atexit() nogil:
 # Vile hack for raising a exception and not contaminate the traceback
 
 cdef extern from *:
+    enum: PyMPI_ERR_UNAVAILABLE
+
+cdef extern from *:
     void PyErr_SetObject(object, object)
     void *PyExc_RuntimeError
     void *PyExc_NotImplementedError
@@ -214,7 +217,7 @@ cdef extern from *:
 cdef object MPIException = <object>PyExc_RuntimeError
 
 cdef int PyMPI_Raise(int ierr) except -1 with gil:
-    if ierr == -1:
+    if ierr == PyMPI_ERR_UNAVAILABLE:
         PyErr_SetObject(<object>PyExc_NotImplementedError, None)
         return 0
     if (<void*>MPIException) != NULL:
@@ -224,7 +227,7 @@ cdef int PyMPI_Raise(int ierr) except -1 with gil:
     return 0
 
 cdef inline int CHKERR(int ierr) nogil except -1:
-    if ierr == 0: return 0
+    if ierr == MPI_SUCCESS: return 0
     PyMPI_Raise(ierr)
     return -1
 

@@ -135,9 +135,9 @@ cdef inline int del_Datatype(MPI_Datatype* ob):
     #
     if not mpi_active(): return 0
     #
-    cdef int ierr, i=0, a=0, t=0, combiner=MPI_UNDEFINED
+    cdef int ierr, i=0, a=0, t=0, combiner=0
     ierr = MPI_Type_get_envelope(ob[0], &i, &a, &t, &combiner)
-    if ierr > 0: return ierr
+    if ierr > MPI_SUCCESS: return ierr
     if combiner == MPI_COMBINER_NAMED       : return 0
     if combiner == MPI_COMBINER_F90_INTEGER : return 0
     if combiner == MPI_COMBINER_F90_REAL    : return 0
