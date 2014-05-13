@@ -87,6 +87,7 @@ cdef object _op_NO_OP(object x, object y):
 cdef list op_user_registry = [None]*(1+32)
 
 cdef inline object op_user_py(int index, object x, object y, object dt):
+    if index < 0: index = -index
     return op_user_registry[index](x, y, dt)
 
 cdef inline void op_user_mpi(
@@ -97,6 +98,7 @@ cdef inline void op_user_mpi(
         datatype = <Datatype>Datatype.__new__(Datatype)
         datatype.ob_mpi = t[0]
         op_user_py(index, tomemory(a, n), tomemory(b, n), datatype)
+        datatype.ob_mpi = MPI_DATATYPE_NULL
     except:
         # print the full exception traceback and abort.
         PySys_WriteStderr(b"Fatal Python error: exception in "

@@ -9,7 +9,7 @@ cdef class Op:
         if op is not None:
             self.ob_mpi = op.ob_mpi
             self.ob_func = op.ob_func
-            self.ob_usrid = 0 # XXX
+            self.ob_usrid = -op.ob_usrid
 
     def __dealloc__(self):
         if not (self.flags & PyMPI_OWNED): return
