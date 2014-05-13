@@ -31,8 +31,8 @@ cdef class _p_datarep:
         cdef object fbuf = tomemory(filebuf, flen)
         cdef Datatype dtype = <Datatype>Datatype.__new__(Datatype)
         dtype.ob_mpi = datatype
-        self.read_fn(ubuf, dtype, count, fbuf, position)
-        dtype.ob_mpi = MPI_DATATYPE_NULL
+        try: self.read_fn(ubuf, dtype, count, fbuf, position)
+        finally: dtype.ob_mpi = MPI_DATATYPE_NULL
         return MPI_SUCCESS
 
     cdef int write(self,
@@ -51,8 +51,8 @@ cdef class _p_datarep:
         cdef object fbuf = tomemory(filebuf, flen)
         cdef Datatype dtype = <Datatype>Datatype.__new__(Datatype)
         dtype.ob_mpi = datatype
-        self.write_fn(ubuf, dtype, count, fbuf, position)
-        dtype.ob_mpi = MPI_DATATYPE_NULL
+        try: self.write_fn(ubuf, dtype, count, fbuf, position)
+        finally: dtype.ob_mpi = MPI_DATATYPE_NULL
         return MPI_SUCCESS
 
     cdef int extent(self,
@@ -61,8 +61,8 @@ cdef class _p_datarep:
                     ) except -1:
         cdef Datatype dtype = <Datatype>Datatype.__new__(Datatype)
         dtype.ob_mpi = datatype
-        file_extent[0] = self.extent_fn(dtype)
-        dtype.ob_mpi = MPI_DATATYPE_NULL
+        try: file_extent[0] = self.extent_fn(dtype)
+        finally: dtype.ob_mpi = MPI_DATATYPE_NULL
         return MPI_SUCCESS
 
 # ---
