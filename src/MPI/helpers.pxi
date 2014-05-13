@@ -60,10 +60,88 @@ cdef inline Datatype new_Datatype(MPI_Datatype ob):
     return datatype
 
 cdef inline int del_Datatype(MPI_Datatype* ob):
+    if ob    == NULL                        : return 0
+    if ob[0] == MPI_DATATYPE_NULL           : return 0
+    if ob[0] == MPI_DATATYPE_NULL           : return 0
+    if ob[0] == MPI_UB                      : return 0
+    if ob[0] == MPI_LB                      : return 0
+    if ob[0] == MPI_PACKED                  : return 0
+    if ob[0] == MPI_BYTE                    : return 0
+    if ob[0] == MPI_AINT                    : return 0
+    if ob[0] == MPI_OFFSET                  : return 0
+    if ob[0] == MPI_COUNT                   : return 0
+    if ob[0] == MPI_CHAR                    : return 0
+    if ob[0] == MPI_WCHAR                   : return 0
+    if ob[0] == MPI_SIGNED_CHAR             : return 0
+    if ob[0] == MPI_SHORT                   : return 0
+    if ob[0] == MPI_INT                     : return 0
+    if ob[0] == MPI_LONG                    : return 0
+    if ob[0] == MPI_LONG_LONG               : return 0
+    if ob[0] == MPI_UNSIGNED_CHAR           : return 0
+    if ob[0] == MPI_UNSIGNED_SHORT          : return 0
+    if ob[0] == MPI_UNSIGNED                : return 0
+    if ob[0] == MPI_UNSIGNED_LONG           : return 0
+    if ob[0] == MPI_UNSIGNED_LONG_LONG      : return 0
+    if ob[0] == MPI_FLOAT                   : return 0
+    if ob[0] == MPI_DOUBLE                  : return 0
+    if ob[0] == MPI_LONG_DOUBLE             : return 0
+    if ob[0] == MPI_C_BOOL                  : return 0
+    if ob[0] == MPI_INT8_T                  : return 0
+    if ob[0] == MPI_INT16_T                 : return 0
+    if ob[0] == MPI_INT32_T                 : return 0
+    if ob[0] == MPI_INT64_T                 : return 0
+    if ob[0] == MPI_UINT8_T                 : return 0
+    if ob[0] == MPI_UINT16_T                : return 0
+    if ob[0] == MPI_UINT32_T                : return 0
+    if ob[0] == MPI_UINT64_T                : return 0
+    if ob[0] == MPI_C_COMPLEX               : return 0
+    if ob[0] == MPI_C_FLOAT_COMPLEX         : return 0
+    if ob[0] == MPI_C_DOUBLE_COMPLEX        : return 0
+    if ob[0] == MPI_C_LONG_DOUBLE_COMPLEX   : return 0
+    if ob[0] == MPI_CXX_BOOL                : return 0
+    if ob[0] == MPI_CXX_FLOAT_COMPLEX       : return 0
+    if ob[0] == MPI_CXX_DOUBLE_COMPLEX      : return 0
+    if ob[0] == MPI_CXX_LONG_DOUBLE_COMPLEX : return 0
+    if ob[0] == MPI_SHORT_INT               : return 0
+    if ob[0] == MPI_2INT                    : return 0
+    if ob[0] == MPI_LONG_INT                : return 0
+    if ob[0] == MPI_FLOAT_INT               : return 0
+    if ob[0] == MPI_DOUBLE_INT              : return 0
+    if ob[0] == MPI_LONG_DOUBLE_INT         : return 0
+    if ob[0] == MPI_CHARACTER               : return 0
+    if ob[0] == MPI_LOGICAL                 : return 0
+    if ob[0] == MPI_INTEGER                 : return 0
+    if ob[0] == MPI_REAL                    : return 0
+    if ob[0] == MPI_DOUBLE_PRECISION        : return 0
+    if ob[0] == MPI_COMPLEX                 : return 0
+    if ob[0] == MPI_DOUBLE_COMPLEX          : return 0
+    if ob[0] == MPI_LOGICAL1                : return 0
+    if ob[0] == MPI_LOGICAL2                : return 0
+    if ob[0] == MPI_LOGICAL4                : return 0
+    if ob[0] == MPI_LOGICAL8                : return 0
+    if ob[0] == MPI_INTEGER1                : return 0
+    if ob[0] == MPI_INTEGER2                : return 0
+    if ob[0] == MPI_INTEGER4                : return 0
+    if ob[0] == MPI_INTEGER8                : return 0
+    if ob[0] == MPI_INTEGER16               : return 0
+    if ob[0] == MPI_REAL2                   : return 0
+    if ob[0] == MPI_REAL4                   : return 0
+    if ob[0] == MPI_REAL8                   : return 0
+    if ob[0] == MPI_REAL16                  : return 0
+    if ob[0] == MPI_COMPLEX4                : return 0
+    if ob[0] == MPI_COMPLEX8                : return 0
+    if ob[0] == MPI_COMPLEX16               : return 0
+    if ob[0] == MPI_COMPLEX32               : return 0
     #
-    if ob    == NULL              : return 0
-    if ob[0] == MPI_DATATYPE_NULL : return 0
-    if not mpi_active()           : return 0
+    if not mpi_active(): return 0
+    #
+    cdef int ierr, i=0, a=0, t=0, combiner=MPI_UNDEFINED
+    ierr = MPI_Type_get_envelope(ob[0], &i, &a, &t, &combiner)
+    if ierr > 0: return ierr
+    if combiner == MPI_COMBINER_NAMED       : return 0
+    if combiner == MPI_COMBINER_F90_INTEGER : return 0
+    if combiner == MPI_COMBINER_F90_REAL    : return 0
+    if combiner == MPI_COMBINER_F90_COMPLEX : return 0
     #
     return MPI_Type_free(ob)
 
@@ -91,11 +169,10 @@ cdef inline Request new_Request(MPI_Request ob):
     return request
 
 cdef inline int del_Request(MPI_Request* ob):
-    #
     if ob    == NULL             : return 0
     if ob[0] == MPI_REQUEST_NULL : return 0
-    if not mpi_active()          : return 0
     #
+    if not mpi_active(): return 0
     return MPI_Request_free(ob)
 
 #------------------------------------------------------------------------------
@@ -107,12 +184,11 @@ cdef inline Message new_Message(MPI_Message ob):
     return message
 
 cdef inline int del_Message(MPI_Message* ob):
-    #
     if ob    == NULL                : return 0
     if ob[0] == MPI_MESSAGE_NULL    : return 0
     if ob[0] == MPI_MESSAGE_NO_PROC : return 0
-    if not mpi_active()             : return 0
     #
+    if not mpi_active(): return 0
     # ob[0] = MPI_MESSAGE_NULL
     return 0
 
@@ -142,7 +218,6 @@ cdef inline Op new_Op(MPI_Op ob):
     return op
 
 cdef inline int del_Op(MPI_Op* ob):
-    #
     if ob    == NULL        : return 0
     if ob[0] == MPI_OP_NULL : return 0
     if ob[0] == MPI_MAX     : return 0
@@ -158,8 +233,9 @@ cdef inline int del_Op(MPI_Op* ob):
     if ob[0] == MPI_MAXLOC  : return 0
     if ob[0] == MPI_MINLOC  : return 0
     if ob[0] == MPI_REPLACE : return 0
-    if not mpi_active()     : return 0
+    if ob[0] == MPI_NO_OP   : return 0
     #
+    if not mpi_active(): return 0
     return MPI_Op_free(ob)
 
 #------------------------------------------------------------------------------
@@ -171,12 +247,11 @@ cdef inline Info new_Info(MPI_Info ob):
     return info
 
 cdef inline int del_Info(MPI_Info* ob):
-    #
     if ob    == NULL          : return 0
     if ob[0] == MPI_INFO_NULL : return 0
     if ob[0] == MPI_INFO_ENV  : return 0
-    if not mpi_active()       : return 0
     #
+    if not mpi_active(): return 0
     return MPI_Info_free(ob)
 
 cdef inline MPI_Info arg_Info(object info):
@@ -193,12 +268,11 @@ cdef inline Group new_Group(MPI_Group ob):
 
 
 cdef inline int del_Group(MPI_Group* ob):
-     #
      if ob    == NULL            : return 0
      if ob[0] == MPI_GROUP_NULL  : return 0
      if ob[0] == MPI_GROUP_EMPTY : return 0
-     if not mpi_active()         : return 0
      #
+     if not mpi_active(): return 0
      return MPI_Group_free(ob)
 
 #------------------------------------------------------------------------------
@@ -222,13 +296,12 @@ cdef inline Intercomm new_Intercomm(MPI_Comm ob):
     return comm
 
 cdef inline int del_Comm(MPI_Comm* ob):
-    #
     if ob    == NULL           : return 0
     if ob[0] == MPI_COMM_NULL  : return 0
     if ob[0] == MPI_COMM_SELF  : return 0
     if ob[0] == MPI_COMM_WORLD : return 0
-    if not mpi_active()        : return 0
     #
+    if not mpi_active(): return 0
     return MPI_Comm_free(ob)
 
 #------------------------------------------------------------------------------
@@ -242,11 +315,10 @@ cdef inline Win new_Win(MPI_Win ob):
     return win
 
 cdef inline int del_Win(MPI_Win* ob):
-    #
     if ob    == NULL         : return 0
     if ob[0] == MPI_WIN_NULL : return 0
-    if not mpi_active()      : return 0
     #
+    if not mpi_active(): return 0
     return MPI_Win_free(ob)
 
 #------------------------------------------------------------------------------
@@ -260,11 +332,10 @@ cdef inline File new_File(MPI_File ob):
     return file
 
 cdef inline int del_File(MPI_File* ob):
-    #
     if ob    == NULL          : return 0
     if ob[0] == MPI_FILE_NULL : return 0
-    if not mpi_active()       : return 0
     #
+    if not mpi_active(): return 0
     return MPI_File_close(ob)
 
 #------------------------------------------------------------------------------
@@ -276,11 +347,12 @@ cdef inline Errhandler new_Errhandler(MPI_Errhandler ob):
     return errhandler
 
 cdef inline int del_Errhandler(MPI_Errhandler* ob):
+    if ob    == NULL                 : return 0
+    if ob[0] == MPI_ERRHANDLER_NULL  : return 0
+   #if ob[0] == MPI_ERRORS_RETURN    : return 0
+   #if ob[0] == MPI_ERRORS_ARE_FATAL : return 0
     #
-    if ob    == NULL                : return 0
-    if ob[0] == MPI_ERRHANDLER_NULL : return 0
-    if not mpi_active()             : return 0
-    #
+    if not mpi_active(): return 0
     return MPI_Errhandler_free(ob)
 
 #------------------------------------------------------------------------------

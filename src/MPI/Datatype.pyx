@@ -817,29 +817,31 @@ cdef Datatype __FLOAT__              = new_Datatype( MPI_FLOAT              )
 cdef Datatype __DOUBLE__             = new_Datatype( MPI_DOUBLE             )
 cdef Datatype __LONG_DOUBLE__        = new_Datatype( MPI_LONG_DOUBLE        )
 
-cdef Datatype __C_BOOL__                = new_Datatype( MPI_C_BOOL           )
-cdef Datatype __INT8_T__                = new_Datatype( MPI_INT8_T           )
-cdef Datatype __INT16_T__               = new_Datatype( MPI_INT16_T          )
-cdef Datatype __INT32_T__               = new_Datatype( MPI_INT32_T          )
-cdef Datatype __INT64_T__               = new_Datatype( MPI_INT64_T          )
-cdef Datatype __UINT8_T__               = new_Datatype( MPI_UINT8_T          )
-cdef Datatype __UINT16_T__              = new_Datatype( MPI_UINT16_T         )
-cdef Datatype __UINT32_T__              = new_Datatype( MPI_UINT32_T         )
-cdef Datatype __UINT64_T__              = new_Datatype( MPI_UINT64_T         )
-cdef Datatype __C_COMPLEX__             = new_Datatype( MPI_C_COMPLEX        )
-cdef Datatype __C_FLOAT_COMPLEX__       = new_Datatype( MPI_C_FLOAT_COMPLEX  )
-cdef Datatype __C_DOUBLE_COMPLEX__      = new_Datatype( MPI_C_DOUBLE_COMPLEX )
+cdef Datatype __C_BOOL__                = new_Datatype( MPI_C_BOOL      )
+cdef Datatype __INT8_T__                = new_Datatype( MPI_INT8_T      )
+cdef Datatype __INT16_T__               = new_Datatype( MPI_INT16_T     )
+cdef Datatype __INT32_T__               = new_Datatype( MPI_INT32_T     )
+cdef Datatype __INT64_T__               = new_Datatype( MPI_INT64_T     )
+cdef Datatype __UINT8_T__               = new_Datatype( MPI_UINT8_T     )
+cdef Datatype __UINT16_T__              = new_Datatype( MPI_UINT16_T    )
+cdef Datatype __UINT32_T__              = new_Datatype( MPI_UINT32_T    )
+cdef Datatype __UINT64_T__              = new_Datatype( MPI_UINT64_T    )
+cdef Datatype __C_COMPLEX__             = new_Datatype(
+                                              MPI_C_COMPLEX             )
+cdef Datatype __C_FLOAT_COMPLEX__       = new_Datatype(
+                                              MPI_C_FLOAT_COMPLEX       )
+cdef Datatype __C_DOUBLE_COMPLEX__      = new_Datatype(
+                                              MPI_C_DOUBLE_COMPLEX      )
 cdef Datatype __C_LONG_DOUBLE_COMPLEX__ = new_Datatype(
-                                              MPI_C_LONG_DOUBLE_COMPLEX      )
+                                              MPI_C_LONG_DOUBLE_COMPLEX )
 
-cdef Datatype __CXX_BOOL__ = \
-              new_Datatype( MPI_CXX_BOOL )
-cdef Datatype __CXX_FLOAT_COMPLEX__ = \
-              new_Datatype( MPI_CXX_FLOAT_COMPLEX )
-cdef Datatype __CXX_DOUBLE_COMPLEX__      = \
-              new_Datatype( MPI_CXX_DOUBLE_COMPLEX )
-cdef Datatype __CXX_LONG_DOUBLE_COMPLEX__ = \
-              new_Datatype( MPI_CXX_LONG_DOUBLE_COMPLEX )
+cdef Datatype __CXX_BOOL__                = new_Datatype( MPI_CXX_BOOL      )
+cdef Datatype __CXX_FLOAT_COMPLEX__       = new_Datatype(
+                                                MPI_CXX_FLOAT_COMPLEX       )
+cdef Datatype __CXX_DOUBLE_COMPLEX__      = new_Datatype(
+                                                MPI_CXX_DOUBLE_COMPLEX      )
+cdef Datatype __CXX_LONG_DOUBLE_COMPLEX__ = new_Datatype(
+                                                MPI_CXX_LONG_DOUBLE_COMPLEX )
 
 cdef Datatype __SHORT_INT__        = new_Datatype( MPI_SHORT_INT       )
 cdef Datatype __TWOINT__           = new_Datatype( MPI_2INT            )
@@ -958,7 +960,6 @@ COMPLEX4  = __COMPLEX4__
 COMPLEX8  = __COMPLEX8__
 COMPLEX16 = __COMPLEX16__
 COMPLEX32 = __COMPLEX32__
-
 
 # Convenience aliases
 UNSIGNED_INT          = __UNSIGNED__
