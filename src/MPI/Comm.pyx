@@ -980,19 +980,15 @@ cdef class Comm:
         """
         Return the parent intercommunicator for this process
         """
-        cdef MPI_Comm comm = MPI_COMM_NULL
-        with nogil: CHKERR( MPI_Comm_get_parent(&comm) )
-        global __COMM_PARENT__
-        cdef Intercomm parent = __COMM_PARENT__
-        parent.ob_mpi = comm
-        return parent
+        cdef Intercomm comm = __COMM_PARENT__
+        with nogil: CHKERR( MPI_Comm_get_parent(&comm.ob_mpi) )
+        return comm
 
     def Disconnect(self):
         """
         Disconnect from a communicator
         """
-        with nogil: CHKERR( MPI_Comm_disconnect(
-            &self.ob_mpi) )
+        with nogil: CHKERR( MPI_Comm_disconnect(&self.ob_mpi) )
 
     @classmethod
     def Join(cls, int fd):
@@ -1001,8 +997,7 @@ cdef class Comm:
         two processes connected by a socket
         """
         cdef Intercomm comm = <Intercomm>Intercomm.__new__(Intercomm)
-        with nogil: CHKERR( MPI_Comm_join(
-            fd, &comm.ob_mpi) )
+        with nogil: CHKERR( MPI_Comm_join(fd, &comm.ob_mpi) )
         return comm
 
     # Attributes

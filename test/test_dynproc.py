@@ -146,7 +146,7 @@ class TestDPM(unittest.TestCase):
         MPI.COMM_WORLD.Barrier()
         if client:
             fd = client.fileno()
-            intercomm = MPI.COMM_SELF.Join(fd)
+            intercomm = MPI.Comm.Join(fd)
             client.close()
             self.assertEqual(intercomm.remote_size, 1)
             self.assertEqual(intercomm.size, 1)
