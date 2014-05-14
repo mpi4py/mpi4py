@@ -27,9 +27,10 @@ class Config(object):
         self.compiler_info = OrderedDict((
                 ('mpicc'  , None),
                 ('mpicxx' , None),
+                ('mpifort', None),
                 ('mpif77' , None),
                 ('mpif90' , None),
-                ('mpif95' , None),
+                ('mpif08' , None),
                 ('mpild'  , None),
                 ))
         self.library_info = OrderedDict((
@@ -66,22 +67,25 @@ class Config(object):
 
     def info(self, log=None):
         if log is None: log = self.log
-        mpicc  = self.compiler_info.get('mpicc')
-        mpicxx = self.compiler_info.get('mpicxx')
-        mpif77 = self.compiler_info.get('mpif77')
-        mpif90 = self.compiler_info.get('mpif90')
-        mpif95 = self.compiler_info.get('mpif95')
-        mpild  = self.compiler_info.get('mpild')
+        mpicc   = self.compiler_info.get('mpicc')
+        mpicxx  = self.compiler_info.get('mpicxx')
+        mpifort = self.compiler_info.get('mpifort')
+        mpif77  = self.compiler_info.get('mpif77')
+        mpif90  = self.compiler_info.get('mpif90')
+        mpif08  = self.compiler_info.get('mpif08')
+        mpild   = self.compiler_info.get('mpild')
         if mpicc:
             log.info("MPI C compiler:    %s", mpicc)
         if mpicxx:
             log.info("MPI C++ compiler:  %s", mpicxx)
+        if mpifort:
+            log.info("MPI F compiler:    %s", mpifort)
         if mpif77:
             log.info("MPI F77 compiler:  %s", mpif77)
         if mpif90:
             log.info("MPI F90 compiler:  %s", mpif90)
-        if mpif95:
-            log.info("MPI F95 compiler:  %s", mpif95)
+        if mpif08:
+            log.info("MPI F08 compiler:  %s", mpif08)
         if mpild:
             log.info("MPI linker:        %s", mpild)
 
@@ -202,12 +206,13 @@ class Config(object):
             if not exe: return None
             return ' '.join([exe]+args)
         COMPILERS = (
-            ('mpicc',  ['mpicc',  'mpcc_r']),
-            ('mpicxx', ['mpicxx', 'mpic++', 'mpiCC', 'mpCC_r']),
-            ('mpif77', ['mpif77', 'mpf77_r']),
-            ('mpif90', ['mpif90', 'mpf90_r']),
-            ('mpif95', ['mpif95', 'mpf95_r']),
-            ('mpild',  []),
+            ('mpicc',   ['mpicc',   'mpcc_r']),
+            ('mpicxx',  ['mpicxx',  'mpic++', 'mpiCC', 'mpCC_r']),
+            ('mpifort', ['mpifort', 'mpfort_r']),
+            ('mpif77',  ['mpif77',  'mpf77_r']),
+            ('mpif90',  ['mpif90',  'mpf90_r']),
+            ('mpif08',  ['mpif08',  'mpf08_r']),
+            ('mpild',   []),
             )
         #
         compiler_info = {}
@@ -374,12 +379,14 @@ if __name__ == '__main__':
 
     import optparse
     parser = optparse.OptionParser()
-    parser.add_option("--mpi",    type="string")
-    parser.add_option("--mpicc",  type="string")
-    parser.add_option("--mpicxx", type="string")
-    parser.add_option("--mpif90", type="string")
-    parser.add_option("--mpif77", type="string")
-    parser.add_option("--mpild",  type="string")
+    parser.add_option("--mpi",     type="string")
+    parser.add_option("--mpicc",   type="string")
+    parser.add_option("--mpicxx",  type="string")
+    parser.add_option("--mpifort", type="string")
+    parser.add_option("--mpif77",  type="string")
+    parser.add_option("--mpif90",  type="string")
+    parser.add_option("--mpif08",  type="string")
+    parser.add_option("--mpild",   type="string")
     (options, args) = parser.parse_args()
 
     logger = log.Log(log.INFO)
