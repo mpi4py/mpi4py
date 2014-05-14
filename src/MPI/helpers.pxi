@@ -348,8 +348,8 @@ cdef inline Errhandler new_Errhandler(MPI_Errhandler ob):
 cdef inline int del_Errhandler(MPI_Errhandler* ob):
     if ob    == NULL                 : return 0
     if ob[0] == MPI_ERRHANDLER_NULL  : return 0
-   #if ob[0] == MPI_ERRORS_RETURN    : return 0
-   #if ob[0] == MPI_ERRORS_ARE_FATAL : return 0
+    if ob[0] == MPI_ERRORS_RETURN    : return 0
+    if ob[0] == MPI_ERRORS_ARE_FATAL : return 0
     #
     if not mpi_active(): return 0
     return MPI_Errhandler_free(ob)
