@@ -30,6 +30,8 @@ cdef class Errhandler:
         Free an error handler
         """
         CHKERR( MPI_Errhandler_free(&self.ob_mpi) )
+        if self is __ERRORS_RETURN__:    self.ob_mpi = MPI_ERRORS_RETURN
+        if self is __ERRORS_ARE_FATAL__: self.ob_mpi = MPI_ERRORS_ARE_FATAL
 
     # Fortran Handle
     # --------------

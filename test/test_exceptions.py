@@ -179,11 +179,6 @@ class TestExcGroupNull(unittest.TestCase):
             self.assertRaisesMPI(
                 MPI.ERR_GROUP, getattr(MPI.GROUP_NULL, method))
 
-class TestExcGroup(unittest.TestCase):
-
-    def testFreeEmpty(self):
-        self.assertRaisesMPI(MPI.ERR_GROUP, MPI.GROUP_EMPTY.Free)
-
 # --------------------------------------------------------------------
 
 class TestExcCommNull(unittest.TestCase):

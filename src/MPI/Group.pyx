@@ -205,11 +205,8 @@ cdef class Group:
         """
         Free a group
         """
-        if self.ob_mpi != MPI_GROUP_EMPTY:
-            CHKERR( MPI_Group_free(&self.ob_mpi) )
-        elif self is not __GROUP_EMPTY__:
-            self.ob_mpi = MPI_GROUP_NULL
-        else: CHKERR( MPI_ERR_GROUP )
+        CHKERR( MPI_Group_free(&self.ob_mpi) )
+        if self is __GROUP_EMPTY__: self.ob_mpi = MPI_GROUP_EMPTY
 
     # Fortran Handle
     # --------------
