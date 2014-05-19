@@ -52,11 +52,7 @@ static int MPIAPI PyMPI_Commctx_free_fn(MPI_Comm comm, int k, void *v, void *xs)
   } else {
     PyMPI_Commctx *commctx = (PyMPI_Commctx *)v;
     if (commctx->localcomm != MPI_COMM_NULL)
-      (void)MPI_Comm_disconnect(&commctx->localcomm);
-    if (commctx->localcomm != MPI_COMM_NULL)
       (void)MPI_Comm_free(&commctx->localcomm);
-    if (commctx->dupcomm != MPI_COMM_NULL)
-      (void)MPI_Comm_disconnect(&commctx->dupcomm);
     if (commctx->dupcomm != MPI_COMM_NULL)
       (void)MPI_Comm_free(&commctx->dupcomm);
     PyMPI_FREE(commctx);
