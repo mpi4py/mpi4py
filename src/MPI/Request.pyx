@@ -6,9 +6,9 @@ cdef class Request:
 
     def __cinit__(self, Request request=None):
         self.ob_mpi = MPI_REQUEST_NULL
-        if request is not None:
-            self.ob_mpi = request.ob_mpi
-            self.ob_buf = request.ob_buf
+        if request is None: return
+        self.ob_mpi = request.ob_mpi
+        self.ob_buf = request.ob_buf
 
     def __dealloc__(self):
         if not (self.flags & PyMPI_OWNED): return
@@ -282,8 +282,8 @@ cdef class Prequest(Request):
     """
 
     def __cinit__(self, Request request=None):
-        if self.ob_mpi != MPI_REQUEST_NULL:
-            <void>(<Prequest?>request)
+        if self.ob_mpi == MPI_REQUEST_NULL: return
+        <void>(<Prequest?>request)
 
     def Start(self):
         """
@@ -315,8 +315,8 @@ cdef class Grequest(Request):
 
     def __cinit__(self, Request request=None):
         self.ob_grequest = self.ob_mpi
-        if self.ob_mpi != MPI_REQUEST_NULL:
-            <void>(<Grequest?>request)
+        if self.ob_mpi == MPI_REQUEST_NULL: return
+        <void>(<Grequest?>request)
 
     @classmethod
     def Start(cls, query_fn, free_fn, cancel_fn,

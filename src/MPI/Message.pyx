@@ -6,8 +6,8 @@ cdef class Message:
 
     def __cinit__(self, Message message=None):
         self.ob_mpi = MPI_MESSAGE_NULL
-        if message is not None:
-            self.ob_mpi = message.ob_mpi
+        if message is None: return
+        self.ob_mpi = message.ob_mpi
 
     def __dealloc__(self):
         if not (self.flags & PyMPI_OWNED): return

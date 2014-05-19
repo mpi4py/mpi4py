@@ -48,8 +48,8 @@ cdef class Datatype:
 
     def __cinit__(self, Datatype datatype=None):
         self.ob_mpi = MPI_DATATYPE_NULL
-        if datatype is not None:
-            self.ob_mpi = datatype.ob_mpi
+        if datatype is None: return
+        self.ob_mpi = datatype.ob_mpi
 
     def __dealloc__(self):
         if not (self.flags & PyMPI_OWNED): return

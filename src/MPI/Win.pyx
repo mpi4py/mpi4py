@@ -32,8 +32,8 @@ cdef class Win:
 
     def __cinit__(self, Win win=None):
         self.ob_mpi = MPI_WIN_NULL
-        if win is not None:
-            self.ob_mpi =  win.ob_mpi
+        if win is None: return
+        self.ob_mpi =  win.ob_mpi
 
     def __dealloc__(self):
         if not (self.flags & PyMPI_OWNED): return

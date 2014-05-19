@@ -56,8 +56,8 @@ cdef class File:
 
     def __cinit__(self, File file=None):
         self.ob_mpi = MPI_FILE_NULL
-        if file is not None:
-            self.ob_mpi = file.ob_mpi
+        if file is None: return
+        self.ob_mpi = file.ob_mpi
 
     def __dealloc__(self):
         if not (self.flags & PyMPI_OWNED): return

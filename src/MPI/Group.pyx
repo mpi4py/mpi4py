@@ -6,8 +6,8 @@ cdef class Group:
 
     def __cinit__(self, Group group=None):
         self.ob_mpi = MPI_GROUP_NULL
-        if group is not None:
-            self.ob_mpi = group.ob_mpi
+        if group is None: return
+        self.ob_mpi = group.ob_mpi
 
     def __dealloc__(self):
         if not (self.flags & PyMPI_OWNED): return

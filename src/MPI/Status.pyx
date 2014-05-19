@@ -8,8 +8,8 @@ cdef class Status:
         self.ob_mpi.MPI_SOURCE = MPI_ANY_SOURCE
         self.ob_mpi.MPI_TAG    = MPI_ANY_TAG
         self.ob_mpi.MPI_ERROR  = MPI_SUCCESS
-        if status is not None:
-            copy_Status(&status.ob_mpi, &self.ob_mpi)
+        if status is None: return
+        copy_Status(&status.ob_mpi, &self.ob_mpi)
 
     def __richcmp__(self, other, int op):
         if not isinstance(other, Status): return NotImplemented

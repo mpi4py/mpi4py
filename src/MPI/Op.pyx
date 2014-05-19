@@ -6,10 +6,10 @@ cdef class Op:
 
     def __cinit__(self, Op op=None):
         self.ob_mpi = MPI_OP_NULL
-        if op is not None:
-            self.ob_mpi = op.ob_mpi
-            self.ob_func = op.ob_func
-            self.ob_usrid = -op.ob_usrid
+        if op is None: return
+        self.ob_mpi = op.ob_mpi
+        self.ob_func = op.ob_func
+        self.ob_usrid = -op.ob_usrid
 
     def __dealloc__(self):
         if not (self.flags & PyMPI_OWNED): return

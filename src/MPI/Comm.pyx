@@ -36,8 +36,8 @@ cdef class Comm:
 
     def __cinit__(self, Comm comm=None):
         self.ob_mpi = MPI_COMM_NULL
-        if comm is not None:
-            self.ob_mpi = comm.ob_mpi
+        if comm is None: return
+        self.ob_mpi = comm.ob_mpi
 
     def __dealloc__(self):
         if not (self.flags & PyMPI_OWNED): return
@@ -1300,11 +1300,11 @@ cdef class Intracomm(Comm):
     """
 
     def __cinit__(self, Comm comm=None):
-        cdef int inter = 0
-        if self.ob_mpi != MPI_COMM_NULL:
-            CHKERR( MPI_Comm_test_inter(self.ob_mpi, &inter) )
-            if inter: raise TypeError(
-                "expecting an intracommunicator")
+        if self.ob_mpi == MPI_COMM_NULL: return
+        cdef int inter = 1
+        CHKERR( MPI_Comm_test_inter(self.ob_mpi, &inter) )
+        if inter: raise TypeError(
+            "expecting an intracommunicator")
 
     # Communicator Constructors
     # -------------------------
@@ -1602,11 +1602,11 @@ cdef class Topocomm(Intracomm):
     """
 
     def __cinit__(self, Comm comm=None):
+        if self.ob_mpi == MPI_COMM_NULL: return
         cdef int topo = MPI_UNDEFINED
-        if self.ob_mpi != MPI_COMM_NULL:
-            CHKERR( MPI_Topo_test(self.ob_mpi, &topo) )
-            if topo == MPI_UNDEFINED: raise TypeError(
-                "expecting a topology communicator")
+        CHKERR( MPI_Topo_test(self.ob_mpi, &topo) )
+        if topo == MPI_UNDEFINED: raise TypeError(
+            "expecting a topology communicator")
 
     property degrees:
         "number of incoming and outgoing neighbors"
@@ -1817,11 +1817,11 @@ cdef class Cartcomm(Topocomm):
     """
 
     def __cinit__(self, Comm comm=None):
-        cdef int topo = MPI_CART
-        if self.ob_mpi != MPI_COMM_NULL:
-            CHKERR( MPI_Topo_test(self.ob_mpi, &topo) )
-            if topo != MPI_CART: raise TypeError(
-                "expecting a Cartesian communicator")
+        if self.ob_mpi == MPI_COMM_NULL: return
+        cdef int topo = MPI_UNDEFINED
+        CHKERR( MPI_Topo_test(self.ob_mpi, &topo) )
+        if topo != MPI_CART: raise TypeError(
+            "expecting a Cartesian communicator")
 
     # Cartesian Inquiry Functions
     # ---------------------------
@@ -1981,11 +1981,11 @@ cdef class Graphcomm(Topocomm):
     """
 
     def __cinit__(self, Comm comm=None):
-        cdef int topo = MPI_GRAPH
-        if self.ob_mpi != MPI_COMM_NULL:
-            CHKERR( MPI_Topo_test(self.ob_mpi, &topo) )
-            if topo != MPI_GRAPH: raise TypeError(
-                "expecting a general graph communicator")
+        if self.ob_mpi == MPI_COMM_NULL: return
+        cdef int topo = MPI_UNDEFINED
+        CHKERR( MPI_Topo_test(self.ob_mpi, &topo) )
+        if topo != MPI_GRAPH: raise TypeError(
+            "expecting a general graph communicator")
 
     # Graph Inquiry Functions
     # -----------------------
@@ -2107,11 +2107,11 @@ cdef class Distgraphcomm(Topocomm):
     """
 
     def __cinit__(self, Comm comm=None):
-        cdef int topo = MPI_DIST_GRAPH
-        if self.ob_mpi != MPI_COMM_NULL:
-            CHKERR( MPI_Topo_test(self.ob_mpi, &topo) )
-            if topo != MPI_DIST_GRAPH: raise TypeError(
-                "expecting a distributed graph communicator")
+        if self.ob_mpi == MPI_COMM_NULL: return
+        cdef int topo = MPI_UNDEFINED
+        CHKERR( MPI_Topo_test(self.ob_mpi, &topo) )
+        if topo != MPI_DIST_GRAPH: raise TypeError(
+            "expecting a distributed graph communicator")
 
     # Topology Inquiry Functions
     # --------------------------
@@ -2169,11 +2169,11 @@ cdef class Intercomm(Comm):
     """
 
     def __cinit__(self, Comm comm=None):
-        cdef int inter = 1
-        if self.ob_mpi != MPI_COMM_NULL:
-            CHKERR( MPI_Comm_test_inter(self.ob_mpi, &inter) )
-            if not inter: raise TypeError(
-                "expecting an intercommunicator")
+        if self.ob_mpi == MPI_COMM_NULL: return
+        cdef int inter = 0
+        CHKERR( MPI_Comm_test_inter(self.ob_mpi, &inter) )
+        if not inter: raise TypeError(
+            "expecting an intercommunicator")
 
     # Intercommunicator Accessors
     # ---------------------------
