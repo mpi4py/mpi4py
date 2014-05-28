@@ -49,7 +49,7 @@ class BaseTest(object):
         size = self.comm.size
         for root in range(size):
             msg = rank
-            res = self.comm.reduce(sendobj=msg, op=MPI.MINLOC, root=root)
+            res = self.comm.reduce(sendobj=(msg, rank), op=MPI.MINLOC, root=root)
             if self.comm.rank == root:
                 self.assertEqual(res, (0, 0))
             else:
@@ -60,7 +60,7 @@ class BaseTest(object):
         size = self.comm.size
         for root in range(size):
             msg = rank
-            res = self.comm.reduce(sendobj=msg, op=MPI.MAXLOC, root=root)
+            res = self.comm.reduce(sendobj=(msg, rank), op=MPI.MAXLOC, root=root)
             if self.comm.rank == root:
                 self.assertEqual(res, (size-1, size-1))
             else:
@@ -91,14 +91,14 @@ class BaseTest(object):
         rank = self.comm.rank
         size = self.comm.size
         msg = rank
-        res = self.comm.allreduce(sendobj=msg, op=MPI.MINLOC)
+        res = self.comm.allreduce(sendobj=(msg, rank), op=MPI.MINLOC)
         self.assertEqual(res, (0, 0))
 
     def test_allreduce_maxloc(self):
         rank = self.comm.rank
         size = self.comm.size
         msg = rank
-        res = self.comm.allreduce(sendobj=msg, op=MPI.MAXLOC)
+        res = self.comm.allreduce(sendobj=(msg, rank), op=MPI.MAXLOC)
         self.assertEqual(res, (size-1, size-1))
 
     def test_scan(self):
@@ -126,14 +126,14 @@ class BaseTest(object):
         rank = self.comm.rank
         size = self.comm.size
         msg = rank
-        res = self.comm.scan(sendobj=msg, op=MPI.MINLOC)
+        res = self.comm.scan(sendobj=(msg, rank), op=MPI.MINLOC)
         self.assertEqual(res, (0, 0))
 
     def test_scan_maxloc(self):
         rank = self.comm.rank
         size = self.comm.size
         msg = rank
-        res = self.comm.scan(sendobj=msg, op=MPI.MAXLOC)
+        res = self.comm.scan(sendobj=(msg, rank), op=MPI.MAXLOC)
         self.assertEqual(res, (rank, rank))
 
     def test_exscan(self):
@@ -170,7 +170,7 @@ class BaseTest(object):
         rank = self.comm.rank
         size = self.comm.size
         msg = rank
-        res = self.comm.exscan(sendobj=msg, op=MPI.MINLOC)
+        res = self.comm.exscan(sendobj=(msg, rank), op=MPI.MINLOC)
         if self.comm.rank == 0:
             self.assertEqual(res, None)
         else:
@@ -180,7 +180,7 @@ class BaseTest(object):
         rank = self.comm.rank
         size = self.comm.size
         msg = rank
-        res = self.comm.exscan(sendobj=msg, op=MPI.MAXLOC)
+        res = self.comm.exscan(sendobj=(msg, rank), op=MPI.MAXLOC)
         if self.comm.rank == 0:
             self.assertEqual(res, None)
         else:

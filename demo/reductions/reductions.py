@@ -15,9 +15,6 @@ class Intracomm(MPI.Intracomm):
         assert 0 <= root < size
         tag = MPI.COMM_WORLD.Get_attr(MPI.TAG_UB)-1
 
-        if op in (MPI.MINLOC, MPI.MAXLOC):
-            sendobj = (sendobj, rank)
-
         recvobj = sendobj
         mask = 1
 
@@ -53,9 +50,6 @@ class Intracomm(MPI.Intracomm):
         rank = self.rank
         tag = MPI.COMM_WORLD.Get_attr(MPI.TAG_UB)-1
 
-        if op in (MPI.MINLOC, MPI.MAXLOC):
-            sendobj = (sendobj, rank)
-
         recvobj = sendobj
         partial = sendobj
         mask = 1
@@ -79,9 +73,6 @@ class Intracomm(MPI.Intracomm):
         size = self.size
         rank = self.rank
         tag = MPI.COMM_WORLD.Get_attr(MPI.TAG_UB)-1
-
-        if op in (MPI.MINLOC, MPI.MAXLOC):
-            sendobj = (sendobj, rank)
 
         recvobj = sendobj
         partial = sendobj

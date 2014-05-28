@@ -847,28 +847,19 @@ cdef object PyMPI_neighbor_alltoall(object sendobj, MPI_Comm comm):
 
 cdef inline object _py_reduce(object seq, object op):
     if seq is None: return None
-    cdef object res
-    cdef Py_ssize_t i=0, n=len(seq)
-    if op is __MAXLOC__ or op is __MINLOC__:
-        res = (seq[0], 0)
-        for i from 1 <= i < n:
-            res = op(res, (seq[i], i))
-    else:
-        res = seq[0]
-        for i from 1 <= i < n:
-            res = op(res, seq[i])
+    cdef Py_ssize_t i = 0
+    cdef Py_ssize_t n = len(seq)
+    cdef object res = seq[0]
+    for i from 1 <= i < n:
+        res = op(res, seq[i])
     return res
 
 cdef inline object _py_scan(object seq, object op):
     if seq is None: return None
-    cdef Py_ssize_t i=0, n=len(seq)
-    if op is __MAXLOC__ or op is __MINLOC__:
-        seq[0] = (seq[0], 0)
-        for i from 1 <= i < n:
-            seq[i] = op((seq[i], i), seq[i-1])
-    else:
-        for i from 1 <= i < n:
-            seq[i] = op(seq[i], seq[i-1])
+    cdef Py_ssize_t i = 0
+    cdef Py_ssize_t n = len(seq)
+    for i from 1 <= i < n:
+        seq[i] = op(seq[i], seq[i-1])
     return seq
 
 cdef inline object _py_exscan(object seq, object op):
@@ -976,9 +967,6 @@ cdef object PyMPI_reduce_p2p(object sendobj, object op, int root,
     if root < 0 or root >= size:
         <void>MPI_Comm_call_errhandler(comm, MPI_ERR_ROOT)
         raise MPIException(MPI_ERR_ROOT)
-    # Special-case MAXLOC and MINLOC
-    if op is __MAXLOC__ or op is __MINLOC__:
-        sendobj = (sendobj, <long> rank)
     if size == 1: sendobj = PyMPI_copy(sendobj)
     #
     cdef object result = sendobj
@@ -1016,9 +1004,6 @@ cdef object PyMPI_scan_p2p(object sendobj, object op,
     cdef int rank = MPI_PROC_NULL
     CHKERR( MPI_Comm_size(comm, &size) )
     CHKERR( MPI_Comm_rank(comm, &rank) )
-    # Special-case MAXLOC and MINLOC
-    if op is __MAXLOC__ or op is __MINLOC__:
-        sendobj = (sendobj, <long> rank)
     if size == 1: sendobj = PyMPI_copy(sendobj)
     #
     cdef object result  = sendobj
@@ -1051,9 +1036,6 @@ cdef object PyMPI_exscan_p2p(object sendobj, object op,
     cdef int rank = MPI_PROC_NULL
     CHKERR( MPI_Comm_size(comm, &size) )
     CHKERR( MPI_Comm_rank(comm, &rank) )
-    # Special-case MAXLOC and MINLOC
-    if op is __MAXLOC__ or op is __MINLOC__:
-        sendobj = (sendobj, <long> rank)
     #
     cdef object result  = sendobj
     cdef object partial = result

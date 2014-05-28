@@ -50,6 +50,10 @@ Release 2.0 [2014-XX-XX]
   + Change signature of all lowercase-spelling collectives,
     ``sendobj`` arguments are now mandatory,
     ``recvobj`` arguments were removed.
+  + Reduction operations ``MAXLOC`` and ``MINLOC`` are no longer
+    special-cased in lowercase-spelling methods ``Comm.[all]reduce()``
+    and ``Comm.[ex]scan()``, the input object must be specified as a
+    tuple ``(obj, location)``.
   + Change signature of name publishing functions.
     The new signatures are
     ``Publish_name(service_name, port_name, info=INFO_NULL)`` and
