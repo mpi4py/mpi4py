@@ -8,6 +8,7 @@ cdef class Message:
         self.ob_mpi = MPI_MESSAGE_NULL
         if message is None: return
         self.ob_mpi = message.ob_mpi
+        self.ob_buf = message.ob_buf
 
     def __dealloc__(self):
         if not (self.flags & PyMPI_OWNED): return
