@@ -80,6 +80,7 @@ class BaseTestCCOObj(object):
                        MPI.MAX, MPI.MIN,
                        MPI.MAXLOC, MPI.MINLOC,
                        MPI.REPLACE, MPI.NO_OP):
+                if op == MPI.OP_NULL: continue
                 if op in (MPI.MAXLOC, MPI.MINLOC):
                     sendobj = (rank, rank)
                 else:
@@ -114,6 +115,7 @@ class BaseTestCCOObj(object):
                    MPI.MAX, MPI.MIN,
                    MPI.MAXLOC, MPI.MINLOC,
                    MPI.REPLACE, MPI.NO_OP):
+            if op == MPI.OP_NULL: continue
             if op in (MPI.MAXLOC, MPI.MINLOC):
                 sendobj = (rank, rank)
             else:
@@ -151,11 +153,13 @@ class BaseTestCCOObj(object):
         self.assertEqual(minloc, (0, 0))
         self.assertEqual(maxloc, (rank, rank))
         # --
-        rscan = self.COMM.scan(rank, op=MPI.REPLACE)
-        self.assertEqual(rscan, rank)
+        if MPI.REPLACE != MPI.OP_NULL:
+            rscan = self.COMM.scan(rank, op=MPI.REPLACE)
+            self.assertEqual(rscan, rank)
         # --
-        rscan = self.COMM.scan(rank, op=MPI.NO_OP)
-        self.assertEqual(rscan, 0)
+        if MPI.NO_OP != MPI.OP_NULL:
+            rscan = self.COMM.scan(rank, op=MPI.NO_OP)
+            self.assertEqual(rscan, 0)
 
     def testExscan(self):
         size = self.COMM.Get_size()
@@ -182,17 +186,19 @@ class BaseTestCCOObj(object):
             self.assertEqual(minloc, (0, 0))
             self.assertEqual(maxloc, (rank-1, rank-1))
         # --
-        rscan = self.COMM.exscan(rank, op=MPI.REPLACE)
-        if rank == 0:
-            self.assertTrue(rscan is None)
-        else:
-            self.assertEqual(rscan, rank-1)
+        if MPI.REPLACE != MPI.OP_NULL:
+            rscan = self.COMM.exscan(rank, op=MPI.REPLACE)
+            if rank == 0:
+                self.assertTrue(rscan is None)
+            else:
+                self.assertEqual(rscan, rank-1)
         # --
-        rscan = self.COMM.exscan(rank, op=MPI.NO_OP)
-        if rank == 0:
-            self.assertTrue(rscan is None)
-        else:
-            self.assertEqual(rscan, 0)
+        if MPI.NO_OP != MPI.OP_NULL:
+            rscan = self.COMM.exscan(rank, op=MPI.NO_OP)
+            if rank == 0:
+                self.assertTrue(rscan is None)
+            else:
+                self.assertEqual(rscan, 0)
 
 
 class BaseTestCCOObjDup(BaseTestCCOObj):
