@@ -78,7 +78,8 @@ class BaseTestCCOObj(object):
         for root in range(size):
             for op in (MPI.SUM, MPI.PROD,
                        MPI.MAX, MPI.MIN,
-                       MPI.MAXLOC, MPI.MINLOC):
+                       MPI.MAXLOC, MPI.MINLOC,
+                       MPI.REPLACE, MPI.NO_OP):
                 if op in (MPI.MAXLOC, MPI.MINLOC):
                     sendobj = (rank, rank)
                 else:
@@ -101,13 +102,18 @@ class BaseTestCCOObj(object):
                     elif op == MPI.MINLOC:
                         self.assertEqual(value[0], 0)
                         self.assertEqual(value[1], 0)
+                    elif op == MPI.REPLACE:
+                        self.assertEqual(value, size-1)
+                    elif op == MPI.NO_OP:
+                        self.assertEqual(value, 0)
 
     def testAllreduce(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for op in (MPI.SUM, MPI.PROD,
                    MPI.MAX, MPI.MIN,
-                   MPI.MAXLOC, MPI.MINLOC):
+                   MPI.MAXLOC, MPI.MINLOC,
+                   MPI.REPLACE, MPI.NO_OP):
             if op in (MPI.MAXLOC, MPI.MINLOC):
                 sendobj = (rank, rank)
             else:
@@ -125,6 +131,10 @@ class BaseTestCCOObj(object):
                 self.assertEqual(value[1], size-1)
             elif op == MPI.MINLOC:
                 self.assertEqual(value[1], 0)
+            elif op == MPI.REPLACE:
+                self.assertEqual(value, size-1)
+            elif op == MPI.NO_OP:
+                self.assertEqual(value, 0)
 
     def testScan(self):
         size = self.COMM.Get_size()
@@ -140,6 +150,12 @@ class BaseTestCCOObj(object):
         maxloc = self.COMM.scan((rank, rank), op=MPI.MAXLOC)
         self.assertEqual(minloc, (0, 0))
         self.assertEqual(maxloc, (rank, rank))
+        # --
+        rscan = self.COMM.scan(rank, op=MPI.REPLACE)
+        self.assertEqual(rscan, rank)
+        # --
+        rscan = self.COMM.scan(rank, op=MPI.NO_OP)
+        self.assertEqual(rscan, 0)
 
     def testExscan(self):
         size = self.COMM.Get_size()
@@ -156,7 +172,7 @@ class BaseTestCCOObj(object):
             self.assertTrue(rscan is None)
         else:
             self.assertEqual(rscan, cumsum(range(rank)))
-        #
+        # --
         minloc = self.COMM.exscan((rank, rank), op=MPI.MINLOC)
         maxloc = self.COMM.exscan((rank, rank), op=MPI.MAXLOC)
         if rank == 0:
@@ -165,6 +181,19 @@ class BaseTestCCOObj(object):
         else:
             self.assertEqual(minloc, (0, 0))
             self.assertEqual(maxloc, (rank-1, rank-1))
+        # --
+        rscan = self.COMM.exscan(rank, op=MPI.REPLACE)
+        if rank == 0:
+            self.assertTrue(rscan is None)
+        else:
+            self.assertEqual(rscan, rank-1)
+        # --
+        rscan = self.COMM.exscan(rank, op=MPI.NO_OP)
+        if rank == 0:
+            self.assertTrue(rscan is None)
+        else:
+            self.assertEqual(rscan, 0)
+
 
 class BaseTestCCOObjDup(BaseTestCCOObj):
     def setUp(self):

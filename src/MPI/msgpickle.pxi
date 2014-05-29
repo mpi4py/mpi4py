@@ -859,7 +859,7 @@ cdef inline object _py_scan(object seq, object op):
     cdef Py_ssize_t i = 0
     cdef Py_ssize_t n = len(seq)
     for i from 1 <= i < n:
-        seq[i] = op(seq[i], seq[i-1])
+        seq[i] = op(seq[i-1], seq[i])
     return seq
 
 cdef inline object _py_exscan(object seq, object op):
