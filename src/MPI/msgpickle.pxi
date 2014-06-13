@@ -97,7 +97,10 @@ cdef class Pickle:
         def __set__(self, PROTOCOL):
             self.ob_PROTOCOL = PROTOCOL
         def __del__(self):
-            self.ob_PROTOCOL = PyPickle_PROTOCOL
+            if self.ob_dumps is None:
+                self.ob_PROTOCOL = PyPickle_PROTOCOL
+            else:
+                self.ob_PROTOCOL = None
 
     cdef object dump(self, object obj, void **p, int *n):
         if obj is None:
