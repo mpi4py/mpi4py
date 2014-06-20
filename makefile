@@ -54,7 +54,7 @@ RST2HTMLOPTS += --cloak-email-addresses
 .PHONY: rst2html
 rst2html:
 	${RST2HTML} ${RST2HTMLOPTS} ./LICENSE.txt > docs/LICENSE.html
-	${RST2HTML} ${RST2HTMLOPTS} ./HISTORY.txt > docs/HISTORY.html
+	${RST2HTML} ${RST2HTMLOPTS} ./CHANGES.rst > docs/CHANGES.html
 	${RST2HTML} ${RST2HTMLOPTS} ./THANKS.txt  > docs/THANKS.html
 	${RST2HTML} ${RST2HTMLOPTS} docs/source/index.rst > docs/index.html
 

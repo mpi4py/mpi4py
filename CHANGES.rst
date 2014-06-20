@@ -1,5 +1,5 @@
 =======================
-HISTORY: MPI for Python
+CHANGES: MPI for Python
 =======================
 
 :Author:       Lisandro Dalcin
