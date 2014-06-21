@@ -183,7 +183,7 @@ scientific computing and software development with Python.
 
 .. _Python:    http://www.python.org/
 
-.. _NumPy:     http://numpy.scipy.org/
+.. _NumPy:     http://www.numpy.org/
 
 .. _SciPy:     http://www.scipy.org/
 
