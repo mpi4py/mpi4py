@@ -5,6 +5,7 @@
    mpi4py
    install
    tutorial
+   citing
    appendix
 
 .. Local Variables:
