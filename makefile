@@ -20,6 +20,7 @@ distclean: clean
 	-${RM} -r build  _configtest* *.py[co]
 	-${RM} -r MANIFEST dist mpi4py.egg-info
 	-${RM} -r conf/__pycache__ test/__pycache__
+	-${RM} -r demo/__pycache__ src/__pycache__
 	-find conf -name '*.py[co]' -exec rm -f {} ';'
 	-find demo -name '*.py[co]' -exec rm -f {} ';'
 	-find test -name '*.py[co]' -exec rm -f {} ';'
