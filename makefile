@@ -21,6 +21,7 @@ distclean: clean
 	-${RM} -r MANIFEST dist mpi4py.egg-info
 	-${RM} -r conf/__pycache__ test/__pycache__
 	-find conf -name '*.py[co]' -exec rm -f {} ';'
+	-find demo -name '*.py[co]' -exec rm -f {} ';'
 	-find test -name '*.py[co]' -exec rm -f {} ';'
 	-find src  -name '*.py[co]' -exec rm -f {} ';'
 srcclean:
@@ -28,13 +29,13 @@ srcclean:
 	${RM} src/include/mpi4py/mpi4py.MPI.h
 	${RM} src/include/mpi4py/mpi4py.MPI_api.h
 fullclean: distclean srcclean docsclean
-	-find .    -name '*~' -exec rm -f {} ';'
+	-find . -name '*~' -exec rm -f {} ';'
 
 # ----
 
 .PHONY: install uninstall
 install: build
-	${PYTHON} setup.py install --user ${INSTALLOPT}
+	${PYTHON} setup.py install --prefix='' --user ${INSTALLOPT}
 uninstall:
 	-${RM} -r $(shell ${PYTHON} -m site --user-site)/mpi4py
 	-${RM} -r $(shell ${PYTHON} -m site --user-site)/mpi4py-*-py*.egg-info
@@ -47,7 +48,7 @@ docs-html: rst2html sphinx-html epydoc-html
 docs-pdf:  sphinx-pdf epydoc-pdf
 docs-misc: sphinx-man sphinx-info
 
-RST2HTML = rst2html
+RST2HTML = $(shell command -v rst2html || command -v rst2html.py || false)
 RST2HTMLOPTS  = --input-encoding=utf-8
 RST2HTMLOPTS += --no-compact-lists
 RST2HTMLOPTS += --cloak-email-addresses
