@@ -2,10 +2,8 @@
 CHANGES: MPI for Python
 =======================
 
-:Author:       Lisandro Dalcin
-:Contact:      dalcinl@gmail.com
-:Organization: CIMEC <http://www.cimec.org.ar>
-:Address:      CCT CONICET, 3000 Santa Fe, Argentina
+:Author:  Lisandro Dalcin
+:Contact: dalcinl@gmail.com
 
 
 Release 2.0 [2014-XX-XX]
