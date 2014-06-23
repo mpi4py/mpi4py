@@ -419,7 +419,7 @@ cdef class Datatype:
         cdef int k = 0
         cdef object integers  = [i[k] for k from 0 <= k < ni]
         cdef object addresses = [a[k] for k from 0 <= k < na]
-        cdef object datatypes = [new_Datatype(d[k]) for k from 0 <= k < nd]
+        cdef object datatypes = [ref_Datatype(d[k]) for k from 0 <= k < nd]
         return (integers, addresses, datatypes)
 
     property contents:
@@ -448,11 +448,11 @@ cdef class Datatype:
         cdef int k = 0, s1, e1, s2, e2, s3, e3, s4, e4
         cdef object oldtype = None
         if combiner == <int>MPI_COMBINER_STRUCT:
-            oldtype = [new_Datatype(d[k]) for k from 0 <= k < nd]
+            oldtype = [ref_Datatype(d[k]) for k from 0 <= k < nd]
         elif (combiner != <int>MPI_COMBINER_F90_INTEGER and
               combiner != <int>MPI_COMBINER_F90_REAL and
               combiner != <int>MPI_COMBINER_F90_COMPLEX):
-            oldtype = new_Datatype(d[0])
+            oldtype = ref_Datatype(d[0])
         # dispatch depending on the combiner value
         if combiner == <int>MPI_COMBINER_DUP:
             return (oldtype, ('DUP'), {})

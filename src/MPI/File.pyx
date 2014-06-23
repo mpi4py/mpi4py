@@ -218,7 +218,8 @@ cdef class File:
         cdef char cdatarep[MPI_MAX_DATAREP_STRING+1]
         with nogil: CHKERR( MPI_File_get_view(
             self.ob_mpi, &disp, &etype.ob_mpi, &ftype.ob_mpi, cdatarep) )
-        fix_fileview_Datatype(etype); fix_fileview_Datatype(ftype)
+        #if builtin_Datatype(etype.ob_mpi): etype.flags = 0
+        #if builtin_Datatype(ftype.ob_mpi): ftype.flags = 0
         cdatarep[MPI_MAX_DATAREP_STRING] = 0 # just in case
         cdef object datarep = mpistr(cdatarep)
         return (disp, etype, ftype, datarep)

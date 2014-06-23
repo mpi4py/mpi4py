@@ -54,7 +54,22 @@ cdef inline void copy_Status(MPI_Status* si, MPI_Status* so) nogil:
 
 include "typeimpl.pxi"
 
+cdef inline int builtin_Datatype(MPI_Datatype ob):
+    cdef int ni = 0, na = 0, nt = 0, combiner = MPI_UNDEFINED
+    if ob == MPI_DATATYPE_NULL: return 1
+    cdef int ierr = MPI_Type_get_envelope(ob, &ni, &na, &nt, &combiner)
+    if ierr != MPI_SUCCESS: return 0 # XXX
+    return (combiner == <int>MPI_COMBINER_NAMED       or
+            combiner == <int>MPI_COMBINER_F90_INTEGER or
+            combiner == <int>MPI_COMBINER_F90_REAL    or
+            combiner == <int>MPI_COMBINER_F90_COMPLEX)
+
 cdef inline Datatype new_Datatype(MPI_Datatype ob):
+    cdef Datatype datatype = <Datatype>Datatype.__new__(Datatype)
+    datatype.ob_mpi = ob
+    return datatype
+
+cdef inline Datatype ref_Datatype(MPI_Datatype ob):
     cdef Datatype datatype = <Datatype>Datatype.__new__(Datatype)
     datatype.ob_mpi = ob
     return datatype
@@ -133,29 +148,9 @@ cdef inline int del_Datatype(MPI_Datatype* ob):
     if ob[0] == MPI_COMPLEX32               : return 0
     #
     if not mpi_active(): return 0
-    #
-    cdef int ierr, i=0, a=0, t=0, combiner=0
-    ierr = MPI_Type_get_envelope(ob[0], &i, &a, &t, &combiner)
-    if ierr > MPI_SUCCESS: return ierr
-    if combiner == MPI_COMBINER_NAMED       : return 0
-    if combiner == MPI_COMBINER_F90_INTEGER : return 0
-    if combiner == MPI_COMBINER_F90_REAL    : return 0
-    if combiner == MPI_COMBINER_F90_COMPLEX : return 0
+    if builtin_Datatype(ob[0]): return 0
     #
     return MPI_Type_free(ob)
-
-cdef inline int named_Datatype(MPI_Datatype ob):
-    if ob == MPI_DATATYPE_NULL: return 0
-    cdef int ni = 0, na = 0, nt = 0, combiner = MPI_UNDEFINED
-    cdef int ierr = MPI_SUCCESS
-    ierr = MPI_Type_get_envelope(ob, &ni, &na, &nt, &combiner)
-    if ierr: return 0 # XXX
-    return combiner == MPI_COMBINER_NAMED
-
-cdef void fix_fileview_Datatype(Datatype datatype):
-    cdef MPI_Datatype ob = datatype.ob_mpi
-    if ob == MPI_DATATYPE_NULL: return
-    if named_Datatype(ob): pass
 
 #------------------------------------------------------------------------------
 # Request
