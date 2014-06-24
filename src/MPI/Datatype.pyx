@@ -552,6 +552,7 @@ cdef class Datatype:
     property is_predefined:
         """is a predefined datatype"""
         def __get__(self):
+            if self.ob_mpi == MPI_DATATYPE_NULL: return True
             cdef int combiner = self.Get_envelope()[3]
             return (combiner == <int>MPI_COMBINER_NAMED or
                     combiner == <int>MPI_COMBINER_F90_INTEGER or
