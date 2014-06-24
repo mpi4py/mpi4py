@@ -61,6 +61,7 @@ class TestOp(unittest.TestCase):
             for commute in [True, False]:
                 for N in range(4):
                     myop = MPI.Op.Create(mysum, commute)
+                    self.assertFalse(myop.is_predefined)
                     try:
                         if hasattr(sys, 'pypy_version_info'):
                             if comm.size > 1: continue
@@ -195,6 +196,17 @@ class TestOp(unittest.TestCase):
             flag = op.Is_commutative()
             self.assertEqual(flag, op.is_commutative)
             #self.assertFalse(flag)
+
+    def testIsPredefined(self):
+        self.assertTrue(MPI.OP_NULL.is_predefined)
+        ops = [MPI.MAX,    MPI.MIN,
+               MPI.SUM,    MPI.PROD,
+               MPI.LAND,   MPI.BAND,
+               MPI.LOR,    MPI.BOR,
+               MPI.LXOR,   MPI.BXOR,
+               MPI.MAXLOC, MPI.MINLOC,]
+        for op in ops:
+            self.assertTrue(op.is_predefined)
 
 
 name, version = MPI.get_vendor()

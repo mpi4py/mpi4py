@@ -100,6 +100,26 @@ cdef class Op:
         with nogil: CHKERR( MPI_Reduce_local(
             m.sbuf, m.rbuf, m.rcount, m.rtype, self.ob_mpi) )
 
+    property is_predefined:
+        """is a predefined operation"""
+        def __get__(self):
+            cdef MPI_Op op = self.ob_mpi
+            return (op == MPI_OP_NULL or
+                    op == MPI_MAX or
+                    op == MPI_MIN or
+                    op == MPI_SUM or
+                    op == MPI_PROD or
+                    op == MPI_LAND or
+                    op == MPI_BAND or
+                    op == MPI_LOR or
+                    op == MPI_BOR or
+                    op == MPI_LXOR or
+                    op == MPI_BXOR or
+                    op == MPI_MAXLOC or
+                    op == MPI_MINLOC or
+                    op == MPI_REPLACE or
+                    op == MPI_NO_OP)
+
     # Fortran Handle
     # --------------
 
