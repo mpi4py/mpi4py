@@ -2,6 +2,20 @@
 #define PyMPI_COMPAT_MPICH3_H
 #if defined(MPICH_NUMVERSION)
 
+#if (MPICH_NUMVERSION == 30101300)
+
+static int PyMPI_MPICH3_MPI_Status_c2f(const MPI_Status *c_status,
+                                       MPI_Fint *f_status)
+{
+  if (c_status == MPI_STATUS_IGNORE ||
+      c_status == MPI_STATUSES_IGNORE) return MPI_ERR_OTHER;
+  *(MPI_Status *)f_status = *c_status;
+  return MPI_SUCCESS;
+}
+#define MPI_Status_c2f PyMPI_MPICH3_MPI_Status_c2f
+
+#endif
+
 #if (MPICH_NUMVERSION < 30100301)
 
 static int PyMPI_MPICH3_MPI_Add_error_class(int *errorclass)

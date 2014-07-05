@@ -12,6 +12,19 @@ class BaseTestFortran(object):
             handle2 = type(handle1).f2py(fint)
             self.assertEqual(handle1, handle2)
 
+class TestFortranStatus(BaseTestFortran, unittest.TestCase):
+    def setUp(self):
+        s1 = MPI.Status()
+        s2 = MPI.Status()
+        s2.source = 1
+        s2.tag = 2
+        s2.error = MPI.ERR_OTHER
+        s3 = MPI.Status()
+        s3.source = 0
+        s3.tag = 0
+        s3.error = MPI.SUCCESS
+        self.HANDLES = [s1, s2, s3]
+
 class TestFortranDatatype(BaseTestFortran, unittest.TestCase):
     HANDLES = [MPI.DATATYPE_NULL,
                MPI.CHAR,  MPI.SHORT,
