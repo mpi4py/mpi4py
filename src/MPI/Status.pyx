@@ -15,8 +15,8 @@ cdef class Status:
         if not isinstance(other, Status): return NotImplemented
         cdef Status s = <Status>self, o = <Status>other
         cdef int r = equal_Status(&s.ob_mpi, &o.ob_mpi)
-        if   op == Py_EQ: return  r == 0
-        elif op == Py_NE: return  r != 0
+        if   op == Py_EQ: return  r != 0
+        elif op == Py_NE: return  r == 0
         cdef str mod = type(self).__module__
         cdef str cls = type(self).__name__
         raise TypeError("unorderable type: '%s.%s'" % (mod, cls))
