@@ -143,10 +143,11 @@ cdef class Status:
     def py2f(self):
         """
         """
-        cdef size_t i = 0, n = sizeof(MPI_Status)/sizeof(MPI_Fint)
-        cdef MPI_Status *c_status = &self.ob_mpi
+        cdef Status status = <Status> self
+        cdef size_t i = 0, n = sizeof(MPI_Status)/sizeof(int)
+        cdef MPI_Status *c_status = &status.ob_mpi
         cdef MPI_Fint *f_status = NULL
-        cdef tmp = allocate(n, sizeof(MPI_Fint)+1, <void**>&f_status)
+        cdef tmp = allocate(n+1, sizeof(MPI_Fint), <void**>&f_status)
         CHKERR( MPI_Status_c2f(c_status, f_status) )
         return [f_status[i] for i from 0 <= i < n]
 
@@ -154,11 +155,11 @@ cdef class Status:
     def f2py(cls, arg):
         """
         """
-        cdef size_t i = 0, n = sizeof(MPI_Status)/sizeof(MPI_Fint)
-        cdef Status status = Status.__new__(Status)
+        cdef Status status = <Status> Status.__new__(Status)
+        cdef size_t i = 0, n = sizeof(MPI_Status)/sizeof(int)
         cdef MPI_Status *c_status = &status.ob_mpi
         cdef MPI_Fint *f_status = NULL
-        cdef tmp = allocate(n, sizeof(MPI_Fint)+1, <void**>&f_status)
+        cdef tmp = allocate(n+1, sizeof(MPI_Fint), <void**>&f_status)
         for i from 0 <= i < n: f_status[i] = arg[i]
         CHKERR( MPI_Status_f2c(f_status, c_status) )
         return status
