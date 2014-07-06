@@ -364,6 +364,7 @@ cdef class Comm:
         cdef MPI_Status *statusp = arg_Status(status)
         with nogil: CHKERR( MPI_Probe(
             source, tag, self.ob_mpi, statusp) )
+        return True
 
     def Iprobe(self, int source=ANY_SOURCE, int tag=ANY_TAG,
                Status status=None):

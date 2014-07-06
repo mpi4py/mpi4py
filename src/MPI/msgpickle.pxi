@@ -505,7 +505,7 @@ cdef object PyMPI_testall(requests, int *flag, statuses):
 cdef object PyMPI_probe(int source, int tag,
                         MPI_Comm comm, MPI_Status *status):
     with nogil: CHKERR( MPI_Probe(source, tag, comm, status) )
-    return None
+    return True
 
 cdef object PyMPI_iprobe(int source, int tag,
                          MPI_Comm comm, MPI_Status *status):
