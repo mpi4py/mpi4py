@@ -145,7 +145,7 @@ cdef inline object asarray_nprocs(object sequence,
      cdef int value = 1
      cdef int *array = NULL
      cdef object ob
-     if sequence is None or is_int(sequence):
+     if sequence is None or is_integral(sequence):
          if sequence is not None:
              value = sequence
          ob = newarray_int(size, &array)

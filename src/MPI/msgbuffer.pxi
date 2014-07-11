@@ -1,9 +1,24 @@
 #------------------------------------------------------------------------------
 
 cdef extern from "Python.h":
-    int is_int    "PyIndex_Check" (object)
     int is_list   "PyList_Check" (object)
     int is_tuple  "PyTuple_Check" (object)
+
+cdef extern from "Python.h":
+    int PyIndex_Check(object)
+    int PySequence_Check(object)
+    object PyNumber_Index(object)
+    Py_ssize_t PySequence_Size(object) except -1
+
+cdef inline int is_integral(object ob):
+    if not PyIndex_Check(ob): return 0
+    if not PySequence_Check(ob): return 1
+    try: PySequence_Size(ob)
+    except: pass
+    else: return 0
+    try: PyNumber_Index(ob)
+    except: return 0
+    else: return 1
 
 cdef inline int is_buffer(object ob):
     return (PyObject_CheckBuffer(ob) or
@@ -268,7 +283,7 @@ cdef _p_message message_vector(object msg,
         for i from 0 <= i < blocks:
             aval = (asize // blocks) + (asize % blocks > i)
             counts[i] = downcast(aval)
-    elif is_int(o_counts):
+    elif is_integral(o_counts):
         val = <int> o_counts
         o_counts = mkarray_int(blocks, &counts)
         for i from 0 <= i < blocks:
@@ -281,7 +296,7 @@ cdef _p_message message_vector(object msg,
         for i from 0 <= i < blocks:
             displs[i] = val
             val += counts[i]
-    elif is_int(o_displs): # strided
+    elif is_integral(o_displs): # strided
         val = <int> o_displs
         o_displs = mkarray_int(blocks, &displs)
         for i from 0 <= i < blocks:
@@ -941,7 +956,7 @@ cdef class _p_msg_rma:
             self.tdisp  = 0
             self.tcount = self.ocount
             self.ttype  = self.otype
-        elif is_int(target):
+        elif is_integral(target):
             self.tdisp  = <MPI_Aint>target
             self.tcount = self.ocount
             self.ttype  = self.otype

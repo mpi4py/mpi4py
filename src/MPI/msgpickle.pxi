@@ -269,7 +269,7 @@ cdef object PyMPI_recv(object obj, int source, int tag,
             source = rsts.MPI_SOURCE
             tag = rsts.MPI_TAG
         else:
-            if is_int(obj):
+            if is_integral(obj):
                 rcount = <int> obj
                 rmsg = pickle.alloc(&rbuf, rcount)
                 rlen = <MPI_Aint> rcount
@@ -356,7 +356,7 @@ cdef object PyMPI_irecv(object obj, int source, int tag,
             rcount = <int>(1<<15)
             obj = pickle.alloc(&rbuf, rcount)
             rmsg = getbuffer_r(obj, NULL, NULL)
-        elif is_int(obj):
+        elif is_integral(obj):
             rcount = <int> obj
             obj = pickle.alloc(&rbuf, rcount)
             rmsg = getbuffer_r(obj, NULL, NULL)
