@@ -14,8 +14,10 @@ communication of buffer-provider objects (e.g., NumPy arrays).
 * Communication of generic Python objects
 
   You have to use **all-lowercase** methods (of the :class:`Comm`
-  class), like :meth:`send()`, :meth:`recv()`, :meth:`bcast()`. Note
-  that :meth:`isend()` is available, but :meth:`irecv()` is not.
+  class), like :meth:`send()`, :meth:`recv()`, :meth:`bcast()`. Note that
+  the methods :meth:`isend()` and :meth:`irecv` return :class:`Request` 
+  instances; completion of these methods can be managed using the
+  :meth:`test` and :meth:`wait` methods of the :class:`Request` class.
 
   Collective calls like :meth:`scatter()`, :meth:`gather()`,
   :meth:`allgather()`, :meth:`alltoall()` expect/return a sequence of
@@ -24,7 +26,7 @@ communication of buffer-provider objects (e.g., NumPy arrays).
   :const:`None`.
 
   Global reduction operations :meth:`reduce()` and :meth:`allreduce()`
-  are naively implemented, the reduction is actually done at the
+  are naively implemented; the reduction is actually done at the
   designated root process or all processes.
 
 * Communication of buffer-provider objects
@@ -47,6 +49,11 @@ communication of buffer-provider objects (e.g., NumPy arrays).
   buffer-provider object can be passed directly as a buffer argument,
   the count and MPI datatype will be inferred.
 
+Both :meth:`Recv`/:meth:`Irecv` and :meth:`recv`/:meth:`irecv` may be passed a 
+buffer object that can be repeatedly used to receive messages without
+reallocation. This buffer must be sufficiently long to accommodate the
+transmitted messages; hence, any buffer passed to :meth:`recv` or :meth:`irecv`
+must be at least as long as the *pickled* data transmitted to the receiver.
 
 Point-to-Point Communication
 ----------------------------
@@ -63,6 +70,20 @@ Point-to-Point Communication
       comm.send(data, dest=1, tag=11)
    elif rank == 1:
       data = comm.recv(source=0, tag=11)
+
+* Python objects with non-blocking communication::
+
+   from mpi4py import MPI
+
+   comm = MPI.COMM_WORLD
+   rank = comm.Get_rank()
+
+   if rank == 0:
+      data = {'a': 7, 'b': 3.14}
+      req = comm.isend(data, dest=1, tag=11)
+   elif rank == 1:
+      req = comm.irecv(source=0, tag=11)
+      data = req.wait()
 
 * NumPy arrays (the fast way!)::
 
