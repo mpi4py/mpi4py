@@ -217,6 +217,10 @@ cdef class Request:
         """
         """
         cdef Request request = <Request>Request.__new__(Request)
+        if issubclass(cls, Prequest):
+            request = <Request>Prequest.__new__(Prequest)
+        if issubclass(cls, Grequest):
+            request = <Request>Grequest.__new__(Grequest)
         request.ob_mpi = MPI_Request_f2c(arg)
         return request
 
