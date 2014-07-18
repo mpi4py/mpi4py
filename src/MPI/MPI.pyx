@@ -278,6 +278,39 @@ def get_vendor():
 
 # --------------------------------------------------------------------
 
+def _addressof(mpiobj):
+    """
+    Memory address of the underlying MPI handle
+    """
+    cdef void *ptr = NULL
+    if isinstance(mpiobj, Status):
+        ptr = <void*>&(<Status>mpiobj).ob_mpi
+    elif isinstance(mpiobj, Datatype):
+        ptr = <void*>&(<Datatype>mpiobj).ob_mpi
+    elif isinstance(mpiobj, Request):
+        ptr = <void*>&(<Request>mpiobj).ob_mpi
+    elif isinstance(mpiobj, Message):
+        ptr = <void*>&(<Message>mpiobj).ob_mpi
+    elif isinstance(mpiobj, Op):
+        ptr = <void*>&(<Op>mpiobj).ob_mpi
+    elif isinstance(mpiobj, Group):
+        ptr = <void*>&(<Group>mpiobj).ob_mpi
+    elif isinstance(mpiobj, Info):
+        ptr = <void*>&(<Info>mpiobj).ob_mpi
+    elif isinstance(mpiobj, Errhandler):
+        ptr = <void*>&(<Errhandler>mpiobj).ob_mpi
+    elif isinstance(mpiobj, Comm):
+        ptr = <void*>&(<Comm>mpiobj).ob_mpi
+    elif isinstance(mpiobj, Win):
+        ptr = <void*>&(<Win>mpiobj).ob_mpi
+    elif isinstance(mpiobj, File):
+        ptr = <void*>&(<File>mpiobj).ob_mpi
+    else:
+        raise TypeError("expecting an MPI instance")
+    return PyLong_FromVoidPtr(ptr)
+
+# --------------------------------------------------------------------
+
 cdef extern from *:
     enum: PY_VERSION_HEX
 
