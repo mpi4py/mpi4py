@@ -17,6 +17,7 @@ default:
 
 	${MAKE} PYTHON=${PYTHON} -C cython
 	${MAKE} PYTHON=${PYTHON} -C embedding
+	${MAKE} PYTHON=${PYTHON} -C libmpi-cffi
 
 	${MAKE} PYTHON=${PYTHON} -C mpi-ref-v1
 	${MAKE} PYTHON=${PYTHON} -C init-fini
