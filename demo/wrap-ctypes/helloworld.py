@@ -1,14 +1,18 @@
-from os import path as _pth
-import ctypes as _ctypes
 from mpi4py import MPI
+import os
+import ctypes
 
-_libdir = _pth.dirname(__file__)
+if MPI._sizeof(MPI.Comm) == ctypes.sizeof(ctypes.c_int):
+    MPI_Comm = ctypes.c_int
+else:
+    MPI_Comm = ctypes.c_void_p
 
-_lib = _ctypes.CDLL(_pth.join(_libdir, "libhelloworld.so"))
+_libdir = os.path.dirname(__file__)
+_lib = ctypes.CDLL(os.path.join(_libdir, "libhelloworld.so"))
 _lib.sayhello.restype = None
-_lib.sayhello.argtypes = [_ctypes.c_void_p]
+_lib.sayhello.argtypes = [MPI_Comm]
 
 def sayhello(comm):
-    address = MPI._addressof(comm)
-    comm_ptr = _ctypes.c_void_p(address)
-    _lib.sayhello(comm_ptr)
+    comm_ptr = MPI._addressof(comm)
+    comm_val = MPI_Comm.from_address(comm_ptr)
+    _lib.sayhello(comm_val)

@@ -6,13 +6,12 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-void sayhello(void *);
+extern void sayhello(MPI_Comm);
 #ifdef __cplusplus
 }
 #endif
 
-void sayhello(void *ptr) {
-  MPI_Comm comm = *((MPI_Comm*)ptr);
+void sayhello(MPI_Comm comm) {
   int size, rank;
   char pname[MPI_MAX_PROCESSOR_NAME]; int len;
   if (comm == MPI_COMM_NULL) {
