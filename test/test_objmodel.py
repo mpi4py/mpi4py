@@ -92,13 +92,13 @@ class TestObjModel(unittest.TestCase):
             self.assertRaises(TypeError, ob_init)
 
     def testSizeOf(self):
-        for obj self.objects:
+        for obj in self.objects:
             n1 = MPI._sizeof(obj)
             n2 = MPI._sizeof(type(obj))
             self.assertEqual(n1, n2)
 
     def testAddressOf(self):
-        for obj self.objects:
+        for obj in self.objects:
             addr = MPI._addressof(obj)
 
 
