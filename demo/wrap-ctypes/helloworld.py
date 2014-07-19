@@ -1,13 +1,13 @@
 from mpi4py import MPI
-import os
 import ctypes
+import os
+
+_libdir = os.path.dirname(__file__)
 
 if MPI._sizeof(MPI.Comm) == ctypes.sizeof(ctypes.c_int):
     MPI_Comm = ctypes.c_int
 else:
     MPI_Comm = ctypes.c_void_p
-
-_libdir = os.path.dirname(__file__)
 _lib = ctypes.CDLL(os.path.join(_libdir, "libhelloworld.so"))
 _lib.sayhello.restype = None
 _lib.sayhello.argtypes = [MPI_Comm]

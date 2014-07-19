@@ -14,6 +14,7 @@ default:
 	${MAKE} PYTHON=${PYTHON} -C wrap-boost
 	${MAKE} PYTHON=${PYTHON} -C wrap-cython
 	${MAKE} PYTHON=${PYTHON} -C wrap-ctypes
+	${MAKE} PYTHON=${PYTHON} -C wrap-cffi
 
 	${MAKE} PYTHON=${PYTHON} -C cython
 	${MAKE} PYTHON=${PYTHON} -C embedding
