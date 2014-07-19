@@ -91,6 +91,16 @@ class TestObjModel(unittest.TestCase):
             ob_init = lambda: klass("abc")
             self.assertRaises(TypeError, ob_init)
 
+    def testSizeOf(self):
+        for obj self.objects:
+            n1 = MPI._sizeof(obj)
+            n2 = MPI._sizeof(type(obj))
+            self.assertEqual(n1, n2)
+
+    def testAddressOf(self):
+        for obj self.objects:
+            addr = MPI._addressof(obj)
+
 
 if __name__ == '__main__':
     unittest.main()
