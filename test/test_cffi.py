@@ -7,6 +7,19 @@ except ImportError:
 
 class TestCFFI(unittest.TestCase):
 
+    mpitypes = [
+        MPI.Datatype,
+        MPI.Request,
+        MPI.Info,
+        MPI.Errhandler,
+        MPI.Group,
+        MPI.Win,
+        MPI.Op,
+        MPI.File,
+        MPI.Message,
+        MPI.Comm,
+    ]
+
     objects = [
         MPI.DATATYPE_NULL,
         MPI.INT,
@@ -36,16 +49,21 @@ class TestCFFI(unittest.TestCase):
         ffi = cffi.FFI()
         typemap = {ffi.sizeof('int'): 'int',
                    ffi.sizeof('void*'): 'void*'}
+        for tp in self.mpitypes:
+            handle_t = typemap[MPI._sizeof(tp)]
+            mpi_t = 'MPI_' + tp.__name__
+            ffi.cdef("typedef %s %s;" % (handle_t, mpi_t))
         for obj in self.objects:
-            handle_t = typemap[MPI._sizeof(obj)]
-            mpi_name = 'MPI_' + type(obj).__name__
-            ffi.cdef("typedef %s %s;" % (handle_t, mpi_name))
+            if isinstance(obj, MPI.Comm):
+                mpi_t = 'MPI_Comm'
+            else:
+                mpi_t = 'MPI_' + type(obj).__name__
             oldobj = obj
             newobj = type(obj)()
-            handle_old = ffi.cast(mpi_name+'*', MPI._addressof(oldobj))
-            handle_new = ffi.cast(mpi_name+'*', MPI._addressof(newobj))
+            handle_old = ffi.cast(mpi_t+'*', MPI._addressof(oldobj))
+            handle_new = ffi.cast(mpi_t+'*', MPI._addressof(newobj))
             handle_new[0] = handle_old[0]
-            self.assertEqual(obj, newobj)
+            self.assertEqual(oldobj, newobj)
 
 if cffi is None:
     del TestCFFI
