@@ -278,6 +278,35 @@ def get_vendor():
 
 # --------------------------------------------------------------------
 
+def _sizeof(mpiobj):
+    """
+    Size in bytes of the underlying MPI handle
+    """
+    if isinstance(mpiobj, Status):
+        return sizeof((<Status>mpiobj).ob_mpi)
+    elif isinstance(mpiobj, Datatype):
+        return sizeof((<Datatype>mpiobj).ob_mpi)
+    elif isinstance(mpiobj, Request):
+        return sizeof((<Request>mpiobj).ob_mpi)
+    elif isinstance(mpiobj, Message):
+        return sizeof((<Message>mpiobj).ob_mpi)
+    elif isinstance(mpiobj, Op):
+        return sizeof((<Op>mpiobj).ob_mpi)
+    elif isinstance(mpiobj, Group):
+        return sizeof((<Group>mpiobj).ob_mpi)
+    elif isinstance(mpiobj, Info):
+        return sizeof((<Info>mpiobj).ob_mpi)
+    elif isinstance(mpiobj, Errhandler):
+        return sizeof((<Errhandler>mpiobj).ob_mpi)
+    elif isinstance(mpiobj, Comm):
+        return sizeof((<Comm>mpiobj).ob_mpi)
+    elif isinstance(mpiobj, Win):
+        return sizeof((<Win>mpiobj).ob_mpi)
+    elif isinstance(mpiobj, File):
+        return sizeof((<File>mpiobj).ob_mpi)
+    else:
+        raise TypeError("expecting an MPI instance")
+
 def _addressof(mpiobj):
     """
     Memory address of the underlying MPI handle
