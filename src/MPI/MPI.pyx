@@ -278,62 +278,57 @@ def get_vendor():
 
 # --------------------------------------------------------------------
 
-def _sizeof(mpiobj):
+cdef inline int _mpi_type(object arg, type cls) except -1:
+    if isinstance(arg, type):
+        if issubclass(arg, cls): return 1
+    else:
+        if isinstance(arg, cls): return 1
+    return 0
+
+def _sizeof(arg):
     """
     Size in bytes of the underlying MPI handle
     """
-    if isinstance(mpiobj, Status):
-        return sizeof((<Status>mpiobj).ob_mpi)
-    elif isinstance(mpiobj, Datatype):
-        return sizeof((<Datatype>mpiobj).ob_mpi)
-    elif isinstance(mpiobj, Request):
-        return sizeof((<Request>mpiobj).ob_mpi)
-    elif isinstance(mpiobj, Message):
-        return sizeof((<Message>mpiobj).ob_mpi)
-    elif isinstance(mpiobj, Op):
-        return sizeof((<Op>mpiobj).ob_mpi)
-    elif isinstance(mpiobj, Group):
-        return sizeof((<Group>mpiobj).ob_mpi)
-    elif isinstance(mpiobj, Info):
-        return sizeof((<Info>mpiobj).ob_mpi)
-    elif isinstance(mpiobj, Errhandler):
-        return sizeof((<Errhandler>mpiobj).ob_mpi)
-    elif isinstance(mpiobj, Comm):
-        return sizeof((<Comm>mpiobj).ob_mpi)
-    elif isinstance(mpiobj, Win):
-        return sizeof((<Win>mpiobj).ob_mpi)
-    elif isinstance(mpiobj, File):
-        return sizeof((<File>mpiobj).ob_mpi)
-    else:
-        raise TypeError("expecting an MPI instance")
+    if _mpi_type(arg, Status):     return sizeof(MPI_Status)
+    if _mpi_type(arg, Datatype):   return sizeof(MPI_Datatype)
+    if _mpi_type(arg, Request):    return sizeof(MPI_Request)
+    if _mpi_type(arg, Message):    return sizeof(MPI_Message)
+    if _mpi_type(arg, Op):         return sizeof(MPI_Op)
+    if _mpi_type(arg, Group):      return sizeof(MPI_Group)
+    if _mpi_type(arg, Info):       return sizeof(MPI_Info)
+    if _mpi_type(arg, Errhandler): return sizeof(MPI_Errhandler)
+    if _mpi_type(arg, Comm):       return sizeof(MPI_Comm)
+    if _mpi_type(arg, Win):        return sizeof(MPI_Win)
+    if _mpi_type(arg, File):       return sizeof(MPI_File)
+    raise TypeError("expecting an MPI type or instance")
 
-def _addressof(mpiobj):
+def _addressof(arg):
     """
     Memory address of the underlying MPI handle
     """
     cdef void *ptr = NULL
-    if isinstance(mpiobj, Status):
-        ptr = <void*>&(<Status>mpiobj).ob_mpi
-    elif isinstance(mpiobj, Datatype):
-        ptr = <void*>&(<Datatype>mpiobj).ob_mpi
-    elif isinstance(mpiobj, Request):
-        ptr = <void*>&(<Request>mpiobj).ob_mpi
-    elif isinstance(mpiobj, Message):
-        ptr = <void*>&(<Message>mpiobj).ob_mpi
-    elif isinstance(mpiobj, Op):
-        ptr = <void*>&(<Op>mpiobj).ob_mpi
-    elif isinstance(mpiobj, Group):
-        ptr = <void*>&(<Group>mpiobj).ob_mpi
-    elif isinstance(mpiobj, Info):
-        ptr = <void*>&(<Info>mpiobj).ob_mpi
-    elif isinstance(mpiobj, Errhandler):
-        ptr = <void*>&(<Errhandler>mpiobj).ob_mpi
-    elif isinstance(mpiobj, Comm):
-        ptr = <void*>&(<Comm>mpiobj).ob_mpi
-    elif isinstance(mpiobj, Win):
-        ptr = <void*>&(<Win>mpiobj).ob_mpi
-    elif isinstance(mpiobj, File):
-        ptr = <void*>&(<File>mpiobj).ob_mpi
+    if isinstance(arg, Status):
+        ptr = <void*>&(<Status>arg).ob_mpi
+    elif isinstance(arg, Datatype):
+        ptr = <void*>&(<Datatype>arg).ob_mpi
+    elif isinstance(arg, Request):
+        ptr = <void*>&(<Request>arg).ob_mpi
+    elif isinstance(arg, Message):
+        ptr = <void*>&(<Message>arg).ob_mpi
+    elif isinstance(arg, Op):
+        ptr = <void*>&(<Op>arg).ob_mpi
+    elif isinstance(arg, Group):
+        ptr = <void*>&(<Group>arg).ob_mpi
+    elif isinstance(arg, Info):
+        ptr = <void*>&(<Info>arg).ob_mpi
+    elif isinstance(arg, Errhandler):
+        ptr = <void*>&(<Errhandler>arg).ob_mpi
+    elif isinstance(arg, Comm):
+        ptr = <void*>&(<Comm>arg).ob_mpi
+    elif isinstance(arg, Win):
+        ptr = <void*>&(<Win>arg).ob_mpi
+    elif isinstance(arg, File):
+        ptr = <void*>&(<File>arg).ob_mpi
     else:
         raise TypeError("expecting an MPI instance")
     return PyLong_FromVoidPtr(ptr)
