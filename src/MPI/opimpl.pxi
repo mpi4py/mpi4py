@@ -87,7 +87,6 @@ cdef object _op_NO_OP(object x, object y):
 cdef list op_user_registry = [None]*(1+32)
 
 cdef inline object op_user_py(int index, object x, object y, object dt):
-    if index < 0: index = -index
     return op_user_registry[index](x, y, dt)
 
 cdef inline void op_user_mpi(
@@ -269,11 +268,11 @@ cdef int op_user_new(object function, MPI_User_function **cfunction) except -1:
     cfunction[0] = op_user_map(index)
     return index
 
-cdef int op_user_del(int *index) except -1:
+cdef int op_user_del(int *indexp) except -1:
     # free slot in the registry
-    cdef int idx = index[0]
-    index[0] = 0 # clear the value
-    if idx > 0: op_user_registry[idx] = None
+    cdef int index = indexp[0]
+    indexp[0] = 0 # clear the value
+    op_user_registry[index] = None
     return 0
 
 # -----------------------------------------------------------------------------

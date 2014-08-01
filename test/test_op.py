@@ -80,6 +80,14 @@ class TestOp(unittest.TestCase):
                         self.assertTrue(ret is b)
                         for i in range(N):
                             self.assertEqual(b[i], a[i]+scale*i)
+                        myop2 = MPI.Op(myop)
+                        a = array.array('i', [1]*N)
+                        b = array.array('i', [2]*N)
+                        ret = myop2(a, b)
+                        self.assertTrue(ret is b)
+                        for i in range(N):
+                            self.assertEqual(b[i], 3)
+                        myop2 = None
                     finally:
                         myop.Free()
 
