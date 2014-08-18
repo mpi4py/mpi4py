@@ -896,13 +896,13 @@ typedef void *PyMPI_MPI_Errhandler;
 
 #ifndef PyMPI_HAVE_MPI_Type_copy_attr_function
 #undef  MPI_Type_copy_attr_function
-typedef int (PyMPI_MPI_Type_copy_attr_function)(MPI_Datatype,int,void*,void*,void*,int*);
+typedef int (MPIAPI PyMPI_MPI_Type_copy_attr_function)(MPI_Datatype,int,void*,void*,void*,int*);
 #define MPI_Type_copy_attr_function PyMPI_MPI_Type_copy_attr_function
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Type_delete_attr_function
 #undef  MPI_Type_delete_attr_function
-typedef int (PyMPI_MPI_Type_delete_attr_function)(MPI_Datatype,int,void*,void*);
+typedef int (MPIAPI PyMPI_MPI_Type_delete_attr_function)(MPI_Datatype,int,void*,void*);
 #define MPI_Type_delete_attr_function PyMPI_MPI_Type_delete_attr_function
 #endif
 
@@ -1048,19 +1048,19 @@ typedef int (PyMPI_MPI_Type_delete_attr_function)(MPI_Datatype,int,void*,void*);
 
 #ifndef PyMPI_HAVE_MPI_Grequest_cancel_function
 #undef  MPI_Grequest_cancel_function
-typedef int (PyMPI_MPI_Grequest_cancel_function)(void*,int);
+typedef int (MPIAPI PyMPI_MPI_Grequest_cancel_function)(void*,int);
 #define MPI_Grequest_cancel_function PyMPI_MPI_Grequest_cancel_function
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Grequest_free_function
 #undef  MPI_Grequest_free_function
-typedef int (PyMPI_MPI_Grequest_free_function)(void*);
+typedef int (MPIAPI PyMPI_MPI_Grequest_free_function)(void*);
 #define MPI_Grequest_free_function PyMPI_MPI_Grequest_free_function
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Grequest_query_function
 #undef  MPI_Grequest_query_function
-typedef int (PyMPI_MPI_Grequest_query_function)(void*,MPI_Status*);
+typedef int (MPIAPI PyMPI_MPI_Grequest_query_function)(void*,MPI_Status*);
 #define MPI_Grequest_query_function PyMPI_MPI_Grequest_query_function
 #endif
 
@@ -1156,7 +1156,7 @@ typedef int (PyMPI_MPI_Grequest_query_function)(void*,MPI_Status*);
 
 #ifndef PyMPI_HAVE_MPI_User_function
 #undef  MPI_User_function
-typedef void (PyMPI_MPI_User_function)(void*,void*,int*,MPI_Datatype*);
+typedef void (MPIAPI PyMPI_MPI_User_function)(void*,void*,int*,MPI_Datatype*);
 #define MPI_User_function PyMPI_MPI_User_function
 #endif
 
@@ -2007,7 +2007,7 @@ typedef void (PyMPI_MPI_User_function)(void*,void*,int*,MPI_Datatype*);
 
 #ifndef PyMPI_HAVE_MPI_Handler_function
 #undef  MPI_Handler_function
-typedef void (PyMPI_MPI_Handler_function)(MPI_Comm*,int*,...);
+typedef void (MPIAPI PyMPI_MPI_Handler_function)(MPI_Comm*,int*,...);
 #define MPI_Handler_function PyMPI_MPI_Handler_function
 #endif
 
@@ -2033,13 +2033,13 @@ typedef void (PyMPI_MPI_Handler_function)(MPI_Comm*,int*,...);
 
 #ifndef PyMPI_HAVE_MPI_Copy_function
 #undef  MPI_Copy_function
-typedef int (PyMPI_MPI_Copy_function)(MPI_Comm,int,void*,void*,void*,int*);
+typedef int (MPIAPI PyMPI_MPI_Copy_function)(MPI_Comm,int,void*,void*,void*,int*);
 #define MPI_Copy_function PyMPI_MPI_Copy_function
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Delete_function
 #undef  MPI_Delete_function
-typedef int (PyMPI_MPI_Delete_function)(MPI_Comm,int,void*,void*);
+typedef int (MPIAPI PyMPI_MPI_Delete_function)(MPI_Comm,int,void*,void*);
 #define MPI_Delete_function PyMPI_MPI_Delete_function
 #endif
 
@@ -2425,7 +2425,7 @@ typedef int (PyMPI_MPI_Delete_function)(MPI_Comm,int,void*,void*);
 
 #ifndef PyMPI_HAVE_MPI_Win_errhandler_fn
 #undef  MPI_Win_errhandler_fn
-typedef void (PyMPI_MPI_Win_errhandler_fn)(MPI_Win*,int*,...);
+typedef void (MPIAPI PyMPI_MPI_Win_errhandler_fn)(MPI_Win*,int*,...);
 #define MPI_Win_errhandler_fn PyMPI_MPI_Win_errhandler_fn
 #endif
 
@@ -2526,13 +2526,13 @@ typedef void (PyMPI_MPI_Win_errhandler_fn)(MPI_Win*,int*,...);
 
 #ifndef PyMPI_HAVE_MPI_Win_copy_attr_function
 #undef  MPI_Win_copy_attr_function
-typedef int (PyMPI_MPI_Win_copy_attr_function)(MPI_Win,int,void*,void*,void*,int*);
+typedef int (MPIAPI PyMPI_MPI_Win_copy_attr_function)(MPI_Win,int,void*,void*,void*,int*);
 #define MPI_Win_copy_attr_function PyMPI_MPI_Win_copy_attr_function
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Win_delete_attr_function
 #undef  MPI_Win_delete_attr_function
-typedef int (PyMPI_MPI_Win_delete_attr_function)(MPI_Win,int,void*,void*);
+typedef int (MPIAPI PyMPI_MPI_Win_delete_attr_function)(MPI_Win,int,void*,void*);
 #define MPI_Win_delete_attr_function PyMPI_MPI_Win_delete_attr_function
 #endif
 
@@ -2898,7 +2898,7 @@ typedef int (PyMPI_MPI_Win_delete_attr_function)(MPI_Win,int,void*,void*);
 
 #ifndef PyMPI_HAVE_MPI_File_errhandler_fn
 #undef  MPI_File_errhandler_fn
-typedef void (PyMPI_MPI_File_errhandler_fn)(MPI_File*,int*,...);
+typedef void (MPIAPI PyMPI_MPI_File_errhandler_fn)(MPI_File*,int*,...);
 #define MPI_File_errhandler_fn PyMPI_MPI_File_errhandler_fn
 #endif
 
@@ -2919,13 +2919,13 @@ typedef void (PyMPI_MPI_File_errhandler_fn)(MPI_File*,int*,...);
 
 #ifndef PyMPI_HAVE_MPI_Datarep_conversion_function
 #undef  MPI_Datarep_conversion_function
-typedef int (PyMPI_MPI_Datarep_conversion_function)(void*,MPI_Datatype,int,void*,MPI_Offset,void*);
+typedef int (MPIAPI PyMPI_MPI_Datarep_conversion_function)(void*,MPI_Datatype,int,void*,MPI_Offset,void*);
 #define MPI_Datarep_conversion_function PyMPI_MPI_Datarep_conversion_function
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Datarep_extent_function
 #undef  MPI_Datarep_extent_function
-typedef int (PyMPI_MPI_Datarep_extent_function)(MPI_Datatype,MPI_Aint*,void*);
+typedef int (MPIAPI PyMPI_MPI_Datarep_extent_function)(MPI_Datatype,MPI_Aint*,void*);
 #define MPI_Datarep_extent_function PyMPI_MPI_Datarep_extent_function
 #endif
 

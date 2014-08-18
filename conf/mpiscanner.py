@@ -77,7 +77,7 @@ class NodeFuncType(NodeType):
     HEADER = """\
     typedef %(crett)s (%(cname)s)(%(cargs)s);"""
     MISSING = """\
-    typedef %(crett)s (PyMPI_%(cname)s)(%(cargs)s);
+    typedef %(crett)s (MPIAPI PyMPI_%(cname)s)(%(cargs)s);
     #define %(cname)s PyMPI_%(cname)s"""
 
     def __init__(self, crett, cname, cargs, calias=None):
