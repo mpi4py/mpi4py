@@ -22,7 +22,7 @@ serialize generic Python objects using ASCII or binary formats. The
 objects using a binary format specific to Python, but independent of
 machine architecture issues.
 
-*MPI for Python* can communicate any built-in or used-defined Python
+*MPI for Python* can communicate any built-in or user-defined Python
 object taking advantage of the features provided by the mod:`pickle`
 module. These facilities will be routinely used to build binary
 representations of objects to communicate (at sending processes), and
@@ -37,7 +37,7 @@ or container built-in types to user-defined classes, necessarily
 requires computer resources.  Processing is also needed for
 dispatching the appropriate serialization method (that depends on the
 type of the object) and doing the actual packing. Additional memory is
-always needed, and if its total amount in not known *a priori*, many
+always needed, and if its total amount is not known *a priori*, many
 reallocations can occur.  Indeed, in the case of large numeric arrays,
 this is certainly unacceptable and precludes communication of objects
 occupying half or more of the available memory resources.
@@ -97,8 +97,8 @@ Point-to-Point Communications
 -----------------------------
 
 Point to point communication is a fundamental capability of message
-passing systems. This mechanism enables the transmittal of data
-between a pair of processes, one side sending, the other, receiving.
+passing systems. This mechanism enables the transmission of data
+between a pair of processes, one side sending, the other receiving.
 
 MPI provides a set of *send* and *receive* functions allowing the
 communication of *typed* data with an associated *tag*.  The type
@@ -239,7 +239,7 @@ communication between them and the existing MPI application. It also
 provides mechanisms to establish communication between two existing
 MPI applications, even when one did not *start* the other.
 
-In *MPI for Python*, new independent processes groups can be created
+In *MPI for Python*, new independent process groups can be created
 by calling the :meth:`Spawn` method within an intracommunicator (i.e.,
 an :class:`Intracomm` instance).  This call returns a new
 intercommunicator (i.e., an :class:`Intercomm` instance) at the parent
