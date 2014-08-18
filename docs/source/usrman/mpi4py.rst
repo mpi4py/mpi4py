@@ -1,5 +1,5 @@
-Design and Interface Overview
-=============================
+Overview
+========
 
 MPI for Python provides an object oriented approach to message passing
 which grounds on the standard MPI-2 C++ bindings. The interface was
