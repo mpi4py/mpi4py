@@ -648,6 +648,8 @@ elif name == 'Open MPI':
     if version < (1,4,0):
         if MPI.Query_thread() > MPI.THREAD_SINGLE:
             del TestCCOBufWorldDup
+elif name == 'Microsoft MPI':
+    del BaseTestCCOBufInplace.testExscan
 
 
 if __name__ == '__main__':
