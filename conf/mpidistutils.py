@@ -937,10 +937,11 @@ class build_clib(cmd_build_clib.build_clib):
             language = (lib.language or src_language)
             # Now "link" the object files together
             # into a shared library.
-            linker_so = self.compiler.linker_so[:]
-            if sys.platform == 'darwin' and '-bundle' in linker_so:
-                pos = linker_so.index('-bundle')
-                self.compiler.linker_so[pos] = '-shared'
+            if sys.platform == 'darwin':
+                linker_so = self.compiler.linker_so[:]
+                while '-bundle' in self.compiler.linker_so:
+                    pos = self.compiler.linker_so.index('-bundle')
+                    self.compiler.linker_so[pos] = '-shared'
             self.compiler.link(
                 self.compiler.SHARED_LIBRARY,
                 objects, lib_fullpath,
@@ -954,7 +955,8 @@ class build_clib(cmd_build_clib.build_clib):
                 debug=self.debug,
                 target_lang=language,
                 )
-            self.compiler.linker_so = linker_so
+            if sys.platform == 'darwin':
+                self.compiler.linker_so = linker_so
         return
 
     def get_lib_fullpath (self, lib, build_dir):
