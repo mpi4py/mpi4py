@@ -157,6 +157,7 @@ class Config(object):
             ('deinompi', ProgramFiles, 'DeinoMPI'),
             ('msmpi',    CCP_HOME,     ''),
             ('msmpi',    ProgramFiles, 'Microsoft MPI'),
+            ('msmpi',    ProgramFiles, 'Microsoft HPC Pack 2012 R2'),
             ('msmpi',    ProgramFiles, 'Microsoft HPC Pack 2012'),
             ('msmpi',    ProgramFiles, 'Microsoft HPC Pack 2012 SDK'),
             ('msmpi',    ProgramFiles, 'Microsoft HPC Pack 2008 R2'),
