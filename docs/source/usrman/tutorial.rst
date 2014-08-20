@@ -14,26 +14,33 @@ communication of buffer-provider objects (e.g., NumPy arrays).
 * Communication of generic Python objects
 
   You have to use **all-lowercase** methods (of the :class:`Comm`
-  class), like :meth:`send()`, :meth:`recv()`, :meth:`bcast()`. Note that
-  the methods :meth:`isend()` and :meth:`irecv` return :class:`Request` 
-  instances; completion of these methods can be managed using the
-  :meth:`test` and :meth:`wait` methods of the :class:`Request` class.
+  class), like :meth:`send()`, :meth:`recv()`, :meth:`bcast()`. An
+  object to be sent is passed as a paramenter to the communication
+  call, and the received object is simply the return value.
+
+  The :meth:`isend()` and :meth:`irecv` methods return
+  :class:`Request` instances; completion of these methods can be
+  managed using the :meth:`test` and :meth:`wait` methods of the
+  :class:`Request` class.
+
+  The :meth:`recv` and :meth:`irecv` methods may be passed a buffer
+  object that can be repeatedly used to receive messages avoiding
+  internal memory allocation. This buffer must be sufficiently large
+  to accommodate the transmitted messages; hence, any buffer passed to
+  :meth:`recv` or :meth:`irecv` must be at least as long as the
+  *pickled* data transmitted to the receiver.
 
   Collective calls like :meth:`scatter()`, :meth:`gather()`,
-  :meth:`allgather()`, :meth:`alltoall()` expect/return a sequence of
-  :attr:`Comm.size` elements at the root or all process. They return a
-  single value, a list of :attr:`Comm.size` elements, or
-  :const:`None`.
+  :meth:`allgather()`, :meth:`alltoall()` expect a single value or a
+  sequence of :attr:`Comm.size` elements at the root or all
+  process. They return a single value, a list of :attr:`Comm.size`
+  elements, or :const:`None`.
 
-  Global reduction operations :meth:`reduce()` and :meth:`allreduce()`
-  are naively implemented; the reduction is actually done at the
-  designated root process or all processes.
-
-* Communication of buffer-provider objects
+* Communication of buffer-like objects
 
   You have to use method names starting with an **upper-case** letter
   (of the :class:`Comm` class), like :meth:`Send()`, :meth:`Recv()`,
-  :meth:`Bcast()`.
+  :meth:`Bcast()`, :meth:`Scatter()`, :meth:`Gather()`.
 
   In general, buffer arguments to these calls must be explicitly
   specified by using a 2/3-list/tuple like ``[data, MPI.DOUBLE]``, or
@@ -48,12 +55,6 @@ communication of buffer-provider objects (e.g., NumPy arrays).
   in the underlying MPI implementation. In this case, the
   buffer-provider object can be passed directly as a buffer argument,
   the count and MPI datatype will be inferred.
-
-Both :meth:`Recv`/:meth:`Irecv` and :meth:`recv`/:meth:`irecv` may be passed a 
-buffer object that can be repeatedly used to receive messages without
-reallocation. This buffer must be sufficiently long to accommodate the
-transmitted messages; hence, any buffer passed to :meth:`recv` or :meth:`irecv`
-must be at least as long as the *pickled* data transmitted to the receiver.
 
 Point-to-Point Communication
 ----------------------------
