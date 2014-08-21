@@ -6,6 +6,7 @@ import sys
 class TestObjModel(unittest.TestCase):
 
     objects = [
+        MPI.Status(),
         MPI.DATATYPE_NULL,
         MPI.REQUEST_NULL,
         MPI.INFO_NULL,
@@ -23,8 +24,11 @@ class TestObjModel(unittest.TestCase):
             objects = self.objects[:]
             obj2 = objects[i]
             self.assertTrue(obj1 == obj2)
+            self.assertFalse(obj1 != obj2)
             del objects[i]
             for obj2 in objects:
+                self.assertTrue(obj1 != obj2)
+                self.assertTrue(obj2 != obj1)
                 self.assertFalse(obj1 == obj2)
                 self.assertFalse(obj2 == obj1)
             self.assertFalse(None == obj1 )
@@ -58,7 +62,7 @@ class TestObjModel(unittest.TestCase):
             self.assertTrue(obj1 != set())
 
     def testBool(self):
-        for obj in self.objects:
+        for obj in self.objects[1:]:
             self.assertFalse(not not obj)
             self.assertTrue(not obj)
             self.assertFalse(obj)
