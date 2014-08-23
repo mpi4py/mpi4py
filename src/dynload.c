@@ -43,6 +43,7 @@ dl_dlsym(PyObject *self, PyObject *args)
 static PyObject *
 dl_dlclose(PyObject *self, PyObject *arg0)
 {
+  int err = 0;
   void *handle = NULL;
   (void)self; /* unused */
   if (arg0 != Py_None) {
@@ -51,8 +52,8 @@ dl_dlclose(PyObject *self, PyObject *arg0)
       return NULL;
   }
   if (handle)
-    dlclose(handle);
-  return Py_BuildValue((char *)"");
+    err = dlclose(handle);
+  return Py_BuildValue((char *)"i", err);
 }
 
 static PyObject *
