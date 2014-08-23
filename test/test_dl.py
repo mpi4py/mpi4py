@@ -1,4 +1,7 @@
-from mpi4py import dl
+try:
+    from mpi4py import dl
+except ImportError:
+    dl = None
 import mpiunittest as unittest
 import sys
 import os
@@ -50,8 +53,7 @@ class TestDL(unittest.TestCase):
         self.assertTrue(dl.dlerror() is not None)
 
 
-if os.name != 'posix':
-    del TestDL
+if dl is None: del TestDL
 
 
 if __name__ == '__main__':
