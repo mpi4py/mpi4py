@@ -1,5 +1,5 @@
-#ifndef PyMPI_CONFIG_MPICH2_H
-#define PyMPI_CONFIG_MPICH2_H
+#ifndef PyMPI_CONFIG_MPICH3_H
+#define PyMPI_CONFIG_MPICH3_H
 
 #include "mpi-11.h"
 #include "mpi-12.h"
@@ -15,4 +15,4 @@
 #include "mpich3-io.h"
 #endif
 
-#endif /* !PyMPI_CONFIG_MPICH2_H */
+#endif /* !PyMPI_CONFIG_MPICH3_H */

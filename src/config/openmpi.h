@@ -65,12 +65,6 @@
 #undef PyMPI_HAVE_MPI_COMPLEX32
 #endif
 
-#if MPI_VERSION==2 && MPI_SUBVERSION<2
-#undef PyMPI_HAVE_MPI_Comm_errhandler_function
-#undef PyMPI_HAVE_MPI_Win_errhandler_function
-#undef PyMPI_HAVE_MPI_File_errhandler_function
-#endif
-
 #ifdef OMPI_PROVIDE_MPI_FILE_INTERFACE
 #if OMPI_PROVIDE_MPI_FILE_INTERFACE == 0
 #include "openmpi-io.h"

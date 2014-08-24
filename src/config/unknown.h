@@ -16,15 +16,6 @@
 #undef PyMPI_HAVE_MPI_REAL2
 #undef PyMPI_HAVE_MPI_COMPLEX4
 
-/* These types are not available in MPICH(1) */
-#if defined(MPICH_NAME) && (MPICH_NAME==1)
-#undef PyMPI_HAVE_MPI_INTEGER1
-#undef PyMPI_HAVE_MPI_INTEGER2
-#undef PyMPI_HAVE_MPI_INTEGER4
-#undef PyMPI_HAVE_MPI_REAL4
-#undef PyMPI_HAVE_MPI_REAL8
-#endif
-
 /* ------------------------------------------------------------------------- */
 
 #endif /* !PyMPI_CONFIG_UNKNOWN_H */
