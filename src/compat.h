@@ -4,6 +4,8 @@
 #include "compat/mpich2.h"
 #elif defined(OPEN_MPI)
 #include "compat/openmpi.h"
+#elif defined(MS_MPI)
+#include "compat/msmpi.h"
 #elif defined(PLATFORM_MPI)
 #include "compat/pcmpi.h"
 #elif defined(HP_MPI)

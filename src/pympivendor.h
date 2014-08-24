@@ -56,11 +56,14 @@ static int PyMPI_Get_vendor(const char **vendor_name,
   name = "MPICH2";
   #if defined(DEINO_MPI)
   name = "DeinoMPI";
-  #elif defined(MS_MPI)
-  name = "Microsoft MPI";
   #elif defined(__SICORTEX__)
   name = "SiCortex MPI";
   #endif
+#endif
+
+  /* Microsoft MPI */
+#if defined(MS_MPI)
+  name = "Microsoft MPI";
 #endif
 
   /* Open MPI */

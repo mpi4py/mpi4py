@@ -57,10 +57,14 @@ class TestErrhandler(unittest.TestCase):
         file.Call_errhandler(MPI.SUCCESS)
         file.Close()
 
+name, version = MPI.get_vendor()
 if MPI.Get_version() < (2, 0):
     del TestErrhandler.testCommCallErrhandler
     del TestErrhandler.testWinCallErrhandler
     del TestErrhandler.testFileCallErrhandler
+elif name == 'Microsoft MPI':
+	del TestErrhandler.testFileCallErrhandler
+
 
 if __name__ == '__main__':
     unittest.main()
