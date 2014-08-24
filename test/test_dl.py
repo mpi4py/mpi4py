@@ -52,8 +52,11 @@ class TestDL(unittest.TestCase):
         self.assertTrue(handle == 0)
         self.assertTrue(dl.dlerror() is not None)
 
-
-if dl is None: del TestDL
+if dl is None:
+    del TestDL
+elif (sys.platform == 'darwin' and
+      hasattr(sys, 'pypy_version_info')):
+    del TestDL.testDL2
 
 
 if __name__ == '__main__':
