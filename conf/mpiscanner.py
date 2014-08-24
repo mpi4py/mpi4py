@@ -44,10 +44,14 @@ class Node(object):
         return line + '\n'
     def config(self):
         return dedent(self.CONFIG) % vars(self)
-    def missing(self):
-        head = dedent(self.MISSING_HEAD)
+    def missing(self, guard=True):
+        if guard:
+            head = dedent(self.MISSING_HEAD)
+            tail = dedent(self.MISSING_TAIL)
+        else:
+            head = "#undef  %(cname)s\n"
+            tail = "\n\n"
         body = dedent(self.MISSING)
-        tail = dedent(self.MISSING_TAIL)
         return (head+body+tail) % vars(self)
 
 class NodeType(Node):
@@ -104,7 +108,7 @@ class NodeValue(Node):
                   calias=calias)
         if ctype.endswith('*'):
             ctype = ctype.replace('*', "* const")
-            self.HEADER = ctype + " %(cname)s;" 
+            self.HEADER = ctype + " %(cname)s;"
 
 def ctypefix(ct):
     ct = ct.strip()
@@ -261,9 +265,8 @@ class Scanner(object):
     def __iter__(self):
         return iter(self.nodes)
 
-    def itertests(self):
-        for node in self:
-            yield (node.name, node.config())
+    def __getitem__(self, name):
+        return self.nodes[self.nodemap[name]]
 
     def dump_header_h(self, fileobj):
         if isinstance(fileobj, str):
@@ -350,12 +353,9 @@ class Scanner(object):
             for node in self:
                 fileobj.write(node.missing())
         else:
-            nodelist = self.nodes
-            nodemap = self.nodemap
             for name, result in suite:
-                assert name in nodemap, name
+                node = self[name]
                 if not result:
-                    node = nodelist[nodemap[name]]
                     fileobj.write(node.missing())
         fileobj.write(tail)
 

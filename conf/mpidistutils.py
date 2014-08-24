@@ -223,6 +223,19 @@ class ConfigureMPI(object):
     CONFIG_H = os.path.join('config', 'config.h')
     MISSING_H = 'missing.h'
 
+    CONFIGTEST_H = """\
+/* _configtest.h */
+
+#if !defined(MPIAPI)
+#  if defined(DEINO_MPI) && defined(MPI_CALL)
+#    define MPIAPI MPI_CALL
+#  else
+#    define MPIAPI
+#  endif
+#endif
+
+"""
+
     def __init__(self, config_cmd):
         self.scanner = Scanner()
         for filename in self.SOURCES:
@@ -232,16 +245,28 @@ class ConfigureMPI(object):
 
     def run(self):
         results = []
-        for name, code in self.scanner.itertests():
+        cfgtest_h = open('_configtest.h', 'w')
+        cfgtest_h.write(self.CONFIGTEST_H)
+        cfgtest_h.close()
+        for node in self.scanner:
+            name = node.name
+            testcode = node.config()
+            confcode = node.missing(guard=False)
             log.info("checking for '%s' ..." % name)
-            ok = self.run_test(code)
+            ok = self.run_test(testcode)
             if not ok:
                 log.info("**** failed check for '%s'" % name)
+                cfgtest_h = open('_configtest.h', 'a')
+                cfgtest_h.write(confcode)
+                cfgtest_h.close()
             results.append((name, ok))
+        try: os.remove('_configtest.h')
+        except OSError: pass
         return results
 
     def gen_test(self, code):
-        body = ['int main(int argc, char **argv) {',
+        body = ['#include "_configtest.h"',
+                'int main(int argc, char **argv) {',
                 '\n'.join(['  ' + line for line in code.split('\n')]),
                 '  (void)argc; (void)argv;',
                 '  return 0;',
@@ -251,7 +276,8 @@ class ConfigureMPI(object):
 
     def run_test(self, code, lang='c'):
         body = self.gen_test(code)
-        ok = self.config_cmd.try_link(body, headers=['mpi.h'], lang=lang)
+        headers = ['stdlib.h', 'mpi.h']
+        ok = self.config_cmd.try_link(body, headers=headers, lang=lang)
         return ok
 
     def dump(self, results):
