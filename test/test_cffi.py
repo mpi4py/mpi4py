@@ -49,15 +49,16 @@ class TestCFFI(unittest.TestCase):
         ffi = cffi.FFI()
         typemap = {ffi.sizeof('int'): 'int',
                    ffi.sizeof('void*'): 'void*'}
+        typename = lambda t: t.__name__.rsplit('.', 1)[-1]
         for tp in self.mpitypes:
             handle_t = typemap[MPI._sizeof(tp)]
-            mpi_t = 'MPI_' + tp.__name__
+            mpi_t = 'MPI_' + typename(tp)
             ffi.cdef("typedef %s %s;" % (handle_t, mpi_t))
         for obj in self.objects:
             if isinstance(obj, MPI.Comm):
                 mpi_t = 'MPI_Comm'
             else:
-                mpi_t = 'MPI_' + type(obj).__name__
+                mpi_t = 'MPI_' + typename(type(obj))
             oldobj = obj
             newobj = type(obj)()
             handle_old = ffi.cast(mpi_t+'*', MPI._addressof(oldobj))
