@@ -136,14 +136,14 @@ elif darwin:
         library_dirs  = compiler.library_dirs[:]
         library_dirs += [flag[2:] for flag in linker_cmd
                          if flag.startswith('-L')]
-        library_dirs += ["/usr/lib"]
-        library_dirs += ["/usr/local/lib"]
+        library_dirs += ['/usr/lib']
+        library_dirs += ['/usr/local/lib']
         return library_dirs
     def whole_archive(compiler, name, library_dirs=[]):
         library_dirs = library_dirs[:]
         library_dirs += darwin_linker_dirs(compiler)
         for libdir in library_dirs:
-            libpath = os.path.join(libdir, "lib%s.a" % name)
+            libpath = os.path.join(libdir, 'lib%s.a' % name)
             if os.path.isfile(libpath):
                 return ['-force_load', libpath]
         return ['-l%s' % name]
@@ -159,11 +159,11 @@ else:
 def configure_dl(ext, config_cmd):
     from distutils import log
     log.info("checking for dlopen() availability ...")
-    ok = config_cmd.check_header("dlfcn.h")
+    ok = config_cmd.check_header('dlfcn.h')
     if ok : ext.define_macros += [('HAVE_DLFCN_H', 1)]
     ok = config_cmd.check_library('dl')
     if ok: ext.libraries += ['dl']
-    ok = config_cmd.check_function("dlopen",
+    ok = config_cmd.check_function('dlopen',
                                    libraries=['dl'],
                                    decl=1, call=1)
     if ok: ext.define_macros += [('HAVE_DLOPEN', 1)]
@@ -176,10 +176,10 @@ def configure_mpi(ext, config_cmd):
     log.info("checking for MPI compile and link ...")
     errmsg = ("Cannot find 'mpi.h' header. "
               "Check your configuration!!!")
-    ok = config_cmd.check_header("mpi.h", headers=["stdlib.h"])
+    ok = config_cmd.check_header('mpi.h', headers=['stdlib.h'])
     if not ok: raise DistutilsPlatformError(errmsg)
     #
-    headers = ["stdlib.h", "mpi.h"]
+    headers = ['stdlib.h', 'mpi.h']
     ConfigTest = dedent("""\
     int main(int argc, char **argv)
     {
@@ -213,14 +213,14 @@ def configure_mpi(ext, config_cmd):
         ext.define_macros += [('HAVE_CONFIG_H', 1)]
     else:
         for prefix, suffixes in (
-            ("MPI_Type_create_f90_", ("integer", "real", "complex")),
+            ('MPI_Type_create_f90_', ('integer', 'real', 'complex')),
             ):
             for suffix in suffixes:
                 function = prefix + suffix
                 ok = config_cmd.check_function(
                     function, decl=1, call=1)
                 if not ok:
-                    macro = "PyMPI_MISSING_" + function
+                    macro = 'PyMPI_MISSING_' + function
                     ext.define_macros += [(macro, 1)]
     #
     if os.name == 'posix':
@@ -506,7 +506,7 @@ def run_cython(source, depends=(), includes=(),
     from distutils import log
     from distutils import dep_util
     from distutils.errors import DistutilsError
-    target = os.path.splitext(source)[0]+".c"
+    target = os.path.splitext(source)[0]+'.c'
     cwd = os.getcwd()
     try:
         if wdir: os.chdir(wdir)
@@ -520,7 +520,7 @@ def run_cython(source, depends=(), includes=(),
     finally:
         os.chdir(cwd)
     if not chk_cython(VERSION):
-        raise DistutilsError('requires Cython>=%s' % VERSION)
+        raise DistutilsError("requires Cython>=%s" % VERSION)
     log.info("cythonizing '%s' -> '%s'", source, target)
     from conf.cythonize import cythonize
     err = cythonize(source,
@@ -542,10 +542,10 @@ def build_sources(cmd):
     if (has_src and not has_vcs and not cmd.force): return
     # mpi4py.MPI
     source = 'mpi4py.MPI.pyx'
-    depends = ["include/*/*.pxi",
-               "include/*/*.pxd",
-               "MPI/*.pyx",
-               "MPI/*.pxi",]
+    depends = ['include/*/*.pxi',
+               'include/*/*.pxd',
+               'MPI/*.pyx',
+               'MPI/*.pxi',]
     includes = ['include']
     destdir_h = os.path.join('include', 'mpi4py')
     run_cython(source, depends, includes,
