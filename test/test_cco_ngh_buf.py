@@ -159,26 +159,26 @@ class TestCCONghBufWorldDup(BaseTestCCONghBuf, unittest.TestCase):
 
 
 name, version = MPI.get_vendor()
-if name == 'Open MPI':
-    if version < (1,8,3):
-        _create_topo_comms = create_topo_comms
-        def create_topo_comms(comm):
-            for c in _create_topo_comms(comm):
-                if c.size * 2 < sum(c.degrees):
-                    c.Free(); continue
-                yield c
-else:
-    cartcomm = MPI.COMM_SELF.Create_cart([1], periods=[0])
+cartcomm = MPI.COMM_SELF.Create_cart([1], periods=[0])
+try:
     try:
-        try:
-            cartcomm.neighbor_allgather(None)
-        finally:
-            cartcomm.Free()
-    except NotImplementedError:
-        del TestCCONghBufSelf
-        del TestCCONghBufWorld
-        del TestCCONghBufSelfDup
-        del TestCCONghBufWorldDup
+        cartcomm.neighbor_allgather(None)
+    finally:
+        cartcomm.Free()
+        del cartcomm
+    if name == 'Open MPI':
+        if version < (1,8,3):
+            _create_topo_comms = create_topo_comms
+            def create_topo_comms(comm):
+                for c in _create_topo_comms(comm):
+                    if c.size * 2 < sum(c.degrees):
+                        c.Free(); continue
+                    yield c
+except NotImplementedError:
+    del TestCCONghBufSelf
+    del TestCCONghBufWorld
+    del TestCCONghBufSelfDup
+    del TestCCONghBufWorldDup
 
 
 if __name__ == '__main__':
