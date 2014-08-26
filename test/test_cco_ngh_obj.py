@@ -116,10 +116,10 @@ try:
                         c.Free(); continue
                     yield c
 except NotImplementedError:
-    del TestCCONghBufSelf
-    del TestCCONghBufWorld
-    del TestCCONghBufSelfDup
-    del TestCCONghBufWorldDup
+    del TestCCONghObjSelf
+    del TestCCONghObjWorld
+    del TestCCONghObjSelfDup
+    del TestCCONghObjWorldDup
 
 
 if __name__ == '__main__':
