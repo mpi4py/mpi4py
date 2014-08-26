@@ -797,11 +797,12 @@ cdef object PyMPI_neighbor_allgather(object sendobj, MPI_Comm comm):
     cdef int *rdispls = NULL
     cdef MPI_Datatype rtype = MPI_BYTE
     #
-    cdef int rsize=0
+    cdef int i=0, rsize=0
     comm_neighbors_count(comm, &rsize, NULL)
     #
     cdef object tmp1 = allocate_int(rsize, &rcounts)
     cdef object tmp2 = allocate_int(rsize, &rdispls)
+    for i from 0 <= i < rsize: rcounts[i] = 0
     #
     cdef object tmps = pickle.dump(sendobj, &sbuf, &scount)
     with nogil: CHKERR( MPI_Neighbor_allgather(&scount, 1, MPI_INT,
@@ -827,13 +828,14 @@ cdef object PyMPI_neighbor_alltoall(object sendobj, MPI_Comm comm):
     cdef int *rdispls = NULL
     cdef MPI_Datatype rtype = MPI_BYTE
     #
-    cdef int ssize=0, rsize=0
+    cdef int i=0, ssize=0, rsize=0
     comm_neighbors_count(comm, &rsize, &ssize)
     #
     cdef object tmps1 = allocate_int(ssize, &scounts)
     cdef object tmps2 = allocate_int(ssize, &sdispls)
     cdef object tmpr1 = allocate_int(rsize, &rcounts)
     cdef object tmpr2 = allocate_int(rsize, &rdispls)
+    for i from 0 <= i < rsize: rcounts[i] = 0
     #
     cdef object tmps = pickle.dumpv(sendobj, &sbuf, ssize, scounts, sdispls)
     with nogil: CHKERR( MPI_Neighbor_alltoall(scounts, 1, MPI_INT,
