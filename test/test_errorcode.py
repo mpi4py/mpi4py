@@ -13,7 +13,7 @@ class TestErrorCode(unittest.TestCase):
         for ierr in self.errorclasses:
             errcls = MPI.Get_error_class(ierr)
             self.assertTrue(errcls >= MPI.SUCCESS)
-            self.assertTrue(errcls < MPI.ERR_LASTCODE)
+            self.assertTrue(errcls <= MPI.ERR_LASTCODE)
             self.assertEqual(errcls, ierr)
 
     def testGetErrorStrings(self):
@@ -40,12 +40,12 @@ class TestErrorCode(unittest.TestCase):
             self.assertTrue(errexc == errexc)
             self.assertFalse(errexc != ierr)
             self.assertFalse(errexc != errexc)
-            self.assertTrue(success <= ierr   < lasterr)
-            self.assertTrue(success <= errexc < lasterr)
+            self.assertTrue(success <= ierr   <= lasterr)
+            self.assertTrue(success <= errexc <= lasterr)
             self.assertTrue(errexc >= ierr)
             self.assertTrue(errexc >= success)
-            self.assertTrue(lasterr > ierr)
-            self.assertTrue(lasterr > errexc)
+            self.assertTrue(lasterr >= ierr)
+            self.assertTrue(lasterr >= errexc)
             if errexc == success:
                 self.assertFalse(errexc)
             else:

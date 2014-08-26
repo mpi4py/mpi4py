@@ -133,10 +133,11 @@ class BaseTestComm(object):
 
     def testSplitType(self):
         try:
-            comm = self.COMM.Split_type(MPI.UNDEFINED)
+            MPI.COMM_SELF.Split_type(MPI.COMM_TYPE_SHARED).Free()
         except NotImplementedError:
             return
-        self.assertEqual(comm, MPI.COMM_NULL)
+        #comm = self.COMM.Split_type(MPI.UNDEFINED)
+        #self.assertEqual(comm, MPI.COMM_NULL)
         comm = self.COMM.Split_type(MPI.COMM_TYPE_SHARED)
         self.assertNotEqual(comm, MPI.COMM_NULL)
         size = self.COMM.Get_size()
