@@ -63,7 +63,7 @@ ctypedef public api class Message [
     type   PyMPIMessage_Type,
     object PyMPIMessageObject,
     ]:
-    cdef MPI_Message ob_mpi     
+    cdef MPI_Message ob_mpi
     cdef unsigned    flags
     cdef object      ob_buf
 
