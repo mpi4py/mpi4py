@@ -126,6 +126,9 @@ cdef extern from *:
     #
     int PyMPI_CLEANUP_DONE
     int PyMPI_CleanUp() nogil
+    #
+    int PyMPI_Commctx_finalize() nogil
+
 
 PyMPI_STARTUP_DONE = 0
 PyMPI_CLEANUP_DONE = 0
@@ -190,6 +193,7 @@ cdef void startup() nogil:
 cdef void cleanup() nogil:
     if not mpi_active(): return
     #DBG# fprintf(stderr, b"cleanup: BEGIN\n"); fflush(stderr)
+    <void>PyMPI_Commctx_finalize()
     <void>PyMPI_CleanUp()
     #DBG# fprintf(stderr, b"cleanup: END\n"); fflush(stderr)
 
