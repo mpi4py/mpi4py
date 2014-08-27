@@ -40,6 +40,7 @@ class TestDPM(unittest.TestCase):
         group = group_world.Excl([0])
         group_world.Free()
         comm = comm_world.Create(group)
+        group.Free()
         if wrank == 0:
             self.assertEqual(comm, MPI.COMM_NULL)
         else:
