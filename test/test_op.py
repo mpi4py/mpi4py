@@ -145,7 +145,13 @@ class TestOp(unittest.TestCase):
         res = MPI.MINLOC(u, v)
         self.assertTrue(res[0] is x)
         self.assertTrue(res[1] is i)
+        res = MPI.MINLOC(v, u)
+        self.assertTrue(res[0] is x)
+        self.assertTrue(res[1] is i)
         res = MPI.MAXLOC(u, v)
+        self.assertTrue(res[0] is y)
+        self.assertTrue(res[1] is j)
+        res = MPI.MAXLOC(v, u)
         self.assertTrue(res[0] is y)
         self.assertTrue(res[1] is j)
         #
