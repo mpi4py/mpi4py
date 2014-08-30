@@ -50,6 +50,8 @@ class TestErrorCode(unittest.TestCase):
                 self.assertFalse(errexc)
             else:
                 self.assertTrue(errexc)
+                self.assertTrue(errexc > success)
+                self.assertTrue(success < errexc)
         exc = MPI.Exception(MPI.SUCCESS-1)
         self.assertTrue(exc, MPI.ERR_UNKNOWN)
         exc = MPI.Exception(MPI.ERR_LASTCODE+1)
