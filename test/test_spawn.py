@@ -3,9 +3,32 @@ from mpi4py import MPI
 import mpiunittest as unittest
 
 MPI4PYPATH = os.path.abspath(os.path.dirname(mpi4py.__path__[0]))
+
 CHILDSCRIPT = os.path.abspath(
     os.path.join(os.path.dirname(__file__), 'spawn_child.py')
     )
+
+def childscript():
+    from tempfile import mkstemp
+    from textwrap import dedent
+    fd, script = mkstemp(suffix='.py', prefix="mpi4py-")
+    os.close(fd)
+    fh = open(script, "wt")
+    fh.write(dedent("""\
+    #!%(python)s
+    import sys; sys.path.insert(0, "%(path)s")
+    from mpi4py import MPI
+    parent = MPI.Comm.Get_parent()
+    parent.Barrier()
+    parent.Disconnect()
+    assert parent == MPI.COMM_NULL
+    parent = MPI.Comm.Get_parent()
+    assert parent == MPI.COMM_NULL
+    """ % dict(python=sys.executable, path=MPI4PYPATH)
+    ))
+    fh.close()
+    os.chmod(script, 0770)
+    return script
 
 class BaseTestSpawn(object):
 
@@ -49,6 +72,22 @@ class BaseTestSpawn(object):
                                     info=None, root=self.ROOT)
         child.Barrier()
         child.Disconnect()
+        self.COMM.Barrier()
+
+    def testNoArgs(self):
+        if os.name != 'posix': return
+        script = None
+        if self.COMM.Get_rank() == self.ROOT:
+            script = childscript()
+        self.COMM.Barrier()
+        script = self.COMM.bcast(script, root=self.ROOT)
+        child = self.COMM.Spawn(script, None, self.MAXPROCS,
+                                info=self.INFO, root=self.ROOT)
+        child.Barrier()
+        child.Disconnect()
+        self.COMM.Barrier()
+        if self.COMM.Get_rank() == self.ROOT:
+            os.remove(script)
         self.COMM.Barrier()
 
     def testCommSpawnMultiple(self):
@@ -105,6 +144,26 @@ class BaseTestSpawn(object):
                 info=None, root=self.ROOT)
         child.Barrier()
         child.Disconnect()
+        self.COMM.Barrier()
+
+    def testNoArgsMultiple(self):
+        if os.name != 'posix': return
+        script = None
+        if self.COMM.Get_rank() == self.ROOT:
+            script = childscript()
+        self.COMM.Barrier()
+        script = self.COMM.bcast(script, root=self.ROOT)
+        count = 2 + (self.COMM.Get_size() == 0)
+        COMMAND = [script] * count
+        MAXPROCS = list(range(1, len(COMMAND)+1))
+        INFO = [self.INFO] * len(COMMAND)
+        child = self.COMM.Spawn_multiple(COMMAND, None, MAXPROCS,
+                                         info=INFO, root=self.ROOT)
+        child.Barrier()
+        child.Disconnect()
+        self.COMM.Barrier()
+        if self.COMM.Get_rank() == self.ROOT:
+            os.remove(script)
         self.COMM.Barrier()
 
 class TestSpawnSelf(BaseTestSpawn, unittest.TestCase):
