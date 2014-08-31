@@ -158,19 +158,6 @@ PyMPIString_AsStringAndSize(PyObject *ob, const char **s, Py_ssize_t *n)
 
 /* ------------------------------------------------------------------------- */
 
-#if PY_VERSION_HEX < 0x02040000
-#ifndef Py_CLEAR
-#define Py_CLEAR(op)                        \
-  do {                                      \
-    if (op) {                               \
-      PyObject *_py_tmp = (PyObject *)(op); \
-      (op) = NULL;                          \
-      Py_DECREF(_py_tmp);                   \
-    }                                       \
-  } while (0)
-#endif
-#endif
-
 #if PY_VERSION_HEX < 0x02060000
 #ifndef _PyBytes_Join
 #define _PyBytes_Join _PyString_Join
