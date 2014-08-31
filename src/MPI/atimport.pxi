@@ -1,5 +1,9 @@
 # -----------------------------------------------------------------------------
 
+cdef extern from "atimport.h": pass
+
+# -----------------------------------------------------------------------------
+
 cdef extern from "Python.h":
     int Py_IsInitialized() nogil
     void PySys_WriteStderr(char*,...)
@@ -11,10 +15,8 @@ cdef extern from "Python.h":
 
 # -----------------------------------------------------------------------------
 
-cdef extern from "atimport.h":
+cdef extern from *:
     enum: USE_MATCHED_RECV "PyMPI_USE_MATCHED_RECV"
-
-# -----------------------------------------------------------------------------
 
 ctypedef struct Options:
     int initialize

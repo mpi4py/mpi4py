@@ -1074,9 +1074,9 @@ cdef object PyMPI_exscan_p2p(object sendobj, object op,
 
 # -----
 
-cdef extern from "pympicommctx.h" nogil:
-    int PyMPI_Commctx_intra(MPI_Comm,MPI_Comm*,int*)
-    int PyMPI_Commctx_inter(MPI_Comm,MPI_Comm*,int*,MPI_Comm*,int*)
+cdef extern from "pympicommctx.h":
+    int PyMPI_Commctx_intra(MPI_Comm,MPI_Comm*,int*) nogil
+    int PyMPI_Commctx_inter(MPI_Comm,MPI_Comm*,int*,MPI_Comm*,int*) nogil
 
 cdef object PyMPI_reduce_intra(object sendobj, object op,
                                int root, MPI_Comm comm):
