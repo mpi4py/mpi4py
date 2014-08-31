@@ -9,10 +9,6 @@
 import sys
 import os
 import re
-try:
-    import setuptools
-except ImportError:
-    pass
 
 # --------------------------------------------------------------------
 # Metadata
