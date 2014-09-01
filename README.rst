@@ -2,7 +2,8 @@
 MPI for Python
 ==============
 
-[![Build Status](https://api.travis-ci.org/mpi4py/mpi4py.png?branch=master)](https://travis-ci.org/mpi4py/mpi4py)
+.. image:: https://travis-ci.org/mpi4py/mpi4py.png?branch=master
+   :target: https://travis-ci.org/mpi4py/mpi4py
 
 Overview
 --------
