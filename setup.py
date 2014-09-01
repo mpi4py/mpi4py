@@ -10,11 +10,12 @@ import sys
 import os
 import re
 
+topdir = os.path.abspath(os.path.dirname(__file__))
+sys.path.insert(0, os.path.join(topdir, 'conf'))
+
 # --------------------------------------------------------------------
 # Metadata
 # --------------------------------------------------------------------
-
-topdir = os.path.abspath(os.path.dirname(__file__))
 
 def name():
     return 'mpi4py'
@@ -202,7 +203,7 @@ def configure_mpi(ext, config_cmd):
     ''') % "||".join(tests)
     ok = config_cmd.try_compile(ConfigTest, headers=headers)
     if not ok:
-        from conf.mpidistutils import ConfigureMPI
+        from mpidistutils import ConfigureMPI
         configure = ConfigureMPI(config_cmd)
         results = configure.run()
         configure.dump(results)
@@ -415,10 +416,10 @@ def executables():
 # Setup
 # --------------------------------------------------------------------
 
-from conf.mpidistutils import setup
-from conf.mpidistutils import Extension  as Ext
-from conf.mpidistutils import Library    as Lib
-from conf.mpidistutils import Executable as Exe
+from mpidistutils import setup
+from mpidistutils import Extension  as Ext
+from mpidistutils import Library    as Lib
+from mpidistutils import Executable as Exe
 
 CYTHON = '0.18'
 
@@ -518,7 +519,7 @@ def run_cython(source, depends=(), includes=(),
     if not chk_cython(VERSION):
         raise DistutilsError("requires Cython>=%s" % VERSION)
     log.info("cythonizing '%s' -> '%s'", source, target)
-    from conf.cythonize import cythonize
+    from cythonize import cythonize
     err = cythonize(source,
                     includes=includes,
                     destdir_c=destdir_c,
@@ -548,7 +549,7 @@ def build_sources(cmd):
                destdir_c=None, destdir_h=destdir_h,
                wdir='src', force=cmd.force, VERSION=CYTHON)
 
-from conf.mpidistutils import build_src
+from mpidistutils import build_src
 build_src.run = build_sources
 
 def run_testsuite(cmd):
@@ -569,7 +570,7 @@ def run_testsuite(cmd):
     if err:
         raise DistutilsError("test")
 
-from conf.mpidistutils import test
+from mpidistutils import test
 test.run = run_testsuite
 
 def main():

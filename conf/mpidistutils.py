@@ -149,10 +149,7 @@ def customize_compiler(compiler, lang=None,
 
 # -----------------------------------------------------------------------------
 
-try:
-    from mpiconfig import Config
-except ImportError:
-    from conf.mpiconfig import Config
+from mpiconfig import Config
 
 def configuration(command_obj, verbose=True):
     config = Config()
@@ -207,13 +204,10 @@ def configure_compiler(compiler, config, lang=None):
 try:
     from mpiscanner import Scanner
 except ImportError:
-    try:
-        from conf.mpiscanner import Scanner
-    except ImportError:
-        class Scanner(object):
-            def parse_file(self, *args):
-                raise NotImplementedError(
-                    "You forgot to grab 'mpiscanner.py'")
+    class Scanner(object):
+        def parse_file(self, *args):
+            raise NotImplementedError(
+                "You forgot to grab 'mpiscanner.py'")
 
 class ConfigureMPI(object):
 

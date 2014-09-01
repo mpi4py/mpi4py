@@ -5,12 +5,7 @@
 
 from textwrap import dedent
 from warnings import warn
-
-try:
-    import mpiregexes as Re
-except ImportError:
-    from conf import mpiregexes as Re
-
+import mpiregexes as Re
 
 class Node(object):
 

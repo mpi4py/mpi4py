@@ -1,10 +1,8 @@
-import sys, os, platform, re
+import sys, os, platform
 
-from distutils import sysconfig
-from distutils.util  import convert_path
 from distutils.util  import split_quoted
 from distutils.spawn import find_executable
-from distutils import log
+from distutils import log as dulog
 
 try:
     from collections import OrderedDict
@@ -21,7 +19,7 @@ except ImportError:
 class Config(object):
 
     def __init__(self, logger=None):
-        self.log = logger or log
+        self.log = logger or dulog
         self.section  = None
         self.filename = None
         self.compiler_info = OrderedDict((
@@ -369,7 +367,7 @@ class Config(object):
         elif hasattr(filename, 'write'):
             parser.write(filename)
         elif isinstance(filename, str):
-            f = open(filename, 'wt')
+            f = open(filename, 'w')
             try:
                 parser.write(f)
             finally:
@@ -378,7 +376,6 @@ class Config(object):
 
 
 if __name__ == '__main__':
-
     import optparse
     parser = optparse.OptionParser()
     parser.add_option("--mpi",     type="string")
@@ -389,9 +386,9 @@ if __name__ == '__main__':
     parser.add_option("--mpif90",  type="string")
     parser.add_option("--mpif08",  type="string")
     parser.add_option("--mpild",   type="string")
-    (options, args) = parser.parse_args()
+    (opts, args) = parser.parse_args()
 
-    logger = log.Log(log.INFO)
-    conf = Config(logger)
-    conf.setup(options)
-    conf.dump()
+    log = dulog.Log(dulog.INFO)
+    cfg = Config(log)
+    cfg.setup(opts)
+    cfg.dump()
