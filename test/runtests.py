@@ -77,9 +77,6 @@ def setup_unittest(options):
     except ImportError:
         from unittest import _WritelnDecorator
     #
-    if sys.version[:3] < '2.4':
-        TestSuite.__iter__ = lambda self: iter(self._tests)
-    #
     writeln_orig = _WritelnDecorator.writeln
     def writeln(self, message=''):
         try: self.stream.flush()
