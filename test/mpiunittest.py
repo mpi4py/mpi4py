@@ -36,10 +36,6 @@ class TestCase(unittest.TestCase):
 
     failUnlessRaisesMPI = assertRaisesMPI
 
-    if sys.version_info < (2,4):
-        assertTrue  = unittest.TestCase.failUnless
-        assertFalse = unittest.TestCase.failIf
-
 ErrClsMap = None
 def ErrClsName(ierr):
     global ErrClsMap
