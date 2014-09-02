@@ -422,7 +422,9 @@ if name == 'Open MPI':
     if version < (1,4,0):
         if MPI.Query_thread() > MPI.THREAD_SINGLE:
             del TestCCOVecWorldDup
-
+if name == 'Microsoft MPI':
+    del TestCCOVecInplaceSelf
+    del TestCCOVecInplaceWorld
 
 if __name__ == '__main__':
     unittest.main()

@@ -48,7 +48,7 @@ set PYPATHDIR=%INSTALLDIR%\lib\python
 
 set PATH_ORIG=%PATH%
 set PATH=%MPIDIR%\bin;%PATH%
-%MPIEXEC% -n 2 %PYTHON% test\runtests.py --path=%PYPATHDIR%
+%MPIEXEC% -n 2 %PYTHON% test\runtests.py -q -f --path=%PYPATHDIR%
 set PATH=%PATH_ORIG%
 
 rmdir /S /Q %INSTALLDIR% > NUL

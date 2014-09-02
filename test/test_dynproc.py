@@ -175,6 +175,8 @@ if name == 'MPICH' or name == 'MPICH2':
         del TestDPM.testNamePublishing
 elif name == 'Open MPI':
     del TestDPM
+elif name == 'Microsoft MPI':
+    del TestDPM
 elif name == 'Platform MPI':
     del TestDPM.testNamePublishing
 else:
