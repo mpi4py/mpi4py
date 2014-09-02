@@ -27,7 +27,7 @@ def childscript():
     """ % dict(python=sys.executable, path=MPI4PYPATH)
     ))
     fh.close()
-    os.chmod(script, 0770)
+    os.chmod(script, int("770", 8))
     return script
 
 class BaseTestSpawn(object):
