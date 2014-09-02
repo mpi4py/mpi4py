@@ -1,9 +1,9 @@
 @echo off
 setlocal ENABLEEXTENSIONS
 
-set TEST_PY=25,26,27,30,31,32
+set TEST_PY=25,26,27,30,31,32,33,34,35
 set TEST_CC=msvc,mingw32
-set TEST_MPI=mpich2,openmpi,deinompi,msmpi
+set TEST_MPI=msmpi
 
 for %%A in (%TEST_PY%)  do (
 for %%B in (%TEST_CC%)  do (
@@ -26,10 +26,10 @@ set MINGWDIR=C:\MinGW
 set GCC=%MINGWDIR%\bin\gcc.exe
 
 set MPIDIR==%ProgramFiles%\MPI
+if %MPICONF%==msmpi    set MPIDIR=%ProgramFiles%\Microsoft MPI
 if %MPICONF%==mpich2   set MPIDIR=%ProgramFiles%\MPICH2
 if %MPICONF%==openmpi  set MPIDIR=%ProgramFiles%\OpenMPI_v1.6-win32
 if %MPICONF%==deinompi set MPIDIR=%ProgramFiles%\DeinoMPI
-if %MPICONF%==msmpi    set MPIDIR=%ProgramFiles%\Microsoft HPC Pack 2008 R2
 set MPIEXEC="%MPIDIR%\bin\mpiexec.exe"
 
 echo Py: %PYVERSION% - CC: %COMPILER% - MPI: %MPICONF%

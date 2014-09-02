@@ -9,9 +9,9 @@ set PATH=%MinGW%\bin;%PATH%
 set GENDEF=gendef.exe
 set DLLTOOL=dlltool.exe
 
-rem HPC Pack 2012 MS-MPI Service Pack 1
-rem http://www.microsoft.com/en-us/download/details.aspx?id=39961
-set MPIDIR="%ProgramFiles%\Microsoft HPC Pack 2012"
+rem HPC Pack 2012 R2 MS-MPI Redistributable Package
+rem http://www.microsoft.com/en-us/download/details.aspx?id=41634
+set MPIDIR="%ProgramFiles%\Microsoft MPI"
 set LIBDIR=%MPIDIR%\lib\%ARCH%
 set DLLDIR=%WinDir%\System32
 set LIBNAME=msmpi

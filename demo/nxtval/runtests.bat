@@ -1,9 +1,9 @@
 @echo off
 setlocal ENABLEEXTENSIONS
 
-set MPI=Microsoft HPC Pack 2008 SDK
 set MPI=DeinoMPI
 set MPI=MPICH2
+set MPI=Microsoft MPI
 set PATH="%ProgramFiles%\%MPI%\bin";%PATH%
 
 set MPIEXEC=mpiexec
