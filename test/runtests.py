@@ -180,29 +180,39 @@ def load_tests(options, args):
             testsuite.addTests(cases)
     return testsuite
 
-def run_tests(options, testsuite):
-    runner = unittest.TextTestRunner(verbosity=options.verbose)
-    runner.failfast = options.failfast
+def run_tests(options, testsuite, runner=None):
+    if runner is None:
+        runner = unittest.TextTestRunner(verbosity=options.verbose)
+        runner.failfast = options.failfast
     result = runner.run(testsuite)
     return result.wasSuccessful()
 
-def run_tests_leaks(options, testsuite):
+def test_refleaks(options, args):
     from sys import gettotalrefcount
     from gc import collect
+    testsuite = load_tests(options, args)
+    testsuite._cleanup =  False
+    for case in testsuite:
+        case._cleanup = False
+    class EmptyIO(object):
+        def write(self, *args):
+            pass
+    runner = unittest.TextTestRunner(stream=EmptyIO(), verbosity=0)
     rank, name = getprocessorinfo()
     r1 = r2 = 0
     repeats = options.repeats
     while repeats:
-        repeats -= 1
         collect()
         r1 = gettotalrefcount()
-        run_tests(options, testsuite)
+        run_tests(options, testsuite, runner)
         collect()
         r2 = gettotalrefcount()
         leaks = r2-r1
-        if leaks:
+        if leaks and repeats < options.repeats:
             writeln('[%d@%s] refleaks:  (%d - %d) --> %d'
                     % (rank, name, r2, r1, leaks))
+        repeats -= 1
+
 def abort(code=1):
     from mpi4py import MPI
     MPI.COMM_WORLD.Abort(code)
@@ -222,7 +232,7 @@ def main(args=None):
     success = run_tests(options, testsuite)
     if not success and options.failfast: abort()
     if success and hasattr(sys, 'gettotalrefcount'):
-        run_tests_leaks(options, testsuite)
+        test_refleaks(options, args)
     shutdown(success)
     return not success
 
