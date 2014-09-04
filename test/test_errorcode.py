@@ -91,16 +91,18 @@ class TestErrorCode(unittest.TestCase):
 
 name, version = MPI.get_vendor()
 if name == 'Open MPI':
-    if version < (1,6,0):
+    if (1,7,0) <= version < (1,8,0):
         del TestErrorCode.testAddErrorClass
-        del TestErrorCode.testAddErrorClassCodeString
-    elif version <= (1,8,1) and MPI.VERSION >= 3:
+    elif version < (1,8,2) and MPI.VERSION >= 3:
         del TestErrorCode.testAddErrorClass
         for errcls in [MPI.ERR_RMA_RANGE,
                        MPI.ERR_RMA_ATTACH,
                        MPI.ERR_RMA_FLAVOR,
                        MPI.ERR_RMA_SHARED]:
             TestErrorCode.errorclasses.remove(errcls)
+    elif version < (1,6,0):
+        del TestErrorCode.testAddErrorClass
+        del TestErrorCode.testAddErrorClassCodeString
 
 
 if __name__ == '__main__':

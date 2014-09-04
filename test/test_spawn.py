@@ -184,9 +184,7 @@ class TestSpawnWorldMany(BaseTestSpawn, unittest.TestCase):
 SKIP_TEST = False
 name, version = MPI.get_vendor()
 if name == 'Open MPI':
-    if version < (1,5,0):
-        SKIP_TEST = True
-    elif version < (1,4,0):
+    if version < (1,8,0):
         SKIP_TEST = True
     if 'win' in sys.platform:
         SKIP_TEST = True

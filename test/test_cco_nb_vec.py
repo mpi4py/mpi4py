@@ -324,6 +324,12 @@ class TestCCOVecWorldDup(BaseTestCCOVec, unittest.TestCase):
     def tearDown(self):
         self.COMM.Free()
 
+
+name, version = MPI.get_vendor()
+if name == 'Open MPI':
+    if version < (1,8,1):
+        del BaseTestCCOVec.testAlltoallw
+
 try:
     MPI.COMM_SELF.Ibarrier().Wait()
 except NotImplementedError:
