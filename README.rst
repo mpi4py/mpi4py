@@ -16,8 +16,8 @@ exposes an API which grounds on the standard MPI-2 C++ bindings.
 Dependencies
 ------------
 
-* `Python <http://www.python.org/>`_ 2.4 to 2.7 or 3.0 to 3.4, or a
-  recent `PyPy <http://pypy.org/>`_ release.
+* `Python <http://www.python.org/>`_ 2.6, 2.7, 3.2 or above,
+  or `PyPy <http://pypy.org/>`_ 2.0 or above.
 
 * A functional MPI 1.x/2.x/3.x implementation like `MPICH
   <http://www.mpich.org/>`_ or `Open MPI <http://www.open-mpi.org/>`_

@@ -2,11 +2,8 @@ from mpi4py import MPI
 import mpiunittest as unittest
 import arrayimpl
 
-try:
-    _reduce = reduce
-except NameError:
-    from functools import reduce as _reduce
-prod = lambda sequence,start=1: _reduce(lambda x, y: x*y, sequence, start)
+from functools import reduce
+prod = lambda sequence,start=1: reduce(lambda x, y: x*y, sequence, start)
 
 def maxvalue(a):
     try:

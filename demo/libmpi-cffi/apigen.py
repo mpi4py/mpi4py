@@ -20,14 +20,11 @@ scanner.dump_header_h(libmpi_h)
 #print libmpi_h.read()
 
 libmpi_c = p.join(wdir, 'libmpi.c')
-f = open(libmpi_c, 'w')
-f.write(
-"""\
+with open(libmpi_c, 'w') as f:
+    f.write("""\
 #include <mpi.h>
 #include "%(srcdir)s/config.h"
 #include "%(srcdir)s/missing.h"
 #include "%(srcdir)s/fallback.h"
 #include "%(srcdir)s/compat.h"
-""" % vars()
-)
-f.close()
+""" % vars())

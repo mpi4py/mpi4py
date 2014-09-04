@@ -1,12 +1,9 @@
 from mpi4py import MPI
 import mpiunittest as unittest
 
-try:
-    _reduce = reduce
-except NameError:
-    from functools import reduce as _reduce
-cumsum  = lambda seq: _reduce(lambda x, y: x+y, seq, 0)
-cumprod = lambda seq: _reduce(lambda x, y: x*y, seq, 1)
+from functools import reduce
+cumsum  = lambda seq: reduce(lambda x, y: x+y, seq, 0)
+cumprod = lambda seq: reduce(lambda x, y: x*y, seq, 1)
 
 _basic = [None,
           True, False,

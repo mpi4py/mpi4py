@@ -15,7 +15,7 @@
 
 %init %{
 if (import_mpi4py() < 0)
-#if PY_VERSION_HEX >= 0x03000000
+#if PY_MAJOR_VERSION >= 3
   return NULL;
 #else
   return;

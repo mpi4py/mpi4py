@@ -132,9 +132,6 @@ static int MPIAPI PyMPI_AtExitMPI(MPI_Comm comm, int k, void *v, void *xs)
     #define PyMPI_USE_MATCHED_RECV 0
   #endif
 #endif
-#if !defined(PyMPI_USE_MATCHED_RECV)
-  #define PyMPI_USE_MATCHED_RECV 0
-#endif
 
 /* ------------------------------------------------------------------------- */
 

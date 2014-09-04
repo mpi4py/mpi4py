@@ -55,13 +55,13 @@ installed as :file:`{prefix}/bin/python{X}.{X}-mpi` (or
 :envvar:`PATH`, you should be able to enter your MPI-enabled Python
 interactively, for example::
 
-    $ python2.6-mpi
-    Python 2.6 (r26:66714, Jun  8 2009, 16:07:26)
-    [GCC 4.4.0 20090506 (Red Hat 4.4.0-4)] on linux2
+    $ python2.7-mpi
+    Python 2.7.5 (default, Jun 25 2014, 10:19:55)
+    [GCC 4.8.2 20131212 (Red Hat 4.8.2-7)] on linux2
     Type "help", "copyright", "credits" or "license" for more information.
     >>> import sys
     >>> sys.executable
-    '/usr/bin/python2.6-mpi'
+    '/usr/bin/python2.7-mpi'
     >>>
 
 

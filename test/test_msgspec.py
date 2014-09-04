@@ -156,11 +156,7 @@ class TestMessageSimple(unittest.TestCase):
 
     def testMessageBytearray(self):
         if hasattr(sys, 'pypy_version_info'): return
-        try:
-            bytearray
-        except NameError:
-            return
-        sbuf = bytearray("abc".encode('ascii'))
+        sbuf = bytearray(b"abc")
         rbuf = bytearray(3)
         Sendrecv([sbuf, "c"], [rbuf, MPI.CHAR])
         self.assertEqual(sbuf, rbuf)
@@ -335,11 +331,7 @@ class TestMessageVector(unittest.TestCase):
 
     def testMessageBytearray(self):
         if hasattr(sys, 'pypy_version_info'): return
-        try:
-            bytearray
-        except NameError:
-            return
-        sbuf = bytearray("abc".encode('ascii'))
+        sbuf = bytearray(b"abc")
         rbuf = bytearray(3)
         Alltoallv([sbuf, "c"], [rbuf, MPI.CHAR])
         self.assertEqual(sbuf, rbuf)
@@ -414,11 +406,7 @@ class TestMessageVectorW(unittest.TestCase):
 
     def testMessageBytearray(self):
         if hasattr(sys, 'pypy_version_info'): return
-        try:
-            bytearray
-        except NameError:
-            return
-        sbuf = bytearray("abc".encode('ascii'))
+        sbuf = bytearray(b"abc")
         rbuf = bytearray(3)
         smsg = [sbuf, [3], [0], [MPI.CHAR]]
         rmsg = [rbuf, ([3], [0]), [MPI.CHAR]]
@@ -486,12 +474,8 @@ class TestMessageRMA(unittest.TestCase):
 
     def testMessageBytearray(self):
         if hasattr(sys, 'pypy_version_info'): return
-        try:
-            bytearray
-        except NameError:
-            return
         for target in (None, 0, [0, 3, MPI.BYTE]):
-            sbuf = bytearray("abc".encode('ascii'))
+            sbuf = bytearray(b"abc")
             rbuf = bytearray(3)
             PutGet(sbuf, rbuf, target)
             self.assertEqual(sbuf, rbuf)

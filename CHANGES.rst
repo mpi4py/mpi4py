@@ -34,6 +34,7 @@ Release 2.0 [2014-XX-XX]
 
 * Backward-incompatible changes:
 
+  + Python 2.4, 2.5, 3.0 and 3.1 are no longer supported.
   + Change signature of all send methods,
     ``dest`` is a required argument.
   + Change signature of all receive and probe methods,

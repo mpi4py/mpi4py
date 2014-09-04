@@ -13,20 +13,18 @@ def childscript():
     from textwrap import dedent
     fd, script = mkstemp(suffix='.py', prefix="mpi4py-")
     os.close(fd)
-    fh = open(script, "wt")
-    fh.write(dedent("""\
-    #!%(python)s
-    import sys; sys.path.insert(0, "%(path)s")
-    from mpi4py import MPI
-    parent = MPI.Comm.Get_parent()
-    parent.Barrier()
-    parent.Disconnect()
-    assert parent == MPI.COMM_NULL
-    parent = MPI.Comm.Get_parent()
-    assert parent == MPI.COMM_NULL
-    """ % dict(python=sys.executable, path=MPI4PYPATH)
-    ))
-    fh.close()
+    with open(script, "w") as f:
+        f.write(dedent("""\
+        #!%(python)s
+        import sys; sys.path.insert(0, "%(path)s")
+        from mpi4py import MPI
+        parent = MPI.Comm.Get_parent()
+        parent.Barrier()
+        parent.Disconnect()
+        assert parent == MPI.COMM_NULL
+        parent = MPI.Comm.Get_parent()
+        assert parent == MPI.COMM_NULL
+        """ % dict(python=sys.executable, path=MPI4PYPATH)))
     os.chmod(script, int("770", 8))
     return script
 
