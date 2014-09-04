@@ -5,17 +5,14 @@ import arrayimpl
 def mkzeros(n):
     import sys
     if not hasattr(sys, 'pypy_version_info'):
-        try:
-            return bytearray([0]) * n
-        except NameError:
-            return str('\0') * n
-    return str('\0') * n
+        return bytearray(n)
+    return b'\0' * n
 
 def memzero(m):
     n = len(m)
     if n == 0: return
     try:
-        zero = '\0'.encode('ascii')
+        zero = b'\0'
         m[0] = zero
     except TypeError:
         zero = 0

@@ -18,7 +18,7 @@ def memzero(m):
     n = len(m)
     if n == 0: return
     try:
-        zero = '\0'.encode('ascii')
+        zero = b'\0'
         m[0] = zero
     except TypeError:
         zero = 0

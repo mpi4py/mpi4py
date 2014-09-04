@@ -7,15 +7,6 @@ Support for building mpi4py with distutils.
 
 # -----------------------------------------------------------------------------
 
-import sys
-if sys.version[:3] == '3.0':
-    from distutils import version
-    version.cmp = lambda a, b : (a > b) - (a < b)
-    del version
-del sys
-
-# -----------------------------------------------------------------------------
-
 import sys, os, platform, copy
 from distutils import sysconfig
 from distutils.util import convert_path
@@ -239,9 +230,8 @@ class ConfigureMPI(object):
 
     def run(self):
         results = []
-        cfgtest_h = open('_configtest.h', 'w')
-        cfgtest_h.write(self.CONFIGTEST_H)
-        cfgtest_h.close()
+        with open('_configtest.h', 'w') as f:
+            f.write(self.CONFIGTEST_H)
         for node in self.scanner:
             name = node.name
             testcode = node.config()
@@ -250,9 +240,8 @@ class ConfigureMPI(object):
             ok = self.run_test(testcode)
             if not ok:
                 log.info("**** failed check for '%s'" % name)
-                cfgtest_h = open('_configtest.h', 'a')
-                cfgtest_h.write(confcode)
-                cfgtest_h.close()
+                with open('_configtest.h', 'a') as f:
+                    f.write(confcode)
             results.append((name, ok))
         try: os.remove('_configtest.h')
         except OSError: pass
@@ -1069,13 +1058,6 @@ class build_exe(build_ext):
         self.set_undefined_options('build',
                                    ('build_base','build_base'),
                                    ('build_lib', 'build_exe'))
-        #from distutils.util import get_platform
-        #plat_specifier = ".%s-%s" % (get_platform(), sys.version[0:3])
-        #if hasattr(sys, 'gettotalrefcount') and sys.version[0:3] > '2.5':
-        #    plat_specifier += '-pydebug'
-        #if self.build_exe is None:
-        #    self.build_exe = os.path.join(self.build_base,
-        #                                  'exe' + plat_specifier)
         self.executables = self.distribution.executables
         # XXX This is a hack
         self.extensions  = self.distribution.executables

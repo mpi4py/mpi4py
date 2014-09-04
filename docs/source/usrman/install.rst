@@ -15,8 +15,7 @@ build *MPI for Python*:
      If you want to build some MPI implementation from sources,
      check the instructions at :ref:`building-mpi` in the appendix.
 
-* A Python 2.4 to 2.7 or 3.0 to 3.4 distribution, with Python
-  library preferably built with shared/dynamic libraries.
+* Python 2.6, 2.7, 3.2 or above.
 
   .. note::
 
@@ -156,26 +155,15 @@ The previous steps will install the :mod:`mpi4py` package at standard
 location :file:`{prefix}/lib/python{X}.{X}/site-packages`.
 
 If you do not have root privileges or you want to install *MPI for
-Python* for your private use, you have two options depending on the
-target Python version.
+Python* for your private use, just do::
 
-* For Python 2.6 and up::
-
-    $ python setup.py install --user
-
-* For Python 2.5 and below (assuming your home directory is available
-  through the :envvar:`HOME` environment variable)::
-
-    $ python setup.py install --home=$HOME
-
-  Finally, add :file:`$HOME/lib/python` or :file:`$HOME/lib64/python`
-  to your :envvar:`PYTHONPATH` environment variable.
+  $ python setup.py install --user
 
 
 Testing
 -------
 
-To quickly test the installation (Python 2.5 and up)::
+To quickly test the installation (Python 2.7 and up)::
 
   $ mpiexec -n 5 python -m mpi4py helloworld
   Hello, World! I am process 0 of 5 on localhost.

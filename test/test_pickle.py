@@ -138,11 +138,7 @@ class TestPickle(unittest.TestCase):
             pickle = self.pickle
             dumps = marshal.dumps
             loads = marshal.loads
-            protocols = [0]
-            if sys.version_info[:2] >= (2, 4):
-                protocols.append(1)
-            if sys.version_info[:2] >= (2, 5):
-                protocols.append(2)
+            protocols = [0, 1, 2]
             if sys.version_info[:2] >= (3, 4):
                 protocols.append(3)
                 protocols.append(4)

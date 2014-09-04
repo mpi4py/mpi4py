@@ -234,9 +234,8 @@ class Scanner(object):
         self.nodemap = {}
 
     def parse_file(self, filename):
-        fileobj = open(filename)
-        try: self.parse_lines(fileobj)
-        finally: fileobj.close()
+        with open(filename) as f:
+            self.parse_lines(f)
 
     def parse_lines(self, lines):
         for line in lines:
@@ -265,9 +264,8 @@ class Scanner(object):
 
     def dump_header_h(self, fileobj):
         if isinstance(fileobj, str):
-            fileobj = open(fileobj, 'w')
-            try: self.dump_header_h(fileobj)
-            finally: fileobj.close()
+            with open(fileobj, 'w') as f:
+                self.dump_header_h(f)
             return
         for node in self:
             fileobj.write(node.header())
@@ -284,9 +282,8 @@ class Scanner(object):
     """
     def dump_config_h(self, fileobj, suite):
         if isinstance(fileobj, str):
-            fileobj = open(fileobj, 'w')
-            try: self.dump_config_h(fileobj, suite)
-            finally: fileobj.close()
+            with open(fileobj, 'w') as f:
+                self.dump_config_h(f, suite)
             return
         head  = dedent(self.CONFIG_HEAD)
         macro = dedent(self.CONFIG_MACRO)
@@ -336,9 +333,8 @@ class Scanner(object):
     """
     def dump_missing_h(self, fileobj, suite):
         if isinstance(fileobj, str):
-            fileobj = open(fileobj, 'w')
-            try: self.dump_missing_h(fileobj, suite)
-            finally: fileobj.close()
+            with open(fileobj, 'w') as f:
+                self.dump_missing_h(f, suite)
             return
         head = dedent(self.MISSING_HEAD)
         tail = dedent(self.MISSING_TAIL)

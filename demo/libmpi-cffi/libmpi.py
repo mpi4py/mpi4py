@@ -47,11 +47,8 @@ def _compiler_pop():
 
 def _read(filename):
     srcdir = _os.path.abspath(_os.path.dirname(__file__))
-    f = open(_os.path.join(srcdir, filename))
-    try:
+    with open(_os.path.join(srcdir, filename)) as f:
         return f.read()
-    finally:
-        f.close()
 
 
 _mpicc = _os.getenv('MPICC', "mpicc")

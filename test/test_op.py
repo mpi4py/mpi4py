@@ -10,11 +10,6 @@ try:
 except ImportError:
     array = None
 
-try:
-    bytes
-except NameError:
-    bytes = str
-
 if array:
     try:
         tobytes = array.array.tobytes

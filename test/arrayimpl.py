@@ -20,7 +20,7 @@ if MPI.SIGNED_CHAR == MPI.DATATYPE_NULL:
     del TypeMap['b']
 
 import sys
-if sys.version_info[:2] < (3,3):
+if sys.version_info[:2] < (3, 3):
     del TypeMap['q']
 del sys
 

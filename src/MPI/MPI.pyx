@@ -334,34 +334,3 @@ def _addressof(arg):
     return PyLong_FromVoidPtr(ptr)
 
 # --------------------------------------------------------------------
-
-cdef extern from *:
-    enum: PY_VERSION_HEX
-
-if PYPY and PY_VERSION_HEX < 0x02070300: exec("""
-def _pypy_setup():
-    for klass in (
-        Status,
-        Datatype,
-        Request,
-        Prequest,
-        Grequest,
-        Message,
-        Op,
-        Group,
-        Info,
-        Errhandler,
-        Comm,
-        Win,
-        File,
-        ):
-        for name in klass.__dict__:
-            meth = klass.__dict__[name]
-            if (isinstance(meth, classmethod) or
-                isinstance(meth, staticmethod)):
-                hasattr(klass, name)
-_pypy_setup()
-del _pypy_setup
-""", globals())
-
-# --------------------------------------------------------------------

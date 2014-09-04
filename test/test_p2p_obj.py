@@ -4,10 +4,7 @@ import mpiunittest as unittest
 
 def allocate(n):
     if not hasattr(sys, 'pypy_version_info'):
-        try:
-            return bytearray(n)
-        except NameError:
-            pass
+        return bytearray(n)
     try:
         from array import array
         return array('B', [0]) * n

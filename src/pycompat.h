@@ -3,81 +3,6 @@
 
 /* ------------------------------------------------------------------------- */
 
-#if PY_VERSION_HEX < 0x02060000
-#ifndef _PyBytes_Join
-#define _PyBytes_Join _PyString_Join
-#endif
-#endif
-
-#if PY_VERSION_HEX < 0x02060000
-
-#ifndef PyExc_BufferError
-#define PyExc_BufferError PyExc_TypeError
-#endif/*PyExc_BufferError*/
-
-#ifndef PyBuffer_FillInfo
-static int
-PyBuffer_FillInfo(Py_buffer *view, PyObject *obj,
-                  void *buf, Py_ssize_t len,
-                  int readonly, int flags)
-{
-  if (view == NULL) return 0;
-  if (((flags & PyBUF_WRITABLE) == PyBUF_WRITABLE) &&
-      (readonly == 1)) {
-    PyErr_SetString(PyExc_BufferError,
-                    "Object is not writable.");
-    return -1;
-  }
-
-  view->obj = obj;
-  if (obj)
-    Py_INCREF(obj);
-
-  view->buf = buf;
-  view->len = len;
-  view->itemsize = 1;
-  view->readonly = readonly;
-
-  view->format = NULL;
-  if ((flags & PyBUF_FORMAT) == PyBUF_FORMAT)
-    view->format = "B";
-
-  view->ndim = 1;
-  view->shape = NULL;
-  if ((flags & PyBUF_ND) == PyBUF_ND)
-    view->shape = &(view->len);
-  view->strides = NULL;
-  if ((flags & PyBUF_STRIDES) == PyBUF_STRIDES)
-    view->strides = &(view->itemsize);
-  view->suboffsets = NULL;
-
-  view->internal = NULL;
-  return 0;
-}
-#endif/*PyBuffer_FillInfo*/
-
-#ifndef PyBuffer_Release
-static void
-PyBuffer_Release(Py_buffer *view)
-{
-  PyObject *obj = view->obj;
-  Py_XDECREF(obj);
-  view->obj = NULL;
-}
-#endif/*PyBuffer_Release*/
-
-#ifndef PyObject_CheckBuffer
-#define PyObject_CheckBuffer(ob) (0)
-#endif/*PyObject_CheckBuffer*/
-
-#ifndef PyObject_GetBuffer
-#define PyObject_GetBuffer(ob,view,flags) \
-        (PyErr_SetString(PyExc_NotImplementedError, \
-                        "new buffer interface is not available"), -1)
-#endif/*PyObject_GetBuffer*/
-
-#endif
-
 #if PY_VERSION_HEX < 0x02070000
 static PyObject *
 PyMemoryView_FromBuffer(Py_buffer *view)
@@ -122,32 +47,9 @@ _PyLong_AsByteArray(PyLongObject* v,
 }
 #endif
 
-#if PY_VERSION_HEX < 0x02070300 /* PyPy < 2.0 */
-#define PyCode_GetNumFree(o) PyCode_GetNumFree((PyObject *)(o))
-#endif
-
-#if PY_VERSION_HEX < 0x02070300 /* PyPy < 2.0 */
-static int
-PyBuffer_FillInfo_PyPy(Py_buffer *view, PyObject *obj,
-                       void *buf, Py_ssize_t len,
-                       int readonly, int flags)
-{
-  if (view == NULL) return 0;
-  if ((flags & PyBUF_WRITABLE) && readonly) {
-    PyErr_SetString(PyExc_BufferError, "Object is not writable.");
-    return -1;
-  }
-  if (PyBuffer_FillInfo(view, obj, buf, len, readonly, flags) < 0)
-    return -1;
-  view->readonly = readonly;
-  return 0;
-}
-#define PyBuffer_FillInfo PyBuffer_FillInfo_PyPy
-#endif
-
 #ifndef PyMemoryView_FromBuffer
 static PyObject *
-PyMemoryView_FromBuffer_PyPy(Py_buffer *view)
+PyMemoryView_FromBuffer(Py_buffer *view)
 {
   if (view->obj) {
     if (view->readonly)
@@ -161,7 +63,6 @@ PyMemoryView_FromBuffer_PyPy(Py_buffer *view)
       return PyBuffer_FromReadWriteMemory(view->buf,view->len);
   }
 }
-#define PyMemoryView_FromBuffer PyMemoryView_FromBuffer_PyPy
 #endif
 
 #endif/*PYPY_VERSION*/

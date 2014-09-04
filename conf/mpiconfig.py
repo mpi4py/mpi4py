@@ -367,11 +367,8 @@ class Config(object):
         elif hasattr(filename, 'write'):
             parser.write(filename)
         elif isinstance(filename, str):
-            f = open(filename, 'w')
-            try:
+            with open(filename, 'w') as f:
                 parser.write(f)
-            finally:
-                f.close()
         return parser
 
 

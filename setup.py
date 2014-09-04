@@ -10,6 +10,13 @@ import sys
 import os
 import re
 
+pyver = sys.version_info[:2]
+if pyver < (2, 6) or (3, 0) <= pyver < (3, 2):
+    raise RuntimeError("Python version 2.6, 2.7 or >= 3.2 required")
+if (hasattr(sys, 'pypy_version_info') and
+    sys.pypy_version_info[:2] < (2.0)):
+    raise RuntimeError("PyPy version >= 2.0 required")
+
 topdir = os.path.abspath(os.path.dirname(__file__))
 sys.path.insert(0, os.path.join(topdir, 'conf'))
 
@@ -21,17 +28,13 @@ def name():
     return 'mpi4py'
 
 def version():
-    f = open(os.path.join(topdir, 'src', '__init__.py'))
-    try: data = f.read()
-    finally: f.close()
-    m = re.search(r"__version__\s*=\s*'(.*)'", data)
-    return m.groups()[0]
+    with open(os.path.join(topdir, 'src', '__init__.py')) as f:
+        m = re.search(r"__version__\s*=\s*'(.*)'", f.read())
+        return m.groups()[0]
 
 def description():
-    f = open(os.path.join(topdir, 'DESCRIPTION.rst'))
-    try: data = f.read()
-    finally: f.close()
-    return data
+    with open(os.path.join(topdir, 'DESCRIPTION.rst')) as f:
+        return f.read()
 
 name    = name()
 version = version()
@@ -109,9 +112,8 @@ def run_command(exe, args):
     if not isinstance(args, str):
         args = ' '.join(args)
     try:
-        fd = os.popen(cmd + ' ' + args)
-        output = fd.read(); fd.close()
-        return split_quoted(output)
+        with os.popen(cmd + ' ' + args) as f:
+            return split_quoted(f.read())
     except:
         return []
 
@@ -534,7 +536,7 @@ def build_sources(cmd):
     has_src = os.path.exists(os.path.join(
         topdir, 'src', 'mpi4py.MPI.c'))
     has_vcs = (os.path.isdir(os.path.join(topdir, '.git')) or
-               os.path.isdir(os.path.join(topdir, '.hg' )) or 
+               os.path.isdir(os.path.join(topdir, '.hg' )) or
                os.path.isdir(os.path.join(topdir, '.svn')))
     if (has_src and not has_vcs and not cmd.force): return
     # mpi4py.MPI
