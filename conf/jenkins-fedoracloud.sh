@@ -11,6 +11,14 @@ fi
 MPI=$1
 echo "Running tests with MPI: $MPI"
 # TODO check if this MPI implementation is available
+case "$1" in
+
+    mpich|openmpi)
+        ;;
+    *) echo "MPI $MPI not supported yet"
+        exit 1
+        ;;
+esac
 
 ## define mpi_{un,}load
 source /etc/profile.d/modules.sh
@@ -34,8 +42,20 @@ make build
 coverage run test/runtests.py --no-threads -v
 coverage xml
 
-#mpiexec -np 5 python test/runtests.py --no-threads -v
-#mpiexec -np 8 python test/runtests.py --no-threads -v
+case "$1" in
+    mpich)
+        mpiexec -np 1 python test/runtests.py -v
+        mpiexec -np 2 python test/runtests.py -v
+        mpiexec -np 3 python test/runtests.py -v
+        #mpiexec -np 8 python test/runtests.py -v
+        ;;
+    openmpi)
+        mpiexec -np 1 python test/runtests.py -v --no-threads
+        mpiexec -np 2 python test/runtests.py -v --no-threads
+        mpiexec -np 3 python test/runtests.py -v --no-threads
+        #mpiexec -np 8 python test/runtests.py -v --no-threads
+        ;;
+esac
 
 $_mpi_unload
 
