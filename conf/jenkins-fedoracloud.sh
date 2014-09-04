@@ -51,8 +51,8 @@ case "$1" in
         ;;
     openmpi)
         mpiexec -np 1 python test/runtests.py -v --no-threads
-        mpiexec -np 2 python test/runtests.py -v --no-threads
-        mpiexec -np 3 python test/runtests.py -v --no-threads
+        #mpiexec -np 2 python test/runtests.py -v --no-threads
+        #mpiexec -np 3 python test/runtests.py -v --no-threads
         #mpiexec -np 8 python test/runtests.py -v --no-threads
         ;;
 esac
