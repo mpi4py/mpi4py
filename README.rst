@@ -25,3 +25,12 @@ Dependencies
 
 * To work with the in-development version, you need to install `Cython
   <http://www.cython.org/>`_.
+
+Testsuite
+---------
+
+The testsuite is run periodically on
+
+* `Travis <https://travis-ci.org/mpi4py/mpi4py>`_
+
+* `Fedora Jenkins <http://jenkins.cloud.fedoraproject.org/job/mpi4py/>`_
