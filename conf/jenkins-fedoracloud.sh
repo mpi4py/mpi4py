@@ -31,11 +31,11 @@ $_mpi_load
 make build
 
 # TODO check if default pep8, pylint and coverage reports are 'sane'
-coverage run test/runtests.py
+coverage run test/runtests.py --no-threads -v
 coverage xml
 
-mpiexec -np 5 python test/runtests.py
-mpiexec -np 8 python test/runtests.py
+#mpiexec -np 5 python test/runtests.py --no-threads -v
+#mpiexec -np 8 python test/runtests.py --no-threads -v
 
 $_mpi_unload
 
