@@ -38,7 +38,6 @@ $_mpi_load
 
 make build
 
-# TODO check if default pep8, pylint and coverage reports are 'sane'
 coverage run --source=mpi4py,test test/runtests.py --no-threads
 coverage xml
 
@@ -59,7 +58,7 @@ esac
 
 $_mpi_unload
 
-pep8 demo src | tee pep8.out 
+pep8 demo build/*/mpi4py | tee pep8.out
 pylint build/*/mpi4py | tee pylint.out
 
 deactivate
