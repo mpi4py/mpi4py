@@ -1312,7 +1312,7 @@ class install_exe(cmd_install_lib.install_lib):
 class test(Command):
     description = "run the test suite"
     user_options = [
-        ('args=', None, "options"),
+        ('args=', 'a', "options"),
         ]
 
     def initialize_options(self):
