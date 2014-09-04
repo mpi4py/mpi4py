@@ -171,6 +171,8 @@ else:
     elif name == 'MPICH2':
         if version < (1,5,0):
             del TestRMASelf, TestRMAWorld
+        elif version >= (2,0,0) and MPI.VERSION < 3: # Intel MPI
+            del TestRMASelf, TestRMAWorld
     elif MPI.Get_version() < (3,0):
         del TestRMASelf, TestRMAWorld
 
