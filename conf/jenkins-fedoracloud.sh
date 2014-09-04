@@ -39,7 +39,7 @@ $_mpi_load
 make build
 
 # TODO check if default pep8, pylint and coverage reports are 'sane'
-coverage run test/runtests.py --no-threads -v
+coverage run --source=mpi4py,test test/runtests.py --no-threads
 coverage xml
 
 case "$1" in
