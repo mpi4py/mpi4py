@@ -31,6 +31,6 @@ Testsuite
 
 The testsuite is run periodically on
 
-* `Travis <https://travis-ci.org/mpi4py/mpi4py>`_
+* `Travis CI <https://travis-ci.org/mpi4py/mpi4py>`_
 
 * `Fedora Jenkins <http://jenkins.cloud.fedoraproject.org/job/mpi4py/>`_
