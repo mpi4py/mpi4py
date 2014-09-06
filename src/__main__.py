@@ -3,28 +3,36 @@
 """
 Run some benchmarks and tests
 """
+import sys as _sys
+
 
 def helloworld(comm, args=None, verbose=True):
     """
     Hello, World! using MPI
     """
-    from sys import stdout
     from mpi4py import MPI
     from optparse import OptionParser
     parser = OptionParser(prog="mpi4py helloworld")
-    parser.add_option("-q","--quiet", action="store_false",
+    parser.add_option("-q", "--quiet", action="store_false",
                       dest="verbose", default=verbose)
     (options, args) = parser.parse_args(args)
+
     size = comm.Get_size()
     rank = comm.Get_rank()
     name = MPI.Get_processor_name()
-    message = ("Hello, World! I am process %*d of %d on %s."
-               % (len(str(size-1)), rank, size, name) )
-    _seq_begin(comm)
+    message = ("Hello, World! I am process %*d of %d on %s.\n"
+               % (len(str(size-1)), rank, size, name))
+    comm.Barrier()
+    if rank > 0:
+        comm.Recv([None, 'B'], rank - 1)
     if options.verbose:
-        _println(message, stream=stdout)
-    _seq_end(comm)
+        _sys.stdout.write(message)
+        _sys.stdout.flush()
+    if rank < size - 1:
+        comm.Send([None, 'B'], rank + 1)
+    comm.Barrier()
     return message
+
 
 def ringtest(comm, args=None, verbose=True):
     """
@@ -32,12 +40,11 @@ def ringtest(comm, args=None, verbose=True):
     """
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-branches
-    from sys import stdout
     from array import array
     from mpi4py import MPI
     from optparse import OptionParser
     parser = OptionParser(prog="mpi4py ringtest")
-    parser.add_option("-q","--quiet", action="store_false",
+    parser.add_option("-q", "--quiet", action="store_false",
                       dest="verbose", default=verbose)
     parser.add_option("-n", "--size", type="int", default=1, dest="size",
                       help="message size")
@@ -46,18 +53,22 @@ def ringtest(comm, args=None, verbose=True):
     parser.add_option("-l", "--loop", type="int", default=1, dest="loop",
                       help="number of iterations")
     (options, args) = parser.parse_args(args)
+
     def ring(comm, n=1, loop=1, skip=0):
+        # pylint: disable=invalid-name
+        # pylint: disable=bad-whitespace
+        # pylint: disable=missing-docstring
         iterations = list(range((loop+skip)))
         size = comm.Get_size()
         rank = comm.Get_rank()
-        source  = (rank - 1) % size
+        source = (rank - 1) % size
         dest = (rank + 1) % size
         Sendrecv = comm.Sendrecv
         Send = comm.Send
         Recv = comm.Recv
         Wtime = MPI.Wtime
         sendmsg = array('B', [42])*n
-        recvmsg = array('B', [ 0])*n
+        recvmsg = array('B',  [0])*n
         if size == 1:
             for i in iterations:
                 if i == skip:
@@ -80,49 +91,32 @@ def ringtest(comm, args=None, verbose=True):
                     Send(sendmsg, dest,   0)
         toc = Wtime()
         if comm.rank == 0 and sendmsg != recvmsg:
-            import warnings, traceback
+            import warnings
+            import traceback
             try:
                 warnings.warn("received message does not match!")
             except UserWarning:
                 traceback.print_exc()
                 comm.Abort(2)
         return toc - tic
+
     size = getattr(options, 'size', 1)
     loop = getattr(options, 'loop', 1)
     skip = getattr(options, 'skip', 0)
     comm.Barrier()
     elapsed = ring(comm, size, loop, skip)
     if options.verbose and comm.rank == 0:
-        _println("time for %d loops = %g seconds (%d processes, %d bytes)"
-                 % (loop, elapsed, comm.size, size),
-                 stream=stdout)
+        message = ("time for %d loops = %g seconds (%d processes, %d bytes)\n"
+                   % (loop, elapsed, comm.size, size))
+        _sys.stdout.write(message)
+        _sys.stdout.flush()
     return elapsed
 
-def _println(message, stream):
-    stream.write(message+'\n')
-    stream.flush()
-
-def _seq_begin(comm):
-    comm.Barrier()
-    rank = comm.Get_rank()
-    if rank > 0:
-        comm.Recv([None, 'B'], rank - 1)
-
-def _seq_end(comm):
-    size = comm.Get_size()
-    rank = comm.Get_rank()
-    if rank < size - 1:
-        comm.Send([None, 'B'], rank + 1)
-    comm.Barrier()
-
-_commands = {
-    'helloworld' : helloworld,
-    'ringtest'   : ringtest,
-    }
 
 def main(args=None):
+    "Entry-point for ``python -m mpi4py``"
     from optparse import OptionParser
-    from mpi4py import __name__    as prog
+    from mpi4py import __name__ as prog
     from mpi4py import __version__ as version
     parser = OptionParser(prog=prog, version='%prog ' + version,
                           usage="%prog [options] <command> [args]")
@@ -141,7 +135,7 @@ def main(args=None):
                       help="use VampirTrace for MPI profiling")
     parser.disable_interspersed_args()
     (options, args) = parser.parse_args(args)
-    #
+
     import mpi4py
     mpi4py.rc.threaded = options.threaded
     mpi4py.rc.thread_level = options.thread_level
@@ -149,7 +143,7 @@ def main(args=None):
         mpi4py.profile('mpe', logfile='mpi4py')
     if options.vt:
         mpi4py.profile('vt', logfile='mpi4py')
-    #
+
     from mpi4py import MPI
     comm = MPI.COMM_WORLD
     if not args:
@@ -157,13 +151,18 @@ def main(args=None):
             parser.print_usage()
         parser.exit()
     command = args.pop(0)
-    if command not in _commands:
+    if command not in main.commands:
         if comm.rank == 0:
             parser.error("unknown command '%s'" % command)
         parser.exit(2)
-    command = _commands[command]
+    command = main.commands[command]
     command(comm, args=args)
     parser.exit()
+
+main.commands = {
+    'helloworld': helloworld,
+    'ringtest':   ringtest,
+}
 
 if __name__ == '__main__':
     main()

@@ -24,15 +24,16 @@ provides an object oriented interface which closely follows MPI-2 C++
 bindings.
 """
 
-__version__   = '1.3.1'
-__author__    = 'Lisandro Dalcin'
-__credits__   = 'MPI Forum, MPICH Team, Open MPI Team.'
+__version__ = '1.3.1'
+__author__  = 'Lisandro Dalcin'
+__credits__ = 'MPI Forum, MPICH Team, Open MPI Team'
 
 # --------------------------------------------------------------------
 
 __all__ = ['MPI']
 
 # --------------------------------------------------------------------
+
 
 def get_include():
     """
@@ -52,6 +53,7 @@ def get_include():
 
 # --------------------------------------------------------------------
 
+
 def get_config():
     """
     Return a dictionary with information about MPI.
@@ -69,7 +71,8 @@ def get_config():
 
 # --------------------------------------------------------------------
 
-def rc(**kargs):
+
+def rc(**kargs):  # pylint: disable=invalid-name
     """
     Runtime configuration options.
 
@@ -108,6 +111,7 @@ del modules
 
 # --------------------------------------------------------------------
 
+
 def profile(name='mpe', **kargs):
     """
     Support for the MPI profiling interface.
@@ -123,7 +127,8 @@ def profile(name='mpe', **kargs):
     """
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-branches
-    import sys, os, imp
+    import sys
+    import os
     try:
         from mpi4py.dl import dlopen, RTLD_NOW, RTLD_GLOBAL
         from mpi4py.dl import dlerror
@@ -133,10 +138,12 @@ def profile(name='mpe', **kargs):
             # pylint: disable=import-error
             from DLFCN import RTLD_NOW
         except ImportError:
-            RTLD_NOW = 2
+            RTLD_NOW = 2  # pylint: disable=invalid-name
         dlerror = None
-    #
+
     def lookup_dylib(name, path):
+        # pylint: disable=missing-docstring
+        import imp
         pattern = []
         for suffix, _, kind in imp.get_suffixes():
             if kind == imp.C_EXTENSION:
@@ -149,8 +156,8 @@ def profile(name='mpe', **kargs):
             pattern.append(('lib', '.so'))
         pattern.append(('', ''))
         for pth in path:
-            for (lib, so) in pattern:
-                filename = os.path.join(pth, lib + name + so)
+            for (lib, dso) in pattern:
+                filename = os.path.join(pth, lib + name + dso)
                 if os.path.isfile(filename):
                     return filename
         return None
@@ -170,7 +177,7 @@ def profile(name='mpe', **kargs):
         path = [path]
     else:
         path = list(path)
-    #
+
     prefix = os.path.dirname(__file__)
     path.append(os.path.join(prefix, 'lib-pmpi'))
     filename = lookup_dylib(name, path)
@@ -178,8 +185,8 @@ def profile(name='mpe', **kargs):
         raise ValueError("profiler '%s' not found" % name)
     else:
         filename = os.path.abspath(filename)
-    #
-    handle = dlopen(filename, RTLD_NOW|RTLD_GLOBAL)
+
+    handle = dlopen(filename, RTLD_NOW | RTLD_GLOBAL)
     if handle:
         profile.registry.append((name, (handle, filename)))
     else:
