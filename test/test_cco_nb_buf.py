@@ -548,7 +548,9 @@ name, version = MPI.get_vendor()
 if name == 'Open MPI':
     if version < (1,8,2):
         del BaseTestCCOBuf.testExscan
+        del BaseTestCCOBuf.testReduceScatter
         del BaseTestCCOBufInplace.testReduceScatter
+        del BaseTestCCOBufInplace.testReduceScatterBlock
 try:
     MPI.COMM_SELF.Ibarrier().Wait()
 except NotImplementedError:

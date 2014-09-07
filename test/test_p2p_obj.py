@@ -554,6 +554,7 @@ if name == 'MPICH1':
 if name == 'Open MPI':
     if (1,7,0) <= version < (1,8,0):
         del BaseTestP2PObj.testIRecvAndSend
+        del BaseTestP2PObj.testIRecvAndISend
         del BaseTestP2PObj.testIRecvAndBSend
         del BaseTestP2PObj.testIRecvAndIBSend
         del BaseTestP2PObj.testIRecvAndSSend
