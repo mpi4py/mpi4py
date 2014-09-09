@@ -106,7 +106,7 @@ rc.fast_reduce = True
 rc.recv_mprobe = True
 
 from sys import modules
-modules[__name__+'.rc'] = rc
+modules[__name__ + '.rc'] = rc
 del modules
 
 # --------------------------------------------------------------------

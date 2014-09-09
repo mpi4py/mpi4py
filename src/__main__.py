@@ -21,7 +21,7 @@ def helloworld(comm, args=None, verbose=True):
     rank = comm.Get_rank()
     name = MPI.Get_processor_name()
     message = ("Hello, World! I am process %*d of %d on %s.\n"
-               % (len(str(size-1)), rank, size, name))
+               % (len(str(size - 1)), rank, size, name))
     comm.Barrier()
     if rank > 0:
         comm.Recv([None, 'B'], rank - 1)
@@ -58,7 +58,7 @@ def ringtest(comm, args=None, verbose=True):
         # pylint: disable=invalid-name
         # pylint: disable=bad-whitespace
         # pylint: disable=missing-docstring
-        iterations = list(range((loop+skip)))
+        iterations = list(range((loop + skip)))
         size = comm.Get_size()
         rank = comm.Get_rank()
         source = (rank - 1) % size
@@ -67,20 +67,20 @@ def ringtest(comm, args=None, verbose=True):
         Send = comm.Send
         Recv = comm.Recv
         Wtime = MPI.Wtime
-        sendmsg = array('B', [42])*n
-        recvmsg = array('B',  [0])*n
+        sendmsg = array('B', [+42]) * n
+        recvmsg = array('B', [-42]) * n
         if size == 1:
             for i in iterations:
                 if i == skip:
                     tic = Wtime()
-                Sendrecv(sendmsg, dest,   0,
+                Sendrecv(sendmsg, dest, 0,
                          recvmsg, source, 0)
         else:
             if rank == 0:
                 for i in iterations:
                     if i == skip:
                         tic = Wtime()
-                    Send(sendmsg, dest,   0)
+                    Send(sendmsg, dest, 0)
                     Recv(recvmsg, source, 0)
             else:
                 sendmsg = recvmsg
@@ -88,7 +88,7 @@ def ringtest(comm, args=None, verbose=True):
                     if i == skip:
                         tic = Wtime()
                     Recv(recvmsg, source, 0)
-                    Send(sendmsg, dest,   0)
+                    Send(sendmsg, dest, 0)
         toc = Wtime()
         if comm.rank == 0 and sendmsg != recvmsg:
             import warnings
@@ -161,7 +161,7 @@ def main(args=None):
 
 main.commands = {
     'helloworld': helloworld,
-    'ringtest':   ringtest,
+    'ringtest': ringtest,
 }
 
 if __name__ == '__main__':
