@@ -13,15 +13,20 @@ cdef extern from "Python.h":
 #------------------------------------------------------------------------------
 
 cdef extern from "Python.h":
-    object PyMemoryView_FromBuffer(Py_buffer *)
+    enum: PyBUF_READ
+    enum: PyBUF_WRITE
+    object PyMemoryView_FromMemory(char*,Py_ssize_t,int)
+
+cdef extern from *:
+    void *emptymemory '((void*)"")'
 
 cdef inline object asmemory(object ob, void **base, MPI_Aint *size):
     cdef _p_buffer buf = getbuffer_w(ob, base, size)
     return buf
 
 cdef inline object tomemory(void *base, MPI_Aint size):
-    cdef _p_buffer buf = tobuffer(base, size, 0)
-    return PyMemoryView_FromBuffer(&buf.view)
+    if base == NULL and size == 0: base = emptymemory
+    return PyMemoryView_FromMemory(<char*>base, size, PyBUF_WRITE)
 
 #------------------------------------------------------------------------------
 

@@ -2,6 +2,7 @@
 
 # Python 3 buffer interface (PEP 3118)
 cdef extern from "Python.h":
+    enum: PY3 "(PY_MAJOR_VERSION>=3)"
     ctypedef struct Py_buffer:
         void *obj
         void *buf
@@ -33,8 +34,9 @@ cdef extern from "Python.h":
     int PyObject_CheckReadBuffer(object)
     int PyObject_AsReadBuffer (object, const_void **, Py_ssize_t *) except -1
     int PyObject_AsWriteBuffer(object, void **, Py_ssize_t *) except -1
-    object PyBuffer_FromObject(object, Py_ssize_t, Py_ssize_t)
-    object PyBuffer_FromReadWriteObject(object, Py_ssize_t, Py_ssize_t)
+
+cdef extern from *:
+    void *emptybuffer '((void*)"")'
 
 #------------------------------------------------------------------------------
 
@@ -87,6 +89,7 @@ except -1:
         else:
             readonly = 1
             PyObject_AsReadBuffer(obj, <const_void**>&buf, &size)
+    if buf == NULL and size == 0: buf = emptybuffer
     PyBuffer_FillInfo(view, obj, buf, size, readonly, flags)
     if (flags & PyBUF_FORMAT) == PyBUF_FORMAT: view.format = b"B"
     return 0
@@ -100,7 +103,7 @@ except -1:
     if PYPY: # special-case PyPy runtime
         return PyPy_GetBuffer(obj, view, flags)
     # Python 3 buffer interface (PEP 3118)
-    if PyObject_CheckBuffer(obj):
+    if PY3 or PyObject_CheckBuffer(obj):
         return PyObject_GetBuffer(obj, view, flags)
     # Python 2 buffer interface (legacy)
     if (flags & PyBUF_WRITABLE) == PyBUF_WRITABLE:
@@ -109,6 +112,7 @@ except -1:
     else:
         view.readonly = 1
         PyObject_AsReadBuffer(obj, <const_void**>&view.buf, &view.len)
+    if view.buf == NULL and view.len == 0: view.buf = emptybuffer
     PyBuffer_FillInfo(view, obj, view.buf, view.len, view.readonly, flags)
     if (flags & PyBUF_FORMAT) == PyBUF_FORMAT: view.format = b"B"
     return 0
@@ -118,6 +122,7 @@ except -1:
 @cython.final
 @cython.internal
 cdef class _p_buffer:
+
     cdef Py_buffer view
 
     def __dealloc__(self):
@@ -194,13 +199,6 @@ cdef inline object getformat(_p_buffer buf):
             if view.format != NULL:
                 format = mpistr(view.format)
     return format
-
-cdef inline _p_buffer tobuffer(void *p, Py_ssize_t n, bint ro):
-    cdef _p_buffer buf = newbuffer()
-    cdef Py_buffer *view = &buf.view
-    PyBuffer_FillInfo(view, <object>NULL, p, n, ro,
-                      PyBUF_FORMAT|PyBUF_STRIDES)
-    return buf
 
 #------------------------------------------------------------------------------
 

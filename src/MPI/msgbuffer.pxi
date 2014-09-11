@@ -21,8 +21,11 @@ cdef inline int is_integral(object ob):
     else: return 1
 
 cdef inline int is_buffer(object ob):
-    return (PyObject_CheckBuffer(ob) or
-            PyObject_CheckReadBuffer(ob))
+    if PY_MAJOR_VERSION >= 3:
+        return PyObject_CheckBuffer(ob)
+    else:
+        return (PyObject_CheckBuffer(ob) or
+                PyObject_CheckReadBuffer(ob))
 
 #------------------------------------------------------------------------------
 
