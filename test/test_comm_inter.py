@@ -28,6 +28,8 @@ class BaseTestIntercomm(object):
     def tearDown(self):
         self.INTRACOMM.Free()
         self.INTERCOMM.Free()
+        del self.INTRACOMM
+        del self.INTERCOMM
 
     def testFortran(self):
         intercomm = self.INTERCOMM
@@ -74,6 +76,7 @@ class TestIntercommDup(TestIntercomm):
         super(TestIntercommDup, self).setUp()
     def tearDown(self):
         self.BASECOMM.Free()
+        del self.BASECOMM
         super(TestIntercommDup, self).tearDown()
 
 class TestIntercommDupDup(TestIntercomm):
