@@ -102,13 +102,18 @@ extern wchar_t* _Py_DecodeUTF8_surrogateescape(const char *, Py_ssize_t);
 #endif
 #endif
 
+#if PY_VERSION_HEX < 0x03040000
+#define PyMem_RawMalloc PyMem_Malloc
+#define PyMem_RawFree   PyMem_Free
+#endif
+
 static wchar_t **
 mk_wargs(int argc, char **argv)
 {
   int i; char *saved_locale = NULL;
   wchar_t **args = NULL;
 
-  args = (wchar_t **)PyMem_Malloc((size_t)(argc+1)*sizeof(wchar_t *));
+  args = (wchar_t **)PyMem_RawMalloc((size_t)(argc+1)*sizeof(wchar_t *));
   if (!args) goto oom;
 
   saved_locale = strdup(setlocale(LC_ALL, NULL));
@@ -146,7 +151,7 @@ cp_wargs(int argc, wchar_t **args)
 {
   int i; wchar_t **args_copy = NULL;
   if (!args) return NULL;
-  args_copy = (wchar_t **)PyMem_Malloc((size_t)(argc+1)*sizeof(wchar_t *));
+  args_copy = (wchar_t **)PyMem_RawMalloc((size_t)(argc+1)*sizeof(wchar_t *));
   if (!args_copy) goto oom;
   for (i=0; i<(argc+1); i++) { args_copy[i] = args[i]; }
   return args_copy;
@@ -161,9 +166,9 @@ rm_wargs(wchar_t **args, int deep)
   int i = 0;
   if (args && deep)
     while (args[i])
-      PyMem_Free(args[i++]);
+      PyMem_RawFree(args[i++]);
   if (args)
-    PyMem_Free(args);
+    PyMem_RawFree(args);
 }
 
 #endif /* !(PY_MAJOR_VERSION >= 3) */
