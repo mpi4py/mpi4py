@@ -167,7 +167,7 @@ try:
         cartcomm.Free()
         del cartcomm
     if name == 'Open MPI':
-        if version < (1,8,3):
+        if version < (1,8,4):
             _create_topo_comms = create_topo_comms
             def create_topo_comms(comm):
                 for c in _create_topo_comms(comm):

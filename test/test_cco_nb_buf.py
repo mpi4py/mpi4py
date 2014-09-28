@@ -546,7 +546,11 @@ class TestCCOBufWorldDup(BaseTestCCOBuf, unittest.TestCase):
 
 name, version = MPI.get_vendor()
 if name == 'Open MPI':
-    if version < (1,8,2):
+    if version < (1,8,4):
+        if MPI.COMM_WORLD.Get_size() == 1:
+            del BaseTestCCOBufInplace.testReduceScatter
+            del BaseTestCCOBufInplace.testReduceScatterBlock
+    elif version < (1,8,2):
         del BaseTestCCOBuf.testExscan
         del BaseTestCCOBuf.testReduceScatter
         del BaseTestCCOBufInplace.testReduceScatter

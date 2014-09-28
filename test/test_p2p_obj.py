@@ -122,11 +122,12 @@ class BaseTestP2PObj(object):
         for smess in messages:
             src = dst = rank
             rreq1 = comm.irecv(None, src, 1)
-            rreq2 = comm.irecv(None, src, 1)
-            rreq3 = comm.irecv(None, src, 1)
+            rreq2 = comm.irecv(None, src, 2)
+            rreq3 = comm.irecv(None, src, 3)
             rreqs = [rreq1, rreq2, rreq3]
             for i in range(len(rreqs)):
-                comm.send(smess, dst, 1)
+                self.assertTrue(rreqs[i])
+                comm.send(smess, dst, i+1)
                 index, obj = MPI.Request.waitany(rreqs)
                 self.assertEqual(index, i)
                 self.assertEqual(obj, smess)
@@ -137,8 +138,8 @@ class BaseTestP2PObj(object):
         for smess in messages:
             src = dst = rank
             rreq1 = comm.irecv(None, src, 1)
-            rreq2 = comm.irecv(None, src, 1)
-            rreq3 = comm.irecv(None, src, 1)
+            rreq2 = comm.irecv(None, src, 2)
+            rreq3 = comm.irecv(None, src, 3)
             rreqs = [rreq1, rreq2, rreq3]
             index, flag, obj = MPI.Request.testany(rreqs)
             self.assertEqual(index, MPI.UNDEFINED)
@@ -146,7 +147,7 @@ class BaseTestP2PObj(object):
             self.assertEqual(obj, None)
             for i in range(len(rreqs)):
                 self.assertTrue(rreqs[i])
-                comm.send(smess, dst, 1)
+                comm.send(smess, dst, i+1)
                 index, flag, obj = MPI.Request.testany(rreqs)
                 while not flag:
                     index, flag, obj = MPI.Request.testany(rreqs)
@@ -552,7 +553,14 @@ name, version = MPI.get_vendor()
 if name == 'MPICH1':
     del BaseTestP2PObj.testProbe
 if name == 'Open MPI':
-    if (1,7,0) <= version < (1,8,0):
+    if version < (1,8,4):
+        #del BaseTestP2PObj.testIRecvAndSend
+        del BaseTestP2PObj.testIRecvAndISend
+        del BaseTestP2PObj.testIRecvAndBSend
+        del BaseTestP2PObj.testIRecvAndIBSend
+        del BaseTestP2PObj.testIRecvAndSSend
+        del BaseTestP2PObj.testIRecvAndISSend
+    elif (1,7,0) <= version < (1,8,0):
         del BaseTestP2PObj.testIRecvAndSend
         del BaseTestP2PObj.testIRecvAndISend
         del BaseTestP2PObj.testIRecvAndBSend
