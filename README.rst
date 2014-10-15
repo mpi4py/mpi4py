@@ -2,7 +2,7 @@
 MPI for Python
 ==============
 
-.. image:: https://travis-ci.org/mpi4py/mpi4py.png?branch=master
+.. image::  https://travis-ci.org/mpi4py/mpi4py.svg?branch=master
    :target: https://travis-ci.org/mpi4py/mpi4py
 
 Overview
