@@ -14,7 +14,7 @@ pyver = sys.version_info[:2]
 if pyver < (2, 6) or (3, 0) <= pyver < (3, 2):
     raise RuntimeError("Python version 2.6, 2.7 or >= 3.2 required")
 if (hasattr(sys, 'pypy_version_info') and
-    sys.pypy_version_info[:2] < (2.0)):
+    sys.pypy_version_info[:2] < (2, 0)):
     raise RuntimeError("PyPy version >= 2.0 required")
 
 topdir = os.path.abspath(os.path.dirname(__file__))
