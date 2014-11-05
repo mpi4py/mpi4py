@@ -57,6 +57,8 @@ Release 2.0 [2014-XX-XX]
     The new signatures are
     ``Publish_name(service_name, port_name, info=INFO_NULL)`` and
     ``Unpublish_name(service_name, port_name, info=INFO_NULL)```
+  + ``Win`` instances now cache Python objects exposing memory by
+    keeping references instead of using MPI attribute caching.
   + Change signature of ``Win.Lock()``.
     The new signature is
     ``Win.Lock(rank, lock_type=LOCK_EXCLUSIVE, assertion=0)``

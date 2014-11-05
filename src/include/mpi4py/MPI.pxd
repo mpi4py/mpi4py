@@ -146,6 +146,7 @@ ctypedef public api class Win [
     ]:
     cdef MPI_Win  ob_mpi
     cdef unsigned flags
+    cdef object   ob_mem
 
 ctypedef public api class File [
     type   PyMPIFile_Type,

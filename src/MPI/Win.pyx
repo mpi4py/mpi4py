@@ -34,6 +34,7 @@ cdef class Win:
         self.ob_mpi = MPI_WIN_NULL
         if win is None: return
         self.ob_mpi =  win.ob_mpi
+        self.ob_mem =  win.ob_mem
 
     def __dealloc__(self):
         if not (self.flags & PyMPI_OWNED): return
@@ -75,7 +76,7 @@ cdef class Win:
                     cinfo, comm.ob_mpi, &win.ob_mpi) )
             CHKERR( MPI_Win_set_errhandler(
                     win.ob_mpi, MPI_ERRORS_RETURN) )
-        CHKERR( PyMPI_Win_set_memory(win.ob_mpi, memory) )
+        win.ob_mem = memory
         return win
 
     @classmethod
@@ -142,7 +143,7 @@ cdef class Win:
                     cinfo, comm.ob_mpi, &win.ob_mpi) )
             CHKERR( MPI_Win_set_errhandler(
                     win.ob_mpi, MPI_ERRORS_RETURN) )
-        CHKERR( PyMPI_Win_set_memory(win.ob_mpi, {}) )
+        win.ob_mem = {}
         return win
 
     def Attach(self, memory):
@@ -153,8 +154,7 @@ cdef class Win:
         cdef MPI_Aint size = 0
         memory = getbuffer_w(memory, &base, &size)
         CHKERR( MPI_Win_attach(self.ob_mpi, base, size) )
-        cdef object mem = PyMPI_Win_get_memory(self.ob_mpi)
-        try: mem[<MPI_Aint>base] = memory
+        try: (<dict>self.ob_mem)[<MPI_Aint>base] = memory
         except: pass
 
     def Detach(self, memory):
@@ -164,8 +164,7 @@ cdef class Win:
         cdef void *base = NULL
         memory = getbuffer_w(memory, &base, NULL)
         CHKERR( MPI_Win_detach(self.ob_mpi, base) )
-        cdef object mem = PyMPI_Win_get_memory(self.ob_mpi)
-        try: del mem[<MPI_Aint>base]
+        try: del (<dict>self.ob_mem)[<MPI_Aint>base]
         except: pass
 
     def Free(self):
@@ -173,6 +172,7 @@ cdef class Win:
         Free a window
         """
         with nogil: CHKERR( MPI_Win_free(&self.ob_mpi) )
+        self.ob_mem = None
 
     # Window Info
     # -----------
