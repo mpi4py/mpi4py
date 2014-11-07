@@ -71,15 +71,15 @@ cdef class _p_greq:
     cdef int query(self, MPI_Status *status) except -1:
         status.MPI_SOURCE = MPI_ANY_SOURCE
         status.MPI_TAG = MPI_ANY_TAG
-        MPI_Status_set_elements(status, MPI_BYTE, 0)
-        MPI_Status_set_cancelled(status, 0)
+        <void>MPI_Status_set_elements(status, MPI_BYTE, 0)
+        <void>MPI_Status_set_cancelled(status, 0)
         cdef Status sts = <Status>Status.__new__(Status)
         if self.query_fn is not None:
             sts.ob_mpi = status[0]
             self.query_fn(sts, *self.args, **self.kargs)
             status[0] = sts.ob_mpi
             if self.cancel_fn is None:
-                MPI_Status_set_cancelled(status, 0)
+                <void>MPI_Status_set_cancelled(status, 0)
         return MPI_SUCCESS
 
     cdef int free(self) except -1:
