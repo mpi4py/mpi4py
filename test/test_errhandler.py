@@ -34,14 +34,19 @@ class TestErrhandler(unittest.TestCase):
             self.assertEqual(e, MPI.ERRHANDLER_NULL)
 
     def testCommCallErrhandler(self):
-        MPI.COMM_SELF.Call_errhandler(MPI.SUCCESS)
+        errhdl = MPI.COMM_SELF.Get_errhandler()
+        comm = MPI.COMM_SELF.Dup()
+        comm.Set_errhandler(MPI.ERRORS_RETURN)
+        comm.Call_errhandler(MPI.ERR_OTHER)
+        comm.Free()
 
     def testWinCallErrhandler(self):
         try:
             win = MPI.Win.Create(MPI.BOTTOM, 1, MPI.INFO_NULL, MPI.COMM_SELF)
         except NotImplementedError:
             return
-        win.Call_errhandler(MPI.SUCCESS)
+        win.Set_errhandler(MPI.ERRORS_RETURN)
+        win.Call_errhandler(MPI.ERR_OTHER)
         win.Free()
 
     def testFileCallErrhandler(self):
@@ -54,6 +59,8 @@ class TestErrhandler(unittest.TestCase):
             file = MPI.File.Open(MPI.COMM_SELF, filename, amode, MPI.INFO_NULL)
         except NotImplementedError:
             return
+        file.Set_errhandler(MPI.ERRORS_RETURN)
+        #file.Call_errhandler(MPI.ERR_OTHER)
         file.Call_errhandler(MPI.SUCCESS)
         file.Close()
 

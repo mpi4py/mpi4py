@@ -3,7 +3,20 @@ import mpiunittest as unittest
 
 # --------------------------------------------------------------------
 
-class TestExcDatatypeNull(unittest.TestCase):
+class BaseTestCase(unittest.TestCase):
+
+    def setUp(self):
+        self.world_errhdl = MPI.COMM_WORLD.Get_errhandler()
+        MPI.COMM_WORLD.Set_errhandler(MPI.ERRORS_RETURN)
+
+    def tearDown(self):
+        MPI.COMM_WORLD.Set_errhandler(self.world_errhdl)
+        self.world_errhdl.Free()
+
+
+# --------------------------------------------------------------------
+
+class TestExcDatatypeNull(BaseTestCase):
 
     def testDup(self):
         self.assertRaisesMPI(MPI.ERR_TYPE, MPI.DATATYPE_NULL.Dup)
@@ -14,7 +27,7 @@ class TestExcDatatypeNull(unittest.TestCase):
     def testFree(self):
         self.assertRaisesMPI(MPI.ERR_TYPE, MPI.DATATYPE_NULL.Free)
 
-class TestExcDatatype(unittest.TestCase):
+class TestExcDatatype(BaseTestCase):
 
     DATATYPES = (MPI.BYTE, MPI.PACKED,
                  MPI.CHAR, MPI.WCHAR,
@@ -54,7 +67,7 @@ if name == 'Open MPI':
 
 # --------------------------------------------------------------------
 
-class TestExcStatus(unittest.TestCase):
+class TestExcStatus(BaseTestCase):
 
     def testGetCount(self):
         status = MPI.Status()
@@ -73,7 +86,7 @@ class TestExcStatus(unittest.TestCase):
 
 # --------------------------------------------------------------------
 
-class TestExcRequestNull(unittest.TestCase):
+class TestExcRequestNull(BaseTestCase):
 
     def testFree(self):
         self.assertRaisesMPI(MPI.ERR_REQUEST, MPI.REQUEST_NULL.Free)
@@ -83,12 +96,12 @@ class TestExcRequestNull(unittest.TestCase):
 
 # --------------------------------------------------------------------
 
-class TestExcOpNull(unittest.TestCase):
+class TestExcOpNull(BaseTestCase):
 
     def testFree(self):
         self.assertRaisesMPI([MPI.ERR_OP, MPI.ERR_ARG], MPI.OP_NULL.Free)
 
-class TestExcOp(unittest.TestCase):
+class TestExcOp(BaseTestCase):
 
     def testFreePredefined(self):
         for op in (MPI.MAX, MPI.MIN,
@@ -103,7 +116,7 @@ class TestExcOp(unittest.TestCase):
 
 # --------------------------------------------------------------------
 
-class TestExcInfoNull(unittest.TestCase):
+class TestExcInfoNull(BaseTestCase):
 
     def testTruth(self):
         self.assertFalse(bool(MPI.INFO_NULL))
@@ -136,14 +149,16 @@ class TestExcInfoNull(unittest.TestCase):
         self.assertRaisesMPI(
             [MPI.ERR_INFO, MPI.ERR_ARG], MPI.INFO_NULL.Get_nthkey, 0)
 
-class TestExcInfo(unittest.TestCase):
+class TestExcInfo(BaseTestCase):
 
     def setUp(self):
+        super(TestExcInfo, self).setUp()
         self.INFO  = MPI.Info.Create()
 
     def tearDown(self):
         self.INFO.Free()
         self.INFO = None
+        super(TestExcInfo, self).tearDown()
 
     def testDelete(self):
         self.assertRaisesMPI(
@@ -164,7 +179,7 @@ else:
 
 # --------------------------------------------------------------------
 
-class TestExcGroupNull(unittest.TestCase):
+class TestExcGroupNull(BaseTestCase):
 
     def testCompare(self):
         self.assertRaisesMPI(
@@ -179,12 +194,12 @@ class TestExcGroupNull(unittest.TestCase):
             self.assertRaisesMPI(
                 MPI.ERR_GROUP, getattr(MPI.GROUP_NULL, method))
 
-class TestExcGroup(unittest.TestCase):
+class TestExcGroup(BaseTestCase):
     pass
 
 # --------------------------------------------------------------------
 
-class TestExcCommNull(unittest.TestCase):
+class TestExcCommNull(BaseTestCase):
 
     ERR_COMM = MPI.ERR_COMM
 
@@ -241,11 +256,17 @@ class TestExcCommNull(unittest.TestCase):
         self.assertRaisesMPI(MPI.ERR_COMM, comm_null.Merge, high=True)
 
 
-class TestExcComm(unittest.TestCase):
+class TestExcComm(BaseTestCase):
 
     def testFreeSelf(self):
-        self.assertRaisesMPI(
-            [MPI.ERR_COMM, MPI.ERR_ARG], MPI.COMM_SELF.Free)
+        errhdl = MPI.COMM_SELF.Get_errhandler()
+        try:
+            MPI.COMM_SELF.Set_errhandler(MPI.ERRORS_RETURN)
+            self.assertRaisesMPI(
+                [MPI.ERR_COMM, MPI.ERR_ARG], MPI.COMM_SELF.Free)
+        finally:
+            MPI.COMM_SELF.Set_errhandler(errhdl)
+            errhdl.Free()
 
     def testFreeWorld(self):
         self.assertRaisesMPI(
@@ -265,7 +286,7 @@ if name == 'Open MPI':
 
 # --------------------------------------------------------------------
 
-class TestExcWinNull(unittest.TestCase):
+class TestExcWinNull(BaseTestCase):
 
     def testFree(self):
         self.assertRaisesMPI(
@@ -285,14 +306,17 @@ class TestExcWinNull(unittest.TestCase):
                              MPI.WIN_NULL.Call_errhandler, 0)
 
 
-class TestExcWin(unittest.TestCase):
+class TestExcWin(BaseTestCase):
 
     def setUp(self):
+        super(TestExcWin, self).setUp()
         self.WIN = MPI.Win.Create(None, 1, MPI.INFO_NULL, MPI.COMM_SELF)
+        self.WIN.Set_errhandler(MPI.ERRORS_RETURN)
 
     def tearDown(self):
         self.WIN.Free()
         self.WIN = None
+        super(TestExcWin, self).tearDown()
 
     def testKeyvalInvalid(self):
         self.assertRaisesMPI(
@@ -300,25 +324,32 @@ class TestExcWin(unittest.TestCase):
             self.WIN.Get_attr, MPI.KEYVAL_INVALID)
 
 try:
-    w = MPI.Win.Create(None, 1, MPI.INFO_NULL, MPI.COMM_SELF)
-    w.Free()
+    MPI.Win.Create(None, 1, MPI.INFO_NULL, MPI.COMM_SELF).Free()
 except NotImplementedError:
     del TestExcWinNull, TestExcWin
 
 # --------------------------------------------------------------------
 
-class TestExcErrhandlerNull(unittest.TestCase):
+class TestExcErrhandlerNull(BaseTestCase):
 
     def testFree(self):
         self.assertRaisesMPI(MPI.ERR_ARG, MPI.ERRHANDLER_NULL.Free)
 
-    def testCommSetErrhandler(self):
-        self.assertRaisesMPI(
-            MPI.ERR_ARG, MPI.COMM_SELF.Set_errhandler, MPI.ERRHANDLER_NULL)
+    def testCommSelfSetErrhandler(self):
+        errhdl = MPI.COMM_SELF.Get_errhandler()
+        try:
+            MPI.COMM_SELF.Set_errhandler(MPI.ERRORS_RETURN)
+            self.assertRaisesMPI(
+                MPI.ERR_ARG, MPI.COMM_SELF.Set_errhandler, MPI.ERRHANDLER_NULL)
+        finally:
+            MPI.COMM_SELF.Set_errhandler(errhdl)
+            errhdl.Free()
+
+    def testCommWorldSetErrhandler(self):
         self.assertRaisesMPI(
             MPI.ERR_ARG, MPI.COMM_WORLD.Set_errhandler, MPI.ERRHANDLER_NULL)
 
-class TestExcErrhandler(unittest.TestCase):
+class TestExcErrhandler(BaseTestCase):
 
     def testFreePredefined(self):
         #self.assertRaisesMPI(MPI.ERR_ARG, MPI.ERRORS_ARE_FATAL.Free)
