@@ -262,12 +262,12 @@ cdef inline Group new_Group(MPI_Group ob):
 
 
 cdef inline int del_Group(MPI_Group* ob):
-     if ob    == NULL            : return 0
-     if ob[0] == MPI_GROUP_NULL  : return 0
-     if ob[0] == MPI_GROUP_EMPTY : return 0
-     #
-     if not mpi_active(): return 0
-     return MPI_Group_free(ob)
+    if ob    == NULL            : return 0
+    if ob[0] == MPI_GROUP_NULL  : return 0
+    if ob[0] == MPI_GROUP_EMPTY : return 0
+    #
+    if not mpi_active(): return 0
+    return MPI_Group_free(ob)
 
 #------------------------------------------------------------------------------
 # Comm
