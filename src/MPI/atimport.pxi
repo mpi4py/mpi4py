@@ -123,19 +123,12 @@ cdef int getOptions(Options* opts) except -1:
 
 cdef extern from *:
     #
-    int PyMPI_STARTUP_DONE
     int PyMPI_StartUp() nogil
-    #
-    int PyMPI_CLEANUP_DONE
     int PyMPI_CleanUp() nogil
     #
     int PyMPI_Commctx_finalize() nogil
 
-
-PyMPI_STARTUP_DONE = 0
-PyMPI_CLEANUP_DONE = 0
-
-cdef int initialize() except -1:
+cdef int bootstrap() except -1:
     # Get options from 'mpi4py.rc' module
     getOptions(&options)
     # MPI initialized ?
@@ -186,13 +179,13 @@ cdef inline int mpi_active() nogil:
     # MPI should be active ...
     return 1
 
-cdef void startup() nogil:
+cdef void initialize() nogil:
     if not mpi_active(): return
     #DBG# fprintf(stderr, b"statup: BEGIN\n"); fflush(stderr)
     <void>PyMPI_StartUp();
     #DBG# fprintf(stderr, b"statup: END\n"); fflush(stderr)
 
-cdef void cleanup() nogil:
+cdef void finalize() nogil:
     if not mpi_active(): return
     #DBG# fprintf(stderr, b"cleanup: BEGIN\n"); fflush(stderr)
     <void>PyMPI_Commctx_finalize()
@@ -202,7 +195,7 @@ cdef void cleanup() nogil:
 cdef void atexit() nogil:
     if not mpi_active(): return
     #DBG# fprintf(stderr, b"atexit: BEGIN\n"); fflush(stderr)
-    cleanup()
+    finalize()
     if options.finalize:
         #DBG# fprintf(stderr, b"MPI_Finalize\n"); fflush(stderr)
         <void>MPI_Finalize()

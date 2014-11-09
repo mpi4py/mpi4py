@@ -7,8 +7,8 @@ from mpi4py.libmpi cimport *
 include "stdlib.pxi"
 include "atimport.pxi"
 
+bootstrap()
 initialize()
-startup()
 
 include "asmpistr.pxi"
 include "asbuffer.pxi"
@@ -110,13 +110,13 @@ def Init():
     Initialize the MPI execution environment
     """
     CHKERR( MPI_Init(NULL, NULL) )
-    startup()
+    initialize()
 
 def Finalize():
     """
     Terminate the MPI execution environment
     """
-    cleanup()
+    finalize()
     CHKERR( MPI_Finalize() )
 
 # Levels of MPI threading support
@@ -140,7 +140,7 @@ def Init_thread(int required=THREAD_MULTIPLE):
     """
     cdef int provided = MPI_THREAD_SINGLE
     CHKERR( MPI_Init_thread(NULL, NULL, required, &provided) )
-    startup()
+    initialize()
     return provided
 
 def Query_thread():
