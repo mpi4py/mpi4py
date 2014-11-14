@@ -275,7 +275,7 @@ class TestExcComm(BaseTestCase):
     def testKeyvalInvalid(self):
         self.assertRaisesMPI(
             [MPI.ERR_KEYVAL, MPI.ERR_OTHER],
-            MPI.COMM_SELF.Get_attr, MPI.KEYVAL_INVALID)
+            MPI.COMM_WORLD.Get_attr, MPI.KEYVAL_INVALID)
 
 name, version = MPI.get_vendor()
 if name == 'Open MPI':
@@ -363,7 +363,9 @@ name, version = MPI.get_vendor()
 if name == 'MPICH1':
     del TestExcStatus.testSetElements
 if name == 'MPICH2':
+    errhdl = MPI.COMM_WORLD.Get_errhandler()
     try:
+        MPI.COMM_WORLD.Set_errhandler(MPI.ERRORS_RETURN)
         MPI.DATATYPE_NULL.Get_size()
     except MPI.Exception:
         pass
@@ -384,6 +386,10 @@ if name == 'MPICH2':
         del TestExcWin
         del TestExcErrhandlerNull
         del TestExcErrhandler
+    finally:
+        MPI.COMM_WORLD.Set_errhandler(errhdl)
+        errhdl.Free()
+        del errhdl
 if name == 'Open MPI':
     if 'win' in sys.platform:
         del TestExcDatatypeNull
