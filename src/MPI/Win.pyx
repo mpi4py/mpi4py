@@ -70,12 +70,9 @@ cdef class Win:
             memory = getbuffer_w(memory, &base, &size)
         cdef MPI_Info cinfo = arg_Info(info)
         cdef Win win = <Win>Win.__new__(Win)
-        with nogil:
-            CHKERR( MPI_Win_create(
-                    base, size, disp_unit,
-                    cinfo, comm.ob_mpi, &win.ob_mpi) )
-            CHKERR( MPI_Win_set_errhandler(
-                    win.ob_mpi, MPI_ERRORS_RETURN) )
+        with nogil: CHKERR( MPI_Win_create(
+            base, size, disp_unit,
+            cinfo, comm.ob_mpi, &win.ob_mpi) )
         win.ob_mem = memory
         return win
 
@@ -89,12 +86,9 @@ cdef class Win:
         cdef void *base = NULL
         cdef MPI_Info cinfo = arg_Info(info)
         cdef Win win = <Win>Win.__new__(Win)
-        with nogil:
-            CHKERR( MPI_Win_allocate(
-                    size, disp_unit, cinfo,
-                    comm.ob_mpi, &base, &win.ob_mpi) )
-            CHKERR( MPI_Win_set_errhandler(
-                    win.ob_mpi, MPI_ERRORS_RETURN) )
+        with nogil: CHKERR( MPI_Win_allocate(
+            size, disp_unit, cinfo,
+            comm.ob_mpi, &base, &win.ob_mpi) )
         return win
 
     @classmethod
@@ -107,12 +101,9 @@ cdef class Win:
         cdef void *base = NULL
         cdef MPI_Info cinfo = arg_Info(info)
         cdef Win win = <Win>Win.__new__(Win)
-        with nogil:
-            CHKERR( MPI_Win_allocate_shared(
-                    size, disp_unit, cinfo,
-                    comm.ob_mpi, &base, &win.ob_mpi) )
-            CHKERR( MPI_Win_set_errhandler(
-                    win.ob_mpi, MPI_ERRORS_RETURN) )
+        with nogil: CHKERR( MPI_Win_allocate_shared(
+            size, disp_unit, cinfo,
+            comm.ob_mpi, &base, &win.ob_mpi) )
         return win
 
     def Shared_query(self, int rank):
@@ -138,11 +129,8 @@ cdef class Win:
         """
         cdef MPI_Info cinfo = arg_Info(info)
         cdef Win win = <Win>Win.__new__(Win)
-        with nogil:
-            CHKERR( MPI_Win_create_dynamic(
-                    cinfo, comm.ob_mpi, &win.ob_mpi) )
-            CHKERR( MPI_Win_set_errhandler(
-                    win.ob_mpi, MPI_ERRORS_RETURN) )
+        with nogil: CHKERR( MPI_Win_create_dynamic(
+            cinfo, comm.ob_mpi, &win.ob_mpi) )
         win.ob_mem = {}
         return win
 

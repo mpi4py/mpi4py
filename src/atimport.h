@@ -27,43 +27,6 @@
 
 /* ------------------------------------------------------------------------- */
 
-static MPI_Errhandler PyMPI_ERRHDL_COMM_WORLD = (MPI_Errhandler)0;
-static MPI_Errhandler PyMPI_ERRHDL_COMM_SELF  = (MPI_Errhandler)0;
-
-static int PyMPI_StartUp(void)
-{
-  if (PyMPI_ERRHDL_COMM_WORLD == (MPI_Errhandler)0)
-    PyMPI_ERRHDL_COMM_WORLD = MPI_ERRHANDLER_NULL;
-  if (PyMPI_ERRHDL_COMM_WORLD == MPI_ERRHANDLER_NULL) {
-    (void)MPI_Comm_get_errhandler(MPI_COMM_WORLD, &PyMPI_ERRHDL_COMM_WORLD);
-    (void)MPI_Comm_set_errhandler(MPI_COMM_WORLD, MPI_ERRORS_RETURN);
-  }
-  if (PyMPI_ERRHDL_COMM_SELF == (MPI_Errhandler)0)
-    PyMPI_ERRHDL_COMM_SELF = MPI_ERRHANDLER_NULL;
-  if (PyMPI_ERRHDL_COMM_SELF == MPI_ERRHANDLER_NULL) {
-    (void)MPI_Comm_get_errhandler(MPI_COMM_SELF, &PyMPI_ERRHDL_COMM_SELF);
-    (void)MPI_Comm_set_errhandler(MPI_COMM_SELF, MPI_ERRORS_RETURN);
-  }
-  return MPI_SUCCESS;
-}
-
-static int PyMPI_CleanUp(void)
-{
-  if (PyMPI_ERRHDL_COMM_SELF != MPI_ERRHANDLER_NULL) {
-    (void)MPI_Comm_set_errhandler(MPI_COMM_SELF, PyMPI_ERRHDL_COMM_SELF);
-    (void)MPI_Errhandler_free(&PyMPI_ERRHDL_COMM_SELF);
-    PyMPI_ERRHDL_COMM_SELF = MPI_ERRHANDLER_NULL;
-  }
-  if (PyMPI_ERRHDL_COMM_WORLD != MPI_ERRHANDLER_NULL) {
-    (void)MPI_Comm_set_errhandler(MPI_COMM_WORLD, PyMPI_ERRHDL_COMM_WORLD);
-    (void)MPI_Errhandler_free(&PyMPI_ERRHDL_COMM_WORLD);
-    PyMPI_ERRHDL_COMM_WORLD = MPI_ERRHANDLER_NULL;
-  }
-  return MPI_SUCCESS;
-}
-
-/* ------------------------------------------------------------------------- */
-
 #if !defined(PyMPI_USE_MATCHED_RECV)
   #if defined(PyMPI_HAVE_MPI_Mprobe) && \
       defined(PyMPI_HAVE_MPI_Mrecv)

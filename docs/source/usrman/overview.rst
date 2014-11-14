@@ -418,18 +418,19 @@ MPI timer functionalities are available through the :func:`Wtime` and
 Error Handling
 ^^^^^^^^^^^^^^
 
-Error handling functionality is almost completely supported.  Errors
-originated in native MPI calls will raise an instance of the module
-exception class :exc:`Exception`, which is a subclass of the standard
-Python exception :exc:`RuntimeError`.
+In order facilitate handle sharing with other Python modules
+interfacing MPI-based parallel libraries, the predefined MPI error
+handlers :const:`ERRORS_RETURN` and :const:`ERRORS_ARE_FATAL` can be
+assigned to and retrieved from communicators, windows and files using
+methods :meth:`Set_errhandler` and :meth:`Get_errhandler`.
+
+The default MPI error handling policies are not overriden. When the
+predefined error handler :const:`ERRORS_RETURN` is set, errors
+returned from MPI calls will raise an instance of the exception class
+:exc:`Exception`, which is a subclass of the standard Python exception
+:exc:`RuntimeError`.
 
 .. caution::
 
-   Importing with ``from mpi4py.MPI import *`` will cause
-   a name clashing with standard Python :exc:`Exception` base class.
-
-In order facilitate communicator sharing with other Python modules
-interfacing MPI-based parallel libraries, default MPI error handlers
-:const:`ERRORS_RETURN`, :const:`ERRORS_ARE_FATAL` can be assigned to
-and retrieved from communicators, windows and files with methods
-:meth:`{Class}.Set_errhandler` and :meth:`{Class}.Get_errhandler`.
+   Importing with ``from mpi4py.MPI import *`` will cause a name
+   clashing with standard Python :exc:`Exception` base class.

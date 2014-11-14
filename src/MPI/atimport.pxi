@@ -122,48 +122,36 @@ cdef int getOptions(Options* opts) except -1:
 # -----------------------------------------------------------------------------
 
 cdef extern from *:
-    #
-    int PyMPI_StartUp() nogil
-    int PyMPI_CleanUp() nogil
-    #
     int PyMPI_Commctx_finalize() nogil
 
 cdef int bootstrap() except -1:
     # Get options from 'mpi4py.rc' module
     getOptions(&options)
-    # MPI initialized ?
-    cdef int initialized = 1
-    <void>MPI_Initialized(&initialized)
-    # MPI finalized ?
-    cdef int finalized = 1
-    <void>MPI_Finalized(&finalized)
-    # Do we have to initialize MPI?
-    if initialized:
-        if not finalized:
-            # Cleanup at (the very end of) Python exit
-            if Py_AtExit(atexit) < 0:
-                PySys_WriteStderr(b"warning: could not register "
-                                  b"cleanup with Py_AtExit()\n", 0)
-        options.finalize = 0
-        return 0
-    #
-    cdef int ierr = MPI_SUCCESS
-    cdef int required = MPI_THREAD_SINGLE
-    cdef int provided = MPI_THREAD_SINGLE
-    if options.initialize: # We have to initialize MPI
-        if options.threaded:
-            required = options.thread_level
-            ierr = MPI_Init_thread(NULL, NULL, required, &provided)
-            if ierr != MPI_SUCCESS: raise RuntimeError(
-                "MPI_Init_thread() failed [error code: %d]" % ierr)
-        else:
-            ierr = MPI_Init(NULL, NULL)
-            if ierr != MPI_SUCCESS: raise RuntimeError(
-                "MPI_Init() failed [error code: %d]" % ierr)
     # Cleanup at (the very end of) Python exit
     if Py_AtExit(atexit) < 0:
         PySys_WriteStderr(b"warning: could not register "
                           b"cleanup with Py_AtExit()\n", 0)
+    # Do we have to initialize MPI?
+    cdef int initialized = 1
+    <void>MPI_Initialized(&initialized)
+    if initialized:
+        options.finalize = 0
+        return 0
+    if not options.initialize:
+        return 0
+    # MPI initialization
+    cdef int ierr = MPI_SUCCESS
+    cdef int required = MPI_THREAD_SINGLE
+    cdef int provided = MPI_THREAD_SINGLE
+    if options.threaded:
+        required = options.thread_level
+        ierr = MPI_Init_thread(NULL, NULL, required, &provided)
+        if ierr != MPI_SUCCESS: raise RuntimeError(
+            "MPI_Init_thread() failed [error code: %d]" % ierr)
+    else:
+        ierr = MPI_Init(NULL, NULL)
+        if ierr != MPI_SUCCESS: raise RuntimeError(
+            "MPI_Init() failed [error code: %d]" % ierr)
     return 0
 
 cdef inline int mpi_active() nogil:
@@ -181,25 +169,16 @@ cdef inline int mpi_active() nogil:
 
 cdef void initialize() nogil:
     if not mpi_active(): return
-    #DBG# fprintf(stderr, b"statup: BEGIN\n"); fflush(stderr)
-    <void>PyMPI_StartUp();
-    #DBG# fprintf(stderr, b"statup: END\n"); fflush(stderr)
 
 cdef void finalize() nogil:
     if not mpi_active(): return
-    #DBG# fprintf(stderr, b"cleanup: BEGIN\n"); fflush(stderr)
     <void>PyMPI_Commctx_finalize()
-    <void>PyMPI_CleanUp()
-    #DBG# fprintf(stderr, b"cleanup: END\n"); fflush(stderr)
 
 cdef void atexit() nogil:
     if not mpi_active(): return
-    #DBG# fprintf(stderr, b"atexit: BEGIN\n"); fflush(stderr)
     finalize()
     if options.finalize:
-        #DBG# fprintf(stderr, b"MPI_Finalize\n"); fflush(stderr)
         <void>MPI_Finalize()
-    #DBG# fprintf(stderr, b"atexit: END\n"); fflush(stderr)
 
 # -----------------------------------------------------------------------------
 
