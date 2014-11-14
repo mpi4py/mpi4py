@@ -170,8 +170,7 @@ cdef class Win:
         Set new values for the hints
         associated with a window
         """
-        with nogil: CHKERR( MPI_Win_set_info(
-            self.ob_mpi, info.ob_mpi) )
+        with nogil: CHKERR( MPI_Win_set_info(self.ob_mpi, info.ob_mpi) )
 
     def Get_info(self):
         """
@@ -179,8 +178,7 @@ cdef class Win:
         that are currently in use
         """
         cdef Info info = <Info>Info.__new__(Info)
-        with nogil: CHKERR( MPI_Win_get_info(
-            self.ob_mpi, &info.ob_mpi) )
+        with nogil: CHKERR( MPI_Win_get_info( self.ob_mpi, &info.ob_mpi) )
         return info
 
     property info:
@@ -199,8 +197,7 @@ cdef class Win:
         communicator used to create the window
         """
         cdef Group group = Group()
-        with nogil: CHKERR( MPI_Win_get_group(
-                self.ob_mpi, &group.ob_mpi) )
+        with nogil: CHKERR( MPI_Win_get_group(self.ob_mpi, &group.ob_mpi) )
         return group
 
     property group:
@@ -548,8 +545,7 @@ cdef class Win:
         """
         Begin an RMA access epoch at all processes
         """
-        with nogil: CHKERR( MPI_Win_lock_all(
-            assertion, self.ob_mpi) )
+        with nogil: CHKERR( MPI_Win_lock_all(assertion, self.ob_mpi) )
 
     def Unlock_all(self):
         """
