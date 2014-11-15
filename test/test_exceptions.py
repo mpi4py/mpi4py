@@ -362,6 +362,8 @@ import sys
 name, version = MPI.get_vendor()
 if name == 'MPICH1':
     del TestExcStatus.testSetElements
+    del TestExcComm.testFreeSelf
+    del TestExcComm.testFreeWorld
 if name == 'MPICH2':
     errhdl = MPI.COMM_WORLD.Get_errhandler()
     try:
