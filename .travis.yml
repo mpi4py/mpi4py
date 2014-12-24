@@ -30,7 +30,7 @@ cache:
 before_install:
     - sudo apt-get update -q
     - sh ./conf/travis-install-mpi.sh $MPI
-    - pip install -q --install-option --no-cython-compile Cython
+    - pip install -q Cython
     - cython --version
 install:
     - pip install .
