@@ -610,6 +610,7 @@ class TestReduceLocal(unittest.TestCase):
                         elif op == MPI.MIN:
                             self.assertEqual(value, i)
 
+
 class TestCCOBufSelf(BaseTestCCOBuf, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
@@ -622,13 +623,13 @@ class TestCCOBufInplaceSelf(BaseTestCCOBufInplace, unittest.TestCase):
 class TestCCOBufInplaceWorld(BaseTestCCOBufInplace, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
-class TestCCOBufSelfDup(BaseTestCCOBuf, unittest.TestCase):
+class TestCCOBufSelfDup(TestCCOBufSelf):
     def setUp(self):
         self.COMM = MPI.COMM_SELF.Dup()
     def tearDown(self):
         self.COMM.Free()
 
-class TestCCOBufWorldDup(BaseTestCCOBuf, unittest.TestCase):
+class TestCCOBufWorldDup(TestCCOBufWorld):
     def setUp(self):
         self.COMM = MPI.COMM_WORLD.Dup()
     def tearDown(self):

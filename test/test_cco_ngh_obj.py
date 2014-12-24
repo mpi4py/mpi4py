@@ -86,13 +86,13 @@ class TestCCONghObjSelf(BaseTestCCONghObj, unittest.TestCase):
 class TestCCONghObjWorld(BaseTestCCONghObj, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
-class TestCCONghObjSelfDup(BaseTestCCONghObj, unittest.TestCase):
+class TestCCONghObjSelfDup(TestCCONghObjSelf):
     def setUp(self):
         self.COMM = MPI.COMM_SELF.Dup()
     def tearDown(self):
         self.COMM.Free()
 
-class TestCCONghObjWorldDup(BaseTestCCONghObj, unittest.TestCase):
+class TestCCONghObjWorldDup(TestCCONghObjWorld):
     def setUp(self):
         self.COMM = MPI.COMM_WORLD.Dup()
     def tearDown(self):

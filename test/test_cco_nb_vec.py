@@ -312,13 +312,13 @@ class TestCCOVecSelf(BaseTestCCOVec, unittest.TestCase):
 class TestCCOVecWorld(BaseTestCCOVec, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
-class TestCCOVecSelfDup(BaseTestCCOVec, unittest.TestCase):
+class TestCCOVecSelfDup(TestCCOVecSelf):
     def setUp(self):
         self.COMM = MPI.COMM_SELF.Dup()
     def tearDown(self):
         self.COMM.Free()
 
-class TestCCOVecWorldDup(BaseTestCCOVec, unittest.TestCase):
+class TestCCOVecWorldDup(TestCCOVecWorld):
     def setUp(self):
         self.COMM = MPI.COMM_WORLD.Dup()
     def tearDown(self):
@@ -329,7 +329,6 @@ name, version = MPI.get_vendor()
 if name == 'Open MPI':
     if version < (1,8,1):
         del BaseTestCCOVec.testAlltoallw
-
 try:
     MPI.COMM_SELF.Ibarrier().Wait()
 except NotImplementedError:
@@ -337,6 +336,7 @@ except NotImplementedError:
     del TestCCOVecWorld
     del TestCCOVecSelfDup
     del TestCCOVecWorldDup
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -80,6 +80,10 @@ class BaseTestP2PMatched(object):
             self.assertEqual(status.error,  MPI.SUCCESS)
             m = MPI.Message.iprobe(comm)
             self.assertEqual(m, None)
+            # Open MPI <= 1.8.4
+            s = comm.isend(None, comm.rank, 0)
+            r = comm.mprobe(comm.rank, 0).irecv()
+            MPI.Request.waitall([s,r])
         finally:
             comm.Free()
 
@@ -89,26 +93,22 @@ class BaseTestP2PMatched(object):
         rank = comm.Get_rank()
         for smsg in messages:
             if size == 1:
-                m = comm.improbe(0, 0)
-                self.assertEqual(m, None)
                 sr = comm.isend(smsg, 0, 0)
                 m = comm.mprobe(0, 0)
                 self.assertTrue(isinstance(m, MPI.Message))
                 self.assertTrue(m)
-                n = comm.improbe(0, 0)
-                self.assertEqual(n, None)
                 rr = m.irecv()
                 self.assertFalse(m)
+                self.assertTrue(sr)
                 self.assertTrue(rr)
                 MPI.Request.Waitall([sr,rr])
+                self.assertFalse(sr)
                 self.assertFalse(rr)
                 #
                 r = comm.isend(smsg, 0, 0)
                 m = MPI.Message.probe(comm, 0, 0)
                 self.assertTrue(isinstance(m, MPI.Message))
                 self.assertTrue(m)
-                n = MPI.Message.iprobe(comm, 0, 0)
-                self.assertEqual(n, None)
                 rmsg = m.recv()
                 self.assertFalse(m)
                 r.wait()
@@ -116,8 +116,6 @@ class BaseTestP2PMatched(object):
                 comm.send(smsg, 1, 0)
                 m = comm.mprobe(1, 0)
                 self.assertTrue(m)
-                n = comm.improbe(0, 0)
-                self.assertEqual(n, None)
                 rmsg = m.recv()
                 self.assertFalse(m)
                 #
@@ -126,13 +124,9 @@ class BaseTestP2PMatched(object):
                 while not m:
                     m = MPI.Message.iprobe(comm, 1, 1)
                 rmsg = m.irecv().wait()
-                n = comm.improbe(1, 1)
-                self.assertEqual(n, None)
             elif rank == 1:
                 m = comm.mprobe(0, 0)
                 self.assertTrue(m)
-                n = comm.improbe(1, 0)
-                self.assertEqual(n, None)
                 rmsg = m.recv()
                 self.assertFalse(m)
                 comm.send(rmsg, 0, 0)
@@ -142,12 +136,11 @@ class BaseTestP2PMatched(object):
                     m = MPI.Message.iprobe(comm, 0, 1)
                 rmsg = m.irecv().wait()
                 comm.send(smsg, 0, 1)
-                n = comm.improbe(0, 1)
-                self.assertEqual(n, None)
             else:
                 rmsg = smsg
 
             self.assertEqual(smsg, rmsg)
+
 
 class TestP2PMatchedSelf(BaseTestP2PMatched, unittest.TestCase):
     COMM = MPI.COMM_SELF
@@ -155,13 +148,13 @@ class TestP2PMatchedSelf(BaseTestP2PMatched, unittest.TestCase):
 class TestP2PMatchedWorld(BaseTestP2PMatched, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
-class TestP2PMatchedSelfDup(BaseTestP2PMatched, unittest.TestCase):
+class TestP2PMatchedSelfDup(TestP2PMatchedSelf):
     def setUp(self):
         self.COMM = MPI.COMM_SELF.Dup()
     def tearDown(self):
         self.COMM.Free()
 
-class TestP2PMatchedWorldDup(BaseTestP2PMatched, unittest.TestCase):
+class TestP2PMatchedWorldDup(TestP2PMatchedWorld):
     def setUp(self):
         self.COMM = MPI.COMM_WORLD.Dup()
     def tearDown(self):

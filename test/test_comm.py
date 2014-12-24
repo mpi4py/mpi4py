@@ -197,7 +197,7 @@ class TestCommWorldDup(TestCommWorld):
 
 name, version = MPI.get_vendor()
 if name == 'MPICH':
-    if version <= (3,1,0):
+    if version < (3,1,1):
         if MPI.Query_thread() > MPI.THREAD_SINGLE:
             del BaseTestComm.testIDup
 if name == 'Open MPI':

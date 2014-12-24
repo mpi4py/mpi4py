@@ -59,6 +59,11 @@ class BaseTestP2PMatched(object):
             self.assertEqual(status.error,  MPI.SUCCESS)
             m = MPI.Message.Iprobe(comm)
             self.assertEqual(m, None)
+            # Open MPI <= 1.8.4
+            buf = [None, 0, MPI.BYTE]
+            s = comm.Isend(buf, comm.rank, 0)
+            r = comm.Mprobe(comm.rank, 0).Irecv(buf)
+            MPI.Request.Waitall([s,r])
         finally:
             comm.Free()
 
@@ -72,86 +77,88 @@ class BaseTestP2PMatched(object):
                     sbuf = array( s, typecode, s)
                     rbuf = array(-1, typecode, s)
                     if size == 1:
-                        m = comm.Improbe(0, 0)
-                        self.assertEqual(m, None)
+                        n = comm.Improbe(0, 0)
+                        self.assertEqual(n, None)
                         sr = comm.Isend(sbuf.as_mpi(), 0, 0)
                         m = comm.Mprobe(0, 0)
                         self.assertTrue(isinstance(m, MPI.Message))
                         self.assertTrue(m)
-                        n = comm.Improbe(0, 0)
-                        self.assertEqual(n, None)
                         rr = m.Irecv(rbuf.as_raw())
                         self.assertFalse(m)
+                        self.assertTrue(sr)
                         self.assertTrue(rr)
                         MPI.Request.Waitall([sr,rr])
+                        self.assertFalse(sr)
                         self.assertFalse(rr)
                         #
+                        n = comm.Improbe(0, 0)
+                        self.assertEqual(n, None)
                         r = comm.Isend(sbuf.as_mpi(), 0, 0)
                         m = MPI.Message.Probe(comm, 0, 0)
                         self.assertTrue(isinstance(m, MPI.Message))
                         self.assertTrue(m)
-                        n = MPI.Message.Iprobe(comm, 0, 0)
-                        self.assertEqual(n, None)
                         m.Recv(rbuf.as_raw())
                         self.assertFalse(m)
                         r.Wait()
                         #
+                        n = MPI.Message.Iprobe(comm, 0, 0)
+                        self.assertEqual(n, None)
                         r = comm.Isend(sbuf.as_mpi(), 0, 0)
                         m = MPI.Message.Iprobe(comm, 0, 0)
                         self.assertTrue(isinstance(m, MPI.Message))
                         self.assertTrue(m)
-                        n = MPI.Message.Iprobe(comm, 0, 0)
-                        self.assertEqual(n, None)
                         m.Recv(rbuf.as_raw())
                         self.assertFalse(m)
                         r.Wait()
                         #
+                        n = MPI.Message.Iprobe(comm, 0, 0)
+                        self.assertEqual(n, None)
                         r = comm.Isend(sbuf.as_mpi(), 0, 0)
                         m = comm.Mprobe(0, 0)
                         self.assertTrue(isinstance(m, MPI.Message))
                         self.assertTrue(m)
-                        n = comm.Improbe(0, 0)
-                        self.assertEqual(n, None)
                         m.Recv(rbuf.as_raw())
                         self.assertFalse(m)
                         r.Wait()
                     elif rank == 0:
+                        n = comm.Improbe(0, 0)
+                        self.assertEqual(n, None)
+                        #
                         comm.Send(sbuf.as_mpi(), 1, 0)
                         m = comm.Mprobe(1, 0)
                         self.assertTrue(m)
-                        n = comm.Improbe(0, 0)
-                        self.assertEqual(n, None)
                         m.Recv(rbuf.as_raw())
                         self.assertFalse(m)
                         #
+                        n = comm.Improbe(0, 0)
+                        self.assertEqual(n, None)
                         comm.Send(sbuf.as_mpi(), 1, 1)
                         m = None
                         while not m:
                             m = comm.Improbe(1, 1)
                         m.Irecv(rbuf.as_raw()).Wait()
-                        n = comm.Improbe(1, 1)
-                        self.assertEqual(n, None)
                     elif rank == 1:
-                        m = comm.Mprobe(0, 0)
-                        self.assertTrue(m)
                         n = comm.Improbe(1, 0)
                         self.assertEqual(n, None)
+                        #
+                        m = comm.Mprobe(0, 0)
+                        self.assertTrue(m)
                         m.Recv(rbuf.as_raw())
                         self.assertFalse(m)
-                        comm.Send(sbuf.as_mpi(), 0, 0)
                         #
+                        n = comm.Improbe(1, 0)
+                        self.assertEqual(n, None)
+                        comm.Send(sbuf.as_mpi(), 0, 0)
                         m = None
                         while not m:
                             m = comm.Improbe(0, 1)
                         m.Irecv(rbuf.as_mpi()).Wait()
                         comm.Send(sbuf.as_mpi(), 0, 1)
-                        n = comm.Improbe(0, 1)
-                        self.assertEqual(n, None)
                     else:
                         rbuf = sbuf
-
                     for value in rbuf:
                         self.assertEqual(value, s)
+
 
 class TestP2PMatchedSelf(BaseTestP2PMatched, unittest.TestCase):
     COMM = MPI.COMM_SELF
@@ -159,13 +166,13 @@ class TestP2PMatchedSelf(BaseTestP2PMatched, unittest.TestCase):
 class TestP2PMatchedWorld(BaseTestP2PMatched, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
-class TestP2PMatchedSelfDup(BaseTestP2PMatched, unittest.TestCase):
+class TestP2PMatchedSelfDup(TestP2PMatchedSelf):
     def setUp(self):
         self.COMM = MPI.COMM_SELF.Dup()
     def tearDown(self):
         self.COMM.Free()
 
-class TestP2PMatchedWorldDup(BaseTestP2PMatched, unittest.TestCase):
+class TestP2PMatchedWorldDup(TestP2PMatchedWorld):
     def setUp(self):
         self.COMM = MPI.COMM_WORLD.Dup()
     def tearDown(self):
@@ -178,12 +185,6 @@ if MPI.MESSAGE_NULL == MPI.MESSAGE_NO_PROC:
     del TestP2PMatchedWorld
     del TestP2PMatchedSelfDup
     del TestP2PMatchedWorldDup
-else:
-    name, version = MPI.get_vendor()
-    if name == 'Open MPI':
-        if MPI.COMM_WORLD.Get_size() > 1:
-            del TestP2PMatchedSelfDup
-            del TestP2PMatchedWorldDup
 
 
 if __name__ == '__main__':

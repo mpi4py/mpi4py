@@ -54,9 +54,11 @@ class BaseTestRMA(object):
                     for rank in range(size):
                         sbuf = array([rank]*count, typecode)
                         rbuf = array(-1, typecode, count+1)
+                        self.WIN.Fence()
                         self.WIN.Lock(rank)
                         r = self.WIN.Rput(sbuf.as_mpi(), rank)
                         r.Wait()
+                        self.WIN.Flush(rank)
                         r = self.WIN.Rget(rbuf.as_mpi_c(count), rank)
                         r.Wait()
                         self.WIN.Unlock(rank)
@@ -81,14 +83,18 @@ class BaseTestRMA(object):
                                    MPI.REPLACE):
                             self.WIN.Lock(rank)
                             self.WIN.Put(ones.as_mpi(), rank)
-                            r = self.WIN.Raccumulate(sbuf.as_mpi(), rank, op=op)
+                            self.WIN.Flush(rank)
+                            r = self.WIN.Raccumulate(sbuf.as_mpi(),
+                                                     rank, op=op)
                             r.Wait()
-                            self.WIN.Get(rbuf.as_mpi_c(count), rank)
+                            self.WIN.Flush(rank)
+                            r = self.WIN.Rget(rbuf.as_mpi_c(count), rank)
+                            r.Wait()
                             self.WIN.Unlock(rank)
                             #
                             for i in range(count):
                                 self.assertEqual(sbuf[i], i)
-                                self.assertEqual(rbuf[i], op(1,i))
+                                self.assertEqual(rbuf[i], op(1, i))
                             self.assertEqual(rbuf[-1], -1)
 
     def testGetAccumulate(self):
@@ -108,11 +114,14 @@ class BaseTestRMA(object):
                                    MPI.REPLACE, MPI.NO_OP):
                             self.WIN.Lock(rank)
                             self.WIN.Put(ones.as_mpi(), rank)
+                            self.WIN.Flush(rank)
                             r = self.WIN.Rget_accumulate(sbuf.as_mpi(),
                                                          rbuf.as_mpi_c(count),
                                                          rank, op=op)
                             r.Wait()
-                            self.WIN.Get(gbuf.as_mpi_c(count), rank)
+                            self.WIN.Flush(rank)
+                            r = self.WIN.Rget(gbuf.as_mpi_c(count), rank)
+                            r.Wait()
                             self.WIN.Unlock(rank)
                             #
                             for i in range(count):
@@ -151,6 +160,7 @@ class BaseTestRMA(object):
         r = self.WIN.Raccumulate([None, MPI.INT], MPI.PROC_NULL, None, MPI.SUM)
         r.Wait()
         self.WIN.Unlock_all()
+
 
 class TestRMASelf(BaseTestRMA, unittest.TestCase):
     COMM = MPI.COMM_SELF

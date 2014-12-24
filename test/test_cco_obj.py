@@ -198,26 +198,23 @@ class BaseTestCCOObj(object):
                 self.assertEqual(rscan, 0)
 
 
-class BaseTestCCOObjDup(BaseTestCCOObj):
-    def setUp(self):
-        self.COMM = self.COMM.Dup()
-    def tearDown(self):
-        self.COMM.Free()
-        del self.COMM
-
-
 class TestCCOObjSelf(BaseTestCCOObj, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
 class TestCCOObjWorld(BaseTestCCOObj, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
+class TestCCOObjSelfDup(TestCCOObjSelf):
+    def setUp(self):
+        self.COMM = MPI.COMM_SELF.Dup()
+    def tearDown(self):
+        self.COMM.Free()
 
-class TestCCOObjSelfDup(BaseTestCCOObjDup, unittest.TestCase):
-    COMM = MPI.COMM_SELF
-
-class TestCCOObjWorldDup(BaseTestCCOObjDup, unittest.TestCase):
-    COMM = MPI.COMM_WORLD
+class TestCCOObjWorldDup(TestCCOObjWorld):
+    def setUp(self):
+        self.COMM = MPI.COMM_WORLD.Dup()
+    def tearDown(self):
+        self.COMM.Free()
 
 
 name, version = MPI.get_vendor()

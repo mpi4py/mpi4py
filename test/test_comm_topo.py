@@ -189,21 +189,23 @@ class TestTopoSelf(BaseTestTopo, unittest.TestCase):
 class TestTopoWorld(BaseTestTopo, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
-class TestTopoSelfDup(BaseTestTopo, unittest.TestCase):
+class TestTopoSelfDup(TestTopoSelf):
     def setUp(self):
         self.COMM = MPI.COMM_SELF.Dup()
     def tearDown(self):
         self.COMM.Free()
 
-class TestTopoWorldDup(BaseTestTopo, unittest.TestCase):
+class TestTopoWorldDup(TestTopoWorld):
     def setUp(self):
         self.COMM = MPI.COMM_WORLD.Dup()
     def tearDown(self):
         self.COMM.Free()
 
+
 name, version = MPI.get_vendor()
 if name == 'Platform MPI':
     del BaseTestTopo.testDistgraphcomm
+
 
 if __name__ == '__main__':
     unittest.main()

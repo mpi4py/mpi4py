@@ -139,19 +139,20 @@ class BaseTestCCONghBuf(object):
                                 self.assertEqual(value, v+1)
             comm.Free()
 
+
 class TestCCONghBufSelf(BaseTestCCONghBuf, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
 class TestCCONghBufWorld(BaseTestCCONghBuf, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
-class TestCCONghBufSelfDup(BaseTestCCONghBuf, unittest.TestCase):
+class TestCCONghBufSelfDup(TestCCONghBufSelf):
     def setUp(self):
         self.COMM = MPI.COMM_SELF.Dup()
     def tearDown(self):
         self.COMM.Free()
 
-class TestCCONghBufWorldDup(BaseTestCCONghBuf, unittest.TestCase):
+class TestCCONghBufWorldDup(TestCCONghBufWorld):
     def setUp(self):
         self.COMM = MPI.COMM_WORLD.Dup()
     def tearDown(self):

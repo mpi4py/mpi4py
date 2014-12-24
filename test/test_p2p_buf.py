@@ -304,19 +304,20 @@ class BaseTestP2PBuf(object):
         finally:
             comm.Free()
 
+
 class TestP2PBufSelf(BaseTestP2PBuf, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
 class TestP2PBufWorld(BaseTestP2PBuf, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
-class TestP2PBufSelfDup(BaseTestP2PBuf, unittest.TestCase):
+class TestP2PBufSelfDup(TestP2PBufSelf):
     def setUp(self):
         self.COMM = MPI.COMM_SELF.Dup()
     def tearDown(self):
         self.COMM.Free()
 
-class TestP2PBufWorldDup(BaseTestP2PBuf, unittest.TestCase):
+class TestP2PBufWorldDup(TestP2PBufWorld):
     def setUp(self):
         self.COMM = MPI.COMM_WORLD.Dup()
     def tearDown(self):

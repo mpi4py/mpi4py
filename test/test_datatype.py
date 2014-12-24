@@ -369,6 +369,7 @@ class TestGetAddress(unittest.TestCase):
         except ImportError:
             pass
 
+
 import sys
 name, version = MPI.get_vendor()
 if name == 'LAM/MPI':
@@ -408,6 +409,7 @@ if name == 'Platform MPI':
 
 if sys.version_info[0] >=3:
     del TestGetAddress
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -386,19 +386,20 @@ class BaseTestCCOVecInplace(object):
                         for vb in b:
                             self.assertEqual(vb, -1)
 
+
 class TestCCOVecSelf(BaseTestCCOVec, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
 class TestCCOVecWorld(BaseTestCCOVec, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
-class TestCCOVecSelfDup(BaseTestCCOVec, unittest.TestCase):
+class TestCCOVecSelfDup(TestCCOVecSelf):
     def setUp(self):
         self.COMM = MPI.COMM_SELF.Dup()
     def tearDown(self):
         self.COMM.Free()
 
-class TestCCOVecWorldDup(BaseTestCCOVec, unittest.TestCase):
+class TestCCOVecWorldDup(TestCCOVecWorld):
     def setUp(self):
         self.COMM = MPI.COMM_WORLD.Dup()
     def tearDown(self):
@@ -425,6 +426,7 @@ if name == 'Open MPI':
 if name == 'Microsoft MPI':
     del TestCCOVecInplaceSelf
     del TestCCOVecInplaceWorld
+
 
 if __name__ == '__main__':
     unittest.main()

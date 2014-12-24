@@ -531,13 +531,13 @@ class TestCCOBufInplaceSelf(BaseTestCCOBufInplace, unittest.TestCase):
 class TestCCOBufInplaceWorld(BaseTestCCOBufInplace, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
-class TestCCOBufSelfDup(BaseTestCCOBuf, unittest.TestCase):
+class TestCCOBufSelfDup(TestCCOBufSelf):
     def setUp(self):
         self.COMM = MPI.COMM_SELF.Dup()
     def tearDown(self):
         self.COMM.Free()
 
-class TestCCOBufWorldDup(BaseTestCCOBuf, unittest.TestCase):
+class TestCCOBufWorldDup(TestCCOBufWorld):
     def setUp(self):
         self.COMM = MPI.COMM_WORLD.Dup()
     def tearDown(self):
@@ -546,15 +546,17 @@ class TestCCOBufWorldDup(BaseTestCCOBuf, unittest.TestCase):
 
 name, version = MPI.get_vendor()
 if name == 'Open MPI':
-    if version < (1,8,4):
+    if version == (1,8,4):
+        def SKIP(*args, **kwargs): pass
+        TestCCOBufSelf.testReduceScatter = SKIP
         if MPI.COMM_WORLD.Get_size() == 1:
-            del BaseTestCCOBufInplace.testReduceScatter
-            del BaseTestCCOBufInplace.testReduceScatterBlock
-    elif version < (1,8,2):
-        del BaseTestCCOBuf.testExscan
-        del BaseTestCCOBuf.testReduceScatter
+            TestCCOBufWorld.testReduceScatter = SKIP
+    if version < (1,8,4):
         del BaseTestCCOBufInplace.testReduceScatter
         del BaseTestCCOBufInplace.testReduceScatterBlock
+    if version < (1,8,2):
+        del BaseTestCCOBuf.testExscan
+        del BaseTestCCOBuf.testReduceScatter
 try:
     MPI.COMM_SELF.Ibarrier().Wait()
 except NotImplementedError:
@@ -564,6 +566,7 @@ except NotImplementedError:
     del TestCCOBufInplaceWorld
     del TestCCOBufSelfDup
     del TestCCOBufWorldDup
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -529,12 +529,6 @@ class BaseTestP2PObj(object):
         finally:
             comm.Free()
 
-class BaseTestP2PObjDup(BaseTestP2PObj):
-    def setUp(self):
-        self.COMM = self.COMM.Dup()
-    def tearDown(self):
-        self.COMM.Free()
-        del self.COMM
 
 class TestP2PObjSelf(BaseTestP2PObj, unittest.TestCase):
     COMM = MPI.COMM_SELF
@@ -542,34 +536,27 @@ class TestP2PObjSelf(BaseTestP2PObj, unittest.TestCase):
 class TestP2PObjWorld(BaseTestP2PObj, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
-class TestP2PObjSelfDup(BaseTestP2PObjDup, unittest.TestCase):
-    COMM = MPI.COMM_SELF
+class TestP2PObjSelfDup(TestP2PObjSelf):
+    def setUp(self):
+        self.COMM = MPI.COMM_SELF.Dup()
+    def tearDown(self):
+        self.COMM.Free()
 
-class TestP2PObjWorldDup(BaseTestP2PObjDup, unittest.TestCase):
-    COMM = MPI.COMM_WORLD
+class TestP2PObjWorldDup(TestP2PObjWorld):
+    def setUp(self):
+        self.COMM = MPI.COMM_WORLD.Dup()
+    def tearDown(self):
+        self.COMM.Free()
 
 
 name, version = MPI.get_vendor()
 if name == 'MPICH1':
     del BaseTestP2PObj.testProbe
 if name == 'Open MPI':
-    if version < (1,8,4):
-        #del BaseTestP2PObj.testIRecvAndSend
-        del BaseTestP2PObj.testIRecvAndISend
-        del BaseTestP2PObj.testIRecvAndBSend
-        del BaseTestP2PObj.testIRecvAndIBSend
-        del BaseTestP2PObj.testIRecvAndSSend
-        del BaseTestP2PObj.testIRecvAndISSend
-    elif (1,7,0) <= version < (1,8,0):
-        del BaseTestP2PObj.testIRecvAndSend
-        del BaseTestP2PObj.testIRecvAndISend
-        del BaseTestP2PObj.testIRecvAndBSend
-        del BaseTestP2PObj.testIRecvAndIBSend
-        del BaseTestP2PObj.testIRecvAndSSend
-        del BaseTestP2PObj.testIRecvAndISSend
-    elif version < (1,4,0):
+    if version < (1,4,0):
         if MPI.Query_thread() > MPI.THREAD_SINGLE:
             del TestP2PObjWorldDup
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -218,16 +218,16 @@ if name == 'Open MPI':
         del TestCCOObjInterDup
         del TestCCOObjInterDupDup
 elif name == "MPICH2" or name == "Microsoft MPI":
-    if version <= (1,0,7):
-        def _SKIPPED(*args, **kwargs): pass
-        TestCCOObjInterDupDup.testBarrier   = _SKIPPED
-        TestCCOObjInterDupDup.testAllgather = _SKIPPED
-        TestCCOObjInterDupDup.testAllreduce = _SKIPPED
+    if version < (1,0,8):
+        def SKIP(*args, **kwargs): pass
+        TestCCOObjInterDupDup.testBarrier   = SKIP
+        TestCCOObjInterDupDup.testAllgather = SKIP
+        TestCCOObjInterDupDup.testAllreduce = SKIP
 elif name == "DeinoMPI":
-    def _SKIPPED(*args, **kwargs): pass
-    TestCCOObjInterDupDup.testBarrier   = _SKIPPED
-    TestCCOObjInterDupDup.testAllgather = _SKIPPED
-    TestCCOObjInterDupDup.testAllreduce = _SKIPPED
+    def SKIP(*args, **kwargs): pass
+    TestCCOObjInterDupDup.testBarrier   = SKIP
+    TestCCOObjInterDupDup.testAllgather = SKIP
+    TestCCOObjInterDupDup.testAllreduce = SKIP
 elif name == "MPICH1":
     del TestCCOObjInter
     del TestCCOObjInterDup
@@ -236,6 +236,7 @@ elif MPI.ROOT == MPI.PROC_NULL:
     del TestCCOObjInter
     del TestCCOObjInterDup
     del TestCCOObjInterDupDup
+
 
 if __name__ == '__main__':
     unittest.main()
