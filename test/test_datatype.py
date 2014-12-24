@@ -396,7 +396,7 @@ if name == 'Open MPI':
         for t in datatypes_f90[-4:]:
             if t != MPI.DATATYPE_NULL:
                 datatypes.remove(t)
-    if 'win' in sys.platform:
+    if sys.platform.startswith('win'):
         del TestDatatype.testCommit
         del TestDatatype.testDup
         del TestDatatype.testCreateResized

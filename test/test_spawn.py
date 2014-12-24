@@ -184,12 +184,12 @@ name, version = MPI.get_vendor()
 if name == 'Open MPI':
     if version < (1,8,0):
         SKIP_TEST = True
-    if 'win' in sys.platform:
+    if sys.platform.startswith('win'):
         SKIP_TEST = True
 if name == 'MPICH2':
     if version < (1,0,6):
         SKIP_TEST = True
-    if 'win' in sys.platform:
+    if sys.platform.startswith('win'):
         SKIP_TEST = True
 if name == 'Microsoft MPI':
     SKIP_TEST = True

@@ -263,7 +263,7 @@ if name == 'Open MPI':
             del TestWinCreateWorld
             del TestWinAllocateWorld
 if name == 'MPICH2':
-    if 'win' in sys.platform:
+    if sys.platform.startswith('win'):
         del BaseTestWin.testAttributes
 
 

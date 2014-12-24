@@ -393,7 +393,7 @@ if name == 'MPICH2':
         errhdl.Free()
         del errhdl
 if name == 'Open MPI':
-    if 'win' in sys.platform:
+    if sys.platform.startswith('win'):
         del TestExcDatatypeNull
         del TestExcDatatype
         del TestExcStatus
