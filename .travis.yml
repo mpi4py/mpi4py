@@ -24,10 +24,13 @@ branches:
   only:
     - master
 
+cache:
+  apt: true
+
 before_install:
     - sudo apt-get update -q
     - sh ./conf/travis-install-mpi.sh $MPI
-    - pip install -q Cython
+    - pip install -q --install-option --no-cython-compile Cython
     - cython --version
 install:
     - pip install .
