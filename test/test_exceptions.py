@@ -6,13 +6,16 @@ import mpiunittest as unittest
 class BaseTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.world_errhdl = MPI.COMM_WORLD.Get_errhandler()
+        self.errhdl_world = MPI.COMM_WORLD.Get_errhandler()
         MPI.COMM_WORLD.Set_errhandler(MPI.ERRORS_RETURN)
+        self.errhdl_self = MPI.COMM_SELF.Get_errhandler()
+        MPI.COMM_SELF.Set_errhandler(MPI.ERRORS_RETURN)
 
     def tearDown(self):
-        MPI.COMM_WORLD.Set_errhandler(self.world_errhdl)
-        self.world_errhdl.Free()
-
+        MPI.COMM_WORLD.Set_errhandler(self.errhdl_world)
+        self.errhdl_world.Free()
+        MPI.COMM_SELF.Set_errhandler(self.errhdl_self)
+        self.errhdl_self.Free()
 
 # --------------------------------------------------------------------
 
@@ -336,14 +339,8 @@ class TestExcErrhandlerNull(BaseTestCase):
         self.assertRaisesMPI(MPI.ERR_ARG, MPI.ERRHANDLER_NULL.Free)
 
     def testCommSelfSetErrhandler(self):
-        errhdl = MPI.COMM_SELF.Get_errhandler()
-        try:
-            MPI.COMM_SELF.Set_errhandler(MPI.ERRORS_RETURN)
-            self.assertRaisesMPI(
-                MPI.ERR_ARG, MPI.COMM_SELF.Set_errhandler, MPI.ERRHANDLER_NULL)
-        finally:
-            MPI.COMM_SELF.Set_errhandler(errhdl)
-            errhdl.Free()
+        self.assertRaisesMPI(
+            MPI.ERR_ARG, MPI.COMM_SELF.Set_errhandler, MPI.ERRHANDLER_NULL)
 
     def testCommWorldSetErrhandler(self):
         self.assertRaisesMPI(
