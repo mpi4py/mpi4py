@@ -121,7 +121,7 @@ def main(args=None):
     parser = OptionParser(prog=prog, version='%prog ' + version,
                           usage="%prog [options] <command> [args]")
     parser.add_option("--no-threads",
-                      action="store_false", dest="threaded", default=True,
+                      action="store_false", dest="threads", default=True,
                       help="initialize MPI without thread support")
     parser.add_option("--thread-level", type="choice", metavar="LEVEL",
                       choices=["single", "funneled", "serialized", "multiple"],
@@ -137,7 +137,7 @@ def main(args=None):
     (options, args) = parser.parse_args(args)
 
     import mpi4py
-    mpi4py.rc.threaded = options.threaded
+    mpi4py.rc.threads = options.threads
     mpi4py.rc.thread_level = options.thread_level
     if options.mpe:
         mpi4py.profile('mpe', logfile='mpi4py')

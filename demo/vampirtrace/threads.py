@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import mpi4py
-mpi4py.rc.threaded = True
+mpi4py.rc.threads = True
 mpi4py.rc.thread_level = "funneled"
 mpi4py.profile('vt-hyb', logfile='threads')
 

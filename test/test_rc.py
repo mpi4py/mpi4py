@@ -5,7 +5,7 @@ class TestRC(unittest.TestCase):
 
     def testRC1(self):
         rc(initialize   = rc.initialize)
-        rc(threaded     = rc.threaded)
+        rc(threads      = rc.threads)
         rc(thread_level = rc.thread_level)
         rc(finalize     = rc.finalize)
         rc(fast_reduce  = rc.fast_reduce)

@@ -80,7 +80,7 @@ def rc(**kargs):  # pylint: disable=invalid-name
     ----------
     initialize : bool
         Automatic MPI initialization at import (default: True).
-    threaded : bool
+    threads : bool
         Request for thread support (default: True).
     thread_level : {'multiple', 'serialized', 'funneled', 'single'}
         Level of thread support to request (default: 'multiple').
@@ -99,7 +99,7 @@ def rc(**kargs):  # pylint: disable=invalid-name
         setattr(rc, key, value)
 
 rc.initialize = True
-rc.threaded = True
+rc.threads = True
 rc.thread_level = "multiple"
 rc.finalize = None
 rc.fast_reduce = True

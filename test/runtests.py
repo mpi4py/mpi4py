@@ -31,7 +31,7 @@ def getoptionparser():
                       help="run tests REPEAT times in a loop to catch leaks",
                       metavar="REPEAT")
     parser.add_option("--no-threads",
-                      action="store_false", dest="threaded", default=True,
+                      action="store_false", dest="threads", default=True,
                       help="initialize MPI without thread support")
     parser.add_option("--thread-level", type="choice",
                       choices=["single", "funneled", "serialized", "multiple"],
@@ -94,7 +94,7 @@ def import_package(options, pkgname):
     package = __import__(pkgname)
     #
     import mpi4py.rc
-    mpi4py.rc.threaded = options.threaded
+    mpi4py.rc.threads = options.threads
     mpi4py.rc.thread_level = options.thread_level
     if options.mpe:
         mpi4py.profile('mpe', logfile='runtests-mpi4py')

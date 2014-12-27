@@ -20,7 +20,7 @@ cdef extern from *:
 
 ctypedef struct Options:
     int initialize
-    int threaded
+    int threads
     int thread_level
     int finalize
     int fast_reduce
@@ -28,7 +28,7 @@ ctypedef struct Options:
 
 cdef Options options
 options.initialize = 1
-options.threaded = 1
+options.threads = 1
 options.thread_level = MPI_THREAD_MULTIPLE
 options.finalize = 1
 options.fast_reduce = 1
@@ -42,7 +42,7 @@ cdef int warnOpt(object name, object value) except -1:
 cdef int getOptions(Options* opts) except -1:
     cdef object rc
     opts.initialize = 1
-    opts.threaded = 1
+    opts.threads = 1
     opts.thread_level = MPI_THREAD_MULTIPLE
     opts.finalize = 1
     opts.fast_reduce = 1
@@ -51,15 +51,17 @@ cdef int getOptions(Options* opts) except -1:
     except: return 0
     #
     cdef object initialize = True
-    cdef object threaded = True
+    cdef object threads = True
     cdef object thread_level = 'multiple'
     cdef object finalize = None
     cdef object fast_reduce = True
     cdef object recv_mprobe = True
     try: initialize = rc.initialize
     except: pass
-    try: threaded = rc.threaded
+    try: threads = rc.threads
     except: pass
+    try: threads = rc.threaded # backward
+    except: pass               # compatibility
     try: thread_level = rc.thread_level
     except: pass
     try: finalize = rc.finalize
@@ -76,12 +78,12 @@ cdef int getOptions(Options* opts) except -1:
     else:
         warnOpt("initialize", initialize)
     #
-    if threaded in (True, 'yes'):
-        opts.threaded = 1
-    elif threaded in (False, 'no'):
-        opts.threaded = 0
+    if threads in (True, 'yes'):
+        opts.threads = 1
+    elif threads in (False, 'no'):
+        opts.threads = 0
     else:
-        warnOpt("threaded", threaded)
+        warnOpt("threads", threads)
     #
     if thread_level == 'single':
         opts.thread_level = MPI_THREAD_SINGLE
@@ -143,7 +145,7 @@ cdef int bootstrap() except -1:
     cdef int ierr = MPI_SUCCESS
     cdef int required = MPI_THREAD_SINGLE
     cdef int provided = MPI_THREAD_SINGLE
-    if options.threaded:
+    if options.threads:
         required = options.thread_level
         ierr = MPI_Init_thread(NULL, NULL, required, &provided)
         if ierr != MPI_SUCCESS: raise RuntimeError(
