@@ -117,7 +117,8 @@ cdef class Comm:
         """
         Clone an existing communicator
         """
-        cdef Comm comm = <Comm>type(self)()
+        cdef type comm_type = type(self)
+        cdef Comm comm = <Comm>comm_type.__new__(comm_type)
         with nogil: CHKERR( MPI_Comm_dup(self.ob_mpi, &comm.ob_mpi) )
         return comm
 
@@ -126,7 +127,8 @@ cdef class Comm:
         Duplicate an existing communicator
         """
         cdef MPI_Info cinfo = arg_Info(info)
-        cdef Comm comm = <Comm>type(self)()
+        cdef type comm_type = type(self)
+        cdef Comm comm = <Comm>comm_type.__new__(comm_type)
         if info is None:
             with nogil: CHKERR( MPI_Comm_dup(
                 self.ob_mpi, &comm.ob_mpi) )
@@ -139,7 +141,8 @@ cdef class Comm:
         """
         Duplicate an existing communicator
         """
-        cdef Comm comm = <Comm>type(self)()
+        cdef type comm_type = type(self)
+        cdef Comm comm = <Comm>comm_type.__new__(comm_type)
         with nogil: CHKERR( MPI_Comm_dup_with_info(
             self.ob_mpi, info.ob_mpi, &comm.ob_mpi) )
         return comm
@@ -148,7 +151,8 @@ cdef class Comm:
         """
         Nonblocking duplicate an existing communicator
         """
-        cdef Comm comm = <Comm>type(self)()
+        cdef type comm_type = type(self)
+        cdef Comm comm = <Comm>comm_type.__new__(comm_type)
         cdef Request request = <Request>Request.__new__(Request)
         with nogil: CHKERR( MPI_Comm_idup(
             self.ob_mpi, &comm.ob_mpi, &request.ob_mpi) )
