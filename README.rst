@@ -4,6 +4,8 @@ MPI for Python
 
 .. image::  https://travis-ci.org/mpi4py/mpi4py.svg?branch=master
    :target: https://travis-ci.org/mpi4py/mpi4py
+.. image::  https://readthedocs.org/projects/mpi4py/badge/?version=latest
+   :target: https://mpi4py.readthedocs.org/en/latest/
 
 Overview
 --------
