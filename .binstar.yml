@@ -12,6 +12,8 @@ engine:
 env:
  - CFLAGS=-O0
 
+iotimeout: 120
+
 script:
  - pip install .
 after_success:
