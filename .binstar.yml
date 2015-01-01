@@ -7,8 +7,8 @@ platform:
 #- win-32
 #- win-64
 engine:
- - python=2 cython numpy mpich2
- - python=3 cython numpy mpich2
+ - python=2 pip cython numpy mpich2
+ - python=3 pip cython numpy mpich2
 
 script:
  - pip install .
