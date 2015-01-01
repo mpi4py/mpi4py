@@ -7,13 +7,9 @@ platform:
 #- win-32
 #- win-64
 engine:
- - python=2 cython numpy
- - python=3 cython numpy
-env:
- - MPI=mpich2
+ - python=2 cython numpy mpich2
+ - python=3 cython numpy mpich2
 
-before_script:
- - conda install $MPI
 script:
  - pip install .
 after_success:
