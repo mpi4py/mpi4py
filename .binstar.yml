@@ -9,6 +9,8 @@ platform:
 engine:
  - python=2 pip cython numpy mpich2
  - python=3 pip cython numpy mpich2
+env:
+ - CFLAGS=-O0
 
 script:
  - pip install .
