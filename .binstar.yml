@@ -23,7 +23,7 @@ install:
  - python setup.py clean --all
 
 test:
- - mpiexec -n 1 python test/runtests.py -v -f
- - mpiexec -n 3 python test/runtests.py -v -f
+ - mpiexec -n 1 python $PWD/test/runtests.py -v -f -e spawn
+ - mpiexec -n 3 python $PWD/test/runtests.py -v -f -e spawn
 
 iotimeout: 120
