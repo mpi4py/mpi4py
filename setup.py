@@ -218,6 +218,7 @@ def configure_mpi(ext, config_cmd):
     else:
         for prefix, suffixes in (
             ('MPI_Type_create_f90_', ('integer', 'real', 'complex')),
+            ('MPI_Status_', ('c2f', 'f2c')),
             ):
             for suffix in suffixes:
                 function = prefix + suffix

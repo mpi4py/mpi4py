@@ -44,3 +44,11 @@
 #ifdef PyMPI_MISSING_MPI_Type_create_f90_complex
 #undef PyMPI_HAVE_MPI_Type_create_f90_complex
 #endif
+
+#ifdef PyMPI_MISSING_MPI_Status_c2f
+#undef PyMPI_HAVE_MPI_Status_c2f
+#endif
+
+#ifdef PyMPI_MISSING_MPI_Status_f2c
+#undef PyMPI_HAVE_MPI_Status_f2c
+#endif
