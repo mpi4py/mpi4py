@@ -12,14 +12,14 @@ engine:
  - python=2.7
  - python=3.3
  - python=3.4
-env:
- - CFLAGS=-O0 MPI=mpich
- - CFLAGS=-O0 MPI=mpich2
+## env:
+##  - CFLAGS=-O0 MPI=mpich
+##  - CFLAGS=-O0 MPI=mpich2
 
 install:
- - conda install cython numpy
+ - conda install --quiet --yes cython numpy
  - conda config --add channels mpi4py
- - conda install $MPI
+ - conda install --quiet --yes mpich
  - python setup.py install
  - python setup.py clean --all
 
