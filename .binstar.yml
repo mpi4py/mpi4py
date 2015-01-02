@@ -13,18 +13,17 @@ engine:
  - python=3.3
  - python=3.4
 env:
- - CFLAGS=-O0 MPI=mpich
- - CFLAGS=-O0 MPI=mpich2
+ - MPI=mpich
+ - MPI=mpich2
 
 install:
  - conda config --add channels mpi4py
- - conda install --quiet --yes cython numpy
- - conda install --quiet --yes $MPI
+ - conda install --quiet --yes cython numpy $MPI
  - python setup.py install
  - python setup.py clean --all
 
 test:
- - mpiexec -n 1 python test/runtests.py -v -f --exclude=spawn
- - mpiexec -n 5 python test/runtests.py -v -f --exclude=spawn
+ - mpiexec -n 1 python test/runtests.py -v -f
+ - mpiexec -n 3 python test/runtests.py -v -f
 
 iotimeout: 120
