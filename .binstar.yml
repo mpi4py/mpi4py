@@ -19,7 +19,7 @@ env:
 install:
  - conda install cython numpy
  - conda config --add channels mpi4py
- - conda install {{environ.get('MPI')}}
+ - conda install $MPI
  - python setup.py install
  - python setup.py clean --all
 
