@@ -14,6 +14,7 @@ engine:
  - python=3.4
 env:
  - MPI=mpich
+ - MPI=openmpi
  - MPI=mpich2
 
 install:
@@ -24,6 +25,6 @@ install:
 
 test:
  - mpiexec -n 1 python $PWD/test/runtests.py -v -f -e spawn
- - mpiexec -n 3 python $PWD/test/runtests.py -v -f -e spawn
+ - mpiexec -n 2 python $PWD/test/runtests.py -v -f -e spawn
 
 iotimeout: 120
