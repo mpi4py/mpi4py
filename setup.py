@@ -102,7 +102,6 @@ metadata = {
     'maintainer_email' : 'dalcinl@gmail.com',
     }
 
-metadata['requires'] = ['pickle']
 metadata['provides'] = ['mpi4py', 'mpi4py.MPI']
 
 # --------------------------------------------------------------------
