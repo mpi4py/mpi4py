@@ -389,6 +389,11 @@ if name == 'Open MPI':
     del TestDatatype.testCreateF90RealDouble
     del TestDatatype.testCreateF90ComplexSingle
     del TestDatatype.testCreateF90ComplexDouble
+    if MPI.CHARACTER.Get_size() == 0:
+        del TestDatatype.testMatchSize
+        for dtype in datatypes_f + datatypes_f90:
+            if dtype and dtype in datatypes:
+                datatypes.remove(dtype)
     if version < (1,8,2) and MPI.VERSION == 3:
         del TestDatatype.testCreateHindexedBlock
     if (1,6,0) < version < (1,7,0):
