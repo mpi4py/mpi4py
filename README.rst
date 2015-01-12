@@ -2,7 +2,7 @@
 MPI for Python
 ==============
 
-.. image::  https://binstar.org/mpi4py/mpi4py/badges/build.svg
+.. image::  https://binstar.org/mpi4py/mpi4py/badges/build.svg?
    :target: https://binstar.org/mpi4py/mpi4py/builds
 .. image::  https://travis-ci.org/mpi4py/mpi4py.svg?branch=master
    :target: https://travis-ci.org/mpi4py/mpi4py
