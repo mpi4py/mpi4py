@@ -2,6 +2,8 @@
 MPI for Python
 ==============
 
+.. image::  https://binstar.org/mpi4py/mpi4py/badges/build.svg
+   :target: https://binstar.org/mpi4py/mpi4py/builds
 .. image::  https://travis-ci.org/mpi4py/mpi4py.svg?branch=master
    :target: https://travis-ci.org/mpi4py/mpi4py
 .. image::  https://readthedocs.org/projects/mpi4py/badge/?version=latest
@@ -32,6 +34,8 @@ Testsuite
 ---------
 
 The testsuite is run periodically on
+
+* `Binstar <https://binstar.org/mpi4py/mpi4py/builds>`_
 
 * `Travis CI <https://travis-ci.org/mpi4py/mpi4py>`_
 
