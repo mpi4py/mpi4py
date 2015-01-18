@@ -28,4 +28,6 @@ test:
  - mpiexec -n 1 python $PWD/test/runtests.py -v -f -e spawn
  - mpiexec -n 2 python $PWD/test/runtests.py -v -f -e spawn
 
+build_targets: conda
+
 iotimeout: 120
