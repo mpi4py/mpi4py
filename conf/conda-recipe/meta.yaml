@@ -1,0 +1,42 @@
+{% set build = 0 %}
+{% set mpi = environ['MPI'] or 'mpich' %}
+{% set req = {'mpich':'>=3.0', 'openmpi':'>=1.8'} %}
+
+package:
+  name: mpi4py
+  version: 2.0.0.dev
+
+about:
+  home: https://bitbucket.org/mpi4py/
+  summary: 'MPI for Python'
+  license: 'BSD (https://bitbucket.org/mpi4py/mpi4py/src/master/LICENSE.rst)'
+
+source:
+# git_url: https://bitbucket.org/mpi4py/mpi4py
+# git_rev: master
+  path: ../..
+
+requirements:
+  build:
+    - python
+    - cython >=0.18
+    - {{mpi}} {{req[mpi]}}
+  run:
+    - python
+    - {{mpi}} {{req[mpi]}}
+
+build:
+  number: {{build}}
+  string: py{{py}}_{{mpi}}_{{build}}
+  script: python setup.py build_exe install
+
+test:
+  imports:
+    - mpi4py
+    - mpi4py.rc
+    - mpi4py.dl # [linux or osx]
+    - mpi4py.MPI
+  commands:
+    - mpiexec -n 1 python -m mpi4py --version
+    - mpiexec -n 2 python -m mpi4py helloworld
+    - mpiexec -n 2 python -m mpi4py ringtest
