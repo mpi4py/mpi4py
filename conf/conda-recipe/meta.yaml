@@ -8,7 +8,7 @@ package:
 
 about:
   home: https://bitbucket.org/mpi4py/
-  summary: 'MPI for Python'
+  summary: 'Python bindings for MPI'
   license: 'BSD (https://bitbucket.org/mpi4py/mpi4py/src/master/LICENSE.rst)'
 
 source:
