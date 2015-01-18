@@ -18,17 +18,14 @@ env:
  - MPI=mpich2
 
 install:
+ - conda update --quiet --yes -n root conda-build
  - conda config --add channels mpi4py
- - conda build --quiet conf/conda-recipe/
+ - conda build  --quiet --build-only conf/conda-recipe/
 
 test:
  - conda install --quiet --yes numpy
  - conda install --quiet --yes --use-local mpi4py
  - mpiexec -n 1 python $PWD/test/runtests.py -v -f -e spawn
  - mpiexec -n 2 python $PWD/test/runtests.py -v -f -e spawn
-
-build_targets:
- files: conda
- channels: main
 
 iotimeout: 120
