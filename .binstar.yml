@@ -19,10 +19,11 @@ env:
 
 install:
  - conda config --add channels mpi4py
- - conda build conf/conda-recipe/
+ - conda build --quiet conf/conda-recipe/
 
 test:
- - conda install --quiet --yes numpy mpi4py
+ - conda install --quiet --yes numpy
+ - conda install --quiet --yes --use-local mpi4py
  - mpiexec -n 1 python $PWD/test/runtests.py -v -f -e spawn
  - mpiexec -n 2 python $PWD/test/runtests.py -v -f -e spawn
 

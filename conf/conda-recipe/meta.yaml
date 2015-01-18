@@ -37,6 +37,6 @@ test:
     - mpi4py.dl # [linux or osx]
     - mpi4py.MPI
   commands:
-    - mpiexec -n 1 python -m mpi4py --version
-    - mpiexec -n 2 python -m mpi4py helloworld
-    - mpiexec -n 2 python -m mpi4py ringtest
+    - mpiexec -n 1 python -m mpi4py --version  # [not py26]
+    - mpiexec -n 2 python -m mpi4py helloworld # [not py26]
+    - mpiexec -n 2 python -m mpi4py ringtest   # [not py26]
