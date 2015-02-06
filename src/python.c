@@ -92,14 +92,8 @@ Py3_Main(int argc, char **argv)
   return sts;
 }
 
-#if defined(__APPLE__)
-#ifdef __cplusplus
-extern "C" {
-#endif
-extern wchar_t* _Py_DecodeUTF8_surrogateescape(const char *, Py_ssize_t);
-#ifdef __cplusplus
-}
-#endif
+#if PY_VERSION_HEX < 0x03050000
+#define Py_DecodeLocale _Py_char2wchar
 #endif
 
 #if PY_VERSION_HEX < 0x03040000
@@ -121,11 +115,7 @@ mk_wargs(int argc, char **argv)
   setlocale(LC_ALL, "");
 
   for (i=0; i<argc; i++) {
-#if defined(__APPLE__)
-    args[i] = _Py_DecodeUTF8_surrogateescape(argv[i], strlen(argv[i]));
-#else
-    args[i] = _Py_char2wchar(argv[i], NULL);
-#endif
+    args[i] = Py_DecodeLocale(argv[i], NULL);
     if (!args[i]) goto oom;
   }
   args[argc] = NULL;
