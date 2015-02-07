@@ -930,22 +930,20 @@ class build_ext(cmd_build_ext.build_ext):
              sys.platform.startswith('gnu') or
              sys.platform.startswith('sunos')) and
             sysconfig.get_config_var('Py_ENABLE_SHARED')):
-            py_version = sysconfig.get_python_version()
-            bad_pylib_dir = os.path.join(sys.prefix, "lib",
-                                         "python" + py_version,
-                                         "config")
-            try:
-                self.library_dirs.remove(bad_pylib_dir)
-            except ValueError:
-                pass
-            pylib_dir = sysconfig.get_config_var("LIBDIR")
-            if pylib_dir not in self.library_dirs:
-                self.library_dirs.append(pylib_dir)
-            if pylib_dir not in self.rpath:
-                self.rpath.append(pylib_dir)
+            # Remove <prefix>/lib[64]/pythonX.Y/config
+            libdir = os.path.dirname(sysconfig.get_makefile_filename())
+            if libdir in self.library_dirs:
+                self.library_dirs.remove(bad_libdir)
+            # Add <prefix>/lib[64]
+            libdir = sysconfig.get_config_var("LIBDIR")
+            if libdir not in self.library_dirs:
+                self.library_dirs.append(libdir)
+            if libdir not in self.rpath:
+                self.rpath.append(libdir)
+            # Special-case
             if sys.exec_prefix == '/usr':
-                self.library_dirs.remove(pylib_dir)
-                self.rpath.remove(pylib_dir)
+                self.library_dirs.remove(libdir)
+                self.rpath.remove(libdir)
 
     def run (self):
         if self.distribution.has_c_libraries():
