@@ -81,7 +81,7 @@ You can also install the in-development version of mpi4py
     $ easy_install https://bitbucket.org/mpi4py/mpi4py/get/master.tar.gz
 
 You can also install it directly on Fedora and RHEL (and their derivatives)
-using the epel repository
+using the EPEL software repository
 
 * using ``yum`` and the ``openmpi`` package on ``x86_64``::
 
@@ -91,7 +91,7 @@ using the epel repository
 
   # yum install mpi4py-mpich
 
-Please remember to load the correct module for your choosen mpi environment
+Please remember to load the correct module for your choosen MPI environment
 
 * for ``openmpi`` package on ``x86_64`` do::
 
