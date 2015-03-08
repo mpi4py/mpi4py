@@ -26,7 +26,7 @@ AddTypeMap(TypeDict, "h" , __SHORT__       )
 AddTypeMap(TypeDict, "i" , __INT__         )
 AddTypeMap(TypeDict, "l" , __LONG__        )
 AddTypeMap(TypeDict, "q" , __LONG_LONG__   )
-AddTypeMap(TypeDict, "p" , __AINT__        ), # NumPy
+AddTypeMap(TypeDict, "p" , __AINT__        ) # NumPy
 # unsigned integer
 AddTypeMap(TypeDict, "B" , __UNSIGNED_CHAR__     )
 AddTypeMap(TypeDict, "H" , __UNSIGNED_SHORT__    )
