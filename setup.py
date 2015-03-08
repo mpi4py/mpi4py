@@ -428,7 +428,7 @@ from mpidistutils import Extension  as Ext
 from mpidistutils import Library    as Lib
 from mpidistutils import Executable as Exe
 
-CYTHON = '0.18'
+CYTHON = '0.22'
 
 def run_setup():
     """

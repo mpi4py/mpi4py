@@ -19,7 +19,7 @@ source:
 requirements:
   build:
     - python
-    - cython >=0.18
+    - cython >=0.22
     - {{mpi}} {{req[mpi]}}
   run:
     - python
