@@ -218,15 +218,15 @@ cdef class Win:
         if flag == 0: return None
         if attrval == NULL: return 0
         # handle predefined keyvals
-        if (keyval == <int>MPI_WIN_BASE):
+        if keyval == MPI_WIN_BASE:
             return <MPI_Aint>attrval
-        elif (keyval == <int>MPI_WIN_SIZE):
+        elif keyval == MPI_WIN_SIZE:
             return (<MPI_Aint*>attrval)[0]
-        elif (keyval == <int>MPI_WIN_DISP_UNIT):
+        elif keyval == MPI_WIN_DISP_UNIT:
             return (<int*>attrval)[0]
-        elif (keyval == <int>MPI_WIN_CREATE_FLAVOR):
+        elif keyval == MPI_WIN_CREATE_FLAVOR:
             return (<int*>attrval)[0]
-        elif (keyval == <int>MPI_WIN_MODEL):
+        elif keyval == MPI_WIN_MODEL:
             return (<int*>attrval)[0]
         # likely be a user-defined keyval
         elif keyval in win_keyval:

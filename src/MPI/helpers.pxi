@@ -59,10 +59,10 @@ cdef inline int builtin_Datatype(MPI_Datatype ob):
     if ob == MPI_DATATYPE_NULL: return 1
     cdef int ierr = MPI_Type_get_envelope(ob, &ni, &na, &nt, &combiner)
     if ierr != MPI_SUCCESS: return 0 # XXX
-    return (combiner == <int>MPI_COMBINER_NAMED       or
-            combiner == <int>MPI_COMBINER_F90_INTEGER or
-            combiner == <int>MPI_COMBINER_F90_REAL    or
-            combiner == <int>MPI_COMBINER_F90_COMPLEX)
+    return (combiner == MPI_COMBINER_NAMED       or
+            combiner == MPI_COMBINER_F90_INTEGER or
+            combiner == MPI_COMBINER_F90_REAL    or
+            combiner == MPI_COMBINER_F90_COMPLEX)
 
 cdef inline Datatype new_Datatype(MPI_Datatype ob):
     cdef Datatype datatype = <Datatype>Datatype.__new__(Datatype)

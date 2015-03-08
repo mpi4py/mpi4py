@@ -485,8 +485,8 @@ cdef class _p_msg_cco:
                 self.for_cco_recv(0, msg, root, 0)
                 sending = 0
         else: # inter-communication
-            if ((root == <int>MPI_ROOT) or
-                (root == <int>MPI_PROC_NULL)):
+            if (root == MPI_ROOT or
+                root == MPI_PROC_NULL):
                 self.for_cco_send(0, msg, root, 0)
                 sending = 1
             else:
@@ -525,8 +525,8 @@ cdef class _p_msg_cco:
                 self.for_cco_send(0, smsg, root, 0)
         else: # inter-communication
             CHKERR( MPI_Comm_remote_size(comm, &size) )
-            if ((root == <int>MPI_ROOT) or
-                (root == <int>MPI_PROC_NULL)):
+            if (root == MPI_ROOT or
+                root == MPI_PROC_NULL):
                 self.for_cco_recv(v, rmsg, root, size)
                 self.for_cco_send(0, smsg, null, 0)
             else:
@@ -557,8 +557,8 @@ cdef class _p_msg_cco:
                 self.for_cco_recv(0, rmsg, root, 0)
         else: # inter-communication
             CHKERR( MPI_Comm_remote_size(comm, &size) )
-            if ((root == <int>MPI_ROOT) or
-                (root == <int>MPI_PROC_NULL)):
+            if (root == MPI_ROOT or
+                root == MPI_PROC_NULL):
                 self.for_cco_send(v, smsg, root, size)
                 self.for_cco_recv(0, rmsg, null,  0)
             else:
@@ -678,8 +678,8 @@ cdef class _p_msg_cco:
                 self.rcount = self.scount
                 self.rtype  = self.stype
         else: # inter-communication
-            if ((root == <int>MPI_ROOT) or
-                (root == <int>MPI_PROC_NULL)):
+            if (root == MPI_ROOT or
+                root == MPI_PROC_NULL):
                 self.for_cro_recv(rmsg, root)
                 self.scount = self.rcount
                 self.stype  = self.rtype

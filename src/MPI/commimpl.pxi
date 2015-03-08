@@ -164,18 +164,18 @@ cdef inline int comm_neighbors_count(MPI_Comm comm,
     cdef int size=0, ndims=0, rank=0, nneighbors=0
     cdef int indegree=0, outdegree=0, weighted=0
     CHKERR( MPI_Topo_test(comm, &topo) )
-    if topo == <int>MPI_UNDEFINED: # XXX
+    if topo == MPI_UNDEFINED: # XXX
         CHKERR( MPI_Comm_size(comm, &size) )
         indegree = outdegree = size
-    elif topo == <int>MPI_CART:
+    elif topo == MPI_CART:
         CHKERR( MPI_Cartdim_get(comm, &ndims) )
         indegree = outdegree = <int>2*ndims
-    elif topo == <int>MPI_GRAPH:
+    elif topo == MPI_GRAPH:
         CHKERR( MPI_Comm_rank(comm, &rank) )
         CHKERR( MPI_Graph_neighbors_count(
                 comm, rank, &nneighbors) )
         indegree = outdegree = nneighbors
-    elif topo == <int>MPI_DIST_GRAPH:
+    elif topo == MPI_DIST_GRAPH:
         CHKERR( MPI_Dist_graph_neighbors_count(
                 comm, &indegree, &outdegree, &weighted) )
     if incoming != NULL: incoming[0] = indegree

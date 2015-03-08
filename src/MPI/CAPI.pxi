@@ -101,13 +101,13 @@ cdef api object PyMPIComm_New(MPI_Comm arg):
             cls = Intercomm
         else:
             CHKERR( MPI_Topo_test(arg, &topo) )
-            if topo == <int>MPI_UNDEFINED:
+            if topo == MPI_UNDEFINED:
                 cls = Intracomm
-            elif topo == <int>MPI_CART:
+            elif topo == MPI_CART:
                 cls = Cartcomm
-            elif topo == <int>MPI_GRAPH:
+            elif topo == MPI_GRAPH:
                 cls = Graphcomm
-            elif topo == <int>MPI_DIST_GRAPH:
+            elif topo == MPI_DIST_GRAPH:
                 cls = Distgraphcomm
             else:
                 cls = Intracomm

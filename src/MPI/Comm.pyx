@@ -1020,15 +1020,15 @@ cdef class Comm:
         if not flag: return None
         if attrval == NULL: return 0
         # MPI-1 predefined attribute keyvals
-        if ((keyval == <int>MPI_TAG_UB) or
-            (keyval == <int>MPI_HOST) or
-            (keyval == <int>MPI_IO) or
-            (keyval == <int>MPI_WTIME_IS_GLOBAL)):
+        if (keyval == MPI_TAG_UB or
+            keyval == MPI_HOST or
+            keyval == MPI_IO or
+            keyval == MPI_WTIME_IS_GLOBAL):
             return (<int*>attrval)[0]
         # MPI-2 predefined attribute keyvals
-        elif ((keyval == <int>MPI_UNIVERSE_SIZE) or
-              (keyval == <int>MPI_APPNUM) or
-              (keyval == <int>MPI_LASTUSEDCODE)):
+        elif (keyval == MPI_UNIVERSE_SIZE or
+              keyval == MPI_APPNUM or
+              keyval == MPI_LASTUSEDCODE):
             return (<int*>attrval)[0]
         # user-defined attribute keyval
         elif keyval in comm_keyval:

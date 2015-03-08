@@ -519,58 +519,58 @@ cdef class Datatype:
         # manage in advance the contained datatypes
         cdef int k = 0, s1, e1, s2, e2, s3, e3, s4, e4
         cdef object oldtype = None
-        if combiner == <int>MPI_COMBINER_STRUCT:
+        if combiner == MPI_COMBINER_STRUCT:
             oldtype = [ref_Datatype(d[k]) for k from 0 <= k < nd]
-        elif (combiner != <int>MPI_COMBINER_F90_INTEGER and
-              combiner != <int>MPI_COMBINER_F90_REAL and
-              combiner != <int>MPI_COMBINER_F90_COMPLEX):
+        elif (combiner != MPI_COMBINER_F90_INTEGER and
+              combiner != MPI_COMBINER_F90_REAL and
+              combiner != MPI_COMBINER_F90_COMPLEX):
             oldtype = ref_Datatype(d[0])
         # dispatch depending on the combiner value
-        if combiner == <int>MPI_COMBINER_DUP:
+        if combiner == MPI_COMBINER_DUP:
             return (oldtype, ('DUP'), {})
-        elif combiner == <int>MPI_COMBINER_CONTIGUOUS:
+        elif combiner == MPI_COMBINER_CONTIGUOUS:
             return (oldtype, ('CONTIGUOUS'),
                     {('count') : i[0]})
-        elif combiner == <int>MPI_COMBINER_VECTOR:
+        elif combiner == MPI_COMBINER_VECTOR:
             return (oldtype, ('VECTOR'),
                     {('count')       : i[0],
                      ('blocklength') : i[1],
                      ('stride')      : i[2]})
-        elif combiner == <int>MPI_COMBINER_HVECTOR:
+        elif combiner == MPI_COMBINER_HVECTOR:
             return (oldtype, ('HVECTOR'),
                     {('count')       : i[0],
                      ('blocklength') : i[1],
                      ('stride')      : a[0]})
-        elif combiner == <int>MPI_COMBINER_INDEXED:
+        elif combiner == MPI_COMBINER_INDEXED:
             s1 =      1; e1 =   i[0]
             s2 = i[0]+1; e2 = 2*i[0]
             return (oldtype, ('INDEXED'),
                     {('blocklengths')  : [i[k] for k from s1 <= k <= e1],
                      ('displacements') : [i[k] for k from s2 <= k <= e2]})
-        elif combiner == <int>MPI_COMBINER_HINDEXED:
+        elif combiner == MPI_COMBINER_HINDEXED:
             s1 = 1; e1 = i[0]
             s2 = 0; e2 = i[0]-1
             return (oldtype, ('HINDEXED'),
                     {('blocklengths')  : [i[k] for k from s1 <= k <= e1],
                      ('displacements') : [a[k] for k from s2 <= k <= e2]})
-        elif combiner == <int>MPI_COMBINER_INDEXED_BLOCK:
+        elif combiner == MPI_COMBINER_INDEXED_BLOCK:
             s2 = 2; e2 = i[0]+1
             return (oldtype, ('INDEXED_BLOCK'),
                     {('blocklength')   : i[1],
                      ('displacements') : [i[k] for k from s2 <= k <= e2]})
-        elif combiner == <int>MPI_COMBINER_HINDEXED_BLOCK:
+        elif combiner == MPI_COMBINER_HINDEXED_BLOCK:
             s2 = 0; e2 = i[0]-1
             return (oldtype, ('HINDEXED_BLOCK'),
                     {('blocklength')   : i[1],
                      ('displacements') : [a[k] for k from s2 <= k <= e2]})
-        elif combiner == <int>MPI_COMBINER_STRUCT:
+        elif combiner == MPI_COMBINER_STRUCT:
             s1 = 1; e1 = i[0]
             s2 = 0; e2 = i[0]-1
             return (Datatype, ('STRUCT'),
                     {('blocklengths')  : [i[k] for k from s1 <= k <= e1],
                      ('displacements') : [a[k] for k from s2 <= k <= e2],
                      ('datatypes')     : oldtype})
-        elif combiner == <int>MPI_COMBINER_SUBARRAY:
+        elif combiner == MPI_COMBINER_SUBARRAY:
             s1 =        1; e1 =   i[0]
             s2 =   i[0]+1; e2 = 2*i[0]
             s3 = 2*i[0]+1; e3 = 3*i[0]
@@ -579,7 +579,7 @@ cdef class Datatype:
                      ('subsizes') : [i[k] for k from s2 <= k <= e2],
                      ('starts')   : [i[k] for k from s3 <= k <= e3],
                      ('order')    : i[3*i[0]+1]})
-        elif combiner == <int>MPI_COMBINER_DARRAY:
+        elif combiner == MPI_COMBINER_DARRAY:
             s1 =        3; e1 =   i[2]+2
             s2 =   i[2]+3; e2 = 2*i[2]+2
             s3 = 2*i[2]+3; e3 = 3*i[2]+2
@@ -592,18 +592,18 @@ cdef class Datatype:
                      ('dargs')    : [i[k] for k from s3 <= k <= e3],
                      ('psizes')   : [i[k] for k from s4 <= k <= e4],
                      ('order')    : i[4*i[2]+3]})
-        elif combiner == <int>MPI_COMBINER_RESIZED:
+        elif combiner == MPI_COMBINER_RESIZED:
             return (oldtype, ('RESIZED'),
                     {('lb')     : a[0],
                      ('extent') : a[1]})
-        elif combiner == <int>MPI_COMBINER_F90_INTEGER:
+        elif combiner == MPI_COMBINER_F90_INTEGER:
             return (Datatype, ('F90_INTEGER'),
                     {('r') : i[0]})
-        elif combiner == <int>MPI_COMBINER_F90_REAL:
+        elif combiner == MPI_COMBINER_F90_REAL:
             return (Datatype, ('F90_REAL'),
                     {('p') : i[0],
                      ('r') : i[1]})
-        elif combiner == <int>MPI_COMBINER_F90_COMPLEX:
+        elif combiner == MPI_COMBINER_F90_COMPLEX:
             return (Datatype, ('F90_COMPLEX'),
                     {('p') : i[0],
                      ('r') : i[1]})
@@ -626,10 +626,10 @@ cdef class Datatype:
         def __get__(self):
             if self.ob_mpi == MPI_DATATYPE_NULL: return True
             cdef int combiner = self.Get_envelope()[3]
-            return (combiner == <int>MPI_COMBINER_NAMED or
-                    combiner == <int>MPI_COMBINER_F90_INTEGER or
-                    combiner == <int>MPI_COMBINER_F90_REAL or
-                    combiner == <int>MPI_COMBINER_F90_COMPLEX)
+            return (combiner == MPI_COMBINER_NAMED or
+                    combiner == MPI_COMBINER_F90_INTEGER or
+                    combiner == MPI_COMBINER_F90_REAL or
+                    combiner == MPI_COMBINER_F90_COMPLEX)
 
     # Pack and Unpack
     # ---------------
