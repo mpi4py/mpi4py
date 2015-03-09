@@ -8,6 +8,7 @@ python:
     - 3.3
     - 3.4
     - pypy
+    - pypy3
 
 env:
     - MPI=mpich3
@@ -18,6 +19,7 @@ env:
 matrix:
   allow_failures:
     - python: pypy
+    - python: pypy3
     - env: MPI=mpich1
 
 branches:
