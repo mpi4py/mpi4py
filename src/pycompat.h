@@ -30,12 +30,14 @@ _PyLong_AsByteArray(PyLongObject* v,
 
 /* ------------------------------------------------------------------------- */
 
-#if PY_VERSION_HEX < 0x03030000 || defined(PYPY_VERSION)
+#if PY_VERSION_HEX < 0x03030000 || \
+    (defined(PYPY_VERSION) && !defined(PyMemoryView_FromMemory))
 static PyObject *
 PyMemoryView_FromMemory(char *mem, Py_ssize_t size, int flags)
 {
   int readonly = (flags == PyBUF_WRITE) ? 0 : 1;
-#if PY_VERSION_HEX < 0x02070000 || defined(PYPY_VERSION)
+#if PY_VERSION_HEX < 0x02070000 || \
+    (defined(PYPY_VERSION) && !defined(PyMemoryView_FromBuffer))
   if (readonly)
     return PyBuffer_FromMemory((void*)mem, size);
   else

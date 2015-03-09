@@ -18,9 +18,10 @@ cdef extern from "Python.h":
         PyBUF_SIMPLE
         PyBUF_WRITABLE
         PyBUF_FORMAT
-        PyBUF_ANY_CONTIGUOUS
         PyBUF_ND
         PyBUF_STRIDES
+        PyBUF_ANY_CONTIGUOUS
+        PyBUF_FULL_RO
     int  PyObject_CheckBuffer(object)
     int  PyObject_GetBuffer(object, Py_buffer *, int) except -1
     void PyBuffer_Release(Py_buffer *)
@@ -45,16 +46,20 @@ cdef extern from *:
 
 cdef type array_array
 cdef type numpy_array
+cdef int  pypy_have_numpy = 0
 if PYPY:
     from array import array as array_array
     try:
         from _numpypy.multiarray import ndarray as numpy_array
+        pypy_have_numpy = 1
     except ImportError:
         try:
             from numpypy import ndarray as numpy_array
+            pypy_have_numpy = 1
         except ImportError:
             try:
                 from numpy import ndarray as numpy_array
+                pypy_have_numpy = 1
             except ImportError:
                 pass
 
@@ -65,6 +70,8 @@ except -1:
     cdef void *buf = NULL
     cdef Py_ssize_t size = 0
     cdef bint readonly = 0
+    if PyObject_CheckBuffer(obj):
+        return PyObject_GetBuffer(obj, view, flags)
     if isinstance(obj, bytes):
         buf  = PyBytes_AsString(obj)
         size = PyBytes_Size(obj)
@@ -78,7 +85,7 @@ except -1:
         buf = PyLong_AsVoidPtr(addr)
         size *= obj.itemsize
         readonly = 0
-    elif isinstance(obj, numpy_array):
+    elif pypy_have_numpy and isinstance(obj, numpy_array):
         addr, readonly = obj.__array_interface__['data']
         buf = PyLong_AsVoidPtr(addr)
         size = obj.nbytes
