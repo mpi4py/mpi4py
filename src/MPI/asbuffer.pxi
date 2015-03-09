@@ -145,7 +145,6 @@ cdef class _p_buffer:
             PyBuffer_FillInfo(view, <object>NULL,
                               self.view.buf, self.view.len,
                               self.view.readonly, flags)
-
     def __releasebuffer__(self, Py_buffer *view):
         if view == NULL: return
         PyBuffer_Release(view)
@@ -168,9 +167,29 @@ cdef class _p_buffer:
         p[0] = self.view.buf
         return self.view.len
 
+    # sequence interface (basic)
+    def __len__(self):
+        return self.view.len
+    def __getitem__(self, Py_ssize_t i):
+        cdef unsigned char *buf = <unsigned char *>self.view.buf
+        if i < 0: i += self.view.len
+        if i < 0 or i >= self.view.len:
+            raise IndexError("index out of range")
+        return <long>buf[i]
+    def __setitem__(self, Py_ssize_t i, unsigned char v):
+        cdef unsigned char *buf = <unsigned char*>self.view.buf
+        if i < 0: i += self.view.len
+        if i < 0 or i >= self.view.len:
+            raise IndexError("index out of range")
+        buf[i] = v
 
 cdef inline _p_buffer newbuffer():
     return <_p_buffer>_p_buffer.__new__(_p_buffer)
+
+cdef inline _p_buffer tobuffer(void *base, Py_ssize_t size):
+    cdef _p_buffer buf = newbuffer()
+    PyBuffer_FillInfo(&buf.view, <object>NULL, base, size, 0, PyBUF_FULL_RO)
+    return buf
 
 cdef inline _p_buffer getbuffer(object ob, bint readonly, bint format):
     cdef _p_buffer buf = newbuffer()
