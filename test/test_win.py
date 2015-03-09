@@ -1,4 +1,3 @@
-import sys
 from mpi4py import MPI
 import mpiunittest as unittest
 try:
@@ -263,6 +262,7 @@ if name == 'Open MPI':
             del TestWinCreateWorld
             del TestWinAllocateWorld
 if name == 'MPICH2':
+    import sys
     if sys.platform.startswith('win'):
         del BaseTestWin.testAttributes
 

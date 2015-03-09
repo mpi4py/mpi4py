@@ -11,7 +11,7 @@ class TestDPM(unittest.TestCase):
         None,
         True, False,
         -7, 0, 7,
-        -2**63, 2**63-1,
+        -2**63+1, 2**63-1,
         -2.17, 0.0, 3.14,
         1+2j, 2-3j,
         'mpi4py',
