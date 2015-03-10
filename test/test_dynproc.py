@@ -132,18 +132,33 @@ class TestDPM(unittest.TestCase):
         rank = MPI.COMM_WORLD.Get_rank()
         if size < 2: return
         server = client = address = None
-        MPI.COMM_WORLD.Barrier()
+        # crate server/client sockets
         if rank == 0: # server
             server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             server.bind(('', 0))
-            address = server.getsockname()
-        address = MPI.COMM_WORLD.bcast(address, root=0)
-        if rank == 0: # server
             server.listen(0)
-            client = server.accept()[0]
         if rank == 1: # client
             client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            client.connect(address)
+        # communicate address
+        if rank == 0:
+            address = server.getsockname()
+            MPI.COMM_WORLD.ssend(address, 1)
+        if rank == 1:
+            address = MPI.COMM_WORLD.recv(None, 0)
+        MPI.COMM_WORLD.Barrier()
+        # stablish client/server connection
+        connected = False
+        if rank == 0: # server
+            client = server.accept()[0]
+            server.close()
+        if rank == 1: # client
+            try:
+                client.connect(address)
+                connected = True
+            except socket.error:
+                raise
+        connected = MPI.COMM_WORLD.bcast(connected, root=1)
+        # test Comm.Join()
         MPI.COMM_WORLD.Barrier()
         if client:
             fd = client.fileno()
@@ -164,8 +179,6 @@ class TestDPM(unittest.TestCase):
             else:
                 self.assertEqual(message, TestDPM.message)
             intercomm.Free()
-        if server:
-            server.close()
         MPI.COMM_WORLD.Barrier()
 
 
