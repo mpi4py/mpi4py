@@ -32,6 +32,7 @@ cache:
 before_install:
     - sudo apt-get update -q
     - sh ./conf/travis-install-mpi.sh $MPI
+    - if [[ $TRAVIS_PYTHON_VERSION == pypy3 ]]; then pip install -q https://github.com/cython/cython/archive/0.22.x.zip; fi
     - pip install -q Cython
     - cython --version
 install:
