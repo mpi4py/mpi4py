@@ -1,0 +1,14 @@
+package: openmpi
+user: mpi4py
+
+platform:
+ - linux-64
+#- linux-32
+#- osx-64
+
+engine: openssl
+
+script:
+ - conda build .
+
+build_targets: conda

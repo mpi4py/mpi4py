@@ -1,6 +1,6 @@
 {% set build = 0 %}
 {% set mpi = environ['MPI'] or 'mpich' %}
-{% set req = {'mpich':'>=3.0', 'openmpi':'>=1.8'} %}
+{% set req = {'mpich':'>=3.1', 'openmpi':'>=1.8'} %}
 
 package:
   name: mpi4py

@@ -1,0 +1,42 @@
+package:
+  name: openmpi
+  version: 1.8.4
+
+about:
+  home: http://www.open-mpi.org/
+  summary: 'Open MPI: A high performance message passing library'
+  license: 'BSD (https://www.open-mpi.org/community/license.php)'
+
+requirements:
+  conflicts:
+    - mpich
+    - mpich2
+
+source:
+  fn: openmpi-1.8.4.tar.bz2
+  url: http://www.open-mpi.org/software/ompi/v1.8/downloads/openmpi-1.8.4.tar.bz2
+  md5: 93b7ea2c4ebae76947f942579608ae4a
+
+build:
+  number: 0
+  binary_relocation: true
+  detect_binary_files_with_prefix: true
+
+test:
+  files:
+    - test/helloworld.c
+    - test/helloworld.cxx
+  commands:
+    - command -v ompi_info
+    - ompi_info
+    - command -v mpiexec
+    - mpiexec -n 4 hostname
+    - command -v mpicc
+    - mpicc -show
+    - command -v mpicxx
+    - mpicxx -show
+    - mpicc  helloworld.c   -o helloworld_c
+    - mpicxx helloworld.cxx -o helloworld_cxx
+    - export DYLD_LIBRARY_PATH=$LIBRARY_PATH # [osx]
+    - mpiexec -n 4 ./helloworld_c
+    - mpiexec -n 4 ./helloworld_cxx

@@ -20,7 +20,7 @@ env:
 install:
  - conda update --quiet --yes -n root conda-build
  - conda config --add channels mpi4py
- - conda build  --quiet conf/conda-recipe/
+ - conda build  --quiet conf/conda-recipes/mpi4py
 
 test:
  - conda install --quiet --yes numpy
