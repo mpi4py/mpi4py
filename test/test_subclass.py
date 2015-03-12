@@ -238,7 +238,7 @@ class TestMyWin(BaseTestMyWin, unittest.TestCase):
     pass
 
 try:
-    w = MPI.Win.Create(MPI.BOTTOM).Free()
+    MPI.Win.Create(MPI.BOTTOM).Free()
 except NotImplementedError:
     del TestMyWin
 
@@ -301,6 +301,12 @@ try:
 except NotImplementedError:
     try: del TestMyFile
     except NameError: pass
+
+if hasattr(MPI, 'ffi'):
+    for k, v in list(globals().items()):
+        if isinstance(v, type):
+            del globals()[k]
+    del k, v
 
 
 if __name__ == '__main__':
