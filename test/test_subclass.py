@@ -257,18 +257,20 @@ class MyFile(MPI.File):
 
 class BaseTestMyFile(object):
 
-    def setUp(self):
+    def openfile(self):
         fd, fname = tempfile.mkstemp(prefix='mpi4py')
         os.close(fd)
         amode = MPI.MODE_RDWR | MPI.MODE_CREATE | MPI.MODE_DELETE_ON_CLOSE
         try:
-            f = MPI.File.Open(MPI.COMM_SELF,
-                              fname, amode,
-                              MPI.INFO_NULL)
-            self.file = MyFile(f)
+            self.file = MPI.File.Open(MPI.COMM_SELF, fname, amode, MPI.INFO_NULL)
+            return self.file
         except Exception:
             os.remove(fname)
             raise
+
+    def setUp(self):
+        f = self.openfile()
+        self.file = MyFile(f)
 
     def tearDown(self):
         if self.file:
@@ -295,8 +297,7 @@ if name == 'Open MPI':
         del TestMyFile
 try:
     dummy = BaseTestMyFile()
-    dummy.setUp()
-    dummy.tearDown()
+    dummy.openfile().Close()
     del dummy
 except NotImplementedError:
     try: del TestMyFile
