@@ -3,7 +3,7 @@
 # Contact: dalcinl@gmail.com
 
 """
-"Python bindings for MPI"
+Python bindings for MPI
 """
 
 import sys
