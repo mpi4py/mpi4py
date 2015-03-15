@@ -51,7 +51,9 @@ dl_dlclose(PyObject *self, PyObject *arg0)
     if (!handle && PyErr_Occurred())
       return NULL;
   }
-  if (handle)
+  if (!handle)
+    (void)dlerror();
+  else
     err = dlclose(handle);
   return Py_BuildValue((char *)"i", err);
 }
