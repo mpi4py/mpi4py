@@ -39,9 +39,11 @@ $_mpi_load
 
 make build
 
-coverage run --source=mpi4py,test test/runtests.py --no-threads
+echo "Running coverage"
+coverage run --source=mpi4py,test test/runtests.py -v --no-threads
 coverage xml
 
+echo "Running testsuite"
 case "$1" in
     mpich)
         mpiexec -np 1 python test/runtests.py -v
