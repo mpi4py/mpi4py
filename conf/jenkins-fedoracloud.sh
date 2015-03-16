@@ -34,6 +34,7 @@ pip install nose pylint --upgrade  ## Needed within the venv
 hash -r  ## Reload where the nosetests app is (within the venv) - see `which nosetests` with and without
 pip install nosexcover
 
+$_mpi_unload
 $_mpi_load
 
 make build
