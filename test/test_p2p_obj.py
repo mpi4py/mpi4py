@@ -469,6 +469,34 @@ class BaseTestP2PObj(object):
                                        None,   MPI.PROC_NULL, 0)
             self.assertEqual(rmess, None)
 
+    def testMixed(self):
+        comm = self.COMM
+        rank = comm.Get_rank()
+        #
+        sreq = comm.Isend([None, 0, 'B'], rank)
+        obj = comm.recv(None, rank)
+        sreq.Wait()
+        self.assertTrue(obj is None)
+        for smess in messages:
+            buf = MPI.pickle.dumps(smess)
+            sreq = comm.Isend([buf, 'B'], rank)
+            rmess = comm.recv(None, rank)
+            sreq.Wait()
+            self.assertTrue(rmess == smess)
+        #
+        sreq = comm.Isend([None, 0, 'B'], rank)
+        rreq = comm.irecv(None, rank)
+        sreq.Wait()
+        obj = rreq.wait()
+        self.assertTrue(obj is None)
+        for smess in messages:
+            buf = MPI.pickle.dumps(smess)
+            sreq = comm.Isend([buf, 'B'], rank)
+            rreq = comm.irecv(None, rank)
+            sreq.Wait()
+            rmess = rreq.wait()
+            self.assertTrue(rmess == smess)
+
     def testPingPong01(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
