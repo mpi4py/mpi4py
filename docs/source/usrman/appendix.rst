@@ -56,8 +56,8 @@ installed as :file:`{prefix}/bin/python{X}.{X}-mpi` (or
 interactively, for example::
 
     $ python2.7-mpi
-    Python 2.7.5 (default, Jun 25 2014, 10:19:55)
-    [GCC 4.8.2 20131212 (Red Hat 4.8.2-7)] on linux2
+    Python 2.7.8 (default, Nov 10 2014, 08:19:18)
+    [GCC 4.9.2 20141101 (Red Hat 4.9.2-1)] on linux2
     Type "help", "copyright", "credits" or "license" for more information.
     >>> import sys
     >>> sys.executable

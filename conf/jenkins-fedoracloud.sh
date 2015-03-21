@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Test script running on Fedora jenkins http://jenkins.cloud.fedoraproject.org/job/mpi4py
-# Copyright (c) 2014, Thomas Spura.
+# Copyright (c) 2015, Thomas Spura.
 
 #rpm -qa | sort
 
