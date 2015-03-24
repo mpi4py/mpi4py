@@ -31,9 +31,8 @@ cdef extern from "Python.h":
 
 # Python 2 buffer interface (legacy)
 cdef extern from "Python.h":
-    ctypedef void const_void "const void"
     int PyObject_CheckReadBuffer(object)
-    int PyObject_AsReadBuffer (object, const_void **, Py_ssize_t *) except -1
+    int PyObject_AsReadBuffer (object, const void **, Py_ssize_t *) except -1
     int PyObject_AsWriteBuffer(object, void **, Py_ssize_t *) except -1
 
 cdef extern from *:
@@ -95,7 +94,7 @@ except -1:
             PyObject_AsWriteBuffer(obj, &buf, &size)
         else:
             readonly = 1
-            PyObject_AsReadBuffer(obj, <const_void**>&buf, &size)
+            PyObject_AsReadBuffer(obj, <const void**>&buf, &size)
     if buf == NULL and size == 0: buf = emptybuffer
     PyBuffer_FillInfo(view, obj, buf, size, readonly, flags)
     if (flags & PyBUF_FORMAT) == PyBUF_FORMAT: view.format = b"B"
@@ -118,7 +117,7 @@ except -1:
         PyObject_AsWriteBuffer(obj, &view.buf, &view.len)
     else:
         view.readonly = 1
-        PyObject_AsReadBuffer(obj, <const_void**>&view.buf, &view.len)
+        PyObject_AsReadBuffer(obj, <const void**>&view.buf, &view.len)
     if view.buf == NULL and view.len == 0: view.buf = emptybuffer
     PyBuffer_FillInfo(view, obj, view.buf, view.len, view.readonly, flags)
     if (flags & PyBUF_FORMAT) == PyBUF_FORMAT: view.format = b"B"
