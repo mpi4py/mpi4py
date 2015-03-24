@@ -96,7 +96,7 @@ cdef inline object asarray_str(object sequence, char ***p):
      cdef char** array = NULL
      cdef object ob = allocate(size+1, sizeof(char*), <void**>&array)
      for i from 0 <= i < size:
-         sequence[i] = asmpistr(sequence[i], &array[i], NULL)
+         sequence[i] = asmpistr(sequence[i], &array[i])
      array[size] = NULL
      p[0] = array
      return (sequence, ob)

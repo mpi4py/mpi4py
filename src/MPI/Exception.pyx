@@ -125,5 +125,5 @@ def Add_error_string(int errorcode, string):
     *error class* or *errorcode*
     """
     cdef char *cstring = NULL
-    string = asmpistr(string, &cstring, NULL)
+    string = asmpistr(string, &cstring)
     CHKERR( MPI_Add_error_string(errorcode, cstring) )

@@ -7,13 +7,10 @@ cdef extern from *:
 
 #------------------------------------------------------------------------------
 
-cdef inline object asmpistr(object ob, char *s[], int *n):
-    cdef const char *sbuf = NULL
-    cdef Py_ssize_t slen = 0, *slenp = NULL
-    if n != NULL: slenp = &slen
-    ob = PyMPIString_AsStringAndSize(ob, &sbuf, slenp)
-    if s != NULL: s[0] = <char*> sbuf
-    if n != NULL: n[0] = <int>   slen
+cdef inline object asmpistr(object ob, char *s[]):
+    cdef const char *buf = NULL
+    ob = PyMPIString_AsStringAndSize(ob, &buf, NULL)
+    if s != NULL: s[0] = <char*> buf
     return ob
 
 cdef inline object tompistr(const char s[], int n):

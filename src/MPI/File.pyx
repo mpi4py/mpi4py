@@ -85,7 +85,7 @@ cdef class File:
         Open a file
         """
         cdef char *cfilename = NULL
-        filename = asmpistr(filename, &cfilename, NULL)
+        filename = asmpistr(filename, &cfilename)
         cdef MPI_Info cinfo = arg_Info(info)
         cdef File file = <File>File.__new__(File)
         with nogil: CHKERR( MPI_File_open(
@@ -104,7 +104,7 @@ cdef class File:
         Delete a file
         """
         cdef char *cfilename = NULL
-        filename = asmpistr(filename, &cfilename, NULL)
+        filename = asmpistr(filename, &cfilename)
         cdef MPI_Info cinfo = arg_Info(info)
         with nogil: CHKERR( MPI_File_delete(cfilename, cinfo) )
 
@@ -199,7 +199,7 @@ cdef class File:
         Set the file view
         """
         cdef char *cdatarep = b"native"
-        if datarep is not None: datarep = asmpistr(datarep, &cdatarep, NULL)
+        if datarep is not None: datarep = asmpistr(datarep, &cdatarep)
         cdef MPI_Datatype cetype = MPI_BYTE
         if etype is not None: cetype = etype.ob_mpi
         cdef MPI_Datatype cftype = cetype
@@ -672,7 +672,7 @@ def Register_datatrep(datarep, read_fn, write_fn, extent_fn):
     Register user-defined data representations
     """
     cdef char *cdatarep = NULL
-    datarep = asmpistr(datarep, &cdatarep, NULL)
+    datarep = asmpistr(datarep, &cdatarep)
     cdef object state = _p_datarep(read_fn, write_fn, extent_fn)
     cdef MPI_Datarep_conversion_function *rd = MPI_CONVERSION_FN_NULL
     cdef MPI_Datarep_conversion_function *wr = MPI_CONVERSION_FN_NULL

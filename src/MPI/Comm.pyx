@@ -1131,7 +1131,7 @@ cdef class Comm:
         Set the print name for this communicator
         """
         cdef char *cname = NULL
-        name = asmpistr(name, &cname, NULL)
+        name = asmpistr(name, &cname)
         CHKERR( MPI_Comm_set_name(self.ob_mpi, cname) )
 
     property name:
@@ -1502,7 +1502,7 @@ cdef class Intracomm(Comm):
         CHKERR( MPI_Comm_rank(self.ob_mpi, &rank) )
         cdef tmp1, tmp2, tmp3
         if root == rank:
-            tmp1 = asmpistr(command, &cmd, NULL)
+            tmp1 = asmpistr(command, &cmd)
             tmp2 = asarray_argv(args, &argv)
         if errcodes is not None:
             tmp3 = mkarray_int(maxprocs, &ierrcodes)
@@ -1572,7 +1572,7 @@ cdef class Intracomm(Comm):
         cdef int rank = MPI_UNDEFINED
         CHKERR( MPI_Comm_rank(self.ob_mpi, &rank) )
         if root == rank:
-            port_name = asmpistr(port_name, &cportname, NULL)
+            port_name = asmpistr(port_name, &cportname)
             cinfo = arg_Info(info)
         cdef Intercomm comm = <Intercomm>Intercomm.__new__(Intercomm)
         with nogil: CHKERR( MPI_Comm_accept(
@@ -1591,7 +1591,7 @@ cdef class Intracomm(Comm):
         cdef int rank = MPI_UNDEFINED
         CHKERR( MPI_Comm_rank(self.ob_mpi, &rank) )
         if root == rank:
-            port_name = asmpistr(port_name, &cportname, NULL)
+            port_name = asmpistr(port_name, &cportname)
             cinfo = arg_Info(info)
         cdef Intercomm comm = <Intercomm>Intercomm.__new__(Intercomm)
         with nogil: CHKERR( MPI_Comm_connect(
@@ -2287,7 +2287,7 @@ def Close_port(port_name):
     Close a port
     """
     cdef char *cportname = NULL
-    port_name = asmpistr(port_name, &cportname, NULL)
+    port_name = asmpistr(port_name, &cportname)
     with nogil: CHKERR( MPI_Close_port(cportname) )
 
 # Name Publishing
@@ -2300,9 +2300,9 @@ def Publish_name(service_name, port_name, info=INFO_NULL):
     if isinstance(port_name, Info): # backward compatibility
         port_name, info = info, port_name
     cdef char *csrvcname = NULL
-    service_name = asmpistr(service_name, &csrvcname, NULL)
+    service_name = asmpistr(service_name, &csrvcname)
     cdef char *cportname = NULL
-    port_name = asmpistr(port_name, &cportname, NULL)
+    port_name = asmpistr(port_name, &cportname)
     cdef MPI_Info cinfo = arg_Info(<Info?>info)
     with nogil: CHKERR( MPI_Publish_name(csrvcname, cinfo, cportname) )
 
@@ -2313,9 +2313,9 @@ def Unpublish_name(service_name, port_name, info=INFO_NULL):
     if isinstance(port_name, Info): # backward compatibility
         port_name, info = info, port_name
     cdef char *csrvcname = NULL
-    service_name = asmpistr(service_name, &csrvcname, NULL)
+    service_name = asmpistr(service_name, &csrvcname)
     cdef char *cportname = NULL
-    port_name = asmpistr(port_name, &cportname, NULL)
+    port_name = asmpistr(port_name, &cportname)
     cdef MPI_Info cinfo = arg_Info(<Info?>info)
     with nogil: CHKERR( MPI_Unpublish_name(csrvcname, cinfo, cportname) )
 
@@ -2324,7 +2324,7 @@ def Lookup_name(service_name, info=INFO_NULL):
     Lookup a port name given a service name
     """
     cdef char *csrvcname = NULL
-    service_name = asmpistr(service_name, &csrvcname, NULL)
+    service_name = asmpistr(service_name, &csrvcname)
     cdef MPI_Info cinfo = arg_Info(<Info?>info)
     cdef char cportname[MPI_MAX_PORT_NAME+1]
     with nogil: CHKERR( MPI_Lookup_name(csrvcname, cinfo, cportname) )

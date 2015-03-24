@@ -628,7 +628,7 @@ cdef class Win:
         Set the print name associated with the window
         """
         cdef char *cname = NULL
-        name = asmpistr(name, &cname, NULL)
+        name = asmpistr(name, &cname)
         CHKERR( MPI_Win_set_name(self.ob_mpi, cname) )
 
     property name:

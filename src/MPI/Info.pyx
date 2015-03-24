@@ -59,7 +59,7 @@ cdef class Info:
         cdef char *ckey = NULL
         cdef char *cvalue = NULL
         cdef int flag = 0
-        key = asmpistr(key, &ckey, NULL)
+        key = asmpistr(key, &ckey)
         cdef tmp = allocate((maxlen+1), sizeof(char), <void**>&cvalue)
         CHKERR( MPI_Info_get(self.ob_mpi, ckey, maxlen, cvalue, &flag) )
         cvalue[maxlen] = 0 # just in case
@@ -73,8 +73,8 @@ cdef class Info:
         """
         cdef char *ckey = NULL
         cdef char *cvalue = NULL
-        key = asmpistr(key, &ckey, NULL)
-        value = asmpistr(value, &cvalue, NULL)
+        key = asmpistr(key, &ckey)
+        value = asmpistr(value, &cvalue)
         CHKERR( MPI_Info_set(self.ob_mpi, ckey, cvalue) )
 
     def Delete(self, object key):
@@ -82,7 +82,7 @@ cdef class Info:
         Remove a (key, value) pair from info
         """
         cdef char *ckey = NULL
-        key = asmpistr(key, &ckey, NULL)
+        key = asmpistr(key, &ckey)
         CHKERR( MPI_Info_delete(self.ob_mpi, ckey) )
 
     def Get_nkeys(self):
@@ -132,7 +132,7 @@ cdef class Info:
         cdef char *ckey = NULL
         cdef int dummy = 0
         cdef int haskey = 0
-        key = asmpistr(key, &ckey, NULL)
+        key = asmpistr(key, &ckey)
         CHKERR( MPI_Info_get_valuelen(self.ob_mpi, ckey, &dummy, &haskey) )
         return <bint>haskey
 

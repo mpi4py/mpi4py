@@ -689,7 +689,7 @@ cdef class Datatype:
         using a portable data representation (**external32**).
         """
         cdef char *cdatarep = NULL
-        datarep = asmpistr(datarep, &cdatarep, NULL)
+        datarep = asmpistr(datarep, &cdatarep)
         cdef MPI_Aint lb = 0, extent = 0
         CHKERR( MPI_Type_get_extent(self.ob_mpi, &lb, &extent) )
         #
@@ -710,7 +710,7 @@ cdef class Datatype:
         using a portable data representation (**external32**).
         """
         cdef char *cdatarep = NULL
-        datarep = asmpistr(datarep, &cdatarep, NULL)
+        datarep = asmpistr(datarep, &cdatarep)
         cdef MPI_Aint lb = 0, extent = 0
         CHKERR( MPI_Type_get_extent(self.ob_mpi, &lb, &extent) )
         #
@@ -732,7 +732,7 @@ cdef class Datatype:
         """
         cdef char *cdatarep = NULL
         cdef MPI_Aint size = 0
-        datarep = asmpistr(datarep, &cdatarep, NULL)
+        datarep = asmpistr(datarep, &cdatarep)
         CHKERR( MPI_Pack_external_size(cdatarep, count,
                                        self.ob_mpi, &size) )
         return size
@@ -820,7 +820,7 @@ cdef class Datatype:
         Set the print name for this datatype
         """
         cdef char *cname = NULL
-        name = asmpistr(name, &cname, NULL)
+        name = asmpistr(name, &cname)
         CHKERR( MPI_Type_set_name(self.ob_mpi, cname) )
 
     property name:
