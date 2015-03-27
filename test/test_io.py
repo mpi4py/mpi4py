@@ -25,7 +25,7 @@ class BaseTestIO(object):
             self.FILE = MPI.File.Open(comm, fname, amode, info)
         except Exception:
             if comm.Get_rank() == 0:
-                os.remove(self.fname)
+                os.remove(fname)
             raise
 
     def tearDown(self):
@@ -342,13 +342,20 @@ class TestIOWorld(BaseTestIO, unittest.TestCase):
 import sys
 name, version = MPI.get_vendor()
 if name == 'Open MPI':
-    if version < (1,2,9):
-        if MPI.Query_thread() > MPI.THREAD_SINGLE:
-            del TestFileNull
-            del TestFileSelf
-    elif sys.platform.startswith('win'):
-        del TestFileNull
-        del TestFileSelf
+    if version < (1,8,0):
+        TestIOWorld = None
+    if sys.platform.startswith('win'):
+        TestIOSelf = None
+        TestIOWorld = None
+if name == 'MPICH2':
+    TestIOWorld = None
+if name == 'MPICH1':
+    TestIOSelf = None
+    TestIOWorld = None
+if name == 'LAM/MPI':
+    TestIOSelf = None
+    TestIOWorld = None
+
 try:
     dummy = BaseTestIO()
     dummy.COMM = MPI.COMM_SELF
@@ -356,10 +363,8 @@ try:
     dummy.tearDown()
     del dummy
 except NotImplementedError:
-    try: del TestFileSelf
-    except NameError: pass
-    try: del TestFileWorld
-    except NameError: pass
+    TestIOSelf = None
+    TestIOWorld = None
 
 if __name__ == '__main__':
     unittest.main()
