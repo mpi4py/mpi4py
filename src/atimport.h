@@ -13,6 +13,9 @@
 #include "fallback.h"
 #include "compat.h"
 
+#include "pympivendor.h"
+#include "pympicommctx.h"
+
 /* ------------------------------------------------------------------------- */
 
 #include "pycompat.h"

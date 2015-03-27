@@ -260,7 +260,7 @@ MAX_LIBRARY_VERSION_STRING = MPI_MAX_LIBRARY_VERSION_STRING
 
 # --------------------------------------------------------------------
 
-cdef extern from "pympivendor.h":
+cdef extern from *:
     int PyMPI_Get_vendor(const char**,int*,int*,int*) nogil
 
 def get_vendor():
