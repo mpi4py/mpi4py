@@ -1416,6 +1416,39 @@ cdef class Intracomm(Comm):
             tag, &comm.ob_mpi) )
         return comm
 
+    # Low-Level Topology Functions
+    # ----------------------------
+
+    def Cart_map(self, dims, periods=None):
+        """
+        Return an optimal placement for the
+        calling process on the physical machine
+        """
+        cdef int ndims = 0, *idims = NULL, *iperiods = NULL
+        ndims = <int>len(dims)
+        dims = asarray_int(dims, ndims, &idims)
+        if periods is None: periods = [False] * ndims
+        periods = asarray_int(periods, ndims, &iperiods)
+        cdef int rank = MPI_PROC_NULL
+        CHKERR( MPI_Cart_map(self.ob_mpi, ndims, idims, iperiods, &rank) )
+        return rank
+
+    def Graph_map(self, index, edges):
+        """
+        Return an optimal placement for the
+        calling process on the physical machine
+        """
+        cdef int nnodes = 0, *iindex = NULL
+        index = getarray_int(index, &nnodes, &iindex)
+        cdef int nedges = 0, *iedges = NULL
+        edges = getarray_int(edges, &nedges, &iedges)
+        # extension: accept more 'standard' adjacency arrays
+        if iindex[0]==0 and iindex[nnodes-1]==nedges:
+            nnodes -= 1; iindex += 1;
+        cdef int rank = MPI_PROC_NULL
+        CHKERR( MPI_Graph_map(self.ob_mpi, nnodes, iindex, iedges, &rank) )
+        return rank
+
     # Global Reduction Operations
     # ---------------------------
 
@@ -1942,24 +1975,6 @@ cdef class Cartcomm(Topocomm):
         return comm
 
 
-    # Cartesian Low-Level Functions
-    # -----------------------------
-
-    def Map(self, dims, periods=None):
-        """
-        Return an optimal placement for the
-        calling process on the physical machine
-        """
-        cdef int ndims = 0, *idims = NULL, *iperiods = NULL
-        ndims = <int>len(dims)
-        dims = asarray_int(dims, ndims, &idims)
-        if periods is None: periods = [False] * ndims
-        periods = asarray_int(periods, ndims, &iperiods)
-        cdef int rank = MPI_PROC_NULL
-        CHKERR( MPI_Cart_map(self.ob_mpi, ndims, idims, iperiods, &rank) )
-        return rank
-
-
 # Cartesian Convenience Function
 
 def Compute_dims(int nnodes, dims):
@@ -2084,25 +2099,6 @@ cdef class Graphcomm(Topocomm):
         def __get__(self):
             cdef int rank = self.Get_rank()
             return self.Get_neighbors(rank)
-
-    # Graph Low-Level Functions
-    # -------------------------
-
-    def Map(self, index, edges):
-        """
-        Return an optimal placement for the
-        calling process on the physical machine
-        """
-        cdef int nnodes = 0, *iindex = NULL
-        index = getarray_int(index, &nnodes, &iindex)
-        cdef int nedges = 0, *iedges = NULL
-        edges = getarray_int(edges, &nedges, &iedges)
-        # extension: accept more 'standard' adjacency arrays
-        if iindex[0]==0 and iindex[nnodes-1]==nedges:
-            nnodes -= 1; iindex += 1;
-        cdef int rank = MPI_PROC_NULL
-        CHKERR( MPI_Graph_map(self.ob_mpi, nnodes, iindex, iedges, &rank) )
-        return rank
 
 
 cdef class Distgraphcomm(Topocomm):

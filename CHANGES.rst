@@ -62,12 +62,14 @@ Release 2.0.0 [2015-XX-XX]
   + Change signature of name publishing functions.
     The new signatures are
     ``Publish_name(service_name, port_name, info=INFO_NULL)`` and
-    ``Unpublish_name(service_name, port_name, info=INFO_NULL)```
+    ``Unpublish_name(service_name, port_name, info=INFO_NULL)```.
   + ``Win`` instances now cache Python objects exposing memory by
     keeping references instead of using MPI attribute caching.
   + Change signature of ``Win.Lock()``.
     The new signature is
-    ``Win.Lock(rank, lock_type=LOCK_EXCLUSIVE, assertion=0)``
+    ``Win.Lock(rank, lock_type=LOCK_EXCLUSIVE, assertion=0)``.
+  + Move ``Cartcomm.Map()`` to ``Intracomm.Cart_map()``.
+  + Move ``Graphcomm.Map()`` to ``Intracomm.Graph_map()``.
   + Remove the ``mpi4py.MPE`` module.
   + Rename the Cython definition file for use with ``cimport``
     statement from ``mpi_c.pxd`` to ``libmpi.pxd``.
