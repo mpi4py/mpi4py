@@ -144,7 +144,8 @@ cdef class Status:
         """
         """
         cdef Status status = <Status> self
-        cdef size_t i = 0, n = sizeof(MPI_Status)/sizeof(int)
+        cdef Py_ssize_t i = 0
+        cdef Py_ssize_t n = <int>(sizeof(MPI_Status)/sizeof(int))
         cdef MPI_Status *c_status = &status.ob_mpi
         cdef MPI_Fint *f_status = NULL
         cdef tmp = allocate(n+1, sizeof(MPI_Fint), <void**>&f_status)
@@ -156,7 +157,8 @@ cdef class Status:
         """
         """
         cdef Status status = <Status> Status.__new__(Status)
-        cdef size_t i = 0, n = sizeof(MPI_Status)/sizeof(int)
+        cdef Py_ssize_t i = 0
+        cdef Py_ssize_t n = <int>(sizeof(MPI_Status)/sizeof(int))
         cdef MPI_Status *c_status = &status.ob_mpi
         cdef MPI_Fint *f_status = NULL
         cdef tmp = allocate(n+1, sizeof(MPI_Fint), <void**>&f_status)
