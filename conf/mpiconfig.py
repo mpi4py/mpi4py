@@ -148,11 +148,6 @@ class Config(object):
         ProgramFiles = os.environ.get('ProgramFiles', '')
         CCP_HOME = os.environ.get('CCP_HOME', '')
         for (name, prefix, suffix) in (
-            ('mpich3',   ProgramFiles, 'MPICH'),
-            ('mpich2',   ProgramFiles, 'MPICH2'),
-            ('openmpi',  ProgramFiles, 'OpenMPI'),
-            ('openmpi',  ProgramFiles, 'OpenMPI*'),
-            ('deinompi', ProgramFiles, 'DeinoMPI'),
             ('msmpi',    CCP_HOME,     ''),
             ('msmpi',    ProgramFiles, 'Microsoft MPI'),
             ('msmpi',    ProgramFiles, 'Microsoft HPC Pack 2012 R2'),
@@ -161,6 +156,11 @@ class Config(object):
             ('msmpi',    ProgramFiles, 'Microsoft HPC Pack 2008 R2'),
             ('msmpi',    ProgramFiles, 'Microsoft HPC Pack 2008'),
             ('msmpi',    ProgramFiles, 'Microsoft HPC Pack 2008 SDK'),
+            ('mpich3',   ProgramFiles, 'MPICH'),
+            ('mpich2',   ProgramFiles, 'MPICH2'),
+            ('openmpi',  ProgramFiles, 'OpenMPI'),
+            ('openmpi',  ProgramFiles, 'OpenMPI*'),
+            ('deinompi', ProgramFiles, 'DeinoMPI'),
             ):
             mpi_dir = os.path.join(prefix, suffix)
             if '*' in mpi_dir:
@@ -170,23 +170,25 @@ class Config(object):
             if not (mpi_dir and os.path.isdir(mpi_dir)):
                 continue
             define_macros = []
-            include_dirs = [os.path.join(mpi_dir, 'include')]
+            include_dir = os.path.join(mpi_dir, 'include')
             library = 'mpi'
             library_dir = os.path.join(mpi_dir, 'lib')
-            if name == 'openmpi':
-                define_macros.append(('OMPI_IMPORTS', None))
-                library = 'libmpi'
             if name == 'msmpi':
-                include_dirs.append(os.path.join(mpi_dir, 'inc'))
+                include_dir = os.path.join(mpi_dir, 'inc')
                 library = 'msmpi'
                 bits = platform.architecture()[0]
                 if bits == '32bit':
                     library_dir = os.path.join(library_dir, 'i386')
                 if bits == '64bit':
                     library_dir = os.path.join(library_dir, 'amd64')
+                if not os.path.isdir(include_dir):
+                    include_dir = os.path.join(mpi_dir, 'include')
+            if name == 'openmpi':
+                define_macros.append(('OMPI_IMPORTS', None))
+                library = 'libmpi'
             self.library_info.update(
                 define_macros=define_macros,
-                include_dirs=include_dirs,
+                include_dirs=[include_dir],
                 libraries=[library],
                 library_dirs=[library_dir],
                 )
