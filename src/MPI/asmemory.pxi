@@ -41,13 +41,13 @@ cdef class _p_mem:
         PyMem_Free(self.buf)
 
 cdef inline _p_mem allocate(Py_ssize_t m, size_t b, void **buf):
-  cdef Py_ssize_t n = m * <Py_ssize_t>b
-  if n > PY_SSIZE_T_MAX:
+  if m > PY_SSIZE_T_MAX/<Py_ssize_t>b:
       raise MemoryError("memory allocation size too large")
-  if n < 0:
+  if m < 0:
       raise RuntimeError("memory allocation with negative size")
+  cdef size_t n = <size_t>m * b
   cdef _p_mem ob = <_p_mem>_p_mem.__new__(_p_mem)
-  ob.buf = PyMem_Malloc(<size_t>n)
+  ob.buf = PyMem_Malloc(n)
   if ob.buf == NULL: raise MemoryError
   if buf != NULL: buf[0] = ob.buf
   return ob
