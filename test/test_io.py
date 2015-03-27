@@ -349,6 +349,8 @@ if name == 'Open MPI':
         TestIOWorld = None
 if name == 'MPICH2':
     TestIOWorld = None
+if name == 'Microsoft MPI':
+    TestIOWorld = None
 if name == 'MPICH1':
     TestIOSelf = None
     TestIOWorld = None
