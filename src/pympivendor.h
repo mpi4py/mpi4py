@@ -1,7 +1,7 @@
 /* Author:  Lisandro Dalcin   */
 /* Contact: dalcinl@gmail.com */
 
-#define pympiAtoI(p, i)                \
+#define pympiAtoI(p, i)             \
   do {                              \
     i = 0;                          \
     while (*p >= '0' && *p <= '9')  \
@@ -9,9 +9,9 @@
   } while(0)
 
 #define pympiVersionParser(S, a, b, c)      \
-  do {                                   \
-    const char *s = S;                   \
-    a = b = c = 0;                       \
+  do {                                      \
+    const char *s = S;                      \
+    a = b = c = 0;                          \
     pympiAtoI(s, a); if(*s++ != '.') break; \
     pympiAtoI(s, b); if(*s++ != '.') break; \
     pympiAtoI(s, c); if(*s++ != '.') break; \
