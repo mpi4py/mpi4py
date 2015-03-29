@@ -32,7 +32,8 @@
 
 #if !defined(PyMPI_USE_MATCHED_RECV)
   #if defined(PyMPI_HAVE_MPI_Mprobe) && \
-      defined(PyMPI_HAVE_MPI_Mrecv)
+      defined(PyMPI_HAVE_MPI_Mrecv)  && \
+      MPI_VERSION >= 3
     #define PyMPI_USE_MATCHED_RECV 1
   #else
     #define PyMPI_USE_MATCHED_RECV 0
