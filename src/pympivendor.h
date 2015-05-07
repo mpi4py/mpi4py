@@ -43,6 +43,12 @@ static int PyMPI_Get_vendor(const char **vendor_name,
   #endif
 #endif
 
+  /* Intel MPI */
+#if defined(I_MPI_VERSION)
+  name = "Intel MPI";
+  pympiVersionParser(I_MPI_VERSION,major,minor,micro);
+#endif
+
   /* MPICH2 */
 #if defined(MPICH2)
   #if defined(MPICH2_NUMVERSION)
