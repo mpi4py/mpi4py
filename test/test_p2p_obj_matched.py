@@ -170,7 +170,8 @@ if MPI.MESSAGE_NULL == MPI.MESSAGE_NO_PROC:
 else:
     name, version = MPI.get_vendor()
     if name == 'Open MPI':
-        if MPI.COMM_WORLD.Get_size() > 1:
+        if (version < (1,8,5) and
+            MPI.COMM_WORLD.Get_size() > 1):
             del TestP2PMatchedSelfDup
             del TestP2PMatchedWorldDup
 
