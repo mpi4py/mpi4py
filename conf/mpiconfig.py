@@ -146,8 +146,10 @@ class Config(object):
     def _setup_windows(self):
         from glob import glob
         ProgramFiles = os.environ.get('ProgramFiles', '')
+        MSMPI_HOME = os.path.dirname(os.environ.get('MSMPI_BIN', ''))
         CCP_HOME = os.environ.get('CCP_HOME', '')
         for (name, prefix, suffix) in (
+            ('msmpi',    MSMPI_HOME,   ''),
             ('msmpi',    CCP_HOME,     ''),
             ('msmpi',    ProgramFiles, 'Microsoft MPI'),
             ('msmpi',    ProgramFiles, 'Microsoft HPC Pack 2012 R2'),
