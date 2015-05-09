@@ -175,14 +175,9 @@ def configure_mpi(ext, config_cmd):
     from textwrap import dedent
     from distutils import log
     from distutils.errors import DistutilsPlatformError
+    headers = ['stdlib.h', 'mpi.h']
     #
     log.info("checking for MPI compile and link ...")
-    errmsg = ("Cannot find 'mpi.h' header. "
-              "Check your configuration!!!")
-    ok = config_cmd.check_header('mpi.h', headers=['stdlib.h'])
-    if not ok: raise DistutilsPlatformError(errmsg)
-    #
-    headers = ['stdlib.h', 'mpi.h']
     ConfigTest = dedent("""\
     int main(int argc, char **argv)
     {
@@ -191,8 +186,7 @@ def configure_mpi(ext, config_cmd):
       return 0;
     }
     """)
-    errmsg = ("Cannot %s MPI programs. "
-              "Check your configuration!!!")
+    errmsg = "Cannot %s MPI programs. Check your configuration!!!"
     ok = config_cmd.try_compile(ConfigTest, headers=headers)
     if not ok: raise DistutilsPlatformError(errmsg % "compile")
     ok = config_cmd.try_link(ConfigTest, headers=headers)
@@ -202,11 +196,11 @@ def configure_mpi(ext, config_cmd):
     tests  = ["defined(%s)" % macro for macro in
               ("OPEN_MPI", "MPICH2", "DEINO_MPI", "MSMPI_VER",)]
     tests += ["(defined(MPICH_NAME)&&(MPICH_NAME==3))"]
-    ConfigTest = dedent('''\
+    ConfigTest = dedent("""\
     #if !(%s)
     #error "Unknown MPI implementation"
     #endif
-    ''') % "||".join(tests)
+    """) % "||".join(tests)
     ok = config_cmd.try_compile(ConfigTest, headers=headers)
     if not ok:
         from mpidistutils import ConfigureMPI
@@ -215,17 +209,18 @@ def configure_mpi(ext, config_cmd):
         configure.dump(results)
         ext.define_macros += [('HAVE_CONFIG_H', 1)]
     else:
-        for prefix, suffixes in (
-            ('MPI_Type_create_f90_', ('integer', 'real', 'complex')),
-            ('MPI_Status_', ('c2f', 'f2c')),
+        for function, arglist in (
+            ('MPI_Type_create_f90_integer',   '0,(MPI_Datatype*)0'),
+            ('MPI_Type_create_f90_real',    '0,0,(MPI_Datatype*)0'),
+            ('MPI_Type_create_f90_complex', '0,0,(MPI_Datatype*)0'),
+            ('MPI_Status_c2f', '(MPI_Status*)0,(MPI_Fint*)0'),
+            ('MPI_Status_f2c', '(MPI_Fint*)0,(MPI_Status*)0'),
             ):
-            for suffix in suffixes:
-                function = prefix + suffix
-                ok = config_cmd.check_function(
-                    function, decl=1, call=1)
-                if not ok:
-                    macro = 'PyMPI_MISSING_' + function
-                    ext.define_macros += [(macro, 1)]
+            ok = config_cmd.check_function_call(
+                function, arglist, headers=headers)
+            if not ok:
+                macro = 'PyMPI_MISSING_' + function
+                ext.define_macros += [(macro, 1)]
     #
     if os.name == 'posix':
         configure_dl(ext, config_cmd)

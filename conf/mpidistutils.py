@@ -551,7 +551,23 @@ class config(cmd_config.config):
         if decl:
             body.append("%s %s;" % (type, symbol))
         body.append("int main (int n, char**v) {")
-        body.append("  %s v; v = %s;" % (type, symbol))
+        body.append("  %s s; s = %s; (void)s;" % (type, symbol))
+        body.append("  (void)n; (void)v;")
+        body.append("  return 0;")
+        body.append("}")
+        body = "\n".join(body) + "\n"
+        ok = self.try_link(body, headers, include_dirs,
+                           libraries, library_dirs, lang=lang)
+        return ok
+
+    def check_function_call (self, function, args='',
+                             headers=None, include_dirs=None,
+                             libraries=None, library_dirs=None,
+                             lang="c"):
+        log.info("checking for function '%s' ..." % function)
+        body = []
+        body.append("int main (int n, char**v) {")
+        body.append("  (void)%s(%s);" % (function, args))
         body.append("  (void)n; (void)v;")
         body.append("  return 0;")
         body.append("}")
