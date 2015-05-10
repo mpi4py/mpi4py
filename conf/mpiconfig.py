@@ -144,12 +144,27 @@ class Config(object):
         pass
 
     def _setup_windows(self):
+        # Microsoft MPI (modern)
+        from os.path import join, isfile
+        arch = platform.architecture()[0][:2]
+        MSMPI_INC = os.environ.get('MSMPI_INC')
+        MSMPI_LIB = os.environ.get('MSMPI_LIB'+arch)
+        if (MSMPI_INC and isfile(join(MSMPI_INC, 'mpi.h')) and
+            MSMPI_LIB and isfile(join(MSMPI_LIB, 'msmpi.lib'))):
+            MSMPI_INC = os.path.normpath(MSMPI_INC)
+            MSMPI_LIB = os.path.normpath(MSMPI_LIB)
+            self.library_info.update(
+                include_dirs=[MSMPI_INC],
+                library_dirs=[MSMPI_LIB],
+                libraries=['msmpi'])
+            self.section = 'msmpi'
+            self.filename = [os.path.dirname(MSMPI_INC)]
+            return
+        # Microsoft MPI and others (legacy)
         from glob import glob
         ProgramFiles = os.environ.get('ProgramFiles', '')
-        #MSMPI_HOME = os.path.dirname(os.environ.get('MSMPI_BIN', ''))
         CCP_HOME = os.environ.get('CCP_HOME', '')
         for (name, prefix, suffix) in (
-            #('msmpi',    MSMPI_HOME,   ''),
             ('msmpi',    CCP_HOME,     ''),
             ('msmpi',    ProgramFiles, 'Microsoft MPI'),
             ('msmpi',    ProgramFiles, 'Microsoft HPC Pack 2012 R2'),
@@ -178,10 +193,10 @@ class Config(object):
             if name == 'msmpi':
                 include_dir = os.path.join(mpi_dir, 'inc')
                 library = 'msmpi'
-                bits = platform.architecture()[0]
-                if bits == '32bit':
+                arch = platform.architecture()[0]
+                if arch == '32bit':
                     library_dir = os.path.join(library_dir, 'i386')
-                if bits == '64bit':
+                if arch == '64bit':
                     library_dir = os.path.join(library_dir, 'amd64')
                 if not os.path.isdir(include_dir):
                     include_dir = os.path.join(mpi_dir, 'include')
