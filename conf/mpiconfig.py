@@ -110,6 +110,8 @@ class Config(object):
         if mpiopt:
             if ',' in mpiopt:
                 section, filename = mpiopt.split(',', 1)
+            elif os.path.isfile(mpiopt):
+                filename = mpiopt
             else:
                 section = mpiopt
         if not filename: filename = "mpi.cfg"
