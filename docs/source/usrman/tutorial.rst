@@ -208,7 +208,7 @@ Collective Communication
    comm.Gather(sendbuf, recvbuf, root=0)
    if rank == 0:
        for i in range(size):
-           assert np.allclose(recvbuf[i,:], rank)
+           assert np.allclose(recvbuf[i,:], i)
 
 * Parallel matrix-vector product::
 
