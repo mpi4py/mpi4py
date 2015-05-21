@@ -20,23 +20,19 @@ requirements:
   build:
     - python
     - cython >=0.22
-    - {{mpi}} {{req[mpi]}}
+    - {{mpi}} {{req[mpi]}} # [not win]
   run:
     - python
-    - {{mpi}} {{req[mpi]}}
+    - {{mpi}} {{req[mpi]}} # [not win]
 
 build:
   number: {{build}}
   string: py{{py}}_{{mpi}}_{{build}}
-  script: python setup.py build_exe install
+  script: python setupegg.py build_exe install -O0
 
 test:
   imports:
     - mpi4py
     - mpi4py.rc
-    - mpi4py.dl # [linux or osx]
+    - mpi4py.dl # [not win]
     - mpi4py.MPI
-  commands:
-    - mpiexec -n 1 python -m mpi4py --version  # [not py26]
-    - mpiexec -n 2 python -m mpi4py helloworld # [not py26]
-    - mpiexec -n 2 python -m mpi4py ringtest   # [not py26]
