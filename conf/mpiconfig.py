@@ -147,14 +147,29 @@ class Config(object):
 
     def _setup_windows(self):
         # Microsoft MPI (v5.x and v4.x)
+        def msmpi_ver():
+            try:
+                import _winreg as winreg
+                HKLM = winreg.HKEY_LOCAL_MACHINE
+                subkey = "SOFTWARE\Microsoft\MPI"
+                with winreg.OpenKey(HKLM, subkey) as key:
+                    for i in range(winreg.QueryInfoKey(key)[1]):
+                        name, value, type = winreg.EnumValue(key, i)
+                        if name != "Version": continue
+                        major, minor = value.split('.')[:2]
+                        return (int(major), int(minor))
+            except: pass
+            return (1, 0)
         def setup_msmpi(MSMPI_INC, MSMPI_LIB):
             from os.path import join, isfile
             ok = (MSMPI_INC and isfile(join(MSMPI_INC, 'mpi.h')) and
                   MSMPI_LIB and isfile(join(MSMPI_LIB, 'msmpi.lib')))
             if not ok: return False
+            MSMPI_VER = '0x%d%02d' % msmpi_ver()
             MSMPI_INC = os.path.normpath(MSMPI_INC)
             MSMPI_LIB = os.path.normpath(MSMPI_LIB)
             self.library_info.update(
+                define_macros=[('MSMPI_VER', MSMPI_VER)],
                 include_dirs=[MSMPI_INC],
                 library_dirs=[MSMPI_LIB],
                 libraries=['msmpi'])
