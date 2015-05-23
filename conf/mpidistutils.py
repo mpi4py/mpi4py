@@ -1407,6 +1407,18 @@ class clean(cmd_clean.clean):
             except OSError:
                 pass
 
+        # remove the <package>.egg_info directory
+        if self.all:
+            try:
+                egg_info = self.get_finalized_command('egg_info').egg_info
+                if os.path.exists(egg_info):
+                    remove_tree(egg_info, dry_run=self.dry_run)
+                else:
+                    log.debug("'%s' does not exist -- can't clean it",
+                              egg_info)
+            except DistutilsError:
+                pass
+
 # -----------------------------------------------------------------------------
 
 try:
