@@ -41,7 +41,7 @@ static int PyMPI_PCMPI_MPI_Win_get_attr(MPI_Win win,
 #if PCMPI_DLOPEN_LIBMPI
 #if HAVE_DLOPEN
 
-#include "../dynload.h"
+#include "../../dynload.h"
 
 static void PyMPI_PCMPI_dlopen_libmpi(void)
 {

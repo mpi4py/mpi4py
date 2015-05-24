@@ -1,2 +1,2 @@
-#include "pmpi-vt.h"
+#include "vt.h"
 char pympi_pmpi_name[] = "vt";

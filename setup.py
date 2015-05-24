@@ -338,8 +338,9 @@ def ext_modules():
         sources=['src/MPI.c'],
         depends=(['src/mpi4py.MPI.c'] +
                  glob('src/*.h') +
-                 glob('src/config/*.h') +
-                 glob('src/compat/*.h')
+                 glob('src/lib-mpi/*.h') +
+                 glob('src/lib-mpi/config/*.h') +
+                 glob('src/lib-mpi/compat/*.h')
                  ),
         configure=configure_mpi,
         )
@@ -364,7 +365,7 @@ def libraries():
         optional=True,
         package='mpi4py',
         dest_dir='lib-pmpi',
-        sources=['src/pmpi-mpe.c'],
+        sources=['src/lib-pmpi/mpe.c'],
         configure=configure_libmpe,
         )
     # VampirTrace logging
@@ -373,7 +374,7 @@ def libraries():
         optional=True,
         package='mpi4py',
         dest_dir='lib-pmpi',
-        sources=['src/pmpi-vt.c'],
+        sources=['src/lib-pmpi/vt.c'],
         configure=configure_libvt,
         )
     pmpi_vt_mpi = dict(
@@ -381,7 +382,7 @@ def libraries():
         optional=True,
         package='mpi4py',
         dest_dir='lib-pmpi',
-        sources=['src/pmpi-vt-mpi.c'],
+        sources=['src/lib-pmpi/vt-mpi.c'],
         configure=configure_libvt,
         )
     pmpi_vt_hyb = dict(
@@ -389,7 +390,7 @@ def libraries():
         optional=True,
         package='mpi4py',
         dest_dir='lib-pmpi',
-        sources=['src/pmpi-vt-hyb.c'],
+        sources=['src/lib-pmpi/vt-hyb.c'],
         configure=configure_libvt,
         )
     #

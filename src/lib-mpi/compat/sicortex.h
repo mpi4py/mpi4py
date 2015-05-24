@@ -1,7 +1,7 @@
 #ifndef PyMPI_COMPAT_SICORTEX_H
 #define PyMPI_COMPAT_SICORTEX_H
 
-#include "../dynload.h"
+#include "../../dynload.h"
 
 static void PyMPI_SCMPI_dlopen_libslurm(void)
 {

@@ -28,7 +28,7 @@
 #if HPMPI_DLOPEN_LIBMPI
 #if HAVE_DLOPEN
 
-#include "../dynload.h"
+#include "../../dynload.h"
 
 static void HPMPI_dlopen_libmpi(void)
 {

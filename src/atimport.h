@@ -8,10 +8,10 @@
 
 /* ------------------------------------------------------------------------- */
 
-#include "config.h"
-#include "missing.h"
-#include "fallback.h"
-#include "compat.h"
+#include "lib-mpi/config.h"
+#include "lib-mpi/missing.h"
+#include "lib-mpi/fallback.h"
+#include "lib-mpi/compat.h"
 
 #include "pympivendor.h"
 #include "pympicommctx.h"

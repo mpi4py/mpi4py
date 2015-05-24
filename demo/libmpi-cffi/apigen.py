@@ -23,8 +23,8 @@ libmpi_c = p.join(wdir, 'libmpi.c')
 with open(libmpi_c, 'w') as f:
     f.write("""\
 #include <mpi.h>
-#include "%(srcdir)s/config.h"
-#include "%(srcdir)s/missing.h"
-#include "%(srcdir)s/fallback.h"
-#include "%(srcdir)s/compat.h"
+#include "%(srcdir)s/lib-mpi/config.h"
+#include "%(srcdir)s/lib-mpi/missing.h"
+#include "%(srcdir)s/lib-mpi/fallback.h"
+#include "%(srcdir)s/lib-mpi/compat.h"
 """ % vars())
