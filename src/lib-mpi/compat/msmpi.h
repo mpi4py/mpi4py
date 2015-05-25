@@ -1,6 +1,7 @@
 #ifndef PyMPI_COMPAT_MSMPI_H
 #define PyMPI_COMPAT_MSMPI_H
 
+#if MSMPI_VER <= 0x500
 static int PyMPI_MSMPI_MPI_Add_error_class(int *errorclass)
 {
   int ierr; char errstr[1] = {0};
@@ -19,6 +20,7 @@ static int PyMPI_MSMPI_MPI_Add_error_code(int errorclass,
 }
 #undef  MPI_Add_error_code
 #define MPI_Add_error_code PyMPI_MSMPI_MPI_Add_error_code
+#endif
 
 #if defined(MPICH_NAME)
 #undef  MPI_File_c2f

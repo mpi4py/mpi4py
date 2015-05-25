@@ -424,8 +424,11 @@ if name == 'Open MPI':
         if MPI.Query_thread() > MPI.THREAD_SINGLE:
             del TestCCOVecWorldDup
 if name == 'Microsoft MPI':
-    del TestCCOVecInplaceSelf
-    del TestCCOVecInplaceWorld
+    if version <= (5,0,0):
+        def SKIP(*args, **kwargs): pass
+        TestCCOVecInplaceWorld.testAlltoallv  = SKIP
+        TestCCOVecInplaceWorld.testAlltoallw  = SKIP
+        TestCCOVecInplaceWorld.testAlltoallw2 = SKIP
 
 
 if __name__ == '__main__':

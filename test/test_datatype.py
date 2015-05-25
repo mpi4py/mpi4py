@@ -384,6 +384,12 @@ elif MPI.Get_version() < (2,0):
     combiner_map = None
 if MPI.Get_version() < (2,0):
     del TestDatatype.testMatchSize
+if name == 'Microsoft MPI':
+    if version <= (5,0,0):
+        del TestDatatype.testCreateF90RealSingle
+        del TestDatatype.testCreateF90RealDouble
+        del TestDatatype.testCreateF90ComplexSingle
+        del TestDatatype.testCreateF90ComplexDouble
 if name == 'Open MPI':
     del TestDatatype.testCreateF90RealSingle
     del TestDatatype.testCreateF90RealDouble

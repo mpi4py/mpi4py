@@ -146,7 +146,7 @@ class Config(object):
         pass
 
     def _setup_windows(self):
-        # Microsoft MPI (v5.x and v4.x)
+        # Microsoft MPI (v5, v4)
         def msmpi_ver():
             try:
                 import _winreg as winreg

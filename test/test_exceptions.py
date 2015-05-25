@@ -408,7 +408,9 @@ if name == 'Open MPI':
         del TestExcErrhandlerNull
         del TestExcErrhandler
 if name == 'Microsoft MPI':
+    if version <= (5,0,0):
         del TestExcDatatype.testFreePredefined
+    if version <= (4,2,0):
         del TestExcStatus
         TestExcCommNull.ERR_COMM = (MPI.ERR_COMM, MPI.ERR_ARG)
 if name == 'Platform MPI':
