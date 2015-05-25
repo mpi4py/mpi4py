@@ -141,9 +141,8 @@ def customize_compiler(compiler, lang=None,
         if VERSION < 10.0:
             for options in (compiler.compile_options,
                             compiler.compile_options_debug):
-                options.append('/D_USE_DECLSPECS_FOR_SAL=1')
-                #options.append('/D_USE_DECLSPECS_FOR_SAL=0')
-                #options.append('/D_USE_ATTRIBUTES_FOR_SAL=0')
+                options.append('/D_USE_DECLSPECS_FOR_SAL=0')
+                options.append('/D_USE_ATTRIBUTES_FOR_SAL=0')
 
 # -----------------------------------------------------------------------------
 

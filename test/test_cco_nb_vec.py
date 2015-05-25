@@ -329,6 +329,11 @@ name, version = MPI.get_vendor()
 if name == 'Open MPI':
     if version < (1,8,1):
         del BaseTestCCOVec.testAlltoallw
+if name == 'Microsoft MPI':
+    TestCCOVecSelf = None
+    TestCCOVecWorld = None
+    TestCCOVecSelfDup = None
+    TestCCOVecWorldDup = None
 try:
     MPI.COMM_SELF.Ibarrier().Wait()
 except NotImplementedError:

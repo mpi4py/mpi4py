@@ -413,9 +413,6 @@ class TestCCOVecInplaceWorld(BaseTestCCOVecInplace, unittest.TestCase):
 
 
 name, version = MPI.get_vendor()
-if name == 'MPICH1' or name == 'LAM/MPI' or MPI.BOTTOM == MPI.IN_PLACE:
-    del TestCCOVecInplaceSelf
-    del TestCCOVecInplaceWorld
 if name == 'Open MPI':
     if version < (1,8,0):
         del TestCCOVecInplaceSelf
@@ -424,11 +421,13 @@ if name == 'Open MPI':
         if MPI.Query_thread() > MPI.THREAD_SINGLE:
             del TestCCOVecWorldDup
 if name == 'Microsoft MPI':
-    if version <= (5,0,0):
-        def SKIP(*args, **kwargs): pass
-        TestCCOVecInplaceWorld.testAlltoallv  = SKIP
-        TestCCOVecInplaceWorld.testAlltoallw  = SKIP
-        TestCCOVecInplaceWorld.testAlltoallw2 = SKIP
+    def SKIP(*args, **kwargs): pass
+    TestCCOVecInplaceWorld.testAlltoallv  = SKIP
+    TestCCOVecInplaceWorld.testAlltoallw  = SKIP
+    TestCCOVecInplaceWorld.testAlltoallw2 = SKIP
+if name == 'MPICH1' or name == 'LAM/MPI' or MPI.BOTTOM == MPI.IN_PLACE:
+    del TestCCOVecInplaceSelf
+    del TestCCOVecInplaceWorld
 
 
 if __name__ == '__main__':

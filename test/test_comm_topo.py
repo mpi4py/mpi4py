@@ -203,6 +203,9 @@ class TestTopoWorldDup(TestTopoWorld):
 
 
 name, version = MPI.get_vendor()
+if name == 'Microsoft MPI':
+    del BaseTestTopo.testDistgraphcomm
+    del BaseTestTopo.testDistgraphcommAdjacent
 if name == 'Platform MPI':
     del BaseTestTopo.testDistgraphcomm
 

@@ -557,6 +557,26 @@ if name == 'Open MPI':
     if version < (1,8,2):
         del BaseTestCCOBuf.testExscan
         del BaseTestCCOBuf.testReduceScatter
+if name == 'Microsoft MPI':
+    implemented = set()
+    if version >= (6,0,0):
+        implemented.update([
+        "testBarrier",
+        "testBcast",
+        "testGather",
+        "testReduce",
+        ])
+    if version >= (7,0,0):
+        implemented.update([
+        ])
+    for cls in (
+        BaseTestCCOBuf,
+        BaseTestCCOBufInplace,
+        ):
+        for meth in dir(cls):
+            if (meth.startswith('test') and
+                meth not in implemented):
+                delattr(cls, meth)
 try:
     MPI.COMM_SELF.Ibarrier().Wait()
 except NotImplementedError:
