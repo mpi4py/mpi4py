@@ -802,8 +802,8 @@ class build_clib(cmd_build_clib.build_clib):
             except (DistutilsError, CCompilerError):
                 if not lib.optional: raise
                 e = sys.exc_info()[1]
-                self.warn('building library "%s" failed' % lib.name)
                 self.warn('%s' % e)
+                self.warn('building optional library "%s" failed' % lib.name)
 
     def config_library (self, lib):
         if lib.configure:
@@ -1003,8 +1003,10 @@ class build_ext(cmd_build_ext.build_ext):
             except (DistutilsError, CCompilerError):
                 if not ext.optional: raise
                 e = sys.exc_info()[1]
-                self.warn('building extension "%s" failed' % ext.name)
                 self.warn('%s' % e)
+                exe = isinstance(ext, Executable)
+                knd = 'executable' if exe else 'extension'
+                self.warn('building optional %s "%s" failed' % (knd, ext.name))
 
     def config_extension (self, ext):
         configure = getattr(ext, 'configure', None)
