@@ -1,1 +1,1 @@
-python setupegg.py build_exe install -O0
+python setupegg.py build_exe install

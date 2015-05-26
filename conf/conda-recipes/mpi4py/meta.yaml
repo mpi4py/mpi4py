@@ -28,7 +28,7 @@ requirements:
 build:
   number: {{build}}
   string: py{{py}}_{{mpi}}_{{build}}
-  script: python setupegg.py build_exe install -O0
+  script: python setupegg.py build_exe install
 
 test:
   imports:
