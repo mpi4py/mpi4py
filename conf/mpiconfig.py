@@ -146,7 +146,7 @@ class Config(object):
         pass
 
     def _setup_windows(self):
-        # Microsoft MPI (v5, v4)
+        # Microsoft MPI (v6, v5, v4)
         def msmpi_ver():
             try:
                 try:
@@ -180,23 +180,26 @@ class Config(object):
             self.filename = [os.path.dirname(MSMPI_INC)]
             return True
         arch = platform.architecture()[0][:2]
-        ProgramFiles = os.environ.get('ProgramFiles', '')
         # Look for Microsoft MPI in the environment
         MSMPI_INC = os.environ.get('MSMPI_INC')
         MSMPI_LIB = os.environ.get('MSMPI_LIB'+arch)
         if setup_msmpi(MSMPI_INC, MSMPI_LIB): return
-        # Look for Microsoft MPI v5 in default install path
-        archdir = {'32':'x86', '64':'x64'}[arch]
-        MSMPI_DIR = os.path.join(ProgramFiles, 'Microsoft SDKs', 'MPI')
-        MSMPI_INC = os.path.join(MSMPI_DIR, 'Include')
-        MSMPI_LIB = os.path.join(MSMPI_DIR, 'Lib', archdir)
-        if setup_msmpi(MSMPI_INC, MSMPI_LIB): return
+        # Look for Microsoft MPI v6/v5 in default install path
+        for ProgramFiles in ('ProgramFiles', 'ProgramFiles(x86)'):
+            ProgramFiles = os.environ.get(ProgramFiles, '')
+            archdir = {'32':'x86', '64':'x64'}[arch]
+            MSMPI_DIR = os.path.join(ProgramFiles, 'Microsoft SDKs', 'MPI')
+            MSMPI_INC = os.path.join(MSMPI_DIR, 'Include')
+            MSMPI_LIB = os.path.join(MSMPI_DIR, 'Lib', archdir)
+            if setup_msmpi(MSMPI_INC, MSMPI_LIB): return
         # Look for Microsoft HPC Pack 2012 R2 in default install path
-        archdir = {'32':'i386', '64':'amd64'}[arch]
-        MSMPI_DIR = os.path.join(ProgramFiles, 'Microsoft MPI')
-        MSMPI_INC = os.path.join(MSMPI_DIR, 'Inc')
-        MSMPI_LIB = os.path.join(MSMPI_DIR, 'Lib', archdir)
-        if setup_msmpi(MSMPI_INC, MSMPI_LIB): return
+        for ProgramFiles in ('ProgramFiles', 'ProgramFiles(x86)'):
+            ProgramFiles = os.environ.get(ProgramFiles, '')
+            archdir = {'32':'i386', '64':'amd64'}[arch]
+            MSMPI_DIR = os.path.join(ProgramFiles, 'Microsoft MPI')
+            MSMPI_INC = os.path.join(MSMPI_DIR, 'Inc')
+            MSMPI_LIB = os.path.join(MSMPI_DIR, 'Lib', archdir)
+            if setup_msmpi(MSMPI_INC, MSMPI_LIB): return
 
         # Microsoft MPI (legacy) and others
         from glob import glob
