@@ -6,6 +6,8 @@ MPI for Python
    :target: https://binstar.org/mpi4py/mpi4py/builds
 .. image::  https://travis-ci.org/mpi4py/mpi4py.svg?branch=master
    :target: https://travis-ci.org/mpi4py/mpi4py
+.. image::  https://ci.appveyor.com/api/projects/status/whh5xovp217h0f7n?svg=true
+   :target: https://ci.appveyor.com/project/mpi4py/mpi4py
 .. image::  https://readthedocs.org/projects/mpi4py/badge/?version=latest
    :target: https://mpi4py.readthedocs.org/en/latest/
 
@@ -38,5 +40,7 @@ The testsuite is run periodically on
 * `Binstar <https://binstar.org/mpi4py/mpi4py/builds>`_
 
 * `Travis CI <https://travis-ci.org/mpi4py/mpi4py>`_
+
+* `AppVeyor <https://ci.appveyor.com/project/mpi4py/mpi4py>`_
 
 * `Fedora Jenkins <http://jenkins.cloud.fedoraproject.org/job/mpi4py/>`_

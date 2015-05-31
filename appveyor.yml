@@ -1,0 +1,109 @@
+# https://ci.appveyor.com/project/mpi4py/mpi4py
+
+version: 2.0.0a0-{build}
+
+environment:
+
+  global:
+    # SDK v7.0 MSVC Express 2008's SetEnv.cmd script will fail if the
+    # /E:ON and /V:ON options are not enabled in the batch script intepreter
+    # See: http://stackoverflow.com/a/13751649/163740
+    WITH_ENV: "cmd /E:ON /V:ON /C .\\conf\\appveyor\\run_with_env.cmd"
+
+  matrix:
+    - PYTHON_VERSION: "2.6.6"
+      PYTHON_ARCH: "32"
+      PYTHON: "C:\\Python26"
+
+    - PYTHON_VERSION: "2.6.6"
+      PYTHON_ARCH: "64"
+      PYTHON: "C:\\Python26-x64"
+
+    - PYTHON_VERSION: "2.7.9"
+      PYTHON_ARCH: "32"
+      PYTHON: "C:\\Python27"
+
+    - PYTHON_VERSION: "2.7.9"
+      PYTHON_ARCH: "64"
+      PYTHON: "C:\\Python27-x64"
+
+    - PYTHON_VERSION: "3.3.5"
+      PYTHON_ARCH: "32"
+      PYTHON: "C:\\Python33"
+
+    - PYTHON_VERSION: "3.3.5"
+      PYTHON_ARCH: "64"
+      PYTHON: "C:\\Python33-x64"
+
+    - PYTHON_VERSION: "3.4.3"
+      PYTHON_ARCH: "32"
+      PYTHON: "C:\\Python34"
+
+    - PYTHON_VERSION: "3.4.3"
+      PYTHON_ARCH: "64"
+      PYTHON: "C:\\Python34-x64"
+
+clone_depth: 5
+
+branches:
+  only:
+    - master
+    - maint
+
+init:
+  - "ECHO Python %PYTHON_VERSION% (%PYTHON_ARCH%bit) from %PYTHON%"
+
+install:
+  # Python
+  - "powershell conf\\appveyor\\install-python.ps1"
+  - "%PYTHON%\\python.exe --version"
+  - "%PYTHON%\\Scripts\\pip.exe --version"
+  - "%PYTHON%\\Scripts\\wheel.exe version"
+  # Cython
+  - "%WITH_ENV% %PYTHON%\\Scripts\\pip.exe install Cython"
+  - "%PYTHON%\\python.exe -m cython --version"
+  # Microsoft MPI
+  - "powershell conf\\appveyor\\install-msmpi.ps1"
+  - "SetEnvMPI.cmd"
+
+build: off
+build_script:
+  - "%WITH_ENV% %PYTHON%\\python.exe setupegg.py build_exe build"
+  - "%WITH_ENV% %PYTHON%\\python.exe setupegg.py --quiet bdist_wheel"
+  - "%WITH_ENV% %PYTHON%\\python.exe setupegg.py --quiet bdist_msi"
+  - "%WITH_ENV% %PYTHON%\\python.exe setupegg.py --quiet bdist_wininst"
+
+test: off
+test_script:
+  - "%PYTHON%\\Scripts\\pip.exe install --no-cache-dir --no-index --find-links=dist\\ mpi4py"
+  - "%PYTHON%\\python.exe %CD%\\test\\runtests.py -f --no-builddir"
+  - "%PYTHON%\\Scripts\\pip.exe uninstall --yes mpi4py"
+
+after_test:
+# - "%PYTHON%\\python.exe setupegg.py --quiet clean --all"
+  - "set MPI=msmpi"
+  - "set ANACONDA=C:\\Anaconda"
+  - "powershell conf\\appveyor\\install-anaconda.ps1"
+  - "set PATH=%ANACONDA%;%ANACONDA%\\Scripts\\;%PATH%"
+  - "conda info --all"
+  - "%WITH_ENV% conda build --quiet --python %PYTHON_VERSION:~0,3% conf\\conda-recipes\\mpi4py"
+  - "conda clean --yes --lock --tarballs"
+  - ps: "Move-Item $env:ANACONDA\\conda-bld\\win-*\\mpi4py-*.tar.bz2 dist\\ -Force"
+  - ps: "Start-Sleep 5"
+  - ps: "Remove-Item -Recurse -Force -Path $env:ANACONDA\\conda-bld"
+  - ps: "Remove-Item -Recurse -Force -Path $env:ANACONDA\\envs"
+  - ps: "Remove-Item -Recurse -Force -Path $env:ANACONDA\\pkgs\\mpi4py*"
+
+artifacts:
+  - path: dist\*
+
+cache:
+  - C:\Downloads\Python   -> conf\appveyor\install-python.ps1
+  - C:\Downloads\MSMPI    -> conf\appveyor\install-msmpi.ps1
+  - C:\Downloads\Anaconda -> conf\appveyor\install-anaconda.ps1
+  - C:\Anaconda           -> conf\appveyor\install-anaconda.ps1
+  - '%LOCALAPPDATA%\pip\Cache'
+
+#on_success:
+#  - TODO: upload the content of dist\*.tar.bz2 to Binstar
+#  - TODO: upload the content of dist\*.whl to a public wheelhouse
