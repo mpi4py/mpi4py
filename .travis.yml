@@ -25,6 +25,7 @@ matrix:
 branches:
   only:
     - master
+    - maint
 
 cache:
   apt: true
