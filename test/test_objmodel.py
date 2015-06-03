@@ -105,6 +105,11 @@ class TestObjModel(unittest.TestCase):
         for obj in self.objects:
             addr = MPI._addressof(obj)
 
+    def testAHandleOf(self):
+        for obj in self.objects:
+            if isinstance(obj, MPI.Status): continue
+            hdl = MPI._handleof(obj)
+
 
 if __name__ == '__main__':
     unittest.main()

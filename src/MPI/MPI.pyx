@@ -278,6 +278,10 @@ def get_vendor():
 
 # --------------------------------------------------------------------
 
+cdef extern from "Python.h":
+    ctypedef ssize_t Py_intptr_t
+    ctypedef size_t  Py_uintptr_t
+
 cdef inline int _mpi_type(object arg, type cls) except -1:
     if isinstance(arg, type):
         if issubclass(arg, cls): return 1
@@ -332,5 +336,34 @@ def _addressof(arg):
     else:
         raise TypeError("expecting an MPI instance")
     return PyLong_FromVoidPtr(ptr)
+
+def _handleof(arg):
+    """
+    Unsigned integer value with the underlying MPI handle
+    """
+    if isinstance(arg, Status):
+        raise NotImplementedError
+    elif isinstance(arg, Datatype):
+        return <Py_uintptr_t>((<Datatype>arg).ob_mpi)
+    elif isinstance(arg, Request):
+        return <Py_uintptr_t>((<Request>arg).ob_mpi)
+    elif isinstance(arg, Message):
+        return <Py_uintptr_t>((<Message>arg).ob_mpi)
+    elif isinstance(arg, Op):
+        return <Py_uintptr_t>((<Op>arg).ob_mpi)
+    elif isinstance(arg, Group):
+        return <Py_uintptr_t>((<Group>arg).ob_mpi)
+    elif isinstance(arg, Info):
+        return <Py_uintptr_t>((<Info>arg).ob_mpi)
+    elif isinstance(arg, Errhandler):
+        return <Py_uintptr_t>((<Errhandler>arg).ob_mpi)
+    elif isinstance(arg, Comm):
+        return <Py_uintptr_t>((<Comm>arg).ob_mpi)
+    elif isinstance(arg, Win):
+        return <Py_uintptr_t>((<Win>arg).ob_mpi)
+    elif isinstance(arg, File):
+        return <Py_uintptr_t>((<File>arg).ob_mpi)
+    else:
+        raise TypeError("expecting an MPI instance")
 
 # --------------------------------------------------------------------

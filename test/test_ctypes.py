@@ -32,7 +32,7 @@ class TestCTYPES(unittest.TestCase):
         MPI.COMM_WORLD,
     ]
 
-    def testHandle(self):
+    def testHandleAdress(self):
         typemap = {ctypes.sizeof(ctypes.c_int): ctypes.c_int,
                    ctypes.sizeof(ctypes.c_void_p): ctypes.c_void_p}
         for obj in self.objects:
@@ -43,6 +43,14 @@ class TestCTYPES(unittest.TestCase):
             handle_new = handle_t.from_address(MPI._addressof(newobj))
             handle_new.value = handle_old.value
             self.assertEqual(obj, newobj)
+
+    def testHandleValue(self):
+        typemap = {ctypes.sizeof(ctypes.c_uint32): ctypes.c_uint32,
+                   ctypes.sizeof(ctypes.c_uint64): ctypes.c_uint64}
+        for obj in self.objects:
+            uintptr_t = typemap[MPI._sizeof(obj)]
+            handle = uintptr_t.from_address(MPI._addressof(obj))
+            self.assertEqual(handle.value, MPI._handleof(obj))
 
 if ctypes is None:
     del TestCTYPES

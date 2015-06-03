@@ -45,7 +45,7 @@ class TestCFFI(unittest.TestCase):
         MPI.COMM_WORLD,
     ]
 
-    def testHandle(self):
+    def testHandleAddress(self):
         ffi = cffi.FFI()
         typemap = {ffi.sizeof('int'): 'int',
                    ffi.sizeof('void*'): 'void*'}
@@ -65,6 +65,15 @@ class TestCFFI(unittest.TestCase):
             handle_new = ffi.cast(mpi_t+'*', MPI._addressof(newobj))
             handle_new[0] = handle_old[0]
             self.assertEqual(oldobj, newobj)
+
+    def testHandleValue(self):
+        ffi = cffi.FFI()
+        typemap = {ffi.sizeof('uint32_t'): 'uint32_t',
+                   ffi.sizeof('uint64_t'): 'uint64_t',}
+        for obj in self.objects:
+            uintptr_t = typemap[MPI._sizeof(obj)]
+            handle = ffi.cast(uintptr_t+'*', MPI._addressof(obj))[0]
+            self.assertEqual(handle, MPI._handleof(obj))
 
 if cffi is None:
     del TestCFFI
