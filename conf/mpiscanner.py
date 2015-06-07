@@ -145,7 +145,7 @@ class NodeFuncProto(Node):
 class IntegralType(NodeType):
     REGEX = Re.INTEGRAL_TYPE
     HEADER = """\
-    typedef %(cbase)s %(ctype)s;"""
+    typedef %(cbase)s... %(ctype)s;"""
     MISSING = """\
     typedef %(ctdef)s PyMPI_%(ctype)s;
     #define %(ctype)s PyMPI_%(ctype)s"""

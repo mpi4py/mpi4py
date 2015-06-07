@@ -1,12 +1,11 @@
-from libmpi import ffi
-from libmpi.mpi import *
+from libmpi import ffi, lib
 
 def ring(comm, count=1, loop=1, skip=0):
 
     size_p = ffi.new('int*')
     rank_p = ffi.new('int*')
-    MPI_Comm_size(comm, size_p)
-    MPI_Comm_rank(comm, rank_p)
+    lib.MPI_Comm_size(comm, size_p)
+    lib.MPI_Comm_rank(comm, rank_p)
     size = size_p[0]
     rank = rank_p[0]
 
@@ -20,32 +19,32 @@ def ring(comm, count=1, loop=1, skip=0):
     if size == 1:
         for i in iterations:
             if i == skip:
-                tic = MPI_Wtime()
-            MPI_Sendrecv(sbuf, count, MPI_BYTE, dest,   0,
-                         rbuf, count, MPI_BYTE, source, 0,
-                         comm, MPI_STATUS_IGNORE)
+                tic = lib.MPI_Wtime()
+            lib.MPI_Sendrecv(sbuf, count, lib.MPI_BYTE, dest,   0,
+                             rbuf, count, lib.MPI_BYTE, source, 0,
+                             comm, lib.MPI_STATUS_IGNORE)
     else:
         if rank == 0:
             for i in iterations:
                 if i == skip:
-                    tic = MPI_Wtime()
-                MPI_Send(sbuf, count, MPI_BYTE, dest,   0, comm)
-                MPI_Recv(rbuf, count, MPI_BYTE, source, 0, comm, MPI_STATUS_IGNORE)
+                    tic = lib.MPI_Wtime()
+                lib.MPI_Send(sbuf, count, lib.MPI_BYTE, dest,   0, comm)
+                lib.MPI_Recv(rbuf, count, lib.MPI_BYTE, source, 0, comm, lib.MPI_STATUS_IGNORE)
         else:
             sbuf = rbuf
             for i in iterations:
                 if i == skip:
-                    tic = MPI_Wtime()
-                MPI_Recv(rbuf, count, MPI_BYTE, source, 0, comm, MPI_STATUS_IGNORE)
-                MPI_Send(sbuf, count, MPI_BYTE, dest,   0, comm)
-    toc = MPI_Wtime()
+                    tic = lib.MPI_Wtime()
+                lib.MPI_Recv(rbuf, count, lib.MPI_BYTE, source, 0, comm, lib.MPI_STATUS_IGNORE)
+                lib.MPI_Send(sbuf, count, lib.MPI_BYTE, dest,   0, comm)
+    toc = lib.MPI_Wtime()
     if rank == 0 and ffi.string(sbuf) != ffi.string(rbuf):
         import warnings, traceback
         try:
             warnings.warn("received message does not match!")
         except UserWarning:
             traceback.print_exc()
-            MPI_Abort(comm, 2)
+            lib.MPI_Abort(comm, 2)
     return toc - tic
 
 def ringtest(comm):
@@ -54,13 +53,13 @@ def ringtest(comm):
     loop = ( 1 )
     skip = ( 0 )
 
-    MPI_Barrier(comm)
+    lib.MPI_Barrier(comm)
     elapsed = ring(comm, size, loop, skip)
 
     size_p = ffi.new('int*')
     rank_p = ffi.new('int*')
-    MPI_Comm_size(comm, size_p)
-    MPI_Comm_rank(comm, rank_p)
+    lib.MPI_Comm_size(comm, size_p)
+    lib.MPI_Comm_rank(comm, rank_p)
     comm_size = size_p[0]
     comm_rank = rank_p[0]
 
@@ -69,9 +68,9 @@ def ringtest(comm):
                % (loop, elapsed, comm_size, size))
 
 def main():
-    MPI_Init(ffi.NULL, ffi.NULL)
-    ringtest(MPI_COMM_WORLD)
-    MPI_Finalize()
+    lib.MPI_Init(ffi.NULL, ffi.NULL)
+    ringtest(lib.MPI_COMM_WORLD)
+    lib.MPI_Finalize()
 
 if __name__ == '__main__':
     main()

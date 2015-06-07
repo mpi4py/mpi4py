@@ -1,7 +1,6 @@
 # http://mvapich.cse.ohio-state.edu/benchmarks/
 
-from libmpi import ffi
-from libmpi.mpi import *
+from libmpi import ffi, lib
 
 def osu_latency(
     BENCHMARH = "MPI Latency Test",
@@ -15,8 +14,8 @@ def osu_latency(
 
     myid = ffi.new('int*')
     numprocs = ffi.new('int*')
-    MPI_Comm_rank(MPI_COMM_WORLD, myid)
-    MPI_Comm_size(MPI_COMM_WORLD, numprocs)
+    lib.MPI_Comm_rank(lib.MPI_COMM_WORLD, myid)
+    lib.MPI_Comm_size(lib.MPI_COMM_WORLD, numprocs)
     myid = myid[0]
     numprocs = numprocs[0]
 
@@ -29,10 +28,10 @@ def osu_latency(
 
     sbuf = ffi.new('unsigned char[]', MAX_MSG_SIZE)
     rbuf = ffi.new('unsigned char[]', MAX_MSG_SIZE)
-    dtype = MPI_BYTE
+    dtype = lib.MPI_BYTE
     tag = 1
-    comm = MPI_COMM_WORLD
-    status = MPI_STATUS_IGNORE
+    comm = lib.MPI_COMM_WORLD
+    status = lib.MPI_STATUS_IGNORE
 
     if myid == 0:
         print ('# %s' % (BENCHMARH,))
@@ -48,27 +47,27 @@ def osu_latency(
             loop = loop_large
         iterations = list(range(loop+skip))
         #
-        MPI_Barrier(comm)
+        lib.MPI_Barrier(comm)
         if myid == 0:
             for i in iterations:
                 if i == skip:
-                    t_start = MPI_Wtime()
-                MPI_Send(sbuf, size, dtype, 1, tag, comm)
-                MPI_Recv(rbuf, size, dtype, 1, tag, comm, status)
-            t_end = MPI_Wtime()
+                    t_start = lib.MPI_Wtime()
+                lib.MPI_Send(sbuf, size, dtype, 1, tag, comm)
+                lib.MPI_Recv(rbuf, size, dtype, 1, tag, comm, status)
+            t_end = lib.MPI_Wtime()
         elif myid == 1:
             for i in iterations:
-                MPI_Recv(rbuf, size, dtype, 0, tag, comm, status)
-                MPI_Send(sbuf, size, dtype, 0, tag, comm)
+                lib.MPI_Recv(rbuf, size, dtype, 0, tag, comm, status)
+                lib.MPI_Send(sbuf, size, dtype, 0, tag, comm)
         #
         if myid == 0:
             latency = (t_end - t_start) * 1e6 / (2 * loop)
             print ('%-10d%20.2f' % (size, latency))
 
 def main():
-    MPI_Init(ffi.NULL, ffi.NULL)
+    lib.MPI_Init(ffi.NULL, ffi.NULL)
     osu_latency()
-    MPI_Finalize()
+    lib.MPI_Finalize()
 
 if __name__ == '__main__':
     main()

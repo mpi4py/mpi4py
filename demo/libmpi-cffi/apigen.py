@@ -19,7 +19,7 @@ scanner.dump_header_h(libmpi_h)
 #scanner.dump_header_h(libmpi_h)
 #print libmpi_h.read()
 
-libmpi_c = p.join(wdir, 'libmpi.c')
+libmpi_c = p.join(wdir, 'libmpi.c.in')
 with open(libmpi_c, 'w') as f:
     f.write("""\
 #include <mpi.h>
