@@ -2,7 +2,7 @@
 # Contact: dalcinl@gmail.com
 
 """
-Support for building mpi4py with distutils.
+Support for building mpi4py with distutils/setuptools.
 """
 
 # -----------------------------------------------------------------------------
@@ -351,22 +351,43 @@ def cmd_set_undefined_mpi_options(cmd, basecmd):
 
 # -----------------------------------------------------------------------------
 
-from distutils.core import setup        as fcn_setup
-from distutils.core import Distribution as cls_Distribution
-from distutils.core import Extension    as cls_Extension
-from distutils.core import Command
+if 'setuptools' in sys.modules:
+    import setuptools
+else:
+    setuptools = None
 
-from distutils.command import config  as cmd_config
-from distutils.command import build   as cmd_build
-from distutils.command import install as cmd_install
-from distutils.command import sdist   as cmd_sdist
-from distutils.command import clean   as cmd_clean
+def import_command(cmd):
+    try:
+        from importlib import import_module
+    except ImportError:
+        import_module = lambda n:  __import__(n, fromlist=[None])
+    try:
+        if not setuptools: raise ImportError
+        return import_module('setuptools.command.' + cmd)
+    except ImportError:
+        return import_module('distutils.command.' + cmd)
 
-from distutils.command import build_py     as cmd_build_py
-from distutils.command import build_clib   as cmd_build_clib
-from distutils.command import build_ext    as cmd_build_ext
-from distutils.command import install_data as cmd_install_data
-from distutils.command import install_lib  as cmd_install_lib
+if setuptools:
+    from setuptools import setup        as fcn_setup
+    from setuptools import Distribution as cls_Distribution
+    from setuptools import Extension    as cls_Extension
+    from setuptools import Command
+else:
+    from distutils.core import setup        as fcn_setup
+    from distutils.core import Distribution as cls_Distribution
+    from distutils.core import Extension    as cls_Extension
+    from distutils.core import Command
+
+cmd_config       = import_command('config')
+cmd_build        = import_command('build')
+cmd_install      = import_command('install')
+cmd_sdist        = import_command('sdist')
+cmd_clean        = import_command('clean')
+
+cmd_build_clib   = import_command('build_clib')
+cmd_build_ext    = import_command('build_ext')
+cmd_install_lib  = import_command('install_lib')
+cmd_install_data = import_command('install_data')
 
 from distutils.errors import DistutilsError
 from distutils.errors import DistutilsSetupError
@@ -440,8 +461,7 @@ def setup(**attrs):
     cmdclass = attrs['cmdclass']
     for cmd in (config, build, install,
                 test, clean, sdist,
-                build_src, build_py,
-                build_clib, build_ext, build_exe,
+                build_src, build_clib, build_ext, build_exe,
                 install_lib, install_data, install_exe,
                 ):
         if cmd.__name__ not in cmdclass:
@@ -645,10 +665,6 @@ class build_src(Command):
                                    )
     def run(self):
         pass
-
-
-class build_py(cmd_build_py.build_py):
-    pass
 
 
 # Command class to build libraries
@@ -1408,8 +1424,8 @@ class clean(cmd_clean.clean):
             except OSError:
                 pass
 
-        # remove the <package>.egg_info directory
         if self.all:
+            # remove the <package>.egg_info directory
             try:
                 egg_info = self.get_finalized_command('egg_info').egg_info
                 if os.path.exists(egg_info):
