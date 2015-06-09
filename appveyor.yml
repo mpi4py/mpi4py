@@ -68,10 +68,10 @@ install:
 
 build: off
 build_script:
-  - "%WITH_ENV% %PYTHON%\\python.exe setupegg.py build_exe build"
-  - "%WITH_ENV% %PYTHON%\\python.exe setupegg.py --quiet bdist_wheel"
-  - "%WITH_ENV% %PYTHON%\\python.exe setupegg.py --quiet bdist_msi"
-  - "%WITH_ENV% %PYTHON%\\python.exe setupegg.py --quiet bdist_wininst"
+  - "%WITH_ENV% %PYTHON%\\python.exe setup.py build_exe build"
+  - "%WITH_ENV% %PYTHON%\\python.exe setup.py --quiet bdist_wheel"
+  - "%WITH_ENV% %PYTHON%\\python.exe setup.py --quiet bdist_msi"
+  - "%WITH_ENV% %PYTHON%\\python.exe setup.py --quiet bdist_wininst"
 
 test: off
 test_script:
@@ -80,7 +80,7 @@ test_script:
   - "%PYTHON%\\Scripts\\pip.exe uninstall --yes mpi4py"
 
 after_test:
-# - "%PYTHON%\\python.exe setupegg.py --quiet clean --all"
+# - "%PYTHON%\\python.exe setup.py --quiet clean --all"
   - "set MPI=msmpi"
   - "set ANACONDA=C:\\Anaconda"
   - "powershell conf\\appveyor\\install-anaconda.ps1"

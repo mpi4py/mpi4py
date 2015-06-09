@@ -10,6 +10,11 @@ import sys
 import os
 import re
 
+try:
+    import setuptools
+except ImportError:
+    setuptools = None
+
 pyver = sys.version_info[:2]
 if pyver < (2, 6) or (3, 0) <= pyver < (3, 2):
     raise RuntimeError("Python version 2.6, 2.7 or >= 3.2 required")
@@ -428,13 +433,12 @@ CYTHON = '0.22'
 
 def run_setup():
     """
-    Call distutils.setup(*targs, **kwargs)
+    Call setup(*args, **kargs)
     """
-    if 'setuptools' in sys.modules:
-        metadata['zip_safe'] = False
-        csource = os.path.join(topdir, 'src', 'mpi4py.MPI.c')
-        if not os.path.exists(csource):
-            metadata['install_requires'] = ['Cython>='+CYTHON]
+    setup_args = metadata.copy()
+    if setuptools:
+        setup_args['zip_safe'] = False
+        setup_args['setup_requires'] = ['Cython>='+CYTHON]
     #
     setup(packages     = ['mpi4py'],
           package_dir  = {'mpi4py' : 'src'},
@@ -448,20 +452,13 @@ def run_setup():
           ext_modules  = [Ext(**ext) for ext in ext_modules()],
           libraries    = [Lib(**lib) for lib in libraries()  ],
           executables  = [Exe(**exe) for exe in executables()],
-          **metadata)
+          **setup_args)
 
 def chk_cython(VERSION):
     from distutils import log
     from distutils.version import LooseVersion
     from distutils.version import StrictVersion
     warn = lambda msg='': sys.stderr.write(msg+'\n')
-    #
-    cython_zip = 'cython.zip'
-    if os.path.isfile(cython_zip):
-        path = os.path.abspath(cython_zip)
-        if sys.path[0] != path:
-            sys.path.insert(0, path)
-            log.info("adding '%s' to sys.path", cython_zip)
     #
     try:
         import Cython
