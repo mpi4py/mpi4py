@@ -306,6 +306,9 @@ except NotImplementedError:
 else:
     name, version = MPI.get_vendor()
     if name == 'Open MPI':
+        if version == (1,8,6):
+            del BaseTestRMA.testStartComplete
+            del BaseTestRMA.testPostWait
         if version == (1,8,1):
             del BaseTestRMA.testFenceAll
         if version < (1,4,0):

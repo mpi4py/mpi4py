@@ -20,6 +20,8 @@ class BaseTestCCOVec(object):
 
     COMM = MPI.COMM_NULL
 
+    skip = []
+
     def testGatherv(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
@@ -27,6 +29,7 @@ class BaseTestCCOVec(object):
             for typecode in arrayimpl.TypeMap:
                 for root in range(size):
                     for count in range(size):
+                        if (count, typecode) in self.skip: continue
                         sbuf = array(root, typecode, count)
                         rbuf = array(  -1, typecode, size*size)
                         counts = [count] * size
@@ -50,6 +53,7 @@ class BaseTestCCOVec(object):
             for typecode in arrayimpl.TypeMap:
                 for root in range(size):
                     for count in range(size):
+                        if (count, typecode) in self.skip: continue
                         sbuf = array(root, typecode, size)
                         rbuf = array(  -1, typecode, size*size)
                         sendbuf = sbuf.as_mpi_c(count)
@@ -72,6 +76,7 @@ class BaseTestCCOVec(object):
             for typecode in arrayimpl.TypeMap:
                 for root in range(size):
                     for count in range(size+1):
+                        if (count, typecode) in self.skip: continue
                         #
                         sbuf = array(root, typecode, count).as_raw()
                         rbuf = array(  -1, typecode, count*size).as_raw()
@@ -101,7 +106,7 @@ class BaseTestCCOVec(object):
             for typecode in arrayimpl.TypeMap:
                 for root in range(size):
                     for count in range(size):
-                        #
+                        if (count, typecode) in self.skip: continue
                         sbuf = array(root, typecode, size*size)
                         rbuf = array(  -1, typecode, count)
                         counts = [count] * size
@@ -119,6 +124,7 @@ class BaseTestCCOVec(object):
             for typecode in arrayimpl.TypeMap:
                 for root in range(size):
                     for count in range(size):
+                        if (count, typecode) in self.skip: continue
                         sbuf = array(root, typecode, size*size)
                         rbuf = array(  -1, typecode, size)
                         sendbuf = sbuf.as_mpi_v(count, size)
@@ -138,6 +144,7 @@ class BaseTestCCOVec(object):
             for typecode in arrayimpl.TypeMap:
                 for root in range(size):
                     for count in range(size+1):
+                        if (count, typecode) in self.skip: continue
                         #
                         sbuf = array(root, typecode, count*size).as_raw()
                         rbuf = array(  -1, typecode, count).as_raw()
@@ -164,6 +171,7 @@ class BaseTestCCOVec(object):
             for typecode in arrayimpl.TypeMap:
                 for root in range(size):
                     for count in range(size):
+                        if (count, typecode) in self.skip: continue
                         sbuf = array(root, typecode, count)
                         rbuf = array(  -1, typecode, size*size)
                         counts = [count] * size
@@ -186,6 +194,7 @@ class BaseTestCCOVec(object):
             for typecode in arrayimpl.TypeMap:
                 for root in range(size):
                     for count in range(size):
+                        if (count, typecode) in self.skip: continue
                         sbuf = array(root, typecode, size)
                         rbuf = array(  -1, typecode, size*size)
                         sendbuf = sbuf.as_mpi_c(count)
@@ -206,6 +215,7 @@ class BaseTestCCOVec(object):
             for typecode in arrayimpl.TypeMap:
                 for root in range(size):
                     for count in range(size+1):
+                        if (count, typecode) in self.skip: continue
                         #
                         sbuf = array(root, typecode, count).as_raw()
                         rbuf = array(  -1, typecode, count*size).as_raw()
@@ -327,6 +337,8 @@ class TestCCOVecWorldDup(TestCCOVecWorld):
 
 name, version = MPI.get_vendor()
 if name == 'Open MPI':
+    if version == (1,8,6):
+        BaseTestCCOVec.skip += [(0, 'b')]
     if version < (1,8,1):
         del BaseTestCCOVec.testAlltoallw
 if name == 'Microsoft MPI':
