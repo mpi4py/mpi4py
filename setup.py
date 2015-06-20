@@ -438,7 +438,13 @@ def run_setup():
     setup_args = metadata.copy()
     if setuptools:
         setup_args['zip_safe'] = False
-        setup_args['setup_requires'] = ['Cython>='+CYTHON]
+    if setuptools:
+        src = os.path.join('src', 'mpi4py.MPI.c')
+        has_src = os.path.exists(os.path.join(topdir, src))
+        has_git = os.path.isdir(os.path.join(topdir, '.git'))
+        has_hg  = os.path.isdir(os.path.join(topdir, '.hg'))
+        if not has_src or has_git or has_hg:
+            setup_args['setup_requires'] = ['Cython>='+CYTHON]
     #
     setup(packages     = ['mpi4py'],
           package_dir  = {'mpi4py' : 'src'},
@@ -534,8 +540,7 @@ def build_sources(cmd):
     has_src = os.path.exists(os.path.join(
         topdir, 'src', 'mpi4py.MPI.c'))
     has_vcs = (os.path.isdir(os.path.join(topdir, '.git')) or
-               os.path.isdir(os.path.join(topdir, '.hg' )) or
-               os.path.isdir(os.path.join(topdir, '.svn')))
+               os.path.isdir(os.path.join(topdir, '.hg' )))
     if (has_src and not has_vcs and not cmd.force): return
     # mpi4py.MPI
     source = 'mpi4py.MPI.pyx'
