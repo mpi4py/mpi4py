@@ -1,6 +1,6 @@
 package:
   name: openmpi
-  version: 1.8.5
+  version: 1.8.6
 
 about:
   home: http://www.open-mpi.org/
@@ -13,9 +13,9 @@ requirements:
     - mpich2
 
 source:
-  fn: openmpi-1.8.5.tar.bz2
-  url: http://www.open-mpi.org/software/ompi/v1.8/downloads/openmpi-1.8.5.tar.bz2
-  md5: 93e958914ff0e4d9634d668d2d48c793
+  fn: openmpi-1.8.6.tar.bz2
+  url: http://www.open-mpi.org/software/ompi/v1.8/downloads/openmpi-1.8.6.tar.bz2
+  md5: eb569e7dc97eeaa5b1876cccf114f377
 
 build:
   number: 0
@@ -37,6 +37,6 @@ test:
     - mpicxx -show
     - mpicc  helloworld.c   -o helloworld_c
     - mpicxx helloworld.cxx -o helloworld_cxx
-    - export DYLD_LIBRARY_PATH=$LIBRARY_PATH # [osx]
+    - export DYLD_LIBRARY_PATH=$PREFIX/lib # [osx]
     - mpiexec -n 4 ./helloworld_c
     - mpiexec -n 4 ./helloworld_cxx
