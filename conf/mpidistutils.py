@@ -7,7 +7,7 @@ Support for building mpi4py with distutils/setuptools.
 
 # -----------------------------------------------------------------------------
 
-import sys, os, platform, copy
+import sys, os, platform
 from distutils import sysconfig
 from distutils.util import convert_path
 from distutils.util import split_quoted
@@ -351,9 +351,9 @@ def cmd_set_undefined_mpi_options(cmd, basecmd):
 
 # -----------------------------------------------------------------------------
 
-if 'setuptools' in sys.modules:
+try:
     import setuptools
-else:
+except ImportError:
     setuptools = None
 
 def import_command(cmd):
@@ -378,11 +378,11 @@ else:
     from distutils.core import Extension    as cls_Extension
     from distutils.core import Command
 
-cmd_config       = import_command('config')
-cmd_build        = import_command('build')
-cmd_install      = import_command('install')
-cmd_sdist        = import_command('sdist')
-cmd_clean        = import_command('clean')
+cmd_config  = import_command('config')
+cmd_build   = import_command('build')
+cmd_install = import_command('install')
+cmd_sdist   = import_command('sdist')
+cmd_clean   = import_command('clean')
 
 cmd_build_clib   = import_command('build_clib')
 cmd_build_ext    = import_command('build_ext')
@@ -991,10 +991,11 @@ class build_ext(cmd_build_ext.build_ext):
         cmd_build_ext.build_ext.run(self)
 
     def build_extensions(self):
+        from copy import deepcopy
         # First, sanity-check the 'extensions' list
         self.check_extensions_list(self.extensions)
         # customize compiler
-        self.compiler_sys = copy.deepcopy(self.compiler)
+        self.compiler_sys = deepcopy(self.compiler)
         customize_compiler(self.compiler_sys)
         # parse configuration file and configure compiler
         self.compiler_mpi = self.compiler
