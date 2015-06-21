@@ -546,6 +546,12 @@ class TestCCOBufWorldDup(TestCCOBufWorld):
 
 name, version = MPI.get_vendor()
 if name == 'Open MPI':
+    if version == (1,8,6):
+        def SKIP(*args, **kwargs): pass
+        TestCCOBufInplaceSelf.testReduceScatter = SKIP
+        TestCCOBufInplaceSelf.testReduceScatterBlock = SKIP
+        TestCCOBufInplaceWorld.testReduceScatter = SKIP
+        TestCCOBufInplaceWorld.testReduceScatterBlock = SKIP
     if version == (1,8,4):
         def SKIP(*args, **kwargs): pass
         TestCCOBufSelf.testReduceScatter = SKIP
