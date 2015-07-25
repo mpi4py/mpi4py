@@ -105,5 +105,5 @@ cache:
   - '%LOCALAPPDATA%\pip\Cache'
 
 #on_success:
-#  - TODO: upload the content of dist\*.tar.bz2 to Binstar
+#  - TODO: upload the content of dist\*.tar.bz2 to Anaconda
 #  - TODO: upload the content of dist\*.whl to a public wheelhouse

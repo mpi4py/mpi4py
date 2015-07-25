@@ -2,8 +2,8 @@
 MPI for Python
 ==============
 
-.. image::  https://binstar.org/mpi4py/mpi4py/badges/build.svg?
-   :target: https://binstar.org/mpi4py/mpi4py/builds
+.. image::  https://anaconda.org/mpi4py/mpi4py/badges/build.svg?
+   :target: https://anaconda.org/mpi4py/mpi4py/builds
 .. image::  https://travis-ci.org/mpi4py/mpi4py.svg?branch=master
    :target: https://travis-ci.org/mpi4py/mpi4py
 .. image::  https://ci.appveyor.com/api/projects/status/whh5xovp217h0f7n?svg=true
@@ -37,7 +37,7 @@ Testsuite
 
 The testsuite is run periodically on
 
-* `Binstar <https://binstar.org/mpi4py/mpi4py/builds>`_
+* `Anaconda <https://anaconda.org/mpi4py/mpi4py/builds>`_
 
 * `Travis CI <https://travis-ci.org/mpi4py/mpi4py>`_
 
