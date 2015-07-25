@@ -11,4 +11,6 @@ engine: openssl
 script:
  - conda build .
 
-build_targets: conda
+build_targets:
+  files: conda
+  channels: main
