@@ -35,7 +35,7 @@ camel_name  = r'MPI_[A-Z][a-z0-9_]+'
 usrfun_name = camel_name + r'_(?:function|fn)'
 
 arg_list = r'.*'
-ret_type = r'void|int|double'
+ret_type = r'void|int|double|MPI_Aint'
 
 canyint = anyof(r'int', r'long(?:\s+long)?')
 canyptr = join(r'\w+', pointer+'?')

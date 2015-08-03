@@ -171,7 +171,10 @@ cdef import from "mpi.h" nogil:
     enum: MPI_DISTRIBUTE_DFLT_DARG  #:= 4
     int MPI_Type_create_darray(int, int, int, int[], int[], int[], int[], int, MPI_Datatype, MPI_Datatype*)
 
-    int MPI_Get_address(void*, MPI_Aint*)                                             #:= MPI_Address
+    int MPI_Get_address(void*, MPI_Aint*) #:= MPI_Address
+    MPI_Aint MPI_Aint_add(MPI_Aint, MPI_Aint)
+    MPI_Aint MPI_Aint_diff(MPI_Aint, MPI_Aint)
+
     int MPI_Type_create_hvector(int, int, MPI_Aint, MPI_Datatype, MPI_Datatype*)      #:= MPI_Type_hvector
     int MPI_Type_create_hindexed(int, int[], MPI_Aint[], MPI_Datatype, MPI_Datatype*) #:= MPI_Type_hindexed
     int MPI_Type_create_hindexed_block(int, int, MPI_Aint[], MPI_Datatype, MPI_Datatype*)
@@ -681,7 +684,9 @@ cdef import from "mpi.h" nogil:
     int MPI_File_write_at_all (MPI_File, MPI_Offset, void*, int, MPI_Datatype, MPI_Status*)
 
     int MPI_File_iread_at     (MPI_File, MPI_Offset, void*, int, MPI_Datatype, MPI_Request*)
+    int MPI_File_iread_at_all (MPI_File, MPI_Offset, void*, int, MPI_Datatype, MPI_Request*)
     int MPI_File_iwrite_at    (MPI_File, MPI_Offset, void*, int, MPI_Datatype, MPI_Request*)
+    int MPI_File_iwrite_at_all(MPI_File, MPI_Offset, void*, int, MPI_Datatype, MPI_Request*)
 
     enum: MPI_SEEK_SET              #:= 0
     enum: MPI_SEEK_CUR              #:= 1
@@ -696,7 +701,9 @@ cdef import from "mpi.h" nogil:
     int MPI_File_write     (MPI_File, void*, int, MPI_Datatype, MPI_Status*)
     int MPI_File_write_all (MPI_File, void*, int, MPI_Datatype, MPI_Status*)
     int MPI_File_iread     (MPI_File, void*, int, MPI_Datatype, MPI_Request*)
+    int MPI_File_iread_all (MPI_File, void*, int, MPI_Datatype, MPI_Request*)
     int MPI_File_iwrite    (MPI_File, void*, int, MPI_Datatype, MPI_Request*)
+    int MPI_File_iwrite_all(MPI_File, void*, int, MPI_Datatype, MPI_Request*)
 
     int MPI_File_read_shared   (MPI_File, void*, int, MPI_Datatype, MPI_Status*)
     int MPI_File_write_shared  (MPI_File, void*, int, MPI_Datatype, MPI_Status*)

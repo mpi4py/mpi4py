@@ -277,6 +277,17 @@ cdef class File:
         request.ob_buf = m
         return request
 
+    def Iread_at_all(self, Offset offset, buf):
+        """
+        Nonblocking collective read using explicit offset
+        """
+        cdef _p_msg_io m = message_io_read(buf)
+        cdef Request request = <Request>Request.__new__(Request)
+        with nogil: CHKERR( MPI_File_iread_at_all(
+            self.ob_mpi, offset, m.buf, m.count, m.dtype, &request.ob_mpi) )
+        request.ob_buf = m
+        return request
+
     def Iwrite_at(self, Offset offset, buf):
         """
         Nonblocking write using explicit offset
@@ -284,6 +295,17 @@ cdef class File:
         cdef _p_msg_io m = message_io_write(buf)
         cdef Request request = <Request>Request.__new__(Request)
         with nogil: CHKERR( MPI_File_iwrite_at(
+            self.ob_mpi, offset, m.buf, m.count, m.dtype, &request.ob_mpi) )
+        request.ob_buf = m
+        return request
+
+    def Iwrite_at_all(self, Offset offset, buf):
+        """
+        Nonblocking collective write using explicit offset
+        """
+        cdef _p_msg_io m = message_io_write(buf)
+        cdef Request request = <Request>Request.__new__(Request)
+        with nogil: CHKERR( MPI_File_iwrite_at_all(
             self.ob_mpi, offset, m.buf, m.count, m.dtype, &request.ob_mpi) )
         request.ob_buf = m
         return request
@@ -338,6 +360,17 @@ cdef class File:
         request.ob_buf = m
         return request
 
+    def Iread_all(self, buf):
+        """
+        Nonblocking collective read using individual file pointer
+        """
+        cdef _p_msg_io m = message_io_read(buf)
+        cdef Request request = <Request>Request.__new__(Request)
+        with nogil: CHKERR( MPI_File_iread_all(
+            self.ob_mpi, m.buf, m.count, m.dtype, &request.ob_mpi) )
+        request.ob_buf = m
+        return request
+
     def Iwrite(self, buf):
         """
         Nonblocking write using individual file pointer
@@ -345,6 +378,17 @@ cdef class File:
         cdef _p_msg_io m = message_io_write(buf)
         cdef Request request = <Request>Request.__new__(Request)
         with nogil: CHKERR( MPI_File_iwrite(
+            self.ob_mpi, m.buf, m.count, m.dtype, &request.ob_mpi) )
+        request.ob_buf = m
+        return request
+
+    def Iwrite_all(self, buf):
+        """
+        Nonblocking collective write using individual file pointer
+        """
+        cdef _p_msg_io m = message_io_write(buf)
+        cdef Request request = <Request>Request.__new__(Request)
+        with nogil: CHKERR( MPI_File_iwrite_all(
             self.ob_mpi, m.buf, m.count, m.dtype, &request.ob_mpi) )
         request.ob_buf = m
         return request

@@ -6,6 +6,7 @@
 #include "mpi-20.h"
 #include "mpi-22.h"
 #include "mpi-30.h"
+#include "mpi-31.h"
 
 /* These types are difficult to implement portably */
 #undef PyMPI_HAVE_MPI_REAL2

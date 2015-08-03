@@ -649,6 +649,16 @@ typedef void *PyMPI_MPI_Errhandler;
 #define MPI_Get_address MPI_Address
 #endif
 
+#ifndef PyMPI_HAVE_MPI_Aint_add
+#undef  MPI_Aint_add
+#define MPI_Aint_add(a1,a2) PyMPI_UNAVAILABLE("MPI_Aint_add",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Aint_diff
+#undef  MPI_Aint_diff
+#define MPI_Aint_diff(a1,a2) PyMPI_UNAVAILABLE("MPI_Aint_diff",a1,a2)
+#endif
+
 #ifndef PyMPI_HAVE_MPI_Type_create_hvector
 #undef  MPI_Type_create_hvector
 #define MPI_Type_create_hvector MPI_Type_hvector
@@ -2696,9 +2706,19 @@ typedef int (MPIAPI PyMPI_MPI_Win_delete_attr_function)(MPI_Win,int,void*,void*)
 #define MPI_File_iread_at(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_File_iread_at",a1,a2,a3,a4,a5,a6)
 #endif
 
+#ifndef PyMPI_HAVE_MPI_File_iread_at_all
+#undef  MPI_File_iread_at_all
+#define MPI_File_iread_at_all(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_File_iread_at_all",a1,a2,a3,a4,a5,a6)
+#endif
+
 #ifndef PyMPI_HAVE_MPI_File_iwrite_at
 #undef  MPI_File_iwrite_at
 #define MPI_File_iwrite_at(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_File_iwrite_at",a1,a2,a3,a4,a5,a6)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_File_iwrite_at_all
+#undef  MPI_File_iwrite_at_all
+#define MPI_File_iwrite_at_all(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_File_iwrite_at_all",a1,a2,a3,a4,a5,a6)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_SEEK_SET
@@ -2761,9 +2781,19 @@ typedef int (MPIAPI PyMPI_MPI_Win_delete_attr_function)(MPI_Win,int,void*,void*)
 #define MPI_File_iread(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_File_iread",a1,a2,a3,a4,a5)
 #endif
 
+#ifndef PyMPI_HAVE_MPI_File_iread_all
+#undef  MPI_File_iread_all
+#define MPI_File_iread_all(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_File_iread_all",a1,a2,a3,a4,a5)
+#endif
+
 #ifndef PyMPI_HAVE_MPI_File_iwrite
 #undef  MPI_File_iwrite
 #define MPI_File_iwrite(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_File_iwrite",a1,a2,a3,a4,a5)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_File_iwrite_all
+#undef  MPI_File_iwrite_all
+#define MPI_File_iwrite_all(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_File_iwrite_all",a1,a2,a3,a4,a5)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_File_read_shared
