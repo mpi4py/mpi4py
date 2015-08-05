@@ -76,7 +76,7 @@ build_script:
 test: off
 test_script:
   - "%PYTHON%\\Scripts\\pip.exe install --no-cache-dir --no-index --find-links=dist\\ mpi4py"
-  - "%PYTHON%\\python.exe %CD%\\test\\runtests.py -f --no-builddir"
+  - "%PYTHON%\\python.exe %CD%\\test\\runtests.py -v -f --no-builddir"
   - "%PYTHON%\\Scripts\\pip.exe uninstall --yes mpi4py"
 
 after_test:
