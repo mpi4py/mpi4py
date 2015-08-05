@@ -37,7 +37,7 @@ function UpdateAnaconda ($anaconda_home) {
     $conda = Join-Path $anaconda_home "Scripts\conda.exe"
     $commands = @(
         "update --yes --quiet --all",
-        "update --yes --quiet -n root conda-build
+        "update --yes --quiet binstar conda-build jinja2",
         "clean  --yes --lock --tarballs"
     )
     foreach($args in $commands) {
