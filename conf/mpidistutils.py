@@ -75,6 +75,11 @@ def customize_compiler(compiler, lang=None,
                        mpicc=None, mpicxx=None, mpild=None,
                        ):
     sysconfig.customize_compiler(compiler)
+    if compiler.compiler_type == 'unix':
+        ld = compiler.linker_exe
+        for envvar in ('LDFLAGS', 'CFLAGS', 'CPPFLAGS'):
+            if envvar in os.environ:
+                ld += split_quoted(os.environ[envvar])
     if sys.platform == 'darwin':
         badcflags = ['-mno-fused-madd']
         for attr in ('preprocessor',
