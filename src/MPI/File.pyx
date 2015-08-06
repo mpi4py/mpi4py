@@ -711,7 +711,7 @@ FILE_NULL = __FILE_NULL__  #: Null file handle
 # User-defined data representations
 # ---------------------------------
 
-def Register_datatrep(datarep, read_fn, write_fn, extent_fn):
+def Register_datarep(datarep, read_fn, write_fn, extent_fn):
     """
     Register user-defined data representations
     """
