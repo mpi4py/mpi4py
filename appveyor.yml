@@ -86,14 +86,15 @@ after_test:
   - "powershell conf\\appveyor\\install-anaconda.ps1"
   - "set PATH=%ANACONDA%;%ANACONDA%\\Scripts\\;%PATH%"
   - "conda info --all"
-  - "conda remove --yes --quiet psutil || call"
+  - "conda install --yes --quiet psutil"
+  - "conda remove  --yes --quiet psutil"
   - "%WITH_ENV% conda build --quiet --python %PYTHON_VERSION:~0,3% conf\\conda-recipes\\mpi4py"
-  - "conda clean --yes --lock --tarballs"
+# - "conda clean --yes --lock --tarballs"
   - ps: "Move-Item $env:ANACONDA\\conda-bld\\win-*\\mpi4py-*.tar.bz2 dist\\ -Force"
-  - ps: "Start-Sleep 5"
-  - ps: "Remove-Item -Recurse -Force -Path $env:ANACONDA\\conda-bld"
-  - ps: "Remove-Item -Recurse -Force -Path $env:ANACONDA\\envs"
-  - ps: "Remove-Item -Recurse -Force -Path $env:ANACONDA\\pkgs\\mpi4py*"
+# - ps: "Start-Sleep 5"
+# - ps: "Remove-Item -Recurse -Force -Path $env:ANACONDA\\conda-bld"
+# - ps: "Remove-Item -Recurse -Force -Path $env:ANACONDA\\envs"
+# - ps: "Remove-Item -Recurse -Force -Path $env:ANACONDA\\pkgs\\mpi4py*"
 
 artifacts:
   - path: dist\*
@@ -102,7 +103,7 @@ cache:
   - C:\Downloads\Python   -> conf\appveyor\install-python.ps1
   - C:\Downloads\MSMPI    -> conf\appveyor\install-msmpi.ps1
   - C:\Downloads\Anaconda -> conf\appveyor\install-anaconda.ps1
-  - C:\Anaconda           -> conf\appveyor\install-anaconda.ps1
+# - C:\Anaconda           -> conf\appveyor\install-anaconda.ps1
   - '%LOCALAPPDATA%\pip\Cache'
 
 #on_success:
