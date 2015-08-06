@@ -44,14 +44,14 @@ class BaseTestGroup(object):
         self.assertEqual(MPI.Group.Compare(group, MPI.GROUP_EMPTY), MPI.IDENT)
         group.Free()
 
-    def testIntersect(self):
-        group = MPI.Group.Intersect(MPI.GROUP_EMPTY, self.GROUP)
+    def testIntersection(self):
+        group = MPI.Group.Intersection(MPI.GROUP_EMPTY, self.GROUP)
         self.assertEqual(MPI.Group.Compare(group, MPI.GROUP_EMPTY), MPI.IDENT)
         group.Free()
-        group = MPI.Group.Intersect(self.GROUP, MPI.GROUP_EMPTY)
+        group = MPI.Group.Intersection(self.GROUP, MPI.GROUP_EMPTY)
         self.assertEqual(MPI.Group.Compare(group, MPI.GROUP_EMPTY), MPI.IDENT)
         group.Free()
-        group = MPI.Group.Intersect(self.GROUP, self.GROUP)
+        group = MPI.Group.Intersection(self.GROUP, self.GROUP)
         self.assertEqual(MPI.Group.Compare(group, self.GROUP), MPI.IDENT)
         group.Free()
 

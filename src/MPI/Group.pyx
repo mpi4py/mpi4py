@@ -119,7 +119,7 @@ cdef class Group:
         return group
 
     @classmethod
-    def Intersect(cls,
+    def Intersection(cls,
                   Group group1 not None,
                   Group group2 not None):
         """
@@ -130,6 +130,8 @@ cdef class Group:
         CHKERR( MPI_Group_intersection(
                 group1.ob_mpi, group2.ob_mpi, &group.ob_mpi) )
         return group
+
+    Intersect = Intersection
 
     @classmethod
     def Difference(cls,
