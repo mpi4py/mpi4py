@@ -57,6 +57,8 @@ def fix_compiler_cmd(cc, mpicc):
         i = i + 1
         while '=' in cc[i]:
             i = i + 1
+    while os.path.basename(cc[i]) == 'ccache':
+        i = i + 1
     cc[i:i+1] = split_quoted(mpicc)
 
 def fix_linker_cmd(ld, mpild):
@@ -69,6 +71,8 @@ def fix_linker_cmd(ld, mpild):
         i = i + 1
         while '=' in ld[i]:
             i = i + 1
+    while os.path.basename(ld[i]) == 'ccache':
+        del ld[i]
     ld[i:i+1] = split_quoted(mpild)
 
 def customize_compiler(compiler, lang=None,
