@@ -207,6 +207,31 @@ class BaseTestIO(object):
                     self.assertEqual(value, 42)
                 self.assertEqual(rbuf[-1], -1)
 
+    def testIReadIWriteAtAll(self):
+        comm = self.COMM
+        size = comm.Get_size()
+        rank = comm.Get_rank()
+        fh = self.FILE
+        try: # MPI 3.1
+            for array in arrayimpl.ArrayTypes:
+                for typecode in arrayimpl.TypeMap:
+                    etype = arrayimpl.TypeMap[typecode]
+                    fh.Set_size(0)
+                    fh.Set_view(0, etype)
+                    count = 13
+                    wbuf = array(42, typecode, count)
+                    fh.Iwrite_at_all(count*rank, wbuf.as_raw()).Wait()
+                    fh.Sync()
+                    comm.Barrier()
+                    fh.Sync()
+                    rbuf = array(-1, typecode, count+1)
+                    fh.Iread_at_all(count*rank, rbuf.as_mpi_c(count)).Wait()
+                    for value in rbuf[:-1]:
+                        self.assertEqual(value, 42)
+                    self.assertEqual(rbuf[-1], -1)
+        except NotImplementedError:
+            if MPI.Get_version() >= (3, 1): raise
+
     def testReadWriteAtAllBeginEnd(self):
         comm = self.COMM
         size = comm.Get_size()
@@ -254,6 +279,33 @@ class BaseTestIO(object):
                 for value in rbuf[:-1]:
                     self.assertEqual(value, 42)
                 self.assertEqual(rbuf[-1], -1)
+
+    def testIReadIWriteAll(self):
+        comm = self.COMM
+        size = comm.Get_size()
+        rank = comm.Get_rank()
+        fh = self.FILE
+        try: # MPI 3.1
+            for array in arrayimpl.ArrayTypes:
+                for typecode in arrayimpl.TypeMap:
+                    etype = arrayimpl.TypeMap[typecode]
+                    fh.Set_size(0)
+                    fh.Set_view(0, etype)
+                    count = 13
+                    wbuf = array(42, typecode, count)
+                    fh.Seek(count*rank, MPI.SEEK_SET)
+                    fh.Iwrite_all(wbuf.as_raw()).Wait()
+                    fh.Sync()
+                    comm.Barrier()
+                    fh.Sync()
+                    rbuf = array(-1, typecode, count+1)
+                    fh.Seek(count*rank, MPI.SEEK_SET)
+                    fh.Iread_all(rbuf.as_mpi_c(count)).Wait()
+                    for value in rbuf[:-1]:
+                        self.assertEqual(value, 42)
+                    self.assertEqual(rbuf[-1], -1)
+        except NotImplementedError:
+            if MPI.Get_version() >= (3, 1): raise
 
     def testReadWriteAllBeginEnd(self):
         comm = self.COMM
