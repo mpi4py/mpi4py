@@ -1,6 +1,6 @@
 package:
   name: openmpi
-  version: 1.8.7
+  version: 1.8.8
 
 about:
   home: http://www.open-mpi.org/
@@ -14,8 +14,8 @@ requirements:
 
 source:
   fn: openmpi-1.8.7.tar.bz2
-  url: http://www.open-mpi.org/software/ompi/v1.8/downloads/openmpi-1.8.7.tar.bz2
-  md5: 2485ed6fa0fab9bb5b4e7a9f63718630
+  url: http://www.open-mpi.org/software/ompi/v1.8/downloads/openmpi-1.8.8.tar.bz2
+  md5: 0dab8e602372da1425e9242ae37faf8c
 
 build:
   number: 0
