@@ -421,6 +421,12 @@ if name == 'Open MPI':
         if MPI.Query_thread() > MPI.THREAD_SINGLE:
             del TestCCOVecWorldDup
 if name == 'Microsoft MPI':
+    import struct
+    if struct.calcsize('P')*8 == 32:
+        def SKIP(*args, **kwargs): pass
+        TestCCOVecInplaceSelf.testAlltoallv   = SKIP
+        TestCCOVecInplaceSelf.testAlltoallw   = SKIP
+        TestCCOVecInplaceSelf.testAlltoallw2  = SKIP
     def SKIP(*args, **kwargs): pass
     TestCCOVecInplaceWorld.testAlltoallv  = SKIP
     TestCCOVecInplaceWorld.testAlltoallw  = SKIP
