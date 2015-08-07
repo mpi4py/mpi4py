@@ -24,6 +24,11 @@ function InstallAnaconda ($python_version, $architecture, $anaconda_home) {
     $args = "/S /D=$anaconda_home"
     Write-Host $filepath $args
     Start-Process -FilePath $filepath -ArgumentList $args -Wait
+    Write-Host "Updating Anaconda packages"
+    $prog = Join-Path $anaconda_home "Scripts\conda.exe"
+    $args = "update --yes --quiet --all"
+    Write-Host $prog $args
+    Start-Process -FilePath $prog -ArgumentList $args -Wait
     Write-Host "Installing additional Anaconda packages"
     $prog = Join-Path $anaconda_home "Scripts\conda.exe"
     $args = "install --yes --quiet anaconda-client conda-build jinja2"
@@ -36,9 +41,8 @@ function UpdateAnaconda ($anaconda_home) {
     Write-Host "Updating Anaconda"
     $conda = Join-Path $anaconda_home "Scripts\conda.exe"
     $commands = @(
-        "update --yes --quiet --all",
-        "update --yes --quiet anaconda-client conda-build jinja2",
-        "clean  --yes --lock --tarballs"
+        "update  --yes --quiet --all",
+        "install --yes --quiet anaconda-client conda-build jinja2"
     )
     foreach($args in $commands) {
         Write-Host $conda $args
@@ -48,7 +52,7 @@ function UpdateAnaconda ($anaconda_home) {
 
 function main () {
     InstallAnaconda $env:PYTHON_VERSION $env:PYTHON_ARCH $env:ANACONDA
-    UpdateAnaconda  $env:ANACONDA
+    #UpdateAnaconda $env:ANACONDA
 }
 
 main
