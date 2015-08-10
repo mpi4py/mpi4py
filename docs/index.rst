@@ -11,9 +11,14 @@ MPI for Python
 Online Documentation
 --------------------
 
-Hosted at SciPy servers [http://mpi4py.scipy.org/]:
+Hosted at *Read the Docs* [http://mpi4py.readthedocs.org/]:
 
-Hosted at PyPI  servers [http://pythonhosted.org/mpi4py/]:
+.. image::  https://readthedocs.org/projects/mpi4py/badge/?version=stable
+   :target: https://mpi4py.readthedocs.org/stable/
+.. image::  https://readthedocs.org/projects/mpi4py/badge/?version=latest
+   :target: https://mpi4py.readthedocs.org/latest/
+
+Hosted at *PyPI* [http://pythonhosted.org/mpi4py/]:
 
 + `User Manual (HTML)`_ (generated with Sphinx_).
 + `User Manual (PDF)`_  (generated with Sphinx_).
