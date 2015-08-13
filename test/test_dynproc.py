@@ -88,6 +88,7 @@ class TestDPM(unittest.TestCase):
         group = group_world.Excl([0])
         group_world.Free()
         comm = comm_world.Create(group)
+        group.Free()
         if wrank == 0:
             self.assertEqual(comm, MPI.COMM_NULL)
         else:
@@ -164,21 +165,22 @@ class TestDPM(unittest.TestCase):
             fd = client.fileno()
             intercomm = MPI.Comm.Join(fd)
             client.close()
-            self.assertEqual(intercomm.remote_size, 1)
-            self.assertEqual(intercomm.size, 1)
-            self.assertEqual(intercomm.rank, 0)
-            if rank == 0:
-                message = TestDPM.message
-                root = MPI.ROOT
-            else:
-                message = None
-                root = 0
-            message = intercomm.bcast(message, root)
-            if rank == 0:
-                self.assertEqual(message, None)
-            else:
-                self.assertEqual(message, TestDPM.message)
-            intercomm.Free()
+            if intercomm != MPI.COMM_NULL:
+                self.assertEqual(intercomm.remote_size, 1)
+                self.assertEqual(intercomm.size, 1)
+                self.assertEqual(intercomm.rank, 0)
+                if rank == 0:
+                    message = TestDPM.message
+                    root = MPI.ROOT
+                else:
+                    message = None
+                    root = 0
+                message = intercomm.bcast(message, root)
+                if rank == 0:
+                    self.assertEqual(message, None)
+                else:
+                    self.assertEqual(message, TestDPM.message)
+                intercomm.Free()
         MPI.COMM_WORLD.Barrier()
 
 
