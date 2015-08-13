@@ -355,13 +355,33 @@ class TestExcErrhandler(BaseTestCase):
 
 # --------------------------------------------------------------------
 
-import sys
+import sys, os
+HAVE_MPE = 'MPE_LOGFILE_PREFIX' in os.environ
+HAVE_VT  = 'VT_FILE_PREFIX' in os.environ
 name, version = MPI.get_vendor()
-if name == 'MPICH1':
+
+if HAVE_MPE or HAVE_VT:
+    del TestExcDatatypeNull
+    del TestExcDatatype
+    del TestExcStatus
+    del TestExcRequestNull
+    del TestExcOpNull
+    del TestExcOp
+    del TestExcInfoNull
+    del TestExcInfo
+    del TestExcGroupNull
+    del TestExcGroup
+    del TestExcCommNull
+    del TestExcComm
+    del TestExcWinNull
+    del TestExcWin
+    del TestExcErrhandlerNull
+    del TestExcErrhandler
+elif name == 'MPICH1':
     del TestExcStatus.testSetElements
     del TestExcComm.testFreeSelf
     del TestExcComm.testFreeWorld
-if name == 'MPICH2':
+elif name == 'MPICH2':
     errhdl = MPI.COMM_WORLD.Get_errhandler()
     try:
         MPI.COMM_WORLD.Set_errhandler(MPI.ERRORS_RETURN)
@@ -389,7 +409,7 @@ if name == 'MPICH2':
         MPI.COMM_WORLD.Set_errhandler(errhdl)
         errhdl.Free()
         del errhdl
-if name == 'Open MPI':
+elif name == 'Open MPI':
     if sys.platform.startswith('win'):
         del TestExcDatatypeNull
         del TestExcDatatype
@@ -407,12 +427,12 @@ if name == 'Open MPI':
         del TestExcWin
         del TestExcErrhandlerNull
         del TestExcErrhandler
-if name == 'Microsoft MPI':
+elif name == 'Microsoft MPI':
     del TestExcDatatype.testFreePredefined
     if version <= (4,2,0):
         del TestExcStatus
         TestExcCommNull.ERR_COMM = (MPI.ERR_COMM, MPI.ERR_ARG)
-if name == 'Platform MPI':
+elif name == 'Platform MPI':
         del TestExcDatatypeNull
         del TestExcDatatype
         del TestExcStatus
@@ -429,7 +449,7 @@ if name == 'Platform MPI':
         del TestExcWin
         del TestExcErrhandlerNull
         del TestExcErrhandler
-if name == 'HP MPI':
+elif name == 'HP MPI':
         del TestExcDatatypeNull
         del TestExcDatatype
         del TestExcStatus

@@ -8,6 +8,9 @@ CHILDSCRIPT = os.path.abspath(
     os.path.join(os.path.dirname(__file__), 'spawn_child.py')
     )
 
+HAVE_MPE = 'MPE_LOGFILE_PREFIX' in os.environ
+HAVE_VT  = 'VT_FILE_PREFIX' in os.environ
+
 def childscript():
     from tempfile import mkstemp
     from textwrap import dedent
@@ -17,6 +20,9 @@ def childscript():
         f.write(dedent("""\
         #!%(python)s
         import sys; sys.path.insert(0, "%(path)s")
+        import mpi4py
+        if %(mpe)s: mpi4py.profile('mpe', logfile="%(logfile)s")
+        if %(vt)s:  mpi4py.profile('vt',  logfile="%(logfile)s")
         from mpi4py import MPI
         parent = MPI.Comm.Get_parent()
         parent.Barrier()
@@ -24,7 +30,9 @@ def childscript():
         assert parent == MPI.COMM_NULL
         parent = MPI.Comm.Get_parent()
         assert parent == MPI.COMM_NULL
-        """ % dict(python=sys.executable, path=MPI4PYPATH)))
+        """ % dict(python=sys.executable, path=MPI4PYPATH,
+                   mpe=HAVE_MPE, vt=HAVE_VT,
+                   logfile="runtests-mpi4py-child")))
     os.chmod(script, int("770", 8))
     return script
 
@@ -32,7 +40,9 @@ class BaseTestSpawn(object):
 
     COMM = MPI.COMM_NULL
     COMMAND = sys.executable
-    ARGS = [CHILDSCRIPT, MPI4PYPATH]
+    ARGS = [CHILDSCRIPT, MPI4PYPATH,
+            "mpe" if HAVE_MPE else
+            "vt"  if HAVE_VT  else ""]
     MAXPROCS = 1
     INFO = MPI.INFO_NULL
     ROOT = 0
