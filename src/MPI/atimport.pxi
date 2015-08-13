@@ -25,6 +25,7 @@ ctypedef struct Options:
     int finalize
     int fast_reduce
     int recv_mprobe
+    int errors
 
 cdef Options options
 options.initialize = 1
@@ -33,6 +34,7 @@ options.thread_level = MPI_THREAD_MULTIPLE
 options.finalize = 1
 options.fast_reduce = 1
 options.recv_mprobe = 1
+options.errors = 1
 
 cdef int warnOpt(object name, object value) except -1:
     cdef object warn
@@ -47,6 +49,7 @@ cdef int getOptions(Options* opts) except -1:
     opts.finalize = 1
     opts.fast_reduce = 1
     opts.recv_mprobe = 1
+    opts.errors = 1
     try: from mpi4py import rc
     except: return 0
     #
@@ -56,6 +59,7 @@ cdef int getOptions(Options* opts) except -1:
     cdef object finalize = None
     cdef object fast_reduce = True
     cdef object recv_mprobe = True
+    cdef object errors = 'exception'
     try: initialize = rc.initialize
     except: pass
     try: threads = rc.threads
@@ -69,6 +73,8 @@ cdef int getOptions(Options* opts) except -1:
     try: fast_reduce = rc.fast_reduce
     except: pass
     try: recv_mprobe = rc.recv_mprobe
+    except: pass
+    try: errors = rc.errors
     except: pass
     #
     if initialize in (True, 'yes'):
@@ -118,6 +124,15 @@ cdef int getOptions(Options* opts) except -1:
         opts.recv_mprobe = 0
     else:
         warnOpt("recv_mprobe", recv_mprobe)
+    #
+    if errors == 'default':
+        opts.errors = 0
+    elif errors == 'exception':
+        opts.errors = 1
+    elif errors == 'fatal':
+        opts.errors = 2
+    else:
+        warnOpt("errors", errors)
     #
     return 0
 
@@ -169,8 +184,11 @@ cdef inline int mpi_active() nogil:
     # MPI should be active ...
     return 1
 
-cdef void initialize() nogil:
-    if not mpi_active(): return
+cdef int initialize() nogil except -1:
+    if not mpi_active(): return 0
+    comm_set_eh(MPI_COMM_SELF)
+    comm_set_eh(MPI_COMM_WORLD)
+    return 0
 
 cdef void finalize() nogil:
     if not mpi_active(): return

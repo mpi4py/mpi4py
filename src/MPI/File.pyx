@@ -90,6 +90,7 @@ cdef class File:
         cdef File file = <File>File.__new__(File)
         with nogil: CHKERR( MPI_File_open(
             comm.ob_mpi, cfilename, amode, cinfo, &file.ob_mpi) )
+        file_set_eh(file.ob_mpi)
         return file
 
     def Close(self):

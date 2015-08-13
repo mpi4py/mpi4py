@@ -424,11 +424,22 @@ handlers :const:`ERRORS_RETURN` and :const:`ERRORS_ARE_FATAL` can be
 assigned to and retrieved from communicators, windows and files using
 methods :meth:`Set_errhandler` and :meth:`Get_errhandler`.
 
-The default MPI error handling policies are not overriden. When the
-predefined error handler :const:`ERRORS_RETURN` is set, errors
-returned from MPI calls will raise an instance of the exception class
-:exc:`Exception`, which is a subclass of the standard Python exception
-:exc:`RuntimeError`.
+When the predefined error handler :const:`ERRORS_RETURN` is set,
+errors returned from MPI calls within Python code will raise an
+instance of the exception class :exc:`Exception`, which is a subclass
+of the standard Python exception :exc:`RuntimeError`.
+
+.. caution::
+
+   After import, mpi4py overrides the default MPI rules governing
+   inheritance of error handlers. The :const:`ERRORS_RETURN` error
+   handler is set in the predefined :const:`COMM_SELF` and
+   :const:`COMM_WORLD` communicators, as well as any new
+   :class:`Comm`, :class:`Win`, or :class:`File` instance created
+   through mpi4py. If you ever pass such handles to C/C++/Fortran
+   library code, it is recommended to set the
+   :const:`ERRORS_ARE_FATAL` error handler on them to ensure MPI
+   errors do not pass silently.
 
 .. caution::
 

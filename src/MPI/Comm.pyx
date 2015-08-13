@@ -120,6 +120,7 @@ cdef class Comm:
         cdef type comm_type = type(self)
         cdef Comm comm = <Comm>comm_type.__new__(comm_type)
         with nogil: CHKERR( MPI_Comm_dup(self.ob_mpi, &comm.ob_mpi) )
+        comm_set_eh(comm.ob_mpi)
         return comm
 
     def Dup(self, Info info=None):
@@ -135,6 +136,7 @@ cdef class Comm:
         else:
             with nogil: CHKERR( MPI_Comm_dup_with_info(
                 self.ob_mpi, cinfo, &comm.ob_mpi) )
+        comm_set_eh(comm.ob_mpi)
         return comm
 
     def Dup_with_info(self, Info info not None):
@@ -145,6 +147,7 @@ cdef class Comm:
         cdef Comm comm = <Comm>comm_type.__new__(comm_type)
         with nogil: CHKERR( MPI_Comm_dup_with_info(
             self.ob_mpi, info.ob_mpi, &comm.ob_mpi) )
+        comm_set_eh(comm.ob_mpi)
         return comm
 
     def Idup(self):
@@ -156,6 +159,7 @@ cdef class Comm:
         cdef Request request = <Request>Request.__new__(Request)
         with nogil: CHKERR( MPI_Comm_idup(
             self.ob_mpi, &comm.ob_mpi, &request.ob_mpi) )
+        comm_set_eh(comm.ob_mpi)
         return (comm, request)
 
     def Create(self, Group group not None):
@@ -168,6 +172,7 @@ cdef class Comm:
         cdef Comm comm = <Comm>comm_type.__new__(comm_type)
         with nogil: CHKERR( MPI_Comm_create(
             self.ob_mpi, group.ob_mpi, &comm.ob_mpi) )
+        comm_set_eh(comm.ob_mpi)
         return comm
 
     def Create_group(self, Group group not None, int tag=0):
@@ -180,6 +185,7 @@ cdef class Comm:
         cdef Comm comm = <Comm>comm_type.__new__(comm_type)
         with nogil: CHKERR( MPI_Comm_create_group(
             self.ob_mpi, group.ob_mpi, tag, &comm.ob_mpi) )
+        comm_set_eh(comm.ob_mpi)
         return comm
 
     def Split(self, int color=0, int key=0):
@@ -192,6 +198,7 @@ cdef class Comm:
         cdef Comm comm = <Comm>comm_type.__new__(comm_type)
         with nogil: CHKERR( MPI_Comm_split(
             self.ob_mpi, color, key, &comm.ob_mpi) )
+        comm_set_eh(comm.ob_mpi)
         return comm
 
     def Split_type(self, int split_type, int key=0,
@@ -206,6 +213,7 @@ cdef class Comm:
         cdef Comm comm = <Comm>comm_type.__new__(comm_type)
         with nogil: CHKERR( MPI_Comm_split_type(
             self.ob_mpi, split_type, key, cinfo, &comm.ob_mpi) )
+        comm_set_eh(comm.ob_mpi)
         return comm
 
     # Communicator Destructor
@@ -989,6 +997,7 @@ cdef class Comm:
         """
         cdef Intercomm comm = __COMM_PARENT__
         with nogil: CHKERR( MPI_Comm_get_parent(&comm.ob_mpi) )
+        comm_set_eh(comm.ob_mpi)
         return comm
 
     def Disconnect(self):
@@ -1005,6 +1014,7 @@ cdef class Comm:
         """
         cdef Intercomm comm = <Intercomm>Intercomm.__new__(Intercomm)
         with nogil: CHKERR( MPI_Comm_join(fd, &comm.ob_mpi) )
+        comm_set_eh(comm.ob_mpi)
         return comm
 
     # Attributes
@@ -1329,6 +1339,7 @@ cdef class Intracomm(Comm):
         cdef Cartcomm comm = <Cartcomm>Cartcomm.__new__(Cartcomm)
         with nogil: CHKERR( MPI_Cart_create(
             self.ob_mpi, ndims, idims, iperiods, reorder, &comm.ob_mpi) )
+        comm_set_eh(comm.ob_mpi)
         return comm
 
     def Create_graph(self, index, edges, bint reorder=False):
@@ -1346,6 +1357,7 @@ cdef class Intracomm(Comm):
         cdef Graphcomm comm = <Graphcomm>Graphcomm.__new__(Graphcomm)
         with nogil: CHKERR( MPI_Graph_create(
             self.ob_mpi, nnodes, iindex, iedges, reorder, &comm.ob_mpi) )
+        comm_set_eh(comm.ob_mpi)
         return comm
 
     def Create_dist_graph_adjacent(self, sources, destinations,
@@ -1371,10 +1383,11 @@ cdef class Intracomm(Comm):
         cdef Distgraphcomm comm = \
             <Distgraphcomm>Distgraphcomm.__new__(Distgraphcomm)
         with nogil: CHKERR( MPI_Dist_graph_create_adjacent(
-                self.ob_mpi,
-                indegree,  isource, isourceweight,
-                outdegree, idest,   idestweight,
-                cinfo, reorder, &comm.ob_mpi) )
+            self.ob_mpi,
+            indegree,  isource, isourceweight,
+            outdegree, idest,   idestweight,
+            cinfo, reorder, &comm.ob_mpi) )
+        comm_set_eh(comm.ob_mpi)
         return comm
 
     def Create_dist_graph(self, sources, degrees, destinations, weights=None,
@@ -1396,9 +1409,10 @@ cdef class Intracomm(Comm):
         cdef Distgraphcomm comm = \
             <Distgraphcomm>Distgraphcomm.__new__(Distgraphcomm)
         with nogil: CHKERR( MPI_Dist_graph_create(
-                self.ob_mpi,
-                nv, isource, idegree, idest, iweight,
-                cinfo, reorder, &comm.ob_mpi) )
+            self.ob_mpi,
+            nv, isource, idegree, idest, iweight,
+            cinfo, reorder, &comm.ob_mpi) )
+        comm_set_eh(comm.ob_mpi)
         return comm
 
     def Create_intercomm(self,
@@ -1414,6 +1428,7 @@ cdef class Intracomm(Comm):
             self.ob_mpi, local_leader,
             peer_comm.ob_mpi, remote_leader,
             tag, &comm.ob_mpi) )
+        comm_set_eh(comm.ob_mpi)
         return comm
 
     # Low-Level Topology Functions
@@ -1549,6 +1564,7 @@ cdef class Intracomm(Comm):
         if errcodes is not None:
             errcodes[:] = [ierrcodes[i] for i from 0<=i<maxprocs]
         #
+        comm_set_eh(comm.ob_mpi)
         return comm
 
     def Spawn_multiple(self, command, args=None, maxprocs=None,
@@ -1592,6 +1608,7 @@ cdef class Intracomm(Comm):
                 errcodes[i] = [ierrcodes[j] for j from p <= j < q]
                 p = q
         #
+        comm_set_eh(comm.ob_mpi)
         return comm
 
     # Server Routines
@@ -1611,6 +1628,7 @@ cdef class Intracomm(Comm):
         with nogil: CHKERR( MPI_Comm_accept(
             cportname, cinfo, root,
             self.ob_mpi, &comm.ob_mpi) )
+        comm_set_eh(comm.ob_mpi)
         return comm
 
     # Client Routines
@@ -1630,6 +1648,7 @@ cdef class Intracomm(Comm):
         with nogil: CHKERR( MPI_Comm_connect(
             cportname, cinfo, root,
             self.ob_mpi, &comm.ob_mpi) )
+        comm_set_eh(comm.ob_mpi)
         return comm
 
 
@@ -1972,6 +1991,7 @@ cdef class Cartcomm(Topocomm):
         remain_dims = asarray_int(remain_dims, ndim, &iremdims)
         cdef Cartcomm comm = <Cartcomm>Cartcomm.__new__(Cartcomm)
         with nogil: CHKERR( MPI_Cart_sub(self.ob_mpi, iremdims, &comm.ob_mpi) )
+        comm_set_eh(comm.ob_mpi)
         return comm
 
 
@@ -2216,6 +2236,7 @@ cdef class Intercomm(Comm):
         cdef Intracomm comm = <Intracomm>Intracomm.__new__(Intracomm)
         with nogil: CHKERR( MPI_Intercomm_merge(
             self.ob_mpi, high, &comm.ob_mpi) )
+        comm_set_eh(comm.ob_mpi)
         return comm
 
 

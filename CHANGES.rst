@@ -35,12 +35,14 @@ Release 2.0.0 [2015-XX-XX]
 * Backward-incompatible changes:
 
   + Python 2.4, 2.5, 3.0 and 3.1 are no longer supported.
-  + Default MPI error handling policies are no longer overriden.
-    Communications errors (``Comm`` and ``Win``) are fatal, but I/O
-    (``File``) errors are not. Use the method ``Set_errhandler()`` of
-    ``Comm``, ``Win``, and ``File`` instances to set the predefined
-    ``ERRORS_RETURN`` error handler. After that, MPI errors translate
-    to Python exceptions.
+  + Default MPI error handling policies are overriden. After import,
+    mpi4py sets the ``ERRORS_RETURN`` error handler in ``COMM_SELF``
+    and ``COMM_WORLD``, as well as any new ``Comm``, ``Win``, or
+    ``File`` instance created through mpi4py, thus effectively
+    ignoring the MPI rules about error handler inheritance.  This way,
+    MPI errors translate to Python exceptions.  To disable this
+    behavior and use the standard MPI error handling rules, use
+    ``mpi4py.rc.errors = 'default'``.
   + Change signature of all send methods,
     ``dest`` is a required argument.
   + Change signature of all receive and probe methods,

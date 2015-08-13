@@ -90,6 +90,8 @@ def rc(**kargs):  # pylint: disable=invalid-name
         Use tree-based reductions for objects (default: True).
     recv_mprobe : bool
         Use matched probes to receive objects (default: True).
+    errors : {'exception', 'default', 'fatal'}
+        Error handling policy (default: 'exception').
 
     """
     for key in kargs:
@@ -100,10 +102,11 @@ def rc(**kargs):  # pylint: disable=invalid-name
 
 rc.initialize = True
 rc.threads = True
-rc.thread_level = "multiple"
+rc.thread_level = 'multiple'
 rc.finalize = None
 rc.fast_reduce = True
 rc.recv_mprobe = True
+rc.errors = 'exception'
 
 from sys import modules
 modules[__name__ + '.rc'] = rc
