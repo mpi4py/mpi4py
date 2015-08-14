@@ -306,9 +306,18 @@ def configure_libvt(lib, config_cmd):
 
 def configure_pyexe(exe, config_cmd):
     from distutils import sysconfig
-    from distutils.util import split_quoted
     if sys.platform.startswith('win'):
         return
+    if (sys.platform == 'darwin' and
+        ('Anaconda' in sys.version or
+         'Continuum Analytics' in sys.version)):
+        py_version = sysconfig.get_python_version()
+        py_abiflags = getattr(sys, 'abiflags', '')
+        exe.libraries += ['python' + py_version + py_abiflags]
+        return
+    #
+    from distutils.util import split_quoted
+    cfg_vars = sysconfig.get_config_vars()
     libraries = []
     library_dirs = []
     link_args = []
@@ -316,7 +325,6 @@ def configure_pyexe(exe, config_cmd):
         py_version = sysconfig.get_python_version()
         py_abiflags = getattr(sys, 'abiflags', '')
         libraries = ['python' + py_version + py_abiflags]
-    cfg_vars = sysconfig.get_config_vars()
     if sys.platform == 'darwin':
         fwkdir = cfg_vars.get('PYTHONFRAMEWORKDIR')
         if (fwkdir and fwkdir != 'no-framework' and
@@ -328,7 +336,6 @@ def configure_pyexe(exe, config_cmd):
                 'LIBS', 'MODLIBS', 'SYSLIBS',
                 'LDLAST'):
         link_args += split_quoted(cfg_vars.get(var, ''))
-
     exe.libraries += libraries
     exe.library_dirs += library_dirs
     exe.extra_link_args += link_args
