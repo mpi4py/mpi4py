@@ -28,7 +28,7 @@ requirements:
 build:
   number: {{build}}
   string: py{{py}}_{{mpi}}_{{build}}
-  script: python setup.py build_exe install
+  script: python setup.py install
 
 test:
   imports:
