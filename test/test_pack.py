@@ -105,6 +105,9 @@ name, version = MPI.get_vendor()
 if name =='MPICH' or name == 'MPICH2' or name == 'DeinoMPI':
     BaseTestPackExternal.skipdtype += ['l']
     BaseTestPackExternal.skipdtype += ['d']
+elif name == 'Intel MPI':
+    BaseTestPackExternal.skipdtype += ['l']
+    BaseTestPackExternal.skipdtype += ['d']
 elif name == 'Open MPI':
     del TestPackExternal
 else:
