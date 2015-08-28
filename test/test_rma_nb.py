@@ -176,6 +176,10 @@ except NotImplementedError:
 else:
     name, version = MPI.get_vendor()
     if name == 'Open MPI':
+        if version == (1,10,0):
+            def SKIP(*t, **k): pass
+            TestRMAWorld.testAccumulate = SKIP
+            TestRMAWorld.testGetAccumulate = SKIP
         if version < (1,8,1):
             del TestRMASelf, TestRMAWorld
     elif name == 'MPICH2':
