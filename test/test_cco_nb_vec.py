@@ -29,6 +29,7 @@ class BaseTestCCOVec(object):
             for typecode in arrayimpl.TypeMap:
                 for root in range(size):
                     for count in range(size):
+                        if (count, '*') in self.skip: continue
                         if (count, typecode) in self.skip: continue
                         sbuf = array(root, typecode, count)
                         rbuf = array(  -1, typecode, size*size)
@@ -53,6 +54,7 @@ class BaseTestCCOVec(object):
             for typecode in arrayimpl.TypeMap:
                 for root in range(size):
                     for count in range(size):
+                        if (count, '*') in self.skip: continue
                         if (count, typecode) in self.skip: continue
                         sbuf = array(root, typecode, size)
                         rbuf = array(  -1, typecode, size*size)
@@ -76,6 +78,7 @@ class BaseTestCCOVec(object):
             for typecode in arrayimpl.TypeMap:
                 for root in range(size):
                     for count in range(size+1):
+                        if (count, '*') in self.skip: continue
                         if (count, typecode) in self.skip: continue
                         #
                         sbuf = array(root, typecode, count).as_raw()
@@ -106,6 +109,7 @@ class BaseTestCCOVec(object):
             for typecode in arrayimpl.TypeMap:
                 for root in range(size):
                     for count in range(size):
+                        if (count, '*') in self.skip: continue
                         if (count, typecode) in self.skip: continue
                         sbuf = array(root, typecode, size*size)
                         rbuf = array(  -1, typecode, count)
@@ -124,6 +128,7 @@ class BaseTestCCOVec(object):
             for typecode in arrayimpl.TypeMap:
                 for root in range(size):
                     for count in range(size):
+                        if (count, '*') in self.skip: continue
                         if (count, typecode) in self.skip: continue
                         sbuf = array(root, typecode, size*size)
                         rbuf = array(  -1, typecode, size)
@@ -144,6 +149,7 @@ class BaseTestCCOVec(object):
             for typecode in arrayimpl.TypeMap:
                 for root in range(size):
                     for count in range(size+1):
+                        if (count, '*') in self.skip: continue
                         if (count, typecode) in self.skip: continue
                         #
                         sbuf = array(root, typecode, count*size).as_raw()
@@ -171,6 +177,7 @@ class BaseTestCCOVec(object):
             for typecode in arrayimpl.TypeMap:
                 for root in range(size):
                     for count in range(size):
+                        if (count, '*') in self.skip: continue
                         if (count, typecode) in self.skip: continue
                         sbuf = array(root, typecode, count)
                         rbuf = array(  -1, typecode, size*size)
@@ -194,6 +201,7 @@ class BaseTestCCOVec(object):
             for typecode in arrayimpl.TypeMap:
                 for root in range(size):
                     for count in range(size):
+                        if (count, '*') in self.skip: continue
                         if (count, typecode) in self.skip: continue
                         sbuf = array(root, typecode, size)
                         rbuf = array(  -1, typecode, size*size)
@@ -215,6 +223,7 @@ class BaseTestCCOVec(object):
             for typecode in arrayimpl.TypeMap:
                 for root in range(size):
                     for count in range(size+1):
+                        if (count, '*') in self.skip: continue
                         if (count, typecode) in self.skip: continue
                         #
                         sbuf = array(root, typecode, count).as_raw()
@@ -338,7 +347,7 @@ class TestCCOVecWorldDup(TestCCOVecWorld):
 name, version = MPI.get_vendor()
 if name == 'Open MPI':
     if version == (1,10,0):
-        BaseTestCCOVec.skip += [(0, 'b')]
+        BaseTestCCOVec.skip += [(0, '*')]
     if version == (1,8,6):
         BaseTestCCOVec.skip += [(0, 'b')]
     if version < (1,8,1):

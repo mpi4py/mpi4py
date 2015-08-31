@@ -306,6 +306,8 @@ except NotImplementedError:
 else:
     name, version = MPI.get_vendor()
     if name == 'Open MPI':
+        if version == (1,10,0):
+            del BaseTestRMA.testFlushSync
         if version == (1,8,7):
             del BaseTestRMA.testStartCompletePostTest
             del BaseTestRMA.testStartCompletePostWait
