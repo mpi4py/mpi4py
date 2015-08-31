@@ -17,7 +17,7 @@ cdef inline int win_set_eh(MPI_Win ob) nogil except -1:
     return 0
 
 cdef inline int file_set_eh(MPI_File ob) nogil except -1:
-    if ob != MPI_FILE_NULL: return 0
+    if ob == MPI_FILE_NULL: return 0
     cdef int opt = options.errors
     if   opt == 0: pass
     elif opt == 1: CHKERR( MPI_File_set_errhandler(ob, MPI_ERRORS_RETURN) )
