@@ -52,16 +52,16 @@ coverage xml
 echo "Running testsuite"
 case "$MPI" in
     mpich)
-        mpiexec -n 1 python test/runtests.py -v -e spawn
-        mpiexec -n 2 python test/runtests.py -v -e spawn
-        mpiexec -n 3 python test/runtests.py -v -e spawn
-       #mpiexec -n 8 python test/runtests.py -v -e spawn
+        mpiexec -n 1 python test/runtests.py -v -e spawn -e dynproc
+        mpiexec -n 2 python test/runtests.py -v -e spawn -e dynproc
+        mpiexec -n 3 python test/runtests.py -v -e spawn -e dynproc
+       #mpiexec -n 8 python test/runtests.py -v -e spawn -e dynproc
         ;;
     openmpi)
-        mpiexec -n 1 python test/runtests.py -v -e spawn --no-threads
-        mpiexec -n 2 python test/runtests.py -v -e spawn --no-threads
-        mpiexec -n 3 python test/runtests.py -v -e spawn --no-threads
-       #mpiexec -n 8 python test/runtests.py -v -e spawn --no-threads
+        mpiexec -n 1 python test/runtests.py -v -e spawn -e dynproc --no-threads
+        mpiexec -n 2 python test/runtests.py -v -e spawn -e dynproc --no-threads
+        mpiexec -n 3 python test/runtests.py -v -e spawn -e dynproc --no-threads
+       #mpiexec -n 8 python test/runtests.py -v -e spawn -e dynproc --no-threads
         ;;
 esac
 
