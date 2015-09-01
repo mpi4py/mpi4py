@@ -1,21 +1,19 @@
 #!/usr/bin/env bash
-# Test script running on Fedora jenkins http://jenkins.cloud.fedoraproject.org/job/mpi4py
+# Test script running on Fedora Jenkins
+# http://jenkins.cloud.fedoraproject.org/job/mpi4py
 # Copyright (c) 2015, Thomas Spura.
-
-#rpm -qa | sort
 
 if [ "$#" -ne 1 ]; then
     echo "Usage: jenkins-fedoracloud.sh \$MPI_IMPLEMENTATION"
     exit 1
 fi
 MPI=$1
-echo "Running tests with MPI: $MPI"
-# TODO check if this MPI implementation is available
-case "$1" in
-
+case "$MPI" in
     mpich|openmpi)
+        echo "Running tests with MPI: $MPI"
         ;;
-    *) echo "MPI $MPI not supported yet"
+    *)
+        echo "Unknown MPI implementation: $MPI"
         exit 1
         ;;
 esac
@@ -25,43 +23,48 @@ source /etc/profile.d/modules.sh
 _mpi_load="module load mpi/$MPI-$(uname -m)"
 _mpi_unload="module purge"
 
-rm -rf mpi4pyenv_$MPI build
-virtualenv mpi4pyenv_$MPI
-source mpi4pyenv_$MPI/bin/activate
+echo "Creating virtualenv: mpi4py-venv-$MPI"
+rm -rf mpi4py-venv-$MPI build
+virtualenv mpi4py-venv-$MPI
+source mpi4py-venv-$MPI/bin/activate
 
+echo "Installing dependencies"
 pip install Cython
-pip install nose pylint --upgrade  ## Needed within the venv
-hash -r  ## Reload where the nosetests app is (within the venv) - see `which nosetests` with and without
-pip install nosexcover
+pip install nose pylint --upgrade
+pip install nosexcover  --upgrade
 
+echo "Loading MPI module: $MPI"
 $_mpi_unload
 $_mpi_load
+hash -r
 
-make build
+echo "Installing package"
+pip -vvv install .
+
+echo "Running lint"
+pep8 demo src | tee pep8.out
+pylint mpi4py --extension-pkg-whitelist=mpi4py | tee pylint.out
 
 echo "Running coverage"
-coverage run --source=mpi4py,test test/runtests.py -v --no-threads
+/usr/bin/env bash ./conf/coverage.sh
 coverage xml
 
 echo "Running testsuite"
-case "$1" in
+case "$MPI" in
     mpich)
-        mpiexec -np 1 python test/runtests.py -v
-        mpiexec -np 2 python test/runtests.py -v
-        mpiexec -np 3 python test/runtests.py -v
-        #mpiexec -np 8 python test/runtests.py -v
+        mpiexec -n 1 python test/runtests.py -v -e spawn
+        mpiexec -n 2 python test/runtests.py -v -e spawn
+        mpiexec -n 3 python test/runtests.py -v -e spawn
+       #mpiexec -n 8 python test/runtests.py -v -e spawn
         ;;
     openmpi)
-        mpiexec -np 1 python test/runtests.py -v --no-threads
-        #mpiexec -np 2 python test/runtests.py -v --no-threads
-        #mpiexec -np 3 python test/runtests.py -v --no-threads
-        #mpiexec -np 8 python test/runtests.py -v --no-threads
+        mpiexec -n 1 python test/runtests.py -v -e spawn --no-threads
+        mpiexec -n 2 python test/runtests.py -v -e spawn --no-threads
+        mpiexec -n 3 python test/runtests.py -v -e spawn --no-threads
+       #mpiexec -n 8 python test/runtests.py -v -e spawn --no-threads
         ;;
 esac
 
 $_mpi_unload
-
-pep8 demo build/*/mpi4py | tee pep8.out
-pylint build/*/mpi4py | tee pylint.out
 
 deactivate

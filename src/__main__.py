@@ -90,7 +90,7 @@ def ringtest(comm, args=None, verbose=True):
                     Recv(recvmsg, source, 0)
                     Send(sendmsg, dest, 0)
         toc = Wtime()
-        if comm.rank == 0 and sendmsg != recvmsg:
+        if comm.rank == 0 and sendmsg != recvmsg:  # pragma: no cover
             import warnings
             import traceback
             try:
