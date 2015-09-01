@@ -36,7 +36,7 @@ before_install:
     - pip install -q Cython
     - cython --version
 install:
-    - pip install .
+    - pip -vvv install .
 
 before_script:
     - sudo hostname localhost
