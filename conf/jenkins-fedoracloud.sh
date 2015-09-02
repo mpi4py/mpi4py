@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Test script running on Fedora Jenkins
-# http://jenkins.cloud.fedoraproject.org/job/mpi4py
+# http://jenkins.fedorainfracloud.org/job/mpi4py/
 # Copyright (c) 2015, Thomas Spura.
 
 if [ "$#" -ne 1 ]; then

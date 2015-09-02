@@ -43,4 +43,4 @@ The testsuite is run periodically on
 
 * `AppVeyor <https://ci.appveyor.com/project/mpi4py/mpi4py>`_
 
-* `Fedora Jenkins <http://jenkins.cloud.fedoraproject.org/job/mpi4py/>`_
+* `Fedora Jenkins <http://jenkins.fedorainfracloud.org/job/mpi4py/>`_
