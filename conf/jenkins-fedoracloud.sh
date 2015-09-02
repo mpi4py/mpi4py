@@ -27,6 +27,7 @@ echo "Creating virtualenv: mpi4py-venv-$MPI"
 rm -rf mpi4py-venv-$MPI build
 virtualenv mpi4py-venv-$MPI
 source mpi4py-venv-$MPI/bin/activate
+pip install pip --upgrade
 
 echo "Installing dependencies"
 pip install Cython
