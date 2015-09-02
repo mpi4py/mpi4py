@@ -30,8 +30,7 @@ source mpi4py-venv-$MPI/bin/activate
 
 echo "Installing dependencies"
 pip install Cython
-pip install nose pylint --upgrade
-pip install nosexcover  --upgrade
+pip install pep8 pylint coverage --upgrade
 
 echo "Loading MPI module: $MPI"
 $_mpi_unload
@@ -42,7 +41,7 @@ echo "Installing package"
 pip -vvv install .
 
 echo "Running lint"
-pep8 demo src | tee pep8.out
+pep8 src | tee pep8.out
 pylint mpi4py --extension-pkg-whitelist=mpi4py | tee pylint.out
 
 echo "Running coverage"
