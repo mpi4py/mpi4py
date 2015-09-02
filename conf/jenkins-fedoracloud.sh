@@ -3,30 +3,32 @@
 # http://jenkins.fedorainfracloud.org/job/mpi4py/
 # Copyright (c) 2015, Thomas Spura.
 
-if [ "$#" -ne 1 ]; then
-    echo "Usage: jenkins-fedoracloud.sh \$MPI_IMPLEMENTATION"
-    exit 1
-fi
-MPI=$1
-case "$MPI" in
-    mpich|openmpi)
-        echo "Running tests with MPI: $MPI"
-        ;;
-    *)
-        echo "Unknown MPI implementation: $MPI"
-        exit 1
-        ;;
-esac
+MPI=mpich
+PYTHON=$(command -v python)
+for arg in "$@"; do
+    case "$arg" in
+        mpich|openmpi)
+            MPI="$arg"
+            ;;
+        python|python2|python3|pypy|pypy3)
+            PYTHON=$(command -v "$arg")
+            ;;
+        *)
+            echo "Unknown argument: $arg"
+            exit 1
+            ;;
+    esac
+done
 
-## define mpi_{un,}load
 source /etc/profile.d/modules.sh
 _mpi_load="module load mpi/$MPI-$(uname -m)"
 _mpi_unload="module purge"
 
-echo "Creating virtualenv: mpi4py-venv-$MPI"
-rm -rf mpi4py-venv-$MPI build
-virtualenv mpi4py-venv-$MPI
-source mpi4py-venv-$MPI/bin/activate
+PY=$(basename "$PYTHON")
+echo "Creating virtualenv: venv-$PY-$MPI"
+rm -rf  build venv-$PY-$MPI
+virtualenv -p "$PYTHON" venv-$PY-$MPI
+source venv-$PY-$MPI/bin/activate
 pip install pip --upgrade
 
 echo "Installing dependencies"
@@ -42,12 +44,13 @@ echo "Installing package"
 pip -vvv install .
 
 echo "Running lint"
-pep8 src | tee pep8.out
-pylint mpi4py --extension-pkg-whitelist=mpi4py | tee pylint.out
+pep8 src | tee pep8-$PY-$MPI.out
+pylint mpi4py --extension-pkg-whitelist=mpi4py | tee pylint-$PY-$MPI.out
 
 echo "Running coverage"
 /usr/bin/env bash ./conf/coverage.sh
 coverage xml
+mv coverage.xml coverage-$PY-$MPI.xml
 
 echo "Running testsuite"
 case "$MPI" in
