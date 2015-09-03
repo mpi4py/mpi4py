@@ -3,6 +3,8 @@
 # http://jenkins.fedorainfracloud.org/job/mpi4py/
 # Copyright (c) 2015, Thomas Spura.
 
+source /etc/profile.d/modules.sh
+
 MPI=mpich
 PYTHON=$(command -v python)
 for arg in "$@"; do
@@ -20,10 +22,6 @@ for arg in "$@"; do
     esac
 done
 
-source /etc/profile.d/modules.sh
-_mpi_load="module load mpi/$MPI-$(uname -m)"
-_mpi_unload="module purge"
-
 PY=$(basename "$PYTHON")
 echo "Creating virtualenv: venv-$PY-$MPI"
 rm -rf  build venv-$PY-$MPI
@@ -36,15 +34,15 @@ pip install Cython
 pip install pep8 pylint coverage --upgrade
 
 echo "Loading MPI module: $MPI"
-$_mpi_unload
-$_mpi_load
+module purge
+module load mpi/$MPI-$(uname -m)
 hash -r
 
 echo "Installing package"
 pip -vvv install .
 
 echo "Running lint"
-pep8 src | tee pep8-$PY-$MPI.out
+pep8 --ignore=E221,E402 src | tee pep8-$PY-$MPI.out
 pylint mpi4py --extension-pkg-whitelist=mpi4py | tee pylint-$PY-$MPI.out
 
 echo "Running coverage"
@@ -68,6 +66,5 @@ case "$MPI" in
         ;;
 esac
 
-$_mpi_unload
-
+module purge
 deactivate
