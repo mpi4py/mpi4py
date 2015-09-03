@@ -1,5 +1,6 @@
 #!/bin/sh
 coverage erase
+mpiexec -n 1 coverage run -p --branch --source=mpi4py "$(dirname "$0")/coverage-helper.py" &> /dev/null || true
 mpiexec -n 1 coverage run -p --branch --source=mpi4py -m mpi4py > /dev/null
 mpiexec -n 1 coverage run -p --branch --source=mpi4py -m mpi4py --help > /dev/null
 mpiexec -n 1 coverage run -p --branch --source=mpi4py -m mpi4py helloworld > /dev/null

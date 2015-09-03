@@ -135,7 +135,7 @@ def profile(name='mpe', **kargs):
     try:
         from mpi4py.dl import dlopen, RTLD_NOW, RTLD_GLOBAL
         from mpi4py.dl import dlerror
-    except ImportError:
+    except ImportError:  # pragma: no cover
         from ctypes import CDLL as dlopen, RTLD_GLOBAL
         try:
             # pylint: disable=import-error
@@ -151,11 +151,11 @@ def profile(name='mpe', **kargs):
         for suffix, _, kind in imp.get_suffixes():
             if kind == imp.C_EXTENSION:
                 pattern.append(('', suffix))
-        if sys.platform.startswith('win'):
+        if sys.platform.startswith('win'):  # pragma: no cover
             pattern.append(('', '.dll'))
-        elif sys.platform == 'darwin':
+        elif sys.platform == 'darwin':  # pragma: no cover
             pattern.append(('lib', '.dylib'))
-        elif os.name == 'posix':
+        elif os.name == 'posix':  # pragma: no cover
             pattern.append(('lib', '.so'))
         pattern.append(('', ''))
         for pth in path:
@@ -190,9 +190,9 @@ def profile(name='mpe', **kargs):
         filename = os.path.abspath(filename)
 
     handle = dlopen(filename, RTLD_NOW | RTLD_GLOBAL)
-    if handle:
+    if handle:  # pragma: no branch
         profile.registry.append((name, (handle, filename)))
-    else:
+    else:  # pragma: no cover
         from warnings import warn
         if dlerror:
             message = dlerror()
