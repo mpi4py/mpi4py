@@ -2,7 +2,7 @@
 # Contact: dalcinl@gmail.com
 
 $ANACONDA_BASE_URL = "http://repo.continuum.io/miniconda/"
-$ANACONDA_VERSION = "3.10.1"
+$ANACONDA_VERSION = "3.16.0"
 
 $ScriptDir = Split-Path $MyInvocation.MyCommand.Path -Parent
 . "$ScriptDir\download.ps1"
