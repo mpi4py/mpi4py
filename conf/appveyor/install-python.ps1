@@ -16,14 +16,27 @@ function InstallPython ($python_version, $architecture, $python_home) {
         Write-Host $python_home "already exists, skipping."
         return
     }
-    $arch_suffix = @{"32"="";"64"=".amd64"}[$architecture]
-    $filename = "python-" + $python_version + $arch_suffix + ".msi"
+    $py_major = $python_version[0]; $py_minor = $python_version[2]
+    $installer_exe = ($py_major + $py_minor) -as [int] -ge 35
+    if ($installer_exe) {
+        $arch_suffix = @{"32"="";"64"="-amd64"}[$architecture]
+        $filename = "python-" + $python_version + $arch_suffix + ".exe"
+    } else {
+        $arch_suffix = @{"32"="";"64"=".amd64"}[$architecture]
+        $filename = "python-" + $python_version + $arch_suffix + ".msi"
+    }
     $url = $PYTHON_BASE_URL + $python_version + "/" + $filename
     $filepath = Download $url $filename $DOWNLOADS
     Write-Host "Installing" $filename "to" $python_home
-    $args = "/quiet /qn /i $filepath TARGETDIR=$python_home"
-    Write-Host "msiexec.exe" $args
-    Start-Process -FilePath "msiexec.exe" -ArgumentList $args -Wait
+    if ($installer_exe) {
+        $prog = "$filepath"
+        $args = "/quiet TargetDir=$python_home"
+    } else {
+        $prog = "msiexec.exe"
+        $args = "/quiet /qn /i $filepath TARGETDIR=$python_home"
+    }
+    Write-Host $prog $args
+    Start-Process -FilePath $prog -ArgumentList $args -Wait
     Write-Host "Python $python_version ($architecture-bit) installation complete"
 }
 
