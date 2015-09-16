@@ -2,6 +2,7 @@
 # Author:  Lisandro Dalcin
 # Contact: dalcinl@gmail.com
 
+__doc__ = \
 """
 Python bindings for MPI
 """
