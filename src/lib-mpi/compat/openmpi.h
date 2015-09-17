@@ -53,23 +53,31 @@ static void PyMPI_OPENMPI_dlopen_libmpi(void)
 {
   void *handle = 0;
   int mode = RTLD_NOW | RTLD_GLOBAL;
-  #ifdef RTLD_NOLOAD
-  mode |= RTLD_NOLOAD;
-  #endif
 #if defined(__CYGWIN__)
   if (!handle) handle = dlopen("cygmpi.dll", mode);
   if (!handle) handle = dlopen("mpi.dll",    mode);
 #elif defined(__APPLE__)
   /* Mac OS X */
-  if (!handle) handle = dlopen("libmpi.3.dylib", mode);
-  if (!handle) handle = dlopen("libmpi.2.dylib", mode);
+  if (!handle) handle = dlopen("libmpi.15.dylib", mode);
+  if (!handle) handle = dlopen("libmpi.14.dylib", mode);
+  if (!handle) handle = dlopen("libmpi.13.dylib", mode);
+  if (!handle) handle = dlopen("libmpi.12.dylib", mode);
+  if (!handle) handle = dlopen("libmpi.11.dylib", mode);
+  if (!handle) handle = dlopen("libmpi.10.dylib", mode);
   if (!handle) handle = dlopen("libmpi.1.dylib", mode);
   if (!handle) handle = dlopen("libmpi.0.dylib", mode);
   if (!handle) handle = dlopen("libmpi.dylib",   mode);
 #else
-  /* GNU/Linux and others*/
-  if (!handle) handle = dlopen("libmpi.so.3", mode);
-  if (!handle) handle = dlopen("libmpi.so.2", mode);
+  /* GNU/Linux and others */
+  #ifdef RTLD_NOLOAD
+  mode |= RTLD_NOLOAD;
+  #endif
+  if (!handle) handle = dlopen("libmpi.so.15", mode);
+  if (!handle) handle = dlopen("libmpi.so.14", mode);
+  if (!handle) handle = dlopen("libmpi.so.13", mode);
+  if (!handle) handle = dlopen("libmpi.so.12", mode);
+  if (!handle) handle = dlopen("libmpi.so.11", mode);
+  if (!handle) handle = dlopen("libmpi.so.10", mode);
   if (!handle) handle = dlopen("libmpi.so.1", mode);
   if (!handle) handle = dlopen("libmpi.so.0", mode);
   if (!handle) handle = dlopen("libmpi.so",   mode);
