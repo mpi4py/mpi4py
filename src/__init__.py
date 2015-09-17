@@ -48,7 +48,7 @@ def get_include():
                 include_dirs=[..., mpi4py.get_include()])
 
     """
-    from os.path import dirname, join
+    from os.path import join, dirname
     return join(dirname(__file__), 'include')
 
 # --------------------------------------------------------------------
@@ -58,7 +58,7 @@ def get_config():
     """
     Return a dictionary with information about MPI.
     """
-    from os.path import dirname, join
+    from os.path import join, dirname
     try:
         # pylint: disable=import-error
         from configparser import ConfigParser
@@ -133,8 +133,7 @@ def profile(name='mpe', **kargs):
     import sys
     import os
     try:
-        from mpi4py.dl import dlopen, RTLD_NOW, RTLD_GLOBAL
-        from mpi4py.dl import dlerror
+        from .dl import dlopen, dlerror, RTLD_NOW, RTLD_GLOBAL
     except ImportError:  # pragma: no cover
         from ctypes import CDLL as dlopen, RTLD_GLOBAL
         try:

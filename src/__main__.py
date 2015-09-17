@@ -10,7 +10,7 @@ def helloworld(comm, args=None, verbose=True):
     """
     Hello, World! using MPI
     """
-    from mpi4py import MPI
+    from . import MPI
     from optparse import OptionParser
     parser = OptionParser(prog="mpi4py helloworld")
     parser.add_option("-q", "--quiet", action="store_false",
@@ -40,8 +40,8 @@ def ringtest(comm, args=None, verbose=True):
     """
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-branches
+    from . import MPI
     from array import array
-    from mpi4py import MPI
     from optparse import OptionParser
     parser = OptionParser(prog="mpi4py ringtest")
     parser.add_option("-q", "--quiet", action="store_false",
@@ -116,8 +116,8 @@ def ringtest(comm, args=None, verbose=True):
 def main(args=None):
     "Entry-point for ``python -m mpi4py``"
     from optparse import OptionParser
-    from mpi4py import __name__ as prog
-    from mpi4py import __version__ as version
+    from . import __name__ as prog
+    from . import __version__ as version
     parser = OptionParser(prog=prog, version='%prog ' + version,
                           usage="%prog [options] <command> [args]")
     parser.add_option("--no-threads",
@@ -136,15 +136,15 @@ def main(args=None):
     parser.disable_interspersed_args()
     (options, args) = parser.parse_args(args)
 
-    import mpi4py
-    mpi4py.rc.threads = options.threads
-    mpi4py.rc.thread_level = options.thread_level
+    from . import rc, profile
+    rc.threads = options.threads
+    rc.thread_level = options.thread_level
     if options.mpe:
-        mpi4py.profile('mpe', logfile='mpi4py')
+        profile('mpe', logfile='mpi4py')
     if options.vt:
-        mpi4py.profile('vt', logfile='mpi4py')
+        profile('vt', logfile='mpi4py')
 
-    from mpi4py import MPI
+    from . import MPI
     comm = MPI.COMM_WORLD
     if not args:
         if comm.rank == 0:
