@@ -21,18 +21,19 @@ function InstallAnaconda ($python_version, $architecture, $anaconda_home) {
     $url = $ANACONDA_BASE_URL + $filename
     $filepath = Download $url $filename $DOWNLOADS
     Write-Host "Installing" $filename "to" $anaconda_home
+    $prog = $filepath
     $args = "/S /D=$anaconda_home"
-    Write-Host $filepath $args
-    Start-Process -FilePath $filepath -ArgumentList $args -Wait
+    Write-Host "Executing:" $prog $args
+    Start-Process -FilePath $prog -ArgumentList $args -Wait
     Write-Host "Updating Anaconda packages"
     $prog = Join-Path $anaconda_home "Scripts\conda.exe"
     $args = "update --yes --quiet --all"
-    Write-Host $prog $args
+    Write-Host "Executing:" $prog $args
     Start-Process -FilePath $prog -ArgumentList $args -Wait
     Write-Host "Installing additional Anaconda packages"
     $prog = Join-Path $anaconda_home "Scripts\conda.exe"
     $args = "install --yes --quiet anaconda-client conda-build jinja2"
-    Write-Host $prog $args
+    Write-Host "Executing:" $prog $args
     Start-Process -FilePath $prog -ArgumentList $args -Wait
     Write-Host "Anaconda installation complete"
 }
@@ -45,7 +46,7 @@ function UpdateAnaconda ($anaconda_home) {
         "install --yes --quiet anaconda-client conda-build jinja2"
     )
     foreach($args in $commands) {
-        Write-Host $conda $args
+        Write-Host "Executing:" $conda $args
         Start-Process -FilePath $conda -ArgumentList $args -Wait
     }
 }

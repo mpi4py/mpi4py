@@ -15,9 +15,10 @@ function InstallMicrosoftMPISDK ($baseurl, $filename) {
     $url = $baseurl + $filename
     $filepath = Download $url $filename $DOWNLOADS
     Write-Host "Installing" $filename
+    $prog = "msiexec.exe"
     $args = "/quiet /qn /i $filepath"
-    Write-Host "msiexec.exe" $args
-    Start-Process -FilePath "msiexec.exe" -ArgumentList $args -Wait
+    Write-Host "Executing:" $prog $args
+    Start-Process -FilePath $prog -ArgumentList $args -Wait
     Write-Host "Microsoft MPI SDK installation complete"
 }
 
@@ -26,9 +27,10 @@ function InstallMicrosoftMPIRuntime ($baseurl, $filename) {
     $url = $baseurl + $filename
     $filepath = Download $url $filename $DOWNLOADS
     Write-Host "Installing" $filename
+    $prog = $filepath
     $args = "-unattend"
-    Write-Host $filepath $args
-    Start-Process -FilePath $filepath -ArgumentList $args -Wait
+    Write-Host "Executing:" $prog $args
+    Start-Process -FilePath $prog -ArgumentList $args -Wait
     Write-Host "Microsoft MPI Runtime installation complete"
 }
 

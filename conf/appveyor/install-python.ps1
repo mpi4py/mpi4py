@@ -29,13 +29,13 @@ function InstallPython ($python_version, $architecture, $python_home) {
     $filepath = Download $url $filename $DOWNLOADS
     Write-Host "Installing" $filename "to" $python_home
     if ($installer_exe) {
-        $prog = "$filepath"
+        $prog = $filepath
         $args = "/quiet TargetDir=$python_home"
     } else {
         $prog = "msiexec.exe"
         $args = "/quiet /qn /i $filepath TARGETDIR=$python_home"
     }
-    Write-Host $prog $args
+    Write-Host "Executing:" $prog $args
     Start-Process -FilePath $prog -ArgumentList $args -Wait
     Write-Host "Python $python_version ($architecture-bit) installation complete"
 }
@@ -45,16 +45,19 @@ function InstallPip ($python_home) {
     $pip_path = Join-Path $python_home "Scripts\pip.exe"
     if (Test-Path $pip_path) {
         Write-Host "Upgrading pip"
+        $prog = $python_path
         $args = "-m pip.__main__ install --upgrade pip"
-        Write-Host "Executing:" $python_path $args
-        Start-Process -FilePath $python_path -ArgumentList $args -Wait
+        Write-Host "Executing:" $prog $args
+        Start-Process -FilePath $prog -ArgumentList $args -Wait
         Write-Host "pip upgrade complete"
     } else {
         Write-Host "Installing pip"
         $webclient = New-Object System.Net.WebClient
         $webclient.DownloadFile($GET_PIP_URL, $GET_PIP_PATH)
-        Write-Host "Executing:" $python_path $GET_PIP_PATH
-        Start-Process -FilePath $python_path -ArgumentList "$GET_PIP_PATH" -Wait
+        $prog = $python_path
+        $args = "$GET_PIP_PATH"
+        Write-Host "Executing:" $prog $args
+        Start-Process -FilePath $prog -ArgumentList $args -Wait
         Write-Host "pip installation complete"
     }
 }
