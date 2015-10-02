@@ -12,7 +12,14 @@ static int PyMPI_Get_vendor(const char **vendor_name,
 #if defined(I_MPI_VERSION)
 
   name = "Intel MPI";
+  #if defined(I_MPI_NUMVERSION)
+  {int version = I_MPI_NUMVERSION/1000;
+  major = version/10000; version -= major*10000;
+  minor = version/100;   version -= minor*100;
+  micro = version/1;     version -= micro*1; }
+  #else
   (void)sscanf(I_MPI_VERSION,"%d.%d Update %d",&major,&minor,&micro);
+  #endif
 
 #elif defined(PLATFORM_MPI)
 
