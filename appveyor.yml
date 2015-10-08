@@ -1,7 +1,5 @@
 # https://ci.appveyor.com/project/mpi4py/mpi4py
 
-version: 2.0.0a0-{build}
-
 environment:
 
   global:
