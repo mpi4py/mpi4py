@@ -91,8 +91,6 @@ after_test:
   - "set ANACONDA=C:\\Anaconda"
   - "powershell conf\\appveyor\\install-anaconda.ps1"
   - "set PATH=%ANACONDA%;%ANACONDA%\\Scripts\\;%PATH%"
-  - "conda install --yes --quiet psutil > NUL" # conda-build issue 527
-  - "conda remove  --yes --quiet psutil > NUL" # conda-build issue 527
   - "conda info --all"
   - "conda list"
   - "%WITH_ENV% conda build --quiet --python %PYTHON_VERSION:~0,3% conf\\conda-recipes\\mpi4py"
