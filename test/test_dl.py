@@ -15,6 +15,9 @@ class TestDL(unittest.TestCase):
             libm = 'libm.so'
 
         handle = dl.dlopen(libm, dl.RTLD_LOCAL|dl.RTLD_LAZY)
+        if handle == 0 and sys.platform.startswith('linux'):
+            self.assertTrue(dl.dlerror() is not None)
+            handle = dl.dlopen('libm.so.6', dl.RTLD_LOCAL|dl.RTLD_LAZY)
         self.assertTrue(handle != 0)
         self.assertTrue(dl.dlerror() is None)
 
