@@ -44,8 +44,8 @@ class Node(object):
             head = dedent(self.MISSING_HEAD)
             tail = dedent(self.MISSING_TAIL)
         else:
-            head = "#undef  %(cname)s\n"
-            tail = "\n\n"
+            head = '#undef  %(cname)s\n'
+            tail = '\n\n'
         body = dedent(self.MISSING)
         return (head+body+tail) % vars(self)
 
@@ -291,15 +291,15 @@ class Scanner(object):
         fileobj.write(head)
         if suite is None:
             for node in self:
-                line = "#undef %s\n" % ((macro % node.name))
+                line = '#undef %s\n' % ((macro % node.name))
                 fileobj.write(line)
         else:
             for name, result in suite:
                 assert name in self.nodemap
                 if result:
-                    line = "#define %s 1\n" % ((macro % name))
+                    line = '#define %s 1\n' % ((macro % name))
                 else:
-                    line = "#undef  %s\n" % ((macro % name))
+                    line = '#undef  %s\n' % ((macro % name))
                 fileobj.write(line)
         fileobj.write(tail)
 
