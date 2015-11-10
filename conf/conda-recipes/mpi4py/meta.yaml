@@ -12,14 +12,13 @@ about:
   license: 'BSD (https://bitbucket.org/mpi4py/mpi4py/src/master/LICENSE.rst)'
 
 source:
-# git_url: https://bitbucket.org/mpi4py/mpi4py
-# git_rev: master
-  path: ../../..
+  fn: mpi4py-2.0.0.tar.gz
+  url: https://bitbucket.org/mpi4py/mpi4py/downloads/mpi4py-2.0.0.tar.gz
+  md5: 4f7d8126d7367c239fd67615680990e3
 
 requirements:
   build:
     - python
-    - cython >=0.22
     - {{mpi}} {{req[mpi]}} # [not win]
   run:
     - python
