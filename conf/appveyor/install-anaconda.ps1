@@ -2,7 +2,7 @@
 # Contact: dalcinl@gmail.com
 
 $ANACONDA_BASE_URL = "http://repo.continuum.io/miniconda/"
-$ANACONDA_VERSION = "3.16.0"
+$ANACONDA_VERSION = "3.18.3"
 
 $ScriptDir = Split-Path $MyInvocation.MyCommand.Path -Parent
 . "$ScriptDir\download.ps1"
@@ -15,7 +15,7 @@ function InstallAnaconda ($python_version, $architecture, $anaconda_home) {
         Write-Host $anaconda_home "already exists, skipping."
         return
     }
-    $pver = @{"2"="";"3"="3"}[$python_version]
+    $pver = @{"2"="2";"3"="3"}[$python_version]
     $arch = @{"32"="x86";"64"="x86_64"}[$architecture]
     $filename = "Miniconda" + $pver + "-" + $ANACONDA_VERSION + "-Windows-" + $arch + ".exe"
     $url = $ANACONDA_BASE_URL + $filename
