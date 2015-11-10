@@ -17,6 +17,7 @@ recursive-include docs/source *
 
 prune misc
 prune conf/conda-recipes
+prune conf/anaconda
 prune conf/appveyor
 prune conf/jenkins
 prune conf/travis
