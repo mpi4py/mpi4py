@@ -346,6 +346,16 @@ class TestCCOVecWorldDup(TestCCOVecWorld):
 
 name, version = MPI.get_vendor()
 if name == 'Open MPI':
+    if version == (1,10,1):
+        del BaseTestCCOVec.testScatterv
+        del BaseTestCCOVec.testScatterv2
+        del BaseTestCCOVec.testScatterv3
+        del BaseTestCCOVec.testGatherv
+        del BaseTestCCOVec.testGatherv2
+        del BaseTestCCOVec.testGatherv3
+        del BaseTestCCOVec.testAllgatherv
+        del BaseTestCCOVec.testAllgatherv2
+        del BaseTestCCOVec.testAllgatherv3
     if version == (1,10,0):
         BaseTestCCOVec.skip += [(0, '*')]
     if version == (1,8,6):
