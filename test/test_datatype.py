@@ -352,11 +352,13 @@ class TestDatatype(unittest.TestCase):
 class TestGetAddress(unittest.TestCase):
 
     def testGetAddress(self):
+        from struct import pack, unpack
         try:
             from array import array
             location = array('i', range(10))
             bufptr, _ = location.buffer_info()
             addr = MPI.Get_address(location)
+            addr = unpack('P', pack('P', addr)[0]
             self.assertEqual(addr, bufptr)
         except ImportError:
             pass
@@ -365,6 +367,7 @@ class TestGetAddress(unittest.TestCase):
             location = asarray(range(10), dtype='i')
             bufptr, _ = location.__array_interface__['data']
             addr = MPI.Get_address(location)
+            addr = unpack('P', pack('P', addr)[0]
             self.assertEqual(addr, bufptr)
         except ImportError:
             pass
