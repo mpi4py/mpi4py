@@ -1,6 +1,6 @@
 package:
   name: mpich
-  version: 3.1.4
+  version: 3.2.0
 
 about:
   home: http://www.mpich.org/
@@ -13,9 +13,9 @@ requirements:
     - mpich2
 
 source:
-  fn: mpich-3.1.4.tar.gz
-  url: http://www.mpich.org/static/downloads/3.1.4/mpich-3.1.4.tar.gz
-  md5: 2ab544607986486562e076b83937bba2
+  fn: mpich-3.2.tar.gz
+  url: http://www.mpich.org/static/downloads/3.2/mpich-3.2.tar.gz
+  md5: f414cfa77099cd1fa1a5ae4e22db508a
 
 build:
   number: 0
