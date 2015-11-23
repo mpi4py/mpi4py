@@ -16,7 +16,6 @@ engine:
 env:
  - MPI=mpich
  - MPI=openmpi
- - MPI=mpich2
 
 script:
  - conda config --add channels mpi4py
