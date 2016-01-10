@@ -31,4 +31,4 @@ test:
 
 build_targets: conda
 
-iotimeout: 120
+iotimeout: 240
