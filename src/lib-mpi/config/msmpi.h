@@ -71,4 +71,12 @@
 #define PyMPI_HAVE_MPI_Ireduce 1
 #endif
 
+#if MSMPI_VER >= 0x700
+#define PyMPI_HAVE_MPI_Iallgather 1
+#define PyMPI_HAVE_MPI_Iallreduce 1
+#define PyMPI_HAVE_MPI_Igatherv 1
+#define PyMPI_HAVE_MPI_Iscatter 1
+#define PyMPI_HAVE_MPI_Iscatterv 1
+#endif
+
 #endif /* !PyMPI_CONFIG_MSMPI_H */
