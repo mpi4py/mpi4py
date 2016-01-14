@@ -1,7 +1,11 @@
 from mpi4py import MPI
 import mpiunittest as unittest
+import sys
 try:
-    import ctypes
+    if hasattr(sys, 'pypy_version_info'):
+        ctypes = None
+    else:
+        import ctypes
 except ImportError:
     ctypes = None
 
