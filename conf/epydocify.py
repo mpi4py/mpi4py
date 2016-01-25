@@ -76,6 +76,17 @@ except AttributeError:
 
 # --------------------------------------------------------------------
 
+from epydoc import docstringparser as dp
+dp.STANDARD_FIELDS += [
+    dp.DocstringField(['credits'], 'Credits', multivalue=0,
+                      varnames=['__credits__']),
+]
+
+from epydoc import docintrospecter as di
+di.UNDOCUMENTED_MODULE_VARS += ('__package__',)
+
+# --------------------------------------------------------------------
+
 import re
 
 _SIGNATURE_RE = re.compile(
