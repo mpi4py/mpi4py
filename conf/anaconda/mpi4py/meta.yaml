@@ -1,6 +1,6 @@
 {% set build = 0 %}
-{% set mpi = environ['MPI'] or 'mpich' %}
-{% set req = {'mpich':'>=3.1', 'openmpi':'>=1.8', 'mpich2':'', 'msmpi':''} %}
+{% set mpi = (environ.get('MPI') or 'mpich') if not win else 'msmpi' %}
+{% set mpi_version = {'mpich':'>=3.1', 'openmpi':'>=1.8'}.get(mpi,'') %}
 
 package:
   name: mpi4py
@@ -20,10 +20,10 @@ requirements:
   build:
     - python
     - cython >=0.22
-    - {{mpi}} {{req[mpi]}} # [not win]
+    - {{mpi}} {{mpi_version}} # [not win]
   run:
     - python
-    - {{mpi}} {{req[mpi]}} # [not win]
+    - {{mpi}} {{mpi_version}} # [not win]
 
 build:
   number: {{build}}

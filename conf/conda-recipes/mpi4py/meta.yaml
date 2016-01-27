@@ -1,10 +1,12 @@
 {% set build = 1 %}
-{% set mpi = environ['MPI'] or 'mpich' %}
-{% set req = {'mpich':'>=3.2', 'openmpi':'>=1.10'} %}
+{% set version = '2.0.0' %}
+{% set md5 = '4f7d8126d7367c239fd67615680990e3' %}
+{% set mpi = (environ.get('MPI') or 'mpich') if not win else 'msmpi' %}
+{% set mpi_version = {'mpich':'>=3.1', 'openmpi':'>=1.8'}.get(mpi,'') %}
 
 package:
   name: mpi4py
-  version: 2.0.0
+  version: {{version}}
 
 about:
   home: https://bitbucket.org/mpi4py/
@@ -12,17 +14,17 @@ about:
   license: 'BSD (https://bitbucket.org/mpi4py/mpi4py/src/master/LICENSE.rst)'
 
 source:
-  fn: mpi4py-2.0.0.tar.gz
-  url: https://bitbucket.org/mpi4py/mpi4py/downloads/mpi4py-2.0.0.tar.gz
-  md5: 4f7d8126d7367c239fd67615680990e3
+  fn: mpi4py-{{version}}.tar.gz
+  url: https://bitbucket.org/mpi4py/mpi4py/downloads/mpi4py-{{version}}.tar.gz
+  {%if md5%}md5: {{md5}}{%endif%}
 
 requirements:
   build:
     - python
-    - {{mpi}} {{req[mpi]}} # [not win]
+    - {{mpi}} {{mpi_version}} # [not win]
   run:
     - python
-    - {{mpi}} {{req[mpi]}} # [not win]
+    - {{mpi}} {{mpi_version}} # [not win]
 
 build:
   number: {{build}}
