@@ -27,6 +27,7 @@ build:
   string: {{mpi}}_{{build}}
   binary_relocation: true
   detect_binary_files_with_prefix: true
+  skip: true # [win]
 
 test:
   files:
