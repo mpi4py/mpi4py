@@ -1,10 +1,13 @@
 #!/bin/bash
 
 conda_install() { conda install -y -q -p /home/anaconda/env $@; }
-command -v libtoolize > /dev/null || \
+command -v autoconf > /dev/null || \
+conda_install --channel asmeurer autoconf
+command -v libtoolize > /dev/null || command -v glibtoolize > /dev/null || \
 conda_install --channel asmeurer libtool
-test -f ./configure || \
-conda_install --channel asmeurer m4 autoconf
+java -version &> /dev/null || \
+conda_install --channel cyclus java-jre
+
 test -f ./configure || ./autogen.sh
 
 ./configure \
