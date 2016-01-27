@@ -1,0 +1,39 @@
+{% set build = 0 %}
+{% set version = '2.4.9b' %}
+{% set mpi = environ.get('MPI') or 'mpich' %}
+{% set mpi_version = {'mpich':'>=3.1', 'openmpi':'>=1.10'}.get(mpi,'') %}
+
+package:
+  name: mpe
+  version: {{version}}
+
+about:
+  home: http://www.mcs.anl.gov/research/projects/perfvis/software/MPE/
+  summary: 'MPE: MPI Parallel Environment'
+  license: 'MIT (http://git.mpich.org/mpe.git/blob/HEAD:/COPYRIGHT)'
+
+source:
+  git_url: http://git.mpich.org/mpe.git
+  git_rev: master
+
+requirements:
+  build:
+    - {{mpi}} {{mpi_version}}
+  run:
+    - {{mpi}} {{mpi_version}}
+
+build:
+  number: {{build}}
+  string: {{mpi}}_{{build}}
+  binary_relocation: true
+  detect_binary_files_with_prefix: true
+
+test:
+  files:
+    - test/helloworld.c
+  commands:
+    - command -v mpecc
+    - mpecc -mpilog -show
+    - mpecc -mpilog helloworld.c -o helloworld
+    - export DYLD_LIBRARY_PATH=$PREFIX/lib # [osx]
+    - mpiexec -n 5 ./helloworld

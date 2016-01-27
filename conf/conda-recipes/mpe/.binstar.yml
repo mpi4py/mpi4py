@@ -1,0 +1,18 @@
+package: mpe
+user: mpi4py
+
+platform:
+ - linux-64
+#- linux-32
+#- osx-64
+engine:
+ - openssl
+env:
+ - MPI=mpich
+ - MPI=openmpi
+
+script:
+ - conda config --add channels mpi4py
+ - conda build --quiet .
+
+build_targets: conda
