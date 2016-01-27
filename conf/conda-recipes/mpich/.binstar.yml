@@ -9,6 +9,6 @@ platform:
 engine: openssl
 
 script:
- - conda build .
+ - conda build --quiet .
 
 build_targets: conda

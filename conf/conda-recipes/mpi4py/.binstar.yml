@@ -19,6 +19,6 @@ env:
 
 script:
  - conda config --add channels mpi4py
- - conda build .
+ - conda build --quiet .
 
 build_targets: conda
