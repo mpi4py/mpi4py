@@ -888,6 +888,7 @@ class build_clib(cmd_build_clib.build_clib):
             extra_objects = lib.extra_objects[:]
             export_symbols = lib.export_symbols[:]
             extra_link_args = lib.extra_link_args[:]
+            extra_preargs = None
             objects.extend(extra_objects)
             if (self.compiler.compiler_type == 'msvc' and
                 export_symbols is not None):
@@ -905,6 +906,8 @@ class build_clib(cmd_build_clib.build_clib):
                 while '-bundle' in self.compiler.linker_so:
                     pos = self.compiler.linker_so.index('-bundle')
                     self.compiler.linker_so[pos] = '-shared'
+                install_name = os.path.basename(lib_fullpath)
+                extra_preargs = ['-install_name', install_name]
             self.compiler.link(
                 self.compiler.SHARED_LIBRARY,
                 objects, lib_fullpath,
@@ -913,7 +916,7 @@ class build_clib(cmd_build_clib.build_clib):
                 library_dirs=lib.library_dirs,
                 runtime_library_dirs=lib.runtime_library_dirs,
                 export_symbols=export_symbols,
-                extra_preargs=None,
+                extra_preargs=extra_preargs,
                 extra_postargs=extra_link_args,
                 debug=self.debug,
                 target_lang=language,
