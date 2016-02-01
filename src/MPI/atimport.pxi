@@ -194,11 +194,23 @@ cdef void finalize() nogil:
     if not mpi_active(): return
     <void>PyMPI_Commctx_finalize()
 
+cdef int abort_status = 0
+
 cdef void atexit() nogil:
     if not mpi_active(): return
+    if abort_status:
+        <void>MPI_Abort(MPI_COMM_WORLD, abort_status)
     finalize()
     if options.finalize:
         <void>MPI_Finalize()
+
+def _set_abort_status(object status):
+    "Helper for ``python -m mpi4py.run ...``"
+    global abort_status
+    try:
+        abort_status = status
+    except:
+        abort_status = 1 if status else 0
 
 # -----------------------------------------------------------------------------
 
