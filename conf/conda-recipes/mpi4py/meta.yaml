@@ -1,4 +1,4 @@
-{% set build = 1 %}
+{% set build = 2 %}
 {% set version = '2.0.0' %}
 {% set md5 = '4f7d8126d7367c239fd67615680990e3' %}
 {% set mpi = (environ.get('MPI') or 'mpich') if not win else 'msmpi' %}
