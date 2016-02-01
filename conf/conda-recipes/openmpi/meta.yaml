@@ -14,8 +14,8 @@ requirements:
 
 source:
   fn: openmpi-1.10.1.tar.bz2
-  url: http://www.open-mpi.org/software/ompi/v1.10/downloads/openmpi-1.10.1.tar.bz2
-  md5: f0fcd77ed345b7eafb431968124ba16e
+  url: http://www.open-mpi.org/software/ompi/v1.10/downloads/openmpi-1.10.2.tar.bz2
+  md5: b2f43d9635d2d52826e5ef9feb97fd4c
 
 build:
   number: 0
