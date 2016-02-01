@@ -19,6 +19,7 @@ env:
  - MPI=mpich2
 
 install:
+ - export CFLAGS=-O0
  - conda update --quiet --yes -n root conda-build
  - conda config --add channels mpi4py
  - conda build  --quiet conf/anaconda/mpi4py
@@ -29,4 +30,4 @@ test:
  - mpiexec -n 1 python $PWD/test/runtests.py -v -f -e spawn
  - mpiexec -n 2 python $PWD/test/runtests.py -v -f -e spawn
 
-iotimeout: 120
+iotimeout: 240
