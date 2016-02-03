@@ -25,7 +25,7 @@ bindings.
 """
 
 __version__ = '2.0.1a0'
-__author__  = 'Lisandro Dalcin'
+__author__ = 'Lisandro Dalcin'
 __credits__ = 'MPI Forum, MPICH Team, Open MPI Team'
 
 # --------------------------------------------------------------------
@@ -108,9 +108,7 @@ rc.fast_reduce = True
 rc.recv_mprobe = True
 rc.errors = 'exception'
 
-from sys import modules
-modules[__name__ + '.rc'] = rc
-del modules
+__import__('sys').modules[__name__ + '.rc'] = rc
 
 # --------------------------------------------------------------------
 
