@@ -62,7 +62,7 @@ def get_config():
     try:
         # pylint: disable=import-error
         from configparser import ConfigParser
-    except ImportError:
+    except ImportError:  # pragma: no cover
         # pylint: disable=import-error
         from ConfigParser import ConfigParser
     parser = ConfigParser()

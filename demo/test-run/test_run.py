@@ -44,7 +44,7 @@ def execute(np, command, args=''):
     p = sp.Popen(cmdline, stdout=sp.PIPE, stderr=sp.PIPE,
                  env=env, bufsize=4096)
     stdout, stderr = p.communicate()
-    return p.returncode, stdout, stderr
+    return p.returncode, stdout.decode(), stderr.decode()
 
 
 class BaseTestRun(object):
@@ -150,7 +150,7 @@ class TestRunCommand(BaseTestRun, unittest.TestCase):
 
     def testException(self):
         command = '"from mpi4py import MPI; 1/0"'
-        message = 'ZeroDivisionError: integer division or modulo by zero'
+        message = 'ZeroDivisionError:'
         for np in (1, 2, 3):
             for rank in range(0, np):
                 status, stdout, stderr = self.execute(command, np)

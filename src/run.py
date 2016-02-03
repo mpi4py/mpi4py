@@ -30,8 +30,9 @@ def main():
 
     def run_string(string, init_globals=None, run_name=None, argv0='-c'):
         from runpy import _run_module_code
+        karg = 'script_name' if sys.version_info >= (3, 4) else 'mod_fname'
         code = compile(string, '<string>', 'exec')
-        return _run_module_code(code, init_globals, run_name, argv0)
+        return _run_module_code(code, init_globals, run_name, **{karg: argv0})
 
     def version():
         from . import __version__
@@ -163,16 +164,14 @@ def main():
     try:
 
         if sys.argv[0] == '-c':
-            dct = {'__builtins__': __builtins__}
-            run_string(sys.argv[1], dct, run_name='__main__')
+            run_string(sys.argv[1], run_name='__main__')
         elif sys.argv[0] == '-m':
             del sys.argv[0]  # Remove "-m" from argument list
-            run_module(sys.argv[0], {}, run_name='__main__', alter_sys=True)
+            run_module(sys.argv[0], run_name='__main__', alter_sys=True)
         else:
             from os.path import realpath, dirname
             sys.path[0] = realpath(dirname(sys.argv[0]))  # Fix sys.path
-            dct = {'__builtins__': __builtins__}
-            run_path(sys.argv[0], dct, run_name='__main__')
+            run_path(sys.argv[0], run_name='__main__')
 
     except SystemExit as exc:
         set_abort_status(exc.code)

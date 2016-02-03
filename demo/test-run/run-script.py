@@ -1,12 +1,7 @@
 from mpi4py import MPI
 import sys, os, optparse
-try:
-    import builtins
-except ImportError:
-    import __builtin__ as builtins
 
 assert __name__ == '__main__'
-assert __builtins__ is builtins
 from os.path import split, splitext, dirname, realpath
 dirname = dirname(__file__)
 assert sys.path[0] == realpath(dirname)
