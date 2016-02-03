@@ -3,7 +3,7 @@
 """
 Entry-point for ``python -m mpi4py ...``
 """
-from .bench import main
+from .run import main
 
 if __name__ == '__main__':
     main()

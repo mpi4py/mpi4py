@@ -33,9 +33,17 @@ def main():
         code = compile(string, '<string>', 'exec')
         return _run_module_code(code, init_globals, run_name, argv0)
 
+    def version():
+        from . import __version__
+        print(__package__, __version__, file=sys.stdout)
+        sys.exit(0)
+
     def usage(errmess=None):
         from textwrap import dedent
-        prog_name = __package__ + '.run'
+        if __name__ == '__main__':
+            prog_name = __package__ + '.run'
+        else:
+            prog_name = __package__
         subs = dict(prog=prog_name, python='python'+sys.version[0])
 
         cmdline = dedent("""
@@ -50,6 +58,7 @@ def main():
 
         options = dedent("""
         options:
+          --version            show version number and exit
           -h|--help            show this help message and exit
           -rc <key=value,...>  set 'mpi4py.rc.key=value'
           -p|--profile <pmpi>  use <pmpi> for profiling
@@ -82,9 +91,11 @@ def main():
         args = sys.argv[1:] if args is None else args[:]
         while args and args[0].startswith('-'):
             if args[0] in ('-m', '-c'):
-                break    # Stop processing options
+                break  # Stop processing options
             if args[0] in ('-h', '-help', '--help'):
                 usage()  # Print help and exit
+            if args[0] in ('-version', '--version'):
+                version()  # Print version and exit
             try:
                 arg0 = args[0]
                 if arg0.startswith('--'):

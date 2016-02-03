@@ -119,7 +119,7 @@ class TestRunModule(BaseTestRun, unittest.TestCase):
         return execute(np, '-m', module)
 
     def testSuccess(self):
-        module = 'mpi4py --no-threads helloworld'
+        module = 'mpi4py.bench --no-threads helloworld'
         message = 'Hello, World!'
         for np in (1, 2, 3):
             status, stdout, stderr = self.execute(module, np)
