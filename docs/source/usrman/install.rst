@@ -163,9 +163,9 @@ Python* for your private use, just do::
 Testing
 -------
 
-To quickly test the installation (Python 2.7 and up)::
+To quickly test the installation::
 
-  $ mpiexec -n 5 python -m mpi4py helloworld
+  $ mpiexec -n 5 python -m mpi4py.bench helloworld
   Hello, World! I am process 0 of 5 on localhost.
   Hello, World! I am process 1 of 5 on localhost.
   Hello, World! I am process 2 of 5 on localhost.
