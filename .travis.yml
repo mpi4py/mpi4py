@@ -44,8 +44,6 @@ before_script:
     - MPIEXEC='mpiexec'; PYTHON='python';
     - test $MPI == mpich1 && MPIEXEC='mpirun' || true
     - test $MPI == mpich1 && PYTHON=$(command -v $PYTHON) || true
-    - test $MPI == mpich2 && MPIEXEC='mpiexec -launcher fork' || true
-    - test $MPI == mpich3 && MPIEXEC='mpiexec -launcher fork' || true
 script:
     - $MPIEXEC -n 1 $PYTHON $PWD/test/runtests.py -v -f --no-builddir --exclude=spawn
     - $MPIEXEC -n 5 $PYTHON $PWD/test/runtests.py -v -f --no-builddir --exclude=spawn
