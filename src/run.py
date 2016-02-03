@@ -5,6 +5,7 @@ Run Python code (scripts, modules, zip files) using the ``runpy``
 module. In case of an unhandled exception, abort execution of the MPI
 program by calling ``MPI.COMM_WORLD.Abort()``.
 """
+from __future__ import print_function
 
 
 def main():
@@ -12,7 +13,6 @@ def main():
     Entry-point for ``python -m mpi4py.run ...``
     """
     # pylint: disable=missing-docstring
-    # pylint: disable=too-many-locals
     import sys
     from runpy import run_module
     try:
@@ -33,61 +33,104 @@ def main():
         code = compile(string, '<string>', 'exec')
         return _run_module_code(code, init_globals, run_name, argv0)
 
-    def usage():
+    def usage(errmess=None):
         from textwrap import dedent
         prog_name = __package__ + '.run'
-        return dedent("""\
-        usage: {python} -m {prog} [options] <pyfile> [arg] ..."
-           or: {python} -m {prog} [options] -m <module> [arg] ..."
+        subs = dict(prog=prog_name, python='python'+sys.version[0])
 
+        cmdline = dedent("""
+        usage: {python} -m {prog} [options] <pyfile> [arg] ...
+           or: {python} -m {prog} [options] -m <module> [arg] ...
+           or: {python} -m {prog} [options] -c <string> [arg] ...
+        """).strip().format(**subs)
+
+        helptip = dedent("""
+        Try `{python} -m {prog} -h` for more information.
+        """).strip().format(**subs)
+
+        options = dedent("""
         options:
+          -h|--help            show this help message and exit
           -rc <key=value,...>  set 'mpi4py.rc.key=value'
           -p|--profile <pmpi>  use <pmpi> for profiling
           --mpe                profile with MPE
           --vt                 profile with VampirTrace
-        """).format(python='python'+sys.version[0], prog=prog_name)
+        """).strip()
+
+        if errmess:
+            print(errmess, file=sys.stderr)
+            print(cmdline, file=sys.stderr)
+            print(helptip, file=sys.stderr)
+            sys.exit(1)
+        else:
+            print(cmdline, file=sys.stdout)
+            print(options, file=sys.stdout)
+            sys.exit(0)
 
     def parse_command_line(args=None):
-        class Options(object):
-            # pylint: disable=too-few-public-methods
+        # pylint: disable=too-many-branches
+        class Options(object):  # pylint: disable=too-few-public-methods
             rc_args = {}
             profile = None
-        if args is None:
-            args = sys.argv[1:]
-        else:
-            args = args[:]
+
+        def poparg(args):
+            if len(args) < 2 or not args[1] or args[1].startswith('-'):
+                usage('Argument expected for option: ' + args[0])
+            return args.pop(1)
+
         options = Options()
+        args = sys.argv[1:] if args is None else args[:]
         while args and args[0].startswith('-'):
-            if args[0].startswith('--'):
-                args[0] = opt = args[0][1:]
-                if '=' in opt:
-                    i = opt.index('=')
-                    opt, arg = opt[:i], opt[i+1:]
-                    assert opt and arg
-                    args[0:1] = opt, arg
-            if args[0] == '-rc':
-                for entry in args[1].split(','):
-                    i = entry.index('=')
-                    key = entry[:i].strip()
-                    val = entry[i+1:].strip()
-                    assert key and val
-                    try:
-                        # pylint: disable=eval-used
-                        options.rc_args[key] = eval(val, {})
-                    except NameError:
-                        options.rc_args[key] = val
-                del args[0:2]
-                continue
-            if args[0] in ('-p', '-prof', '-profile'):
-                options.profile = args[1]
-                del args[0:2]
-                continue
-            if args[0] in ('-mpe', '-vt'):
-                options.profile = args[0][1:]
+            if args[0] in ('-m', '-c'):
+                break    # Stop processing options
+            if args[0] in ('-h', '-help', '--help'):
+                usage()  # Print help and exit
+            try:
+                arg0 = args[0]
+                if arg0.startswith('--'):
+                    if '=' in arg0:
+                        i = arg0.index('=')
+                        opt, arg = arg0[1:i], arg0[i+1:]
+                        if opt in ('-rc', '-profile'):
+                            arg0, args[1:1] = opt, [arg]
+                    else:
+                        arg0 = arg0[1:]
+                if arg0 == '-rc':
+                    for entry in poparg(args).split(','):
+                        i = entry.index('=')
+                        key = entry[:i].strip()
+                        val = entry[i+1:].strip()
+                        if not key or not val:
+                            raise ValueError(entry)
+                        try:
+                            # pylint: disable=eval-used
+                            options.rc_args[key] = eval(val, {})
+                        except NameError:
+                            options.rc_args[key] = val
+                elif arg0 in ('-p', '-profile'):
+                    options.profile = poparg(args) or None
+                elif arg0 in ('-mpe', '-vt'):
+                    options.profile = arg0[1:]
+                else:
+                    usage('Unknown option: ' + args[0])
                 del args[0]
-                continue
-            break
+            except Exception:  # pylint: disable=broad-except
+                # Bad option, print usage and exit with error
+                usage('Cannot parse option: ' + args[0])
+        # Final check and return to caller
+        if len(args) < 1:
+            usage("No path specified for execution")
+        elif args[0] in ('-m', '-c') and len(args) < 2:
+            usage('Argument expected for option: ' + args[0])
         return options, args
+
+    def bootstrap(options):
+        if options.rc_args:  # Set mpi4py.rc parameters
+            from . import rc
+            rc(**options.rc_args)
+        if options.profile:  # Load profiling library
+            from . import profile
+            profile(options.profile)
 
     def set_abort_status(status):
         if status is None:
@@ -99,24 +142,9 @@ def main():
             # pylint: disable=protected-access
             mpi._set_abort_status(status)
 
-    # Parse command line and check remaining args
-    try:
-        options, args = parse_command_line()
-    except:  # pylint: disable=bare-except
-        sys.exit(usage())
-    if len(args) < 1 or args[0] in ('-m', '-c') and len(args) < 2:
-        sys.exit(usage())
-
-    # Process command line options
-    if options.rc_args:  # Set mpi4py.rc parameters
-        from . import rc
-        rc(**options.rc_args)
-    if options.profile:  # Load profiling library
-        from . import profile
-        profile(options.profile)
-
-    # Set sys.argv to remaining args
-    sys.argv[:] = args
+    # Parse and process command line options
+    options, sys.argv[:] = parse_command_line()
+    bootstrap(options)
 
     # Run user code (scripts, modules, zip files) using the 'runpy'
     # module. In case of an unhandled exception, abort execution of
@@ -128,10 +156,10 @@ def main():
             run_string(sys.argv[1], dct, run_name='__main__')
         elif sys.argv[0] == '-m':
             del sys.argv[0]  # Remove "-m" from argument list
-            run_module(sys.argv[0], {}, run_name='__main__', alter_sys=1)
+            run_module(sys.argv[0], {}, run_name='__main__', alter_sys=True)
         else:
             from os.path import realpath, dirname
-            sys.path[0] = realpath(dirname(sys.argv[0]))
+            sys.path[0] = realpath(dirname(sys.argv[0]))  # Fix sys.path
             dct = {'__builtins__': __builtins__}
             run_path(sys.argv[0], dct, run_name='__main__')
 
