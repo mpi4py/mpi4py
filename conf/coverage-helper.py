@@ -1,4 +1,5 @@
 import mpi4py
+
 mpi4py.get_include()
 mpi4py.get_config()
 
@@ -31,3 +32,5 @@ try: mpi4py.profile('@querty')
 except ValueError: pass
 
 import mpi4py.__main__
+import mpi4py.bench
+import mpi4py.run

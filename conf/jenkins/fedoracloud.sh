@@ -41,8 +41,10 @@ hash -r
 echo "Installing package"
 pip -vvv install .
 
-echo "Running lint"
-pep8 --ignore=E221,E402 src | tee pep8-$PY-$MPI.out
+echo "Running pep8"
+pep8 src | tee pep8-$PY-$MPI.out
+
+echo "Running pylint"
 pylint mpi4py --extension-pkg-whitelist=mpi4py | tee pylint-$PY-$MPI.out
 
 echo "Running coverage"

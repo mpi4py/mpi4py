@@ -17,7 +17,7 @@ def main():
     from runpy import run_module
     try:
         from runpy import run_path
-    except ImportError:  # Python 2.6
+    except ImportError:  # Python 2.6  # pragma: no cover
         def run_path(path_name, init_globals=None, run_name=None):
             from pkgutil import read_code
             from runpy import _run_module_code
