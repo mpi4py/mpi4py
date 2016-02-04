@@ -89,7 +89,7 @@ class TestRunScript(BaseTestRun, unittest.TestCase):
             for r in sorted(set([0, np-1])):
                 args = ['--rank', str(r), '--sys-exit', str(errcode)]
                 status, stdout, stderr = self.execute(args, np)
-                self.assertEqual(status, errcode)
+                self.assertTrue(status in (errcode, 1))
                 self.assertTrue('Traceback' not in stderr)
                 self.assertMPIAbort(stdout, stderr)
 

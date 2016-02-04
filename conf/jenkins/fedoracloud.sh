@@ -53,6 +53,7 @@ coverage xml
 mv coverage.xml coverage-$PY-$MPI.xml
 
 echo "Running testsuite"
+python demo/test-run/test_run.py -v
 case "$MPI" in
     mpich)
         mpiexec -n 1 python test/runtests.py -v -e spawn -e dynproc
