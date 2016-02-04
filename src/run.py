@@ -84,7 +84,7 @@ def main():
             profile = None
 
         def poparg(args):
-            if len(args) < 2 or not args[1] or args[1].startswith('-'):
+            if len(args) < 2 or args[1].startswith('-'):
                 usage('Argument expected for option: ' + args[0])
             return args.pop(1)
 
