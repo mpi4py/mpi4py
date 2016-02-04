@@ -31,7 +31,7 @@ def main():
     def run_string(string, init_globals=None, run_name=None, argv0='-c'):
         from runpy import _run_module_code
         karg = 'script_name' if sys.version_info >= (3, 4) else 'mod_fname'
-        code = compile(string, '<string>', 'exec')
+        code = compile(string, '<string>', 'exec', 0, 1)
         return _run_module_code(code, init_globals, run_name, **{karg: argv0})
 
     def version():
