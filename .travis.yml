@@ -47,7 +47,6 @@ before_script:
 script:
     - $MPIEXEC -n 1 $PYTHON $PWD/test/runtests.py -v -f --no-builddir --exclude=spawn
     - $MPIEXEC -n 3 $PYTHON $PWD/test/runtests.py -v -f --no-builddir --exclude=spawn
-    - $MPIEXEC -n 5 $PYTHON $PWD/test/runtests.py -q -f --no-builddir --exclude=spawn
 
 #notifications:
 #  email: false
