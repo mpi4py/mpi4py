@@ -46,9 +46,8 @@ before_script:
     - test $MPI == mpich1 && PYTHON=$(command -v $PYTHON) || true
 script:
     - $MPIEXEC -n 1 $PYTHON $PWD/test/runtests.py -v -f --no-builddir --exclude=spawn
-    - $MPIEXEC -n 2 $PYTHON $PWD/test/runtests.py -v -f --no-builddir --exclude=spawn
     - $MPIEXEC -n 3 $PYTHON $PWD/test/runtests.py -v -f --no-builddir --exclude=spawn
-    - $MPIEXEC -n 5 $PYTHON $PWD/test/runtests.py -v -f --no-builddir --exclude=spawn
+    - $MPIEXEC -n 5 $PYTHON $PWD/test/runtests.py -q -f --no-builddir --exclude=spawn
 
 #notifications:
 #  email: false
