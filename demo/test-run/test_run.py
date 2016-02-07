@@ -24,7 +24,7 @@ def find_mpiexec(mpiexec='mpiexec'):
 
 def launcher(np):
     mpiexec = find_mpiexec()
-    python = sys.executable
+    python = sys.executable + ' -u'
     if 'coverage' in sys.modules:
         python += ' -m coverage run -p -m'
     module = 'mpi4py.run -rc threads=False'
@@ -41,8 +41,7 @@ def execute(np, command, args=''):
     if isinstance(args, str):
         args = shlex.split(args)
     cmdline = launcher(np) + command + args
-    p = sp.Popen(cmdline, stdout=sp.PIPE, stderr=sp.PIPE,
-                 env=env, bufsize=4096)
+    p = sp.Popen(cmdline, stdout=sp.PIPE, stderr=sp.PIPE, env=env)
     stdout, stderr = p.communicate()
     return p.returncode, stdout.decode(), stderr.decode()
 
