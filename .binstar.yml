@@ -27,7 +27,7 @@ install:
 test:
  - conda install --quiet --yes numpy
  - conda install --quiet --yes --use-local mpi4py $MPI
- - python -u $PWD/demo/test-run/test_run.py -v
+ - python $PWD/demo/test-run/test_run.py -v
  - mpiexec -n 1 python $PWD/test/runtests.py -v -f -e spawn
  - mpiexec -n 2 python $PWD/test/runtests.py -v -f -e spawn
 
