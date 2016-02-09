@@ -373,8 +373,9 @@ class TestAddress(unittest.TestCase):
             pass
 
     def testAintAdd(self):
-        addr = MPI.Aint_add(MPI.BOTTOM, 0)
-        self.assertEqual(addr, MPI.BOTTOM)
+        base = MPI.Get_address(MPI.BOTTOM)
+        addr = MPI.Aint_add(base, 0)
+        self.assertEqual(addr, base)
         try:
             from array import array
             location = array('i', range(10))
@@ -385,7 +386,8 @@ class TestAddress(unittest.TestCase):
             pass
 
     def testAintDiff(self):
-        diff = MPI.Aint_add(MPI.BOTTOM, MPI.BOTTOM)
+        base = MPI.Get_address(MPI.BOTTOM)
+        diff = MPI.Aint_diff(base, base)
         self.assertEqual(diff, 0)
         try:
             from array import array
