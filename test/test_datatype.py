@@ -349,7 +349,7 @@ class TestDatatype(unittest.TestCase):
             dtype.Commit()
 
 
-class TestGetAddress(unittest.TestCase):
+class TestAddress(unittest.TestCase):
 
     def testGetAddress(self):
         from struct import pack, unpack
@@ -369,6 +369,32 @@ class TestGetAddress(unittest.TestCase):
             addr = MPI.Get_address(location)
             addr = unpack('P', pack('P', addr))[0]
             self.assertEqual(addr, bufptr)
+        except ImportError:
+            pass
+
+    def testAintAdd(self):
+        addr = MPI.Aint_add(MPI.BOTTOM, 0)
+        self.assertEqual(addr, MPI.BOTTOM)
+        try:
+            from array import array
+            location = array('i', range(10))
+            base = MPI.Get_address(location)
+            addr = MPI.Aint_add(base, 4)
+            self.assertEqual(addr, base + 4)
+        except ImportError:
+            pass
+
+    def testAintDiff(self):
+        diff = MPI.Aint_add(MPI.BOTTOM, MPI.BOTTOM)
+        self.assertEqual(diff, 0)
+        try:
+            from array import array
+            location = array('i', range(10))
+            base = MPI.Get_address(location)
+            addr1 = base + 8
+            addr2 = base + 4
+            diff = MPI.Aint_diff(addr1, addr2)
+            self.assertEqual(diff, 4)
         except ImportError:
             pass
 

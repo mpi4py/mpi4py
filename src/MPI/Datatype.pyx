@@ -847,9 +847,8 @@ cdef class Datatype:
         return datatype
 
 
-
-# Address Function
-# ----------------
+# Address Functions
+# -----------------
 
 def Get_address(location):
     """
@@ -861,6 +860,17 @@ def Get_address(location):
     CHKERR( MPI_Get_address(baseptr, &address) )
     return address
 
+def Aint_add(Aint base, Aint disp):
+    """
+    Return the sum of base address and displacement
+    """
+    return MPI_Aint_add(base, disp)
+
+def Aint_diff(Aint addr1, Aint addr2):
+    """
+    Return the difference between absolute addresses
+    """
+    return MPI_Aint_diff(addr1, addr2)
 
 
 cdef Datatype __DATATYPE_NULL__ = new_Datatype( MPI_DATATYPE_NULL )
