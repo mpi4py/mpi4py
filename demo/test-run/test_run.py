@@ -149,7 +149,7 @@ class TestRunCommand(BaseTestRun, unittest.TestCase):
             self.assertEqual(stderr, '')
 
     def testException(self):
-        command = '"from mpi4py import MPI; 1/0"'
+        command = '"from mpi4py import MPI; 1/0 if MPI.COMM_WORLD.Get_rank()==0 else 0;"'
         excmess = 'ZeroDivisionError:'
         for np in (1, 2, 3):
             for rank in range(0, np):
