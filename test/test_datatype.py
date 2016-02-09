@@ -447,8 +447,6 @@ if name == 'Platform MPI':
     combiner_map[MPI.COMBINER_DARRAY] = MPI.COMBINER_STRUCT
     combiner_map[MPI.COMBINER_SUBARRAY] = MPI.COMBINER_STRUCT
     del TestDatatype.match_size_complex[:]
-if sys.version_info[0] >=3:
-    del TestGetAddress
 
 
 if __name__ == '__main__':
