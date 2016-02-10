@@ -1041,25 +1041,13 @@ cdef class Comm:
               keyval == MPI_LASTUSEDCODE):
             return (<int*>attrval)[0]
         # user-defined attribute keyval
-        elif keyval in comm_keyval:
-            return <object>attrval
-        else:
-            return PyLong_FromVoidPtr(attrval)
+        return PyMPI_attr_get(self.ob_mpi, keyval, attrval)
 
     def Set_attr(self, int keyval, object attrval):
         """
         Store attribute value associated with a key
         """
-        cdef void *ptrval = NULL
-        cdef object state = comm_keyval.get(keyval)
-        if state is not None:
-            ptrval = <void *>attrval
-        else:
-            ptrval = PyLong_AsVoidPtr(attrval)
-        CHKERR( MPI_Comm_set_attr(self.ob_mpi, keyval, ptrval) )
-        if state is None: return
-        Py_INCREF(attrval)
-        Py_INCREF(state)
+        PyMPI_attr_set(self.ob_mpi, keyval, attrval)
 
     def Delete_attr(self, int keyval):
         """
@@ -1074,8 +1062,8 @@ cdef class Comm:
         """
         cdef object state = _p_keyval(copy_fn, delete_fn)
         cdef int keyval = MPI_KEYVAL_INVALID
-        cdef MPI_Comm_copy_attr_function *_copy = comm_attr_copy_fn
-        cdef MPI_Comm_delete_attr_function *_del = comm_attr_delete_fn
+        cdef MPI_Comm_copy_attr_function *_copy = PyMPI_attr_copy_fn
+        cdef MPI_Comm_delete_attr_function *_del = PyMPI_attr_delete_fn
         cdef void *extra_state = <void *>state
         CHKERR( MPI_Comm_create_keyval(_copy, _del, &keyval, extra_state) )
         comm_keyval[keyval] = state

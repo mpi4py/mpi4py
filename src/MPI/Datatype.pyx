@@ -748,29 +748,15 @@ cdef class Datatype:
         cdef int flag = 0
         CHKERR( MPI_Type_get_attr(self.ob_mpi, keyval, &attrval, &flag) )
         if not flag: return None
-        if not attrval: return 0
-        # handle predefined keyvals
-        if 0: pass
-        # likely be a user-defined keyval
-        elif keyval in type_keyval:
-            return <object>attrval
-        else:
-            return PyLong_FromVoidPtr(attrval)
+        if attrval == NULL: return 0
+        # user-defined attribute keyval
+        return PyMPI_attr_get(self.ob_mpi, keyval, attrval)
 
     def Set_attr(self, int keyval, object attrval):
         """
         Store attribute value associated with a key
         """
-        cdef void *ptrval = NULL
-        cdef object state = type_keyval.get(keyval)
-        if state is not None:
-            ptrval = <void *>attrval
-        else:
-            ptrval = PyLong_AsVoidPtr(attrval)
-        CHKERR( MPI_Type_set_attr(self.ob_mpi, keyval, ptrval) )
-        if state is None: return
-        Py_INCREF(attrval)
-        Py_INCREF(state)
+        PyMPI_attr_set(self.ob_mpi, keyval, attrval)
 
     def Delete_attr(self, int keyval):
         """
@@ -785,8 +771,8 @@ cdef class Datatype:
         """
         cdef object state = _p_keyval(copy_fn, delete_fn)
         cdef int keyval = MPI_KEYVAL_INVALID
-        cdef MPI_Type_copy_attr_function *_copy = type_attr_copy_fn
-        cdef MPI_Type_delete_attr_function *_del = type_attr_delete_fn
+        cdef MPI_Type_copy_attr_function *_copy = PyMPI_attr_copy_fn
+        cdef MPI_Type_delete_attr_function *_del = PyMPI_attr_delete_fn
         cdef void *extra_state = <void *>state
         CHKERR( MPI_Type_create_keyval(_copy, _del, &keyval, extra_state) )
         type_keyval[keyval] = state

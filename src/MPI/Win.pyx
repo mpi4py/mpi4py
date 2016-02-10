@@ -221,37 +221,26 @@ cdef class Win:
         CHKERR( MPI_Win_get_attr(self.ob_mpi, keyval, &attrval, &flag) )
         if flag == 0: return None
         if attrval == NULL: return 0
-        # handle predefined keyvals
+        # MPI-2 predefined attribute keyvals
         if keyval == MPI_WIN_BASE:
             return <MPI_Aint>attrval
         elif keyval == MPI_WIN_SIZE:
             return (<MPI_Aint*>attrval)[0]
         elif keyval == MPI_WIN_DISP_UNIT:
             return (<int*>attrval)[0]
+        # MPI-3 predefined attribute keyvals
         elif keyval == MPI_WIN_CREATE_FLAVOR:
             return (<int*>attrval)[0]
         elif keyval == MPI_WIN_MODEL:
             return (<int*>attrval)[0]
-        # likely be a user-defined keyval
-        elif keyval in win_keyval:
-            return <object>attrval
-        else:
-            return PyLong_FromVoidPtr(attrval)
+        # user-defined attribute keyval
+        return PyMPI_attr_get(self.ob_mpi, keyval, attrval)
 
     def Set_attr(self, int keyval, object attrval):
         """
         Store attribute value associated with a key
         """
-        cdef void *ptrval = NULL
-        cdef object state = win_keyval.get(keyval)
-        if state is not None:
-            ptrval = <void *>attrval
-        else:
-            ptrval = PyLong_AsVoidPtr(attrval)
-        CHKERR( MPI_Win_set_attr(self.ob_mpi, keyval, ptrval) )
-        if state is None: return
-        Py_INCREF(attrval)
-        Py_INCREF(state)
+        PyMPI_attr_set(self.ob_mpi, keyval, attrval)
 
     def Delete_attr(self, int keyval):
         """
@@ -266,8 +255,8 @@ cdef class Win:
         """
         cdef object state = _p_keyval(copy_fn, delete_fn)
         cdef int keyval = MPI_KEYVAL_INVALID
-        cdef MPI_Win_copy_attr_function *_copy = win_attr_copy_fn
-        cdef MPI_Win_delete_attr_function *_del = win_attr_delete_fn
+        cdef MPI_Win_copy_attr_function *_copy = PyMPI_attr_copy_fn
+        cdef MPI_Win_delete_attr_function *_del = PyMPI_attr_delete_fn
         cdef void *extra_state = <void *>state
         CHKERR( MPI_Win_create_keyval(_copy, _del, &keyval, extra_state) )
         win_keyval[keyval] = state

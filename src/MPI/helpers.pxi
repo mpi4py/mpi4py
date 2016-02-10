@@ -14,20 +14,6 @@ cdef enum PyMPI_OBJECT_FLAGS:
     PyMPI_OWNED = 1<<1
 
 #------------------------------------------------------------------------------
-
-@cython.final
-@cython.internal
-cdef class _p_keyval:
-    cdef object copy_fn
-    cdef object delete_fn
-    def __cinit__(self, copy_fn, delete_fn):
-        if copy_fn   is False: copy_fn   = None
-        if delete_fn is False: delete_fn = None
-        if delete_fn is True:  delete_fn = None
-        self.copy_fn   = copy_fn
-        self.delete_fn = delete_fn
-
-#------------------------------------------------------------------------------
 # Status
 
 cdef inline MPI_Status *arg_Status(object status):
@@ -51,8 +37,6 @@ cdef inline void copy_Status(MPI_Status* si, MPI_Status* so) nogil:
 
 #------------------------------------------------------------------------------
 # Datatype
-
-include "typeimpl.pxi"
 
 cdef inline int builtin_Datatype(MPI_Datatype ob):
     cdef int ni = 0, na = 0, nt = 0, combiner = MPI_UNDEFINED
@@ -300,8 +284,6 @@ cdef inline int del_Comm(MPI_Comm* ob):
 
 #------------------------------------------------------------------------------
 # Win
-
-include "winimpl.pxi"
 
 cdef inline Win new_Win(MPI_Win ob):
     cdef Win win = <Win>Win.__new__(Win)
