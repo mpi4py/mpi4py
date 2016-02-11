@@ -1321,7 +1321,8 @@ cdef class Intracomm(Comm):
         cdef int *idims = NULL
         dims = asarray_int(dims, ndims, &idims)
         cdef int *iperiods = NULL
-        if periods is None: periods = [False] * ndims
+        if periods is None: periods = False
+        if isinstance(periods, bool): periods = [periods] * ndims
         periods = asarray_int(periods, ndims, &iperiods)
         #
         cdef Cartcomm comm = <Cartcomm>Cartcomm.__new__(Cartcomm)
@@ -1430,7 +1431,8 @@ cdef class Intracomm(Comm):
         cdef int ndims = 0, *idims = NULL, *iperiods = NULL
         ndims = <int>len(dims)
         dims = asarray_int(dims, ndims, &idims)
-        if periods is None: periods = [False] * ndims
+        if periods is None: periods = False
+        if isinstance(periods, bool): periods = [periods] * ndims
         periods = asarray_int(periods, ndims, &iperiods)
         cdef int rank = MPI_PROC_NULL
         CHKERR( MPI_Cart_map(self.ob_mpi, ndims, idims, iperiods, &rank) )
