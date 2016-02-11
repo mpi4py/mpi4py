@@ -16,7 +16,6 @@ class BaseTestTopo(object):
         size = comm.Get_size()
         rank = comm.Get_rank()
         for ndim in (1,2,3,4,5):
-            dims = [0]*ndim
             dims = MPI.Compute_dims(size, [0]*ndim)
             periods = [True] * len(dims)
             topo = comm.Create_cart(dims, periods=periods)
@@ -182,6 +181,36 @@ class BaseTestTopo(object):
         self.assertEqual(topo.Get_dist_neighbors_count(), (3, 3, True))
         topo.Free()
 
+    def testCartMap(self):
+        comm = self.COMM
+        size = comm.Get_size()
+        for ndim in (1,2,3,4,5):
+            for periods in (None, True, False):
+                dims = MPI.Compute_dims(size, [0]*ndim)
+                topo = comm.Create_cart(dims, periods, reorder=True)
+                rank = comm.Cart_map(dims, periods)
+                self.assertEqual(topo.Get_rank(), rank)
+                topo.Free()
+
+    def testGraphMap(self):
+        comm = self.COMM
+        size = comm.Get_size()
+        index, edges = [0], []
+        for i in range(size):
+            pos = index[-1]
+            index.append(pos+2)
+            edges.append((i-1)%size)
+            edges.append((i+1)%size)
+        # Version 1
+        topo = comm.Create_graph(index, edges, reorder=True)
+        rank = comm.Graph_map(index, edges)
+        self.assertEqual(topo.Get_rank(), rank)
+        topo.Free()
+        # Version 2
+        topo = comm.Create_graph(index[1:], edges, reorder=True)
+        rank = comm.Graph_map(index[1:], edges)
+        self.assertEqual(topo.Get_rank(), rank)
+        topo.Free()
 
 class TestTopoSelf(BaseTestTopo, unittest.TestCase):
     COMM = MPI.COMM_SELF
