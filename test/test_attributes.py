@@ -79,14 +79,10 @@ class BaseTestAttr(object):
         obj.Set_attr(self.keyval, intval)
         attr = obj.Get_attr(self.keyval)
         self.assertEqual(attr, intval)
-        if intval:
-            self.assertTrue(attr is not intval)
         if hasattr(obj, 'Dup'):
             dup = obj.Dup()
             attr = dup.Get_attr(self.keyval)
             self.assertEqual(attr, intval)
-            if intval:
-                self.assertTrue(attr is not intval)
             dup.Free()
         obj.Delete_attr(self.keyval)
         attr = obj.Get_attr(self.keyval)
