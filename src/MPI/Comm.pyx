@@ -1056,11 +1056,11 @@ cdef class Comm:
         CHKERR( MPI_Comm_delete_attr(self.ob_mpi, keyval) )
 
     @classmethod
-    def Create_keyval(cls, copy_fn=None, delete_fn=None):
+    def Create_keyval(cls, copy_fn=None, delete_fn=None, nopython=False):
         """
         Create a new attribute key for communicators
         """
-        cdef object state = _p_keyval(copy_fn, delete_fn)
+        cdef object state = _p_keyval(copy_fn, delete_fn, nopython)
         cdef int keyval = MPI_KEYVAL_INVALID
         cdef MPI_Comm_copy_attr_function *_copy = PyMPI_attr_copy_fn
         cdef MPI_Comm_delete_attr_function *_del = PyMPI_attr_delete_fn
