@@ -54,6 +54,7 @@ mv coverage.xml coverage-$PY-$MPI.xml
 
 echo "Running testsuite"
 python demo/test-run/test_run.py -v
+set -e
 case "$MPI" in
     mpich)
         mpiexec -n 1 python test/runtests.py -v -e spawn -e dynproc
@@ -68,6 +69,7 @@ case "$MPI" in
        #mpiexec -n 8 python test/runtests.py -v -e spawn -e dynproc --no-threads
         ;;
 esac
+set +e
 
 module purge
 deactivate
