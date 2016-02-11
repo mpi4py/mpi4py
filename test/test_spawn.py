@@ -114,6 +114,30 @@ class BaseTestSpawn(object):
         self.assertEqual(local_size, self.COMM.Get_size())
         self.assertEqual(remote_size, sum(MAXPROCS))
 
+    def testCommSpawnMultipleDefaults1(self):
+        count = 2 + (self.COMM.Get_size() == 0)
+        COMMAND = [self.COMMAND] * count
+        ARGS = [self.ARGS] * len(COMMAND)
+        child = self.COMM.Spawn_multiple(COMMAND, ARGS)
+        local_size = child.Get_size()
+        remote_size = child.Get_remote_size()
+        child.Barrier()
+        child.Disconnect()
+        self.assertEqual(local_size, self.COMM.Get_size())
+        self.assertEqual(remote_size, len(COMMAND))
+
+    def testCommSpawnMultipleDefaults2(self):
+        count = 2 + (self.COMM.Get_size() == 0)
+        COMMAND = [self.COMMAND] * count
+        ARGS = [self.ARGS] * len(COMMAND)
+        child = self.COMM.Spawn_multiple(COMMAND, ARGS, 1)
+        local_size = child.Get_size()
+        remote_size = child.Get_remote_size()
+        child.Barrier()
+        child.Disconnect()
+        self.assertEqual(local_size, self.COMM.Get_size())
+        self.assertEqual(remote_size, len(COMMAND))
+
     def testReturnedErrcodesMultiple(self):
         count = 2 + (self.COMM.Get_size() == 0)
         COMMAND = [self.COMMAND] * count
