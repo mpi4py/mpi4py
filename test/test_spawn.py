@@ -130,7 +130,7 @@ class BaseTestSpawn(object):
         count = 2 + (self.COMM.Get_size() == 0)
         COMMAND = [self.COMMAND] * count
         ARGS = [self.ARGS] * len(COMMAND)
-        child = self.COMM.Spawn_multiple(COMMAND, ARGS, 1)
+        child = self.COMM.Spawn_multiple(COMMAND, ARGS, 1, MPI.INFO_NULL)
         local_size = child.Get_size()
         remote_size = child.Get_remote_size()
         child.Barrier()
