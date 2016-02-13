@@ -1,35 +1,58 @@
-import mpi4py
-
-mpi4py.get_include()
-mpi4py.get_config()
-
-import mpi4py.rc
-mpi4py.rc(
-initialize = True,
-threads = True,
-thread_level = 'multiple',
-finalize = None,
-fast_reduce = True,
-recv_mprobe = True,
-errors = 'exception',
-)
-try: mpi4py.rc(querty=False)
-except TypeError: pass
+# ---
 
 import mpi4py
-mpi4py.profile()
-mpi4py.profile('mpe')
-mpi4py.profile('mpe', path="/usr/lib")
-mpi4py.profile('mpe', path=["/usr/lib"])
-mpi4py.profile('mpe', logfile="mpi4py")
-mpi4py.profile('mpe', logfile="mpi4py")
-mpi4py.profile('vt')
-mpi4py.profile('vt', path="/usr/lib")
-mpi4py.profile('vt', path=["/usr/lib"])
-mpi4py.profile('vt', logfile="mpi4py")
-mpi4py.profile('vt', logfile="mpi4py")
-try: mpi4py.profile('@querty')
-except ValueError: pass
+try: mpi4py.get_include()
+except: pass
+try: mpi4py.get_config()
+except: pass
+
+# ---
+
+def test_mp4py_rc():
+    import mpi4py.rc
+    mpi4py.rc(
+    initialize = True,
+    threads = True,
+    thread_level = 'multiple',
+    finalize = None,
+    fast_reduce = True,
+    recv_mprobe = True,
+    errors = 'exception',
+    )
+    try: mpi4py.rc(querty=False)
+    except TypeError: pass
+
+test_mp4py_rc()
+
+# ---
+
+def test_mp4py_profile():
+    import mpi4py
+    def mpi4py_profile(*args, **kargs):
+        try: mpi4py.profile(*args, **kargs)
+        except ValueError: pass
+    import warnings
+    warnings.simplefilter('ignore')
+    mpi4py_profile()
+    mpi4py_profile('mpe')
+    mpi4py_profile('mpe', path="/usr/lib")
+    mpi4py_profile('mpe', path=["/usr/lib"])
+    mpi4py_profile('mpe', logfile="mpi4py")
+    mpi4py_profile('mpe', logfile="mpi4py")
+    mpi4py_profile('vt')
+    mpi4py_profile('vt', path="/usr/lib")
+    mpi4py_profile('vt', path=["/usr/lib"])
+    mpi4py_profile('vt', logfile="mpi4py")
+    mpi4py_profile('vt', logfile="mpi4py")
+    mpi4py_profile('@querty')
+    mpi4py_profile('c', path=["/usr/lib", "/usr/lib64"])
+    mpi4py_profile('m', path=["/usr/lib", "/usr/lib64"])
+    mpi4py_profile('dl', path=["/usr/lib", "/usr/lib64"])
+    mpi4py_profile('hosts', path=["/etc"])
+
+test_mp4py_profile()
+
+# ---
 
 import mpi4py.__main__
 import mpi4py.bench
