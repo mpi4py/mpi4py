@@ -7,7 +7,7 @@ class MyBaseComm(object):
 
     def free(self):
         if self != MPI.COMM_NULL:
-            super(type(self), self).Free()
+            MPI.Comm.Free(self)
 
 class BaseTestBaseComm(object):
 
@@ -212,7 +212,8 @@ class MyWin(MPI.Win):
         return MPI.Win.__new__(cls, win)
 
     def free(self):
-        MPI.Win.Free(self)
+        if self != MPI.WIN_NULL:
+            MPI.Win.Free(self)
 
 class BaseTestMyWin(object):
 
@@ -221,8 +222,7 @@ class BaseTestMyWin(object):
         self.win = MyWin(w)
 
     def tearDown(self):
-        if self.win:
-            self.win.Free()
+        self.win.free()
 
     def testSubType(self):
         self.assertTrue(type(self.win) is not MPI.Win)
@@ -252,7 +252,8 @@ class MyFile(MPI.File):
         return MPI.File.__new__(cls, file)
 
     def close(self):
-        MPI.File.Close(self)
+        if self != MPI.FILE_NULL:
+            MPI.File.Close(self)
 
 
 class BaseTestMyFile(object):
@@ -273,8 +274,7 @@ class BaseTestMyFile(object):
         self.file = MyFile(f)
 
     def tearDown(self):
-        if self.file:
-            self.file.Close()
+        self.file.close()
 
     def testSubType(self):
         self.assertTrue(type(self.file) is not MPI.File)
@@ -302,12 +302,6 @@ try:
 except NotImplementedError:
     try: del TestMyFile
     except NameError: pass
-
-if hasattr(MPI, 'ffi'):
-    for k, v in list(globals().items()):
-        if isinstance(v, type):
-            del globals()[k]
-    del k, v
 
 
 if __name__ == '__main__':
