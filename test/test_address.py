@@ -56,7 +56,8 @@ class TestAddress(unittest.TestCase):
 
 name, version = MPI.get_vendor()
 if name == 'Open MPI':
-    del TestAddress
+    if version <= (1,10,2):
+        del TestAddress.testBottom
 
 
 if __name__ == '__main__':

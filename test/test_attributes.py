@@ -217,7 +217,7 @@ except NotImplementedError:
 name, version = MPI.get_vendor()
 def SKIP(*args, **kwargs): pass
 if name == 'Open MPI':
-    if version < (1,11):
+    if version <= (1,10,2):
         BaseTestDatatypeAttr.testAttrNoPythonZero = SKIP
     if version < (1,5,2):
         if MPI.Query_thread() > MPI.THREAD_SINGLE:
