@@ -918,6 +918,10 @@ cdef class _p_msg_rma:
     cdef void*        oaddr
     cdef int          ocount
     cdef MPI_Datatype otype
+    # raw compare arguments
+    cdef void*        caddr
+    cdef int          ccount
+    cdef MPI_Datatype ctype
     # raw result arguments
     cdef void*        raddr
     cdef int          rcount
@@ -928,6 +932,7 @@ cdef class _p_msg_rma:
     cdef MPI_Datatype ttype
     # python-side arguments
     cdef object _origin
+    cdef object _compare
     cdef object _result
     cdef object _target
 
@@ -986,14 +991,63 @@ cdef class _p_msg_rma:
         self.for_rma(1, origin, rank, target)
         return 0
 
-    cdef int for_get_acc(self, object origin, object result,
-                         int rank, object target) except -1:
-        # ORIGIN & TARGET
-        self.for_rma(0, origin, rank, target)
-        # RESULT
+    cdef int set_origin(self, object origin, int rank) except -1:
+        self._origin = message_simple(
+            origin, 1, rank, 0,
+            &self.oaddr,  &self.ocount,  &self.otype)
+        self.tdisp  = 0
+        self.tcount = self.ocount
+        self.ttype  = self.otype
+
+    cdef int set_compare(self, object compare, int rank) except -1:
+        self._compare = message_simple(
+            compare, 1, rank, 0,
+            &self.caddr,  &self.ccount,  &self.ctype)
+
+    cdef int set_result(self, object result, int rank) except -1:
         self._result = message_simple(
             result, 0, rank, 0,
             &self.raddr,  &self.rcount,  &self.rtype)
+
+    cdef int for_get_acc(self, object origin, object result,
+                         int rank, object target) except -1:
+        self.for_rma(0, origin, rank, target)
+        self.set_result(result, rank)
+        return 0
+
+    cdef int for_fetch_op(self, object origin, object result,
+                          int rank, MPI_Aint disp) except -1:
+        self.set_origin(origin, rank)
+        self.set_result(result, rank)
+        self.tdisp = disp
+        if rank == MPI_PROC_NULL: return 0
+        # Check
+        if self.ocount != 1:  raise ValueError(
+            "origin: expecting a single element, got %d" % self.ocount)
+        if self.rcount != 1: raise ValueError(
+            "result: expecting a single element, got %d" % self.rcount)
+        if self.otype != self.rtype: raise ValueError(
+            "mismatch in origin and result MPI datatypes")
+        return 0
+
+    cdef int for_cmp_swap(self, object origin, object compare, object result,
+                          int rank, MPI_Aint disp) except -1:
+        self.set_origin(origin, rank)
+        self.set_compare(compare, rank)
+        self.set_result(result, rank)
+        self.tdisp = disp
+        if rank == MPI_PROC_NULL: return 0
+        # Check
+        if self.ocount != 1:  raise ValueError(
+            "origin: expecting a single element, got %d" % self.ocount)
+        if self.ccount != 1:  raise ValueError(
+            "compare: expecting a single element, got %d" % self.ccount)
+        if self.rcount != 1: raise ValueError(
+            "result: expecting a single element, got %d" % self.rcount)
+        if self.otype != self.ctype: raise ValueError(
+            "mismatch in origin and compare MPI datatypes")
+        if self.otype != self.rtype: raise ValueError(
+            "mismatch in origin and result MPI datatypes")
         return 0
 
 cdef inline _p_msg_rma message_rma():

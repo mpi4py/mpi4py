@@ -402,6 +402,29 @@ cdef class Win:
             msg.tdisp, msg.tcount, msg.ttype,
             op.ob_mpi, self.ob_mpi) )
 
+    def Fetch_and_op(self, origin, result,int target_rank,
+                     Aint target_disp=0, Op op not None=SUM):
+        """
+        Perform one-sided read-modify-write
+        """
+        cdef _p_msg_rma msg = message_rma()
+        msg.for_fetch_op(origin, result, target_rank, target_disp)
+        with nogil: CHKERR( MPI_Fetch_and_op(
+                msg.oaddr, msg.raddr, msg.ttype,
+                target_rank, target_disp,
+                op.ob_mpi, self.ob_mpi) )
+
+    def Compare_and_swap(self, origin, compare, result,
+                         int target_rank, Aint target_disp=0):
+        """
+        Perform one-sided atomic compare-and-swap
+        """
+        cdef _p_msg_rma msg = message_rma()
+        msg.for_cmp_swap(origin, compare, result, target_rank, target_disp)
+        with nogil: CHKERR( MPI_Compare_and_swap(
+                msg.oaddr, msg.caddr, msg.raddr, msg.ttype,
+                target_rank, target_disp, self.ob_mpi) )
+
     # Request-based RMA Communication Operations
     # ------------------------------------------
 
