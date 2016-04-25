@@ -100,8 +100,8 @@ cdef inline void op_user_mpi(
         finally: datatype.ob_mpi = MPI_DATATYPE_NULL
     except:
         # print the full exception traceback and abort.
-        PySys_WriteStderr(b"Fatal Python error: exception in "
-                          b"user-defined reduction operation\n", 0)
+        PySys_WriteStderr(b"Fatal Python error: %s\n",
+                          b"exception in user-defined reduction operation")
         try: print_traceback()
         finally: <void>MPI_Abort(MPI_COMM_WORLD, 1)
 
