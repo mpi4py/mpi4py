@@ -147,7 +147,7 @@ cdef int bootstrap() except -1:
     # Cleanup at (the very end of) Python exit
     if Py_AtExit(atexit) < 0:
         PySys_WriteStderr(b"warning: could not register "
-                          b"cleanup with Py_AtExit()\n", 0)
+                          b"cleanup with Py_AtExit()%s", "\n")
     # Do we have to initialize MPI?
     cdef int initialized = 1
     <void>MPI_Initialized(&initialized)
