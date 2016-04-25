@@ -158,6 +158,75 @@ class BaseTestRMA(object):
                             self.assertEqual(rbuf[-1], -1)
                             self.assertEqual(gbuf[-1], -1)
 
+    def testFetchAndOp(self):
+        group = self.WIN.Get_group()
+        size = group.Get_size()
+        rank = group.Get_rank()
+        group.Free()
+        self.WIN.Fence()
+        obuf = MPI.Alloc_mem(1); memzero(obuf)
+        rbuf = MPI.Alloc_mem(1); memzero(rbuf)
+        try:
+            try:
+                self.WIN.Fetch_and_op([obuf, 1, MPI.BYTE], [rbuf, 1, MPI.BYTE], rank)
+            finally:
+                MPI.Free_mem(obuf)
+                MPI.Free_mem(rbuf)
+        except NotImplementedError:
+            return
+        self.WIN.Fence()
+        for array in arrayimpl.ArrayTypes:
+            for typecode in arrayimpl.TypeMap:
+                obuf = array(+1, typecode)
+                rbuf = array(-1, typecode, 2)
+                for op in (MPI.SUM, MPI.PROD,
+                           MPI.MAX, MPI.MIN,
+                           MPI.REPLACE, MPI.NO_OP):
+                    for rank in range(size):
+                        for disp in range(3):
+                            self.WIN.Fetch_and_op(obuf.as_mpi(),
+                                                  rbuf.as_mpi_c(1),
+                                                  rank, disp, op=op)
+                            self.assertEqual(rbuf[1], -1)
+        self.WIN.Fence()
+
+    def testCompareAndSwap(self):
+        group = self.WIN.Get_group()
+        size = group.Get_size()
+        rank = group.Get_rank()
+        group.Free()
+        self.WIN.Fence()
+        obuf = MPI.Alloc_mem(1); memzero(obuf)
+        cbuf = MPI.Alloc_mem(1); memzero(cbuf)
+        rbuf = MPI.Alloc_mem(1); memzero(rbuf)
+        try:
+            try:
+                self.WIN.Compare_and_swap([obuf, 1, MPI.BYTE],
+                                          [cbuf, 1, MPI.BYTE],
+                                          [rbuf, 1, MPI.BYTE],
+                                          rank, 0)
+            finally:
+                MPI.Free_mem(obuf)
+                MPI.Free_mem(cbuf)
+                MPI.Free_mem(rbuf)
+        except NotImplementedError:
+            return
+        self.WIN.Fence()
+        for array in arrayimpl.ArrayTypes:
+            for typecode in arrayimpl.TypeMap:
+                if typecode in 'fdg': continue
+                obuf = array(+1, typecode)
+                cbuf = array( 0, typecode)
+                rbuf = array(-1, typecode, 2)
+                for rank in range(size):
+                    for disp in range(3):
+                        self.WIN.Compare_and_swap(obuf.as_mpi(),
+                                                  cbuf.as_mpi(),
+                                                  rbuf.as_mpi_c(1),
+                                                  rank, disp)
+                        self.assertEqual(rbuf[1], -1)
+        self.WIN.Fence()
+
     def testPutProcNull(self):
         self.WIN.Fence()
         self.WIN.Put(None, MPI.PROC_NULL, None)
@@ -185,6 +254,24 @@ class BaseTestRMA(object):
         self.WIN.Fence()
         self.WIN.Accumulate([None, MPI.INT], MPI.PROC_NULL, None, MPI.SUM)
         self.WIN.Fence()
+
+    ##def testFetchAndOpProcNull(self):
+    ##    self.WIN.Fence()
+    ##    obuf = rbuf = None
+    ##    self.WIN.Fence()
+    ##    self.WIN.Fetch_and_op(obuf, rbuf, MPI.PROC_NULL, 0)
+    ##    self.WIN.Fence()
+    ##    self.WIN.Fetch_and_op(obuf, rbuf, MPI.PROC_NULL, 0)
+    ##    self.WIN.Fence()
+
+    ##def testCompareAndSwapProcNull(self):
+    ##    self.WIN.Fence()
+    ##    obuf = cbuf = rbuf = None
+    ##    self.WIN.Fence()
+    ##    self.WIN.Compare_and_swap(obuf, cbuf, rbuf, MPI.PROC_NULL, 0)
+    ##    self.WIN.Fence()
+    ##    self.WIN.Compare_and_swap(obuf, cbuf, rbuf, MPI.PROC_NULL, 0)
+    ##    self.WIN.Fence()
 
     def testFence(self):
         win = self.WIN
