@@ -12,7 +12,7 @@ python:
     - pypy3
 
 env:
-    - MPI=mpich3
+#   - MPI=mpich3
     - MPI=mpich2
     - MPI=mpich1
     - MPI=openmpi
