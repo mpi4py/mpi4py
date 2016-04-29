@@ -18,7 +18,7 @@ source:
   md5: b2f43d9635d2d52826e5ef9feb97fd4c
 
 build:
-  number: 0
+  number: 1
   binary_relocation: true
   detect_binary_files_with_prefix: true
   skip: true # [win]

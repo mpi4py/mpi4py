@@ -6,7 +6,7 @@ platform:
 #- linux-32
 #- osx-64
 
-engine: openssl
+engine: python
 
 script:
  - conda build --quiet .

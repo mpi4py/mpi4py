@@ -5,8 +5,9 @@ platform:
  - linux-64
 #- linux-32
 #- osx-64
-engine:
- - openssl
+
+engine: python
+
 env:
  - MPI=mpich
  - MPI=openmpi
