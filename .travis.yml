@@ -2,51 +2,75 @@
 
 language: python
 python:
-    - 2.6
-    - 2.7
-    - 3.2
-    - 3.3
-    - 3.4
-    - 3.5
-    - pypy
-    - pypy3
+  - 2.6
+  - 2.7
+  - 3.2
+  - 3.3
+  - 3.4
+  - 3.5
+
+os: linux
+dist: trusty
+sudo: required
 
 env:
-#   - MPI=mpich3
-    - MPI=mpich2
-    - MPI=mpich1
+  global:
+    - HYDRA_LAUNCHER=fork
+  matrix:
+    - MPI=mpich
     - MPI=openmpi
 
 matrix:
+  include:
+    - os: osx
+      env: MPI=mpich PY=
+      language: generic
+      python: 2
+    - os: osx
+      env: MPI=openmpi PY=
+      language: generic
+      python: 2
+    - os: osx
+      env: MPI=mpich PY=3
+      language: generic
+      python: 3
+    - os: osx
+      env: MPI=openmpi PY=3
+      language: generic
+      python: 3
+    - python: pypy
+    - python: pypy3
   allow_failures:
     - python: pypy
     - python: pypy3
-    - env: MPI=mpich1
 
 branches:
   only:
     - master
     - maint
 
+git:
+  depth: 3
+
 cache:
   apt: true
 
 before_install:
-    - sudo apt-get update -q
-    - sh ./conf/travis/install-mpi.sh $MPI
-    - pip install -q Cython
-    - cython --version
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install $MPI; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install python$PY; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then pip$PY install numpy; fi
+  - sh ./conf/travis/install-mpi.sh $MPI
+  - pip$PY install Cython
+  - cython --version
 install:
-    - pip -vvv install .
+  - pip$PY -vvv install .
 
 before_script:
-    - sudo hostname localhost
-    - MPIEXEC='mpiexec'; PYTHON='python';
-    - test $MPI == mpich1 && MPIEXEC='mpirun' || true
-    - test $MPI == mpich1 && PYTHON=$(command -v $PYTHON) || true
+  - if [[ "$MPI" == "mpich" ]]; then P=2; else P=5; fi
 script:
-    - $MPIEXEC -n 1 $PYTHON $PWD/test/runtests.py -v -f --no-builddir --exclude=spawn
-    - $MPIEXEC -n 3 $PYTHON $PWD/test/runtests.py -v -f --no-builddir --exclude=spawn
+  - mpiexec -n 1  python$PY $PWD/test/runtests.py -v -f --no-builddir --exclude=spawn
+  - mpiexec -n $P python$PY $PWD/test/runtests.py -v -f --no-builddir --exclude=spawn
 
 #notifications:
 #  email: false
