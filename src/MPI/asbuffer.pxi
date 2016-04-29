@@ -38,6 +38,10 @@ cdef extern from "Python.h":
 cdef extern from *:
     void *emptybuffer '((void*)"")'
 
+cdef char BYTE_FMT[2]
+BYTE_FMT[0] = c'B'
+BYTE_FMT[1] = 0
+
 #------------------------------------------------------------------------------
 
 cdef extern from *:
@@ -97,7 +101,7 @@ except -1:
             PyObject_AsReadBuffer(obj, <const void**>&buf, &size)
     if buf == NULL and size == 0: buf = emptybuffer
     PyBuffer_FillInfo(view, obj, buf, size, readonly, flags)
-    if (flags & PyBUF_FORMAT) == PyBUF_FORMAT: view.format = b"B"
+    if (flags & PyBUF_FORMAT) == PyBUF_FORMAT: view.format = BYTE_FMT
     return 0
 
 #------------------------------------------------------------------------------
@@ -120,7 +124,7 @@ except -1:
         PyObject_AsReadBuffer(obj, <const void**>&view.buf, &view.len)
     if view.buf == NULL and view.len == 0: view.buf = emptybuffer
     PyBuffer_FillInfo(view, obj, view.buf, view.len, view.readonly, flags)
-    if (flags & PyBUF_FORMAT) == PyBUF_FORMAT: view.format = b"B"
+    if (flags & PyBUF_FORMAT) == PyBUF_FORMAT: view.format = BYTE_FMT
     return 0
 
 #------------------------------------------------------------------------------
@@ -210,7 +214,7 @@ cdef inline object getformat(_p_buffer buf):
             return "B"
     elif view.format != NULL:
         # XXX this is a hack
-        if view.format != <char*>b"B":
+        if view.format != BYTE_FMT:
             return mpistr(view.format)
     #
     cdef object ob = <object>buf.view.obj
