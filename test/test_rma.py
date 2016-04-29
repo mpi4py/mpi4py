@@ -184,11 +184,12 @@ class BaseTestRMA(object):
                            MPI.REPLACE, MPI.NO_OP):
                     for rank in range(size):
                         for disp in range(3):
+                            self.WIN.Lock(rank)
                             self.WIN.Fetch_and_op(obuf.as_mpi(),
                                                   rbuf.as_mpi_c(1),
                                                   rank, disp, op=op)
+                            self.WIN.Unlock(rank)
                             self.assertEqual(rbuf[1], -1)
-        self.WIN.Fence()
 
     def testCompareAndSwap(self):
         group = self.WIN.Get_group()
@@ -220,12 +221,13 @@ class BaseTestRMA(object):
                 rbuf = array(-1, typecode, 2)
                 for rank in range(size):
                     for disp in range(3):
+                        self.WIN.Lock(rank)
                         self.WIN.Compare_and_swap(obuf.as_mpi(),
                                                   cbuf.as_mpi(),
                                                   rbuf.as_mpi_c(1),
                                                   rank, disp)
+                        self.WIN.Unlock(rank)
                         self.assertEqual(rbuf[1], -1)
-        self.WIN.Fence()
 
     def testPutProcNull(self):
         self.WIN.Fence()
