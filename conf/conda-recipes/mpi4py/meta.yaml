@@ -29,7 +29,8 @@ requirements:
 build:
   number: {{build}}
   string: py{{py}}_{{mpi}}_{{build}}
-  script: python setup.py install
+  script: '$PYTHON  setup.py install' # [not win]
+  script: '%PYTHON% setup.py install' # [win]
 
 test:
   imports:
