@@ -447,7 +447,7 @@ def run_setup():
     setup_args = metadata.copy()
     if setuptools:
         setup_args['zip_safe'] = False
-    if setuptools:
+    if setuptools and not os.getenv('CONDA_BUILD'):
         src = os.path.join('src', 'mpi4py.MPI.c')
         has_src = os.path.exists(os.path.join(topdir, src))
         has_git = os.path.isdir(os.path.join(topdir, '.git'))
