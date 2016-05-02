@@ -163,10 +163,10 @@ cdef class _p_buffer:
         p[0] = self.view.buf
         return self.view.len
     def __getwritebuffer__(self, Py_ssize_t idx, void **p):
-        if idx != 0: raise SystemError(
-            "accessing non-existent buffer segment")
         if self.view.readonly:
             raise TypeError("object is not writeable")
+        if idx != 0: raise SystemError(
+            "accessing non-existent buffer segment")
         p[0] = self.view.buf
         return self.view.len
 
@@ -180,6 +180,8 @@ cdef class _p_buffer:
             raise IndexError("index out of range")
         return <long>buf[i]
     def __setitem__(self, Py_ssize_t i, unsigned char v):
+        if self.view.readonly:
+            raise TypeError("object is not writeable")
         cdef unsigned char *buf = <unsigned char*>self.view.buf
         if i < 0: i += self.view.len
         if i < 0 or i >= self.view.len:
