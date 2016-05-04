@@ -57,10 +57,12 @@ class TestOp(unittest.TestCase):
                 for N in range(4):
                     myop = MPI.Op.Create(mysum, commute)
                     self.assertFalse(myop.is_predefined)
+                    if ((hasattr(sys, 'pypy_version_info') and
+                         comm.size > 1) or
+                        sys.version_info < (2, 7)):
+                        myop.Free()
+                        continue
                     try:
-                        if sys.version_info <= (2, 6): continue
-                        if hasattr(sys, 'pypy_version_info'):
-                            if comm.size > 1: continue
                         # buffer(empty_array) returns
                         # the same non-NULL pointer !!!
                         if N == 0: continue
