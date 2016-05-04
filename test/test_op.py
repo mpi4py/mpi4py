@@ -26,6 +26,10 @@ def frombytes(typecode, data):
         _frombytes = array.array.frombytes
     except AttributeError:
         _frombytes = array.array.fromstring
+    try:
+        data = buffer(data)
+    except NameError:
+        pass
     _frombytes(a, data)
     return a
 
@@ -42,7 +46,7 @@ def mysum(ba, bb, dt):
     a = frombytes('i', ba)
     b = frombytes('i', bb)
     b = mysum_py(a, b)
-    bb[:] = tobytes(b)
+    memoryview(bb)[:] = tobytes(b)
 
 class TestOp(unittest.TestCase):
 
