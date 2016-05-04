@@ -17,19 +17,11 @@ if array:
         tobytes = array.array.tostring
 
 def frombytes(typecode, data):
-    a = array.array(typecode,[])
-    try:
-        data = data.tobytes()
-    except AttributeError:
-        pass
+    a = array.array(typecode, [])
     try:
         _frombytes = array.array.frombytes
     except AttributeError:
         _frombytes = array.array.fromstring
-    try:
-        data = buffer(data)
-    except NameError:
-        pass
     _frombytes(a, data)
     return a
 
@@ -43,8 +35,8 @@ def mysum(ba, bb, dt):
         return mysum_py(ba, bb)
     assert dt == MPI.INT
     assert len(ba) == len(bb)
-    a = frombytes('i', ba)
-    b = frombytes('i', bb)
+    a = frombytes('i', memoryview(ba).tobytes())
+    b = frombytes('i', memoryview(bb).tobytes())
     b = mysum_py(a, b)
     memoryview(bb)[:] = tobytes(b)
 
@@ -62,6 +54,7 @@ class TestOp(unittest.TestCase):
                     myop = MPI.Op.Create(mysum, commute)
                     self.assertFalse(myop.is_predefined)
                     try:
+                        if sys.version_info <= (2.6): continue
                         if hasattr(sys, 'pypy_version_info'):
                             if comm.size > 1: continue
                         # buffer(empty_array) returns
