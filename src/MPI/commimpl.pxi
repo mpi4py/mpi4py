@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 
-cdef _p_buffer _buffer = None
+cdef memory _buffer = None
 
 cdef inline int attach_buffer(ob, void **p, int *n) except -1:
     global _buffer

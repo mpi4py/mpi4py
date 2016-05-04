@@ -383,7 +383,7 @@ cdef object PyMPI_sendrecv(object sobj, int dest,   int sendtag,
 cdef object PyMPI_load(MPI_Status *status, object buf):
     cdef int rcount = 0
     cdef MPI_Datatype rtype = MPI_BYTE
-    if type(buf) is not _p_buffer: return None
+    if type(buf) is not memory: return None
     CHKERR( MPI_Get_count(status, rtype, &rcount) )
     if rcount <= 0: return None
     cdef Pickle pickle = PyMPI_PICKLE

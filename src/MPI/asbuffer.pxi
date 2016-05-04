@@ -35,6 +35,10 @@ cdef extern from "Python.h":
     int PyObject_AsReadBuffer (object, const void **, Py_ssize_t *) except -1
     int PyObject_AsWriteBuffer(object, void **, Py_ssize_t *) except -1
 
+cdef extern from "Python.h":
+    object PyLong_FromVoidPtr(void*)
+    void*  PyLong_AsVoidPtr(object)
+
 cdef extern from *:
     void *emptybuffer '((void*)"")'
 
@@ -107,7 +111,7 @@ except -1:
 #------------------------------------------------------------------------------
 
 cdef int \
-PyObject_GetBufferEx(object obj, Py_buffer *view, int flags) \
+PyMPI_GetBuffer(object obj, Py_buffer *view, int flags) \
 except -1:
     if view == NULL: return 0
     if PYPY: # special-case PyPy runtime
@@ -130,83 +134,114 @@ except -1:
 #------------------------------------------------------------------------------
 
 @cython.final
-@cython.internal
-cdef class _p_buffer:
+cdef class memory:
+
+    """
+    Memory
+    """
 
     cdef Py_buffer view
 
     def __dealloc__(self):
         PyBuffer_Release(&self.view)
 
+    # properties
+
+    property address:
+        """Memory address"""
+        def __get__(self):
+            return PyLong_FromVoidPtr(self.view.buf)
+
+    property nbytes:
+        """Memory size (in bytes)"""
+        def __get__(self):
+            return self.view.len
+
+    property readonly:
+        """Boolean indicating whether the memory is read-only"""
+        def __get__(self):
+            return self.view.readonly
+
     # buffer interface (PEP 3118)
+
     def __getbuffer__(self, Py_buffer *view, int flags):
         if view == NULL: return
         if view.obj == <void*>None: Py_CLEAR(view.obj)
         if self.view.obj != NULL:
-            PyObject_GetBufferEx(<object>self.view.obj, view, flags)
+            PyMPI_GetBuffer(<object>self.view.obj, view, flags)
         else:
             PyBuffer_FillInfo(view, <object>NULL,
                               self.view.buf, self.view.len,
                               self.view.readonly, flags)
+
     def __releasebuffer__(self, Py_buffer *view):
         if view == NULL: return
         PyBuffer_Release(view)
 
     # buffer interface (legacy)
+
     def __getsegcount__(self, Py_ssize_t *lenp):
         if lenp != NULL:
             lenp[0] = self.view.len
         return 1
+
     def __getreadbuffer__(self, Py_ssize_t idx, void **p):
         if idx != 0: raise SystemError(
             "accessing non-existent buffer segment")
         p[0] = self.view.buf
         return self.view.len
+
     def __getwritebuffer__(self, Py_ssize_t idx, void **p):
         if self.view.readonly:
-            raise TypeError("object is not writeable")
+            raise TypeError("memory buffer is read-only")
         if idx != 0: raise SystemError(
             "accessing non-existent buffer segment")
         p[0] = self.view.buf
         return self.view.len
 
     # sequence interface (basic)
+
     def __len__(self):
         return self.view.len
+
     def __getitem__(self, Py_ssize_t i):
-        cdef unsigned char *buf = <unsigned char *>self.view.buf
         if i < 0: i += self.view.len
         if i < 0 or i >= self.view.len:
             raise IndexError("index out of range")
+        cdef unsigned char *buf = <unsigned char *>self.view.buf
         return <long>buf[i]
+
     def __setitem__(self, Py_ssize_t i, unsigned char v):
         if self.view.readonly:
-            raise TypeError("object is not writeable")
-        cdef unsigned char *buf = <unsigned char*>self.view.buf
+            raise TypeError("memory buffer is read-only")
         if i < 0: i += self.view.len
         if i < 0 or i >= self.view.len:
             raise IndexError("index out of range")
+        cdef unsigned char *buf = <unsigned char*>self.view.buf
         buf[i] = v
 
-cdef inline _p_buffer newbuffer():
-    return <_p_buffer>_p_buffer.__new__(_p_buffer)
+#------------------------------------------------------------------------------
 
-cdef inline _p_buffer tobuffer(void *base, Py_ssize_t size):
-    cdef _p_buffer buf = newbuffer()
+cdef inline memory newbuffer():
+    return <memory>memory.__new__(memory)
+
+cdef inline memory tobuffer(void *base, Py_ssize_t size):
+    cdef memory buf = newbuffer()
+    if base == NULL and size == 0: base = emptybuffer
     PyBuffer_FillInfo(&buf.view, <object>NULL, base, size, 0, PyBUF_FULL_RO)
     return buf
 
-cdef inline _p_buffer getbuffer(object ob, bint readonly, bint format):
-    cdef _p_buffer buf = newbuffer()
+cdef inline memory getbuffer(object ob, bint readonly, bint format):
+    cdef memory buf = newbuffer()
     cdef int flags = PyBUF_ANY_CONTIGUOUS
     if not readonly:
         flags |= PyBUF_WRITABLE
     if format:
         flags |= PyBUF_FORMAT
-    PyObject_GetBufferEx(ob, &buf.view, flags)
+    PyMPI_GetBuffer(ob, &buf.view, flags)
     return buf
 
-cdef inline object getformat(_p_buffer buf):
+cdef inline object getformat(memory buf):
     cdef Py_buffer *view = &buf.view
     #
     if buf.view.obj == NULL:
@@ -233,16 +268,25 @@ cdef inline object getformat(_p_buffer buf):
 
 #------------------------------------------------------------------------------
 
-cdef inline _p_buffer getbuffer_r(object ob, void **base, MPI_Aint *size):
-    cdef _p_buffer buf = getbuffer(ob, 1, 0)
+cdef inline memory getbuffer_r(object ob, void **base, MPI_Aint *size):
+    cdef memory buf = getbuffer(ob, 1, 0)
     if base != NULL: base[0] = <void*>    buf.view.buf
     if size != NULL: size[0] = <MPI_Aint> buf.view.len
     return buf
 
-cdef inline _p_buffer getbuffer_w(object ob, void **base, MPI_Aint *size):
-    cdef _p_buffer buf = getbuffer(ob, 0, 0)
+cdef inline memory getbuffer_w(object ob, void **base, MPI_Aint *size):
+    cdef memory buf = getbuffer(ob, 0, 0)
     if base != NULL: base[0] = <void*>    buf.view.buf
     if size != NULL: size[0] = <MPI_Aint> buf.view.len
     return buf
+
+#------------------------------------------------------------------------------
+
+cdef inline object asmemory(object ob, void **base, MPI_Aint *size):
+    cdef memory buf = getbuffer_w(ob, base, size)
+    return buf
+
+cdef inline object tomemory(void *base, MPI_Aint size):
+    return tobuffer(base, size)
 
 #------------------------------------------------------------------------------

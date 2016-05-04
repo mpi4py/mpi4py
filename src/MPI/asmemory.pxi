@@ -6,29 +6,6 @@ cdef extern from "Python.h":
     void *PyMem_Realloc(void*, size_t)
     void PyMem_Free(void*)
 
-cdef extern from "Python.h":
-    object PyLong_FromVoidPtr(void*)
-    void*  PyLong_AsVoidPtr(object)
-
-cdef extern from "Python.h":
-    enum: PyBUF_READ
-    enum: PyBUF_WRITE
-    object PyMemoryView_FromMemory(char*,Py_ssize_t,int)
-
-#------------------------------------------------------------------------------
-
-cdef extern from *:
-    void *emptymemory '((void*)"")'
-
-cdef inline object asmemory(object ob, void **base, MPI_Aint *size):
-    cdef _p_buffer buf = getbuffer_w(ob, base, size)
-    return buf
-
-cdef inline object tomemory(void *base, MPI_Aint size):
-    if base == NULL and size == 0: base = emptymemory
-    if PYPY and PY3: return tobuffer(base, size)
-    return PyMemoryView_FromMemory(<char*>base, size, PyBUF_WRITE)
-
 #------------------------------------------------------------------------------
 
 @cython.final

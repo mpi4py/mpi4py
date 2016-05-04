@@ -54,7 +54,7 @@ cdef object __IN_PLACE__ = <MPI_Aint>MPI_IN_PLACE
 @cython.final
 @cython.internal
 cdef class _p_message:
-    cdef _p_buffer buf
+    cdef memory buf
     cdef object count
     cdef object displ
     cdef Datatype type
