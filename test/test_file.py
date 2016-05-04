@@ -98,14 +98,18 @@ class BaseTestFile(object):
                     self.FILE.Set_view(disp, etype, ftype,
                                        datarep, MPI.INFO_NULL)
                     of, et, ft, dr = self.FILE.Get_view()
-                    self.assertEqual(disp,    of)
-                    self.assertEqual(etype,   et)
-                    self.assertEqual(ftype,   ft)
+                    self.assertEqual(disp, of)
+                    self.assertEqual(etype.Get_extent(), et.Get_extent())
+                    self.assertEqual(ftype.Get_extent(), ft.Get_extent())
                     self.assertEqual(datarep, dr)
-                    #try: et.Free()
-                    #except MPI.Exception: pass
-                    #try: ft.Free()
-                    #except MPI.Exception: pass
+                    try:
+                        if not et.is_predefined: et.Free()
+                    except NotImplementedError:
+                        if et != etype: et.Free()
+                    try:
+                        if not ft.is_predefined: ft.Free()
+                    except NotImplementedError:
+                        if ft != ftype: ft.Free()
 
     def testGetSetAtomicity(self):
         atom = self.FILE.Get_atomicity()
