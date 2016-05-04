@@ -25,20 +25,24 @@ def frombytes(typecode, data):
     _frombytes(a, data)
     return a
 
-def mysum_py(a, b):
+def mysum_obj(a, b):
     for i in range(len(a)):
         b[i] = a[i] + b[i]
     return b
 
-def mysum(ba, bb, dt):
-    if dt is None:
-        return mysum_py(ba, bb)
+def mysum_buf(ba, bb, dt):
     assert dt == MPI.INT
     assert len(ba) == len(bb)
     a = frombytes('i', memoryview(ba).tobytes())
     b = frombytes('i', memoryview(bb).tobytes())
-    b = mysum_py(a, b)
+    b = mysum_obj(a, b)
     memoryview(bb)[:] = tobytes(b)
+
+def mysum(ba, bb, dt):
+    if dt is None:
+        return mysum_obj(ba, bb)
+    else:
+        return mysum_buf(ba, bb, dt)
 
 class TestOp(unittest.TestCase):
 
@@ -54,7 +58,7 @@ class TestOp(unittest.TestCase):
                     myop = MPI.Op.Create(mysum, commute)
                     self.assertFalse(myop.is_predefined)
                     try:
-                        if sys.version_info <= (2.6): continue
+                        if sys.version_info <= (2, 6): continue
                         if hasattr(sys, 'pypy_version_info'):
                             if comm.size > 1: continue
                         # buffer(empty_array) returns
