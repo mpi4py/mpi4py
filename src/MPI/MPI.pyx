@@ -96,13 +96,14 @@ def Alloc_mem(Aint size, Info info=INFO_NULL):
     CHKERR( MPI_Alloc_mem(size, cinfo, &base) )
     return tomemory(base, size)
 
-def Free_mem(memory):
+def Free_mem(mem):
     """
     Free memory allocated with `Alloc_mem()`
     """
     cdef void *base = NULL
-    asmemory(memory, &base, NULL)
+    cdef memory m = asmemory(mem, &base, NULL)
     CHKERR( MPI_Free_mem(base) )
+    m.release()
 
 # Initialization and Exit
 # -----------------------

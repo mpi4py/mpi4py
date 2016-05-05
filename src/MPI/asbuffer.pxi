@@ -1,5 +1,15 @@
 #------------------------------------------------------------------------------
 
+cdef extern from "Python.h":
+    int PyIndex_Check(object)
+    int PySlice_Check(object)
+    int PySlice_GetIndicesEx(object, Py_ssize_t,
+                             Py_ssize_t *, Py_ssize_t *,
+                             Py_ssize_t *, Py_ssize_t *) except -1
+    Py_ssize_t PyNumber_AsSsize_t(object, object) except -1
+
+#------------------------------------------------------------------------------
+
 # Python 3 buffer interface (PEP 3118)
 cdef extern from "Python.h":
     enum: PY3 "(PY_MAJOR_VERSION>=3)"
@@ -142,6 +152,10 @@ cdef class memory:
 
     cdef Py_buffer view
 
+    def __cinit__(self):
+        PyBuffer_FillInfo(&self.view, <object>NULL,
+                          NULL, 0, 0, PyBUF_SIMPLE)
+
     def __dealloc__(self):
         PyBuffer_Release(&self.view)
 
@@ -161,6 +175,18 @@ cdef class memory:
         """Boolean indicating whether the memory is read-only"""
         def __get__(self):
             return self.view.readonly
+
+    # convenience methods
+
+    def tobytes(self):
+        """Return the data in the buffer as a byte string"""
+        return PyBytes_FromStringAndSize(<char*>self.view.buf, self.view.len)
+
+    def release(self):
+        """Release the underlying buffer exposed by the memory object"""
+        PyBuffer_Release(&self.view)
+        PyBuffer_FillInfo(&self.view, <object>NULL,
+                          NULL, 0, 0, PyBUF_SIMPLE)
 
     # buffer interface (PEP 3118)
 
@@ -208,17 +234,35 @@ cdef class memory:
         if i < 0: i += self.view.len
         if i < 0 or i >= self.view.len:
             raise IndexError("index out of range")
-        cdef unsigned char *buf = <unsigned char *>self.view.buf
+        cdef unsigned char *buf = <unsigned char*>self.view.buf
         return <long>buf[i]
 
-    def __setitem__(self, Py_ssize_t i, unsigned char v):
+    def __setitem__(self, object item, object value):
         if self.view.readonly:
             raise TypeError("memory buffer is read-only")
-        if i < 0: i += self.view.len
-        if i < 0 or i >= self.view.len:
-            raise IndexError("index out of range")
         cdef unsigned char *buf = <unsigned char*>self.view.buf
-        buf[i] = v
+        cdef Py_ssize_t start, stop, step, length
+        cdef memory inmem
+        if PyIndex_Check(item):
+            start = PyNumber_AsSsize_t(item, IndexError)
+            if start < 0: start += self.view.len
+            if start < 0 or start >= self.view.len:
+                raise IndexError("index out of range")
+            buf[start] = <unsigned char>value
+        elif PySlice_Check(item):
+            PySlice_GetIndicesEx(item, self.view.len,
+                                 &start, &stop, &step, &length)
+            if step != 1:
+                raise IndexError("slice with step not supported")
+            if PyIndex_Check(value):
+                <void>memset(buf+start, <unsigned char>value, <size_t>length)
+            else:
+                inmem = getbuffer(value, 1, 0)
+                if inmem.view.len != length:
+                    raise ValueError("slice length does not match buffer")
+                <void>memcpy(buf+start, inmem.view.buf, <size_t>length)
+        else:
+            raise TypeError("indices must be integers or slices")
 
 #------------------------------------------------------------------------------
 
@@ -270,23 +314,29 @@ cdef inline object getformat(memory buf):
 
 cdef inline memory getbuffer_r(object ob, void **base, MPI_Aint *size):
     cdef memory buf = getbuffer(ob, 1, 0)
-    if base != NULL: base[0] = <void*>    buf.view.buf
-    if size != NULL: size[0] = <MPI_Aint> buf.view.len
+    if base != NULL: base[0] = buf.view.buf
+    if size != NULL: size[0] = <MPI_Aint>buf.view.len
     return buf
 
 cdef inline memory getbuffer_w(object ob, void **base, MPI_Aint *size):
     cdef memory buf = getbuffer(ob, 0, 0)
-    if base != NULL: base[0] = <void*>    buf.view.buf
-    if size != NULL: size[0] = <MPI_Aint> buf.view.len
+    if base != NULL: base[0] = buf.view.buf
+    if size != NULL: size[0] = <MPI_Aint>buf.view.len
     return buf
 
 #------------------------------------------------------------------------------
 
-cdef inline object asmemory(object ob, void **base, MPI_Aint *size):
-    cdef memory buf = getbuffer_w(ob, base, size)
-    return buf
+cdef inline memory asmemory(object ob, void **base, MPI_Aint *size):
+    cdef memory mem
+    if isinstance(ob, memory):
+        mem = <memory> ob
+    else:
+        mem = getbuffer(ob, 1, 0)
+    if base != NULL: base[0] = mem.view.buf
+    if size != NULL: size[0] = <MPI_Aint> mem.view.len
+    return mem
 
-cdef inline object tomemory(void *base, MPI_Aint size):
+cdef inline memory tomemory(void *base, MPI_Aint size):
     return tobuffer(base, size)
 
 #------------------------------------------------------------------------------

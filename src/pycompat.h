@@ -30,6 +30,24 @@ _PyLong_AsByteArray(PyLongObject* v,
 
 /* ------------------------------------------------------------------------- */
 
+#ifdef PYPY_VERSION
+#ifdef PySlice_GetIndicesEx
+#undef PySlice_GetIndicesEx
+#define PySlice_GetIndicesEx(s, n, start, stop, step, length) \
+PyPySlice_GetIndicesEx((PySliceObject *)(s), n, start, stop, step, length)
+#else
+#define PySlice_GetIndicesEx(s, n, start, stop, step, length) \
+PySlice_GetIndicesEx((PySliceObject *)(s), n, start, stop, step, length)
+#endif
+#else
+#if PY_VERSION_HEX < 0x03020000
+#define PySlice_GetIndicesEx(s, n, start, stop, step, length) \
+PySlice_GetIndicesEx((PySliceObject *)(s), n, start, stop, step, length)
+#endif
+#endif
+
+/* ------------------------------------------------------------------------- */
+
 #if !defined(WITH_THREAD)
 #undef  PyGILState_Ensure
 #define PyGILState_Ensure() ((PyGILState_STATE)0)
