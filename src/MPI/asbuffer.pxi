@@ -260,7 +260,7 @@ cdef class memory:
                 inmem = getbuffer(value, 1, 0)
                 if inmem.view.len != length:
                     raise ValueError("slice length does not match buffer")
-                <void>memcpy(buf+start, inmem.view.buf, <size_t>length)
+                <void>memmove(buf+start, inmem.view.buf, <size_t>length)
         else:
             raise TypeError("indices must be integers or slices")
 
