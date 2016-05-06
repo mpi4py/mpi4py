@@ -545,6 +545,7 @@ class config(cmd_config.config):
                            [library]+other_libraries, library_dirs,
                            lang=lang)
         if sys.platform == "darwin":
+            self.compiler.linker_exe.remove('-flat_namespace')
             self.compiler.linker_exe.remove('-undefined')
             self.compiler.linker_exe.remove('suppress')
         return ok
