@@ -49,6 +49,12 @@ cdef inline char* Datatype2Str(MPI_Datatype datatype) nogil:
     elif datatype == MPI_C_FLOAT_COMPLEX       : return "F"
     elif datatype == MPI_C_DOUBLE_COMPLEX      : return "D"
     elif datatype == MPI_C_LONG_DOUBLE_COMPLEX : return "G"
+    # C++ - boolean
+    elif datatype == MPI_CXX_BOOL : return "?"
+    # C++ - complex floating
+    elif datatype == MPI_CXX_FLOAT_COMPLEX       : return "F"
+    elif datatype == MPI_CXX_DOUBLE_COMPLEX      : return "D"
+    elif datatype == MPI_CXX_LONG_DOUBLE_COMPLEX : return "G"
     # Fortran
     elif datatype == MPI_CHARACTER        : return "c"
     elif datatype == MPI_LOGICAL          : return ""#"?"# XXX
