@@ -1,22 +1,31 @@
 # -----------------------------------------------------------------------------
 
-cdef inline char* Datatype2Str(MPI_Datatype datatype) nogil:
+def _typecode(Datatype datatype not None):
+    """
+    Map MPI datatype to typecode string
+    """
+    cdef char *tc = Datatype2String(datatype.ob_mpi)
+    return mpistr(tc) if tc != NULL else None
+
+# -----------------------------------------------------------------------------
+
+cdef inline char* Datatype2String(MPI_Datatype datatype) nogil:
     if datatype == MPI_DATATYPE_NULL: return NULL
     # MPI
-    elif datatype == MPI_LB     : return ""
-    elif datatype == MPI_UB     : return ""
+    elif datatype == MPI_LB     : return NULL
+    elif datatype == MPI_UB     : return NULL
     elif datatype == MPI_PACKED : return "B"
     elif datatype == MPI_BYTE   : return "B"
-    elif datatype == MPI_AINT   : return "p"# XXX NumPy-specific
+    elif datatype == MPI_AINT   : return "p"
     elif datatype == MPI_OFFSET :
         if   sizeof(MPI_Offset) == sizeof(MPI_Aint)  : return "p"
         elif sizeof(MPI_Offset) == sizeof(long long) : return "q"
         elif sizeof(MPI_Offset) == sizeof(long)      : return "l"
         elif sizeof(MPI_Offset) == sizeof(int)       : return "i"
-        else                                         : return ""
+        else                                         : return NULL
     # C - character
     elif datatype == MPI_CHAR  : return "c"
-    elif datatype == MPI_WCHAR : return ""#"U"#XXX
+    elif datatype == MPI_WCHAR : return NULL
     # C - (signed) integral
     elif datatype == MPI_SIGNED_CHAR : return "b"
     elif datatype == MPI_SHORT       : return "h"
@@ -57,17 +66,17 @@ cdef inline char* Datatype2Str(MPI_Datatype datatype) nogil:
     elif datatype == MPI_CXX_LONG_DOUBLE_COMPLEX : return "G"
     # Fortran
     elif datatype == MPI_CHARACTER        : return "c"
-    elif datatype == MPI_LOGICAL          : return ""#"?"# XXX
+    elif datatype == MPI_LOGICAL          : return NULL
     elif datatype == MPI_INTEGER          : return "i"
     elif datatype == MPI_REAL             : return "f"
     elif datatype == MPI_DOUBLE_PRECISION : return "d"
     elif datatype == MPI_COMPLEX          : return "F"
     elif datatype == MPI_DOUBLE_COMPLEX   : return "D"
     # Fortran 90
-    elif datatype == MPI_LOGICAL1  : return ""#"?1"# XXX
-    elif datatype == MPI_LOGICAL2  : return ""#"?2"# XXX
-    elif datatype == MPI_LOGICAL4  : return ""#"?4"# XXX
-    elif datatype == MPI_LOGICAL8  : return ""#"?8"# XXX
+    elif datatype == MPI_LOGICAL1  : return NULL
+    elif datatype == MPI_LOGICAL2  : return NULL
+    elif datatype == MPI_LOGICAL4  : return NULL
+    elif datatype == MPI_LOGICAL8  : return NULL
     elif datatype == MPI_INTEGER1  : return "i1"
     elif datatype == MPI_INTEGER2  : return "i2"
     elif datatype == MPI_INTEGER4  : return "i4"
@@ -82,6 +91,6 @@ cdef inline char* Datatype2Str(MPI_Datatype datatype) nogil:
     elif datatype == MPI_COMPLEX16 : return "c16"
     elif datatype == MPI_COMPLEX32 : return "c32"
 
-    else : return ""
+    else : return NULL
 
 # -----------------------------------------------------------------------------

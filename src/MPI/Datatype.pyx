@@ -947,6 +947,7 @@ cdef Datatype __COMPLEX16__ = new_Datatype( MPI_COMPLEX16 )
 cdef Datatype __COMPLEX32__ = new_Datatype( MPI_COMPLEX32 )
 
 include "typemap.pxi"
+include "typestr.pxi"
 
 
 # Predefined datatype handles

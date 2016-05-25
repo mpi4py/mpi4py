@@ -18,9 +18,11 @@ AddTypeMap(TypeDict, "?"  , __C_BOOL__   ) # PEP-3118 & NumPy
 # character
 AddTypeMap(TypeDict, "c"  , __CHAR__     ) # PEP-3118 & NumPy
 AddTypeMap(TypeDict, "S"  , __CHAR__     ) # NumPy
-## XXX this requires special handling
-## AddTypeMap(TypeDict, "u"  , __????__   ) # PEP-3118
-## AddTypeMap(TypeDict, "w"  , __????__   ) # PEP-3118
+# UCS-2|4
+AddTypeMap(TypeDict, "u"  , __UNSIGNED_SHORT__ ) # PEP-3118
+AddTypeMap(TypeDict, "u"  , __UINT16_T__       ) # PEP-3118
+AddTypeMap(TypeDict, "w"  , __UNSIGNED__       ) # PEP-3118
+AddTypeMap(TypeDict, "w"  , __UINT32_T__       ) # PEP-3118
 # (signed) integer
 AddTypeMap(TypeDict, "b" , __SIGNED_CHAR__ ) # MPI-2
 AddTypeMap(TypeDict, "h" , __SHORT__       )
