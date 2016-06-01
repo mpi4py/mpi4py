@@ -12,17 +12,17 @@ cdef dict TypeDict = { }
 _typedict = TypeDict
 
 # boolean (C++)
-AddTypeMap(TypeDict, "?"  , __CXX_BOOL__ ) # PEP-3118 & NumPy
+AddTypeMap(TypeDict, "?" , __CXX_BOOL__ ) # PEP-3118 & NumPy
 # boolean (C99)
-AddTypeMap(TypeDict, "?"  , __C_BOOL__   ) # PEP-3118 & NumPy
+AddTypeMap(TypeDict, "?" , __C_BOOL__   ) # PEP-3118 & NumPy
 # character
-AddTypeMap(TypeDict, "c"  , __CHAR__     ) # PEP-3118 & NumPy
-AddTypeMap(TypeDict, "S"  , __CHAR__     ) # NumPy
+AddTypeMap(TypeDict, "c" , __CHAR__     ) # PEP-3118 & NumPy
+AddTypeMap(TypeDict, "S" , __CHAR__     ) # NumPy
 # UCS-2|4
-AddTypeMap(TypeDict, "u"  , __UNSIGNED_SHORT__ ) # PEP-3118
-AddTypeMap(TypeDict, "u"  , __UINT16_T__       ) # PEP-3118
-AddTypeMap(TypeDict, "w"  , __UNSIGNED__       ) # PEP-3118
-AddTypeMap(TypeDict, "w"  , __UINT32_T__       ) # PEP-3118
+AddTypeMap(TypeDict, "u" , __UNSIGNED_SHORT__ ) # PEP-3118
+AddTypeMap(TypeDict, "u" , __UINT16_T__       ) # PEP-3118
+AddTypeMap(TypeDict, "w" , __UNSIGNED__       ) # PEP-3118
+AddTypeMap(TypeDict, "w" , __UINT32_T__       ) # PEP-3118
 # (signed) integer
 AddTypeMap(TypeDict, "b" , __SIGNED_CHAR__ ) # MPI-2
 AddTypeMap(TypeDict, "h" , __SHORT__       )
@@ -70,7 +70,7 @@ AddTypeMap(TypeDict, "G"  , __C_LONG_DOUBLE_COMPLEX__   ) # NumPy
 cdef dict CTypeDict = { }
 _typedict_c = CTypeDict
 
-AddTypeMap(CTypeDict, "?"  , __C_BOOL__ )
+AddTypeMap(CTypeDict, "?" , __C_BOOL__ )
 
 AddTypeMap(CTypeDict, "b" , __SIGNED_CHAR__ )
 AddTypeMap(CTypeDict, "h" , __SHORT__       )
@@ -88,9 +88,9 @@ AddTypeMap(CTypeDict, "f" , __FLOAT__       )
 AddTypeMap(CTypeDict, "d" , __DOUBLE__      )
 AddTypeMap(CTypeDict, "g" , __LONG_DOUBLE__ )
 
-AddTypeMap(CTypeDict, "F"  , __C_FLOAT_COMPLEX__       )
-AddTypeMap(CTypeDict, "D"  , __C_DOUBLE_COMPLEX__      )
-AddTypeMap(CTypeDict, "G"  , __C_LONG_DOUBLE_COMPLEX__ )
+AddTypeMap(CTypeDict, "F" , __C_FLOAT_COMPLEX__       )
+AddTypeMap(CTypeDict, "D" , __C_DOUBLE_COMPLEX__      )
+AddTypeMap(CTypeDict, "G" , __C_LONG_DOUBLE_COMPLEX__ )
 
 AddTypeMap(CTypeDict, "i1" , __INT8_T__   )
 AddTypeMap(CTypeDict, "i2" , __INT16_T__  )
