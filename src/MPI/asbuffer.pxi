@@ -196,13 +196,9 @@ cdef class memory:
         if self.view.obj != NULL:
             PyMPI_GetBuffer(<object>self.view.obj, view, flags)
         else:
-            PyBuffer_FillInfo(view, <object>NULL,
+            PyBuffer_FillInfo(view, self,
                               self.view.buf, self.view.len,
                               self.view.readonly, flags)
-
-    def __releasebuffer__(self, Py_buffer *view):
-        if view == NULL: return
-        PyBuffer_Release(view)
 
     # buffer interface (legacy)
 
@@ -212,16 +208,16 @@ cdef class memory:
         return 1
 
     def __getreadbuffer__(self, Py_ssize_t idx, void **p):
-        if idx != 0: raise SystemError(
-            "accessing non-existent buffer segment")
+        if idx != 0:
+            raise SystemError("accessing non-existent buffer segment")
         p[0] = self.view.buf
         return self.view.len
 
     def __getwritebuffer__(self, Py_ssize_t idx, void **p):
         if self.view.readonly:
             raise TypeError("memory buffer is read-only")
-        if idx != 0: raise SystemError(
-            "accessing non-existent buffer segment")
+        if idx != 0:
+            raise SystemError("accessing non-existent buffer segment")
         p[0] = self.view.buf
         return self.view.len
 
@@ -288,7 +284,7 @@ cdef inline memory getbuffer(object ob, bint readonly, bint format):
 cdef inline object getformat(memory buf):
     cdef Py_buffer *view = &buf.view
     #
-    if buf.view.obj == NULL:
+    if view.obj == NULL:
         if view.format != NULL:
             return mpistr(view.format)
         else:
@@ -298,7 +294,7 @@ cdef inline object getformat(memory buf):
         if view.format != BYTE_FMT:
             return mpistr(view.format)
     #
-    cdef object ob = <object>buf.view.obj
+    cdef object ob = <object>view.obj
     cdef str format = None
     try: # numpy.ndarray
         format = ob.dtype.char
@@ -328,7 +324,7 @@ cdef inline memory getbuffer_w(object ob, void **base, MPI_Aint *size):
 
 cdef inline memory asmemory(object ob, void **base, MPI_Aint *size):
     cdef memory mem
-    if isinstance(ob, memory):
+    if type(ob) is memory:
         mem = <memory> ob
     else:
         mem = getbuffer(ob, 1, 0)
