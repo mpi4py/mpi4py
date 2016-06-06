@@ -704,15 +704,14 @@ cdef class _p_msg_cco:
         else:
             self.for_cro_send(smsg, 0)
         # check counts and datatypes
-        if (self.sbuf   != MPI_IN_PLACE and
-            self.scount != self.rcount):
-            raise ValueError(
-                "mismatch in send count %d and receive count %d" %
-                (self.scount, self.rcount))
-        if (self.sbuf  != MPI_IN_PLACE and
-            self.stype != self.rtype):
-            raise ValueError(
-                "mismatch in send and receive MPI datatypes")
+        if self.sbuf != MPI_IN_PLACE:
+            if self.stype != self.rtype:
+                raise ValueError(
+                    "mismatch in send and receive MPI datatypes")
+            if self.scount != self.rcount:
+                raise ValueError(
+                    "mismatch in send count %d and receive count %d" %
+                    (self.scount, self.rcount))
         return 0
 
     cdef int for_reduce_scatter_block(self,
@@ -798,15 +797,14 @@ cdef class _p_msg_cco:
         else:
             self.for_cro_send(smsg, 0)
         # check counts and datatypes
-        if (self.sbuf   != MPI_IN_PLACE and
-            self.scount != self.rcount):
-            raise ValueError(
-                "mismatch in send count %d and receive count %d" %
-                (self.scount, self.rcount))
-        if (self.sbuf  != MPI_IN_PLACE and
-            self.stype != self.rtype):
-            raise ValueError(
-                "mismatch in send and receive MPI datatypes")
+        if self.sbuf != MPI_IN_PLACE:
+            if self.stype != self.rtype:
+                raise ValueError(
+                    "mismatch in send and receive MPI datatypes")
+            if self.scount != self.rcount:
+                raise ValueError(
+                    "mismatch in send count %d and receive count %d" %
+                    (self.scount, self.rcount))
         return 0
 
     cdef int for_exscan(self,
@@ -822,13 +820,14 @@ cdef class _p_msg_cco:
         else:
             self.for_cro_send(smsg, 0)
         # check counts and datatypes
-        if self.scount != self.rcount:
-            raise ValueError(
-                "mismatch in send count %d and receive count %d" %
-                (self.scount, self.rcount))
-        if self.stype != self.rtype:
-            raise ValueError(
-                "mismatch in send and receive MPI datatypes")
+        if self.sbuf != MPI_IN_PLACE:
+            if self.stype != self.rtype:
+                raise ValueError(
+                    "mismatch in send and receive MPI datatypes")
+            if self.scount != self.rcount:
+                raise ValueError(
+                    "mismatch in send count %d and receive count %d" %
+                    (self.scount, self.rcount))
         return 0
 
 
