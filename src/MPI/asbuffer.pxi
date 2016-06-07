@@ -159,6 +159,20 @@ cdef class memory:
     def __dealloc__(self):
         PyBuffer_Release(&self.view)
 
+    @staticmethod
+    def fromaddress(address, nbytes, readonly=False):
+        """Memory from address and size in bytes"""
+        cdef void *buf = PyLong_AsVoidPtr(address)
+        cdef Py_ssize_t size = nbytes
+        if size < 0:
+            raise ValueError("expecting non-negative buffer length")
+        elif size > 0 and buf == NULL:
+            raise ValueError("expecting non-NULL address")
+        cdef memory mem = <memory>memory.__new__(memory)
+        PyBuffer_FillInfo(&mem.view, <object>NULL,
+                          buf, size, readonly, PyBUF_SIMPLE)
+        return mem
+
     # properties
 
     property address:
