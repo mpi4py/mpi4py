@@ -1,4 +1,6 @@
 #!/bin/bash
+export CC=${CC-cc}
+export CXX=${CXX-c++}
 ./configure \
   --disable-fortran \
   --disable-dependency-tracking \

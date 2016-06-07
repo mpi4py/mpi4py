@@ -1,6 +1,6 @@
 {% set build = 0 %}
 {% set mpi = (environ.get('MPI') or 'mpich') if not win else 'msmpi' %}
-{% set mpi_version = {'mpich':'>=3.1', 'openmpi':'>=1.8'}.get(mpi,'') %}
+{% set mpi_version = {'mpich':'>=3.2', 'openmpi':'>=1.10'}.get(mpi,'') %}
 
 package:
   name: mpi4py
@@ -28,6 +28,7 @@ requirements:
 build:
   number: {{build}}
   string: py{{py}}_{{mpi}}_{{build}}
+  features: {{mpi}} # [not win]
   script: '$PYTHON  setup.py install' # [not win]
   script: '%PYTHON% setup.py install' # [win]
 

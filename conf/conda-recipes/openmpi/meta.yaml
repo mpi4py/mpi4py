@@ -18,10 +18,14 @@ source:
   md5: b2f43d9635d2d52826e5ef9feb97fd4c
 
 build:
-  number: 1
+  number: 2
+  features:
+    - openmpi
+  track_features:
+    - openmpi
+  skip: true # [win]
   binary_relocation: true
   detect_binary_files_with_prefix: true
-  skip: true # [win]
 
 test:
   files:
