@@ -16,7 +16,7 @@ engine:
 env:
  - MPI=mpich
  - MPI=openmpi
- - MPI=mpich2
+#- MPI=mpich2
 
 install:
  - export CFLAGS=-O0
