@@ -60,7 +60,7 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install $MPI; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install python$PY; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then pip$PY install numpy; fi
-  - sh ./conf/travis/install-mpi.sh $MPI
+  - sh conf/ci/travis-ci/install-mpi.sh $MPI
   - pip$PY install Cython
   - cython --version
 install:

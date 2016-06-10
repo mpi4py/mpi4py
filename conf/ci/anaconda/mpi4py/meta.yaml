@@ -14,7 +14,7 @@ about:
 source:
 # git_url: https://bitbucket.org/mpi4py/mpi4py
 # git_rev: master
-  path: ../../..
+  path: ../../../..
 
 requirements:
   build:
