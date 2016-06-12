@@ -315,41 +315,19 @@ cdef _p_message message_vector(object msg,
     _type[0]   = btype
     return m
 
-cdef tuple message_vecw_I(object msg,
-                          int readonly,
-                          int blocks,
-                          #
-                          void         **_addr,
-                          int          **_counts,
-                          int          **_displs,
-                          MPI_Datatype **_types,
-                          ):
-    cdef Py_ssize_t nargs = len(msg)
-    cdef object o_buffer, o_counts, o_displs, o_types
-    if nargs == 3:
-        o_buffer, (o_counts, o_displs), o_types = msg
-    elif nargs == 4:
-        o_buffer,  o_counts, o_displs,  o_types = msg
-    else:
-        raise ValueError("message: expecting 3 to 4 items")
-    if readonly:
-        o_buffer = getbuffer_r(o_buffer, _addr, NULL)
-    else:
-        o_buffer = getbuffer_w(o_buffer, _addr, NULL)
-    o_counts = asarray_int(o_counts, blocks, _counts)
-    o_displs = asarray_int(o_displs, blocks, _displs)
-    o_types  = asarray_Datatype(o_types, blocks, _types)
-    return (o_buffer, o_counts, o_displs, o_types)
+ctypedef fused PyMPI_displ_t:
+    int
+    MPI_Aint
 
-cdef tuple message_vecw_A(object msg,
-                          int readonly,
-                          int blocks,
-                          #
-                          void         **_addr,
-                          int          **_counts,
-                          MPI_Aint     **_displs,
-                          MPI_Datatype **_types,
-                          ):
+cdef tuple message_vecw(object msg,
+                        int readonly,
+                        int blocks,
+                        #
+                        void         **_addr,
+                        int          **_counts,
+                        PyMPI_displ_t**_displs,
+                        MPI_Datatype **_types,
+                      ):
     cdef Py_ssize_t nargs = len(msg)
     cdef object o_buffer, o_counts, o_displs, o_types
     if nargs == 3:
@@ -363,7 +341,10 @@ cdef tuple message_vecw_A(object msg,
     else:
         o_buffer = getbuffer_w(o_buffer, _addr, NULL)
     o_counts = asarray_int(o_counts, blocks, _counts)
-    o_displs = asarray_Aint(o_displs, blocks, _displs)
+    if PyMPI_displ_t is int:
+        o_displs = asarray_int(o_displs, blocks, _displs)
+    if PyMPI_displ_t is MPI_Aint:
+        o_displs = asarray_Aint(o_displs, blocks, _displs)
     o_types  = asarray_Datatype(o_types, blocks, _types)
     return (o_buffer, o_counts, o_displs, o_types)
 
@@ -869,7 +850,7 @@ cdef class _p_msg_ccow:
         else: # inter-communication
             CHKERR( MPI_Comm_remote_size(comm, &size) )
         #
-        self._rmsg = message_vecw_I(
+        self._rmsg = message_vecw(
             rmsg, 0, size,
             &self.rbuf, &self.rcounts,
             &self.rdispls, &self.rtypes)
@@ -879,7 +860,7 @@ cdef class _p_msg_ccow:
             self.sdispls = self.rdispls
             self.stypes  = self.rtypes
             return 0
-        self._smsg = message_vecw_I(
+        self._smsg = message_vecw(
             smsg, 1, size,
             &self.sbuf, &self.scounts,
             &self.sdispls, &self.stypes)
@@ -892,11 +873,11 @@ cdef class _p_msg_ccow:
         if comm == MPI_COMM_NULL: return 0
         cdef int sendsize=0, recvsize=0
         comm_neighbors_count(comm, &recvsize, &sendsize)
-        self._rmsg = message_vecw_A(
+        self._rmsg = message_vecw(
             rmsg, 0, recvsize,
             &self.rbuf, &self.rcounts,
             &self.rdisplsA, &self.rtypes)
-        self._smsg = message_vecw_A(
+        self._smsg = message_vecw(
             smsg, 1, sendsize,
             &self.sbuf, &self.scounts,
             &self.sdisplsA, &self.stypes)
