@@ -5,7 +5,7 @@ ctypedef fused integral_t:
     MPI_Aint
 
 cdef inline object newarray(int n, integral_t **p):
-    return allocate(n, sizeof(integral_t), <void**>p)
+    return allocate(n, sizeof(integral_t), p)
 
 cdef inline object getarray(object ob, int *n, integral_t **p):
     cdef Py_ssize_t  olen = len(ob)
@@ -32,7 +32,7 @@ cdef inline object asarray_Datatype(object sequence,
      cdef MPI_Datatype *array = NULL
      if size != len(sequence): raise ValueError(
          "expecting %d items, got %d" % (size, len(sequence)))
-     cdef object ob = allocate(size, sizeof(MPI_Datatype), <void**>&array)
+     cdef object ob = allocate(size, sizeof(MPI_Datatype), &array)
      for i from 0 <= i < size:
          array[i] = (<Datatype?>sequence[i]).ob_mpi
      p[0] = array
@@ -47,13 +47,13 @@ cdef inline object asarray_Info(object sequence,
      if sequence is None or isinstance(sequence, Info):
          if sequence is not None:
              info = (<Info?>sequence).ob_mpi
-         ob = allocate(size, sizeof(MPI_Info), <void**>&array)
+         ob = allocate(size, sizeof(MPI_Info), &array)
          for i from 0 <= i < size:
              array[i] = info
      else:
          if size != len(sequence): raise ValueError(
              "expecting %d items, got %d" % (size, len(sequence)))
-         ob = allocate(size, sizeof(MPI_Datatype), <void**>&array)
+         ob = allocate(size, sizeof(MPI_Datatype), &array)
          for i from 0 <= i < size:
              array[i] = (<Info?>sequence[i]).ob_mpi
      p[0] = array
@@ -72,7 +72,7 @@ cdef inline object asarray_str(object sequence, char ***p):
      sequence = list(sequence)
      cdef Py_ssize_t i = 0, size = len(sequence)
      cdef char** array = NULL
-     cdef object ob = allocate(size+1, sizeof(char*), <void**>&array)
+     cdef object ob = allocate(size+1, sizeof(char*), &array)
      for i from 0 <= i < size:
          sequence[i] = asmpistr(sequence[i], &array[i])
      array[size] = NULL
@@ -107,7 +107,7 @@ cdef inline object asarray_argvs(object sequence,
              "expecting %d items, got %d" % (size, len(sequence)))
      cdef int i = 0
      cdef char*** array = NULL
-     cdef object ob = allocate(size+1, sizeof(char**), <void**>&array)
+     cdef object ob = allocate(size+1, sizeof(char**), &array)
      cdef object argv
      for i from 0 <= i < size:
          argv = sequence[i]

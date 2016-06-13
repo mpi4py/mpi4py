@@ -17,7 +17,7 @@ cdef class _p_mem:
     def __dealloc__(self):
         PyMem_Free(self.buf)
 
-cdef inline _p_mem allocate(Py_ssize_t m, size_t b, void **buf):
+cdef inline _p_mem allocate(Py_ssize_t m, size_t b, void *buf):
   if m > PY_SSIZE_T_MAX/<Py_ssize_t>b:
       raise MemoryError("memory allocation size too large")
   if m < 0:
@@ -26,7 +26,7 @@ cdef inline _p_mem allocate(Py_ssize_t m, size_t b, void **buf):
   cdef _p_mem ob = <_p_mem>_p_mem.__new__(_p_mem)
   ob.buf = PyMem_Malloc(n)
   if ob.buf == NULL: raise MemoryError
-  if buf != NULL: buf[0] = ob.buf
+  if buf != NULL: (<void**>buf)[0] = ob.buf
   return ob
 
 #------------------------------------------------------------------------------

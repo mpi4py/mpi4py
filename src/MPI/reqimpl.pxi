@@ -15,12 +15,12 @@ cdef object acquire_rs(object requests,
      cdef object ob_r = None, ob_s = None
      cdef Py_ssize_t i = 0, n = len(requests)
      count[0] = <int>n
-     ob_r = allocate(n, sizeof(MPI_Request), <void**>&array_r)
+     ob_r = allocate(n, sizeof(MPI_Request), &array_r)
      for i from 0 <= i < n:
          array_r[i] = (<Request?>requests[i]).ob_mpi
      rp[0] = array_r
      if statuses is not None:
-         ob_s = allocate(n, sizeof(MPI_Status), <void**>&array_s)
+         ob_s = allocate(n, sizeof(MPI_Status), &array_s)
          for i from 0 <= i < n:
              array_s[i] = empty_status
          sp[0] = array_s

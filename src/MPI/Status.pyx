@@ -148,7 +148,7 @@ cdef class Status:
         cdef Py_ssize_t n = <int>(sizeof(MPI_Status)/sizeof(int))
         cdef MPI_Status *c_status = &status.ob_mpi
         cdef MPI_Fint *f_status = NULL
-        cdef tmp = allocate(n+1, sizeof(MPI_Fint), <void**>&f_status)
+        cdef tmp = allocate(n+1, sizeof(MPI_Fint), &f_status)
         CHKERR( MPI_Status_c2f(c_status, f_status) )
         return [f_status[i] for i from 0 <= i < n]
 
@@ -161,7 +161,7 @@ cdef class Status:
         cdef Py_ssize_t n = <int>(sizeof(MPI_Status)/sizeof(int))
         cdef MPI_Status *c_status = &status.ob_mpi
         cdef MPI_Fint *f_status = NULL
-        cdef tmp = allocate(n+1, sizeof(MPI_Fint), <void**>&f_status)
+        cdef tmp = allocate(n+1, sizeof(MPI_Fint), &f_status)
         for i from 0 <= i < n: f_status[i] = arg[i]
         CHKERR( MPI_Status_f2c(f_status, c_status) )
         return status

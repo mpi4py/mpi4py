@@ -198,7 +198,7 @@ pickle = PyMPI_PICKLE
 # -----------------------------------------------------------------------------
 
 cdef inline object allocate_int(int n, int **p):
-     return allocate(n, sizeof(int), <void**>p)
+     return allocate(n, sizeof(int), p)
 
 # -----------------------------------------------------------------------------
 
