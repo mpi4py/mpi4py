@@ -1316,14 +1316,11 @@ cdef class Intracomm(Comm):
         """
         Create cartesian communicator
         """
-        cdef int ndims = 0
-        ndims = <int>len(dims)
-        cdef int *idims = NULL
-        dims = asarray_int(dims, ndims, &idims)
-        cdef int *iperiods = NULL
+        cdef int ndims = 0, *idims = NULL, *iperiods = NULL
+        dims = getarray(dims, &ndims, &idims)
         if periods is None: periods = False
         if isinstance(periods, bool): periods = [periods] * ndims
-        periods = asarray_int(periods, ndims, &iperiods)
+        periods = chkarray(periods, ndims, &iperiods)
         #
         cdef Cartcomm comm = <Cartcomm>Cartcomm.__new__(Cartcomm)
         with nogil: CHKERR( MPI_Cart_create(
@@ -1336,9 +1333,9 @@ cdef class Intracomm(Comm):
         Create graph communicator
         """
         cdef int nnodes = 0, *iindex = NULL
-        index = getarray_int(index, &nnodes, &iindex)
+        index = getarray(index, &nnodes, &iindex)
         cdef int nedges = 0, *iedges = NULL
-        edges = getarray_int(edges, &nedges, &iedges)
+        edges = getarray(edges, &nedges, &iedges)
         # extension: 'standard' adjacency arrays
         if iindex[0]==0 and iindex[nnodes-1]==nedges:
             nnodes -= 1; iindex += 1;
@@ -1360,11 +1357,11 @@ cdef class Intracomm(Comm):
         cdef int *isourceweight = MPI_UNWEIGHTED
         cdef int *idestweight   = MPI_UNWEIGHTED
         if sources is not None:
-            sources = getarray_int(sources, &indegree, &isource)
+            sources = getarray(sources, &indegree, &isource)
         sourceweights = asarray_weights(
             sourceweights, indegree, &isourceweight)
         if destinations is not None:
-            destinations = getarray_int(destinations, &outdegree, &idest)
+            destinations = getarray(destinations, &outdegree, &idest)
         destweights = asarray_weights(
             destweights, outdegree, &idestweight)
         cdef MPI_Info cinfo = arg_Info(info)
@@ -1387,11 +1384,10 @@ cdef class Intracomm(Comm):
         cdef int nv = 0, ne = 0, i = 0
         cdef int *isource = NULL, *idegree = NULL,
         cdef int *idest = NULL, *iweight = MPI_UNWEIGHTED
-        nv = <int>len(sources)
-        sources = asarray_int(sources, nv, &isource)
-        degrees = asarray_int(degrees, nv, &idegree)
+        sources = getarray(sources, &nv, &isource)
+        degrees = chkarray(degrees,  nv, &idegree)
         for i from 0 <= i < nv: ne += idegree[i]
-        destinations = asarray_int(destinations, ne, &idest)
+        destinations = chkarray(destinations, ne, &idest)
         weights = asarray_weights(weights, ne, &iweight)
         cdef MPI_Info cinfo = arg_Info(info)
         #
@@ -1429,11 +1425,10 @@ cdef class Intracomm(Comm):
         calling process on the physical machine
         """
         cdef int ndims = 0, *idims = NULL, *iperiods = NULL
-        ndims = <int>len(dims)
-        dims = asarray_int(dims, ndims, &idims)
+        dims = getarray(dims, &ndims, &idims)
         if periods is None: periods = False
         if isinstance(periods, bool): periods = [periods] * ndims
-        periods = asarray_int(periods, ndims, &iperiods)
+        periods = chkarray(periods, ndims, &iperiods)
         cdef int rank = MPI_PROC_NULL
         CHKERR( MPI_Cart_map(self.ob_mpi, ndims, idims, iperiods, &rank) )
         return rank
@@ -1444,9 +1439,9 @@ cdef class Intracomm(Comm):
         calling process on the physical machine
         """
         cdef int nnodes = 0, *iindex = NULL
-        index = getarray_int(index, &nnodes, &iindex)
+        index = getarray(index, &nnodes, &iindex)
         cdef int nedges = 0, *iedges = NULL
-        edges = getarray_int(edges, &nedges, &iedges)
+        edges = getarray(edges, &nedges, &iedges)
         # extension: accept more 'standard' adjacency arrays
         if iindex[0]==0 and iindex[nnodes-1]==nedges:
             nnodes -= 1; iindex += 1;
@@ -1543,7 +1538,7 @@ cdef class Intracomm(Comm):
             tmp1 = asmpistr(command, &cmd)
             tmp2 = asarray_argv(args, &argv)
         if errcodes is not None:
-            tmp3 = mkarray_int(maxprocs, &ierrcodes)
+            tmp3 = newarray(maxprocs, &ierrcodes)
         #
         cdef Intercomm comm = <Intercomm>Intercomm.__new__(Intercomm)
         with nogil: CHKERR( MPI_Comm_spawn(
@@ -1583,7 +1578,7 @@ cdef class Intracomm(Comm):
                 count = <int>len(maxprocs)
                 tmp3 = asarray_nprocs(maxprocs, count, &imaxprocs)
             for i from 0 <= i < count: np += imaxprocs[i]
-            tmp5 = mkarray_int(np, &ierrcodes)
+            tmp5 = newarray(np, &ierrcodes)
         #
         cdef Intercomm comm = <Intercomm>Intercomm.__new__(Intercomm)
         with nogil: CHKERR( MPI_Comm_spawn_multiple(
@@ -1898,11 +1893,11 @@ cdef class Cartcomm(Topocomm):
         cdef int ndim = 0
         CHKERR( MPI_Cartdim_get(self.ob_mpi, &ndim) )
         cdef int *idims = NULL
-        cdef tmp1 = mkarray_int(ndim, &idims)
+        cdef tmp1 = newarray(ndim, &idims)
         cdef int *iperiods = NULL
-        cdef tmp2 = mkarray_int(ndim, &iperiods)
+        cdef tmp2 = newarray(ndim, &iperiods)
         cdef int *icoords = NULL
-        cdef tmp3 = mkarray_int(ndim, &icoords)
+        cdef tmp3 = newarray(ndim, &icoords)
         CHKERR( MPI_Cart_get(self.ob_mpi, ndim, idims, iperiods, icoords) )
         cdef int i = 0
         cdef object dims    = [idims[i]    for i from 0 <= i < ndim]
@@ -1940,7 +1935,7 @@ cdef class Cartcomm(Topocomm):
         """
         cdef int ndim = 0, *icoords = NULL
         CHKERR( MPI_Cartdim_get( self.ob_mpi, &ndim) )
-        coords = asarray_int(coords, ndim, &icoords)
+        coords = chkarray(coords, ndim, &icoords)
         cdef int rank = MPI_PROC_NULL
         CHKERR( MPI_Cart_rank(self.ob_mpi, icoords, &rank) )
         return rank
@@ -1951,7 +1946,7 @@ cdef class Cartcomm(Topocomm):
         """
         cdef int i = 0, ndim = 0, *icoords = NULL
         CHKERR( MPI_Cartdim_get(self.ob_mpi, &ndim) )
-        cdef tmp = mkarray_int(ndim, &icoords)
+        cdef tmp = newarray(ndim, &icoords)
         CHKERR( MPI_Cart_coords(self.ob_mpi, rank, ndim, icoords) )
         cdef object coords = [icoords[i] for i from 0 <= i < ndim]
         return coords
@@ -1978,7 +1973,7 @@ cdef class Cartcomm(Topocomm):
         """
         cdef int ndim = 0, *iremdims = NULL
         CHKERR( MPI_Cartdim_get(self.ob_mpi, &ndim) )
-        remain_dims = asarray_int(remain_dims, ndim, &iremdims)
+        remain_dims = chkarray(remain_dims, ndim, &iremdims)
         cdef Cartcomm comm = <Cartcomm>Cartcomm.__new__(Cartcomm)
         with nogil: CHKERR( MPI_Cart_sub(self.ob_mpi, iremdims, &comm.ob_mpi) )
         comm_set_eh(comm.ob_mpi)
@@ -1998,7 +1993,7 @@ def Compute_dims(int nnodes, dims):
     except:
         ndims = dims
         dims = [0] * ndims
-    cdef tmp = asarray_int(dims, ndims, &idims)
+    cdef tmp = chkarray(dims, ndims, &idims)
     CHKERR( MPI_Dims_create(nnodes, ndims, idims) )
     dims = [idims[i] for i from 0 <= i < ndims]
     return dims
@@ -2050,9 +2045,9 @@ cdef class Graphcomm(Topocomm):
         cdef int nindex = 0, nedges = 0
         CHKERR( MPI_Graphdims_get( self.ob_mpi, &nindex, &nedges) )
         cdef int *iindex = NULL
-        cdef tmp1 = mkarray_int(nindex, &iindex)
+        cdef tmp1 = newarray(nindex, &iindex)
         cdef int *iedges = NULL
-        cdef tmp2 = mkarray_int(nedges, &iedges)
+        cdef tmp2 = newarray(nedges, &iedges)
         CHKERR( MPI_Graph_get(self.ob_mpi, nindex, nedges, iindex, iedges) )
         cdef int i = 0
         cdef object index = [iindex[i] for i from 0 <= i < nindex]
@@ -2098,7 +2093,7 @@ cdef class Graphcomm(Topocomm):
         cdef int i = 0, nneighbors = 0, *ineighbors = NULL
         CHKERR( MPI_Graph_neighbors_count(
                 self.ob_mpi, rank, &nneighbors) )
-        cdef tmp = mkarray_int(nneighbors, &ineighbors)
+        cdef tmp = newarray(nneighbors, &ineighbors)
         CHKERR( MPI_Graph_neighbors(
                 self.ob_mpi, rank, nneighbors, ineighbors) )
         cdef object neighbors = [ineighbors[i] for i from 0 <= i < nneighbors]
@@ -2150,13 +2145,13 @@ cdef class Distgraphcomm(Topocomm):
         cdef int *sourceweights = MPI_UNWEIGHTED
         cdef int *destweights   = MPI_UNWEIGHTED
         cdef tmp1, tmp2, tmp3, tmp4
-        tmp1 = mkarray_int(maxindegree,  &sources)
-        tmp2 = mkarray_int(maxoutdegree, &destinations)
+        tmp1 = newarray(maxindegree,  &sources)
+        tmp2 = newarray(maxoutdegree, &destinations)
         cdef int i = 0
         if weighted:
-            tmp3 = mkarray_int(maxindegree,  &sourceweights)
+            tmp3 = newarray(maxindegree,  &sourceweights)
             for i from 0 <= i < maxindegree:  sourceweights[i] = 1
-            tmp4 = mkarray_int(maxoutdegree, &destweights)
+            tmp4 = newarray(maxoutdegree, &destweights)
             for i from 0 <= i < maxoutdegree: destweights[i]   = 1
         #
         CHKERR( MPI_Dist_graph_neighbors(

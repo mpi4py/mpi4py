@@ -42,7 +42,7 @@ cdef object asarray_weights(object weights, int nweight, int **iweight):
         if nweight > 0: raise ValueError("empty weights but nonzero degree")
         iweight[0] = MPI_WEIGHTS_EMPTY
         return None
-    return asarray_int(weights, nweight, iweight)
+    return chkarray(weights, nweight, iweight)
 
 # -----------------------------------------------------------------------------
 

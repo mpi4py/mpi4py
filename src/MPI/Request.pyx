@@ -157,7 +157,7 @@ cdef class Request:
         #
         cdef tmp1 = acquire_rs(requests, statuses,
                                &incount, &irequests, &istatuses)
-        cdef tmp2 = mkarray_int(incount, &iindices)
+        cdef tmp2 = newarray(incount, &iindices)
         try:
             with nogil: CHKERR( MPI_Waitsome(
                 incount, irequests, &outcount, iindices, istatuses) )
@@ -182,7 +182,7 @@ cdef class Request:
         #
         cdef tmp1 = acquire_rs(requests, statuses,
                                &incount, &irequests, &istatuses)
-        cdef tmp2 = mkarray_int(incount, &iindices)
+        cdef tmp2 = newarray(incount, &iindices)
         try:
             with nogil: CHKERR( MPI_Testsome(
                 incount, irequests, &outcount, iindices, istatuses) )

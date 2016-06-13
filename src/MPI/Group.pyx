@@ -65,8 +65,8 @@ cdef class Group:
         cdef MPI_Group grp1 = MPI_GROUP_NULL
         cdef MPI_Group grp2 = MPI_GROUP_NULL
         cdef int i = 0, n = 0, *iranks1 = NULL, *iranks2 = NULL
-        cdef tmp1 = getarray_int(ranks1, &n, &iranks1)
-        cdef tmp2 = newarray_int(n, &iranks2)
+        cdef tmp1 = getarray(ranks1, &n, &iranks1)
+        cdef tmp2 = newarray(n, &iranks2)
         #
         grp1 = group1.ob_mpi
         if group2 is not None:
@@ -152,7 +152,7 @@ cdef class Group:
         group and taking only listed members
         """
         cdef int n = 0, *iranks = NULL
-        ranks = getarray_int(ranks, &n, &iranks)
+        ranks = getarray(ranks, &n, &iranks)
         cdef Group group = <Group>Group.__new__(Group)
         CHKERR( MPI_Group_incl(self.ob_mpi, n, iranks, &group.ob_mpi) )
         return group
@@ -163,7 +163,7 @@ cdef class Group:
         group and taking only unlisted members
         """
         cdef int n = 0, *iranks = NULL
-        ranks = getarray_int(ranks, &n, &iranks)
+        ranks = getarray(ranks, &n, &iranks)
         cdef Group group = <Group>Group.__new__(Group)
         CHKERR( MPI_Group_excl(self.ob_mpi, n, iranks, &group.ob_mpi) )
         return group

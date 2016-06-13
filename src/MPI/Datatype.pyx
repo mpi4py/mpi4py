@@ -161,8 +161,8 @@ cdef class Datatype:
         Create an indexed datatype
         """
         cdef int count = 0, *iblen = NULL, *idisp = NULL
-        blocklengths  = getarray_int(blocklengths,  &count, &iblen)
-        displacements = chkarray_int(displacements,  count, &idisp)
+        blocklengths  = getarray(blocklengths,  &count, &iblen)
+        displacements = chkarray(displacements,  count, &idisp)
         #
         cdef Datatype datatype = <Datatype>Datatype.__new__(Datatype)
         CHKERR( MPI_Type_indexed(count, iblen, idisp,
@@ -175,9 +175,9 @@ cdef class Datatype:
         with displacements in bytes
         """
         cdef int count = 0, *iblen = NULL
-        blocklengths = getarray_int(blocklengths, &count, &iblen)
+        blocklengths = getarray(blocklengths, &count, &iblen)
         cdef MPI_Aint *idisp = NULL
-        displacements = asarray_Aint(displacements, count, &idisp)
+        displacements = chkarray(displacements, count, &idisp)
         #
         cdef Datatype datatype = <Datatype>Datatype.__new__(Datatype)
         CHKERR( MPI_Type_create_hindexed(count, iblen, idisp,
@@ -191,7 +191,7 @@ cdef class Datatype:
         with constant-sized blocks
         """
         cdef int count = 0, *idisp = NULL
-        displacements = getarray_int(displacements, &count, &idisp)
+        displacements = getarray(displacements, &count, &idisp)
         #
         cdef Datatype datatype = <Datatype>Datatype.__new__(Datatype)
         CHKERR( MPI_Type_create_indexed_block(count, blocklength,
@@ -207,8 +207,7 @@ cdef class Datatype:
         """
         cdef int count = 0
         cdef MPI_Aint *idisp = NULL
-        count = <int>len(displacements)
-        displacements = asarray_Aint(displacements, count, &idisp)
+        displacements = getarray(displacements, &count, &idisp)
         #
         cdef Datatype datatype = <Datatype>Datatype.__new__(Datatype)
         CHKERR( MPI_Type_create_hindexed_block(count, blocklength,
@@ -223,9 +222,9 @@ cdef class Datatype:
         block sizes, displacements and datatypes
         """
         cdef int count = 0, *iblen = NULL
-        blocklengths = getarray_int(blocklengths, &count, &iblen)
+        blocklengths = getarray(blocklengths, &count, &iblen)
         cdef MPI_Aint *idisp = NULL
-        displacements = asarray_Aint(displacements, count, &idisp)
+        displacements = chkarray(displacements, count, &idisp)
         cdef MPI_Datatype *ptype = NULL
         datatypes = asarray_Datatype(datatypes, count, &ptype)
         #
@@ -245,9 +244,9 @@ cdef class Datatype:
         """
         cdef int ndims = 0, *isizes = NULL
         cdef int *isubsizes = NULL, *istarts = NULL
-        sizes    = getarray_int(sizes,   &ndims, &isizes   )
-        subsizes = chkarray_int(subsizes, ndims, &isubsizes)
-        starts   = chkarray_int(starts,   ndims, &istarts  )
+        sizes    = getarray(sizes,   &ndims, &isizes   )
+        subsizes = chkarray(subsizes, ndims, &isubsizes)
+        starts   = chkarray(starts,   ndims, &istarts  )
         cdef int iorder = MPI_ORDER_C
         if order is not None: iorder = order
         #
@@ -270,10 +269,10 @@ cdef class Datatype:
         """
         cdef int ndims = 0, *igsizes = NULL
         cdef int *idistribs = NULL, *idargs = NULL, *ipsizes = NULL
-        gsizes   = getarray_int(gsizes,  &ndims, &igsizes   )
-        distribs = chkarray_int(distribs, ndims, &idistribs )
-        dargs    = chkarray_int(dargs,    ndims, &idargs    )
-        psizes   = chkarray_int(psizes,   ndims, &ipsizes   )
+        gsizes   = getarray(gsizes,  &ndims, &igsizes   )
+        distribs = chkarray(distribs, ndims, &idistribs )
+        dargs    = chkarray(dargs,    ndims, &idargs    )
+        psizes   = chkarray(psizes,   ndims, &ipsizes   )
         #
         cdef Datatype datatype = <Datatype>Datatype.__new__(Datatype)
         CHKERR( MPI_Type_create_darray(size, rank, ndims, igsizes,
