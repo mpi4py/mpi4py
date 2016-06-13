@@ -251,7 +251,7 @@ cdef class memory:
         if self.view.readonly:
             raise TypeError("memory buffer is read-only")
         cdef unsigned char *buf = <unsigned char*>self.view.buf
-        cdef Py_ssize_t start, stop, step, length
+        cdef Py_ssize_t start=0, stop=0, step=1, length=0
         cdef memory inmem
         if PyIndex_Check(item):
             start = PyNumber_AsSsize_t(item, IndexError)
