@@ -1552,7 +1552,7 @@ cdef class Intracomm(Comm):
         #
         cdef int i=0
         if errcodes is not None:
-            errcodes[:] = [ierrcodes[i] for i from 0<=i<maxprocs]
+            errcodes[:] = [ierrcodes[i] for i from 0 <= i < maxprocs]
         #
         comm_set_eh(comm.ob_mpi)
         return comm
