@@ -324,20 +324,31 @@ cdef tuple message_vector_w(object msg,
                             integral_t   **_displs,
                             MPI_Datatype **_types,
                       ):
+    cdef int i = 0
     cdef Py_ssize_t nargs = len(msg)
     cdef object o_buffer, o_counts, o_displs, o_types
-    if nargs == 3:
+    if nargs == 2:
+        o_buffer, o_types = msg
+        o_counts = o_displs = None
+    elif nargs == 3:
         o_buffer, (o_counts, o_displs), o_types = msg
     elif nargs == 4:
         o_buffer,  o_counts, o_displs,  o_types = msg
     else:
-        raise ValueError("message: expecting 3 to 4 items")
+        raise ValueError("message: expecting 2 to 4 items")
     if readonly:
         o_buffer = getbuffer_r(o_buffer, _addr, NULL)
     else:
         o_buffer = getbuffer_w(o_buffer, _addr, NULL)
-    o_counts = chkarray(o_counts, blocks, _counts)
-    o_displs = chkarray(o_displs, blocks, _displs)
+    if o_counts is None and o_displs is None:
+        o_counts = newarray(blocks, _counts)
+        o_displs = newarray(blocks, _displs)
+        for i from 0 <= i < blocks:
+            _counts[0][i] = 1
+            _displs[0][i] = 0
+    else:
+        o_counts = chkarray(o_counts, blocks, _counts)
+        o_displs = chkarray(o_displs, blocks, _displs)
     o_types  = asarray_Datatype(o_types, blocks, _types)
     return (o_buffer, o_counts, o_displs, o_types)
 
