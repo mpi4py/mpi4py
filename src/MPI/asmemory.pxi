@@ -29,9 +29,4 @@ cdef inline _p_mem allocate(Py_ssize_t m, size_t b, void **buf):
   if buf != NULL: buf[0] = ob.buf
   return ob
 
-cdef inline _p_mem allocate_int(int n, int **p):
-     cdef _p_mem ob = allocate(n, sizeof(int), NULL)
-     p[0] = <int*>ob.buf
-     return ob
-
 #------------------------------------------------------------------------------
