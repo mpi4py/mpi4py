@@ -345,6 +345,16 @@ def configure_pyexe(exe, config_cmd):
 
 def ext_modules():
     modules = []
+    # custom dl extension module
+    dl = dict(
+        name='mpi4py.dl',
+        optional=True,
+        sources=['src/dynload.c'],
+        depends=['src/dynload.h'],
+        configure=configure_dl,
+        )
+    if os.name == 'posix':
+        modules.append(dl)
     # MPI extension module
     from glob import glob
     MPI = dict(
@@ -359,16 +369,6 @@ def ext_modules():
         configure=configure_mpi,
         )
     modules.append(MPI)
-    # custom dl extension module
-    dl = dict(
-        name='mpi4py.dl',
-        optional=True,
-        sources=['src/dynload.c'],
-        depends=['src/dynload.h'],
-        configure=configure_dl,
-        )
-    if os.name == 'posix':
-        modules.append(dl)
     #
     return modules
 
