@@ -219,7 +219,7 @@ def _set_abort_status(object status):
 cdef extern from *:
     enum: PyMPI_ERR_UNAVAILABLE
 
-cdef extern from *:
+cdef extern from "Python.h":
     void PyErr_SetObject(object, object)
     void *PyExc_RuntimeError
     void *PyExc_NotImplementedError
