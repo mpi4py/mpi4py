@@ -300,13 +300,13 @@ cdef inline object getformat(memory buf):
     #
     if view.obj == NULL:
         if view.format != NULL:
-            return mpistr(view.format)
+            return pystr(view.format)
         else:
             return "B"
     elif view.format != NULL:
         # XXX this is a hack
         if view.format != BYTE_FMT:
-            return mpistr(view.format)
+            return pystr(view.format)
     #
     cdef object ob = <object>view.obj
     cdef str format = None
@@ -317,7 +317,7 @@ cdef inline object getformat(memory buf):
             format = ob.typecode
         except (AttributeError, TypeError):
             if view.format != NULL:
-                format = mpistr(view.format)
+                format = pystr(view.format)
     return format
 
 #------------------------------------------------------------------------------

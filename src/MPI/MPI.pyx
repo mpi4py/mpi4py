@@ -10,7 +10,7 @@ include "atimport.pxi"
 bootstrap()
 initialize()
 
-include "asmpistr.pxi"
+include "asstring.pxi"
 include "asbuffer.pxi"
 include "asmemory.pxi"
 include "asarray.pxi"

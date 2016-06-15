@@ -5,7 +5,7 @@ def _typecode(Datatype datatype not None):
     Map MPI datatype to typecode string
     """
     cdef char *tc = Datatype2String(datatype.ob_mpi)
-    return mpistr(tc) if tc != NULL else None
+    return pystr(tc) if tc != NULL else None
 
 # -----------------------------------------------------------------------------
 
