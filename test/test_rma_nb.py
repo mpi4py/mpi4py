@@ -132,34 +132,38 @@ class BaseTestRMA(object):
                             self.assertEqual(gbuf[-1], -1)
 
     def testPutProcNull(self):
-        self.WIN.Lock_all()
+        rank = self.COMM.Get_rank()
+        self.WIN.Lock(rank)
         r = self.WIN.Rput(None, MPI.PROC_NULL, None)
         r.Wait()
-        self.WIN.Unlock_all()
+        self.WIN.Unlock(rank)
 
     def testGetProcNull(self):
-        self.WIN.Lock_all()
+        rank = self.COMM.Get_rank()
+        self.WIN.Lock(rank)
         r = self.WIN.Rget(None, MPI.PROC_NULL, None)
         r.Wait()
-        self.WIN.Unlock_all()
+        self.WIN.Unlock(rank)
 
     def testAccumulateProcNullReplace(self):
+        rank = self.COMM.Get_rank()
         zeros = mkzeros(8)
-        self.WIN.Lock_all()
+        self.WIN.Lock(rank)
         r = self.WIN.Raccumulate([zeros, MPI.INT], MPI.PROC_NULL, None, MPI.REPLACE)
         r.Wait()
         r = self.WIN.Raccumulate([zeros, MPI.INT], MPI.PROC_NULL, None, MPI.REPLACE)
         r.Wait()
-        self.WIN.Unlock_all()
+        self.WIN.Unlock(rank)
 
     def testAccumulateProcNullSum(self):
+        rank = self.COMM.Get_rank()
         zeros = mkzeros(8)
-        self.WIN.Lock_all()
+        self.WIN.Lock(rank)
         r = self.WIN.Raccumulate([zeros, MPI.INT], MPI.PROC_NULL, None, MPI.SUM)
         r.Wait()
         r = self.WIN.Raccumulate([None, MPI.INT], MPI.PROC_NULL, None, MPI.SUM)
         r.Wait()
-        self.WIN.Unlock_all()
+        self.WIN.Unlock(rank)
 
 
 class TestRMASelf(BaseTestRMA, unittest.TestCase):
@@ -176,7 +180,8 @@ except NotImplementedError:
 else:
     name, version = MPI.get_vendor()
     if name == 'Open MPI':
-        if (version == (1,10,2) or
+        if (version == (1,10,3) or
+            version == (1,10,2) or
             version == (1,10,1) or
             version == (1,10,0)):
             def SKIP(*t, **k): pass

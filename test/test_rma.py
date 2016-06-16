@@ -358,29 +358,44 @@ class BaseTestRMA(object):
             group.Free()
         wingroup.Free()
 
-    def testFlushSync(self):
-        size = self.COMM.Get_size()
+    def testSync(self):
         win = self.WIN
-        try:
-            win.Lock_all()
-            win.Sync()
-            win.Unlock_all()
-        except NotImplementedError:
-            return
-        for rank in range(size):
-            win.Lock(rank)
-            win.Flush(rank)
-            win.Unlock(rank)
-        win.Lock_all()
-        win.Flush_all()
-        win.Unlock_all()
-        for rank in range(size):
-            win.Lock(rank)
-            win.Flush_local(rank)
-            win.Unlock(rank)
-        win.Lock_all()
-        win.Flush_local_all()
-        win.Unlock_all()
+        comm = self.COMM
+        rank = comm.Get_rank()
+        win.Lock(rank)
+        win.Sync()
+        win.Unlock(rank)
+        comm.Barrier()
+
+    def testFlush(self):
+        win = self.WIN
+        comm = self.COMM
+        size = comm.Get_size()
+        rank = comm.Get_rank()
+        #
+        for i in range(size):
+            win.Lock(i)
+            win.Flush(i)
+            win.Unlock(i)
+        comm.Barrier()
+        for i in range(size):
+            if i == rank:
+                win.Lock_all()
+                win.Flush_all()
+                win.Unlock_all()
+            comm.Barrier()
+        #
+        for i in range(size):
+            win.Lock(i)
+            win.Flush_local(i)
+            win.Unlock(i)
+        comm.Barrier()
+        for i in range(size):
+            if i == rank:
+                win.Lock_all()
+                win.Flush_local_all()
+                win.Unlock_all()
+            comm.Barrier()
 
 class TestRMASelf(BaseTestRMA, unittest.TestCase):
     COMM = MPI.COMM_SELF
@@ -395,10 +410,6 @@ except NotImplementedError:
 else:
     name, version = MPI.get_vendor()
     if name == 'Open MPI':
-        if (version == (1,10,2) or
-            version == (1,10,1) or
-            version == (1,10,0)):
-            del BaseTestRMA.testFlushSync
         if version == (1,8,7):
             del BaseTestRMA.testStartCompletePostTest
             del BaseTestRMA.testStartCompletePostWait
@@ -414,6 +425,9 @@ else:
                 del TestRMAWorld
     if name == 'HP MPI':
         BaseTestRMA.COUNT_MIN = 1
+    if MPI.Get_version() < (3,0):
+        del BaseTestRMA.testSync
+        del BaseTestRMA.testFlush
 
 if __name__ == '__main__':
     unittest.main()
