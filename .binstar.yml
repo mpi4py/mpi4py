@@ -27,7 +27,7 @@ install:
 test:
  - conda install --quiet --yes numpy nomkl
  - conda install --quiet --yes --use-local mpi4py $MPI
- - python $PWD/demo/test-run/test_run.py -v || true
+#- python $PWD/demo/test-run/test_run.py -v || true
  - mpiexec -n 1 python $PWD/test/runtests.py -v -f -e spawn
  - mpiexec -n 2 python $PWD/test/runtests.py -v -f -e spawn
 
