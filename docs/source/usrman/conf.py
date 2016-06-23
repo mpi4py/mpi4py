@@ -17,7 +17,8 @@ def get_version():
     here = os.path.dirname(__file__)
     pardir = [os.path.pardir] * 3
     topdir = os.path.join(here, *pardir)
-    with open(os.path.join(topdir, 'src', '__init__.py')) as f:
+    srcdir = os.path.join(topdir, 'src')
+    with open(os.path.join(srcdir, 'mpi4py', '__init__.py')) as f:
         m = re.search(r"__version__\s*=\s*'(.*)'", f.read())
         return m.groups()[0]
 

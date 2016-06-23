@@ -65,32 +65,3 @@ print (hwmess % (rank1, size1, pname1))
 
 
 # ---------
-
-
-# Cython-level include with PXI file
-# this make available the native MPI C API
-# without namespace-protection (stuff accessed as in C)
-# (file: mpi4py/include/mpi4py/mpi.pxi)
-
-include "mpi4py/mpi.pxi"
-
-cdef MPI_Comm world2 = WORLD.ob_mpi
-
-cdef int ierr2=0
-
-cdef int size2 = 0
-ierr2 = MPI_Comm_size(MPI_COMM_WORLD, &size2)
-
-cdef int rank2 = 0
-ierr2 = MPI_Comm_rank(MPI_COMM_WORLD, &rank2)
-
-cdef int rlen2=0
-cdef char pname2[MPI_MAX_PROCESSOR_NAME]
-ierr2 = MPI_Get_processor_name(pname2, &rlen2)
-pname2[rlen2] = 0 # just in case ;-)
-
-hwmess = "Hello, World! I am process %d of %d on %s."
-print (hwmess % (rank2, size2, pname2))
-
-
-# ---------

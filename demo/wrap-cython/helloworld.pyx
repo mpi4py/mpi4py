@@ -10,7 +10,7 @@ cdef void c_sayhello(MPI_Comm comm):
     cdef int size, rank, plen
     cdef char pname[MPI_MAX_PROCESSOR_NAME]
     if comm == MPI_COMM_NULL:
-        printf(b"You passed MPI_COMM_NULL !!!\n",0)
+        printf(b"You passed MPI_COMM_NULL !!!%s", b"\n")
         return
     MPI_Comm_size(comm, &size)
     MPI_Comm_rank(comm, &rank)

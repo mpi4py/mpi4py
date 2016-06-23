@@ -16,14 +16,13 @@ SET(mpi4py_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/mpi4py")
 
 FILE(GLOB mpi4py_PYTHON_FILES
      RELATIVE ${mpi4py_SOURCE_DIR}
-     ${mpi4py_SOURCE_DIR}/*.py)
+     ${mpi4py_SOURCE_DIR}/mpi4py/*.py)
 
 FILE(GLOB mpi4py_HEADER_FILES
      RELATIVE ${mpi4py_SOURCE_DIR}
-     ${mpi4py_SOURCE_DIR}/include/mpi4py/*.px[di]
-     ${mpi4py_SOURCE_DIR}/include/mpi4py/*.pyx
-     ${mpi4py_SOURCE_DIR}/include/mpi4py/*.[hi]
-     ${mpi4py_SOURCE_DIR}/*.pxd
+     ${mpi4py_SOURCE_DIR}/mpi4py/*.pxd
+     ${mpi4py_SOURCE_DIR}/mpi4py/include/mpi4py/*.[hi]
+     ${mpi4py_SOURCE_DIR}/mpi4py/include/mpi4py/*.px[di]
     )
 
 FOREACH(file

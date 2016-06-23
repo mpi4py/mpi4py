@@ -34,7 +34,8 @@ def name():
     return 'mpi4py'
 
 def version():
-    with open(os.path.join(topdir, 'src', '__init__.py')) as f:
+    srcdir = os.path.join(topdir, 'src')
+    with open(os.path.join(srcdir, 'mpi4py', '__init__.py')) as f:
         m = re.search(r"__version__\s*=\s*'(.*)'", f.read())
         return m.groups()[0]
 
@@ -456,14 +457,11 @@ def run_setup():
             setup_args['setup_requires'] = ['Cython>='+CYTHON]
     #
     setup(packages     = ['mpi4py'],
-          package_dir  = {'mpi4py' : 'src'},
-          package_data = {'mpi4py' : ['include/mpi4py/*.h',
-                                      'include/mpi4py/*.pxd',
-                                      'include/mpi4py/*.pyx',
-                                      'include/mpi4py/*.pxi',
+          package_dir  = {'mpi4py' : 'src/mpi4py'},
+          package_data = {'mpi4py' : ['*.pxd',
+                                      'include/mpi4py/*.h',
                                       'include/mpi4py/*.i',
-                                      'MPI.pxd',
-                                      'libmpi.pxd',]},
+                                      'include/mpi4py/*.pxi',]},
           ext_modules  = [Ext(**ext) for ext in ext_modules()],
           libraries    = [Lib(**lib) for lib in libraries()  ],
           executables  = [Exe(**exe) for exe in executables()],
@@ -553,14 +551,13 @@ def build_sources(cmd):
     if (has_src and not has_vcs and not cmd.force): return
     # mpi4py.MPI
     source = 'mpi4py.MPI.pyx'
-    depends = ['include/*/*.pxi',
-               'include/*/*.pxd',
+    depends = ['include/*/*.pxd',
+               'include/*/*.pxi',
                'MPI/*.pyx',
+               'MPI/*.pxd',
                'MPI/*.pxi',]
-    includes = ['include']
-    destdir_h = os.path.join('include', 'mpi4py')
-    run_cython(source, depends, includes,
-               destdir_c=None, destdir_h=destdir_h,
+    destdir_h = os.path.join('mpi4py', 'include', 'mpi4py')
+    run_cython(source, depends, destdir_h=destdir_h,
                wdir='src', force=cmd.force, VERSION=CYTHON)
 
 from mpidistutils import build_src

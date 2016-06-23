@@ -5,4 +5,4 @@
 #cython: warn.multiple_declarators=False
 #cython: optimize.use_switch=False
 cimport cython
-include "MPI/MPI.pyx"
+include "mpi4py/MPI/MPI.pyx"

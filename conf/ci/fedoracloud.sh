@@ -42,7 +42,7 @@ echo "Installing package"
 pip -vvv install .
 
 echo "Running pep8"
-pep8 src | tee pep8-$PY-$MPI.out
+pep8 src/mpi4py | tee pep8-$PY-$MPI.out
 
 echo "Running pylint"
 pylint mpi4py --extension-pkg-whitelist=mpi4py | tee pylint-$PY-$MPI.out

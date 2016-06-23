@@ -12,5 +12,5 @@ __pycache__
 *.pyo
 .tox
 #src/mpi4py.MPI.c
-#src/include/mpi4py/mpi4py.MPI.h
-#src/include/mpi4py/mpi4py.MPI_api.h
+#src/mpi4py/include/mpi4py/mpi4py.MPI.h
+#src/mpi4py/include/mpi4py/mpi4py.MPI_api.h
