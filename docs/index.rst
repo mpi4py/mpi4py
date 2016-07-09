@@ -4,8 +4,6 @@ MPI for Python
 
 :Author:       Lisandro Dalcin
 :Contact:      dalcinl@gmail.com
-:Organization: `CIMEC <http://www.cimec.org.ar/>`_
-:Address:      CCT CONICET, 3000 Santa Fe, Argentina
 
 
 Online Documentation
