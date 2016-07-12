@@ -551,11 +551,9 @@ def build_sources(cmd):
     if (has_src and not has_vcs and not cmd.force): return
     # mpi4py.MPI
     source = 'mpi4py.MPI.pyx'
-    depends = ['include/*/*.pxd',
-               'include/*/*.pxi',
-               'MPI/*.pyx',
-               'MPI/*.pxd',
-               'MPI/*.pxi',]
+    depends = ['mpi4py/MPI/*.pyx',
+               'mpi4py/MPI/*.pxd',
+               'mpi4py/MPI/*.pxi',]
     destdir_h = os.path.join('mpi4py', 'include', 'mpi4py')
     run_cython(source, depends, destdir_h=destdir_h,
                wdir='src', force=cmd.force, VERSION=CYTHON)
