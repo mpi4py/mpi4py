@@ -29,13 +29,14 @@ cdef inline int is_buffer(object ob):
 
 #------------------------------------------------------------------------------
 
-cdef inline int downcast(MPI_Aint value) except? -1:
-    cdef int ivalue = <int>value
-    if <MPI_Aint>ivalue == value: return ivalue
-    raise OverflowError("integer %d does not fit in 'int'" % value)
-
 cdef extern from *:
     int INT_MAX
+
+cdef inline int downcast(MPI_Aint value) except? -1:
+    if value > <MPI_Aint>INT_MAX:
+        raise OverflowError("integer %d does not fit in 'int'" % value)
+    else:
+        return <int>value
 
 cdef inline int clipcount(MPI_Aint value):
     if value > <MPI_Aint>INT_MAX:
