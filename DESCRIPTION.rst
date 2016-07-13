@@ -80,34 +80,28 @@ You can also install the in-development version of mpi4py
 
     $ easy_install https://bitbucket.org/mpi4py/mpi4py/get/master.tar.gz
 
-You can also install it directly on Fedora and RHEL (and their derivatives)
-using the EPEL software repository
+You can also install it directly on Fedora (as well as RHEL and their
+derivatives using the EPEL software repository)
 
-* using ``yum`` and the ``openmpi`` package on ``x86_64``::
+* using ``dnf`` and the ``mpich`` package on ``x86_64``::
 
-  # yum install mpi4py-openmpi
+  $ dnf install mpi4py-mpich
 
-* using ``yum`` and the ``mpich`` package on ``x86_64``::
+* using ``dnf`` and the ``openmpi`` package on ``x86_64``::
 
-  # yum install mpi4py-mpich
+  $ dnf install mpi4py-openmpi
 
 Please remember to load the correct module for your choosen MPI environment
+
+* for ``mpich`` package on ``x86_64`` do::
+
+  $ module load mpi/mpich-x86_64
+  $ python -c "import mpi4py"
 
 * for ``openmpi`` package on ``x86_64`` do::
 
   $ module load mpi/openmpi-x86_64
   $ python -c "import mpi4py"
-
-* for ``mpich`` package on ``x86_64`` do::
-
-    $ module load mpi/mpich-x86_64
-    $ python -c "import mpi4py"
-
-  Note however, that the later doesn't work on RHEL (and their derivatives)
-  because of `this bug`_ and you need to manually adjust your ``PYTHONPATH``
-  accordingly.
-
-.. _this bug: https://bugzilla.redhat.com/show_bug.cgi?id=1148992
 
 
 Citations
