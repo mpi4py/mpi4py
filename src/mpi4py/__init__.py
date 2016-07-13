@@ -113,14 +113,14 @@ __import__('sys').modules[__name__ + '.rc'] = rc
 # --------------------------------------------------------------------
 
 
-def profile(name='mpe', **kargs):
+def profile(name, **kargs):
     """
     Support for the MPI profiling interface.
 
     Parameters
     ----------
-    name : str, optional
-       Name of the profiler to load.
+    name : str
+       Name of the profiler library to load.
     path : list of str, optional
        Additional paths to search for the profiler.
     logfile : str, optional
@@ -133,11 +133,7 @@ def profile(name='mpe', **kargs):
 
     def lookup_dylib(name, path):
         # pylint: disable=missing-docstring
-        import imp
         pattern = []
-        for suffix, _, kind in imp.get_suffixes():
-            if kind == imp.C_EXTENSION:
-                pattern.append(('', suffix))
         if sys.platform.startswith('win'):  # pragma: no cover
             pattern.append(('', '.dll'))
         elif sys.platform == 'darwin':  # pragma: no cover

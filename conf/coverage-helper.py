@@ -33,7 +33,6 @@ def test_mp4py_profile():
         except ValueError: pass
     import warnings
     warnings.simplefilter('ignore')
-    mpi4py_profile()
     mpi4py_profile('mpe')
     mpi4py_profile('mpe', path="/usr/lib")
     mpi4py_profile('mpe', path=["/usr/lib"])
