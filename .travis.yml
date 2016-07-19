@@ -39,10 +39,22 @@ matrix:
       language: generic
       python: 3
     - python: pypy
+      env: MPI=mpich
+    - python: pypy
+      env: MPI=openmpi
     - python: pypy3
+      env: MPI=mpich
+    - python: pypy3
+      env: MPI=openmpi
   allow_failures:
     - python: pypy
+      env: MPI=mpich
+    - python: pypy
+      env: MPI=openmpi
     - python: pypy3
+      env: MPI=mpich
+    - python: pypy3
+      env: MPI=openmpi
 
 branches:
   only:
