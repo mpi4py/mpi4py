@@ -98,10 +98,10 @@ class BaseTestIO(object):
                     fh.Sync()
                     comm.Barrier()
                     fh.Sync()
-                    for s in range(0, len(wbuf)):
-                        rbuf = array(-1, typecode, count+1)
+                    for n in range(0, len(wbuf)):
+                        rbuf = array(-1, typecode, n+1)
                         fh.Seek(0, MPI.SEEK_SET)
-                        fh.Read(rbuf.as_mpi_c(count))
+                        fh.Read(rbuf.as_mpi_c(n))
                         for value in rbuf[:-1]:
                             self.assertEqual(value, 42)
                         self.assertEqual(rbuf[-1], -1)
@@ -125,10 +125,10 @@ class BaseTestIO(object):
                     fh.Sync()
                     comm.Barrier()
                     fh.Sync()
-                    for s in range(0, len(wbuf)):
-                        rbuf = array(-1, typecode, count+1)
+                    for n in range(0, len(wbuf)):
+                        rbuf = array(-1, typecode, n+1)
                         fh.Seek(0, MPI.SEEK_SET)
-                        fh.Iread(rbuf.as_mpi_c(count)).Wait()
+                        fh.Iread(rbuf.as_mpi_c(n)).Wait()
                         for value in rbuf[:-1]:
                             self.assertEqual(value, 42)
                         self.assertEqual(rbuf[-1], -1)
