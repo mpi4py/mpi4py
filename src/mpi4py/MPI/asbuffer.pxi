@@ -60,6 +60,8 @@ BYTE_FMT[1] = 0
 
 cdef extern from *:
     enum: PYPY "PyMPI_RUNTIME_PYPY"
+    char*      PyByteArray_AsString(object) except NULL
+    Py_ssize_t PyByteArray_Size(object) except -1
 
 cdef type array_array
 cdef type numpy_array
@@ -93,10 +95,10 @@ except -1:
         buf  = PyBytes_AsString(obj)
         size = PyBytes_Size(obj)
         readonly = 1
-    #elif isinstance(obj, bytearray):
-    #    buf = <void*> PyByteArray_AsString(obj)
-    #    size = PyByteArray_Size(obj)
-    #    readonly = 0
+    elif isinstance(obj, bytearray):
+        buf = <void*> PyByteArray_AsString(obj)
+        size = PyByteArray_Size(obj)
+        readonly = 0
     elif isinstance(obj, array_array):
         addr, size = obj.buffer_info()
         buf = PyLong_AsVoidPtr(addr)

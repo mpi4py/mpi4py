@@ -8,16 +8,37 @@
 #ifndef PyByteArray_Check
 #define PyByteArray_Check(self) PyObject_TypeCheck(self, &PyByteArray_Type)
 #endif
+
+#ifndef PyByteArray_AsString
+static char* PyByteArray_AsString(PyObject* o)
+{
+  PyErr_SetString(PyExc_RuntimeError,
+                  "PyPy: PyByteArray_AsString() not available");
+  (void)o; return NULL;
+}
+#endif
+
+#ifndef PyByteArray_Size
+static Py_ssize_t PyByteArray_Size(PyObject* o)
+{
+  PyErr_SetString(PyExc_RuntimeError,
+                  "PyPy: PyByteArray_Size() not available");
+  (void)o; return NULL;
+}
+#endif
+
 #ifndef PyByteArray_AS_STRING
-#define PyByteArray_GET_SIZE(self)  0
-#define PyByteArray_AS_STRING(self) NULL
+#define PyByteArray_AS_STRING PyByteArray_AsString
+#endif
+
+#ifndef PyByteArray_GET_SIZE
+#define PyByteArray_GET_SIZE PyByteArray_Size
 #endif
 
 #ifndef _PyLong_AsByteArray
-static int
-_PyLong_AsByteArray(PyLongObject* v,
-                    unsigned char* bytes, size_t n,
-                    int little_endian, int is_signed)
+static int _PyLong_AsByteArray(PyLongObject* v,
+                               unsigned char* bytes, size_t n,
+                               int little_endian, int is_signed)
 {
   (void)_PyLong_AsByteArray; /* unused */
   PyErr_SetString(PyExc_RuntimeError,
