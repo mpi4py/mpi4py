@@ -96,7 +96,7 @@ except -1:
         size = PyBytes_Size(obj)
         readonly = 1
     elif isinstance(obj, bytearray):
-        buf = <void*> PyByteArray_AsString(obj)
+        buf  = PyByteArray_AsString(obj)
         size = PyByteArray_Size(obj)
         readonly = 0
     elif isinstance(obj, array_array):

@@ -23,27 +23,7 @@ static Py_ssize_t PyByteArray_Size(PyObject* o)
 {
   PyErr_SetString(PyExc_RuntimeError,
                   "PyPy: PyByteArray_Size() not available");
-  (void)o; return NULL;
-}
-#endif
-
-#ifndef PyByteArray_AS_STRING
-#define PyByteArray_AS_STRING PyByteArray_AsString
-#endif
-
-#ifndef PyByteArray_GET_SIZE
-#define PyByteArray_GET_SIZE PyByteArray_Size
-#endif
-
-#ifndef _PyLong_AsByteArray
-static int _PyLong_AsByteArray(PyLongObject* v,
-                               unsigned char* bytes, size_t n,
-                               int little_endian, int is_signed)
-{
-  (void)_PyLong_AsByteArray; /* unused */
-  PyErr_SetString(PyExc_RuntimeError,
-                  "PyPy: _PyLong_AsByteArray() not available");
-  return -1;
+  (void)o; return -1;
 }
 #endif
 
