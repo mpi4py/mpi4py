@@ -31,7 +31,6 @@ cdef extern from "Python.h":
         PyBUF_ND
         PyBUF_STRIDES
         PyBUF_ANY_CONTIGUOUS
-        PyBUF_FULL_RO
     int  PyObject_CheckBuffer(object)
     int  PyObject_GetBuffer(object, Py_buffer *, int) except -1
     void PyBuffer_Release(Py_buffer *)
@@ -283,8 +282,7 @@ cdef inline memory newbuffer():
 
 cdef inline memory tobuffer(void *base, Py_ssize_t size):
     cdef memory buf = newbuffer()
-    if base == NULL and size == 0: base = emptybuffer
-    PyBuffer_FillInfo(&buf.view, <object>NULL, base, size, 0, PyBUF_FULL_RO)
+    PyBuffer_FillInfo(&buf.view, <object>NULL, base, size, 0, PyBUF_SIMPLE)
     return buf
 
 cdef inline memory getbuffer(object ob, bint readonly, bint format):
