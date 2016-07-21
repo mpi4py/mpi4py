@@ -161,7 +161,17 @@ cdef class memory:
         PyBuffer_Release(&self.view)
 
     @staticmethod
-    def fromaddress(address, nbytes, readonly=False):
+    def frombuffer(obj, bint readonly=False):
+        """Memory from buffer-like object"""
+        cdef int flags = PyBUF_SIMPLE
+        if not readonly: flags |= PyBUF_WRITABLE
+        cdef memory mem = <memory>memory.__new__(memory)
+        PyMPI_GetBuffer(obj, &mem.view, flags)
+        mem.view.readonly = readonly
+        return mem
+
+    @staticmethod
+    def fromaddress(address, nbytes, bint readonly=False):
         """Memory from address and size in bytes"""
         cdef void *buf = PyLong_AsVoidPtr(address)
         cdef Py_ssize_t size = nbytes
@@ -208,12 +218,9 @@ cdef class memory:
     def __getbuffer__(self, Py_buffer *view, int flags):
         if view == NULL: return
         if view.obj == <void*>None: Py_CLEAR(view.obj)
-        if self.view.obj != NULL:
-            PyMPI_GetBuffer(<object>self.view.obj, view, flags)
-        else:
-            PyBuffer_FillInfo(view, self,
-                              self.view.buf, self.view.len,
-                              self.view.readonly, flags)
+        PyBuffer_FillInfo(view, self,
+                          self.view.buf, self.view.len,
+                          self.view.readonly, flags)
 
     # buffer interface (legacy)
 
