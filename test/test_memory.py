@@ -13,10 +13,11 @@ class TestMemory(unittest.TestCase):
         self.assertEqual(len(mem), 0)
         mem[:] = 0
         mem[:] = memory()
-        if sys.version_info < (3,):
+        if sys.version_info < (3,0):
             b = buffer(mem)
             self.assertEqual(len(b), 0)
-        if sys.version_info >= (2,7):
+        if (sys.version_info == (2,7) or
+            sys.version_info >= (3,3)):
             m = memoryview(mem)
             self.assertEqual(m.format, 'B')
             self.assertEqual(m.itemsize, 1)
