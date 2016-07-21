@@ -7,6 +7,8 @@ docs/apiref
 docs/usrman
 dist
 MANIFEST
+*.egg-info
+.eggs
 __pycache__
 *.pyc
 *.pyo
