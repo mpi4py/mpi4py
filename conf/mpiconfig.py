@@ -146,7 +146,7 @@ class Config(object):
         pass
 
     def _setup_windows(self):
-        # Microsoft MPI (v6, v5, v4)
+        # Microsoft MPI (v7, v6, v5, v4)
         def msmpi_ver():
             try:
                 try:
@@ -184,7 +184,7 @@ class Config(object):
         MSMPI_INC = os.environ.get('MSMPI_INC')
         MSMPI_LIB = os.environ.get('MSMPI_LIB'+arch)
         if setup_msmpi(MSMPI_INC, MSMPI_LIB): return
-        # Look for Microsoft MPI v6/v5 in default install path
+        # Look for Microsoft MPI v7/v6/v5 in default install path
         for ProgramFiles in ('ProgramFiles', 'ProgramFiles(x86)'):
             ProgramFiles = os.environ.get(ProgramFiles, '')
             archdir = {'32':'x86', '64':'x64'}[arch]
