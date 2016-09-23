@@ -80,6 +80,7 @@ install:
 
 before_script:
   - if [[ "$MPI" == "mpich" ]]; then P=2; else P=5; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]];  then P=2; fi
 script:
   - mpiexec -n 1  python$PY $PWD/test/runtests.py -v -f --no-builddir --exclude=spawn
   - mpiexec -n $P python$PY $PWD/test/runtests.py -v -f --no-builddir --exclude=spawn
