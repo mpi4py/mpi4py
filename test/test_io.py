@@ -394,8 +394,8 @@ class TestIOWorld(BaseTestIO, unittest.TestCase):
 import sys
 name, version = MPI.get_vendor()
 if name == 'Open MPI':
-    if version == (2,0,0):
-        TestIOWorld = None # XXX fh.Set_size(0)
+    if version < (2,1,0):
+        TestIOWorld = None
     if version < (1,8,0):
         TestIOWorld = None
     if sys.platform.startswith('win'):
