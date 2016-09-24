@@ -170,7 +170,8 @@ def main():
             run_module(sys.argv[0], run_name='__main__', alter_sys=True)
         else:
             from os.path import realpath, dirname
-            sys.path[0] = realpath(dirname(sys.argv[0]))  # Fix sys.path
+            if not getattr(sys.flags, 'isolated', 0):  # pragma: no branch
+                sys.path[0] = realpath(dirname(sys.argv[0]))  # Fix sys.path
             run_path(sys.argv[0], run_name='__main__')
 
     except SystemExit as exc:
