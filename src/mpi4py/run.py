@@ -133,7 +133,7 @@ def main():
         if len(args) < 1:
             usage("No path specified for execution")
         elif args[0] in ('-m', '-c') and len(args) < 2:
-            usage('Argument expected for option: ' + args[0])
+            usage("Argument expected for option: " + args[0])
         return options, args
 
     def bootstrap(options):

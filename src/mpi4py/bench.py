@@ -119,7 +119,7 @@ def main(args=None):
     from optparse import OptionParser
     from . import __name__ as prog
     from . import __version__ as version
-    parser = OptionParser(prog=prog, version='%prog ' + version,
+    parser = OptionParser(prog=prog, version="%prog " + version,
                           usage="%prog.bench [options] <command> [args]")
     parser.add_option("--no-threads",
                       action="store_false", dest="threads", default=True,
