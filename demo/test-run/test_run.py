@@ -41,7 +41,7 @@ def execute(np, command, args=''):
     if isinstance(args, str):
         args = shlex.split(args)
     cmdline = launcher(np) + command + args
-    p = sp.Popen(cmdline, stdout=sp.PIPE, stderr=sp.PIPE, env=env, bufsize=-1)
+    p = sp.Popen(cmdline, stdout=sp.PIPE, stderr=sp.PIPE, env=env, bufsize=0)
     stdout, stderr = p.communicate()
     return p.returncode, stdout.decode(), stderr.decode()
 

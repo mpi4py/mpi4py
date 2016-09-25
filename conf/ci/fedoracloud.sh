@@ -53,7 +53,14 @@ coverage xml
 mv coverage.xml coverage-$PY-$MPI.xml
 
 echo "Running testsuite"
-python demo/test-run/test_run.py -v
+case "$MPI" in
+    mpich)
+        python demo/test-run/test_run.py -v
+        ;;
+    openmpi)
+       #python demo/test-run/test_run.py -v
+        ;;
+esac
 set -e
 case "$MPI" in
     mpich)
