@@ -8,9 +8,14 @@ program by calling ``MPI.COMM_WORLD.Abort()``.
 from __future__ import print_function
 
 
-def main():
+def run_command_line(args=None):
     """
-    Entry-point for ``python -m mpi4py.run ...``
+    Run command line ``[pyfile | -m mod | -c cmd] [arg] ...``
+
+    * ``pyfile`` : program read from script file
+    * ``-m mod`` : run library module as a script
+    * ``-c cmd`` : program passed in as string
+    * ``arg ...``: arguments passed to program in ``sys.argv[1:]``
     """
     # pylint: disable=missing-docstring
     import sys
@@ -33,6 +38,34 @@ def main():
         karg = 'script_name' if sys.version_info >= (3, 4) else 'mod_fname'
         code = compile(string, '<string>', 'exec', 0, 1)
         return _run_module_code(code, init_globals, run_name, **{karg: argv0})
+
+    args = sys.argv[1:] if args is None else list(args)
+    if len(args) < 1:
+        print("No path specified for execution", file=sys.stderr)
+        sys.exit(1)
+    elif args[0] in ('-m', '-c') and len(args) < 2:
+        print("Argument expected for option: " + args[0], file=sys.stderr)
+        sys.exit(1)
+
+    sys.argv[:] = args
+    if sys.argv[0] == '-c':
+        run_string(sys.argv[1], run_name='__main__')
+    elif sys.argv[0] == '-m':
+        del sys.argv[0]  # Remove "-m" from argument list
+        run_module(sys.argv[0], run_name='__main__', alter_sys=True)
+    else:
+        from os.path import realpath, dirname
+        if not getattr(sys.flags, 'isolated', 0):  # pragma: no branch
+            sys.path[0] = realpath(dirname(sys.argv[0]))  # Fix sys.path
+        run_path(sys.argv[0], run_name='__main__')
+
+
+def main():
+    """
+    Entry-point for ``python -m mpi4py.run ...``
+    """
+    # pylint: disable=missing-docstring
+    import sys
 
     def version():
         from . import __version__
@@ -129,7 +162,7 @@ def main():
             except Exception:  # pylint: disable=broad-except
                 # Bad option, print usage and exit with error
                 usage('Cannot parse option: ' + args[0])
-        # Final check and return to caller
+        # Check remaining args and return to caller
         if len(args) < 1:
             usage("No path specified for execution")
         elif args[0] in ('-m', '-c') and len(args) < 2:
@@ -155,25 +188,13 @@ def main():
             mpi._set_abort_status(status)
 
     # Parse and process command line options
-    options, sys.argv[:] = parse_command_line()
+    options, args = parse_command_line()
     bootstrap(options)
 
-    # Run user code (scripts, modules, zip files) using the 'runpy'
-    # module. In case of an unhandled exception, abort execution of
-    # the MPI program by calling 'MPI_Abort()'.
+    # Run user code. In case of an unhandled exception, abort
+    # execution of the MPI program by calling 'MPI_Abort()'.
     try:
-
-        if sys.argv[0] == '-c':
-            run_string(sys.argv[1], run_name='__main__')
-        elif sys.argv[0] == '-m':
-            del sys.argv[0]  # Remove "-m" from argument list
-            run_module(sys.argv[0], run_name='__main__', alter_sys=True)
-        else:
-            from os.path import realpath, dirname
-            if not getattr(sys.flags, 'isolated', 0):  # pragma: no branch
-                sys.path[0] = realpath(dirname(sys.argv[0]))  # Fix sys.path
-            run_path(sys.argv[0], run_name='__main__')
-
+        run_command_line(args)
     except SystemExit as exc:
         set_abort_status(exc.code)
         raise
