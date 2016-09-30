@@ -18,6 +18,7 @@ mpiexec -n 2 coverage run -p --branch --source=mpi4py -m mpi4py.bench qwerty &> 
 mpiexec -n 1 coverage run -p --branch --source=mpi4py -m mpi4py.run --help > /dev/null
 mpiexec -n 1 coverage run -p --branch --source=mpi4py -m mpi4py --version > /dev/null
 mpiexec -n 1 coverage run -p --branch --source=mpi4py -m mpi4py --help > /dev/null
+mpiexec -n 1 coverage run -p --branch --source=mpi4py -m mpi4py - < /dev/null
 mpiexec -n 1 coverage run -p --branch --source=mpi4py -m mpi4py -c "123" > /dev/null
 mpiexec -n 1 coverage run -p --branch --source=mpi4py -m mpi4py -m this > /dev/null
 mpiexec -n 1 coverage run -p --branch --source=mpi4py -m mpi4py "$(dirname "$0")/coverage-helper.py" > /dev/null || true

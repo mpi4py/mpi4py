@@ -16,6 +16,7 @@ def run_command_line(args=None):
     * ``-m mod`` : run library module as a script
     * ``-c cmd`` : program passed in as string
     * ``arg ...``: arguments passed to program in ``sys.argv[1:]``
+    * ``-``      : program read from stdin
     """
     # pylint: disable=missing-docstring
     import sys
@@ -33,23 +34,20 @@ def run_command_line(args=None):
                     code = compile(fobj.read(), path_name, 'exec')
             return _run_module_code(code, init_globals, run_name, path_name)
 
-    def run_string(string, init_globals=None, run_name=None, argv0='-c'):
+    def run_string(string, init_globals=None, run_name=None,
+                   filename='<string>', argv0='-c'):
         from runpy import _run_module_code
         karg = 'script_name' if sys.version_info >= (3, 4) else 'mod_fname'
-        code = compile(string, '<string>', 'exec', 0, 1)
+        code = compile(string, filename, 'exec', 0, 1)
         return _run_module_code(code, init_globals, run_name, **{karg: argv0})
 
-    args = sys.argv[1:] if args is None else list(args)
-    if len(args) < 1:
-        print("No path specified for execution", file=sys.stderr)
-        sys.exit(1)
-    elif args[0] in ('-m', '-c') and len(args) < 2:
-        print("Argument expected for option: " + args[0], file=sys.stderr)
-        sys.exit(1)
-
     sys.argv[:] = args
-    if sys.argv[0] == '-c':
-        run_string(sys.argv[1], run_name='__main__')
+    if sys.argv[0] == '-':
+        cmd = sys.stdin.read()
+        run_string(cmd, run_name='__main__', filename='<stdin>', argv0='-')
+    elif sys.argv[0] == '-c':
+        cmd = sys.argv.pop(1)  # Remove "cmd" from argument list
+        run_string(cmd, run_name='__main__', filename='<string>', argv0='-c')
     elif sys.argv[0] == '-m':
         del sys.argv[0]  # Remove "-m" from argument list
         run_module(sys.argv[0], run_name='__main__', alter_sys=True)
@@ -58,6 +56,25 @@ def run_command_line(args=None):
         if not getattr(sys.flags, 'isolated', 0):  # pragma: no branch
             sys.path[0] = realpath(dirname(sys.argv[0]))  # Fix sys.path
         run_path(sys.argv[0], run_name='__main__')
+
+
+def set_abort_status(status):
+    """
+    Terminate MPI execution environment at Python exit
+
+    Terminate MPI execution environment at Python exit by calling
+    ``MPI.COMM_WORLD.Abort(status)``. This function should be called
+    within an ``except`` block. Afterwards, exceptions should be
+    re-raised.
+    """
+    import sys
+    status = (status if isinstance(status, int)
+              else 0 if status is None else 1)
+    mpi = sys.modules.get(__package__ + '.MPI')
+    if mpi is not None and status:
+        # pylint: disable=protected-access
+        mpi._set_abort_status(status)
+    return sys.exc_info()
 
 
 def main():
@@ -124,7 +141,7 @@ def main():
         options = Options()
         args = sys.argv[1:] if args is None else args[:]
         while args and args[0].startswith('-'):
-            if args[0] in ('-m', '-c'):
+            if args[0] in ('-m', '-c', '-'):
                 break  # Stop processing options
             if args[0] in ('-h', '-help', '--help'):
                 usage()  # Print help and exit
@@ -176,16 +193,6 @@ def main():
         if options.profile:  # Load profiling library
             from . import profile
             profile(options.profile)
-
-    def set_abort_status(status):
-        if status is None:
-            status = 0
-        if not isinstance(status, int):
-            status = 1
-        mpi = sys.modules.get(__package__ + '.MPI')
-        if mpi is not None:
-            # pylint: disable=protected-access
-            mpi._set_abort_status(status)
 
     # Parse and process command line options
     options, args = parse_command_line()

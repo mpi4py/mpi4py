@@ -53,29 +53,6 @@ test_mp4py_profile()
 
 # ---
 
-def test_mp4py_run():
-    from mpi4py.run import run_command_line
-    class stream(object):
-        def write(self, *args):
-            pass
-    def run_cmdline(args):
-        import sys
-        stderr = sys.stderr
-        try:
-            sys.stderr = stream()
-            run_command_line(args)
-        except SystemExit:
-            pass
-        finally:
-            sys.stderr = stderr
-    run_cmdline([])
-    run_cmdline(['-m'])
-    run_cmdline(['-c'])
-
-test_mp4py_run()
-
-# ---
-
 import mpi4py.__main__
 import mpi4py.bench
 import mpi4py.run
