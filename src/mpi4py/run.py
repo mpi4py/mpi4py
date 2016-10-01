@@ -41,7 +41,8 @@ def run_command_line(args=None):
         code = compile(string, filename, 'exec', 0, 1)
         return _run_module_code(code, init_globals, run_name, **{karg: argv0})
 
-    sys.argv[:] = args
+    sys.argv[:] = args if args is not None else sys.argv[1:]
+
     if sys.argv[0] == '-':
         cmd = sys.stdin.read()
         run_string(cmd, run_name='__main__', filename='<stdin>', argv0='-')
