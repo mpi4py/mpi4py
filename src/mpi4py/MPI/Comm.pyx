@@ -2190,7 +2190,8 @@ cdef class Intercomm(Comm):
         with the inter-communicator
         """
         cdef Group group = <Group>Group.__new__(Group)
-        CHKERR( MPI_Comm_remote_group(self.ob_mpi, &group.ob_mpi) )
+        with nogil: CHKERR( MPI_Comm_remote_group(
+            self.ob_mpi, &group.ob_mpi) )
         return group
 
     property remote_group:
