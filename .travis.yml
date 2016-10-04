@@ -27,6 +27,7 @@ matrix:
       language: generic
       python: 2
     - os: osx
+      osx_image: xcode8
       env: MPI=openmpi PY=
       language: generic
       python: 2
@@ -35,6 +36,7 @@ matrix:
       language: generic
       python: 3
     - os: osx
+      osx_image: xcode8
       env: MPI=openmpi PY=3
       language: generic
       python: 3
