@@ -12,7 +12,6 @@ cdef extern from "Python.h":
 
 # Python 3 buffer interface (PEP 3118)
 cdef extern from "Python.h":
-    enum: PY3 "(PY_MAJOR_VERSION>=3)"
     ctypedef struct Py_buffer:
         void *obj
         void *buf
@@ -128,7 +127,7 @@ except -1:
     if PYPY: # special-case PyPy runtime
         return PyPy_GetBuffer(obj, view, flags)
     # Python 3 buffer interface (PEP 3118)
-    if PY3 or PyObject_CheckBuffer(obj):
+    if PY_MAJOR_VERSION >= 3 or PyObject_CheckBuffer(obj):
         return PyObject_GetBuffer(obj, view, flags)
     # Python 2 buffer interface (legacy)
     if (flags & PyBUF_WRITABLE) == PyBUF_WRITABLE:

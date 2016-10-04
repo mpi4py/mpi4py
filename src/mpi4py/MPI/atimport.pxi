@@ -5,6 +5,8 @@ cdef extern from "atimport.h": pass
 # -----------------------------------------------------------------------------
 
 cdef extern from "Python.h":
+    enum: PY_MAJOR_VERSION
+
     int Py_IsInitialized() nogil
     void PySys_WriteStderr(char*,...)
     int Py_AtExit(void (*)())

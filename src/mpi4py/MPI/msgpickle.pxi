@@ -1,7 +1,6 @@
 # -----------------------------------------------------------------------------
 
 cdef extern from "Python.h":
-    enum:      PY_MAJOR_VERSION
     bint       PyBytes_CheckExact(object)
     char*      PyBytes_AsString(object) except NULL
     Py_ssize_t PyBytes_Size(object) except -1

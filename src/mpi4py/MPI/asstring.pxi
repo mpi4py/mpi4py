@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 
 cdef extern from "Python.h":
-    enum: PY3 "(PY_MAJOR_VERSION>=3)"
+    enum:  PY3 "(PY_MAJOR_VERSION>=3)"
     int    PyUnicode_Check(object)
     object PyUnicode_AsUTF8String(object)
     object PyUnicode_AsASCIIString(object)
