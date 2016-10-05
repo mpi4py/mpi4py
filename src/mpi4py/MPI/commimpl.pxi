@@ -120,7 +120,8 @@ cdef inline dict PyMPI_Lock_table(MPI_Comm comm):
         lock_registry[<Py_uintptr_t>comm] = table = {}
         CHKERR( MPI_Comm_set_attr(comm, lock_keyval, <void*> table) )
     else:
-        table = <dict> attrval
+        if PYPY: table = lock_registry[<Py_uintptr_t>comm]
+        else:    table = <dict> attrval
     return table
 
 cdef inline object PyMPI_Lock(MPI_Comm comm, object key):
