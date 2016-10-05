@@ -144,9 +144,12 @@ cdef int PyMPI_attr_copy_fn(PyMPI_attr_type hdl,
                           void *attrval_out,
                           int *flag) nogil:
     if flag != NULL: flag[0] = 0
-    if extra_state == NULL: return MPI_ERR_INTERN
-    if attrval_out == NULL: return MPI_ERR_INTERN
-    if not Py_IsInitialized(): return MPI_SUCCESS
+    if extra_state == NULL:
+        return MPI_ERR_INTERN
+    if attrval_out == NULL:
+        return MPI_ERR_INTERN
+    if not Py_IsInitialized():
+        return MPI_SUCCESS
     return PyMPI_attr_copy_cb(hdl, keyval, extra_state,
                               attrval_in, attrval_out, flag)
 
@@ -155,8 +158,10 @@ cdef int PyMPI_attr_delete_fn(PyMPI_attr_type hdl,
                             int keyval,
                             void *attrval,
                             void *extra_state) nogil:
-    if extra_state == NULL: return MPI_ERR_INTERN
-    if not Py_IsInitialized(): return MPI_SUCCESS
+    if extra_state == NULL:
+        return MPI_ERR_INTERN
+    if not Py_IsInitialized():
+        return MPI_SUCCESS
     return PyMPI_attr_delete_cb(hdl, keyval, attrval, extra_state)
 
 #------------------------------------------------------------------------------

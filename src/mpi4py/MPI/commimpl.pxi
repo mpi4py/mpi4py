@@ -97,10 +97,11 @@ cdef inline void lock_free_cb(void *attrval) with gil:
 @cython.callspec("MPIAPI")
 cdef int lock_free_fn(MPI_Comm comm, int keyval,
                       void *attrval, void *xstate) nogil:
-    if Py_IsInitialized():
-        if attrval != NULL: lock_free_cb(attrval)
     if comm == MPI_COMM_SELF:
         return MPI_Comm_free_keyval(&lock_keyval)
+    if Py_IsInitialized():
+        if attrval != NULL:
+            lock_free_cb(attrval)
     return MPI_SUCCESS
 
 cdef inline dict PyMPI_Lock_table(MPI_Comm comm):

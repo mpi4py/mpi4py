@@ -57,7 +57,6 @@ BYTE_FMT[1] = 0
 #------------------------------------------------------------------------------
 
 cdef extern from *:
-    enum: PYPY "PyMPI_RUNTIME_PYPY"
     char*      PyByteArray_AsString(object) except NULL
     Py_ssize_t PyByteArray_Size(object) except -1
 
