@@ -88,16 +88,22 @@ the package is ready for building.
 *MPI for Python* uses a standard distutils-based build system. However,
 some distutils commands (like *build*) have additional options:
 
-* :option:`--mpicc=` : let you specify a special location or name for
-  the :program:`mpicc` compiler wrapper.
+.. cmdoption:: --mpicc=
 
-* :option:`--mpi=` : let you pass a section with MPI configuration
-  within a special configuration file.
+   Lets you specify a special location or name for the
+   :program:`mpicc` compiler wrapper.
 
-* :option:`--configure` : runs exhaustive tests for checking about
-  missing MPI types/constants/calls. This option should be passed in
-  order to build *MPI for Python* against old MPI-1 or MPI-2
-  implementations, possibly providing a subset of MPI-3.
+.. cmdoption:: --mpi=
+
+   Lets you pass a section with MPI configuration within a special
+   configuration file.
+
+.. cmdoption:: --configure
+
+   Runs exhaustive tests for checking about missing MPI types,
+   constants, and functions. This option should be passed in order to
+   build *MPI for Python* against old MPI-1 or MPI-2 implementations,
+   possibly providing a subset of MPI-3.
 
 
 If you use a MPI implementation providing a :program:`mpicc` compiler
@@ -197,4 +203,4 @@ or, if you have `py.test`_ unit testing framework installed::
 
   $ mpiexec -n 5 py.test test/
 
-.. _py.test: http://pytest.org/
+.. _py.test: http://docs.pytest.org/

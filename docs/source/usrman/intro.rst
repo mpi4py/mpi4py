@@ -170,7 +170,7 @@ scientific computing and software development with Python.
 .. External Links
 .. ..............
 
-.. _MPI:       http://www.mpi-forum.org/
+.. _MPI:       http://mpi-forum.org/
 
 .. _MPICH:     http://www.mpich.org/
 
@@ -192,7 +192,7 @@ scientific computing and software development with Python.
 .. _SWIG:      http://www.swig.org/
 
 
-.. _OOMPI:     http://www.osl.iu.edu/research/oompi/
+.. _OOMPI:     http://www.osl.iu.edu/research/oompi/overview.php
 
 .. _Pypar:     http://pypar.googlecode.com/
 
