@@ -3,9 +3,9 @@
 
    intro
    overview
-   install
    tutorial
    citing
+   install
    appendix
 
 .. Local Variables:
