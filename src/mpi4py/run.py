@@ -1,6 +1,7 @@
 # Author:  Lisandro Dalcin
 # Contact: dalcinl@gmail.com
-"""
+"""Run Python code using ``mpi4py``.
+
 Run Python code (scripts, modules, zip files) using the ``runpy``
 module. In case of an unhandled exception, abort execution of the MPI
 program by calling ``MPI.COMM_WORLD.Abort()``.
@@ -9,8 +10,7 @@ from __future__ import print_function
 
 
 def run_command_line(args=None):
-    """
-    Run command line ``[pyfile | -m mod | -c cmd] [arg] ...``
+    """Run command line ``[pyfile | -m mod | -c cmd] [arg] ...``.
 
     * ``pyfile`` : program read from script file
     * ``-m mod`` : run library module as a script
@@ -60,8 +60,7 @@ def run_command_line(args=None):
 
 
 def set_abort_status(status):
-    """
-    Terminate MPI execution environment at Python exit
+    """Terminate MPI execution environment at Python exit.
 
     Terminate MPI execution environment at Python exit by calling
     ``MPI.COMM_WORLD.Abort(status)``. This function should be called
@@ -79,9 +78,7 @@ def set_abort_status(status):
 
 
 def main():
-    """
-    Entry-point for ``python -m mpi4py.run ...``
-    """
+    """Entry-point for ``python -m mpi4py.run ...``."""
     # pylint: disable=missing-docstring
     import sys
 

@@ -36,8 +36,7 @@ __all__ = ['MPI']
 
 
 def get_include():
-    """
-    Return the directory in the package that contains header files.
+    """Return the directory in the package that contains header files.
 
     Extension modules that need to compile against mpi4py should use
     this function to locate the appropriate include directory. Using
@@ -55,9 +54,7 @@ def get_include():
 
 
 def get_config():
-    """
-    Return a dictionary with information about MPI.
-    """
+    """Return a dictionary with information about MPI."""
     from os.path import join, dirname
     try:
         # pylint: disable=import-error
@@ -73,8 +70,7 @@ def get_config():
 
 
 def rc(**kargs):  # pylint: disable=invalid-name
-    """
-    Runtime configuration options.
+    """Runtime configuration options.
 
     Parameters
     ----------
@@ -114,8 +110,7 @@ __import__('sys').modules[__name__ + '.rc'] = rc
 
 
 def profile(name, **kargs):
-    """
-    Support for the MPI profiling interface.
+    """Support for the MPI profiling interface.
 
     Parameters
     ----------

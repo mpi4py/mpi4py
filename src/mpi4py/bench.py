@@ -1,15 +1,11 @@
 # Author:  Lisandro Dalcin
 # Contact: dalcinl@gmail.com
-"""
-Run MPI benchmarks and tests
-"""
+"""Run MPI benchmarks and tests."""
 import sys as _sys
 
 
 def helloworld(comm, args=None, verbose=True):
-    """
-    Hello, World! using MPI
-    """
+    """Hello, World! using MPI."""
     from optparse import OptionParser
     from . import __name__ as prog
     parser = OptionParser(prog=prog + ".bench helloworld")
@@ -36,9 +32,7 @@ def helloworld(comm, args=None, verbose=True):
 
 
 def ringtest(comm, args=None, verbose=True):
-    """
-    Time a message going around the ring of processes
-    """
+    """Time a message going around the ring of processes."""
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-branches
     from optparse import OptionParser
@@ -115,7 +109,7 @@ def ringtest(comm, args=None, verbose=True):
 
 
 def main(args=None):
-    "Entry-point for ``python -m mpi4py.bench``"
+    """Entry-point for ``python -m mpi4py.bench``."""
     from optparse import OptionParser
     from . import __name__ as prog
     from . import __version__ as version
