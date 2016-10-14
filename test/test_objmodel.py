@@ -107,7 +107,10 @@ class TestObjModel(unittest.TestCase):
 
     def testAHandleOf(self):
         for obj in self.objects:
-            if isinstance(obj, MPI.Status): continue
+            if isinstance(obj, MPI.Status):
+                hdl = lambda: MPI._handleof(obj)
+                self.assertRaises(NotImplementedError, hdl)
+                continue
             hdl = MPI._handleof(obj)
 
 
