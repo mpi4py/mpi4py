@@ -11,11 +11,13 @@ class TestInfoNull(unittest.TestCase):
         def getitem(): return inull['k']
         def setitem(): inull['k'] = 'v'
         def delitem(): del inull['k']
+        def update():  inull.update([])
         self.assertEqual(len(inull), 0)
         self.assertFalse('key' in inull)
         self.assertRaises(KeyError, getitem)
         self.assertRaises(KeyError, setitem)
         self.assertRaises(KeyError, delitem)
+        self.assertRaises(KeyError, update)
         self.assertEqual(inull.get('key', None), None)
         self.assertEqual(inull.keys(), [])
         self.assertEqual(inull.values(), [])
