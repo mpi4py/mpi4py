@@ -54,33 +54,32 @@ class BaseTestP2PObj(object):
     def testISendAndRecv(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
-        tmp = allocate(512)
-        for buf in (None, 512, tmp):
-            for smess in messages:
-                req = self.COMM.isend(smess,  MPI.PROC_NULL)
-                self.assertTrue(req)
-                req.Wait()
-                self.assertFalse(req)
-                rmess = self.COMM.recv(buf, MPI.PROC_NULL, 0)
-                self.assertEqual(rmess, None)
-            for smess in messages:
-                req = self.COMM.isend(smess,  rank, 0)
-                self.assertTrue(req)
-                rmess = self.COMM.recv(buf, rank, 0)
-                self.assertTrue(req)
-                flag = req.Test()
-                self.assertTrue(flag)
-                self.assertFalse(req)
-                self.assertEqual(rmess, smess)
-            for smess in messages:
-                dst = (rank+1)%size
-                src = (rank-1)%size
-                req = self.COMM.isend(smess,  dst, 0)
-                self.assertTrue(req)
-                rmess = self.COMM.recv(buf,  src, 0)
-                req.Wait()
-                self.assertFalse(req)
-                self.assertEqual(rmess, smess)
+        buf = None
+        for smess in messages:
+            req = self.COMM.isend(smess,  MPI.PROC_NULL)
+            self.assertTrue(req)
+            req.Wait()
+            self.assertFalse(req)
+            rmess = self.COMM.recv(buf, MPI.PROC_NULL, 0)
+            self.assertEqual(rmess, None)
+        for smess in messages:
+            req = self.COMM.isend(smess,  rank, 0)
+            self.assertTrue(req)
+            rmess = self.COMM.recv(buf, rank, 0)
+            self.assertTrue(req)
+            flag = req.Test()
+            self.assertTrue(flag)
+            self.assertFalse(req)
+            self.assertEqual(rmess, smess)
+        for smess in messages:
+            dst = (rank+1)%size
+            src = (rank-1)%size
+            req = self.COMM.isend(smess,  dst, 0)
+            self.assertTrue(req)
+            rmess = self.COMM.recv(buf,  src, 0)
+            req.Wait()
+            self.assertFalse(req)
+            self.assertEqual(rmess, smess)
 
     def testIRecvAndSend(self):
         comm = self.COMM
