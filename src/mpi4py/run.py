@@ -10,13 +10,13 @@ from __future__ import print_function
 
 
 def run_command_line(args=None):
-    """Run command line ``[pyfile | -m mod | -c cmd] [arg] ...``.
+    """Run command line ``[pyfile | -m mod | -c cmd | -] [arg] ...``.
 
     * ``pyfile`` : program read from script file
     * ``-m mod`` : run library module as a script
-    * ``-c cmd`` : program passed in as string
+    * ``-c cmd`` : program passed in as a command string
+    * ``-``      : program read from standard input (``sys.stdin``)
     * ``arg ...``: arguments passed to program in ``sys.argv[1:]``
-    * ``-``      : program read from stdin
     """
     # pylint: disable=missing-docstring
     import sys
@@ -80,6 +80,7 @@ def set_abort_status(status):
 def main():
     """Entry-point for ``python -m mpi4py.run ...``."""
     # pylint: disable=missing-docstring
+    import os
     import sys
 
     def version():
@@ -93,12 +94,14 @@ def main():
             prog_name = __package__ + '.run'
         else:
             prog_name = __package__
-        subs = dict(prog=prog_name, python='python'+sys.version[0])
+        python_exe = os.path.basename(sys.executable)
+        subs = dict(prog=prog_name, python=python_exe)
 
         cmdline = dedent("""
         usage: {python} -m {prog} [options] <pyfile> [arg] ...
-           or: {python} -m {prog} [options] -m <module> [arg] ...
-           or: {python} -m {prog} [options] -c <string> [arg] ...
+           or: {python} -m {prog} [options] -m <mod> [arg] ...
+           or: {python} -m {prog} [options] -c <cmd> [arg] ...
+           or: {python} -m {prog} [options] - [arg] ...
         """).strip().format(**subs)
 
         helptip = dedent("""
