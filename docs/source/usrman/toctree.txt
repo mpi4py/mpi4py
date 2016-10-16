@@ -3,6 +3,7 @@
 
    intro
    overview
+   mpi4py.run
    tutorial
    citing
    install
