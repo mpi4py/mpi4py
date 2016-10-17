@@ -130,7 +130,9 @@ def main():
 
     def parse_command_line(args=None):
         # pylint: disable=too-many-branches
-        class Options(object):  # pylint: disable=too-few-public-methods
+
+        class Options(object):
+            # pylint: disable=too-few-public-methods
             rc_args = {}
             profile = None
 

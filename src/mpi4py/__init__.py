@@ -57,10 +57,8 @@ def get_config():
     """Return a dictionary with information about MPI."""
     from os.path import join, dirname
     try:
-        # pylint: disable=import-error
         from configparser import ConfigParser
     except ImportError:  # pragma: no cover
-        # pylint: disable=import-error
         from ConfigParser import ConfigParser
     parser = ConfigParser()
     parser.read(join(dirname(__file__), 'mpi.cfg'))

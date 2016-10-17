@@ -34,7 +34,6 @@ def helloworld(comm, args=None, verbose=True):
 def ringtest(comm, args=None, verbose=True):
     """Time a message going around the ring of processes."""
     # pylint: disable=too-many-locals
-    # pylint: disable=too-many-branches
     from optparse import OptionParser
     from . import __name__ as prog
     parser = OptionParser(prog=prog + ".bench ringtest")
@@ -52,7 +51,7 @@ def ringtest(comm, args=None, verbose=True):
         # pylint: disable=invalid-name
         # pylint: disable=missing-docstring
         from array import array
-        from . import MPI  # pylint: disable=no-name-in-module
+        from . import MPI
         iterations = list(range((loop + skip)))
         size = comm.Get_size()
         rank = comm.Get_rank()
