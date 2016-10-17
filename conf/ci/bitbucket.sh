@@ -36,6 +36,6 @@ test-package() {
   RUN python setup.py --quiet clean --all
   if [[ "$MPI" == "mpich"   ]]; then P=2; else P=5; fi
   if [[ "$MPI" == "openmpi" ]]; then ARGS=--allow-run-as-root; else ARGS=; fi
-  RUN mpiexec $ARGS -n 1  python $PWD/test/runtests.py -v -f --exclude=spawn
+  RUN mpiexec $ARGS -n 1  python $PWD/test/runtests.py -v -f
   RUN mpiexec $ARGS -n $P python $PWD/test/runtests.py -v -f --exclude=spawn
 }
