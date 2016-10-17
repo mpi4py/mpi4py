@@ -110,7 +110,7 @@ metadata = {
     'maintainer_email' : 'dalcinl@gmail.com',
     }
 
-metadata['provides'] = ['mpi4py', 'mpi4py.MPI']
+metadata['provides'] = ['mpi4py']
 
 # --------------------------------------------------------------------
 # Extension modules
