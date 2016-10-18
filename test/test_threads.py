@@ -1,3 +1,4 @@
+import sys
 try:
     import threading as _threading
     _HAS_THREADING = True
@@ -35,21 +36,19 @@ class TestMPIThreads(unittest.TestCase):
         except NotImplementedError:
             pass
 
-    def _test_is(self, main=False):
+    def testIsThreadMain(self, main=True):
         try:
             flag = MPI.Is_thread_main()
         except NotImplementedError:
             return
         self.assertEqual(flag, main)
         if _VERBOSE:
-            from sys import stderr
             thread = current_thread()
             name = thread.getName()
-            log = lambda m: stderr.write(m+'\n')
+            log = lambda m: sys.stderr.write(m+'\n')
             log("%s: MPI.Is_thread_main() -> %s" % (name, flag))
 
-    def testIsThreadMain(self):
-        self._test_is(main=True)
+    def testIsThreadMainInThread(self):
         try:
             provided = MPI.Query_thread()
         except NotImplementedError:
@@ -58,7 +57,7 @@ class TestMPIThreads(unittest.TestCase):
             return
         T = []
         for i in range(5):
-            t = Thread(target=self._test_is,
+            t = Thread(target=self.testIsThreadMain,
                        args = (not _HAS_THREADING,))
             T.append(t)
         if provided == MPI.THREAD_SERIALIZED:
@@ -72,6 +71,11 @@ class TestMPIThreads(unittest.TestCase):
                 t.join()
 
 
+if hasattr(sys, 'pypy_version_info'):
+    if (sys.version_info[0] == 3 and
+        sys.pypy_version_info[0] < 5):
+        del TestMPIThreads.testIsThreadMainInThread
+
 name, version = MPI.get_vendor()
 if name == 'Open MPI':
     TestMPIThreads.REQUIRED = MPI.THREAD_MULTIPLE
@@ -82,7 +86,6 @@ if name == 'LAM/MPI':
 _VERBOSE = False
 #_VERBOSE = True
 if __name__ == '__main__':
-    import sys
     if '-v' in sys.argv:
         _VERBOSE = True
     unittest.main()

@@ -237,8 +237,7 @@ if hasattr(sys, 'pypy_version_info'):
     # Maybe a refcount bug in
     # PySequence_SetItem() at
     # asarray.pxi:asarray_str()
-    if (sys.version_info[0] == 2 and
-        sys.pypy_version_info[0] < 5):
+    if sys.pypy_version_info[0] < 5:
         SKIP_TEST = True
 
 if SKIP_TEST:
