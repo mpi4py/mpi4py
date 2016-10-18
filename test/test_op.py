@@ -57,9 +57,8 @@ class TestOp(unittest.TestCase):
                 for N in range(4):
                     myop = MPI.Op.Create(mysum, commute)
                     self.assertFalse(myop.is_predefined)
-                    if ((hasattr(sys, 'pypy_version_info') and
-                         comm.size > 1) or
-                        sys.version_info < (2, 7)):
+                    if (hasattr(sys, 'pypy_version_info') and
+                        comm.size > 1):
                         myop.Free()
                         continue
                     try:

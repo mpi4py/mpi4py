@@ -20,19 +20,7 @@ def run_command_line(args=None):
     """
     # pylint: disable=missing-docstring
     import sys
-    from runpy import run_module
-    try:
-        from runpy import run_path
-    except ImportError:  # Python 2.6  # pragma: no cover
-        def run_path(path_name, init_globals=None, run_name=None):
-            from pkgutil import read_code
-            from runpy import _run_module_code
-            with open(path_name, 'rb') as fobj:  # compiled file
-                code = read_code(fobj)
-            if code is None:
-                with open(path_name, 'rU') as fobj:  # normal source code
-                    code = compile(fobj.read(), path_name, 'exec')
-            return _run_module_code(code, init_globals, run_name, path_name)
+    from runpy import run_module, run_path
 
     def run_string(string, init_globals=None, run_name=None,
                    filename='<string>', argv0='-c'):
