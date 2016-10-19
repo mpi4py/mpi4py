@@ -28,11 +28,8 @@ __version__ = '2.0.1a0'
 __author__ = 'Lisandro Dalcin'
 __credits__ = 'MPI Forum, MPICH Team, Open MPI Team'
 
-# --------------------------------------------------------------------
 
 __all__ = ['MPI']
-
-# --------------------------------------------------------------------
 
 
 def get_include():
@@ -50,8 +47,6 @@ def get_include():
     from os.path import join, dirname
     return join(dirname(__file__), 'include')
 
-# --------------------------------------------------------------------
-
 
 def get_config():
     """Return a dictionary with information about MPI."""
@@ -63,8 +58,6 @@ def get_config():
     parser = ConfigParser()
     parser.read(join(dirname(__file__), 'mpi.cfg'))
     return dict(parser.items('mpi'))
-
-# --------------------------------------------------------------------
 
 
 def rc(**kargs):  # pylint: disable=invalid-name
@@ -101,10 +94,7 @@ rc.finalize = None
 rc.fast_reduce = True
 rc.recv_mprobe = True
 rc.errors = 'exception'
-
 __import__('sys').modules[__name__ + '.rc'] = rc
-
-# --------------------------------------------------------------------
 
 
 def profile(name, **kargs):
@@ -169,5 +159,3 @@ def profile(name, **kargs):
         warn(dlerror())
 
 profile.registry = []
-
-# --------------------------------------------------------------------
