@@ -66,15 +66,22 @@ cdef inline int is_string(object obj):
              isinstance(obj, bytes) or
              isinstance(obj, unicode))
 
+cdef inline object asstring(object ob, char *s[]):
+     cdef Py_ssize_t n = 0
+     cdef char *p = NULL, *q = NULL
+     ob = asmpistr(ob, &p)
+     PyBytes_AsStringAndSize(ob, &p, &n)
+     cdef object mem = allocate(n+1, sizeof(char), &q)
+     <void>memcpy(q, p, <size_t>n)
+     q[n] = 0; s[0] = q;
+     return mem
+
 cdef inline object asarray_str(object sequence, char ***p):
-     if is_string(sequence):
-         raise ValueError("expecting a sequence of strings")
-     sequence = list(sequence)
-     cdef Py_ssize_t i = 0, size = len(sequence)
      cdef char** array = NULL
+     cdef Py_ssize_t i = 0, size = len(sequence)
      cdef object ob = allocate(size+1, sizeof(char*), &array)
      for i from 0 <= i < size:
-         sequence[i] = asmpistr(sequence[i], &array[i])
+         sequence[i] = asstring(sequence[i], &array[i])
      array[size] = NULL
      p[0] = array
      return (sequence, ob)
@@ -85,17 +92,18 @@ cdef inline object asarray_argv(object sequence, char ***p):
          return None
      if is_string(sequence):
          sequence = [sequence]
+     else:
+         sequence = list(sequence)
      return asarray_str(sequence, p)
 
-cdef inline object asarray_cmds(object sequence,
-                               int *count, char ***p):
+cdef inline object asarray_cmds(object sequence, int *count, char ***p):
      if is_string(sequence):
          raise ValueError("expecting a sequence of strings")
+     sequence = list(sequence)
      count[0] = <int>len(sequence)
      return asarray_str(sequence, p)
 
-cdef inline object asarray_argvs(object sequence,
-                                 int size, char ****p):
+cdef inline object asarray_argvs(object sequence, int size, char ****p):
      if sequence is None:
          p[0] = MPI_ARGVS_NULL
          return None
@@ -117,8 +125,7 @@ cdef inline object asarray_argvs(object sequence,
      p[0] = array
      return (sequence, ob)
 
-cdef inline object asarray_nprocs(object sequence,
-                                  int size, int **p):
+cdef inline object asarray_nprocs(object sequence, int size, int **p):
      cdef object ob
      cdef int *array = NULL
      cdef int i = 0, value = 1

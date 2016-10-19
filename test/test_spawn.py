@@ -233,12 +233,6 @@ if name == 'HP MPI':
     SKIP_TEST = True
 if MPI.Get_version() < (2,0):
     SKIP_TEST = True
-if hasattr(sys, 'pypy_version_info'):
-    # Maybe a refcount bug in
-    # PySequence_SetItem() at
-    # asarray.pxi:asarray_str()
-    if sys.pypy_version_info[0] < 5:
-        SKIP_TEST = True
 
 if SKIP_TEST:
     del TestSpawnSelf
