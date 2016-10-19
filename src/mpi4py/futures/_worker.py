@@ -1,0 +1,730 @@
+# Author:  Lisandro Dalcin
+# Contact: dalcinl@gmail.com
+"""Management of MPI worker processes."""
+# pylint: disable=missing-docstring
+
+import os
+import sys
+import time
+import atexit
+import weakref
+import threading
+import collections
+
+from mpi4py import MPI
+
+
+# ---
+
+
+class Queue(collections.deque):
+    put = collections.deque.append
+    pop = collections.deque.popleft
+
+
+class Stack(collections.deque):
+    put = collections.deque.append
+    pop = collections.deque.pop
+
+
+if sys.version_info[0] == 2:     # pragma: no cover
+    def sys_exception():
+        exc = sys.exc_info()[1]
+        return exc
+else:                            # pragma: no cover
+    def sys_exception():
+        exc = sys.exc_info()[1]
+        exc.__traceback__ = None
+        return exc
+
+# ---
+
+
+def serialized(function):
+    if serialized.lock is None:
+        return function
+    def wrapper(*args, **kwargs):
+        with serialized.lock:
+            return function(*args, **kwargs)
+    return wrapper
+serialized.lock = None
+
+
+def setup_mpi_threads():
+    thead_level = setup_mpi_threads.thead_level
+    if thead_level is None:
+        thead_level = MPI.Query_thread()
+        setup_mpi_threads.thead_level = thead_level
+        if thead_level < MPI.THREAD_MULTIPLE:  # pragma: no cover
+            serialized.lock = threading.Lock()
+    if thead_level < MPI.THREAD_SERIALIZED:  # pragma: no cover
+        from _warnings import warn
+        warn("The level of thread support in MPI "
+             "should be at least MPI_THREAD_SERIALIZED",
+             RuntimeWarning, 2)
+setup_mpi_threads.thead_level = None
+
+
+# ---
+
+
+def _set_num_workers(executor_ref, event, num_workers):
+    # pylint: disable=protected-access
+    executor = executor_ref()
+    if executor is not None:
+        executor._num_workers = num_workers
+    del executor
+    event.set()
+
+
+def _manager_thread(executor_ref, event, queue, **options):
+    _set_num_workers(executor_ref, event, 1)
+
+    sleep = time.sleep
+    delay = options.get('delay', 10e-6)
+    assert delay >= 0
+
+    while True:
+        while not queue:
+            sleep(delay)
+        task = queue.pop()
+        if task is None:
+            break
+        future, work = task
+        if not future.set_running_or_notify_cancel():
+            continue
+        func, args, kwargs = work
+        try:
+            result = func(*args, **kwargs)
+            exception = None
+        except BaseException:
+            result = None
+            exception = sys_exception()
+        if exception is None:
+            future.set_result(result)
+        else:
+            future.set_exception(exception)
+
+
+def _manager_comm(executor_ref, event, queue, comm, **options):
+    size = comm.Get_remote_size()
+    pool = Stack(reversed(range(size)))
+    _set_num_workers(executor_ref, event, size)
+    client(comm, 0, pool, queue, **options)
+    serialized(client_close)(comm)
+
+
+def _manager_spawn(executor_ref, event, queue, **options):
+    comm, options = serialized(client_spawn)(**options)
+    size = comm.Get_remote_size()
+    pool = Stack(reversed(range(size)))
+    _set_num_workers(executor_ref, event, size)
+    client(comm, 0, pool, queue, **options)
+    serialized(client_close)(comm)
+
+
+THREADS_QUEUES = weakref.WeakKeyDictionary()
+
+
+class Pool(object):
+
+    def __init__(self, manager_target, executor, *args, **options):
+        event, queue = threading.Event(), Queue()
+        executor_ref = weakref.ref(executor, lambda _, q=queue: q.put(None))
+
+        setup_mpi_threads()
+        thread = threading.Thread(target=manager_target,
+                                  args=(executor_ref, event, queue) + args,
+                                  kwargs=options)
+        thread.daemon = True
+        thread.start()
+        THREADS_QUEUES[thread] = queue
+
+        self.thread = thread
+        self.event = event
+        self.queue = queue
+
+    def wait(self):
+        self.event.wait()
+
+    def push(self, task):
+        self.queue.put(task)
+
+    def done(self):
+        self.queue.put(None)
+
+    def join(self):
+        self.thread.join()
+
+    @staticmethod
+    def join_all(threads_queues=THREADS_QUEUES):
+        items = list(threads_queues.items())
+        for _, queue in items:   # pragma: no cover
+            queue.put(None)
+        for thread, _ in items:  # pragma: no cover
+            thread.join()
+
+
+atexit.register(Pool.join_all)
+
+
+def ThreadPool(executor, **options):
+    # pylint: disable=invalid-name
+    return Pool(_manager_thread, executor, **options)
+
+
+def CommPool(executor, comm, **options):
+    # pylint: disable=invalid-name
+    return Pool(_manager_comm, executor, comm, **options)
+
+
+def SpawnPool(executor, **options):
+    # pylint: disable=invalid-name
+    return Pool(_manager_spawn, executor, **options)
+
+
+WorkerPool = SpawnPool  # pylint: disable=invalid-name
+
+
+# ---
+
+
+def _manager_shared(executor_ref, event, queue,
+                    comm, tag, pool, **options):
+    # pylint: disable=too-many-arguments
+    if tag == 0:
+        options = serialized(client_sync)(comm, options)
+    _set_num_workers(executor_ref, event, comm.Get_remote_size())
+    client(comm, tag, pool, queue, **options)
+
+
+def _patch_worker_pool(obj):
+    # pylint: disable=invalid-name
+    # pylint: disable=global-statement
+    global WorkerPool
+    if obj is not None:
+        WorkerPool = obj
+    else:
+        WorkerPool = SpawnPool
+
+
+class SharedPool(object):
+    # pylint: disable=too-few-public-methods
+
+    ACTIVE = False
+
+    def __init__(self):
+        self.comm = MPI.COMM_NULL
+        self.itag = 0
+        self.pool = None
+        self.root = None
+        self.lock = threading.Lock()
+        self.threads_queues = weakref.WeakKeyDictionary()
+
+    def __call__(self, executor, **options):
+        assert SharedPool.ACTIVE
+        with self.lock:
+            tag = self.itag
+            self.itag = tag + 1
+        if self.comm != MPI.COMM_NULL and self.root:
+            manager, args = _manager_shared, (self.comm, tag, self.pool)
+        else:
+            manager, args = _manager_thread, ()
+        pool = Pool(manager, executor, *args, **options)
+        del THREADS_QUEUES[pool.thread]
+        self.threads_queues[pool.thread] = pool.queue
+        return pool
+
+    def __enter__(self):
+        assert SharedPool.ACTIVE is False
+        if MPI.COMM_WORLD.Get_size() >= 2:
+            self.comm = comm = split(MPI.COMM_WORLD, root=0)
+            if MPI.COMM_WORLD.Get_rank() == 0:
+                size = comm.Get_remote_size()
+                self.pool = Stack(reversed(range(size)))
+        self.itag = 0
+        self.root = MPI.COMM_WORLD.Get_rank() == 0
+        _patch_worker_pool(self)
+        SharedPool.ACTIVE = True
+        return self if self.root else None
+
+    def __exit__(self, *args):
+        assert SharedPool.ACTIVE is True
+        if self.root:
+            Pool.join_all(self.threads_queues)
+        if self.comm != MPI.COMM_NULL:
+            if self.root:
+                if self.itag == 0:
+                    client_sync(self.comm, dict(main=False))
+                client_close(self.comm)
+            else:
+                options = server_sync(self.comm)
+                server(self.comm, **options)
+                server_close(self.comm)
+        if not self.root:
+            Pool.join_all(self.threads_queues)
+        _patch_worker_pool(None)
+        SharedPool.ACTIVE = False
+        self.comm = MPI.COMM_NULL
+        self.itag = 0
+        self.pool = None
+        self.root = None
+        self.threads_queues.clear()
+        return False
+
+
+# ---
+
+
+def client(comm, tag, worker_pool, task_queue, **options):
+    # pylint: disable=too-many-locals
+    assert comm.Is_inter()
+    assert comm.Get_size() == 1
+    assert tag >= 0
+
+    status = MPI.Status()
+    comm_recv = serialized(comm.recv)
+    comm_isend = serialized(comm.issend)
+    comm_iprobe = serialized(comm.iprobe)
+    request_free = serialized(MPI.Request.Free)
+
+    sleep = time.sleep
+    delay = options.get('delay', 10e-6)
+    assert delay >= 0
+
+    pending = {}
+
+    def iprobe():
+        pid = MPI.ANY_SOURCE
+        return comm_iprobe(pid, tag, status)
+
+    def probe():
+        pid = MPI.ANY_SOURCE
+        while not comm_iprobe(pid, tag, status):
+            sleep(delay)
+
+    def recv():
+        pid = status.source
+        try:
+            task = comm_recv(None, pid, tag, status)
+        except BaseException:
+            task = (None, sys_exception())
+        pid = status.source
+        worker_pool.put(pid)
+
+        future, request = pending.pop(pid)
+        request_free(request)
+        result, exception = task
+        if exception is None:
+            future.set_result(result)
+        else:
+            future.set_exception(exception)
+
+    def send():
+        try:
+            pid = worker_pool.pop()
+        except IndexError:  # pragma: no cover
+            return None
+
+        task = task_queue.pop()
+        if task is None:
+            worker_pool.put(pid)
+            return True
+
+        future, work = task
+        if not future.set_running_or_notify_cancel():
+            worker_pool.put(pid)
+            return None
+
+        try:
+            request = comm_isend(work, pid, tag)
+            pending[pid] = (future, request)
+        except BaseException:
+            worker_pool.put(pid)
+            future.set_exception(sys_exception())
+
+    while True:
+        idle = True
+        if worker_pool and task_queue:
+            idle = False
+            stop = send()
+            if stop:
+                break
+        if pending and iprobe():
+            idle = False
+            recv()
+        if idle:
+            sleep(delay)
+    while pending:
+        probe()
+        recv()
+
+
+def client_close(comm):
+    assert comm.Is_inter()
+    MPI.Request.Waitall([
+        comm.issend(None, dest=pid, tag=0)
+        for pid in range(comm.Get_remote_size())])
+    try:
+        comm.Disconnect()
+    except NotImplementedError:  # pragma: no cover
+        comm.Free()
+
+
+def server(comm, **options):
+    assert comm.Is_inter()
+    assert comm.Get_remote_size() == 1
+
+    status = MPI.Status()
+    comm_recv = comm.recv
+    comm_isend = comm.issend
+    comm_iprobe = comm.iprobe
+    request_test = MPI.Request.Test
+
+    sleep = time.sleep
+    delay = options.get('delay', 10e-6)  # XXX
+    assert delay >= 0
+
+    def recv():
+        pid, tag = MPI.ANY_SOURCE, MPI.ANY_TAG
+        while not comm_iprobe(pid, tag, status):
+            sleep(delay)
+        pid, tag = status.source, status.tag
+        try:
+            task = comm_recv(None, pid, tag, status)
+        except BaseException:
+            task = sys_exception()
+        return task
+
+    def call(task):
+        if isinstance(task, BaseException):
+            return (None, task)
+        func, args, kwargs = task
+        try:
+            result = func(*args, **kwargs)
+            return (result, None)
+        except BaseException:
+            return (None, sys_exception())
+
+    def send(task):
+        pid, tag = status.source, status.tag
+        try:
+            request = comm_isend(task, pid, tag)
+        except BaseException:
+            task = (None, sys_exception())
+            request = comm_isend(task, pid, tag)
+        while not request_test(request):
+            sleep(delay)
+
+    while True:
+        task = recv()
+        if task is None:
+            break
+        task = call(task)
+        send(task)
+
+
+def server_close(comm):
+    try:
+        comm.Disconnect()
+    except NotImplementedError:  # pragma: no cover
+        comm.Free()
+
+
+# ---
+
+
+def get_world():
+    return MPI.COMM_WORLD
+
+
+def split(comm, root=0, tag=0):
+    assert not comm.Is_inter()
+    assert comm.Get_size() > 1
+    assert 0 <= root < comm.Get_size()
+    rank = comm.Get_rank()
+
+    mpi22 = MPI.Get_version() >= (2, 2)
+    if mpi22:  # pragma: no branch
+        allgroup = comm.Get_group()
+        if rank == root:
+            group = allgroup.Incl([root])
+        else:
+            group = allgroup.Excl([root])
+        allgroup.Free()
+        intracomm = comm.Create(group)
+        group.Free()
+    else:  # pragma: no cover
+        color = 0 if rank == root else 1
+        intracomm = comm.Split(color, key=0)
+
+    if rank == root:
+        local_leader = 0
+        remote_leader = 0 if root else 1
+    else:
+        local_leader = 0
+        remote_leader = root
+    intercomm = intracomm.Create_intercomm(
+        local_leader, comm, remote_leader, tag)
+    intracomm.Free()
+
+    return intercomm
+
+
+# ---
+
+
+def import_main(mod_name, mod_path, run_name):
+    # pylint: disable=protected-access
+    import types
+    import runpy
+
+    module = types.ModuleType(run_name)
+
+    class TempModulePatch(runpy._TempModule):
+        # pylint: disable=too-few-public-methods
+        def __init__(self, mod_name):
+            super(TempModulePatch, self).__init__(mod_name)
+            assert self.module.__name__ == run_name
+            self.module = module
+
+    TempModule = runpy._TempModule  # pylint: disable=invalid-name
+    runpy._TempModule = TempModulePatch
+    import_main.info = (mod_name, mod_path)
+    try:
+        main_module = sys.modules['__main__']
+        sys.modules['__main__'] = sys.modules[run_name] = module
+        if mod_name:  # pragma: no cover
+            runpy.run_module(mod_name, run_name=run_name, alter_sys=True)
+        elif mod_path:  # pragma: no branch
+            runpy.run_path(mod_path, run_name=run_name)
+        sys.modules['__main__'] = sys.modules[run_name] = module
+    except:  # pragma: no cover
+        sys.modules['__main__'] = main_module
+        raise
+    finally:
+        del import_main.info
+        runpy._TempModule = TempModule
+
+
+MAIN_RUN_NAME = '__worker__'
+
+
+def _sync_get_data(options):
+    main = sys.modules['__main__']
+    sys.modules.setdefault(MAIN_RUN_NAME, main)
+
+    import_main_module = options.pop('main', True)
+    data = options.copy()
+    if import_main_module:
+        spec = getattr(main, '__spec__', None)
+        name = getattr(spec, 'name', None)
+        path = getattr(main, '__file__', None)
+        if name is not None:  # pragma: no cover
+            data['@main:mod_name'] = name
+        if path is not None:  # pragma: no branch
+            data['@main:mod_path'] = path
+
+    return data
+
+
+def _sync_set_data(data):
+    if 'sys_argv' in data:
+        sys.argv[:] = data.pop('sys_argv')
+    if 'sys_path' in data:
+        sys.path[:] = data.pop('sys_path')
+    if 'path' in data:
+        sys.path.extend(data.pop('path'))
+    if 'wdir' in data:
+        os.chdir(data.pop('wdir'))
+    if 'env' in data:
+        os.environ.update(data.pop('env'))
+
+    mod_name = data.pop('@main:mod_name', None)
+    mod_path = data.pop('@main:mod_path', None)
+    run_name = data.pop('@main:run_name', MAIN_RUN_NAME)
+    import_main(mod_name, mod_path, run_name)
+
+    return data
+
+
+def _sys_flags():
+    flag_opt_map = {
+        # Python 3
+        'inspect': 'i',
+        'interactive': 'i',
+        'debug': 'd',
+        'optimize': 'O',
+        'no_user_site': 's',
+        'no_site': 'S',
+        'isolated': 'I',
+        'ignore_environment': 'E',
+        'dont_write_bytecode': 'B',
+        'hash_randomization': 'R',
+        'verbose': 'v',
+        'quiet': 'q',
+        'bytes_warning': 'b',
+        # Python 2
+        'division_warning': 'Qwarn',
+        'division_new': 'Qnew',
+        'py3k_warning': '3',
+        'tabcheck': 't',
+        'unicode': 'U',
+    }
+    args = []
+    for flag, opt in flag_opt_map.items():
+        val = getattr(sys.flags, flag, 0)
+        val = val if opt[0] != 'i' else 0
+        val = val if opt[0] != 'Q' else min(val, 1)
+        if val > 0:
+            args.append('-' + opt * val)
+    for opt in sys.warnoptions:  # pragma: no cover
+        args.append('-W' + opt)
+    sys_xoptions = getattr(sys, '_xoptions', {})
+    for opt, val in sys_xoptions.items():  # pragma: no cover
+        args.append('-X' + opt if val is True else
+                    '-X' + opt + '=' + val)
+    return args
+
+
+def _sync_ibarrier(comm):
+    assert comm.Is_inter()
+    sleep = time.sleep
+    delay = 10e-6
+    try:
+        request = comm.Ibarrier()
+        while not request.Test():
+            sleep(delay)
+    except NotImplementedError:  # pragma: no cover
+        buf = [None, 0, MPI.BYTE]
+        tag = MPI.COMM_WORLD.Get_attr(MPI.TAG_UB)
+        sendreqs, recvreqs = [], []
+        for pid in range(comm.Get_remote_size()):
+            recvreqs.append(comm.Irecv(buf, pid, tag))
+            sendreqs.append(comm.Issend(buf, pid, tag))
+        while not MPI.Request.Testall(recvreqs):
+            sleep(delay)
+        MPI.Request.Waitall(sendreqs)
+
+
+def client_sync(comm, options):
+    assert comm.Is_inter()
+    assert comm.Get_size() == 1
+    _sync_ibarrier(comm)
+    data = _sync_get_data(options)
+    if MPI.ROOT != MPI.PROC_NULL:
+        comm.bcast(data, MPI.ROOT)
+    else:  # pragma: no cover
+        tag = MPI.COMM_WORLD.Get_attr(MPI.TAG_UB)
+        size = comm.Get_remote_size()
+        MPI.Request.Waitall([
+            comm.issend(data, pid, tag)
+            for pid in range(size)])
+    return options
+
+
+def server_sync(comm):
+    assert comm.Is_inter()
+    assert comm.Get_remote_size() == 1
+    _sync_ibarrier(comm)
+    if MPI.ROOT != MPI.PROC_NULL:
+        data = comm.bcast(None, 0)
+    else:  # pragma: no cover
+        tag = MPI.COMM_WORLD.Get_attr(MPI.TAG_UB)
+        data = comm.recv(None, 0, tag)
+    options = _sync_set_data(data)
+    return options
+
+
+# ---
+
+
+def client_spawn_abort(main_name, main_path):  # pragma: no cover
+    main_info = "\n"
+    if main_name is not None:
+        main_info += "    main name: '%s'\n" % main_name
+    if main_path is not None:
+        main_info += "    main path: '%s'\n" % main_path
+    main_info += "\n"
+    sys.stderr.write("""
+    The main script or module attempted to spawn new MPI worker processes.
+    This probably means that you have forgotten to use the proper idiom in
+    your main script or module:
+
+        if __name__ == '__main__':
+            ...
+
+    This error is unrecoverable. The MPI execution environment had to be
+    aborted. The name/path of the offending main script/module follows:
+    """ + main_info)
+    sys.stderr.flush()
+    time.sleep(1)
+    MPI.COMM_WORLD.Abort(1)
+
+
+def client_spawn(python_exe=None,
+                 python_args=None,
+                 max_workers=None,
+                 spawn_info=None,
+                 **options):
+    if hasattr(import_main, 'info'):  # pragma: no cover
+        client_spawn_abort(*import_main.info)
+    if python_exe is None:
+        python_exe = sys.executable
+    if python_args is None:  # pragma: no branch
+        python_args = []     # pragma: no cover
+    if max_workers is None:
+        world_size = MPI.COMM_WORLD.Get_size()
+        universe_size = (MPI.COMM_WORLD.Get_attr(MPI.UNIVERSE_SIZE)
+                         if MPI.UNIVERSE_SIZE != MPI.KEYVAL_INVALID
+                         else world_size)
+        max_workers = (max(universe_size - world_size, 1)
+                       if universe_size is not None else 1)
+    if spawn_info is None:
+        spawn_info = dict(soft='1:%d' % max_workers)
+
+    args = _sys_flags() + list(python_args)
+    args.extend(['-m', __package__ + '._spawn'])
+    info = MPI.Info.Create()
+    info.update(spawn_info)
+    comm = MPI.COMM_SELF.Spawn(python_exe, args, max_workers, info)
+    info.Free()
+    options = client_sync(comm, options)
+    return comm, options
+
+
+def server_spawn():
+    comm = MPI.Comm.Get_parent()
+    assert comm != MPI.COMM_NULL
+    options = server_sync(comm)
+    server(comm, **options)
+    server_close(comm)
+
+
+# ---
+
+
+def client_connect(service=__package__, **options):  # pragma: no cover
+    port = MPI.Lookup_name(service)
+    info = MPI.INFO_NULL
+    comm = MPI.COMM_SELF.Connect(port, info, root=0)
+    options = client_sync(comm, options)
+    return comm, options
+
+
+def server_connect(service=__package__):  # pragma: no cover
+    port = None
+    if MPI.COMM_WORLD.Get_rank() == 0:
+        port = MPI.Open_port()
+        MPI.Publish_name(service, port)
+    info = MPI.INFO_NULL
+    comm = MPI.COMM_WORLD.Accept(port, info, root=0)
+    if MPI.COMM_WORLD.Get_rank() == 0:
+        MPI.Unpublish_name(service, port)
+        MPI.Close_port(port)
+    options = server_sync(comm)
+    server(comm, **options)
+    server_close(comm)
+
+
+# ---

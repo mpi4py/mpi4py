@@ -58,7 +58,8 @@ def set_abort_status(status):
     import sys
     status = (status if isinstance(status, int)
               else 0 if status is None else 1)
-    mpi = sys.modules.get(__package__ + '.MPI')
+    pkg = __package__ or __name__.rpartition('.')[0]
+    mpi = sys.modules.get(pkg + '.MPI')
     if mpi is not None and status:
         # pylint: disable=protected-access
         mpi._set_abort_status(status)

@@ -45,7 +45,7 @@ echo "Running pep8"
 pep8 src/mpi4py | tee pep8-$PY-$MPI.out
 
 echo "Running pylint"
-pylint mpi4py --extension-pkg-whitelist=mpi4py | tee pylint-$PY-$MPI.out
+pylint mpi4py | tee pylint-$PY-$MPI.out
 
 echo "Running coverage"
 /usr/bin/env bash ./conf/coverage.sh
@@ -68,12 +68,16 @@ case "$MPI" in
         mpiexec -n 2 python test/runtests.py -v -e spawn -e dynproc
         mpiexec -n 3 python test/runtests.py -v -e spawn -e dynproc
        #mpiexec -n 8 python test/runtests.py -v -e spawn -e dynproc
+        mpiexec -n 2 python -m mpi4py.futures demo/futures/test_futures.py -v
+        mpiexec -n 3 python -m mpi4py.futures demo/futures/test_futures.py -v
         ;;
     openmpi)
         mpiexec -n 1 python test/runtests.py -v -e spawn -e dynproc --no-threads
         mpiexec -n 2 python test/runtests.py -v -e spawn -e dynproc --no-threads
         mpiexec -n 3 python test/runtests.py -v -e spawn -e dynproc --no-threads
        #mpiexec -n 8 python test/runtests.py -v -e spawn -e dynproc --no-threads
+        mpiexec -n 2 python -m mpi4py.futures demo/futures/test_futures.py -v
+        mpiexec -n 3 python -m mpi4py.futures demo/futures/test_futures.py -v
         ;;
 esac
 set +e

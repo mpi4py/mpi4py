@@ -458,7 +458,7 @@ def run_setup():
         if not has_src or has_git or has_hg:
             setup_args['setup_requires'] = ['Cython>='+CYTHON]
     #
-    setup(packages     = ['mpi4py'],
+    setup(packages     = ['mpi4py', 'mpi4py.futures'],
           package_dir  = {'mpi4py' : 'src/mpi4py'},
           package_data = {'mpi4py' : ['*.pxd',
                                       'include/mpi4py/*.h',
