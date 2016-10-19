@@ -11,7 +11,7 @@ import weakref
 import threading
 import collections
 
-from mpi4py import MPI
+from .. import MPI
 
 
 # ---

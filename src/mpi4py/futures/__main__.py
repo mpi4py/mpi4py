@@ -15,8 +15,8 @@ def main():
     # pylint: disable=missing-docstring
     import os
     import sys
-    from mpi4py.run import run_command_line
-    from mpi4py.run import set_abort_status
+    from ..run import run_command_line
+    from ..run import set_abort_status
     from . import _worker as worker
 
     class UsageExit(SystemExit):
