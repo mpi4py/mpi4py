@@ -804,10 +804,32 @@ class MPICommExecutorTest(unittest.TestCase):
                 self.fail('expected RuntimeError')
 
 
+SKIP_POOL_TEST = False
+name, version = MPI.get_vendor()
+if name == 'Open MPI':
+    if version < (1,8,0):
+        SKIP_POOL_TEST = True
+    if sys.platform.startswith('win'):
+        SKIP_POOL_TEST = True
+if name == 'MPICH2':
+    if version < (1,0,6):
+        SKIP_POOL_TEST = True
+    if sys.platform.startswith('win'):
+        SKIP_POOL_TEST = True
+if name == 'Microsoft MPI':
+    SKIP_POOL_TEST = True
+if name == 'Platform MPI':
+    SKIP_POOL_TEST = True
+if name == 'HP MPI':
+    SKIP_POOL_TEST = True
+if MPI.Get_version() < (2,0):
+    SKIP_POOL_TEST = True
+
+
 if futures._worker.SharedPool.ACTIVE:
     del MPICommExecutorTest.test_arg_root
     del MPICommExecutorTest.test_arg_comm_bad
-elif MPI.COMM_WORLD.Get_size() > 1:
+elif SKIP_POOL_TEST or MPI.COMM_WORLD.Get_size() > 1:
     del ProcessPoolInitTest
     del ProcessPoolBootupTest
     del ProcessPoolShutdownTest
