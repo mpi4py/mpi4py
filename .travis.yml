@@ -86,6 +86,8 @@ script:
   - mpiexec -n 1  python$PY $PWD/test/runtests.py -v -f
   - mpiexec -n $P python$PY $PWD/test/runtests.py -v -f --exclude=spawn
   - mpiexec -n 1  python$PY $PWD/demo/futures/test_futures.py -v
+  - mpiexec -n $P python$PY $PWD/demo/futures/test_futures.py -v
+  - mpiexec -n 1  python$PY -m mpi4py.futures $PWD/demo/futures/test_futures.py -v
   - mpiexec -n $P python$PY -m mpi4py.futures $PWD/demo/futures/test_futures.py -v
 
 #notifications:

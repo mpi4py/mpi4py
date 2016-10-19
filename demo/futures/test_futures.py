@@ -624,8 +624,9 @@ class ProcessPoolSubmitTest(unittest.TestCase):
                           for j, e in enumerate(executors))
             assert sorted(f.result() for f in fs) == list(range(16*128))
             world_size = MPI.COMM_WORLD.Get_size()
+            num_workers = max(1, world_size - 1)
             for e in executors:
-                self.assertEqual(e._num_workers, world_size - 1)
+                self.assertEqual(e._num_workers, num_workers)
             del e, executors
 
 
@@ -829,6 +830,8 @@ if MPI.Get_version() < (2,0):
 if futures._worker.SharedPool.ACTIVE:
     del MPICommExecutorTest.test_arg_root
     del MPICommExecutorTest.test_arg_comm_bad
+    if MPI.COMM_WORLD.Get_size() == 1:
+        del ProcessPoolPickleTest
 elif SKIP_POOL_TEST or MPI.COMM_WORLD.Get_size() > 1:
     del ProcessPoolInitTest
     del ProcessPoolBootupTest

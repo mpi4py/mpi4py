@@ -39,6 +39,8 @@ test-package() {
   RUN mpiexec $ARGS -n 1  python $PWD/test/runtests.py -v -f
   RUN mpiexec $ARGS -n $P python $PWD/test/runtests.py -v -f --exclude=spawn
   RUN mpiexec $ARGS -n 1  python $PWD/demo/futures/test_futures.py -v
+  RUN mpiexec $ARGS -n $P python $PWD/demo/futures/test_futures.py -v
+  RUN mpiexec $ARGS -n 1  python -m mpi4py.futures $PWD/demo/futures/test_futures.py -v
   RUN mpiexec $ARGS -n $P python -m mpi4py.futures $PWD/demo/futures/test_futures.py -v
   RUN source deactivate
 }
