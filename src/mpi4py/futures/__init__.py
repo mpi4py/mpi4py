@@ -1,6 +1,7 @@
 # Author:  Lisandro Dalcin
 # Contact: dalcinl@gmail.com
 """Execute computations asynchronously using MPI processes."""
+# pylint: disable=redefined-builtin
 
 try:
     from concurrent.futures import (
