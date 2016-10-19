@@ -7,7 +7,7 @@ $PYTHON -m coverage erase
 
 mpiexec -n 1 $PYTHON -m coverage run "$(dirname "$0")/coverage-helper.py" &> /dev/null || true
 
-mpiexec -n 1 $PYTHON -m coverage run -m mpi4py.bench > /dev/null
+mpiexec -n 1 $PYTHON -m coverage run -m mpi4py.bench &> /dev/null || true
 mpiexec -n 1 $PYTHON -m coverage run -m mpi4py.bench --help > /dev/null
 mpiexec -n 1 $PYTHON -m coverage run -m mpi4py.bench helloworld > /dev/null
 mpiexec -n 1 $PYTHON -m coverage run -m mpi4py.bench ringtest > /dev/null
@@ -15,7 +15,7 @@ mpiexec -n 1 $PYTHON -m coverage run -m mpi4py.bench ringtest -q -l 2 -s 1
 mpiexec -n 1 $PYTHON -m coverage run -m mpi4py.bench qwerty &> /dev/null || true
 mpiexec -n 1 $PYTHON -m coverage run -m mpi4py.bench --mpe qwerty &> /dev/null || true
 mpiexec -n 1 $PYTHON -m coverage run -m mpi4py.bench --vt  qwerty &> /dev/null || true
-mpiexec -n 2 $PYTHON -m coverage run -m mpi4py.bench > /dev/null
+mpiexec -n 2 $PYTHON -m coverage run -m mpi4py.bench &> /dev/null || true
 mpiexec -n 2 $PYTHON -m coverage run -m mpi4py.bench helloworld -q
 mpiexec -n 2 $PYTHON -m coverage run -m mpi4py.bench ringtest -q -l 2 -s 1
 mpiexec -n 2 $PYTHON -m coverage run -m mpi4py.bench qwerty &> /dev/null || true

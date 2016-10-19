@@ -6,12 +6,11 @@ import sys as _sys
 
 def helloworld(comm, args=None, verbose=True):
     """Hello, World! using MPI."""
-    from optparse import OptionParser
-    from . import __name__ as prog
-    parser = OptionParser(prog=prog + ".bench helloworld")
-    parser.add_option("-q", "--quiet", action="store_false",
-                      dest="verbose", default=verbose)
-    (options, args) = parser.parse_args(args)
+    from argparse import ArgumentParser
+    parser = ArgumentParser(prog=__package__ + ".bench helloworld")
+    parser.add_argument("-q", "--quiet", action="store_false",
+                        dest="verbose", default=verbose)
+    options = parser.parse_args(args)
 
     from . import MPI
     size = comm.Get_size()
@@ -34,18 +33,17 @@ def helloworld(comm, args=None, verbose=True):
 def ringtest(comm, args=None, verbose=True):
     """Time a message going around the ring of processes."""
     # pylint: disable=too-many-locals
-    from optparse import OptionParser
-    from . import __name__ as prog
-    parser = OptionParser(prog=prog + ".bench ringtest")
-    parser.add_option("-q", "--quiet", action="store_false",
-                      dest="verbose", default=verbose)
-    parser.add_option("-n", "--size", type="int", default=1, dest="size",
-                      help="message size")
-    parser.add_option("-s", "--skip", type="int", default=0, dest="skip",
-                      help="number of warm-up iterations")
-    parser.add_option("-l", "--loop", type="int", default=1, dest="loop",
-                      help="number of iterations")
-    (options, args) = parser.parse_args(args)
+    from argparse import ArgumentParser
+    parser = ArgumentParser(prog=__package__ + ".bench ringtest")
+    parser.add_argument("-q", "--quiet", action="store_false",
+                        dest="verbose", default=verbose)
+    parser.add_argument("-n", "--size", type=int, default=1, dest="size",
+                        help="message size")
+    parser.add_argument("-s", "--skip", type=int, default=0, dest="skip",
+                        help="number of warm-up iterations")
+    parser.add_argument("-l", "--loop", type=int, default=1, dest="loop",
+                        help="number of iterations")
+    options = parser.parse_args(args)
 
     def ring(comm, n=1, loop=1, skip=0):
         # pylint: disable=invalid-name
@@ -109,26 +107,30 @@ def ringtest(comm, args=None, verbose=True):
 
 def main(args=None):
     """Entry-point for ``python -m mpi4py.bench``."""
-    from optparse import OptionParser
-    from . import __name__ as prog
-    from . import __version__ as version
-    parser = OptionParser(prog=prog, version="%prog " + version,
-                          usage="%prog.bench [options] <command> [args]")
-    parser.add_option("--no-threads",
-                      action="store_false", dest="threads", default=True,
-                      help="initialize MPI without thread support")
-    parser.add_option("--thread-level", type="choice", metavar="LEVEL",
-                      choices=["single", "funneled", "serialized", "multiple"],
-                      action="store", dest="thread_level", default="multiple",
-                      help="initialize MPI with required thread support")
-    parser.add_option("--mpe",
-                      action="store_true", dest="mpe", default=False,
-                      help="use MPE for MPI profiling")
-    parser.add_option("--vt",
-                      action="store_true", dest="vt", default=False,
-                      help="use VampirTrace for MPI profiling")
-    parser.disable_interspersed_args()
-    (options, args) = parser.parse_args(args)
+    from argparse import ArgumentParser, REMAINDER
+    parser = ArgumentParser(prog=__package__ + ".bench",
+                            usage="%(prog)s [options] <command> [args]")
+    parser.add_argument("--no-threads",
+                        action="store_false", dest="threads", default=True,
+                        help="initialize MPI without thread support")
+    parser.add_argument("--thread-level",
+                        dest="thread_level", default="multiple",
+                        action="store", metavar="LEVEL",
+                        choices="single funneled serialized multiple".split(),
+                        help="initialize MPI with required thread level")
+    parser.add_argument("--mpe",
+                        action="store_true", dest="mpe", default=False,
+                        help="use MPE for MPI profiling")
+    parser.add_argument("--vt",
+                        action="store_true", dest="vt", default=False,
+                        help="use VampirTrace for MPI profiling")
+    parser.add_argument("command",
+                        action="store", metavar="<command>",
+                        help="benchmark command to run")
+    parser.add_argument("args",
+                        nargs=REMAINDER, metavar="[args]",
+                        help="arguments for benchmark command")
+    options = parser.parse_args(args)
 
     from . import rc, profile
     rc.threads = options.threads
@@ -140,17 +142,12 @@ def main(args=None):
 
     from . import MPI
     comm = MPI.COMM_WORLD
-    if not args:
+    if options.command not in main.commands:
         if comm.rank == 0:
-            parser.print_usage()
-        parser.exit()
-    command = args.pop(0)
-    if command not in main.commands:
-        if comm.rank == 0:
-            parser.error("unknown command '%s'" % command)
+            parser.error("unknown command '%s'" % options.command)
         parser.exit(2)
-    command = main.commands[command]
-    command(comm, args=args)
+    command = main.commands[options.command]
+    command(comm, options.args)
     parser.exit()
 
 main.commands = {
