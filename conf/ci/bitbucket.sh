@@ -3,7 +3,7 @@
 # https://bitbucket.org/mpi4py/mpi4py/addon/pipelines/home
 
 RUN() { echo + $@; $@; }
-RUN export ANACONDA=/opt/anaconda
+RUN export ANACONDA=${ANACONDA-/opt/anaconda}
 RUN export CFLAGS=-O0
 
 install-anaconda() {
@@ -40,4 +40,5 @@ test-package() {
   RUN mpiexec $ARGS -n $P python $PWD/test/runtests.py -v -f --exclude=spawn
   RUN mpiexec $ARGS -n 1  python $PWD/demo/futures/test_futures.py -v
   RUN mpiexec $ARGS -n $P python -m mpi4py.futures $PWD/demo/futures/test_futures.py -v
+  RUN source deactivate
 }
