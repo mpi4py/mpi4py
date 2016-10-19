@@ -1,5 +1,5 @@
-.PHONY: default
 PYTHON=python
+.PHONY: default
 default:
 	${MAKE} PYTHON=${PYTHON} -C compute-pi
 	${MAKE} PYTHON=${PYTHON} -C mandelbrot
@@ -23,3 +23,5 @@ default:
 	${MAKE} PYTHON=${PYTHON} -C mpi-ref-v1
 	${MAKE} PYTHON=${PYTHON} -C init-fini
 	${MAKE} PYTHON=${PYTHON} -C threads
+
+	${MAKE} PYTHON=${PYTHON} -C futures

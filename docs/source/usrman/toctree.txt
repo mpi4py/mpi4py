@@ -3,8 +3,9 @@
 
    intro
    overview
-   mpi4py.run
    tutorial
+   mpi4py.futures
+   mpi4py.run
    citing
    install
    appendix

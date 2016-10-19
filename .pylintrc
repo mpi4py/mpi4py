@@ -1,0 +1,5 @@
+[MASTER]
+disable = locally-disabled,file-ignored
+good-names = i,j,k,_,fn
+extension-pkg-whitelist = mpi4py
+reports = no
