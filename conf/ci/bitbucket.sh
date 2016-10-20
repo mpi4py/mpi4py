@@ -36,13 +36,13 @@ test-package() {
   RUN python setup.py --quiet clean --all
   if [[ "$MPI" == "mpich"   ]]; then P=2; else P=5; fi
   if [[ "$MPI" == "openmpi" ]]; then MPIEXEC="mpiexec --allow-run-as-root"; fi
-  RUN export MPIEXEC="${MPIEXEC-mpiexec}"
-  RUN $MPIEXEC -n 1  python $PWD/test/runtests.py -v -f
-  RUN $MPIEXEC -n $P python $PWD/test/runtests.py -v -f --exclude=spawn
-  RUN $MPIEXEC -n 1  python $PWD/demo/futures/test_futures.py -v
-  RUN $MPIEXEC -n $P python $PWD/demo/futures/test_futures.py -v
-  RUN $MPIEXEC -n 1  python -m mpi4py.futures $PWD/demo/futures/test_futures.py -v
-  RUN $MPIEXEC -n $P python -m mpi4py.futures $PWD/demo/futures/test_futures.py -v
+  export MPIEXEC=${MPIEXEC-mpiexec}
+  RUN $MPIEXEC -n 1  python $PWD/test/runtests.py
+  RUN $MPIEXEC -n $P python $PWD/test/runtests.py -f --exclude=spawn
+  RUN $MPIEXEC -n 1  python $PWD/demo/futures/test_futures.py
+  RUN $MPIEXEC -n $P python $PWD/demo/futures/test_futures.py -f
+  RUN $MPIEXEC -n 1  python -m mpi4py.futures $PWD/demo/futures/test_futures.py
+  RUN $MPIEXEC -n $P python -m mpi4py.futures $PWD/demo/futures/test_futures.py -f
   RUN ./conf/coverage.sh
   RUN coverage report
   RUN source deactivate
