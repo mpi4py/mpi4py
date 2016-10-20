@@ -1,5 +1,5 @@
-:mod:`mpi4py.run`
-=================
+mpi4py.run
+==========
 
 .. module:: mpi4py.run
    :synopsis: Run Python code using ``-m mpi4py``.

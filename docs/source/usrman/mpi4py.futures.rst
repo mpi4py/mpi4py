@@ -1,5 +1,5 @@
-:mod:`mpi4py.futures`
-=====================
+mpi4py.futures
+==============
 
 .. module:: mpi4py.futures
    :synopsis: Execute computations concurrently using MPI processes.
