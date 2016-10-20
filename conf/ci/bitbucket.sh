@@ -29,7 +29,7 @@ test-package() {
   PY=${PY-2.7} MPI=${MPI-mpich}
   RUN source $ANACONDA/bin/activate root
   RUN rm -rf $ANACONDA/envs/test
-  RUN conda create --quiet --yes -n test --channel mpi4py python=$PY $MPI numpy nomkl cython coverage
+  RUN conda create --quiet --yes -n test --channel mpi4py python=$PY $MPI numpy nomkl cython
   RUN source activate test
   RUN python setup.py build_src --force
   RUN python setup.py install
@@ -43,7 +43,10 @@ test-package() {
   RUN $MPIEXEC -n $P python $PWD/demo/futures/test_futures.py -f
   RUN $MPIEXEC -n 1  python -m mpi4py.futures $PWD/demo/futures/test_futures.py
   RUN $MPIEXEC -n $P python -m mpi4py.futures $PWD/demo/futures/test_futures.py -f
+  RUN conda install --quiet --yes coverage
   RUN ./conf/coverage.sh
   RUN coverage report
+  RUN curl -s -o codecov.sh https://codecov.io/bash
+  RUN bash codecov.sh -C $BITBUCKET_COMMIT -B $BITBUCKET_BRANCH || true
   RUN source deactivate
 }
