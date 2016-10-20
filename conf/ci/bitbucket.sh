@@ -29,18 +29,21 @@ test-package() {
   PY=${PY-2.7} MPI=${MPI-mpich}
   RUN source $ANACONDA/bin/activate root
   RUN rm -rf $ANACONDA/envs/test
-  RUN conda create --quiet --yes -n test --channel mpi4py python=$PY $MPI numpy nomkl cython
+  RUN conda create --quiet --yes -n test --channel mpi4py python=$PY $MPI numpy nomkl cython coverage
   RUN source activate test
   RUN python setup.py build_src --force
   RUN python setup.py install
   RUN python setup.py --quiet clean --all
   if [[ "$MPI" == "mpich"   ]]; then P=2; else P=5; fi
-  if [[ "$MPI" == "openmpi" ]]; then ARGS=--allow-run-as-root; else ARGS=; fi
-  RUN mpiexec $ARGS -n 1  python $PWD/test/runtests.py -v -f
-  RUN mpiexec $ARGS -n $P python $PWD/test/runtests.py -v -f --exclude=spawn
-  RUN mpiexec $ARGS -n 1  python $PWD/demo/futures/test_futures.py -v
-  RUN mpiexec $ARGS -n $P python $PWD/demo/futures/test_futures.py -v
-  RUN mpiexec $ARGS -n 1  python -m mpi4py.futures $PWD/demo/futures/test_futures.py -v
-  RUN mpiexec $ARGS -n $P python -m mpi4py.futures $PWD/demo/futures/test_futures.py -v
+  if [[ "$MPI" == "openmpi" ]]; then MPIEXEC="mpiexec --allow-run-as-root"; fi
+  RUN export MPIEXEC="${MPIEXEC-mpiexec}"
+  RUN $MPIEXEC -n 1  python $PWD/test/runtests.py -v -f
+  RUN $MPIEXEC -n $P python $PWD/test/runtests.py -v -f --exclude=spawn
+  RUN $MPIEXEC -n 1  python $PWD/demo/futures/test_futures.py -v
+  RUN $MPIEXEC -n $P python $PWD/demo/futures/test_futures.py -v
+  RUN $MPIEXEC -n 1  python -m mpi4py.futures $PWD/demo/futures/test_futures.py -v
+  RUN $MPIEXEC -n $P python -m mpi4py.futures $PWD/demo/futures/test_futures.py -v
+  RUN ./conf/coverage.sh
+  RUN coverage report
   RUN source deactivate
 }
