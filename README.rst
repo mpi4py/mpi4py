@@ -7,7 +7,7 @@ MPI for Python
 .. image::  https://ci.appveyor.com/api/projects/status/whh5xovp217h0f7n?svg=true
    :target: https://ci.appveyor.com/project/mpi4py/mpi4py
 .. image::  https://readthedocs.org/projects/mpi4py/badge/?version=latest
-   :target: https://mpi4py.readthedocs.org/latest/
+   :target: https://mpi4py.readthedocs.org/en/latest/
 
 Overview
 --------
