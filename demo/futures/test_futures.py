@@ -1,4 +1,3 @@
-from __future__ import print_function
 import os
 import sys
 import time
@@ -55,8 +54,6 @@ class ExecutorMixin:
     def tearDown(self):
         self.executor.shutdown(wait=True)
         dt = time.time() - self.t1
-        if 0:
-            print('[%.2fs]' % dt, end=' ')
         self.assertLess(dt, 60, 'synchronization issue: test lasted too long')
 
     def _prime_executor(self):
@@ -812,7 +809,13 @@ if name == 'Open MPI':
         SKIP_POOL_TEST = True
     if sys.platform.startswith('win'):
         SKIP_POOL_TEST = True
+if name == 'MPICH':
+    if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
+        SKIP_POOL_TEST = True
 if name == 'MPICH2':
+    if (version > (1,2,0) and
+        MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None):
+        SKIP_POOL_TEST = True
     if version < (1,0,6):
         SKIP_POOL_TEST = True
     if sys.platform.startswith('win'):
