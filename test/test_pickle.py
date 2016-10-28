@@ -35,6 +35,7 @@ except ImportError:
 
 try:
     import yaml
+    yaml.dump(None)
 except ImportError:
     yaml = None
 
