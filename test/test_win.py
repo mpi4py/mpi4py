@@ -14,16 +14,7 @@ except ImportError:
             return self
 
 def memzero(m):
-    n = len(m)
-    if n == 0: return
-    try:
-        zero = b'\0'
-        m[0] = zero
-    except TypeError:
-        zero = 0
-        m[0] = zero
-    for i in range(n):
-        m[i] = zero
+    m[:] = 0
 
 class BaseTestWin(object):
 
