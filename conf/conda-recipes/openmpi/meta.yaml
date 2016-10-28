@@ -1,6 +1,6 @@
 package:
   name: openmpi
-  version: 2.0.0
+  version: 2.0.1
 
 about:
   home: http://www.open-mpi.org/
@@ -13,9 +13,9 @@ requirements:
     - mpich2
 
 source:
-  fn: openmpi-2.0.0.tar.bz2
-  url: http://www.open-mpi.org/software/ompi/v2.0/downloads/openmpi-2.0.0.tar.bz2
-  md5: cdacc800cb4ce690c1f1273cb6366674
+  fn: openmpi-2.0.1.tar.bz2
+  url: http://www.open-mpi.org/software/ompi/v2.0/downloads/openmpi-2.0.1.tar.bz2
+  md5: 6f78155bd7203039d2448390f3b51c96
 
 build:
   number: 0
@@ -38,6 +38,6 @@ test:
     - mpiexec -n 4 hostname
     - command -v mpicc
     - mpicc -show
-    - mpicc  helloworld.c   -o helloworld_c
+    - mpicc test/helloworld.c -o helloworld_c
     - export DYLD_LIBRARY_PATH=$PREFIX/lib # [osx]
     - mpiexec -n 4 ./helloworld_c
