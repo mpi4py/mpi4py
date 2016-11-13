@@ -103,6 +103,24 @@ class ProcessPoolInitTest(ProcessPoolMixin,
             f.result()
         executor.shutdown()
 
+    def test_max_workers_environ(self):
+        save = os.environ.get('MPI4PY_MAX_WORKERS')
+        os.environ['MPI4PY_MAX_WORKERS'] = '1'
+        try:
+            executor = self.executor_type()
+            executor.submit(time.sleep, 0).result()
+            executor.shutdown()
+        finally:
+            del os.environ['MPI4PY_MAX_WORKERS']
+            if save is not None:
+                os.environ['MPI4PY_MAX_WORKERS'] = save
+
+    def test_max_workers_negative(self):
+        for number in (0, -1):
+            self.assertRaises(ValueError,
+                              self.executor_type,
+                              max_workers=number)
+
 
 class ProcessPoolBootupTest(ProcessPoolMixin,
                             unittest.TestCase):
@@ -462,12 +480,6 @@ class ExecutorTestMixin:
         for i in self.executor.map(time.sleep, [0, 0, 0], timeout=1):
             results.append(i)
         self.assertEqual([None, None, None], results)
-
-    def test_max_workers_negative(self):
-        for number in (0, -1):
-            self.assertRaises(ValueError,
-                              self.executor_type,
-                              max_workers=number)
 
 
 class ProcessPoolExecutorTest(ProcessPoolMixin,

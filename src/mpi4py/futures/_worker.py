@@ -658,6 +658,17 @@ def client_spawn_abort(main_name, main_path):  # pragma: no cover
     MPI.COMM_WORLD.Abort(1)
 
 
+def client_spawn_max_workers():
+    if 'MPI4PY_MAX_WORKERS' in os.environ:
+        return int(os.environ['MPI4PY_MAX_WORKERS'])
+    if MPI.UNIVERSE_SIZE != MPI.KEYVAL_INVALID:  # pragma: no branch
+        universe_size = MPI.COMM_WORLD.Get_attr(MPI.UNIVERSE_SIZE)
+        if universe_size is not None:  # pragma: no cover
+            world_size = MPI.COMM_WORLD.Get_size()
+            return max(universe_size - world_size, 1)
+    return 1
+
+
 def client_spawn(python_exe=None,
                  python_args=None,
                  max_workers=None,
@@ -670,12 +681,7 @@ def client_spawn(python_exe=None,
     if python_args is None:  # pragma: no branch
         python_args = []     # pragma: no cover
     if max_workers is None:
-        world_size = MPI.COMM_WORLD.Get_size()
-        universe_size = (MPI.COMM_WORLD.Get_attr(MPI.UNIVERSE_SIZE)
-                         if MPI.UNIVERSE_SIZE != MPI.KEYVAL_INVALID
-                         else world_size)
-        max_workers = (max(universe_size - world_size, 1)
-                       if universe_size is not None else 1)
+        max_workers = client_spawn_max_workers()
     if mpi_info is None:
         mpi_info = dict(soft='1:%d' % max_workers)
 
