@@ -529,10 +529,6 @@ def _sync_get_data(options):
 
 
 def _sync_set_data(data):
-    if 'sys_argv' in data:
-        sys.argv[:] = data.pop('sys_argv')
-    if 'sys_path' in data:
-        sys.path[:] = data.pop('sys_path')
     if 'path' in data:
         sys.path.extend(data.pop('path'))
     if 'wdir' in data:
@@ -665,7 +661,7 @@ def client_spawn_abort(main_name, main_path):  # pragma: no cover
 def client_spawn(python_exe=None,
                  python_args=None,
                  max_workers=None,
-                 spawn_info=None,
+                 mpi_info=None,
                  **options):
     if hasattr(import_main, 'info'):  # pragma: no cover
         client_spawn_abort(*import_main.info)
@@ -680,13 +676,13 @@ def client_spawn(python_exe=None,
                          else world_size)
         max_workers = (max(universe_size - world_size, 1)
                        if universe_size is not None else 1)
-    if spawn_info is None:
-        spawn_info = dict(soft='1:%d' % max_workers)
+    if mpi_info is None:
+        mpi_info = dict(soft='1:%d' % max_workers)
 
     args = _sys_flags() + list(python_args)
     args.extend(['-m', __package__ + '._spawn'])
     info = MPI.Info.Create()
-    info.update(spawn_info)
+    info.update(mpi_info)
     comm = MPI.COMM_SELF.Spawn(python_exe, args, max_workers, info)
     info.Free()
     options = client_sync(comm, options)

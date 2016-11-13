@@ -91,11 +91,9 @@ class ProcessPoolInitTest(ProcessPoolMixin,
         executor = self.executor_type(
             python_exe=sys.executable,
             max_workers=None,
-            spawn_info=dict(soft="0:1"),
-            sys_argv=sys.argv,
-            sys_path=sys.path,
-            path=[],
+            mpi_info=dict(soft="0:1"),
             main=False,
+            path=[],
             wdir=os.getcwd(),
             env={},
             )

@@ -29,5 +29,13 @@ run-cmdline:
 	${MPIEXEC} ${NPFLAG} 5 ${PYTHON} -m mpi4py.futures run_mandelbrot.py
 
 
+.PHONY: run-unittest
+run-unittest:
+	${MPIEXEC} ${NPFLAG} 1 ${PYTHON} test_futures.py
+	${MPIEXEC} ${NPFLAG} 2 ${PYTHON} test_futures.py
+	${MPIEXEC} ${NPFLAG} 1 ${PYTHON} -m mpi4py.futures test_futures.py
+	${MPIEXEC} ${NPFLAG} 2 ${PYTHON} -m mpi4py.futures test_futures.py
+
+
 .PHONY: test
 test: run-pool run-comm run-cmdline

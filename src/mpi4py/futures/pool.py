@@ -30,11 +30,9 @@ class MPIPoolExecutor(Executor):
         Keyword Args:
             python_exe: Path to Python executable used to spawn workers.
             python_args: Command line arguments to pass to Python executable.
-            spawn_info: Dict or iterable with ``(key, value)`` pairs.
-            sys_argv: List of strings to set as ``sys.argv`` in workers.
-            sys_path: List of paths to set as ``sys.path`` in workers.
-            path: List of paths to append to ``sys.path`` in workers.
+            mpi_info: Dict or iterable with ``(key, value)`` pairs.
             main: If ``False``, do not import ``__main__`` in workers.
+            path: List of paths to append to ``sys.path`` in workers.
             wdir: Path to set current working directory in workers.
             env: Environment variables to update ``os.environ`` in workers.
         """
