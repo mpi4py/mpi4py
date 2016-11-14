@@ -90,9 +90,49 @@ only) thread until they are signaled for completion.
 
    An :class:`~concurrent.futures.Executor` subclass that executes calls
    asynchronously using a pool of at most *max_workers* processes.  If
-   *max_workers* is ``None`` or not given, it will default to the number of
-   processors on the machine.  If *max_workers* is lower or equal to ``0``,
-   then a :exc:`ValueError` will be raised.
+   *max_workers* is ``None`` or not given, its value is determined from the
+   :envvar:`MPI4PY_MAX_WORKERS` environment variable if set, or the MPI
+   universe size if set, otherwise a single worker process is spawned.  If
+   *max_workers* is lower than or equal to ``0``, then a :exc:`ValueError` will
+   be raised.
+
+   Other parameters:
+
+   * *python_exe*: Path to the Python interpreter executable used to spawn
+     worker processes, otherwise :data:`sys.executable` is used.
+
+   * *python_args*: :class:`list` or iterable with additional command line
+     flags to pass to the Python executable. Command line flags determined from
+     inspection of :data:`sys.flags`, :data:`sys.warnoptions` and
+     :data:`sys._xoptions` in are passed unconditionally.
+
+   * *mpi_info*: :class:`dict` or iterable yielding ``(key, value)`` pairs.
+     These ``(key, value)`` pairs are passed (through an :class:`MPI.Info`
+     object) to the :meth:`MPI.Intracomm.Spawn` call used to spawn worker
+     processes. This mechanism allows telling the MPI runtime system where and
+     how to start the processes. Check the documentation of the backend MPI
+     implementation about the set of keys it interprets and the corresponding
+     format for values.
+
+   * *main*: If set to ``False``, do not import the ``__main__`` module in
+     worker processes. Setting *main* to ``False`` prevents worker processes
+     from accessing definitions in the parent ``__main__`` namespace.
+
+   * *path*: :class:`list` or iterable with paths to append to :data:`sys.path`
+     in worker processes to extend the :ref:`module search path
+     <python:tut-searchpath>`.
+
+   * *wdir*: Path to set the current working directory in worker processes
+     using :func:`os.chdir()`. The initial working directory is set by the MPI
+     implementation. Quality MPI implementations should honor a ``wdir`` info
+     key passed through *mpi_info*, although such feature is not mandatory.
+
+   * *env*: :class:`dict` or iterable yielding ``(name, value)`` pairs with
+     environment variables to update :data:`os.environ` in worker processes.
+     The initial environment is set by the MPI implementation. MPI
+     implementations may allow setting the initial environment through
+     *mpi_info*, however such feature is not required nor recommended by the
+     MPI standard.
 
    .. method:: submit(func, *args, **kwargs)
 
@@ -390,12 +430,14 @@ As explained previously, the 17 processes are partitioned in one master and 16
 workers. The master process executes the main script while the workers execute
 the tasks submitted from the master.
 
-.. [#] This :program:`mpiexec` invocation example assumes the backend MPI
-   implementation is an MPICH derivative using the Hydra process manager. In
-   the Open MPI implementation, the MPI universe size can be specified by
-   setting the :envvar:`OMPI_UNIVERSE_SIZE` environment variable to a positive
-   integer.  Check the documentation of your actual MPI implementation and/or
-   batch system for the ways to specify the desired MPI universe size.
+.. [#] This :program:`mpiexec` invocation example using the ``-usize`` flag
+   (alternatively, setting the :envvar:`MPIEXEC_UNIVERSE_SIZE` environment
+   variable) assumes the backend MPI implementation is an MPICH derivative
+   using the Hydra process manager. In the Open MPI implementation, the MPI
+   universe size can be specified by setting the :envvar:`OMPI_UNIVERSE_SIZE`
+   environment variable to a positive integer.  Check the documentation of your
+   actual MPI implementation and/or batch system for the ways to specify the
+   desired MPI universe size.
 
 
 .. Local variables:
