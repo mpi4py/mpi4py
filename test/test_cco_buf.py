@@ -647,6 +647,8 @@ elif name == 'Open MPI':
     if version < (1,4,0):
         if MPI.Query_thread() > MPI.THREAD_SINGLE:
             del TestCCOBufWorldDup
+elif name == 'MVAPICH2':
+    del BaseTestCCOBufInplace.testReduceScatter
 elif name == 'Microsoft MPI':
     if version <= (4,2,0):
         del BaseTestCCOBufInplace.testExscan

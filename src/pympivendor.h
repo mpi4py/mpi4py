@@ -49,6 +49,18 @@ static int PyMPI_Get_vendor(const char **vendor_name,
 
   name = "Deino MPI";
 
+#elif defined(MVAPICH2_VERSION) || defined(MVAPICH2_NUMVERSION)
+
+  name = "MVAPICH2";
+  #if defined(MVAPICH2_NUMVERSION)
+  {int version = MVAPICH2_NUMVERSION/1000;
+  major = version/10000; version -= major*10000;
+  minor = version/100;   version -= minor*100;
+  micro = version/1;     version -= micro*1; }
+  #elif defined(MVAPICH2_VERSION)
+  (void)sscanf(MVAPICH2_VERSION,"%d.%d.%d",&major,&minor,&micro);
+  #endif
+
 #elif defined(MPICH_NAME) && (MPICH_NAME == 3)
 
   name = "MPICH";

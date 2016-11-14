@@ -220,6 +220,8 @@ if name == 'Open MPI':
         SKIP_TEST = True
     if sys.platform.startswith('win'):
         SKIP_TEST = True
+if name == 'MVAPICH2':
+    SKIP_TEST = True
 if name == 'MPICH2':
     if version < (1,0,6):
         SKIP_TEST = True

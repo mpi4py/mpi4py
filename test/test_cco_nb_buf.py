@@ -563,6 +563,8 @@ if name == 'Open MPI':
     if version < (1,8,2):
         del BaseTestCCOBuf.testExscan
         del BaseTestCCOBuf.testReduceScatter
+if name == 'MVAPICH2':
+    del BaseTestCCOBufInplace.testReduceScatter
 if name == 'Microsoft MPI':
     implemented = set()
     if version >= (6,0,0):

@@ -108,6 +108,9 @@ if name =='MPICH' or name == 'MPICH2' or name == 'DeinoMPI':
 elif name == 'Intel MPI':
     BaseTestPackExternal.skipdtype += ['l']
     BaseTestPackExternal.skipdtype += ['d']
+elif name == 'MVAPICH2':
+    BaseTestPackExternal.skipdtype += ['l']
+    BaseTestPackExternal.skipdtype += ['d']
 elif name == 'Open MPI':
     del TestPackExternal
 else:

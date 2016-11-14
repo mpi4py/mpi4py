@@ -95,7 +95,8 @@ class TestWorldAttrs(unittest.TestCase):
 
 
 name, version = MPI.get_vendor()
-if name == 'MPICH' or (name == 'MPICH2' and version > (1,2,0)):
+if ((name == 'MPICH' or name == 'MVAPICH2') or
+    (name == 'MPICH2' and version > (1,2,0))):
     # Up to mpich2-1.3.1 when running under Hydra process manager,
     # getting the universe size fails for the singleton init case
     if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
