@@ -89,6 +89,8 @@ except -1:
     try:
         if PyObject_CheckBuffer(obj):
             return PyObject_GetBuffer(obj, view, flags)
+    except SystemError:
+        pass
     except TypeError:
         pass
     if isinstance(obj, bytes):
