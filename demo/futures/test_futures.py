@@ -822,6 +822,8 @@ if name == 'Open MPI':
 if name == 'MPICH':
     if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
         SKIP_POOL_TEST = True
+if name == 'MVAPICH2':
+    SKIP_POOL_TEST = True
 if name == 'MPICH2':
     if (version > (1,2,0) and
         MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None):
