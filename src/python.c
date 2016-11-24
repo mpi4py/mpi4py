@@ -96,18 +96,13 @@ Py3_Main(int argc, char **argv)
 #define Py_DecodeLocale _Py_char2wchar
 #endif
 
-#if PY_VERSION_HEX < 0x03040000
-#define PyMem_RawMalloc PyMem_Malloc
-#define PyMem_RawFree   PyMem_Free
-#endif
-
 static wchar_t **
 mk_wargs(int argc, char **argv)
 {
   int i; char *saved_locale = NULL;
   wchar_t **args = NULL;
 
-  args = (wchar_t **)PyMem_RawMalloc((size_t)(argc+1)*sizeof(wchar_t *));
+  args = (wchar_t **)malloc((size_t)(argc+1)*sizeof(wchar_t *));
   if (!args) goto oom;
 
   saved_locale = strdup(setlocale(LC_ALL, NULL));
@@ -141,7 +136,7 @@ cp_wargs(int argc, wchar_t **args)
 {
   int i; wchar_t **args_copy = NULL;
   if (!args) return NULL;
-  args_copy = (wchar_t **)PyMem_RawMalloc((size_t)(argc+1)*sizeof(wchar_t *));
+  args_copy = (wchar_t **)malloc((size_t)(argc+1)*sizeof(wchar_t *));
   if (!args_copy) goto oom;
   for (i=0; i<(argc+1); i++) { args_copy[i] = args[i]; }
   return args_copy;
@@ -156,9 +151,9 @@ rm_wargs(wchar_t **args, int deep)
   int i = 0;
   if (args && deep)
     while (args[i])
-      PyMem_RawFree(args[i++]);
+      free(args[i++]);
   if (args)
-    PyMem_RawFree(args);
+    free(args);
 }
 
 #endif /* !(PY_MAJOR_VERSION >= 3) */
