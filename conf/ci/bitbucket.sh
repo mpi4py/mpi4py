@@ -47,6 +47,6 @@ test-package() {
   RUN ./conf/coverage.sh
   RUN coverage report
   RUN curl -s -o codecov.sh https://codecov.io/bash
-  RUN bash codecov.sh -C $BITBUCKET_COMMIT -B $BITBUCKET_BRANCH || true
+  RUN bash codecov.sh -X gcov -X fix -C $BITBUCKET_COMMIT -B $BITBUCKET_BRANCH
   RUN source deactivate
 }
