@@ -7,6 +7,8 @@ pipelines:
           - test-package python=2.7 MPI=mpich
           - test-package python=3.4 MPI=mpich
           - test-package python=3.5 MPI=mpich
+          - test-package python=3.6 MPI=mpich
           - test-package python=2.7 MPI=openmpi
           - test-package python=3.4 MPI=openmpi
           - test-package python=3.5 MPI=openmpi
+          - test-package python=3.6 MPI=openmpi
