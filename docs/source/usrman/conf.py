@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
-# MPI for Python documentation build configuration file, created by
-# sphinx-quickstart on Mon Oct 10 17:28:55 2016.
+# mpi4py documentation build configuration file, created by
+# sphinx-quickstart on Thu Jan 19 17:29:48 2017.
 #
 # This file is execfile()d with the current directory set to its
 # containing dir.
@@ -67,7 +67,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'MPI for Python'
-copyright = u'2016, Lisandro Dalcin'
+copyright = u'2017, Lisandro Dalcin'
 author = u'Lisandro Dalcin'
 
 # The version info for the project you're documenting, acts as replacement for
