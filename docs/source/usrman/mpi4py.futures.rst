@@ -260,7 +260,7 @@ execution path and team-up to execute the tasks submitted from the master.
 
 Besides alleviating the lack of dynamic process managment features in legacy
 MPI-1 or partial MPI-2 implementations, the :class:`MPICommExecutor` context
-manager may be useful classic MPI-based Python applications willing to take
+manager may be useful in classic MPI-based Python applications willing to take
 advantage of the simple, task-based, master/worker approach available in the
 :mod:`mpi4py.futures` package.
 
