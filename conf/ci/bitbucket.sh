@@ -35,7 +35,7 @@ test-package() {
   RUN python setup.py install
   RUN python setup.py --quiet clean --all
   if [[ "$MPI" == "mpich"   ]]; then P=2; else P=5; fi
-  if [[ "$MPI" == "openmpi" ]]; then MPIEXEC="mpiexec --allow-run-as-root"; fi
+  if [[ "$MPI" == "openmpi" ]]; then MPIEXEC="mpiexec --allow-run-as-root --mca btl self,sm,tcp"; fi
   export MPIEXEC=${MPIEXEC-mpiexec}
   RUN $MPIEXEC -n 1  python $PWD/test/runtests.py
   RUN $MPIEXEC -n $P python $PWD/test/runtests.py -f --exclude=spawn
