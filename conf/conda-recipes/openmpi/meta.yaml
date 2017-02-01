@@ -1,6 +1,6 @@
 package:
   name: openmpi
-  version: 2.0.1
+  version: 2.0.2
 
 about:
   home: http://www.open-mpi.org/
@@ -13,9 +13,9 @@ requirements:
     - mpich2
 
 source:
-  fn: openmpi-2.0.1.tar.bz2
-  url: http://www.open-mpi.org/software/ompi/v2.0/downloads/openmpi-2.0.1.tar.bz2
-  md5: 6f78155bd7203039d2448390f3b51c96
+  fn: openmpi-2.0.2.tar.bz2
+  url: http://www.open-mpi.org/software/ompi/v2.0/downloads/openmpi-2.0.2.tar.bz2
+  md5: ecd99aa436a1ca69ce936a96d6a3fa48
 
 build:
   number: 0
