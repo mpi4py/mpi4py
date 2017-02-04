@@ -79,4 +79,17 @@
 #define PyMPI_HAVE_MPI_Iscatterv 1
 #endif
 
+#if MSMPI_VER >= 0x800
+#define PyMPI_HAVE_MPI_Reduce_scatter_block 1
+#define PyMPI_HAVE_MPI_Iallgatherv 1
+#define PyMPI_HAVE_MPI_Ialltoall 1
+#define PyMPI_HAVE_MPI_Ialltoallv 1
+#define PyMPI_HAVE_MPI_Ialltoallw 1
+#define PyMPI_HAVE_MPI_Iallreduce 1
+#define PyMPI_HAVE_MPI_Ireduce_scatter 1
+#define PyMPI_HAVE_MPI_Ireduce_scatter_block 1
+#define PyMPI_HAVE_MPI_Iscan 1
+#define PyMPI_HAVE_MPI_Iexscan 1
+#endif
+
 #endif /* !PyMPI_CONFIG_MSMPI_H */
