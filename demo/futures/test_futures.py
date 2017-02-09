@@ -815,6 +815,8 @@ class MPICommExecutorTest(unittest.TestCase):
 SKIP_POOL_TEST = False
 name, version = MPI.get_vendor()
 if name == 'Open MPI':
+    if version[:2] == (2,0):
+        SKIP_TEST = True
     if version < (1,8,0):
         SKIP_POOL_TEST = True
     if sys.platform.startswith('win'):
