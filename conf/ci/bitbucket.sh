@@ -29,7 +29,7 @@ test-package() {
   PY=${PY-2.7} MPI=${MPI-mpich}
   RUN source $ANACONDA/bin/activate root
   RUN rm -rf $ANACONDA/envs/test
-  RUN conda create --quiet --yes -n test --channel mpi4py python=$PY $MPI numpy nomkl cython
+  RUN conda create --quiet --yes -n test -c conda-forge python=$PY $MPI numpy cython
   RUN source activate test
   RUN python setup.py build_src --force
   RUN python setup.py install
