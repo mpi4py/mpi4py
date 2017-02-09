@@ -520,5 +520,11 @@ class TestMessageRMA(unittest.TestCase):
             self.assertEqual(sbuf, rbuf)
 
 
+name, version = MPI.get_vendor()
+if name == 'Microsoft MPI':
+    if version == (8,0,0):
+        del TestMessageVector
+
+
 if __name__ == '__main__':
     unittest.main()
