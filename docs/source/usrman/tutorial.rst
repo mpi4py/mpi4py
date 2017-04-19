@@ -377,6 +377,10 @@ Wrapping with F2Py
         call MPI_Comm_rank(comm, rank, ierr)
         print *, 'Hello, World! I am process ',rank,' of ',size,'.'
       end subroutine sayhello
+      
+* Compiling example using f2py ::
+
+      $ f2py -c --f90exec=mpif90 helloworld.f90 -m helloworld
 
 * Try it in the Python prompt::
 
