@@ -194,7 +194,10 @@ elif name == 'Open MPI':
 elif name == 'MVAPICH2':
     del TestDPM
 elif name == 'Microsoft MPI':
-    del TestDPM
+    if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
+        del TestDPM.testNamePublishing
+    if version < (8,1,0):
+        del TestDPM
 elif name == 'Platform MPI':
     del TestDPM.testNamePublishing
 else:

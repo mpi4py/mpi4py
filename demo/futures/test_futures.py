@@ -1168,7 +1168,11 @@ if name == 'MPICH2':
     if sys.platform.startswith('win'):
         SKIP_POOL_TEST = True
 if name == 'Microsoft MPI':
-    SKIP_POOL_TEST = True
+    del ProcessPoolSubmitTest.test_multiple_executors
+    if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
+        SKIP_POOL_TEST = True
+    if version < (8,1,0):
+        SKIP_POOL_TEST = True
 if name == 'Platform MPI':
     SKIP_POOL_TEST = True
 if name == 'HP MPI':

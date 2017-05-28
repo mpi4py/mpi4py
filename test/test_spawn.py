@@ -230,7 +230,14 @@ if name == 'MPICH2':
     if sys.platform.startswith('win'):
         SKIP_TEST = True
 if name == 'Microsoft MPI':
-    SKIP_TEST = True
+    del BaseTestSpawn.testArgsOnlyAtRoot
+    del BaseTestSpawn.testReturnedErrcodes
+    del BaseTestSpawn.testArgsOnlyAtRootMultiple
+    del BaseTestSpawn.testReturnedErrcodesMultiple
+    if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
+        SKIP_TEST = True
+    if version < (8,1,0):
+        SKIP_TEST = True
 if name == 'Platform MPI':
     SKIP_TEST = True
 if name == 'HP MPI':

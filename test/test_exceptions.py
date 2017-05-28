@@ -177,8 +177,9 @@ except NotImplementedError:
     del TestExcInfoNull, TestExcInfo
 else:
     name, version = MPI.get_vendor()
-    if name == 'Microsoft MPI': # ???
-        del TestExcInfoNull.testDup
+    if name == 'Microsoft MPI':
+        if version < (8,1,0):
+            del TestExcInfoNull.testDup
 
 # --------------------------------------------------------------------
 

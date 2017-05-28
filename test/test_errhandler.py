@@ -70,7 +70,7 @@ if MPI.Get_version() < (2, 0):
     del TestErrhandler.testWinCallErrhandler
     del TestErrhandler.testFileCallErrhandler
 elif name == 'Microsoft MPI':
-	del TestErrhandler.testFileCallErrhandler
+    del TestErrhandler.testFileCallErrhandler
 
 
 if __name__ == '__main__':
