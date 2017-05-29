@@ -108,7 +108,7 @@ try:
         cartcomm.Free()
         del cartcomm
     if name == 'Open MPI':
-        if version < (2,1,0):
+        if version < (2,2,0):
             del BaseTestCCONghObj.testNeighborAllgather
         if version < (1,8,4):
             _create_topo_comms = create_topo_comms
