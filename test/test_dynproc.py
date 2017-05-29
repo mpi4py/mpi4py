@@ -136,7 +136,8 @@ class TestDPM(unittest.TestCase):
         # crate server/client sockets
         if rank == 0: # server
             server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            server.bind(('', 0))
+            host = socket.gethostname()
+            server.bind((host, 0))
             server.listen(0)
         if rank == 1: # client
             client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
