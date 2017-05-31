@@ -382,7 +382,7 @@ def server(comm, **options):
     request_test = MPI.Request.Test
 
     sleep = time.sleep
-    delay = options.get('delay', 10e-6)  # XXX
+    delay = options.get('delay', 10e-6)
     assert delay >= 0
 
     def recv():
