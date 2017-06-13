@@ -812,6 +812,304 @@ class MPICommExecutorTest(unittest.TestCase):
                 self.fail('expected RuntimeError')
 
 
+from mpi4py.futures.aplus import ThenableFuture
+
+class ThenTest(unittest.TestCase):
+
+    assert_ = unittest.TestCase.assertTrue
+
+    def test_not_done(self):
+
+        base_f = ThenableFuture()
+        new_f = base_f.then()
+
+        self.assert_(base_f is not new_f)
+        self.assert_(not base_f.done())
+        self.assert_(not new_f.done())
+
+        base_f._invoke_callbacks()
+        self.assert_(new_f.cancelled())
+
+    def test_cancel(self):
+
+        base_f = ThenableFuture()
+        new_f = base_f.then()
+
+        self.assert_(base_f is not new_f)
+        self.assert_(not base_f.done())
+        self.assert_(not new_f.done())
+
+        base_f.cancel()
+        self.assert_(base_f.done())
+        self.assert_(new_f.done())
+
+        self.assert_(base_f.cancelled())
+        self.assert_(new_f.cancelled())
+
+    def test_then_multiple(self):
+
+        base_f = ThenableFuture()
+        new_f1 = base_f.then()
+        new_f2 = base_f.then()
+        new_f3 = base_f.then()
+
+        self.assert_(base_f is not new_f1)
+        self.assert_(base_f is not new_f2)
+        self.assert_(base_f is not new_f3)
+        self.assert_(not base_f.done())
+        self.assert_(not new_f1.done())
+        self.assert_(not new_f2.done())
+        self.assert_(not new_f3.done())
+
+        base_f.set_result('done')
+        self.assert_(base_f.done())
+        self.assert_(new_f1.done())
+        self.assert_(new_f2.done())
+        self.assert_(new_f3.done())
+
+        self.assert_(not new_f1.exception())
+        self.assert_(not new_f2.exception())
+        self.assert_(not new_f3.exception())
+        self.assert_(new_f1.result() == 'done')
+        self.assert_(new_f2.result() == 'done')
+        self.assert_(new_f3.result() == 'done')
+
+    def test_no_callbacks_and_success(self):
+
+        base_f = ThenableFuture()
+        new_f = base_f.then()
+
+        self.assert_(base_f is not new_f)
+        self.assert_(not base_f.done())
+        self.assert_(not new_f.done())
+
+        base_f.set_result('done')
+        self.assert_(base_f.done())
+        self.assert_(new_f.done())
+
+        self.assert_(not new_f.exception())
+        self.assert_(new_f.result() == 'done')
+
+    def test_no_callbacks_and_failure(self):
+
+        class MyException(Exception):
+            pass
+
+        base_f = ThenableFuture()
+        new_f = base_f.then()
+
+        self.assert_(base_f is not new_f)
+        self.assert_(not base_f.done())
+        self.assert_(not new_f.done())
+
+        base_f.set_exception(MyException('sad'))
+        self.assert_(base_f.done())
+        self.assert_(new_f.done())
+
+        self.assert_(new_f.exception())
+        with self.assertRaises(MyException) as catcher:
+            new_f.result()
+        self.assert_(catcher.exception.args[0] == 'sad')
+
+    def test_success_callback_and_success(self):
+
+        base_f = ThenableFuture()
+        new_f = base_f.then(lambda result: result + ' manipulated')
+
+        self.assert_(base_f is not new_f)
+        self.assert_(not base_f.done())
+        self.assert_(not new_f.done())
+
+        base_f.set_result('done')
+        self.assert_(base_f.done())
+        self.assert_(new_f.done())
+
+        self.assert_(not new_f.exception())
+        self.assert_(new_f.result() == 'done manipulated')
+
+    def test_err_callback_and_failure_repackage(self):
+
+        class MyException(Exception):
+            pass
+
+        class MyRepackagedException(Exception):
+            pass
+
+        class NotMatched(Exception):
+            pass
+
+        def on_failure(ex):
+            if isinstance(ex, MyException):
+                return MyRepackagedException(ex.args[0] + ' repackaged')
+            else:
+                return NotMatched('?')
+
+        base_f = ThenableFuture()
+        new_f = base_f.then(None, on_failure)
+
+        self.assert_(base_f is not new_f)
+        self.assert_(not base_f.done())
+        self.assert_(not new_f.done())
+
+        base_f.set_exception(MyException('sad'))
+        self.assert_(base_f.done())
+        self.assert_(new_f.done())
+
+        self.assert_(new_f.exception())
+        with self.assertRaises(MyRepackagedException) as catcher:
+            new_f.result()
+        self.assert_(catcher.exception.args[0] == 'sad repackaged')
+
+    def test_err_callback_and_failure_raised(self):
+
+        class MyException(Exception):
+            pass
+
+        class MyRepackagedException(Exception):
+            pass
+
+        def raise_something_else(ex):
+            raise MyRepackagedException(ex.args[0] + ' repackaged')
+
+        base_f = ThenableFuture()
+        new_f = base_f.then(None, raise_something_else)
+
+        self.assert_(base_f is not new_f)
+        self.assert_(not base_f.done())
+        self.assert_(not new_f.done())
+
+        base_f.set_exception(MyException('sad'))
+        self.assert_(base_f.done())
+        self.assert_(new_f.done())
+
+        self.assert_(new_f.exception())
+        with self.assertRaises(MyRepackagedException) as catcher:
+            new_f.result()
+        self.assert_(catcher.exception.args[0] == 'sad repackaged')
+
+    def test_err_callback_convert_to_success(self):
+
+        class MyException(Exception):
+            pass
+
+        class NotMatched(Exception):
+            pass
+
+        def on_failure(ex):
+            if isinstance(ex, MyException):
+                return ex.args[0] + ' repackaged'
+            else:
+                return NotMatched('?')
+
+        base_f = ThenableFuture()
+        new_f = base_f.catch(on_failure)
+
+        self.assert_(base_f is not new_f)
+        self.assert_(not base_f.done())
+        self.assert_(not new_f.done())
+
+        base_f.set_exception(MyException('sad'))
+        self.assert_(base_f.done())
+        self.assert_(new_f.done())
+
+        self.assert_(not new_f.exception())
+        self.assert_(new_f.result() == 'sad repackaged')
+
+    def test_err_catch_ignore(self):
+
+        base_f = ThenableFuture()
+        new_f = base_f.catch()
+
+        self.assert_(base_f is not new_f)
+        self.assert_(not base_f.done())
+        self.assert_(not new_f.done())
+
+        base_f.set_exception(Exception('sad'))
+        self.assert_(base_f.done())
+        self.assert_(new_f.done())
+
+        self.assert_(new_f.exception() is None)
+        self.assert_(new_f.result() is None)
+
+    def test_success_callback_and_failure_raised(self):
+
+        class MyException(Exception):
+            pass
+
+        def raise_something_else(value):
+            raise MyException(value + ' repackaged')
+
+        base_f = ThenableFuture()
+        new_f = base_f.then(raise_something_else)
+
+        self.assert_(base_f is not new_f)
+        self.assert_(not base_f.done())
+        self.assert_(not new_f.done())
+
+        base_f.set_result('sad')
+        self.assert_(base_f.done())
+        self.assert_(new_f.done())
+
+        self.assert_(new_f.exception())
+        with self.assertRaises(MyException) as catcher:
+            new_f.result()
+        assert catcher.exception.args[0] == 'sad repackaged'
+
+    def test_chained_success_callback_and_success(self):
+
+        def transform(value):
+            f = ThenableFuture()
+            if value < 5:
+                f.set_result(transform(value+1))
+            else:
+                f.set_result(value)
+            return f
+
+        base_f = ThenableFuture()
+        new_f = base_f.then(transform)
+
+        self.assert_(base_f is not new_f)
+        self.assert_(not base_f.done())
+        self.assert_(not new_f.done())
+
+        base_f.set_result(1)
+        self.assert_(base_f.done())
+        self.assert_(new_f.done())
+
+        self.assert_(not new_f.exception())
+        self.assert_(new_f.result() == 5)
+
+    def test_detect_circular_chains(self):
+
+        f1 = ThenableFuture()
+        f2 = ThenableFuture()
+        chain = [f1, f2, f1]
+
+        def transform(a):
+            try:
+                f = chain.pop(0)
+                f.set_result(transform(a))
+                return f
+            except IndexError:
+                return 42
+
+        base_f = ThenableFuture()
+        new_f = base_f.then(transform)
+
+        self.assert_(base_f is not new_f)
+        self.assert_(not base_f.done())
+        self.assert_(not new_f.done())
+
+        base_f.set_result(1)
+        self.assert_(base_f.done())
+        self.assert_(new_f.done())
+
+        self.assert_(new_f.exception())
+        with self.assertRaises(RuntimeError) as catcher:
+            new_f.result()
+        assert 'Circular future chain detected' in catcher.exception.args[0]
+
+
 SKIP_POOL_TEST = False
 name, version = MPI.get_vendor()
 if name == 'Open MPI':
