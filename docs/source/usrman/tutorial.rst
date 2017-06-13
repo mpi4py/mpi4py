@@ -45,8 +45,12 @@ communication of buffer-provider objects (e.g., NumPy arrays).
   In general, buffer arguments to these calls must be explicitly
   specified by using a 2/3-list/tuple like ``[data, MPI.DOUBLE]``, or
   ``[data, count, MPI.DOUBLE]`` (the former one uses the byte-size of
-  ``data`` and the extent of the MPI datatype to define the
-  ``count``).
+  ``data`` and the extent of the MPI datatype to define ``count``).
+
+  For vector collectives communication operations like
+  :meth:`Scatterv()` and :meth:`Gatherv()`, buffer arguments are
+  specified as ``[data, count, displ, datatype]``, where ``count`` and
+  ``displ`` are sequences of integral values.
 
   Automatic MPI datatype discovery for NumPy arrays and PEP-3118
   buffers is supported, but limited to basic C types (all C/C99-native
