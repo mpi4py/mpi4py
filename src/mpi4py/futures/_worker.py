@@ -189,29 +189,34 @@ WorkerPool = SpawnPool  # pylint: disable=invalid-name
 # ---
 
 
+SharedPool = None  # pylint: disable=invalid-name
+
+
+def _set_shared_pool(obj):
+    # pylint: disable=invalid-name
+    # pylint: disable=global-statement
+    global WorkerPool
+    global SharedPool
+    if obj is not None:
+        WorkerPool = obj
+        SharedPool = obj
+    else:
+        WorkerPool = SpawnPool
+        SharedPool = None
+
+
 def _manager_shared(executor_ref, event, queue,
                     comm, tag, pool, **options):
     # pylint: disable=too-many-arguments
     if tag == 0:
         options = serialized(client_sync)(comm, options)
-    _set_num_workers(executor_ref, event, comm.Get_remote_size())
+    size = comm.Get_remote_size()
+    _set_num_workers(executor_ref, event, size)
     client(comm, tag, pool, queue, **options)
 
 
-def _patch_worker_pool(obj):
-    # pylint: disable=invalid-name
-    # pylint: disable=global-statement
-    global WorkerPool
-    if obj is not None:
-        WorkerPool = obj
-    else:
-        WorkerPool = SpawnPool
-
-
-class SharedPool(object):
+class SharedPoolCtx(object):
     # pylint: disable=too-few-public-methods
-
-    ACTIVE = False
 
     def __init__(self):
         self.comm = MPI.COMM_NULL
@@ -222,7 +227,7 @@ class SharedPool(object):
         self.threads_queues = weakref.WeakKeyDictionary()
 
     def __call__(self, executor, **options):
-        assert SharedPool.ACTIVE
+        assert SharedPool is self
         with self.lock:
             tag = self.itag
             self.itag = tag + 1
@@ -236,7 +241,7 @@ class SharedPool(object):
         return pool
 
     def __enter__(self):
-        assert SharedPool.ACTIVE is False
+        assert SharedPool is None
         if MPI.COMM_WORLD.Get_size() >= 2:
             self.comm = comm = split(MPI.COMM_WORLD, root=0)
             if MPI.COMM_WORLD.Get_rank() == 0:
@@ -244,12 +249,11 @@ class SharedPool(object):
                 self.pool = Stack(reversed(range(size)))
         self.itag = 0
         self.root = MPI.COMM_WORLD.Get_rank() == 0
-        _patch_worker_pool(self)
-        SharedPool.ACTIVE = True
+        _set_shared_pool(self)
         return self if self.root else None
 
     def __exit__(self, *args):
-        assert SharedPool.ACTIVE is True
+        assert SharedPool is self
         if self.root:
             Pool.join_all(self.threads_queues)
         if self.comm != MPI.COMM_NULL:
@@ -263,8 +267,7 @@ class SharedPool(object):
                 server_close(self.comm)
         if not self.root:
             Pool.join_all(self.threads_queues)
-        _patch_worker_pool(None)
-        SharedPool.ACTIVE = False
+        _set_shared_pool(None)
         self.comm = MPI.COMM_NULL
         self.itag = 0
         self.pool = None

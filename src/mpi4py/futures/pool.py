@@ -271,10 +271,10 @@ class MPICommExecutor(object):
         if self._executor is not None:
             raise RuntimeError("__enter__")
 
-        if _worker.SharedPool.ACTIVE:
+        if _worker.SharedPool:
             assert self._root == 0
             executor = MPIPoolExecutor()
-            executor._pool = _worker.WorkerPool(executor)
+            executor._pool = _worker.SharedPool(executor)
         elif self._comm.Get_size() == 1:
             executor = MPIPoolExecutor()
             executor._pool = _worker.ThreadPool(executor)

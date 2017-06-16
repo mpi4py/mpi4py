@@ -54,7 +54,7 @@ def main():
             usage("Path does not exist: " + args[0])
 
     try:
-        with worker.SharedPool() as context:
+        with worker.SharedPoolCtx() as context:
             if context is not None:
                 chk_command_line()
                 run_command_line()

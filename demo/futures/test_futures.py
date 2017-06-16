@@ -621,7 +621,7 @@ class ProcessPoolSubmitTest(unittest.TestCase):
         finally:
             serialized.lock = lock_save
 
-    if futures._worker.SharedPool.ACTIVE:
+    if futures._worker.SharedPool:
 
         def test_shared_executors(self):
             executors = [futures.MPIPoolExecutor() for _ in range(16)]
@@ -844,7 +844,7 @@ if MPI.Get_version() < (2,0):
     SKIP_POOL_TEST = True
 
 
-if futures._worker.SharedPool.ACTIVE:
+if futures._worker.SharedPool:
     del MPICommExecutorTest.test_arg_root
     del MPICommExecutorTest.test_arg_comm_bad
     if MPI.COMM_WORLD.Get_size() == 1:
