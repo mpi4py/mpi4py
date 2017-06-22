@@ -17,6 +17,8 @@ from . import _worker
 class MPIPoolExecutor(Executor):
     """MPI-based asynchronous executor."""
 
+    Future = Future
+
     def __init__(self, max_workers=None, **kwargs):
         """Initialize a new MPIPoolExecutor instance.
 
@@ -35,6 +37,7 @@ class MPIPoolExecutor(Executor):
             path: List of paths to append to ``sys.path`` in workers.
             wdir: Path to set current working directory in workers.
             env: Environment variables to update ``os.environ`` in workers.
+
         """
         if max_workers is not None:
             max_workers = int(max_workers)
@@ -81,7 +84,7 @@ class MPIPoolExecutor(Executor):
             if self._shutdown:
                 raise RuntimeError("cannot submit after shutdown")
             self._bootstrap()
-            future = Future()
+            future = self.Future()
             work = (fn, args, kwargs)
             self._pool.push((future, work))
             return future
@@ -110,7 +113,9 @@ class MPIPoolExecutor(Executor):
             TimeoutError: If the entire result iterator could not be generated
                 before the given timeout.
             Exception: If ``fn(*args)`` raises for any values.
+
         """
+        # pylint: disable=arguments-differ
         iterable = getattr(itertools, 'izip', zip)(*iterables)
         return self.starmap(fn, iterable, **kwargs)
 
@@ -253,6 +258,7 @@ class MPICommExecutor(object):
         Raises:
             ValueError: If the communicator has wrong kind or
                the root value is not in the expected range.
+
         """
         if comm is None:
             comm = _worker.get_world()
