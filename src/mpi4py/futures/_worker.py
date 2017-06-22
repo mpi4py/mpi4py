@@ -243,9 +243,9 @@ class SharedPoolCtx(object):
     def __enter__(self):
         assert SharedPool is None
         if MPI.COMM_WORLD.Get_size() >= 2:
-            self.comm = comm = split(MPI.COMM_WORLD, root=0)
+            self.comm = split(MPI.COMM_WORLD, root=0)
             if MPI.COMM_WORLD.Get_rank() == 0:
-                size = comm.Get_remote_size()
+                size = self.comm.Get_remote_size()
                 self.pool = Stack(reversed(range(size)))
         self.itag = 0
         self.root = MPI.COMM_WORLD.Get_rank() == 0
