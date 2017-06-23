@@ -16,7 +16,9 @@ SET(mpi4py_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/mpi4py")
 
 FILE(GLOB mpi4py_PYTHON_FILES
      RELATIVE ${mpi4py_SOURCE_DIR}
-     ${mpi4py_SOURCE_DIR}/mpi4py/*.py)
+     ${mpi4py_SOURCE_DIR}/mpi4py/*.py
+     ${mpi4py_SOURCE_DIR}/mpi4py/futures/*.py
+     )
 
 FILE(GLOB mpi4py_HEADER_FILES
      RELATIVE ${mpi4py_SOURCE_DIR}
