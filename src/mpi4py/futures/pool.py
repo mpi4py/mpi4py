@@ -212,6 +212,7 @@ def _apply_chunks(function, chunk):
 
 
 def _build_chunks(chunksize, iterable):
+    iterable = iter(iterable)
     while True:
         chunk = tuple(itertools.islice(iterable, chunksize))
         if not chunk:
