@@ -51,18 +51,18 @@ serialized.lock = None
 
 
 def setup_mpi_threads():
-    thead_level = setup_mpi_threads.thead_level
-    if thead_level is None:
-        thead_level = MPI.Query_thread()
-        setup_mpi_threads.thead_level = thead_level
-        if thead_level < MPI.THREAD_MULTIPLE:  # pragma: no cover
+    thread_level = setup_mpi_threads.thread_level
+    if thread_level is None:
+        thread_level = MPI.Query_thread()
+        setup_mpi_threads.thread_level = thread_level
+        if thread_level < MPI.THREAD_MULTIPLE:  # pragma: no cover
             serialized.lock = threading.Lock()
-    if thead_level < MPI.THREAD_SERIALIZED:  # pragma: no cover
+    if thread_level < MPI.THREAD_SERIALIZED:  # pragma: no cover
         from _warnings import warn
         warn("The level of thread support in MPI "
              "should be at least MPI_THREAD_SERIALIZED",
              RuntimeWarning, 2)
-setup_mpi_threads.thead_level = None
+setup_mpi_threads.thread_level = None
 
 
 # ---
