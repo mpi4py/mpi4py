@@ -10,7 +10,7 @@
 #include <mpi.h>
 
 #ifdef __FreeBSD__
-#include <floatingpoint.h>
+#include <fenv.h>
 #endif
 
 static int PyMPI_Main(int, char **);
@@ -25,9 +25,7 @@ int
 main(int argc, char **argv)
 {
 #ifdef __FreeBSD__
-  fp_except_t m;
-  m = fpgetmask();
-  fpsetmask(m & ~FP_X_OFL);
+  fedisableexcept(FE_OVERFLOW);
 #endif
   return PyMPI_Main(argc, argv);
 }
