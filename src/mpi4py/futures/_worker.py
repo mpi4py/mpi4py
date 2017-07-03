@@ -641,9 +641,9 @@ def server_sync(comm):
 def client_spawn_abort(main_name, main_path):  # pragma: no cover
     main_info = "\n"
     if main_name is not None:
-        main_info += "    main name: '%s'\n" % main_name
+        main_info += "    main name: '{}'\n".format(main_name)
     if main_path is not None:
-        main_info += "    main path: '%s'\n" % main_path
+        main_info += "    main path: '{}'\n".format(main_path)
     main_info += "\n"
     sys.stderr.write("""
     The main script or module attempted to spawn new MPI worker processes.
@@ -686,7 +686,7 @@ def client_spawn(python_exe=None,
     if max_workers is None:
         max_workers = client_spawn_max_workers()
     if mpi_info is None:
-        mpi_info = dict(soft='1:%d' % max_workers)
+        mpi_info = dict(soft='1:{}'.format(max_workers))
 
     args = _sys_flags() + list(python_args)
     args.extend(['-m', __package__ + '._spawn'])
