@@ -742,7 +742,7 @@ static int PyMPI_Status_set_elements_x(MPI_Status *status,
 #ifndef PyMPI_HAVE_MPI_Aint_add
 static MPI_Aint PyMPI_Aint_add(MPI_Aint base, MPI_Aint disp)
 {
-  return base + disp;
+  return (MPI_Aint) ((char*)base + disp);
 }
 #undef  MPI_Aint_add
 #define MPI_Aint_add PyMPI_Aint_add
@@ -751,7 +751,7 @@ static MPI_Aint PyMPI_Aint_add(MPI_Aint base, MPI_Aint disp)
 #ifndef PyMPI_HAVE_MPI_Aint_diff
 static MPI_Aint PyMPI_Aint_diff(MPI_Aint addr1, MPI_Aint addr2)
 {
-  return addr1 - addr2;
+  return (MPI_Aint) ((char*)addr1 - (char*)addr2);
 }
 #undef  MPI_Aint_diff
 #define MPI_Aint_diff PyMPI_Aint_diff
