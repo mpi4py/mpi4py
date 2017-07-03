@@ -61,6 +61,7 @@ class MPIPoolExecutor(Executor):
         Args:
             wait: If ``True`` then bootup will not return until the
                 executor resources are ready to process submissions.
+
         """
         with self._lock:
             if self._shutdown:
