@@ -22,6 +22,7 @@ class TestInfoNull(unittest.TestCase):
         self.assertEqual(inull.keys(), [])
         self.assertEqual(inull.values(), [])
         self.assertEqual(inull.items(), [])
+        self.assertEqual(inull.copy(), inull)
         inull.clear()
 
 class TestInfoEnv(unittest.TestCase):
@@ -141,6 +142,9 @@ class TestInfo(unittest.TestCase):
         self.assertEqual(INFO['key1'], 'val1')
         self.assertEqual(INFO['key2'], 'val2')
         self.assertEqual(INFO['key3'], 'val3')
+        dupe = INFO.copy()
+        self.assertEqual(INFO.items(), dupe.items())
+        dupe.Free()
         INFO.clear()
         self.assertEqual(len(INFO), 0)
         self.assertEqual(INFO.get('key1'), None)

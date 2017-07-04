@@ -209,6 +209,11 @@ cdef class Info:
         for key, value in kwds.items():
             self.Set(key, value)
 
+    def copy(self):
+        """info copy"""
+        if not self: return Info()
+        return self.Dup()
+
     def clear(self):
         """info clear"""
         if not self: return None
