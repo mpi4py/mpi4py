@@ -80,7 +80,7 @@ cdef int datarep_read(
     cdef object exc
     try:
         ierr = state.read(userbuf, datatype, count, filebuf, position)
-    except MPIException, exc:
+    except MPIException as exc:
         print_traceback()
         ierr = exc.Get_error_code()
     except:
@@ -101,7 +101,7 @@ cdef int datarep_write(
     cdef object exc
     try:
         ierr = state.write(userbuf, datatype, count, filebuf, position)
-    except MPIException, exc:
+    except MPIException as exc:
         print_traceback()
         ierr = exc.Get_error_code()
     except:
@@ -119,7 +119,7 @@ cdef int datarep_extent(
     cdef object exc
     try:
         ierr = state.extent(datatype, file_extent)
-    except MPIException, exc:
+    except MPIException as exc:
         print_traceback()
         ierr = exc.Get_error_code()
     except:

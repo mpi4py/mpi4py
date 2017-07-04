@@ -100,7 +100,7 @@ cdef int greq_query(void *extra_state, MPI_Status *status) with gil:
     cdef object exc
     try:
         ierr = state.query(status)
-    except MPIException, exc:
+    except MPIException as exc:
         print_traceback()
         ierr = exc.Get_error_code()
     except:
@@ -114,7 +114,7 @@ cdef int greq_free(void *extra_state) with gil:
     cdef object exc
     try:
         ierr = state.free()
-    except MPIException, exc:
+    except MPIException as exc:
         print_traceback()
         ierr = exc.Get_error_code()
     except:
@@ -129,7 +129,7 @@ cdef int greq_cancel(void *extra_state, int completed) with gil:
     cdef object exc
     try:
         ierr = state.cancel(completed)
-    except MPIException, exc:
+    except MPIException as exc:
         print_traceback()
         ierr = exc.Get_error_code()
     except:
