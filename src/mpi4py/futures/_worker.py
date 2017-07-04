@@ -477,12 +477,15 @@ def split(comm, root=0, tag=0):
 # ---
 
 
-def import_main(mod_name, mod_path, run_name):
+def import_main(mod_name, mod_path, init_globals, run_name):
     # pylint: disable=protected-access
     import types
     import runpy
 
     module = types.ModuleType(run_name)
+    if init_globals is not None:
+        module.__dict__.update(init_globals)
+        module.__name__ = run_name
 
     class TempModulePatch(runpy._TempModule):
         # pylint: disable=too-few-public-methods
@@ -541,8 +544,8 @@ def _sync_set_data(data):
 
     mod_name = data.pop('@main:mod_name', None)
     mod_path = data.pop('@main:mod_path', None)
-    run_name = data.pop('@main:run_name', MAIN_RUN_NAME)
-    import_main(mod_name, mod_path, run_name)
+    mod_glbs = data.pop('globals', None)
+    import_main(mod_name, mod_path, mod_glbs, MAIN_RUN_NAME)
 
     return data
 

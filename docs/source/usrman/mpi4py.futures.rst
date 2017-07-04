@@ -114,6 +114,9 @@ only) thread until they are signaled for completion.
      implementation about the set of keys it interprets and the corresponding
      format for values.
 
+   * *globals*: :class:`dict` or iterable yielding ``(name, value)`` pairs to
+     initialize the main module namespace in worker processes.
+
    * *main*: If set to ``False``, do not import the ``__main__`` module in
      worker processes. Setting *main* to ``False`` prevents worker processes
      from accessing definitions in the parent ``__main__`` namespace.

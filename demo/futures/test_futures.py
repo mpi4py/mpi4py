@@ -39,6 +39,14 @@ def sleep_and_raise(t):
     raise Exception('this is an exception')
 
 
+def check_global_var(x):
+    return global_var == x
+
+
+def check_run_name(name):
+    return __name__ == name
+
+
 class ExecutorMixin:
     worker_count = 2
 
@@ -92,6 +100,7 @@ class ProcessPoolInitTest(ProcessPoolMixin,
             python_exe=sys.executable,
             max_workers=None,
             mpi_info=dict(soft="0:1"),
+            globals=None,
             main=False,
             path=[],
             wdir=os.getcwd(),
@@ -102,6 +111,20 @@ class ProcessPoolInitTest(ProcessPoolMixin,
         for f in futures:
             f.result()
         executor.shutdown()
+
+    def test_init_globals(self):
+        executor = self.executor_type(globals=dict(global_var=42))
+        future1 = executor.submit(check_global_var, 42)
+        future2 = executor.submit(check_global_var, 24)
+        self.assertTrue(future1.result())
+        self.assertFalse(future2.result())
+        executor.shutdown()
+
+    def test_run_name(self):
+        executor = self.executor_type()
+        run_name = futures._worker.MAIN_RUN_NAME
+        future = executor.submit(check_run_name, run_name)
+        self.assertTrue(future.result(), run_name)
 
     def test_max_workers_environ(self):
         save = os.environ.get('MPI4PY_MAX_WORKERS')
@@ -1184,7 +1207,9 @@ if MPI.Get_version() < (2,0):
 if futures._worker.SharedPool:
     del MPICommExecutorTest.test_arg_root
     del MPICommExecutorTest.test_arg_comm_bad
+    del ProcessPoolInitTest.test_init_globals
     if MPI.COMM_WORLD.Get_size() == 1:
+        del ProcessPoolInitTest.test_run_name
         del ProcessPoolPickleTest
 elif SKIP_POOL_TEST or MPI.COMM_WORLD.Get_size() > 1:
     del ProcessPoolInitTest
