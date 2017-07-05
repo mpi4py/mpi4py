@@ -1,8 +1,8 @@
 # -----------------------------------------------------------------------------
 
-cdef inline int AddTypeMap(dict TD, object key, Datatype datatype) except -1:
-    if datatype.ob_mpi != MPI_DATATYPE_NULL:
-        TD[key] = datatype
+cdef inline int AddTypeMap(dict TD, const char tc[], Datatype dt) except -1:
+    if dt.ob_mpi != MPI_DATATYPE_NULL:
+        TD[pystr(tc)] = dt
         return 1
     return 0
 

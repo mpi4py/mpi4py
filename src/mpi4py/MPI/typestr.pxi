@@ -4,12 +4,12 @@ def _typecode(Datatype datatype not None):
     """
     Map MPI datatype to typecode string
     """
-    cdef char *tc = Datatype2String(datatype.ob_mpi)
+    cdef const char *tc = Datatype2String(datatype.ob_mpi)
     return pystr(tc) if tc != NULL else None
 
 # -----------------------------------------------------------------------------
 
-cdef inline char* Datatype2String(MPI_Datatype datatype) nogil:
+cdef inline const char* Datatype2String(MPI_Datatype datatype) nogil:
     if datatype == MPI_DATATYPE_NULL: return NULL
     # MPI
     elif datatype == MPI_LB     : return NULL

@@ -27,6 +27,14 @@ cdef inline int is_buffer(object ob):
         return (PyObject_CheckBuffer(ob) or
                 PyObject_CheckReadBuffer(ob))
 
+cdef inline int is_datatype(object ob):
+    if isinstance(ob, Datatype): return 1
+    if PY_MAJOR_VERSION >= 3:
+        if isinstance(ob, unicode): return 1
+    else:
+        if isinstance(ob, bytes): return 1
+    return 0
+
 #------------------------------------------------------------------------------
 
 cdef extern from *:
@@ -68,7 +76,6 @@ cdef _p_message message_basic(object o_buf,
                               MPI_Aint     *bsize,
                               MPI_Datatype *btype,
                               ):
-    global TypeDict
     cdef _p_message m = <_p_message>_p_message.__new__(_p_message)
     # special-case for BOTTOM or None,
     # an explicit MPI datatype is required
@@ -125,8 +132,7 @@ cdef _p_message message_simple(object msg,
         nargs = len(msg)
         if nargs == 2:
             (o_buf, o_count) = msg
-            if (isinstance(o_count, Datatype) or
-                isinstance(o_count, str)):
+            if is_datatype(o_count):
                 (o_count, o_type) = None, o_count
             elif is_tuple(o_count) or is_list(o_count):
                 (o_count, o_displ) = o_count
@@ -238,8 +244,7 @@ cdef _p_message message_vector(object msg,
         nargs = len(msg)
         if nargs == 2:
             (o_buf, o_counts) = msg
-            if (isinstance(o_counts, Datatype) or
-                isinstance(o_counts, str)):
+            if is_datatype(o_counts):
                 (o_counts, o_type) = None, o_counts
             elif is_tuple(o_counts):
                 (o_counts, o_displs) = o_counts
@@ -324,7 +329,7 @@ cdef tuple message_vector_w(object msg,
                             int          **_counts,
                             integral_t   **_displs,
                             MPI_Datatype **_types,
-                      ):
+                            ):
     cdef int i = 0
     cdef Py_ssize_t nargs = len(msg)
     cdef object o_buffer, o_counts, o_displs, o_types

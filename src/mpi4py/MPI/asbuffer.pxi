@@ -319,7 +319,7 @@ cdef inline object getformat(memory buf):
             return pystr(view.format)
     #
     cdef object ob = <object>view.obj
-    cdef str format = None
+    cdef object format = None
     try: # numpy.ndarray
         format = ob.dtype.char
     except (AttributeError, TypeError):
