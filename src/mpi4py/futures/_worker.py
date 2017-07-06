@@ -81,12 +81,12 @@ def _manager_thread(executor_ref, event, queue, **options):
     _set_num_workers(executor_ref, event, 1)
 
     sleep = time.sleep
-    delay = options.get('delay', 10e-6)
-    assert delay >= 0
+    throttle = options.get('throttle', 100e-6)
+    assert throttle >= 0
 
     while True:
         while not queue:
-            sleep(delay)
+            sleep(throttle)
         task = queue.pop()
         if task is None:
             break
@@ -292,8 +292,8 @@ def client(comm, tag, worker_pool, task_queue, **options):
     request_free = serialized(MPI.Request.Free)
 
     sleep = time.sleep
-    delay = options.get('delay', 10e-6)
-    assert delay >= 0
+    throttle = options.get('throttle', 100e-6)
+    assert throttle >= 0
 
     pending = {}
 
@@ -304,7 +304,7 @@ def client(comm, tag, worker_pool, task_queue, **options):
     def probe():
         pid = MPI.ANY_SOURCE
         while not comm_iprobe(pid, tag, status):
-            sleep(delay)
+            sleep(throttle)
 
     def recv():
         pid = status.source
@@ -357,7 +357,7 @@ def client(comm, tag, worker_pool, task_queue, **options):
             idle = False
             recv()
         if idle:
-            sleep(delay)
+            sleep(throttle)
     while pending:
         probe()
         recv()
@@ -385,13 +385,13 @@ def server(comm, **options):
     request_test = MPI.Request.Test
 
     sleep = time.sleep
-    delay = options.get('delay', 10e-6)
-    assert delay >= 0
+    throttle = options.get('throttle', 100e-6)
+    assert throttle >= 0
 
     def recv():
         pid, tag = MPI.ANY_SOURCE, MPI.ANY_TAG
         while not comm_iprobe(pid, tag, status):
-            sleep(delay)
+            sleep(throttle)
         pid, tag = status.source, status.tag
         try:
             task = comm_recv(None, pid, tag, status)
@@ -417,7 +417,7 @@ def server(comm, **options):
             task = (None, sys_exception())
             request = comm_isend(task, pid, tag)
         while not request_test(request):
-            sleep(delay)
+            sleep(throttle)
 
     while True:
         task = recv()
@@ -490,6 +490,7 @@ def import_main(mod_name, mod_path, init_globals, run_name):
     class TempModulePatch(runpy._TempModule):
         # pylint: disable=too-few-public-methods
         def __init__(self, mod_name):
+            # pylint: disable=no-member
             super(TempModulePatch, self).__init__(mod_name)
             assert self.module.__name__ == run_name
             self.module = module
@@ -592,11 +593,11 @@ def _sys_flags():
 def _sync_ibarrier(comm):
     assert comm.Is_inter()
     sleep = time.sleep
-    delay = 10e-6
+    throttle = 100e-6
     try:
         request = comm.Ibarrier()
         while not request.Test():
-            sleep(delay)
+            sleep(throttle)
     except NotImplementedError:  # pragma: no cover
         buf = [None, 0, MPI.BYTE]
         tag = MPI.COMM_WORLD.Get_attr(MPI.TAG_UB)
@@ -605,7 +606,7 @@ def _sync_ibarrier(comm):
             recvreqs.append(comm.Irecv(buf, pid, tag))
             sendreqs.append(comm.Issend(buf, pid, tag))
         while not MPI.Request.Testall(recvreqs):
-            sleep(delay)
+            sleep(throttle)
         MPI.Request.Waitall(sendreqs)
 
 
