@@ -279,6 +279,42 @@ class SharedPoolCtx(object):
 # ---
 
 
+def barrier(comm):
+    assert comm.Is_inter()
+    sleep = time.sleep
+    throttle = 100e-6
+    try:
+        request = comm.Ibarrier()
+        while not request.Test():
+            sleep(throttle)
+    except NotImplementedError:  # pragma: no cover
+        buf = [None, 0, MPI.BYTE]
+        tag = MPI.COMM_WORLD.Get_attr(MPI.TAG_UB)
+        sendreqs, recvreqs = [], []
+        for pid in range(comm.Get_remote_size()):
+            recvreqs.append(comm.Irecv(buf, pid, tag))
+            sendreqs.append(comm.Issend(buf, pid, tag))
+        while not MPI.Request.Testall(recvreqs):
+            sleep(throttle)
+        MPI.Request.Waitall(sendreqs)
+
+
+def client_sync(comm, options):
+    assert comm.Is_inter()
+    assert comm.Get_size() == 1
+    barrier(comm)
+    data = _sync_get_data(options)
+    if MPI.ROOT != MPI.PROC_NULL:
+        comm.bcast(data, MPI.ROOT)
+    else:  # pragma: no cover
+        tag = MPI.COMM_WORLD.Get_attr(MPI.TAG_UB)
+        size = comm.Get_remote_size()
+        MPI.Request.Waitall([
+            comm.issend(data, pid, tag)
+            for pid in range(size)])
+    return options
+
+
 def client(comm, tag, worker_pool, task_queue, **options):
     # pylint: disable=too-many-locals
     assert comm.Is_inter()
@@ -372,6 +408,19 @@ def client_close(comm):
         comm.Disconnect()
     except NotImplementedError:  # pragma: no cover
         comm.Free()
+
+
+def server_sync(comm):
+    assert comm.Is_inter()
+    assert comm.Get_remote_size() == 1
+    barrier(comm)
+    if MPI.ROOT != MPI.PROC_NULL:
+        data = comm.bcast(None, 0)
+    else:  # pragma: no cover
+        tag = MPI.COMM_WORLD.Get_attr(MPI.TAG_UB)
+        data = comm.recv(None, 0, tag)
+    options = _sync_set_data(data)
+    return options
 
 
 def server(comm, **options):
@@ -588,55 +637,6 @@ def _sys_flags():
         args.append('-X' + opt if val is True else
                     '-X' + opt + '=' + val)
     return args
-
-
-def _sync_ibarrier(comm):
-    assert comm.Is_inter()
-    sleep = time.sleep
-    throttle = 100e-6
-    try:
-        request = comm.Ibarrier()
-        while not request.Test():
-            sleep(throttle)
-    except NotImplementedError:  # pragma: no cover
-        buf = [None, 0, MPI.BYTE]
-        tag = MPI.COMM_WORLD.Get_attr(MPI.TAG_UB)
-        sendreqs, recvreqs = [], []
-        for pid in range(comm.Get_remote_size()):
-            recvreqs.append(comm.Irecv(buf, pid, tag))
-            sendreqs.append(comm.Issend(buf, pid, tag))
-        while not MPI.Request.Testall(recvreqs):
-            sleep(throttle)
-        MPI.Request.Waitall(sendreqs)
-
-
-def client_sync(comm, options):
-    assert comm.Is_inter()
-    assert comm.Get_size() == 1
-    _sync_ibarrier(comm)
-    data = _sync_get_data(options)
-    if MPI.ROOT != MPI.PROC_NULL:
-        comm.bcast(data, MPI.ROOT)
-    else:  # pragma: no cover
-        tag = MPI.COMM_WORLD.Get_attr(MPI.TAG_UB)
-        size = comm.Get_remote_size()
-        MPI.Request.Waitall([
-            comm.issend(data, pid, tag)
-            for pid in range(size)])
-    return options
-
-
-def server_sync(comm):
-    assert comm.Is_inter()
-    assert comm.Get_remote_size() == 1
-    _sync_ibarrier(comm)
-    if MPI.ROOT != MPI.PROC_NULL:
-        data = comm.bcast(None, 0)
-    else:  # pragma: no cover
-        tag = MPI.COMM_WORLD.Get_attr(MPI.TAG_UB)
-        data = comm.recv(None, 0, tag)
-    options = _sync_set_data(data)
-    return options
 
 
 # ---
