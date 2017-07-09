@@ -8,6 +8,7 @@ import sys
 import time
 import atexit
 import weakref
+import itertools
 import threading
 import collections
 
@@ -220,58 +221,55 @@ class SharedPoolCtx(object):
 
     def __init__(self):
         self.comm = MPI.COMM_NULL
-        self.itag = 0
-        self.pool = None
-        self.root = None
-        self.lock = threading.Lock()
+        self.on_root = None
+        self.counter = None
+        self.workers = None
         self.threads_queues = weakref.WeakKeyDictionary()
 
     def __call__(self, executor, **options):
         assert SharedPool is self
-        with self.lock:
-            tag = self.itag
-            self.itag = tag + 1
-        if self.comm != MPI.COMM_NULL and self.root:
-            manager, args = _manager_shared, (self.comm, tag, self.pool)
+        tag = next(self.counter)
+        if self.comm != MPI.COMM_NULL and self.on_root:
+            args = (self.comm, tag, self.workers)
+            pool = Pool(_manager_shared, executor, *args, **options)
         else:
-            manager, args = _manager_thread, ()
-        pool = Pool(manager, executor, *args, **options)
+            pool = Pool(_manager_thread, executor, **options)
         del THREADS_QUEUES[pool.thread]
         self.threads_queues[pool.thread] = pool.queue
         return pool
 
     def __enter__(self):
         assert SharedPool is None
+        self.on_root = MPI.COMM_WORLD.Get_rank() == 0
+        self.counter = itertools.count(0)
         if MPI.COMM_WORLD.Get_size() >= 2:
             self.comm = split(MPI.COMM_WORLD, root=0)
-            if MPI.COMM_WORLD.Get_rank() == 0:
+            if self.on_root:
                 size = self.comm.Get_remote_size()
-                self.pool = Stack(reversed(range(size)))
-        self.itag = 0
-        self.root = MPI.COMM_WORLD.Get_rank() == 0
+                self.workers = Stack(reversed(range(size)))
         _set_shared_pool(self)
-        return self if self.root else None
+        return self if self.on_root else None
 
     def __exit__(self, *args):
         assert SharedPool is self
-        if self.root:
+        if self.on_root:
             Pool.join_all(self.threads_queues)
         if self.comm != MPI.COMM_NULL:
-            if self.root:
-                if self.itag == 0:
+            if self.on_root:
+                if next(self.counter) == 0:
                     client_sync(self.comm, dict(main=False))
                 client_close(self.comm)
             else:
                 options = server_sync(self.comm)
                 server(self.comm, **options)
                 server_close(self.comm)
-        if not self.root:
+        if not self.on_root:
             Pool.join_all(self.threads_queues)
         _set_shared_pool(None)
         self.comm = MPI.COMM_NULL
-        self.itag = 0
-        self.pool = None
-        self.root = None
+        self.on_root = None
+        self.counter = None
+        self.workers = None
         self.threads_queues.clear()
         return False
 
@@ -490,7 +488,7 @@ def get_world():
     return MPI.COMM_WORLD
 
 
-def split(comm, root=0, tag=0):
+def split(comm, root=0):
     assert not comm.Is_inter()
     assert comm.Get_size() > 1
     assert 0 <= root < comm.Get_size()
@@ -517,7 +515,7 @@ def split(comm, root=0, tag=0):
         local_leader = 0
         remote_leader = root
     intercomm = intracomm.Create_intercomm(
-        local_leader, comm, remote_leader, tag)
+        local_leader, comm, remote_leader, tag=0)
     intracomm.Free()
 
     return intercomm
