@@ -79,32 +79,42 @@ def _set_num_workers(executor_ref, event, num_workers):
 
 
 def _manager_thread(executor_ref, event, queue, **options):
-    _set_num_workers(executor_ref, event, 1)
+    size = options.pop('max_workers', 1)
+    _set_num_workers(executor_ref, event, size)
 
     sleep = time.sleep
     throttle = options.get('throttle', 100e-6)
     assert throttle >= 0
 
-    while True:
-        while not queue:
-            sleep(throttle)
-        task = queue.pop()
-        if task is None:
-            break
-        future, work = task
-        if not future.set_running_or_notify_cancel():
-            continue
-        func, args, kwargs = work
-        try:
-            result = func(*args, **kwargs)
-            exception = None
-        except BaseException:
-            result = None
-            exception = sys_exception()
-        if exception is None:
-            future.set_result(result)
-        else:
-            future.set_exception(exception)
+    def worker():
+        while True:
+            try:
+                task = queue.pop()
+            except LookupError:
+                sleep(throttle)
+                continue
+            if task is None:
+                queue.put(None)
+                break
+            future, work = task
+            if not future.set_running_or_notify_cancel():
+                continue
+            func, args, kwargs = work
+            try:
+                result = func(*args, **kwargs)
+                future.set_result(result)
+            except BaseException:
+                exception = sys_exception()
+                future.set_exception(exception)
+
+    threads = [threading.Thread(target=worker)
+               for _ in range(size - 1)]
+    for thread in threads:
+        thread.start()
+    worker()
+    for thread in threads:
+        thread.join()
+    queue.pop()
 
 
 def _manager_comm(executor_ref, event, queue, comm, **options):
