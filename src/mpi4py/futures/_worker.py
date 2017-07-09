@@ -127,6 +127,17 @@ def _manager_spawn(executor_ref, event, queue, **options):
 THREADS_QUEUES = weakref.WeakKeyDictionary()
 
 
+def join_threads(threads_queues=THREADS_QUEUES):
+    items = list(threads_queues.items())
+    for _, queue in items:   # pragma: no cover
+        queue.put(None)
+    for thread, _ in items:  # pragma: no cover
+        thread.join()
+
+
+atexit.register(join_threads)
+
+
 class Pool(object):
 
     def __init__(self, manager_target, executor, *args, **options):
@@ -156,17 +167,6 @@ class Pool(object):
 
     def join(self):
         self.thread.join()
-
-    @staticmethod
-    def join_all(threads_queues=THREADS_QUEUES):
-        items = list(threads_queues.items())
-        for _, queue in items:   # pragma: no cover
-            queue.put(None)
-        for thread, _ in items:  # pragma: no cover
-            thread.join()
-
-
-atexit.register(Pool.join_all)
 
 
 def ThreadPool(executor, **options):
@@ -224,7 +224,7 @@ class SharedPoolCtx(object):
         self.on_root = None
         self.counter = None
         self.workers = None
-        self.threads_queues = weakref.WeakKeyDictionary()
+        self.threads = weakref.WeakKeyDictionary()
 
     def __call__(self, executor, **options):
         assert SharedPool is self
@@ -235,7 +235,7 @@ class SharedPoolCtx(object):
         else:
             pool = Pool(_manager_thread, executor, **options)
         del THREADS_QUEUES[pool.thread]
-        self.threads_queues[pool.thread] = pool.queue
+        self.threads[pool.thread] = pool.queue
         return pool
 
     def __enter__(self):
@@ -253,7 +253,7 @@ class SharedPoolCtx(object):
     def __exit__(self, *args):
         assert SharedPool is self
         if self.on_root:
-            Pool.join_all(self.threads_queues)
+            join_threads(self.threads)
         if self.comm != MPI.COMM_NULL:
             if self.on_root:
                 if next(self.counter) == 0:
@@ -264,13 +264,13 @@ class SharedPoolCtx(object):
                 server(self.comm, **options)
                 server_close(self.comm)
         if not self.on_root:
-            Pool.join_all(self.threads_queues)
+            join_threads(self.threads)
         _set_shared_pool(None)
         self.comm = MPI.COMM_NULL
         self.on_root = None
         self.counter = None
         self.workers = None
-        self.threads_queues.clear()
+        self.threads.clear()
         return False
 
 
