@@ -964,10 +964,8 @@ cdef object PyMPI_send_p2p(object obj, int dst, int tag, MPI_Comm comm):
     cdef int count = 0
     cdef MPI_Datatype dtype = MPI_BYTE
     obj = pickle.dump(obj, &buf, &count)
-    with nogil:
-        CHKERR( MPI_Send(&count, 1, MPI_INT, dst, tag, comm) )
-    with nogil:
-        CHKERR( MPI_Send(buf, count, dtype, dst, tag, comm) )
+    with nogil: CHKERR( MPI_Send(&count, 1, MPI_INT, dst, tag, comm) )
+    with nogil: CHKERR( MPI_Send(buf, count, dtype, dst, tag, comm) )
     return None
 
 cdef object PyMPI_recv_p2p(int src, int tag, MPI_Comm comm):
@@ -977,11 +975,9 @@ cdef object PyMPI_recv_p2p(int src, int tag, MPI_Comm comm):
     cdef MPI_Datatype dtype = MPI_BYTE
     cdef MPI_Status *status = MPI_STATUS_IGNORE
     cdef object obj
-    with nogil:
-        CHKERR( MPI_Recv(&count, 1, MPI_INT, src, tag, comm, status) )
+    with nogil: CHKERR( MPI_Recv(&count, 1, MPI_INT, src, tag, comm, status) )
     obj = pickle.alloc(&buf, count)
-    with nogil:
-        CHKERR( MPI_Recv(buf, count, dtype, src, tag, comm, status) )
+    with nogil: CHKERR( MPI_Recv(buf, count, dtype, src, tag, comm, status) )
     return pickle.load(obj)
 
 cdef object PyMPI_sendrecv_p2p(object obj,
@@ -993,15 +989,13 @@ cdef object PyMPI_sendrecv_p2p(object obj,
     cdef int scount = 0, rcount = 0
     cdef MPI_Datatype dtype = MPI_BYTE
     cdef object tmps = pickle.dump(obj, &sbuf, &scount)
-    with nogil:
-        CHKERR( MPI_Sendrecv(&scount, 1, MPI_INT, dst, stag,
-                             &rcount, 1, MPI_INT, src, rtag,
-                             comm, MPI_STATUS_IGNORE) )
+    with nogil: CHKERR( MPI_Sendrecv(&scount, 1, MPI_INT, dst, stag,
+                                     &rcount, 1, MPI_INT, src, rtag,
+                                     comm, MPI_STATUS_IGNORE) )
     cdef object robj = pickle.alloc(&rbuf, rcount)
-    with nogil:
-        CHKERR( MPI_Sendrecv(sbuf, scount, dtype, dst, stag,
-                             rbuf, rcount, dtype, src, rtag,
-                             comm, MPI_STATUS_IGNORE) )
+    with nogil: CHKERR( MPI_Sendrecv(sbuf, scount, dtype, dst, stag,
+                                     rbuf, rcount, dtype, src, rtag,
+                                     comm, MPI_STATUS_IGNORE) )
     return pickle.load(robj)
 
 cdef object PyMPI_bcast_p2p(object obj, int root, MPI_Comm comm):
