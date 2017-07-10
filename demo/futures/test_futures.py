@@ -112,6 +112,12 @@ class ProcessPoolInitTest(ProcessPoolMixin,
             f.result()
         executor.shutdown()
 
+    def test_init_pyargs(self):
+        executor_type = futures.MPIPoolExecutor
+        executor = executor_type(python_args=['-B', '-Wi'])
+        executor.submit(time.sleep, 0).result()
+        executor.shutdown()
+
     def test_init_globals(self):
         executor = self.executor_type(globals=dict(global_var=42))
         future1 = executor.submit(check_global_var, 42)

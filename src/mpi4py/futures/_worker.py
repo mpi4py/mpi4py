@@ -693,8 +693,8 @@ def client_spawn(python_exe=None,
         client_spawn_abort(*import_main.info)
     if python_exe is None:
         python_exe = sys.executable
-    if python_args is None:  # pragma: no branch
-        python_args = []     # pragma: no cover
+    if python_args is None:
+        python_args = []
     if max_workers is None:
         max_workers = client_spawn_max_workers()
     if mpi_info is None:
