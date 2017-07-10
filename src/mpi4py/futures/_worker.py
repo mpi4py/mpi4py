@@ -107,8 +107,7 @@ def _manager_thread(executor_ref, event, queue, **options):
                 exception = sys_exception()
                 future.set_exception(exception)
 
-    threads = [threading.Thread(target=worker)
-               for _ in range(size - 1)]
+    threads = [threading.Thread(target=worker) for _ in range(size - 1)]
     for thread in threads:
         thread.start()
     worker()
@@ -150,14 +149,13 @@ atexit.register(join_threads)
 
 class Pool(object):
 
-    def __init__(self, manager_target, executor, *args, **options):
+    def __init__(self, manager, executor, *args, **options):
         event, queue = threading.Event(), Queue()
         executor_ref = weakref.ref(executor, lambda _, q=queue: q.put(None))
+        args = (executor_ref, event, queue) + args
 
         setup_mpi_threads()
-        thread = threading.Thread(target=manager_target,
-                                  args=(executor_ref, event, queue) + args,
-                                  kwargs=options)
+        thread = threading.Thread(target=manager, args=args, kwargs=options)
         thread.daemon = True
         thread.start()
         THREADS_QUEUES[thread] = queue
@@ -194,7 +192,12 @@ def SpawnPool(executor, **options):
     return Pool(_manager_spawn, executor, **options)
 
 
-WorkerPool = SpawnPool  # pylint: disable=invalid-name
+def WorkerPool(executor, **options):
+    # pylint: disable=invalid-name
+    if SharedPool is not None:
+        return SharedPool(executor, **options)
+    else:
+        return SpawnPool(executor, **options)
 
 
 # ---
@@ -206,14 +209,8 @@ SharedPool = None  # pylint: disable=invalid-name
 def _set_shared_pool(obj):
     # pylint: disable=invalid-name
     # pylint: disable=global-statement
-    global WorkerPool
     global SharedPool
-    if obj is not None:
-        WorkerPool = obj
-        SharedPool = obj
-    else:
-        WorkerPool = SpawnPool
-        SharedPool = None
+    SharedPool = obj
 
 
 def _manager_shared(executor_ref, event, queue,
