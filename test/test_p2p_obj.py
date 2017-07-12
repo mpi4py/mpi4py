@@ -382,41 +382,45 @@ class BaseTestP2PObj(object):
         rank = comm.Get_rank()
         buf = MPI.Alloc_mem((1<<16)+MPI.BSEND_OVERHEAD)
         MPI.Attach_buffer(buf)
-        for smess in messages:
-            src = dst = rank
-            req1 = comm.irecv(None, src, 1)
-            req2 = comm.irecv(None, src, 2)
-            req3 = comm.irecv(None, src, 3)
-            comm.bsend(smess, dst, 3)
-            comm.bsend(smess, dst, 2)
-            comm.bsend(smess, dst, 1)
-            self.assertEqual(smess, req3.wait())
-            self.assertEqual(smess, req2.wait())
-            self.assertEqual(smess, req1.wait())
-            comm.bsend(smess, MPI.PROC_NULL, 3)
-        MPI.Detach_buffer()
-        MPI.Free_mem(buf)
+        try:
+            for smess in messages:
+                src = dst = rank
+                req1 = comm.irecv(None, src, 1)
+                req2 = comm.irecv(None, src, 2)
+                req3 = comm.irecv(None, src, 3)
+                comm.bsend(smess, dst, 3)
+                comm.bsend(smess, dst, 2)
+                comm.bsend(smess, dst, 1)
+                self.assertEqual(smess, req3.wait())
+                self.assertEqual(smess, req2.wait())
+                self.assertEqual(smess, req1.wait())
+                comm.bsend(smess, MPI.PROC_NULL, 3)
+        finally:
+            MPI.Detach_buffer()
+            MPI.Free_mem(buf)
 
     def testIRecvAndIBSend(self):
         comm = self.COMM
         rank = comm.Get_rank()
         buf = MPI.Alloc_mem((1<<16)+MPI.BSEND_OVERHEAD)
         MPI.Attach_buffer(buf)
-        for smess in messages:
-            src = dst = rank
-            req1 = comm.irecv(None, src, 1)
-            req2 = comm.irecv(None, src, 2)
-            req3 = comm.irecv(None, src, 3)
-            req4 = comm.ibsend(smess, dst, 3)
-            req5 = comm.ibsend(smess, dst, 2)
-            req6 = comm.ibsend(smess, dst, 1)
-            MPI.Request.waitall([req4, req5, req6])
-            self.assertEqual(smess, req3.wait())
-            self.assertEqual(smess, req2.wait())
-            self.assertEqual(smess, req1.wait())
-            comm.ibsend(smess, MPI.PROC_NULL, 3).wait()
-        MPI.Detach_buffer()
-        MPI.Free_mem(buf)
+        try:
+            for smess in messages:
+                src = dst = rank
+                req1 = comm.irecv(None, src, 1)
+                req2 = comm.irecv(None, src, 2)
+                req3 = comm.irecv(None, src, 3)
+                req4 = comm.ibsend(smess, dst, 3)
+                req5 = comm.ibsend(smess, dst, 2)
+                req6 = comm.ibsend(smess, dst, 1)
+                MPI.Request.waitall([req4, req5, req6])
+                self.assertEqual(smess, req3.wait())
+                self.assertEqual(smess, req2.wait())
+                self.assertEqual(smess, req1.wait())
+                comm.ibsend(smess, MPI.PROC_NULL, 3).wait()
+        finally:
+            MPI.Detach_buffer()
+            MPI.Free_mem(buf)
 
     def testIRecvAndSSend(self):
         comm = self.COMM

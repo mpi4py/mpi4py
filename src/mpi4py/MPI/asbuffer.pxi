@@ -87,8 +87,9 @@ except -1:
     cdef Py_ssize_t size = 0
     cdef bint readonly = 0
     try:
-        if PyObject_CheckBuffer(obj):
-            return PyObject_GetBuffer(obj, view, flags)
+        if not isinstance(obj, bytes):
+            if PyObject_CheckBuffer(obj):
+                return PyObject_GetBuffer(obj, view, flags)
     except SystemError:
         pass
     except TypeError:
