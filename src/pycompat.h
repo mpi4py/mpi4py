@@ -32,6 +32,7 @@ static Py_ssize_t PyByteArray_Size(PyObject* o)
 /* ------------------------------------------------------------------------- */
 
 #ifdef PYPY_VERSION
+#if PY_VERSION_HEX < 0x03030000
 #ifdef PySlice_GetIndicesEx
 #undef PySlice_GetIndicesEx
 #define PySlice_GetIndicesEx(s, n, start, stop, step, length) \
@@ -39,6 +40,7 @@ PyPySlice_GetIndicesEx((PySliceObject *)(s), n, start, stop, step, length)
 #else
 #define PySlice_GetIndicesEx(s, n, start, stop, step, length) \
 PySlice_GetIndicesEx((PySliceObject *)(s), n, start, stop, step, length)
+#endif
 #endif
 #else
 #if PY_VERSION_HEX < 0x03020000
