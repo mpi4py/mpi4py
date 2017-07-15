@@ -983,9 +983,7 @@ cdef class Comm:
     property is_topo:
         """is a topology communicator"""
         def __get__(self):
-            cdef int topo = MPI_UNDEFINED
-            CHKERR( MPI_Topo_test(self.ob_mpi, &topo) )
-            return topo != MPI_UNDEFINED
+            return self.Get_topology() != MPI_UNDEFINED
 
     # Process Creation and Management
     # -------------------------------
