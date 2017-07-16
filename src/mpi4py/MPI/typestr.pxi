@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 
-def _typecode(Datatype datatype not None):
+def _typecode(Datatype datatype):
     """
     Map MPI datatype to typecode string
     """

@@ -30,7 +30,7 @@ cdef class Message:
     # --------------
 
     @classmethod
-    def Probe(cls, Comm comm not None,
+    def Probe(cls, Comm comm,
               int source=ANY_SOURCE, int tag=ANY_TAG, Status status=None):
         """
         Blocking test for a matched message
@@ -44,7 +44,7 @@ cdef class Message:
         return message
 
     @classmethod
-    def Iprobe(cls, Comm comm not None,
+    def Iprobe(cls, Comm comm,
                int source=ANY_SOURCE, int tag=ANY_TAG, Status status=None):
         """
         Nonblocking test for a matched message
@@ -100,7 +100,7 @@ cdef class Message:
     # --------------------
     #
     @classmethod
-    def probe(cls, Comm comm not None,
+    def probe(cls, Comm comm,
               int source=ANY_SOURCE, int tag=ANY_TAG, Status status=None):
         """Blocking test for a matched message"""
         cdef Message message = <Message>Message.__new__(cls)
@@ -110,7 +110,7 @@ cdef class Message:
         return message
     #
     @classmethod
-    def iprobe(cls, Comm comm not None,
+    def iprobe(cls, Comm comm,
                int source=ANY_SOURCE, int tag=ANY_TAG, Status status=None):
         """Nonblocking test for a matched message"""
         cdef int flag = 0

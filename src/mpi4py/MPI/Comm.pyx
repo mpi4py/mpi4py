@@ -101,7 +101,7 @@ cdef class Comm:
             return self.Get_rank()
 
     @classmethod
-    def Compare(cls, Comm comm1 not None, Comm comm2 not None):
+    def Compare(cls, Comm comm1, Comm comm2):
         """
         Compare two communicators
         """
@@ -139,7 +139,7 @@ cdef class Comm:
         comm_set_eh(comm.ob_mpi)
         return comm
 
-    def Dup_with_info(self, Info info not None):
+    def Dup_with_info(self, Info info):
         """
         Duplicate an existing communicator
         """
@@ -162,7 +162,7 @@ cdef class Comm:
         comm_set_eh(comm.ob_mpi)
         return (comm, request)
 
-    def Create(self, Group group not None):
+    def Create(self, Group group):
         """
         Create communicator from group
         """
@@ -175,7 +175,7 @@ cdef class Comm:
         comm_set_eh(comm.ob_mpi)
         return comm
 
-    def Create_group(self, Group group not None, int tag=0):
+    def Create_group(self, Group group, int tag=0):
         """
         Create communicator from group
         """
@@ -209,10 +209,9 @@ cdef class Comm:
         cdef type comm_type = Comm
         if   isinstance(self, Intracomm): comm_type = Intracomm
         elif isinstance(self, Intercomm): comm_type = Intercomm
-        cdef MPI_Info cinfo = arg_Info(info)
         cdef Comm comm = <Comm>comm_type.__new__(comm_type)
         with nogil: CHKERR( MPI_Comm_split_type(
-            self.ob_mpi, split_type, key, cinfo, &comm.ob_mpi) )
+            self.ob_mpi, split_type, key, info.ob_mpi, &comm.ob_mpi) )
         comm_set_eh(comm.ob_mpi)
         return comm
 
@@ -230,7 +229,7 @@ cdef class Comm:
     # Communicator Info
     # -----------------
 
-    def Set_info(self, Info info not None):
+    def Set_info(self, Info info):
         """
         Set new values for the hints
         associated with a communicator
@@ -696,7 +695,7 @@ cdef class Comm:
     # Global Reduction Operations
     # ---------------------------
 
-    def Reduce(self, sendbuf, recvbuf, Op op not None=SUM, int root=0):
+    def Reduce(self, sendbuf, recvbuf, Op op=SUM, int root=0):
         """
         Reduce
         """
@@ -706,7 +705,7 @@ cdef class Comm:
             m.sbuf, m.rbuf, m.rcount, m.rtype,
             op.ob_mpi, root, self.ob_mpi) )
 
-    def Allreduce(self, sendbuf, recvbuf, Op op not None=SUM):
+    def Allreduce(self, sendbuf, recvbuf, Op op=SUM):
         """
         All Reduce
         """
@@ -716,8 +715,7 @@ cdef class Comm:
             m.sbuf, m.rbuf, m.rcount, m.rtype,
             op.ob_mpi, self.ob_mpi) )
 
-    def Reduce_scatter_block(self, sendbuf, recvbuf,
-                             Op op not None=SUM):
+    def Reduce_scatter_block(self, sendbuf, recvbuf, Op op=SUM):
         """
         Reduce-Scatter Block (regular, non-vector version)
         """
@@ -727,8 +725,7 @@ cdef class Comm:
             m.sbuf, m.rbuf, m.rcount, m.rtype,
             op.ob_mpi, self.ob_mpi) )
 
-    def Reduce_scatter(self, sendbuf, recvbuf, recvcounts=None,
-                       Op op not None=SUM):
+    def Reduce_scatter(self, sendbuf, recvbuf, recvcounts=None, Op op=SUM):
         """
         Reduce-Scatter (vector version)
         """
@@ -888,7 +885,7 @@ cdef class Comm:
         request.ob_buf = m
         return request
 
-    def Ireduce(self, sendbuf, recvbuf, Op op not None=SUM, int root=0):
+    def Ireduce(self, sendbuf, recvbuf, Op op=SUM, int root=0):
         """
         Nonblocking Reduce
         """
@@ -900,7 +897,7 @@ cdef class Comm:
             op.ob_mpi, root, self.ob_mpi, &request.ob_mpi) )
         return request
 
-    def Iallreduce(self, sendbuf, recvbuf, Op op not None=SUM):
+    def Iallreduce(self, sendbuf, recvbuf, Op op=SUM):
         """
         Nonblocking All Reduce
         """
@@ -912,8 +909,7 @@ cdef class Comm:
             op.ob_mpi, self.ob_mpi, &request.ob_mpi) )
         return request
 
-    def Ireduce_scatter_block(self, sendbuf, recvbuf,
-                             Op op not None=SUM):
+    def Ireduce_scatter_block(self, sendbuf, recvbuf, Op op=SUM):
         """
         Nonblocking Reduce-Scatter Block (regular, non-vector version)
         """
@@ -925,8 +921,7 @@ cdef class Comm:
             op.ob_mpi, self.ob_mpi, &request.ob_mpi) )
         return request
 
-    def Ireduce_scatter(self, sendbuf, recvbuf, recvcounts=None,
-                       Op op not None=SUM):
+    def Ireduce_scatter(self, sendbuf, recvbuf, recvcounts=None, Op op=SUM):
         """
         Nonblocking Reduce-Scatter (vector version)
         """
@@ -1089,7 +1084,7 @@ cdef class Comm:
         CHKERR( MPI_Comm_get_errhandler(self.ob_mpi, &errhandler.ob_mpi) )
         return errhandler
 
-    def Set_errhandler(self, Errhandler errhandler not None):
+    def Set_errhandler(self, Errhandler errhandler):
         """
         Set the error handler for a communicator
         """
@@ -1362,7 +1357,6 @@ cdef class Intracomm(Comm):
             destinations = getarray(destinations, &outdegree, &idest)
         destweights = asarray_weights(
             destweights, outdegree, &idestweight)
-        cdef MPI_Info cinfo = arg_Info(info)
         #
         cdef Distgraphcomm comm = \
             <Distgraphcomm>Distgraphcomm.__new__(Distgraphcomm)
@@ -1370,7 +1364,7 @@ cdef class Intracomm(Comm):
             self.ob_mpi,
             indegree,  isource, isourceweight,
             outdegree, idest,   idestweight,
-            cinfo, reorder, &comm.ob_mpi) )
+            info.ob_mpi, reorder, &comm.ob_mpi) )
         comm_set_eh(comm.ob_mpi)
         return comm
 
@@ -1387,20 +1381,19 @@ cdef class Intracomm(Comm):
         for i from 0 <= i < nv: ne += idegree[i]
         destinations = chkarray(destinations, ne, &idest)
         weights = asarray_weights(weights, ne, &iweight)
-        cdef MPI_Info cinfo = arg_Info(info)
         #
         cdef Distgraphcomm comm = \
             <Distgraphcomm>Distgraphcomm.__new__(Distgraphcomm)
         with nogil: CHKERR( MPI_Dist_graph_create(
             self.ob_mpi,
             nv, isource, idegree, idest, iweight,
-            cinfo, reorder, &comm.ob_mpi) )
+            info.ob_mpi, reorder, &comm.ob_mpi) )
         comm_set_eh(comm.ob_mpi)
         return comm
 
     def Create_intercomm(self,
                          int local_leader,
-                         Intracomm peer_comm not None,
+                         Intracomm peer_comm,
                          int remote_leader,
                          int tag=0):
         """
@@ -1452,7 +1445,7 @@ cdef class Intracomm(Comm):
 
     # Inclusive Scan
 
-    def Scan(self, sendbuf, recvbuf, Op op not None=SUM):
+    def Scan(self, sendbuf, recvbuf, Op op=SUM):
         """
         Inclusive Scan
         """
@@ -1464,7 +1457,7 @@ cdef class Intracomm(Comm):
 
     # Exclusive Scan
 
-    def Exscan(self, sendbuf, recvbuf, Op op not None=SUM):
+    def Exscan(self, sendbuf, recvbuf, Op op=SUM):
         """
         Exclusive Scan
         """
@@ -1476,7 +1469,7 @@ cdef class Intracomm(Comm):
 
     # Nonblocking
 
-    def Iscan(self, sendbuf, recvbuf, Op op not None=SUM):
+    def Iscan(self, sendbuf, recvbuf, Op op=SUM):
         """
         Inclusive Scan
         """
@@ -1488,7 +1481,7 @@ cdef class Intracomm(Comm):
             op.ob_mpi, self.ob_mpi, &request.ob_mpi) )
         return request
 
-    def Iexscan(self, sendbuf, recvbuf, Op op not None=SUM):
+    def Iexscan(self, sendbuf, recvbuf, Op op=SUM):
         """
         Inclusive Scan
         """
@@ -1526,7 +1519,6 @@ cdef class Intracomm(Comm):
         """
         cdef char *cmd = NULL
         cdef char **argv = MPI_ARGV_NULL
-        cdef MPI_Info cinfo = arg_Info(info)
         cdef int *ierrcodes = MPI_ERRCODES_IGNORE
         #
         cdef int rank = MPI_UNDEFINED
@@ -1540,7 +1532,7 @@ cdef class Intracomm(Comm):
         #
         cdef Intercomm comm = <Intercomm>Intercomm.__new__(Intercomm)
         with nogil: CHKERR( MPI_Comm_spawn(
-            cmd, argv, maxprocs, cinfo, root,
+            cmd, argv, maxprocs, info.ob_mpi, root,
             self.ob_mpi, &comm.ob_mpi, ierrcodes) )
         #
         cdef int i=0
@@ -1601,15 +1593,13 @@ cdef class Intracomm(Comm):
         Accept a request to form a new intercommunicator
         """
         cdef char *cportname = NULL
-        cdef MPI_Info cinfo = MPI_INFO_NULL
         cdef int rank = MPI_UNDEFINED
         CHKERR( MPI_Comm_rank(self.ob_mpi, &rank) )
         if root == rank:
             port_name = asmpistr(port_name, &cportname)
-            cinfo = arg_Info(info)
         cdef Intercomm comm = <Intercomm>Intercomm.__new__(Intercomm)
         with nogil: CHKERR( MPI_Comm_accept(
-            cportname, cinfo, root,
+            cportname, info.ob_mpi, root,
             self.ob_mpi, &comm.ob_mpi) )
         comm_set_eh(comm.ob_mpi)
         return comm
@@ -1621,15 +1611,13 @@ cdef class Intracomm(Comm):
         Make a request to form a new intercommunicator
         """
         cdef char *cportname = NULL
-        cdef MPI_Info cinfo = MPI_INFO_NULL
         cdef int rank = MPI_UNDEFINED
         CHKERR( MPI_Comm_rank(self.ob_mpi, &rank) )
         if root == rank:
             port_name = asmpistr(port_name, &cportname)
-            cinfo = arg_Info(info)
         cdef Intercomm comm = <Intercomm>Intercomm.__new__(Intercomm)
         with nogil: CHKERR( MPI_Comm_connect(
-            cportname, cinfo, root,
+            cportname, info.ob_mpi, root,
             self.ob_mpi, &comm.ob_mpi) )
         comm_set_eh(comm.ob_mpi)
         return comm
@@ -2277,9 +2265,8 @@ def Open_port(Info info=INFO_NULL):
     Return an address that can be used to establish
     connections between groups of MPI processes
     """
-    cdef MPI_Info cinfo = arg_Info(info)
     cdef char cportname[MPI_MAX_PORT_NAME+1]
-    with nogil: CHKERR( MPI_Open_port(cinfo, cportname) )
+    with nogil: CHKERR( MPI_Open_port(info.ob_mpi, cportname) )
     cportname[MPI_MAX_PORT_NAME] = 0 # just in case
     return mpistr(cportname)
 

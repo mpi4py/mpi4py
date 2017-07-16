@@ -77,7 +77,7 @@ class BaseTestSpawn(object):
                                     info=self.INFO, root=self.ROOT)
         else:
             child = self.COMM.Spawn(None, None, -1,
-                                    info=None, root=self.ROOT)
+                                    info=MPI.INFO_NULL, root=self.ROOT)
         child.Barrier()
         child.Disconnect()
         self.COMM.Barrier()
@@ -173,7 +173,7 @@ class BaseTestSpawn(object):
         else:
             child = self.COMM.Spawn_multiple(
                 None, None, -1,
-                info=None, root=self.ROOT)
+                info=MPI.INFO_NULL, root=self.ROOT)
         child.Barrier()
         child.Disconnect()
         self.COMM.Barrier()

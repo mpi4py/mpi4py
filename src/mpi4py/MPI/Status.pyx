@@ -78,7 +78,7 @@ cdef class Status:
         def __set__(self, value):
             self.Set_error(value)
 
-    def Get_count(self, Datatype datatype not None=BYTE):
+    def Get_count(self, Datatype datatype=BYTE):
         """
         Get the number of *top level* elements
         """
@@ -92,7 +92,7 @@ cdef class Status:
         def __get__(self):
             return self.Get_count(__BYTE__)
 
-    def Get_elements(self, Datatype datatype not None):
+    def Get_elements(self, Datatype datatype):
         """
         Get the number of basic elements in a datatype
         """
@@ -101,7 +101,7 @@ cdef class Status:
         CHKERR( MPI_Get_elements_x(&self.ob_mpi, dtype, &elements) )
         return elements
 
-    def Set_elements(self, Datatype datatype not None, Count count):
+    def Set_elements(self, Datatype datatype, Count count):
         """
         Set the number of elements in a status
 

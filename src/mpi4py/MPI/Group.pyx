@@ -55,9 +55,7 @@ cdef class Group:
             return self.Get_rank()
 
     @classmethod
-    def Translate_ranks(cls,
-                        Group group1 not None, ranks1,
-                        Group group2=None):
+    def Translate_ranks(cls, Group group1, ranks1, Group group2=None):
         """
         Translate the ranks of processes in
         one group to those in another group
@@ -84,9 +82,7 @@ cdef class Group:
         return ranks2
 
     @classmethod
-    def Compare(cls,
-                Group group1 not None,
-                Group group2 not None):
+    def Compare(cls, Group group1, Group group2):
         """
         Compare two groups
         """
@@ -106,9 +102,7 @@ cdef class Group:
         return group
 
     @classmethod
-    def Union(cls,
-              Group group1 not None,
-              Group group2 not None):
+    def Union(cls, Group group1, Group group2):
         """
         Produce a group by combining
         two existing groups
@@ -119,9 +113,7 @@ cdef class Group:
         return group
 
     @classmethod
-    def Intersection(cls,
-                  Group group1 not None,
-                  Group group2 not None):
+    def Intersection(cls, Group group1, Group group2):
         """
         Produce a group as the intersection
         of two existing groups
@@ -134,9 +126,7 @@ cdef class Group:
     Intersect = Intersection
 
     @classmethod
-    def Difference(cls,
-                   Group group1 not None,
-                   Group group2 not None):
+    def Difference(cls, Group group1, Group group2):
         """
         Produce a group from the difference
         of two existing groups

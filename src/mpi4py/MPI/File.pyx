@@ -79,17 +79,16 @@ cdef class File:
     # -----------------
 
     @classmethod
-    def Open(cls, Intracomm comm not None, filename,
+    def Open(cls, Intracomm comm, filename,
              int amode=MODE_RDONLY, Info info=INFO_NULL):
         """
         Open a file
         """
         cdef char *cfilename = NULL
         filename = asmpistr(filename, &cfilename)
-        cdef MPI_Info cinfo = arg_Info(info)
         cdef File file = <File>File.__new__(File)
         with nogil: CHKERR( MPI_File_open(
-            comm.ob_mpi, cfilename, amode, cinfo, &file.ob_mpi) )
+            comm.ob_mpi, cfilename, amode, info.ob_mpi, &file.ob_mpi) )
         file_set_eh(file.ob_mpi)
         return file
 
@@ -106,8 +105,7 @@ cdef class File:
         """
         cdef char *cfilename = NULL
         filename = asmpistr(filename, &cfilename)
-        cdef MPI_Info cinfo = arg_Info(info)
-        with nogil: CHKERR( MPI_File_delete(cfilename, cinfo) )
+        with nogil: CHKERR( MPI_File_delete(cfilename, info.ob_mpi) )
 
     def Set_size(self, Offset size):
         """
@@ -167,7 +165,7 @@ cdef class File:
     # File Info
     # ---------
 
-    def Set_info(self, Info info not None):
+    def Set_info(self, Info info):
         """
         Set new values for the hints
         associated with a file
@@ -205,9 +203,8 @@ cdef class File:
         if etype is not None: cetype = etype.ob_mpi
         cdef MPI_Datatype cftype = cetype
         if filetype is not None: cftype = filetype.ob_mpi
-        cdef MPI_Info cinfo = arg_Info(info)
         with nogil: CHKERR( MPI_File_set_view(
-            self.ob_mpi, disp, cetype, cftype, cdatarep, cinfo) )
+            self.ob_mpi, disp, cetype, cftype, cdatarep, info.ob_mpi) )
 
     def Get_view(self):
         """
@@ -619,7 +616,7 @@ cdef class File:
     # File Interoperability
     # ---------------------
 
-    def Get_type_extent(self, Datatype datatype not None):
+    def Get_type_extent(self, Datatype datatype):
         """
         Return the extent of datatype in the file
         """
@@ -670,7 +667,7 @@ cdef class File:
         CHKERR( MPI_File_get_errhandler(self.ob_mpi, &errhandler.ob_mpi) )
         return errhandler
 
-    def Set_errhandler(self, Errhandler errhandler not None):
+    def Set_errhandler(self, Errhandler errhandler):
         """
         Set the error handler for a file
         """

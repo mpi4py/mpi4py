@@ -247,13 +247,11 @@ cdef class Datatype:
         sizes    = getarray(sizes,   &ndims, &isizes   )
         subsizes = chkarray(subsizes, ndims, &isubsizes)
         starts   = chkarray(starts,   ndims, &istarts  )
-        cdef int iorder = MPI_ORDER_C
-        if order is not None: iorder = order
         #
         cdef Datatype datatype = <Datatype>Datatype.__new__(Datatype)
         CHKERR( MPI_Type_create_subarray(ndims, isizes,
                                          isubsizes, istarts,
-                                         iorder, self.ob_mpi,
+                                         order, self.ob_mpi,
                                          &datatype.ob_mpi) )
         return datatype
 
@@ -633,7 +631,7 @@ cdef class Datatype:
     # Pack and Unpack
     # ---------------
 
-    def Pack(self, inbuf, outbuf, int position, Comm comm not None):
+    def Pack(self, inbuf, outbuf, int position, Comm comm):
         """
         Pack into contiguous memory according to datatype.
         """
@@ -651,7 +649,7 @@ cdef class Datatype:
                          &position, comm.ob_mpi) )
         return position
 
-    def Unpack(self, inbuf, int position, outbuf, Comm comm not None):
+    def Unpack(self, inbuf, int position, outbuf, Comm comm):
         """
         Unpack from contiguous memory according to datatype.
         """
@@ -669,7 +667,7 @@ cdef class Datatype:
                            self.ob_mpi, comm.ob_mpi) )
         return position
 
-    def Pack_size(self, int count, Comm comm not None):
+    def Pack_size(self, int count, Comm comm):
         """
         Returns the upper bound on the amount of space (in bytes)
         needed to pack a message according to datatype.

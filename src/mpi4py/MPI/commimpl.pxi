@@ -133,7 +133,7 @@ cdef inline object PyMPI_Lock(MPI_Comm comm, object key):
         lock = table[key] = allocate_lock()
     return lock
 
-def _lock_table(Comm comm not None):
+def _lock_table(Comm comm):
     "Internal communicator lock table"
     return PyMPI_Lock_table(comm.ob_mpi)
 

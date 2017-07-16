@@ -57,7 +57,7 @@ cdef class Win:
 
     @classmethod
     def Create(cls, memory, int disp_unit=1,
-               Info info=INFO_NULL, Intracomm comm not None=COMM_SELF):
+               Info info=INFO_NULL, Intracomm comm=COMM_SELF):
         """
         Create an window object for one-sided communication
         """
@@ -68,43 +68,38 @@ cdef class Win:
             memory = None
         elif memory is not None:
             memory = getbuffer_w(memory, &base, &size)
-        cdef MPI_Info cinfo = arg_Info(info)
         cdef Win win = <Win>Win.__new__(Win)
         with nogil: CHKERR( MPI_Win_create(
             base, size, disp_unit,
-            cinfo, comm.ob_mpi, &win.ob_mpi) )
+            info.ob_mpi, comm.ob_mpi, &win.ob_mpi) )
         win_set_eh(win.ob_mpi)
         win.ob_mem = memory
         return win
 
     @classmethod
     def Allocate(cls, Aint size, int disp_unit=1,
-                 Info info=INFO_NULL,
-                 Intracomm comm not None=COMM_SELF):
+                 Info info=INFO_NULL, Intracomm comm=COMM_SELF):
         """
         Create an window object for one-sided communication
         """
         cdef void *base = NULL
-        cdef MPI_Info cinfo = arg_Info(info)
         cdef Win win = <Win>Win.__new__(Win)
         with nogil: CHKERR( MPI_Win_allocate(
-            size, disp_unit, cinfo,
+            size, disp_unit, info.ob_mpi,
             comm.ob_mpi, &base, &win.ob_mpi) )
         win_set_eh(win.ob_mpi)
         return win
 
     @classmethod
     def Allocate_shared(cls, Aint size, int disp_unit=1,
-                        Info info=INFO_NULL,
-                        Intracomm comm not None=COMM_SELF):
+                        Info info=INFO_NULL, Intracomm comm=COMM_SELF):
         """
         Create an window object for one-sided communication
         """
         cdef void *base = NULL
-        cdef MPI_Info cinfo = arg_Info(info)
         cdef Win win = <Win>Win.__new__(Win)
         with nogil: CHKERR( MPI_Win_allocate_shared(
-            size, disp_unit, cinfo,
+            size, disp_unit, info.ob_mpi,
             comm.ob_mpi, &base, &win.ob_mpi) )
         win_set_eh(win.ob_mpi)
         return win
@@ -124,16 +119,13 @@ cdef class Win:
         return (tomemory(base, size), disp_unit)
 
     @classmethod
-    def Create_dynamic(cls,
-                       Info info=INFO_NULL,
-                       Intracomm comm not None=COMM_SELF):
+    def Create_dynamic(cls, Info info=INFO_NULL, Intracomm comm=COMM_SELF):
         """
         Create an window object for one-sided communication
         """
-        cdef MPI_Info cinfo = arg_Info(info)
         cdef Win win = <Win>Win.__new__(Win)
         with nogil: CHKERR( MPI_Win_create_dynamic(
-            cinfo, comm.ob_mpi, &win.ob_mpi) )
+            info.ob_mpi, comm.ob_mpi, &win.ob_mpi) )
         win_set_eh(win.ob_mpi)
         win.ob_mem = {}
         return win
@@ -169,7 +161,7 @@ cdef class Win:
     # Window Info
     # -----------
 
-    def Set_info(self, Info info not None):
+    def Set_info(self, Info info):
         """
         Set new values for the hints
         associated with a window
@@ -376,7 +368,7 @@ cdef class Win:
             self.ob_mpi) )
 
     def Accumulate(self, origin, int target_rank,
-                   target=None, Op op not None=SUM):
+                   target=None, Op op=SUM):
         """
         Accumulate data into the target process
         """
@@ -389,7 +381,7 @@ cdef class Win:
             op.ob_mpi, self.ob_mpi) )
 
     def Get_accumulate(self, origin, result, int target_rank,
-                       target=None, Op op not None=SUM):
+                       target=None, Op op=SUM):
         """
         Fetch-and-accumulate data into the target process
         """
@@ -403,7 +395,7 @@ cdef class Win:
             op.ob_mpi, self.ob_mpi) )
 
     def Fetch_and_op(self, origin, result,int target_rank,
-                     Aint target_disp=0, Op op not None=SUM):
+                     Aint target_disp=0, Op op=SUM):
         """
         Perform one-sided read-modify-write
         """
@@ -459,7 +451,7 @@ cdef class Win:
         return request
 
     def Raccumulate(self, origin, int target_rank,
-                   target=None, Op op not None=SUM):
+                   target=None, Op op=SUM):
         """
         Fetch-and-accumulate data into the target process
         """
@@ -475,7 +467,7 @@ cdef class Win:
         return request
 
     def Rget_accumulate(self, origin, result, int target_rank,
-                        target=None, Op op not None=SUM):
+                        target=None, Op op=SUM):
         """
         Accumulate data into the target process
         using remote memory access.
@@ -507,7 +499,7 @@ cdef class Win:
     # General Active Target Synchronization
     # -------------------------------------
 
-    def Start(self, Group group not None, int assertion=0):
+    def Start(self, Group group, int assertion=0):
         """
         Start an RMA access epoch for MPI
         """
@@ -520,7 +512,7 @@ cdef class Win:
         """
         with nogil: CHKERR( MPI_Win_complete(self.ob_mpi) )
 
-    def Post(self, Group group not None, int assertion=0):
+    def Post(self, Group group, int assertion=0):
         """
         Start an RMA exposure epoch
         """
@@ -614,7 +606,7 @@ cdef class Win:
         CHKERR( MPI_Win_get_errhandler(self.ob_mpi, &errhandler.ob_mpi) )
         return errhandler
 
-    def Set_errhandler(self, Errhandler errhandler not None):
+    def Set_errhandler(self, Errhandler errhandler):
         """
         Set the error handler for a window
         """
