@@ -3,7 +3,7 @@ from array import array
 from math import pi as PI
 from sys import argv
 
-cmd = 'cpi-worker-py.exe'
+cmd = './cpi-worker-py.exe'
 if len(argv) > 1: cmd = argv[1]
 print("%s -> %s" % (argv[0], cmd))
 

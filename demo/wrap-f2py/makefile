@@ -5,13 +5,16 @@ PYTHON  = python
 PYTHON_CONFIG = ${PYTHON} ../python-config
 
 
-MPIF90 = mpif90
-F2PY = f2py --fcompiler=gnu95
 SO = ${shell ${PYTHON_CONFIG} --extension-suffix}
+MPIF90 = mpif90
+F2PY = f2py
+ifneq (${MPI_FORTRAN_MOD_DIR},)
+F2PYFLAGS += --f90flags=-I${MPI_FORTRAN_MOD_DIR}
+endif
 .PHONY: build
 build: helloworld${SO}
 helloworld${SO}: helloworld.f90
-	${F2PY} --f90exec=${MPIF90} -m helloworld -c $<
+	${F2PY} ${F2PYFLAGS} --f90exec=${MPIF90} -m helloworld -c $<
 
 
 MPIEXEC = mpiexec

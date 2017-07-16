@@ -5,7 +5,7 @@
 
 int main(int argc, char *argv[])
 {
-  char cmd[32] = "cpi-worker-c.exe";
+  char cmd[32] = "./cpi-worker-c.exe";
   MPI_Comm worker;
   int n;
   double pi;

@@ -24,6 +24,9 @@ clean:
 MPICC=mpicc
 MPICXX=mpicxx
 MPIF90=mpif90
+ifneq (${MPI_FORTRAN_MOD_DIR},)
+FFLAGS += -I${MPI_FORTRAN_MOD_DIR}
+endif
 
 # Python
 cpi-master-py.exe: cpi-master.py
@@ -49,6 +52,6 @@ cpi-worker-cxx.exe: cpi-worker.cxx
 
 # Fortran 90
 cpi-master-f90.exe: cpi-master.f90
-	${MPIF90} $< -o $@
+	${MPIF90} ${FFLAGS} $< -o $@
 cpi-worker-f90.exe: cpi-worker.f90
-	${MPIF90} $< -o $@
+	${MPIF90} ${FFLAGS} $< -o $@

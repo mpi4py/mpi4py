@@ -6,7 +6,7 @@ sys.path.insert(0, p.join(topdir, 'conf'))
 
 from mpiscanner import Scanner
 scanner = Scanner()
-libmpi_pxd = p.join(srcdir, 'include', 'mpi4py', 'libmpi.pxd')
+libmpi_pxd = p.join(srcdir, 'mpi4py', 'libmpi.pxd')
 scanner.parse_file(libmpi_pxd)
 libmpi_h = p.join(wdir, 'libmpi.h')
 scanner.dump_header_h(libmpi_h)
