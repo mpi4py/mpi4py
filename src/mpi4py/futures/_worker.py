@@ -125,7 +125,12 @@ def _manager_comm(executor_ref, event, queue, comm, **options):
 
 
 def _manager_spawn(executor_ref, event, queue, **options):
-    comm, options = serialized(client_spawn)(**options)
+    pyexe = options.pop('python_exe', None)
+    pyargs = options.pop('python_args', None)
+    nprocs = options.pop('max_workers', None)
+    info = options.pop('mpi_info', None)
+    comm = serialized(client_spawn)(pyexe, pyargs, nprocs, info)
+    serialized(client_sync)(comm, options)
     size = comm.Get_remote_size()
     pool = Stack(reversed(range(size)))
     _set_num_workers(executor_ref, event, size)
@@ -217,7 +222,7 @@ def _manager_shared(executor_ref, event, queue,
                     comm, tag, pool, **options):
     # pylint: disable=too-many-arguments
     if tag == 0:
-        options = serialized(client_sync)(comm, options)
+        serialized(client_sync)(comm, options)
     size = comm.Get_remote_size()
     _set_num_workers(executor_ref, event, size)
     client(comm, tag, pool, queue, **options)
@@ -317,7 +322,6 @@ def client_sync(comm, options):
         MPI.Request.Waitall([
             comm.issend(data, pid, tag)
             for pid in range(size)])
-    return options
 
 
 def client(comm, tag, worker_pool, task_queue, **options):
@@ -684,8 +688,7 @@ def client_spawn_max_workers():
 def client_spawn(python_exe=None,
                  python_args=None,
                  max_workers=None,
-                 mpi_info=None,
-                 **options):
+                 mpi_info=None):
     if hasattr(import_main, 'info'):  # pragma: no cover
         client_spawn_abort(*import_main.info)
     if python_exe is None:
@@ -703,39 +706,12 @@ def client_spawn(python_exe=None,
     info.update(mpi_info)
     comm = MPI.COMM_SELF.Spawn(python_exe, args, max_workers, info)
     info.Free()
-    options = client_sync(comm, options)
-    return comm, options
+    return comm
 
 
 def server_spawn():
     comm = MPI.Comm.Get_parent()
     assert comm != MPI.COMM_NULL
-    options = server_sync(comm)
-    server(comm, **options)
-    server_close(comm)
-
-
-# ---
-
-
-def client_connect(service=__package__, **options):  # pragma: no cover
-    port = MPI.Lookup_name(service)
-    info = MPI.INFO_NULL
-    comm = MPI.COMM_SELF.Connect(port, info, root=0)
-    options = client_sync(comm, options)
-    return comm, options
-
-
-def server_connect(service=__package__):  # pragma: no cover
-    port = None
-    if MPI.COMM_WORLD.Get_rank() == 0:
-        port = MPI.Open_port()
-        MPI.Publish_name(service, port)
-    info = MPI.INFO_NULL
-    comm = MPI.COMM_WORLD.Accept(port, info, root=0)
-    if MPI.COMM_WORLD.Get_rank() == 0:
-        MPI.Unpublish_name(service, port)
-        MPI.Close_port(port)
     options = server_sync(comm)
     server(comm, **options)
     server_close(comm)
