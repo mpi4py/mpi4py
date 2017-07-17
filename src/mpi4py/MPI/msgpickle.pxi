@@ -972,7 +972,7 @@ cdef object PyMPI_recv_p2p(int src, int tag, MPI_Comm comm):
     cdef MPI_Status *status = MPI_STATUS_IGNORE
     cdef object obj
     with nogil: CHKERR( MPI_Recv(&rcount, 1, MPI_INT, src, tag, comm, status) )
-    obj = pickle.alloc(&buf, count)
+    obj = pickle.alloc(&rbuf, rcount)
     with nogil: CHKERR( MPI_Recv(rbuf, rcount, rtype, src, tag, comm, status) )
     return pickle.load(rbuf, rcount)
 
