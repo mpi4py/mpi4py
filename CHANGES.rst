@@ -29,6 +29,8 @@ Release 2.1.0 [2017-XX-XX]
   + The ``MPI.Comm.Alltoallw()`` method now uses ``count=1`` and
     ``displ=0`` as defaults, assuming that messages are specified
     through user-defined datatypes.
+  + The ``Request.Wait[all]()`` methods now return ``True`` to match
+    the interface of ``Request.Test[all]()``.
 
 * Backward-incompatible changes:
 

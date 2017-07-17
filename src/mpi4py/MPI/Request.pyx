@@ -38,6 +38,7 @@ cdef class Request:
             &self.ob_mpi, statusp) )
         if self.ob_mpi == MPI_REQUEST_NULL:
             self.ob_buf = None
+        return True
 
     def Test(self, Status status=None):
         """
@@ -124,7 +125,7 @@ cdef class Request:
                 count, irequests, istatuses) )
         finally:
             release_rs(requests, statuses, count, irequests, istatuses)
-        return None
+        return True
 
     @classmethod
     def Testall(cls, requests, statuses=None):

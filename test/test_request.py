@@ -12,18 +12,21 @@ class TestRequest(unittest.TestCase):
         self.REQUEST.Wait()
         self.REQUEST.Wait(None)
         self.REQUEST.Wait(self.STATUS)
+        self.assertTrue(self.REQUEST.Wait() is True)
         self.REQUEST.wait()
         self.REQUEST.wait(None)
         self.REQUEST.wait(self.STATUS)
-
+        self.assertTrue(self.REQUEST.wait() is None)
 
     def testTest(self):
-        self.REQUEST.Wait()
-        self.REQUEST.Wait(None)
+        self.REQUEST.Test()
+        self.REQUEST.Test(None)
         self.REQUEST.Test(self.STATUS)
-        self.REQUEST.wait()
-        self.REQUEST.wait(None)
+        self.assertTrue(self.REQUEST.Test() is True)
+        self.REQUEST.test()
+        self.REQUEST.test(None)
         self.REQUEST.test(self.STATUS)
+        self.assertTrue(self.REQUEST.test() == (True, None))
 
     def testGetStatus(self):
         try: flag = self.REQUEST.Get_status()
@@ -64,6 +67,7 @@ class TestRequestArray(unittest.TestCase):
     def testWaitall(self):
         MPI.Request.Waitall(self.REQUESTS)
         MPI.Request.Waitall(self.REQUESTS, None)
+        self.assertTrue(MPI.Request.Waitall(self.REQUESTS) is True)
         for statuses in (tuple(self.STATUSES), (self.STATUSES[0],), ()):
             MPI.Request.Waitall(self.REQUESTS, statuses)
         for statuses in (self.STATUSES, []):
@@ -78,6 +82,7 @@ class TestRequestArray(unittest.TestCase):
     def testTestall(self):
         MPI.Request.Testall(self.REQUESTS)
         MPI.Request.Testall(self.REQUESTS, None)
+        self.assertTrue(MPI.Request.Testall(self.REQUESTS) is True)
         for statuses in (self.STATUSES, []):
             MPI.Request.Testall(self.REQUESTS, statuses)
             self.assertEqual(len(statuses), len(self.REQUESTS))
