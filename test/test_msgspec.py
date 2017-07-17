@@ -16,6 +16,9 @@ try:
 except ImportError:
     HAVE_NUMPY = False
 
+pypy_lt_53 = (hasattr(sys, 'pypy_version_info') and
+              sys.pypy_version_info < (5, 3))
+
 def Sendrecv(smsg, rmsg):
     MPI.COMM_SELF.Sendrecv(sendbuf=smsg, dest=0,   sendtag=0,
                            recvbuf=rmsg, source=0, recvtag=0,
@@ -155,16 +158,14 @@ class TestMessageSimple(unittest.TestCase):
         Sendrecv(empty, empty)
 
     def testMessageBytes(self):
-        if hasattr(sys, 'pypy_version_info'):
-            if sys.pypy_version_info < (5, 3): return
+        if pypy_lt_53: return
         sbuf = b"abc"
         rbuf = bytearray(3)
         Sendrecv([sbuf, "c"], [rbuf, MPI.CHAR])
         self.assertEqual(sbuf, rbuf)
 
     def testMessageBytearray(self):
-        if hasattr(sys, 'pypy_version_info'):
-            if sys.pypy_version_info < (5, 3): return
+        if pypy_lt_53: return
         sbuf = bytearray(b"abc")
         rbuf = bytearray(3)
         Sendrecv([sbuf, "c"], [rbuf, MPI.CHAR])
@@ -339,16 +340,14 @@ class TestMessageVector(unittest.TestCase):
         Alltoallv(empty, empty)
 
     def testMessageBytes(self):
-        if hasattr(sys, 'pypy_version_info'):
-            if sys.pypy_version_info < (5, 3): return
+        if pypy_lt_53: return
         sbuf = b"abc"
         rbuf = bytearray(3)
         Alltoallv([sbuf, "c"], [rbuf, MPI.CHAR])
         self.assertEqual(sbuf, rbuf)
 
     def testMessageBytearray(self):
-        if hasattr(sys, 'pypy_version_info'):
-            if sys.pypy_version_info < (5, 3): return
+        if pypy_lt_53: return
         sbuf = bytearray(b"abc")
         rbuf = bytearray(3)
         Alltoallv([sbuf, "c"], [rbuf, MPI.CHAR])
@@ -423,8 +422,7 @@ class TestMessageVectorW(unittest.TestCase):
         MPI.Free_mem(rbuf)
 
     def testMessageBytes(self):
-        if hasattr(sys, 'pypy_version_info'):
-            if sys.pypy_version_info < (5, 3): return
+        if pypy_lt_53: return
         sbuf = b"abc"
         rbuf = bytearray(3)
         smsg = [sbuf, [3], [0], [MPI.CHAR]]
@@ -433,8 +431,7 @@ class TestMessageVectorW(unittest.TestCase):
         self.assertEqual(sbuf, rbuf)
 
     def testMessageBytearray(self):
-        if hasattr(sys, 'pypy_version_info'):
-            if sys.pypy_version_info < (5, 3): return
+        if pypy_lt_53: return
         sbuf = bytearray(b"abc")
         rbuf = bytearray(3)
         smsg = [sbuf, [3], [0], [MPI.CHAR]]
@@ -502,8 +499,7 @@ class TestMessageRMA(unittest.TestCase):
                 PutGet(empty, empty, target)
 
     def testMessageBytes(self):
-        if hasattr(sys, 'pypy_version_info'):
-            if sys.pypy_version_info < (5, 3): return
+        if pypy_lt_53: return
         for target in (None, 0, [0, 3, MPI.BYTE]):
             sbuf = b"abc"
             rbuf = bytearray(3)
@@ -511,8 +507,7 @@ class TestMessageRMA(unittest.TestCase):
             self.assertEqual(sbuf, rbuf)
 
     def testMessageBytearray(self):
-        if hasattr(sys, 'pypy_version_info'):
-            if sys.pypy_version_info < (5, 3): return
+        if pypy_lt_53: return
         for target in (None, 0, [0, 3, MPI.BYTE]):
             sbuf = bytearray(b"abc")
             rbuf = bytearray(3)

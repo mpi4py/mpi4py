@@ -2,6 +2,9 @@ from mpi4py import MPI
 import mpiunittest as unittest
 import sys
 
+pypy_lt_58 = (hasattr(sys, 'pypy_version_info') and
+              sys.pypy_version_info < (5,8))
+
 class TestMemory(unittest.TestCase):
 
     def testNewEmpty(self):
@@ -21,7 +24,7 @@ class TestMemory(unittest.TestCase):
             self.assertEqual(m.format, 'B')
             self.assertEqual(m.itemsize, 1)
             self.assertEqual(m.ndim, 1)
-            if not hasattr(sys, 'pypy_version_info'):
+            if not pypy_lt_58:
                 self.assertEqual(m.readonly, False)
             self.assertEqual(m.shape, (0,))
             self.assertEqual(m.strides, (1,))
@@ -47,7 +50,7 @@ class TestMemory(unittest.TestCase):
             self.assertEqual(m.format, 'B')
             self.assertEqual(m.itemsize, 1)
             self.assertEqual(m.ndim, 1)
-            if not hasattr(sys, 'pypy_version_info'):
+            if not pypy_lt_58:
                 self.assertEqual(m.readonly, True)
             self.assertEqual(m.shape, (3,))
             self.assertEqual(m.strides, (1,))
@@ -78,7 +81,7 @@ class TestMemory(unittest.TestCase):
             self.assertEqual(m.format, 'B')
             self.assertEqual(m.itemsize, 1)
             self.assertEqual(m.ndim, 1)
-            if not hasattr(sys, 'pypy_version_info'):
+            if not pypy_lt_58:
                 self.assertEqual(m.readonly, True)
             self.assertEqual(m.shape, (3,))
             self.assertEqual(m.strides, (1,))
@@ -109,7 +112,7 @@ class TestMemory(unittest.TestCase):
             self.assertEqual(m.format, 'B')
             self.assertEqual(m.itemsize, 1)
             self.assertEqual(m.ndim, 1)
-            if not hasattr(sys, 'pypy_version_info'):
+            if not pypy_lt_58:
                 self.assertEqual(m.readonly, False)
             self.assertEqual(m.shape, (3,))
             self.assertEqual(m.strides, (1,))
@@ -148,7 +151,7 @@ class TestMemory(unittest.TestCase):
             self.assertEqual(m.format, 'B')
             self.assertEqual(m.itemsize, 1)
             self.assertEqual(m.ndim, 1)
-            if not hasattr(sys, 'pypy_version_info'):
+            if not pypy_lt_58:
                 self.assertEqual(m.readonly, False)
             self.assertEqual(m.shape, (3,))
             self.assertEqual(m.strides, (1,))

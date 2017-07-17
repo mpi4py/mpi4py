@@ -1,14 +1,15 @@
 from mpi4py import MPI
 import mpiunittest as unittest
 import arrayimpl
+import sys
 
 typemap = MPI._typedict
 
 def mkzeros(n):
-    import sys
-    if not hasattr(sys, 'pypy_version_info'):
-        return bytearray(n)
-    return b'\0' * n
+    if hasattr(sys, 'pypy_version_info'):
+        if sys.pypy_version_info < (5, 3):
+            return b'\0' * n
+    return bytearray(n)
 
 def memzero(m):
     try:
