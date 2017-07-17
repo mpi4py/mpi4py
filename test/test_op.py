@@ -10,19 +10,18 @@ try:
 except ImportError:
     array = None
 
-if array:
+def asarray(typecode, data):
     try:
-        tobytes = array.array.tobytes
-    except AttributeError:
-        tobytes = array.array.tostring
-
-def frombytes(typecode, data):
-    a = array.array(typecode, [])
+        memoryview
+        _tobytes = lambda s: memoryview(s).tobytes()
+    except NameError:
+        _tobytes = lambda s: buffer(s)[:]
     try:
         _frombytes = array.array.frombytes
     except AttributeError:
         _frombytes = array.array.fromstring
-    _frombytes(a, data)
+    a = array.array(typecode, [])
+    _frombytes(a, _tobytes(data))
     return a
 
 def mysum_obj(a, b):
@@ -30,13 +29,10 @@ def mysum_obj(a, b):
         b[i] = a[i] + b[i]
     return b
 
-def mysum_buf(ba, bb, dt):
+def mysum_buf(a, b, dt):
     assert dt == MPI.INT
-    assert len(ba) == len(bb)
-    a = frombytes('i', memoryview(ba).tobytes())
-    b = frombytes('i', memoryview(bb).tobytes())
-    b = mysum_obj(a, b)
-    memoryview(bb)[:] = tobytes(b)
+    assert len(a) == len(b)
+    b[:] = mysum_obj(asarray('i', a), asarray('i', b))
 
 def mysum(ba, bb, dt):
     if dt is None:

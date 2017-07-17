@@ -53,6 +53,12 @@ OBJS = [
     {'a':0, 'b':1},
     ]
 
+try:
+    memoryview
+    tobytes = lambda s: memoryview(s).tobytes()
+except NameError:
+    tobytes = lambda s: buffer(s)[:]
+
 class TestPickle(unittest.TestCase):
 
     def setUp(self):
@@ -153,7 +159,6 @@ class TestPickle(unittest.TestCase):
     if simplejson is not None:
         def testSimpleJson(self):
             pickle = self.pickle
-            tobytes = lambda s: memoryview(s).tobytes()
             dumps = lambda o: simplejson.dumps(o).encode()
             loads = lambda s: simplejson.loads(tobytes(s).decode())
             pickle.__init__(dumps, loads)
@@ -166,7 +171,6 @@ class TestPickle(unittest.TestCase):
     if json is not None:
         def testJson(self):
             pickle = self.pickle
-            tobytes = lambda s: memoryview(s).tobytes()
             dumps = lambda o: json.dumps(o).encode()
             loads = lambda s: json.loads(tobytes(s).decode())
             pickle.__init__(dumps, loads)
@@ -179,7 +183,6 @@ class TestPickle(unittest.TestCase):
     if yaml is not None:
         def testYAML(self):
             pickle = self.pickle
-            tobytes = lambda s: memoryview(s).tobytes()
             dumps = lambda o: yaml.dump(o).encode()
             loads = lambda s: yaml.load(tobytes(s).decode())
             pickle.__init__(dumps, loads)
