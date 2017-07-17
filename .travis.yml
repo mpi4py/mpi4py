@@ -7,6 +7,7 @@ python:
   - 3.4
   - 3.5
   - 3.6
+  - 3.6-dev
   - 3.7-dev
 
 os: linux
@@ -40,23 +41,23 @@ matrix:
       env: MPI=openmpi PY=3
       language: generic
       python: 3
-    - python: pypy
+    - python: pypy-5.8
       env: MPI=mpich
-    - python: pypy
+    - python: pypy-5.8
       env: MPI=openmpi
-    - python: pypy3
-      env: MPI=mpich
-    - python: pypy3
-      env: MPI=openmpi
+#   - python: pypy3-5.8
+#     env: MPI=mpich
+#   - python: pypy3-5.8
+#     env: MPI=openmpi
   allow_failures:
-    - python: pypy
+    - python: pypy-5.8
       env: MPI=mpich
-    - python: pypy
+    - python: pypy-5.8
       env: MPI=openmpi
-    - python: pypy3
-      env: MPI=mpich
-    - python: pypy3
-      env: MPI=openmpi
+#   - python: pypy3-5.8
+#     env: MPI=mpich
+#   - python: pypy3-5.8
+#     env: MPI=openmpi
 
 branches:
   only:
