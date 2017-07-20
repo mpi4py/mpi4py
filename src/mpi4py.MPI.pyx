@@ -1,6 +1,7 @@
 #cython: embedsignature=True
 #cython: cdivision=True
 #cython: binding=False
+#cython: auto_pickle=False
 #cython: always_allow_keywords=True
 #cython: allow_none_for_extension_args=False
 #cython: autotestdict=False
