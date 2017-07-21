@@ -79,7 +79,11 @@ static void PyMPI_OPENMPI_dlopen_libmpi(void)
   mode |= RTLD_NOLOAD;
   #endif
   #if defined(OMPI_MAJOR_VERSION)
-  #if OMPI_MAJOR_VERSION == 2
+  #if OMPI_MAJOR_VERSION >= 10 /* IBM Spectrum MPI */
+  if (!handle) handle = dlopen("libmpi_ibm.so.2", mode);
+  if (!handle) handle = dlopen("libmpi_ibm.so.1", mode);
+  if (!handle) handle = dlopen("libmpi_ibm.so", mode);
+  #elif OMPI_MAJOR_VERSION == 2
   if (!handle) handle = dlopen("libmpi.so.20", mode);
   #elif OMPI_MAJOR_VERSION == 1 && OMPI_MINOR_VERSION >= 10
   if (!handle) handle = dlopen("libmpi.so.12", mode);
