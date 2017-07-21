@@ -46,7 +46,12 @@ test-package() {
   RUN conda install --quiet --yes coverage
   RUN ./conf/coverage.sh
   RUN coverage report
-  RUN curl -s -o codecov.sh https://codecov.io/bash
-  RUN bash codecov.sh -X gcov -X fix -C $BITBUCKET_COMMIT -B $BITBUCKET_BRANCH
+  RUN coverage xml
+  RUN mv coverage.xml coverage-py$PY-$MPI.xml
   RUN source deactivate
+}
+
+upload-coverage() {
+  RUN curl -s -o codecov.sh https://codecov.io/bash
+  RUN bash codecov.sh -X gcov -X py -X fix -C $BITBUCKET_COMMIT -B $BITBUCKET_BRANCH
 }

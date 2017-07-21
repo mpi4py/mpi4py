@@ -1,14 +1,19 @@
 pipelines:
-  default:
-    - step:
-        script:
-          - source conf/ci/bitbucket.sh
-          - install-anaconda
-          - test-package python=2.7 MPI=mpich
-          - test-package python=3.4 MPI=mpich
-          - test-package python=3.5 MPI=mpich
-          - test-package python=3.6 MPI=mpich
-          - test-package python=2.7 MPI=openmpi
-          - test-package python=3.4 MPI=openmpi
-          - test-package python=3.5 MPI=openmpi
-          - test-package python=3.6 MPI=openmpi
+  branches:
+    master: &default-step
+      - step:
+          script:
+            - source conf/ci/bitbucket.sh
+            - install-anaconda
+            - test-package python=2.7 MPI=mpich
+            - test-package python=3.4 MPI=mpich
+            - test-package python=3.5 MPI=mpich
+            - test-package python=3.6 MPI=mpich
+            - test-package python=2.7 MPI=openmpi
+            - test-package python=3.4 MPI=openmpi
+            - test-package python=3.5 MPI=openmpi
+            - test-package python=3.6 MPI=openmpi
+            - upload-coverage
+    maint: *default-step
+  custom:
+    default: *default-step
