@@ -823,7 +823,7 @@ class MPICommExecutorTest(unittest.TestCase):
 
             list(executor.map(time.sleep, [0, 0]))
             list(executor.map(time.sleep, [0, 0], timeout=1))
-            iterator = executor.map(time.sleep, [0.01, 0], timeout=0)
+            iterator = executor.map(time.sleep, [0.1, 0], timeout=0)
             self.assertRaises(futures.TimeoutError, list, iterator)
 
     def test_args(self):
