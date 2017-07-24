@@ -68,9 +68,9 @@ class MPIPoolExecutor(Executor):
             if self._shutdown:
                 raise RuntimeError("cannot bootup after shutdown")
             self._bootstrap()
-        if wait:
-            self._pool.wait()
-        return self
+            if wait:
+                self._pool.wait()
+            return self
 
     def submit(self, fn, *args, **kwargs):
         """Submit a callable to be executed with the given arguments.
@@ -173,10 +173,10 @@ class MPIPoolExecutor(Executor):
                 self._shutdown = True
                 if self._pool is not None:
                     self._pool.done()
-        if wait:
-            if self._pool is not None:
-                self._pool.join()
-                self._pool = None
+            if wait:
+                if self._pool is not None:
+                    self._pool.join()
+                    self._pool = None
 
 
 def _starmap_helper(submit, function, iterable, timeout, unordered):
