@@ -1,6 +1,4 @@
 #!/bin/bash
-# Test script running on Bitbucket Pipelines
-# https://bitbucket.org/mpi4py/mpi4py/addon/pipelines/home
 
 RUN() { echo + $@; $@; }
 RUN export ANACONDA=${ANACONDA-/opt/anaconda}
@@ -29,7 +27,7 @@ test-package() {
   PY=${PY-2.7} MPI=${MPI-mpich}
   RUN source $ANACONDA/bin/activate root
   RUN rm -rf $ANACONDA/envs/test
-  RUN conda create --quiet --yes -n test -c conda-forge python=$PY $MPI numpy cython coverage
+  RUN conda create --quiet --yes -n test -c conda-forge python=$PY $MPI numpy cython
   RUN source activate test
   RUN python setup.py build_src --force
   RUN python setup.py install
@@ -43,14 +41,12 @@ test-package() {
   RUN $MPIEXEC -n $P python $PWD/demo/futures/test_futures.py -f
   RUN $MPIEXEC -n 1  python -m mpi4py.futures $PWD/demo/futures/test_futures.py
   RUN $MPIEXEC -n $P python -m mpi4py.futures $PWD/demo/futures/test_futures.py -f
-  RUN ./conf/coverage.sh
-  RUN coverage report
-  RUN coverage xml
-  RUN mv coverage.xml coverage-py$PY-$MPI.xml
+  if [[ "$coverage" == "yes" ]]; then
+      RUN conda install --quiet --yes coverage
+      RUN ./conf/coverage.sh
+      RUN coverage report
+      RUN coverage xml
+      RUN mv coverage.xml coverage-py$PY-$MPI.xml
+  fi
   RUN source deactivate
-}
-
-upload-coverage() {
-  RUN curl -s -o codecov.sh https://codecov.io/bash
-  RUN bash codecov.sh -X gcov -X py -X fix -C $BITBUCKET_COMMIT -B $BITBUCKET_BRANCH
 }
