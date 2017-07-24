@@ -17,3 +17,4 @@ jobs:
       - run: .circleci/test-package python=3.4 MPI=openmpi
       - run: .circleci/test-package python=3.5 MPI=openmpi
       - run: .circleci/test-package python=3.6 MPI=openmpi
+      - run: .circleci/upload-coverage
