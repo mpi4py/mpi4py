@@ -8,7 +8,7 @@ RUN export CFLAGS=-O0
 
 install-anaconda() {
   MINICONDA=Miniconda2-latest-Linux-$(arch).sh
-  RUN wget --quiet -P ~ http://repo.continuum.io/miniconda/$MINICONDA
+  RUN curl -s -o ~/$MINICONDA https://repo.continuum.io/miniconda/$MINICONDA
   RUN bash ~/$MINICONDA -b -f -p $ANACONDA
   RUN source $ANACONDA/bin/activate root
   RUN conda config --set show_channel_urls yes
@@ -29,7 +29,7 @@ test-package() {
   PY=${PY-2.7} MPI=${MPI-mpich}
   RUN source $ANACONDA/bin/activate root
   RUN rm -rf $ANACONDA/envs/test
-  RUN conda create --quiet --yes -n test -c conda-forge python=$PY $MPI numpy cython
+  RUN conda create --quiet --yes -n test -c conda-forge python=$PY $MPI numpy cython coverage
   RUN source activate test
   RUN python setup.py build_src --force
   RUN python setup.py install
@@ -43,7 +43,6 @@ test-package() {
   RUN $MPIEXEC -n $P python $PWD/demo/futures/test_futures.py -f
   RUN $MPIEXEC -n 1  python -m mpi4py.futures $PWD/demo/futures/test_futures.py
   RUN $MPIEXEC -n $P python -m mpi4py.futures $PWD/demo/futures/test_futures.py -f
-  RUN conda install --quiet --yes coverage
   RUN ./conf/coverage.sh
   RUN coverage report
   RUN coverage xml

@@ -1,0 +1,8 @@
+#!/bin/bash
+export PATH=/opt/rh/devtoolset-2/root/usr/bin:$PATH
+export ANACONDA=/opt/conda
+export HYDRA_LAUNCHER=fork
+export OMPI_MCA_plm=isolated
+export OMPI_MCA_btl_vader_single_copy_mechanism=none
+source conf/ci/bitbucket.sh
+test-package $@

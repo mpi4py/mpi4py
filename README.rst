@@ -4,6 +4,8 @@ MPI for Python
 
 .. image::  https://travis-ci.org/mpi4py/mpi4py.svg?branch=master
    :target: https://travis-ci.org/mpi4py/mpi4py
+.. image::  https://circleci.com/gh/mpi4py/mpi4py.svg?style=shield
+   :target: https://circleci.com/gh/mpi4py/mpi4py
 .. image::  https://ci.appveyor.com/api/projects/status/whh5xovp217h0f7n?svg=true
    :target: https://ci.appveyor.com/project/mpi4py/mpi4py
 .. image::  https://codecov.io/bb/mpi4py/mpi4py/branch/master/graph/badge.svg
@@ -38,6 +40,8 @@ Testsuite
 The testsuite is run periodically on
 
 * `Travis CI <https://travis-ci.org/mpi4py/mpi4py>`_
+
+* `Circle CI <https://circleci.com/gh/mpi4py/mpi4py>`_
 
 * `AppVeyor <https://ci.appveyor.com/project/mpi4py/mpi4py>`_
 
