@@ -330,6 +330,9 @@ def configure_pyexe(exe, config_cmd):
         py_version = sysconfig.get_python_version()
         py_abiflags = getattr(sys, 'abiflags', '')
         libraries = ['python' + py_version + py_abiflags]
+        if hasattr(sys, 'pypy_version_info'):
+            py_tag = py_version[0].replace('2', '')
+            libraries = ['pypy%s-c' % py_tag]
     if sys.platform == 'darwin':
         fwkdir = cfg_vars.get('PYTHONFRAMEWORKDIR')
         if (fwkdir and fwkdir != 'no-framework' and

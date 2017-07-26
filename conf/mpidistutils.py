@@ -19,6 +19,9 @@ if hasattr(sys, 'pypy_version_info'):
     for name in ('prefix', 'exec_prefix'):
         if name not in config_vars:
             config_vars[name] = os.path.normpath(getattr(sys, name))
+    if sys.platform == 'darwin' and 'LDSHARED' in config_vars:
+        if '-undefined' not in config_vars['LDSHARED']:
+            config_vars['LDSHARED'] += ' -undefined dynamic_lookup'
 
 # Workaround distutils.cygwinccompiler.get_versions()
 # failing when the compiler path contains spaces
