@@ -71,7 +71,6 @@ $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.futures -x                      
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.futures -c "1/0"                  > /dev/null 2>&1 || true
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.futures -c "raise SystemExit(11)" > /dev/null 2>&1 || true
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.futures -c "raise SystemExit('')" > /dev/null 2>&1 || true
-
 if [ $(command -v mpichversion) ]; then
     testdir=demo/futures
     $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.futures.server --xyz > /dev/null 2>&1 || true
@@ -87,9 +86,9 @@ fi
 if [ $(command -v mpichversion) ] && [ $(command -v hydra_nameserver) ]; then
     testdir=demo/futures
     hydra_nameserver &
-    nameserver=$!; sleep 0.25;
+    nameserver=$!; sleep 1;
     $MPIEXEC -nameserver localhost -n 2 $PYTHON -m coverage run -m mpi4py.futures.server &
-    mpi4pyserver=$!; sleep 0.25;
+    mpi4pyserver=$!; sleep 1;
     $MPIEXEC -nameserver localhost -n 1 $PYTHON -m coverage run $testdir/test_service.py
     wait $mpi4pyserver
     kill -s SIGTERM $nameserver
