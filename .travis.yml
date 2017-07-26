@@ -39,23 +39,23 @@ matrix:
       env: MPI=openmpi PY=3
       language: generic
       python: 3
-    - python: pypy-5.8
+    - python: pypy2.7-5.8.0
       env: MPI=mpich
-    - python: pypy-5.8
+    - python: pypy2.7-5.8.0
       env: MPI=openmpi
-#   - python: pypy3-5.8
-#     env: MPI=mpich
-#   - python: pypy3-5.8
-#     env: MPI=openmpi
+    - python: pypy3.5-5.8.0
+      env: MPI=mpich
+    - python: pypy3.5-5.8.0
+      env: MPI=openmpi
   allow_failures:
-    - python: pypy-5.8
+    - python: pypy2.7-5.8.0
       env: MPI=mpich
-    - python: pypy-5.8
+    - python: pypy2.7-5.8.0
       env: MPI=openmpi
-#   - python: pypy3-5.8
-#     env: MPI=mpich
-#   - python: pypy3-5.8
-#     env: MPI=openmpi
+    - python: pypy3.5-5.8.0
+      env: MPI=mpich
+    - python: pypy3.5-5.8.0
+      env: MPI=openmpi
 
 branches:
   only:
