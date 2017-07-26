@@ -54,7 +54,7 @@ class MPIPoolExecutor(Executor):
 
     def _bootstrap(self):
         if self._pool is None:
-            self._pool = _worker.WorkerPool(self, **self._options)
+            self._pool = _worker.WorkerPool(self)
 
     def bootup(self, wait=True):
         """Allocate executor resources eagerly.
@@ -154,7 +154,7 @@ class MPIPoolExecutor(Executor):
                                    timeout, unordered)
         else:
             return _starmap_chunks(self.submit, fn, iterable,
-                                   timeout, chunksize, unordered)
+                                   timeout, unordered, chunksize)
 
     def shutdown(self, wait=True):
         """Clean-up the resources associated with the executor.
@@ -223,7 +223,7 @@ def _build_chunks(chunksize, iterable):
 
 
 def _starmap_chunks(submit, function, iterable,
-                    timeout, chunksize, unordered):
+                    timeout, unordered, chunksize):
     # pylint: disable=too-many-arguments
     function = functools.partial(_apply_chunks, function)
     iterable = _build_chunks(chunksize, iterable)
@@ -251,7 +251,7 @@ class MPICommExecutor(object):
 
     # pylint: disable=too-few-public-methods
 
-    def __init__(self, comm=None, root=0):
+    def __init__(self, comm=None, root=0, **kwargs):
         """Initialize a new MPICommExecutor instance.
 
         Args:
@@ -264,7 +264,7 @@ class MPICommExecutor(object):
 
         """
         if comm is None:
-            comm = _worker.get_world()
+            comm = _worker.get_comm_world()
         if comm.Is_inter():
             raise ValueError("Expecting an intracommunicator")
         if root < 0 or root >= comm.Get_size():
@@ -272,6 +272,7 @@ class MPICommExecutor(object):
 
         self._comm = comm
         self._root = root
+        self._options = kwargs
         self._executor = None
 
     def __enter__(self):
@@ -280,22 +281,24 @@ class MPICommExecutor(object):
         if self._executor is not None:
             raise RuntimeError("__enter__")
 
+        comm = self._comm
+        root = self._root
+        options = self._options
         if _worker.SharedPool:
-            assert self._root == 0
-            executor = MPIPoolExecutor()
-            executor._pool = _worker.SharedPool(executor)
-        elif self._comm.Get_size() == 1:
-            executor = MPIPoolExecutor()
-            executor._pool = _worker.ThreadPool(executor)
-        elif self._comm.Get_rank() == self._root:
-            executor = MPIPoolExecutor()
-            comm = _worker.split(self._comm, self._root)
-            executor._pool = _worker.CommPool(executor, comm)
+            assert root == 0
+            executor = MPIPoolExecutor(**options)
+            pool = _worker.SharedPool(executor)
+        elif comm.Get_size() == 1:
+            executor = MPIPoolExecutor(**options)
+            pool = _worker.ThreadPool(executor)
+        elif comm.Get_rank() == root:
+            executor = MPIPoolExecutor(**options)
+            pool = _worker.SplitPool(executor, comm, root)
         else:
-            executor = None
-            comm = _worker.split(self._comm, self._root)
-            _worker.server(comm)
-            _worker.server_close(comm)
+            executor = pool = None
+            _worker.server_main_split(comm, root, **options)
+        if executor is not None:
+            executor._pool = pool
 
         self._executor = executor
         return executor

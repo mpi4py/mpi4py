@@ -858,7 +858,7 @@ class MPICommExecutorTest(unittest.TestCase):
     def test_arg_comm_bad(self):
         if MPI.COMM_WORLD.Get_size() == 1:
             return
-        intercomm = futures._worker.split(MPI.COMM_WORLD)
+        intercomm = futures._worker.comm_split(MPI.COMM_WORLD)
         try:
             self.assertRaises(ValueError, self.MPICommExecutor, intercomm)
         finally:

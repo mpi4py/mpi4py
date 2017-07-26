@@ -8,35 +8,13 @@ import sys
 import time
 import atexit
 import weakref
+import warnings
 import itertools
 import threading
 import collections
 
 from .. import MPI
 
-
-# ---
-
-
-class Queue(collections.deque):
-    put = collections.deque.append
-    pop = collections.deque.popleft
-
-
-class Stack(collections.deque):
-    put = collections.deque.append
-    pop = collections.deque.pop
-
-
-if sys.version_info[0] == 2:     # pragma: no cover
-    def sys_exception():
-        exc = sys.exc_info()[1]
-        return exc
-else:                            # pragma: no cover
-    def sys_exception():
-        exc = sys.exc_info()[1]
-        exc.__traceback__ = None
-        return exc
 
 # ---
 
@@ -52,35 +30,105 @@ serialized.lock = None
 
 
 def setup_mpi_threads():
-    thread_level = setup_mpi_threads.thread_level
-    if thread_level is None:
-        thread_level = MPI.Query_thread()
-        setup_mpi_threads.thread_level = thread_level
-        if thread_level < MPI.THREAD_MULTIPLE:  # pragma: no cover
-            serialized.lock = threading.Lock()
+    with setup_mpi_threads.lock:
+        thread_level = setup_mpi_threads.thread_level
+        if thread_level is None:
+            thread_level = MPI.Query_thread()
+            setup_mpi_threads.thread_level = thread_level
+            if thread_level < MPI.THREAD_MULTIPLE:  # pragma: no cover
+                serialized.lock = threading.Lock()
     if thread_level < MPI.THREAD_SERIALIZED:  # pragma: no cover
-        from _warnings import warn
-        warn("The level of thread support in MPI "
-             "should be at least MPI_THREAD_SERIALIZED",
-             RuntimeWarning, 2)
+        warnings.warn("The level of thread support in MPI "
+                      "should be at least MPI_THREAD_SERIALIZED",
+                      RuntimeWarning, 2)
+setup_mpi_threads.lock = threading.Lock()
 setup_mpi_threads.thread_level = None
 
 
 # ---
 
 
-def _set_num_workers(executor_ref, event, num_workers):
+if sys.version_info[0] == 2:     # pragma: no cover
+    def sys_exception():
+        exc = sys.exc_info()[1]
+        return exc
+else:                            # pragma: no cover
+    def sys_exception():
+        exc = sys.exc_info()[1]
+        exc.__traceback__ = None
+        return exc
+
+
+# ---
+
+
+class Queue(collections.deque):
+    put = collections.deque.append
+    pop = collections.deque.popleft
+    add = collections.deque.appendleft
+
+
+class Stack(collections.deque):
+    put = collections.deque.append
+    pop = collections.deque.pop
+
+
+THREADS_QUEUES = weakref.WeakKeyDictionary()
+
+
+def join_threads(threads_queues=THREADS_QUEUES):
+    items = list(threads_queues.items())
+    for _, queue in items:   # pragma: no cover
+        queue.put(None)
+    for thread, _ in items:  # pragma: no cover
+        thread.join()
+
+
+atexit.register(join_threads)
+
+
+class Pool(object):
+
+    def __init__(self, executor, manager, *args):
+        self.event = threading.Event()
+        self.queue = queue = Queue()
+        self.exref = weakref.ref(executor, lambda _, q=queue: q.put(None))
+
+        args = (self,) + args
+        kwargs = executor._options  # pylint: disable=protected-access
+        thread = threading.Thread(target=manager, args=args, kwargs=kwargs)
+        thread.daemon = True
+        self.thread = thread
+
+        setup_mpi_threads()
+        thread.start()
+        THREADS_QUEUES[thread] = queue
+
+    def wait(self):
+        self.event.wait()
+
+    def push(self, task):
+        self.queue.put(task)
+
+    def done(self):
+        self.queue.put(None)
+
+    def join(self):
+        self.thread.join()
+
+
+def setup_pool(pool, num_workers):
     # pylint: disable=protected-access
-    executor = executor_ref()
+    executor = pool.exref()
     if executor is not None:
         executor._num_workers = num_workers
-    del executor
-    event.set()
+    pool.event.set()
+    return pool.queue
 
 
-def _manager_thread(executor_ref, event, queue, **options):
+def _manager_thread(pool, **options):
     size = options.pop('max_workers', 1)
-    _set_num_workers(executor_ref, event, size)
+    queue = setup_pool(pool, size)
 
     sleep = time.sleep
     throttle = options.get('throttle', 100e-6)
@@ -116,97 +164,116 @@ def _manager_thread(executor_ref, event, queue, **options):
     queue.pop()
 
 
-def _manager_comm(executor_ref, event, queue, comm, **options):
+def _manager_comm(pool, comm, **options):
     size = comm.Get_remote_size()
-    pool = Stack(reversed(range(size)))
-    _set_num_workers(executor_ref, event, size)
-    client(comm, 0, pool, queue, **options)
-    serialized(client_close)(comm)
+    workers = Stack(reversed(range(size)))
+    queue = setup_pool(pool, size)
+    client(comm, 0, workers, queue, **options)
 
 
-def _manager_spawn(executor_ref, event, queue, **options):
+def _manager_spawn(pool, **options):
     pyexe = options.pop('python_exe', None)
     pyargs = options.pop('python_args', None)
     nprocs = options.pop('max_workers', None)
     info = options.pop('mpi_info', None)
     comm = serialized(client_spawn)(pyexe, pyargs, nprocs, info)
     serialized(client_sync)(comm, options)
-    size = comm.Get_remote_size()
-    pool = Stack(reversed(range(size)))
-    _set_num_workers(executor_ref, event, size)
-    client(comm, 0, pool, queue, **options)
+    _manager_comm(pool, comm, **options)
     serialized(client_close)(comm)
 
 
-THREADS_QUEUES = weakref.WeakKeyDictionary()
+def _manager_service(pool, **options):
+    service = options.pop('service', None)
+    info = options.pop('mpi_info', None)
+    comm = serialized(client_connect)(service, info)
+    serialized(client_sync)(comm, options)
+    _manager_comm(pool, comm, **options)
+    serialized(client_close)(comm)
 
 
-def join_threads(threads_queues=THREADS_QUEUES):
-    items = list(threads_queues.items())
-    for _, queue in items:   # pragma: no cover
-        queue.put(None)
-    for thread, _ in items:  # pragma: no cover
-        thread.join()
-
-
-atexit.register(join_threads)
-
-
-class Pool(object):
-
-    def __init__(self, manager, executor, *args, **options):
-        event, queue = threading.Event(), Queue()
-        executor_ref = weakref.ref(executor, lambda _, q=queue: q.put(None))
-        args = (executor_ref, event, queue) + args
-
-        setup_mpi_threads()
-        thread = threading.Thread(target=manager, args=args, kwargs=options)
-        thread.daemon = True
-        thread.start()
-        THREADS_QUEUES[thread] = queue
-
-        self.thread = thread
-        self.event = event
-        self.queue = queue
-
-    def wait(self):
-        self.event.wait()
-
-    def push(self, task):
-        self.queue.put(task)
-
-    def done(self):
-        self.queue.put(None)
-
-    def join(self):
-        self.thread.join()
-
-
-def ThreadPool(executor, **options):
+def ThreadPool(executor):
     # pylint: disable=invalid-name
-    return Pool(_manager_thread, executor, **options)
+    return Pool(executor, _manager_thread)
 
 
-def CommPool(executor, comm, **options):
+def SpawnPool(executor):
     # pylint: disable=invalid-name
-    return Pool(_manager_comm, executor, comm, **options)
+    return Pool(executor, _manager_spawn)
 
 
-def SpawnPool(executor, **options):
+def ServicePool(executor):
     # pylint: disable=invalid-name
-    return Pool(_manager_spawn, executor, **options)
+    return Pool(executor, _manager_service)
 
 
-def WorkerPool(executor, **options):
+def WorkerPool(executor):
     # pylint: disable=invalid-name
+    # pylint: disable=protected-access
     if SharedPool is not None:
-        return SharedPool(executor, **options)
+        return SharedPool(executor)
+    if 'service' in executor._options:
+        return ServicePool(executor)
     else:
-        return SpawnPool(executor, **options)
+        return SpawnPool(executor)
 
 
 # ---
 
+
+def get_comm_world():
+    return MPI.COMM_WORLD
+
+
+def comm_split(comm, root=0):
+    assert not comm.Is_inter()
+    assert comm.Get_size() > 1
+    assert 0 <= root < comm.Get_size()
+    rank = comm.Get_rank()
+
+    if MPI.Get_version() >= (2, 2):
+        allgroup = comm.Get_group()
+        if rank == root:
+            group = allgroup.Incl([root])
+        else:
+            group = allgroup.Excl([root])
+        allgroup.Free()
+        intracomm = comm.Create(group)
+        group.Free()
+    else:  # pragma: no cover
+        color = 0 if rank == root else 1
+        intracomm = comm.Split(color, key=0)
+
+    if rank == root:
+        local_leader = 0
+        remote_leader = 0 if root else 1
+    else:
+        local_leader = 0
+        remote_leader = root
+    intercomm = intracomm.Create_intercomm(
+        local_leader, comm, remote_leader, tag=0)
+    intracomm.Free()
+
+    return intercomm
+
+
+def _manager_split(pool, comm, root, **options):
+    comm = serialized(comm_split)(comm, root)
+    _manager_comm(pool, comm, **options)
+    serialized(client_close)(comm)
+
+
+def SplitPool(executor, comm, root):
+    # pylint: disable=invalid-name
+    return Pool(executor, _manager_split, comm, root)
+
+
+def server_main_split(comm, root, **options):
+    comm = comm_split(comm, root)
+    server(comm, **options)
+    server_close(comm)
+
+
+# ---
 
 SharedPool = None  # pylint: disable=invalid-name
 
@@ -218,14 +285,13 @@ def _set_shared_pool(obj):
     SharedPool = obj
 
 
-def _manager_shared(executor_ref, event, queue,
-                    comm, tag, pool, **options):
+def _manager_shared(pool, comm, tag, workers, **options):
     # pylint: disable=too-many-arguments
     if tag == 0:
         serialized(client_sync)(comm, options)
     size = comm.Get_remote_size()
-    _set_num_workers(executor_ref, event, size)
-    client(comm, tag, pool, queue, **options)
+    queue = setup_pool(pool, size)
+    client(comm, tag, workers, queue, **options)
 
 
 class SharedPoolCtx(object):
@@ -238,14 +304,14 @@ class SharedPoolCtx(object):
         self.workers = None
         self.threads = weakref.WeakKeyDictionary()
 
-    def __call__(self, executor, **options):
+    def __call__(self, executor):
         assert SharedPool is self
-        tag = next(self.counter)
         if self.comm != MPI.COMM_NULL and self.on_root:
+            tag = next(self.counter)
             args = (self.comm, tag, self.workers)
-            pool = Pool(_manager_shared, executor, *args, **options)
+            pool = Pool(executor, _manager_shared, *args)
         else:
-            pool = Pool(_manager_thread, executor, **options)
+            pool = Pool(executor, _manager_thread)
         del THREADS_QUEUES[pool.thread]
         self.threads[pool.thread] = pool.queue
         return pool
@@ -253,11 +319,11 @@ class SharedPoolCtx(object):
     def __enter__(self):
         assert SharedPool is None
         self.on_root = MPI.COMM_WORLD.Get_rank() == 0
-        self.counter = itertools.count(0)
         if MPI.COMM_WORLD.Get_size() >= 2:
-            self.comm = split(MPI.COMM_WORLD, root=0)
+            self.comm = comm_split(MPI.COMM_WORLD, root=0)
             if self.on_root:
                 size = self.comm.Get_remote_size()
+                self.counter = itertools.count(0)
                 self.workers = Stack(reversed(range(size)))
         _set_shared_pool(self)
         return self if self.on_root else None
@@ -290,7 +356,6 @@ class SharedPoolCtx(object):
 
 
 def barrier(comm):
-    assert comm.Is_inter()
     sleep = time.sleep
     throttle = 100e-6
     try:
@@ -298,10 +363,14 @@ def barrier(comm):
         while not request.Test():
             sleep(throttle)
     except NotImplementedError:  # pragma: no cover
+        if comm.Is_inter():
+            size = comm.Get_remote_size()
+        else:
+            size = comm.Get_size()
         buf = [None, 0, MPI.BYTE]
         tag = MPI.COMM_WORLD.Get_attr(MPI.TAG_UB)
         sendreqs, recvreqs = [], []
-        for pid in range(comm.Get_remote_size()):
+        for pid in range(size):
             recvreqs.append(comm.Irecv(buf, pid, tag))
             sendreqs.append(comm.Issend(buf, pid, tag))
         while not MPI.Request.Testall(recvreqs):
@@ -314,7 +383,7 @@ def client_sync(comm, options):
     assert comm.Get_size() == 1
     barrier(comm)
     data = _sync_get_data(options)
-    if MPI.ROOT != MPI.PROC_NULL:
+    if MPI.VERSION >= 2:
         comm.bcast(data, MPI.ROOT)
     else:  # pragma: no cover
         tag = MPI.COMM_WORLD.Get_attr(MPI.TAG_UB)
@@ -352,7 +421,7 @@ def client(comm, tag, worker_pool, task_queue, **options):
             sleep(throttle)
 
     def recv():
-        pid = status.source
+        pid = MPI.ANY_SOURCE
         try:
             task = comm_recv(None, pid, tag, status)
         except BaseException:
@@ -368,21 +437,17 @@ def client(comm, tag, worker_pool, task_queue, **options):
         else:
             future.set_exception(exception)
 
-    def send():
+    def send(task):
         try:
             pid = worker_pool.pop()
-        except IndexError:  # pragma: no cover
-            return None
-
-        task = task_queue.pop()
-        if task is None:
-            worker_pool.put(pid)
-            return True
+        except LookupError:  # pragma: no cover
+            task_queue.add(task)
+            return
 
         future, work = task
         if not future.set_running_or_notify_cancel():
             worker_pool.put(pid)
-            return None
+            return
 
         try:
             request = comm_isend(work, pid, tag)
@@ -393,11 +458,12 @@ def client(comm, tag, worker_pool, task_queue, **options):
 
     while True:
         idle = True
-        if worker_pool and task_queue:
-            idle = False
-            stop = send()
-            if stop:
+        if task_queue and worker_pool:
+            task = task_queue.pop()
+            if task is None:
                 break
+            idle = False
+            send(task)
         if pending and iprobe():
             idle = False
             recv()
@@ -423,7 +489,7 @@ def server_sync(comm):
     assert comm.Is_inter()
     assert comm.Get_remote_size() == 1
     barrier(comm)
-    if MPI.ROOT != MPI.PROC_NULL:
+    if MPI.VERSION >= 2:
         data = comm.bcast(None, 0)
     else:  # pragma: no cover
         tag = MPI.COMM_WORLD.Get_attr(MPI.TAG_UB)
@@ -495,46 +561,6 @@ def server_close(comm):
 # ---
 
 
-def get_world():
-    return MPI.COMM_WORLD
-
-
-def split(comm, root=0):
-    assert not comm.Is_inter()
-    assert comm.Get_size() > 1
-    assert 0 <= root < comm.Get_size()
-    rank = comm.Get_rank()
-
-    mpi22 = MPI.Get_version() >= (2, 2)
-    if mpi22:  # pragma: no branch
-        allgroup = comm.Get_group()
-        if rank == root:
-            group = allgroup.Incl([root])
-        else:
-            group = allgroup.Excl([root])
-        allgroup.Free()
-        intracomm = comm.Create(group)
-        group.Free()
-    else:  # pragma: no cover
-        color = 0 if rank == root else 1
-        intracomm = comm.Split(color, key=0)
-
-    if rank == root:
-        local_leader = 0
-        remote_leader = 0 if root else 1
-    else:
-        local_leader = 0
-        remote_leader = root
-    intercomm = intracomm.Create_intercomm(
-        local_leader, comm, remote_leader, tag=0)
-    intracomm.Free()
-
-    return intercomm
-
-
-# ---
-
-
 def import_main(mod_name, mod_path, init_globals, run_name):
     # pylint: disable=protected-access
     import types
@@ -555,7 +581,7 @@ def import_main(mod_name, mod_path, init_globals, run_name):
 
     TempModule = runpy._TempModule  # pylint: disable=invalid-name
     runpy._TempModule = TempModulePatch
-    import_main.info = (mod_name, mod_path)
+    import_main.sentinel = (mod_name, mod_path)
     try:
         main_module = sys.modules['__main__']
         sys.modules['__main__'] = sys.modules[run_name] = module
@@ -568,7 +594,7 @@ def import_main(mod_name, mod_path, init_globals, run_name):
         sys.modules['__main__'] = main_module
         raise
     finally:
-        del import_main.info
+        del import_main.sentinel
         runpy._TempModule = TempModule
 
 
@@ -578,8 +604,8 @@ MAIN_RUN_NAME = '__worker__'
 def _sync_get_data(options):
     main = sys.modules['__main__']
     sys.modules.setdefault(MAIN_RUN_NAME, main)
-
     import_main_module = options.pop('main', True)
+
     data = options.copy()
     if import_main_module:
         spec = getattr(main, '__spec__', None)
@@ -609,49 +635,13 @@ def _sync_set_data(data):
     return data
 
 
-def _sys_flags():
-    flag_opt_map = {
-        # Python 3
-        'inspect': 'i',
-        'interactive': 'i',
-        'debug': 'd',
-        'optimize': 'O',
-        'no_user_site': 's',
-        'no_site': 'S',
-        'isolated': 'I',
-        'ignore_environment': 'E',
-        'dont_write_bytecode': 'B',
-        'hash_randomization': 'R',
-        'verbose': 'v',
-        'quiet': 'q',
-        'bytes_warning': 'b',
-        # Python 2
-        'division_warning': 'Qwarn',
-        'division_new': 'Qnew',
-        'py3k_warning': '3',
-        'tabcheck': 't',
-        'unicode': 'U',
-    }
-    args = []
-    for flag, opt in flag_opt_map.items():
-        val = getattr(sys.flags, flag, 0)
-        val = val if opt[0] != 'i' else 0
-        val = val if opt[0] != 'Q' else min(val, 1)
-        if val > 0:
-            args.append('-' + opt * val)
-    for opt in sys.warnoptions:  # pragma: no cover
-        args.append('-W' + opt)
-    sys_xoptions = getattr(sys, '_xoptions', {})
-    for opt, val in sys_xoptions.items():  # pragma: no cover
-        args.append('-X' + opt if val is True else
-                    '-X' + opt + '=' + val)
-    return args
-
-
 # ---
 
 
-def client_spawn_abort(main_name, main_path):  # pragma: no cover
+def check_recursive_spawn():  # pragma: no cover
+    if not hasattr(import_main, 'sentinel'):
+        return
+    main_name, main_path = import_main.sentinel
     main_info = "\n"
     if main_name is not None:
         main_info += "    main name: '{}'\n".format(main_name)
@@ -674,7 +664,48 @@ def client_spawn_abort(main_name, main_path):  # pragma: no cover
     MPI.COMM_WORLD.Abort(1)
 
 
-def client_spawn_max_workers():
+FLAG_OPT_MAP = {
+    # Python 3
+    'inspect': 'i',
+    'interactive': 'i',
+    'debug': 'd',
+    'optimize': 'O',
+    'no_user_site': 's',
+    'no_site': 'S',
+    'isolated': 'I',
+    'ignore_environment': 'E',
+    'dont_write_bytecode': 'B',
+    'hash_randomization': 'R',
+    'verbose': 'v',
+    'quiet': 'q',
+    'bytes_warning': 'b',
+    # Python 2
+    'division_warning': 'Qwarn',
+    'division_new': 'Qnew',
+    'py3k_warning': '3',
+    'tabcheck': 't',
+    'unicode': 'U',
+}
+
+
+def get_python_flags():
+    args = []
+    for flag, opt in FLAG_OPT_MAP.items():
+        val = getattr(sys.flags, flag, 0)
+        val = val if opt[0] != 'i' else 0
+        val = val if opt[0] != 'Q' else min(val, 1)
+        if val > 0:
+            args.append('-' + opt * val)
+    for opt in sys.warnoptions:  # pragma: no cover
+        args.append('-W' + opt)
+    sys_xoptions = getattr(sys, '_xoptions', {})
+    for opt, val in sys_xoptions.items():  # pragma: no cover
+        args.append('-X' + opt if val is True else
+                    '-X' + opt + '=' + val)
+    return args
+
+
+def get_max_workers():
     if 'MPI4PY_MAX_WORKERS' in os.environ:
         return int(os.environ['MPI4PY_MAX_WORKERS'])
     if MPI.UNIVERSE_SIZE != MPI.KEYVAL_INVALID:  # pragma: no branch
@@ -689,19 +720,18 @@ def client_spawn(python_exe=None,
                  python_args=None,
                  max_workers=None,
                  mpi_info=None):
-    if hasattr(import_main, 'info'):  # pragma: no cover
-        client_spawn_abort(*import_main.info)
+    check_recursive_spawn()
     if python_exe is None:
         python_exe = sys.executable
     if python_args is None:
         python_args = []
     if max_workers is None:
-        max_workers = client_spawn_max_workers()
+        max_workers = get_max_workers()
     if mpi_info is None:
         mpi_info = dict(soft='1:{}'.format(max_workers))
 
-    args = _sys_flags() + list(python_args)
-    args.extend(['-m', __package__ + '._spawn'])
+    args = get_python_flags() + list(python_args)
+    args.extend(['-m', __package__ + '.server'])
     info = MPI.Info.Create()
     info.update(mpi_info)
     comm = MPI.COMM_SELF.Spawn(python_exe, args, max_workers, info)
@@ -709,12 +739,167 @@ def client_spawn(python_exe=None,
     return comm
 
 
-def server_spawn():
-    comm = MPI.Comm.Get_parent()
+# ---
+
+
+SERVICE = __package__
+SERVER_HOST = 'localhost'
+SERVER_BIND = ''
+SERVER_PORT = 31415
+
+
+def get_service():
+    return os.environ.get('MPI4PY_SERVICE', SERVICE)
+
+
+def get_server_host():
+    return os.environ.get('MPI4PY_SERVER_HOST', SERVER_HOST)
+
+
+def get_server_bind():
+    return os.environ.get('MPI4PY_SERVER_BIND', SERVER_BIND)
+
+
+def get_server_port():
+    return int(os.environ.get('MPI4PY_SERVER_PORT', SERVER_PORT))
+
+
+def client_lookup(address):
+    from socket import socket
+    host, port = address
+    host = host or get_server_host()
+    port = port or get_server_port()
+    address = (host, int(port))
+    sock = socket()
+    sock.connect(address)
+    try:
+        fdes = sock.fileno()  # pylint: disable=no-member
+        peer = MPI.Comm.Join(fdes)
+    finally:
+        sock.close()
+    mpi_port = peer.recv(None, 0)
+    peer.Disconnect()
+    return mpi_port
+
+
+def server_publish(address, mpi_port):
+    from socket import socket
+    from socket import SOL_SOCKET, SO_REUSEADDR
+    host, port = address
+    host = host or get_server_bind()
+    port = port or get_server_port()
+    address = (host, int(port))
+    serversock = socket()
+    serversock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+    serversock.bind(address)
+    serversock.listen(0)
+    try:
+        sock = serversock.accept()[0]
+    finally:
+        serversock.close()
+    try:
+        fdes = sock.fileno()  # pylint: disable=no-member
+        peer = MPI.Comm.Join(fdes)
+    finally:
+        sock.close()
+    peer.send(mpi_port, 0)
+    peer.Disconnect()
+
+
+def client_connect(service, mpi_info=None):
+    info = MPI.INFO_NULL
+    if mpi_info:
+        info = MPI.Info.Create()
+        info.update(mpi_info)
+    if not isinstance(service, (list, tuple)):
+        service = service or get_service()
+        port = MPI.Lookup_name(service, info)
+    else:
+        port = client_lookup(service)
+
+    comm = MPI.COMM_SELF.Connect(port, info, root=0)
+    if info != MPI.INFO_NULL:
+        info.Free()
+    return comm
+
+
+def server_accept(service, mpi_info=None,
+                  root=0, comm=MPI.COMM_WORLD):
+    assert not comm.Is_inter()
+    assert 0 <= root < comm.Get_size()
+
+    info = MPI.INFO_NULL
+    if comm.Get_rank() == root:
+        if mpi_info:
+            info = MPI.Info.Create()
+            info.update(mpi_info)
+    port = None
+    if comm.Get_rank() == root:
+        port = MPI.Open_port(info)
+    if comm.Get_rank() == root:
+        if not isinstance(service, (list, tuple)):
+            service = service or get_service()
+            MPI.Publish_name(service, port, info)
+        else:
+            server_publish(service, port)
+            service = None
+
+    barrier(comm)
+    comm = comm.Accept(port, info, root)
+    if port is not None:
+        if service is not None:
+            MPI.Unpublish_name(service, port, info)
+        MPI.Close_port(port)
+    if info != MPI.INFO_NULL:
+        info.Free()
+    return comm
+
+
+# ---
+
+
+def server_main_comm(comm):
     assert comm != MPI.COMM_NULL
     options = server_sync(comm)
     server(comm, **options)
     server_close(comm)
+
+
+def server_main_spawn():
+    comm = MPI.Comm.Get_parent()
+    server_main_comm(comm)
+
+
+def server_main_accept():
+    from getopt import getopt
+    longopts = ['bind=', 'port=', 'service=', 'info=']
+    optlist, _ = getopt(sys.argv[1:], '', longopts)
+    options = {opt[2:] : val for opt, val in optlist}
+
+    if 'bind' in options or 'port' in options:
+        bind = options.get('bind') or get_server_bind()
+        port = options.get('port') or get_server_port()
+        service = (bind, int(port))
+    else:
+        service = options.get('service') or get_service()
+    info = options.get('info', '').split(',')
+    info = dict(k_v.split('=', 1) for k_v in info if k_v)
+
+    comm = server_accept(service, info)
+    server_main_comm(comm)
+
+
+def server_main():
+    from ..run import set_abort_status
+    try:
+        comm = MPI.Comm.Get_parent()
+        if comm != MPI.COMM_NULL:
+            server_main_spawn()
+        else:
+            server_main_accept()
+    except:
+        set_abort_status(1)
+        raise
 
 
 # ---

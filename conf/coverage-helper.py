@@ -58,5 +58,5 @@ import mpi4py.__main__
 import mpi4py.bench
 import mpi4py.futures
 import mpi4py.futures.__main__
-import mpi4py.futures._spawn
+import mpi4py.futures.server
 import mpi4py.run
