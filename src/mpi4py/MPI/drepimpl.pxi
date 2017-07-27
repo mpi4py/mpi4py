@@ -73,13 +73,13 @@ cdef int datarep_read(
     int count,
     void *filebuf,
     MPI_Offset position,
-    void *extra_state
-    ) with gil:
+    void *extra_state,
+    ) except MPI_ERR_UNKNOWN with gil:
     cdef _p_datarep state = <_p_datarep>extra_state
     cdef int ierr = MPI_SUCCESS
     cdef object exc
     try:
-        ierr = state.read(userbuf, datatype, count, filebuf, position)
+        state.read(userbuf, datatype, count, filebuf, position)
     except MPIException as exc:
         print_traceback()
         ierr = exc.Get_error_code()
@@ -94,13 +94,13 @@ cdef int datarep_write(
     int count,
     void *filebuf,
     MPI_Offset position,
-    void *extra_state
-    ) with gil:
+    void *extra_state,
+    ) except MPI_ERR_UNKNOWN with gil:
     cdef _p_datarep state = <_p_datarep>extra_state
     cdef int ierr = MPI_SUCCESS
     cdef object exc
     try:
-        ierr = state.write(userbuf, datatype, count, filebuf, position)
+        state.write(userbuf, datatype, count, filebuf, position)
     except MPIException as exc:
         print_traceback()
         ierr = exc.Get_error_code()
@@ -112,13 +112,13 @@ cdef int datarep_write(
 cdef int datarep_extent(
     MPI_Datatype datatype,
     MPI_Aint *file_extent,
-    void *extra_state
-    ) with gil:
+    void *extra_state,
+    ) except MPI_ERR_UNKNOWN with gil:
     cdef _p_datarep state = <_p_datarep>extra_state
     cdef int ierr = MPI_SUCCESS
     cdef object exc
     try:
-        ierr = state.extent(datatype, file_extent)
+        state.extent(datatype, file_extent)
     except MPIException as exc:
         print_traceback()
         ierr = exc.Get_error_code()

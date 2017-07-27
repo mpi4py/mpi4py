@@ -106,17 +106,18 @@ cdef inline int PyMPI_attr_copy_cb(
     void *attrval_out,
     int *flag,
     ) except MPI_ERR_UNKNOWN with gil:
+    cdef int ierr = MPI_SUCCESS
     cdef object exc
     try:
         PyMPI_attr_copy(hdl, keyval, extra_state,
                         attrval_in, attrval_out, flag)
     except MPIException as exc:
         print_traceback()
-        return exc.Get_error_code()
+        ierr = exc.Get_error_code()
     except:
         print_traceback()
-        return MPI_ERR_OTHER
-    return MPI_SUCCESS
+        ierr = MPI_ERR_OTHER
+    return ierr
 
 cdef inline int PyMPI_attr_delete_cb(
     PyMPI_attr_type hdl,
@@ -124,16 +125,17 @@ cdef inline int PyMPI_attr_delete_cb(
     void *attrval,
     void *extra_state,
     ) except MPI_ERR_UNKNOWN with gil:
+    cdef int ierr = MPI_SUCCESS
     cdef object exc
     try:
         PyMPI_attr_delete(hdl, keyval, attrval, extra_state)
     except MPIException as exc:
         print_traceback()
-        return exc.Get_error_code()
+        ierr = exc.Get_error_code()
     except:
         print_traceback()
-        return MPI_ERR_OTHER
-    return MPI_SUCCESS
+        ierr = MPI_ERR_OTHER
+    return ierr
 
 
 @cython.callspec("MPIAPI")

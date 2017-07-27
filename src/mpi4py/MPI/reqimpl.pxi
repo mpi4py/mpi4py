@@ -94,12 +94,13 @@ cdef class _p_greq:
 
 # ---
 
-cdef int greq_query(void *extra_state, MPI_Status *status) with gil:
+cdef int greq_query(void *extra_state, MPI_Status *status) \
+    except MPI_ERR_UNKNOWN with gil:
     cdef _p_greq state = <_p_greq>extra_state
     cdef int ierr = MPI_SUCCESS
     cdef object exc
     try:
-        ierr = state.query(status)
+        state.query(status)
     except MPIException as exc:
         print_traceback()
         ierr = exc.Get_error_code()
@@ -108,12 +109,13 @@ cdef int greq_query(void *extra_state, MPI_Status *status) with gil:
         ierr = MPI_ERR_OTHER
     return ierr
 
-cdef int greq_free(void *extra_state) with gil:
+cdef int greq_free(void *extra_state) \
+    except MPI_ERR_UNKNOWN with gil:
     cdef _p_greq state = <_p_greq>extra_state
     cdef int ierr = MPI_SUCCESS
     cdef object exc
     try:
-        ierr = state.free()
+        state.free()
     except MPIException as exc:
         print_traceback()
         ierr = exc.Get_error_code()
@@ -123,12 +125,13 @@ cdef int greq_free(void *extra_state) with gil:
     Py_DECREF(<object>extra_state)
     return ierr
 
-cdef int greq_cancel(void *extra_state, int completed) with gil:
+cdef int greq_cancel(void *extra_state, int completed) \
+    except MPI_ERR_UNKNOWN with gil:
     cdef _p_greq state = <_p_greq>extra_state
     cdef int ierr = MPI_SUCCESS
     cdef object exc
     try:
-        ierr = state.cancel(completed)
+        state.cancel(completed)
     except MPIException as exc:
         print_traceback()
         ierr = exc.Get_error_code()
