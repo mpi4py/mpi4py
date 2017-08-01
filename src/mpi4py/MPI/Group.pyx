@@ -18,8 +18,8 @@ cdef class Group:
         cdef Group s = <Group>self, o = <Group>other
         if   op == Py_EQ: return (s.ob_mpi == o.ob_mpi)
         elif op == Py_NE: return (s.ob_mpi != o.ob_mpi)
-        cdef str mod = type(self).__module__
-        cdef str cls = type(self).__name__
+        cdef mod = type(self).__module__
+        cdef cls = type(self).__name__
         raise TypeError("unorderable type: '%s.%s'" % (mod, cls))
 
     def __bool__(self):

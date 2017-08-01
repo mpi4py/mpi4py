@@ -17,8 +17,8 @@ cdef class Status:
         cdef int r = equal_Status(&s.ob_mpi, &o.ob_mpi)
         if   op == Py_EQ: return  r != 0
         elif op == Py_NE: return  r == 0
-        cdef str mod = type(self).__module__
-        cdef str cls = type(self).__name__
+        cdef mod = type(self).__module__
+        cdef cls = type(self).__name__
         raise TypeError("unorderable type: '%s.%s'" % (mod, cls))
 
     def Get_source(self):
