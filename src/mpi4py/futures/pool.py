@@ -11,7 +11,7 @@ from . import Future
 from . import Executor
 from . import as_completed
 
-from . import _worker
+from . import _lib
 
 
 class MPIPoolExecutor(Executor):
@@ -54,7 +54,7 @@ class MPIPoolExecutor(Executor):
 
     def _bootstrap(self):
         if self._pool is None:
-            self._pool = _worker.WorkerPool(self)
+            self._pool = _lib.WorkerPool(self)
 
     def bootup(self, wait=True):
         """Allocate executor resources eagerly.
@@ -264,7 +264,7 @@ class MPICommExecutor(object):
 
         """
         if comm is None:
-            comm = _worker.get_comm_world()
+            comm = _lib.get_comm_world()
         if comm.Is_inter():
             raise ValueError("Expecting an intracommunicator")
         if root < 0 or root >= comm.Get_size():
@@ -284,19 +284,19 @@ class MPICommExecutor(object):
         comm = self._comm
         root = self._root
         options = self._options
-        if _worker.SharedPool:
+        if _lib.SharedPool:
             assert root == 0
             executor = MPIPoolExecutor(**options)
-            pool = _worker.SharedPool(executor)
+            pool = _lib.SharedPool(executor)
         elif comm.Get_size() == 1:
             executor = MPIPoolExecutor(**options)
-            pool = _worker.ThreadPool(executor)
+            pool = _lib.ThreadPool(executor)
         elif comm.Get_rank() == root:
             executor = MPIPoolExecutor(**options)
-            pool = _worker.SplitPool(executor, comm, root)
+            pool = _lib.SplitPool(executor, comm, root)
         else:
             executor = pool = None
-            _worker.server_main_split(comm, root, **options)
+            _lib.server_main_split(comm, root, **options)
         if executor is not None:
             executor._pool = pool
 

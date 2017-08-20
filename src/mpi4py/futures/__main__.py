@@ -17,7 +17,7 @@ def main():
     import sys
     from ..run import run_command_line
     from ..run import set_abort_status
-    from . import _worker as worker
+    from ._lib import SharedPoolCtx
 
     class UsageExit(SystemExit):
         pass
@@ -54,7 +54,7 @@ def main():
             usage("Path does not exist: " + args[0])
 
     try:
-        with worker.SharedPoolCtx() as context:
+        with SharedPoolCtx() as context:
             if context is not None:
                 chk_command_line()
                 run_command_line()

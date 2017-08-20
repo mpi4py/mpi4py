@@ -128,7 +128,7 @@ class ProcessPoolInitTest(ProcessPoolMixin,
 
     def test_run_name(self):
         executor = self.executor_type()
-        run_name = futures._worker.MAIN_RUN_NAME
+        run_name = futures._lib.MAIN_RUN_NAME
         future = executor.submit(check_run_name, run_name)
         self.assertTrue(future.result(), run_name)
 
@@ -639,9 +639,9 @@ class ProcessPoolSubmitTest(unittest.TestCase):
         executor1 = executor2 = executor3 = None
 
     def test_mpi_serialized_support(self):
-        futures._worker.setup_mpi_threads()
-        threading = futures._worker.threading
-        serialized = futures._worker.serialized
+        futures._lib.setup_mpi_threads()
+        threading = futures._lib.threading
+        serialized = futures._lib.serialized
         lock_save = serialized.lock
         try:
             if lock_save is None:
@@ -661,8 +661,8 @@ class ProcessPoolSubmitTest(unittest.TestCase):
             serialized.lock = lock_save
 
     def orig_test_mpi_serialized_support(self):
-        threading = futures._worker.threading
-        serialized = futures._worker.serialized
+        threading = futures._lib.threading
+        serialized = futures._lib.serialized
         lock_save = serialized.lock
         try:
             serialized.lock = threading.Lock()
@@ -685,7 +685,7 @@ class ProcessPoolSubmitTest(unittest.TestCase):
         finally:
             serialized.lock = lock_save
 
-    if futures._worker.SharedPool:
+    if futures._lib.SharedPool:
 
         def test_shared_executors(self):
             executors = [futures.MPIPoolExecutor() for _ in range(16)]
@@ -858,7 +858,7 @@ class MPICommExecutorTest(unittest.TestCase):
     def test_arg_comm_bad(self):
         if MPI.COMM_WORLD.Get_size() == 1:
             return
-        intercomm = futures._worker.comm_split(MPI.COMM_WORLD)
+        intercomm = futures._lib.comm_split(MPI.COMM_WORLD)
         try:
             self.assertRaises(ValueError, self.MPICommExecutor, intercomm)
         finally:
@@ -1210,7 +1210,7 @@ if MPI.Get_version() < (2,0):
     SKIP_POOL_TEST = True
 
 
-if futures._worker.SharedPool:
+if futures._lib.SharedPool:
     del MPICommExecutorTest.test_arg_root
     del MPICommExecutorTest.test_arg_comm_bad
     del ProcessPoolInitTest.test_init_globals

@@ -1,5 +1,4 @@
 import sys
-from mpi4py.futures import _worker
 from mpi4py.futures import MPIPoolExecutor
 
 
