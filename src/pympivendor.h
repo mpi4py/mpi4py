@@ -105,6 +105,12 @@ static int PyMPI_Get_vendor(const char **vendor_name,
   micro = OMPI_RELEASE_VERSION;
   #endif
 
+  #if defined(OMPI_MAJOR_VERSION)
+  #if OMPI_MAJOR_VERSION >= 10
+  name = "Spectrum MPI";
+  #endif
+  #endif
+
 #elif defined(LAM_MPI)
 
   name = "LAM/MPI";
