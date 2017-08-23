@@ -14,6 +14,10 @@ except ImportError:
         PENDING, RUNNING, CANCELLED, CANCELLED_AND_NOTIFIED, FINISHED)
 
 
+SHARED_POOL = futures._lib.SharedPool is not None
+WORLD_SIZE  = MPI.COMM_WORLD.Get_size()
+
+
 def create_future(state=PENDING, exception=None, result=None):
     f = futures.Future()
     f._state = state
@@ -118,6 +122,7 @@ class ProcessPoolInitTest(ProcessPoolMixin,
         executor.submit(time.sleep, 0).result()
         executor.shutdown()
 
+    @unittest.skipIf(SHARED_POOL, 'shared-pool')
     def test_init_globals(self):
         executor = self.executor_type(globals=dict(global_var=42))
         future1 = executor.submit(check_global_var, 42)
@@ -126,6 +131,7 @@ class ProcessPoolInitTest(ProcessPoolMixin,
         self.assertFalse(future2.result())
         executor.shutdown()
 
+    @unittest.skipIf(SHARED_POOL and WORLD_SIZE == 1, 'shared-pool')
     def test_run_name(self):
         executor = self.executor_type()
         run_name = futures._lib.MAIN_RUN_NAME
@@ -622,6 +628,7 @@ class ProcessPoolExecutorTest(ProcessPoolMixin,
 
 class ProcessPoolSubmitTest(unittest.TestCase):
 
+    @unittest.skipIf(MPI.get_vendor()[0] == 'Microsoft MPI', 'msmpi')
     def test_multiple_executors(self):
         executor1 = futures.MPIPoolExecutor(1).bootup(wait=True)
         executor2 = futures.MPIPoolExecutor(1).bootup(wait=True)
@@ -685,20 +692,19 @@ class ProcessPoolSubmitTest(unittest.TestCase):
         finally:
             serialized.lock = lock_save
 
-    if futures._lib.SharedPool:
-
-        def test_shared_executors(self):
-            executors = [futures.MPIPoolExecutor() for _ in range(16)]
-            fs = []
-            for i in range(128):
-                fs.extend(e.submit(abs, i*16+j)
-                          for j, e in enumerate(executors))
-            assert sorted(f.result() for f in fs) == list(range(16*128))
-            world_size = MPI.COMM_WORLD.Get_size()
-            num_workers = max(1, world_size - 1)
-            for e in executors:
-                self.assertEqual(e._num_workers, num_workers)
-            del e, executors
+    def test_shared_executors(self):
+        if not SHARED_POOL: return
+        executors = [futures.MPIPoolExecutor() for _ in range(16)]
+        fs = []
+        for i in range(128):
+            fs.extend(e.submit(abs, i*16+j)
+                      for j, e in enumerate(executors))
+        assert sorted(f.result() for f in fs) == list(range(16*128))
+        world_size = MPI.COMM_WORLD.Get_size()
+        num_workers = max(1, world_size - 1)
+        for e in executors:
+            self.assertEqual(e._num_workers, num_workers)
+        del e, executors
 
 
 def inout(arg):
@@ -749,6 +755,7 @@ class BadUnpickle(object):
         1/0
 
 
+@unittest.skipIf(SHARED_POOL and WORLD_SIZE == 1, 'shared-pool')
 class ProcessPoolPickleTest(unittest.TestCase):
 
     def setUp(self):
@@ -838,6 +845,7 @@ class MPICommExecutorTest(unittest.TestCase):
         with self.MPICommExecutor(comm=MPI.COMM_SELF, root=0) as executor:
             self.assertTrue(executor is not None)
 
+    @unittest.skipIf(SHARED_POOL, 'shared-pool')
     def test_arg_root(self):
         comm = MPI.COMM_WORLD
         rank = comm.Get_rank()
@@ -855,6 +863,7 @@ class MPICommExecutorTest(unittest.TestCase):
         self.assertRaises(ValueError, self.MPICommExecutor, root=-1)
         self.assertRaises(ValueError, self.MPICommExecutor, root=+size)
 
+    @unittest.skipIf(SHARED_POOL, 'shared-pool')
     def test_arg_comm_bad(self):
         if MPI.COMM_WORLD.Get_size() == 1:
             return
@@ -1179,28 +1188,18 @@ name, version = MPI.get_vendor()
 if name == 'Open MPI':
     if version < (2,2,0):
         SKIP_POOL_TEST = True
-    if version < (1,8,0):
-        SKIP_POOL_TEST = True
-    if sys.platform.startswith('win'):
-        SKIP_POOL_TEST = True
 if name == 'MPICH':
     if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
         SKIP_POOL_TEST = True
 if name == 'MVAPICH2':
     SKIP_POOL_TEST = True
 if name == 'MPICH2':
-    if (version > (1,2,0) and
-        MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None):
-        SKIP_POOL_TEST = True
-    if version < (1,0,6):
-        SKIP_POOL_TEST = True
-    if sys.platform.startswith('win'):
-        SKIP_POOL_TEST = True
-if name == 'Microsoft MPI':
-    del ProcessPoolSubmitTest.test_multiple_executors
     if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
         SKIP_POOL_TEST = True
+if name == 'Microsoft MPI':
     if version < (8,1,0):
+        SKIP_POOL_TEST = True
+    if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
         SKIP_POOL_TEST = True
 if name == 'Platform MPI':
     SKIP_POOL_TEST = True
@@ -1210,14 +1209,14 @@ if MPI.Get_version() < (2,0):
     SKIP_POOL_TEST = True
 
 
-if futures._lib.SharedPool:
+if SHARED_POOL:
     del MPICommExecutorTest.test_arg_root
     del MPICommExecutorTest.test_arg_comm_bad
     del ProcessPoolInitTest.test_init_globals
-    if MPI.COMM_WORLD.Get_size() == 1:
+    if WORLD_SIZE == 1:
         del ProcessPoolInitTest.test_run_name
         del ProcessPoolPickleTest
-elif SKIP_POOL_TEST or MPI.COMM_WORLD.Get_size() > 1:
+elif WORLD_SIZE > 1 or SKIP_POOL_TEST:
     del ProcessPoolInitTest
     del ProcessPoolBootupTest
     del ProcessPoolShutdownTest
@@ -1226,6 +1225,7 @@ elif SKIP_POOL_TEST or MPI.COMM_WORLD.Get_size() > 1:
     del ProcessPoolExecutorTest
     del ProcessPoolSubmitTest
     del ProcessPoolPickleTest
+
 
 if __name__ == '__main__':
     unittest.main()
