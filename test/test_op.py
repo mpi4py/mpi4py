@@ -40,6 +40,7 @@ def mysum(ba, bb, dt):
     else:
         return mysum_buf(ba, bb, dt)
 
+
 class TestOp(unittest.TestCase):
 
     def testConstructor(self):
@@ -47,6 +48,7 @@ class TestOp(unittest.TestCase):
         self.assertFalse(op)
         self.assertEqual(op, MPI.OP_NULL)
 
+    @unittest.skipIf(array is None, 'array')
     def testCreate(self):
         for comm in [MPI.COMM_SELF, MPI.COMM_WORLD]:
             for commute in [True, False]:
@@ -184,9 +186,12 @@ class TestOp(unittest.TestCase):
         self.assertTrue(res[0] is y)
         self.assertTrue(res[1] is j)
 
+    @unittest.skipMPI('openmpi(<=1.8.1)')
     def testIsCommutative(self):
-        try: MPI.SUM.Is_commutative()
-        except NotImplementedError: return
+        try:
+            MPI.SUM.Is_commutative()
+        except NotImplementedError:
+            self.skipTest('mpi-op-is_commutative')
         ops = [MPI.MAX,    MPI.MIN,
                MPI.SUM,    MPI.PROD,
                MPI.LAND,   MPI.BAND,
@@ -215,14 +220,6 @@ class TestOp(unittest.TestCase):
         for op in ops:
             self.assertTrue(op.is_predefined)
 
-
-name, version = MPI.get_vendor()
-if name == 'Open MPI':
-    if version < (1,8,2):
-        del TestOp.testIsCommutative
-
-if not array:
-    del TestOp.testCreate
 
 if __name__ == '__main__':
     unittest.main()

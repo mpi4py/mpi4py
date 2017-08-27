@@ -1,6 +1,7 @@
 from mpi4py import MPI
 import mpiunittest as unittest
 
+
 class TestStatus(unittest.TestCase):
 
     def setUp(self):
@@ -31,6 +32,7 @@ class TestStatus(unittest.TestCase):
             self.assertEqual(elements, 7)
         except NotImplementedError:
             if MPI.Get_version() >= (2,0): raise
+            self.skipTest('mpi-status-set_elements')
 
     def testIsCancelled(self):
         flag = self.STATUS.Is_cancelled()
@@ -44,6 +46,7 @@ class TestStatus(unittest.TestCase):
             self.assertTrue(flag)
         except NotImplementedError:
             if MPI.Get_version() >= (2,0): raise
+            self.skipTest('mpi-status-set_cancelled')
 
     def testPyProps(self):
         self.assertEqual(self.STATUS.Get_source(), self.STATUS.source)

@@ -20,6 +20,10 @@ messages += [ list(_basic),
                     for key, val in enumerate(_basic)])
               ]
 
+@unittest.skipMPI('openmpi(<1.6.0)')
+@unittest.skipMPI('MPICH1')
+@unittest.skipIf(MPI.ROOT == MPI.PROC_NULL, 'mpi-root')
+@unittest.skipIf(MPI.COMM_WORLD.Get_size() < 2, 'mpi-world-size<2')
 class BaseTestCCOObjInter(object):
 
     BASECOMM  = MPI.COMM_NULL
@@ -29,7 +33,6 @@ class BaseTestCCOObjInter(object):
     def setUp(self):
         size = self.BASECOMM.Get_size()
         rank = self.BASECOMM.Get_rank()
-        if size < 2: return
         if rank < size // 2 :
             self.COLOR = 0
             self.LOCAL_LEADER = 0
@@ -46,19 +49,15 @@ class BaseTestCCOObjInter(object):
                                           self.REMOTE_LEADER)
 
     def tearDown(self):
-        if self.INTRACOMM != MPI.COMM_NULL:
-            self.INTRACOMM.Free()
-        if self.INTERCOMM != MPI.COMM_NULL:
-            self.INTERCOMM.Free()
+        self.INTRACOMM.Free()
+        self.INTERCOMM.Free()
 
+    @unittest.skipMPI('MPICH2(<1.0.8)')
+    @unittest.skipMPI('DeinoMPI')
     def testBarrier(self):
-        if self.INTRACOMM == MPI.COMM_NULL: return
-        if self.INTERCOMM == MPI.COMM_NULL: return
         self.INTERCOMM.Barrier()
 
     def testBcast(self):
-        if self.INTRACOMM == MPI.COMM_NULL: return
-        if self.INTERCOMM == MPI.COMM_NULL: return
         rank = self.INTERCOMM.Get_rank()
         size = self.INTERCOMM.Get_size()
         rsize = self.INTERCOMM.Get_remote_size()
@@ -77,8 +76,6 @@ class BaseTestCCOObjInter(object):
                         self.assertEqual(rmess, smess)
 
     def testGather(self):
-        if self.INTRACOMM == MPI.COMM_NULL: return
-        if self.INTERCOMM == MPI.COMM_NULL: return
         rank = self.INTERCOMM.Get_rank()
         size = self.INTERCOMM.Get_size()
         rsize = self.INTERCOMM.Get_remote_size()
@@ -98,8 +95,6 @@ class BaseTestCCOObjInter(object):
                         self.assertEqual(rmess, None)
 
     def testScatter(self):
-        if self.INTRACOMM == MPI.COMM_NULL: return
-        if self.INTERCOMM == MPI.COMM_NULL: return
         rank = self.INTERCOMM.Get_rank()
         size = self.INTERCOMM.Get_size()
         rsize = self.INTERCOMM.Get_remote_size()
@@ -117,9 +112,9 @@ class BaseTestCCOObjInter(object):
                         rmess = self.INTERCOMM.scatter(None, root=root)
                         self.assertEqual(rmess, smess)
 
+    @unittest.skipMPI('MPICH2(<1.0.8)')
+    @unittest.skipMPI('DeinoMPI')
     def testAllgather(self):
-        if self.INTRACOMM == MPI.COMM_NULL: return
-        if self.INTERCOMM == MPI.COMM_NULL: return
         rank = self.INTERCOMM.Get_rank()
         size = self.INTERCOMM.Get_size()
         rsize = self.INTERCOMM.Get_remote_size()
@@ -128,8 +123,6 @@ class BaseTestCCOObjInter(object):
             self.assertEqual(rmess, [smess] * rsize)
 
     def testAlltoall(self):
-        if self.INTRACOMM == MPI.COMM_NULL: return
-        if self.INTERCOMM == MPI.COMM_NULL: return
         rank = self.INTERCOMM.Get_rank()
         size = self.INTERCOMM.Get_size()
         rsize = self.INTERCOMM.Get_remote_size()
@@ -138,8 +131,6 @@ class BaseTestCCOObjInter(object):
             self.assertEqual(rmess, [smess] * rsize)
 
     def testReduce(self):
-        if self.INTRACOMM == MPI.COMM_NULL: return
-        if self.INTERCOMM == MPI.COMM_NULL: return
         rank = self.INTERCOMM.Get_rank()
         size = self.INTERCOMM.Get_size()
         rsize = self.INTERCOMM.Get_remote_size()
@@ -165,9 +156,9 @@ class BaseTestCCOObjInter(object):
                         value = self.INTERCOMM.reduce(rank, op=op, root=root)
                         self.assertEqual(value, None)
 
+    @unittest.skipMPI('MPICH2(<1.0.8)')
+    @unittest.skipMPI('DeinoMPI')
     def testAllreduce(self):
-        if self.INTRACOMM == MPI.COMM_NULL: return
-        if self.INTERCOMM == MPI.COMM_NULL: return
         rank = self.INTERCOMM.Get_rank()
         size = self.INTERCOMM.Get_size()
         rsize = self.INTERCOMM.Get_remote_size()
@@ -192,7 +183,6 @@ class TestCCOObjInterDup(TestCCOObjInter):
         super(TestCCOObjInterDup, self).setUp()
     def tearDown(self):
         self.BASECOMM.Free()
-        del self.BASECOMM
         super(TestCCOObjInterDup, self).tearDown()
 
 class TestCCOObjInterDupDup(TestCCOObjInterDup):
@@ -200,42 +190,11 @@ class TestCCOObjInterDupDup(TestCCOObjInterDup):
     INTERCOMM_ORIG = MPI.COMM_NULL
     def setUp(self):
         super(TestCCOObjInterDupDup, self).setUp()
-        if self.INTERCOMM == MPI.COMM_NULL: return
         self.INTERCOMM_ORIG = self.INTERCOMM
         self.INTERCOMM = self.INTERCOMM.Dup()
     def tearDown(self):
         super(TestCCOObjInterDupDup, self).tearDown()
-        if self.INTERCOMM_ORIG == MPI.COMM_NULL: return
         self.INTERCOMM_ORIG.Free()
-        del self.INTERCOMM
-        del self.INTERCOMM_ORIG
-
-
-name, version = MPI.get_vendor()
-if name == 'Open MPI':
-    if version < (1,6,0):
-        del TestCCOObjInter
-        del TestCCOObjInterDup
-        del TestCCOObjInterDupDup
-elif name == 'MPICH2':
-    if version < (1,0,8):
-        def SKIP(*args, **kwargs): pass
-        TestCCOObjInterDupDup.testBarrier   = SKIP
-        TestCCOObjInterDupDup.testAllgather = SKIP
-        TestCCOObjInterDupDup.testAllreduce = SKIP
-elif name == 'DeinoMPI':
-    def SKIP(*args, **kwargs): pass
-    TestCCOObjInterDupDup.testBarrier   = SKIP
-    TestCCOObjInterDupDup.testAllgather = SKIP
-    TestCCOObjInterDupDup.testAllreduce = SKIP
-elif name == 'MPICH1':
-    del TestCCOObjInter
-    del TestCCOObjInterDup
-    del TestCCOObjInterDupDup
-elif MPI.ROOT == MPI.PROC_NULL:
-    del TestCCOObjInter
-    del TestCCOObjInterDup
-    del TestCCOObjInterDupDup
 
 
 if __name__ == '__main__':

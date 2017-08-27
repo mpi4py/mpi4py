@@ -1,6 +1,7 @@
 from mpi4py import MPI
 import mpiunittest as unittest
 
+
 class BaseTestGroup(object):
 
     def testProperties(self):
@@ -93,6 +94,9 @@ class BaseTestGroup(object):
         ranks2 = MPI.Group.Translate_ranks(group1, ranks1, group2)
         self.assertEqual(list(ranks1), list(ranks2))
 
+    @unittest.skipMPI('PlatformMPI')
+    @unittest.skipMPI('MPICH1')
+    @unittest.skipMPI('LAM/MPI')
     def testTranslRanksProcNull(self):
         if self.GROUP == MPI.GROUP_EMPTY: return
         group1 = self.GROUP
@@ -136,6 +140,9 @@ class TestGroupEmpty(BaseTestGroup, unittest.TestCase):
     def testRank(self):
         rank = self.GROUP.Get_rank()
         self.assertEqual(rank, MPI.UNDEFINED)
+    @unittest.skipMPI('MPICH1')
+    def testTranslRanks(self):
+        super(TestGroupEmpty, self).testTranslRanks()
 
 class TestGroupSelf(BaseTestGroup, unittest.TestCase):
     def setUp(self):
@@ -161,16 +168,6 @@ class TestGroupWorld(BaseTestGroup, unittest.TestCase):
         size = self.GROUP.Get_size()
         rank = self.GROUP.Get_rank()
         self.assertTrue(rank >= 0 and rank < size)
-
-
-name, version = MPI.get_vendor()
-if name == 'Platform MPI':
-    del BaseTestGroup.testTranslRanksProcNull
-if name == 'MPICH1':
-    del BaseTestGroup.testTranslRanksProcNull
-    TestGroupEmpty.testTranslRanks = lambda self: None
-if name == 'LAM/MPI':
-    del BaseTestGroup.testTranslRanksProcNull
 
 
 if __name__ == '__main__':

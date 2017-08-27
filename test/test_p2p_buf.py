@@ -265,6 +265,8 @@ class BaseTestP2PBuf(object):
         finally:
             comm.Free()
 
+    @unittest.skipMPI('MPICH1')
+    @unittest.skipMPI('LAM/MPI')
     def testProbeCancel(self):
         comm = self.COMM.Dup()
         try:
@@ -317,20 +319,12 @@ class TestP2PBufSelfDup(TestP2PBufSelf):
     def tearDown(self):
         self.COMM.Free()
 
+@unittest.skipMPI('openmpi(<1.4.0)', MPI.Query_thread() > MPI.THREAD_SINGLE)
 class TestP2PBufWorldDup(TestP2PBufWorld):
     def setUp(self):
         self.COMM = MPI.COMM_WORLD.Dup()
     def tearDown(self):
         self.COMM.Free()
-
-
-name, version = MPI.get_vendor()
-if name == 'Open MPI':
-    if version < (1,4,0):
-        if MPI.Query_thread() > MPI.THREAD_SINGLE:
-            del TestP2PBufWorldDup
-if name == 'MPICH1' or name == 'LAM/MPI':
-    del BaseTestP2PBuf.testProbeCancel
 
 
 if __name__ == '__main__':

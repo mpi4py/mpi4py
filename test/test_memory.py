@@ -1,6 +1,10 @@
 from mpi4py import MPI
 import mpiunittest as unittest
 import sys
+try:
+    from array import array
+except ImportError:
+    array = None
 
 pypy_lt_58 = (hasattr(sys, 'pypy_version_info') and
               sys.pypy_version_info < (5,8))
@@ -61,11 +65,8 @@ class TestMemory(unittest.TestCase):
         self.assertEqual(mem.nbytes, 0)
         self.assertFalse(mem.readonly)
 
+    @unittest.skipIf(array is None, 'array')
     def testFromBufferArrayRO(self):
-        try:
-            from array import array
-        except ImportError:
-            return
         memory = MPI.memory
         obj = array('B', [1,2,3])
         mem = memory.frombuffer(obj, readonly=True)
@@ -92,11 +93,8 @@ class TestMemory(unittest.TestCase):
         self.assertEqual(mem.nbytes, 0)
         self.assertFalse(mem.readonly)
 
+    @unittest.skipIf(array is None, 'array')
     def testFromBufferArrayRW(self):
-        try:
-            from array import array
-        except ImportError:
-            return
         memory = MPI.memory
         obj = array('B', [1,2,3])
         mem = memory.frombuffer(obj, readonly=False)
@@ -129,11 +127,8 @@ class TestMemory(unittest.TestCase):
         self.assertEqual(mem.nbytes, 0)
         self.assertFalse(mem.readonly)
 
+    @unittest.skipIf(array is None, 'array')
     def testFromAddress(self):
-        try:
-            from array import array
-        except ImportError:
-            return
         memory = MPI.memory
         obj = array('B', [1,2,3])
         addr, size = obj.buffer_info()
@@ -173,7 +168,7 @@ class TestMemory(unittest.TestCase):
         try:
             mem = MPI.Alloc_mem(n, MPI.INFO_NULL)
         except NotImplementedError:
-            return
+            self.skipTest('mpi-alloc_mem')
         try:
             self.assertTrue(type(mem) is MPI.memory)
             self.assertTrue(mem.address != 0)
@@ -227,7 +222,8 @@ class TestMemory(unittest.TestCase):
 try:
     MPI.memory
 except AttributeError:
-    del TestMemory
+    unittest.disable(TestMemory, 'mpi4py-memory')
+
 
 if __name__ == '__main__':
     unittest.main()

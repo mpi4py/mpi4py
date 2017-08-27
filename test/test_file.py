@@ -1,6 +1,7 @@
 from mpi4py import MPI
 import mpiunittest as unittest
-import os, tempfile
+import sys, os, tempfile
+
 
 class BaseTestFile(object):
 
@@ -30,12 +31,9 @@ class BaseTestFile(object):
         if not (amode & MPI.MODE_DELETE_ON_CLOSE):
             MPI.File.Delete(self.fname, MPI.INFO_NULL)
 
+    @unittest.skipMPI('openmpi(==2.0.0)')
+    @unittest.skipMPI('MPICH2(<1.1.0)')
     def testPreallocate(self):
-        ## MPICH2 1.0.x emits a nesting level warning
-        ## when preallocating zero size.
-        name, ver = MPI.get_vendor()
-        if not (name == 'MPICH2' and ver  < (1,1,0)):
-            self.FILE.Preallocate(0)
         size = self.FILE.Get_size()
         self.assertEqual(size, 0)
         self.FILE.Preallocate(1)
@@ -138,6 +136,7 @@ class BaseTestFile(object):
         pos = self.FILE.Get_position_shared()
         self.assertEqual(pos, offset)
 
+    @unittest.skipMPI('openmpi(==2.0.0)')
     def testGetByteOffset(self):
         for offset in range(10):
             disp = self.FILE.Get_byte_offset(offset)
@@ -180,39 +179,18 @@ class TestFileSelf(BaseTestFile, unittest.TestCase):
     prefix = BaseTestFile.prefix + ('-%d' % MPI.COMM_WORLD.Get_rank())
 
 
-import sys
-name, version = MPI.get_vendor()
-if name == 'Open MPI':
-    if version == (2,0,0):
-        del BaseTestFile.testPreallocate
-        del BaseTestFile.testGetByteOffset
-    if version < (1,2,9):
-        if MPI.Query_thread() > MPI.THREAD_SINGLE:
-            del BaseTestFile.testPreallocate
-            del BaseTestFile.testGetSetInfo
-            del BaseTestFile.testGetSetAtomicity
-            del BaseTestFile.testSync
-            del BaseTestFile.testGetAmode
-            del BaseTestFile.testGetSetSize
-            del BaseTestFile.testGetSetView
-            del BaseTestFile.testGetByteOffset
-            del BaseTestFile.testGetTypeExtent
-            del BaseTestFile.testSeekGetPosition
-            del BaseTestFile.testSeekGetPositionShared
-    if sys.platform.startswith('win'):
-        del TestFileNull
-        del TestFileSelf
+def have_feature():
+    case = BaseTestFile()
+    case.COMM = TestFileSelf.COMM
+    case.prefix = TestFileSelf.prefix
+    case.setUp()
+    case.tearDown()
 try:
-    dummy = BaseTestFile()
-    dummy.COMM = MPI.COMM_SELF
-    dummy.setUp()
-    dummy.tearDown()
-    del dummy
+    have_feature()
 except NotImplementedError:
-    try: del TestFileNull
-    except NameError: pass
-    try: del TestFileSelf
-    except NameError: pass
+    unittest.disable(BaseTestFile, 'mpi-file')
+    unittest.disable(TestFileNull, 'mpi-file')
+
 
 if __name__ == '__main__':
     unittest.main()

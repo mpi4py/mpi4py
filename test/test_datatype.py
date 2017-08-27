@@ -1,5 +1,6 @@
 from mpi4py import MPI
 import mpiunittest as unittest
+import sys
 
 datatypes_c = [
 MPI.CHAR, MPI.WCHAR,
@@ -68,14 +69,14 @@ class TestDatatype(unittest.TestCase):
                 self.assertEqual(dtype.true_ub, lb+ext)
                 self.assertEqual(dtype.true_extent, ext)
             except NotImplementedError:
-                return
+                self.skipTest('mpi-type-get_true_extent')
 
     def testGetEnvelope(self):
         for dtype in datatypes:
             try:
                 envelope = dtype.Get_envelope()
             except NotImplementedError:
-                return
+                self.skipTest('mpi-type-get_envelope')
             if ('LAM/MPI' == MPI.get_vendor()[0] and
                 "COMPLEX" in dtype.name): continue
             ni, na, nd, combiner = envelope
@@ -95,7 +96,7 @@ class TestDatatype(unittest.TestCase):
             envelope = newtype.Get_envelope()
             contents = newtype.Get_contents()
         except NotImplementedError:
-            return
+            self.skipTest('mpi-type-get_envelope')
         ni, na, nd, combiner = envelope
         i, a, d = contents
         self.assertEqual(ni, len(i))
@@ -142,7 +143,7 @@ class TestDatatype(unittest.TestCase):
             else:
                 newtype = factory(*args)
         except NotImplementedError:
-            return
+            self.skipTest('mpi-type-constructor')
         self.check_datatype_contents(oldtype, factory,  newtype)
         newtype.Commit()
         self.check_datatype_contents(oldtype, factory,  newtype)
@@ -223,6 +224,7 @@ class TestDatatype(unittest.TestCase):
                 #args = (block, displacements) XXX
                 #self.check_datatype(dtype, factory, *args)  XXX
 
+    @unittest.skipMPI('openmpi(<=1.8.1)', MPI.VERSION == 3)
     def testCreateHindexedBlock(self):
         for dtype in datatypes:
             for block in range(5):
@@ -285,24 +287,36 @@ class TestDatatype(unittest.TestCase):
             args = (r,)
             self.check_datatype(None, factory, *args)
 
+    @unittest.skipMPI('openmpi(<3.0.0)')
+    @unittest.skipMPI('msmpi')
+    @unittest.skipMPI('SpectrumMPI')
     def testCreateF90RealSingle(self):
         (p, r) = (6, 30)
         factory = MPI.Datatype.Create_f90_real
         args = (p, r)
         self.check_datatype(None, factory, *args)
 
+    @unittest.skipMPI('openmpi(<3.0.0)')
+    @unittest.skipMPI('msmpi')
+    @unittest.skipMPI('SpectrumMPI')
     def testCreateF90RealDouble(self):
         (p, r) = (15, 300)
         factory = MPI.Datatype.Create_f90_real
         args = (p, r)
         self.check_datatype(None, factory, *args)
 
-    def testCreateF90ComplexSingle(self):
+    @unittest.skipMPI('openmpi(<3.0.0)')
+    @unittest.skipMPI('msmpi')
+    @unittest.skipMPI('SpectrumMPI')
+    def testCreatef90ComplexSingle(self):
         (p, r) = (6, 30)
         factory = MPI.Datatype.Create_f90_complex
         args = (p, r)
         self.check_datatype(None, factory, *args)
 
+    @unittest.skipMPI('openmpi(<3.0.0)')
+    @unittest.skipMPI('msmpi')
+    @unittest.skipMPI('SpectrumMPI')
     def testCreateF90ComplexDouble(self):
         (p, r) = (15, 300)
         factory = MPI.Datatype.Create_f90_complex
@@ -312,6 +326,8 @@ class TestDatatype(unittest.TestCase):
     match_size_integer = [1, 2, 4, 8]
     match_size_real    = [4, 8]
     match_size_complex = [8, 16]
+    @unittest.skipMPI('MPI(<2.0)')
+    @unittest.skipMPI('openmpi', MPI.CHARACTER.Get_size() == 0)
     def testMatchSize(self):
         typeclass = MPI.TYPECLASS_INTEGER
         for size in self.match_size_integer:
@@ -342,14 +358,13 @@ class TestDatatype(unittest.TestCase):
                 dtype.Set_name(name)
                 self.assertEqual(name, dtype.Get_name())
             except NotImplementedError:
-                return
+                self.skipTest('mpi-type-name')
 
     def testCommit(self):
         for dtype in datatypes:
             dtype.Commit()
 
 
-import sys
 name, version = MPI.get_vendor()
 if name == 'LAM/MPI':
     combiner_map[MPI.COMBINER_INDEXED_BLOCK] = MPI.COMBINER_INDEXED
@@ -361,40 +376,22 @@ elif name == 'MPICH1':
     for t in datatypes_f: datatypes.remove(t)
 elif MPI.Get_version() < (2,0):
     combiner_map = None
-if MPI.Get_version() < (2,0):
-    del TestDatatype.testMatchSize
 if name == 'Open MPI':
-    del TestDatatype.testCreateF90RealSingle
-    del TestDatatype.testCreateF90RealDouble
-    del TestDatatype.testCreateF90ComplexSingle
-    del TestDatatype.testCreateF90ComplexDouble
     if MPI.CHARACTER.Get_size() == 0:
-        del TestDatatype.testMatchSize
         for dtype in datatypes_f + datatypes_f90:
             if dtype and dtype in datatypes:
                 datatypes.remove(dtype)
-    if version < (1,8,2) and MPI.VERSION == 3:
-        del TestDatatype.testCreateHindexedBlock
     if (1,6,0) < version < (1,7,0):
-        del TestDatatype.match_size_complex[:]
+        TestDatatype.match_size_complex[:] = []
     if version < (1,5,2):
         for t in datatypes_f90[-4:]:
             if t != MPI.DATATYPE_NULL:
                 datatypes.remove(t)
-    if sys.platform.startswith('win'):
-        del TestDatatype.testCommit
-        del TestDatatype.testDup
-        del TestDatatype.testCreateResized
-if name == 'Microsoft MPI':
-    del TestDatatype.testCreateF90RealSingle
-    del TestDatatype.testCreateF90RealDouble
-    del TestDatatype.testCreateF90ComplexSingle
-    del TestDatatype.testCreateF90ComplexDouble
 if name == 'Platform MPI':
     combiner_map[MPI.COMBINER_INDEXED_BLOCK] = MPI.COMBINER_INDEXED
     combiner_map[MPI.COMBINER_DARRAY] = MPI.COMBINER_STRUCT
     combiner_map[MPI.COMBINER_SUBARRAY] = MPI.COMBINER_STRUCT
-    del TestDatatype.match_size_complex[:]
+    TestDatatype.match_size_complex[:] = []
 
 
 if __name__ == '__main__':

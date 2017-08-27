@@ -16,6 +16,7 @@ messages += [ list(_basic),
                     for key, val in enumerate(_basic)])
               ]
 
+@unittest.skipIf(MPI.MESSAGE_NULL == MPI.MESSAGE_NO_PROC, "mpi-message")
 class TestMessage(unittest.TestCase):
 
     def testMessageNull(self):
@@ -59,6 +60,7 @@ class TestMessage(unittest.TestCase):
         self.assertNotEqual(message, MPI.MESSAGE_NULL)
         self.assertEqual(message, MPI.MESSAGE_NO_PROC)
 
+@unittest.skipIf(MPI.MESSAGE_NULL == MPI.MESSAGE_NO_PROC, "mpi-message")
 class BaseTestP2PMatched(object):
 
     COMM = MPI.COMM_NULL
@@ -148,32 +150,19 @@ class TestP2PMatchedSelf(BaseTestP2PMatched, unittest.TestCase):
 class TestP2PMatchedWorld(BaseTestP2PMatched, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
+@unittest.skipMPI('openmpi(<1.8.5)', MPI.COMM_WORLD.Get_size() > 1)
 class TestP2PMatchedSelfDup(TestP2PMatchedSelf):
     def setUp(self):
         self.COMM = MPI.COMM_SELF.Dup()
     def tearDown(self):
         self.COMM.Free()
 
+@unittest.skipMPI('openmpi(<1.8.5)', MPI.COMM_WORLD.Get_size() > 1)
 class TestP2PMatchedWorldDup(TestP2PMatchedWorld):
     def setUp(self):
         self.COMM = MPI.COMM_WORLD.Dup()
     def tearDown(self):
         self.COMM.Free()
-
-
-if MPI.MESSAGE_NULL == MPI.MESSAGE_NO_PROC:
-    del TestMessage
-    del TestP2PMatchedSelf
-    del TestP2PMatchedWorld
-    del TestP2PMatchedSelfDup
-    del TestP2PMatchedWorldDup
-else:
-    name, version = MPI.get_vendor()
-    if name == 'Open MPI':
-        if (version < (1,8,5) and
-            MPI.COMM_WORLD.Get_size() > 1):
-            del TestP2PMatchedSelfDup
-            del TestP2PMatchedWorldDup
 
 
 if __name__ == '__main__':

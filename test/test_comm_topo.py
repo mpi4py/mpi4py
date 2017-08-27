@@ -57,9 +57,12 @@ class BaseTestTopo(object):
                     self.assertEqual(sub.dims, dims)
                     sub.Free()
             topo.Free()
-        if size > 1: return
-        if MPI.VERSION < 2: return
+
+    @unittest.skipMPI('MPI(<2.0)')
+    def testCartcommZeroDim(self):
+        comm = self.COMM
         topo = comm.Create_cart([])
+        if topo == MPI.COMM_NULL: return
         self.assertEqual(topo.dim, 0)
         self.assertEqual(topo.dims, [])
         self.assertEqual(topo.periods, [])
@@ -106,6 +109,7 @@ class BaseTestTopo(object):
         self.assertEqual(outedges, neighbors)
         topo.Free()
 
+    @unittest.skipMPI('msmpi')
     def testDistgraphcommAdjacent(self):
         comm = self.COMM
         size = comm.Get_size()
@@ -114,7 +118,7 @@ class BaseTestTopo(object):
             topo = comm.Create_dist_graph_adjacent(None, None)
             topo.Free()
         except NotImplementedError:
-            return
+            self.skipTest('mpi-comm-create_dist_graph_adjacent')
         #
         sources = [(rank-2)%size, (rank-1)%size]
         destinations = [(rank+1)%size, (rank+2)%size]
@@ -156,6 +160,8 @@ class BaseTestTopo(object):
         self.assertEqual(topo.Get_dist_neighbors(), ([], [], ([], [])))
         topo.Free()
 
+    @unittest.skipMPI('msmpi')
+    @unittest.skipMPI('PlatformMPI')
     def testDistgraphcomm(self):
         comm = self.COMM
         size = comm.Get_size()
@@ -165,7 +171,7 @@ class BaseTestTopo(object):
             topo = comm.Create_dist_graph([], [], [], MPI.UNWEIGHTED)
             topo.Free()
         except NotImplementedError:
-            return
+            self.skipTest('mpi-comm-create_dist_graph')
         #
         sources = [rank]
         degrees = [3]
@@ -212,6 +218,7 @@ class BaseTestTopo(object):
         self.assertEqual(topo.Get_rank(), rank)
         topo.Free()
 
+
 class TestTopoSelf(BaseTestTopo, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
@@ -229,14 +236,6 @@ class TestTopoWorldDup(TestTopoWorld):
         self.COMM = MPI.COMM_WORLD.Dup()
     def tearDown(self):
         self.COMM.Free()
-
-
-name, version = MPI.get_vendor()
-if name == 'Microsoft MPI':
-    del BaseTestTopo.testDistgraphcomm
-    del BaseTestTopo.testDistgraphcommAdjacent
-if name == 'Platform MPI':
-    del BaseTestTopo.testDistgraphcomm
 
 
 if __name__ == '__main__':

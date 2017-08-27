@@ -7,10 +7,10 @@ def getoptionparser():
 
     parser.add_option("-q", "--quiet",
                       action="store_const", const=0, dest="verbose", default=1,
-                      help="do not print status messages to stdout")
+                      help="minimal output")
     parser.add_option("-v", "--verbose",
                       action="store_const", const=2, dest="verbose", default=1,
-                      help="print status messages to stdout")
+                      help="verbose output")
     parser.add_option("-i", "--include", type="string",
                       action="append",  dest="include", default=[],
                       help="include tests matching PATTERN", metavar="PATTERN")
@@ -19,7 +19,10 @@ def getoptionparser():
                       help="exclude tests matching PATTERN", metavar="PATTERN")
     parser.add_option("-f", "--failfast",
                       action="store_true", dest="failfast", default=False,
-                      help="Stop on first failure")
+                      help="stop on first failure")
+    parser.add_option("-c", "--catch",
+                      action="store_true", dest="catchbreak", default=False,
+                      help="catch Control-C and display results")
     parser.add_option("--no-builddir",
                       action="store_false", dest="builddir", default=True,
                       help="disable testing from build directory")
@@ -48,7 +51,10 @@ def getoptionparser():
                       help="disable testing with NumPy arrays")
     parser.add_option("--no-array",
                       action="store_false", dest="array", default=True,
-                      help="disable testing with builtin array.array")
+                      help="disable testing with builtin array module")
+    parser.add_option("--no-skip-mpi",
+                      action="store_false", dest="skip_mpi", default=True,
+                      help="disable known failures with backend MPI")
     return parser
 
 def getbuilddir():
@@ -141,38 +147,46 @@ def print_banner(options, package):
         writeln(fmt % (r, n, getpackageinfo(package)))
 
 def load_tests(options, args):
-    from glob import glob
-    import re
+    # Find tests
+    import re, glob
     testsuitedir = os.path.dirname(__file__)
     sys.path.insert(0, testsuitedir)
     pattern = 'test_*.py'
     wildcard = os.path.join(testsuitedir, pattern)
-    testfiles = glob(wildcard)
-    testfiles.sort()
-    testsuite = unittest.TestSuite()
-    testloader = unittest.TestLoader()
+    testfiles = glob.glob(wildcard)
     include = exclude = None
     if options.include:
         include = re.compile('|'.join(options.include)).search
     if options.exclude:
         exclude = re.compile('|'.join(options.exclude)).search
-    if not options.numpy:
-        sys.modules['numpy'] = None
-    if not options.array:
-        sys.modules['array'] = None
+    testnames = []
     for testfile in testfiles:
         filename = os.path.basename(testfile)
         testname = os.path.splitext(filename)[0]
         if ((exclude and exclude(testname)) or
             (include and not include(testname))):
             continue
+        testnames.append(testname)
+    testnames.sort()
+    # Handle options
+    if not options.numpy:
+        sys.modules['numpy'] = None
+    if not options.array:
+        sys.modules['array'] = None
+    if not options.skip_mpi:
+        import mpiunittest
+        mpiunittest.skipMPI = lambda p, *c: lambda f: f
+    # Load tests and populate suite
+    testloader = unittest.TestLoader()
+    testsuite = unittest.TestSuite()
+    for testname in testnames:
         module = __import__(testname)
         for arg in args:
             try:
                 cases = testloader.loadTestsFromNames((arg,), module)
-                testsuite.addTests(cases)
             except AttributeError:
-                pass
+                continue
+            testsuite.addTests(cases)
         if not args:
             cases = testloader.loadTestsFromModule(module)
             testsuite.addTests(cases)
@@ -180,8 +194,11 @@ def load_tests(options, args):
 
 def run_tests(options, testsuite, runner=None):
     if runner is None:
-        runner = unittest.TextTestRunner(verbosity=options.verbose)
+        runner = unittest.TextTestRunner()
+        runner.verbosity = options.verbose
         runner.failfast = options.failfast
+    if options.catchbreak:
+        unittest.installHandler()
     result = runner.run(testsuite)
     return result.wasSuccessful()
 

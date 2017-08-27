@@ -29,9 +29,9 @@ class BaseTestRMA(object):
             self.memory = self.mpi_memory
             memzero(self.memory)
         except MPI.Exception:
-            from array import array
+            import array
             self.mpi_memory = None
-            self.memory = array('B',[0]*nbytes)
+            self.memory = array.array('B',[0]*nbytes)
         self.WIN = MPI.Win.Create(self.memory, 1, self.INFO, self.COMM)
 
     def tearDown(self):
@@ -62,6 +62,7 @@ class BaseTestRMA(object):
                             self.assertEqual(rbuf[i], rank)
                         self.assertEqual(rbuf[-1], -1)
 
+    @unittest.skipMPI('openmpi(>=1.10.0,<1.11.0)')
     def testAccumulate(self):
         group = self.WIN.Get_group()
         size = group.Get_size()
@@ -92,6 +93,7 @@ class BaseTestRMA(object):
                                 self.assertEqual(rbuf[i], op(1, i))
                             self.assertEqual(rbuf[-1], -1)
 
+    @unittest.skipMPI('openmpi(>=1.10,<1.11)')
     def testGetAccumulate(self):
         group = self.WIN.Get_group()
         size = group.Get_size()
@@ -161,33 +163,25 @@ class BaseTestRMA(object):
         self.WIN.Unlock(rank)
 
 
+@unittest.skipMPI('MPI(<3.0)')
+@unittest.skipMPI('openmpi(<1.8.1)')
+@unittest.skipMPI('MPICH2(<1.5.0)')
 class TestRMASelf(BaseTestRMA, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
+@unittest.skipMPI('MPI(<3.0)')
+@unittest.skipMPI('openmpi(<1.8.1)')
+@unittest.skipMPI('MPICH2(<1.5.0)')
 class TestRMAWorld(BaseTestRMA, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
 
+SpectrumMPI = MPI.get_vendor()[0] == 'Spectrum MPI'
 try:
+    if SpectrumMPI: raise NotImplementedError
     MPI.Win.Create(None, 1, MPI.INFO_NULL, MPI.COMM_SELF).Free()
 except NotImplementedError:
-    del TestRMASelf, TestRMAWorld
-else:
-    name, version = MPI.get_vendor()
-    if name == 'Open MPI':
-        if version[:2] == (1,10):
-            def SKIP(*t, **k): pass
-            TestRMAWorld.testAccumulate = SKIP
-            TestRMAWorld.testGetAccumulate = SKIP
-        if version < (1,8,1):
-            del TestRMASelf, TestRMAWorld
-    elif name == 'MPICH2':
-        if version < (1,5,0):
-            del TestRMASelf, TestRMAWorld
-        elif version >= (2,0,0) and MPI.VERSION < 3: # Intel MPI
-            del TestRMASelf, TestRMAWorld
-    elif MPI.Get_version() < (3,0):
-        del TestRMASelf, TestRMAWorld
+    unittest.disable(BaseTestRMA, 'mpi-rma-nb')
 
 
 if __name__ == '__main__':

@@ -1,6 +1,6 @@
-import sys, os, mpi4py
 from mpi4py import MPI
 import mpiunittest as unittest
+import sys, os, mpi4py
 
 MPI4PYPATH = os.path.abspath(os.path.dirname(mpi4py.__path__[0]))
 
@@ -36,6 +36,20 @@ def childscript():
     os.chmod(script, int("770", 8))
     return script
 
+def appnum():
+    if MPI.APPNUM == MPI.KEYVAL_INVALID: return None
+    return MPI.COMM_WORLD.Get_attr(MPI.APPNUM)
+
+@unittest.skipMPI('MPI(<2.0)')
+@unittest.skipMPI('openmpi(<2.2.0)')
+@unittest.skipMPI('mpich', appnum() is None)
+@unittest.skipMPI('msmpi(<8.1.0)')
+@unittest.skipMPI('msmpi', appnum() is None)
+@unittest.skipMPI('MVAPICH2')
+@unittest.skipMPI('MPICH2')
+@unittest.skipMPI('MPICH1')
+@unittest.skipMPI('PlatformMPI')
+@unittest.skipMPI('HP-MPI')
 class BaseTestSpawn(object):
 
     COMM = MPI.COMM_NULL
@@ -57,6 +71,7 @@ class BaseTestSpawn(object):
         self.assertEqual(local_size, self.COMM.Get_size())
         self.assertEqual(remote_size, self.MAXPROCS)
 
+    @unittest.skipMPI('msmpi')
     def testReturnedErrcodes(self):
         errcodes = []
         child = self.COMM.Spawn(self.COMMAND, self.ARGS, self.MAXPROCS,
@@ -69,6 +84,7 @@ class BaseTestSpawn(object):
         for errcode in errcodes:
             self.assertEqual(errcode, MPI.SUCCESS)
 
+    @unittest.skipMPI('msmpi')
     def testArgsOnlyAtRoot(self):
         self.COMM.Barrier()
         rank = self.COMM.Get_rank()
@@ -138,6 +154,7 @@ class BaseTestSpawn(object):
         self.assertEqual(local_size, self.COMM.Get_size())
         self.assertEqual(remote_size, len(COMMAND))
 
+    @unittest.skipMPI('msmpi')
     def testReturnedErrcodesMultiple(self):
         count = 2 + (self.COMM.Get_size() == 0)
         COMMAND = [self.COMMAND] * count
@@ -158,6 +175,7 @@ class BaseTestSpawn(object):
             for errcode in errcodes:
                 self.assertEqual(errcode, MPI.SUCCESS)
 
+    @unittest.skipMPI('msmpi')
     def testArgsOnlyAtRootMultiple(self):
         self.COMM.Barrier()
         rank = self.COMM.Get_rank()
@@ -211,53 +229,6 @@ class TestSpawnSelfMany(BaseTestSpawn, unittest.TestCase):
 class TestSpawnWorldMany(BaseTestSpawn, unittest.TestCase):
     COMM = MPI.COMM_WORLD
     MAXPROCS = MPI.COMM_WORLD.Get_size()
-
-
-SKIP_TEST = False
-name, version = MPI.get_vendor()
-if name == 'Open MPI':
-    if version < (2,2,0):
-        SKIP_TEST = True
-    if version < (1,8,0):
-        SKIP_TEST = True
-    if sys.platform.startswith('win'):
-        SKIP_TEST = True
-if name == 'MVAPICH2':
-    SKIP_TEST = True
-if name == 'MPICH2':
-    if version < (1,0,6):
-        SKIP_TEST = True
-    if sys.platform.startswith('win'):
-        SKIP_TEST = True
-if name == 'Microsoft MPI':
-    del BaseTestSpawn.testArgsOnlyAtRoot
-    del BaseTestSpawn.testReturnedErrcodes
-    del BaseTestSpawn.testArgsOnlyAtRootMultiple
-    del BaseTestSpawn.testReturnedErrcodesMultiple
-    if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
-        SKIP_TEST = True
-    if version < (8,1,0):
-        SKIP_TEST = True
-if name == 'Platform MPI':
-    SKIP_TEST = True
-if name == 'HP MPI':
-    SKIP_TEST = True
-if MPI.Get_version() < (2,0):
-    SKIP_TEST = True
-
-if SKIP_TEST:
-    del TestSpawnSelf
-    del TestSpawnWorld
-    del TestSpawnSelfMany
-    del TestSpawnWorldMany
-elif name == 'MPICH' or (name == 'MPICH2' and version > (1,2,0)):
-    # Up to mpich2-1.3.1 when running under Hydra process manager,
-    # spawn fails for the singleton init case
-    if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
-        del TestSpawnSelf
-        del TestSpawnWorld
-        del TestSpawnSelfMany
-        del TestSpawnWorldMany
 
 
 if __name__ == '__main__':

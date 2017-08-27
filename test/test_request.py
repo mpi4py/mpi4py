@@ -28,9 +28,13 @@ class TestRequest(unittest.TestCase):
         self.REQUEST.test(self.STATUS)
         self.assertTrue(self.REQUEST.test() == (True, None))
 
+    @unittest.skipMPI('MPICH1')
+    @unittest.skipMPI('LAM/MPI')
     def testGetStatus(self):
-        try: flag = self.REQUEST.Get_status()
-        except NotImplementedError: return
+        try:
+            flag = self.REQUEST.Get_status()
+        except NotImplementedError:
+            self.skipTest('mpi-request-get_status')
         self.assertTrue(flag)
         flag = self.REQUEST.Get_status(self.STATUS)
         self.assertTrue(flag)
@@ -39,8 +43,11 @@ class TestRequest(unittest.TestCase):
         self.assertEqual(self.STATUS.Get_error(),  MPI.SUCCESS)
         self.assertEqual(self.STATUS.Get_count(MPI.BYTE),    0)
         self.assertEqual(self.STATUS.Get_elements(MPI.BYTE), 0)
-        try: self.assertFalse(self.STATUS.Is_cancelled())
-        except NotImplementedError: pass
+        try:
+            self.assertFalse(self.STATUS.Is_cancelled())
+        except NotImplementedError:
+            self.skipTest('mpi-status-is_cancelled')
+
 
 class TestRequestArray(unittest.TestCase):
 
@@ -111,11 +118,6 @@ class TestRequestArray(unittest.TestCase):
             ret = MPI.Request.Testsome(self.REQUESTS, statuses)
             self.assertEqual(ret, None)
             self.assertEqual(len(statuses), len(self.REQUESTS))
-
-
-name, version = MPI.get_vendor()
-if name == 'MPICH1' or name == 'LAM/MPI':
-    del TestRequest.testGetStatus
 
 
 if __name__ == '__main__':

@@ -1,8 +1,18 @@
+import sys
 from mpi4py import MPI
 try:
     from collections import OrderedDict
 except ImportError:
     OrderedDict = dict
+try:
+    import array
+except ImportError:
+    array = None
+try:
+    import numpy
+except ImportError:
+    numpy = None
+
 
 __all__ = ['TypeMap', 'ArrayTypes', 'allclose']
 
@@ -19,10 +29,8 @@ TypeMap = OrderedDict([
 if MPI.SIGNED_CHAR == MPI.DATATYPE_NULL:
     del TypeMap['b']
 
-import sys
 if sys.version_info[:2] < (3, 3):
     del TypeMap['q']
-del sys
 
 ArrayTypes = []
 
@@ -36,11 +44,8 @@ def allclose(a, b, rtol=1.e-5, atol=1.e-8):
             return False
     return True
 
-try:
-    import array
-except ImportError:
-    pass
-else:
+
+if array is not None:
 
     def product(seq):
         res = 1
@@ -97,11 +102,8 @@ else:
     ArrayTypes.append(Array)
     __all__.append('Array')
 
-try:
-    import numpy
-except ImportError:
-    pass
-else:
+
+if numpy is not None:
 
     class NumPy(object):
 

@@ -1,7 +1,8 @@
 from mpi4py import MPI
 import mpiunittest as unittest
 import arrayimpl
-import os, tempfile
+import sys, os, tempfile
+
 
 class BaseTestIO(object):
 
@@ -56,6 +57,7 @@ class BaseTestIO(object):
                 for value in rbuf[:-1]:
                     self.assertEqual(value, 42)
                 self.assertEqual(rbuf[-1], -1)
+                comm.Barrier()
 
     def testIReadIWriteAt(self):
         comm = self.COMM
@@ -78,6 +80,7 @@ class BaseTestIO(object):
                 for value in rbuf[:-1]:
                     self.assertEqual(value, 42)
                 self.assertEqual(rbuf[-1], -1)
+                comm.Barrier()
 
     def testReadWrite(self):
         comm = self.COMM
@@ -105,6 +108,7 @@ class BaseTestIO(object):
                         for value in rbuf[:-1]:
                             self.assertEqual(value, 42)
                         self.assertEqual(rbuf[-1], -1)
+                    comm.Barrier()
 
     def testIReadIWrite(self):
         comm = self.COMM
@@ -132,6 +136,7 @@ class BaseTestIO(object):
                         for value in rbuf[:-1]:
                             self.assertEqual(value, 42)
                         self.assertEqual(rbuf[-1], -1)
+                    comm.Barrier()
 
     def testReadWriteShared(self):
         comm = self.COMM
@@ -157,6 +162,7 @@ class BaseTestIO(object):
                     self.assertTrue(0<=value<42)
                     self.assertEqual(value, rbuf[0])
                 self.assertEqual(rbuf[-1], -1)
+                comm.Barrier()
 
     def testIReadIWriteShared(self):
         comm = self.COMM
@@ -182,6 +188,7 @@ class BaseTestIO(object):
                     self.assertTrue(0<=value<42)
                     self.assertEqual(value, rbuf[0])
                 self.assertEqual(rbuf[-1], -1)
+                comm.Barrier()
 
     # collective
 
@@ -206,7 +213,9 @@ class BaseTestIO(object):
                 for value in rbuf[:-1]:
                     self.assertEqual(value, 42)
                 self.assertEqual(rbuf[-1], -1)
+                comm.Barrier()
 
+    @unittest.skipMPI('SpectrumMPI')
     def testIReadIWriteAtAll(self):
         comm = self.COMM
         size = comm.Get_size()
@@ -229,8 +238,10 @@ class BaseTestIO(object):
                     for value in rbuf[:-1]:
                         self.assertEqual(value, 42)
                     self.assertEqual(rbuf[-1], -1)
+                    comm.Barrier()
         except NotImplementedError:
             if MPI.Get_version() >= (3, 1): raise
+            self.skipTest("mpi-iwrite_at_all")
 
     def testReadWriteAtAllBeginEnd(self):
         comm = self.COMM
@@ -255,6 +266,7 @@ class BaseTestIO(object):
                 for value in rbuf[:-1]:
                     self.assertEqual(value, 42)
                 self.assertEqual(rbuf[-1], -1)
+                comm.Barrier()
 
     def testReadWriteAll(self):
         comm = self.COMM
@@ -279,7 +291,9 @@ class BaseTestIO(object):
                 for value in rbuf[:-1]:
                     self.assertEqual(value, 42)
                 self.assertEqual(rbuf[-1], -1)
+                comm.Barrier()
 
+    @unittest.skipMPI('SpectrumMPI')
     def testIReadIWriteAll(self):
         comm = self.COMM
         size = comm.Get_size()
@@ -304,8 +318,10 @@ class BaseTestIO(object):
                     for value in rbuf[:-1]:
                         self.assertEqual(value, 42)
                     self.assertEqual(rbuf[-1], -1)
+                    comm.Barrier()
         except NotImplementedError:
             if MPI.Get_version() >= (3, 1): raise
+            self.skipTest("mpi-iwrite_all")
 
     def testReadWriteAllBeginEnd(self):
         comm = self.COMM
@@ -332,6 +348,7 @@ class BaseTestIO(object):
                 for value in rbuf[:-1]:
                     self.assertEqual(value, 42)
                 self.assertEqual(rbuf[-1], -1)
+                comm.Barrier()
 
     def testReadWriteOrdered(self):
         comm = self.COMM
@@ -356,6 +373,7 @@ class BaseTestIO(object):
                 for value in rbuf[:-1]:
                     self.assertEqual(value, rank%42)
                 self.assertEqual(rbuf[-1], -1)
+                comm.Barrier()
 
     def testReadWriteOrderedBeginEnd(self):
         comm = self.COMM
@@ -382,45 +400,34 @@ class BaseTestIO(object):
                 for value in rbuf[:-1]:
                     self.assertEqual(value, rank%42)
                 self.assertEqual(rbuf[-1], -1)
+                comm.Barrier()
 
+@unittest.skipMPI('MPICH1')
+@unittest.skipMPI('LAM/MPI')
 class TestIOSelf(BaseTestIO, unittest.TestCase):
     COMM = MPI.COMM_SELF
     prefix = BaseTestIO.prefix + ('%d-' % MPI.COMM_WORLD.Get_rank())
 
+@unittest.skipMPI('openmpi(<2.2.0)')
+@unittest.skipMPI('msmpi')
+@unittest.skipMPI('MPICH2')
+@unittest.skipMPI('MPICH1')
+@unittest.skipMPI('LAM/MPI')
 class TestIOWorld(BaseTestIO, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
 
-import sys
-name, version = MPI.get_vendor()
-if name == 'Open MPI':
-    if version < (2,2,0):
-        TestIOWorld = None
-    if version < (1,8,0):
-        TestIOWorld = None
-    if sys.platform.startswith('win'):
-        TestIOSelf = None
-        TestIOWorld = None
-if name == 'MPICH2':
-    TestIOWorld = None
-if name == 'Microsoft MPI':
-    TestIOWorld = None
-if name == 'MPICH1':
-    TestIOSelf = None
-    TestIOWorld = None
-if name == 'LAM/MPI':
-    TestIOSelf = None
-    TestIOWorld = None
-
+def have_feature():
+    case = BaseTestIO()
+    case.COMM = TestIOSelf.COMM
+    case.prefix = TestIOSelf.prefix
+    case.setUp()
+    case.tearDown()
 try:
-    dummy = BaseTestIO()
-    dummy.COMM = MPI.COMM_SELF
-    dummy.setUp()
-    dummy.tearDown()
-    del dummy
+    have_feature()
 except NotImplementedError:
-    TestIOSelf = None
-    TestIOWorld = None
+    unittest.disable(BaseTestIO, 'mpi-io')
+
 
 if __name__ == '__main__':
     unittest.main()

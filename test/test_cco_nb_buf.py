@@ -18,6 +18,7 @@ def maxvalue(a):
         return 2 ** (a.itemsize * 7) - 1
 
 
+@unittest.skipMPI("msmpi(<8.1.0)")
 class BaseTestCCOBuf(object):
 
     COMM = MPI.COMM_NULL
@@ -154,6 +155,7 @@ class BaseTestCCOBuf(object):
                         elif op == MPI.MIN:
                             self.assertEqual(value, i)
 
+    @unittest.skipMPI("openmpi(<=1.8.3)")
     def testReduceScatter(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
@@ -256,6 +258,7 @@ class BaseTestCCOBuf(object):
                         elif op == MPI.MIN:
                             self.assertEqual(value, i)
 
+    @unittest.skipMPI("openmpi(<=1.8.1)")
     def testExscan(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
@@ -328,6 +331,7 @@ class BaseTestCCOBuf(object):
                                 self.assertEqual(value, i)
 
 
+@unittest.skipMPI('MVAPICH2')
 class BaseTestCCOBufInplace(object):
 
     def testGather(self):
@@ -448,6 +452,7 @@ class BaseTestCCOBufInplace(object):
                         elif op == MPI.MIN:
                             self.assertEqual(value, i)
 
+    @unittest.skipMPI("openmpi(<=1.8.6)")
     def testReduceScatterBlock(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
@@ -483,6 +488,7 @@ class BaseTestCCOBufInplace(object):
                                 elif op == MPI.MIN:
                                     self.assertEqual(value, 0)
 
+    @unittest.skipMPI("openmpi(<=1.8.6)")
     def testReduceScatter(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
@@ -530,6 +536,9 @@ class TestCCOBufInplaceSelf(BaseTestCCOBufInplace, unittest.TestCase):
 
 class TestCCOBufInplaceWorld(BaseTestCCOBufInplace, unittest.TestCase):
     COMM = MPI.COMM_WORLD
+    @unittest.skipMPI('IntelMPI', MPI.COMM_WORLD.Get_size() > 1)
+    def testReduceScatter(self):
+        super(TestCCOBufInplaceWorld, self).testReduceScatter()
 
 class TestCCOBufSelfDup(TestCCOBufSelf):
     def setUp(self):
@@ -544,42 +553,11 @@ class TestCCOBufWorldDup(TestCCOBufWorld):
         self.COMM.Free()
 
 
-name, version = MPI.get_vendor()
-if name == 'Open MPI':
-    if version == (1,8,6):
-        def SKIP(*args, **kwargs): pass
-        TestCCOBufInplaceSelf.testReduceScatter = SKIP
-        TestCCOBufInplaceSelf.testReduceScatterBlock = SKIP
-        TestCCOBufInplaceWorld.testReduceScatter = SKIP
-        TestCCOBufInplaceWorld.testReduceScatterBlock = SKIP
-    if version == (1,8,4):
-        def SKIP(*args, **kwargs): pass
-        TestCCOBufSelf.testReduceScatter = SKIP
-        if MPI.COMM_WORLD.Get_size() == 1:
-            TestCCOBufWorld.testReduceScatter = SKIP
-    if version < (1,8,4):
-        del BaseTestCCOBufInplace.testReduceScatter
-        del BaseTestCCOBufInplace.testReduceScatterBlock
-    if version < (1,8,2):
-        del BaseTestCCOBuf.testExscan
-        del BaseTestCCOBuf.testReduceScatter
-if name == 'MVAPICH2':
-    del BaseTestCCOBufInplace.testReduceScatter
-if name == 'Microsoft MPI':
-    if version < (8,1,0):
-        for cls in (BaseTestCCOBuf, BaseTestCCOBufInplace):
-            for meth in dir(cls):
-                if meth.startswith('test'):
-                    delattr(cls, meth)
 try:
     MPI.COMM_SELF.Ibarrier().Wait()
 except NotImplementedError:
-    del TestCCOBufSelf
-    del TestCCOBufWorld
-    del TestCCOBufInplaceSelf
-    del TestCCOBufInplaceWorld
-    del TestCCOBufSelfDup
-    del TestCCOBufWorldDup
+    unittest.disable(BaseTestCCOBuf, 'mpi-nbc')
+    unittest.disable(BaseTestCCOBufInplace, 'mpi-nbc')
 
 
 if __name__ == '__main__':

@@ -1,5 +1,9 @@
-import sys, os, glob
+import os
+import sys
+import glob
 import unittest
+from distutils.versionpredicate import VersionPredicate
+
 
 class TestCase(unittest.TestCase):
 
@@ -44,7 +48,7 @@ def ErrClsName(ierr):
         ErrClsMap = {}
         ErrClsMap[MPI.SUCCESS] = 'SUCCESS'
         for entry in dir(MPI):
-            if 'ERR_' in entry:
+            if entry.startswith('ERR_'):
                 errcls = getattr(MPI, entry)
                 ErrClsMap[errcls] = entry
     try:
@@ -53,17 +57,36 @@ def ErrClsName(ierr):
         return '<unknown>'
 
 
-def find_tests(pattern='test_*.py', directory=None, exclude=()):
-    if directory is None: directory = os.path.split(__file__)[0]
-    pattern = os.path.join(directory, pattern)
-    test_list = []
-    for test_file in glob.glob(pattern):
-        filename = os.path.basename(test_file)
-        modulename = os.path.splitext(filename)[0]
-        if modulename not in exclude:
-            test = __import__(modulename)
-            test_list.append(test)
-    return test_list
+SkipTest = unittest.SkipTest
+
+skip = unittest.skip
+
+skipIf = unittest.skipIf
+
+skipUnless = unittest.skipUnless
+
+def skipMPI(predicate, *conditions):
+    from mpi4py import MPI
+    def key(s):
+        s = s.replace(' ', '')
+        s = s.replace('/', '')
+        s = s.replace('-', '')
+        s = s.replace('Microsoft', 'MS')
+        return s.lower()
+    vp = VersionPredicate(key(predicate))
+    if vp.name == 'mpi':
+        name, version = 'mpi', MPI.Get_version()
+        version = version + (0,)
+    else:
+        name, version = MPI.get_vendor()
+    if vp.name == key(name):
+        if vp.satisfied_by('%d.%d.%d' % version):
+            if not conditions or any(conditions):
+                return unittest.skip(str(vp))
+    return unittest.skipIf(False, '')
+
+def disable(what, reason):
+    return unittest.skip(reason)(what)
 
 
 def main(*args, **kargs):

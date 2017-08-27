@@ -269,7 +269,7 @@ class BaseTestCCOBuf(object):
                                          rbuf.as_mpi(),
                                          op)
                     except NotImplementedError:
-                        return
+                        self.skipTest('mpi-exscan')
                     if rank == 1:
                         for i, value in enumerate(rbuf):
                             self.assertEqual(value, i)
@@ -351,10 +351,7 @@ class BaseTestCCOBufInplace(object):
                         buf = array(root, typecode, count)
                         sbuf = buf.as_mpi()
                         rbuf = None
-                    try:
-                        self.COMM.Gather(sbuf, rbuf, root=root)
-                    except NotImplementedError:
-                        return
+                    self.COMM.Gather(sbuf, rbuf, root=root)
                     for value in buf.flat:
                         self.assertEqual(value, root)
 
@@ -373,10 +370,7 @@ class BaseTestCCOBufInplace(object):
                             buf = array(-1, typecode, count)
                             sbuf = None
                             rbuf = buf.as_mpi()
-                        try:
-                            self.COMM.Scatter(sbuf, rbuf, root=root)
-                        except NotImplementedError:
-                            return
+                        self.COMM.Scatter(sbuf, rbuf, root=root)
                         for value in buf.flat:
                             self.assertEqual(value, root)
 
@@ -391,10 +385,7 @@ class BaseTestCCOBufInplace(object):
                     #    array(count, typecode, count)
                     s, e = rank*count, (rank+1)*count
                     for i in range(s, e): buf.flat[i] = count
-                    try:
-                        self.COMM.Allgather(MPI.IN_PLACE, buf.as_mpi())
-                    except NotImplementedError:
-                        return
+                    self.COMM.Allgather(MPI.IN_PLACE, buf.as_mpi())
                     for value in buf.flat:
                         self.assertEqual(value, count)
 
@@ -421,10 +412,7 @@ class BaseTestCCOBufInplace(object):
                             buf2 = array(range(size), typecode)
                             sbuf = buf.as_mpi()
                             rbuf = buf2.as_mpi()
-                        try:
-                            self.COMM.Reduce(sbuf, rbuf, op, root)
-                        except NotImplementedError:
-                            return
+                        self.COMM.Reduce(sbuf, rbuf, op, root)
                         if rank == root:
                             max_val = maxvalue(buf)
                             for i, value in enumerate(buf):
@@ -497,6 +485,7 @@ class BaseTestCCOBufInplace(object):
                                 elif op == MPI.MIN:
                                     self.assertEqual(value, 0)
 
+    @unittest.skipMPI('MVAPICH2')
     def testReduceScatter(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
@@ -532,6 +521,7 @@ class BaseTestCCOBufInplace(object):
                             elif op == MPI.MIN:
                                 self.assertEqual(value, 0)
 
+    @unittest.skipMPI('openmpi(<=1.8.4)')
     def testScan(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
@@ -556,6 +546,8 @@ class BaseTestCCOBufInplace(object):
                         elif op == MPI.MIN:
                             self.assertEqual(value, i)
 
+    @unittest.skipMPI('openmpi(<=1.8.4)')
+    @unittest.skipMPI('msmpi(<=4.2.0)')
     def testExscan(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
@@ -568,7 +560,7 @@ class BaseTestCCOBufInplace(object):
                                          buf.as_mpi(),
                                          op)
                     except NotImplementedError:
-                        return
+                        self.skipTest('mpi-exscan')
                     if rank == 1:
                         for i, value in enumerate(buf):
                             self.assertEqual(value, i)
@@ -598,7 +590,7 @@ class TestReduceLocal(unittest.TestCase):
                     try:
                         op.Reduce_local(sbuf.as_mpi(), rbuf.as_mpi())
                     except NotImplementedError:
-                        return
+                        self.skipTest('mpi-op-reduce_local')
                     for i, value in enumerate(rbuf):
                         self.assertEqual(sbuf[i], i+1)
                         if op == MPI.SUM:
@@ -617,11 +609,20 @@ class TestCCOBufSelf(BaseTestCCOBuf, unittest.TestCase):
 class TestCCOBufWorld(BaseTestCCOBuf, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
+@unittest.skipMPI('MPICH1')
+@unittest.skipMPI('LAM/MPI')
+@unittest.skipIf(MPI.IN_PLACE == MPI.BOTTOM, 'mpi-in-place')
 class TestCCOBufInplaceSelf(BaseTestCCOBufInplace, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
+@unittest.skipMPI('MPICH1')
+@unittest.skipMPI('LAM/MPI')
+@unittest.skipIf(MPI.IN_PLACE == MPI.BOTTOM, 'mpi-in-place')
 class TestCCOBufInplaceWorld(BaseTestCCOBufInplace, unittest.TestCase):
     COMM = MPI.COMM_WORLD
+    @unittest.skipMPI('IntelMPI', MPI.COMM_WORLD.Get_size() > 1)
+    def testReduceScatter(self):
+        super(TestCCOBufInplaceWorld, self).testReduceScatter()
 
 class TestCCOBufSelfDup(TestCCOBufSelf):
     def setUp(self):
@@ -629,29 +630,12 @@ class TestCCOBufSelfDup(TestCCOBufSelf):
     def tearDown(self):
         self.COMM.Free()
 
+@unittest.skipMPI('openmpi(<1.4.0)', MPI.Query_thread() > MPI.THREAD_SINGLE)
 class TestCCOBufWorldDup(TestCCOBufWorld):
     def setUp(self):
         self.COMM = MPI.COMM_WORLD.Dup()
     def tearDown(self):
         self.COMM.Free()
-
-
-name, version = MPI.get_vendor()
-if name == 'MPICH1' or name == 'LAM/MPI' or MPI.BOTTOM == MPI.IN_PLACE:
-    del TestCCOBufInplaceSelf
-    del TestCCOBufInplaceWorld
-elif name == 'Open MPI':
-    if version < (1,8,5):
-        del BaseTestCCOBufInplace.testScan
-        del BaseTestCCOBufInplace.testExscan
-    if version < (1,4,0):
-        if MPI.Query_thread() > MPI.THREAD_SINGLE:
-            del TestCCOBufWorldDup
-elif name == 'MVAPICH2':
-    del BaseTestCCOBufInplace.testReduceScatter
-elif name == 'Microsoft MPI':
-    if version <= (4,2,0):
-        del BaseTestCCOBufInplace.testExscan
 
 
 if __name__ == '__main__':

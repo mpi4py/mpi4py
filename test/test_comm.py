@@ -66,18 +66,18 @@ class BaseTestComm(object):
     def testGetSetName(self):
         try:
             name = self.COMM.Get_name()
+            self.COMM.Set_name('comm')
+            self.assertEqual(self.COMM.Get_name(), 'comm')
+            self.COMM.Set_name(name)
+            self.assertEqual(self.COMM.Get_name(), name)
         except NotImplementedError:
-            return
-        self.COMM.Set_name('comm')
-        self.assertEqual(self.COMM.Get_name(), 'comm')
-        self.COMM.Set_name(name)
-        self.assertEqual(self.COMM.Get_name(), name)
+            self.skipTest('mpi-comm-name')
 
     def testGetParent(self):
         try:
             parent = MPI.Comm.Get_parent()
         except NotImplementedError:
-            return
+            self.skipTest('mpi-comm-get_parent')
 
     def testDupWithInfo(self):
         info = None
@@ -90,11 +90,12 @@ class BaseTestComm(object):
         self.COMM.Dup_with_info(info).Free()
         info.Free()
 
+    @unittest.skipMPI('mpich(<=3.1.0)', MPI.Query_thread() > MPI.THREAD_SINGLE)
     def testIDup(self):
         try:
             comm, request = self.COMM.Idup()
         except NotImplementedError:
-            return
+            self.skipTest('mpi-comm-idup')
         request.Wait()
         ccmp = MPI.Comm.Compare(self.COMM, comm)
         comm.Free()
@@ -118,6 +119,7 @@ class BaseTestComm(object):
         comm.Free()
         group.Free()
 
+    @unittest.skipMPI('openmpi(<=1.8.1)')
     def testCreateGroup(self):
         group = self.COMM.Get_group()
         try:
@@ -129,13 +131,15 @@ class BaseTestComm(object):
             finally:
                 group.Free()
         except NotImplementedError:
-            pass
+            self.skipTest('mpi-comm-create_group')
 
+
+    @unittest.skipMPI('openmpi(==2.0.0)')
     def testSplitType(self):
         try:
             MPI.COMM_SELF.Split_type(MPI.COMM_TYPE_SHARED).Free()
         except NotImplementedError:
-            return
+            self.skipTest('mpi-comm-split_type')
         #comm = self.COMM.Split_type(MPI.UNDEFINED)
         #self.assertEqual(comm, MPI.COMM_NULL)
         comm = self.COMM.Split_type(MPI.COMM_TYPE_SHARED)
@@ -188,26 +192,12 @@ class TestCommSelfDup(TestCommSelf):
     def tearDown(self):
         self.COMM.Free()
 
+@unittest.skipMPI('openmpi(<1.4.0)', MPI.Query_thread() > MPI.THREAD_SINGLE)
 class TestCommWorldDup(TestCommWorld):
     def setUp(self):
         self.COMM = MPI.COMM_WORLD.Dup()
     def tearDown(self):
         self.COMM.Free()
-
-
-name, version = MPI.get_vendor()
-if name == 'MPICH':
-    if version < (3,1,1):
-        if MPI.Query_thread() > MPI.THREAD_SINGLE:
-            del BaseTestComm.testIDup
-if name == 'Open MPI':
-    if version == (2,0,0):
-        del BaseTestComm.testSplitType
-    if version < (1,8,2):
-        del BaseTestComm.testCreateGroup
-    if version < (1,4,0):
-        if MPI.Query_thread() > MPI.THREAD_SINGLE:
-            del TestCommWorldDup
 
 
 if __name__ == '__main__':

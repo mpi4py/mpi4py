@@ -73,7 +73,8 @@ class TestObjModel(unittest.TestCase):
         except TypeError:
             pass
         else:
-            if hasattr(sys, 'pypy_version_info'): return
+            if hasattr(sys, 'pypy_version_info'):
+                self.skipTest('pypy')
         for obj in self.objects:
             ob_hash = lambda: hash(obj)
             self.assertRaises(TypeError, ob_hash)

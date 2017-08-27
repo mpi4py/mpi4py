@@ -16,12 +16,14 @@ def maxvalue(a):
         return 2 ** (a.itemsize * 7) - 1
 
 
+@unittest.skipMPI('msmpi(<8.1.0)')
 class BaseTestCCOVec(object):
 
     COMM = MPI.COMM_NULL
 
     skip = []
 
+    @unittest.skipMPI('openmpi(==1.10.1)')
     def testGatherv(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
@@ -47,6 +49,7 @@ class BaseTestCCOVec(object):
                                 for vb in b:
                                     self.assertEqual(vb, -1)
 
+    @unittest.skipMPI('openmpi(==1.10.1)')
     def testGatherv2(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
@@ -71,6 +74,7 @@ class BaseTestCCOVec(object):
                                 for vb in b:
                                     self.assertEqual(vb, -1)
 
+    @unittest.skipMPI('openmpi(==1.10.1)')
     def testGatherv3(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
@@ -102,6 +106,7 @@ class BaseTestCCOVec(object):
                             for v in rbuf:
                                 self.assertEqual(v, root)
 
+    @unittest.skipMPI('openmpi(==1.10.1)')
     def testScatterv(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
@@ -121,6 +126,7 @@ class BaseTestCCOVec(object):
                         for vr in rbuf:
                             self.assertEqual(vr, root)
 
+    @unittest.skipMPI('openmpi(==1.10.1)')
     def testScatterv2(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
@@ -142,6 +148,7 @@ class BaseTestCCOVec(object):
                         for vb in b:
                             self.assertEqual(vb, -1)
 
+    @unittest.skipMPI('openmpi(==1.10.1)')
     def testScatterv3(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
@@ -170,6 +177,7 @@ class BaseTestCCOVec(object):
                         for v in rbuf:
                             self.assertEqual(v, root)
 
+    @unittest.skipMPI('openmpi(==1.10.1)')
     def testAllgatherv(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
@@ -194,6 +202,7 @@ class BaseTestCCOVec(object):
                             for vb in b:
                                 self.assertEqual(vb, -1)
 
+    @unittest.skipMPI('openmpi(==1.10.1)')
     def testAllgatherv2(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
@@ -216,6 +225,7 @@ class BaseTestCCOVec(object):
                             for vb in b:
                                 self.assertEqual(vb, -1)
 
+    @unittest.skipMPI('openmpi(==1.10.1)')
     def testAllgatherv3(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
@@ -304,6 +314,7 @@ class BaseTestCCOVec(object):
                         for v in rbuf:
                             self.assertEqual(v, root)
 
+    @unittest.skipMPI('openmpi(<=1.8.0)')
     def testAlltoallw(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
@@ -320,7 +331,7 @@ class BaseTestCCOVec(object):
                     try:
                         self.COMM.Ialltoallw(smsg, rmsg).Wait()
                     except NotImplementedError:
-                        return
+                        self.skipTest('mpi-ialltoallw')
                     for v in rbuf.flat:
                         self.assertEqual(v, n)
 
@@ -346,35 +357,14 @@ class TestCCOVecWorldDup(TestCCOVecWorld):
 
 name, version = MPI.get_vendor()
 if name == 'Open MPI':
-    if version == (1,10,1):
-        del BaseTestCCOVec.testScatterv
-        del BaseTestCCOVec.testScatterv2
-        del BaseTestCCOVec.testScatterv3
-        del BaseTestCCOVec.testGatherv
-        del BaseTestCCOVec.testGatherv2
-        del BaseTestCCOVec.testGatherv3
-        del BaseTestCCOVec.testAllgatherv
-        del BaseTestCCOVec.testAllgatherv2
-        del BaseTestCCOVec.testAllgatherv3
     if version == (1,10,0):
         BaseTestCCOVec.skip += [(0, '*')]
     if version == (1,8,6):
         BaseTestCCOVec.skip += [(0, 'b')]
-    if version < (1,8,1):
-        del BaseTestCCOVec.testAlltoallw
-if name == 'Microsoft MPI':
-    if version < (8,1,0):
-        TestCCOVecSelf = None
-        TestCCOVecWorld = None
-        TestCCOVecSelfDup = None
-        TestCCOVecWorldDup = None
 try:
     MPI.COMM_SELF.Ibarrier().Wait()
 except NotImplementedError:
-    del TestCCOVecSelf
-    del TestCCOVecWorld
-    del TestCCOVecSelfDup
-    del TestCCOVecWorldDup
+    unittest.disable(BaseTestCCOVec, 'mpi-nbc')
 
 
 if __name__ == '__main__':

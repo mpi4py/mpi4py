@@ -1,11 +1,11 @@
+import mpiunittest as unittest
+import sys, os
 try:
     from mpi4py import dl
 except ImportError:
     dl = None
-import mpiunittest as unittest
-import sys
-import os
 
+@unittest.skipIf(dl is None, 'mpi4py-dl')
 class TestDL(unittest.TestCase):
 
     def testDL1(self):
@@ -33,6 +33,9 @@ class TestDL(unittest.TestCase):
         self.assertTrue(ierr == 0)
         self.assertTrue(dl.dlerror() is None)
 
+    @unittest.skipIf(hasattr(sys, 'pypy_version_info') and
+                     sys.platform == 'darwin',
+                     'pypy|darwin')
     def testDL2(self):
         handle = dl.dlopen(None, dl.RTLD_GLOBAL|dl.RTLD_NOW)
         self.assertTrue(handle != 0)
@@ -67,13 +70,6 @@ class TestDL(unittest.TestCase):
         handle = dl.dlopen('xxxxx', dl.RTLD_LOCAL|dl.RTLD_LAZY)
         self.assertTrue(handle == 0)
         self.assertTrue(dl.dlerror() is not None)
-
-
-if dl is None:
-    del TestDL
-elif (sys.platform == 'darwin' and
-      hasattr(sys, 'pypy_version_info')):
-    del TestDL.testDL2
 
 
 if __name__ == '__main__':

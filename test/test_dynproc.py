@@ -5,6 +5,13 @@ try:
 except ImportError:
     socket = None
 
+def appnum():
+    if MPI.APPNUM == MPI.KEYVAL_INVALID: return None
+    return MPI.COMM_WORLD.Get_attr(MPI.APPNUM)
+
+@unittest.skipMPI('openmpi(<2.0.0)')
+@unittest.skipMPI('MVAPICH2')
+@unittest.skipMPI('msmpi(<8.1.0)')
 class TestDPM(unittest.TestCase):
 
     message = [
@@ -20,6 +27,11 @@ class TestDPM(unittest.TestCase):
         {1:2},
     ]
 
+    @unittest.skipMPI('mpich', appnum() is None)
+    @unittest.skipMPI('MPICH2', appnum() is None)
+    @unittest.skipMPI('MPICH1', appnum() is None)
+    @unittest.skipMPI('msmpi(<8.1.0)', appnum() is None)
+    @unittest.skipMPI('PlatformMPI')
     def testNamePublishing(self):
         rank = MPI.COMM_WORLD.Get_rank()
         service = "mpi4py-%d" % rank
@@ -30,12 +42,12 @@ class TestDPM(unittest.TestCase):
         MPI.Unpublish_name(service, port)
         MPI.Close_port(port)
 
+    @unittest.skipIf(MPI.COMM_WORLD.Get_size() < 2, 'mpi-world-size<2')
     def testAcceptConnect(self):
         comm_self  = MPI.COMM_SELF
         comm_world = MPI.COMM_WORLD
         wsize = comm_world.Get_size()
         wrank = comm_world.Get_rank()
-        if wsize == 1: return
         group_world = comm_world.Get_group()
         group = group_world.Excl([0])
         group_world.Free()
@@ -78,12 +90,12 @@ class TestDPM(unittest.TestCase):
             self.assertEqual(message, TestDPM.message)
         intercomm.Free()
 
+    @unittest.skipIf(MPI.COMM_WORLD.Get_size() < 2, 'mpi-world-size<2')
     def testConnectAccept(self):
         comm_self  = MPI.COMM_SELF
         comm_world = MPI.COMM_WORLD
         wsize = comm_world.Get_size()
         wrank = comm_world.Get_rank()
-        if wsize == 1: return
         group_world = comm_world.Get_group()
         group = group_world.Excl([0])
         group_world.Free()
@@ -127,11 +139,11 @@ class TestDPM(unittest.TestCase):
             self.assertEqual(message, TestDPM.message)
         intercomm.Free()
 
+    @unittest.skipIf(MPI.COMM_WORLD.Get_size() < 2, 'mpi-world-size<2')
+    @unittest.skipIf(socket is None, 'socket')
     def testJoin(self):
-        if not socket: return
         size = MPI.COMM_WORLD.Get_size()
         rank = MPI.COMM_WORLD.Get_rank()
-        if size < 2: return
         server = client = address = None
         # crate server/client sockets
         if rank == 0: # server
@@ -185,27 +197,12 @@ class TestDPM(unittest.TestCase):
         MPI.COMM_WORLD.Barrier()
 
 
-name, version = MPI.get_vendor()
-if name == 'MPICH' or name == 'MPICH2':
-    if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
-        del TestDPM.testNamePublishing
-elif name == 'Open MPI':
-    if version < (2,0,0):
-        del TestDPM
-elif name == 'MVAPICH2':
-    del TestDPM
-elif name == 'Microsoft MPI':
-    if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
-        del TestDPM.testNamePublishing
-    if version < (8,1,0):
-        del TestDPM
-elif name == 'Platform MPI':
-    del TestDPM.testNamePublishing
-else:
-    try:
-        MPI.Close_port(MPI.Open_port())
-    except NotImplementedError:
-        del TestDPM
+MVAPICH2 = MPI.get_vendor()[0] == 'MVAPICH2'
+try:
+    if MVAPICH2: raise NotImplementedError
+    MPI.Close_port(MPI.Open_port())
+except NotImplementedError:
+    unittest.disable(TestDPM, 'mpi-dpm')
 
 
 if __name__ == '__main__':

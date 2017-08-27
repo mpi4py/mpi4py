@@ -1,6 +1,7 @@
 from mpi4py import MPI
 import mpiunittest as unittest
 
+
 class BaseTestMessageZero(object):
 
     null_b = [None, MPI.INT]
@@ -29,6 +30,8 @@ class BaseTestMessageZero(object):
         comm.Allgatherv(self.null_b, self.null_v)
         comm.Alltoallv(self.null_v, self.null_v)
 
+    @unittest.skipMPI('openmpi')
+    @unittest.skipMPI('SpectrumMPI')
     def testReductions(self):
         comm = self.COMM
         comm.Reduce(self.null_b, self.null_b)
@@ -47,9 +50,6 @@ class TestMessageZeroSelf(BaseTestMessageZero, unittest.TestCase):
 class TestMessageZeroWorld(BaseTestMessageZero, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
-name, version = MPI.get_vendor()
-if name == 'Open MPI':
-    del BaseTestMessageZero.testReductions
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,6 +1,7 @@
 from mpi4py import MPI
 import mpiunittest as unittest
 
+
 class TestErrorCode(unittest.TestCase):
 
     errorclasses = [item[1] for item in vars(MPI).items()
@@ -57,18 +58,20 @@ class TestErrorCode(unittest.TestCase):
         exc = MPI.Exception(MPI.ERR_LASTCODE+1)
         self.assertTrue(exc, MPI.ERR_UNKNOWN)
 
+    @unittest.skipMPI('openmpi(<1.10.0)')
     def testAddErrorClass(self):
         try:
-            errclass  = MPI.Add_error_class()
+            errclass = MPI.Add_error_class()
         except NotImplementedError:
-            return
+            self.skipTest('mpi-add_error_class')
         self.assertTrue(errclass >= MPI.ERR_LASTCODE)
 
+    @unittest.skipMPI('openmpi(<1.10.0)')
     def testAddErrorClassCodeString(self):
         try:
-            errclass  = MPI.Add_error_class()
+            errclass = MPI.Add_error_class()
         except NotImplementedError:
-            return
+            self.skipTest('mpi-add_error_class')
         lastused = MPI.COMM_WORLD.Get_attr(MPI.LASTUSEDCODE)
         self.assertTrue(errclass == lastused)
         errstr = MPI.Get_error_string(errclass)
@@ -87,22 +90,6 @@ class TestErrorCode(unittest.TestCase):
         MPI.Add_error_string(errcode2, "error code 2")
         self.assertEqual(MPI.Get_error_class(errcode2), errclass)
         self.assertEqual(MPI.Get_error_string(errcode2), "error code 2")
-
-
-name, version = MPI.get_vendor()
-if name == 'Open MPI':
-    if (1,7,0) <= version < (1,8,0):
-        del TestErrorCode.testAddErrorClass
-    elif version < (1,8,2) and MPI.VERSION >= 3:
-        del TestErrorCode.testAddErrorClass
-        for errcls in [MPI.ERR_RMA_RANGE,
-                       MPI.ERR_RMA_ATTACH,
-                       MPI.ERR_RMA_FLAVOR,
-                       MPI.ERR_RMA_SHARED]:
-            TestErrorCode.errorclasses.remove(errcls)
-    elif version < (1,6,0):
-        del TestErrorCode.testAddErrorClass
-        del TestErrorCode.testAddErrorClassCodeString
 
 
 if __name__ == '__main__':

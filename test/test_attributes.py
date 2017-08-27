@@ -1,5 +1,10 @@
 from mpi4py import MPI
 import mpiunittest as unittest
+try:
+    import array
+except ImportError:
+    array = None
+
 
 class BaseTestAttr(object):
 
@@ -88,15 +93,16 @@ class BaseTestAttr(object):
         attr = obj.Get_attr(self.keyval)
         self.assertTrue(attr is None)
 
+    @unittest.skipMPI('openmpi(<=1.10.2)')
     def testAttrNoPythonZero(self):
         self.testAttrNoPython(0)
 
+    @unittest.skipIf(array is None, 'array')
     def testAttrNoPythonArray(self):
         cls, obj = type(self.obj), self.obj
         self.keyval = cls.Create_keyval(nopython=True)
         #
-        from array import array
-        ary = array('i', [42])
+        ary = array.array('i', [42])
         addr, _ = ary.buffer_info()
         obj.Set_attr(self.keyval, addr)
         #
@@ -108,6 +114,7 @@ class BaseTestCommAttr(BaseTestAttr):
 
     NULL = MPI.COMM_NULL
 
+    @unittest.skipMPI('openmpi(<=1.5.1)')
     def testAttrCopyDelete(self):
         cls, obj, null = type(self.obj), self.obj, self.NULL
         #
@@ -180,6 +187,8 @@ class TestWinAttr(BaseTestAttr, unittest.TestCase):
                              MPI.INFO_NULL, MPI.COMM_SELF)
         self.obj = self.win = win
 
+    @unittest.skipMPI('openmpi(<=1.5.1)')
+    @unittest.skipMPI('PlatformMPI')
     def testAttrCopyDelete(self):
         #
         null = self.NULL
@@ -203,28 +212,14 @@ try:
     k = MPI.Datatype.Create_keyval()
     k = MPI.Datatype.Free_keyval(k)
 except NotImplementedError:
-    del TestDatatypeAttrBYTE
-    del TestDatatypeAttrINT
-    del TestDatatypeAttrFLOAT
-
+    unittest.disable(BaseTestDatatypeAttr, 'mpi-type-attr')
+SpectrumMPI = MPI.get_vendor()[0] == 'Spectrum MPI'
 try:
+    if SpectrumMPI: raise NotImplementedError
     k = MPI.Win.Create_keyval()
     k = MPI.Win.Free_keyval(k)
 except NotImplementedError:
-    del TestWinAttr
-
-
-name, version = MPI.get_vendor()
-def SKIP(*args, **kwargs): pass
-if name == 'Open MPI':
-    if version <= (1,10,2):
-        BaseTestDatatypeAttr.testAttrNoPythonZero = SKIP
-    if version < (1,5,2):
-        if MPI.Query_thread() > MPI.THREAD_SINGLE:
-            del BaseTestCommAttr.testAttrCopyDelete
-            del TestWinAttr.testAttrCopyDelete
-if name == 'Platform MPI':
-    del TestWinAttr.testAttrCopyDelete
+    unittest.disable(TestWinAttr, 'mpi-win-attr')
 
 
 if __name__ == '__main__':

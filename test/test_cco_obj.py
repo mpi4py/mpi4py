@@ -210,18 +210,12 @@ class TestCCOObjSelfDup(TestCCOObjSelf):
     def tearDown(self):
         self.COMM.Free()
 
+@unittest.skipMPI('openmpi(<1.4.0)', MPI.Query_thread() > MPI.THREAD_SINGLE)
 class TestCCOObjWorldDup(TestCCOObjWorld):
     def setUp(self):
         self.COMM = MPI.COMM_WORLD.Dup()
     def tearDown(self):
         self.COMM.Free()
-
-
-name, version = MPI.get_vendor()
-if name == 'Open MPI':
-    if version < (1,4,0):
-        if MPI.Query_thread() > MPI.THREAD_SINGLE:
-            del TestCCOObjWorldDup
 
 
 if __name__ == '__main__':

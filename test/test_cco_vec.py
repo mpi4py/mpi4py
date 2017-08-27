@@ -306,10 +306,13 @@ class BaseTestCCOVec(object):
                     try:
                         self.COMM.Alltoallw(smsg, rmsg)
                     except NotImplementedError:
-                        return
+                        self.skipTest('mpi-alltoallw')
                     for value in rbuf.flat:
                         self.assertEqual(value, n)
 
+@unittest.skipMPI('openmpi(<1.8.0)')
+@unittest.skipMPI('msmpi(<8.1.0)')
+@unittest.skipIf(MPI.BOTTOM == MPI.IN_PLACE, 'mpi-in-place')
 class BaseTestCCOVecInplace(object):
 
     COMM = MPI.COMM_NULL
@@ -352,7 +355,7 @@ class BaseTestCCOVecInplace(object):
                     try:
                         self.COMM.Alltoallw(MPI.IN_PLACE, rmsg)
                     except NotImplementedError:
-                        return
+                        self.skipTest('mpi-alltoallw')
                     for i in range(size):
                         row = rbuf[i*size:(i+1)*size]
                         a, b = row[:count], row[count:]
@@ -377,7 +380,7 @@ class BaseTestCCOVecInplace(object):
                     try:
                         self.COMM.Alltoallw(MPI.IN_PLACE, rmsg)
                     except NotImplementedError:
-                        return
+                        self.skipTest('mpi-alltoallw')
                     for i in range(size):
                         row = rbuf[i*size:(i+1)*size]
                         a, b = row[:count], row[count:]
@@ -410,30 +413,6 @@ class TestCCOVecInplaceSelf(BaseTestCCOVecInplace, unittest.TestCase):
 
 class TestCCOVecInplaceWorld(BaseTestCCOVecInplace, unittest.TestCase):
     COMM = MPI.COMM_WORLD
-
-
-name, version = MPI.get_vendor()
-if name == 'Open MPI':
-    if version < (1,8,0):
-        del TestCCOVecInplaceSelf
-        del TestCCOVecInplaceWorld
-    if version < (1,4,0):
-        if MPI.Query_thread() > MPI.THREAD_SINGLE:
-            del TestCCOVecWorldDup
-if name == 'Microsoft MPI':
-    if version < (8,1,0):
-        import struct
-        def SKIP(*args, **kwargs): pass
-        if struct.calcsize('P')*8 == 32:
-            TestCCOVecInplaceSelf.testAlltoallv  = SKIP
-            TestCCOVecInplaceSelf.testAlltoallw  = SKIP
-            TestCCOVecInplaceSelf.testAlltoallw2 = SKIP
-        TestCCOVecInplaceWorld.testAlltoallv  = SKIP
-        TestCCOVecInplaceWorld.testAlltoallw  = SKIP
-        TestCCOVecInplaceWorld.testAlltoallw2 = SKIP
-if name == 'MPICH1' or name == 'LAM/MPI' or MPI.BOTTOM == MPI.IN_PLACE:
-    del TestCCOVecInplaceSelf
-    del TestCCOVecInplaceWorld
 
 
 if __name__ == '__main__':

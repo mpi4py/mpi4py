@@ -43,7 +43,17 @@ def get_neighbors_count(comm):
         return indeg, outdeg
     return 0, 0
 
+def have_feature():
+    cartcomm = MPI.COMM_SELF.Create_cart([1], periods=[0])
+    try:
+        cartcomm.neighbor_allgather(None)
+        return True
+    except NotImplementedError:
+        return False
+    finally:
+        cartcomm.Free()
 
+@unittest.skipIf(not have_feature(), 'mpi-neighbor')
 class BaseTestCCONghBuf(object):
 
     COMM = MPI.COMM_NULL
@@ -127,14 +137,14 @@ class BaseTestCCONghBuf(object):
                             try:
                                 comm.Neighbor_alltoallw(smsg, rmsg)
                             except NotImplementedError:
-                                return
+                                self.skipTest('mpi-neighbor_alltoallw')
                             for value in rbuf.flat:
                                 self.assertEqual(value, v)
                             smsg[0] = array(v+1, typecode, (ssize, n)).as_raw()
                             try:
                                 comm.Ineighbor_alltoallw(smsg, rmsg).Wait()
                             except NotImplementedError:
-                                return
+                                self.skipTest('mpi-ineighbor_alltoallw')
                             for value in rbuf.flat:
                                 self.assertEqual(value, v+1)
             comm.Free()
@@ -160,26 +170,13 @@ class TestCCONghBufWorldDup(TestCCONghBufWorld):
 
 
 name, version = MPI.get_vendor()
-cartcomm = MPI.COMM_SELF.Create_cart([1], periods=[0])
-try:
-    try:
-        cartcomm.neighbor_allgather(None)
-    finally:
-        cartcomm.Free()
-        del cartcomm
-    if name == 'Open MPI':
-        if version < (1,8,4):
-            _create_topo_comms = create_topo_comms
-            def create_topo_comms(comm):
-                for c in _create_topo_comms(comm):
-                    if c.size * 2 < sum(c.degrees):
-                        c.Free(); continue
-                    yield c
-except NotImplementedError:
-    del TestCCONghBufSelf
-    del TestCCONghBufWorld
-    del TestCCONghBufSelfDup
-    del TestCCONghBufWorldDup
+if name == 'Open MPI' and version < (1,8,4):
+    _create_topo_comms = create_topo_comms
+    def create_topo_comms(comm):
+        for c in _create_topo_comms(comm):
+            if c.size * 2 < sum(c.degrees):
+                c.Free(); continue
+            yield c
 
 
 if __name__ == '__main__':

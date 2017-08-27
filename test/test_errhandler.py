@@ -1,6 +1,7 @@
 from mpi4py import MPI
 import mpiunittest as unittest
 
+
 class TestErrhandler(unittest.TestCase):
 
     def testPredefined(self):
@@ -33,6 +34,7 @@ class TestErrhandler(unittest.TestCase):
         for e in errhdls:
             self.assertEqual(e, MPI.ERRHANDLER_NULL)
 
+    @unittest.skipMPI('MPI(<2.0)')
     def testCommCallErrhandler(self):
         errhdl = MPI.COMM_SELF.Get_errhandler()
         comm = MPI.COMM_SELF.Dup()
@@ -40,15 +42,19 @@ class TestErrhandler(unittest.TestCase):
         comm.Call_errhandler(MPI.ERR_OTHER)
         comm.Free()
 
+    @unittest.skipMPI('MPI(<2.0)')
+    @unittest.skipMPI('SpectrumMPI')
     def testWinCallErrhandler(self):
         try:
             win = MPI.Win.Create(MPI.BOTTOM, 1, MPI.INFO_NULL, MPI.COMM_SELF)
         except NotImplementedError:
-            return
+            self.skipTest('mpi-win')
         win.Set_errhandler(MPI.ERRORS_RETURN)
         win.Call_errhandler(MPI.ERR_OTHER)
         win.Free()
 
+    @unittest.skipMPI('MPI(<2.0)')
+    @unittest.skipMPI('msmpi')
     def testFileCallErrhandler(self):
         import os, tempfile
         rank = MPI.COMM_WORLD.Get_rank()
@@ -58,19 +64,11 @@ class TestErrhandler(unittest.TestCase):
         try:
             file = MPI.File.Open(MPI.COMM_SELF, filename, amode, MPI.INFO_NULL)
         except NotImplementedError:
-            return
+            self.skipTest('mpi-file')
         file.Set_errhandler(MPI.ERRORS_RETURN)
         #file.Call_errhandler(MPI.ERR_OTHER)
         file.Call_errhandler(MPI.SUCCESS)
         file.Close()
-
-name, version = MPI.get_vendor()
-if MPI.Get_version() < (2, 0):
-    del TestErrhandler.testCommCallErrhandler
-    del TestErrhandler.testWinCallErrhandler
-    del TestErrhandler.testFileCallErrhandler
-elif name == 'Microsoft MPI':
-    del TestErrhandler.testFileCallErrhandler
 
 
 if __name__ == '__main__':

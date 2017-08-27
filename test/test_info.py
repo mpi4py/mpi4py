@@ -1,6 +1,7 @@
 from mpi4py import MPI
 import mpiunittest as unittest
 
+
 class TestInfoNull(unittest.TestCase):
 
     def testTruth(self):
@@ -154,14 +155,14 @@ class TestInfo(unittest.TestCase):
         self.assertEqual(INFO.get('key2', 'value2'), 'value2')
         self.assertEqual(INFO.get('key3', 'value3'), 'value3')
 
+
 try:
     MPI.Info.Create().Free()
 except NotImplementedError:
-    del TestInfoNull
-    del TestInfo
-if (MPI.VERSION < 3 and
-    MPI.INFO_ENV == MPI.INFO_NULL):
-    del TestInfoEnv
+    unittest.disable(TestInfo, 'mpi-info')
+    unittest.disable(TestInfoNull, 'mpi-info')
+if (MPI.VERSION < 3 and MPI.INFO_ENV == MPI.INFO_NULL):
+    unittest.disable(TestInfoEnv, 'mpi-info-env')
 
 
 if __name__ == '__main__':

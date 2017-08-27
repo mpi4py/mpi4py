@@ -2,6 +2,8 @@ from mpi4py import MPI
 import mpiunittest as unittest
 import arrayimpl
 
+
+@unittest.skipIf(MPI.MESSAGE_NULL == MPI.MESSAGE_NO_PROC, "mpi-message")
 class TestMessage(unittest.TestCase):
 
     def testMessageNull(self):
@@ -38,6 +40,7 @@ class TestMessage(unittest.TestCase):
         self.assertEqual(request, MPI.REQUEST_NULL)
 
 
+@unittest.skipIf(MPI.MESSAGE_NULL == MPI.MESSAGE_NO_PROC, "mpi-message")
 class BaseTestP2PMatched(object):
 
     COMM = MPI.COMM_NULL
@@ -177,14 +180,6 @@ class TestP2PMatchedWorldDup(TestP2PMatchedWorld):
         self.COMM = MPI.COMM_WORLD.Dup()
     def tearDown(self):
         self.COMM.Free()
-
-
-if MPI.MESSAGE_NULL == MPI.MESSAGE_NO_PROC:
-    del TestMessage
-    del TestP2PMatchedSelf
-    del TestP2PMatchedWorld
-    del TestP2PMatchedSelfDup
-    del TestP2PMatchedWorldDup
 
 
 if __name__ == '__main__':

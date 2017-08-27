@@ -1,6 +1,10 @@
 from mpi4py import MPI
 import mpiunittest as unittest
 
+def appnum():
+    if MPI.APPNUM == MPI.KEYVAL_INVALID: return None
+    return MPI.COMM_WORLD.Get_attr(MPI.APPNUM)
+
 class TestEnviron(unittest.TestCase):
 
     def testIsInitialized(self):
@@ -76,31 +80,25 @@ class TestWorldAttrs(unittest.TestCase):
         if ioproc is not None:
             self.assertTrue(ioproc in vals)
 
+    @unittest.skipIf(MPI.APPNUM == MPI.KEYVAL_INVALID, 'mpi-appnum')
     def testAppNum(self):
-        if MPI.APPNUM == MPI.KEYVAL_INVALID: return
         appnum = MPI.COMM_WORLD.Get_attr(MPI.APPNUM)
         if appnum is not None:
             self.assertTrue(appnum == MPI.UNDEFINED or appnum >= 0)
 
+    @unittest.skipMPI('MPICH(>1.2.0)', appnum() is None)
+    @unittest.skipMPI('MVAPICH2', appnum() is None)
+    @unittest.skipMPI('MPICH2', appnum() is None)
+    @unittest.skipIf(MPI.UNIVERSE_SIZE == MPI.KEYVAL_INVALID, 'mpi-universe-size')
     def testUniverseSize(self):
-        if MPI.UNIVERSE_SIZE == MPI.KEYVAL_INVALID: return
         univsz = MPI.COMM_WORLD.Get_attr(MPI.UNIVERSE_SIZE)
         if univsz is not None:
             self.assertTrue(univsz == MPI.UNDEFINED or univsz >= 0)
 
+    @unittest.skipIf(MPI.LASTUSEDCODE == MPI.KEYVAL_INVALID, 'mpi-lastusedcode')
     def testLastUsedCode(self):
-        if MPI.LASTUSEDCODE == MPI.KEYVAL_INVALID: return
         lastuc = MPI.COMM_WORLD.Get_attr(MPI.LASTUSEDCODE)
         self.assertTrue(lastuc >= 0)
-
-
-name, version = MPI.get_vendor()
-if ((name == 'MPICH' or name == 'MVAPICH2') or
-    (name == 'MPICH2' and version > (1,2,0))):
-    # Up to mpich2-1.3.1 when running under Hydra process manager,
-    # getting the universe size fails for the singleton init case
-    if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
-        del TestWorldAttrs.testUniverseSize
 
 
 if __name__ == '__main__':

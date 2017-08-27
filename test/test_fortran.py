@@ -25,6 +25,11 @@ class TestFortranStatus(BaseTestFortran, unittest.TestCase):
         s3.error = MPI.SUCCESS
         self.HANDLES = [s1, s2, s3]
 
+    @unittest.skipMPI('MPICH1')
+    def testFortran(self):
+        super(TestFortranStatus, self).testFortran()
+
+
 class TestFortranDatatype(BaseTestFortran, unittest.TestCase):
     HANDLES = [MPI.DATATYPE_NULL,
                MPI.CHAR,  MPI.SHORT,
@@ -79,6 +84,7 @@ class TestFortranWin(BaseTestFortran, unittest.TestCase):
 class TestFortranFile(BaseTestFortran, unittest.TestCase):
     HANDLES = [MPI.FILE_NULL,
                ]
+
 
 if __name__ == '__main__':
     unittest.main()

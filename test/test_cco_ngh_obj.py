@@ -58,11 +58,23 @@ def get_neighbors_count(comm):
         return indeg, outdeg
     return 0, 0
 
+def have_feature():
+    cartcomm = MPI.COMM_SELF.Create_cart([1], periods=[0])
+    try:
+        cartcomm.neighbor_allgather(None)
+        return True
+    except NotImplementedError:
+        return False
+    finally:
+        cartcomm.Free()
 
+
+@unittest.skipIf(not have_feature(), 'mpi-neighbor')
 class BaseTestCCONghObj(object):
 
     COMM = MPI.COMM_NULL
 
+    @unittest.skipMPI('openmpi(<2.2.0)')
     def testNeighborAllgather(self):
         for comm in create_topo_comms(self.COMM):
             rsize, ssize = get_neighbors_count(comm)
@@ -100,28 +112,13 @@ class TestCCONghObjWorldDup(TestCCONghObjWorld):
 
 
 name, version = MPI.get_vendor()
-cartcomm = MPI.COMM_SELF.Create_cart([1], periods=[0])
-try:
-    try:
-        cartcomm.neighbor_allgather(None)
-    finally:
-        cartcomm.Free()
-        del cartcomm
-    if name == 'Open MPI':
-        if version < (2,2,0):
-            del BaseTestCCONghObj.testNeighborAllgather
-        if version < (1,8,4):
-            _create_topo_comms = create_topo_comms
-            def create_topo_comms(comm):
-                for c in _create_topo_comms(comm):
-                    if c.size * 2 < sum(c.degrees):
-                        c.Free(); continue
-                    yield c
-except NotImplementedError:
-    del TestCCONghObjSelf
-    del TestCCONghObjWorld
-    del TestCCONghObjSelfDup
-    del TestCCONghObjWorldDup
+if name == 'Open MPI' and version < (1,8,4):
+    _create_topo_comms = create_topo_comms
+    def create_topo_comms(comm):
+        for c in _create_topo_comms(comm):
+            if c.size * 2 < sum(c.degrees):
+                c.Free(); continue
+            yield c
 
 
 if __name__ == '__main__':

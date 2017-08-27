@@ -1,6 +1,7 @@
 from mpi4py import rc
 import mpiunittest as unittest
 
+
 class TestRC(unittest.TestCase):
 
     def testRC1(self):
@@ -18,6 +19,7 @@ class TestRC(unittest.TestCase):
     def testRC3(self):
         error = lambda: rc(ABCXYZ=123456)
         self.assertRaises(TypeError, error)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -21,6 +21,7 @@ class GReqCtx(object):
             raise MPI.Exception(MPI.ERR_PENDING)
         
 
+@unittest.skipMPI('MPI(<2.0)')
 class TestGrequest(unittest.TestCase):
 
     def testAll(self):
@@ -70,9 +71,6 @@ class TestGrequest(unittest.TestCase):
         self.assertFalse(status.Is_cancelled())
         greq.Wait()
 
-if MPI.Get_version() < (2, 0):
-    del GReqCtx
-    del TestGrequest
 
 if __name__ == '__main__':
     unittest.main()

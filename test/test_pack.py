@@ -3,6 +3,7 @@ import mpiunittest as unittest
 import arrayimpl
 import struct
 
+
 class BaseTestPack(object):
 
     COMM = MPI.COMM_NULL
@@ -97,6 +98,7 @@ class TestPackSelf(BaseTestPack, unittest.TestCase):
 class TestPackWorld(BaseTestPack, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
+@unittest.skipMPI('openmpi')
 class TestPackExternal(BaseTestPackExternal, unittest.TestCase):
     pass
 
@@ -111,13 +113,11 @@ elif name == 'Intel MPI':
 elif name == 'MVAPICH2':
     BaseTestPackExternal.skipdtype += ['l']
     BaseTestPackExternal.skipdtype += ['d']
-elif name == 'Open MPI':
-    del TestPackExternal
 else:
     try:
         MPI.BYTE.Pack_external_size(EXT32, 0)
     except NotImplementedError:
-        del TestPackExternal
+        unittest.disable(BaseTestPackExternal, 'mpi-ext32')
 
 
 if __name__ == '__main__':

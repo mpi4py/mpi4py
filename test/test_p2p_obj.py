@@ -6,8 +6,8 @@ def allocate(n):
     if hasattr(sys, 'pypy_version_info'):
         if sys.pypy_version_info < (5, 3):
             try:
-                from array import array
-                return array('B', [0]) * n
+                import array
+                return array.array('B', [0]) * n
             except ImportError:
                 return None
     return bytearray(n)
@@ -530,6 +530,7 @@ class BaseTestP2PObj(object):
                 rmess = smess
             self.assertEqual(rmess, smess)
 
+    @unittest.skipMPI('MPICH1')
     def testProbe(self):
         comm = self.COMM.Dup()
         try:
@@ -574,20 +575,13 @@ class TestP2PObjSelfDup(TestP2PObjSelf):
     def tearDown(self):
         self.COMM.Free()
 
+@unittest.skipMPI('openmpi(<1.4.0)', MPI.Query_thread() > MPI.THREAD_SINGLE)
 class TestP2PObjWorldDup(TestP2PObjWorld):
     def setUp(self):
         self.COMM = MPI.COMM_WORLD.Dup()
     def tearDown(self):
         self.COMM.Free()
 
-
-name, version = MPI.get_vendor()
-if name == 'MPICH1':
-    del BaseTestP2PObj.testProbe
-if name == 'Open MPI':
-    if version < (1,4,0):
-        if MPI.Query_thread() > MPI.THREAD_SINGLE:
-            del TestP2PObjWorldDup
 
 
 if __name__ == '__main__':

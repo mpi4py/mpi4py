@@ -1,8 +1,16 @@
 from mpi4py import MPI
 import mpiunittest as unittest
+import sys, os
+
+HAVE_MPE = 'MPE_LOGFILE_PREFIX' in os.environ
+HAVE_VT  = 'VT_FILE_PREFIX' in os.environ
 
 # --------------------------------------------------------------------
 
+@unittest.skipMPI('PlatformMPI')
+@unittest.skipMPI('HP-MPI')
+@unittest.skipMPI('MPICH2')
+@unittest.skipIf(HAVE_MPE or HAVE_VT, 'mpe|vt')
 class BaseTestCase(unittest.TestCase):
 
     def setUp(self):
@@ -46,6 +54,7 @@ class TestExcDatatype(BaseTestCase):
 
     ERR_TYPE   = MPI.ERR_TYPE
 
+    @unittest.skipMPI('msmpi')
     def testFreePredefined(self):
         for dtype in self.DATATYPES:
             if dtype != MPI.DATATYPE_NULL:
@@ -60,7 +69,7 @@ class TestExcDatatype(BaseTestCase):
                         [MPI.ERR_KEYVAL, MPI.ERR_OTHER],
                         dtype.Get_attr, MPI.KEYVAL_INVALID)
                 except NotImplementedError:
-                    return
+                    self.skipTest('mpi-type-get_attr')
 
 name, version = MPI.get_vendor()
 if name == 'Open MPI':
@@ -70,6 +79,7 @@ if name == 'Open MPI':
 
 # --------------------------------------------------------------------
 
+@unittest.skipMPI('msmpi(<=4.2.0)')
 class TestExcStatus(BaseTestCase):
 
     def testGetCount(self):
@@ -82,6 +92,7 @@ class TestExcStatus(BaseTestCase):
         self.assertRaisesMPI(
             MPI.ERR_TYPE, status.Get_elements, MPI.DATATYPE_NULL)
 
+    @unittest.skipMPI('MPICH1')
     def testSetElements(self):
         status = MPI.Status()
         self.assertRaisesMPI(
@@ -124,6 +135,7 @@ class TestExcInfoNull(BaseTestCase):
     def testTruth(self):
         self.assertFalse(bool(MPI.INFO_NULL))
 
+    @unittest.skipMPI('msmpi(<8.1.0)')
     def testDup(self):
         self.assertRaisesMPI(
             [MPI.ERR_INFO, MPI.ERR_ARG], MPI.INFO_NULL.Dup)
@@ -174,12 +186,8 @@ class TestExcInfo(BaseTestCase):
 try:
     MPI.Info.Create().Free()
 except NotImplementedError:
-    del TestExcInfoNull, TestExcInfo
-else:
-    name, version = MPI.get_vendor()
-    if name == 'Microsoft MPI':
-        if version < (8,1,0):
-            del TestExcInfoNull.testDup
+    unittest.disable(TestExcInfo, 'mpi-info')
+    unittest.disable(TestExcInfoNull, 'mpi-info')
 
 # --------------------------------------------------------------------
 
@@ -229,13 +237,17 @@ class TestExcCommNull(BaseTestCase):
         self.assertRaisesMPI(MPI.ERR_COMM, MPI.COMM_NULL.Free)
 
     def testDisconnect(self):
-        try: self.assertRaisesMPI(MPI.ERR_COMM, MPI.COMM_NULL.Disconnect)
-        except NotImplementedError: return
+        try:
+            self.assertRaisesMPI(MPI.ERR_COMM, MPI.COMM_NULL.Disconnect)
+        except NotImplementedError:
+            self.skipTest('mpi-comm-disconnect')
 
+    @unittest.skipMPI('openmpi(<1.4.2)')
     def testGetAttr(self):
         self.assertRaisesMPI(
             MPI.ERR_COMM, MPI.COMM_NULL.Get_attr, MPI.TAG_UB)
 
+    @unittest.skipMPI('openmpi(<1.4.1)')
     def testGetErrhandler(self):
         self.assertRaisesMPI(
             [MPI.ERR_COMM, MPI.ERR_ARG], MPI.COMM_NULL.Get_errhandler)
@@ -262,6 +274,7 @@ class TestExcCommNull(BaseTestCase):
 
 class TestExcComm(BaseTestCase):
 
+    @unittest.skipMPI('MPICH1')
     def testFreeSelf(self):
         errhdl = MPI.COMM_SELF.Get_errhandler()
         try:
@@ -272,6 +285,7 @@ class TestExcComm(BaseTestCase):
             MPI.COMM_SELF.Set_errhandler(errhdl)
             errhdl.Free()
 
+    @unittest.skipMPI('MPICH1')
     def testFreeWorld(self):
         self.assertRaisesMPI(
             [MPI.ERR_COMM, MPI.ERR_ARG], MPI.COMM_WORLD.Free)
@@ -280,13 +294,6 @@ class TestExcComm(BaseTestCase):
         self.assertRaisesMPI(
             [MPI.ERR_KEYVAL, MPI.ERR_OTHER],
             MPI.COMM_WORLD.Get_attr, MPI.KEYVAL_INVALID)
-
-name, version = MPI.get_vendor()
-if name == 'Open MPI':
-    if version < (1,4,2):
-        del TestExcCommNull.testGetAttr
-    if version < (1,4,1):
-        del TestExcCommNull.testGetErrhandler
 
 # --------------------------------------------------------------------
 
@@ -327,10 +334,13 @@ class TestExcWin(BaseTestCase):
             [MPI.ERR_KEYVAL, MPI.ERR_OTHER],
             self.WIN.Get_attr, MPI.KEYVAL_INVALID)
 
+SpectrumMPI = MPI.get_vendor()[0] == 'Spectrum MPI'
 try:
+    if SpectrumMPI: raise NotImplementedError
     MPI.Win.Create(None, 1, MPI.INFO_NULL, MPI.COMM_SELF).Free()
 except NotImplementedError:
-    del TestExcWinNull, TestExcWin
+    unittest.disable(TestExcWin, 'mpi-win')
+    unittest.disable(TestExcWinNull, 'mpi-win')
 
 # --------------------------------------------------------------------
 
@@ -347,126 +357,12 @@ class TestExcErrhandlerNull(BaseTestCase):
         self.assertRaisesMPI(
             MPI.ERR_ARG, MPI.COMM_WORLD.Set_errhandler, MPI.ERRHANDLER_NULL)
 
-class TestExcErrhandler(BaseTestCase):
-
-    def testFreePredefined(self):
-        #self.assertRaisesMPI(MPI.ERR_ARG, MPI.ERRORS_ARE_FATAL.Free)
-        #self.assertRaisesMPI(MPI.ERR_ARG, MPI.ERRORS_RETURN.Free)
-        pass
-
-# --------------------------------------------------------------------
-
-import sys, os
-HAVE_MPE = 'MPE_LOGFILE_PREFIX' in os.environ
-HAVE_VT  = 'VT_FILE_PREFIX' in os.environ
-name, version = MPI.get_vendor()
-
-if HAVE_MPE or HAVE_VT:
-    del TestExcDatatypeNull
-    del TestExcDatatype
-    del TestExcStatus
-    del TestExcRequestNull
-    del TestExcOpNull
-    del TestExcOp
-    del TestExcInfoNull
-    del TestExcInfo
-    del TestExcGroupNull
-    del TestExcGroup
-    del TestExcCommNull
-    del TestExcComm
-    del TestExcWinNull
-    del TestExcWin
-    del TestExcErrhandlerNull
-    del TestExcErrhandler
-elif name == 'MPICH1':
-    del TestExcStatus.testSetElements
-    del TestExcComm.testFreeSelf
-    del TestExcComm.testFreeWorld
-elif name == 'MPICH2':
-    errhdl = MPI.COMM_WORLD.Get_errhandler()
-    try:
-        MPI.COMM_WORLD.Set_errhandler(MPI.ERRORS_RETURN)
-        MPI.DATATYPE_NULL.Get_size()
-    except MPI.Exception:
-        pass
-    else:
-        del TestExcDatatypeNull
-        del TestExcDatatype
-        del TestExcStatus
-        del TestExcRequestNull
-        del TestExcOpNull
-        del TestExcOp
-        del TestExcInfoNull
-        del TestExcInfo
-        del TestExcGroupNull
-        del TestExcGroup
-        del TestExcCommNull
-        del TestExcComm
-        del TestExcWinNull
-        del TestExcWin
-        del TestExcErrhandlerNull
-        del TestExcErrhandler
-    finally:
-        MPI.COMM_WORLD.Set_errhandler(errhdl)
-        errhdl.Free()
-        del errhdl
-elif name == 'Open MPI':
-    if sys.platform.startswith('win'):
-        del TestExcDatatypeNull
-        del TestExcDatatype
-        del TestExcStatus
-        del TestExcRequestNull
-        del TestExcOpNull
-        del TestExcOp
-        del TestExcInfoNull
-        del TestExcInfo
-        del TestExcGroupNull
-        del TestExcGroup
-        del TestExcCommNull
-        del TestExcComm
-        del TestExcWinNull
-        del TestExcWin
-        del TestExcErrhandlerNull
-        del TestExcErrhandler
-elif name == 'Microsoft MPI':
-    del TestExcDatatype.testFreePredefined
-    if version <= (4,2,0):
-        del TestExcStatus
-        TestExcCommNull.ERR_COMM = (MPI.ERR_COMM, MPI.ERR_ARG)
-elif name == 'Platform MPI':
-        del TestExcDatatypeNull
-        del TestExcDatatype
-        del TestExcStatus
-        del TestExcRequestNull
-        del TestExcOpNull
-        del TestExcOp
-        del TestExcInfoNull
-        del TestExcInfo
-        del TestExcGroupNull
-        del TestExcGroup
-        del TestExcCommNull
-        del TestExcComm
-        del TestExcWinNull
-        del TestExcWin
-        del TestExcErrhandlerNull
-        del TestExcErrhandler
-elif name == 'HP MPI':
-        del TestExcDatatypeNull
-        del TestExcDatatype
-        del TestExcStatus
-        del TestExcRequestNull
-        del TestExcOpNull
-        del TestExcOp
-        del TestExcInfoNull
-        del TestExcInfo
-        del TestExcGroupNull
-        del TestExcGroup
-        del TestExcCommNull
-        del TestExcComm
-        del TestExcWinNull
-        del TestExcWin
-        del TestExcErrhandlerNull
-        del TestExcErrhandler
+# class TestExcErrhandler(BaseTestCase):
+# 
+#     def testFreePredefined(self):
+#         self.assertRaisesMPI(MPI.ERR_ARG, MPI.ERRORS_ARE_FATAL.Free)
+#         self.assertRaisesMPI(MPI.ERR_ARG, MPI.ERRORS_RETURN.Free)
+#         pass
 
 # --------------------------------------------------------------------
 

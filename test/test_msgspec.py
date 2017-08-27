@@ -7,14 +7,12 @@ typemap = MPI._typedict
 
 try:
     import array
-    HAVE_ARRAY = True
 except ImportError:
-    HAVE_ARRAY = False
+    array = None
 try:
     import numpy
-    HAVE_NUMPY = True
 except ImportError:
-    HAVE_NUMPY = False
+    numpy = None
 
 pypy_lt_53 = (hasattr(sys, 'pypy_version_info') and
               sys.pypy_version_info < (5, 3))
@@ -157,69 +155,69 @@ class TestMessageSimple(unittest.TestCase):
         empty = [MPI.BOTTOM, "B"]
         Sendrecv(empty, empty)
 
+    @unittest.skipIf(pypy_lt_53, "pypy(<5.3)")
     def testMessageBytes(self):
-        if pypy_lt_53: return
         sbuf = b"abc"
         rbuf = bytearray(3)
         Sendrecv([sbuf, "c"], [rbuf, MPI.CHAR])
         self.assertEqual(sbuf, rbuf)
 
+    @unittest.skipIf(pypy_lt_53, "pypy(<5.3)")
     def testMessageBytearray(self):
-        if pypy_lt_53: return
         sbuf = bytearray(b"abc")
         rbuf = bytearray(3)
         Sendrecv([sbuf, "c"], [rbuf, MPI.CHAR])
         self.assertEqual(sbuf, rbuf)
 
-    if HAVE_ARRAY:
-        def checkArray(self, test):
-            from array import array
-            from operator import eq as equal
-            for t in tuple(self.TYPECODES):
-                for n in range(1, 10):
-                    z = array(t, [0]*n)
-                    s = array(t, list(range(n)))
-                    r = array(t, [0]*n)
-                    test(equal, z, s, r, t)
-        def testArray1(self):
-            self.checkArray(self.check1)
-        def testArray21(self):
-            self.checkArray(self.check21)
-        def testArray22(self):
-            self.checkArray(self.check22)
-        def testArray31(self):
-            self.checkArray(self.check31)
-        def testArray32(self):
-            self.checkArray(self.check32)
-        def testArray4(self):
-            self.checkArray(self.check4)
+    @unittest.skipIf(array is None, 'array')
+    def checkArray(self, test):
+        from operator import eq as equal
+        for t in tuple(self.TYPECODES):
+            for n in range(1, 10):
+                z = array.array(t, [0]*n)
+                s = array.array(t, list(range(n)))
+                r = array.array(t, [0]*n)
+                test(equal, z, s, r, t)
+    def testArray1(self):
+        self.checkArray(self.check1)
+    def testArray21(self):
+        self.checkArray(self.check21)
+    def testArray22(self):
+        self.checkArray(self.check22)
+    def testArray31(self):
+        self.checkArray(self.check31)
+    def testArray32(self):
+        self.checkArray(self.check32)
+    def testArray4(self):
+        self.checkArray(self.check4)
 
-    if HAVE_NUMPY:
-        def checkNumPy(self, test):
-            from numpy import zeros, arange, empty
-            for t in tuple(self.TYPECODES):
-                for n in range(10):
-                    z = zeros (n, dtype=t)
-                    s = arange(n, dtype=t)
-                    r = empty (n, dtype=t)
-                    test(allclose, z, s, r, t)
-        def testNumPy1(self):
-            self.checkNumPy(self.check1)
-        def testNumPy21(self):
-            self.checkNumPy(self.check21)
-        def testNumPy22(self):
-            self.checkNumPy(self.check22)
-        def testNumPy31(self):
-            self.checkNumPy(self.check31)
-        def testNumPy32(self):
-            self.checkNumPy(self.check32)
-        def testNumPy4(self):
-            self.checkNumPy(self.check4)
+    @unittest.skipIf(numpy is None, 'numpy')
+    def checkNumPy(self, test):
+        from numpy import zeros, arange, empty
+        for t in tuple(self.TYPECODES):
+            for n in range(10):
+                z = zeros (n, dtype=t)
+                s = arange(n, dtype=t)
+                r = empty (n, dtype=t)
+                test(allclose, z, s, r, t)
+    def testNumPy1(self):
+        self.checkNumPy(self.check1)
+    def testNumPy21(self):
+        self.checkNumPy(self.check21)
+    def testNumPy22(self):
+        self.checkNumPy(self.check22)
+    def testNumPy31(self):
+        self.checkNumPy(self.check31)
+    def testNumPy32(self):
+        self.checkNumPy(self.check32)
+    def testNumPy4(self):
+        self.checkNumPy(self.check4)
 
 def Alltoallv(smsg, rmsg):
     comm = MPI.COMM_SELF
     comm.Alltoallv(smsg, rmsg)
 
+@unittest.skipMPI("msmpi(<8.0.0)")
 class TestMessageVector(unittest.TestCase):
 
     TYPECODES = "hil"+"HIL"+"fd"
@@ -339,64 +337,63 @@ class TestMessageVector(unittest.TestCase):
         empty = [MPI.BOTTOM, "B"]
         Alltoallv(empty, empty)
 
+    @unittest.skipIf(pypy_lt_53, "pypy(<5.3)")
     def testMessageBytes(self):
-        if pypy_lt_53: return
         sbuf = b"abc"
         rbuf = bytearray(3)
         Alltoallv([sbuf, "c"], [rbuf, MPI.CHAR])
         self.assertEqual(sbuf, rbuf)
 
+    @unittest.skipIf(pypy_lt_53, "pypy(<5.3)")
     def testMessageBytearray(self):
-        if pypy_lt_53: return
         sbuf = bytearray(b"abc")
         rbuf = bytearray(3)
         Alltoallv([sbuf, "c"], [rbuf, MPI.CHAR])
         self.assertEqual(sbuf, rbuf)
 
-    if HAVE_ARRAY:
-        def checkArray(self, test):
-            from array import array
-            from operator import eq as equal
-            for t in tuple(self.TYPECODES):
-                for n in range(1, 10):
-                    z = array(t, [0]*n)
-                    s = array(t, list(range(n)))
-                    r = array(t, [0]*n)
-                    test(equal, z, s, r, t)
-        def testArray1(self):
-            self.checkArray(self.check1)
-        def testArray21(self):
-            self.checkArray(self.check21)
-        def testArray22(self):
-            self.checkArray(self.check22)
-        def testArray31(self):
-            self.checkArray(self.check31)
-        def testArray32(self):
-            self.checkArray(self.check32)
-        def testArray4(self):
-            self.checkArray(self.check4)
+    @unittest.skipIf(array is None, 'array')
+    def checkArray(self, test):
+        from operator import eq as equal
+        for t in tuple(self.TYPECODES):
+            for n in range(1, 10):
+                z = array.array(t, [0]*n)
+                s = array.array(t, list(range(n)))
+                r = array.array(t, [0]*n)
+                test(equal, z, s, r, t)
+    def testArray1(self):
+        self.checkArray(self.check1)
+    def testArray21(self):
+        self.checkArray(self.check21)
+    def testArray22(self):
+        self.checkArray(self.check22)
+    def testArray31(self):
+        self.checkArray(self.check31)
+    def testArray32(self):
+        self.checkArray(self.check32)
+    def testArray4(self):
+        self.checkArray(self.check4)
 
-    if HAVE_NUMPY:
-        def checkNumPy(self, test):
-            from numpy import zeros, arange, empty
-            for t in tuple(self.TYPECODES):
-                for n in range(10):
-                    z = zeros (n, dtype=t)
-                    s = arange(n, dtype=t)
-                    r = empty (n, dtype=t)
-                    test(allclose, z, s, r, t)
-        def testNumPy1(self):
-            self.checkNumPy(self.check1)
-        def testNumPy21(self):
-            self.checkNumPy(self.check21)
-        def testNumPy22(self):
-            self.checkNumPy(self.check22)
-        def testNumPy31(self):
-            self.checkNumPy(self.check31)
-        def testNumPy32(self):
-            self.checkNumPy(self.check32)
-        def testNumPy4(self):
-            self.checkNumPy(self.check4)
+    @unittest.skipIf(numpy is None, 'numpy')
+    def checkNumPy(self, test):
+        from numpy import zeros, arange, empty
+        for t in tuple(self.TYPECODES):
+            for n in range(10):
+                z = zeros (n, dtype=t)
+                s = arange(n, dtype=t)
+                r = empty (n, dtype=t)
+                test(allclose, z, s, r, t)
+    def testNumPy1(self):
+        self.checkNumPy(self.check1)
+    def testNumPy21(self):
+        self.checkNumPy(self.check21)
+    def testNumPy22(self):
+        self.checkNumPy(self.check22)
+    def testNumPy31(self):
+        self.checkNumPy(self.check31)
+    def testNumPy32(self):
+        self.checkNumPy(self.check32)
+    def testNumPy4(self):
+        self.checkNumPy(self.check4)
 
 def Alltoallw(smsg, rmsg):
     try:
@@ -421,8 +418,8 @@ class TestMessageVectorW(unittest.TestCase):
         MPI.Free_mem(sbuf)
         MPI.Free_mem(rbuf)
 
+    @unittest.skipIf(pypy_lt_53, "pypy(<5.3)")
     def testMessageBytes(self):
-        if pypy_lt_53: return
         sbuf = b"abc"
         rbuf = bytearray(3)
         smsg = [sbuf, [3], [0], [MPI.CHAR]]
@@ -430,8 +427,8 @@ class TestMessageVectorW(unittest.TestCase):
         Alltoallw(smsg, rmsg)
         self.assertEqual(sbuf, rbuf)
 
+    @unittest.skipIf(pypy_lt_53, "pypy(<5.3)")
     def testMessageBytearray(self):
-        if pypy_lt_53: return
         sbuf = bytearray(b"abc")
         rbuf = bytearray(3)
         smsg = [sbuf, [3], [0], [MPI.CHAR]]
@@ -498,27 +495,21 @@ class TestMessageRMA(unittest.TestCase):
             for target in (None, 0, [0, 0, MPI.BYTE]):
                 PutGet(empty, empty, target)
 
+    @unittest.skipIf(pypy_lt_53, "pypy(<5.3)")
     def testMessageBytes(self):
-        if pypy_lt_53: return
         for target in (None, 0, [0, 3, MPI.BYTE]):
             sbuf = b"abc"
             rbuf = bytearray(3)
             PutGet(sbuf, rbuf, target)
             self.assertEqual(sbuf, rbuf)
 
+    @unittest.skipIf(pypy_lt_53, "pypy(<5.3)")
     def testMessageBytearray(self):
-        if pypy_lt_53: return
         for target in (None, 0, [0, 3, MPI.BYTE]):
             sbuf = bytearray(b"abc")
             rbuf = bytearray(3)
             PutGet(sbuf, rbuf, target)
             self.assertEqual(sbuf, rbuf)
-
-
-name, version = MPI.get_vendor()
-if name == 'Microsoft MPI':
-    if version == (8,0,0):
-        del TestMessageVector
 
 
 if __name__ == '__main__':

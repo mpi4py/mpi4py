@@ -22,7 +22,7 @@ class BaseTestRMA(object):
     COMM = MPI.COMM_NULL
     INFO = MPI.INFO_NULL
 
-    COUNT_MIN = 0
+    COUNT_MIN = 0 if MPI.get_vendor()[0] != 'HP MPI' else 1
 
     def setUp(self):
         nbytes = 100*MPI.DOUBLE.size
@@ -31,9 +31,9 @@ class BaseTestRMA(object):
             self.memory = self.mpi_memory
             memzero(self.memory)
         except MPI.Exception:
-            from array import array
+            import array
             self.mpi_memory = None
-            self.memory = array('B',[0]*nbytes)
+            self.memory = array.array('B',[0]*nbytes)
         self.WIN = MPI.Win.Create(self.memory, 1, self.INFO, self.COMM)
 
     def tearDown(self):
@@ -125,7 +125,7 @@ class BaseTestRMA(object):
                 MPI.Free_mem(obuf)
                 MPI.Free_mem(rbuf)
         except NotImplementedError:
-            return
+            self.skipTest('mpi-win-get_accumulate')
         self.WIN.Fence()
         for array in arrayimpl.ArrayTypes:
             for typecode in arrayimpl.TypeMap:
@@ -168,7 +168,7 @@ class BaseTestRMA(object):
                 MPI.Free_mem(obuf)
                 MPI.Free_mem(rbuf)
         except NotImplementedError:
-            return
+            self.skipTest('mpi-win-fetch_and_op')
         self.WIN.Fence()
         for array in arrayimpl.ArrayTypes:
             for typecode in arrayimpl.TypeMap:
@@ -206,7 +206,7 @@ class BaseTestRMA(object):
                 MPI.Free_mem(cbuf)
                 MPI.Free_mem(rbuf)
         except NotImplementedError:
-            return
+            self.skipTest('mpi-win-compare_and_swap')
         self.WIN.Fence()
         for array in arrayimpl.ArrayTypes:
             for typecode in arrayimpl.TypeMap:
@@ -282,6 +282,7 @@ class BaseTestRMA(object):
                 win.Fence(assertion)
         win.Fence()
 
+    @unittest.skipMPI('openmpi(==1.8.1)')
     def testFenceAll(self):
         win = self.WIN
         assertion = 0
@@ -297,14 +298,18 @@ class BaseTestRMA(object):
             win.Fence(assertion)
         win.Fence()
 
+    @unittest.skipMPI('openmpi(==1.8.6)')
     def testStartComplete(self):
         self.WIN.Start(MPI.GROUP_EMPTY)
         self.WIN.Complete()
 
+    @unittest.skipMPI('openmpi(==1.8.6)')
     def testPostWait(self):
         self.WIN.Post(MPI.GROUP_EMPTY)
         self.WIN.Wait()
 
+    @unittest.skipMPI('openmpi(==1.8.7)')
+    @unittest.skipMPI('openmpi(==1.8.6)')
     def testStartCompletePostWait(self):
         win = self.WIN
         wingroup = win.Get_group()
@@ -327,6 +332,8 @@ class BaseTestRMA(object):
             group.Free()
         wingroup.Free()
 
+    @unittest.skipMPI('openmpi(==1.8.7)')
+    @unittest.skipMPI('openmpi(==1.8.6)')
     def testStartCompletePostTest(self):
         comm = self.COMM
         win = self.WIN
@@ -353,6 +360,7 @@ class BaseTestRMA(object):
             group.Free()
         wingroup.Free()
 
+    @unittest.skipMPI('MPI(<3.0)')
     def testSync(self):
         win = self.WIN
         comm = self.COMM
@@ -362,6 +370,7 @@ class BaseTestRMA(object):
         win.Unlock(rank)
         comm.Barrier()
 
+    @unittest.skipMPI('MPI(<3.0)')
     def testFlush(self):
         win = self.WIN
         comm = self.COMM
@@ -398,31 +407,14 @@ class TestRMASelf(BaseTestRMA, unittest.TestCase):
 class TestRMAWorld(BaseTestRMA, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
+
+SpectrumMPI = MPI.get_vendor()[0] == 'Spectrum MPI'
 try:
+    if SpectrumMPI: raise NotImplementedError
     MPI.Win.Create(None, 1, MPI.INFO_NULL, MPI.COMM_SELF).Free()
 except NotImplementedError:
-    del TestRMASelf, TestRMAWorld
-else:
-    name, version = MPI.get_vendor()
-    if name == 'Open MPI':
-        if version == (1,8,7):
-            del BaseTestRMA.testStartCompletePostTest
-            del BaseTestRMA.testStartCompletePostWait
-        if version == (1,8,6):
-            del BaseTestRMA.testPostWait
-            del BaseTestRMA.testStartComplete
-            del BaseTestRMA.testStartCompletePostTest
-            del BaseTestRMA.testStartCompletePostWait
-        if version == (1,8,1):
-            del BaseTestRMA.testFenceAll
-        if version < (1,4,0):
-            if MPI.Query_thread() > MPI.THREAD_SINGLE:
-                del TestRMAWorld
-    if name == 'HP MPI':
-        BaseTestRMA.COUNT_MIN = 1
-    if MPI.Get_version() < (3,0):
-        del BaseTestRMA.testSync
-        del BaseTestRMA.testFlush
+    unittest.disable(BaseTestRMA, 'mpi-rma')
+
 
 if __name__ == '__main__':
     unittest.main()

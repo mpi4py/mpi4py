@@ -1,8 +1,9 @@
 from mpi4py import MPI
 import mpiunittest as unittest
+import sys
 try:
-    from sys import getrefcount
-except ImportError:
+    sys.getrefcount
+except AttributeError:
     class getrefcount(object):
         def __init__(self, arg):
             pass
@@ -18,6 +19,7 @@ def memzero(m):
         m[:] = 0
     except IndexError: # cffi buffer
         m[0:len(m)] = b'\0'*len(m)
+
 
 class BaseTestWin(object):
 
@@ -88,10 +90,10 @@ class BaseTestWin(object):
             self.WIN.Set_name(name)
             self.assertEqual(self.WIN.Get_name(), name)
         except NotImplementedError:
-            pass
+            self.skipTest('mpi-win-name')
 
+    @unittest.skipIf(MPI.WIN_CREATE_FLAVOR == MPI.KEYVAL_INVALID, 'mpi-win-flavor')
     def testCreateFlavor(self):
-        if MPI.WIN_CREATE_FLAVOR == MPI.KEYVAL_INVALID: return
         flavors = (MPI.WIN_FLAVOR_CREATE,
                    MPI.WIN_FLAVOR_ALLOCATE,
                    MPI.WIN_FLAVOR_DYNAMIC,
@@ -101,11 +103,11 @@ class BaseTestWin(object):
         self.assertEqual(flavor, self.WIN.flavor)
         self.assertEqual(flavor, self.CREATE_FLAVOR)
 
+    @unittest.skipIf(MPI.WIN_MODEL == MPI.KEYVAL_INVALID, 'mpi-win-model')
     def testMemoryModel(self):
-        if MPI.WIN_MODEL == MPI.KEYVAL_INVALID: return
         models = (MPI.WIN_SEPARATE, MPI.WIN_UNIFIED)
         model = self.WIN.Get_attr(MPI.WIN_MODEL)
-        self.assertTrue (model in models)
+        self.assertTrue(model in models)
         self.assertEqual(model, self.WIN.model)
 
 class BaseTestWinCreate(BaseTestWin):
@@ -210,12 +212,14 @@ class BaseTestWinCreateDynamic(BaseTestWin):
 class TestWinCreateSelf(BaseTestWinCreate, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
+@unittest.skipMPI('openmpi(<1.4.0)')
 class TestWinCreateWorld(BaseTestWinCreate, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
 class TestWinAllocateSelf(BaseTestWinAllocate, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
+@unittest.skipMPI('openmpi(<1.4.0)')
 class TestWinAllocateWorld(BaseTestWinAllocate, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
@@ -232,33 +236,27 @@ class TestWinCreateDynamicWorld(BaseTestWinCreateDynamic, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
 
+SpectrumMPI = MPI.get_vendor()[0] == 'Spectrum MPI'
 try:
+    if SpectrumMPI: raise NotImplementedError
     MPI.Win.Create(MPI.BOTTOM, 1, MPI.INFO_NULL, MPI.COMM_SELF).Free()
 except NotImplementedError:
-    del TestWinCreateSelf, TestWinCreateWorld
+    unittest.disable(BaseTestWinCreate, 'mpi-win-create')
 try:
+    if SpectrumMPI: raise NotImplementedError
     MPI.Win.Allocate(1, 1, MPI.INFO_NULL, MPI.COMM_SELF).Free()
 except NotImplementedError:
-    del TestWinAllocateSelf, TestWinAllocateWorld
+    unittest.disable(BaseTestWinAllocate, 'mpi-win-allocate')
 try:
+    if SpectrumMPI: raise NotImplementedError
     MPI.Win.Allocate_shared(1, 1, MPI.INFO_NULL, MPI.COMM_SELF).Free()
 except NotImplementedError:
-    del TestWinAllocateSharedSelf, TestWinAllocateSharedWorld
+    unittest.disable(BaseTestWinAllocateShared, 'mpi-win-shared')
 try:
+    if SpectrumMPI: raise NotImplementedError
     MPI.Win.Create_dynamic(MPI.INFO_NULL, MPI.COMM_SELF).Free()
 except NotImplementedError:
-    del TestWinCreateDynamicSelf, TestWinCreateDynamicWorld
-
-name, version = MPI.get_vendor()
-if name == 'Open MPI':
-    if version < (1,4,0):
-        if MPI.Query_thread() > MPI.THREAD_SINGLE:
-            del TestWinCreateWorld
-            del TestWinAllocateWorld
-if name == 'MPICH2':
-    import sys
-    if sys.platform.startswith('win'):
-        del BaseTestWin.testAttributes
+    unittest.disable(BaseTestWinCreateDynamic, 'mpi-win-dynamic')
 
 
 if __name__ == '__main__':

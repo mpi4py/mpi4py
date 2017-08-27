@@ -1,6 +1,8 @@
 from mpi4py import MPI
 import mpiunittest as unittest
 
+
+@unittest.skipIf(MPI.COMM_WORLD.Get_size() < 2, 'mpi-world-size<2')
 class BaseTestIntercomm(object):
 
     BASECOMM  = MPI.COMM_NULL
@@ -28,8 +30,6 @@ class BaseTestIntercomm(object):
     def tearDown(self):
         self.INTRACOMM.Free()
         self.INTERCOMM.Free()
-        del self.INTRACOMM
-        del self.INTERCOMM
 
     def testFortran(self):
         intercomm = self.INTERCOMM
@@ -76,7 +76,6 @@ class TestIntercommDup(TestIntercomm):
         super(TestIntercommDup, self).setUp()
     def tearDown(self):
         self.BASECOMM.Free()
-        del self.BASECOMM
         super(TestIntercommDup, self).tearDown()
 
 class TestIntercommDupDup(TestIntercomm):
@@ -85,12 +84,6 @@ class TestIntercommDupDup(TestIntercomm):
         INTERCOMM = self.INTERCOMM
         self.INTERCOMM = self.INTERCOMM.Dup()
         INTERCOMM.Free()
-
-
-if MPI.COMM_WORLD.Get_size() < 2:
-    del TestIntercomm
-    del TestIntercommDup
-    del TestIntercommDupDup
 
 
 if __name__ == '__main__':

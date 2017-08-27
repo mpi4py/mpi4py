@@ -9,6 +9,8 @@ try:
 except ImportError:
     ctypes = None
 
+
+@unittest.skipIf(ctypes is None, 'ctypes')
 class TestCTYPES(unittest.TestCase):
 
     objects = [
@@ -56,8 +58,6 @@ class TestCTYPES(unittest.TestCase):
             handle = uintptr_t.from_address(MPI._addressof(obj))
             self.assertEqual(handle.value, MPI._handleof(obj))
 
-if ctypes is None:
-    del TestCTYPES
 
 if __name__ == '__main__':
     unittest.main()

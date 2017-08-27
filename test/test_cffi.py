@@ -5,6 +5,7 @@ try:
 except ImportError:
     cffi = None
 
+@unittest.skipIf(cffi is None, 'cffi')
 class TestCFFI(unittest.TestCase):
 
     mpitypes = [
@@ -75,8 +76,6 @@ class TestCFFI(unittest.TestCase):
             handle = ffi.cast(uintptr_t+'*', MPI._addressof(obj))[0]
             self.assertEqual(handle, MPI._handleof(obj))
 
-if cffi is None:
-    del TestCFFI
 
 if __name__ == '__main__':
     unittest.main()

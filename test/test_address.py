@@ -1,29 +1,36 @@
 from mpi4py import MPI
 import mpiunittest as unittest
 
+try:
+    import array
+except ImportError:
+    array = None
+try:
+    import numpy
+except ImportError:
+    numpy = None
+
 class TestAddress(unittest.TestCase):
 
-    def testGetAddress(self):
+    @unittest.skipIf(array is None, 'array')
+    def testGetAddress1(self):
         from struct import pack, unpack
-        try:
-            from array import array
-            location = array('i', range(10))
-            bufptr, _ = location.buffer_info()
-            addr = MPI.Get_address(location)
-            addr = unpack('P', pack('P', addr))[0]
-            self.assertEqual(addr, bufptr)
-        except ImportError:
-            pass
-        try:
-            from numpy import asarray
-            location = asarray(range(10), dtype='i')
-            bufptr, _ = location.__array_interface__['data']
-            addr = MPI.Get_address(location)
-            addr = unpack('P', pack('P', addr))[0]
-            self.assertEqual(addr, bufptr)
-        except ImportError:
-            pass
+        location = array.array('i', range(10))
+        bufptr, _ = location.buffer_info()
+        addr = MPI.Get_address(location)
+        addr = unpack('P', pack('P', addr))[0]
+        self.assertEqual(addr, bufptr)
 
+    @unittest.skipIf(numpy is None, 'numpy')
+    def testGetAddress2(self):
+        from struct import pack, unpack
+        location = numpy.asarray(range(10), dtype='i')
+        bufptr, _ = location.__array_interface__['data']
+        addr = MPI.Get_address(location)
+        addr = unpack('P', pack('P', addr))[0]
+        self.assertEqual(addr, bufptr)
+
+    @unittest.skipMPI('openmpi(<=1.10.2)')
     def testBottom(self):
         base = MPI.Get_address(MPI.BOTTOM)
         addr = MPI.Aint_add(base, 0)
@@ -31,33 +38,21 @@ class TestAddress(unittest.TestCase):
         diff = MPI.Aint_diff(base, base)
         self.assertEqual(diff, 0)
 
+    @unittest.skipIf(array is None, 'array')
     def testAintAdd(self):
-        try:
-            from array import array
-        except ImportError:
-            return
-        location = array('i', range(10))
+        location = array.array('i', range(10))
         base = MPI.Get_address(location)
         addr = MPI.Aint_add(base, 4)
         self.assertEqual(addr, base + 4)
 
+    @unittest.skipIf(array is None, 'array')
     def testAintDiff(self):
-        try:
-            from array import array
-        except ImportError:
-            return
-        location = array('i', range(10))
+        location = array.array('i', range(10))
         base = MPI.Get_address(location)
         addr1 = base + 8
         addr2 = base + 4
         diff = MPI.Aint_diff(addr1, addr2)
         self.assertEqual(diff, 4)
-
-
-name, version = MPI.get_vendor()
-if name == 'Open MPI':
-    if version <= (1,10,2):
-        del TestAddress.testBottom
 
 
 if __name__ == '__main__':

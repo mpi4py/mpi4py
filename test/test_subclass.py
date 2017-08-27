@@ -1,5 +1,6 @@
 from mpi4py import MPI
 import mpiunittest as unittest
+import sys
 
 # ---
 
@@ -237,10 +238,12 @@ class BaseTestMyWin(object):
 class TestMyWin(BaseTestMyWin, unittest.TestCase):
     pass
 
+SpectrumMPI = MPI.get_vendor()[0] == 'Spectrum MPI'
 try:
+    if SpectrumMPI: raise NotImplementedError
     MPI.Win.Create(MPI.BOTTOM).Free()
 except NotImplementedError:
-    del TestMyWin
+    unittest.disable(BaseTestMyWin, 'mpi-win')
 
 # ---
 
@@ -290,18 +293,10 @@ class TestMyFile(BaseTestMyFile, unittest.TestCase):
     pass
 
 
-import sys
-name, version = MPI.get_vendor()
-if name == 'Open MPI':
-    if sys.platform.startswith('win'):
-        del TestMyFile
 try:
-    dummy = BaseTestMyFile()
-    dummy.openfile().Close()
-    del dummy
+    BaseTestMyFile().openfile().Close()
 except NotImplementedError:
-    try: del TestMyFile
-    except NameError: pass
+    unittest.disable(BaseTestMyFile, 'mpi-file')
 
 
 if __name__ == '__main__':
