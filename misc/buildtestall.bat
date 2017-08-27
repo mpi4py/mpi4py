@@ -26,10 +26,7 @@ set MINGWDIR=C:\MinGW
 set GCC=%MINGWDIR%\bin\gcc.exe
 
 set MPIDIR==%ProgramFiles%\MPI
-if %MPICONF%==msmpi    set MPIDIR=%ProgramFiles%\Microsoft MPI
-if %MPICONF%==mpich2   set MPIDIR=%ProgramFiles%\MPICH2
-if %MPICONF%==openmpi  set MPIDIR=%ProgramFiles%\OpenMPI_v1.6-win32
-if %MPICONF%==deinompi set MPIDIR=%ProgramFiles%\DeinoMPI
+if %MPICONF%==msmpi set MPIDIR=%ProgramFiles%\Microsoft MPI
 set MPIEXEC="%MPIDIR%\bin\mpiexec.exe"
 
 echo Py: %PYVERSION% - CC: %COMPILER% - MPI: %MPICONF%

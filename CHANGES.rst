@@ -42,6 +42,7 @@ Release 2.1.0 [2017-XX-XX]
   + Python 2.6 and 3.2 are no longer supported. The ``mpi4py.MPI``
     module may still build and partially work, but other pure-Python
     modules under the ``mpi4py`` namespace will not.
+  + Windows: Remove support for legacy MPICH2, Open MPI, and DeinoMPI.
 
 
 Release 2.0.0 [2015-10-18]

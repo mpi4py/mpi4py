@@ -53,7 +53,6 @@ class BaseTestCCOObjInter(object):
         self.INTERCOMM.Free()
 
     @unittest.skipMPI('MPICH2(<1.0.8)')
-    @unittest.skipMPI('DeinoMPI')
     def testBarrier(self):
         self.INTERCOMM.Barrier()
 
@@ -113,7 +112,6 @@ class BaseTestCCOObjInter(object):
                         self.assertEqual(rmess, smess)
 
     @unittest.skipMPI('MPICH2(<1.0.8)')
-    @unittest.skipMPI('DeinoMPI')
     def testAllgather(self):
         rank = self.INTERCOMM.Get_rank()
         size = self.INTERCOMM.Get_size()
@@ -157,7 +155,6 @@ class BaseTestCCOObjInter(object):
                         self.assertEqual(value, None)
 
     @unittest.skipMPI('MPICH2(<1.0.8)')
-    @unittest.skipMPI('DeinoMPI')
     def testAllreduce(self):
         rank = self.INTERCOMM.Get_rank()
         size = self.INTERCOMM.Get_size()

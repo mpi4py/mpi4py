@@ -230,11 +230,7 @@ class ConfigureMPI(object):
 /* _configtest.h */
 
 #if !defined(MPIAPI)
-#  if defined(DEINO_MPI) && defined(MPI_CALL)
-#    define MPIAPI MPI_CALL
-#  else
-#    define MPIAPI
-#  endif
+#  define MPIAPI
 #endif
 
 """

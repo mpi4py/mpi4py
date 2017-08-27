@@ -14,11 +14,11 @@ mandelbrot-worker.exe: mandelbrot-worker.f90
 
 PYTHON=python
 MPIEXEC=mpiexec
-NPFLAG= -n
+NP_FLAG=-n
 
 test: build
-	${MPIEXEC} ${NPFLAG} 1 ${PYTHON} mandelbrot-master.py
-	${MPIEXEC} ${NPFLAG} 7 ${PYTHON} mandelbrot.py
+	${MPIEXEC} ${NP_FLAG} 1 ${PYTHON} mandelbrot-master.py
+	${MPIEXEC} ${NP_FLAG} 7 ${PYTHON} mandelbrot.py
 	${PYTHON} mandelbrot-seq.py
 
 clean:

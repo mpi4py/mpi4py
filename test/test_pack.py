@@ -104,7 +104,7 @@ class TestPackExternal(BaseTestPackExternal, unittest.TestCase):
 
 
 name, version = MPI.get_vendor()
-if name =='MPICH' or name == 'MPICH2' or name == 'DeinoMPI':
+if name =='MPICH' or name == 'MPICH2':
     BaseTestPackExternal.skipdtype += ['l']
     BaseTestPackExternal.skipdtype += ['d']
 elif name == 'Intel MPI':

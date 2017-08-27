@@ -2,9 +2,6 @@
 #  if !defined(MSMPI_VER) && (defined(MPICH2) && defined(MPIAPI))
 #    define MSMPI_VER 0x100
 #  endif
-#  if defined(DEINO_MPI) && !defined(MPICH2)
-#    define MPICH2 1
-#  endif
 #endif
 
 #if defined(MPICH_NAME) && (MPICH_NAME==3)
@@ -15,11 +12,7 @@
 #endif
 
 #if !defined(MPIAPI)
-#  if defined(DEINO_MPI) && defined(MPI_CALL)
-#    define MPIAPI MPI_CALL
-#  else
-#    define MPIAPI
-#  endif
+#  define MPIAPI
 #endif
 
 #if defined(HAVE_CONFIG_H)
