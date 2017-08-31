@@ -356,21 +356,18 @@ class SharedPoolCtx(object):
 
 
 def barrier(comm):
+    assert comm.Is_inter()
     sleep = time.sleep
     throttle = 100e-6
     try:
         request = comm.Ibarrier()
         while not request.Test():
             sleep(throttle)
-    except NotImplementedError:  # pragma: no cover
-        if comm.Is_inter():
-            size = comm.Get_remote_size()
-        else:
-            size = comm.Get_size()
+    except (NotImplementedError, MPI.Exception):  # pragma: no cover
         buf = [None, 0, MPI.BYTE]
         tag = MPI.COMM_WORLD.Get_attr(MPI.TAG_UB)
         sendreqs, recvreqs = [], []
-        for pid in range(size):
+        for pid in range(comm.Get_remote_size()):
             recvreqs.append(comm.Irecv(buf, pid, tag))
             sendreqs.append(comm.Issend(buf, pid, tag))
         while not MPI.Request.Testall(recvreqs):
@@ -844,7 +841,6 @@ def server_accept(service, mpi_info=None,
             server_publish(service, port)
             service = None
 
-    barrier(comm)
     comm = comm.Accept(port, info, root)
     if port is not None:
         if service is not None:
