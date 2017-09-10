@@ -11,6 +11,12 @@
  * availability of library symbols.
  */
 
+#if !defined(OPENMPI_DLOPEN_LIBMPI) && defined(OMPI_MAJOR_VERSION)
+#if OMPI_MAJOR_VERSION >= 3 && OMPI_MAJOR_VERSION < 10
+#define OPENMPI_DLOPEN_LIBMPI 0
+#endif
+#endif
+
 #ifndef OPENMPI_DLOPEN_LIBMPI
 #define OPENMPI_DLOPEN_LIBMPI 1
 #endif
@@ -62,7 +68,9 @@ static void PyMPI_OPENMPI_dlopen_libmpi(void)
   mode |= RTLD_NOLOAD;
   #endif
   #if defined(OMPI_MAJOR_VERSION)
-  #if OMPI_MAJOR_VERSION == 2
+  #if OMPI_MAJOR_VERSION == 3
+  if (!handle) handle = dlopen("libmpi.40.dylib", mode);
+  #elif OMPI_MAJOR_VERSION == 2
   if (!handle) handle = dlopen("libmpi.20.dylib", mode);
   #elif OMPI_MAJOR_VERSION == 1 && OMPI_MINOR_VERSION >= 10
   if (!handle) handle = dlopen("libmpi.12.dylib", mode);
@@ -83,6 +91,8 @@ static void PyMPI_OPENMPI_dlopen_libmpi(void)
   if (!handle) handle = dlopen("libmpi_ibm.so.2", mode);
   if (!handle) handle = dlopen("libmpi_ibm.so.1", mode);
   if (!handle) handle = dlopen("libmpi_ibm.so", mode);
+  #elif OMPI_MAJOR_VERSION == 3
+  if (!handle) handle = dlopen("libmpi.so.40", mode);
   #elif OMPI_MAJOR_VERSION == 2
   if (!handle) handle = dlopen("libmpi.so.20", mode);
   #elif OMPI_MAJOR_VERSION == 1 && OMPI_MINOR_VERSION >= 10
