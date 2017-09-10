@@ -1,6 +1,6 @@
 pipelines:
-  branches:
-    master: &default-step
+  custom:
+    default: &default-step
       - step:
           script:
             - source conf/ci/anaconda.sh
@@ -9,6 +9,6 @@ pipelines:
             - test-package python=3.6 MPI=mpich
             - test-package python=2.7 MPI=openmpi
             - test-package python=3.6 MPI=openmpi
-    maint: *default-step
-  custom:
-    default: *default-step
+# branches:
+#   maint: *default-step
+#   master: *default-step
