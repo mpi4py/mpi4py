@@ -59,11 +59,8 @@ static void PyMPI_OPENMPI_dlopen_libmpi(void)
 {
   void *handle = 0;
   int mode = RTLD_NOW | RTLD_GLOBAL;
-#if defined(__CYGWIN__)
-  if (!handle) handle = dlopen("cygmpi.dll", mode);
-  if (!handle) handle = dlopen("mpi.dll", mode);
-#elif defined(__APPLE__)
-  /* Mac OS X */
+#if defined(__APPLE__)
+  /* macOS */
   #ifdef RTLD_NOLOAD
   mode |= RTLD_NOLOAD;
   #endif
