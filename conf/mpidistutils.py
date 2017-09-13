@@ -305,11 +305,6 @@ cmd_mpi_opts = [
      "overridden by environment variable 'MPIF90' "
      "(defaults to 'mpif90' if available)"),
 
-    ('mpif08=',  None,
-     "MPI F08 compiler command, "
-     "overridden by environment variable 'MPIF08' "
-     "(defaults to 'mpif08' if available)"),
-
     ('mpifort=',  None,
      "MPI Fortran compiler command, "
      "overridden by environment variable 'MPIFORT' "
