@@ -29,15 +29,6 @@ static int PyMPI_Get_vendor(const char **vendor_name,
   micro = (PLATFORM_MPI>> 8)&0xff;
   major = (major/16)*10+(major%16);
 
-#elif defined(HP_MPI)
-
-  name = "HP MPI";
-  major = HP_MPI/100;
-  minor = HP_MPI%100;
-  #if defined(HP_MPI_MINOR)
-  micro = HP_MPI_MINOR;
-  #endif
-
 #elif defined(MSMPI_VER)
 
   name = "Microsoft MPI";

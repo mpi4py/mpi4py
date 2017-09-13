@@ -8,7 +8,6 @@ HAVE_VT  = 'VT_FILE_PREFIX' in os.environ
 # --------------------------------------------------------------------
 
 @unittest.skipMPI('PlatformMPI')
-@unittest.skipMPI('HP-MPI')
 @unittest.skipMPI('MPICH2')
 @unittest.skipIf(HAVE_MPE or HAVE_VT, 'mpe|vt')
 class BaseTestCase(unittest.TestCase):

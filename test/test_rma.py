@@ -22,8 +22,6 @@ class BaseTestRMA(object):
     COMM = MPI.COMM_NULL
     INFO = MPI.INFO_NULL
 
-    COUNT_MIN = 0 if MPI.get_vendor()[0] != 'HP MPI' else 1
-
     def setUp(self):
         nbytes = 100*MPI.DOUBLE.size
         try:
@@ -47,7 +45,7 @@ class BaseTestRMA(object):
         group.Free()
         for array in arrayimpl.ArrayTypes:
             for typecode in arrayimpl.TypeMap:
-                for count in range(self.COUNT_MIN, 10):
+                for count in range(10):
                     for rank in range(size):
                         sbuf = array(range(count), typecode)
                         rbuf = array(-1, typecode, count+1)
@@ -95,7 +93,7 @@ class BaseTestRMA(object):
         group.Free()
         for array in arrayimpl.ArrayTypes:
             for typecode in arrayimpl.TypeMap:
-                for count in range(self.COUNT_MIN, 10):
+                for count in range(10):
                     for rank in range(size):
                         sbuf = array(range(count), typecode)
                         rbuf = array(-1, typecode, count+1)
@@ -129,7 +127,7 @@ class BaseTestRMA(object):
         self.WIN.Fence()
         for array in arrayimpl.ArrayTypes:
             for typecode in arrayimpl.TypeMap:
-                for count in range(self.COUNT_MIN, 10):
+                for count in range(10):
                     for rank in range(size):
                         ones = array([1]*count, typecode)
                         sbuf = array(range(count), typecode)

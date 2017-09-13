@@ -1203,8 +1203,6 @@ if name == 'Microsoft MPI':
         SKIP_POOL_TEST = True
 if name == 'Platform MPI':
     SKIP_POOL_TEST = True
-if name == 'HP MPI':
-    SKIP_POOL_TEST = True
 if MPI.Get_version() < (2,0):
     SKIP_POOL_TEST = True
 

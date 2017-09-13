@@ -49,7 +49,6 @@ def appnum():
 @unittest.skipMPI('MPICH2')
 @unittest.skipMPI('MPICH1')
 @unittest.skipMPI('PlatformMPI')
-@unittest.skipMPI('HP-MPI')
 class BaseTestSpawn(object):
 
     COMM = MPI.COMM_NULL
