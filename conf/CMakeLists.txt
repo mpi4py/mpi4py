@@ -71,27 +71,34 @@ FIND_PROGRAM(MPI_COMPILER_CXX
   PATH_SUFFIXES bin
   DOC "MPI C++ compiler wrapper")
 MARK_AS_ADVANCED(MPI_COMPILER_CXX)
-find_program(MPI_COMPILER_F77
-  NAMES mpif77
+find_program(MPI_COMPILER_FC
+  NAMES mpifort mpif90 mpif77
   HINTS "${MPI_BASE_DIR}"
   PATH_SUFFIXES bin
-  DOC "MPI F77 compiler wrapper")
-MARK_AS_ADVANCED(MPI_COMPILER_F77)
+  DOC "MPI Fortran compiler wrapper")
+MARK_AS_ADVANCED(MPI_COMPILER_FC)
 FIND_PROGRAM(MPI_COMPILER_F90
   NAMES mpif90
   HINTS "${MPI_BASE_DIR}"
   PATH_SUFFIXES bin
-  DOC "MPI F90 compiler wrapper")
+  DOC "MPI Fortran 90 compiler wrapper")
 MARK_AS_ADVANCED(MPI_COMPILER_F90)
+find_program(MPI_COMPILER_F77
+  NAMES mpif77
+  HINTS "${MPI_BASE_DIR}"
+  PATH_SUFFIXES bin
+  DOC "MPI Fortran 77 compiler wrapper")
+MARK_AS_ADVANCED(MPI_COMPILER_F77)
 FOREACH(file "mpi.cfg")
   SET(tgt "${mpi4py_BINARY_DIR}/${file}")
   ADD_CUSTOM_COMMAND(
     OUTPUT  ${tgt}
     COMMAND ${CMAKE_COMMAND} ARGS -E echo '[mpi]' > "${tgt}"
-    COMMAND ${CMAKE_COMMAND} ARGS -E echo 'mpicc  = ${MPI_COMPILER_CC}'  >> ${tgt}
+    COMMAND ${CMAKE_COMMAND} ARGS -E echo 'mpicc = ${MPI_COMPILER_CC}'   >> ${tgt}
     COMMAND ${CMAKE_COMMAND} ARGS -E echo 'mpicxx = ${MPI_COMPILER_CXX}' >> ${tgt}
-    COMMAND ${CMAKE_COMMAND} ARGS -E echo 'mpif77 = ${MPI_COMPILER_F77}' >> ${tgt}
+    COMMAND ${CMAKE_COMMAND} ARGS -E echo 'mpifort = ${MPI_COMPILER_FC}' >> ${tgt}
     COMMAND ${CMAKE_COMMAND} ARGS -E echo 'mpif90 = ${MPI_COMPILER_F90}' >> ${tgt}
+    COMMAND ${CMAKE_COMMAND} ARGS -E echo 'mpif77 = ${MPI_COMPILER_F77}' >> ${tgt}
     COMMENT "write: ${file}"
     )
   SET(mpi4py_OUTPUT_FILES ${mpi4py_OUTPUT_FILES} ${tgt})
