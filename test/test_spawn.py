@@ -41,7 +41,7 @@ def appnum():
     return MPI.COMM_WORLD.Get_attr(MPI.APPNUM)
 
 @unittest.skipMPI('MPI(<2.0)')
-@unittest.skipMPI('openmpi(<2.0.0)')
+@unittest.skipMPI('openmpi(<3.0.0)')
 @unittest.skipMPI('mpich', appnum() is None)
 @unittest.skipMPI('msmpi(<8.1.0)')
 @unittest.skipMPI('msmpi', appnum() is None)
