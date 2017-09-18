@@ -30,13 +30,13 @@ if (import_mpi4py() < 0)
 SWIGINTERN int
 SWIG_AsPtr_dec(Type)(SWIG_Object input, Type **p) {
   if (input == Py_None) {
-    if (p) *p = 0;
+    if (p) *p = NULL;
     return SWIG_OK;
   } else if (PyObject_TypeCheck(input,&PyMPI##PyType##_Type)) {
     if (p) *p = PyMPI##PyType##_Get(input);
     return SWIG_OK;
   } else {
-    void *argp = 0;
+    void *argp = NULL;
     int res = SWIG_ConvertPtr(input,&argp,%descriptor(p_##Type), 0);
     if (!SWIG_IsOK(res)) return res;
     if (!argp) return SWIG_ValueError;
@@ -69,16 +69,12 @@ SWIG_From_dec(Type)(Type v) {
 %define SWIG_TYPECHECK_MPI_Win        409 %enddef
 %define SWIG_TYPECHECK_MPI_Errhandler 410 %enddef
 
-%define %mpi4py_checkcode(Type)
-%checkcode(Type)
-%enddef /*mpi4py_checkcode*/
-
 /* ---------------------------------------------------------------- */
 
 %define %mpi4py_typemap(PyType, Type)
 %types(Type*);
 %mpi4py_fragments(PyType, Type);
-%typemaps_asptrfromn(%mpi4py_checkcode(Type), Type);
+%typemaps_asptrfromn(%checkcode(Type), Type);
 %enddef /*mpi4py_typemap*/
 
 /* ---------------------------------------------------------------- */
