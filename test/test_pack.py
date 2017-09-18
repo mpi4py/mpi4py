@@ -98,7 +98,7 @@ class TestPackSelf(BaseTestPack, unittest.TestCase):
 class TestPackWorld(BaseTestPack, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
-@unittest.skipMPI('openmpi')
+@unittest.skipMPI('openmpi(<3.0.0)')
 class TestPackExternal(BaseTestPackExternal, unittest.TestCase):
     pass
 
