@@ -1186,7 +1186,7 @@ class ThenTest(unittest.TestCase):
 SKIP_POOL_TEST = False
 name, version = MPI.get_vendor()
 if name == 'Open MPI':
-    if version < (2,2,0):
+    if version < (2,0,0):
         SKIP_POOL_TEST = True
 if name == 'MPICH':
     if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:

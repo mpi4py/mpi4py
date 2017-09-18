@@ -36,7 +36,7 @@ test-package() {
   if [[ "$MPI" == "openmpi" ]]; then MPIEXEC="mpiexec --allow-run-as-root"; fi
   export MPIEXEC=${MPIEXEC-mpiexec}
   RUN $MPIEXEC -n 1  python $PWD/test/runtests.py
-  RUN $MPIEXEC -n $P python $PWD/test/runtests.py -f --exclude=spawn
+  RUN $MPIEXEC -n $P python $PWD/test/runtests.py -f
   RUN $MPIEXEC -n 1  python $PWD/demo/futures/test_futures.py
   RUN $MPIEXEC -n $P python $PWD/demo/futures/test_futures.py -f
   RUN $MPIEXEC -n 1  python -m mpi4py.futures $PWD/demo/futures/test_futures.py

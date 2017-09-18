@@ -15,6 +15,9 @@ sudo: required
 env:
   global:
     - HYDRA_LAUNCHER=fork
+    - OMPI_MCA_plm=isolated
+    - OMPI_MCA_btl_vader_single_copy_mechanism=none
+    - OMPI_MCA_rmaps_base_oversubscribe=yes
   matrix:
     - MPI=mpich
     - MPI=openmpi
@@ -84,7 +87,7 @@ before_script:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]];  then P=2; fi
 script:
   - mpiexec -n 1  python$PY $PWD/test/runtests.py -v -f
-  - mpiexec -n $P python$PY $PWD/test/runtests.py -v -f --exclude=spawn
+  - mpiexec -n $P python$PY $PWD/test/runtests.py -v -f
   - mpiexec -n 1  python$PY $PWD/demo/futures/test_futures.py -v
   - mpiexec -n $P python$PY $PWD/demo/futures/test_futures.py -v
   - mpiexec -n 1  python$PY -m mpi4py.futures $PWD/demo/futures/test_futures.py -v
