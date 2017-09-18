@@ -15,9 +15,6 @@ sudo: required
 env:
   global:
     - HYDRA_LAUNCHER=fork
-    - OMPI_MCA_plm=isolated
-    - OMPI_MCA_btl_vader_single_copy_mechanism=none
-    - OMPI_MCA_rmaps_base_oversubscribe=yes
   matrix:
     - MPI=mpich
     - MPI=openmpi
