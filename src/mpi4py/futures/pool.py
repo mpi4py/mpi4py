@@ -185,26 +185,32 @@ def _starmap_helper(submit, function, iterable, timeout, unordered):
         end_time = timeout + timer()
 
     futures = [submit(function, *args) for args in iterable]
+    if unordered:
+        futures = set(futures)
+    else:
+        futures.reverse()
 
     def result_iterator():  # pylint: disable=missing-docstring
         try:
             if unordered:
                 if timeout is None:
                     for future in as_completed(futures):
+                        futures.remove(future)
                         yield future.result()
                 else:
                     for future in as_completed(futures, end_time - timer()):
+                        futures.remove(future)
                         yield future.result()
             else:
                 if timeout is None:
-                    for future in futures:
-                        yield future.result()
+                    while futures:
+                        yield futures.pop().result()
                 else:
-                    for future in futures:
-                        yield future.result(end_time - timer())
+                    while futures:
+                        yield futures.pop().result(end_time - timer())
         except:
-            for future in futures:
-                future.cancel()
+            while futures:
+                futures.pop().cancel()
             raise
     return result_iterator()
 

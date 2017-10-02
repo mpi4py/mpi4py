@@ -1,4 +1,4 @@
-# Backport of concurrent.futures._base from Python 3.5
+# Backport of concurrent.futures._base from Python 3.7
 # pylint: skip-file
 
 # Copyright 2009 Brian Quinlan. All Rights Reserved.
@@ -178,6 +178,29 @@ def _create_and_install_waiters(fs, return_when):
 
     return waiter
 
+
+def _yield_finished_futures(fs, waiter, ref_collect):
+    """
+    Iterate on the list *fs*, yielding finished futures one by one in
+    reverse order.
+    Before yielding a future, *waiter* is removed from its waiters
+    and the future is removed from each set in the collection of sets
+    *ref_collect*.
+
+    The aim of this function is to avoid keeping stale references after
+    the future is yielded and before the iterator resumes.
+    """
+    while fs:
+        f = fs[-1]
+        for futures_set in ref_collect:
+            futures_set.remove(f)
+        with f._condition:
+            f._waiters.remove(waiter)
+        del f
+        # Careful not to keep a reference to the popped value
+        yield fs.pop()
+
+
 def as_completed(fs, timeout=None):
     """An iterator over the given futures that yields each as it completes.
 
@@ -200,16 +223,17 @@ def as_completed(fs, timeout=None):
         end_time = timeout + time.time()
 
     fs = set(fs)
+    total_futures = len(fs)
     with _AcquireFutures(fs):
         finished = set(
                 f for f in fs
                 if f._state in [CANCELLED_AND_NOTIFIED, FINISHED])
         pending = fs - finished
         waiter = _create_and_install_waiters(fs, _AS_COMPLETED)
-
+    finished = list(finished)
     try:
-        for future in finished:
-            yield future
+        for f in _yield_finished_futures(finished, waiter, (fs,)):
+            yield f
 
         while pending:
             if timeout is None:
@@ -219,7 +243,7 @@ def as_completed(fs, timeout=None):
                 if wait_timeout < 0:
                     raise TimeoutError(
                             '%d (of %d) futures unfinished' % (
-                            len(pending), len(fs)))
+                            len(pending), total_futures))
 
             waiter.event.wait(wait_timeout)
 
@@ -228,11 +252,13 @@ def as_completed(fs, timeout=None):
                 waiter.finished_futures = []
                 waiter.event.clear()
 
-            for future in finished:
-                yield future
-                pending.remove(future)
+            # reverse to keep finishing order
+            finished.reverse()
+            for f in _yield_finished_futures(finished, waiter, (fs, pending)):
+                yield f
 
     finally:
+        # Remove waiter from unfinished futures
         for f in fs:
             with f._condition:
                 f._waiters.remove(waiter)
@@ -530,7 +556,7 @@ class Executor(object):
         raise NotImplementedError()
 
     def map(self, fn, *iterables, **kwargs):
-        """Returns a iterator equivalent to map(fn, iter).
+        """Returns an iterator equivalent to map(fn, iter).
 
         Args:
             fn: A callable that will take as many arguments as there are
@@ -561,11 +587,14 @@ class Executor(object):
         # before the first iterator value is required.
         def result_iterator():
             try:
-                for future in fs:
+                # reverse to keep finishing order
+                fs.reverse()
+                while fs:
+                    # Careful not to keep a reference to the popped future
                     if timeout is None:
-                        yield future.result()
+                        yield fs.pop().result()
                     else:
-                        yield future.result(end_time - time.time())
+                        yield fs.pop().result(end_time - time.time())
             finally:
                 for future in fs:
                     future.cancel()
