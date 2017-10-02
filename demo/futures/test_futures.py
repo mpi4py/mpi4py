@@ -789,11 +789,9 @@ class ProcessPoolPickleTest(unittest.TestCase):
         self.assertEqual(f.result(), 42)
 
     def test_bad_unpickle(self):
-        executor = futures.MPIPoolExecutor(1).bootup(wait=True)
-
         o = BadUnpickle()
         self.assertFalse(o.pickled)
-        f = executor.submit(inout, o)
+        f = self.executor.submit(inout, o)
         self.assertRaises(ZeroDivisionError, f.result)
         self.assertTrue(o.pickled)
 
