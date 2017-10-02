@@ -16,7 +16,7 @@ Hosted at *Read the Docs* [http://mpi4py.readthedocs.org/]:
 .. image::  https://readthedocs.org/projects/mpi4py/badge/?version=latest
    :target: https://mpi4py.readthedocs.org/latest/
 
-Hosted at *PyPI* [http://pythonhosted.org/mpi4py/]:
+Hosted at *SciPy* [http://mpi4py.scipy.org/]:
 
 + `User Manual (HTML)`_ (generated with Sphinx_).
 + `User Manual (PDF)`_  (generated with Sphinx_).
@@ -72,7 +72,8 @@ Citations
 Acknowledgments
 ---------------
 
-This project was partially supported by the Center for Numerical
-Porous Media, Division of Computer, Electrical, and Mathematical
-Sciences & Engineering, King Abdullah University of Science and
-Technology (KAUST).
+This project was partially supported by the
+Extreme Computing Research Center (ECRC),
+Division of Computer, Electrical, and
+Mathematical Sciences & Engineering (CEMSE),
+King Abdullah University of Science and Technology (KAUST).

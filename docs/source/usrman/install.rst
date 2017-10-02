@@ -19,16 +19,6 @@ build *MPI for Python*:
 
   .. note::
 
-     **Mac OS X** users employing a Python distribution built
-     with **universal binaries** may need to temporarily set the
-     environment variables :envvar:`MACOSX_DEPLOYMENT_TARGET`,
-     :envvar:`SDKROOT`, and :envvar:`ARCHFLAGS` to appropriate values
-     in the shell before trying to build/install *MPI for
-     Python*. Check the instructions at :ref:`macosx-universal-sdk` in
-     the appendix.
-
-  .. note::
-
      Some MPI-1 implementations **do require** the actual
      command line arguments to be passed in :c:func:`MPI_Init()`. In
      this case, you will need to use a rebuilt, MPI-enabled, Python
@@ -107,9 +97,9 @@ some distutils commands (like *build*) have additional options:
 
 
 If you use a MPI implementation providing a :program:`mpicc` compiler
-wrapper (e.g., MPICH, Open MPI, LAM), it will be used for compilation
-and linking. This is the preferred and easiest way of building *MPI
-for Python*.
+wrapper (e.g., MPICH, Open MPI), it will be used for compilation and
+linking. This is the preferred and easiest way of building *MPI for
+Python*.
 
 If :program:`mpicc` is located somewhere in your search path, simply
 run the *build* command::
@@ -197,7 +187,7 @@ or, if you have nose_ unit testing framework installed::
 
   $ mpiexec -n 5 nosetests -w test
 
-.. _nose: http://nose.readthedocs.org/
+.. _nose: http://nose.readthedocs.io/
 
 or, if you have `py.test`_ unit testing framework installed::
 

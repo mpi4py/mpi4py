@@ -65,79 +65,6 @@ interactively, for example::
     >>>
 
 
-.. _macosx-universal-sdk:
-
-Mac OS X and Universal/SDK Python builds
-----------------------------------------
-
-Mac OS X users employing a Python distribution built with support for
-`Universal applications <http://www.apple.com/universal/>`_ could have
-trouble building *MPI for Python*, specially if they want to link
-against MPI libraries built without such support. Another source of
-trouble could be a Python build using a specific *deployment target*
-and *cross-development SDK* configuration. Workarounds for such issues
-are to temporarily set the environment variables
-:envvar:`MACOSX_DEPLOYMENT_TARGET`, :envvar:`SDKROOT` and/or
-:envvar:`ARCHFLAGS` to appropriate values in the shell before trying
-to build/install *MPI for Python*.
-
-An appropriate value for :envvar:`MACOSX_DEPLOYMENT_TARGET` should be
-any greater or equal than the one used to build Python, and less or
-equal than your system version. The safest choice for end-users would
-be to use the system version (e.g, if you are on *Leopard*, you should
-try ``MACOSX_DEPLOYMENT_TARGET=10.5``).
-
-An appropriate value for :envvar:`SDKROOT` is the full path name of
-any of the SDK's you have at :file:`/Developer/SDKs` directory (e.g.,
-``SDKROOT=/Developer/SDKs/MacOSX10.5.sdk``). The safest choice for
-end-users would be the one matching the system version; or
-alternatively the root directory (i.e., ``SDKROOT=/``).
-
-Appropriate values for :envvar:`ARCHFLAGS` have the form ``-arch
-<value>``, where ``<value>`` should be chosen from the following
-table:
-
-====== ==========  =========
-  @      Intel      PowerPC
-====== ==========  =========
-32-bit ``i386``    ``ppc``
-64-bit ``x86_64``  ``ppc64``
-====== ==========  =========
-
-For example, assuming your Mac is running **Snow Leopard** on a
-**64-bit Intel** processor and you want to override the hard-wired
-cross-development SDK in Python configuration, you can build and
-install *MPI for Python* using any of the alternatives below. Note
-that environment variables may need to be passed/set both at the build
-and install steps (because :program:`sudo` may not pass environment
-variables to subprocesses for security reasons)
-
-* Alternative 1::
-
-    $ env MACOSX_DEPLOYMENT_TARGET=10.6 \
-          SDKROOT=/                     \
-          ARCHFLAGS='-arch x86_64'      \
-          python setup.py build [options]
-
-    $ sudo env MACOSX_DEPLOYMENT_TARGET=10.6 \
-               SDKROOT=/                     \
-               ARCHFLAGS='-arch x86_64'      \
-               python setup.py install [options]
-
-* Alternative 2::
-
-    $ export MACOSX_DEPLOYMENT_TARGET=10.6
-    $ export SDKROOT=/
-    $ export ARCHFLAGS='-arch x86_64'
-    $ python setup.py build [options]
-
-    $ sudo -s # enter interactive shell as root
-    $ export MACOSX_DEPLOYMENT_TARGET=10.6
-    $ export SDKROOT=/
-    $ export ARCHFLAGS='-arch x86_64'
-    $ python setup.py install [options]
-    $ exit
-
 .. _building-mpi:
 
 
@@ -164,14 +91,6 @@ shared/dynamic libraries on POSIX environments.
     $ make all
     $ make install
 
-+ *LAM/MPI* ::
-
-    $ tar -zxf lam-X.X.X.tar.gz
-    $ cd lam-X.X.X
-    $ ./configure --enable-shared --prefix=/usr/local/lam
-    $ make
-    $ make install
-
 + *MPICH 1* ::
 
     $ tar -zxf mpich-X.X.X.tar.gz
@@ -195,11 +114,6 @@ script (:file:`.profile`, :file:`.bashrc`, etc.).
 - *Open MPI* ::
 
     MPI_DIR=/usr/local/openmpi
-    export LD_LIBRARY_PATH=$MPI_DIR/lib:$LD_LIBRARY_PATH
-
-- *LAM/MPI* ::
-
-    MPI_DIR=/usr/local/lam
     export LD_LIBRARY_PATH=$MPI_DIR/lib:$LD_LIBRARY_PATH
 
 - *MPICH 1* ::

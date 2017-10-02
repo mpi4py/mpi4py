@@ -52,8 +52,7 @@ Since its release, the MPI specification [mpi-std1]_ [mpi-std2]_ has
 become the leading standard for message-passing libraries for parallel
 computers.  Implementations are available from vendors of
 high-performance computers and from well known open source projects
-like MPICH_ [mpi-mpich]_, `Open MPI`_ [mpi-openmpi]_ or LAM_
-[mpi-lammpi]_.
+like MPICH_ [mpi-mpich]_ and `Open MPI`_ [mpi-openmpi]_.
 
 
 What is Python?
@@ -172,31 +171,29 @@ scientific computing and software development with Python.
 
 .. _MPI:       http://mpi-forum.org/
 
-.. _MPICH:     http://www.mpich.org/
+.. _MPICH:     https://www.mpich.org/
 
-.. _Open MPI:  http://www.open-mpi.org/
-
-.. _LAM:       http://www.lam-mpi.org/
+.. _Open MPI:  https://www.open-mpi.org/
 
 .. _Beowulf:   http://www.beowulf.org/
 
 
-.. _Python:    http://www.python.org/
+.. _Python:    https://www.python.org/
 
 .. _NumPy:     http://www.numpy.org/
 
-.. _SciPy:     http://www.scipy.org/
+.. _SciPy:     https://www.scipy.org/
 
-.. _Cython:    http://www.cython.org/
+.. _Cython:    http://cython.org/
 
 .. _SWIG:      http://www.swig.org/
 
 
 .. _OOMPI:     http://www.osl.iu.edu/research/oompi/overview.php
 
-.. _Pypar:     http://pypar.googlecode.com/
+.. _Pypar:     https://github.com/daleroberts/pypar
 
-.. _pyMPI:     http://sourceforge.net/projects/pympi/
+.. _pyMPI:     https://sourceforge.net/projects/pympi/
 
 .. _Scientific Python:
                http://dirac.cnrs-orleans.fr/plone/software/scientificpython/
@@ -233,10 +230,6 @@ scientific computing and software development with Python.
    S. Woodall. Open MPI: Goals, Concept, and Design of a Next
    Generation MPI Implementation. In Proceedings, 11th European
    PVM/MPI Users' Group Meeting, Budapest, Hungary, September 2004.
-
-.. [mpi-lammpi] Greg Burns, Raja Daoud, and James Vaigl.  LAM: An Open
-   Cluster Environment for MPI. In Proceedings of Supercomputing
-   Symposium, pages 379-386, 1994.
 
 .. [Hinsen97] Konrad Hinsen.  The Molecular Modelling Toolkit: a case
    study of a large scientific application in Python.  In Proceedings
