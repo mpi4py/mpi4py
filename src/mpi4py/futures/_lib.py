@@ -154,6 +154,7 @@ def _manager_thread(pool, **options):
             except BaseException:
                 exception = sys_exception()
                 future.set_exception(exception)
+            del task, future
 
     threads = [threading.Thread(target=worker) for _ in range(size - 1)]
     for thread in threads:
@@ -434,7 +435,11 @@ def client(comm, tag, worker_pool, task_queue, **options):
         else:
             future.set_exception(exception)
 
-    def send(task):
+    def send():
+        task = task_queue.pop()
+        if task is None:
+            return True
+
         try:
             pid = worker_pool.pop()
         except LookupError:  # pragma: no cover
@@ -456,11 +461,10 @@ def client(comm, tag, worker_pool, task_queue, **options):
     while True:
         idle = True
         if task_queue and worker_pool:
-            task = task_queue.pop()
-            if task is None:
-                break
             idle = False
-            send(task)
+            stop = send()
+            if stop:
+                break
         if pending and iprobe():
             idle = False
             recv()
