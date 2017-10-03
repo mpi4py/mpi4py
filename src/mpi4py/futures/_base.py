@@ -334,6 +334,10 @@ class Future(object):
                 callback(self)
             except Exception:
                 LOGGER.exception('exception calling callback for %r', self)
+            except BaseException:
+                raise
+            except:  # old-style exception objects
+                LOGGER.exception('exception calling callback for %r', self)
 
     def __repr__(self):
         with self._condition:
