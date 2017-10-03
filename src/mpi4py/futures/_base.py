@@ -233,7 +233,8 @@ def as_completed(fs, timeout=None):
     finished = list(finished)
     try:
         for f in _yield_finished_futures(finished, waiter, (fs,)):
-            yield f
+            f = [f]
+            yield f.pop()
 
         while pending:
             if timeout is None:
@@ -255,7 +256,8 @@ def as_completed(fs, timeout=None):
             # reverse to keep finishing order
             finished.reverse()
             for f in _yield_finished_futures(finished, waiter, (fs, pending)):
-                yield f
+                f = [f]
+                yield f.pop()
 
     finally:
         # Remove waiter from unfinished futures

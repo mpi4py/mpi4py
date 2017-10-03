@@ -187,21 +187,20 @@ def _starmap_helper(submit, function, iterable, timeout, unordered):
     futures = [submit(function, *args) for args in iterable]
     if unordered:
         futures = set(futures)
-    else:
-        futures.reverse()
 
     def result_iterator():  # pylint: disable=missing-docstring
         try:
             if unordered:
                 if timeout is None:
-                    for future in as_completed(futures):
-                        futures.remove(future)
-                        yield future.result()
+                    iterator = as_completed(futures)
                 else:
-                    for future in as_completed(futures, end_time - timer()):
-                        futures.remove(future)
-                        yield future.result()
+                    iterator = as_completed(futures, end_time - timer())
+                for future in iterator:
+                    futures.remove(future)
+                    future = [future]
+                    yield future.pop().result()
             else:
+                futures.reverse()
                 if timeout is None:
                     while futures:
                         yield futures.pop().result()
@@ -228,6 +227,13 @@ def _build_chunks(chunksize, iterable):
         yield (chunk,)
 
 
+def _chain_from_iterable_of_lists(iterable):
+    for item in iterable:
+        item.reverse()
+        while item:
+            yield item.pop()
+
+
 def _starmap_chunks(submit, function, iterable,
                     timeout, unordered, chunksize):
     # pylint: disable=too-many-arguments
@@ -235,7 +241,7 @@ def _starmap_chunks(submit, function, iterable,
     iterable = _build_chunks(chunksize, iterable)
     result = _starmap_helper(submit, function, iterable,
                              timeout, unordered)
-    return itertools.chain.from_iterable(result)
+    return _chain_from_iterable_of_lists(result)
 
 
 class MPICommExecutor(object):
