@@ -16,6 +16,5 @@ recursive-include docs/usrman *
 recursive-include docs/apiref *
 recursive-include docs/source *
 
-prune misc
 prune conf/ci
 prune conf/conda-recipes
