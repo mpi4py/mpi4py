@@ -60,6 +60,18 @@ communication of buffer-provider objects (e.g., NumPy arrays).
   buffer-provider object can be passed directly as a buffer argument,
   the count and MPI datatype will be inferred.
 
+
+Running Python scripts with MPI
+-------------------------------
+
+Most MPI programs can be run with the command :program:`mpiexec`. In practice, running
+Python programs looks like::
+
+  $ mpiexec -n 4 python script.py
+
+to run the program with 4 processors.
+
+
 Point-to-Point Communication
 ----------------------------
 
