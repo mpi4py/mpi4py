@@ -47,7 +47,6 @@ class MPIPoolExecutor(Executor):
             kwargs['max_workers'] = max_workers
 
         self._options = kwargs
-        self._num_workers = None
         self._shutdown = False
         self._lock = threading.Lock()
         self._pool = None

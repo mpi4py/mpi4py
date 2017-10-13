@@ -90,6 +90,7 @@ atexit.register(join_threads)
 class Pool(object):
 
     def __init__(self, executor, manager, *args):
+        self.size = None
         self.event = threading.Event()
         self.queue = queue = Queue()
         self.exref = weakref.ref(executor, lambda _, q=queue: q.put(None))
@@ -118,10 +119,7 @@ class Pool(object):
 
 
 def setup_pool(pool, num_workers):
-    # pylint: disable=protected-access
-    executor = pool.exref()
-    if executor is not None:
-        executor._num_workers = num_workers
+    pool.size = num_workers
     pool.event.set()
     return pool.queue
 

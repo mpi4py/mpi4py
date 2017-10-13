@@ -580,7 +580,7 @@ class ProcessPoolExecutorTest(ProcessPoolMixin,
 
     def test_map_unordered_timeout(self):
         map_unordered = functools.partial(self.executor.map, unordered=True)
-        num_workers = self.executor._num_workers
+        num_workers = self.executor._pool.size
         results = []
         try:
             args = [0.2] + [0]*(num_workers-1)
@@ -703,7 +703,7 @@ class ProcessPoolSubmitTest(unittest.TestCase):
         world_size = MPI.COMM_WORLD.Get_size()
         num_workers = max(1, world_size - 1)
         for e in executors:
-            self.assertEqual(e._num_workers, num_workers)
+            self.assertEqual(e._pool.size, num_workers)
         del e, executors
 
 
