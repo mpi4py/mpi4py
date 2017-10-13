@@ -135,24 +135,24 @@ def _manager_thread(pool, **options):
     def worker():
         while True:
             try:
-                task = queue.pop()
+                item = queue.pop()
             except LookupError:
                 sleep(throttle)
                 continue
-            if task is None:
+            if item is None:
                 queue.put(None)
                 break
-            future, work = task
+            future, task = item
             if not future.set_running_or_notify_cancel():
                 continue
-            func, args, kwargs = work
+            func, args, kwargs = task
             try:
                 result = func(*args, **kwargs)
                 future.set_result(result)
             except BaseException:
                 exception = sys_exception()
                 future.set_exception(exception)
-            del task, future
+            del item, future
 
     threads = [threading.Thread(target=worker) for _ in range(size - 1)]
     for thread in threads:
@@ -434,23 +434,23 @@ def client(comm, tag, worker_pool, task_queue, **options):
             future.set_exception(exception)
 
     def send():
-        task = task_queue.pop()
-        if task is None:
+        item = task_queue.pop()
+        if item is None:
             return True
 
         try:
             pid = worker_pool.pop()
         except LookupError:  # pragma: no cover
-            task_queue.add(task)
+            task_queue.add(item)
             return
 
-        future, work = task
+        future, task = item
         if not future.set_running_or_notify_cancel():
             worker_pool.put(pid)
             return
 
         try:
-            request = comm_isend(work, pid, tag)
+            request = comm_isend(task, pid, tag)
             pending[pid] = (future, request)
         except BaseException:
             worker_pool.put(pid)

@@ -86,8 +86,8 @@ class MPIPoolExecutor(Executor):
                 raise RuntimeError("cannot submit after shutdown")
             self._bootstrap()
             future = self.Future()
-            work = (fn, args, kwargs)
-            self._pool.push((future, work))
+            task = (fn, args, kwargs)
+            self._pool.push((future, task))
             return future
 
     def map(self, fn, *iterables, **kwargs):
