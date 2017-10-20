@@ -5,20 +5,20 @@ PYTHON  = python
 MPIEXEC = mpiexec
 NPFLAG  = -n
 
-.PHONY: run-crawl run-primes run-pool
+.PHONY: run-pool run-crawl run-primes
+run-pool: run-crawl run-primes
 run-crawl:
 	${MPIEXEC} ${NPFLAG} 1 ${PYTHON} run_crawl.py
 run-primes:
 	${MPIEXEC} ${NPFLAG} 1 ${PYTHON} run_primes.py
-run-pool: run-crawl run-primes
 
 
-.PHONY: run-mandelbrot run-julia run-comm
-run-mandelbrot:
-	${MPIEXEC} ${NPFLAG} 5 ${PYTHON} run_julia.py
+.PHONY: run-comm run-julia run-mandelbrot
+run-comm: run-julia run-mandelbrot
 run-julia:
+	${MPIEXEC} ${NPFLAG} 5 ${PYTHON} run_julia.py
+run-mandelbrot:
 	${MPIEXEC} ${NPFLAG} 5 ${PYTHON} run_mandelbrot.py
-run-comm: run-mandelbrot run-julia
 
 
 .PHONY: run-cmdline
