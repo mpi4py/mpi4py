@@ -268,26 +268,13 @@ cdef class Win:
     property attrs:
         "window attributes"
         def __get__(self):
-            cdef MPI_Win win = self.ob_mpi
-            cdef void *base = NULL, *pbase = NULL
-            cdef MPI_Aint size = 0, *psize = NULL
-            cdef int      disp = 1, *pdisp = NULL
-            cdef int keyval = MPI_KEYVAL_INVALID
-            cdef int flag = 0
-            #
-            keyval = MPI_WIN_BASE
-            CHKERR( MPI_Win_get_attr(win, keyval, &pbase, &flag) )
-            if flag and pbase != NULL: base = pbase
-            #
-            keyval = MPI_WIN_SIZE
-            CHKERR( MPI_Win_get_attr(win, keyval, &psize, &flag) )
-            if flag and psize != NULL: size = psize[0]
-            #
-            keyval = MPI_WIN_DISP_UNIT
-            CHKERR( MPI_Win_get_attr(win, keyval, &pdisp, &flag) )
-            if flag and pdisp != NULL: disp = pdisp[0]
-            #
-            return (<MPI_Aint>base, size, disp)
+            cdef void *base = NULL
+            cdef MPI_Aint size = 0
+            cdef int disp_unit = 1
+            win_get_base(self.ob_mpi, &base)
+            win_get_size(self.ob_mpi, &size)
+            win_get_unit(self.ob_mpi, &disp_unit)
+            return (<MPI_Aint>base, size, disp_unit)
 
     property flavor:
         """window create flavor"""
@@ -316,29 +303,43 @@ cdef class Win:
     property memory:
         """window memory buffer"""
         def __get__(self):
-            cdef MPI_Win win = self.ob_mpi
-            cdef int *flavor = NULL
-            cdef void *base = NULL, *pbase = NULL
-            cdef MPI_Aint size = 0, *psize = NULL
-            cdef int keyval = MPI_KEYVAL_INVALID
-            cdef int flag = 0
-            #
-            keyval = MPI_WIN_CREATE_FLAVOR
-            if keyval != MPI_KEYVAL_INVALID:
-                CHKERR( MPI_Win_get_attr(win, keyval, &flavor, &flag) )
-                if flag and flavor != NULL:
-                    if flavor[0] == MPI_WIN_FLAVOR_DYNAMIC:
-                        return None
-            #
-            keyval = MPI_WIN_BASE
-            CHKERR( MPI_Win_get_attr(win, keyval, &pbase, &flag) )
-            if flag and pbase != NULL: base = pbase
-            #
-            keyval = MPI_WIN_SIZE
-            CHKERR( MPI_Win_get_attr(win, keyval, &psize, &flag) )
-            if flag and psize != NULL: size = psize[0]
-            #
-            return tomemory(base, size)
+            return getbuffer(self, 0, 1)
+
+    # buffer interface (PEP 3118)
+
+    def __getbuffer__(self, Py_buffer *view, int flags):
+        if view == NULL: return
+        if view.obj == <void*>None: Py_CLEAR(view.obj)
+        cdef void *base = NULL
+        cdef MPI_Aint size = 0
+        win_get_base(self.ob_mpi, &base)
+        win_get_size(self.ob_mpi, &size)
+        PyBuffer_FillInfo(view, self, base, size, 0, flags)
+
+    # buffer interface (legacy)
+
+    def __getsegcount__(self, Py_ssize_t *lenp):
+        if lenp == NULL: return 1
+        cdef MPI_Aint size = 0
+        win_get_size(self.ob_mpi, &size)
+        lenp[0] = <Py_ssize_t>size
+        return 1
+
+    def __getreadbuffer__(self, Py_ssize_t idx, void **bufp):
+        if idx != 0:
+            raise SystemError("accessing non-existent buffer segment")
+        cdef MPI_Aint size = 0
+        win_get_base(self.ob_mpi, bufp)
+        win_get_size(self.ob_mpi, &size)
+        return <Py_ssize_t>size
+
+    def __getwritebuffer__(self, Py_ssize_t idx, void **bufp):
+        if idx != 0:
+            raise SystemError("accessing non-existent buffer segment")
+        cdef MPI_Aint size = 0
+        win_get_base(self.ob_mpi, bufp)
+        win_get_size(self.ob_mpi, &size)
+        return <Py_ssize_t>size
 
     # Communication Operations
     # ------------------------

@@ -31,6 +31,7 @@ Release 2.1.0 [2017-XX-XX]
     through user-defined datatypes.
   + The ``Request.Wait[all]()`` methods now return ``True`` to match
     the interface of ``Request.Test[all]()``.
+  + The ``Win`` class now implements the Python buffer interface.
 
 * Backward-incompatible changes:
 

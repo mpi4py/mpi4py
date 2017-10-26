@@ -46,9 +46,9 @@ class BaseTestWin(object):
 
     def testAttributes(self):
         base, size, unit = self.WIN.attrs
+        self.assertEqual(base, MPI.Get_address(self.memory))
         self.assertEqual(size, len(self.memory))
         self.assertEqual(unit, 1)
-        self.assertEqual(base, MPI.Get_address(self.memory))
 
     def testGetGroup(self):
         cgroup = self.COMM.Get_group()
@@ -176,16 +176,20 @@ class BaseTestWinCreateDynamic(BaseTestWin):
     def testGetAttr(self):
         base = self.WIN.Get_attr(MPI.WIN_BASE)
         size = self.WIN.Get_attr(MPI.WIN_SIZE)
-        disp = self.WIN.Get_attr(MPI.WIN_DISP_UNIT)
         self.assertEqual(base, 0)
         self.assertEqual(size, 0)
-        #self.assertEqual(disp, 1)
 
     def testMemory(self):
-        self.assertTrue(self.WIN.memory is None)
+        memory = self.WIN.memory
+        base = MPI.Get_address(memory)
+        size = len(memory)
+        self.assertEqual(base, 0)
+        self.assertEqual(size, 0)
 
     def testAttributes(self):
-        pass
+        base, size, _ = self.WIN.attrs
+        self.assertEqual(base, 0)
+        self.assertEqual(size, 0)
 
     def testAttachDetach(self):
         mem1 = MPI.Alloc_mem(8)
