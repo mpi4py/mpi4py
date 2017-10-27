@@ -33,8 +33,7 @@ dl_dlsym(PyObject *self, PyObject *args)
 #endif
   if (arg0 != Py_None) {
     handle = PyLong_AsVoidPtr(arg0);
-    if (!handle && PyErr_Occurred())
-      return NULL;
+    if (PyErr_Occurred()) return NULL;
   }
   symval = dlsym(handle, symbol);
   return PyLong_FromVoidPtr(symval);
@@ -48,12 +47,9 @@ dl_dlclose(PyObject *self, PyObject *arg0)
   (void)self; /* unused */
   if (arg0 != Py_None) {
     handle = PyLong_AsVoidPtr(arg0);
-    if (!handle && PyErr_Occurred())
-      return NULL;
+    if (PyErr_Occurred()) return NULL;
   }
-  if (!handle)
-    (void)dlerror();
-  else
+  if (handle)
     err = dlclose(handle);
   return Py_BuildValue((char *)"i", err);
 }
