@@ -13,7 +13,7 @@ cdef extern from "Python.h":
 # Python 3 buffer interface (PEP 3118)
 cdef extern from "Python.h":
     ctypedef struct Py_buffer:
-        void *obj
+        PyObject *obj
         void *buf
         Py_ssize_t len
         Py_ssize_t itemsize
@@ -221,7 +221,7 @@ cdef class memory:
 
     def __getbuffer__(self, Py_buffer *view, int flags):
         if view == NULL: return
-        if view.obj == <void*>None: Py_CLEAR(view.obj)
+        if view.obj == Py_None: Py_CLEAR(view.obj)
         PyBuffer_FillInfo(view, self,
                           self.view.buf, self.view.len,
                           self.view.readonly, flags)

@@ -11,9 +11,12 @@ cdef extern from "Python.h":
     void PySys_WriteStderr(char*,...)
     int Py_AtExit(void (*)())
 
+    ctypedef struct PyObject
+    PyObject *Py_None
+    void Py_CLEAR(PyObject*)
+
     void Py_INCREF(object)
     void Py_DECREF(object)
-    void Py_CLEAR(void*)
 
 # -----------------------------------------------------------------------------
 
