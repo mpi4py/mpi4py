@@ -280,24 +280,24 @@ cdef class Win:
         """window create flavor"""
         def __get__(self):
             cdef int keyval = MPI_WIN_CREATE_FLAVOR
-            cdef int *flavor = NULL
+            cdef int *attrval = NULL
             cdef int flag = 0
-            if keyval == MPI_KEYVAL_INVALID: return MPI_WIN_FLAVOR_CREATE
-            CHKERR( MPI_Win_get_attr(self.ob_mpi, keyval,
-                                     <void*>&flavor, &flag) )
-            if flag and flavor != NULL: return flavor[0]
+            if keyval != MPI_KEYVAL_INVALID:
+                CHKERR( MPI_Win_get_attr(self.ob_mpi, keyval,
+                                         <void*>&attrval, &flag) )
+                if flag and attrval != NULL: return attrval[0]
             return MPI_WIN_FLAVOR_CREATE
 
     property model:
         """window memory model"""
         def __get__(self):
             cdef int keyval = MPI_WIN_MODEL
-            cdef int *model = NULL
+            cdef int *attrval = NULL
             cdef int flag = 0
-            if keyval == MPI_KEYVAL_INVALID: return MPI_WIN_SEPARATE
-            CHKERR( MPI_Win_get_attr(self.ob_mpi, keyval,
-                                     <void*>&model, &flag) )
-            if flag and model != NULL: return model[0]
+            if keyval != MPI_KEYVAL_INVALID:
+                CHKERR( MPI_Win_get_attr(self.ob_mpi, keyval,
+                                         <void*>&attrval, &flag) )
+                if flag and attrval != NULL: return attrval[0]
             return MPI_WIN_SEPARATE
 
     property memory:
