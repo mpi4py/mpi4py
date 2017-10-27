@@ -107,7 +107,7 @@ cdef class Win:
     def Shared_query(self, int rank):
         """
         Query the process-local address
-        for  remote memory segments
+        for remote memory segments
         created with `Win.Allocate_shared()`
         """
         cdef void *base = NULL
