@@ -2233,14 +2233,14 @@ COMM_WORLD = __COMM_WORLD__  #: World communicator handle
 BSEND_OVERHEAD = MPI_BSEND_OVERHEAD
 #: Upper bound of memory overhead for sending in buffered mode
 
-def Attach_buffer(memory):
+def Attach_buffer(buf):
     """
     Attach a user-provided buffer for
     sending in buffered mode
     """
     cdef void *base = NULL
     cdef int size = 0
-    attach_buffer(memory, &base, &size)
+    attach_buffer(buf, &base, &size)
     with nogil: CHKERR( MPI_Buffer_attach(base, size) )
 
 def Detach_buffer():
