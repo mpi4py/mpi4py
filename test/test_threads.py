@@ -6,12 +6,6 @@ except ImportError:
     import dummy_threading as threading
     HAVE_THREADING = False
 
-Thread = threading.Thread
-try:
-    current_thread = threading.current_thread # Py 3.X
-except AttributeError:
-    current_thread = threading.currentThread  # Py 2.X
-
 VERBOSE = False
 #VERBOSE = True
 
@@ -26,8 +20,6 @@ pypy3_lt_50 = (hasattr(sys, 'pypy_version_info') and
 
 class TestMPIThreads(unittest.TestCase):
 
-    REQUIRED = MPI.THREAD_SERIALIZED
-
     def testThreadLevels(self):
         levels = [MPI.THREAD_SINGLE,
                   MPI.THREAD_FUNNELED,
@@ -41,15 +33,15 @@ class TestMPIThreads(unittest.TestCase):
         except NotImplementedError:
             self.skipTest('mpi-query_thread')
 
-    def testIsThreadMain(self, main=True):
+    def testIsThreadMain(self):
         try:
             flag = MPI.Is_thread_main()
         except NotImplementedError:
             self.skipTest('mpi-is_thread_main')
+        name = threading.current_thread().name
+        main = (name == 'MainThread') or not HAVE_THREADING
         self.assertEqual(flag, main)
         if VERBOSE:
-            thread = current_thread()
-            name = thread.getName()
             log = lambda m: sys.stderr.write(m+'\n')
             log("%s: MPI.Is_thread_main() -> %s" % (name, flag))
 
@@ -59,29 +51,19 @@ class TestMPIThreads(unittest.TestCase):
             provided = MPI.Query_thread()
         except NotImplementedError:
             self.skipTest('mpi-query_thread')
-        if provided < self.REQUIRED:
-            return
-        T = []
-        for i in range(5):
-            t = Thread(target=self.testIsThreadMain,
-                       args = (not HAVE_THREADING,))
-            T.append(t)
-        if provided == MPI.THREAD_SERIALIZED:
-            for t in T:
-                t.start()
-                t.join()
-        elif provided == MPI.THREAD_MULTIPLE:
+        self.testIsThreadMain()
+        T = [threading.Thread(target=self.testIsThreadMain) for _ in range(5)]
+        if provided == MPI.THREAD_MULTIPLE:
             for t in T:
                 t.start()
             for t in T:
                 t.join()
-
-
-name, version = MPI.get_vendor()
-if name == 'Open MPI':
-    TestMPIThreads.REQUIRED = MPI.THREAD_MULTIPLE
-if name == 'LAM/MPI':
-    TestMPIThreads.REQUIRED = MPI.THREAD_MULTIPLE
+        elif provided == MPI.THREAD_SERIALIZED:
+            for t in T:
+                t.start()
+                t.join()
+        else:
+            self.skipTest('mpi-thread_level')
 
 
 if __name__ == '__main__':
