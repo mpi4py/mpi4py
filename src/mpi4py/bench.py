@@ -114,7 +114,7 @@ def main(args=None):
                         action="store_false", dest="threads", default=True,
                         help="initialize MPI without thread support")
     parser.add_argument("--thread-level",
-                        dest="thread_level", default="multiple",
+                        dest="thread_level", default=None,
                         action="store", metavar="LEVEL",
                         choices="single funneled serialized multiple".split(),
                         help="initialize MPI with required thread level")
@@ -133,8 +133,10 @@ def main(args=None):
     options = parser.parse_args(args)
 
     from . import rc, profile
-    rc.threads = options.threads
-    rc.thread_level = options.thread_level
+    if options.threads is not None:
+        rc.threads = options.threads
+    if options.thread_level is not None:
+        rc.thread_level = options.thread_level
     if options.mpe:
         profile('mpe', logfile='mpi4py')
     if options.vt:
