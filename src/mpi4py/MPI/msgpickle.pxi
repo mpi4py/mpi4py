@@ -12,7 +12,7 @@ cdef extern from "Python.h":
 cdef object PyPickle_dumps = None
 cdef object PyPickle_loads = None
 cdef object PyPickle_PROTOCOL = None
-if PY_MAJOR_VERSION >= 3:
+if PY3:
     from pickle import dumps as PyPickle_dumps
     from pickle import loads as PyPickle_loads
     from pickle import DEFAULT_PROTOCOL as PyPickle_PROTOCOL
@@ -28,7 +28,7 @@ else:
 
 cdef object PyBytesIO_New = None
 cdef object PyPickle_loadf = None
-if PY_MAJOR_VERSION == 2:
+if PY2:
     try:
         from cStringIO import StringIO as PyBytesIO_New
     except ImportError:
@@ -76,7 +76,7 @@ cdef class Pickle:
 
     cpdef object loads(self, object buf):
         "loads(buf) -> object"
-        if PY_MAJOR_VERSION == 2 and not PyBytes_CheckExact(buf):
+        if PY2 and not PyBytes_CheckExact(buf):
             if self.ob_loads is PyPickle_loads:
                 buf = PyBytesIO_New(buf)
                 return PyPickle_loadf(buf)

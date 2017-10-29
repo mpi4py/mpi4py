@@ -75,7 +75,7 @@ cdef inline int comm_neighbors_count(MPI_Comm comm,
 # -----------------------------------------------------------------------------
 
 cdef object allocate_lock = None
-if PY_MAJOR_VERSION >= 3:
+if PY3:
     try:
         from _thread import allocate_lock
     except ImportError:

@@ -21,7 +21,7 @@ cdef inline int is_integral(object ob):
     else: return 1
 
 cdef inline int is_buffer(object ob):
-    if PY_MAJOR_VERSION >= 3:
+    if PY3:
         return PyObject_CheckBuffer(ob)
     else:
         return (PyObject_CheckBuffer(ob) or
@@ -29,7 +29,7 @@ cdef inline int is_buffer(object ob):
 
 cdef inline int is_datatype(object ob):
     if isinstance(ob, Datatype): return 1
-    if PY_MAJOR_VERSION >= 3:
+    if PY3:
         if isinstance(ob, unicode): return 1
     else:
         if isinstance(ob, bytes): return 1

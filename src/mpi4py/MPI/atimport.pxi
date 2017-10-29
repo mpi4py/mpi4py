@@ -5,7 +5,8 @@ cdef extern from "atimport.h": pass
 # -----------------------------------------------------------------------------
 
 cdef extern from "Python.h":
-    enum: PY_MAJOR_VERSION
+    enum: PY3 "(PY_MAJOR_VERSION>=3)"
+    enum: PY2 "(PY_MAJOR_VERSION==2)"
     enum: PYPY "PyMPI_RUNTIME_PYPY"
 
     void PySys_WriteStderr(char*,...)
