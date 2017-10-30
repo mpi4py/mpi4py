@@ -8,6 +8,8 @@ MPI for Python
    :target: https://circleci.com/gh/mpi4py/mpi4py
 .. image::  https://ci.appveyor.com/api/projects/status/whh5xovp217h0f7n?svg=true
    :target: https://ci.appveyor.com/project/mpi4py/mpi4py
+.. image::  https://scan.coverity.com/projects/mpi4py-mpi4py/badge.svg
+   :target: https://scan.coverity.com/projects/mpi4py-mpi4py
 .. image::  https://codecov.io/gh/mpi4py/mpi4py/branch/master/graph/badge.svg
    :target: https://codecov.io/gh/mpi4py/mpi4py
 .. image::  https://readthedocs.org/projects/mpi4py/badge/?version=latest
