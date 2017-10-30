@@ -3,51 +3,40 @@
 environment:
 
   global:
-    # SDK v7.0 MSVC Express 2008's SetEnv.cmd script will fail if the
-    # /E:ON and /V:ON options are not enabled in the batch script intepreter
-    # See: http://stackoverflow.com/a/13751649/163740
-    WITH_ENV: "cmd /E:ON /V:ON /C .\\conf\\ci\\appveyor\\run_with_env.cmd"
+    BUILD: "cmd /E:ON /V:ON /C .\\conf\\ci\\appveyor\\build.cmd"
 
   matrix:
-    - PYTHON_VERSION: "2.7.13"
-      PYTHON_ARCH: "32"
-      PYTHON: "C:\\Python27"
+    - PYTHON: "C:\\Python27"
+      ANACONDA: "C:\\Miniconda"
 
-    - PYTHON_VERSION: "2.7.13"
-      PYTHON_ARCH: "64"
-      PYTHON: "C:\\Python27-x64"
+    - PYTHON: "C:\\Python27-x64"
+      ANACONDA: "C:\\Miniconda-x64"
 
-    - PYTHON_VERSION: "3.3.5"
-      PYTHON_ARCH: "32"
-      PYTHON: "C:\\Python33"
+    - PYTHON: "C:\\Python33"
+      ANACONDA: "C:\\Miniconda3"
 
-    - PYTHON_VERSION: "3.3.5"
-      PYTHON_ARCH: "64"
-      PYTHON: "C:\\Python33-x64"
+    - PYTHON: "C:\\Python33-x64"
+      ANACONDA: "C:\\Miniconda3-x64"
+      DISTUTILS_USE_SDK: "1"
 
-    - PYTHON_VERSION: "3.4.4"
-      PYTHON_ARCH: "32"
-      PYTHON: "C:\\Python34"
+    - PYTHON: "C:\\Python34"
+      ANACONDA: "C:\\Miniconda3"
 
-    - PYTHON_VERSION: "3.4.4"
-      PYTHON_ARCH: "64"
-      PYTHON: "C:\\Python34-x64"
+    - PYTHON: "C:\\Python34-x64"
+      ANACONDA: "C:\\Miniconda3-x64"
+      DISTUTILS_USE_SDK: "1"
 
-    - PYTHON_VERSION: "3.5.3"
-      PYTHON_ARCH: "32"
-      PYTHON: "C:\\Python35"
+    - PYTHON: "C:\\Python35"
+      ANACONDA: "C:\\Miniconda3"
 
-    - PYTHON_VERSION: "3.5.3"
-      PYTHON_ARCH: "64"
-      PYTHON: "C:\\Python35-x64"
+    - PYTHON: "C:\\Python35-x64"
+      ANACONDA: "C:\\Miniconda3-x64"
 
-    - PYTHON_VERSION: "3.6.1"
-      PYTHON_ARCH: "32"
-      PYTHON: "C:\\Python36"
+    - PYTHON: "C:\\Python36"
+      ANACONDA: "C:\\Miniconda3"
 
-    - PYTHON_VERSION: "3.6.1"
-      PYTHON_ARCH: "64"
-      PYTHON: "C:\\Python36-x64"
+    - PYTHON: "C:\\Python36-x64"
+      ANACONDA: "C:\\Miniconda3-x64"
 
 clone_depth: 5
 
@@ -55,18 +44,21 @@ branches:
   only:
     - master
     - maint
+    - ci/appveyor
 
 init:
-  - "ECHO Python %PYTHON_VERSION% (%PYTHON_ARCH%bit) from %PYTHON%"
+  - "ECHO Python from %PYTHON%"
+  - "ECHO Miniconda from %ANACONDA%"
 
 install:
   # Python
-  - "powershell conf\\ci\\appveyor\\install-python.ps1"
   - "%PYTHON%\\python.exe --version"
-  - "%PYTHON%\\Scripts\\pip.exe --version"
-  - "%PYTHON%\\Scripts\\wheel.exe version"
+  - "%PYTHON%\\python.exe -m pip install --upgrade pip"
+  - "%PYTHON%\\python.exe -m pip --version"
+  - "%PYTHON%\\python.exe -m pip install --upgrade wheel"
+  - "%PYTHON%\\python.exe -m wheel version"
   # Cython
-  - "%WITH_ENV% %PYTHON%\\Scripts\\pip.exe install Cython"
+  - "%BUILD% %PYTHON%\\python.exe -m pip install Cython"
   - "%PYTHON%\\python.exe -m cython --version"
   # Microsoft MPI
   - "powershell conf\\ci\\appveyor\\install-msmpi.ps1"
@@ -74,10 +66,10 @@ install:
 
 build: off
 build_script:
-  - "%WITH_ENV% %PYTHON%\\python.exe setup.py build"
-  - "%WITH_ENV% %PYTHON%\\python.exe setup.py --quiet bdist_wheel"
-  - "%WITH_ENV% %PYTHON%\\python.exe setup.py --quiet bdist_msi"
-  - "%WITH_ENV% %PYTHON%\\python.exe setup.py --quiet bdist_wininst"
+  - "%BUILD% %PYTHON%\\python.exe setup.py build"
+  - "%BUILD% %PYTHON%\\python.exe setup.py --quiet bdist_wheel"
+  - "%BUILD% %PYTHON%\\python.exe setup.py --quiet bdist_msi"
+  - "%BUILD% %PYTHON%\\python.exe setup.py --quiet bdist_wininst"
 
 test: off
 test_script:
@@ -90,12 +82,13 @@ test_script:
 after_test:
 # - "%PYTHON%\\python.exe setup.py --quiet clean --all"
   - "set MPI=msmpi"
-  - "set ANACONDA=C:\\Anaconda"
-  - "powershell conf\\ci\\appveyor\\install-anaconda.ps1"
   - "set PATH=%ANACONDA%;%ANACONDA%\\Scripts\\;%PATH%"
+  - "set CONDA_PY=%PYTHON:~9,2%"
+  - "conda config --set show_channel_urls yes"
+  - "conda install --quiet --yes -n root conda-build"
   - "conda info --all"
   - "conda list"
-  - "%WITH_ENV% conda build --quiet --python %PYTHON_VERSION:~0,3% conf\\ci\\anaconda\\mpi4py"
+  - "%BUILD% conda build --quiet conf\\ci\\anaconda\\mpi4py"
   - ps: "Move-Item $env:ANACONDA\\conda-bld\\win-*\\mpi4py-*.tar.bz2 dist\\ -Force"
 
 artifacts:
@@ -103,8 +96,8 @@ artifacts:
 
 cache:
   - C:\Downloads\Python   -> conf\ci\appveyor\install-python.ps1
-  - C:\Downloads\MSMPI    -> conf\ci\appveyor\install-msmpi.ps1
   - C:\Downloads\Anaconda -> conf\ci\appveyor\install-anaconda.ps1
+  - C:\Downloads\MSMPI    -> conf\ci\appveyor\install-msmpi.ps1
   - '%LOCALAPPDATA%\pip\Cache'
 
 #on_success:
