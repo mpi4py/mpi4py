@@ -1125,29 +1125,32 @@ cdef extern from *:
     int PyMPI_Commctx_intra(MPI_Comm,MPI_Comm*,int*) nogil
     int PyMPI_Commctx_inter(MPI_Comm,MPI_Comm*,int*,MPI_Comm*,int*) nogil
 
-cdef int PyMPI_Commctx_INTRA(MPI_Comm comm, MPI_Comm *dupcomm, int *tag):
+cdef int PyMPI_Commctx_INTRA(MPI_Comm comm,
+                             MPI_Comm *dupcomm, int *tag) except -1:
     with PyMPI_Lock(comm, "@commctx_intra"):
-        return PyMPI_Commctx_intra(comm, dupcomm, tag)
-    return MPI_SUCCESS
+        CHKERR( PyMPI_Commctx_intra(comm, dupcomm, tag) )
+    return 0
 
-cdef int PyMPI_Commctx_INTER(MPI_Comm comm, MPI_Comm *dupcomm, int *tag,
-                             MPI_Comm *localcomm, int *low_group):
+cdef int PyMPI_Commctx_INTER(MPI_Comm comm,
+                             MPI_Comm *dupcomm, int *tag,
+                             MPI_Comm *localcomm, int *low_group) except -1:
     with PyMPI_Lock(comm, "@commctx_inter"):
-        return PyMPI_Commctx_inter(comm, dupcomm, tag, localcomm, low_group)
-    return MPI_SUCCESS
+        CHKERR( PyMPI_Commctx_inter(comm, dupcomm, tag,
+                                    localcomm, low_group) )
+    return 0
 
 
 cdef object PyMPI_reduce_intra(object sendobj, object op,
                                int root, MPI_Comm comm):
     cdef int tag = MPI_UNDEFINED
-    CHKERR( PyMPI_Commctx_INTRA(comm, &comm, &tag) )
+    PyMPI_Commctx_INTRA(comm, &comm, &tag)
     return PyMPI_reduce_p2p(sendobj, op, root, comm, tag)
 
 cdef object PyMPI_reduce_inter(object sendobj, object op,
                                int root, MPI_Comm comm):
     cdef int tag = MPI_UNDEFINED
     cdef MPI_Comm localcomm = MPI_COMM_NULL
-    CHKERR( PyMPI_Commctx_INTER(comm, &comm, &tag, &localcomm, NULL) )
+    PyMPI_Commctx_INTER(comm, &comm, &tag, &localcomm, NULL)
     # Get communicator remote size and rank
     cdef int size = MPI_UNDEFINED
     cdef int rank = MPI_PROC_NULL
@@ -1169,7 +1172,7 @@ cdef object PyMPI_reduce_inter(object sendobj, object op,
 
 cdef object PyMPI_allreduce_intra(object sendobj, object op, MPI_Comm comm):
     cdef int tag = MPI_UNDEFINED
-    CHKERR( PyMPI_Commctx_INTRA(comm, &comm, &tag) )
+    PyMPI_Commctx_INTRA(comm, &comm, &tag)
     sendobj = PyMPI_reduce_p2p(sendobj, op, 0, comm, tag)
     return PyMPI_bcast_p2p(sendobj, 0, comm)
 
@@ -1177,7 +1180,7 @@ cdef object PyMPI_allreduce_inter(object sendobj, object op, MPI_Comm comm):
     cdef int tag = MPI_UNDEFINED
     cdef int rank = MPI_PROC_NULL
     cdef MPI_Comm localcomm = MPI_COMM_NULL
-    CHKERR( PyMPI_Commctx_INTER(comm, &comm, &tag, &localcomm, NULL) )
+    PyMPI_Commctx_INTER(comm, &comm, &tag, &localcomm, NULL)
     CHKERR( MPI_Comm_rank(comm, &rank) )
     # Reduce in local group, exchange, and broadcast in local group
     sendobj = PyMPI_reduce_p2p(sendobj, op, 0, localcomm, tag)
@@ -1188,12 +1191,12 @@ cdef object PyMPI_allreduce_inter(object sendobj, object op, MPI_Comm comm):
 
 cdef object PyMPI_scan_intra(object sendobj, object op, MPI_Comm comm):
     cdef int tag = MPI_UNDEFINED
-    CHKERR( PyMPI_Commctx_INTRA(comm, &comm, &tag) )
+    PyMPI_Commctx_INTRA(comm, &comm, &tag)
     return PyMPI_scan_p2p(sendobj, op, comm, tag)
 
 cdef object PyMPI_exscan_intra(object sendobj, object op, MPI_Comm comm):
     cdef int tag = MPI_UNDEFINED
-    CHKERR( PyMPI_Commctx_INTRA(comm, &comm, &tag) )
+    PyMPI_Commctx_INTRA(comm, &comm, &tag)
     return PyMPI_exscan_p2p(sendobj, op, comm, tag)
 
 # -----
