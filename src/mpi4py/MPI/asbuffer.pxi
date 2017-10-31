@@ -128,7 +128,6 @@ except -1:
 cdef int \
 PyMPI_GetBuffer(object obj, Py_buffer *view, int flags) \
 except -1:
-    if view == NULL: return 0
     if PYPY: # special-case PyPy runtime
         return PyPy_GetBuffer(obj, view, flags)
     # Python 3 buffer interface (PEP 3118)
@@ -220,7 +219,6 @@ cdef class memory:
     # buffer interface (PEP 3118)
 
     def __getbuffer__(self, Py_buffer *view, int flags):
-        if view == NULL: return
         if view.obj == Py_None: Py_CLEAR(view.obj)
         PyBuffer_FillInfo(view, self,
                           self.view.buf, self.view.len,

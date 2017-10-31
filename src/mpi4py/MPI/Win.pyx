@@ -308,7 +308,6 @@ cdef class Win:
     # buffer interface (PEP 3118)
 
     def __getbuffer__(self, Py_buffer *view, int flags):
-        if view == NULL: return
         if view.obj == Py_None: Py_CLEAR(view.obj)
         cdef void *base = NULL
         cdef MPI_Aint size = 0
