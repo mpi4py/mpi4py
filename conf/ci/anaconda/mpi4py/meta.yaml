@@ -1,17 +1,14 @@
 {% set build = 0 %}
+{% set version = '2.0.1a0' %}
 {% set mpi = (environ.get('MPI') or 'mpich') if not win else 'msmpi' %}
-{% set mpi_version = {'mpich':'>=3.2', 'openmpi':'>=1.10'}.get(mpi,'') %}
+{% set mpi_version = {'mpich':'>=3.2', 'openmpi':'>=2.0'}.get(mpi,'') %}
 
 package:
   name: mpi4py
-  version: 2.0.1a0
-
-about:
-  home: https://bitbucket.org/mpi4py/
-  summary: 'Python bindings for MPI'
-  license: 'BSD (https://bitbucket.org/mpi4py/mpi4py/src/master/LICENSE.rst)'
+  version: {{version}}
 
 source:
+# url: https://bitbucket.org/mpi4py/mpi4py/downloads/mpi4py-{{version}}.tar.gz
 # git_url: https://bitbucket.org/mpi4py/mpi4py
 # git_rev: master
   path: ../../../..
@@ -27,9 +24,7 @@ requirements:
 
 build:
   number: {{build}}
-  string: py{{py}}_{{mpi}}_{{build}}
-  features:   # [not win]
-    - {{mpi}} # [not win]
+  string: py{{py}}_{{mpi}}__{{build}}
   script: '$PYTHON  setup.py install' # [not win]
   script: '%PYTHON% setup.py install' # [win]
 
@@ -39,3 +34,20 @@ test:
     - mpi4py.rc
     - mpi4py.dl # [not win]
     - mpi4py.MPI
+
+about:
+  home: http://mpi4py.scipy.org/
+  summary: Python bindings for MPI
+  description: |
+    MPI for Python provides bindings of the Message Passing Interface
+    (MPI) standard for the Python programming language, allowing any
+    Python program to exploit multiple processors.
+  doc_url: http://mpi4py.readthedocs.org/
+  dev_url: https://bitbucket.org/mpi4py/mpi4py
+  license: BSD 2-clause
+  license_family: BSD
+  license_file: LICENSE.rst
+
+extra:
+  maintainers:
+   - dalcinl
