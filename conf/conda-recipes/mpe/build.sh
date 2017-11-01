@@ -1,20 +1,12 @@
 #!/bin/bash
 
-conda_install() { conda install -y -q -p /home/anaconda/env $@; }
-command -v autoconf > /dev/null || \
-conda_install --channel asmeurer autoconf
-command -v libtoolize > /dev/null || command -v glibtoolize > /dev/null || \
-conda_install --channel asmeurer libtool
-java -version &> /dev/null || \
-conda_install --channel cyclus java-jre
-
 test -f ./configure || ./autogen.sh
 
 ./configure \
 --prefix=$PREFIX \
 --enable-PIC \
-CFLAGS=-pthread \
-LDFLAGS=-pthread \
+CFLAGS="-pthread $CFLAGS" \
+LDFLAGS="-pthread $LDFLAGS" \
 --disable-f77 \
 --disable-graphics
 

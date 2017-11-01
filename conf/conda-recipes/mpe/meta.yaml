@@ -1,16 +1,11 @@
-{% set build = 1 %}
+{% set build = 2 %}
 {% set version = '2.4.9b' %}
 {% set mpi = environ.get('MPI') or 'mpich' %}
-{% set mpi_version = {'mpich':'>=3.1', 'openmpi':'>=1.10'}.get(mpi,'') %}
+{% set mpi_version = {'mpich':'>=3.2', 'openmpi':'>=2.0'}.get(mpi,'') %}
 
 package:
   name: mpe
   version: {{version}}
-
-about:
-  home: http://www.mcs.anl.gov/research/projects/perfvis/software/MPE/
-  summary: 'MPE: MPI Parallel Environment'
-  license: 'MIT (http://git.mpich.org/mpe.git/blob/HEAD:/COPYRIGHT)'
 
 source:
   git_url: http://git.mpich.org/mpe.git
@@ -18,15 +13,17 @@ source:
 
 requirements:
   build:
+    - autoconf
+    - libtool
+    - java-jre
     - {{mpi}} {{mpi_version}}
   run:
+    - java-jre
     - {{mpi}} {{mpi_version}}
 
 build:
   number: {{build}}
   string: {{mpi}}_{{build}}
-  binary_relocation: true
-  detect_binary_files_with_prefix: true
   skip: true # [win]
 
 test:
@@ -35,6 +32,13 @@ test:
   commands:
     - command -v mpecc
     - mpecc -mpilog -show
-    - mpecc -mpilog helloworld.c -o helloworld
-    - export DYLD_LIBRARY_PATH=$PREFIX/lib # [osx]
+    - mpecc -mpilog test/helloworld.c -o helloworld
     - mpiexec -n 5 ./helloworld
+    - clog2TOslog2 helloworld.clog2
+    - slog2print -c helloworld.slog2
+
+about:
+  home: http://www.mcs.anl.gov/research/projects/perfvis/software/MPE/
+  summary: 'MPE: MPI Parallel Environment'
+  license: MIT
+  license_file: COPYRIGHT
