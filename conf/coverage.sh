@@ -6,9 +6,12 @@ export PYTHONDONTWRITEBYTECODE=1
 
 $PYTHON -m coverage erase
 
-$MPIEXEC -n 1 $PYTHON -m coverage run "$(dirname "$0")/coverage-helper.py" > /dev/null || true
-
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.bench --help > /dev/null
+$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.bench --threads             helloworld -q
+$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.bench --no-threads          helloworld -q
+$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.bench --thread-level=single helloworld -q
+$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.bench helloworld > /dev/null
+$MPIEXEC -n 2 $PYTHON -m coverage run -m mpi4py.bench helloworld > /dev/null
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.bench helloworld > /dev/null
 $MPIEXEC -n 2 $PYTHON -m coverage run -m mpi4py.bench helloworld -q
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.bench ringtest > /dev/null
