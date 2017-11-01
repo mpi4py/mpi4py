@@ -51,12 +51,11 @@ class MPIPoolExecutor(Executor):
         self._lock = threading.Lock()
         self._pool = None
 
-    def _make_pool(self):
-        return _lib.WorkerPool(self)
+    _make_pool = staticmethod(_lib.WorkerPool)
 
     def _bootstrap(self):
         if self._pool is None:
-            self._pool = self._make_pool()
+            self._pool = self._make_pool(self)
 
     def bootup(self, wait=True):
         """Allocate executor resources eagerly.
@@ -326,3 +325,13 @@ class MPICommExecutor(object):
             return False
         else:
             return True
+
+
+class ThreadPoolExecutor(MPIPoolExecutor):
+    """`MPIPoolExecutor` subclass using a pool of threads."""
+    _make_pool = staticmethod(_lib.ThreadPool)
+
+
+class ProcessPoolExecutor(MPIPoolExecutor):
+    """`MPIPoolExecutor` subclass using a pool of processes."""
+    _make_pool = staticmethod(_lib.SpawnPool)

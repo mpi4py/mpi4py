@@ -30,3 +30,6 @@ except ImportError:  # pragma: no cover
 
 from .pool import MPIPoolExecutor
 from .pool import MPICommExecutor
+
+from .pool import ThreadPoolExecutor
+from .pool import ProcessPoolExecutor
