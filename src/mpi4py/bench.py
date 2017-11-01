@@ -110,8 +110,11 @@ def main(args=None):
     from argparse import ArgumentParser, REMAINDER
     parser = ArgumentParser(prog=__package__ + ".bench",
                             usage="%(prog)s [options] <command> [args]")
+    parser.add_argument("--threads",
+                        action="store_true", dest="threads", default=None,
+                        help="initialize MPI with thread support")
     parser.add_argument("--no-threads",
-                        action="store_false", dest="threads", default=True,
+                        action="store_false", dest="threads", default=None,
                         help="initialize MPI without thread support")
     parser.add_argument("--thread-level",
                         dest="thread_level", default=None,
