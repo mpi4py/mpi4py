@@ -33,8 +33,11 @@ def getoptionparser():
                       action="store", dest="repeats", default=3,
                       help="run tests REPEAT times in a loop to catch leaks",
                       metavar="REPEAT")
+    parser.add_option("--threads",
+                      action="store_true", dest="threads", default=None,
+                      help="initialize MPI with thread support")
     parser.add_option("--no-threads",
-                      action="store_false", dest="threads", default=True,
+                      action="store_false", dest="threads", default=None,
                       help="initialize MPI without thread support")
     parser.add_option("--thread-level", type="choice",
                       choices=["single", "funneled", "serialized", "multiple"],
