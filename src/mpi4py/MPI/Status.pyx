@@ -9,14 +9,14 @@ cdef class Status:
         self.ob_mpi.MPI_TAG    = MPI_ANY_TAG
         self.ob_mpi.MPI_ERROR  = MPI_SUCCESS
         if status is None: return
-        copy_Status(&status.ob_mpi, &self.ob_mpi)
+        self.ob_mpi = status.ob_mpi
 
     def __richcmp__(self, other, int op):
         if not isinstance(other, Status): return NotImplemented
         cdef Status s = <Status>self, o = <Status>other
-        cdef int r = equal_Status(&s.ob_mpi, &o.ob_mpi)
-        if   op == Py_EQ: return  r != 0
-        elif op == Py_NE: return  r == 0
+        cdef int ne = memcmp(&s.ob_mpi, &o.ob_mpi, sizeof(MPI_Status))
+        if   op == Py_EQ: return (ne == 0)
+        elif op == Py_NE: return (ne != 0)
         cdef mod = type(self).__module__
         cdef cls = type(self).__name__
         raise TypeError("unorderable type: '%s.%s'" % (mod, cls))
