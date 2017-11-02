@@ -300,10 +300,11 @@ cdef class Win:
                 if flag and attrval != NULL: return attrval[0]
             return MPI_WIN_SEPARATE
 
-    property memory:
-        """window memory buffer"""
-        def __get__(self):
-            return getbuffer(self, 0, 1)
+    def tomemory(self):
+        """
+        Return window memory buffer
+        """
+        return getbuffer(self, 0, 1)
 
     # buffer interface (PEP 3118)
 

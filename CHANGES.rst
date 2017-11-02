@@ -37,6 +37,8 @@ Release 2.1.0 [2017-XX-XX]
 
   + The ``buf`` argument of the ``MPI.Comm.recv()`` method is
     deprecated, passing anything but ``None`` emits a warning.
+  + The ``MPI.Win.memory`` property was removed, use the
+    ``MPI.Win.tomemory()`` method instead.
   + Executing ``python -m mpi4py`` in the command line is now
     equivalent to ``python -m mpi4py.run``. For the former behavior,
     use ``python -m mpi4py.bench``.
