@@ -61,7 +61,9 @@ else:                            # pragma: no cover
 
 # ---
 
+
 BACKOFF = 0.001
+
 
 class Backoff(object):
 
@@ -77,7 +79,6 @@ class Backoff(object):
         time.sleep(self.tval)
         self.tval = min(self.tmax, max(self.tmin, self.tval * 2))
 
-# ---
 
 class Queue(collections.deque):
     put = collections.deque.append

@@ -327,11 +327,11 @@ class MPICommExecutor(object):
             return True
 
 
-class ThreadPoolExecutor(MPIPoolExecutor):
+class ThreadPoolExecutor(MPIPoolExecutor):  # noqa: D204
     """`MPIPoolExecutor` subclass using a pool of threads."""
     _make_pool = staticmethod(_lib.ThreadPool)
 
 
-class ProcessPoolExecutor(MPIPoolExecutor):
+class ProcessPoolExecutor(MPIPoolExecutor):  # noqa: D204
     """`MPIPoolExecutor` subclass using a pool of processes."""
     _make_pool = staticmethod(_lib.SpawnPool)
