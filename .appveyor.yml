@@ -13,30 +13,30 @@ environment:
       ANACONDA: "C:\\Miniconda-x64"
 
     - PYTHON: "C:\\Python33"
-      ANACONDA: "C:\\Miniconda3"
+      ANACONDA: "C:\\Miniconda36"
 
     - PYTHON: "C:\\Python33-x64"
-      ANACONDA: "C:\\Miniconda3-x64"
+      ANACONDA: "C:\\Miniconda36-x64"
       DISTUTILS_USE_SDK: "1"
 
     - PYTHON: "C:\\Python34"
-      ANACONDA: "C:\\Miniconda3"
+      ANACONDA: "C:\\Miniconda36"
 
     - PYTHON: "C:\\Python34-x64"
-      ANACONDA: "C:\\Miniconda3-x64"
+      ANACONDA: "C:\\Miniconda36-x64"
       DISTUTILS_USE_SDK: "1"
 
     - PYTHON: "C:\\Python35"
-      ANACONDA: "C:\\Miniconda3"
+      ANACONDA: "C:\\Miniconda36"
 
     - PYTHON: "C:\\Python35-x64"
-      ANACONDA: "C:\\Miniconda3-x64"
+      ANACONDA: "C:\\Miniconda36-x64"
 
     - PYTHON: "C:\\Python36"
-      ANACONDA: "C:\\Miniconda3"
+      ANACONDA: "C:\\Miniconda36"
 
     - PYTHON: "C:\\Python36-x64"
-      ANACONDA: "C:\\Miniconda3-x64"
+      ANACONDA: "C:\\Miniconda36-x64"
 
 clone_depth: 5
 
