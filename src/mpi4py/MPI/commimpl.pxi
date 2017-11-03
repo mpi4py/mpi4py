@@ -20,7 +20,7 @@ cdef inline object detach_buffer(void *p, int n):
             _buffer.view.obj != NULL):
             ob = <object>_buffer.view.obj
         else:
-            ob = tomemory(p, <MPI_Aint>n)
+            ob = tomemory(p, n)
     finally:
         _buffer = None
     return ob

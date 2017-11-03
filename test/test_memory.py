@@ -175,13 +175,17 @@ class TestMemory(unittest.TestCase):
             self.assertEqual(mem.nbytes, n)
             self.assertFalse(mem.readonly)
             self.assertEqual(len(mem), n)
-            def getitem(): return mem[n]
-            def delitem(): del mem[n]
+            def delitem():  del mem[n]
+            def getitem1(): return mem[n]
+            def getitem2(): return mem[::2]
+            def getitem3(): return mem[None]
             def setitem1(): mem[n] = 0
             def setitem2(): mem[::2] = 0
             def setitem3(): mem[None] = 0
-            self.assertRaises(IndexError, getitem)
             self.assertRaises(Exception,  delitem)
+            self.assertRaises(IndexError, getitem1)
+            self.assertRaises(IndexError, getitem2)
+            self.assertRaises(TypeError,  getitem3)
             self.assertRaises(IndexError, setitem1)
             self.assertRaises(IndexError, setitem2)
             self.assertRaises(TypeError,  setitem3)
@@ -213,6 +217,8 @@ class TestMemory(unittest.TestCase):
                 self.assertEqual(mem[10+i], ord(c))
             for i in range(13, n):
                 self.assertEqual(mem[i], 0)
+            self.assertEqual(mem[1:5].tobytes(), b"abcd")
+            self.assertEqual(mem[10:13].tobytes(), b"xyz")
         finally:
             MPI.Free_mem(mem)
             self.assertEqual(mem.address, 0)

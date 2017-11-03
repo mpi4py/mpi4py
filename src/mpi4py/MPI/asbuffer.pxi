@@ -250,49 +250,53 @@ cdef class memory:
     def __len__(self):
         return self.view.len
 
-    def __getitem__(self, Py_ssize_t i):
-        if i < 0: i += self.view.len
-        if i < 0 or i >= self.view.len:
-            raise IndexError("index out of range")
+    def __getitem__(self, object item):
+        cdef Py_ssize_t start=0, stop=0, step=1, slen=0
         cdef unsigned char *buf = <unsigned char*>self.view.buf
-        return <long>buf[i]
+        cdef Py_ssize_t blen = self.view.len
+        if PyIndex_Check(item):
+            start = PyNumber_AsSsize_t(item, IndexError)
+            if start < 0: start += blen
+            if start < 0 or start >= blen:
+                raise IndexError("index out of range")
+            return <long>buf[start]
+        elif PySlice_Check(item):
+            PySlice_GetIndicesEx(item, blen, &start, &stop, &step, &slen)
+            if step != 1: raise IndexError("slice with step not supported")
+            return asbuffer(self, buf+start, slen, self.view.readonly)
+        else:
+            raise TypeError("index must be integer or slice")
 
     def __setitem__(self, object item, object value):
         if self.view.readonly:
             raise TypeError("memory buffer is read-only")
+        cdef Py_ssize_t start=0, stop=0, step=1, slen=0
         cdef unsigned char *buf = <unsigned char*>self.view.buf
-        cdef Py_ssize_t start=0, stop=0, step=1, length=0
+        cdef Py_ssize_t blen = self.view.len
         cdef memory inmem
         if PyIndex_Check(item):
             start = PyNumber_AsSsize_t(item, IndexError)
-            if start < 0: start += self.view.len
-            if start < 0 or start >= self.view.len:
+            if start < 0: start += blen
+            if start < 0 or start >= blen:
                 raise IndexError("index out of range")
             buf[start] = <unsigned char>value
         elif PySlice_Check(item):
-            PySlice_GetIndicesEx(item, self.view.len,
-                                 &start, &stop, &step, &length)
-            if step != 1:
-                raise IndexError("slice with step not supported")
+            PySlice_GetIndicesEx(item, blen, &start, &stop, &step, &slen)
+            if step != 1: raise IndexError("slice with step not supported")
             if PyIndex_Check(value):
-                <void>memset(buf+start, <unsigned char>value, <size_t>length)
+                <void>memset(buf+start, <unsigned char>value, <size_t>slen)
             else:
                 inmem = getbuffer(value, 1, 0)
-                if inmem.view.len != length:
+                if inmem.view.len != slen:
                     raise ValueError("slice length does not match buffer")
-                <void>memmove(buf+start, inmem.view.buf, <size_t>length)
+                <void>memmove(buf+start, inmem.view.buf, <size_t>slen)
         else:
-            raise TypeError("indices must be integers or slices")
+            raise TypeError("index must be integer or slice")
 
 #------------------------------------------------------------------------------
 
 cdef inline memory newbuffer():
     return <memory>memory.__new__(memory)
-
-cdef inline memory tobuffer(void *base, Py_ssize_t size):
-    cdef memory buf = newbuffer()
-    PyBuffer_FillInfo(&buf.view, <object>NULL, base, size, 0, PyBUF_SIMPLE)
-    return buf
 
 cdef inline memory getbuffer(object ob, bint readonly, bint format):
     cdef memory buf = newbuffer()
@@ -329,18 +333,21 @@ cdef inline object getformat(memory buf):
                 format = pystr(view.format)
     return format
 
-#------------------------------------------------------------------------------
-
 cdef inline memory getbuffer_r(object ob, void **base, MPI_Aint *size):
     cdef memory buf = getbuffer(ob, 1, 0)
     if base != NULL: base[0] = buf.view.buf
-    if size != NULL: size[0] = <MPI_Aint>buf.view.len
+    if size != NULL: size[0] = buf.view.len
     return buf
 
 cdef inline memory getbuffer_w(object ob, void **base, MPI_Aint *size):
     cdef memory buf = getbuffer(ob, 0, 0)
     if base != NULL: base[0] = buf.view.buf
-    if size != NULL: size[0] = <MPI_Aint>buf.view.len
+    if size != NULL: size[0] = buf.view.len
+    return buf
+
+cdef inline memory asbuffer(object ob, void *base, MPI_Aint size, bint ro):
+    cdef memory buf = newbuffer()
+    PyBuffer_FillInfo(&buf.view, ob, base, size, ro, PyBUF_SIMPLE)
     return buf
 
 #------------------------------------------------------------------------------
@@ -352,10 +359,12 @@ cdef inline memory asmemory(object ob, void **base, MPI_Aint *size):
     else:
         mem = getbuffer(ob, 1, 0)
     if base != NULL: base[0] = mem.view.buf
-    if size != NULL: size[0] = <MPI_Aint> mem.view.len
+    if size != NULL: size[0] = mem.view.len
     return mem
 
 cdef inline memory tomemory(void *base, MPI_Aint size):
-    return tobuffer(base, size)
+    cdef memory mem = <memory>memory.__new__(memory)
+    PyBuffer_FillInfo(&mem.view, <object>NULL, base, size, 0, PyBUF_SIMPLE)
+    return mem
 
 #------------------------------------------------------------------------------

@@ -116,7 +116,7 @@ cdef class Win:
         with nogil: CHKERR( MPI_Win_shared_query(
             self.ob_mpi, rank,
             &size, &disp_unit, &base) )
-        return (tomemory(base, size), disp_unit)
+        return (asbuffer(self, base, size, 0), disp_unit)
 
     @classmethod
     def Create_dynamic(cls, Info info=INFO_NULL, Intracomm comm=COMM_SELF):

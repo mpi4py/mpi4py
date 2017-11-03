@@ -104,7 +104,7 @@ cdef class Pickle:
 
     cdef object load(self, void *p, int n):
         if p == NULL or n == 0: return None
-        return self.loads(tobuffer(p, n))
+        return self.loads(tomemory(p, n))
 
     cdef object dumpv(self, object obj, void **p, int n, int cnt[], int dsp[]):
         cdef Py_ssize_t i=0, m=n
