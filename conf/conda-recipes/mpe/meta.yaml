@@ -8,17 +8,17 @@ package:
   version: {{version}}
 
 source:
-  git_url: http://git.mpich.org/mpe.git
+  git_url: https://github.com/pmodels/mpe
   git_rev: master
 
 requirements:
   build:
     - autoconf
     - libtool
-    - java-jre
+    - openjdk
     - {{mpi}} {{mpi_version}}
   run:
-    - java-jre
+    - openjdk
     - {{mpi}} {{mpi_version}}
 
 build:
