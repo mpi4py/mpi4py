@@ -85,6 +85,7 @@ after_test:
   - "set PATH=%ANACONDA%;%ANACONDA%\\Scripts\\;%PATH%"
   - "set CONDA_PY=%PYTHON:~9,2%"
   - "conda config --set show_channel_urls yes"
+  - "conda update  --quiet --yes -n root conda"
   - "conda install --quiet --yes -n root conda-build"
   - "conda info --all"
   - "conda list"
