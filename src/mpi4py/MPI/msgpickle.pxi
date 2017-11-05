@@ -87,14 +87,12 @@ cdef class Pickle:
             self.ob_PROTO = protocol
 
     cdef object cdumps(self, object obj):
-        "dumps(obj) -> bytes"
         if self.ob_PROTO is not None:
             return self.ob_dumps(obj, self.ob_PROTO)
         else:
             return self.ob_dumps(obj)
 
     cdef object cloads(self, object buf):
-        "loads(buf) -> object"
         if PY2:
             if not PyBytes_CheckExact(buf):
                 if self.ob_loads is PyPickle_loads:
