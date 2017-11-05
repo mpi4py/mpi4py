@@ -3,7 +3,7 @@ import mpiunittest as unittest
 import arrayimpl
 
 
-@unittest.skipIf(MPI.MESSAGE_NULL == MPI.MESSAGE_NO_PROC, "mpi-message")
+@unittest.skipIf(MPI.MESSAGE_NULL == MPI.MESSAGE_NO_PROC, 'mpi-message')
 class TestMessage(unittest.TestCase):
 
     def testMessageNull(self):
@@ -40,7 +40,7 @@ class TestMessage(unittest.TestCase):
         self.assertEqual(request, MPI.REQUEST_NULL)
 
 
-@unittest.skipIf(MPI.MESSAGE_NULL == MPI.MESSAGE_NO_PROC, "mpi-message")
+@unittest.skipIf(MPI.MESSAGE_NULL == MPI.MESSAGE_NO_PROC, 'mpi-message')
 class BaseTestP2PMatched(object):
 
     COMM = MPI.COMM_NULL

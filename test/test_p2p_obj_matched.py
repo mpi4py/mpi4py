@@ -16,7 +16,7 @@ messages += [ list(_basic),
                     for key, val in enumerate(_basic)])
               ]
 
-@unittest.skipIf(MPI.MESSAGE_NULL == MPI.MESSAGE_NO_PROC, "mpi-message")
+@unittest.skipIf(MPI.MESSAGE_NULL == MPI.MESSAGE_NO_PROC, 'mpi-message')
 class TestMessage(unittest.TestCase):
 
     def testMessageNull(self):
@@ -60,7 +60,7 @@ class TestMessage(unittest.TestCase):
         self.assertNotEqual(message, MPI.MESSAGE_NULL)
         self.assertEqual(message, MPI.MESSAGE_NO_PROC)
 
-@unittest.skipIf(MPI.MESSAGE_NULL == MPI.MESSAGE_NO_PROC, "mpi-message")
+@unittest.skipIf(MPI.MESSAGE_NULL == MPI.MESSAGE_NO_PROC, 'mpi-message')
 class BaseTestP2PMatched(object):
 
     COMM = MPI.COMM_NULL

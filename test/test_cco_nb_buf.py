@@ -18,7 +18,7 @@ def maxvalue(a):
         return 2 ** (a.itemsize * 7) - 1
 
 
-@unittest.skipMPI("msmpi(<8.1.0)")
+@unittest.skipMPI('msmpi(<8.1.0)')
 class BaseTestCCOBuf(object):
 
     COMM = MPI.COMM_NULL
@@ -155,7 +155,7 @@ class BaseTestCCOBuf(object):
                         elif op == MPI.MIN:
                             self.assertEqual(value, i)
 
-    @unittest.skipMPI("openmpi(<=1.8.3)")
+    @unittest.skipMPI('openmpi(<=1.8.3)')
     def testReduceScatter(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
@@ -258,7 +258,7 @@ class BaseTestCCOBuf(object):
                         elif op == MPI.MIN:
                             self.assertEqual(value, i)
 
-    @unittest.skipMPI("openmpi(<=1.8.1)")
+    @unittest.skipMPI('openmpi(<=1.8.1)')
     def testExscan(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
@@ -452,7 +452,7 @@ class BaseTestCCOBufInplace(object):
                         elif op == MPI.MIN:
                             self.assertEqual(value, i)
 
-    @unittest.skipMPI("openmpi(<=1.8.6)")
+    @unittest.skipMPI('openmpi(<=1.8.6)')
     def testReduceScatterBlock(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
@@ -488,7 +488,7 @@ class BaseTestCCOBufInplace(object):
                                 elif op == MPI.MIN:
                                     self.assertEqual(value, 0)
 
-    @unittest.skipMPI("openmpi(<=1.8.6)")
+    @unittest.skipMPI('openmpi(<=1.8.6)')
     def testReduceScatter(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()

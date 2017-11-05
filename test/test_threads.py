@@ -45,7 +45,7 @@ class TestMPIThreads(unittest.TestCase):
             log = lambda m: sys.stderr.write(m+'\n')
             log("%s: MPI.Is_thread_main() -> %s" % (name, flag))
 
-    @unittest.skipIf(pypy3_lt_50, "pypy3(<5.0)")
+    @unittest.skipIf(pypy3_lt_50, 'pypy3(<5.0)')
     def testIsThreadMainInThread(self):
         try:
             provided = MPI.Query_thread()

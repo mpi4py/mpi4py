@@ -241,7 +241,7 @@ class BaseTestIO(object):
                     comm.Barrier()
         except NotImplementedError:
             if MPI.Get_version() >= (3, 1): raise
-            self.skipTest("mpi-iwrite_at_all")
+            self.skipTest('mpi-iwrite_at_all')
 
     def testReadWriteAtAllBeginEnd(self):
         comm = self.COMM
@@ -321,7 +321,7 @@ class BaseTestIO(object):
                     comm.Barrier()
         except NotImplementedError:
             if MPI.Get_version() >= (3, 1): raise
-            self.skipTest("mpi-iwrite_all")
+            self.skipTest('mpi-iwrite_all')
 
     def testReadWriteAllBeginEnd(self):
         comm = self.COMM

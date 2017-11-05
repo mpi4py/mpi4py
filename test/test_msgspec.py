@@ -155,14 +155,14 @@ class TestMessageSimple(unittest.TestCase):
         empty = [MPI.BOTTOM, "B"]
         Sendrecv(empty, empty)
 
-    @unittest.skipIf(pypy_lt_53, "pypy(<5.3)")
+    @unittest.skipIf(pypy_lt_53, 'pypy(<5.3)')
     def testMessageBytes(self):
         sbuf = b"abc"
         rbuf = bytearray(3)
         Sendrecv([sbuf, "c"], [rbuf, MPI.CHAR])
         self.assertEqual(sbuf, rbuf)
 
-    @unittest.skipIf(pypy_lt_53, "pypy(<5.3)")
+    @unittest.skipIf(pypy_lt_53, 'pypy(<5.3)')
     def testMessageBytearray(self):
         sbuf = bytearray(b"abc")
         rbuf = bytearray(3)
@@ -217,7 +217,7 @@ def Alltoallv(smsg, rmsg):
     comm = MPI.COMM_SELF
     comm.Alltoallv(smsg, rmsg)
 
-@unittest.skipMPI("msmpi(<8.0.0)")
+@unittest.skipMPI('msmpi(<8.0.0)')
 class TestMessageVector(unittest.TestCase):
 
     TYPECODES = "hil"+"HIL"+"fd"
@@ -337,14 +337,14 @@ class TestMessageVector(unittest.TestCase):
         empty = [MPI.BOTTOM, "B"]
         Alltoallv(empty, empty)
 
-    @unittest.skipIf(pypy_lt_53, "pypy(<5.3)")
+    @unittest.skipIf(pypy_lt_53, 'pypy(<5.3)')
     def testMessageBytes(self):
         sbuf = b"abc"
         rbuf = bytearray(3)
         Alltoallv([sbuf, "c"], [rbuf, MPI.CHAR])
         self.assertEqual(sbuf, rbuf)
 
-    @unittest.skipIf(pypy_lt_53, "pypy(<5.3)")
+    @unittest.skipIf(pypy_lt_53, 'pypy(<5.3)')
     def testMessageBytearray(self):
         sbuf = bytearray(b"abc")
         rbuf = bytearray(3)
@@ -418,7 +418,7 @@ class TestMessageVectorW(unittest.TestCase):
         MPI.Free_mem(sbuf)
         MPI.Free_mem(rbuf)
 
-    @unittest.skipIf(pypy_lt_53, "pypy(<5.3)")
+    @unittest.skipIf(pypy_lt_53, 'pypy(<5.3)')
     def testMessageBytes(self):
         sbuf = b"abc"
         rbuf = bytearray(3)
@@ -427,7 +427,7 @@ class TestMessageVectorW(unittest.TestCase):
         Alltoallw(smsg, rmsg)
         self.assertEqual(sbuf, rbuf)
 
-    @unittest.skipIf(pypy_lt_53, "pypy(<5.3)")
+    @unittest.skipIf(pypy_lt_53, 'pypy(<5.3)')
     def testMessageBytearray(self):
         sbuf = bytearray(b"abc")
         rbuf = bytearray(3)
@@ -495,7 +495,7 @@ class TestMessageRMA(unittest.TestCase):
             for target in (None, 0, [0, 0, MPI.BYTE]):
                 PutGet(empty, empty, target)
 
-    @unittest.skipIf(pypy_lt_53, "pypy(<5.3)")
+    @unittest.skipIf(pypy_lt_53, 'pypy(<5.3)')
     def testMessageBytes(self):
         for target in (None, 0, [0, 3, MPI.BYTE]):
             sbuf = b"abc"
@@ -503,7 +503,7 @@ class TestMessageRMA(unittest.TestCase):
             PutGet(sbuf, rbuf, target)
             self.assertEqual(sbuf, rbuf)
 
-    @unittest.skipIf(pypy_lt_53, "pypy(<5.3)")
+    @unittest.skipIf(pypy_lt_53, 'pypy(<5.3)')
     def testMessageBytearray(self):
         for target in (None, 0, [0, 3, MPI.BYTE]):
             sbuf = bytearray(b"abc")
