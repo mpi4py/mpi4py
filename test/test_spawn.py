@@ -61,24 +61,27 @@ class BaseTestSpawn(object):
     ROOT = 0
 
     def testCommSpawn(self):
+        self.COMM.Barrier()
         child = self.COMM.Spawn(self.COMMAND, self.ARGS, self.MAXPROCS,
                                 info=self.INFO, root=self.ROOT)
         local_size = child.Get_size()
         remote_size = child.Get_remote_size()
         child.Barrier()
         child.Disconnect()
+        self.COMM.Barrier()
         self.assertEqual(local_size, self.COMM.Get_size())
         self.assertEqual(remote_size, self.MAXPROCS)
 
     @unittest.skipMPI('msmpi')
-    def testReturnedErrcodes(self):
+    def testErrcodes(self):
+        self.COMM.Barrier()
         errcodes = []
         child = self.COMM.Spawn(self.COMMAND, self.ARGS, self.MAXPROCS,
                                 info=self.INFO, root=self.ROOT,
                                 errcodes=errcodes)
         child.Barrier()
         child.Disconnect()
-        rank = self.COMM.Get_rank()
+        self.COMM.Barrier()
         self.assertEqual(len(errcodes), self.MAXPROCS)
         for errcode in errcodes:
             self.assertEqual(errcode, MPI.SUCCESS)
@@ -86,8 +89,7 @@ class BaseTestSpawn(object):
     @unittest.skipMPI('msmpi')
     def testArgsOnlyAtRoot(self):
         self.COMM.Barrier()
-        rank = self.COMM.Get_rank()
-        if rank == self.ROOT:
+        if self.COMM.Get_rank() == self.ROOT:
             child = self.COMM.Spawn(self.COMMAND, self.ARGS, self.MAXPROCS,
                                     info=self.INFO, root=self.ROOT)
         else:
@@ -97,8 +99,9 @@ class BaseTestSpawn(object):
         child.Disconnect()
         self.COMM.Barrier()
 
+    @unittest.skipIf(os.name != 'posix', 'posix')
     def testNoArgs(self):
-        if os.name != 'posix': return
+        self.COMM.Barrier()
         script = None
         if self.COMM.Get_rank() == self.ROOT:
             script = childscript()
@@ -114,6 +117,7 @@ class BaseTestSpawn(object):
         self.COMM.Barrier()
 
     def testCommSpawnMultiple(self):
+        self.COMM.Barrier()
         count = 2 + (self.COMM.Get_size() == 0)
         COMMAND = [self.COMMAND] * count
         ARGS = [self.ARGS] * len(COMMAND)
@@ -126,10 +130,12 @@ class BaseTestSpawn(object):
         remote_size = child.Get_remote_size()
         child.Barrier()
         child.Disconnect()
+        self.COMM.Barrier()
         self.assertEqual(local_size, self.COMM.Get_size())
         self.assertEqual(remote_size, sum(MAXPROCS))
 
     def testCommSpawnMultipleDefaults1(self):
+        self.COMM.Barrier()
         count = 2 + (self.COMM.Get_size() == 0)
         COMMAND = [self.COMMAND] * count
         ARGS = [self.ARGS] * len(COMMAND)
@@ -138,10 +144,12 @@ class BaseTestSpawn(object):
         remote_size = child.Get_remote_size()
         child.Barrier()
         child.Disconnect()
+        self.COMM.Barrier()
         self.assertEqual(local_size, self.COMM.Get_size())
         self.assertEqual(remote_size, len(COMMAND))
 
     def testCommSpawnMultipleDefaults2(self):
+        self.COMM.Barrier()
         count = 2 + (self.COMM.Get_size() == 0)
         COMMAND = [self.COMMAND] * count
         ARGS = [self.ARGS] * len(COMMAND)
@@ -150,11 +158,13 @@ class BaseTestSpawn(object):
         remote_size = child.Get_remote_size()
         child.Barrier()
         child.Disconnect()
+        self.COMM.Barrier()
         self.assertEqual(local_size, self.COMM.Get_size())
         self.assertEqual(remote_size, len(COMMAND))
 
     @unittest.skipMPI('msmpi')
-    def testReturnedErrcodesMultiple(self):
+    def testErrcodesMultiple(self):
+        self.COMM.Barrier()
         count = 2 + (self.COMM.Get_size() == 0)
         COMMAND = [self.COMMAND] * count
         ARGS = [self.ARGS]*len(COMMAND)
@@ -167,7 +177,7 @@ class BaseTestSpawn(object):
             errcodes=errcodelist)
         child.Barrier()
         child.Disconnect()
-        rank = self.COMM.Get_rank()
+        self.COMM.Barrier()
         self.assertEqual(len(errcodelist), len(COMMAND))
         for i, errcodes in enumerate(errcodelist):
             self.assertEqual(len(errcodes), MAXPROCS[i])
@@ -177,8 +187,7 @@ class BaseTestSpawn(object):
     @unittest.skipMPI('msmpi')
     def testArgsOnlyAtRootMultiple(self):
         self.COMM.Barrier()
-        rank = self.COMM.Get_rank()
-        if rank == self.ROOT:
+        if self.COMM.Get_rank() == self.ROOT:
             count = 2 + (self.COMM.Get_size() == 0)
             COMMAND = [self.COMMAND] * count
             ARGS = [self.ARGS] * len(COMMAND)
@@ -195,8 +204,9 @@ class BaseTestSpawn(object):
         child.Disconnect()
         self.COMM.Barrier()
 
+    @unittest.skipIf(os.name != 'posix', 'posix')
     def testNoArgsMultiple(self):
-        if os.name != 'posix': return
+        self.COMM.Barrier()
         script = None
         if self.COMM.Get_rank() == self.ROOT:
             script = childscript()
