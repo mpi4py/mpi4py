@@ -67,20 +67,13 @@ cdef class Pickle:
         self.ob_loads = loads
         self.ob_PROTO = protocol
 
-    cpdef object dumps(self, object obj):
+    def dumps(self, obj):
         "dumps(obj) -> bytes"
-        if self.ob_PROTO is not None:
-            return self.ob_dumps(obj, self.ob_PROTO)
-        else:
-            return self.ob_dumps(obj)
+        return self.cdumps(obj)
 
-    cpdef object loads(self, object buf):
+    def loads(self, buf):
         "loads(buf) -> object"
-        if PY2 and not PyBytes_CheckExact(buf):
-            if self.ob_loads is PyPickle_loads:
-                buf = PyBytesIO_New(buf)
-                return PyPickle_loadf(buf)
-        return self.ob_loads(buf)
+        return self.cloads(buf)
 
     property PROTOCOL:
         "protocol"
@@ -92,19 +85,35 @@ cdef class Pickle:
                     protocol = PyPickle_PROTOCOL
             self.ob_PROTO = protocol
 
+    cdef object cdumps(self, object obj):
+        "dumps(obj) -> bytes"
+        if self.ob_PROTO is not None:
+            return self.ob_dumps(obj, self.ob_PROTO)
+        else:
+            return self.ob_dumps(obj)
+
+    cdef object cloads(self, object buf):
+        "loads(buf) -> object"
+        if PY2:
+            if not PyBytes_CheckExact(buf):
+                if self.ob_loads is PyPickle_loads:
+                    buf = PyBytesIO_New(buf)
+                    return PyPickle_loadf(buf)
+        return self.ob_loads(buf)
+
     cdef object dump(self, object obj, void **p, int *n):
         if obj is None:
             p[0] = NULL
             n[0] = 0
             return None
-        cdef object buf = self.dumps(obj)
+        cdef object buf = self.cdumps(obj)
         p[0] = <void*>PyBytes_AsString(buf)
         n[0] = downcast(PyBytes_Size(buf))
         return buf
 
     cdef object load(self, void *p, int n):
         if p == NULL or n == 0: return None
-        return self.loads(tomemory(p, n))
+        return self.cloads(tomemory(p, n))
 
     cdef object dumpv(self, object obj, void **p, int n, int cnt[], int dsp[]):
         cdef Py_ssize_t i=0, m=n
