@@ -146,9 +146,8 @@ def _manager_thread(pool, **options):
     size = options.pop('max_workers', 1)
     queue = setup_pool(pool, size)
 
-    backoff = Backoff(options.get('backoff', BACKOFF))
-
     def worker():
+        backoff = Backoff(options.get('backoff', BACKOFF))
         while True:
             try:
                 item = queue.pop()
