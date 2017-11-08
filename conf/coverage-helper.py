@@ -8,7 +8,7 @@ except: pass
 
 # ---
 
-def test_mp4py_rc():
+def test_mpi4py_rc():
     import mpi4py.rc
     mpi4py.rc(
     initialize = True,
@@ -23,11 +23,11 @@ def test_mp4py_rc():
     except TypeError: pass
     else: raise RuntimeError
 
-test_mp4py_rc()
+test_mpi4py_rc()
 
 # ---
 
-def test_mp4py_profile():
+def test_mpi4py_profile():
     import mpi4py
     def mpi4py_profile(*args, **kargs):
         try: mpi4py.profile(*args, **kargs)
@@ -50,7 +50,7 @@ def test_mp4py_profile():
     mpi4py_profile('dl', path=["/usr/lib", "/usr/lib64"])
     mpi4py_profile('hosts', path=["/etc"])
 
-test_mp4py_profile()
+test_mpi4py_profile()
 
 # ---
 
