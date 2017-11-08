@@ -6,7 +6,7 @@ CHANGES: MPI for Python
 :Contact: dalcinl@gmail.com
 
 
-Release 2.1.0 [2017-XX-XX]
+Release 3.0.0 [2017-11-08]
 ==========================
 
 * New features:
