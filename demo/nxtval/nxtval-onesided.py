@@ -27,7 +27,7 @@ class Counter(object):
 
     def free(self):
         self.dt_get.Free()
-        mem = self.win.memory
+        mem = self.win.tomemory()
         self.win.Free()
         if mem: MPI.Free_mem(mem)
 

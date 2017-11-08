@@ -5,8 +5,8 @@
  *
  */
 
-#include <mpi.h>
 #include <Python.h>
+#include <mpi.h>
 
 const char helloworld[] = \
   "from mpi4py import MPI                                \n"

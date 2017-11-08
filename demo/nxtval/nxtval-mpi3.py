@@ -16,7 +16,7 @@ class Counter(object):
         self.win = MPI.Win.Allocate(n*itemsize, itemsize, 
                                     MPI.INFO_NULL, comm)
         if rank == 0:
-            mem = self.win.memory
+            mem = self.win.tomemory()
             mem[:] = _struct.pack('i', 0)
 
     def free(self):

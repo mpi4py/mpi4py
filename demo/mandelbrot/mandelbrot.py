@@ -90,7 +90,10 @@ if rank == 0:
     try:
         from matplotlib import pyplot as plt
         plt.imshow(M, aspect='equal')
-        plt.spectral()
+        try:
+            plt.nipy_spectral()
+        except AttributeError:
+            plt.spectral()
         try:
             import signal
             def action(*args): raise SystemExit

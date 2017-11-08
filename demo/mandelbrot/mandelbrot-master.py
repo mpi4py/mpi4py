@@ -46,17 +46,21 @@ M = np.zeros([h, w], dtype='i')
 M[indices, :] = cdata
 
 # eye candy (requires matplotlib)
-try:
-    from matplotlib import pyplot as plt
-    plt.imshow(M, aspect='equal')
-    plt.spectral()
+if 1:
     try:
-        import signal
-        def action(*args): raise SystemExit
-        signal.signal(signal.SIGALRM, action)
-        signal.alarm(2)
+        from matplotlib import pyplot as plt
+        plt.imshow(M, aspect='equal')
+        try:
+            plt.nipy_spectral()
+        except AttributeError:
+            plt.spectral()
+        try:
+            import signal
+            def action(*args): raise SystemExit
+            signal.signal(signal.SIGALRM, action)
+            signal.alarm(2)
+        except:
+            pass
+        plt.show()
     except:
         pass
-    plt.show()
-except:
-    pass
