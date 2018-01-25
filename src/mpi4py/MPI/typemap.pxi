@@ -102,13 +102,15 @@ AddTypeMap(CTypeDict, "u2" , __UINT16_T__ )
 AddTypeMap(CTypeDict, "u4" , __UINT32_T__ )
 AddTypeMap(CTypeDict, "u8" , __UINT64_T__ )
 
-AddTypeMap(CTypeDict, "f4"  , __FLOAT__       )
-AddTypeMap(CTypeDict, "f8"  , __DOUBLE__      )
-AddTypeMap(CTypeDict, "f16" , __LONG_DOUBLE__ )
+AddTypeMap(CTypeDict, "f4" , __FLOAT__    )
+AddTypeMap(CTypeDict, "f8" , __DOUBLE__   )
 
-AddTypeMap(CTypeDict, "c8"  , __C_FLOAT_COMPLEX__       )
-AddTypeMap(CTypeDict, "c16" , __C_DOUBLE_COMPLEX__      )
-AddTypeMap(CTypeDict, "c32" , __C_LONG_DOUBLE_COMPLEX__ )
+AddTypeMap(CTypeDict, "c8"  , __C_FLOAT_COMPLEX__  )
+AddTypeMap(CTypeDict, "c16" , __C_DOUBLE_COMPLEX__ )
+
+if sizeof(long double) == 16:
+    AddTypeMap(CTypeDict, "f16" , __LONG_DOUBLE__ )
+    AddTypeMap(CTypeDict, "c32" , __C_LONG_DOUBLE_COMPLEX__ )
 
 # -----------------------------------------------------------------------------
 
