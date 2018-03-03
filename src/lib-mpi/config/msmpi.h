@@ -92,4 +92,24 @@
 #define PyMPI_HAVE_MPI_Iexscan 1
 #endif
 
+#if MSMPI_VER >= 0x900
+#define PyMPI_HAVE_MPI_NO_OP 1
+#define PyMPI_HAVE_MPI_Win_allocate 1
+#define PyMPI_HAVE_MPI_Win_create_dynamic 1
+#define PyMPI_HAVE_MPI_Win_attach 1
+#define PyMPI_HAVE_MPI_Win_detach 1
+#define PyMPI_HAVE_MPI_Rget 1
+#define PyMPI_HAVE_MPI_Rput 1
+#define PyMPI_HAVE_MPI_Raccumulate 1
+#define PyMPI_HAVE_MPI_Win_flush 1
+#define PyMPI_HAVE_MPI_WIN_CREATE_FLAVOR 1
+#define PyMPI_HAVE_MPI_WIN_MODEL 1
+#define PyMPI_HAVE_MPI_WIN_FLAVOR_CREATE 1
+#define PyMPI_HAVE_MPI_WIN_FLAVOR_ALLOCATE 1
+#define PyMPI_HAVE_MPI_WIN_FLAVOR_DYNAMIC 1
+#define PyMPI_HAVE_MPI_WIN_FLAVOR_SHARED 1
+#define PyMPI_HAVE_MPI_WIN_SEPARATE 1
+#define PyMPI_HAVE_MPI_WIN_UNIFIED 1
+#endif
+
 #endif /* !PyMPI_CONFIG_MSMPI_H */

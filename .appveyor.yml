@@ -45,6 +45,7 @@ branches:
     - master
     - maint
     - ci/appveyor
+    - msmpi/v90
 
 init:
   - "ECHO Python from %PYTHON%"

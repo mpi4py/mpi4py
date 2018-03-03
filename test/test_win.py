@@ -191,6 +191,7 @@ class BaseTestWinCreateDynamic(BaseTestWin):
         self.assertEqual(base, 0)
         self.assertEqual(size, 0)
 
+    @unittest.skipMPI('msmpi(<9.1.0)')
     def testAttachDetach(self):
         mem1 = MPI.Alloc_mem(8)
         mem2 = MPI.Alloc_mem(16)
