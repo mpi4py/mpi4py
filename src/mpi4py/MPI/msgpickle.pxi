@@ -1014,9 +1014,8 @@ cdef object PyMPI_reduce_p2p(object sendobj, object op, int root,
     if root < 0 or root >= size:
         <void>MPI_Comm_call_errhandler(comm, MPI_ERR_ROOT)
         raise MPIException(MPI_ERR_ROOT)
-    if size == 1: sendobj = PyMPI_copy(sendobj)
     #
-    cdef object result = sendobj
+    cdef object result = PyMPI_copy(sendobj)
     cdef object tmp
     # Compute reduction at process 0
     cdef unsigned int umask = <unsigned int> 1
@@ -1036,7 +1035,7 @@ cdef object PyMPI_reduce_p2p(object sendobj, object op, int root,
     # Send reduction to root
     if root != 0:
         if rank == 0:
-            result = PyMPI_send_p2p(result, root, tag, comm)
+            PyMPI_send_p2p(result, root, tag, comm)
         elif rank == root:
             result = PyMPI_recv_p2p(0, tag, comm)
     if rank != root:
@@ -1051,12 +1050,11 @@ cdef object PyMPI_scan_p2p(object sendobj, object op,
     cdef int rank = MPI_PROC_NULL
     CHKERR( MPI_Comm_size(comm, &size) )
     CHKERR( MPI_Comm_rank(comm, &rank) )
-    if size == 1: sendobj = PyMPI_copy(sendobj)
     #
-    cdef object result  = sendobj
+    cdef object result  = PyMPI_copy(sendobj)
     cdef object partial = result
     cdef object tmp
-    # Compute prefix op
+    # Compute prefix reduction
     cdef unsigned int umask = <unsigned int> 1
     cdef unsigned int usize = <unsigned int> size
     cdef unsigned int urank = <unsigned int> rank
@@ -1084,7 +1082,7 @@ cdef object PyMPI_exscan_p2p(object sendobj, object op,
     CHKERR( MPI_Comm_size(comm, &size) )
     CHKERR( MPI_Comm_rank(comm, &rank) )
     #
-    cdef object result  = sendobj
+    cdef object result  = PyMPI_copy(sendobj)
     cdef object partial = result
     cdef object tmp
     # Compute prefix reduction
