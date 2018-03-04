@@ -23,22 +23,18 @@ env:
 matrix:
   include:
     - os: osx
-      osx_image: xcode8
       env: MPI=mpich PY=2
       language: generic
       python: 2
     - os: osx
-      osx_image: xcode8
       env: MPI=openmpi PY=2
       language: generic
       python: 2
     - os: osx
-      osx_image: xcode8
       env: MPI=mpich PY=3
       language: generic
       python: 3
     - os: osx
-      osx_image: xcode8
       env: MPI=openmpi PY=3
       language: generic
       python: 3
@@ -74,9 +70,9 @@ cache:
 before_install:
   - |
     if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then  # Install Python
-        brew update
+        brew update && brew cask uninstall oclint
         if [[ "$PY" == "3" ]]; then
-            brew install python3
+            brew upgrade python
         fi
     fi
   - python$PY -m pip install Cython
