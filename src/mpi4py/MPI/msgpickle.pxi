@@ -113,9 +113,8 @@ cdef class Pickle:
     cdef object dumpv(self, object obj, void **p, int n, int cnt[], int dsp[]):
         cdef Py_ssize_t i=0, m=n
         cdef object items
-        if is_list(obj):  items = obj
-        elif obj is None: items = [None] * m
-        else:             items = list(obj)
+        if obj is None: items = [None] * m
+        else:           items = list(obj)
         m = len(items)
         if m != n: raise ValueError(
             "expecting %d items, got %d" % (n, m))
