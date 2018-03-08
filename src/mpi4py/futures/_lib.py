@@ -886,7 +886,7 @@ def server_main_accept():
     from getopt import getopt
     longopts = ['bind=', 'port=', 'service=', 'info=']
     optlist, _ = getopt(sys.argv[1:], '', longopts)
-    options = {opt[2:] : val for opt, val in optlist}
+    options = {opt[2:]: val for opt, val in optlist}
 
     if 'bind' in options or 'port' in options:
         bind = options.get('bind') or get_server_bind()
