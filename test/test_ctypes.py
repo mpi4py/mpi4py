@@ -1,8 +1,12 @@
 from mpi4py import MPI
 import mpiunittest as unittest
 import sys
+
+pypy_lt_510 = (hasattr(sys, 'pypy_version_info') and
+               sys.pypy_version_info < (5,10))
+
 try:
-    if hasattr(sys, 'pypy_version_info'):
+    if pypy_lt_510:
         ctypes = None
     else:
         import ctypes
