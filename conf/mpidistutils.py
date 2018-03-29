@@ -903,6 +903,8 @@ class build_clib(cmd_build_clib.build_clib):
                     self.compiler.linker_so[pos] = '-shared'
                 install_name = os.path.basename(lib_fullpath)
                 extra_preargs = ['-install_name', install_name]
+            if sys.platform.startswith('linux'):
+                extra_preargs = ['-Wl,--no-as-needed']
             self.compiler.link(
                 self.compiler.SHARED_LIBRARY,
                 objects, lib_fullpath,
