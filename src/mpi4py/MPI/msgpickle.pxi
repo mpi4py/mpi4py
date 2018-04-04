@@ -1098,11 +1098,10 @@ cdef object PyMPI_exscan_p2p(object sendobj, object op,
                                      target, tag, comm)
             if rank > target:
                 partial = op(tmp, partial)
-                if rank != 0:
-                    if uflag == 0:
-                        result = tmp; uflag = 1
-                    else:
-                        result = op(tmp, result)
+                if uflag == 0:
+                    result = tmp; uflag = 1
+                else:
+                    result = op(tmp, result)
             else:
                 tmp = op(partial, tmp)
                 partial = tmp
