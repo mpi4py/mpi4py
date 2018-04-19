@@ -950,6 +950,7 @@ cdef class _p_msg_rma:
             self.otype  = (<Datatype?>origin[-1]).ob_mpi
             self._origin = origin
         # TARGET
+        cdef Py_ssize_t nargs = 0
         if target is None:
             self.tdisp  = 0
             self.tcount = self.ocount
@@ -959,11 +960,18 @@ cdef class _p_msg_rma:
             self.tcount = self.ocount
             self.ttype  = self.otype
         elif is_list(target) or is_tuple(target):
-            if len(target) != 3:
-                raise ValueError("target: expecting 3 items")
-            self.tdisp  = <MPI_Aint>target[0]
-            self.tcount = <int>target[1]
-            self.ttype  = (<Datatype?>target[2]).ob_mpi
+            self.tdisp  = 0
+            self.tcount = self.ocount
+            self.ttype  = self.otype
+            nargs = len(target)
+            if nargs >= 1:
+                self.tdisp  = <MPI_Aint>target[0]
+            if nargs >= 2:
+                self.tcount = <int>target[1]
+            if nargs >= 3:
+                self.ttype  = (<Datatype?>target[2]).ob_mpi
+            if nargs >= 4:
+                raise ValueError("target: expecting 3 items at most")
         else:
             raise ValueError("target: expecting integral or list/tuple")
         self._target = target
