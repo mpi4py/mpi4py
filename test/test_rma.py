@@ -3,12 +3,12 @@ import mpiunittest as unittest
 import arrayimpl
 import sys
 
-typemap = MPI._typedict
+pypy_lt_53 = (hasattr(sys, 'pypy_version_info') and
+              sys.pypy_version_info < (5, 3))
 
 def mkzeros(n):
-    if hasattr(sys, 'pypy_version_info'):
-        if sys.pypy_version_info < (5, 3):
-            return b'\0' * n
+    if pypy_lt_53:
+        return b'\0' * n
     return bytearray(n)
 
 def memzero(m):
@@ -40,6 +40,7 @@ class BaseTestRMA(object):
             MPI.Free_mem(self.mpi_memory)
 
     def testPutGet(self):
+        typemap = MPI._typedict
         group = self.WIN.Get_group()
         size = group.Get_size()
         group.Free()

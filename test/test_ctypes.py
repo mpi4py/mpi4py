@@ -3,7 +3,7 @@ import mpiunittest as unittest
 import sys
 
 pypy_lt_510 = (hasattr(sys, 'pypy_version_info') and
-               sys.pypy_version_info < (5,10))
+               sys.pypy_version_info < (5, 10))
 
 try:
     if pypy_lt_510:

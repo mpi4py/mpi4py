@@ -7,7 +7,7 @@ except ImportError:
     array = None
 
 pypy_lt_58 = (hasattr(sys, 'pypy_version_info') and
-              sys.pypy_version_info < (5,8))
+              sys.pypy_version_info < (5, 8))
 
 class TestMemory(unittest.TestCase):
 

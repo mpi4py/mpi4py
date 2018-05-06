@@ -2,14 +2,16 @@ from mpi4py import MPI
 import mpiunittest as unittest
 import sys
 
+pypy_lt_53 = (hasattr(sys, 'pypy_version_info') and
+              sys.pypy_version_info < (5, 3))
+
 def allocate(n):
-    if hasattr(sys, 'pypy_version_info'):
-        if sys.pypy_version_info < (5, 3):
-            try:
-                import array
-                return array.array('B', [0]) * n
-            except ImportError:
-                return None
+    if pypy_lt_53:
+        try:
+            import array
+            return array.array('B', [0]) * n
+        except ImportError:
+            return None
     return bytearray(n)
 
 _basic = [None,

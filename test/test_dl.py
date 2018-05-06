@@ -5,6 +5,9 @@ try:
 except ImportError:
     dl = None
 
+pypy_lt_510 = (hasattr(sys, 'pypy_version_info') and
+               sys.pypy_version_info < (5, 10))
+
 @unittest.skipIf(dl is None, 'mpi4py-dl')
 class TestDL(unittest.TestCase):
 
@@ -33,9 +36,8 @@ class TestDL(unittest.TestCase):
         self.assertTrue(ierr == 0)
         self.assertTrue(dl.dlerror() is None)
 
-    @unittest.skipIf(hasattr(sys, 'pypy_version_info') and
-                     sys.platform == 'darwin',
-                     'pypy|darwin')
+    @unittest.skipIf(pypy_lt_510 and sys.platform == 'darwin',
+                     'pypy(<5.10)|darwin')
     def testDL2(self):
         handle = dl.dlopen(None, dl.RTLD_GLOBAL|dl.RTLD_NOW)
         self.assertTrue(handle != 0)
