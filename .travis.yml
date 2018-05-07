@@ -38,22 +38,22 @@ matrix:
       env: MPI=openmpi PY=3
       language: generic
       python: 3
-    - python: pypy2.7-5.8.0
+    - python: pypy2.7-5.10.0
       env: MPI=mpich
-    - python: pypy2.7-5.8.0
+    - python: pypy2.7-5.10.0
       env: MPI=openmpi
-    - python: pypy3.5-5.8.0
+    - python: pypy3.5-5.10.0
       env: MPI=mpich
-    - python: pypy3.5-5.8.0
+    - python: pypy3.5-5.10.0
       env: MPI=openmpi
   allow_failures:
-    - python: pypy2.7-5.8.0
+    - python: pypy2.7-5.10.0
       env: MPI=mpich
-    - python: pypy2.7-5.8.0
+    - python: pypy2.7-5.10.0
       env: MPI=openmpi
-    - python: pypy3.5-5.8.0
+    - python: pypy3.5-5.10.0
       env: MPI=mpich
-    - python: pypy3.5-5.8.0
+    - python: pypy3.5-5.10.0
       env: MPI=openmpi
 
 branches:
@@ -69,9 +69,14 @@ cache:
 
 before_install:
   - |
-    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then  # Install Python
-        brew update && brew cask uninstall oclint
-        if [[ "$PY" == "3" ]]; then
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+        sudo apt-get update -q
+    fi
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+        brew update
+        brew cask uninstall oclint
+        if [[ "$PY" == "3" ]]; then  # Install Python 3
             brew upgrade python
         fi
     fi

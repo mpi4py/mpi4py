@@ -2,7 +2,6 @@
 set -e
 case `uname` in
 Linux)
-  sudo apt-get update -q
   case $1 in
     mpich) set -x;
       sudo apt-get install -y -q mpich libmpich-dev
@@ -17,7 +16,6 @@ Linux)
   esac
   ;;
 Darwin)
-  brew update
   case $1 in
     mpich) set -x;
       brew install mpich
