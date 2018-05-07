@@ -139,10 +139,13 @@ class BaseTestRMA(object):
                                    MPI.REPLACE, MPI.NO_OP):
                             self.WIN.Lock(rank)
                             self.WIN.Put(ones.as_mpi(), rank)
+                            self.WIN.Flush(rank)
                             self.WIN.Get_accumulate(sbuf.as_mpi(),
                                                     rbuf.as_mpi_c(count),
                                                     rank, op=op)
+                            self.WIN.Flush(rank)
                             self.WIN.Get(gbuf.as_mpi_c(count), rank)
+                            self.WIN.Flush(rank)
                             self.WIN.Unlock(rank)
                             #
                             for i in range(count):
