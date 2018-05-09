@@ -1,5 +1,5 @@
 {% set build = 0 %}
-{% set version = '2.0.1a0' %}
+{% set version = '3.0.1a0' %}
 {% set mpi = (environ.get('MPI') or 'mpich') if not win else 'msmpi' %}
 {% set mpi_version = {'mpich':'>=3.2', 'openmpi':'>=2.0'}.get(mpi,'') %}
 
@@ -24,7 +24,7 @@ requirements:
 
 build:
   number: {{build}}
-  string: py{{py}}_{{mpi}}__{{build}}
+  string: py{{py}}_{{mpi}}_{{build}}
   script: '$PYTHON  setup.py install' # [not win]
   script: '%PYTHON% setup.py install' # [win]
 
