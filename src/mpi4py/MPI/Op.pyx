@@ -93,7 +93,7 @@ cdef class Op:
         # check counts and datatypes
         if m.scount != m.rcount: raise ValueError(
             "mismatch in inbuf count %d and inoutbuf count %d" %
-            (self.scount, self.rcount))
+            (m.scount, m.rcount))
         if (m.stype != m.rtype): raise ValueError(
             "mismatch in inbuf and inoutbuf MPI datatypes")
         # do local reduction
