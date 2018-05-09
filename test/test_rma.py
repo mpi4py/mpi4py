@@ -254,22 +254,32 @@ class BaseTestRMA(object):
         self.WIN.Accumulate([None, MPI.INT], MPI.PROC_NULL, None, MPI.SUM)
         self.WIN.Fence()
 
+    def testGetAccumulateProcNull(self):
+        obuf = [mkzeros(8), 0, MPI.INT]
+        rbuf = [mkzeros(8), 0, MPI.INT]
+        self.WIN.Fence()
+        try:
+            self.WIN.Get_accumulate(obuf, rbuf, MPI.PROC_NULL)
+        except NotImplementedError:
+            self.skipTest('mpi-win-get_accumulate')
+        self.WIN.Fence()
+
     ##def testFetchAndOpProcNull(self):
+    ##    obuf = cbuf = rbuf = None
     ##    self.WIN.Fence()
-    ##    obuf = rbuf = None
-    ##    self.WIN.Fence()
-    ##    self.WIN.Fetch_and_op(obuf, rbuf, MPI.PROC_NULL, 0)
-    ##    self.WIN.Fence()
-    ##    self.WIN.Fetch_and_op(obuf, rbuf, MPI.PROC_NULL, 0)
+    ##    try:
+    ##        self.WIN.Fetch_and_op(obuf, rbuf, MPI.PROC_NULL, 0)
+    ##    except NotImplementedError:
+    ##        self.skipTest('mpi-win-fetch_and_op')
     ##    self.WIN.Fence()
 
     ##def testCompareAndSwapProcNull(self):
-    ##    self.WIN.Fence()
     ##    obuf = cbuf = rbuf = None
     ##    self.WIN.Fence()
-    ##    self.WIN.Compare_and_swap(obuf, cbuf, rbuf, MPI.PROC_NULL, 0)
-    ##    self.WIN.Fence()
-    ##    self.WIN.Compare_and_swap(obuf, cbuf, rbuf, MPI.PROC_NULL, 0)
+    ##    try:
+    ##        self.WIN.Compare_and_swap(obuf, cbuf, rbuf, MPI.PROC_NULL, 0)
+    ##    except NotImplementedError:
+    ##        self.skipTest('mpi-win-compare_and_swap')
     ##    self.WIN.Fence()
 
     def testFence(self):

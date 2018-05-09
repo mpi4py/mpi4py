@@ -29,6 +29,6 @@ if [ $(command -v mpichversion) ] && [ $(command -v hydra_nameserver) ]; then
     mpi4pyserver=$!; sleep 0.25;
     $MPIEXEC -nameserver localhost -n 1 $PYTHON $testdir/test_service.py --service test-service
     wait $mpi4pyserver
-    kill -s SIGTERM $nameserver
-    wait $nameserver 2>/dev/null
+    kill -TERM $nameserver
+    wait $nameserver 2>/dev/null || true
 fi

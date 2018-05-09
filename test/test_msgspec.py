@@ -121,7 +121,7 @@ class TestMessageSimple(unittest.TestCase):
                     self.assertTrue(equal(z[q:], r[q:]))
 
     def testMessageBad(self):
-        buf = MPI.Alloc_mem(4)
+        buf = MPI.Alloc_mem(5)
         empty = [None, 0, "B"]
         def f(): Sendrecv([buf, 0, 0, "i", None], empty)
         self.assertRaises(ValueError, f)
@@ -135,6 +135,12 @@ class TestMessageSimple(unittest.TestCase):
         self.assertRaises(ValueError, f)
         def f(): Sendrecv([None, 1,  0, "i"], empty)
         self.assertRaises(ValueError, f)
+        def f(): Sendrecv([buf, None,  0, "i"], empty)
+        self.assertRaises(ValueError, f)
+        def f(): Sendrecv([buf, 0, 1, MPI.DATATYPE_NULL], empty)
+        self.assertRaises(ValueError, f)
+        def f(): Sendrecv([buf, None, 0, MPI.DATATYPE_NULL], empty)
+        self.assertRaises(ValueError, f)
         MPI.Free_mem(buf)
         buf = [1,2,3,4]
         def f(): Sendrecv([buf, 4,  0, "i"], empty)
@@ -142,6 +148,8 @@ class TestMessageSimple(unittest.TestCase):
         buf = {1:2,3:4}
         def f(): Sendrecv([buf, 4,  0, "i"], empty)
         self.assertRaises(TypeError, f)
+        def f(): Sendrecv(b"abc", b"abc")
+        self.assertRaises((BufferError, TypeError, ValueError), f)
 
     def testMessageNone(self):
         empty = [None, 0, "B"]
@@ -309,12 +317,16 @@ class TestMessageVector(unittest.TestCase):
                     self.assertTrue(equal(z[q:], r[q:]))
 
     def testMessageBad(self):
-        buf = MPI.Alloc_mem(4)
+        buf = MPI.Alloc_mem(5)
         empty = [None, 0, [0], "B"]
         def f(): Alltoallv([buf, 0, [0], "i", None], empty)
         self.assertRaises(ValueError, f)
         def f(): Alltoallv([buf, 0, [0], "\0"], empty)
         self.assertRaises(KeyError, f)
+        def f(): Alltoallv([buf, None, [0], MPI.DATATYPE_NULL], empty)
+        self.assertRaises(ValueError, f)
+        def f(): Alltoallv([buf, None, [0], "i"], empty)
+        self.assertRaises(ValueError, f)
         MPI.Free_mem(buf)
         buf = [1,2,3,4]
         def f(): Alltoallv([buf, 0,  0, "i"], empty)
@@ -409,14 +421,17 @@ class TestMessageVectorW(unittest.TestCase):
     def testMessageBad(self):
         sbuf = MPI.Alloc_mem(4)
         rbuf = MPI.Alloc_mem(4)
+        def f(): Alltoallw([sbuf],[rbuf])
+        self.assertRaises(ValueError, f)
         def f(): Alltoallw([sbuf, [0], [0], [MPI.BYTE], None],
-                           [sbuf, [0], [0], [MPI.BYTE]])
+                           [rbuf, [0], [0], [MPI.BYTE]])
         self.assertRaises(ValueError, f)
         def f(): Alltoallw([sbuf, [0], [0], [MPI.BYTE]],
-                           [sbuf, [0], [0], [MPI.BYTE], None])
+                           [rbuf, [0], [0], [MPI.BYTE], None])
         self.assertRaises(ValueError, f)
         MPI.Free_mem(sbuf)
         MPI.Free_mem(rbuf)
+
 
     @unittest.skipIf(pypy_lt_53, 'pypy(<5.3)')
     def testMessageBytes(self):
@@ -435,6 +450,13 @@ class TestMessageVectorW(unittest.TestCase):
         rmsg = [rbuf, ([3], [0]), [MPI.CHAR]]
         Alltoallw(smsg, rmsg)
         self.assertEqual(sbuf, rbuf)
+        sbuf = bytearray(b"abc")
+        rbuf = bytearray(3)
+        smsg = [sbuf, None, None, [MPI.CHAR]]
+        rmsg = [rbuf, [MPI.CHAR]]
+        Alltoallw(smsg, rmsg)
+        self.assertEqual(sbuf[0], rbuf[0])
+        self.assertEqual(bytearray(2), rbuf[1:])
 
 def PutGet(smsg, rmsg, target):
     try: win =  MPI.Win.Allocate(8, 1, MPI.INFO_NULL, MPI.COMM_SELF)

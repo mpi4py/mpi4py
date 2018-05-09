@@ -80,11 +80,11 @@ if [ $(command -v mpichversion) ]; then
     testdir=demo/futures
     $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.futures.server --xyz > /dev/null 2>&1 || true
     $MPIEXEC -n 2 $PYTHON -m coverage run -m mpi4py.futures.server --bind localhost &
-    mpi4pyserver=$!; sleep 0.25;
+    mpi4pyserver=$!; sleep 1;
     $MPIEXEC -n 1 $PYTHON -m coverage run $testdir/test_service.py --host localhost
     wait $mpi4pyserver
     $MPIEXEC -n 2 $PYTHON -m coverage run -m mpi4py.futures.server --port 31414 --info "a=x,b=y" &
-    mpi4pyserver=$!; sleep 0.25;
+    mpi4pyserver=$!; sleep 1;
     $MPIEXEC -n 1 $PYTHON -m coverage run $testdir/test_service.py --port 31414 --info "a=x,b=y"
     wait $mpi4pyserver
 fi
@@ -96,8 +96,8 @@ if [ $(command -v mpichversion) ] && [ $(command -v hydra_nameserver) ]; then
     mpi4pyserver=$!; sleep 1;
     $MPIEXEC -nameserver localhost -n 1 $PYTHON -m coverage run $testdir/test_service.py
     wait $mpi4pyserver
-    kill -s SIGTERM $nameserver
-    wait $nameserver 2>/dev/null
+    kill -TERM $nameserver
+    wait $nameserver 2>/dev/null || true
 fi
 
 $PYTHON -m coverage combine
