@@ -14,6 +14,8 @@ try:
 except ImportError:
     numpy = None
 
+pypy2 = (hasattr(sys, 'pypy_version_info') and
+         sys.version_info[0] == 2)
 pypy_lt_53 = (hasattr(sys, 'pypy_version_info') and
               sys.pypy_version_info < (5, 3))
 
@@ -141,6 +143,15 @@ class TestMessageSimple(unittest.TestCase):
         self.assertRaises(ValueError, f)
         def f(): Sendrecv([buf, None, 0, MPI.DATATYPE_NULL], empty)
         self.assertRaises(ValueError, f)
+        try:
+            t = MPI.INT.Create_resized(0, -4).Commit()
+            def f(): Sendrecv([buf, None, t], empty)
+            self.assertRaises(ValueError, f)
+            def f(): Sendrecv([buf, 0, 1, t], empty)
+            self.assertRaises(ValueError, f)
+            t.Free()
+        except NotImplementedError:
+            pass
         MPI.Free_mem(buf)
         buf = [1,2,3,4]
         def f(): Sendrecv([buf, 4,  0, "i"], empty)
@@ -176,6 +187,27 @@ class TestMessageSimple(unittest.TestCase):
         rbuf = bytearray(3)
         Sendrecv([sbuf, "c"], [rbuf, MPI.CHAR])
         self.assertEqual(sbuf, rbuf)
+
+    @unittest.skipIf(pypy_lt_53, 'pypy(<5.3)')
+    def testMessageBuffer(self):
+        if sys.version_info[0] != 2: return
+        sbuf = buffer(b"abc")
+        rbuf = bytearray(3)
+        Sendrecv([sbuf, "c"], [rbuf, MPI.CHAR])
+        self.assertEqual(sbuf, rbuf)
+        self.assertRaises((BufferError, TypeError, ValueError),
+                          Sendrecv, [rbuf, "c"], [sbuf, "c"])
+
+    @unittest.skipIf(pypy2, 'pypy2')
+    @unittest.skipIf(pypy_lt_53, 'pypy(<5.3)')
+    def testMessageMemoryView(self):
+        if sys.version_info[:2] < (2, 7): return
+        sbuf = memoryview(b"abc")
+        rbuf = bytearray(3)
+        Sendrecv([sbuf, "c"], [rbuf, MPI.CHAR])
+        self.assertEqual(sbuf, rbuf)
+        self.assertRaises((BufferError, TypeError, ValueError),
+                          Sendrecv, [rbuf, "c"], [sbuf, "c"])
 
     @unittest.skipIf(array is None, 'array')
     def checkArray(self, test):
@@ -220,6 +252,32 @@ class TestMessageSimple(unittest.TestCase):
         self.checkNumPy(self.check32)
     def testNumPy4(self):
         self.checkNumPy(self.check4)
+
+    @unittest.skipIf(numpy is None, 'numpy')
+    def testNumPyBad(self):
+        from numpy import zeros
+        wbuf = zeros([1])
+        rbuf = zeros([1])
+        rbuf.flags.writeable = False
+        self.assertRaises((BufferError, ValueError),
+                          Sendrecv, wbuf, rbuf)
+        wbuf = zeros([3,2])[:,0]
+        rbuf = zeros([3])
+        rbuf.flags.writeable = False
+        self.assertRaises((BufferError, ValueError),
+                          Sendrecv, rbuf, wbuf)
+
+@unittest.skipMPI('msmpi(<8.0.0)')
+class TestMessageBlock(unittest.TestCase):
+
+    @unittest.skipIf(MPI.COMM_WORLD.Get_size() < 2, 'mpi-world-size<2')
+    def testMessageBad(self):
+        comm = MPI.COMM_WORLD
+        buf = MPI.Alloc_mem(4)
+        empty = [None, 0, "B"]
+        def f(): comm.Alltoall([buf, None, "i"], empty)
+        self.assertRaises(ValueError, f)
+        MPI.Free_mem(buf)
 
 def Alltoallv(smsg, rmsg):
     comm = MPI.COMM_SELF
@@ -327,6 +385,13 @@ class TestMessageVector(unittest.TestCase):
         self.assertRaises(ValueError, f)
         def f(): Alltoallv([buf, None, [0], "i"], empty)
         self.assertRaises(ValueError, f)
+        try:
+            t = MPI.INT.Create_resized(0, -4).Commit()
+            def f(): Alltoallv([buf, None, [0], t], empty)
+            self.assertRaises(ValueError, f)
+            t.Free()
+        except NotImplementedError:
+            pass
         MPI.Free_mem(buf)
         buf = [1,2,3,4]
         def f(): Alltoallv([buf, 0,  0, "i"], empty)
