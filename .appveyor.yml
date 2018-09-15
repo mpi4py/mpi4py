@@ -38,6 +38,12 @@ environment:
     - PYTHON: "C:\\Python36-x64"
       ANACONDA: "C:\\Miniconda36-x64"
 
+    - PYTHON: "C:\\Python37"
+#     ANACONDA: "C:\\Miniconda37"
+
+    - PYTHON: "C:\\Python37-x64"
+#     ANACONDA: "C:\\Miniconda37-x64"
+
 clone_depth: 5
 
 branches:
@@ -80,6 +86,7 @@ test_script:
   - "%PYTHON%\\Scripts\\pip.exe uninstall --yes mpi4py"
 
 after_test:
+  - cmd: if  "%ANACONDA%"=="" appveyor exit
 # - "%PYTHON%\\python.exe setup.py --quiet clean --all"
   - "set MPI=msmpi"
   - "set PATH=%ANACONDA%;%ANACONDA%\\Scripts\\;%PATH%"

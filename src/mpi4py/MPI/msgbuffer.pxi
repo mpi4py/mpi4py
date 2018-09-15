@@ -24,8 +24,7 @@ cdef inline int is_buffer(object ob):
     if PY3:
         return PyObject_CheckBuffer(ob)
     else:
-        return (PyObject_CheckBuffer(ob) or
-                PyObject_CheckReadBuffer(ob))
+        return PyObject_CheckBuffer(ob) or _Py2_IsBuffer(ob)
 
 cdef inline int is_datatype(object ob):
     if isinstance(ob, Datatype): return 1

@@ -38,10 +38,9 @@ cdef extern from "Python.h":
                            bint, int) except -1
 
 # Python 2 buffer interface (legacy)
-cdef extern from "Python.h":
-    int PyObject_CheckReadBuffer(object)
-    int PyObject_AsReadBuffer (object, const void **, Py_ssize_t *) except -1
-    int PyObject_AsWriteBuffer(object, void **, Py_ssize_t *) except -1
+cdef extern from *:
+    int _Py2_IsBuffer(object)
+    int _Py2_AsBuffer(object, int, void **, Py_ssize_t *) except -1
 
 cdef extern from "Python.h":
     object PyLong_FromVoidPtr(void*)
@@ -79,9 +78,7 @@ if PYPY:
             except ImportError:
                 pass
 
-cdef int \
-PyPy_GetBuffer(object obj, Py_buffer *view, int flags) \
-except -1:
+cdef int PyPy_GetBuffer(object obj, Py_buffer *view, int flags) except -1:
     cdef object addr
     cdef void *buf = NULL
     cdef Py_ssize_t size = 0
@@ -112,12 +109,8 @@ except -1:
         buf = PyLong_AsVoidPtr(addr)
         size = obj.nbytes
     else:
-        if (flags & PyBUF_WRITABLE) == PyBUF_WRITABLE:
-            readonly = 0
-            PyObject_AsWriteBuffer(obj, &buf, &size)
-        else:
-            readonly = 1
-            PyObject_AsReadBuffer(obj, <const void**>&buf, &size)
+        readonly = (flags & PyBUF_WRITABLE) != PyBUF_WRITABLE
+        _Py2_AsBuffer(obj, readonly, &buf, &size)
     if buf == NULL and size == 0: buf = emptybuffer
     PyBuffer_FillInfo(view, obj, buf, size, readonly, flags)
     if (flags & PyBUF_FORMAT) == PyBUF_FORMAT: view.format = BYTE_FMT
@@ -125,25 +118,24 @@ except -1:
 
 #------------------------------------------------------------------------------
 
-cdef int \
-PyMPI_GetBuffer(object obj, Py_buffer *view, int flags) \
-except -1:
-    if PYPY: # special-case PyPy runtime
-        return PyPy_GetBuffer(obj, view, flags)
+cdef int Py27_GetBuffer(object obj, Py_buffer *view, int flags) except -1:
     # Python 3 buffer interface (PEP 3118)
-    if PY3 or PyObject_CheckBuffer(obj):
+    if PyObject_CheckBuffer(obj):
         return PyObject_GetBuffer(obj, view, flags)
     # Python 2 buffer interface (legacy)
-    if (flags & PyBUF_WRITABLE) == PyBUF_WRITABLE:
-        view.readonly = 0
-        PyObject_AsWriteBuffer(obj, &view.buf, &view.len)
-    else:
-        view.readonly = 1
-        PyObject_AsReadBuffer(obj, <const void**>&view.buf, &view.len)
+    view.readonly = (flags & PyBUF_WRITABLE) != PyBUF_WRITABLE
+    _Py2_AsBuffer(obj, view.readonly, &view.buf, &view.len)
     if view.buf == NULL and view.len == 0: view.buf = emptybuffer
     PyBuffer_FillInfo(view, obj, view.buf, view.len, view.readonly, flags)
     if (flags & PyBUF_FORMAT) == PyBUF_FORMAT: view.format = BYTE_FMT
     return 0
+
+#------------------------------------------------------------------------------
+
+cdef int PyMPI_GetBuffer(object obj, Py_buffer *view, int flags) except -1:
+    if PYPY: return PyPy_GetBuffer(obj, view, flags)
+    if PY2:  return Py27_GetBuffer(obj, view, flags)
+    return PyObject_GetBuffer(obj, view, flags)
 
 #------------------------------------------------------------------------------
 

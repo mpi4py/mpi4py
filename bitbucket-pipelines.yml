@@ -6,9 +6,9 @@ pipelines:
             - source conf/ci/anaconda.sh
             - install-anaconda
             - test-package python=2.7 MPI=mpich
-            - test-package python=3.6 MPI=mpich
+            - test-package python=3.7 MPI=mpich
             - test-package python=2.7 MPI=openmpi
-            - test-package python=3.6 MPI=openmpi
+            - test-package python=3.7 MPI=openmpi
 # branches:
 #   maint: *default-step
 #   master: *default-step
