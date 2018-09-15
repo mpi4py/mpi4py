@@ -86,7 +86,8 @@ only) thread until they are signaled for completion.
    spawn recursion is using the idiom :code:`if __name__ == '__main__': ...` in
    the main script.
 
-.. class:: MPIPoolExecutor(max_workers=None, **kwargs)
+.. class:: MPIPoolExecutor(max_workers=None, \
+                           initializer=None, initargs=(), **kwargs)
 
    An :class:`~concurrent.futures.Executor` subclass that executes calls
    asynchronously using a pool of at most *max_workers* processes.  If
@@ -95,6 +96,12 @@ only) thread until they are signaled for completion.
    universe size if set, otherwise a single worker process is spawned.  If
    *max_workers* is lower than or equal to ``0``, then a :exc:`ValueError` will
    be raised.
+
+   *initializer* is an optional callable that is called at the start of each
+   worker process before executing any tasks; *initargs* is a tuple of
+   arguments passed to the initializer. If *initializer* raises an exception,
+   all pending tasks and any attempt to submit new tasks to the pool will raise
+   a :exc:`~concurrent.futures.BrokenProcessPool` exception.
 
    Other parameters:
 

@@ -56,6 +56,7 @@ $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py -c "from mpi4py import MPI; 1/0;
 $MPIEXEC -n 1 $PYTHON -m coverage run demo/futures/test_futures.py -q 2> /dev/null
 $MPIEXEC -n 2 $PYTHON -m coverage run demo/futures/test_futures.py -q 2> /dev/null
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.futures demo/futures/test_futures.py -q 2> /dev/null
+$MPIEXEC -n 2 $PYTHON -m coverage run -m mpi4py.futures demo/futures/test_futures.py -q ASharedPoolInitTest   2> /dev/null
 $MPIEXEC -n 2 $PYTHON -m coverage run -m mpi4py.futures demo/futures/test_futures.py -q ProcessPoolPickleTest 2> /dev/null
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.futures -h > /dev/null
 $MPIEXEC -n 2 $PYTHON -m coverage run -m mpi4py.futures -h > /dev/null

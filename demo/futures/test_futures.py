@@ -87,8 +87,50 @@ class ProcessPoolMixin(ExecutorMixin):
             )
 
 
+@unittest.skipIf(not SHARED_POOL, 'not-shared-pool')
+class ASharedPoolInitTest(unittest.TestCase):
+    executor_type = futures.MPIPoolExecutor
+
+    @unittest.skipIf(WORLD_SIZE == 1, 'world-size-1')
+    def test_initializer_1(self):
+        executor = self.executor_type(
+            initializer=sleep_and_raise,
+            initargs=(0.2,),
+        )
+        executor.submit(time.sleep, 0).cancel()
+        future = executor.submit(time.sleep, 0)
+        with self.assertRaises(futures.BrokenExecutor):
+            executor.submit(time.sleep, 0).result()
+        with self.assertRaises(futures.BrokenExecutor):
+            future.result()
+        with self.assertRaises(futures.BrokenExecutor):
+            executor.submit(time.sleep, 0)
+
+    @unittest.skipIf(WORLD_SIZE == 1, 'world-size-1')
+    def test_initializer_2(self):
+        executor = self.executor_type(
+            initializer=time.sleep,
+            initargs=(0,),
+        )
+        executor.bootup()
+        with self.assertRaises(futures.BrokenExecutor):
+            executor.submit(time.sleep, 0)
+
+    @unittest.skipIf(WORLD_SIZE == 1, 'world-size-1')
+    def test_initializer_3(self):
+        executor = self.executor_type()
+        executor.submit(time.sleep, 0).result()
+        executor.shutdown()
+
+
 class ProcessPoolInitTest(ProcessPoolMixin,
                           unittest.TestCase):
+
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
 
     def _prime_executor(self):
         pass
@@ -155,6 +197,43 @@ class ProcessPoolInitTest(ProcessPoolMixin,
             self.assertRaises(ValueError,
                               self.executor_type,
                               max_workers=number)
+
+    @unittest.skipIf(SHARED_POOL, 'shared-pool')
+    def test_initializer(self):
+        executor = self.executor_type(
+            initializer=time.sleep,
+            initargs=(0,),
+        )
+        executor.submit(time.sleep, 0).result()
+
+    @unittest.skipIf(SHARED_POOL, 'shared-pool')
+    def test_initializer_bad(self):
+        with self.assertRaises(TypeError):
+            self.executor_type(initializer=123)
+
+    @unittest.skipIf(SHARED_POOL, 'shared-pool')
+    def test_initializer_error(self):
+        executor = self.executor_type(
+            initializer=sleep_and_raise,
+            initargs=(0.2,),
+        )
+        executor.submit(time.sleep, 0).cancel()
+        future = executor.submit(time.sleep, 0)
+        with self.assertRaises(futures.BrokenExecutor):
+            executor.submit(time.sleep, 0).result()
+        with self.assertRaises(futures.BrokenExecutor):
+            future.result()
+        with self.assertRaises(futures.BrokenExecutor):
+            executor.submit(time.sleep, 0)
+
+    @unittest.skipIf(SHARED_POOL, 'shared-pool')
+    def test_initializer_error_del(self):
+        executor = self.executor_type(
+            initializer=sleep_and_raise,
+            initargs=(0.2,),
+        )
+        executor.bootup()
+        del executor
 
 
 class ProcessPoolBootupTest(ProcessPoolMixin,
@@ -861,8 +940,7 @@ class MPICommExecutorTest(unittest.TestCase):
 
     @unittest.skipIf(SHARED_POOL, 'shared-pool')
     def test_arg_comm_bad(self):
-        if MPI.COMM_WORLD.Get_size() == 1:
-            return
+        if MPI.COMM_WORLD.Get_size() == 1: return
         intercomm = futures._lib.comm_split(MPI.COMM_WORLD)
         try:
             self.assertRaises(ValueError, self.MPICommExecutor, intercomm)
@@ -879,6 +957,39 @@ class MPICommExecutorTest(unittest.TestCase):
                 pass
             else:
                 self.fail('expected RuntimeError')
+
+    @unittest.skipIf(SHARED_POOL, 'shared-pool')
+    def test_initializer(self):
+        mpicommexecutor = self.MPICommExecutor(
+            initializer=time.sleep,
+            initargs=(0,),
+        )
+        with mpicommexecutor as executor:
+            if executor is not None:
+                executor.bootup()
+                del executor
+        with mpicommexecutor as executor:
+            if executor is not None:
+                executor.submit(time.sleep, 0).result()
+
+    @unittest.skipIf(SHARED_POOL, 'shared-pool')
+    def test_initializer_error(self):
+        mpicommexecutor = self.MPICommExecutor(
+            initializer=sleep_and_raise,
+            initargs=(0.2,),
+        )
+        with mpicommexecutor as executor:
+            if executor is not None:
+                executor.bootup()
+                del executor
+        with mpicommexecutor as executor:
+            if executor is not None:
+                executor.submit(time.sleep, 0).cancel()
+                future = executor.submit(time.sleep, 0)
+                with self.assertRaises(futures.BrokenExecutor):
+                    executor.submit(time.sleep, 0).result()
+                with self.assertRaises(futures.BrokenExecutor):
+                    future.result()
 
 
 from mpi4py.futures.aplus import ThenableFuture
@@ -1215,8 +1326,15 @@ if MPI.Get_version() < (2,0):
 if SHARED_POOL:
     del MPICommExecutorTest.test_arg_root
     del MPICommExecutorTest.test_arg_comm_bad
+    del MPICommExecutorTest.test_initializer
+    del MPICommExecutorTest.test_initializer_error
     del ProcessPoolInitTest.test_init_globals
+    del ProcessPoolInitTest.test_initializer
+    del ProcessPoolInitTest.test_initializer_bad
+    del ProcessPoolInitTest.test_initializer_error
+    del ProcessPoolInitTest.test_initializer_error_del
     if WORLD_SIZE == 1:
+        del ASharedPoolInitTest
         del ProcessPoolInitTest.test_run_name
         del ProcessPoolPickleTest
 elif WORLD_SIZE > 1 or SKIP_POOL_TEST:
@@ -1228,6 +1346,8 @@ elif WORLD_SIZE > 1 or SKIP_POOL_TEST:
     del ProcessPoolExecutorTest
     del ProcessPoolSubmitTest
     del ProcessPoolPickleTest
+if not SHARED_POOL:
+    del ASharedPoolInitTest
 
 
 if __name__ == '__main__':

@@ -1,6 +1,7 @@
 # Author:  Lisandro Dalcin
 # Contact: dalcinl@gmail.com
 """Support for Future chaining."""
+# pylint: disable=broad-except
 
 # This implementation is heavily inspired in code written by
 # Daniel Dotsenko [@dvdotsenko] [dotsa at hotmail.com]

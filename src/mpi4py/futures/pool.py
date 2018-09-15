@@ -19,7 +19,8 @@ class MPIPoolExecutor(Executor):
 
     Future = Future
 
-    def __init__(self, max_workers=None, **kwargs):
+    def __init__(self, max_workers=None,
+                 initializer=None, initargs=(), **kwargs):
         """Initialize a new MPIPoolExecutor instance.
 
         Args:
@@ -28,6 +29,8 @@ class MPIPoolExecutor(Executor):
                 number of worker processes will be determined from the MPI
                 universe size attribute if defined, otherwise a single worker
                 process will be spawned.
+            initializer: An callable used to initialize workers processes.
+            initargs: A tuple of arguments to pass to the initializer.
 
         Keyword Args:
             python_exe: Path to Python executable used to spawn workers.
@@ -45,9 +48,15 @@ class MPIPoolExecutor(Executor):
             if max_workers <= 0:
                 raise ValueError("max_workers must be greater than 0")
             kwargs['max_workers'] = max_workers
+        if initializer is not None:
+            if not callable(initializer):
+                raise TypeError("initializer must be a callable")
+            kwargs['initializer'] = initializer
+            kwargs['initargs'] = initargs
 
         self._options = kwargs
         self._shutdown = False
+        self._broken = None
         self._lock = threading.Lock()
         self._pool = None
 
@@ -84,6 +93,8 @@ class MPIPoolExecutor(Executor):
 
         """
         with self._lock:
+            if self._broken:
+                raise _lib.BrokenExecutor(self._broken)
             if self._shutdown:
                 raise RuntimeError("cannot submit after shutdown")
             self._bootstrap()

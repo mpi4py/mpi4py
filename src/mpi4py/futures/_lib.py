@@ -1,7 +1,10 @@
 # Author:  Lisandro Dalcin
 # Contact: dalcinl@gmail.com
 """Management of MPI worker processes."""
+# pylint: disable=broad-except
+# pylint: disable=too-many-lines
 # pylint: disable=missing-docstring
+# pylint: disable=import-outside-toplevel
 
 import os
 import sys
@@ -14,6 +17,7 @@ import threading
 import collections
 
 from .. import MPI
+from . import BrokenExecutor
 
 
 # ---
@@ -142,12 +146,62 @@ def setup_pool(pool, num_workers):
     return pool.queue
 
 
+def initialize(options):
+    initializer = options.get('initializer', None)
+    initargs = options.get('initargs', ())
+    initkwargs = options.get('initkwargs', {})
+    if initializer is not None:
+        try:
+            initializer(*initargs, **initkwargs)
+            return True
+        except BaseException:
+            return False
+    return True
+
+
+def broken(pool, message):
+    lock = None
+    queue = pool.queue
+    executor = pool.exref()
+    if executor is not None:
+        # pylint: disable=protected-access
+        executor._broken = message
+        if not executor._shutdown:
+            lock = executor._lock
+    if lock:
+        lock.acquire()
+    try:
+        while True:
+            try:
+                item = queue.pop()
+            except LookupError:
+                item = None
+            if item is None:
+                queue.put(None)
+                break
+            future, _ = item
+            if future.set_running_or_notify_cancel():
+                future.set_exception(BrokenExecutor(message))
+            del item, future
+    finally:
+        if lock:
+            lock.release()
+
+
 def _manager_thread(pool, **options):
     size = options.pop('max_workers', 1)
     queue = setup_pool(pool, size)
 
+    def init():
+        if not initialize(options):
+            broken(pool, "initializer failed")
+            return False
+        return True
+
     def worker():
         backoff = Backoff(options.get('backoff', BACKOFF))
+        if not init():
+            return
         while True:
             try:
                 item = queue.pop()
@@ -183,7 +237,10 @@ def _manager_comm(pool, comm, **options):
     size = comm.Get_remote_size()
     workers = Stack(reversed(range(size)))
     queue = setup_pool(pool, size)
-    client(comm, 0, workers, queue, **options)
+    if not client_init(comm, options):
+        broken(pool, "initializer failed")
+        return
+    client(comm, 0, workers, queue, options)
 
 
 def _manager_spawn(pool, **options):
@@ -284,7 +341,8 @@ def SplitPool(executor, comm, root):
 
 def server_main_split(comm, root, **options):
     comm = comm_split(comm, root)
-    server(comm, **options)
+    server_init(comm)
+    server(comm, options)
     server_close(comm)
 
 
@@ -306,7 +364,15 @@ def _manager_shared(pool, comm, tag, workers, **options):
         serialized(client_sync)(comm, options)
     size = comm.Get_remote_size()
     queue = setup_pool(pool, size)
-    client(comm, tag, workers, queue, **options)
+    if tag == 0:
+        if not client_init(comm, options):
+            broken(pool, "initializer failed")
+            return
+    if tag >= 1:
+        if options.get('initializer') is not None:
+            broken(pool, "cannot run initializer")
+            return
+    client(comm, tag, workers, queue, options)
 
 
 class SharedPoolCtx(object):
@@ -350,11 +416,14 @@ class SharedPoolCtx(object):
         if self.comm != MPI.COMM_NULL:
             if self.on_root:
                 if next(self.counter) == 0:
-                    client_sync(self.comm, dict(main=False))
+                    options = dict(main=False)
+                    client_sync(self.comm, options)
+                    client_init(self.comm, options)
                 client_close(self.comm)
             else:
                 options = server_sync(self.comm)
-                server(self.comm, **options)
+                server_init(self.comm)
+                server(self.comm, options)
                 server_close(self.comm)
         if not self.on_root:
             join_threads(self.threads)
@@ -390,11 +459,9 @@ def barrier(comm):
         MPI.Request.Waitall(sendreqs)
 
 
-def client_sync(comm, options):
+def client_push(comm, data):
     assert comm.Is_inter()
     assert comm.Get_size() == 1
-    barrier(comm)
-    data = _sync_get_data(options)
     if MPI.VERSION >= 2:
         comm.bcast(data, MPI.ROOT)
     else:  # pragma: no cover
@@ -405,7 +472,27 @@ def client_sync(comm, options):
             for pid in range(size)])
 
 
-def client(comm, tag, worker_pool, task_queue, **options):
+def client_sync(comm, options):
+    assert comm.Is_inter()
+    assert comm.Get_size() == 1
+    barrier(comm)
+    data = _sync_get_data(options)
+    client_push(comm, data)
+
+
+def client_init(comm, options):
+    keys = ('initializer', 'initargs', 'initkwargs')
+    vals = (None, (), {})
+    data = dict((k, options.pop(k, v)) for k, v in zip(keys, vals))
+    serialized(client_push)(comm, data)
+    sbuf = bytearray([False])
+    rbuf = bytearray([False])
+    serialized(comm.Allreduce)(sbuf, rbuf, op=MPI.LAND)
+    success = bool(rbuf[0])
+    return success
+
+
+def client(comm, tag, worker_pool, task_queue, options):
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-statements
     assert comm.Is_inter()
@@ -499,20 +586,36 @@ def client_close(comm):
         comm.Free()
 
 
-def server_sync(comm):
+def server_pull(comm):
     assert comm.Is_inter()
     assert comm.Get_remote_size() == 1
-    barrier(comm)
     if MPI.VERSION >= 2:
         data = comm.bcast(None, 0)
     else:  # pragma: no cover
         tag = MPI.COMM_WORLD.Get_attr(MPI.TAG_UB)
         data = comm.recv(None, 0, tag)
+    return data
+
+def server_sync(comm):
+    assert comm.Is_inter()
+    assert comm.Get_remote_size() == 1
+    barrier(comm)
+    data = server_pull(comm)
     options = _sync_set_data(data)
     return options
 
 
-def server(comm, **options):
+def server_init(comm):
+    options = server_pull(comm)
+    success = initialize(options)
+    sbuf = bytearray([success])
+    rbuf = bytearray([True])
+    comm.Allreduce(sbuf, rbuf, op=MPI.LAND)
+    assert bool(rbuf[0]) is False
+    return success
+
+
+def server(comm, options):
     assert comm.Is_inter()
     assert comm.Get_remote_size() == 1
 
@@ -621,6 +724,10 @@ def _sync_get_data(options):
     import_main_module = options.pop('main', True)
 
     data = options.copy()
+    data.pop('initializer', None)
+    data.pop('initargs', None)
+    data.pop('initkwargs', None)
+
     if import_main_module:
         spec = getattr(main, '__spec__', None)
         name = getattr(spec, 'name', None)
@@ -874,7 +981,8 @@ def server_accept(service, mpi_info=None,
 def server_main_comm(comm):
     assert comm != MPI.COMM_NULL
     options = server_sync(comm)
-    server(comm, **options)
+    server_init(comm)
+    server(comm, options)
     server_close(comm)
 
 
