@@ -242,7 +242,7 @@ SpectrumMPI = MPI.get_vendor()[0] == 'Spectrum MPI'
 try:
     if SpectrumMPI: raise NotImplementedError
     MPI.Win.Create(MPI.BOTTOM).Free()
-except NotImplementedError:
+except (NotImplementedError, MPI.Exception):
     unittest.disable(BaseTestMyWin, 'mpi-win')
 
 # ---

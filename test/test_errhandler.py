@@ -71,5 +71,12 @@ class TestErrhandler(unittest.TestCase):
         file.Close()
 
 
+try:
+    MPI.Win.Create(MPI.BOTTOM, 1, MPI.INFO_NULL, MPI.COMM_SELF).Free()
+except (NotImplementedError, MPI.Exception):
+    TestErrhandler.testWinCallErrhandler = \
+    unittest.disable(TestErrhandler.testWinCallErrhandler, 'mpi-win')
+
+
 if __name__ == '__main__':
     unittest.main()
