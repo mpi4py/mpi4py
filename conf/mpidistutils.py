@@ -1456,6 +1456,9 @@ if setuptools:
 
 try:
     import msilib
+    if not hasattr(msilib, 'Win64'):
+        if hasattr(msilib, 'AMD64'):
+            msilib.Win64 = msilib.AMD64
     Directory_make_short = msilib.Directory.make_short
     def make_short(self, file):
         parts = file.split('.')
