@@ -42,7 +42,7 @@ test-package() {
   RUN $MPIEXEC -n 1  python -m mpi4py.futures $PWD/demo/futures/test_futures.py
   RUN $MPIEXEC -n $P python -m mpi4py.futures $PWD/demo/futures/test_futures.py -f
   if [[ "$coverage" == "yes" ]]; then
-      RUN conda install --quiet --yes coverage
+      RUN conda install --quiet --yes -c conda-forge coverage
       RUN ./conf/coverage.sh
       RUN coverage report
       RUN coverage xml
