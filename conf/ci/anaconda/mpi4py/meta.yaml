@@ -36,7 +36,7 @@ test:
     - mpi4py.MPI
 
 about:
-  home: http://mpi4py.scipy.org/
+  home: https://mpi4py.bitbucket.io/
   summary: Python bindings for MPI
   description: |
     MPI for Python provides bindings of the Message Passing Interface

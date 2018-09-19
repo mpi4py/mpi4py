@@ -2,8 +2,8 @@
 MPI for Python
 ==============
 
-:Author:       Lisandro Dalcin
-:Contact:      dalcinl@gmail.com
+:Author:  Lisandro Dalcin
+:Contact: dalcinl@gmail.com
 
 
 Online Documentation
@@ -16,7 +16,7 @@ Hosted at *Read the Docs* [http://mpi4py.readthedocs.org/]:
 .. image::  https://readthedocs.org/projects/mpi4py/badge/?version=latest
    :target: https://mpi4py.readthedocs.org/latest/
 
-Hosted at *SciPy* [http://mpi4py.scipy.org/]:
+Hosted at *Bitbucket* [https://mpi4py.bitbucket.io/]:
 
 + `User Manual (HTML)`_ (generated with Sphinx_).
 + `User Manual (PDF)`_  (generated with Sphinx_).
