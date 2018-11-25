@@ -112,4 +112,17 @@
 #define PyMPI_HAVE_MPI_WIN_UNIFIED 1
 #endif
 
+#if MSMPI_VER >= 0x1000
+#define PyMPI_HAVE_MPI_Get_accumulate
+#define PyMPI_HAVE_MPI_Rget_accumulate
+#define PyMPI_HAVE_MPI_Fetch_and_op
+#define PyMPI_HAVE_MPI_Compare_and_swap
+#define PyMPI_HAVE_MPI_Win_lock_all
+#define PyMPI_HAVE_MPI_Win_unlock_all
+#define PyMPI_HAVE_MPI_Win_flush_all
+#define PyMPI_HAVE_MPI_Win_flush_local
+#define PyMPI_HAVE_MPI_Win_flush_local_all
+#define PyMPI_HAVE_MPI_Win_sync
+#endif
+
 #endif /* !PyMPI_CONFIG_MSMPI_H */
