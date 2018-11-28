@@ -149,12 +149,21 @@ def customize_compiler(compiler, lang=None,
         if not compiler.initialized: compiler.initialize()
         compiler.ldflags_shared.append('/MANIFEST')
         compiler.ldflags_shared_debug.append('/MANIFEST')
+        compile_options = (compiler.compile_options,
+                           compiler.compile_options_debug)
         from distutils.msvc9compiler import VERSION
         if VERSION < 10.0:
-            for options in (compiler.compile_options,
-                            compiler.compile_options_debug):
+            for options in compile_options:
                 options.append('/D_USE_DECLSPECS_FOR_SAL=0')
                 options.append('/D_USE_ATTRIBUTES_FOR_SAL=0')
+                options.append('/DMSMPI_NO_SAL')
+        if VERSION <= 10.0:
+            topdir = os.path.dirname(os.path.dirname(__file__))
+            srcdir = os.path.abspath(os.path.join(topdir, 'src'))
+            header = os.path.join(srcdir, 'msvcfix.h')
+            if os.path.exists(header):
+                for options in compile_options:
+                    options.append('/FI%s' % header)
 
 # -----------------------------------------------------------------------------
 
