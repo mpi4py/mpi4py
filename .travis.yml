@@ -3,19 +3,20 @@
 language: python
 python:
   - 2.7
-  - 3.3
   - 3.4
   - 3.5
   - 3.6
+  - 3.7
 
 os: linux
-dist: trusty
+dist: xenial
 sudo: required
 
 env:
   global:
     - HYDRA_LAUNCHER=fork
-    - OMPI_MCA_rmaps_base_oversubscribe=yes
+    - OMPI_MCA_plm=isolated
+    - OMPI_MCA_rmaps_base_oversubscribe=true
   matrix:
     - MPI=mpich
     - MPI=openmpi
@@ -23,18 +24,22 @@ env:
 matrix:
   include:
     - os: osx
+      osx_image: xcode10
       env: MPI=mpich PY=2
       language: generic
       python: 2
     - os: osx
+      osx_image: xcode10
       env: MPI=openmpi PY=2
       language: generic
       python: 2
     - os: osx
+      osx_image: xcode10
       env: MPI=mpich PY=3
       language: generic
       python: 3
     - os: osx
+      osx_image: xcode10
       env: MPI=openmpi PY=3
       language: generic
       python: 3
@@ -60,6 +65,7 @@ branches:
   only:
     - master
     - maint
+    - ci/travis
 
 git:
   depth: 3
@@ -67,19 +73,13 @@ git:
 cache:
   apt: true
 
+addons:
+  apt:
+    update: true
+  homebrew:
+    update: true
+
 before_install:
-  - |
-    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-        sudo apt-get update -q
-    fi
-  - |
-    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-        brew update
-        brew cask uninstall oclint
-        if [[ "$PY" == "3" ]]; then  # Install Python 3
-            brew upgrade python
-        fi
-    fi
   - python$PY -m pip install Cython
   - python$PY -m pip install numpy
   - ./conf/ci/travis-ci/install-mpi.sh $MPI
