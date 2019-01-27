@@ -109,6 +109,7 @@ class BaseTestRMA(object):
                                 self.assertNotEqual(rbuf[i], -1)
                             self.assertEqual(rbuf[-1], -1)
 
+    @unittest.skipMPI('openmpi(>=1.10,<1.11)')
     def testGetAccumulate(self):
         group = self.WIN.Get_group()
         size = group.Get_size()
