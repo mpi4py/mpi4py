@@ -27,7 +27,7 @@ test-package() {
   PY=${PY-2.7} MPI=${MPI-mpich}
   RUN source $ANACONDA/bin/activate root
   RUN rm -rf $ANACONDA/envs/test
-  RUN conda create --quiet --yes -n test -c conda-forge python=$PY $MPI numpy cython
+  RUN conda create --quiet --yes -n test -c conda-forge python=$PY $MPI gcc_linux-64 numpy cython coverage
   RUN source activate test
   RUN python setup.py build_src --force
   RUN python setup.py install
@@ -42,11 +42,10 @@ test-package() {
   RUN $MPIEXEC -n 1  python -m mpi4py.futures $PWD/demo/futures/test_futures.py
   RUN $MPIEXEC -n $P python -m mpi4py.futures $PWD/demo/futures/test_futures.py -f
   if [[ "$coverage" == "yes" ]]; then
-      RUN conda install --quiet --yes -c conda-forge coverage
       RUN ./conf/coverage.sh
       RUN coverage report
       RUN coverage xml
       RUN mv coverage.xml coverage-py$PY-$MPI.xml
   fi
-  RUN source deactivate
+  RUN source $ANACONDA/bin/deactivate
 }
