@@ -311,8 +311,8 @@ class WaitTestMixin:
 
     def test_first_exception(self):
         future1 = self.executor.submit(mul, 2, 21)
-        future2 = self.executor.submit(sleep_and_raise, 0.1)
-        future3 = self.executor.submit(time.sleep, 0.2)
+        future2 = self.executor.submit(sleep_and_raise, 0.2)
+        future3 = self.executor.submit(time.sleep, 0.4)
 
         finished, pending = futures.wait(
                 [future1, future2, future3],
