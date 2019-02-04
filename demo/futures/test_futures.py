@@ -1186,6 +1186,8 @@ name, version = MPI.get_vendor()
 if name == 'Open MPI':
     if version < (3,0,0):
         SKIP_POOL_TEST = True
+    if version == (4,0,0):
+        SKIP_POOL_TEST = True
 if name == 'MPICH':
     if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
         SKIP_POOL_TEST = True
