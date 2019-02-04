@@ -39,10 +39,10 @@ environment:
       ANACONDA: "C:\\Miniconda36-x64"
 
     - PYTHON: "C:\\Python37"
-#     ANACONDA: "C:\\Miniconda37"
+      ANACONDA: "C:\\Miniconda36"
 
     - PYTHON: "C:\\Python37-x64"
-#     ANACONDA: "C:\\Miniconda37-x64"
+      ANACONDA: "C:\\Miniconda36-x64"
 
 clone_depth: 5
 
