@@ -60,7 +60,7 @@ master_doc = 'index'
 # General information about the project.
 package = 'mpi4py'
 project = u'MPI for Python'
-copyright = u'2017, Lisandro Dalcin'
+copyright = u'2019, Lisandro Dalcin'
 author = u'Lisandro Dalcin'
 
 # The version info for the project you're documenting, acts as replacement for
