@@ -26,7 +26,7 @@ exposes an API which grounds on the standard MPI-2 C++ bindings.
 Dependencies
 ------------
 
-* `Python <http://www.python.org/>`_ 2.7, 3.3 or above,
+* `Python <http://www.python.org/>`_ 2.7, 3.4 or above,
   or `PyPy <http://pypy.org/>`_ 2.0 or above.
 
 * A functional MPI 1.x/2.x/3.x implementation like `MPICH

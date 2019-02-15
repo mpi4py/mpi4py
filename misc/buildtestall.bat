@@ -1,7 +1,7 @@
 @echo off
 setlocal ENABLEEXTENSIONS
 
-set TEST_PY=25,26,27,30,31,32,33,34,35
+set TEST_PY=27,34,35,35,37,38
 set TEST_CC=msvc,mingw32
 set TEST_MPI=msmpi
 
