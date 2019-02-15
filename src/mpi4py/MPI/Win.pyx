@@ -63,7 +63,7 @@ cdef class Win:
         """
         cdef void *base = NULL
         cdef MPI_Aint size = 0
-        if memory is __BOTTOM__:
+        if is_BOTTOM(memory):
             base = MPI_BOTTOM
             memory = None
         elif memory is not None:

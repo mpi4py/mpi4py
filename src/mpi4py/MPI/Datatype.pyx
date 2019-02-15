@@ -838,7 +838,7 @@ def Get_address(location):
     Get the address of a location in memory
     """
     cdef void *baseptr = MPI_BOTTOM
-    if location is not __BOTTOM__:
+    if not is_BOTTOM(location):
         getbuffer_r(location, &baseptr, NULL)
     cdef MPI_Aint address = 0
     CHKERR( MPI_Get_address(baseptr, &address) )

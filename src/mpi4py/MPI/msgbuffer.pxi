@@ -57,6 +57,15 @@ cdef object __BOTTOM__   = <MPI_Aint>MPI_BOTTOM
 
 cdef object __IN_PLACE__ = <MPI_Aint>MPI_IN_PLACE
 
+
+cdef inline bint is_BOTTOM(object obj):
+    if PYPY: return type(obj) is type(__BOTTOM__) and obj == __BOTTOM__
+    else:    return obj is __BOTTOM__
+
+cdef inline bint is_IN_PLACE(object obj):
+    if PYPY: return type(obj) is type(__IN_PLACE__) and obj == __IN_PLACE__
+    else:    return obj is __IN_PLACE__
+
 #------------------------------------------------------------------------------
 
 @cython.final
@@ -78,7 +87,7 @@ cdef _p_message message_basic(object o_buf,
     cdef _p_message m = <_p_message>_p_message.__new__(_p_message)
     # special-case for BOTTOM or None,
     # an explicit MPI datatype is required
-    if o_buf is __BOTTOM__ or o_buf is None:
+    if is_BOTTOM(o_buf) or o_buf is None:
         if isinstance(o_type, Datatype):
             m.type = <Datatype>o_type
         else:
@@ -504,7 +513,7 @@ cdef class _p_msg_cco:
             CHKERR( MPI_Comm_rank(comm, &rank) )
             if root == rank:
                 self.for_cco_recv(v, rmsg, root, size)
-                if smsg is __IN_PLACE__:
+                if is_IN_PLACE(smsg):
                     self.sbuf   = MPI_IN_PLACE
                     self.scount = self.rcount
                     self.stype  = self.rtype
@@ -536,7 +545,7 @@ cdef class _p_msg_cco:
             CHKERR( MPI_Comm_rank(comm, &rank) )
             if root == rank:
                 self.for_cco_send(v, smsg, root, size)
-                if rmsg is __IN_PLACE__:
+                if is_IN_PLACE(rmsg):
                     self.rbuf   = MPI_IN_PLACE
                     self.rcount = self.scount
                     self.rtype  = self.stype
@@ -569,7 +578,7 @@ cdef class _p_msg_cco:
             CHKERR( MPI_Comm_remote_size(comm, &size) )
         #
         self.for_cco_recv(v, rmsg, 0, size)
-        if not inter and smsg is __IN_PLACE__:
+        if not inter and is_IN_PLACE(smsg):
             self.sbuf   = MPI_IN_PLACE
             self.scount = self.rcount
             self.stype  = self.rtype
@@ -590,7 +599,7 @@ cdef class _p_msg_cco:
             CHKERR( MPI_Comm_remote_size(comm, &size) )
         #
         self.for_cco_recv(v, rmsg, 0, size)
-        if not inter and smsg is __IN_PLACE__:
+        if not inter and is_IN_PLACE(smsg):
             self.sbuf    = MPI_IN_PLACE
             self.scount  = self.rcount
             self.scounts = self.rcounts
@@ -656,7 +665,7 @@ cdef class _p_msg_cco:
             CHKERR( MPI_Comm_rank(comm, &rank) )
             if root == rank:
                 self.for_cro_recv(rmsg, root)
-                if smsg is __IN_PLACE__:
+                if is_IN_PLACE(smsg):
                     self.sbuf   = MPI_IN_PLACE
                     self.scount = self.rcount
                     self.stype  = self.rtype
@@ -687,7 +696,7 @@ cdef class _p_msg_cco:
         CHKERR( MPI_Comm_test_inter(comm, &inter) )
         # get send and recv buffers
         self.for_cro_recv(rmsg, 0)
-        if not inter and smsg is __IN_PLACE__:
+        if not inter and is_IN_PLACE(smsg):
             self.sbuf   = MPI_IN_PLACE
             self.scount = self.rcount
             self.stype  = self.rtype
@@ -712,7 +721,7 @@ cdef class _p_msg_cco:
         CHKERR( MPI_Comm_test_inter(comm, &inter) )
         CHKERR( MPI_Comm_size(comm, &size) )
         # get send and recv buffers
-        if not inter and smsg is __IN_PLACE__:
+        if not inter and is_IN_PLACE(smsg):
             self.for_cco_recv(0, rmsg, 0, size)
             self.sbuf = MPI_IN_PLACE
         else:
@@ -739,7 +748,7 @@ cdef class _p_msg_cco:
         CHKERR( MPI_Comm_rank(comm, &rank) )
         # get send and recv buffers
         self.for_cro_recv(rmsg, 0)
-        if not inter and smsg is __IN_PLACE__:
+        if not inter and is_IN_PLACE(smsg):
             self.sbuf = MPI_IN_PLACE
         else:
             self.for_cro_send(smsg, 0)
@@ -780,7 +789,7 @@ cdef class _p_msg_cco:
         if comm == MPI_COMM_NULL: return 0
         # get send and recv buffers
         self.for_cro_recv(rmsg, 0)
-        if smsg is __IN_PLACE__:
+        if is_IN_PLACE(smsg):
             self.sbuf   = MPI_IN_PLACE
             self.scount = self.rcount
             self.stype  = self.rtype
@@ -803,7 +812,7 @@ cdef class _p_msg_cco:
         if comm == MPI_COMM_NULL: return 0
         # get send and recv buffers
         self.for_cro_recv(rmsg, 0)
-        if smsg is __IN_PLACE__:
+        if is_IN_PLACE(smsg):
             self.sbuf   = MPI_IN_PLACE
             self.scount = self.rcount
             self.stype  = self.rtype
@@ -863,7 +872,7 @@ cdef class _p_msg_ccow:
             rmsg, 0, size,
             &self.rbuf, &self.rcounts,
             &self.rdispls, &self.rtypes)
-        if not inter and smsg is __IN_PLACE__:
+        if not inter and is_IN_PLACE(smsg):
             self.sbuf    = MPI_IN_PLACE
             self.scounts = self.rcounts
             self.sdispls = self.rdispls

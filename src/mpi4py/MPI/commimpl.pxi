@@ -31,14 +31,25 @@ cdef object __UNWEIGHTED__    = <MPI_Aint>MPI_UNWEIGHTED
 
 cdef object __WEIGHTS_EMPTY__ = <MPI_Aint>MPI_WEIGHTS_EMPTY
 
+
+cdef inline bint is_weights(object obj, object CONST):
+    if PYPY: return type(obj) is type(CONST) and obj == CONST
+    else:    return obj is CONST
+
+cdef inline bint is_UNWEIGHTED(object weights):
+    return is_weights(weights, __UNWEIGHTED__)
+
+cdef inline bint is_WEIGHTS_EMPTY(object weights):
+    return is_weights(weights, __WEIGHTS_EMPTY__)
+
 cdef object asarray_weights(object weights, int nweight, int **iweight):
     if weights is None:
         iweight[0] = MPI_UNWEIGHTED
         return None
-    if weights is __UNWEIGHTED__:
+    if is_UNWEIGHTED(weights):
         iweight[0] = MPI_UNWEIGHTED
         return None
-    if weights is __WEIGHTS_EMPTY__:
+    if is_WEIGHTS_EMPTY(weights):
         if nweight > 0: raise ValueError("empty weights but nonzero degree")
         iweight[0] = MPI_WEIGHTS_EMPTY
         return None
