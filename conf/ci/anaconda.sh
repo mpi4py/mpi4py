@@ -5,30 +5,36 @@ RUN export ANACONDA=${ANACONDA-/opt/anaconda}
 RUN export CFLAGS=-O0
 
 install-anaconda() {
-  MINICONDA=Miniconda2-latest-Linux-$(arch).sh
+  MINICONDA=Miniconda3-latest-Linux-$(arch).sh
   RUN curl -s -o ~/$MINICONDA https://repo.continuum.io/miniconda/$MINICONDA
   RUN bash ~/$MINICONDA -b -f -p $ANACONDA
   RUN source $ANACONDA/bin/activate root
   RUN conda config --set show_channel_urls yes
-  RUN conda install --quiet --yes -n root conda-build
 }
 
 test-package() {
+  unset PY
+  unset MPI
+  unset COVERAGE
   for arg in $@; do
     case $arg in
       python=?*)
         PY="${arg#*=}";;
       MPI=?*)
         MPI="${arg#*=}";;
+      coverage=?*)
+        COVERAGE="${arg#*=}";;
       *)
         break
     esac
   done
-  PY=${PY-2.7} MPI=${MPI-mpich}
+  PY=${PY-2.7}
+  MPI=${MPI-mpich}
+  COVERAGE=${COVERAGE-no}
   RUN source $ANACONDA/bin/activate root
   RUN rm -rf $ANACONDA/envs/test
-  RUN conda create --quiet --yes -n test -c conda-forge python=$PY $MPI gcc_linux-64 numpy cython coverage
-  RUN source activate test
+  RUN conda create --quiet --yes -n test -c conda-forge python=$PY $MPI $MPI-mpicc numpy cython coverage
+  RUN conda activate test
   RUN python setup.py build_src --force
   RUN python setup.py install
   RUN python setup.py --quiet clean --all
@@ -41,11 +47,11 @@ test-package() {
   RUN $MPIEXEC -n $P python $PWD/demo/futures/test_futures.py -f
   RUN $MPIEXEC -n 1  python -m mpi4py.futures $PWD/demo/futures/test_futures.py
   RUN $MPIEXEC -n $P python -m mpi4py.futures $PWD/demo/futures/test_futures.py -f
-  if [[ "$coverage" == "yes" ]]; then
+  if [[ "$COVERAGE" == "yes" ]]; then
       RUN ./conf/coverage.sh
       RUN coverage report
       RUN coverage xml
       RUN mv coverage.xml coverage-py$PY-$MPI.xml
   fi
-  RUN source $ANACONDA/bin/deactivate
+  RUN conda deactivate
 }
