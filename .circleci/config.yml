@@ -5,7 +5,7 @@ jobs:
       only:
         - master
         - maint
-        - ci/circleci
+        - ci/circle
     docker:
       - image: condaforge/linux-anvil
     steps:
