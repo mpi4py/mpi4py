@@ -4,7 +4,7 @@ mpi4py.run
 .. module:: mpi4py.run
    :synopsis: Run Python code using ``-m mpi4py``.
 
-.. versionadded:: 2.1.0
+.. versionadded:: 3.0.0
 
 At import time, :mod:`mpi4py` initializes the MPI execution environment calling
 :c:func:`MPI_Init_thread` and installs an exit hook to automatically call
