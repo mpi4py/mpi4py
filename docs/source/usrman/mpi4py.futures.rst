@@ -4,7 +4,7 @@ mpi4py.futures
 .. module:: mpi4py.futures
    :synopsis: Execute computations concurrently using MPI processes.
 
-.. versionadded:: 2.1.0
+.. versionadded:: 3.0.0
 
 This package provides a high-level interface for asynchronously executing
 callables on a pool of worker processes using MPI for inter-process
