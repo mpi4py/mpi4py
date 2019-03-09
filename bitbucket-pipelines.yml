@@ -9,6 +9,8 @@ pipelines:
             - test-package python=3.7 MPI=mpich
             - test-package python=2.7 MPI=openmpi
             - test-package python=3.7 MPI=openmpi
+clone:
+  depth: 3
 # branches:
 #   maint: *default-step
 #   master: *default-step
