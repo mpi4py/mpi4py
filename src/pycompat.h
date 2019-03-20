@@ -48,9 +48,9 @@ static int _Py2_AsBuffer(PyObject *obj, int readonly,
 {
 #if defined(PYPY_VERSION) || PY_VERSION_HEX < 0x03000000
   if (readonly)
-    return PyObject_AsWriteBuffer(obj, buf, size);
-  else
     return PyObject_AsReadBuffer(obj, (const void**)buf, size);
+  else
+    return PyObject_AsWriteBuffer(obj, buf, size);
 #else
   (void)obj; (void)readonly;
   (void)buf; (void)size;
