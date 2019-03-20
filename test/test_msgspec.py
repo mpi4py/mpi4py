@@ -188,10 +188,11 @@ class TestMessageSimple(unittest.TestCase):
         Sendrecv([sbuf, "c"], [rbuf, MPI.CHAR])
         self.assertEqual(sbuf, rbuf)
 
+    @unittest.skipIf(pypy2, 'pypy2')
     @unittest.skipIf(sys.version_info[0] >= 3, 'python3')
     def testMessageUnicode(self):  # Test for Issue #120
         sbuf = unicode("abc")
-        rbuf = bytearray(3 * 4)
+        rbuf = bytearray(len(buffer(sbuf)))
         Sendrecv([sbuf, MPI.BYTE], [rbuf, MPI.BYTE])
 
     @unittest.skipIf(pypy_lt_53, 'pypy(<5.3)')
@@ -434,12 +435,6 @@ class TestMessageVector(unittest.TestCase):
         Alltoallv([sbuf, "c"], [rbuf, MPI.CHAR])
         self.assertEqual(sbuf, rbuf)
 
-    @unittest.skipIf(sys.version_info[0] >= 3, 'python3')
-    def testMessageUnicode(self):  # Test for Issue #120
-        sbuf = unicode("abc")
-        rbuf = bytearray(3 * 4)
-        Alltoallv([sbuf, MPI.BYTE], [rbuf, MPI.BYTE])
-
     @unittest.skipIf(array is None, 'array')
     def checkArray(self, test):
         from operator import eq as equal
@@ -610,11 +605,12 @@ class TestMessageRMA(unittest.TestCase):
             PutGet(sbuf, rbuf, target)
             self.assertEqual(sbuf, rbuf)
 
+    @unittest.skipIf(pypy2, 'pypy2')
     @unittest.skipIf(sys.version_info[0] >= 3, 'python3')
     def testMessageUnicode(self):  # Test for Issue #120
         sbuf = unicode("abc")
         rbuf = bytearray(len(buffer(sbuf)))
-        PutGet(sbuf, rbuf, None)
+        PutGet([sbuf, MPI.BYTE], [rbuf, MPI.BYTE], None)
 
 if __name__ == '__main__':
     unittest.main()
