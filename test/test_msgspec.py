@@ -190,6 +190,7 @@ class TestMessageSimple(unittest.TestCase):
 
     @unittest.skipIf(pypy2, 'pypy2')
     @unittest.skipIf(sys.version_info[0] >= 3, 'python3')
+    @unittest.skipIf(hasattr(MPI, 'ffi'), 'mpi4py-cffi')
     def testMessageUnicode(self):  # Test for Issue #120
         sbuf = unicode("abc")
         rbuf = bytearray(len(buffer(sbuf)))
@@ -607,6 +608,7 @@ class TestMessageRMA(unittest.TestCase):
 
     @unittest.skipIf(pypy2, 'pypy2')
     @unittest.skipIf(sys.version_info[0] >= 3, 'python3')
+    @unittest.skipIf(hasattr(MPI, 'ffi'), 'mpi4py-cffi')
     def testMessageUnicode(self):  # Test for Issue #120
         sbuf = unicode("abc")
         rbuf = bytearray(len(buffer(sbuf)))
