@@ -73,7 +73,7 @@ only) thread until they are signaled for completion.
    script code (using the :mod:`runpy` module) under the :mod:`__worker__`
    namespace to define the :mod:`__main__` module. The :mod:`__main__` and
    :mod:`__worker__` modules are added to :data:`sys.modules` (both at the
-   master and worker processes) to ensure proper *picklig* and *unpickling*.
+   master and worker processes) to ensure proper *pickling* and *unpickling*.
 
 .. warning::
 
