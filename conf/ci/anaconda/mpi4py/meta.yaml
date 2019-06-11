@@ -15,6 +15,8 @@ source:
 
 requirements:
   build:
+    - {{ compiler('c') }} # [not win or py==27 or py>=35]
+  host:
     - python
     - cython >=0.22
     - {{mpi}} {{mpi_version}} # [not win]

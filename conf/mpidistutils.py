@@ -380,12 +380,10 @@ def import_command(cmd):
         return import_module('distutils.command.' + cmd)
 
 if setuptools:
-    from setuptools import setup        as fcn_setup
     from setuptools import Distribution as cls_Distribution
     from setuptools import Extension    as cls_Extension
     from setuptools import Command
 else:
-    from distutils.core import setup        as fcn_setup
     from distutils.core import Distribution as cls_Distribution
     from distutils.core import Extension    as cls_Extension
     from distutils.core import Command
@@ -466,6 +464,10 @@ class Executable(Extension):
 # setup function
 
 def setup(**attrs):
+    if setuptools:
+        from setuptools import setup as fcn_setup
+    else:
+        from distutils.core import setup as fcn_setup
     if 'distclass' not in attrs:
         attrs['distclass'] = Distribution
     if 'cmdclass' not in attrs:
