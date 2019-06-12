@@ -407,6 +407,7 @@ def client_sync(comm, options):
 
 def client(comm, tag, worker_pool, task_queue, **options):
     # pylint: disable=too-many-locals
+    # pylint: disable=too-many-statements
     assert comm.Is_inter()
     assert comm.Get_size() == 1
     assert tag >= 0

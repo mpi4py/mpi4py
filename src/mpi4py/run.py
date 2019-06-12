@@ -69,6 +69,7 @@ def set_abort_status(status):
 def main():
     """Entry-point for ``python -m mpi4py.run ...``."""
     # pylint: disable=missing-docstring
+    # pylint: disable=too-many-statements
     import os
     import sys
 
@@ -172,7 +173,7 @@ def main():
                 # Bad option, print usage and exit with error
                 usage('Cannot parse option: ' + args[0])
         # Check remaining args and return to caller
-        if len(args) < 1:
+        if not args:
             usage("No path specified for execution")
         elif args[0] in ('-m', '-c') and len(args) < 2:
             usage("Argument expected for option: " + args[0])

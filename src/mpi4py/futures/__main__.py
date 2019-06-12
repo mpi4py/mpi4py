@@ -39,7 +39,7 @@ def main():
 
     def chk_command_line():
         args = sys.argv[1:]
-        if len(args) < 1:
+        if not args:
             usage("No path specified for execution")
         elif args[0] == '-':
             pass

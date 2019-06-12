@@ -33,6 +33,7 @@ def helloworld(comm, args=None, verbose=True):
 def ringtest(comm, args=None, verbose=True):
     """Time a message going around the ring of processes."""
     # pylint: disable=too-many-locals
+    # pylint: disable=too-many-statements
     from argparse import ArgumentParser
     parser = ArgumentParser(prog=__package__ + ".bench ringtest")
     parser.add_argument("-q", "--quiet", action="store_false",
