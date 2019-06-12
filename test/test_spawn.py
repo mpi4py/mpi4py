@@ -43,6 +43,7 @@ def appnum():
 @unittest.skipMPI('MPI(<2.0)')
 @unittest.skipMPI('openmpi(<3.0.0)')
 @unittest.skipMPI('openmpi(==4.0.0)')
+@unittest.skipMPI('openmpi(==4.0.1)', sys.platform=='darwin')
 @unittest.skipMPI('mpich', appnum() is None)
 @unittest.skipMPI('msmpi(<8.1.0)')
 @unittest.skipMPI('msmpi', appnum() is None)
