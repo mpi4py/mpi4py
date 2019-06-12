@@ -12,9 +12,9 @@ Online Documentation
 Hosted at *Read the Docs* [http://mpi4py.readthedocs.org/]:
 
 .. image::  https://readthedocs.org/projects/mpi4py/badge/?version=stable
-   :target: https://mpi4py.readthedocs.org/stable/
+   :target: https://mpi4py.readthedocs.org/en/stable/
 .. image::  https://readthedocs.org/projects/mpi4py/badge/?version=latest
-   :target: https://mpi4py.readthedocs.org/latest/
+   :target: https://mpi4py.readthedocs.org/en/latest/
 
 Hosted at *Bitbucket* [https://mpi4py.bitbucket.io/]:
 

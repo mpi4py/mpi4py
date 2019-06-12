@@ -82,19 +82,6 @@ PySlice_GetIndicesEx((PySliceObject *)(s), n, start, stop, step, length)
 
 /* ------------------------------------------------------------------------- */
 
-#if !defined(WITH_THREAD)
-#undef  PyGILState_Ensure
-#define PyGILState_Ensure() ((PyGILState_STATE)0)
-#undef  PyGILState_Release
-#define PyGILState_Release(state) (state)=((PyGILState_STATE)0)
-#undef  Py_BLOCK_THREADS
-#define Py_BLOCK_THREADS (_save)=(PyThreadState*)0;
-#undef  Py_UNBLOCK_THREADS
-#define Py_UNBLOCK_THREADS (_save)=(PyThreadState*)0;
-#endif
-
-/* ------------------------------------------------------------------------- */
-
 /*
   Local variables:
   c-basic-offset: 2
