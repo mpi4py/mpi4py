@@ -182,7 +182,7 @@ class TestPickle(unittest.TestCase):
     def testYAML(self):
         pickle = self.pickle
         dumps = lambda o: yaml.dump(o).encode()
-        loads = lambda s: yaml.load(tobytes(s).decode())
+        loads = lambda s: yaml.load(tobytes(s).decode(), Loader=yaml.Loader)
         pickle.__init__(dumps, loads)
         OBJS2 = [o for o in OBJS
                  if not isinstance(o, (complex, tuple))]
