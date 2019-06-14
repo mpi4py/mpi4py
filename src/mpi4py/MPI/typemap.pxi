@@ -18,6 +18,7 @@ AddTypeMap(TypeDict, "?" , __C_BOOL__   ) # PEP-3118 & NumPy
 # character
 AddTypeMap(TypeDict, "c" , __CHAR__     ) # PEP-3118 & NumPy
 AddTypeMap(TypeDict, "S" , __CHAR__     ) # NumPy
+AddTypeMap(TypeDict, "U" , __WCHAR__    ) # NumPy
 # UCS-2|4
 AddTypeMap(TypeDict, "u" , __UNSIGNED_SHORT__ ) # PEP-3118
 AddTypeMap(TypeDict, "u" , __UINT16_T__       ) # PEP-3118

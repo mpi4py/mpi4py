@@ -25,7 +25,7 @@ cdef inline const char* Datatype2String(MPI_Datatype datatype) nogil:
         else                                         : return NULL
     # C - character
     elif datatype == MPI_CHAR  : return "c"
-    elif datatype == MPI_WCHAR : return NULL
+    elif datatype == MPI_WCHAR : return "U"
     # C - (signed) integral
     elif datatype == MPI_SIGNED_CHAR : return "b"
     elif datatype == MPI_SHORT       : return "h"
