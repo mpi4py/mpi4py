@@ -65,6 +65,9 @@ AddTypeMap(TypeDict, "F"  , __C_FLOAT_COMPLEX__         ) # NumPy
 AddTypeMap(TypeDict, "D"  , __C_DOUBLE_COMPLEX__        ) # NumPy
 AddTypeMap(TypeDict, "G"  , __C_LONG_DOUBLE_COMPLEX__   ) # NumPy
 
+# boolean (C99/C++)
+AddTypeMap(TypeDict, "b1" , __CXX_BOOL__ ) # NumPy
+AddTypeMap(TypeDict, "b1" , __C_BOOL__   ) # NumPy
 # signed and unsigned integer (C)
 if sizeof(char) == 1:
     AddTypeMap(TypeDict, "i1" ,  __SIGNED_CHAR__        ) # NumPy
@@ -85,16 +88,16 @@ elif sizeof(long long) == 8:
     AddTypeMap(TypeDict, "i8" ,  __LONG_LONG__          ) # NumPy
     AddTypeMap(TypeDict, "u8" ,  __UNSIGNED_LONG_LONG__ ) # NumPy
 # signed integer (C99)
-AddTypeMap(TypeDict, "i1"  , __INT8_T__   ) # NumPy
-AddTypeMap(TypeDict, "i2"  , __INT16_T__  ) # NumPy
-AddTypeMap(TypeDict, "i4"  , __INT32_T__  ) # NumPy
-AddTypeMap(TypeDict, "i8"  , __INT64_T__  ) # NumPy
+AddTypeMap(TypeDict, "i1" , __INT8_T__   ) # NumPy
+AddTypeMap(TypeDict, "i2" , __INT16_T__  ) # NumPy
+AddTypeMap(TypeDict, "i4" , __INT32_T__  ) # NumPy
+AddTypeMap(TypeDict, "i8" , __INT64_T__  ) # NumPy
 # unsigned integer (C99)
-AddTypeMap(TypeDict, "u1"  , __UINT8_T__  ) # NumPy
-AddTypeMap(TypeDict, "u2"  , __UINT16_T__ ) # NumPy
-AddTypeMap(TypeDict, "u4"  , __UINT32_T__ ) # NumPy
-AddTypeMap(TypeDict, "u8"  , __UINT64_T__ ) # NumPy
-# real (C) and complex (C99) floating
+AddTypeMap(TypeDict, "u1" , __UINT8_T__  ) # NumPy
+AddTypeMap(TypeDict, "u2" , __UINT16_T__ ) # NumPy
+AddTypeMap(TypeDict, "u4" , __UINT32_T__ ) # NumPy
+AddTypeMap(TypeDict, "u8" , __UINT64_T__ ) # NumPy
+# real (C) and complex (C99/C++) floating
 if sizeof(float) == 4:
     AddTypeMap(TypeDict, "f4"  , __FLOAT__              ) # NumPy
     AddTypeMap(TypeDict, "c8"  , __CXX_FLOAT_COMPLEX__  ) # NumPy
@@ -103,6 +106,10 @@ if sizeof(double) == 8:
     AddTypeMap(TypeDict, "f8"  , __DOUBLE__             ) # NumPy
     AddTypeMap(TypeDict, "c16" , __CXX_DOUBLE_COMPLEX__ ) # NumPy
     AddTypeMap(TypeDict, "c16" , __C_DOUBLE_COMPLEX__   ) # NumPy
+if sizeof(long double) == 12:
+    AddTypeMap(TypeDict, "f12" , __LONG_DOUBLE__             ) # NumPy
+    AddTypeMap(TypeDict, "c24" , __CXX_LONG_DOUBLE_COMPLEX__ ) # NumPy
+    AddTypeMap(TypeDict, "c24" , __C_LONG_DOUBLE_COMPLEX__   ) # NumPy
 if sizeof(long double) == 16:
     AddTypeMap(TypeDict, "f16" , __LONG_DOUBLE__             ) # NumPy
     AddTypeMap(TypeDict, "c32" , __CXX_LONG_DOUBLE_COMPLEX__ ) # NumPy
@@ -134,6 +141,8 @@ AddTypeMap(CTypeDict, "g" , __LONG_DOUBLE__ )
 AddTypeMap(CTypeDict, "F" , __C_FLOAT_COMPLEX__       )
 AddTypeMap(CTypeDict, "D" , __C_DOUBLE_COMPLEX__      )
 AddTypeMap(CTypeDict, "G" , __C_LONG_DOUBLE_COMPLEX__ )
+
+AddTypeMap(CTypeDict, "b1" , __C_BOOL__   )
 
 AddTypeMap(CTypeDict, "i1" , __INT8_T__   )
 AddTypeMap(CTypeDict, "i2" , __INT16_T__  )
