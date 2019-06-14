@@ -46,7 +46,7 @@ class BaseTestRMA(object):
         size = group.Get_size()
         group.Free()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
                 for count in range(self.COUNT_MIN, 10):
                     for rank in range(size):
                         sbuf = array([rank]*count, typecode)
@@ -70,7 +70,8 @@ class BaseTestRMA(object):
         size = group.Get_size()
         group.Free()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
+                if typecode in 'FDG': continue
                 for count in range(self.COUNT_MIN, 10):
                     for rank in range(size):
                         ones = array([1]*count, typecode)
@@ -101,7 +102,8 @@ class BaseTestRMA(object):
         size = group.Get_size()
         group.Free()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
+                if typecode in 'FDG': continue
                 for count in range(self.COUNT_MIN, 10):
                     for rank in range(size):
                         ones = array([1]*count, typecode)

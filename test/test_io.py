@@ -42,8 +42,8 @@ class BaseTestIO(object):
         rank = comm.Get_rank()
         fh = self.FILE
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
-                etype = arrayimpl.TypeMap[typecode]
+            for typecode in array.TypeMap:
+                etype = array.TypeMap[typecode]
                 fh.Set_size(0)
                 fh.Set_view(0, etype)
                 count = 13
@@ -65,8 +65,8 @@ class BaseTestIO(object):
         rank = comm.Get_rank()
         fh = self.FILE
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
-                etype = arrayimpl.TypeMap[typecode]
+            for typecode in array.TypeMap:
+                etype = array.TypeMap[typecode]
                 fh.Set_size(0)
                 fh.Set_view(0, etype)
                 count = 13
@@ -88,8 +88,8 @@ class BaseTestIO(object):
         rank = comm.Get_rank()
         fh = self.FILE
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
-                etype = arrayimpl.TypeMap[typecode]
+            for typecode in array.TypeMap:
+                etype = array.TypeMap[typecode]
                 fh.Set_size(0)
                 fh.Set_view(0, etype)
                 count = 13
@@ -116,8 +116,8 @@ class BaseTestIO(object):
         rank = comm.Get_rank()
         fh = self.FILE
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
-                etype = arrayimpl.TypeMap[typecode]
+            for typecode in array.TypeMap:
+                etype = array.TypeMap[typecode]
                 fh.Set_size(0)
                 fh.Set_view(0, etype)
                 count = 13
@@ -144,8 +144,8 @@ class BaseTestIO(object):
         rank = comm.Get_rank()
         fh = self.FILE
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
-                etype = arrayimpl.TypeMap[typecode]
+            for typecode in array.TypeMap:
+                etype = array.TypeMap[typecode]
                 fh.Set_size(0)
                 fh.Set_view(0, etype)
                 count = 13
@@ -170,8 +170,8 @@ class BaseTestIO(object):
         rank = comm.Get_rank()
         fh = self.FILE
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
-                etype = arrayimpl.TypeMap[typecode]
+            for typecode in array.TypeMap:
+                etype = array.TypeMap[typecode]
                 fh.Set_size(0)
                 fh.Set_view(0, etype)
                 count = 13
@@ -198,8 +198,8 @@ class BaseTestIO(object):
         rank = comm.Get_rank()
         fh = self.FILE
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
-                etype = arrayimpl.TypeMap[typecode]
+            for typecode in array.TypeMap:
+                etype = array.TypeMap[typecode]
                 fh.Set_size(0)
                 fh.Set_view(0, etype)
                 count = 13
@@ -223,8 +223,8 @@ class BaseTestIO(object):
         fh = self.FILE
         try: # MPI 3.1
             for array in arrayimpl.ArrayTypes:
-                for typecode in arrayimpl.TypeMap:
-                    etype = arrayimpl.TypeMap[typecode]
+                for typecode in array.TypeMap:
+                    etype = array.TypeMap[typecode]
                     fh.Set_size(0)
                     fh.Set_view(0, etype)
                     count = 13
@@ -249,8 +249,8 @@ class BaseTestIO(object):
         rank = comm.Get_rank()
         fh = self.FILE
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
-                etype = arrayimpl.TypeMap[typecode]
+            for typecode in array.TypeMap:
+                etype = array.TypeMap[typecode]
                 fh.Set_size(0)
                 fh.Set_view(0, etype)
                 count = 13
@@ -274,8 +274,8 @@ class BaseTestIO(object):
         rank = comm.Get_rank()
         fh = self.FILE
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
-                etype = arrayimpl.TypeMap[typecode]
+            for typecode in array.TypeMap:
+                etype = array.TypeMap[typecode]
                 fh.Set_size(0)
                 fh.Set_view(0, etype)
                 count = 13
@@ -301,8 +301,8 @@ class BaseTestIO(object):
         fh = self.FILE
         try: # MPI 3.1
             for array in arrayimpl.ArrayTypes:
-                for typecode in arrayimpl.TypeMap:
-                    etype = arrayimpl.TypeMap[typecode]
+                for typecode in array.TypeMap:
+                    etype = array.TypeMap[typecode]
                     fh.Set_size(0)
                     fh.Set_view(0, etype)
                     count = 13
@@ -329,8 +329,8 @@ class BaseTestIO(object):
         rank = comm.Get_rank()
         fh = self.FILE
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
-                etype = arrayimpl.TypeMap[typecode]
+            for typecode in array.TypeMap:
+                etype = array.TypeMap[typecode]
                 fh.Set_size(0)
                 fh.Set_view(0, etype)
                 count = 13
@@ -356,8 +356,8 @@ class BaseTestIO(object):
         rank = comm.Get_rank()
         fh = self.FILE
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
-                etype = arrayimpl.TypeMap[typecode]
+            for typecode in array.TypeMap:
+                etype = array.TypeMap[typecode]
                 fh.Set_size(0)
                 fh.Set_view(0, etype)
                 count = 13
@@ -381,8 +381,8 @@ class BaseTestIO(object):
         rank = comm.Get_rank()
         fh = self.FILE
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
-                etype = arrayimpl.TypeMap[typecode]
+            for typecode in array.TypeMap:
+                etype = array.TypeMap[typecode]
                 fh.Set_size(0)
                 fh.Set_view(0, etype)
                 count = 13

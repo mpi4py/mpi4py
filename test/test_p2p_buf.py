@@ -13,7 +13,7 @@ class BaseTestP2PBuf(object):
         dest = (rank + 1) % size
         source = (rank - 1) % size
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
                 for s in range(0, size):
                     sbuf = array( s, typecode, s)
                     rbuf = array(-1, typecode, s+1)
@@ -29,7 +29,7 @@ class BaseTestP2PBuf(object):
         dest = (rank + 1) % size
         source = (rank - 1) % size
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
                 for s in range(0, size):
                     buf = array(rank, typecode, s);
                     self.COMM.Sendrecv_replace(buf.as_mpi(), dest, 0, source, 0)
@@ -40,7 +40,7 @@ class BaseTestP2PBuf(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
                 for s in range(0, size):
                     #
                     sbuf = array( s, typecode, s)
@@ -136,7 +136,7 @@ class BaseTestP2PBuf(object):
         dest = (rank + 1) % size
         source = (rank - 1) % size
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
                 for s in range(size):
                     for xs in range(3):
                         #

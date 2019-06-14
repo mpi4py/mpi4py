@@ -45,7 +45,7 @@ class BaseTestRMA(object):
         size = group.Get_size()
         group.Free()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
                 for count in range(10):
                     for rank in range(size):
                         sbuf = array(range(count), typecode)
@@ -93,7 +93,8 @@ class BaseTestRMA(object):
         size = group.Get_size()
         group.Free()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
+                if typecode in 'FDG': continue
                 for count in range(10):
                     for rank in range(size):
                         sbuf = array(range(count), typecode)
@@ -128,7 +129,8 @@ class BaseTestRMA(object):
             self.skipTest('mpi-win-get_accumulate')
         self.WIN.Fence()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
+                if typecode in 'FDG': continue
                 for count in range(10):
                     for rank in range(size):
                         ones = array([1]*count, typecode)
@@ -174,7 +176,8 @@ class BaseTestRMA(object):
             self.skipTest('mpi-win-fetch_and_op')
         self.WIN.Fence()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
+                if typecode in 'FDG': continue
                 obuf = array(+1, typecode)
                 rbuf = array(-1, typecode, 2)
                 for op in (MPI.SUM, MPI.PROD,
@@ -212,8 +215,9 @@ class BaseTestRMA(object):
             self.skipTest('mpi-win-compare_and_swap')
         self.WIN.Fence()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
                 if typecode in 'fdg': continue
+                if typecode in 'FDG': continue
                 obuf = array(+1, typecode)
                 cbuf = array( 0, typecode)
                 rbuf = array(-1, typecode, 2)

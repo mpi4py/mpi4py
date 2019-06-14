@@ -75,7 +75,7 @@ class BaseTestP2PMatched(object):
         size = comm.Get_size()
         rank = comm.Get_rank()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
                 for s in range(0, size+1):
                     sbuf = array( s, typecode, s)
                     rbuf = array(-1, typecode, s)

@@ -28,7 +28,7 @@ class BaseTestCCOVec(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
                 for root in range(size):
                     for count in range(size):
                         if (count, '*') in self.skip: continue
@@ -54,7 +54,7 @@ class BaseTestCCOVec(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
                 for root in range(size):
                     for count in range(size):
                         if (count, '*') in self.skip: continue
@@ -79,7 +79,7 @@ class BaseTestCCOVec(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
                 for root in range(size):
                     for count in range(size+1):
                         if (count, '*') in self.skip: continue
@@ -111,7 +111,7 @@ class BaseTestCCOVec(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
                 for root in range(size):
                     for count in range(size):
                         if (count, '*') in self.skip: continue
@@ -131,7 +131,7 @@ class BaseTestCCOVec(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
                 for root in range(size):
                     for count in range(size):
                         if (count, '*') in self.skip: continue
@@ -153,7 +153,7 @@ class BaseTestCCOVec(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
                 for root in range(size):
                     for count in range(size+1):
                         if (count, '*') in self.skip: continue
@@ -182,7 +182,7 @@ class BaseTestCCOVec(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
                 for root in range(size):
                     for count in range(size):
                         if (count, '*') in self.skip: continue
@@ -207,7 +207,7 @@ class BaseTestCCOVec(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
                 for root in range(size):
                     for count in range(size):
                         if (count, '*') in self.skip: continue
@@ -230,7 +230,7 @@ class BaseTestCCOVec(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
                 for root in range(size):
                     for count in range(size+1):
                         if (count, '*') in self.skip: continue
@@ -254,7 +254,7 @@ class BaseTestCCOVec(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
                 for root in range(size):
                     for count in range(size):
                         sbuf = array(root, typecode, size*size)
@@ -276,7 +276,7 @@ class BaseTestCCOVec(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
                 for root in range(size):
                     for count in range(size):
                         sbuf = array(root, typecode, size*size)
@@ -296,7 +296,7 @@ class BaseTestCCOVec(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
                 for root in range(size):
                     for count in range(size+1):
                         #
@@ -319,7 +319,7 @@ class BaseTestCCOVec(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
                 for n in range(1, size+1):
                     sbuf = array( n, typecode, (size, n))
                     rbuf = array(-1, typecode, (size, n))

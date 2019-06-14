@@ -1,17 +1,19 @@
 from mpi4py import MPI
 import mpiunittest as unittest
 import arrayimpl
-import struct
 
 
 class BaseTestPack(object):
 
     COMM = MPI.COMM_NULL
 
+    skipdtype = []
+
     def testPackSize(self):
         for array in arrayimpl.ArrayTypes:
-            for typecode, datatype in arrayimpl.TypeMap.items():
-                itemsize = struct.calcsize(typecode)
+            for typecode, datatype in array.TypeMap.items():
+                if typecode in self.skipdtype: continue
+                itemsize = datatype.Get_size()
                 overhead = datatype.Pack_size(0, self.COMM)
                 for count in range(10):
                     pack_size = datatype.Pack_size(count, self.COMM)
@@ -19,8 +21,10 @@ class BaseTestPack(object):
 
     def testPackUnpack(self):
         for array in arrayimpl.ArrayTypes:
-            for typecode1, datatype1 in arrayimpl.TypeMap.items():
-                for typecode2, datatype2 in arrayimpl.TypeMap.items():
+            for typecode1, datatype1 in array.TypeMap.items():
+                if typecode1 in self.skipdtype: continue
+                for typecode2, datatype2 in array.TypeMap.items():
+                    if typecode2 in self.skipdtype: continue
                     for items in range(10):
                         # input and output arrays
                         iarray1 = array(range(items), typecode1).as_raw()
@@ -48,12 +52,13 @@ EXT32 = 'external32'
 
 class BaseTestPackExternal(object):
 
-    skipdtype = []
+    skipdtype = list('gFDG')
 
     def testPackSize(self):
         for array in arrayimpl.ArrayTypes:
-            for typecode, datatype in arrayimpl.TypeMap.items():
-                itemsize = struct.calcsize(typecode)
+            for typecode, datatype in array.TypeMap.items():
+                if typecode in self.skipdtype: continue
+                itemsize = datatype.Get_size()
                 overhead = datatype.Pack_external_size(EXT32, 0)
                 for count in range(10):
                     pack_size = datatype.Pack_external_size(EXT32, count)
@@ -61,8 +66,10 @@ class BaseTestPackExternal(object):
 
     def testPackUnpackExternal(self):
         for array in arrayimpl.ArrayTypes:
-            for typecode1, datatype1 in arrayimpl.TypeMap.items():
-                for typecode2, datatype2 in arrayimpl.TypeMap.items():
+            for typecode1, datatype1 in array.TypeMap.items():
+                if typecode1 in self.skipdtype: continue
+                for typecode2, datatype2 in array.TypeMap.items():
+                    if typecode2 in self.skipdtype: continue
                     for items in range(1, 10):
                         if typecode1 in self.skipdtype: continue
                         if typecode2 in self.skipdtype: continue
@@ -75,8 +82,8 @@ class BaseTestPackExternal(object):
                         oarray1 = array(-1, typecode1, items).as_raw()
                         oarray2 = array(-1, typecode2, items).as_raw()
                         # temp array for packing
-                        size1 = datatype1.Pack_external_size(EXT32, iarray1.size)
-                        size2 = datatype2.Pack_external_size(EXT32, iarray2.size)
+                        size1 = datatype1.Pack_external_size(EXT32, len(iarray1))
+                        size2 = datatype2.Pack_external_size(EXT32, len(iarray2))
                         tmpbuf = array(0, 'b', size1 + size2 + 1).as_raw()
                         # pack input arrays
                         position = 0

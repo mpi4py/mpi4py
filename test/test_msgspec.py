@@ -14,10 +14,9 @@ try:
 except ImportError:
     numpy = None
 
-pypy2 = (hasattr(sys, 'pypy_version_info') and
-         sys.version_info[0] == 2)
-pypy_lt_53 = (hasattr(sys, 'pypy_version_info') and
-              sys.pypy_version_info < (5, 3))
+pypy = hasattr(sys, 'pypy_version_info')
+pypy2 = pypy and sys.version_info[0] == 2
+pypy_lt_53 = pypy and sys.pypy_version_info < (5, 3)
 
 def Sendrecv(smsg, rmsg):
     MPI.COMM_SELF.Sendrecv(sendbuf=smsg, dest=0,   sendtag=0,
@@ -26,7 +25,7 @@ def Sendrecv(smsg, rmsg):
 
 class TestMessageSimple(unittest.TestCase):
 
-    TYPECODES = "hil"+"HIL"+"fd"
+    TYPECODES = "bhil"+"BHIL"+"fd"
 
     def check1(self, equal, zero, s, r, t):
         r[:] = zero
@@ -294,7 +293,7 @@ def Alltoallv(smsg, rmsg):
 @unittest.skipMPI('msmpi(<8.0.0)')
 class TestMessageVector(unittest.TestCase):
 
-    TYPECODES = "hil"+"HIL"+"fd"
+    TYPECODES = "bhil"+"BHIL"+"fd"
 
     def check1(self, equal, zero, s, r, t):
         r[:] = zero

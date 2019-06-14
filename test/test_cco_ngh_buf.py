@@ -62,7 +62,7 @@ class BaseTestCCONghBuf(object):
         for comm in create_topo_comms(self.COMM):
             rsize, ssize = get_neighbors_count(comm)
             for array in arrayimpl.ArrayTypes:
-                for typecode in arrayimpl.TypeMap:
+                for typecode in array.TypeMap:
                     for v in range(3):
                         sbuf = array( v, typecode, 3)
                         rbuf = array(-1, typecode, (rsize, 3))
@@ -90,7 +90,7 @@ class BaseTestCCONghBuf(object):
         for comm in create_topo_comms(self.COMM):
             rsize, ssize = get_neighbors_count(comm)
             for array in arrayimpl.ArrayTypes:
-                for typecode in arrayimpl.TypeMap:
+                for typecode in array.TypeMap:
                     for v in range(3):
                         sbuf = array( v, typecode, (ssize, 3))
                         rbuf = array(-1, typecode, (rsize, 3))
@@ -124,7 +124,7 @@ class BaseTestCCONghBuf(object):
         for comm in create_topo_comms(self.COMM):
             rsize, ssize = get_neighbors_count(comm)
             for array in arrayimpl.ArrayTypes:
-                for typecode in arrayimpl.TypeMap:
+                for typecode in array.TypeMap:
                     for n in range(1,4):
                         for v in range(3):
                             sbuf = array( v, typecode, (ssize, n))

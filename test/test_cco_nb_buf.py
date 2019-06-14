@@ -5,6 +5,12 @@ import arrayimpl
 from functools import reduce
 prod = lambda sequence,start=1: reduce(lambda x, y: x*y, sequence, start)
 
+def skip_op(typecode, op):
+    if typecode in 'FDG':
+        if op in (MPI.MAX, MPI.MIN):
+            return True
+    return False
+
 def maxvalue(a):
     try:
         typecode = a.typecode
@@ -30,7 +36,7 @@ class BaseTestCCOBuf(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
                 for root in range(size):
                     if rank == root:
                         buf = array(root, typecode, root)
@@ -44,7 +50,7 @@ class BaseTestCCOBuf(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
                 for root in range(size):
                     sbuf = array(root, typecode, root+1)
                     if rank == root:
@@ -61,7 +67,7 @@ class BaseTestCCOBuf(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
                 for root in range(size):
                     rbuf = array(-1, typecode, size)
                     if rank == root:
@@ -77,7 +83,7 @@ class BaseTestCCOBuf(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
                 for root in range(size):
                     sbuf = array(root, typecode, root+1)
                     rbuf = array(  -1, typecode, (size, root+1))
@@ -89,7 +95,7 @@ class BaseTestCCOBuf(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
                 for root in range(size):
                     sbuf = array(root, typecode, (size, root+1))
                     rbuf = array(  -1, typecode, (size, root+1))
@@ -98,8 +104,8 @@ class BaseTestCCOBuf(object):
                         self.assertEqual(value, root)
 
     def assertAlmostEqual(self, first, second):
-        num = float(float(second-first))
-        den = float(second+first)/2 or 1.0
+        num = complex(second-first)
+        den = complex(second+first)/2 or 1.0
         if (abs(num/den) > 1e-2):
             raise self.failureException('%r != %r' % (first, second))
 
@@ -107,9 +113,10 @@ class BaseTestCCOBuf(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
-                for root in range(size):
-                    for op in (MPI.SUM, MPI.PROD, MPI.MAX, MPI.MIN):
+            for typecode in array.TypeMap:
+                for op in (MPI.SUM, MPI.PROD, MPI.MAX, MPI.MIN):
+                    if skip_op(typecode, op): continue
+                    for root in range(size):
                         sbuf = array(range(size), typecode)
                         rbuf = array(-1, typecode, size)
                         self.COMM.Ireduce(sbuf.as_mpi(),
@@ -135,8 +142,9 @@ class BaseTestCCOBuf(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
                 for op in (MPI.SUM, MPI.MAX, MPI.MIN, MPI.PROD):
+                    if skip_op(typecode, op): continue
                     sbuf = array(range(size), typecode)
                     rbuf = array(0, typecode, size)
                     self.COMM.Iallreduce(sbuf.as_mpi(),
@@ -160,8 +168,9 @@ class BaseTestCCOBuf(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
                 for op in (MPI.SUM, MPI.MAX, MPI.MIN, MPI.PROD):
+                    if skip_op(typecode, op): continue
                     rcnt = list(range(1,size+1))
                     sbuf = array([rank+1]*sum(rcnt), typecode)
                     rbuf = array(-1, typecode, rank+1)
@@ -205,8 +214,9 @@ class BaseTestCCOBuf(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
                 for op in (MPI.SUM, MPI.MAX, MPI.MIN, MPI.PROD):
+                    if skip_op(typecode, op): continue
                     for rcnt in range(1, size+1):
                         sbuf = array([rank]*rcnt*size, typecode)
                         rbuf = array(-1, typecode, rcnt)
@@ -238,8 +248,9 @@ class BaseTestCCOBuf(object):
         rank = self.COMM.Get_rank()
         # --
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
                 for op in (MPI.SUM, MPI.PROD, MPI.MAX, MPI.MIN):
+                    if skip_op(typecode, op): continue
                     sbuf = array(range(size), typecode)
                     rbuf = array(0, typecode, size)
                     self.COMM.Iscan(sbuf.as_mpi(),
@@ -263,8 +274,9 @@ class BaseTestCCOBuf(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
                 for op in (MPI.SUM, MPI.PROD, MPI.MAX, MPI.MIN):
+                    if skip_op(typecode, op): continue
                     sbuf = array(range(size), typecode)
                     rbuf = array(0, typecode, size)
                     self.COMM.Iexscan(sbuf.as_mpi(),
@@ -292,7 +304,7 @@ class BaseTestCCOBuf(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array in arrayimpl.ArrayTypes:
-            for typecode, datatype in arrayimpl.TypeMap.items():
+            for typecode, datatype in array.TypeMap.items():
                 for root in range(size):
                     #
                     if rank == root:
@@ -338,7 +350,7 @@ class BaseTestCCOBufInplace(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
                 for root in range(size):
                     count = root+3
                     if rank == root:
@@ -362,7 +374,7 @@ class BaseTestCCOBufInplace(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
                 for root in range(size):
                     for count in range(1, 10):
                         if rank == root:
@@ -381,7 +393,7 @@ class BaseTestCCOBufInplace(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
                 for count in range(1, 10):
                     buf = array(-1, typecode, (size, count))
                     #buf.flat[(rank*count):((rank+1)*count)] = \
@@ -393,8 +405,8 @@ class BaseTestCCOBufInplace(object):
                         self.assertEqual(value, count)
 
     def assertAlmostEqual(self, first, second):
-        num = float(second-first)
-        den = float(second+first)/2 or 1.0
+        num = complex(second-first)
+        den = complex(second+first)/2 or 1.0
         if (abs(num/den) > 1e-2):
             raise self.failureException('%r != %r' % (first, second))
 
@@ -402,9 +414,10 @@ class BaseTestCCOBufInplace(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
-                for root in range(size):
-                    for op in (MPI.SUM, MPI.PROD, MPI.MAX, MPI.MIN):
+            for typecode in array.TypeMap:
+                for op in (MPI.SUM, MPI.PROD, MPI.MAX, MPI.MIN):
+                    if skip_op(typecode, op): continue
+                    for root in range(size):
                         count = size
                         if rank == root:
                             buf  = array(range(size), typecode)
@@ -434,8 +447,9 @@ class BaseTestCCOBufInplace(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
                 for op in (MPI.SUM, MPI.MAX, MPI.MIN, MPI.PROD):
+                    if skip_op(typecode, op): continue
                     buf = array(range(size), typecode)
                     sbuf = MPI.IN_PLACE
                     rbuf = buf.as_mpi()
@@ -458,8 +472,9 @@ class BaseTestCCOBufInplace(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
                 for op in (MPI.SUM, MPI.MAX, MPI.MIN, MPI.PROD):
+                    if skip_op(typecode, op): continue
                     for rcnt in range(size):
                         if op == MPI.PROD:
                             rbuf = array([rank+1]*rcnt*size, typecode)
@@ -494,8 +509,9 @@ class BaseTestCCOBufInplace(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array in arrayimpl.ArrayTypes:
-            for typecode in arrayimpl.TypeMap:
+            for typecode in array.TypeMap:
                 for op in (MPI.SUM, MPI.MAX, MPI.MIN, MPI.PROD):
+                    if skip_op(typecode, op): continue
                     rcnt = list(range(1, size+1))
                     if op == MPI.PROD:
                         rbuf = array([rank+1]*sum(rcnt), typecode)
