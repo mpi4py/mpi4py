@@ -49,6 +49,12 @@ def getoptionparser():
     parser.add_option("--vt",
                       action="store_true", dest="vt", default=False,
                       help="use VampirTrace for MPI profiling")
+    parser.add_option("--cupy",
+                      action="store_true", dest="cupy", default=False,
+                      help="enable testing with CuPy arrays")
+    parser.add_option("--no-cupy",
+                      action="store_false", dest="cupy", default=False,
+                      help="disable testing with CuPy arrays")
     parser.add_option("--no-numpy",
                       action="store_false", dest="numpy", default=True,
                       help="disable testing with NumPy arrays")
@@ -95,6 +101,8 @@ def setup_unittest(options):
 
 def import_package(options, pkgname):
     #
+    if not options.cupy:
+        sys.modules['cupy'] = None
     if not options.numpy:
         sys.modules['numpy'] = None
     if not options.array:
@@ -174,6 +182,8 @@ def load_tests(options, args):
         testnames.append(testname)
     testnames.sort()
     # Handle options
+    if not options.cupy:
+        sys.modules['cupy'] = None
     if not options.numpy:
         sys.modules['numpy'] = None
     if not options.array:

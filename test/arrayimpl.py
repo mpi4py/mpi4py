@@ -12,6 +12,10 @@ try:
     import numpy
 except ImportError:
     numpy = None
+try:
+    import cupy
+except ImportError:
+    cupy = None
 
 
 __all__ = ['allclose', 'subTest']
@@ -196,7 +200,7 @@ if numpy is not None:
             if isinstance(arg, (int, float, complex)):
                 self.array.fill(arg)
             else:
-                self.array[:] = arg
+                self.array[:] = numpy.asarray(arg, typecode)
 
         @property
         def address(self):
@@ -215,9 +219,117 @@ if numpy is not None:
             return self.array.flat
 
 
-def subTest(case):
+def typestr(typecode, itemsize):
+    typestr = ''
+    if sys.byteorder == 'little':
+        typestr += '<'
+    if sys.byteorder == 'big':
+        typestr += '>'
+    if typecode in '?':
+        typestr += 'b'
+    if typecode in 'bhilq':
+        typestr += 'i'
+    if typecode in 'BHILQ':
+        typestr += 'u'
+    if typecode in 'fdg':
+        typestr += 'f'
+    if typecode in 'FDG':
+        typestr += 'c'
+    typestr += str(itemsize)
+    return typestr
+
+
+class BaseFakeGPUArray(object):
+
+    def set_interface(self, shape, readonly=False):
+        self.__cuda_array_interface__ = dict(
+            version = 0,
+            data    = (self.address, readonly),
+            typestr = typestr(self.typecode, self.itemsize),
+            shape   = shape,
+        )
+
+    def as_raw(self):
+        return self
+
+
+if array is not None:
+
+    @add_backend
+    class FakeGPUArrayBasic(BaseFakeGPUArray, ArrayArray):
+
+        def __init__(self, arg, typecode, shape=None, readonly=False):
+            super(FakeGPUArrayBasic, self).__init__(arg, typecode, shape)
+            self.set_interface((len(self),), readonly)
+
+
+if numpy is not None:
+
+    @add_backend
+    class FakeGPUArrayNumPy(BaseFakeGPUArray, ArrayNumPy):
+
+        def __init__(self, arg, typecode, shape=None, readonly=False):
+            super(FakeGPUArrayNumPy, self).__init__(arg, typecode, shape)
+            self.set_interface(self.array.shape, readonly)
+
+
+if cupy is not None:
+
+    @add_backend
+    class GPUArrayCuPy(BaseArray):
+
+        backend = 'cupy'
+
+        TypeMap = make_typemap([])
+        #TypeMap.update(TypeMapBool)
+        TypeMap.update(TypeMapInteger)
+        #TypeMap.update(TypeMapUnsigned)
+        TypeMap.update(TypeMapFloat)
+        TypeMap.update(TypeMapComplex)
+        try:
+            cupy.array(0, 'g')
+        except ValueError:
+            TypeMap.pop('g', None)
+        try:
+            cupy.array(0, 'G')
+        except ValueError:
+            TypeMap.pop('G', None)
+
+        def __init__(self, arg, typecode, shape=None, readonly=False):
+            if isinstance(arg, (int, float, complex)):
+                if shape is None: shape = ()
+            else:
+                if shape is None: shape = len(arg)
+            self.array = cupy.zeros(shape, typecode)
+            if isinstance(arg, (int, float, complex)):
+                self.array.fill(arg)
+            else:
+                self.array[:] = cupy.asarray(arg, typecode)
+
+        @property
+        def address(self):
+            return self.array.__cuda_array_interface__['data'][0]
+
+        @property
+        def typecode(self):
+            return self.array.dtype.char
+
+        @property
+        def itemsize(self):
+            return self.array.itemsize
+
+        @property
+        def flat(self):
+            return self.array.reshape(-1)
+
+
+def subTest(case, skip=(), skiptypecode=()):
     for array in ArrayBackends:
+        if array.backend == skip: continue
+        if array.backend in skip: continue
         for typecode in array.TypeMap:
+            if typecode == skiptypecode: continue
+            if typecode in skiptypecode: continue
             with case.subTest(backend=array.backend, typecode=typecode):
                 try:
                     yield array, typecode

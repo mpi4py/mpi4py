@@ -72,16 +72,7 @@ def ErrClsName(ierr):
     except KeyError:
         return '<unknown>'
 
-
-SkipTest = unittest.SkipTest
-
-skip = unittest.skip
-
-skipIf = unittest.skipIf
-
-skipUnless = unittest.skipUnless
-
-def skipMPI(predicate, *conditions):
+def mpi_predicate(predicate):
     from mpi4py import MPI
     def key(s):
         s = s.replace(' ', '')
@@ -97,8 +88,28 @@ def skipMPI(predicate, *conditions):
         name, version = MPI.get_vendor()
     if vp.name == key(name):
         if vp.satisfied_by('%d.%d.%d' % version):
-            if not conditions or any(conditions):
-                return unittest.skip(str(vp))
+            return vp
+    return None
+
+def is_mpi_gpu(predicate, array):
+    if array.backend in ('cupy',):
+        if mpi_predicate(predicate):
+            return True
+    return False
+
+SkipTest = unittest.SkipTest
+
+skip = unittest.skip
+
+skipIf = unittest.skipIf
+
+skipUnless = unittest.skipUnless
+
+def skipMPI(predicate, *conditions):
+    version = mpi_predicate(predicate)
+    if version:
+        if not conditions or any(conditions):
+            return unittest.skip(str(version))
     return unittest.skipIf(False, '')
 
 def disable(what, reason):

@@ -210,7 +210,7 @@ cdef object PyMPI_ssend(object obj, int dest, int tag,
 # -----------------------------------------------------------------------------
 
 cdef extern from "Python.h":
-    int PyErr_WarnEx(object, char*, int) except -1
+    int PyErr_WarnEx(object, const char*, int) except -1
 
 cdef object PyMPI_recv_obarg(object obj, int source, int tag,
                              MPI_Comm comm, MPI_Status *status):

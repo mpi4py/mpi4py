@@ -4,6 +4,12 @@ import arrayimpl
 import sys, os, tempfile
 
 
+def subTestIO(case, *args, **kwargs):
+    for array, typecode in arrayimpl.subTest(case, *args, **kwargs):
+        if unittest.is_mpi_gpu('mvapich2', array): continue
+        yield array, typecode
+
+
 class BaseTestIO(object):
 
     COMM = MPI.COMM_NULL
@@ -41,7 +47,7 @@ class BaseTestIO(object):
         size = comm.Get_size()
         rank = comm.Get_rank()
         fh = self.FILE
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in subTestIO(self):
             etype = array.TypeMap[typecode]
             fh.Set_size(0)
             fh.Set_view(0, etype)
@@ -63,7 +69,7 @@ class BaseTestIO(object):
         size = comm.Get_size()
         rank = comm.Get_rank()
         fh = self.FILE
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in subTestIO(self):
             etype = array.TypeMap[typecode]
             fh.Set_size(0)
             fh.Set_view(0, etype)
@@ -85,7 +91,7 @@ class BaseTestIO(object):
         size = comm.Get_size()
         rank = comm.Get_rank()
         fh = self.FILE
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in subTestIO(self):
             etype = array.TypeMap[typecode]
             fh.Set_size(0)
             fh.Set_view(0, etype)
@@ -112,7 +118,7 @@ class BaseTestIO(object):
         size = comm.Get_size()
         rank = comm.Get_rank()
         fh = self.FILE
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in subTestIO(self):
             etype = array.TypeMap[typecode]
             fh.Set_size(0)
             fh.Set_view(0, etype)
@@ -139,7 +145,7 @@ class BaseTestIO(object):
         size = comm.Get_size()
         rank = comm.Get_rank()
         fh = self.FILE
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in subTestIO(self):
             etype = array.TypeMap[typecode]
             fh.Set_size(0)
             fh.Set_view(0, etype)
@@ -164,7 +170,7 @@ class BaseTestIO(object):
         size = comm.Get_size()
         rank = comm.Get_rank()
         fh = self.FILE
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in subTestIO(self):
             etype = array.TypeMap[typecode]
             fh.Set_size(0)
             fh.Set_view(0, etype)
@@ -191,7 +197,7 @@ class BaseTestIO(object):
         size = comm.Get_size()
         rank = comm.Get_rank()
         fh = self.FILE
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in subTestIO(self):
             etype = array.TypeMap[typecode]
             fh.Set_size(0)
             fh.Set_view(0, etype)
@@ -215,7 +221,7 @@ class BaseTestIO(object):
         rank = comm.Get_rank()
         fh = self.FILE
         try: # MPI 3.1
-            for array, typecode in arrayimpl.subTest(self):
+            for array, typecode in subTestIO(self):
                 etype = array.TypeMap[typecode]
                 fh.Set_size(0)
                 fh.Set_view(0, etype)
@@ -240,7 +246,7 @@ class BaseTestIO(object):
         size = comm.Get_size()
         rank = comm.Get_rank()
         fh = self.FILE
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in subTestIO(self):
             etype = array.TypeMap[typecode]
             fh.Set_size(0)
             fh.Set_view(0, etype)
@@ -264,7 +270,7 @@ class BaseTestIO(object):
         size = comm.Get_size()
         rank = comm.Get_rank()
         fh = self.FILE
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in subTestIO(self):
             etype = array.TypeMap[typecode]
             fh.Set_size(0)
             fh.Set_view(0, etype)
@@ -290,7 +296,7 @@ class BaseTestIO(object):
         rank = comm.Get_rank()
         fh = self.FILE
         try: # MPI 3.1
-            for array, typecode in arrayimpl.subTest(self):
+            for array, typecode in subTestIO(self):
                 etype = array.TypeMap[typecode]
                 fh.Set_size(0)
                 fh.Set_view(0, etype)
@@ -317,7 +323,7 @@ class BaseTestIO(object):
         size = comm.Get_size()
         rank = comm.Get_rank()
         fh = self.FILE
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in subTestIO(self):
             etype = array.TypeMap[typecode]
             fh.Set_size(0)
             fh.Set_view(0, etype)
@@ -343,7 +349,7 @@ class BaseTestIO(object):
         size = comm.Get_size()
         rank = comm.Get_rank()
         fh = self.FILE
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in subTestIO(self):
             etype = array.TypeMap[typecode]
             fh.Set_size(0)
             fh.Set_view(0, etype)
@@ -367,7 +373,7 @@ class BaseTestIO(object):
         size = comm.Get_size()
         rank = comm.Get_rank()
         fh = self.FILE
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in subTestIO(self):
             etype = array.TypeMap[typecode]
             fh.Set_size(0)
             fh.Set_view(0, etype)

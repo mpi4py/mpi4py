@@ -46,6 +46,7 @@ class BaseTestRMA(object):
         size = group.Get_size()
         group.Free()
         for array, typecode in arrayimpl.subTest(self):
+            if unittest.is_mpi_gpu('mvapich2', array): continue
             for count in range(self.COUNT_MIN, 10):
                 for rank in range(size):
                     sbuf = array([rank]*count, typecode)
@@ -69,6 +70,8 @@ class BaseTestRMA(object):
         size = group.Get_size()
         group.Free()
         for array, typecode in arrayimpl.subTest(self):
+            if unittest.is_mpi_gpu('openmpi', array): continue
+            if unittest.is_mpi_gpu('mvapich2', array): continue
             if typecode in 'FDG': continue
             for count in range(self.COUNT_MIN, 10):
                 for rank in range(size):
@@ -100,6 +103,8 @@ class BaseTestRMA(object):
         size = group.Get_size()
         group.Free()
         for array, typecode in arrayimpl.subTest(self):
+            if unittest.is_mpi_gpu('openmpi', array): continue
+            if unittest.is_mpi_gpu('mvapich2', array): continue
             if typecode in 'FDG': continue
             for count in range(self.COUNT_MIN, 10):
                 for rank in range(size):

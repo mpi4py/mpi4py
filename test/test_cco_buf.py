@@ -581,6 +581,7 @@ class TestReduceLocal(unittest.TestCase):
 
     def testReduceLocal(self):
         for array, typecode in arrayimpl.subTest(self):
+            if unittest.is_mpi_gpu('openmpi', array): continue
             for op in (MPI.SUM, MPI.PROD, MPI.MAX, MPI.MIN):
                 if skip_op(typecode, op): continue
                 size = 5
@@ -603,6 +604,7 @@ class TestReduceLocal(unittest.TestCase):
 
     def testReduceLocalBadCount(self):
         for array, typecode in arrayimpl.subTest(self):
+            if unittest.is_mpi_gpu('openmpi', array): continue
             for op in (MPI.SUM, MPI.PROD, MPI.MAX, MPI.MIN):
                 sbuf = array(range(3), typecode)
                 rbuf = array(range(3), typecode)

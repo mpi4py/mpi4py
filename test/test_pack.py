@@ -67,6 +67,8 @@ class BaseTestPackExternal(object):
 
     def testPackUnpackExternal(self):
         for array, typecode1 in arrayimpl.subTest(self):
+            if unittest.is_mpi_gpu('openmpi', array): continue
+            if unittest.is_mpi_gpu('mvapich2', array): continue
             if typecode1 in self.skipdtype: continue
             for typecode2 in array.TypeMap:
                 if typecode2 in self.skipdtype: continue

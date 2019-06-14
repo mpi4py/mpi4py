@@ -1,6 +1,7 @@
 from mpi4py import MPI
 import mpiunittest as unittest
 from arrayimpl import allclose
+from arrayimpl import typestr
 import sys
 
 typemap = MPI._typedict
@@ -13,113 +14,69 @@ try:
     import numpy
 except ImportError:
     numpy = None
+try:
+    import cupy
+except ImportError:
+    cupy = None
 
+
+py2 = sys.version_info[0] == 2
+py3 = sys.version_info[0] >= 3
 pypy = hasattr(sys, 'pypy_version_info')
-pypy2 = pypy and sys.version_info[0] == 2
+pypy2 = pypy and py2
 pypy_lt_53 = pypy and sys.pypy_version_info < (5, 3)
+
+
+# ---
+
+class GPUBuf(object):
+
+    def __init__(self, typecode, initializer, readonly=False):
+        self._buf = array.array(typecode, initializer)
+        address = self._buf.buffer_info()[0]
+        typecode = self._buf.typecode
+        itemsize = self._buf.itemsize
+        self.__cuda_array_interface__ = dict(
+            version = 0,
+            data    = (address, readonly),
+            typestr = typestr(typecode, itemsize),
+            shape   = (len(self._buf), 1, 1),
+            strides = (itemsize,) * 3,
+            descr   = [('', typestr(typecode, itemsize))],
+        )
+
+    def __eq__(self, other):
+        return self._buf == other._buf
+
+    def __ne__(self, other):
+        return self._buf != other._buf
+
+    def __len__(self):
+        return len(self._buf)
+
+    def __getitem__(self, item):
+        return self._buf[item]
+
+    def __setitem__(self, item, value):
+        self._buf[item] = value._buf
+
+
+cupy_issue_2259 = False
+if cupy is not None:
+    cupy_issue_2259 = not isinstance(
+        cupy.zeros((2,2)).T.__cuda_array_interface__['strides'],
+        tuple
+    )
+
+# ---
 
 def Sendrecv(smsg, rmsg):
     MPI.COMM_SELF.Sendrecv(sendbuf=smsg, dest=0,   sendtag=0,
                            recvbuf=rmsg, source=0, recvtag=0,
                            status=MPI.Status())
 
+
 class TestMessageSimple(unittest.TestCase):
-
-    TYPECODES = "bhil"+"BHIL"+"fd"
-
-    def check1(self, equal, zero, s, r, t):
-        r[:] = zero
-        Sendrecv(s, r)
-        self.assertTrue(equal(s, r))
-
-    def check21(self, equal, zero, s, r, typecode):
-        datatype = typemap[typecode]
-        for type in (None, typecode, datatype):
-            r[:] = zero
-            Sendrecv([s, type],
-                     [r, type])
-            self.assertTrue(equal(s, r))
-
-    def check22(self, equal, zero, s, r, typecode):
-        size = len(r)
-        for count in range(size):
-            r[:] = zero
-            Sendrecv([s, count],
-                     [r, count])
-            for i in range(count):
-                self.assertTrue(equal(r[i], s[i]))
-            for i in range(count, size):
-                self.assertTrue(equal(r[i], zero[0]))
-        for count in range(size):
-            r[:] = zero
-            Sendrecv([s, (count, None)],
-                     [r, (count, None)])
-            for i in range(count):
-                self.assertTrue(equal(r[i], s[i]))
-            for i in range(count, size):
-                self.assertTrue(equal(r[i], zero[0]))
-        for disp in range(size):
-            r[:] = zero
-            Sendrecv([s, (None, disp)],
-                     [r, (None, disp)])
-            for i in range(disp):
-                self.assertTrue(equal(r[i], zero[0]))
-            for i in range(disp, size):
-                self.assertTrue(equal(r[i], s[i]))
-        for disp in range(size):
-            for count in range(size-disp):
-                r[:] = zero
-                Sendrecv([s, (count, disp)],
-                         [r, (count, disp)])
-                for i in range(0, disp):
-                    self.assertTrue(equal(r[i], zero[0]))
-                for i in range(disp, disp+count):
-                    self.assertTrue(equal(r[i], s[i]))
-                for i in range(disp+count, size):
-                    self.assertTrue(equal(r[i], zero[0]))
-
-    def check31(self, equal, z, s, r, typecode):
-        datatype = typemap[typecode]
-        for type in (None, typecode, datatype):
-            for count in (None, len(s)):
-                r[:] = z
-                Sendrecv([s, count, type],
-                         [r, count, type])
-                self.assertTrue(equal(s, r))
-
-    def check32(self, equal, z, s, r, typecode):
-        datatype = typemap[typecode]
-        for type in (None, typecode, datatype):
-            for p in range(0, len(s)):
-                r[:] = z
-                Sendrecv([s, (p, None), type],
-                         [r, (p, None), type])
-                self.assertTrue(equal(s[:p], r[:p]))
-                for q in range(p, len(s)):
-                    count, displ = q-p, p
-                    r[:] = z
-                    Sendrecv([s, (count, displ), type],
-                             [r, (count, displ), type])
-                    self.assertTrue(equal(s[p:q], r[p:q]))
-                    self.assertTrue(equal(z[:p], r[:p]))
-                    self.assertTrue(equal(z[q:], r[q:]))
-
-    def check4(self, equal, z, s, r, typecode):
-        datatype = typemap[typecode]
-        for type in (None, typecode, datatype):
-            for p in range(0, len(s)):
-                r[:] = z
-                Sendrecv([s, p, None, type],
-                         [r, p, None, type])
-                self.assertTrue(equal(s[:p], r[:p]))
-                for q in range(p, len(s)):
-                    count, displ = q-p, p
-                    r[:] = z
-                    Sendrecv([s, count, displ, type],
-                             [r, count, displ, type])
-                    self.assertTrue(equal(s[p:q], r[p:q]))
-                    self.assertTrue(equal(z[:p], r[:p]))
-                    self.assertTrue(equal(z[q:], r[q:]))
 
     def testMessageBad(self):
         buf = MPI.Alloc_mem(5)
@@ -187,17 +144,17 @@ class TestMessageSimple(unittest.TestCase):
         Sendrecv([sbuf, "c"], [rbuf, MPI.CHAR])
         self.assertEqual(sbuf, rbuf)
 
+    @unittest.skipIf(py3, 'python3')
     @unittest.skipIf(pypy2, 'pypy2')
-    @unittest.skipIf(sys.version_info[0] >= 3, 'python3')
     @unittest.skipIf(hasattr(MPI, 'ffi'), 'mpi4py-cffi')
     def testMessageUnicode(self):  # Test for Issue #120
         sbuf = unicode("abc")
         rbuf = bytearray(len(buffer(sbuf)))
         Sendrecv([sbuf, MPI.BYTE], [rbuf, MPI.BYTE])
 
+    @unittest.skipIf(py3, 'python3')
     @unittest.skipIf(pypy_lt_53, 'pypy(<5.3)')
     def testMessageBuffer(self):
-        if sys.version_info[0] != 2: return
         sbuf = buffer(b"abc")
         rbuf = bytearray(3)
         Sendrecv([sbuf, "c"], [rbuf, MPI.CHAR])
@@ -208,7 +165,6 @@ class TestMessageSimple(unittest.TestCase):
     @unittest.skipIf(pypy2, 'pypy2')
     @unittest.skipIf(pypy_lt_53, 'pypy(<5.3)')
     def testMessageMemoryView(self):
-        if sys.version_info[:2] < (2, 7): return
         sbuf = memoryview(b"abc")
         rbuf = bytearray(3)
         Sendrecv([sbuf, "c"], [rbuf, MPI.CHAR])
@@ -216,63 +172,6 @@ class TestMessageSimple(unittest.TestCase):
         self.assertRaises((BufferError, TypeError, ValueError),
                           Sendrecv, [rbuf, "c"], [sbuf, "c"])
 
-    @unittest.skipIf(array is None, 'array')
-    def checkArray(self, test):
-        from operator import eq as equal
-        for t in tuple(self.TYPECODES):
-            for n in range(1, 10):
-                z = array.array(t, [0]*n)
-                s = array.array(t, list(range(n)))
-                r = array.array(t, [0]*n)
-                test(equal, z, s, r, t)
-    def testArray1(self):
-        self.checkArray(self.check1)
-    def testArray21(self):
-        self.checkArray(self.check21)
-    def testArray22(self):
-        self.checkArray(self.check22)
-    def testArray31(self):
-        self.checkArray(self.check31)
-    def testArray32(self):
-        self.checkArray(self.check32)
-    def testArray4(self):
-        self.checkArray(self.check4)
-
-    @unittest.skipIf(numpy is None, 'numpy')
-    def checkNumPy(self, test):
-        from numpy import zeros, arange, empty
-        for t in tuple(self.TYPECODES):
-            for n in range(10):
-                z = zeros (n, dtype=t)
-                s = arange(n, dtype=t)
-                r = empty (n, dtype=t)
-                test(allclose, z, s, r, t)
-    def testNumPy1(self):
-        self.checkNumPy(self.check1)
-    def testNumPy21(self):
-        self.checkNumPy(self.check21)
-    def testNumPy22(self):
-        self.checkNumPy(self.check22)
-    def testNumPy31(self):
-        self.checkNumPy(self.check31)
-    def testNumPy32(self):
-        self.checkNumPy(self.check32)
-    def testNumPy4(self):
-        self.checkNumPy(self.check4)
-
-    @unittest.skipIf(numpy is None, 'numpy')
-    def testNumPyBad(self):
-        from numpy import zeros
-        wbuf = zeros([1])
-        rbuf = zeros([1])
-        rbuf.flags.writeable = False
-        self.assertRaises((BufferError, ValueError),
-                          Sendrecv, wbuf, rbuf)
-        wbuf = zeros([3,2])[:,0]
-        rbuf = zeros([3])
-        rbuf.flags.writeable = False
-        self.assertRaises((BufferError, ValueError),
-                          Sendrecv, rbuf, wbuf)
 
 @unittest.skipMPI('msmpi(<8.0.0)')
 class TestMessageBlock(unittest.TestCase):
@@ -286,100 +185,422 @@ class TestMessageBlock(unittest.TestCase):
         self.assertRaises(ValueError, f)
         MPI.Free_mem(buf)
 
-def Alltoallv(smsg, rmsg):
-    comm = MPI.COMM_SELF
-    comm.Alltoallv(smsg, rmsg)
 
-@unittest.skipMPI('msmpi(<8.0.0)')
-class TestMessageVector(unittest.TestCase):
+class BaseTestMessageSimpleArray(object):
 
     TYPECODES = "bhil"+"BHIL"+"fd"
 
-    def check1(self, equal, zero, s, r, t):
-        r[:] = zero
-        Alltoallv(s, r)
-        self.assertTrue(equal(s, r))
+    def array(self, typecode, initializer):
+        raise NotImplementedError
 
-    def check21(self, equal, zero, s, r, typecode):
+    def check1(self, z, s, r, typecode):
+        r[:] = z
+        Sendrecv(s, r)
+        for a, b in zip(s, r):
+            self.assertEqual(a, b)
+
+    def check2(self, z, s, r, typecode):
         datatype = typemap[typecode]
         for type in (None, typecode, datatype):
-            r[:] = zero
-            Alltoallv([s, type],
-                      [r, type])
-            self.assertTrue(equal(s, r))
+            r[:] = z
+            Sendrecv([s, type],
+                     [r, type])
+            for a, b in zip(s, r):
+                self.assertEqual(a, b)
 
-    def check22(self, equal, zero, s, r, typecode):
+    def check3(self, z, s, r, typecode):
         size = len(r)
         for count in range(size):
-            r[:] = zero
-            Alltoallv([s, count],
-                      [r, count])
+            r[:] = z
+            Sendrecv([s, count],
+                     [r, count])
             for i in range(count):
-                self.assertTrue(equal(r[i], s[i]))
+                self.assertEqual(r[i], s[i])
             for i in range(count, size):
-                self.assertTrue(equal(r[i], zero[0]))
+                self.assertEqual(r[i], z[0])
         for count in range(size):
-            r[:] = zero
-            Alltoallv([s, (count, None)],
-                      [r, (count, None)])
+            r[:] = z
+            Sendrecv([s, (count, None)],
+                     [r, (count, None)])
             for i in range(count):
-                self.assertTrue(equal(r[i], s[i]))
+                self.assertEqual(r[i], s[i])
             for i in range(count, size):
-                self.assertTrue(equal(r[i], zero[0]))
+                self.assertEqual(r[i], z[0])
+        for disp in range(size):
+            r[:] = z
+            Sendrecv([s, (None, disp)],
+                     [r, (None, disp)])
+            for i in range(disp):
+                self.assertEqual(r[i], z[0])
+            for i in range(disp, size):
+                self.assertEqual(r[i], s[i])
         for disp in range(size):
             for count in range(size-disp):
-                r[:] = zero
-                Alltoallv([s, ([count], [disp])],
-                          [r, ([count], [disp])])
+                r[:] = z
+                Sendrecv([s, (count, disp)],
+                         [r, (count, disp)])
                 for i in range(0, disp):
-                    self.assertTrue(equal(r[i], zero[0]))
+                    self.assertEqual(r[i], z[0])
                 for i in range(disp, disp+count):
-                    self.assertTrue(equal(r[i], s[i]))
+                    self.assertEqual(r[i], s[i])
                 for i in range(disp+count, size):
-                    self.assertTrue(equal(r[i], zero[0]))
+                    self.assertEqual(r[i], z[0])
 
-    def check31(self, equal, z, s, r, typecode):
+    def check4(self, z, s, r, typecode):
         datatype = typemap[typecode]
         for type in (None, typecode, datatype):
             for count in (None, len(s)):
                 r[:] = z
-                Alltoallv([s, count, type],
-                          [r, count, type])
-                self.assertTrue(equal(s, r))
+                Sendrecv([s, count, type],
+                         [r, count, type])
+                for a, b in zip(s, r):
+                    self.assertEqual(a, b)
 
-    def check32(self, equal, z, s, r, typecode):
-        datatype = typemap[typecode]
-        for type in (None, typecode, datatype):
-            for p in range(len(s)):
-                r[:] = z
-                Alltoallv([s, (p, None), type],
-                          [r, (p, None), type])
-                self.assertTrue(equal(s[:p], r[:p]))
-                for q in range(p, len(s)):
-                    count, displ = q-p, p
-                    r[:] = z
-                    Alltoallv([s, (count, [displ]), type],
-                              [r, (count, [displ]), type])
-                    self.assertTrue(equal(s[p:q], r[p:q]))
-                    self.assertTrue(equal(z[:p], r[:p]))
-                    self.assertTrue(equal(z[q:], r[q:]))
-
-    def check4(self, equal, z, s, r, typecode):
+    def check5(self, z, s, r, typecode):
         datatype = typemap[typecode]
         for type in (None, typecode, datatype):
             for p in range(0, len(s)):
                 r[:] = z
-                Alltoallv([s, p, None, type],
-                          [r, p, None, type])
-                self.assertTrue(equal(s[:p], r[:p]))
+                Sendrecv([s, (p, None), type],
+                         [r, (p, None), type])
+                for a, b in zip(s[:p], r[:p]):
+                    self.assertEqual(a, b)
                 for q in range(p, len(s)):
                     count, displ = q-p, p
                     r[:] = z
-                    Alltoallv([s, count, [displ], type],
-                              [r, count, [displ], type])
-                    self.assertTrue(equal(s[p:q], r[p:q]))
-                    self.assertTrue(equal(z[:p], r[:p]))
-                    self.assertTrue(equal(z[q:], r[q:]))
+                    Sendrecv([s, (count, displ), type],
+                             [r, (count, displ), type])
+                    for a, b in zip(r[:p], z[:p]):
+                        self.assertEqual(a, b)
+                    for a, b in zip(r[p:q], s[p:q]):
+                        self.assertEqual(a, b)
+                    for a, b in zip(r[q:], z[q:]):
+                        self.assertEqual(a, b)
+
+    def check6(self, z, s, r, typecode):
+        datatype = typemap[typecode]
+        for type in (None, typecode, datatype):
+            for p in range(0, len(s)):
+                r[:] = z
+                Sendrecv([s, p, None, type],
+                         [r, p, None, type])
+                for a, b in zip(s[:p], r[:p]):
+                    self.assertEqual(a, b)
+                for q in range(p, len(s)):
+                    count, displ = q-p, p
+                    r[:] = z
+                    Sendrecv([s, count, displ, type],
+                             [r, count, displ, type])
+                    for a, b in zip(r[:p], z[:p]):
+                        self.assertEqual(a, b)
+                    for a, b in zip(r[p:q], s[p:q]):
+                        self.assertEqual(a, b)
+                    for a, b in zip(r[q:], z[q:]):
+                        self.assertEqual(a, b)
+
+    def check(self, test):
+        for t in tuple(self.TYPECODES):
+            for n in range(1, 10):
+                z = self.array(t, [0]*n)
+                s = self.array(t, list(range(n)))
+                r = self.array(t, [0]*n)
+                test(z, s, r, t)
+
+    def testArray1(self):
+        self.check(self.check1)
+
+    def testArray2(self):
+        self.check(self.check2)
+
+    def testArray3(self):
+        self.check(self.check3)
+
+    def testArray4(self):
+        self.check(self.check4)
+
+    def testArray5(self):
+        self.check(self.check5)
+
+    def testArray6(self):
+        self.check(self.check6)
+
+
+@unittest.skipIf(array is None, 'array')
+class TestMessageSimpleArray(unittest.TestCase,
+                             BaseTestMessageSimpleArray):
+
+    def array(self, typecode, initializer):
+        return array.array(typecode, initializer)
+
+
+@unittest.skipIf(numpy is None, 'numpy')
+class TestMessageSimpleNumPy(unittest.TestCase,
+                             BaseTestMessageSimpleArray):
+
+    def array(self, typecode, initializer):
+        return numpy.array(initializer, dtype=typecode)
+
+    def testOrderC(self):
+        sbuf = numpy.ones([3,2])
+        rbuf = numpy.zeros([3,2])
+        Sendrecv(sbuf, rbuf)
+        self.assertTrue((sbuf == rbuf).all())
+
+    def testOrderFortran(self):
+        sbuf = numpy.ones([3,2]).T
+        rbuf = numpy.zeros([3,2]).T
+        Sendrecv(sbuf, rbuf)
+        self.assertTrue((sbuf == rbuf).all())
+
+    def testReadonly(self):
+        sbuf = numpy.ones([3])
+        rbuf = numpy.zeros([3])
+        sbuf.flags.writeable = False
+        Sendrecv(sbuf, rbuf)
+        self.assertTrue((sbuf == rbuf).all())
+
+    def testNotWriteable(self):
+        sbuf = numpy.ones([3])
+        rbuf = numpy.zeros([3])
+        rbuf.flags.writeable = False
+        self.assertRaises((BufferError, ValueError),
+                          Sendrecv, sbuf, rbuf)
+
+    def testNotContiguous(self):
+        sbuf = numpy.ones([3,2])[:,0]
+        rbuf = numpy.zeros([3])
+        sbuf.flags.writeable = False
+        self.assertRaises((BufferError, ValueError),
+                          Sendrecv, sbuf, rbuf)
+
+
+@unittest.skipIf(array is None, 'array')
+class TestMessageSimpleGPUBuf(unittest.TestCase,
+                              BaseTestMessageSimpleArray):
+
+    def array(self, typecode, initializer):
+        return GPUBuf(typecode, initializer)
+
+
+@unittest.skipIf(cupy is None, 'cupy')
+class TestMessageSimpleCuPy(unittest.TestCase,
+                            BaseTestMessageSimpleArray):
+
+    def array(self, typecode, initializer):
+        return cupy.array(initializer, dtype=typecode)
+
+    def testOrderC(self):
+        sbuf = cupy.ones([3,2])
+        rbuf = cupy.zeros([3,2])
+        Sendrecv(sbuf, rbuf)
+        self.assertTrue((sbuf == rbuf).all())
+
+    @unittest.skipIf(cupy_issue_2259, 'cupy-issue-2259')
+    def testOrderFortran(self):
+        sbuf = cupy.ones([3,2]).T
+        rbuf = cupy.zeros([3,2]).T
+        Sendrecv(sbuf, rbuf)
+        self.assertTrue((sbuf == rbuf).all())
+
+    @unittest.skipIf(cupy_issue_2259, 'cupy-issue-2259')
+    def testNotContiguous(self):
+        sbuf = cupy.ones([3,2])[:,0]
+        rbuf = cupy.zeros([3])
+        self.assertRaises((BufferError, ValueError),
+                          Sendrecv, sbuf, rbuf)
+
+
+# ---
+
+@unittest.skipIf(array is None, 'array')
+class TestMessageGPUBufInterface(unittest.TestCase):
+
+    def testNonReadonly(self):
+        smsg = GPUBuf('i', [1,2,3], readonly=True)
+        rmsg = GPUBuf('i', [0,0,0], readonly=True)
+        if pypy: self.assertRaises(ValueError,  Sendrecv, smsg, rmsg)
+        else:    self.assertRaises(BufferError, Sendrecv, smsg, rmsg)
+
+    def testNonContiguous(self):
+        smsg = GPUBuf('i', [1,2,3])
+        rmsg = GPUBuf('i', [0,0,0])
+        strides = rmsg.__cuda_array_interface__['strides']
+        bad_strides = strides[:-1] + (7,)
+        rmsg.__cuda_array_interface__['strides'] = bad_strides
+        self.assertRaises(BufferError, Sendrecv, smsg, rmsg)
+
+    def testAttrNone(self):
+        smsg = GPUBuf('B', [1,2,3])
+        rmsg = GPUBuf('B', [0,0,0])
+        rmsg.__cuda_array_interface__ = None
+        self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
+
+    def testAttrEmpty(self):
+        smsg = GPUBuf('B', [1,2,3])
+        rmsg = GPUBuf('B', [0,0,0])
+        class MyDict(dict): pass
+        rmsg.__cuda_array_interface__ = MyDict()
+        self.assertRaises(KeyError, Sendrecv, smsg, rmsg)
+
+    def testAttrType(self):
+        smsg = GPUBuf('B', [1,2,3])
+        rmsg = GPUBuf('B', [0,0,0])
+        class MyDict(dict): pass
+        items = list(rmsg.__cuda_array_interface__.items())
+        rmsg.__cuda_array_interface__ = items
+        self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
+
+    def testDataMissing(self):
+        smsg = GPUBuf('B', [1,2,3])
+        rmsg = GPUBuf('B', [0,0,0])
+        del rmsg.__cuda_array_interface__['data']
+        self.assertRaises(KeyError, Sendrecv, smsg, rmsg)
+
+    def testDataNone(self):
+        smsg = GPUBuf('B', [1,2,3])
+        rmsg = GPUBuf('B', [0,0,0])
+        rmsg.__cuda_array_interface__['data'] = None
+        self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
+
+    def testDataType(self):
+        smsg = GPUBuf('B', [1,2,3])
+        rmsg = GPUBuf('B', [0,0,0])
+        rmsg.__cuda_array_interface__['data'] = 0
+        self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
+
+    def testDataValue(self):
+        smsg = GPUBuf('B', [1,2,3])
+        rmsg = GPUBuf('B', [0,0,0])
+        dev_ptr = rmsg.__cuda_array_interface__['data'][0]
+        rmsg.__cuda_array_interface__['data'] = (dev_ptr, )
+        self.assertRaises(ValueError, Sendrecv, smsg, rmsg)
+        rmsg.__cuda_array_interface__['data'] = ( )
+        self.assertRaises(ValueError, Sendrecv, smsg, rmsg)
+        rmsg.__cuda_array_interface__['data'] = (dev_ptr, False, None)
+        self.assertRaises(ValueError, Sendrecv, smsg, rmsg)
+
+    def testTypestrMissing(self):
+        smsg = GPUBuf('B', [1,2,3])
+        rmsg = GPUBuf('B', [0,0,0])
+        del rmsg.__cuda_array_interface__['typestr']
+        self.assertRaises(KeyError, Sendrecv, smsg, rmsg)
+
+    def testTypestrNone(self):
+        smsg = GPUBuf('B', [1,2,3])
+        rmsg = GPUBuf('B', [0,0,0])
+        rmsg.__cuda_array_interface__['typestr'] = None
+        self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
+
+    def testTypestrType(self):
+        smsg = GPUBuf('B', [1,2,3])
+        rmsg = GPUBuf('B', [0,0,0])
+        rmsg.__cuda_array_interface__['typestr'] = 42
+        self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
+
+    def testTypestrItemsize(self):
+        smsg = GPUBuf('B', [1,2,3])
+        rmsg = GPUBuf('B', [0,0,0])
+        typestr = rmsg.__cuda_array_interface__['typestr']
+        rmsg.__cuda_array_interface__['typestr'] = typestr[:2]+'X'
+        self.assertRaises(ValueError, Sendrecv, smsg, rmsg)
+
+    def testShapeMissing(self):
+        smsg = GPUBuf('B', [1,2,3])
+        rmsg = GPUBuf('B', [0,0,0])
+        del rmsg.__cuda_array_interface__['shape']
+        self.assertRaises(KeyError, Sendrecv, smsg, rmsg)
+
+    def testShapeNone(self):
+        smsg = GPUBuf('B', [1,2,3])
+        rmsg = GPUBuf('B', [0,0,0])
+        rmsg.__cuda_array_interface__['shape'] = None
+        self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
+
+    def testShapeType(self):
+        smsg = GPUBuf('B', [1,2,3])
+        rmsg = GPUBuf('B', [0,0,0])
+        rmsg.__cuda_array_interface__['shape'] = 3
+        self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
+
+    def testShapeValue(self):
+        smsg = GPUBuf('B', [1,2,3])
+        rmsg = GPUBuf('B', [0,0,0])
+        rmsg.__cuda_array_interface__['shape'] = (3, -1)
+        rmsg.__cuda_array_interface__['strides'] = None
+        self.assertRaises(BufferError, Sendrecv, smsg, rmsg)
+
+    def testStridesMissing(self):
+        smsg = GPUBuf('B', [1,2,3])
+        rmsg = GPUBuf('B', [0,0,0])
+        del rmsg.__cuda_array_interface__['strides']
+        Sendrecv(smsg, rmsg)
+        self.assertEqual(smsg, rmsg)
+
+    def testStridesNone(self):
+        smsg = GPUBuf('B', [1,2,3])
+        rmsg = GPUBuf('B', [0,0,0])
+        rmsg.__cuda_array_interface__['strides'] = None
+        Sendrecv(smsg, rmsg)
+        self.assertEqual(smsg, rmsg)
+
+    def testStridesType(self):
+        smsg = GPUBuf('B', [1,2,3])
+        rmsg = GPUBuf('B', [0,0,0])
+        rmsg.__cuda_array_interface__['strides'] = 42
+        self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
+
+    def testDescrMissing(self):
+        smsg = GPUBuf('d', [1,2,3])
+        rmsg = GPUBuf('d', [0,0,0])
+        del rmsg.__cuda_array_interface__['descr']
+        Sendrecv(smsg, rmsg)
+        self.assertEqual(smsg, rmsg)
+
+    def testDescrNone(self):
+        smsg = GPUBuf('d', [1,2,3])
+        rmsg = GPUBuf('d', [0,0,0])
+        rmsg.__cuda_array_interface__['descr'] = None
+        Sendrecv(smsg, rmsg)
+        self.assertEqual(smsg, rmsg)
+
+    def testDescrType(self):
+        smsg = GPUBuf('B', [1,2,3])
+        rmsg = GPUBuf('B', [0,0,0])
+        rmsg.__cuda_array_interface__['descr'] = 42
+        self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
+
+    def testDescrWarning(self):
+        m, n = 5, 3
+        smsg = GPUBuf('d', list(range(m*n)))
+        rmsg = GPUBuf('d', [0]*(m*n))
+        typestr = rmsg.__cuda_array_interface__['typestr']
+        itemsize = int(typestr[2:])
+        new_typestr = "|V"+str(itemsize*n)
+        new_descr = [('', typestr)]*n
+        rmsg.__cuda_array_interface__['shape'] = (m,)
+        rmsg.__cuda_array_interface__['strides'] = (itemsize*n,)
+        rmsg.__cuda_array_interface__['typestr'] = new_typestr
+        rmsg.__cuda_array_interface__['descr'] = new_descr
+        try:  # Python 3.2+
+            self.assertWarns(RuntimeWarning, Sendrecv, smsg, rmsg)
+        except AttributeError:  # Python 2
+            import warnings
+            with warnings.catch_warnings(record=True) as w:
+                warnings.simplefilter("always")
+                Sendrecv(smsg, rmsg)
+                self.assertEqual(w[-1].category, RuntimeWarning)
+        self.assertEqual(smsg, rmsg)
+
+
+# ---
+
+def Alltoallv(smsg, rmsg):
+    comm = MPI.COMM_SELF
+    comm.Alltoallv(smsg, rmsg)
+
+
+@unittest.skipMPI('msmpi(<8.0.0)')
+class TestMessageVector(unittest.TestCase):
 
     def testMessageBad(self):
         buf = MPI.Alloc_mem(5)
@@ -435,49 +656,172 @@ class TestMessageVector(unittest.TestCase):
         Alltoallv([sbuf, "c"], [rbuf, MPI.CHAR])
         self.assertEqual(sbuf, rbuf)
 
-    @unittest.skipIf(array is None, 'array')
-    def checkArray(self, test):
-        from operator import eq as equal
+
+@unittest.skipMPI('msmpi(<8.0.0)')
+class BaseTestMessageVectorArray(object):
+
+    TYPECODES = "bhil"+"BHIL"+"fd"
+
+    def array(self, typecode, initializer):
+        raise NotImplementedError
+
+    def check1(self, z, s, r, typecode):
+        r[:] = z
+        Alltoallv(s, r)
+        for a, b in zip(s, r):
+            self.assertEqual(a, b)
+
+    def check2(self, z, s, r, typecode):
+        datatype = typemap[typecode]
+        for type in (None, typecode, datatype):
+            r[:] = z
+            Alltoallv([s, type],
+                      [r, type])
+            for a, b in zip(s, r):
+                self.assertEqual(a, b)
+
+    def check3(self, z, s, r, typecode):
+        size = len(r)
+        for count in range(size):
+            r[:] = z
+            Alltoallv([s, count],
+                      [r, count])
+            for i in range(count):
+                self.assertEqual(r[i], s[i])
+            for i in range(count, size):
+                self.assertEqual(r[i], z[0])
+        for count in range(size):
+            r[:] = z
+            Alltoallv([s, (count, None)],
+                      [r, (count, None)])
+            for i in range(count):
+                self.assertEqual(r[i], s[i])
+            for i in range(count, size):
+                self.assertEqual(r[i], z[0])
+        for disp in range(size):
+            for count in range(size-disp):
+                r[:] = z
+                Alltoallv([s, ([count], [disp])],
+                          [r, ([count], [disp])])
+                for i in range(0, disp):
+                    self.assertEqual(r[i], z[0])
+                for i in range(disp, disp+count):
+                    self.assertEqual(r[i], s[i])
+                for i in range(disp+count, size):
+                    self.assertEqual(r[i], z[0])
+
+    def check4(self, z, s, r, typecode):
+        datatype = typemap[typecode]
+        for type in (None, typecode, datatype):
+            for count in (None, len(s)):
+                r[:] = z
+                Alltoallv([s, count, type],
+                          [r, count, type])
+                for a, b in zip(s, r):
+                    self.assertEqual(a, b)
+
+    def check5(self, z, s, r, typecode):
+        datatype = typemap[typecode]
+        for type in (None, typecode, datatype):
+            for p in range(len(s)):
+                r[:] = z
+                Alltoallv([s, (p, None), type],
+                          [r, (p, None), type])
+                for a, b in zip(s[:p], r[:p]):
+                    self.assertEqual(a, b)
+                for q in range(p, len(s)):
+                    count, displ = q-p, p
+                    r[:] = z
+                    Alltoallv([s, (count, [displ]), type],
+                              [r, (count, [displ]), type])
+                    for a, b in zip(r[:p], z[:p]):
+                        self.assertEqual(a, b)
+                    for a, b in zip(r[p:q], s[p:q]):
+                        self.assertEqual(a, b)
+                    for a, b in zip(r[q:], z[q:]):
+                        self.assertEqual(a, b)
+
+    def check6(self, z, s, r, typecode):
+        datatype = typemap[typecode]
+        for type in (None, typecode, datatype):
+            for p in range(0, len(s)):
+                r[:] = z
+                Alltoallv([s, p, None, type],
+                          [r, p, None, type])
+                for a, b in zip(s[:p], r[:p]):
+                    self.assertEqual(a, b)
+                for q in range(p, len(s)):
+                    count, displ = q-p, p
+                    r[:] = z
+                    Alltoallv([s, count, [displ], type],
+                              [r, count, [displ], type])
+                    for a, b in zip(r[:p], z[:p]):
+                        self.assertEqual(a, b)
+                    for a, b in zip(r[p:q], s[p:q]):
+                        self.assertEqual(a, b)
+                    for a, b in zip(r[q:], z[q:]):
+                        self.assertEqual(a, b)
+
+    def check(self, test):
         for t in tuple(self.TYPECODES):
             for n in range(1, 10):
-                z = array.array(t, [0]*n)
-                s = array.array(t, list(range(n)))
-                r = array.array(t, [0]*n)
-                test(equal, z, s, r, t)
-    def testArray1(self):
-        self.checkArray(self.check1)
-    def testArray21(self):
-        self.checkArray(self.check21)
-    def testArray22(self):
-        self.checkArray(self.check22)
-    def testArray31(self):
-        self.checkArray(self.check31)
-    def testArray32(self):
-        self.checkArray(self.check32)
-    def testArray4(self):
-        self.checkArray(self.check4)
+                z = self.array(t, [0]*n)
+                s = self.array(t, list(range(n)))
+                r = self.array(t, [0]*n)
+                test(z, s, r, t)
 
-    @unittest.skipIf(numpy is None, 'numpy')
-    def checkNumPy(self, test):
-        from numpy import zeros, arange, empty
-        for t in tuple(self.TYPECODES):
-            for n in range(10):
-                z = zeros (n, dtype=t)
-                s = arange(n, dtype=t)
-                r = empty (n, dtype=t)
-                test(allclose, z, s, r, t)
-    def testNumPy1(self):
-        self.checkNumPy(self.check1)
-    def testNumPy21(self):
-        self.checkNumPy(self.check21)
-    def testNumPy22(self):
-        self.checkNumPy(self.check22)
-    def testNumPy31(self):
-        self.checkNumPy(self.check31)
-    def testNumPy32(self):
-        self.checkNumPy(self.check32)
-    def testNumPy4(self):
-        self.checkNumPy(self.check4)
+    def testArray1(self):
+        self.check(self.check1)
+
+    def testArray2(self):
+        self.check(self.check2)
+
+    def testArray3(self):
+        self.check(self.check3)
+
+    def testArray4(self):
+        self.check(self.check4)
+
+    def testArray5(self):
+        self.check(self.check5)
+
+    def testArray6(self):
+        self.check(self.check6)
+
+
+@unittest.skipIf(array is None, 'array')
+class TestMessageVectorArray(unittest.TestCase,
+                             BaseTestMessageVectorArray):
+
+    def array(self, typecode, initializer):
+        return array.array(typecode, initializer)
+
+
+@unittest.skipIf(numpy is None, 'numpy')
+class TestMessageVectorNumPy(unittest.TestCase,
+                             BaseTestMessageVectorArray):
+
+    def array(self, typecode, initializer):
+        return numpy.array(initializer, dtype=typecode)
+
+
+@unittest.skipIf(array is None, 'array')
+class TestMessageVectorGPUBuf(unittest.TestCase,
+                              BaseTestMessageVectorArray):
+
+    def array(self, typecode, initializer):
+        return GPUBuf(typecode, initializer)
+
+
+@unittest.skipIf(cupy is None, 'cupy')
+class TestMessageVectorCuPy(unittest.TestCase,
+                            BaseTestMessageVectorArray):
+
+    def array(self, typecode, initializer):
+        return cupy.array(initializer, dtype=typecode)
+
+
+# ---
 
 def Alltoallw(smsg, rmsg):
     try:
@@ -487,6 +831,7 @@ def Alltoallw(smsg, rmsg):
         if isinstance(rmsg, (list, tuple)): rmsg = rmsg[0]
         try: rmsg[:] = smsg
         except: pass
+
 
 class TestMessageVectorW(unittest.TestCase):
 
@@ -503,7 +848,6 @@ class TestMessageVectorW(unittest.TestCase):
         self.assertRaises(ValueError, f)
         MPI.Free_mem(sbuf)
         MPI.Free_mem(rbuf)
-
 
     @unittest.skipIf(pypy_lt_53, 'pypy(<5.3)')
     def testMessageBytes(self):
@@ -530,7 +874,46 @@ class TestMessageVectorW(unittest.TestCase):
         self.assertEqual(sbuf[0], rbuf[0])
         self.assertEqual(bytearray(2), rbuf[1:])
 
-def PutGet(smsg, rmsg, target):
+    @unittest.skipIf(array is None, 'array')
+    def testMessageArray(self):
+        sbuf = array.array('i', [1,2,3])
+        rbuf = array.array('i', [0,0,0])
+        smsg = [sbuf, [3], [0], [MPI.INT]]
+        rmsg = [rbuf, ([3], [0]), [MPI.INT]]
+        Alltoallw(smsg, rmsg)
+        self.assertEqual(sbuf, rbuf)
+
+    @unittest.skipIf(numpy is None, 'numpy')
+    def testMessageNumPy(self):
+        sbuf = numpy.array([1,2,3], dtype='i')
+        rbuf = numpy.array([0,0,0], dtype='i')
+        smsg = [sbuf, [3], [0], [MPI.INT]]
+        rmsg = [rbuf, ([3], [0]), [MPI.INT]]
+        Alltoallw(smsg, rmsg)
+        self.assertTrue((sbuf == rbuf).all())
+
+    @unittest.skipIf(array is None, 'array')
+    def testMessageGPUBuf(self):
+        sbuf = GPUBuf('i', [1,2,3], readonly=True)
+        rbuf = GPUBuf('i', [0,0,0], readonly=False)
+        smsg = [sbuf, [3], [0], [MPI.INT]]
+        rmsg = [rbuf, ([3], [0]), [MPI.INT]]
+        Alltoallw(smsg, rmsg)
+        self.assertEqual(sbuf, rbuf)
+
+    @unittest.skipIf(cupy is None, 'cupy')
+    def testMessageCuPy(self):
+        sbuf = cupy.array([1,2,3], 'i')
+        rbuf = cupy.array([0,0,0], 'i')
+        smsg = [sbuf, [3], [0], [MPI.INT]]
+        rmsg = [rbuf, ([3], [0]), [MPI.INT]]
+        Alltoallw(smsg, rmsg)
+        self.assertTrue((sbuf == rbuf).all())
+
+
+# ---
+
+def PutGet(smsg, rmsg, target=None):
     try: win =  MPI.Win.Allocate(8, 1, MPI.INFO_NULL, MPI.COMM_SELF)
     except NotImplementedError: win = MPI.WIN_NULL
     try:
@@ -550,6 +933,7 @@ def PutGet(smsg, rmsg, target):
         except NotImplementedError: pass
     finally:
         if win != MPI.WIN_NULL: win.Free()
+
 
 class TestMessageRMA(unittest.TestCase):
 
@@ -605,13 +989,45 @@ class TestMessageRMA(unittest.TestCase):
             PutGet(sbuf, rbuf, target)
             self.assertEqual(sbuf, rbuf)
 
+    @unittest.skipIf(py3, 'python3')
     @unittest.skipIf(pypy2, 'pypy2')
-    @unittest.skipIf(sys.version_info[0] >= 3, 'python3')
     @unittest.skipIf(hasattr(MPI, 'ffi'), 'mpi4py-cffi')
     def testMessageUnicode(self):  # Test for Issue #120
         sbuf = unicode("abc")
         rbuf = bytearray(len(buffer(sbuf)))
         PutGet([sbuf, MPI.BYTE], [rbuf, MPI.BYTE], None)
+
+    @unittest.skipIf(array is None, 'array')
+    def testMessageArray(self):
+        sbuf = array.array('i', [1,2,3])
+        rbuf = array.array('i', [0,0,0])
+        PutGet(sbuf, rbuf)
+        self.assertEqual(sbuf, rbuf)
+
+    @unittest.skipIf(numpy is None, 'numpy')
+    def testMessageNumPy(self):
+        sbuf = numpy.array([1,2,3], dtype='i')
+        rbuf = numpy.array([0,0,0], dtype='i')
+        PutGet(sbuf, rbuf)
+        self.assertTrue((sbuf == rbuf).all())
+
+    @unittest.skipIf(array is None, 'array')
+    def testMessageGPUBuf(self):
+        sbuf = GPUBuf('i', [1,2,3], readonly=True)
+        rbuf = GPUBuf('i', [0,0,0], readonly=False)
+        PutGet(sbuf, rbuf)
+        self.assertEqual(sbuf, rbuf)
+
+    @unittest.skipMPI('mvapich2')
+    @unittest.skipIf(cupy is None, 'cupy')
+    def testMessageCuPy(self):
+        sbuf = cupy.array([1,2,3], 'i')
+        rbuf = cupy.array([0,0,0], 'i')
+        PutGet(sbuf, rbuf)
+        self.assertTrue((sbuf == rbuf).all())
+
+
+# ---
 
 if __name__ == '__main__':
     unittest.main()
