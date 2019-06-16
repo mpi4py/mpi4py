@@ -44,7 +44,7 @@ cdef extern from *:
 
 cdef extern from "Python.h":
     object PyLong_FromVoidPtr(void*)
-    void*  PyLong_AsVoidPtr(object)
+    void*  PyLong_AsVoidPtr(object) except? NULL
 
 cdef extern from *:
     void *emptybuffer '((void*)"")'
