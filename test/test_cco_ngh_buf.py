@@ -61,92 +61,89 @@ class BaseTestCCONghBuf(object):
     def testNeighborAllgather(self):
         for comm in create_topo_comms(self.COMM):
             rsize, ssize = get_neighbors_count(comm)
-            for array in arrayimpl.ArrayTypes:
-                for typecode in array.TypeMap:
-                    for v in range(3):
-                        sbuf = array( v, typecode, 3)
-                        rbuf = array(-1, typecode, (rsize, 3))
-                        comm.Neighbor_allgather(sbuf.as_mpi(), rbuf.as_mpi())
-                        for value in rbuf.flat:
-                            self.assertEqual(value, v)
-                        sbuf = array( v, typecode, 3)
-                        rbuf = array(-1, typecode, (rsize, 3))
-                        comm.Neighbor_allgatherv(sbuf.as_mpi_c(3), rbuf.as_mpi_c(3))
-                        for value in rbuf.flat:
-                            self.assertEqual(value, v)
-                        sbuf = array( v, typecode, 3)
-                        rbuf = array(-1, typecode, (rsize, 3))
-                        comm.Ineighbor_allgather(sbuf.as_mpi(), rbuf.as_mpi()).Wait()
-                        for value in rbuf.flat:
-                            self.assertEqual(value, v)
-                        sbuf = array( v, typecode, 3)
-                        rbuf = array(-1, typecode, (rsize, 3))
-                        comm.Ineighbor_allgatherv(sbuf.as_mpi_c(3), rbuf.as_mpi_c(3)).Wait()
-                        for value in rbuf.flat:
-                            self.assertEqual(value, v)
+            for array, typecode in arrayimpl.subTest(self):
+                for v in range(3):
+                    sbuf = array( v, typecode, 3)
+                    rbuf = array(-1, typecode, (rsize, 3))
+                    comm.Neighbor_allgather(sbuf.as_mpi(), rbuf.as_mpi())
+                    for value in rbuf.flat:
+                        self.assertEqual(value, v)
+                    sbuf = array( v, typecode, 3)
+                    rbuf = array(-1, typecode, (rsize, 3))
+                    comm.Neighbor_allgatherv(sbuf.as_mpi_c(3), rbuf.as_mpi_c(3))
+                    for value in rbuf.flat:
+                        self.assertEqual(value, v)
+                    sbuf = array( v, typecode, 3)
+                    rbuf = array(-1, typecode, (rsize, 3))
+                    comm.Ineighbor_allgather(sbuf.as_mpi(), rbuf.as_mpi()).Wait()
+                    for value in rbuf.flat:
+                        self.assertEqual(value, v)
+                    sbuf = array( v, typecode, 3)
+                    rbuf = array(-1, typecode, (rsize, 3))
+                    comm.Ineighbor_allgatherv(sbuf.as_mpi_c(3), rbuf.as_mpi_c(3)).Wait()
+                    for value in rbuf.flat:
+                        self.assertEqual(value, v)
             comm.Free()
 
     def testNeighborAlltoall(self):
         for comm in create_topo_comms(self.COMM):
             rsize, ssize = get_neighbors_count(comm)
-            for array in arrayimpl.ArrayTypes:
-                for typecode in array.TypeMap:
-                    for v in range(3):
-                        sbuf = array( v, typecode, (ssize, 3))
-                        rbuf = array(-1, typecode, (rsize, 3))
-                        comm.Neighbor_alltoall(sbuf.as_mpi(), rbuf.as_mpi_c(3))
-                        for value in rbuf.flat:
-                            self.assertEqual(value, v)
-                        sbuf = array( v, typecode, (ssize, 3))
-                        rbuf = array(-1, typecode, (rsize, 3))
-                        comm.Neighbor_alltoall(sbuf.as_mpi(), rbuf.as_mpi())
-                        for value in rbuf.flat:
-                            self.assertEqual(value, v)
-                        sbuf = array( v, typecode, (ssize, 3))
-                        rbuf = array(-1, typecode, (rsize, 3))
-                        comm.Neighbor_alltoallv(sbuf.as_mpi_c(3), rbuf.as_mpi_c(3))
-                        for value in rbuf.flat:
-                            self.assertEqual(value, v)
-                        sbuf = array( v, typecode, (ssize, 3))
-                        rbuf = array(-1, typecode, (rsize, 3))
-                        comm.Ineighbor_alltoall(sbuf.as_mpi(), rbuf.as_mpi()).Wait()
-                        for value in rbuf.flat:
-                            self.assertEqual(value, v)
-                        sbuf = array( v, typecode, (ssize, 3))
-                        rbuf = array(-1, typecode, (rsize, 3))
-                        comm.Ineighbor_alltoallv(sbuf.as_mpi_c(3), rbuf.as_mpi_c(3)).Wait()
-                        for value in rbuf.flat:
-                            self.assertEqual(value, v)
+            for array, typecode in arrayimpl.subTest(self):
+                for v in range(3):
+                    sbuf = array( v, typecode, (ssize, 3))
+                    rbuf = array(-1, typecode, (rsize, 3))
+                    comm.Neighbor_alltoall(sbuf.as_mpi(), rbuf.as_mpi_c(3))
+                    for value in rbuf.flat:
+                        self.assertEqual(value, v)
+                    sbuf = array( v, typecode, (ssize, 3))
+                    rbuf = array(-1, typecode, (rsize, 3))
+                    comm.Neighbor_alltoall(sbuf.as_mpi(), rbuf.as_mpi())
+                    for value in rbuf.flat:
+                        self.assertEqual(value, v)
+                    sbuf = array( v, typecode, (ssize, 3))
+                    rbuf = array(-1, typecode, (rsize, 3))
+                    comm.Neighbor_alltoallv(sbuf.as_mpi_c(3), rbuf.as_mpi_c(3))
+                    for value in rbuf.flat:
+                        self.assertEqual(value, v)
+                    sbuf = array( v, typecode, (ssize, 3))
+                    rbuf = array(-1, typecode, (rsize, 3))
+                    comm.Ineighbor_alltoall(sbuf.as_mpi(), rbuf.as_mpi()).Wait()
+                    for value in rbuf.flat:
+                        self.assertEqual(value, v)
+                    sbuf = array( v, typecode, (ssize, 3))
+                    rbuf = array(-1, typecode, (rsize, 3))
+                    comm.Ineighbor_alltoallv(sbuf.as_mpi_c(3), rbuf.as_mpi_c(3)).Wait()
+                    for value in rbuf.flat:
+                        self.assertEqual(value, v)
             comm.Free()
 
     def testNeighborAlltoallw(self):
         size = self.COMM.Get_size()
         for comm in create_topo_comms(self.COMM):
             rsize, ssize = get_neighbors_count(comm)
-            for array in arrayimpl.ArrayTypes:
-                for typecode in array.TypeMap:
-                    for n in range(1,4):
-                        for v in range(3):
-                            sbuf = array( v, typecode, (ssize, n))
-                            rbuf = array(-1, typecode, (rsize, n))
-                            sdt, rdt = sbuf.mpidtype, rbuf.mpidtype
-                            sdsp = list(range(0, ssize*n*sdt.extent, n*sdt.extent))
-                            rdsp = list(range(0, rsize*n*rdt.extent, n*rdt.extent))
-                            smsg = [sbuf.as_raw(), ([n]*ssize, sdsp), [sdt]*ssize]
-                            rmsg = (rbuf.as_raw(), ([n]*rsize, rdsp), [rdt]*rsize)
-                            try:
-                                comm.Neighbor_alltoallw(smsg, rmsg)
-                            except NotImplementedError:
-                                self.skipTest('mpi-neighbor_alltoallw')
-                            for value in rbuf.flat:
-                                self.assertEqual(value, v)
-                            smsg[0] = array(v+1, typecode, (ssize, n)).as_raw()
-                            try:
-                                comm.Ineighbor_alltoallw(smsg, rmsg).Wait()
-                            except NotImplementedError:
-                                self.skipTest('mpi-ineighbor_alltoallw')
-                            for value in rbuf.flat:
-                                self.assertEqual(value, v+1)
+            for array, typecode in arrayimpl.subTest(self):
+                for n in range(1,4):
+                    for v in range(3):
+                        sbuf = array( v, typecode, (ssize, n))
+                        rbuf = array(-1, typecode, (rsize, n))
+                        sdt, rdt = sbuf.mpidtype, rbuf.mpidtype
+                        sdsp = list(range(0, ssize*n*sdt.extent, n*sdt.extent))
+                        rdsp = list(range(0, rsize*n*rdt.extent, n*rdt.extent))
+                        smsg = [sbuf.as_raw(), ([n]*ssize, sdsp), [sdt]*ssize]
+                        rmsg = (rbuf.as_raw(), ([n]*rsize, rdsp), [rdt]*rsize)
+                        try:
+                            comm.Neighbor_alltoallw(smsg, rmsg)
+                        except NotImplementedError:
+                            self.skipTest('mpi-neighbor_alltoallw')
+                        for value in rbuf.flat:
+                            self.assertEqual(value, v)
+                        smsg[0] = array(v+1, typecode, (ssize, n)).as_raw()
+                        try:
+                            comm.Ineighbor_alltoallw(smsg, rmsg).Wait()
+                        except NotImplementedError:
+                            self.skipTest('mpi-ineighbor_alltoallw')
+                        for value in rbuf.flat:
+                            self.assertEqual(value, v+1)
             comm.Free()
 
 

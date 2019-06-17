@@ -14,7 +14,7 @@ except ImportError:
     numpy = None
 
 
-__all__ = ['ArrayTypes', 'allclose']
+__all__ = ['allclose', 'subTest']
 
 def allclose(a, b, rtol=1.e-5, atol=1.e-8):
     try: iter(a)
@@ -77,7 +77,15 @@ TypeMapComplex = make_typemap([
 ])
 
 
+ArrayBackends = []
+
+def add_backend(cls):
+    ArrayBackends.append(cls)
+    return cls
+
 class BaseArray(object):
+
+    backend = None
 
     TypeMap = TypeMap.copy()
     TypeMap.pop('g', None)
@@ -113,59 +121,6 @@ class BaseArray(object):
         return (self.as_raw(), (cnt, dsp), self.mpidtype)
 
 
-class BaseArrayBasic(BaseArray):
-
-    @property
-    def address(self):
-        return self.array.buffer_info()[0]
-
-    @property
-    def typecode(self):
-        return self.array.typecode
-
-    @property
-    def itemsize(self):
-        return self.array.itemsize
-
-    @property
-    def flat(self):
-        return self.array
-
-
-class BaseArrayNumPy(BaseArray):
-
-    TypeMap = make_typemap([])
-    #TypeMap.update(TypeMapBool)
-    TypeMap.update(TypeMapInteger)
-    #TypeMap.update(TypeMapUnsigned)
-    TypeMap.update(TypeMapFloat)
-    TypeMap.update(TypeMapComplex)
-
-    @property
-    def address(self):
-        return self.array.__array_interface__['data'][0]
-
-    @property
-    def typecode(self):
-        return self.array.dtype.char
-
-    @property
-    def itemsize(self):
-        return self.array.itemsize
-
-    @property
-    def flat(self):
-        return self.array.flat
-
-
-ArrayTypes = []
-
-def export(cls):
-    ArrayTypes.append(cls)
-    __all__.append(cls.__name__)
-    return cls
-
-
 if array is not None:
 
     def product(seq):
@@ -177,8 +132,10 @@ if array is not None:
     def mkshape(shape):
         return tuple([int(s) for s in shape])
 
-    @export
-    class ArrayBasic(BaseArrayBasic):
+    @add_backend
+    class ArrayArray(BaseArray):
+
+        backend = 'array'
 
         def __init__(self, arg, typecode, shape=None):
             if isinstance(arg, (int, float)):
@@ -200,11 +157,35 @@ if array is not None:
                 assert size == product(shape)
             self.array = array.array(typecode, arg)
 
+        @property
+        def address(self):
+            return self.array.buffer_info()[0]
+
+        @property
+        def typecode(self):
+            return self.array.typecode
+
+        @property
+        def itemsize(self):
+            return self.array.itemsize
+
+        @property
+        def flat(self):
+            return self.array
 
 if numpy is not None:
 
-    @export
-    class ArrayNumPy(BaseArrayNumPy):
+    @add_backend
+    class ArrayNumPy(BaseArray):
+
+        backend = 'numpy'
+
+        TypeMap = make_typemap([])
+        #TypeMap.update(TypeMapBool)
+        TypeMap.update(TypeMapInteger)
+        #TypeMap.update(TypeMapUnsigned)
+        TypeMap.update(TypeMapFloat)
+        TypeMap.update(TypeMapComplex)
 
         def __init__(self, arg, typecode, shape=None):
             if isinstance(arg, (int, float, complex)):
@@ -217,9 +198,28 @@ if numpy is not None:
             else:
                 self.array[:] = arg
 
+        @property
+        def address(self):
+            return self.array.__array_interface__['data'][0]
+
+        @property
+        def typecode(self):
+            return self.array.dtype.char
+
+        @property
+        def itemsize(self):
+            return self.array.itemsize
+
+        @property
+        def flat(self):
+            return self.array.flat
 
 
-
-
-
-
+def subTest(case):
+    for array in ArrayBackends:
+        for typecode in array.TypeMap:
+            with case.subTest(backend=array.backend, typecode=typecode):
+                try:
+                    yield array, typecode
+                except GeneratorExit:
+                    return

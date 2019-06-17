@@ -38,7 +38,23 @@ class TestCase(unittest.TestCase):
             else: excName = str(excClass)
             raise self.failureException("%s not raised" % excName)
 
-    failUnlessRaisesMPI = assertRaisesMPI
+    try:
+
+        unittest.TestCase.subTest
+
+    except AttributeError:
+
+        class _SubTestManager(object):
+            def __init__(self, case, msg=None, **params):
+                pass
+            def __enter__(self):
+                pass
+            def __exit__(self, *args):
+                pass
+
+        def subTest(self, msg=None, **params):
+            return self._SubTestManager(self, msg, **params)
+
 
 ErrClsMap = None
 def ErrClsName(ierr):
