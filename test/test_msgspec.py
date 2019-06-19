@@ -997,6 +997,7 @@ class TestMessageRMA(unittest.TestCase):
         rbuf = bytearray(len(buffer(sbuf)))
         PutGet([sbuf, MPI.BYTE], [rbuf, MPI.BYTE], None)
 
+    @unittest.skipMPI('msmpi')
     @unittest.skipIf(array is None, 'array')
     def testMessageArray(self):
         sbuf = array.array('i', [1,2,3])
@@ -1004,6 +1005,7 @@ class TestMessageRMA(unittest.TestCase):
         PutGet(sbuf, rbuf)
         self.assertEqual(sbuf, rbuf)
 
+    @unittest.skipMPI('msmpi')
     @unittest.skipIf(numpy is None, 'numpy')
     def testMessageNumPy(self):
         sbuf = numpy.array([1,2,3], dtype='i')
@@ -1011,6 +1013,7 @@ class TestMessageRMA(unittest.TestCase):
         PutGet(sbuf, rbuf)
         self.assertTrue((sbuf == rbuf).all())
 
+    @unittest.skipMPI('msmpi')
     @unittest.skipIf(array is None, 'array')
     def testMessageGPUBuf(self):
         sbuf = GPUBuf('i', [1,2,3], readonly=True)
@@ -1018,6 +1021,7 @@ class TestMessageRMA(unittest.TestCase):
         PutGet(sbuf, rbuf)
         self.assertEqual(sbuf, rbuf)
 
+    @unittest.skipMPI('msmpi')
     @unittest.skipMPI('mvapich2')
     @unittest.skipIf(cupy is None, 'cupy')
     def testMessageCuPy(self):
