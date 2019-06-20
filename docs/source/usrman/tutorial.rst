@@ -52,13 +52,18 @@ communication of buffer-provider objects (e.g., NumPy arrays).
   specified as ``[data, count, displ, datatype]``, where ``count`` and
   ``displ`` are sequences of integral values.
 
-  Automatic MPI datatype discovery for NumPy arrays and PEP-3118
+  Automatic MPI datatype discovery for NumPy/CUDA arrays and PEP-3118
   buffers is supported, but limited to basic C types (all C/C99-native
   signed/unsigned integral types and single/double precision
   real/complex floating types) and availability of matching datatypes
   in the underlying MPI implementation. In this case, the
   buffer-provider object can be passed directly as a buffer argument,
   the count and MPI datatype will be inferred.
+
+  If mpi4py is built against a CUDA-aware MPI, CUDA GPU arrays can be
+  passed to the upper-case methods as long as they have a ``__cuda_array_interface__``
+  attribute compliant with the standard specification. Moreover, only
+  C- or Fortran- contiguous CUDA arrays are supported.
 
 
 Running Python scripts with MPI
@@ -334,6 +339,27 @@ Dynamic Process Management
                op=MPI.SUM, root=0)
 
    comm.Disconnect()
+
+
+CUDA-aware MPI + Python GPU arrays
+----------------------------------
+
+* Reduce-to-all CuPy arrays::
+
+   from mpi4py import MPI
+   import cupy as cp
+
+   comm = MPI.COMM_WORLD
+   size = comm.Get_size()
+   rank = comm.Get_rank()
+
+   sendbuf = cp.arange(10, dtype='i')
+   recvbuf = cp.empty_like(sendbuf)
+   assert hasattr(sendbuf, '__cuda_array_interface__')
+   assert hasattr(recvbuf, '__cuda_array_interface__')
+   comm.Allreduce(sendbuf, recvbuf)
+
+   assert cp.allclose(recvbuf, sendbuf*size)
 
 
 Wrapping with SWIG

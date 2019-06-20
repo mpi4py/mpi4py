@@ -6,6 +6,19 @@ CHANGES: MPI for Python
 :Contact: dalcinl@gmail.com
 
 
+Release 3.1.0 [2019-XX-XX]
+==========================
+
+* Enhancements:
+
+  + Support passing Python GPU arrays compliant with the ``__cuda_array_interface__``
+    standard (`link`_) to uppercase API calls if mpi4py is built against 
+    CUDA-aware MPI implementations. This feature is currently experimental 
+    and subject to future changes.
+
+.. _link: http://numba.pydata.org/numba-doc/latest/cuda/cuda_array_interface.html
+
+
 Release 3.0.2 [2019-06-11]
 ==========================
 
