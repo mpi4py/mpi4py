@@ -410,7 +410,7 @@ class AsCompletedTestMixin:
                 completed)
 
     def test_zero_timeout(self):
-        future1 = self.executor.submit(time.sleep, 0.2)
+        future1 = self.executor.submit(time.sleep, 0.5)
         completed_futures = set()
         try:
             for future in futures.as_completed(
@@ -430,7 +430,7 @@ class AsCompletedTestMixin:
 
     def test_nonzero_timeout(self):
         future1 = self.executor.submit(time.sleep, 0.0)
-        future2 = self.executor.submit(time.sleep, 0.2)
+        future2 = self.executor.submit(time.sleep, 0.5)
         completed_futures = set()
         try:
             for future in futures.as_completed(
@@ -438,7 +438,7 @@ class AsCompletedTestMixin:
                      EXCEPTION_FUTURE,
                      SUCCESSFUL_FUTURE,
                      future1],
-                    timeout=0.1):
+                    timeout=0.2):
                 completed_futures.add(future)
         except futures.TimeoutError:
             pass
@@ -508,9 +508,7 @@ class ExecutorTestMixin:
     def test_map_timeout(self):
         results = []
         try:
-            for i in self.executor.map(time.sleep,
-                                       [0, 0, 1],
-                                       timeout=0.25):
+            for i in self.executor.map(time.sleep, [0, 0, 1], timeout=0.25):
                 results.append(i)
         except futures.TimeoutError:
             pass
@@ -583,8 +581,8 @@ class ProcessPoolExecutorTest(ProcessPoolMixin,
         num_workers = self.executor._pool.size
         results = []
         try:
-            args = [0.2] + [0]*(num_workers-1)
-            for i in map_unordered(time.sleep, args, timeout=0.1):
+            args = [1] + [0]*(num_workers-1)
+            for i in map_unordered(time.sleep, args, timeout=0.25):
                 results.append(i)
         except futures.TimeoutError:
             pass
@@ -828,7 +826,7 @@ class MPICommExecutorTest(unittest.TestCase):
 
             list(executor.map(time.sleep, [0, 0]))
             list(executor.map(time.sleep, [0, 0], timeout=1))
-            iterator = executor.map(time.sleep, [0.1, 0], timeout=0)
+            iterator = executor.map(time.sleep, [0.2, 0], timeout=0)
             self.assertRaises(futures.TimeoutError, list, iterator)
 
     def test_args(self):
