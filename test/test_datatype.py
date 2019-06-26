@@ -308,7 +308,7 @@ class TestDatatype(unittest.TestCase):
     @unittest.skipMPI('openmpi(<3.0.0)')
     @unittest.skipMPI('msmpi')
     @unittest.skipMPI('SpectrumMPI')
-    def testCreatef90ComplexSingle(self):
+    def testCreateF90ComplexSingle(self):
         (p, r) = (6, 30)
         factory = MPI.Datatype.Create_f90_complex
         args = (p, r)
