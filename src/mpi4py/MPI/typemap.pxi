@@ -19,18 +19,12 @@ AddTypeMap(TypeDict, "?" , __C_BOOL__   ) # PEP-3118 & NumPy
 AddTypeMap(TypeDict, "c" , __CHAR__     ) # PEP-3118 & NumPy
 AddTypeMap(TypeDict, "S" , __CHAR__     ) # NumPy
 AddTypeMap(TypeDict, "U" , __WCHAR__    ) # NumPy
-# UCS-2|4
-AddTypeMap(TypeDict, "u" , __UNSIGNED_SHORT__ ) # PEP-3118
-AddTypeMap(TypeDict, "u" , __UINT16_T__       ) # PEP-3118
-AddTypeMap(TypeDict, "w" , __UNSIGNED__       ) # PEP-3118
-AddTypeMap(TypeDict, "w" , __UINT32_T__       ) # PEP-3118
 # (signed) integer
 AddTypeMap(TypeDict, "b" , __SIGNED_CHAR__ ) # MPI-2
 AddTypeMap(TypeDict, "h" , __SHORT__       )
 AddTypeMap(TypeDict, "i" , __INT__         )
 AddTypeMap(TypeDict, "l" , __LONG__        )
 AddTypeMap(TypeDict, "q" , __LONG_LONG__   )
-AddTypeMap(TypeDict, "p" , __AINT__        ) # NumPy
 # unsigned integer
 AddTypeMap(TypeDict, "B" , __UNSIGNED_CHAR__      )
 AddTypeMap(TypeDict, "H" , __UNSIGNED_SHORT__     )
@@ -76,18 +70,18 @@ if sizeof(char) == 1:
 if sizeof(short) == 2:
     AddTypeMap(TypeDict, "i2" ,  __SHORT__              ) # NumPy
     AddTypeMap(TypeDict, "u2" ,  __UNSIGNED_SHORT__     ) # NumPy
+if sizeof(long) == 4:
+    AddTypeMap(TypeDict, "i4" ,  __LONG__               ) # NumPy
+    AddTypeMap(TypeDict, "u4" ,  __UNSIGNED_LONG__      ) # NumPy
 if sizeof(int) == 4:
     AddTypeMap(TypeDict, "i4" ,  __INT__                ) # NumPy
     AddTypeMap(TypeDict, "u4" ,  __UNSIGNED__           ) # NumPy
-elif sizeof(long) == 4:
-    AddTypeMap(TypeDict, "i4" ,  __LONG__               ) # NumPy
-    AddTypeMap(TypeDict, "u4" ,  __UNSIGNED_LONG__      ) # NumPy
+if sizeof(long long) == 8:
+    AddTypeMap(TypeDict, "i8" ,  __LONG_LONG__          ) # NumPy
+    AddTypeMap(TypeDict, "u8" ,  __UNSIGNED_LONG_LONG__ ) # NumPy
 if sizeof(long) == 8:
     AddTypeMap(TypeDict, "i8" ,  __LONG__               ) # NumPy
     AddTypeMap(TypeDict, "u8" ,  __UNSIGNED_LONG__      ) # NumPy
-elif sizeof(long long) == 8:
-    AddTypeMap(TypeDict, "i8" ,  __LONG_LONG__          ) # NumPy
-    AddTypeMap(TypeDict, "u8" ,  __UNSIGNED_LONG_LONG__ ) # NumPy
 # signed integer (C99)
 AddTypeMap(TypeDict, "i1" , __INT8_T__   ) # NumPy
 AddTypeMap(TypeDict, "i2" , __INT16_T__  ) # NumPy
@@ -115,6 +109,38 @@ if sizeof(long double) == 16:
     AddTypeMap(TypeDict, "f16" , __LONG_DOUBLE__             ) # NumPy
     AddTypeMap(TypeDict, "c32" , __CXX_LONG_DOUBLE_COMPLEX__ ) # NumPy
     AddTypeMap(TypeDict, "c32" , __C_LONG_DOUBLE_COMPLEX__   ) # NumPy
+
+# ssize_t and size_t (C)
+if sizeof(size_t) == sizeof(long long):
+    AddTypeMap(TypeDict, "n" , __LONG_LONG__          )
+    AddTypeMap(TypeDict, "N" , __UNSIGNED_LONG_LONG__ )
+if sizeof(size_t) == sizeof(long):
+    AddTypeMap(TypeDict, "n" , __LONG__               )
+    AddTypeMap(TypeDict, "N" , __UNSIGNED_LONG__      )
+if sizeof(size_t) == sizeof(int):
+    AddTypeMap(TypeDict, "n" , __INT__                )
+    AddTypeMap(TypeDict, "N" , __UNSIGNED__           )
+
+# intptr_t and uintptr_t (C99)
+if sizeof(Py_intptr_t) == sizeof(long long):
+    AddTypeMap(TypeDict, "p" , __LONG_LONG__          ) # NumPy
+    AddTypeMap(TypeDict, "P" , __UNSIGNED_LONG_LONG__ ) # NumPy
+if sizeof(Py_intptr_t) == sizeof(long):
+    AddTypeMap(TypeDict, "p" , __LONG__               ) # NumPy
+    AddTypeMap(TypeDict, "P" , __UNSIGNED_LONG__      ) # NumPy
+if sizeof(Py_intptr_t) == sizeof(int):
+    AddTypeMap(TypeDict, "p" , __INT__                ) # NumPy
+    AddTypeMap(TypeDict, "P" , __UNSIGNED__           ) # NumPy
+if sizeof(Py_intptr_t) == sizeof(MPI_Aint):
+    AddTypeMap(TypeDict, "p" , __AINT__               ) # NumPy
+
+# UCS-2 and UCS-4
+if sizeof(short) == 2:
+    AddTypeMap(TypeDict, "u" , __UNSIGNED_SHORT__ ) # PEP-3118
+if sizeof(int) == 4:
+    AddTypeMap(TypeDict, "w" , __UNSIGNED__       ) # PEP-3118
+AddTypeMap(TypeDict, "u" , __UINT16_T__ ) # PEP-3118
+AddTypeMap(TypeDict, "w" , __UINT32_T__ ) # PEP-3118
 
 # -----------------------------------------------------------------------------
 
@@ -156,11 +182,14 @@ AddTypeMap(CTypeDict, "u4" , __UINT32_T__ )
 AddTypeMap(CTypeDict, "u8" , __UINT64_T__ )
 
 if sizeof(float) == 4:
-    AddTypeMap(CTypeDict, "f4" , __FLOAT__             )
+    AddTypeMap(CTypeDict, "f4"  , __FLOAT__            )
     AddTypeMap(CTypeDict, "c8"  , __C_FLOAT_COMPLEX__  )
 if sizeof(double) == 8:
-    AddTypeMap(CTypeDict, "f8" , __DOUBLE__            )
+    AddTypeMap(CTypeDict, "f8"  , __DOUBLE__           )
     AddTypeMap(CTypeDict, "c16" , __C_DOUBLE_COMPLEX__ )
+if sizeof(long double) == 12:
+    AddTypeMap(CTypeDict, "f12" , __LONG_DOUBLE__           )
+    AddTypeMap(CTypeDict, "c24" , __C_LONG_DOUBLE_COMPLEX__ )
 if sizeof(long double) == 16:
     AddTypeMap(CTypeDict, "f16" , __LONG_DOUBLE__           )
     AddTypeMap(CTypeDict, "c32" , __C_LONG_DOUBLE_COMPLEX__ )
@@ -171,9 +200,7 @@ cdef dict FTypeDict = { }
 _typedict_f = FTypeDict
 
 AddTypeMap(FTypeDict, "?"   , __LOGICAL__          )
-
 AddTypeMap(FTypeDict, "i"   , __INTEGER__          )
-
 AddTypeMap(FTypeDict, "s"   , __REAL__             )
 AddTypeMap(FTypeDict, "r"   , __REAL__             )
 AddTypeMap(FTypeDict, "d"   , __DOUBLE_PRECISION__ )
