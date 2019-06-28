@@ -291,6 +291,27 @@ static int PyMPI_OPENMPI_MPI_Mrecv(void *buf, int count, MPI_Datatype type,
 
 /* ------------------------------------------------------------------------- */
 
+/*
+ * Open MPI < 1.10.3 errors with MPI_Get_address(MPI_BOTTOM, &address).
+ */
+
+#if PyMPI_OPENMPI_VERSION < 11003
+
+static int PyMPI_OPENMPI_Get_address(const void *location, MPI_Aint *address)
+{
+  if (location == MPI_BOTTOM && address) {
+    *address = 0;
+    return MPI_SUCCESS;
+  }
+  return MPI_Get_address(location, address);
+}
+#undef  MPI_Get_address
+#define MPI_Get_address PyMPI_OPENMPI_Get_address
+
+#endif
+
+/* ------------------------------------------------------------------------- */
+
 #endif /* !PyMPI_COMPAT_OPENMPI_H */
 
 /*

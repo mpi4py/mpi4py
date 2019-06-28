@@ -30,7 +30,6 @@ class TestAddress(unittest.TestCase):
         addr = unpack('P', pack('P', addr))[0]
         self.assertEqual(addr, bufptr)
 
-    @unittest.skipMPI('openmpi(<=1.10.2)')
     def testBottom(self):
         base = MPI.Get_address(MPI.BOTTOM)
         addr = MPI.Aint_add(base, 0)
