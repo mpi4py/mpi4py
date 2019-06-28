@@ -581,13 +581,17 @@ class TestMessageGPUBufInterface(unittest.TestCase):
         rmsg.__cuda_array_interface__['strides'] = (itemsize*n,)
         rmsg.__cuda_array_interface__['typestr'] = new_typestr
         rmsg.__cuda_array_interface__['descr'] = new_descr
+        import warnings
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            self.assertRaises(RuntimeWarning, Sendrecv, smsg, rmsg)
         try:  # Python 3.2+
             self.assertWarns(RuntimeWarning, Sendrecv, smsg, rmsg)
         except AttributeError:  # Python 2
-            import warnings
             with warnings.catch_warnings(record=True) as w:
                 warnings.simplefilter("always")
                 Sendrecv(smsg, rmsg)
+                self.assertEqual(len(w), 1)
                 self.assertEqual(w[-1].category, RuntimeWarning)
         self.assertEqual(smsg, rmsg)
 
