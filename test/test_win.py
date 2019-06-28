@@ -181,8 +181,8 @@ class BaseTestWinCreateDynamic(BaseTestWin):
 
     def testMemory(self):
         memory = self.WIN.tomemory()
-        base = memory.address
-        size = memory.nbytes
+        base = MPI.Get_address(memory)
+        size = len(memory)
         self.assertEqual(base, 0)
         self.assertEqual(size, 0)
 
