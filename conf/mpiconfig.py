@@ -150,7 +150,7 @@ class Config(object):
                 except ImportError:
                     import _winreg as winreg
                 HKLM = winreg.HKEY_LOCAL_MACHINE
-                subkey = "SOFTWARE\Microsoft\MPI"
+                subkey = r"SOFTWARE\Microsoft\MPI"
                 with winreg.OpenKey(HKLM, subkey) as key:
                     for i in range(winreg.QueryInfoKey(key)[1]):
                         name, value, type = winreg.EnumValue(key, i)
