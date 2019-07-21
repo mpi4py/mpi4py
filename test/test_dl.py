@@ -8,19 +8,23 @@ except ImportError:
 pypy_lt_510 = (hasattr(sys, 'pypy_version_info') and
                sys.pypy_version_info < (5, 10))
 
+try:
+    if pypy_lt_510:
+        ctypes = None
+    else:
+        import ctypes
+except ImportError:
+    ctypes = None
+
 @unittest.skipIf(dl is None, 'mpi4py-dl')
 class TestDL(unittest.TestCase):
 
+    @unittest.skipIf(ctypes is None, 'ctypes')
     def testDL1(self):
-        if sys.platform == 'darwin':
-            libm = 'libm.dylib'
-        else:
-            libm = 'libm.so'
+        from ctypes.util import find_library
+        libm = find_library('m')
 
         handle = dl.dlopen(libm, dl.RTLD_LOCAL|dl.RTLD_LAZY)
-        if handle == 0 and sys.platform.startswith('linux'):
-            self.assertTrue(dl.dlerror() is not None)
-            handle = dl.dlopen('libm.so.6', dl.RTLD_LOCAL|dl.RTLD_LAZY)
         self.assertTrue(handle != 0)
         self.assertTrue(dl.dlerror() is None)
 
