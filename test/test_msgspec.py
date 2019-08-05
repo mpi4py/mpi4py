@@ -532,7 +532,7 @@ class TestMessageVectorW(unittest.TestCase):
         self.assertEqual(bytearray(2), rbuf[1:])
 
 def PutGet(smsg, rmsg, target):
-    try: win =  MPI.Win.Allocate(8, 1, MPI.INFO_NULL, MPI.COMM_SELF)
+    try: win =  MPI.Win.Allocate(256, 1, MPI.INFO_NULL, MPI.COMM_SELF)
     except NotImplementedError: win = MPI.WIN_NULL
     try:
         try: win.Fence()
