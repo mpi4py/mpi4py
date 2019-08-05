@@ -918,7 +918,7 @@ class TestMessageVectorW(unittest.TestCase):
 # ---
 
 def PutGet(smsg, rmsg, target=None):
-    try: win =  MPI.Win.Allocate(8, 1, MPI.INFO_NULL, MPI.COMM_SELF)
+    try: win =  MPI.Win.Allocate(256, 1, MPI.INFO_NULL, MPI.COMM_SELF)
     except NotImplementedError: win = MPI.WIN_NULL
     try:
         try: win.Fence()
