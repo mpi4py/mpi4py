@@ -333,6 +333,7 @@ class BaseTestCCOBuf(object):
 
 
 @unittest.skipMPI('MVAPICH2')
+@unittest.skipMPI('msmpi(<8.1.0)')
 class BaseTestCCOBufInplace(object):
 
     def testGather(self):

@@ -93,6 +93,7 @@ class BaseTestCCOObjInter(object):
                         rmess = self.INTERCOMM.gather(smess, root=root)
                         self.assertEqual(rmess, None)
 
+    @unittest.skipMPI('msmpi(<8.0.0)')
     def testScatter(self):
         rank = self.INTERCOMM.Get_rank()
         size = self.INTERCOMM.Get_size()
