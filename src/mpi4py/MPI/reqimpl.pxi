@@ -28,24 +28,25 @@ cdef object acquire_rs(object requests,
 
 cdef int release_rs(object requests,
                     object statuses,
-                    int         count,
+                    Py_ssize_t  incount,
                     MPI_Request rp[],
+                    Py_ssize_t  outcount,
                     MPI_Status  sp[]) except -1:
-    cdef Py_ssize_t i = 0, nr = count, ns = 0
+    cdef Py_ssize_t i = 0, nr = incount, ns = 0
     cdef Request req = None
     for i from 0 <= i < nr:
         req = <Request>requests[i]
         req.ob_mpi = rp[i]
         if rp[i] == MPI_REQUEST_NULL:
             req.ob_buf = None
-    if statuses is not None:
+    if statuses is not None and outcount != MPI_UNDEFINED:
         ns = len(statuses)
-        if nr > ns :
+        if outcount > ns:
             if isinstance(statuses, list):
                 statuses += [Status.__new__(Status)
-                             for i from ns <= i < nr]
-                ns = nr
-        for i from 0 <= i < ns:
+                             for i from ns <= i < outcount]
+                ns = outcount
+        for i from 0 <= i < min(nr, ns):
             (<Status?>statuses[i]).ob_mpi = sp[i]
     return 0
 

@@ -86,7 +86,7 @@ cdef class Request:
             with nogil: CHKERR( MPI_Waitany(
                 count, irequests, &index, statusp) )
         finally:
-            release_rs(requests, None, count, irequests, NULL)
+            release_rs(requests, None, count, irequests, 0, NULL)
         return index
 
     @classmethod
@@ -105,7 +105,7 @@ cdef class Request:
             with nogil: CHKERR( MPI_Testany(
                 count, irequests, &index, &flag, statusp) )
         finally:
-            release_rs(requests, None, count, irequests, NULL)
+            release_rs(requests, None, count, irequests, 0, NULL)
         #
         return (index, <bint>flag)
 
@@ -124,7 +124,7 @@ cdef class Request:
             with nogil: CHKERR( MPI_Waitall(
                 count, irequests, istatuses) )
         finally:
-            release_rs(requests, statuses, count, irequests, istatuses)
+            release_rs(requests, statuses, count, irequests, count, istatuses)
         return True
 
     @classmethod
@@ -143,7 +143,7 @@ cdef class Request:
             with nogil: CHKERR( MPI_Testall(
                 count, irequests, &flag, istatuses) )
         finally:
-            release_rs(requests, statuses, count, irequests, istatuses)
+            release_rs(requests, statuses,count, irequests, count, istatuses)
         return <bint>flag
 
     @classmethod
@@ -163,7 +163,9 @@ cdef class Request:
             with nogil: CHKERR( MPI_Waitsome(
                 incount, irequests, &outcount, iindices, istatuses) )
         finally:
-            release_rs(requests, statuses, incount, irequests, istatuses)
+            release_rs(requests, statuses,
+                       incount, irequests,
+                       outcount, istatuses)
         #
         cdef int i = 0
         cdef object indices = None
@@ -188,7 +190,9 @@ cdef class Request:
             with nogil: CHKERR( MPI_Testsome(
                 incount, irequests, &outcount, iindices, istatuses) )
         finally:
-            release_rs(requests, statuses, incount, irequests, istatuses)
+            release_rs(requests, statuses,
+                       incount, irequests,
+                       outcount, istatuses)
         #
         cdef int i = 0
         cdef object indices = None
@@ -278,6 +282,20 @@ cdef class Request:
         cdef int flag = 0
         cdef msg = PyMPI_testall(requests, &flag, statuses)
         return (<bint>flag, msg)
+    #
+    @classmethod
+    def waitsome(cls, requests, statuses=None):
+        """
+        Wait for some previously initiated requests to complete
+        """
+        return PyMPI_waitsome(requests, statuses)
+    #
+    @classmethod
+    def testsome(cls, requests, statuses=None):
+        """
+        Test for completion of some previously initiated requests
+        """
+        return PyMPI_testsome(requests, statuses)
 
 
 cdef class Prequest(Request):
@@ -308,7 +326,7 @@ cdef class Prequest(Request):
         try:
             with nogil: CHKERR( MPI_Startall(count, irequests) )
         finally:
-            release_rs(requests, None, count, irequests, NULL)
+            release_rs(requests, None, count, irequests, 0, NULL)
 
 
 

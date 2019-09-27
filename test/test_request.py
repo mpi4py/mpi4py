@@ -105,9 +105,10 @@ class TestRequestArray(unittest.TestCase):
         ret = MPI.Request.Waitsome(self.REQUESTS, None)
         self.assertEqual(ret, None)
         for statuses in (self.STATUSES, []):
+            slen = len(statuses)
             ret = MPI.Request.Waitsome(self.REQUESTS, statuses)
             self.assertEqual(ret, None)
-            self.assertEqual(len(statuses), len(self.REQUESTS))
+            self.assertEqual(len(statuses), slen)
 
     def testTestsome(self):
         ret = MPI.Request.Testsome(self.REQUESTS)
@@ -115,9 +116,10 @@ class TestRequestArray(unittest.TestCase):
         ret = MPI.Request.Testsome(self.REQUESTS, None)
         self.assertEqual(ret, None)
         for statuses in (self.STATUSES, []):
+            slen = len(statuses)
             ret = MPI.Request.Testsome(self.REQUESTS, statuses)
             self.assertEqual(ret, None)
-            self.assertEqual(len(statuses), len(self.REQUESTS))
+            self.assertEqual(len(statuses), slen)
 
 
 if __name__ == '__main__':

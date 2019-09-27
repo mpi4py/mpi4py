@@ -449,7 +449,7 @@ cdef object PyMPI_waitany(requests, int *index, Status status):
         if status is not None:
             status.ob_mpi = rsts
     finally:
-        release_rs(requests, None, count, irequests, NULL)
+        release_rs(requests, None, count, irequests, 0, NULL)
     #
     if index[0] == MPI_UNDEFINED: return None
     return PyMPI_load(&rsts, buf)
@@ -470,12 +470,11 @@ cdef object PyMPI_testany(requests, int *index, int *flag, Status status):
         if status is not None:
             status.ob_mpi = rsts
     finally:
-        release_rs(requests, None, count, irequests, NULL)
+        release_rs(requests, None, count, irequests, 0, NULL)
     #
     if index[0] == MPI_UNDEFINED: return None
     if not flag[0]: return None
     return PyMPI_load(&rsts, buf)
-
 
 cdef object PyMPI_waitall(requests, statuses):
     cdef object bufs = None
@@ -490,10 +489,9 @@ cdef object PyMPI_waitall(requests, statuses):
         with nogil: CHKERR( MPI_Waitall(count, irequests, istatuses) )
         bufs = [(<Request>requests[i]).ob_buf for i from 0 <= i < count]
     finally:
-        release_rs(requests, statuses, count, irequests, istatuses)
+        release_rs(requests, statuses, count, irequests, count, istatuses)
     #
     return [PyMPI_load(&istatuses[i], bufs[i]) for i from 0 <= i < count]
-
 
 cdef object PyMPI_testall(requests, int *flag, statuses):
     cdef object bufs = None
@@ -509,10 +507,66 @@ cdef object PyMPI_testall(requests, int *flag, statuses):
         if flag[0]:
             bufs = [(<Request>requests[i]).ob_buf for i from 0 <= i < count]
     finally:
-        release_rs(requests, statuses, count, irequests, istatuses)
+        release_rs(requests, statuses, count, irequests, count, istatuses)
     #
     if not flag[0]: return None
     return [PyMPI_load(&istatuses[i], bufs[i]) for i from 0 <= i < count]
+
+cdef object PyMPI_waitsome(requests, statuses):
+    cdef object bufs = None
+    cdef object indices = None
+    cdef object objects = None
+    #
+    cdef Py_ssize_t i = 0
+    cdef int incount = 0
+    cdef MPI_Request *irequests = NULL
+    cdef int outcount = MPI_UNDEFINED, *iindices = NULL
+    cdef MPI_Status *istatuses = MPI_STATUSES_IGNORE
+    #
+    cdef tmp1 = acquire_rs(requests, True, &incount, &irequests, &istatuses)
+    cdef tmp2 = newarray(incount, &iindices)
+    try:
+        with nogil: CHKERR( MPI_Waitsome(
+            incount, irequests, &outcount, iindices, istatuses) )
+        if outcount != MPI_UNDEFINED:
+            bufs = [(<Request>requests[iindices[i]]).ob_buf
+                    for i from 0 <= i < outcount]
+    finally:
+        release_rs(requests, statuses, incount, irequests, outcount, istatuses)
+    #
+    if outcount != MPI_UNDEFINED:
+        indices = [iindices[i] for i from 0 <= i < outcount]
+        objects = [PyMPI_load(&istatuses[i], bufs[i])
+                   for i from 0 <= i < outcount]
+    return (indices, objects)
+
+cdef object PyMPI_testsome(requests, statuses):
+    cdef object bufs = None
+    cdef object indices = None
+    cdef object objects = None
+    #
+    cdef Py_ssize_t i = 0
+    cdef int incount = 0
+    cdef MPI_Request *irequests = NULL
+    cdef int outcount = MPI_UNDEFINED, *iindices = NULL
+    cdef MPI_Status *istatuses = MPI_STATUSES_IGNORE
+    #
+    cdef tmp1 = acquire_rs(requests, True, &incount, &irequests, &istatuses)
+    cdef tmp2 = newarray(incount, &iindices)
+    try:
+        with nogil: CHKERR( MPI_Testsome(
+            incount, irequests, &outcount, iindices, istatuses) )
+        if outcount != MPI_UNDEFINED:
+            bufs = [(<Request>requests[iindices[i]]).ob_buf
+                    for i from 0 <= i < outcount]
+    finally:
+        release_rs(requests, statuses, incount, irequests, outcount, istatuses)
+    #
+    if outcount != MPI_UNDEFINED:
+        indices = [iindices[i] for i from 0 <= i < outcount]
+        objects = [PyMPI_load(&istatuses[i], bufs[i])
+                   for i from 0 <= i < outcount]
+    return (indices, objects)
 
 # -----------------------------------------------------------------------------
 

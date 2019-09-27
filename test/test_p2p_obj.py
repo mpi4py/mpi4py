@@ -564,6 +564,92 @@ class BaseTestP2PObj(object):
         finally:
             comm.Free()
 
+    def testWaitSomeRecv(self):
+        comm = self.COMM.Dup()
+        rank = comm.Get_rank()
+        reqs = [comm.irecv(source=rank, tag=i) for i in range(6)]
+        for indexlist in ([5], [3,1,2], [0,4]):
+            for i in indexlist:
+                comm.ssend("abc", dest=rank, tag=i)
+            statuses = []
+            idxs, objs = MPI.Request.waitsome(reqs, statuses)
+            self.assertEqual(sorted(idxs), sorted(indexlist))
+            self.assertEqual(objs, ["abc"]*len(idxs))
+            self.assertFalse(any(reqs[i] for i in idxs))
+            self.assertEqual(len(statuses), len(idxs))
+            self.assertTrue(all(s.source == rank for s in statuses))
+            self.assertTrue(all(s.tag in indexlist for s in statuses))
+            self.assertTrue(all(s.error == MPI.SUCCESS for s in statuses))
+        idxs, objs = MPI.Request.waitsome(reqs)
+        self.assertEqual(idxs, None)
+        self.assertEqual(objs, None)
+        self.assertFalse(any(reqs))
+
+    def testTestSomeRecv(self):
+        comm = self.COMM.Dup()
+        rank = comm.Get_rank()
+        reqs = [comm.irecv(source=rank, tag=i) for i in range(6)]
+        statuses = []
+        idxs, objs = MPI.Request.testsome(reqs, statuses)
+        self.assertEqual(idxs, [])
+        self.assertEqual(objs, [])
+        self.assertTrue(all(reqs))
+        self.assertEqual(statuses, [])
+        for indexlist in ([5], [], [3,1,2], [], [0,4]):
+            for i in indexlist:
+                comm.ssend("abc", dest=rank, tag=i)
+            statuses = []
+            idxs, objs = MPI.Request.testsome(reqs, statuses)
+            self.assertEqual(sorted(idxs), sorted(indexlist))
+            self.assertEqual(objs, ["abc"]*len(idxs))
+            self.assertFalse(any(reqs[i] for i in idxs))
+            self.assertEqual(len(statuses), len(idxs))
+            self.assertTrue(all(s.source == rank for s in statuses))
+            self.assertTrue(all(s.tag in indexlist for s in statuses))
+            self.assertTrue(all(s.error == MPI.SUCCESS for s in statuses))
+        idxs, objs = MPI.Request.testsome(reqs)
+        self.assertEqual(idxs, None)
+        self.assertEqual(objs, None)
+        self.assertFalse(any(reqs))
+
+    def testWaitSomeSend(self):
+        comm = self.COMM.Dup()
+        rank = comm.Get_rank()
+        reqs = [comm.issend("abc", dest=rank, tag=i) for i in range(6)]
+        for indexlist in ([5], [3,1,2], [0,4]):
+            for i in indexlist:
+                msg = comm.recv(source=rank, tag=i)
+                self.assertEqual(msg, "abc")
+            idxs, objs = MPI.Request.waitsome(reqs)
+            self.assertEqual(sorted(idxs), sorted(indexlist))
+            self.assertEqual(objs, [None]*len(idxs))
+            self.assertFalse(any(reqs[i] for i in idxs))
+        idxs, objs = MPI.Request.waitsome(reqs)
+        self.assertEqual(idxs, None)
+        self.assertEqual(objs, None)
+        self.assertFalse(any(reqs))
+
+    def testTestSomeSend(self):
+        comm = self.COMM.Dup()
+        rank = comm.Get_rank()
+        reqs = [comm.issend("abc", dest=rank, tag=i) for i in range(6)]
+        idxs, objs = MPI.Request.testsome(reqs)
+        self.assertEqual(idxs, [])
+        self.assertEqual(objs, [])
+        self.assertTrue(all(reqs))
+        for indexlist in ([5], [], [3,1,2], [], [0,4]):
+            for i in indexlist:
+                msg = comm.recv(source=rank, tag=i)
+                self.assertEqual(msg, "abc")
+            idxs, objs = MPI.Request.testsome(reqs)
+            self.assertEqual(sorted(idxs), sorted(indexlist))
+            self.assertEqual(objs, [None]*len(idxs))
+            self.assertFalse(any(reqs[i] for i in idxs))
+        idxs, objs = MPI.Request.testsome(reqs)
+        self.assertEqual(idxs, None)
+        self.assertEqual(objs, None)
+        self.assertFalse(any(reqs))
+
 
 class TestP2PObjSelf(BaseTestP2PObj, unittest.TestCase):
     COMM = MPI.COMM_SELF
