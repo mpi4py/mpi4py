@@ -2,9 +2,6 @@
 
 environment:
 
-  global:
-    BUILD: "cmd /E:ON /V:ON /C .\\conf\\ci\\appveyor\\build.cmd"
-
   matrix:
     - PYTHON: "C:\\Python27"
       ANACONDA: "C:\\Miniconda"
@@ -25,10 +22,10 @@ environment:
       ANACONDA: "C:\\Miniconda36-x64"
 
     - PYTHON: "C:\\Python37"
-      ANACONDA: "C:\\Miniconda36"
+      ANACONDA: "C:\\Miniconda37"
 
     - PYTHON: "C:\\Python37-x64"
-      ANACONDA: "C:\\Miniconda36-x64"
+      ANACONDA: "C:\\Miniconda37-x64"
 
 clone_depth: 5
 
@@ -50,18 +47,18 @@ install:
   - "%PYTHON%\\python.exe -m pip install --upgrade wheel"
   - "%PYTHON%\\python.exe -m wheel version"
   # Cython
-  - "%BUILD% %PYTHON%\\python.exe -m pip install Cython"
+  - "%PYTHON%\\python.exe -m pip install Cython"
   - "%PYTHON%\\python.exe -m cython --version"
   # Microsoft MPI
-  - "powershell conf\\ci\\appveyor\\install-msmpi.ps1"
+  - "powershell .azure\\install-msmpi.ps1"
   - "SetEnvMPI.cmd"
 
 build: off
 build_script:
-  - "%BUILD% %PYTHON%\\python.exe setup.py build"
-  - "%BUILD% %PYTHON%\\python.exe setup.py --quiet bdist_wheel"
-  - "%BUILD% %PYTHON%\\python.exe setup.py --quiet bdist_msi"
-  - "%BUILD% %PYTHON%\\python.exe setup.py --quiet bdist_wininst"
+  - "%PYTHON%\\python.exe setup.py build"
+  - "%PYTHON%\\python.exe setup.py --quiet bdist_wheel"
+  - "%PYTHON%\\python.exe setup.py --quiet bdist_msi"
+  - "%PYTHON%\\python.exe setup.py --quiet bdist_wininst"
 
 test: off
 test_script:
@@ -72,7 +69,6 @@ test_script:
   - "%PYTHON%\\Scripts\\pip.exe uninstall --yes mpi4py"
 
 after_test:
-  - cmd: if  "%ANACONDA%"=="" appveyor exit
 # - "%PYTHON%\\python.exe setup.py --quiet clean --all"
   - "set MPI=msmpi"
   - "set PATH=%ANACONDA%;%ANACONDA%\\Scripts\\;%PATH%"
@@ -82,17 +78,15 @@ after_test:
   - "conda install --quiet --yes -n root conda-build"
   - "conda info --all"
   - "conda list"
-  - "%BUILD% conda build --quiet conf\\ci\\anaconda\\mpi4py"
+  - "conda build --quiet conf\\ci\\anaconda\\mpi4py"
   - ps: "Move-Item $env:ANACONDA\\conda-bld\\win-*\\mpi4py-*.tar.bz2 dist\\ -Force"
 
 artifacts:
   - path: dist\*
 
-cache:
-  - C:\Downloads\Python   -> conf\ci\appveyor\install-python.ps1
-  - C:\Downloads\Anaconda -> conf\ci\appveyor\install-anaconda.ps1
-  - C:\Downloads\MSMPI    -> conf\ci\appveyor\install-msmpi.ps1
-  - '%LOCALAPPDATA%\pip\Cache'
+#cache:
+#  - C:\Downloads\MSMPI -> .azure\install-msmpi.ps1
+#  - '%LOCALAPPDATA%\pip\Cache'
 
 #on_success:
 #  - TODO: upload the content of dist\*.tar.bz2 to Anaconda
