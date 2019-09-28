@@ -336,7 +336,7 @@ def configure_pyexe(exe, config_cmd):
     libraries = []
     library_dirs = []
     link_args = []
-    if not sysconfig.get_config_var('Py_ENABLE_SHARED'):
+    if pyver >= (3, 8) or not cfg_vars.get('Py_ENABLE_SHARED'):
         py_version = sysconfig.get_python_version()
         py_abiflags = getattr(sys, 'abiflags', '')
         libraries = ['python' + py_version + py_abiflags]
