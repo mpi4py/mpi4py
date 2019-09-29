@@ -164,7 +164,8 @@ class Config(object):
             ok = (MSMPI_INC and isfile(join(MSMPI_INC, 'mpi.h')) and
                   MSMPI_LIB and isfile(join(MSMPI_LIB, 'msmpi.lib')))
             if not ok: return False
-            MSMPI_VER = '0x%d%02d' % msmpi_ver()
+            major, minor = msmpi_ver()
+            MSMPI_VER = hex((major<<8)|(minor&0xFF))
             MSMPI_INC = os.path.normpath(MSMPI_INC)
             MSMPI_LIB = os.path.normpath(MSMPI_LIB)
             self.library_info.update(

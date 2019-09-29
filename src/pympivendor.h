@@ -33,8 +33,7 @@ static int PyMPI_Get_vendor(const char **vendor_name,
 
   name = "Microsoft MPI";
   major = MSMPI_VER >> 8;
-  minor = MSMPI_VER & 0xff;
-  major = (major/16)*10+(major%16);
+  minor = MSMPI_VER & 0xFF;
 
 #elif defined(MVAPICH2_VERSION) || defined(MVAPICH2_NUMVERSION)
 
