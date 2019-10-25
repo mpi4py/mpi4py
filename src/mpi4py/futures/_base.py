@@ -1,4 +1,4 @@
-# Backport of concurrent.futures._base from Python 3.7
+# Backport of concurrent.futures._base from Python 3.8
 # pylint: skip-file
 
 # Copyright 2009 Brian Quinlan. All Rights Reserved.
@@ -59,6 +59,10 @@ class CancelledError(Error):
 
 class TimeoutError(Error):
     """The operation exceeded the given deadline."""
+    pass
+
+class InvalidStateError(Error):
+    """The operation is not allowed in this state."""
     pass
 
 class _Waiter(object):
@@ -414,7 +418,14 @@ class Future(object):
             if self._state not in [CANCELLED, CANCELLED_AND_NOTIFIED, FINISHED]:
                 self._done_callbacks.append(fn)
                 return
-        fn(self)
+        try:
+            fn(self)
+        except Exception:
+            LOGGER.exception('exception calling callback for %r', self)
+        except BaseException:
+            raise
+        except:  # old-style exception objects
+            LOGGER.exception('exception calling callback for %r', self)
 
     def result(self, timeout=None):
         """Return the result of the call that the future represents.
@@ -527,6 +538,8 @@ class Future(object):
         Should only be used by Executor implementations and unit tests.
         """
         with self._condition:
+            if self._state in {CANCELLED, CANCELLED_AND_NOTIFIED, FINISHED}:
+                raise InvalidStateError('{}: {!r}'.format(self._state, self))
             self._result = result
             self._state = FINISHED
             for waiter in self._waiters:
@@ -540,6 +553,8 @@ class Future(object):
         Should only be used by Executor implementations and unit tests.
         """
         with self._condition:
+            if self._state in {CANCELLED, CANCELLED_AND_NOTIFIED, FINISHED}:
+                raise InvalidStateError('{}: {!r}'.format(self._state, self))
             self._exception = exception
             self._state = FINISHED
             for waiter in self._waiters:
@@ -625,3 +640,9 @@ class Executor(object):
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.shutdown(wait=True)
         return False
+
+
+class BrokenExecutor(RuntimeError):
+    """
+    Raised when a executor has become non-functional after a severe failure.
+    """

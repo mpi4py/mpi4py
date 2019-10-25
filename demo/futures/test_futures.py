@@ -1157,7 +1157,9 @@ class ThenTest(unittest.TestCase):
         def transform(a):
             try:
                 f = chain.pop(0)
-                f.set_result(transform(a))
+                r = transform(a)
+                f.__init__()
+                f.set_result(r)
                 return f
             except IndexError:
                 return 42
@@ -1176,7 +1178,8 @@ class ThenTest(unittest.TestCase):
         self.assert_(new_f.exception())
         with self.assertRaises(RuntimeError) as catcher:
             new_f.result()
-        assert 'Circular future chain detected' in catcher.exception.args[0]
+        self.assert_('Circular future chain detected'
+                     in catcher.exception.args[0])
 
 
 SKIP_POOL_TEST = False

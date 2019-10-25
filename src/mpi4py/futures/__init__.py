@@ -15,6 +15,14 @@ try:
         wait,
         as_completed,
     )
+    try:  # Python 3.7
+        from concurrent.futures import BrokenExecutor
+    except ImportError:  # pragma: no cover
+        BrokenExecutor = RuntimeError
+    try:  # Python 3.8
+        from concurrent.futures import InvalidStateError
+    except ImportError:  # pragma: no cover
+        InvalidStateError = CancelledError.__base__
 except ImportError:  # pragma: no cover
     from ._base import (
         FIRST_COMPLETED,
@@ -22,6 +30,8 @@ except ImportError:  # pragma: no cover
         ALL_COMPLETED,
         CancelledError,
         TimeoutError,
+        InvalidStateError,
+        BrokenExecutor,
         Future,
         Executor,
         wait,
