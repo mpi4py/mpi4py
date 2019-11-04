@@ -21,6 +21,12 @@ Release 3.1.0 [2019-XX-XX]
 .. _link: http://numba.pydata.org/numba-doc/latest/cuda/cuda_array_interface.html
 
 
+Release 3.0.3 [2019-11-04]
+==========================
+
+* Regenerate Cython wrappers to support Python 3.8.
+
+
 Release 3.0.2 [2019-06-11]
 ==========================
 
