@@ -51,6 +51,12 @@ or alternatively *setuptools* :program:`easy_install` (deprecated)::
      $ [sudo] env MPICC=/path/to/mpicc pip install mpi4py
 
      $ [sudo] env MPICC=/path/to/mpicc easy_install mpi4py
+     
+   If you have previously installed mpi4py with a different mpi 
+   library/executable, then you will need to force :program:`pip`
+   to renew the paths to the library objects::
+
+     $ [sudo] pip install --no-cache-dir mpi4py
 
 
 Using **distutils**
