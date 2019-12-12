@@ -4,30 +4,17 @@ environment:
 
   matrix:
     - PYTHON: "C:\\Python27"
-      ANACONDA: "C:\\Miniconda"
-
     - PYTHON: "C:\\Python27-x64"
-      ANACONDA: "C:\\Miniconda-x64"
-
     - PYTHON: "C:\\Python35"
-      ANACONDA: "C:\\Miniconda36"
-
     - PYTHON: "C:\\Python35-x64"
-      ANACONDA: "C:\\Miniconda36-x64"
-
     - PYTHON: "C:\\Python36"
-      ANACONDA: "C:\\Miniconda36"
-
     - PYTHON: "C:\\Python36-x64"
-      ANACONDA: "C:\\Miniconda36-x64"
-
     - PYTHON: "C:\\Python37"
-      ANACONDA: "C:\\Miniconda37"
-
     - PYTHON: "C:\\Python37-x64"
-      ANACONDA: "C:\\Miniconda37-x64"
+    - PYTHON: "C:\\Python38"
+    - PYTHON: "C:\\Python38-x64"
 
-clone_depth: 5
+clone_depth: 3
 
 branches:
   only:
@@ -37,7 +24,6 @@ branches:
 
 init:
   - "ECHO Python from %PYTHON%"
-  - "ECHO Miniconda from %ANACONDA%"
 
 install:
   # Python
@@ -58,7 +44,6 @@ build_script:
   - "%PYTHON%\\python.exe setup.py build"
   - "%PYTHON%\\python.exe setup.py --quiet bdist_wheel"
   - "%PYTHON%\\python.exe setup.py --quiet bdist_msi"
-  - "%PYTHON%\\python.exe setup.py --quiet bdist_wininst"
 
 test: off
 test_script:
@@ -68,26 +53,9 @@ test_script:
   - "\"%MSMPI_BIN%\\mpiexec.exe\" -n 2 %PYTHON%\\python.exe %CD%\\demo\\futures\\test_futures.py -v"
   - "%PYTHON%\\Scripts\\pip.exe uninstall --yes mpi4py"
 
-after_test:
-# - "%PYTHON%\\python.exe setup.py --quiet clean --all"
-  - "set MPI=msmpi"
-  - "set PATH=%ANACONDA%;%ANACONDA%\\Scripts\\;%PATH%"
-  - "set CONDA_PY=%PYTHON:~9,2%"
-  - "conda config --set show_channel_urls yes"
-  - "conda update  --quiet --yes -n root conda"
-  - "conda install --quiet --yes -n root conda-build"
-  - "conda info --all"
-  - "conda list"
-  - "conda build --quiet conf\\ci\\anaconda\\mpi4py"
-  - ps: "Move-Item $env:ANACONDA\\conda-bld\\win-*\\mpi4py-*.tar.bz2 dist\\ -Force"
-
 artifacts:
   - path: dist\*
 
 #cache:
 #  - C:\Downloads\MSMPI -> .azure\install-msmpi.ps1
 #  - '%LOCALAPPDATA%\pip\Cache'
-
-#on_success:
-#  - TODO: upload the content of dist\*.tar.bz2 to Anaconda
-#  - TODO: upload the content of dist\*.whl to a public wheelhouse
