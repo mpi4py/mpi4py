@@ -1,7 +1,7 @@
 .PHONY: default
 default: build test clean
 
-PYTHON = python
+PYTHON = python$(py)
 PYTHON_CONFIG = ${PYTHON} ../python-config
 MPI4PY_INCLUDE = ${shell ${PYTHON} -c 'import mpi4py; print( mpi4py.get_include() )'}
 

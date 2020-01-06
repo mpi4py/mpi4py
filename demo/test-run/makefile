@@ -1,7 +1,7 @@
 .PHONY: default
 default: build test clean
 
-PYTHON = python
+PYTHON = python$(py)
 
 .PHONY: build
 build:

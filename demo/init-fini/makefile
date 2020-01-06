@@ -1,8 +1,8 @@
-MPIEXEC=mpiexec
-NP_FLAG=-n
-NP=3
+MPIEXEC = mpiexec
+NP_FLAG = -n
+NP = 3
 
-PYTHON=python
+PYTHON = python$(py)
 
 .PHONY: test
 test:

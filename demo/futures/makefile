@@ -1,7 +1,7 @@
 .PHONY: default
 default: test
 
-PYTHON  = python
+PYTHON  = python$(py)
 MPIEXEC = mpiexec
 NPFLAG  = -n
 

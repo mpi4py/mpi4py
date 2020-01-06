@@ -2,7 +2,7 @@
 
 default: build test clean
 
-PYTHON = python
+PYTHON = python$(py)
 PYTHON_CONFIG = ${PYTHON} ../python-config
 
 MPICC   = mpicc

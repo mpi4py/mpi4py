@@ -1,27 +1,26 @@
-PYTHON=python
 .PHONY: default
 default:
-	${MAKE} PYTHON=${PYTHON} -C compute-pi
-	${MAKE} PYTHON=${PYTHON} -C mandelbrot
-	${MAKE} PYTHON=${PYTHON} -C nxtval
-	${MAKE} PYTHON=${PYTHON} -C reductions
-	${MAKE} PYTHON=${PYTHON} -C sequential
-	${MAKE} PYTHON=${PYTHON} -C spawning
+	${MAKE} -C compute-pi
+	${MAKE} -C mandelbrot
+	${MAKE} -C nxtval
+	${MAKE} -C reductions
+	${MAKE} -C sequential
+	${MAKE} -C spawning
 
-	${MAKE} PYTHON=${PYTHON} -C wrap-c
-	${MAKE} PYTHON=${PYTHON} -C wrap-f2py
-	${MAKE} PYTHON=${PYTHON} -C wrap-swig
-	${MAKE} PYTHON=${PYTHON} -C wrap-boost
-	${MAKE} PYTHON=${PYTHON} -C wrap-cython
-	${MAKE} PYTHON=${PYTHON} -C wrap-ctypes
-	${MAKE} PYTHON=${PYTHON} -C wrap-cffi
+	${MAKE} -C wrap-c
+	${MAKE} -C wrap-f2py
+	${MAKE} -C wrap-swig
+	${MAKE} -C wrap-boost
+	${MAKE} -C wrap-cython
+	${MAKE} -C wrap-ctypes
+	${MAKE} -C wrap-cffi
 
-	${MAKE} PYTHON=${PYTHON} -C cython
-	${MAKE} PYTHON=${PYTHON} -C embedding
-	${MAKE} PYTHON=${PYTHON} -C libmpi-cffi
+	${MAKE} -C cython
+	${MAKE} -C embedding
+	${MAKE} -C libmpi-cffi
 
-	${MAKE} PYTHON=${PYTHON} -C mpi-ref-v1
-	${MAKE} PYTHON=${PYTHON} -C init-fini
-	${MAKE} PYTHON=${PYTHON} -C threads
+	${MAKE} -C mpi-ref-v1
+	${MAKE} -C init-fini
+	${MAKE} -C threads
 
-	${MAKE} PYTHON=${PYTHON} -C futures
+	${MAKE} -C futures

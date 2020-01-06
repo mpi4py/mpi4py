@@ -94,14 +94,7 @@ if rank == 0:
             plt.nipy_spectral()
         except AttributeError:
             plt.spectral()
-        try:
-            import signal
-            def action(*args): raise SystemExit
-            signal.signal(signal.SIGALRM, action)
-            signal.alarm(2)
-        except:
-            pass
-        plt.show()
+        plt.pause(2)
     except:
         pass
 MPI.COMM_WORLD.Barrier()

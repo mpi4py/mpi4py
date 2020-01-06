@@ -1,6 +1,7 @@
 MPIEXEC = mpiexec
-PYTHON = python
 N = 8
+
+PYTHON = python$(py)
 
 .PHONY: default
 default: build test clean

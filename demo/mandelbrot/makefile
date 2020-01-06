@@ -12,9 +12,10 @@ endif
 mandelbrot-worker.exe: mandelbrot-worker.f90
 	${MPIF90} ${FFLAGS} -o $@ $<
 
-PYTHON=python
-MPIEXEC=mpiexec
-NP_FLAG=-n
+MPIEXEC = mpiexec
+NP_FLAG = -n
+
+PYTHON = python$(py)
 
 test: build
 	${MPIEXEC} ${NP_FLAG} 1 ${PYTHON} mandelbrot-master.py

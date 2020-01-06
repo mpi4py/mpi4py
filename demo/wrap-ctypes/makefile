@@ -1,14 +1,14 @@
 .PHONY: default
 default: build test clean
 
-PYTHON = python
+PYTHON = python$(py)
 
 MPICC = mpicc
 LIBNAME = libhelloworld.so
 .PHONY: build
 build: ${LIBNAME}
 ${LIBNAME}: helloworld.c
-	${MPICC} -shared -o $@ $<
+	${MPICC} -shared -fPIC -o $@ $<
 
 
 MPIEXEC = mpiexec

@@ -1,7 +1,7 @@
 .PHONY: default
 default: build test clean
 
-PYTHON = python
+PYTHON = python$(py)
 PYTHON_CONFIG = ${PYTHON} ../python-config
 
 CYTHON = cython
