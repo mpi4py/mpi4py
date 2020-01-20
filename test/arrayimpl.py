@@ -16,6 +16,18 @@ try:
     import cupy
 except ImportError:
     cupy = None
+try:
+    import numba
+    import numba.cuda
+    from distutils.version import StrictVersion
+    numba_version = StrictVersion(numba.__version__).version
+    if numba_version < (0, 48):
+        import warnings
+        warnings.warn('To test Numba GPU arrays, use Numba v0.48.0+.',
+                      RuntimeWarning)
+        numba = None
+except ImportError:
+    numba = None
 
 
 __all__ = ['allclose', 'subTest']
@@ -177,6 +189,11 @@ if array is not None:
         def flat(self):
             return self.array
 
+        @property
+        def size(self):
+            return self.array.buffer_info()[1]
+
+
 if numpy is not None:
 
     @add_backend
@@ -217,6 +234,10 @@ if numpy is not None:
         @property
         def flat(self):
             return self.array.flat
+
+        @property
+        def size(self):
+            return self.array.size
 
 
 def typestr(typecode, itemsize):
@@ -320,7 +341,77 @@ if cupy is not None:
 
         @property
         def flat(self):
-            return self.array.reshape(-1)
+            return self.array.ravel()
+
+        @property
+        def size(self):
+            return self.array.size
+
+
+if numba is not None:
+
+    @add_backend
+    class GPUArrayNumba(BaseArray):
+
+        backend = 'numba'
+
+        TypeMap = make_typemap([])
+        #TypeMap.update(TypeMapBool)
+        TypeMap.update(TypeMapInteger)
+        #TypeMap.update(TypeMapUnsigned)
+        TypeMap.update(TypeMapFloat)
+        TypeMap.update(TypeMapComplex)
+
+        # one can allocate arrays with those types,
+        # but the Numba compiler doesn't support them...
+        TypeMap.pop('g', None)
+        TypeMap.pop('G', None)
+
+        def __init__(self, arg, typecode, shape=None, readonly=False):
+            if isinstance(arg, (int, float, complex)):
+                if shape is None: shape = ()
+            else:
+                if shape is None: shape = len(arg)
+            self.array = numba.cuda.device_array(shape, typecode)
+            if isinstance(arg, (int, float, complex)):
+                if self.array.size > 0:
+                    self.array[:] = arg
+            elif arg == [] or arg == ():
+                self.array = numba.cuda.device_array(0, typecode)
+            else:
+                if self.array.size > 0:
+                    self.array[:] = numba.cuda.to_device(arg)
+
+#        def __getitem__(self, i):
+#            if isinstance(i, slice):
+#                return self.array[i]
+#            elif i < self.array.size:
+#                return self.array[i]
+#            else:
+#                raise StopIteration
+
+        @property
+        def address(self):
+            return self.array.__cuda_array_interface__['data'][0]
+
+        @property
+        def typecode(self):
+            return self.array.dtype.char
+
+        @property
+        def itemsize(self):
+            return self.array.dtype.itemsize
+
+        @property
+        def flat(self):
+            if self.array.ndim <= 1:
+                return self.array
+            else:
+                return self.array.ravel()
+
+        @property
+        def size(self):
+            return self.array.size
 
 
 def subTest(case, skip=(), skiptypecode=()):

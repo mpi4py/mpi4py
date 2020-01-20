@@ -57,13 +57,13 @@ cdef int Py_CheckCUDABuffer(object obj):
     except: return 0
 
 cdef int Py_GetCUDABuffer(object obj, Py_buffer *view, int flags) except -1:
-    cdef object cuda_array_interface
+    cdef dict cuda_array_interface
     cdef tuple data
     cdef str   typestr
     cdef tuple shape
     cdef tuple strides
     cdef list descr
-    cdef object dev_ptr
+    cdef object dev_ptr, mask
     cdef void *buf = NULL
     cdef bint readonly = 0
     cdef Py_ssize_t s, size = 1
@@ -76,13 +76,15 @@ cdef int Py_GetCUDABuffer(object obj, Py_buffer *view, int flags) except -1:
     except AttributeError:
         raise NotImplementedError("missing CUDA array interface")
 
+    # mandatory
     data = cuda_array_interface['data']
     typestr = cuda_array_interface['typestr']
     shape = cuda_array_interface['shape']
-    try: strides = cuda_array_interface['strides']
-    except KeyError: strides = None
-    try: descr = cuda_array_interface['descr']
-    except KeyError: descr = None
+
+    # optional
+    strides = cuda_array_interface.get('strides')
+    descr = cuda_array_interface.get('descr')
+    mask = cuda_array_interface.get('mask')
 
     dev_ptr, readonly = data
     for s in shape: size *= s
@@ -91,6 +93,11 @@ cdef int Py_GetCUDABuffer(object obj, Py_buffer *view, int flags) except -1:
     typekind = <char>ord(typestr[1])
     itemsize = <Py_ssize_t>int(typestr[2:])
 
+    if mask is not None:
+        raise NotImplementedError(
+            "__cuda_array_interface__: "
+            "cannot handle masked arrays"
+        )
     if size < 0:
         raise BufferError(
             "__cuda_array_interface__: "
