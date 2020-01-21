@@ -18,6 +18,18 @@ try:
     import cupy
 except ImportError:
     cupy = None
+try:
+    import numba
+    import numba.cuda
+    from distutils.version import StrictVersion
+    numba_version = StrictVersion(numba.__version__).version
+    if numba_version < (0, 48):
+        import warnings
+        warnings.warn('To test Numba GPU arrays, use Numba v0.48.0+.',
+                      RuntimeWarning)
+        numba = None
+except ImportError:
+    numba = None
 
 
 py2 = sys.version_info[0] == 2
@@ -410,6 +422,52 @@ class TestMessageSimpleCuPy(unittest.TestCase,
                           Sendrecv, sbuf, rbuf)
 
 
+@unittest.skipIf(numba is None, 'numba')
+class TestMessageSimpleNumba(unittest.TestCase,
+                             BaseTestMessageSimpleArray):
+
+    def array(self, typecode, initializer):
+        n = len(initializer)
+        arr = numba.cuda.device_array((n,), dtype=typecode)
+        arr[:] = initializer
+        return arr
+
+    def testOrderC(self):
+        sbuf = numba.cuda.device_array((6,))
+        sbuf[:] = 1
+        sbuf = sbuf.reshape(3,2)
+        rbuf = numba.cuda.device_array((6,))
+        rbuf[:] = 0
+        rbuf = sbuf.reshape(3,2)
+        Sendrecv(sbuf, rbuf)
+        # numba arrays do not have the .all() method
+        for i in range(3):
+            for j in range(2):
+                self.assertTrue(sbuf[i,j] == rbuf[i,j])
+
+    def testOrderFortran(self):
+        sbuf = numba.cuda.device_array((6,))
+        sbuf[:] = 1
+        sbuf = sbuf.reshape(3,2,order='F')
+        rbuf = numba.cuda.device_array((6,))
+        rbuf[:] = 0
+        rbuf = sbuf.reshape(3,2,order='F')
+        Sendrecv(sbuf, rbuf)
+        # numba arrays do not have the .all() method
+        for i in range(3):
+            for j in range(2):
+                self.assertTrue(sbuf[i,j] == rbuf[i,j])
+
+    def testNotContiguous(self):
+        sbuf = numba.cuda.device_array((6,))
+        sbuf[:] = 1
+        sbuf = sbuf.reshape(3,2)[:,0]
+        rbuf = numba.cuda.device_array((3,))
+        rbuf[:] = 0
+        self.assertRaises((BufferError, ValueError),
+                          Sendrecv, sbuf, rbuf)
+
+
 # ---
 
 @unittest.skipIf(array is None, 'array')
@@ -438,14 +496,12 @@ class TestMessageGPUBufInterface(unittest.TestCase):
     def testAttrEmpty(self):
         smsg = GPUBuf('B', [1,2,3])
         rmsg = GPUBuf('B', [0,0,0])
-        class MyDict(dict): pass
-        rmsg.__cuda_array_interface__ = MyDict()
+        rmsg.__cuda_array_interface__ = dict()
         self.assertRaises(KeyError, Sendrecv, smsg, rmsg)
 
     def testAttrType(self):
         smsg = GPUBuf('B', [1,2,3])
         rmsg = GPUBuf('B', [0,0,0])
-        class MyDict(dict): pass
         items = list(rmsg.__cuda_array_interface__.items())
         rmsg.__cuda_array_interface__ = items
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
@@ -825,6 +881,17 @@ class TestMessageVectorCuPy(unittest.TestCase,
         return cupy.array(initializer, dtype=typecode)
 
 
+@unittest.skipIf(numba is None, 'numba')
+class TestMessageVectorNumba(unittest.TestCase,
+                             BaseTestMessageVectorArray):
+
+    def array(self, typecode, initializer):
+        n = len(initializer)
+        arr = numba.cuda.device_array((n,), dtype=typecode)
+        arr[:] = initializer
+        return arr
+
+
 # ---
 
 def Alltoallw(smsg, rmsg):
@@ -913,6 +980,19 @@ class TestMessageVectorW(unittest.TestCase):
         rmsg = [rbuf, ([3], [0]), [MPI.INT]]
         Alltoallw(smsg, rmsg)
         self.assertTrue((sbuf == rbuf).all())
+
+    @unittest.skipIf(numba is None, 'numba')
+    def testMessageNumba(self):
+        sbuf = numba.cuda.device_array((3,), 'i')
+        sbuf[:] = [1,2,3]
+        rbuf = numba.cuda.device_array((3,), 'i')
+        rbuf[:] = [0,0,0]
+        smsg = [sbuf, [3], [0], [MPI.INT]]
+        rmsg = [rbuf, ([3], [0]), [MPI.INT]]
+        Alltoallw(smsg, rmsg)
+        # numba arrays do not have the .all() method
+        for i in range(3):
+            self.assertTrue(sbuf[i] == rbuf[i])
 
 
 # ---
@@ -1033,6 +1113,19 @@ class TestMessageRMA(unittest.TestCase):
         rbuf = cupy.array([0,0,0], 'i')
         PutGet(sbuf, rbuf)
         self.assertTrue((sbuf == rbuf).all())
+
+    @unittest.skipMPI('msmpi')
+    @unittest.skipMPI('mvapich2')
+    @unittest.skipIf(numba is None, 'numba')
+    def testMessageNumba(self):
+        sbuf = numba.cuda.device_array((3,), 'i')
+        sbuf[:] = [1,2,3]
+        rbuf = numba.cuda.device_array((3,), 'i')
+        rbuf[:] = [0,0,0]
+        PutGet(sbuf, rbuf)
+        # numba arrays do not have the .all() method
+        for i in range(3):
+            self.assertTrue(sbuf[i] == rbuf[i])
 
 
 # ---

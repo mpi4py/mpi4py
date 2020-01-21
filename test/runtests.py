@@ -55,6 +55,12 @@ def getoptionparser():
     parser.add_option("--no-cupy",
                       action="store_false", dest="cupy", default=False,
                       help="disable testing with CuPy arrays")
+    parser.add_option("--numba",
+                      action="store_true", dest="numba", default=False,
+                      help="enable testing with Numba arrays")
+    parser.add_option("--no-numba",
+                      action="store_false", dest="numba", default=False,
+                      help="disable testing with Numba arrays")
     parser.add_option("--no-numpy",
                       action="store_false", dest="numpy", default=True,
                       help="disable testing with NumPy arrays")
@@ -103,6 +109,8 @@ def import_package(options, pkgname):
     #
     if not options.cupy:
         sys.modules['cupy'] = None
+    if not options.numba:
+        sys.modules['numba'] = None
     if not options.numpy:
         sys.modules['numpy'] = None
     if not options.array:
@@ -184,6 +192,8 @@ def load_tests(options, args):
     # Handle options
     if not options.cupy:
         sys.modules['cupy'] = None
+    if not options.numba:
+        sys.modules['numba'] = None
     if not options.numpy:
         sys.modules['numpy'] = None
     if not options.array:
