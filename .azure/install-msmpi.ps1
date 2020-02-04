@@ -89,6 +89,7 @@ function InstallMicrosoftMPI () {
     InstallMicrosoftMPIRuntime $MSMPI_BASE_URL "MSMpiSetup.exe"
     SaveMicrosoftMPIEnvironment "SetEnvMPI.cmd"
     $MSMPI_BIN = [Environment]::GetEnvironmentVariable("MSMPI_BIN", "Machine")
+    Write-Host "::add-path::$MSMPI_BIN"
     Write-Host "##vso[task.prependpath]$MSMPI_BIN";
 }
 

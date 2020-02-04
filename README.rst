@@ -2,14 +2,16 @@
 MPI for Python
 ==============
 
-.. image::  https://travis-ci.org/mpi4py/mpi4py.svg?branch=master
-   :target: https://travis-ci.org/mpi4py/mpi4py
-.. image::  https://circleci.com/gh/mpi4py/mpi4py.svg?style=shield
-   :target: https://circleci.com/gh/mpi4py/mpi4py
-.. image::  https://ci.appveyor.com/api/projects/status/whh5xovp217h0f7n?svg=true
-   :target: https://ci.appveyor.com/project/mpi4py/mpi4py
+.. image::  https://github.com/mpi4py/mpi4py/workflows/ci/badge.svg?branch=master
+   :target: https://github.com/mpi4py/mpi4py/actions/
 .. image::  https://dev.azure.com/mpi4py/mpi4py/_apis/build/status/mpi4py.mpi4py?branchName=master
    :target: https://dev.azure.com/mpi4py/mpi4py/_build
+.. image::  https://ci.appveyor.com/api/projects/status/whh5xovp217h0f7n?svg=true
+   :target: https://ci.appveyor.com/project/mpi4py/mpi4py
+.. image::  https://circleci.com/gh/mpi4py/mpi4py.svg?style=shield
+   :target: https://circleci.com/gh/mpi4py/mpi4py
+.. image::  https://travis-ci.org/mpi4py/mpi4py.svg?branch=master
+   :target: https://travis-ci.org/mpi4py/mpi4py
 .. image::  https://scan.coverity.com/projects/mpi4py-mpi4py/badge.svg
    :target: https://scan.coverity.com/projects/mpi4py-mpi4py
 .. image::  https://codecov.io/gh/mpi4py/mpi4py/branch/master/graph/badge.svg
@@ -43,13 +45,15 @@ Testsuite
 
 The testsuite is run periodically on
 
-* `Travis CI <https://travis-ci.org/mpi4py/mpi4py>`_
+* `GitHub Actions <https://github.com/mpi4py/mpi4py/actions/>`_
 
-* `Circle CI <https://circleci.com/gh/mpi4py/mpi4py>`_
+* `Azure Pipelines <https://dev.azure.com/mpi4py/mpi4py>`_
 
 * `AppVeyor <https://ci.appveyor.com/project/mpi4py/mpi4py>`_
 
-* `Azure Pipelines <https://dev.azure.com/mpi4py/mpi4py>`_
+* `Circle CI <https://circleci.com/gh/mpi4py/mpi4py>`_
+
+* `Travis CI <https://travis-ci.org/mpi4py/mpi4py>`_
 
 * `Bitbucket Pipelines <https://bitbucket.org/mpi4py/mpi4py/addon/pipelines/home>`_
 

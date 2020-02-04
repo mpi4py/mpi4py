@@ -1,0 +1,86 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - master
+      - maint
+      - ci/github
+
+jobs:
+
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        py-version:
+          - 2.7
+          - 3.5
+          - 3.6
+          - 3.7
+          - 3.8
+        py-arch:
+          - x86
+          - x64
+        mpi:
+          - mpich
+          - openmpi
+          - msmpi
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+        exclude:
+          - os: ubuntu-latest
+            py-arch: x86
+          - os: ubuntu-latest
+            mpi: msmpi
+          - os: macos-latest
+            py-arch: x86
+          - os: macos-latest
+            mpi: msmpi
+          - os: windows-latest
+            mpi: mpich
+          - os: windows-latest
+            mpi: openmpi
+
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Install MPI (${{ matrix.mpi }})
+      run:  bash .azure/install-${{ matrix.mpi }}.sh
+
+    - name: Use Python ${{ matrix.py-version }} ${{ matrix.py-arch }}
+      uses: actions/setup-python@v1
+      with:
+        py-version: ${{ matrix.py-version }}
+        architecture: ${{ matrix.py-arch }}
+
+    - name: Install packaging tools
+      run:  python -m pip install --upgrade setuptools pip wheel
+    - name: Install build dependencies
+      run:  python -m pip install --upgrade cython
+    - name: Build package
+      run:  python -m pip wheel -vvv --wheel-dir=dist .
+    - name: Upload package artifacts
+      uses: actions/upload-artifact@v1
+      with:
+        name: mpi4py-py${{matrix.py-version}}-${{matrix.py-arch}}-${{matrix.mpi}}-${{matrix.os}}
+        path: dist
+
+    - name: Install test dependencies
+      run:  python -m pip install --upgrade numpy cffi simplejson PyYAML
+    - name: Install package for testing
+      run:  python -m pip install --no-index --find-links=dist mpi4py
+    - name: Test package
+      run:  mpiexec -n 1 python test/runtests.py -v
+    - name: Test package
+      run:  mpiexec -n 2 python test/runtests.py -v -f -e spawn
+    - name: Test subpackage
+      run:  mpiexec -n 1 python demo/futures/test_futures.py -v
+    - name: Test subpackage
+      run:  mpiexec -n 2 python demo/futures/test_futures.py -v
+    - name: Uninstall package after testing
+      run:  python -m pip uninstall --yes mpi4py
