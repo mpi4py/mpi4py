@@ -117,6 +117,9 @@ cdef int Py_GetCUDABuffer(object obj, Py_buffer *view, int flags) except -1:
                      b"__cuda_array_interface__: "
                      b"ignoring 'descr' key", 1)
 
+    if PYPY and readonly and ((flags & PyBUF_WRITABLE) == PyBUF_WRITABLE):
+        raise BufferError("Object is not writable")
+
     fixnull = (buf == NULL and size == 0)
     if fixnull: buf = &fixnull
     PyBuffer_FillInfo(view, obj, buf, size*itemsize, readonly, flags)

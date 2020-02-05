@@ -476,8 +476,7 @@ class TestMessageGPUBufInterface(unittest.TestCase):
     def testNonReadonly(self):
         smsg = GPUBuf('i', [1,2,3], readonly=True)
         rmsg = GPUBuf('i', [0,0,0], readonly=True)
-        if pypy: self.assertRaises(ValueError,  Sendrecv, smsg, rmsg)
-        else:    self.assertRaises(BufferError, Sendrecv, smsg, rmsg)
+        self.assertRaises(BufferError, Sendrecv, smsg, rmsg)
 
     def testNonContiguous(self):
         smsg = GPUBuf('i', [1,2,3])
