@@ -284,7 +284,8 @@ cdef object PyMPI_recv_probe(object obj, int source, int tag,
         with nogil:
             CHKERR( MPI_Probe(source, tag, comm, &rsts) )
             CHKERR( MPI_Get_count(&rsts, rtype, &rcount) )
-            source = rsts.MPI_SOURCE; tag = rsts.MPI_TAG
+            CHKERR( PyMPI_Status_get_source(&rsts, &source) )
+            CHKERR( PyMPI_Status_get_tag(&rsts, &tag) )
         tmpr = pickle.alloc(&rbuf, rcount)
         with nogil:
             CHKERR( MPI_Recv(rbuf, rcount, rtype,

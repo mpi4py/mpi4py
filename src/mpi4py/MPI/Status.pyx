@@ -5,9 +5,10 @@ cdef class Status:
     """
 
     def __cinit__(self, Status status=None):
-        self.ob_mpi.MPI_SOURCE = MPI_ANY_SOURCE
-        self.ob_mpi.MPI_TAG    = MPI_ANY_TAG
-        self.ob_mpi.MPI_ERROR  = MPI_SUCCESS
+        cdef MPI_Status *s = &self.ob_mpi
+        CHKERR( PyMPI_Status_set_source (s, MPI_ANY_SOURCE ) )
+        CHKERR( PyMPI_Status_set_tag    (s, MPI_ANY_TAG    ) )
+        CHKERR( PyMPI_Status_set_error  (s, MPI_SUCCESS    ) )
         if status is None: return
         self.ob_mpi = status.ob_mpi
 
@@ -25,13 +26,15 @@ cdef class Status:
         """
         Get message source
         """
-        return self.ob_mpi.MPI_SOURCE
+        cdef int source = MPI_ANY_SOURCE
+        CHKERR( PyMPI_Status_get_source(&self.ob_mpi, &source) )
+        return source
 
     def Set_source(self, int source):
         """
         Set message source
         """
-        self.ob_mpi.MPI_SOURCE = source
+        CHKERR( PyMPI_Status_set_source(&self.ob_mpi, source) )
 
     property source:
         """source"""
@@ -44,13 +47,15 @@ cdef class Status:
         """
         Get message tag
         """
-        return self.ob_mpi.MPI_TAG
+        cdef int tag = MPI_ANY_TAG
+        CHKERR( PyMPI_Status_get_tag(&self.ob_mpi, &tag) )
+        return tag
 
     def Set_tag(self, int tag):
         """
         Set message tag
         """
-        self.ob_mpi.MPI_TAG = tag
+        CHKERR( PyMPI_Status_set_tag(&self.ob_mpi, tag) )
 
     property tag:
         """tag"""
@@ -63,13 +68,15 @@ cdef class Status:
         """
         Get message error
         """
-        return self.ob_mpi.MPI_ERROR
+        cdef int error = MPI_SUCCESS
+        CHKERR( PyMPI_Status_get_error(&self.ob_mpi, &error) )
+        return error
 
     def Set_error(self, int error):
         """
         Set message error
         """
-        self.ob_mpi.MPI_ERROR = error
+        CHKERR( PyMPI_Status_set_error(&self.ob_mpi, error) )
 
     property error:
         """error"""

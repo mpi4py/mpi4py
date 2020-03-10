@@ -16,6 +16,14 @@ cdef enum PyMPI_OBJECT_FLAGS:
 #------------------------------------------------------------------------------
 # Status
 
+cdef extern from * nogil:
+    int PyMPI_Status_get_source(MPI_Status*, int*)
+    int PyMPI_Status_set_source(MPI_Status*, int)
+    int PyMPI_Status_get_tag(MPI_Status*, int*)
+    int PyMPI_Status_set_tag(MPI_Status*, int)
+    int PyMPI_Status_get_error(MPI_Status*, int*)
+    int PyMPI_Status_set_error(MPI_Status*, int)
+
 cdef inline MPI_Status *arg_Status(object status):
     if status is None: return MPI_STATUS_IGNORE
     return &((<Status>status).ob_mpi)

@@ -1,9 +1,9 @@
 # -----------------------------------------------------------------------------
 
 cdef MPI_Status empty_status
-empty_status.MPI_SOURCE = MPI_ANY_SOURCE
-empty_status.MPI_TAG = MPI_ANY_TAG
-empty_status.MPI_ERROR  = MPI_SUCCESS
+<void>PyMPI_Status_set_source (&empty_status, MPI_ANY_SOURCE )
+<void>PyMPI_Status_set_tag    (&empty_status, MPI_ANY_TAG    )
+<void>PyMPI_Status_set_error  (&empty_status, MPI_SUCCESS    )
 
 cdef object acquire_rs(object requests,
                        object statuses,
@@ -70,8 +70,9 @@ cdef class _p_greq:
         self.kargs = dict(kargs) if kargs is not None else {}
 
     cdef int query(self, MPI_Status *status) except -1:
-        status.MPI_SOURCE = MPI_ANY_SOURCE
-        status.MPI_TAG = MPI_ANY_TAG
+        <void>PyMPI_Status_set_source(status, MPI_ANY_SOURCE)
+        <void>PyMPI_Status_set_tag(status, MPI_ANY_TAG)
+        <void>PyMPI_Status_set_error(status, MPI_SUCCESS)
         <void>MPI_Status_set_elements(status, MPI_BYTE, 0)
         <void>MPI_Status_set_cancelled(status, 0)
         cdef Status sts = Status.__new__(Status)
