@@ -40,8 +40,6 @@ class Exception(RuntimeError):
         cdef int ierr = self.ob_mpi
         return ierr != MPI_SUCCESS
 
-    __nonzero__ = __bool__
-
     def __int__(self):
         return self.ob_mpi
 
@@ -83,3 +81,5 @@ class Exception(RuntimeError):
         return tompistr(string, resultlen)
 
     error_string = property(Get_error_string, doc="error string")
+
+    if PY2: __nonzero__ = __bool__

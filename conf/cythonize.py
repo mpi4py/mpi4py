@@ -2,6 +2,7 @@
 import sys, os
 
 def cythonize(source,
+              output=None,
               includes=(),
               destdir_c=None,
               destdir_h=None,
@@ -13,9 +14,13 @@ def cythonize(source,
     from Cython.Compiler import Options
     cwd = os.getcwd()
     try:
-        name, ext = os.path.splitext(source)
-        outputs_c = [name+'.c']
-        outputs_h = [name+'.h', name+'_api.h']
+        if output is None:
+            name, _ = os.path.splitext(source)
+            output = name + '.c'
+        else:
+            name, _ = os.path.splitext(output)
+        outputs_c = [output]
+        outputs_h = [name + '.h', name + '_api.h']
         # change working directory
         if wdir:
             os.chdir(wdir)
@@ -23,6 +28,7 @@ def cythonize(source,
         options = CompilationOptions(default_options)
         options.output_file = outputs_c[0]
         options.include_path = list(includes)
+        options.language_level = '3str'
         Options.generate_cleanup_code = 3
         any_failures = 0
         try:
@@ -61,7 +67,7 @@ def cythonize(source,
 
 if __name__ == "__main__":
     sys.exit(
-        cythonize('mpi4py.MPI.pyx',
+        cythonize('mpi4py/MPI.pyx', 'mpi4py.MPI.c',
                   destdir_h=os.path.join('mpi4py', 'include', 'mpi4py'),
                   wdir='src')
         )

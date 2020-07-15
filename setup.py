@@ -524,14 +524,16 @@ def chk_cython(VERSION):
     #
     return True
 
-def run_cython(source, depends=(), includes=(),
+def run_cython(source, target=None,
+               depends=(), includes=(),
                destdir_c=None, destdir_h=None,
                wdir=None, force=False, VERSION=None):
     from glob import glob
     from distutils import log
     from distutils import dep_util
     from distutils.errors import DistutilsError
-    target = os.path.splitext(source)[0]+'.c'
+    if target is None:
+        target = os.path.splitext(source)[0]+'.c'
     cwd = os.getcwd()
     try:
         if wdir: os.chdir(wdir)
@@ -548,7 +550,7 @@ def run_cython(source, depends=(), includes=(),
         raise DistutilsError("requires Cython>=%s" % VERSION)
     log.info("cythonizing '%s' -> '%s'", source, target)
     from cythonize import cythonize
-    err = cythonize(source,
+    err = cythonize(source, target,
                     includes=includes,
                     destdir_c=destdir_c,
                     destdir_h=destdir_h,
@@ -565,12 +567,13 @@ def build_sources(cmd):
                os.path.isdir(os.path.join(topdir, '.hg' )))
     if (has_src and not has_vcs and not cmd.force): return
     # mpi4py.MPI
-    source = 'mpi4py.MPI.pyx'
+    source = 'mpi4py/MPI.pyx'
+    target = 'mpi4py.MPI.c'
     depends = ['mpi4py/MPI/*.pyx',
                'mpi4py/MPI/*.pxd',
                'mpi4py/MPI/*.pxi',]
     destdir_h = os.path.join('mpi4py', 'include', 'mpi4py')
-    run_cython(source, depends, destdir_h=destdir_h,
+    run_cython(source, target, depends, destdir_h=destdir_h,
                wdir='src', force=cmd.force, VERSION=CYTHON)
 
 from mpidistutils import build_src
