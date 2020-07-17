@@ -8,3 +8,7 @@ Darwin) set -x;
   brew install openmpi
   ;;
 esac
+
+openmpi_mca_params=$HOME/.openmpi/mca-params.conf
+mkdir -p $(dirname $openmpi_mca_params)
+echo rmaps_base_oversubscribe=yes >> $openmpi_mca_params
