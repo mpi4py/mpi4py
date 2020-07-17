@@ -141,8 +141,9 @@ cdef int PyMPI_GetBuffer(object obj, Py_buffer *view, int flags) except -1:
         return PyObject_GetBuffer(obj, view, flags)
     except BaseException as exc:
         try: return Py_GetGPUBuffer(obj, view, flags)
-        except NotImplementedError: raise exc
+        except NotImplementedError: pass
         except BaseException: raise
+        raise exc
 
 #------------------------------------------------------------------------------
 
