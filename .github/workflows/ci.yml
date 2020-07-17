@@ -40,6 +40,8 @@ jobs:
           - os: macos-latest
             mpi: msmpi
           - os: windows-latest
+            py-version: 2.7
+          - os: windows-latest
             mpi: mpich
           - os: windows-latest
             mpi: openmpi
