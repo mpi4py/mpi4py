@@ -6,7 +6,7 @@ RUN export CFLAGS=-O0
 
 install-anaconda() {
   MINICONDA=Miniconda3-latest-Linux-$(arch).sh
-  RUN curl -s -o ~/$MINICONDA https://repo.continuum.io/miniconda/$MINICONDA
+  RUN curl -s -o ~/$MINICONDA https://repo.anaconda.com/miniconda/$MINICONDA
   RUN bash ~/$MINICONDA -b -f -p $ANACONDA
   RUN source $ANACONDA/bin/activate root
   RUN conda config --set show_channel_urls yes
