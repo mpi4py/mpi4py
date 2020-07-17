@@ -53,9 +53,9 @@ jobs:
       run:  bash .azure/install-${{ matrix.mpi }}.sh
 
     - name: Use Python ${{ matrix.py-version }} ${{ matrix.py-arch }}
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v2
       with:
-        py-version: ${{ matrix.py-version }}
+        python-version: ${{ matrix.py-version }}
         architecture: ${{ matrix.py-arch }}
 
     - name: Install packaging tools
