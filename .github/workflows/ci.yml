@@ -6,6 +6,10 @@ on:
       - master
       - maint
       - ci/github
+  pull_request:
+    branches:
+      - master
+      - maint
 
 jobs:
 
