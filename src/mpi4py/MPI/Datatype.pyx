@@ -669,7 +669,7 @@ cdef class Datatype:
 
     def Pack_size(self, int count, Comm comm):
         """
-        Returns the upper bound on the amount of space (in bytes)
+        Return the upper bound on the amount of space (in bytes)
         needed to pack a message according to datatype.
         """
         cdef int size = 0
@@ -723,7 +723,7 @@ cdef class Datatype:
 
     def Pack_external_size(self, datarep, int count):
         """
-        Returns the upper bound on the amount of space (in bytes)
+        Return the upper bound on the amount of space (in bytes)
         needed to pack a message according to datatype,
         using a portable data representation (**external32**).
         """

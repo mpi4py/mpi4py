@@ -408,7 +408,7 @@ cdef class File:
 
     def Get_byte_offset(self, Offset offset):
         """
-        Returns the absolute byte position in the file corresponding
+        Return the absolute byte position in the file corresponding
         to 'offset' etypes relative to the current view
         """
         cdef MPI_Offset disp = 0

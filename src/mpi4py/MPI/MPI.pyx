@@ -269,7 +269,7 @@ def get_vendor():
     """
     Infomation about the underlying MPI implementation
 
-    :Returns:
+    Returns:
       - a string with the name of the MPI implementation
       - an integer 3-tuple version ``(major, minor, micro)``
     """
