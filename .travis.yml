@@ -23,38 +23,26 @@ env:
 
 matrix:
   include:
-    - os: osx
-      osx_image: xcode10
-      env: MPI=mpich PY=2
-      language: generic
-      python: 2
-    - os: osx
-      osx_image: xcode10
-      env: MPI=openmpi PY=2
-      language: generic
-      python: 2
-    - os: osx
-      osx_image: xcode10
-      env: MPI=mpich PY=3
-      language: generic
-      python: 3
-    - os: osx
-      osx_image: xcode10
-      env: MPI=openmpi PY=3
-      language: generic
-      python: 3
-    - python: pypy2.7-6.0
+    - python: pypy
       env: MPI=mpich
-    - python: pypy2.7-6.0
+    - python: pypy
+      env: MPI=openmpi
+    - python: pypy3
+      env: MPI=mpich
+    - python: pypy3
       env: MPI=openmpi
     - python: pypy3.5-6.0
       env: MPI=mpich
     - python: pypy3.5-6.0
       env: MPI=openmpi
   allow_failures:
-    - python: pypy2.7-6.0
+    - python: pypy
       env: MPI=mpich
-    - python: pypy2.7-6.0
+    - python: pypy
+      env: MPI=openmpi
+    - python: pypy3
+      env: MPI=mpich
+    - python: pypy3
       env: MPI=openmpi
     - python: pypy3.5-6.0
       env: MPI=mpich
@@ -80,27 +68,26 @@ addons:
     update: true
 
 before_install:
-  - python$PY -m pip install Cython
-  - python$PY -m pip install numpy
+  - python -m pip install Cython
+  - python -m pip install numpy
   - ./conf/ci/travis-ci/install-mpi.sh $MPI
-  - python$PY --version
-  - python$PY -m cython --version
-  - python$PY -c "import numpy;print(numpy.__version__)"
+  - python --version
+  - python -m cython --version
+  - python -c "import numpy;print(numpy.__version__)"
   - if [[ "$MPI" == "mpich"   ]]; then mpichversion; fi
   - if [[ "$MPI" == "openmpi" ]]; then ompi_info;    fi
 install:
-  - python$PY -m pip -vvv install .
+  - python -m pip -vvv install .
 
 before_script:
   - if [[ "$MPI" == "mpich" ]]; then P=2; else P=5; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]];  then P=2; fi
 script:
-  - mpiexec -n 1  python$PY $PWD/test/runtests.py -v
-  - mpiexec -n $P python$PY $PWD/test/runtests.py -v -f -e spawn
-  - mpiexec -n 1  python$PY $PWD/demo/futures/test_futures.py -v
-  - mpiexec -n $P python$PY $PWD/demo/futures/test_futures.py -v
-  - mpiexec -n 1  python$PY -m mpi4py.futures $PWD/demo/futures/test_futures.py -v
-  - mpiexec -n $P python$PY -m mpi4py.futures $PWD/demo/futures/test_futures.py -v
+  - mpiexec -n 1  python $PWD/test/runtests.py -v
+  - mpiexec -n $P python $PWD/test/runtests.py -v -f -e spawn
+  - mpiexec -n 1  python $PWD/demo/futures/test_futures.py -v
+  - mpiexec -n $P python $PWD/demo/futures/test_futures.py -v
+  - mpiexec -n 1  python -m mpi4py.futures $PWD/demo/futures/test_futures.py -v
+  - mpiexec -n $P python -m mpi4py.futures $PWD/demo/futures/test_futures.py -v
 
 #notifications:
 #  email: false
