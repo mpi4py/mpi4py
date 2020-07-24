@@ -94,7 +94,7 @@ cdef int Py_GetCUDABuffer(object obj, Py_buffer *view, int flags) except -1:
     itemsize = <Py_ssize_t>int(typestr[2:])
 
     if mask is not None:
-        raise NotImplementedError(
+        raise BufferError(
             "__cuda_array_interface__: "
             "cannot handle masked arrays"
         )
