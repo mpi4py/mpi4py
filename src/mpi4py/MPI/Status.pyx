@@ -156,7 +156,7 @@ cdef class Status:
     def f2py(cls, arg):
         """
         """
-        cdef Status status = <Status> Status.__new__(Status)
+        cdef Status status = Status.__new__(Status)
         cdef Py_ssize_t i = 0
         cdef Py_ssize_t n = <int>(sizeof(MPI_Status)/sizeof(int))
         cdef MPI_Status *c_status = &status.ob_mpi

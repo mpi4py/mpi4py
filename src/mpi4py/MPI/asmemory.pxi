@@ -23,7 +23,7 @@ cdef inline _p_mem allocate(Py_ssize_t m, size_t b, void *buf):
   if m < 0:
       raise RuntimeError("memory allocation with negative size")
   cdef size_t n = <size_t>m * b
-  cdef _p_mem ob = <_p_mem>_p_mem.__new__(_p_mem)
+  cdef _p_mem ob = _p_mem.__new__(_p_mem)
   ob.buf = PyMem_Malloc(n)
   if ob.buf == NULL: raise MemoryError
   if buf != NULL: (<void**>buf)[0] = ob.buf

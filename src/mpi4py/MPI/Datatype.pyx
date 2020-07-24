@@ -122,7 +122,7 @@ cdef class Datatype:
         """
         Duplicate a datatype
         """
-        cdef Datatype datatype = <Datatype>Datatype.__new__(Datatype)
+        cdef Datatype datatype = Datatype.__new__(Datatype)
         CHKERR( MPI_Type_dup(self.ob_mpi, &datatype.ob_mpi) )
         return datatype
 
@@ -132,7 +132,7 @@ cdef class Datatype:
         """
         Create a contiguous datatype
         """
-        cdef Datatype datatype = <Datatype>Datatype.__new__(Datatype)
+        cdef Datatype datatype = Datatype.__new__(Datatype)
         CHKERR( MPI_Type_contiguous(count, self.ob_mpi,
                                     &datatype.ob_mpi) )
         return datatype
@@ -141,7 +141,7 @@ cdef class Datatype:
         """
         Create a vector (strided) datatype
         """
-        cdef Datatype datatype = <Datatype>Datatype.__new__(Datatype)
+        cdef Datatype datatype = Datatype.__new__(Datatype)
         CHKERR( MPI_Type_vector(count, blocklength, stride,
                                 self.ob_mpi, &datatype.ob_mpi) )
         return datatype
@@ -150,7 +150,7 @@ cdef class Datatype:
         """
         Create a vector (strided) datatype
         """
-        cdef Datatype datatype = <Datatype>Datatype.__new__(Datatype)
+        cdef Datatype datatype = Datatype.__new__(Datatype)
         CHKERR( MPI_Type_create_hvector(count, blocklength, stride,
                                         self.ob_mpi,
                                         &datatype.ob_mpi) )
@@ -164,7 +164,7 @@ cdef class Datatype:
         blocklengths  = getarray(blocklengths,  &count, &iblen)
         displacements = chkarray(displacements,  count, &idisp)
         #
-        cdef Datatype datatype = <Datatype>Datatype.__new__(Datatype)
+        cdef Datatype datatype = Datatype.__new__(Datatype)
         CHKERR( MPI_Type_indexed(count, iblen, idisp,
                                  self.ob_mpi, &datatype.ob_mpi) )
         return datatype
@@ -179,7 +179,7 @@ cdef class Datatype:
         cdef MPI_Aint *idisp = NULL
         displacements = chkarray(displacements, count, &idisp)
         #
-        cdef Datatype datatype = <Datatype>Datatype.__new__(Datatype)
+        cdef Datatype datatype = Datatype.__new__(Datatype)
         CHKERR( MPI_Type_create_hindexed(count, iblen, idisp,
                                          self.ob_mpi,
                                          &datatype.ob_mpi) )
@@ -193,7 +193,7 @@ cdef class Datatype:
         cdef int count = 0, *idisp = NULL
         displacements = getarray(displacements, &count, &idisp)
         #
-        cdef Datatype datatype = <Datatype>Datatype.__new__(Datatype)
+        cdef Datatype datatype = Datatype.__new__(Datatype)
         CHKERR( MPI_Type_create_indexed_block(count, blocklength,
                                               idisp, self.ob_mpi,
                                               &datatype.ob_mpi) )
@@ -209,7 +209,7 @@ cdef class Datatype:
         cdef MPI_Aint *idisp = NULL
         displacements = getarray(displacements, &count, &idisp)
         #
-        cdef Datatype datatype = <Datatype>Datatype.__new__(Datatype)
+        cdef Datatype datatype = Datatype.__new__(Datatype)
         CHKERR( MPI_Type_create_hindexed_block(count, blocklength,
                                                idisp, self.ob_mpi,
                                                &datatype.ob_mpi) )
@@ -228,7 +228,7 @@ cdef class Datatype:
         cdef MPI_Datatype *ptype = NULL
         datatypes = asarray_Datatype(datatypes, count, &ptype)
         #
-        cdef Datatype datatype = <Datatype>Datatype.__new__(Datatype)
+        cdef Datatype datatype = Datatype.__new__(Datatype)
         CHKERR( MPI_Type_create_struct(count, iblen, idisp, ptype,
                                        &datatype.ob_mpi) )
         return datatype
@@ -248,7 +248,7 @@ cdef class Datatype:
         subsizes = chkarray(subsizes, ndims, &isubsizes)
         starts   = chkarray(starts,   ndims, &istarts  )
         #
-        cdef Datatype datatype = <Datatype>Datatype.__new__(Datatype)
+        cdef Datatype datatype = Datatype.__new__(Datatype)
         CHKERR( MPI_Type_create_subarray(ndims, isizes,
                                          isubsizes, istarts,
                                          order, self.ob_mpi,
@@ -272,7 +272,7 @@ cdef class Datatype:
         dargs    = chkarray(dargs,    ndims, &idargs    )
         psizes   = chkarray(psizes,   ndims, &ipsizes   )
         #
-        cdef Datatype datatype = <Datatype>Datatype.__new__(Datatype)
+        cdef Datatype datatype = Datatype.__new__(Datatype)
         CHKERR( MPI_Type_create_darray(size, rank, ndims, igsizes,
                                        idistribs, idargs, ipsizes,
                                        order, self.ob_mpi,
@@ -287,7 +287,7 @@ cdef class Datatype:
         """
         Return a bounded integer datatype
         """
-        cdef Datatype datatype = <Datatype>Datatype.__new__(Datatype)
+        cdef Datatype datatype = Datatype.__new__(Datatype)
         CHKERR( MPI_Type_create_f90_integer(r, &datatype.ob_mpi) )
         return datatype
 
@@ -296,7 +296,7 @@ cdef class Datatype:
         """
         Return a bounded real datatype
         """
-        cdef Datatype datatype = <Datatype>Datatype.__new__(Datatype)
+        cdef Datatype datatype = Datatype.__new__(Datatype)
         CHKERR( MPI_Type_create_f90_real(p, r, &datatype.ob_mpi) )
         return datatype
 
@@ -305,7 +305,7 @@ cdef class Datatype:
         """
         Return a bounded complex datatype
         """
-        cdef Datatype datatype = <Datatype>Datatype.__new__(Datatype)
+        cdef Datatype datatype = Datatype.__new__(Datatype)
         CHKERR( MPI_Type_create_f90_complex(p, r, &datatype.ob_mpi) )
         return datatype
 
@@ -314,7 +314,7 @@ cdef class Datatype:
         """
         Find a datatype matching a specified size in bytes
         """
-        cdef Datatype datatype = <Datatype>Datatype.__new__(Datatype)
+        cdef Datatype datatype = Datatype.__new__(Datatype)
         CHKERR( MPI_Type_match_size(typeclass, size, &datatype.ob_mpi) )
         return datatype
 
@@ -413,7 +413,7 @@ cdef class Datatype:
         """
         Create a datatype with a new lower bound and extent
         """
-        cdef Datatype datatype = <Datatype>Datatype.__new__(Datatype)
+        cdef Datatype datatype = Datatype.__new__(Datatype)
         CHKERR( MPI_Type_create_resized(self.ob_mpi,
                                         lb, extent,
                                         &datatype.ob_mpi) )
@@ -825,7 +825,7 @@ cdef class Datatype:
     def f2py(cls, arg):
         """
         """
-        cdef Datatype datatype = <Datatype>Datatype.__new__(Datatype)
+        cdef Datatype datatype = Datatype.__new__(Datatype)
         datatype.ob_mpi = MPI_Type_f2c(arg)
         return datatype
 

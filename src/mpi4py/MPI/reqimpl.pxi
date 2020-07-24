@@ -74,7 +74,7 @@ cdef class _p_greq:
         status.MPI_TAG = MPI_ANY_TAG
         <void>MPI_Status_set_elements(status, MPI_BYTE, 0)
         <void>MPI_Status_set_cancelled(status, 0)
-        cdef Status sts = <Status>Status.__new__(Status)
+        cdef Status sts = Status.__new__(Status)
         if self.query_fn is not None:
             sts.ob_mpi = status[0]
             self.query_fn(sts, *self.args, **self.kargs)

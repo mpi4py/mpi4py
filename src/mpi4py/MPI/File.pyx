@@ -86,7 +86,7 @@ cdef class File:
         """
         cdef char *cfilename = NULL
         filename = asmpistr(filename, &cfilename)
-        cdef File file = <File>File.__new__(File)
+        cdef File file = File.__new__(File)
         with nogil: CHKERR( MPI_File_open(
             comm.ob_mpi, cfilename, amode, info.ob_mpi, &file.ob_mpi) )
         file_set_eh(file.ob_mpi)
@@ -153,7 +153,7 @@ cdef class File:
         Return the group of processes
         that opened the file
         """
-        cdef Group group = <Group>Group.__new__(Group)
+        cdef Group group = Group.__new__(Group)
         with nogil: CHKERR( MPI_File_get_group(self.ob_mpi, &group.ob_mpi) )
         return group
 
@@ -177,7 +177,7 @@ cdef class File:
         Return the hints for a file that
         that are currently in use
         """
-        cdef Info info = <Info>Info.__new__(Info)
+        cdef Info info = Info.__new__(Info)
         with nogil: CHKERR( MPI_File_get_info(self.ob_mpi, &info.ob_mpi) )
         return info
 
@@ -211,8 +211,8 @@ cdef class File:
         Return the file view
         """
         cdef MPI_Offset disp = 0
-        cdef Datatype etype = <Datatype>Datatype.__new__(Datatype)
-        cdef Datatype ftype = <Datatype>Datatype.__new__(Datatype)
+        cdef Datatype etype = Datatype.__new__(Datatype)
+        cdef Datatype ftype = Datatype.__new__(Datatype)
         cdef char cdatarep[MPI_MAX_DATAREP_STRING+1]
         with nogil: CHKERR( MPI_File_get_view(
             self.ob_mpi, &disp, &etype.ob_mpi, &ftype.ob_mpi, cdatarep) )
@@ -269,7 +269,7 @@ cdef class File:
         Nonblocking read using explicit offset
         """
         cdef _p_msg_io m = message_io_read(buf)
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_File_iread_at(
             self.ob_mpi, offset, m.buf, m.count, m.dtype, &request.ob_mpi) )
         request.ob_buf = m
@@ -280,7 +280,7 @@ cdef class File:
         Nonblocking collective read using explicit offset
         """
         cdef _p_msg_io m = message_io_read(buf)
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_File_iread_at_all(
             self.ob_mpi, offset, m.buf, m.count, m.dtype, &request.ob_mpi) )
         request.ob_buf = m
@@ -291,7 +291,7 @@ cdef class File:
         Nonblocking write using explicit offset
         """
         cdef _p_msg_io m = message_io_write(buf)
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_File_iwrite_at(
             self.ob_mpi, offset, m.buf, m.count, m.dtype, &request.ob_mpi) )
         request.ob_buf = m
@@ -302,7 +302,7 @@ cdef class File:
         Nonblocking collective write using explicit offset
         """
         cdef _p_msg_io m = message_io_write(buf)
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_File_iwrite_at_all(
             self.ob_mpi, offset, m.buf, m.count, m.dtype, &request.ob_mpi) )
         request.ob_buf = m
@@ -352,7 +352,7 @@ cdef class File:
         Nonblocking read using individual file pointer
         """
         cdef _p_msg_io m = message_io_read(buf)
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_File_iread(
             self.ob_mpi, m.buf, m.count, m.dtype, &request.ob_mpi) )
         request.ob_buf = m
@@ -363,7 +363,7 @@ cdef class File:
         Nonblocking collective read using individual file pointer
         """
         cdef _p_msg_io m = message_io_read(buf)
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_File_iread_all(
             self.ob_mpi, m.buf, m.count, m.dtype, &request.ob_mpi) )
         request.ob_buf = m
@@ -374,7 +374,7 @@ cdef class File:
         Nonblocking write using individual file pointer
         """
         cdef _p_msg_io m = message_io_write(buf)
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_File_iwrite(
             self.ob_mpi, m.buf, m.count, m.dtype, &request.ob_mpi) )
         request.ob_buf = m
@@ -385,7 +385,7 @@ cdef class File:
         Nonblocking collective write using individual file pointer
         """
         cdef _p_msg_io m = message_io_write(buf)
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_File_iwrite_all(
             self.ob_mpi, m.buf, m.count, m.dtype, &request.ob_mpi) )
         request.ob_buf = m
@@ -442,7 +442,7 @@ cdef class File:
         Nonblocking read using shared file pointer
         """
         cdef _p_msg_io m = message_io_read(buf)
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_File_iread_shared(
             self.ob_mpi, m.buf, m.count, m.dtype, &request.ob_mpi) )
         request.ob_buf = m
@@ -453,7 +453,7 @@ cdef class File:
         Nonblocking write using shared file pointer
         """
         cdef _p_msg_io m = message_io_write(buf)
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_File_iwrite_shared(
             self.ob_mpi, m.buf, m.count, m.dtype, &request.ob_mpi) )
         request.ob_buf = m
@@ -663,7 +663,7 @@ cdef class File:
         """
         Get the error handler for a file
         """
-        cdef Errhandler errhandler = <Errhandler>Errhandler.__new__(Errhandler)
+        cdef Errhandler errhandler = Errhandler.__new__(Errhandler)
         CHKERR( MPI_File_get_errhandler(self.ob_mpi, &errhandler.ob_mpi) )
         return errhandler
 
@@ -691,7 +691,7 @@ cdef class File:
     def f2py(cls, arg):
         """
         """
-        cdef File file = <File>File.__new__(File)
+        cdef File file = File.__new__(File)
         file.ob_mpi = MPI_File_f2c(arg)
         return file
 

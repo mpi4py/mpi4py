@@ -30,7 +30,7 @@ cdef class Info:
         """
         Create a new, empty info object
         """
-        cdef Info info = <Info>Info.__new__(Info)
+        cdef Info info = Info.__new__(Info)
         CHKERR( MPI_Info_create(&info.ob_mpi) )
         return info
 
@@ -46,7 +46,7 @@ cdef class Info:
         Duplicate an existing info object, creating a new object, with
         the same (key, value) pairs and the same ordering of keys
         """
-        cdef Info info = <Info>Info.__new__(Info)
+        cdef Info info = Info.__new__(Info)
         CHKERR( MPI_Info_dup(self.ob_mpi, &info.ob_mpi) )
         return info
 
@@ -116,7 +116,7 @@ cdef class Info:
     def f2py(cls, arg):
         """
         """
-        cdef Info info = <Info>Info.__new__(Info)
+        cdef Info info = Info.__new__(Info)
         info.ob_mpi = MPI_Info_f2c(arg)
         return info
 

@@ -62,7 +62,7 @@ cdef class Comm:
         """
         Access the group associated with a communicator
         """
-        cdef Group group = <Group>Group.__new__(Group)
+        cdef Group group = Group.__new__(Group)
         with nogil: CHKERR( MPI_Comm_group(self.ob_mpi, &group.ob_mpi) )
         return group
 
@@ -156,7 +156,7 @@ cdef class Comm:
         """
         cdef type comm_type = type(self)
         cdef Comm comm = <Comm>comm_type.__new__(comm_type)
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_Comm_idup(
             self.ob_mpi, &comm.ob_mpi, &request.ob_mpi) )
         comm_set_eh(comm.ob_mpi)
@@ -242,7 +242,7 @@ cdef class Comm:
         Return the hints for a communicator
         that are currently in use
         """
-        cdef Info info = <Info>Info.__new__(Info)
+        cdef Info info = Info.__new__(Info)
         with nogil: CHKERR( MPI_Comm_get_info(
             self.ob_mpi, &info.ob_mpi) )
         return info
@@ -343,7 +343,7 @@ cdef class Comm:
         Nonblocking send
         """
         cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_Isend(
             smsg.buf, smsg.count, smsg.dtype,
             dest, tag, self.ob_mpi, &request.ob_mpi) )
@@ -355,7 +355,7 @@ cdef class Comm:
         Nonblocking receive
         """
         cdef _p_msg_p2p rmsg = message_p2p_recv(buf, source)
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_Irecv(
             rmsg.buf, rmsg.count, rmsg.dtype,
             source, tag, self.ob_mpi, &request.ob_mpi) )
@@ -400,7 +400,7 @@ cdef class Comm:
         cdef MPI_Status *statusp = arg_Status(status)
         with nogil: CHKERR( MPI_Mprobe(
             source, tag, self.ob_mpi, &cmessage, statusp) )
-        cdef Message message = <Message>Message.__new__(Message)
+        cdef Message message = Message.__new__(Message)
         message.ob_mpi = cmessage
         return message
 
@@ -415,7 +415,7 @@ cdef class Comm:
         with nogil: CHKERR( MPI_Improbe(
              source, tag, self.ob_mpi, &flag, &cmessage, statusp) )
         if flag == 0: return None
-        cdef Message message = <Message>Message.__new__(Message)
+        cdef Message message = Message.__new__(Message)
         message.ob_mpi = cmessage
         return message
 
@@ -427,7 +427,7 @@ cdef class Comm:
         Create a persistent request for a standard send
         """
         cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
-        cdef Prequest request = <Prequest>Prequest.__new__(Prequest)
+        cdef Prequest request = Prequest.__new__(Prequest)
         with nogil: CHKERR( MPI_Send_init(
             smsg.buf, smsg.count, smsg.dtype,
             dest, tag, self.ob_mpi, &request.ob_mpi) )
@@ -439,7 +439,7 @@ cdef class Comm:
         Create a persistent request for a receive
         """
         cdef _p_msg_p2p rmsg = message_p2p_recv(buf, source)
-        cdef Prequest request = <Prequest>Prequest.__new__(Prequest)
+        cdef Prequest request = Prequest.__new__(Prequest)
         with nogil: CHKERR( MPI_Recv_init(
             rmsg.buf, rmsg.count, rmsg.dtype,
             source, tag, self.ob_mpi, &request.ob_mpi) )
@@ -485,7 +485,7 @@ cdef class Comm:
         Nonblocking send in buffered mode
         """
         cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_Ibsend(
             smsg.buf, smsg.count, smsg.dtype,
             dest, tag, self.ob_mpi, &request.ob_mpi) )
@@ -497,7 +497,7 @@ cdef class Comm:
         Nonblocking send in synchronous mode
         """
         cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_Issend(
             smsg.buf, smsg.count, smsg.dtype,
             dest, tag, self.ob_mpi, &request.ob_mpi) )
@@ -509,7 +509,7 @@ cdef class Comm:
         Nonblocking send in ready mode
         """
         cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_Irsend(
             smsg.buf, smsg.count, smsg.dtype,
             dest, tag, self.ob_mpi, &request.ob_mpi) )
@@ -523,7 +523,7 @@ cdef class Comm:
         Persistent request for a send in buffered mode
         """
         cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
-        cdef Prequest request = <Prequest>Prequest.__new__(Prequest)
+        cdef Prequest request = Prequest.__new__(Prequest)
         with nogil: CHKERR( MPI_Bsend_init(
             smsg.buf, smsg.count, smsg.dtype,
             dest, tag, self.ob_mpi, &request.ob_mpi) )
@@ -535,7 +535,7 @@ cdef class Comm:
         Persistent request for a send in synchronous mode
         """
         cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
-        cdef Prequest request = <Prequest>Prequest.__new__(Prequest)
+        cdef Prequest request = Prequest.__new__(Prequest)
         with nogil: CHKERR( MPI_Ssend_init(
             smsg.buf, smsg.count, smsg.dtype,
             dest, tag, self.ob_mpi, &request.ob_mpi) )
@@ -547,7 +547,7 @@ cdef class Comm:
         Persistent request for a send in ready mode
         """
         cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
-        cdef Prequest request = <Prequest>Prequest.__new__(Prequest)
+        cdef Prequest request = Prequest.__new__(Prequest)
         with nogil: CHKERR( MPI_Rsend_init(
             smsg.buf, smsg.count, smsg.dtype,
             dest, tag, self.ob_mpi, &request.ob_mpi) )
@@ -743,7 +743,7 @@ cdef class Comm:
         """
         Nonblocking Barrier
         """
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_Ibarrier(self.ob_mpi, &request.ob_mpi) )
         return request
 
@@ -753,7 +753,7 @@ cdef class Comm:
         """
         cdef _p_msg_cco m = message_cco()
         m.for_bcast(buf, root, self.ob_mpi)
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_Ibcast(
             m.sbuf, m.scount, m.stype,
             root, self.ob_mpi, &request.ob_mpi) )
@@ -766,7 +766,7 @@ cdef class Comm:
         """
         cdef _p_msg_cco m = message_cco()
         m.for_gather(0, sendbuf, recvbuf, root, self.ob_mpi)
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_Igather(
             m.sbuf, m.scount, m.stype,
             m.rbuf, m.rcount, m.rtype,
@@ -780,7 +780,7 @@ cdef class Comm:
         """
         cdef _p_msg_cco m = message_cco()
         m.for_gather(1, sendbuf, recvbuf, root, self.ob_mpi)
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_Igatherv(
             m.sbuf, m.scount,             m.stype,
             m.rbuf, m.rcounts, m.rdispls, m.rtype,
@@ -794,7 +794,7 @@ cdef class Comm:
         """
         cdef _p_msg_cco m = message_cco()
         m.for_scatter(0, sendbuf, recvbuf, root, self.ob_mpi)
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_Iscatter(
             m.sbuf, m.scount, m.stype,
             m.rbuf, m.rcount, m.rtype,
@@ -808,7 +808,7 @@ cdef class Comm:
         """
         cdef _p_msg_cco m = message_cco()
         m.for_scatter(1, sendbuf, recvbuf, root, self.ob_mpi)
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_Iscatterv(
             m.sbuf, m.scounts, m.sdispls, m.stype,
             m.rbuf, m.rcount,             m.rtype,
@@ -822,7 +822,7 @@ cdef class Comm:
         """
         cdef _p_msg_cco m = message_cco()
         m.for_allgather(0, sendbuf, recvbuf, self.ob_mpi)
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_Iallgather(
             m.sbuf, m.scount, m.stype,
             m.rbuf, m.rcount, m.rtype,
@@ -836,7 +836,7 @@ cdef class Comm:
         """
         cdef _p_msg_cco m = message_cco()
         m.for_allgather(1, sendbuf, recvbuf, self.ob_mpi)
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_Iallgatherv(
             m.sbuf, m.scount,             m.stype,
             m.rbuf, m.rcounts, m.rdispls, m.rtype,
@@ -849,7 +849,7 @@ cdef class Comm:
         """
         cdef _p_msg_cco m = message_cco()
         m.for_alltoall(0, sendbuf, recvbuf, self.ob_mpi)
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_Ialltoall(
             m.sbuf, m.scount, m.stype,
             m.rbuf, m.rcount, m.rtype,
@@ -863,7 +863,7 @@ cdef class Comm:
         """
         cdef _p_msg_cco m = message_cco()
         m.for_alltoall(1, sendbuf, recvbuf, self.ob_mpi)
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_Ialltoallv(
             m.sbuf, m.scounts, m.sdispls, m.stype,
             m.rbuf, m.rcounts, m.rdispls, m.rtype,
@@ -877,7 +877,7 @@ cdef class Comm:
         """
         cdef _p_msg_ccow m = message_ccow()
         m.for_alltoallw(sendbuf, recvbuf, self.ob_mpi)
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_Ialltoallw(
             m.sbuf, m.scounts, m.sdispls, m.stypes,
             m.rbuf, m.rcounts, m.rdispls, m.rtypes,
@@ -891,7 +891,7 @@ cdef class Comm:
         """
         cdef _p_msg_cco m = message_cco()
         m.for_reduce(sendbuf, recvbuf, root, self.ob_mpi)
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_Ireduce(
             m.sbuf, m.rbuf, m.rcount, m.rtype,
             op.ob_mpi, root, self.ob_mpi, &request.ob_mpi) )
@@ -903,7 +903,7 @@ cdef class Comm:
         """
         cdef _p_msg_cco m = message_cco()
         m.for_allreduce(sendbuf, recvbuf, self.ob_mpi)
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_Iallreduce(
             m.sbuf, m.rbuf, m.rcount, m.rtype,
             op.ob_mpi, self.ob_mpi, &request.ob_mpi) )
@@ -915,7 +915,7 @@ cdef class Comm:
         """
         cdef _p_msg_cco m = message_cco()
         m.for_reduce_scatter_block(sendbuf, recvbuf, self.ob_mpi)
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_Ireduce_scatter_block(
             m.sbuf, m.rbuf, m.rcount, m.rtype,
             op.ob_mpi, self.ob_mpi, &request.ob_mpi) )
@@ -928,7 +928,7 @@ cdef class Comm:
         cdef _p_msg_cco m = message_cco()
         m.for_reduce_scatter(sendbuf, recvbuf,
                              recvcounts, self.ob_mpi)
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_Ireduce_scatter(
             m.sbuf, m.rbuf, m.rcounts, m.rtype,
             op.ob_mpi, self.ob_mpi, &request.ob_mpi) )
@@ -1005,7 +1005,7 @@ cdef class Comm:
         Create a intercommunicator by joining
         two processes connected by a socket
         """
-        cdef Intercomm comm = <Intercomm>Intercomm.__new__(Intercomm)
+        cdef Intercomm comm = Intercomm.__new__(Intercomm)
         with nogil: CHKERR( MPI_Comm_join(fd, &comm.ob_mpi) )
         comm_set_eh(comm.ob_mpi)
         return comm
@@ -1080,7 +1080,7 @@ cdef class Comm:
         """
         Get the error handler for a communicator
         """
-        cdef Errhandler errhandler = <Errhandler>Errhandler.__new__(Errhandler)
+        cdef Errhandler errhandler = Errhandler.__new__(Errhandler)
         CHKERR( MPI_Comm_get_errhandler(self.ob_mpi, &errhandler.ob_mpi) )
         return errhandler
 
@@ -1185,28 +1185,28 @@ cdef class Comm:
     def isend(self, obj, int dest, int tag=0):
         """Nonblocking send"""
         cdef MPI_Comm comm = self.ob_mpi
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         request.ob_buf = PyMPI_isend(obj, dest, tag, comm, &request.ob_mpi)
         return request
     #
     def ibsend(self, obj, int dest, int tag=0):
         """Nonblocking send in buffered mode"""
         cdef MPI_Comm comm = self.ob_mpi
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         request.ob_buf = PyMPI_ibsend(obj, dest, tag, comm, &request.ob_mpi)
         return request
     #
     def issend(self, obj, int dest, int tag=0):
         """Nonblocking send in synchronous mode"""
         cdef MPI_Comm comm = self.ob_mpi
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         request.ob_buf = PyMPI_issend(obj, dest, tag, comm, &request.ob_mpi)
         return request
     #
     def irecv(self, buf=None, int source=ANY_SOURCE, int tag=ANY_TAG):
         """Nonblocking receive"""
         cdef MPI_Comm comm = self.ob_mpi
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         request.ob_buf = PyMPI_irecv(buf, source, tag, comm, &request.ob_mpi)
         return request
     #
@@ -1229,7 +1229,7 @@ cdef class Comm:
         """Blocking test for a matched message"""
         cdef MPI_Comm comm = self.ob_mpi
         cdef MPI_Status *statusp = arg_Status(status)
-        cdef Message message = <Message>Message.__new__(Message)
+        cdef Message message = Message.__new__(Message)
         message.ob_buf = PyMPI_mprobe(source, tag, comm,
                                       &message.ob_mpi, statusp)
         return message
@@ -1240,7 +1240,7 @@ cdef class Comm:
         cdef int flag = 0
         cdef MPI_Comm comm = self.ob_mpi
         cdef MPI_Status *statusp = arg_Status(status)
-        cdef Message message = <Message>Message.__new__(Message)
+        cdef Message message = Message.__new__(Message)
         message.ob_buf = PyMPI_improbe(source, tag, comm, &flag,
                                        &message.ob_mpi, statusp)
         if flag == 0: return None
@@ -1315,7 +1315,7 @@ cdef class Intracomm(Comm):
         if isinstance(periods, bool): periods = [periods] * ndims
         periods = chkarray(periods, ndims, &iperiods)
         #
-        cdef Cartcomm comm = <Cartcomm>Cartcomm.__new__(Cartcomm)
+        cdef Cartcomm comm = Cartcomm.__new__(Cartcomm)
         with nogil: CHKERR( MPI_Cart_create(
             self.ob_mpi, ndims, idims, iperiods, reorder, &comm.ob_mpi) )
         comm_set_eh(comm.ob_mpi)
@@ -1333,7 +1333,7 @@ cdef class Intracomm(Comm):
         if iindex[0]==0 and iindex[nnodes-1]==nedges:
             nnodes -= 1; iindex += 1;
         #
-        cdef Graphcomm comm = <Graphcomm>Graphcomm.__new__(Graphcomm)
+        cdef Graphcomm comm = Graphcomm.__new__(Graphcomm)
         with nogil: CHKERR( MPI_Graph_create(
             self.ob_mpi, nnodes, iindex, iedges, reorder, &comm.ob_mpi) )
         comm_set_eh(comm.ob_mpi)
@@ -1358,8 +1358,7 @@ cdef class Intracomm(Comm):
         destweights = asarray_weights(
             destweights, outdegree, &idestweight)
         #
-        cdef Distgraphcomm comm = \
-            <Distgraphcomm>Distgraphcomm.__new__(Distgraphcomm)
+        cdef Distgraphcomm comm = Distgraphcomm.__new__(Distgraphcomm)
         with nogil: CHKERR( MPI_Dist_graph_create_adjacent(
             self.ob_mpi,
             indegree,  isource, isourceweight,
@@ -1382,8 +1381,7 @@ cdef class Intracomm(Comm):
         destinations = chkarray(destinations, ne, &idest)
         weights = asarray_weights(weights, ne, &iweight)
         #
-        cdef Distgraphcomm comm = \
-            <Distgraphcomm>Distgraphcomm.__new__(Distgraphcomm)
+        cdef Distgraphcomm comm = Distgraphcomm.__new__(Distgraphcomm)
         with nogil: CHKERR( MPI_Dist_graph_create(
             self.ob_mpi,
             nv, isource, idegree, idest, iweight,
@@ -1399,7 +1397,7 @@ cdef class Intracomm(Comm):
         """
         Create intercommunicator
         """
-        cdef Intercomm comm = <Intercomm>Intercomm.__new__(Intercomm)
+        cdef Intercomm comm = Intercomm.__new__(Intercomm)
         with nogil: CHKERR( MPI_Intercomm_create(
             self.ob_mpi, local_leader,
             peer_comm.ob_mpi, remote_leader,
@@ -1475,7 +1473,7 @@ cdef class Intracomm(Comm):
         """
         cdef _p_msg_cco m = message_cco()
         m.for_scan(sendbuf, recvbuf, self.ob_mpi)
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_Iscan(
             m.sbuf, m.rbuf, m.rcount, m.rtype,
             op.ob_mpi, self.ob_mpi, &request.ob_mpi) )
@@ -1487,7 +1485,7 @@ cdef class Intracomm(Comm):
         """
         cdef _p_msg_cco m = message_cco()
         m.for_exscan(sendbuf, recvbuf, self.ob_mpi)
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_Iexscan(
             m.sbuf, m.rbuf, m.rcount, m.rtype,
             op.ob_mpi, self.ob_mpi, &request.ob_mpi) )
@@ -1530,7 +1528,7 @@ cdef class Intracomm(Comm):
         if errcodes is not None:
             tmp3 = newarray(maxprocs, &ierrcodes)
         #
-        cdef Intercomm comm = <Intercomm>Intercomm.__new__(Intercomm)
+        cdef Intercomm comm = Intercomm.__new__(Intercomm)
         with nogil: CHKERR( MPI_Comm_spawn(
             cmd, argv, maxprocs, info.ob_mpi, root,
             self.ob_mpi, &comm.ob_mpi, ierrcodes) )
@@ -1570,7 +1568,7 @@ cdef class Intracomm(Comm):
             for i from 0 <= i < count: np += imaxprocs[i]
             tmp5 = newarray(np, &ierrcodes)
         #
-        cdef Intercomm comm = <Intercomm>Intercomm.__new__(Intercomm)
+        cdef Intercomm comm = Intercomm.__new__(Intercomm)
         with nogil: CHKERR( MPI_Comm_spawn_multiple(
             count, cmds, argvs, imaxprocs, infos, root,
             self.ob_mpi, &comm.ob_mpi, ierrcodes) )
@@ -1597,7 +1595,7 @@ cdef class Intracomm(Comm):
         CHKERR( MPI_Comm_rank(self.ob_mpi, &rank) )
         if root == rank:
             port_name = asmpistr(port_name, &cportname)
-        cdef Intercomm comm = <Intercomm>Intercomm.__new__(Intercomm)
+        cdef Intercomm comm = Intercomm.__new__(Intercomm)
         with nogil: CHKERR( MPI_Comm_accept(
             cportname, info.ob_mpi, root,
             self.ob_mpi, &comm.ob_mpi) )
@@ -1615,7 +1613,7 @@ cdef class Intracomm(Comm):
         CHKERR( MPI_Comm_rank(self.ob_mpi, &rank) )
         if root == rank:
             port_name = asmpistr(port_name, &cportname)
-        cdef Intercomm comm = <Intercomm>Intercomm.__new__(Intercomm)
+        cdef Intercomm comm = Intercomm.__new__(Intercomm)
         with nogil: CHKERR( MPI_Comm_connect(
             cportname, info.ob_mpi, root,
             self.ob_mpi, &comm.ob_mpi) )
@@ -1761,7 +1759,7 @@ cdef class Topocomm(Intracomm):
         """
         cdef _p_msg_cco m = message_cco()
         m.for_neighbor_allgather(0, sendbuf, recvbuf, self.ob_mpi)
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_Ineighbor_allgather(
             m.sbuf, m.scount, m.stype,
             m.rbuf, m.rcount, m.rtype,
@@ -1775,7 +1773,7 @@ cdef class Topocomm(Intracomm):
         """
         cdef _p_msg_cco m = message_cco()
         m.for_neighbor_allgather(1, sendbuf, recvbuf, self.ob_mpi)
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_Ineighbor_allgatherv(
             m.sbuf, m.scount, m.stype,
             m.rbuf, m.rcounts, m.rdispls, m.rtype,
@@ -1789,7 +1787,7 @@ cdef class Topocomm(Intracomm):
         """
         cdef _p_msg_cco m = message_cco()
         m.for_neighbor_alltoall(0, sendbuf, recvbuf, self.ob_mpi)
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_Ineighbor_alltoall(
             m.sbuf, m.scount, m.stype,
             m.rbuf, m.rcount, m.rtype,
@@ -1803,7 +1801,7 @@ cdef class Topocomm(Intracomm):
         """
         cdef _p_msg_cco m = message_cco()
         m.for_neighbor_alltoall(1, sendbuf, recvbuf, self.ob_mpi)
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_Ineighbor_alltoallv(
             m.sbuf, m.scounts, m.sdispls, m.stype,
             m.rbuf, m.rcounts, m.rdispls, m.rtype,
@@ -1817,7 +1815,7 @@ cdef class Topocomm(Intracomm):
         """
         cdef _p_msg_ccow m = message_ccow()
         m.for_neighbor_alltoallw(sendbuf, recvbuf, self.ob_mpi)
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_Ineighbor_alltoallw(
             m.sbuf, m.scounts, m.sdisplsA, m.stypes,
             m.rbuf, m.rcounts, m.rdisplsA, m.rtypes,
@@ -1960,7 +1958,7 @@ cdef class Cartcomm(Topocomm):
         cdef int ndim = 0, *iremdims = NULL
         CHKERR( MPI_Cartdim_get(self.ob_mpi, &ndim) )
         remain_dims = chkarray(remain_dims, ndim, &iremdims)
-        cdef Cartcomm comm = <Cartcomm>Cartcomm.__new__(Cartcomm)
+        cdef Cartcomm comm = Cartcomm.__new__(Cartcomm)
         with nogil: CHKERR( MPI_Cart_sub(self.ob_mpi, iremdims, &comm.ob_mpi) )
         comm_set_eh(comm.ob_mpi)
         return comm
@@ -2175,7 +2173,7 @@ cdef class Intercomm(Comm):
         Access the remote group associated
         with the inter-communicator
         """
-        cdef Group group = <Group>Group.__new__(Group)
+        cdef Group group = Group.__new__(Group)
         with nogil: CHKERR( MPI_Comm_remote_group(
             self.ob_mpi, &group.ob_mpi) )
         return group
@@ -2205,7 +2203,7 @@ cdef class Intercomm(Comm):
         """
         Merge intercommunicator
         """
-        cdef Intracomm comm = <Intracomm>Intracomm.__new__(Intracomm)
+        cdef Intracomm comm = Intracomm.__new__(Intracomm)
         with nogil: CHKERR( MPI_Intercomm_merge(
             self.ob_mpi, high, &comm.ob_mpi) )
         comm_set_eh(comm.ob_mpi)

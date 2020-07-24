@@ -34,12 +34,12 @@ cdef inline int builtin_Datatype(MPI_Datatype ob):
             combiner == MPI_COMBINER_F90_COMPLEX)
 
 cdef inline Datatype new_Datatype(MPI_Datatype ob):
-    cdef Datatype datatype = <Datatype>Datatype.__new__(Datatype)
+    cdef Datatype datatype = Datatype.__new__(Datatype)
     datatype.ob_mpi = ob
     return datatype
 
 cdef inline Datatype ref_Datatype(MPI_Datatype ob):
-    cdef Datatype datatype = <Datatype>Datatype.__new__(Datatype)
+    cdef Datatype datatype = Datatype.__new__(Datatype)
     datatype.ob_mpi = ob
     return datatype
 
@@ -127,7 +127,7 @@ cdef inline int del_Datatype(MPI_Datatype* ob):
 include "reqimpl.pxi"
 
 cdef inline Request new_Request(MPI_Request ob):
-    cdef Request request = <Request>Request.__new__(Request)
+    cdef Request request = Request.__new__(Request)
     request.ob_mpi = ob
     return request
 
@@ -142,7 +142,7 @@ cdef inline int del_Request(MPI_Request* ob):
 # Message
 
 cdef inline Message new_Message(MPI_Message ob):
-    cdef Message message = <Message>Message.__new__(Message)
+    cdef Message message = Message.__new__(Message)
     message.ob_mpi = ob
     return message
 
@@ -161,7 +161,7 @@ cdef inline int del_Message(MPI_Message* ob):
 include "opimpl.pxi"
 
 cdef inline Op new_Op(MPI_Op ob):
-    cdef Op op = <Op>Op.__new__(Op)
+    cdef Op op = Op.__new__(Op)
     op.ob_mpi = ob
     if   ob == MPI_OP_NULL : op.ob_func = NULL
     elif ob == MPI_MAX     : op.ob_func = _op_MAX
@@ -205,7 +205,7 @@ cdef inline int del_Op(MPI_Op* ob):
 # Info
 
 cdef inline Info new_Info(MPI_Info ob):
-    cdef Info info = <Info>Info.__new__(Info)
+    cdef Info info = Info.__new__(Info)
     info.ob_mpi = ob
     return info
 
@@ -225,7 +225,7 @@ cdef inline MPI_Info arg_Info(object info):
 # Group
 
 cdef inline Group new_Group(MPI_Group ob):
-    cdef Group group = <Group>Group.__new__(Group)
+    cdef Group group = Group.__new__(Group)
     group.ob_mpi = ob
     return group
 
@@ -244,17 +244,17 @@ cdef inline int del_Group(MPI_Group* ob):
 include "commimpl.pxi"
 
 cdef inline Comm new_Comm(MPI_Comm ob):
-    cdef Comm comm = <Comm>Comm.__new__(Comm)
+    cdef Comm comm = Comm.__new__(Comm)
     comm.ob_mpi = ob
     return comm
 
 cdef inline Intracomm new_Intracomm(MPI_Comm ob):
-    cdef Intracomm comm = <Intracomm>Intracomm.__new__(Intracomm)
+    cdef Intracomm comm = Intracomm.__new__(Intracomm)
     comm.ob_mpi = ob
     return comm
 
 cdef inline Intercomm new_Intercomm(MPI_Comm ob):
-    cdef Intercomm comm = <Intercomm>Intercomm.__new__(Intercomm)
+    cdef Intercomm comm = Intercomm.__new__(Intercomm)
     comm.ob_mpi = ob
     return comm
 
@@ -273,7 +273,7 @@ cdef inline int del_Comm(MPI_Comm* ob):
 include "winimpl.pxi"
 
 cdef inline Win new_Win(MPI_Win ob):
-    cdef Win win = <Win>Win.__new__(Win)
+    cdef Win win = Win.__new__(Win)
     win.ob_mpi = ob
     return win
 
@@ -290,7 +290,7 @@ cdef inline int del_Win(MPI_Win* ob):
 include "drepimpl.pxi"
 
 cdef inline File new_File(MPI_File ob):
-    cdef File file = <File>File.__new__(File)
+    cdef File file = File.__new__(File)
     file.ob_mpi = ob
     return file
 
@@ -305,7 +305,7 @@ cdef inline int del_File(MPI_File* ob):
 # Errhandler
 
 cdef inline Errhandler new_Errhandler(MPI_Errhandler ob):
-    cdef Errhandler errhandler = <Errhandler>Errhandler.__new__(Errhandler)
+    cdef Errhandler errhandler = Errhandler.__new__(Errhandler)
     errhandler.ob_mpi = ob
     return errhandler
 

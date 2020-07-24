@@ -221,7 +221,7 @@ cdef class Request:
     def f2py(cls, arg):
         """
         """
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         if issubclass(cls, Prequest):
             request = <Request>Prequest.__new__(Prequest)
         if issubclass(cls, Grequest):
@@ -347,7 +347,7 @@ cdef class Grequest(Request):
         """
         Create and return a user-defined request
         """
-        cdef Grequest request = <Grequest>Grequest.__new__(Grequest)
+        cdef Grequest request = Grequest.__new__(Grequest)
         cdef _p_greq state = \
              _p_greq(query_fn, free_fn, cancel_fn, args, kargs)
         with nogil: CHKERR( MPI_Grequest_start(

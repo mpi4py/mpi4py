@@ -3,7 +3,7 @@
 #  Datatype
 
 cdef api object PyMPIDatatype_New(MPI_Datatype arg):
-    cdef Datatype obj = <Datatype>Datatype.__new__(Datatype)
+    cdef Datatype obj = Datatype.__new__(Datatype)
     obj.ob_mpi = arg
     return obj
 
@@ -15,7 +15,7 @@ cdef api MPI_Datatype* PyMPIDatatype_Get(object arg) except NULL:
 #  Status
 
 cdef api object PyMPIStatus_New(MPI_Status *arg):
-    cdef Status obj = <Status>Status.__new__(Status)
+    cdef Status obj = Status.__new__(Status)
     if (arg != NULL and
         arg != MPI_STATUS_IGNORE and
         arg != MPI_STATUSES_IGNORE):
@@ -32,7 +32,7 @@ cdef api MPI_Status* PyMPIStatus_Get(object arg) except? NULL:
 #  Request
 
 cdef api object PyMPIRequest_New(MPI_Request arg):
-    cdef Request obj = <Request>Request.__new__(Request)
+    cdef Request obj = Request.__new__(Request)
     obj.ob_mpi = arg
     return obj
 
@@ -44,7 +44,7 @@ cdef api MPI_Request* PyMPIRequest_Get(object arg) except NULL:
 #  Message
 
 cdef api object PyMPIMessage_New(MPI_Message arg):
-    cdef Message obj = <Message>Message.__new__(Message)
+    cdef Message obj = Message.__new__(Message)
     obj.ob_mpi = arg
     return obj
 
@@ -56,7 +56,7 @@ cdef api MPI_Message* PyMPIMessage_Get(object arg) except NULL:
 #  Op
 
 cdef api object PyMPIOp_New(MPI_Op arg):
-    cdef Op obj = <Op>Op.__new__(Op)
+    cdef Op obj = Op.__new__(Op)
     obj.ob_mpi = arg
     return obj
 
@@ -68,7 +68,7 @@ cdef api MPI_Op* PyMPIOp_Get(object arg) except NULL:
 #  Info
 
 cdef api object PyMPIInfo_New(MPI_Info arg):
-    cdef Info obj = <Info>Info.__new__(Info)
+    cdef Info obj = Info.__new__(Info)
     obj.ob_mpi = arg
     return obj
 
@@ -80,7 +80,7 @@ cdef api MPI_Info* PyMPIInfo_Get(object arg) except NULL:
 #  Group
 
 cdef api object PyMPIGroup_New(MPI_Group arg):
-    cdef Group obj = <Group>Group.__new__(Group)
+    cdef Group obj = Group.__new__(Group)
     obj.ob_mpi = arg
     return obj
 
@@ -123,7 +123,7 @@ cdef api MPI_Comm* PyMPIComm_Get(object arg) except NULL:
 # Win
 
 cdef api object PyMPIWin_New(MPI_Win arg):
-    cdef Win obj = <Win>Win.__new__(Win)
+    cdef Win obj = Win.__new__(Win)
     obj.ob_mpi = arg
     return obj
 
@@ -135,7 +135,7 @@ cdef api MPI_Win* PyMPIWin_Get(object arg) except NULL:
 # File
 
 cdef api object PyMPIFile_New(MPI_File arg):
-    cdef File obj = <File>File.__new__(File)
+    cdef File obj = File.__new__(File)
     obj.ob_mpi = arg
     return obj
 
@@ -147,7 +147,7 @@ cdef api MPI_File* PyMPIFile_Get(object arg) except NULL:
 # Errhandler
 
 cdef api object PyMPIErrhandler_New(MPI_Errhandler arg):
-    cdef Errhandler obj = <Errhandler>Errhandler.__new__(Errhandler)
+    cdef Errhandler obj = Errhandler.__new__(Errhandler)
     obj.ob_mpi = arg
     return obj
 

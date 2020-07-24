@@ -87,7 +87,7 @@ cdef class Message:
         if message == MPI_MESSAGE_NO_PROC:
             source = MPI_PROC_NULL
         cdef _p_msg_p2p rmsg = message_p2p_recv(buf, source)
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_Imrecv(
             rmsg.buf, rmsg.count, rmsg.dtype,
             &message, &request.ob_mpi) )
@@ -135,7 +135,7 @@ cdef class Message:
         """Nonblocking receive of matched message"""
         cdef object rmsg = self.ob_buf
         cdef MPI_Message message = self.ob_mpi
-        cdef Request request = <Request>Request.__new__(Request)
+        cdef Request request = Request.__new__(Request)
         request.ob_buf = PyMPI_imrecv(rmsg, &message, &request.ob_mpi)
         if self is not __MESSAGE_NO_PROC__: self.ob_mpi = message
         if self.ob_mpi == MPI_MESSAGE_NULL: self.ob_buf = None
@@ -153,7 +153,7 @@ cdef class Message:
     def f2py(cls, arg):
         """
         """
-        cdef Message message = <Message>Message.__new__(Message)
+        cdef Message message = Message.__new__(Message)
         message.ob_mpi = MPI_Message_f2c(arg)
         return message
 

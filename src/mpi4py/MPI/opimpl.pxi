@@ -94,7 +94,7 @@ cdef inline void op_user_mpi(
     cdef Datatype datatype
     # errors in user-defined reduction operations are unrecoverable
     try:
-        datatype = <Datatype>Datatype.__new__(Datatype)
+        datatype = Datatype.__new__(Datatype)
         datatype.ob_mpi = t[0]
         try: op_user_py(index, tomemory(a, n), tomemory(b, n), datatype)
         finally: datatype.ob_mpi = MPI_DATATYPE_NULL
