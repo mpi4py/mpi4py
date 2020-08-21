@@ -142,6 +142,32 @@ class Config(object):
         pass
 
     def _setup_windows(self):
+        if 'I_MPI_ROOT' in os.environ:
+            self._setup_windows_intelmpi()
+        else:
+            self._setup_windows_msmpi()
+
+    def _setup_windows_intelmpi(self):
+        I_MPI_ROOT = os.environ.get('I_MPI_ROOT', '')
+        if not I_MPI_ROOT: return
+        if not os.path.isdir(I_MPI_ROOT): return
+        arch = platform.architecture()[0][:2]
+        archdir = {'32':'ia32', '64':'intel64'}[arch]
+        mpi_dir = os.path.join(I_MPI_ROOT, archdir)
+        if not os.path.isdir(mpi_dir): return
+        IMPI_INC = os.path.join(mpi_dir, 'include')
+        IMPI_LIB = os.path.join(mpi_dir, 'lib', 'release')
+        if not os.path.isdir(IMPI_INC): return
+        if not os.path.isdir(IMPI_LIB): return
+        self.library_info.update(
+            include_dirs=[IMPI_INC],
+            library_dirs=[IMPI_LIB],
+            libraries=['impi'])
+        self.section = 'intelmpi'
+        self.filename = [mpi_dir]
+        return True
+
+    def _setup_windows_msmpi(self):
         # Microsoft MPI (v7, v6, v5, v4)
         def msmpi_ver():
             try:
