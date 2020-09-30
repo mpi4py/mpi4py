@@ -5,6 +5,7 @@ on:
     branches:
       - master
       - maint
+      - ci/all
       - ci/github
   pull_request:
     branches:

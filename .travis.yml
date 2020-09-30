@@ -57,6 +57,7 @@ branches:
   only:
     - master
     - maint
+    - ci/all
     - ci/travis
 
 git:

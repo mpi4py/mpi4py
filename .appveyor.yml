@@ -20,6 +20,7 @@ branches:
   only:
     - master
     - maint
+    - ci/all
     - ci/appveyor
 
 init:
