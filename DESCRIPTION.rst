@@ -66,19 +66,19 @@ You can also install the in-development version of mpi4py
 
 * using ``pip``::
 
-    $ pip install git+https://bitbucket.org/mpi4py/mpi4py
+    $ pip install git+https://github.com/mpi4py/mpi4py
 
   or::
 
-    $ pip install https://bitbucket.org/mpi4py/mpi4py/get/master.tar.gz
+    $ pip install https://github.com/mpi4py/mpi4py/tarball/master
 
 * using ``easy_install`` (deprecated)::
 
-    $ easy_install git+https://bitbucket.org/mpi4py/mpi4py
+    $ easy_install git+https://github.com/mpi4py/mpi4py
 
   or::
 
-    $ easy_install https://bitbucket.org/mpi4py/mpi4py/get/master.tar.gz
+    $ easy_install https://github.com/mpi4py/mpi4py/tarball/master
 
 You can also install it directly on Fedora (as well as RHEL and their
 derivatives using the EPEL software repository)

@@ -57,21 +57,21 @@ Using **distutils**
 -------------------
 
 The *MPI for Python* package is available for download at the project
-website generously hosted by Bitbucket. You can use :program:`curl`
+website generously hosted by GitHub. You can use :program:`curl`
 or :program:`wget` to get a release tarball.
 
 * Using :program:`curl`::
 
-    $ curl -O https://bitbucket.org/mpi4py/mpi4py/downloads/mpi4py-X.Y.tar.gz
+    $ curl -O https://github.com/mpi4py/mpi4py/releases/download/X.Y.Z/mpi4py-X.Y.Z.tar.gz
 
 * Using :program:`wget`::
 
-    $ wget https://bitbucket.org/mpi4py/mpi4py/downloads/mpi4py-X.Y.tar.gz
+    $ wget https://github.com/mpi4py/mpi4py/releases/download/X.Y.Z/mpi4py-X.Y.Z.tar.gz
 
 After unpacking the release tarball::
 
-  $ tar -zxf mpi4py-X.Y.tar.gz
-  $ cd mpi4py-X.Y
+  $ tar -zxf mpi4py-X.Y.Z.tar.gz
+  $ cd mpi4py-X.Y.Z
 
 the package is ready for building.
 

@@ -16,7 +16,7 @@ Hosted at *Read the Docs* [http://mpi4py.readthedocs.org/]:
 .. image::  https://readthedocs.org/projects/mpi4py/badge/?version=latest
    :target: https://mpi4py.readthedocs.org/en/latest/
 
-Hosted at *Bitbucket* [https://mpi4py.bitbucket.io/]:
+Hosted at *GitHub* [https://mpi4py.github.io/]:
 
 + `User Manual (HTML)`_ (generated with Sphinx_).
 + `User Manual (PDF)`_  (generated with Sphinx_).
@@ -42,12 +42,12 @@ Hosted at Google Groups:
 Downloads and Development
 -------------------------
 
-Hosted at Bitbucket:
+Hosted at GitHub:
 
-+ Project Site:    https://bitbucket.org/mpi4py/mpi4py
-+ Source Releases: https://bitbucket.org/mpi4py/mpi4py/downloads
-+ Issue Tracker:   https://bitbucket.org/mpi4py/mpi4py/issues
-+ Git Repository:  https://bitbucket.org/mpi4py/mpi4py.git
++ Project Site:    https://github.com/mpi4py/mpi4py
++ Source Releases: https://github.com/mpi4py/mpi4py/releases
++ Issue Tracker:   https://github.com/mpi4py/mpi4py/issues
++ Git Repository:  https://github.com/mpi4py/mpi4py.git
 
 
 Citations

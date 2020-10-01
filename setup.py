@@ -49,8 +49,9 @@ def description():
 name    = name()
 version = version()
 
-url      = 'https://bitbucket.org/mpi4py/%(name)s/' % vars()
-download = url + 'downloads/%(name)s-%(version)s.tar.gz' % vars()
+url      = 'https://github.com/mpi4py/%(name)s/' % vars()
+download = url + 'releases/download/%(version)s/' % vars()
+download = download + '%(name)s-%(version)s.tar.gz' % vars()
 
 classifiers = """
 Development Status :: 5 - Production/Stable

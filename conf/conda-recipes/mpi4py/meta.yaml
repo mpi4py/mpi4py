@@ -1,6 +1,6 @@
-{% set build = 3 %}
-{% set version = '2.0.0' %}
-{% set md5 = '4f7d8126d7367c239fd67615680990e3' %}
+{% set build = 0 %}
+{% set version = '3.0.3' %}
+{% set sha256 = '012d716c8b9ed1e513fcc4b18e5af16a8791f51e6d1716baccf988ad355c5a1f' %}
 {% set mpi = (environ.get('MPI') or 'mpich') if not win else 'msmpi' %}
 {% set mpi_version = {'mpich':'>=3.2', 'openmpi':'>=1.10'}.get(mpi,'') %}
 
@@ -9,14 +9,14 @@ package:
   version: {{version}}
 
 about:
-  home: https://bitbucket.org/mpi4py/
-  summary: 'Python bindings for MPI'
-  license: 'BSD (https://bitbucket.org/mpi4py/mpi4py/src/master/LICENSE.rst)'
+  home: https://github.com/mpi4py/mpi4py
+  summary: Python bindings for MPI
+  license: BSD 2-clause
 
 source:
   fn: mpi4py-{{version}}.tar.gz
-  url: https://bitbucket.org/mpi4py/mpi4py/downloads/mpi4py-{{version}}.tar.gz
-  {%if md5%}md5: {{md5}}{%endif%}
+  url: https://pypi.io/packages/source/{{name[0]}}/{{name}}/{{name}}-{{version}}.tar.gz
+  {%if sha256%}sha256: {{sha256}}{%endif%}
 
 requirements:
   build:
