@@ -6,7 +6,7 @@ CHANGES: MPI for Python
 :Contact: dalcinl@gmail.com
 
 
-Release 3.1.0 [2019-XX-XX]
+Release 3.1.0 [2020-XX-XX]
 ==========================
 
 * Enhancements:
@@ -17,6 +17,8 @@ Release 3.1.0 [2019-XX-XX]
     standard (`link`_) to uppercase API calls if mpi4py is built against 
     CUDA-aware MPI implementations. This feature is currently experimental 
     and subject to future changes.
+
+  + `mpi4py.futures`: Add support for initializers and canceling futures at shutdown.
 
 .. _link: http://numba.pydata.org/numba-doc/latest/cuda/cuda_array_interface.html
 
