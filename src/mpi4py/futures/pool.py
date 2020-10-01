@@ -168,7 +168,7 @@ class MPIPoolExecutor(Executor):
             return _starmap_chunks(self.submit, fn, iterable,
                                    timeout, unordered, chunksize)
 
-    def shutdown(self, wait=True):
+    def shutdown(self, wait=True, cancel_futures=False):
         """Clean-up the resources associated with the executor.
 
         It is safe to call this method several times. Otherwise, no other
@@ -178,6 +178,9 @@ class MPIPoolExecutor(Executor):
             wait: If ``True`` then shutdown will not return until all running
                 futures have finished executing and the resources used by the
                 executor have been reclaimed.
+            cancel_futures: If ``True`` then shutdown will cancel all pending
+                futures. Futures that are completed or running will not be
+                cancelled.
 
         """
         with self._lock:
@@ -185,6 +188,9 @@ class MPIPoolExecutor(Executor):
                 self._shutdown = True
                 if self._pool is not None:
                     self._pool.done()
+            if cancel_futures:
+                if self._pool is not None:
+                    self._pool.cancel()
             if wait:
                 if self._pool is not None:
                     self._pool.join()

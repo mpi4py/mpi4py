@@ -318,6 +318,27 @@ class ProcessPoolShutdownTest(ProcessPoolMixin,
         self.assertEqual(executor._pool, None)
         self.assertEqual(executor._shutdown, True)
 
+    def test_submit_shutdown_cancel(self):
+        executor = self.executor_type(max_workers=1)
+        executor.bootup()
+        fut1 = executor.submit(time.sleep, 0.5)
+        fut2 = executor.submit(time.sleep, 0)
+        executor.shutdown(wait=False, cancel_futures=False)
+        self.assertFalse(fut2.cancelled())
+        executor.shutdown(wait=True, cancel_futures=True)
+        self.assertTrue(fut2.cancelled())
+
+    def test_shutdown_cancel(self):
+        executor = self.executor_type(max_workers=1)
+        executor.bootup()
+        executor._pool.cancel()
+        executor.shutdown(wait=False, cancel_futures=False)
+        executor.shutdown(wait=False, cancel_futures=False)
+        executor.shutdown(wait=False, cancel_futures=True)
+        executor.shutdown(wait=False, cancel_futures=True)
+        executor.shutdown(wait=True,  cancel_futures=True)
+        executor.shutdown(wait=True,  cancel_futures=True)
+
     def test_init_bootup_shutdown(self):
         executor = self.executor_type(max_workers=1)
         self.assertEqual(executor._pool, None)

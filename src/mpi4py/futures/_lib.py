@@ -130,8 +130,8 @@ class Pool(object):
     def wait(self):
         self.event.wait()
 
-    def push(self, task):
-        self.queue.put(task)
+    def push(self, item):
+        self.queue.put(item)
 
     def done(self):
         self.queue.put(None)
@@ -139,10 +139,27 @@ class Pool(object):
     def join(self):
         self.thread.join()
 
+    def setup(self, size):
+        self.size = size
+        self.event.set()
+
+    def cancel(self):
+        queue = self.queue
+        while True:
+            try:
+                item = queue.pop()
+            except LookupError:
+                break
+            if item is None:
+                queue.put(None)
+                break
+            future, _ = item
+            future.cancel()
+            del item, future
+
 
 def setup_pool(pool, num_workers):
-    pool.size = num_workers
-    pool.event.set()
+    pool.setup(num_workers)
     return pool.queue
 
 

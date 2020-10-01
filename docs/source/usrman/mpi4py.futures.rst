@@ -192,7 +192,7 @@ only) thread until they are signaled for completion.
          for result in executor.starmap(pow, iterable):
              print(result)
 
-   .. method:: shutdown(wait=True)
+   .. method:: shutdown(wait=True, cancel_futures=False)
 
       Signal the executor that it should free any resources that it is using
       when the currently pending futures are done executing.  Calls to
@@ -206,6 +206,11 @@ only) thread until they are signaled for completion.
       freed when all pending futures are done executing.  Regardless of the
       value of *wait*, the entire Python program will not exit until all
       pending futures are done executing.
+
+      If *cancel_futures* is ``True``, this method will cancel all pending
+      futures that the executor has not started running. Any futures that
+      are completed or running won't be cancelled, regardless of the value
+      of *cancel_futures*.
 
       You can avoid having to call this method explicitly if you use the
       :keyword:`with` statement, which will shutdown the executor instance
