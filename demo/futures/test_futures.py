@@ -114,6 +114,8 @@ class ASharedPoolInitTest(unittest.TestCase):
         )
         executor.bootup()
         with self.assertRaises(futures.BrokenExecutor):
+            executor.submit(time.sleep, 0).result()
+        with self.assertRaises(futures.BrokenExecutor):
             executor.submit(time.sleep, 0)
 
     @unittest.skipIf(WORLD_SIZE == 1, 'world-size-1')
