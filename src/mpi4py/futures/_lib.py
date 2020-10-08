@@ -3,6 +3,7 @@
 """Management of MPI worker processes."""
 # pylint: disable=broad-except
 # pylint: disable=too-many-lines
+# pylint: disable=protected-access
 # pylint: disable=missing-docstring
 # pylint: disable=import-outside-toplevel
 
@@ -106,7 +107,10 @@ def join_threads(threads_queues=THREADS_QUEUES):
         thread.join()
 
 
-atexit.register(join_threads)
+try:
+    threading._register_atexit(join_threads)
+except AttributeError:  # pragma: no cover
+    atexit.register(join_threads)
 
 
 class Pool(object):
@@ -118,12 +122,15 @@ class Pool(object):
         self.exref = weakref.ref(executor, lambda _, q=queue: q.put(None))
 
         args = (self,) + args
-        kwargs = executor._options  # pylint: disable=protected-access
+        kwargs = executor._options
         thread = threading.Thread(target=manager, args=args, kwargs=kwargs)
-        thread.daemon = True
         self.thread = thread
 
         setup_mpi_threads()
+        try:
+            threading._register_atexit
+        except AttributeError:  # pragma: no cover
+            thread.daemon = True
         thread.start()
         THREADS_QUEUES[thread] = queue
 
@@ -181,7 +188,6 @@ def broken(pool, message):
     queue = pool.queue
     executor = pool.exref()
     if executor is not None:
-        # pylint: disable=protected-access
         executor._broken = message
         if not executor._shutdown:
             lock = executor._lock
@@ -297,7 +303,6 @@ def ServicePool(executor):
 
 def WorkerPool(executor):
     # pylint: disable=invalid-name
-    # pylint: disable=protected-access
     if SharedPool is not None:
         return SharedPool(executor)
     if 'service' in executor._options:
@@ -697,7 +702,6 @@ def server_close(comm):
 
 
 def import_main(mod_name, mod_path, init_globals, run_name):
-    # pylint: disable=protected-access
     import types
     import runpy
 
