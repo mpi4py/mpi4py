@@ -90,8 +90,7 @@ def _chain_log(new_future, future):
                 "Circular future chain detected: "
                 "Future {0} is already in the resolved chain {1}"
                 .format(future, set(log)))
-        else:
-            log.add(future)
+        log.add(future)
 
 
 _chain_log.lock = threading.Lock()

@@ -18,12 +18,13 @@ def run_command_line(args=None):
     * ``-``      : program read from standard input (``sys.stdin``)
     * ``arg ...``: arguments passed to program in ``sys.argv[1:]``
     """
-    # pylint: disable=missing-docstring
+    # pylint: disable=import-outside-toplevel
     import sys
     from runpy import run_module, run_path
 
     def run_string(string, init_globals=None, run_name=None,
                    filename='<string>', argv0='-c'):
+        # pylint: disable=missing-docstring
         from runpy import _run_module_code
         karg = 'script_name' if sys.version_info >= (3, 4) else 'mod_fname'
         code = compile(string, filename, 'exec', 0, 1)
@@ -55,6 +56,7 @@ def set_abort_status(status):
     within an ``except`` block. Afterwards, exceptions should be
     re-raised.
     """
+    # pylint: disable=import-outside-toplevel
     import sys
     status = (status if isinstance(status, int)
               else 0 if status is None else 1)
@@ -70,6 +72,7 @@ def main():
     """Entry-point for ``python -m mpi4py.run ...``."""
     # pylint: disable=missing-docstring
     # pylint: disable=too-many-statements
+    # pylint: disable=import-outside-toplevel
     import os
     import sys
 

@@ -44,12 +44,14 @@ def get_include():
                 include_dirs=[..., mpi4py.get_include()])
 
     """
+    # pylint: disable=import-outside-toplevel
     from os.path import join, dirname
     return join(dirname(__file__), 'include')
 
 
 def get_config():
     """Return a dictionary with information about MPI."""
+    # pylint: disable=import-outside-toplevel
     from os.path import join, dirname
     try:
         from configparser import ConfigParser
@@ -110,8 +112,9 @@ def profile(name, **kargs):
        Filename prefix for dumping profiler output.
 
     """
-    import sys
+    # pylint: disable=import-outside-toplevel
     import os
+    import sys
     from .dl import dlopen, dlerror, RTLD_NOW, RTLD_GLOBAL
 
     def lookup_dylib(name, path):

@@ -7,14 +7,13 @@ Python code (scripts, modules, zip files) is run in the process with rank 0 in
 other processes team-up in a static-size shared pool of workers executing tasks
 submitted from the master process.
 """
-# pylint: disable=import-outside-toplevel
-
 from __future__ import print_function
 
 
 def main():
     """Entry point for ``python -m mpi4py.futures ...``."""
     # pylint: disable=missing-docstring
+    # pylint: disable=import-outside-toplevel
     import os
     import sys
     from ..run import run_command_line
@@ -34,10 +33,9 @@ def main():
         if error:
             print(error, file=sys.stderr)
             print(usage, file=sys.stderr)
-            raise UsageExit(1)
         else:
             print(usage, file=sys.stdout)
-            raise UsageExit(0)
+        raise UsageExit(1 if error else 0)
 
     def chk_command_line():
         args = sys.argv[1:]
