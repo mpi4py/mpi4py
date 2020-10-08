@@ -17,7 +17,7 @@ import threading
 import collections
 
 from .. import MPI
-from . import BrokenExecutor
+from ._core import BrokenExecutor
 
 
 # ---
@@ -612,6 +612,7 @@ def server_pull(comm):
         tag = MPI.COMM_WORLD.Get_attr(MPI.TAG_UB)
         data = comm.recv(None, 0, tag)
     return data
+
 
 def server_sync(comm):
     assert comm.Is_inter()

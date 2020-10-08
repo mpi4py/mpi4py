@@ -12,7 +12,7 @@ import weakref
 import threading
 import functools
 
-from . import Future
+from ._core import Future
 
 
 class ThenableFuture(Future):
@@ -92,6 +92,8 @@ def _chain_log(new_future, future):
                 .format(future, set(log)))
         else:
             log.add(future)
+
+
 _chain_log.lock = threading.Lock()
 _chain_log.registry = weakref.WeakKeyDictionary()
 
