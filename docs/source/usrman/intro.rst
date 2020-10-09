@@ -88,7 +88,7 @@ known MPI and Python related open source projects from the Internet.
 
 * `OOMPI`_
 
-  + It has not relation with Python, but is an excellent object
+  + It has no relation with Python, but is an excellent object
     oriented approach to MPI.
 
   + It is a C++ class library specification layered on top of the C
