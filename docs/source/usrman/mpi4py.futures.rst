@@ -449,10 +449,11 @@ argument to :program:`mpiexec` ::
 
   $ mpiexec -n 1 -host <hostname>:17 python julia.py
 
-Another, implementation-independent, way to specify the MPI universe size is to
+Another, implementation-independent, way to specify the number of workers is to
 use `mpi4py`-specific environment variable::
 
   $ MPI4PY_MAX_WORKERS=16 mpiexec -n 1 python julia.py
+Notice that in this case MPI universe size is ignored.
 
 Alternatively, users may decide to execute the script in a more traditional
 way, that is, all the MPI process are started at once. The user script is run
