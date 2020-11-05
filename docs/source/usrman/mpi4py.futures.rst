@@ -425,7 +425,7 @@ The recommended way to execute the script is by using the :program:`mpiexec`
 command specifying one MPI process and (optional but recommended) the desired
 MPI universe size, which is provided either by a batch system or is set by the
 user via command-line arguments or environment variables. Below we provide
-examples for MPICH and Open MPI as well as `mpi4py`-specific way [#]_. In all
+examples for MPICH and Open MPI [#]_. In all
 of these examples, the :program:`mpiexec` command launches a single MPI process
 (the master) running the Python interpreter and executing the main script. When
 required, :mod:`mpi4py.futures` spawns the pool of 16 worker processes. The
@@ -448,10 +448,11 @@ argument to :program:`mpiexec` ::
 
   $ mpiexec -n 1 -host <hostname>:17 python julia.py
 
-Another, implementation-independent, way to specify the number of workers is to
+Another way to specify the number of workers is to
 use `mpi4py`-specific environment variable::
 
   $ MPI4PY_MAX_WORKERS=16 mpiexec -n 1 python julia.py
+  
 Notice that in this case MPI universe size is ignored.
 
 Alternatively, users may decide to execute the script in a more traditional
