@@ -435,7 +435,7 @@ and waits for the results. The workers receive incoming tasks, execute them,
 and send back the results to the master.
 
 When using MPICH implementation or its derivatives based on the Hydra process
-manager, the MPI universe size can be set via ``-usize`` argument to
+manager, the user can set the MPI universe size via ``-usize`` argument to
 :program:`mpiexec`::
 
   $ mpiexec -n 1 -usize 17 python julia.py
@@ -455,18 +455,18 @@ Another way to specify the number of workers is to use a
 
   $ MPI4PY_MAX_WORKERS=16 mpiexec -n 1 python julia.py
   
-Note that in this case the MPI universe size is ignored.
+Note that in this case, the MPI universe size is ignored.
 
 Alternatively, users may decide to execute the script in a more traditional
-way, that is, all the MPI process are started at once. The user script is run
-under command line control of :mod:`mpi4py.futures` passing the :ref:`-m
+way, that is, all the MPI processes are started at once. The user script is run
+under command-line control of :mod:`mpi4py.futures` passing the :ref:`-m
 <python:using-on-cmdline>` flag to the :program:`python` executable::
 
   $ mpiexec -n 17 python -m mpi4py.futures julia.py
 
 As explained previously, the 17 processes are partitioned in one master and 16
 workers. The master process executes the main script while the workers execute
-the tasks submitted from the master.
+the tasks submitted by the master.
 
 .. [#] When using an MPI implementation other than MPICH or Open MPI, please
    check the documentation of the implementation and/or batch
