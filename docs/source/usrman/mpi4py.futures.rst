@@ -434,17 +434,17 @@ receive incoming tasks, execute them, and send back the results to the master.
 
 When using MPICH implementation or its derivatives based on the Hydra process
 manager, the MPI universe size can be set via ``-usize`` argument to
-:program:`mpiexec` ::
+:program:`mpiexec`::
 
   $ mpiexec -n 1 -usize 17 python julia.py
 
 or, alternatively, by setting the :envvar:`MPIEXEC_UNIVERSE_SIZE` environment
-variable ::
+variable::
 
   $ MPIEXEC_UNIVERSE_SIZE=17 mpiexec -n 1 python julia.py
 
 In the Open MPI implementation, the MPI universe size can be set via ``-host``
-argument to :program:`mpiexec` ::
+argument to :program:`mpiexec`::
 
   $ mpiexec -n 1 -host <hostname>:17 python julia.py
 
@@ -458,7 +458,7 @@ Notice that in this case MPI universe size is ignored.
 Alternatively, users may decide to execute the script in a more traditional
 way, that is, all the MPI process are started at once. The user script is run
 under command line control of :mod:`mpi4py.futures` passing the :ref:`-m
-<python:using-on-cmdline>` flag to the :program:`python` executable. ::
+<python:using-on-cmdline>` flag to the :program:`python` executable::
 
   $ mpiexec -n 17 python -m mpi4py.futures julia.py
 
