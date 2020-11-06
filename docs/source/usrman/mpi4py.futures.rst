@@ -466,8 +466,8 @@ As explained previously, the 17 processes are partitioned in one master and 16
 workers. The master process executes the main script while the workers execute
 the tasks submitted from the master.
 
-.. [#] When using MPI implementations different from MPICH and Open MPI, please
-   check the documentation of your actual MPI implementation and/or batch
+.. [#] When using an MPI implementation other than MPICH or Open MPI, please
+   check the documentation of the implementation and/or batch
    system for the ways to specify the desired MPI universe size.
 
 
