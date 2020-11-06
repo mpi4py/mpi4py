@@ -422,15 +422,17 @@ scanline is dumped to disk.
                    f.write(line)
 
 The recommended way to execute the script is by using the :program:`mpiexec`
-command specifying one MPI process and (optional but recommended) the desired
-MPI universe size, which is provided either by a batch system or is set by the
-user via command-line arguments or environment variables. Below we provide
-examples for MPICH and Open MPI [#]_. In all
-of these examples, the :program:`mpiexec` command launches a single MPI process
-(the master) running the Python interpreter and executing the main script. When
-required, :mod:`mpi4py.futures` spawns the pool of 16 worker processes. The
-master submits tasks to the workers and waits for the results. The workers
-receive incoming tasks, execute them, and send back the results to the master.
+command specifying one MPI process (master) and (optional but recommended) the
+desired MPI universe size, which determines the number of additional
+dynamically spawned processes (workers). The MPI universe size is provided
+either by a batch system or set by the user via command-line arguments to
+:program:`mpiexec` or environment variables. Below we provide examples for
+MPICH and Open MPI implementations [#]_. In all of these examples, the
+:program:`mpiexec` command launches a single master process running the Python
+interpreter and executing the main script. When required, :mod:`mpi4py.futures`
+spawns the pool of 16 worker processes. The master submits tasks to the workers
+and waits for the results. The workers receive incoming tasks, execute them,
+and send back the results to the master.
 
 When using MPICH implementation or its derivatives based on the Hydra process
 manager, the MPI universe size can be set via ``-usize`` argument to
