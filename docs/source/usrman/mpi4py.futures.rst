@@ -450,7 +450,7 @@ argument to :program:`mpiexec`::
 
   $ mpiexec -n 1 -host <hostname>:17 python julia.py
 
-Another way to specify the number of workers is to use a
+Another way to specify the number of workers is to use the
 `mpi4py.futures`-specific environment variable :envvar:`MPI4PY_MAX_WORKERS`::
 
   $ MPI4PY_MAX_WORKERS=16 mpiexec -n 1 python julia.py
