@@ -421,38 +421,56 @@ scanline is dumped to disk.
                for line in image:
                    f.write(line)
 
-The recommended way to execute the script is using the :program:`mpiexec`
-command specifying one MPI process and (optional but recommended) the desired
-MPI universe size [#]_. ::
+The recommended way to execute the script is by using the :program:`mpiexec`
+command specifying one MPI process (master) and (optional but recommended) the
+desired MPI universe size, which determines the number of additional
+dynamically spawned processes (workers). The MPI universe size is provided
+either by a batch system or set by the user via command-line arguments to
+:program:`mpiexec` or environment variables. Below we provide examples for
+MPICH and Open MPI implementations [#]_. In all of these examples, the
+:program:`mpiexec` command launches a single master process running the Python
+interpreter and executing the main script. When required, :mod:`mpi4py.futures`
+spawns the pool of 16 worker processes. The master submits tasks to the workers
+and waits for the results. The workers receive incoming tasks, execute them,
+and send back the results to the master.
+
+When using MPICH implementation or its derivatives based on the Hydra process
+manager, the user can set the MPI universe size via ``-usize`` argument to
+:program:`mpiexec`::
 
   $ mpiexec -n 1 -usize 17 python julia.py
 
-The :program:`mpiexec` command launches a single MPI process (the master)
-running the Python interpreter and executing the main script. When required,
-:mod:`mpi4py.futures` spawns 16 additional MPI processes (the children) to
-dynamically allocate the pool of workers. The master submits tasks to the
-children and waits for the results. The children receive incoming tasks,
-execute them, and send back the results to the master.
+or, alternatively, by setting the :envvar:`MPIEXEC_UNIVERSE_SIZE` environment
+variable::
+
+  $ MPIEXEC_UNIVERSE_SIZE=17 mpiexec -n 1 python julia.py
+
+In the Open MPI implementation, the MPI universe size can be set via ``-host``
+argument to :program:`mpiexec`::
+
+  $ mpiexec -n 1 -host <hostname>:17 python julia.py
+
+Another way to specify the number of workers is to use the
+`mpi4py.futures`-specific environment variable :envvar:`MPI4PY_MAX_WORKERS`::
+
+  $ MPI4PY_MAX_WORKERS=16 mpiexec -n 1 python julia.py
+  
+Note that in this case, the MPI universe size is ignored.
 
 Alternatively, users may decide to execute the script in a more traditional
-way, that is, all the MPI process are started at once. The user script is run
-under command line control of :mod:`mpi4py.futures` passing the :ref:`-m
-<python:using-on-cmdline>` flag to the :program:`python` executable. ::
+way, that is, all the MPI processes are started at once. The user script is run
+under command-line control of :mod:`mpi4py.futures` passing the :ref:`-m
+<python:using-on-cmdline>` flag to the :program:`python` executable::
 
   $ mpiexec -n 17 python -m mpi4py.futures julia.py
 
 As explained previously, the 17 processes are partitioned in one master and 16
 workers. The master process executes the main script while the workers execute
-the tasks submitted from the master.
+the tasks submitted by the master.
 
-.. [#] This :program:`mpiexec` invocation example using the ``-usize`` flag
-   (alternatively, setting the :envvar:`MPIEXEC_UNIVERSE_SIZE` environment
-   variable) assumes the backend MPI implementation is an MPICH derivative
-   using the Hydra process manager. In the Open MPI implementation, the MPI
-   universe size can be specified by setting the :envvar:`OMPI_UNIVERSE_SIZE`
-   environment variable to a positive integer.  Check the documentation of your
-   actual MPI implementation and/or batch system for the ways to specify the
-   desired MPI universe size.
+.. [#] When using an MPI implementation other than MPICH or Open MPI, please
+   check the documentation of the implementation and/or batch
+   system for the ways to specify the desired MPI universe size.
 
 
 .. Local variables:
