@@ -9,14 +9,13 @@
 #define OMPI_IGNORE_CXX_SEEK 1
 #include <mpi.h>
 
-#ifdef __FreeBSD__
-#include <fenv.h>
-#endif
-
-static int PyMPI_Main(int, char **);
-
-#if PY_MAJOR_VERSION >= 3
-static int Py3_Main(int, char **);
+#if PY_MAJOR_VERSION <= 2
+#define Py_BytesMain Py_Main
+#elif PY_VERSION_HEX < 0x03070000
+static int Py_BytesMain(int, char **);
+#elif PY_VERSION_HEX < 0x03080000
+PyAPI_FUNC(int) _Py_UnixMain(int, char **);
+#define Py_BytesMain _Py_UnixMain
 #endif
 
 /* -------------------------------------------------------------------------- */
@@ -24,16 +23,7 @@ static int Py3_Main(int, char **);
 int
 main(int argc, char **argv)
 {
-#ifdef __FreeBSD__
-  fedisableexcept(FE_OVERFLOW);
-#endif
-  return PyMPI_Main(argc, argv);
-}
-
-static int
-PyMPI_Main(int argc, char **argv)
-{
-  int sts=0, flag=1, finalize=0;
+  int status = 0, flag = 1, finalize = 0;
 
   /* MPI initalization */
   (void)MPI_Initialized(&flag);
@@ -49,25 +39,23 @@ PyMPI_Main(int argc, char **argv)
   }
 
   /* Python main */
-#if PY_MAJOR_VERSION >= 3
-  sts = Py3_Main(argc, argv);
-#else
-  sts = Py_Main(argc, argv);
-#endif
+  status = Py_BytesMain(argc, argv);
 
   /* MPI finalization */
   (void)MPI_Finalized(&flag);
   if (!flag) {
-    if (sts != 0) (void)MPI_Abort(MPI_COMM_WORLD, sts);
-    if (finalize) (void)MPI_Finalize();
+    if (status)
+      (void)MPI_Abort(MPI_COMM_WORLD, status);
+    if (finalize)
+      (void)MPI_Finalize();
   }
 
-  return sts;
+  return status;
 }
 
 /* -------------------------------------------------------------------------- */
 
-#if PY_MAJOR_VERSION >= 3
+#if PY_MAJOR_VERSION >= 3 && PY_VERSION_HEX < 0x03070000
 
 #include <locale.h>
 
@@ -76,7 +64,7 @@ static wchar_t **cp_wargs(int, wchar_t **);
 static void rm_wargs(wchar_t **, int);
 
 static int
-Py3_Main(int argc, char **argv)
+Py_BytesMain(int argc, char **argv)
 {
   int sts = 0;
   wchar_t **wargv  = mk_wargs(argc, argv);
