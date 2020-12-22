@@ -46,6 +46,19 @@ search path, you can use :program:`pip`::
 
      $ env MPICC=/path/to/mpicc python -m pip install mpi4py
 
+.. warning::
+
+   :program:`pip` keeps previouly built wheel files on its cache for
+   future reuse. If you want to reinstall the :mod:`mpi4py` package
+   using a different or updated MPI implementation, you have to either
+   first remove the cached wheel file with::
+
+     $ python -m pip cache remove mpi4py
+
+   or ask :program:`pip` to disable the cache::
+
+     $ python -m pip install --no-cache-dir mpi4py
+
 
 Using **distutils**
 -------------------
