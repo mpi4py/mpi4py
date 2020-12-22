@@ -52,33 +52,17 @@ Install
 -------
 
 Once you have a working MPI implementation and the ``mpicc`` compiler
-wrapper is on your search path, you can install this package
+wrapper is on your search path, you can install this package using ``pip``::
 
-* using ``pip``::
+  $ python -m pip install mpi4py
 
-  $ pip install mpi4py
+You can also install the in-development version of mpi4py using ``pip``::
 
-* using ``easy_install`` (deprecated)::
+  $ python -m pip install git+https://github.com/mpi4py/mpi4py
 
-  $ easy_install mpi4py
+or::
 
-You can also install the in-development version of mpi4py
-
-* using ``pip``::
-
-    $ pip install git+https://github.com/mpi4py/mpi4py
-
-  or::
-
-    $ pip install https://github.com/mpi4py/mpi4py/tarball/master
-
-* using ``easy_install`` (deprecated)::
-
-    $ easy_install git+https://github.com/mpi4py/mpi4py
-
-  or::
-
-    $ easy_install https://github.com/mpi4py/mpi4py/tarball/master
+  $ python -m pip install https://github.com/mpi4py/mpi4py/tarball/master
 
 You can also install it directly on Fedora (as well as RHEL and their
 derivatives using the EPEL software repository)

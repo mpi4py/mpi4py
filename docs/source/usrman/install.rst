@@ -27,19 +27,15 @@ build *MPI for Python*:
      :ref:`python-mpi` in the appendix.
 
 
-Using **pip** or **easy_install**
----------------------------------
+Using **pip**
+-------------
 
 If you already have a working MPI (either if you installed it from
 sources or by using a pre-built package from your favourite GNU/Linux
 distribution) and the :program:`mpicc` compiler wrapper is on your
 search path, you can use :program:`pip`::
 
-  $ [sudo] pip install mpi4py
-
-or alternatively *setuptools* :program:`easy_install` (deprecated)::
-
-  $ [sudo] easy_install mpi4py
+  $ python -m pip install mpi4py
 
 .. note::
 
@@ -48,9 +44,7 @@ or alternatively *setuptools* :program:`easy_install` (deprecated)::
    :program:`env` to pass the environment variable :envvar:`MPICC`
    providing the full path to the MPI compiler wrapper executable::
 
-     $ [sudo] env MPICC=/path/to/mpicc pip install mpi4py
-
-     $ [sudo] env MPICC=/path/to/mpicc easy_install mpi4py
+     $ env MPICC=/path/to/mpicc python -m pip install mpi4py
 
 
 Using **distutils**
