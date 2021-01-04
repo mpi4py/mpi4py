@@ -209,6 +209,29 @@ cdef class Info:
         for key, value in kwds.items():
             self.Set(key, value)
 
+    def pop(self, object key, *default):
+        """info pop"""
+        cdef object value = None
+        if self:
+            value = self.Get(key)
+        if value is not None:
+            self.Delete(key)
+            return value
+        if default:
+            value, = default
+            return value
+        raise KeyError(key)
+
+    def popitem(self):
+        """info popitem"""
+        if not self: raise KeyError
+        cdef object key, value
+        cdef int nkeys = self.Get_nkeys()
+        key = self.Get_nthkey(nkeys - 1)
+        value = self.Get(key)
+        self.Delete(key)
+        return (key, value)
+
     def copy(self):
         """info copy"""
         if not self: return Info()

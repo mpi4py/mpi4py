@@ -13,13 +13,18 @@ class TestInfoNull(unittest.TestCase):
         def setitem(): inull['k'] = 'v'
         def delitem(): del inull['k']
         def update():  inull.update([])
+        def pop():     inull.pop('k')
+        def popitem(): inull.popitem()
         self.assertEqual(len(inull), 0)
         self.assertFalse('key' in inull)
         self.assertRaises(KeyError, getitem)
         self.assertRaises(KeyError, setitem)
         self.assertRaises(KeyError, delitem)
         self.assertRaises(KeyError, update)
+        self.assertRaises(KeyError, pop)
+        self.assertRaises(KeyError, popitem)
         self.assertEqual(inull.get('key', None), None)
+        self.assertEqual(inull.pop('key', None), None)
         self.assertEqual(inull.keys(), [])
         self.assertEqual(inull.values(), [])
         self.assertEqual(inull.items(), [])
@@ -103,8 +108,30 @@ class TestInfo(unittest.TestCase):
         self.assertEqual(INFO.values(), ['value'])
         self.assertEqual(INFO.items(), [('key', 'value')])
         self.assertEqual(key, 'key')
-
         del INFO['key']
+        self.assertEqual(len(INFO), 0)
+
+        INFO['key'] = 'value'
+        self.assertEqual(INFO.pop('key'), 'value')
+        self.assertEqual(len(INFO), 0)
+        self.assertEqual(INFO.pop('key', 'value'), 'value')
+        INFO['key1'] = 'value1'
+        INFO['key2'] = 'value2'
+        self.assertEqual(INFO.pop('key1'), 'value1')
+        self.assertEqual(len(INFO), 1)
+        self.assertEqual(INFO.pop('key2'), 'value2')
+        self.assertEqual(len(INFO), 0)
+
+        INFO['key'] = 'value'
+        self.assertEqual(INFO.popitem(), ('key', 'value'))
+        self.assertEqual(len(INFO), 0)
+        INFO['key1'] = 'value1'
+        INFO['key2'] = 'value2'
+        self.assertEqual(INFO.popitem(), ('key2', 'value2'))
+        self.assertEqual(len(INFO), 1)
+        self.assertEqual(INFO.popitem(), ('key1', 'value1'))
+        self.assertEqual(len(INFO), 0)
+
         self.assertEqual(len(INFO), 0)
         self.assertTrue('key' not in INFO)
         self.assertEqual(INFO.keys(), [])
