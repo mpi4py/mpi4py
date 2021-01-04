@@ -39,6 +39,7 @@ install:
   - "%PYTHON%\\python.exe --version"
   - "%PYTHON%\\python.exe -m pip install --upgrade pip"
   - "%PYTHON%\\python.exe -m pip --version"
+  - "%PYTHON%\\python.exe -m pip install --upgrade setuptools"
   - "%PYTHON%\\python.exe -m pip install --upgrade wheel"
   - "%PYTHON%\\python.exe -m wheel version"
   # Cython
