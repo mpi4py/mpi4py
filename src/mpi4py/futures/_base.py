@@ -12,9 +12,9 @@ import threading
 import time
 
 try:
-    from itertools import izip as zip
+    from itertools import izip as _zip
 except ImportError:
-    pass
+    _zip = zip
 
 FIRST_COMPLETED = 'FIRST_COMPLETED'
 FIRST_EXCEPTION = 'FIRST_EXCEPTION'
@@ -538,7 +538,7 @@ class Future(object):
         Should only be used by Executor implementations and unit tests.
         """
         with self._condition:
-            if self._state in {CANCELLED, CANCELLED_AND_NOTIFIED, FINISHED}:
+            if self._state in set([CANCELLED, CANCELLED_AND_NOTIFIED, FINISHED]):
                 raise InvalidStateError('{}: {!r}'.format(self._state, self))
             self._result = result
             self._state = FINISHED
@@ -553,7 +553,7 @@ class Future(object):
         Should only be used by Executor implementations and unit tests.
         """
         with self._condition:
-            if self._state in {CANCELLED, CANCELLED_AND_NOTIFIED, FINISHED}:
+            if self._state in set([CANCELLED, CANCELLED_AND_NOTIFIED, FINISHED]):
                 raise InvalidStateError('{}: {!r}'.format(self._state, self))
             self._exception = exception
             self._state = FINISHED
@@ -602,7 +602,7 @@ class Executor(object):
         if timeout is not None:
             end_time = timeout + time.time()
 
-        fs = [self.submit(fn, *args) for args in zip(*iterables)]
+        fs = [self.submit(fn, *args) for args in _zip(*iterables)]
 
         # Yield must be hidden in closure so that the futures are submitted
         # before the first iterator value is required.

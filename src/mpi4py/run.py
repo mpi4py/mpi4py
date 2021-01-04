@@ -6,7 +6,6 @@ Run Python code (scripts, modules, zip files) using the ``runpy``
 module. In case of an unhandled exception, abort execution of the MPI
 program by calling ``MPI.COMM_WORLD.Abort()``.
 """
-from __future__ import print_function
 
 
 def run_command_line(args=None):
@@ -124,7 +123,7 @@ def main():
     def parse_command_line(args=None):
         # pylint: disable=too-many-branches
 
-        class Options(object):
+        class Options:
             # pylint: disable=too-few-public-methods
             rc_args = {}
             profile = None

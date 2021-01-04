@@ -70,7 +70,7 @@ else:                            # pragma: no cover
 BACKOFF = 0.001
 
 
-class Backoff(object):
+class Backoff:
 
     def __init__(self, seconds=BACKOFF):
         self.tval = 0.0
@@ -113,7 +113,7 @@ except AttributeError:  # pragma: no cover
     atexit.register(join_threads)
 
 
-class Pool(object):
+class Pool:
 
     def __init__(self, executor, manager, *args):
         self.size = None
@@ -397,7 +397,7 @@ def _manager_shared(pool, comm, tag, workers, **options):
     client(comm, tag, workers, queue, options)
 
 
-class SharedPoolCtx(object):
+class SharedPoolCtx:
     # pylint: disable=too-few-public-methods
 
     def __init__(self):
@@ -714,7 +714,7 @@ def import_main(mod_name, mod_path, init_globals, run_name):
         # pylint: disable=too-few-public-methods
         def __init__(self, mod_name):
             # pylint: disable=no-member
-            super(TempModulePatch, self).__init__(mod_name)
+            super().__init__(mod_name)
             assert self.module.__name__ == run_name
             self.module = module
 
