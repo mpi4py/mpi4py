@@ -115,6 +115,7 @@ class TestInfo(unittest.TestCase):
         self.assertEqual(INFO.pop('key'), 'value')
         self.assertEqual(len(INFO), 0)
         self.assertEqual(INFO.pop('key', 'value'), 'value')
+        self.assertRaises(KeyError, INFO.pop, 'key')
         INFO['key1'] = 'value1'
         INFO['key2'] = 'value2'
         self.assertEqual(INFO.pop('key1'), 'value1')
@@ -125,6 +126,7 @@ class TestInfo(unittest.TestCase):
         INFO['key'] = 'value'
         self.assertEqual(INFO.popitem(), ('key', 'value'))
         self.assertEqual(len(INFO), 0)
+        self.assertRaises(KeyError, INFO.popitem)
         INFO['key1'] = 'value1'
         INFO['key2'] = 'value2'
         self.assertEqual(INFO.popitem(), ('key2', 'value2'))

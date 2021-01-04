@@ -227,6 +227,7 @@ cdef class Info:
         if not self: raise KeyError
         cdef object key, value
         cdef int nkeys = self.Get_nkeys()
+        if nkeys == 0: raise KeyError
         key = self.Get_nthkey(nkeys - 1)
         value = self.Get(key)
         self.Delete(key)
