@@ -92,6 +92,7 @@ class MPIPoolExecutor(Executor):
             A `Future` representing the given call.
 
         """
+        # pylint: disable=arguments-differ
         with self._lock:
             if self._broken:
                 raise _lib.BrokenExecutor(self._broken)
@@ -103,7 +104,7 @@ class MPIPoolExecutor(Executor):
             self._pool.push((future, task))
             return future
 
-    def map(self, fn, *iterables, **kwargs):
+    def map(self, fn, *iterables, timeout=None, chunksize=1, unordered=False):
         """Return an iterator equivalent to ``map(fn, *iterables)``.
 
         Args:
@@ -115,8 +116,6 @@ class MPIPoolExecutor(Executor):
                 there is no limit on the wait time.
             chunksize: The size of the chunks the iterable will be broken into
                 before being passed to a worker process.
-
-        Keyword Args:
             unordered: If ``True``, yield results out-of-order, as completed.
 
         Returns:
@@ -130,10 +129,9 @@ class MPIPoolExecutor(Executor):
 
         """
         # pylint: disable=arguments-differ
-        iterable = getattr(itertools, 'izip', zip)(*iterables)
-        return self.starmap(fn, iterable, **kwargs)
+        return self.starmap(fn, zip(*iterables), timeout, chunksize, unordered)
 
-    def starmap(self, fn, iterable, timeout=None, chunksize=1, **kwargs):
+    def starmap(self, fn, iterable, timeout=None, chunksize=1, unordered=False):
         """Return an iterator equivalent to ``itertools.starmap(...)``.
 
         Args:
@@ -144,8 +142,6 @@ class MPIPoolExecutor(Executor):
                 there is no limit on the wait time.
             chunksize: The size of the chunks the iterable will be broken into
                 before being passed to a worker process.
-
-        Keyword Args:
             unordered: If ``True``, yield results out-of-order, as completed.
 
         Returns:
@@ -158,7 +154,7 @@ class MPIPoolExecutor(Executor):
             Exception: If ``fn(*args)`` raises for any values.
 
         """
-        unordered = kwargs.pop('unordered', False)
+        # pylint: disable=too-many-arguments
         if chunksize < 1:
             raise ValueError("chunksize must be >= 1.")
         if chunksize == 1:
@@ -183,6 +179,7 @@ class MPIPoolExecutor(Executor):
                 cancelled.
 
         """
+        # pylint: disable=arguments-differ
         with self._lock:
             if not self._shutdown:
                 self._shutdown = True
@@ -262,7 +259,7 @@ def _starmap_chunks(submit, function, iterable,
     return _chain_from_iterable_of_lists(result)
 
 
-class MPICommExecutor(object):
+class MPICommExecutor:
     """Context manager for `MPIPoolExecutor`.
 
     This context manager splits a MPI (intra)communicator in two

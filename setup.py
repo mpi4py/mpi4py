@@ -466,13 +466,16 @@ def run_setup():
     setup_args = metadata.copy()
     if setuptools:
         setup_args['zip_safe'] = False
+        setup_args['setup_requires'] = []
+    if setuptools and pyver < (3, 0):
+        setup_args['setup_requires'] += ['3to2']
     if setuptools and not os.getenv('CONDA_BUILD'):
         src = os.path.join('src', 'mpi4py.MPI.c')
         has_src = os.path.exists(os.path.join(topdir, src))
         has_git = os.path.isdir(os.path.join(topdir, '.git'))
         has_hg  = os.path.isdir(os.path.join(topdir, '.hg'))
         if not has_src or has_git or has_hg:
-            setup_args['setup_requires'] = ['Cython>='+CYTHON]
+            setup_args['setup_requires'] += ['Cython>='+CYTHON]
     #
     setup(packages     = ['mpi4py', 'mpi4py.futures'],
           package_dir  = {'mpi4py' : 'src/mpi4py'},

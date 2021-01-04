@@ -394,6 +394,7 @@ cmd_install = import_command('install')
 cmd_sdist   = import_command('sdist')
 cmd_clean   = import_command('clean')
 
+cmd_build_py     = import_command('build_py')
 cmd_build_clib   = import_command('build_clib')
 cmd_build_ext    = import_command('build_ext')
 cmd_install_lib  = import_command('install_lib')
@@ -475,7 +476,7 @@ def setup(**attrs):
     cmdclass = attrs['cmdclass']
     for cmd in (config, build, install,
                 test, clean, sdist,
-                build_src, build_clib, build_ext, build_exe,
+                build_py, build_src, build_clib, build_ext, build_exe,
                 install_lib, install_data, install_exe,
                 ):
         if cmd.__name__ not in cmdclass:
@@ -680,6 +681,101 @@ class build_src(Command):
                                    )
     def run(self):
         pass
+
+
+if sys.version_info[0] >= 3:
+
+    build_py = cmd_build_py.build_py
+
+else:
+
+    def get_fixers_3to2():
+        import re
+        import lib3to2
+        try:
+            loader =  lib3to2.__loader__
+            files = loader._files.keys()
+        except AttributeError:
+            from lib3to2.build import refactor
+            return refactor.get_fixers_from_package('lib3to2.fixes')
+        fixers = []
+        pattern = re.compile(r'lib3to2/fixes/(fix_.*)\.py$')
+        for f in files:
+            m = pattern.match(f)
+            if m:
+                fixer = 'lib3to2.fixes.' + m.groups()[0]
+                fixers.append(fixer)
+        return fixers
+
+
+    def run_3to2(files, fixer_names=None, options=None,
+                 explicit=None, unwanted=None):
+        from lib3to2.fixes import fix_imports
+        from lib3to2.build import DistutilsRefactoringTool
+        if not files:
+            return
+        if fixer_names is None:
+            fixer_names = get_fixers_3to2()
+        if unwanted is not None:
+            fixer_names = list(fixer_names)
+            for fixer in unwanted:
+                if fixer in fixer_names:
+                    fixer_names.remove(fixer)
+        r = DistutilsRefactoringTool(
+            fixer_names, options=options, explicit=explicit)
+        try:
+            fix_imports.MAPPING['queue'] = 'queue'
+            r.refactor(files, write=True)
+        finally:
+            fix_imports.MAPPING['queue'] = 'Queue'
+
+
+    class Mixin3to2:
+
+        fixer_names = None
+
+        options = None
+
+        explicit = [
+            'lib3to2.fixes.fix_printfunction',
+        ]
+
+        unwanted  = [
+            'lib3to2.fixes.fix_str',
+            'lib3to2.fixes.fix_with',
+            'lib3to2.fixes.fix_print',
+            'lib3to2.fixes.fix_except',
+            'lib3to2.fixes.fix_absimport',
+        ]
+
+        def run_3to2(self, files):
+            return run_3to2(files, self.fixer_names, self.options,
+                            self.explicit, self.unwanted)
+
+
+    class build_py(cmd_build_py.build_py, Mixin3to2):
+
+        def run(self):
+            self.updated_files = []
+
+            # build_py code
+            if self.py_modules:
+                self.build_modules()
+            if self.packages:
+                self.build_packages()
+                self.build_package_data()
+
+            # 3to2
+            self.run_3to2(self.updated_files)
+
+            # build_py code
+            self.byte_compile(self.get_outputs(include_bytecode=0))
+
+        def build_module(self, module, module_file, package):
+            super_build_module = cmd_build_py.build_py.build_module
+            ret = super_build_module(self, module, module_file, package)
+            if ret[1]: self.updated_files.append(ret[0])
+            return ret
 
 
 # Command class to build libraries

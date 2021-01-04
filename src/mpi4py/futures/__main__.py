@@ -7,7 +7,6 @@ Python code (scripts, modules, zip files) is run in the process with rank 0 in
 other processes team-up in a static-size shared pool of workers executing tasks
 submitted from the master process.
 """
-from __future__ import print_function
 
 
 def main():
