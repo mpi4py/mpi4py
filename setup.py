@@ -58,11 +58,12 @@ Development Status :: 5 - Production/Stable
 Intended Audience :: Developers
 Intended Audience :: Science/Research
 License :: OSI Approved :: BSD License
+Operating System :: MacOS
 Operating System :: MacOS :: MacOS X
 Operating System :: Microsoft :: Windows
 Operating System :: POSIX
+Operating System :: POSIX :: BSD
 Operating System :: POSIX :: Linux
-Operating System :: POSIX :: SunOS/Solaris
 Operating System :: Unix
 Programming Language :: C
 Programming Language :: Cython
@@ -90,10 +91,10 @@ MPI
 """
 
 platforms = """
-Mac OS X
+POSIX
 Linux
-Solaris
-Unix
+macOS
+FreeBSD
 Windows
 """
 
