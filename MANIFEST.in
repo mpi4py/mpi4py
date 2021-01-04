@@ -1,4 +1,4 @@
-include setup*.py *.cfg *.rst
+include setup*.py *.toml *.cfg *.rst
 
 recursive-include demo *.py *.txt *.pyx *.i *.h *.c *.cxx *.f90 *.f08
 recursive-include demo [M,m]akefile  *.sh *.bat python-config
