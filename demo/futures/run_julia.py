@@ -5,11 +5,6 @@ import time
 
 from mpi4py.futures import MPICommExecutor
 
-try:
-    range = xrange
-except NameError:
-    pass
-
 x0 = -2.0
 x1 = +2.0
 y0 = -1.5

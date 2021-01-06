@@ -5,10 +5,6 @@ Compare the speed of primes sequentially vs. using futures.
 import sys
 import time
 import math
-try:
-    range = xrange
-except NameError:
-    range = range
 
 try:
     from concurrent.futures import ThreadPoolExecutor

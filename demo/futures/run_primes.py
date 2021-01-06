@@ -1,9 +1,5 @@
 from __future__ import print_function
 import math
-try:
-    range = xrange
-except NameError:
-    range = range
 
 from mpi4py.futures import MPIPoolExecutor
 
