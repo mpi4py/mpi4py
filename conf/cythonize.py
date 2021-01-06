@@ -26,9 +26,10 @@ def cythonize(source,
             os.chdir(wdir)
         # run Cython on source
         options = CompilationOptions(default_options)
+        if Options.directive_types['language_level'] is str:
+            options.language_level = '3str'
         options.output_file = outputs_c[0]
         options.include_path = list(includes)
-        options.language_level = '3str'
         Options.generate_cleanup_code = 3
         any_failures = 0
         try:

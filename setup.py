@@ -457,7 +457,7 @@ from mpidistutils import Extension  as Ext
 from mpidistutils import Library    as Lib
 from mpidistutils import Executable as Exe
 
-CYTHON = '0.22'
+CYTHON = '0.27'
 
 def run_setup():
     """
@@ -528,6 +528,7 @@ def chk_cython(VERSION):
         warn("*"*80)
         return False
     #
+    log.info("using Cython version %s" % CYTHON_VERSION)
     return True
 
 def run_cython(source, target=None,
