@@ -281,10 +281,17 @@ class ConfigureMPI(object):
         return body
 
     def run_test(self, code, lang='c'):
-        body = self.gen_test(code)
-        headers = ['stdlib.h', 'mpi.h']
-        ok = self.config_cmd.try_link(body, headers=headers, lang=lang)
-        return ok
+        level = log.set_threshold(log.WARN)
+        log.set_threshold(level)
+        if not self.config_cmd.noisy:
+            level = log.set_threshold(log.WARN)
+        try:
+            body = self.gen_test(code)
+            headers = ['stdlib.h', 'mpi.h']
+            ok = self.config_cmd.try_link(body, headers=headers, lang=lang)
+            return ok
+        finally:
+            log.set_threshold(level)
 
     def dump(self, results):
         destdir = self.DESTDIR
