@@ -159,6 +159,7 @@ def main(args=None):
     command(comm, options.args)
     parser.exit()
 
+
 main.commands = {
     'helloworld': helloworld,
     'ringtest': ringtest,
