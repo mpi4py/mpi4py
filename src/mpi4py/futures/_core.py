@@ -22,12 +22,16 @@ try:
     try:  # Python 3.7
         from concurrent.futures import BrokenExecutor
     except ImportError:  # pragma: no cover
-        BrokenExecutor = RuntimeError
+        class BrokenExecutor(RuntimeError):
+            """The executor has become non-functional."""
 
     try:  # Python 3.8
         from concurrent.futures import InvalidStateError
     except ImportError:  # pragma: no cover
-        InvalidStateError = CancelledError.__base__
+        # pylint: disable=too-few-public-methods
+        # pylint: disable=useless-object-inheritance
+        class InvalidStateError(CancelledError.__base__):
+            """The operation is not allowed in this state."""
 
 except ImportError:  # pragma: no cover
 
