@@ -96,14 +96,14 @@ rc.errors = 'exception'
 __import__('sys').modules[__name__ + '.rc'] = rc
 
 
-def profile(name, **kargs):
+def profile(name, *, path=None, logfile=None):
     """Support for the MPI profiling interface.
 
     Parameters
     ----------
     name : str
        Name of the profiler library to load.
-    path : list of str, optional
+    path : sequence of str, optional
        Additional paths to search for the profiler.
     logfile : str, optional
        Filename prefix for dumping profiler output.
@@ -131,7 +131,6 @@ def profile(name, **kargs):
                     return os.path.abspath(filename)
         return None
 
-    logfile = kargs.pop('logfile', None)
     if logfile:
         if name in ('mpe',):
             if 'MPE_LOGFILE_PREFIX' not in os.environ:
@@ -140,8 +139,9 @@ def profile(name, **kargs):
             if 'VT_FILE_PREFIX' not in os.environ:
                 os.environ['VT_FILE_PREFIX'] = logfile
 
-    path = kargs.pop('path', [])
-    if isinstance(path, str):
+    if path is None:
+        path = []
+    elif isinstance(path, str):
         path = [path]
     else:
         path = list(path)
@@ -153,9 +153,8 @@ def profile(name, **kargs):
 
     handle = dlopen(filename, RTLD_NOW | RTLD_GLOBAL)
     if handle:
-        profile.registry.append((name, (handle, filename)))
+        registry = vars(profile).setdefault('registry', [])
+        registry.append((name, (handle, filename)))
     else:
         from warnings import warn
         warn(dlerror())
-
-profile.registry = []

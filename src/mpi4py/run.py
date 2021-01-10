@@ -146,17 +146,14 @@ def main():
                 arg0 = args[0]
                 if arg0.startswith('--'):
                     if '=' in arg0:
-                        i = arg0.index('=')
-                        opt, arg = arg0[1:i], arg0[i+1:]
+                        opt, _, arg = arg0[1:].partition('=')
                         if opt in ('-rc', '-profile'):
                             arg0, args[1:1] = opt, [arg]
                     else:
                         arg0 = arg0[1:]
                 if arg0 == '-rc':
                     for entry in poparg(args).split(','):
-                        i = entry.index('=')
-                        key = entry[:i].strip()
-                        val = entry[i+1:].strip()
+                        key, _, val = entry.partition('=')
                         if not key or not val:
                             raise ValueError(entry)
                         try:
