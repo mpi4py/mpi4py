@@ -131,7 +131,8 @@ class MPIPoolExecutor(Executor):
         # pylint: disable=arguments-differ
         return self.starmap(fn, zip(*iterables), timeout, chunksize, unordered)
 
-    def starmap(self, fn, iterable, timeout=None, chunksize=1, unordered=False):
+    def starmap(self, fn, iterable,
+                timeout=None, chunksize=1, unordered=False):
         """Return an iterator equivalent to ``itertools.starmap(...)``.
 
         Args:
@@ -164,7 +165,7 @@ class MPIPoolExecutor(Executor):
             return _starmap_chunks(self.submit, fn, iterable,
                                    timeout, unordered, chunksize)
 
-    def shutdown(self, wait=True, cancel_futures=False):
+    def shutdown(self, wait=True, *, cancel_futures=False):
         """Clean-up the resources associated with the executor.
 
         It is safe to call this method several times. Otherwise, no other
@@ -179,7 +180,6 @@ class MPIPoolExecutor(Executor):
                 cancelled.
 
         """
-        # pylint: disable=arguments-differ
         with self._lock:
             if not self._shutdown:
                 self._shutdown = True
