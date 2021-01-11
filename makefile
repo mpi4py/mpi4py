@@ -97,14 +97,16 @@ sphinx-info:
 	${MAKE} -C build/texinfo info > /dev/null
 	mv build/texinfo/*.info docs/
 
-EPYDOCBUILD = ${PYTHON} ./conf/epydocify.py
+PYTHON2 = python2
+EPYDOCBUILD = ${PYTHON2} ./conf/epydocify.py
 EPYDOCOPTS  =
 .PHONY: epydoc epydoc-html epydoc-pdf
 epydoc: epydoc-html epydoc-pdf
 epydoc-html:
-	${PYTHON} -c 'import mpi4py.MPI'
 	mkdir -p docs/apiref
-	${EPYDOCBUILD} ${EPYDOCOPTS} --html -o docs/apiref
+	${PYTHON2} -c 'import epydoc, docutils'
+	env CFLAGS=-O0 ${PYTHON2} setup.py -q build --build-lib build/lib.py2 2> /dev/null
+	env PYTHONPATH=$$PWD/build/lib.py2 ${EPYDOCBUILD} ${EPYDOCOPTS} --html -o docs/apiref
 epydoc-pdf:
 
 .PHONY: docsclean
