@@ -32,6 +32,54 @@ __credits__ = 'MPI Forum, MPICH Team, Open MPI Team'
 __all__ = ['MPI']
 
 
+class Rc:
+    """Runtime configuration options.
+
+    Attributes
+    ----------
+    initialize : bool
+        Automatic MPI initialization at import (default: True).
+    threads : bool
+        Request for thread support (default: True).
+    thread_level : {'multiple', 'serialized', 'funneled', 'single'}
+        Level of thread support to request (default: 'multiple').
+    finalize : None or bool
+        Automatic MPI finalization at exit (default: None).
+    fast_reduce : bool
+        Use tree-based reductions for objects (default: True).
+    recv_mprobe : bool
+        Use matched probes to receive objects (default: True).
+    errors : {'exception', 'default', 'fatal'}
+        Error handling policy (default: 'exception').
+
+    """
+
+    initialize = True
+    threads = True
+    thread_level = 'multiple'
+    finalize = None
+    fast_reduce = True
+    recv_mprobe = True
+    errors = 'exception'
+
+    def __init__(self, **kwargs):
+        self(**kwargs)
+
+    def __call__(self, **kwargs):
+        for key in kwargs:
+            if not hasattr(self, key):
+                raise TypeError("unexpected argument '{0}'".format(key))
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+    def __repr__(self):
+        return '<{0}.rc>'.format(__name__)
+
+
+rc = Rc()
+__import__('sys').modules[__name__ + '.rc'] = rc
+
+
 def get_include():
     """Return the directory in the package that contains header files.
 
@@ -57,43 +105,6 @@ def get_config():
     parser = ConfigParser()
     parser.read(join(dirname(__file__), 'mpi.cfg'))
     return dict(parser.items('mpi'))
-
-
-def rc(**kargs):  # pylint: disable=invalid-name
-    """Runtime configuration options.
-
-    Parameters
-    ----------
-    initialize : bool
-        Automatic MPI initialization at import (default: True).
-    threads : bool
-        Request for thread support (default: True).
-    thread_level : {'multiple', 'serialized', 'funneled', 'single'}
-        Level of thread support to request (default: 'multiple').
-    finalize : None or bool
-        Automatic MPI finalization at exit (default: None).
-    fast_reduce : bool
-        Use tree-based reductions for objects (default: True).
-    recv_mprobe : bool
-        Use matched probes to receive objects (default: True).
-    errors : {'exception', 'default', 'fatal'}
-        Error handling policy (default: 'exception').
-
-    """
-    for key in kargs:
-        if not hasattr(rc, key):
-            raise TypeError("unexpected argument '{0}'".format(key))
-    for key, value in kargs.items():
-        setattr(rc, key, value)
-
-rc.initialize = True
-rc.threads = True
-rc.thread_level = 'multiple'
-rc.finalize = None
-rc.fast_reduce = True
-rc.recv_mprobe = True
-rc.errors = 'exception'
-__import__('sys').modules[__name__ + '.rc'] = rc
 
 
 def profile(name, *, path=None, logfile=None):
