@@ -160,7 +160,7 @@ def main(args=None):
     parser.exit()
 
 
-main.commands = {
+main.commands = {  # type: ignore[attr-defined]
     'helloworld': helloworld,
     'ringtest': ringtest,
 }
