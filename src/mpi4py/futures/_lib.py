@@ -31,7 +31,7 @@ def serialized(function):
         with serialized.lock:
             return function(*args, **kwargs)
     return wrapper
-serialized.lock = None
+serialized.lock = None  # type: ignore[attr-defined]
 
 
 def setup_mpi_threads():
@@ -46,8 +46,8 @@ def setup_mpi_threads():
         warnings.warn("The level of thread support in MPI "
                       "should be at least MPI_THREAD_SERIALIZED",
                       RuntimeWarning, 2)
-setup_mpi_threads.lock = threading.Lock()
-setup_mpi_threads.thread_level = None
+setup_mpi_threads.lock = threading.Lock()  # type: ignore[attr-defined]
+setup_mpi_threads.thread_level = None      # type: ignore[attr-defined]
 
 
 # ---
@@ -96,7 +96,7 @@ class Stack(collections.deque):
     pop = collections.deque.pop
 
 
-THREADS_QUEUES = weakref.WeakKeyDictionary()
+THREADS_QUEUES = weakref.WeakKeyDictionary()  # type: weakref.WeakKeyDictionary
 
 
 def join_threads(threads_queues=THREADS_QUEUES):
@@ -108,7 +108,7 @@ def join_threads(threads_queues=THREADS_QUEUES):
 
 
 try:
-    threading._register_atexit(join_threads)
+    threading._register_atexit(join_threads)  # type: ignore[attr-defined]
 except AttributeError:  # pragma: no cover
     atexit.register(join_threads)
 

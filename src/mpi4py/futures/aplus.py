@@ -93,8 +93,8 @@ def _chain_log(new_future, future):
         log.add(future)
 
 
-_chain_log.lock = threading.Lock()
-_chain_log.registry = weakref.WeakKeyDictionary()
+_chain_log.lock = threading.Lock()  # type: ignore[attr-defined]
+_chain_log.registry = weakref.WeakKeyDictionary()  # type: ignore[attr-defined]
 
 
 def _chain_future(new_future, future):
