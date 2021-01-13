@@ -56,9 +56,39 @@ cdef inline int clipcount(MPI_Aint value):
 
 #------------------------------------------------------------------------------
 
-cdef object __BOTTOM__   = <MPI_Aint>MPI_BOTTOM
+@cython.final
+@cython.internal
+cdef class Bottom(int):
+    """
+    Type of `BOTTOM`
+    """
 
-cdef object __IN_PLACE__ = <MPI_Aint>MPI_IN_PLACE
+    def __cinit__(self):
+        cdef MPI_Aint a = self, b = <MPI_Aint>MPI_BOTTOM
+        if a != b : raise ValueError("cannot create instance")
+
+    def __repr__(self):
+        return 'BOTTOM'
+
+
+@cython.final
+@cython.internal
+cdef class InPlace(int):
+    """
+    Type of `IN_PLACE`
+    """
+
+    def __cinit__(self):
+        cdef MPI_Aint a = self, b = <MPI_Aint>MPI_IN_PLACE
+        if a != b : raise ValueError("cannot create instance")
+
+    def __repr__(self):
+        return 'IN_PLACE'
+
+
+cdef object __BOTTOM__   = Bottom(<MPI_Aint>MPI_BOTTOM)
+
+cdef object __IN_PLACE__ = InPlace(<MPI_Aint>MPI_IN_PLACE)
 
 
 cdef inline bint is_BOTTOM(object obj):
