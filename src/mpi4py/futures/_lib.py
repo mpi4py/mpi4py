@@ -40,9 +40,9 @@ def setup_mpi_threads():
         if thread_level is None:
             thread_level = MPI.Query_thread()
             setup_mpi_threads.thread_level = thread_level
-            if thread_level < MPI.THREAD_MULTIPLE:  # pragma: no cover
+            if thread_level < MPI.THREAD_MULTIPLE:
                 serialized.lock = threading.Lock()
-    if thread_level < MPI.THREAD_SERIALIZED:  # pragma: no cover
+    if thread_level < MPI.THREAD_SERIALIZED:
         warnings.warn("The level of thread support in MPI "
                       "should be at least MPI_THREAD_SERIALIZED",
                       RuntimeWarning, 2)
@@ -53,14 +53,17 @@ setup_mpi_threads.thread_level = None      # type: ignore[attr-defined]
 # ---
 
 
-if sys.version_info[0] == 2:     # pragma: no cover
-    def sys_exception():
-        exc = sys.exc_info()[1]
-        return exc
-else:                            # pragma: no cover
+if sys.version_info[0] >= 3:
+
     def sys_exception():
         exc = sys.exc_info()[1]
         exc.__traceback__ = None
+        return exc
+
+else:  # pragma: no cover
+
+    def sys_exception():
+        exc = sys.exc_info()[1]
         return exc
 
 
@@ -149,8 +152,9 @@ class Pool:
     def setup(self, size):
         self.size = size
         self.event.set()
+        return self.queue
 
-    def cancel(self):
+    def cancel(self, handler=None):
         queue = self.queue
         while True:
             try:
@@ -161,13 +165,32 @@ class Pool:
                 queue.put(None)
                 break
             future, _ = item
-            future.cancel()
+            if handler:
+                handler(future)
+            else:
+                future.cancel()
             del item, future
 
+    def broken(self, message):
+        lock = None
+        executor = self.exref()
+        if executor is not None:
+            executor._broken = message
+            if not executor._shutdown:
+                lock = executor._lock
 
-def setup_pool(pool, num_workers):
-    pool.setup(num_workers)
-    return pool.queue
+        def handler(future):
+            if future.set_running_or_notify_cancel():
+                exception = BrokenExecutor(message)
+                future.set_exception(exception)
+
+        if lock:
+            lock.acquire()
+        try:
+            self.cancel(handler)
+        finally:
+            if lock:
+                lock.release()
 
 
 def initialize(options):
@@ -183,47 +206,20 @@ def initialize(options):
     return True
 
 
-def broken(pool, message):
-    lock = None
-    queue = pool.queue
-    executor = pool.exref()
-    if executor is not None:
-        executor._broken = message
-        if not executor._shutdown:
-            lock = executor._lock
-    if lock:
-        lock.acquire()
-    try:
-        while True:
-            try:
-                item = queue.pop()
-            except LookupError:
-                item = None
-            if item is None:
-                queue.put(None)
-                break
-            future, _ = item
-            if future.set_running_or_notify_cancel():
-                future.set_exception(BrokenExecutor(message))
-            del item, future
-    finally:
-        if lock:
-            lock.release()
-
-
 def _manager_thread(pool, **options):
     size = options.pop('max_workers', 1)
-    queue = setup_pool(pool, size)
+    queue = pool.setup(size)
 
     def init():
         if not initialize(options):
-            broken(pool, "initializer failed")
+            pool.broken("initializer failed")
             return False
         return True
 
     def worker():
         backoff = Backoff(options.get('backoff', BACKOFF))
         if not init():
+            queue.put(None)
             return
         while True:
             try:
@@ -259,11 +255,11 @@ def _manager_thread(pool, **options):
 def _manager_comm(pool, comm, **options):
     size = comm.Get_remote_size()
     workers = Stack(reversed(range(size)))
-    queue = setup_pool(pool, size)
+    queue = pool.setup(size)
     if not client_init(comm, options):
-        broken(pool, "initializer failed")
+        pool.broken("initializer failed")
         return
-    client(comm, 0, workers, queue, options)
+    client_exec(comm, 0, workers, queue, options)
 
 
 def _manager_spawn(pool, **options):
@@ -352,6 +348,7 @@ def comm_split(comm, root=0):
 
 def _manager_split(pool, comm, root, **options):
     comm = serialized(comm_split)(comm, root)
+    serialized(client_push)(comm, options)
     _manager_comm(pool, comm, **options)
     serialized(client_close)(comm)
 
@@ -361,10 +358,11 @@ def SplitPool(executor, comm, root):
     return Pool(executor, _manager_split, comm, root)
 
 
-def server_main_split(comm, root, **options):
+def server_main_split(comm, root):
     comm = comm_split(comm, root)
+    options = server_pull(comm)
     server_init(comm)
-    server(comm, options)
+    server_exec(comm, options)
     server_close(comm)
 
 
@@ -385,16 +383,16 @@ def _manager_shared(pool, comm, tag, workers, **options):
     if tag == 0:
         serialized(client_sync)(comm, options)
     size = comm.Get_remote_size()
-    queue = setup_pool(pool, size)
+    queue = pool.setup(size)
     if tag == 0:
         if not client_init(comm, options):
-            broken(pool, "initializer failed")
+            pool.broken("initializer failed")
             return
     if tag >= 1:
         if options.get('initializer') is not None:
-            broken(pool, "cannot run initializer")
+            pool.broken("cannot run initializer")
             return
-    client(comm, tag, workers, queue, options)
+    client_exec(comm, tag, workers, queue, options)
 
 
 class SharedPoolCtx:
@@ -445,7 +443,7 @@ class SharedPoolCtx:
             else:
                 options = server_sync(self.comm)
                 server_init(self.comm)
-                server(self.comm, options)
+                server_exec(self.comm, options)
                 server_close(self.comm)
         if not self.on_root:
             join_threads(self.threads)
@@ -514,7 +512,7 @@ def client_init(comm, options):
     return success
 
 
-def client(comm, tag, worker_pool, task_queue, options):
+def client_exec(comm, tag, worker_pool, task_queue, options):
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-statements
     assert comm.Is_inter()
@@ -638,7 +636,7 @@ def server_init(comm):
     return success
 
 
-def server(comm, options):
+def server_exec(comm, options):
     assert comm.Is_inter()
     assert comm.Get_remote_size() == 1
 
@@ -701,6 +699,9 @@ def server_close(comm):
 # ---
 
 
+MAIN_RUN_NAME = '__worker__'
+
+
 def import_main(mod_name, mod_path, init_globals, run_name):
     import types
     import runpy
@@ -735,9 +736,6 @@ def import_main(mod_name, mod_path, init_globals, run_name):
     finally:
         del import_main.sentinel
         runpy._TempModule = TempModule
-
-
-MAIN_RUN_NAME = '__worker__'
 
 
 def _sync_get_data(options):
@@ -781,7 +779,7 @@ def _sync_set_data(data):
 # ---
 
 
-def check_recursive_spawn():  # pragma: no cover
+def _check_recursive_spawn():  # pragma: no cover
     if not hasattr(import_main, 'sentinel'):
         return
     main_name, main_path = import_main.sentinel
@@ -822,6 +820,8 @@ FLAG_OPT_MAP = {
     'verbose': 'v',
     'quiet': 'q',
     'bytes_warning': 'b',
+    # 'dev_mode': 'Xdev',
+    # 'utf8_mode': 'Xutf8',
     # Python 2
     'division_warning': 'Qwarn',
     'division_new': 'Qnew',
@@ -863,7 +863,7 @@ def client_spawn(python_exe=None,
                  python_args=None,
                  max_workers=None,
                  mpi_info=None):
-    check_recursive_spawn()
+    _check_recursive_spawn()
     if python_exe is None:
         python_exe = sys.executable
     if python_args is None:
@@ -1004,7 +1004,7 @@ def server_main_comm(comm):
     assert comm != MPI.COMM_NULL
     options = server_sync(comm)
     server_init(comm)
-    server(comm, options)
+    server_exec(comm, options)
     server_close(comm)
 
 

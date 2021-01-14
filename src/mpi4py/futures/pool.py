@@ -324,7 +324,7 @@ class MPICommExecutor:
             executor = MPIPoolExecutor(**options)
             executor._pool = _lib.SplitPool(executor, comm, root)
         else:
-            _lib.server_main_split(comm, root, **options)
+            _lib.server_main_split(comm, root)
 
         self._executor = executor
         return executor
