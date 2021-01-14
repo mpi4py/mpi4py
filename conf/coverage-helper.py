@@ -22,6 +22,7 @@ def test_mpi4py_rc():
     try: mpi4py.rc(qwerty=False)
     except TypeError: pass
     else: raise RuntimeError
+    repr(mpi4py.rc)
 
 test_mpi4py_rc()
 
