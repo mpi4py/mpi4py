@@ -1438,7 +1438,7 @@ class install_exe(cmd_install_lib.install_lib):
                 if (os.name == "posix" and
                     exe_filename.startswith("python-")):
                     install_name = exe_filename.replace(
-                        "python-","python%s-" % sys.version[:3])
+                        "python-", "python%s.%s-" % sys.version_info[:2])
                     link = None
                 else:
                     install_name = exe_fullpath
