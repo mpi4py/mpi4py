@@ -1,5 +1,4 @@
 #!/bin/bash
-export PATH=/opt/rh/devtoolset-2/root/usr/bin:$PATH
 export ANACONDA=/opt/conda
 export HYDRA_LAUNCHER=fork
 export OMPI_MCA_plm=isolated

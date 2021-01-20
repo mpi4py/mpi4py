@@ -8,7 +8,7 @@ jobs:
         - ci/all
         - ci/circle
     docker:
-      - image: condaforge/linux-anvil
+      - image: condaforge/linux-anvil-comp7
     steps:
       - checkout
       - run: .circleci/test-package python=2.7 MPI=mpich
