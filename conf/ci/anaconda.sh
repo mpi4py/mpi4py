@@ -20,6 +20,8 @@ test-package() {
     case $arg in
       python=?*)
         PY="${arg#*=}";;
+      py=?*)
+        PY="${arg#*=}";;
       MPI=?*)
         MPI="${arg#*=}";;
       coverage=?*)
