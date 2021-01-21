@@ -859,6 +859,10 @@ def get_max_workers():
     return 1
 
 
+def get_spawn_module():
+    return __package__ + '.server'
+
+
 def client_spawn(python_exe=None,
                  python_args=None,
                  max_workers=None,
@@ -874,7 +878,7 @@ def client_spawn(python_exe=None,
         mpi_info = dict(soft='1:{}'.format(max_workers))
 
     args = get_python_flags() + list(python_args)
-    args.extend(['-m', __package__ + '.server'])
+    args.extend(['-m', get_spawn_module()])
     info = MPI.Info.Create()
     info.update(mpi_info)
     comm = MPI.COMM_SELF.Spawn(python_exe, args, max_workers, info)
