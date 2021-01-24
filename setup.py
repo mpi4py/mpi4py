@@ -477,16 +477,25 @@ def run_setup():
         if not has_src or has_git or has_hg:
             setup_args['setup_requires'] += ['Cython>='+CYTHON]
     #
-    setup(packages     = ['mpi4py', 'mpi4py.futures'],
-          package_dir  = {'mpi4py' : 'src/mpi4py'},
-          package_data = {'mpi4py' : ['*.pxd',
-                                      'include/mpi4py/*.h',
-                                      'include/mpi4py/*.i',
-                                      'include/mpi4py/*.pxi',]},
-          ext_modules  = [Ext(**ext) for ext in ext_modules()],
-          libraries    = [Lib(**lib) for lib in libraries()  ],
-          executables  = [Exe(**exe) for exe in executables()],
-          **setup_args)
+    setup(
+        packages = [
+            'mpi4py',
+            'mpi4py.futures',
+        ],
+        package_data = {
+            'mpi4py' : [
+                '*.pxd',
+                'include/mpi4py/*.h',
+                'include/mpi4py/*.i',
+                'include/mpi4py/*.pxi',
+            ],
+        },
+        package_dir = {'' : 'src'},
+        ext_modules = [Ext(**ext) for ext in ext_modules()],
+        executables = [Exe(**exe) for exe in executables()],
+        libraries   = [Lib(**lib) for lib in libraries()  ],
+        **setup_args
+    )
 
 def chk_cython(VERSION):
     from distutils import log
