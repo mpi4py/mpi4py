@@ -30,7 +30,7 @@ cdef class Win:
     Window
     """
 
-    def __cinit__(self, Win win=None):
+    def __cinit__(self, Win win: Optional[Win] = None):
         self.ob_mpi = MPI_WIN_NULL
         if win is None: return
         self.ob_mpi =  win.ob_mpi
@@ -49,15 +49,20 @@ cdef class Win:
         cdef cls = type(self).__name__
         raise TypeError("unorderable type: '%s.%s'" % (mod, cls))
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return self.ob_mpi != MPI_WIN_NULL
 
     # Window Creation
     # ---------------
 
     @classmethod
-    def Create(cls, memory, int disp_unit=1,
-               Info info=INFO_NULL, Intracomm comm=COMM_SELF):
+    def Create(
+        cls,
+        memory: Union[Buffer, Bottom, None],
+        int disp_unit: int = 1,
+        Info info: Info = INFO_NULL,
+        Intracomm comm: Intracomm = COMM_SELF,
+    ) -> Win:
         """
         Create an window object for one-sided communication
         """
@@ -77,8 +82,13 @@ cdef class Win:
         return win
 
     @classmethod
-    def Allocate(cls, Aint size, int disp_unit=1,
-                 Info info=INFO_NULL, Intracomm comm=COMM_SELF):
+    def Allocate(
+        cls,
+        Aint size: int,
+        int disp_unit: int = 1,
+        Info info: Info = INFO_NULL,
+        Intracomm comm: Intracomm = COMM_SELF,
+    ) -> Win:
         """
         Create an window object for one-sided communication
         """
@@ -91,8 +101,13 @@ cdef class Win:
         return win
 
     @classmethod
-    def Allocate_shared(cls, Aint size, int disp_unit=1,
-                        Info info=INFO_NULL, Intracomm comm=COMM_SELF):
+    def Allocate_shared(
+        cls,
+        Aint size: int,
+        int disp_unit: int = 1,
+        Info info: Info = INFO_NULL,
+        Intracomm comm: Intracomm = COMM_SELF,
+        ) -> Win:
         """
         Create an window object for one-sided communication
         """
@@ -104,7 +119,7 @@ cdef class Win:
         win_set_eh(win.ob_mpi)
         return win
 
-    def Shared_query(self, int rank):
+    def Shared_query(self, int rank: int) -> Tuple[memory, int]:
         """
         Query the process-local address
         for remote memory segments
@@ -119,7 +134,11 @@ cdef class Win:
         return (asbuffer(self, base, size, 0), disp_unit)
 
     @classmethod
-    def Create_dynamic(cls, Info info=INFO_NULL, Intracomm comm=COMM_SELF):
+    def Create_dynamic(
+        cls,
+        Info info: Info = INFO_NULL,
+        Intracomm comm: Intracomm = COMM_SELF,
+    ) -> Win:
         """
         Create an window object for one-sided communication
         """
@@ -130,7 +149,7 @@ cdef class Win:
         win.ob_mem = {}
         return win
 
-    def Attach(self, memory):
+    def Attach(self, memory: Buffer) -> None:
         """
         Attach a local memory region
         """
@@ -141,7 +160,7 @@ cdef class Win:
         try: (<dict>self.ob_mem)[<MPI_Aint>base] = memory
         except: pass
 
-    def Detach(self, memory):
+    def Detach(self, memory: Buffer) -> None:
         """
         Detach a local memory region
         """
@@ -151,7 +170,7 @@ cdef class Win:
         try: del (<dict>self.ob_mem)[<MPI_Aint>base]
         except: pass
 
-    def Free(self):
+    def Free(self) -> None:
         """
         Free a window
         """
@@ -161,14 +180,14 @@ cdef class Win:
     # Window Info
     # -----------
 
-    def Set_info(self, Info info):
+    def Set_info(self, Info info: Info) -> None:
         """
         Set new values for the hints
         associated with a window
         """
         with nogil: CHKERR( MPI_Win_set_info(self.ob_mpi, info.ob_mpi) )
 
-    def Get_info(self):
+    def Get_info(self) -> Info:
         """
         Return the hints for a windows
         that are currently in use
@@ -179,15 +198,15 @@ cdef class Win:
 
     property info:
         """window info"""
-        def __get__(self):
+        def __get__(self) -> Info:
             return self.Get_info()
-        def __set__(self, info):
-            self.Set_info(info)
+        def __set__(self, value: Info):
+            self.Set_info(value)
 
     # Window Group
     # -------------
 
-    def Get_group(self):
+    def Get_group(self) -> Group:
         """
         Return a duplicate of the group of the
         communicator used to create the window
@@ -198,13 +217,13 @@ cdef class Win:
 
     property group:
         """window group"""
-        def __get__(self):
+        def __get__(self) -> Group:
             return self.Get_group()
 
     # Window Attributes
     # -----------------
 
-    def Get_attr(self, int keyval):
+    def Get_attr(self, int keyval: int) -> Optional[Union[int, Any]]:
         """
         Retrieve attribute value by key
         """
@@ -228,20 +247,25 @@ cdef class Win:
         # user-defined attribute keyval
         return PyMPI_attr_get(self.ob_mpi, keyval, attrval)
 
-    def Set_attr(self, int keyval, object attrval):
+    def Set_attr(self, int keyval: int, attrval: Any) -> None:
         """
         Store attribute value associated with a key
         """
         PyMPI_attr_set(self.ob_mpi, keyval, attrval)
 
-    def Delete_attr(self, int keyval):
+    def Delete_attr(self, int keyval: int) -> None:
         """
         Delete attribute value associated with a key
         """
         CHKERR( MPI_Win_delete_attr(self.ob_mpi, keyval) )
 
     @classmethod
-    def Create_keyval(cls, copy_fn=None, delete_fn=None, nopython=False):
+    def Create_keyval(
+        cls,
+        copy_fn: Optional[Callable[[Win, int, Any], Any]] = None,
+        delete_fn: Optional[Callable[[Win, int, Any], None]] = None,
+        nopython: bool = False,
+    ) -> int:
         """
         Create a new attribute key for windows
         """
@@ -255,7 +279,7 @@ cdef class Win:
         return keyval
 
     @classmethod
-    def Free_keyval(cls, int keyval):
+    def Free_keyval(cls, int keyval: int) -> int:
         """
         Free and attribute key for windows
         """
@@ -267,7 +291,7 @@ cdef class Win:
 
     property attrs:
         "window attributes"
-        def __get__(self):
+        def __get__(self) -> Tuple[int, int, int]:
             cdef void *base = NULL
             cdef MPI_Aint size = 0
             cdef int disp_unit = 1
@@ -278,7 +302,7 @@ cdef class Win:
 
     property flavor:
         """window create flavor"""
-        def __get__(self):
+        def __get__(self) -> int:
             cdef int keyval = MPI_WIN_CREATE_FLAVOR
             cdef int *attrval = NULL
             cdef int flag = 0
@@ -290,7 +314,7 @@ cdef class Win:
 
     property model:
         """window memory model"""
-        def __get__(self):
+        def __get__(self) -> int:
             cdef int keyval = MPI_WIN_MODEL
             cdef int *attrval = NULL
             cdef int flag = 0
@@ -300,7 +324,7 @@ cdef class Win:
                 if flag and attrval != NULL: return attrval[0]
             return MPI_WIN_SEPARATE
 
-    def tomemory(self):
+    def tomemory(self) -> memory:
         """
         Return window memory buffer
         """
@@ -344,7 +368,12 @@ cdef class Win:
     # Communication Operations
     # ------------------------
 
-    def Put(self, origin, int target_rank, target=None):
+    def Put(
+        self,
+        origin: BufSpec,
+        int target_rank: int,
+        target: Optional[TargetSpec] = None,
+    ) -> None:
         """
         Put data into a memory window on a remote process.
         """
@@ -356,7 +385,12 @@ cdef class Win:
             msg.tdisp, msg.tcount, msg.ttype,
             self.ob_mpi) )
 
-    def Get(self, origin, int target_rank, target=None):
+    def Get(
+        self,
+        origin: BufSpec,
+        int target_rank: int,
+        target: Optional[TargetSpec] = None,
+    ) -> None:
         """
         Get data from a memory window on a remote process.
         """
@@ -368,8 +402,13 @@ cdef class Win:
             msg.tdisp, msg.tcount, msg.ttype,
             self.ob_mpi) )
 
-    def Accumulate(self, origin, int target_rank,
-                   target=None, Op op=SUM):
+    def Accumulate(
+        self,
+        origin: BufSpec,
+        int target_rank: int,
+        target: Optional[TargetSpec] = None,
+        Op op: Op = SUM,
+    ) -> None:
         """
         Accumulate data into the target process
         """
@@ -381,8 +420,14 @@ cdef class Win:
             msg.tdisp, msg.tcount, msg.ttype,
             op.ob_mpi, self.ob_mpi) )
 
-    def Get_accumulate(self, origin, result, int target_rank,
-                       target=None, Op op=SUM):
+    def Get_accumulate(
+        self,
+        origin: BufSpec,
+        result: BufSpec,
+        int target_rank: int,
+        target: Optional[TargetSpec] = None,
+        Op op: Op = SUM,
+    ) -> None:
         """
         Fetch-and-accumulate data into the target process
         """
@@ -395,8 +440,14 @@ cdef class Win:
             msg.tdisp, msg.tcount, msg.ttype,
             op.ob_mpi, self.ob_mpi) )
 
-    def Fetch_and_op(self, origin, result,int target_rank,
-                     Aint target_disp=0, Op op=SUM):
+    def Fetch_and_op(
+        self,
+        origin: BufSpec,
+        result: BufSpec,
+        int target_rank: int,
+        Aint target_disp: int = 0,
+        Op op: Op = SUM,
+    ) -> None:
         """
         Perform one-sided read-modify-write
         """
@@ -407,8 +458,14 @@ cdef class Win:
                 target_rank, target_disp,
                 op.ob_mpi, self.ob_mpi) )
 
-    def Compare_and_swap(self, origin, compare, result,
-                         int target_rank, Aint target_disp=0):
+    def Compare_and_swap(
+        self,
+        origin: BufSpec,
+        compare: BufSpec,
+        result: BufSpec,
+        int target_rank: int,
+        Aint target_disp: int = 0,
+    ) -> None:
         """
         Perform one-sided atomic compare-and-swap
         """
@@ -421,7 +478,12 @@ cdef class Win:
     # Request-based RMA Communication Operations
     # ------------------------------------------
 
-    def Rput(self, origin, int target_rank, target=None):
+    def Rput(
+        self,
+        origin: BufSpec,
+        int target_rank: int,
+        target: Optional[TargetSpec] = None,
+    ) -> Request:
         """
         Put data into a memory window on a remote process.
         """
@@ -436,7 +498,12 @@ cdef class Win:
         request.ob_buf = msg
         return request
 
-    def Rget(self, origin, int target_rank, target=None):
+    def Rget(
+        self,
+        origin: BufSpec,
+        int target_rank: int,
+        target: Optional[TargetSpec] = None,
+    ) -> Request:
         """
         Get data from a memory window on a remote process.
         """
@@ -451,8 +518,13 @@ cdef class Win:
         request.ob_buf = msg
         return request
 
-    def Raccumulate(self, origin, int target_rank,
-                   target=None, Op op=SUM):
+    def Raccumulate(
+        self,
+        origin: BufSpec,
+        int target_rank: int,
+        target: Optional[TargetSpec] = None,
+        Op op: Op = SUM,
+    ) -> Request:
         """
         Fetch-and-accumulate data into the target process
         """
@@ -467,8 +539,14 @@ cdef class Win:
         request.ob_buf = msg
         return request
 
-    def Rget_accumulate(self, origin, result, int target_rank,
-                        target=None, Op op=SUM):
+    def Rget_accumulate(
+        self,
+        origin: BufSpec,
+        result: BufSpec,
+        int target_rank: int,
+        target: Optional[TargetSpec] = None,
+        Op op: Op = SUM,
+    ) -> Request:
         """
         Accumulate data into the target process
         using remote memory access.
@@ -491,7 +569,7 @@ cdef class Win:
     # Fence
     # -----
 
-    def Fence(self, int assertion=0):
+    def Fence(self, int assertion: int = 0) -> None:
         """
         Perform an MPI fence synchronization on a window
         """
@@ -500,33 +578,34 @@ cdef class Win:
     # General Active Target Synchronization
     # -------------------------------------
 
-    def Start(self, Group group, int assertion=0):
+    def Start(self, Group group: Group, int assertion: int = 0) -> None:
         """
         Start an RMA access epoch for MPI
         """
         with nogil: CHKERR( MPI_Win_start(
             group.ob_mpi, assertion, self.ob_mpi) )
 
-    def Complete(self):
+    def Complete(self) -> None:
         """
         Completes an RMA operations begun after an `Win.Start()`
         """
         with nogil: CHKERR( MPI_Win_complete(self.ob_mpi) )
 
-    def Post(self, Group group, int assertion=0):
+    def Post(self, Group group: Group, int assertion: int = 0) -> None:
         """
         Start an RMA exposure epoch
         """
         with nogil: CHKERR( MPI_Win_post(
             group.ob_mpi, assertion, self.ob_mpi) )
 
-    def Wait(self):
+    def Wait(self) -> Literal[True]:
         """
         Complete an RMA exposure epoch begun with `Win.Post()`
         """
         with nogil: CHKERR( MPI_Win_wait(self.ob_mpi) )
+        return True
 
-    def Test(self):
+    def Test(self) -> bool:
         """
         Test whether an RMA exposure epoch has completed
         """
@@ -537,26 +616,31 @@ cdef class Win:
     # Lock
     # ----
 
-    def Lock(self, int rank, int lock_type=LOCK_EXCLUSIVE, int assertion=0):
+    def Lock(
+        self,
+        int rank: int,
+        int lock_type: int = LOCK_EXCLUSIVE,
+        int assertion: int = 0,
+    ) -> None:
         """
         Begin an RMA access epoch at the target process
         """
         with nogil: CHKERR( MPI_Win_lock(
             lock_type, rank, assertion, self.ob_mpi) )
 
-    def Unlock(self, int rank):
+    def Unlock(self, int rank: int) -> None:
         """
         Complete an RMA access epoch at the target process
         """
         with nogil: CHKERR( MPI_Win_unlock(rank, self.ob_mpi) )
 
-    def Lock_all(self, int assertion=0):
+    def Lock_all(self, int assertion: int = 0) -> None:
         """
         Begin an RMA access epoch at all processes
         """
         with nogil: CHKERR( MPI_Win_lock_all(assertion, self.ob_mpi) )
 
-    def Unlock_all(self):
+    def Unlock_all(self) -> None:
         """
         Complete an RMA access epoch at all processes
         """
@@ -565,31 +649,31 @@ cdef class Win:
     # Flush and Sync
     # --------------
 
-    def Flush(self, int rank):
+    def Flush(self, int rank: int) -> None:
         """
         Complete all outstanding RMA operations at the given target
         """
         with nogil: CHKERR( MPI_Win_flush(rank, self.ob_mpi) )
 
-    def Flush_all(self):
+    def Flush_all(self) -> None:
         """
         Complete  all  outstanding RMA operations at all targets
         """
         with nogil: CHKERR( MPI_Win_flush_all(self.ob_mpi) )
 
-    def Flush_local(self, int rank):
+    def Flush_local(self, int rank: int) -> None:
         """
         Complete locally all outstanding RMA operations at the given target
         """
         with nogil: CHKERR( MPI_Win_flush_local(rank, self.ob_mpi) )
 
-    def Flush_local_all(self):
+    def Flush_local_all(self) -> None:
         """
         Complete locally all outstanding RMA opera- tions at all targets
         """
         with nogil: CHKERR( MPI_Win_flush_local_all(self.ob_mpi) )
 
-    def Sync(self):
+    def Sync(self) -> None:
         """
         Synchronize public and private copies of the given window
         """
@@ -599,7 +683,7 @@ cdef class Win:
     # Error Handling
     # --------------
 
-    def Get_errhandler(self):
+    def Get_errhandler(self) -> Errhandler:
         """
         Get the error handler for a window
         """
@@ -607,13 +691,13 @@ cdef class Win:
         CHKERR( MPI_Win_get_errhandler(self.ob_mpi, &errhandler.ob_mpi) )
         return errhandler
 
-    def Set_errhandler(self, Errhandler errhandler):
+    def Set_errhandler(self, Errhandler errhandler: Errhandler) -> None:
         """
         Set the error handler for a window
         """
         CHKERR( MPI_Win_set_errhandler(self.ob_mpi, errhandler.ob_mpi) )
 
-    def Call_errhandler(self, int errorcode):
+    def Call_errhandler(self, int errorcode: int) -> None:
         """
         Call the error handler installed on a window
         """
@@ -623,7 +707,7 @@ cdef class Win:
     # Naming Objects
     # --------------
 
-    def Get_name(self):
+    def Get_name(self) -> str:
         """
         Get the print name associated with the window
         """
@@ -632,7 +716,7 @@ cdef class Win:
         CHKERR( MPI_Win_get_name(self.ob_mpi, name, &nlen) )
         return tompistr(name, nlen)
 
-    def Set_name(self, name):
+    def Set_name(self, name: str) -> None:
         """
         Set the print name associated with the window
         """
@@ -642,21 +726,21 @@ cdef class Win:
 
     property name:
         """window name"""
-        def __get__(self):
+        def __get__(self) -> str:
             return self.Get_name()
-        def __set__(self, value):
+        def __set__(self, value: str):
             self.Set_name(value)
 
     # Fortran Handle
     # --------------
 
-    def py2f(self):
+    def py2f(self) -> int:
         """
         """
         return MPI_Win_c2f(self.ob_mpi)
 
     @classmethod
-    def f2py(cls, arg):
+    def f2py(cls, arg: int) -> Win:
         """
         """
         cdef Win win = Win.__new__(Win)

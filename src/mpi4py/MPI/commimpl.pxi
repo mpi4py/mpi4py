@@ -85,17 +85,17 @@ cdef inline int comm_neighbors_count(MPI_Comm comm,
 
 # -----------------------------------------------------------------------------
 
-cdef object allocate_lock = None
+cdef object Lock = None
 if PY3:
     try:
-        from _thread import allocate_lock
+        from _thread import allocate_lock as Lock
     except ImportError:
-        from _dummy_thread import allocate_lock
+        from _dummy_thread import allocate_lock as Lock
 else:
     try:
-        from thread  import allocate_lock
+        from thread  import allocate_lock as Lock
     except ImportError:
-        from dummy_thread import allocate_lock
+        from dummy_thread import allocate_lock as Lock
 
 cdef int  lock_keyval   = MPI_KEYVAL_INVALID
 cdef dict lock_registry = {}
@@ -141,15 +141,15 @@ cdef inline object PyMPI_Lock(MPI_Comm comm, object key):
     try:
         lock = table[key]
     except KeyError:
-        lock = table[key] = allocate_lock()
+        lock = table[key] = Lock()
     return lock
 
 
-def _comm_lock(Comm comm, object key=None):
+def _comm_lock(Comm comm: Comm, object key: Hashable = None) -> Lock:
     "Create/get communicator lock"
     return PyMPI_Lock(comm.ob_mpi, key)
 
-def _comm_lock_table(Comm comm):
+def _comm_lock_table(Comm comm: Comm) -> Dict[Hashable, Lock]:
     "Internal communicator lock table"
     return PyMPI_Lock_table(comm.ob_mpi)
 

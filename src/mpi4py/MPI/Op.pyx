@@ -4,7 +4,7 @@ cdef class Op:
     Op
     """
 
-    def __cinit__(self, Op op=None):
+    def __cinit__(self, Op op: Optional[Op] = None):
         self.ob_mpi = MPI_OP_NULL
         if op is None: return
         self.ob_mpi = op.ob_mpi
@@ -25,17 +25,21 @@ cdef class Op:
         cdef cls = type(self).__name__
         raise TypeError("unorderable type: '%s.%s'" % (mod, cls))
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return self.ob_mpi != MPI_OP_NULL
 
-    def __call__(self, x, y):
+    def __call__(self, x: Any, y: Any) -> Any:
         if self.ob_func != NULL:
             return self.ob_func(x, y)
         else:
             return op_user_py(self.ob_usrid, x, y, None)
 
     @classmethod
-    def Create(cls, function, bint commute=False):
+    def Create(
+        cls,
+        function: Callable[[Buffer, Buffer, Datatype], None],
+        bint commute: bool = False,
+    ) -> Op:
         """
         Create a user-defined operation
         """
@@ -45,7 +49,7 @@ cdef class Op:
         CHKERR( MPI_Op_create(cfunction, commute, &op.ob_mpi) )
         return op
 
-    def Free(self):
+    def Free(self) -> None:
         """
         Free the operation
         """
@@ -69,7 +73,7 @@ cdef class Op:
     # Process-local reduction
     # -----------------------
 
-    def Is_commutative(self):
+    def Is_commutative(self) -> bool:
         """
         Query reduction operations for their commutativity
         """
@@ -79,10 +83,10 @@ cdef class Op:
 
     property is_commutative:
         """is commutative"""
-        def __get__(self):
+        def __get__(self) -> bool:
             return self.Is_commutative()
 
-    def Reduce_local(self, inbuf, inoutbuf):
+    def Reduce_local(self, inbuf: BufSpec, inoutbuf: BufSpec) -> None:
         """
         Apply a reduction operator to local data
         """
@@ -102,7 +106,7 @@ cdef class Op:
 
     property is_predefined:
         """is a predefined operation"""
-        def __get__(self):
+        def __get__(self) -> bool:
             cdef MPI_Op op = self.ob_mpi
             return (op == MPI_OP_NULL or
                     op == MPI_MAX or
@@ -123,13 +127,13 @@ cdef class Op:
     # Fortran Handle
     # --------------
 
-    def py2f(self):
+    def py2f(self) -> int:
         """
         """
         return MPI_Op_c2f(self.ob_mpi)
 
     @classmethod
-    def f2py(cls, arg):
+    def f2py(cls, arg: int) -> Op:
         """
         """
         cdef Op op = Op.__new__(Op)

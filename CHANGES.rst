@@ -20,6 +20,9 @@ Release 3.1.0 [2020-XX-XX]
 
   + `mpi4py.futures`: Add support for initializers and canceling futures at shutdown.
 
+  + Add type annotations to Cython code. The first line of the docstring of functions
+    and methods displays a signature including type annotations.
+
 .. _link: http://numba.pydata.org/numba-doc/latest/cuda/cuda_array_interface.html
 
 

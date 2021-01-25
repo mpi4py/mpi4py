@@ -5,6 +5,7 @@ Message Passing Interface
 from mpi4py.libmpi cimport *
 
 include "stdlib.pxi"
+include "typing.pxi"
 include "atimport.pxi"
 
 bootstrap()
@@ -71,14 +72,14 @@ WIN_MODEL         = MPI_WIN_MODEL
 
 
 include "Exception.pyx"
-include "Errhandler.pyx"
 include "Datatype.pyx"
 include "Status.pyx"
 include "Request.pyx"
 include "Message.pyx"
-include "Info.pyx"
 include "Op.pyx"
 include "Group.pyx"
+include "Info.pyx"
+include "Errhandler.pyx"
 include "Comm.pyx"
 include "Win.pyx"
 include "File.pyx"
@@ -87,7 +88,7 @@ include "File.pyx"
 # Memory Allocation
 # -----------------
 
-def Alloc_mem(Aint size, Info info=INFO_NULL):
+def Alloc_mem(Aint size: int, Info info: Info = INFO_NULL) -> memory:
     """
     Allocate memory for message passing and RMA
     """
@@ -95,7 +96,7 @@ def Alloc_mem(Aint size, Info info=INFO_NULL):
     CHKERR( MPI_Alloc_mem(size, info.ob_mpi, &base) )
     return tomemory(base, size)
 
-def Free_mem(mem):
+def Free_mem(mem: memory) -> None:
     """
     Free memory allocated with `Alloc_mem()`
     """
@@ -107,14 +108,14 @@ def Free_mem(mem):
 # Initialization and Exit
 # -----------------------
 
-def Init():
+def Init() -> None:
     """
     Initialize the MPI execution environment
     """
     CHKERR( MPI_Init(NULL, NULL) )
     initialize()
 
-def Finalize():
+def Finalize() -> None:
     """
     Terminate the MPI execution environment
     """
@@ -136,7 +137,7 @@ THREAD_SERIALIZED = MPI_THREAD_SERIALIZED
 THREAD_MULTIPLE   = MPI_THREAD_MULTIPLE
 #: Multiple threads may call MPI
 
-def Init_thread(int required=THREAD_MULTIPLE):
+def Init_thread(int required: int = THREAD_MULTIPLE) -> int:
     """
     Initialize the MPI execution environment
     """
@@ -145,7 +146,7 @@ def Init_thread(int required=THREAD_MULTIPLE):
     initialize()
     return provided
 
-def Query_thread():
+def Query_thread() -> int:
     """
     Return the level of thread support
     provided by the MPI library
@@ -154,7 +155,7 @@ def Query_thread():
     CHKERR( MPI_Query_thread(&provided) )
     return provided
 
-def Is_thread_main():
+def Is_thread_main() -> bool:
     """
     Indicate whether this thread called
     ``Init`` or ``Init_thread``
@@ -163,7 +164,7 @@ def Is_thread_main():
     CHKERR( MPI_Is_thread_main(&flag) )
     return <bint>flag
 
-def Is_initialized():
+def Is_initialized() -> bool:
     """
     Indicates whether ``Init`` has been called
     """
@@ -171,7 +172,7 @@ def Is_initialized():
     CHKERR( MPI_Initialized(&flag) )
     return <bint>flag
 
-def Is_finalized():
+def Is_finalized() -> bool:
     """
     Indicates whether ``Finalize`` has completed
     """
@@ -188,7 +189,7 @@ def Is_finalized():
 VERSION    = MPI_VERSION
 SUBVERSION = MPI_SUBVERSION
 
-def Get_version():
+def Get_version() -> Tuple[int, int]:
     """
     Obtain the version number of the MPI standard supported
     by the implementation as a tuple ``(version, subversion)``
@@ -198,7 +199,7 @@ def Get_version():
     CHKERR( MPI_Get_version(&version, &subversion) )
     return (version, subversion)
 
-def Get_library_version():
+def Get_library_version() -> str:
     """
     Obtain the version string of the MPI library
     """
@@ -210,7 +211,7 @@ def Get_library_version():
 # Environmental Inquires
 # ----------------------
 
-def Get_processor_name():
+def Get_processor_name() -> str:
     """
     Obtain the name of the calling processor
     """
@@ -222,13 +223,13 @@ def Get_processor_name():
 # Timers and Synchronization
 # --------------------------
 
-def Wtime():
+def Wtime() -> float:
     """
     Return an elapsed time on the calling processor
     """
     return MPI_Wtime()
 
-def Wtick():
+def Wtick() -> float:
     """
     Return the resolution of ``Wtime``
     """
@@ -237,7 +238,7 @@ def Wtick():
 # Control of Profiling
 # --------------------
 
-def Pcontrol(int level):
+def Pcontrol(int level: int) -> None:
     """
     Control profiling
     """
@@ -265,7 +266,7 @@ MAX_LIBRARY_VERSION_STRING = MPI_MAX_LIBRARY_VERSION_STRING
 cdef extern from *:
     int PyMPI_Get_vendor(const char**,int*,int*,int*) nogil
 
-def get_vendor():
+def get_vendor() -> Tuple[str, Tuple[int, int, int]]:
     """
     Infomation about the underlying MPI implementation
 
@@ -291,7 +292,7 @@ cdef inline int _mpi_type(object arg, type cls) except -1:
         if isinstance(arg, cls): return 1
     return 0
 
-def _sizeof(arg):
+def _sizeof(arg: Any) -> int:
     """
     Size in bytes of the underlying MPI handle
     """
@@ -308,7 +309,7 @@ def _sizeof(arg):
     if _mpi_type(arg, File):       return sizeof(MPI_File)
     raise TypeError("expecting an MPI type or instance")
 
-def _addressof(arg):
+def _addressof(arg: Any) -> int:
     """
     Memory address of the underlying MPI handle
     """
@@ -339,7 +340,7 @@ def _addressof(arg):
         raise TypeError("expecting an MPI instance")
     return PyLong_FromVoidPtr(ptr)
 
-def _handleof(arg):
+def _handleof(arg: Any) -> int:
     """
     Unsigned integer value with the underlying MPI handle
     """

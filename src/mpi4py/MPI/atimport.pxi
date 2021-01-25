@@ -228,7 +228,7 @@ cdef void atexit() nogil:
     if options.finalize:
         <void>MPI_Finalize()
 
-def _set_abort_status(object status):
+def _set_abort_status(object status: Any) -> None:
     "Helper for ``python -m mpi4py.run ...``"
     global abort_status
     try:

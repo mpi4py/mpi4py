@@ -4,7 +4,7 @@ cdef class Errhandler:
     Error Handler
     """
 
-    def __cinit__(self, Errhandler errhandler=None):
+    def __cinit__(self, Errhandler errhandler: Optional[Errhandler] = None):
         self.ob_mpi = MPI_ERRHANDLER_NULL
         if errhandler is None: return
         self.ob_mpi = errhandler.ob_mpi
@@ -22,10 +22,10 @@ cdef class Errhandler:
         cdef cls = type(self).__name__
         raise TypeError("unorderable type: '%s.%s'" % (mod, cls))
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return self.ob_mpi != MPI_ERRHANDLER_NULL
 
-    def Free(self):
+    def Free(self) -> None:
         """
         Free an error handler
         """
@@ -36,13 +36,13 @@ cdef class Errhandler:
     # Fortran Handle
     # --------------
 
-    def py2f(self):
+    def py2f(self) -> int:
         """
         """
         return MPI_Errhandler_c2f(self.ob_mpi)
 
     @classmethod
-    def f2py(cls, arg):
+    def f2py(cls, arg: int) -> Errhandler:
         """
         """
         cdef Errhandler errhandler = Errhandler.__new__(Errhandler)

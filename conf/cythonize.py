@@ -7,6 +7,7 @@ def cythonize(source,
               destdir_c=None,
               destdir_h=None,
               wdir=None):
+    import cyautodoc
     from Cython.Compiler.Main import \
          CompilationOptions, default_options, \
          compile, \

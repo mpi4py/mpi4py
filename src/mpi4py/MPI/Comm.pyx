@@ -34,7 +34,7 @@ cdef class Comm:
     Communicator
     """
 
-    def __cinit__(self, Comm comm=None):
+    def __cinit__(self, Comm comm: Optional[Comm] = None):
         self.ob_mpi = MPI_COMM_NULL
         if comm is None: return
         self.ob_mpi = comm.ob_mpi
@@ -52,13 +52,13 @@ cdef class Comm:
         cdef cls = type(self).__name__
         raise TypeError("unorderable type: '%s.%s'" % (mod, cls))
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return self.ob_mpi != MPI_COMM_NULL
 
     # Group
     # -----
 
-    def Get_group(self):
+    def Get_group(self) -> Group:
         """
         Access the group associated with a communicator
         """
@@ -68,13 +68,13 @@ cdef class Comm:
 
     property group:
         """communicator group"""
-        def __get__(self):
+        def __get__(self) -> Group:
             return self.Get_group()
 
     # Communicator Accessors
     # ----------------------
 
-    def Get_size(self):
+    def Get_size(self) -> int:
         """
         Return the number of processes in a communicator
         """
@@ -84,10 +84,10 @@ cdef class Comm:
 
     property size:
         """number of processes in communicator"""
-        def __get__(self):
+        def __get__(self) -> int:
             return self.Get_size()
 
-    def Get_rank(self):
+    def Get_rank(self) -> int:
         """
         Return the rank of this process in a communicator
         """
@@ -97,11 +97,11 @@ cdef class Comm:
 
     property rank:
         """rank of this process in communicator"""
-        def __get__(self):
+        def __get__(self) -> int:
             return self.Get_rank()
 
     @classmethod
-    def Compare(cls, Comm comm1, Comm comm2):
+    def Compare(cls, Comm comm1: Comm, Comm comm2: Comm) -> int:
         """
         Compare two communicators
         """
@@ -113,7 +113,7 @@ cdef class Comm:
     # Communicator Constructors
     # -------------------------
 
-    def Clone(self):
+    def Clone(self) -> Comm:
         """
         Clone an existing communicator
         """
@@ -123,7 +123,7 @@ cdef class Comm:
         comm_set_eh(comm.ob_mpi)
         return comm
 
-    def Dup(self, Info info=None):
+    def Dup(self, Info info: Optional[Info] = None) -> Comm:
         """
         Duplicate an existing communicator
         """
@@ -139,7 +139,7 @@ cdef class Comm:
         comm_set_eh(comm.ob_mpi)
         return comm
 
-    def Dup_with_info(self, Info info):
+    def Dup_with_info(self, Info info: Info) -> Comm:
         """
         Duplicate an existing communicator
         """
@@ -150,7 +150,7 @@ cdef class Comm:
         comm_set_eh(comm.ob_mpi)
         return comm
 
-    def Idup(self):
+    def Idup(self) -> Tuple[Comm, Request]:
         """
         Nonblocking duplicate an existing communicator
         """
@@ -162,7 +162,7 @@ cdef class Comm:
         comm_set_eh(comm.ob_mpi)
         return (comm, request)
 
-    def Create(self, Group group):
+    def Create(self, Group group: Group) -> Comm:
         """
         Create communicator from group
         """
@@ -175,7 +175,7 @@ cdef class Comm:
         comm_set_eh(comm.ob_mpi)
         return comm
 
-    def Create_group(self, Group group, int tag=0):
+    def Create_group(self, Group group: Group, int tag: int = 0) -> Comm:
         """
         Create communicator from group
         """
@@ -188,7 +188,7 @@ cdef class Comm:
         comm_set_eh(comm.ob_mpi)
         return comm
 
-    def Split(self, int color=0, int key=0):
+    def Split(self, int color: int = 0, int key: int = 0) -> Comm:
         """
         Split communicator by color and key
         """
@@ -201,8 +201,12 @@ cdef class Comm:
         comm_set_eh(comm.ob_mpi)
         return comm
 
-    def Split_type(self, int split_type, int key=0,
-                   Info info=INFO_NULL):
+    def Split_type(
+        self,
+        int split_type: int,
+        int key: int = 0,
+        Info info: Info = INFO_NULL,
+    ) -> Comm:
         """
         Split communicator by color and key
         """
@@ -218,7 +222,7 @@ cdef class Comm:
     # Communicator Destructor
     # -----------------------
 
-    def Free(self):
+    def Free(self) -> None:
         """
         Free a communicator
         """
@@ -229,7 +233,7 @@ cdef class Comm:
     # Communicator Info
     # -----------------
 
-    def Set_info(self, Info info):
+    def Set_info(self, Info info: Info) -> None:
         """
         Set new values for the hints
         associated with a communicator
@@ -237,7 +241,7 @@ cdef class Comm:
         with nogil: CHKERR( MPI_Comm_set_info(
             self.ob_mpi, info.ob_mpi) )
 
-    def Get_info(self):
+    def Get_info(self) -> Info:
         """
         Return the hints for a communicator
         that are currently in use
@@ -249,10 +253,10 @@ cdef class Comm:
 
     property info:
         """communicator info"""
-        def __get__(self):
+        def __get__(self) -> Info:
             return self.Get_info()
-        def __set__(self, info):
-            self.Set_info(info)
+        def __set__(self, value: Info):
+            self.Set_info(value)
 
     # Point to Point communication
     # ----------------------------
@@ -260,7 +264,12 @@ cdef class Comm:
     # Blocking Send and Receive Operations
     # ------------------------------------
 
-    def Send(self, buf, int dest, int tag=0):
+    def Send(
+        self,
+        buf: BufSpec,
+        int dest: int,
+        int tag: int = 0,
+    ) -> None:
         """
         Blocking send
 
@@ -273,8 +282,13 @@ cdef class Comm:
             smsg.buf, smsg.count, smsg.dtype,
             dest, tag, self.ob_mpi) )
 
-    def Recv(self, buf, int source=ANY_SOURCE, int tag=ANY_TAG,
-             Status status=None):
+    def Recv(
+        self,
+        buf: BufSpec,
+        int source: int = ANY_SOURCE,
+        int tag: int = ANY_TAG,
+        Status status: Optional[Status] = None,
+    ) -> None:
         """
         Blocking receive
 
@@ -289,9 +303,16 @@ cdef class Comm:
     # Send-Receive
     # ------------
 
-    def Sendrecv(self, sendbuf, int dest, int sendtag=0,
-                 recvbuf=None, int source=ANY_SOURCE, int recvtag=ANY_TAG,
-                 Status status=None):
+    def Sendrecv(
+        self,
+        sendbuf: BufSpec,
+        int dest: int,
+        int sendtag: int = 0,
+        recvbuf: BufSpec = None,
+        int source: int = ANY_SOURCE,
+        int recvtag: int = ANY_TAG,
+        Status status: Optional[Status] = None,
+    ) -> None:
         """
         Send and receive a message
 
@@ -311,9 +332,15 @@ cdef class Comm:
             rmsg.buf, rmsg.count, rmsg.dtype, source, recvtag,
             self.ob_mpi, statusp) )
 
-    def Sendrecv_replace(self, buf, int dest, int sendtag=0,
-                         int source=ANY_SOURCE, int recvtag=ANY_TAG,
-                         Status status=None):
+    def Sendrecv_replace(
+        self,
+        buf: BufSpec,
+        int dest: int,
+        int sendtag: int = 0,
+        int source: int = ANY_SOURCE,
+        int recvtag: int = ANY_TAG,
+        Status status: Optional[Status] = None,
+    ) -> None:
         """
         Send and receive a message
 
@@ -331,14 +358,19 @@ cdef class Comm:
         cdef _p_msg_p2p rmsg = message_p2p_recv(buf, rank)
         cdef MPI_Status *statusp = arg_Status(status)
         with nogil: CHKERR( MPI_Sendrecv_replace(
-                rmsg.buf, rmsg.count, rmsg.dtype,
-                dest, sendtag, source, recvtag,
-                self.ob_mpi, statusp) )
+            rmsg.buf, rmsg.count, rmsg.dtype,
+            dest, sendtag, source, recvtag,
+            self.ob_mpi, statusp) )
 
     # Nonblocking Communications
     # --------------------------
 
-    def Isend(self, buf, int dest, int tag=0):
+    def Isend(
+        self,
+        buf: BufSpec,
+        int dest: int,
+        int tag: int = 0,
+    ) -> Request:
         """
         Nonblocking send
         """
@@ -350,7 +382,12 @@ cdef class Comm:
         request.ob_buf = smsg
         return request
 
-    def Irecv(self, buf, int source=ANY_SOURCE, int tag=ANY_TAG):
+    def Irecv(
+        self,
+        buf: BufSpec,
+        int source: int = ANY_SOURCE,
+        int tag: int = ANY_TAG,
+    ) -> Request:
         """
         Nonblocking receive
         """
@@ -365,8 +402,12 @@ cdef class Comm:
     # Probe
     # -----
 
-    def Probe(self, int source=ANY_SOURCE, int tag=ANY_TAG,
-              Status status=None):
+    def Probe(
+        self,
+        int source: int = ANY_SOURCE,
+        int tag: int = ANY_TAG,
+        Status status: Optional[Status] = None,
+    ) -> Literal[True]:
         """
         Blocking test for a message
 
@@ -377,8 +418,12 @@ cdef class Comm:
             source, tag, self.ob_mpi, statusp) )
         return True
 
-    def Iprobe(self, int source=ANY_SOURCE, int tag=ANY_TAG,
-               Status status=None):
+    def Iprobe(
+        self,
+        int source: int = ANY_SOURCE,
+        int tag: int = ANY_TAG,
+        Status status: Optional[Status] = None,
+    ) -> bool:
         """
         Nonblocking test for a message
         """
@@ -391,8 +436,12 @@ cdef class Comm:
     # Matching Probe
     # --------------
 
-    def Mprobe(self, int source=ANY_SOURCE, int tag=ANY_TAG,
-               Status status=None):
+    def Mprobe(
+        self,
+        int source: int = ANY_SOURCE,
+        int tag: int = ANY_TAG,
+        Status status: Optional[Status] = None,
+    ) -> Message:
         """
         Blocking test for a matched message
         """
@@ -404,8 +453,12 @@ cdef class Comm:
         message.ob_mpi = cmessage
         return message
 
-    def Improbe(self, int source=ANY_SOURCE, int tag=ANY_TAG,
-                Status status=None):
+    def Improbe(
+        self,
+        int source: int = ANY_SOURCE,
+        int tag: int = ANY_TAG,
+        Status status: Optional[Status] = None,
+    ) -> Optional[Message]:
         """
         Nonblocking test for a matched message
         """
@@ -422,7 +475,12 @@ cdef class Comm:
     # Persistent Communication
     # ------------------------
 
-    def Send_init(self, buf, int dest, int tag=0):
+    def Send_init(
+        self,
+        buf: BufSpec,
+        int dest: int,
+        int tag: int = 0,
+    ) -> Prequest:
         """
         Create a persistent request for a standard send
         """
@@ -434,7 +492,12 @@ cdef class Comm:
         request.ob_buf = smsg
         return request
 
-    def Recv_init(self, buf, int source=ANY_SOURCE, int tag=ANY_TAG):
+    def Recv_init(
+        self,
+        buf: BufSpec,
+        int source: int = ANY_SOURCE,
+        int tag: int = ANY_TAG,
+    ) -> Prequest:
         """
         Create a persistent request for a receive
         """
@@ -451,7 +514,12 @@ cdef class Comm:
 
     # Blocking calls
 
-    def Bsend(self, buf, int dest, int tag=0):
+    def Bsend(
+        self,
+        buf: BufSpec,
+        int dest: int,
+        int tag: int = 0,
+    ) -> None:
         """
         Blocking send in buffered mode
         """
@@ -460,7 +528,12 @@ cdef class Comm:
             smsg.buf, smsg.count, smsg.dtype,
             dest, tag, self.ob_mpi) )
 
-    def Ssend(self, buf, int dest, int tag=0):
+    def Ssend(
+        self,
+        buf: BufSpec,
+        int dest: int,
+        int tag: int = 0,
+    ) -> None:
         """
         Blocking send in synchronous mode
         """
@@ -469,7 +542,12 @@ cdef class Comm:
             smsg.buf, smsg.count, smsg.dtype,
             dest, tag, self.ob_mpi) )
 
-    def Rsend(self, buf, int dest, int tag=0):
+    def Rsend(
+        self,
+        buf: BufSpec,
+        int dest: int,
+        int tag: int = 0,
+    ) -> None:
         """
         Blocking send in ready mode
         """
@@ -480,7 +558,12 @@ cdef class Comm:
 
     # Nonblocking calls
 
-    def Ibsend(self, buf, int dest, int tag=0):
+    def Ibsend(
+        self,
+        buf: BufSpec,
+        int dest: int,
+        int tag: int = 0,
+    ) -> Request:
         """
         Nonblocking send in buffered mode
         """
@@ -492,7 +575,12 @@ cdef class Comm:
         request.ob_buf = smsg
         return request
 
-    def Issend(self, buf, int dest, int tag=0):
+    def Issend(
+        self,
+        buf: BufSpec,
+        int dest: int,
+        int tag: int = 0,
+    ) -> Request:
         """
         Nonblocking send in synchronous mode
         """
@@ -504,7 +592,12 @@ cdef class Comm:
         request.ob_buf = smsg
         return request
 
-    def Irsend(self, buf, int dest, int tag=0):
+    def Irsend(
+        self,
+        buf: BufSpec,
+        int dest: int,
+        int tag: int = 0,
+    ) -> Request:
         """
         Nonblocking send in ready mode
         """
@@ -518,7 +611,12 @@ cdef class Comm:
 
     # Persistent Requests
 
-    def Bsend_init(self, buf, int dest, int tag=0):
+    def Bsend_init(
+        self,
+        buf: BufSpec,
+        int dest: int,
+        int tag: int = 0,
+    ) -> Request:
         """
         Persistent request for a send in buffered mode
         """
@@ -530,7 +628,12 @@ cdef class Comm:
         request.ob_buf = smsg
         return request
 
-    def Ssend_init(self, buf, int dest, int tag=0):
+    def Ssend_init(
+        self,
+        buf: BufSpec,
+        int dest: int,
+        int tag: int = 0,
+    ) -> Request:
         """
         Persistent request for a send in synchronous mode
         """
@@ -542,7 +645,12 @@ cdef class Comm:
         request.ob_buf = smsg
         return request
 
-    def Rsend_init(self, buf, int dest, int tag=0):
+    def Rsend_init(
+        self,
+        buf: BufSpec,
+        int dest: int,
+        int tag: int = 0,
+    ) -> Request:
         """
         Persistent request for a send in ready mode
         """
@@ -560,7 +668,7 @@ cdef class Comm:
     # Barrier Synchronization
     # -----------------------
 
-    def Barrier(self):
+    def Barrier(self) -> None:
         """
         Barrier synchronization
         """
@@ -569,7 +677,11 @@ cdef class Comm:
     # Global Communication Functions
     # ------------------------------
 
-    def Bcast(self, buf, int root=0):
+    def Bcast(
+        self,
+        buf: BufSpec,
+        int root: int = 0,
+    ) -> None:
         """
         Broadcast a message from one process
         to all other processes in a group
@@ -580,7 +692,12 @@ cdef class Comm:
             m.sbuf, m.scount, m.stype,
             root, self.ob_mpi) )
 
-    def Gather(self, sendbuf, recvbuf, int root=0):
+    def Gather(
+        self,
+        sendbuf: Union[BufSpec, InPlace],
+        recvbuf: Optional[BufSpecB],
+        int root: int = 0,
+    ) -> None:
         """
         Gather together values from a group of processes
         """
@@ -591,7 +708,12 @@ cdef class Comm:
             m.rbuf, m.rcount, m.rtype,
             root, self.ob_mpi) )
 
-    def Gatherv(self, sendbuf, recvbuf, int root=0):
+    def Gatherv(
+        self,
+        sendbuf: Union[BufSpec, InPlace],
+        recvbuf: Optional[BufSpecV],
+        int root: int = 0,
+    ) -> None:
         """
         Gather Vector, gather data to one process from all other
         processes in a group providing different amount of data and
@@ -604,7 +726,12 @@ cdef class Comm:
             m.rbuf, m.rcounts, m.rdispls, m.rtype,
             root, self.ob_mpi) )
 
-    def Scatter(self, sendbuf, recvbuf, int root=0):
+    def Scatter(
+        self,
+        sendbuf: Optional[BufSpecB],
+        recvbuf: Union[BufSpec, InPlace],
+        int root: int = 0,
+    ) -> None:
         """
         Scatter data from one process
         to all other processes in a group
@@ -616,7 +743,12 @@ cdef class Comm:
             m.rbuf, m.rcount, m.rtype,
             root, self.ob_mpi) )
 
-    def Scatterv(self, sendbuf, recvbuf, int root=0):
+    def Scatterv(
+        self,
+        sendbuf: Optional[BufSpecV],
+        recvbuf: Union[BufSpec, InPlace],
+        int root: int = 0,
+    ) -> None:
         """
         Scatter Vector, scatter data from one process to all other
         processes in a group providing different amount of data and
@@ -629,7 +761,11 @@ cdef class Comm:
             m.rbuf, m.rcount,             m.rtype,
             root, self.ob_mpi) )
 
-    def Allgather(self, sendbuf, recvbuf):
+    def Allgather(
+        self,
+        sendbuf: Union[BufSpec, InPlace],
+        recvbuf: BufSpecB,
+    ) -> None:
         """
         Gather to All, gather data from all processes and
         distribute it to all other processes in a group
@@ -641,7 +777,11 @@ cdef class Comm:
             m.rbuf, m.rcount, m.rtype,
             self.ob_mpi) )
 
-    def Allgatherv(self, sendbuf, recvbuf):
+    def Allgatherv(
+        self,
+        sendbuf: Union[BufSpec, InPlace],
+        recvbuf: BufSpecV,
+    ) -> None:
         """
         Gather to All Vector, gather data from all processes and
         distribute it to all other processes in a group providing
@@ -654,7 +794,11 @@ cdef class Comm:
             m.rbuf, m.rcounts, m.rdispls, m.rtype,
             self.ob_mpi) )
 
-    def Alltoall(self, sendbuf, recvbuf):
+    def Alltoall(
+        self,
+        sendbuf: Union[BufSpecB, InPlace],
+        recvbuf: BufSpecB,
+    ) -> None:
         """
         All to All Scatter/Gather, send data from all to all
         processes in a group
@@ -666,7 +810,11 @@ cdef class Comm:
             m.rbuf, m.rcount, m.rtype,
             self.ob_mpi) )
 
-    def Alltoallv(self, sendbuf, recvbuf):
+    def Alltoallv(
+        self,
+        sendbuf: Union[BufSpecV, InPlace],
+        recvbuf: BufSpecV,
+    ) -> None:
         """
         All to All Scatter/Gather Vector, send data from all to all
         processes in a group providing different amount of data and
@@ -679,7 +827,11 @@ cdef class Comm:
             m.rbuf, m.rcounts, m.rdispls, m.rtype,
             self.ob_mpi) )
 
-    def Alltoallw(self, sendbuf, recvbuf):
+    def Alltoallw(
+        self,
+        sendbuf: Union[BufSpecW, InPlace],
+        recvbuf: BufSpecW,
+    ) -> None:
         """
         Generalized All-to-All communication allowing different
         counts, displacements and datatypes for each partner
@@ -695,7 +847,13 @@ cdef class Comm:
     # Global Reduction Operations
     # ---------------------------
 
-    def Reduce(self, sendbuf, recvbuf, Op op=SUM, int root=0):
+    def Reduce(
+        self,
+        sendbuf: Union[BufSpec, InPlace],
+        recvbuf: Optional[BufSpec],
+        Op op: Op = SUM,
+        int root: int = 0,
+    ) -> None:
         """
         Reduce
         """
@@ -705,7 +863,12 @@ cdef class Comm:
             m.sbuf, m.rbuf, m.rcount, m.rtype,
             op.ob_mpi, root, self.ob_mpi) )
 
-    def Allreduce(self, sendbuf, recvbuf, Op op=SUM):
+    def Allreduce(
+        self,
+        sendbuf: Union[BufSpec, InPlace],
+        recvbuf: BufSpec,
+        Op op: Op = SUM,
+    ) -> None:
         """
         All Reduce
         """
@@ -715,7 +878,12 @@ cdef class Comm:
             m.sbuf, m.rbuf, m.rcount, m.rtype,
             op.ob_mpi, self.ob_mpi) )
 
-    def Reduce_scatter_block(self, sendbuf, recvbuf, Op op=SUM):
+    def Reduce_scatter_block(
+        self,
+        sendbuf: Union[BufSpecB, InPlace],
+        recvbuf: Union[BufSpec, BufSpecB],
+        Op op: Op = SUM,
+    ) -> None:
         """
         Reduce-Scatter Block (regular, non-vector version)
         """
@@ -725,7 +893,13 @@ cdef class Comm:
             m.sbuf, m.rbuf, m.rcount, m.rtype,
             op.ob_mpi, self.ob_mpi) )
 
-    def Reduce_scatter(self, sendbuf, recvbuf, recvcounts=None, Op op=SUM):
+    def Reduce_scatter(
+        self,
+        sendbuf: Union[BufSpec, InPlace],
+        recvbuf: BufSpec,
+        recvcounts: Optional[Sequence[int]] = None,
+        Op op: Op = SUM,
+    ) -> None:
         """
         Reduce-Scatter (vector version)
         """
@@ -739,7 +913,7 @@ cdef class Comm:
     # Nonblocking Collectives
     # -----------------------
 
-    def Ibarrier(self):
+    def Ibarrier(self) -> Request:
         """
         Nonblocking Barrier
         """
@@ -747,7 +921,11 @@ cdef class Comm:
         with nogil: CHKERR( MPI_Ibarrier(self.ob_mpi, &request.ob_mpi) )
         return request
 
-    def Ibcast(self, buf, int root=0):
+    def Ibcast(
+        self,
+        buf: BufSpec,
+        int root: int = 0,
+    ) -> Request:
         """
         Nonblocking Broadcast
         """
@@ -760,7 +938,12 @@ cdef class Comm:
         request.ob_buf = m
         return request
 
-    def Igather(self, sendbuf, recvbuf, int root=0):
+    def Igather(
+        self,
+        sendbuf: Union[BufSpec, InPlace],
+        recvbuf: Optional[BufSpecB],
+        int root: int = 0,
+    ) -> Request:
         """
         Nonblocking Gather
         """
@@ -774,7 +957,12 @@ cdef class Comm:
         request.ob_buf = m
         return request
 
-    def Igatherv(self, sendbuf, recvbuf, int root=0):
+    def Igatherv(
+        self,
+        sendbuf: Union[BufSpec, InPlace],
+        recvbuf: Optional[BufSpecV],
+        int root: int = 0,
+    ) -> Request:
         """
         Nonblocking Gather Vector
         """
@@ -788,7 +976,12 @@ cdef class Comm:
         request.ob_buf = m
         return request
 
-    def Iscatter(self, sendbuf, recvbuf, int root=0):
+    def Iscatter(
+        self,
+        sendbuf: Optional[BufSpecB],
+        recvbuf: Union[BufSpec, InPlace],
+        int root: int = 0,
+    ) -> Request:
         """
         Nonblocking Scatter
         """
@@ -802,7 +995,12 @@ cdef class Comm:
         request.ob_buf = m
         return request
 
-    def Iscatterv(self, sendbuf, recvbuf, int root=0):
+    def Iscatterv(
+        self,
+        sendbuf: Optional[BufSpecV],
+        recvbuf: Union[BufSpec, InPlace],
+        int root: int = 0,
+    ) -> Request:
         """
         Nonblocking Scatter Vector
         """
@@ -816,7 +1014,11 @@ cdef class Comm:
         request.ob_buf = m
         return request
 
-    def Iallgather(self, sendbuf, recvbuf):
+    def Iallgather(
+        self,
+        sendbuf: Union[BufSpec, InPlace],
+        recvbuf: BufSpecB,
+    ) -> Request:
         """
         Nonblocking Gather to All
         """
@@ -830,7 +1032,11 @@ cdef class Comm:
         request.ob_buf = m
         return request
 
-    def Iallgatherv(self, sendbuf, recvbuf):
+    def Iallgatherv(
+        self,
+        sendbuf: Union[BufSpec, InPlace],
+        recvbuf: BufSpecV,
+    ) -> Request:
         """
         Nonblocking Gather to All Vector
         """
@@ -843,7 +1049,11 @@ cdef class Comm:
             self.ob_mpi, &request.ob_mpi) )
         return request
 
-    def Ialltoall(self, sendbuf, recvbuf):
+    def Ialltoall(
+        self,
+        sendbuf: Union[BufSpecB, InPlace],
+        recvbuf: BufSpecB,
+    ) -> Request:
         """
         Nonblocking All to All Scatter/Gather
         """
@@ -857,7 +1067,11 @@ cdef class Comm:
         request.ob_buf = m
         return request
 
-    def Ialltoallv(self, sendbuf, recvbuf):
+    def Ialltoallv(
+        self,
+        sendbuf: Union[BufSpecV, InPlace],
+        recvbuf: BufSpecV,
+    ) -> Request:
         """
         Nonblocking All to All Scatter/Gather Vector
         """
@@ -871,7 +1085,11 @@ cdef class Comm:
         request.ob_buf = m
         return request
 
-    def Ialltoallw(self, sendbuf, recvbuf):
+    def Ialltoallw(
+        self,
+        sendbuf: Union[BufSpecW, InPlace],
+        recvbuf: BufSpecW,
+    ) -> Request:
         """
         Nonblocking Generalized All-to-All
         """
@@ -885,7 +1103,13 @@ cdef class Comm:
         request.ob_buf = m
         return request
 
-    def Ireduce(self, sendbuf, recvbuf, Op op=SUM, int root=0):
+    def Ireduce(
+        self,
+        sendbuf: Union[BufSpec, InPlace],
+        recvbuf: Optional[BufSpec],
+        Op op: Op = SUM,
+        int root: int = 0,
+    ) -> Request:
         """
         Nonblocking Reduce
         """
@@ -897,7 +1121,12 @@ cdef class Comm:
             op.ob_mpi, root, self.ob_mpi, &request.ob_mpi) )
         return request
 
-    def Iallreduce(self, sendbuf, recvbuf, Op op=SUM):
+    def Iallreduce(
+        self,
+        sendbuf: Union[BufSpec, InPlace],
+        recvbuf: BufSpec,
+        Op op: Op = SUM,
+    ) -> Request:
         """
         Nonblocking All Reduce
         """
@@ -909,7 +1138,12 @@ cdef class Comm:
             op.ob_mpi, self.ob_mpi, &request.ob_mpi) )
         return request
 
-    def Ireduce_scatter_block(self, sendbuf, recvbuf, Op op=SUM):
+    def Ireduce_scatter_block(
+        self,
+        sendbuf: Union[BufSpecB, InPlace],
+        recvbuf: Union[BufSpec, BufSpecB],
+        Op op: Op = SUM,
+    ) -> Request:
         """
         Nonblocking Reduce-Scatter Block (regular, non-vector version)
         """
@@ -921,7 +1155,13 @@ cdef class Comm:
             op.ob_mpi, self.ob_mpi, &request.ob_mpi) )
         return request
 
-    def Ireduce_scatter(self, sendbuf, recvbuf, recvcounts=None, Op op=SUM):
+    def Ireduce_scatter(
+        self,
+        sendbuf: Union[BufSpec, InPlace],
+        recvbuf: BufSpec,
+        recvcounts: Optional[Sequence[int]] = None,
+        Op op: Op = SUM,
+    ) -> Request:
         """
         Nonblocking Reduce-Scatter (vector version)
         """
@@ -937,7 +1177,7 @@ cdef class Comm:
     # Tests
     # -----
 
-    def Is_inter(self):
+    def Is_inter(self) -> bool:
         """
         Test to see if a comm is an intercommunicator
         """
@@ -947,10 +1187,10 @@ cdef class Comm:
 
     property is_inter:
         """is intercommunicator"""
-        def __get__(self):
+        def __get__(self) -> bool:
             return self.Is_inter()
 
-    def Is_intra(self):
+    def Is_intra(self) -> bool:
         """
         Test to see if a comm is an intracommunicator
         """
@@ -958,10 +1198,10 @@ cdef class Comm:
 
     property is_intra:
         """is intracommunicator"""
-        def __get__(self):
+        def __get__(self) -> bool:
             return self.Is_intra()
 
-    def Get_topology(self):
+    def Get_topology(self) -> int:
         """
         Determine the type of topology (if any)
         associated with a communicator
@@ -972,19 +1212,19 @@ cdef class Comm:
 
     property topology:
         """communicator topology type"""
-        def __get__(self):
+        def __get__(self) -> int:
             return self.Get_topology()
 
     property is_topo:
         """is a topology communicator"""
-        def __get__(self):
+        def __get__(self) -> bool:
             return self.Get_topology() != MPI_UNDEFINED
 
     # Process Creation and Management
     # -------------------------------
 
     @classmethod
-    def Get_parent(cls):
+    def Get_parent(cls) -> Intercomm:
         """
         Return the parent intercommunicator for this process
         """
@@ -993,14 +1233,14 @@ cdef class Comm:
         comm_set_eh(comm.ob_mpi)
         return comm
 
-    def Disconnect(self):
+    def Disconnect(self) -> None:
         """
         Disconnect from a communicator
         """
         with nogil: CHKERR( MPI_Comm_disconnect(&self.ob_mpi) )
 
     @classmethod
-    def Join(cls, int fd):
+    def Join(cls, int fd: int) -> Intercomm:
         """
         Create a intercommunicator by joining
         two processes connected by a socket
@@ -1013,7 +1253,7 @@ cdef class Comm:
     # Attributes
     # ----------
 
-    def Get_attr(self, int keyval):
+    def Get_attr(self, int keyval: int) -> Optional[Union[int, Any]]:
         """
         Retrieve attribute value by key
         """
@@ -1036,20 +1276,25 @@ cdef class Comm:
         # user-defined attribute keyval
         return PyMPI_attr_get(self.ob_mpi, keyval, attrval)
 
-    def Set_attr(self, int keyval, object attrval):
+    def Set_attr(self, int keyval: int, attrval: Any) -> None:
         """
         Store attribute value associated with a key
         """
         PyMPI_attr_set(self.ob_mpi, keyval, attrval)
 
-    def Delete_attr(self, int keyval):
+    def Delete_attr(self, int keyval: int) -> None:
         """
         Delete attribute value associated with a key
         """
         CHKERR( MPI_Comm_delete_attr(self.ob_mpi, keyval) )
 
     @classmethod
-    def Create_keyval(cls, copy_fn=None, delete_fn=None, nopython=False):
+    def Create_keyval(
+        cls,
+        copy_fn: Optional[Callable[[Comm, int, Any], Any]] = None,
+        delete_fn: Optional[Callable[[Comm, int, Any], None]] = None,
+        nopython: bool = False,
+    ) -> int:
         """
         Create a new attribute key for communicators
         """
@@ -1063,7 +1308,7 @@ cdef class Comm:
         return keyval
 
     @classmethod
-    def Free_keyval(cls, int keyval):
+    def Free_keyval(cls, int keyval: int) -> int:
         """
         Free and attribute key for communicators
         """
@@ -1076,7 +1321,7 @@ cdef class Comm:
     # Error handling
     # --------------
 
-    def Get_errhandler(self):
+    def Get_errhandler(self) -> Errhandler:
         """
         Get the error handler for a communicator
         """
@@ -1084,20 +1329,20 @@ cdef class Comm:
         CHKERR( MPI_Comm_get_errhandler(self.ob_mpi, &errhandler.ob_mpi) )
         return errhandler
 
-    def Set_errhandler(self, Errhandler errhandler):
+    def Set_errhandler(self, Errhandler errhandler: Errhandler) -> None:
         """
         Set the error handler for a communicator
         """
         CHKERR( MPI_Comm_set_errhandler(self.ob_mpi, errhandler.ob_mpi) )
 
-    def Call_errhandler(self, int errorcode):
+    def Call_errhandler(self, int errorcode: int) -> None:
         """
         Call the error handler installed on a communicator
         """
         CHKERR( MPI_Comm_call_errhandler(self.ob_mpi, errorcode) )
 
 
-    def Abort(self, int errorcode=0):
+    def Abort(self, int errorcode: int = 0) -> NoReturn:
         """
         Terminate MPI execution environment
 
@@ -1108,7 +1353,7 @@ cdef class Comm:
     # Naming Objects
     # --------------
 
-    def Get_name(self):
+    def Get_name(self) -> str:
         """
         Get the print name for this communicator
         """
@@ -1117,7 +1362,7 @@ cdef class Comm:
         CHKERR( MPI_Comm_get_name(self.ob_mpi, name, &nlen) )
         return tompistr(name, nlen)
 
-    def Set_name(self, name):
+    def Set_name(self, name: str) -> None:
         """
         Set the print name for this communicator
         """
@@ -1127,21 +1372,21 @@ cdef class Comm:
 
     property name:
         """communicator name"""
-        def __get__(self):
+        def __get__(self) -> str:
             return self.Get_name()
-        def __set__(self, value):
+        def __set__(self, value: str):
             self.Set_name(value)
 
     # Fortran Handle
     # --------------
 
-    def py2f(self):
+    def py2f(self) -> int:
         """
         """
         return MPI_Comm_c2f(self.ob_mpi)
 
     @classmethod
-    def f2py(cls, arg):
+    def f2py(cls, arg: int) -> Comm:
         """
         """
         cdef MPI_Comm comm = MPI_Comm_f2c(arg)
@@ -1150,31 +1395,58 @@ cdef class Comm:
     # Python Communication
     # --------------------
     #
-    def send(self, obj, int dest, int tag=0):
+    def send(
+        self,
+        obj: Any,
+        int dest: int,
+        int tag: int = 0,
+    ) -> None:
         """Send"""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_send(obj, dest, tag, comm)
     #
-    def bsend(self, obj, int dest, int tag=0):
+    def bsend(
+        self,
+        obj: Any,
+        int dest: int,
+        int tag: int = 0,
+    ) -> None:
         """Send in buffered mode"""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_bsend(obj, dest, tag, comm)
     #
-    def ssend(self, obj, int dest, int tag=0):
+    def ssend(
+        self,
+        obj: Any,
+        int dest: int,
+        int tag: int = 0,
+    ) -> None:
         """Send in synchronous mode"""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_ssend(obj, dest, tag, comm)
     #
-    def recv(self, buf=None, int source=ANY_SOURCE, int tag=ANY_TAG,
-             Status status=None):
+    def recv(
+        self,
+        buf: Optional[Buffer] = None,
+        int source: int = ANY_SOURCE,
+        int tag: int = ANY_TAG,
+        Status status: Optional[Status] = None,
+    ) -> Any:
         """Receive"""
         cdef MPI_Comm comm = self.ob_mpi
         cdef MPI_Status *statusp = arg_Status(status)
         return PyMPI_recv(buf, source, tag, comm, statusp)
     #
-    def sendrecv(self, sendobj, int dest, int sendtag=0,
-                 recvbuf=None, int source=ANY_SOURCE, int recvtag=ANY_TAG,
-                 Status status=None):
+    def sendrecv(
+        self,
+        sendobj: Any,
+        int dest: int,
+        int sendtag: int = 0,
+        recvbuf: Optional[Buffer] = None,
+        int source: int = ANY_SOURCE,
+        int recvtag: int = ANY_TAG,
+        Status status: Optional[Status] = None,
+    ) -> Any:
         """Send and Receive"""
         cdef MPI_Comm comm = self.ob_mpi
         cdef MPI_Status *statusp = arg_Status(status)
@@ -1182,50 +1454,82 @@ cdef class Comm:
                               recvbuf, source, recvtag,
                               comm, statusp)
     #
-    def isend(self, obj, int dest, int tag=0):
+    def isend(
+        self,
+        obj: Any,
+        int dest: int,
+        int tag: int = 0,
+    ) -> Request:
         """Nonblocking send"""
         cdef MPI_Comm comm = self.ob_mpi
         cdef Request request = Request.__new__(Request)
         request.ob_buf = PyMPI_isend(obj, dest, tag, comm, &request.ob_mpi)
         return request
     #
-    def ibsend(self, obj, int dest, int tag=0):
+    def ibsend(
+        self,
+        obj: Any,
+        int dest: int,
+        int tag: int = 0,
+    ) -> Request:
         """Nonblocking send in buffered mode"""
         cdef MPI_Comm comm = self.ob_mpi
         cdef Request request = Request.__new__(Request)
         request.ob_buf = PyMPI_ibsend(obj, dest, tag, comm, &request.ob_mpi)
         return request
     #
-    def issend(self, obj, int dest, int tag=0):
+    def issend(
+        self,
+        obj: Any,
+        int dest: int,
+        int tag: int = 0,
+    ) -> Request:
         """Nonblocking send in synchronous mode"""
         cdef MPI_Comm comm = self.ob_mpi
         cdef Request request = Request.__new__(Request)
         request.ob_buf = PyMPI_issend(obj, dest, tag, comm, &request.ob_mpi)
         return request
     #
-    def irecv(self, buf=None, int source=ANY_SOURCE, int tag=ANY_TAG):
+    def irecv(
+        self,
+        buf: Optional[Buffer] = None,
+        int source: int = ANY_SOURCE,
+        int tag: int = ANY_TAG,
+    ) -> Request:
         """Nonblocking receive"""
         cdef MPI_Comm comm = self.ob_mpi
         cdef Request request = Request.__new__(Request)
         request.ob_buf = PyMPI_irecv(buf, source, tag, comm, &request.ob_mpi)
         return request
     #
-    def probe(self, int source=ANY_SOURCE, int tag=ANY_TAG,
-              Status status=None):
+    def probe(
+        self,
+        int source: int = ANY_SOURCE,
+        int tag: int = ANY_TAG,
+        Status status: Optional[Status] = None,
+    ) -> Literal[True]:
         """Blocking test for a message"""
         cdef MPI_Comm comm = self.ob_mpi
         cdef MPI_Status *statusp = arg_Status(status)
         return PyMPI_probe(source, tag, comm, statusp)
     #
-    def iprobe(self, int source=ANY_SOURCE, int tag=ANY_TAG,
-               Status status=None):
+    def iprobe(
+        self,
+        int source: int = ANY_SOURCE,
+        int tag: int = ANY_TAG,
+        Status status: Optional[Status] = None,
+    ) -> bool:
         """Nonblocking test for a message"""
         cdef MPI_Comm comm = self.ob_mpi
         cdef MPI_Status *statusp = arg_Status(status)
         return PyMPI_iprobe(source, tag, comm, statusp)
     #
-    def mprobe(self, int source=ANY_SOURCE, int tag=ANY_TAG,
-               Status status=None):
+    def mprobe(
+        self,
+        int source: int = ANY_SOURCE,
+        int tag: int = ANY_TAG,
+        Status status: Optional[Status] = None,
+    ) -> Message:
         """Blocking test for a matched message"""
         cdef MPI_Comm comm = self.ob_mpi
         cdef MPI_Status *statusp = arg_Status(status)
@@ -1234,8 +1538,12 @@ cdef class Comm:
                                       &message.ob_mpi, statusp)
         return message
     #
-    def improbe(self, int source=ANY_SOURCE, int tag=ANY_TAG,
-                Status status=None):
+    def improbe(
+        self,
+        int source: int = ANY_SOURCE,
+        int tag: int = ANY_TAG,
+        Status status: Optional[Status] = None,
+    ) -> Optional[Message]:
         """Nonblocking test for a matched message"""
         cdef int flag = 0
         cdef MPI_Comm comm = self.ob_mpi
@@ -1246,45 +1554,70 @@ cdef class Comm:
         if flag == 0: return None
         return message
     #
-    def barrier(self):
+    def barrier(self) -> None:
         """Barrier"""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_barrier(comm)
     #
-    def bcast(self, obj, int root=0):
+    def bcast(
+        self,
+        obj: Any,
+        int root: int = 0,
+    ) -> Any:
         """Broadcast"""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_bcast(obj, root, comm)
     #
-    def gather(self, sendobj, int root=0):
+    def gather(
+        self,
+        sendobj: Any,
+        int root: int = 0,
+    ) -> Optional[List[Any]]:
         """Gather"""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_gather(sendobj, root, comm)
     #
-    def scatter(self, sendobj, int root=0):
+    def scatter(
+        self,
+        sendobj: Sequence[Any],
+        int root: int = 0,
+    ) -> Any:
         """Scatter"""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_scatter(sendobj, root, comm)
     #
-    def allgather(self, sendobj):
+    def allgather(
+        self,
+        sendobj: Any,
+    ) -> List[Any]:
         """Gather to All"""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_allgather(sendobj, comm)
     #
-    def alltoall(self, sendobj):
+    def alltoall(
+        self,
+        sendobj: Sequence[Any],
+    ) -> List[Any]:
         """All to All Scatter/Gather"""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_alltoall(sendobj, comm)
     #
-    def reduce(self, sendobj, op=SUM, int root=0):
+    def reduce(
+        self,
+        sendobj: Any,
+        op: Union[Op, Callable[[Any, Any], Any]] = SUM,
+        int root: int = 0,
+    ) -> Optional[Any]:
         """Reduce"""
-        if op is None: op = SUM
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_reduce(sendobj, op, root, comm)
     #
-    def allreduce(self, sendobj, op=SUM):
+    def allreduce(
+        self,
+        sendobj: Any,
+        op: Union[Op, Callable[[Any, Any], Any]] = SUM,
+    ) -> Any:
         """Reduce to All"""
-        if op is None: op = SUM
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_allreduce(sendobj, op, comm)
 
@@ -1295,7 +1628,7 @@ cdef class Intracomm(Comm):
     Intracommunicator
     """
 
-    def __cinit__(self, Comm comm=None):
+    def __cinit__(self, Comm comm: Optional[Comm] = None):
         if self.ob_mpi == MPI_COMM_NULL: return
         cdef int inter = 1
         CHKERR( MPI_Comm_test_inter(self.ob_mpi, &inter) )
@@ -1305,7 +1638,12 @@ cdef class Intracomm(Comm):
     # Communicator Constructors
     # -------------------------
 
-    def Create_cart(self, dims, periods=None, bint reorder=False):
+    def Create_cart(
+        self,
+        dims: Sequence[int],
+        periods: Optional[Sequence[bool]] = None,
+        bint reorder: bool = False,
+    ) -> Cartcomm:
         """
         Create cartesian communicator
         """
@@ -1321,7 +1659,12 @@ cdef class Intracomm(Comm):
         comm_set_eh(comm.ob_mpi)
         return comm
 
-    def Create_graph(self, index, edges, bint reorder=False):
+    def Create_graph(
+        self,
+        index: Sequence[int],
+        edges: Sequence[int],
+        bint reorder: bool = False,
+    ) -> Graphcomm:
         """
         Create graph communicator
         """
@@ -1339,9 +1682,15 @@ cdef class Intracomm(Comm):
         comm_set_eh(comm.ob_mpi)
         return comm
 
-    def Create_dist_graph_adjacent(self, sources, destinations,
-                                   sourceweights=None, destweights=None,
-                                   Info info=INFO_NULL, bint reorder=False):
+    def Create_dist_graph_adjacent(
+        self,
+        sources: Sequence[int],
+        destinations: Sequence[int],
+        sourceweights: Optional[Sequence[int]] = None,
+        destweights: Optional[Sequence[int]] = None,
+        Info info: Info = INFO_NULL,
+        bint reorder: bool = False,
+    ) -> Distgraphcomm:
         """
         Create distributed graph communicator
         """
@@ -1367,8 +1716,15 @@ cdef class Intracomm(Comm):
         comm_set_eh(comm.ob_mpi)
         return comm
 
-    def Create_dist_graph(self, sources, degrees, destinations, weights=None,
-                          Info info=INFO_NULL, bint reorder=False):
+    def Create_dist_graph(
+        self,
+        sources: Sequence[int],
+        degrees: Sequence[int],
+        destinations: Sequence[int],
+        weights: Optional[Sequence[int]] = None,
+        Info info: Info = INFO_NULL,
+        bint reorder: bool = False,
+    ) -> Distgraphcomm:
         """
         Create distributed graph communicator
         """
@@ -1389,11 +1745,13 @@ cdef class Intracomm(Comm):
         comm_set_eh(comm.ob_mpi)
         return comm
 
-    def Create_intercomm(self,
-                         int local_leader,
-                         Intracomm peer_comm,
-                         int remote_leader,
-                         int tag=0):
+    def Create_intercomm(
+        self,
+        int local_leader: int,
+        Intracomm peer_comm: Intracomm,
+        int remote_leader: int,
+        int tag: int = 0,
+    ) -> Intercomm:
         """
         Create intercommunicator
         """
@@ -1408,7 +1766,11 @@ cdef class Intracomm(Comm):
     # Low-Level Topology Functions
     # ----------------------------
 
-    def Cart_map(self, dims, periods=None):
+    def Cart_map(
+        self,
+        dims: Sequence[int],
+        periods: Optional[Sequence[bool]] = None,
+    ) -> int:
         """
         Return an optimal placement for the
         calling process on the physical machine
@@ -1422,7 +1784,11 @@ cdef class Intracomm(Comm):
         CHKERR( MPI_Cart_map(self.ob_mpi, ndims, idims, iperiods, &rank) )
         return rank
 
-    def Graph_map(self, index, edges):
+    def Graph_map(
+        self,
+        index: Sequence[int],
+        edges: Sequence[int],
+    ) -> int:
         """
         Return an optimal placement for the
         calling process on the physical machine
@@ -1443,7 +1809,12 @@ cdef class Intracomm(Comm):
 
     # Inclusive Scan
 
-    def Scan(self, sendbuf, recvbuf, Op op=SUM):
+    def Scan(
+        self,
+        sendbuf: Union[BufSpec, InPlace],
+        recvbuf: BufSpec,
+        Op op: Op = SUM,
+    ) -> None:
         """
         Inclusive Scan
         """
@@ -1455,7 +1826,12 @@ cdef class Intracomm(Comm):
 
     # Exclusive Scan
 
-    def Exscan(self, sendbuf, recvbuf, Op op=SUM):
+    def Exscan(
+        self,
+        sendbuf: Union[BufSpec, InPlace],
+        recvbuf: BufSpec,
+        Op op: Op = SUM,
+    ) -> None:
         """
         Exclusive Scan
         """
@@ -1467,7 +1843,12 @@ cdef class Intracomm(Comm):
 
     # Nonblocking
 
-    def Iscan(self, sendbuf, recvbuf, Op op=SUM):
+    def Iscan(
+        self,
+        sendbuf: Union[BufSpec, InPlace],
+        recvbuf: BufSpec,
+        Op op: Op = SUM,
+    ) -> Request:
         """
         Inclusive Scan
         """
@@ -1479,7 +1860,12 @@ cdef class Intracomm(Comm):
             op.ob_mpi, self.ob_mpi, &request.ob_mpi) )
         return request
 
-    def Iexscan(self, sendbuf, recvbuf, Op op=SUM):
+    def Iexscan(
+        self,
+        sendbuf: Union[BufSpec, InPlace],
+        recvbuf: BufSpec,
+        Op op: Op = SUM,
+    ) -> Request:
         """
         Inclusive Scan
         """
@@ -1493,15 +1879,21 @@ cdef class Intracomm(Comm):
 
     # Python Communication
     #
-    def scan(self, sendobj, op=SUM):
+    def scan(
+        self,
+        sendobj: Any,
+        op: Union[Op, Callable[[Any, Any], Any]] = SUM,
+    ) -> Any:
         """Inclusive Scan"""
-        if op is None: op = SUM
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_scan(sendobj, op, comm)
     #
-    def exscan(self, sendobj, op=SUM):
+    def exscan(
+        self,
+        sendobj: Any,
+        op: Union[Op, Callable[[Any, Any], Any]] = SUM,
+    ) -> Any:
         """Exclusive Scan"""
-        if op is None: op = SUM
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_exscan(sendobj, op, comm)
 
@@ -1510,8 +1902,15 @@ cdef class Intracomm(Comm):
 
     # Starting Processes
 
-    def Spawn(self, command, args=None, int maxprocs=1,
-              Info info=INFO_NULL, int root=0, errcodes=None):
+    def Spawn(
+        self,
+        command: str,
+        args: Optional[Sequence[str]] = None,
+        int maxprocs: int = 1,
+        Info info: Info = INFO_NULL,
+        int root: int = 0,
+        errcodes: Optional[list] = None,
+    ) -> Intercomm:
         """
         Spawn instances of a single MPI application
         """
@@ -1540,8 +1939,15 @@ cdef class Intracomm(Comm):
         comm_set_eh(comm.ob_mpi)
         return comm
 
-    def Spawn_multiple(self, command, args=None, maxprocs=None,
-                       info=INFO_NULL, int root=0, errcodes=None):
+    def Spawn_multiple(
+        self,
+        command: Sequence[str],
+        args: Optional[Sequence[Sequence[str]]] = None,
+        maxprocs: Optional[Sequence[int]] = None,
+        info: Union[Info, Sequence[Info]] = INFO_NULL,
+        int root: int = 0,
+        errcodes: Optional[list] = None,
+    ) -> Intercomm:
         """
         Spawn instances of multiple MPI applications
         """
@@ -1586,7 +1992,12 @@ cdef class Intracomm(Comm):
 
     # Server Routines
 
-    def Accept(self, port_name, Info info=INFO_NULL, int root=0):
+    def Accept(
+        self,
+        port_name: str,
+        Info info: Info = INFO_NULL,
+        int root: int = 0,
+    ) -> Intercomm:
         """
         Accept a request to form a new intercommunicator
         """
@@ -1604,7 +2015,12 @@ cdef class Intracomm(Comm):
 
     # Client Routines
 
-    def Connect(self, port_name, Info info=INFO_NULL, int root=0):
+    def Connect(
+        self,
+        port_name: str,
+        Info info: Info = INFO_NULL,
+        int root: int = 0,
+    ) -> Intercomm:
         """
         Make a request to form a new intercommunicator
         """
@@ -1627,7 +2043,7 @@ cdef class Topocomm(Intracomm):
     Topology intracommunicator
     """
 
-    def __cinit__(self, Comm comm=None):
+    def __cinit__(self, Comm comm: Optional[Comm] = None):
         if self.ob_mpi == MPI_COMM_NULL: return
         cdef int topo = MPI_UNDEFINED
         CHKERR( MPI_Topo_test(self.ob_mpi, &topo) )
@@ -1636,7 +2052,7 @@ cdef class Topocomm(Intracomm):
 
     property degrees:
         "number of incoming and outgoing neighbors"
-        def __get__(self):
+        def __get__(self) -> Tuple[int, int]:
             cdef object dim, rank
             cdef object nneighbors
             if isinstance(self, Cartcomm):
@@ -1653,17 +2069,17 @@ cdef class Topocomm(Intracomm):
 
     property indegree:
         "number of incoming neighbors"
-        def __get__(self):
+        def __get__(self) -> int:
             return self.degrees[0]
 
     property outdegree:
         "number of outgoing neighbors"
-        def __get__(self):
+        def __get__(self) -> int:
             return self.degrees[1]
 
     property inoutedges:
         "incoming and outgoing neighbors"
-        def __get__(self):
+        def __get__(self) -> Tuple[List[int], List[int]]:
             cdef object direction, source, dest, rank
             cdef object neighbors
             if isinstance(self, Cartcomm):
@@ -1684,18 +2100,22 @@ cdef class Topocomm(Intracomm):
 
     property inedges:
         "incoming neighbors"
-        def __get__(self):
+        def __get__(self) -> List[int]:
             return self.inoutedges[0]
 
     property outedges:
         "outgoing neighbors"
-        def __get__(self):
+        def __get__(self) -> List[int]:
             return self.inoutedges[1]
 
     # Neighborhood Collectives
     # ------------------------
 
-    def Neighbor_allgather(self, sendbuf, recvbuf):
+    def Neighbor_allgather(
+        self,
+        sendbuf: BufSpec,
+        recvbuf: BufSpecB,
+    ) -> None:
         """
         Neighbor Gather to All
         """
@@ -1706,7 +2126,11 @@ cdef class Topocomm(Intracomm):
             m.rbuf, m.rcount, m.rtype,
             self.ob_mpi) )
 
-    def Neighbor_allgatherv(self, sendbuf, recvbuf):
+    def Neighbor_allgatherv(
+        self,
+        sendbuf: BufSpec,
+        recvbuf: BufSpecV,
+    ) -> None:
         """
         Neighbor Gather to All Vector
         """
@@ -1717,7 +2141,11 @@ cdef class Topocomm(Intracomm):
             m.rbuf, m.rcounts, m.rdispls, m.rtype,
             self.ob_mpi) )
 
-    def Neighbor_alltoall(self, sendbuf, recvbuf):
+    def Neighbor_alltoall(
+        self,
+        sendbuf: BufSpecB,
+        recvbuf: BufSpecB,
+    ) -> None:
         """
         Neighbor All-to-All
         """
@@ -1728,7 +2156,11 @@ cdef class Topocomm(Intracomm):
             m.rbuf, m.rcount, m.rtype,
             self.ob_mpi) )
 
-    def Neighbor_alltoallv(self, sendbuf, recvbuf):
+    def Neighbor_alltoallv(
+        self,
+        sendbuf: BufSpecV,
+        recvbuf: BufSpecV,
+    ) -> None:
         """
         Neighbor All-to-All Vector
         """
@@ -1739,7 +2171,11 @@ cdef class Topocomm(Intracomm):
             m.rbuf, m.rcounts, m.rdispls, m.rtype,
             self.ob_mpi) )
 
-    def Neighbor_alltoallw(self, sendbuf, recvbuf):
+    def Neighbor_alltoallw(
+        self,
+        sendbuf: BufSpecW,
+        recvbuf: BufSpecW,
+    ) -> None:
         """
         Neighbor All-to-All Generalized
         """
@@ -1753,7 +2189,11 @@ cdef class Topocomm(Intracomm):
     # Nonblocking Neighborhood Collectives
     # ------------------------------------
 
-    def Ineighbor_allgather(self, sendbuf, recvbuf):
+    def Ineighbor_allgather(
+        self,
+        sendbuf: BufSpec,
+        recvbuf: BufSpecB,
+    ) -> Request:
         """
         Nonblocking Neighbor Gather to All
         """
@@ -1767,7 +2207,11 @@ cdef class Topocomm(Intracomm):
         request.ob_buf = m
         return request
 
-    def Ineighbor_allgatherv(self, sendbuf, recvbuf):
+    def Ineighbor_allgatherv(
+        self,
+        sendbuf: BufSpec,
+        recvbuf: BufSpecV,
+    ) -> Request:
         """
         Nonblocking Neighbor Gather to All Vector
         """
@@ -1781,7 +2225,11 @@ cdef class Topocomm(Intracomm):
         request.ob_buf = m
         return request
 
-    def Ineighbor_alltoall(self, sendbuf, recvbuf):
+    def Ineighbor_alltoall(
+        self,
+        sendbuf: BufSpecB,
+        recvbuf: BufSpecB,
+    ) -> Request:
         """
         Nonblocking Neighbor All-to-All
         """
@@ -1795,7 +2243,11 @@ cdef class Topocomm(Intracomm):
         request.ob_buf = m
         return request
 
-    def Ineighbor_alltoallv(self, sendbuf, recvbuf):
+    def Ineighbor_alltoallv(
+        self,
+        sendbuf: BufSpecV,
+        recvbuf: BufSpecV,
+    ) -> Request:
         """
         Nonblocking Neighbor All-to-All Vector
         """
@@ -1809,7 +2261,11 @@ cdef class Topocomm(Intracomm):
         request.ob_buf = m
         return request
 
-    def Ineighbor_alltoallw(self, sendbuf, recvbuf):
+    def Ineighbor_alltoallw(
+        self,
+        sendbuf: BufSpecW,
+        recvbuf: BufSpecW,
+    ) -> Request:
         """
         Nonblocking Neighbor All-to-All Generalized
         """
@@ -1825,12 +2281,12 @@ cdef class Topocomm(Intracomm):
 
     # Python Communication
     #
-    def neighbor_allgather(self, sendobj):
+    def neighbor_allgather(self, sendobj: Any) -> List[Any]:
         """Neighbor Gather to All"""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_neighbor_allgather(sendobj, comm)
     #
-    def neighbor_alltoall(self, sendobj):
+    def neighbor_alltoall(self, sendobj: List[Any]) -> List[Any]:
         """Neighbor All to All Scatter/Gather"""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_neighbor_alltoall(sendobj, comm)
@@ -1842,7 +2298,7 @@ cdef class Cartcomm(Topocomm):
     Cartesian topology intracommunicator
     """
 
-    def __cinit__(self, Comm comm=None):
+    def __cinit__(self, Comm comm: Optional[Comm] = None):
         if self.ob_mpi == MPI_COMM_NULL: return
         cdef int topo = MPI_UNDEFINED
         CHKERR( MPI_Topo_test(self.ob_mpi, &topo) )
@@ -1852,7 +2308,7 @@ cdef class Cartcomm(Topocomm):
     # Cartesian Inquiry Functions
     # ---------------------------
 
-    def Get_dim(self):
+    def Get_dim(self) -> int:
         """
         Return number of dimensions
         """
@@ -1862,15 +2318,15 @@ cdef class Cartcomm(Topocomm):
 
     property dim:
         """number of dimensions"""
-        def __get__(self):
+        def __get__(self) -> int:
             return self.Get_dim()
 
     property ndim:
         """number of dimensions"""
-        def __get__(self):
+        def __get__(self) -> int:
             return self.Get_dim()
 
-    def Get_topo(self):
+    def Get_topo(self) -> Tuple[List[int], List[int], List[int]]:
         """
         Return information on the cartesian topology
         """
@@ -1891,29 +2347,29 @@ cdef class Cartcomm(Topocomm):
 
     property topo:
         """topology information"""
-        def __get__(self):
+        def __get__(self) -> Tuple[List[int], List[int], List[int]]:
             return self.Get_topo()
 
     property dims:
         """dimensions"""
-        def __get__(self):
+        def __get__(self) -> List[int]:
             return self.Get_topo()[0]
 
     property periods:
         """periodicity"""
-        def __get__(self):
+        def __get__(self) -> List[int]:
             return self.Get_topo()[1]
 
     property coords:
         """coordinates"""
-        def __get__(self):
+        def __get__(self) -> List[int]:
             return self.Get_topo()[2]
 
 
     # Cartesian Translator Functions
     # ------------------------------
 
-    def Get_cart_rank(self, coords):
+    def Get_cart_rank(self, coords: Sequence[int]) -> int:
         """
         Translate logical coordinates to ranks
         """
@@ -1924,7 +2380,7 @@ cdef class Cartcomm(Topocomm):
         CHKERR( MPI_Cart_rank(self.ob_mpi, icoords, &rank) )
         return rank
 
-    def Get_coords(self, int rank):
+    def Get_coords(self, int rank: int) -> List[int]:
         """
         Translate ranks to logical coordinates
         """
@@ -1938,9 +2394,9 @@ cdef class Cartcomm(Topocomm):
     # Cartesian Shift Function
     # ------------------------
 
-    def Shift(self, int direction, int disp):
+    def Shift(self, int direction: int, int disp: int) -> Tuple[int, int]:
         """
-        Return a tuple (source,dest) of process ranks
+        Return a tuple (source, dest) of process ranks
         for data shifting with Comm.Sendrecv()
         """
         cdef int source = MPI_PROC_NULL, dest = MPI_PROC_NULL
@@ -1950,7 +2406,7 @@ cdef class Cartcomm(Topocomm):
     # Cartesian Partition Function
     # ----------------------------
 
-    def Sub(self, remain_dims):
+    def Sub(self, remain_dims: Sequence[bool]) -> Cartcomm:
         """
         Return cartesian communicators
         that form lower-dimensional subgrids
@@ -1966,7 +2422,7 @@ cdef class Cartcomm(Topocomm):
 
 # Cartesian Convenience Function
 
-def Compute_dims(int nnodes, dims):
+def Compute_dims(int nnodes: int, dims: Union[int, Sequence[int]]) -> List[int]:
     """
     Return a balanced distribution of
     processes per coordinate direction
@@ -1989,7 +2445,7 @@ cdef class Graphcomm(Topocomm):
     General graph topology intracommunicator
     """
 
-    def __cinit__(self, Comm comm=None):
+    def __cinit__(self, Comm comm: Optional[Comm] = None):
         if self.ob_mpi == MPI_COMM_NULL: return
         cdef int topo = MPI_UNDEFINED
         CHKERR( MPI_Topo_test(self.ob_mpi, &topo) )
@@ -1999,7 +2455,7 @@ cdef class Graphcomm(Topocomm):
     # Graph Inquiry Functions
     # -----------------------
 
-    def Get_dims(self):
+    def Get_dims(self) -> Tuple[int, int]:
         """
         Return the number of nodes and edges
         """
@@ -2009,20 +2465,20 @@ cdef class Graphcomm(Topocomm):
 
     property dims:
         """number of nodes and edges"""
-        def __get__(self):
+        def __get__(self) -> Tuple[int, int]:
             return self.Get_dims()
 
     property nnodes:
         """number of nodes"""
-        def __get__(self):
+        def __get__(self) -> int:
             return self.Get_dims()[0]
 
     property nedges:
         """number of edges"""
-        def __get__(self):
+        def __get__(self) -> int:
             return self.Get_dims()[1]
 
-    def Get_topo(self):
+    def Get_topo(self) -> Tuple[List[int], List[int]]:
         """
         Return index and edges
         """
@@ -2040,23 +2496,23 @@ cdef class Graphcomm(Topocomm):
 
     property topo:
         """topology information"""
-        def __get__(self):
+        def __get__(self) -> Tuple[List[int], List[int]]:
             return self.Get_topo()
 
     property index:
         """index"""
-        def __get__(self):
+        def __get__(self) -> List[int]:
             return self.Get_topo()[0]
 
     property edges:
         """edges"""
-        def __get__(self):
+        def __get__(self) -> List[int]:
             return self.Get_topo()[1]
 
     # Graph Information Functions
     # ---------------------------
 
-    def Get_neighbors_count(self, int rank):
+    def Get_neighbors_count(self, int rank: int) -> int:
         """
         Return number of neighbors of a process
         """
@@ -2066,11 +2522,11 @@ cdef class Graphcomm(Topocomm):
 
     property nneighbors:
         """number of neighbors"""
-        def __get__(self):
+        def __get__(self) -> int:
             cdef int rank = self.Get_rank()
             return self.Get_neighbors_count(rank)
 
-    def Get_neighbors(self, int rank):
+    def Get_neighbors(self, int rank: int) -> List[int]:
         """
         Return list of neighbors of a process
         """
@@ -2085,7 +2541,7 @@ cdef class Graphcomm(Topocomm):
 
     property neighbors:
         """neighbors"""
-        def __get__(self):
+        def __get__(self) -> List[int]:
             cdef int rank = self.Get_rank()
             return self.Get_neighbors(rank)
 
@@ -2096,7 +2552,7 @@ cdef class Distgraphcomm(Topocomm):
     Distributed graph topology intracommunicator
     """
 
-    def __cinit__(self, Comm comm=None):
+    def __cinit__(self, Comm comm: Optional[Comm] = None):
         if self.ob_mpi == MPI_COMM_NULL: return
         cdef int topo = MPI_UNDEFINED
         CHKERR( MPI_Topo_test(self.ob_mpi, &topo) )
@@ -2106,7 +2562,7 @@ cdef class Distgraphcomm(Topocomm):
     # Topology Inquiry Functions
     # --------------------------
 
-    def Get_dist_neighbors_count(self):
+    def Get_dist_neighbors_count(self) -> int:
         """
         Return adjacency information for a distributed graph topology
         """
@@ -2117,7 +2573,8 @@ cdef class Distgraphcomm(Topocomm):
                 self.ob_mpi, &indegree, &outdegree, &weighted) )
         return (indegree, outdegree, <bint>weighted)
 
-    def Get_dist_neighbors(self):
+    def Get_dist_neighbors(self) \
+        -> Tuple[List[int], List[int], Optional[Tuple[List[int], List[int]]]]:
         """
         Return adjacency information for a distributed graph topology
         """
@@ -2158,7 +2615,7 @@ cdef class Intercomm(Comm):
     Intercommunicator
     """
 
-    def __cinit__(self, Comm comm=None):
+    def __cinit__(self, Comm comm: Optional[Comm] = None):
         if self.ob_mpi == MPI_COMM_NULL: return
         cdef int inter = 0
         CHKERR( MPI_Comm_test_inter(self.ob_mpi, &inter) )
@@ -2168,7 +2625,7 @@ cdef class Intercomm(Comm):
     # Intercommunicator Accessors
     # ---------------------------
 
-    def Get_remote_group(self):
+    def Get_remote_group(self) -> Group:
         """
         Access the remote group associated
         with the inter-communicator
@@ -2180,10 +2637,10 @@ cdef class Intercomm(Comm):
 
     property remote_group:
         """remote group"""
-        def __get__(self):
+        def __get__(self) -> Group:
             return self.Get_remote_group()
 
-    def Get_remote_size(self):
+    def Get_remote_size(self) -> int:
         """
         Intercommunicator remote size
         """
@@ -2193,13 +2650,13 @@ cdef class Intercomm(Comm):
 
     property remote_size:
         """number of remote processes"""
-        def __get__(self):
+        def __get__(self) -> int:
             return self.Get_remote_size()
 
     # Communicator Constructors
     # -------------------------
 
-    def Merge(self, bint high=False):
+    def Merge(self, bint high: bool = False) -> Intracomm:
         """
         Merge intercommunicator
         """
@@ -2231,7 +2688,7 @@ COMM_WORLD = __COMM_WORLD__  #: World communicator handle
 BSEND_OVERHEAD = MPI_BSEND_OVERHEAD
 #: Upper bound of memory overhead for sending in buffered mode
 
-def Attach_buffer(buf):
+def Attach_buffer(buf: Buffer) -> None:
     """
     Attach a user-provided buffer for
     sending in buffered mode
@@ -2241,7 +2698,7 @@ def Attach_buffer(buf):
     attach_buffer(buf, &base, &size)
     with nogil: CHKERR( MPI_Buffer_attach(base, size) )
 
-def Detach_buffer():
+def Detach_buffer() -> Buffer:
     """
     Remove an existing attached buffer
     """
@@ -2258,7 +2715,7 @@ def Detach_buffer():
 # Server Routines
 # ---------------
 
-def Open_port(Info info=INFO_NULL):
+def Open_port(Info info: Info = INFO_NULL) -> str:
     """
     Return an address that can be used to establish
     connections between groups of MPI processes
@@ -2268,7 +2725,7 @@ def Open_port(Info info=INFO_NULL):
     cportname[MPI_MAX_PORT_NAME] = 0 # just in case
     return mpistr(cportname)
 
-def Close_port(port_name):
+def Close_port(port_name: str) -> None:
     """
     Close a port
     """
@@ -2279,7 +2736,11 @@ def Close_port(port_name):
 # Name Publishing
 # ---------------
 
-def Publish_name(service_name, port_name, info=INFO_NULL):
+def Publish_name(
+    service_name: str,
+    port_name: str,
+    info: Info = INFO_NULL,
+) -> None:
     """
     Publish a service name
     """
@@ -2292,7 +2753,11 @@ def Publish_name(service_name, port_name, info=INFO_NULL):
     cdef MPI_Info cinfo = arg_Info(<Info?>info)
     with nogil: CHKERR( MPI_Publish_name(csrvcname, cinfo, cportname) )
 
-def Unpublish_name(service_name, port_name, info=INFO_NULL):
+def Unpublish_name(
+    service_name: str,
+    port_name: str,
+    info: Info = INFO_NULL,
+) -> None:
     """
     Unpublish a service name
     """
@@ -2305,7 +2770,10 @@ def Unpublish_name(service_name, port_name, info=INFO_NULL):
     cdef MPI_Info cinfo = arg_Info(<Info?>info)
     with nogil: CHKERR( MPI_Unpublish_name(csrvcname, cinfo, cportname) )
 
-def Lookup_name(service_name, info=INFO_NULL):
+def Lookup_name(
+    service_name: str,
+    info: Info = INFO_NULL,
+) -> str:
     """
     Lookup a port name given a service name
     """

@@ -4,7 +4,7 @@ cdef class Message:
     Message
     """
 
-    def __cinit__(self, Message message=None):
+    def __cinit__(self, Message message: Optional[Message] = None):
         self.ob_mpi = MPI_MESSAGE_NULL
         if message is None: return
         self.ob_mpi = message.ob_mpi
@@ -23,15 +23,20 @@ cdef class Message:
         cdef cls = type(self).__name__
         raise TypeError("unorderable type: '%s.%s'" % (mod, cls))
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return self.ob_mpi != MPI_MESSAGE_NULL
 
     # Matching Probe
     # --------------
 
     @classmethod
-    def Probe(cls, Comm comm,
-              int source=ANY_SOURCE, int tag=ANY_TAG, Status status=None):
+    def Probe(
+        cls,
+        Comm comm: Comm,
+        int source: int = ANY_SOURCE,
+        int tag: int = ANY_TAG,
+        Status status: Optional[Status] = None,
+    ) -> Message:
         """
         Blocking test for a matched message
         """
@@ -44,8 +49,13 @@ cdef class Message:
         return message
 
     @classmethod
-    def Iprobe(cls, Comm comm,
-               int source=ANY_SOURCE, int tag=ANY_TAG, Status status=None):
+    def Iprobe(
+        cls,
+        Comm comm: Comm,
+        int source: int = ANY_SOURCE,
+        int tag: int = ANY_TAG,
+        Status status: Optional[Status] = None,
+    ) -> Optional[Message]:
         """
         Nonblocking test for a matched message
         """
@@ -62,7 +72,11 @@ cdef class Message:
     # Matched receives
     # ----------------
 
-    def Recv(self, buf, Status status=None):
+    def Recv(
+        self,
+        buf: BufSpec,
+        Status status: Optional[Status] = None,
+    ) -> None:
         """
         Blocking receive of matched message
         """
@@ -78,7 +92,7 @@ cdef class Message:
         if self is not __MESSAGE_NO_PROC__:
             self.ob_mpi = message
 
-    def Irecv(self, buf):
+    def Irecv(self, buf: BufSpec) -> Request:
         """
         Nonblocking receive of matched message
         """
@@ -100,8 +114,13 @@ cdef class Message:
     # --------------------
     #
     @classmethod
-    def probe(cls, Comm comm,
-              int source=ANY_SOURCE, int tag=ANY_TAG, Status status=None):
+    def probe(
+        cls,
+        Comm comm: Comm,
+        int source: int = ANY_SOURCE,
+        int tag: int = ANY_TAG,
+        Status status: Optional[Status] = None,
+    ) -> Message:
         """Blocking test for a matched message"""
         cdef Message message = <Message>Message.__new__(cls)
         cdef MPI_Status *statusp = arg_Status(status)
@@ -110,8 +129,12 @@ cdef class Message:
         return message
     #
     @classmethod
-    def iprobe(cls, Comm comm,
-               int source=ANY_SOURCE, int tag=ANY_TAG, Status status=None):
+    def iprobe(
+        cls, Comm comm: Comm,
+        int source: int = ANY_SOURCE,
+        int tag: int = ANY_TAG,
+        Status status: Optional[Status] = None,
+    ) -> Optional[Message]:
         """Nonblocking test for a matched message"""
         cdef int flag = 0
         cdef Message message = <Message>Message.__new__(cls)
@@ -121,7 +144,7 @@ cdef class Message:
         if flag == 0: return None
         return message
     #
-    def recv(self, Status status=None):
+    def recv(self, Status status: Optional[Status] = None) -> Any:
         """Blocking receive of matched message"""
         cdef object rmsg = self.ob_buf
         cdef MPI_Message message = self.ob_mpi
@@ -131,7 +154,7 @@ cdef class Message:
         if self.ob_mpi == MPI_MESSAGE_NULL: self.ob_buf = None
         return rmsg
     #
-    def irecv(self):
+    def irecv(self) -> Request:
         """Nonblocking receive of matched message"""
         cdef object rmsg = self.ob_buf
         cdef MPI_Message message = self.ob_mpi
@@ -144,13 +167,13 @@ cdef class Message:
     # Fortran Handle
     # --------------
 
-    def py2f(self):
+    def py2f(self) -> int:
         """
         """
         return MPI_Message_c2f(self.ob_mpi)
 
     @classmethod
-    def f2py(cls, arg):
+    def f2py(cls, arg: int) -> Message:
         """
         """
         cdef Message message = Message.__new__(Message)

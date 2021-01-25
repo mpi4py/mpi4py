@@ -4,7 +4,7 @@ cdef class Request:
     Request
     """
 
-    def __cinit__(self, Request request=None):
+    def __cinit__(self, Request request: Optional[Request] = None):
         self.ob_mpi = MPI_REQUEST_NULL
         if request is None: return
         self.ob_mpi = request.ob_mpi
@@ -23,13 +23,13 @@ cdef class Request:
         cdef cls = type(self).__name__
         raise TypeError("unorderable type: '%s.%s'" % (mod, cls))
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return self.ob_mpi != MPI_REQUEST_NULL
 
     # Completion Operations
     # ---------------------
 
-    def Wait(self, Status status=None):
+    def Wait(self, Status status: Optional[Status] = None) -> Literal[True]:
         """
         Wait for a send or receive to complete
         """
@@ -40,7 +40,7 @@ cdef class Request:
             self.ob_buf = None
         return True
 
-    def Test(self, Status status=None):
+    def Test(self, Status status: Optional[Status] = None) -> bool:
         """
         Test for the completion of a send or receive
         """
@@ -52,13 +52,13 @@ cdef class Request:
             self.ob_buf = None
         return <bint>flag
 
-    def Free(self):
+    def Free(self) -> None:
         """
         Free a communication request
         """
         with nogil: CHKERR( MPI_Request_free(&self.ob_mpi) )
 
-    def Get_status(self, Status status=None):
+    def Get_status(self, Status status: Optional[Status] = None) -> bool:
         """
         Non-destructive test for the completion of a request
         """
@@ -72,7 +72,11 @@ cdef class Request:
     # --------------------
 
     @classmethod
-    def Waitany(cls, requests, Status status=None):
+    def Waitany(
+        cls,
+        requests: Sequence[Request],
+        Status status: Optional[Status] = None,
+    ) -> int:
         """
         Wait for any previously initiated request to complete
         """
@@ -90,7 +94,11 @@ cdef class Request:
         return index
 
     @classmethod
-    def Testany(cls, requests, Status status=None):
+    def Testany(
+        cls,
+        requests: Sequence[Request],
+        Status status: Optional[Status] = None,
+    ) -> Tuple[int, bool]:
         """
         Test for completion of any previously initiated request
         """
@@ -110,7 +118,11 @@ cdef class Request:
         return (index, <bint>flag)
 
     @classmethod
-    def Waitall(cls, requests, statuses=None):
+    def Waitall(
+        cls,
+        requests: Sequence[Request],
+        statuses: Optional[List[Status]] = None,
+    ) -> Literal[True]:
         """
         Wait for all previously initiated requests to complete
         """
@@ -128,7 +140,11 @@ cdef class Request:
         return True
 
     @classmethod
-    def Testall(cls, requests, statuses=None):
+    def Testall(
+        cls,
+        requests: Sequence[Request],
+        statuses: Optional[List[Status]] = None,
+    ) -> bool:
         """
         Test for completion of all previously initiated requests
         """
@@ -147,7 +163,11 @@ cdef class Request:
         return <bint>flag
 
     @classmethod
-    def Waitsome(cls, requests, statuses=None):
+    def Waitsome(
+        cls,
+        requests: Sequence[Request],
+        statuses: Optional[List[Status]] = None,
+    ) -> Optional[List[int]]:
         """
         Wait for some previously initiated requests to complete
         """
@@ -174,7 +194,11 @@ cdef class Request:
         return indices
 
     @classmethod
-    def Testsome(cls, requests, statuses=None):
+    def Testsome(
+        cls,
+        requests: Sequence[Request],
+        statuses: Optional[List[Status]] = None,
+    ) -> Optional[List[int]]:
         """
         Test for completion of some previously initiated requests
         """
@@ -203,7 +227,7 @@ cdef class Request:
     # Cancel
     # ------
 
-    def Cancel(self):
+    def Cancel(self) -> None:
         """
         Cancel a communication request
         """
@@ -212,13 +236,13 @@ cdef class Request:
     # Fortran Handle
     # --------------
 
-    def py2f(self):
+    def py2f(self) -> int:
         """
         """
         return MPI_Request_c2f(self.ob_mpi)
 
     @classmethod
-    def f2py(cls, arg):
+    def f2py(cls, arg: int) -> Request:
         """
         """
         cdef Request request = Request.__new__(Request)
@@ -232,14 +256,14 @@ cdef class Request:
     # Python Communication
     # --------------------
     #
-    def wait(self, Status status=None):
+    def wait(self, Status status: Optional[Status] = None) -> Any:
         """
         Wait for a send or receive to complete
         """
         cdef msg = PyMPI_wait(self, status)
         return msg
     #
-    def test(self, Status status=None):
+    def test(self, Status status: Optional[Status] = None) -> Tuple[bool, Any]:
         """
         Test for the completion of a send or receive
         """
@@ -248,7 +272,11 @@ cdef class Request:
         return (<bint>flag, msg)
     #
     @classmethod
-    def waitany(cls, requests, Status status=None):
+    def waitany(
+        cls,
+        requests: Sequence[Request],
+        Status status: Optional[Status] = None
+    ) -> Tuple[int, Any]:
         """
         Wait for any previously initiated request to complete
         """
@@ -257,7 +285,11 @@ cdef class Request:
         return (index, msg)
     #
     @classmethod
-    def testany(cls, requests, Status status=None):
+    def testany(
+        cls,
+        requests: Sequence[Request],
+        Status status: Optional[Status] = None,
+    ) -> Tuple[int, bool, Any]:
         """
         Test for completion of any previously initiated request
         """
@@ -267,7 +299,11 @@ cdef class Request:
         return (index, <bint>flag, msg)
     #
     @classmethod
-    def waitall(cls, requests, statuses=None):
+    def waitall(
+        cls,
+        requests: Sequence[Request],
+        statuses: Optional[List[Status]] = None,
+    ) -> List[Any]:
         """
         Wait for all previously initiated requests to complete
         """
@@ -275,7 +311,11 @@ cdef class Request:
         return msg
     #
     @classmethod
-    def testall(cls, requests, statuses=None):
+    def testall(
+        cls,
+        requests: Sequence[Request],
+        statuses: Optional[List[Status]] = None
+    ) -> Tuple[bool, List[Any]]:
         """
         Test for completion of all previously initiated requests
         """
@@ -284,14 +324,22 @@ cdef class Request:
         return (<bint>flag, msg)
     #
     @classmethod
-    def waitsome(cls, requests, statuses=None):
+    def waitsome(
+        cls,
+        requests: Sequence[Request],
+        statuses: Optional[List[Status]] = None,
+    ) -> Tuple[Optional[List[int]], Optional[List[Any]]]:
         """
         Wait for some previously initiated requests to complete
         """
         return PyMPI_waitsome(requests, statuses)
     #
     @classmethod
-    def testsome(cls, requests, statuses=None):
+    def testsome(
+        cls,
+        requests: Sequence[Request],
+        statuses: Optional[List[Status]] = None,
+    ) -> Tuple[Optional[List[int]], Optional[List[Any]]]:
         """
         Test for completion of some previously initiated requests
         """
@@ -304,18 +352,18 @@ cdef class Prequest(Request):
     Persistent request
     """
 
-    def __cinit__(self, Request request=None):
+    def __cinit__(self, Request request: Optional[Request] = None):
         if self.ob_mpi == MPI_REQUEST_NULL: return
         <void>(<Prequest?>request)
 
-    def Start(self):
+    def Start(self) -> None:
         """
         Initiate a communication with a persistent request
         """
         with nogil: CHKERR( MPI_Start(&self.ob_mpi) )
 
     @classmethod
-    def Startall(cls, requests):
+    def Startall(cls, requests: List[Prequest]) -> None:
         """
         Start a collection of persistent requests
         """
@@ -336,14 +384,20 @@ cdef class Grequest(Request):
     Generalized request
     """
 
-    def __cinit__(self, Request request=None):
+    def __cinit__(self, Request request: Optional[Request] = None):
         self.ob_grequest = self.ob_mpi
         if self.ob_mpi == MPI_REQUEST_NULL: return
         <void>(<Grequest?>request)
 
     @classmethod
-    def Start(cls, query_fn, free_fn, cancel_fn,
-              args=None, kargs=None):
+    def Start(
+        cls,
+        query_fn: Callable[..., None],
+        free_fn: Callable[..., None],
+        cancel_fn: Callable[..., None],
+        args: Optional[Tuple[Any]] = None,
+        kargs: Optional[Dict[str, Any]] = None,
+    ) -> Grequest:
         """
         Create and return a user-defined request
         """
@@ -357,7 +411,7 @@ cdef class Grequest(Request):
         request.ob_grequest = request.ob_mpi
         return request
 
-    def Complete(self):
+    def Complete(self) -> None:
         """
         Notify that a user-defined request is complete
         """

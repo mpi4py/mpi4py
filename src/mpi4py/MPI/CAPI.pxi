@@ -65,6 +65,18 @@ cdef api MPI_Op* PyMPIOp_Get(object arg) except NULL:
 
 # -----------------------------------------------------------------------------
 
+#  Group
+
+cdef api object PyMPIGroup_New(MPI_Group arg):
+    cdef Group obj = Group.__new__(Group)
+    obj.ob_mpi = arg
+    return obj
+
+cdef api MPI_Group* PyMPIGroup_Get(object arg) except NULL:
+    return &(<Group?>arg).ob_mpi
+
+# -----------------------------------------------------------------------------
+
 #  Info
 
 cdef api object PyMPIInfo_New(MPI_Info arg):
@@ -77,15 +89,15 @@ cdef api MPI_Info* PyMPIInfo_Get(object arg) except NULL:
 
 # -----------------------------------------------------------------------------
 
-#  Group
+# Errhandler
 
-cdef api object PyMPIGroup_New(MPI_Group arg):
-    cdef Group obj = Group.__new__(Group)
+cdef api object PyMPIErrhandler_New(MPI_Errhandler arg):
+    cdef Errhandler obj = Errhandler.__new__(Errhandler)
     obj.ob_mpi = arg
     return obj
 
-cdef api MPI_Group* PyMPIGroup_Get(object arg) except NULL:
-    return &(<Group?>arg).ob_mpi
+cdef api MPI_Errhandler* PyMPIErrhandler_Get(object arg) except NULL:
+    return &(<Errhandler?>arg).ob_mpi
 
 # -----------------------------------------------------------------------------
 
@@ -141,17 +153,5 @@ cdef api object PyMPIFile_New(MPI_File arg):
 
 cdef api MPI_File* PyMPIFile_Get(object arg) except NULL:
     return &(<File?>arg).ob_mpi
-
-# -----------------------------------------------------------------------------
-
-# Errhandler
-
-cdef api object PyMPIErrhandler_New(MPI_Errhandler arg):
-    cdef Errhandler obj = Errhandler.__new__(Errhandler)
-    obj.ob_mpi = arg
-    return obj
-
-cdef api MPI_Errhandler* PyMPIErrhandler_Get(object arg) except NULL:
-    return &(<Errhandler?>arg).ob_mpi
 
 # -----------------------------------------------------------------------------
