@@ -481,6 +481,7 @@ def run_setup():
         packages = [
             'mpi4py',
             'mpi4py.futures',
+            'mpi4py.util',
         ],
         package_data = {
             'mpi4py' : [

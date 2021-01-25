@@ -9,6 +9,10 @@ CHANGES: MPI for Python
 Release 3.1.0 [2021-XX-XX]
 ==========================
 
+* New features:
+
+  + `mpi4py.util`: New package collecting miscellaneous utilities.
+
 * Enhancements:
 
   + Add pickle-based ``Request.waitsome()`` and ``Request.testsome()``.

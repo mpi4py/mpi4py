@@ -18,6 +18,7 @@ FILE(GLOB mpi4py_PYTHON_FILES
      RELATIVE ${mpi4py_SOURCE_DIR}/mpi4py
      ${mpi4py_SOURCE_DIR}/mpi4py/*.py
      ${mpi4py_SOURCE_DIR}/mpi4py/futures/*.py
+     ${mpi4py_SOURCE_DIR}/mpi4py/util/*.py
      )
 
 FILE(GLOB mpi4py_HEADER_FILES
@@ -32,6 +33,7 @@ FILE(GLOB mpi4py_STUBS_FILES
      ${mpi4py_SOURCE_DIR}/mpi4py/py.typed
      ${mpi4py_SOURCE_DIR}/mpi4py/*.pyi
      ${mpi4py_SOURCE_DIR}/mpi4py/futures/*.pyi
+     ${mpi4py_SOURCE_DIR}/mpi4py/util/*.pyi
      )
 
 FOREACH(file
