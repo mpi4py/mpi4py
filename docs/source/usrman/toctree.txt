@@ -5,6 +5,7 @@
    overview
    tutorial
    mpi4py.futures
+   mpi4py.util
    mpi4py.run
    citing
    install
