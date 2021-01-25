@@ -10,7 +10,7 @@ cdef class Exception(RuntimeError):
 
     cdef int ob_mpi
 
-    def __cinit__(self, int ierr=0):
+    def __cinit__(self, int ierr: int = 0):
         if ierr < MPI_SUCCESS: ierr = MPI_ERR_UNKNOWN
         self.ob_mpi = ierr
         RuntimeError.__init__(self, ierr)
@@ -24,24 +24,24 @@ cdef class Exception(RuntimeError):
         if op == Py_GT: return ierr >  error
         if op == Py_GE: return ierr >= error
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.ob_mpi)
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return self.ob_mpi != MPI_SUCCESS
 
-    def __int__(self):
+    def __int__(self) -> int:
         return self.ob_mpi
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "MPI.Exception(%d)" % self.ob_mpi
 
-    def __str__(self):
+    def __str__(self) -> str:
         if not mpi_active():
             return "error code: %d" % self.ob_mpi
         return self.Get_error_string()
 
-    def Get_error_code(self):
+    def Get_error_code(self) -> int:
         """
         Error code
         """
@@ -51,10 +51,10 @@ cdef class Exception(RuntimeError):
 
     property error_code:
         """error code"""
-        def __get__(self):
+        def __get__(self) -> int:
             return self.Get_error_code()
 
-    def Get_error_class(self):
+    def Get_error_class(self) -> int:
         """
         Error class
         """
@@ -64,10 +64,10 @@ cdef class Exception(RuntimeError):
 
     property error_class:
         """error class"""
-        def __get__(self):
+        def __get__(self) -> int:
             return self.Get_error_class()
 
-    def Get_error_string(self):
+    def Get_error_string(self) -> str:
         """
         Error string
         """
@@ -78,5 +78,5 @@ cdef class Exception(RuntimeError):
 
     property error_string:
         """error string"""
-        def __get__(self):
+        def __get__(self) -> str:
             return self.Get_error_string()

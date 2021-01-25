@@ -84,7 +84,7 @@ ERR_RMA_FLAVOR   = MPI_ERR_RMA_FLAVOR
 
 
 
-def Get_error_class(int errorcode):
+def Get_error_class(int errorcode: int) -> int:
     """
     Convert an *error code* into an *error class*
     """
@@ -92,7 +92,7 @@ def Get_error_class(int errorcode):
     CHKERR( MPI_Error_class(errorcode, &errorclass) )
     return errorclass
 
-def Get_error_string(int errorcode):
+def Get_error_string(int errorcode: int) -> str:
     """
     Return the *error string* for a given
     *error class* or *error code*
@@ -103,7 +103,7 @@ def Get_error_string(int errorcode):
     return tompistr(string, resultlen)
 
 
-def Add_error_class():
+def Add_error_class() -> int:
     """
     Add an *error class* to the known error classes
     """
@@ -111,7 +111,7 @@ def Add_error_class():
     CHKERR( MPI_Add_error_class(&errorclass) )
     return errorclass
 
-def Add_error_code(int errorclass):
+def Add_error_code(int errorclass: int) -> int:
     """
     Add an *error code* to an *error class*
     """
@@ -119,7 +119,7 @@ def Add_error_code(int errorclass):
     CHKERR( MPI_Add_error_code(errorclass, &errorcode) )
     return errorcode
 
-def Add_error_string(int errorcode, string):
+def Add_error_string(int errorcode: int, string: str) -> None:
     """
     Associate an *error string* with an
     *error class* or *errorcode*

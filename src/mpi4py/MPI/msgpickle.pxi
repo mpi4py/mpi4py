@@ -56,7 +56,12 @@ cdef class Pickle:
         self.ob_loads = PyPickle_loads
         self.ob_PROTO = PyPickle_PROTOCOL
 
-    def __init__(self, dumps=None, loads=None, protocol=None):
+    def __init__(
+        self,
+        dumps: Optional[Callable[[Any], bytes]] = None,
+        loads: Optional[Callable[[Buffer], Any]] = None,
+        protocol: Optional[Any] = None,
+    ) -> None:
         if dumps is None:
             dumps = PyPickle_dumps
         if loads is None:
@@ -68,23 +73,20 @@ cdef class Pickle:
         self.ob_loads = loads
         self.ob_PROTO = protocol
 
-    def dumps(self, obj):
-        "dumps(obj) -> bytes"
+    def dumps(self, obj: Any) -> bytes:
         return self.cdumps(obj)
 
-    def loads(self, buf):
-        "loads(buf) -> object"
+    def loads(self, buf: Buffer) -> Any:
         return self.cloads(buf)
 
     property PROTOCOL:
-        "protocol"
-        def __get__(self):
+        def __get__(self) -> Any:
             return self.ob_PROTO
-        def __set__(self, protocol):
-            if protocol is None:
+        def __set__(self, value: Any):
+            if value is None:
                 if self.ob_dumps is PyPickle_dumps:
-                    protocol = PyPickle_PROTOCOL
-            self.ob_PROTO = protocol
+                    value = PyPickle_PROTOCOL
+            self.ob_PROTO = value
 
     cdef object cdumps(self, object obj):
         if self.ob_PROTO is not None:

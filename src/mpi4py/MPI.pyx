@@ -1,4 +1,5 @@
 #cython: embedsignature=True
+#cython: annotation_typing=False
 #cython: cdivision=True
 #cython: binding=False
 #cython: auto_pickle=False

@@ -4,7 +4,7 @@ cdef class Status:
     Status
     """
 
-    def __cinit__(self, Status status=None):
+    def __cinit__(self, Status status: Optional[Status] = None):
         cdef MPI_Status *s = &self.ob_mpi
         CHKERR( PyMPI_Status_set_source (s, MPI_ANY_SOURCE ) )
         CHKERR( PyMPI_Status_set_tag    (s, MPI_ANY_TAG    ) )
@@ -22,7 +22,7 @@ cdef class Status:
         cdef cls = type(self).__name__
         raise TypeError("unorderable type: '%s.%s'" % (mod, cls))
 
-    def Get_source(self):
+    def Get_source(self) -> int:
         """
         Get message source
         """
@@ -30,7 +30,7 @@ cdef class Status:
         CHKERR( PyMPI_Status_get_source(&self.ob_mpi, &source) )
         return source
 
-    def Set_source(self, int source):
+    def Set_source(self, int source: int) -> None:
         """
         Set message source
         """
@@ -38,12 +38,12 @@ cdef class Status:
 
     property source:
         """source"""
-        def __get__(self):
+        def __get__(self) -> int:
             return self.Get_source()
-        def __set__(self, value):
+        def __set__(self, value: int):
             self.Set_source(value)
 
-    def Get_tag(self):
+    def Get_tag(self) -> int:
         """
         Get message tag
         """
@@ -51,7 +51,7 @@ cdef class Status:
         CHKERR( PyMPI_Status_get_tag(&self.ob_mpi, &tag) )
         return tag
 
-    def Set_tag(self, int tag):
+    def Set_tag(self, int tag: int) -> None:
         """
         Set message tag
         """
@@ -59,12 +59,12 @@ cdef class Status:
 
     property tag:
         """tag"""
-        def __get__(self):
+        def __get__(self) -> int:
             return self.Get_tag()
-        def __set__(self, value):
+        def __set__(self, value: int):
             self.Set_tag(value)
 
-    def Get_error(self):
+    def Get_error(self) -> int:
         """
         Get message error
         """
@@ -72,7 +72,7 @@ cdef class Status:
         CHKERR( PyMPI_Status_get_error(&self.ob_mpi, &error) )
         return error
 
-    def Set_error(self, int error):
+    def Set_error(self, int error: int) -> None:
         """
         Set message error
         """
@@ -80,12 +80,12 @@ cdef class Status:
 
     property error:
         """error"""
-        def __get__(self):
+        def __get__(self) -> int:
             return self.Get_error()
-        def __set__(self, value):
+        def __set__(self, value: int):
             self.Set_error(value)
 
-    def Get_count(self, Datatype datatype=BYTE):
+    def Get_count(self, Datatype datatype: Datatype = BYTE) -> int:
         """
         Get the number of *top level* elements
         """
@@ -96,10 +96,10 @@ cdef class Status:
 
     property count:
         """byte count"""
-        def __get__(self):
+        def __get__(self) -> int:
             return self.Get_count(__BYTE__)
 
-    def Get_elements(self, Datatype datatype):
+    def Get_elements(self, Datatype datatype: Datatype) -> int:
         """
         Get the number of basic elements in a datatype
         """
@@ -108,7 +108,11 @@ cdef class Status:
         CHKERR( MPI_Get_elements_x(&self.ob_mpi, dtype, &elements) )
         return elements
 
-    def Set_elements(self, Datatype datatype, Count count):
+    def Set_elements(
+        self,
+        Datatype datatype: Datatype,
+        Count count: int,
+    ) -> None:
         """
         Set the number of elements in a status
 
@@ -118,7 +122,7 @@ cdef class Status:
         cdef MPI_Datatype dtype = datatype.ob_mpi
         CHKERR( MPI_Status_set_elements_x(&self.ob_mpi, dtype, count) )
 
-    def Is_cancelled(self):
+    def Is_cancelled(self) -> bool:
         """
         Test to see if a request was cancelled
         """
@@ -126,7 +130,7 @@ cdef class Status:
         CHKERR( MPI_Test_cancelled(&self.ob_mpi, &flag) )
         return <bint>flag
 
-    def Set_cancelled(self, bint flag):
+    def Set_cancelled(self, bint flag: bool) -> None:
         """
         Set the cancelled state associated with a status
 
@@ -139,15 +143,15 @@ cdef class Status:
         """
         cancelled state
         """
-        def __get__(self):
+        def __get__(self) -> bool:
             return self.Is_cancelled()
-        def __set__(self, value):
+        def __set__(self, value: int):
             self.Set_cancelled(value)
 
     # Fortran Handle
     # --------------
 
-    def py2f(self):
+    def py2f(self) -> List[int]:
         """
         """
         cdef Status status = <Status> self
@@ -160,7 +164,7 @@ cdef class Status:
         return [f_status[i] for i from 0 <= i < n]
 
     @classmethod
-    def f2py(cls, arg):
+    def f2py(cls, arg: List[int]) -> Status:
         """
         """
         cdef Status status = Status.__new__(Status)

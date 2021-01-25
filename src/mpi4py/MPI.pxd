@@ -25,19 +25,19 @@ cdef import from *:
     ctypedef MPI_Offset Offset "MPI_Offset"
     ctypedef MPI_Count  Count  "MPI_Count"
 
-ctypedef public api class Status [
-    type   PyMPIStatus_Type,
-    object PyMPIStatusObject,
-    ]:
-    cdef MPI_Status ob_mpi
-    cdef unsigned   flags
-
 ctypedef public api class Datatype [
     type   PyMPIDatatype_Type,
     object PyMPIDatatypeObject,
     ]:
     cdef MPI_Datatype ob_mpi
     cdef unsigned     flags
+
+ctypedef public api class Status [
+    type   PyMPIStatus_Type,
+    object PyMPIStatusObject,
+    ]:
+    cdef MPI_Status ob_mpi
+    cdef unsigned   flags
 
 ctypedef public api class Request [
     type   PyMPIRequest_Type,

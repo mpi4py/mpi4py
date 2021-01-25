@@ -4,7 +4,7 @@ cdef class Group:
     Group
     """
 
-    def __cinit__(self, Group group=None):
+    def __cinit__(self, Group group: Optional[Group] = None):
         self.ob_mpi = MPI_GROUP_NULL
         if group is None: return
         self.ob_mpi = group.ob_mpi
@@ -22,13 +22,13 @@ cdef class Group:
         cdef cls = type(self).__name__
         raise TypeError("unorderable type: '%s.%s'" % (mod, cls))
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return self.ob_mpi != MPI_GROUP_NULL
 
     # Group Accessors
     # ---------------
 
-    def Get_size(self):
+    def Get_size(self) -> int:
         """
         Return the size of a group
         """
@@ -38,10 +38,10 @@ cdef class Group:
 
     property size:
         """number of processes in group"""
-        def __get__(self):
+        def __get__(self) -> int:
             return self.Get_size()
 
-    def Get_rank(self):
+    def Get_rank(self) -> int:
         """
         Return the rank of this process in a group
         """
@@ -51,11 +51,16 @@ cdef class Group:
 
     property rank:
         """rank of this process in group"""
-        def __get__(self):
+        def __get__(self) -> int:
             return self.Get_rank()
 
     @classmethod
-    def Translate_ranks(cls, Group group1, ranks1, Group group2=None):
+    def Translate_ranks(
+        cls,
+        Group group1: Group,
+        ranks1: Sequence[int],
+        Group group2: Optional[Group] = None,
+    ) -> List[int]:
         """
         Translate the ranks of processes in
         one group to those in another group
@@ -82,7 +87,7 @@ cdef class Group:
         return ranks2
 
     @classmethod
-    def Compare(cls, Group group1, Group group2):
+    def Compare(cls, Group group1: Group, Group group2: Group) -> int:
         """
         Compare two groups
         """
@@ -93,7 +98,7 @@ cdef class Group:
     # Group Constructors
     # ------------------
 
-    def Dup(self):
+    def Dup(self) -> Group:
         """
         Duplicate a group
         """
@@ -102,7 +107,7 @@ cdef class Group:
         return group
 
     @classmethod
-    def Union(cls, Group group1, Group group2):
+    def Union(cls, Group group1: Group, Group group2: Group) -> Group:
         """
         Produce a group by combining
         two existing groups
@@ -113,7 +118,7 @@ cdef class Group:
         return group
 
     @classmethod
-    def Intersection(cls, Group group1, Group group2):
+    def Intersection(cls, Group group1: Group, Group group2: Group) -> Group:
         """
         Produce a group as the intersection
         of two existing groups
@@ -126,7 +131,7 @@ cdef class Group:
     Intersect = Intersection
 
     @classmethod
-    def Difference(cls, Group group1, Group group2):
+    def Difference(cls, Group group1: Group, Group group2: Group) -> Group:
         """
         Produce a group from the difference
         of two existing groups
@@ -136,7 +141,7 @@ cdef class Group:
                 group1.ob_mpi, group2.ob_mpi, &group.ob_mpi) )
         return group
 
-    def Incl(self, ranks):
+    def Incl(self, ranks: Sequence[int]) -> Group:
         """
         Produce a group by reordering an existing
         group and taking only listed members
@@ -147,7 +152,7 @@ cdef class Group:
         CHKERR( MPI_Group_incl(self.ob_mpi, n, iranks, &group.ob_mpi) )
         return group
 
-    def Excl(self, ranks):
+    def Excl(self, ranks: Sequence[int]) -> Group:
         """
         Produce a group by reordering an existing
         group and taking only unlisted members
@@ -158,7 +163,7 @@ cdef class Group:
         CHKERR( MPI_Group_excl(self.ob_mpi, n, iranks, &group.ob_mpi) )
         return group
 
-    def Range_incl(self, ranks):
+    def Range_incl(self, ranks: Sequence[Tuple[int, int, int]]) -> Group:
         """
         Create a new group from ranges of
         of ranks in an existing group
@@ -174,7 +179,7 @@ cdef class Group:
         CHKERR( MPI_Group_range_incl(self.ob_mpi, n, ranges, &group.ob_mpi) )
         return group
 
-    def Range_excl(self, ranks):
+    def Range_excl(self, ranks: Sequence[Tuple[int, int, int]]) -> Group:
         """
         Create a new group by excluding ranges
         of processes from an existing group
@@ -193,7 +198,7 @@ cdef class Group:
     # Group Destructor
     # ----------------
 
-    def Free(self):
+    def Free(self) -> None:
         """
         Free a group
         """
@@ -203,13 +208,13 @@ cdef class Group:
     # Fortran Handle
     # --------------
 
-    def py2f(self):
+    def py2f(self) -> int:
         """
         """
         return MPI_Group_c2f(self.ob_mpi)
 
     @classmethod
-    def f2py(cls, arg):
+    def f2py(cls, arg: int) -> Group:
         """
         """
         cdef Group group = Group.__new__(Group)
