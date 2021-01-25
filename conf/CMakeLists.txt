@@ -25,11 +25,19 @@ FILE(GLOB mpi4py_HEADER_FILES
      ${mpi4py_SOURCE_DIR}/mpi4py/*.pxd
      ${mpi4py_SOURCE_DIR}/mpi4py/include/mpi4py/*.[hi]
      ${mpi4py_SOURCE_DIR}/mpi4py/include/mpi4py/*.px[di]
-    )
+     )
+
+FILE(GLOB mpi4py_STUBS_FILES
+     RELATIVE ${mpi4py_SOURCE_DIR}/mpi4py
+     ${mpi4py_SOURCE_DIR}/mpi4py/py.typed
+     ${mpi4py_SOURCE_DIR}/mpi4py/*.pyi
+     ${mpi4py_SOURCE_DIR}/mpi4py/futures/*.pyi
+     )
 
 FOREACH(file
         ${mpi4py_PYTHON_FILES}
         ${mpi4py_HEADER_FILES}
+        ${mpi4py_STUBS_FILES}
         )
   SET(src "${mpi4py_SOURCE_DIR}/mpi4py/${file}")
   SET(tgt "${mpi4py_BINARY_DIR}/${file}")

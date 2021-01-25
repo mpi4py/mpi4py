@@ -23,6 +23,8 @@ Release 3.1.0 [2020-XX-XX]
   + Add type annotations to Cython code. The first line of the docstring of functions
     and methods displays a signature including type annotations.
 
+  + Add companion stub files to support type checkers.
+
 .. _link: http://numba.pydata.org/numba-doc/latest/cuda/cuda_array_interface.html
 
 
