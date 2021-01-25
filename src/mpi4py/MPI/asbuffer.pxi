@@ -194,6 +194,12 @@ cdef class memory:
         def __get__(self):
             return PyLong_FromVoidPtr(self.view.buf)
 
+    property obj:
+        """The underlying object of the memory"""
+        def __get__(self):
+            if self.view.obj == NULL: return None
+            return <object>self.view.obj
+
     property nbytes:
         """Memory size (in bytes)"""
         def __get__(self):
@@ -204,11 +210,35 @@ cdef class memory:
         def __get__(self):
             return self.view.readonly
 
+    property format:
+        """A string with the format of each element"""
+        def __get__(self):
+            if self.view.format != NULL:
+                return pystr(self.view.format)
+            return pystr(BYTE_FMT)
+
+    property itemsize:
+        """The size in bytes of each element"""
+        def __get__(self):
+            return self.view.itemsize
+
     # convenience methods
 
-    def tobytes(self):
+    def tobytes(self, order=None):
         """Return the data in the buffer as a byte string"""
         return PyBytes_FromStringAndSize(<char*>self.view.buf, self.view.len)
+
+    def toreadonly(self):
+        """Return a readonly version of the memory object"""
+        cdef void *buf = self.view.buf
+        cdef Py_ssize_t size = self.view.len
+        cdef object obj = self
+        if self.view.obj != NULL:
+            obj = <object>self.view.obj
+        cdef memory mem = memory.__new__(memory)
+        PyBuffer_FillInfo(&mem.view, obj,
+                          buf, size, 1, PyBUF_SIMPLE)
+        return mem
 
     def release(self):
         """Release the underlying buffer exposed by the memory object"""
