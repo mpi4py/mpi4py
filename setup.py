@@ -489,6 +489,10 @@ def run_setup():
                 'include/mpi4py/*.i',
                 'include/mpi4py/*.pxi',
             ],
+            '' : [
+                'py.typed',
+                '*.pyi',
+            ],
         },
         package_dir = {'' : 'src'},
         ext_modules = [Ext(**ext) for ext in ext_modules()],
