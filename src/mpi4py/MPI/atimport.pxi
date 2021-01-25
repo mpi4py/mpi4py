@@ -22,6 +22,7 @@ cdef extern from "Python.h":
 # -----------------------------------------------------------------------------
 
 cdef extern from *:
+    const char *Py_GETENV(const char[])
     enum: USE_MATCHED_RECV "PyMPI_USE_MATCHED_RECV"
 
 ctypedef struct Options:
@@ -42,10 +43,22 @@ options.fast_reduce = 1
 options.recv_mprobe = 1
 options.errors = 1
 
+cdef object getEnv(object rc, const char name[], object value):
+    cdef bytes oname = b"MPI4PY_RC_" + name.upper()
+    cdef const char *cvalue = Py_GETENV(oname)
+    if cvalue == NULL: return value
+    cdef object ovalue = pystr(cvalue)
+    cdef bytes  bvalue = PyBytes_FromString(cvalue).lower()
+    if bvalue in (b'true',  b'yes', b'on',  b'1'): ovalue = True
+    if bvalue in (b'false', b'no',  b'off', b'0'): ovalue = False
+    try: setattr(rc, pystr(name), ovalue)
+    except: pass
+    return ovalue
+
 cdef int warnOpt(object name, object value) except -1:
     cdef object warn
     from warnings import warn
-    warn("mpi4py.rc: '%s': unexpected value '%r'" % (name, value))
+    warn("mpi4py.rc: '%s': unexpected value %r" % (name, value))
 
 cdef int getOptions(Options* opts) except -1:
     cdef object rc
@@ -82,6 +95,11 @@ cdef int getOptions(Options* opts) except -1:
     except: pass
     try: errors = rc.errors
     except: pass
+    threads      = getEnv(rc, b"threads",      threads)
+    thread_level = getEnv(rc, b"thread_level", thread_level)
+    fast_reduce  = getEnv(rc, b"fast_reduce",  fast_reduce)
+    recv_mprobe  = getEnv(rc, b"recv_mprobe",  recv_mprobe)
+    errors       = getEnv(rc, b"errors",       errors)
     #
     if initialize in (True, 'yes'):
         opts.initialize = 1
