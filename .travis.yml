@@ -9,7 +9,6 @@ python:
   - 3.8
   - 3.9
 arch:
-  - amd64
   - arm64
   - ppc64le
 
@@ -25,34 +24,6 @@ env:
   matrix:
     - MPI=mpich
     - MPI=openmpi
-
-matrix:
-  include:
-    - python: pypy
-      env: MPI=mpich
-    - python: pypy
-      env: MPI=openmpi
-    - python: pypy3
-      env: MPI=mpich
-    - python: pypy3
-      env: MPI=openmpi
-    - python: pypy3.5-6.0
-      env: MPI=mpich
-    - python: pypy3.5-6.0
-      env: MPI=openmpi
-  allow_failures:
-    - python: pypy
-      env: MPI=mpich
-    - python: pypy
-      env: MPI=openmpi
-    - python: pypy3
-      env: MPI=mpich
-    - python: pypy3
-      env: MPI=openmpi
-    - python: pypy3.5-6.0
-      env: MPI=mpich
-    - python: pypy3.5-6.0
-      env: MPI=openmpi
 
 branches:
   only:
