@@ -82,6 +82,20 @@ PySlice_GetIndicesEx((PySliceObject *)(s), n, start, stop, step, length)
 
 /* ------------------------------------------------------------------------- */
 
+#ifdef PYPY_VERSION
+
+#ifndef Py_IgnoreEnvironmentFlag
+#define Py_IgnoreEnvironmentFlag 0
+#endif
+
+#ifndef Py_GETENV
+#define Py_GETENV(s) (Py_IgnoreEnvironmentFlag ? NULL : getenv(s))
+#endif
+
+#endif/*PYPY_VERSION*/
+
+/* ------------------------------------------------------------------------- */
+
 /*
   Local variables:
   c-basic-offset: 2
