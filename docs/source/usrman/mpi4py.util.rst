@@ -9,6 +9,11 @@ mpi4py.util
 The :mod:`mpi4py.util` package collects miscellaneous utilities
 within the intersection of Python and MPI.
 
+.. toctree::
+   :maxdepth: 1
+
+   mpi4py.util.dtlib
+
 
 .. Local variables:
 .. fill-column: 79

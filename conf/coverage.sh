@@ -53,6 +53,8 @@ $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py -c "import sys; sys.exit(1)"    
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py -c "import sys; sys.exit('error')" > /dev/null 2>&1 || true
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py -c "from mpi4py import MPI; 1/0;"  > /dev/null 2>&1 || true
 
+$MPIEXEC -n 1 $PYTHON -m coverage run test/test_util_dtlib.py -q 2> /dev/null
+
 $MPIEXEC -n 1 $PYTHON -m coverage run demo/futures/test_futures.py -q 2> /dev/null
 $MPIEXEC -n 2 $PYTHON -m coverage run demo/futures/test_futures.py -q 2> /dev/null
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.run -rc threads=False demo/futures/test_futures.py -q 2> /dev/null
