@@ -54,8 +54,6 @@ jobs:
           - os: macos-latest
             mpi: msmpi
           - os: windows-latest
-            py-version: 2.7
-          - os: windows-latest
             mpi: mpich
           - os: windows-latest
             mpi: openmpi
@@ -64,7 +62,11 @@ jobs:
 
     - name: Configure hostname
       run:  echo 127.0.0.1 `hostname` | sudo tee -a /etc/hosts > /dev/null
-      if:   ${{ startsWith(matrix.os, 'macos') }}
+      if:   runner.os == 'macOS'
+
+    - name: Install Visual C++
+      if:   runner.os == 'Windows' && matrix.py-version == '2.7'
+      run:  choco install vcpython27 -f -y
 
     - name: Checkout
       uses: actions/checkout@v2
