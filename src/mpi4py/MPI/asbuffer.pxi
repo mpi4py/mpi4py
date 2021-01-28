@@ -40,7 +40,7 @@ cdef extern from "Python.h":
 # Python 2 buffer interface (legacy)
 cdef extern from *:
     int _Py2_IsBuffer(object)
-    int _Py2_AsBuffer(object, int, void **, Py_ssize_t *) except -1
+    int _Py2_AsBuffer(object, bint *, void **, Py_ssize_t *) except -1
 
 cdef extern from "Python.h":
     object PyLong_FromVoidPtr(void*)
@@ -109,8 +109,7 @@ cdef int PyPy_GetBuffer(object obj, Py_buffer *view, int flags) except -1:
         buf = PyLong_AsVoidPtr(addr)
         size = obj.nbytes
     else:
-        readonly = (flags & PyBUF_WRITABLE) != PyBUF_WRITABLE
-        _Py2_AsBuffer(obj, readonly, &buf, &size)
+        _Py2_AsBuffer(obj, &readonly, &buf, &size)
     if buf == NULL and size == 0: buf = emptybuffer
     PyBuffer_FillInfo(view, obj, buf, size, readonly, flags)
     if (flags & PyBUF_FORMAT) == PyBUF_FORMAT: view.format = BYTE_FMT
@@ -123,8 +122,7 @@ cdef int Py27_GetBuffer(object obj, Py_buffer *view, int flags) except -1:
     if PyObject_CheckBuffer(obj):
         return PyObject_GetBuffer(obj, view, flags)
     # Python 2 buffer interface (legacy)
-    view.readonly = (flags & PyBUF_WRITABLE) != PyBUF_WRITABLE
-    _Py2_AsBuffer(obj, view.readonly, &view.buf, &view.len)
+    _Py2_AsBuffer(obj, &view.readonly, &view.buf, &view.len)
     if view.buf == NULL and view.len == 0: view.buf = emptybuffer
     PyBuffer_FillInfo(view, obj, view.buf, view.len, view.readonly, flags)
     if (flags & PyBUF_FORMAT) == PyBUF_FORMAT: view.format = BYTE_FMT

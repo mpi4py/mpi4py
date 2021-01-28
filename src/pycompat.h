@@ -43,14 +43,17 @@ static int _Py2_IsBuffer(PyObject *obj)
 #endif
 }
 
-static int _Py2_AsBuffer(PyObject *obj, int readonly,
+static int _Py2_AsBuffer(PyObject *obj, int *readonly,
                          void **buf, Py_ssize_t *size)
 {
 #if defined(PYPY_VERSION) || PY_VERSION_HEX < 0x03000000
-  if (readonly)
-    return PyObject_AsReadBuffer(obj, (const void**)buf, size);
-  else
-    return PyObject_AsWriteBuffer(obj, buf, size);
+  const void **rbuf = (const void**)buf;
+  if (!PyObject_AsWriteBuffer(obj, buf, size)) {*readonly = 0; return 0;}
+  PyErr_Clear();
+  if (!PyObject_AsReadBuffer(obj, rbuf, size)) {*readonly = 1; return 0;}
+  PyErr_Clear();
+  PyErr_SetString(PyExc_TypeError, "expected a buffer object");
+  return -1;
 #else
   (void)obj; (void)readonly;
   (void)buf; (void)size;
