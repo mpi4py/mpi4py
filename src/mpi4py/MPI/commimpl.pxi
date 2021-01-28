@@ -144,8 +144,15 @@ cdef inline object PyMPI_Lock(MPI_Comm comm, object key):
         lock = table[key] = allocate_lock()
     return lock
 
-def _lock_table(Comm comm):
+
+def _comm_lock(Comm comm, object key=None):
+    "Create/get communicator lock"
+    return PyMPI_Lock(comm.ob_mpi, key)
+
+def _comm_lock_table(Comm comm):
     "Internal communicator lock table"
     return PyMPI_Lock_table(comm.ob_mpi)
+
+_lock_table = _comm_lock_table  # backward-compatibility
 
 # -----------------------------------------------------------------------------
