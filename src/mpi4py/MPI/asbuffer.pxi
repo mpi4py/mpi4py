@@ -154,9 +154,12 @@ cdef class memory:
 
     cdef Py_buffer view
 
-    def __cinit__(self):
-        PyBuffer_FillInfo(&self.view, <object>NULL,
-                          NULL, 0, 0, PyBUF_SIMPLE)
+    def __cinit__(self, *args):
+        if args:
+            PyMPI_GetBuffer(args[0], &self.view, PyBUF_SIMPLE)
+        else:
+            PyBuffer_FillInfo(&self.view, <object>NULL,
+                              NULL, 0, 0, PyBUF_SIMPLE)
 
     def __dealloc__(self):
         PyBuffer_Release(&self.view)

@@ -42,6 +42,41 @@ class TestMemory(unittest.TestCase):
         self.assertEqual(mem.nbytes, 0)
         self.assertEqual(mem.readonly, False)
 
+    def testNewBad(self):
+        memory = MPI.memory
+        for obj in (None, 0, 0.0, [], (), []):
+            self.assertRaises(TypeError,  memory, obj)
+
+    def testNewBytes(self):
+        memory = MPI.memory
+        obj = b"abc"
+        mem = memory(obj)
+        self.assertEqual(mem.obj, obj)
+        self.assertEqual(mem.nbytes, len(obj))
+        self.assertEqual(mem.readonly, True)
+
+    def testNewBytearray(self):
+        memory = MPI.memory
+        obj = bytearray([1,2,3])
+        mem = memory(obj)
+        self.assertEqual(mem.obj, obj)
+        self.assertEqual(mem.nbytes, len(obj))
+        self.assertEqual(mem.readonly, False)
+
+    @unittest.skipIf(array is None, 'array')
+    def testNewArray(self):
+        memory = MPI.memory
+        obj = array('i', [1,2,3])
+        mem = memory(obj)
+        self.assertEqual(mem.obj, obj)
+        self.assertEqual(mem.nbytes, len(obj)*obj.itemsize)
+        self.assertEqual(mem.readonly, False)
+
+    def testFromBufferBad(self):
+        memory = MPI.memory
+        for obj in (None, 0, 0.0, [], (), []):
+            self.assertRaises(TypeError,  memory.frombuffer, obj)
+
     def testFromBufferBytes(self):
         memory = MPI.memory
         mem = memory.frombuffer(b"abc", readonly=True)
