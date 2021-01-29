@@ -74,7 +74,8 @@ def getoptionparser():
 
 def getbuilddir():
     from distutils.util import get_platform
-    s = os.path.join("build", "lib.%s-%.3s" % (get_platform(), sys.version))
+    plat_name, (x, y) = get_platform(), sys.version_info[:2]
+    s = os.path.join("build", "lib.%s-%d.%d" % (plat_name, x, y))
     if hasattr(sys, 'gettotalrefcount'): s += '-pydebug'
     return s
 
