@@ -860,7 +860,7 @@ def get_max_workers():
 
 
 def get_spawn_module():
-    return __package__ + '.server'
+    return __spec__.parent + '.server'
 
 
 def client_spawn(python_exe=None,
@@ -889,7 +889,7 @@ def client_spawn(python_exe=None,
 # ---
 
 
-SERVICE = __package__
+SERVICE = __spec__.parent
 SERVER_HOST = 'localhost'
 SERVER_BIND = ''
 SERVER_PORT = 31415

@@ -30,7 +30,7 @@ def main():
            or: {python} -m {prog} -c <string> [arg] ...
         """).strip().format(
             python=os.path.basename(sys.executable),
-            prog=__package__,
+            prog=__spec__.parent,
         )
         if error:
             print(error, file=sys.stderr)

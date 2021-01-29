@@ -8,7 +8,7 @@ def helloworld(comm, args=None, verbose=True):
     """Hello, World! using MPI."""
     # pylint: disable=import-outside-toplevel
     from argparse import ArgumentParser
-    parser = ArgumentParser(prog=__package__ + ".bench helloworld")
+    parser = ArgumentParser(prog=__name__ + " helloworld")
     parser.add_argument("-q", "--quiet", action="store_false",
                         dest="verbose", default=verbose)
     options = parser.parse_args(args)
@@ -37,7 +37,7 @@ def ringtest(comm, args=None, verbose=True):
     # pylint: disable=too-many-statements
     # pylint: disable=import-outside-toplevel
     from argparse import ArgumentParser
-    parser = ArgumentParser(prog=__package__ + ".bench ringtest")
+    parser = ArgumentParser(prog=__name__ + " ringtest")
     parser.add_argument("-q", "--quiet", action="store_false",
                         dest="verbose", default=verbose)
     parser.add_argument("-n", "--size", type=int, default=1, dest="size",
@@ -112,7 +112,7 @@ def main(args=None):
     """Entry-point for ``python -m mpi4py.bench``."""
     # pylint: disable=import-outside-toplevel
     from argparse import ArgumentParser, REMAINDER
-    parser = ArgumentParser(prog=__package__ + ".bench",
+    parser = ArgumentParser(prog=__name__,
                             usage="%(prog)s [options] <command> [args]")
     parser.add_argument("--threads",
                         action="store_true", dest="threads", default=None,

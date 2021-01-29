@@ -715,6 +715,35 @@ else:
         return fixers
 
 
+    def get_fixers_extra():
+        from lib2to3 import fixer_base
+        from lib2to3.fixer_util import Name
+
+        class FixModSpecAttr(fixer_base.BaseFix):
+
+            PATTERN = """
+                      power< name='__spec__' trailer< '.' attr=('parent') > >
+                      """
+            MAP = {
+                'parent': '__package__',
+            }
+
+            def transform(self, node, results):
+                name = results["name"]
+                attr = results["attr"]
+                newval = self.MAP[attr.value]
+                node.replace(Name(newval, prefix=name.prefix))
+
+        import sys
+        import lib3to2.fixes
+        modname = lib3to2.fixes.__name__ + '.fix_mod_spec_attr'
+        module = type(sys)(modname)
+        module.FixModSpecAttr = FixModSpecAttr
+        setattr(lib3to2.fixes, modname, module)
+        sys.modules[modname] = module
+        return [modname]
+
+
     def run_3to2(files, fixer_names=None, options=None,
                  explicit=None, unwanted=None):
         from lib3to2.fixes import fix_imports
@@ -723,6 +752,8 @@ else:
             return
         if fixer_names is None:
             fixer_names = get_fixers_3to2()
+        for fixer in get_fixers_extra():
+            fixer_names.append(fixer)
         if unwanted is not None:
             fixer_names = list(fixer_names)
             for fixer in unwanted:

@@ -59,7 +59,7 @@ def set_abort_status(status):
     import sys
     status = (status if isinstance(status, int)
               else 0 if status is None else 1)
-    pkg = __package__ or __name__.rpartition('.')[0]
+    pkg = __spec__.parent or __name__.rpartition('.')[0]
     mpi = sys.modules.get(pkg + '.MPI')
     if mpi is not None and status:
         # pylint: disable=protected-access
@@ -75,17 +75,19 @@ def main():
     import os
     import sys
 
+    package = __spec__.parent
+
     def version():
         from . import __version__
-        print(__package__, __version__, file=sys.stdout)
+        print(package, __version__, file=sys.stdout)
         sys.exit(0)
 
     def usage(errmess=None):
         from textwrap import dedent
         if __name__ == '__main__':
-            prog_name = __package__ + '.run'
+            prog_name = package + '.run'
         else:
-            prog_name = __package__
+            prog_name = package
         python_exe = os.path.basename(sys.executable)
         subs = dict(prog=prog_name, python=python_exe)
 
