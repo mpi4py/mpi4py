@@ -380,6 +380,30 @@ class BaseTestP2PObj(object):
             self.assertFalse(req)
             self.assertEqual(rmess, smess)
 
+    def testCancel(self):
+        size = self.COMM.Get_size()
+        rank = self.COMM.Get_rank()
+        status = MPI.Status()
+        for smess in messages:
+            req = self.COMM.issend(smess, rank)
+            self.assertTrue(req)
+            req.cancel()
+            flag = req.get_status(status)
+            cancelled = status.Is_cancelled()
+            self.assertTrue(req)
+            if cancelled:
+                self.assertTrue(flag)
+                req.Free()
+                self.assertFalse(req)
+            else:
+                self.assertFalse(flag)
+                rmess = self.COMM.recv(None,  rank, 0)
+                flag = req.get_status()
+                self.assertTrue(flag)
+                flag, _ = req.test()
+                self.assertTrue(flag)
+                self.assertEqual(rmess, smess)
+
     def testIRecvAndBSend(self):
         comm = self.COMM
         rank = comm.Get_rank()

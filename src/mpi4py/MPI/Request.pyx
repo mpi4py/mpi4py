@@ -277,6 +277,19 @@ cdef class Request:
         cdef msg = PyMPI_test(self, &flag, status)
         return (<bint>flag, msg)
     #
+    def get_status(
+        self,
+        Status status: Optional[Status] = None,
+    ) -> bool:
+        """
+        Non-destructive test for the completion of a request
+        """
+        cdef int flag = 0
+        cdef MPI_Status *statusp = arg_Status(status)
+        with nogil: CHKERR( MPI_Request_get_status(
+            self.ob_mpi, &flag, statusp) )
+        return <bint>flag
+    #
     @classmethod
     def waitany(
         cls,
@@ -350,6 +363,12 @@ cdef class Request:
         Test for completion of some previously initiated requests
         """
         return PyMPI_testsome(requests, statuses)
+    #
+    def cancel(self) -> None:
+        """
+        Cancel a communication request
+        """
+        with nogil: CHKERR( MPI_Cancel(&self.ob_mpi) )
 
 
 cdef class Prequest(Request):

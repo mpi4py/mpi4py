@@ -13,6 +13,8 @@ Release 3.1.0 [2020-XX-XX]
 
   + Add pickle-based ``Request.waitsome()`` and ``Request.testsome()``.
 
+  + Add lowercase methods ``Request.get_status()`` and ``Request.cancel()``.
+
   + Support passing Python GPU arrays compliant with the ``__cuda_array_interface__``
     standard (`link`_) to uppercase API calls if mpi4py is built against 
     CUDA-aware MPI implementations. This feature is currently experimental 
