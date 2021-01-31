@@ -6,7 +6,7 @@ CHANGES: MPI for Python
 :Contact: dalcinl@gmail.com
 
 
-Release 3.1.0 [2020-XX-XX]
+Release 3.1.0 [2021-XX-XX]
 ==========================
 
 * Enhancements:
