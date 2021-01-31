@@ -256,14 +256,20 @@ cdef class Request:
     # Python Communication
     # --------------------
     #
-    def wait(self, Status status: Optional[Status] = None) -> Any:
+    def wait(
+        self,
+        Status status: Optional[Status] = None,
+    ) -> Any:
         """
         Wait for a send or receive to complete
         """
         cdef msg = PyMPI_wait(self, status)
         return msg
     #
-    def test(self, Status status: Optional[Status] = None) -> Tuple[bool, Any]:
+    def test(
+        self,
+            Status status: Optional[Status] = None,
+    ) -> Tuple[bool, Optional[Any]]:
         """
         Test for the completion of a send or receive
         """
@@ -289,7 +295,7 @@ cdef class Request:
         cls,
         requests: Sequence[Request],
         Status status: Optional[Status] = None,
-    ) -> Tuple[int, bool, Any]:
+    ) -> Tuple[int, bool, Optional[Any]]:
         """
         Test for completion of any previously initiated request
         """
@@ -315,7 +321,7 @@ cdef class Request:
         cls,
         requests: Sequence[Request],
         statuses: Optional[List[Status]] = None
-    ) -> Tuple[bool, List[Any]]:
+    ) -> Tuple[bool, Optional[List[Any]]]:
         """
         Test for completion of all previously initiated requests
         """
