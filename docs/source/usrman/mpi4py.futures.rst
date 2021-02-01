@@ -50,7 +50,7 @@ MPIPoolExecutor
 
 The :class:`MPIPoolExecutor` class uses a pool of MPI processes to execute
 calls asynchronously. By performing computations in separate processes, it
-allows to side-step the :term:`Global Interpreter Lock` but also means that
+allows to side-step the :term:`global interpreter lock` but also means that
 only picklable objects can be executed and returned. The ``__main__`` module
 must be importable by worker processes, thus :class:`MPIPoolExecutor` instances
 may not work in the interactive interpreter.
@@ -471,6 +471,12 @@ the tasks submitted by the master.
 .. [#] When using an MPI implementation other than MPICH or Open MPI, please
    check the documentation of the implementation and/or batch
    system for the ways to specify the desired MPI universe size.
+
+
+.. glossary::
+
+   GIL
+     See :term:`global interpreter lock`.
 
 
 .. Local variables:
