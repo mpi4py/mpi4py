@@ -99,6 +99,8 @@ class TestPickle(unittest.TestCase):
             protocols.append(3)
         if sys.version_info[:2] >= (3, 4):
             protocols.append(4)
+        if sys.version_info[:2] >= (3, 8):
+            protocols.append(5)
         protocols.append(-1)
         protocols.append(None)
         for proto in protocols:
@@ -116,6 +118,8 @@ class TestPickle(unittest.TestCase):
             protocols.append(3)
         if sys.version_info[:2] >= (3, 4):
             protocols.append(4)
+        if sys.version_info[:2] >= (3, 8):
+            protocols.append(5)
         protocols.append(-1)
         protocols.append(None)
         for proto in protocols:

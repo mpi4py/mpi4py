@@ -373,7 +373,22 @@ OVERRIDE = {
         """,
         '__delitem__': None,
     },
-    'pickle': None,
+    'Pickle': {
+        '__new__': None,
+        '__init__': """
+        @overload
+        def __init__(self,
+            dumps: Callable[[Any, int], bytes],
+            loads: Callable[[Buffer], Any],
+            protocol: Optional[int] = None,
+        ) -> None: ...
+        @overload
+        def __init__(self,
+            dumps: Optional[Callable[[Any], bytes]] = None,
+            loads: Optional[Callable[[Buffer], Any]] = None,
+        ) -> None: ...
+        """,
+    },
     '_typedict':   "_typedict: Final[Dict[str, Datatype]] = ...",
     '_typedict_c': "_typedict_c: Final[Dict[str, Datatype]] = ...",
     '_typedict_f': "_typedict_f: Final[Dict[str, Datatype]] = ...",
@@ -450,28 +465,6 @@ TargetSpec = Union[
 ]
 """
 
-pickle = """
-class _Pickle:
-    @overload
-    def __init__(self,
-        dumps: Optional[Callable[[Any], bytes]] = None,
-        loads: Optional[Callable[[Buffer], Any]] = None,
-    ) -> None: ...
-    @overload
-    def __init__(self,
-        dumps: Optional[Callable[[Any, Any], bytes]],
-        loads: Optional[Callable[[Buffer], Any]],
-        protocol: Any,
-    ) -> None: ...
-    PROTOCOL: Any
-    def dumps(self, obj: Any) -> bytes: ...
-    def loads(self, buf: Buffer) -> Any: ...
-
-Pickle = _Pickle
-pickle: Final[Pickle] = ...
-"""
-
-
 def stubgen_mpi4py_MPI(done=None):
     from mpi4py import MPI
 
@@ -484,9 +477,6 @@ def stubgen_mpi4py_MPI(done=None):
 
     lines.add = ""
     lines.add = bufspec
-
-    lines.add = ""
-    lines.add = pickle
 
     return lines
 

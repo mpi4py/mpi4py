@@ -969,6 +969,24 @@ class memory:
     format: str
     itemsize: int
 
+class Pickle:
+    @overload
+    def __init__(self,
+        dumps: Callable[[Any, int], bytes],
+        loads: Callable[[Buffer], Any],
+        protocol: Optional[int] = None,
+    ) -> None: ...
+    @overload
+    def __init__(self,
+        dumps: Optional[Callable[[Any], bytes]] = None,
+        loads: Optional[Callable[[Buffer], Any]] = None,
+    ) -> None: ...
+    def dumps(self, obj: Any, buffer_callback: Optional[Callable[[Buffer], Any]] = None) -> bytes: ...
+    def loads(self, data: Buffer, buffers: Optional[Iterable[Buffer]] = None) -> Any: ...
+    PROTOCOL: Optional[int]
+
+pickle: Final[Pickle] = ...
+
 class Exception(RuntimeError):
     def __init__(self, ierr: int = 0) -> None: ...
     def __eq__(self, other: object) -> bool: ...
@@ -1079,22 +1097,3 @@ TargetSpec = Union[
     Tuple[Displ, Count, Datatype],  # (displ, count, datatype)
     List,                           # (displ, count, datatype)
 ]
-
-class _Pickle:
-    @overload
-    def __init__(self,
-        dumps: Optional[Callable[[Any], bytes]] = None,
-        loads: Optional[Callable[[Buffer], Any]] = None,
-    ) -> None: ...
-    @overload
-    def __init__(self,
-        dumps: Optional[Callable[[Any, Any], bytes]],
-        loads: Optional[Callable[[Buffer], Any]],
-        protocol: Any,
-    ) -> None: ...
-    PROTOCOL: Any
-    def dumps(self, obj: Any) -> bytes: ...
-    def loads(self, buf: Buffer) -> Any: ...
-
-Pickle = _Pickle
-pickle: Final[Pickle] = ...

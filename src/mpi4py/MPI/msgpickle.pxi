@@ -15,7 +15,7 @@ cdef object PyPickle_PROTOCOL = None
 if PY3:
     from pickle import dumps as PyPickle_dumps
     from pickle import loads as PyPickle_loads
-    from pickle import DEFAULT_PROTOCOL as PyPickle_PROTOCOL
+    from pickle import HIGHEST_PROTOCOL as PyPickle_PROTOCOL
 else:
     try:
         from cPickle import dumps as PyPickle_dumps
@@ -25,6 +25,9 @@ else:
         from pickle  import dumps as PyPickle_dumps
         from pickle  import loads as PyPickle_loads
         from pickle  import HIGHEST_PROTOCOL as PyPickle_PROTOCOL
+
+if Py_GETENV(b"MPI4PY_PICKLE_PROTOCOL") != NULL:
+    PyPickle_PROTOCOL = int(Py_GETENV(b"MPI4PY_PICKLE_PROTOCOL"))
 
 cdef object PyBytesIO_New = None
 cdef object PyPickle_loadf = None
@@ -39,12 +42,10 @@ if PY2:
         from pickle import load as PyPickle_loadf
 
 
-@cython.final
-@cython.internal
 cdef class Pickle:
 
     """
-    Pickle/unpickle Python objects
+    Pickle/unpickle Python objects.
     """
 
     cdef object ob_dumps
@@ -58,9 +59,9 @@ cdef class Pickle:
 
     def __init__(
         self,
-        dumps: Optional[Callable[[Any], bytes]] = None,
+        dumps: Optional[Callable[[Any, int], bytes]] = None,
         loads: Optional[Callable[[Buffer], Any]] = None,
-        protocol: Optional[Any] = None,
+        protocol: Optional[int] = None,
     ) -> None:
         if dumps is None:
             dumps = PyPickle_dumps
@@ -73,87 +74,121 @@ cdef class Pickle:
         self.ob_loads = loads
         self.ob_PROTO = protocol
 
-    def dumps(self, obj: Any) -> bytes:
-        return self.cdumps(obj)
+    def dumps(
+        self,
+        obj: Any,
+        buffer_callback: Optional[Callable[[Buffer], Any]] = None,
+    ) -> bytes:
+        """
+        Serialize object to pickle data stream.
+        """
+        if buffer_callback is not None:
+            return cdumps_oob(self, obj, buffer_callback)
+        return cdumps(self, obj)
 
-    def loads(self, buf: Buffer) -> Any:
-        return self.cloads(buf)
+    def loads(
+        self,
+        data: Buffer,
+        buffers: Optional[Iterable[Buffer]] = None,
+    ) -> Any:
+        """
+        Deserialize object from pickle data stream.
+        """
+        if buffers is not None:
+            return cloads_oob(self, data, buffers)
+        return cloads(self, data)
 
     property PROTOCOL:
-        def __get__(self) -> Any:
+        def __get__(self) -> Optional[int]:
             return self.ob_PROTO
-        def __set__(self, value: Any):
-            if value is None:
+        def __set__(self, protocol: Optional[int]):
+            if protocol is None:
                 if self.ob_dumps is PyPickle_dumps:
-                    value = PyPickle_PROTOCOL
-            self.ob_PROTO = value
-
-    cdef object cdumps(self, object obj):
-        if self.ob_PROTO is not None:
-            return self.ob_dumps(obj, self.ob_PROTO)
-        else:
-            return self.ob_dumps(obj)
-
-    cdef object cloads(self, object buf):
-        if PY2:
-            if not PyBytes_CheckExact(buf):
-                if self.ob_loads is PyPickle_loads:
-                    buf = PyBytesIO_New(buf)
-                    return PyPickle_loadf(buf)
-        return self.ob_loads(buf)
-
-    cdef object dump(self, object obj, void **p, int *n):
-        cdef object buf = self.cdumps(obj)
-        p[0] = <void*>PyBytes_AsString(buf)
-        n[0] = downcast(PyBytes_Size(buf))
-        return buf
-
-    cdef object load(self, void *p, int n):
-        if p == NULL or n == 0: return None
-        return self.cloads(tomemory(p, n))
-
-    cdef object dumpv(self, object obj, void **p, int n, int cnt[], int dsp[]):
-        cdef Py_ssize_t i=0, m=n
-        cdef object items
-        if obj is None: items = [None] * m
-        else:           items = list(obj)
-        m = len(items)
-        if m != n: raise ValueError(
-            "expecting %d items, got %d" % (n, m))
-        cdef int  c=0, d=0
-        for i from 0 <= i < m:
-            items[i] = self.dump(items[i], p, &c)
-            cnt[i] = c; dsp[i] = d;
-            d = downcast(<MPI_Aint>d + <MPI_Aint>c)
-        cdef object buf = PyBytes_Join(b'', items)
-        p[0] = PyBytes_AsString(buf)
-        return buf
-
-    cdef object loadv(self, void *p, int n, int cnt[], int dsp[]):
-        cdef Py_ssize_t i=0, m=n
-        cdef object items = [None] * m
-        if p == NULL: return items
-        for i from 0 <= i < m:
-            items[i] = self.load(<char*>p+dsp[i], cnt[i])
-        return items
-
-    cdef object alloc(self, void **p, int n):
-        cdef object buf = PyBytes_FromStringAndSize(NULL, n)
-        p[0] = PyBytes_AsString(buf)
-        return buf
-
-    cdef object allocv(self, void **p, int n, int cnt[], int dsp[]):
-        cdef int i=0, d=0
-        for i from 0 <= i < n:
-            dsp[i] = d
-            d += cnt[i]
-        return self.alloc(p, d)
+                    protocol = PyPickle_PROTOCOL
+            self.ob_PROTO = protocol
 
 
 cdef Pickle PyMPI_PICKLE = Pickle()
 pickle = PyMPI_PICKLE
 
 # -----------------------------------------------------------------------------
+
+cdef object cdumps_oob(Pickle pkl, object obj, object buffer_callback):
+    cdef int protocol = -1
+    if pkl.ob_PROTO is not None:
+        protocol = pkl.ob_PROTO
+        if protocol >= 0:
+            protocol = max(protocol, 5)
+    return pkl.ob_dumps(obj, protocol, buffer_callback=buffer_callback)
+
+cdef object cloads_oob(Pickle pkl, object data, object buffers):
+    return pkl.ob_loads(data, buffers=buffers)
+
+
+cdef object cdumps(Pickle pkl, object obj):
+    if pkl.ob_PROTO is not None:
+        return pkl.ob_dumps(obj, pkl.ob_PROTO)
+    else:
+        return pkl.ob_dumps(obj)
+
+cdef object cloads(Pickle pkl, object buf):
+    if PY2:
+        if not PyBytes_CheckExact(buf):
+            if pkl.ob_loads is PyPickle_loads:
+                buf = PyBytesIO_New(buf)
+                return PyPickle_loadf(buf)
+    return pkl.ob_loads(buf)
+
+
+cdef object pickle_dump(Pickle pkl, object obj, void **p, int *n):
+    cdef object buf = cdumps(pkl, obj)
+    p[0] = <void*>PyBytes_AsString(buf)
+    n[0] = downcast(PyBytes_Size(buf))
+    return buf
+
+cdef object pickle_load(Pickle pkl, void *p, int n):
+    if p == NULL or n == 0: return None
+    return cloads(pkl, tomemory(p, n))
+
+
+cdef object pickle_dumpv(Pickle pkl, object obj, void **p, int n, int cnt[], int dsp[]):
+    cdef Py_ssize_t i=0, m=n
+    cdef object items
+    if obj is None: items = [None] * m
+    else:           items = list(obj)
+    m = len(items)
+    if m != n: raise ValueError(
+        "expecting %d items, got %d" % (n, m))
+    cdef int  c=0, d=0
+    for i from 0 <= i < m:
+        items[i] = pickle_dump(pkl, items[i], p, &c)
+        cnt[i] = c; dsp[i] = d;
+        d = downcast(<MPI_Aint>d + <MPI_Aint>c)
+    cdef object buf = PyBytes_Join(b'', items)
+    p[0] = PyBytes_AsString(buf)
+    return buf
+
+cdef object pickle_loadv(Pickle pkl, void *p, int n, int cnt[], int dsp[]):
+    cdef Py_ssize_t i=0, m=n
+    cdef object items = [None] * m
+    if p == NULL: return items
+    for i from 0 <= i < m:
+        items[i] = pickle_load(pkl, <char*>p+dsp[i], cnt[i])
+    return items
+
+
+cdef object pickle_alloc(void **p, int n):
+    cdef object buf = PyBytes_FromStringAndSize(NULL, n)
+    p[0] = PyBytes_AsString(buf)
+    return buf
+
+cdef object pickle_allocv(void **p, int n, int cnt[], int dsp[]):
+    cdef int i=0, d=0
+    for i from 0 <= i < n:
+        dsp[i] = d
+        d += cnt[i]
+    return pickle_alloc(p, d)
+
 
 cdef inline object allocate_count_displ(int n, int **p, int **q):
     cdef object mem = allocate(2*n, sizeof(int), p)
@@ -172,7 +207,7 @@ cdef object PyMPI_send(object obj, int dest, int tag,
     #
     cdef object tmps = None
     if dest != MPI_PROC_NULL:
-        tmps = pickle.dump(obj, &sbuf, &scount)
+        tmps = pickle_dump(pickle, obj, &sbuf, &scount)
     with nogil: CHKERR( MPI_Send(sbuf, scount, stype,
                                  dest, tag, comm) )
     return None
@@ -188,7 +223,7 @@ cdef object PyMPI_bsend(object obj, int dest, int tag,
     #
     cdef object tmps = None
     if dest != MPI_PROC_NULL:
-        tmps = pickle.dump(obj, &sbuf, &scount)
+        tmps = pickle_dump(pickle, obj, &sbuf, &scount)
     with nogil: CHKERR( MPI_Bsend(sbuf, scount, stype,
                                   dest, tag, comm) )
     return None
@@ -204,7 +239,7 @@ cdef object PyMPI_ssend(object obj, int dest, int tag,
     #
     cdef object tmps = None
     if dest != MPI_PROC_NULL:
-        tmps = pickle.dump(obj, &sbuf, &scount)
+        tmps = pickle_dump(pickle, obj, &sbuf, &scount)
     with nogil: CHKERR( MPI_Ssend(sbuf, scount, stype,
                                   dest, tag, comm) )
     return None
@@ -230,7 +265,7 @@ cdef object PyMPI_recv_obarg(object obj, int source, int tag,
     if source != MPI_PROC_NULL:
         if is_integral(obj):
             rcount = <int> obj
-            rmsg = pickle.alloc(&rbuf, rcount)
+            rmsg = pickle_alloc(&rbuf, rcount)
         else:
             rmsg = getbuffer_w(obj, &rbuf, &rlen)
             rcount = clipcount(rlen)
@@ -244,7 +279,7 @@ cdef object PyMPI_recv_obarg(object obj, int source, int tag,
             CHKERR( MPI_Get_count(status, rtype, &rcount) )
     #
     if rcount <= 0: return None
-    return pickle.load(rbuf, rcount)
+    return pickle_load(pickle, rbuf, rcount)
 
 
 cdef object PyMPI_recv_match(object obj, int source, int tag,
@@ -262,12 +297,12 @@ cdef object PyMPI_recv_match(object obj, int source, int tag,
     with nogil:
         CHKERR( MPI_Mprobe(source, tag, comm, &match, &rsts) )
         CHKERR( MPI_Get_count(&rsts, rtype, &rcount) )
-    cdef object tmpr = pickle.alloc(&rbuf, rcount)
+    cdef object tmpr = pickle_alloc(&rbuf, rcount)
     with nogil:
         CHKERR( MPI_Mrecv(rbuf, rcount, rtype, &match, status) )
     #
     if rcount <= 0: return None
-    return pickle.load(rbuf, rcount)
+    return pickle_load(pickle, rbuf, rcount)
 
 
 cdef object PyMPI_recv_probe(object obj, int source, int tag,
@@ -288,13 +323,13 @@ cdef object PyMPI_recv_probe(object obj, int source, int tag,
             CHKERR( MPI_Get_count(&rsts, rtype, &rcount) )
             CHKERR( PyMPI_Status_get_source(&rsts, &source) )
             CHKERR( PyMPI_Status_get_tag(&rsts, &tag) )
-        tmpr = pickle.alloc(&rbuf, rcount)
+        tmpr = pickle_alloc(&rbuf, rcount)
         with nogil:
             CHKERR( MPI_Recv(rbuf, rcount, rtype,
                              source, tag, comm, status) )
     #
     if rcount <= 0: return None
-    return pickle.load(rbuf, rcount)
+    return pickle_load(pickle, rbuf, rcount)
 
 
 cdef object PyMPI_recv(object obj, int source, int tag,
@@ -318,7 +353,7 @@ cdef object PyMPI_isend(object obj, int dest, int tag,
     #
     cdef object smsg = None
     if dest != MPI_PROC_NULL:
-        smsg = pickle.dump(obj, &sbuf, &scount)
+        smsg = pickle_dump(pickle, obj, &sbuf, &scount)
     with nogil: CHKERR( MPI_Isend(sbuf, scount, stype,
                                   dest, tag, comm, request) )
     return smsg
@@ -334,7 +369,7 @@ cdef object PyMPI_ibsend(object obj, int dest, int tag,
     #
     cdef object smsg = None
     if dest != MPI_PROC_NULL:
-        smsg = pickle.dump(obj, &sbuf, &scount)
+        smsg = pickle_dump(pickle, obj, &sbuf, &scount)
     with nogil: CHKERR( MPI_Ibsend(sbuf, scount, stype,
                                    dest, tag, comm, request) )
     return smsg
@@ -350,7 +385,7 @@ cdef object PyMPI_issend(object obj, int dest, int tag,
     #
     cdef object smsg = None
     if dest != MPI_PROC_NULL:
-        smsg = pickle.dump(obj, &sbuf, &scount)
+        smsg = pickle_dump(pickle, obj, &sbuf, &scount)
     with nogil: CHKERR( MPI_Issend(sbuf, scount, stype,
                                    dest, tag, comm, request) )
     return smsg
@@ -369,11 +404,11 @@ cdef object PyMPI_irecv(object obj, int source, int tag,
     if source != MPI_PROC_NULL:
         if obj is None:
             rcount = <int>(1<<15)
-            obj = pickle.alloc(&rbuf, rcount)
+            obj = pickle_alloc(&rbuf, rcount)
             rmsg = getbuffer_r(obj, NULL, NULL)
         elif is_integral(obj):
             rcount = <int> obj
-            obj = pickle.alloc(&rbuf, rcount)
+            obj = pickle_alloc(&rbuf, rcount)
             rmsg = getbuffer_r(obj, NULL, NULL)
         else:
             rmsg = getbuffer_w(obj, &rbuf, &rlen)
@@ -404,7 +439,7 @@ cdef object PyMPI_load(MPI_Status *status, object ob):
     CHKERR( MPI_Get_count(status, rtype, &rcount) )
     if rcount <= 0: return None
     ob = asmemory(ob, &rbuf, NULL)
-    return pickle.load(rbuf, rcount)
+    return pickle_load(pickle, rbuf, rcount)
 
 
 cdef object PyMPI_wait(Request request, Status status):
@@ -595,7 +630,7 @@ cdef object PyMPI_mprobe(int source, int tag, MPI_Comm comm,
     with nogil: CHKERR( MPI_Mprobe(source, tag, comm, message, status) )
     if message[0] == MPI_MESSAGE_NO_PROC: return None
     CHKERR( MPI_Get_count(status, rtype, &rcount) )
-    cdef object rmsg = pickle.alloc(&rbuf, rcount)
+    cdef object rmsg = pickle_alloc(&rbuf, rcount)
     return rmsg
 
 cdef object PyMPI_improbe(int source, int tag, MPI_Comm comm, int *flag,
@@ -609,7 +644,7 @@ cdef object PyMPI_improbe(int source, int tag, MPI_Comm comm, int *flag,
     with nogil: CHKERR( MPI_Improbe(source, tag, comm, flag, message, status) )
     if flag[0] == 0 or message[0] == MPI_MESSAGE_NO_PROC: return None
     CHKERR( MPI_Get_count(status, rtype, &rcount) )
-    cdef object rmsg = pickle.alloc(&rbuf, rcount)
+    cdef object rmsg = pickle_alloc(&rbuf, rcount)
     return rmsg
 
 cdef object PyMPI_mrecv(object rmsg,
@@ -628,7 +663,7 @@ cdef object PyMPI_mrecv(object rmsg,
         rmsg = getbuffer_w(rmsg, &rbuf, &rlen)
     cdef int rcount = clipcount(rlen)
     with nogil: CHKERR( MPI_Mrecv(rbuf, rcount, rtype, message, status) )
-    rmsg = pickle.load(rbuf, rcount)
+    rmsg = pickle_load(pickle, rbuf, rcount)
     return rmsg
 
 cdef object PyMPI_imrecv(object rmsg,
@@ -682,18 +717,18 @@ cdef object PyMPI_bcast(object obj, int root, MPI_Comm comm):
     cdef object smsg = None
     cdef object rmsg = None
     #
-    if dosend: smsg = pickle.dump(obj, &buf, &count)
+    if dosend: smsg = pickle_dump(pickle, obj, &buf, &count)
     if dosend and dorecv: rmsg = smsg
     with PyMPI_Lock(comm, "bcast"):
         with nogil: CHKERR( MPI_Bcast(
             &count, 1, MPI_INT,
             root, comm) )
         if dorecv and not dosend:
-            rmsg = pickle.alloc(&buf, count)
+            rmsg = pickle_alloc(&buf, count)
         with nogil: CHKERR( MPI_Bcast(
             buf, count, dtype,
             root, comm) )
-    if dorecv: rmsg = pickle.load(buf, count)
+    if dorecv: rmsg = pickle_load(pickle, buf, count)
     #
     return rmsg
 
@@ -733,18 +768,18 @@ cdef object PyMPI_gather(object sendobj, int root, MPI_Comm comm):
     cdef object tmp1
     #
     if dorecv: tmp1 = allocate_count_displ(size, &rcounts, &rdispls)
-    if dosend: tmps = pickle.dump(sendobj, &sbuf, &scount)
+    if dosend: tmps = pickle_dump(pickle, sendobj, &sbuf, &scount)
     with PyMPI_Lock(comm, "gather"):
         with nogil: CHKERR( MPI_Gather(
             &scount, 1, MPI_INT,
             rcounts, 1, MPI_INT,
             root, comm) )
-        if dorecv: rmsg = pickle.allocv(&rbuf, size, rcounts, rdispls)
+        if dorecv: rmsg = pickle_allocv(&rbuf, size, rcounts, rdispls)
         with nogil: CHKERR( MPI_Gatherv(
             sbuf, scount,           stype,
             rbuf, rcounts, rdispls, rtype,
             root, comm) )
-    if dorecv: rmsg = pickle.loadv(rbuf, size, rcounts, rdispls)
+    if dorecv: rmsg = pickle_loadv(pickle, rbuf, size, rcounts, rdispls)
     #
     return rmsg
 
@@ -784,18 +819,18 @@ cdef object PyMPI_scatter(object sendobj, int root, MPI_Comm comm):
     cdef object tmp1
     #
     if dosend: tmp1 = allocate_count_displ(size, &scounts, &sdispls)
-    if dosend: tmps = pickle.dumpv(sendobj, &sbuf, size, scounts, sdispls)
+    if dosend: tmps = pickle_dumpv(pickle, sendobj, &sbuf, size, scounts, sdispls)
     with PyMPI_Lock(comm, "scatter"):
         with nogil: CHKERR( MPI_Scatter(
             scounts, 1, MPI_INT,
             &rcount, 1, MPI_INT,
             root, comm) )
-        if dorecv: rmsg = pickle.alloc(&rbuf, rcount)
+        if dorecv: rmsg = pickle_alloc(&rbuf, rcount)
         with nogil: CHKERR( MPI_Scatterv(
             sbuf, scounts, sdispls, stype,
             rbuf, rcount,           rtype,
             root, comm) )
-    if dorecv: rmsg = pickle.load(rbuf, rcount)
+    if dorecv: rmsg = pickle_load(pickle, rbuf, rcount)
     #
     return rmsg
 
@@ -823,18 +858,18 @@ cdef object PyMPI_allgather(object sendobj, MPI_Comm comm):
     cdef object tmp1
     #
     tmp1 = allocate_count_displ(size, &rcounts, &rdispls)
-    tmps = pickle.dump(sendobj, &sbuf, &scount)
+    tmps = pickle_dump(pickle, sendobj, &sbuf, &scount)
     with PyMPI_Lock(comm, "allgather"):
         with nogil: CHKERR( MPI_Allgather(
             &scount, 1, MPI_INT,
             rcounts, 1, MPI_INT,
             comm) )
-        rmsg = pickle.allocv(&rbuf, size, rcounts, rdispls)
+        rmsg = pickle_allocv(&rbuf, size, rcounts, rdispls)
         with nogil: CHKERR( MPI_Allgatherv(
             sbuf, scount,           stype,
             rbuf, rcounts, rdispls, rtype,
             comm) )
-    rmsg = pickle.loadv(rbuf, size, rcounts, rdispls)
+    rmsg = pickle_loadv(pickle, rbuf, size, rcounts, rdispls)
     #
     return rmsg
 
@@ -864,18 +899,18 @@ cdef object PyMPI_alltoall(object sendobj, MPI_Comm comm):
     #
     tmp1 = allocate_count_displ(size, &scounts, &sdispls)
     tmp2 = allocate_count_displ(size, &rcounts, &rdispls)
-    tmps = pickle.dumpv(sendobj, &sbuf, size, scounts, sdispls)
+    tmps = pickle_dumpv(pickle, sendobj, &sbuf, size, scounts, sdispls)
     with PyMPI_Lock(comm, "alltoall"):
         with nogil: CHKERR( MPI_Alltoall(
             scounts, 1, MPI_INT,
             rcounts, 1, MPI_INT,
             comm) )
-        rmsg = pickle.allocv(&rbuf, size, rcounts, rdispls)
+        rmsg = pickle_allocv(&rbuf, size, rcounts, rdispls)
         with nogil: CHKERR( MPI_Alltoallv(
             sbuf, scounts, sdispls, stype,
             rbuf, rcounts, rdispls, rtype,
             comm) )
-    rmsg = pickle.loadv(rbuf, size, rcounts, rdispls)
+    rmsg = pickle_loadv(pickle, rbuf, size, rcounts, rdispls)
     #
     return rmsg
 
@@ -900,18 +935,18 @@ cdef object PyMPI_neighbor_allgather(object sendobj, MPI_Comm comm):
     #
     tmp1 = allocate_count_displ(rsize, &rcounts, &rdispls)
     for i from 0 <= i < rsize: rcounts[i] = 0
-    tmps = pickle.dump(sendobj, &sbuf, &scount)
+    tmps = pickle_dump(pickle, sendobj, &sbuf, &scount)
     with PyMPI_Lock(comm, "neighbor_allgather"):
         with nogil: CHKERR( MPI_Neighbor_allgather(
             &scount, 1, MPI_INT,
             rcounts, 1, MPI_INT,
             comm) )
-        rmsg = pickle.allocv(&rbuf, rsize, rcounts, rdispls)
+        rmsg = pickle_allocv(&rbuf, rsize, rcounts, rdispls)
         with nogil: CHKERR( MPI_Neighbor_allgatherv(
             sbuf, scount,           stype,
             rbuf, rcounts, rdispls, rtype,
             comm) )
-    rmsg = pickle.loadv(rbuf, rsize, rcounts, rdispls)
+    rmsg = pickle_loadv(pickle, rbuf, rsize, rcounts, rdispls)
     #
     return rmsg
 
@@ -938,18 +973,18 @@ cdef object PyMPI_neighbor_alltoall(object sendobj, MPI_Comm comm):
     tmp1 = allocate_count_displ(ssize, &scounts, &sdispls)
     tmp2 = allocate_count_displ(rsize, &rcounts, &rdispls)
     for i from 0 <= i < rsize: rcounts[i] = 0
-    tmps = pickle.dumpv(sendobj, &sbuf, ssize, scounts, sdispls)
+    tmps = pickle_dumpv(pickle, sendobj, &sbuf, ssize, scounts, sdispls)
     with PyMPI_Lock(comm, "neighbor_alltoall"):
         with nogil: CHKERR( MPI_Neighbor_alltoall(
             scounts, 1, MPI_INT,
             rcounts, 1, MPI_INT,
             comm) )
-        rmsg = pickle.allocv(&rbuf, rsize, rcounts, rdispls)
+        rmsg = pickle_allocv(&rbuf, rsize, rcounts, rdispls)
         with nogil: CHKERR( MPI_Neighbor_alltoallv(
             sbuf, scounts, sdispls, stype,
             rbuf, rcounts, rdispls, rtype,
             comm) )
-    rmsg = pickle.loadv(rbuf, rsize, rcounts, rdispls)
+    rmsg = pickle_loadv(pickle, rbuf, rsize, rcounts, rdispls)
     #
     return rmsg
 
@@ -1004,15 +1039,15 @@ cdef inline object PyMPI_copy(object obj):
     cdef Pickle pickle = PyMPI_PICKLE
     cdef void *buf = NULL
     cdef int count = 0
-    obj = pickle.dump(obj, &buf, &count)
-    return pickle.load(buf, count)
+    obj = pickle_dump(pickle, obj, &buf, &count)
+    return pickle_load(pickle, buf, count)
 
 cdef object PyMPI_send_p2p(object obj, int dst, int tag, MPI_Comm comm):
     cdef Pickle pickle = PyMPI_PICKLE
     cdef void *sbuf = NULL
     cdef int scount = 0
     cdef MPI_Datatype stype = MPI_BYTE
-    cdef object tmps = pickle.dump(obj, &sbuf, &scount)
+    cdef object tmps = pickle_dump(pickle, obj, &sbuf, &scount)
     with nogil: CHKERR( MPI_Send(&scount, 1, MPI_INT, dst, tag, comm) )
     with nogil: CHKERR( MPI_Send(sbuf, scount, stype, dst, tag, comm) )
     return None
@@ -1024,9 +1059,9 @@ cdef object PyMPI_recv_p2p(int src, int tag, MPI_Comm comm):
     cdef MPI_Datatype rtype = MPI_BYTE
     cdef MPI_Status *status = MPI_STATUS_IGNORE
     with nogil: CHKERR( MPI_Recv(&rcount, 1, MPI_INT, src, tag, comm, status) )
-    cdef object tmpr = pickle.alloc(&rbuf, rcount)
+    cdef object tmpr = pickle_alloc(&rbuf, rcount)
     with nogil: CHKERR( MPI_Recv(rbuf, rcount, rtype, src, tag, comm, status) )
-    return pickle.load(rbuf, rcount)
+    return pickle_load(pickle, rbuf, rcount)
 
 cdef object PyMPI_sendrecv_p2p(object obj,
                                int dst, int stag,
@@ -1036,15 +1071,15 @@ cdef object PyMPI_sendrecv_p2p(object obj,
     cdef void *sbuf = NULL, *rbuf = NULL
     cdef int scount = 0, rcount = 0
     cdef MPI_Datatype dtype = MPI_BYTE
-    cdef object tmps = pickle.dump(obj, &sbuf, &scount)
+    cdef object tmps = pickle_dump(pickle, obj, &sbuf, &scount)
     with nogil: CHKERR( MPI_Sendrecv(&scount, 1, MPI_INT, dst, stag,
                                      &rcount, 1, MPI_INT, src, rtag,
                                      comm, MPI_STATUS_IGNORE) )
-    cdef object tmpr = pickle.alloc(&rbuf, rcount)
+    cdef object tmpr = pickle_alloc(&rbuf, rcount)
     with nogil: CHKERR( MPI_Sendrecv(sbuf, scount, dtype, dst, stag,
                                      rbuf, rcount, dtype, src, rtag,
                                      comm, MPI_STATUS_IGNORE) )
-    return pickle.load(rbuf, rcount)
+    return pickle_load(pickle, rbuf, rcount)
 
 cdef object PyMPI_bcast_p2p(object obj, int root, MPI_Comm comm):
     cdef Pickle pickle = PyMPI_PICKLE
@@ -1053,12 +1088,12 @@ cdef object PyMPI_bcast_p2p(object obj, int root, MPI_Comm comm):
     cdef MPI_Datatype dtype = MPI_BYTE
     cdef int rank = MPI_PROC_NULL
     CHKERR( MPI_Comm_rank(comm, &rank) )
-    if root == rank: obj = pickle.dump(obj, &buf, &count)
+    if root == rank: obj = pickle_dump(pickle, obj, &buf, &count)
     with PyMPI_Lock(comm, "@bcast_p2p@"):
         with nogil: CHKERR( MPI_Bcast(&count, 1, MPI_INT, root, comm) )
-        if root != rank: obj = pickle.alloc(&buf, count)
+        if root != rank: obj = pickle_alloc(&buf, count)
         with nogil: CHKERR( MPI_Bcast(buf, count, dtype, root, comm) )
-    return pickle.load(buf, count)
+    return pickle_load(pickle, buf, count)
 
 cdef object PyMPI_reduce_p2p(object sendobj, object op, int root,
                              MPI_Comm comm, int tag):

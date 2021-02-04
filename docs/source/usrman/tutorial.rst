@@ -36,6 +36,16 @@ communication of buffer-provider objects (e.g., NumPy arrays).
   process. They return a single value, a list of :attr:`Comm.size`
   elements, or :const:`None`.
 
+  .. note::
+
+     *MPI for Python* uses the **highest** :ref:`protocol version
+     <pickle-protocols>` available in the Python runtime (see the
+     :data:`~pickle.HIGHEST_PROTOCOL` constant in the :mod:`pickle`
+     module).  The default protocol can be changed at import time by
+     setting the :envvar:`MPI4PY_PICKLE_PROTOCOL` environment
+     variable, or at runtime by assigning a different value to the
+     :attr:`PROTOCOL` attribute of the :obj:`MPI.pickle` object.
+
 * Communication of buffer-like objects
 
   You have to use method names starting with an **upper-case** letter
