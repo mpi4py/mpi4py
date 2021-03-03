@@ -69,7 +69,7 @@ only) thread until they are signaled for completion.
    The worker processes must import the main script in order to *unpickle* any
    callable defined in the :mod:`__main__` module and submitted from the master
    process. Furthermore, the callables may need access to other global
-   variables. At the worker processes,:mod:`mpi4py.futures` executes the main
+   variables. At the worker processes, :mod:`mpi4py.futures` executes the main
    script code (using the :mod:`runpy` module) under the :mod:`__worker__`
    namespace to define the :mod:`__main__` module. The :mod:`__main__` and
    :mod:`__worker__` modules are added to :data:`sys.modules` (both at the
