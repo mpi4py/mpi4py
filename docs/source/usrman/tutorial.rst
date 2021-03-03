@@ -15,7 +15,7 @@ communication of buffer-provider objects (e.g., NumPy arrays).
 
   You have to use **all-lowercase** methods (of the :class:`Comm`
   class), like :meth:`send()`, :meth:`recv()`, :meth:`bcast()`. An
-  object to be sent is passed as a paramenter to the communication
+  object to be sent is passed as a parameter to the communication
   call, and the received object is simply the return value.
 
   The :meth:`isend()` and :meth:`irecv` methods return
