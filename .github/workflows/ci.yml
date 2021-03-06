@@ -37,13 +37,13 @@ jobs:
           - openmpi
           - msmpi
         os:
-          - ubuntu-latest
+          - ubuntu-18.04
           - macos-latest
           - windows-latest
         exclude:
-          - os: ubuntu-latest
+          - os: ubuntu-18.04
             py-arch: x86
-          - os: ubuntu-latest
+          - os: ubuntu-18.04
             mpi: msmpi
           - os: macos-latest
             py-version: pypy2
