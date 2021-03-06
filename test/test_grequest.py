@@ -22,6 +22,7 @@ class GReqCtx(object):
         
 
 @unittest.skipMPI('MPI(<2.0)')
+@unittest.skipMPI('openmpi(==4.1.0)')
 class TestGrequest(unittest.TestCase):
 
     def testAll(self):
