@@ -312,6 +312,41 @@ static int PyMPI_OPENMPI_Get_address(const void *location, MPI_Aint *address)
 
 /* ------------------------------------------------------------------------- */
 
+/*
+ * Open MPI < 2.0.0 matched probes do not return MPI_MESSAGE_NO_PROC
+ * for source=MPI_PROC_NULL if status=MPI_STATUS_IGNORE.
+ */
+
+#if PyMPI_OPENMPI_VERSION < 20000
+
+static int PyMPI_OPENMPI_Mprobe(int source, int tag, MPI_Comm comm,
+                                MPI_Message *message, MPI_Status *status)
+{
+  MPI_Status _pympi_status;
+  if (source == MPI_PROC_NULL &&
+      status == MPI_STATUS_IGNORE)
+    status = &_pympi_status;
+  return MPI_Mprobe(source, tag, comm, message, status);
+}
+#undef  MPI_Mprobe
+#define MPI_Mprobe PyMPI_OPENMPI_Mprobe
+
+static int PyMPI_OPENMPI_Improbe(int source, int tag, MPI_Comm comm, int *flag,
+                                 MPI_Message *message, MPI_Status *status)
+{
+  MPI_Status _pympi_status;
+  if (source == MPI_PROC_NULL &&
+      status == MPI_STATUS_IGNORE)
+    status = &_pympi_status;
+  return MPI_Improbe(source, tag, comm, flag, message, status);
+}
+#undef  MPI_Improbe
+#define MPI_Improbe PyMPI_OPENMPI_Improbe
+
+#endif
+
+/* ------------------------------------------------------------------------- */
+
 #endif /* !PyMPI_COMPAT_OPENMPI_H */
 
 /*
