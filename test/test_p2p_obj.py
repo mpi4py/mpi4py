@@ -608,6 +608,7 @@ class BaseTestP2PObj(object):
         self.assertEqual(idxs, None)
         self.assertEqual(objs, None)
         self.assertFalse(any(reqs))
+        comm.Free()
 
     def testTestSomeRecv(self):
         comm = self.COMM.Dup()
@@ -635,6 +636,7 @@ class BaseTestP2PObj(object):
         self.assertEqual(idxs, None)
         self.assertEqual(objs, None)
         self.assertFalse(any(reqs))
+        comm.Free()
 
     def testWaitSomeSend(self):
         comm = self.COMM.Dup()
@@ -652,6 +654,7 @@ class BaseTestP2PObj(object):
         self.assertEqual(idxs, None)
         self.assertEqual(objs, None)
         self.assertFalse(any(reqs))
+        comm.Free()
 
     def testTestSomeSend(self):
         comm = self.COMM.Dup()
@@ -673,6 +676,7 @@ class BaseTestP2PObj(object):
         self.assertEqual(idxs, None)
         self.assertEqual(objs, None)
         self.assertFalse(any(reqs))
+        comm.Free()
 
 
 class TestP2PObjSelf(BaseTestP2PObj, unittest.TestCase):
