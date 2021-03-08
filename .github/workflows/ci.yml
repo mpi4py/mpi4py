@@ -38,20 +38,20 @@ jobs:
           - msmpi
         os:
           - ubuntu-18.04
-          - macos-latest
+          - macos-10.15
           - windows-latest
         exclude:
           - os: ubuntu-18.04
             py-arch: x86
           - os: ubuntu-18.04
             mpi: msmpi
-          - os: macos-latest
+          - os: macos-10.15
             py-version: pypy2
-          - os: macos-latest
+          - os: macos-10.15
             py-version: pypy3
-          - os: macos-latest
+          - os: macos-10.15
             py-arch: x86
-          - os: macos-latest
+          - os: macos-10.15
             mpi: msmpi
           - os: windows-latest
             mpi: mpich
@@ -61,8 +61,8 @@ jobs:
     steps:
 
     - name: Configure hostname
-      run:  echo 127.0.0.1 `hostname` | sudo tee -a /etc/hosts > /dev/null
       if:   runner.os == 'macOS'
+      run:  echo 127.0.0.1 `hostname` | sudo tee -a /etc/hosts > /dev/null
 
     - name: Install Visual C++
       if:   runner.os == 'Windows' && matrix.py-version == '2.7'
