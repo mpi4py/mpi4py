@@ -1307,6 +1307,11 @@ if name == 'Open MPI':
 if name == 'MPICH':
     if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
         SKIP_POOL_TEST = True
+    port = MPI.Open_port()
+    if port == "":
+        SKIP_POOL_TEST = True
+    MPI.Close_port(port)
+    del port
 if name == 'MVAPICH2':
     SKIP_POOL_TEST = True
 if name == 'MPICH2':

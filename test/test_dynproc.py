@@ -200,7 +200,10 @@ class TestDPM(unittest.TestCase):
 MVAPICH2 = MPI.get_vendor()[0] == 'MVAPICH2'
 try:
     if MVAPICH2: raise NotImplementedError
-    MPI.Close_port(MPI.Open_port())
+    port = MPI.Open_port()
+    MPI.Close_port(port)
+    if not port: raise NotImplementedError
+    del port
 except NotImplementedError:
     unittest.disable(TestDPM, 'mpi-dpm')
 

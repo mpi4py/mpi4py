@@ -202,6 +202,14 @@ class TestOp(unittest.TestCase):
             flag = op.Is_commutative()
             self.assertEqual(flag, op.is_commutative)
             self.assertTrue(flag)
+
+    @unittest.skipMPI('openmpi(<=1.8.1)')
+    @unittest.skipMPI('mpich(==3.4.1)')
+    def testIsCommutativeExtra(self):
+        try:
+            MPI.SUM.Is_commutative()
+        except NotImplementedError:
+            self.skipTest('mpi-op-is_commutative')
         ops =  [MPI.REPLACE, MPI.NO_OP]
         for op in ops:
             if not op: continue

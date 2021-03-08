@@ -166,11 +166,15 @@ class BaseTestRMA(object):
         rank = group.Get_rank()
         group.Free()
         self.WIN.Fence()
-        obuf = MPI.Alloc_mem(1); memzero(obuf)
-        rbuf = MPI.Alloc_mem(1); memzero(rbuf)
+        blen = MPI.INT.Get_size()
+        obuf = MPI.Alloc_mem(blen); memzero(obuf)
+        rbuf = MPI.Alloc_mem(blen); memzero(rbuf)
         try:
             try:
-                self.WIN.Fetch_and_op([obuf, 1, MPI.BYTE], [rbuf, 1, MPI.BYTE], rank)
+                self.WIN.Fetch_and_op(
+                    [obuf, 1, MPI.INT],
+                    [rbuf, 1, MPI.INT],
+                    rank)
             finally:
                 MPI.Free_mem(obuf)
                 MPI.Free_mem(rbuf)

@@ -40,12 +40,23 @@ def appnum():
     if MPI.APPNUM == MPI.KEYVAL_INVALID: return None
     return MPI.COMM_WORLD.Get_attr(MPI.APPNUM)
 
+def badport():
+    if MPI.get_vendor()[0] != 'MPICH':
+        return False
+    try:
+        port = MPI.Open_port()
+        MPI.Close_port(port)
+    except:
+        port = ""
+    return port == ""
+
 @unittest.skipMPI('MPI(<2.0)')
 @unittest.skipMPI('openmpi(<3.0.0)')
 @unittest.skipMPI('openmpi(==4.0.0)')
 @unittest.skipMPI('openmpi(==4.0.1)', sys.platform=='darwin')
 @unittest.skipMPI('openmpi(==4.0.2)', sys.platform=='darwin')
 @unittest.skipMPI('mpich', appnum() is None)
+@unittest.skipMPI('mpich', badport())
 @unittest.skipMPI('msmpi(<8.1.0)')
 @unittest.skipMPI('msmpi', appnum() is None)
 @unittest.skipMPI('MVAPICH2')

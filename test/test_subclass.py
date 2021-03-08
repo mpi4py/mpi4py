@@ -187,6 +187,7 @@ class TestMyRequest2(TestMyRequest):
             dest=MPI.PROC_NULL, tag=0)
         self.req = MyRequest(req)
 
+@unittest.skipMPI('mpich(==3.4.1)')
 class TestMyPrequest2(TestMyPrequest):
 
     def setUp(self):

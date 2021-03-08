@@ -101,30 +101,43 @@ class BaseTestP2PBuf(object):
         #
         comm.Send (None, MPI.PROC_NULL)
         comm.Isend (None, MPI.PROC_NULL).Wait()
-        req = comm.Send_init(None, MPI.PROC_NULL)
-        req.Start(); req.Wait(); req.Free()
         #
         comm.Ssend(None, MPI.PROC_NULL)
         comm.Issend(None, MPI.PROC_NULL).Wait()
-        req = comm.Ssend_init(None, MPI.PROC_NULL)
-        req.Start(); req.Wait(); req.Free()
         #
         buf = MPI.Alloc_mem(MPI.BSEND_OVERHEAD)
         MPI.Attach_buffer(buf)
         comm.Bsend(None, MPI.PROC_NULL)
         comm.Ibsend(None, MPI.PROC_NULL).Wait()
-        req = comm.Bsend_init(None, MPI.PROC_NULL)
-        req.Start(); req.Wait(); req.Free()
         MPI.Detach_buffer()
         MPI.Free_mem(buf)
         #
         comm.Rsend(None, MPI.PROC_NULL)
         comm.Irsend(None, MPI.PROC_NULL).Wait()
-        req = comm.Rsend_init(None, MPI.PROC_NULL)
-        req.Start(); req.Wait(); req.Free()
         #
         comm.Recv (None, MPI.PROC_NULL)
         comm.Irecv(None, MPI.PROC_NULL).Wait()
+
+    @unittest.skipMPI('mpich(==3.4.1)')
+    def testProcNullPersistent(self):
+        comm = self.COMM
+        #
+        req = comm.Send_init(None, MPI.PROC_NULL)
+        req.Start(); req.Wait(); req.Free()
+        #
+        req = comm.Ssend_init(None, MPI.PROC_NULL)
+        req.Start(); req.Wait(); req.Free()
+        #
+        buf = MPI.Alloc_mem(MPI.BSEND_OVERHEAD)
+        MPI.Attach_buffer(buf)
+        req = comm.Bsend_init(None, MPI.PROC_NULL)
+        req.Start(); req.Wait(); req.Free()
+        MPI.Detach_buffer()
+        MPI.Free_mem(buf)
+        #
+        req = comm.Rsend_init(None, MPI.PROC_NULL)
+        req.Start(); req.Wait(); req.Free()
+        #
         req = comm.Recv_init(None, MPI.PROC_NULL)
         req.Start(); req.Wait(); req.Free()
 
