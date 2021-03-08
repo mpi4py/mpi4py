@@ -2721,6 +2721,7 @@ def Open_port(Info info: Info = INFO_NULL) -> str:
     connections between groups of MPI processes
     """
     cdef char cportname[MPI_MAX_PORT_NAME+1]
+    cportname[0] = 0 # just in case
     with nogil: CHKERR( MPI_Open_port(info.ob_mpi, cportname) )
     cportname[MPI_MAX_PORT_NAME] = 0 # just in case
     return mpistr(cportname)
@@ -2781,6 +2782,7 @@ def Lookup_name(
     service_name = asmpistr(service_name, &csrvcname)
     cdef MPI_Info cinfo = arg_Info(<Info?>info)
     cdef char cportname[MPI_MAX_PORT_NAME+1]
+    cportname[0] = 0 # just in case
     with nogil: CHKERR( MPI_Lookup_name(csrvcname, cinfo, cportname) )
     cportname[MPI_MAX_PORT_NAME] = 0 # just in case
     return mpistr(cportname)

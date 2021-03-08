@@ -223,11 +223,12 @@ cdef class File:
         cdef Datatype etype = Datatype.__new__(Datatype)
         cdef Datatype ftype = Datatype.__new__(Datatype)
         cdef char cdatarep[MPI_MAX_DATAREP_STRING+1]
+        cdatarep[0] = 0 # just in case
         with nogil: CHKERR( MPI_File_get_view(
             self.ob_mpi, &disp, &etype.ob_mpi, &ftype.ob_mpi, cdatarep) )
+        cdatarep[MPI_MAX_DATAREP_STRING] = 0 # just in case
         #if builtin_Datatype(etype.ob_mpi): etype.flags = 0
         #if builtin_Datatype(ftype.ob_mpi): ftype.flags = 0
-        cdatarep[MPI_MAX_DATAREP_STRING] = 0 # just in case
         cdef object datarep = mpistr(cdatarep)
         return (disp, etype, ftype, datarep)
 

@@ -61,6 +61,7 @@ cdef class Info:
         cdef int flag = 0
         key = asmpistr(key, &ckey)
         cdef tmp = allocate((maxlen+1), sizeof(char), &cvalue)
+        cvalue[0] = 0  # just in case
         CHKERR( MPI_Info_get(self.ob_mpi, ckey, maxlen, cvalue, &flag) )
         cvalue[maxlen] = 0 # just in case
         if not flag: return None
@@ -100,6 +101,7 @@ cdef class Info:
         `Info.Get_nkeys()`
         """
         cdef char ckey[MPI_MAX_INFO_KEY+1]
+        ckey[0] = 0 # just in case
         CHKERR( MPI_Info_get_nthkey(self.ob_mpi, n, ckey) )
         ckey[MPI_MAX_INFO_KEY] = 0 # just in case
         return mpistr(ckey)
