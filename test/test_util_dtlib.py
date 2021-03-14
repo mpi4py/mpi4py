@@ -26,9 +26,13 @@ typecodes += ['i{:d}'.format(n) for n in (1,2,4,8)]
 typecodes += ['u{:d}'.format(n) for n in (1,2,4,8)]
 typecodes += ['f{:d}'.format(n) for n in (4,8)]
 
-py2 = sys.version_info[0] == 2
 np_lt_117 = (np_version and np_version < (1, 17))
-if py2 or np_lt_117: typecodes.remove('L')
+if np_lt_117 or sys.version_info[0] == 2:
+    typecodes.remove('L')
+if np_lt_117:
+    typecodes.remove('F')
+    typecodes.remove('D')
+    typecodes.remove('G')
 
 name, version = MPI.get_vendor()
 if (name == 'MPICH') and version < (4, 0, 0):
