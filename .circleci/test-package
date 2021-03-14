@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 export ANACONDA=/opt/conda
 export HYDRA_LAUNCHER=fork
 export OMPI_MCA_plm=isolated
