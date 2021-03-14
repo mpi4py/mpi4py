@@ -24,6 +24,8 @@ test-package() {
         PY="${arg#*=}";;
       MPI=?*)
         MPI="${arg#*=}";;
+      mpi=?*)
+        MPI="${arg#*=}";;
       coverage=?*)
         COVERAGE="${arg#*=}";;
       *)
