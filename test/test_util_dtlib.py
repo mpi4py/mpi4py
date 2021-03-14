@@ -14,9 +14,11 @@ except ImportError:
 try:
     import numpy
     np_dtype = numpy.dtype
+    np_version = tuple(map(int, numpy.__version__.split('.', 2)[:2]))
 except ImportError:
     numpy = None
     np_dtype = None
+    np_version = None
 
 typecodes = list("?cbhilqpBHILQfdgFDG")
 typecodes += ['b{:d}'.format(n) for n in (1,)]
@@ -25,7 +27,8 @@ typecodes += ['u{:d}'.format(n) for n in (1,2,4,8)]
 typecodes += ['f{:d}'.format(n) for n in (4,8)]
 
 py2 = sys.version_info[0] == 2
-if py2: typecodes.remove('L')
+np_lt_117 = (np_version and np_version < (1, 17))
+if py2 or np_lt_117: typecodes.remove('L')
 
 name, version = MPI.get_vendor()
 if (name == 'MPICH') and version < (4, 0, 0):
