@@ -1224,6 +1224,28 @@ cdef int PyMPI_Commctx_INTER(MPI_Comm comm,
     return 0
 
 
+def _commctx_intra(
+    Intracomm comm: Intracomm,
+) -> Tuple[Intracomm, int]:
+    "Create/get intracommunicator duplicate"
+    cdef int tag = MPI_UNDEFINED
+    cdef Intracomm dupcomm = Intracomm.__new__(Intracomm)
+    PyMPI_Commctx_INTRA(comm.ob_mpi, &dupcomm.ob_mpi, &tag)
+    return (dupcomm, tag)
+
+def _commctx_inter(
+    Intercomm comm: Intercomm,
+) -> Tuple[Intercomm, int, Intracomm, bool]:
+    "Create/get intercommunicator duplicate"
+    cdef int tag = MPI_UNDEFINED, low_group = 0
+    cdef Intercomm dupcomm = Intercomm.__new__(Intercomm)
+    cdef Intracomm localcomm = Intracomm.__new__(Intracomm)
+    PyMPI_Commctx_INTER(comm.ob_mpi, &dupcomm.ob_mpi, &tag,
+                        &localcomm.ob_mpi, &low_group)
+    return (dupcomm, tag, localcomm, <bint>low_group)
+
+# -----
+
 cdef object PyMPI_reduce_intra(object sendobj, object op,
                                int root, MPI_Comm comm):
     cdef int tag = MPI_UNDEFINED
