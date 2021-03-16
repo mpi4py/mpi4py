@@ -270,7 +270,9 @@ class BaseTestP2PBuf(object):
             self.assertFalse(flag)
             comm.Recv([None, 0, MPI.BYTE], comm.rank, 123)
             self.assertTrue(request)
-            flag = request.Test()
+            flag = False
+            while not flag:
+                flag = request.Test()
             self.assertFalse(request)
             self.assertTrue(flag)
         finally:

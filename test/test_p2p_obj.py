@@ -70,7 +70,9 @@ class BaseTestP2PObj(object):
             self.assertTrue(req)
             rmess = self.COMM.recv(buf, rank, 0)
             self.assertTrue(req)
-            flag = req.Test()
+            flag = False
+            while not flag:
+                flag = req.Test()
             self.assertTrue(flag)
             self.assertFalse(req)
             self.assertEqual(rmess, smess)
@@ -366,7 +368,9 @@ class BaseTestP2PObj(object):
             self.assertTrue(req)
             rmess = self.COMM.recv(None, rank, 0)
             self.assertTrue(req)
-            flag = req.Test()
+            flag = False
+            while not flag:
+                flag = req.Test()
             self.assertTrue(flag)
             self.assertFalse(req)
             self.assertEqual(rmess, smess)
