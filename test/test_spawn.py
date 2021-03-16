@@ -36,6 +36,12 @@ def childscript():
     os.chmod(script, int("770", 8))
     return script
 
+def ch4_ucx():
+    return 'ch4:ucx' in MPI.Get_library_version()
+
+def ch4_ofi():
+    return 'ch4:ofi' in MPI.Get_library_version()
+
 def appnum():
     if MPI.APPNUM == MPI.KEYVAL_INVALID: return None
     return MPI.COMM_WORLD.Get_attr(MPI.APPNUM)
@@ -101,6 +107,7 @@ class BaseTestSpawn(object):
             self.assertEqual(errcode, MPI.SUCCESS)
 
     @unittest.skipMPI('msmpi')
+    @unittest.skipMPI('mpich(==3.4.1)', ch4_ofi())
     def testArgsOnlyAtRoot(self):
         self.COMM.Barrier()
         if self.COMM.Get_rank() == self.ROOT:

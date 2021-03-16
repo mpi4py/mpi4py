@@ -106,6 +106,7 @@ class BaseTestP2PMatched(object):
                     n = MPI.Message.Iprobe(comm, 0, 0)
                     self.assertEqual(n, None)
                     r = comm.Isend(sbuf.as_mpi(), 0, 0)
+                    comm.Probe(0, 0)
                     m = MPI.Message.Iprobe(comm, 0, 0)
                     self.assertTrue(isinstance(m, MPI.Message))
                     self.assertTrue(m)

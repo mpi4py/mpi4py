@@ -566,10 +566,9 @@ class BaseTestP2PObj(object):
             for smess in messages:
                 request = comm.issend(smess, comm.rank, 123)
                 self.assertTrue(request)
-                flag = comm.iprobe(MPI.ANY_SOURCE, MPI.ANY_TAG, status)
+                while not comm.iprobe(MPI.ANY_SOURCE, MPI.ANY_TAG, status): pass
                 self.assertEqual(status.source, comm.rank)
                 self.assertEqual(status.tag, 123)
-                self.assertTrue(flag)
                 comm.probe(MPI.ANY_SOURCE, MPI.ANY_TAG, status)
                 self.assertEqual(status.source, comm.rank)
                 self.assertEqual(status.tag, 123)
@@ -581,9 +580,8 @@ class BaseTestP2PObj(object):
                 obj = comm.recv(None, comm.rank, 123)
                 self.assertEqual(obj, smess)
                 self.assertTrue(request)
-                flag, obj = request.test()
+                obj = request.wait()
                 self.assertFalse(request)
-                self.assertTrue(flag)
                 self.assertEqual(obj, None)
         finally:
             comm.Free()
@@ -647,6 +645,10 @@ class BaseTestP2PObj(object):
                 msg = comm.recv(source=rank, tag=i)
                 self.assertEqual(msg, "abc")
             idxs, objs = MPI.Request.waitsome(reqs)
+            while sorted(idxs) != sorted(indexlist):
+                i, o = MPI.Request.waitsome(reqs)
+                idxs.extend(i)
+                objs.extend(o)
             self.assertEqual(sorted(idxs), sorted(indexlist))
             self.assertEqual(objs, [None]*len(idxs))
             self.assertFalse(any(reqs[i] for i in idxs))
@@ -669,6 +671,10 @@ class BaseTestP2PObj(object):
                 msg = comm.recv(source=rank, tag=i)
                 self.assertEqual(msg, "abc")
             idxs, objs = MPI.Request.testsome(reqs)
+            while sorted(idxs) != sorted(indexlist):
+                i, o = MPI.Request.testsome(reqs)
+                idxs.extend(i)
+                objs.extend(o)
             self.assertEqual(sorted(idxs), sorted(indexlist))
             self.assertEqual(objs, [None]*len(idxs))
             self.assertFalse(any(reqs[i] for i in idxs))

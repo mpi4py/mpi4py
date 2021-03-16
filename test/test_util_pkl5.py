@@ -135,8 +135,7 @@ class BaseTest(object):
             self.assertTrue(req)
             rmess = self.COMM.recv(None, rank, 0)
             self.assertTrue(req)
-            flag, _ = req.test()
-            self.assertTrue(flag)
+            req.wait()
             self.assertFalse(req)
             self.assertEqual(rmess, smess)
         for smess in messages:
@@ -228,8 +227,7 @@ class BaseTest(object):
             if not status.Is_cancelled():
                 rmess = self.COMM.recv(None, rank, 0)
                 self.assertTrue(req)
-                flag, _ = req.test()
-                self.assertTrue(flag)
+                req.wait()
                 self.assertFalse(req)
                 self.assertEqual(rmess, smess)
             else:
@@ -255,8 +253,9 @@ class BaseTest(object):
         for smess in messages:
             rmess = comm.recv(None, rank)
             self.assertEqual(rmess, smess)
-        flag, obj = self.RequestType.testall(requests)
-        self.assertTrue(flag)
+        flag = False
+        while not flag:
+            flag, obj = self.RequestType.testall(requests)
         self.assertEqual(obj, [None]*len(messages))
         flag, _ = self.RequestType.testall(requests)
         self.assertTrue(flag)
@@ -302,8 +301,7 @@ class BaseTest(object):
             self.assertTrue(status.Get_count() > 0)
         comm.barrier()
         statuses = (MPI.Status(),)
-        flag, _ = self.RequestType.testall(requests1, statuses)
-        self.assertTrue(flag)
+        self.RequestType.waitall(requests1, statuses)
         self.assertEqual(statuses[0].error, 0)
 
     def testSendrecv(self):
@@ -379,6 +377,8 @@ class BaseTest(object):
         comm = self.COMM.Dup()
         try:
             status = MPI.Status()
+            flag = comm.iprobe(MPI.ANY_SOURCE, MPI.ANY_TAG, status)
+            self.assertFalse(flag)
             for smess in messages:
                 request = comm.issend(smess, comm.rank, 123)
                 self.assertTrue(isinstance(request, self.RequestType))
@@ -389,10 +389,9 @@ class BaseTest(object):
                 self.assertTrue(request != None)
                 self.assertFalse(request == None)
                 self.assertTrue(request)
-                flag = comm.iprobe(MPI.ANY_SOURCE, MPI.ANY_TAG, status)
+                while not comm.iprobe(MPI.ANY_SOURCE, MPI.ANY_TAG, status): pass
                 self.assertEqual(status.source, comm.rank)
                 self.assertEqual(status.tag, 123)
-                self.assertTrue(flag)
                 comm.probe(MPI.ANY_SOURCE, MPI.ANY_TAG, status)
                 self.assertEqual(status.source, comm.rank)
                 self.assertEqual(status.tag, 123)
@@ -404,9 +403,8 @@ class BaseTest(object):
                 obj = comm.recv(None, comm.rank, 123)
                 self.assertEqual(obj, smess)
                 self.assertTrue(request)
-                flag, obj = request.test()
+                obj = request.wait()
                 self.assertFalse(request)
-                self.assertTrue(flag)
                 self.assertEqual(obj, None)
         finally:
             comm.Free()
@@ -515,6 +513,7 @@ class BaseTest(object):
                 message = comm.improbe(comm.rank, 123)
                 self.assertEqual(message, None)
                 request = comm.issend(smess, comm.rank, 123)
+                while not comm.iprobe(comm.rank, 123): pass
                 message = comm.improbe(comm.rank, 123)
                 self.assertTrue(isinstance(message, self.MessageType))
                 rmess = message.recv()
@@ -524,6 +523,7 @@ class BaseTest(object):
                 message = comm.improbe(comm.rank, 123)
                 self.assertEqual(message, None)
                 request = comm.issend(smess, comm.rank, 123)
+                while not comm.iprobe(comm.rank, 123): pass
                 message = comm.improbe(MPI.ANY_SOURCE, MPI.ANY_TAG, status)
                 self.assertEqual(status.source, comm.rank)
                 self.assertEqual(status.tag, 123)
@@ -557,6 +557,7 @@ class BaseTest(object):
                 message = self.MessageType.iprobe(comm, comm.rank, 123)
                 self.assertEqual(message, None)
                 request = comm.issend(smess, comm.rank, 123)
+                while not comm.iprobe(comm.rank, 123): pass
                 message = self.MessageType.iprobe(comm, MPI.ANY_SOURCE, MPI.ANY_TAG, status)
                 self.assertEqual(status.source, comm.rank)
                 self.assertEqual(status.tag, 123)

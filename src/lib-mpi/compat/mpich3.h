@@ -2,6 +2,23 @@
 #define PyMPI_COMPAT_MPICH3_H
 #if defined(MPICH_NUMVERSION)
 
+#if (MPICH_NUMVERSION >= 30400000 && MPICH_NUMVERSION <= 40000000)
+
+static int PyMPI_MPICH3_MPI_Win_get_attr(MPI_Win win,
+                                         int keyval,
+                                         void *attrval,
+                                         int *flag)
+{
+  int ierr; static MPI_Aint zero[1] = {0}; zero[0] = 0;
+  ierr = MPI_Win_get_attr(win, keyval, attrval, flag); if (ierr) return ierr;
+  if (keyval == MPI_WIN_SIZE && flag && *flag && attrval)
+    if (**((MPI_Aint**)attrval) == -1) *((void**)attrval) = zero;
+  return ierr;
+}
+#define MPI_Win_get_attr PyMPI_MPICH3_MPI_Win_get_attr
+
+#endif
+
 #if (MPICH_NUMVERSION == 30101300)
 
 static int PyMPI_MPICH3_MPI_Status_c2f(const MPI_Status *c_status,

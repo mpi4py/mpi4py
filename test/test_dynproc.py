@@ -5,10 +5,28 @@ try:
 except ImportError:
     socket = None
 
+
+def ch4_ucx():
+    return 'ch4:ucx' in MPI.Get_library_version()
+
+def ch4_ofi():
+    return 'ch4:ofi' in MPI.Get_library_version()
+
 def appnum():
     if MPI.APPNUM == MPI.KEYVAL_INVALID: return None
     return MPI.COMM_WORLD.Get_attr(MPI.APPNUM)
 
+def badport():
+    if MPI.get_vendor()[0] != 'MPICH':
+        return False
+    try:
+        port = MPI.Open_port()
+        MPI.Close_port(port)
+    except:
+        port = ""
+    return port == ""
+
+@unittest.skipMPI('mpich', badport())
 @unittest.skipMPI('openmpi(<2.0.0)')
 @unittest.skipMPI('MVAPICH2')
 @unittest.skipMPI('msmpi(<8.1.0)')
@@ -43,6 +61,7 @@ class TestDPM(unittest.TestCase):
         MPI.Close_port(port)
 
     @unittest.skipIf(MPI.COMM_WORLD.Get_size() < 2, 'mpi-world-size<2')
+    @unittest.skipMPI('mpich(==3.4.1)', ch4_ofi())
     def testAcceptConnect(self):
         comm_self  = MPI.COMM_SELF
         comm_world = MPI.COMM_WORLD
@@ -200,10 +219,6 @@ class TestDPM(unittest.TestCase):
 MVAPICH2 = MPI.get_vendor()[0] == 'MVAPICH2'
 try:
     if MVAPICH2: raise NotImplementedError
-    port = MPI.Open_port()
-    MPI.Close_port(port)
-    if not port: raise NotImplementedError
-    del port
 except NotImplementedError:
     unittest.disable(TestDPM, 'mpi-dpm')
 
