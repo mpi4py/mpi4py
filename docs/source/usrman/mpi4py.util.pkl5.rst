@@ -159,6 +159,12 @@ MPI-3).
                status: Optional[MPI.Status] = None, \
                ) -> Optional[Message]
 
+   .. method:: bcast(
+               self,
+               obj: Any,
+               root: int = 0,
+               ) -> Any
+
 
 .. class:: Intracomm(comm: MPI.Intracomm = MPI.COMM_NULL)
 

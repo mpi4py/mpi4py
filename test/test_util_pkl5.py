@@ -593,6 +593,67 @@ class BaseTest(object):
         self.assertEqual(msg, self.MessageType(MPI.MESSAGE_NO_PROC))
         self.assertNotEqual(msg, MPI.MESSAGE_NULL)
 
+    def testBcastIntra(self, msglist=None, check=None):
+        comm = self.COMM
+        size = comm.Get_size()
+        for smess in (msglist or messages):
+            for root in range(size):
+                rmess = comm.bcast(smess, root)
+                if msglist and check:
+                    self.assertTrue(check(rmess))
+                else:
+                    self.assertEqual(rmess, smess)
+
+    def testBcastInter(self, msglist=None, check=None):
+        basecomm = self.COMM
+        size = basecomm.Get_size()
+        rank = basecomm.Get_rank()
+        if size == 1: return
+        if rank < size // 2 :
+            COLOR = 0
+            local_leader = 0
+            remote_leader = size // 2
+        else:
+            COLOR = 1
+            local_leader = 0
+            remote_leader = 0
+        basecomm.Barrier()
+        intracomm = basecomm.Split(COLOR, key=0)
+        intercomm = MPI.Intracomm.Create_intercomm(
+            intracomm,
+            local_leader,
+            basecomm,
+            remote_leader
+        )
+        intracomm.Free()
+        if isinstance(basecomm, pkl5.Intracomm):
+            intercomm = pkl5.Intercomm(intercomm)
+        rank = intercomm.Get_rank()
+        size = intercomm.Get_size()
+        rsize = intercomm.Get_remote_size()
+        for smess in (msglist or messages)[:1]:
+            intercomm.barrier()
+            for color in [0, 1]:
+                if COLOR == color:
+                    for root in range(size):
+                        if root == rank:
+                            rmess = intercomm.bcast(smess, root=MPI.ROOT)
+                        else:
+                            rmess = intercomm.bcast(None, root=MPI.PROC_NULL)
+                        self.assertEqual(rmess, None)
+                else:
+                    for root in range(rsize):
+                        rmess = intercomm.bcast(None, root=root)
+                        if msglist and check:
+                            self.assertTrue(check(rmess))
+                        else:
+                            self.assertEqual(rmess, smess)
+        if isinstance(intercomm, pkl5.Intercomm):
+            bcast = intercomm.bcast
+            rsize = intercomm.Get_remote_size()
+            self.assertRaises(MPI.Exception, bcast, None, root=rsize)
+        intercomm.Free()
+
     @unittest.skipIf(numpy is None, 'numpy')
     def testBigMPI(self):
         comm = self.COMM
@@ -611,8 +672,10 @@ class BaseTest(object):
             bigmpi.blocksize = blocksize
             a = numpy.empty(1024, dtype='i')
             b = numpy.empty(1024, dtype='i')
+            c = numpy.empty(1024, dtype='i')
             a.fill(rank)
             b.fill(dest)
+            c.fill(42)
             status = MPI.Status()
             smess = (a, b)
             rmess = comm.sendrecv(
@@ -632,6 +695,13 @@ class BaseTest(object):
             self.assertTrue(numpy.all(rmess[1] == rank))
             self.assertTrue(status.Get_elements(MPI.BYTE) > 0)
             request.Free()
+            comm.barrier()
+            check = lambda x: numpy.all(x == 42)
+            self.testBcastIntra([c, c], check)
+            self.testBcastInter([c, c], check)
+            check2 = lambda x: check(x[0]) and check(x[1])
+            self.testBcastIntra([(c, c.copy())], check2)
+            self.testBcastInter([(c, c.copy())], check2)
 
 
 class BaseTestPKL5(object):

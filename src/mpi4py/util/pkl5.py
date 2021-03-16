@@ -16,6 +16,7 @@ from ..MPI import (
 from ..MPI import (
     _typedict,
     _comm_lock,
+    _commctx_inter,
     memory as _memory,
     Pickle as _Pickle,
 )
@@ -168,21 +169,26 @@ def _new_buffer(size):
     return bytearray(size)
 
 
+def _send_raw(comm, send, data, bufs, dest, tag):
+    # pylint: disable=too-many-arguments
+    info = [len(data)]
+    info.extend(len(_memory(sbuf)) for sbuf in bufs)
+    infotype = _info_datatype()
+    info = _info_pack(info)
+    send(comm, (info, infotype), dest, tag)
+    with _bigmpi as bigmpi:
+        send(comm, bigmpi(data), dest, tag)
+        for sbuf in bufs:
+            send(comm, bigmpi(sbuf), dest, tag)
+
+
 def _send(comm, send, obj, dest, tag):
     if dest == PROC_NULL:
         send(comm, (None, 0, MPI.BYTE), dest, tag)
         return
     data, bufs = pickle.dumps(obj)
-    info = [len(data)]
-    info.extend(len(_memory(sbuf)) for sbuf in bufs)
-    infotype = _info_datatype()
-    info = _info_pack(info)
     with _comm_lock(comm, 'send'):
-        send(comm, (info, infotype), dest, tag)
-        with _bigmpi as bigmpi:
-            send(comm, bigmpi(data), dest, tag)
-            for sbuf in bufs:
-                send(comm, bigmpi(sbuf), dest, tag)
+        _send_raw(comm, send, data, bufs, dest, tag)
 
 
 def _isend(comm, isend, obj, dest, tag):
@@ -194,36 +200,42 @@ def _isend(comm, isend, obj, dest, tag):
     return request
 
 
+def _recv_raw(comm, recv, buf, source, tag, status=None):
+    # pylint: disable=too-many-arguments
+    if status is None:
+        status = Status()
+    MPI.Comm.Probe(comm, source, tag, status)
+    source = status.Get_source()
+    tag = status.Get_tag()
+    infotype = _info_datatype()
+    infosize = status.Get_elements(infotype)
+    info = _info_alloc(infosize)
+    MPI.Comm.Recv(comm, (info, infotype), source, tag, status)
+    info = _info_unpack(info)
+    if buf is not None:
+        buf = _memory.frombuffer(buf)
+        if len(buf) > info[0]:
+            buf = buf[:info[0]]
+        if len(buf) < info[0]:
+            buf = None
+    data = bytearray(info[0]) if buf is None else buf
+    bufs = list(map(_new_buffer, info[1:]))
+    with _bigmpi as bigmpi:
+        recv(comm, bigmpi(data), source, tag)
+        for rbuf in bufs:
+            recv(comm, bigmpi(rbuf), source, tag)
+    status.Set_elements(MPI.BYTE, sum(info))
+    return data, bufs
+
+
 def _recv(comm, recv, buf, source, tag, status):
     # pylint: disable=too-many-arguments
     if source == PROC_NULL:
         recv(comm, (None, 0, MPI.BYTE), source, tag, status)
         return None
-    if status is None:
-        status = Status()
     with _comm_lock(comm, 'recv'):
-        MPI.Comm.Probe(comm, source, tag, status)
-        source = status.Get_source()
-        tag = status.Get_tag()
-        infotype = _info_datatype()
-        infosize = status.Get_elements(infotype)
-        info = _info_alloc(infosize)
-        MPI.Comm.Recv(comm, (info, infotype), source, tag, status)
-        info = _info_unpack(info)
-        if buf is not None:
-            buf = _memory.frombuffer(buf)
-            if len(buf) > info[0]:
-                buf = buf[:info[0]]
-            if len(buf) < info[0]:
-                buf = None
-        data = bytearray(info[0]) if buf is None else buf
-        bufs = list(map(_new_buffer, info[1:]))
-        with _bigmpi as bigmpi:
-            recv(comm, bigmpi(data), source, tag)
-            for rbuf in bufs:
-                recv(comm, bigmpi(rbuf), source, tag)
-        status.Set_elements(MPI.BYTE, sum(info))
-        return pickle.loads(data, bufs)
+        data, bufs = _recv_raw(comm, recv, buf, source, tag, status)
+    return pickle.loads(data, bufs)
 
 
 def _mprobe(comm, mprobe, source, tag, status):
@@ -340,6 +352,75 @@ def _testall(requests, testall, statuses):
         objs = [_req_load(req) for req in requests]
         return (flag, objs)
     return (flag, None)
+
+
+def _bcast_intra_raw(comm, bcast, data, bufs, root):
+    rank = comm.Get_rank()
+    if rank == root:
+        info = [len(data)]
+        info.extend(len(_memory(sbuf)) for sbuf in bufs)
+        infotype = _info_datatype()
+        infosize = _info_pack([len(info)])
+        bcast(comm, (infosize, infotype), root)
+        info = _info_pack(info)
+        bcast(comm, (info, infotype), root)
+    else:
+        infotype = _info_datatype()
+        infosize = _info_alloc(1)
+        bcast(comm, (infosize, infotype), root)
+        infosize = _info_unpack(infosize)[0]
+        info = _info_alloc(infosize)
+        bcast(comm, (info, infotype), root)
+        info = _info_unpack(info)
+        data = bytearray(info[0])
+        bufs = list(map(_new_buffer, info[1:]))
+    with _bigmpi as bigmpi:
+        bcast(comm, bigmpi(data), root)
+        for rbuf in bufs:
+            bcast(comm, bigmpi(rbuf), root)
+    return data, bufs
+
+
+def _bcast_intra(comm, bcast, obj, root):
+    rank = comm.Get_rank()
+    if rank == root:
+        data, bufs = pickle.dumps(obj)
+    else:
+        data, bufs = pickle.dumps(None)
+    with _comm_lock(comm, 'bcast'):
+        data, bufs = _bcast_intra_raw(comm, bcast, data, bufs, root)
+    return pickle.loads(data, bufs)
+
+
+def _bcast_inter(comm, bcast, obj, root):
+    rank = comm.Get_rank()
+    size = comm.Get_remote_size()
+    comm, tag, localcomm, _ = _commctx_inter(comm)
+    if root == MPI.PROC_NULL:
+        return None
+    elif root == MPI.ROOT:
+        send = MPI.Comm.Send
+        data, bufs = pickle.dumps(obj)
+        _send_raw(comm, send, data, bufs, 0, tag)
+        return None
+    elif 0 <= root < size:
+        if rank == 0:
+            recv = MPI.Comm.Recv
+            data, bufs = _recv_raw(comm, recv, None, root, tag)
+        else:
+            data, bufs = pickle.dumps(None)
+        with _comm_lock(localcomm, 'bcast'):
+            data, bufs = _bcast_intra_raw(localcomm, bcast, data, bufs, 0)
+        return pickle.loads(data, bufs)
+    comm.Call_errhandler(MPI.ERR_ROOT)
+    raise MPI.Exception(MPI.ERR_ROOT)
+
+
+def _bcast(comm, bcast, obj, root):
+    if comm.Is_inter():
+        return _bcast_inter(comm, bcast, obj, root)
+    else:
+        return _bcast_intra(comm, bcast, obj, root)
 
 
 class Request(tuple):
@@ -524,6 +605,10 @@ class Comm(MPI.Comm):
                 status=None):
         """Nonblocking test for a matched message."""
         return _mprobe(self, MPI.Comm.Improbe, source, tag, status)
+
+    def bcast(self, obj, root=0):
+        """Broadcast."""
+        return _bcast(self, MPI.Comm.Bcast, obj, root)
 
 
 class Intracomm(Comm, MPI.Intracomm):
