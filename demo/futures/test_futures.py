@@ -1305,6 +1305,9 @@ if name == 'Open MPI':
     if version == (4,0,2) and sys.platform=='darwin':
         SKIP_POOL_TEST = True
 if name == 'MPICH':
+    if sys.platform == 'darwin':
+        if version >= (3, 4) and version < (4, 0):
+            SKIP_POOL_TEST = True
     if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
         SKIP_POOL_TEST = True
     port = MPI.Open_port()
