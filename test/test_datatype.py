@@ -327,7 +327,8 @@ class TestDatatype(unittest.TestCase):
     match_size_real    = [4, 8]
     match_size_complex = [8, 16]
     @unittest.skipMPI('MPI(<2.0)')
-    @unittest.skipMPI('openmpi', MPI.CHARACTER.Get_size() == 0)
+    @unittest.skipMPI('openmpi', (MPI.CHARACTER == MPI.DATATYPE_NULL or
+                                  MPI.CHARACTER.Get_size() == 0))
     def testMatchSize(self):
         typeclass = MPI.TYPECLASS_INTEGER
         for size in self.match_size_integer:

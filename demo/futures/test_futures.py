@@ -1310,10 +1310,13 @@ if name == 'MPICH':
             SKIP_POOL_TEST = True
     if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
         SKIP_POOL_TEST = True
-    port = MPI.Open_port()
+    try:
+        port = MPI.Open_port()
+        MPI.Close_port(port)
+    except:
+        port = ""
     if port == "":
         SKIP_POOL_TEST = True
-    MPI.Close_port(port)
     del port
 if name == 'MVAPICH2':
     SKIP_POOL_TEST = True
