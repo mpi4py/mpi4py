@@ -65,7 +65,9 @@ static void PyMPI_OPENMPI_dlopen_libmpi(void)
   mode |= RTLD_NOLOAD;
   #endif
   #if defined(OMPI_MAJOR_VERSION)
-  #if OMPI_MAJOR_VERSION == 3
+  #if   OMPI_MAJOR_VERSION >= 4
+  if (!handle) handle = dlopen("libmpi.40.dylib", mode);
+  #elif OMPI_MAJOR_VERSION == 3
   if (!handle) handle = dlopen("libmpi.40.dylib", mode);
   #elif OMPI_MAJOR_VERSION == 2
   if (!handle) handle = dlopen("libmpi.20.dylib", mode);
@@ -88,6 +90,8 @@ static void PyMPI_OPENMPI_dlopen_libmpi(void)
   if (!handle) handle = dlopen("libmpi_ibm.so.2", mode);
   if (!handle) handle = dlopen("libmpi_ibm.so.1", mode);
   if (!handle) handle = dlopen("libmpi_ibm.so", mode);
+  #elif OMPI_MAJOR_VERSION >= 4
+  if (!handle) handle = dlopen("libmpi.so.40", mode);
   #elif OMPI_MAJOR_VERSION == 3
   if (!handle) handle = dlopen("libmpi.so.40", mode);
   #elif OMPI_MAJOR_VERSION == 2
