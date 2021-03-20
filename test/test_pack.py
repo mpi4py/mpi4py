@@ -53,7 +53,7 @@ EXT32 = 'external32'
 
 class BaseTestPackExternal(object):
 
-    skipdtype = list('gFDG')
+    skipdtype = []
 
     def testPackSize(self):
         for array, typecode in arrayimpl.subTest(self):
@@ -67,6 +67,7 @@ class BaseTestPackExternal(object):
 
     def testPackUnpackExternal(self):
         for array, typecode1 in arrayimpl.subTest(self):
+            if unittest.is_mpi_gpu('mpich', array): continue
             if unittest.is_mpi_gpu('openmpi', array): continue
             if unittest.is_mpi_gpu('mvapich2', array): continue
             if typecode1 in self.skipdtype: continue
@@ -112,15 +113,17 @@ class TestPackExternal(BaseTestPackExternal, unittest.TestCase):
 
 
 name, version = MPI.get_vendor()
-if name =='MPICH' or name == 'MPICH2':
-    BaseTestPackExternal.skipdtype += ['l']
-    BaseTestPackExternal.skipdtype += ['d']
+if name == 'MPICH':
+    if version < (4, 0, 0):
+        BaseTestPackExternal.skipdtype += 'ldgFDG'
 elif name == 'Intel MPI':
-    BaseTestPackExternal.skipdtype += ['l']
-    BaseTestPackExternal.skipdtype += ['d']
+    BaseTestPackExternal.skipdtype += 'ldgFDG'
+elif name == 'Microsoft MPI':
+    BaseTestPackExternal.skipdtype += 'gFDG'
 elif name == 'MVAPICH2':
-    BaseTestPackExternal.skipdtype += ['l']
-    BaseTestPackExternal.skipdtype += ['d']
+    BaseTestPackExternal.skipdtype += 'ldgFDG'
+elif name =='MPICH2':
+    BaseTestPackExternal.skipdtype += 'ldgFDG'
 else:
     try:
         MPI.BYTE.Pack_external_size(EXT32, 0)
