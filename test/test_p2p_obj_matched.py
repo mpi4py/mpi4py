@@ -82,7 +82,6 @@ class BaseTestP2PMatched(object):
             self.assertEqual(status.error,  MPI.SUCCESS)
             m = MPI.Message.iprobe(comm)
             self.assertEqual(m, None)
-            # Open MPI <= 1.8.4
             s = comm.isend(None, comm.rank, 0)
             r = comm.mprobe(comm.rank, 0).irecv()
             MPI.Request.waitall([s,r])

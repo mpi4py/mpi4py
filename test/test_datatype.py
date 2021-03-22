@@ -378,10 +378,11 @@ elif name == 'MPICH1':
 elif MPI.Get_version() < (2,0):
     combiner_map = None
 if name == 'Open MPI':
-    if MPI.CHARACTER.Get_size() == 0:
-        for dtype in datatypes_f + datatypes_f90:
-            if dtype and dtype in datatypes:
-                datatypes.remove(dtype)
+    for t in datatypes_f + datatypes_f90:
+        if t != MPI.DATATYPE_NULL:
+            if t.Get_size() == 0:
+                if t in datatypes:
+                    datatypes.remove(t)
     if (1,6,0) < version < (1,7,0):
         TestDatatype.match_size_complex[:] = []
     if version < (1,5,2):
