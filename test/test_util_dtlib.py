@@ -276,7 +276,9 @@ class TestUtilDTLib(unittest.TestCase):
     @unittest.skipMPI('msmpi')
     def testF90Integer(self):
         try:
-            MPI.Datatype.Create_f90_integer(1)
+            mt = MPI.Datatype.Create_f90_integer(1)
+            if mt == MPI.DATATYPE_NULL or mt.Get_size() == 0:
+                raise NotImplementedError
         except NotImplementedError:
             self.skipTest('mpi-type-create-f90-integer')
         for r in range(1, 19):
@@ -290,7 +292,9 @@ class TestUtilDTLib(unittest.TestCase):
     @unittest.skipMPI('msmpi')
     def testF90Real(self):
         try:
-            MPI.Datatype.Create_f90_real(7, MPI.UNDEFINED)
+            mt = MPI.Datatype.Create_f90_real(7, MPI.UNDEFINED)
+            if mt == MPI.DATATYPE_NULL or mt.Get_size() == 0:
+                raise NotImplementedError
         except NotImplementedError:
             self.skipTest('mpi-type-create-f90-real')
         for p in (6, 7, 14, 15):
@@ -304,7 +308,9 @@ class TestUtilDTLib(unittest.TestCase):
     @unittest.skipMPI('msmpi')
     def testF90Complex(self):
         try:
-            MPI.Datatype.Create_f90_complex(7, MPI.UNDEFINED)
+            mt = MPI.Datatype.Create_f90_complex(7, MPI.UNDEFINED)
+            if mt == MPI.DATATYPE_NULL or mt.Get_size() == 0:
+                raise NotImplementedError
         except NotImplementedError:
             self.skipTest('mpi-type-create-f90-complex')
         for p in (6, 7, 14, 15):

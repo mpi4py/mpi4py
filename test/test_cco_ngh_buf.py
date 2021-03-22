@@ -167,13 +167,14 @@ class TestCCONghBufWorldDup(TestCCONghBufWorld):
 
 
 name, version = MPI.get_vendor()
-if name == 'Open MPI' and version < (1,8,4):
-    _create_topo_comms = create_topo_comms
-    def create_topo_comms(comm):
-        for c in _create_topo_comms(comm):
-            if c.size * 2 < sum(c.degrees):
-                c.Free(); continue
-            yield c
+if name == 'Open MPI':
+    if version < (1,8,4):
+        _create_topo_comms = create_topo_comms
+        def create_topo_comms(comm):
+            for c in _create_topo_comms(comm):
+                if c.size * 2 < sum(c.degrees):
+                    c.Free(); continue
+                yield c
 
 
 if __name__ == '__main__':
