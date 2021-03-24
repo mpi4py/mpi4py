@@ -23,11 +23,6 @@ except ImportError:
     marshal = None
 
 try:
-    import simplejson
-except ImportError:
-    simplejson = None
-
-try:
     import json
 except ImportError:
     json = None
@@ -157,18 +152,6 @@ class TestPickle(unittest.TestCase):
             for obj in OBJS:
                 self.do_pickle(obj, pickle)
             self.do_pickle(OBJS, pickle)
-
-    @unittest.skipIf(simplejson is None, 'simplejson')
-    def testSimpleJson(self):
-        pickle = self.pickle
-        dumps = lambda o: simplejson.dumps(o).encode()
-        loads = lambda s: simplejson.loads(tobytes(s).decode())
-        pickle.__init__(dumps, loads)
-        OBJS2 = [o for o in OBJS
-                 if not isinstance(o, (float, complex, tuple))]
-        for obj in OBJS2:
-            self.do_pickle(obj, pickle)
-        self.do_pickle(OBJS2, pickle)
 
     @unittest.skipIf(json is None, 'json')
     def testJson(self):
