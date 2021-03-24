@@ -93,7 +93,7 @@ jobs:
         path: dist
 
     - name: Install test dependencies
-      run:  python -m pip install --upgrade numpy cffi simplejson PyYAML
+      run:  python -m pip install --upgrade numpy cffi pyyaml
     - name: Install package for testing
       run:  python -m pip install --no-index --find-links=dist mpi4py
     - name: Test package
