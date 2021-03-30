@@ -728,6 +728,8 @@ def import_main(mod_name, mod_path, init_globals, run_name):
         if mod_name:  # pragma: no cover
             runpy.run_module(mod_name, run_name=run_name, alter_sys=True)
         elif mod_path:  # pragma: no branch
+            if not getattr(sys.flags, 'isolated', 0):  # pragma: no branch
+                sys.path[0] = os.path.realpath(os.path.dirname(mod_path))
             runpy.run_path(mod_path, run_name=run_name)
         sys.modules['__main__'] = sys.modules[run_name] = module
     except:  # pragma: no cover
@@ -749,8 +751,12 @@ def _sync_get_data(options):
     data.pop('initkwargs', None)
 
     if import_main_module:
-        spec = getattr(main, '__spec__', None)
-        name = getattr(spec, 'name', None)
+        if sys.version_info[0] >= 3:
+            spec = getattr(main, '__spec__', None)
+            name = getattr(spec, 'name', None)
+        else:  # pragma: no cover
+            loader = getattr(main, '__loader__', None)
+            name = getattr(loader, 'fullname', None)
         path = getattr(main, '__file__', None)
         if name is not None:  # pragma: no cover
             data['@main:mod_name'] = name
