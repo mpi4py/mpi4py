@@ -2,7 +2,7 @@
 
 from mpi4py import MPI
 
-def osu_bw(
+def osu_bibw(
     BENCHMARH = "MPI Bi-Directional Bandwidth Test",
     skip = 10,
     loop = 100,
@@ -90,4 +90,4 @@ def allocate(n):
 
 
 if __name__ == '__main__':
-    osu_bw()
+    osu_bibw()

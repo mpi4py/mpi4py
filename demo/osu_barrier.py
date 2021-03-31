@@ -2,7 +2,7 @@
 
 from mpi4py import MPI
 
-def osu_bcast(
+def osu_barrier(
     BENCHMARH = "MPI Barrier Latency Test",
     skip = 1000,
     loop = 10000,
@@ -46,4 +46,4 @@ def osu_bcast(
 
 
 if __name__ == '__main__':
-    osu_bcast()
+    osu_barrier()
