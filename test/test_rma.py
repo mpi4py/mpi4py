@@ -161,6 +161,7 @@ class BaseTestRMA(object):
                         self.assertEqual(gbuf[-1], -1)
 
     def testFetchAndOp(self):
+        typemap = MPI._typedict
         group = self.WIN.Get_group()
         size = group.Get_size()
         rank = group.Get_rank()
@@ -187,6 +188,7 @@ class BaseTestRMA(object):
             if typecode in 'FDG': continue
             obuf = array(+1, typecode)
             rbuf = array(-1, typecode, 2)
+            datatype = typemap[typecode]
             for op in (MPI.SUM, MPI.PROD,
                        MPI.MAX, MPI.MIN,
                        MPI.REPLACE, MPI.NO_OP):
@@ -195,11 +197,15 @@ class BaseTestRMA(object):
                         self.WIN.Lock(rank)
                         self.WIN.Fetch_and_op(obuf.as_mpi(),
                                               rbuf.as_mpi_c(1),
-                                              rank, disp, op=op)
+                                              rank,
+                                              disp * datatype.size,
+                                              op=op)
+
                         self.WIN.Unlock(rank)
                         self.assertEqual(rbuf[1], -1)
 
     def testCompareAndSwap(self):
+        typemap = MPI._typedict
         group = self.WIN.Get_group()
         size = group.Get_size()
         rank = group.Get_rank()
@@ -229,13 +235,16 @@ class BaseTestRMA(object):
             obuf = array(+1, typecode)
             cbuf = array( 0, typecode)
             rbuf = array(-1, typecode, 2)
+            datatype = typemap[typecode]
             for rank in range(size):
                 for disp in range(3):
                     self.WIN.Lock(rank)
                     self.WIN.Compare_and_swap(obuf.as_mpi(),
                                               cbuf.as_mpi(),
                                               rbuf.as_mpi_c(1),
-                                              rank, disp)
+                                              rank,
+                                              disp * datatype.size)
+
                     self.WIN.Unlock(rank)
                     self.assertEqual(rbuf[1], -1)
 
