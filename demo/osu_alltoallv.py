@@ -3,7 +3,7 @@
 from mpi4py import MPI
 from array import array
 
-def osu_alltoall(
+def osu_alltoallv(
     BENCHMARH = "MPI Alltoallv Latency Test",
     skip = 200,
     loop = 1000,
@@ -74,4 +74,4 @@ def allocate(n):
 
 
 if __name__ == '__main__':
-    osu_alltoall()
+    osu_alltoallv()

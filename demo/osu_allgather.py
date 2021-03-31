@@ -2,7 +2,7 @@
 
 from mpi4py import MPI
 
-def osu_bcast(
+def osu_allgather(
     BENCHMARH = "MPI Allgather Latency Test",
     skip = 1000,
     loop = 10000,
@@ -69,4 +69,4 @@ def allocate(n):
 
 
 if __name__ == '__main__':
-    osu_bcast()
+    osu_allgather()
