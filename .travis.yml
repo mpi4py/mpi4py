@@ -57,6 +57,7 @@ install:
   - python -m pip -vvv install .
 
 before_script:
+  - echo 127.0.0.1 `hostname` | sudo tee -a /etc/hosts > /dev/null
   - if [[ "$MPI" == "mpich" ]]; then P=2; else P=5; fi
 script:
   - mpiexec -n 1  python $PWD/test/runtests.py -v
