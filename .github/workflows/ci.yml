@@ -61,7 +61,7 @@ jobs:
     steps:
 
     - name: Configure hostname
-      if:   runner.os == 'macOS'
+      if:   runner.os == 'Linux' || runner.os == 'macOS'
       run:  echo 127.0.0.1 `hostname` | sudo tee -a /etc/hosts > /dev/null
 
     - name: Install Visual C++
