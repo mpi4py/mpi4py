@@ -81,8 +81,10 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Install MPI (${{ matrix.mpi }})
-      run:  bash .azure/install-${{ matrix.mpi }}.sh
+    - name: Setup MPI (${{ matrix.mpi }})
+      uses: mpi4py/setup-mpi@v1
+      with:
+        mpi: ${{ matrix.mpi }}
 
     - name: Use Python ${{ matrix.py-version }} ${{ matrix.py-arch }}
       uses: actions/setup-python@v2
