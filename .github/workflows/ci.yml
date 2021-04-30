@@ -57,6 +57,10 @@ jobs:
             mpi: mpich
           - os: windows-2019
             mpi: openmpi
+          - os: windows-2019
+            py-version: 2.7
+          - os: windows-2019
+            py-version: pypy2
 
     steps:
 
