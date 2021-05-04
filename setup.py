@@ -467,6 +467,7 @@ def run_setup():
     if setuptools:
         setup_args['zip_safe'] = False
         setup_args['setup_requires'] = []
+        setup_args['python_requires'] = '==2.7, >=3.5'
     if setuptools and pyver < (3, 0):
         setup_args['setup_requires'] += ['3to2']
     if setuptools and not os.getenv('CONDA_BUILD'):
