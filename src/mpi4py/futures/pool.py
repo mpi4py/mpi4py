@@ -41,6 +41,7 @@ class MPIPoolExecutor(Executor):
             path: List of paths to append to ``sys.path`` in workers.
             wdir: Path to set current working directory in workers.
             env: Environment variables to update ``os.environ`` in workers.
+            use_pkl5: If ``True``, use pickle5 out-of-band for communication.
 
         """
         if max_workers is not None:

@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+import warnings
 import functools
 import unittest
 
@@ -153,6 +154,7 @@ class ProcessPoolInitTest(ProcessPoolMixin,
             path=[],
             wdir=os.getcwd(),
             env={},
+            use_pkl5=None,
             )
         futures = [executor.submit(time.sleep, 0)
                    for _ in range(self.worker_count)]
@@ -199,6 +201,36 @@ class ProcessPoolInitTest(ProcessPoolMixin,
             self.assertRaises(ValueError,
                               self.executor_type,
                               max_workers=number)
+
+    @unittest.skipIf(SHARED_POOL, 'shared-pool')
+    def test_use_pkl5_kwarg(self):
+        executor = self.executor_type(use_pkl5=True)
+        executor.submit(time.sleep, 0).result()
+        executor.shutdown()
+
+    @unittest.skipIf(SHARED_POOL, 'shared-pool')
+    def test_use_pkl5_environ(self):
+        save = os.environ.get('MPI4PY_FUTURES_USE_PKL5')
+        try:
+            for value in ('false', 'true'):
+                os.environ['MPI4PY_FUTURES_USE_PKL5'] = value
+                executor = self.executor_type()
+                executor.submit(time.sleep, 0).result()
+                executor.shutdown()
+            with warnings.catch_warnings(record=True) as wlist:
+                warnings.simplefilter('always')
+                os.environ['MPI4PY_FUTURES_USE_PKL5'] = 'foobar'
+                executor = self.executor_type()
+                executor.submit(time.sleep, 0).result()
+                executor.shutdown()
+            self.assertTrue(wlist)
+            msg = wlist[0].message
+            self.assertTrue(isinstance(msg, RuntimeWarning))
+            self.assertTrue('foobar' in msg.args[0])
+        finally:
+            del os.environ['MPI4PY_FUTURES_USE_PKL5']
+            if save is not None:
+                os.environ['MPI4PY_FUTURES_USE_PKL5'] = save
 
     @unittest.skipIf(SHARED_POOL, 'shared-pool')
     def test_initializer(self):
@@ -1367,6 +1399,8 @@ if SHARED_POOL:
     del MPICommExecutorTest.test_initializer
     del MPICommExecutorTest.test_initializer_error
     del ProcessPoolInitTest.test_init_globals
+    del ProcessPoolInitTest.test_use_pkl5_kwarg
+    del ProcessPoolInitTest.test_use_pkl5_environ
     del ProcessPoolInitTest.test_initializer
     del ProcessPoolInitTest.test_initializer_bad
     del ProcessPoolInitTest.test_initializer_error
