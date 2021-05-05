@@ -124,9 +124,8 @@ class Pool:
         self.queue = queue = Queue()
         self.exref = weakref.ref(executor, lambda _, q=queue: q.put(None))
 
-        args = (self,) + args
-        kwargs = executor._options
-        thread = threading.Thread(target=manager, args=args, kwargs=kwargs)
+        args = (self, executor._options) + args
+        thread = threading.Thread(target=manager, args=args)
         self.thread = thread
 
         setup_mpi_threads()
@@ -194,9 +193,9 @@ class Pool:
 
 
 def initialize(options):
-    initializer = options.get('initializer', None)
-    initargs = options.get('initargs', ())
-    initkwargs = options.get('initkwargs', {})
+    initializer = options.pop('initializer', None)
+    initargs = options.pop('initargs', ())
+    initkwargs = options.pop('initkwargs', {})
     if initializer is not None:
         try:
             initializer(*initargs, **initkwargs)
@@ -206,7 +205,7 @@ def initialize(options):
     return True
 
 
-def _manager_thread(pool, **options):
+def _manager_thread(pool, options):
     size = options.pop('max_workers', 1)
     queue = pool.setup(size)
 
@@ -252,7 +251,7 @@ def _manager_thread(pool, **options):
     queue.pop()
 
 
-def _manager_comm(pool, comm, **options):
+def _manager_comm(pool, options, comm):
     size = comm.Get_remote_size()
     workers = Stack(reversed(range(size)))
     queue = pool.setup(size)
@@ -262,29 +261,41 @@ def _manager_comm(pool, comm, **options):
     client_exec(comm, 0, workers, queue, options)
 
 
-def _manager_spawn(pool, **options):
+def _manager_split(pool, options, comm, root):
+    comm = serialized(comm_split)(comm, root)
+    serialized(client_push)(comm, options)
+    _manager_comm(pool, options, comm)
+    serialized(client_close)(comm)
+
+
+def _manager_spawn(pool, options):
     pyexe = options.pop('python_exe', None)
     pyargs = options.pop('python_args', None)
     nprocs = options.pop('max_workers', None)
     info = options.pop('mpi_info', None)
     comm = serialized(client_spawn)(pyexe, pyargs, nprocs, info)
     serialized(client_sync)(comm, options)
-    _manager_comm(pool, comm, **options)
+    _manager_comm(pool, options, comm)
     serialized(client_close)(comm)
 
 
-def _manager_service(pool, **options):
+def _manager_service(pool, options):
     service = options.pop('service', None)
     info = options.pop('mpi_info', None)
     comm = serialized(client_connect)(service, info)
     serialized(client_sync)(comm, options)
-    _manager_comm(pool, comm, **options)
+    _manager_comm(pool, options, comm)
     serialized(client_close)(comm)
 
 
 def ThreadPool(executor):
     # pylint: disable=invalid-name
     return Pool(executor, _manager_thread)
+
+
+def SplitPool(executor, comm, root):
+    # pylint: disable=invalid-name
+    return Pool(executor, _manager_split, comm, root)
 
 
 def SpawnPool(executor):
@@ -309,65 +320,6 @@ def WorkerPool(executor):
 
 # ---
 
-
-def get_comm_world():
-    return MPI.COMM_WORLD
-
-
-def comm_split(comm, root=0):
-    assert not comm.Is_inter()
-    assert comm.Get_size() > 1
-    assert 0 <= root < comm.Get_size()
-    rank = comm.Get_rank()
-
-    if MPI.Get_version() >= (2, 2):
-        allgroup = comm.Get_group()
-        if rank == root:
-            group = allgroup.Incl([root])
-        else:
-            group = allgroup.Excl([root])
-        allgroup.Free()
-        intracomm = comm.Create(group)
-        group.Free()
-    else:  # pragma: no cover
-        color = 0 if rank == root else 1
-        intracomm = comm.Split(color, key=0)
-
-    if rank == root:
-        local_leader = 0
-        remote_leader = 0 if root else 1
-    else:
-        local_leader = 0
-        remote_leader = root
-    intercomm = intracomm.Create_intercomm(
-        local_leader, comm, remote_leader, tag=0)
-    intracomm.Free()
-
-    return intercomm
-
-
-def _manager_split(pool, comm, root, **options):
-    comm = serialized(comm_split)(comm, root)
-    serialized(client_push)(comm, options)
-    _manager_comm(pool, comm, **options)
-    serialized(client_close)(comm)
-
-
-def SplitPool(executor, comm, root):
-    # pylint: disable=invalid-name
-    return Pool(executor, _manager_split, comm, root)
-
-
-def server_main_split(comm, root):
-    comm = comm_split(comm, root)
-    options = server_pull(comm)
-    server_init(comm)
-    server_exec(comm, options)
-    server_close(comm)
-
-
-# ---
-
 SharedPool = None  # pylint: disable=invalid-name
 
 
@@ -378,7 +330,7 @@ def _set_shared_pool(obj):
     SharedPool = obj
 
 
-def _manager_shared(pool, comm, tag, workers, **options):
+def _manager_shared(pool, options, comm, tag, workers):
     # pylint: disable=too-many-arguments
     if tag == 0:
         serialized(client_sync)(comm, options)
@@ -501,10 +453,7 @@ def client_sync(comm, options):
 
 
 def client_init(comm, options):
-    keys = ('initializer', 'initargs', 'initkwargs')
-    vals = (None, (), {})
-    data = dict((k, options.pop(k, v)) for k, v in zip(keys, vals))
-    serialized(client_push)(comm, data)
+    serialized(client_push)(comm, _init_get_data(options))
     sbuf = bytearray([False])
     rbuf = bytearray([False])
     serialized(comm.Allreduce)(sbuf, rbuf, op=MPI.LAND)
@@ -699,6 +648,44 @@ def server_close(comm):
 # ---
 
 
+def get_comm_world():
+    return MPI.COMM_WORLD
+
+
+def comm_split(comm, root=0):
+    assert not comm.Is_inter()
+    assert comm.Get_size() > 1
+    assert 0 <= root < comm.Get_size()
+    rank = comm.Get_rank()
+
+    if MPI.Get_version() >= (2, 2):
+        allgroup = comm.Get_group()
+        if rank == root:
+            group = allgroup.Incl([root])
+        else:
+            group = allgroup.Excl([root])
+        allgroup.Free()
+        intracomm = comm.Create(group)
+        group.Free()
+    else:  # pragma: no cover
+        color = 0 if rank == root else 1
+        intracomm = comm.Split(color, key=0)
+
+    if rank == root:
+        local_leader = 0
+        remote_leader = 0 if root else 1
+    else:
+        local_leader = 0
+        remote_leader = root
+    intercomm = intracomm.Create_intercomm(
+        local_leader, comm, remote_leader, tag=0)
+    intracomm.Free()
+    return intercomm
+
+
+# ---
+
+
 MAIN_RUN_NAME = '__worker__'
 
 
@@ -779,6 +766,13 @@ def _sync_set_data(data):
     mod_glbs = data.pop('globals', None)
     import_main(mod_name, mod_path, mod_glbs, MAIN_RUN_NAME)
 
+    return data
+
+
+def _init_get_data(options):
+    keys = ('initializer', 'initargs', 'initkwargs')
+    vals = (None, (), {})
+    data = dict((k, options.pop(k, v)) for k, v in zip(keys, vals))
     return data
 
 
@@ -1010,36 +1004,45 @@ def server_accept(service, mpi_info=None,
 # ---
 
 
-def server_main_comm(comm):
-    assert comm != MPI.COMM_NULL
-    options = server_sync(comm)
+def server_main_comm(comm, options):
     server_init(comm)
     server_exec(comm, options)
     server_close(comm)
 
 
+def server_main_split(comm, root):
+    comm = comm_split(comm, root)
+    assert comm != MPI.COMM_NULL
+    options = server_pull(comm)
+    server_main_comm(comm, options)
+
+
 def server_main_spawn():
     comm = MPI.Comm.Get_parent()
-    server_main_comm(comm)
+    assert comm != MPI.COMM_NULL
+    options = server_sync(comm)
+    server_main_comm(comm, options)
 
 
-def server_main_accept():
+def server_main_service():
     from getopt import getopt
     longopts = ['bind=', 'port=', 'service=', 'info=']
     optlist, _ = getopt(sys.argv[1:], '', longopts)
-    options = {opt[2:]: val for opt, val in optlist}
+    optdict = {opt[2:]: val for opt, val in optlist}
 
-    if 'bind' in options or 'port' in options:
-        bind = options.get('bind') or get_server_bind()
-        port = options.get('port') or get_server_port()
+    if 'bind' in optdict or 'port' in optdict:
+        bind = optdict.get('bind') or get_server_bind()
+        port = optdict.get('port') or get_server_port()
         service = (bind, int(port))
     else:
-        service = options.get('service') or get_service()
-    info = options.get('info', '').split(',')
+        service = optdict.get('service') or get_service()
+    info = optdict.get('info', '').split(',')
     info = dict(k_v.split('=', 1) for k_v in info if k_v)
 
     comm = server_accept(service, info)
-    server_main_comm(comm)
+    assert comm != MPI.COMM_NULL
+    options = server_sync(comm)
+    server_main_comm(comm, options)
 
 
 def server_main():
@@ -1049,7 +1052,7 @@ def server_main():
         if comm != MPI.COMM_NULL:
             server_main_spawn()
         else:
-            server_main_accept()
+            server_main_service()
     except:
         set_abort_status(1)
         raise
