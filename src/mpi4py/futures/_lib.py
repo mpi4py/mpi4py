@@ -18,6 +18,7 @@ import threading
 import collections
 
 from .. import MPI
+from ..util import pkl5
 from ._core import BrokenExecutor
 
 
@@ -43,9 +44,11 @@ def setup_mpi_threads():
             if thread_level < MPI.THREAD_MULTIPLE:
                 serialized.lock = threading.Lock()
     if thread_level < MPI.THREAD_SERIALIZED:
-        warnings.warn("The level of thread support in MPI "
-                      "should be at least MPI_THREAD_SERIALIZED",
-                      RuntimeWarning, 2)
+        warnings.warn(
+            "The level of thread support in MPI "
+            "should be at least MPI_THREAD_SERIALIZED",
+            RuntimeWarning, 2,
+        )
 setup_mpi_threads.lock = threading.Lock()  # type: ignore[attr-defined]
 setup_mpi_threads.thread_level = None      # type: ignore[attr-defined]
 
@@ -260,6 +263,7 @@ def _manager_thread(pool, options):
 def _manager_comm(pool, options, comm, full=True):
     assert comm != MPI.COMM_NULL
     serialized(client_sync)(comm, options, full)
+    comm = client_comm(comm, options)
     if not client_init(comm, options):
         pool.broken("initializer failed")
         serialized(client_close)(comm)
@@ -337,7 +341,9 @@ def _set_shared_pool(obj):
 def _manager_shared(pool, options, comm, tag, workers):
     # pylint: disable=too-many-arguments
     if tag == 0:
+        comm = MPI.Intercomm(comm)
         serialized(client_sync)(comm, options)
+        comm = client_comm(comm, options)
     if tag == 0:
         if not client_init(comm, options):
             pool.broken("initializer failed")
@@ -365,10 +371,14 @@ class SharedPoolCtx:
         assert SharedPool is self
         if self.comm != MPI.COMM_NULL and self.on_root:
             tag = next(self.counter)
+            if tag == 0:
+                options = executor._options
+                self.comm = client_comm(self.comm, options)
+            manager = _manager_shared
             args = (self.comm, tag, self.workers)
-            pool = Pool(executor, _manager_shared, *args)
         else:
-            pool = Pool(executor, _manager_thread)
+            manager, args = _manager_thread, ()
+        pool = Pool(executor, manager, *args)
         del THREADS_QUEUES[pool.thread]
         self.threads[pool.thread] = pool.queue
         return pool
@@ -390,17 +400,20 @@ class SharedPoolCtx:
         if self.on_root:
             join_threads(self.threads)
         if self.comm != MPI.COMM_NULL:
+            comm = self.comm
             if self.on_root:
                 if next(self.counter) == 0:
                     options = dict(main=False)
-                    client_sync(self.comm, options)
-                    client_init(self.comm, options)
-                client_close(self.comm)
+                    client_sync(comm, options)
+                    comm = client_comm(comm, options)
+                    client_init(comm, options)
+                client_close(comm)
             else:
-                options = server_sync(self.comm)
-                server_init(self.comm)
-                server_exec(self.comm, options)
-                server_close(self.comm)
+                options = server_sync(comm)
+                comm = server_comm(comm, options)
+                server_init(comm)
+                server_exec(comm, options)
+                server_close(comm)
         if not self.on_root:
             join_threads(self.threads)
         _set_shared_pool(None)
@@ -410,6 +423,47 @@ class SharedPoolCtx:
         self.workers = None
         self.threads.clear()
         return False
+
+
+# ---
+
+
+def _getenv_use_pkl5():
+    value = os_environ_get('USE_PKL5')
+    if value is None:
+        return None
+    if value.lower() in ('false', 'no', 'off', 'n', '0'):
+        return False
+    if value.lower() in ('true', 'yes', 'on', 'y', '1'):
+        return True
+    warnings.warn(
+        f"Environment variable MPI4PY_FUTURES_USE_PKL5: "
+        f"unexpected value {repr(value)}",
+        RuntimeWarning,
+    )
+    return False
+
+
+def _setopt_use_pkl5(options):
+    use_pkl5 = options.get('use_pkl5')
+    if use_pkl5 is None:
+        use_pkl5 = _getenv_use_pkl5()
+    if use_pkl5 is not None:
+        options['use_pkl5'] = use_pkl5
+
+
+def _get_comm(comm, options):
+    use_pkl5 = options.pop('use_pkl5', None)
+    if use_pkl5:
+        return pkl5.Intercomm(comm)
+    return comm
+
+
+def _get_mpi(comm):
+    use_pkl5 = isinstance(comm, pkl5.Comm)
+    if use_pkl5:
+        return pkl5
+    return MPI
 
 
 # ---
@@ -443,7 +497,7 @@ def bcast_send(comm, data):
     else:  # pragma: no cover
         tag = MPI.COMM_WORLD.Get_attr(MPI.TAG_UB)
         size = comm.Get_remote_size()
-        MPI.Request.Waitall([
+        _get_mpi(comm).Request.waitall([
             comm.issend(data, pid, tag)
             for pid in range(size)])
 
@@ -466,9 +520,14 @@ def client_sync(comm, options, full=True):
     assert comm.Is_inter()
     assert comm.Get_size() == 1
     barrier(comm)
+    _setopt_use_pkl5(options)
     if full:
         options = _sync_get_data(options)
     bcast_send(comm, options)
+
+
+def client_comm(comm, options):
+    return _get_comm(comm, options)
 
 
 def client_init(comm, options):
@@ -493,7 +552,7 @@ def client_exec(comm, options, tag, worker_pool, task_queue):
     comm_recv = serialized(comm.recv)
     comm_isend = serialized(comm.issend)
     comm_iprobe = serialized(comm.iprobe)
-    request_free = serialized(MPI.Request.Free)
+    request_free = serialized(_get_mpi(comm).Request.Free)
 
     pending = {}
 
@@ -565,7 +624,7 @@ def client_exec(comm, options, tag, worker_pool, task_queue):
 
 def client_close(comm):
     assert comm.Is_inter()
-    MPI.Request.Waitall([
+    _get_mpi(comm).Request.waitall([
         comm.issend(None, dest=pid, tag=0)
         for pid in range(comm.Get_remote_size())])
     try:
@@ -582,6 +641,10 @@ def server_sync(comm, full=True):
     if full:
         options = _sync_set_data(options)
     return options
+
+
+def server_comm(comm, options):
+    return _get_comm(comm, options)
 
 
 def server_init(comm):
@@ -604,7 +667,7 @@ def server_exec(comm, options):
     comm_recv = comm.recv
     comm_isend = comm.issend
     comm_iprobe = comm.iprobe
-    request_test = MPI.Request.Test
+    request_test = _get_mpi(comm).Request.test
 
     def recv():
         pid, tag = MPI.ANY_SOURCE, MPI.ANY_TAG
@@ -636,7 +699,7 @@ def server_exec(comm, options):
             task = (None, sys_exception())
             request = comm_isend(task, pid, tag)
         backoff.reset()
-        while not request_test(request):
+        while not request_test(request)[0]:
             backoff.sleep()
 
     while True:
@@ -1007,6 +1070,7 @@ def server_accept(service, mpi_info=None,
 def server_main_comm(comm, full=True):
     assert comm != MPI.COMM_NULL
     options = server_sync(comm, full)
+    comm = server_comm(comm, options)
     server_init(comm)
     server_exec(comm, options)
     server_close(comm)

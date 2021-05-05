@@ -126,6 +126,13 @@ only) thread until they are signaled for completion.
      *mpi_info*, however such feature is not required nor recommended by the
      MPI standard.
 
+   * *use_pkl5*: If set to `True`, use :mod:`pickle5` with out-of-band buffers
+     for interprocess communication. If *use_pkl5* is set to `None` or not
+     given, its value is determined from the :envvar:`MPI4PY_FUTURES_USE_PKL5`
+     environment variable. Using :mod:`pickle5` with out-of-band buffers may
+     benefit applications dealing with large buffer-like objects like NumPy
+     arrays. See :mod:`mpi4py.util.pkl5` for additional information.
+
    .. method:: submit(func, *args, **kwargs)
 
       Schedule the callable, *func*, to be executed as ``func(*args,
@@ -218,9 +225,22 @@ only) thread until they are signaled for completion.
 
    If the *max_workers* parameter to :class:`MPIPoolExecutor` is `None` or not
    given, the :envvar:`MPI4PY_FUTURES_MAX_WORKERS` environment variable
-   provides fallback value for the maximum number of MPI worker processes to
+   provides a fallback value for the maximum number of MPI worker processes to
    spawn.
 
+.. envvar:: MPI4PY_FUTURES_USE_PKL5
+
+   If the *use_pkl5* keyword argument to :class:`MPIPoolExecutor` is `None` or
+   not given, the :envvar:`MPI4PY_FUTURES_USE_PKL5` environment variable
+   provides a fallback value for whether the executor should use :mod:`pickle5`
+   with out-of-band buffers for interprocess communication. Accepted values are
+   ``0`` and ``1`` (interpreted as `False` and `True`, respectively), and
+   strings specifying a `YAML boolean`_ value (case-insensitive). Using
+   :mod:`pickle5` with out-of-band buffers may benefit applications dealing
+   with large buffer-like objects like NumPy arrays. See
+   :mod:`mpi4py.util.pkl5` for additional information.
+
+   .. _YAML boolean: https://yaml.org/type/bool.html
 
 .. note::
 
