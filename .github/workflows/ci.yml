@@ -75,9 +75,8 @@ jobs:
     - name: Configure MSVC
       if:   runner.os == 'Windows' && matrix.py-version == '2.7'
       run:  |
-        echo "MSSdk=1" >> $GITHUB_ENV
-        echo "DISTUTILS_USE_SDK=1" >> $GITHUB_ENV
-      shell: bash
+        Add-Content $Env:GITHUB_ENV MSSdk=1
+        Add-Content $Env:GITHUB_ENV DISTUTILS_USE_SDK=1
 
     - name: Checkout
       uses: actions/checkout@v2
