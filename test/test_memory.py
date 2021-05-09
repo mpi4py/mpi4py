@@ -72,6 +72,22 @@ class TestMemory(unittest.TestCase):
         self.assertEqual(mem.nbytes, len(obj)*obj.itemsize)
         self.assertEqual(mem.readonly, False)
 
+    def testAllocate(self):
+        memory = MPI.memory
+        for size in (0, 1, 2):
+            mem = memory.allocate(size)
+            self.assertEqual(mem.nbytes, size)
+            self.assertNotEqual(mem.address, 0)
+        for clear in (False, True):
+            mem = memory.allocate(1024, clear)
+            self.assertEqual(mem.nbytes, 1024)
+            self.assertNotEqual(mem.address, 0)
+            if clear:
+                self.assertEqual(mem[0], 0)
+                self.assertEqual(mem[-1], 0)
+        self.assertRaises(TypeError,  memory.allocate, None)
+        self.assertRaises(ValueError, memory.allocate, -1)
+
     def testFromBufferBad(self):
         memory = MPI.memory
         for obj in (None, 0, 0.0, [], (), []):
@@ -250,6 +266,11 @@ class TestMemory(unittest.TestCase):
                 mem[i] = i
             for i in range(n):
                 self.assertEqual(mem[i], i)
+            mem[:] = 0
+            for i in range(-n, 0):
+                mem[i] = abs(i)
+            for i in range(-n, 0):
+                self.assertEqual(mem[i], abs(i))
             mem[:] = 0
             for i in range(n):
                 self.assertEqual(mem[i], 0)

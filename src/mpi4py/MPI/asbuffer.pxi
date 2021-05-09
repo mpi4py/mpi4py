@@ -6,7 +6,7 @@ cdef extern from "Python.h":
     int PySlice_GetIndicesEx(object, Py_ssize_t,
                              Py_ssize_t *, Py_ssize_t *,
                              Py_ssize_t *, Py_ssize_t *) except -1
-    Py_ssize_t PyNumber_AsSsize_t(object, object) except -1
+    Py_ssize_t PyNumber_AsSsize_t(object, object) except? -1
 
 #------------------------------------------------------------------------------
 
@@ -163,6 +163,21 @@ cdef class memory:
 
     def __dealloc__(self):
         PyBuffer_Release(&self.view)
+
+    @staticmethod
+    def allocate(
+        Aint nbytes: int,
+        bint clear: bool = False,
+    ) -> memory:
+        """Memory allocation"""
+        cdef void *buf = NULL
+        cdef Py_ssize_t size = nbytes
+        if size < 0:
+            raise ValueError("expecting non-negative size")
+        cdef object ob = rawalloc(size, 1, clear, &buf)
+        cdef memory mem = memory.__new__(memory)
+        PyBuffer_FillInfo(&mem.view, ob, buf, size, 0, PyBUF_SIMPLE)
+        return mem
 
     @staticmethod
     def frombuffer(
