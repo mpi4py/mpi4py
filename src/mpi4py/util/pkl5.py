@@ -166,7 +166,7 @@ def _info_unpack(info):
 
 
 def _new_buffer(size):
-    return bytearray(size)
+    return MPI.memory.allocate(size)
 
 
 def _send_raw(comm, send, data, bufs, dest, tag):
@@ -218,7 +218,7 @@ def _recv_raw(comm, recv, buf, source, tag, status=None):
             buf = buf[:info[0]]
         if len(buf) < info[0]:
             buf = None
-    data = bytearray(info[0]) if buf is None else buf
+    data = _new_buffer(info[0]) if buf is None else buf
     bufs = list(map(_new_buffer, info[1:]))
     with _bigmpi as bigmpi:
         recv(comm, bigmpi(data), source, tag)
@@ -287,7 +287,7 @@ def _mrecv_data(message, mrecv, status=None):
     rmsg = iter(message)
     icnt = len(message) - 1
     info = _mrecv_info(next(rmsg), icnt, status)
-    data = bytearray(info[0])
+    data = _new_buffer(info[0])
     bufs = list(map(_new_buffer, info[1:]))
     with _bigmpi as bigmpi:
         mrecv(next(rmsg), bigmpi(data))
@@ -372,7 +372,7 @@ def _bcast_intra_raw(comm, bcast, data, bufs, root):
         info = _info_alloc(infosize)
         bcast(comm, (info, infotype), root)
         info = _info_unpack(info)
-        data = bytearray(info[0])
+        data = _new_buffer(info[0])
         bufs = list(map(_new_buffer, info[1:]))
     with _bigmpi as bigmpi:
         bcast(comm, bigmpi(data), root)
