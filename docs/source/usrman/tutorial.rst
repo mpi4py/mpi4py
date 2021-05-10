@@ -372,6 +372,74 @@ CUDA-aware MPI + Python GPU arrays
    assert cp.allclose(recvbuf, sendbuf*size)
 
 
+One-Sided Communications
+------------------------
+
+* Read from (write to) the enitre RMA window::
+  
+    import numpy as np
+    from mpi4py import MPI
+    from mpi4py.util import dtlib
+
+    comm = MPI.COMM_WORLD
+    rank = comm.Get_rank()
+
+    datatype = MPI.FLOAT
+    np_dtype = dtlib.to_numpy_dtype(datatype)
+    itemsize = datatype.Get_size()
+
+    N = 10
+    win_size = N * itemsize if rank == 0 else 0
+    win = MPI.Win.Allocate(win_size, comm=comm)
+
+    buf = np.empty(N, dtype=np_dtype)
+    if rank == 0:
+        buf.fill(42)
+        win.Lock(rank=0)
+        win.Put(buf, target_rank=0)
+        win.Unlock(rank=0)
+        comm.Barrier()
+    else:
+        comm.Barrier()
+        win.Lock(rank=0)
+        win.Get(buf, target_rank=0)
+        win.Unlock(rank=0)
+        assert np.all(buf == 42)
+
+* Accessing a part of the RMA window using :data:`target` argument.
+  Target is defined as ``[offset, length, datatype]``::
+
+    import numpy as np
+    from mpi4py import MPI
+    from mpi4py.util import dtlib
+
+    comm = MPI.COMM_WORLD
+    rank = comm.Get_rank()
+
+    datatype = MPI.FLOAT
+    np_dtype = dtlib.to_numpy_dtype(datatype)
+    itemsize = datatype.Get_size()
+
+    N = comm.Get_size() + 1
+    win_size = N * itemsize if rank == 0 else 0
+    win = MPI.Win.Allocate(
+        size=win_size,
+        disp_unit=itemsize,
+        comm=comm,
+    )
+    if rank == 0:
+        mem = np.frombuffer(win, dtype=np_dtype)
+        mem[:] = np.arange(len(mem), dtype=np_dtype)
+    comm.Barrier()
+
+    buf = np.zeros(3, dtype=np_dtype)
+    target = (rank, 2, datatype)
+    win.Lock(rank=0)
+    win.Get(buf, target_rank=0, target=target)
+    win.Unlock(rank=0)
+    assert np.all(buf == [rank, rank+1, 0])
+
+
 Wrapping with SWIG
 ------------------
 
