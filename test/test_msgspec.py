@@ -41,21 +41,10 @@ pypy_lt_53 = pypy and sys.pypy_version_info < (5, 3)
 
 # ---
 
-class GPUBuf(object):
+class BaseBuf(object):
 
-    def __init__(self, typecode, initializer, readonly=False):
+    def __init__(self, typecode, initializer):
         self._buf = array.array(typecode, initializer)
-        address = self._buf.buffer_info()[0]
-        typecode = self._buf.typecode
-        itemsize = self._buf.itemsize
-        self.__cuda_array_interface__ = dict(
-            version = 0,
-            data    = (address, readonly),
-            typestr = typestr(typecode, itemsize),
-            shape   = (len(self._buf), 1, 1),
-            strides = (itemsize,) * 3,
-            descr   = [('', typestr(typecode, itemsize))],
-        )
 
     def __eq__(self, other):
         return self._buf == other._buf
@@ -71,6 +60,54 @@ class GPUBuf(object):
 
     def __setitem__(self, item, value):
         self._buf[item] = value._buf
+
+# ---
+
+try:
+    import dlpackimpl as dlpack
+except ImportError:
+    dlpack = None
+
+class DLPackBuf(BaseBuf):
+
+    def __init__(self, typecode, initializer):
+        super(DLPackBuf, self).__init__(typecode, initializer)
+        self.managed = dlpack.make_dl_managed_tensor(self._buf)
+
+    def __del__(self):
+        self.managed = None
+        if not pypy and sys.getrefcount(self._buf) > 2:
+            raise RuntimeError('dlpack: possible reference leak')
+
+    def __dlpack_device__(self):
+        device = self.managed.dl_tensor.device
+        return (device.device_type, device.device_id)
+
+    def __dlpack__(self, stream=None):
+        managed = self.managed
+        if managed.dl_tensor.device.device_type == \
+           dlpack.DLDeviceType.kDLCPU:
+            assert stream == None
+        capsule = dlpack.make_py_capsule(managed)
+        return capsule
+
+# ---
+
+class GPUBuf(BaseBuf):
+
+    def __init__(self, typecode, initializer, readonly=False):
+        super(GPUBuf, self).__init__(typecode, initializer)
+        address = self._buf.buffer_info()[0]
+        typecode = self._buf.typecode
+        itemsize = self._buf.itemsize
+        self.__cuda_array_interface__ = dict(
+            version = 0,
+            data    = (address, readonly),
+            typestr = typestr(typecode, itemsize),
+            shape   = (len(self._buf), 1, 1),
+            strides = (itemsize,) * 3,
+            descr   = [('', typestr(typecode, itemsize))],
+        )
 
 
 cupy_issue_2259 = False
@@ -387,6 +424,15 @@ class TestMessageSimpleNumPy(unittest.TestCase,
 
 
 @unittest.skipIf(array is None, 'array')
+@unittest.skipIf(dlpack is None, 'dlpack')
+class TestMessageSimpleDLPackBuf(unittest.TestCase,
+                                 BaseTestMessageSimpleArray):
+
+    def array(self, typecode, initializer):
+        return DLPackBuf(typecode, initializer)
+
+
+@unittest.skipIf(array is None, 'array')
 class TestMessageSimpleGPUBuf(unittest.TestCase,
                               BaseTestMessageSimpleArray):
 
@@ -467,6 +513,125 @@ class TestMessageSimpleNumba(unittest.TestCase,
         self.assertRaises((BufferError, ValueError),
                           Sendrecv, sbuf, rbuf)
 
+
+# ---
+
+@unittest.skipIf(array is None, 'array')
+@unittest.skipIf(dlpack is None, 'dlpack')
+class TestMessageDLPackBuf(unittest.TestCase):
+
+    def testDevice(self):
+        buf = DLPackBuf('i', [0,1,2,3])
+        buf.__dlpack_device__ = None
+        MPI.Get_address(buf)
+        buf.__dlpack_device__ = lambda: None
+        self.assertRaises(TypeError, MPI.Get_address, buf)
+        buf.__dlpack_device__ = lambda: (None, 0)
+        self.assertRaises(TypeError, MPI.Get_address, buf)
+        buf.__dlpack_device__ = lambda: (1, None)
+        self.assertRaises(TypeError, MPI.Get_address, buf)
+        buf.__dlpack_device__ = lambda: (1,)
+        self.assertRaises(ValueError, MPI.Get_address, buf)
+        buf.__dlpack_device__ = lambda: (1, 0, 1)
+        self.assertRaises(ValueError, MPI.Get_address, buf)
+        del buf.__dlpack_device__
+        MPI.Get_address(buf)
+
+    def testCapsule(self):
+        buf = DLPackBuf('i', [0,1,2,3])
+        #
+        capsule = buf.__dlpack__()
+        MPI.Get_address(buf)
+        MPI.Get_address(buf)
+        del capsule
+        #
+        capsule = buf.__dlpack__()
+        retvals = [capsule] * 2
+        buf.__dlpack__ = lambda *args, **kwargs: retvals.pop()
+        MPI.Get_address(buf)
+        self.assertRaises(BufferError, MPI.Get_address, buf)
+        del buf.__dlpack__
+        del capsule
+        #
+        buf.__dlpack__ = lambda *args, **kwargs:  None
+        self.assertRaises(BufferError, MPI.Get_address, buf)
+        del buf.__dlpack__
+
+    def testNdim(self):
+        buf = DLPackBuf('i', [0,1,2,3])
+        dltensor = buf.managed.dl_tensor
+        #
+        for ndim in (2, 1, 0):
+            dltensor.ndim = ndim
+            MPI.Get_address(buf)
+        #
+        dltensor.ndim = -1
+        self.assertRaises(BufferError, MPI.Get_address, buf)
+        #
+        del dltensor
+
+    def testShape(self):
+        buf = DLPackBuf('i', [0,1,2,3])
+        dltensor = buf.managed.dl_tensor
+        #
+        dltensor.ndim = 1
+        dltensor.shape[0] = -1
+        self.assertRaises(BufferError, MPI.Get_address, buf)
+        #
+        dltensor.ndim = 0
+        dltensor.shape = None
+        MPI.Get_address(buf)
+        #
+        dltensor.ndim = 1
+        dltensor.shape = None
+        self.assertRaises(BufferError, MPI.Get_address, buf)
+        #
+        del dltensor
+
+    def testStrides(self):
+        buf = DLPackBuf('i', range(8))
+        dltensor = buf.managed.dl_tensor
+        #
+        for order in ('C', 'F'):
+            dltensor.ndim, dltensor.shape, dltensor.strides = \
+                dlpack.make_dl_shape([2, 2, 2], order=order)
+            MPI.Get_address(buf)
+            dltensor.strides[0] = -1
+            self.assertRaises(BufferError, MPI.Get_address, buf)
+        #
+        del dltensor
+
+    def testContiguous(self):
+        buf = DLPackBuf('i', range(8))
+        dltensor = buf.managed.dl_tensor
+        #
+        dltensor.ndim, dltensor.shape, dltensor.strides = \
+            dlpack.make_dl_shape([2, 2, 2], order='C')
+        s = dltensor.strides
+        strides = [s[i] for i in range(dltensor.ndim)]
+        s[0], s[1], s[2] = [strides[i] for i in [0, 1, 2]]
+        MPI.Get_address(buf)
+        s[0], s[1], s[2] = [strides[i] for i in [2, 1, 0]]
+        MPI.Get_address(buf)
+        s[0], s[1], s[2] = [strides[i] for i in [0, 2, 1]]
+        self.assertRaises(BufferError, MPI.Get_address, buf)
+        s[0], s[1], s[2] = [strides[i] for i in [1, 0, 2]]
+        self.assertRaises(BufferError, MPI.Get_address, buf)
+        del s
+        #
+        del dltensor
+
+    def testByteOffset(self):
+        buf = DLPackBuf('B', [0,1,2,3])
+        dltensor = buf.managed.dl_tensor
+        #
+        dltensor.ndim = 1
+        for i in range(len(buf)):
+            dltensor.byte_offset = i
+            mem = MPI.memory(buf)
+            self.assertEqual(mem[0], buf[i])
+        #
+        del dltensor
 
 # ---
 

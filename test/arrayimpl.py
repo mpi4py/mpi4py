@@ -240,6 +240,47 @@ if numpy is not None:
             return self.array.size
 
 
+try:
+    import dlpackimpl as dlpack
+except ImportError:
+    dlpack = None
+
+class BaseDLPackCPU(object):
+
+    def __dlpack_device__(self):
+        return (dlpack.DLDeviceType.kDLCPU, 0)
+
+    def __dlpack__(self, stream=None):
+        assert stream is None
+        capsule = dlpack.make_py_capsule(self.array)
+        return capsule
+
+    def as_raw(self):
+        return self
+
+
+if dlpack is not None and array is not None:
+
+    @add_backend
+    class DLPackArray(BaseDLPackCPU, ArrayArray):
+
+        backend = 'dlpack-array'
+
+        def __init__(self, arg, typecode, shape=None):
+            super(DLPackArray, self).__init__(arg, typecode, shape)
+
+
+if dlpack is not None and numpy is not None:
+
+    @add_backend
+    class DLPackNumPy(BaseDLPackCPU, ArrayNumPy):
+
+        backend = 'dlpack-numpy'
+
+        def __init__(self, arg, typecode, shape=None):
+            super(DLPackNumPy, self).__init__(arg, typecode, shape)
+
+
 def typestr(typecode, itemsize):
     typestr = ''
     if sys.byteorder == 'little':
