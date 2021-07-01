@@ -91,6 +91,41 @@ class DLPackCPUBuf(BaseBuf):
         capsule = dlpack.make_py_capsule(managed)
         return capsule
 
+
+if cupy is not None:
+
+    class DLPackGPUBuf(BaseBuf):
+
+        has_dlpack = None
+        dev_type = None
+
+        def __init__(self, typecode, initializer):
+            self._buf = cupy.array(initializer, dtype=typecode)
+            self.has_dlpack = hasattr(self._buf, '__dlpack_device__')
+            # TODO(leofang): test CUDA managed memory?
+            if cupy.cuda.runtime.is_hip:
+                self.dev_type = dlpack.DLDeviceType.kDLROCM
+            else:
+                self.dev_type = dlpack.DLDeviceType.kDLCUDA
+
+        def __del__(self):
+            if not pypy and sys.getrefcount(self._buf) > 2:
+                raise RuntimeError('dlpack: possible reference leak')
+
+        def __dlpack_device__(self):
+            if self.has_dlpack:
+                return self._buf.__dlpack_device__()
+            else:
+                return (self.dev_type, self._buf.device.id)
+
+        def __dlpack__(self, stream=None):
+            cupy.cuda.get_current_stream().synchronize()
+            if self.has_dlpack:
+                return self._buf.__dlpack__(stream=-1)
+            else:
+                return self._buf.toDlpack()
+
+
 # ---
 
 class CAIBuf(BaseBuf):
@@ -426,10 +461,19 @@ class TestMessageSimpleNumPy(unittest.TestCase,
 @unittest.skipIf(array is None, 'array')
 @unittest.skipIf(dlpack is None, 'dlpack')
 class TestMessageSimpleDLPackCPUBuf(unittest.TestCase,
-                                 BaseTestMessageSimpleArray):
+                                    BaseTestMessageSimpleArray):
 
     def array(self, typecode, initializer):
         return DLPackCPUBuf(typecode, initializer)
+
+
+@unittest.skipIf(cupy is None, 'cupy')
+@unittest.skipIf(dlpack is None, 'dlpack')
+class TestMessageSimpleDLPackGPUBuf(unittest.TestCase,
+                                    BaseTestMessageSimpleArray):
+
+    def array(self, typecode, initializer):
+        return DLPackGPUBuf(typecode, initializer)
 
 
 @unittest.skipIf(array is None, 'array')

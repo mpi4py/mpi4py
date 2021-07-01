@@ -424,7 +424,7 @@ if dlpack is not None and cupy is not None:
         def __dlpack__(self, stream=None):
             cupy.cuda.get_current_stream().synchronize()
             if self.has_dlpack:
-                return self.array.__dlpack__(stream)
+                return self.array.__dlpack__(stream=-1)
             else:
                 return self.array.toDlpack()
 
