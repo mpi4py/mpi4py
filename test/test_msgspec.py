@@ -523,7 +523,7 @@ class TestMessageDLPackBuf(unittest.TestCase):
     def testDevice(self):
         buf = DLPackBuf('i', [0,1,2,3])
         buf.__dlpack_device__ = None
-        MPI.Get_address(buf)
+        self.assertRaises(TypeError, MPI.Get_address, buf)
         buf.__dlpack_device__ = lambda: None
         self.assertRaises(TypeError, MPI.Get_address, buf)
         buf.__dlpack_device__ = lambda: (None, 0)
