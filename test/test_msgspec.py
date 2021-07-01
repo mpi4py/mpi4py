@@ -68,10 +68,10 @@ try:
 except ImportError:
     dlpack = None
 
-class DLPackBuf(BaseBuf):
+class DLPackCPUBuf(BaseBuf):
 
     def __init__(self, typecode, initializer):
-        super(DLPackBuf, self).__init__(typecode, initializer)
+        super(DLPackCPUBuf, self).__init__(typecode, initializer)
         self.managed = dlpack.make_dl_managed_tensor(self._buf)
 
     def __del__(self):
@@ -90,6 +90,41 @@ class DLPackBuf(BaseBuf):
             assert stream == None
         capsule = dlpack.make_py_capsule(managed)
         return capsule
+
+
+if cupy is not None:
+
+    class DLPackGPUBuf(BaseBuf):
+
+        has_dlpack = None
+        dev_type = None
+
+        def __init__(self, typecode, initializer):
+            self._buf = cupy.array(initializer, dtype=typecode)
+            self.has_dlpack = hasattr(self._buf, '__dlpack_device__')
+            # TODO(leofang): test CUDA managed memory?
+            if cupy.cuda.runtime.is_hip:
+                self.dev_type = dlpack.DLDeviceType.kDLROCM
+            else:
+                self.dev_type = dlpack.DLDeviceType.kDLCUDA
+
+        def __del__(self):
+            if not pypy and sys.getrefcount(self._buf) > 2:
+                raise RuntimeError('dlpack: possible reference leak')
+
+        def __dlpack_device__(self):
+            if self.has_dlpack:
+                return self._buf.__dlpack_device__()
+            else:
+                return (self.dev_type, self._buf.device.id)
+
+        def __dlpack__(self, stream=None):
+            cupy.cuda.get_current_stream().synchronize()
+            if self.has_dlpack:
+                return self._buf.__dlpack__(stream=-1)
+            else:
+                return self._buf.toDlpack()
+
 
 # ---
 
@@ -425,11 +460,19 @@ class TestMessageSimpleNumPy(unittest.TestCase,
 
 @unittest.skipIf(array is None, 'array')
 @unittest.skipIf(dlpack is None, 'dlpack')
-class TestMessageSimpleDLPackBuf(unittest.TestCase,
-                                 BaseTestMessageSimpleArray):
+class TestMessageSimpleDLPackCPUBuf(unittest.TestCase,
+                                    BaseTestMessageSimpleArray):
 
     def array(self, typecode, initializer):
-        return DLPackBuf(typecode, initializer)
+        return DLPackCPUBuf(typecode, initializer)
+
+
+@unittest.skipIf(cupy is None, 'cupy')
+class TestMessageSimpleDLPackGPUBuf(unittest.TestCase,
+                                    BaseTestMessageSimpleArray):
+
+    def array(self, typecode, initializer):
+        return DLPackGPUBuf(typecode, initializer)
 
 
 @unittest.skipIf(array is None, 'array')
@@ -518,10 +561,10 @@ class TestMessageSimpleNumba(unittest.TestCase,
 
 @unittest.skipIf(array is None, 'array')
 @unittest.skipIf(dlpack is None, 'dlpack')
-class TestMessageDLPackBuf(unittest.TestCase):
+class TestMessageDLPackCPUBuf(unittest.TestCase):
 
     def testDevice(self):
-        buf = DLPackBuf('i', [0,1,2,3])
+        buf = DLPackCPUBuf('i', [0,1,2,3])
         buf.__dlpack_device__ = None
         self.assertRaises(TypeError, MPI.Get_address, buf)
         buf.__dlpack_device__ = lambda: None
@@ -538,7 +581,7 @@ class TestMessageDLPackBuf(unittest.TestCase):
         MPI.Get_address(buf)
 
     def testCapsule(self):
-        buf = DLPackBuf('i', [0,1,2,3])
+        buf = DLPackCPUBuf('i', [0,1,2,3])
         #
         capsule = buf.__dlpack__()
         MPI.Get_address(buf)
@@ -558,7 +601,7 @@ class TestMessageDLPackBuf(unittest.TestCase):
         del buf.__dlpack__
 
     def testNdim(self):
-        buf = DLPackBuf('i', [0,1,2,3])
+        buf = DLPackCPUBuf('i', [0,1,2,3])
         dltensor = buf.managed.dl_tensor
         #
         for ndim in (2, 1, 0):
@@ -571,7 +614,7 @@ class TestMessageDLPackBuf(unittest.TestCase):
         del dltensor
 
     def testShape(self):
-        buf = DLPackBuf('i', [0,1,2,3])
+        buf = DLPackCPUBuf('i', [0,1,2,3])
         dltensor = buf.managed.dl_tensor
         #
         dltensor.ndim = 1
@@ -589,7 +632,7 @@ class TestMessageDLPackBuf(unittest.TestCase):
         del dltensor
 
     def testStrides(self):
-        buf = DLPackBuf('i', range(8))
+        buf = DLPackCPUBuf('i', range(8))
         dltensor = buf.managed.dl_tensor
         #
         for order in ('C', 'F'):
@@ -602,7 +645,7 @@ class TestMessageDLPackBuf(unittest.TestCase):
         del dltensor
 
     def testContiguous(self):
-        buf = DLPackBuf('i', range(8))
+        buf = DLPackCPUBuf('i', range(8))
         dltensor = buf.managed.dl_tensor
         #
         dltensor.ndim, dltensor.shape, dltensor.strides = \
@@ -622,7 +665,7 @@ class TestMessageDLPackBuf(unittest.TestCase):
         del dltensor
 
     def testByteOffset(self):
-        buf = DLPackBuf('B', [0,1,2,3])
+        buf = DLPackCPUBuf('B', [0,1,2,3])
         dltensor = buf.managed.dl_tensor
         #
         dltensor.ndim = 1

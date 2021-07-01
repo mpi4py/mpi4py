@@ -92,7 +92,7 @@ def mpi_predicate(predicate):
     return None
 
 def is_mpi_gpu(predicate, array):
-    if array.backend in ('cupy', 'numba'):
+    if array.backend in ('cupy', 'numba', 'dlpack-cupy'):
         if mpi_predicate(predicate):
             return True
     return False
