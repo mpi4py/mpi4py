@@ -68,10 +68,10 @@ try:
 except ImportError:
     dlpack = None
 
-class DLPackBuf(BaseBuf):
+class DLPackCPUBuf(BaseBuf):
 
     def __init__(self, typecode, initializer):
-        super(DLPackBuf, self).__init__(typecode, initializer)
+        super(DLPackCPUBuf, self).__init__(typecode, initializer)
         self.managed = dlpack.make_dl_managed_tensor(self._buf)
 
     def __del__(self):
@@ -425,11 +425,11 @@ class TestMessageSimpleNumPy(unittest.TestCase,
 
 @unittest.skipIf(array is None, 'array')
 @unittest.skipIf(dlpack is None, 'dlpack')
-class TestMessageSimpleDLPackBuf(unittest.TestCase,
+class TestMessageSimpleDLPackCPUBuf(unittest.TestCase,
                                  BaseTestMessageSimpleArray):
 
     def array(self, typecode, initializer):
-        return DLPackBuf(typecode, initializer)
+        return DLPackCPUBuf(typecode, initializer)
 
 
 @unittest.skipIf(array is None, 'array')
@@ -518,10 +518,10 @@ class TestMessageSimpleNumba(unittest.TestCase,
 
 @unittest.skipIf(array is None, 'array')
 @unittest.skipIf(dlpack is None, 'dlpack')
-class TestMessageDLPackBuf(unittest.TestCase):
+class TestMessageDLPackCPUBuf(unittest.TestCase):
 
     def testDevice(self):
-        buf = DLPackBuf('i', [0,1,2,3])
+        buf = DLPackCPUBuf('i', [0,1,2,3])
         buf.__dlpack_device__ = None
         self.assertRaises(TypeError, MPI.Get_address, buf)
         buf.__dlpack_device__ = lambda: None
@@ -538,7 +538,7 @@ class TestMessageDLPackBuf(unittest.TestCase):
         MPI.Get_address(buf)
 
     def testCapsule(self):
-        buf = DLPackBuf('i', [0,1,2,3])
+        buf = DLPackCPUBuf('i', [0,1,2,3])
         #
         capsule = buf.__dlpack__()
         MPI.Get_address(buf)
@@ -558,7 +558,7 @@ class TestMessageDLPackBuf(unittest.TestCase):
         del buf.__dlpack__
 
     def testNdim(self):
-        buf = DLPackBuf('i', [0,1,2,3])
+        buf = DLPackCPUBuf('i', [0,1,2,3])
         dltensor = buf.managed.dl_tensor
         #
         for ndim in (2, 1, 0):
@@ -571,7 +571,7 @@ class TestMessageDLPackBuf(unittest.TestCase):
         del dltensor
 
     def testShape(self):
-        buf = DLPackBuf('i', [0,1,2,3])
+        buf = DLPackCPUBuf('i', [0,1,2,3])
         dltensor = buf.managed.dl_tensor
         #
         dltensor.ndim = 1
@@ -589,7 +589,7 @@ class TestMessageDLPackBuf(unittest.TestCase):
         del dltensor
 
     def testStrides(self):
-        buf = DLPackBuf('i', range(8))
+        buf = DLPackCPUBuf('i', range(8))
         dltensor = buf.managed.dl_tensor
         #
         for order in ('C', 'F'):
@@ -602,7 +602,7 @@ class TestMessageDLPackBuf(unittest.TestCase):
         del dltensor
 
     def testContiguous(self):
-        buf = DLPackBuf('i', range(8))
+        buf = DLPackCPUBuf('i', range(8))
         dltensor = buf.managed.dl_tensor
         #
         dltensor.ndim, dltensor.shape, dltensor.strides = \
@@ -622,7 +622,7 @@ class TestMessageDLPackBuf(unittest.TestCase):
         del dltensor
 
     def testByteOffset(self):
-        buf = DLPackBuf('B', [0,1,2,3])
+        buf = DLPackCPUBuf('B', [0,1,2,3])
         dltensor = buf.managed.dl_tensor
         #
         dltensor.ndim = 1
