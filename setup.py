@@ -208,7 +208,7 @@ def configure_mpi(ext, config_cmd):
     log.info("checking for missing MPI functions/symbols ...")
     tests  = ["defined(%s)" % macro for macro in
               ("OPEN_MPI", "MSMPI_VER",)]
-    tests += ["(defined(MPICH_NAME)&&(MPICH_NAME==3))"]
+    tests += ["(defined(MPICH_NAME)&&(MPICH_NAME>=3))"]
     tests += ["(defined(MPICH_NAME)&&(MPICH_NAME==2))"]
     ConfigTest = dedent("""\
     #if !(%s)
