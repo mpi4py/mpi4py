@@ -389,6 +389,46 @@ if cupy is not None:
             return self.array.size
 
 
+if dlpack is not None and cupy is not None:
+
+    # Note: we do not create a BaseDLPackGPU class because each GPU library
+    # has its own way to get device ID etc, so we have to reimplement the
+    # DLPack support anyway
+
+    @add_backend
+    class DLPackCuPy(GPUArrayCuPy):
+
+        backend = 'dlpack-cupy'
+        has_dlpack = None
+        dev_type = None
+
+        def __init__(self, arg, typecode, shape=None):
+            super().__init__(arg, typecode, shape)
+            self.has_dlpack = hasattr(self.array, '__dlpack_device__')
+            # TODO(leofang): test CUDA managed memory?
+            if cupy.cuda.runtime.is_hip:
+                self.dev_type = dlpack.DLDeviceType.kDLROCM
+            else:
+                self.dev_type = dlpack.DLDeviceType.kDLCUDA
+
+        @property
+        def address(self):
+            return self.array.data.ptr
+
+        def __dlpack_device__(self):
+            if self.has_dlpack:
+                return self.array.__dlpack_device__()
+            else:
+                return (self.dev_type, self.array.device.id)
+
+        def __dlpack__(self, stream=None):
+            cupy.cuda.get_current_stream().synchronize()
+            if self.has_dlpack:
+                return self.array.__dlpack__(stream)
+            else:
+                return self.array.toDlpack()
+
+
 if numba is not None:
 
     @add_backend
