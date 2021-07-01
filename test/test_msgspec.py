@@ -93,10 +93,10 @@ class DLPackBuf(BaseBuf):
 
 # ---
 
-class GPUBuf(BaseBuf):
+class CAIBuf(BaseBuf):
 
     def __init__(self, typecode, initializer, readonly=False):
-        super(GPUBuf, self).__init__(typecode, initializer)
+        super(CAIBuf, self).__init__(typecode, initializer)
         address = self._buf.buffer_info()[0]
         typecode = self._buf.typecode
         itemsize = self._buf.itemsize
@@ -433,11 +433,11 @@ class TestMessageSimpleDLPackBuf(unittest.TestCase,
 
 
 @unittest.skipIf(array is None, 'array')
-class TestMessageSimpleGPUBuf(unittest.TestCase,
+class TestMessageSimpleCAIBuf(unittest.TestCase,
                               BaseTestMessageSimpleArray):
 
     def array(self, typecode, initializer):
-        return GPUBuf(typecode, initializer)
+        return CAIBuf(typecode, initializer)
 
 
 @unittest.skipIf(cupy is None, 'cupy')
@@ -636,61 +636,61 @@ class TestMessageDLPackBuf(unittest.TestCase):
 # ---
 
 @unittest.skipIf(array is None, 'array')
-class TestMessageGPUBufInterface(unittest.TestCase):
+class TestMessageCAIBuf(unittest.TestCase):
 
     def testNonReadonly(self):
-        smsg = GPUBuf('i', [1,2,3], readonly=True)
-        rmsg = GPUBuf('i', [0,0,0], readonly=True)
+        smsg = CAIBuf('i', [1,2,3], readonly=True)
+        rmsg = CAIBuf('i', [0,0,0], readonly=True)
         self.assertRaises(BufferError, Sendrecv, smsg, rmsg)
 
     def testNonContiguous(self):
-        smsg = GPUBuf('i', [1,2,3])
-        rmsg = GPUBuf('i', [0,0,0])
+        smsg = CAIBuf('i', [1,2,3])
+        rmsg = CAIBuf('i', [0,0,0])
         strides = rmsg.__cuda_array_interface__['strides']
         bad_strides = strides[:-1] + (7,)
         rmsg.__cuda_array_interface__['strides'] = bad_strides
         self.assertRaises(BufferError, Sendrecv, smsg, rmsg)
 
     def testAttrNone(self):
-        smsg = GPUBuf('B', [1,2,3])
-        rmsg = GPUBuf('B', [0,0,0])
+        smsg = CAIBuf('B', [1,2,3])
+        rmsg = CAIBuf('B', [0,0,0])
         rmsg.__cuda_array_interface__ = None
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testAttrEmpty(self):
-        smsg = GPUBuf('B', [1,2,3])
-        rmsg = GPUBuf('B', [0,0,0])
+        smsg = CAIBuf('B', [1,2,3])
+        rmsg = CAIBuf('B', [0,0,0])
         rmsg.__cuda_array_interface__ = dict()
         self.assertRaises(KeyError, Sendrecv, smsg, rmsg)
 
     def testAttrType(self):
-        smsg = GPUBuf('B', [1,2,3])
-        rmsg = GPUBuf('B', [0,0,0])
+        smsg = CAIBuf('B', [1,2,3])
+        rmsg = CAIBuf('B', [0,0,0])
         items = list(rmsg.__cuda_array_interface__.items())
         rmsg.__cuda_array_interface__ = items
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testDataMissing(self):
-        smsg = GPUBuf('B', [1,2,3])
-        rmsg = GPUBuf('B', [0,0,0])
+        smsg = CAIBuf('B', [1,2,3])
+        rmsg = CAIBuf('B', [0,0,0])
         del rmsg.__cuda_array_interface__['data']
         self.assertRaises(KeyError, Sendrecv, smsg, rmsg)
 
     def testDataNone(self):
-        smsg = GPUBuf('B', [1,2,3])
-        rmsg = GPUBuf('B', [0,0,0])
+        smsg = CAIBuf('B', [1,2,3])
+        rmsg = CAIBuf('B', [0,0,0])
         rmsg.__cuda_array_interface__['data'] = None
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testDataType(self):
-        smsg = GPUBuf('B', [1,2,3])
-        rmsg = GPUBuf('B', [0,0,0])
+        smsg = CAIBuf('B', [1,2,3])
+        rmsg = CAIBuf('B', [0,0,0])
         rmsg.__cuda_array_interface__['data'] = 0
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testDataValue(self):
-        smsg = GPUBuf('B', [1,2,3])
-        rmsg = GPUBuf('B', [0,0,0])
+        smsg = CAIBuf('B', [1,2,3])
+        rmsg = CAIBuf('B', [0,0,0])
         dev_ptr = rmsg.__cuda_array_interface__['data'][0]
         rmsg.__cuda_array_interface__['data'] = (dev_ptr, )
         self.assertRaises(ValueError, Sendrecv, smsg, rmsg)
@@ -700,99 +700,99 @@ class TestMessageGPUBufInterface(unittest.TestCase):
         self.assertRaises(ValueError, Sendrecv, smsg, rmsg)
 
     def testTypestrMissing(self):
-        smsg = GPUBuf('B', [1,2,3])
-        rmsg = GPUBuf('B', [0,0,0])
+        smsg = CAIBuf('B', [1,2,3])
+        rmsg = CAIBuf('B', [0,0,0])
         del rmsg.__cuda_array_interface__['typestr']
         self.assertRaises(KeyError, Sendrecv, smsg, rmsg)
 
     def testTypestrNone(self):
-        smsg = GPUBuf('B', [1,2,3])
-        rmsg = GPUBuf('B', [0,0,0])
+        smsg = CAIBuf('B', [1,2,3])
+        rmsg = CAIBuf('B', [0,0,0])
         rmsg.__cuda_array_interface__['typestr'] = None
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testTypestrType(self):
-        smsg = GPUBuf('B', [1,2,3])
-        rmsg = GPUBuf('B', [0,0,0])
+        smsg = CAIBuf('B', [1,2,3])
+        rmsg = CAIBuf('B', [0,0,0])
         rmsg.__cuda_array_interface__['typestr'] = 42
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testTypestrItemsize(self):
-        smsg = GPUBuf('B', [1,2,3])
-        rmsg = GPUBuf('B', [0,0,0])
+        smsg = CAIBuf('B', [1,2,3])
+        rmsg = CAIBuf('B', [0,0,0])
         typestr = rmsg.__cuda_array_interface__['typestr']
         rmsg.__cuda_array_interface__['typestr'] = typestr[:2]+'X'
         self.assertRaises(ValueError, Sendrecv, smsg, rmsg)
 
     def testShapeMissing(self):
-        smsg = GPUBuf('B', [1,2,3])
-        rmsg = GPUBuf('B', [0,0,0])
+        smsg = CAIBuf('B', [1,2,3])
+        rmsg = CAIBuf('B', [0,0,0])
         del rmsg.__cuda_array_interface__['shape']
         self.assertRaises(KeyError, Sendrecv, smsg, rmsg)
 
     def testShapeNone(self):
-        smsg = GPUBuf('B', [1,2,3])
-        rmsg = GPUBuf('B', [0,0,0])
+        smsg = CAIBuf('B', [1,2,3])
+        rmsg = CAIBuf('B', [0,0,0])
         rmsg.__cuda_array_interface__['shape'] = None
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testShapeType(self):
-        smsg = GPUBuf('B', [1,2,3])
-        rmsg = GPUBuf('B', [0,0,0])
+        smsg = CAIBuf('B', [1,2,3])
+        rmsg = CAIBuf('B', [0,0,0])
         rmsg.__cuda_array_interface__['shape'] = 3
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testShapeValue(self):
-        smsg = GPUBuf('B', [1,2,3])
-        rmsg = GPUBuf('B', [0,0,0])
+        smsg = CAIBuf('B', [1,2,3])
+        rmsg = CAIBuf('B', [0,0,0])
         rmsg.__cuda_array_interface__['shape'] = (3, -1)
         rmsg.__cuda_array_interface__['strides'] = None
         self.assertRaises(BufferError, Sendrecv, smsg, rmsg)
 
     def testStridesMissing(self):
-        smsg = GPUBuf('B', [1,2,3])
-        rmsg = GPUBuf('B', [0,0,0])
+        smsg = CAIBuf('B', [1,2,3])
+        rmsg = CAIBuf('B', [0,0,0])
         del rmsg.__cuda_array_interface__['strides']
         Sendrecv(smsg, rmsg)
         self.assertEqual(smsg, rmsg)
 
     def testStridesNone(self):
-        smsg = GPUBuf('B', [1,2,3])
-        rmsg = GPUBuf('B', [0,0,0])
+        smsg = CAIBuf('B', [1,2,3])
+        rmsg = CAIBuf('B', [0,0,0])
         rmsg.__cuda_array_interface__['strides'] = None
         Sendrecv(smsg, rmsg)
         self.assertEqual(smsg, rmsg)
 
     def testStridesType(self):
-        smsg = GPUBuf('B', [1,2,3])
-        rmsg = GPUBuf('B', [0,0,0])
+        smsg = CAIBuf('B', [1,2,3])
+        rmsg = CAIBuf('B', [0,0,0])
         rmsg.__cuda_array_interface__['strides'] = 42
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testDescrMissing(self):
-        smsg = GPUBuf('d', [1,2,3])
-        rmsg = GPUBuf('d', [0,0,0])
+        smsg = CAIBuf('d', [1,2,3])
+        rmsg = CAIBuf('d', [0,0,0])
         del rmsg.__cuda_array_interface__['descr']
         Sendrecv(smsg, rmsg)
         self.assertEqual(smsg, rmsg)
 
     def testDescrNone(self):
-        smsg = GPUBuf('d', [1,2,3])
-        rmsg = GPUBuf('d', [0,0,0])
+        smsg = CAIBuf('d', [1,2,3])
+        rmsg = CAIBuf('d', [0,0,0])
         rmsg.__cuda_array_interface__['descr'] = None
         Sendrecv(smsg, rmsg)
         self.assertEqual(smsg, rmsg)
 
     def testDescrType(self):
-        smsg = GPUBuf('B', [1,2,3])
-        rmsg = GPUBuf('B', [0,0,0])
+        smsg = CAIBuf('B', [1,2,3])
+        rmsg = CAIBuf('B', [0,0,0])
         rmsg.__cuda_array_interface__['descr'] = 42
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testDescrWarning(self):
         m, n = 5, 3
-        smsg = GPUBuf('d', list(range(m*n)))
-        rmsg = GPUBuf('d', [0]*(m*n))
+        smsg = CAIBuf('d', list(range(m*n)))
+        rmsg = CAIBuf('d', [0]*(m*n))
         typestr = rmsg.__cuda_array_interface__['typestr']
         itemsize = int(typestr[2:])
         new_typestr = "|V"+str(itemsize*n)
@@ -1030,11 +1030,11 @@ class TestMessageVectorNumPy(unittest.TestCase,
 
 
 @unittest.skipIf(array is None, 'array')
-class TestMessageVectorGPUBuf(unittest.TestCase,
+class TestMessageVectorCAIBuf(unittest.TestCase,
                               BaseTestMessageVectorArray):
 
     def array(self, typecode, initializer):
-        return GPUBuf(typecode, initializer)
+        return CAIBuf(typecode, initializer)
 
 
 @unittest.skipIf(cupy is None, 'cupy')
@@ -1128,9 +1128,9 @@ class TestMessageVectorW(unittest.TestCase):
         self.assertTrue((sbuf == rbuf).all())
 
     @unittest.skipIf(array is None, 'array')
-    def testMessageGPUBuf(self):
-        sbuf = GPUBuf('i', [1,2,3], readonly=True)
-        rbuf = GPUBuf('i', [0,0,0], readonly=False)
+    def testMessageCAIBuf(self):
+        sbuf = CAIBuf('i', [1,2,3], readonly=True)
+        rbuf = CAIBuf('i', [0,0,0], readonly=False)
         smsg = [sbuf, [3], [0], [MPI.INT]]
         rmsg = [rbuf, ([3], [0]), [MPI.INT]]
         Alltoallw(smsg, rmsg)
@@ -1263,9 +1263,9 @@ class TestMessageRMA(unittest.TestCase):
 
     @unittest.skipMPI('msmpi')
     @unittest.skipIf(array is None, 'array')
-    def testMessageGPUBuf(self):
-        sbuf = GPUBuf('i', [1,2,3], readonly=True)
-        rbuf = GPUBuf('i', [0,0,0], readonly=False)
+    def testMessageCAIBuf(self):
+        sbuf = CAIBuf('i', [1,2,3], readonly=True)
+        rbuf = CAIBuf('i', [0,0,0], readonly=False)
         PutGet(sbuf, rbuf)
         self.assertEqual(sbuf, rbuf)
 
