@@ -1,4 +1,5 @@
 #------------------------------------------------------------------------------
+# Below is dlpack.h (as of v0.6)
 
 cdef extern from * nogil:
     ctypedef unsigned char      uint8_t
@@ -20,8 +21,8 @@ ctypedef enum DLDeviceType:
     kDLCUDAManaged = 13
 
 ctypedef struct DLDevice:
-  DLDeviceType device_type
-  int device_id
+    DLDeviceType device_type
+    int device_id
 
 ctypedef enum DLDataTypeCode:
     kDLInt = 0
@@ -169,17 +170,11 @@ cdef int Py_GetDLPackBuffer(object obj, Py_buffer *view, int flags) except -1:
 
     try:
         dlpack = obj.__dlpack__
-    except AttributeError:
-        raise NotImplementedError("dlpack: missing __dlpack__ method")
-
-    try:
         dlpack_device = obj.__dlpack_device__
     except AttributeError:
-        dlpack_device = None
-    if dlpack_device is not None:
-        device_type, device_id = dlpack_device()
-    else:
-        device_type, devide_id = kDLCPU, 0
+        raise NotImplementedError("dlpack: missing support")
+
+    device_type, device_id = dlpack_device()
     if device_type == kDLCPU:
         capsule = dlpack()
     else:
