@@ -411,10 +411,6 @@ if dlpack is not None and cupy is not None:
             else:
                 self.dev_type = dlpack.DLDeviceType.kDLCUDA
 
-        @property
-        def address(self):
-            return self.array.data.ptr
-
         def __dlpack_device__(self):
             if self.has_dlpack:
                 return self.array.__dlpack_device__()
@@ -427,6 +423,9 @@ if dlpack is not None and cupy is not None:
                 return self.array.__dlpack__(stream=-1)
             else:
                 return self.array.toDlpack()
+
+        def as_raw(self):
+            return self
 
 
 if numba is not None:
