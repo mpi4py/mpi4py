@@ -17,21 +17,17 @@ def maxvalue(a):
 
 
 @unittest.skipMPI('msmpi(<8.1.0)')
+@unittest.skipMPI('openmpi(<2.0.0)')
 class BaseTestCCOVec(object):
 
     COMM = MPI.COMM_NULL
 
-    skip = []
-
-    @unittest.skipMPI('openmpi(==1.10.1)')
     def testGatherv(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array, typecode in arrayimpl.subTest(self):
             for root in range(size):
                 for count in range(size):
-                    if (count, '*') in self.skip: continue
-                    if (count, typecode) in self.skip: continue
                     sbuf = array(root, typecode, count)
                     rbuf = array(  -1, typecode, size*size)
                     counts = [count] * size
@@ -48,15 +44,12 @@ class BaseTestCCOVec(object):
                             for vb in b:
                                 self.assertEqual(vb, -1)
 
-    @unittest.skipMPI('openmpi(==1.10.1)')
     def testGatherv2(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array, typecode in arrayimpl.subTest(self):
             for root in range(size):
                 for count in range(size):
-                    if (count, '*') in self.skip: continue
-                    if (count, typecode) in self.skip: continue
                     sbuf = array(root, typecode, size)
                     rbuf = array(  -1, typecode, size*size)
                     sendbuf = sbuf.as_mpi_c(count)
@@ -72,15 +65,12 @@ class BaseTestCCOVec(object):
                             for vb in b:
                                 self.assertEqual(vb, -1)
 
-    @unittest.skipMPI('openmpi(==1.10.1)')
     def testGatherv3(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array, typecode in arrayimpl.subTest(self):
             for root in range(size):
                 for count in range(size+1):
-                    if (count, '*') in self.skip: continue
-                    if (count, typecode) in self.skip: continue
                     #
                     sbuf = array(root, typecode, count).as_raw()
                     rbuf = array(  -1, typecode, count*size).as_raw()
@@ -103,15 +93,12 @@ class BaseTestCCOVec(object):
                         for v in rbuf:
                             self.assertEqual(v, root)
 
-    @unittest.skipMPI('openmpi(==1.10.1)')
     def testScatterv(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array, typecode in arrayimpl.subTest(self):
             for root in range(size):
                 for count in range(size):
-                    if (count, '*') in self.skip: continue
-                    if (count, typecode) in self.skip: continue
                     sbuf = array(root, typecode, size*size)
                     rbuf = array(  -1, typecode, count)
                     counts = [count] * size
@@ -122,15 +109,12 @@ class BaseTestCCOVec(object):
                     for vr in rbuf:
                         self.assertEqual(vr, root)
 
-    @unittest.skipMPI('openmpi(==1.10.1)')
     def testScatterv2(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array, typecode in arrayimpl.subTest(self):
             for root in range(size):
                 for count in range(size):
-                    if (count, '*') in self.skip: continue
-                    if (count, typecode) in self.skip: continue
                     sbuf = array(root, typecode, size*size)
                     rbuf = array(  -1, typecode, size)
                     sendbuf = sbuf.as_mpi_v(count, size)
@@ -143,15 +127,12 @@ class BaseTestCCOVec(object):
                     for vb in b:
                         self.assertEqual(vb, -1)
 
-    @unittest.skipMPI('openmpi(==1.10.1)')
     def testScatterv3(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array, typecode in arrayimpl.subTest(self):
             for root in range(size):
                 for count in range(size+1):
-                    if (count, '*') in self.skip: continue
-                    if (count, typecode) in self.skip: continue
                     #
                     sbuf = array(root, typecode, count*size).as_raw()
                     rbuf = array(  -1, typecode, count).as_raw()
@@ -171,39 +152,33 @@ class BaseTestCCOVec(object):
                     for v in rbuf:
                         self.assertEqual(v, root)
 
-    @unittest.skipMPI('openmpi(==1.10.1)')
     def testAllgatherv(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array, typecode in arrayimpl.subTest(self):
-                for root in range(size):
-                    for count in range(size):
-                        if (count, '*') in self.skip: continue
-                        if (count, typecode) in self.skip: continue
-                        sbuf = array(root, typecode, count)
-                        rbuf = array(  -1, typecode, size*size)
-                        counts = [count] * size
-                        displs = list(range(0, size*size, size))
-                        sendbuf = sbuf.as_mpi()
-                        recvbuf = rbuf.as_mpi_v(counts, displs)
-                        self.COMM.Iallgatherv(sendbuf, recvbuf).Wait()
-                        for i in range(size):
-                            row = rbuf[i*size:(i+1)*size]
-                            a, b = row[:count], row[count:]
-                            for va in a:
-                                self.assertEqual(va, root)
-                            for vb in b:
-                                self.assertEqual(vb, -1)
+            for root in range(size):
+                for count in range(size):
+                    sbuf = array(root, typecode, count)
+                    rbuf = array(  -1, typecode, size*size)
+                    counts = [count] * size
+                    displs = list(range(0, size*size, size))
+                    sendbuf = sbuf.as_mpi()
+                    recvbuf = rbuf.as_mpi_v(counts, displs)
+                    self.COMM.Iallgatherv(sendbuf, recvbuf).Wait()
+                    for i in range(size):
+                        row = rbuf[i*size:(i+1)*size]
+                        a, b = row[:count], row[count:]
+                        for va in a:
+                            self.assertEqual(va, root)
+                        for vb in b:
+                            self.assertEqual(vb, -1)
 
-    @unittest.skipMPI('openmpi(==1.10.1)')
     def testAllgatherv2(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array, typecode in arrayimpl.subTest(self):
             for root in range(size):
                 for count in range(size):
-                    if (count, '*') in self.skip: continue
-                    if (count, typecode) in self.skip: continue
                     sbuf = array(root, typecode, size)
                     rbuf = array(  -1, typecode, size*size)
                     sendbuf = sbuf.as_mpi_c(count)
@@ -217,15 +192,12 @@ class BaseTestCCOVec(object):
                         for vb in b:
                             self.assertEqual(vb, -1)
 
-    @unittest.skipMPI('openmpi(==1.10.1)')
     def testAllgatherv3(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array, typecode in arrayimpl.subTest(self):
             for root in range(size):
                 for count in range(size+1):
-                    if (count, '*') in self.skip: continue
-                    if (count, typecode) in self.skip: continue
                     #
                     sbuf = array(root, typecode, count).as_raw()
                     rbuf = array(  -1, typecode, count*size).as_raw()
@@ -302,7 +274,6 @@ class BaseTestCCOVec(object):
                     for v in rbuf:
                         self.assertEqual(v, root)
 
-    @unittest.skipMPI('openmpi(<=1.8.0)')
     def testAlltoallw(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
@@ -323,6 +294,82 @@ class BaseTestCCOVec(object):
                     self.assertEqual(v, n)
 
 
+@unittest.skipMPI('msmpi(<8.1.0)')
+@unittest.skipMPI('openmpi(<2.0.0)')
+class BaseTestCCOVecInplace(object):
+
+    COMM = MPI.COMM_NULL
+
+    def testAlltoallv(self):
+        size = self.COMM.Get_size()
+        rank = self.COMM.Get_rank()
+        for array, typecode in arrayimpl.subTest(self):
+            for count in range(size):
+                rbuf = array(-1, typecode, size*size)
+                counts = [count] * size
+                displs = list(range(0, size*size, size))
+                for i in range(size):
+                    for j in range(count):
+                        rbuf[i*size+j] = rank
+                recvbuf = rbuf.as_mpi_v(counts, displs)
+                self.COMM.Ialltoallv(MPI.IN_PLACE, recvbuf).Wait()
+                for i in range(size):
+                    row = rbuf[i*size:(i+1)*size]
+                    a, b = row[:count], row[count:]
+                    for va in a:
+                        self.assertEqual(va, i)
+                    for vb in b:
+                        self.assertEqual(vb, -1)
+
+    def testAlltoallw(self):
+        size = self.COMM.Get_size()
+        rank = self.COMM.Get_rank()
+        for array, typecode in arrayimpl.subTest(self):
+            for count in range(size):
+                rbuf = array(-1, typecode, size*size)
+                for i in range(size):
+                    for j in range(count):
+                        rbuf[i*size+j] = rank
+                rdt = rbuf.mpidtype
+                rdsp = list(range(0, size*size*rdt.extent, size*rdt.extent))
+                rmsg = (rbuf.as_raw(), ([count]*size, rdsp), [rdt]*size)
+                try:
+                    self.COMM.Ialltoallw(MPI.IN_PLACE, rmsg).Wait()
+                except NotImplementedError:
+                    self.skipTest('mpi-ialltoallw')
+                for i in range(size):
+                    row = rbuf[i*size:(i+1)*size]
+                    a, b = row[:count], row[count:]
+                    for va in a:
+                        self.assertEqual(va, i)
+                    for vb in b:
+                        self.assertEqual(vb, -1)
+
+    def testAlltoallw2(self):
+        size = self.COMM.Get_size()
+        rank = self.COMM.Get_rank()
+        for array, typecode in arrayimpl.subTest(self):
+            for count in range(size):
+                rbuf = array(-1, typecode, size*size)
+                for i in range(size):
+                    for j in range(count):
+                        rbuf[i*size+j] = rank
+                rdt = rbuf.mpidtype
+                rdsp = list(range(0, size*size*rdt.extent, size*rdt.extent))
+                rmsg = (rbuf.as_raw(), [count]*size, rdsp, [rdt]*size)
+                try:
+                    self.COMM.Ialltoallw(MPI.IN_PLACE, rmsg).Wait()
+                except NotImplementedError:
+                    self.skipTest('mpi-ialltoallw')
+                for i in range(size):
+                    row = rbuf[i*size:(i+1)*size]
+                    a, b = row[:count], row[count:]
+                    for va in a:
+                        self.assertEqual(va, i)
+                    for vb in b:
+                        self.assertEqual(vb, -1)
+
+
 class TestCCOVecSelf(BaseTestCCOVec, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
@@ -341,13 +388,12 @@ class TestCCOVecWorldDup(TestCCOVecWorld):
     def tearDown(self):
         self.COMM.Free()
 
+class TestCCOVecInplaceSelf(BaseTestCCOVecInplace, unittest.TestCase):
+    COMM = MPI.COMM_SELF
 
-name, version = MPI.get_vendor()
-if name == 'Open MPI':
-    if version == (1,10,0):
-        BaseTestCCOVec.skip += [(0, '*')]
-    if version == (1,8,6):
-        BaseTestCCOVec.skip += [(0, 'b')]
+class TestCCOVecInplaceWorld(BaseTestCCOVecInplace, unittest.TestCase):
+    COMM = MPI.COMM_WORLD
+
 try:
     MPI.COMM_SELF.Ibarrier().Wait()
 except NotImplementedError:
