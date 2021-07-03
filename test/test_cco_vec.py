@@ -2,6 +2,7 @@ from mpi4py import MPI
 import mpiunittest as unittest
 import arrayimpl
 
+
 def maxvalue(a):
     try:
         typecode = a.typecode
@@ -102,7 +103,6 @@ class BaseTestCCOVec(object):
         for array, typecode in arrayimpl.subTest(self):
             for root in range(size):
                 for count in range(size):
-                    #
                     sbuf = array(root, typecode, size*size)
                     rbuf = array(  -1, typecode, count)
                     counts = [count] * size
@@ -297,8 +297,8 @@ class BaseTestCCOVec(object):
                 for value in rbuf.flat:
                     self.assertEqual(value, n)
 
-@unittest.skipMPI('openmpi(<1.8.0)')
 @unittest.skipMPI('msmpi(<8.1.0)')
+@unittest.skipMPI('openmpi(<1.8.0)')
 @unittest.skipIf(MPI.BOTTOM == MPI.IN_PLACE, 'mpi-in-place')
 class BaseTestCCOVecInplace(object):
 

@@ -545,8 +545,8 @@ class BaseTestCCOBufInplace(object):
                     elif op == MPI.MIN:
                         self.assertEqual(value, i)
 
-    @unittest.skipMPI('openmpi(<=1.8.4)')
     @unittest.skipMPI('msmpi(<=4.2.0)')
+    @unittest.skipMPI('openmpi(<=1.8.4)')
     def testExscan(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
