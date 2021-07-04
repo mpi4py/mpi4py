@@ -175,19 +175,6 @@ cdef class Comm:
         comm_set_eh(comm.ob_mpi)
         return comm
 
-    def Create_group(self, Group group: Group, int tag: int = 0) -> Comm:
-        """
-        Create communicator from group
-        """
-        cdef type comm_type = Comm
-        if   isinstance(self, Intracomm): comm_type = Intracomm
-        elif isinstance(self, Intercomm): comm_type = Intercomm
-        cdef Comm comm = <Comm>comm_type.__new__(comm_type)
-        with nogil: CHKERR( MPI_Comm_create_group(
-            self.ob_mpi, group.ob_mpi, tag, &comm.ob_mpi) )
-        comm_set_eh(comm.ob_mpi)
-        return comm
-
     def Split(self, int color: int = 0, int key: int = 0) -> Comm:
         """
         Split communicator by color and key
@@ -1641,6 +1628,16 @@ cdef class Intracomm(Comm):
 
     # Communicator Constructors
     # -------------------------
+
+    def Create_group(self, Group group: Group, int tag: int = 0) -> Intracomm:
+        """
+        Create communicator from group
+        """
+        cdef Intracomm comm = Intracomm.__new__(Intracomm)
+        with nogil: CHKERR( MPI_Comm_create_group(
+            self.ob_mpi, group.ob_mpi, tag, &comm.ob_mpi) )
+        comm_set_eh(comm.ob_mpi)
+        return comm
 
     def Create_cart(
         self,

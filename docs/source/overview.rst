@@ -78,7 +78,7 @@ communicator by calling the `Comm.Get_group` method, which returns an
 instance of the `Group` class. Set operations with `Group` objects
 like like `Group.Union`, `Group.Intersection` and `Group.Difference`
 are fully supported, as well as the creation of new communicators from
-these groups using `Comm.Create` and `Comm.Create_group`.
+these groups using `Comm.Create` and `Intracomm.Create_group`.
 
 New communicator instances can be obtained with the `Comm.Clone`,
 `Comm.Dup` and `Comm.Split` methods, as well methods
