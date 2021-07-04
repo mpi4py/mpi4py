@@ -208,7 +208,7 @@ cdef class Comm:
         Info info: Info = INFO_NULL,
     ) -> Comm:
         """
-        Split communicator by color and key
+        Split communicator by split type
         """
         cdef type comm_type = Comm
         if   isinstance(self, Intracomm): comm_type = Intracomm
