@@ -118,7 +118,7 @@ cdef object cdumps_oob(Pickle pkl, object obj, object buffer_callback):
     if pkl.ob_PROTO is not None:
         protocol = pkl.ob_PROTO
         if protocol >= 0:
-            protocol = max(protocol, 5)
+            protocol = max(protocol, <int>5)
     return pkl.ob_dumps(obj, protocol, buffer_callback=buffer_callback)
 
 cdef object cloads_oob(Pickle pkl, object data, object buffers):
