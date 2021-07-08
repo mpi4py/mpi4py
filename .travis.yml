@@ -1,4 +1,4 @@
-# http://travis-ci.org/mpi4py/mpi4py
+# https://travis-ci.com/mpi4py/mpi4py
 
 language: python
 python:
@@ -47,7 +47,7 @@ addons:
 before_install:
   - python -m pip install Cython
   - python -m pip install numpy
-  - ./conf/ci/travis-ci/install-mpi.sh $MPI
+  - source .azure/install-$MPI.sh
   - python --version
   - python -m cython --version
   - python -c "import numpy;print(numpy.__version__)"
