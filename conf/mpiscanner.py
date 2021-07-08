@@ -162,10 +162,15 @@ class IntegralType(NodeType):
 
 class StructType(NodeStructType):
     REGEX = Re.STRUCT_TYPE
-    def __init__(self, ctype):
-        cnames = ['MPI_SOURCE', 'MPI_TAG', 'MPI_ERROR']
-        cfields = list(zip(['int']*3, cnames))
+    def __init__(self, ctype, calias=None):
+        cfields = []
+        if ctype == 'MPI_Status':
+            cnames = ['MPI_SOURCE', 'MPI_TAG', 'MPI_ERROR']
+            cfields = list(zip(['int']*3, cnames))
         super(StructType, self).__init__(ctype, cfields)
+        if calias is not None:
+            self.MISSING = '#define %(cname)s %(calias)s'
+            self.calias = calias
 
 class OpaqueType(NodeType):
     REGEX = Re.OPAQUE_TYPE
