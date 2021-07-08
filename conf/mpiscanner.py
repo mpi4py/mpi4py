@@ -105,6 +105,9 @@ class NodeValue(Node):
             ctype = ctype + ' const'
             self.HEADER = ctype + ' %(cname)s;'
 
+class NodePtrVal(NodeValue):
+    MISSING = '#define %(cname)s ((%(ctype)s)%(calias)s)'
+
 def ctypefix(ct):
     ct = ct.strip()
     ct = ct.replace('[][3]',' (*)[3]')
@@ -187,18 +190,16 @@ class HandleValue(NodeValue):
     REGEX = Re.HANDLE_VALUE
     MISSING = '#define %(cname)s ((%(ctype)s)%(calias)s)'
 
-class BasicPtrVal(NodeValue):
+class BasicPtrVal(NodePtrVal):
     REGEX = Re.BASIC_PTRVAL
-    MISSING = '#define %(cname)s ((%(ctype)s)%(calias)s)'
 
-class IntegralPtrVal(NodeValue):
+class IntegralPtrVal(NodePtrVal):
     REGEX = Re.INTEGRAL_PTRVAL
-    MISSING = '#define %(cname)s ((%(ctype)s)%(calias)s)'
 
-class StructPtrVal(NodeValue):
+class StructPtrVal(NodePtrVal):
     REGEX = Re.STRUCT_PTRVAL
 
-class FunctionPtrVal(NodeValue):
+class FunctionPtrVal(NodePtrVal):
     REGEX = Re.FUNCT_PTRVAL
 
 class FunctionProto(NodeFuncProto):
