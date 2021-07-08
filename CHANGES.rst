@@ -31,6 +31,8 @@ Release 3.1.0 [2021-XX-XX]
 
   + Add companion stub files to support type checkers.
 
+  + Support for weak references.
+
 .. _link: http://numba.pydata.org/numba-doc/latest/cuda/cuda_array_interface.html
 
 

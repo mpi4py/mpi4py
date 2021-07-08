@@ -1,6 +1,7 @@
 from mpi4py import MPI
 import mpiunittest as unittest
 import sys
+import weakref
 
 
 class TestObjModel(unittest.TestCase):
@@ -95,6 +96,14 @@ class TestObjModel(unittest.TestCase):
             self.assertRaises(TypeError, ob_init)
             ob_init = lambda: klass("abc")
             self.assertRaises(TypeError, ob_init)
+
+    def testWeakRef(self):
+        for obj in self.objects:
+            wr = weakref.ref(obj)
+            self.assertTrue(wr() is obj)
+            self.assertTrue(wr in weakref.getweakrefs(obj))
+            wr = weakref.proxy(obj)
+            self.assertTrue(wr in weakref.getweakrefs(obj))
 
     def testSizeOf(self):
         for obj in self.objects:
