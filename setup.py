@@ -379,12 +379,13 @@ def ext_modules():
     MPI = dict(
         name='mpi4py.MPI',
         sources=['src/MPI.c'],
-        depends=(['src/mpi4py.MPI.c'] +
-                 glob('src/*.h') +
-                 glob('src/lib-mpi/*.h') +
-                 glob('src/lib-mpi/config/*.h') +
-                 glob('src/lib-mpi/compat/*.h')
-                 ),
+        depends=(
+            ['src/mpi4py.MPI.c'] +
+            glob('src/*.h') +
+            glob('src/lib-mpi/*.h') +
+            glob('src/lib-mpi/config/*.h') +
+            glob('src/lib-mpi/compat/*.h')
+        ),
         configure=configure_mpi,
         )
     modules.append(MPI)
@@ -593,9 +594,13 @@ def build_sources(cmd):
     # mpi4py.MPI
     source = 'mpi4py/MPI.pyx'
     target = 'mpi4py.MPI.c'
-    depends = ['mpi4py/MPI/*.pyx',
-               'mpi4py/MPI/*.pxd',
-               'mpi4py/MPI/*.pxi',]
+    depends = [
+        'mpi4py/*.pyx',
+        'mpi4py/*.pxd',
+        'mpi4py/MPI/*.pyx',
+        'mpi4py/MPI/*.pxd',
+        'mpi4py/MPI/*.pxi',
+    ]
     destdir_h = os.path.join('mpi4py', 'include', 'mpi4py')
     run_cython(source, target, depends, destdir_h=destdir_h,
                wdir='src', force=cmd.force, VERSION=CYTHON)
