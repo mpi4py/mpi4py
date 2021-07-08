@@ -18,6 +18,7 @@ asterisk = r'\*'
 ws       = r'\s*'
 sol      = r'^'
 eol      = r'$'
+opt      = r'?'
 
 enum    = join('enum', colon)
 typedef = 'ctypedef'
@@ -26,7 +27,7 @@ struct  = join(typedef, 'struct')
 
 basic_type    = r'(?:void|int|char\s*\*{1,3})'
 integral_type = r'MPI_(?:Aint|Offset|Count|Fint)'
-struct_type   = r'MPI_(?:Status)'
+struct_type   = r'MPI_(?:Status|F08_status)'
 opaque_type   = r'MPI_(?:Datatype|Request|Message|Op|Info|Group|Errhandler|Comm|Win|File)'
 any_mpi_type  = r'(?:%s|%s|%s)' % (struct_type, integral_type, opaque_type)
 
@@ -45,7 +46,7 @@ fallback_value = r'\(?[A-Za-z0-9_\+\-\(\)\*]+\)?'
 fallback = r'(?:%s)?' % join (annotation, [fallback_value])
 
 INTEGRAL_TYPE = join( typedef, [canyint], [integral_type], fallback, eol)
-STRUCT_TYPE   = join( struct,  [struct_type], colon,  eol)
+STRUCT_TYPE   = join( struct,  [struct_type], colon+opt, fallback,  eol)
 OPAQUE_TYPE   = join( typedef, canyptr,  [opaque_type], eol)
 FUNCTION_TYPE = join( typedef, [ret_type], [camel_name], lparen, [arg_list], rparen, fallback, eol)
 
