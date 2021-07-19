@@ -453,6 +453,8 @@ class BaseTestCCOBufInplace(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array, typecode in arrayimpl.subTest(self):
+            # one of the ranks would fail as of OpenMPI 4.1.1
+            if unittest.is_mpi_gpu('openmpi', array): continue
             for op in (MPI.SUM, MPI.MAX, MPI.MIN, MPI.PROD):
                 if skip_op(typecode, op): continue
                 for rcnt in range(size):
@@ -581,6 +583,7 @@ class TestReduceLocal(unittest.TestCase):
 
     def testReduceLocal(self):
         for array, typecode in arrayimpl.subTest(self):
+            # segfault as of OpenMPI 4.1.1
             if unittest.is_mpi_gpu('openmpi', array): continue
             for op in (MPI.SUM, MPI.PROD, MPI.MAX, MPI.MIN):
                 if skip_op(typecode, op): continue
@@ -604,7 +607,6 @@ class TestReduceLocal(unittest.TestCase):
 
     def testReduceLocalBadCount(self):
         for array, typecode in arrayimpl.subTest(self):
-            if unittest.is_mpi_gpu('openmpi', array): continue
             for op in (MPI.SUM, MPI.PROD, MPI.MAX, MPI.MIN):
                 sbuf = array(range(3), typecode)
                 rbuf = array(range(3), typecode)
