@@ -56,6 +56,16 @@ def badport():
         port = ""
     return port == ""
 
+def using_GPU():
+    # Once a CUDA context is created, the process cannot be forked.
+    # Note: This seems to be a partial fix. Even if we are running cpu-only
+    # tests, if MPI is built with CUDA support we can still fail. Unfortunately
+    # there is no runtime check for us to detect if it's the case...
+    disabled_cupy = (sys.modules.get('cupy', -1) is None)
+    disabled_numba = (sys.modules.get('numba', -1) is None)
+    return False if (disabled_cupy and disabled_numba) else True
+
+
 @unittest.skipMPI('MPI(<2.0)')
 @unittest.skipMPI('openmpi(<3.0.0)')
 @unittest.skipMPI('openmpi(==4.0.0)')
@@ -69,6 +79,7 @@ def badport():
 @unittest.skipMPI('MPICH2')
 @unittest.skipMPI('MPICH1')
 @unittest.skipMPI('PlatformMPI')
+@unittest.skipIf(using_GPU(), 'using CUDA')
 class BaseTestSpawn(object):
 
     COMM = MPI.COMM_NULL

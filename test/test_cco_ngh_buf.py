@@ -62,6 +62,10 @@ class BaseTestCCONghBuf(object):
         for comm in create_topo_comms(self.COMM):
             rsize, ssize = get_neighbors_count(comm)
             for array, typecode in arrayimpl.subTest(self):
+                if unittest.is_mpi_gpu('openmpi', array):
+                    # segfault as of OpenMPI 4.1.1; TODO(leofang): why?
+                    if array.backend == 'numba':
+                        continue
                 for v in range(3):
                     sbuf = array( v, typecode, 3)
                     rbuf = array(-1, typecode, (rsize, 3))

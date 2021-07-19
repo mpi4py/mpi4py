@@ -38,6 +38,7 @@ class BaseTestP2PBuf(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array, typecode in arrayimpl.subTest(self):
+            if unittest.is_mpi_gpu('openmpi', array): continue
             if unittest.is_mpi_gpu('mvapich2', array): continue
             for s in range(0, size):
                 #
@@ -147,6 +148,7 @@ class BaseTestP2PBuf(object):
         dest = (rank + 1) % size
         source = (rank - 1) % size
         for array, typecode in arrayimpl.subTest(self):
+            if unittest.is_mpi_gpu('openmpi', array): continue
             if unittest.is_mpi_gpu('mvapich2', array): continue
             for s in range(size):
                 for xs in range(3):

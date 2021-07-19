@@ -108,6 +108,8 @@ class BaseTestCCOBuf(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array, typecode in arrayimpl.subTest(self):
+            # segfault as of OpenMPI 4.1.1
+            if unittest.is_mpi_gpu('openmpi', array): continue
             for op in (MPI.SUM, MPI.PROD, MPI.MAX, MPI.MIN):
                 if skip_op(typecode, op): continue
                 for root in range(size):
@@ -136,6 +138,8 @@ class BaseTestCCOBuf(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array, typecode in arrayimpl.subTest(self):
+            # segfault as of OpenMPI 4.1.1
+            if unittest.is_mpi_gpu('openmpi', array): continue
             for op in (MPI.SUM, MPI.MAX, MPI.MIN, MPI.PROD):
                 if skip_op(typecode, op): continue
                 sbuf = array(range(size), typecode)
@@ -161,6 +165,8 @@ class BaseTestCCOBuf(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array, typecode in arrayimpl.subTest(self):
+            # segfault as of OpenMPI 4.1.1
+            if unittest.is_mpi_gpu('openmpi', array): continue
             for op in (MPI.SUM, MPI.MAX, MPI.MIN, MPI.PROD):
                 if skip_op(typecode, op): continue
                 rcnt = list(range(1,size+1))
@@ -206,6 +212,8 @@ class BaseTestCCOBuf(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array, typecode in arrayimpl.subTest(self):
+            # segfault as of OpenMPI 4.1.1
+            if unittest.is_mpi_gpu('openmpi', array): continue
             for op in (MPI.SUM, MPI.MAX, MPI.MIN, MPI.PROD):
                 if skip_op(typecode, op): continue
                 for rcnt in range(1, size+1):
@@ -239,6 +247,8 @@ class BaseTestCCOBuf(object):
         rank = self.COMM.Get_rank()
         # --
         for array, typecode in arrayimpl.subTest(self):
+            # segfault as of OpenMPI 4.1.1
+            if unittest.is_mpi_gpu('openmpi', array): continue
             for op in (MPI.SUM, MPI.PROD, MPI.MAX, MPI.MIN):
                 if skip_op(typecode, op): continue
                 sbuf = array(range(size), typecode)
@@ -264,6 +274,8 @@ class BaseTestCCOBuf(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array, typecode in arrayimpl.subTest(self):
+            # segfault as of OpenMPI 4.1.1
+            if unittest.is_mpi_gpu('openmpi', array): continue
             for op in (MPI.SUM, MPI.PROD, MPI.MAX, MPI.MIN):
                 if skip_op(typecode, op): continue
                 sbuf = array(range(size), typecode)
@@ -400,6 +412,8 @@ class BaseTestCCOBufInplace(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array, typecode in arrayimpl.subTest(self):
+            # segfault as of OpenMPI 4.1.1
+            if unittest.is_mpi_gpu('openmpi', array): continue
             for op in (MPI.SUM, MPI.PROD, MPI.MAX, MPI.MIN):
                 if skip_op(typecode, op): continue
                 for root in range(size):
@@ -432,6 +446,8 @@ class BaseTestCCOBufInplace(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array, typecode in arrayimpl.subTest(self):
+            # segfault as of OpenMPI 4.1.1
+            if unittest.is_mpi_gpu('openmpi', array): continue
             for op in (MPI.SUM, MPI.MAX, MPI.MIN, MPI.PROD):
                 if skip_op(typecode, op): continue
                 buf = array(range(size), typecode)
@@ -456,6 +472,8 @@ class BaseTestCCOBufInplace(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array, typecode in arrayimpl.subTest(self):
+            # segfault as of OpenMPI 4.1.1
+            if unittest.is_mpi_gpu('openmpi', array): continue
             for op in (MPI.SUM, MPI.MAX, MPI.MIN, MPI.PROD):
                 if skip_op(typecode, op): continue
                 for rcnt in range(size):
@@ -492,6 +510,8 @@ class BaseTestCCOBufInplace(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array, typecode in arrayimpl.subTest(self):
+            # segfault as of OpenMPI 4.1.1
+            if unittest.is_mpi_gpu('openmpi', array): continue
             for op in (MPI.SUM, MPI.MAX, MPI.MIN, MPI.PROD):
                 if skip_op(typecode, op): continue
                 rcnt = list(range(1, size+1))
@@ -529,6 +549,8 @@ class BaseTestCCOBufInplace(object):
         rank = self.COMM.Get_rank()
         # --
         for array, typecode in arrayimpl.subTest(self):
+            # segfault as of OpenMPI 4.1.1
+            if unittest.is_mpi_gpu('openmpi', array): continue
             for op in (MPI.SUM, MPI.PROD, MPI.MAX, MPI.MIN):
                 if skip_op(typecode, op): continue
                 buf = array(range(size), typecode)
@@ -553,6 +575,8 @@ class BaseTestCCOBufInplace(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array, typecode in arrayimpl.subTest(self):
+            # segfault as of OpenMPI 4.1.1
+            if unittest.is_mpi_gpu('openmpi', array): continue
             for op in (MPI.SUM, MPI.PROD, MPI.MAX, MPI.MIN):
                 if skip_op(typecode, op): continue
                 buf = array(range(size), typecode)
