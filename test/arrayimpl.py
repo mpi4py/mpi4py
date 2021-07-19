@@ -347,6 +347,10 @@ if cupy is not None:
         def size(self):
             return self.array.size
 
+        def as_raw(self):
+            cupy.cuda.get_current_stream().synchronize()
+            return self.array
+
 
 if numba is not None:
 
@@ -412,6 +416,11 @@ if numba is not None:
         @property
         def size(self):
             return self.array.size
+
+        def as_raw(self):
+            # numba by default always runs on the legacy default stream
+            numba.cuda.default_stream().synchronize()
+            return self.array
 
 
 def subTest(case, skip=(), skiptypecode=()):
