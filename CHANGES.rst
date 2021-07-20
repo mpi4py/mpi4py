@@ -19,10 +19,11 @@ Release 3.1.0 [2021-XX-XX]
 
   + Add lowercase methods ``Request.get_status()`` and ``Request.cancel()``.
 
-  + Support passing Python GPU arrays compliant with the ``__cuda_array_interface__``
-    standard (`link`_) to uppercase API calls if mpi4py is built against 
-    CUDA-aware MPI implementations. This feature is currently experimental 
-    and subject to future changes.
+  + Support for passing Python GPU arrays compliant with the `DLPack`_ data
+    interchange mechanism (`link <DIM_>`_) and the ``__cuda_array_interface__``
+    (CAI) standard (`link <CAI_>`_) to uppercase methods. This support requires
+    that mpi4py is built against `CUDA-aware MPI <CAM_>`_ implementations. This
+    feature is currently experimental and subject to future changes.
 
   + `mpi4py.futures`: Add support for initializers and canceling futures at shutdown.
 
@@ -33,7 +34,10 @@ Release 3.1.0 [2021-XX-XX]
 
   + Support for weak references.
 
-.. _link: http://numba.pydata.org/numba-doc/latest/cuda/cuda_array_interface.html
+.. _DLPack: https://github.com/dmlc/dlpack
+.. _DIM: https://data-apis.org/array-api/latest/design_topics/data_interchange.html
+.. _CAI: https://numba.readthedocs.io/en/stable/cuda/cuda_array_interface.html
+.. _CAM: https://developer.nvidia.com/blog/introduction-cuda-aware-mpi/
 
 
 Release 3.0.3 [2019-11-04]
