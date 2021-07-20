@@ -73,7 +73,12 @@ communication of buffer-provider objects (e.g., NumPy arrays).
   If mpi4py is built against a CUDA-aware MPI, CUDA GPU arrays can be
   passed to the upper-case methods as long as they have a ``__cuda_array_interface__``
   attribute compliant with the standard specification. Moreover, only
-  C- or Fortran- contiguous CUDA arrays are supported.
+  C- or Fortran- contiguous CUDA arrays are supported. It is important
+  to note that GPU buffers must be fully ready before any MPI routines
+  operate on them to avoid race condition. This can be ensured by
+  synchronizing using your array library's synchronization API.
+  mpi4py does not have access to any CUDA functionality and thus cannot
+  perform this operation automatically for users.
 
 
 Running Python scripts with MPI
@@ -367,6 +372,7 @@ CUDA-aware MPI + Python GPU arrays
    recvbuf = cp.empty_like(sendbuf)
    assert hasattr(sendbuf, '__cuda_array_interface__')
    assert hasattr(recvbuf, '__cuda_array_interface__')
+   cp.cuda.get_current_stream().synchronize()
    comm.Allreduce(sendbuf, recvbuf)
 
    assert cp.allclose(recvbuf, sendbuf*size)
