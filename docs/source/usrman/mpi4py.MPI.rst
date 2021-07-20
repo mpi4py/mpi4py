@@ -362,9 +362,4 @@ Variables
    mpi4py.MPI.WIN_SIZE
    mpi4py.MPI.WIN_UNIFIED
    mpi4py.MPI.WTIME_IS_GLOBAL
-   mpi4py.MPI.__pyx_capi__
-   mpi4py.MPI._keyval_registry
-   mpi4py.MPI._typedict
-   mpi4py.MPI._typedict_c
-   mpi4py.MPI._typedict_f
    mpi4py.MPI.pickle

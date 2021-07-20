@@ -14,6 +14,7 @@ API Reference
 .. toctree::
    :maxdepth: 2
 
+   mpi4py
    mpi4py.rc
    mpi4py.MPI
    mpi4py.futures
