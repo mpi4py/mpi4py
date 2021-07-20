@@ -52,11 +52,13 @@ cdef inline char* cuda_get_format(char typekind, Py_ssize_t itemsize) nogil:
        if itemsize == 32: return b"c32"
    return BYTE_FMT
 
-cdef int Py_CheckCUDABuffer(object obj):
+#------------------------------------------------------------------------------
+
+cdef int Py_CheckCAIBuffer(object obj):
     try: return <bint>hasattr(obj, '__cuda_array_interface__')
     except: return 0
 
-cdef int Py_GetCUDABuffer(object obj, Py_buffer *view, int flags) except -1:
+cdef int Py_GetCAIBuffer(object obj, Py_buffer *view, int flags) except -1:
     cdef dict cuda_array_interface
     cdef tuple data
     cdef str   typestr
@@ -130,13 +132,5 @@ cdef int Py_GetCUDABuffer(object obj, Py_buffer *view, int flags) except -1:
         if view.format != BYTE_FMT:
             view.itemsize = itemsize
     return 0
-
-#------------------------------------------------------------------------------
-
-cdef int Py_CheckGPUBuffer(object obj):
-    return Py_CheckCUDABuffer(obj)
-
-cdef int Py_GetGPUBuffer(object obj, Py_buffer *view, int flags) except -1:
-    return Py_GetCUDABuffer(obj, view, flags)
 
 #------------------------------------------------------------------------------
