@@ -45,11 +45,13 @@ pkg_version = get_version()
 extensions = [
     'sphinx.ext.intersphinx',
     #'sphinx_rtd_theme',
+    'sphinx.ext.autosummary',
 ]
 
+autosummary_generate = True
+
 # Add any paths that contain templates here, relative to this directory.
-# templates_path = ['_templates']
-templates_path = []
+templates_path = ['_templates']
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
@@ -99,9 +101,10 @@ todo_include_todos = False
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = (
-    'sphinx_rtd_theme' if 'sphinx_rtd_theme' in extensions else 'default'
-)
+#html_theme = (
+#    'sphinx_rtd_theme' if 'sphinx_rtd_theme' in extensions else 'default'
+#)
+html_theme = 'pydata_sphinx_theme'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
