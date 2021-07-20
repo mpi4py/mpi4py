@@ -1,0 +1,15 @@
+name: mpi4py_RTD_env
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - cython=0.29.*
+  - numpy
+  - openmpi>=4,<5
+  - openmpi-mpicc
+  - pip
+  - python=3.8
+  - setuptools
+  - sphinx=4.1.1
+  - pip:
+    - pydata-sphinx-theme==0.6.3
