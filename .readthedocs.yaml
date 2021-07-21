@@ -9,8 +9,7 @@ sphinx:
    configuration: docs/source/usrman/conf.py
 
 # Optionally build your docs in additional formats such as PDF
-formats:
-   - all
+formats: all
 
 # Optionally set the version of Python and requirements required to build your docs
 python:
