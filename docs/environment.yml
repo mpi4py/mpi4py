@@ -5,9 +5,9 @@ channels:
 dependencies:
   - cython=0.29.*
   - numpy
-  - openmpi>=4,<5
-  - openmpi-mpicc
-  - gcc_linux-64
+#  - openmpi>=4,<5
+#  - openmpi-mpicc
+#  - gcc_linux-64
   - pip
   - python=3.8
   - setuptools
