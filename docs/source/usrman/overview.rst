@@ -226,34 +226,35 @@ the predefined (i.e., :const:`MPI.SUM`, :const:`MPI.PROD`,
 :const:`MPI.MAX`, etc.)  reduction operations can be applied.
 
 
-Support for CUDA-aware MPI
---------------------------
+Support for GPU-aware MPI
+-------------------------
 
 Several MPI implementations, including Open MPI and MVAPICH, support
-passing CUDA GPU pointers to MPI calls to avoid explict data movement
-between the host and the device. On the Python side, CUDA GPU arrays
-have been implemented by many libraries that need GPU computation,
-such as CuPy, Numba, PyTorch, and PyArrow. In order to increase
-library interoperability, a ``__cuda_array_interface__`` attribute
-is `defined`_ and agreed upon. For example, a CuPy array can be passed
-to a Numba CUDA-jit kernel.
+passing GPU pointers to MPI calls to avoid explict data movement
+between the host and the device. On the Python side, GPU arrays have
+been implemented by many libraries that need GPU computation, such as
+CuPy, Numba, PyTorch, and PyArrow. In order to increase library
+interoperability, two kinds of zero-copy data exchange protocols are
+defined and agreed upon: `DLPack`_ and `CUDA Array Interface`_. For
+example, a CuPy array can be passed to a Numba CUDA-jit kernel.
 
-.. _defined: http://numba.pydata.org/numba-doc/latest/cuda/cuda_array_interface.html
+.. _DLPack: https://data-apis.org/array-api/latest/design_topics/data_interchange.html
+.. _CUDA Array Interface: https://numba.readthedocs.io/en/stable/cuda/cuda_array_interface.html
 
-*MPI for Python* provides an experimental support for CUDA-aware MPI.
+*MPI for Python* provides an experimental support for GPU-aware MPI.
 This feature requires:
 
-1. mpi4py is built against a CUDA-aware MPI library.
+1. mpi4py is built against a GPU-aware MPI library.
 
-2. The Python GPU arrays are compliant with the ``__cuda_array_interface__`` standard.
+2. The Python GPU arrays are compliant with either of the protocols.
 
 See the :doc:`tutorial` section for further information. We note that
 
-* Whether or not a MPI call can work for GPU arrays depends on the underlying MPI
-  implementation, not on mpi4py.
+* Whether or not a MPI call can work for GPU arrays depends on the
+  underlying MPI implementation, not on mpi4py.
 
-* This support is currently experimental (so is the ``__cuda_array_interface__``
-  standard) and subject to change in the future.
+* This support is currently experimental and subject to change in the
+  future.
 
 
 Dynamic Process Management
