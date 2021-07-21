@@ -21,5 +21,12 @@ python:
        # extra_requirements:
        #   - docs
 
-conda:
-   environment: docs/environment.yml
+build:
+  apt_packages:
+    - openmpi-bin
+    - openmpi-common
+    - openmpi-doc
+    - libopenmpi-dev
+
+# conda:
+#    environment: docs/environment.yml
