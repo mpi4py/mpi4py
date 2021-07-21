@@ -1,31 +1,44 @@
 MPI module
 ==========
 
+Communicators
+-------------
+
+:class:`~mpi4py.MPI.Comm` is the base class for all MPI communicators in mpi4py.
+
+.. autosummary::
+   :toctree: generated/
+
+   mpi4py.MPI.Comm
+   mpi4py.MPI.Intercomm
+   mpi4py.MPI.Intracomm
+   mpi4py.MPI.Topocomm
+   mpi4py.MPI.Cartcomm
+   mpi4py.MPI.Graphcomm
+   mpi4py.MPI.Distgraphcomm
+   mpi4py.MPI.COMM_NULL
+   mpi4py.MPI.COMM_SELF
+   mpi4py.MPI.COMM_WORLD
+
+
 Classes
 -------
 
 .. autosummary::
    :toctree: generated/
 
-   mpi4py.MPI.Cartcomm
-   mpi4py.MPI.Comm
    mpi4py.MPI.Datatype
-   mpi4py.MPI.Distgraphcomm
    mpi4py.MPI.Errhandler
    mpi4py.MPI.Exception
    mpi4py.MPI.File
-   mpi4py.MPI.Graphcomm
    mpi4py.MPI.Grequest
    mpi4py.MPI.Group
    mpi4py.MPI.Info
-   mpi4py.MPI.Intercomm
-   mpi4py.MPI.Intracomm
    mpi4py.MPI.Message
    mpi4py.MPI.Op
    mpi4py.MPI.Prequest
    mpi4py.MPI.Request
    mpi4py.MPI.Status
-   mpi4py.MPI.Topocomm
    mpi4py.MPI.Win
    mpi4py.MPI.memory
 
@@ -116,10 +129,7 @@ Variables
    mpi4py.MPI.COMBINER_STRUCT
    mpi4py.MPI.COMBINER_SUBARRAY
    mpi4py.MPI.COMBINER_VECTOR
-   mpi4py.MPI.COMM_NULL
-   mpi4py.MPI.COMM_SELF
    mpi4py.MPI.COMM_TYPE_SHARED
-   mpi4py.MPI.COMM_WORLD
    mpi4py.MPI.COMPLEX
    mpi4py.MPI.COMPLEX16
    mpi4py.MPI.COMPLEX32
