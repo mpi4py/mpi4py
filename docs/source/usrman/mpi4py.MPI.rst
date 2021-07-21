@@ -1,8 +1,8 @@
-MPI module
+mpi4py.MPI
 ==========
 
-Communicators
--------------
+MPI communicators
+-----------------
 
 :class:`~mpi4py.MPI.Comm` is the base class for all MPI communicators in mpi4py.
 
@@ -21,8 +21,21 @@ Communicators
    mpi4py.MPI.COMM_WORLD
 
 
-Classes
--------
+MPI requests, messages, and status
+----------------------------------
+
+.. autosummary::
+   :toctree: generated/
+
+   mpi4py.MPI.Request
+   mpi4py.MPI.Prequest
+   mpi4py.MPI.Grequest
+   mpi4py.MPI.Message
+   mpi4py.MPI.Status
+
+
+Other MPI classes
+-----------------
 
 .. autosummary::
    :toctree: generated/
@@ -31,14 +44,9 @@ Classes
    mpi4py.MPI.Errhandler
    mpi4py.MPI.Exception
    mpi4py.MPI.File
-   mpi4py.MPI.Grequest
    mpi4py.MPI.Group
    mpi4py.MPI.Info
-   mpi4py.MPI.Message
    mpi4py.MPI.Op
-   mpi4py.MPI.Prequest
-   mpi4py.MPI.Request
-   mpi4py.MPI.Status
    mpi4py.MPI.Win
    mpi4py.MPI.memory
 
