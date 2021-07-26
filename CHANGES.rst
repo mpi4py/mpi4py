@@ -39,6 +39,10 @@ Release 3.1.0 [2021-XX-XX]
 .. _CAI: https://numba.readthedocs.io/en/stable/cuda/cuda_array_interface.html
 .. _CAM: https://developer.nvidia.com/blog/introduction-cuda-aware-mpi/
 
+* Misc:
+
+  + Add a new reference to the citation list.
+
 
 Release 3.0.3 [2019-11-04]
 ==========================
