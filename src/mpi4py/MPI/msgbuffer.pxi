@@ -26,8 +26,11 @@ cdef inline int is_buffer(object ob):
     else:
         return PyObject_CheckBuffer(ob) or _Py2_IsBuffer(ob)
 
-cdef inline int is_gpu_buffer(object ob):
-    return Py_CheckGPUBuffer(ob)
+cdef inline int is_dlpack_buffer(object ob):
+    return Py_CheckDLPackBuffer(ob)
+
+cdef inline int is_cai_buffer(object ob):
+    return Py_CheckCAIBuffer(ob)
 
 cdef inline int is_datatype(object ob):
     if isinstance(ob, Datatype): return 1
@@ -185,7 +188,9 @@ cdef _p_message message_simple(object msg,
             (o_buf, o_count, o_displ, o_type) = msg
         else:
             raise ValueError("message: expecting 2 to 4 items")
-    elif is_gpu_buffer(msg):
+    elif is_dlpack_buffer(msg):
+        o_buf = msg
+    elif is_cai_buffer(msg):
         o_buf = msg
     elif PYPY:
         o_buf = msg
@@ -299,7 +304,9 @@ cdef _p_message message_vector(object msg,
             (o_buf, o_counts, o_displs, o_type) = msg
         else:
             raise ValueError("message: expecting 2 to 4 items")
-    elif is_gpu_buffer(msg):
+    elif is_dlpack_buffer(msg):
+        o_buf = msg
+    elif is_cai_buffer(msg):
         o_buf = msg
     elif PYPY:
         o_buf = msg

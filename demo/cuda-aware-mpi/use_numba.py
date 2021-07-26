@@ -28,9 +28,12 @@ if rank == 0:
     block = 32
     grid = (buf.size + block - 1)//block
     add_const[grid, block](buf, 100)
+    # always make sure the GPU buffer is ready before any MPI operation
+    cuda.default_stream().synchronize()
     comm.Send(buf, dest=1, tag=77)
 else:
     buf = cuda.device_array((20,), dtype='f')
+    cuda.default_stream().synchronize()
     comm.Recv(buf, source=0, tag=77)
     buf = buf.copy_to_host()
     assert numpy.allclose(buf, 100+numpy.arange(20, dtype='f'))

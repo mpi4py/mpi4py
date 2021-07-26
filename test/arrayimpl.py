@@ -240,6 +240,47 @@ if numpy is not None:
             return self.array.size
 
 
+try:
+    import dlpackimpl as dlpack
+except ImportError:
+    dlpack = None
+
+class BaseDLPackCPU(object):
+
+    def __dlpack_device__(self):
+        return (dlpack.DLDeviceType.kDLCPU, 0)
+
+    def __dlpack__(self, stream=None):
+        assert stream is None
+        capsule = dlpack.make_py_capsule(self.array)
+        return capsule
+
+    def as_raw(self):
+        return self
+
+
+if dlpack is not None and array is not None:
+
+    @add_backend
+    class DLPackArray(BaseDLPackCPU, ArrayArray):
+
+        backend = 'dlpack-array'
+
+        def __init__(self, arg, typecode, shape=None):
+            super(DLPackArray, self).__init__(arg, typecode, shape)
+
+
+if dlpack is not None and numpy is not None:
+
+    @add_backend
+    class DLPackNumPy(BaseDLPackCPU, ArrayNumPy):
+
+        backend = 'dlpack-numpy'
+
+        def __init__(self, arg, typecode, shape=None):
+            super(DLPackNumPy, self).__init__(arg, typecode, shape)
+
+
 def typestr(typecode, itemsize):
     typestr = ''
     if sys.byteorder == 'little':
@@ -350,6 +391,45 @@ if cupy is not None:
         def as_raw(self):
             cupy.cuda.get_current_stream().synchronize()
             return self.array
+
+
+if cupy is not None:
+
+    # Note: we do not create a BaseDLPackGPU class because each GPU library
+    # has its own way to get device ID etc, so we have to reimplement the
+    # DLPack support anyway
+
+    @add_backend
+    class DLPackCuPy(GPUArrayCuPy):
+
+        backend = 'dlpack-cupy'
+        has_dlpack = None
+        dev_type = None
+
+        def __init__(self, arg, typecode, shape=None):
+            super().__init__(arg, typecode, shape)
+            self.has_dlpack = hasattr(self.array, '__dlpack_device__')
+            # TODO(leofang): test CUDA managed memory?
+            if cupy.cuda.runtime.is_hip:
+                self.dev_type = dlpack.DLDeviceType.kDLROCM
+            else:
+                self.dev_type = dlpack.DLDeviceType.kDLCUDA
+
+        def __dlpack_device__(self):
+            if self.has_dlpack:
+                return self.array.__dlpack_device__()
+            else:
+                return (self.dev_type, self.array.device.id)
+
+        def __dlpack__(self, stream=None):
+            cupy.cuda.get_current_stream().synchronize()
+            if self.has_dlpack:
+                return self.array.__dlpack__(stream=-1)
+            else:
+                return self.array.toDlpack()
+
+        def as_raw(self):
+            return self
 
 
 if numba is not None:

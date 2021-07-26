@@ -62,7 +62,7 @@ communication of buffer-provider objects (e.g., NumPy arrays).
   specified as ``[data, count, displ, datatype]``, where ``count`` and
   ``displ`` are sequences of integral values.
 
-  Automatic MPI datatype discovery for NumPy/CUDA arrays and PEP-3118
+  Automatic MPI datatype discovery for NumPy/GPU arrays and PEP-3118
   buffers is supported, but limited to basic C types (all C/C99-native
   signed/unsigned integral types and single/double precision
   real/complex floating types) and availability of matching datatypes
@@ -70,10 +70,17 @@ communication of buffer-provider objects (e.g., NumPy arrays).
   buffer-provider object can be passed directly as a buffer argument,
   the count and MPI datatype will be inferred.
 
-  If mpi4py is built against a CUDA-aware MPI, CUDA GPU arrays can be
-  passed to the upper-case methods as long as they have a ``__cuda_array_interface__``
-  attribute compliant with the standard specification. Moreover, only
-  C- or Fortran- contiguous CUDA arrays are supported.
+  If mpi4py is built against a GPU-aware MPI implementation, GPU
+  arrays can be passed to upper-case methods as long as they have
+  either the ``__dlpack__`` and ``__dlpack_device__`` methods or the
+  ``__cuda_array_interface__`` attribute that are compliant with the
+  respective standard specifications. Moreover, only C-contiguous or
+  Fortran-contiguous GPU arrays are supported. It is important to note
+  that GPU buffers must be fully ready before any MPI routines operate
+  on them to avoid race conditions. This can be ensured by using the
+  synchronization API of your array library. mpi4py does not have
+  access to any GPU-specific functionality and thus cannot perform
+  this operation automatically for users.
 
 
 Running Python scripts with MPI
@@ -367,6 +374,7 @@ CUDA-aware MPI + Python GPU arrays
    recvbuf = cp.empty_like(sendbuf)
    assert hasattr(sendbuf, '__cuda_array_interface__')
    assert hasattr(recvbuf, '__cuda_array_interface__')
+   cp.cuda.get_current_stream().synchronize()
    comm.Allreduce(sendbuf, recvbuf)
 
    assert cp.allclose(recvbuf, sendbuf*size)

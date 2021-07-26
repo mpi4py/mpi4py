@@ -20,3 +20,4 @@ API Reference
    mpi4py.futures
    mpi4py.util
    mpi4py.run
+   envvars

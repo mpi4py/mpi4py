@@ -41,21 +41,10 @@ pypy_lt_53 = pypy and sys.pypy_version_info < (5, 3)
 
 # ---
 
-class GPUBuf(object):
+class BaseBuf(object):
 
-    def __init__(self, typecode, initializer, readonly=False):
+    def __init__(self, typecode, initializer):
         self._buf = array.array(typecode, initializer)
-        address = self._buf.buffer_info()[0]
-        typecode = self._buf.typecode
-        itemsize = self._buf.itemsize
-        self.__cuda_array_interface__ = dict(
-            version = 0,
-            data    = (address, readonly),
-            typestr = typestr(typecode, itemsize),
-            shape   = (len(self._buf), 1, 1),
-            strides = (itemsize,) * 3,
-            descr   = [('', typestr(typecode, itemsize))],
-        )
 
     def __eq__(self, other):
         return self._buf == other._buf
@@ -71,6 +60,89 @@ class GPUBuf(object):
 
     def __setitem__(self, item, value):
         self._buf[item] = value._buf
+
+# ---
+
+try:
+    import dlpackimpl as dlpack
+except ImportError:
+    dlpack = None
+
+class DLPackCPUBuf(BaseBuf):
+
+    def __init__(self, typecode, initializer):
+        super(DLPackCPUBuf, self).__init__(typecode, initializer)
+        self.managed = dlpack.make_dl_managed_tensor(self._buf)
+
+    def __del__(self):
+        self.managed = None
+        if not pypy and sys.getrefcount(self._buf) > 2:
+            raise RuntimeError('dlpack: possible reference leak')
+
+    def __dlpack_device__(self):
+        device = self.managed.dl_tensor.device
+        return (device.device_type, device.device_id)
+
+    def __dlpack__(self, stream=None):
+        managed = self.managed
+        if managed.dl_tensor.device.device_type == \
+           dlpack.DLDeviceType.kDLCPU:
+            assert stream == None
+        capsule = dlpack.make_py_capsule(managed)
+        return capsule
+
+
+if cupy is not None:
+
+    class DLPackGPUBuf(BaseBuf):
+
+        has_dlpack = None
+        dev_type = None
+
+        def __init__(self, typecode, initializer):
+            self._buf = cupy.array(initializer, dtype=typecode)
+            self.has_dlpack = hasattr(self._buf, '__dlpack_device__')
+            # TODO(leofang): test CUDA managed memory?
+            if cupy.cuda.runtime.is_hip:
+                self.dev_type = dlpack.DLDeviceType.kDLROCM
+            else:
+                self.dev_type = dlpack.DLDeviceType.kDLCUDA
+
+        def __del__(self):
+            if not pypy and sys.getrefcount(self._buf) > 2:
+                raise RuntimeError('dlpack: possible reference leak')
+
+        def __dlpack_device__(self):
+            if self.has_dlpack:
+                return self._buf.__dlpack_device__()
+            else:
+                return (self.dev_type, self._buf.device.id)
+
+        def __dlpack__(self, stream=None):
+            cupy.cuda.get_current_stream().synchronize()
+            if self.has_dlpack:
+                return self._buf.__dlpack__(stream=-1)
+            else:
+                return self._buf.toDlpack()
+
+
+# ---
+
+class CAIBuf(BaseBuf):
+
+    def __init__(self, typecode, initializer, readonly=False):
+        super(CAIBuf, self).__init__(typecode, initializer)
+        address = self._buf.buffer_info()[0]
+        typecode = self._buf.typecode
+        itemsize = self._buf.itemsize
+        self.__cuda_array_interface__ = dict(
+            version = 0,
+            data    = (address, readonly),
+            typestr = typestr(typecode, itemsize),
+            shape   = (len(self._buf), 1, 1),
+            strides = (itemsize,) * 3,
+            descr   = [('', typestr(typecode, itemsize))],
+        )
 
 
 cupy_issue_2259 = False
@@ -387,11 +459,28 @@ class TestMessageSimpleNumPy(unittest.TestCase,
 
 
 @unittest.skipIf(array is None, 'array')
-class TestMessageSimpleGPUBuf(unittest.TestCase,
+@unittest.skipIf(dlpack is None, 'dlpack')
+class TestMessageSimpleDLPackCPUBuf(unittest.TestCase,
+                                    BaseTestMessageSimpleArray):
+
+    def array(self, typecode, initializer):
+        return DLPackCPUBuf(typecode, initializer)
+
+
+@unittest.skipIf(cupy is None, 'cupy')
+class TestMessageSimpleDLPackGPUBuf(unittest.TestCase,
+                                    BaseTestMessageSimpleArray):
+
+    def array(self, typecode, initializer):
+        return DLPackGPUBuf(typecode, initializer)
+
+
+@unittest.skipIf(array is None, 'array')
+class TestMessageSimpleCAIBuf(unittest.TestCase,
                               BaseTestMessageSimpleArray):
 
     def array(self, typecode, initializer):
-        return GPUBuf(typecode, initializer)
+        return CAIBuf(typecode, initializer)
 
 
 @unittest.skipIf(cupy is None, 'cupy')
@@ -471,61 +560,180 @@ class TestMessageSimpleNumba(unittest.TestCase,
 # ---
 
 @unittest.skipIf(array is None, 'array')
-class TestMessageGPUBufInterface(unittest.TestCase):
+@unittest.skipIf(dlpack is None, 'dlpack')
+class TestMessageDLPackCPUBuf(unittest.TestCase):
+
+    def testDevice(self):
+        buf = DLPackCPUBuf('i', [0,1,2,3])
+        buf.__dlpack_device__ = None
+        self.assertRaises(TypeError, MPI.Get_address, buf)
+        buf.__dlpack_device__ = lambda: None
+        self.assertRaises(TypeError, MPI.Get_address, buf)
+        buf.__dlpack_device__ = lambda: (None, 0)
+        self.assertRaises(TypeError, MPI.Get_address, buf)
+        buf.__dlpack_device__ = lambda: (1, None)
+        self.assertRaises(TypeError, MPI.Get_address, buf)
+        buf.__dlpack_device__ = lambda: (1,)
+        self.assertRaises(ValueError, MPI.Get_address, buf)
+        buf.__dlpack_device__ = lambda: (1, 0, 1)
+        self.assertRaises(ValueError, MPI.Get_address, buf)
+        del buf.__dlpack_device__
+        MPI.Get_address(buf)
+
+    def testCapsule(self):
+        buf = DLPackCPUBuf('i', [0,1,2,3])
+        #
+        capsule = buf.__dlpack__()
+        MPI.Get_address(buf)
+        MPI.Get_address(buf)
+        del capsule
+        #
+        capsule = buf.__dlpack__()
+        retvals = [capsule] * 2
+        buf.__dlpack__ = lambda *args, **kwargs: retvals.pop()
+        MPI.Get_address(buf)
+        self.assertRaises(BufferError, MPI.Get_address, buf)
+        del buf.__dlpack__
+        del capsule
+        #
+        buf.__dlpack__ = lambda *args, **kwargs:  None
+        self.assertRaises(BufferError, MPI.Get_address, buf)
+        del buf.__dlpack__
+
+    def testNdim(self):
+        buf = DLPackCPUBuf('i', [0,1,2,3])
+        dltensor = buf.managed.dl_tensor
+        #
+        for ndim in (2, 1, 0):
+            dltensor.ndim = ndim
+            MPI.Get_address(buf)
+        #
+        dltensor.ndim = -1
+        self.assertRaises(BufferError, MPI.Get_address, buf)
+        #
+        del dltensor
+
+    def testShape(self):
+        buf = DLPackCPUBuf('i', [0,1,2,3])
+        dltensor = buf.managed.dl_tensor
+        #
+        dltensor.ndim = 1
+        dltensor.shape[0] = -1
+        self.assertRaises(BufferError, MPI.Get_address, buf)
+        #
+        dltensor.ndim = 0
+        dltensor.shape = None
+        MPI.Get_address(buf)
+        #
+        dltensor.ndim = 1
+        dltensor.shape = None
+        self.assertRaises(BufferError, MPI.Get_address, buf)
+        #
+        del dltensor
+
+    def testStrides(self):
+        buf = DLPackCPUBuf('i', range(8))
+        dltensor = buf.managed.dl_tensor
+        #
+        for order in ('C', 'F'):
+            dltensor.ndim, dltensor.shape, dltensor.strides = \
+                dlpack.make_dl_shape([2, 2, 2], order=order)
+            MPI.Get_address(buf)
+            dltensor.strides[0] = -1
+            self.assertRaises(BufferError, MPI.Get_address, buf)
+        #
+        del dltensor
+
+    def testContiguous(self):
+        buf = DLPackCPUBuf('i', range(8))
+        dltensor = buf.managed.dl_tensor
+        #
+        dltensor.ndim, dltensor.shape, dltensor.strides = \
+            dlpack.make_dl_shape([2, 2, 2], order='C')
+        s = dltensor.strides
+        strides = [s[i] for i in range(dltensor.ndim)]
+        s[0], s[1], s[2] = [strides[i] for i in [0, 1, 2]]
+        MPI.Get_address(buf)
+        s[0], s[1], s[2] = [strides[i] for i in [2, 1, 0]]
+        MPI.Get_address(buf)
+        s[0], s[1], s[2] = [strides[i] for i in [0, 2, 1]]
+        self.assertRaises(BufferError, MPI.Get_address, buf)
+        s[0], s[1], s[2] = [strides[i] for i in [1, 0, 2]]
+        self.assertRaises(BufferError, MPI.Get_address, buf)
+        del s
+        #
+        del dltensor
+
+    def testByteOffset(self):
+        buf = DLPackCPUBuf('B', [0,1,2,3])
+        dltensor = buf.managed.dl_tensor
+        #
+        dltensor.ndim = 1
+        for i in range(len(buf)):
+            dltensor.byte_offset = i
+            mem = MPI.memory(buf)
+            self.assertEqual(mem[0], buf[i])
+        #
+        del dltensor
+
+# ---
+
+@unittest.skipIf(array is None, 'array')
+class TestMessageCAIBuf(unittest.TestCase):
 
     def testNonReadonly(self):
-        smsg = GPUBuf('i', [1,2,3], readonly=True)
-        rmsg = GPUBuf('i', [0,0,0], readonly=True)
+        smsg = CAIBuf('i', [1,2,3], readonly=True)
+        rmsg = CAIBuf('i', [0,0,0], readonly=True)
         self.assertRaises(BufferError, Sendrecv, smsg, rmsg)
 
     def testNonContiguous(self):
-        smsg = GPUBuf('i', [1,2,3])
-        rmsg = GPUBuf('i', [0,0,0])
+        smsg = CAIBuf('i', [1,2,3])
+        rmsg = CAIBuf('i', [0,0,0])
         strides = rmsg.__cuda_array_interface__['strides']
         bad_strides = strides[:-1] + (7,)
         rmsg.__cuda_array_interface__['strides'] = bad_strides
         self.assertRaises(BufferError, Sendrecv, smsg, rmsg)
 
     def testAttrNone(self):
-        smsg = GPUBuf('B', [1,2,3])
-        rmsg = GPUBuf('B', [0,0,0])
+        smsg = CAIBuf('B', [1,2,3])
+        rmsg = CAIBuf('B', [0,0,0])
         rmsg.__cuda_array_interface__ = None
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testAttrEmpty(self):
-        smsg = GPUBuf('B', [1,2,3])
-        rmsg = GPUBuf('B', [0,0,0])
+        smsg = CAIBuf('B', [1,2,3])
+        rmsg = CAIBuf('B', [0,0,0])
         rmsg.__cuda_array_interface__ = dict()
         self.assertRaises(KeyError, Sendrecv, smsg, rmsg)
 
     def testAttrType(self):
-        smsg = GPUBuf('B', [1,2,3])
-        rmsg = GPUBuf('B', [0,0,0])
+        smsg = CAIBuf('B', [1,2,3])
+        rmsg = CAIBuf('B', [0,0,0])
         items = list(rmsg.__cuda_array_interface__.items())
         rmsg.__cuda_array_interface__ = items
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testDataMissing(self):
-        smsg = GPUBuf('B', [1,2,3])
-        rmsg = GPUBuf('B', [0,0,0])
+        smsg = CAIBuf('B', [1,2,3])
+        rmsg = CAIBuf('B', [0,0,0])
         del rmsg.__cuda_array_interface__['data']
         self.assertRaises(KeyError, Sendrecv, smsg, rmsg)
 
     def testDataNone(self):
-        smsg = GPUBuf('B', [1,2,3])
-        rmsg = GPUBuf('B', [0,0,0])
+        smsg = CAIBuf('B', [1,2,3])
+        rmsg = CAIBuf('B', [0,0,0])
         rmsg.__cuda_array_interface__['data'] = None
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testDataType(self):
-        smsg = GPUBuf('B', [1,2,3])
-        rmsg = GPUBuf('B', [0,0,0])
+        smsg = CAIBuf('B', [1,2,3])
+        rmsg = CAIBuf('B', [0,0,0])
         rmsg.__cuda_array_interface__['data'] = 0
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testDataValue(self):
-        smsg = GPUBuf('B', [1,2,3])
-        rmsg = GPUBuf('B', [0,0,0])
+        smsg = CAIBuf('B', [1,2,3])
+        rmsg = CAIBuf('B', [0,0,0])
         dev_ptr = rmsg.__cuda_array_interface__['data'][0]
         rmsg.__cuda_array_interface__['data'] = (dev_ptr, )
         self.assertRaises(ValueError, Sendrecv, smsg, rmsg)
@@ -535,99 +743,99 @@ class TestMessageGPUBufInterface(unittest.TestCase):
         self.assertRaises(ValueError, Sendrecv, smsg, rmsg)
 
     def testTypestrMissing(self):
-        smsg = GPUBuf('B', [1,2,3])
-        rmsg = GPUBuf('B', [0,0,0])
+        smsg = CAIBuf('B', [1,2,3])
+        rmsg = CAIBuf('B', [0,0,0])
         del rmsg.__cuda_array_interface__['typestr']
         self.assertRaises(KeyError, Sendrecv, smsg, rmsg)
 
     def testTypestrNone(self):
-        smsg = GPUBuf('B', [1,2,3])
-        rmsg = GPUBuf('B', [0,0,0])
+        smsg = CAIBuf('B', [1,2,3])
+        rmsg = CAIBuf('B', [0,0,0])
         rmsg.__cuda_array_interface__['typestr'] = None
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testTypestrType(self):
-        smsg = GPUBuf('B', [1,2,3])
-        rmsg = GPUBuf('B', [0,0,0])
+        smsg = CAIBuf('B', [1,2,3])
+        rmsg = CAIBuf('B', [0,0,0])
         rmsg.__cuda_array_interface__['typestr'] = 42
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testTypestrItemsize(self):
-        smsg = GPUBuf('B', [1,2,3])
-        rmsg = GPUBuf('B', [0,0,0])
+        smsg = CAIBuf('B', [1,2,3])
+        rmsg = CAIBuf('B', [0,0,0])
         typestr = rmsg.__cuda_array_interface__['typestr']
         rmsg.__cuda_array_interface__['typestr'] = typestr[:2]+'X'
         self.assertRaises(ValueError, Sendrecv, smsg, rmsg)
 
     def testShapeMissing(self):
-        smsg = GPUBuf('B', [1,2,3])
-        rmsg = GPUBuf('B', [0,0,0])
+        smsg = CAIBuf('B', [1,2,3])
+        rmsg = CAIBuf('B', [0,0,0])
         del rmsg.__cuda_array_interface__['shape']
         self.assertRaises(KeyError, Sendrecv, smsg, rmsg)
 
     def testShapeNone(self):
-        smsg = GPUBuf('B', [1,2,3])
-        rmsg = GPUBuf('B', [0,0,0])
+        smsg = CAIBuf('B', [1,2,3])
+        rmsg = CAIBuf('B', [0,0,0])
         rmsg.__cuda_array_interface__['shape'] = None
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testShapeType(self):
-        smsg = GPUBuf('B', [1,2,3])
-        rmsg = GPUBuf('B', [0,0,0])
+        smsg = CAIBuf('B', [1,2,3])
+        rmsg = CAIBuf('B', [0,0,0])
         rmsg.__cuda_array_interface__['shape'] = 3
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testShapeValue(self):
-        smsg = GPUBuf('B', [1,2,3])
-        rmsg = GPUBuf('B', [0,0,0])
+        smsg = CAIBuf('B', [1,2,3])
+        rmsg = CAIBuf('B', [0,0,0])
         rmsg.__cuda_array_interface__['shape'] = (3, -1)
         rmsg.__cuda_array_interface__['strides'] = None
         self.assertRaises(BufferError, Sendrecv, smsg, rmsg)
 
     def testStridesMissing(self):
-        smsg = GPUBuf('B', [1,2,3])
-        rmsg = GPUBuf('B', [0,0,0])
+        smsg = CAIBuf('B', [1,2,3])
+        rmsg = CAIBuf('B', [0,0,0])
         del rmsg.__cuda_array_interface__['strides']
         Sendrecv(smsg, rmsg)
         self.assertEqual(smsg, rmsg)
 
     def testStridesNone(self):
-        smsg = GPUBuf('B', [1,2,3])
-        rmsg = GPUBuf('B', [0,0,0])
+        smsg = CAIBuf('B', [1,2,3])
+        rmsg = CAIBuf('B', [0,0,0])
         rmsg.__cuda_array_interface__['strides'] = None
         Sendrecv(smsg, rmsg)
         self.assertEqual(smsg, rmsg)
 
     def testStridesType(self):
-        smsg = GPUBuf('B', [1,2,3])
-        rmsg = GPUBuf('B', [0,0,0])
+        smsg = CAIBuf('B', [1,2,3])
+        rmsg = CAIBuf('B', [0,0,0])
         rmsg.__cuda_array_interface__['strides'] = 42
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testDescrMissing(self):
-        smsg = GPUBuf('d', [1,2,3])
-        rmsg = GPUBuf('d', [0,0,0])
+        smsg = CAIBuf('d', [1,2,3])
+        rmsg = CAIBuf('d', [0,0,0])
         del rmsg.__cuda_array_interface__['descr']
         Sendrecv(smsg, rmsg)
         self.assertEqual(smsg, rmsg)
 
     def testDescrNone(self):
-        smsg = GPUBuf('d', [1,2,3])
-        rmsg = GPUBuf('d', [0,0,0])
+        smsg = CAIBuf('d', [1,2,3])
+        rmsg = CAIBuf('d', [0,0,0])
         rmsg.__cuda_array_interface__['descr'] = None
         Sendrecv(smsg, rmsg)
         self.assertEqual(smsg, rmsg)
 
     def testDescrType(self):
-        smsg = GPUBuf('B', [1,2,3])
-        rmsg = GPUBuf('B', [0,0,0])
+        smsg = CAIBuf('B', [1,2,3])
+        rmsg = CAIBuf('B', [0,0,0])
         rmsg.__cuda_array_interface__['descr'] = 42
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testDescrWarning(self):
         m, n = 5, 3
-        smsg = GPUBuf('d', list(range(m*n)))
-        rmsg = GPUBuf('d', [0]*(m*n))
+        smsg = CAIBuf('d', list(range(m*n)))
+        rmsg = CAIBuf('d', [0]*(m*n))
         typestr = rmsg.__cuda_array_interface__['typestr']
         itemsize = int(typestr[2:])
         new_typestr = "|V"+str(itemsize*n)
@@ -865,11 +1073,11 @@ class TestMessageVectorNumPy(unittest.TestCase,
 
 
 @unittest.skipIf(array is None, 'array')
-class TestMessageVectorGPUBuf(unittest.TestCase,
+class TestMessageVectorCAIBuf(unittest.TestCase,
                               BaseTestMessageVectorArray):
 
     def array(self, typecode, initializer):
-        return GPUBuf(typecode, initializer)
+        return CAIBuf(typecode, initializer)
 
 
 @unittest.skipIf(cupy is None, 'cupy')
@@ -963,9 +1171,9 @@ class TestMessageVectorW(unittest.TestCase):
         self.assertTrue((sbuf == rbuf).all())
 
     @unittest.skipIf(array is None, 'array')
-    def testMessageGPUBuf(self):
-        sbuf = GPUBuf('i', [1,2,3], readonly=True)
-        rbuf = GPUBuf('i', [0,0,0], readonly=False)
+    def testMessageCAIBuf(self):
+        sbuf = CAIBuf('i', [1,2,3], readonly=True)
+        rbuf = CAIBuf('i', [0,0,0], readonly=False)
         smsg = [sbuf, [3], [0], [MPI.INT]]
         rmsg = [rbuf, ([3], [0]), [MPI.INT]]
         Alltoallw(smsg, rmsg)
@@ -1098,9 +1306,9 @@ class TestMessageRMA(unittest.TestCase):
 
     @unittest.skipMPI('msmpi')
     @unittest.skipIf(array is None, 'array')
-    def testMessageGPUBuf(self):
-        sbuf = GPUBuf('i', [1,2,3], readonly=True)
-        rbuf = GPUBuf('i', [0,0,0], readonly=False)
+    def testMessageCAIBuf(self):
+        sbuf = CAIBuf('i', [1,2,3], readonly=True)
+        rbuf = CAIBuf('i', [0,0,0], readonly=False)
         PutGet(sbuf, rbuf)
         self.assertEqual(sbuf, rbuf)
 
