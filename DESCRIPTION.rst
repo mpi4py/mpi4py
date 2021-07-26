@@ -95,6 +95,11 @@ If MPI for Python been significant to a project that leads to an
 academic publication, please acknowledge that fact by citing the
 project.
 
+* L. Dalcin and Y.-L. L. Fang,
+  *mpi4py: Status Update After 12 Years of Development*,
+  Computing in Science & Engineering, 2021.
+  https://doi.org/10.1109/MCSE.2021.3083216
+
 * L. Dalcin, P. Kler, R. Paz, and A. Cosimo,
   *Parallel Distributed Computing using Python*,
   Advances in Water Resources, 34(9):1124-1139, 2011.
