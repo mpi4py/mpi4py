@@ -855,7 +855,7 @@ cdef class Comm:
         int root: int = 0,
     ) -> None:
         """
-        Reduce
+        Reduce to Root
         """
         cdef _p_msg_cco m = message_cco()
         m.for_reduce(sendbuf, recvbuf, root, self.ob_mpi)
@@ -870,7 +870,7 @@ cdef class Comm:
         Op op: Op = SUM,
     ) -> None:
         """
-        All Reduce
+        Reduce to All
         """
         cdef _p_msg_cco m = message_cco()
         m.for_allreduce(sendbuf, recvbuf, self.ob_mpi)
@@ -1111,7 +1111,7 @@ cdef class Comm:
         int root: int = 0,
     ) -> Request:
         """
-        Nonblocking Reduce
+        Nonblocking Reduce to Root
         """
         cdef _p_msg_cco m = message_cco()
         m.for_reduce(sendbuf, recvbuf, root, self.ob_mpi)
@@ -1128,7 +1128,7 @@ cdef class Comm:
         Op op: Op = SUM,
     ) -> Request:
         """
-        Nonblocking All Reduce
+        Nonblocking Reduce to All
         """
         cdef _p_msg_cco m = message_cco()
         m.for_allreduce(sendbuf, recvbuf, self.ob_mpi)
@@ -1310,7 +1310,7 @@ cdef class Comm:
     @classmethod
     def Free_keyval(cls, int keyval: int) -> int:
         """
-        Free and attribute key for communicators
+        Free an attribute key for communicators
         """
         cdef int keyval_save = keyval
         CHKERR( MPI_Comm_free_keyval(&keyval) )
@@ -1608,7 +1608,7 @@ cdef class Comm:
         op: Union[Op, Callable[[Any, Any], Any]] = SUM,
         int root: int = 0,
     ) -> Optional[Any]:
-        """Reduce"""
+        """Reduce to Root"""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_reduce(sendobj, op, root, comm)
     #

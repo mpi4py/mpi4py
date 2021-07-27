@@ -1,7 +1,7 @@
 cdef class Group:
 
     """
-    Group
+    Group of processes
     """
 
     def __cinit__(self, Group group: Optional[Group] = None):

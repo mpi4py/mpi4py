@@ -1,5 +1,5 @@
 __doc__ = """
-Message Passing Interface
+Message Passing Interface.
 """
 
 from mpi4py.libmpi cimport *
@@ -148,8 +148,7 @@ def Init_thread(int required: int = THREAD_MULTIPLE) -> int:
 
 def Query_thread() -> int:
     """
-    Return the level of thread support
-    provided by the MPI library
+    Return the level of thread support provided by the MPI library
     """
     cdef int provided = MPI_THREAD_SINGLE
     CHKERR( MPI_Query_thread(&provided) )
@@ -157,8 +156,7 @@ def Query_thread() -> int:
 
 def Is_thread_main() -> bool:
     """
-    Indicate whether this thread called
-    ``Init`` or ``Init_thread``
+    Indicate whether this thread called `Init` or `Init_thread`
     """
     cdef int flag = 1
     CHKERR( MPI_Is_thread_main(&flag) )
@@ -166,7 +164,7 @@ def Is_thread_main() -> bool:
 
 def Is_initialized() -> bool:
     """
-    Indicates whether ``Init`` has been called
+    Indicates whether `Init` has been called
     """
     cdef int flag = 0
     CHKERR( MPI_Initialized(&flag) )
@@ -174,7 +172,7 @@ def Is_initialized() -> bool:
 
 def Is_finalized() -> bool:
     """
-    Indicates whether ``Finalize`` has completed
+    Indicates whether `Finalize` has completed
     """
     cdef int flag = 0
     CHKERR( MPI_Finalized(&flag) )
@@ -231,7 +229,7 @@ def Wtime() -> float:
 
 def Wtick() -> float:
     """
-    Return the resolution of ``Wtime``
+    Return the resolution of `Wtime`
     """
     return MPI_Wtick()
 

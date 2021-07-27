@@ -45,7 +45,7 @@ if PY2:
 cdef class Pickle:
 
     """
-    Pickle/unpickle Python objects.
+    Pickle/unpickle Python objects
     """
 
     cdef object ob_dumps
@@ -99,6 +99,7 @@ cdef class Pickle:
         return cloads(self, data)
 
     property PROTOCOL:
+        """pickle protocol"""
         def __get__(self) -> Optional[int]:
             return self.ob_PROTO
         def __set__(self, protocol: Optional[int]):

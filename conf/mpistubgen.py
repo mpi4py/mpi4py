@@ -336,7 +336,7 @@ OVERRIDE = {
         IN_PLACE: Final[InPlace] = ...
         """,
     'Exception': {
-        '__init__': "def __init__(self, ierr: int = 0) -> None: ...",
+        '__init__': "def __init__(self, ierr: int = SUCCESS) -> None: ...",
         "__lt__": "def __lt__(self, other: int) -> bool: ...",
         "__le__": "def __le__(self, other: int) -> bool: ...",
         "__gt__": "def __gt__(self, other: int) -> bool: ...",

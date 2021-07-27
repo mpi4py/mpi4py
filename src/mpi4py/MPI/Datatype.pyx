@@ -43,7 +43,7 @@ COMBINER_F90_INTEGER      = MPI_COMBINER_F90_INTEGER
 cdef class Datatype:
 
     """
-    Datatype
+    Datatype object
     """
 
     def __cinit__(self, Datatype datatype: Optional[Datatype] = None):
@@ -858,7 +858,7 @@ cdef class Datatype:
     @classmethod
     def Free_keyval(cls, int keyval: int) -> int:
         """
-        Free and attribute key for datatypes
+        Free an attribute key for datatypes
         """
         cdef int keyval_save = keyval
         CHKERR( MPI_Type_free_keyval(&keyval) )

@@ -1,7 +1,7 @@
 cdef class Request:
 
     """
-    Request
+    Request handle
     """
 
     def __cinit__(self, Request request: Optional[Request] = None):
@@ -374,7 +374,7 @@ cdef class Request:
 cdef class Prequest(Request):
 
     """
-    Persistent request
+    Persistent request handle
     """
 
     def __cinit__(self, Request request: Optional[Request] = None):
@@ -406,7 +406,7 @@ cdef class Prequest(Request):
 cdef class Grequest(Request):
 
     """
-    Generalized request
+    Generalized request handle
     """
 
     def __cinit__(self, Request request: Optional[Request] = None):

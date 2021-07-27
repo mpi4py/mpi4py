@@ -1,7 +1,7 @@
 cdef class Op:
 
     """
-    Op
+    Operation object
     """
 
     def __cinit__(self, Op op: Optional[Op] = None):

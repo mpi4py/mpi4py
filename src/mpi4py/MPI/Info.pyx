@@ -1,7 +1,7 @@
 cdef class Info:
 
     """
-    Info
+    Info object
     """
 
     def __cinit__(self, Info info: Optional[Info] =None):

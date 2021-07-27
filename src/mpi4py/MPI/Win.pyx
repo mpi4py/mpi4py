@@ -27,7 +27,7 @@ LOCK_SHARED    = MPI_LOCK_SHARED
 cdef class Win:
 
     """
-    Window
+    Window handle
     """
 
     def __cinit__(self, Win win: Optional[Win] = None):
@@ -281,7 +281,7 @@ cdef class Win:
     @classmethod
     def Free_keyval(cls, int keyval: int) -> int:
         """
-        Free and attribute key for windows
+        Free an attribute key for windows
         """
         cdef int keyval_save = keyval
         CHKERR( MPI_Win_free_keyval(&keyval) )
