@@ -1,27 +1,20 @@
 # Author:  Lisandro Dalcin
 # Contact: dalcinl@gmail.com
-"""
-This is the **MPI for Python** package.
+"""This is the **MPI for Python** package.
 
-What is *MPI*?
-==============
-
-The *Message Passing Interface*, is a standardized and portable
+The *Message Passing Interface* (MPI) is a standardized and portable
 message-passing system designed to function on a wide variety of
-parallel computers. The standard defines the syntax and semantics of
-library routines and allows users to write portable programs in the
-main scientific programming languages (Fortran, C, or C++). Since
-its release, the MPI specification has become the leading standard
-for message-passing libraries for parallel computers.
-
-What is *MPI for Python*?
-=========================
+parallel computers. The MPI standard defines the syntax and semantics
+of library routines and allows users to write portable programs in the
+main scientific programming languages (Fortran, C, or C++). Since its
+release, the MPI specification has become the leading standard for
+message-passing libraries for parallel computers.
 
 *MPI for Python* provides MPI bindings for the Python programming
 language, allowing any Python program to exploit multiple processors.
-This package is constructed on top of the MPI-1/2 specifications and
-provides an object oriented interface which closely follows MPI-2 C++
-bindings.
+This package build on the MPI specification and provides an object
+oriented interface which closely follows MPI-2 C++ bindings.
+
 """
 
 __version__ = '3.1.0a0'
@@ -40,17 +33,17 @@ class Rc:
     initialize : bool
         Automatic MPI initialization at import (default: True).
     threads : bool
-        Request for thread support (default: True).
-    thread_level : {'multiple', 'serialized', 'funneled', 'single'}
-        Level of thread support to request (default: 'multiple').
+        Request initialization with thread support (default: True).
+    thread_level : {"multiple", "serialized", "funneled", "single"}
+        Level of thread support to request (default: "multiple").
     finalize : None or bool
         Automatic MPI finalization at exit (default: None).
     fast_reduce : bool
         Use tree-based reductions for objects (default: True).
     recv_mprobe : bool
         Use matched probes to receive objects (default: True).
-    errors : {'exception', 'default', 'fatal'}
-        Error handling policy (default: 'exception').
+    errors : {"exception", "default", "fatal"}
+        Error handling policy (default: "exception").
 
     """
 
@@ -114,7 +107,7 @@ def profile(name, *, path=None, logfile=None):
     ----------
     name : str
        Name of the profiler library to load.
-    path : sequence of str, optional
+    path : Sequence[str], optional
        Additional paths to search for the profiler.
     logfile : str, optional
        Filename prefix for dumping profiler output.

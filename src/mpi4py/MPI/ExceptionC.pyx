@@ -5,7 +5,7 @@ cdef extern from "Python.h":
 cdef class Exception(RuntimeError):
 
     """
-    Exception
+    Exception class
     """
 
     cdef int ob_mpi

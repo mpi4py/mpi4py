@@ -1,7 +1,7 @@
 cdef class Message:
 
     """
-    Message
+    Matched message handle
     """
 
     def __cinit__(self, Message message: Optional[Message] = None):

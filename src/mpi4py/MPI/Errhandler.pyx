@@ -1,7 +1,7 @@
 cdef class Errhandler:
 
     """
-    Error Handler
+    Error handler
     """
 
     def __cinit__(self, Errhandler errhandler: Optional[Errhandler] = None):

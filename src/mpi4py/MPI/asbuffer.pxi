@@ -153,7 +153,7 @@ cdef int PyMPI_GetBuffer(object obj, Py_buffer *view, int flags) except -1:
 cdef class memory:
 
     """
-    Memory
+    Memory buffer
     """
 
     cdef Py_buffer view

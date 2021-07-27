@@ -51,7 +51,7 @@ DISP_CUR = MPI_DISPLACEMENT_CURRENT
 cdef class File:
 
     """
-    File
+    File handle
     """
 
     def __cinit__(self, File file: Optional[File] = None):

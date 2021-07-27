@@ -1,7 +1,7 @@
 class Exception(RuntimeError):
 
     """
-    Exception
+    Exception class
     """
 
     def __init__(self, int ierr: int = 0):

@@ -1,7 +1,7 @@
 cdef class Status:
 
     """
-    Status
+    Status object
     """
 
     def __cinit__(self, Status status: Optional[Status] = None):
