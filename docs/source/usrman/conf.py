@@ -48,7 +48,10 @@ version = release.rsplit('.', 1)[0]
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
     'sphinx.ext.intersphinx',
+    'sphinx.ext.napoleon',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -61,10 +64,21 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 default_role = 'any'
 
+autodoc_typehints = 'description'
+autodoc_type_aliases = {}
+autodoc_mock_imports = []
+
+autosummary_context = {
+    'synopsis': {},
+    'autotype': {},
+}
+
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3/', None),
     'numpy': ('https://numpy.org/doc/stable/', None),
 }
+
+napoleon_preprocess_types = True
 
 try:
     import sphinx_rtd_theme
@@ -72,6 +86,66 @@ try:
         extensions.append('sphinx_rtd_theme')
 except ImportError:
     sphinx_rtd_theme = None
+
+
+def _patch_autosummary():
+    from sphinx.ext import autodoc
+    from sphinx.ext import autosummary
+    from sphinx.ext.autosummary import generate
+
+    class ExceptionDocumenter(autodoc.ExceptionDocumenter):
+        objtype = 'class'
+
+    def get_documenter(app, obj, parent):
+        if isinstance(obj, type) and issubclass(obj, BaseException):
+            caller = sys._getframe().f_back.f_code.co_name
+            if caller == 'generate_autosummary_content':
+                if obj.__module__ == 'mpi4py.MPI':
+                    if obj.__name__ == 'Exception':
+                        return ExceptionDocumenter
+        return autosummary.get_documenter(app, obj, parent)
+
+    generate.get_documenter = get_documenter
+
+
+def setup(app):
+    _patch_autosummary()
+    try:
+        from mpi4py import MPI
+    except ImportError:
+        autodoc_mock_imports.append('mpi4py')
+        return
+
+    sys_dwb = sys.dont_write_bytecode
+    sys.dont_write_bytecode = True
+    import apidoc
+    sys.dont_write_bytecode = sys_dwb
+
+    name = MPI.__name__
+    here = os.path.abspath(os.path.dirname(__file__))
+    outdir = os.path.join(here, apidoc.OUTDIR)
+    source = os.path.join(outdir, f'{name}.py')
+    getmtime = os.path.getmtime
+    generate = (
+        not os.path.exists(source)
+        or getmtime(source) < getmtime(MPI.__file__)
+        or getmtime(source) < getmtime(apidoc.__file__)
+    )
+    if generate:
+        apidoc.generate(source)
+    module = apidoc.load_module(source)
+    apidoc.replace_module(module)
+
+    for name in dir(module):
+        attr = getattr(module, name)
+        if isinstance(attr, type):
+            if attr.__module__ == module.__name__:
+                autodoc_type_aliases[name] = name
+
+    synopsis = autosummary_context['synopsis']
+    synopsis[module.__name__] = module.__doc__.strip()
+    autotype = autosummary_context['autotype']
+    autotype[module.Exception.__name__] = 'exception'
 
 
 # -- Options for HTML output -------------------------------------------------
