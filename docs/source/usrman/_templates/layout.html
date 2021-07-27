@@ -1,0 +1,11 @@
+{% extends "!layout.html" %}
+
+{% block menu %}
+  {{ super() }}
+  {%- if builder == 'html' %}
+    <a class="reference internal" href="genindex.html">Index</a>
+  {%- endif %}
+  {%- if builder == 'dirhtml' %}
+    <a class="reference internal" href="genindex/">Index</a>
+  {%- endif %}
+{% endblock %}
