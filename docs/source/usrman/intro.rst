@@ -169,34 +169,34 @@ scientific computing and software development with Python.
 .. External Links
 .. ..............
 
-.. _MPI:       http://mpi-forum.org/
+.. _MPI:       https://www.mpi-forum.org/
 
 .. _MPICH:     https://www.mpich.org/
 
 .. _Open MPI:  https://www.open-mpi.org/
 
-.. _Beowulf:   http://www.beowulf.org/
+.. _Beowulf:   https://www.beowulf.org/
 
 
 .. _Python:    https://www.python.org/
 
-.. _NumPy:     http://www.numpy.org/
+.. _NumPy:     https://numpy.org/
 
 .. _SciPy:     https://www.scipy.org/
 
-.. _Cython:    http://cython.org/
+.. _Cython:    https://cython.org/
 
 .. _SWIG:      http://www.swig.org/
 
 
-.. _OOMPI:     http://www.osl.iu.edu/research/oompi/overview.php
+.. _OOMPI:     https://web.archive.org/web/20100614170656/http://www.osl.iu.edu/research/oompi/overview.php
 
 .. _Pypar:     https://github.com/daleroberts/pypar
 
 .. _pyMPI:     https://sourceforge.net/projects/pympi/
 
 .. _Scientific Python:
-               http://dirac.cnrs-orleans.fr/plone/software/scientificpython/
+               http://dirac.cnrs-orleans.fr/ScientificPython.html
 
 
 .. References

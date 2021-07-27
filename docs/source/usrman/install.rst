@@ -194,10 +194,10 @@ or, if you have nose_ unit testing framework installed::
 
   $ mpiexec -n 5 nosetests -w test
 
-.. _nose: http://nose.readthedocs.io/
+.. _nose: https://nose.readthedocs.io/
 
 or, if you have `py.test`_ unit testing framework installed::
 
   $ mpiexec -n 5 py.test test/
 
-.. _py.test: http://docs.pytest.org/
+.. _py.test: https://docs.pytest.org/
