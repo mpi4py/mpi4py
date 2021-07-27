@@ -8,6 +8,7 @@
    mpi4py.util
    mpi4py.run
    envvars
+   reference
    citing
    install
    appendix
