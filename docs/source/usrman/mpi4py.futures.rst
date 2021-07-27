@@ -37,7 +37,7 @@ be passed to the :func:`~concurrent.futures.wait` and
    from Python 3.5 to work with Python 2.7.
 
    .. _futures-repo: https://github.com/agronholm/pythonfutures
-   .. _futures-pypi: https://pypi.python.org/pypi/futures
+   .. _futures-pypi: https://pypi.org/project/futures
 
 .. seealso::
 
