@@ -56,15 +56,13 @@ docs-html: rst2html sphinx-html epydoc-html
 docs-pdf:  sphinx-pdf epydoc-pdf
 docs-misc: sphinx-man sphinx-info
 
-RST2HTML = $(shell command -v rst2html || command -v rst2html.py || false)
-RST2HTMLOPTS  = --input-encoding=utf-8
-RST2HTMLOPTS += --no-compact-lists
-RST2HTMLOPTS += --cloak-email-addresses
+RST2HTML = $(shell command -v rst2html5.py || command -v rst2html5 || false)
+RST2HTMLOPTS = --config=conf/docutils.conf
 .PHONY: rst2html
 rst2html:
-	${RST2HTML} ${RST2HTMLOPTS} ./LICENSE.rst  > docs/LICENSE.html
-	${RST2HTML} ${RST2HTMLOPTS} ./CHANGES.rst  > docs/CHANGES.html
-	${RST2HTML} ${RST2HTMLOPTS} docs/index.rst > docs/index.html
+	${RST2HTML} ${RST2HTMLOPTS} LICENSE.rst    docs/LICENSE.html
+	${RST2HTML} ${RST2HTMLOPTS} CHANGES.rst    docs/CHANGES.html
+	${RST2HTML} ${RST2HTMLOPTS} docs/index.rst docs/index.html
 
 SPHINXBUILD = sphinx-build
 SPHINXOPTS  =
