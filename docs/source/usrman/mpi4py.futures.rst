@@ -51,13 +51,13 @@ MPIPoolExecutor
 The :class:`MPIPoolExecutor` class uses a pool of MPI processes to execute
 calls asynchronously. By performing computations in separate processes, it
 allows to side-step the :term:`global interpreter lock` but also means that
-only picklable objects can be executed and returned. The ``__main__`` module
+only picklable objects can be executed and returned. The :mod:`__main__` module
 must be importable by worker processes, thus :class:`MPIPoolExecutor` instances
 may not work in the interactive interpreter.
 
 :class:`MPIPoolExecutor` takes advantage of the dynamic process management
 features introduced in the MPI-2 standard. In particular, the
-:func:`MPI.Intracomm.Spawn` method of :func:`MPI.COMM_SELF` is used in the
+:meth:`MPI.Intracomm.Spawn` method of :const:`MPI.COMM_SELF` is used in the
 master (or parent) process to spawn new worker (or child) processes running a
 Python interpreter. The master process uses a separate thread (one for each
 :class:`MPIPoolExecutor` instance) to communicate back and forth with the
@@ -101,7 +101,7 @@ only) thread until they are signaled for completion.
    worker process before executing any tasks; *initargs* is a tuple of
    arguments passed to the initializer. If *initializer* raises an exception,
    all pending tasks and any attempt to submit new tasks to the pool will raise
-   a :exc:`~concurrent.futures.BrokenProcessPool` exception.
+   a :exc:`~concurrent.futures.BrokenExecutor` exception.
 
    Other parameters:
 
@@ -451,7 +451,7 @@ argument to :program:`mpiexec`::
   $ mpiexec -n 1 -host <hostname>:17 python julia.py
 
 Another way to specify the number of workers is to use the
-`mpi4py.futures`-specific environment variable
+:mod:`mpi4py.futures`-specific environment variable
 :envvar:`MPI4PY_FUTURES_MAX_WORKERS`::
 
   $ MPI4PY_FUTURES_MAX_WORKERS=16 mpiexec -n 1 python julia.py

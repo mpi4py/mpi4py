@@ -9,11 +9,11 @@ MPI-enabled Python interpreter
   .. warning::
 
      These days it is no longer required to use the MPI-enabled Python
-     interpreter in most cases, and, therefore, is not built by
+     interpreter in most cases, and, therefore, it is not built by
      default anymore because it is too difficult to reliably build a
      Python interpreter across different distributions.  If you know
      that you still **really** need it, see below on how to use the
-     `build_exe` and `install_exe` commands.
+     ``build_exe`` and ``install_exe`` commands.
 
 Some MPI-1 implementations (notably, MPICH 1) **do require** the
 actual command line arguments to be passed at the time

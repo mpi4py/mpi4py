@@ -76,10 +76,11 @@ and :meth:`MPI.Comm.Get_rank`. The associated process group can be
 retrieved from a communicator by calling the
 :meth:`MPI.Comm.Get_group` method, which returns an instance of the
 :class:`MPI.Group` class. Set operations with :class:`MPI.Group`
-objects like like :meth:`MPI.Group.Union`, :meth:`MPI.Group.Intersect`
-and :meth:`MPI.Group.Difference` are fully supported, as well as the
-creation of new communicators from these groups using
-:meth:`MPI.Comm.Create` and :meth:`MPI.Comm.Create_group`.
+objects like like :meth:`MPI.Group.Union`,
+:meth:`MPI.Group.Intersection` and :meth:`MPI.Group.Difference` are
+fully supported, as well as the creation of new communicators from
+these groups using :meth:`MPI.Comm.Create` and
+:meth:`MPI.Comm.Create_group`.
 
 New communicator instances can be obtained with the
 :meth:`MPI.Comm.Clone`, :meth:`MPI.Comm.Dup` and
@@ -333,7 +334,7 @@ be called.
 The three one-sided MPI operations for remote write, read and
 reduction are available through calling the methods
 :meth:`MPI.Win.Put`, :meth:`MPI.Win.Get()`, and
-:meth:`MPI.Win.Accumulate` respectively within a :class:`Win`
+:meth:`MPI.Win.Accumulate` respectively within a :class:`MPI.Win`
 instance.  These methods need an integer rank identifying the target
 process and an integer offset relative the base address of the remote
 memory block being accessed.
@@ -464,9 +465,10 @@ Error Handling
 In order facilitate handle sharing with other Python modules
 interfacing MPI-based parallel libraries, the predefined MPI error
 handlers :const:`MPI.ERRORS_RETURN` and :const:`MPI.ERRORS_ARE_FATAL`
-can be assigned to and retrieved from communicators, windows and files
-using methods :meth:`MPI.{Comm|Win|File}.Set_errhandler` and
-:meth:`MPI.{Comm|Win|File}.Get_errhandler`.
+can be assigned to and retrieved from communicators using methods
+:meth:`MPI.Comm.Set_errhandler` and
+:meth:`MPI.Comm.Get_errhandler`, and similarly for windows
+and files.
 
 When the predefined error handler :const:`MPI.ERRORS_RETURN` is set,
 errors returned from MPI calls within Python code will raise an
