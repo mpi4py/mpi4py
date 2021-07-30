@@ -7,7 +7,7 @@ project.
 
 * L. Dalcin and Y.-L. L. Fang,
   *mpi4py: Status Update After 12 Years of Development*,
-  Computing in Science & Engineering, 2021.
+  Computing in Science & Engineering, 23(4):47-54, 2021.
   https://doi.org/10.1109/MCSE.2021.3083216
 
 * L. Dalcin, P. Kler, R. Paz, and A. Cosimo,
