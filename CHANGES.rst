@@ -26,6 +26,8 @@ Release 3.1.0 [2021-XX-XX]
     feature is currently experimental and subject to future changes.
 
   + `mpi4py.futures`: Add support for initializers and canceling futures at shutdown.
+    Environment variables names now follow the pattern ``MPI4PY_FUTURES_*``, the
+    previous ``MPI4PY_*`` names are deprecated.
 
   + Add type annotations to Cython code. The first line of the docstring of functions
     and methods displays a signature including type annotations.
