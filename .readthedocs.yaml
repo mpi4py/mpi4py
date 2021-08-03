@@ -1,0 +1,15 @@
+# https://readthedocs.org/projects/mpi4py/builds/
+
+version: 2
+
+sphinx:
+   configuration: docs/source/usrman/conf.py
+   fail_on_warning: true
+
+formats: all
+
+python:
+   version: "3.8"
+   install:
+     - path: .
+     - requirements: conf/requirements-docs.txt
