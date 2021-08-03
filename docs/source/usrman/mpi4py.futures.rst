@@ -92,7 +92,7 @@ only) thread until they are signaled for completion.
    An :class:`~concurrent.futures.Executor` subclass that executes calls
    asynchronously using a pool of at most *max_workers* processes.  If
    *max_workers* is ``None`` or not given, its value is determined from the
-   :envvar:`MPI4PY_MAX_WORKERS` environment variable if set, or the MPI
+   :envvar:`MPI4PY_FUTURES_MAX_WORKERS` environment variable if set, or the MPI
    universe size if set, otherwise a single worker process is spawned.  If
    *max_workers* is lower than or equal to ``0``, then a :exc:`ValueError` will
    be raised.
@@ -451,9 +451,10 @@ argument to :program:`mpiexec`::
   $ mpiexec -n 1 -host <hostname>:17 python julia.py
 
 Another way to specify the number of workers is to use the
-`mpi4py.futures`-specific environment variable :envvar:`MPI4PY_MAX_WORKERS`::
+`mpi4py.futures`-specific environment variable
+:envvar:`MPI4PY_FUTURES_MAX_WORKERS`::
 
-  $ MPI4PY_MAX_WORKERS=16 mpiexec -n 1 python julia.py
+  $ MPI4PY_FUTURES_MAX_WORKERS=16 mpiexec -n 1 python julia.py
   
 Note that in this case, the MPI universe size is ignored.
 

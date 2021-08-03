@@ -183,16 +183,16 @@ class ProcessPoolInitTest(ProcessPoolMixin,
         self.assertTrue(future.result(), run_name)
 
     def test_max_workers_environ(self):
-        save = os.environ.get('MPI4PY_MAX_WORKERS')
-        os.environ['MPI4PY_MAX_WORKERS'] = '1'
+        save = os.environ.get('MPI4PY_FUTURES_MAX_WORKERS')
+        os.environ['MPI4PY_FUTURES_MAX_WORKERS'] = '1'
         try:
             executor = self.executor_type()
             executor.submit(time.sleep, 0).result()
             executor.shutdown()
         finally:
-            del os.environ['MPI4PY_MAX_WORKERS']
+            del os.environ['MPI4PY_FUTURES_MAX_WORKERS']
             if save is not None:
-                os.environ['MPI4PY_MAX_WORKERS'] = save
+                os.environ['MPI4PY_FUTURES_MAX_WORKERS'] = save
 
     def test_max_workers_negative(self):
         for number in (0, -1):

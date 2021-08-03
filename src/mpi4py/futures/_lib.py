@@ -67,6 +67,17 @@ else:  # pragma: no cover
         return exc
 
 
+def os_environ_get(name, default=None):
+    varname = 'MPI4PY_FUTURES_{}'.format(name)
+    if varname not in os.environ:
+        oldname = 'MPI4PY_{}'.format(name)
+        if oldname in os.environ:  # pragma: no cover
+            message = "Environment variable {} is deprecated, use {}"
+            warnings.warn(message.format(oldname, varname), DeprecationWarning)
+            return os.environ[oldname]
+    return os.environ.get(varname, default)
+
+
 # ---
 
 
@@ -852,8 +863,9 @@ def get_python_flags():
 
 
 def get_max_workers():
-    if 'MPI4PY_MAX_WORKERS' in os.environ:
-        return int(os.environ['MPI4PY_MAX_WORKERS'])
+    max_workers = os_environ_get('MAX_WORKERS')
+    if max_workers is not None:
+        return int(max_workers)
     if MPI.UNIVERSE_SIZE != MPI.KEYVAL_INVALID:  # pragma: no branch
         universe_size = MPI.COMM_WORLD.Get_attr(MPI.UNIVERSE_SIZE)
         if universe_size is not None:  # pragma: no cover
@@ -899,19 +911,19 @@ SERVER_PORT = 31415
 
 
 def get_service():
-    return os.environ.get('MPI4PY_SERVICE', SERVICE)
+    return os_environ_get('SERVICE', SERVICE)
 
 
 def get_server_host():
-    return os.environ.get('MPI4PY_SERVER_HOST', SERVER_HOST)
+    return os_environ_get('SERVER_HOST', SERVER_HOST)
 
 
 def get_server_bind():
-    return os.environ.get('MPI4PY_SERVER_BIND', SERVER_BIND)
+    return os_environ_get('SERVER_BIND', SERVER_BIND)
 
 
 def get_server_port():
-    return int(os.environ.get('MPI4PY_SERVER_PORT', SERVER_PORT))
+    return int(os_environ_get('SERVER_PORT', SERVER_PORT))
 
 
 def client_lookup(address):
