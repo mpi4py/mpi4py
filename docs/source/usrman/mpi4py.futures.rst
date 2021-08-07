@@ -57,9 +57,9 @@ may not work in the interactive interpreter.
 
 :class:`MPIPoolExecutor` takes advantage of the dynamic process management
 features introduced in the MPI-2 standard. In particular, the
-:meth:`MPI.Intracomm.Spawn` method of :const:`MPI.COMM_SELF` is used in the
-master (or parent) process to spawn new worker (or child) processes running a
-Python interpreter. The master process uses a separate thread (one for each
+`MPI.Intracomm.Spawn` method of `MPI.COMM_SELF` is used in the master (or
+parent) process to spawn new worker (or child) processes running a Python
+interpreter. The master process uses a separate thread (one for each
 :class:`MPIPoolExecutor` instance) to communicate back and forth with the
 workers.  The worker processes serve the execution of tasks in the main (and
 only) thread until they are signaled for completion.
@@ -114,12 +114,11 @@ only) thread until they are signaled for completion.
      :data:`sys._xoptions` in are passed unconditionally.
 
    * *mpi_info*: :class:`dict` or iterable yielding ``(key, value)`` pairs.
-     These ``(key, value)`` pairs are passed (through an :class:`MPI.Info`
-     object) to the :meth:`MPI.Intracomm.Spawn` call used to spawn worker
-     processes. This mechanism allows telling the MPI runtime system where and
-     how to start the processes. Check the documentation of the backend MPI
-     implementation about the set of keys it interprets and the corresponding
-     format for values.
+     These ``(key, value)`` pairs are passed (through an `MPI.Info` object) to
+     the `MPI.Intracomm.Spawn` call used to spawn worker processes. This
+     mechanism allows telling the MPI runtime system where and how to start the
+     processes. Check the documentation of the backend MPI implementation about
+     the set of keys it interprets and the corresponding format for values.
 
    * *globals*: :class:`dict` or iterable yielding ``(name, value)`` pairs to
      initialize the main module namespace in worker processes.
@@ -235,20 +234,20 @@ only) thread until they are signaled for completion.
 
    As the master process uses a separate thread to perform MPI communication
    with the workers, the backend MPI implementation should provide support for
-   :const:`MPI.THREAD_MULTIPLE`. However, some popular MPI implementations do
-   not support yet concurrent MPI calls from multiple threads. Additionally,
-   users may decide to initialize MPI with a lower level of thread support. If
-   the level of thread support in the backend MPI is less than
-   :const:`MPI.THREAD_MULTIPLE`, :mod:`mpi4py.futures` will use a global lock
-   to serialize MPI calls. If the level of thread support is less than
-   :const:`MPI.THREAD_SERIALIZED`, :mod:`mpi4py.futures` will emit a
+   `MPI.THREAD_MULTIPLE`. However, some popular MPI implementations do not
+   support yet concurrent MPI calls from multiple threads. Additionally, users
+   may decide to initialize MPI with a lower level of thread support. If the
+   level of thread support in the backend MPI is less than
+   `MPI.THREAD_MULTIPLE`, :mod:`mpi4py.futures` will use a global lock to
+   serialize MPI calls. If the level of thread support is less than
+   `MPI.THREAD_SERIALIZED`, :mod:`mpi4py.futures` will emit a
    :exc:`RuntimeWarning`.
 
 .. warning::
 
    If the level of thread support in the backend MPI is less than
-   :const:`MPI.THREAD_SERIALIZED` (i.e, it is either :const:`MPI.THREAD_SINGLE`
-   or :const:`MPI.THREAD_FUNNELED`), in theory :mod:`mpi4py.futures` cannot be
+   `MPI.THREAD_SERIALIZED` (i.e, it is either `MPI.THREAD_SINGLE` or
+   `MPI.THREAD_FUNNELED`), in theory :mod:`mpi4py.futures` cannot be
    used. Rather than raising an exception, :mod:`mpi4py.futures` emits a
    warning and takes a "cross-fingers" attitude to continue execution in the
    hope that serializing MPI calls with a global lock will actually work.
@@ -282,12 +281,12 @@ advantage of the simple, task-based, master/worker approach available in the
 .. class:: MPICommExecutor(comm=None, root=0)
 
    Context manager for :class:`MPIPoolExecutor`. This context manager splits a
-   MPI (intra)communicator *comm* (defaults to :const:`MPI.COMM_WORLD` if not
-   provided or ``None``) in two disjoint sets: a single master process (with
-   rank *root* in *comm*) and the remaining worker processes. These sets are
-   then connected through an intercommunicator.  The target of the
-   :keyword:`with` statement is assigned either an :class:`MPIPoolExecutor`
-   instance (at the master) or ``None`` (at the workers). ::
+   MPI (intra)communicator *comm* (defaults to `MPI.COMM_WORLD` if not provided
+   or `None`) in two disjoint sets: a single master process (with rank *root*
+   in *comm*) and the remaining worker processes. These sets are then connected
+   through an intercommunicator.  The target of the :keyword:`with` statement
+   is assigned either an :class:`MPIPoolExecutor` instance (at the master) or
+   ``None`` (at the workers). ::
 
       from mpi4py import MPI
       from mpi4py.futures import MPICommExecutor
@@ -302,8 +301,8 @@ advantage of the simple, task-based, master/worker approach available in the
 .. warning::
 
    If :class:`MPICommExecutor` is passed a communicator of size one (e.g.,
-   :const:`MPI.COMM_SELF`), then the executor instace assigned to the target of
-   the :keyword:`with` statement will execute all submitted tasks in a single
+   `MPI.COMM_SELF`), then the executor instace assigned to the target of the
+   :keyword:`with` statement will execute all submitted tasks in a single
    worker thread, thus ensuring that task execution still progress
    asynchronously. However, the :term:`GIL` will prevent the main and worker
    threads from running concurrently in multicore processors. Moreover, the
@@ -336,16 +335,16 @@ Summarizing, :samp:`mpi4py.futures` can be invoked in the following ways:
 * :samp:`$ mpiexec -n {numprocs} python -m mpi4py.futures - [arg] ...`
 
 Before starting the main script execution, :mod:`mpi4py.futures` splits
-:const:`MPI.COMM_WORLD` in one master (the process with rank 0 in
-:const:`MPI.COMM_WORLD`) and 16 workers and connect them through an MPI
-intercommunicator. Afterwards, the master process proceeds with the execution
-of the user script code, which eventually creates :class:`MPIPoolExecutor`
-instances to submit tasks. Meanwhile, the worker processes follow a different
-execution path to serve the master.  Upon successful termination of the main
-script at the master, the entire MPI execution environment exists
-gracefully. In case of any unhandled exception in the main script, the master
-process calls :code:`MPI.COMM_WORLD.Abort(1)` to prevent deadlocks and force
-termination of entire MPI execution environment.
+`MPI.COMM_WORLD` in one master (the process with rank 0 in `MPI.COMM_WORLD`)
+and 16 workers and connect them through an MPI intercommunicator. Afterwards,
+the master process proceeds with the execution of the user script code, which
+eventually creates :class:`MPIPoolExecutor` instances to submit
+tasks. Meanwhile, the worker processes follow a different execution path to
+serve the master.  Upon successful termination of the main script at the
+master, the entire MPI execution environment exists gracefully. In case of any
+unhandled exception in the main script, the master process calls
+``MPI.COMM_WORLD.Abort(1)`` to prevent deadlocks and force termination of
+entire MPI execution environment.
 
 .. warning::
 

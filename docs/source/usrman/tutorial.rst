@@ -3,6 +3,8 @@
 Tutorial
 ========
 
+.. currentmodule:: mpi4py.MPI
+
 .. warning::
 
    Under construction. Contributions very welcome!
@@ -13,28 +15,27 @@ communication of buffer-provider objects (e.g., NumPy arrays).
 
 * Communication of generic Python objects
 
-  You have to use **all-lowercase** methods (of the :class:`Comm`
-  class), like :meth:`send()`, :meth:`recv()`, :meth:`bcast()`. An
-  object to be sent is passed as a parameter to the communication
-  call, and the received object is simply the return value.
+  You have to use methods with **all-lowercase** names, like
+  `Comm.send`, `Comm.recv`, `Comm.bcast`, `Comm.scatter`,
+  `Comm.gather` . An object to be sent is passed as a parameter to the
+  communication call, and the received object is simply the return
+  value.
 
-  The :meth:`isend()` and :meth:`irecv` methods return
-  :class:`Request` instances; completion of these methods can be
-  managed using the :meth:`test` and :meth:`wait` methods of the
-  :class:`Request` class.
+  The `Comm.isend` and `Comm.irecv` methods return `Request`
+  instances; completion of these methods can be managed using the
+  `Request.test` and `Request.wait` methods.
 
-  The :meth:`recv` and :meth:`irecv` methods may be passed a buffer
+  The `Comm.recv` and `Comm.irecv` methods may be passed a buffer
   object that can be repeatedly used to receive messages avoiding
   internal memory allocation. This buffer must be sufficiently large
   to accommodate the transmitted messages; hence, any buffer passed to
-  :meth:`recv` or :meth:`irecv` must be at least as long as the
+  `Comm.recv` or `Comm.irecv` must be at least as long as the
   *pickled* data transmitted to the receiver.
 
-  Collective calls like :meth:`scatter()`, :meth:`gather()`,
-  :meth:`allgather()`, :meth:`alltoall()` expect a single value or a
-  sequence of :attr:`Comm.size` elements at the root or all
-  process. They return a single value, a list of :attr:`Comm.size`
-  elements, or :const:`None`.
+  Collective calls like `Comm.scatter`, `Comm.gather`,
+  `Comm.allgather`, `Comm.alltoall` expect a single value or a
+  sequence of `Comm.size` elements at the root or all process. They
+  return a single value, a list of `Comm.size` elements, or `None`.
 
   .. note::
 
@@ -44,13 +45,15 @@ communication of buffer-provider objects (e.g., NumPy arrays).
      module).  The default protocol can be changed at import time by
      setting the :envvar:`MPI4PY_PICKLE_PROTOCOL` environment
      variable, or at runtime by assigning a different value to the
-     :attr:`PROTOCOL` attribute of the :obj:`MPI.pickle` object.
+     :attr:`~mpi4py.MPI.Pickle.PROTOCOL` attribute of the
+     :obj:`~mpi4py.MPI.pickle` object within the :mod:`~mpi4py.MPI`
+     module.
 
 * Communication of buffer-like objects
 
-  You have to use method names starting with an **upper-case** letter
-  (of the :class:`Comm` class), like :meth:`Send()`, :meth:`Recv()`,
-  :meth:`Bcast()`, :meth:`Scatter()`, :meth:`Gather()`.
+  You have to use method names starting with an **upper-case** letter,
+  like `Comm.Send`, `Comm.Recv`, `Comm.Bcast`, `Comm.Scatter`,
+  `Comm.Gather`.
 
   In general, buffer arguments to these calls must be explicitly
   specified by using a 2/3-list/tuple like ``[data, MPI.DOUBLE]``, or
@@ -58,7 +61,7 @@ communication of buffer-provider objects (e.g., NumPy arrays).
   ``data`` and the extent of the MPI datatype to define ``count``).
 
   For vector collectives communication operations like
-  :meth:`Scatterv()` and :meth:`Gatherv()`, buffer arguments are
+  `Comm.Scatterv` and `Comm.Gatherv`, buffer arguments are
   specified as ``[data, count, displ, datatype]``, where ``count`` and
   ``displ`` are sequences of integral values.
 
@@ -86,8 +89,8 @@ communication of buffer-provider objects (e.g., NumPy arrays).
 Running Python scripts with MPI
 -------------------------------
 
-Most MPI programs can be run with the command :program:`mpiexec`. In practice, running
-Python programs looks like::
+Most MPI programs can be run with the command :program:`mpiexec`. In
+practice, running Python programs looks like::
 
   $ mpiexec -n 4 python script.py
 

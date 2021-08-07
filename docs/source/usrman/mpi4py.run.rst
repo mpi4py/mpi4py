@@ -9,17 +9,16 @@ mpi4py.run
 At import time, :mod:`mpi4py` initializes the MPI execution environment calling
 :c:func:`MPI_Init_thread` and installs an exit hook to automatically call
 :c:func:`MPI_Finalize` just before the Python process terminates. Additionally,
-:mod:`mpi4py` overrides the default :const:`MPI.ERRORS_ARE_FATAL` error handler
-in favor of :const:`MPI.ERRORS_RETURN`, which allows translating MPI errors in
-Python exceptions. These departures from standard MPI behavior may be
-controversial, but are quite convenient within the highly dynamic Python
-programming environment. Third-party code using :mod:`mpi4py` can just ``from
-mpi4py import MPI`` and perform MPI calls without the tedious
-initialization/finalization handling.  MPI errors, once translated
-automatically to Python exceptions, can be dealt with the common
-:keyword:`try`...\ :keyword:`except`...\ :keyword:`finally` clauses; unhandled
-MPI exceptions will print a traceback which helps in locating problems in
-source code.
+:mod:`mpi4py` overrides the default `ERRORS_ARE_FATAL` error handler in favor
+of `ERRORS_RETURN`, which allows translating MPI errors in Python
+exceptions. These departures from standard MPI behavior may be controversial,
+but are quite convenient within the highly dynamic Python programming
+environment. Third-party code using :mod:`mpi4py` can just ``from mpi4py import
+MPI`` and perform MPI calls without the tedious initialization/finalization
+handling.  MPI errors, once translated automatically to Python exceptions, can
+be dealt with the common :keyword:`try`...\ :keyword:`except`...\
+:keyword:`finally` clauses; unhandled MPI exceptions will print a traceback
+which helps in locating problems in source code.
 
 Unfortunately, the interplay of automatic MPI finalization and unhandled
 exceptions may lead to deadlocks. In unattended runs, these deadlocks will
@@ -39,11 +38,11 @@ processes. ::
    elif rank == 1:
        MPI.COMM_WORLD.recv(source=0, tag=42)
 
-Process 0 raises :exc:`ZeroDivisionError` exception before performing a send
-call to process 1. As the exception is not handled, the Python interpreter
-running in process 0 will proceed to exit with non-zero status. However, as
-:mod:`mpi4py` installed a finalizer hook to call :c:func:`MPI_Finalize` before
-exit, process 0 will block waiting for other processes to also enter the
+Process 0 raises `ZeroDivisionError` exception before performing a send call to
+process 1. As the exception is not handled, the Python interpreter running in
+process 0 will proceed to exit with non-zero status. However, as :mod:`mpi4py`
+installed a finalizer hook to call :c:func:`MPI_Finalize` before exit, process
+0 will block waiting for other processes to also enter the
 :c:func:`MPI_Finalize` call. Meanwhile, process 1 will block waiting for a
 message to arrive from process 0, thus never reaching to
 :c:func:`MPI_Finalize`. The whole MPI execution environment is irremediably in

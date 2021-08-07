@@ -1,6 +1,8 @@
 Overview
 ========
 
+.. currentmodule:: mpi4py.MPI
+
 MPI for Python provides an object oriented approach to message passing
 which grounds on the standard MPI-2 C++ bindings. The interface was
 designed with focus in translating MPI syntax and semantics of
@@ -58,42 +60,35 @@ or C++ codes.
 Communicators
 -------------
 
-In *MPI for Python*, :class:`MPI.Comm` is the base class of
-communicators. The :class:`MPI.Intracomm` and :class:`MPI.Intercomm`
-classes are sublcasses of the :class:`MPI.Comm` class.  The
-:meth:`MPI.Comm.Is_inter` method (and :meth:`MPI.Comm.Is_intra`,
-provided for convenience but not part of the MPI specification) is
-defined for communicator objects and can be used to determine the
-particular communicator class.
+In *MPI for Python*, `Comm` is the base class of communicators. The
+`Intracomm` and `Intercomm` classes are sublcasses of the `Comm`
+class.  The `Comm.Is_inter` method (and `Comm.Is_intra`, provided for
+convenience but not part of the MPI specification) is defined for
+communicator objects and can be used to determine the particular
+communicator class.
 
 The two predefined intracommunicator instances are available:
-:const:`MPI.COMM_SELF` and :const:`MPI.COMM_WORLD`. From them, new
-communicators can be created as needed.
+`COMM_SELF` and `COMM_WORLD`. From them, new communicators can be
+created as needed.
 
 The number of processes in a communicator and the calling process rank
-can be respectively obtained with methods :meth:`MPI.Comm.Get_size`
-and :meth:`MPI.Comm.Get_rank`. The associated process group can be
-retrieved from a communicator by calling the
-:meth:`MPI.Comm.Get_group` method, which returns an instance of the
-:class:`MPI.Group` class. Set operations with :class:`MPI.Group`
-objects like like :meth:`MPI.Group.Union`,
-:meth:`MPI.Group.Intersection` and :meth:`MPI.Group.Difference` are
-fully supported, as well as the creation of new communicators from
-these groups using :meth:`MPI.Comm.Create` and
-:meth:`MPI.Comm.Create_group`.
+can be respectively obtained with methods `Comm.Get_size` and
+`Comm.Get_rank`. The associated process group can be retrieved from a
+communicator by calling the `Comm.Get_group` method, which returns an
+instance of the `Group` class. Set operations with `Group` objects
+like like `Group.Union`, `Group.Intersection` and `Group.Difference`
+are fully supported, as well as the creation of new communicators from
+these groups using `Comm.Create` and `Comm.Create_group`.
 
-New communicator instances can be obtained with the
-:meth:`MPI.Comm.Clone`, :meth:`MPI.Comm.Dup` and
-:meth:`MPI.Comm.Split` methods, as well methods
-:meth:`MPI.Intracomm.Create_intercomm` and
-:meth:`MPI.Intercomm.Merge`.
+New communicator instances can be obtained with the `Comm.Clone`,
+`Comm.Dup` and `Comm.Split` methods, as well methods
+`Intracomm.Create_intercomm` and `Intercomm.Merge`.
 
-Virtual topologies (:class:`MPI.Cartcomm`, :class:`MPI.Graphcomm` and
-:class:`MPI.Distgraphcomm` classes, which are specializations of the
-:class:`MPI.Intracomm` class) are fully supported. New instances can
-be obtained from intracommunicator instances with factory methods
-:meth:`MPI.Intracomm.Create_cart` and
-:meth:`MPI.Intracomm.Create_graph`.
+Virtual topologies (`Cartcomm`, `Graphcomm` and `Distgraphcomm`
+classes, which are specializations of the `Intracomm` class) are fully
+supported. New instances can be obtained from intracommunicator
+instances with factory methods `Intracomm.Create_cart` and
+`Intracomm.Create_graph`.
 
 
 Point-to-Point Communications
@@ -121,13 +116,12 @@ MPI provides basic send and receive functions that are *blocking*.
 These functions block the caller until the data buffers involved in
 the communication can be safely reused by the application program.
 
-In *MPI for Python*, the :meth:`MPI.Comm.Send`, :meth:`MPI.Comm.Recv`
-and :meth:`MPI.Comm.Sendrecv` methods of communicator objects provide
-support for blocking point-to-point communications within
-:class:`MPI.Intracomm` and :class:`MPI.Intercomm` instances. These
-methods can communicate memory buffers. The variants
-:meth:`MPI.Comm.send`, :meth:`MPI.Comm.recv` and
-:meth:`MPI.Comm.sendrecv` can communicate general Python objects.
+In *MPI for Python*, the `Comm.Send`, `Comm.Recv` and `Comm.Sendrecv`
+methods of communicator objects provide support for blocking
+point-to-point communications within `Intracomm` and `Intercomm`
+instances. These methods can communicate memory buffers. The variants
+`Comm.send`, `Comm.recv` and `Comm.sendrecv` can communicate general
+Python objects.
 
 Nonblocking Communications
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -143,13 +137,12 @@ communication always come in two parts: posting functions, which begin
 the requested operation; and test-for-completion functions, which
 allow to discover whether the requested operation has completed.
 
-In *MPI for Python*, the :meth:`MPI.Comm.Isend` and
-:meth:`MPI.Comm.Irecv` methods initiate send and receive operations,
-respectively. These methods return a :class:`MPI.Request` instance,
-uniquely identifying the started operation.  Its completion can be
-managed using the :meth:`MPI.Request.Test`, :meth:`MPI.Request.Wait`
-and :meth:`MPI.Request.Cancel` methods. The management of
-:class:`MPI.Request` objects and associated memory buffers involved in
+In *MPI for Python*, the `Comm.Isend` and `Comm.Irecv` methods
+initiate send and receive operations, respectively. These methods
+return a `Request` instance, uniquely identifying the started
+operation.  Its completion can be managed using the `Request.Test`,
+`Request.Wait` and `Request.Cancel` methods. The management of
+`Request` objects and associated memory buffers involved in
 communication requires a careful, rather low-level coordination. Users
 must ensure that objects exposing their memory buffers are not
 accessed at the Python level while they are involved in nonblocking
@@ -166,13 +159,12 @@ between processes and communication controllers. Furthermore , this
 kind of optimization can also alleviate the extra call overheads
 associated to interpreted, dynamic languages like Python.
 
-In *MPI for Python*, the :meth:`MPI.Comm.Send_init` and
-:meth:`MPI.Comm.Recv_init` methods create persistent requests for a
-send and receive operation, respectively.  These methods return an
-instance of the :class:`MPI.Prequest` class, a subclass of the
-:class:`MPI.Request` class. The actual communication can be
-effectively started using the :meth:`MPI.Prequest.Start` method, and
-its completion can be managed as previously described.
+In *MPI for Python*, the `Comm.Send_init` and `Comm.Recv_init` methods
+create persistent requests for a send and receive operation,
+respectively.  These methods return an instance of the `Prequest`
+class, a subclass of the `Request` class. The actual communication can
+be effectively started using the `Prequest.Start` method, and its
+completion can be managed as previously described.
 
 
 Collective Communications
@@ -201,30 +193,24 @@ following.
 
 * Global reduction operations such as sum, maximum, minimum, etc.
 
-In *MPI for Python*, the :meth:`MPI.Comm.Bcast`,
-:meth:`MPI.Comm.Scatter`, :meth:`MPI.Comm.Gather`,
-:meth:`MPI.Comm.Allgather`, and :meth:`MPI.Comm.Alltoall`
-:meth:`MPI.Comm.Alltoallw` methods provide support for collective
-communications of memory buffers. The lower-case variants
-:meth:`MPI.Comm.bcast`, :meth:`MPI.Comm.scatter`,
-:meth:`MPI.Comm.gather`, :meth:`MPI.Comm.allgather` and
-:meth:`MPI.Comm.alltoall` can communicate general Python objects.  The
-vector variants (which can communicate different amounts of data to
-each process) :meth:`MPI.Comm.Scatterv`, :meth:`MPI.Comm.Gatherv`,
-:meth:`MPI.Comm.Allgatherv`, :meth:`MPI.Comm.Alltoallv` and
-:meth:`MPI.Comm.Alltoallw` are also supported, they can only
-communicate objects exposing memory buffers.
+In *MPI for Python*, the `Comm.Bcast`, `Comm.Scatter`, `Comm.Gather`,
+`Comm.Allgather`, `Comm.Alltoall` methods provide support for
+collective communications of memory buffers. The lower-case variants
+`Comm.bcast`, `Comm.scatter`, `Comm.gather`, `Comm.allgather` and
+`Comm.alltoall` can communicate general Python objects.  The vector
+variants (which can communicate different amounts of data to each
+process) `Comm.Scatterv`, `Comm.Gatherv`, `Comm.Allgatherv`,
+`Comm.Alltoallv` and `Comm.Alltoallw` are also supported, they can
+only communicate objects exposing memory buffers.
 
-Global reduction operations on memory buffers are accessible through
-the :meth:`MPI.Comm.Reduce`, `MPI.Comm.Reduce_scatter`,
-:meth:`MPI.Comm.Allreduce`, :meth:`MPI.Intracomm.Scan` and
-:meth:`MPI.Intracomm.Exscan` methods. The lower-case variants
-:meth:`MPI.Comm.reduce`, :meth:`MPI.Comm.allreduce`,
-:meth:`MPI.Intracomm.scan` and :meth:`MPI.Intracomm.exscan` can
-communicate general Python objects; however, the actual required
-reduction computations are performed sequentially at some process. All
-the predefined (i.e., :const:`MPI.SUM`, :const:`MPI.PROD`,
-:const:`MPI.MAX`, etc.)  reduction operations can be applied.
+Global reducion operations on memory buffers are accessible through
+the `Comm.Reduce`, `Comm.Reduce_scatter`, `Comm.Allreduce`,
+`Intracomm.Scan` and `Intracomm.Exscan` methods. The lower-case
+variants `Comm.reduce`, `Comm.allreduce`, `Intracomm.scan` and
+`Intracomm.exscan` can communicate general Python objects; however,
+the actual required reduction computations are performed sequentially
+at some process. All the predefined (i.e., `SUM`, `PROD`, `MAX`, etc.)
+reduction operations can be applied.
 
 
 Support for GPU-aware MPI
@@ -277,31 +263,27 @@ provides mechanisms to establish communication between two existing
 MPI applications, even when one did not *start* the other.
 
 In *MPI for Python*, new independent process groups can be created by
-calling the :meth:`MPI.Intracomm.Spawn` method within an
-intracommunicator.  This call returns a new intercommunicator (i.e.,
-an :class:`MPI.Intercomm` instance) at the parent process group. The
-child process group can retrieve the matching intercommunicator by
-calling the :meth:`MPI.Comm.Get_parent` class method. At each side,
-the new intercommunicator can be used to perform point to point and
-collective communications between the parent and child groups of
-processes.
+calling the `Intracomm.Spawn` method within an intracommunicator.
+This call returns a new intercommunicator (i.e., an `Intercomm`
+instance) at the parent process group. The child process group can
+retrieve the matching intercommunicator by calling the
+`Comm.Get_parent` class method. At each side, the new
+intercommunicator can be used to perform point to point and collective
+communications between the parent and child groups of processes.
 
 Alternatively, disjoint groups of processes can establish
 communication using a client/server approach. Any server application
-must first call the :func:`MPI.Open_port` function to open a *port*
-and the :func:`MPI.Publish_name` function to publish a provided
-*service*, and next call the :meth:`MPI.Intracomm.Accept` method.  Any
-client applications can first find a published *service* by calling
-the :func:`MPI.Lookup_name` function, which returns the *port* where a
-server can be contacted; and next call the
-:meth:`MPI.Intracomm.Connect` method. Both
-:meth:`MPI.Intracomm.Accept` and :meth:`MPI.Intracomm.Connect` methods
-return an :class:`MPI.Intercomm` instance. When connection between
-client/server processes is no longer needed, all of them must
-cooperatively call the :meth:`MPI.Comm.Disconnect`
+must first call the `Open_port` function to open a *port* and the
+`Publish_name` function to publish a provided *service*, and next call
+the `Intracomm.Accept` method.  Any client applications can first find
+a published *service* by calling the `Lookup_name` function, which
+returns the *port* where a server can be contacted; and next call the
+`Intracomm.Connect` method. Both `Intracomm.Accept` and
+`Intracomm.Connect` methods return an `Intercomm` instance. When
+connection between client/server processes is no longer needed, all of
+them must cooperatively call the `Comm.Disconnect`
 method. Additionally, server applications should release resources by
-calling the :func:`MPI.Unpublish_name` and :func:`MPI.Close_port`
-functions.
+calling the `Unpublish_name` and `Close_port` functions.
 
 
 One-Sided Communications
@@ -325,32 +307,29 @@ different synchronization styles; the semantics of these
 synchronization operations are fairly complex.
 
 In *MPI for Python*, one-sided operations are available by using
-instances of the :class:`MPI.Win` class. New window objects are
-created by calling the :meth:`MPI.Win.Create` method at all processes
-within a communicator and specifying a memory buffer . When a window
-instance is no longer needed, the :meth:`MPI.Win.Free` method should
-be called.
+instances of the `Win` class. New window objects are created by
+calling the `Win.Create` method at all processes within a communicator
+and specifying a memory buffer . When a window instance is no longer
+needed, the `Win.Free` method should be called.
 
 The three one-sided MPI operations for remote write, read and
-reduction are available through calling the methods
-:meth:`MPI.Win.Put`, :meth:`MPI.Win.Get()`, and
-:meth:`MPI.Win.Accumulate` respectively within a :class:`MPI.Win`
-instance.  These methods need an integer rank identifying the target
-process and an integer offset relative the base address of the remote
-memory block being accessed.
+reduction are available through calling the methods `Win.Put`,
+`Win.Get`, and `Win.Accumulate` respectively within a `Win` instance.
+These methods need an integer rank identifying the target process and
+an integer offset relative the base address of the remote memory block
+being accessed.
 
 The one-sided operations read, write, and reduction are implicitly
 nonblocking, and must be synchronized by using two primary modes.
 Active target synchronization requires the origin process to call the
-:meth:`MPI.Win.Start` and :meth:`MPI.Win.Complete` methods at the
-origin process, and target process cooperates by calling the
-:meth:`MPI.Win.Post` and :meth:`MPI.Win.Wait` methods. There is also a
-collective variant provided by the :meth:`MPI.Win.Fence`
-method. Passive target synchronization is more lenient, only the
-origin process calls the :meth:`MPI.Win.Lock` and
-:meth:`MPI.Win.Unlock` methods. Locks are used to protect remote
-accesses to the locked remote window and to protect local load/store
-accesses to a locked local window.
+`Win.Start` and `Win.Complete` methods at the origin process, and
+target process cooperates by calling the `Win.Post` and `Win.Wait`
+methods. There is also a collective variant provided by the
+`Win.Fence` method. Passive target synchronization is more lenient,
+only the origin process calls the `Win.Lock` and `Win.Unlock`
+methods. Locks are used to protect remote accesses to the locked
+remote window and to protect local load/store accesses to a locked
+local window.
 
 
 Parallel Input/Output
@@ -387,19 +366,17 @@ coordination (non-collective and collective), and synchronism
 (blocking, nonblocking, and split collective with begin/end phases).
 
 In *MPI for Python*, all MPI input/output operations are performed
-through instances of the :class:`MPI.File` class. File handles are
-obtained by calling the :meth:`MPI.File.Open` method at all processes
-within a communicator and providing a file name and the intended
-access mode.  After use, they must be closed by calling the
-:meth:`MPI.File.Close` method.  Files even can be deleted by calling
-method :meth:`MPI.File.Delete`.
+through instances of the `File` class. File handles are obtained by
+calling the `File.Open` method at all processes within a communicator
+and providing a file name and the intended access mode.  After use,
+they must be closed by calling the `File.Close` method.  Files even
+can be deleted by calling method `File.Delete`.
 
 After creation, files are typically associated with a per-process
 *view*. The view defines the current set of data visible and
 accessible from an open file as an ordered set of elementary
 datatypes. This data layout can be set and queried with the
-:meth:`MPI.File.Set_view` and :meth:`MPI.File.Get_view` methods
-respectively.
+`File.Set_view` and `File.Get_view` methods respectively.
 
 Actual input/output operations are achieved by many methods combining
 read and write calls with different behavior regarding positioning,
@@ -415,79 +392,73 @@ Environmental Management
 Initialization and Exit
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-Module functions :func:`MPI.Init` or :func:`MPI.Init_thread` and
-:func:`MPI.Finalize` provide MPI initialization and finalization
-respectively. Module functions :func:`MPI.Is_initialized()` and
-:func:`MPI.Is_finalized()` provide the respective tests for
+Module functions `Init` or `Init_thread` and `Finalize` provide MPI
+initialization and finalization respectively. Module functions
+`Is_initialized` and `Is_finalized` provide the respective tests for
 initialization and finalization.
 
 .. note::
 
-   :c:func:`MPI_Init()` or :c:func:`MPI_Init_thread()` is actually
-   called when you import the :mod:`MPI` module from the :mod:`mpi4py`
-   package, but only if MPI is not already initialized. In such case,
-   calling :func:`MPI.Init` or :func:`MPI.Init_thread` from Python is
-   expected to generate an MPI error, and in turn an exception will be
-   raised.
+   :c:func:`MPI_Init` or :c:func:`MPI_Init_thread` is actually called
+   when you import the :mod:`~mpi4py.MPI` module from the
+   :mod:`mpi4py` package, but only if MPI is not already
+   initialized. In such case, calling `Init` or `Init_thread` from
+   Python is expected to generate an MPI error, and in turn an
+   exception will be raised.
 
 .. note::
 
-   :c:func:`MPI_Finalize()` is registered (by using Python C/API
-   function :c:func:`Py_AtExit()`) for being automatically called when
+   :c:func:`MPI_Finalize` is registered (by using Python C/API
+   function :c:func:`Py_AtExit`) for being automatically called when
    Python processes exit, but only if :mod:`mpi4py` actually
-   initialized MPI. Therefore, there is no need to call
-   :func:`MPI.Finalize()` from Python to ensure MPI finalization.
+   initialized MPI. Therefore, there is no need to call `Finalize`
+   from Python to ensure MPI finalization.
 
 Implementation Information
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 * The MPI version number can be retrieved from module function
-  :func:`MPI.Get_version`. It returns a two-integer tuple
-  ``(version,subversion)``.
+  `Get_version`. It returns a two-integer tuple ``(version,
+  subversion)``.
 
-* The :func:`MPI.Get_processor_name` function can be used to access
-  the processor name.
+* The `Get_processor_name` function can be used to access the
+  processor name.
 
 * The values of predefined attributes attached to the world
-  communicator can be obtained by calling the
-  :meth:`MPI.Comm.Get_attr` method within the :const:`MPI.COMM_WORLD`
-  instance.
+  communicator can be obtained by calling the `Comm.Get_attr` method
+  within the `COMM_WORLD` instance.
 
 Timers
 ^^^^^^
 
-MPI timer functionalities are available through the :func:`MPI.Wtime`
-and :func:`MPI.Wtick` functions.
+MPI timer functionalities are available through the `Wtime` and
+`Wtick` functions.
 
 Error Handling
 ^^^^^^^^^^^^^^
 
 In order facilitate handle sharing with other Python modules
 interfacing MPI-based parallel libraries, the predefined MPI error
-handlers :const:`MPI.ERRORS_RETURN` and :const:`MPI.ERRORS_ARE_FATAL`
-can be assigned to and retrieved from communicators using methods
-:meth:`MPI.Comm.Set_errhandler` and
-:meth:`MPI.Comm.Get_errhandler`, and similarly for windows
-and files.
+handlers `ERRORS_RETURN` and `ERRORS_ARE_FATAL` can be assigned to and
+retrieved from communicators using methods `Comm.Set_errhandler` and
+`Comm.Get_errhandler`, and similarly for windows and files.
 
-When the predefined error handler :const:`MPI.ERRORS_RETURN` is set,
-errors returned from MPI calls within Python code will raise an
-instance of the exception class :exc:`MPI.Exception`, which is a
-subclass of the standard Python exception :exc:`RuntimeError`.
+When the predefined error handler `ERRORS_RETURN` is set, errors
+returned from MPI calls within Python code will raise an instance of
+the exception class `Exception`, which is a subclass of the standard
+Python exception `python:RuntimeError`.
 
 .. note::
 
    After import, mpi4py overrides the default MPI rules governing
-   inheritance of error handlers. The :const:`MPI.ERRORS_RETURN` error
-   handler is set in the predefined :const:`MPI.COMM_SELF` and
-   :const:`MPI.COMM_WORLD` communicators, as well as any new
-   :class:`MPI.Comm`, :class:`MPI.Win`, or :class:`MPI.File` instance
-   created through mpi4py. If you ever pass such handles to
-   C/C++/Fortran library code, it is recommended to set the
-   :const:`MPI.ERRORS_ARE_FATAL` error handler on them to ensure MPI
-   errors do not pass silently.
+   inheritance of error handlers. The `ERRORS_RETURN` error handler is
+   set in the predefined `COMM_SELF` and `COMM_WORLD` communicators,
+   as well as any new `Comm`, `Win`, or `File` instance created
+   through mpi4py. If you ever pass such handles to C/C++/Fortran
+   library code, it is recommended to set the `ERRORS_ARE_FATAL` error
+   handler on them to ensure MPI errors do not pass silently.
 
 .. warning::
 
    Importing with ``from mpi4py.MPI import *`` will cause a name
-   clashing with the standard Python :exc:`Exception` base class.
+   clashing with the standard Python `python:Exception` base class.
