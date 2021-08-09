@@ -2,7 +2,7 @@
 #define PyMPI_COMPAT_MPICH_H
 #if defined(MPICH_NUMVERSION)
 
-#if (MPICH_NUMVERSION == 30400000)
+#if (MPICH_NUMVERSION >= 30400000 && MPICH_NUMVERSION < 40000000)
 
 static int PyMPI_MPICH_MPI_Win_get_attr(MPI_Win win,
                                         int keyval,
