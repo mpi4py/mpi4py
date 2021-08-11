@@ -17,4 +17,3 @@ recursive-include docs/apiref *
 recursive-include docs/source *
 
 prune conf/ci
-prune conf/conda-recipes
