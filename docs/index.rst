@@ -38,6 +38,10 @@ Hosted at Google Groups:
 + Group Page:   https://groups.google.com/g/mpi4py
 + Mailing List: mpi4py@googlegroups.com
 
+Hosted at GitHub:
+
+* Discussions: https://github.com/mpi4py/mpi4py/discussions
+
 
 Downloads and Development
 -------------------------

@@ -4,6 +4,8 @@ MPI for Python
 
 .. image::  https://github.com/mpi4py/mpi4py/workflows/ci/badge.svg?branch=master
    :target: https://github.com/mpi4py/mpi4py/actions/
+.. image::  https://readthedocs.org/projects/mpi4py/badge/?version=latest
+   :target: https://mpi4py.readthedocs.org/en/latest/
 .. image::  https://dev.azure.com/mpi4py/mpi4py/_apis/build/status/mpi4py.mpi4py?branchName=master
    :target: https://dev.azure.com/mpi4py/mpi4py/_build
 .. image::  https://ci.appveyor.com/api/projects/status/whh5xovp217h0f7n?svg=true
@@ -12,12 +14,10 @@ MPI for Python
    :target: https://circleci.com/gh/mpi4py/mpi4py
 .. image::  https://travis-ci.com/mpi4py/mpi4py.svg?branch=master
    :target: https://travis-ci.com/mpi4py/mpi4py
-.. image::  https://scan.coverity.com/projects/mpi4py-mpi4py/badge.svg
-   :target: https://scan.coverity.com/projects/mpi4py-mpi4py
 .. image::  https://codecov.io/gh/mpi4py/mpi4py/branch/master/graph/badge.svg
    :target: https://codecov.io/gh/mpi4py/mpi4py
-.. image::  https://readthedocs.org/projects/mpi4py/badge/?version=latest
-   :target: https://mpi4py.readthedocs.org/en/latest/
+.. image::  https://scan.coverity.com/projects/mpi4py-mpi4py/badge.svg
+   :target: https://scan.coverity.com/projects/mpi4py-mpi4py
 
 Overview
 --------
@@ -40,12 +40,27 @@ Dependencies
 * To work with the in-development version, you need to install `Cython
   <https://cython.org/>`_.
 
+Documentation
+-------------
+
+* Read the Docs: https://mpi4py.readthedocs.org/
+* GitHub Pages:  https://mpi4py.github.io/
+
+Support
+-------
+
+* Mailing List:       mpi4py@googlegroups.com
+* Google Groups:      https://groups.google.com/g/mpi4py
+* GitHub Discussions: https://github.com/mpi4py/mpi4py/discussions
+
 Testsuite
 ---------
 
 The testsuite is run periodically on
 
 * `GitHub Actions <https://github.com/mpi4py/mpi4py/actions/>`_
+
+* `Read the Docs <https://readthedocs.org/projects/mpi4py/builds/>`_
 
 * `Azure Pipelines <https://dev.azure.com/mpi4py/mpi4py>`_
 
@@ -55,4 +70,12 @@ The testsuite is run periodically on
 
 * `Travis CI <https://travis-ci.com/mpi4py/mpi4py>`_
 
-* `Fedora Jenkins <http://jenkins.fedorainfracloud.org/job/mpi4py/>`_
+* `Codecov <https://app.codecov.io/gh/mpi4py/mpi4py>`_
+
+Citation
+--------
+
++ L. Dalcin and Y.-L. L. Fang,
+  *mpi4py: Status Update After 12 Years of Development*,
+  Computing in Science & Engineering, 23(4):47-54, 2021.
+  https://doi.org/10.1109/MCSE.2021.3083216
