@@ -836,6 +836,7 @@ FLAG_OPT_MAP = {
     'bytes_warning': 'b',
     # 'dev_mode': 'Xdev',
     # 'utf8_mode': 'Xutf8',
+    # 'warn_default_encoding': 'Xwarn_default_encoding',
     # Python 2
     'division_warning': 'Qwarn',
     'division_new': 'Qnew',
