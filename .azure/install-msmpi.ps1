@@ -3,7 +3,7 @@
 
 $ErrorActionPreference = "Stop"
 
-$MS_DOWNLOAD_URL      = "http://download.microsoft.com/download/"
+$MS_DOWNLOAD_URL      = "https://download.microsoft.com/download/"
 $MSMPI_HASH_URL_V0500 = "3/7/6/3764A48C-5C4E-4E4D-91DA-68CED9032EDE/"
 $MSMPI_HASH_URL_V0600 = "6/4/A/64A7852A-A8C3-476D-908C-30501F761DF3/"
 $MSMPI_HASH_URL_V0700 = "D/7/B/D7BBA00F-71B7-436B-80BC-4D22F2EE9862/"
