@@ -2,7 +2,7 @@ include setup*.py *.toml *.cfg *.rst
 
 recursive-include demo *.py *.txt *.pyx *.i *.h *.c *.cxx *.f90 *.f08
 recursive-include demo [M,m]akefile  *.sh *.bat python-config
-recursive-include conf *.py *.txt *.cfg *.ini *.sh *.bat *.h
+recursive-include conf *.py *.txt *.cfg *.conf *.ini *.sh *.bat *.h
 recursive-include src  *.py py.typed *.pyi *.pyx *.px[di] *.h *.c *.i
 recursive-include test *.py
 
