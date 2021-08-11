@@ -6,7 +6,7 @@ CHANGES: MPI for Python
 :Contact: dalcinl@gmail.com
 
 
-Release 3.1.0 [2021-XX-XX]
+Release 3.1.0 [2021-08-12]
 ==========================
 
 .. warning:: This is the last release supporting Python 2.
@@ -38,7 +38,7 @@ Release 3.1.0 [2021-XX-XX]
 
   + Support for weak references.
 
-* Miscelaneous:
+* Miscellaneous:
 
   + Add a new mpi4py publication (`link <DOI_>`_) to the citation listing.
 
