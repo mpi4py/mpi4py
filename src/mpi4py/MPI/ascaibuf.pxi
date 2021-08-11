@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 
 # CUDA array interface for interoperating Python CUDA GPU libraries
-# See http://numba.pydata.org/numba-doc/latest/cuda/cuda_array_interface.html
+# See https://numba.pydata.org/numba-doc/latest/cuda/cuda_array_interface.html
 
 cdef inline int cuda_is_contig(tuple shape,
                                tuple strides,

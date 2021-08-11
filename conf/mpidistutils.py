@@ -129,7 +129,7 @@ def customize_compiler(compiler, lang=None,
     if compiler.compiler_type == 'mingw32':
         # Remove msvcrXX.dll
         del compiler.dll_libraries[:]
-        # http://bugs.python.org/issue12641
+        # https://bugs.python.org/issue12641
         if compiler.gcc_version >= '4.4':
             for attr in (
                 'preprocessor',

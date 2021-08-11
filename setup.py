@@ -518,7 +518,7 @@ def chk_cython(VERSION):
         warn("*"*80)
         warn()
         warn(" You need to generate C source files with Cython!!")
-        warn(" Download and install Cython <http://www.cython.org>")
+        warn(" Download and install Cython <https://cython.org>")
         warn()
         warn("*"*80)
         return False
@@ -541,7 +541,7 @@ def chk_cython(VERSION):
         warn()
         warn(" You need to install Cython %s (you have version %s)"
              % (REQUIRED, CYTHON_VERSION))
-        warn(" Download and install Cython <http://www.cython.org>")
+        warn(" Download and install Cython <https://cython.org>")
         warn()
         warn("*"*80)
         return False
