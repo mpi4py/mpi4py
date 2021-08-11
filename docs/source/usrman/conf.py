@@ -157,6 +157,9 @@ html_theme = (
     'sphinx_rtd_theme' if 'sphinx_rtd_theme' in extensions else 'default'
 )
 
+if html_theme == 'default':
+    html_copy_source = False
+
 if html_theme == 'sphinx_rtd_theme':
     html_theme_options = {
         'analytics_id': 'UA-48837848-1',
