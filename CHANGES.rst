@@ -9,6 +9,8 @@ CHANGES: MPI for Python
 Release 3.1.0 [2021-XX-XX]
 ==========================
 
+.. warning:: This is the last release supporting Python 2.
+
 * New features:
 
   + `mpi4py.util`: New package collecting miscellaneous utilities.
@@ -36,14 +38,15 @@ Release 3.1.0 [2021-XX-XX]
 
   + Support for weak references.
 
+* Miscelaneous:
+
+  + Add a new mpi4py publication (`link <DOI_>`_) to the citation listing.
+
 .. _DLPack: https://github.com/dmlc/dlpack
 .. _DIM: https://data-apis.org/array-api/latest/design_topics/data_interchange.html
 .. _CAI: https://numba.readthedocs.io/en/stable/cuda/cuda_array_interface.html
 .. _CAM: https://developer.nvidia.com/blog/introduction-cuda-aware-mpi/
-
-* Misc:
-
-  + Add a new reference to the citation list.
+.. _DOI: https://doi.org/10.1109/MCSE.2021.3083216
 
 
 Release 3.0.3 [2019-11-04]
