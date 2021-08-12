@@ -27,9 +27,10 @@ def getdocstr(mc, docstrings, namespace=None):
         if doc == "<undocumented>": return
         docstrings[name] = doc
 
+
+@unittest.skipIf(hasattr(sys, 'pypy_version_info'), 'pypy')
 class TestDoc(unittest.TestCase):
 
-    @unittest.skipIf(hasattr(sys, 'pypy_version_info'), 'pypy')
     def testDoc(self):
         missing = False
         docs = { }

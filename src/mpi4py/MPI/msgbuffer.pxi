@@ -21,10 +21,7 @@ cdef inline int is_integral(object ob):
     else: return 1
 
 cdef inline int is_buffer(object ob):
-    if PY3:
-        return PyObject_CheckBuffer(ob)
-    else:
-        return PyObject_CheckBuffer(ob) or _Py2_IsBuffer(ob)
+    return PyObject_CheckBuffer(ob)
 
 cdef inline int is_dlpack_buffer(object ob):
     return Py_CheckDLPackBuffer(ob)
@@ -34,11 +31,12 @@ cdef inline int is_cai_buffer(object ob):
 
 cdef inline int is_datatype(object ob):
     if isinstance(ob, Datatype): return 1
-    if PY3:
-        if isinstance(ob, unicode): return 1
-    else:
-        if isinstance(ob, bytes): return 1
+    if isinstance(ob, str): return 1
     return 0
+
+cdef inline bint is_constant(object obj, object CONST):
+    if PYPY: return type(obj) is type(CONST) and obj == CONST
+    return obj is CONST
 
 #------------------------------------------------------------------------------
 
@@ -47,7 +45,7 @@ cdef extern from *:
 
 cdef inline int downcast(MPI_Aint value) except? -1:
     if value > <MPI_Aint>INT_MAX:
-        raise OverflowError("integer %d does not fit in 'int'" % value)
+        raise OverflowError("integer {value} does not fit in 'int'")
     else:
         return <int>value
 
@@ -95,12 +93,10 @@ cdef object __IN_PLACE__ = InPlace(<MPI_Aint>MPI_IN_PLACE)
 
 
 cdef inline bint is_BOTTOM(object obj):
-    if PYPY: return type(obj) is type(__BOTTOM__) and obj == __BOTTOM__
-    else:    return obj is __BOTTOM__
+    return is_constant(obj, __BOTTOM__)
 
 cdef inline bint is_IN_PLACE(object obj):
-    if PYPY: return type(obj) is type(__IN_PLACE__) and obj == __IN_PLACE__
-    else:    return obj is __IN_PLACE__
+    return is_constant(obj, __IN_PLACE__)
 
 #------------------------------------------------------------------------------
 
@@ -192,8 +188,6 @@ cdef _p_message message_simple(object msg,
         o_buf = msg
     elif is_cai_buffer(msg):
         o_buf = msg
-    elif PYPY:
-        o_buf = msg
     else:
         raise TypeError("message: expecting buffer or list/tuple")
     # buffer: address, length, and datatype
@@ -211,49 +205,44 @@ cdef _p_message message_simple(object msg,
     if o_displ is not None:
         displ = <int> o_displ
         if displ < 0: raise ValueError(
-            "message: negative diplacement %d" % displ)
+            f"message: negative diplacement {displ}")
         if displ > 0:
             if btype == MPI_DATATYPE_NULL: raise ValueError(
                 "message: cannot handle diplacement, datatype is null")
             CHKERR( MPI_Type_get_extent(btype, &lb, &extent) )
             if extent <= 0: raise ValueError(
-                ("message: cannot handle diplacement, "
-                 "datatype extent %d (lb:%d, ub:%d)"
-                 ) % (extent, lb, lb+extent))
+                f"message: cannot handle diplacement, "
+                f"datatype extent {extent} (lb:{lb}, ub:{lb+extent})")
             if displ*extent > length: raise ValueError(
-                ("message: displacement %d out of bounds, "
-                 "number of datatype entries %d"
-                 ) % (displ, length//extent))
+                f"message: displacement {displ} out of bounds, "
+                f"number of datatype entries {length//extent}")
             offset = displ*extent
             length -= offset
     if o_count is not None:
         count = <int> o_count
         if count < 0: raise ValueError(
-            "message: negative count %d" % count)
+            f"message: negative count {count}")
         if count > 0 and o_buf is None: raise ValueError(
-            "message: buffer is None but count is %d" % count)
+            f"message: buffer is None but count is {count}")
     elif length > 0:
         if extent == 0:
             if btype == MPI_DATATYPE_NULL: raise ValueError(
-                "message: cannot infer count, datatype is null")
+                f"message: cannot infer count, datatype is null")
             CHKERR( MPI_Type_get_extent(btype, &lb, &extent) )
             if extent <= 0: raise ValueError(
-                ("message: cannot infer count, "
-                 "datatype extent %d (lb:%d, ub:%d)"
-                 ) % (extent, lb, lb+extent))
+                f"message: cannot infer count, "
+                f"datatype extent {extent} (lb:{lb}, ub:{lb+extent})")
         if (length % extent) != 0: raise ValueError(
-            ("message: cannot infer count, "
-             "buffer length %d is not a multiple of "
-             "datatype extent %d (lb:%d, ub:%d)"
-             ) % (length, extent, lb, lb+extent))
+            f"message: cannot infer count, "
+            f"buffer length {length} is not a multiple of "
+            f"datatype extent {extent} (lb:{lb}, ub:{lb+extent})")
         if blocks < 2:
             count = downcast(length // extent)
         else:
             if ((length // extent) % blocks) != 0: raise ValueError(
-                ("message: cannot infer count, "
-                 "number of entries %d is not a multiple of "
-                 "required number of blocks %d"
-                 ) %  (length//extent, blocks))
+                f"message: cannot infer count, "
+                f"number of entries {length//extent} is not a multiple of "
+                f"required number of blocks {blocks}")
             count = downcast((length // extent) // blocks)
     # return collected message data
     m.count = o_count if o_count is not None else count
@@ -308,8 +297,6 @@ cdef _p_message message_vector(object msg,
         o_buf = msg
     elif is_cai_buffer(msg):
         o_buf = msg
-    elif PYPY:
-        o_buf = msg
     else:
         raise TypeError("message: expecting buffer or list/tuple")
     # buffer: address, length, and datatype
@@ -327,18 +314,16 @@ cdef _p_message message_vector(object msg,
     if o_counts is None:
         if bsize > 0:
             if btype == MPI_DATATYPE_NULL: raise ValueError(
-                "message: cannot infer count, "
-                "datatype is null")
+                f"message: cannot infer count, "
+                f"datatype is null")
             CHKERR( MPI_Type_get_extent(btype, &lb, &extent) )
             if extent <= 0: raise ValueError(
-                ("message: cannot infer count, "
-                 "datatype extent %d (lb:%d, ub:%d)"
-                 ) % (extent, lb, lb+extent))
+                f"message: cannot infer count, "
+                f"datatype extent {extent} (lb:{lb}, ub:{lb+extent})")
             if (bsize % extent) != 0: raise ValueError(
-                ("message: cannot infer count, "
-                 "buffer length %d is not a multiple of "
-                 "datatype extent %d (lb:%d, ub:%d)"
-                 ) % (bsize, extent, lb, lb+extent))
+                f"message: cannot infer count, "
+                f"buffer length {bsize} is not a multiple of "
+                f"datatype extent {extent} (lb:{lb}, ub:{lb+extent})")
             asize = bsize // extent
         o_counts = newarray(blocks, &counts)
         for i from 0 <= i < blocks:
@@ -750,11 +735,11 @@ cdef class _p_msg_cco:
         if self.sbuf != MPI_IN_PLACE:
             if self.stype != self.rtype:
                 raise ValueError(
-                    "mismatch in send and receive MPI datatypes")
+                    f"mismatch in send and receive MPI datatypes")
             if self.scount != self.rcount:
                 raise ValueError(
-                    "mismatch in send count %d and receive count %d" %
-                    (self.scount, self.rcount))
+                    f"mismatch in send count {self.scount} "
+                    f"and receive count {self.rcount}")
         return 0
 
     cdef int for_reduce_scatter_block(self,
@@ -775,11 +760,11 @@ cdef class _p_msg_cco:
         if self.sbuf != MPI_IN_PLACE:
             if self.stype != self.rtype:
                 raise ValueError(
-                    "mismatch in send and receive MPI datatypes")
+                    f"mismatch in send and receive MPI datatypes")
             if self.scount != self.rcount:
                 raise ValueError(
-                    "mismatch in send count %d receive count %d" %
-                    (self.scount, self.rcount*size))
+                    f"mismatch in send count {self.scount} "
+                    f"and receive count {self.rcount*size}")
         return 0
 
     cdef int for_reduce_scatter(self,
@@ -811,20 +796,20 @@ cdef class _p_msg_cco:
         if self.sbuf != MPI_IN_PLACE:
             if self.stype != self.rtype:
                 raise ValueError(
-                    "mismatch in send and receive MPI datatypes")
+                    f"mismatch in send and receive MPI datatypes")
             if self.scount != sumrcounts:
                 raise ValueError(
-                    "mismatch in send count %d and sum(counts) %d" %
-                    (self.scount, sumrcounts))
+                    f"mismatch in send count {self.scount} "
+                    f"and sum(counts) {sumrcounts}")
             if self.rcount != self.rcounts[rank]:
                 raise ValueError(
-                    "mismatch in receive count %d and counts[%d] %d" %
-                    (self.rcount, rank, self.rcounts[rank]))
+                    f"mismatch in receive count {self.rcount} "
+                    f"and counts[{rank}] {self.rcounts[rank]}")
         else:
             if self.rcount != sumrcounts:
                 raise ValueError(
-                    "mismatch in receive count %d and sum(counts) %d" %
-                    (self.rcount, sumrcounts))
+                    f"mismatch in receive count {self.rcount} "
+                    f"and sum(counts) {sumrcounts}")
         return 0
 
     cdef int for_scan(self,
@@ -843,11 +828,11 @@ cdef class _p_msg_cco:
         if self.sbuf != MPI_IN_PLACE:
             if self.stype != self.rtype:
                 raise ValueError(
-                    "mismatch in send and receive MPI datatypes")
+                    f"mismatch in send and receive MPI datatypes")
             if self.scount != self.rcount:
                 raise ValueError(
-                    "mismatch in send count %d and receive count %d" %
-                    (self.scount, self.rcount))
+                    f"mismatch in send count {self.scount} "
+                    f"and receive count {self.rcount}")
         return 0
 
     cdef int for_exscan(self,
@@ -866,11 +851,11 @@ cdef class _p_msg_cco:
         if self.sbuf != MPI_IN_PLACE:
             if self.stype != self.rtype:
                 raise ValueError(
-                    "mismatch in send and receive MPI datatypes")
+                    f"mismatch in send and receive MPI datatypes")
             if self.scount != self.rcount:
                 raise ValueError(
-                    "mismatch in send count %d and receive count %d" %
-                    (self.scount, self.rcount))
+                    f"mismatch in send count {self.scount} "
+                    f"and receive count {self.rcount}")
         return 0
 
 
@@ -1073,11 +1058,11 @@ cdef class _p_msg_rma:
         if rank == MPI_PROC_NULL: return 0
         # Check
         if self.ocount != 1:  raise ValueError(
-            "origin: expecting a single element, got %d" % self.ocount)
+            f"origin: expecting a single element, got {self.ocount}")
         if self.rcount != 1: raise ValueError(
-            "result: expecting a single element, got %d" % self.rcount)
+            f"result: expecting a single element, got {self.rcount}")
         if self.otype != self.rtype: raise ValueError(
-            "mismatch in origin and result MPI datatypes")
+            f"mismatch in origin and result MPI datatypes")
         return 0
 
     cdef int for_cmp_swap(self, object origin, object compare, object result,
@@ -1089,15 +1074,15 @@ cdef class _p_msg_rma:
         if rank == MPI_PROC_NULL: return 0
         # Check
         if self.ocount != 1:  raise ValueError(
-            "origin: expecting a single element, got %d" % self.ocount)
+            f"origin: expecting a single element, got {self.ocount}")
         if self.ccount != 1:  raise ValueError(
-            "compare: expecting a single element, got %d" % self.ccount)
+            f"compare: expecting a single element, got {self.ccount}")
         if self.rcount != 1: raise ValueError(
-            "result: expecting a single element, got %d" % self.rcount)
+            f"result: expecting a single element, got {self.rcount}")
         if self.otype != self.ctype: raise ValueError(
-            "mismatch in origin and compare MPI datatypes")
+            f"mismatch in origin and compare MPI datatypes")
         if self.otype != self.rtype: raise ValueError(
-            "mismatch in origin and result MPI datatypes")
+            f"mismatch in origin and result MPI datatypes")
         return 0
 
 cdef inline _p_msg_rma message_rma():

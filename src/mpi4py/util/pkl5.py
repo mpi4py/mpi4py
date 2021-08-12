@@ -147,8 +147,7 @@ def _info_datatype():
 def _info_pack(info):
     code = _info_typecode()
     size = len(info)
-    sfmt = "{0}{1}".format(size, code)
-    return _struct.pack(sfmt, *info)
+    return _struct.pack(f"{size}{code}", *info)
 
 
 def _info_alloc(size):
@@ -161,8 +160,7 @@ def _info_unpack(info):
     code = _info_typecode()
     itemsize = _struct.calcsize(code)
     size = len(info) // itemsize
-    sfmt = "{0}{1}".format(size, code)
-    return _struct.unpack(sfmt, info)
+    return _struct.unpack(f"{size}{code}", info)
 
 
 def _new_buffer(size):

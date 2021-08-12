@@ -9,18 +9,8 @@
 
 /* ---------------------------------------------------------------- */
 
-%header %{
-#include "mpi4py/mpi4py.h"
-%}
-
-%init %{
-if (import_mpi4py() < 0)
-#if PY_MAJOR_VERSION >= 3
-  return NULL;
-#else
-  return;
-#endif
-%}
+%header %{ #include "mpi4py/mpi4py.h" %}
+%init   %{ if (import_mpi4py() < 0) return NULL; %}
 
 /* ---------------------------------------------------------------- */
 

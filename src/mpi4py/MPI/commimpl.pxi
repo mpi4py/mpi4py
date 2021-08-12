@@ -32,15 +32,13 @@ cdef object __UNWEIGHTED__    = <MPI_Aint>MPI_UNWEIGHTED
 cdef object __WEIGHTS_EMPTY__ = <MPI_Aint>MPI_WEIGHTS_EMPTY
 
 
-cdef inline bint is_weights(object obj, object CONST):
-    if PYPY: return type(obj) is type(CONST) and obj == CONST
-    else:    return obj is CONST
 
 cdef inline bint is_UNWEIGHTED(object weights):
-    return is_weights(weights, __UNWEIGHTED__)
+    return is_constant(weights, __UNWEIGHTED__)
 
 cdef inline bint is_WEIGHTS_EMPTY(object weights):
-    return is_weights(weights, __WEIGHTS_EMPTY__)
+    return is_constant(weights, __WEIGHTS_EMPTY__)
+
 
 cdef object asarray_weights(object weights, int nweight, int **iweight):
     if weights is None:
@@ -86,16 +84,10 @@ cdef inline int comm_neighbors_count(MPI_Comm comm,
 # -----------------------------------------------------------------------------
 
 cdef object Lock = None
-if PY3:
-    try:
-        from _thread import allocate_lock as Lock
-    except ImportError:
-        from _dummy_thread import allocate_lock as Lock
-else:
-    try:
-        from thread  import allocate_lock as Lock
-    except ImportError:
-        from dummy_thread import allocate_lock as Lock
+try:
+    from _thread import allocate_lock as Lock
+except ImportError:
+    from _dummy_thread import allocate_lock as Lock
 
 cdef int  lock_keyval   = MPI_KEYVAL_INVALID
 cdef dict lock_registry = {}

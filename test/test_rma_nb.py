@@ -3,12 +3,7 @@ import mpiunittest as unittest
 import arrayimpl
 import sys
 
-pypy_lt_53 = (hasattr(sys, 'pypy_version_info') and
-              sys.pypy_version_info < (5, 3))
-
 def mkzeros(n):
-    if pypy_lt_53:
-        return b'\0' * n
     return bytearray(n)
 
 def memzero(m):

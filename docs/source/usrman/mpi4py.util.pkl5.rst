@@ -37,10 +37,6 @@ MPI-3).
 
    .. _pickle5-pypi: https://pypi.org/project/pickle5/
 
-   The :mod:`pickle5` backport is not available for Python 2. Using the
-   :mod:`mpi4py.util.pkl5` module on a Python 2 runtime provides no benefits
-   and may hurt communication performance.
-
 .. class:: Request
 
    Custom request class for nonblocking communications.

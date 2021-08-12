@@ -1,12 +1,11 @@
-import sys, os, shlex
+import sys, os, shlex, shutil
 import subprocess as sp
 import unittest
 import mpi4py
 
 def find_executable(exe):
-    from distutils.spawn import find_executable as find_exe
     command = shlex.split(exe)
-    executable = find_exe(command[0])
+    executable = shutil.which(command[0])
     if executable:
         command[0] = executable
         return ' '.join(command)

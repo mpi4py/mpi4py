@@ -14,10 +14,6 @@ mpi4py.rc.thread_level = 'multiple'
 from mpi4py import MPI
 import mpiunittest as unittest
 
-pypy3_lt_50 = (hasattr(sys, 'pypy_version_info') and
-               sys.version_info[0] == 3 and
-               sys.pypy_version_info < (5, 0))
-
 class TestMPIThreads(unittest.TestCase):
 
     def testThreadLevels(self):
@@ -45,7 +41,6 @@ class TestMPIThreads(unittest.TestCase):
             log = lambda m: sys.stderr.write(m+'\n')
             log("%s: MPI.Is_thread_main() -> %s" % (name, flag))
 
-    @unittest.skipIf(pypy3_lt_50, 'pypy3(<5.0)')
     def testIsThreadMainInThread(self):
         try:
             provided = MPI.Query_thread()

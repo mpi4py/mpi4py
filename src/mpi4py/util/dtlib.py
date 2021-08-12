@@ -186,7 +186,7 @@ def to_numpy_dtype(datatype):
             datatypes = info['datatypes']
             blocklengths = info['blocklengths']
             displacements = info['displacements']
-            names = list(map('f{}'.format, range(len(datatypes))))
+            names = [f'f{i}' for i in range(len(datatypes))]
             formats = list(map(mpi2npy, datatypes, blocklengths))
             offsets = displacements
             itemsize = datatype.extent
@@ -217,7 +217,7 @@ def to_numpy_dtype(datatype):
             if combiner == MPI.COMBINER_HVECTOR:
                 stride = stride if count > 1 else 0
                 aligned = _is_aligned(basetype, stride)
-            names = list(map('f{0}'.format, range(count)))
+            names = [f'f{i}' for i in range(count)]
             formats = [(dtype, (blocklength,))] * count
             offsets = [stride * i for i in range(count)]
             itemsize = datatype.extent
@@ -251,7 +251,7 @@ def to_numpy_dtype(datatype):
                 stride = basetype.extent
             if combiner in combiner_indexed[1::2]:
                 aligned &= all(_is_aligned(basetype, d) for d in displacements)
-            names = list(map('f{}'.format, range(len(displacements))))
+            names = [f'f{i}' for i in range(len(displacements))]
             formats = [(dtype, (blen,)) for blen in blocklengths]
             offsets = [disp * stride for disp in displacements]
             return np_dtype(
@@ -273,7 +273,7 @@ def to_numpy_dtype(datatype):
             datatypes.pop()
             typesize = datatype.Get_size()
             typecode = 'ifc'[combiner_f90.index(combiner)]
-            return np_dtype('{0}{1:d}'.format(typecode, typesize))
+            return np_dtype(f'{typecode}{typesize}')
 
         raise ValueError("cannot convert MPI datatype to NumPy")
     finally:

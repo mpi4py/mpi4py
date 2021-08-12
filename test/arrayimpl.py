@@ -19,8 +19,7 @@ except ImportError:
 try:
     import numba
     import numba.cuda
-    from distutils.version import StrictVersion
-    numba_version = StrictVersion(numba.__version__).version
+    numba_version = tuple(map(int, numba.__version__.split('.', 2)[:2]))
     if numba_version < (0, 48):
         import warnings
         warnings.warn('To test Numba GPU arrays, use Numba v0.48.0+.',
@@ -105,8 +104,6 @@ class BaseArray(object):
 
     TypeMap = TypeMap.copy()
     TypeMap.pop('g', None)
-    if sys.version_info[:2] < (3, 3):
-        TypeMap.pop('q', None)
 
     def __len__(self):
         return len(self.array)

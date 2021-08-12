@@ -1,10 +1,4 @@
-from __future__ import print_function
-from __future__ import division
-
-try:
-    from urllib.request import urlopen
-except ImportError:
-    from urllib2 import urlopen
+from urllib.request import urlopen
 
 from mpi4py.futures import MPIPoolExecutor
 

@@ -1,5 +1,5 @@
-include "ExceptionP.pyx"
-#include "ExceptionC.pyx"
+#include "ExceptionP.pyx"
+include "ExceptionC.pyx"
 MPIException = Exception
 
 

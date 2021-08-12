@@ -1,12 +1,21 @@
-from __future__ import absolute_import
-from __future__ import print_function
-
 from Cython.Compiler import Options
 from Cython.Compiler import PyrexTypes
 from Cython.Compiler.Visitor import CythonTransform
 from Cython.Compiler.StringEncoding import EncodedString
-from Cython.Compiler.AutoDocTransforms import ExpressionWriter
-from Cython.Compiler.AutoDocTransforms import AnnotationWriter
+from Cython.Compiler.AutoDocTransforms import (
+    ExpressionWriter as BaseExpressionWriter,
+    AnnotationWriter as BaseAnnotationWriter,
+)
+
+
+class ExpressionWriter(BaseExpressionWriter):
+
+    def visit_UnicodeNode(self, node):
+        self.emit_string(node)
+
+
+class AnnotationWriter(ExpressionWriter, BaseAnnotationWriter):
+    pass
 
 
 class EmbedSignature(CythonTransform):

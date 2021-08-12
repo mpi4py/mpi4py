@@ -36,7 +36,7 @@ static void hw_sayhello(object py_comm)
 
 BOOST_PYTHON_MODULE(helloworld)
 {
-  if (import_mpi4py() < 0) return; /* Python 2.X */
+  if (import_mpi4py() < 0) return;
 
   def("sayhello", hw_sayhello);
 }

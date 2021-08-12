@@ -17,8 +17,11 @@ def helloworld(comm, args=None, verbose=True):
     size = comm.Get_size()
     rank = comm.Get_rank()
     name = MPI.Get_processor_name()
-    message = ("Hello, World! I am process %*d of %d on %s.\n"
-               % (len(str(size - 1)), rank, size, name))
+    message = (
+        f"Hello, World! I am process "
+        f"{rank:{len(str(size - 1))}d} "
+        f"of {size} on {name}.\n"
+    )
     comm.Barrier()
     if rank > 0:
         comm.Recv([None, 'B'], rank - 1)
@@ -101,9 +104,10 @@ def ringtest(comm, args=None, verbose=True):
     comm.Barrier()
     elapsed = ring(comm, size, loop, skip)
     if options.verbose and comm.rank == 0:
-        message = ("time for %d loops = %g seconds (%d processes, %d bytes)\n"
-                   % (loop, elapsed, comm.size, size))
-        _sys.stdout.write(message)
+        _sys.stdout.write(
+            f"time for {loop} loops = {elapsed:g} seconds "
+            f"({comm.size} processes, {size} bytes)\n"
+        )
         _sys.stdout.flush()
     return elapsed
 
@@ -153,7 +157,7 @@ def main(args=None):
     comm = MPI.COMM_WORLD
     if options.command not in main.commands:
         if comm.rank == 0:
-            parser.error("unknown command '%s'" % options.command)
+            parser.error(f"unknown command '{options.command}'")
         parser.exit(2)
     command = main.commands[options.command]
     command(comm, options.args)

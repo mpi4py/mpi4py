@@ -4,25 +4,41 @@ cdef extern from "atimport.h": pass
 
 # -----------------------------------------------------------------------------
 
-cdef extern from "Python.h":
-    enum: PY3 "(PY_MAJOR_VERSION>=3)"
-    enum: PY2 "(PY_MAJOR_VERSION==2)"
+cdef extern from *:
+    """
+    #if defined(PYPY_VERSION)
+    #  define PyMPI_RUNTIME_PYPY 1
+    #else
+    #  define PyMPI_RUNTIME_PYPY 0
+    #endif
+    """
     enum: PYPY "PyMPI_RUNTIME_PYPY"
-
-    void PySys_WriteStderr(char*,...)
-    int Py_AtExit(void (*)())
-
-    ctypedef struct PyObject
-    PyObject *Py_None
-    void Py_CLEAR(PyObject*)
-
-    void Py_INCREF(object)
-    void Py_DECREF(object)
 
 # -----------------------------------------------------------------------------
 
 cdef extern from *:
+    """
+    #if !defined(Py_GETENV)
+    #  define Py_GETENV(s) (Py_IgnoreEnvironmentFlag ? NULL : getenv(s))
+    #endif
+    """
     const char *Py_GETENV(const char[])
+
+# -----------------------------------------------------------------------------
+
+cdef extern from *:
+    """
+    #if !defined(PyMPI_USE_MATCHED_RECV)
+    #  if defined(PyMPI_HAVE_MPI_Mprobe) && defined(PyMPI_HAVE_MPI_Mrecv)
+    #    if defined(MPI_VERSION) && MPI_VERSION >= 3
+    #      define PyMPI_USE_MATCHED_RECV 1
+    #    endif
+    #  endif
+    #endif
+    #if !defined(PyMPI_USE_MATCHED_RECV)
+    #  define PyMPI_USE_MATCHED_RECV 0
+    #endif
+    """
     enum: USE_MATCHED_RECV "PyMPI_USE_MATCHED_RECV"
 
 ctypedef struct Options:
@@ -58,7 +74,7 @@ cdef object getEnv(object rc, const char name[], object value):
 cdef int warnOpt(object name, object value) except -1:
     cdef object warn
     from warnings import warn
-    warn("mpi4py.rc: '%s': unexpected value %r" % (name, value))
+    warn(f"mpi4py.rc: '{name}': unexpected value {repr(value)}")
 
 cdef int getOptions(Options* opts) except -1:
     cdef object rc
@@ -67,9 +83,9 @@ cdef int getOptions(Options* opts) except -1:
     opts.thread_level = MPI_THREAD_MULTIPLE
     opts.finalize = 1
     opts.fast_reduce = 1
-    opts.recv_mprobe = 1
+    opts.recv_mprobe = USE_MATCHED_RECV
     opts.errors = 1
-    try: from mpi4py import rc
+    try: from . import rc
     except: return 0
     #
     cdef object initialize = True
@@ -162,6 +178,10 @@ cdef int getOptions(Options* opts) except -1:
 
 # -----------------------------------------------------------------------------
 
+cdef extern from "Python.h":
+    int Py_AtExit(void (*)())
+    void PySys_WriteStderr(char*,...)
+
 cdef extern from *:
     int PyMPI_Commctx_finalize() nogil
 
@@ -188,11 +208,11 @@ cdef int bootstrap() except -1:
         required = options.thread_level
         ierr = MPI_Init_thread(NULL, NULL, required, &provided)
         if ierr != MPI_SUCCESS: raise RuntimeError(
-            "MPI_Init_thread() failed [error code: %d]" % ierr)
+            f"MPI_Init_thread() failed [error code: {ierr}]")
     else:
         ierr = MPI_Init(NULL, NULL)
         if ierr != MPI_SUCCESS: raise RuntimeError(
-            "MPI_Init() failed [error code: %d]" % ierr)
+            f"MPI_Init() failed [error code: {ierr}]")
     return 0
 
 cdef inline int mpi_active() nogil:
@@ -244,9 +264,9 @@ cdef extern from *:
     enum: PyMPI_ERR_UNAVAILABLE
 
 cdef extern from "Python.h":
-    void PyErr_SetObject(object, object)
     void *PyExc_RuntimeError
     void *PyExc_NotImplementedError
+    void PyErr_SetObject(object, object)
 
 cdef object MPIException = <object>PyExc_RuntimeError
 

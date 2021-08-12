@@ -19,30 +19,6 @@
 
 /* ------------------------------------------------------------------------- */
 
-#include "pycompat.h"
-
-#ifdef PYPY_VERSION
-  #define PyMPI_RUNTIME_PYPY    1
-  #define PyMPI_RUNTIME_CPYTHON 0
-#else
-  #define PyMPI_RUNTIME_PYPY    0
-  #define PyMPI_RUNTIME_CPYTHON 1
-#endif
-
-/* ------------------------------------------------------------------------- */
-
-#if !defined(PyMPI_USE_MATCHED_RECV)
-  #if defined(PyMPI_HAVE_MPI_Mprobe) && \
-      defined(PyMPI_HAVE_MPI_Mrecv)  && \
-      MPI_VERSION >= 3
-    #define PyMPI_USE_MATCHED_RECV 1
-  #else
-    #define PyMPI_USE_MATCHED_RECV 0
-  #endif
-#endif
-
-/* ------------------------------------------------------------------------- */
-
 /*
   Local variables:
   c-basic-offset: 2

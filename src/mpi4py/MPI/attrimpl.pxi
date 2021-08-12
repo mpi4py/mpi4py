@@ -1,5 +1,11 @@
 #------------------------------------------------------------------------------
 
+cdef extern from "Python.h":
+    void Py_INCREF(object)
+    void Py_DECREF(object)
+
+#------------------------------------------------------------------------------
+
 @cython.final
 @cython.internal
 cdef class _p_keyval:

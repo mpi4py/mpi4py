@@ -3,15 +3,12 @@ docs/*.html
 docs/*.pdf
 docs/*.info
 docs/*.[137]
-docs/apiref
 docs/usrman
 dist
 MANIFEST
 *.egg-info
 .eggs
 __pycache__
-*.pyc
-*.pyo
 .tox
 #src/mpi4py.MPI.c
 #src/mpi4py/include/mpi4py/mpi4py.MPI.h

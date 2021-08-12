@@ -1,6 +1,11 @@
 #------------------------------------------------------------------------------
 
 cdef extern from "Python.h":
+    ctypedef struct PyObject
+    PyObject *Py_None
+    void Py_CLEAR(PyObject*)
+
+cdef extern from "Python.h":
     int PyIndex_Check(object)
     int PySlice_Check(object)
     int PySlice_GetIndicesEx(object, Py_ssize_t,
@@ -37,96 +42,13 @@ cdef extern from "Python.h":
                            void *, Py_ssize_t,
                            bint, int) except -1
 
-# Python 2 buffer interface (legacy)
-cdef extern from *:
-    int _Py2_IsBuffer(object)
-    int _Py2_AsBuffer(object, bint *, void **, Py_ssize_t *) except -1
-
 cdef extern from "Python.h":
     object PyLong_FromVoidPtr(void*)
     void*  PyLong_AsVoidPtr(object) except? NULL
 
-cdef extern from *:
-    void *emptybuffer '((void*)"")'
-
 cdef char BYTE_FMT[2]
 BYTE_FMT[0] = c'B'
 BYTE_FMT[1] = 0
-
-#------------------------------------------------------------------------------
-
-cdef extern from *:
-    char*      PyByteArray_AsString(object) except NULL
-    Py_ssize_t PyByteArray_Size(object) except -1
-
-cdef type array_array
-cdef type numpy_array
-cdef int  pypy_have_numpy = 0
-if PYPY:
-    from array import array as array_array
-    try:
-        from _numpypy.multiarray import ndarray as numpy_array
-        pypy_have_numpy = 1
-    except ImportError:
-        try:
-            from numpypy import ndarray as numpy_array
-            pypy_have_numpy = 1
-        except ImportError:
-            try:
-                from numpy import ndarray as numpy_array
-                pypy_have_numpy = 1
-            except ImportError:
-                pass
-
-cdef int PyPy_GetBuffer(object obj, Py_buffer *view, int flags) except -1:
-    cdef object addr
-    cdef void *buf = NULL
-    cdef Py_ssize_t size = 0
-    cdef bint readonly = 0
-    try:
-        if not isinstance(obj, bytes):
-            if PyObject_CheckBuffer(obj):
-                return PyObject_GetBuffer(obj, view, flags)
-    except SystemError:
-        pass
-    except TypeError:
-        pass
-    if isinstance(obj, bytes):
-        buf  = PyBytes_AsString(obj)
-        size = PyBytes_Size(obj)
-        readonly = 1
-    elif isinstance(obj, bytearray):
-        buf  = PyByteArray_AsString(obj)
-        size = PyByteArray_Size(obj)
-        readonly = 0
-    elif isinstance(obj, array_array):
-        addr, size = obj.buffer_info()
-        buf = PyLong_AsVoidPtr(addr)
-        size *= obj.itemsize
-        readonly = 0
-    elif pypy_have_numpy and isinstance(obj, numpy_array):
-        addr, readonly = obj.__array_interface__['data']
-        buf = PyLong_AsVoidPtr(addr)
-        size = obj.nbytes
-    else:
-        _Py2_AsBuffer(obj, &readonly, &buf, &size)
-    if buf == NULL and size == 0: buf = emptybuffer
-    PyBuffer_FillInfo(view, obj, buf, size, readonly, flags)
-    if (flags & PyBUF_FORMAT) == PyBUF_FORMAT: view.format = BYTE_FMT
-    return 0
-
-#------------------------------------------------------------------------------
-
-cdef int Py27_GetBuffer(object obj, Py_buffer *view, int flags) except -1:
-    # Python 3 buffer interface (PEP 3118)
-    if PyObject_CheckBuffer(obj):
-        return PyObject_GetBuffer(obj, view, flags)
-    # Python 2 buffer interface (legacy)
-    _Py2_AsBuffer(obj, &view.readonly, &view.buf, &view.len)
-    if view.buf == NULL and view.len == 0: view.buf = emptybuffer
-    PyBuffer_FillInfo(view, obj, view.buf, view.len, view.readonly, flags)
-    if (flags & PyBUF_FORMAT) == PyBUF_FORMAT: view.format = BYTE_FMT
-    return 0
 
 #------------------------------------------------------------------------------
 
@@ -135,8 +57,6 @@ include "ascaibuf.pxi"
 
 cdef int PyMPI_GetBuffer(object obj, Py_buffer *view, int flags) except -1:
     try:
-        if PYPY: return PyPy_GetBuffer(obj, view, flags)
-        if PY2:  return Py27_GetBuffer(obj, view, flags)
         return PyObject_GetBuffer(obj, view, flags)
     except BaseException:
         try: return Py_GetDLPackBuffer(obj, view, flags)
