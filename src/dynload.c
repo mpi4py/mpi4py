@@ -74,7 +74,6 @@ static PyMethodDef dl_methods[] = {
 PyDoc_STRVAR(dl_doc,
 "POSIX dynamic linking loader");
 
-#if PY_MAJOR_VERSION >= 3
 static struct PyModuleDef dl_module = {
   PyModuleDef_HEAD_INIT, /* m_base     */
   (char *)"dl",          /* m_name     */
@@ -86,32 +85,16 @@ static struct PyModuleDef dl_module = {
   NULL,                  /* m_clear    */
   NULL                   /* m_free     */
 };
-#endif
-
-#if !defined(PyModule_AddIntMacro)
-#define PyModule_AddIntMacro(m, c) \
-  PyModule_AddIntConstant(m, (char *)#c, c)
-#endif
 
 #define PyModule_AddPtrMacro(m, c) \
   PyModule_AddObject(m, (char *)#c, PyLong_FromVoidPtr((void *)c))
 
-
-#if PY_MAJOR_VERSION >= 3
 PyMODINIT_FUNC PyInit_dl(void);
 PyMODINIT_FUNC PyInit_dl(void)
-#else
-PyMODINIT_FUNC initdl(void);
-PyMODINIT_FUNC initdl(void)
-#endif
 {
   PyObject *m = NULL;
 
-#if PY_MAJOR_VERSION >= 3
   m = PyModule_Create(&dl_module);
-#else
-  m = Py_InitModule3((char *)"dl", dl_methods, (char *)dl_doc);
-#endif
   if (!m) goto bad;
 
   if (PyModule_AddIntMacro(m, RTLD_LAZY   ) < 0) goto bad;
@@ -147,11 +130,7 @@ PyMODINIT_FUNC initdl(void)
 #endif
 
  finally:
-#if PY_MAJOR_VERSION >= 3
   return m;
-#else
-  return;
-#endif
 
  bad:
   Py_XDECREF(m);

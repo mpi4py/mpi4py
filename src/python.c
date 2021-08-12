@@ -142,7 +142,7 @@ rm_wargs(wchar_t **args, int deep)
     free(args);
 }
 
-#endif /* !(PY_MAJOR_VERSION >= 3) */
+#endif
 
 /* -------------------------------------------------------------------------- */
 

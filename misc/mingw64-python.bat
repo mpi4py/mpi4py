@@ -8,9 +8,9 @@ set PATH=%MinGW%\bin;%PATH%
 set GENDEF=gendef.exe
 set DLLTOOL=dlltool.exe
 
-rem Python 2.7
-rem http://www.python.org/download/releases/2.7/
-set PYVER=27
+rem Python 3.9
+rem https://www.python.org/downloads/
+set PYVER=39
 set PYDIR=C:\Python%PYVER%
 set LIBDIR=%PYDIR%\libs
 set DLLDIR=%WinDir%\System32

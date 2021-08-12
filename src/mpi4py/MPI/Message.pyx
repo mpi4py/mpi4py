@@ -21,7 +21,7 @@ cdef class Message:
         elif op == Py_NE: return (s.ob_mpi != o.ob_mpi)
         cdef mod = type(self).__module__
         cdef cls = type(self).__name__
-        raise TypeError("unorderable type: '%s.%s'" % (mod, cls))
+        raise TypeError(f"unorderable type: '{mod}.{cls}'")
 
     def __bool__(self) -> bool:
         return self.ob_mpi != MPI_MESSAGE_NULL

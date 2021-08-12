@@ -69,13 +69,6 @@ class TestObjModel(unittest.TestCase):
             self.assertFalse(obj)
 
     def testHash(self):
-        try:
-            hash(MPI.COMM_NULL)
-        except TypeError:
-            pass
-        else:
-            if hasattr(sys, 'pypy_version_info'):
-                self.skipTest('pypy')
         for obj in self.objects:
             ob_hash = lambda: hash(obj)
             self.assertRaises(TypeError, ob_hash)

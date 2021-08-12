@@ -92,7 +92,7 @@ cdef int Py_GetCAIBuffer(object obj, Py_buffer *view, int flags) except -1:
     for s in shape: size *= s
     if dev_ptr is None and size == 0: dev_ptr = 0 # XXX
     buf = PyLong_AsVoidPtr(dev_ptr)
-    typekind = <char>ord(typestr[1])
+    typekind = <char>ord(typestr[1:2])
     itemsize = <Py_ssize_t>int(typestr[2:])
 
     if mask is not None:
@@ -102,17 +102,17 @@ cdef int Py_GetCAIBuffer(object obj, Py_buffer *view, int flags) except -1:
         )
     if size < 0:
         raise BufferError(
-            "__cuda_array_interface__: "
-            "buffer with negative size (shape:%s, size:%d)"
-            % (shape, size)
+            f"__cuda_array_interface__: "
+            f"buffer with negative size "
+            f"(shape:{shape}, size:{size})"
         )
     if (strides is not None and
         not cuda_is_contig(shape, strides, itemsize, c'C') and
         not cuda_is_contig(shape, strides, itemsize, c'F')):
         raise BufferError(
-            "__cuda_array_interface__: "
-            "buffer is not contiguous (shape:%s, strides:%s, itemsize:%d)"
-            % (shape, strides, itemsize)
+            f"__cuda_array_interface__: "
+            f"buffer is not contiguous "
+            f"(shape:{shape}, strides:{strides}, itemsize:{itemsize})"
         )
     if descr is not None and (len(descr) != 1 or descr[0] != ('', typestr)):
         PyErr_WarnEx(RuntimeWarning,

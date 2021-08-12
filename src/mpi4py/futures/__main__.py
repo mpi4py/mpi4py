@@ -24,14 +24,13 @@ def main():
 
     def usage(error=None):
         from textwrap import dedent
-        usage = dedent("""
-        usage: {python} -m {prog} <pyfile> [arg] ...
-           or: {python} -m {prog} -m <module> [arg] ...
-           or: {python} -m {prog} -c <string> [arg] ...
-        """).strip().format(
-            python=os.path.basename(sys.executable),
-            prog=__spec__.parent,
-        )
+        python = os.path.basename(sys.executable)
+        program = __spec__.parent
+        usage = dedent(f"""
+        usage: {python} -m {program} <pyfile> [arg] ...
+           or: {python} -m {program} -m <module> [arg] ...
+           or: {python} -m {program} -c <string> [arg] ...
+        """).strip()
         if error:
             print(error, file=sys.stderr)
             print(usage, file=sys.stderr)
@@ -49,11 +48,11 @@ def main():
             usage()
         elif args[0] in ('-m', '-c'):
             if len(args) < 2:
-                usage("Argument expected for option: " + args[0])
+                usage(f"Argument expected for option: {args[0]}")
         elif args[0].startswith('-'):
-            usage("Unknown option: " + args[0])
+            usage(f"Unknown option: {args[0]}")
         elif not os.path.exists(args[0]):
-            usage("Path does not exist: " + args[0])
+            usage(f"Path does not exist: {args[0]}")
 
     try:
         with SharedPoolCtx() as context:

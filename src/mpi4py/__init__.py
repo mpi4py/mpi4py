@@ -66,12 +66,12 @@ class Rc:
     def __call__(self, **kwargs):
         for key in kwargs:
             if not hasattr(self, key):
-                raise TypeError("unexpected argument '{0}'".format(key))
+                raise TypeError(f"unexpected argument '{key}'")
         for key, value in kwargs.items():
             setattr(self, key, value)
 
     def __repr__(self):
-        return '<{0}.rc>'.format(__name__)
+        return f'<{__name__}.rc>'
 
 
 rc = Rc()
@@ -158,7 +158,7 @@ def profile(name, *, path=None, logfile=None):
     path.append(os.path.join(prefix, 'lib-pmpi'))
     filename = lookup_dylib(name, path)
     if filename is None:
-        raise ValueError("profiler '{0}' not found".format(name))
+        raise ValueError(f"profiler '{name}' not found")
 
     handle = dlopen(filename, RTLD_NOW | RTLD_GLOBAL)
     if handle:

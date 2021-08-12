@@ -1,4 +1,6 @@
 import os
+import shlex
+import shutil
 import cffi
 
 ffi = cffi.FFI()
@@ -23,12 +25,10 @@ class mpicompiler(object):
         self.ffiplatform.compile = self.ffi_compile
 
     def configure(self, compiler):
-        from distutils.util import split_quoted
-        from distutils.spawn import find_executable
         def fix_command(command, cmd):
             if not cmd: return
-            cmd = split_quoted(cmd)
-            exe = find_executable(cmd[0])
+            cmd = shlex.split(cmd)
+            exe = shutil.which(cmd[0])
             if not exe: return
             command[0] = exe
             command += cmd[1:]

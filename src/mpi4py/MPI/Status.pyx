@@ -20,7 +20,7 @@ cdef class Status:
         elif op == Py_NE: return (ne != 0)
         cdef mod = type(self).__module__
         cdef cls = type(self).__name__
-        raise TypeError("unorderable type: '%s.%s'" % (mod, cls))
+        raise TypeError(f"unorderable type: '{mod}.{cls}'")
 
     def Get_source(self) -> int:
         """

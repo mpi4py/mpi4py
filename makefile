@@ -28,14 +28,10 @@ srcclean:
 clean:
 	${PYTHON} setup.py clean --all
 distclean: clean
-	-${RM} -r build  _configtest* *.py[co]
+	-${RM} -r build _configtest*
 	-${RM} -r MANIFEST dist
 	-${RM} -r conf/__pycache__ test/__pycache__
 	-${RM} -r demo/__pycache__ src/mpi4py/__pycache__
-	-find conf -name '*.py[co]' -exec rm -f {} ';'
-	-find demo -name '*.py[co]' -exec rm -f {} ';'
-	-find test -name '*.py[co]' -exec rm -f {} ';'
-	-find src  -name '*.py[co]' -exec rm -f {} ';'
 fullclean: distclean srcclean docsclean
 	-find . -name '*~' -exec rm -f {} ';'
 
@@ -52,8 +48,8 @@ uninstall:
 
 .PHONY: docs docs-html docs-pdf docs-misc
 docs: docs-html docs-pdf docs-misc
-docs-html: rst2html sphinx-html epydoc-html
-docs-pdf:  sphinx-pdf epydoc-pdf
+docs-html: rst2html sphinx-html
+docs-pdf:  sphinx-pdf
 docs-misc: sphinx-man sphinx-info
 
 RST2HTML = $(shell command -v rst2html5.py || command -v rst2html5 || false)
@@ -95,23 +91,11 @@ sphinx-info:
 	${MAKE} -C build/texinfo info > /dev/null
 	mv build/texinfo/*.info docs/
 
-PYTHON2 = python2
-EPYDOCBUILD = ${PYTHON2} ./conf/epydocify.py
-EPYDOCOPTS  =
-.PHONY: epydoc epydoc-html epydoc-pdf
-epydoc: epydoc-html epydoc-pdf
-epydoc-html:
-	mkdir -p docs/apiref
-	${PYTHON2} -c 'import epydoc, docutils'
-	env CFLAGS=-O0 ${PYTHON2} setup.py -q build --build-lib build/lib.py2 2> /dev/null
-	env PYTHONPATH=$$PWD/build/lib.py2 ${EPYDOCBUILD} ${EPYDOCOPTS} --html -o docs/apiref
-epydoc-pdf:
-
 .PHONY: docsclean
 docsclean:
 	-${RM} docs/*.info docs/*.[137]
 	-${RM} docs/*.html docs/*.pdf
-	-${RM} -r docs/usrman docs/apiref
+	-${RM} -r docs/usrman
 
 # ----
 

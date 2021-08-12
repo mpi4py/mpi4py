@@ -7,11 +7,15 @@ Support for building mpi4py with distutils/setuptools.
 
 # -----------------------------------------------------------------------------
 
-import sys, os, platform
+import sys
+import os
+import shlex
+import shutil
+import platform
+
+from distutils import log
 from distutils import sysconfig
 from distutils.util import convert_path
-from distutils.util import split_quoted
-from distutils import log
 
 # Fix missing variables PyPy's  distutils.sysconfig
 if hasattr(sys, 'pypy_version_info'):
@@ -62,7 +66,7 @@ def fix_compiler_cmd(cc, mpicc):
             i = i + 1
     while os.path.basename(cc[i]) == 'ccache':
         i = i + 1
-    cc[i:i+1] = split_quoted(mpicc)
+    cc[i:i+1] = shlex.split(mpicc)
 
 def fix_linker_cmd(ld, mpild):
     if not mpild: return
@@ -76,7 +80,7 @@ def fix_linker_cmd(ld, mpild):
             i = i + 1
     while os.path.basename(ld[i]) == 'ccache':
         del ld[i]
-    ld[i:i+1] = split_quoted(mpild)
+    ld[i:i+1] = shlex.split(mpild)
 
 def customize_compiler(compiler, lang=None,
                        mpicc=None, mpicxx=None, mpild=None,
@@ -86,7 +90,7 @@ def customize_compiler(compiler, lang=None,
         ld = compiler.linker_exe
         for envvar in ('LDFLAGS', 'CFLAGS', 'CPPFLAGS'):
             if envvar in os.environ:
-                ld += split_quoted(os.environ[envvar])
+                ld += shlex.split(os.environ[envvar])
     if sys.platform == 'darwin':
         badcflags = ['-mno-fused-madd']
         for attr in ('preprocessor',
@@ -151,19 +155,6 @@ def customize_compiler(compiler, lang=None,
         compiler.ldflags_shared_debug.append('/MANIFEST')
         compile_options = (compiler.compile_options,
                            compiler.compile_options_debug)
-        from distutils.msvc9compiler import VERSION
-        if VERSION < 10.0:
-            for options in compile_options:
-                options.append('/D_USE_DECLSPECS_FOR_SAL=0')
-                options.append('/D_USE_ATTRIBUTES_FOR_SAL=0')
-                options.append('/DMSMPI_NO_SAL')
-        if VERSION <= 10.0:
-            topdir = os.path.dirname(os.path.dirname(__file__))
-            srcdir = os.path.abspath(os.path.join(topdir, 'src'))
-            header = os.path.join(srcdir, 'msvcfix.h')
-            if os.path.exists(header):
-                for options in compile_options:
-                    options.append('/FI%s' % header)
 
 # -----------------------------------------------------------------------------
 
@@ -401,7 +392,6 @@ cmd_install = import_command('install')
 cmd_sdist   = import_command('sdist')
 cmd_clean   = import_command('clean')
 
-cmd_build_py     = import_command('build_py')
 cmd_build_clib   = import_command('build_clib')
 cmd_build_ext    = import_command('build_ext')
 cmd_install_lib  = import_command('install_lib')
@@ -412,6 +402,28 @@ from distutils.errors import DistutilsSetupError
 from distutils.errors import DistutilsPlatformError
 from distutils.errors import DistutilsOptionError
 from distutils.errors import CCompilerError
+
+try:
+    from packaging.version import (
+        Version,
+        LegacyVersion,
+    )
+except ImportError:
+    try:
+        from setuptools.extern.packaging.version import (
+            Version,
+            LegacyVersion,
+        )
+    except ImportError:
+        from distutils.version import (
+            StrictVersion as Version,
+            LooseVersion  as LegacyVersion
+        )
+
+try:
+    from setuptools import dep_util
+except ImportError:
+    from distutils import dep_util
 
 # -----------------------------------------------------------------------------
 
@@ -481,9 +493,8 @@ def setup(**attrs):
     if 'cmdclass' not in attrs:
         attrs['cmdclass'] = {}
     cmdclass = attrs['cmdclass']
-    for cmd in (config, build, install,
-                test, clean, sdist,
-                build_py, build_src, build_clib, build_ext, build_exe,
+    for cmd in (config, build, install, sdist, clean,
+                build_src, build_clib, build_ext, build_exe,
                 install_lib, install_data, install_exe,
                 ):
         if cmd.__name__ not in cmdclass:
@@ -690,132 +701,6 @@ class build_src(Command):
         pass
 
 
-if sys.version_info[0] >= 3:
-
-    build_py = cmd_build_py.build_py
-
-else:
-
-    def get_fixers_3to2():
-        import re
-        import lib3to2
-        try:
-            loader =  lib3to2.__loader__
-            files = loader._files.keys()
-        except AttributeError:
-            from lib3to2.build import refactor
-            return refactor.get_fixers_from_package('lib3to2.fixes')
-        fixers = []
-        pattern = re.compile(r'lib3to2/fixes/(fix_.*)\.py$')
-        for f in files:
-            m = pattern.match(f)
-            if m:
-                fixer = 'lib3to2.fixes.' + m.groups()[0]
-                fixers.append(fixer)
-        return fixers
-
-
-    def get_fixers_extra():
-        from lib2to3 import fixer_base
-        from lib2to3.fixer_util import Name
-
-        class FixModSpecAttr(fixer_base.BaseFix):
-
-            PATTERN = """
-                      power< name='__spec__' trailer< '.' attr=('parent') > >
-                      """
-            MAP = {
-                'parent': '__package__',
-            }
-
-            def transform(self, node, results):
-                name = results["name"]
-                attr = results["attr"]
-                newval = self.MAP[attr.value]
-                node.replace(Name(newval, prefix=name.prefix))
-
-        import sys
-        import lib3to2.fixes
-        modname = lib3to2.fixes.__name__ + '.fix_mod_spec_attr'
-        module = type(sys)(modname)
-        module.FixModSpecAttr = FixModSpecAttr
-        setattr(lib3to2.fixes, modname, module)
-        sys.modules[modname] = module
-        return [modname]
-
-
-    def run_3to2(files, fixer_names=None, options=None,
-                 explicit=None, unwanted=None):
-        from lib3to2.fixes import fix_imports
-        from lib3to2.build import DistutilsRefactoringTool
-        if not files:
-            return
-        if fixer_names is None:
-            fixer_names = get_fixers_3to2()
-        for fixer in get_fixers_extra():
-            fixer_names.append(fixer)
-        if unwanted is not None:
-            fixer_names = list(fixer_names)
-            for fixer in unwanted:
-                if fixer in fixer_names:
-                    fixer_names.remove(fixer)
-        r = DistutilsRefactoringTool(
-            fixer_names, options=options, explicit=explicit)
-        try:
-            fix_imports.MAPPING['queue'] = 'queue'
-            r.refactor(files, write=True)
-        finally:
-            fix_imports.MAPPING['queue'] = 'Queue'
-
-
-    class Mixin3to2:
-
-        fixer_names = None
-
-        options = None
-
-        explicit = [
-            'lib3to2.fixes.fix_printfunction',
-        ]
-
-        unwanted  = [
-            'lib3to2.fixes.fix_str',
-            'lib3to2.fixes.fix_with',
-            'lib3to2.fixes.fix_print',
-            'lib3to2.fixes.fix_except',
-            'lib3to2.fixes.fix_absimport',
-        ]
-
-        def run_3to2(self, files):
-            return run_3to2(files, self.fixer_names, self.options,
-                            self.explicit, self.unwanted)
-
-
-    class build_py(cmd_build_py.build_py, Mixin3to2):
-
-        def run(self):
-            self.updated_files = []
-
-            # build_py code
-            if self.py_modules:
-                self.build_modules()
-            if self.packages:
-                self.build_packages()
-                self.build_package_data()
-
-            # 3to2
-            self.run_3to2(self.updated_files)
-
-            # build_py code
-            self.byte_compile(self.get_outputs(include_bytecode=0))
-
-        def build_module(self, module, module_file, package):
-            super_build_module = cmd_build_py.build_py.build_module
-            ret = super_build_module(self, module, module_file, package)
-            if ret[1]: self.updated_files.append(ret[0])
-            return ret
-
-
 # Command class to build libraries
 
 class build_clib(cmd_build_clib.build_clib):
@@ -977,8 +862,6 @@ class build_clib(cmd_build_clib.build_clib):
             return lib.configure(lib, config_cmd)
 
     def build_library(self, lib):
-        from distutils.dep_util import newer_group
-
         sources = [convert_path(p) for p in lib.sources]
         depends = [convert_path(p) for p in lib.depends]
         depends = sources + depends
@@ -989,7 +872,8 @@ class build_clib(cmd_build_clib.build_clib):
             build_dir = self.build_clib_so
         lib_fullpath = self.get_lib_fullpath(lib, build_dir)
 
-        if not (self.force or newer_group(depends, lib_fullpath, 'newer')):
+        if not (self.force or
+                dep_util.newer_group(depends, lib_fullpath, 'newer')):
             log.debug("skipping '%s' %s library (up-to-date)",
                       lib.name, lib.kind)
             return
@@ -1186,12 +1070,12 @@ class build_ext(cmd_build_ext.build_ext):
             configure(ext, config_cmd)
 
     def build_extension (self, ext):
-        from distutils.dep_util import newer_group
         fullname = self.get_ext_fullname(ext.name)
         filename = os.path.join(
             self.build_lib, self.get_ext_filename(fullname))
         depends = ext.sources + ext.depends
-        if not (self.force or newer_group(depends, filename, 'newer')):
+        if not (self.force or
+                dep_util.newer_group(depends, filename, 'newer')):
             log.debug("skipping '%s' extension (up-to-date)", ext.name)
             return
         #
@@ -1290,12 +1174,12 @@ class build_exe(build_ext):
         build_ext.config_extension(self, exe)
 
     def build_executable (self, exe):
-        from distutils.dep_util import newer_group
         sources = list(exe.sources)
         depends = list(exe.depends)
         exe_fullpath = self.get_exe_fullpath(exe)
         depends = sources + depends
-        if not (self.force or newer_group(depends, exe_fullpath, 'newer')):
+        if not (self.force or
+                dep_util.newer_group(depends, exe_fullpath, 'newer')):
             log.debug("skipping '%s' executable (up-to-date)", exe.name)
             return
 
@@ -1347,7 +1231,7 @@ class build_exe(build_ext):
             fwkprefix = sysconfig.get_config_var('PYTHONFRAMEWORKPREFIX')
             fwkdir = sysconfig.get_config_var('PYTHONFRAMEWORKDIR')
             if fwkprefix and fwkdir and fwkdir != 'no-framework':
-                for flag in split_quoted(ldshflag):
+                for flag in shlex.split(ldshflag):
                     if flag.startswith(fwkdir):
                         fwkpath = os.path.join(fwkprefix, flag)
                         ldshflag = ldshflag.replace(flag, fwkpath)
@@ -1364,7 +1248,7 @@ class build_exe(build_ext):
             libraries=self.get_libraries(exe),
             library_dirs=exe.library_dirs,
             runtime_library_dirs=exe.runtime_library_dirs,
-            extra_preargs=split_quoted(ldshflag),
+            extra_preargs=shlex.split(ldshflag),
             extra_postargs=extra_args,
             debug=self.debug,
             target_lang=language)
@@ -1491,23 +1375,6 @@ class install_exe(cmd_install_lib.install_lib):
         return inputs
 
 
-class test(Command):
-    description = "run the test suite"
-    user_options = [
-        ('args=', 'a', "options"),
-        ]
-
-    def initialize_options(self):
-        self.args = None
-    def finalize_options(self):
-        if self.args:
-            self.args = split_quoted(self.args)
-        else:
-            self.args = []
-    def run(self):
-        pass
-
-
 class sdist(cmd_sdist.sdist):
 
     def run (self):
@@ -1596,22 +1463,5 @@ if setuptools:
         mod_egg_info.FileList = FileList
     except:
         pass
-
-# -----------------------------------------------------------------------------
-
-try:
-    import msilib
-    if not hasattr(msilib, 'Win64'):
-        if hasattr(msilib, 'AMD64'):
-            msilib.Win64 = msilib.AMD64
-    Directory_make_short = msilib.Directory.make_short
-    def make_short(self, file):
-        parts = file.split('.')
-        if len(parts) > 1:
-            file = '_'.join(parts[:-1])+'.'+parts[-1]
-        return Directory_make_short(self, file)
-    msilib.Directory.make_short = make_short
-except:
-    pass
 
 # -----------------------------------------------------------------------------

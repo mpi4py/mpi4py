@@ -15,7 +15,7 @@ build *MPI for Python*:
      If you want to build some MPI implementation from sources,
      check the instructions at :ref:`building-mpi` in the appendix.
 
-* Python 2.7, 3.5 or above.
+* Python 3.6 or above.
 
   .. note::
 

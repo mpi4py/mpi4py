@@ -26,19 +26,6 @@ result or exception. Sets of :class:`~concurrent.futures.Future` instances can
 be passed to the :func:`~concurrent.futures.wait` and
 :func:`~concurrent.futures.as_completed` functions.
 
-.. note::
-
-   The :mod:`concurrent.futures` package was introduced in Python 3.2. A
-   `backport <futures-repo_>`_ targeting Python 2.7 is available on `PyPI
-   <futures-pypi_>`_. The :mod:`mpi4py.futures` package uses
-   :mod:`concurrent.futures` if available, either from the Python 3 standard
-   library or the Python 2.7 backport if installed. Otherwise,
-   :mod:`mpi4py.futures` uses a bundled copy of core functionality backported
-   from Python 3.5 to work with Python 2.7.
-
-   .. _futures-repo: https://github.com/agronholm/pythonfutures
-   .. _futures-pypi: https://pypi.org/project/futures
-
 .. seealso::
 
    Module :mod:`concurrent.futures`

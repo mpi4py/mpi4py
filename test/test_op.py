@@ -55,14 +55,7 @@ class TestOp(unittest.TestCase):
                 for N in range(4):
                     myop = MPI.Op.Create(mysum, commute)
                     self.assertFalse(myop.is_predefined)
-                    if (hasattr(sys, 'pypy_version_info') and
-                        comm.size > 1):
-                        myop.Free()
-                        continue
                     try:
-                        # buffer(empty_array) returns
-                        # the same non-NULL pointer !!!
-                        if N == 0: continue
                         size = comm.Get_size()
                         rank = comm.Get_rank()
                         a = array.array('i', [i*(rank+1) for i in range(N)])

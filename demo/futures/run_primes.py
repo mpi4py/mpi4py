@@ -1,4 +1,3 @@
-from __future__ import print_function
 import math
 
 from mpi4py.futures import MPIPoolExecutor

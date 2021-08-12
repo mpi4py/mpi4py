@@ -21,8 +21,7 @@ except ImportError:
 try:
     import numba
     import numba.cuda
-    from distutils.version import StrictVersion
-    numba_version = StrictVersion(numba.__version__).version
+    numba_version = tuple(map(int, numba.__version__.split('.', 2)[:2]))
     if numba_version < (0, 48):
         import warnings
         warnings.warn('To test Numba GPU arrays, use Numba v0.48.0+.',
@@ -30,13 +29,6 @@ try:
         numba = None
 except ImportError:
     numba = None
-
-
-py2 = sys.version_info[0] == 2
-py3 = sys.version_info[0] >= 3
-pypy = hasattr(sys, 'pypy_version_info')
-pypy2 = pypy and py2
-pypy_lt_53 = pypy and sys.pypy_version_info < (5, 3)
 
 
 # ---
@@ -76,8 +68,9 @@ class DLPackCPUBuf(BaseBuf):
 
     def __del__(self):
         self.managed = None
-        if not pypy and sys.getrefcount(self._buf) > 2:
-            raise RuntimeError('dlpack: possible reference leak')
+        if sys and not hasattr(sys, 'pypy_version_info'):
+            if sys.getrefcount(self._buf) > 2:
+                raise RuntimeError('dlpack: possible reference leak')
 
     def __dlpack_device__(self):
         device = self.managed.dl_tensor.device
@@ -109,8 +102,9 @@ if cupy is not None:
                 self.dev_type = dlpack.DLDeviceType.kDLCUDA
 
         def __del__(self):
-            if not pypy and sys.getrefcount(self._buf) > 2:
-                raise RuntimeError('dlpack: possible reference leak')
+            if sys and not hasattr(sys, 'pypy_version_info'):
+                if sys.getrefcount(self._buf) > 2:
+                    raise RuntimeError('dlpack: possible reference leak')
 
         def __dlpack_device__(self):
             if self.has_dlpack:
@@ -214,40 +208,18 @@ class TestMessageSimple(unittest.TestCase):
         empty = [MPI.BOTTOM, "B"]
         Sendrecv(empty, empty)
 
-    @unittest.skipIf(pypy_lt_53, 'pypy(<5.3)')
     def testMessageBytes(self):
         sbuf = b"abc"
         rbuf = bytearray(3)
         Sendrecv([sbuf, "c"], [rbuf, MPI.CHAR])
         self.assertEqual(sbuf, rbuf)
 
-    @unittest.skipIf(pypy_lt_53, 'pypy(<5.3)')
     def testMessageBytearray(self):
         sbuf = bytearray(b"abc")
         rbuf = bytearray(3)
         Sendrecv([sbuf, "c"], [rbuf, MPI.CHAR])
         self.assertEqual(sbuf, rbuf)
 
-    @unittest.skipIf(py3, 'python3')
-    @unittest.skipIf(pypy2, 'pypy2')
-    @unittest.skipIf(hasattr(MPI, 'ffi'), 'mpi4py-cffi')
-    def testMessageUnicode(self):  # Test for Issue #120
-        sbuf = unicode("abc")
-        rbuf = bytearray(len(buffer(sbuf)))
-        Sendrecv([sbuf, MPI.BYTE], [rbuf, MPI.BYTE])
-
-    @unittest.skipIf(py3, 'python3')
-    @unittest.skipIf(pypy_lt_53, 'pypy(<5.3)')
-    def testMessageBuffer(self):
-        sbuf = buffer(b"abc")
-        rbuf = bytearray(3)
-        Sendrecv([sbuf, "c"], [rbuf, MPI.CHAR])
-        self.assertEqual(sbuf, rbuf)
-        self.assertRaises((BufferError, TypeError, ValueError),
-                          Sendrecv, [rbuf, "c"], [sbuf, "c"])
-
-    @unittest.skipIf(pypy2, 'pypy2')
-    @unittest.skipIf(pypy_lt_53, 'pypy(<5.3)')
     def testMessageMemoryView(self):
         sbuf = memoryview(b"abc")
         rbuf = bytearray(3)
@@ -848,14 +820,7 @@ class TestMessageCAIBuf(unittest.TestCase):
         with warnings.catch_warnings():
             warnings.simplefilter("error")
             self.assertRaises(RuntimeWarning, Sendrecv, smsg, rmsg)
-        try:  # Python 3.2+
-            self.assertWarns(RuntimeWarning, Sendrecv, smsg, rmsg)
-        except AttributeError:  # Python 2
-            with warnings.catch_warnings(record=True) as w:
-                warnings.simplefilter("always")
-                Sendrecv(smsg, rmsg)
-                self.assertEqual(len(w), 1)
-                self.assertEqual(w[-1].category, RuntimeWarning)
+        self.assertWarns(RuntimeWarning, Sendrecv, smsg, rmsg)
         self.assertEqual(smsg, rmsg)
 
 
@@ -909,14 +874,12 @@ class TestMessageVector(unittest.TestCase):
         empty = [MPI.BOTTOM, "B"]
         Alltoallv(empty, empty)
 
-    @unittest.skipIf(pypy_lt_53, 'pypy(<5.3)')
     def testMessageBytes(self):
         sbuf = b"abc"
         rbuf = bytearray(3)
         Alltoallv([sbuf, "c"], [rbuf, MPI.CHAR])
         self.assertEqual(sbuf, rbuf)
 
-    @unittest.skipIf(pypy_lt_53, 'pypy(<5.3)')
     def testMessageBytearray(self):
         sbuf = bytearray(b"abc")
         rbuf = bytearray(3)
@@ -1127,7 +1090,6 @@ class TestMessageVectorW(unittest.TestCase):
         MPI.Free_mem(sbuf)
         MPI.Free_mem(rbuf)
 
-    @unittest.skipIf(pypy_lt_53, 'pypy(<5.3)')
     def testMessageBytes(self):
         sbuf = b"abc"
         rbuf = bytearray(3)
@@ -1136,7 +1098,6 @@ class TestMessageVectorW(unittest.TestCase):
         Alltoallw(smsg, rmsg)
         self.assertEqual(sbuf, rbuf)
 
-    @unittest.skipIf(pypy_lt_53, 'pypy(<5.3)')
     def testMessageBytearray(self):
         sbuf = bytearray(b"abc")
         rbuf = bytearray(3)
@@ -1264,7 +1225,6 @@ class TestMessageRMA(unittest.TestCase):
             for target in (None, 0, [0, 0, MPI.BYTE]):
                 PutGet(empty, empty, target)
 
-    @unittest.skipIf(pypy_lt_53, 'pypy(<5.3)')
     def testMessageBytes(self):
         for target in (None, 0, [0, 3, MPI.BYTE]):
             sbuf = b"abc"
@@ -1272,21 +1232,12 @@ class TestMessageRMA(unittest.TestCase):
             PutGet(sbuf, rbuf, target)
             self.assertEqual(sbuf, rbuf)
 
-    @unittest.skipIf(pypy_lt_53, 'pypy(<5.3)')
     def testMessageBytearray(self):
         for target in (None, 0, [0, 3, MPI.BYTE]):
             sbuf = bytearray(b"abc")
             rbuf = bytearray(3)
             PutGet(sbuf, rbuf, target)
             self.assertEqual(sbuf, rbuf)
-
-    @unittest.skipIf(py3, 'python3')
-    @unittest.skipIf(pypy2, 'pypy2')
-    @unittest.skipIf(hasattr(MPI, 'ffi'), 'mpi4py-cffi')
-    def testMessageUnicode(self):  # Test for Issue #120
-        sbuf = unicode("abc")
-        rbuf = bytearray(len(buffer(sbuf)))
-        PutGet([sbuf, MPI.BYTE], [rbuf, MPI.BYTE], None)
 
     @unittest.skipMPI('msmpi')
     @unittest.skipIf(array is None, 'array')

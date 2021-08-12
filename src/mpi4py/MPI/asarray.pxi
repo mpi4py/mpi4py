@@ -21,7 +21,7 @@ cdef inline object chkarray(object ob, int n, integral_t **p):
     cdef int size = 0
     cdef object mem = getarray(ob, &size, p)
     if n != size: raise ValueError(
-        "expecting %d items, got %d" % (n, size))
+        f"expecting {n} items, got {size}")
     return mem
 
 # -----------------------------------------------------------------------------
@@ -31,7 +31,7 @@ cdef inline object asarray_Datatype(object sequence,
      cdef int i = 0
      cdef MPI_Datatype *array = NULL
      if size != len(sequence): raise ValueError(
-         "expecting %d items, got %d" % (size, len(sequence)))
+         f"expecting {size} items, got {len(sequence)}")
      cdef object ob = allocate(size, sizeof(MPI_Datatype), &array)
      for i from 0 <= i < size:
          array[i] = (<Datatype?>sequence[i]).ob_mpi
@@ -52,7 +52,7 @@ cdef inline object asarray_Info(object sequence,
              array[i] = info
      else:
          if size != len(sequence): raise ValueError(
-             "expecting %d items, got %d" % (size, len(sequence)))
+             f"expecting {size} items, got {len(sequence)}")
          ob = allocate(size, sizeof(MPI_Datatype), &array)
          for i from 0 <= i < size:
              array[i] = (<Info?>sequence[i]).ob_mpi
@@ -112,7 +112,7 @@ cdef inline object asarray_argvs(object sequence, int size, char ****p):
      else:
          sequence = list(sequence)
          if size != len(sequence): raise ValueError(
-             "expecting %d items, got %d" % (size, len(sequence)))
+             f"expecting {size} items, got {len(sequence)}")
      cdef int i = 0
      cdef char*** array = NULL
      cdef object ob = allocate(size+1, sizeof(char**), &array)

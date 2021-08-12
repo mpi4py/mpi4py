@@ -21,13 +21,10 @@ jobs:
       fail-fast: false
       matrix:
         py-version:
-          - 2.7
-          - 3.5
           - 3.6
           - 3.7
           - 3.8
           - 3.9
-          - pypy2
           - pypy3
         py-arch:
           - x86
@@ -65,18 +62,6 @@ jobs:
     - name: Configure hostname
       if:   runner.os == 'Linux' || runner.os == 'macOS'
       run:  echo 127.0.0.1 `hostname` | sudo tee -a /etc/hosts > /dev/null
-
-    - name: Activate MSVC
-      if:   runner.os == 'Windows' && matrix.py-version == '2.7'
-      uses: ilammy/msvc-dev-cmd@v1
-      with:
-        arch: ${{ matrix.py-arch }}
-
-    - name: Configure MSVC
-      if:   runner.os == 'Windows' && matrix.py-version == '2.7'
-      run:  |
-        Add-Content $Env:GITHUB_ENV MSSdk=1
-        Add-Content $Env:GITHUB_ENV DISTUTILS_USE_SDK=1
 
     - name: Checkout
       uses: actions/checkout@v2

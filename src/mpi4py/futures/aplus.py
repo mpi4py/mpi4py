@@ -87,9 +87,9 @@ def _chain_log(new_future, future):
             registry[new_future] = log
         if future in log:
             raise RuntimeError(
-                "Circular future chain detected: "
-                "Future {0} is already in the resolved chain {1}"
-                .format(future, set(log)))
+                f"Circular future chain detected: "
+                f"Future {future} is already in the resolved chain {set(log)}"
+            )
         log.add(future)
 
 
@@ -103,15 +103,10 @@ def _chain_future(new_future, future):
     future.add_done_callback(done_cb)
 
 
-if sys.version_info[0] == 2:     # pragma: no cover
-    def _sys_exception():
-        exc = sys.exc_info()[1]
-        return exc
-else:                            # pragma: no cover
-    def _sys_exception():
-        exc = sys.exc_info()[1]
-        exc.__traceback__ = None
-        return exc
+def _sys_exception():
+    exc = sys.exc_info()[1]
+    exc.__traceback__ = None
+    return exc
 
 
 def _done_cb(new_future, future, on_success=None, on_failure=None):

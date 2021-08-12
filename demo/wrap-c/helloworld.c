@@ -47,29 +47,6 @@ static struct PyMethodDef hw_methods[] = {
   {NULL,       NULL,                     0,            NULL} /* sentinel */
 };
 
-#if PY_MAJOR_VERSION < 3
-/* --- Python 2 --- */
-
-PyMODINIT_FUNC inithelloworld(void)
-{
-  PyObject *m = NULL;
-
-  /* Initialize mpi4py C-API */
-  if (import_mpi4py() < 0) goto bad;
-
-  /* Module initialization  */
-  m = Py_InitModule("helloworld", hw_methods);
-  if (m == NULL) goto bad;
-
-  return;
-
- bad:
-  return;
-}
-
-#else
-/* --- Python 3 --- */
-
 static struct PyModuleDef hw_module = {
   PyModuleDef_HEAD_INIT,
   "helloworld", /* m_name */
@@ -99,8 +76,6 @@ PyInit_helloworld(void)
  bad:
   return NULL;
 }
-
-#endif
 
 /* -------------------------------------------------------------------------- */
 

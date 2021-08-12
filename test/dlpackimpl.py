@@ -1,9 +1,7 @@
 import sys
 import ctypes
-try:
-    from enum import IntEnum
-except ImportError:
-    IntEnum = object
+from enum import IntEnum
+
 if hasattr(sys, 'pypy_version_info'):
     raise ImportError("unsupported on PyPy")
 

@@ -19,7 +19,7 @@ Some MPI-1 implementations (notably, MPICH 1) **do require** the
 actual command line arguments to be passed at the time
 :c:func:`MPI_Init()` is called. In this case, you will need to use a
 re-built, MPI-enabled, Python interpreter binary executable. A basic
-implementation (targeting Python 2.X) of what is required is shown
+implementation (targeting Python 3.9) of what is required is shown
 below:
 
 .. sourcecode:: c
@@ -31,7 +31,7 @@ below:
     {
        int status, flag;
        MPI_Init(&argc, &argv);
-       status = Py_Main(argc, argv);
+       status = Py_BytesMain(argc, argv);
        MPI_Finalized(&flag);
        if (!flag) MPI_Finalize();
        return status;
@@ -55,13 +55,13 @@ installed as :file:`{prefix}/bin/python{X}.{X}-mpi` (or
 :envvar:`PATH`, you should be able to enter your MPI-enabled Python
 interactively, for example::
 
-    $ python2.7-mpi
-    Python 2.7.8 (default, Nov 10 2014, 08:19:18)
-    [GCC 4.9.2 20141101 (Red Hat 4.9.2-1)] on linux2
+    $ python3.9-mpi
+    Python 3.9.6 (default, Jul 16 2021, 00:00:00) 
+    [GCC 11.1.1 20210531 (Red Hat 11.1.1-3)] on linux
     Type "help", "copyright", "credits" or "license" for more information.
     >>> import sys
     >>> sys.executable
-    '/usr/bin/python2.7-mpi'
+    '/usr/local/bin/python3.9-mpi'
     >>>
 
 

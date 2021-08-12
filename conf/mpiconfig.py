@@ -1,20 +1,13 @@
-import sys, os, platform
+import sys
+import os
+import shlex
+import shutil
+import platform
+from collections import OrderedDict
+from configparser import ConfigParser
+from configparser import Error as ConfigParserError
 
-from distutils.util  import split_quoted
-from distutils.spawn import find_executable
 from distutils import log as dulog
-
-try:
-    from collections import OrderedDict
-except ImportError:
-    OrderedDict = dict
-
-try:
-    from configparser import ConfigParser
-    from configparser import Error as ConfigParserError
-except ImportError:
-    from ConfigParser import ConfigParser
-    from ConfigParser import Error as ConfigParserError
 
 class Config(object):
 
@@ -71,17 +64,17 @@ class Config(object):
         mpif77  = self.compiler_info.get('mpif77')
         mpild   = self.compiler_info.get('mpild')
         if mpicc:
-            log.info("MPI C compiler:    %s", mpicc)
+            log.info(f"MPI C compiler:    {mpicc}")
         if mpicxx:
-            log.info("MPI C++ compiler:  %s", mpicxx)
+            log.info(f"MPI C++ compiler:  {mpicxx}")
         if mpifort:
-            log.info("MPI F compiler:    %s", mpifort)
+            log.info(f"MPI F compiler:    {mpifort}")
         if mpif90:
-            log.info("MPI F90 compiler:  %s", mpif90)
+            log.info(f"MPI F90 compiler:  {mpif90}")
         if mpif77:
-            log.info("MPI F77 compiler:  %s", mpif77)
+            log.info(f"MPI F77 compiler:  {mpif77}")
         if mpild:
-            log.info("MPI linker:        %s", mpild)
+            log.info(f"MPI linker:        {mpild}")
 
     def update(self, config, **more):
         if hasattr(config, 'keys'):
@@ -267,11 +260,11 @@ class Config(object):
     def setup_compiler_info(self, options, environ):
         def find_exe(cmd, path=None):
             if not cmd: return None
-            parts = split_quoted(cmd)
+            parts = shlex.split(cmd)
             exe, args = parts[0], parts[1:]
             if not os.path.isabs(exe) and path:
                 exe = os.path.basename(exe)
-            exe = find_executable(exe, path)
+            exe = shutil.which(exe, path=path)
             if not exe: return None
             return ' '.join([exe]+args)
         COMPILERS = (
@@ -375,14 +368,14 @@ class Config(object):
                 library_info[k] = [expanduser(expandvars(p))
                                    for p in pathlist if p]
             elif k == 'libraries':
-                library_info[k] = [e.strip() for e in split_quoted(v)]
+                library_info[k] = [e.strip() for e in shlex.split(v)]
             elif k in ('extra_compile_args',
                        'extra_link_args',
                        ):
-                library_info[k] = split_quoted(v)
+                library_info[k] = shlex.split(v)
             elif k == 'extra_objects':
                 library_info[k] = [expanduser(expandvars(e))
-                                   for e in split_quoted(v)]
+                                   for e in shlex.split(v)]
             elif hasattr(self, k):
                 library_info[k] = v.strip()
             else:
@@ -408,7 +401,7 @@ class Config(object):
                         if v is None:
                             macros[i] = m
                         else:
-                            macros[i] = '%s=%s' % (m, v)
+                            macros[i] = f'{m}={v}'
                 library_info[k] = ','.join(macros)
             elif k in ('include_dirs',
                        'library_dirs',

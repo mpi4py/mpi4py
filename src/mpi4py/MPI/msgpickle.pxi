@@ -12,34 +12,12 @@ cdef extern from "Python.h":
 cdef object PyPickle_dumps = None
 cdef object PyPickle_loads = None
 cdef object PyPickle_PROTOCOL = None
-if PY3:
-    from pickle import dumps as PyPickle_dumps
-    from pickle import loads as PyPickle_loads
-    from pickle import HIGHEST_PROTOCOL as PyPickle_PROTOCOL
-else:
-    try:
-        from cPickle import dumps as PyPickle_dumps
-        from cPickle import loads as PyPickle_loads
-        from cPickle import HIGHEST_PROTOCOL as PyPickle_PROTOCOL
-    except ImportError:
-        from pickle  import dumps as PyPickle_dumps
-        from pickle  import loads as PyPickle_loads
-        from pickle  import HIGHEST_PROTOCOL as PyPickle_PROTOCOL
+from pickle import dumps as PyPickle_dumps
+from pickle import loads as PyPickle_loads
+from pickle import HIGHEST_PROTOCOL as PyPickle_PROTOCOL
 
 if Py_GETENV(b"MPI4PY_PICKLE_PROTOCOL") != NULL:
     PyPickle_PROTOCOL = int(Py_GETENV(b"MPI4PY_PICKLE_PROTOCOL"))
-
-cdef object PyBytesIO_New = None
-cdef object PyPickle_loadf = None
-if PY2:
-    try:
-        from cStringIO import StringIO as PyBytesIO_New
-    except ImportError:
-        from io import BytesIO as PyBytesIO_New
-    try:
-        from cPickle import load as PyPickle_loadf
-    except ImportError:
-        from pickle import load as PyPickle_loadf
 
 
 cdef class Pickle:
@@ -133,11 +111,6 @@ cdef object cdumps(Pickle pkl, object obj):
         return pkl.ob_dumps(obj)
 
 cdef object cloads(Pickle pkl, object buf):
-    if PY2:
-        if not PyBytes_CheckExact(buf):
-            if pkl.ob_loads is PyPickle_loads:
-                buf = PyBytesIO_New(buf)
-                return PyPickle_loadf(buf)
     return pkl.ob_loads(buf)
 
 
@@ -159,7 +132,7 @@ cdef object pickle_dumpv(Pickle pkl, object obj, void **p, int n, int cnt[], int
     else:           items = list(obj)
     m = len(items)
     if m != n: raise ValueError(
-        "expecting %d items, got %d" % (n, m))
+        f"expecting {n} items, got {m}")
     cdef int  c=0, d=0
     for i from 0 <= i < m:
         items[i] = pickle_dump(pkl, items[i], p, &c)

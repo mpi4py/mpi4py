@@ -25,9 +25,9 @@ def run_command_line(args=None):
                    filename='<string>', argv0='-c'):
         # pylint: disable=missing-docstring
         from runpy import _run_module_code
-        karg = 'script_name' if sys.version_info >= (3, 4) else 'mod_fname'
         code = compile(string, filename, 'exec', 0, 1)
-        return _run_module_code(code, init_globals, run_name, **{karg: argv0})
+        kargs = {'script_name': argv0}
+        return _run_module_code(code, init_globals, run_name, **kargs)
 
     sys.argv[:] = args if args is not None else sys.argv[1:]
 
@@ -59,8 +59,8 @@ def set_abort_status(status):
     import sys
     status = (status if isinstance(status, int)
               else 0 if status is None else 1)
-    pkg = __spec__.parent or __name__.rpartition('.')[0]
-    mpi = sys.modules.get(pkg + '.MPI')
+    pkg = __spec__.parent
+    mpi = sys.modules.get(f'{pkg}.MPI')
     if mpi is not None and status:
         # pylint: disable=protected-access
         mpi._set_abort_status(status)
@@ -84,23 +84,22 @@ def main():
 
     def usage(errmess=None):
         from textwrap import dedent
+        python = os.path.basename(sys.executable)
         if __name__ == '__main__':
-            prog_name = package + '.run'
+            program = package + '.run'
         else:
-            prog_name = package
-        python_exe = os.path.basename(sys.executable)
-        subs = dict(prog=prog_name, python=python_exe)
+            program = package
 
-        cmdline = dedent("""
-        usage: {python} -m {prog} [options] <pyfile> [arg] ...
-           or: {python} -m {prog} [options] -m <mod> [arg] ...
-           or: {python} -m {prog} [options] -c <cmd> [arg] ...
-           or: {python} -m {prog} [options] - [arg] ...
-        """).strip().format(**subs)
+        cmdline = dedent(f"""
+        usage: {python} -m {program} [options] <pyfile> [arg] ...
+           or: {python} -m {program} [options] -m <mod> [arg] ...
+           or: {python} -m {program} [options] -c <cmd> [arg] ...
+           or: {python} -m {program} [options] - [arg] ...
+        """).strip()
 
-        helptip = dedent("""
-        Try `{python} -m {prog} -h` for more information.
-        """).strip().format(**subs)
+        helptip = dedent(f"""
+        Try `{python} -m {program} -h` for more information.
+        """).strip()
 
         options = dedent("""
         options:

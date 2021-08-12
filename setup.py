@@ -10,21 +10,17 @@ Python bindings for MPI
 import sys
 import os
 import re
+import shlex
+import shutil
+from glob import glob
 
 try:
     import setuptools
 except ImportError:
     setuptools = None
 
-pyver = sys.version_info[:2]
-if pyver < (2, 6) or (3, 0) <= pyver <= (3, 2):
-    raise RuntimeError("Python version 2.6+ or 3.3+ required")
-if pyver == (2, 6) or (3, 3) <= pyver <= (3, 4):
-    sys.stderr.write(
-        "WARNING: Python %d.%d is not supported.\n" % pyver)
-if (hasattr(sys, 'pypy_version_info') and
-    sys.pypy_version_info[:2] < (2, 0)):
-    raise RuntimeError("PyPy version >= 2.0 required")
+if sys.version_info < (3, 6):
+    raise RuntimeError("Python version 3.6+ required")
 
 topdir = os.path.abspath(os.path.dirname(__file__))
 sys.path.insert(0, os.path.join(topdir, 'conf'))
@@ -123,15 +119,13 @@ metadata['provides'] = ['mpi4py']
 # --------------------------------------------------------------------
 
 def run_command(exe, args):
-    from distutils.spawn import find_executable
-    from distutils.util  import split_quoted
-    cmd = find_executable(exe)
+    cmd = shutil.which(exe)
     if not cmd: return []
     if not isinstance(args, str):
         args = ' '.join(args)
     try:
         with os.popen(cmd + ' ' + args) as f:
-            return split_quoted(f.read())
+            return shlex.split(f.read())
     except:
         return []
 
@@ -147,7 +141,6 @@ if linux:
                 ]
 elif darwin:
     def darwin_linker_dirs(compiler):
-        from distutils.util import split_quoted
         linker_cmd = compiler.linker_so + ['-show']
         linker_cmd = run_command(linker_cmd[0], linker_cmd[1:])
         library_dirs  = compiler.library_dirs[:]
@@ -174,7 +167,6 @@ else:
     whole_archive = None
 
 def configure_dl(ext, config_cmd):
-    from distutils import log
     log.info("checking for dlopen() availability ...")
     ok = config_cmd.check_header('dlfcn.h')
     if ok : ext.define_macros += [('HAVE_DLFCN_H', 1)]
@@ -187,8 +179,7 @@ def configure_dl(ext, config_cmd):
 
 def configure_mpi(ext, config_cmd):
     from textwrap import dedent
-    from distutils import log
-    from distutils.errors import DistutilsPlatformError
+    from mpidistutils import DistutilsPlatformError
     headers = ['stdlib.h', 'mpi.h']
     #
     log.info("checking for MPI compile and link ...")
@@ -324,7 +315,7 @@ def configure_libvt(lib, config_cmd):
         lib.extra_link_args.append(openmp_flag)
 
 def configure_pyexe(exe, config_cmd):
-    from distutils import sysconfig
+    from mpidistutils import sysconfig
     if sys.platform.startswith('win'):
         return
     if (sys.platform == 'darwin' and
@@ -335,7 +326,7 @@ def configure_pyexe(exe, config_cmd):
         exe.libraries += ['python' + py_version + py_abiflags]
         return
     #
-    from distutils.util import split_quoted
+    pyver = sys.version_info[:2]
     cfg_vars = sysconfig.get_config_vars()
     libraries = []
     library_dirs = []
@@ -353,11 +344,11 @@ def configure_pyexe(exe, config_cmd):
             fwkdir in cfg_vars.get('LINKFORSHARED', '')):
             del libraries[:]
     for var in ('LIBDIR', 'LIBPL'):
-        library_dirs += split_quoted(cfg_vars.get(var, ''))
+        library_dirs += shlex.split(cfg_vars.get(var, ''))
     for var in ('LDFLAGS',
                 'LIBS', 'MODLIBS', 'SYSLIBS',
                 'LDLAST'):
-        link_args += split_quoted(cfg_vars.get(var, ''))
+        link_args += shlex.split(cfg_vars.get(var, ''))
     exe.libraries += libraries
     exe.library_dirs += library_dirs
     exe.extra_link_args += link_args
@@ -376,7 +367,6 @@ def ext_modules():
     if os.name == 'posix':
         modules.append(dl)
     # MPI extension module
-    from glob import glob
     MPI = dict(
         name='mpi4py.MPI',
         sources=['src/MPI.c'],
@@ -454,6 +444,7 @@ def executables():
 # Setup
 # --------------------------------------------------------------------
 
+from mpidistutils import log
 from mpidistutils import setup
 from mpidistutils import Extension  as Ext
 from mpidistutils import Library    as Lib
@@ -469,11 +460,7 @@ def run_setup():
     if setuptools:
         setup_args['zip_safe'] = False
         setup_args['setup_requires'] = []
-        setup_args['python_requires'] = """
-        >=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*
-        """.strip()
-    if setuptools and pyver < (3, 0):
-        setup_args['setup_requires'] += ['3to2']
+        setup_args['python_requires'] = '>=3.6'
     if setuptools and not os.getenv('CONDA_BUILD'):
         src = os.path.join('src', 'mpi4py.MPI.c')
         has_src = os.path.exists(os.path.join(topdir, src))
@@ -508,9 +495,6 @@ def run_setup():
     )
 
 def chk_cython(VERSION):
-    from distutils import log
-    from distutils.version import LooseVersion
-    from distutils.version import StrictVersion
     warn = lambda msg='': sys.stderr.write(msg+'\n')
     #
     try:
@@ -531,10 +515,10 @@ def chk_cython(VERSION):
     REQUIRED = VERSION
     m = re.match(r"(\d+\.\d+(?:\.\d+)?).*", CYTHON_VERSION)
     if m:
-        Version = StrictVersion
+        from mpidistutils import Version
         AVAILABLE = m.groups()[0]
     else:
-        Version = LooseVersion
+        from mpidistutils import LegacyVersion as Version
         AVAILABLE = CYTHON_VERSION
     if (REQUIRED is not None and
         Version(AVAILABLE) < Version(REQUIRED)):
@@ -554,10 +538,8 @@ def run_cython(source, target=None,
                depends=(), includes=(),
                destdir_c=None, destdir_h=None,
                wdir=None, force=False, VERSION=None):
-    from glob import glob
-    from distutils import log
-    from distutils import dep_util
-    from distutils.errors import DistutilsError
+    from mpidistutils import dep_util
+    from mpidistutils import DistutilsError
     if target is None:
         target = os.path.splitext(source)[0]+'.c'
     cwd = os.getcwd()
@@ -586,7 +568,6 @@ def run_cython(source, target=None,
             "Cython failure: '%s' -> '%s'" % (source, target))
 
 def build_sources(cmd):
-    from distutils.errors import DistutilsError
     has_src = os.path.exists(os.path.join(
         topdir, 'src', 'mpi4py.MPI.c'))
     has_vcs = (os.path.isdir(os.path.join(topdir, '.git')) or
@@ -608,27 +589,6 @@ def build_sources(cmd):
 
 from mpidistutils import build_src
 build_src.run = build_sources
-
-def run_testsuite(cmd):
-    from distutils.errors import DistutilsError
-    sys.path.insert(0, 'test')
-    try:
-        from runtests import main
-    finally:
-        del sys.path[0]
-    if cmd.dry_run:
-        return
-    args = cmd.args[:] or []
-    if cmd.verbose < 1:
-        args.insert(0,'-q')
-    if cmd.verbose > 1:
-        args.insert(0,'-v')
-    err = main(args)
-    if err:
-        raise DistutilsError("test")
-
-from mpidistutils import test
-test.run = run_testsuite
 
 def main():
     run_setup()

@@ -53,27 +53,21 @@ setup_mpi_threads.thread_level = None      # type: ignore[attr-defined]
 # ---
 
 
-if sys.version_info[0] >= 3:
-
-    def sys_exception():
-        exc = sys.exc_info()[1]
-        exc.__traceback__ = None
-        return exc
-
-else:  # pragma: no cover
-
-    def sys_exception():
-        exc = sys.exc_info()[1]
-        return exc
+def sys_exception():
+    exc = sys.exc_info()[1]
+    exc.__traceback__ = None
+    return exc
 
 
 def os_environ_get(name, default=None):
-    varname = 'MPI4PY_FUTURES_{}'.format(name)
+    varname = f'MPI4PY_FUTURES_{name}'
     if varname not in os.environ:
-        oldname = 'MPI4PY_{}'.format(name)
+        oldname = f'MPI4PY_{name}'
         if oldname in os.environ:  # pragma: no cover
-            message = "Environment variable {} is deprecated, use {}"
-            warnings.warn(message.format(oldname, varname), DeprecationWarning)
+            warnings.warn(
+                f"Environment variable {oldname} is deprecated, use {varname}",
+                DeprecationWarning,
+            )
             return os.environ[oldname]
     return os.environ.get(varname, default)
 
@@ -752,12 +746,8 @@ def _sync_get_data(options):
     data.pop('initkwargs', None)
 
     if import_main_module:
-        if sys.version_info[0] >= 3:
-            spec = getattr(main, '__spec__', None)
-            name = getattr(spec, 'name', None)
-        else:  # pragma: no cover
-            loader = getattr(main, '__loader__', None)
-            name = getattr(loader, 'fullname', None)
+        spec = getattr(main, '__spec__', None)
+        name = getattr(spec, 'name', None)
         path = getattr(main, '__file__', None)
         if name is not None:  # pragma: no cover
             data['@main:mod_name'] = name
@@ -799,9 +789,9 @@ def _check_recursive_spawn():  # pragma: no cover
     main_name, main_path = import_main.sentinel
     main_info = "\n"
     if main_name is not None:
-        main_info += "    main name: '{}'\n".format(main_name)
+        main_info += f"    main name: '{main_name}'\n"
     if main_path is not None:
-        main_info += "    main path: '{}'\n".format(main_path)
+        main_info += f"    main path: '{main_path}'\n"
     main_info += "\n"
     sys.stderr.write("""
     The main script or module attempted to spawn new MPI worker processes.
@@ -820,7 +810,6 @@ def _check_recursive_spawn():  # pragma: no cover
 
 
 FLAG_OPT_MAP = {
-    # Python 3
     'inspect': 'i',
     'interactive': 'i',
     'debug': 'd',
@@ -837,12 +826,6 @@ FLAG_OPT_MAP = {
     # 'dev_mode': 'Xdev',
     # 'utf8_mode': 'Xutf8',
     # 'warn_default_encoding': 'Xwarn_default_encoding',
-    # Python 2
-    'division_warning': 'Qwarn',
-    'division_new': 'Qnew',
-    'py3k_warning': '3',
-    'tabcheck': 't',
-    'unicode': 'U',
 }
 
 
@@ -891,7 +874,7 @@ def client_spawn(python_exe=None,
     if max_workers is None:
         max_workers = get_max_workers()
     if mpi_info is None:
-        mpi_info = dict(soft='1:{}'.format(max_workers))
+        mpi_info = dict(soft=f'1:{max_workers}')
 
     args = get_python_flags() + list(python_args)
     args.extend(['-m', get_spawn_module()])

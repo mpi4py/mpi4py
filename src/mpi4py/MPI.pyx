@@ -8,6 +8,5 @@
 #cython: autotestdict=False
 #cython: warn.multiple_declarators=False
 #cython: optimize.use_switch=False
-from __future__ import absolute_import
 cimport cython
 include "MPI/MPI.pyx"
