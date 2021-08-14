@@ -6,6 +6,16 @@ CHANGES: MPI for Python
 :Contact: dalcinl@gmail.com
 
 
+Release 3.1.1 [2021-08-14]
+==========================
+
+.. warning:: This is the last release supporting Python 2.
+
+* Fix typo in Requires-Python package metadata.
+
+* Regenerate C sources with Cython 0.29.24.
+
+
 Release 3.1.0 [2021-08-12]
 ==========================
 
