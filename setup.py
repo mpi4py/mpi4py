@@ -470,7 +470,7 @@ def run_setup():
         setup_args['zip_safe'] = False
         setup_args['setup_requires'] = []
         setup_args['python_requires'] = """
-        >=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*'
+        >=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*
         """.strip()
     if setuptools and pyver < (3, 0):
         setup_args['setup_requires'] += ['3to2']
