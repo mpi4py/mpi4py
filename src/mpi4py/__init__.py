@@ -58,6 +58,11 @@ class Rc:
     def __init__(self, **kwargs):
         self(**kwargs)
 
+    def __setattr__(self, name, value):
+        if not hasattr(self, name):
+            raise TypeError(f"object has no attribute '{name}'")
+        super().__setattr__(name, value)
+
     def __call__(self, **kwargs):
         for key in kwargs:
             if not hasattr(self, key):
