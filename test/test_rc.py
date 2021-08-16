@@ -19,6 +19,8 @@ class TestRC(unittest.TestCase):
     def testRC3(self):
         error = lambda: rc(ABCXYZ=123456)
         self.assertRaises(TypeError, error)
+        error = lambda: setattr(rc, 'ABCXYZ', 123456)
+        self.assertRaises(TypeError, error)
 
 
 if __name__ == '__main__':
