@@ -50,6 +50,7 @@ test-package() {
   RUN $MPIEXEC -n $P python $PWD/demo/futures/test_futures.py -f
   RUN $MPIEXEC -n 1  python -m mpi4py.futures $PWD/demo/futures/test_futures.py
   RUN $MPIEXEC -n $P python -m mpi4py.futures $PWD/demo/futures/test_futures.py -f
+  RUN python $PWD/demo/test-run/test_run.py
   if [[ "$COVERAGE" == "yes" ]]; then
       RUN ./conf/coverage.sh
       RUN coverage report

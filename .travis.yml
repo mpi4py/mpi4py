@@ -64,6 +64,7 @@ script:
   - mpiexec -n $P python $PWD/demo/futures/test_futures.py -v
   - mpiexec -n 1  python -m mpi4py.futures $PWD/demo/futures/test_futures.py -v
   - mpiexec -n $P python -m mpi4py.futures $PWD/demo/futures/test_futures.py -v
+  - python $PWD/demo/test-run/test_run.py -v
 
 #notifications:
 #  email: false
