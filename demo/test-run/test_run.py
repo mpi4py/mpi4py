@@ -1,80 +1,120 @@
-import sys, os, shlex, shutil
-import subprocess as sp
+import sys
+import os
+import shlex
+import shutil
+import warnings
+import subprocess
 import unittest
 import mpi4py
+
 
 def find_executable(exe):
     command = shlex.split(exe)
     executable = shutil.which(command[0])
     if executable:
         command[0] = executable
-        return ' '.join(command)
+        try:  # Python 3.8
+            return shlex.join(command)
+        except AttributeError:
+            return ' '.join(shlex.quote(arg) for arg in command)
+
 
 def find_mpiexec(mpiexec='mpiexec'):
     mpiexec = os.environ.get('MPIEXEC') or mpiexec
     mpiexec = find_executable(mpiexec)
     if not mpiexec and sys.platform.startswith('win'):
         MSMPI_BIN = os.environ.get('MSMPI_BIN', '')
-        mpiexec = os.path.join(MSMPI_BIN, mpiexec)
-        mpiexec = find_executable(mpiexec)
-    if not mpiexec:
-        mpiexec = find_executable('mpirun')
+        mpiexec = os.path.join(MSMPI_BIN, 'mpiexec.exe')
+        mpiexec = shutil.which(mpiexec)
+        mpiexec = shlex.quote(mpiexec)
     return mpiexec
+
 
 def launcher(np):
     mpiexec = find_mpiexec()
-    python = sys.executable
+    python = shlex.quote(sys.executable)
     if 'coverage' in sys.modules:
-        python += ' -m coverage run -p -m'
+        python += ' -m coverage run -p'
     module = 'mpi4py.run -rc threads=False'
-    command = '{mpiexec} -n {np} {python} -m {module}'
-    return shlex.split(command.format(**vars()))
+    command = f'{mpiexec} -n {np} {python} -m {module}'
+    return shlex.split(command)
 
-def execute(np, command, args=''):
-    env = os.environ.copy()
-    pypath = os.environ.get('PYTHONPATH', '').split(os.pathsep)
-    pypath.insert(0, os.path.abspath(os.path.dirname(mpi4py.__path__[0])))
-    env['PYTHONPATH'] = os.pathsep.join(pypath)
-    if isinstance(command, str):
-        command = shlex.split(command)
+
+def execute(np, cmd, args=''):
+    mpi4pyroot = os.path.abspath(os.path.dirname(mpi4py.__path__[0]))
+    pythonpath = os.environ.get('PYTHONPATH', '').split(os.pathsep)
+    pythonpath.insert(0, mpi4pyroot)
+
+    mpiexec = launcher(np)
+    if isinstance(cmd, str):
+        cmd = shlex.split(cmd)
     if isinstance(args, str):
         args = shlex.split(args)
-    cmdline = launcher(np) + command + args
-    p = sp.Popen(cmdline, stdout=sp.PIPE, stderr=sp.PIPE, env=env, bufsize=0)
+    command = mpiexec + cmd + args
+
+    env = os.environ.copy()
+    env['PYTHONPATH'] = os.pathsep.join(pythonpath)
+    env['PYTHONUNBUFFERED'] = '1'
+
+    p = subprocess.Popen(
+        command, env=env,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
     stdout, stderr = p.communicate()
     return p.returncode, stdout.decode(), stderr.decode()
 
 
-class BaseTestRun(object):
+@unittest.skipIf(not find_mpiexec(), 'mpiexec')
+class BaseTestRun(unittest.TestCase):
 
     def assertMPIAbort(self, stdout, stderr):
-        if not ('MPI_Abort' in stdout or 'MPI_ABORT' in stdout or
-                'MPI_Abort' in stderr or 'MPI_ABORT' in stderr):
-            msg = ("expecting MPI_Abort() message in stdout/stderr:\n"
-                   "[stdout]:\n{0}\n[stderr]:\n{1}\n").format(stdout, stderr)
-            raise self.failureException(msg)
+        aborted = any(
+            mpiabort in output
+            for output in (stdout, stderr)
+            for mpiabort in (
+                'MPI_Abort',                # MPICH
+                'MPI_ABORT',                # Open MPI
+                'aborting MPI_COMM_WORLD',  # Microsoft MPI
+            )
+        )
+        if aborted:
+            return
+        ci = any((
+            os.environ.get('TRAVIS'),
+        ))
+        if ci:
+            warnings.warn(
+                "expecting MPI_Abort() message in stdout/stderr",
+                RuntimeWarning, 2,
+            )
+        else:
+            raise self.failureException(
+                "expecting MPI_Abort() message in stdout/stderr:\n"
+                f"[stdout]:\n{stdout}\n[stderr]:\n{stderr}\n"
+            )
 
 
-class TestRunScript(BaseTestRun, unittest.TestCase):
+class TestRunScript(BaseTestRun):
     pyfile = 'run-script.py'
 
     def execute(self, args='', np=1):
         dirname = os.path.abspath(os.path.dirname(__file__))
         script = os.path.join(dirname, self.pyfile)
-        return execute(np, script, args)
+        return execute(np, shlex.quote(script), args)
 
     def testSuccess(self):
         success = 'Hello, World!'
-        for np in (1, 2, 3):
+        for np in (1, 2):
             status, stdout, stderr = self.execute(np=np)
             self.assertEqual(status, 0)
-            self.assertEqual(stderr, '')
             self.assertEqual(stdout.count(success), np)
+            self.assertEqual(stderr, '')
 
     def testException(self):
         message = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
         excmess = 'RuntimeError: {0}'.format(message)
-        for np in (1, 2, 3):
+        for np in (1, 2):
             for rank in range(0, np):
                 args = ['--rank', str(rank), '--exception', message]
                 status, stdout, stderr = self.execute(args, np)
@@ -84,8 +124,8 @@ class TestRunScript(BaseTestRun, unittest.TestCase):
 
     def testSysExitCode(self):
         errcode = 7
-        for np in (1, 2, 3):
-            for r in sorted(set([0, np-1])):
+        for np in (1, 2):
+            for r in sorted(set([0, np - 1])):
                 args = ['--rank', str(r), '--sys-exit', str(errcode)]
                 status, stdout, stderr = self.execute(args, np)
                 self.assertTrue(status in (errcode, 1))
@@ -94,8 +134,8 @@ class TestRunScript(BaseTestRun, unittest.TestCase):
 
     def testSysExitMess(self):
         exitmsg = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-        for np in (1, 2, 3):
-            for r in sorted(set([0, np-1])):
+        for np in (1, 2):
+            for r in sorted(set([0, np - 1])):
                 args = ['--rank', str(r), '--sys-exit-msg', exitmsg]
                 status, stdout, stderr = self.execute(args, np)
                 self.assertEqual(status, 1)
@@ -103,16 +143,48 @@ class TestRunScript(BaseTestRun, unittest.TestCase):
                 self.assertTrue('Traceback' not in stderr)
                 self.assertTrue(exitmsg in stderr)
 
-if os.path.exists(os.path.join(os.path.dirname(__file__), 'run-directory')):
-    class TestRunDirectory(TestRunScript):
-        pyfile = 'run-directory'
 
-if os.path.exists(os.path.join(os.path.dirname(__file__), 'run-zipfile.zip')):
-    class TestRunZipFile(TestRunScript):
-        pyfile = 'run-zipfile.zip'
+class TestRunDirectory(TestRunScript):
+    directory = 'run-directory'
+
+    @classmethod
+    def setUpClass(cls):
+        from tempfile import mkdtemp
+        cls.tempdir = mkdtemp()
+        cls.directory = os.path.join(cls.tempdir, cls.directory)
+        os.makedirs(cls.directory)
+        topdir = os.path.dirname(__file__)
+        script = os.path.join(topdir, super().pyfile)
+        pymain = os.path.join(cls.directory, '__main__.py')
+        shutil.copy(script, pymain)
+        cls.pyfile = cls.directory
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls.tempdir)
 
 
-class TestRunModule(BaseTestRun, unittest.TestCase):
+class TestRunZipFile(TestRunScript):
+    zipfile = 'run-zipfile.zip'
+
+    @classmethod
+    def setUpClass(cls):
+        from tempfile import mkdtemp
+        from zipfile import ZipFile
+        cls.tempdir = mkdtemp()
+        cls.zipfile = os.path.join(cls.tempdir, cls.zipfile)
+        topdir = os.path.dirname(__file__)
+        script = os.path.join(topdir, super().pyfile)
+        with ZipFile(cls.zipfile, 'w') as f:
+            f.write(script, '__main__.py')
+        cls.pyfile = cls.zipfile
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls.tempdir)
+
+
+class TestRunModule(BaseTestRun):
 
     def execute(self, module, np=1):
         return execute(np, '-m', module)
@@ -120,52 +192,49 @@ class TestRunModule(BaseTestRun, unittest.TestCase):
     def testSuccess(self):
         module = 'mpi4py.bench --no-threads helloworld'
         message = 'Hello, World!'
-        for np in (1, 2, 3):
+        for np in (1, 2):
             status, stdout, stderr = self.execute(module, np)
             self.assertEqual(status, 0)
             self.assertEqual(stdout.count(message), np)
             self.assertEqual(stderr, '')
 
 
-class TestRunCommand(BaseTestRun, unittest.TestCase):
+class TestRunCommand(BaseTestRun):
 
     def execute(self, command, np=1):
-        return execute(np, '-c', command)
+        return execute(np, '-c', shlex.quote(command))
 
     def testArgv0(self):
-        command = '"import sys; print(sys.argv[0])"'
+        command = 'import sys; print(sys.argv[0], flush=True)'
         status, stdout, stderr = self.execute(command, 1)
         self.assertEqual(status, 0)
-        self.assertEqual(stdout, '-c\n')
-        self.assertEqual(stderr, '')
+        self.assertEqual(stdout.strip(), '-c')
+        self.assertEqual(stderr.strip(), '')
 
     def testSuccess(self):
-        command = '"from mpi4py import MPI"'
-        for np in (1, 2, 3):
+        command = 'from mpi4py import MPI'
+        for np in (1, 2):
             status, stdout, stderr = self.execute(command, np)
             self.assertEqual(status, 0)
             self.assertEqual(stdout, '')
             self.assertEqual(stderr, '')
 
     def testException(self):
-        command = '"from mpi4py import MPI; 1/0 if MPI.COMM_WORLD.Get_rank()==0 else 0;"'
+        command = '; '.join((
+            'from mpi4py import MPI',
+            'comm = MPI.COMM_WORLD',
+            'comm.Barrier()',
+            'comm.Barrier()',
+            'comm.Get_rank() == {} and (1/0)',
+            'comm.Barrier()',
+        ))
         excmess = 'ZeroDivisionError:'
-        for np in (1, 2, 3):
+        for np in (1, 2):
             for rank in range(0, np):
-                status, stdout, stderr = self.execute(command, np)
+                status, stdout, stderr = self.execute(command.format(rank), np)
                 self.assertEqual(status, 1)
                 self.assertMPIAbort(stdout, stderr)
                 self.assertTrue(excmess in stderr)
-
-
-if not find_mpiexec():
-    del TestRunScript
-    try: del TestRunDirectory
-    except: pass
-    try: del TestRunZipFile
-    except: pass
-    del TestRunModule
-    del TestRunCommand
 
 
 if __name__ == '__main__':

@@ -52,6 +52,7 @@ test_script:
   - "\"%MSMPI_BIN%\\mpiexec.exe\" -n 1 %PYTHON%\\python.exe %CD%\\test\\runtests.py -v -f --no-builddir"
   - "\"%MSMPI_BIN%\\mpiexec.exe\" -n 1 %PYTHON%\\python.exe %CD%\\demo\\futures\\test_futures.py -v"
   - "\"%MSMPI_BIN%\\mpiexec.exe\" -n 2 %PYTHON%\\python.exe %CD%\\demo\\futures\\test_futures.py -v"
+  - "%PYTHON%\\python.exe %CD%\\demo\\test-run\\test_run.py -v"
   - "%PYTHON%\\Scripts\\pip.exe uninstall --yes mpi4py"
 
 artifacts:

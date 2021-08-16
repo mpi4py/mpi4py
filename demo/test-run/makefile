@@ -5,9 +5,6 @@ PYTHON = python$(py)
 
 .PHONY: build
 build:
-	mkdir -p run-directory/
-	cp run-script.py run-directory/__main__.py
-	zip -qj run-zipfile.zip run-directory/__main__.py
 
 .PHONY: test
 test:
@@ -15,4 +12,3 @@ test:
 
 .PHONY: clean
 clean:
-	${RM} -r run-directory run-zipfile.zip
