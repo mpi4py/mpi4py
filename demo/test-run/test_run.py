@@ -81,8 +81,9 @@ class BaseTestRun(unittest.TestCase):
         if aborted:
             return
         ci = any((
-            os.environ.get('TRAVIS') == 'true',
+            os.environ.get('GITHUB_ACTIONS') == 'true',
             os.environ.get('CIRCLECI') == 'true',
+            os.environ.get('TRAVIS') == 'true',
         ))
         if ci:
             warnings.warn(
