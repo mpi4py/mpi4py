@@ -6,7 +6,7 @@ MPI for Python
    :target: https://github.com/mpi4py/mpi4py/actions/
 .. image::  https://readthedocs.org/projects/mpi4py/badge/?version=latest
    :target: https://mpi4py.readthedocs.org/en/latest/
-.. image::  https://dev.azure.com/mpi4py/mpi4py/_apis/build/status/mpi4py.mpi4py?branchName=master
+.. image::  https://dev.azure.com/mpi4py/mpi4py/_apis/build/status/ci?branchName=master
    :target: https://dev.azure.com/mpi4py/mpi4py/_build
 .. image::  https://ci.appveyor.com/api/projects/status/whh5xovp217h0f7n?svg=true
    :target: https://ci.appveyor.com/project/mpi4py/mpi4py
