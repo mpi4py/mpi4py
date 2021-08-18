@@ -71,11 +71,9 @@ class TestPickle(unittest.TestCase):
 
     def testDefault(self):
         pickle = self.pickle
-        protocols = [0, 1, 2]
-        if sys.version_info[:2] >= (3, 0):
-            protocols.append(3)
-        if sys.version_info[:2] >= (3, 4):
-            protocols.append(4)
+        protocols = [0, 1, 2, 3, 4]
+        if sys.version_info[:2] >= (3, 8):
+            protocols.append(5)
         protocols.append(-1)
         protocols.append(None)
         for proto in protocols:
@@ -89,11 +87,7 @@ class TestPickle(unittest.TestCase):
         pickle = self.pickle
         dumps = cPickle.dumps
         loads = cPickle.loads
-        protocols = [0, 1, 2]
-        if sys.version_info[:2] >= (3, 0):
-            protocols.append(3)
-        if sys.version_info[:2] >= (3, 4):
-            protocols.append(4)
+        protocols = [0, 1, 2, 3, 4]
         if sys.version_info[:2] >= (3, 8):
             protocols.append(5)
         protocols.append(-1)
@@ -108,11 +102,7 @@ class TestPickle(unittest.TestCase):
         pickle = self.pickle
         dumps = pyPickle.dumps
         loads = pyPickle.loads
-        protocols = [0, 1, 2]
-        if sys.version_info[:2] >= (3, 0):
-            protocols.append(3)
-        if sys.version_info[:2] >= (3, 4):
-            protocols.append(4)
+        protocols = [0, 1, 2, 3, 4]
         if sys.version_info[:2] >= (3, 8):
             protocols.append(5)
         protocols.append(-1)
@@ -142,10 +132,7 @@ class TestPickle(unittest.TestCase):
         pickle = self.pickle
         dumps = marshal.dumps
         loads = marshal.loads
-        protocols = [0, 1, 2]
-        if sys.version_info[:2] >= (3, 4):
-            protocols.append(3)
-            protocols.append(4)
+        protocols = [0, 1, 2, 3, 4]
         protocols.append(None)
         for protocol in protocols:
             pickle.__init__(dumps, loads, protocol)
