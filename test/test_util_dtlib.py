@@ -26,10 +26,8 @@ typecodes += ['i{:d}'.format(n) for n in (1,2,4,8)]
 typecodes += ['u{:d}'.format(n) for n in (1,2,4,8)]
 typecodes += ['f{:d}'.format(n) for n in (4,8)]
 
-np_lt_117 = (np_version and np_version < (1, 17))
-if np_lt_117 or sys.version_info[0] == 2:
+if np_version and np_version < (1, 17):
     typecodes.remove('L')
-if np_lt_117:
     typecodes.remove('F')
     typecodes.remove('D')
     typecodes.remove('G')

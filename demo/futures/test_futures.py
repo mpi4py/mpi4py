@@ -554,8 +554,6 @@ class AsCompletedTestMixin:
                          completed_futures)
 
     def test_duplicate_futures(self):
-        py_version = sys.version_info[:3]
-        if py_version[0] == 3 and py_version < (3, 3, 5): return
         # Issue 20367. Duplicate futures should not raise exceptions or give
         # duplicate responses.
         future1 = self.executor.submit(time.sleep, 0.1)

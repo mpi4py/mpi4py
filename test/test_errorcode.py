@@ -22,17 +22,15 @@ class TestErrorCode(unittest.TestCase):
             errstr = MPI.Get_error_string(ierr)
 
     def testException(self):
-        from sys import version_info as py_version
         success = MPI.Exception(MPI.SUCCESS)
         lasterr = MPI.Exception(MPI.ERR_LASTCODE)
         for ierr in self.errorclasses:
             errstr = MPI.Get_error_string(ierr)
             errcls = MPI.Get_error_class(ierr)
             errexc = MPI.Exception(ierr)
-            if py_version >= (2,5):
-                self.assertEqual(errexc.error_code,   ierr)
-                self.assertEqual(errexc.error_class,  ierr)
-                self.assertEqual(errexc.error_string, errstr)
+            self.assertEqual(errexc.error_code,   ierr)
+            self.assertEqual(errexc.error_class,  ierr)
+            self.assertEqual(errexc.error_string, errstr)
             self.assertEqual(repr(errexc), "MPI.Exception(%d)" % ierr)
             self.assertEqual(str(errexc), errstr)
             self.assertEqual(int(errexc), ierr)

@@ -37,8 +37,7 @@ URLS = [
 ]
 
 def load_url(url, timeout):
-    kwargs = {'timeout': timeout} if sys.version_info >= (2, 6) else {}
-    return urlopen(url, **kwargs).read()
+    return urlopen(url, timeout=timeout).read()
 
 def download_urls_sequential(urls, timeout=60):
     url_to_content = {}
