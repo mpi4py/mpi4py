@@ -1,0 +1,44 @@
+cff-version: 1.2.0
+message: Please cite this software using the metadata from 'preferred-citation'.
+
+title: MPI for Python
+abstract: Python bindings for MPI.
+license: BSD-2-Clause
+url: https://mpi4py.github.io
+repository-code: https://github.com/mpi4py/mpi4py
+contact:
+  - name: MPI for Python
+    email: mpi4py@googlegroups.com
+    website: https://groups.google.com/g/mpi4py
+
+version: 3.1.1
+date-released: 2021-08-12
+doi: 10.5281/zenodo.5229640
+authors:
+  - family-names: Dalcin
+    given-names: Lisandro
+    alias: dalcinl
+    orcid: https://orcid.org/0000-0001-8086-0155
+  - family-names: Fang
+    given-names: Yao-Lung L.
+    alias: leofang
+    orcid: https://orcid.org/0000-0001-7191-1651
+
+preferred-citation:
+  type: article
+  title: "mpi4py: Status Update After 12 Years of Development"
+  authors:
+    - family-names: Dalcin
+      given-names: Lisandro
+      orcid: https://orcid.org/0000-0001-8086-0155
+    - family-names: Fang
+      given-names: Yao-Lung L.
+      orcid: https://orcid.org/0000-0001-7191-1651
+  journal: Computing in Science & Engineering
+  doi: 10.1109/mcse.2021.3083216
+  issn: 1558-366X
+  volume: 23
+  number: 4
+  start: 47
+  end: 54
+  year: 2021
