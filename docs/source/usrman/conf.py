@@ -199,7 +199,7 @@ latex_elements = {
 
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', package, project, [author], 1)
+    ('index', package, project, [author], 3)
 ]
 
 
