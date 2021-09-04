@@ -1,5 +1,6 @@
 from mpi4py import MPI
 import mpiunittest as unittest
+
 try:
     import array
 except ImportError:

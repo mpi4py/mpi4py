@@ -1,8 +1,9 @@
 from mpi4py import MPI
 import mpiunittest as unittest
 import sys
+
 try:
-    from array import array
+    import array
 except ImportError:
     array = None
 
@@ -58,7 +59,7 @@ class TestMemory(unittest.TestCase):
     @unittest.skipIf(array is None, 'array')
     def testNewArray(self):
         memory = MPI.memory
-        obj = array('i', [1,2,3])
+        obj = array.array('i', [1,2,3])
         mem = memory(obj)
         self.assertEqual(mem.obj, obj)
         self.assertEqual(mem.nbytes, len(obj)*obj.itemsize)
@@ -113,10 +114,10 @@ class TestMemory(unittest.TestCase):
     @unittest.skipIf(array is None, 'array')
     def testFromBufferArrayRO(self):
         memory = MPI.memory
-        obj = array('B', [1,2,3])
+        obj = array.array('B', [1,2,3])
         mem = memory.frombuffer(obj, readonly=True)
         self.assertNotEqual(mem.address, 0)
-        self.assertEqual(type(mem.obj), array)
+        self.assertEqual(type(mem.obj), array.array)
         self.assertEqual(mem.nbytes, 3)
         self.assertEqual(mem.readonly, True)
         self.assertEqual(mem.format, 'B')
@@ -139,7 +140,7 @@ class TestMemory(unittest.TestCase):
     @unittest.skipIf(array is None, 'array')
     def testFromBufferArrayRW(self):
         memory = MPI.memory
-        obj = array('B', [1,2,3])
+        obj = array.array('B', [1,2,3])
         mem = memory.frombuffer(obj, readonly=False)
         self.assertNotEqual(mem.address, 0)
         self.assertEqual(mem.nbytes, 3)
@@ -155,11 +156,11 @@ class TestMemory(unittest.TestCase):
         self.assertEqual(m.tobytes(), b"\1\2\3")
         self.assertEqual(m.tolist(), [1,2,3])
         mem[:] = 1
-        self.assertEqual(obj, array('B', [1]*3))
-        mem[1:] = array('B', [7]*2)
-        self.assertEqual(obj, array('B', [1,7,7]))
-        mem[1:2] = array('B', [8]*1)
-        self.assertEqual(obj, array('B', [1,8,7]))
+        self.assertEqual(obj, array.array('B', [1]*3))
+        mem[1:] = array.array('B', [7]*2)
+        self.assertEqual(obj, array.array('B', [1,7,7]))
+        mem[1:2] = array.array('B', [8]*1)
+        self.assertEqual(obj, array.array('B', [1,8,7]))
         mem.release()
         self.assertEqual(mem.address, 0)
         self.assertEqual(mem.nbytes, 0)
@@ -168,7 +169,7 @@ class TestMemory(unittest.TestCase):
     @unittest.skipIf(array is None, 'array')
     def testFromAddress(self):
         memory = MPI.memory
-        obj = array('B', [1,2,3])
+        obj = array.array('B', [1,2,3])
         addr, size = obj.buffer_info()
         nbytes = size * obj.itemsize
         mem = memory.fromaddress(addr, nbytes, readonly=False)
@@ -186,11 +187,11 @@ class TestMemory(unittest.TestCase):
         self.assertEqual(m.tobytes(), b"\1\2\3")
         self.assertEqual(m.tolist(), [1,2,3])
         mem[:] = 1
-        self.assertEqual(obj, array('B', [1]*3))
-        mem[1:] = array('B', [7]*2)
-        self.assertEqual(obj, array('B', [1,7,7]))
-        mem[1:2] = array('B', [8]*1)
-        self.assertEqual(obj, array('B', [1,8,7]))
+        self.assertEqual(obj, array.array('B', [1]*3))
+        mem[1:] = array.array('B', [7]*2)
+        self.assertEqual(obj, array.array('B', [1,7,7]))
+        mem[1:2] = array.array('B', [8]*1)
+        self.assertEqual(obj, array.array('B', [1,8,7]))
         mem.release()
         self.assertEqual(mem.address, 0)
         self.assertEqual(mem.nbytes, 0)

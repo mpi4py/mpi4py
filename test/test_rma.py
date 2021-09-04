@@ -24,9 +24,8 @@ class BaseTestRMA(object):
             self.memory = self.mpi_memory
             memzero(self.memory)
         except MPI.Exception:
-            import array
             self.mpi_memory = None
-            self.memory = array.array('B',[0]*nbytes)
+            self.memory = bytearray(nbytes)
         self.WIN = MPI.Win.Create(self.memory, 1, self.INFO, self.COMM)
 
     def tearDown(self):

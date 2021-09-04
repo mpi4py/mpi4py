@@ -1,14 +1,11 @@
 from mpi4py import MPI
 import mpiunittest as unittest
 
-try:
-    import array
-except ImportError:
-    array = None
-try:
-    import numpy
-except ImportError:
-    numpy = None
+from arrayimpl import (
+    array,
+    numpy,
+)
+
 
 class TestAddress(unittest.TestCase):
 
