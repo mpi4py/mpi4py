@@ -1,29 +1,34 @@
 import sys
 from mpi4py import MPI
-try:
-    from collections import OrderedDict
-except ImportError:
-    OrderedDict = dict
+
 try:
     import array
 except ImportError:
     array = None
+
 try:
     import numpy
 except ImportError:
     numpy = None
+
 try:
     import cupy
 except ImportError:
     cupy = None
+
 try:
     import numba
     import numba.cuda
     numba_version = tuple(map(int, numba.__version__.split('.', 2)[:2]))
     if numba_version < (0, 48):
         import warnings
-        warnings.warn('To test Numba GPU arrays, use Numba v0.48.0+.',
-                      RuntimeWarning)
+        try:
+            warnings.warn(
+                'To test Numba GPU arrays, use Numba v0.48.0+.',
+                RuntimeWarning,
+            )
+        except RuntimeWarning:
+            pass
         numba = None
 except ImportError:
     numba = None
@@ -42,10 +47,16 @@ def allclose(a, b, rtol=1.e-5, atol=1.e-8):
     return True
 
 def make_typemap(entries):
-    typemap = OrderedDict(entries)
-    for typecode, datatype in entries:
-        if datatype == MPI.DATATYPE_NULL:
-            del typemap[typecode]
+    if sys.version_info[:2] > (3, 7):
+        dict_type = dict
+    else:
+        from collections import OrderedDict
+        dict_type = OrderedDict
+    typemap = dict_type(
+        (typecode, datatype)
+        for typecode, datatype in entries
+        if datatype != MPI.DATATYPE_NULL
+    )
     return typemap
 
 TypeMap = make_typemap([

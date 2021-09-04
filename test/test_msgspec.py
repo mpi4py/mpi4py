@@ -1,35 +1,16 @@
 from mpi4py import MPI
 import mpiunittest as unittest
-from arrayimpl import allclose
-from arrayimpl import typestr
 import sys
 
+from arrayimpl import (
+    array,
+    numpy,
+    cupy,
+    numba,
+)
+
+from arrayimpl import typestr
 typemap = MPI._typedict
-
-try:
-    import array
-except ImportError:
-    array = None
-try:
-    import numpy
-except ImportError:
-    numpy = None
-try:
-    import cupy
-except ImportError:
-    cupy = None
-try:
-    import numba
-    import numba.cuda
-    numba_version = tuple(map(int, numba.__version__.split('.', 2)[:2]))
-    if numba_version < (0, 48):
-        import warnings
-        warnings.warn('To test Numba GPU arrays, use Numba v0.48.0+.',
-                      RuntimeWarning)
-        numba = None
-except ImportError:
-    numba = None
-
 
 # ---
 

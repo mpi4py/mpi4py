@@ -2,9 +2,6 @@ from mpi4py import MPI
 import mpiunittest as unittest
 import sys
 
-
-MPI_ERR_OP = MPI.ERR_OP
-
 try:
     import array
 except ImportError:

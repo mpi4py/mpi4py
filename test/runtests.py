@@ -92,10 +92,7 @@ def setup_python(options):
 
 def setup_unittest(options):
     from unittest import TestSuite
-    try:
-        from unittest.runner import _WritelnDecorator
-    except ImportError:
-        from unittest import _WritelnDecorator
+    from unittest.runner import _WritelnDecorator
     #
     writeln_orig = _WritelnDecorator.writeln
     def writeln(self, message=''):
