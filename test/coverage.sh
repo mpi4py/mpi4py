@@ -6,8 +6,6 @@ export PYTHONDONTWRITEBYTECODE=1
 
 $PYTHON -m coverage erase
 
-$MPIEXEC -n 1 $PYTHON -m coverage run "$(dirname "$0")/coverage-helper.py" > /dev/null || true
-
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.bench --help > /dev/null
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.bench --threads             helloworld -q
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.bench --no-threads          helloworld -q
@@ -27,13 +25,11 @@ $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.bench --mpe qwerty > /dev/null 2
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.bench --vt  qwerty > /dev/null 2>&1 || true
 
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.run --help > /dev/null
-$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py --version > /dev/null
-$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py --help > /dev/null
-$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py - < /dev/null
-$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py -c "42" > /dev/null
-$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py -m this > /dev/null
-$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py "$(dirname "$0")/coverage-helper.py" > /dev/null || true
-$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py -rc threads=0 --rc=thread_level=single -c "" > /dev/null
+$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py --version  > /dev/null
+$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py --help     > /dev/null
+$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py -          < /dev/null
+$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py -rc threads=0 -c ""                > /dev/null
+$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py --rc=thread_level=single -c ""     > /dev/null
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py -p mpe -profile mpe -c ""          > /dev/null 2>&1 || true
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py --profile mpe --profile=mpe -c ""  > /dev/null 2>&1 || true
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py -vt --vt -mpe --mpe -c ""          > /dev/null 2>&1 || true
@@ -47,16 +43,13 @@ $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py -rc=                            
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py --rc=a                             > /dev/null 2>&1 || true
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py --rc=a=                            > /dev/null 2>&1 || true
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py --rc==a                            > /dev/null 2>&1 || true
-$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py -c "import sys; sys.exit()"        > /dev/null 2>&1 || true
-$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py -c "import sys; sys.exit(0)"       > /dev/null 2>&1 || true
-$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py -c "import sys; sys.exit(1)"       > /dev/null 2>&1 || true
-$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py -c "import sys; sys.exit('error')" > /dev/null 2>&1 || true
-$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py -c "from mpi4py import MPI; 1/0;"  > /dev/null 2>&1 || true
 
+$MPIEXEC -n 1 $PYTHON -m coverage run test/test_toplevel.py   -q 2> /dev/null
 $MPIEXEC -n 1 $PYTHON -m coverage run test/test_util_pkl5.py  -q 2> /dev/null
 $MPIEXEC -n 2 $PYTHON -m coverage run test/test_util_pkl5.py  -q 2> /dev/null
 $MPIEXEC -n 3 $PYTHON -m coverage run test/test_util_pkl5.py  -q 2> /dev/null
 $MPIEXEC -n 1 $PYTHON -m coverage run test/test_util_dtlib.py -q 2> /dev/null
+$PYTHON -m coverage run demo/test-run/test_run.py             -q 2> /dev/null
 
 $MPIEXEC -n 1 $PYTHON -m coverage run demo/futures/test_futures.py -q 2> /dev/null
 $MPIEXEC -n 2 $PYTHON -m coverage run demo/futures/test_futures.py -q 2> /dev/null

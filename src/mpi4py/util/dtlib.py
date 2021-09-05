@@ -37,8 +37,7 @@ def _is_aligned(datatype, offset=0):
             combiner == MPI.COMBINER_F90_COMPLEX,
         ))
         typesize = datatype.Get_size() or 1
-        if is_complex:
-            typesize //= 2
+        typesize //= 2 if is_complex else 1
         return offset % typesize == 0
 
     combiner = datatype.combiner
