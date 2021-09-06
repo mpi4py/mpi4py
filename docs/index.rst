@@ -28,9 +28,9 @@ Hosted at *GitHub* [https://mpi4py.github.io/]:
 + `User Manual (PDF)`_  (generated with Sphinx_).
 + `Reference Guide`_    (generated with Sphinx_).
 
-.. _User Manual (HTML): usrman/index.html
+.. _User Manual (HTML): html/index.html
 .. _User Manual (PDF):  mpi4py.pdf
-.. _Reference Guide:    usrman/reference/index.html
+.. _Reference Guide:    html/reference/index.html
 
 .. _Sphinx: https://www.sphinx-doc.org/
 

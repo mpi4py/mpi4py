@@ -27,7 +27,7 @@ package = 'mpi4py'
 def pkg_version():
     import re
     here = os.path.dirname(__file__)
-    pardir = [os.path.pardir] * 3
+    pardir = [os.path.pardir] * 2
     topdir = os.path.join(here, *pardir)
     srcdir = os.path.join(topdir, 'src')
     with open(os.path.join(srcdir, 'mpi4py', '__init__.py')) as f:
