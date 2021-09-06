@@ -3,7 +3,7 @@ docs/*.html
 docs/*.pdf
 docs/*.info
 docs/*.[137]
-docs/usrman
+docs/html
 dist
 MANIFEST
 *.egg-info

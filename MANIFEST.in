@@ -12,8 +12,8 @@ include docs/*.info
 include docs/*.[137]
 include docs/*.rst
 include docs/*.bib
-graft   docs/usrman
+graft   docs/html
 graft   docs/source
-prune   docs/source/usrman/reference
+prune   docs/source/reference
 
 prune conf/ci
