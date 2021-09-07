@@ -9,12 +9,18 @@ MPI for Python
 Online Documentation
 --------------------
 
-Hosted at *Read the Docs* [https://mpi4py.readthedocs.org/]:
+Hosted at *Read the Docs* [https://mpi4py.readthedocs.io/]:
 
-.. image::  https://readthedocs.org/projects/mpi4py/badge/?version=stable
-   :target: https://mpi4py.readthedocs.org/en/stable/
-.. image::  https://readthedocs.org/projects/mpi4py/badge/?version=latest
-   :target: https://mpi4py.readthedocs.org/en/latest/
++ `Stable <rtd-stable_>`_: |rtd-stable|
++ `Latest <rtd-latest_>`_: |rtd-latest|
+
+.. |rtd-stable| image:: https://readthedocs.org/projects/mpi4py/badge/?version=stable
+   :target: `rtd-stable`_
+.. _rtd-stable: https://mpi4py.readthedocs.io/en/stable/
+
+.. |rtd-latest| image:: https://readthedocs.org/projects/mpi4py/badge/?version=latest
+   :target: `rtd-latest`_
+.. _rtd-latest: https://mpi4py.readthedocs.io/en/latest
 
 Hosted at *GitHub* [https://mpi4py.github.io/]:
 
