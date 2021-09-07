@@ -5,7 +5,7 @@ MPI for Python
 .. image::  https://github.com/mpi4py/mpi4py/workflows/ci/badge.svg?branch=master
    :target: https://github.com/mpi4py/mpi4py/actions/
 .. image::  https://readthedocs.org/projects/mpi4py/badge/?version=latest
-   :target: https://mpi4py.readthedocs.org/en/latest/
+   :target: https://mpi4py.readthedocs.io/en/latest/
 .. image::  https://dev.azure.com/mpi4py/mpi4py/_apis/build/status/ci?branchName=master
    :target: https://dev.azure.com/mpi4py/mpi4py/_build
 .. image::  https://ci.appveyor.com/api/projects/status/whh5xovp217h0f7n?svg=true
@@ -43,7 +43,7 @@ Dependencies
 Documentation
 -------------
 
-* Read the Docs: https://mpi4py.readthedocs.org/
+* Read the Docs: https://mpi4py.readthedocs.io/
 * GitHub Pages:  https://mpi4py.github.io/
 
 Support
