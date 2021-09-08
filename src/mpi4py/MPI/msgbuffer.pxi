@@ -100,6 +100,15 @@ cdef inline bint is_IN_PLACE(object obj):
 
 #------------------------------------------------------------------------------
 
+cdef inline Datatype asdatatype(object datatype):
+    if isinstance(datatype, Datatype):
+        return <Datatype> datatype
+    return <Datatype?> TypeDict[datatype]
+
+cdef inline Datatype getdatatype(const char format[]):
+    if format == BYTE_FMT: return __BYTE__
+    return <Datatype?> TypeDict[pystr(format)]
+
 @cython.final
 @cython.internal
 cdef class _p_message:
@@ -120,32 +129,24 @@ cdef _p_message message_basic(object o_buf,
     # special-case for BOTTOM or None,
     # an explicit MPI datatype is required
     if is_BOTTOM(o_buf) or o_buf is None:
-        if isinstance(o_type, Datatype):
-            m.type = <Datatype> o_type
-        else:
-            m.type = TypeDict[o_type]
         m.buf = newbuffer()
+        m.type = asdatatype(o_type)
         baddr[0] = MPI_BOTTOM
         bsize[0] = 0
         btype[0] = m.type.ob_mpi
         return m
-    # get buffer base address and length
+    # get message buffer
     cdef bint fmt = (o_type is None)
     m.buf = getbuffer(o_buf, readonly, fmt)
-    baddr[0] = <void*>    m.buf.view.buf
-    bsize[0] = <MPI_Aint> m.buf.view.len
-    # lookup datatype if not provided or not a Datatype
-    if isinstance(o_type, Datatype):
-        m.type = <Datatype> o_type
-    elif o_type is None:
-        if m.buf.view.format != BYTE_FMT:
-            m.type = TypeDict[pystr(m.buf.view.format)]
-        else:
-            m.type = __BYTE__
+    # get message datatype
+    if o_type is not None:
+        m.type = asdatatype(o_type)
     else:
-        m.type = TypeDict[o_type]
+        m.type = getdatatype(m.buf.view.format)
+    # return collected message data
+    baddr[0] = <void*> m.buf.view.buf
+    bsize[0] = <MPI_Aint> m.buf.view.len
     btype[0] = m.type.ob_mpi
-    # and we are done ...
     return m
 
 cdef _p_message message_simple(object msg,
@@ -986,8 +987,8 @@ cdef class _p_msg_rma:
         if ((rank == MPI_PROC_NULL) and
             (origin is not None) and
             (is_list(origin) or is_tuple(origin)) and
-            (len(origin) > 0 and isinstance(origin[-1], Datatype))):
-            self.otype  = (<Datatype?>origin[-1]).ob_mpi
+            (len(origin) > 0 and is_datatype(origin[-1]))):
+            self.otype  = asdatatype(origin[-1]).ob_mpi
             self._origin = origin
         # TARGET
         cdef Py_ssize_t nargs = 0
@@ -1009,7 +1010,7 @@ cdef class _p_msg_rma:
             if nargs >= 2:
                 self.tcount = <int>target[1]
             if nargs >= 3:
-                self.ttype  = (<Datatype?>target[2]).ob_mpi
+                self.ttype  = asdatatype(target[2]).ob_mpi
             if nargs >= 4:
                 raise ValueError("target: expecting 3 items at most")
         else:
