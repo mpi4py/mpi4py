@@ -1098,6 +1098,6 @@ TargetSpec = Union[
     Tuple[()],                      # ()
     Tuple[Displ],                   # (displ,)
     Tuple[Displ, Count],            # (displ, count)
-    Tuple[Displ, Count, Datatype],  # (displ, count, datatype)
+    Tuple[Displ, Count, TypeSpec],  # (displ, count, datatype)
     List,                           # (displ, count, datatype)
 ]
