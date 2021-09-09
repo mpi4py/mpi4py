@@ -413,55 +413,20 @@ OVERRIDE.update({
     )
 })
 
-bufspec = """
-Buffer = Any  # TODO
-
-Count = int
-Displ = int
-TypeSpec = Union[Datatype, str]
-
-BufSpec = Union[
+TYPING = """
+from .typing import (
     Buffer,
-    Tuple[Buffer, Count],                         # (buffer, count)
-    Tuple[Buffer, TypeSpec],                      # (buffer, datatype)
-    Tuple[Buffer, Count, TypeSpec],               # (buffer, count, datatype)
-    Tuple[Union[Bottom, None], Count, Datatype],  # (BOTTOM, count, datatype)
-    List,                                         # (buffer, count, datatype)
-]
-
-BufSpecB = Union[
-    Buffer,
-    Tuple[Buffer, TypeSpec],         # (buffer, datatype)
-    Tuple[Buffer, Count, TypeSpec],  # (buffer, count, datatype)
-    List,                            # (buffer, count, datatype)
-]
-
-BufSpecV = Union[
-    Buffer,
-    Tuple[Buffer, Count],                          # (buffer, count)
-    Tuple[Buffer, Tuple[Count, Displ]],            # (buffer, (count, displ))
-    Tuple[Buffer, TypeSpec],                       # (buffer, datatype)
-    Tuple[Buffer, Count, TypeSpec],                # (buffer, count, datatype)
-    Tuple[Buffer, Tuple[Count, Displ], TypeSpec],  # (buffer, (count, displ), datatype)
-    Tuple[Buffer, Count, Displ, TypeSpec],         # (buffer, count, displ, datatype)
-    List,                                          # (buffer, count, displ, datatype)
-]
-
-BufSpecW = Union[
-    Tuple[Buffer, Sequence[Datatype]],                                           # (buffer, datatypes)
-    Tuple[Buffer, Tuple[Sequence[Count], Sequence[Displ]], Sequence[Datatype]],  # (buffer, (counts, displs), datatypes)
-    Tuple[Buffer, Sequence[Count], Sequence[Displ], Sequence[Datatype]],         # (buffer, counts, displs, datatypes)
-    List,                                                                        # (buffer, counts, displs, datatypes)
-]
-
-TargetSpec = Union[
-    Displ,                          # displ
-    Tuple[()],                      # ()
-    Tuple[Displ],                   # (displ,)
-    Tuple[Displ, Count],            # (displ, count)
-    Tuple[Displ, Count, TypeSpec],  # (displ, count, datatype)
-    List,                           # (displ, count, datatype)
-]
+    Bottom,
+    InPlace,
+    Count,
+    Displ,
+    TypeSpec,
+    BufSpec,
+    BufSpecB,
+    BufSpecV,
+    BufSpecW,
+    TargetSpec,
+)
 """
 
 def stubgen_mpi4py_MPI(done=None):
@@ -475,7 +440,7 @@ def stubgen_mpi4py_MPI(done=None):
     lines.add = stubgen_module(MPI)
 
     lines.add = ""
-    lines.add = bufspec
+    lines.add = TYPING
 
     return lines
 

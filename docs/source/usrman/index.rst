@@ -31,6 +31,7 @@ MPI for Python
    tutorial
    mpi4py
    mpi4py.MPI
+   mpi4py.typing
    mpi4py.futures
    mpi4py.util
    mpi4py.run
