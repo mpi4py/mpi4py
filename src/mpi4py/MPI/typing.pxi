@@ -16,6 +16,8 @@ cdef List
 cdef Dict
 
 cdef Buffer
+cdef Bottom
+cdef InPlace
 
 cdef BufSpec
 cdef BufSpecB

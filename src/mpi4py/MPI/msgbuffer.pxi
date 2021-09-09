@@ -58,8 +58,7 @@ cdef inline int clipcount(MPI_Aint value):
 #------------------------------------------------------------------------------
 
 @cython.final
-@cython.internal
-cdef class Bottom(int):
+cdef class BottomType(int):
     """
     Type of `BOTTOM`
     """
@@ -73,8 +72,7 @@ cdef class Bottom(int):
 
 
 @cython.final
-@cython.internal
-cdef class InPlace(int):
+cdef class InPlaceType(int):
     """
     Type of `IN_PLACE`
     """
@@ -87,16 +85,16 @@ cdef class InPlace(int):
         return 'IN_PLACE'
 
 
-cdef object __BOTTOM__   = Bottom(<MPI_Aint>MPI_BOTTOM)
+cdef object __BOTTOM__   = BottomType(<MPI_Aint>MPI_BOTTOM)
 
-cdef object __IN_PLACE__ = InPlace(<MPI_Aint>MPI_IN_PLACE)
+cdef object __IN_PLACE__ = InPlaceType(<MPI_Aint>MPI_IN_PLACE)
 
 
 cdef inline bint is_BOTTOM(object obj):
-    return is_constant(obj, __BOTTOM__)
+    return obj is None or is_constant(obj, __BOTTOM__)
 
 cdef inline bint is_IN_PLACE(object obj):
-    return is_constant(obj, __IN_PLACE__)
+    return obj is None or is_constant(obj, __IN_PLACE__)
 
 #------------------------------------------------------------------------------
 
@@ -128,7 +126,7 @@ cdef _p_message message_basic(object o_buf,
     cdef _p_message m = _p_message.__new__(_p_message)
     # special-case for BOTTOM or None,
     # an explicit MPI datatype is required
-    if is_BOTTOM(o_buf) or o_buf is None:
+    if is_BOTTOM(o_buf):
         m.buf = newbuffer()
         m.type = asdatatype(o_type)
         baddr[0] = MPI_BOTTOM

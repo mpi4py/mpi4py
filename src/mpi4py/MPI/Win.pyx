@@ -58,7 +58,7 @@ cdef class Win:
     @classmethod
     def Create(
         cls,
-        memory: Union[Buffer, Bottom, None],
+        memory: Union[Buffer, Bottom],
         int disp_unit: int = 1,
         Info info: Info = INFO_NULL,
         Intracomm comm: Intracomm = COMM_SELF,
@@ -66,12 +66,11 @@ cdef class Win:
         """
         Create an window object for one-sided communication
         """
-        cdef void *base = NULL
+        cdef void *base = MPI_BOTTOM
         cdef MPI_Aint size = 0
         if is_BOTTOM(memory):
-            base = MPI_BOTTOM
             memory = None
-        elif memory is not None:
+        if memory is not None:
             memory = getbuffer_w(memory, &base, &size)
         cdef Win win = Win.__new__(Win)
         with nogil: CHKERR( MPI_Win_create(

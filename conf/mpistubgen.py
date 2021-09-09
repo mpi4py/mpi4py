@@ -325,16 +325,6 @@ else:
 """
 
 OVERRIDE = {
-    'BOTTOM': """
-        class _Bottom(int): ...
-        Bottom = _Bottom
-        BOTTOM: Final[Bottom] = ...
-        """,
-    'IN_PLACE': """
-        class _InPlace(int): ...
-        InPlace = _InPlace
-        IN_PLACE: Final[InPlace] = ...
-        """,
     'Exception': {
         '__new__': "def __new__(cls, ierr: int = SUCCESS) -> Exception: ...",
         "__lt__": "def __lt__(self, other: int) -> bool: ...",
@@ -394,6 +384,15 @@ OVERRIDE = {
     '_typedict_f': "_typedict_f: Final[Dict[str, Datatype]] = ...",
     '_keyval_registry': None,
 }
+OVERRIDE.update({
+    subtype: {
+        '__new__': f"def __new__(cls) -> {subtype}: ...",
+    }
+    for subtype in (
+        'BottomType',
+        'InPlaceType',
+    )
+})
 OVERRIDE.update({
     subtype: {
         '__new__': """
