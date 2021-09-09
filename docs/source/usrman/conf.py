@@ -12,7 +12,9 @@
 
 import os
 import sys
+import typing
 import datetime
+import importlib
 sys.path.insert(0, os.path.abspath('.'))
 _today = datetime.datetime.now()
 
@@ -88,6 +90,41 @@ except ImportError:
     sphinx_rtd_theme = None
 
 
+def _setup_autodoc(app):
+    from sphinx.locale import _
+    from sphinx.util.typing import restify
+    from sphinx.ext.autodoc import ModuleDocumenter
+    from sphinx.ext.autodoc import ClassDocumenter
+    from sphinx.ext.autodoc import DataDocumenter
+
+    def istypealias(obj):
+        if isinstance(obj, type):
+            return True
+        return obj in (
+            typing.Any,
+        )
+
+    class TypeDocumenter(DataDocumenter):
+        objtype = 'type'
+        directivetype = 'data'
+        priority = ClassDocumenter.priority + 1
+
+        @classmethod
+        def can_document_member(cls, member, membername, isattr, parent):
+            return (isinstance(parent, ModuleDocumenter) and
+                    parent.name == 'mpi4py.typing' and
+                    istypealias(member))
+
+        def update_content(self, more_content):
+            if istypealias(self.object):
+                more_content.append(
+                    _('alias of %s') % restify(self.object), '')
+                more_content.append('', '')
+            super().update_content(more_content)
+
+    app.add_autodocumenter(TypeDocumenter)
+
+
 def _patch_autosummary():
     from sphinx.ext import autodoc
     from sphinx.ext import autosummary
@@ -109,7 +146,9 @@ def _patch_autosummary():
 
 
 def setup(app):
+    _setup_autodoc(app)
     _patch_autosummary()
+
     try:
         from mpi4py import MPI
     except ImportError:
@@ -136,17 +175,21 @@ def setup(app):
     module = apidoc.load_module(source)
     apidoc.replace_module(module)
 
-    for name in dir(module):
-        attr = getattr(module, name)
-        if isinstance(attr, type):
-            if attr.__module__ == module.__name__:
-                autodoc_type_aliases[name] = name
-
     synopsis = autosummary_context['synopsis']
     synopsis[module.__name__] = module.__doc__.strip()
     autotype = autosummary_context['autotype']
     autotype[module.Exception.__name__] = 'exception'
 
+    mod = importlib.import_module('mpi4py.typing')
+    for name in mod.__all__:
+        autodoc_type_aliases[name] = f'{name}'
+
+    mod = importlib.import_module('mpi4py.MPI')
+    for name in dir(mod):
+        attr = getattr(mod, name)
+        if isinstance(attr, type):
+            if attr.__module__ == mod.__name__:
+                autodoc_type_aliases[name] = f'{name}'
 
 # -- Options for HTML output -------------------------------------------------
 

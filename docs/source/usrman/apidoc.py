@@ -278,8 +278,16 @@ def apidoc_module(module, done=None):
             isinstance(getattr(module, name), int),
         ))
     ]
-    for attr in constants:
-        name, value = attr
+    for _, value in constants:
+        cls = type(value)
+        name = cls.__name__
+        if name in done or name in skip:
+            continue
+        if cls.__module__ == module.__name__:
+            done.add(name)
+            lines.add = apidoc_class(cls)
+            lines.add = ""
+    for name, value in constants:
         done.add(name)
         if name in OVERRIDE:
             lines.add = OVERRIDE[name]
@@ -343,13 +351,9 @@ from __future__ import annotations
 HELPERS = """
 class _Int(int): pass
 
-class Bottom(_Int): pass
-
-class InPlace(_Int): pass
-
 def _repr(obj):
     try:
-        return obj._repr
+        return obj._name
     except AttributeError:
         return super(obj).__repr__()
 
@@ -359,7 +363,7 @@ def _def(cls, name):
     obj = cls()
     if cls.__name__ in ('Pickle', 'memory'):
         return obj
-    obj._repr = name
+    obj._name = name
     if '__repr__' not in cls.__dict__:
         cls.__repr__ = _repr
     return obj
@@ -367,9 +371,9 @@ def _def(cls, name):
 
 OVERRIDE = {
     'Exception': {
-        '__new__':(
+        '__new__': (
             "def __new__(cls, ierr: int = SUCCESS) -> Exception:\n"
-            "    return super().__new__(ierr)"),
+            "    return super().__new__(cls, ierr)"),
         "__lt__": "def __lt__(self, other: int) -> bool: ...",
         "__le__": "def __le__(self, other: int) -> bool: ...",
         "__gt__": "def __gt__(self, other: int) -> bool: ...",
@@ -391,9 +395,9 @@ OVERRIDE = {
         '__call__': "def __call__(self, x: Any, y: Any) -> Any: ...",
     },
     'memory': {
-        '__new__':(
+        '__new__': (
             "def __new__(cls, buf: Buffer) -> memory:\n"
-            "    return super().__new__()"),
+            "    return super().__new__(cls)"),
         '__getitem__': (
             "def __getitem__(self, "
             "item: Union[int, slice]) "
@@ -420,6 +424,42 @@ OVERRIDE = {
     '_keyval_registry': None,
 }
 
+ConstantTypes = (
+    'BottomType',
+    'InPlaceType',
+)
+for cls in ConstantTypes:
+    OVERRIDE[cls] = {
+        '__new__': (
+            f"def __new__(cls) -> {cls}:\n"
+            f"    return super().__new__({cls})"),
+        '__repr__': "def __repr__(self) -> str: return self._name",
+    }
+
+TYPING = """
+from typing import (
+    Any,
+    Union,
+    Literal,
+    Optional,
+    NoReturn,
+    Final,
+)
+from typing import (
+    Callable,
+    Hashable,
+    Iterable,
+    Iterator,
+    Sequence,
+    Mapping,
+)
+from typing import (
+    Tuple,
+    List,
+    Dict,
+)
+from .typing import *
+"""
 
 def apidoc_mpi4py_MPI(done=None):
     from mpi4py import MPI
@@ -430,6 +470,8 @@ def apidoc_mpi4py_MPI(done=None):
     lines.add = HELPERS
     lines.add = ""
     lines.add = apidoc_module(MPI)
+    lines.add = ""
+    lines.add = TYPING
     return lines
 
 
