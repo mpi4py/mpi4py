@@ -91,7 +91,7 @@ only) thread until they are signaled for completion.
 
    An :class:`~concurrent.futures.Executor` subclass that executes calls
    asynchronously using a pool of at most *max_workers* processes.  If
-   *max_workers* is ``None`` or not given, its value is determined from the
+   *max_workers* is `None` or not given, its value is determined from the
    :envvar:`MPI4PY_FUTURES_MAX_WORKERS` environment variable if set, or the MPI
    universe size if set, otherwise a single worker process is spawned.  If
    *max_workers* is lower than or equal to ``0``, then a :exc:`ValueError` will
@@ -123,9 +123,9 @@ only) thread until they are signaled for completion.
    * *globals*: :class:`dict` or iterable yielding ``(name, value)`` pairs to
      initialize the main module namespace in worker processes.
 
-   * *main*: If set to ``False``, do not import the ``__main__`` module in
-     worker processes. Setting *main* to ``False`` prevents worker processes
-     from accessing definitions in the parent ``__main__`` namespace.
+   * *main*: If set to `False`, do not import the :mod:`__main__` module in
+     worker processes. Setting *main* to `False` prevents worker processes
+     from accessing definitions in the parent :mod:`__main__` namespace.
 
    * *path*: :class:`list` or iterable with paths to append to :data:`sys.path`
      in worker processes to extend the :ref:`module search path
@@ -162,7 +162,7 @@ only) thread until they are signaled for completion.
       :meth:`~iterator.__next__` is called and the result isn't available after
       *timeout* seconds from the original call to :meth:`~MPIPoolExecutor.map`.
       *timeout* can be an int or a float.  If *timeout* is not specified or
-      ``None``, there is no limit to the wait time.  If a call raises an
+      `None`, there is no limit to the wait time.  If a call raises an
       exception, then that exception will be raised when its value is retrieved
       from the iterator. This method chops *iterables* into a number of chunks
       which it submits to the pool as separate tasks. The (approximate) size of
@@ -171,7 +171,7 @@ only) thread until they are signaled for completion.
       significantly improve performance compared to the default size of one. By
       default, the returned iterator yields results in-order, waiting for
       successive tasks to complete . This behavior can be changed by passing
-      the keyword argument *unordered* as ``True``, then the result iterator
+      the keyword argument *unordered* as `True`, then the result iterator
       will yield a result as soon as any of the tasks complete. ::
 
          executor = MPIPoolExecutor(max_workers=3)
@@ -198,15 +198,15 @@ only) thread until they are signaled for completion.
       :meth:`~MPIPoolExecutor.submit` and :meth:`~MPIPoolExecutor.map` made
       after :meth:`~MPIPoolExecutor.shutdown` will raise :exc:`RuntimeError`.
 
-      If *wait* is ``True`` then this method will not return until all the
+      If *wait* is `True` then this method will not return until all the
       pending futures are done executing and the resources associated with the
-      executor have been freed.  If *wait* is ``False`` then this method will
+      executor have been freed.  If *wait* is `False` then this method will
       return immediately and the resources associated with the executor will be
       freed when all pending futures are done executing.  Regardless of the
       value of *wait*, the entire Python program will not exit until all
       pending futures are done executing.
 
-      If *cancel_futures* is ``True``, this method will cancel all pending
+      If *cancel_futures* is `True`, this method will cancel all pending
       futures that the executor has not started running. Any futures that
       are completed or running won't be cancelled, regardless of the value
       of *cancel_futures*.
@@ -214,7 +214,7 @@ only) thread until they are signaled for completion.
       You can avoid having to call this method explicitly if you use the
       :keyword:`with` statement, which will shutdown the executor instance
       (waiting as if :meth:`~MPIPoolExecutor.shutdown` were called with *wait*
-      set to ``True``). ::
+      set to `True`). ::
 
          import time
          with MPIPoolExecutor(max_workers=1) as executor:
@@ -224,7 +224,7 @@ only) thread until they are signaled for completion.
    .. method:: bootup(wait=True)
 
       Signal the executor that it should allocate eagerly any required
-      resources (in particular, MPI worker processes). If *wait* is ``True``,
+      resources (in particular, MPI worker processes). If *wait* is `True`,
       then :meth:`~MPIPoolExecutor.bootup` will not return until the executor
       resources are ready to process submissions.  Resources are automatically
       allocated in the first call to :meth:`~MPIPoolExecutor.submit`, thus
@@ -286,7 +286,7 @@ advantage of the simple, task-based, master/worker approach available in the
    in *comm*) and the remaining worker processes. These sets are then connected
    through an intercommunicator.  The target of the :keyword:`with` statement
    is assigned either an :class:`MPIPoolExecutor` instance (at the master) or
-   ``None`` (at the workers). ::
+   `None` (at the workers). ::
 
       from mpi4py import MPI
       from mpi4py.futures import MPICommExecutor
@@ -434,7 +434,7 @@ and waits for the results. The workers receive incoming tasks, execute them,
 and send back the results to the master.
 
 When using MPICH implementation or its derivatives based on the Hydra process
-manager, the user can set the MPI universe size via ``-usize`` argument to
+manager, users can set the MPI universe size via the ``-usize`` argument to
 :program:`mpiexec`::
 
   $ mpiexec -n 1 -usize 17 python julia.py
@@ -444,8 +444,8 @@ variable::
 
   $ MPIEXEC_UNIVERSE_SIZE=17 mpiexec -n 1 python julia.py
 
-In the Open MPI implementation, the MPI universe size can be set via ``-host``
-argument to :program:`mpiexec`::
+In the Open MPI implementation, the MPI universe size can be set via the
+``-host`` argument to :program:`mpiexec`::
 
   $ mpiexec -n 1 -host <hostname>:17 python julia.py
 
