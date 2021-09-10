@@ -386,7 +386,7 @@ CUDA-aware MPI + Python GPU arrays
 One-Sided Communications
 ------------------------
 
-* Read from (write to) the enitre RMA window::
+* Read from (write to) the entire RMA window::
   
     import numpy as np
     from mpi4py import MPI
@@ -417,8 +417,8 @@ One-Sided Communications
         win.Unlock(rank=0)
         assert np.all(buf == 42)
 
-* Accessing a part of the RMA window using :data:`target` argument.
-  Target is defined as ``[offset, length, datatype]``::
+* Accessing a part of the RMA window using the ``target`` argument,
+  which is defined as ``(offset, count, datatype)``::
 
     import numpy as np
     from mpi4py import MPI
