@@ -24,22 +24,67 @@ def _get_typecode(datatype):
     return MPI._typecode(datatype)
 
 
+def _get_alignment_ctypes(typecode):
+    # pylint: disable=protected-access
+    # pylint: disable=import-outside-toplevel
+    import ctypes as ct
+    if typecode in ('p', 'n', 'P', 'N'):
+        kind = 'i' if typecode in ('p', 'n') else 'u'
+        size = ct.sizeof(ct.c_void_p)
+        typecode = '{}{:d}'.format(kind, size)
+    if typecode in ('F', 'D', 'G'):
+        typecode = typecode.lower()
+    if len(typecode) > 1:
+        mapping = {
+            'b': (ct.c_bool,),
+            'i': (ct.c_int8, ct.c_int16, ct.c_int32, ct.c_int64),
+            'u': (ct.c_uint8, ct.c_uint16, ct.c_uint32, ct.c_uint64),
+            'f': (ct.c_float, ct.c_double, ct.c_longdouble),
+        }
+        kind, size = typecode[0], int(typecode[1:])
+        if kind == 'c':
+            kind, size = 'f', size // 2
+        for c_type in mapping[kind]:
+            if ct.sizeof(c_type) == size:
+                typecode = c_type._type_
+    c_type_base = ct._SimpleCData
+    c_type = type('c_type', (c_type_base,), dict(_type_=typecode))
+    fields = [('base', ct.c_char), ('c_type', c_type)]
+    struct = type('S', (ct.Structure,), dict(_fields_=fields))
+    return struct.c_type.offset
+
+
+def _get_alignment(datatype):
+    typecode = _get_typecode(datatype)
+    if typecode is None:
+        combiner = datatype.combiner
+        combiner_f90 = (
+            MPI.COMBINER_F90_INTEGER,
+            MPI.COMBINER_F90_REAL,
+            MPI.COMBINER_F90_COMPLEX,
+        )
+        if combiner in combiner_f90:
+            typesize = datatype.Get_size()
+            typekind = 'ifc'[combiner_f90.index(combiner)]
+            typecode = '{0}{1:d}'.format(typekind, typesize)
+    if typecode is None:
+        # pylint: disable=import-outside-toplevel
+        from struct import calcsize
+        alignment = datatype.Get_size()
+        return min(max(1, alignment), calcsize('P'))
+    try:
+        return _np_dtype(typecode).alignment
+    except NameError:  # pragma: no cover
+        return _get_alignment_ctypes(typecode)
+
+
 def _is_aligned(datatype, offset=0):
     """Dermine whether an MPI datatype is aligned."""
     if datatype.is_predefined:
         if offset == 0:
             return True
-        typecode = _get_typecode(datatype)
-        combiner = datatype.combiner
-        is_complex = any((
-            typecode in ('F', 'D', 'G'),
-            typecode in ('c4', 'c8', 'c16', 'c32'),
-            combiner == MPI.COMBINER_F90_COMPLEX,
-        ))
-        typesize = datatype.Get_size() or 1
-        if is_complex:
-            typesize //= 2
-        return offset % typesize == 0
+        alignment = _get_alignment(datatype)
+        return offset % alignment == 0
 
     combiner = datatype.combiner
     basetype, _, info = datatype.decode()
