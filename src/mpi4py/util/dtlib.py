@@ -31,7 +31,7 @@ def _get_alignment_ctypes(typecode):
     if typecode in ('p', 'n', 'P', 'N'):
         kind = 'i' if typecode in ('p', 'n') else 'u'
         size = ct.sizeof(ct.c_void_p)
-        typecode = '{}{:d}'.format(kind, size)
+        typecode = f'{kind}{size}'
     if typecode in ('F', 'D', 'G'):
         typecode = typecode.lower()
     if len(typecode) > 1:
@@ -66,7 +66,7 @@ def _get_alignment(datatype):
         if combiner in combiner_f90:
             typesize = datatype.Get_size()
             typekind = 'ifc'[combiner_f90.index(combiner)]
-            typecode = '{0}{1:d}'.format(typekind, typesize)
+            typecode = f'{typekind}{typesize}'
     if typecode is None:
         # pylint: disable=import-outside-toplevel
         from struct import calcsize
