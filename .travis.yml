@@ -1,4 +1,4 @@
-# https://travis-ci.com/mpi4py/mpi4py
+# https://app.travis-ci.com/mpi4py/mpi4py
 
 language: python
 python:

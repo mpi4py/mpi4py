@@ -12,8 +12,8 @@ MPI for Python
    :target: https://ci.appveyor.com/project/mpi4py/mpi4py
 .. image::  https://circleci.com/gh/mpi4py/mpi4py.svg?style=shield
    :target: https://circleci.com/gh/mpi4py/mpi4py
-.. image::  https://travis-ci.com/mpi4py/mpi4py.svg?branch=master
-   :target: https://travis-ci.com/mpi4py/mpi4py
+.. image::  https://app.travis-ci.com/mpi4py/mpi4py.svg?branch=master
+   :target: https://app.travis-ci.com/mpi4py/mpi4py
 .. image::  https://codecov.io/gh/mpi4py/mpi4py/branch/master/graph/badge.svg
    :target: https://codecov.io/gh/mpi4py/mpi4py
 .. image::  https://scan.coverity.com/projects/mpi4py-mpi4py/badge.svg
@@ -68,7 +68,7 @@ The testsuite is run periodically on
 
 * `Circle CI <https://circleci.com/gh/mpi4py/mpi4py>`_
 
-* `Travis CI <https://travis-ci.com/mpi4py/mpi4py>`_
+* `Travis CI <https://app.travis-ci.com/mpi4py/mpi4py>`_
 
 * `Codecov <https://app.codecov.io/gh/mpi4py/mpi4py>`_
 
