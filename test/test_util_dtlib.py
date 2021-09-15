@@ -33,7 +33,8 @@ if np_version and np_version < (1, 17):
     typecodes.remove('G')
 
 name, version = MPI.get_vendor()
-if (name == 'MPICH') and version < (4, 0, 0):
+mpich_lt_400 = (name == 'MPICH') and version < (4, 0, 0)
+if mpich_lt_400:
     typecodes = [t for t in typecodes if t not in 'FDG']
 
 datatypes = [MPI._typedict[t] for t in typecodes]
@@ -137,6 +138,16 @@ class TestUtilDTLib(unittest.TestCase):
         mt1.Free()
         mt2.Free()
 
+    def makeStruct(self, dt, mt):
+        dt = numpy.dtype(dt).str
+        stp = numpy.dtype(",".join(['B', dt, 'B']), align=True)
+        off = lambda i: stp.fields[stp.names[i]][1]
+        blens = [1, 1, 1]
+        disps = [0, off(1), off(2)]
+        types = [MPI.BYTE, mt, MPI.BYTE]
+        mtp = MPI.Datatype.Create_struct(blens, disps, types)
+        return stp, mtp
+
     @unittest.skipMPI('msmpi')
     @unittest.skipIf(numpy is None, 'numpy')
     def testStruct4(self):
@@ -144,12 +155,8 @@ class TestUtilDTLib(unittest.TestCase):
             with self.subTest(typecode=t):
                 dt0 = np_dtype(t)
                 mt0 = fromnumpy(dt0)
-                sz0 = mt0.Get_size()
-                blens = [1, 1,  1]
-                disps = [0, sz0, 2*sz0]
-                types = [MPI.BYTE, mt0, MPI.BYTE]
-                mt1 = MPI.Datatype.Create_struct(blens, disps, types)
-                ex1 = 2*sz0 + sz0 // (2 if t in 'FDG' else 1)
+                stp, mt1 = self.makeStruct(t, mt0)
+                ex1 = stp.itemsize
                 for n, mt in (
                     (1, mt1),
                     (1, mt1.Dup()),
@@ -272,6 +279,48 @@ class TestUtilDTLib(unittest.TestCase):
                 mt2.Free()
 
     @unittest.skipMPI('msmpi')
+    def testF77(self):
+        mpif77types = [
+            MPI.CHARACTER,
+            #MPI.LOGICAL,
+            MPI.INTEGER,
+            MPI.REAL,
+            MPI.DOUBLE_PRECISION,
+            MPI.COMPLEX,
+            MPI.DOUBLE_COMPLEX,
+        ]
+        for mt in mpif77types:
+            if mt == MPI.DATATYPE_NULL:
+                continue
+            if mt.Get_size() == 0:
+                continue
+            dt = tonumpy(mt)
+            if np_dtype is not None:
+                self.assertEqual(dt.itemsize, mt.extent)
+
+    @unittest.skipMPI('msmpi')
+    def testF90(self):
+        mpif90types = (
+            MPI.INTEGER1,
+            MPI.INTEGER2,
+            MPI.INTEGER4,
+            MPI.INTEGER8,
+            MPI.INTEGER16,
+            MPI.REAL4,
+            MPI.REAL8,
+            MPI.COMPLEX8,
+            MPI.COMPLEX16,
+        )
+        for mt in mpif90types:
+            if mt == MPI.DATATYPE_NULL:
+                continue
+            if mt.Get_size() == 0:
+                continue
+            dt = tonumpy(mt)
+            if np_dtype is not None:
+                self.assertEqual(dt.itemsize, mt.extent)
+
+    @unittest.skipMPI('msmpi')
     def testF90Integer(self):
         try:
             mt = MPI.Datatype.Create_f90_integer(1)
@@ -286,6 +335,11 @@ class TestUtilDTLib(unittest.TestCase):
                 if np_dtype is not None:
                     self.assertEqual(dt.kind, 'i')
                     self.assertEqual(dt.itemsize, mt.extent)
+                    tstr = 'i{}'.format(mt.Get_size())
+                    stp, mtp = self.makeStruct(tstr, mt)
+                    self.assertEqual(stp.itemsize, mtp.extent)
+                    self.check(mtp)
+                    mtp.Free()
 
     @unittest.skipMPI('msmpi')
     def testF90Real(self):
@@ -302,6 +356,11 @@ class TestUtilDTLib(unittest.TestCase):
                 if np_dtype is not None:
                     self.assertEqual(dt.kind, 'f')
                     self.assertEqual(dt.itemsize, mt.extent)
+                    tstr = 'f{}'.format(mt.Get_size())
+                    stp, mtp = self.makeStruct(tstr, mt)
+                    self.assertEqual(stp.itemsize, mtp.extent)
+                    self.check(mtp)
+                    mtp.Free()
 
     @unittest.skipMPI('msmpi')
     def testF90Complex(self):
@@ -318,6 +377,29 @@ class TestUtilDTLib(unittest.TestCase):
                 if np_dtype is not None:
                     self.assertEqual(dt.kind, 'c')
                     self.assertEqual(dt.itemsize, mt.extent)
+
+    @unittest.skipMPI('msmpi')
+    def testCoverage(self):
+        from mpi4py.util import dtlib
+        mpitypes = (
+            MPI.LOGICAL,
+        )
+        for mt in mpitypes:
+            if mt == MPI.DATATYPE_NULL:
+                continue
+            if mt.Get_size() == 0:
+                continue
+            dtlib._get_alignment(mt)
+
+    def testAlignment(self):
+        from mpi4py.util import dtlib
+        complexcodes = ['c{}'.format(n) for n in (8, 16)]
+        for t in typecodes + complexcodes:
+            with self.subTest(typecode=t):
+                alignment1 = dtlib._get_alignment_ctypes(t)
+                if np_dtype is not None:
+                    alignment2 = numpy.dtype(t).alignment
+                    self.assertTrue(alignment1, alignment2)
 
     @unittest.skipIf(numpy is None, 'numpy')
     def testFailures(self):

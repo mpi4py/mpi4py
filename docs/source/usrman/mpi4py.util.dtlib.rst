@@ -9,7 +9,7 @@ mpi4py.util.dtlib
 The :mod:`mpi4py.util.dtlib` module provides converter routines between NumPy
 and MPI datatypes.
 
-.. function:: from_numpy_dtype(dtype: numpy.DTypeLike) -> Datatype
+.. function:: from_numpy_dtype(dtype: numpy.typing.DTypeLike) -> Datatype
 
    Convert NumPy datatype to MPI datatype.
 
