@@ -122,6 +122,8 @@ if sizeof(size_t) == sizeof(long):
 if sizeof(size_t) == sizeof(int):
     AddTypeMap(TypeDict, "n" , __INT__                )
     AddTypeMap(TypeDict, "N" , __UNSIGNED__           )
+if sizeof(size_t) == sizeof(MPI_Count):
+    AddTypeMap(TypeDict, "n" , __COUNT__              )
 
 # intptr_t and uintptr_t (C99)
 if sizeof(Py_intptr_t) == sizeof(long long):
