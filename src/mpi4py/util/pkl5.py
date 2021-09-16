@@ -17,7 +17,6 @@ from ..MPI import (
     _typedict,
     _comm_lock,
     _commctx_inter,
-    memory as _memory,
     Pickle as _Pickle,
 )
 
@@ -50,13 +49,9 @@ def _buffer_handler(protocol, threshold):
         protocol = _PROTOCOL
     if protocol < 5:
         return bufs, None
-    buffer_len = len
-    buffer_raw = _memory
-    buffer_add = bufs.append
     def buf_cb(buf):
-        buf = buffer_raw(buf)
-        if buffer_len(buf) >= threshold:
-            buffer_add(buf)
+        if memoryview(buf).nbytes >= threshold:
+            bufs.append(buf)
             return False
         return True
     return bufs, buf_cb
@@ -118,8 +113,8 @@ class _BigMPI:
         cache.clear()
 
     def __call__(self, buf):
-        buf = _memory(buf)
-        count = len(buf)
+        buf = memoryview(buf)
+        count = buf.nbytes
         blocksize = self.blocksize
         if count < blocksize:
             return (buf, count, MPI.BYTE)
@@ -170,7 +165,7 @@ def _new_buffer(size):
 def _send_raw(comm, send, data, bufs, dest, tag):
     # pylint: disable=too-many-arguments
     info = [len(data)]
-    info.extend(len(_memory(sbuf)) for sbuf in bufs)
+    info.extend(memoryview(sbuf).nbytes for sbuf in bufs)
     infotype = _info_datatype()
     info = _info_pack(info)
     send(comm, (info, infotype), dest, tag)
@@ -211,7 +206,7 @@ def _recv_raw(comm, recv, buf, source, tag, status=None):
     MPI.Comm.Recv(comm, (info, infotype), source, tag, status)
     info = _info_unpack(info)
     if buf is not None:
-        buf = _memory.frombuffer(buf)
+        buf = memoryview(buf).cast('B')
         if len(buf) > info[0]:
             buf = buf[:info[0]]
         if len(buf) < info[0]:
@@ -356,7 +351,7 @@ def _bcast_intra_raw(comm, bcast, data, bufs, root):
     rank = comm.Get_rank()
     if rank == root:
         info = [len(data)]
-        info.extend(len(_memory(sbuf)) for sbuf in bufs)
+        info.extend(memoryview(sbuf).nbytes for sbuf in bufs)
         infotype = _info_datatype()
         infosize = _info_pack([len(info)])
         bcast(comm, (infosize, infotype), root)
