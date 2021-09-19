@@ -121,34 +121,47 @@ cdef inline Py_ssize_t dlpack_get_size(const DLTensor *dltensor) nogil:
 cdef inline char *dlpack_get_format(const DLTensor *dltensor) nogil:
     cdef unsigned int code = dltensor.dtype.code
     cdef unsigned int bits = dltensor.dtype.bits
-    if dltensor.dtype.lanes != 1: return BYTE_FMT
+    if dltensor.dtype.lanes != 1:
+        if code == kDLFloat and dltensor.dtype.lanes == 2:
+            if bits == 8*sizeof(float):       return b"Zf"
+            if bits == 8*sizeof(double):      return b"Zd"
+            if bits == 8*sizeof(long double): return b"Zg"
+        return BYTE_FMT
     if code == kDLInt:
-        if bits == 1*8: return b"i1"
-        if bits == 2*8: return b"i2"
-        if bits == 4*8: return b"i4"
-        if bits == 8*8: return b"i8"
+        if bits == 8*sizeof(char):      return b"b"
+        if bits == 8*sizeof(short):     return b"h"
+        if bits == 8*sizeof(int):       return b"i"
+        if bits == 8*sizeof(long):      return b"l"
+        if bits == 8*sizeof(long long): return b"q"
     if code == kDLUInt:
-        if bits == 1*8: return b"u1"
-        if bits == 2*8: return b"u2"
-        if bits == 4*8: return b"u4"
-        if bits == 8*8: return b"u8"
+        if bits == 8*sizeof(char):      return b"B"
+        if bits == 8*sizeof(short):     return b"H"
+        if bits == 8*sizeof(int):       return b"I"
+        if bits == 8*sizeof(long):      return b"L"
+        if bits == 8*sizeof(long long): return b"Q"
     if code == kDLFloat:
-       if bits ==  2*8: return b"f2"
-       if bits ==  4*8: return b"f4"
-       if bits ==  8*8: return b"f8"
-       if bits == 12*8: return b"f12"
-       if bits == 16*8: return b"f16"
+        if bits ==  8*sizeof(float)//2:    return b"e"
+        if bits ==  8*sizeof(float):       return b"f"
+        if bits ==  8*sizeof(double):      return b"d"
+        if bits ==  8*sizeof(long double): return b"g"
     if code == kDLComplex:
-       if bits ==  4*8: return b"c4"
-       if bits ==  8*8: return b"c8"
-       if bits == 16*8: return b"c16"
-       if bits == 24*8: return b"c24"
-       if bits == 32*8: return b"c32"
+        if bits ==  8*2*sizeof(float)//2:    return b"Ze"
+        if bits ==  8*2*sizeof(float):       return b"Zf"
+        if bits ==  8*2*sizeof(double):      return b"Zd"
+        if bits ==  8*2*sizeof(long double): return b"Zg"
     return BYTE_FMT
 
 cdef inline Py_ssize_t dlpack_get_itemsize(const DLTensor *dltensor) nogil:
-    if dltensor.dtype.lanes != 1: return 1
-    return (dltensor.dtype.bits + 7) // 8
+    cdef unsigned int code = dltensor.dtype.code
+    cdef unsigned int bits = dltensor.dtype.bits
+    if dltensor.dtype.lanes != 1:
+        if code == kDLFloat and dltensor.dtype.lanes == 2:
+            if (bits == 8*sizeof(float) or
+                bits == 8*sizeof(double) or
+                bits == 8*sizeof(long double)):
+                return <Py_ssize_t> bits // 8 * 2
+        return 1
+    return <Py_ssize_t> (bits + 7) // 8
 
 #------------------------------------------------------------------------------
 
