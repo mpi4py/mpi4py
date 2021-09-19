@@ -12,8 +12,8 @@ bootstrap()
 initialize()
 
 include "asstring.pxi"
-include "asbuffer.pxi"
 include "asmemory.pxi"
+include "asbuffer.pxi"
 include "asarray.pxi"
 include "helpers.pxi"
 include "attrimpl.pxi"

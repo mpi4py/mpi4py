@@ -18,25 +18,32 @@ cdef extern from "Python.h":
 @cython.final
 @cython.internal
 cdef class _p_mem:
+
     cdef void *buf
-    cdef size_t len
+    cdef Py_ssize_t len
     cdef void (*free)(void*)
+
     def __cinit__(self):
         self.buf = NULL
         self.len = 0
         self.free = NULL
+
     def __dealloc__(self):
         if self.free:
             self.free(self.buf)
 
+    def __getbuffer__(self, Py_buffer *view, int flags):
+        if view.obj == Py_None: Py_CLEAR(view.obj)
+        PyBuffer_FillInfo(view, self, self.buf, self.len, 0, flags)
+
 
 cdef inline _p_mem allocate(Py_ssize_t m, size_t b, void *buf):
-  if m > PY_SSIZE_T_MAX/<Py_ssize_t>b:
+  if m > PY_SSIZE_T_MAX // <Py_ssize_t>b:
       raise MemoryError("memory allocation size too large")
   if m < 0:
       raise RuntimeError("memory allocation with negative size")
   cdef _p_mem ob = _p_mem.__new__(_p_mem)
-  ob.len  = <size_t>m * b
+  ob.len  = m * <Py_ssize_t>b
   ob.free = PyMem_Free
   ob.buf  = PyMem_Malloc(<size_t>m * b)
   if ob.buf == NULL: raise MemoryError
@@ -45,12 +52,12 @@ cdef inline _p_mem allocate(Py_ssize_t m, size_t b, void *buf):
 
 
 cdef inline _p_mem rawalloc(Py_ssize_t m, size_t b, bint clear, void *buf):
-  if m > PY_SSIZE_T_MAX/<Py_ssize_t>b:
+  if m > PY_SSIZE_T_MAX // <Py_ssize_t>b:
       raise MemoryError("memory allocation size too large")
   if m < 0:
       raise RuntimeError("memory allocation with negative size")
   cdef _p_mem ob = _p_mem.__new__(_p_mem)
-  ob.len = <size_t>m * b
+  ob.len = m * <Py_ssize_t>b
   ob.free = PyMem_RawFree
   if clear:
       ob.buf = PyMem_RawCalloc(<size_t>m, b)

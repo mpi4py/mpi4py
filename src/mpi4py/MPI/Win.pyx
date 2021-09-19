@@ -340,31 +340,6 @@ cdef class Win:
         win_get_size(self.ob_mpi, &size)
         PyBuffer_FillInfo(view, self, base, size, 0, flags)
 
-    # buffer interface (legacy)
-
-    def __getsegcount__(self, Py_ssize_t *lenp):
-        if lenp == NULL: return 1
-        cdef MPI_Aint size = 0
-        win_get_size(self.ob_mpi, &size)
-        lenp[0] = <Py_ssize_t>size
-        return 1
-
-    def __getreadbuffer__(self, Py_ssize_t idx, void **bufp):
-        if idx != 0:
-            raise SystemError("accessing non-existent buffer segment")
-        cdef MPI_Aint size = 0
-        win_get_base(self.ob_mpi, bufp)
-        win_get_size(self.ob_mpi, &size)
-        return <Py_ssize_t>size
-
-    def __getwritebuffer__(self, Py_ssize_t idx, void **bufp):
-        if idx != 0:
-            raise SystemError("accessing non-existent buffer segment")
-        cdef MPI_Aint size = 0
-        win_get_base(self.ob_mpi, bufp)
-        win_get_size(self.ob_mpi, &size)
-        return <Py_ssize_t>size
-
     # Communication Operations
     # ------------------------
 

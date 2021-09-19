@@ -121,7 +121,7 @@ cdef _p_message message_basic(object o_buf,
     # an explicit MPI datatype is required
     if is_BOTTOM(o_buf) or o_buf is None:
         if isinstance(o_type, Datatype):
-            m.type = <Datatype>o_type
+            m.type = <Datatype> o_type
         else:
             m.type = TypeDict[o_type]
         m.buf = newbuffer()
@@ -136,9 +136,12 @@ cdef _p_message message_basic(object o_buf,
     bsize[0] = <MPI_Aint> m.buf.view.len
     # lookup datatype if not provided or not a Datatype
     if isinstance(o_type, Datatype):
-        m.type = <Datatype>o_type
+        m.type = <Datatype> o_type
     elif o_type is None:
-        m.type = TypeDict[getformat(m.buf)]
+        if m.buf.view.format != BYTE_FMT:
+            m.type = TypeDict[pystr(m.buf.view.format)]
+        else:
+            m.type = __BYTE__
     else:
         m.type = TypeDict[o_type]
     btype[0] = m.type.ob_mpi
