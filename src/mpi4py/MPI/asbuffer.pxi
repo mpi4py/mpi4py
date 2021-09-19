@@ -201,27 +201,6 @@ cdef class memory:
                           self.view.buf, self.view.len,
                           self.view.readonly, flags)
 
-    # buffer interface (legacy)
-
-    def __getsegcount__(self, Py_ssize_t *lenp):
-        if lenp != NULL:
-            lenp[0] = self.view.len
-        return 1
-
-    def __getreadbuffer__(self, Py_ssize_t idx, void **p):
-        if idx != 0:
-            raise SystemError("accessing non-existent buffer segment")
-        p[0] = self.view.buf
-        return self.view.len
-
-    def __getwritebuffer__(self, Py_ssize_t idx, void **p):
-        if self.view.readonly:
-            raise TypeError("memory buffer is read-only")
-        if idx != 0:
-            raise SystemError("accessing non-existent buffer segment")
-        p[0] = self.view.buf
-        return self.view.len
-
     # sequence interface (basic)
 
     def __len__(self):
@@ -284,31 +263,6 @@ cdef inline memory getbuffer(object ob, bint readonly, bint format):
         flags |= PyBUF_FORMAT
     PyMPI_GetBuffer(ob, &buf.view, flags)
     return buf
-
-cdef inline object getformat(memory buf):
-    cdef Py_buffer *view = &buf.view
-    #
-    if view.obj == NULL:
-        if view.format != NULL:
-            return pystr(view.format)
-        else:
-            return "B"
-    elif view.format != NULL:
-        # XXX this is a hack
-        if view.format != BYTE_FMT:
-            return pystr(view.format)
-    #
-    cdef object ob = <object>view.obj
-    cdef object format = None
-    try: # numpy.ndarray
-        format = ob.dtype.char
-    except (AttributeError, TypeError):
-        try: # array.array
-            format = ob.typecode
-        except (AttributeError, TypeError):
-            if view.format != NULL:
-                format = pystr(view.format)
-    return format
 
 cdef inline memory getbuffer_r(object ob, void **base, MPI_Aint *size):
     cdef memory buf = getbuffer(ob, 1, 0)
