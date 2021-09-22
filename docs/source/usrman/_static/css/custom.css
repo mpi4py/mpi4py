@@ -1,9 +1,3 @@
-/* Fix for sphinx-rtd-theme <= 0.5.2 */
-.rst-content .sig-prename, .rst-content .sig-name {
-    font-family: SFMono-Regular, Menlo, Monaco, Consolas, Liberation, Mono, "Courier New", Courier, monospace;
-    color: #000;
-}
-
 /* Custom :c:func:`Function` */
 .rst-content code.xref.c-func span.pre {
     font-weight: normal;
