@@ -335,16 +335,16 @@ Summarizing, :samp:`mpi4py.futures` can be invoked in the following ways:
 * :samp:`$ mpiexec -n {numprocs} python -m mpi4py.futures - [arg] ...`
 
 Before starting the main script execution, :mod:`mpi4py.futures` splits
-`MPI.COMM_WORLD` in one master (the process with rank 0 in `MPI.COMM_WORLD`)
-and 16 workers and connect them through an MPI intercommunicator. Afterwards,
-the master process proceeds with the execution of the user script code, which
-eventually creates :class:`MPIPoolExecutor` instances to submit
+`MPI.COMM_WORLD` in one master (the process with rank 0 in `MPI.COMM_WORLD`) and
+*numprocs - 1* workers and connects them through an MPI intercommunicator.
+Afterwards, the master process proceeds with the execution of the user script
+code, which eventually creates :class:`MPIPoolExecutor` instances to submit
 tasks. Meanwhile, the worker processes follow a different execution path to
-serve the master.  Upon successful termination of the main script at the
-master, the entire MPI execution environment exists gracefully. In case of any
-unhandled exception in the main script, the master process calls
-``MPI.COMM_WORLD.Abort(1)`` to prevent deadlocks and force termination of
-entire MPI execution environment.
+serve the master.  Upon successful termination of the main script at the master,
+the entire MPI execution environment exists gracefully. In case of any unhandled
+exception in the main script, the master process calls
+``MPI.COMM_WORLD.Abort(1)`` to prevent deadlocks and force termination of entire
+MPI execution environment.
 
 .. warning::
 
@@ -454,7 +454,7 @@ Another way to specify the number of workers is to use the
 :envvar:`MPI4PY_FUTURES_MAX_WORKERS`::
 
   $ MPI4PY_FUTURES_MAX_WORKERS=16 mpiexec -n 1 python julia.py
-  
+
 Note that in this case, the MPI universe size is ignored.
 
 Alternatively, users may decide to execute the script in a more traditional
