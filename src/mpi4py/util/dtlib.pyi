@@ -1,3 +1,4 @@
+from __future__ import annotations
 from ..MPI import Datatype
 from numpy import dtype
 from numpy.typing import DTypeLike

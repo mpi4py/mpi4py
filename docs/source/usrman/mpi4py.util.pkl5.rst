@@ -37,137 +37,89 @@ MPI-3).
 
    .. _pickle5-pypi: https://pypi.org/project/pickle5/
 
-.. class:: Request
+
+.. autoclass:: Request
 
    Custom request class for nonblocking communications.
 
-   .. note:: :class:`Request` is not a subclass of :class:`MPI.Request`
+   .. note:: :class:`Request` is not a subclass of :class:`mpi4py.MPI.Request`
 
-   .. method:: Free() -> None
+   .. automethod:: Free
 
-   .. method:: cancel() -> None
+   .. automethod:: cancel
 
-   .. method:: get_status( \
-               status: Optional[MPI.Status] = None, \
-               ) -> bool
+   .. automethod:: get_status
 
-   .. method:: test( \
-               status: Optional[MPI.Status] = None, \
-               ) -> Tuple[bool, Optional[Any]]
+   .. automethod:: test
 
-   .. method:: wait( \
-               status: Optional[MPI.Status] = None, \
-               ) -> Any
+   .. automethod:: wait
 
-   .. method:: testall( \
-               requests: Sequence[Request], \
-               statuses: Optional[List[MPI.Status]] = None,\
-               ) -> Tuple[bool, Optional[List[Any]]]
+   .. automethod:: testall
+
       :classmethod:
 
-   .. method:: waitall( \
-               requests: Sequence[Request], \
-               statuses: Optional[List[MPI.Status]] = None, \
-               ) -> List[Any]
+   .. automethod:: waitall
+
       :classmethod:
 
 
-.. class:: Message
+.. autoclass:: Message
 
    Custom message class for matching probes.
 
-   .. note:: :class:`Message` is not a subclass of :class:`MPI.Message`
+   .. note:: :class:`Message` is not a subclass of :class:`mpi4py.MPI.Message`
 
-   .. method:: recv( \
-               status: Optional[MPI.Status] = None, \
-               ) -> Any: ...
+   .. automethod:: recv
 
-   .. method:: irecv() -> Request
+   .. automethod:: irecv
 
-   .. method:: probe( \
-               comm: Comm, \
-               source: int = MPI.ANY_SOURCE, \
-               tag: int = MPI.ANY_TAG, \
-               status: Optional[MPI.Status] = None, \
-               ) -> Message
+   .. automethod:: probe
+
       :classmethod:
 
-   .. method:: iprobe( \
-               comm: Comm, \
-               source: int = MPI.ANY_SOURCE, \
-               tag: int = MPI.ANY_TAG, \
-               status: Optional[MPI.Status] = None, \
-               ) -> Optional[Message]: ...
+   .. automethod:: iprobe
+
       :classmethod:
 
 
-.. class:: Comm(comm: MPI.Comm = MPI.COMM_NULL)
+.. autoclass:: Comm
 
    Base communicator wrapper class.
 
-   .. method:: send(obj: Any, dest: int, tag: int = 0) -> None
+   .. automethod:: send
 
-   .. method:: bsend(obj: Any, dest: int, tag: int = 0) -> None
+   .. automethod:: bsend
 
-   .. method:: ssend(obj: Any, dest: int, tag: int = 0) -> None
+   .. automethod:: ssend
 
-   .. method:: isend(obj: Any, dest: int, tag: int = 0) -> Request
+   .. automethod:: isend
 
-   .. method:: ibsend(obj: Any, dest: int, tag: int = 0) -> Request
+   .. automethod:: ibsend
 
-   .. method:: issend(obj: Any, dest: int, tag: int = 0) -> Request
+   .. automethod:: issend
 
-   .. method:: recv( \
-               buf: Optional[Buffer] = None, \
-               source: int = MPI.ANY_SOURCE, \
-               tag: int = MPI.ANY_TAG, \
-               status: Optional[MPI.Status] = None, \
-               ) -> Any
+   .. automethod:: recv
 
-   .. method:: irecv( \
-               buf: Optional[Buffer] = None, \
-               source: int = MPI.ANY_SOURCE, \
-               tag: int = MPI.ANY_TAG, \
-               ) -> Request
+   .. automethod:: irecv
 
       .. warning:: This method cannot be supported reliably
                    and raises :exc:`RuntimeError`.
 
-   .. method:: sendrecv( \
-               sendobj: Any, \
-               dest: int, \
-               sendtag: int = 0, \
-               recvbuf: Optional[Buffer] = None, \
-               source: int = MPI.ANY_SOURCE, \
-               recvtag: int = MPI.ANY_TAG, \
-               status: Optional[MPI.Status] = None, \
-               ) -> Any
+   .. automethod:: sendrecv
 
-   .. method:: mprobe( \
-               source: int = MPI.ANY_SOURCE, \
-               tag: int = MPI.ANY_TAG, \
-               status: Optional[MPI.Status] = None, \
-               ) -> Message
+   .. automethod:: mprobe
 
-   .. method:: improbe( \
-               source: int = MPI.ANY_SOURCE, \
-               tag: int = MPI.ANY_TAG, \
-               status: Optional[MPI.Status] = None, \
-               ) -> Optional[Message]
+   .. automethod:: improbe
 
-   .. method:: bcast( \
-               self, \
-               obj: Any, \
-               root: int = 0, \
-               ) -> Any
+   .. automethod:: bcast
 
 
-.. class:: Intracomm(comm: MPI.Intracomm = MPI.COMM_NULL)
+.. autoclass:: Intracomm
 
    Intracommunicator wrapper class.
 
 
-.. class:: Intercomm(comm: MPI.Intercomm = MPI.COMM_NULL)
+.. autoclass:: Intercomm
 
    Intercommunicator wrapper class.
 

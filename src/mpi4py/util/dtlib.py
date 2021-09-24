@@ -112,7 +112,7 @@ def _is_aligned(datatype, offset=0):
 
 
 def from_numpy_dtype(dtype):
-    """Convert NumPy datatype to MPI."""
+    """Convert NumPy datatype to MPI datatype."""
     try:
         dtype = _np_dtype(dtype)
     except NameError:  # pragma: no cover
@@ -168,7 +168,7 @@ def from_numpy_dtype(dtype):
 
 
 def to_numpy_dtype(datatype):
-    """Convert MPI datatype to NumPy."""
+    """Convert MPI datatype to NumPy datatype."""
 
     def mpi2npy(datatype, count):
         dtype = to_numpy_dtype(datatype)

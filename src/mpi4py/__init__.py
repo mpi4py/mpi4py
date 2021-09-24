@@ -112,7 +112,7 @@ def profile(name, *, path=None, logfile=None):
     ----------
     name : str
        Name of the profiler library to load.
-    path : Sequence[str], optional
+    path : `sequence` of str, optional
        Additional paths to search for the profiler.
     logfile : str, optional
        Filename prefix for dumping profiler output.
