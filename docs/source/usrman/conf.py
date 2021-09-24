@@ -12,7 +12,9 @@
 
 import os
 import sys
+import typing
 import datetime
+import importlib
 sys.path.insert(0, os.path.abspath('.'))
 _today = datetime.datetime.now()
 
@@ -64,6 +66,20 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 default_role = 'any'
 
+nitpicky = False
+nitpick_ignore = [
+    ('c:func', r'atexit'),
+    ('envvar', r'MPICC'),
+    ('py:mod', r'__worker__'),
+    ('py:mod', r'pickle5'),
+]
+nitpick_ignore_regex = [
+    (r'c:.*', r'MPI_.*'),
+    (r'envvar', r'(LD_LIBRARY_)?PATH'),
+    (r'envvar', r'(MPICH|OMPI|MPIEXEC)_.*'),
+]
+# python_use_unqualified_type_names = True
+
 autodoc_typehints = 'description'
 autodoc_type_aliases = {}
 autodoc_mock_imports = []
@@ -88,6 +104,58 @@ except ImportError:
     sphinx_rtd_theme = None
 
 
+def _setup_numpy_typing():
+    try:
+        import numpy as np
+    except ImportError:
+        np = type(sys)('numpy')
+        sys.modules[np.__name__] = np
+        np.dtype = type('dtype', (), {})
+
+    try:
+        import numpy.typing as npt
+    except ImportError:
+        npt = type(sys)('numpy.typing')
+        np.typing = npt
+        sys.modules[npt.__name__] = npt
+        npt.__all__ = []
+        for attr in ['ArrayLike', 'DTypeLike']:
+            setattr(npt, attr, typing.Any)
+            npt.__all__.append(attr)
+
+    autodoc_type_aliases.update({
+        'dtype': 'numpy.dtype',
+        'ArrayLike': 'numpy.typing.ArrayLike',
+        'DTypeLike': 'numpy.typing.DTypeLike',
+    })
+
+
+def _patch_domain_python():
+    from sphinx.domains import python
+    try:
+        from numpy.typing import __all__ as numpy_types
+    except ImportError:
+        numpy_types = []
+    try:
+        from mpi4py.typing import __all__ as mpi4py_types
+    except ImportError:
+        mpi4py_types = []
+
+    def make_xref(self, rolename, domain, target, *args, **kwargs):
+        if target in ('True', 'False'):
+            rolename = 'obj'
+        elif target in numpy_types:
+            rolename = 'data'
+        elif target in mpi4py_types:
+            rolename = 'data'
+        return make_xref_orig(self, rolename, domain, target, *args, *kwargs)
+
+    numpy_types = set(f'numpy.typing.{name}' for name in numpy_types)
+    mpi4py_types = set(mpi4py_types)
+    make_xref_orig = python.PyXrefMixin.make_xref
+    python.PyXrefMixin.make_xref = make_xref
+
+
 def _patch_autosummary():
     from sphinx.ext import autodoc
     from sphinx.ext import autosummary
@@ -109,6 +177,8 @@ def _patch_autosummary():
 
 
 def setup(app):
+    _setup_numpy_typing()
+    _patch_domain_python()
     _patch_autosummary()
     try:
         from mpi4py import MPI
@@ -146,6 +216,21 @@ def setup(app):
     synopsis[module.__name__] = module.__doc__.strip()
     autotype = autosummary_context['autotype']
     autotype[module.Exception.__name__] = 'exception'
+
+
+    modules = [
+        'mpi4py',
+        'mpi4py.run',
+        'mpi4py.util.dtlib',
+        'mpi4py.util.pkl5',
+    ]
+    typing_overload = typing.overload
+    typing.overload = lambda arg: arg
+    for name in modules:
+        mod = importlib.import_module(name)
+        ann = apidoc.load_module(f'{mod.__file__}i', name)
+        apidoc.annotate(mod, ann)
+    typing.overload = typing_overload
 
 
 # -- Options for HTML output -------------------------------------------------

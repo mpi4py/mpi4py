@@ -1,3 +1,4 @@
+from __future__ import annotations
 from .. import MPI
 from ..MPI import ANY_SOURCE, ANY_TAG
 from ..MPI import Status, Datatype

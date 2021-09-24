@@ -441,9 +441,10 @@ def generate(filename):
             print(line, file=f)
 
 
-def load_module(filename):
-    name, _ = os.path.splitext(
-        os.path.basename(filename))
+def load_module(filename, name=None):
+    if name is None:
+        name, _ = os.path.splitext(
+            os.path.basename(filename))
     module = type(sys)(name)
     module.__file__ = filename
     module.__package__ = name.rsplit('.', 1)[0]
@@ -466,6 +467,25 @@ def restore_module(module):
     name = module.__name__
     assert name in _sys_modules
     sys.modules[name] = _sys_modules[name]
+
+
+def annotate(dest, source):
+    try:
+        dest.__annotations__ = source.__annotations__
+    except Exception:
+        pass
+    if isinstance(dest, type):
+        for name in dest.__dict__.keys():
+            if hasattr(source, name):
+                obj = getattr(dest, name)
+                annotate(obj, getattr(source, name))
+    if isinstance(dest, type(sys)):
+        for name in dir(dest):
+            if hasattr(source, name):
+                obj = getattr(dest, name)
+                mod = getattr(obj, '__module__', None)
+                if dest.__name__ == mod:
+                    annotate(obj, getattr(source, name))
 
 
 OUTDIR = 'reference'
