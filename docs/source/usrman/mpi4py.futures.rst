@@ -217,6 +217,15 @@ only) thread until they are signaled for completion.
       allocated in the first call to :meth:`~MPIPoolExecutor.submit`, thus
       calling :meth:`~MPIPoolExecutor.bootup` explicitly is seldom needed.
 
+
+.. envvar:: MPI4PY_FUTURES_MAX_WORKERS
+
+   If the *max_workers* parameter to :class:`MPIPoolExecutor` is `None` or not
+   given, the :envvar:`MPI4PY_FUTURES_MAX_WORKERS` environment variable
+   provides fallback value for the maximum number of MPI worker processes to
+   spawn.
+
+
 .. note::
 
    As the master process uses a separate thread to perform MPI communication
