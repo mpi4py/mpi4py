@@ -23,6 +23,9 @@ def getoptionparser():
     parser.add_option("-c", "--catch",
                       action="store_true", dest="catchbreak", default=False,
                       help="catch Control-C and display results")
+    parser.add_option("-k", "--pattern", type="string",
+                      action="append", dest="patterns", default=[],
+                      help="only run tests which match the given substring")
     parser.add_option("--no-builddir",
                       action="store_false", dest="builddir", default=True,
                       help="disable testing from build directory")
@@ -204,6 +207,10 @@ def load_tests(options, args):
         mpiunittest.skipMPI = lambda p, *c: lambda f: f
     # Load tests and populate suite
     testloader = unittest.TestLoader()
+    if options.patterns:
+        testloader.testNamePatterns = [
+            ('*%s*' % p) if ('*' not in p) else p
+            for p in options.patterns]
     testsuite = unittest.TestSuite()
     for testname in testnames:
         module = __import__(testname)
