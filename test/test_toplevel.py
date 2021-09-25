@@ -84,6 +84,7 @@ class TestPackage(unittest.TestCase):
     def testImports(self):
         import mpi4py
         import mpi4py.MPI
+        import mpi4py.typing
         import mpi4py.__main__
         import mpi4py.bench
         import mpi4py.futures
