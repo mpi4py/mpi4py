@@ -75,20 +75,16 @@ def main():
     import os
     import sys
 
-    package = __spec__.parent
-
     def version():
         from . import __version__
+        package = __spec__.parent
         print(package, __version__, file=sys.stdout)
         sys.exit(0)
 
     def usage(errmess=None):
         from textwrap import dedent
         python = os.path.basename(sys.executable)
-        if __name__ == '__main__':
-            program = package + '.run'
-        else:
-            program = package
+        program = __spec__.name
 
         cmdline = dedent(f"""
         usage: {python} -m {program} [options] <pyfile> [arg] ...
