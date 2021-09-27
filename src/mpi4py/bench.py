@@ -1,16 +1,23 @@
 # Author:  Lisandro Dalcin
 # Contact: dalcinl@gmail.com
 """Run MPI benchmarks and tests."""
+import os as _os
 import sys as _sys
+
+
+def _prog(cmd=""):
+    pyexe = _os.path.basename(_sys.executable)
+    return f"{pyexe} -m {__spec__.name} {cmd}".strip()
 
 
 def helloworld(comm, args=None, verbose=True):
     """Hello, World! using MPI."""
     # pylint: disable=import-outside-toplevel
     from argparse import ArgumentParser
-    parser = ArgumentParser(prog=__name__ + " helloworld")
+    parser = ArgumentParser(prog=_prog("helloworld"))
     parser.add_argument("-q", "--quiet", action="store_false",
-                        dest="verbose", default=verbose)
+                        dest="verbose", default=verbose,
+                        help="quiet output")
     options = parser.parse_args(args)
 
     from . import MPI
@@ -40,14 +47,18 @@ def ringtest(comm, args=None, verbose=True):
     # pylint: disable=too-many-statements
     # pylint: disable=import-outside-toplevel
     from argparse import ArgumentParser
-    parser = ArgumentParser(prog=__name__ + " ringtest")
+    parser = ArgumentParser(prog=_prog("ringtest"))
     parser.add_argument("-q", "--quiet", action="store_false",
-                        dest="verbose", default=verbose)
-    parser.add_argument("-n", "--size", type=int, default=1, dest="size",
+                        dest="verbose", default=verbose,
+                        help="quiet output")
+    parser.add_argument("-n", "--size", type=int,
+                        dest="size", default=1,
                         help="message size")
-    parser.add_argument("-s", "--skip", type=int, default=0, dest="skip",
+    parser.add_argument("-s", "--skip", type=int,
+                        dest="skip", default=0,
                         help="number of warm-up iterations")
-    parser.add_argument("-l", "--loop", type=int, default=1, dest="loop",
+    parser.add_argument("-l", "--loop", type=int,
+                        dest="loop", default=1,
                         help="number of iterations")
     options = parser.parse_args(args)
 
@@ -112,11 +123,193 @@ def ringtest(comm, args=None, verbose=True):
     return elapsed
 
 
+def pingpong(comm, args=None, verbose=True):
+    """Time messages between processes."""
+    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-branches
+    # pylint: disable=too-many-statements
+    # pylint: disable=import-outside-toplevel
+    from argparse import ArgumentParser
+    parser = ArgumentParser(prog=_prog("pingpong"))
+    parser.add_argument("-q", "--quiet", action="store_false",
+                        dest="verbose", default=verbose,
+                        help="quiet output")
+    parser.add_argument("-m", "--min-size", type=int,
+                        dest="min_size", default=1,
+                        help="maximum message size")
+    parser.add_argument("-n", "--max-size", type=int,
+                        dest="max_size", default=1 << 30,
+                        help="maximum message size")
+    parser.add_argument("-s", "--skip", type=int,
+                        dest="skip", default=100,
+                        help="number of warm-up iterations")
+    parser.add_argument("-l", "--loop", type=int,
+                        dest="loop", default=10000,
+                        help="number of iterations")
+    parser.add_argument("-a", "--array", action="store",
+                        dest="array", default="numpy",
+                        choices=["numpy", "cupy", "numba", "none"],
+                        help="use NumPy/CuPy/Numba arrays")
+    parser.add_argument("-p", "--pickle", action="store_true",
+                        dest="pickle", default=False,
+                        help="use pickle-based send and receive")
+    parser.add_argument("--protocol", type=int,
+                        dest="protocol", default=None,
+                        help="pickle protocol version")
+    parser.add_argument("-o", "--outband", action="store_true",
+                        dest="outband", default=False,
+                        help="use out-of-band pickle-based send and receive")
+    parser.add_argument("--threshold", type=int,
+                        dest="threshold", default=None,
+                        help="size threshold for out-of-band pickle buffers")
+    parser.add_argument("--skip-large", type=int,
+                        dest="skip_large", default=10)
+    parser.add_argument("--loop-large", type=int,
+                        dest="loop_large", default=1000)
+    parser.add_argument("--large-size", type=int,
+                        dest="large_size", default=1 << 14)
+    parser.add_argument("--skip-huge", type=int,
+                        dest="skip_huge", default=1)
+    parser.add_argument("--loop-huge", type=int,
+                        dest="loop_huge", default=10)
+    parser.add_argument("--huge-size", type=int,
+                        dest="huge_size", default=1 << 20)
+    parser.add_argument("--no-header", action="store_false",
+                        dest="print_header", default=True)
+    parser.add_argument("--no-stats", action="store_false",
+                        dest="print_stats", default=True)
+    options = parser.parse_args(args)
+
+    import statistics
+    from . import MPI
+    from .util import pkl5
+
+    # pylint: disable=import-error
+    numpy = cupy = numba = None
+    if options.array == 'numpy':
+        try:
+            import numpy
+        except ImportError:  # pragma: no cover
+            pass
+    elif options.array == 'cupy':  # pragma: no cover
+        import cupy
+    elif options.array == 'numba':  # pragma: no cover
+        import numba.cuda
+
+    skip = options.skip
+    loop = options.loop
+    min_size = options.min_size
+    max_size = options.max_size
+    skip_large = options.skip_large
+    loop_large = options.loop_large
+    large_size = options.large_size
+    skip_huge = options.skip_huge
+    loop_huge = options.loop_huge
+    huge_size = options.huge_size
+
+    use_pickle = options.pickle or options.outband
+    use_outband = options.outband
+    protocol = options.protocol if use_pickle else None
+    threshold = options.threshold if use_outband else None
+
+    if use_outband:
+        comm = pkl5.Intracomm(comm)
+    if protocol is not None:
+        setattr(MPI.pickle, 'PROTOCOL', protocol)
+    if threshold is not None:
+        setattr(pkl5.pickle, 'THRESHOLD', threshold)
+
+    buf_sizes = [1 << i for i in range(33)]
+    buf_sizes = [n for n in buf_sizes if min_size <= n <= max_size]
+
+    wtime = MPI.Wtime
+    if use_pickle:
+        send = comm.send
+        recv = comm.recv
+        sendrecv = comm.sendrecv
+    else:
+        send = comm.Send
+        recv = comm.Recv
+        sendrecv = comm.Sendrecv
+    s_msg = r_msg = None
+
+    def allocate(nbytes):  # pragma: no cover
+        if numpy:
+            return numpy.empty(nbytes, 'B')
+        elif cupy:
+            return cupy.empty(nbytes, 'B')
+        elif numba:
+            return numba.cuda.device_array(nbytes, 'B')
+        else:
+            return bytearray(nbytes)
+
+    def run_pingpong():
+        rank = comm.Get_rank()
+        size = comm.Get_size()
+        t_start = wtime()
+        if size == 1:
+            sendrecv(s_msg, 0, 0, r_msg, 0, 0)
+            sendrecv(s_msg, 0, 0, r_msg, 0, 0)
+        elif rank == 0:
+            send(s_msg, 1, 0)
+            recv(r_msg, 1, 0)
+        elif rank == 1:
+            recv(r_msg, 0, 0)
+            send(s_msg, 0, 0)
+        t_end = wtime()
+        return (t_end - t_start) / 2
+
+    result = []
+    for nbytes in buf_sizes:
+        if nbytes > large_size:
+            skip = min(skip, skip_large)
+            loop = min(loop, loop_large)
+        if nbytes > huge_size:
+            skip = min(skip, skip_huge)
+            loop = min(loop, loop_huge)
+        iterations = list(range(loop + skip))
+
+        if use_pickle:
+            s_msg = allocate(nbytes)
+        else:
+            s_msg = [allocate(nbytes), nbytes, MPI.BYTE]
+            r_msg = [allocate(nbytes), nbytes, MPI.BYTE]
+
+        t_list = []
+        comm.Barrier()
+        for i in iterations:
+            elapsed = run_pingpong()
+            if i >= skip:
+                t_list.append(elapsed)
+
+        s_msg = r_msg = None
+
+        t_mean = statistics.mean(t_list) if t_list else float('nan')
+        t_stdev = statistics.stdev(t_list) if len(t_list) > 1 else 0.0
+        result.append((nbytes, t_mean, t_stdev))
+
+        if options.verbose and comm.rank == 0:
+            if options.print_header:
+                options.print_header = False
+                print("# MPI PingPong Test")
+                header = "# Size [B]  Bandwidth [MB/s]"
+                if options.print_stats:
+                    header += " | Time Mean [s] \u00b1 StdDev [s]  Samples"
+                print(header, flush=True)
+            bandwidth = nbytes / t_mean
+            message = f"{nbytes:10d}{bandwidth/1e6:18.2f}"
+            if options.print_stats:
+                message += f" | {t_mean:.7e} \u00b1 {t_stdev:.4e} {loop:8d}"
+            print(message, flush=True)
+
+    return result
+
+
 def main(args=None):
     """Entry-point for ``python -m mpi4py.bench``."""
     # pylint: disable=import-outside-toplevel
     from argparse import ArgumentParser, REMAINDER
-    parser = ArgumentParser(prog=__name__,
+    parser = ArgumentParser(prog=_prog(),
                             usage="%(prog)s [options] <command> [args]")
     parser.add_argument("--threads",
                         action="store_true", dest="threads", default=None,
@@ -167,6 +360,7 @@ def main(args=None):
 main.commands = {  # type: ignore[attr-defined]
     'helloworld': helloworld,
     'ringtest': ringtest,
+    'pingpong': pingpong,
 }
 
 if __name__ == '__main__':

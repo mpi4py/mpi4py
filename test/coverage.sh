@@ -17,6 +17,16 @@ $MPIEXEC -n 2 $PYTHON -m coverage run -m mpi4py.bench helloworld -q
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.bench ringtest > /dev/null
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.bench ringtest -q -l 2 -s 1
 $MPIEXEC -n 2 $PYTHON -m coverage run -m mpi4py.bench ringtest -q -l 2 -s 1
+$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.bench pingpong -n 64 --array none > /dev/null
+$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.bench pingpong -n 64 --no-header  > /dev/null
+$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.bench pingpong -n 64 --no-stats   > /dev/null
+$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.bench pingpong -q -l 1 -s 1 -n 2097152
+$MPIEXEC -n 2 $PYTHON -m coverage run -m mpi4py.bench pingpong -q -l 1 -s 1 -n 128
+$MPIEXEC -n 3 $PYTHON -m coverage run -m mpi4py.bench pingpong -q -l 1 -s 1 -n 128
+$MPIEXEC -n 2 $PYTHON -m coverage run -m mpi4py.bench pingpong -q -l 1 -s 1 -n 128 -p
+$MPIEXEC -n 2 $PYTHON -m coverage run -m mpi4py.bench pingpong -q -l 1 -s 1 -n 128 -o
+$MPIEXEC -n 2 $PYTHON -m coverage run -m mpi4py.bench pingpong -q -l 1 -s 1 -n 128 -p --protocol 4
+$MPIEXEC -n 2 $PYTHON -m coverage run -m mpi4py.bench pingpong -q -l 1 -s 1 -n 128 -o --threshold 32
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.bench              > /dev/null 2>&1 || true
 $MPIEXEC -n 2 $PYTHON -m coverage run -m mpi4py.bench              > /dev/null 2>&1 || true
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.bench qwerty       > /dev/null 2>&1 || true
