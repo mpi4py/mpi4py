@@ -25,9 +25,18 @@ exceptions may lead to deadlocks. In unattended runs, these deadlocks will
 drain the battery of your laptop, or burn precious allocation hours in your
 supercomputing facility.
 
+Exceptions and deadlocks
+------------------------
+
 Consider the following snippet of Python code. Assume this code is stored in a
 standard Python script file and run with :command:`mpiexec` in two or more
-processes. ::
+processes.
+
+.. code-block:: python
+   :name: deadlock-py
+   :caption: :file:`deadlock.py`
+   :emphasize-lines: 5
+   :linenos:
 
    from mpi4py import MPI
    assert MPI.COMM_WORLD.Get_size() > 1
@@ -66,8 +75,8 @@ effectively aborting the MPI execution environment.
    termination. However, MPI provides no other mechanism to recover from a
    deadlock state.
 
-Interface options
------------------
+Command line
+------------
 
 The use of ``-m mpi4py`` to execute Python code on the command line resembles
 that of the Python interpreter.

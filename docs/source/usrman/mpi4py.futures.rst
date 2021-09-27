@@ -10,10 +10,6 @@ This package provides a high-level interface for asynchronously executing
 callables on a pool of worker processes using MPI for inter-process
 communication.
 
-
-concurrent.futures
-------------------
-
 The :mod:`mpi4py.futures` package is based on :mod:`concurrent.futures` from
 the Python standard library. More precisely, :mod:`mpi4py.futures` provides the
 :class:`MPIPoolExecutor` class as a concrete implementation of the abstract
