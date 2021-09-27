@@ -267,8 +267,8 @@ Collective Communication
        return y
 
 
-MPI-IO
-------
+Input/Output (MPI-IO)
+---------------------
 
 * Collective I/O with NumPy arrays::
 
@@ -361,8 +361,8 @@ Dynamic Process Management
    comm.Disconnect()
 
 
-CUDA-aware MPI + Python GPU arrays
-----------------------------------
+GPU-aware MPI + Python GPU arrays
+---------------------------------
 
 * Reduce-to-all CuPy arrays::
 
@@ -375,16 +375,14 @@ CUDA-aware MPI + Python GPU arrays
 
    sendbuf = cp.arange(10, dtype='i')
    recvbuf = cp.empty_like(sendbuf)
-   assert hasattr(sendbuf, '__cuda_array_interface__')
-   assert hasattr(recvbuf, '__cuda_array_interface__')
    cp.cuda.get_current_stream().synchronize()
    comm.Allreduce(sendbuf, recvbuf)
 
    assert cp.allclose(recvbuf, sendbuf*size)
 
 
-One-Sided Communications
-------------------------
+One-Sided Communication (RMA)
+-----------------------------
 
 * Read from (write to) the entire RMA window::
   
