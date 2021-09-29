@@ -194,6 +194,7 @@ class Pool:
                 exception = BrokenExecutor(message)
                 future.set_exception(exception)
 
+        self.event.set()
         if lock:
             lock.acquire()
         try:
@@ -265,13 +266,13 @@ def _manager_thread(pool, options):
 def _manager_comm(pool, options, comm, full=True):
     assert comm != MPI.COMM_NULL
     serialized(client_sync)(comm, options, full)
-    size = comm.Get_remote_size()
-    queue = pool.setup(size)
-    workers = Stack(reversed(range(size)))
     if not client_init(comm, options):
         pool.broken("initializer failed")
         serialized(client_close)(comm)
         return
+    size = comm.Get_remote_size()
+    queue = pool.setup(size)
+    workers = Stack(reversed(range(size)))
     client_exec(comm, options, 0, workers, queue)
     serialized(client_close)(comm)
 
@@ -343,8 +344,6 @@ def _manager_shared(pool, options, comm, tag, workers):
     # pylint: disable=too-many-arguments
     if tag == 0:
         serialized(client_sync)(comm, options)
-    size = comm.Get_remote_size()
-    queue = pool.setup(size)
     if tag == 0:
         if not client_init(comm, options):
             pool.broken("initializer failed")
@@ -353,6 +352,8 @@ def _manager_shared(pool, options, comm, tag, workers):
         if options.get('initializer') is not None:
             pool.broken("cannot run initializer")
             return
+    size = comm.Get_remote_size()
+    queue = pool.setup(size)
     client_exec(comm, options, tag, workers, queue)
 
 
