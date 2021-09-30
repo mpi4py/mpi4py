@@ -1,5 +1,5 @@
 [MASTER]
-disable = locally-disabled,file-ignored,no-else-return
+disable = locally-disabled,file-ignored,no-else-return,consider-using-f-string
 good-names = i,j,k,_,fn
 extension-pkg-whitelist = mpi4py
 reports = no
