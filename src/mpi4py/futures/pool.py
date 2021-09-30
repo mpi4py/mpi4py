@@ -188,10 +188,12 @@ class MPIPoolExecutor(Executor):
             if cancel_futures:
                 if self._pool is not None:
                     self._pool.cancel()
+            pool = None
             if wait:
-                if self._pool is not None:
-                    self._pool.join()
-                    self._pool = None
+                pool = self._pool
+                self._pool = None
+        if pool is not None:
+            pool.join()
 
 
 def _starmap_helper(submit, function, iterable, timeout, unordered):

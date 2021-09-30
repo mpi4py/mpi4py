@@ -237,6 +237,16 @@ class ProcessPoolInitTest(ProcessPoolMixin,
         executor.bootup()
         del executor
 
+    @unittest.skipIf(SHARED_POOL, 'shared-pool')
+    def test_initializer_error_del_nowait(self):
+        executor = self.executor_type(
+            initializer=sleep_and_raise,
+            initargs=(1.2,),
+        )
+        executor.bootup(wait=False)
+        executor.shutdown(wait=False)
+        del executor
+
 
 class ProcessPoolBootupTest(ProcessPoolMixin,
                             unittest.TestCase):
@@ -978,16 +988,35 @@ class MPICommExecutorTest(unittest.TestCase):
         )
         with mpicommexecutor as executor:
             if executor is not None:
-                executor.bootup()
-                del executor
-        with mpicommexecutor as executor:
-            if executor is not None:
                 executor.submit(time.sleep, 0).cancel()
                 future = executor.submit(time.sleep, 0)
                 with self.assertRaises(futures.BrokenExecutor):
                     executor.submit(time.sleep, 0).result()
                 with self.assertRaises(futures.BrokenExecutor):
                     future.result()
+
+    @unittest.skipIf(SHARED_POOL, 'shared-pool')
+    def test_initializer_error_del(self):
+        mpicommexecutor = self.MPICommExecutor(
+            initializer=sleep_and_raise,
+            initargs=(0.2,),
+        )
+        with mpicommexecutor as executor:
+            if executor is not None:
+                executor.bootup()
+                del executor
+
+    @unittest.skipIf(SHARED_POOL, 'shared-pool')
+    def test_initializer_error_del_nowait(self):
+        mpicommexecutor = self.MPICommExecutor(
+            initializer=sleep_and_raise,
+            initargs=(0.2,),
+        )
+        with mpicommexecutor as executor:
+            if executor is not None:
+                executor.bootup(wait=False)
+                executor.shutdown(wait=False)
+                del executor
 
 
 from mpi4py.futures.aplus import ThenableFuture
