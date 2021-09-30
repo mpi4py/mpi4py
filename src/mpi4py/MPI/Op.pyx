@@ -96,8 +96,8 @@ cdef class Op:
         m.for_cro_recv(inoutbuf, 0)
         # check counts and datatypes
         if m.scount != m.rcount: raise ValueError(
-            "mismatch in inbuf count %d and inoutbuf count %d" %
-            (m.scount, m.rcount))
+            f"mismatch in inbuf count {m.scount} "
+            f"and inoutbuf count {m.rcount}")
         if (m.stype != m.rtype): raise ValueError(
             "mismatch in inbuf and inoutbuf MPI datatypes")
         # do local reduction
