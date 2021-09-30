@@ -1,5 +1,8 @@
 #------------------------------------------------------------------------------
 
+cdef extern from * nogil: # "stddef.h"
+    ctypedef unsigned int wchar_t
+
 cdef extern from * nogil: # "string.h"
     int memcmp(const void *, const void *, size_t)
     void *memset(void *, int, size_t)
