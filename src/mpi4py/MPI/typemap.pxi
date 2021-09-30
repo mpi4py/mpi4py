@@ -18,7 +18,9 @@ AddTypeMap(TypeDict, "?" , __C_BOOL__   ) # PEP-3118 & NumPy
 # character
 AddTypeMap(TypeDict, "c" , __CHAR__     ) # PEP-3118 & NumPy
 AddTypeMap(TypeDict, "S" , __CHAR__     ) # NumPy
-AddTypeMap(TypeDict, "U" , __WCHAR__    ) # NumPy
+AddTypeMap(TypeDict, "S1", __CHAR__     ) # NumPy
+AddTypeMap(TypeDict, "s",  __CHAR__     ) # PEP-3118
+AddTypeMap(TypeDict, "1s", __CHAR__     ) # PEP-3118
 # (signed) integer
 AddTypeMap(TypeDict, "b" , __SIGNED_CHAR__ ) # MPI-2
 AddTypeMap(TypeDict, "h" , __SHORT__       )
@@ -134,13 +136,30 @@ if sizeof(Py_intptr_t) == sizeof(int):
 if sizeof(Py_intptr_t) == sizeof(MPI_Aint):
     AddTypeMap(TypeDict, "p" , __AINT__               ) # NumPy
 
-# UCS-2 and UCS-4
+# wide character
+if sizeof(wchar_t) == 4:
+    AddTypeMap(TypeDict, "U" , __WCHAR__          ) # NumPy
+    AddTypeMap(TypeDict, "U1", __WCHAR__          ) # NumPy
+# UTF-16/UCS-2
 if sizeof(short) == 2:
     AddTypeMap(TypeDict, "u" , __UNSIGNED_SHORT__ ) # PEP-3118
+    AddTypeMap(TypeDict, "1u", __UNSIGNED_SHORT__ ) # PEP-3118
+if 2 == 2:
+    AddTypeMap(TypeDict, "u" , __UINT16_T__       ) # PEP-3118
+    AddTypeMap(TypeDict, "1u", __UINT16_T__       ) # PEP-3118
+if sizeof(wchar_t) == 2:
+    AddTypeMap(TypeDict, "u" , __WCHAR__          ) # PEP-3118
+    AddTypeMap(TypeDict, "1u", __WCHAR__          ) # PEP-3118
+# UTF-32/UCS-4
 if sizeof(int) == 4:
     AddTypeMap(TypeDict, "w" , __UNSIGNED__       ) # PEP-3118
-AddTypeMap(TypeDict, "u" , __UINT16_T__ ) # PEP-3118
-AddTypeMap(TypeDict, "w" , __UINT32_T__ ) # PEP-3118
+    AddTypeMap(TypeDict, "1w", __UNSIGNED__       ) # PEP-3118
+if 4 == 4:
+    AddTypeMap(TypeDict, "w" , __UINT32_T__       ) # PEP-3118
+    AddTypeMap(TypeDict, "1w", __UINT32_T__       ) # PEP-3118
+if sizeof(wchar_t) == 4:
+    AddTypeMap(TypeDict, "w" , __WCHAR__          ) # PEP-3118
+    AddTypeMap(TypeDict, "1w", __WCHAR__          ) # PEP-3118
 
 # -----------------------------------------------------------------------------
 
