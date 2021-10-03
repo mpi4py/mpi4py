@@ -49,8 +49,8 @@ cdef object getEnv(object rc, const char name[], object value):
     if cvalue == NULL: return value
     cdef object ovalue = pystr(cvalue)
     cdef bytes  bvalue = PyBytes_FromString(cvalue).lower()
-    if bvalue in (b'true',  b'yes', b'on',  b'1'): ovalue = True
-    if bvalue in (b'false', b'no',  b'off', b'0'): ovalue = False
+    if bvalue in (b'true',  b'yes', b'on',  b'y', b'1'): ovalue = True
+    if bvalue in (b'false', b'no',  b'off', b'n', b'0'): ovalue = False
     try: setattr(rc, pystr(name), ovalue)
     except: pass
     return ovalue

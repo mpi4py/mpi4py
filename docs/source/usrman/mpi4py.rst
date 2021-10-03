@@ -120,8 +120,17 @@ The following environment variables override the corresponding attributes of
 the :data:`mpi4py.rc` and :data:`MPI.pickle` objects at import time of the
 :mod:`~mpi4py.MPI` module.
 
+.. note::
+
+   For variables of boolean type, accepted values are ``0`` and ``1``
+   (interpreted as :obj:`False` and :obj:`True`, respectively), and strings
+   specifying a `YAML boolean`_ value (case-insensitive).
+
+   .. _YAML boolean: https://yaml.org/type/bool.html
+
 .. envvar:: MPI4PY_RC_INITIALIZE
 
+  :type: :class:`bool`
   :default: :obj:`True`
 
   Whether to automatically initialize MPI at import time of the
@@ -132,6 +141,7 @@ the :data:`mpi4py.rc` and :data:`MPI.pickle` objects at import time of the
 
 .. envvar:: MPI4PY_RC_FINALIZE
 
+  :type:  :obj:`None` | :class:`bool`
   :default: :obj:`None`
   :choices: :obj:`None`, :obj:`True`, :obj:`False`
 
@@ -142,6 +152,7 @@ the :data:`mpi4py.rc` and :data:`MPI.pickle` objects at import time of the
 
 .. envvar:: MPI4PY_RC_THREADS
 
+  :type: :class:`bool`
   :default: :obj:`True`
 
   Whether to initialize MPI with thread support.
@@ -162,6 +173,7 @@ the :data:`mpi4py.rc` and :data:`MPI.pickle` objects at import time of the
 
 .. envvar:: MPI4PY_RC_FAST_REDUCE
 
+  :type: :class:`bool`
   :default: :obj:`True`
 
   Whether to use tree-based reductions for objects.
@@ -171,6 +183,7 @@ the :data:`mpi4py.rc` and :data:`MPI.pickle` objects at import time of the
 
 .. envvar:: MPI4PY_RC_RECV_MPROBE
 
+  :type: :class:`bool`
   :default: :obj:`True`
 
   Whether to use matched probes to receive objects.
@@ -189,6 +202,7 @@ the :data:`mpi4py.rc` and :data:`MPI.pickle` objects at import time of the
 
 .. envvar:: MPI4PY_PICKLE_PROTOCOL
 
+  :type: :class:`int`
   :default: :data:`pickle.HIGHEST_PROTOCOL`
 
   Controls the default pickle protocol to use when communicating Python
