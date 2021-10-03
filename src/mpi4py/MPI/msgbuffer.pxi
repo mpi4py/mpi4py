@@ -545,9 +545,7 @@ cdef class _p_msg_cco:
             if root == rank:
                 self.for_cco_recv(v, rmsg, root, size)
                 if is_IN_PLACE(smsg):
-                    self.sbuf   = MPI_IN_PLACE
-                    self.scount = self.rcount
-                    self.stype  = self.rtype
+                    self.sbuf = MPI_IN_PLACE
                 else:
                     self.for_cco_send(0, smsg, 0, 0)
             else:
@@ -577,9 +575,7 @@ cdef class _p_msg_cco:
             if root == rank:
                 self.for_cco_send(v, smsg, root, size)
                 if is_IN_PLACE(rmsg):
-                    self.rbuf   = MPI_IN_PLACE
-                    self.rcount = self.scount
-                    self.rtype  = self.stype
+                    self.rbuf = MPI_IN_PLACE
                 else:
                     self.for_cco_recv(0, rmsg, root, 0)
             else:
@@ -610,9 +606,7 @@ cdef class _p_msg_cco:
         #
         self.for_cco_recv(v, rmsg, 0, size)
         if not inter and is_IN_PLACE(smsg):
-            self.sbuf   = MPI_IN_PLACE
-            self.scount = self.rcount
-            self.stype  = self.rtype
+            self.sbuf = MPI_IN_PLACE
         else:
             self.for_cco_send(0, smsg, 0, 0)
         return 0
@@ -631,11 +625,7 @@ cdef class _p_msg_cco:
         #
         self.for_cco_recv(v, rmsg, 0, size)
         if not inter and is_IN_PLACE(smsg):
-            self.sbuf    = MPI_IN_PLACE
-            self.scount  = self.rcount
-            self.scounts = self.rcounts
-            self.sdispls = self.rdispls
-            self.stype   = self.rtype
+            self.sbuf = MPI_IN_PLACE
         else:
             self.for_cco_send(v, smsg, 0, size)
         return 0
@@ -697,9 +687,7 @@ cdef class _p_msg_cco:
             if root == rank:
                 self.for_cro_recv(rmsg, root)
                 if is_IN_PLACE(smsg):
-                    self.sbuf   = MPI_IN_PLACE
-                    self.scount = self.rcount
-                    self.stype  = self.rtype
+                    self.sbuf = MPI_IN_PLACE
                 else:
                     self.for_cro_send(smsg, root)
             else:
@@ -728,9 +716,7 @@ cdef class _p_msg_cco:
         # get send and recv buffers
         self.for_cro_recv(rmsg, 0)
         if not inter and is_IN_PLACE(smsg):
-            self.sbuf   = MPI_IN_PLACE
-            self.scount = self.rcount
-            self.stype  = self.rtype
+            self.sbuf = MPI_IN_PLACE
         else:
             self.for_cro_send(smsg, 0)
         # check counts and datatypes
@@ -821,9 +807,7 @@ cdef class _p_msg_cco:
         # get send and recv buffers
         self.for_cro_recv(rmsg, 0)
         if is_IN_PLACE(smsg):
-            self.sbuf   = MPI_IN_PLACE
-            self.scount = self.rcount
-            self.stype  = self.rtype
+            self.sbuf = MPI_IN_PLACE
         else:
             self.for_cro_send(smsg, 0)
         # check counts and datatypes
@@ -844,9 +828,7 @@ cdef class _p_msg_cco:
         # get send and recv buffers
         self.for_cro_recv(rmsg, 0)
         if is_IN_PLACE(smsg):
-            self.sbuf   = MPI_IN_PLACE
-            self.scount = self.rcount
-            self.stype  = self.rtype
+            self.sbuf = MPI_IN_PLACE
         else:
             self.for_cro_send(smsg, 0)
         # check counts and datatypes
@@ -904,10 +886,7 @@ cdef class _p_msg_ccow:
             &self.rbuf, &self.rcounts,
             &self.rdispls, &self.rtypes)
         if not inter and is_IN_PLACE(smsg):
-            self.sbuf    = MPI_IN_PLACE
-            self.scounts = self.rcounts
-            self.sdispls = self.rdispls
-            self.stypes  = self.rtypes
+            self.sbuf = MPI_IN_PLACE
             return 0
         self._smsg = message_vector_w(
             smsg, 1, size,
