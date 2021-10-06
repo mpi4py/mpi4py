@@ -36,7 +36,12 @@ def version():
     srcdir = os.path.join(topdir, 'src')
     with open(os.path.join(srcdir, 'mpi4py', '__init__.py')) as f:
         m = re.search(r"__version__\s*=\s*'(.*)'", f.read())
-        return m.groups()[0]
+    public_version = m.groups()[0]
+    local_version = os.environ.get('MPI4PY_LOCAL_VERSION')
+    if local_version:
+        return '{0}+{1}'.format(public_version, local_version)
+    else:
+        return public_version
 
 def description():
     with open(os.path.join(topdir, 'DESCRIPTION.rst')) as f:
