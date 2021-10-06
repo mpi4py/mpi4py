@@ -182,6 +182,14 @@ class ProcessPoolInitTest(ProcessPoolMixin,
         future = executor.submit(check_run_name, run_name)
         self.assertTrue(future.result(), run_name)
 
+    @unittest.skipIf(SHARED_POOL and WORLD_SIZE > 2, 'shared-pool')
+    def test_max_workers(self):
+        executor = self.executor_type(max_workers=1)
+        self.assertEqual(executor._max_workers, 1)
+        executor.shutdown()
+        self.assertEqual(executor._max_workers, None)
+
+    @unittest.skipIf(SHARED_POOL and WORLD_SIZE > 2, 'shared-pool')
     def test_max_workers_environ(self):
         save = os.environ.get('MPI4PY_FUTURES_MAX_WORKERS')
         os.environ['MPI4PY_FUTURES_MAX_WORKERS'] = '1'
@@ -189,6 +197,10 @@ class ProcessPoolInitTest(ProcessPoolMixin,
             executor = self.executor_type()
             executor.submit(time.sleep, 0).result()
             executor.shutdown()
+            executor = self.executor_type()
+            self.assertEqual(executor._max_workers, 1)
+            executor.shutdown()
+            self.assertEqual(executor._max_workers, None)
         finally:
             del os.environ['MPI4PY_FUTURES_MAX_WORKERS']
             if save is not None:
@@ -227,6 +239,7 @@ class ProcessPoolInitTest(ProcessPoolMixin,
             future.result()
         with self.assertRaises(futures.BrokenExecutor):
             executor.submit(time.sleep, 0)
+        self.assertEqual(executor._max_workers, None)
 
     @unittest.skipIf(SHARED_POOL, 'shared-pool')
     def test_initializer_error_del(self):
@@ -333,7 +346,7 @@ class ProcessPoolShutdownTest(ProcessPoolMixin,
     def test_submit_shutdown_cancel(self):
         executor = self.executor_type(max_workers=1)
         executor.bootup()
-        num_workers = executor._pool.size
+        num_workers = executor._max_workers
         for _ in range(num_workers*10):
             executor.submit(time.sleep, 0.1)
         fut = executor.submit(time.sleep, 0)
@@ -692,7 +705,7 @@ class ProcessPoolExecutorTest(ProcessPoolMixin,
 
     def test_map_unordered_timeout(self):
         map_unordered = functools.partial(self.executor.map, unordered=True)
-        num_workers = self.executor._pool.size
+        num_workers = self.executor._max_workers
         results = []
         try:
             args = [1] + [0]*(num_workers-1)
@@ -790,7 +803,7 @@ class ProcessPoolSubmitTest(unittest.TestCase):
         world_size = MPI.COMM_WORLD.Get_size()
         num_workers = max(1, world_size - 1)
         for e in executors:
-            self.assertEqual(e._pool.size, num_workers)
+            self.assertEqual(e._max_workers, num_workers)
         del e, executors
 
 
@@ -1368,15 +1381,21 @@ if SHARED_POOL:
     del MPICommExecutorTest.test_arg_comm_bad
     del MPICommExecutorTest.test_initializer
     del MPICommExecutorTest.test_initializer_error
+    del MPICommExecutorTest.test_initializer_error_del
+    del MPICommExecutorTest.test_initializer_error_del_nowait
     del ProcessPoolInitTest.test_init_globals
     del ProcessPoolInitTest.test_initializer
     del ProcessPoolInitTest.test_initializer_bad
     del ProcessPoolInitTest.test_initializer_error
     del ProcessPoolInitTest.test_initializer_error_del
+    del ProcessPoolInitTest.test_initializer_error_del_nowait
     if WORLD_SIZE == 1:
         del ASharedPoolInitTest
         del ProcessPoolInitTest.test_run_name
         del ProcessPoolPickleTest
+    if WORLD_SIZE > 2:
+        del ProcessPoolInitTest.test_max_workers
+        del ProcessPoolInitTest.test_max_workers_environ
 elif WORLD_SIZE > 1 or SKIP_POOL_TEST:
     del ProcessPoolInitTest
     del ProcessPoolBootupTest
