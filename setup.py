@@ -37,8 +37,9 @@ def version():
     with open(os.path.join(srcdir, 'mpi4py', '__init__.py')) as f:
         m = re.search(r"__version__\s*=\s*'(.*)'", f.read())
     public_version = m.groups()[0]
-    if "MPI4PY_LOCAL_VERSION" in os.environ:
-        return public_version + "+" + os.environ['MPI4PY_LOCAL_VERSION']
+    local_version = os.environ.get('MPI4PY_LOCAL_VERSION')
+    if local_version:
+        return '{0}+{1}'.format(public_version, local_version)
     else:
         return public_version
 
