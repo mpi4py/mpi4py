@@ -100,9 +100,9 @@ jobs:
     - name: Build package
       run:  python -m pip wheel -vvv --wheel-dir=dist .
     - name: Upload package artifacts
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v2
       with:
-        name: mpi4py-py${{matrix.py-version}}-${{matrix.py-arch}}-${{matrix.mpi}}-${{matrix.os}}
+        name: mpi4py-${{matrix.mpi}}-${{matrix.os}}
         path: dist
 
     - name: Install test dependencies
