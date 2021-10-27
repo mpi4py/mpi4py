@@ -36,15 +36,21 @@ except ImportError:
 
 __all__ = ['allclose', 'subTest']
 
+
 def allclose(a, b, rtol=1.e-5, atol=1.e-8):
-    try: iter(a)
-    except TypeError: a = [a]
-    try: iter(b)
-    except TypeError: b = [b]
+    try:
+        iter(a)
+    except TypeError:
+        a = [a]
+    try:
+        iter(b)
+    except TypeError:
+        b = [b]
     for x, y in zip(a, b):
-        if abs(x-y) > (atol + rtol * abs(y)):
+        if abs(x - y) > (atol + rtol * abs(y)):
             return False
     return True
+
 
 def make_typemap(entries):
     if sys.version_info[:2] > (3, 7):
@@ -105,9 +111,11 @@ TypeMapComplex = make_typemap([
 
 ArrayBackends = []
 
+
 def add_backend(cls):
     ArrayBackends.append(cls)
     return cls
+
 
 class BaseArray(object):
 
@@ -218,9 +226,11 @@ if numpy is not None:
 
         def __init__(self, arg, typecode, shape=None):
             if isinstance(arg, (int, float, complex)):
-                if shape is None: shape = ()
+                if shape is None:
+                    shape = ()
             else:
-                if shape is None: shape = len(arg)
+                if shape is None:
+                    shape = len(arg)
             self.array = numpy.zeros(shape, typecode)
             if isinstance(arg, (int, float, complex)):
                 self.array.fill(arg)
@@ -252,6 +262,7 @@ try:
     import dlpackimpl as dlpack
 except ImportError:
     dlpack = None
+
 
 class BaseDLPackCPU(object):
 
@@ -367,9 +378,11 @@ if cupy is not None:
 
         def __init__(self, arg, typecode, shape=None, readonly=False):
             if isinstance(arg, (int, float, complex)):
-                if shape is None: shape = ()
+                if shape is None:
+                    shape = ()
             else:
-                if shape is None: shape = len(arg)
+                if shape is None:
+                    shape = len(arg)
             self.array = cupy.zeros(shape, typecode)
             if isinstance(arg, (int, float, complex)):
                 self.array.fill(arg)
@@ -461,9 +474,11 @@ if numba is not None:
 
         def __init__(self, arg, typecode, shape=None, readonly=False):
             if isinstance(arg, (int, float, complex)):
-                if shape is None: shape = ()
+                if shape is None:
+                    shape = ()
             else:
-                if shape is None: shape = len(arg)
+                if shape is None:
+                    shape = len(arg)
             self.array = numba.cuda.device_array(shape, typecode)
             if isinstance(arg, (int, float, complex)):
                 if self.array.size > 0:
@@ -513,11 +528,15 @@ if numba is not None:
 
 def subTest(case, skip=(), skiptypecode=()):
     for array in ArrayBackends:
-        if array.backend == skip: continue
-        if array.backend in skip: continue
+        if array.backend == skip:
+            continue
+        if array.backend in skip:
+            continue
         for typecode in array.TypeMap:
-            if typecode == skiptypecode: continue
-            if typecode in skiptypecode: continue
+            if typecode == skiptypecode:
+                continue
+            if typecode in skiptypecode:
+                continue
             with case.subTest(backend=array.backend, typecode=typecode):
                 try:
                     yield array, typecode
