@@ -9,14 +9,14 @@ from distutils.versionpredicate import VersionPredicate
 class TestCase(unittest.TestCase):
 
     def assertRaisesMPI(self, IErrClass, callableObj, *args, **kwargs):
-        from mpi4py.MPI import Exception as excClass, Get_version
+        from mpi4py import MPI
+        excClass = MPI.Exception
         try:
             callableObj(*args, **kwargs)
         except NotImplementedError:
-            if Get_version() >= (2, 0):
+            if MPI.Get_version() < (2, 0):
                 raise self.failureException("raised NotImplementedError")
-        except excClass:
-            excValue = sys.exc_info()[1]
+        except excClass as excValue:
             error_class = excValue.Get_error_class()
             if isinstance(IErrClass, (list, tuple)):
                 match = (error_class in IErrClass)
@@ -29,40 +29,22 @@ class TestCase(unittest.TestCase):
                 else:
                     IErrClassName = ErrClsName(IErrClass)
                 raise self.failureException(
-                    "generated error class is '%s' (%d), "
-                    "but expected '%s' (%s)" % \
-                    (ErrClsName(error_class), error_class,
-                     IErrClassName,  IErrClass,)
+                    "generated error class is '{}' ({}), "
+                    "but expected '{}' ({})".format(
+                        ErrClsName(error_class), error_class,
+                        IErrClassName, IErrClass,
                     )
+                )
         else:
-            if hasattr(excClass,'__name__'): excName = excClass.__name__
-            else: excName = str(excClass)
-            raise self.failureException("%s not raised" % excName)
-
-    try:
-
-        unittest.TestCase.subTest
-
-    except AttributeError:
-
-        class _SubTestManager(object):
-            def __init__(self, case, msg=None, **params):
-                pass
-            def __enter__(self):
-                pass
-            def __exit__(self, *args):
-                pass
-
-        def subTest(self, msg=None, **params):
-            return self._SubTestManager(self, msg, **params)
+            raise self.failureException(f"{excClass.__name__} not raised")
 
 
-ErrClsMap = None
+ErrClsMap = {}
+
+
 def ErrClsName(ierr):
-    global ErrClsMap
-    if ErrClsMap is None:
+    if not ErrClsMap:
         from mpi4py import MPI
-        ErrClsMap = {}
         ErrClsMap[MPI.SUCCESS] = 'SUCCESS'
         for entry in dir(MPI):
             if entry.startswith('ERR_'):
@@ -72,6 +54,7 @@ def ErrClsName(ierr):
         return ErrClsMap[ierr]
     except KeyError:
         return '<unknown>'
+
 
 def mpi_predicate(predicate):
     from mpi4py import MPI
@@ -92,11 +75,13 @@ def mpi_predicate(predicate):
             return vp
     return None
 
+
 def is_mpi_gpu(predicate, array):
     if array.backend in ('cupy', 'numba', 'dlpack-cupy'):
         if mpi_predicate(predicate):
             return True
     return False
+
 
 SkipTest = unittest.SkipTest
 
@@ -106,6 +91,7 @@ skipIf = unittest.skipIf
 
 skipUnless = unittest.skipUnless
 
+
 def skipMPI(predicate, *conditions):
     version = mpi_predicate(predicate)
     if version:
@@ -113,12 +99,14 @@ def skipMPI(predicate, *conditions):
             return unittest.skip(str(version))
     return unittest.skipIf(False, '')
 
+
 def disable(what, reason):
     return unittest.skip(reason)(what)
 
 
 def main(*args, **kargs):
+    from main import main
     try:
-        unittest.main(*args, **kargs)
+        main(*args, **kargs)
     except SystemExit:
         pass
