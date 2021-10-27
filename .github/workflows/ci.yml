@@ -21,11 +21,13 @@ jobs:
       fail-fast: false
       matrix:
         py-version:
-          - 3.6
-          - 3.7
-          - 3.8
-          - 3.9
-          - pypy3
+          - "3.6"
+          - "3.7"
+          - "3.8"
+          - "3.9"
+          - "3.10"
+          - "pypy-3.6"
+          - "pypy-3.7"
         py-arch:
           - x86
           - x64
@@ -43,9 +45,9 @@ jobs:
           - os: ubuntu-18.04
             mpi: msmpi
           - os: macos-10.15
-            py-version: pypy2
+            py-version: pypy-3.6
           - os: macos-10.15
-            py-version: pypy3
+            py-version: pypy-3.7
           - os: macos-10.15
             py-arch: x86
           - os: macos-10.15
@@ -55,7 +57,11 @@ jobs:
           - os: windows-2019
             mpi: openmpi
           - os: windows-2019
-            py-version: pypy2
+            py-version: pypy-3.6
+            py-arch: x86
+          - os: windows-2019
+            py-version: pypy-3.7
+            py-arch: x86
 
     steps:
 
@@ -84,9 +90,9 @@ jobs:
     - name: Build package
       run:  python -m pip wheel -vvv --wheel-dir=dist .
     - name: Upload package artifacts
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v2
       with:
-        name: mpi4py-py${{matrix.py-version}}-${{matrix.py-arch}}-${{matrix.mpi}}-${{matrix.os}}
+        name: mpi4py-${{matrix.mpi}}-${{matrix.os}}
         path: dist
 
     - name: Install test dependencies

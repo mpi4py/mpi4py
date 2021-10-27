@@ -2,10 +2,11 @@
 
 language: python
 python:
-  - 3.6
-  - 3.7
-  - 3.8
-  - 3.9
+  - "3.6"
+  - "3.7"
+  - "3.8"
+  - "3.9"
+ #- "3.10"
 arch:
   - arm64
   - ppc64le
@@ -31,7 +32,7 @@ branches:
     - ci/travis
 
 git:
-  depth: 3
+  depth: 1
 
 cache:
   apt: true
