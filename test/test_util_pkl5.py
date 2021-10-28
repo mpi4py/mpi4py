@@ -572,10 +572,10 @@ class BaseTest(object):
             comm.Free()
 
     def testSSendAndMProbe(self):
-        comm = self.COMM.Dup()
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         if size == 1: return
+        comm = self.COMM.Dup()
         try:
             for smess in messages:
                 if rank == 0:
