@@ -558,7 +558,8 @@ class Comm(MPI.Comm):
 
     def ssend(self, obj, dest, tag=0):
         """Blocking send in synchronous mode."""
-        _send(self, MPI.Comm.Ssend, obj, dest, tag)
+        sreq = _isend(self, MPI.Comm.Issend, obj, dest, tag)
+        MPI.Request.Waitall(sreq)
 
     def isend(self, obj, dest, tag=0):
         """Nonblocking send in standard mode."""
