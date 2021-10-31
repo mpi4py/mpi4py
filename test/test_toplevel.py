@@ -59,24 +59,36 @@ class TestConfig(unittest.TestCase):
 class TestProfile(unittest.TestCase):
 
     def testProfile(self):
+        import platform, sysconfig
+        bits = platform.architecture()[0][:-3]
+        multiarch = sysconfig.get_config_var('MULTIARCH') or ''
+        libpath = [
+            "/usr/lib" + bits,
+            os.path.join("/usr/lib", multiarch),
+            "/usr/lib",
+        ]
         def mpi4py_profile(*args, **kargs):
             try:
                 mpi4py.profile(*args, **kargs)
             except ValueError:
                 pass
         with warnings.catch_warnings():
+            warnings.simplefilter('error')
+            with self.assertRaises(UserWarning):
+                mpi4py.profile('hosts', path=["/etc"])
             warnings.simplefilter('ignore')
-            for name in ('mpe', 'vt'):
-                mpi4py_profile(name)
-                mpi4py_profile(name, path="/usr/lib")
-                mpi4py_profile(name, path=["/usr/lib"])
-                mpi4py_profile(name, logfile="mpi4py")
-                mpi4py_profile(name, logfile="mpi4py")
-            mpi4py_profile('hosts', path=["/etc"])
             for libname in ('c', 'm', 'dl'):
-                for path in ("/usr/lib", "/usr/lib64"):
+                mpi4py_profile(libname, path=libpath)
+                for path in libpath:
                     mpi4py_profile(libname, path=path)
-            self.assertRaises(ValueError, mpi4py.profile, '@querty')
+            with self.assertRaises(ValueError):
+                mpi4py.profile('@querty')
+            with self.assertRaises(ValueError):
+                mpi4py.profile('@querty', path="/usr/lib")
+            with self.assertRaises(ValueError):
+                mpi4py.profile('@querty', path=["/usr/lib"])
+            with self.assertRaises(ValueError):
+                mpi4py.profile('@querty')
 
 
 class TestPackage(unittest.TestCase):

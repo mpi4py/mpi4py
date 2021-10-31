@@ -1,14 +1,9 @@
-from mpi4py import MPI
 import sys
+import threading
+from mpi4py import MPI
 
 if MPI.Query_thread() < MPI.THREAD_MULTIPLE:
     sys.stderr.write("MPI does not provide enough thread support\n")
-    sys.exit(0)
-
-try:
-    import threading
-except ImportError:
-    sys.stderr.write("threading module not available\n")
     sys.exit(0)
 
 try:

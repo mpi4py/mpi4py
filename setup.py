@@ -120,54 +120,6 @@ metadata['provides'] = ['mpi4py']
 # Extension modules
 # --------------------------------------------------------------------
 
-def run_command(exe, args):
-    cmd = shutil.which(exe)
-    if not cmd: return []
-    if not isinstance(args, str):
-        args = ' '.join(args)
-    try:
-        with os.popen(cmd + ' ' + args) as f:
-            return shlex.split(f.read())
-    except:
-        return []
-
-linux   = sys.platform.startswith('linux')
-solaris = sys.platform.startswith('sunos')
-darwin  = sys.platform.startswith('darwin')
-
-if linux:
-    def whole_archive(compiler, name, library_dirs=[]):
-        return ['-Wl,-whole-archive',
-                '-l' + name,
-                '-Wl,-no-whole-archive',
-                ]
-elif darwin:
-    def darwin_linker_dirs(compiler):
-        linker_cmd = compiler.linker_so + ['-show']
-        linker_cmd = run_command(linker_cmd[0], linker_cmd[1:])
-        library_dirs  = compiler.library_dirs[:]
-        library_dirs += [flag[2:] for flag in linker_cmd
-                         if flag.startswith('-L')]
-        library_dirs += ['/usr/lib']
-        library_dirs += ['/usr/local/lib']
-        return library_dirs
-    def whole_archive(compiler, name, library_dirs=[]):
-        library_dirs = library_dirs[:]
-        library_dirs += darwin_linker_dirs(compiler)
-        for libdir in library_dirs:
-            libpath = os.path.join(libdir, 'lib%s.a' % name)
-            if os.path.isfile(libpath):
-                return ['-force_load', libpath]
-        return ['-l%s' % name]
-elif solaris:
-    def whole_archive(compiler, name, library_dirs=[]):
-        return ['-Wl,-zallextract',
-                '-l' + name,
-                '-Wl,-zdefaultextract',
-                ]
-else:
-    whole_archive = None
-
 def configure_dl(ext, config_cmd):
     log.info("checking for dlopen() availability ...")
     ok = config_cmd.check_header('dlfcn.h')
@@ -242,80 +194,6 @@ def configure_mpi(ext, config_cmd):
     if os.name == 'posix':
         configure_dl(ext, config_cmd)
 
-def configure_libmpe(lib, config_cmd):
-    #
-    mpecc = os.environ.get('MPECC') or 'mpecc'
-    command = run_command(mpecc, '-mpilog -show')
-    for arg in command:
-        if arg.startswith('-L'):
-            libdir = arg[2:]
-            lib.library_dirs.append(libdir)
-            lib.runtime_library_dirs.append(libdir)
-    #
-    log_lib  = 'lmpe'
-    dep_libs = ('pthread', 'mpe')
-    ok = config_cmd.check_library(log_lib, lib.library_dirs)
-    if not ok: return
-    libraries = []
-    for libname in dep_libs:
-        if config_cmd.check_library(
-            libname, lib.library_dirs,
-            other_libraries=libraries):
-            libraries.insert(0, libname)
-    if whole_archive:
-        cc = config_cmd.compiler
-        dirs = lib.library_dirs[:]
-        lib.extra_link_args += whole_archive(cc, log_lib, dirs)
-        lib.extra_link_args += ['-l' + libname
-                                for libname in libraries]
-    else:
-        lib.libraries += [log_lib] + libraries
-
-def configure_libvt(lib, config_cmd):
-    #
-    vtcc = os.environ.get('VTCC') or 'vtcc'
-    command = run_command(vtcc, '-vt:showme')
-    for arg in command:
-        if arg.startswith('-L'):
-            libdir = arg[2:]
-            lib.library_dirs.append(libdir)
-            lib.runtime_library_dirs.append(libdir)
-    # modern VampirTrace
-    if lib.name == 'vt':
-        log_lib = 'vt-mpi'
-    else:
-        log_lib = lib.name
-    ok = config_cmd.check_library(log_lib, lib.library_dirs)
-    if ok: lib.libraries = [log_lib]
-    if ok: return
-    # older VampirTrace, Open MPI <= 1.4
-    if lib.name == 'vt-hyb':
-        log_lib = 'vt.ompi'
-    else:
-        log_lib = 'vt.mpi'
-    dep_libs = ('dl', 'z', 'otf',)
-    ok = config_cmd.check_library(log_lib, lib.library_dirs)
-    if not ok: return
-    libraries = []
-    for libname in dep_libs:
-        if config_cmd.check_library(
-            libname, lib.library_dirs,
-            other_libraries=libraries):
-            libraries.insert(0, libname)
-    if whole_archive:
-        cc = config_cmd.compiler
-        dirs = lib.library_dirs[:]
-        lib.extra_link_args += whole_archive(cc, log_lib, dirs)
-        lib.extra_link_args += ['-l' + libname
-                                for libname in libraries]
-    else:
-        lib.libraries += [log_lib] + libraries
-    lib.define_macros.append(('LIBVT_LEGACY', 1))
-    if lib.name == 'vt-hyb':
-        openmp_flag = '-fopenmp' # GCC, Intel
-        lib.extra_compile_args.append(openmp_flag)
-        lib.extra_link_args.append(openmp_flag)
-
 def configure_pyexe(exe, config_cmd):
     from mpidistutils import sysconfig
     if sys.platform.startswith('win'):
@@ -356,7 +234,7 @@ def configure_pyexe(exe, config_cmd):
     exe.extra_link_args += link_args
 
 
-def ext_modules():
+def extensions():
     modules = []
     # custom dl extension module
     dl = dict(
@@ -385,49 +263,6 @@ def ext_modules():
     #
     return modules
 
-def libraries():
-    # MPE logging
-    pmpi_mpe = dict(
-        name='mpe', kind='dylib',
-        optional=True,
-        package='mpi4py',
-        dest_dir='lib-pmpi',
-        sources=['src/lib-pmpi/mpe.c'],
-        configure=configure_libmpe,
-        )
-    # VampirTrace logging
-    pmpi_vt = dict(
-        name='vt', kind='dylib',
-        optional=True,
-        package='mpi4py',
-        dest_dir='lib-pmpi',
-        sources=['src/lib-pmpi/vt.c'],
-        configure=configure_libvt,
-        )
-    pmpi_vt_mpi = dict(
-        name='vt-mpi', kind='dylib',
-        optional=True,
-        package='mpi4py',
-        dest_dir='lib-pmpi',
-        sources=['src/lib-pmpi/vt-mpi.c'],
-        configure=configure_libvt,
-        )
-    pmpi_vt_hyb = dict(
-        name='vt-hyb', kind='dylib',
-        optional=True,
-        package='mpi4py',
-        dest_dir='lib-pmpi',
-        sources=['src/lib-pmpi/vt-hyb.c'],
-        configure=configure_libvt,
-        )
-    #
-    return [
-        pmpi_mpe,
-        pmpi_vt,
-        pmpi_vt_mpi,
-        pmpi_vt_hyb,
-        ]
-
 def executables():
     # MPI-enabled Python interpreter
     pyexe = dict(name='python-mpi',
@@ -449,7 +284,6 @@ def executables():
 from mpidistutils import log
 from mpidistutils import setup
 from mpidistutils import Extension  as Ext
-from mpidistutils import Library    as Lib
 from mpidistutils import Executable as Exe
 
 CYTHON = '0.27'
@@ -490,9 +324,8 @@ def run_setup():
             ],
         },
         package_dir = {'' : 'src'},
-        ext_modules = [Ext(**ext) for ext in ext_modules()],
+        ext_modules = [Ext(**ext) for ext in extensions()],
         executables = [Exe(**exe) for exe in executables()],
-        libraries   = [Lib(**lib) for lib in libraries()  ],
         **setup_args
     )
 

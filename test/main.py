@@ -51,16 +51,6 @@ def setup_parser(parser):
         type=str, metavar="LEVEL",
     )
     parser.add_argument(
-        "--mpe",
-        help="Use MPE for MPI profiling",
-        action="store_true", dest="mpe", default=False,
-    )
-    parser.add_argument(
-        "--vt",
-        help="Use VampirTrace for MPI profiling",
-        action="store_true", dest="vt", default=False,
-    )
-    parser.add_argument(
         "--cupy",
         help="Enable testing with CuPy arrays",
         action="store_true", dest="cupy", default=False,
@@ -175,10 +165,6 @@ def setup_modules(options):
         mpi4py.rc.threads = options.threads
     if options.thread_level is not None:
         mpi4py.rc.thread_level = options.thread_level
-    if options.mpe:
-        mpi4py.profile('mpe', logfile='runtests-mpi4py')
-    if options.vt:
-        mpi4py.profile('vt', logfile='runtests-mpi4py')
     #
     import mpi4py.MPI
 

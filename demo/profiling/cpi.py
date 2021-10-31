@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 
-# If you want MPE to log MPI calls, you have to add the two lines
-# below at the very beginning of your main bootstrap script.
-import mpi4py
-mpi4py.profile('mpe', logfile='cpilog')
+if False:
+    import mpi4py
+    name = "name" # lib{name}.so
+    path = []
+    mpi4py.profile(name, path=path)
 
 # Import the MPI extension module
 from mpi4py import MPI
-if 0: # <- use '1' to disable logging of MPI calls
+
+if False: # set to True to disable profiling
     MPI.Pcontrol(0)
 
 # Import the 'array' module
