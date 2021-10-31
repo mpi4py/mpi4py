@@ -131,8 +131,8 @@ def profile(name, *, path=None):
         elif os.name == 'posix':  # pragma: no cover
             pattern.append(('lib', '.so'))
         for pth in path:
-            for (lib, so) in pattern:
-                filename = os.path.join(pth, lib + name + so)
+            for (lib, dso) in pattern:
+                filename = os.path.join(pth, lib + name + dso)
                 if os.path.isfile(filename):
                     return os.path.abspath(filename)
         return None
