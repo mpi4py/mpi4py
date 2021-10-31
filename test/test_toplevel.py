@@ -61,11 +61,11 @@ class TestProfile(unittest.TestCase):
     def testProfile(self):
         import platform, sysconfig
         bits = platform.architecture()[0][:-3]
-        multiarch = sysconfig.get_config_var('MULTIARCH') or ''
+        triplet = sysconfig.get_config_var('MULTIARCH') or ''
         libpath = [
-            "/usr/lib" + bits,
-            os.path.join("/usr/lib", multiarch),
-            "/usr/lib",
+            f"{prefix}{suffix}"
+            for prefix in ("/lib", "/usr/lib")
+            for suffix in (bits, f"/{triplet}", "")
         ]
         def mpi4py_profile(*args, **kargs):
             try:
@@ -77,7 +77,7 @@ class TestProfile(unittest.TestCase):
             with self.assertRaises(UserWarning):
                 mpi4py.profile('hosts', path=["/etc"])
             warnings.simplefilter('ignore')
-            for libname in ('c', 'm', 'dl'):
+            for libname in ('c', 'm', 'dl', 'libdl.so.2'):
                 mpi4py_profile(libname, path=libpath)
                 for path in libpath:
                     mpi4py_profile(libname, path=path)

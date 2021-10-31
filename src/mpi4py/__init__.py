@@ -123,17 +123,16 @@ def profile(name, *, path=None):
 
     def lookup_dylib(name, path):
         # pylint: disable=missing-docstring
-        pattern = []
+        pattern = [('', '')]
         if sys.platform.startswith('win'):  # pragma: no cover
             pattern.append(('', '.dll'))
         elif sys.platform == 'darwin':  # pragma: no cover
             pattern.append(('lib', '.dylib'))
         elif os.name == 'posix':  # pragma: no cover
             pattern.append(('lib', '.so'))
-        pattern.append(('', ''))
         for pth in path:
-            for (lib, dso) in pattern:
-                filename = os.path.join(pth, lib + name + dso)
+            for (lib, so) in pattern:
+                filename = os.path.join(pth, lib + name + so)
                 if os.path.isfile(filename):
                     return os.path.abspath(filename)
         return None
@@ -141,7 +140,7 @@ def profile(name, *, path=None):
     if path is None:
         path = ['']
     elif isinstance(path, str):
-        path = path.split(os.path.sep)
+        path = path.split(os.pathsep)
     else:
         path = list(path)
     filename = lookup_dylib(name, path)
