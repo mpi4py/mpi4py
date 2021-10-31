@@ -6,6 +6,7 @@ default:
 	${MAKE} -C reductions
 	${MAKE} -C sequential
 	${MAKE} -C spawning
+	${MAKE} -C profiling
 
 	${MAKE} -C wrap-c
 	${MAKE} -C wrap-f2py

@@ -102,9 +102,6 @@ def main():
           --version            show version number and exit
           -h|--help            show this help message and exit
           -rc <key=value,...>  set 'mpi4py.rc.key=value'
-          -p|--profile <pmpi>  use <pmpi> for profiling
-          --mpe                profile with MPE
-          --vt                 profile with VampirTrace
         """).strip()
 
         if errmess:
@@ -123,7 +120,6 @@ def main():
         class Options:
             # pylint: disable=too-few-public-methods
             rc_args = {}
-            profile = None
 
         def poparg(args):
             if len(args) < 2 or args[1].startswith('-'):
@@ -144,7 +140,7 @@ def main():
                 if arg0.startswith('--'):
                     if '=' in arg0:
                         opt, _, arg = arg0[1:].partition('=')
-                        if opt in ('-rc', '-profile'):
+                        if opt in ('-rc',):
                             arg0, args[1:1] = opt, [arg]
                     else:
                         arg0 = arg0[1:]
@@ -158,10 +154,6 @@ def main():
                             options.rc_args[key] = eval(val, {})
                         except NameError:
                             options.rc_args[key] = val
-                elif arg0 in ('-p', '-profile'):
-                    options.profile = poparg(args) or None
-                elif arg0 in ('-mpe', '-vt'):
-                    options.profile = arg0[1:]
                 else:
                     usage('Unknown option: ' + args[0])
                 del args[0]
@@ -179,9 +171,6 @@ def main():
         if options.rc_args:  # Set mpi4py.rc parameters
             from . import rc
             rc(**options.rc_args)
-        if options.profile:  # Load profiling library
-            from . import profile
-            profile(options.profile)
 
     # Parse and process command line options
     options, args = parse_command_line()

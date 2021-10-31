@@ -2,14 +2,10 @@ from mpi4py import MPI
 import mpiunittest as unittest
 import sys, os
 
-HAVE_MPE = 'MPE_LOGFILE_PREFIX' in os.environ
-HAVE_VT  = 'VT_FILE_PREFIX' in os.environ
-
 # --------------------------------------------------------------------
 
 @unittest.skipMPI('PlatformMPI')
 @unittest.skipMPI('MPICH2')
-@unittest.skipIf(HAVE_MPE or HAVE_VT, 'mpe|vt')
 class BaseTestCase(unittest.TestCase):
 
     def setUp(self):

@@ -31,8 +31,6 @@ $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.bench              > /dev/null 2
 $MPIEXEC -n 2 $PYTHON -m coverage run -m mpi4py.bench              > /dev/null 2>&1 || true
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.bench qwerty       > /dev/null 2>&1 || true
 $MPIEXEC -n 2 $PYTHON -m coverage run -m mpi4py.bench qwerty       > /dev/null 2>&1 || true
-$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.bench --mpe qwerty > /dev/null 2>&1 || true
-$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.bench --vt  qwerty > /dev/null 2>&1 || true
 
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.run --help > /dev/null
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py --version  > /dev/null
@@ -40,16 +38,15 @@ $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py --help     > /dev/null
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py -          < /dev/null
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py -rc threads=0 -c ""                > /dev/null
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py --rc=thread_level=single -c ""     > /dev/null
-$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py -p mpe -profile mpe -c ""          > /dev/null 2>&1 || true
-$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py --profile mpe --profile=mpe -c ""  > /dev/null 2>&1 || true
-$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py -vt --vt -mpe --mpe -c ""          > /dev/null 2>&1 || true
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py                                    > /dev/null 2>&1 || true
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py -m                                 > /dev/null 2>&1 || true
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py -c                                 > /dev/null 2>&1 || true
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py -p                                 > /dev/null 2>&1 || true
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py -bad                               > /dev/null 2>&1 || true
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py --bad=a                            > /dev/null 2>&1 || true
+$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py -rc                                > /dev/null 2>&1 || true
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py -rc=                               > /dev/null 2>&1 || true
+$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py --rc                               > /dev/null 2>&1 || true
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py --rc=a                             > /dev/null 2>&1 || true
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py --rc=a=                            > /dev/null 2>&1 || true
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py --rc==a                            > /dev/null 2>&1 || true

@@ -105,7 +105,7 @@ def get_config():
     return dict(parser.items('mpi'))
 
 
-def profile(name, *, path=None, logfile=None):
+def profile(name, *, path=None):
     """Support for the MPI profiling interface.
 
     Parameters
@@ -114,8 +114,6 @@ def profile(name, *, path=None, logfile=None):
        Name of the profiler library to load.
     path : `sequence` of str, optional
        Additional paths to search for the profiler.
-    logfile : str, optional
-       Filename prefix for dumping profiler output.
 
     """
     # pylint: disable=import-outside-toplevel
@@ -140,22 +138,12 @@ def profile(name, *, path=None, logfile=None):
                     return os.path.abspath(filename)
         return None
 
-    if logfile:
-        if name in ('mpe',):
-            if 'MPE_LOGFILE_PREFIX' not in os.environ:
-                os.environ['MPE_LOGFILE_PREFIX'] = logfile
-        if name in ('vt', 'vt-mpi', 'vt-hyb'):
-            if 'VT_FILE_PREFIX' not in os.environ:
-                os.environ['VT_FILE_PREFIX'] = logfile
-
     if path is None:
-        path = []
+        path = ['']
     elif isinstance(path, str):
-        path = [path]
+        path = path.split(os.path.sep)
     else:
         path = list(path)
-    prefix = os.path.dirname(__file__)
-    path.append(os.path.join(prefix, 'lib-pmpi'))
     filename = lookup_dylib(name, path)
     if filename is None:
         raise ValueError(f"profiler '{name}' not found")

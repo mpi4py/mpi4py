@@ -322,12 +322,6 @@ def main(args=None):
                         action="store", metavar="LEVEL",
                         choices="single funneled serialized multiple".split(),
                         help="initialize MPI with required thread level")
-    parser.add_argument("--mpe",
-                        action="store_true", dest="mpe", default=False,
-                        help="use MPE for MPI profiling")
-    parser.add_argument("--vt",
-                        action="store_true", dest="vt", default=False,
-                        help="use VampirTrace for MPI profiling")
     parser.add_argument("command",
                         action="store", metavar="<command>",
                         help="benchmark command to run")
@@ -336,15 +330,11 @@ def main(args=None):
                         help="arguments for benchmark command")
     options = parser.parse_args(args)
 
-    from . import rc, profile
+    from . import rc
     if options.threads is not None:
         rc.threads = options.threads
     if options.thread_level is not None:
         rc.thread_level = options.thread_level
-    if options.mpe:
-        profile('mpe', logfile='mpi4py')
-    if options.vt:
-        profile('vt', logfile='mpi4py')
 
     from . import MPI
     comm = MPI.COMM_WORLD
