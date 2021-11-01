@@ -212,6 +212,17 @@ the :data:`mpi4py.rc` and :data:`MPI.pickle` objects at import time of the
                :data:`MPI.pickle` object within the :mod:`~mpi4py.MPI` module.
   .. versionadded:: 3.1.0
 
+.. envvar:: MPI4PY_PICKLE_THRESHOLD
+
+  :type: :class:`int`
+  :default: ``262144``
+
+  Controls the default buffer size threshold for switching from in-band to
+  out-of-band buffer handling when using pickle protocol version 5 or higher.
+
+  .. seealso:: Module :mod:`mpi4py.util.pkl5`.
+  .. versionadded:: 3.1.2
+
 
 Miscellaneous functions
 -----------------------
