@@ -13,7 +13,7 @@ arch:
   - ppc64le
 
 os: linux
-dist: xenial
+dist: bionic
 sudo: required
 
 env:
