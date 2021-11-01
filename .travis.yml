@@ -58,14 +58,13 @@ install:
 
 before_script:
   - echo 127.0.0.1 `hostname` | sudo tee -a /etc/hosts > /dev/null
-  - if [[ "$MPI" == "mpich" ]]; then P=2; else P=5; fi
 script:
-  - mpiexec -n 1  python $PWD/test/runtests.py -v
-  - mpiexec -n $P python $PWD/test/runtests.py -v -f -e spawn
-  - mpiexec -n 1  python $PWD/demo/futures/test_futures.py -v
-  - mpiexec -n $P python $PWD/demo/futures/test_futures.py -v
-  - mpiexec -n 1  python -m mpi4py.futures $PWD/demo/futures/test_futures.py -v
-  - mpiexec -n $P python -m mpi4py.futures $PWD/demo/futures/test_futures.py -v
+  - mpiexec -n 1 python $PWD/test/runtests.py -v
+  - mpiexec -n 2 python $PWD/test/runtests.py -v -f -e spawn
+  - mpiexec -n 1 python $PWD/demo/futures/test_futures.py -v
+  - mpiexec -n 2 python $PWD/demo/futures/test_futures.py -v
+  - mpiexec -n 1 python -m mpi4py.futures $PWD/demo/futures/test_futures.py -v
+  - mpiexec -n 2 python -m mpi4py.futures $PWD/demo/futures/test_futures.py -v
   - python $PWD/demo/test-run/test_run.py -v
 
 #notifications:
