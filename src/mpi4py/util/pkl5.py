@@ -2,6 +2,7 @@
 # Contact: dalcinl@gmail.com
 """Pickle-based communication using protocol 5."""
 
+import os as _os
 import sys as _sys
 import struct as _struct
 
@@ -62,10 +63,15 @@ def _buffer_handler(protocol, threshold):
     return bufs, buf_cb
 
 
+def _get_threshold(default):
+    varname = 'MPI4PY_PICKLE_THRESHOLD'
+    return int(_os.environ.get(varname, default))
+
+
 class Pickle(_Pickle):
     """Pickle/unpickle Python objects using out-of-band buffers."""
 
-    THRESHOLD = 1024**2 // 4  # 0.25 MiB
+    THRESHOLD = _get_threshold(1024**2 // 4)  # 0.25 MiB
 
     def __init__(self, dumps=_dumps, loads=_loads, protocol=_PROTOCOL):
         """Initialize pickle context."""
