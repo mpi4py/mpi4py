@@ -8,6 +8,7 @@ python:
   - "3.9"
  #- "3.10"
 arch:
+  - s390x
   - arm64
   - ppc64le
 
