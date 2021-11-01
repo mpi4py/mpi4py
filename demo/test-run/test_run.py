@@ -68,7 +68,7 @@ def execute(np, cmd, args=''):
 @unittest.skipIf(not find_mpiexec(), 'mpiexec')
 class BaseTestRun(unittest.TestCase):
 
-    def assertMPIAbort(self, stdout, stderr):
+    def assertMPIAbort(self, stdout, stderr, message=None):
         aborted = any(
             mpiabort in output
             for output in (stdout, stderr)
@@ -78,13 +78,15 @@ class BaseTestRun(unittest.TestCase):
                 'aborting MPI_COMM_WORLD',  # Microsoft MPI
             )
         )
-        if aborted:
-            return
         ci = any((
             os.environ.get('GITHUB_ACTIONS') == 'true',
             os.environ.get('CIRCLECI') == 'true',
             os.environ.get('TRAVIS') == 'true',
         ))
+        if aborted:
+            if message is not None and not ci:
+                self.assertTrue(message in stderr)
+            return
         if ci:
             warnings.warn(
                 "expecting MPI_Abort() message in stdout/stderr",
@@ -121,8 +123,7 @@ class TestRunScript(BaseTestRun):
                 args = ['--rank', str(rank), '--exception', message]
                 status, stdout, stderr = self.execute(args, np)
                 self.assertEqual(status, 1)
-                self.assertMPIAbort(stdout, stderr)
-                self.assertTrue(excmess in stderr)
+                self.assertMPIAbort(stdout, stderr, excmess)
 
     def testSysExitCode(self):
         errcode = 7
@@ -141,9 +142,8 @@ class TestRunScript(BaseTestRun):
                 args = ['--rank', str(r), '--sys-exit-msg', exitmsg]
                 status, stdout, stderr = self.execute(args, np)
                 self.assertEqual(status, 1)
-                self.assertMPIAbort(stdout, stderr)
+                self.assertMPIAbort(stdout, stderr, exitmsg)
                 self.assertTrue('Traceback' not in stderr)
-                self.assertTrue(exitmsg in stderr)
 
 
 class TestRunDirectory(TestRunScript):
@@ -235,8 +235,7 @@ class TestRunCommand(BaseTestRun):
             for rank in range(0, np):
                 status, stdout, stderr = self.execute(command.format(rank), np)
                 self.assertEqual(status, 1)
-                self.assertMPIAbort(stdout, stderr)
-                self.assertTrue(excmess in stderr)
+                self.assertMPIAbort(stdout, stderr, excmess)
 
 
 if __name__ == '__main__':
