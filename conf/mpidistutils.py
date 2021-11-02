@@ -1225,20 +1225,21 @@ class build_exe(build_ext):
         # Get special linker flags for building a executable with
         # bundled Python library, also fix location of needed
         # python.exp file on AIX
-        ldshflag = sysconfig.get_config_var('LINKFORSHARED') or ''
-        ldshflag = ldshflag.replace('-Xlinker ', '-Wl,')
+        ldflags = sysconfig.get_config_var('PY_LDFLAGS') or ''
+        linkshared = sysconfig.get_config_var('LINKFORSHARED') or ''
+        linkshared = linkshared.replace('-Xlinker ', '-Wl,')
         if sys.platform == 'darwin': # fix wrong framework paths
             fwkprefix = sysconfig.get_config_var('PYTHONFRAMEWORKPREFIX')
             fwkdir = sysconfig.get_config_var('PYTHONFRAMEWORKDIR')
             if fwkprefix and fwkdir and fwkdir != 'no-framework':
-                for flag in shlex.split(ldshflag):
+                for flag in shlex.split(linkshared):
                     if flag.startswith(fwkdir):
                         fwkpath = os.path.join(fwkprefix, flag)
-                        ldshflag = ldshflag.replace(flag, fwkpath)
+                        linkshared = linkshared.replace(flag, fwkpath)
         if sys.platform.startswith('aix'):
             python_lib = sysconfig.get_python_lib(standard_lib=1)
             python_exp = os.path.join(python_lib, 'config', 'python.exp')
-            ldshflag = ldshflag.replace('Modules/python.exp', python_exp)
+            linkshared = linkshared.replace('Modules/python.exp', python_exp)
         # Detect target language, if not provided
         language = exe.language or self.compiler.detect_language(sources)
         self.compiler.link(
@@ -1248,7 +1249,7 @@ class build_exe(build_ext):
             libraries=self.get_libraries(exe),
             library_dirs=exe.library_dirs,
             runtime_library_dirs=exe.runtime_library_dirs,
-            extra_preargs=shlex.split(ldshflag),
+            extra_preargs=shlex.split(ldflags) + shlex.split(linkshared),
             extra_postargs=extra_args,
             debug=self.debug,
             target_lang=language)
@@ -1350,13 +1351,12 @@ class install_exe(cmd_install_lib.install_lib):
             for exe in build_exe.executables:
                 exe_fullpath = build_exe.get_exe_fullpath(exe)
                 exe_filename = os.path.basename(exe_fullpath)
-                if (os.name == "posix" and
-                    exe_filename.startswith("python-")):
+                if exe_filename.startswith("python-") and os.name == 'posix':
                     install_name = exe_filename.replace(
-                        "python-", "python%s.%s-" % sys.version_info[:2])
+                        "python-", "python%d.%d-" % sys.version_info[:2])
                     link = None
                 else:
-                    install_name = exe_fullpath
+                    install_name = exe_filename
                     link = None
                 source = exe_fullpath
                 target = os.path.join(self.install_dir, install_name)

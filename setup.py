@@ -210,6 +210,7 @@ def configure_pyexe(exe, config_cmd):
     cfg_vars = sysconfig.get_config_vars()
     libraries = []
     library_dirs = []
+    runtime_dirs = []
     link_args = []
     if pyver >= (3, 8) or not cfg_vars.get('Py_ENABLE_SHARED'):
         py_version = sysconfig.get_python_version()
@@ -225,12 +226,13 @@ def configure_pyexe(exe, config_cmd):
             del libraries[:]
     for var in ('LIBDIR', 'LIBPL'):
         library_dirs += shlex.split(cfg_vars.get(var, ''))
-    for var in ('LDFLAGS',
-                'LIBS', 'MODLIBS', 'SYSLIBS',
-                'LDLAST'):
+    for var in ('LIBDIR',):
+        runtime_dirs += shlex.split(cfg_vars.get(var, ''))
+    for var in ('LIBS', 'MODLIBS', 'SYSLIBS', 'LDLAST'):
         link_args += shlex.split(cfg_vars.get(var, ''))
     exe.libraries += libraries
     exe.library_dirs += library_dirs
+    exe.runtime_library_dirs += runtime_dirs
     exe.extra_link_args += link_args
 
 
@@ -273,8 +275,6 @@ def executables():
                  configure=configure_pyexe,
                  )
     #
-    if hasattr(sys, 'pypy_version_info'):
-        return []
     return [pyexe]
 
 # --------------------------------------------------------------------

@@ -9,7 +9,10 @@
 #define OMPI_IGNORE_CXX_SEEK 1
 #include <mpi.h>
 
-#if PY_MAJOR_VERSION <= 2
+#if defined(PYPY_VERSION)
+PyAPI_FUNC(int) pypy_main_startup(int, char **);
+#define Py_BytesMain pypy_main_startup
+#elif PY_MAJOR_VERSION <= 2
 #define Py_BytesMain Py_Main
 #elif PY_VERSION_HEX < 0x03070000
 static int Py_BytesMain(int, char **);
@@ -55,6 +58,7 @@ main(int argc, char **argv)
 
 /* -------------------------------------------------------------------------- */
 
+#if !defined(PYPY_VERSION)
 #if PY_MAJOR_VERSION >= 3 && PY_VERSION_HEX < 0x03070000
 
 #include <locale.h>
@@ -142,6 +146,7 @@ rm_wargs(wchar_t **args, int deep)
     free(args);
 }
 
+#endif
 #endif
 
 /* -------------------------------------------------------------------------- */
