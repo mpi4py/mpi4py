@@ -27,6 +27,30 @@ build *MPI for Python*:
      :ref:`python-mpi` in the appendix.
 
 
+Using **conda**
+---------------
+
+If you need the fastest way to bootstrap a working environment locally without
+worrying about network setup, compiler flags, etc, using the pre-built binary
+package from conda-forge is the suggested practice. On conda-forge, three MPI
+implementations are provided: Open MPI (for UNIX-like OS), MPICH (for UNIX-like
+OS), and MS-MPI (for Windows). You can use :program:`conda`::
+
+  $ conda install -c conda-forge mpi4py
+
+and an MPI package will be picked and installed together with ``mpi4py`` for
+you. You can also be explicit on the MPI library to be installed, for examplle::
+
+  $ conda install -c conda-forge mpi4py mpich  # or openmpi
+
+.. note::
+
+  The ``openmpi`` package on conda-forge has the CUDA support built but disabled
+  by default. To enable it, follow the instruction outlined during ``conda
+  install``. Additionally, the UCX support is also available if the ``ucx``
+  package is installed.
+
+
 Using **pip**
 -------------
 
