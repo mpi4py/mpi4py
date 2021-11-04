@@ -1,11 +1,3 @@
-=======================
-CHANGES: MPI for Python
-=======================
-
-:Author:  Lisandro Dalcin
-:Contact: dalcinl@gmail.com
-
-
 Release 3.1.2 [2021-11-04]
 ==========================
 
