@@ -1,11 +1,3 @@
-=======================
-LICENSE: MPI for Python
-=======================
-
-:Author:  Lisandro Dalcin
-:Contact: dalcinl@gmail.com
-
-
 Copyright (c) 2021, Lisandro Dalcin.
 All rights reserved.
 

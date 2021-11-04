@@ -40,6 +40,8 @@ MPI for Python
    citing
    install
    appendix
+   license
+   changes
 
 .. only:: html and not singlehtml
 
