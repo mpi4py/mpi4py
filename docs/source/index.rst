@@ -35,6 +35,7 @@ MPI for Python
    mpi4py.futures
    mpi4py.util
    mpi4py.run
+   mpi4py.bench
    reference
    citing
    install
