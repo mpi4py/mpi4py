@@ -51,12 +51,11 @@ This package supports:
 Install
 -------
 
-Once you have a working MPI implementation and the ``mpicc`` compiler
-wrapper is on your search path, you can install this package using ``pip``::
+You can install mpi4py from its source distribution using ``pip``::
 
   $ python -m pip install mpi4py
 
-You can also install the in-development version of mpi4py using ``pip``::
+You can also install the in-development version with::
 
   $ python -m pip install git+https://github.com/mpi4py/mpi4py
 
@@ -64,28 +63,93 @@ or::
 
   $ python -m pip install https://github.com/mpi4py/mpi4py/tarball/master
 
-You can also install it directly on Fedora (as well as RHEL and their
-derivatives using the EPEL software repository)
+Installing from source requires compilers and a working MPI
+implementation. The ``mpicc`` compiler wrapper is looked for on the
+executable search path (``PATH`` environment variable). Alternatively,
+you can set the ``MPICC`` environment variable to the full path or
+command corresponding to the MPI-aware C compiler.
 
-* using ``dnf`` and the ``mpich`` package on ``x86_64``::
+The **conda-forge** community provides ready-to-use binary packages
+from an ever growing collection of software libraries built around the
+multi-platform *conda* package manager. Three MPI implementations are
+available on conda-forge: Open MPI (Linux and macOS), MPICH (Linux and
+macOS), and Microsoft MPI (Windows). You can install mpi4py and your
+preferred MPI implementation using ``conda``::
 
-  $ dnf install mpi4py-mpich
+* to use MPICH do::
 
-* using ``dnf`` and the ``openmpi`` package on ``x86_64``::
+  $ conda install -c conda-forge mpi4py mpich
 
-  $ dnf install mpi4py-openmpi
+* to use Open MPI do::
 
-Please remember to load the correct module for your choosen MPI environment
+  $ conda install -c conda-forge mpi4py openmpi
 
-* for ``mpich`` package on ``x86_64`` do::
+* to use Microsoft MPI do::
 
-  $ module load mpi/mpich-x86_64
-  $ python -c "import mpi4py"
+  $ conda install -c conda-forge mpi4py msmpi
 
-* for ``openmpi`` package on ``x86_64`` do::
+MPICH and many of its derivatives are ABI-compatible. You can provide
+the package specification ``mpich=X.Y.*=external_*`` (where ``X`` and
+``Y`` are the major and minor version numbers) to request the conda
+package manager to use system-provided MPICH (or derivative)
+libraries.
 
-  $ module load mpi/openmpi-x86_64
-  $ python -c "import mpi4py"
+The ``openmpi`` package on conda-forge has built-in CUDA support, but
+it is disabled by default. To enable it, follow the instruction
+outlined during ``conda install``. Additionally, UCX support is also
+available once the ``ucx`` package is installed.
+
+On **Fedora Linux** systems (as well as **RHEL** and their derivatives
+using the EPEL software repository), you can install binary packages
+with the system package manager::
+
+* using ``dnf`` and the ``mpich`` package::
+
+  $ sudo dnf install python3-mpi4py-mpich
+
+* using ``dnf`` and the ``openmpi`` package::
+
+  $ sudo dnf install python3-mpi4py-openmpi
+
+Please remember to load the correct MPI module for your chosen MPI
+implementation
+
+* for the ``mpich`` package do::
+
+  $ module load mpi/mpich-$(arch)
+  $ python -c "from mpi4py import MPI"
+
+* for the ``openmpi`` package do::
+
+  $ module load mpi/openmpi-$(arch)
+  $ python -c "from mpi4py import MPI"
+
+On **Ubuntu Linux** and **Debian Linux** systems, binary packages are
+available for installation using the system package manager::
+
+  $ sudo apt install python3-mpi4py
+
+Note that on Ubuntu/Debian systems, the mpi4py package uses Open
+MPI. To use MPICH, install the ``libmpich-dev`` and ``python3-dev``
+packages (and any other required development tools). Afterwards,
+install mpi4py from sources using ``pip``.
+
+**macOS** users can install mpi4py using the Homebrew package
+manager::
+
+  $ brew install mpi4py
+
+Note that the Homebrew mpi4py package uses Open MPI. Alternatively,
+install the ``mpich`` package and next install mpi4py from sources
+using ``pip``.
+
+**Windows** users can install mpi4py from binary wheels hosted on the
+Python Package Index (PyPI) using ``pip``::
+
+  $ python -m pip install mpi4py
+
+Windows wheels require a separate, system-wide installation of the
+Microsoft MPI runtime.
 
 
 Citations

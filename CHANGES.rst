@@ -6,6 +6,30 @@ CHANGES: MPI for Python
 :Contact: dalcinl@gmail.com
 
 
+Release 3.1.2 [2021-11-04]
+==========================
+
+.. warning:: This is the last release supporting Python 2.
+
+* `mpi4py.futures`: Add `_max_workers` property to `MPIPoolExecutor`.
+
+* `mpi4py.util.dtlib`: Fix computation of alignment for predefined datatypes.
+
+* `mpi4py.util.pkl5`: Fix deadlock when using ``ssend()`` + ``mprobe()``.
+
+* `mpi4py.util.pkl5`: Add environment variable `MPI4PY_PICKLE_THRESHOLD`.
+
+* `mpi4py.rc`: Interpret ``"y"`` and ``"n"`` strings as boolean values.
+
+* Fix/add typemap/typestr for `MPI.WCHAR`/`MPI.COUNT` datatypes.
+
+* Minor fixes and additions to documentation.
+
+* Minor fixes to typing support.
+
+* Support for local version identifier (PEP-440).
+
+
 Release 3.1.1 [2021-08-14]
 ==========================
 
