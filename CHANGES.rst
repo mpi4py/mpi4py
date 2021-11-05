@@ -325,7 +325,7 @@ Release 1.2 [2009-12-29]
   feedback.
 
 * Support for logging of user-defined states and events using `MPE
-  <http://www.mcs.anl.gov/research/projects/perfvis/>`_. Runtime
+  <https://www.mcs.anl.gov/research/projects/perfvis/>`_. Runtime
   (i.e., without requiring a recompile!)  activation of logging of all
   MPI calls is supported in POSIX platforms implementing ``dlopen()``.
 
