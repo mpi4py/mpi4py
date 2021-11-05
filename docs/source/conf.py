@@ -69,12 +69,12 @@ default_role = 'any'
 nitpicky = True
 nitpick_ignore = [
     ('c:func', r'atexit'),
-    ('envvar', r'MPICC'),
     ('py:mod', r'__worker__'),
     ('py:mod', r'pickle5'),
 ]
 nitpick_ignore_regex = [
     (r'c:.*', r'MPI_.*'),
+    (r'envvar', r'MPI(CC|LD|CFG)'),
     (r'envvar', r'(LD_LIBRARY_)?PATH'),
     (r'envvar', r'(MPICH|OMPI|MPIEXEC)_.*'),
 ]

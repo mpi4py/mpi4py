@@ -44,11 +44,23 @@ def version():
         return public_version
 
 def description():
-    with open(os.path.join(topdir, 'DESCRIPTION.rst')) as f:
-        return f.read()
+    return __doc__.strip()
 
-name    = name()
+def long_description():
+    filelist = ('DESCRIPTION.rst', 'CITATION.rst', 'INSTALL.rst')
+    template = "See `{0} <{0}>`_.\n\n"
+    template += ".. include:: {0}\n"
+    text = template.format(filelist[0])
+    for filename in filelist:
+        with open(os.path.join(topdir, filename)) as f:
+            includeline = template.format(filename)
+            text = text.replace(includeline, f.read())
+    return text
+
+name = name()
 version = version()
+description = description()
+long_description = long_description()
 
 url      = 'https://github.com/mpi4py/%(name)s/' % vars()
 download = url + 'releases/download/%(version)s/' % vars()
@@ -100,8 +112,8 @@ Windows
 metadata = {
     'name'             : name,
     'version'          : version,
-    'description'      : __doc__.strip(),
-    'long_description' : description(),
+    'description'      : description,
+    'long_description' : long_description,
     'url'              : url,
     'download_url'     : download,
     'classifiers'      : [c for c in classifiers.split('\n') if c],

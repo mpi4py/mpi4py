@@ -1,10 +1,3 @@
-Citation
-========
-
-If MPI for Python been significant to a project that leads to an
-academic publication, please acknowledge that fact by citing the
-project.
-
 * L. Dalcin and Y.-L. L. Fang,
   *mpi4py: Status Update After 12 Years of Development*,
   Computing in Science & Engineering, 23(4):47-54, 2021.

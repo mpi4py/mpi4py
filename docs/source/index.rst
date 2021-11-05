@@ -37,8 +37,9 @@ MPI for Python
    mpi4py.run
    mpi4py.bench
    reference
-   citing
+   citation
    install
+   develop
    appendix
    license
    changes
