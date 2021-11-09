@@ -43,6 +43,7 @@ BufSpec = Union[
 
 BufSpecB = Union[
     Buffer,
+    Tuple[Buffer, Count],
     Tuple[Buffer, TypeSpec],
     Tuple[Buffer, Count, TypeSpec],
     List,
@@ -50,12 +51,12 @@ BufSpecB = Union[
 
 BufSpecV = Union[
     Buffer,
-    Tuple[Buffer, Count],
-    Tuple[Buffer, Tuple[Count, Displ]],
+    Tuple[Buffer, Sequence[Count]],
+    Tuple[Buffer, Tuple[Sequence[Count], Sequence[Displ]]],
     Tuple[Buffer, TypeSpec],
-    Tuple[Buffer, Count, TypeSpec],
-    Tuple[Buffer, Tuple[Count, Displ], TypeSpec],
-    Tuple[Buffer, Count, Displ, TypeSpec],
+    Tuple[Buffer, Sequence[Count], TypeSpec],
+    Tuple[Buffer, Tuple[Sequence[Count], Sequence[Displ]], TypeSpec],
+    Tuple[Buffer, Sequence[Count], Sequence[Displ], TypeSpec],
     List,
 ]
 
