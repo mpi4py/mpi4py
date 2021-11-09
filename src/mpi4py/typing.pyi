@@ -57,6 +57,8 @@ BufSpecV = Union[
     Tuple[Buffer, Sequence[Count], TypeSpec],
     Tuple[Buffer, Tuple[Sequence[Count], Sequence[Displ]], TypeSpec],
     Tuple[Buffer, Sequence[Count], Sequence[Displ], TypeSpec],
+    Tuple[Bottom, Tuple[Sequence[Count], Sequence[Displ]], Datatype],
+    Tuple[Bottom, Sequence[Count], Sequence[Displ], Datatype],
     List,
 ]
 
@@ -64,6 +66,8 @@ BufSpecW = Union[
     Tuple[Buffer, Sequence[Datatype]],
     Tuple[Buffer, Tuple[Sequence[Count], Sequence[Displ]], Sequence[Datatype]],
     Tuple[Buffer, Sequence[Count], Sequence[Displ], Sequence[Datatype]],
+    Tuple[Bottom, Tuple[Sequence[Count], Sequence[Displ]], Sequence[Datatype]],
+    Tuple[Bottom, Sequence[Count], Sequence[Displ], Sequence[Datatype]],
     List,
 ]
 
