@@ -423,11 +423,11 @@ TypeSpec = Union[Datatype, str]
 
 BufSpec = Union[
     Buffer,
-    Tuple[Buffer, Count],                         # (buffer, count)
-    Tuple[Buffer, TypeSpec],                      # (buffer, datatype)
-    Tuple[Buffer, Count, TypeSpec],               # (buffer, count, datatype)
-    Tuple[Union[Bottom, None], Count, Datatype],  # (BOTTOM, count, datatype)
-    List,                                         # (buffer, count, datatype)
+    Tuple[Buffer, Count],            # (buffer, count)
+    Tuple[Buffer, TypeSpec],         # (buffer, datatype)
+    Tuple[Buffer, Count, TypeSpec],  # (buffer, count, datatype)
+    Tuple[Bottom, Count, Datatype],  # (BOTTOM, count, datatype)
+    List,                            # (buffer, count, datatype)
 ]
 
 BufSpecB = Union[
@@ -439,13 +439,13 @@ BufSpecB = Union[
 
 BufSpecV = Union[
     Buffer,
-    Tuple[Buffer, Count],                          # (buffer, count)
-    Tuple[Buffer, Tuple[Count, Displ]],            # (buffer, (count, displ))
-    Tuple[Buffer, TypeSpec],                       # (buffer, datatype)
-    Tuple[Buffer, Count, TypeSpec],                # (buffer, count, datatype)
-    Tuple[Buffer, Tuple[Count, Displ], TypeSpec],  # (buffer, (count, displ), datatype)
-    Tuple[Buffer, Count, Displ, TypeSpec],         # (buffer, count, displ, datatype)
-    List,                                          # (buffer, count, displ, datatype)
+    Tuple[Buffer, Sequence[Count]],                                    # (buffer, counts)
+    Tuple[Buffer, Tuple[Sequence[Count], Sequence[Displ]]],            # (buffer, (counts, displs))
+    Tuple[Buffer, TypeSpec],                                           # (buffer, datatype)
+    Tuple[Buffer, Sequence[Count], TypeSpec],                          # (buffer, counts, datatype)
+    Tuple[Buffer, Tuple[Sequence[Count], Sequence[Displ]], TypeSpec],  # (buffer, (counts, displs), datatype)
+    Tuple[Buffer, Sequence[Count], Sequence[Displ], TypeSpec],         # (buffer, counts, displs, datatype)
+    List,                                                              # (buffer, counts, displs, datatypes)
 ]
 
 BufSpecW = Union[
