@@ -1071,6 +1071,22 @@ class TestMessageVectorW(unittest.TestCase):
         MPI.Free_mem(sbuf)
         MPI.Free_mem(rbuf)
 
+    def testMessageBottom(self):
+        sbuf = b"abcxyz"
+        rbuf = bytearray(6)
+        saddr = MPI.Get_address(sbuf)
+        raddr = MPI.Get_address(rbuf)
+        stype = MPI.Datatype.Create_struct([6], [saddr], [MPI.CHAR]).Commit()
+        rtype = MPI.Datatype.Create_struct([6], [raddr], [MPI.CHAR]).Commit()
+        smsg = [MPI.BOTTOM,  [1], [0] , [stype]]
+        rmsg = [MPI.BOTTOM, ([1], [0]), [rtype]]
+        try:
+            Alltoallw(smsg, rmsg)
+            self.assertEqual(sbuf, rbuf)
+        finally:
+            stype.Free()
+            rtype.Free()
+
     def testMessageBytes(self):
         sbuf = b"abc"
         rbuf = bytearray(3)

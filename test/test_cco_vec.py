@@ -297,6 +297,36 @@ class BaseTestCCOVec(object):
                 for value in rbuf.flat:
                     self.assertEqual(value, n)
 
+    def testAlltoallwBottom(self):
+        size = self.COMM.Get_size()
+        rank = self.COMM.Get_rank()
+        for array, typecode in arrayimpl.subTest(self):
+            for n in range(1, size+1):
+                sbuf = array( n, typecode, (size, n))
+                rbuf = array(-1, typecode, (size, n))
+                saddr = MPI.Get_address(sbuf.as_raw())
+                raddr = MPI.Get_address(rbuf.as_raw())
+                sdt, rdt = sbuf.mpidtype, rbuf.mpidtype
+                stypes = [
+                    MPI.Datatype.Create_struct([n], [saddr+d], [sdt]).Commit()
+                    for d in list(range(0, size*n*sdt.extent, n*sdt.extent))
+                ]
+                rtypes = [
+                    MPI.Datatype.Create_struct([n], [raddr+d], [sdt]).Commit()
+                    for d in list(range(0, size*n*rdt.extent, n*rdt.extent))
+                ]
+                smsg = (MPI.BOTTOM, ([1]*size, [0]*size), stypes)
+                rmsg = (MPI.BOTTOM, ([1]*size, [0]*size), rtypes)
+                try:
+                    self.COMM.Alltoallw(smsg, rmsg)
+                except NotImplementedError:
+                    self.skipTest('mpi-alltoallw')
+                finally:
+                    for t in stypes: t.Free()
+                    for t in rtypes: t.Free()
+                for value in rbuf.flat:
+                    self.assertEqual(value, n)
+
 @unittest.skipMPI('msmpi(<8.1.0)')
 @unittest.skipMPI('openmpi(<1.8.0)')
 @unittest.skipIf(MPI.BOTTOM == MPI.IN_PLACE, 'mpi-in-place')

@@ -150,6 +150,32 @@ class BaseTestCCONghBuf(object):
                             self.assertEqual(value, v+1)
             comm.Free()
 
+    def testNeighborAlltoallwBottom(self):
+        size = self.COMM.Get_size()
+        for comm in create_topo_comms(self.COMM):
+            rsize, ssize = get_neighbors_count(comm)
+            for array, typecode in arrayimpl.subTest(self):
+                for n in range(1,4):
+                    for v in range(3):
+                        sbuf = array( v, typecode, (ssize, n))
+                        rbuf = array(-1, typecode, (rsize, n))
+                        saddr = MPI.Get_address(sbuf.as_raw())
+                        raddr = MPI.Get_address(rbuf.as_raw())
+                        sdt, rdt = sbuf.mpidtype, rbuf.mpidtype
+                        sdsp = list(range(0, ssize*n*sdt.extent, n*sdt.extent))
+                        rdsp = list(range(0, rsize*n*rdt.extent, n*rdt.extent))
+                        sdsp = [saddr + d for d in sdsp]
+                        rdsp = [raddr + d for d in rdsp]
+                        smsg = [MPI.BOTTOM, ([n]*ssize, sdsp), [sdt]*ssize]
+                        rmsg = (MPI.BOTTOM, ([n]*rsize, rdsp), [rdt]*rsize)
+                        try:
+                            comm.Neighbor_alltoallw(smsg, rmsg)
+                        except NotImplementedError:
+                            self.skipTest('mpi-neighbor_alltoallw')
+                        for value in rbuf.flat:
+                            self.assertEqual(value, v)
+            comm.Free()
+
 
 class TestCCONghBufSelf(BaseTestCCONghBuf, unittest.TestCase):
     COMM = MPI.COMM_SELF

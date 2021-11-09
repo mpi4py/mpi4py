@@ -381,7 +381,13 @@ cdef tuple message_vector_w(object msg,
         o_buffer,  o_counts, o_displs,  o_types = msg
     else:
         raise ValueError("message: expecting 2 to 4 items")
-    if readonly:
+    if is_BOTTOM(o_buffer):
+        if o_counts is None:
+            raise ValueError("message: BOTTOM requires counts")
+        if o_displs is None:
+            raise ValueError("message: BOTTOM requires displs")
+        _addr[0] = MPI_BOTTOM
+    elif readonly:
         o_buffer = getbuffer_r(o_buffer, _addr, NULL)
     else:
         o_buffer = getbuffer_w(o_buffer, _addr, NULL)
