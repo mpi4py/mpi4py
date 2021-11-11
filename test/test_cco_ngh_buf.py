@@ -174,6 +174,13 @@ class BaseTestCCONghBuf(object):
                             self.skipTest('mpi-neighbor_alltoallw')
                         for value in rbuf.flat:
                             self.assertEqual(value, v)
+                        sbuf.flat[:] = array( v+1, typecode, (ssize, n)).flat
+                        try:
+                            comm.Ineighbor_alltoallw(smsg, rmsg).Wait()
+                        except NotImplementedError:
+                            self.skipTest('mpi-neighbor_alltoallw')
+                        for value in rbuf.flat:
+                            self.assertEqual(value, v+1)
             comm.Free()
 
 
