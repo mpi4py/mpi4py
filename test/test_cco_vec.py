@@ -282,7 +282,7 @@ class BaseTestCCOVec(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array, typecode in arrayimpl.subTest(self):
-            for n in range(1,size+1):
+            for n in range(1, size+1):
                 sbuf = array( n, typecode, (size, n))
                 rbuf = array(-1, typecode, (size, n))
                 sdt, rdt = sbuf.mpidtype, rbuf.mpidtype

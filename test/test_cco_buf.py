@@ -206,7 +206,7 @@ class BaseTestCCOBuf(object):
         for array, typecode in arrayimpl.subTest(self):
             for op in (MPI.SUM, MPI.MAX, MPI.MIN, MPI.PROD):
                 if skip_op(typecode, op): continue
-                for rcnt in range(1,size):
+                for rcnt in range(1, size+1):
                     sbuf = array([rank]*rcnt*size, typecode)
                     rbuf = array(-1, typecode, rcnt)
                     if op == MPI.PROD:

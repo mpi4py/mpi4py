@@ -368,6 +368,11 @@ class BaseTestCCOBufInplace(object):
                 self.COMM.Igather(sbuf, rbuf, root=root).Wait()
                 for value in buf.flat:
                     self.assertEqual(value, root)
+                if rank == root:
+                    sbuf = None
+                self.COMM.Igather(sbuf, rbuf, root=root).Wait()
+                for value in buf.flat:
+                    self.assertEqual(value, root)
 
     @unittest.skipMPI('msmpi(==10.0.0)')
     def testScatter(self):
@@ -387,6 +392,12 @@ class BaseTestCCOBufInplace(object):
                     self.COMM.Iscatter(sbuf, rbuf, root=root).Wait()
                     for value in buf.flat:
                         self.assertEqual(value, root)
+                    if rank == root:
+                        rbuf = None
+                    self.COMM.Iscatter(sbuf, rbuf, root=root).Wait()
+                    for value in buf.flat:
+                        self.assertEqual(value, root)
+
 
     def testAllgather(self):
         size = self.COMM.Get_size()
@@ -394,11 +405,12 @@ class BaseTestCCOBufInplace(object):
         for array, typecode in arrayimpl.subTest(self):
             for count in range(1, 10):
                 buf = array(-1, typecode, (size, count))
-                #buf.flat[(rank*count):((rank+1)*count)] = \
-                #    array(count, typecode, count)
                 s, e = rank*count, (rank+1)*count
                 for i in range(s, e): buf.flat[i] = count
                 self.COMM.Iallgather(MPI.IN_PLACE, buf.as_mpi()).Wait()
+                for value in buf.flat:
+                    self.assertEqual(value, count)
+                self.COMM.Iallgather(None, buf.as_mpi()).Wait()
                 for value in buf.flat:
                     self.assertEqual(value, count)
 
