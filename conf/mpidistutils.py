@@ -153,8 +153,6 @@ def customize_compiler(compiler, lang=None,
         if not compiler.initialized: compiler.initialize()
         compiler.ldflags_shared.append('/MANIFEST')
         compiler.ldflags_shared_debug.append('/MANIFEST')
-        compile_options = (compiler.compile_options,
-                           compiler.compile_options_debug)
 
 # -----------------------------------------------------------------------------
 
