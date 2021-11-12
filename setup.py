@@ -7,20 +7,12 @@ __doc__ = \
 Python bindings for MPI
 """
 
-import sys
 import os
 import re
+import sys
+import glob
 import shlex
 import shutil
-from glob import glob
-
-try:
-    import setuptools
-except ImportError:
-    setuptools = None
-
-if sys.version_info < (3, 6):
-    raise RuntimeError("Python version 3.6+ required")
 
 topdir = os.path.abspath(os.path.dirname(__file__))
 sys.path.insert(0, os.path.join(topdir, 'conf'))
@@ -128,11 +120,14 @@ metadata = {
 
 metadata['provides'] = ['mpi4py']
 
+
 # --------------------------------------------------------------------
 # Extension modules
 # --------------------------------------------------------------------
 
+
 def configure_dl(ext, config_cmd):
+    from mpidistutils import log
     log.info("checking for dlopen() availability ...")
     ok = config_cmd.check_header('dlfcn.h')
     if ok : ext.define_macros += [('HAVE_DLFCN_H', 1)]
@@ -143,8 +138,10 @@ def configure_dl(ext, config_cmd):
                                    decl=1, call=1)
     if ok: ext.define_macros += [('HAVE_DLOPEN', 1)]
 
+
 def configure_mpi(ext, config_cmd):
     from textwrap import dedent
+    from mpidistutils import log
     from mpidistutils import DistutilsPlatformError
     headers = ['stdlib.h', 'mpi.h']
     #
@@ -206,6 +203,7 @@ def configure_mpi(ext, config_cmd):
     if os.name == 'posix':
         configure_dl(ext, config_cmd)
 
+
 def configure_pyexe(exe, config_cmd):
     from mpidistutils import sysconfig
     if sys.platform.startswith('win'):
@@ -266,16 +264,17 @@ def extensions():
         sources=['src/MPI.c'],
         depends=(
             ['src/mpi4py.MPI.c'] +
-            glob('src/*.h') +
-            glob('src/lib-mpi/*.h') +
-            glob('src/lib-mpi/config/*.h') +
-            glob('src/lib-mpi/compat/*.h')
+            glob.glob('src/*.h') +
+            glob.glob('src/lib-mpi/*.h') +
+            glob.glob('src/lib-mpi/config/*.h') +
+            glob.glob('src/lib-mpi/compat/*.h')
         ),
         configure=configure_mpi,
         )
     modules.append(MPI)
     #
     return modules
+
 
 def executables():
     # MPI-enabled Python interpreter
@@ -289,59 +288,16 @@ def executables():
     #
     return [pyexe]
 
-# --------------------------------------------------------------------
-# Setup
-# --------------------------------------------------------------------
 
-from mpidistutils import log
-from mpidistutils import setup
-from mpidistutils import Extension  as Ext
-from mpidistutils import Executable as Exe
+# --------------------------------------------------------------------
+# Cython
+# --------------------------------------------------------------------
 
 CYTHON = '0.27'
 
-def run_setup():
-    """
-    Call setup(*args, **kargs)
-    """
-    setup_args = metadata.copy()
-    if setuptools:
-        setup_args['zip_safe'] = False
-        setup_args['setup_requires'] = []
-        setup_args['python_requires'] = '>=3.6'
-    if setuptools and not os.getenv('CONDA_BUILD'):
-        src = os.path.join('src', 'mpi4py.MPI.c')
-        has_src = os.path.exists(os.path.join(topdir, src))
-        has_git = os.path.isdir(os.path.join(topdir, '.git'))
-        has_hg  = os.path.isdir(os.path.join(topdir, '.hg'))
-        if not has_src or has_git or has_hg:
-            setup_args['setup_requires'] += ['Cython>='+CYTHON]
-    #
-    setup(
-        packages = [
-            'mpi4py',
-            'mpi4py.futures',
-            'mpi4py.util',
-        ],
-        package_data = {
-            'mpi4py' : [
-                '*.pxd',
-                'include/mpi4py/*.h',
-                'include/mpi4py/*.i',
-                'include/mpi4py/*.pxi',
-            ],
-            '' : [
-                'py.typed',
-                '*.pyi',
-            ],
-        },
-        package_dir = {'' : 'src'},
-        ext_modules = [Ext(**ext) for ext in extensions()],
-        executables = [Exe(**exe) for exe in executables()],
-        **setup_args
-    )
 
 def chk_cython(VERSION):
+    from mpidistutils import log
     warn = lambda msg='': sys.stderr.write(msg+'\n')
     #
     try:
@@ -355,11 +311,8 @@ def chk_cython(VERSION):
         warn("*"*80)
         return False
     #
-    try:
-        CYTHON_VERSION = Cython.__version__
-    except AttributeError:
-        from Cython.Compiler.Version import version as CYTHON_VERSION
     REQUIRED = VERSION
+    CYTHON_VERSION = Cython.__version__
     m = re.match(r"(\d+\.\d+(?:\.\d+)?).*", CYTHON_VERSION)
     if m:
         from mpidistutils import Version
@@ -381,10 +334,12 @@ def chk_cython(VERSION):
     log.info("using Cython version %s" % CYTHON_VERSION)
     return True
 
+
 def run_cython(source, target=None,
                depends=(), includes=(),
                destdir_c=None, destdir_h=None,
                wdir=None, force=False, VERSION=None):
+    from mpidistutils import log
     from mpidistutils import dep_util
     from mpidistutils import DistutilsError
     if target is None:
@@ -394,7 +349,7 @@ def run_cython(source, target=None,
         if wdir: os.chdir(wdir)
         alldeps = [source]
         for dep in depends:
-            alldeps += glob(dep)
+            alldeps += glob.glob(dep)
         if not (force or dep_util.newer_group(alldeps, target)):
             log.debug("skipping '%s' -> '%s' (up-to-date)",
                       source, target)
@@ -414,11 +369,15 @@ def run_cython(source, target=None,
         raise DistutilsError(
             "Cython failure: '%s' -> '%s'" % (source, target))
 
+
 def build_sources(cmd):
     has_src = os.path.exists(os.path.join(
-        topdir, 'src', 'mpi4py.MPI.c'))
-    has_vcs = (os.path.isdir(os.path.join(topdir, '.git')) or
-               os.path.isdir(os.path.join(topdir, '.hg' )))
+        topdir, 'src', 'mpi4py.MPI.c'
+    ))
+    has_vcs = any((
+        os.path.isdir(os.path.join(topdir, '.git')),
+        os.path.isdir(os.path.join(topdir, '.hg' )),
+    ))
     if (has_src and not has_vcs and not cmd.force): return
     # mpi4py.MPI
     source = 'mpi4py/MPI.pyx'
@@ -434,13 +393,87 @@ def build_sources(cmd):
     run_cython(source, target, depends, destdir_h=destdir_h,
                wdir='src', force=cmd.force, VERSION=CYTHON)
 
-from mpidistutils import build_src
-build_src.run = build_sources
+
+# --------------------------------------------------------------------
+# Setup
+# --------------------------------------------------------------------
+
+package_info = dict(
+    packages = [
+        'mpi4py',
+        'mpi4py.futures',
+        'mpi4py.util',
+    ],
+    package_data = {
+        'mpi4py' : [
+            '*.pxd',
+            'include/mpi4py/*.h',
+            'include/mpi4py/*.i',
+            'include/mpi4py/*.pxi',
+            'py.typed',
+            '*.pyi',
+            '*/*.pyi',
+        ],
+    },
+    package_dir = {'' : 'src'},
+)
+
+python_requires = '>=3.6'
+
+
+def run_setup():
+    """
+    Call setuptools.setup(*args, **kargs)
+    """
+    try:
+        import setuptools
+    except ImportError:
+        setuptools = None
+    from mpidistutils import setup
+    from mpidistutils import Extension  as Ext
+    from mpidistutils import Executable as Exe
+    #
+    from mpidistutils import build_src
+    build_src.run = build_sources
+    #
+    requirements = {}
+    builder_args = {}
+    if setuptools:
+        requirements['python_requires'] = python_requires
+        builder_args['zip_safe'] = False
+    if setuptools and not os.getenv('CONDA_BUILD'):
+        src = os.path.join('src', 'mpi4py.MPI.c')
+        has_src = os.path.exists(os.path.join(topdir, src))
+        has_git = os.path.isdir(os.path.join(topdir, '.git'))
+        has_hg  = os.path.isdir(os.path.join(topdir, '.hg'))
+        if not has_src or has_git or has_hg:
+            requirements['setup_requires'] = ['cython>='+CYTHON]
+    #
+    builder_args.update(
+        ext_modules = [Ext(**ext) for ext in extensions()],
+        executables = [Exe(**exe) for exe in executables()],
+    )
+    #
+    setup_args = dict(i for d in (
+        metadata,
+        package_info,
+        requirements,
+        builder_args,
+    ) for i in d.items())
+    #
+    setup(**setup_args)
+
+
+# --------------------------------------------------------------------
+
 
 def main():
     run_setup()
 
 if __name__ == '__main__':
+    if sys.version_info < (3, 6):
+        raise SystemExit("Python version 3.6+ required")
     main()
+
 
 # --------------------------------------------------------------------
