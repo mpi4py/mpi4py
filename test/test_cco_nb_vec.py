@@ -293,7 +293,7 @@ class BaseTestCCOVec(object):
                 for value in rbuf.flat:
                     self.assertEqual(value, n)
 
-    @unittest.skipMPI('openmpi')
+    @unittest.skipMPI('openmpi(<5.0.0)')
     def testAlltoallwBottom(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
@@ -323,6 +323,7 @@ class BaseTestCCOVec(object):
                     for t in rtypes: t.Free()
                 for value in rbuf.flat:
                     self.assertEqual(value, n)
+
 
 @unittest.skipMPI('msmpi(<8.1.0)')
 @unittest.skipMPI('openmpi(<2.0.0)')
