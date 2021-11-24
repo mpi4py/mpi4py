@@ -274,17 +274,17 @@ MPI-IO
 
     from mpi4py import MPI
     import numpy as np
-     
+
     amode = MPI.MODE_WRONLY|MPI.MODE_CREATE
     comm = MPI.COMM_WORLD
     fh = MPI.File.Open(comm, "./datafile.contig", amode)
-    
+
     buffer = np.empty(10, dtype=np.int)
     buffer[:] = comm.Get_rank()
-    
+
     offset = comm.Get_rank()*buffer.nbytes
     fh.Write_at_all(offset, buffer)
-    
+
     fh.Close()
 
 * Non-contiguous Collective I/O with NumPy arrays and datatypes::
@@ -387,7 +387,7 @@ One-Sided Communications
 ------------------------
 
 * Read from (write to) the entire RMA window::
-  
+
     import numpy as np
     from mpi4py import MPI
     from mpi4py.util import dtlib
@@ -508,7 +508,7 @@ Wrapping with F2Py
         call MPI_Comm_rank(comm, rank, ierr)
         print *, 'Hello, World! I am process ',rank,' of ',size,'.'
       end subroutine sayhello
-      
+
 * Compiling example using f2py ::
 
       $ f2py -c --f90exec=mpif90 helloworld.f90 -m helloworld
