@@ -9,6 +9,21 @@ Tutorial
 
    Under construction. Contributions very welcome!
 
+.. tip::
+
+   `Rolf Rabenseifner`_ at `HLRS`_ developed a comprehensive
+   MPI-3.1/4.0 course with slides and a large set of exercises
+   including solutions. This material is `available online
+   <hlrs-mpi_>`_ for self-study. The slides and exercises show the C,
+   Fortran, and Python (mpi4py) interfaces. For performance reasons,
+   most Python exercises use NumPy arrays and communication routines
+   involving buffer-like objects.
+
+   .. _Rolf Rabenseifner: https://www.hlrs.de/people/rabenseifner/
+   .. _HLRS: https://www.hlrs.de/
+   .. _hlrs-mpi: https://www.hlrs.de/training/par-prog-ws/MPI-course-material
+
+
 *MPI for Python* supports convenient, *pickle*-based communication of
 generic Python object as well as fast, near C-speed, direct array data
 communication of buffer-provider objects (e.g., NumPy arrays).
