@@ -23,6 +23,19 @@ Tutorial
    .. _HLRS: https://www.hlrs.de/
    .. _hlrs-mpi: https://www.hlrs.de/training/par-prog-ws/MPI-course-material
 
+.. tip::
+
+   `Victor Eijkhout`_ at `TACC`_ authored the book *Parallel
+   Programming for Science and Engineering*.  This book is available
+   online in `PDF <ppse-pdf_>`_ and `HTML <ppse-html_>`_ formats.  The
+   book covers parallel programming with MPI and OpenMP in C/C++ and
+   Fortran, and MPI in Python using mpi4py.
+
+   .. _Victor Eijkhout: https://tacc.utexas.edu/~eijkhout/
+   .. _TACC: https://www.tacc.utexas.edu/
+   .. _ppse-pdf: https://tinyurl.com/vle335course
+   .. _ppse-html: https://tacc.utexas.edu/~eijkhout/pcse/html/index.html
+
 
 *MPI for Python* supports convenient, *pickle*-based communication of
 generic Python object as well as fast, near C-speed, direct array data
