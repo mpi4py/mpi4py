@@ -6,6 +6,14 @@ CHANGES: MPI for Python
 :Contact: dalcinl@gmail.com
 
 
+Release 3.1.3 [2021-11-25]
+==========================
+
+.. warning:: This is the last release supporting Python 2.
+
+* Add missing support for `MPI.BOTTOM` to generalized all-to-all collectives.
+
+
 Release 3.1.2 [2021-11-04]
 ==========================
 
