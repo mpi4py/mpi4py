@@ -51,7 +51,7 @@ def _get_alignment_ctypes(typecode):
     c_type = type('c_type', (c_type_base,), dict(_type_=typecode))
     fields = [('base', ct.c_char), ('c_type', c_type)]
     struct = type('S', (ct.Structure,), dict(_fields_=fields))
-    return struct.c_type.offset
+    return struct.c_type.offset  # pylint: disable=no-member
 
 
 def _get_alignment(datatype):
