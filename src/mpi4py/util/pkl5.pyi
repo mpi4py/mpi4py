@@ -1,6 +1,6 @@
 from __future__ import annotations
 from .. import MPI
-from ..MPI import ANY_SOURCE, ANY_TAG
+from ..MPI import PROC_NULL, ANY_SOURCE, ANY_TAG
 from ..MPI import Status, Datatype
 from typing import Any, Literal, Optional
 from typing import Callable, Iterable, Sequence
