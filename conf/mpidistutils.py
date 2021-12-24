@@ -30,19 +30,20 @@ if hasattr(sys, 'pypy_version_info'):
 # Workaround distutils.cygwinccompiler.get_versions()
 # failing when the compiler path contains spaces
 from distutils import cygwinccompiler as cygcc
-cygcc_get_versions = cygcc.get_versions
-def get_versions():
-    import distutils.spawn
-    find_executable_orig  = distutils.spawn.find_executable
-    def find_executable(exe):
-        exe = find_executable_orig(exe)
-        if exe and ' ' in exe: exe = '"' + exe + '"'
-        return exe
-    distutils.spawn.find_executable = find_executable
-    versions = cygcc_get_versions()
-    distutils.spawn.find_executable = find_executable_orig
-    return versions
-cygcc.get_versions = get_versions
+if hasattr(cygcc, 'get_versions'):
+    cygcc_get_versions = cygcc.get_versions
+    def get_versions():
+        import distutils.spawn
+        find_executable_orig  = distutils.spawn.find_executable
+        def find_executable(exe):
+            exe = find_executable_orig(exe)
+            if exe and ' ' in exe: exe = '"' + exe + '"'
+            return exe
+        distutils.spawn.find_executable = find_executable
+        versions = cygcc_get_versions()
+        distutils.spawn.find_executable = find_executable_orig
+        return versions
+    cygcc.get_versions = get_versions
 
 # Normalize linker flags for runtime library dirs
 from distutils.unixccompiler import UnixCCompiler
