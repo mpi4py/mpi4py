@@ -443,6 +443,7 @@ class TestMessageSimpleNumPy(unittest.TestCase,
         Sendrecv(sbuf, rbuf)
         self.assertTrue((sbuf == rbuf).all())
 
+    @unittest.skipIf(numpy.__version__[:5] == '1.22.', 'numpy==1.22.*')
     def testNotWriteable(self):
         sbuf = numpy.ones([3])
         rbuf = numpy.zeros([3])
@@ -453,7 +454,6 @@ class TestMessageSimpleNumPy(unittest.TestCase,
     def testNotContiguous(self):
         sbuf = numpy.ones([3,2])[:,0]
         rbuf = numpy.zeros([3])
-        sbuf.flags.writeable = False
         self.assertRaises((BufferError, ValueError),
                           Sendrecv, sbuf, rbuf)
 
