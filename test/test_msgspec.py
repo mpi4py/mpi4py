@@ -443,8 +443,9 @@ class TestMessageSimpleNumPy(unittest.TestCase,
         Sendrecv(sbuf, rbuf)
         self.assertTrue((sbuf == rbuf).all())
 
-    @unittest.skipIf(numpy.__version__[:5] == '1.22.', 'numpy==1.22.*')
     def testNotWriteable(self):
+        if numpy.__version__[:5] == '1.22.':
+            raise unittest.SkipTest("numpy==1.22")
         sbuf = numpy.ones([3])
         rbuf = numpy.zeros([3])
         rbuf.flags.writeable = False
