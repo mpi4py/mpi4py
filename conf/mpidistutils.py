@@ -160,13 +160,13 @@ def customize_compiler(compiler, lang=None,
 from mpiconfig import Config
 
 def configuration(command_obj, verbose=True):
-    config = Config()
+    config = Config(log)
     config.setup(command_obj)
     if verbose:
         if config.section and config.filename:
-            log.info("MPI configuration: [%s] from '%s'",
-                     config.section, ','.join(config.filename))
-            config.info(log)
+            config.log.info("MPI configuration: [%s] from '%s'",
+                            config.section, ','.join(config.filename))
+            config.info()
     return config
 
 def configure_compiler(compiler, config, lang=None):

@@ -2,17 +2,21 @@ import sys
 import os
 import shlex
 import shutil
+import logging
 import platform
 from collections import OrderedDict
 from configparser import ConfigParser
 from configparser import Error as ConfigParserError
 
-from distutils import log as dulog
+
+_logger = logging.getLogger("mpiconfig")
+_logger.setLevel(logging.INFO)
+
 
 class Config(object):
 
     def __init__(self, logger=None):
-        self.log = logger or dulog
+        self.log = logger or _logger
         self.section  = None
         self.filename = None
         self.compiler_info = OrderedDict((
@@ -445,7 +449,6 @@ if __name__ == '__main__':
     parser.add_option("--mpild",   type="string")
     (opts, args) = parser.parse_args()
 
-    log = dulog.Log(dulog.INFO)
-    cfg = Config(log)
+    cfg = Config()
     cfg.setup(opts)
     cfg.dump()
