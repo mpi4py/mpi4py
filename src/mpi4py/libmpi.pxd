@@ -1,7 +1,7 @@
 # Author:  Lisandro Dalcin
 # Contact: dalcinl@gmail.com
 
-cdef import from "mpi.h" nogil:
+cdef import from "<mpi.h>" nogil:
 
     #-----------------------------------------------------------------
 
