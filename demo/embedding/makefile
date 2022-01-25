@@ -1,5 +1,4 @@
 .PHONY: default build test clean
-
 default: build test clean
 
 PYTHON = python$(py)
@@ -7,7 +6,7 @@ PYTHON_CONFIG = ${PYTHON} ../python-config
 
 MPICC   = mpicc
 CFLAGS  = ${shell ${PYTHON_CONFIG} --cflags}
-LDFLAGS = ${shell ${PYTHON_CONFIG} --ldflags}
+LDFLAGS = ${shell ${PYTHON_CONFIG} --ldflags --embed}
 build: helloworld.exe
 helloworld.exe: helloworld.c
 	${MPICC} ${CFLAGS} -o $@ $< ${LDFLAGS}
