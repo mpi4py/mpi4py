@@ -2,7 +2,7 @@
  * Contact: dalcinl@gmail.com
  */
 
-#include "Python.h"
+#include <Python.h>
 #include "dynload.h"
 
 static PyObject *

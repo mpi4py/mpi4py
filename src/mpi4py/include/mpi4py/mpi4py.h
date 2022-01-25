@@ -4,7 +4,7 @@
 #ifndef MPI4PY_H
 #define MPI4PY_H
 
-#include "mpi.h"
+#include <mpi.h>
 
 #if defined(MSMPI_VER) && !defined(PyMPI_HAVE_MPI_Message)
 #  if defined(MPI_MESSAGE_NULL)
