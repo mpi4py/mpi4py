@@ -1,19 +1,18 @@
 #!/usr/bin/env python
 # -*- python -*-
 
-import sys, os
 import getopt
-try:
-    import sysconfig
-except ImportError:
-    from distutils import sysconfig
+import os
+import sys
+import sysconfig
 
-valid_opts = ['help', 'prefix', 'exec-prefix', 'includes', 'libs', 'cflags',
-              'ldflags', 'extension-suffix', 'abiflags', 'configdir']
+valid_opts = ['prefix', 'exec-prefix', 'includes', 'libs', 'cflags',
+              'ldflags', 'extension-suffix', 'help', 'abiflags', 'configdir',
+              'embed']
 
 def exit_with_usage(code=1):
-    sys.stderr.write("Usage: %s [%s]\n" % (
-        sys.argv[0], '|'.join('--'+opt for opt in valid_opts)))
+    print("Usage: {0} [{1}]".format(
+        sys.argv[0], '|'.join('--'+opt for opt in valid_opts)), file=sys.stderr)
     sys.exit(code)
 
 try:
@@ -26,10 +25,6 @@ if not opts:
 
 getvar = sysconfig.get_config_var
 pyver = getvar('VERSION')
-try:
-    abiflags = sys.abiflags
-except AttributeError:
-    abiflags = ''
 
 opt_flags = [flag for (flag, val) in opts]
 
@@ -44,37 +39,37 @@ for opt in opt_flags:
         print(getvar('exec_prefix'))
 
     elif opt in ('--includes', '--cflags'):
-        try:
-            include = sysconfig.get_path('include')
-            platinclude = sysconfig.get_path('platinclude')
-        except AttributeError:
-            include = sysconfig.get_python_inc()
-            platinclude = sysconfig.get_python_inc(plat_specific=True)
-        flags = ['-I' + include]
-        if include != platinclude:
-            flags.append('-I' + platinclude)
+        flags = ['-I' + sysconfig.get_path('include'),
+                 '-I' + sysconfig.get_path('platinclude')]
         if opt == '--cflags':
             flags.extend(getvar('CFLAGS').split())
         print(' '.join(flags))
 
     elif opt in ('--libs', '--ldflags'):
-        libs = getvar('LIBS').split() + getvar('SYSLIBS').split()
-        libs.append('-lpython' + pyver + abiflags)
+        libs = []
+        if '--embed' in opt_flags:
+            libs.append('-lpython' + pyver + sys.abiflags)
+        else:
+            if opt == '--ldflags':
+                if sys.platform == 'darwin':
+                    libs.extend('-undefined dynamic_lookup'.split())
+            libpython = getvar('LIBPYTHON')
+            if libpython:
+                libs.append(libpython)
+        libs.extend(getvar('LIBS').split() + getvar('SYSLIBS').split())
+
+        # add the prefix/lib/pythonX.Y/config dir, but only if there is no
+        # shared library in prefix/lib/.
         if opt == '--ldflags':
             if not getvar('Py_ENABLE_SHARED'):
                 libs.insert(0, '-L' + getvar('LIBPL'))
-            if not getvar('PYTHONFRAMEWORK'):
-                libs.extend(getvar('LINKFORSHARED').split())
         print(' '.join(libs))
 
     elif opt == '--extension-suffix':
-        ext_suffix = getvar('EXT_SUFFIX')
-        if ext_suffix is None:
-            ext_suffix = getvar('SO')
-        print(ext_suffix)
+        print(getvar('EXT_SUFFIX'))
 
     elif opt == '--abiflags':
-        print(abiflags)
+        print(sys.abiflags)
 
     elif opt == '--configdir':
         print(getvar('LIBPL'))

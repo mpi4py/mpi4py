@@ -7,8 +7,8 @@ MPI4PY_INCLUDE = ${shell ${PYTHON} -c 'import mpi4py; print( mpi4py.get_include(
 
 
 MPICC = mpicc
-CFLAGS = -fPIC ${shell ${PYTHON_CONFIG} --includes}
-LDFLAGS = -shared ${shell ${PYTHON_CONFIG} --libs}
+CFLAGS = -fPIC ${shell ${PYTHON_CONFIG} --cflags}
+LDFLAGS = -shared ${shell ${PYTHON_CONFIG} --ldflags}
 SO = ${shell ${PYTHON_CONFIG} --extension-suffix}
 .PHONY: build
 build: helloworld${SO}
