@@ -154,6 +154,7 @@ class BaseTestRMA(object):
                         self.assertEqual(rbuf[-1], -1)
                         self.assertEqual(gbuf[-1], -1)
 
+    @unittest.skipMPI('mpich(==4.0)', sys.platform == 'darwin')
     def testFetchAndOp(self):
         typemap = MPI._typedict
         group = self.WIN.Get_group()
@@ -198,6 +199,7 @@ class BaseTestRMA(object):
                         self.WIN.Unlock(rank)
                         self.assertEqual(rbuf[1], -1)
 
+    @unittest.skipMPI('mpich(==4.0)', sys.platform == 'darwin')
     def testCompareAndSwap(self):
         typemap = MPI._typedict
         group = self.WIN.Get_group()
