@@ -6,7 +6,8 @@ import os
 
 class TestRC(unittest.TestCase):
 
-    def testCall(self):
+    @staticmethod
+    def newrc():
         rc = type(mpi4py.rc)()
         rc(initialize   = rc.initialize)
         rc(threads      = rc.threads)
@@ -17,12 +18,12 @@ class TestRC(unittest.TestCase):
         return rc
 
     def testCallKwArgs(self):
-        rc = self.testCall()
+        rc = self.newrc()
         kwargs = rc.__dict__.copy()
         rc(**kwargs)
 
     def testInitKwArgs(self):
-        rc = self.testCall()
+        rc = self.newrc()
         kwargs = rc.__dict__.copy()
         rc = type(mpi4py.rc)(**kwargs)
 
