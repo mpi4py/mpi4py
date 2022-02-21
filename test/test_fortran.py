@@ -29,6 +29,19 @@ class TestFortranStatus(BaseTestFortran, unittest.TestCase):
     def testFortran(self):
         super(TestFortranStatus, self).testFortran()
 
+    def testFintArray(self):
+        s = MPI.F_SOURCE
+        t = MPI.F_TAG
+        e = MPI.F_ERROR
+        for status in self.HANDLES:
+            try:
+                f_status = status.py2f()
+            except NotImplementedError:
+                continue
+            self.assertEqual(f_status[s], status.Get_source())
+            self.assertEqual(f_status[t], status.Get_tag())
+            self.assertEqual(f_status[e], status.Get_error())
+            self.assertEqual(len(f_status), MPI.F_STATUS_SIZE)
 
 class TestFortranDatatype(BaseTestFortran, unittest.TestCase):
     HANDLES = [MPI.DATATYPE_NULL,

@@ -90,8 +90,8 @@ cdef class Status:
         Get the number of *top level* elements
         """
         cdef MPI_Datatype dtype = datatype.ob_mpi
-        cdef int count = MPI_UNDEFINED
-        CHKERR( MPI_Get_count(&self.ob_mpi, dtype, &count) )
+        cdef MPI_Count count = MPI_UNDEFINED
+        CHKERR( MPI_Get_count_c(&self.ob_mpi, dtype, &count) )
         return count
 
     property count:
@@ -105,7 +105,7 @@ cdef class Status:
         """
         cdef MPI_Datatype dtype = datatype.ob_mpi
         cdef MPI_Count elements = MPI_UNDEFINED
-        CHKERR( MPI_Get_elements_x(&self.ob_mpi, dtype, &elements) )
+        CHKERR( MPI_Get_elements_c(&self.ob_mpi, dtype, &elements) )
         return elements
 
     def Set_elements(
@@ -120,7 +120,7 @@ cdef class Status:
            query callback functions for generalized requests
         """
         cdef MPI_Datatype dtype = datatype.ob_mpi
-        CHKERR( MPI_Status_set_elements_x(&self.ob_mpi, dtype, count) )
+        CHKERR( MPI_Status_set_elements_c(&self.ob_mpi, dtype, count) )
 
     def Is_cancelled(self) -> bool:
         """
@@ -176,3 +176,10 @@ cdef class Status:
         for i from 0 <= i < n: f_status[i] = arg[i]
         CHKERR( MPI_Status_f2c(f_status, c_status) )
         return status
+
+
+
+F_SOURCE      = MPI_F_SOURCE
+F_TAG         = MPI_F_TAG
+F_ERROR       = MPI_F_ERROR
+F_STATUS_SIZE = MPI_F_STATUS_SIZE
