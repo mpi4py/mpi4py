@@ -101,6 +101,26 @@ class BaseTestComm(object):
         comm.Free()
         self.assertEqual(ccmp, MPI.CONGRUENT)
 
+    @unittest.skipMPI('mpich(<=3.1.0)', MPI.Query_thread() > MPI.THREAD_SINGLE)
+    def testIDupWithInfo(self):
+        try:
+            comm, request = self.COMM.Idup_with_info(MPI.INFO_NULL)
+        except NotImplementedError:
+            self.skipTest('mpi-comm-idup-info')
+        request.Wait()
+        ccmp = MPI.Comm.Compare(self.COMM, comm)
+        comm.Free()
+        self.assertEqual(ccmp, MPI.CONGRUENT)
+        #
+        new_info = MPI.Info.Create()
+        for info in (None, MPI.INFO_NULL, new_info):
+            comm, request = self.COMM.Idup(info)
+            request.Wait()
+            ccmp = MPI.Comm.Compare(self.COMM, comm)
+            comm.Free()
+            self.assertEqual(ccmp, MPI.CONGRUENT)
+        new_info.Free()
+
     def testGetSetInfo(self):
         #info = MPI.INFO_NULL
         #self.COMM.Set_info(info)
