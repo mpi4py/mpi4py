@@ -80,6 +80,7 @@ include "Op.pyx"
 include "Group.pyx"
 include "Info.pyx"
 include "Errhandler.pyx"
+include "Session.pyx"
 include "Comm.pyx"
 include "Win.pyx"
 include "File.pyx"
@@ -258,6 +259,8 @@ MAX_OBJECT_NAME    = MPI_MAX_OBJECT_NAME
 MAX_DATAREP_STRING = MPI_MAX_DATAREP_STRING
 # MPI-3
 MAX_LIBRARY_VERSION_STRING = MPI_MAX_LIBRARY_VERSION_STRING
+# MPI-4
+MAX_PSET_NAME_LEN  = MPI_MAX_PSET_NAME_LEN
 
 # --------------------------------------------------------------------
 
@@ -302,6 +305,7 @@ def _sizeof(arg: Any) -> int:
     if _mpi_type(arg, Group):      return sizeof(MPI_Group)
     if _mpi_type(arg, Info):       return sizeof(MPI_Info)
     if _mpi_type(arg, Errhandler): return sizeof(MPI_Errhandler)
+    if _mpi_type(arg, Session):    return sizeof(MPI_Session)
     if _mpi_type(arg, Comm):       return sizeof(MPI_Comm)
     if _mpi_type(arg, Win):        return sizeof(MPI_Win)
     if _mpi_type(arg, File):       return sizeof(MPI_File)
@@ -328,6 +332,8 @@ def _addressof(arg: Any) -> int:
         ptr = <void*>&(<Info>arg).ob_mpi
     elif isinstance(arg, Errhandler):
         ptr = <void*>&(<Errhandler>arg).ob_mpi
+    elif isinstance(arg, Session):
+        ptr = <void*>&(<Session>arg).ob_mpi
     elif isinstance(arg, Comm):
         ptr = <void*>&(<Comm>arg).ob_mpi
     elif isinstance(arg, Win):
@@ -358,6 +364,8 @@ def _handleof(arg: Any) -> int:
         return <Py_uintptr_t>((<Info>arg).ob_mpi)
     elif isinstance(arg, Errhandler):
         return <Py_uintptr_t>((<Errhandler>arg).ob_mpi)
+    elif isinstance(arg, Session):
+        return <Py_uintptr_t>((<Session>arg).ob_mpi)
     elif isinstance(arg, Comm):
         return <Py_uintptr_t>((<Comm>arg).ob_mpi)
     elif isinstance(arg, Win):

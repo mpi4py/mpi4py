@@ -101,6 +101,18 @@ cdef api MPI_Errhandler* PyMPIErrhandler_Get(object arg) except NULL:
 
 # -----------------------------------------------------------------------------
 
+# Session
+
+cdef api object PyMPISession_New(MPI_Session arg):
+    cdef Session obj = Session.__new__(Session)
+    obj.ob_mpi = arg
+    return obj
+
+cdef api MPI_Session* PyMPISession_Get(object arg) except NULL:
+    return &(<Session?>arg).ob_mpi
+
+# -----------------------------------------------------------------------------
+
 # Comm
 
 cdef api object PyMPIComm_New(MPI_Comm arg):

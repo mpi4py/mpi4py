@@ -13,6 +13,39 @@ class TestErrhandler(unittest.TestCase):
         else:
             self.assertFalse(MPI.ERRORS_ABORT)
 
+    def testGetErrhandler(self):
+        errhdls = []
+        for i in range(100):
+            e = MPI.COMM_WORLD.Get_errhandler()
+            errhdls.append(e)
+        for e in errhdls:
+            e.Free()
+        for e in errhdls:
+            self.assertEqual(e, MPI.ERRHANDLER_NULL)
+
+    def testSessionGetSetErrhandler(self):
+        try:
+            session = MPI.Session.Init()
+        except NotImplementedError:
+            self.skipTest('mpi-session')
+        for ERRHANDLER in [
+            MPI.ERRORS_ARE_FATAL,
+            MPI.ERRORS_RETURN,
+            MPI.ERRORS_ARE_FATAL,
+            MPI.ERRORS_RETURN,
+        ]:
+            errhdl_1 = session.Get_errhandler()
+            self.assertNotEqual(errhdl_1, MPI.ERRHANDLER_NULL)
+            session.Set_errhandler(ERRHANDLER)
+            errhdl_2 = session.Get_errhandler()
+            self.assertEqual(errhdl_2, ERRHANDLER)
+            errhdl_2.Free()
+            self.assertEqual(errhdl_2, MPI.ERRHANDLER_NULL)
+            session.Set_errhandler(errhdl_1)
+            errhdl_1.Free()
+            self.assertEqual(errhdl_1, MPI.ERRHANDLER_NULL)
+        session.Finalize()
+
     def testCommGetSetErrhandler(self):
         for COMM in [MPI.COMM_SELF, MPI.COMM_WORLD]:
             for ERRHANDLER in [MPI.ERRORS_ARE_FATAL, MPI.ERRORS_RETURN,
@@ -28,15 +61,14 @@ class TestErrhandler(unittest.TestCase):
                 errhdl_1.Free()
                 self.assertEqual(errhdl_1, MPI.ERRHANDLER_NULL)
 
-    def testGetErrhandler(self):
-        errhdls = []
-        for i in range(100):
-            e = MPI.COMM_WORLD.Get_errhandler()
-            errhdls.append(e)
-        for e in errhdls:
-            e.Free()
-        for e in errhdls:
-            self.assertEqual(e, MPI.ERRHANDLER_NULL)
+    def testSessionCallErrhandler(self):
+        try:
+            session = MPI.Session.Init()
+        except NotImplementedError:
+            self.skipTest('mpi-session')
+        session.Set_errhandler(MPI.ERRORS_RETURN)
+        session.Call_errhandler(MPI.ERR_OTHER)
+        session.Finalize()
 
     @unittest.skipMPI('MPI(<2.0)')
     def testCommCallErrhandler(self):

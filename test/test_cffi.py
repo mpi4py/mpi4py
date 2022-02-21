@@ -13,6 +13,7 @@ class TestCFFI(unittest.TestCase):
         MPI.Request,
         MPI.Info,
         MPI.Errhandler,
+        MPI.Session,
         MPI.Group,
         MPI.Win,
         MPI.Op,

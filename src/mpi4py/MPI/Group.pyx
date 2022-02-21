@@ -195,6 +195,22 @@ cdef class Group:
         CHKERR( MPI_Group_range_excl(self.ob_mpi, n, ranges, &group.ob_mpi) )
         return group
 
+    @classmethod
+    def Create_from_session_pset(
+        cls,
+        Session session: Session,
+        pset_name: str,
+    ) -> Group:
+        """
+        Create a new group from session and process set
+        """
+        cdef char *cname = NULL
+        pset_name = asmpistr(pset_name, &cname)
+        cdef Group group = Group.__new__(Group)
+        CHKERR( MPI_Group_from_session_pset(
+            session.ob_mpi, cname, &group.ob_mpi) )
+        return group
+
     # Group Destructor
     # ----------------
 
