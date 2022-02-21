@@ -44,9 +44,13 @@ cdef class Op:
         Create a user-defined operation
         """
         cdef Op op = Op.__new__(Op)
-        cdef MPI_User_function *cfunction = NULL
-        op.ob_usrid = op_user_new(function, &cfunction)
-        CHKERR( MPI_Op_create(cfunction, commute, &op.ob_mpi) )
+        cdef MPI_User_function   *fn_i = NULL
+        cdef MPI_User_function_c *fn_c = NULL
+        op.ob_usrid = op_user_new(function, &fn_i, &fn_c)
+        try:
+            CHKERR( MPI_Op_create_c(fn_c, commute, &op.ob_mpi) )
+        except NotImplementedError:
+            CHKERR( MPI_Op_create(fn_i, commute, &op.ob_mpi) )
         return op
 
     def Free(self) -> None:
