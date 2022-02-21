@@ -105,7 +105,7 @@ cdef class Op:
         if (m.stype != m.rtype): raise ValueError(
             "mismatch in inbuf and inoutbuf MPI datatypes")
         # do local reduction
-        with nogil: CHKERR( MPI_Reduce_local(
+        with nogil: CHKERR( MPI_Reduce_local_c(
             m.sbuf, m.rbuf, m.rcount, m.rtype, self.ob_mpi) )
 
     property is_predefined:
