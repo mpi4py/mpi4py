@@ -1,3 +1,19 @@
+Release 4.0.0 [2022-XX-XX]
+==========================
+
+* Add support for the MPI-4.0 standard.
+
+  + Use large count MPI-4 rutines.
+
+  + Add persistent collective communication.
+
+  + Add partitioned point-to-point communication.
+
+  + Add new communicator constructors.
+
+  + Add the `Session` class and its methods.
+
+
 Release 3.1.3 [2021-11-25]
 ==========================
 
