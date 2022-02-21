@@ -135,7 +135,7 @@ class BaseTestComm(object):
 
 
     @unittest.skipMPI('openmpi(==2.0.0)')
-    def testSplitType(self):
+    def testSplitTypeShared(self):
         try:
             MPI.COMM_SELF.Split_type(MPI.COMM_TYPE_SHARED).Free()
         except NotImplementedError:
@@ -164,6 +164,80 @@ class BaseTestComm(object):
             else:
                 self.assertEqual(comm, MPI.COMM_NULL)
 
+    def testSplitTypeHWGuided(self):
+        try:
+            MPI.COMM_SELF.Split_type(MPI.COMM_TYPE_SHARED).Free()
+        except NotImplementedError:
+            self.skipTest('mpi-comm-split_type')
+        if MPI.COMM_TYPE_HW_GUIDED == MPI.UNDEFINED:
+            self.skipTest("mpi-comm-split_type-hw_guided")
+        split_type = MPI.COMM_TYPE_HW_GUIDED
+        #
+        comm = self.COMM.Split_type(split_type)
+        self.assertEqual(comm, MPI.COMM_NULL)
+        comm = self.COMM.Split_type(split_type, info=MPI.INFO_NULL)
+        self.assertEqual(comm, MPI.COMM_NULL)
+        info = MPI.Info.Create()
+        comm = self.COMM.Split_type(split_type, info=info)
+        self.assertEqual(comm, MPI.COMM_NULL)
+        info.Set("foo", "bar")
+        comm = self.COMM.Split_type(split_type, info=info)
+        self.assertEqual(comm, MPI.COMM_NULL)
+        info.Set("mpi_hw_resource_type", "@dont-thread-on-me@")
+        comm = self.COMM.Split_type(split_type, info=info)
+        self.assertEqual(comm, MPI.COMM_NULL)
+        info.Free()
+        #
+        restype = "mpi_hw_resource_type"
+        shmem = "mpi_shared_memory"
+        info = MPI.Info.Create()
+        info.Set(restype, shmem)
+        comm = self.COMM.Split_type(split_type, info=info)
+        self.assertNotEqual(comm, MPI.COMM_NULL)
+        self.assertEqual(info.Get(restype), shmem)
+        comm.Free()
+        size = self.COMM.Get_size()
+        rank = self.COMM.Get_rank()
+        for root in range(size):
+            if rank == root:
+                split_type = MPI.COMM_TYPE_HW_GUIDED
+            else:
+                split_type = MPI.UNDEFINED
+            comm = self.COMM.Split_type(split_type, info=info)
+            self.assertEqual(info.Get(restype), shmem)
+            if rank == root:
+                self.assertNotEqual(comm, MPI.COMM_NULL)
+                self.assertEqual(comm.size, 1)
+                self.assertEqual(comm.rank, 0)
+                comm.Free()
+            else:
+                self.assertEqual(comm, MPI.COMM_NULL)
+        info.Free()
+
+    def testSplitTypeHWUnguided(self):
+        try:
+            MPI.COMM_SELF.Split_type(MPI.COMM_TYPE_SHARED).Free()
+        except NotImplementedError:
+            self.skipTest('mpi-comm-split_type')
+        if MPI.COMM_TYPE_HW_UNGUIDED == MPI.UNDEFINED:
+            self.skipTest("mpi-comm-split_type-hw_unguided")
+        hwcomm = [self.COMM]
+        while len(hwcomm) < 32:
+            rank = hwcomm[-1].Get_rank()
+            info = MPI.Info.Create()
+            comm = hwcomm[-1].Split_type(
+                MPI.COMM_TYPE_HW_UNGUIDED,
+                key=rank, info=info,
+            )
+            if comm != MPI.COMM_NULL:
+                self.assertTrue(info.Get("mpi_hw_resource_type"))
+                self.assertTrue(comm.Get_size() < hwcomm[-1].Get_size())
+            info.Free()
+            if comm == MPI.COMM_NULL:
+                break
+            hwcomm.append(comm)
+        for comm in hwcomm[1:]:
+            comm.Free()
 
 class TestCommSelf(BaseTestComm, unittest.TestCase):
     def setUp(self):
