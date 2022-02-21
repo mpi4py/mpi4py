@@ -1224,6 +1224,289 @@ cdef class Comm:
             op.ob_mpi, self.ob_mpi, &request.ob_mpi) )
         return request
 
+    # Persistent Collectives
+    # ----------------------
+
+    def Barrier_init(
+        self,
+        Info info: Info = INFO_NULL,
+    ) -> Prequest:
+        """
+        Persistent Barrier
+        """
+        cdef Prequest request = Prequest.__new__(Prequest)
+        with nogil: CHKERR( MPI_Barrier_init(
+                self.ob_mpi, info.ob_mpi,
+                &request.ob_mpi) )
+        return request
+
+    def Bcast_init(
+        self,
+        buf: BufSpec,
+        int root: int = 0,
+        Info info: Info = INFO_NULL,
+    ) -> Prequest:
+        """
+        Persistent Broadcast
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_bcast(buf, root, self.ob_mpi)
+        cdef Prequest request = Prequest.__new__(Prequest)
+        with nogil: CHKERR( MPI_Bcast_init(
+            m.sbuf, m.scount, m.stype,
+            root, self.ob_mpi, info.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = m
+        return request
+
+    def Gather_init(
+        self,
+        sendbuf: Union[BufSpec, InPlace],
+        recvbuf: Optional[BufSpecB],
+        int root: int = 0,
+        Info info: Info = INFO_NULL,
+    ) -> Prequest:
+        """
+        Persistent Gather
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_gather(0, sendbuf, recvbuf, root, self.ob_mpi)
+        cdef Prequest request = Prequest.__new__(Prequest)
+        with nogil: CHKERR( MPI_Gather_init(
+            m.sbuf, m.scount, m.stype,
+            m.rbuf, m.rcount, m.rtype,
+            root, self.ob_mpi, info.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = m
+        return request
+
+    def Gatherv_init(
+        self,
+        sendbuf: Union[BufSpec, InPlace],
+        recvbuf: Optional[BufSpecV],
+        int root: int = 0,
+        Info info: Info = INFO_NULL,
+    ) -> Prequest:
+        """
+        Persistent Gather Vector
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_gather(1, sendbuf, recvbuf, root, self.ob_mpi)
+        cdef Prequest request = Prequest.__new__(Prequest)
+        with nogil: CHKERR( MPI_Gatherv_init(
+            m.sbuf, m.scount,             m.stype,
+            m.rbuf, m.rcounts, m.rdispls, m.rtype,
+            root, self.ob_mpi, info.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = m
+        return request
+
+    def Scatter_init(
+        self,
+        sendbuf: Optional[BufSpecB],
+        recvbuf: Union[BufSpec, InPlace],
+        int root: int = 0,
+        Info info: Info = INFO_NULL,
+    ) -> Prequest:
+        """
+        Persistent Scatter
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_scatter(0, sendbuf, recvbuf, root, self.ob_mpi)
+        cdef Prequest request = Prequest.__new__(Prequest)
+        with nogil: CHKERR( MPI_Scatter_init(
+            m.sbuf, m.scount, m.stype,
+            m.rbuf, m.rcount, m.rtype,
+            root, self.ob_mpi, info.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = m
+        return request
+
+    def Scatterv_init(
+        self,
+        sendbuf: Optional[BufSpecV],
+        recvbuf: Union[BufSpec, InPlace],
+        int root: int = 0,
+        Info info: Info = INFO_NULL,
+    ) -> Prequest:
+        """
+        Persistent Scatter Vector
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_scatter(1, sendbuf, recvbuf, root, self.ob_mpi)
+        cdef Prequest request = Prequest.__new__(Prequest)
+        with nogil: CHKERR( MPI_Scatterv_init(
+            m.sbuf, m.scounts, m.sdispls, m.stype,
+            m.rbuf, m.rcount,             m.rtype,
+            root, self.ob_mpi, info.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = m
+        return request
+
+    def Allgather_init(
+        self,
+        sendbuf: Union[BufSpec, InPlace],
+        recvbuf: BufSpecB,
+        Info info: Info = INFO_NULL,
+    ) -> Prequest:
+        """
+        Persistent Gather to All
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_allgather(0, sendbuf, recvbuf, self.ob_mpi)
+        cdef Prequest request = Prequest.__new__(Prequest)
+        with nogil: CHKERR( MPI_Allgather_init(
+            m.sbuf, m.scount, m.stype,
+            m.rbuf, m.rcount, m.rtype,
+            self.ob_mpi, info.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = m
+        return request
+
+    def Allgatherv_init(
+        self,
+        sendbuf: Union[BufSpec, InPlace],
+        recvbuf: BufSpecV,
+        Info info: Info = INFO_NULL,
+    ) -> Prequest:
+        """
+        Persistent Gather to All Vector
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_allgather(1, sendbuf, recvbuf, self.ob_mpi)
+        cdef Prequest request = Prequest.__new__(Prequest)
+        with nogil: CHKERR( MPI_Allgatherv_init(
+            m.sbuf, m.scount,             m.stype,
+            m.rbuf, m.rcounts, m.rdispls, m.rtype,
+            self.ob_mpi, info.ob_mpi, &request.ob_mpi) )
+        return request
+
+    def Alltoall_init(
+        self,
+        sendbuf: Union[BufSpecB, InPlace],
+        recvbuf: BufSpecB,
+        Info info: Info = INFO_NULL,
+    ) -> Prequest:
+        """
+        Persistent All to All Scatter/Gather
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_alltoall(0, sendbuf, recvbuf, self.ob_mpi)
+        cdef Prequest request = Prequest.__new__(Prequest)
+        with nogil: CHKERR( MPI_Alltoall_init(
+            m.sbuf, m.scount, m.stype,
+            m.rbuf, m.rcount, m.rtype,
+            self.ob_mpi, info.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = m
+        return request
+
+    def Alltoallv_init(
+        self,
+        sendbuf: Union[BufSpecV, InPlace],
+        recvbuf: BufSpecV,
+        Info info: Info = INFO_NULL,
+    ) -> Prequest:
+        """
+        Persistent All to All Scatter/Gather Vector
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_alltoall(1, sendbuf, recvbuf, self.ob_mpi)
+        cdef Prequest request = Prequest.__new__(Prequest)
+        with nogil: CHKERR( MPI_Alltoallv_init(
+            m.sbuf, m.scounts, m.sdispls, m.stype,
+            m.rbuf, m.rcounts, m.rdispls, m.rtype,
+            self.ob_mpi, info.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = m
+        return request
+
+    def Alltoallw_init(
+        self,
+        sendbuf: Union[BufSpecW, InPlace],
+        recvbuf: BufSpecW,
+        Info info: Info = INFO_NULL,
+    ) -> Prequest:
+        """
+        Persistent Generalized All-to-All
+        """
+        cdef _p_msg_ccow m = message_ccow()
+        m.for_alltoallw(sendbuf, recvbuf, self.ob_mpi)
+        cdef Prequest request = Prequest.__new__(Prequest)
+        with nogil: CHKERR( MPI_Alltoallw_init(
+            m.sbuf, m.scounts, m.sdispls, m.stypes,
+            m.rbuf, m.rcounts, m.rdispls, m.rtypes,
+            self.ob_mpi, info.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = m
+        return request
+
+    def Reduce_init(
+        self,
+        sendbuf: Union[BufSpec, InPlace],
+        recvbuf: Optional[BufSpec],
+        Op op: Op = SUM,
+        int root: int = 0,
+        Info info: Info = INFO_NULL,
+    ) -> Prequest:
+        """
+        Persistent Reduce
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_reduce(sendbuf, recvbuf, root, self.ob_mpi)
+        cdef Prequest request = Prequest.__new__(Prequest)
+        with nogil: CHKERR( MPI_Reduce_init(
+            m.sbuf, m.rbuf, m.rcount, m.rtype,
+            op.ob_mpi, root, self.ob_mpi, info.ob_mpi, &request.ob_mpi) )
+        return request
+
+    def Allreduce_init(
+        self,
+        sendbuf: Union[BufSpec, InPlace],
+        recvbuf: BufSpec,
+        Op op: Op = SUM,
+        Info info: Info = INFO_NULL,
+    ) -> Prequest:
+        """
+        Persistent All Reduce
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_allreduce(sendbuf, recvbuf, self.ob_mpi)
+        cdef Prequest request = Prequest.__new__(Prequest)
+        with nogil: CHKERR( MPI_Allreduce_init(
+            m.sbuf, m.rbuf, m.rcount, m.rtype,
+            op.ob_mpi, self.ob_mpi, info.ob_mpi, &request.ob_mpi) )
+        return request
+
+    def Reduce_scatter_block_init(
+        self,
+        sendbuf: Union[BufSpecB, InPlace],
+        recvbuf: Union[BufSpec, BufSpecB],
+        Op op: Op = SUM,
+        Info info: Info = INFO_NULL,
+    ) -> Prequest:
+        """
+        Persistent Reduce-Scatter Block (regular, non-vector version)
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_reduce_scatter_block(sendbuf, recvbuf, self.ob_mpi)
+        cdef Prequest request = Prequest.__new__(Prequest)
+        with nogil: CHKERR( MPI_Reduce_scatter_block_init(
+            m.sbuf, m.rbuf, m.rcount, m.rtype,
+            op.ob_mpi, self.ob_mpi, info.ob_mpi, &request.ob_mpi) )
+        return request
+
+    def Reduce_scatter_init(
+        self,
+        sendbuf: Union[BufSpec, InPlace],
+        recvbuf: BufSpec,
+        recvcounts: Optional[Sequence[int]] = None,
+        Op op: Op = SUM,
+        Info info: Info = INFO_NULL,
+    ) -> Prequest:
+        """
+        Persistent Reduce-Scatter (vector version)
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_reduce_scatter(sendbuf, recvbuf,
+                             recvcounts, self.ob_mpi)
+        cdef Prequest request = Prequest.__new__(Prequest)
+        with nogil: CHKERR( MPI_Reduce_scatter_init(
+            m.sbuf, m.rbuf, m.rcounts, m.rtype,
+            op.ob_mpi, self.ob_mpi, info.ob_mpi, &request.ob_mpi) )
+        return request
+
     # Tests
     # -----
 
@@ -1960,6 +2243,46 @@ cdef class Intracomm(Comm):
             op.ob_mpi, self.ob_mpi, &request.ob_mpi) )
         return request
 
+    # Persistent
+
+    def Scan_init(
+        self,
+        sendbuf: Union[BufSpec, InPlace],
+        recvbuf: BufSpec,
+        Op op: Op = SUM,
+        Info info: Info = INFO_NULL,
+    ) -> Prequest:
+        """
+        Inclusive Scan
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_scan(sendbuf, recvbuf, self.ob_mpi)
+        cdef Prequest request = Prequest.__new__(Prequest)
+        with nogil: CHKERR( MPI_Scan_init(
+            m.sbuf, m.rbuf, m.rcount, m.rtype,
+            op.ob_mpi, self.ob_mpi, info.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = m
+        return request
+
+    def Exscan_init(
+        self,
+        sendbuf: Union[BufSpec, InPlace],
+        recvbuf: BufSpec,
+        Op op: Op = SUM,
+        Info info: Info = INFO_NULL,
+    ) -> Prequest:
+        """
+        Inclusive Scan
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_exscan(sendbuf, recvbuf, self.ob_mpi)
+        cdef Prequest request = Prequest.__new__(Prequest)
+        with nogil: CHKERR( MPI_Exscan_init(
+            m.sbuf, m.rbuf, m.rcount, m.rtype,
+            op.ob_mpi, self.ob_mpi, info.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = m
+        return request
+
     # Python Communication
     #
     def scan(
@@ -2359,6 +2682,104 @@ cdef class Topocomm(Intracomm):
             m.sbuf, m.scounts, m.sdisplsA, m.stypes,
             m.rbuf, m.rcounts, m.rdisplsA, m.rtypes,
             self.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = m
+        return request
+
+    # Persistent Neighborhood Collectives
+    # -----------------------------------
+
+    def Neighbor_allgather_init(
+        self,
+        sendbuf: BufSpec,
+        recvbuf: BufSpecB,
+        Info info: Info = INFO_NULL,
+    ) -> Prequest:
+        """
+        Persistent Neighbor Gather to All
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_neighbor_allgather(0, sendbuf, recvbuf, self.ob_mpi)
+        cdef Prequest request = Prequest.__new__(Prequest)
+        with nogil: CHKERR( MPI_Neighbor_allgather_init(
+            m.sbuf, m.scount, m.stype,
+            m.rbuf, m.rcount, m.rtype,
+            self.ob_mpi, info.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = m
+        return request
+
+    def Neighbor_allgatherv_init(
+        self,
+        sendbuf: BufSpec,
+        recvbuf: BufSpecV,
+        Info info: Info = INFO_NULL,
+    ) -> Prequest:
+        """
+        Persistent Neighbor Gather to All Vector
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_neighbor_allgather(1, sendbuf, recvbuf, self.ob_mpi)
+        cdef Prequest request = Prequest.__new__(Prequest)
+        with nogil: CHKERR( MPI_Neighbor_allgatherv_init(
+            m.sbuf, m.scount, m.stype,
+            m.rbuf, m.rcounts, m.rdispls, m.rtype,
+            self.ob_mpi, info.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = m
+        return request
+
+    def Neighbor_alltoall_init(
+        self,
+        sendbuf: BufSpecB,
+        recvbuf: BufSpecB,
+        Info info: Info = INFO_NULL,
+    ) -> Prequest:
+        """
+        Persistent Neighbor All-to-All
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_neighbor_alltoall(0, sendbuf, recvbuf, self.ob_mpi)
+        cdef Prequest request = Prequest.__new__(Prequest)
+        with nogil: CHKERR( MPI_Neighbor_alltoall_init(
+            m.sbuf, m.scount, m.stype,
+            m.rbuf, m.rcount, m.rtype,
+            self.ob_mpi, info.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = m
+        return request
+
+    def Neighbor_alltoallv_init(
+        self,
+        sendbuf: BufSpecV,
+        recvbuf: BufSpecV,
+        Info info: Info = INFO_NULL,
+    ) -> Prequest:
+        """
+        Persistent Neighbor All-to-All Vector
+        """
+        cdef _p_msg_cco m = message_cco()
+        m.for_neighbor_alltoall(1, sendbuf, recvbuf, self.ob_mpi)
+        cdef Prequest request = Prequest.__new__(Prequest)
+        with nogil: CHKERR( MPI_Neighbor_alltoallv_init(
+            m.sbuf, m.scounts, m.sdispls, m.stype,
+            m.rbuf, m.rcounts, m.rdispls, m.rtype,
+            self.ob_mpi, info.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = m
+        return request
+
+    def Neighbor_alltoallw_init(
+        self,
+        sendbuf: BufSpecW,
+        recvbuf: BufSpecW,
+        Info info: Info = INFO_NULL,
+    ) -> Prequest:
+        """
+        Persistent Neighbor All-to-All Generalized
+        """
+        cdef _p_msg_ccow m = message_ccow()
+        m.for_neighbor_alltoallw(sendbuf, recvbuf, self.ob_mpi)
+        cdef Prequest request = Prequest.__new__(Prequest)
+        with nogil: CHKERR( MPI_Neighbor_alltoallw_init(
+            m.sbuf, m.scounts, m.sdisplsA, m.stypes,
+            m.rbuf, m.rcounts, m.rdisplsA, m.rtypes,
+            self.ob_mpi, info.ob_mpi, &request.ob_mpi) )
         request.ob_buf = m
         return request
 
