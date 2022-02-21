@@ -2,16 +2,16 @@
 
 cdef memory _buffer = None
 
-cdef inline int attach_buffer(ob, void **p, int *n) except -1:
+cdef inline int attach_buffer(ob, void **p, MPI_Count *n) except -1:
     global _buffer
     cdef void *bptr = NULL
     cdef MPI_Aint blen = 0
     _buffer = getbuffer_w(ob, &bptr, &blen)
     p[0] = bptr
-    n[0] = clipcount(blen)
+    n[0] = blen
     return 0
 
-cdef inline object detach_buffer(void *p, int n):
+cdef inline object detach_buffer(void *p, MPI_Count n):
     global _buffer
     cdef object ob = None
     try:
@@ -20,7 +20,7 @@ cdef inline object detach_buffer(void *p, int n):
             _buffer.view.obj != NULL):
             ob = <object>_buffer.view.obj
         else:
-            ob = tomemory(p, n)
+            ob = tomemory(p, <Py_ssize_t>n)
     finally:
         _buffer = None
     return ob

@@ -86,7 +86,7 @@ cdef class Message:
             source = MPI_PROC_NULL
         cdef _p_msg_p2p rmsg = message_p2p_recv(buf, source)
         cdef MPI_Status *statusp = arg_Status(status)
-        with nogil: CHKERR( MPI_Mrecv(
+        with nogil: CHKERR( MPI_Mrecv_c(
             rmsg.buf, rmsg.count, rmsg.dtype,
             &message, statusp) )
         if self is not __MESSAGE_NO_PROC__:
@@ -102,7 +102,7 @@ cdef class Message:
             source = MPI_PROC_NULL
         cdef _p_msg_p2p rmsg = message_p2p_recv(buf, source)
         cdef Request request = Request.__new__(Request)
-        with nogil: CHKERR( MPI_Imrecv(
+        with nogil: CHKERR( MPI_Imrecv_c(
             rmsg.buf, rmsg.count, rmsg.dtype,
             &message, &request.ob_mpi) )
         if self is not __MESSAGE_NO_PROC__:
