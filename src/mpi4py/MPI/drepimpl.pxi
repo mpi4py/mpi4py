@@ -18,15 +18,15 @@ cdef class _p_datarep:
     cdef int read(self,
                   void *userbuf,
                   MPI_Datatype datatype,
-                  int count,
+                  MPI_Count count,
                   void *filebuf,
                   MPI_Offset position,
                   ) except -1:
-        cdef MPI_Aint lb=0, extent=0
-        cdef int ierr = MPI_Type_get_extent(datatype, &lb, &extent)
+        cdef MPI_Count lb=0, extent=0
+        cdef int ierr = MPI_Type_get_extent_c(datatype, &lb, &extent)
         if ierr != MPI_SUCCESS: return ierr
-        cdef MPI_Aint ulen = <MPI_Aint>(position+count) * extent
-        cdef MPI_Aint flen = <MPI_Aint>PY_SSIZE_T_MAX # XXX
+        cdef MPI_Aint ulen = <MPI_Aint> ((position + count) * extent)
+        cdef MPI_Aint flen = <MPI_Aint> PY_SSIZE_T_MAX # XXX
         cdef object ubuf = tomemory(userbuf, ulen)
         cdef object fbuf = tomemory(filebuf, flen)
         cdef Datatype dtype = Datatype.__new__(Datatype)
@@ -38,15 +38,15 @@ cdef class _p_datarep:
     cdef int write(self,
                   void *userbuf,
                   MPI_Datatype datatype,
-                  int count,
+                  MPI_Count count,
                   void *filebuf,
                   MPI_Offset position,
                   ) except -1:
-        cdef MPI_Aint lb=0, extent=0
-        cdef int ierr = MPI_Type_get_extent(datatype, &lb, &extent)
+        cdef MPI_Count lb=0, extent=0
+        cdef int ierr = MPI_Type_get_extent_c(datatype, &lb, &extent)
         if ierr != MPI_SUCCESS: return ierr
-        cdef MPI_Aint ulen = <MPI_Aint>(position+count) * extent
-        cdef MPI_Aint flen = <MPI_Aint>PY_SSIZE_T_MAX # XXX
+        cdef MPI_Aint ulen = <MPI_Aint> ((position + count) * extent)
+        cdef MPI_Aint flen = <MPI_Aint> PY_SSIZE_T_MAX # XXX
         cdef object ubuf = tomemory(userbuf, ulen)
         cdef object fbuf = tomemory(filebuf, flen)
         cdef Datatype dtype = Datatype.__new__(Datatype)
@@ -70,7 +70,7 @@ cdef class _p_datarep:
 cdef int datarep_read(
     void *userbuf,
     MPI_Datatype datatype,
-    int count,
+    MPI_Count count,
     void *filebuf,
     MPI_Offset position,
     void *extra_state,
@@ -91,7 +91,7 @@ cdef int datarep_read(
 cdef int datarep_write(
     void *userbuf,
     MPI_Datatype datatype,
-    int count,
+    MPI_Count count,
     void *filebuf,
     MPI_Offset position,
     void *extra_state,
@@ -133,7 +133,7 @@ cdef int datarep_extent(
 cdef int datarep_read_fn(
     void *userbuf,
     MPI_Datatype datatype,
-    int count,
+    MPI_Count count,
     void *filebuf,
     MPI_Offset position,
     void *extra_state
@@ -149,7 +149,7 @@ cdef int datarep_read_fn(
 cdef int datarep_write_fn(
     void *userbuf,
     MPI_Datatype datatype,
-    int count,
+    MPI_Count count,
     void *filebuf,
     MPI_Offset position,
     void *extra_state

@@ -1499,6 +1499,77 @@ static int PyMPI_Pack_external_size_c(const char datarep[],
 
 /* ---------------------------------------------------------------- */
 
+#ifndef PyMPI_HAVE_MPI_Register_datarep_c
+
+typedef struct PyMPI_datarep_s {
+  MPI_Datarep_conversion_function_c *read_fn;
+  MPI_Datarep_conversion_function_c *write_fn;
+  MPI_Datarep_extent_function *extent_fn;
+  void *extra_state;
+} PyMPI_datarep_t;
+
+static int MPIAPI
+PyMPI_datarep_read_fn(void *userbuf,
+                      MPI_Datatype datatype,
+                      int count,
+                      void *filebuf,
+                      MPI_Offset position,
+                      void *extra_state)
+{
+  PyMPI_datarep_t *drep = (PyMPI_datarep_t *) extra_state;
+  return drep->read_fn(userbuf, datatype, count,
+                       filebuf, position,
+                       drep->extra_state);
+}
+
+static int MPIAPI
+PyMPI_datarep_write_fn(void *userbuf,
+                       MPI_Datatype datatype,
+                       int count,
+                       void *filebuf,
+                       MPI_Offset position,
+                       void *extra_state)
+{
+  PyMPI_datarep_t *drep = (PyMPI_datarep_t *) extra_state;
+  return drep->write_fn(userbuf, datatype, count,
+                        filebuf, position,
+                        drep->extra_state);
+}
+
+static int PyMPI_Register_datarep_c(const char *datarep,
+  MPI_Datarep_conversion_function_c *read_conversion_fn,
+  MPI_Datarep_conversion_function_c *write_conversion_fn,
+  MPI_Datarep_extent_function *dtype_file_extent_fn,
+  void *extra_state)
+{
+  static int n = 0; enum {N=32};
+  static PyMPI_datarep_t registry[N];
+  PyMPI_datarep_t *drep = (n < N) ? &registry[n++] :
+    (PyMPI_datarep_t *) PyMPI_MALLOC(sizeof(PyMPI_datarep_t));
+
+  MPI_Datarep_conversion_function *r_fn = MPI_CONVERSION_FN_NULL;
+  MPI_Datarep_conversion_function *w_fn = MPI_CONVERSION_FN_NULL;
+  MPI_Datarep_extent_function *e_fn = dtype_file_extent_fn;
+
+  drep->read_fn = read_conversion_fn;
+  drep->write_fn = write_conversion_fn;
+  drep->extent_fn = dtype_file_extent_fn;
+  drep->extra_state = extra_state;
+
+  if (read_conversion_fn != MPI_CONVERSION_FN_NULL_C)
+    r_fn = PyMPI_datarep_read_fn;
+  if (write_conversion_fn != MPI_CONVERSION_FN_NULL_C)
+    w_fn = PyMPI_datarep_write_fn;
+
+  return MPI_Register_datarep(datarep, r_fn, w_fn, e_fn, drep);
+}
+
+#undef  MPI_Register_datarep_c
+#define MPI_Register_datarep_c PyMPI_Register_datarep_c
+#endif
+
+/* ---------------------------------------------------------------- */
+
 #endif /* !PyMPI_FALLBACK_H */
 
 /*
