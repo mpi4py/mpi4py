@@ -85,6 +85,18 @@ typedef void *PyMPI_MPI_Info;
 #define MPI_Info PyMPI_MPI_Info
 #endif
 
+#ifndef PyMPI_HAVE_MPI_Errhandler
+#undef  MPI_Errhandler
+typedef void *PyMPI_MPI_Errhandler;
+#define MPI_Errhandler PyMPI_MPI_Errhandler
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Session
+#undef  MPI_Session
+typedef void *PyMPI_MPI_Session;
+#define MPI_Session PyMPI_MPI_Session
+#endif
+
 #ifndef PyMPI_HAVE_MPI_Comm
 #undef  MPI_Comm
 typedef void *PyMPI_MPI_Comm;
@@ -101,12 +113,6 @@ typedef void *PyMPI_MPI_Win;
 #undef  MPI_File
 typedef void *PyMPI_MPI_File;
 #define MPI_File PyMPI_MPI_File
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Errhandler
-#undef  MPI_Errhandler
-typedef void *PyMPI_MPI_Errhandler;
-#define MPI_Errhandler PyMPI_MPI_Errhandler
 #endif
 
 #ifndef PyMPI_HAVE_MPI_UNDEFINED
@@ -519,64 +525,19 @@ typedef void *PyMPI_MPI_Errhandler;
 #define MPI_COMPLEX32 ((MPI_Datatype)MPI_DATATYPE_NULL)
 #endif
 
-#ifndef PyMPI_HAVE_MPI_UB
-#undef  MPI_UB
-#define MPI_UB ((MPI_Datatype)MPI_DATATYPE_NULL)
+#ifndef PyMPI_HAVE_MPI_Get_address
+#undef  MPI_Get_address
+#define MPI_Get_address MPI_Address
 #endif
 
-#ifndef PyMPI_HAVE_MPI_LB
-#undef  MPI_LB
-#define MPI_LB ((MPI_Datatype)MPI_DATATYPE_NULL)
+#ifndef PyMPI_HAVE_MPI_Aint_add
+#undef  MPI_Aint_add
+#define MPI_Aint_add(a1,a2) PyMPI_UNAVAILABLE("MPI_Aint_add",a1,a2)
 #endif
 
-#ifndef PyMPI_HAVE_MPI_Type_lb
-#undef  MPI_Type_lb
-#define MPI_Type_lb(a1,a2) PyMPI_UNAVAILABLE("MPI_Type_lb",a1,a2)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Type_ub
-#undef  MPI_Type_ub
-#define MPI_Type_ub(a1,a2) PyMPI_UNAVAILABLE("MPI_Type_ub",a1,a2)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Type_extent
-#undef  MPI_Type_extent
-#define MPI_Type_extent(a1,a2) PyMPI_UNAVAILABLE("MPI_Type_extent",a1,a2)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Address
-#undef  MPI_Address
-#define MPI_Address(a1,a2) PyMPI_UNAVAILABLE("MPI_Address",a1,a2)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Type_hvector
-#undef  MPI_Type_hvector
-#define MPI_Type_hvector(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Type_hvector",a1,a2,a3,a4,a5)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Type_hindexed
-#undef  MPI_Type_hindexed
-#define MPI_Type_hindexed(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Type_hindexed",a1,a2,a3,a4,a5)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Type_struct
-#undef  MPI_Type_struct
-#define MPI_Type_struct(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Type_struct",a1,a2,a3,a4,a5)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_COMBINER_HVECTOR_INTEGER
-#undef  MPI_COMBINER_HVECTOR_INTEGER
-#define MPI_COMBINER_HVECTOR_INTEGER (MPI_UNDEFINED)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_COMBINER_HINDEXED_INTEGER
-#undef  MPI_COMBINER_HINDEXED_INTEGER
-#define MPI_COMBINER_HINDEXED_INTEGER (MPI_UNDEFINED)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_COMBINER_STRUCT_INTEGER
-#undef  MPI_COMBINER_STRUCT_INTEGER
-#define MPI_COMBINER_STRUCT_INTEGER (MPI_UNDEFINED)
+#ifndef PyMPI_HAVE_MPI_Aint_diff
+#undef  MPI_Aint_diff
+#define MPI_Aint_diff(a1,a2) PyMPI_UNAVAILABLE("MPI_Aint_diff",a1,a2)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Type_dup
@@ -644,21 +605,6 @@ typedef void *PyMPI_MPI_Errhandler;
 #define MPI_Type_create_darray(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10) PyMPI_UNAVAILABLE("MPI_Type_create_darray",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)
 #endif
 
-#ifndef PyMPI_HAVE_MPI_Get_address
-#undef  MPI_Get_address
-#define MPI_Get_address MPI_Address
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Aint_add
-#undef  MPI_Aint_add
-#define MPI_Aint_add(a1,a2) PyMPI_UNAVAILABLE("MPI_Aint_add",a1,a2)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Aint_diff
-#undef  MPI_Aint_diff
-#define MPI_Aint_diff(a1,a2) PyMPI_UNAVAILABLE("MPI_Aint_diff",a1,a2)
-#endif
-
 #ifndef PyMPI_HAVE_MPI_Type_create_hvector
 #undef  MPI_Type_create_hvector
 #define MPI_Type_create_hvector MPI_Type_hvector
@@ -689,24 +635,24 @@ typedef void *PyMPI_MPI_Errhandler;
 #define MPI_Type_size(a1,a2) PyMPI_UNAVAILABLE("MPI_Type_size",a1,a2)
 #endif
 
-#ifndef PyMPI_HAVE_MPI_Type_size_x
-#undef  MPI_Type_size_x
-#define MPI_Type_size_x(a1,a2) PyMPI_UNAVAILABLE("MPI_Type_size_x",a1,a2)
-#endif
-
 #ifndef PyMPI_HAVE_MPI_Type_get_extent
 #undef  MPI_Type_get_extent
 #define MPI_Type_get_extent(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Type_get_extent",a1,a2,a3)
 #endif
 
-#ifndef PyMPI_HAVE_MPI_Type_get_extent_x
-#undef  MPI_Type_get_extent_x
-#define MPI_Type_get_extent_x(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Type_get_extent_x",a1,a2,a3)
-#endif
-
 #ifndef PyMPI_HAVE_MPI_Type_get_true_extent
 #undef  MPI_Type_get_true_extent
 #define MPI_Type_get_true_extent(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Type_get_true_extent",a1,a2,a3)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Type_size_x
+#undef  MPI_Type_size_x
+#define MPI_Type_size_x(a1,a2) PyMPI_UNAVAILABLE("MPI_Type_size_x",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Type_get_extent_x
+#undef  MPI_Type_get_extent_x
+#define MPI_Type_get_extent_x(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Type_get_extent_x",a1,a2,a3)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Type_get_true_extent_x
@@ -757,36 +703,6 @@ typedef void *PyMPI_MPI_Errhandler;
 #ifndef PyMPI_HAVE_MPI_Type_free
 #undef  MPI_Type_free
 #define MPI_Type_free(a1) PyMPI_UNAVAILABLE("MPI_Type_free",a1)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Pack
-#undef  MPI_Pack
-#define MPI_Pack(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Pack",a1,a2,a3,a4,a5,a6,a7)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Unpack
-#undef  MPI_Unpack
-#define MPI_Unpack(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Unpack",a1,a2,a3,a4,a5,a6,a7)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Pack_size
-#undef  MPI_Pack_size
-#define MPI_Pack_size(a1,a2,a3,a4) PyMPI_UNAVAILABLE("MPI_Pack_size",a1,a2,a3,a4)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Pack_external
-#undef  MPI_Pack_external
-#define MPI_Pack_external(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Pack_external",a1,a2,a3,a4,a5,a6,a7)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Unpack_external
-#undef  MPI_Unpack_external
-#define MPI_Unpack_external(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Unpack_external",a1,a2,a3,a4,a5,a6,a7)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Pack_external_size
-#undef  MPI_Pack_external_size
-#define MPI_Pack_external_size(a1,a2,a3,a4) PyMPI_UNAVAILABLE("MPI_Pack_external_size",a1,a2,a3,a4)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_COMBINER_NAMED
@@ -879,6 +795,36 @@ typedef void *PyMPI_MPI_Errhandler;
 #define MPI_Type_get_contents(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Type_get_contents",a1,a2,a3,a4,a5,a6,a7)
 #endif
 
+#ifndef PyMPI_HAVE_MPI_Pack
+#undef  MPI_Pack
+#define MPI_Pack(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Pack",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Unpack
+#undef  MPI_Unpack
+#define MPI_Unpack(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Unpack",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Pack_size
+#undef  MPI_Pack_size
+#define MPI_Pack_size(a1,a2,a3,a4) PyMPI_UNAVAILABLE("MPI_Pack_size",a1,a2,a3,a4)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Pack_external
+#undef  MPI_Pack_external
+#define MPI_Pack_external(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Pack_external",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Unpack_external
+#undef  MPI_Unpack_external
+#define MPI_Unpack_external(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Unpack_external",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Pack_external_size
+#undef  MPI_Pack_external_size
+#define MPI_Pack_external_size(a1,a2,a3,a4) PyMPI_UNAVAILABLE("MPI_Pack_external_size",a1,a2,a3,a4)
+#endif
+
 #ifndef PyMPI_HAVE_MPI_Type_get_name
 #undef  MPI_Type_get_name
 #define MPI_Type_get_name(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Type_get_name",a1,a2,a3)
@@ -941,6 +887,116 @@ typedef int (MPIAPI PyMPI_MPI_Type_delete_attr_function)(MPI_Datatype,int,void*,
 #define MPI_Type_free_keyval(a1) PyMPI_UNAVAILABLE("MPI_Type_free_keyval",a1)
 #endif
 
+#ifndef PyMPI_HAVE_MPI_Type_contiguous_c
+#undef  MPI_Type_contiguous_c
+#define MPI_Type_contiguous_c(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Type_contiguous_c",a1,a2,a3)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Type_vector_c
+#undef  MPI_Type_vector_c
+#define MPI_Type_vector_c(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Type_vector_c",a1,a2,a3,a4,a5)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Type_indexed_c
+#undef  MPI_Type_indexed_c
+#define MPI_Type_indexed_c(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Type_indexed_c",a1,a2,a3,a4,a5)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Type_create_indexed_block_c
+#undef  MPI_Type_create_indexed_block_c
+#define MPI_Type_create_indexed_block_c(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Type_create_indexed_block_c",a1,a2,a3,a4,a5)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Type_create_subarray_c
+#undef  MPI_Type_create_subarray_c
+#define MPI_Type_create_subarray_c(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Type_create_subarray_c",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Type_create_darray_c
+#undef  MPI_Type_create_darray_c
+#define MPI_Type_create_darray_c(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10) PyMPI_UNAVAILABLE("MPI_Type_create_darray_c",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Type_create_hvector_c
+#undef  MPI_Type_create_hvector_c
+#define MPI_Type_create_hvector_c(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Type_create_hvector_c",a1,a2,a3,a4,a5)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Type_create_hindexed_c
+#undef  MPI_Type_create_hindexed_c
+#define MPI_Type_create_hindexed_c(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Type_create_hindexed_c",a1,a2,a3,a4,a5)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Type_create_hindexed_block_c
+#undef  MPI_Type_create_hindexed_block_c
+#define MPI_Type_create_hindexed_block_c(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Type_create_hindexed_block_c",a1,a2,a3,a4,a5)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Type_create_struct_c
+#undef  MPI_Type_create_struct_c
+#define MPI_Type_create_struct_c(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Type_create_struct_c",a1,a2,a3,a4,a5)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Type_create_resized_c
+#undef  MPI_Type_create_resized_c
+#define MPI_Type_create_resized_c(a1,a2,a3,a4) PyMPI_UNAVAILABLE("MPI_Type_create_resized_c",a1,a2,a3,a4)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Type_size_c
+#undef  MPI_Type_size_c
+#define MPI_Type_size_c MPI_Type_size_x
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Type_get_extent_c
+#undef  MPI_Type_get_extent_c
+#define MPI_Type_get_extent_c MPI_Type_get_extent_x
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Type_get_true_extent_c
+#undef  MPI_Type_get_true_extent_c
+#define MPI_Type_get_true_extent_c MPI_Type_get_true_extent_x
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Type_get_envelope_c
+#undef  MPI_Type_get_envelope_c
+#define MPI_Type_get_envelope_c(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_Type_get_envelope_c",a1,a2,a3,a4,a5,a6)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Type_get_contents_c
+#undef  MPI_Type_get_contents_c
+#define MPI_Type_get_contents_c(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Type_get_contents_c",a1,a2,a3,a4,a5,a6,a7,a8,a9)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Pack_c
+#undef  MPI_Pack_c
+#define MPI_Pack_c(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Pack_c",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Unpack_c
+#undef  MPI_Unpack_c
+#define MPI_Unpack_c(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Unpack_c",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Pack_size_c
+#undef  MPI_Pack_size_c
+#define MPI_Pack_size_c(a1,a2,a3,a4) PyMPI_UNAVAILABLE("MPI_Pack_size_c",a1,a2,a3,a4)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Pack_external_c
+#undef  MPI_Pack_external_c
+#define MPI_Pack_external_c(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Pack_external_c",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Unpack_external_c
+#undef  MPI_Unpack_external_c
+#define MPI_Unpack_external_c(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Unpack_external_c",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Pack_external_size_c
+#undef  MPI_Pack_external_size_c
+#define MPI_Pack_external_size_c(a1,a2,a3,a4) PyMPI_UNAVAILABLE("MPI_Pack_external_size_c",a1,a2,a3,a4)
+#endif
+
 #ifndef PyMPI_HAVE_MPI_STATUS_IGNORE
 #undef  MPI_STATUS_IGNORE
 #define MPI_STATUS_IGNORE ((MPI_Status*)0)
@@ -961,14 +1017,14 @@ typedef int (MPIAPI PyMPI_MPI_Type_delete_attr_function)(MPI_Datatype,int,void*,
 #define MPI_Get_elements(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Get_elements",a1,a2,a3)
 #endif
 
-#ifndef PyMPI_HAVE_MPI_Get_elements_x
-#undef  MPI_Get_elements_x
-#define MPI_Get_elements_x(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Get_elements_x",a1,a2,a3)
-#endif
-
 #ifndef PyMPI_HAVE_MPI_Status_set_elements
 #undef  MPI_Status_set_elements
 #define MPI_Status_set_elements(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Status_set_elements",a1,a2,a3)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Get_elements_x
+#undef  MPI_Get_elements_x
+#define MPI_Get_elements_x(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Get_elements_x",a1,a2,a3)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Status_set_elements_x
@@ -984,6 +1040,21 @@ typedef int (MPIAPI PyMPI_MPI_Type_delete_attr_function)(MPI_Datatype,int,void*,
 #ifndef PyMPI_HAVE_MPI_Status_set_cancelled
 #undef  MPI_Status_set_cancelled
 #define MPI_Status_set_cancelled(a1,a2) PyMPI_UNAVAILABLE("MPI_Status_set_cancelled",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Get_count_c
+#undef  MPI_Get_count_c
+#define MPI_Get_count_c(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Get_count_c",a1,a2,a3)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Get_elements_c
+#undef  MPI_Get_elements_c
+#define MPI_Get_elements_c MPI_Get_elements_x
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Status_set_elements_c
+#undef  MPI_Status_set_elements_c
+#define MPI_Status_set_elements_c MPI_Status_set_elements_x
 #endif
 
 #ifndef PyMPI_HAVE_MPI_REQUEST_NULL
@@ -1054,6 +1125,26 @@ typedef int (MPIAPI PyMPI_MPI_Type_delete_attr_function)(MPI_Datatype,int,void*,
 #ifndef PyMPI_HAVE_MPI_Startall
 #undef  MPI_Startall
 #define MPI_Startall(a1,a2) PyMPI_UNAVAILABLE("MPI_Startall",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Pready
+#undef  MPI_Pready
+#define MPI_Pready(a1,a2) PyMPI_UNAVAILABLE("MPI_Pready",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Pready_range
+#undef  MPI_Pready_range
+#define MPI_Pready_range(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Pready_range",a1,a2,a3)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Pready_list
+#undef  MPI_Pready_list
+#define MPI_Pready_list(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Pready_list",a1,a2,a3)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Parrived
+#undef  MPI_Parrived
+#define MPI_Parrived(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Parrived",a1,a2,a3)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Grequest_cancel_function
@@ -1180,69 +1271,15 @@ typedef void (MPIAPI PyMPI_MPI_User_function)(void*,void*,int*,MPI_Datatype*);
 #define MPI_Op_commutative(a1,a2) PyMPI_UNAVAILABLE("MPI_Op_commutative",a1,a2)
 #endif
 
-#ifndef PyMPI_HAVE_MPI_INFO_NULL
-#undef  MPI_INFO_NULL
-#define MPI_INFO_NULL ((MPI_Info)0)
+#ifndef PyMPI_HAVE_MPI_User_function_c
+#undef  MPI_User_function_c
+typedef void (MPIAPI PyMPI_MPI_User_function_c)(void*,void*,MPI_Count*,MPI_Datatype*);
+#define MPI_User_function_c PyMPI_MPI_User_function_c
 #endif
 
-#ifndef PyMPI_HAVE_MPI_INFO_ENV
-#undef  MPI_INFO_ENV
-#define MPI_INFO_ENV ((MPI_Info)MPI_INFO_NULL)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Info_free
-#undef  MPI_Info_free
-#define MPI_Info_free(a1) PyMPI_UNAVAILABLE("MPI_Info_free",a1)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Info_create
-#undef  MPI_Info_create
-#define MPI_Info_create(a1) PyMPI_UNAVAILABLE("MPI_Info_create",a1)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Info_dup
-#undef  MPI_Info_dup
-#define MPI_Info_dup(a1,a2) PyMPI_UNAVAILABLE("MPI_Info_dup",a1,a2)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_MAX_INFO_KEY
-#undef  MPI_MAX_INFO_KEY
-#define MPI_MAX_INFO_KEY (1)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_MAX_INFO_VAL
-#undef  MPI_MAX_INFO_VAL
-#define MPI_MAX_INFO_VAL (1)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Info_get
-#undef  MPI_Info_get
-#define MPI_Info_get(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Info_get",a1,a2,a3,a4,a5)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Info_set
-#undef  MPI_Info_set
-#define MPI_Info_set(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Info_set",a1,a2,a3)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Info_delete
-#undef  MPI_Info_delete
-#define MPI_Info_delete(a1,a2) PyMPI_UNAVAILABLE("MPI_Info_delete",a1,a2)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Info_get_nkeys
-#undef  MPI_Info_get_nkeys
-#define MPI_Info_get_nkeys(a1,a2) PyMPI_UNAVAILABLE("MPI_Info_get_nkeys",a1,a2)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Info_get_nthkey
-#undef  MPI_Info_get_nthkey
-#define MPI_Info_get_nthkey(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Info_get_nthkey",a1,a2,a3)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Info_get_valuelen
-#undef  MPI_Info_get_valuelen
-#define MPI_Info_get_valuelen(a1,a2,a3,a4) PyMPI_UNAVAILABLE("MPI_Info_get_valuelen",a1,a2,a3,a4)
+#ifndef PyMPI_HAVE_MPI_Op_create_c
+#undef  MPI_Op_create_c
+#define MPI_Op_create_c(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Op_create_c",a1,a2,a3)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_GROUP_NULL
@@ -1315,6 +1352,167 @@ typedef void (MPIAPI PyMPI_MPI_User_function)(void*,void*,int*,MPI_Datatype*);
 #define MPI_Group_range_excl(a1,a2,a3,a4) PyMPI_UNAVAILABLE("MPI_Group_range_excl",a1,a2,a3,a4)
 #endif
 
+#ifndef PyMPI_HAVE_MPI_INFO_NULL
+#undef  MPI_INFO_NULL
+#define MPI_INFO_NULL ((MPI_Info)0)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_INFO_ENV
+#undef  MPI_INFO_ENV
+#define MPI_INFO_ENV ((MPI_Info)MPI_INFO_NULL)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Info_free
+#undef  MPI_Info_free
+#define MPI_Info_free(a1) PyMPI_UNAVAILABLE("MPI_Info_free",a1)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Info_create
+#undef  MPI_Info_create
+#define MPI_Info_create(a1) PyMPI_UNAVAILABLE("MPI_Info_create",a1)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Info_dup
+#undef  MPI_Info_dup
+#define MPI_Info_dup(a1,a2) PyMPI_UNAVAILABLE("MPI_Info_dup",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Info_create_env
+#undef  MPI_Info_create_env
+#define MPI_Info_create_env(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Info_create_env",a1,a2,a3)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_MAX_INFO_KEY
+#undef  MPI_MAX_INFO_KEY
+#define MPI_MAX_INFO_KEY (1)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_MAX_INFO_VAL
+#undef  MPI_MAX_INFO_VAL
+#define MPI_MAX_INFO_VAL (1)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Info_get_string
+#undef  MPI_Info_get_string
+#define MPI_Info_get_string(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Info_get_string",a1,a2,a3,a4,a5)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Info_set
+#undef  MPI_Info_set
+#define MPI_Info_set(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Info_set",a1,a2,a3)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Info_delete
+#undef  MPI_Info_delete
+#define MPI_Info_delete(a1,a2) PyMPI_UNAVAILABLE("MPI_Info_delete",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Info_get_nkeys
+#undef  MPI_Info_get_nkeys
+#define MPI_Info_get_nkeys(a1,a2) PyMPI_UNAVAILABLE("MPI_Info_get_nkeys",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Info_get_nthkey
+#undef  MPI_Info_get_nthkey
+#define MPI_Info_get_nthkey(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Info_get_nthkey",a1,a2,a3)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_ERRHANDLER_NULL
+#undef  MPI_ERRHANDLER_NULL
+#define MPI_ERRHANDLER_NULL ((MPI_Errhandler)0)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_ERRORS_RETURN
+#undef  MPI_ERRORS_RETURN
+#define MPI_ERRORS_RETURN ((MPI_Errhandler)MPI_ERRHANDLER_NULL)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_ERRORS_ABORT
+#undef  MPI_ERRORS_ABORT
+#define MPI_ERRORS_ABORT ((MPI_Errhandler)MPI_ERRHANDLER_NULL)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_ERRORS_ARE_FATAL
+#undef  MPI_ERRORS_ARE_FATAL
+#define MPI_ERRORS_ARE_FATAL ((MPI_Errhandler)MPI_ERRHANDLER_NULL)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Errhandler_free
+#undef  MPI_Errhandler_free
+#define MPI_Errhandler_free(a1) PyMPI_UNAVAILABLE("MPI_Errhandler_free",a1)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_SESSION_NULL
+#undef  MPI_SESSION_NULL
+#define MPI_SESSION_NULL ((MPI_Session)0)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_MAX_PSET_NAME_LEN
+#undef  MPI_MAX_PSET_NAME_LEN
+#define MPI_MAX_PSET_NAME_LEN (1)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Session_init
+#undef  MPI_Session_init
+#define MPI_Session_init(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Session_init",a1,a2,a3)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Session_finalize
+#undef  MPI_Session_finalize
+#define MPI_Session_finalize(a1) PyMPI_UNAVAILABLE("MPI_Session_finalize",a1)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Session_get_num_psets
+#undef  MPI_Session_get_num_psets
+#define MPI_Session_get_num_psets(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Session_get_num_psets",a1,a2,a3)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Session_get_nth_pset
+#undef  MPI_Session_get_nth_pset
+#define MPI_Session_get_nth_pset(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Session_get_nth_pset",a1,a2,a3,a4,a5)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Session_get_info
+#undef  MPI_Session_get_info
+#define MPI_Session_get_info(a1,a2) PyMPI_UNAVAILABLE("MPI_Session_get_info",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Session_get_pset_info
+#undef  MPI_Session_get_pset_info
+#define MPI_Session_get_pset_info(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Session_get_pset_info",a1,a2,a3)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Group_from_session_pset
+#undef  MPI_Group_from_session_pset
+#define MPI_Group_from_session_pset(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Group_from_session_pset",a1,a2,a3)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Session_errhandler_function
+#undef  MPI_Session_errhandler_function
+typedef void (MPIAPI PyMPI_MPI_Session_errhandler_function)(MPI_Session*,int*,...);
+#define MPI_Session_errhandler_function PyMPI_MPI_Session_errhandler_function
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Session_create_errhandler
+#undef  MPI_Session_create_errhandler
+#define MPI_Session_create_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_Session_create_errhandler",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Session_get_errhandler
+#undef  MPI_Session_get_errhandler
+#define MPI_Session_get_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_Session_get_errhandler",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Session_set_errhandler
+#undef  MPI_Session_set_errhandler
+#define MPI_Session_set_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_Session_set_errhandler",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Session_call_errhandler
+#undef  MPI_Session_call_errhandler
+#define MPI_Session_call_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_Session_call_errhandler",a1,a2)
+#endif
+
 #ifndef PyMPI_HAVE_MPI_COMM_NULL
 #undef  MPI_COMM_NULL
 #define MPI_COMM_NULL ((MPI_Comm)0)
@@ -1370,6 +1568,21 @@ typedef void (MPIAPI PyMPI_MPI_User_function)(void*,void*,int*,MPI_Datatype*);
 #define MPI_Abort(a1,a2) PyMPI_UNAVAILABLE("MPI_Abort",a1,a2)
 #endif
 
+#ifndef PyMPI_HAVE_MPI_BSEND_OVERHEAD
+#undef  MPI_BSEND_OVERHEAD
+#define MPI_BSEND_OVERHEAD (0)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Buffer_attach
+#undef  MPI_Buffer_attach
+#define MPI_Buffer_attach(a1,a2) PyMPI_UNAVAILABLE("MPI_Buffer_attach",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Buffer_detach
+#undef  MPI_Buffer_detach
+#define MPI_Buffer_detach(a1,a2) PyMPI_UNAVAILABLE("MPI_Buffer_detach",a1,a2)
+#endif
+
 #ifndef PyMPI_HAVE_MPI_Send
 #undef  MPI_Send
 #define MPI_Send(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_Send",a1,a2,a3,a4,a5,a6)
@@ -1388,21 +1601,6 @@ typedef void (MPIAPI PyMPI_MPI_User_function)(void*,void*,int*,MPI_Datatype*);
 #ifndef PyMPI_HAVE_MPI_Sendrecv_replace
 #undef  MPI_Sendrecv_replace
 #define MPI_Sendrecv_replace(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Sendrecv_replace",a1,a2,a3,a4,a5,a6,a7,a8,a9)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_BSEND_OVERHEAD
-#undef  MPI_BSEND_OVERHEAD
-#define MPI_BSEND_OVERHEAD (0)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Buffer_attach
-#undef  MPI_Buffer_attach
-#define MPI_Buffer_attach(a1,a2) PyMPI_UNAVAILABLE("MPI_Buffer_attach",a1,a2)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Buffer_detach
-#undef  MPI_Buffer_detach
-#define MPI_Buffer_detach(a1,a2) PyMPI_UNAVAILABLE("MPI_Buffer_detach",a1,a2)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Bsend
@@ -1425,6 +1623,21 @@ typedef void (MPIAPI PyMPI_MPI_User_function)(void*,void*,int*,MPI_Datatype*);
 #define MPI_Isend(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Isend",a1,a2,a3,a4,a5,a6,a7)
 #endif
 
+#ifndef PyMPI_HAVE_MPI_Irecv
+#undef  MPI_Irecv
+#define MPI_Irecv(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Irecv",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Isendrecv
+#undef  MPI_Isendrecv
+#define MPI_Isendrecv(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12) PyMPI_UNAVAILABLE("MPI_Isendrecv",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Isendrecv_replace
+#undef  MPI_Isendrecv_replace
+#define MPI_Isendrecv_replace(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Isendrecv_replace",a1,a2,a3,a4,a5,a6,a7,a8,a9)
+#endif
+
 #ifndef PyMPI_HAVE_MPI_Ibsend
 #undef  MPI_Ibsend
 #define MPI_Ibsend(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Ibsend",a1,a2,a3,a4,a5,a6,a7)
@@ -1438,11 +1651,6 @@ typedef void (MPIAPI PyMPI_MPI_User_function)(void*,void*,int*,MPI_Datatype*);
 #ifndef PyMPI_HAVE_MPI_Irsend
 #undef  MPI_Irsend
 #define MPI_Irsend(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Irsend",a1,a2,a3,a4,a5,a6,a7)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Irecv
-#undef  MPI_Irecv
-#define MPI_Irecv(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Irecv",a1,a2,a3,a4,a5,a6,a7)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Send_init
@@ -1468,6 +1676,16 @@ typedef void (MPIAPI PyMPI_MPI_User_function)(void*,void*,int*,MPI_Datatype*);
 #ifndef PyMPI_HAVE_MPI_Recv_init
 #undef  MPI_Recv_init
 #define MPI_Recv_init(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Recv_init",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Psend_init
+#undef  MPI_Psend_init
+#define MPI_Psend_init(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Psend_init",a1,a2,a3,a4,a5,a6,a7,a8,a9)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Precv_init
+#undef  MPI_Precv_init
+#define MPI_Precv_init(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Precv_init",a1,a2,a3,a4,a5,a6,a7,a8,a9)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Probe
@@ -1565,6 +1783,11 @@ typedef void (MPIAPI PyMPI_MPI_User_function)(void*,void*,int*,MPI_Datatype*);
 #define MPI_Alltoallw(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Alltoallw",a1,a2,a3,a4,a5,a6,a7,a8,a9)
 #endif
 
+#ifndef PyMPI_HAVE_MPI_Reduce_local
+#undef  MPI_Reduce_local
+#define MPI_Reduce_local(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Reduce_local",a1,a2,a3,a4,a5)
+#endif
+
 #ifndef PyMPI_HAVE_MPI_Reduce
 #undef  MPI_Reduce
 #define MPI_Reduce(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Reduce",a1,a2,a3,a4,a5,a6,a7)
@@ -1573,11 +1796,6 @@ typedef void (MPIAPI PyMPI_MPI_User_function)(void*,void*,int*,MPI_Datatype*);
 #ifndef PyMPI_HAVE_MPI_Allreduce
 #undef  MPI_Allreduce
 #define MPI_Allreduce(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_Allreduce",a1,a2,a3,a4,a5,a6)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Reduce_local
-#undef  MPI_Reduce_local
-#define MPI_Reduce_local(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Reduce_local",a1,a2,a3,a4,a5)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Reduce_scatter_block
@@ -1735,6 +1953,116 @@ typedef void (MPIAPI PyMPI_MPI_User_function)(void*,void*,int*,MPI_Datatype*);
 #define MPI_Ineighbor_alltoallw(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10) PyMPI_UNAVAILABLE("MPI_Ineighbor_alltoallw",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)
 #endif
 
+#ifndef PyMPI_HAVE_MPI_Barrier_init
+#undef  MPI_Barrier_init
+#define MPI_Barrier_init(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Barrier_init",a1,a2,a3)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Bcast_init
+#undef  MPI_Bcast_init
+#define MPI_Bcast_init(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Bcast_init",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Gather_init
+#undef  MPI_Gather_init
+#define MPI_Gather_init(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10) PyMPI_UNAVAILABLE("MPI_Gather_init",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Gatherv_init
+#undef  MPI_Gatherv_init
+#define MPI_Gatherv_init(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11) PyMPI_UNAVAILABLE("MPI_Gatherv_init",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Scatter_init
+#undef  MPI_Scatter_init
+#define MPI_Scatter_init(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10) PyMPI_UNAVAILABLE("MPI_Scatter_init",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Scatterv_init
+#undef  MPI_Scatterv_init
+#define MPI_Scatterv_init(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11) PyMPI_UNAVAILABLE("MPI_Scatterv_init",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Allgather_init
+#undef  MPI_Allgather_init
+#define MPI_Allgather_init(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Allgather_init",a1,a2,a3,a4,a5,a6,a7,a8,a9)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Allgatherv_init
+#undef  MPI_Allgatherv_init
+#define MPI_Allgatherv_init(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10) PyMPI_UNAVAILABLE("MPI_Allgatherv_init",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Alltoall_init
+#undef  MPI_Alltoall_init
+#define MPI_Alltoall_init(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Alltoall_init",a1,a2,a3,a4,a5,a6,a7,a8,a9)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Alltoallv_init
+#undef  MPI_Alltoallv_init
+#define MPI_Alltoallv_init(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11) PyMPI_UNAVAILABLE("MPI_Alltoallv_init",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Alltoallw_init
+#undef  MPI_Alltoallw_init
+#define MPI_Alltoallw_init(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11) PyMPI_UNAVAILABLE("MPI_Alltoallw_init",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Reduce_init
+#undef  MPI_Reduce_init
+#define MPI_Reduce_init(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Reduce_init",a1,a2,a3,a4,a5,a6,a7,a8,a9)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Allreduce_init
+#undef  MPI_Allreduce_init
+#define MPI_Allreduce_init(a1,a2,a3,a4,a5,a6,a7,a8) PyMPI_UNAVAILABLE("MPI_Allreduce_init",a1,a2,a3,a4,a5,a6,a7,a8)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Reduce_scatter_block_init
+#undef  MPI_Reduce_scatter_block_init
+#define MPI_Reduce_scatter_block_init(a1,a2,a3,a4,a5,a6,a7,a8) PyMPI_UNAVAILABLE("MPI_Reduce_scatter_block_init",a1,a2,a3,a4,a5,a6,a7,a8)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Reduce_scatter_init
+#undef  MPI_Reduce_scatter_init
+#define MPI_Reduce_scatter_init(a1,a2,a3,a4,a5,a6,a7,a8) PyMPI_UNAVAILABLE("MPI_Reduce_scatter_init",a1,a2,a3,a4,a5,a6,a7,a8)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Scan_init
+#undef  MPI_Scan_init
+#define MPI_Scan_init(a1,a2,a3,a4,a5,a6,a7,a8) PyMPI_UNAVAILABLE("MPI_Scan_init",a1,a2,a3,a4,a5,a6,a7,a8)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Exscan_init
+#undef  MPI_Exscan_init
+#define MPI_Exscan_init(a1,a2,a3,a4,a5,a6,a7,a8) PyMPI_UNAVAILABLE("MPI_Exscan_init",a1,a2,a3,a4,a5,a6,a7,a8)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Neighbor_allgather_init
+#undef  MPI_Neighbor_allgather_init
+#define MPI_Neighbor_allgather_init(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Neighbor_allgather_init",a1,a2,a3,a4,a5,a6,a7,a8,a9)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Neighbor_allgatherv_init
+#undef  MPI_Neighbor_allgatherv_init
+#define MPI_Neighbor_allgatherv_init(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10) PyMPI_UNAVAILABLE("MPI_Neighbor_allgatherv_init",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Neighbor_alltoall_init
+#undef  MPI_Neighbor_alltoall_init
+#define MPI_Neighbor_alltoall_init(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Neighbor_alltoall_init",a1,a2,a3,a4,a5,a6,a7,a8,a9)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Neighbor_alltoallv_init
+#undef  MPI_Neighbor_alltoallv_init
+#define MPI_Neighbor_alltoallv_init(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11) PyMPI_UNAVAILABLE("MPI_Neighbor_alltoallv_init",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Neighbor_alltoallw_init
+#undef  MPI_Neighbor_alltoallw_init
+#define MPI_Neighbor_alltoallw_init(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11) PyMPI_UNAVAILABLE("MPI_Neighbor_alltoallw_init",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11)
+#endif
+
 #ifndef PyMPI_HAVE_MPI_Comm_dup
 #undef  MPI_Comm_dup
 #define MPI_Comm_dup(a1,a2) PyMPI_UNAVAILABLE("MPI_Comm_dup",a1,a2)
@@ -1750,6 +2078,11 @@ typedef void (MPIAPI PyMPI_MPI_User_function)(void*,void*,int*,MPI_Datatype*);
 #define MPI_Comm_idup(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Comm_idup",a1,a2,a3)
 #endif
 
+#ifndef PyMPI_HAVE_MPI_Comm_idup_with_info
+#undef  MPI_Comm_idup_with_info
+#define MPI_Comm_idup_with_info(a1,a2,a3,a4) PyMPI_UNAVAILABLE("MPI_Comm_idup_with_info",a1,a2,a3,a4)
+#endif
+
 #ifndef PyMPI_HAVE_MPI_Comm_create
 #undef  MPI_Comm_create
 #define MPI_Comm_create(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Comm_create",a1,a2,a3)
@@ -1760,6 +2093,16 @@ typedef void (MPIAPI PyMPI_MPI_User_function)(void*,void*,int*,MPI_Datatype*);
 #define MPI_Comm_create_group(a1,a2,a3,a4) PyMPI_UNAVAILABLE("MPI_Comm_create_group",a1,a2,a3,a4)
 #endif
 
+#ifndef PyMPI_HAVE_MPI_MAX_STRINGTAG_LEN
+#undef  MPI_MAX_STRINGTAG_LEN
+#define MPI_MAX_STRINGTAG_LEN (1)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Comm_create_from_group
+#undef  MPI_Comm_create_from_group
+#define MPI_Comm_create_from_group(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Comm_create_from_group",a1,a2,a3,a4,a5)
+#endif
+
 #ifndef PyMPI_HAVE_MPI_Comm_split
 #undef  MPI_Comm_split
 #define MPI_Comm_split(a1,a2,a3,a4) PyMPI_UNAVAILABLE("MPI_Comm_split",a1,a2,a3,a4)
@@ -1768,6 +2111,16 @@ typedef void (MPIAPI PyMPI_MPI_User_function)(void*,void*,int*,MPI_Datatype*);
 #ifndef PyMPI_HAVE_MPI_COMM_TYPE_SHARED
 #undef  MPI_COMM_TYPE_SHARED
 #define MPI_COMM_TYPE_SHARED (MPI_UNDEFINED)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_COMM_TYPE_HW_GUIDED
+#undef  MPI_COMM_TYPE_HW_GUIDED
+#define MPI_COMM_TYPE_HW_GUIDED (MPI_UNDEFINED)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_COMM_TYPE_HW_UNGUIDED
+#undef  MPI_COMM_TYPE_HW_UNGUIDED
+#define MPI_COMM_TYPE_HW_UNGUIDED (MPI_UNDEFINED)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Comm_split_type
@@ -1910,6 +2263,11 @@ typedef void (MPIAPI PyMPI_MPI_User_function)(void*,void*,int*,MPI_Datatype*);
 #define MPI_Intercomm_create(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_Intercomm_create",a1,a2,a3,a4,a5,a6)
 #endif
 
+#ifndef PyMPI_HAVE_MPI_Intercomm_create_from_groups
+#undef  MPI_Intercomm_create_from_groups
+#define MPI_Intercomm_create_from_groups(a1,a2,a3,a4,a5,a6,a7,a8) PyMPI_UNAVAILABLE("MPI_Intercomm_create_from_groups",a1,a2,a3,a4,a5,a6,a7,a8)
+#endif
+
 #ifndef PyMPI_HAVE_MPI_Comm_remote_group
 #undef  MPI_Comm_remote_group
 #define MPI_Comm_remote_group(a1,a2) PyMPI_UNAVAILABLE("MPI_Comm_remote_group",a1,a2)
@@ -2005,109 +2363,6 @@ typedef void (MPIAPI PyMPI_MPI_User_function)(void*,void*,int*,MPI_Datatype*);
 #define MPI_Comm_get_parent(a1) PyMPI_UNAVAILABLE("MPI_Comm_get_parent",a1)
 #endif
 
-#ifndef PyMPI_HAVE_MPI_Errhandler_get
-#undef  MPI_Errhandler_get
-#define MPI_Errhandler_get(a1,a2) PyMPI_UNAVAILABLE("MPI_Errhandler_get",a1,a2)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Errhandler_set
-#undef  MPI_Errhandler_set
-#define MPI_Errhandler_set(a1,a2) PyMPI_UNAVAILABLE("MPI_Errhandler_set",a1,a2)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Handler_function
-#undef  MPI_Handler_function
-typedef void (MPIAPI PyMPI_MPI_Handler_function)(MPI_Comm*,int*,...);
-#define MPI_Handler_function PyMPI_MPI_Handler_function
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Errhandler_create
-#undef  MPI_Errhandler_create
-#define MPI_Errhandler_create(a1,a2) PyMPI_UNAVAILABLE("MPI_Errhandler_create",a1,a2)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Attr_get
-#undef  MPI_Attr_get
-#define MPI_Attr_get(a1,a2,a3,a4) PyMPI_UNAVAILABLE("MPI_Attr_get",a1,a2,a3,a4)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Attr_put
-#undef  MPI_Attr_put
-#define MPI_Attr_put(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Attr_put",a1,a2,a3)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Attr_delete
-#undef  MPI_Attr_delete
-#define MPI_Attr_delete(a1,a2) PyMPI_UNAVAILABLE("MPI_Attr_delete",a1,a2)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Copy_function
-#undef  MPI_Copy_function
-typedef int (MPIAPI PyMPI_MPI_Copy_function)(MPI_Comm,int,void*,void*,void*,int*);
-#define MPI_Copy_function PyMPI_MPI_Copy_function
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Delete_function
-#undef  MPI_Delete_function
-typedef int (MPIAPI PyMPI_MPI_Delete_function)(MPI_Comm,int,void*,void*);
-#define MPI_Delete_function PyMPI_MPI_Delete_function
-#endif
-
-#ifndef PyMPI_HAVE_MPI_DUP_FN
-#undef  MPI_DUP_FN
-#define MPI_DUP_FN ((MPI_Copy_function*)0)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_NULL_COPY_FN
-#undef  MPI_NULL_COPY_FN
-#define MPI_NULL_COPY_FN ((MPI_Copy_function*)0)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_NULL_DELETE_FN
-#undef  MPI_NULL_DELETE_FN
-#define MPI_NULL_DELETE_FN ((MPI_Delete_function*)0)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Keyval_create
-#undef  MPI_Keyval_create
-#define MPI_Keyval_create(a1,a2,a3,a4) PyMPI_UNAVAILABLE("MPI_Keyval_create",a1,a2,a3,a4)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Keyval_free
-#undef  MPI_Keyval_free
-#define MPI_Keyval_free(a1) PyMPI_UNAVAILABLE("MPI_Keyval_free",a1)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Comm_get_errhandler
-#undef  MPI_Comm_get_errhandler
-#define MPI_Comm_get_errhandler MPI_Errhandler_get
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Comm_set_errhandler
-#undef  MPI_Comm_set_errhandler
-#define MPI_Comm_set_errhandler MPI_Errhandler_set
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Comm_errhandler_fn
-#undef  MPI_Comm_errhandler_fn
-#define MPI_Comm_errhandler_fn MPI_Handler_function
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Comm_errhandler_function
-#undef  MPI_Comm_errhandler_function
-#define MPI_Comm_errhandler_function MPI_Comm_errhandler_fn
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Comm_create_errhandler
-#undef  MPI_Comm_create_errhandler
-#define MPI_Comm_create_errhandler MPI_Errhandler_create
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Comm_call_errhandler
-#undef  MPI_Comm_call_errhandler
-#define MPI_Comm_call_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_Comm_call_errhandler",a1,a2)
-#endif
-
 #ifndef PyMPI_HAVE_MPI_Comm_get_name
 #undef  MPI_Comm_get_name
 #define MPI_Comm_get_name(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Comm_get_name",a1,a2,a3)
@@ -2201,6 +2456,471 @@ typedef int (MPIAPI PyMPI_MPI_Delete_function)(MPI_Comm,int,void*,void*);
 #ifndef PyMPI_HAVE_MPI_Comm_free_keyval
 #undef  MPI_Comm_free_keyval
 #define MPI_Comm_free_keyval MPI_Keyval_free
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Comm_errhandler_fn
+#undef  MPI_Comm_errhandler_fn
+#define MPI_Comm_errhandler_fn MPI_Handler_function
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Comm_errhandler_function
+#undef  MPI_Comm_errhandler_function
+#define MPI_Comm_errhandler_function MPI_Comm_errhandler_fn
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Comm_create_errhandler
+#undef  MPI_Comm_create_errhandler
+#define MPI_Comm_create_errhandler MPI_Errhandler_create
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Comm_get_errhandler
+#undef  MPI_Comm_get_errhandler
+#define MPI_Comm_get_errhandler MPI_Errhandler_get
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Comm_set_errhandler
+#undef  MPI_Comm_set_errhandler
+#define MPI_Comm_set_errhandler MPI_Errhandler_set
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Comm_call_errhandler
+#undef  MPI_Comm_call_errhandler
+#define MPI_Comm_call_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_Comm_call_errhandler",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Buffer_attach_c
+#undef  MPI_Buffer_attach_c
+#define MPI_Buffer_attach_c(a1,a2) PyMPI_UNAVAILABLE("MPI_Buffer_attach_c",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Buffer_detach_c
+#undef  MPI_Buffer_detach_c
+#define MPI_Buffer_detach_c(a1,a2) PyMPI_UNAVAILABLE("MPI_Buffer_detach_c",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Send_c
+#undef  MPI_Send_c
+#define MPI_Send_c(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_Send_c",a1,a2,a3,a4,a5,a6)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Recv_c
+#undef  MPI_Recv_c
+#define MPI_Recv_c(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Recv_c",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Sendrecv_c
+#undef  MPI_Sendrecv_c
+#define MPI_Sendrecv_c(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12) PyMPI_UNAVAILABLE("MPI_Sendrecv_c",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Sendrecv_replace_c
+#undef  MPI_Sendrecv_replace_c
+#define MPI_Sendrecv_replace_c(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Sendrecv_replace_c",a1,a2,a3,a4,a5,a6,a7,a8,a9)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Bsend_c
+#undef  MPI_Bsend_c
+#define MPI_Bsend_c(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_Bsend_c",a1,a2,a3,a4,a5,a6)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Ssend_c
+#undef  MPI_Ssend_c
+#define MPI_Ssend_c(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_Ssend_c",a1,a2,a3,a4,a5,a6)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Rsend_c
+#undef  MPI_Rsend_c
+#define MPI_Rsend_c(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_Rsend_c",a1,a2,a3,a4,a5,a6)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Isend_c
+#undef  MPI_Isend_c
+#define MPI_Isend_c(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Isend_c",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Irecv_c
+#undef  MPI_Irecv_c
+#define MPI_Irecv_c(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Irecv_c",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Isendrecv_c
+#undef  MPI_Isendrecv_c
+#define MPI_Isendrecv_c(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12) PyMPI_UNAVAILABLE("MPI_Isendrecv_c",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Isendrecv_replace_c
+#undef  MPI_Isendrecv_replace_c
+#define MPI_Isendrecv_replace_c(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Isendrecv_replace_c",a1,a2,a3,a4,a5,a6,a7,a8,a9)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Ibsend_c
+#undef  MPI_Ibsend_c
+#define MPI_Ibsend_c(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Ibsend_c",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Issend_c
+#undef  MPI_Issend_c
+#define MPI_Issend_c(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Issend_c",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Irsend_c
+#undef  MPI_Irsend_c
+#define MPI_Irsend_c(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Irsend_c",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Send_init_c
+#undef  MPI_Send_init_c
+#define MPI_Send_init_c(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Send_init_c",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Recv_init_c
+#undef  MPI_Recv_init_c
+#define MPI_Recv_init_c(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Recv_init_c",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Bsend_init_c
+#undef  MPI_Bsend_init_c
+#define MPI_Bsend_init_c(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Bsend_init_c",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Ssend_init_c
+#undef  MPI_Ssend_init_c
+#define MPI_Ssend_init_c(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Ssend_init_c",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Rsend_init_c
+#undef  MPI_Rsend_init_c
+#define MPI_Rsend_init_c(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Rsend_init_c",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Mrecv_c
+#undef  MPI_Mrecv_c
+#define MPI_Mrecv_c(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Mrecv_c",a1,a2,a3,a4,a5)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Imrecv_c
+#undef  MPI_Imrecv_c
+#define MPI_Imrecv_c(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Imrecv_c",a1,a2,a3,a4,a5)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Bcast_c
+#undef  MPI_Bcast_c
+#define MPI_Bcast_c(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Bcast_c",a1,a2,a3,a4,a5)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Gather_c
+#undef  MPI_Gather_c
+#define MPI_Gather_c(a1,a2,a3,a4,a5,a6,a7,a8) PyMPI_UNAVAILABLE("MPI_Gather_c",a1,a2,a3,a4,a5,a6,a7,a8)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Gatherv_c
+#undef  MPI_Gatherv_c
+#define MPI_Gatherv_c(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Gatherv_c",a1,a2,a3,a4,a5,a6,a7,a8,a9)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Scatter_c
+#undef  MPI_Scatter_c
+#define MPI_Scatter_c(a1,a2,a3,a4,a5,a6,a7,a8) PyMPI_UNAVAILABLE("MPI_Scatter_c",a1,a2,a3,a4,a5,a6,a7,a8)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Scatterv_c
+#undef  MPI_Scatterv_c
+#define MPI_Scatterv_c(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Scatterv_c",a1,a2,a3,a4,a5,a6,a7,a8,a9)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Allgather_c
+#undef  MPI_Allgather_c
+#define MPI_Allgather_c(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Allgather_c",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Allgatherv_c
+#undef  MPI_Allgatherv_c
+#define MPI_Allgatherv_c(a1,a2,a3,a4,a5,a6,a7,a8) PyMPI_UNAVAILABLE("MPI_Allgatherv_c",a1,a2,a3,a4,a5,a6,a7,a8)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Alltoall_c
+#undef  MPI_Alltoall_c
+#define MPI_Alltoall_c(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Alltoall_c",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Alltoallv_c
+#undef  MPI_Alltoallv_c
+#define MPI_Alltoallv_c(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Alltoallv_c",a1,a2,a3,a4,a5,a6,a7,a8,a9)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Alltoallw_c
+#undef  MPI_Alltoallw_c
+#define MPI_Alltoallw_c(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Alltoallw_c",a1,a2,a3,a4,a5,a6,a7,a8,a9)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Reduce_local_c
+#undef  MPI_Reduce_local_c
+#define MPI_Reduce_local_c(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Reduce_local_c",a1,a2,a3,a4,a5)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Reduce_c
+#undef  MPI_Reduce_c
+#define MPI_Reduce_c(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Reduce_c",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Allreduce_c
+#undef  MPI_Allreduce_c
+#define MPI_Allreduce_c(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_Allreduce_c",a1,a2,a3,a4,a5,a6)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Reduce_scatter_block_c
+#undef  MPI_Reduce_scatter_block_c
+#define MPI_Reduce_scatter_block_c(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_Reduce_scatter_block_c",a1,a2,a3,a4,a5,a6)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Reduce_scatter_c
+#undef  MPI_Reduce_scatter_c
+#define MPI_Reduce_scatter_c(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_Reduce_scatter_c",a1,a2,a3,a4,a5,a6)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Scan_c
+#undef  MPI_Scan_c
+#define MPI_Scan_c(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_Scan_c",a1,a2,a3,a4,a5,a6)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Exscan_c
+#undef  MPI_Exscan_c
+#define MPI_Exscan_c(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_Exscan_c",a1,a2,a3,a4,a5,a6)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Neighbor_allgather_c
+#undef  MPI_Neighbor_allgather_c
+#define MPI_Neighbor_allgather_c(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Neighbor_allgather_c",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Neighbor_allgatherv_c
+#undef  MPI_Neighbor_allgatherv_c
+#define MPI_Neighbor_allgatherv_c(a1,a2,a3,a4,a5,a6,a7,a8) PyMPI_UNAVAILABLE("MPI_Neighbor_allgatherv_c",a1,a2,a3,a4,a5,a6,a7,a8)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Neighbor_alltoall_c
+#undef  MPI_Neighbor_alltoall_c
+#define MPI_Neighbor_alltoall_c(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Neighbor_alltoall_c",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Neighbor_alltoallv_c
+#undef  MPI_Neighbor_alltoallv_c
+#define MPI_Neighbor_alltoallv_c(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Neighbor_alltoallv_c",a1,a2,a3,a4,a5,a6,a7,a8,a9)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Neighbor_alltoallw_c
+#undef  MPI_Neighbor_alltoallw_c
+#define MPI_Neighbor_alltoallw_c(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Neighbor_alltoallw_c",a1,a2,a3,a4,a5,a6,a7,a8,a9)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Ibcast_c
+#undef  MPI_Ibcast_c
+#define MPI_Ibcast_c(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_Ibcast_c",a1,a2,a3,a4,a5,a6)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Igather_c
+#undef  MPI_Igather_c
+#define MPI_Igather_c(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Igather_c",a1,a2,a3,a4,a5,a6,a7,a8,a9)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Igatherv_c
+#undef  MPI_Igatherv_c
+#define MPI_Igatherv_c(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10) PyMPI_UNAVAILABLE("MPI_Igatherv_c",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Iscatter_c
+#undef  MPI_Iscatter_c
+#define MPI_Iscatter_c(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Iscatter_c",a1,a2,a3,a4,a5,a6,a7,a8,a9)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Iscatterv_c
+#undef  MPI_Iscatterv_c
+#define MPI_Iscatterv_c(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10) PyMPI_UNAVAILABLE("MPI_Iscatterv_c",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Iallgather_c
+#undef  MPI_Iallgather_c
+#define MPI_Iallgather_c(a1,a2,a3,a4,a5,a6,a7,a8) PyMPI_UNAVAILABLE("MPI_Iallgather_c",a1,a2,a3,a4,a5,a6,a7,a8)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Iallgatherv_c
+#undef  MPI_Iallgatherv_c
+#define MPI_Iallgatherv_c(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Iallgatherv_c",a1,a2,a3,a4,a5,a6,a7,a8,a9)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Ialltoall_c
+#undef  MPI_Ialltoall_c
+#define MPI_Ialltoall_c(a1,a2,a3,a4,a5,a6,a7,a8) PyMPI_UNAVAILABLE("MPI_Ialltoall_c",a1,a2,a3,a4,a5,a6,a7,a8)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Ialltoallv_c
+#undef  MPI_Ialltoallv_c
+#define MPI_Ialltoallv_c(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10) PyMPI_UNAVAILABLE("MPI_Ialltoallv_c",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Ialltoallw_c
+#undef  MPI_Ialltoallw_c
+#define MPI_Ialltoallw_c(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10) PyMPI_UNAVAILABLE("MPI_Ialltoallw_c",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Ireduce_c
+#undef  MPI_Ireduce_c
+#define MPI_Ireduce_c(a1,a2,a3,a4,a5,a6,a7,a8) PyMPI_UNAVAILABLE("MPI_Ireduce_c",a1,a2,a3,a4,a5,a6,a7,a8)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Iallreduce_c
+#undef  MPI_Iallreduce_c
+#define MPI_Iallreduce_c(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Iallreduce_c",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Ireduce_scatter_block_c
+#undef  MPI_Ireduce_scatter_block_c
+#define MPI_Ireduce_scatter_block_c(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Ireduce_scatter_block_c",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Ireduce_scatter_c
+#undef  MPI_Ireduce_scatter_c
+#define MPI_Ireduce_scatter_c(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Ireduce_scatter_c",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Iscan_c
+#undef  MPI_Iscan_c
+#define MPI_Iscan_c(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Iscan_c",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Iexscan_c
+#undef  MPI_Iexscan_c
+#define MPI_Iexscan_c(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Iexscan_c",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Ineighbor_allgather_c
+#undef  MPI_Ineighbor_allgather_c
+#define MPI_Ineighbor_allgather_c(a1,a2,a3,a4,a5,a6,a7,a8) PyMPI_UNAVAILABLE("MPI_Ineighbor_allgather_c",a1,a2,a3,a4,a5,a6,a7,a8)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Ineighbor_allgatherv_c
+#undef  MPI_Ineighbor_allgatherv_c
+#define MPI_Ineighbor_allgatherv_c(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Ineighbor_allgatherv_c",a1,a2,a3,a4,a5,a6,a7,a8,a9)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Ineighbor_alltoall_c
+#undef  MPI_Ineighbor_alltoall_c
+#define MPI_Ineighbor_alltoall_c(a1,a2,a3,a4,a5,a6,a7,a8) PyMPI_UNAVAILABLE("MPI_Ineighbor_alltoall_c",a1,a2,a3,a4,a5,a6,a7,a8)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Ineighbor_alltoallv_c
+#undef  MPI_Ineighbor_alltoallv_c
+#define MPI_Ineighbor_alltoallv_c(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10) PyMPI_UNAVAILABLE("MPI_Ineighbor_alltoallv_c",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Ineighbor_alltoallw_c
+#undef  MPI_Ineighbor_alltoallw_c
+#define MPI_Ineighbor_alltoallw_c(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10) PyMPI_UNAVAILABLE("MPI_Ineighbor_alltoallw_c",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Bcast_init_c
+#undef  MPI_Bcast_init_c
+#define MPI_Bcast_init_c(a1,a2,a3,a4,a5,a6,a7) PyMPI_UNAVAILABLE("MPI_Bcast_init_c",a1,a2,a3,a4,a5,a6,a7)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Gather_init_c
+#undef  MPI_Gather_init_c
+#define MPI_Gather_init_c(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10) PyMPI_UNAVAILABLE("MPI_Gather_init_c",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Gatherv_init_c
+#undef  MPI_Gatherv_init_c
+#define MPI_Gatherv_init_c(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11) PyMPI_UNAVAILABLE("MPI_Gatherv_init_c",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Scatter_init_c
+#undef  MPI_Scatter_init_c
+#define MPI_Scatter_init_c(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10) PyMPI_UNAVAILABLE("MPI_Scatter_init_c",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Scatterv_init_c
+#undef  MPI_Scatterv_init_c
+#define MPI_Scatterv_init_c(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11) PyMPI_UNAVAILABLE("MPI_Scatterv_init_c",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Allgather_init_c
+#undef  MPI_Allgather_init_c
+#define MPI_Allgather_init_c(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Allgather_init_c",a1,a2,a3,a4,a5,a6,a7,a8,a9)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Allgatherv_init_c
+#undef  MPI_Allgatherv_init_c
+#define MPI_Allgatherv_init_c(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10) PyMPI_UNAVAILABLE("MPI_Allgatherv_init_c",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Alltoall_init_c
+#undef  MPI_Alltoall_init_c
+#define MPI_Alltoall_init_c(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Alltoall_init_c",a1,a2,a3,a4,a5,a6,a7,a8,a9)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Alltoallv_init_c
+#undef  MPI_Alltoallv_init_c
+#define MPI_Alltoallv_init_c(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11) PyMPI_UNAVAILABLE("MPI_Alltoallv_init_c",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Alltoallw_init_c
+#undef  MPI_Alltoallw_init_c
+#define MPI_Alltoallw_init_c(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11) PyMPI_UNAVAILABLE("MPI_Alltoallw_init_c",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Reduce_init_c
+#undef  MPI_Reduce_init_c
+#define MPI_Reduce_init_c(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Reduce_init_c",a1,a2,a3,a4,a5,a6,a7,a8,a9)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Allreduce_init_c
+#undef  MPI_Allreduce_init_c
+#define MPI_Allreduce_init_c(a1,a2,a3,a4,a5,a6,a7,a8) PyMPI_UNAVAILABLE("MPI_Allreduce_init_c",a1,a2,a3,a4,a5,a6,a7,a8)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Reduce_scatter_block_init_c
+#undef  MPI_Reduce_scatter_block_init_c
+#define MPI_Reduce_scatter_block_init_c(a1,a2,a3,a4,a5,a6,a7,a8) PyMPI_UNAVAILABLE("MPI_Reduce_scatter_block_init_c",a1,a2,a3,a4,a5,a6,a7,a8)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Reduce_scatter_init_c
+#undef  MPI_Reduce_scatter_init_c
+#define MPI_Reduce_scatter_init_c(a1,a2,a3,a4,a5,a6,a7,a8) PyMPI_UNAVAILABLE("MPI_Reduce_scatter_init_c",a1,a2,a3,a4,a5,a6,a7,a8)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Scan_init_c
+#undef  MPI_Scan_init_c
+#define MPI_Scan_init_c(a1,a2,a3,a4,a5,a6,a7,a8) PyMPI_UNAVAILABLE("MPI_Scan_init_c",a1,a2,a3,a4,a5,a6,a7,a8)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Exscan_init_c
+#undef  MPI_Exscan_init_c
+#define MPI_Exscan_init_c(a1,a2,a3,a4,a5,a6,a7,a8) PyMPI_UNAVAILABLE("MPI_Exscan_init_c",a1,a2,a3,a4,a5,a6,a7,a8)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Neighbor_allgather_init_c
+#undef  MPI_Neighbor_allgather_init_c
+#define MPI_Neighbor_allgather_init_c(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Neighbor_allgather_init_c",a1,a2,a3,a4,a5,a6,a7,a8,a9)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Neighbor_allgatherv_init_c
+#undef  MPI_Neighbor_allgatherv_init_c
+#define MPI_Neighbor_allgatherv_init_c(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10) PyMPI_UNAVAILABLE("MPI_Neighbor_allgatherv_init_c",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Neighbor_alltoall_init_c
+#undef  MPI_Neighbor_alltoall_init_c
+#define MPI_Neighbor_alltoall_init_c(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Neighbor_alltoall_init_c",a1,a2,a3,a4,a5,a6,a7,a8,a9)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Neighbor_alltoallv_init_c
+#undef  MPI_Neighbor_alltoallv_init_c
+#define MPI_Neighbor_alltoallv_init_c(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11) PyMPI_UNAVAILABLE("MPI_Neighbor_alltoallv_init_c",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Neighbor_alltoallw_init_c
+#undef  MPI_Neighbor_alltoallw_init_c
+#define MPI_Neighbor_alltoallw_init_c(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11) PyMPI_UNAVAILABLE("MPI_Neighbor_alltoallw_init_c",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_WIN_NULL
@@ -2423,37 +3143,6 @@ typedef int (MPIAPI PyMPI_MPI_Delete_function)(MPI_Comm,int,void*,void*);
 #define MPI_Win_sync(a1) PyMPI_UNAVAILABLE("MPI_Win_sync",a1)
 #endif
 
-#ifndef PyMPI_HAVE_MPI_Win_get_errhandler
-#undef  MPI_Win_get_errhandler
-#define MPI_Win_get_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_Win_get_errhandler",a1,a2)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Win_set_errhandler
-#undef  MPI_Win_set_errhandler
-#define MPI_Win_set_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_Win_set_errhandler",a1,a2)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Win_errhandler_fn
-#undef  MPI_Win_errhandler_fn
-typedef void (MPIAPI PyMPI_MPI_Win_errhandler_fn)(MPI_Win*,int*,...);
-#define MPI_Win_errhandler_fn PyMPI_MPI_Win_errhandler_fn
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Win_errhandler_function
-#undef  MPI_Win_errhandler_function
-#define MPI_Win_errhandler_function MPI_Win_errhandler_fn
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Win_create_errhandler
-#undef  MPI_Win_create_errhandler
-#define MPI_Win_create_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_Win_create_errhandler",a1,a2)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Win_call_errhandler
-#undef  MPI_Win_call_errhandler
-#define MPI_Win_call_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_Win_call_errhandler",a1,a2)
-#endif
-
 #ifndef PyMPI_HAVE_MPI_Win_get_name
 #undef  MPI_Win_get_name
 #define MPI_Win_get_name(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Win_get_name",a1,a2,a3)
@@ -2569,6 +3258,97 @@ typedef int (MPIAPI PyMPI_MPI_Win_delete_attr_function)(MPI_Win,int,void*,void*)
 #ifndef PyMPI_HAVE_MPI_Win_free_keyval
 #undef  MPI_Win_free_keyval
 #define MPI_Win_free_keyval(a1) PyMPI_UNAVAILABLE("MPI_Win_free_keyval",a1)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Win_errhandler_fn
+#undef  MPI_Win_errhandler_fn
+typedef void (MPIAPI PyMPI_MPI_Win_errhandler_fn)(MPI_Win*,int*,...);
+#define MPI_Win_errhandler_fn PyMPI_MPI_Win_errhandler_fn
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Win_errhandler_function
+#undef  MPI_Win_errhandler_function
+#define MPI_Win_errhandler_function MPI_Win_errhandler_fn
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Win_create_errhandler
+#undef  MPI_Win_create_errhandler
+#define MPI_Win_create_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_Win_create_errhandler",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Win_get_errhandler
+#undef  MPI_Win_get_errhandler
+#define MPI_Win_get_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_Win_get_errhandler",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Win_set_errhandler
+#undef  MPI_Win_set_errhandler
+#define MPI_Win_set_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_Win_set_errhandler",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Win_call_errhandler
+#undef  MPI_Win_call_errhandler
+#define MPI_Win_call_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_Win_call_errhandler",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Win_create_c
+#undef  MPI_Win_create_c
+#define MPI_Win_create_c(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_Win_create_c",a1,a2,a3,a4,a5,a6)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Win_allocate_c
+#undef  MPI_Win_allocate_c
+#define MPI_Win_allocate_c(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_Win_allocate_c",a1,a2,a3,a4,a5,a6)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Win_allocate_shared_c
+#undef  MPI_Win_allocate_shared_c
+#define MPI_Win_allocate_shared_c(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_Win_allocate_shared_c",a1,a2,a3,a4,a5,a6)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Win_shared_query_c
+#undef  MPI_Win_shared_query_c
+#define MPI_Win_shared_query_c(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Win_shared_query_c",a1,a2,a3,a4,a5)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Get_c
+#undef  MPI_Get_c
+#define MPI_Get_c(a1,a2,a3,a4,a5,a6,a7,a8) PyMPI_UNAVAILABLE("MPI_Get_c",a1,a2,a3,a4,a5,a6,a7,a8)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Put_c
+#undef  MPI_Put_c
+#define MPI_Put_c(a1,a2,a3,a4,a5,a6,a7,a8) PyMPI_UNAVAILABLE("MPI_Put_c",a1,a2,a3,a4,a5,a6,a7,a8)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Accumulate_c
+#undef  MPI_Accumulate_c
+#define MPI_Accumulate_c(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Accumulate_c",a1,a2,a3,a4,a5,a6,a7,a8,a9)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Get_accumulate_c
+#undef  MPI_Get_accumulate_c
+#define MPI_Get_accumulate_c(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12) PyMPI_UNAVAILABLE("MPI_Get_accumulate_c",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Rget_c
+#undef  MPI_Rget_c
+#define MPI_Rget_c(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Rget_c",a1,a2,a3,a4,a5,a6,a7,a8,a9)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Rput_c
+#undef  MPI_Rput_c
+#define MPI_Rput_c(a1,a2,a3,a4,a5,a6,a7,a8,a9) PyMPI_UNAVAILABLE("MPI_Rput_c",a1,a2,a3,a4,a5,a6,a7,a8,a9)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Raccumulate_c
+#undef  MPI_Raccumulate_c
+#define MPI_Raccumulate_c(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10) PyMPI_UNAVAILABLE("MPI_Raccumulate_c",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Rget_accumulate_c
+#undef  MPI_Rget_accumulate_c
+#define MPI_Rget_accumulate_c(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13) PyMPI_UNAVAILABLE("MPI_Rget_accumulate_c",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_FILE_NULL
@@ -2916,16 +3696,6 @@ typedef int (MPIAPI PyMPI_MPI_Win_delete_attr_function)(MPI_Win,int,void*,void*)
 #define MPI_File_sync(a1) PyMPI_UNAVAILABLE("MPI_File_sync",a1)
 #endif
 
-#ifndef PyMPI_HAVE_MPI_File_get_errhandler
-#undef  MPI_File_get_errhandler
-#define MPI_File_get_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_File_get_errhandler",a1,a2)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_File_set_errhandler
-#undef  MPI_File_set_errhandler
-#define MPI_File_set_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_File_set_errhandler",a1,a2)
-#endif
-
 #ifndef PyMPI_HAVE_MPI_File_errhandler_fn
 #undef  MPI_File_errhandler_fn
 typedef void (MPIAPI PyMPI_MPI_File_errhandler_fn)(MPI_File*,int*,...);
@@ -2940,6 +3710,16 @@ typedef void (MPIAPI PyMPI_MPI_File_errhandler_fn)(MPI_File*,int*,...);
 #ifndef PyMPI_HAVE_MPI_File_create_errhandler
 #undef  MPI_File_create_errhandler
 #define MPI_File_create_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_File_create_errhandler",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_File_get_errhandler
+#undef  MPI_File_get_errhandler
+#define MPI_File_get_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_File_get_errhandler",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_File_set_errhandler
+#undef  MPI_File_set_errhandler
+#define MPI_File_set_errhandler(a1,a2) PyMPI_UNAVAILABLE("MPI_File_set_errhandler",a1,a2)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_File_call_errhandler
@@ -2974,24 +3754,165 @@ typedef int (MPIAPI PyMPI_MPI_Datarep_extent_function)(MPI_Datatype,MPI_Aint*,vo
 #define MPI_Register_datarep(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Register_datarep",a1,a2,a3,a4,a5)
 #endif
 
-#ifndef PyMPI_HAVE_MPI_ERRHANDLER_NULL
-#undef  MPI_ERRHANDLER_NULL
-#define MPI_ERRHANDLER_NULL ((MPI_Errhandler)0)
+#ifndef PyMPI_HAVE_MPI_File_read_at_c
+#undef  MPI_File_read_at_c
+#define MPI_File_read_at_c(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_File_read_at_c",a1,a2,a3,a4,a5,a6)
 #endif
 
-#ifndef PyMPI_HAVE_MPI_ERRORS_RETURN
-#undef  MPI_ERRORS_RETURN
-#define MPI_ERRORS_RETURN ((MPI_Errhandler)MPI_ERRHANDLER_NULL)
+#ifndef PyMPI_HAVE_MPI_File_read_at_all_c
+#undef  MPI_File_read_at_all_c
+#define MPI_File_read_at_all_c(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_File_read_at_all_c",a1,a2,a3,a4,a5,a6)
 #endif
 
-#ifndef PyMPI_HAVE_MPI_ERRORS_ARE_FATAL
-#undef  MPI_ERRORS_ARE_FATAL
-#define MPI_ERRORS_ARE_FATAL ((MPI_Errhandler)MPI_ERRHANDLER_NULL)
+#ifndef PyMPI_HAVE_MPI_File_write_at_c
+#undef  MPI_File_write_at_c
+#define MPI_File_write_at_c(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_File_write_at_c",a1,a2,a3,a4,a5,a6)
 #endif
 
-#ifndef PyMPI_HAVE_MPI_Errhandler_free
-#undef  MPI_Errhandler_free
-#define MPI_Errhandler_free(a1) PyMPI_UNAVAILABLE("MPI_Errhandler_free",a1)
+#ifndef PyMPI_HAVE_MPI_File_write_at_all_c
+#undef  MPI_File_write_at_all_c
+#define MPI_File_write_at_all_c(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_File_write_at_all_c",a1,a2,a3,a4,a5,a6)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_File_iread_at_c
+#undef  MPI_File_iread_at_c
+#define MPI_File_iread_at_c(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_File_iread_at_c",a1,a2,a3,a4,a5,a6)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_File_iread_at_all_c
+#undef  MPI_File_iread_at_all_c
+#define MPI_File_iread_at_all_c(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_File_iread_at_all_c",a1,a2,a3,a4,a5,a6)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_File_iwrite_at_c
+#undef  MPI_File_iwrite_at_c
+#define MPI_File_iwrite_at_c(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_File_iwrite_at_c",a1,a2,a3,a4,a5,a6)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_File_iwrite_at_all_c
+#undef  MPI_File_iwrite_at_all_c
+#define MPI_File_iwrite_at_all_c(a1,a2,a3,a4,a5,a6) PyMPI_UNAVAILABLE("MPI_File_iwrite_at_all_c",a1,a2,a3,a4,a5,a6)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_File_read_c
+#undef  MPI_File_read_c
+#define MPI_File_read_c(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_File_read_c",a1,a2,a3,a4,a5)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_File_read_all_c
+#undef  MPI_File_read_all_c
+#define MPI_File_read_all_c(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_File_read_all_c",a1,a2,a3,a4,a5)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_File_write_c
+#undef  MPI_File_write_c
+#define MPI_File_write_c(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_File_write_c",a1,a2,a3,a4,a5)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_File_write_all_c
+#undef  MPI_File_write_all_c
+#define MPI_File_write_all_c(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_File_write_all_c",a1,a2,a3,a4,a5)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_File_iread_c
+#undef  MPI_File_iread_c
+#define MPI_File_iread_c(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_File_iread_c",a1,a2,a3,a4,a5)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_File_iread_all_c
+#undef  MPI_File_iread_all_c
+#define MPI_File_iread_all_c(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_File_iread_all_c",a1,a2,a3,a4,a5)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_File_iwrite_c
+#undef  MPI_File_iwrite_c
+#define MPI_File_iwrite_c(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_File_iwrite_c",a1,a2,a3,a4,a5)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_File_iwrite_all_c
+#undef  MPI_File_iwrite_all_c
+#define MPI_File_iwrite_all_c(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_File_iwrite_all_c",a1,a2,a3,a4,a5)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_File_read_shared_c
+#undef  MPI_File_read_shared_c
+#define MPI_File_read_shared_c(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_File_read_shared_c",a1,a2,a3,a4,a5)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_File_write_shared_c
+#undef  MPI_File_write_shared_c
+#define MPI_File_write_shared_c(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_File_write_shared_c",a1,a2,a3,a4,a5)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_File_iread_shared_c
+#undef  MPI_File_iread_shared_c
+#define MPI_File_iread_shared_c(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_File_iread_shared_c",a1,a2,a3,a4,a5)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_File_iwrite_shared_c
+#undef  MPI_File_iwrite_shared_c
+#define MPI_File_iwrite_shared_c(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_File_iwrite_shared_c",a1,a2,a3,a4,a5)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_File_read_ordered_c
+#undef  MPI_File_read_ordered_c
+#define MPI_File_read_ordered_c(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_File_read_ordered_c",a1,a2,a3,a4,a5)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_File_write_ordered_c
+#undef  MPI_File_write_ordered_c
+#define MPI_File_write_ordered_c(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_File_write_ordered_c",a1,a2,a3,a4,a5)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_File_read_at_all_begin_c
+#undef  MPI_File_read_at_all_begin_c
+#define MPI_File_read_at_all_begin_c(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_File_read_at_all_begin_c",a1,a2,a3,a4,a5)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_File_write_at_all_begin_c
+#undef  MPI_File_write_at_all_begin_c
+#define MPI_File_write_at_all_begin_c(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_File_write_at_all_begin_c",a1,a2,a3,a4,a5)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_File_read_all_begin_c
+#undef  MPI_File_read_all_begin_c
+#define MPI_File_read_all_begin_c(a1,a2,a3,a4) PyMPI_UNAVAILABLE("MPI_File_read_all_begin_c",a1,a2,a3,a4)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_File_write_all_begin_c
+#undef  MPI_File_write_all_begin_c
+#define MPI_File_write_all_begin_c(a1,a2,a3,a4) PyMPI_UNAVAILABLE("MPI_File_write_all_begin_c",a1,a2,a3,a4)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_File_read_ordered_begin_c
+#undef  MPI_File_read_ordered_begin_c
+#define MPI_File_read_ordered_begin_c(a1,a2,a3,a4) PyMPI_UNAVAILABLE("MPI_File_read_ordered_begin_c",a1,a2,a3,a4)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_File_write_ordered_begin_c
+#undef  MPI_File_write_ordered_begin_c
+#define MPI_File_write_ordered_begin_c(a1,a2,a3,a4) PyMPI_UNAVAILABLE("MPI_File_write_ordered_begin_c",a1,a2,a3,a4)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_File_get_type_extent_c
+#undef  MPI_File_get_type_extent_c
+#define MPI_File_get_type_extent_c(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_File_get_type_extent_c",a1,a2,a3)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Datarep_conversion_function_c
+#undef  MPI_Datarep_conversion_function_c
+typedef int (MPIAPI PyMPI_MPI_Datarep_conversion_function_c)(void*,MPI_Datatype,MPI_Count,void*,MPI_Offset,void*);
+#define MPI_Datarep_conversion_function_c PyMPI_MPI_Datarep_conversion_function_c
+#endif
+
+#ifndef PyMPI_HAVE_MPI_CONVERSION_FN_NULL_C
+#undef  MPI_CONVERSION_FN_NULL_C
+#define MPI_CONVERSION_FN_NULL_C ((MPI_Datarep_conversion_function_c*)0)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Register_datarep_c
+#undef  MPI_Register_datarep_c
+#define MPI_Register_datarep_c(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Register_datarep_c",a1,a2,a3,a4,a5)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_MAX_ERROR_STRING
@@ -3179,6 +4100,11 @@ typedef int (MPIAPI PyMPI_MPI_Datarep_extent_function)(MPI_Datatype,MPI_Aint*,vo
 #define MPI_ERR_NAME (MPI_ERR_UNKNOWN)
 #endif
 
+#ifndef PyMPI_HAVE_MPI_ERR_PROC_ABORTED
+#undef  MPI_ERR_PROC_ABORTED
+#define MPI_ERR_PROC_ABORTED (MPI_ERR_UNKNOWN)
+#endif
+
 #ifndef PyMPI_HAVE_MPI_ERR_FILE
 #undef  MPI_ERR_FILE
 #define MPI_ERR_FILE (MPI_ERR_ARG)
@@ -3259,6 +4185,11 @@ typedef int (MPIAPI PyMPI_MPI_Datarep_extent_function)(MPI_Datatype,MPI_Aint*,vo
 #define MPI_ERR_IO (MPI_ERR_UNKNOWN)
 #endif
 
+#ifndef PyMPI_HAVE_MPI_ERR_VALUE_TOO_LARGE
+#undef  MPI_ERR_VALUE_TOO_LARGE
+#define MPI_ERR_VALUE_TOO_LARGE (MPI_ERR_UNKNOWN)
+#endif
+
 #ifndef PyMPI_HAVE_MPI_ERR_WIN
 #undef  MPI_ERR_WIN
 #define MPI_ERR_WIN (MPI_ERR_ARG)
@@ -3317,6 +4248,11 @@ typedef int (MPIAPI PyMPI_MPI_Datarep_extent_function)(MPI_Datatype,MPI_Aint*,vo
 #ifndef PyMPI_HAVE_MPI_ERR_RMA_FLAVOR
 #undef  MPI_ERR_RMA_FLAVOR
 #define MPI_ERR_RMA_FLAVOR (MPI_ERR_UNKNOWN)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_ERR_SESSION
+#undef  MPI_ERR_SESSION
+#define MPI_ERR_SESSION (MPI_ERR_ARG)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Alloc_mem
@@ -3440,6 +4376,26 @@ typedef int PyMPI_MPI_Fint;
 #define MPI_Fint PyMPI_MPI_Fint
 #endif
 
+#ifndef PyMPI_HAVE_MPI_F_SOURCE
+#undef  MPI_F_SOURCE
+#define MPI_F_SOURCE (MPI_UNDEFINED)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_F_TAG
+#undef  MPI_F_TAG
+#define MPI_F_TAG (MPI_UNDEFINED)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_F_ERROR
+#undef  MPI_F_ERROR
+#define MPI_F_ERROR (MPI_UNDEFINED)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_F_STATUS_SIZE
+#undef  MPI_F_STATUS_SIZE
+#define MPI_F_STATUS_SIZE (MPI_UNDEFINED)
+#endif
+
 #ifndef PyMPI_HAVE_MPI_F_STATUS_IGNORE
 #undef  MPI_F_STATUS_IGNORE
 #define MPI_F_STATUS_IGNORE ((MPI_Fint*)0)
@@ -3480,14 +4436,19 @@ typedef int PyMPI_MPI_Fint;
 #define MPI_Op_c2f(a1) ((MPI_Fint)0)
 #endif
 
+#ifndef PyMPI_HAVE_MPI_Group_c2f
+#undef  MPI_Group_c2f
+#define MPI_Group_c2f(a1) ((MPI_Fint)0)
+#endif
+
 #ifndef PyMPI_HAVE_MPI_Info_c2f
 #undef  MPI_Info_c2f
 #define MPI_Info_c2f(a1) ((MPI_Fint)0)
 #endif
 
-#ifndef PyMPI_HAVE_MPI_Group_c2f
-#undef  MPI_Group_c2f
-#define MPI_Group_c2f(a1) ((MPI_Fint)0)
+#ifndef PyMPI_HAVE_MPI_Session_c2f
+#undef  MPI_Session_c2f
+#define MPI_Session_c2f(a1) ((MPI_Fint)0)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Comm_c2f
@@ -3530,14 +4491,19 @@ typedef int PyMPI_MPI_Fint;
 #define MPI_Op_f2c(a1) MPI_OP_NULL
 #endif
 
+#ifndef PyMPI_HAVE_MPI_Group_f2c
+#undef  MPI_Group_f2c
+#define MPI_Group_f2c(a1) MPI_GROUP_NULL
+#endif
+
 #ifndef PyMPI_HAVE_MPI_Info_f2c
 #undef  MPI_Info_f2c
 #define MPI_Info_f2c(a1) MPI_INFO_NULL
 #endif
 
-#ifndef PyMPI_HAVE_MPI_Group_f2c
-#undef  MPI_Group_f2c
-#define MPI_Group_f2c(a1) MPI_GROUP_NULL
+#ifndef PyMPI_HAVE_MPI_Session_f2c
+#undef  MPI_Session_f2c
+#define MPI_Session_f2c(a1) MPI_SESSION_NULL
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Comm_f2c
@@ -3558,6 +4524,149 @@ typedef int PyMPI_MPI_Fint;
 #ifndef PyMPI_HAVE_MPI_Errhandler_f2c
 #undef  MPI_Errhandler_f2c
 #define MPI_Errhandler_f2c(a1) MPI_ERRHANDLER_NULL
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Info_get
+#undef  MPI_Info_get
+#define MPI_Info_get(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Info_get",a1,a2,a3,a4,a5)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Info_get_valuelen
+#undef  MPI_Info_get_valuelen
+#define MPI_Info_get_valuelen(a1,a2,a3,a4) PyMPI_UNAVAILABLE("MPI_Info_get_valuelen",a1,a2,a3,a4)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Attr_get
+#undef  MPI_Attr_get
+#define MPI_Attr_get(a1,a2,a3,a4) PyMPI_UNAVAILABLE("MPI_Attr_get",a1,a2,a3,a4)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Attr_put
+#undef  MPI_Attr_put
+#define MPI_Attr_put(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Attr_put",a1,a2,a3)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Attr_delete
+#undef  MPI_Attr_delete
+#define MPI_Attr_delete(a1,a2) PyMPI_UNAVAILABLE("MPI_Attr_delete",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Copy_function
+#undef  MPI_Copy_function
+typedef int (MPIAPI PyMPI_MPI_Copy_function)(MPI_Comm,int,void*,void*,void*,int*);
+#define MPI_Copy_function PyMPI_MPI_Copy_function
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Delete_function
+#undef  MPI_Delete_function
+typedef int (MPIAPI PyMPI_MPI_Delete_function)(MPI_Comm,int,void*,void*);
+#define MPI_Delete_function PyMPI_MPI_Delete_function
+#endif
+
+#ifndef PyMPI_HAVE_MPI_DUP_FN
+#undef  MPI_DUP_FN
+#define MPI_DUP_FN ((MPI_Copy_function*)0)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_NULL_COPY_FN
+#undef  MPI_NULL_COPY_FN
+#define MPI_NULL_COPY_FN ((MPI_Copy_function*)0)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_NULL_DELETE_FN
+#undef  MPI_NULL_DELETE_FN
+#define MPI_NULL_DELETE_FN ((MPI_Delete_function*)0)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Keyval_create
+#undef  MPI_Keyval_create
+#define MPI_Keyval_create(a1,a2,a3,a4) PyMPI_UNAVAILABLE("MPI_Keyval_create",a1,a2,a3,a4)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Keyval_free
+#undef  MPI_Keyval_free
+#define MPI_Keyval_free(a1) PyMPI_UNAVAILABLE("MPI_Keyval_free",a1)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Errhandler_get
+#undef  MPI_Errhandler_get
+#define MPI_Errhandler_get(a1,a2) PyMPI_UNAVAILABLE("MPI_Errhandler_get",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Errhandler_set
+#undef  MPI_Errhandler_set
+#define MPI_Errhandler_set(a1,a2) PyMPI_UNAVAILABLE("MPI_Errhandler_set",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Handler_function
+#undef  MPI_Handler_function
+typedef void (MPIAPI PyMPI_MPI_Handler_function)(MPI_Comm*,int*,...);
+#define MPI_Handler_function PyMPI_MPI_Handler_function
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Errhandler_create
+#undef  MPI_Errhandler_create
+#define MPI_Errhandler_create(a1,a2) PyMPI_UNAVAILABLE("MPI_Errhandler_create",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Address
+#undef  MPI_Address
+#define MPI_Address(a1,a2) PyMPI_UNAVAILABLE("MPI_Address",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_UB
+#undef  MPI_UB
+#define MPI_UB ((MPI_Datatype)MPI_DATATYPE_NULL)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_LB
+#undef  MPI_LB
+#define MPI_LB ((MPI_Datatype)MPI_DATATYPE_NULL)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Type_lb
+#undef  MPI_Type_lb
+#define MPI_Type_lb(a1,a2) PyMPI_UNAVAILABLE("MPI_Type_lb",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Type_ub
+#undef  MPI_Type_ub
+#define MPI_Type_ub(a1,a2) PyMPI_UNAVAILABLE("MPI_Type_ub",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Type_extent
+#undef  MPI_Type_extent
+#define MPI_Type_extent(a1,a2) PyMPI_UNAVAILABLE("MPI_Type_extent",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Type_hvector
+#undef  MPI_Type_hvector
+#define MPI_Type_hvector(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Type_hvector",a1,a2,a3,a4,a5)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Type_hindexed
+#undef  MPI_Type_hindexed
+#define MPI_Type_hindexed(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Type_hindexed",a1,a2,a3,a4,a5)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Type_struct
+#undef  MPI_Type_struct
+#define MPI_Type_struct(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Type_struct",a1,a2,a3,a4,a5)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_COMBINER_HVECTOR_INTEGER
+#undef  MPI_COMBINER_HVECTOR_INTEGER
+#define MPI_COMBINER_HVECTOR_INTEGER (MPI_UNDEFINED)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_COMBINER_HINDEXED_INTEGER
+#undef  MPI_COMBINER_HINDEXED_INTEGER
+#define MPI_COMBINER_HINDEXED_INTEGER (MPI_UNDEFINED)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_COMBINER_STRUCT_INTEGER
+#undef  MPI_COMBINER_STRUCT_INTEGER
+#define MPI_COMBINER_STRUCT_INTEGER (MPI_UNDEFINED)
 #endif
 
 #endif /* !PyMPI_MISSING_H */

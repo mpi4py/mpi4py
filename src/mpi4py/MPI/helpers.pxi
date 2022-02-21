@@ -210,6 +210,23 @@ cdef inline int del_Op(MPI_Op* ob):
     return MPI_Op_free(ob)
 
 #------------------------------------------------------------------------------
+# Group
+
+cdef inline Group new_Group(MPI_Group ob):
+    cdef Group group = Group.__new__(Group)
+    group.ob_mpi = ob
+    return group
+
+
+cdef inline int del_Group(MPI_Group* ob):
+    if ob    == NULL            : return 0
+    if ob[0] == MPI_GROUP_NULL  : return 0
+    if ob[0] == MPI_GROUP_EMPTY : return 0
+    #
+    if not mpi_active(): return 0
+    return MPI_Group_free(ob)
+
+#------------------------------------------------------------------------------
 # Info
 
 cdef inline Info new_Info(MPI_Info ob):
@@ -230,21 +247,46 @@ cdef inline MPI_Info arg_Info(object info):
     return (<Info>info).ob_mpi
 
 #------------------------------------------------------------------------------
-# Group
+# Errhandler
 
-cdef inline Group new_Group(MPI_Group ob):
-    cdef Group group = Group.__new__(Group)
-    group.ob_mpi = ob
-    return group
+cdef inline Errhandler new_Errhandler(MPI_Errhandler ob):
+    cdef Errhandler errhandler = Errhandler.__new__(Errhandler)
+    errhandler.ob_mpi = ob
+    return errhandler
 
-
-cdef inline int del_Group(MPI_Group* ob):
-    if ob    == NULL            : return 0
-    if ob[0] == MPI_GROUP_NULL  : return 0
-    if ob[0] == MPI_GROUP_EMPTY : return 0
+cdef inline int del_Errhandler(MPI_Errhandler* ob):
+    if ob    == NULL                 : return 0
+    if ob[0] == MPI_ERRHANDLER_NULL  : return 0
+    if ob[0] == MPI_ERRORS_RETURN    : return 0
+    if ob[0] == MPI_ERRORS_ARE_FATAL : return 0
     #
     if not mpi_active(): return 0
-    return MPI_Group_free(ob)
+    return MPI_Errhandler_free(ob)
+
+cdef inline MPI_Errhandler arg_Errhandler(object errhandler):
+    if errhandler is not None:
+        return (<Errhandler>errhandler).ob_mpi
+    cdef MPI_Errhandler eh_default = MPI_ERRORS_ARE_FATAL
+    cdef int opt = options.errors
+    if   opt == 0: return eh_default
+    elif opt == 1: return MPI_ERRORS_RETURN
+    elif opt == 2: return MPI_ERRORS_ARE_FATAL
+    else:          return eh_default
+
+#------------------------------------------------------------------------------
+# Session
+
+cdef inline Session new_Session(MPI_Session ob):
+    cdef Session session = Session.__new__(Session)
+    session.ob_mpi = ob
+    return session
+
+cdef inline int del_Session(MPI_Session* ob):
+    if ob    == NULL              : return 0
+    if ob[0] == MPI_SESSION_NULL  : return 0
+    #
+    if not mpi_active(): return 0
+    return MPI_Session_finalize(ob)
 
 #------------------------------------------------------------------------------
 # Comm
@@ -308,22 +350,5 @@ cdef inline int del_File(MPI_File* ob):
     #
     if not mpi_active(): return 0
     return MPI_File_close(ob)
-
-#------------------------------------------------------------------------------
-# Errhandler
-
-cdef inline Errhandler new_Errhandler(MPI_Errhandler ob):
-    cdef Errhandler errhandler = Errhandler.__new__(Errhandler)
-    errhandler.ob_mpi = ob
-    return errhandler
-
-cdef inline int del_Errhandler(MPI_Errhandler* ob):
-    if ob    == NULL                 : return 0
-    if ob[0] == MPI_ERRHANDLER_NULL  : return 0
-    if ob[0] == MPI_ERRORS_RETURN    : return 0
-    if ob[0] == MPI_ERRORS_ARE_FATAL : return 0
-    #
-    if not mpi_active(): return 0
-    return MPI_Errhandler_free(ob)
 
 #------------------------------------------------------------------------------

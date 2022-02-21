@@ -28,12 +28,12 @@ struct  = join(typedef, 'struct')
 basic_type    = r'(?:void|int|char\s*\*{1,3})'
 integral_type = r'MPI_(?:Aint|Offset|Count|Fint)'
 struct_type   = r'MPI_(?:Status|F08_status)'
-opaque_type   = r'MPI_(?:Datatype|Request|Message|Op|Info|Group|Errhandler|Comm|Win|File)'
+opaque_type   = r'MPI_(?:Datatype|Request|Message|Op|Info|Group|Errhandler|Session|Comm|Win|File)'
 any_mpi_type  = r'(?:%s|%s|%s)' % (struct_type, integral_type, opaque_type)
 
 upper_name  = r'MPI_[A-Z0-9_]+'
 camel_name  = r'MPI_[A-Z][a-z0-9_]+'
-usrfun_name = camel_name + r'_(?:function|fn)'
+usrfun_name = camel_name + r'_(?:function|function_c|fn)'
 
 arg_list = r'.*'
 ret_type = r'void|int|double|MPI_Aint'
