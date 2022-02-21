@@ -8,6 +8,10 @@ class TestErrhandler(unittest.TestCase):
         self.assertFalse(MPI.ERRHANDLER_NULL)
         self.assertTrue(MPI.ERRORS_ARE_FATAL)
         self.assertTrue(MPI.ERRORS_RETURN)
+        if MPI.VERSION >= 4:
+            self.assertTrue(MPI.ERRORS_ABORT)
+        else:
+            self.assertFalse(MPI.ERRORS_ABORT)
 
     def testCommGetSetErrhandler(self):
         for COMM in [MPI.COMM_SELF, MPI.COMM_WORLD]:
