@@ -50,22 +50,11 @@ cdef class Info:
         CHKERR( MPI_Info_dup(self.ob_mpi, &info.ob_mpi) )
         return info
 
-    def Get(self, key: str, int maxlen: int = -1) -> Optional[str]:
+    def Get(self, key: str) -> Optional[str]:
         """
         Retrieve the value associated with a key
         """
-        if maxlen < 0: maxlen = MPI_MAX_INFO_VAL
-        if maxlen > MPI_MAX_INFO_VAL: maxlen = MPI_MAX_INFO_VAL
-        cdef char *ckey = NULL
-        cdef char *cvalue = NULL
-        cdef int flag = 0
-        key = asmpistr(key, &ckey)
-        cdef tmp = allocate((maxlen+1), sizeof(char), &cvalue)
-        cvalue[0] = 0  # just in case
-        CHKERR( MPI_Info_get(self.ob_mpi, ckey, maxlen, cvalue, &flag) )
-        cvalue[maxlen] = 0 # just in case
-        if not flag: return None
-        return mpistr(cvalue)
+        return self.Get_string(key)
 
     def Set(self, key: str, value: str) -> None:
         """
@@ -85,6 +74,20 @@ cdef class Info:
         cdef char *ckey = NULL
         key = asmpistr(key, &ckey)
         CHKERR( MPI_Info_delete(self.ob_mpi, ckey) )
+
+    def Get_string(self, key: str) -> Optional[str]:
+        """
+        Retrieve the value associated with a key
+        """
+        cdef char *ckey = NULL
+        cdef char *cvalue = NULL
+        cdef int buflen = MPI_MAX_INFO_VAL
+        cdef int flag = 0
+        key = asmpistr(key, &ckey)
+        cdef tmp = allocate(buflen+1, sizeof(char), &cvalue)
+        CHKERR( MPI_Info_get_string(self.ob_mpi, ckey, &buflen, cvalue, &flag) )
+        if not flag: return None
+        return mpistr(cvalue)
 
     def Get_nkeys(self) -> int:
         """
@@ -132,11 +135,12 @@ cdef class Info:
     def __contains__(self, key: str) -> bool:
         if not self: return False
         cdef char *ckey = NULL
-        cdef int dummy = 0
-        cdef int haskey = 0
+        cdef char cvalue[1]
+        cdef int buflen = 0
+        cdef int flag = 0
         key = asmpistr(key, &ckey)
-        CHKERR( MPI_Info_get_valuelen(self.ob_mpi, ckey, &dummy, &haskey) )
-        return <bint>haskey
+        CHKERR( MPI_Info_get_string(self.ob_mpi, ckey, &buflen, cvalue, &flag) )
+        return <bint>flag
 
     def __iter__(self) -> Iterator[str]:
         return iter(self.keys())

@@ -70,6 +70,10 @@ class TestInfo(unittest.TestCase):
         value = self.INFO.Get('key')
         self.assertEqual(value, None)
 
+    def testGetString(self):
+        value = self.INFO.Get_string('key')
+        self.assertEqual(value, None)
+
     def testGetNKeys(self):
         self.assertEqual(self.INFO.Get_nkeys(), 0)
 
