@@ -58,6 +58,7 @@ SWIG_From_dec(Type)(Type v) {
 %define SWIG_TYPECHECK_MPI_File       408 %enddef
 %define SWIG_TYPECHECK_MPI_Win        409 %enddef
 %define SWIG_TYPECHECK_MPI_Errhandler 410 %enddef
+%define SWIG_TYPECHECK_MPI_Session    411 %enddef
 
 /* ---------------------------------------------------------------- */
 

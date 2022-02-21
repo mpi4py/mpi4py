@@ -12,6 +12,7 @@ class TestObjModel(unittest.TestCase):
         MPI.REQUEST_NULL,
         MPI.INFO_NULL,
         MPI.ERRHANDLER_NULL,
+        MPI.SESSION_NULL,
         MPI.GROUP_NULL,
         MPI.WIN_NULL,
         MPI.OP_NULL,

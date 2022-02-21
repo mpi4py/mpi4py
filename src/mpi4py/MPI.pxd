@@ -14,6 +14,7 @@ from mpi4py.libmpi cimport MPI_Op
 from mpi4py.libmpi cimport MPI_Group
 from mpi4py.libmpi cimport MPI_Info
 from mpi4py.libmpi cimport MPI_Errhandler
+from mpi4py.libmpi cimport MPI_Session
 from mpi4py.libmpi cimport MPI_Comm
 from mpi4py.libmpi cimport MPI_Win
 from mpi4py.libmpi cimport MPI_File
@@ -104,6 +105,14 @@ ctypedef public api class Errhandler [
     cdef MPI_Errhandler ob_mpi
     cdef unsigned       flags
     cdef object       __weakref__
+
+ctypedef public api class Session [
+    type   PyMPISession_Type,
+    object PyMPISessionObject,
+    ]:
+    cdef MPI_Session ob_mpi
+    cdef unsigned    flags
+    cdef object     __weakref__
 
 ctypedef public api class Comm [
     type   PyMPIComm_Type,
