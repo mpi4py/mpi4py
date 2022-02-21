@@ -518,6 +518,47 @@ cdef class Comm:
         request.ob_buf = rmsg
         return request
 
+    # Partitioned Communication
+    # -------------------------
+
+    def Psend_init(
+        self,
+        buf: BufSpec,
+        int partitions: int,
+        int dest: int,
+        int tag: int = 0,
+        Info info: Info = INFO_NULL,
+    ) -> Prequest:
+        """
+        Create request for a partitioned send operation
+        """
+        cdef _p_msg_p2p smsg = message_p2p_psend(buf, dest, partitions)
+        cdef Prequest request = Prequest.__new__(Prequest)
+        with nogil: CHKERR( MPI_Psend_init(
+            smsg.buf, partitions, smsg.count, smsg.dtype,
+            dest, tag, self.ob_mpi, info.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = smsg
+        return request
+
+    def Precv_init(
+        self,
+        buf: BufSpec,
+        int partitions: int,
+        int source: int = ANY_SOURCE,
+        int tag: int = ANY_TAG,
+        Info info: Info = INFO_NULL,
+    ) -> Prequest:
+        """
+        Create request for a partitioned recv operation
+        """
+        cdef _p_msg_p2p rmsg = message_p2p_precv(buf, source, partitions)
+        cdef Prequest request = Prequest.__new__(Prequest)
+        with nogil: CHKERR( MPI_Precv_init(
+            rmsg.buf, partitions, rmsg.count, rmsg.dtype,
+            source, tag, self.ob_mpi, info.ob_mpi, &request.ob_mpi) )
+        request.ob_buf = rmsg
+        return request
+
     # Communication Modes
     # -------------------
 

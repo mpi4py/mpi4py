@@ -401,6 +401,49 @@ cdef class Prequest(Request):
         finally:
             release_rs(requests, None, count, irequests, 0, NULL)
 
+    # Partitioned completion
+    # ----------------------
+
+    def Pready(
+        self,
+        int partition: int,
+    ) -> None:
+        """
+        Mark a given partition as ready
+        """
+        CHKERR( MPI_Pready(partition, self.ob_mpi) )
+
+    def Pready_range(
+        self,
+        int partition_low: int,
+        int partition_high: int,
+    ) -> None:
+        """
+        Mark a range of partitions as ready
+        """
+        CHKERR( MPI_Pready_range(partition_low, partition_high, self.ob_mpi) )
+
+    def Pready_list(
+        self,
+        partitions: Sequence[int],
+    ) -> None:
+        """
+        Mark a sequence of partitions as ready
+        """
+        cdef int length = 0, *array_of_partitions = NULL
+        partitions = getarray(partitions, &length, &array_of_partitions)
+        CHKERR( MPI_Pready_list(length, array_of_partitions, self.ob_mpi) )
+
+    def Parrived(
+        self,
+        int partition: int,
+    ) -> bool:
+        """
+        Test partial completion of a partitioned receive operation
+        """
+        cdef int flag = 0
+        CHKERR( MPI_Parrived(self.ob_mpi, partition, &flag) )
+        return <bint>flag
 
 
 cdef class Grequest(Request):
