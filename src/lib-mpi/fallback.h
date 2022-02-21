@@ -832,6 +832,21 @@ static int PyMPI_Comm_dup_with_info(MPI_Comm comm, MPI_Info info,
 #define MPI_Comm_dup_with_info PyMPI_Comm_dup_with_info
 #endif
 
+#ifndef PyMPI_HAVE_MPI_Comm_idup_with_info
+static int PyMPI_Comm_idup_with_info(MPI_Comm comm, MPI_Info info,
+                                     MPI_Comm *newcomm, MPI_Request *request)
+{
+  int dummy, ierr;
+  if (info != MPI_INFO_NULL) {
+    ierr = MPI_Info_get_nkeys(info, &dummy);
+    if (ierr != MPI_SUCCESS) return ierr;
+  }
+  return MPI_Comm_idup(comm, newcomm, request);
+}
+#undef  MPI_Comm_idup_with_info
+#define MPI_Comm_idup_with_info PyMPI_Comm_idup_with_info
+#endif
+
 #ifndef PyMPI_HAVE_MPI_Comm_set_info
 static int PyMPI_Comm_set_info(MPI_Comm comm, MPI_Info info)
 {
@@ -996,6 +1011,490 @@ static int PyMPI_Win_get_info(MPI_Win win, MPI_Info *info)
 }
 #undef  MPI_Win_get_info
 #define MPI_Win_get_info PyMPI_Win_get_info
+#endif
+
+/* ---------------------------------------------------------------- */
+
+#ifndef PyMPI_HAVE_MPI_Info_get_string
+static int PyMPI_Info_get_string(MPI_Info info,
+                                 const char key[],
+                                 int *buflen,
+                                 char value[],
+                                 int *flag)
+{
+  int ierr, valuelen = buflen ? *buflen : 0;
+  if (valuelen) {
+    ierr = MPI_Info_get(info, key, valuelen-1, value, flag);
+    if (ierr != MPI_SUCCESS) return ierr;
+    if (value && flag && *flag) value[valuelen] = 0;
+  }
+  ierr = MPI_Info_get_valuelen(info, key, &valuelen, flag);
+  if (ierr != MPI_SUCCESS) return ierr;
+  if (buflen && flag && *flag) *buflen = valuelen + 1;
+  return MPI_SUCCESS;
+}
+#undef  MPI_Info_get_string
+#define MPI_Info_get_string PyMPI_Info_get_string
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Info_create_env
+static int PyMPI_Info_create_env(int argc,
+                                 char *argv[],
+                                 MPI_Info *info)
+{
+  (void)argc; (void)argv;
+  if (MPI_INFO_ENV != MPI_INFO_NULL) {
+    return MPI_Info_dup(MPI_INFO_ENV, info);
+  } else if (info) {
+    *info = MPI_INFO_NULL;
+    return MPI_SUCCESS;
+  } else {
+    (void)MPI_Comm_call_errhandler(MPI_COMM_SELF, MPI_ERR_INFO);
+    return MPI_ERR_INFO;
+  }
+}
+#undef  MPI_Info_create_env
+#define MPI_Info_create_env PyMPI_Info_create_env
+#endif
+
+/* ---------------------------------------------------------------- */
+
+#ifndef PyMPI_HAVE_MPI_F_SOURCE
+#define PyMPI_F_SOURCE ((int)(offsetof(MPI_Status,MPI_SOURCE)/sizeof(int)))
+#undef  MPI_F_SOURCE
+#define MPI_F_SOURCE PyMPI_F_SOURCE
+#endif
+
+#ifndef PyMPI_HAVE_MPI_F_TAG
+#define PyMPI_F_TAG ((int)(offsetof(MPI_Status,MPI_TAG)/sizeof(int)))
+#undef  MPI_F_TAG
+#define MPI_F_TAG PyMPI_F_TAG
+#endif
+
+#ifndef PyMPI_HAVE_MPI_F_ERROR
+#define PyMPI_F_ERROR ((int)(offsetof(MPI_Status,MPI_ERROR)/sizeof(int)))
+#undef  MPI_F_ERROR
+#define MPI_F_ERROR PyMPI_F_ERROR
+#endif
+
+#ifndef PyMPI_HAVE_MPI_F_STATUS_SIZE
+#define PyMPI_F_STATUS_SIZE ((int)(sizeof(MPI_Status)/sizeof(int)))
+#undef  MPI_F_STATUS_SIZE
+#define MPI_F_STATUS_SIZE PyMPI_F_STATUS_SIZE
+#endif
+
+/* ---------------------------------------------------------------- */
+
+#include "largecnt.h"
+
+/* ---------------------------------------------------------------- */
+
+#ifndef PyMPI_HAVE_MPI_Type_contiguous_c
+static int PyMPI_Type_contiguous_c(MPI_Count count,
+                                   MPI_Datatype oldtype,
+                                   MPI_Datatype *newtype)
+{
+  int ierr; int c;
+  PyMPICastValue(int, c, MPI_Count, count);
+  ierr = MPI_Type_contiguous(c, oldtype, newtype);
+ fn_exit:
+  return ierr;
+}
+#undef  MPI_Type_contiguous_c
+#define MPI_Type_contiguous_c PyMPI_Type_contiguous_c
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Type_vector_c
+static int PyMPI_Type_vector_c(MPI_Count count,
+                               MPI_Count blocklength,
+                               MPI_Count stride,
+                               MPI_Datatype oldtype,
+                               MPI_Datatype *newtype)
+{
+  int ierr; int c, b, s;
+  PyMPICastValue(int, c, MPI_Count, count);
+  PyMPICastValue(int, b, MPI_Count, blocklength);
+  PyMPICastValue(int, s, MPI_Count, stride);
+  ierr = MPI_Type_vector(c, b, s, oldtype, newtype);
+ fn_exit:
+  return ierr;
+}
+#undef  MPI_Type_vector_c
+#define MPI_Type_vector_c PyMPI_Type_vector_c
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Type_create_hvector_c
+static int PyMPI_Type_create_hvector_c(MPI_Count count,
+                                       MPI_Count blocklength,
+                                       MPI_Count stride,
+                                       MPI_Datatype oldtype,
+                                       MPI_Datatype *newtype)
+{
+  int ierr; int c, b, s;
+  PyMPICastValue(int, c, MPI_Count, count);
+  PyMPICastValue(int, b, MPI_Count, blocklength);
+  PyMPICastValue(int, s, MPI_Count, stride);
+  ierr = MPI_Type_create_hvector(c, b, s, oldtype, newtype);
+ fn_exit:
+  return ierr;
+}
+#undef  MPI_Type_create_hvector_c
+#define MPI_Type_create_hvector_c PyMPI_Type_create_hvector_c
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Type_indexed_c
+static int PyMPI_Type_indexed_c(MPI_Count count,
+                                const MPI_Count blocklengths[],
+                                const MPI_Count displacements[],
+                                MPI_Datatype oldtype,
+                                MPI_Datatype *newtype)
+{
+  int ierr; int c, *b = NULL, *d = NULL;
+  PyMPICastValue(int, c, MPI_Count, count);
+  PyMPICastArray(int, b, MPI_Count, blocklengths,  count);
+  PyMPICastArray(int, d, MPI_Count, displacements, count);
+  ierr = MPI_Type_indexed(c, b, d, oldtype, newtype);
+ fn_exit:
+  PyMPIFreeArray(b);
+  PyMPIFreeArray(d);
+  return ierr;
+}
+#undef  MPI_Type_indexed_c
+#define MPI_Type_indexed_c PyMPI_Type_indexed_c
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Type_create_hindexed_c
+static int PyMPI_Type_create_hindexed_c(MPI_Count count,
+                                        const MPI_Count blocklengths[],
+                                        const MPI_Count displacements[],
+                                        MPI_Datatype oldtype,
+                                        MPI_Datatype *newtype)
+{
+  int ierr; int c, *b = NULL; MPI_Aint *d = NULL;
+  PyMPICastValue(int, c, MPI_Count, count);
+  PyMPICastArray(int, b, MPI_Count, blocklengths,  count);
+  PyMPICastArray(MPI_Aint, d, MPI_Count, displacements, count);
+  ierr = MPI_Type_create_hindexed(c, b, d, oldtype, newtype);
+ fn_exit:
+  PyMPIFreeArray(b);
+  PyMPIFreeArray(d);
+  return ierr;
+}
+#undef  MPI_Type_create_hindexed_c
+#define MPI_Type_create_hindexed_c PyMPI_Type_create_hindexed_c
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Type_create_indexed_block_c
+static int PyMPI_Type_create_indexed_block_c(MPI_Count count,
+                                             MPI_Count blocklength,
+                                             const MPI_Count displacements[],
+                                             MPI_Datatype oldtype,
+                                             MPI_Datatype *newtype)
+{
+  int ierr; int c, b, *d = NULL;
+  PyMPICastValue(int, c, MPI_Count, count);
+  PyMPICastValue(int, b, MPI_Count, blocklength);
+  PyMPICastArray(int, d, MPI_Count, displacements, count);
+  ierr = MPI_Type_create_indexed_block(c, b, d, oldtype, newtype);
+ fn_exit:
+  PyMPIFreeArray(d);
+  return ierr;
+}
+#undef  MPI_Type_create_indexed_block_c
+#define MPI_Type_create_indexed_block_c PyMPI_Type_create_indexed_block_c
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Type_create_hindexed_block_c
+static int PyMPI_Type_create_hindexed_block_c(MPI_Count count,
+                                              MPI_Count blocklength,
+                                              const MPI_Count displacements[],
+                                              MPI_Datatype oldtype,
+                                              MPI_Datatype *newtype)
+{
+  int ierr; int c, b; MPI_Aint *d = NULL;
+  PyMPICastValue(int,      c, MPI_Count, count);
+  PyMPICastValue(int,      b, MPI_Count, blocklength);
+  PyMPICastArray(MPI_Aint, d, MPI_Count, displacements, count);
+  ierr = MPI_Type_create_hindexed_block(c, b, d, oldtype, newtype);
+ fn_exit:
+  PyMPIFreeArray(d);
+  return ierr;
+}
+#undef  MPI_Type_create_hindexed_block_c
+#define MPI_Type_create_hindexed_block_c PyMPI_Type_create_hindexed_block_c
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Type_create_struct_c
+static int PyMPI_Type_create_struct_c(MPI_Count count,
+                                      const MPI_Count blocklengths[],
+                                      const MPI_Count displacements[],
+                                      const MPI_Datatype types[],
+                                      MPI_Datatype *newtype)
+{
+  int ierr; int c, *b = NULL; MPI_Aint *d = NULL;
+  MPI_Datatype *t = (MPI_Datatype *) types;
+  PyMPICastValue(int,      c, MPI_Count, count);
+  PyMPICastArray(int,      b, MPI_Count, blocklengths,  count);
+  PyMPICastArray(MPI_Aint, d, MPI_Count, displacements, count);
+  ierr = MPI_Type_create_struct(c, b, d, t, newtype);
+ fn_exit:
+  PyMPIFreeArray(b);
+  PyMPIFreeArray(d);
+  return ierr;
+}
+#undef  MPI_Type_create_struct_c
+#define MPI_Type_create_struct_c PyMPI_Type_create_struct_c
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Type_create_subarray_c
+static int PyMPI_Type_create_subarray_c(int ndims,
+                                        const MPI_Count sizes[],
+                                        const MPI_Count subsizes[],
+                                        const MPI_Count starts[],
+                                        int order,
+                                        MPI_Datatype oldtype,
+                                        MPI_Datatype *newtype)
+
+{
+  int ierr; int *N = NULL, *n = NULL, *s = NULL;
+  PyMPICastArray(int, N, MPI_Count, sizes,    ndims);
+  PyMPICastArray(int, n, MPI_Count, subsizes, ndims);
+  PyMPICastArray(int, s, MPI_Count, starts,   ndims);
+  ierr = MPI_Type_create_subarray(ndims, N, n, s,
+                                  order, oldtype, newtype);
+ fn_exit:
+  PyMPIFreeArray(N);
+  PyMPIFreeArray(n);
+  PyMPIFreeArray(s);
+  return ierr;
+}
+#undef  MPI_Type_create_subarray_c
+#define MPI_Type_create_subarray_c PyMPI_Type_create_subarray_c
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Type_create_darray_c
+static int PyMPI_Type_create_darray_c(int size, int rank, int ndims,
+                                      const MPI_Count gsizes[],
+                                      const int distribs[],
+                                      const int dargs[],
+                                      const int psizes[],
+                                      int order,
+                                      MPI_Datatype oldtype,
+                                      MPI_Datatype *newtype)
+
+{
+  int ierr; int *g = NULL;
+  PyMPICastArray(int, g, MPI_Count, gsizes, ndims);
+  ierr = MPI_Type_create_darray(size, rank, ndims, g,
+                                (int *) distribs,
+                                (int *) dargs,
+                                (int *) psizes,
+                                order, oldtype, newtype);
+ fn_exit:
+  PyMPIFreeArray(g);
+  return ierr;
+}
+#undef  MPI_Type_create_darray_c
+#define MPI_Type_create_darray_c PyMPI_Type_create_darray_c
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Type_create_resized_c
+static int PyMPI_Type_create_resized_c(MPI_Datatype oldtype,
+                                       MPI_Count lb,
+                                       MPI_Count extent,
+                                       MPI_Datatype *newtype)
+{
+  int ierr; MPI_Aint ilb, iex;
+  PyMPICastValue(MPI_Aint, ilb, MPI_Count, lb);
+  PyMPICastValue(MPI_Aint, iex, MPI_Count, extent);
+  ierr = MPI_Type_create_resized(oldtype, ilb, iex, newtype);
+ fn_exit:
+  return ierr;
+}
+#undef  MPI_Type_create_resized_c
+#define MPI_Type_create_resized_c PyMPI_Type_create_resized_c
+#endif
+
+/* ---------------------------------------------------------------- */
+
+#ifndef PyMPI_HAVE_MPI_Type_get_envelope_c
+static int PyMPI_Type_get_envelope_c(MPI_Datatype datatype,
+                                     MPI_Count *num_integers,
+                                     MPI_Count *num_addresses,
+                                     MPI_Count *num_large_counts,
+                                     MPI_Count *num_datatypes,
+                                     int *combiner)
+{
+  int ierr; int ni = 0, na = 0, nd = 0;
+  ierr = MPI_Type_get_envelope(datatype, &ni, &na, &nd, combiner);
+  if (ierr != MPI_SUCCESS) return ierr;
+  if (num_integers) *num_integers     = ni;
+  if (num_addresses) *num_addresses    = na;
+  if (num_large_counts) *num_large_counts = 0;
+  if (num_datatypes) *num_datatypes    = nd;
+  return ierr;
+}
+#undef  MPI_Type_get_envelope_c
+#define MPI_Type_get_envelope_c PyMPI_Type_get_envelope_c
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Type_get_contents_c
+static int PyMPI_Type_get_contents_c(MPI_Datatype datatype,
+                                     MPI_Count max_integers,
+                                     MPI_Count max_addresses,
+                                     MPI_Count max_large_counts,
+                                     MPI_Count max_datatypes,
+                                     int integers[],
+                                     MPI_Aint addresses[],
+                                     MPI_Count large_counts[],
+                                     MPI_Datatype datatypes[])
+{
+  int ierr; int ni, na, nd;
+  PyMPICastValue(int, ni, MPI_Count, max_integers);
+  PyMPICastValue(int, na, MPI_Count, max_addresses);
+  PyMPICastValue(int, nd, MPI_Count, max_datatypes);
+  ierr = MPI_Type_get_contents(datatype,
+                               ni, na, nd,
+                               integers,
+                               addresses,
+                               datatypes);
+  (void)max_large_counts;
+  (void)large_counts;
+ fn_exit:
+  return ierr;
+}
+#undef  MPI_Type_get_contents_c
+#define MPI_Type_get_contents_c PyMPI_Type_get_contents_c
+#endif
+
+/* ---------------------------------------------------------------- */
+
+#ifndef PyMPI_HAVE_MPI_Pack_c
+static int PyMPI_Pack_c(const void *inbuf,
+                        MPI_Count incount,
+                        MPI_Datatype datatype,
+                        void *outbuf,
+                        MPI_Count outsize,
+                        MPI_Count *position,
+                        MPI_Comm comm)
+{
+  int ierr; int ic, os, pp;
+  PyMPICastValue(int, ic, MPI_Count, incount);
+  PyMPICastValue(int, os, MPI_Count, outsize);
+  PyMPICastValue(int, pp, MPI_Count, *position);
+  ierr = MPI_Pack((void*)inbuf, ic, datatype, outbuf, os, &pp, comm);
+  if (ierr == MPI_SUCCESS) *position = pp;
+ fn_exit:
+  return ierr;
+}
+#undef  MPI_Pack_c
+#define MPI_Pack_c PyMPI_Pack_c
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Unpack_c
+static int PyMPI_Unpack_c(const void *inbuf,
+                          MPI_Count insize,
+                          MPI_Count *position,
+                          void *outbuf,
+                          MPI_Count outcount,
+                          MPI_Datatype datatype,
+                          MPI_Comm comm)
+{
+  int ierr; int is, pp, oc;
+  PyMPICastValue(int, is, MPI_Count, insize);
+  PyMPICastValue(int, pp, MPI_Count, *position);
+  PyMPICastValue(int, oc, MPI_Count, outcount);
+  ierr = MPI_Unpack((void*)inbuf, is, &pp, outbuf, oc, datatype, comm);
+  if (ierr == MPI_SUCCESS) *position = pp;
+ fn_exit:
+  return ierr;
+}
+#undef  MPI_Unpack_c
+#define MPI_Unpack_c PyMPI_Unpack_c
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Pack_size_c
+static int PyMPI_Pack_size_c(MPI_Count count,
+                             MPI_Datatype datatype,
+                             MPI_Comm comm,
+                             MPI_Count *size)
+{
+  int ierr; int c, s;
+  PyMPICastValue(int, c, MPI_Count, count);
+  ierr = MPI_Pack_size(c, datatype, comm, &s);
+  if (ierr == MPI_SUCCESS) *size = s;
+ fn_exit:
+  return ierr;
+}
+#undef  MPI_Pack_size_c
+#define MPI_Pack_size_c PyMPI_Pack_size_c
+#endif
+
+/* ---------------------------------------------------------------- */
+
+#ifndef PyMPI_HAVE_MPI_Pack_external_c
+static int PyMPI_Pack_external_c(const char datarep[],
+                                 const void *inbuf,
+                                 MPI_Count incount,
+                                 MPI_Datatype datatype,
+                                 void *outbuf,
+                                 MPI_Count outsize,
+                                 MPI_Count *position)
+{
+  int ierr; int ic; MPI_Aint os, pp;
+  PyMPICastValue(int,      ic, MPI_Count, incount);
+  PyMPICastValue(MPI_Aint, os, MPI_Count, outsize);
+  PyMPICastValue(MPI_Aint, pp, MPI_Count, *position);
+  ierr = MPI_Pack_external((char*)datarep,
+                           (void*)inbuf, ic, datatype,
+                           outbuf, os, &pp);
+  if (ierr == MPI_SUCCESS) *position = pp;
+ fn_exit:
+  return ierr;
+}
+#undef  MPI_Pack_external_c
+#define MPI_Pack_external_c PyMPI_Pack_external_c
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Unpack_external_c
+static int PyMPI_Unpack_external_c(const char datarep[],
+                                   const void *inbuf,
+                                   MPI_Count insize,
+                                   MPI_Count *position,
+                                   void *outbuf,
+                                   MPI_Count outcount,
+                                   MPI_Datatype datatype)
+{
+  int ierr; MPI_Aint is, pp; int oc;
+  PyMPICastValue(MPI_Aint, is, MPI_Count, insize);
+  PyMPICastValue(MPI_Aint, pp, MPI_Count, *position);
+  PyMPICastValue(int,      oc, MPI_Count, outcount);
+  ierr = MPI_Unpack_external((char*)datarep,
+                             (void*)inbuf, is, &pp,
+                             outbuf, oc, datatype);
+  if (ierr == MPI_SUCCESS) *position = pp;
+ fn_exit:
+  return ierr;
+}
+#undef  MPI_Unpack_external_c
+#define MPI_Unpack_external_c PyMPI_Unpack_external_c
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Pack_external_size_c
+static int PyMPI_Pack_external_size_c(const char datarep[],
+                                      MPI_Count count,
+                                      MPI_Datatype datatype,
+                                      MPI_Count *size)
+{
+  int ierr; int c; MPI_Aint s;
+  PyMPICastValue(int, c, MPI_Count, count);
+  ierr = MPI_Pack_external_size((char*)datarep, c, datatype, &s);
+  if (ierr == MPI_SUCCESS) *size = s;
+ fn_exit:
+  return ierr;
+}
+#undef  MPI_Pack_external_size_c
+#define MPI_Pack_external_size_c PyMPI_Pack_external_size_c
 #endif
 
 /* ---------------------------------------------------------------- */
