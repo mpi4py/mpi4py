@@ -249,7 +249,7 @@ cdef class File:
         """
         cdef _p_msg_io m = message_io_read(buf)
         cdef MPI_Status *statusp = arg_Status(status)
-        with nogil: CHKERR( MPI_File_read_at(
+        with nogil: CHKERR( MPI_File_read_at_c(
             self.ob_mpi, offset, m.buf, m.count, m.dtype, statusp) )
 
     def Read_at_all(
@@ -263,7 +263,7 @@ cdef class File:
         """
         cdef _p_msg_io m = message_io_read(buf)
         cdef MPI_Status *statusp = arg_Status(status)
-        with nogil: CHKERR( MPI_File_read_at_all(
+        with nogil: CHKERR( MPI_File_read_at_all_c(
             self.ob_mpi, offset, m.buf, m.count, m.dtype, statusp) )
 
     def Write_at(
@@ -277,7 +277,7 @@ cdef class File:
         """
         cdef _p_msg_io m = message_io_write(buf)
         cdef MPI_Status *statusp = arg_Status(status)
-        with nogil: CHKERR( MPI_File_write_at(
+        with nogil: CHKERR( MPI_File_write_at_c(
             self.ob_mpi, offset, m.buf, m.count, m.dtype, statusp) )
 
     def Write_at_all(
@@ -291,7 +291,7 @@ cdef class File:
         """
         cdef _p_msg_io m = message_io_write(buf)
         cdef MPI_Status *statusp = arg_Status(status)
-        with nogil: CHKERR( MPI_File_write_at_all(
+        with nogil: CHKERR( MPI_File_write_at_all_c(
             self.ob_mpi, offset, m.buf, m.count, m.dtype, statusp) )
 
     def Iread_at(
@@ -304,7 +304,7 @@ cdef class File:
         """
         cdef _p_msg_io m = message_io_read(buf)
         cdef Request request = Request.__new__(Request)
-        with nogil: CHKERR( MPI_File_iread_at(
+        with nogil: CHKERR( MPI_File_iread_at_c(
             self.ob_mpi, offset, m.buf, m.count, m.dtype, &request.ob_mpi) )
         request.ob_buf = m
         return request
@@ -319,7 +319,7 @@ cdef class File:
         """
         cdef _p_msg_io m = message_io_read(buf)
         cdef Request request = Request.__new__(Request)
-        with nogil: CHKERR( MPI_File_iread_at_all(
+        with nogil: CHKERR( MPI_File_iread_at_all_c(
             self.ob_mpi, offset, m.buf, m.count, m.dtype, &request.ob_mpi) )
         request.ob_buf = m
         return request
@@ -334,7 +334,7 @@ cdef class File:
         """
         cdef _p_msg_io m = message_io_write(buf)
         cdef Request request = Request.__new__(Request)
-        with nogil: CHKERR( MPI_File_iwrite_at(
+        with nogil: CHKERR( MPI_File_iwrite_at_c(
             self.ob_mpi, offset, m.buf, m.count, m.dtype, &request.ob_mpi) )
         request.ob_buf = m
         return request
@@ -349,7 +349,7 @@ cdef class File:
         """
         cdef _p_msg_io m = message_io_write(buf)
         cdef Request request = Request.__new__(Request)
-        with nogil: CHKERR( MPI_File_iwrite_at_all(
+        with nogil: CHKERR( MPI_File_iwrite_at_all_c(
             self.ob_mpi, offset, m.buf, m.count, m.dtype, &request.ob_mpi) )
         request.ob_buf = m
         return request
@@ -367,7 +367,7 @@ cdef class File:
         """
         cdef _p_msg_io m = message_io_read(buf)
         cdef MPI_Status *statusp = arg_Status(status)
-        with nogil: CHKERR( MPI_File_read(
+        with nogil: CHKERR( MPI_File_read_c(
             self.ob_mpi, m.buf, m.count, m.dtype, statusp) )
 
     def Read_all(
@@ -380,7 +380,7 @@ cdef class File:
         """
         cdef _p_msg_io m = message_io_read(buf)
         cdef MPI_Status *statusp = arg_Status(status)
-        with nogil: CHKERR( MPI_File_read_all(
+        with nogil: CHKERR( MPI_File_read_all_c(
             self.ob_mpi, m.buf, m.count, m.dtype, statusp) )
 
     def Write(
@@ -393,7 +393,7 @@ cdef class File:
         """
         cdef _p_msg_io m = message_io_write(buf)
         cdef MPI_Status *statusp = arg_Status(status)
-        with nogil: CHKERR( MPI_File_write(
+        with nogil: CHKERR( MPI_File_write_c(
             self.ob_mpi, m.buf, m.count, m.dtype, statusp) )
 
     def Write_all(
@@ -406,7 +406,7 @@ cdef class File:
         """
         cdef _p_msg_io m = message_io_write(buf)
         cdef MPI_Status *statusp = arg_Status(status)
-        with nogil: CHKERR( MPI_File_write_all(
+        with nogil: CHKERR( MPI_File_write_all_c(
             self.ob_mpi, m.buf, m.count, m.dtype, statusp) )
 
     def Iread(
@@ -418,7 +418,7 @@ cdef class File:
         """
         cdef _p_msg_io m = message_io_read(buf)
         cdef Request request = Request.__new__(Request)
-        with nogil: CHKERR( MPI_File_iread(
+        with nogil: CHKERR( MPI_File_iread_c(
             self.ob_mpi, m.buf, m.count, m.dtype, &request.ob_mpi) )
         request.ob_buf = m
         return request
@@ -432,7 +432,7 @@ cdef class File:
         """
         cdef _p_msg_io m = message_io_read(buf)
         cdef Request request = Request.__new__(Request)
-        with nogil: CHKERR( MPI_File_iread_all(
+        with nogil: CHKERR( MPI_File_iread_all_c(
             self.ob_mpi, m.buf, m.count, m.dtype, &request.ob_mpi) )
         request.ob_buf = m
         return request
@@ -446,7 +446,7 @@ cdef class File:
         """
         cdef _p_msg_io m = message_io_write(buf)
         cdef Request request = Request.__new__(Request)
-        with nogil: CHKERR( MPI_File_iwrite(
+        with nogil: CHKERR( MPI_File_iwrite_c(
             self.ob_mpi, m.buf, m.count, m.dtype, &request.ob_mpi) )
         request.ob_buf = m
         return request
@@ -460,7 +460,7 @@ cdef class File:
         """
         cdef _p_msg_io m = message_io_write(buf)
         cdef Request request = Request.__new__(Request)
-        with nogil: CHKERR( MPI_File_iwrite_all(
+        with nogil: CHKERR( MPI_File_iwrite_all_c(
             self.ob_mpi, m.buf, m.count, m.dtype, &request.ob_mpi) )
         request.ob_buf = m
         return request
@@ -503,7 +503,7 @@ cdef class File:
         """
         cdef _p_msg_io m = message_io_read(buf)
         cdef MPI_Status *statusp = arg_Status(status)
-        with nogil: CHKERR( MPI_File_read_shared(
+        with nogil: CHKERR( MPI_File_read_shared_c(
             self.ob_mpi, m.buf, m.count, m.dtype, statusp) )
 
     def Write_shared(
@@ -516,7 +516,7 @@ cdef class File:
         """
         cdef _p_msg_io m = message_io_write(buf)
         cdef MPI_Status *statusp = arg_Status(status)
-        with nogil: CHKERR( MPI_File_write_shared(
+        with nogil: CHKERR( MPI_File_write_shared_c(
             self.ob_mpi, m.buf, m.count, m.dtype, statusp) )
 
     def Iread_shared(
@@ -528,7 +528,7 @@ cdef class File:
         """
         cdef _p_msg_io m = message_io_read(buf)
         cdef Request request = Request.__new__(Request)
-        with nogil: CHKERR( MPI_File_iread_shared(
+        with nogil: CHKERR( MPI_File_iread_shared_c(
             self.ob_mpi, m.buf, m.count, m.dtype, &request.ob_mpi) )
         request.ob_buf = m
         return request
@@ -542,7 +542,7 @@ cdef class File:
         """
         cdef _p_msg_io m = message_io_write(buf)
         cdef Request request = Request.__new__(Request)
-        with nogil: CHKERR( MPI_File_iwrite_shared(
+        with nogil: CHKERR( MPI_File_iwrite_shared_c(
             self.ob_mpi, m.buf, m.count, m.dtype, &request.ob_mpi) )
         request.ob_buf = m
         return request
@@ -557,7 +557,7 @@ cdef class File:
         """
         cdef _p_msg_io m = message_io_read(buf)
         cdef MPI_Status *statusp = arg_Status(status)
-        with nogil: CHKERR( MPI_File_read_ordered(
+        with nogil: CHKERR( MPI_File_read_ordered_c(
             self.ob_mpi, m.buf, m.count, m.dtype, statusp) )
 
     def Write_ordered(
@@ -570,7 +570,7 @@ cdef class File:
         """
         cdef _p_msg_io m = message_io_write(buf)
         cdef MPI_Status *statusp = arg_Status(status)
-        with nogil: CHKERR( MPI_File_write_ordered(
+        with nogil: CHKERR( MPI_File_write_ordered_c(
             self.ob_mpi, m.buf, m.count, m.dtype, statusp) )
 
     def Seek_shared(
@@ -608,7 +608,7 @@ cdef class File:
         Start a split collective read using explict offset
         """
         cdef _p_msg_io m = message_io_read(buf)
-        with nogil: CHKERR( MPI_File_read_at_all_begin(
+        with nogil: CHKERR( MPI_File_read_at_all_begin_c(
             self.ob_mpi, offset, m.buf, m.count, m.dtype) )
 
     def Read_at_all_end(
@@ -633,7 +633,7 @@ cdef class File:
         Start a split collective write using explict offset
         """
         cdef _p_msg_io m = message_io_write(buf)
-        with nogil: CHKERR( MPI_File_write_at_all_begin(
+        with nogil: CHKERR( MPI_File_write_at_all_begin_c(
             self.ob_mpi, offset, m.buf, m.count, m.dtype) )
 
     def Write_at_all_end(
@@ -660,7 +660,7 @@ cdef class File:
         using individual file pointer
         """
         cdef _p_msg_io m = message_io_read(buf)
-        with nogil: CHKERR( MPI_File_read_all_begin(
+        with nogil: CHKERR( MPI_File_read_all_begin_c(
             self.ob_mpi, m.buf, m.count, m.dtype) )
 
     def Read_all_end(
@@ -686,7 +686,7 @@ cdef class File:
         using individual file pointer
         """
         cdef _p_msg_io m = message_io_write(buf)
-        with nogil: CHKERR( MPI_File_write_all_begin(
+        with nogil: CHKERR( MPI_File_write_all_begin_c(
             self.ob_mpi, m.buf, m.count, m.dtype) )
 
     def Write_all_end(
@@ -714,7 +714,7 @@ cdef class File:
         using shared file pointer
         """
         cdef _p_msg_io m = message_io_read(buf)
-        with nogil: CHKERR( MPI_File_read_ordered_begin(
+        with nogil: CHKERR( MPI_File_read_ordered_begin_c(
             self.ob_mpi, m.buf, m.count, m.dtype) )
 
     def Read_ordered_end(
@@ -740,7 +740,7 @@ cdef class File:
         shared file pointer
         """
         cdef _p_msg_io m = message_io_write(buf)
-        with nogil: CHKERR( MPI_File_write_ordered_begin(
+        with nogil: CHKERR( MPI_File_write_ordered_begin_c(
             self.ob_mpi, m.buf, m.count, m.dtype) )
 
     def Write_ordered_end(
@@ -764,8 +764,8 @@ cdef class File:
         """
         Return the extent of datatype in the file
         """
-        cdef MPI_Aint extent = 0
-        with nogil: CHKERR( MPI_File_get_type_extent(
+        cdef MPI_Count extent = 0
+        with nogil: CHKERR( MPI_File_get_type_extent_c(
             self.ob_mpi, datatype.ob_mpi, &extent) )
         return extent
 
@@ -865,11 +865,11 @@ def Register_datarep(
     cdef char *cdatarep = NULL
     datarep = asmpistr(datarep, &cdatarep)
     cdef object state = _p_datarep(read_fn, write_fn, extent_fn)
-    cdef MPI_Datarep_conversion_function *rd = MPI_CONVERSION_FN_NULL
-    cdef MPI_Datarep_conversion_function *wr = MPI_CONVERSION_FN_NULL
-    cdef MPI_Datarep_extent_function     *ex = datarep_extent_fn
-    cdef void* xs = <void*>state
+    cdef MPI_Datarep_conversion_function_c *rd = MPI_CONVERSION_FN_NULL_C
+    cdef MPI_Datarep_conversion_function_c *wr = MPI_CONVERSION_FN_NULL_C
+    cdef MPI_Datarep_extent_function       *ex = datarep_extent_fn
+    cdef void *xs = <void*> state
     if read_fn  is not None: rd = datarep_read_fn
     if write_fn is not None: wr = datarep_write_fn
-    CHKERR ( MPI_Register_datarep(cdatarep, rd, wr, ex, xs) )
+    CHKERR ( MPI_Register_datarep_c(cdatarep, rd, wr, ex, xs) )
     datarep_registry[datarep] = state
