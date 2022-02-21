@@ -421,17 +421,17 @@ cdef class _p_msg_p2p:
         self.count = 0
         self.dtype = MPI_DATATYPE_NULL
 
-    cdef int for_send(self, object msg, int rank) except -1:
+    cdef int for_send(self, object msg, int rank, int parts) except -1:
         self._msg = message_simple(msg, 1, # readonly
-                                   rank, 0,
+                                   rank, parts,
                                    &self.buf,
                                    &self.count,
                                    &self.dtype)
         return 0
 
-    cdef int for_recv(self, object msg, int rank) except -1:
+    cdef int for_recv(self, object msg, int rank, int parts) except -1:
         self._msg = message_simple(msg, 0, # writable
-                                   rank, 0,
+                                   rank, parts,
                                    &self.buf,
                                    &self.count,
                                    &self.dtype)
@@ -439,12 +439,22 @@ cdef class _p_msg_p2p:
 
 cdef inline _p_msg_p2p message_p2p_send(object sendbuf, int dest):
     cdef _p_msg_p2p msg = _p_msg_p2p.__new__(_p_msg_p2p)
-    msg.for_send(sendbuf, dest)
+    msg.for_send(sendbuf, dest, 1)
     return msg
 
 cdef inline _p_msg_p2p message_p2p_recv(object recvbuf, int source):
     cdef _p_msg_p2p msg = _p_msg_p2p.__new__(_p_msg_p2p)
-    msg.for_recv(recvbuf, source)
+    msg.for_recv(recvbuf, source, 1)
+    return msg
+
+cdef inline _p_msg_p2p message_p2p_psend(object sendbuf, int dest, int parts):
+    cdef _p_msg_p2p msg = _p_msg_p2p.__new__(_p_msg_p2p)
+    msg.for_send(sendbuf, dest, parts)
+    return msg
+
+cdef inline _p_msg_p2p message_p2p_precv(object recvbuf, int source, int parts):
+    cdef _p_msg_p2p msg = _p_msg_p2p.__new__(_p_msg_p2p)
+    msg.for_recv(recvbuf, source, parts)
     return msg
 
 #------------------------------------------------------------------------------
