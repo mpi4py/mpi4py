@@ -153,6 +153,19 @@ class BaseTestComm(object):
         except NotImplementedError:
             self.skipTest('mpi-comm-create_group')
 
+    def testCreateFromGroup(self):
+        group = self.COMM.Get_group()
+        try:
+            try:
+                comm = MPI.Intracomm.Create_from_group(group)
+                ccmp = MPI.Comm.Compare(self.COMM, comm)
+                comm.Free()
+                self.assertEqual(ccmp, MPI.CONGRUENT)
+            finally:
+                group.Free()
+        except NotImplementedError:
+            self.assertTrue(MPI.VERSION < 4)
+            self.skipTest('mpi-comm-create_from_group')
 
     @unittest.skipMPI('openmpi(==2.0.0)')
     def testSplitTypeShared(self):
