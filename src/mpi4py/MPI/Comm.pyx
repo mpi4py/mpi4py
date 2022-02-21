@@ -152,15 +152,35 @@ cdef class Comm:
         comm_set_eh(comm.ob_mpi)
         return comm
 
-    def Idup(self) -> Tuple[Comm, Request]:
+    def Idup(self, Info info: Optional[Info] = None) -> Tuple[Comm, Request]:
         """
         Nonblocking duplicate an existing communicator
+        """
+        cdef MPI_Info cinfo = arg_Info(info)
+        cdef type comm_type = type(self)
+        cdef Comm comm = <Comm>comm_type.__new__(comm_type)
+        cdef Request request = Request.__new__(Request)
+        if info is None:
+            with nogil: CHKERR( MPI_Comm_idup(
+                self.ob_mpi,
+                &comm.ob_mpi, &request.ob_mpi) )
+        else:
+            with nogil: CHKERR( MPI_Comm_idup_with_info(
+                self.ob_mpi, info.ob_mpi,
+                &comm.ob_mpi, &request.ob_mpi) )
+        comm_set_eh(comm.ob_mpi)
+        return (comm, request)
+
+    def Idup_with_info(self, Info info: Info) ->  Tuple[Comm, Request]:
+        """
+        Duplicate an existing communicator
         """
         cdef type comm_type = type(self)
         cdef Comm comm = <Comm>comm_type.__new__(comm_type)
         cdef Request request = Request.__new__(Request)
-        with nogil: CHKERR( MPI_Comm_idup(
-            self.ob_mpi, &comm.ob_mpi, &request.ob_mpi) )
+        with nogil: CHKERR( MPI_Comm_idup_with_info(
+            self.ob_mpi, info.ob_mpi,
+            &comm.ob_mpi, &request.ob_mpi) )
         comm_set_eh(comm.ob_mpi)
         return (comm, request)
 
