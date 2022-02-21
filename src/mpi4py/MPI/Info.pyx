@@ -34,6 +34,19 @@ cdef class Info:
         CHKERR( MPI_Info_create(&info.ob_mpi) )
         return info
 
+    @classmethod
+    def Create_env(cls, args: Optional[Sequence[str]] = None) -> Info:
+        """
+        Create a new info object
+        """
+        cdef int argc = 0
+        cdef char **argv = MPI_ARGV_NULL
+        cdef Info info = Info.__new__(Info)
+        args = asarray_argv(args, &argv)
+        while argv and argv[argc]: argc += 1
+        CHKERR( MPI_Info_create_env(argc, argv, &info.ob_mpi) )
+        return info
+
     def Free(self) -> None:
         """
         Free a info object
