@@ -32,9 +32,10 @@ cdef inline MPI_Status *arg_Status(object status):
 # Datatype
 
 cdef inline int builtin_Datatype(MPI_Datatype ob):
-    cdef int ni = 0, na = 0, nt = 0, combiner = MPI_UNDEFINED
+    cdef int combiner = MPI_UNDEFINED
+    cdef MPI_Count ni = 0, na = 0, nc = 0, nd = 0
     if ob == MPI_DATATYPE_NULL: return 1
-    cdef int ierr = MPI_Type_get_envelope(ob, &ni, &na, &nt, &combiner)
+    cdef int ierr = MPI_Type_get_envelope_c(ob, &ni, &na, &nc, &nd, &combiner)
     if ierr != MPI_SUCCESS: return 0 # XXX
     return (combiner == MPI_COMBINER_NAMED       or
             combiner == MPI_COMBINER_F90_INTEGER or

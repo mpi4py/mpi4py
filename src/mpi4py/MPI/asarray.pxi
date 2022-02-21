@@ -1,24 +1,37 @@
 # -----------------------------------------------------------------------------
 
+cdef extern from *:
+    int INT_MAX
+
+ctypedef fused count_t:
+    int
+    MPI_Count
+
 ctypedef fused integral_t:
     int
     MPI_Aint
+    MPI_Count
 
-cdef inline object newarray(int n, integral_t **p):
+cdef inline object newarray(Py_ssize_t n, integral_t **p):
     return allocate(n, sizeof(integral_t), p)
 
-cdef inline object getarray(object ob, int *n, integral_t **p):
-    cdef Py_ssize_t  olen = len(ob)
+cdef inline object getarray(object ob, count_t *n, integral_t **p):
+    cdef Py_ssize_t i = 0
+    cdef Py_ssize_t size = len(ob)
     cdef integral_t *base = NULL
-    cdef int i = 0, size = downcast(olen)
     cdef object mem = newarray(size, &base)
     for i from 0 <= i < size: base[i] = ob[i]
-    n[0] = size
+    if count_t is int:
+        if size > <Py_ssize_t>INT_MAX:
+            raise OverflowError("integer {size} does not fit in 'int'")
+        n[0] = <int>size
+    else:
+        n[0] = size
     p[0] = base
     return mem
 
-cdef inline object chkarray(object ob, int n, integral_t **p):
-    cdef int size = 0
+cdef inline object chkarray(object ob, count_t n, integral_t **p):
+    cdef count_t size = 0
     cdef object mem = getarray(ob, &size, p)
     if n != size: raise ValueError(
         f"expecting {n} items, got {size}")
@@ -27,8 +40,8 @@ cdef inline object chkarray(object ob, int n, integral_t **p):
 # -----------------------------------------------------------------------------
 
 cdef inline object asarray_Datatype(object sequence,
-                                    int size, MPI_Datatype **p):
-     cdef int i = 0
+                                    MPI_Count size, MPI_Datatype **p):
+     cdef int MPI_Count = 0
      cdef MPI_Datatype *array = NULL
      if size != len(sequence): raise ValueError(
          f"expecting {size} items, got {len(sequence)}")
@@ -39,8 +52,8 @@ cdef inline object asarray_Datatype(object sequence,
      return ob
 
 cdef inline object asarray_Info(object sequence,
-                                int size, MPI_Info **p):
-     cdef int i = 0
+                                MPI_Count size, MPI_Info **p):
+     cdef MPI_Count i = 0
      cdef MPI_Info *array = NULL
      cdef MPI_Info info = MPI_INFO_NULL
      cdef object ob

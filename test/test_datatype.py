@@ -79,10 +79,11 @@ class TestDatatype(unittest.TestCase):
                 self.skipTest('mpi-type-get_envelope')
             if ('LAM/MPI' == MPI.get_vendor()[0] and
                 "COMPLEX" in dtype.name): continue
-            ni, na, nd, combiner = envelope
+            ni, na, nc, nd, combiner = envelope
             self.assertEqual(combiner, MPI.COMBINER_NAMED)
             self.assertEqual(ni, 0)
             self.assertEqual(na, 0)
+            self.assertEqual(nc, 0)
             self.assertEqual(nd, 0)
             self.assertEqual(dtype.envelope, envelope)
             self.assertEqual(dtype.combiner, combiner)
@@ -97,10 +98,11 @@ class TestDatatype(unittest.TestCase):
             contents = newtype.Get_contents()
         except NotImplementedError:
             self.skipTest('mpi-type-get_envelope')
-        ni, na, nd, combiner = envelope
-        i, a, d = contents
+        ni, na, nc, nd, combiner = envelope
+        i, a, c, d = contents
         self.assertEqual(ni, len(i))
         self.assertEqual(na, len(a))
+        self.assertEqual(nc, len(c))
         self.assertEqual(nd, len(d))
         self.assertTrue(combiner != MPI.COMBINER_NAMED)
         self.assertEqual(newtype.envelope, envelope)
