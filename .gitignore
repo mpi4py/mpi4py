@@ -8,6 +8,7 @@ dist
 MANIFEST
 *.egg-info
 .eggs
+_skbuild
 __pycache__
 .tox
 #src/mpi4py.MPI.c
