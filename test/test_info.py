@@ -1,5 +1,6 @@
 from mpi4py import MPI
 import mpiunittest as unittest
+import sys
 
 
 class TestInfoNull(unittest.TestCase):
@@ -45,6 +46,25 @@ class TestInfoEnv(unittest.TestCase):
                     "wdir", "file",
                     "thread_level"):
             v = env.Get(key)
+
+    def testCreateEnv(self):
+        env = MPI.Info.Create_env()
+        if env == MPI.INFO_NULL: return
+        for key in ("command", "argv",
+                    "maxprocs", "soft",
+                    "host", "arch",
+                    "wdir", "file",
+                    "thread_level"):
+            v = env.Get(key)
+        env.Free()
+        for args in (
+            None, [], (),
+            sys.executable,
+            [sys.executable],
+            (sys.executable,),
+        ):
+            MPI.Info.Create_env(args).Free()
+            MPI.Info.Create_env(args=args).Free()
 
 class TestInfo(unittest.TestCase):
 
