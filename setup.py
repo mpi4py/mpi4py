@@ -464,11 +464,49 @@ def run_setup():
     setup(**setup_args)
 
 
+def run_skbuild():
+    """
+    Call skbuild.setup(*args, **kargs)
+    """
+    from skbuild import setup
+    #
+    requirements = dict(
+        python_requires = python_requires,
+    )
+    builder_args = dict(
+        cmake_source_dir = 'src/mpi4py',
+    )
+    #
+    setup_args = dict(i for d in (
+        metadata,
+        package_info,
+        requirements,
+        builder_args,
+    ) for i in d.items())
+    #
+    setup(**setup_args)
+
+
 # --------------------------------------------------------------------
 
 
+def get_backend_name(default='default'):
+    return os.environ.get(
+        'MPI4PY_BUILD_BACKEND', default
+    ).lower().replace('_', '-')
+
+
 def main():
-    run_setup()
+    backend = get_backend_name()
+    if backend == 'default':
+        run_setup()
+    elif backend in ('setuptools', 'distutils'):
+        run_setup()
+    elif backend in ('scikit-build', 'skbuild'):
+        run_skbuild()
+    else:
+        sys.exit("Unknown build backend '{}'".format(backend))
+
 
 if __name__ == '__main__':
     if sys.version_info < (3, 6):
