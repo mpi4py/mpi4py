@@ -105,6 +105,8 @@ class _BigMPI:
     """Support for large message counts."""
 
     blocksize = 1024**3  # 1 GiB
+    if MPI.VERSION >= 4:  # pragma: no cover
+        blocksize = 1024**6  # 1 EiB
 
     def __init__(self):
         self.cache = {}
