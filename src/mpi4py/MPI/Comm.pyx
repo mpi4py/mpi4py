@@ -1661,6 +1661,25 @@ cdef class Intracomm(Comm):
         comm_set_eh(comm.ob_mpi)
         return comm
 
+    @classmethod
+    def Create_from_group(
+        cls,
+        Group group: Group,
+        stringtag: str = "org.mpi4py",
+        Info info: Info = INFO_NULL,
+        Errhandler errhandler: Optional[Errhandler] = None,
+    ) -> Intracomm:
+        """
+        Create communicator from group
+        """
+        cdef char *cstringtag = NULL
+        stringtag = asmpistr(stringtag, &cstringtag)
+        cdef MPI_Errhandler cerrhdl = arg_Errhandler(errhandler)
+        cdef Intracomm comm = Intracomm.__new__(Intracomm)
+        with nogil: CHKERR( MPI_Comm_create_from_group(
+            group.ob_mpi, cstringtag, info.ob_mpi, cerrhdl, &comm.ob_mpi) )
+        return comm
+
     def Create_cart(
         self,
         dims: Sequence[int],
@@ -2644,6 +2663,33 @@ cdef class Intercomm(Comm):
         CHKERR( MPI_Comm_test_inter(self.ob_mpi, &inter) )
         if not inter: raise TypeError(
             "expecting an intercommunicator")
+
+    # Intercommunicator Constructors
+    # ------------------------------
+
+    @classmethod
+    def Create_from_groups(
+        cls,
+        Group local_group: Group,
+        int local_leader: int,
+        Group remote_group: Group,
+        int remote_leader: int,
+        stringtag: str = "org.mpi4py",
+        Info info: Info = INFO_NULL,
+        Errhandler errhandler: Optional[Errhandler] = None,
+    ) -> Intracomm:
+        """
+        Create communicator from group
+        """
+        cdef char *cstringtag = NULL
+        stringtag = asmpistr(stringtag, &cstringtag)
+        cdef MPI_Errhandler cerrhdl = arg_Errhandler(errhandler)
+        cdef Intercomm comm = Intercomm.__new__(Intercomm)
+        with nogil: CHKERR( MPI_Intercomm_create_from_groups(
+            local_group.ob_mpi, local_leader,
+            remote_group.ob_mpi, remote_leader,
+            cstringtag, info.ob_mpi, cerrhdl, &comm.ob_mpi) )
+        return comm
 
     # Intercommunicator Accessors
     # ---------------------------

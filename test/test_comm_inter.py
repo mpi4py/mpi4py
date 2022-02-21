@@ -66,6 +66,23 @@ class BaseTestIntercomm(object):
         self.assertEqual(intracomm.rank, basecomm.rank)
         intracomm.Free()
 
+    def testCreateFromGroups(self):
+        lgroup = self.INTERCOMM.Get_group()
+        rgroup = self.INTERCOMM.Get_remote_group()
+        try:
+            try:
+                Create_from_groups = MPI.Intercomm.Create_from_groups
+                intercomm = Create_from_groups(lgroup, 0, rgroup, 0)
+                ccmp = MPI.Comm.Compare(self.INTERCOMM, intercomm)
+                intercomm.Free()
+                self.assertEqual(ccmp, MPI.CONGRUENT)
+            finally:
+                lgroup.Free()
+                rgroup.Free()
+        except NotImplementedError:
+            self.assertTrue(MPI.VERSION < 4)
+            self.skipTest('mpi-comm-create_from_group')
+
 
 class TestIntercomm(BaseTestIntercomm, unittest.TestCase):
     BASECOMM = MPI.COMM_WORLD
@@ -84,6 +101,68 @@ class TestIntercommDupDup(TestIntercomm):
         INTERCOMM = self.INTERCOMM
         self.INTERCOMM = self.INTERCOMM.Dup()
         INTERCOMM.Free()
+
+
+@unittest.skipIf(MPI.COMM_WORLD.Get_size() < 2, 'mpi-world-size<2')
+class TestIntercommCreateFromGroups(unittest.TestCase):
+
+    def testPair(self):
+        done = True
+        rank = MPI.COMM_WORLD.Get_rank()
+        if rank < 2:
+            world_group = MPI.COMM_WORLD.Get_group()
+            local_group = world_group.Incl([rank])
+            remote_group = world_group.Incl([1 - rank])
+            world_group.Free()
+            try:
+                comm = MPI.Intercomm.Create_from_groups(
+                    local_group, 0,
+                    remote_group, 0,
+                )
+                self.assertEqual(comm.Get_size(), 1)
+                self.assertEqual(comm.Get_remote_size(), 1)
+                comm.Free()
+            except NotImplementedError:
+                done = False
+            finally:
+                local_group.Free()
+                remote_group.Free()
+        done = MPI.COMM_WORLD.allreduce(done, op=MPI.LAND)
+        if not done:
+            self.assertTrue(MPI.VERSION < 4)
+            self.skipTest('mpi-intercomm-create_from_groups')
+
+    def testHalf(self):
+        done = True
+        size = MPI.COMM_WORLD.Get_size()
+        rank = MPI.COMM_WORLD.Get_rank()
+        world_group = MPI.COMM_WORLD.Get_group()
+        low_group = world_group.Range_incl([(0, size//2-1, 1)])
+        high_group = world_group.Range_incl([(size//2, size-1, 1)])
+        world_group.Free()
+        if rank <= size//2-1:
+            local_group, remote_group = low_group, high_group
+            local_leader, remote_leader = 0, high_group.Get_size()-1
+        else:
+            local_group, remote_group = high_group, low_group
+            local_leader, remote_leader = high_group.Get_size()-1, 0
+        try:
+            comm = MPI.Intercomm.Create_from_groups(
+                local_group, local_leader,
+                remote_group, remote_leader,
+            )
+            self.assertEqual(comm.Get_rank(), local_group.Get_rank())
+            self.assertEqual(comm.Get_size(), local_group.Get_size())
+            self.assertEqual(comm.Get_remote_size(), remote_group.Get_size())
+            comm.Free()
+        except NotImplementedError:
+            done = False
+        finally:
+            local_group.Free()
+            remote_group.Free()
+        if not done:
+            self.assertTrue(MPI.VERSION < 4)
+            self.skipTest('mpi-intercomm-create_from_groups')
 
 
 if __name__ == '__main__':
