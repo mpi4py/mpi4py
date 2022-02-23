@@ -141,3 +141,66 @@ jobs:
     - name: mypy (typecheck)
       run:  mypy -p mpi4py
               --config-file=conf/mypy.ini
+
+  skbuild:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        py:
+          - 3
+        mpi:
+          - mpich
+          - openmpi
+        os:
+          - ubuntu-18.04
+          - ubuntu-20.04
+
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Setup MPI (${{ matrix.mpi }})
+      uses: mpi4py/setup-mpi@v1
+      with:
+        mpi: ${{ matrix.mpi }}
+
+    - name: Use Python ${{ matrix.py }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.py }}
+
+    - name: Install packaging tools
+      run:  python -m pip install build
+
+    - name: Build sdist
+      run:  python -m build -s
+      env:
+        MPI_BUILD_BACKEND: skbuild
+
+    - name: Unpack sdist
+      run:  |
+        mkdir /tmp/mpi4py
+        tar -zxf dist/mpi4py-*.tar.gz -C /tmp/mpi4py
+
+    - name: Build wheel
+      run:  python -m build -o dist -w /tmp/mpi4py/mpi4py-*
+      env:
+        MPI4PY_BUILD_BACKEND: skbuild
+        MPI4PY_LOCAL_VERSION: ${{ matrix.mpi }}
+
+    - name: Install wheel
+      run:  python -m pip install --no-index --find-links=dist mpi4py
+
+    - name: Test wheel after install
+      run:  mpiexec -n 2 python -m mpi4py.bench helloworld
+
+    - name: Uninstall wheel after testing
+      run:  python -m pip uninstall --yes mpi4py
+
+    - name: Upload wheel
+      uses: actions/upload-artifact@v2
+      with:
+        name: mpi4py-${{ matrix.os }}
+        path: dist/mpi4py-*.whl
