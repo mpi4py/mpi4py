@@ -136,7 +136,6 @@ jobs:
     - name: mypy (stubtest)
       run:  stubtest mpi4py
               --mypy-config-file=conf/mypy.ini
-              --allowlist=conf/mypy.stubtest.allow.txt
 
     - name: mypy (typecheck)
       run:  mypy -p mpi4py
