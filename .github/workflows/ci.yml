@@ -176,8 +176,6 @@ jobs:
 
     - name: Build sdist
       run:  python -m build -s
-      env:
-        MPI_BUILD_BACKEND: skbuild
 
     - name: Unpack sdist
       run:  |
