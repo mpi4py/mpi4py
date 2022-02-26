@@ -394,9 +394,12 @@ class BaseTestP2PObj(object):
                 self.assertFalse(flag)
                 rmess = self.COMM.recv(None,  rank, 0)
                 flag = req.get_status()
+                while not flag: flag = req.get_status()
                 self.assertTrue(flag)
+                self.assertTrue(req)
                 flag, _ = req.test()
                 self.assertTrue(flag)
+                self.assertFalse(req)
                 self.assertEqual(rmess, smess)
 
     def testIRecvAndBSend(self):
