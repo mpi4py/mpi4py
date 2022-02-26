@@ -28,7 +28,7 @@ typedef void *PyMPI_MPI_Session;
 #define MPI_Session PyMPI_MPI_Session
 #endif
 
-#include "mpi4py.MPI_api.h"
+#include "../../MPI_api.h"
 
 static int import_mpi4py(void) {
   if (import_mpi4py__MPI() < 0) goto bad;

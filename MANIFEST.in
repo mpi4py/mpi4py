@@ -2,10 +2,14 @@ include setup*.py *.toml *.cfg *.rst
 
 recursive-include demo *.py *.txt *.pyx *.i *.h *.c *.cxx *.f90 *.f08
 recursive-include demo [M,m]akefile *.sh python-config
-recursive-include conf *.py *.txt *.conf *.ini *.sh *.bat *.h
+recursive-include conf *.py *.sh *.bat *.txt *.conf *.ini *.h
 recursive-include src  *.py py.typed *.pyi *.pyx *.px[di]
 recursive-include src  *.h *.c *.i CMakeLists.txt
 recursive-include test *.py *.sh
+
+exclude src/mpi4py/MPI.c
+exclude src/mpi4py/MPI.h
+exclude src/mpi4py/MPI_api.h
 
 include docs/*.html
 include docs/*.pdf

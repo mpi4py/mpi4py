@@ -69,7 +69,9 @@ def cythonize(source,
 
 if __name__ == "__main__":
     sys.exit(
-        cythonize('mpi4py/MPI.pyx', 'mpi4py.MPI.c',
-                  destdir_h=os.path.join('mpi4py', 'include', 'mpi4py'),
-                  wdir='src')
+        cythonize(
+            'mpi4py/MPI.pyx',
+            'mpi4py/MPI.c',
+            wdir='src',
         )
+    )

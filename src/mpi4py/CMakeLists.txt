@@ -19,7 +19,7 @@ get_filename_component(TOPDIR ${SRCDIR} DIRECTORY)
 set(SKBUILD "${SKBUILD}")
 
 
-# mpi.cfg
+# mpi4py/mpi.cfg
 set(mpi.cfg "${BINDIR}/mpi.cfg")
 file(WRITE ${mpi.cfg} "[mpi]\n")
 file(APPEND ${mpi.cfg} "mpicc = ${MPI_C_COMPILER}\n")
@@ -29,22 +29,22 @@ install(FILES ${mpi.cfg} DESTINATION src/mpi4py)
 # Cython
 set(cythoncmd ${TOPDIR}/conf/cythoncmd.py --cleanup 3)
 set(CYTHON_EXECUTABLE ${PYTHON_EXECUTABLE} ${cythoncmd})
-add_cython_target(mpi4py.MPI MPI.pyx OUTPUT_VAR mpi4py.MPI.c PY3)
-file(GLOB_RECURSE mpi4py.MPI.pyx ${PKGDIR}/MPI/*.pyx ${PKGDIR}/MPI/*.pxi)
-foreach(file mpi4py.MPI.h mpi4py.MPI_api.h)
-  set(mpi4py.MPI.h ${mpi4py.MPI.h} ${BINDIR}/${file})
+add_cython_target(MPI MPI.pyx OUTPUT_VAR MPI.c PY3)
+file(GLOB_RECURSE MPI.pyx ${PKGDIR}/MPI/*.pyx ${PKGDIR}/MPI/*.pxi)
+foreach(file MPI.h MPI_api.h)
+  set(MPI.h ${MPI.h} ${BINDIR}/${file})
 endforeach()
 add_custom_command(
-  OUTPUT ${mpi4py.MPI.c}
-  DEPENDS ${mpi4py.MPI.pyx}
-  BYPRODUCTS ${mpi4py.MPI.h}
+  OUTPUT ${MPI.c}
+  DEPENDS ${MPI.pyx}
+  BYPRODUCTS ${MPI.h}
   APPEND
   )
-install(FILES ${mpi4py.MPI.h} DESTINATION src/mpi4py/include)
+install(FILES ${MPI.h} DESTINATION src/mpi4py)
 
 
 # mpi4py.MPI
-add_library(MPI MODULE ${mpi4py.MPI.c})
+add_library(MPI MODULE ${MPI.c})
 target_include_directories(MPI PRIVATE ${SRCDIR})
 target_include_directories(MPI PRIVATE ${MPI_C_INCLUDE_PATH})
 target_compile_definitions(MPI PRIVATE MPICH_SKIP_MPICXX=1)

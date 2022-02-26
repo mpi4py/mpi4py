@@ -20,15 +20,15 @@ test-%:
 srcbuild:
 	$(PYTHON) setup.py build_src $(opt)
 srcclean:
-	$(RM) src/mpi4py.MPI.c
-	$(RM) src/mpi4py/include/mpi4py/mpi4py.MPI.h
-	$(RM) src/mpi4py/include/mpi4py/mpi4py.MPI_api.h
+	$(RM) src/mpi4py/MPI.c
+	$(RM) src/mpi4py/MPI.h
+	$(RM) src/mpi4py/MPI_api.h
 
 .PHONY: clean distclean fullclean
 clean:
 	$(PYTHON) setup.py clean --all
 distclean: clean
-	-$(RM) -r build _configtest*
+	-$(RM) -r build _configtest* _skbuild
 	-$(RM) -r conf/__pycache__ test/__pycache__
 	-$(RM) -r demo/__pycache__ src/mpi4py/__pycache__
 fullclean: distclean srcclean

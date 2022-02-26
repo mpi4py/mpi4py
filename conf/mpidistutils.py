@@ -388,7 +388,6 @@ else:
 cmd_config  = import_command('config')
 cmd_build   = import_command('build')
 cmd_install = import_command('install')
-cmd_sdist   = import_command('sdist')
 cmd_clean   = import_command('clean')
 
 cmd_build_clib   = import_command('build_clib')
@@ -492,7 +491,7 @@ def setup(**attrs):
     if 'cmdclass' not in attrs:
         attrs['cmdclass'] = {}
     cmdclass = attrs['cmdclass']
-    for cmd in (config, build, install, sdist, clean,
+    for cmd in (config, build, install, clean,
                 build_src, build_clib, build_ext, build_exe,
                 install_lib, install_data, install_exe,
                 ):
@@ -1296,7 +1295,7 @@ class install_lib(cmd_install_lib.install_lib):
         return outputs
 
 
-class install_data (cmd_install_data.install_data):
+class install_data(cmd_install_data.install_data):
 
     def finalize_options (self):
         self.set_undefined_options('install',
@@ -1372,14 +1371,6 @@ class install_exe(cmd_install_lib.install_lib):
             build_exe = self.get_finalized_command('build_exe')
             inputs.extend(build_exe.get_outputs())
         return inputs
-
-
-class sdist(cmd_sdist.sdist):
-
-    def run (self):
-        build_src = self.get_finalized_command('build_src')
-        build_src.run()
-        cmd_sdist.sdist.run(self)
 
 
 class clean(cmd_clean.clean):
