@@ -255,22 +255,27 @@ def extensions():
         sources=['src/dynload.c'],
         depends=['src/dynload.h'],
         configure=configure_dl,
-        )
+    )
     if os.name == 'posix':
         modules.append(dl)
     # MPI extension module
     MPI = dict(
         name='mpi4py.MPI',
-        sources=['src/MPI.c'],
+        sources=['src/mpi4py/MPI.c'],
         depends=(
-            ['src/mpi4py.MPI.c'] +
             glob.glob('src/*.h') +
             glob.glob('src/lib-mpi/*.h') +
             glob.glob('src/lib-mpi/config/*.h') +
             glob.glob('src/lib-mpi/compat/*.h')
         ),
+        include_dirs = ['src'],
+        define_macros=[
+            ('MPICH_SKIP_MPICXX', 1),
+            ('OMPI_SKIP_MPICXX', 1),
+            ('OMPI_WANT_MPI_INTERFACE_WARNING', 0),
+        ],
         configure=configure_mpi,
-        )
+    )
     modules.append(MPI)
     #
     return modules
@@ -278,13 +283,14 @@ def extensions():
 
 def executables():
     # MPI-enabled Python interpreter
-    pyexe = dict(name='python-mpi',
-                 optional=True,
-                 package='mpi4py',
-                 dest_dir='bin',
-                 sources=['src/python.c'],
-                 configure=configure_pyexe,
-                 )
+    pyexe = dict(
+        name='python-mpi',
+        optional=True,
+        package='mpi4py',
+        dest_dir='bin',
+        sources=['src/python.c'],
+        configure=configure_pyexe,
+    )
     #
     return [pyexe]
 
@@ -305,8 +311,8 @@ def chk_cython(VERSION):
     except ImportError:
         warn("*"*80)
         warn()
-        warn(" You need to generate C source files with Cython!!")
-        warn(" Download and install Cython <https://cython.org>")
+        warn(" You need Cython to generate C source files.\n")
+        warn("   $ python -m pip install cython")
         warn()
         warn("*"*80)
         return False
@@ -324,9 +330,9 @@ def chk_cython(VERSION):
         Version(AVAILABLE) < Version(REQUIRED)):
         warn("*"*80)
         warn()
-        warn(" You need to install Cython %s (you have version %s)"
-             % (REQUIRED, CYTHON_VERSION))
-        warn(" Download and install Cython <https://cython.org>")
+        warn(" You need Cython >= {0} (you have version {1}).\n"
+             .format(REQUIRED, CYTHON_VERSION))
+        warn("   $ python -m pip install --upgrade cython")
         warn()
         warn("*"*80)
         return False
@@ -360,28 +366,21 @@ def run_cython(source, target=None,
         raise DistutilsError("requires Cython>=%s" % VERSION)
     log.info("cythonizing '%s' -> '%s'", source, target)
     from cythonize import cythonize
-    err = cythonize(source, target,
-                    includes=includes,
-                    destdir_c=destdir_c,
-                    destdir_h=destdir_h,
-                    wdir=wdir)
+    err = cythonize(
+        source, target,
+        includes=includes,
+        destdir_c=destdir_c,
+        destdir_h=destdir_h,
+        wdir=wdir,
+    )
     if err:
         raise DistutilsError(
             "Cython failure: '%s' -> '%s'" % (source, target))
 
 
 def build_sources(cmd):
-    has_src = os.path.exists(os.path.join(
-        topdir, 'src', 'mpi4py.MPI.c'
-    ))
-    has_vcs = any((
-        os.path.isdir(os.path.join(topdir, '.git')),
-        os.path.isdir(os.path.join(topdir, '.hg' )),
-    ))
-    if (has_src and not has_vcs and not cmd.force): return
     # mpi4py.MPI
     source = 'mpi4py/MPI.pyx'
-    target = 'mpi4py.MPI.c'
     depends = [
         'mpi4py/*.pyx',
         'mpi4py/*.pxd',
@@ -389,9 +388,10 @@ def build_sources(cmd):
         'mpi4py/MPI/*.pxd',
         'mpi4py/MPI/*.pxi',
     ]
-    destdir_h = os.path.join('mpi4py', 'include', 'mpi4py')
-    run_cython(source, target, depends, destdir_h=destdir_h,
-               wdir='src', force=cmd.force, VERSION=CYTHON)
+    run_cython(
+        source, depends=depends, wdir='src',
+        force=cmd.force, VERSION=CYTHON,
+    )
 
 
 # --------------------------------------------------------------------
@@ -407,6 +407,7 @@ package_info = dict(
     package_data = {
         'mpi4py' : [
             '*.pxd',
+            'MPI*.h',
             'include/mpi4py/*.h',
             'include/mpi4py/*.i',
             'include/mpi4py/*.pxi',
@@ -441,13 +442,6 @@ def run_setup():
     if setuptools:
         requirements['python_requires'] = python_requires
         builder_args['zip_safe'] = False
-    if setuptools and not os.getenv('CONDA_BUILD'):
-        src = os.path.join('src', 'mpi4py.MPI.c')
-        has_src = os.path.exists(os.path.join(topdir, src))
-        has_git = os.path.isdir(os.path.join(topdir, '.git'))
-        has_hg  = os.path.isdir(os.path.join(topdir, '.hg'))
-        if not has_src or has_git or has_hg:
-            requirements['setup_requires'] = ['cython>='+CYTHON]
     #
     builder_args.update(
         ext_modules = [Ext(**ext) for ext in extensions()],

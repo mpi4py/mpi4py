@@ -25,3 +25,10 @@ PyMPI_Status_GETSET( error,  ERROR  )
 #undef PyMPI_Status_GETSET
 
 #endif
+
+/*
+   Local variables:
+   c-basic-offset: 2
+   indent-tabs-mode: nil
+   End:
+*/

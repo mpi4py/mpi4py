@@ -34,8 +34,8 @@ def get_requires_for_build_wheel(config_settings=None):
     use_skbuild = backend in ('scikit-build', 'skbuild')
     with set_build_backend():
         requires = _st_bm.get_requires_for_build_wheel(config_settings)
+    requires.append(CYTHON)
     if use_skbuild:
-        requires.append(CYTHON)
         requires.append(SKBUILD)
         requires.append(CMAKE)
         requires.append(NINJA)
@@ -45,7 +45,6 @@ def get_requires_for_build_wheel(config_settings=None):
 def get_requires_for_build_sdist(config_settings=None):
     with set_build_backend():
         requires = _st_bm.get_requires_for_build_sdist(config_settings)
-    requires.append(CYTHON)
     return requires
 
 
