@@ -121,8 +121,8 @@ cdef inline void op_user_call(
     if (<void*>op_user_registry) == NULL:
         <void>MPI_Abort(MPI_COMM_WORLD, 1)
     # compute the byte-size of memory buffers
-    cdef MPI_Count lb=0, extent=0
-    <void>MPI_Type_get_extent_c(t, &lb, &extent)
+    cdef MPI_Aint lb=0, extent=0
+    <void>MPI_Type_get_extent(t, &lb, &extent)
     cdef MPI_Count n = count * extent
     # make the actual GIL-safe Python call
     op_user_mpi(index, a, b, n, t)
