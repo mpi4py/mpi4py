@@ -80,7 +80,7 @@ class BaseTestRun(unittest.TestCase):
         )
         ci = any((
             os.environ.get('GITHUB_ACTIONS') == 'true',
-            os.environ.get('TF_BUILD') == 'true',
+            os.environ.get('TF_BUILD') == 'True',
             os.environ.get('CIRCLECI') == 'true',
             os.environ.get('TRAVIS') == 'true',
         ))
