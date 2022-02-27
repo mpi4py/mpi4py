@@ -377,6 +377,22 @@ class TestMessageSimpleNumPy(unittest.TestCase,
     def array(self, typecode, initializer):
         return numpy.array(initializer, dtype=typecode)
 
+    def testByteOrder(self):
+        sbuf = numpy.zeros([3], 'i')
+        rbuf = numpy.zeros([3], 'i')
+        sbuf = sbuf.newbyteorder('=')
+        rbuf = rbuf.newbyteorder('=')
+        Sendrecv(sbuf, rbuf)
+        byteorder = '<' if sys.byteorder == 'little' else '>'
+        sbuf = sbuf.newbyteorder(byteorder)
+        rbuf = rbuf.newbyteorder(byteorder)
+        Sendrecv(sbuf, rbuf)
+        byteorder = '>' if sys.byteorder == 'little' else '<'
+        sbuf = sbuf.newbyteorder(byteorder)
+        rbuf = rbuf.newbyteorder(byteorder)
+        self.assertRaises(ValueError,
+                          Sendrecv, sbuf, rbuf)
+
     def testOrderC(self):
         sbuf = numpy.ones([3,2])
         rbuf = numpy.zeros([3,2])
@@ -713,6 +729,15 @@ class TestMessageCAIBuf(unittest.TestCase):
         rmsg = CAIBuf('B', [0,0,0])
         rmsg.__cuda_array_interface__['typestr'] = 42
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
+
+    def testTypestrEndian(self):
+        smsg = CAIBuf('i', [1,2,3])
+        rmsg = CAIBuf('i', [0,0,0])
+        typestr = smsg.__cuda_array_interface__['typestr']
+        byteorder = '>' if sys.byteorder == 'little' else '<'
+        typestr = byteorder + typestr[1:]
+        smsg.__cuda_array_interface__['typestr'] = typestr
+        self.assertRaises(BufferError, Sendrecv, smsg, rmsg)
 
     def testTypestrItemsize(self):
         smsg = CAIBuf('B', [1,2,3])
