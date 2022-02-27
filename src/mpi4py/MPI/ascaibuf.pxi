@@ -67,6 +67,7 @@ cdef int Py_GetCAIBuffer(object obj, Py_buffer *view, int flags) except -1:
     cdef bint readonly = 0
     cdef Py_ssize_t s, size = 1
     cdef Py_ssize_t itemsize = 1
+    cdef char byteorder = c'|'
     cdef char typekind = c'u'
     cdef bint fixnull = 0
 
@@ -89,6 +90,7 @@ cdef int Py_GetCAIBuffer(object obj, Py_buffer *view, int flags) except -1:
     for s in shape: size *= s
     if dev_ptr is None and size == 0: dev_ptr = 0 # XXX
     buf = PyLong_AsVoidPtr(dev_ptr)
+    byteorder = <char>ord(typestr[0:1])
     typekind = <char>ord(typestr[1:2])
     itemsize = <Py_ssize_t>int(typestr[2:])
 
@@ -97,6 +99,23 @@ cdef int Py_GetCAIBuffer(object obj, Py_buffer *view, int flags) except -1:
             "__cuda_array_interface__: "
             "cannot handle masked arrays"
         )
+    if byteorder == c'<': # little-endian
+        if not is_little_endian():
+            raise BufferError(
+                f"__cuda_array_interface__: "
+                f"typestr {typestr!r} "
+                f"with non-native byte order")
+    elif byteorder == c'>': # little-endian
+        if not is_big_endian():
+            raise BufferError(
+                f"__cuda_array_interface__: "
+                f"typestr {typestr!r} "
+                f"with non-native byte order")
+    elif byteorder != c'|':
+        raise BufferError(
+            f"__cuda_array_interface__: "
+            f"typestr {typestr!r} "
+            f"with unrecognized byte order")
     if size < 0:
         raise BufferError(
             f"__cuda_array_interface__: "

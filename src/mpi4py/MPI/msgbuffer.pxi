@@ -81,14 +81,37 @@ cdef inline bint is_IN_PLACE(object obj):
 
 #------------------------------------------------------------------------------
 
+cdef inline const char *getformat(const char format[]) except NULL:
+    cdef char byteorder = format[0]
+    if byteorder == c'@': # native
+        return format + 1
+    if byteorder == c'<': # little-endian
+        if not is_little_endian(): raise ValueError(
+            f"format string {pystr(format)!r} "
+            f"with non-native byte order")
+        return format + 1
+    if byteorder == c'>': # big-endian
+        if not is_big_endian(): raise ValueError(
+            f"format string {pystr(format)!r} "
+            f"with non-native byte order")
+        return format + 1
+    # passthrough
+    return format
+
+cdef inline Datatype lookup_datatype(object key):
+    try:
+        return <Datatype?> TypeDict[key]
+    except KeyError:
+        raise KeyError(f"cannot map {key!r} to MPI datatype")
+
 cdef inline Datatype asdatatype(object datatype):
     if isinstance(datatype, Datatype):
         return <Datatype> datatype
-    return <Datatype?> TypeDict[datatype]
+    return lookup_datatype(datatype)
 
 cdef inline Datatype getdatatype(const char format[]):
     if format == BYTE_FMT: return __BYTE__
-    return <Datatype?> TypeDict[pystr(format)]
+    return lookup_datatype(pystr(getformat(format)))
 
 @cython.final
 @cython.internal

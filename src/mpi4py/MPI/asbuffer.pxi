@@ -52,6 +52,16 @@ BYTE_FMT[1] = 0
 
 #------------------------------------------------------------------------------
 
+cdef inline int is_big_endian() nogil:
+    cdef int i = 1
+    return (<char*>&i)[0] == 0
+
+cdef inline int is_little_endian() nogil:
+    cdef int i = 1
+    return (<char*>&i)[0] != 0
+
+#------------------------------------------------------------------------------
+
 include "asdlpack.pxi"
 include "ascaibuf.pxi"
 
