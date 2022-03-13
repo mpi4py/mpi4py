@@ -78,7 +78,7 @@ jobs:
         path: dist
 
     - name: Install test dependencies
-      run:  python -m pip install --upgrade numpy cffi pyyaml
+      run:  python -m pip install --upgrade -r conf/requirements-test.txt
       if:   ${{ runner.os == 'Linux' || !startsWith(matrix.py, 'pypy-') }}
     - name: Install package for testing
       run:  python -m pip install --no-index --find-links=dist mpi4py
