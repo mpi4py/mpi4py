@@ -1,0 +1,4 @@
+pickle5; python_version < '3.8' and implementation_name == 'cpython'
+numpy
+cffi
+pyyaml

@@ -762,10 +762,8 @@ class BaseTestPKL5(object):
                     data, bufs = pickle.dumps(sobj)
                     robj = pickle.loads(data, bufs)
                     self.assertTrue(numpy.all(sobj==robj))
-                    if protocol is None:
-                        protocol = MPI.Pickle().PROTOCOL
-                    if protocol < 0:
-                        protocol = pkl5._PROTOCOL
+                    if protocol is None or protocol < 0:
+                        protocol = pkl5.Pickle().PROTOCOL
                     if protocol >= 5 and sobj.nbytes >= threshold:
                         self.assertEqual(len(bufs), 1)
                     else:
