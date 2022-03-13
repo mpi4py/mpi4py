@@ -126,7 +126,14 @@ def stubgen_class(cls, done=None):
     done = set() if done is None else done
     lines = Lines()
 
+    try:
+        class sub(cls): pass
+        final = False
+    except TypeError:
+        final = True
     base = cls.__base__
+    if final:
+        lines.add = f"@final"
     if base is object:
         lines.add = f"class {cls.__name__}:"
     else:
@@ -207,7 +214,6 @@ def stubgen_module(module, done=None):
         '__file__',
         '__package__',
         '__builtins__',
-        '__pyx_capi__',
     }
 
     done = set() if done is None else done
@@ -285,6 +291,7 @@ IMPORTS = """
 from __future__ import annotations
 import sys
 from threading import Lock
+from typing import final
 from typing import overload
 from typing import (
     Any,
@@ -379,6 +386,7 @@ OVERRIDE = {
         ) -> None: ...
         """,
     },
+    '__pyx_capi__': "__pyx_capi__: Final[Dict[str, Any]] = ...",
     '_typedict':   "_typedict: Final[Dict[str, Datatype]] = ...",
     '_typedict_c': "_typedict_c: Final[Dict[str, Datatype]] = ...",
     '_typedict_f': "_typedict_f: Final[Dict[str, Datatype]] = ...",
