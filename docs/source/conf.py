@@ -81,6 +81,7 @@ nitpick_ignore_regex = [
 # python_use_unqualified_type_names = True
 
 autodoc_typehints = 'description'
+autodoc_typehints_format = 'short'
 autodoc_type_aliases = {}
 autodoc_mock_imports = []
 
@@ -123,12 +124,6 @@ def _setup_numpy_typing():
             setattr(npt, attr, typing.Any)
             npt.__all__.append(attr)
 
-    autodoc_type_aliases.update({
-        'dtype': 'numpy.dtype',
-        'ArrayLike': 'numpy.typing.ArrayLike',
-        'DTypeLike': 'numpy.typing.DTypeLike',
-    })
-
 
 def _patch_domain_python():
     from sphinx.domains import python
@@ -142,7 +137,7 @@ def _patch_domain_python():
         mpi4py_types = []
 
     def make_xref(self, rolename, domain, target, *args, **kwargs):
-        if target in ('True', 'False'):
+        if target in ('None', 'True', 'False'):
             rolename = 'obj'
         elif target in numpy_types:
             rolename = 'data'
@@ -248,22 +243,11 @@ def setup(app):
     autotype = autosummary_context['autotype']
     autotype[module.Exception.__name__] = 'exception'
 
-    mod = importlib.import_module('mpi4py.typing')
-    for name in mod.__all__:
-        autodoc_type_aliases[name] = f'{name}'
-
-    mod = importlib.import_module('mpi4py.MPI')
-    for name in dir(mod):
-        attr = getattr(mod, name)
-        if isinstance(attr, type):
-            if attr.__module__ == mod.__name__:
-                autodoc_type_aliases[name] = f'{name}'
-
     modules = [
         'mpi4py',
         'mpi4py.run',
-        'mpi4py.util.dtlib',
         'mpi4py.util.pkl5',
+        'mpi4py.util.dtlib',
     ]
     typing_overload = typing.overload
     typing.overload = lambda arg: arg
