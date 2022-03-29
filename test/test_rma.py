@@ -117,6 +117,7 @@ class BaseTestRMA(object):
         try:
             try:
                 self.WIN.Get_accumulate([obuf, 0, MPI.BYTE], [rbuf, 0, MPI.BYTE], rank)
+                self.WIN.Fence()
             finally:
                 MPI.Free_mem(obuf)
                 MPI.Free_mem(rbuf)
@@ -154,7 +155,6 @@ class BaseTestRMA(object):
                         self.assertEqual(rbuf[-1], -1)
                         self.assertEqual(gbuf[-1], -1)
 
-    @unittest.skipMPI('mpich(>=4.0,<4.1)', sys.platform == 'darwin')
     def testFetchAndOp(self):
         typemap = MPI._typedict
         group = self.WIN.Get_group()
@@ -171,6 +171,7 @@ class BaseTestRMA(object):
                     [obuf, 1, MPI.INT],
                     [rbuf, 1, MPI.INT],
                     rank)
+                self.WIN.Fence()
             finally:
                 MPI.Free_mem(obuf)
                 MPI.Free_mem(rbuf)
@@ -216,6 +217,7 @@ class BaseTestRMA(object):
                                           [cbuf, 1, MPI.BYTE],
                                           [rbuf, 1, MPI.BYTE],
                                           rank, 0)
+                self.WIN.Fence()
             finally:
                 MPI.Free_mem(obuf)
                 MPI.Free_mem(cbuf)
