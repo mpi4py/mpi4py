@@ -18,7 +18,7 @@ jobs:
 executors:
   linux:
     docker:
-      - image: condaforge/linux-anvil-comp7
+      - image: condaforge/linux-anvil-cos7-x86_64
 
 workflows:
   test-all:
