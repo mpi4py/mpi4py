@@ -2,12 +2,11 @@ from __future__ import annotations
 from .. import MPI
 from ..MPI import PROC_NULL, ANY_SOURCE, ANY_TAG
 from ..MPI import Status, Datatype
+from ..typing import Buffer
 from typing import Any, Literal, Optional
 from typing import Callable, Iterable, Sequence
 from typing import Dict, List, Tuple
 from typing import overload
-
-Buffer = Any
 
 class Pickle:
     PROTOCOL: int = ...

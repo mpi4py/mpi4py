@@ -127,8 +127,10 @@ def _setup_numpy_typing():
 
 def _patch_domain_python():
     from sphinx.domains import python
+    from sphinx.util.inspect import TypeAliasForwardRef
     try:
         from numpy.typing import __all__ as numpy_types
+        numpy_types = [f'numpy.typing.{name}' for name in numpy_types]
     except ImportError:
         numpy_types = []
     try:
@@ -143,12 +145,19 @@ def _patch_domain_python():
             rolename = 'data'
         elif target in mpi4py_types:
             rolename = 'data'
+        elif target.rsplit('.')[-1] in mpi4py_types:
+            target = target.rsplit('.')[-1]
+            rolename = 'data'
         return make_xref_orig(self, rolename, domain, target, *args, *kwargs)
 
-    numpy_types = set(f'numpy.typing.{name}' for name in numpy_types)
+    numpy_types = set(numpy_types)
     mpi4py_types = set(mpi4py_types)
     make_xref_orig = python.PyXrefMixin.make_xref
     python.PyXrefMixin.make_xref = make_xref
+
+    TypeAliasForwardRef.__repr__ = lambda self: self.name
+    for name in mpi4py_types:
+        autodoc_type_aliases[name] = f'mpi4py.typing.{name}'
 
 
 def _setup_autodoc(app):
