@@ -65,7 +65,7 @@ class Lines(list):
 def signature(obj):
     doc = obj.__doc__
     sig = doc.split('\n', 1)[0].split('.', 1)[-1]
-    return sig
+    return sig or None
 
 
 def docstring(obj):
@@ -120,11 +120,11 @@ def apidoc_property(prop, name=None):
     return f"@property\ndef {sig}:\n{doc}\n{body}\n"
 
 
-def apidoc_constructor(cls, name='__init__'):
+def apidoc_constructor(cls, name='__init__', args=None):
     init = (name == '__init__')
     argname = cls.__mro__[-2].__name__.lower()
     argtype = cls.__name__
-    initarg = f"{argname}: Optional[{argtype}] = None"
+    initarg = args or f"{argname}: Optional[{argtype}] = None"
     selfarg = 'self' if init else 'cls'
     rettype = 'None' if init else argtype
     arglist = f"{selfarg}, {initarg}"
@@ -172,19 +172,23 @@ def apidoc_class(cls, done=None):
         lines.add = f"class {cls.__name__}({base.__name__}):"
     lines.level += 1
 
-    doc = cls.__doc__
-    doc = dedent(doc).strip()
-    if doc.startswith(f"{cls.__name__}("):
-        doc = doc.split('\n', 1)[1].strip()
-    lines.add = f'"""{doc}"""'
+    lines.add = docstring(cls)
+
+    name = "__init__"
+    if name not in override:
+        sig = signature(cls)
+        if sig is not None:
+            done.update(constructor)
+            args = sig.strip().split('->', 1)[0].strip()
+            args = args[args.index('('):][1:-1]
+            lines.add = apidoc_constructor(cls, name, args)
 
     for name in constructor:
+        if name in done:
+            break
         if name in override:
             done.update(constructor)
             lines.add = override[name]
-            break
-    for name in constructor:
-        if name in done:
             break
         if name in cls.__dict__:
             done.update(constructor)
@@ -408,15 +412,6 @@ OVERRIDE = {
             "value: Union[int, Buffer]) "
             "-> None: ..."),
         '__delitem__': None,
-    },
-    'Pickle': {
-        '__init__': """
-        def __init__(self,
-            dumps: Optional[Callable[[Any, int], bytes]] = None,
-            loads: Optional[Callable[[Buffer], Any]] = None,
-            protocol: Optional[int] = None,
-        ) -> None: ...
-        """
     },
     '_typedict': "_typedict: Dict[str, Datatype] = {}",
     '_typedict_c': "_typedict_c: Dict[str, Datatype] = {}",
