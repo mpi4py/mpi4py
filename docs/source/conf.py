@@ -112,6 +112,7 @@ def _setup_numpy_typing():
         np = type(sys)('numpy')
         sys.modules[np.__name__] = np
         np.dtype = type('dtype', (), {})
+        np.dtype.__module__ = np.__name__
 
     try:
         import numpy.typing as npt
@@ -127,7 +128,7 @@ def _setup_numpy_typing():
 
 def _patch_domain_python():
     from sphinx.domains import python
-    from sphinx.util.inspect import TypeAliasForwardRef
+    from sphinx.util import inspect
     try:
         from numpy.typing import __all__ as numpy_types
         numpy_types = [f'numpy.typing.{name}' for name in numpy_types]
@@ -135,8 +136,16 @@ def _patch_domain_python():
         numpy_types = []
     try:
         from mpi4py.typing import __all__ as mpi4py_types
+        mpi4py_types = [f'{name}' for name in mpi4py_types]
     except ImportError:
         mpi4py_types = []
+
+    numpy_types = set(numpy_types)
+    mpi4py_types = set(mpi4py_types)
+    for name in numpy_types:
+        autodoc_type_aliases[name] = f'{name}'
+    for name in mpi4py_types:
+        autodoc_type_aliases[name] = f'{name}'
 
     def make_xref(self, rolename, domain, target, *args, **kwargs):
         if target in ('None', 'True', 'False'):
@@ -145,19 +154,13 @@ def _patch_domain_python():
             rolename = 'data'
         elif target in mpi4py_types:
             rolename = 'data'
-        elif target.rsplit('.')[-1] in mpi4py_types:
-            target = target.rsplit('.')[-1]
-            rolename = 'data'
         return make_xref_orig(self, rolename, domain, target, *args, *kwargs)
 
-    numpy_types = set(numpy_types)
-    mpi4py_types = set(mpi4py_types)
     make_xref_orig = python.PyXrefMixin.make_xref
     python.PyXrefMixin.make_xref = make_xref
 
-    TypeAliasForwardRef.__repr__ = lambda self: self.name
-    for name in mpi4py_types:
-        autodoc_type_aliases[name] = f'mpi4py.typing.{name}'
+    inspect.TypeAliasForwardRef.__repr__ = lambda self: self.name
+    inspect.TypeAliasForwardRef.__hash__ = lambda self: hash(self.name)
 
 
 def _setup_autodoc(app):
