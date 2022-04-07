@@ -523,6 +523,9 @@ def annotate(dest, source):
                 mod = getattr(obj, '__module__', None)
                 if dest.__name__ == mod:
                     annotate(obj, getattr(source, name))
+        for name in dir(source):
+            if not hasattr(dest, name):
+                setattr(dest, name, getattr(source, name))
 
 
 OUTDIR = 'reference'
