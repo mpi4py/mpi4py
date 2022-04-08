@@ -21,10 +21,10 @@ sys.path.insert(0, os.path.join(topdir, 'conf'))
 # Metadata
 # --------------------------------------------------------------------
 
-def name():
+def get_name():
     return 'mpi4py'
 
-def version():
+def get_version():
     srcdir = os.path.join(topdir, 'src')
     with open(os.path.join(srcdir, 'mpi4py', '__init__.py')) as f:
         m = re.search(r"__version__\s*=\s*'(.*)'", f.read())
@@ -49,14 +49,33 @@ def long_description():
             text = text.replace(includeline, f.read())
     return text
 
-name = name()
-version = version()
-description = description()
-long_description = long_description()
+def homepage():
+    return 'https://mpi4py.github.io'
 
-url      = 'https://github.com/mpi4py/%(name)s/' % vars()
-download = url + 'releases/download/%(version)s/' % vars()
-download = download + '%(name)s-%(version)s.tar.gz' % vars()
+def github(*args):
+    base = 'https://github.com/mpi4py/mpi4py'
+    return '/'.join((base,) + args)
+
+def readthedocs(*args):
+    base = 'https://mpi4py.readthedocs.io'
+    return '/'.join((base,) + args)
+
+def download_url():
+    if '.dev' in version:
+        path = 'tarball'
+        archive = 'master'
+    else:
+        path = 'releases/download/' + version
+        archive = name + '-' + version + '.tar.gz'
+    return github(path, archive)
+
+def documentation_url():
+    language = 'en'
+    location = 'latest' if '.dev' in version else version
+    return readthedocs(language, location, '')
+
+name = get_name()
+version = get_version()
 
 classifiers = """
 Development Status :: 5 - Production/Stable
@@ -104,22 +123,30 @@ Windows
 metadata = {
     'name'             : name,
     'version'          : version,
-    'description'      : description,
-    'long_description' : long_description,
-    'url'              : url,
-    'download_url'     : download,
-    'classifiers'      : [c for c in classifiers.split('\n') if c],
-    'keywords'         : [k for k in keywords.split('\n')    if k],
-    'platforms'        : [p for p in platforms.split('\n')   if p],
-    'license'          : 'BSD',
+    'description'      : description(),
+    'long_description' : long_description(),
+    'url'              : homepage(),
+    'download_url'     : download_url(),
+    'classifiers'      : classifiers.strip().split('\n'),
+    'keywords'         : keywords.strip().split('\n'),
+    'platforms'        : platforms.strip().split('\n'),
+    'license'          : 'BSD-2-Clause',
     'author'           : 'Lisandro Dalcin',
     'author_email'     : 'dalcinl@gmail.com',
-    'maintainer'       : 'Lisandro Dalcin',
-    'maintainer_email' : 'dalcinl@gmail.com',
-    }
+}
 
-metadata['provides'] = ['mpi4py']
+require_python = (3, 6)
 
+metadata_extra = {
+    'project_urls': {
+        "Source Code"   : github(),
+        "Bug Tracker"   : github('issues'),
+        "Discussions"   : github('discussions'),
+        "Documentation" : documentation_url(),
+    },
+    'python_requires': '>=' + '.'.join(map(str, require_python)),
+    'long_description_content_type': 'text/rst',
+}
 
 # --------------------------------------------------------------------
 # Extension modules
@@ -419,8 +446,6 @@ package_info = dict(
     package_dir = {'' : 'src'},
 )
 
-python_requires = '>=3.6'
-
 
 def run_setup():
     """
@@ -437,21 +462,17 @@ def run_setup():
     from mpidistutils import build_src
     build_src.run = build_sources
     #
-    requirements = {}
-    builder_args = {}
-    if setuptools:
-        requirements['python_requires'] = python_requires
-        builder_args['zip_safe'] = False
-    #
-    builder_args.update(
+    builder_args = dict(
         ext_modules = [Ext(**ext) for ext in extensions()],
         executables = [Exe(**exe) for exe in executables()],
     )
+    if setuptools:
+        builder_args['zip_safe'] = False
+        metadata.update(metadata_extra)
     #
     setup_args = dict(i for d in (
         metadata,
         package_info,
-        requirements,
         builder_args,
     ) for i in d.items())
     #
@@ -464,17 +485,14 @@ def run_skbuild():
     """
     from skbuild import setup
     #
-    requirements = dict(
-        python_requires = python_requires,
-    )
     builder_args = dict(
         cmake_source_dir = 'src/mpi4py',
     )
+    metadata.update(metadata_extra)
     #
     setup_args = dict(i for d in (
         metadata,
         package_info,
-        requirements,
         builder_args,
     ) for i in d.items())
     #
@@ -503,8 +521,11 @@ def main():
 
 
 if __name__ == '__main__':
-    if sys.version_info < (3, 6):
-        raise SystemExit("Python version 3.6+ required")
+    if sys.version_info < require_python:
+        raise SystemExit(
+            "error: requires Python version " +
+            metadata_extra['python_requires']
+        )
     main()
 
 
