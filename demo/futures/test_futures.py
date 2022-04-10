@@ -379,7 +379,7 @@ class ProcessPoolShutdownTest(ProcessPoolMixin,
         executor = self.executor_type(max_workers=1)
         executor.bootup()
         num_workers = executor._max_workers
-        for _ in range(num_workers*10):
+        for _ in range(num_workers*100):
             executor.submit(time.sleep, 0.1)
         fut = executor.submit(time.sleep, 0)
         executor.shutdown(wait=False, cancel_futures=False)
