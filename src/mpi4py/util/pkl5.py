@@ -2,8 +2,6 @@
 # Contact: dalcinl@gmail.com
 """Pickle-based communication using protocol 5."""
 
-import os as _os
-import sys as _sys
 import struct as _struct
 
 from .. import MPI
@@ -15,77 +13,21 @@ from ..MPI import (
 )
 
 from ..MPI import (
+    Pickle,
     _typedict,
     _comm_lock,
     _commctx_inter,
-    Pickle as _Pickle,
 )
 
-if _sys.version_info >= (3, 8):
-    from pickle import (
-        dumps as _dumps,
-        loads as _loads,
-        HIGHEST_PROTOCOL as _PROTOCOL,
-    )
-else:  # pragma: no cover
-    try:
-        from pickle5 import (
-            dumps as _dumps,
-            loads as _loads,
-            HIGHEST_PROTOCOL as _PROTOCOL,
-        )
-    except ImportError:
-        _PROTOCOL = MPI.Pickle().PROTOCOL
-
-        def _dumps(obj, *_p, **_kw):
-            return MPI.pickle.dumps(obj)
-
-        def _loads(buf, *_p, **_kw):
-            return MPI.pickle.loads(buf)
-
-
-def _buffer_handler(protocol, threshold):
-    bufs = []
-    if protocol is None or protocol < 0:
-        protocol = _PROTOCOL
-    if protocol < 5:
-        return bufs, None
-    def buf_cb(buf):
-        if memoryview(buf).nbytes >= threshold:
-            bufs.append(buf)
-            return False
-        return True
-    return bufs, buf_cb
-
-
-def _get_threshold(default):
-    varname = 'MPI4PY_PICKLE_THRESHOLD'
-    return int(_os.environ.get(varname, default))
-
-
-class Pickle(_Pickle):
-    """Pickle/unpickle Python objects using out-of-band buffers."""
-
-    THRESHOLD = _get_threshold(1024**2 // 4)  # 0.25 MiB
-
-    def __init__(self, dumps=_dumps, loads=_loads, protocol=_PROTOCOL):
-        """Initialize pickle context."""
-        # pylint: disable=useless-super-delegation
-        super().__init__(dumps, loads, protocol)
-
-    def dumps(self, obj):
-        """Serialize object to data and out-of-band buffers."""
-        bufs, buf_cb = _buffer_handler(self.PROTOCOL, self.THRESHOLD)
-        data = super().dumps(obj, buf_cb)
-        return data, bufs
-
-    def loads(self, data, bufs):
-        """Deserialize object from data and out-of-band buffers."""
-        # pylint: disable=useless-super-delegation
-        return super().loads(data, bufs)
-
-
 pickle = Pickle()
+
+
+def _pickle_dumps(obj):
+    return pickle.dumps_oob(obj)
+
+
+def _pickle_loads(data, bufs):
+    return pickle.loads_oob(data, bufs)
 
 
 def _bigmpi_create_type(basetype, count, blocksize):
@@ -173,7 +115,7 @@ def _new_buffer(size):
 def _send_raw(comm, send, data, bufs, dest, tag):
     # pylint: disable=too-many-arguments
     info = [len(data)]
-    info.extend(memoryview(sbuf).nbytes for sbuf in bufs)
+    info.extend(len(sbuf) for sbuf in bufs)
     infotype = _info_datatype()
     info = _info_pack(info)
     send(comm, (info, infotype), dest, tag)
@@ -187,7 +129,7 @@ def _send(comm, send, obj, dest, tag):
     if dest == PROC_NULL:
         send(comm, (None, 0, MPI.BYTE), dest, tag)
         return
-    data, bufs = pickle.dumps(obj)
+    data, bufs = _pickle_dumps(obj)
     with _comm_lock(comm, 'send'):
         _send_raw(comm, send, data, bufs, dest, tag)
 
@@ -236,7 +178,7 @@ def _recv(comm, recv, buf, source, tag, status):
         return None
     with _comm_lock(comm, 'recv'):
         data, bufs = _recv_raw(comm, recv, buf, source, tag, status)
-    return pickle.loads(data, bufs)
+    return _pickle_loads(data, bufs)
 
 
 def _mprobe(comm, mprobe, source, tag, status):
@@ -277,7 +219,7 @@ def _mrecv_none(rmsg, mrecv, status):
     _mrecv_info(rmsg, 0, status)
     noproc = MPI.MESSAGE_NO_PROC
     mrecv(noproc, (None, 0, MPI.BYTE))
-    data, bufs = pickle.dumps(None)
+    data, bufs = _pickle_dumps(None)
     return (bytearray(data), bufs)
 
 
@@ -303,7 +245,7 @@ def _mrecv(message, status):
     def mrecv(rmsg, buf):
         MPI.Message.Recv(rmsg, buf)
     data, bufs = _mrecv_data(message, mrecv, status)
-    return pickle.loads(data, bufs)
+    return _pickle_loads(data, bufs)
 
 
 def _imrecv(message):
@@ -322,7 +264,7 @@ def _req_load(request):
         delattr(request, '_data_bufs')
     if data_bufs is not None:
         data, bufs = data_bufs
-        obj = pickle.loads(data, bufs)
+        obj = _pickle_loads(data, bufs)
         return obj
     return None
 
@@ -359,7 +301,7 @@ def _bcast_intra_raw(comm, bcast, data, bufs, root):
     rank = comm.Get_rank()
     if rank == root:
         info = [len(data)]
-        info.extend(memoryview(sbuf).nbytes for sbuf in bufs)
+        info.extend(len(sbuf) for sbuf in bufs)
         infotype = _info_datatype()
         infosize = _info_pack([len(info)])
         bcast(comm, (infosize, infotype), root)
@@ -385,12 +327,12 @@ def _bcast_intra_raw(comm, bcast, data, bufs, root):
 def _bcast_intra(comm, bcast, obj, root):
     rank = comm.Get_rank()
     if rank == root:
-        data, bufs = pickle.dumps(obj)
+        data, bufs = _pickle_dumps(obj)
     else:
-        data, bufs = pickle.dumps(None)
+        data, bufs = _pickle_dumps(None)
     with _comm_lock(comm, 'bcast'):
         data, bufs = _bcast_intra_raw(comm, bcast, data, bufs, root)
-    return pickle.loads(data, bufs)
+    return _pickle_loads(data, bufs)
 
 
 def _bcast_inter(comm, bcast, obj, root):
@@ -401,7 +343,7 @@ def _bcast_inter(comm, bcast, obj, root):
         return None
     elif root == MPI.ROOT:
         send = MPI.Comm.Send
-        data, bufs = pickle.dumps(obj)
+        data, bufs = _pickle_dumps(obj)
         _send_raw(comm, send, data, bufs, 0, tag)
         return None
     elif 0 <= root < size:
@@ -409,10 +351,10 @@ def _bcast_inter(comm, bcast, obj, root):
             recv = MPI.Comm.Recv
             data, bufs = _recv_raw(comm, recv, None, root, tag)
         else:
-            data, bufs = pickle.dumps(None)
+            data, bufs = _pickle_dumps(None)
         with _comm_lock(localcomm, 'bcast'):
             data, bufs = _bcast_intra_raw(localcomm, bcast, data, bufs, 0)
-        return pickle.loads(data, bufs)
+        return _pickle_loads(data, bufs)
     comm.Call_errhandler(MPI.ERR_ROOT)
     raise MPI.Exception(MPI.ERR_ROOT)
 

@@ -1,6 +1,7 @@
 from mpi4py import MPI
 from mpi4py.util import pkl5
 import unittest
+import sys
 
 _basic = [
     None,
@@ -759,13 +760,18 @@ class BaseTestPKL5(object):
                         None, rank, 42)
                     self.assertTrue(numpy.all(sobj==robj))
                     #
-                    data, bufs = pickle.dumps(sobj)
-                    robj = pickle.loads(data, bufs)
+                    data, bufs = pickle.dumps_oob(sobj)
+                    self.assertTrue(type(data) is bytes)
+                    self.assertTrue(type(bufs) is list)
+                    robj = pickle.loads_oob(data, bufs)
                     self.assertTrue(numpy.all(sobj==robj))
-                    if protocol is None or protocol < 0:
-                        protocol = pkl5.Pickle().PROTOCOL
-                    if protocol >= 5 and sobj.nbytes >= threshold:
+                    have_pickle5 = (
+                        sys.version_info >= (3, 8) or
+                        'pickle5' in sys.modules
+                    )
+                    if sobj.nbytes >= threshold and have_pickle5:
                         self.assertEqual(len(bufs), 1)
+                        self.assertTrue(type(bufs[0]) is MPI.memory)
                     else:
                         self.assertEqual(len(bufs), 0)
 

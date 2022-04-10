@@ -378,6 +378,7 @@ OVERRIDE = {
             dumps: Callable[[Any, int], bytes],
             loads: Callable[[Buffer], Any],
             protocol: Optional[int] = None,
+            threshold: Optional[int] = None,
         ) -> None: ...
         @overload
         def __init__(self,

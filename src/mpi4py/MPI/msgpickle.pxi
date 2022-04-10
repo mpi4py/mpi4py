@@ -12,6 +12,8 @@ cdef extern from "Python.h":
 cdef object PyPickle_dumps = None
 cdef object PyPickle_loads = None
 cdef object PyPickle_PROTOCOL = None
+cdef object PyPickle_THRESHOLD = 1024**2 // 4 # 0.25 MiB
+
 from pickle import dumps as PyPickle_dumps
 from pickle import loads as PyPickle_loads
 from pickle import HIGHEST_PROTOCOL as PyPickle_PROTOCOL
@@ -19,6 +21,8 @@ from pickle import HIGHEST_PROTOCOL as PyPickle_PROTOCOL
 if Py_GETENV(b"MPI4PY_PICKLE_PROTOCOL") != NULL:
     PyPickle_PROTOCOL = int(Py_GETENV(b"MPI4PY_PICKLE_PROTOCOL"))
 
+if Py_GETENV(b"MPI4PY_PICKLE_THRESHOLD") != NULL:
+    PyPickle_THRESHOLD = int(Py_GETENV(b"MPI4PY_PICKLE_THRESHOLD"))
 
 cdef class Pickle:
 
@@ -29,17 +33,20 @@ cdef class Pickle:
     cdef object ob_dumps
     cdef object ob_loads
     cdef object ob_PROTO
+    cdef object ob_THRES
 
     def __cinit__(self, *args, **kwargs):
         self.ob_dumps = PyPickle_dumps
         self.ob_loads = PyPickle_loads
         self.ob_PROTO = PyPickle_PROTOCOL
+        self.ob_THRES = PyPickle_THRESHOLD
 
     def __init__(
         self,
         dumps: Optional[Callable[[Any, int], bytes]] = None,
         loads: Optional[Callable[[Buffer], Any]] = None,
         protocol: Optional[int] = None,
+        threshold: Optional[int] = None,
     ) -> None:
         if dumps is None:
             dumps = PyPickle_dumps
@@ -48,36 +55,52 @@ cdef class Pickle:
         if protocol is None:
             if dumps is PyPickle_dumps:
                 protocol = PyPickle_PROTOCOL
+        if threshold is None:
+            threshold = PyPickle_THRESHOLD
         self.ob_dumps = dumps
         self.ob_loads = loads
         self.ob_PROTO = protocol
+        self.ob_THRES = threshold
 
     def dumps(
         self,
         obj: Any,
-        buffer_callback: Optional[Callable[[Buffer], Any]] = None,
     ) -> bytes:
         """
         Serialize object to pickle data stream.
         """
-        if buffer_callback is not None:
-            return cdumps_oob(self, obj, buffer_callback)
         return cdumps(self, obj)
 
     def loads(
         self,
         data: Buffer,
-        buffers: Optional[Iterable[Buffer]] = None,
     ) -> Any:
         """
         Deserialize object from pickle data stream.
         """
-        if buffers is not None:
-            return cloads_oob(self, data, buffers)
         return cloads(self, data)
 
+    def dumps_oob(
+        self,
+        obj: Any,
+    ) -> Tuple[bytes, List[memory]]:
+        """
+        Serialize object to pickle data stream and out-of-band buffers.
+        """
+        return cdumps_oob(self, obj)
+
+    def loads_oob(
+        self,
+        data: Buffer,
+        buffers: Iterable[Buffer],
+    ) -> Any:
+        """
+        Deserialize object from pickle data stream and out-of-band buffers.
+        """
+        return cloads_oob(self, data, buffers)
+
     property PROTOCOL:
-        """pickle protocol"""
+        """protocol version"""
         def __get__(self) -> Optional[int]:
             return self.ob_PROTO
         def __set__(self, protocol: Optional[int]):
@@ -86,23 +109,82 @@ cdef class Pickle:
                     protocol = PyPickle_PROTOCOL
             self.ob_PROTO = protocol
 
+    property THRESHOLD:
+        """out-of-band threshold"""
+        def __get__(self) -> int:
+            return self.ob_THRES
+        def __set__(self, threshold: Optional[int]):
+            if threshold is None:
+                threshold = PyPickle_THRESHOLD
+            self.ob_THRES = threshold
+
 
 cdef Pickle PyMPI_PICKLE = Pickle()
 pickle = PyMPI_PICKLE
 
 # -----------------------------------------------------------------------------
 
-cdef object cdumps_oob(Pickle pkl, object obj, object buffer_callback):
-    cdef int protocol = -1
-    if pkl.ob_PROTO is not None:
-        protocol = pkl.ob_PROTO
-        if protocol >= 0:
-            protocol = max(protocol, <int>5)
-    return pkl.ob_dumps(obj, protocol, buffer_callback=buffer_callback)
+cdef extern from "Python.h":
+    enum: PY_VERSION_HEX
+
+cdef int have_pickle5 = -1
+cdef object PyPickle5_dumps = None
+cdef object PyPickle5_loads = None
+
+cdef int import_pickle5() except -1:
+    global have_pickle5
+    global PyPickle5_dumps
+    global PyPickle5_loads
+    if have_pickle5 < 0:
+        try:
+            from pickle5 import dumps as PyPickle5_dumps
+            from pickle5 import loads as PyPickle5_loads
+            have_pickle5 = 1
+        except ImportError:
+            PyPickle5_dumps = None
+            PyPickle5_loads = None
+            have_pickle5 = 0
+    return have_pickle5
+
+
+cdef object get_buffer_callback(list buffers, Py_ssize_t threshold):
+    def buffer_callback(buf):
+        cdef memory mem = getbuffer(buf, 1, 0)
+        if mem.view.len >= threshold:
+            buffers.append(mem)
+            return False
+        else:
+            return True
+    return buffer_callback
+
+cdef object cdumps_oob(Pickle pkl, object obj):
+    cdef object pkl_dumps = pkl.ob_dumps
+    if PY_VERSION_HEX < 0x03080000:
+        if pkl_dumps is PyPickle_dumps:
+            if not import_pickle5():
+                return cdumps(pkl, obj), []
+            pkl_dumps = PyPickle5_dumps
+    cdef object protocol = pkl.ob_PROTO
+    if protocol is None:
+        protocol = PyPickle_PROTOCOL
+    protocol = max(protocol, 5)
+    cdef list buffers = []
+    cdef Py_ssize_t threshold = pkl.ob_THRES
+    cdef object buf_cb = get_buffer_callback(buffers, threshold)
+    cdef object data = pkl_dumps(obj, protocol, buffer_callback=buf_cb)
+    return data, buffers
 
 cdef object cloads_oob(Pickle pkl, object data, object buffers):
-    return pkl.ob_loads(data, buffers=buffers)
+    cdef object pkl_loads = pkl.ob_loads
+    if PY_VERSION_HEX < 0x03080000:
+        if pkl_loads is PyPickle_loads:
+            if not import_pickle5():
+                return cloads(pkl, data)
+            pkl_loads = PyPickle5_loads
+    return pkl_loads(data, buffers=buffers)
 
+
+# -----------------------------------------------------------------------------
 
 cdef object cdumps(Pickle pkl, object obj):
     if pkl.ob_PROTO is not None:

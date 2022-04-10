@@ -2,22 +2,12 @@ from __future__ import annotations
 from .. import MPI
 from ..MPI import PROC_NULL, ANY_SOURCE, ANY_TAG
 from ..MPI import Status, Datatype
+from ..MPI import Pickle
 from ..typing import Buffer
 from typing import Any, Literal, Optional
 from typing import Callable, Iterable, Sequence
 from typing import Dict, List, Tuple
 from typing import overload
-
-class Pickle:
-    PROTOCOL: int = ...
-    THRESHOLD: int = ...
-    def __init__(self,
-        dumps: Callable[[Any, int], bytes] = ...,
-        loads: Callable[[Buffer], Any] = ...,
-        protocol: Optional[int] = ...,
-    ) -> None: ...
-    def dumps(self, obj: Any) -> Tuple[bytes, List[Buffer]]: ...
-    def loads(self, data: Buffer, bufs: Iterable[Buffer]): ...
 
 pickle: Pickle = ...
 
