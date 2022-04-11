@@ -34,7 +34,7 @@ Tutorial
    .. _Victor Eijkhout: https://tacc.utexas.edu/~eijkhout/
    .. _TACC: https://www.tacc.utexas.edu/
    .. _ppse-pdf: https://tinyurl.com/vle335course
-   .. _ppse-html: https://tacc.utexas.edu/~eijkhout/pcse/html/index.html
+   .. _ppse-html: https://theartofhpc.com/pcse/index.html
 
 
 *MPI for Python* supports convenient, *pickle*-based communication of
