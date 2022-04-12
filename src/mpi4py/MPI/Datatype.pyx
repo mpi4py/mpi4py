@@ -783,8 +783,8 @@ cdef class Datatype:
         #
         cdef void *ibptr = NULL, *obptr = NULL
         cdef MPI_Aint iblen = 0, oblen = 0
-        cdef tmp1 = getbuffer_r(inbuf,  &ibptr, &iblen)
-        cdef tmp2 = getbuffer_w(outbuf, &obptr, &oblen)
+        cdef tmp1 = asbuffer_r(inbuf,  &ibptr, &iblen)
+        cdef tmp2 = asbuffer_w(outbuf, &obptr, &oblen)
         cdef MPI_Count icount = iblen // extent
         cdef MPI_Count ocount = oblen
         #
@@ -809,8 +809,8 @@ cdef class Datatype:
         #
         cdef void *ibptr = NULL, *obptr = NULL
         cdef MPI_Aint iblen = 0, oblen = 0
-        cdef tmp1 = getbuffer_r(inbuf,  &ibptr, &iblen)
-        cdef tmp2 = getbuffer_w(outbuf, &obptr, &oblen)
+        cdef tmp1 = asbuffer_r(inbuf,  &ibptr, &iblen)
+        cdef tmp2 = asbuffer_w(outbuf, &obptr, &oblen)
         cdef MPI_Count icount = iblen
         cdef MPI_Count ocount = oblen // extent
         #
@@ -856,8 +856,8 @@ cdef class Datatype:
         #
         cdef void *ibptr = NULL, *obptr = NULL
         cdef MPI_Aint iblen = 0, oblen = 0
-        cdef tmp1 = getbuffer_r(inbuf,  &ibptr, &iblen)
-        cdef tmp2 = getbuffer_w(outbuf, &obptr, &oblen)
+        cdef tmp1 = asbuffer_r(inbuf,  &ibptr, &iblen)
+        cdef tmp2 = asbuffer_w(outbuf, &obptr, &oblen)
         cdef MPI_Count icount = iblen // extent
         cdef MPI_Count ocount = oblen
         #
@@ -885,8 +885,8 @@ cdef class Datatype:
         #
         cdef void *ibptr = NULL, *obptr = NULL
         cdef MPI_Aint iblen = 0, oblen = 0
-        cdef tmp1 = getbuffer_r(inbuf,  &ibptr, &iblen)
-        cdef tmp2 = getbuffer_w(outbuf, &obptr, &oblen)
+        cdef tmp1 = asbuffer_r(inbuf,  &ibptr, &iblen)
+        cdef tmp2 = asbuffer_w(outbuf, &obptr, &oblen)
         cdef MPI_Count icount = iblen
         cdef MPI_Count ocount = oblen // extent
         #
@@ -1023,7 +1023,7 @@ def Get_address(location: Union[Buffer, Bottom]) -> int:
     """
     cdef void *baseptr = MPI_BOTTOM
     if not is_BOTTOM(location):
-        getbuffer_r(location, &baseptr, NULL)
+        asbuffer_r(location, &baseptr, NULL)
     cdef MPI_Aint address = 0
     CHKERR( MPI_Get_address(baseptr, &address) )
     return address

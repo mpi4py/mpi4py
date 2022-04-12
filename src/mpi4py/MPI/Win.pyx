@@ -71,7 +71,7 @@ cdef class Win:
         if is_BOTTOM(memory):
             memory = None
         if memory is not None:
-            memory = getbuffer_w(memory, &base, &size)
+            memory = asbuffer_w(memory, &base, &size)
         cdef Win win = Win.__new__(Win)
         with nogil: CHKERR( MPI_Win_create_c(
             base, size, disp_unit,
@@ -130,7 +130,7 @@ cdef class Win:
         with nogil: CHKERR( MPI_Win_shared_query_c(
             self.ob_mpi, rank,
             &size, &disp_unit, &base) )
-        return (asbuffer(self, base, size, 0), disp_unit)
+        return (tobuffer(self, base, size, 0), disp_unit)
 
     @classmethod
     def Create_dynamic(
@@ -154,7 +154,7 @@ cdef class Win:
         """
         cdef void *base = NULL
         cdef MPI_Aint size = 0
-        memory = getbuffer_w(memory, &base, &size)
+        memory = asbuffer_w(memory, &base, &size)
         with nogil: CHKERR( MPI_Win_attach(self.ob_mpi, base, size) )
         try: (<dict>self.ob_mem)[<MPI_Aint>base] = memory
         except: pass
@@ -164,7 +164,7 @@ cdef class Win:
         Detach a local memory region
         """
         cdef void *base = NULL
-        memory = getbuffer_w(memory, &base, NULL)
+        memory = asbuffer_w(memory, &base, NULL)
         with nogil: CHKERR( MPI_Win_detach(self.ob_mpi, base) )
         try: del (<dict>self.ob_mem)[<MPI_Aint>base]
         except: pass

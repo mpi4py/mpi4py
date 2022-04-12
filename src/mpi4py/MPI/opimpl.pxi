@@ -90,17 +90,14 @@ cdef inline object op_user_py(int index, object x, object y, object dt):
     return op_user_registry[index](x, y, dt)
 
 cdef inline void op_user_mpi(
-    int index, void *a, void *b, MPI_Count nbytes, MPI_Datatype t) with gil:
-    cdef MPI_Aint n = <MPI_Aint> nbytes
+    int index, void *a, void *b, MPI_Count n, MPI_Datatype t) with gil:
     cdef Datatype datatype
     # errors in user-defined reduction operations are unrecoverable
     try:
-        if nbytes != <MPI_Count>n:
-            raise OverflowError("integer {nbytes} does not fit in 'MPI_Aint'")
         datatype = Datatype.__new__(Datatype)
         datatype.ob_mpi = t
         try:
-            op_user_py(index, tomemory(a, n), tomemory(b, n), datatype)
+            op_user_py(index, mpibuf(a, n), mpibuf(b, n), datatype)
         finally:
             datatype.ob_mpi = MPI_DATATYPE_NULL
     except:

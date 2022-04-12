@@ -228,7 +228,7 @@ cdef class memory:
         elif PySlice_Check(item):
             PySlice_GetIndicesEx(item, blen, &start, &stop, &step, &slen)
             if step != 1: raise IndexError("slice with step not supported")
-            return asbuffer(self, buf+start, slen, self.view.readonly)
+            return tobuffer(self, buf+start, slen, self.view.readonly)
         else:
             raise TypeError("index must be integer or slice")
 
@@ -273,38 +273,35 @@ cdef inline memory getbuffer(object ob, bint readonly, bint format):
     PyMPI_GetBuffer(ob, &buf.view, flags)
     return buf
 
-cdef inline memory getbuffer_r(object ob, void **base, MPI_Aint *size):
-    cdef memory buf = getbuffer(ob, 1, 0)
+cdef inline memory asbuffer(object ob, void **base, MPI_Aint *size, bint ro):
+    cdef memory buf
+    if type(ob) is memory:
+        buf = <memory> ob
+        if buf.view.readonly and not ro:
+            raise BufferError("Object is not writable")
+    else:
+        buf = getbuffer(ob, ro, 0)
     if base != NULL: base[0] = buf.view.buf
     if size != NULL: size[0] = buf.view.len
     return buf
 
-cdef inline memory getbuffer_w(object ob, void **base, MPI_Aint *size):
-    cdef memory buf = getbuffer(ob, 0, 0)
-    if base != NULL: base[0] = buf.view.buf
-    if size != NULL: size[0] = buf.view.len
-    return buf
+cdef inline memory asbuffer_r(object ob, void **base, MPI_Aint *size):
+    return asbuffer(ob, base, size, 1)
 
-cdef inline memory asbuffer(object ob, void *base, MPI_Aint size, bint ro):
+cdef inline memory asbuffer_w(object ob, void **base, MPI_Aint *size):
+    return asbuffer(ob, base, size, 0)
+
+cdef inline memory tobuffer(object ob, void *base, MPI_Aint size, bint ro):
+    if size < 0:
+        raise ValueError("expecting non-negative buffer length")
     cdef memory buf = newbuffer()
     PyBuffer_FillInfo(&buf.view, ob, base, size, ro, PyBUF_SIMPLE)
     return buf
 
-#------------------------------------------------------------------------------
-
-cdef inline memory asmemory(object ob, void **base, MPI_Aint *size):
-    cdef memory mem
-    if type(ob) is memory:
-        mem = <memory> ob
-    else:
-        mem = getbuffer(ob, 1, 0)
-    if base != NULL: base[0] = mem.view.buf
-    if size != NULL: size[0] = mem.view.len
-    return mem
-
-cdef inline memory tomemory(void *base, MPI_Aint size):
-    cdef memory mem = memory.__new__(memory)
-    PyBuffer_FillInfo(&mem.view, <object>NULL, base, size, 0, PyBUF_SIMPLE)
-    return mem
+cdef inline memory mpibuf(void *base, MPI_Count count):
+    cdef MPI_Aint size = <MPI_Aint>count
+    if count != <MPI_Count>size:
+        raise OverflowError("integer {size} does not fit in 'MPI_Aint'")
+    return tobuffer(<object>NULL, base, size, 0)
 
 #------------------------------------------------------------------------------

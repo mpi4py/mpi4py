@@ -95,16 +95,16 @@ def Alloc_mem(Aint size: int, Info info: Info = INFO_NULL) -> memory:
     """
     cdef void *base = NULL
     CHKERR( MPI_Alloc_mem(size, info.ob_mpi, &base) )
-    return tomemory(base, size)
+    return mpibuf(base, size)
 
 def Free_mem(mem: memory) -> None:
     """
     Free memory allocated with `Alloc_mem()`
     """
     cdef void *base = NULL
-    cdef memory m = asmemory(mem, &base, NULL)
+    cdef memory buf = asbuffer(mem, &base, NULL, 1)
     CHKERR( MPI_Free_mem(base) )
-    m.release()
+    buf.release()
 
 # Initialization and Exit
 # -----------------------
