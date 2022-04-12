@@ -25,10 +25,10 @@ cdef class _p_datarep:
         cdef MPI_Count lb=0, extent=0
         cdef int ierr = MPI_Type_get_extent_c(datatype, &lb, &extent)
         if ierr != MPI_SUCCESS: return ierr
-        cdef MPI_Aint ulen = <MPI_Aint> ((position + count) * extent)
-        cdef MPI_Aint flen = <MPI_Aint> PY_SSIZE_T_MAX # XXX
-        cdef object ubuf = tomemory(userbuf, ulen)
-        cdef object fbuf = tomemory(filebuf, flen)
+        cdef MPI_Count ulen = (position + count) * extent
+        cdef MPI_Count flen = <MPI_Count> PY_SSIZE_T_MAX # XXX
+        cdef object ubuf = mpibuf(userbuf, ulen)
+        cdef object fbuf = mpibuf(filebuf, flen)
         cdef Datatype dtype = Datatype.__new__(Datatype)
         dtype.ob_mpi = datatype
         try: self.read_fn(ubuf, dtype, count, fbuf, position)
@@ -45,10 +45,10 @@ cdef class _p_datarep:
         cdef MPI_Count lb=0, extent=0
         cdef int ierr = MPI_Type_get_extent_c(datatype, &lb, &extent)
         if ierr != MPI_SUCCESS: return ierr
-        cdef MPI_Aint ulen = <MPI_Aint> ((position + count) * extent)
-        cdef MPI_Aint flen = <MPI_Aint> PY_SSIZE_T_MAX # XXX
-        cdef object ubuf = tomemory(userbuf, ulen)
-        cdef object fbuf = tomemory(filebuf, flen)
+        cdef MPI_Count ulen = (position + count) * extent
+        cdef MPI_Count flen = <MPI_Count> PY_SSIZE_T_MAX # XXX
+        cdef object ubuf = mpibuf(userbuf, ulen)
+        cdef object fbuf = mpibuf(filebuf, flen)
         cdef Datatype dtype = Datatype.__new__(Datatype)
         dtype.ob_mpi = datatype
         try: self.write_fn(ubuf, dtype, count, fbuf, position)

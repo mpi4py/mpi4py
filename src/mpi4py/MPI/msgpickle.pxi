@@ -148,10 +148,10 @@ cdef int import_pickle5() except -1:
 
 
 cdef object get_buffer_callback(list buffers, Py_ssize_t threshold):
-    def buffer_callback(buf):
-        cdef memory mem = getbuffer(buf, 1, 0)
-        if mem.view.len >= threshold:
-            buffers.append(mem)
+    def buffer_callback(ob):
+        cdef memory buf = getbuffer(ob, 1, 0)
+        if buf.view.len >= threshold:
+            buffers.append(buf)
             return False
         else:
             return True
@@ -204,7 +204,7 @@ cdef object pickle_dump(Pickle pkl, object obj, void **p, MPI_Count *n):
 
 cdef object pickle_load(Pickle pkl, void *p, MPI_Count n):
     if p == NULL or n == 0: return None
-    return cloads(pkl, tomemory(p, <MPI_Aint>n))
+    return cloads(pkl, mpibuf(p, n))
 
 
 cdef object pickle_dumpv(Pickle pkl, object obj, void **p, int n, MPI_Count cnt[], MPI_Aint dsp[]):
@@ -327,7 +327,7 @@ cdef object PyMPI_recv_obarg(object obj, int source, int tag,
             rcount = <MPI_Count> obj
             rmsg = pickle_alloc(&rbuf, rcount)
         else:
-            rmsg = getbuffer_w(obj, &rbuf, &rlen)
+            rmsg = asbuffer_w(obj, &rbuf, &rlen)
             rcount = <MPI_Count> rlen
         if status == MPI_STATUS_IGNORE:
             status = &rsts
@@ -471,13 +471,13 @@ cdef object PyMPI_irecv(object obj, int source, int tag,
         if obj is None:
             rcount = <MPI_Count> (1<<15)
             obj = pickle_alloc(&rbuf, rcount)
-            rmsg = getbuffer_r(obj, NULL, NULL)
+            rmsg = asbuffer_r(obj, NULL, NULL)
         elif is_integral(obj):
             rcount = <MPI_Count> obj
             obj = pickle_alloc(&rbuf, rcount)
-            rmsg = getbuffer_r(obj, NULL, NULL)
+            rmsg = asbuffer_r(obj, NULL, NULL)
         else:
-            rmsg = getbuffer_w(obj, &rbuf, &rlen)
+            rmsg = asbuffer_w(obj, &rbuf, &rlen)
             rcount = <MPI_Count> rlen
     with nogil: CHKERR( MPI_Irecv_c(
         rbuf, rcount, rtype,
@@ -499,13 +499,12 @@ cdef object PyMPI_sendrecv(object sobj, int dest,   int sendtag,
 
 cdef object PyMPI_load(MPI_Status *status, object ob):
     cdef Pickle pickle = PyMPI_PICKLE
-    cdef void *rbuf = NULL
     cdef MPI_Count rcount = 0
     cdef MPI_Datatype rtype = MPI_BYTE
     if type(ob) is not memory: return None
     CHKERR( MPI_Get_count_c(status, rtype, &rcount) )
     if rcount <= 0: return None
-    ob = asmemory(ob, &rbuf, NULL)
+    cdef void *rbuf = (<memory>ob).view.buf
     return pickle_load(pickle, rbuf, rcount)
 
 
@@ -725,9 +724,9 @@ cdef object PyMPI_mrecv(object rmsg,
     elif rmsg is None:
         pass
     elif PyBytes_CheckExact(rmsg):
-        rmsg = getbuffer_r(rmsg, &rbuf, &rlen)
+        rmsg = asbuffer_r(rmsg, &rbuf, &rlen)
     else:
-        rmsg = getbuffer_w(rmsg, &rbuf, &rlen)
+        rmsg = asbuffer_w(rmsg, &rbuf, &rlen)
     cdef MPI_Count rcount = <MPI_Count> rlen
     with nogil: CHKERR( MPI_Mrecv_c(
         rbuf, rcount, rtype, message, status) )
@@ -744,9 +743,9 @@ cdef object PyMPI_imrecv(object rmsg,
     elif rmsg is None:
         pass
     elif PyBytes_CheckExact(rmsg):
-        rmsg = getbuffer_r(rmsg, &rbuf, &rlen)
+        rmsg = asbuffer_r(rmsg, &rbuf, &rlen)
     else:
-        rmsg = getbuffer_w(rmsg, &rbuf, &rlen)
+        rmsg = asbuffer_w(rmsg, &rbuf, &rlen)
     cdef MPI_Count rcount = <MPI_Count> rlen
     with nogil: CHKERR( MPI_Imrecv_c(
         rbuf, rcount, rtype, message, request) )

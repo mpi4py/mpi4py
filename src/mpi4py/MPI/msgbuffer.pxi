@@ -395,9 +395,9 @@ cdef tuple message_vector_w(object msg,
             raise ValueError("message: BOTTOM requires displs")
         _addr[0] = MPI_BOTTOM
     elif readonly:
-        o_buffer = getbuffer_r(o_buffer, _addr, NULL)
+        o_buffer = asbuffer_r(o_buffer, _addr, NULL)
     else:
-        o_buffer = getbuffer_w(o_buffer, _addr, NULL)
+        o_buffer = asbuffer_w(o_buffer, _addr, NULL)
     if o_counts is None and o_displs is None:
         o_counts = newarray(blocks, _counts)
         o_displs = newarray(blocks, _displs)
