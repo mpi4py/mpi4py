@@ -15,11 +15,19 @@ on:
 
 jobs:
 
-  build:
+  test:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
+        os:
+          - ubuntu-20.04
+          - macos-11
+          - windows-2022
+        mpi:
+          - mpich
+          - openmpi
+          - msmpi
         py:
           - "3.7"
           - "3.8"
@@ -27,14 +35,7 @@ jobs:
           - "3.10"
           - "pypy-3.7"
           - "pypy-3.8"
-        mpi:
-          - mpich
-          - openmpi
-          - msmpi
-        os:
-          - ubuntu-20.04
-          - macos-11
-          - windows-2022
+          - "pypy-3.9"
         exclude:
           - os: ubuntu-20.04
             mpi: msmpi
@@ -52,7 +53,7 @@ jobs:
       run:  echo 127.0.0.1 `hostname` | sudo tee -a /etc/hosts > /dev/null
 
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Setup MPI (${{ matrix.mpi }})
       uses: mpi4py/setup-mpi@v1
@@ -60,7 +61,7 @@ jobs:
         mpi: ${{ matrix.mpi }}
 
     - name: Use Python ${{ matrix.py }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.py }}
         architecture: x64
@@ -72,10 +73,10 @@ jobs:
     - name: Build package
       run:  python -m pip wheel -vvv --wheel-dir=dist .
     - name: Upload package artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
-        name: mpi4py-${{matrix.mpi}}-${{matrix.os}}
-        path: dist
+        name: mpi4py-${{matrix.os}}-${{matrix.mpi}}
+        path: dist/mpi4py-*.whl
 
     - name: Install test dependencies
       run:  python -m pip install --upgrade -r conf/requirements-test.txt
@@ -101,10 +102,10 @@ jobs:
     steps:
 
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Use Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v3
       with:
         python-version: 3
 
@@ -146,19 +147,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        py:
-          - 3
-        mpi:
-          - mpich
-          - openmpi
         os:
           - ubuntu-18.04
           - ubuntu-20.04
+        mpi:
+          - mpich
+          - openmpi
+        py:
+          - 3
 
     steps:
 
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Setup MPI (${{ matrix.mpi }})
       uses: mpi4py/setup-mpi@v1
@@ -166,7 +167,7 @@ jobs:
         mpi: ${{ matrix.mpi }}
 
     - name: Use Python ${{ matrix.py }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.py }}
 
@@ -197,7 +198,7 @@ jobs:
       run:  python -m pip uninstall --yes mpi4py
 
     - name: Upload wheel
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
-        name: mpi4py-${{ matrix.os }}
+        name: mpi4py-skbuild-${{ matrix.os }}
         path: dist/mpi4py-*.whl
