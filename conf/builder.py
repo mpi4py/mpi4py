@@ -4,7 +4,7 @@ import shutil
 import contextlib
 import setuptools.build_meta as _st_bm
 
-CYTHON = 'cython >= 0.27'
+CYTHON = 'cython >= 0.28'
 SKBUILD = 'scikit-build >= 0.13'
 CMAKE = 'cmake >= 3.12'
 NINJA = 'ninja'

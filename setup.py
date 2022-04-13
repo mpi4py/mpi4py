@@ -326,7 +326,12 @@ def executables():
 # Cython
 # --------------------------------------------------------------------
 
-CYTHON = '0.27'
+def req_cython():
+    with open(os.path.join(topdir, 'conf', 'builder.py')) as f:
+        m = re.search(r"CYTHON\s*=\s*'cython\s*>=+\s*(.*)'", f.read())
+    assert m is not None
+    cython_version = m.groups()[0]
+    return cython_version
 
 
 def chk_cython(VERSION):
@@ -417,7 +422,7 @@ def build_sources(cmd):
     ]
     run_cython(
         source, depends=depends, wdir='src',
-        force=cmd.force, VERSION=CYTHON,
+        force=cmd.force, VERSION=req_cython(),
     )
 
 
