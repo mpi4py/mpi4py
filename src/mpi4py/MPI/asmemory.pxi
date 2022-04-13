@@ -33,7 +33,6 @@ cdef class _p_mem:
             self.free(self.buf)
 
     def __getbuffer__(self, Py_buffer *view, int flags):
-        if view.obj == Py_None: Py_CLEAR(view.obj)
         PyBuffer_FillInfo(view, self, self.buf, self.len, 0, flags)
 
 

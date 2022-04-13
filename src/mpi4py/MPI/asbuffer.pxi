@@ -206,7 +206,6 @@ cdef class memory:
     # buffer interface (PEP 3118)
 
     def __getbuffer__(self, Py_buffer *view, int flags):
-        if view.obj == Py_None: Py_CLEAR(view.obj)
         PyBuffer_FillInfo(view, self,
                           self.view.buf, self.view.len,
                           self.view.readonly, flags)
