@@ -11,8 +11,8 @@ include "atimport.pxi"
 bootstrap()
 initialize()
 
+include "allocate.pxi"
 include "asstring.pxi"
-include "asmemory.pxi"
 include "asbuffer.pxi"
 include "asarray.pxi"
 include "helpers.pxi"

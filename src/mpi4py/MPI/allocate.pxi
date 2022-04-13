@@ -17,7 +17,7 @@ cdef extern from "Python.h":
 
 @cython.final
 @cython.internal
-cdef class _p_mem:
+cdef class _PyMem:
 
     cdef void *buf
     cdef Py_ssize_t len
@@ -36,12 +36,12 @@ cdef class _p_mem:
         PyBuffer_FillInfo(view, self, self.buf, self.len, 0, flags)
 
 
-cdef inline _p_mem allocate(Py_ssize_t m, size_t b, void *buf):
+cdef inline _PyMem allocate(Py_ssize_t m, size_t b, void *buf):
   if m > PY_SSIZE_T_MAX // <Py_ssize_t>b:
       raise MemoryError("memory allocation size too large")
   if m < 0:
       raise RuntimeError("memory allocation with negative size")
-  cdef _p_mem ob = _p_mem.__new__(_p_mem)
+  cdef _PyMem ob = _PyMem.__new__(_PyMem)
   ob.len  = m * <Py_ssize_t>b
   ob.free = PyMem_Free
   ob.buf  = PyMem_Malloc(<size_t>m * b)
@@ -50,12 +50,12 @@ cdef inline _p_mem allocate(Py_ssize_t m, size_t b, void *buf):
   return ob
 
 
-cdef inline _p_mem rawalloc(Py_ssize_t m, size_t b, bint clear, void *buf):
+cdef inline _PyMem rawalloc(Py_ssize_t m, size_t b, bint clear, void *buf):
   if m > PY_SSIZE_T_MAX // <Py_ssize_t>b:
       raise MemoryError("memory allocation size too large")
   if m < 0:
       raise RuntimeError("memory allocation with negative size")
-  cdef _p_mem ob = _p_mem.__new__(_p_mem)
+  cdef _PyMem ob = _PyMem.__new__(_PyMem)
   ob.len = m * <Py_ssize_t>b
   ob.free = PyMem_RawFree
   if clear:
