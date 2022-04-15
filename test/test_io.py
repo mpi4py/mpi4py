@@ -2,11 +2,15 @@ from mpi4py import MPI
 import mpiunittest as unittest
 import arrayimpl
 import sys, os, tempfile
+import platform
 
 
 def subTestIO(case, *args, **kwargs):
+    openmpi = unittest.mpi_predicate('openmpi(<5.0.0)')
+    is_i386 = platform.machine() in ('i386', 'i686')
     for array, typecode in arrayimpl.subTest(case, *args, **kwargs):
         if unittest.is_mpi_gpu('mvapich2', array): continue
+        if openmpi and is_i386 and typecode in ('g', 'G'): continue
         yield array, typecode
 
 
