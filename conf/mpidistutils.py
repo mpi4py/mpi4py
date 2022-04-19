@@ -54,13 +54,31 @@ def rpath_option(compiler, dir):
     return option
 UnixCCompiler.runtime_library_dir_option = rpath_option
 
+def _fix_env(cmd, i):
+    while os.path.basename(cmd[i]) == 'env':
+        i = i + 1
+        while '=' in cmd[i]:
+            i = i + 1
+    return i
+
+def _fix_xcrun(cmd, i):
+    if os.path.basename(cmd[i]) == 'xcrun':
+        del cmd[i]
+        while True:
+            if cmd[i] == '-sdk':
+                del cmd[i:i+2]
+                continue
+            if cmd[i] == '-log':
+                del cmd[i]
+                continue
+            break
+    return i
+
 def fix_compiler_cmd(cc, mpicc):
     if not mpicc: return
     i = 0
-    while os.path.basename(cc[i]) == 'env':
-        i = i + 1
-        while '=' in cc[i]:
-            i = i + 1
+    i = _fix_env(cc, i)
+    i = _fix_xcrun(cc, i)
     while os.path.basename(cc[i]) == 'ccache':
         i = i + 1
     cc[i:i+1] = split_quoted(mpicc)
@@ -71,10 +89,8 @@ def fix_linker_cmd(ld, mpild):
     if (sys.platform.startswith('aix') and
         os.path.basename(ld[i]) == 'ld_so_aix'):
         i = 1
-    while os.path.basename(ld[i]) == 'env':
-        i = i + 1
-        while '=' in ld[i]:
-            i = i + 1
+    i = _fix_env(ld, i)
+    i = _fix_xcrun(ld, i)
     while os.path.basename(ld[i]) == 'ccache':
         del ld[i]
     ld[i:i+1] = split_quoted(mpild)
