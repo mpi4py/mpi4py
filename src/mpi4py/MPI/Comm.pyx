@@ -1969,7 +1969,7 @@ cdef class Comm:
     #
     def scatter(
         self,
-        sendobj: Sequence[Any],
+        sendobj: Optional[Sequence[Any]],
         int root: int = 0,
     ) -> Any:
         """Scatter"""
