@@ -614,22 +614,12 @@ class BaseTest(object):
         self.assertEqual(msg, self.MessageType(MPI.MESSAGE_NO_PROC))
         self.assertNotEqual(msg, MPI.MESSAGE_NULL)
 
-    def testBcastIntra(self, msglist=None, check=None):
-        comm = self.COMM
-        size = comm.Get_size()
-        for smess in (msglist or messages):
-            for root in range(size):
-                rmess = comm.bcast(smess, root)
-                if msglist and check:
-                    self.assertTrue(check(rmess))
-                else:
-                    self.assertEqual(rmess, smess)
-
-    def testBcastInter(self, msglist=None, check=None):
-        basecomm = self.COMM
+    @staticmethod
+    def make_intercomm(basecomm):
         size = basecomm.Get_size()
         rank = basecomm.Get_rank()
-        if size == 1: return
+        if size == 1:
+            raise unittest.SkipTest("comm.size==1")
         if rank < size // 2 :
             COLOR = 0
             local_leader = 0
@@ -649,31 +639,168 @@ class BaseTest(object):
         intracomm.Free()
         if isinstance(basecomm, pkl5.Intracomm):
             intercomm = pkl5.Intercomm(intercomm)
-        rank = intercomm.Get_rank()
-        size = intercomm.Get_size()
-        rsize = intercomm.Get_remote_size()
+        return intercomm, COLOR
+
+    def testBcastIntra(self, msglist=None, check=None):
+        comm = self.COMM
+        size = comm.Get_size()
+        for smess in (msglist or messages):
+            for root in range(size):
+                rmess = comm.bcast(smess, root)
+                if msglist and check:
+                    self.assertTrue(check(rmess))
+                else:
+                    self.assertEqual(rmess, smess)
+
+    def testBcastInter(self, msglist=None, check=None):
+        comm, COLOR = self.make_intercomm(self.COMM)
+        rank = comm.Get_rank()
+        size = comm.Get_size()
+        rsize = comm.Get_remote_size()
         for smess in (msglist or messages)[:1]:
-            intercomm.barrier()
+            comm.barrier()
             for color in [0, 1]:
                 if COLOR == color:
                     for root in range(size):
                         if root == rank:
-                            rmess = intercomm.bcast(smess, root=MPI.ROOT)
+                            rmess = comm.bcast(smess, root=MPI.ROOT)
                         else:
-                            rmess = intercomm.bcast(None, root=MPI.PROC_NULL)
+                            rmess = comm.bcast(None, root=MPI.PROC_NULL)
                         self.assertEqual(rmess, None)
                 else:
                     for root in range(rsize):
-                        rmess = intercomm.bcast(None, root=root)
+                        rmess = comm.bcast(None, root=root)
                         if msglist and check:
                             self.assertTrue(check(rmess))
                         else:
                             self.assertEqual(rmess, smess)
-        if isinstance(intercomm, pkl5.Intercomm):
-            bcast = intercomm.bcast
-            rsize = intercomm.Get_remote_size()
+        if isinstance(comm, pkl5.Comm):
+            bcast = comm.bcast
+            rsize = comm.Get_remote_size()
             self.assertRaises(MPI.Exception, bcast, None, root=rsize)
-        intercomm.Free()
+        comm.Free()
+
+    def testGatherIntra(self):
+        comm = self.COMM
+        size = comm.Get_size()
+        rank = comm.Get_rank()
+        for smess in messages:
+            for root in range(size):
+                rmess = comm.gather(smess, root)
+                if rank == root:
+                    self.assertEqual(rmess, [smess]*size)
+                else:
+                    self.assertEqual(rmess, None)
+        self.assertRaises(MPI.Exception, comm.gather, None, root=-1)
+        self.assertRaises(MPI.Exception, comm.gather, None, root=size)
+
+    def testGatherInter(self):
+        comm, COLOR = self.make_intercomm(self.COMM)
+        rank = comm.Get_rank()
+        size = comm.Get_size()
+        rsize = comm.Get_remote_size()
+        for smess in messages:
+            for color in [0, 1]:
+                if color == COLOR:
+                    for root in range(size):
+                        if root == rank:
+                            rmess = comm.gather(smess, root=MPI.ROOT)
+                            self.assertEqual(rmess, [smess] * rsize)
+                        else:
+                            rmess = comm.gather(None, root=MPI.PROC_NULL)
+                            self.assertEqual(rmess, None)
+                else:
+                    for root in range(rsize):
+                        rmess = comm.gather(smess, root=root)
+                        self.assertEqual(rmess, None)
+        self.assertRaises(MPI.Exception, comm.gather, None, root=max(size,rsize))
+        self.assertRaises(MPI.Exception, comm.gather, None, root=max(size,rsize))
+        comm.Free()
+
+    def testScatterIntra(self):
+        comm = self.COMM
+        size = comm.Get_size()
+        for smess in messages:
+            for root in range(size):
+                rmess = comm.scatter(None, root)
+                self.assertEqual(rmess, None)
+                rmess = comm.scatter([smess]*size, root)
+                self.assertEqual(rmess, smess)
+                rmess = comm.scatter(iter([smess]*size), root)
+                self.assertEqual(rmess, smess)
+        self.assertRaises(MPI.Exception, comm.scatter, [None]*size, root=-1)
+        self.assertRaises(MPI.Exception, comm.scatter, [None]*size, root=size)
+        if size == 1:
+            self.assertRaises(ValueError, comm.scatter, [None]*(size-1), root=0)
+            self.assertRaises(ValueError, comm.scatter, [None]*(size+1), root=0)
+
+    def testScatterInter(self):
+        comm, COLOR = self.make_intercomm(self.COMM)
+        rank = comm.Get_rank()
+        size = comm.Get_size()
+        rsize = comm.Get_remote_size()
+        for smess in messages + [messages]:
+            for color in [0, 1]:
+                if color == COLOR:
+                    for root in range(size):
+                        if root == rank:
+                            rmess = comm.scatter([smess] * rsize, root=MPI.ROOT)
+                        else:
+                            rmess = comm.scatter(None, root=MPI.PROC_NULL)
+                        self.assertEqual(rmess, None)
+                else:
+                    for root in range(rsize):
+                        rmess = comm.scatter(None, root=root)
+                        self.assertEqual(rmess, smess)
+        self.assertRaises(MPI.Exception, comm.scatter, None, root=max(size, rsize))
+        self.assertRaises(MPI.Exception, comm.scatter, None, root=max(size, rsize))
+        comm.Free()
+
+    def testAllgatherIntra(self):
+        comm = self.COMM
+        size = comm.Get_size()
+        for smess in messages:
+            rmess = comm.allgather(None)
+            self.assertEqual(rmess, [None]*size)
+            rmess = comm.allgather(smess)
+            self.assertEqual(rmess, [smess]*size)
+
+    def testAllgatherInter(self):
+        comm, COLOR = self.make_intercomm(self.COMM)
+        size = comm.Get_remote_size()
+        for smess in messages:
+            rmess = comm.allgather(None)
+            self.assertEqual(rmess, [None]*size)
+            rmess = comm.allgather(smess)
+            self.assertEqual(rmess, [smess]*size)
+        comm.Free()
+
+    def testAlltoallIntra(self):
+        comm = self.COMM
+        size = comm.Get_size()
+        for smess in messages:
+            rmess = comm.alltoall(None)
+            self.assertEqual(rmess, [None]*size)
+            rmess = comm.alltoall([smess]*size)
+            self.assertEqual(rmess, [smess]*size)
+            rmess = comm.alltoall(iter([smess]*size))
+            self.assertEqual(rmess, [smess]*size)
+        self.assertRaises(ValueError, comm.alltoall, [None]*(size-1))
+        self.assertRaises(ValueError, comm.alltoall, [None]*(size+1))
+
+    def testAlltoallInter(self):
+        comm, COLOR = self.make_intercomm(self.COMM)
+        size = comm.Get_remote_size()
+        for smess in messages:
+            rmess = comm.alltoall(None)
+            self.assertEqual(rmess, [None]*size)
+            rmess = comm.alltoall([smess]*size)
+            self.assertEqual(rmess, [smess]*size)
+            rmess = comm.alltoall(iter([smess]*size))
+            self.assertEqual(rmess, [smess]*size)
+        self.assertRaises(ValueError, comm.alltoall, [None]*(size-1))
+        self.assertRaises(ValueError, comm.alltoall, [None]*(size+1))
+        comm.Free()
 
     @unittest.skipIf(numpy is None, 'numpy')
     def testBigMPI(self):

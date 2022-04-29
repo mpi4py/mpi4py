@@ -6,6 +6,7 @@ import struct as _struct
 
 from .. import MPI
 from ..MPI import (
+    ROOT,
     PROC_NULL,
     ANY_SOURCE,
     ANY_TAG,
@@ -16,6 +17,7 @@ from ..MPI import (
     Pickle,
     _typedict,
     _comm_lock,
+    _commctx_intra,
     _commctx_inter,
 )
 
@@ -339,9 +341,9 @@ def _bcast_inter(comm, bcast, obj, root):
     rank = comm.Get_rank()
     size = comm.Get_remote_size()
     comm, tag, localcomm, _ = _commctx_inter(comm)
-    if root == MPI.PROC_NULL:
+    if root == PROC_NULL:
         return None
-    elif root == MPI.ROOT:
+    elif root == ROOT:
         send = MPI.Comm.Send
         data, bufs = _pickle_dumps(obj)
         _send_raw(comm, send, data, bufs, 0, tag)
@@ -364,6 +366,148 @@ def _bcast(comm, bcast, obj, root):
         return _bcast_inter(comm, bcast, obj, root)
     else:
         return _bcast_intra(comm, bcast, obj, root)
+
+
+def _get_p2p_backend():
+    reqs = []
+
+    def send(comm, buf, dest, tag):
+        reqs.append(MPI.Comm.Isend(comm, buf, dest, tag))
+
+    def recv(comm, buf, source, tag):
+        MPI.Comm.Recv(comm, buf, source, tag)
+
+    return reqs, send, recv
+
+
+def _gather(comm, obj, root):
+    # pylint: disable=too-many-branches
+    reqs, send, recv = _get_p2p_backend()
+    if comm.Is_inter():
+        comm, tag, *_ = _commctx_inter(comm)
+        size = comm.Get_remote_size()
+        if root == PROC_NULL:
+            send = recv = None
+        elif root == MPI.ROOT:
+            send = None
+        elif 0 <= root < size:
+            recv = None
+        else:
+            comm.Call_errhandler(MPI.ERR_ROOT)
+            raise MPI.Exception(MPI.ERR_ROOT)
+    else:
+        comm, tag = _commctx_intra(comm)
+        size = comm.Get_size()
+        if root != comm.Get_rank():
+            recv = None
+        if root < 0 or root >= size:
+            comm.Call_errhandler(MPI.ERR_ROOT)
+            raise MPI.Exception(MPI.ERR_ROOT)
+
+    if send:
+        data, bufs = _pickle_dumps(obj)
+        _send_raw(comm, send, data, bufs, root, tag)
+    objs = None
+    if recv:
+        objs = []
+        for source in range(size):
+            data, bufs = _recv_raw(comm, recv, None, source, tag)
+            obj = _pickle_loads(data, bufs)
+            objs.append(obj)
+    if send:
+        MPI.Request.Waitall(reqs)
+    return objs
+
+
+def _scatter(comm, objs, root):
+    # pylint: disable=too-many-branches
+    reqs, send, recv = _get_p2p_backend()
+    if comm.Is_inter():
+        comm, tag, *_ = _commctx_inter(comm)
+        size = comm.Get_remote_size()
+        if root == PROC_NULL:
+            send = recv = None
+        elif root == ROOT:
+            recv = None
+        elif 0 <= root < size:
+            send = None
+        else:
+            comm.Call_errhandler(MPI.ERR_ROOT)
+            raise MPI.Exception(MPI.ERR_ROOT)
+    else:
+        comm, tag = _commctx_intra(comm)
+        size = comm.Get_size()
+        if root != comm.Get_rank():
+            send = None
+        if root < 0 or root >= size:
+            comm.Call_errhandler(MPI.ERR_ROOT)
+            raise MPI.Exception(MPI.ERR_ROOT)
+
+    if send:
+        if objs is None:
+            objs = [None] * size
+        elif not isinstance(objs, list):
+            objs = list(objs)
+        if len(objs) != size:
+            raise ValueError(f"expecting {size} items, got {len(objs)}")
+        for dest, obj in enumerate(objs):
+            data, bufs = _pickle_dumps(obj)
+            _send_raw(comm, send, data, bufs, dest, tag)
+    obj = None
+    if recv:
+        data, bufs = _recv_raw(comm, recv, None, root, tag)
+        obj = _pickle_loads(data, bufs)
+    if send:
+        MPI.Request.Waitall(reqs)
+    return obj
+
+
+def _allgather(comm, obj):
+    reqs, send, recv = _get_p2p_backend()
+    if comm.Is_inter():
+        comm, tag, *_ = _commctx_inter(comm)
+        size = comm.Get_remote_size()
+    else:
+        comm, tag = _commctx_intra(comm)
+        size = comm.Get_size()
+
+    data, bufs = _pickle_dumps(obj)
+    for dest in range(size):
+        _send_raw(comm, send, data, bufs, dest, tag)
+    objs = []
+    for source in range(size):
+        data, bufs = _recv_raw(comm, recv, None, source, tag)
+        obj = _pickle_loads(data, bufs)
+        objs.append(obj)
+    MPI.Request.Waitall(reqs)
+    return objs
+
+
+def _alltoall(comm, objs):
+    reqs, send, recv = _get_p2p_backend()
+    if comm.Is_inter():
+        comm, tag, *_ = _commctx_inter(comm)
+        size = comm.Get_remote_size()
+    else:
+        comm, tag = _commctx_intra(comm)
+        size = comm.Get_size()
+
+    if objs is None:
+        objs = [None] * size
+    elif not isinstance(objs, list):
+        objs = list(objs)
+    if len(objs) != size:
+        raise ValueError(f"expecting {size} items, got {len(objs)}")
+    for dest, obj in enumerate(objs):
+        data, bufs = _pickle_dumps(obj)
+        _send_raw(comm, send, data, bufs, dest, tag)
+    objs = []
+    for source in range(size):
+        data, bufs = _recv_raw(comm, recv, None, source, tag)
+        obj = _pickle_loads(data, bufs)
+        objs.append(obj)
+    MPI.Request.Waitall(reqs)
+    return objs
 
 
 class Request(tuple):
@@ -553,6 +697,22 @@ class Comm(MPI.Comm):
     def bcast(self, obj, root=0):
         """Broadcast."""
         return _bcast(self, MPI.Comm.Bcast, obj, root)
+
+    def gather(self, sendobj, root=0):
+        """Gather."""
+        return _gather(self, sendobj, root)
+
+    def scatter(self, sendobj, root=0):
+        """Scatter."""
+        return _scatter(self, sendobj, root)
+
+    def allgather(self, sendobj):
+        """Gather to All."""
+        return _allgather(self, sendobj)
+
+    def alltoall(self, sendobj):
+        """All to All Scatter/Gather."""
+        return _alltoall(self, sendobj)
 
 
 class Intracomm(Comm, MPI.Intracomm):

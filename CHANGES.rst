@@ -13,6 +13,8 @@ Release 4.0.0 [2022-XX-XX]
 
   + Add the `Session` class and its methods.
 
+* `mpi4py.util.pkl5`: Add support for collective communication.
+
 
 Release 3.1.3 [2021-11-25]
 ==========================
