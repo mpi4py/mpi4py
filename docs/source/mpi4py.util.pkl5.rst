@@ -113,6 +113,24 @@ MPI-3).
 
    .. automethod:: bcast
 
+      .. versionadded:: 3.1.0
+
+   .. automethod:: gather
+
+      .. versionadded:: 4.0.0
+
+   .. automethod:: scatter
+
+      .. versionadded:: 4.0.0
+
+   .. automethod:: allgather
+
+      .. versionadded:: 4.0.0
+
+   .. automethod:: alltoall
+
+      .. versionadded:: 4.0.0
+
 
 .. autoclass:: Intracomm
 

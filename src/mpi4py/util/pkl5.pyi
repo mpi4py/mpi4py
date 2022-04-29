@@ -1,6 +1,6 @@
 from __future__ import annotations
 from .. import MPI
-from ..MPI import PROC_NULL, ANY_SOURCE, ANY_TAG
+from ..MPI import ROOT, PROC_NULL, ANY_SOURCE, ANY_TAG
 from ..MPI import Status, Datatype
 from ..MPI import Pickle
 from ..typing import Buffer
@@ -113,6 +113,24 @@ class Comm(MPI.Comm):
         obj: Any,
         root: int = 0,
     ) -> Any: ...
+    def gather(
+        self,
+        sendobj: Any,
+        root: int = 0,
+    ) -> Optional[List[Any]]: ...
+    def scatter(
+        self,
+        sendobj: Optional[Sequence[Any]],
+        root: int = 0,
+    ) -> Any: ...
+    def allgather(
+        self,
+        sendobj: Any,
+    ) -> List[Any]: ...
+    def alltoall(
+        self,
+        sendobj: Sequence[Any],
+    ) -> List[Any]: ...
 
 class Intracomm(Comm, MPI.Intracomm): ...
 class Intercomm(Comm, MPI.Intercomm): ...
