@@ -20,10 +20,10 @@ if sys.version_info >= (3, 9):
         Sequence,
         Mapping,
     )
-    from builtins import (
-        tuple as Tuple,
-        list  as List,
-        dict  as Dict,
+    from typing import (
+        Tuple,
+        List,
+        Dict,
     )
 else:
     from typing import (
@@ -35,9 +35,9 @@ else:
         Mapping,
     )
     from typing import (
-        Tuple as Tuple,
-        List  as List,
-        Dict  as Dict,
+        Tuple,
+        List,
+        Dict,
     )
 
 UNDEFINED: Final[int] = ...

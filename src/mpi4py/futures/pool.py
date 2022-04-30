@@ -2,6 +2,7 @@
 # Contact: dalcinl@gmail.com
 """Implements MPIPoolExecutor."""
 
+import sys
 import time
 import functools
 import itertools
@@ -115,6 +116,8 @@ class MPIPoolExecutor(Executor):
             task = (fn, args, kwargs)
             self._pool.push((future, task))
             return future
+    if sys.version_info >= (3, 8):
+        submit.__text_signature__ = '($self, fn, /, *args, **kwargs)'
 
     def map(self, fn, *iterables, timeout=None, chunksize=1, unordered=False):
         """Return an iterator equivalent to ``map(fn, *iterables)``.

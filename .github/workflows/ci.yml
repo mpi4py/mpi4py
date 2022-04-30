@@ -113,6 +113,7 @@ jobs:
       run:  python -m pip install .
       env:
         MPICFG: nompi
+        CFLAGS: -O0
 
     - name: Install lint dependencies
       run:  python -m pip install
@@ -120,7 +121,6 @@ jobs:
               pydocstyle
               flake8
               pylint
-              mypy
 
     - name: pycodestyle
       run:  pycodestyle src/mpi4py
@@ -134,13 +134,43 @@ jobs:
     - name: pylint
       run:  pylint mpi4py
 
-    - name: mypy (stubtest)
-      run:  stubtest mpi4py
-              --mypy-config-file=conf/mypy.ini
+  type:
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        py:
+          - "3.8"
+          - "3.9"
+          - "3.10"
+
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Use Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.py }}
+
+    - name: Install package
+      run:  python -m pip install .
+      env:
+        MPICFG: nompi
+        CFLAGS: -O0
+
+    - name: Install type dependencies
+      run:  python -m pip install
+              mypy
+              numpy
 
     - name: mypy (typecheck)
       run:  mypy -p mpi4py
-              --config-file=conf/mypy.ini
+
+    - name: mypy (stubtest)
+      run:  stubtest mpi4py
+      if:   matrix.py != '3.8'
 
   skbuild:
     runs-on: ${{ matrix.os }}
