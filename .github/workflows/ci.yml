@@ -140,6 +140,7 @@ jobs:
       fail-fast: false
       matrix:
         py:
+          - "3.7"
           - "3.8"
           - "3.9"
           - "3.10"
@@ -170,7 +171,9 @@ jobs:
 
     - name: mypy (stubtest)
       run:  stubtest mpi4py
-      if:   matrix.py != '3.8'
+              ${{ matrix.py == '3.8' && '$(
+              echo mpi4py.*.Executor.submit > allowlist &&
+              echo --allowlist=allowlist )' || '' }}
 
   skbuild:
     runs-on: ${{ matrix.os }}
