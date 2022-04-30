@@ -1,5 +1,9 @@
 import sys
-from typing import Final, Optional
+from typing import Optional
+if sys.version_info >= (3, 8):
+    from typing import Final
+else:
+    from typing_extensions import Final
 
 Path = str
 Handle = int

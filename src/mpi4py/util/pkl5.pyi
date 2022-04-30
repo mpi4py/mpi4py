@@ -1,13 +1,18 @@
 from __future__ import annotations
+import sys
 from .. import MPI
 from ..MPI import ROOT, PROC_NULL, ANY_SOURCE, ANY_TAG
 from ..MPI import Status, Datatype
 from ..MPI import Pickle
 from ..typing import Buffer
-from typing import Any, Literal, Optional
+from typing import Any, Optional
 from typing import Callable, Iterable, Sequence
 from typing import Dict, List, Tuple
 from typing import overload
+if sys.version_info >= (3, 8):
+    from typing import Literal
+else:
+    from typing_extensions import Literal
 
 pickle: Pickle = ...
 

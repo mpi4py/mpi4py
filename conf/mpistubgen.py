@@ -291,16 +291,25 @@ IMPORTS = """
 from __future__ import annotations
 import sys
 from threading import Lock
-from typing import final
-from typing import overload
 from typing import (
     Any,
     Union,
-    Literal,
     Optional,
     NoReturn,
-    Final,
+    overload,
 )
+if sys.version_info >= (3, 8):
+    from typing import (
+        final,
+        Final,
+        Literal,
+    )
+else:
+    from typing_extensions import (
+        final,
+        Final,
+        Literal,
+    )
 if sys.version_info >= (3, 9):
     from collections.abc import (
         Callable,
@@ -354,7 +363,7 @@ OVERRIDE = {
         @overload
         def __new__(cls) -> memory: ...
         @overload
-        def __new__(cls, buf: Buffer, /) -> memory: ...
+        def __new__(cls, __buf: Buffer) -> memory: ...
         """,
         '__getitem__': """
         @overload
