@@ -3,8 +3,13 @@ from ..MPI import Intracomm, COMM_WORLD
 from ._core import Executor, Future
 from typing import Any, Optional, Tuple, Type, TypeVar, Union
 from typing import Callable, Iterable, Iterator, Mapping, Sequence
+if sys.version_info >= (3, 10):
+    from typing import ParamSpec
+else:
+    from typing_extensions import ParamSpec
 
 _T = TypeVar("_T")
+_P = ParamSpec("_P")
 
 class MPIPoolExecutor(Executor):
     Future: Any = ...  # _type: Union[Type[Future], Callable[[], Future]]
@@ -28,13 +33,27 @@ class MPIPoolExecutor(Executor):
         self: _T,
         wait: bool = True,
     ) -> _T: ...
-    def submit(
-        self,
-        fn: Callable[..., _T],
-        /,
-        *args: Any,
-        **kwargs: Any,
-    ) -> Future[_T]: ...
+    if sys.version_info >= (3, 9):
+        def submit(
+            self,
+            __fn: Callable[_P, _T],
+            *args: _P.args,
+            **kwargs: _P.kwargs,
+        ) -> Future[_T]: ...
+    elif sys.version_info >= (3, 8):
+        def submit(  # type: ignore[override]
+            self,
+            __fn: Callable[_P, _T],
+            *args: _P.args,
+            **kwargs: _P.kwargs,
+        ) -> Future[_T]: ...
+    else:
+        def submit(
+            self,
+            fn: Callable[_P, _T],
+            *args: _P.args,
+            **kwargs: _P.kwargs,
+        ) -> Future[_T]: ...
     def map(
         self,
         fn: Callable[..., _T],
