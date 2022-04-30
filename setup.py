@@ -450,6 +450,8 @@ package_info = dict(
     },
     package_dir = {'' : 'src'},
 )
+if sys.version_info < (3, 7):
+    del package_info['package_data']['mpi4py'][-3:]
 
 
 def run_setup():
