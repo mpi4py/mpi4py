@@ -161,6 +161,11 @@ jobs:
         MPICFG: nompi
         CFLAGS: -O0
 
+    - name: Check stubs generation
+      run:  |
+        python conf/mpistubgen.py
+        git diff && test -z "$(git diff)"
+
     - name: Install type dependencies
       run:  python -m pip install
               mypy
