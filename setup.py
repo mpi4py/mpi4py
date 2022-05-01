@@ -199,11 +199,12 @@ def configure_mpi(ext, config_cmd):
     """) % "||".join(tests)
     ok = config_cmd.try_compile(ConfigTest, headers=headers)
     if not ok:
-        from mpidistutils import ConfigureMPI
-        configure = ConfigureMPI(config_cmd)
-        results = configure.run()
-        configure.dump(results)
-        ext.define_macros += [('HAVE_CONFIG_H', 1)]
+        if not config_cmd.check_macro("HAVE_CONFIG_H"):
+            from mpidistutils import ConfigureMPI
+            configure = ConfigureMPI(config_cmd)
+            results = configure.run()
+            configure.dump(results)
+            ext.define_macros += [('HAVE_CONFIG_H', 1)]
     else:
         for function, arglist in (
             ('MPI_Type_create_f90_integer',   '0,(MPI_Datatype*)0'),

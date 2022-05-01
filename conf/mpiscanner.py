@@ -675,9 +675,9 @@ if __name__ == '__main__':
         scanner.parse_file(filename)
     log('processed %d definitions' % len(scanner.nodes))
 
-    config_h  = os.path.join('src', 'lib-mpi', 'config', 'config.h')
-    log('writing file %s' % config_h)
-    scanner.dump_config_h(config_h, None)
+    #config_h  = os.path.join('src', 'lib-mpi', 'config', 'config.h')
+    #log('writing file %s' % config_h)
+    #scanner.dump_config_h(config_h, None)
 
     missing_h = os.path.join('src', 'lib-mpi', 'missing.h')
     log('writing file %s' % missing_h)
