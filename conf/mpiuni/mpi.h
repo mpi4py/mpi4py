@@ -15,6 +15,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+static int PETSC_COMM_WORLD = MPI_COMM_NULL;
 #include <../src/sys/mpiuni/mpi.c>
 #include <../src/sys/mpiuni/mpitime.c>
 

@@ -428,7 +428,7 @@ class Scanner(object):
 
     #define PyMPICommSize(comm, n)                                   \\
       do {                                                           \\
-        int _inter;                                                  \\
+        int _inter = 0;                                              \\
         ierr = MPI_Comm_test_inter(comm, &_inter);                   \\
         if (_inter)                                                  \\
           ierr = MPI_Comm_remote_size((comm), &(n));                 \\
@@ -445,7 +445,8 @@ class Scanner(object):
 
     #define PyMPICommNeighborCount(comm, ns, nr)                     \\
       do {                                                           \\
-        int _topo, _i, _n; (ns) = (nr) = 0;                          \\
+        int _topo = MPI_UNDEFINED;                                   \\
+        int _i, _n; (ns) = (nr) = 0;                                 \\
         ierr = MPI_Topo_test((comm), &_topo);                        \\
         if (ierr != MPI_SUCCESS) goto fn_exit;                       \\
         if (_topo == MPI_UNDEFINED) {                                \\
