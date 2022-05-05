@@ -131,9 +131,11 @@ cdef int Py_GetCAIBuffer(object obj, Py_buffer *view, int flags) except -1:
             f"(shape:{shape}, strides:{strides}, itemsize:{itemsize})"
         )
     if descr is not None and (len(descr) != 1 or descr[0] != ('', typestr)):
-        PyErr_WarnEx(RuntimeWarning,
-                     b"__cuda_array_interface__: "
-                     b"ignoring 'descr' key", 1)
+        PyErr_WarnFormat(
+            RuntimeWarning, 1,
+            b"__cuda_array_interface__: %s",
+            b"ignoring 'descr' key",
+        )
 
     if PYPY and readonly and ((flags & PyBUF_WRITABLE) == PyBUF_WRITABLE):
         raise BufferError("Object is not writable")

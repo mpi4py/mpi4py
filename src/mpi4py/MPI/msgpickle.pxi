@@ -306,9 +306,6 @@ cdef object PyMPI_ssend(object obj, int dest, int tag,
 
 # -----------------------------------------------------------------------------
 
-cdef extern from "Python.h":
-    int PyErr_WarnEx(object, const char*, int) except -1
-
 cdef object PyMPI_recv_obarg(object obj, int source, int tag,
                              MPI_Comm comm, MPI_Status *status):
     cdef Pickle pickle = PyMPI_PICKLE
@@ -320,7 +317,10 @@ cdef object PyMPI_recv_obarg(object obj, int source, int tag,
     cdef object   rmsg = None
     cdef MPI_Aint rlen = 0
     #
-    PyErr_WarnEx(UserWarning, b"the 'buf' argument is deprecated", 1)
+    PyErr_WarnFormat(
+        UserWarning, 1, b"%s",
+        b"the 'buf' argument is deprecated",
+    )
     #
     if source != MPI_PROC_NULL:
         if is_integral(obj):
