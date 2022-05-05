@@ -4,6 +4,14 @@ cdef extern from "mpimodule.h": pass
 
 # -----------------------------------------------------------------------------
 
+cdef extern from "Python.h":
+    void *PyExc_RuntimeError
+    void *PyExc_NotImplementedError
+    void PyErr_SetObject(object, object)
+    int  PyErr_WarnFormat(object, Py_ssize_t, const char[], ...) except -1
+
+# -----------------------------------------------------------------------------
+
 cdef extern from *:
     """
     #if defined(PYPY_VERSION)
@@ -22,7 +30,7 @@ cdef extern from *:
     #  define Py_GETENV(s) (Py_IgnoreEnvironmentFlag ? NULL : getenv(s))
     #endif
     """
-    const char *Py_GETENV(const char[])
+    const char *Py_GETENV(const char[]) nogil
 
 # -----------------------------------------------------------------------------
 
@@ -71,10 +79,14 @@ cdef object getEnv(object rc, const char name[], object value):
     except: pass
     return ovalue
 
-cdef int warnOpt(object name, object value) except -1:
-    cdef object warn
-    from warnings import warn
-    warn(f"mpi4py.rc: '{name}': unexpected value {repr(value)}")
+cdef int warnOpt(const char name[], object value) except -1:
+    value = PyUnicode_AsUTF8String(repr(value))
+    PyErr_WarnFormat(
+        RuntimeWarning, 1,
+        b"mpi4py.rc.%s: unexpected value %.200s",
+        name, <const char*>value,
+    )
+    return 0
 
 cdef int getOptions(Options* opts) except -1:
     cdef object rc
@@ -122,14 +134,14 @@ cdef int getOptions(Options* opts) except -1:
     elif initialize in (False, 'no'):
         opts.initialize = 0
     else:
-        warnOpt("initialize", initialize)
+        warnOpt(b"initialize", initialize)
     #
     if threads in (True, 'yes'):
         opts.threads = 1
     elif threads in (False, 'no'):
         opts.threads = 0
     else:
-        warnOpt("threads", threads)
+        warnOpt(b"threads", threads)
     #
     if thread_level == 'single':
         opts.thread_level = MPI_THREAD_SINGLE
@@ -140,7 +152,7 @@ cdef int getOptions(Options* opts) except -1:
     elif thread_level == 'multiple':
         opts.thread_level = MPI_THREAD_MULTIPLE
     else:
-        warnOpt("thread_level", thread_level)
+        warnOpt(b"thread_level", thread_level)
     #
     if finalize is None:
         opts.finalize = opts.initialize
@@ -149,21 +161,21 @@ cdef int getOptions(Options* opts) except -1:
     elif finalize in (False, 'no'):
         opts.finalize = 0
     else:
-        warnOpt("finalize", finalize)
+        warnOpt(b"finalize", finalize)
     #
     if fast_reduce in (True, 'yes'):
         opts.fast_reduce = 1
     elif fast_reduce in (False, 'no'):
         opts.fast_reduce = 0
     else:
-        warnOpt("fast_reduce", fast_reduce)
+        warnOpt(b"fast_reduce", fast_reduce)
     #
     if recv_mprobe in (True, 'yes'):
         opts.recv_mprobe = 1 and USE_MATCHED_RECV
     elif recv_mprobe in (False, 'no'):
         opts.recv_mprobe = 0
     else:
-        warnOpt("recv_mprobe", recv_mprobe)
+        warnOpt(b"recv_mprobe", recv_mprobe)
     #
     if errors == 'default':
         opts.errors = 0
@@ -172,7 +184,7 @@ cdef int getOptions(Options* opts) except -1:
     elif errors == 'fatal':
         opts.errors = 2
     else:
-        warnOpt("errors", errors)
+        warnOpt(b"errors", errors)
     #
     return 0
 
@@ -262,11 +274,6 @@ def _set_abort_status(object status: Any) -> None:
 
 cdef extern from *:
     enum: PyMPI_ERR_UNAVAILABLE
-
-cdef extern from "Python.h":
-    void *PyExc_RuntimeError
-    void *PyExc_NotImplementedError
-    void PyErr_SetObject(object, object)
 
 cdef object MPIException = <object>PyExc_RuntimeError
 
