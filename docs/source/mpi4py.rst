@@ -137,7 +137,7 @@ the :data:`mpi4py.rc` and :data:`MPI.pickle` objects at import time of the
   :mod:`mpi4py.MPI` module.
 
   .. seealso:: :attr:`mpi4py.rc.initialize`
-  .. versionadded:: 3.1.0
+  .. versionadded:: 4.0.0
 
 .. envvar:: MPI4PY_RC_FINALIZE
 
@@ -148,7 +148,7 @@ the :data:`mpi4py.rc` and :data:`MPI.pickle` objects at import time of the
   Whether to automatically finalize MPI at exit time of the Python process.
 
   .. seealso:: :attr:`mpi4py.rc.finalize`
-  .. versionadded:: 3.1.0
+  .. versionadded:: 4.0.0
 
 .. envvar:: MPI4PY_RC_THREADS
 

@@ -67,10 +67,13 @@ options.fast_reduce = 1
 options.recv_mprobe = 1
 options.errors = 1
 
-cdef object getEnv(object rc, const char name[], object value):
+cdef object getOpt(object rc, const char name[], object value):
     cdef bytes oname = b"MPI4PY_RC_" + name.upper()
     cdef const char *cvalue = Py_GETENV(oname)
-    if cvalue == NULL: return value
+    if cvalue == NULL:
+        try: value = getattr(rc, pystr(name), value)
+        except: pass
+        return value
     cdef object ovalue = pystr(cvalue)
     cdef bytes  bvalue = PyBytes_FromString(cvalue).lower()
     if bvalue in (b'true',  b'yes', b'on',  b'y', b'1'): ovalue = True
@@ -100,34 +103,13 @@ cdef int getOptions(Options* opts) except -1:
     try: from . import rc
     except: return 0
     #
-    cdef object initialize = True
-    cdef object threads = True
-    cdef object thread_level = 'multiple'
-    cdef object finalize = None
-    cdef object fast_reduce = True
-    cdef object recv_mprobe = True
-    cdef object errors = 'exception'
-    try: initialize = rc.initialize
-    except: pass
-    try: threads = rc.threads
-    except: pass
-    try: threads = rc.threaded # backward
-    except: pass               # compatibility
-    try: thread_level = rc.thread_level
-    except: pass
-    try: finalize = rc.finalize
-    except: pass
-    try: fast_reduce = rc.fast_reduce
-    except: pass
-    try: recv_mprobe = rc.recv_mprobe
-    except: pass
-    try: errors = rc.errors
-    except: pass
-    threads      = getEnv(rc, b"threads",      threads)
-    thread_level = getEnv(rc, b"thread_level", thread_level)
-    fast_reduce  = getEnv(rc, b"fast_reduce",  fast_reduce)
-    recv_mprobe  = getEnv(rc, b"recv_mprobe",  recv_mprobe)
-    errors       = getEnv(rc, b"errors",       errors)
+    cdef object initialize   = getOpt(rc, b"initialize"   , True        )
+    cdef object threads      = getOpt(rc, b"threads"      , True        )
+    cdef object thread_level = getOpt(rc, b"thread_level" , 'multiple'  )
+    cdef object finalize     = getOpt(rc, b"finalize"     , None        )
+    cdef object fast_reduce  = getOpt(rc, b"fast_reduce"  , True        )
+    cdef object recv_mprobe  = getOpt(rc, b"recv_mprobe"  , True        )
+    cdef object errors       = getOpt(rc, b"errors"       , 'exception' )
     #
     if initialize in (True, 'yes'):
         opts.initialize = 1
