@@ -16,6 +16,7 @@ import platform
 from distutils import log
 from distutils import sysconfig
 from distutils.util import convert_path
+from distutils.file_util import copy_file
 
 # Fix missing variables PyPy's  distutils.sysconfig
 if hasattr(sys, 'pypy_version_info'):
@@ -1125,6 +1126,7 @@ class build_exe(build_ext):
         build_ext.initialize_options(self)
         self.build_base = None
         self.build_exe  = None
+        self.inplace = None
 
     def finalize_options (self):
         build_ext.finalize_options(self)
@@ -1132,11 +1134,14 @@ class build_exe(build_ext):
         self.set_undefined_options('build',
                                    ('build_base','build_base'),
                                    ('build_lib', 'build_exe'))
+        self.set_undefined_options('build_ext',
+                                   ('inplace', 'inplace'))
         self.executables = self.distribution.executables
         # XXX This is a hack
         self.extensions  = self.distribution.executables
         self.check_extensions_list = self.check_executables_list
         self.build_extension = self.build_executable
+        self.copy_extensions_to_source = self.copy_executables_to_source
         self.get_ext_filename = self.get_exe_filename
         self.build_lib = self.build_exe
 
@@ -1251,6 +1256,19 @@ class build_exe(build_ext):
             extra_postargs=extra_args,
             debug=self.debug,
             target_lang=language)
+
+    def copy_executables_to_source(self):
+        build_py = self.get_finalized_command('build_py')
+        root_dir = build_py.get_package_dir('')
+        for exe in self.executables:
+            src = self.get_exe_fullpath(exe)
+            dest = self.get_exe_fullpath(exe, root_dir)
+            self.mkpath(os.path.dirname(dest))
+            copy_file(
+                src, dest,
+                verbose=self.verbose,
+                dry_run=self.dry_run
+            )
 
     def get_outputs (self):
         outputs = []
