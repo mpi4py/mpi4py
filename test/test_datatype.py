@@ -59,7 +59,7 @@ class TestDatatype(unittest.TestCase):
     def testGetSize(self):
         for dtype in datatypes:
             size = dtype.Get_size()
-            self.assertTrue(dtype.size, size)
+            self.assertEqual(dtype.size, size)
 
     def testGetTrueExtent(self):
         for dtype in datatypes:
