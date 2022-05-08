@@ -5,7 +5,8 @@ from mpi4py import MPI
 assert not MPI.Is_initialized()
 assert not MPI.Is_finalized()
 
-MPI.Init_thread(MPI.THREAD_MULTIPLE)
+level = MPI.Init_thread(MPI.THREAD_MULTIPLE)
+assert MPI.Query_thread() == level
 assert MPI.Is_initialized()
 assert not MPI.Is_finalized()
 
