@@ -4,6 +4,20 @@
 
 #if (MPICH_NUMVERSION >= 30400000 && MPICH_NUMVERSION < 40000000)
 
+static int PyMPI_MPICH_MPI_Initialized(int *flag)
+{
+  int ierr;
+  ierr = MPI_Initialized(flag); if (ierr) return ierr;
+  if (!flag || *flag) return ierr;
+  ierr = MPI_Finalized(flag); if (ierr) return ierr;
+  return MPI_SUCCESS;
+}
+#define MPI_Initialized PyMPI_MPICH_MPI_Initialized
+
+#endif
+
+#if (MPICH_NUMVERSION >= 30400000 && MPICH_NUMVERSION < 40000000)
+
 static int PyMPI_MPICH_MPI_Win_get_attr(MPI_Win win,
                                         int keyval,
                                         void *attrval,

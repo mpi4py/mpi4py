@@ -91,6 +91,8 @@ jobs:
       run:  mpiexec -n 2 python demo/futures/test_futures.py -v
     - name: Test subpackage
       run:  python demo/test-run/test_run.py -v
+    - name: Test extra
+      run:  bash demo/init-fini/run.sh
     - name: Uninstall package after testing
       run:  python -m pip uninstall --yes mpi4py
 
