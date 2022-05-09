@@ -116,7 +116,7 @@ class MPIPoolExecutor(Executor):
             task = (fn, args, kwargs)
             self._pool.push((future, task))
             return future
-    if sys.version_info >= (3, 8):
+    if sys.version_info >= (3, 8):  # pragma: no branch
         submit.__text_signature__ = '($self, fn, /, *args, **kwargs)'
 
     def map(self, fn, *iterables, timeout=None, chunksize=1, unordered=False):
