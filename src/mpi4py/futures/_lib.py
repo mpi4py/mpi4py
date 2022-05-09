@@ -15,6 +15,7 @@ import weakref
 import warnings
 import itertools
 import threading
+import traceback
 import collections
 
 from .. import MPI
@@ -55,11 +56,40 @@ setup_mpi_threads.thread_level = None      # type: ignore[attr-defined]
 
 # ---
 
+class RemoteTraceback(Exception):
+    pass
+
+
+def _unwrap_exc(exc, tb):
+    exc.__cause__ = RemoteTraceback(tb)
+    return exc
+
+
+class _ExceptionWrapper(Exception):
+    def __reduce__(self):
+        return _unwrap_exc, self.args
+
+
+def _wrap_exc(exc, tb):
+    exc.__cause__ = None
+    exc.__context__ = None
+    exc.__traceback__ = None
+    return _ExceptionWrapper(exc, tb)
+
+
+def _format_exc(exc, comm):
+    exc_info = (type(exc), exc, exc.__traceback__)
+    tb_lines = traceback.format_exception(*exc_info)
+    body = "".join(tb_lines)
+    host = MPI.Get_processor_name()
+    rank = comm.Get_rank()
+    size = comm.Get_size()
+    info = f"### Worker {rank} of {size} on {host}\n"
+    return f'\n{info}"""\n{body}"""'
+
 
 def sys_exception():
-    exc = sys.exc_info()[1]
-    exc.__traceback__ = None
-    return exc
+    return sys.exc_info()[1]
 
 
 def os_environ_get(name, default=None):
@@ -669,6 +699,11 @@ def server_exec(comm, options):
     comm_iprobe = comm.iprobe
     request_test = _get_mpi(comm).Request.test
 
+    def exception():
+        exc = sys_exception()
+        tb = _format_exc(exc, comm)
+        return _wrap_exc(exc, tb)
+
     def recv():
         pid, tag = MPI.ANY_SOURCE, MPI.ANY_TAG
         backoff.reset()
@@ -678,7 +713,7 @@ def server_exec(comm, options):
         try:
             task = comm_recv(None, pid, tag, status)
         except BaseException:
-            task = sys_exception()
+            task = exception()
         return task
 
     def call(task):
@@ -689,14 +724,14 @@ def server_exec(comm, options):
             result = func(*args, **kwargs)
             return (result, None)
         except BaseException:
-            return (None, sys_exception())
+            return (None, exception())
 
     def send(task):
         pid, tag = status.source, status.tag
         try:
             request = comm_isend(task, pid, tag)
         except BaseException:
-            task = (None, sys_exception())
+            task = (None, exception())
             request = comm_isend(task, pid, tag)
         backoff.reset()
         while not request_test(request)[0]:

@@ -931,6 +931,22 @@ class ProcessPoolPickleTest(unittest.TestCase):
         f = self.executor.submit(abs, 42)
         self.assertEqual(f.result(), 42)
 
+    def test_exc_pickle(self):
+        o = BadPickle()
+        f = self.executor.submit(inout, o)
+        exc = f.exception()
+        self.assertTrue(isinstance(exc, ZeroDivisionError))
+        cause = exc.__cause__
+        self.assertTrue(cause is None)
+
+    def test_exc_unpickle(self):
+        o = BadUnpickle()
+        f = self.executor.submit(inout, o)
+        exc = f.exception()
+        self.assertTrue(isinstance(exc, ZeroDivisionError))
+        cause = exc.__cause__
+        self.assertTrue(isinstance(cause, futures._lib.RemoteTraceback))
+
 
 class MPICommExecutorTest(unittest.TestCase):
 
