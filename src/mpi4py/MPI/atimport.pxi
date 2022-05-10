@@ -68,19 +68,26 @@ options.recv_mprobe = 1
 options.errors = 1
 
 cdef object getOpt(object rc, const char name[], object value):
-    cdef bytes oname = b"MPI4PY_RC_" + name.upper()
-    cdef const char *cvalue = Py_GETENV(oname)
+    cdef bytes bname = b"MPI4PY_RC_" + name.upper()
+    cdef const char *cname  = <const char*>bname
+    cdef const char *cvalue = Py_GETENV(cname)
     if cvalue == NULL:
-        try: value = getattr(rc, pystr(name), value)
-        except: pass
+        try:
+            value = getattr(rc, pystr(name), value)
+        except:
+            pass
         return value
-    cdef object ovalue = pystr(cvalue)
-    cdef bytes  bvalue = PyBytes_FromString(cvalue).lower()
-    if bvalue in (b'true',  b'yes', b'on',  b'y', b'1'): ovalue = True
-    if bvalue in (b'false', b'no',  b'off', b'n', b'0'): ovalue = False
-    try: setattr(rc, pystr(name), ovalue)
-    except: pass
-    return ovalue
+    cdef int bvalue = cstr2bool(cvalue)
+    cdef object svalue = None
+    if bvalue >= 0:
+        svalue = <bint>bvalue
+    else:
+        svalue = pystr(cvalue).lower()
+    try:
+        setattr(rc, pystr(name), svalue)
+    except:
+        pass
+    return svalue
 
 cdef int warnOpt(const char name[], object value) except -1:
     value = PyUnicode_AsUTF8String(repr(value))
