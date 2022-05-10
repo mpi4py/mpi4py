@@ -179,6 +179,74 @@ cdef int getOptions(Options* opts) except -1:
 
 # -----------------------------------------------------------------------------
 
+cdef extern from *:
+    """
+    #if defined(MPICH)
+    #  define PyMPI_HAVE_MPICH   1
+    #  define PyMPI_HAVE_OPENMPI 0
+    #elif defined(OPEN_MPI)
+    #  define PyMPI_HAVE_MPICH   0
+    #  define PyMPI_HAVE_OPENMPI 1
+    #else
+    #  define PyMPI_HAVE_MPICH   0
+    #  define PyMPI_HAVE_OPENMPI 0
+    #endif
+    """
+    enum: MPICH   "PyMPI_HAVE_MPICH"
+    enum: OPENMPI "PyMPI_HAVE_OPENMPI"
+
+cdef int check_mpiexec() nogil except -1:
+    cdef int ierr, size = 0
+    ierr = MPI_Comm_size(MPI_COMM_WORLD, &size)
+    if ierr != MPI_SUCCESS: return 0
+    if size > 1: return 0
+
+    cdef int check = 1
+    cdef const char *check_name   = b"MPI4PY_CHECK_MPIEXEC"
+    cdef const char *check_value  = Py_GETENV(check_name)
+    if check_value != NULL: check = cstr2bool(check_value)
+    if check <= 0:
+        if check == -1:
+            with gil:
+                PyErr_WarnFormat(
+                    RuntimeWarning, 1,
+                    b"Environment variable %s: "
+                    b"unexpected value '%s'",
+                    check_name, check_value,
+                )
+        return 0
+
+    cdef const char *hydra   = b"HYDI_CONTROL_FD"
+    cdef const char *mpich   = b"PMI_SIZE"
+    cdef const char *openmpi = b"OMPI_COMM_WORLD_SIZE"
+    cdef const char *bad_env = NULL
+    if MPICH:
+        if getenv(mpich) == NULL and getenv(hydra) == NULL:
+            if getenv(openmpi) != NULL:
+                bad_env = openmpi
+    if OPENMPI:
+        if getenv(openmpi) == NULL:
+            if getenv(mpich) != NULL and getenv(hydra) != NULL:
+                bad_env = mpich
+    if bad_env == NULL: return 0
+
+    cdef const char *vendor = NULL
+    <void>PyMPI_Get_vendor(&vendor, NULL, NULL, NULL)
+
+    with gil:
+        PyErr_WarnFormat(
+            RuntimeWarning, 1,
+            b"Suspicious MPI execution environment.\n"
+            b"Your environment has %s=%.200s set, "
+            b"but mpi4py was built with %s.\n"
+            b"You may be using `mpiexec` or `mpirun` "
+            b"from a different MPI implementation.",
+            bad_env, getenv(bad_env), vendor,
+        )
+    return  0
+
+# -----------------------------------------------------------------------------
+
 cdef extern from "Python.h":
     int Py_AtExit(void (*)())
     void PySys_WriteStderr(char*,...)
@@ -231,6 +299,7 @@ cdef inline int mpi_active() nogil:
 
 cdef int initialize() nogil except -1:
     if not mpi_active(): return 0
+    check_mpiexec()
     comm_set_eh(MPI_COMM_SELF)
     comm_set_eh(MPI_COMM_WORLD)
     return 0

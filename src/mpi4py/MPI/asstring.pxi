@@ -28,21 +28,36 @@ cdef inline object pystr(const char s[]):
 
 #------------------------------------------------------------------------------
 
-cdef extern from "Python.h":
-    int PyOS_stricmp(const char[],const char[]) nogil
+cdef extern from * nogil:
+    """
+    static int PyMPI_tolower(int c)
+    {
+      return (c >= 'A' && c <= 'Z') ? c + ('a' - 'A') : c;
+    }
+    static int PyMPI_strcasecmp(const char *s1, const char *s2)
+    {
+      int c1, c2;
+      do {
+         c1 = PyMPI_tolower((int)*s1++);
+         c2 = PyMPI_tolower((int)*s2++);
+      } while (c1 && c1 == c2);
+      return c1 - c2;
+    }
+    """
+    int PyMPI_strcasecmp(const char[],const char[])
 
 cdef int cstr2bool(const char s[]) nogil:
     cdef const char **T = [b"true",  b"yes", b"on",  b"y", b"1"], *t = NULL
     cdef const char **F = [b"false", b"no",  b"off", b"n", b"0"], *f = NULL
     if s == NULL:
         return 0
-    if PyOS_stricmp(s, b"") == 0:
+    if PyMPI_strcasecmp(s, b"") == 0:
         return 0
     for f in F[:5]:
-        if PyOS_stricmp(s, f) == 0:
+        if PyMPI_strcasecmp(s, f) == 0:
             return 0
     for t in T[:5]:
-        if PyOS_stricmp(s, t) == 0:
+        if PyMPI_strcasecmp(s, t) == 0:
             return 1
     return -1
 
