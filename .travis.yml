@@ -67,6 +67,7 @@ script:
   - mpiexec -n 2 python -m mpi4py.futures $PWD/demo/futures/test_futures.py -v
   - python $PWD/demo/test-run/test_run.py -v
   - bash $PWD/demo/init-fini/run.sh
+  - bash $PWD/demo/check-mpiexec/run.sh
 
 #notifications:
 #  email: false
