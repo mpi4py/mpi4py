@@ -93,6 +93,8 @@ jobs:
       run:  python demo/test-run/test_run.py -v
     - name: Test extra
       run:  bash demo/init-fini/run.sh
+    - name: Test extra
+      run:  bash demo/check-mpiexec/run.sh
     - name: Uninstall package after testing
       run:  python -m pip uninstall --yes mpi4py
 
