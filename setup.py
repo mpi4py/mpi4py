@@ -198,7 +198,8 @@ def configure_mpi(ext, config_cmd):
     #endif
     """) % "||".join(tests)
     ok = config_cmd.try_compile(ConfigTest, headers=headers)
-    if not ok:
+    config = os.environ.get('MPI4PY_BUILD_CONFIGURE') or None
+    if not ok or config:
         if not config_cmd.check_macro("HAVE_CONFIG_H"):
             from mpidistutils import ConfigureMPI
             configure = ConfigureMPI(config_cmd)
