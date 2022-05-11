@@ -9,6 +9,7 @@ Support for building mpi4py with distutils/setuptools.
 
 import sys
 import os
+import copy
 import shlex
 import shutil
 import platform
@@ -367,10 +368,7 @@ except ImportError:
     setuptools = None
 
 def import_command(cmd):
-    try:
-        from importlib import import_module
-    except ImportError:
-        import_module = lambda n:  __import__(n, fromlist=[None])
+    from importlib import import_module
     try:
         if not setuptools: raise ImportError
         return import_module('setuptools.command.' + cmd)
@@ -400,6 +398,7 @@ from distutils.errors import DistutilsError
 from distutils.errors import DistutilsSetupError
 from distutils.errors import DistutilsPlatformError
 from distutils.errors import DistutilsOptionError
+from distutils.errors import DistutilsModuleError
 from distutils.errors import CCompilerError
 
 try:
@@ -640,7 +639,7 @@ class config(cmd_config.config):
     check_func = check_function
     check_sym  = check_symbol
 
-    def run (self):
+    def run(self):
         #
         config = configuration(self, verbose=True)
         # test MPI C compiler
@@ -674,10 +673,11 @@ class build(cmd_build.build):
     def has_executables (self):
         return self.distribution.has_executables()
 
-    sub_commands = \
-        [('build_src', lambda *args: True)] + \
-        cmd_build.build.sub_commands + \
+    sub_commands = (
+        [('build_src', lambda *args: True)] +
+        cmd_build.build.sub_commands +
         [('build_exe', has_executables)]
+    )
 
     # XXX disable build_exe subcommand !!!
     del sub_commands[-1]
@@ -803,7 +803,7 @@ class build_clib(cmd_build_clib.build_clib):
                     "'depends' must be a list "
                     "of source filenames" % lib_name)
 
-    def run (self):
+    def run(self):
         cmd_build_clib.build_clib.run(self)
         if (not self.libraries_a and
             not self.libraries_so):
@@ -1019,19 +1019,25 @@ class build_ext(cmd_build_ext.build_ext):
                 self.library_dirs.remove(libdir)
                 self.rpath.remove(libdir)
 
-    def run (self):
+    def run(self):
         if self.distribution.has_c_libraries():
             build_clib = self.get_finalized_command('build_clib')
             if build_clib.libraries:
                 build_clib.run()
+
+        self.build_sources()
         cmd_build_ext.build_ext.run(self)
 
+    def build_sources(self):
+        if self.get_command_name() == 'build_ext':
+            if 'build_src' in self.distribution.cmdclass:
+                self.run_command('build_src')
+
     def build_extensions(self):
-        from copy import deepcopy
         # First, sanity-check the 'extensions' list
         self.check_extensions_list(self.extensions)
         # customize compiler
-        self.compiler_sys = deepcopy(self.compiler)
+        self.compiler_sys = copy.deepcopy(self.compiler)
         customize_compiler(self.compiler_sys)
         # parse configuration file and configure compiler
         self.compiler_mpi = self.compiler
@@ -1063,10 +1069,11 @@ class build_ext(cmd_build_ext.build_ext):
 
     def config_extension (self, ext):
         configure = getattr(ext, 'configure', None)
-        if configure:
-            config_cmd = self.get_finalized_command('config')
-            config_cmd.compiler = self.compiler # fix compiler
-            configure(ext, config_cmd)
+        if not configure:
+            return
+        config_cmd = self.get_finalized_command('config')
+        config_cmd.compiler = self.compiler # fix compiler
+        configure(ext, config_cmd)
 
     def build_extension (self, ext):
         fullname = self.get_ext_fullname(ext.name)
@@ -1139,11 +1146,15 @@ class build_exe(build_ext):
         self.executables = self.distribution.executables
         # XXX This is a hack
         self.extensions  = self.distribution.executables
+        self.get_ext_filename = self.get_exe_filename
         self.check_extensions_list = self.check_executables_list
         self.build_extension = self.build_executable
         self.copy_extensions_to_source = self.copy_executables_to_source
-        self.get_ext_filename = self.get_exe_filename
         self.build_lib = self.build_exe
+
+    def get_exe_filename(self, exe_name):
+        exe_ext = sysconfig.get_config_var('EXE') or ''
+        return exe_name + exe_ext
 
     def check_executables_list (self, executables):
         ListType, TupleType = type([]), type(())
@@ -1160,10 +1171,6 @@ class build_exe(build_ext):
                     ("in 'executables' option (executable '%s'), " +
                      "'sources' must be present and must be " +
                      "a list of source filenames") % exe.name)
-
-    def get_exe_filename(self, exe_name):
-        exe_ext = sysconfig.get_config_var('EXE') or ''
-        return exe_name + exe_ext
 
     def get_exe_fullpath(self, exe, build_dir=None):
         build_dir = build_dir or self.build_exe
@@ -1289,9 +1296,10 @@ class install(cmd_install.install):
     def has_exe (self):
         return self.distribution.has_executables()
 
-    sub_commands = \
-        cmd_install.install.sub_commands[:] + \
+    sub_commands = (
+        cmd_install.install.sub_commands[:] +
         [('install_exe', has_exe)]
+    )
 
     # XXX disable install_exe subcommand !!!
     del sub_commands[-1]
@@ -1351,7 +1359,7 @@ class install_exe(cmd_install_lib.install_lib):
                                    ('skip_build', 'skip_build'),
                                    ('install_scripts', 'install_dir'))
 
-    def run (self):
+    def run(self):
         self.build()
         self.install()
 
