@@ -22,6 +22,27 @@ class BaseTestP2PBuf(object):
                     self.assertEqual(value, s)
                 self.assertEqual(rbuf[-1], -1)
 
+    def testISendrecv(self):
+        size = self.COMM.Get_size()
+        rank = self.COMM.Get_rank()
+        dest = (rank + 1) % size
+        source = (rank - 1) % size
+        for array, typecode in arrayimpl.subTest(self):
+            for s in range(0, size):
+                sbuf = array( s, typecode, s)
+                rbuf = array(-1, typecode, s+1)
+                try:
+                    self.COMM.Isendrecv(
+                        sbuf.as_mpi(), dest,   0,
+                        rbuf.as_mpi(), source, 0,
+                    ).Wait()
+                except NotImplementedError:
+                    if MPI.Get_version() >= (4, 0): raise
+                    raise unittest.SkipTest("mpi-isendrecv")
+                for value in rbuf[:-1]:
+                    self.assertEqual(value, s)
+                self.assertEqual(rbuf[-1], -1)
+
     def testSendrecvReplace(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
@@ -31,6 +52,24 @@ class BaseTestP2PBuf(object):
             for s in range(0, size):
                 buf = array(rank, typecode, s);
                 self.COMM.Sendrecv_replace(buf.as_mpi(), dest, 0, source, 0)
+                for value in buf:
+                    self.assertEqual(value, source)
+
+    def testISendrecvReplace(self):
+        size = self.COMM.Get_size()
+        rank = self.COMM.Get_rank()
+        dest = (rank + 1) % size
+        source = (rank - 1) % size
+        for array, typecode in arrayimpl.subTest(self):
+            for s in range(0, size):
+                buf = array(rank, typecode, s);
+                try:
+                    self.COMM.Isendrecv_replace(
+                        buf.as_mpi(), dest, 0, source, 0
+                    ).Wait()
+                except NotImplementedError:
+                    if MPI.Get_version() >= (4, 0): raise
+                    raise unittest.SkipTest("mpi-isendrecv")
                 for value in buf:
                     self.assertEqual(value, source)
 
@@ -118,6 +157,22 @@ class BaseTestP2PBuf(object):
         #
         comm.Recv (None, MPI.PROC_NULL)
         comm.Irecv(None, MPI.PROC_NULL).Wait()
+
+    @unittest.skipMPI('mpich(<4.1.0)')
+    def testProcNullISendrecv(self):
+        try:
+            self.COMM.Isendrecv(
+                None, MPI.PROC_NULL, 0,
+                None, MPI.PROC_NULL, 0,
+            ).Wait()
+            self.COMM.Isendrecv_replace(
+                None,
+                MPI.PROC_NULL, 0,
+                MPI.PROC_NULL, 0,
+            ).Wait()
+        except NotImplementedError:
+            if MPI.Get_version() >= (4, 0): raise
+            raise unittest.SkipTest("mpi-isendrecv")
 
     @unittest.skipMPI('mpich(==3.4.1)')
     def testProcNullPersistent(self):
