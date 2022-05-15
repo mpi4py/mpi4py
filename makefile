@@ -36,10 +36,10 @@ fullclean: distclean srcclean
 
 # ----
 
-.PHONY: develop undevelop
+.PHONY: develop develop-uninstall
 develop:
 	$(PYTHON) setup.py develop --prefix='' --user $(opt)
-undevelop:
+develop-uninstall:
 	$(PYTHON) setup.py develop --prefix='' --user --uninstall $(opt)
 
 # ----
