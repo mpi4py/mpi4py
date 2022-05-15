@@ -1658,6 +1658,280 @@ static int PyMPI_Ineighbor_alltoallw_c(void *a1,
 #define MPI_Ineighbor_alltoallw_c PyMPI_Ineighbor_alltoallw_c
 #endif
 
+#ifndef PyMPI_HAVE_MPI_Bcast_init_c
+static int PyMPI_Bcast_init_c(void *a1,
+                              MPI_Count a2,
+                              MPI_Datatype a3,
+                              int a4,
+                              MPI_Comm a5,
+                              MPI_Info a6,
+                              MPI_Request *a7)
+{
+  int ierr;
+  int b2;
+  PyMPICastValue(int, b2, MPI_Count, a2);
+  ierr = MPI_Bcast_init(a1, b2, a3, a4, a5, a6, a7);
+  if (ierr != MPI_SUCCESS) goto fn_exit;
+ fn_exit:
+  return ierr;
+}
+#undef  MPI_Bcast_init_c
+#define MPI_Bcast_init_c PyMPI_Bcast_init_c
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Gather_init_c
+static int PyMPI_Gather_init_c(void *a1,
+                               MPI_Count a2,
+                               MPI_Datatype a3,
+                               void *a4,
+                               MPI_Count a5,
+                               MPI_Datatype a6,
+                               int a7,
+                               MPI_Comm a8,
+                               MPI_Info a9,
+                               MPI_Request *a10)
+{
+  int ierr;
+  int b2; int b5;
+  PyMPICastValue(int, b2, MPI_Count, a2);
+  PyMPICastValue(int, b5, MPI_Count, a5);
+  ierr = MPI_Gather_init(a1, b2, a3, a4, b5, a6, a7, a8, a9, a10);
+  if (ierr != MPI_SUCCESS) goto fn_exit;
+ fn_exit:
+  return ierr;
+}
+#undef  MPI_Gather_init_c
+#define MPI_Gather_init_c PyMPI_Gather_init_c
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Gatherv_init_c
+static int PyMPI_Gatherv_init_c(void *a1,
+                                MPI_Count a2,
+                                MPI_Datatype a3,
+                                void *a4,
+                                MPI_Count *a5,
+                                MPI_Aint *a6,
+                                MPI_Datatype a7,
+                                int a8,
+                                MPI_Comm a9,
+                                MPI_Info a10,
+                                MPI_Request *a11)
+{
+  int ierr; int n;
+  int b2; int *b5 = NULL; int *b6 = NULL;
+  PyMPICommSize(a9, n);
+  PyMPICastValue(int, b2, MPI_Count, a2);
+  PyMPICastArray(int, b5, MPI_Count, a5, n);
+  PyMPICastArray(int, b6, MPI_Aint, a6, n);
+  ierr = MPI_Gatherv_init(a1, b2, a3, a4, b5, b6, a7, a8, a9, a10, a11);
+  if (ierr != MPI_SUCCESS) goto fn_exit;
+ fn_exit:
+  PyMPIFreeArray(b5);
+  PyMPIFreeArray(b6);
+  return ierr;
+}
+#undef  MPI_Gatherv_init_c
+#define MPI_Gatherv_init_c PyMPI_Gatherv_init_c
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Scatter_init_c
+static int PyMPI_Scatter_init_c(void *a1,
+                                MPI_Count a2,
+                                MPI_Datatype a3,
+                                void *a4,
+                                MPI_Count a5,
+                                MPI_Datatype a6,
+                                int a7,
+                                MPI_Comm a8,
+                                MPI_Info a9,
+                                MPI_Request *a10)
+{
+  int ierr;
+  int b2; int b5;
+  PyMPICastValue(int, b2, MPI_Count, a2);
+  PyMPICastValue(int, b5, MPI_Count, a5);
+  ierr = MPI_Scatter_init(a1, b2, a3, a4, b5, a6, a7, a8, a9, a10);
+  if (ierr != MPI_SUCCESS) goto fn_exit;
+ fn_exit:
+  return ierr;
+}
+#undef  MPI_Scatter_init_c
+#define MPI_Scatter_init_c PyMPI_Scatter_init_c
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Scatterv_init_c
+static int PyMPI_Scatterv_init_c(void *a1,
+                                 MPI_Count *a2,
+                                 MPI_Aint *a3,
+                                 MPI_Datatype a4,
+                                 void *a5,
+                                 MPI_Count a6,
+                                 MPI_Datatype a7,
+                                 int a8,
+                                 MPI_Comm a9,
+                                 MPI_Info a10,
+                                 MPI_Request *a11)
+{
+  int ierr; int n;
+  int *b2 = NULL; int *b3 = NULL; int b6;
+  PyMPICommSize(a9, n);
+  PyMPICastArray(int, b2, MPI_Count, a2, n);
+  PyMPICastArray(int, b3, MPI_Aint, a3, n);
+  PyMPICastValue(int, b6, MPI_Count, a6);
+  ierr = MPI_Scatterv_init(a1, b2, b3, a4, a5, b6, a7, a8, a9, a10, a11);
+  if (ierr != MPI_SUCCESS) goto fn_exit;
+ fn_exit:
+  PyMPIFreeArray(b2);
+  PyMPIFreeArray(b3);
+  return ierr;
+}
+#undef  MPI_Scatterv_init_c
+#define MPI_Scatterv_init_c PyMPI_Scatterv_init_c
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Allgather_init_c
+static int PyMPI_Allgather_init_c(void *a1,
+                                  MPI_Count a2,
+                                  MPI_Datatype a3,
+                                  void *a4,
+                                  MPI_Count a5,
+                                  MPI_Datatype a6,
+                                  MPI_Comm a7,
+                                  MPI_Info a8,
+                                  MPI_Request *a9)
+{
+  int ierr;
+  int b2; int b5;
+  PyMPICastValue(int, b2, MPI_Count, a2);
+  PyMPICastValue(int, b5, MPI_Count, a5);
+  ierr = MPI_Allgather_init(a1, b2, a3, a4, b5, a6, a7, a8, a9);
+  if (ierr != MPI_SUCCESS) goto fn_exit;
+ fn_exit:
+  return ierr;
+}
+#undef  MPI_Allgather_init_c
+#define MPI_Allgather_init_c PyMPI_Allgather_init_c
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Allgatherv_init_c
+static int PyMPI_Allgatherv_init_c(void *a1,
+                                   MPI_Count a2,
+                                   MPI_Datatype a3,
+                                   void *a4,
+                                   MPI_Count *a5,
+                                   MPI_Aint *a6,
+                                   MPI_Datatype a7,
+                                   MPI_Comm a8,
+                                   MPI_Info a9,
+                                   MPI_Request *a10)
+{
+  int ierr; int n;
+  int b2; int *b5 = NULL; int *b6 = NULL;
+  PyMPICommSize(a8, n);
+  PyMPICastValue(int, b2, MPI_Count, a2);
+  PyMPICastArray(int, b5, MPI_Count, a5, n);
+  PyMPICastArray(int, b6, MPI_Aint, a6, n);
+  ierr = MPI_Allgatherv_init(a1, b2, a3, a4, b5, b6, a7, a8, a9, a10);
+  if (ierr != MPI_SUCCESS) goto fn_exit;
+ fn_exit:
+  PyMPIFreeArray(b5);
+  PyMPIFreeArray(b6);
+  return ierr;
+}
+#undef  MPI_Allgatherv_init_c
+#define MPI_Allgatherv_init_c PyMPI_Allgatherv_init_c
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Alltoall_init_c
+static int PyMPI_Alltoall_init_c(void *a1,
+                                 MPI_Count a2,
+                                 MPI_Datatype a3,
+                                 void *a4,
+                                 MPI_Count a5,
+                                 MPI_Datatype a6,
+                                 MPI_Comm a7,
+                                 MPI_Info a8,
+                                 MPI_Request *a9)
+{
+  int ierr;
+  int b2; int b5;
+  PyMPICastValue(int, b2, MPI_Count, a2);
+  PyMPICastValue(int, b5, MPI_Count, a5);
+  ierr = MPI_Alltoall_init(a1, b2, a3, a4, b5, a6, a7, a8, a9);
+  if (ierr != MPI_SUCCESS) goto fn_exit;
+ fn_exit:
+  return ierr;
+}
+#undef  MPI_Alltoall_init_c
+#define MPI_Alltoall_init_c PyMPI_Alltoall_init_c
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Alltoallv_init_c
+static int PyMPI_Alltoallv_init_c(void *a1,
+                                  MPI_Count *a2,
+                                  MPI_Aint *a3,
+                                  MPI_Datatype a4,
+                                  void *a5,
+                                  MPI_Count *a6,
+                                  MPI_Aint *a7,
+                                  MPI_Datatype a8,
+                                  MPI_Comm a9,
+                                  MPI_Info a10,
+                                  MPI_Request *a11)
+{
+  int ierr; int n;
+  int *b2 = NULL; int *b3 = NULL; int *b6 = NULL; int *b7 = NULL;
+  PyMPICommSize(a9, n);
+  PyMPICastArray(int, b2, MPI_Count, a2, n);
+  PyMPICastArray(int, b3, MPI_Aint, a3, n);
+  PyMPICastArray(int, b6, MPI_Count, a6, n);
+  PyMPICastArray(int, b7, MPI_Aint, a7, n);
+  ierr = MPI_Alltoallv_init(a1, b2, b3, a4, a5, b6, b7, a8, a9, a10, a11);
+  if (ierr != MPI_SUCCESS) goto fn_exit;
+ fn_exit:
+  PyMPIFreeArray(b2);
+  PyMPIFreeArray(b3);
+  PyMPIFreeArray(b6);
+  PyMPIFreeArray(b7);
+  return ierr;
+}
+#undef  MPI_Alltoallv_init_c
+#define MPI_Alltoallv_init_c PyMPI_Alltoallv_init_c
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Alltoallw_init_c
+static int PyMPI_Alltoallw_init_c(void *a1,
+                                  MPI_Count *a2,
+                                  MPI_Aint *a3,
+                                  MPI_Datatype *a4,
+                                  void *a5,
+                                  MPI_Count *a6,
+                                  MPI_Aint *a7,
+                                  MPI_Datatype *a8,
+                                  MPI_Comm a9,
+                                  MPI_Info a10,
+                                  MPI_Request *a11)
+{
+  int ierr; int n;
+  int *b2 = NULL; int *b3 = NULL; int *b6 = NULL; int *b7 = NULL;
+  PyMPICommSize(a9, n);
+  PyMPICastArray(int, b2, MPI_Count, a2, n);
+  PyMPICastArray(int, b3, MPI_Aint, a3, n);
+  PyMPICastArray(int, b6, MPI_Count, a6, n);
+  PyMPICastArray(int, b7, MPI_Aint, a7, n);
+  ierr = MPI_Alltoallw_init(a1, b2, b3, a4, a5, b6, b7, a8, a9, a10, a11);
+  if (ierr != MPI_SUCCESS) goto fn_exit;
+ fn_exit:
+  PyMPIFreeArray(b2);
+  PyMPIFreeArray(b3);
+  PyMPIFreeArray(b6);
+  PyMPIFreeArray(b7);
+  return ierr;
+}
+#undef  MPI_Alltoallw_init_c
+#define MPI_Alltoallw_init_c PyMPI_Alltoallw_init_c
+#endif
+
 #ifndef PyMPI_HAVE_MPI_Reduce_init_c
 static int PyMPI_Reduce_init_c(void *a1,
                                void *a2,
@@ -1791,6 +2065,145 @@ static int PyMPI_Exscan_init_c(void *a1,
 }
 #undef  MPI_Exscan_init_c
 #define MPI_Exscan_init_c PyMPI_Exscan_init_c
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Neighbor_allgather_init_c
+static int PyMPI_Neighbor_allgather_init_c(void *a1,
+                                           MPI_Count a2,
+                                           MPI_Datatype a3,
+                                           void *a4,
+                                           MPI_Count a5,
+                                           MPI_Datatype a6,
+                                           MPI_Comm a7,
+                                           MPI_Info a8,
+                                           MPI_Request *a9)
+{
+  int ierr;
+  int b2; int b5;
+  PyMPICastValue(int, b2, MPI_Count, a2);
+  PyMPICastValue(int, b5, MPI_Count, a5);
+  ierr = MPI_Neighbor_allgather_init(a1, b2, a3, a4, b5, a6, a7, a8, a9);
+  if (ierr != MPI_SUCCESS) goto fn_exit;
+ fn_exit:
+  return ierr;
+}
+#undef  MPI_Neighbor_allgather_init_c
+#define MPI_Neighbor_allgather_init_c PyMPI_Neighbor_allgather_init_c
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Neighbor_allgatherv_init_c
+static int PyMPI_Neighbor_allgatherv_init_c(void *a1,
+                                            MPI_Count a2,
+                                            MPI_Datatype a3,
+                                            void *a4,
+                                            MPI_Count *a5,
+                                            MPI_Aint *a6,
+                                            MPI_Datatype a7,
+                                            MPI_Comm a8,
+                                            MPI_Info a9,
+                                            MPI_Request *a10)
+{
+  int ierr; int ns, nr;
+  int b2; int *b5 = NULL; int *b6 = NULL;
+  PyMPICommNeighborCount(a8, ns, nr);
+  PyMPICastValue(int, b2, MPI_Count, a2);
+  PyMPICastArray(int, b5, MPI_Count, a5, nr);
+  PyMPICastArray(int, b6, MPI_Aint, a6, nr);
+  ierr = MPI_Neighbor_allgatherv_init(a1, b2, a3, a4, b5, b6, a7, a8, a9, a10);
+  if (ierr != MPI_SUCCESS) goto fn_exit;
+ fn_exit:
+  PyMPIFreeArray(b5);
+  PyMPIFreeArray(b6);
+  return ierr;
+}
+#undef  MPI_Neighbor_allgatherv_init_c
+#define MPI_Neighbor_allgatherv_init_c PyMPI_Neighbor_allgatherv_init_c
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Neighbor_alltoall_init_c
+static int PyMPI_Neighbor_alltoall_init_c(void *a1,
+                                          MPI_Count a2,
+                                          MPI_Datatype a3,
+                                          void *a4,
+                                          MPI_Count a5,
+                                          MPI_Datatype a6,
+                                          MPI_Comm a7,
+                                          MPI_Info a8,
+                                          MPI_Request *a9)
+{
+  int ierr;
+  int b2; int b5;
+  PyMPICastValue(int, b2, MPI_Count, a2);
+  PyMPICastValue(int, b5, MPI_Count, a5);
+  ierr = MPI_Neighbor_alltoall_init(a1, b2, a3, a4, b5, a6, a7, a8, a9);
+  if (ierr != MPI_SUCCESS) goto fn_exit;
+ fn_exit:
+  return ierr;
+}
+#undef  MPI_Neighbor_alltoall_init_c
+#define MPI_Neighbor_alltoall_init_c PyMPI_Neighbor_alltoall_init_c
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Neighbor_alltoallv_init_c
+static int PyMPI_Neighbor_alltoallv_init_c(void *a1,
+                                           MPI_Count *a2,
+                                           MPI_Aint *a3,
+                                           MPI_Datatype a4,
+                                           void *a5,
+                                           MPI_Count *a6,
+                                           MPI_Aint *a7,
+                                           MPI_Datatype a8,
+                                           MPI_Comm a9,
+                                           MPI_Info a10,
+                                           MPI_Request *a11)
+{
+  int ierr; int ns, nr;
+  int *b2 = NULL; int *b3 = NULL; int *b6 = NULL; int *b7 = NULL;
+  PyMPICommNeighborCount(a9, ns, nr);
+  PyMPICastArray(int, b2, MPI_Count, a2, ns);
+  PyMPICastArray(int, b3, MPI_Aint, a3, ns);
+  PyMPICastArray(int, b6, MPI_Count, a6, nr);
+  PyMPICastArray(int, b7, MPI_Aint, a7, nr);
+  ierr = MPI_Neighbor_alltoallv_init(a1, b2, b3, a4, a5, b6, b7, a8, a9, a10, a11);
+  if (ierr != MPI_SUCCESS) goto fn_exit;
+ fn_exit:
+  PyMPIFreeArray(b2);
+  PyMPIFreeArray(b3);
+  PyMPIFreeArray(b6);
+  PyMPIFreeArray(b7);
+  return ierr;
+}
+#undef  MPI_Neighbor_alltoallv_init_c
+#define MPI_Neighbor_alltoallv_init_c PyMPI_Neighbor_alltoallv_init_c
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Neighbor_alltoallw_init_c
+static int PyMPI_Neighbor_alltoallw_init_c(void *a1,
+                                           MPI_Count *a2,
+                                           MPI_Aint *a3,
+                                           MPI_Datatype *a4,
+                                           void *a5,
+                                           MPI_Count *a6,
+                                           MPI_Aint *a7,
+                                           MPI_Datatype *a8,
+                                           MPI_Comm a9,
+                                           MPI_Info a10,
+                                           MPI_Request *a11)
+{
+  int ierr; int ns, nr;
+  int *b2 = NULL; int *b6 = NULL;
+  PyMPICommNeighborCount(a9, ns, nr);
+  PyMPICastArray(int, b2, MPI_Count, a2, ns);
+  PyMPICastArray(int, b6, MPI_Count, a6, nr);
+  ierr = MPI_Neighbor_alltoallw_init(a1, b2, a3, a4, a5, b6, a7, a8, a9, a10, a11);
+  if (ierr != MPI_SUCCESS) goto fn_exit;
+ fn_exit:
+  PyMPIFreeArray(b2);
+  PyMPIFreeArray(b6);
+  return ierr;
+}
+#undef  MPI_Neighbor_alltoallw_init_c
+#define MPI_Neighbor_alltoallw_init_c PyMPI_Neighbor_alltoallw_init_c
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Win_create_c
