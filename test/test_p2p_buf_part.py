@@ -11,7 +11,7 @@ class BaseTestP2PBufPart(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array, typecode in arrayimpl.subTest(self):
-            for s in range(1, size):
+            for s in range(0, size):
                 for p in range(1, 4):
                     sbuf = array( s, typecode, s*p)
                     rbuf = array(-1, typecode, s*p)
@@ -49,7 +49,7 @@ class BaseTestP2PBufPart(object):
         dest = (rank + 1) % size
         source = (rank - 1) % size
         for array, typecode in arrayimpl.subTest(self):
-            for s in range(1, size):
+            for s in range(0, size):
                 for p in range(1, 4):
                     sbuf = array( s, typecode, s*p)
                     rbuf = array(-1, typecode, s*p)
