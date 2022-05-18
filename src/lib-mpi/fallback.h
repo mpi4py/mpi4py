@@ -1037,26 +1037,6 @@ static int PyMPI_Info_get_string(MPI_Info info,
 #define MPI_Info_get_string PyMPI_Info_get_string
 #endif
 
-#ifndef PyMPI_HAVE_MPI_Info_create_env
-static int PyMPI_Info_create_env(int argc,
-                                 char *argv[],
-                                 MPI_Info *info)
-{
-  (void)argc; (void)argv;
-  if (MPI_INFO_ENV != MPI_INFO_NULL) {
-    return MPI_Info_dup(MPI_INFO_ENV, info);
-  } else if (info) {
-    *info = MPI_INFO_NULL;
-    return MPI_SUCCESS;
-  } else {
-    (void)MPI_Comm_call_errhandler(MPI_COMM_SELF, MPI_ERR_INFO);
-    return MPI_ERR_INFO;
-  }
-}
-#undef  MPI_Info_create_env
-#define MPI_Info_create_env PyMPI_Info_create_env
-#endif
-
 /* ---------------------------------------------------------------- */
 
 #ifndef PyMPI_HAVE_MPI_F_SOURCE

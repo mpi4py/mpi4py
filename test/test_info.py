@@ -48,8 +48,11 @@ class TestInfoEnv(unittest.TestCase):
             v = env.Get(key)
 
     def testCreateEnv(self):
-        env = MPI.Info.Create_env()
-        if env == MPI.INFO_NULL: return
+        try:
+            env = MPI.Info.Create_env()
+        except NotImplementedError:
+            if MPI.Get_version() >= (4, 0): raise
+            raise unittest.SkipTest("mpi-info-create-env")
         for key in ("command", "argv",
                     "maxprocs", "soft",
                     "host", "arch",
