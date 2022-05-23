@@ -52,6 +52,10 @@ def check_run_name(name):
     return __name__ == name
 
 
+def sys_flags_get(name):
+    return getattr(sys.flags, name)
+
+
 class ExecutorMixin:
     worker_count = 2
 
@@ -167,6 +171,33 @@ class ProcessPoolInitTest(ProcessPoolMixin,
         executor = executor_type(python_args=['-B', '-Wi'])
         executor.submit(time.sleep, 0).result()
         executor.shutdown()
+
+    @unittest.skipIf(SHARED_POOL, 'shared-pool')
+    def test_init_sys_flags(self):
+        executor_type = futures.MPIPoolExecutor
+        sys_flags = [
+            ('debug', '-d', 1),
+            ('debug', '-dd', 2),
+            ('optimize', '-O', 1),
+            ('optimize', '-OO', 2),
+            ('dont_write_bytecode', '-B', True),
+        ]
+        if sys.version_info >= (3, 7):
+            sys_flags.extend([
+                ('dev_mode', '-Xdev', True),
+                ('utf8_mode', '-Xutf8', True),
+            ])
+        if sys.version_info >= (3, 11):
+            sys_flags.extend([
+                ('safe_path', '-P', True),
+            ])
+        for (name, flag, value) in sys_flags:
+            if not isinstance(value, bool):
+                if isinstance(value, int):
+                    value += getattr(sys.flags, name)
+            with executor_type(python_args=[flag]) as executor:
+                result = executor.submit(sys_flags_get, name).result()
+            self.assertEqual(value, result, f"sys.flags.{name}")
 
     @unittest.skipIf(SHARED_POOL, 'shared-pool')
     def test_init_globals(self):
@@ -1429,6 +1460,7 @@ if SHARED_POOL:
     del MPICommExecutorTest.test_initializer_error
     del MPICommExecutorTest.test_initializer_error_del
     del MPICommExecutorTest.test_initializer_error_del_nowait
+    del ProcessPoolInitTest.test_init_sys_flags
     del ProcessPoolInitTest.test_init_globals
     del ProcessPoolInitTest.test_use_pkl5_kwarg
     del ProcessPoolInitTest.test_use_pkl5_environ
