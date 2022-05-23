@@ -822,7 +822,8 @@ def import_main(mod_name, mod_path, init_globals, run_name):
         if mod_name:  # pragma: no cover
             runpy.run_module(mod_name, run_name=run_name, alter_sys=True)
         elif mod_path:  # pragma: no branch
-            if not getattr(sys.flags, 'isolated', 0):  # pragma: no branch
+            safe_path = getattr(sys.flags, 'safe_path', sys.flags.isolated)
+            if not safe_path:  # pragma: no branch
                 sys.path[0] = os.path.realpath(os.path.dirname(mod_path))
             runpy.run_path(mod_path, run_name=run_name)
         sys.modules['__main__'] = sys.modules[run_name] = module
@@ -920,11 +921,13 @@ FLAG_OPT_MAP = {
     'dont_write_bytecode': 'B',
     'hash_randomization': 'R',
     'verbose': 'v',
-    'quiet': 'q',
     'bytes_warning': 'b',
+    'quiet': 'q',
+    # 'hash_randomization', 'R',
     # 'dev_mode': 'Xdev',
     # 'utf8_mode': 'Xutf8',
     # 'warn_default_encoding': 'Xwarn_default_encoding',
+    'safe_path': 'P',
 }
 
 
