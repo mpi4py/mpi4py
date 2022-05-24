@@ -60,14 +60,14 @@ cdef class _p_greq:
     cdef object free_fn
     cdef object cancel_fn
     cdef tuple args
-    cdef dict  kargs
+    cdef dict  kwargs
 
-    def __cinit__(self, query_fn, free_fn, cancel_fn, args, kargs):
+    def __cinit__(self, query_fn, free_fn, cancel_fn, args, kwargs):
         self.query_fn  = query_fn
         self.free_fn   = free_fn
         self.cancel_fn = cancel_fn
-        self.args  = tuple(args) if args  is not None else ()
-        self.kargs = dict(kargs) if kargs is not None else {}
+        self.args   = tuple(args)  if args   is not None else ()
+        self.kwargs = dict(kwargs) if kwargs is not None else {}
 
     cdef int query(self, MPI_Status *status) except -1:
         <void>PyMPI_Status_set_source(status, MPI_ANY_SOURCE)
@@ -78,7 +78,7 @@ cdef class _p_greq:
         cdef Status sts = Status.__new__(Status)
         if self.query_fn is not None:
             sts.ob_mpi = status[0]
-            self.query_fn(sts, *self.args, **self.kargs)
+            self.query_fn(sts, *self.args, **self.kwargs)
             status[0] = sts.ob_mpi
             if self.cancel_fn is None:
                 <void>MPI_Status_set_cancelled(status, 0)
@@ -86,12 +86,12 @@ cdef class _p_greq:
 
     cdef int free(self) except -1:
         if self.free_fn is not None:
-            self.free_fn(*self.args, **self.kargs)
+            self.free_fn(*self.args, **self.kwargs)
         return MPI_SUCCESS
 
     cdef int cancel(self, bint completed) except -1:
         if self.cancel_fn is not None:
-            self.cancel_fn(completed, *self.args, **self.kargs)
+            self.cancel_fn(completed, *self.args, **self.kwargs)
         return MPI_SUCCESS
 
 # ---

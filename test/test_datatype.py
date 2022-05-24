@@ -124,9 +124,9 @@ class TestDatatype(unittest.TestCase):
         if symbol is None: return
         self.assertEqual(symbol, combiner)
         decoded = newtype.decode()
-        oldtype, constructor, kargs = decoded
+        oldtype, constructor, kwargs = decoded
         constructor = 'Create_' + constructor.lower()
-        newtype2 = getattr(oldtype, constructor)(**kargs)
+        newtype2 = getattr(oldtype, constructor)(**kwargs)
         decoded2 = newtype2.decode()
         self.assertEqual(decoded[1], decoded2[1])
         self.assertEqual(decoded[2], decoded2[2])

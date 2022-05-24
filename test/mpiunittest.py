@@ -151,9 +151,9 @@ def disable(what, reason):
     return unittest.skip(reason)(what)
 
 
-def main(*args, **kargs):
+def main(*args, **kwargs):
     from main import main
     try:
-        main(*args, **kargs)
+        main(*args, **kwargs)
     except SystemExit:
         pass

@@ -68,9 +68,9 @@ class TestProfile(unittest.TestCase):
             for prefix in ("/lib", "/usr/lib")
             for suffix in (bits, f"/{triplet}", "")
         ]
-        def mpi4py_profile(*args, **kargs):
+        def mpi4py_profile(*args, **kwargs):
             try:
-                mpi4py.profile(*args, **kargs)
+                mpi4py.profile(*args, **kwargs)
             except ValueError:
                 pass
         with warnings.catch_warnings():
