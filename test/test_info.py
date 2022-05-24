@@ -34,18 +34,34 @@ class TestInfoNull(unittest.TestCase):
 
 class TestInfoEnv(unittest.TestCase):
 
+    KEYS = (
+        "command",
+        "argv",
+        "maxprocs",
+        "soft",
+        "host",
+        "arch",
+        "wdir",
+        "file",
+        "thread_level",
+    )
+
     def testTruth(self):
         self.assertTrue(bool(MPI.INFO_ENV))
 
     def testPyMethods(self):
         env = MPI.INFO_ENV
-        if env == MPI.INFO_NULL: return
-        for key in ("command", "argv",
-                    "maxprocs", "soft",
-                    "host", "arch",
-                    "wdir", "file",
-                    "thread_level"):
+        for key in self.KEYS:
             v = env.Get(key)
+
+    def testDup(self):
+        env = MPI.INFO_ENV
+        dup = env.Dup()
+        try:
+            for key in self.KEYS:
+                self.assertEqual(env.Get(key), dup.Get(key))
+        finally:
+            dup.Free()
 
     def testCreateEnv(self):
         try:
@@ -53,13 +69,17 @@ class TestInfoEnv(unittest.TestCase):
         except NotImplementedError:
             if MPI.Get_version() >= (4, 0): raise
             raise unittest.SkipTest("mpi-info-create-env")
-        for key in ("command", "argv",
-                    "maxprocs", "soft",
-                    "host", "arch",
-                    "wdir", "file",
-                    "thread_level"):
+        for key in self.KEYS:
             v = env.Get(key)
-        env.Free()
+        try:
+            dup = env.Dup()
+            try:
+                for key in self.KEYS:
+                    self.assertEqual(env.Get(key), dup.Get(key))
+            finally:
+                dup.Free()
+        finally:
+            env.Free()
         for args in (
             None, [], (),
             sys.executable,
