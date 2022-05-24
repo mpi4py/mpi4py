@@ -458,7 +458,7 @@ if sys.version_info < (3, 7):
 
 def run_setup():
     """
-    Call setuptools.setup(*args, **kargs)
+    Call setuptools.setup(*args, **kwargs)
     """
     try:
         import setuptools
@@ -490,7 +490,7 @@ def run_setup():
 
 def run_skbuild():
     """
-    Call skbuild.setup(*args, **kargs)
+    Call skbuild.setup(*args, **kwargs)
     """
     from skbuild import setup
     #

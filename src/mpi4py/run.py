@@ -26,8 +26,8 @@ def run_command_line(args=None):
         # pylint: disable=missing-docstring
         from runpy import _run_module_code
         code = compile(string, filename, 'exec', 0, 1)
-        kargs = {'script_name': argv0}
-        return _run_module_code(code, init_globals, run_name, **kargs)
+        kwargs = {'script_name': argv0}
+        return _run_module_code(code, init_globals, run_name, **kwargs)
 
     sys.argv[:] = args if args is not None else sys.argv[1:]
 

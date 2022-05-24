@@ -35,7 +35,7 @@ class mpicompiler(object):
         fix_command(compiler.compiler_so, self.cc)
         fix_command(compiler.linker_so, self.ld)
 
-    def compile(self, *args, **kargs):
+    def compile(self, *args, **kwargs):
         from distutils.command import build_ext
         customize_compiler_orig = build_ext.customize_compiler
         def customize_compiler(compiler):
@@ -43,7 +43,7 @@ class mpicompiler(object):
             self.configure(compiler)
         build_ext.customize_compiler = customize_compiler
         try:
-            return self.ffi_compile(*args, **kargs)
+            return self.ffi_compile(*args, **kwargs)
         finally:
             build_ext.customize_compiler = customize_compiler_orig
 

@@ -28,10 +28,10 @@ class Node(object):
 
     """
 
-    def init(self, name, **kargs):
+    def init(self, name, **kwargs):
         assert name is not None
         self.name = name
-        self.__dict__.update(kargs)
+        self.__dict__.update(kwargs)
     def header(self):
         line = dedent(self.HEADER) % vars(self)
         line = line.replace('\n', '')
