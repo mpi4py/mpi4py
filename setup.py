@@ -157,7 +157,7 @@ def configure_dl(ext, config_cmd):
     from mpidistutils import log
     log.info("checking for dlopen() availability ...")
     ok = config_cmd.check_header('dlfcn.h')
-    if ok : ext.define_macros += [('HAVE_DLFCN_H', 1)]
+    if ok: ext.define_macros += [('HAVE_DLFCN_H', 1)]
     ok = config_cmd.check_library('dl')
     if ok: ext.libraries += ['dl']
     ok = config_cmd.check_function('dlopen',
@@ -336,9 +336,12 @@ def req_cython():
     return cython_version
 
 
-def chk_cython(VERSION):
+def chk_cython(VERSION, verbose=True):
     from mpidistutils import log
-    warn = lambda msg='': sys.stderr.write(msg+'\n')
+    if verbose:
+        warn = lambda msg='': sys.stderr.write(msg+'\n')
+    else:
+        warn = lambda msg='': None
     #
     try:
         import Cython
@@ -360,8 +363,7 @@ def chk_cython(VERSION):
     else:
         from mpidistutils import LegacyVersion as Version
         AVAILABLE = CYTHON_VERSION
-    if (REQUIRED is not None and
-        Version(AVAILABLE) < Version(REQUIRED)):
+    if REQUIRED is not None and Version(AVAILABLE) < Version(REQUIRED):
         warn("*"*80)
         warn()
         warn(" You need Cython >= {0} (you have version {1}).\n"
@@ -396,8 +398,23 @@ def run_cython(source, target=None,
             return
     finally:
         os.chdir(cwd)
+    require = 'Cython'
+    if VERSION is not None:
+        require += '>=%s' % VERSION
+    if not chk_cython(VERSION, verbose=False):
+        try:
+            import warnings
+            import setuptools
+            install_setup_requires = setuptools._install_setup_requires
+            with warnings.catch_warnings():
+                category = setuptools.SetuptoolsDeprecationWarning
+                warnings.simplefilter('ignore', category)
+                log.info("fetching build requirement %s" % require)
+                install_setup_requires(dict(setup_requires=[require]))
+        except Exception:
+            log.info("failed to fetch build requirement %s" % require)
     if not chk_cython(VERSION):
-        raise DistutilsError("requires Cython>=%s" % VERSION)
+        raise DistutilsError("requires %s" % require)
     log.info("cythonizing '%s' -> '%s'", source, target)
     from cythonize import cythonize
     err = cythonize(
