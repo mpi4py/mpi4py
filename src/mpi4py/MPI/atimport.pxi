@@ -222,7 +222,7 @@ cdef int check_mpiexec() nogil except -1:
             with gil:
                 PyErr_WarnFormat(
                     RuntimeWarning, 1,
-                    b"Environment variable %s: "
+                    b"environment variable %s: "
                     b"unexpected value '%s'",
                     check_name, check_value,
                 )
@@ -248,7 +248,7 @@ cdef int check_mpiexec() nogil except -1:
     with gil:
         PyErr_WarnFormat(
             RuntimeWarning, 1,
-            b"Suspicious MPI execution environment.\n"
+            b"suspicious MPI execution environment\n"
             b"Your environment has %s=%.200s set, "
             b"but mpi4py was built with %s.\n"
             b"You may be using `mpiexec` or `mpirun` "
