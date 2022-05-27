@@ -84,10 +84,14 @@ cdef inline int comm_neighbors_count(MPI_Comm comm,
 # -----------------------------------------------------------------------------
 
 cdef object Lock = None
-try:
+
+if PY_VERSION_HEX >= 0x030900F0:
     from _thread import allocate_lock as Lock
-except ImportError:
-    from _dummy_thread import allocate_lock as Lock
+else:
+    try:
+        from _thread import allocate_lock as Lock
+    except ImportError:
+        from _dummy_thread import allocate_lock as Lock
 
 cdef int  lock_keyval   = MPI_KEYVAL_INVALID
 cdef dict lock_registry = {}
