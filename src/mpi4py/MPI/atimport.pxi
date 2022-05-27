@@ -15,12 +15,15 @@ cdef extern from *:
 # -----------------------------------------------------------------------------
 
 cdef extern from "Python.h":
-    void *PyExc_RuntimeError
-    void *PyExc_NotImplementedError
-    void PyErr_SetObject(object, object)
-    int  PyErr_WarnFormat(object, Py_ssize_t, const char[], ...) except -1
+    enum: PY_VERSION_HEX
 
-# -----------------------------------------------------------------------------
+cdef extern from "Python.h":
+    """
+    #if !defined(Py_GETENV)
+    #  define Py_GETENV(s) (Py_IgnoreEnvironmentFlag ? NULL : getenv(s))
+    #endif
+    """
+    const char *Py_GETENV(const char[]) nogil
 
 cdef extern from *:
     """
@@ -34,13 +37,12 @@ cdef extern from *:
 
 # -----------------------------------------------------------------------------
 
-cdef extern from *:
-    """
-    #if !defined(Py_GETENV)
-    #  define Py_GETENV(s) (Py_IgnoreEnvironmentFlag ? NULL : getenv(s))
-    #endif
-    """
-    const char *Py_GETENV(const char[]) nogil
+cdef extern from "Python.h":
+    void *PyExc_RuntimeError
+    void *PyExc_NotImplementedError
+    void PyErr_SetObject(object, object)
+    int  PyErr_WarnFormat(object, Py_ssize_t, const char[], ...) except -1
+    void PySys_WriteStderr(const char[], ...)
 
 # -----------------------------------------------------------------------------
 
@@ -259,7 +261,6 @@ cdef int check_mpiexec() nogil except -1:
 
 cdef extern from "Python.h":
     int Py_AtExit(void (*)())
-    void PySys_WriteStderr(char*,...)
 
 cdef extern from *:
     int PyMPI_Commctx_finalize() nogil
@@ -269,8 +270,10 @@ cdef int bootstrap() except -1:
     getOptions(&options)
     # Cleanup at (the very end of) Python exit
     if Py_AtExit(atexit) < 0:
-        PySys_WriteStderr(b"warning: could not register "
-                          b"cleanup with Py_AtExit()%s", b"\n")
+        PySys_WriteStderr(
+            b"WARNING: %s\n",
+            b"could not register cleanup with Py_AtExit()",
+        )
     # Do we have to initialize MPI?
     cdef int initialized = 1
     <void>MPI_Initialized(&initialized)
