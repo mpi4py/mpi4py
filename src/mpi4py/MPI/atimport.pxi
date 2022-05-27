@@ -1,6 +1,16 @@
 # -----------------------------------------------------------------------------
 
-cdef extern from "mpimodule.h": pass
+cdef extern from *:
+    """
+    #include "lib-mpi/config.h"
+    #include "lib-mpi/missing.h"
+    #include "lib-mpi/fallback.h"
+    #include "lib-mpi/compat.h"
+
+    #include "pympivendor.h"
+    #include "pympistatus.h"
+    #include "pympicommctx.h"
+    """
 
 # -----------------------------------------------------------------------------
 
