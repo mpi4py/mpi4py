@@ -124,9 +124,6 @@ pickle = PyMPI_PICKLE
 
 # -----------------------------------------------------------------------------
 
-cdef extern from "Python.h":
-    enum: PY_VERSION_HEX
-
 cdef int have_pickle5 = -1
 cdef object PyPickle5_dumps = None
 cdef object PyPickle5_loads = None
