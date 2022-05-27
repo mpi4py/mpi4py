@@ -48,8 +48,12 @@ class TestErrhandler(unittest.TestCase):
 
     def testCommGetSetErrhandler(self):
         for COMM in [MPI.COMM_SELF, MPI.COMM_WORLD]:
-            for ERRHANDLER in [MPI.ERRORS_ARE_FATAL, MPI.ERRORS_RETURN,
-                               MPI.ERRORS_ARE_FATAL, MPI.ERRORS_RETURN, ]:
+            for ERRHANDLER in [
+                MPI.ERRORS_ARE_FATAL,
+                MPI.ERRORS_RETURN,
+                MPI.ERRORS_ARE_FATAL,
+                MPI.ERRORS_RETURN,
+            ]:
                 errhdl_1 = COMM.Get_errhandler()
                 self.assertNotEqual(errhdl_1, MPI.ERRHANDLER_NULL)
                 COMM.Set_errhandler(ERRHANDLER)
