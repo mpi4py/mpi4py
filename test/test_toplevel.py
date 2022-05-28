@@ -15,6 +15,7 @@ class TestRC(unittest.TestCase):
         rc(finalize     = rc.finalize)
         rc(fast_reduce  = rc.fast_reduce)
         rc(recv_mprobe  = rc.recv_mprobe)
+        rc(errors       = rc.errors)
         return rc
 
     def testCallKwArgs(self):

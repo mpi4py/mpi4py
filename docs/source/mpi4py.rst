@@ -91,7 +91,7 @@ Runtime configuration options
 
    :type: :class:`str`
    :default: ``"exception"``
-   :choices: ``"exception"``, ``"default"``, ``"fatal"``
+   :choices: ``"exception"``, ``"default"``, ``"abort"``, ``"fatal"``
 
    .. seealso:: :envvar:`MPI4PY_RC_ERRORS`
 
@@ -193,7 +193,7 @@ the :data:`mpi4py.rc` and :data:`MPI.pickle` objects at import time of the
 .. envvar:: MPI4PY_RC_ERRORS
 
   :default: ``"exception"``
-  :choices: ``"exception"``, ``"default"``, ``"fatal"``
+  :choices: ``"exception"``, ``"default"``, ``"abort"``, ``"fatal"``
 
   Controls default MPI error handling policy.
 
