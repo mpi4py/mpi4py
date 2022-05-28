@@ -42,7 +42,7 @@ class Rc:
         Use tree-based reductions for objects (default: True).
     recv_mprobe : bool
         Use matched probes to receive objects (default: True).
-    errors : {"exception", "default", "fatal"}
+    errors : {"exception", "default", "abort", "fatal"}
         Error handling policy (default: "exception").
 
     """

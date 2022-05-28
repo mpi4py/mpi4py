@@ -182,8 +182,10 @@ cdef int getOptions(Options* opts) except -1:
         opts.errors = 0
     elif errors == 'exception':
         opts.errors = 1
-    elif errors == 'fatal':
+    elif errors == 'abort' and MPI_ERRORS_ABORT != MPI_ERRHANDLER_NULL:
         opts.errors = 2
+    elif errors == 'fatal':
+        opts.errors = 3
     else:
         warnOpt(b"errors", errors)
     #
