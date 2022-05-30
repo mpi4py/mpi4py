@@ -2,6 +2,38 @@
 #define PyMPI_COMPAT_MPICH_H
 #if defined(MPICH_NUMVERSION)
 
+#if (MPICH_NUMVERSION >= 30000000 && MPICH_NUMVERSION < 40000000)
+
+static int PyMPI_MPICH_MPI_Type_get_extent_x(MPI_Datatype datatype,
+                                             MPI_Count   *lb,
+                                             MPI_Count   *extent)
+{
+  int ierr;
+  MPI_Aint lb_a = MPI_UNDEFINED;
+  MPI_Aint extent_a = MPI_UNDEFINED;
+  if (sizeof(MPI_Count) == sizeof(MPI_Aint)) {
+    ierr = MPI_Type_get_extent(datatype, &lb_a, &extent_a);
+    if (ierr) goto fn_exit;
+    if (lb) *lb = lb_a;
+    if (extent) *extent = extent_a;
+  } else {
+    ierr = MPI_Type_get_extent(datatype, &lb_a, &extent_a);
+    if (ierr) goto fn_exit;
+    if (lb_a != MPI_UNDEFINED && extent_a != MPI_UNDEFINED) {
+      if (lb) *lb = lb_a;
+      if (extent) *extent = extent_a;
+    } else {
+      ierr = MPI_Type_get_extent_x(datatype, lb, extent);
+      if (ierr) goto fn_exit;
+    }
+  }
+ fn_exit:
+  return ierr;
+}
+#define MPI_Type_get_extent_x PyMPI_MPICH_MPI_Type_get_extent_x
+
+#endif
+
 #if (MPICH_NUMVERSION >= 30400000 && MPICH_NUMVERSION < 40000000)
 
 static int PyMPI_MPICH_MPI_Initialized(int *flag)
