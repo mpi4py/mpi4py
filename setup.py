@@ -373,7 +373,8 @@ def chk_cython(VERSION, verbose=True):
         warn("*"*80)
         return False
     #
-    log.info("using Cython version %s" % CYTHON_VERSION)
+    if verbose:
+        log.info("using Cython version %s" % CYTHON_VERSION)
     return True
 
 
