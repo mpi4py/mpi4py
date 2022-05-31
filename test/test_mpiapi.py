@@ -30,8 +30,8 @@ class TestMPIAPI(unittest.TestCase):
         self.assertTrue(large_count)
 
         nm = shutil.which('nm')
-        nm_output = sp.check_output([nm, '-uj', mod_file])
-        regex = re.compile(rf"^_?({mpiname})$")
+        nm_output = sp.check_output([nm, '-Pu', mod_file])
+        regex = re.compile(rf"^_?({mpiname}) U.*$")
         mpi_symbols = set()
         for line in map(bytes.decode, nm_output.split(b"\n")):
             match = regex.search(line)
