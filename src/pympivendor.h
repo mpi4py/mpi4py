@@ -21,14 +21,6 @@ static int PyMPI_Get_vendor(const char **vendor_name,
   (void)sscanf(I_MPI_VERSION,"%d.%d Update %d",&major,&minor,&micro);
   #endif
 
-#elif defined(PLATFORM_MPI)
-
-  name = "Platform MPI";
-  major = (PLATFORM_MPI>>24)&0xff;
-  minor = (PLATFORM_MPI>>16)&0xff;
-  micro = (PLATFORM_MPI>> 8)&0xff;
-  major = (major/16)*10+(major%16);
-
 #elif defined(MSMPI_VER)
 
   name = "Microsoft MPI";

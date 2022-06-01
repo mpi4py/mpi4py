@@ -189,7 +189,6 @@ class TestWinAttr(BaseTestAttr, unittest.TestCase):
         self.obj = self.win = win
 
     @unittest.skipMPI('openmpi(<=1.5.1)')
-    @unittest.skipMPI('PlatformMPI')
     def testAttrCopyDelete(self):
         #
         null = self.NULL

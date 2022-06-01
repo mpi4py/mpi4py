@@ -161,7 +161,6 @@ class BaseTestTopo(object):
         topo.Free()
 
     @unittest.skipMPI('msmpi')
-    @unittest.skipMPI('PlatformMPI')
     def testDistgraphcomm(self):
         comm = self.COMM
         size = comm.Get_size()

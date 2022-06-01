@@ -49,7 +49,6 @@ class TestDPM(unittest.TestCase):
     @unittest.skipMPI('MPICH2', appnum() is None)
     @unittest.skipMPI('MPICH1', appnum() is None)
     @unittest.skipMPI('msmpi(<8.1.0)', appnum() is None)
-    @unittest.skipMPI('PlatformMPI')
     def testNamePublishing(self):
         rank = MPI.COMM_WORLD.Get_rank()
         service = "mpi4py-%d" % rank

@@ -75,7 +75,6 @@ def using_GPU():
 @unittest.skipMPI('MVAPICH2')
 @unittest.skipMPI('MPICH2')
 @unittest.skipMPI('MPICH1')
-@unittest.skipMPI('PlatformMPI')
 @unittest.skipIf(using_GPU(), 'using CUDA')
 class BaseTestSpawn(object):
 
