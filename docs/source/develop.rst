@@ -98,28 +98,29 @@ location, either via the :option:`--mpicc` command option or using the
   $ MPICC=/path/to/mpicc python setup.py build
 
 Alternatively, you can provide all the relevant information about your
-MPI implementation by editing the file called :file:`mpi.cfg`. You can
-use the default section ``[mpi]`` or add a new, custom section, for
-example ``[other_mpi]`` (see the examples provided in the
-:file:`mpi.cfg` file as a starting point to write your own section)::
+MPI implementation by editing the :file:`mpi.cfg` file located in the
+top level source directory. You can use the default section ``[mpi]``
+or add a new custom section, for example ``[other_mpi]`` (see the
+examples provided in the :file:`mpi.cfg` file as a starting point to
+write your own section):
+
+.. code-block:: ini
 
   [mpi]
-
   include_dirs         = /usr/local/mpi/include
   libraries            = mpi
   library_dirs         = /usr/local/mpi/lib
   runtime_library_dirs = /usr/local/mpi/lib
 
   [other_mpi]
-
   include_dirs         = /opt/mpi/include ...
   libraries            = mpi ...
   library_dirs         = /opt/mpi/lib ...
-  runtime_library_dirs = /op/mpi/lib ...
+  runtime_library_dirs = /opt/mpi/lib ...
 
   ...
 
-and then run the *build* command, perhaps specifying you custom
+and then run the *build* command specifying you custom
 configuration section::
 
   $ python setup.py build --mpi=other_mpi

@@ -100,9 +100,12 @@ class Config(object):
         filename = section = None
         mpiopt = getattr(options, 'mpi', None)
         mpiopt = environ.get('MPICFG', mpiopt)
+        mpiopt = environ.get('MPI4PY_BUILD_MPICFG', mpiopt)
         if mpiopt:
             if ',' in mpiopt:
                 section, filename = mpiopt.split(',', 1)
+            elif ':' in mpiopt:
+                filename, section = mpiopt.split(':', 1)
             elif os.path.isfile(mpiopt):
                 filename = mpiopt
             else:
