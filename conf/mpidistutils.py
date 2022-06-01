@@ -345,12 +345,11 @@ cmd_mpi_opts = [
      "(defaults to 'mpicc' if available)"),
 
     ('mpi=',     None,
-     "specify a configuration section, "
-     "and an optional list of configuration files "
-     + "(e.g. --mpi=section,file1" + os.path.pathsep + "file2), " +
+     "specify a ini-style configuration file and section "
+     "(e.g. --mpi=filename or --mpi=filename:section), "
      "to look for MPI includes/libraries, "
      "overridden by environment variable 'MPICFG' "
-     "(defaults to section 'mpi' in configuration file 'mpi.cfg')"),
+     "(defaults to configuration file 'mpi.cfg' and section 'mpi')"),
 
     ('configure', None,
      "exhaustive test for checking missing MPI constants/types/functions"),
