@@ -94,7 +94,6 @@ class BaseTestGroup(object):
         ranks2 = MPI.Group.Translate_ranks(group1, ranks1, group2)
         self.assertEqual(list(ranks1), list(ranks2))
 
-    @unittest.skipMPI('PlatformMPI')
     @unittest.skipMPI('MPICH1')
     @unittest.skipMPI('LAM/MPI')
     def testTranslRanksProcNull(self):

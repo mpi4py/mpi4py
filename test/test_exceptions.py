@@ -4,7 +4,6 @@ import sys, os
 
 # --------------------------------------------------------------------
 
-@unittest.skipMPI('PlatformMPI')
 @unittest.skipMPI('MPICH2')
 class BaseTestCase(unittest.TestCase):
 

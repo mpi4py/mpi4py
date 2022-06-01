@@ -391,11 +391,6 @@ if name == 'Open MPI':
         for t in datatypes_f90[-4:]:
             if t != MPI.DATATYPE_NULL:
                 datatypes.remove(t)
-if name == 'Platform MPI':
-    combiner_map[MPI.COMBINER_INDEXED_BLOCK] = MPI.COMBINER_INDEXED
-    combiner_map[MPI.COMBINER_DARRAY] = MPI.COMBINER_STRUCT
-    combiner_map[MPI.COMBINER_SUBARRAY] = MPI.COMBINER_STRUCT
-    TestDatatype.match_size_complex[:] = []
 
 
 if __name__ == '__main__':

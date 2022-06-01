@@ -8,8 +8,6 @@
 #include "compat/mpich1.h"
 #elif defined(OPEN_MPI)
 #include "compat/openmpi.h"
-#elif defined(PLATFORM_MPI)
-#include "compat/pcmpi.h"
 #elif defined(LAM_MPI)
 #include "compat/lammpi.h"
 #endif

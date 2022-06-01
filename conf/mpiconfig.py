@@ -275,11 +275,11 @@ class Config(object):
             if not exe: return None
             return ' '.join([exe]+args)
         COMPILERS = (
-            ('mpicc',   ['mpicc',   'mpcc_r']),
-            ('mpicxx',  ['mpicxx',  'mpic++', 'mpiCC', 'mpCC_r']),
-            ('mpifort', ['mpifort', 'mpif90', 'mpif77', 'mpfort_r']),
-            ('mpif90',  ['mpif90',  'mpf90_r']),
-            ('mpif77',  ['mpif77',  'mpf77_r']),
+            ('mpicc',   ['mpicc']),
+            ('mpicxx',  ['mpicxx',  'mpic++', 'mpiCC']),
+            ('mpifort', ['mpifort', 'mpif90', 'mpif77']),
+            ('mpif90',  ['mpif90']),
+            ('mpif77',  ['mpif77']),
             ('mpild',   []),
             )
         #
