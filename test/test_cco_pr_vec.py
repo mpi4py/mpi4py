@@ -29,7 +29,7 @@ class BaseTestCCOVec(object):
     def testGatherv(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in arrayimpl.loop():
             for root in range(size):
                 for count in range(size):
                     sbuf = array(root, typecode, count)
@@ -53,7 +53,7 @@ class BaseTestCCOVec(object):
     def testGatherv2(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in arrayimpl.loop():
             for root in range(size):
                 for count in range(size):
                     sbuf = array(root, typecode, size)
@@ -76,7 +76,7 @@ class BaseTestCCOVec(object):
     def testGatherv3(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in arrayimpl.loop():
             for root in range(size):
                 for count in range(size+1):
                     #
@@ -107,7 +107,7 @@ class BaseTestCCOVec(object):
     def testScatterv(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in arrayimpl.loop():
             for root in range(size):
                 for count in range(size):
                     sbuf = array(root, typecode, size*size)
@@ -125,7 +125,7 @@ class BaseTestCCOVec(object):
     def testScatterv2(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in arrayimpl.loop():
             for root in range(size):
                 for count in range(size):
                     sbuf = array(root, typecode, size*size)
@@ -145,7 +145,7 @@ class BaseTestCCOVec(object):
     def testScatterv3(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in arrayimpl.loop():
             for root in range(size):
                 for count in range(size+1):
                     #
@@ -174,7 +174,7 @@ class BaseTestCCOVec(object):
     def testAllgatherv(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in arrayimpl.loop():
             for root in range(size):
                 for count in range(size):
                     sbuf = array(root, typecode, count)
@@ -197,7 +197,7 @@ class BaseTestCCOVec(object):
     def testAllgatherv2(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in arrayimpl.loop():
             for root in range(size):
                 for count in range(size):
                     sbuf = array(root, typecode, size)
@@ -218,7 +218,7 @@ class BaseTestCCOVec(object):
     def testAllgatherv3(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in arrayimpl.loop():
             for root in range(size):
                 for count in range(size+1):
                     #
@@ -241,7 +241,7 @@ class BaseTestCCOVec(object):
     def testAlltoallv(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in arrayimpl.loop():
             for root in range(size):
                 for count in range(size):
                     sbuf = array(root, typecode, size*size)
@@ -264,7 +264,7 @@ class BaseTestCCOVec(object):
     def testAlltoallv2(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in arrayimpl.loop():
             for root in range(size):
                 for count in range(size):
                     sbuf = array(root, typecode, size*size)
@@ -285,7 +285,7 @@ class BaseTestCCOVec(object):
     def testAlltoallv3(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in arrayimpl.loop():
             for root in range(size):
                 for count in range(size+1):
                     #
@@ -310,7 +310,7 @@ class BaseTestCCOVec(object):
     def testAlltoallw(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in arrayimpl.loop():
             for n in range(1,size+1):
                 sbuf = array( n, typecode, (size, n))
                 rbuf = array(-1, typecode, (size, n))
@@ -332,7 +332,7 @@ class BaseTestCCOVecInplace(object):
     def testAlltoallv(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in arrayimpl.loop():
             for count in range(size):
                 rbuf = array(-1, typecode, size*size)
                 counts = [count] * size
@@ -355,7 +355,7 @@ class BaseTestCCOVecInplace(object):
     def testAlltoallw(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in arrayimpl.loop():
             for count in range(size):
                 rbuf = array(-1, typecode, size*size)
                 for i in range(size):
@@ -378,7 +378,7 @@ class BaseTestCCOVecInplace(object):
     def testAlltoallw2(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in arrayimpl.loop():
             for count in range(size):
                 rbuf = array(-1, typecode, size*size)
                 for i in range(size):

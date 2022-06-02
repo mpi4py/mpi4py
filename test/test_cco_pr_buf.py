@@ -41,7 +41,7 @@ class BaseTestCCOBuf(object):
     def testBcast(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in arrayimpl.loop():
             for root in range(size):
                 if rank == root:
                     buf = array(root, typecode, root)
@@ -56,7 +56,7 @@ class BaseTestCCOBuf(object):
     def testGather(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in arrayimpl.loop():
             for root in range(size):
                 sbuf = array(root, typecode, root+1)
                 if rank == root:
@@ -74,7 +74,7 @@ class BaseTestCCOBuf(object):
     def testScatter(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in arrayimpl.loop():
             for root in range(size):
                 rbuf = array(-1, typecode, size)
                 if rank == root:
@@ -91,7 +91,7 @@ class BaseTestCCOBuf(object):
     def testAllgather(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in arrayimpl.loop():
             for root in range(size):
                 sbuf = array(root, typecode, root+1)
                 rbuf = array(  -1, typecode, (size, root+1))
@@ -104,7 +104,7 @@ class BaseTestCCOBuf(object):
     def testAlltoall(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in arrayimpl.loop():
             for root in range(size):
                 sbuf = array(root, typecode, (size, root+1))
                 rbuf = array(  -1, typecode, (size, root+1))
@@ -123,7 +123,7 @@ class BaseTestCCOBuf(object):
     def testReduce(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in arrayimpl.loop():
             for op in (MPI.SUM, MPI.PROD, MPI.MAX, MPI.MIN):
                 if skip_op(typecode, op): continue
                 for root in range(size):
@@ -153,7 +153,7 @@ class BaseTestCCOBuf(object):
     def testAllreduce(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in arrayimpl.loop():
             for op in (MPI.SUM, MPI.MAX, MPI.MIN, MPI.PROD):
                 if skip_op(typecode, op): continue
                 sbuf = array(range(size), typecode)
@@ -179,7 +179,7 @@ class BaseTestCCOBuf(object):
     def testReduceScatter(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in arrayimpl.loop():
             for op in (MPI.SUM, MPI.MAX, MPI.MIN, MPI.PROD):
                 if skip_op(typecode, op): continue
                 rcnt = list(range(1,size+1))
@@ -228,7 +228,7 @@ class BaseTestCCOBuf(object):
     def testReduceScatterBlock(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in arrayimpl.loop():
             for op in (MPI.SUM, MPI.MAX, MPI.MIN, MPI.PROD):
                 if skip_op(typecode, op): continue
                 for rcnt in range(1,size):
@@ -263,7 +263,7 @@ class BaseTestCCOBuf(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         # --
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in arrayimpl.loop():
             for op in (MPI.SUM, MPI.PROD, MPI.MAX, MPI.MIN):
                 if skip_op(typecode, op): continue
                 sbuf = array(range(size), typecode)
@@ -289,7 +289,7 @@ class BaseTestCCOBuf(object):
     def testExscan(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in arrayimpl.loop():
             for op in (MPI.SUM, MPI.PROD, MPI.MAX, MPI.MIN):
                 if skip_op(typecode, op): continue
                 sbuf = array(range(size), typecode)
@@ -319,7 +319,7 @@ class BaseTestCCOBuf(object):
     def testBcastTypeIndexed(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in arrayimpl.loop():
             datatype = array.TypeMap[typecode]
             for root in range(size):
                 #
@@ -368,7 +368,7 @@ class BaseTestCCOBufInplace(object):
     def testGather(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in arrayimpl.loop():
             for root in range(size):
                 count = root+3
                 if rank == root:
@@ -393,7 +393,7 @@ class BaseTestCCOBufInplace(object):
     def testScatter(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in arrayimpl.loop():
             for root in range(size):
                 for count in range(1, 10):
                     if rank == root:
@@ -413,7 +413,7 @@ class BaseTestCCOBufInplace(object):
     def testAllgather(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in arrayimpl.loop():
             for count in range(1, 10):
                 buf = array(-1, typecode, (size, count))
                 #buf.flat[(rank*count):((rank+1)*count)] = \
@@ -435,7 +435,7 @@ class BaseTestCCOBufInplace(object):
     def testReduce(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in arrayimpl.loop():
             for op in (MPI.SUM, MPI.PROD, MPI.MAX, MPI.MIN):
                 if skip_op(typecode, op): continue
                 for root in range(size):
@@ -469,7 +469,7 @@ class BaseTestCCOBufInplace(object):
     def testAllreduce(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in arrayimpl.loop():
             for op in (MPI.SUM, MPI.MAX, MPI.MIN, MPI.PROD):
                 if skip_op(typecode, op): continue
                 buf = array(range(size), typecode)
@@ -494,7 +494,7 @@ class BaseTestCCOBufInplace(object):
     def testReduceScatterBlock(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in arrayimpl.loop():
             for op in (MPI.SUM, MPI.MAX, MPI.MIN, MPI.PROD):
                 if skip_op(typecode, op): continue
                 for rcnt in range(size):
@@ -532,7 +532,7 @@ class BaseTestCCOBufInplace(object):
     def testReduceScatter(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in arrayimpl.loop():
             for op in (MPI.SUM, MPI.MAX, MPI.MIN, MPI.PROD):
                 if skip_op(typecode, op): continue
                 rcnt = list(range(1, size+1))
@@ -571,7 +571,7 @@ class BaseTestCCOBufInplace(object):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         # --
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in arrayimpl.loop():
             for op in (MPI.SUM, MPI.PROD, MPI.MAX, MPI.MIN):
                 if skip_op(typecode, op): continue
                 buf = array(range(size), typecode)
@@ -596,7 +596,7 @@ class BaseTestCCOBufInplace(object):
     def testExscan(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
-        for array, typecode in arrayimpl.subTest(self):
+        for array, typecode in arrayimpl.loop():
             for op in (MPI.SUM, MPI.PROD, MPI.MAX, MPI.MIN):
                 if skip_op(typecode, op): continue
                 buf = array(range(size), typecode)

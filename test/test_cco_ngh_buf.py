@@ -61,7 +61,7 @@ class BaseTestCCONghBuf(object):
     def testNeighborAllgather(self):
         for comm in create_topo_comms(self.COMM):
             rsize, ssize = get_neighbors_count(comm)
-            for array, typecode in arrayimpl.subTest(self):
+            for array, typecode in arrayimpl.loop():
                 if unittest.is_mpi_gpu('openmpi', array):
                     # segfault as of OpenMPI 4.1.1; TODO(leofang): why?
                     if array.backend == 'numba':
@@ -92,7 +92,7 @@ class BaseTestCCONghBuf(object):
     def testNeighborAlltoall(self):
         for comm in create_topo_comms(self.COMM):
             rsize, ssize = get_neighbors_count(comm)
-            for array, typecode in arrayimpl.subTest(self):
+            for array, typecode in arrayimpl.loop():
                 for v in range(3):
                     sbuf = array( v, typecode, (ssize, 3))
                     rbuf = array(-1, typecode, (rsize, 3))
@@ -125,7 +125,7 @@ class BaseTestCCONghBuf(object):
         size = self.COMM.Get_size()
         for comm in create_topo_comms(self.COMM):
             rsize, ssize = get_neighbors_count(comm)
-            for array, typecode in arrayimpl.subTest(self):
+            for array, typecode in arrayimpl.loop():
                 for n in range(1,4):
                     for v in range(3):
                         sbuf = array( v, typecode, (ssize, n))
@@ -154,7 +154,7 @@ class BaseTestCCONghBuf(object):
         size = self.COMM.Get_size()
         for comm in create_topo_comms(self.COMM):
             rsize, ssize = get_neighbors_count(comm)
-            for array, typecode in arrayimpl.subTest(self):
+            for array, typecode in arrayimpl.loop():
                 for n in range(1,4):
                     for v in range(3):
                         sbuf = array( v, typecode, (ssize, n))
