@@ -1,4 +1,5 @@
 import sys
+import itertools
 from mpi4py import MPI
 
 try:
@@ -34,22 +35,7 @@ except ImportError:
     numba = None
 
 
-__all__ = ['allclose', 'subTest']
-
-
-def allclose(a, b, rtol=1.e-5, atol=1.e-8):
-    try:
-        iter(a)
-    except TypeError:
-        a = [a]
-    try:
-        iter(b)
-    except TypeError:
-        b = [b]
-    for x, y in zip(a, b):
-        if abs(x - y) > (atol + rtol * abs(y)):
-            return False
-    return True
+__all__ = ['loop', 'test']
 
 
 def make_typemap(entries):
@@ -526,19 +512,23 @@ if numba is not None:
             return self.array
 
 
-def subTest(case, skip=(), skiptypecode=()):
+def loop(*args):
     for array in ArrayBackends:
-        if array.backend == skip:
-            continue
-        if array.backend in skip:
-            continue
+        loop.array = array
         for typecode in array.TypeMap:
-            if typecode == skiptypecode:
-                continue
-            if typecode in skiptypecode:
-                continue
-            with case.subTest(backend=array.backend, typecode=typecode):
-                try:
-                    yield array, typecode
-                except GeneratorExit:
-                    return
+            loop.typecode = typecode
+            if not args:
+                yield array, typecode
+            else:
+                for prod in itertools.product(*args):
+                    yield (array, typecode) + prod
+    del loop.array
+    del loop.typecode
+
+
+def test(case, **kargs):
+    return case.subTest(
+        typecode=loop.typecode,
+        backend=loop.array.backend,
+        **kargs,
+    )

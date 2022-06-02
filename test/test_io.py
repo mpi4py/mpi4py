@@ -5,10 +5,10 @@ import sys, os, tempfile
 import platform
 
 
-def subTestIO(case, *args, **kwargs):
+def arrayimpl_loop_io():
     openmpi = unittest.mpi_predicate('openmpi(<5.0.0)')
     is_i386 = platform.machine() in ('i386', 'i686')
-    for array, typecode in arrayimpl.subTest(case, *args, **kwargs):
+    for array, typecode in arrayimpl.loop():
         if unittest.is_mpi_gpu('mvapich2', array): continue
         if openmpi and is_i386 and typecode in ('g', 'G'): continue
         yield array, typecode
@@ -51,148 +51,154 @@ class BaseTestIO(object):
         size = comm.Get_size()
         rank = comm.Get_rank()
         fh = self.FILE
-        for array, typecode in subTestIO(self):
-            etype = array.TypeMap[typecode]
-            fh.Set_size(0)
-            fh.Set_view(0, etype)
-            count = 13
-            wbuf = array(42, typecode, count)
-            fh.Write_at(count*rank, wbuf.as_raw())
-            fh.Sync()
-            comm.Barrier()
-            fh.Sync()
-            rbuf = array(-1, typecode, count+1)
-            fh.Read_at(count*rank, rbuf.as_mpi_c(count))
-            for value in rbuf[:-1]:
-                self.assertEqual(value, 42)
-            self.assertEqual(rbuf[-1], -1)
-            comm.Barrier()
+        for array, typecode in arrayimpl_loop_io():
+            with arrayimpl.test(self):
+                etype = array.TypeMap[typecode]
+                fh.Set_size(0)
+                fh.Set_view(0, etype)
+                count = 13
+                wbuf = array(42, typecode, count)
+                fh.Write_at(count*rank, wbuf.as_raw())
+                fh.Sync()
+                comm.Barrier()
+                fh.Sync()
+                rbuf = array(-1, typecode, count+1)
+                fh.Read_at(count*rank, rbuf.as_mpi_c(count))
+                for value in rbuf[:-1]:
+                    self.assertEqual(value, 42)
+                self.assertEqual(rbuf[-1], -1)
+                comm.Barrier()
 
     def testIReadIWriteAt(self):
         comm = self.COMM
         size = comm.Get_size()
         rank = comm.Get_rank()
         fh = self.FILE
-        for array, typecode in subTestIO(self):
-            etype = array.TypeMap[typecode]
-            fh.Set_size(0)
-            fh.Set_view(0, etype)
-            count = 13
-            wbuf = array(42, typecode, count)
-            fh.Iwrite_at(count*rank, wbuf.as_raw()).Wait()
-            fh.Sync()
-            comm.Barrier()
-            fh.Sync()
-            rbuf = array(-1, typecode, count+1)
-            fh.Iread_at(count*rank, rbuf.as_mpi_c(count)).Wait()
-            for value in rbuf[:-1]:
-                self.assertEqual(value, 42)
-            self.assertEqual(rbuf[-1], -1)
-            comm.Barrier()
+        for array, typecode in arrayimpl_loop_io():
+            with arrayimpl.test(self):
+                etype = array.TypeMap[typecode]
+                fh.Set_size(0)
+                fh.Set_view(0, etype)
+                count = 13
+                wbuf = array(42, typecode, count)
+                fh.Iwrite_at(count*rank, wbuf.as_raw()).Wait()
+                fh.Sync()
+                comm.Barrier()
+                fh.Sync()
+                rbuf = array(-1, typecode, count+1)
+                fh.Iread_at(count*rank, rbuf.as_mpi_c(count)).Wait()
+                for value in rbuf[:-1]:
+                    self.assertEqual(value, 42)
+                self.assertEqual(rbuf[-1], -1)
+                comm.Barrier()
 
     def testReadWrite(self):
         comm = self.COMM
         size = comm.Get_size()
         rank = comm.Get_rank()
         fh = self.FILE
-        for array, typecode in subTestIO(self):
-            etype = array.TypeMap[typecode]
-            fh.Set_size(0)
-            fh.Set_view(0, etype)
-            count = 13
-            wbuf = array(42, typecode, count)
-            for r in range(size):
-                if r == rank:
-                    fh.Seek(0, MPI.SEEK_SET)
-                    fh.Write(wbuf.as_raw())
-                fh.Sync()
-                comm.Barrier()
-                fh.Sync()
-                for n in range(0, len(wbuf)):
-                    rbuf = array(-1, typecode, n+1)
-                    fh.Seek(0, MPI.SEEK_SET)
-                    fh.Read(rbuf.as_mpi_c(n))
-                    for value in rbuf[:-1]:
-                        self.assertEqual(value, 42)
-                    self.assertEqual(rbuf[-1], -1)
-                comm.Barrier()
+        for array, typecode in arrayimpl_loop_io():
+            with arrayimpl.test(self):
+                etype = array.TypeMap[typecode]
+                fh.Set_size(0)
+                fh.Set_view(0, etype)
+                count = 13
+                wbuf = array(42, typecode, count)
+                for r in range(size):
+                    if r == rank:
+                        fh.Seek(0, MPI.SEEK_SET)
+                        fh.Write(wbuf.as_raw())
+                    fh.Sync()
+                    comm.Barrier()
+                    fh.Sync()
+                    for n in range(0, len(wbuf)):
+                        rbuf = array(-1, typecode, n+1)
+                        fh.Seek(0, MPI.SEEK_SET)
+                        fh.Read(rbuf.as_mpi_c(n))
+                        for value in rbuf[:-1]:
+                            self.assertEqual(value, 42)
+                        self.assertEqual(rbuf[-1], -1)
+                    comm.Barrier()
 
     def testIReadIWrite(self):
         comm = self.COMM
         size = comm.Get_size()
         rank = comm.Get_rank()
         fh = self.FILE
-        for array, typecode in subTestIO(self):
-            etype = array.TypeMap[typecode]
-            fh.Set_size(0)
-            fh.Set_view(0, etype)
-            count = 13
-            wbuf = array(42, typecode, count)
-            for r in range(size):
-                if r == rank:
-                    fh.Seek(0, MPI.SEEK_SET)
-                    fh.Iwrite(wbuf.as_raw()).Wait()
-                fh.Sync()
-                comm.Barrier()
-                fh.Sync()
-                for n in range(0, len(wbuf)):
-                    rbuf = array(-1, typecode, n+1)
-                    fh.Seek(0, MPI.SEEK_SET)
-                    fh.Iread(rbuf.as_mpi_c(n)).Wait()
-                    for value in rbuf[:-1]:
-                        self.assertEqual(value, 42)
-                    self.assertEqual(rbuf[-1], -1)
-                comm.Barrier()
+        for array, typecode in arrayimpl_loop_io():
+            with arrayimpl.test(self):
+                etype = array.TypeMap[typecode]
+                fh.Set_size(0)
+                fh.Set_view(0, etype)
+                count = 13
+                wbuf = array(42, typecode, count)
+                for r in range(size):
+                    if r == rank:
+                        fh.Seek(0, MPI.SEEK_SET)
+                        fh.Iwrite(wbuf.as_raw()).Wait()
+                    fh.Sync()
+                    comm.Barrier()
+                    fh.Sync()
+                    for n in range(0, len(wbuf)):
+                        rbuf = array(-1, typecode, n+1)
+                        fh.Seek(0, MPI.SEEK_SET)
+                        fh.Iread(rbuf.as_mpi_c(n)).Wait()
+                        for value in rbuf[:-1]:
+                            self.assertEqual(value, 42)
+                        self.assertEqual(rbuf[-1], -1)
+                    comm.Barrier()
 
     def testReadWriteShared(self):
         comm = self.COMM
         size = comm.Get_size()
         rank = comm.Get_rank()
         fh = self.FILE
-        for array, typecode in subTestIO(self):
-            etype = array.TypeMap[typecode]
-            fh.Set_size(0)
-            fh.Set_view(0, etype)
-            count = 13
-            wbuf = array(rank%42, typecode, count)
-            fh.Seek_shared(0, MPI.SEEK_SET)
-            fh.Write_shared(wbuf.as_raw())
-            fh.Sync()
-            comm.Barrier()
-            fh.Sync()
-            rbuf = array(-1, typecode, count+1)
-            fh.Seek_shared(0, MPI.SEEK_SET)
-            fh.Read_shared(rbuf.as_mpi_c(count))
-            for value in rbuf[:-1]:
-                self.assertTrue(0<=value<42)
-                self.assertEqual(value, rbuf[0])
-            self.assertEqual(rbuf[-1], -1)
-            comm.Barrier()
+        for array, typecode in arrayimpl_loop_io():
+            with arrayimpl.test(self):
+                etype = array.TypeMap[typecode]
+                fh.Set_size(0)
+                fh.Set_view(0, etype)
+                count = 13
+                wbuf = array(rank%42, typecode, count)
+                fh.Seek_shared(0, MPI.SEEK_SET)
+                fh.Write_shared(wbuf.as_raw())
+                fh.Sync()
+                comm.Barrier()
+                fh.Sync()
+                rbuf = array(-1, typecode, count+1)
+                fh.Seek_shared(0, MPI.SEEK_SET)
+                fh.Read_shared(rbuf.as_mpi_c(count))
+                for value in rbuf[:-1]:
+                    self.assertTrue(0<=value<42)
+                    self.assertEqual(value, rbuf[0])
+                self.assertEqual(rbuf[-1], -1)
+                comm.Barrier()
 
     def testIReadIWriteShared(self):
         comm = self.COMM
         size = comm.Get_size()
         rank = comm.Get_rank()
         fh = self.FILE
-        for array, typecode in subTestIO(self):
-            etype = array.TypeMap[typecode]
-            fh.Set_size(0)
-            fh.Set_view(0, etype)
-            count = 13
-            wbuf = array(rank%42, typecode, count)
-            fh.Seek_shared(0, MPI.SEEK_SET)
-            fh.Iwrite_shared(wbuf.as_raw()).Wait()
-            fh.Sync()
-            comm.Barrier()
-            fh.Sync()
-            rbuf = array(-1, typecode, count+1)
-            fh.Seek_shared(0, MPI.SEEK_SET)
-            fh.Iread_shared(rbuf.as_mpi_c(count)).Wait()
-            for value in rbuf[:-1]:
-                self.assertTrue(0<=value<42)
-                self.assertEqual(value, rbuf[0])
-            self.assertEqual(rbuf[-1], -1)
-            comm.Barrier()
+        for array, typecode in arrayimpl_loop_io():
+            with arrayimpl.test(self):
+                etype = array.TypeMap[typecode]
+                fh.Set_size(0)
+                fh.Set_view(0, etype)
+                count = 13
+                wbuf = array(rank%42, typecode, count)
+                fh.Seek_shared(0, MPI.SEEK_SET)
+                fh.Iwrite_shared(wbuf.as_raw()).Wait()
+                fh.Sync()
+                comm.Barrier()
+                fh.Sync()
+                rbuf = array(-1, typecode, count+1)
+                fh.Seek_shared(0, MPI.SEEK_SET)
+                fh.Iread_shared(rbuf.as_mpi_c(count)).Wait()
+                for value in rbuf[:-1]:
+                    self.assertTrue(0<=value<42)
+                    self.assertEqual(value, rbuf[0])
+                self.assertEqual(rbuf[-1], -1)
+                comm.Barrier()
 
     # collective
 
@@ -201,22 +207,23 @@ class BaseTestIO(object):
         size = comm.Get_size()
         rank = comm.Get_rank()
         fh = self.FILE
-        for array, typecode in subTestIO(self):
-            etype = array.TypeMap[typecode]
-            fh.Set_size(0)
-            fh.Set_view(0, etype)
-            count = 13
-            wbuf = array(42, typecode, count)
-            fh.Write_at_all(count*rank, wbuf.as_raw())
-            fh.Sync()
-            comm.Barrier()
-            fh.Sync()
-            rbuf = array(-1, typecode, count+1)
-            fh.Read_at_all(count*rank, rbuf.as_mpi_c(count))
-            for value in rbuf[:-1]:
-                self.assertEqual(value, 42)
-            self.assertEqual(rbuf[-1], -1)
-            comm.Barrier()
+        for array, typecode in arrayimpl_loop_io():
+            with arrayimpl.test(self):
+                etype = array.TypeMap[typecode]
+                fh.Set_size(0)
+                fh.Set_view(0, etype)
+                count = 13
+                wbuf = array(42, typecode, count)
+                fh.Write_at_all(count*rank, wbuf.as_raw())
+                fh.Sync()
+                comm.Barrier()
+                fh.Sync()
+                rbuf = array(-1, typecode, count+1)
+                fh.Read_at_all(count*rank, rbuf.as_mpi_c(count))
+                for value in rbuf[:-1]:
+                    self.assertEqual(value, 42)
+                self.assertEqual(rbuf[-1], -1)
+                comm.Barrier()
 
     @unittest.skipMPI('SpectrumMPI')
     def testIReadIWriteAtAll(self):
@@ -224,74 +231,77 @@ class BaseTestIO(object):
         size = comm.Get_size()
         rank = comm.Get_rank()
         fh = self.FILE
-        try: # MPI 3.1
-            for array, typecode in subTestIO(self):
-                etype = array.TypeMap[typecode]
-                fh.Set_size(0)
-                fh.Set_view(0, etype)
-                count = 13
-                wbuf = array(42, typecode, count)
-                fh.Iwrite_at_all(count*rank, wbuf.as_raw()).Wait()
-                fh.Sync()
-                comm.Barrier()
-                fh.Sync()
-                rbuf = array(-1, typecode, count+1)
-                fh.Iread_at_all(count*rank, rbuf.as_mpi_c(count)).Wait()
-                for value in rbuf[:-1]:
-                    self.assertEqual(value, 42)
-                self.assertEqual(rbuf[-1], -1)
-                comm.Barrier()
-        except NotImplementedError:
-            if MPI.Get_version() >= (3, 1): raise
-            self.skipTest('mpi-iwrite_at_all')
+        for array, typecode in arrayimpl_loop_io():
+            with arrayimpl.test(self):
+                try: # MPI 3.1
+                    etype = array.TypeMap[typecode]
+                    fh.Set_size(0)
+                    fh.Set_view(0, etype)
+                    count = 13
+                    wbuf = array(42, typecode, count)
+                    fh.Iwrite_at_all(count*rank, wbuf.as_raw()).Wait()
+                    fh.Sync()
+                    comm.Barrier()
+                    fh.Sync()
+                    rbuf = array(-1, typecode, count+1)
+                    fh.Iread_at_all(count*rank, rbuf.as_mpi_c(count)).Wait()
+                    for value in rbuf[:-1]:
+                        self.assertEqual(value, 42)
+                    self.assertEqual(rbuf[-1], -1)
+                    comm.Barrier()
+                except NotImplementedError:
+                    if MPI.Get_version() >= (3, 1): raise
+                    self.skipTest('mpi-iwrite_at_all')
 
     def testReadWriteAtAllBeginEnd(self):
         comm = self.COMM
         size = comm.Get_size()
         rank = comm.Get_rank()
         fh = self.FILE
-        for array, typecode in subTestIO(self):
-            etype = array.TypeMap[typecode]
-            fh.Set_size(0)
-            fh.Set_view(0, etype)
-            count = 13
-            wbuf = array(42, typecode, count)
-            fh.Write_at_all_begin(count*rank, wbuf.as_raw())
-            fh.Write_at_all_end(wbuf.as_raw())
-            fh.Sync()
-            comm.Barrier()
-            fh.Sync()
-            rbuf = array(-1, typecode, count+1)
-            fh.Read_at_all_begin(count*rank, rbuf.as_mpi_c(count))
-            fh.Read_at_all_end(rbuf.as_raw())
-            for value in rbuf[:-1]:
-                self.assertEqual(value, 42)
-            self.assertEqual(rbuf[-1], -1)
-            comm.Barrier()
+        for array, typecode in arrayimpl_loop_io():
+            with arrayimpl.test(self):
+                etype = array.TypeMap[typecode]
+                fh.Set_size(0)
+                fh.Set_view(0, etype)
+                count = 13
+                wbuf = array(42, typecode, count)
+                fh.Write_at_all_begin(count*rank, wbuf.as_raw())
+                fh.Write_at_all_end(wbuf.as_raw())
+                fh.Sync()
+                comm.Barrier()
+                fh.Sync()
+                rbuf = array(-1, typecode, count+1)
+                fh.Read_at_all_begin(count*rank, rbuf.as_mpi_c(count))
+                fh.Read_at_all_end(rbuf.as_raw())
+                for value in rbuf[:-1]:
+                    self.assertEqual(value, 42)
+                self.assertEqual(rbuf[-1], -1)
+                comm.Barrier()
 
     def testReadWriteAll(self):
         comm = self.COMM
         size = comm.Get_size()
         rank = comm.Get_rank()
         fh = self.FILE
-        for array, typecode in subTestIO(self):
-            etype = array.TypeMap[typecode]
-            fh.Set_size(0)
-            fh.Set_view(0, etype)
-            count = 13
-            wbuf = array(42, typecode, count)
-            fh.Seek(count*rank, MPI.SEEK_SET)
-            fh.Write_all(wbuf.as_raw())
-            fh.Sync()
-            comm.Barrier()
-            fh.Sync()
-            rbuf = array(-1, typecode, count+1)
-            fh.Seek(count*rank, MPI.SEEK_SET)
-            fh.Read_all(rbuf.as_mpi_c(count))
-            for value in rbuf[:-1]:
-                self.assertEqual(value, 42)
-            self.assertEqual(rbuf[-1], -1)
-            comm.Barrier()
+        for array, typecode in arrayimpl_loop_io():
+            with arrayimpl.test(self):
+                etype = array.TypeMap[typecode]
+                fh.Set_size(0)
+                fh.Set_view(0, etype)
+                count = 13
+                wbuf = array(42, typecode, count)
+                fh.Seek(count*rank, MPI.SEEK_SET)
+                fh.Write_all(wbuf.as_raw())
+                fh.Sync()
+                comm.Barrier()
+                fh.Sync()
+                rbuf = array(-1, typecode, count+1)
+                fh.Seek(count*rank, MPI.SEEK_SET)
+                fh.Read_all(rbuf.as_mpi_c(count))
+                for value in rbuf[:-1]:
+                    self.assertEqual(value, 42)
+                self.assertEqual(rbuf[-1], -1)
+                comm.Barrier()
 
     @unittest.skipMPI('SpectrumMPI')
     def testIReadIWriteAll(self):
@@ -299,104 +309,108 @@ class BaseTestIO(object):
         size = comm.Get_size()
         rank = comm.Get_rank()
         fh = self.FILE
-        try: # MPI 3.1
-            for array, typecode in subTestIO(self):
-                etype = array.TypeMap[typecode]
-                fh.Set_size(0)
-                fh.Set_view(0, etype)
-                count = 13
-                wbuf = array(42, typecode, count)
-                fh.Seek(count*rank, MPI.SEEK_SET)
-                fh.Iwrite_all(wbuf.as_raw()).Wait()
-                fh.Sync()
-                comm.Barrier()
-                fh.Sync()
-                rbuf = array(-1, typecode, count+1)
-                fh.Seek(count*rank, MPI.SEEK_SET)
-                fh.Iread_all(rbuf.as_mpi_c(count)).Wait()
-                for value in rbuf[:-1]:
-                    self.assertEqual(value, 42)
-                self.assertEqual(rbuf[-1], -1)
-                comm.Barrier()
-        except NotImplementedError:
-            if MPI.Get_version() >= (3, 1): raise
-            self.skipTest('mpi-iwrite_all')
+        for array, typecode in arrayimpl_loop_io():
+            with arrayimpl.test(self):
+                try: # MPI 3.1
+                    etype = array.TypeMap[typecode]
+                    fh.Set_size(0)
+                    fh.Set_view(0, etype)
+                    count = 13
+                    wbuf = array(42, typecode, count)
+                    fh.Seek(count*rank, MPI.SEEK_SET)
+                    fh.Iwrite_all(wbuf.as_raw()).Wait()
+                    fh.Sync()
+                    comm.Barrier()
+                    fh.Sync()
+                    rbuf = array(-1, typecode, count+1)
+                    fh.Seek(count*rank, MPI.SEEK_SET)
+                    fh.Iread_all(rbuf.as_mpi_c(count)).Wait()
+                    for value in rbuf[:-1]:
+                        self.assertEqual(value, 42)
+                    self.assertEqual(rbuf[-1], -1)
+                    comm.Barrier()
+                except NotImplementedError:
+                    if MPI.Get_version() >= (3, 1): raise
+                    self.skipTest('mpi-iwrite_all')
 
     def testReadWriteAllBeginEnd(self):
         comm = self.COMM
         size = comm.Get_size()
         rank = comm.Get_rank()
         fh = self.FILE
-        for array, typecode in subTestIO(self):
-            etype = array.TypeMap[typecode]
-            fh.Set_size(0)
-            fh.Set_view(0, etype)
-            count = 13
-            wbuf = array(42, typecode, count)
-            fh.Seek(count*rank, MPI.SEEK_SET)
-            fh.Write_all_begin(wbuf.as_raw())
-            fh.Write_all_end(wbuf.as_raw())
-            fh.Sync()
-            comm.Barrier()
-            fh.Sync()
-            rbuf = array(-1, typecode, count+1)
-            fh.Seek(count*rank, MPI.SEEK_SET)
-            fh.Read_all_begin(rbuf.as_mpi_c(count))
-            fh.Read_all_end(rbuf.as_raw())
-            for value in rbuf[:-1]:
-                self.assertEqual(value, 42)
-            self.assertEqual(rbuf[-1], -1)
-            comm.Barrier()
+        for array, typecode in arrayimpl_loop_io():
+            with arrayimpl.test(self):
+                etype = array.TypeMap[typecode]
+                fh.Set_size(0)
+                fh.Set_view(0, etype)
+                count = 13
+                wbuf = array(42, typecode, count)
+                fh.Seek(count*rank, MPI.SEEK_SET)
+                fh.Write_all_begin(wbuf.as_raw())
+                fh.Write_all_end(wbuf.as_raw())
+                fh.Sync()
+                comm.Barrier()
+                fh.Sync()
+                rbuf = array(-1, typecode, count+1)
+                fh.Seek(count*rank, MPI.SEEK_SET)
+                fh.Read_all_begin(rbuf.as_mpi_c(count))
+                fh.Read_all_end(rbuf.as_raw())
+                for value in rbuf[:-1]:
+                    self.assertEqual(value, 42)
+                self.assertEqual(rbuf[-1], -1)
+                comm.Barrier()
 
     def testReadWriteOrdered(self):
         comm = self.COMM
         size = comm.Get_size()
         rank = comm.Get_rank()
         fh = self.FILE
-        for array, typecode in subTestIO(self):
-            etype = array.TypeMap[typecode]
-            fh.Set_size(0)
-            fh.Set_view(0, etype)
-            count = 13
-            wbuf = array(rank%42, typecode, count)
-            fh.Seek_shared(0, MPI.SEEK_SET)
-            fh.Write_ordered(wbuf.as_raw())
-            fh.Sync()
-            comm.Barrier()
-            fh.Sync()
-            rbuf = array(-1, typecode, count+1)
-            fh.Seek_shared(0, MPI.SEEK_SET)
-            fh.Read_ordered(rbuf.as_mpi_c(count))
-            for value in rbuf[:-1]:
-                self.assertEqual(value, rank%42)
-            self.assertEqual(rbuf[-1], -1)
-            comm.Barrier()
+        for array, typecode in arrayimpl_loop_io():
+            with arrayimpl.test(self):
+                etype = array.TypeMap[typecode]
+                fh.Set_size(0)
+                fh.Set_view(0, etype)
+                count = 13
+                wbuf = array(rank%42, typecode, count)
+                fh.Seek_shared(0, MPI.SEEK_SET)
+                fh.Write_ordered(wbuf.as_raw())
+                fh.Sync()
+                comm.Barrier()
+                fh.Sync()
+                rbuf = array(-1, typecode, count+1)
+                fh.Seek_shared(0, MPI.SEEK_SET)
+                fh.Read_ordered(rbuf.as_mpi_c(count))
+                for value in rbuf[:-1]:
+                    self.assertEqual(value, rank%42)
+                self.assertEqual(rbuf[-1], -1)
+                comm.Barrier()
 
     def testReadWriteOrderedBeginEnd(self):
         comm = self.COMM
         size = comm.Get_size()
         rank = comm.Get_rank()
         fh = self.FILE
-        for array, typecode in subTestIO(self):
-            etype = array.TypeMap[typecode]
-            fh.Set_size(0)
-            fh.Set_view(0, etype)
-            count = 13
-            wbuf = array(rank%42, typecode, count)
-            fh.Seek_shared(0, MPI.SEEK_SET)
-            fh.Write_ordered_begin(wbuf.as_raw())
-            fh.Write_ordered_end(wbuf.as_raw())
-            fh.Sync()
-            comm.Barrier()
-            fh.Sync()
-            rbuf = array(-1, typecode, count+1)
-            fh.Seek_shared(0, MPI.SEEK_SET)
-            fh.Read_ordered_begin(rbuf.as_mpi_c(count))
-            fh.Read_ordered_end(rbuf.as_raw())
-            for value in rbuf[:-1]:
-                self.assertEqual(value, rank%42)
-            self.assertEqual(rbuf[-1], -1)
-            comm.Barrier()
+        for array, typecode in arrayimpl_loop_io():
+            with arrayimpl.test(self):
+                etype = array.TypeMap[typecode]
+                fh.Set_size(0)
+                fh.Set_view(0, etype)
+                count = 13
+                wbuf = array(rank%42, typecode, count)
+                fh.Seek_shared(0, MPI.SEEK_SET)
+                fh.Write_ordered_begin(wbuf.as_raw())
+                fh.Write_ordered_end(wbuf.as_raw())
+                fh.Sync()
+                comm.Barrier()
+                fh.Sync()
+                rbuf = array(-1, typecode, count+1)
+                fh.Seek_shared(0, MPI.SEEK_SET)
+                fh.Read_ordered_begin(rbuf.as_mpi_c(count))
+                fh.Read_ordered_end(rbuf.as_raw())
+                for value in rbuf[:-1]:
+                    self.assertEqual(value, rank%42)
+                self.assertEqual(rbuf[-1], -1)
+                comm.Barrier()
 
 @unittest.skipMPI('MPICH1')
 @unittest.skipMPI('LAM/MPI')
