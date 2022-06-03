@@ -2524,7 +2524,7 @@ cdef class Topocomm(Intracomm):
             if isinstance(self, Distgraphcomm):
                 nneighbors = self.Get_dist_neighbors_count()[:2]
                 return nneighbors
-            raise TypeError("Not a topology communicator")
+            raise TypeError("expecting a topology communicator")
 
     property indegree:
         "number of incoming neighbors"
@@ -2555,7 +2555,7 @@ cdef class Topocomm(Intracomm):
             if isinstance(self, Distgraphcomm):
                 neighbors = self.Get_dist_neighbors()[:2]
                 return neighbors
-            raise TypeError("Not a topology communicator")
+            raise TypeError("expecting a topology communicator")
 
     property inedges:
         "incoming neighbors"

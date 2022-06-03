@@ -105,7 +105,7 @@ cdef int warnOpt(const char name[], object value) except -1:
     value = PyUnicode_AsUTF8String(repr(value))
     PyErr_WarnFormat(
         RuntimeWarning, 1,
-        b"mpi4py.rc.%s: unexpected value %.200s",
+        b"mpi4py.rc.%s: unexpected value '%.200s'",
         name, <const char*>value,
     )
     return 0
@@ -225,7 +225,7 @@ cdef int check_mpiexec() nogil except -1:
                 PyErr_WarnFormat(
                     RuntimeWarning, 1,
                     b"environment variable %s: "
-                    b"unexpected value '%s'",
+                    b"unexpected value '%.200s'",
                     check_name, check_value,
                 )
         return 0

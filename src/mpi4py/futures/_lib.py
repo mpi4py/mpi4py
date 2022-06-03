@@ -46,7 +46,7 @@ def setup_mpi_threads():
                 serialized.lock = threading.Lock()
     if thread_level < MPI.THREAD_SERIALIZED:
         warnings.warn(
-            "The level of thread support in MPI "
+            "the level of thread support in MPI "
             "should be at least MPI_THREAD_SERIALIZED",
             RuntimeWarning, 2,
         )
@@ -98,7 +98,7 @@ def os_environ_get(name, default=None):
         oldname = f'MPI4PY_{name}'
         if oldname in os.environ:  # pragma: no cover
             warnings.warn(
-                f"Environment variable {oldname} is deprecated, use {varname}",
+                f"environment variable {oldname} is deprecated, use {varname}",
                 DeprecationWarning,
             )
             return os.environ[oldname]
@@ -467,7 +467,7 @@ def _getenv_use_pkl5():
     if value.lower() in ('true', 'yes', 'on', 'y', '1'):
         return True
     warnings.warn(
-        f"Environment variable MPI4PY_FUTURES_USE_PKL5: "
+        f"environment variable MPI4PY_FUTURES_USE_PKL5: "
         f"unexpected value {repr(value)}",
         RuntimeWarning,
     )
