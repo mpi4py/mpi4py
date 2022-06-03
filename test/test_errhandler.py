@@ -10,8 +10,11 @@ class TestErrhandler(unittest.TestCase):
         self.assertTrue(MPI.ERRORS_RETURN)
         if MPI.VERSION >= 4:
             self.assertTrue(MPI.ERRORS_ABORT)
+        elif MPI.ERRORS_ABORT != MPI.ERRHANDLER_NULL:
+            self.assertTrue(MPI.ERRORS_ABORT)
         else:
             self.assertFalse(MPI.ERRORS_ABORT)
+
 
 class BaseTestErrhandler:
 
