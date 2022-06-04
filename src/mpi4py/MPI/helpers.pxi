@@ -265,14 +265,14 @@ cdef inline int del_Errhandler(MPI_Errhandler* ob):
     if MPI_VERSION < 4 and not mpi_active(): return 0
     return MPI_Errhandler_free(ob)
 
-cdef inline MPI_Errhandler arg_Errhandler(object errhandler):
-    if errhandler is not None:
-        return (<Errhandler>errhandler).ob_mpi
+cdef inline MPI_Errhandler arg_Errhandler(object errhandler) except *:
+    if errhandler is not None: return (<Errhandler>errhandler).ob_mpi
     cdef MPI_Errhandler eh_default = MPI_ERRORS_ARE_FATAL
     cdef int opt = options.errors
     if   opt == 0: return eh_default
     elif opt == 1: return MPI_ERRORS_RETURN
-    elif opt == 2: return MPI_ERRORS_ARE_FATAL
+    elif opt == 2: return MPI_ERRORS_ABORT
+    elif opt == 3: return MPI_ERRORS_ARE_FATAL
     else:          return eh_default
 
 #------------------------------------------------------------------------------
