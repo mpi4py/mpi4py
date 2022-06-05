@@ -286,10 +286,13 @@ class Config(object):
         compiler_info = {}
         PATH = environ.get('PATH', '')
         for name, _ in COMPILERS:
-            cmd = (environ.get(name.upper()) or
-                   getattr(options, name, None) or
-                   self.compiler_info.get(name) or
-                   None)
+            cmd = (
+                environ.get(f'MPI4PY_BUILD_{name.upper()}') or
+                environ.get(name.upper()) or
+                getattr(options, name, None) or
+                self.compiler_info.get(name) or
+                None
+            )
             if cmd:
                 exe = find_exe(cmd, path=PATH)
                 if exe:
