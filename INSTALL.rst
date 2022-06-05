@@ -13,14 +13,10 @@ or::
 
   $ python -m pip install https://github.com/mpi4py/mpi4py/tarball/master
 
-Installing from sources requires a C compiler and a working MPI
-implementation. The ``mpicc`` compiler wrapper is looked for on the
-executable search path (``PATH`` environment variable). Alternatively,
-you can set the ``MPICC`` environment variable to the full path or
-command corresponding to the MPI-aware C compiler. The ``mpicc``
-compiler wrapper is also used for linking mpi4py extension modules.
-Alternatively, you can set the ``MPILD`` environment variable to the
-full path or command corresponding to the MPI-aware C linker.
+.. note::
+
+   Installing mpi4py from sources requires a C compiler and an MPI
+   implementation with development headers and libraries.
 
 .. warning::
 

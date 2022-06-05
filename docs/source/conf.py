@@ -74,7 +74,6 @@ nitpick_ignore = [
 ]
 nitpick_ignore_regex = [
     (r'c:.*', r'MPI_.*'),
-    (r'envvar', r'MPI(CC|LD|CFG)'),
     (r'envvar', r'(LD_LIBRARY_)?PATH'),
     (r'envvar', r'(MPICH|OMPI|MPIEXEC)_.*'),
 ]
