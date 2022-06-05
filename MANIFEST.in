@@ -20,5 +20,6 @@ include docs/*.bib
 graft   docs/html
 graft   docs/source
 prune   docs/source/reference
+prune   docs/source/_build
 
 prune conf/ci
