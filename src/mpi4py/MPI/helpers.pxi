@@ -24,9 +24,9 @@ cdef extern from * nogil:
     int PyMPI_Status_get_error(MPI_Status*, int*)
     int PyMPI_Status_set_error(MPI_Status*, int)
 
-cdef inline MPI_Status *arg_Status(object status):
+cdef inline MPI_Status *arg_Status(object status) except *:
     if status is None: return MPI_STATUS_IGNORE
-    return &((<Status>status).ob_mpi)
+    return &((<Status?>status).ob_mpi)
 
 #------------------------------------------------------------------------------
 # Datatype
@@ -243,9 +243,9 @@ cdef inline int del_Info(MPI_Info* ob):
     if not mpi_active(): return 0
     return MPI_Info_free(ob)
 
-cdef inline MPI_Info arg_Info(object info):
+cdef inline MPI_Info arg_Info(object info) except *:
     if info is None: return MPI_INFO_NULL
-    return (<Info>info).ob_mpi
+    return (<Info?>info).ob_mpi
 
 #------------------------------------------------------------------------------
 # Errhandler
@@ -266,7 +266,7 @@ cdef inline int del_Errhandler(MPI_Errhandler* ob):
     return MPI_Errhandler_free(ob)
 
 cdef inline MPI_Errhandler arg_Errhandler(object errhandler) except *:
-    if errhandler is not None: return (<Errhandler>errhandler).ob_mpi
+    if errhandler is not None: return (<Errhandler?>errhandler).ob_mpi
     cdef MPI_Errhandler eh_default = MPI_ERRORS_ARE_FATAL
     cdef int opt = options.errors
     if   opt == 0: return eh_default
