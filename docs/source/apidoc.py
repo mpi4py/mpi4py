@@ -77,11 +77,12 @@ def docstring(obj):
     return doc
 
 
-def apidoc_constant(constant):
+def apidoc_data(constant):
     name, value = constant
     typename = type(value).__name__
+    kind = "Constant" if isinstance(value, int) else "Object"
     init = f"_def({typename}, '{name}')"
-    doc = f"#: :class:`{typename}` ``{name}``"
+    doc = f"#: {kind} ``{name}`` of type :class:`{typename}`"
     return f"{name}: {typename} = {init}  {doc}\n"
 
 
@@ -296,7 +297,7 @@ def apidoc_module(module, done=None):
         if name in OVERRIDE:
             lines.add = OVERRIDE[name]
         else:
-            lines.add = apidoc_constant((name, value))
+            lines.add = apidoc_data((name, value))
     if constants:
         lines.add = ""
 
@@ -318,7 +319,7 @@ def apidoc_module(module, done=None):
             ]
             for attrname, attrvalue in instances:
                 done.add(attrname)
-                lines.add = apidoc_constant((attrname, attrvalue))
+                lines.add = apidoc_data((attrname, attrvalue))
             if instances:
                 lines.add = ""
             continue
@@ -340,7 +341,7 @@ def apidoc_module(module, done=None):
         if name in OVERRIDE:
             lines.add = OVERRIDE[name]
         else:
-            lines.add = apidoc_constant((name, value))
+            lines.add = apidoc_data((name, value))
 
     leftovers = [name for name in keys if
                  name not in done and name not in skip]
