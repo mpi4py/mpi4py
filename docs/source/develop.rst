@@ -12,7 +12,7 @@ build *MPI for Python*:
 * The `Cython`_ compiler.
 
 * A working `MPI`_ implementation like `MPICH`_ or `Open MPI`_,
-  preferably supporting MPI-3 and built with shared/dynamic libraries.
+  preferably supporting MPI-4 and built with shared/dynamic libraries.
 
   .. note::
 
@@ -75,8 +75,8 @@ accept additional options:
 
    Runs exhaustive tests for checking about missing MPI types,
    constants, and functions. This option should be passed in order to
-   build *MPI for Python* against old MPI-1 or MPI-2 implementations,
-   possibly providing a subset of MPI-3.
+   build *MPI for Python* against old MPI-1, MPI-2, or MPI-3
+   implementations, possibly providing a subset of MPI-4.
 
 If you use a MPI implementation providing a :program:`mpicc` C
 compiler wrapper (e.g., MPICH or Open MPI), it will be used for
