@@ -46,6 +46,8 @@ version = release.rsplit('.', 1)[0]
 
 # -- General configuration ---------------------------------------------------
 
+needs_sphinx = '4.5.0'
+
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
@@ -125,9 +127,16 @@ def _setup_numpy_typing():
             npt.__all__.append(attr)
 
 
+def _patch_util_inspect():
+    import sphinx
+    if sphinx.version_info < (5, 0):
+        from sphinx.util import inspect
+        inspect.TypeAliasForwardRef.__repr__ = lambda self: self.name
+        inspect.TypeAliasForwardRef.__hash__ = lambda self: hash(self.name)
+
+
 def _patch_domain_python():
     from sphinx.domains import python
-    from sphinx.util import inspect
     try:
         from numpy.typing import __all__ as numpy_types
         numpy_types = [f'numpy.typing.{name}' for name in numpy_types]
@@ -157,9 +166,6 @@ def _patch_domain_python():
 
     make_xref_orig = python.PyXrefMixin.make_xref
     python.PyXrefMixin.make_xref = make_xref
-
-    inspect.TypeAliasForwardRef.__repr__ = lambda self: self.name
-    inspect.TypeAliasForwardRef.__hash__ = lambda self: hash(self.name)
 
 
 def _setup_autodoc(app):
@@ -219,6 +225,7 @@ def _patch_autosummary():
 
 def setup(app):
     _setup_numpy_typing()
+    _patch_util_inspect()
     _patch_domain_python()
     _setup_autodoc(app)
     _patch_autosummary()
