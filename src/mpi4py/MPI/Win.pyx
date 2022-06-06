@@ -156,6 +156,7 @@ cdef class Win:
         cdef MPI_Aint size = 0
         memory = asbuffer_w(memory, &base, &size)
         with nogil: CHKERR( MPI_Win_attach(self.ob_mpi, base, size) )
+        if self.ob_mem is None: self.ob_mem = {}
         try: (<dict>self.ob_mem)[<MPI_Aint>base] = memory
         except: pass
 
