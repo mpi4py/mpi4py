@@ -404,7 +404,6 @@ cmd_build   = import_command('build')
 cmd_install = import_command('install')
 cmd_clean   = import_command('clean')
 
-cmd_build_clib   = import_command('build_clib')
 cmd_build_ext    = import_command('build_ext')
 cmd_install_lib  = import_command('install_lib')
 cmd_install_data = import_command('install_data')
@@ -507,7 +506,7 @@ def setup(**attrs):
         attrs['cmdclass'] = {}
     cmdclass = attrs['cmdclass']
     for cmd in (config, build, install, clean,
-                build_src, build_clib, build_ext, build_exe,
+                build_src, build_ext, build_exe,
                 install_lib, install_data, install_exe,
                 ):
         if cmd.__name__ not in cmdclass:
@@ -715,290 +714,6 @@ class build_src(Command):
         pass
 
 
-# Command class to build libraries
-
-class build_clib(cmd_build_clib.build_clib):
-
-    user_options = [
-        ('build-clib-a=', 's',
-         "directory to build C/C++ static libraries to"),
-        ('build-clib-so=', 's',
-         "directory to build C/C++ shared libraries to"),
-        ]
-
-    user_options += cmd_build_clib.build_clib.user_options + cmd_mpi_opts
-
-    def initialize_options (self):
-        self.libraries = None
-        self.libraries_a = []
-        self.libraries_so = []
-
-        self.library_dirs = None
-        self.rpath = None
-        self.link_objects = None
-
-        self.build_lib = None
-        self.build_clib_a = None
-        self.build_clib_so = None
-        cmd_build_clib.build_clib.initialize_options(self)
-        cmd_initialize_mpi_options(self)
-
-    def finalize_options (self):
-        cmd_build_clib.build_clib.finalize_options(self)
-        build_cmd = self.get_finalized_command('build')
-        if isinstance(build_cmd,  build):
-            cmd_set_undefined_mpi_options(self, 'build')
-        #
-        self.set_undefined_options('build',
-                                   ('build_lib', 'build_lib'),
-                                   ('build_lib', 'build_clib_a'),
-                                   ('build_lib', 'build_clib_so'))
-        #
-        if self.libraries:
-            libraries = self.libraries[:]
-            self.libraries = []
-            self.check_library_list (libraries)
-            for i, lib in enumerate(libraries):
-                if isinstance(lib, Library):
-                    if lib.kind == "static":
-                        self.libraries_a.append(lib)
-                    else:
-                        self.libraries_so.append(lib)
-                else:
-                    self.libraries.append(lib)
-
-    def check_library_list (self, libraries):
-        ListType, TupleType = type([]), type(())
-        if not isinstance(libraries, ListType):
-            raise DistutilsSetupError(
-                "'libraries' option must be a list of "
-                "Library instances or 2-tuples")
-        for lib in libraries:
-            #
-            if isinstance(lib, Library):
-                lib_name = lib.name
-                build_info = lib.__dict__
-            elif isinstance(lib, TupleType) and len(lib) == 2:
-                lib_name, build_info = lib
-            else:
-                raise DistutilsSetupError(
-                    "each element of 'libraries' option must be an "
-                    "Library instance or 2-tuple")
-            #
-            if not isinstance(lib_name, str):
-                raise DistutilsSetupError(
-                    "first element of each tuple in 'libraries' "
-                    "must be a string (the library name)")
-            if '/' in lib_name or (os.sep != '/' and os.sep in lib_name):
-                raise DistutilsSetupError(
-                    "bad library name '%s': "
-                    "may not contain directory separators" % lib[0])
-            if not isinstance(build_info, dict):
-                raise DistutilsSetupError(
-                    "second element of each tuple in 'libraries' "
-                    "must be a dictionary (build info)")
-            lib_type = build_info.get('kind', 'static')
-            if lib_type not in ('static', 'shared', 'dylib'):
-                raise DistutilsSetupError(
-                    "in 'kind' option (library '%s'), "
-                    "'kind' must be one of "
-                    " \"static\", \"shared\", \"dylib\"" % lib_name)
-            sources = build_info.get('sources')
-            if (sources is None or
-                type(sources) not in (ListType, TupleType)):
-                raise DistutilsSetupError(
-                    "in 'libraries' option (library '%s'), "
-                    "'sources' must be present and must be "
-                    "a list of source filenames" % lib_name)
-            depends = build_info.get('depends')
-            if (depends is not None and
-                type(depends) not in (ListType, TupleType)):
-                raise DistutilsSetupError(
-                    "in 'libraries' option (library '%s'), "
-                    "'depends' must be a list "
-                    "of source filenames" % lib_name)
-
-    def run(self):
-        cmd_build_clib.build_clib.run(self)
-        if (not self.libraries_a and
-            not self.libraries_so):
-            return
-        #
-        from distutils.ccompiler import new_compiler
-        self.compiler = new_compiler(compiler=self.compiler,
-                                     dry_run=self.dry_run,
-                                     force=self.force)
-        #
-        if self.define is not None:
-            for (name, value) in self.define:
-                self.compiler.define_macro(name, value)
-        if self.undef is not None:
-            for macro in self.undef:
-                self.compiler.undefine_macro(macro)
-        if self.include_dirs is not None:
-            self.compiler.set_include_dirs(self.include_dirs)
-        if self.library_dirs is not None:
-            self.compiler.set_library_dirs(self.library_dirs)
-        if self.rpath is not None:
-            self.compiler.set_runtime_library_dirs(self.rpath)
-        if self.link_objects is not None:
-            self.compiler.set_link_objects(self.link_objects)
-        #
-        config = configuration(self, verbose=True)
-        configure_compiler(self.compiler, config)
-        if self.compiler.compiler_type == "unix":
-            try: del self.compiler.shared_lib_extension
-            except: pass
-        #
-        self.build_libraries(self.libraries)
-        self.build_libraries(self.libraries_a)
-        self.build_libraries(self.libraries_so)
-
-    def build_libraries (self, libraries):
-        for lib in libraries:
-            # old-style
-            if not isinstance(lib, Library):
-                cmd_build_clib.build_clib.build_libraries(self, [lib])
-                continue
-            # new-style
-            try:
-                self.build_library(lib)
-            except (DistutilsError, CCompilerError):
-                if not lib.optional: raise
-                e = sys.exc_info()[1]
-                self.warn('%s' % e)
-                self.warn('building optional library "%s" failed' % lib.name)
-
-    def config_library (self, lib):
-        if lib.configure:
-            config_cmd = self.get_finalized_command('config')
-            config_cmd.compiler = self.compiler # fix compiler
-            return lib.configure(lib, config_cmd)
-
-    def build_library(self, lib):
-        sources = [convert_path(p) for p in lib.sources]
-        depends = [convert_path(p) for p in lib.depends]
-        depends = sources + depends
-
-        if lib.kind == "static":
-            build_dir = self.build_clib_a
-        else:
-            build_dir = self.build_clib_so
-        lib_fullpath = self.get_lib_fullpath(lib, build_dir)
-
-        if not (self.force or
-                dep_util.newer_group(depends, lib_fullpath, 'newer')):
-            log.debug("skipping '%s' %s library (up-to-date)",
-                      lib.name, lib.kind)
-            return
-
-        ok = self.config_library(lib)
-        log.info("building '%s' %s library", lib.name, lib.kind)
-
-        # First, compile the source code to object files in the library
-        # directory.  (This should probably change to putting object
-        # files in a temporary build directory.)
-        macros = lib.define_macros[:]
-        for undef in lib.undef_macros:
-            macros.append((undef,))
-
-        objects = self.compiler.compile(
-            sources,
-            depends=lib.depends,
-            output_dir=self.build_temp,
-            macros=macros,
-            include_dirs=lib.include_dirs,
-            extra_preargs=None,
-            extra_postargs=lib.extra_compile_args,
-            debug=self.debug,
-            )
-
-        if lib.kind == "static":
-            # Now "link" the object files together
-            # into a static library.
-            self.compiler.create_static_lib(
-                objects,
-                lib.name,
-                output_dir=os.path.dirname(lib_fullpath),
-                debug=self.debug,
-                )
-        else:
-            extra_objects = lib.extra_objects[:]
-            export_symbols = lib.export_symbols[:]
-            extra_link_args = lib.extra_link_args[:]
-            extra_preargs = None
-            objects.extend(extra_objects)
-            if (self.compiler.compiler_type == 'msvc' and
-                export_symbols is not None):
-                output_dir = os.path.dirname(lib_fullpath)
-                implib_filename = self.compiler.library_filename(lib.name)
-                implib_file = os.path.join(output_dir, lib_fullpath)
-                extra_link_args.append ('/IMPLIB:' + implib_file)
-            # Detect target language, if not provided
-            src_language = self.compiler.detect_language(sources)
-            language = (lib.language or src_language)
-            # Now "link" the object files together
-            # into a shared library.
-            if sys.platform == 'darwin':
-                linker_so = self.compiler.linker_so[:]
-                while '-bundle' in self.compiler.linker_so:
-                    pos = self.compiler.linker_so.index('-bundle')
-                    self.compiler.linker_so[pos] = '-shared'
-                install_name = os.path.basename(lib_fullpath)
-                extra_preargs = ['-install_name', install_name]
-            if sys.platform.startswith('linux'):
-                extra_preargs = ['-Wl,--no-as-needed']
-            self.compiler.link(
-                self.compiler.SHARED_LIBRARY,
-                objects, lib_fullpath,
-                #
-                libraries=lib.libraries,
-                library_dirs=lib.library_dirs,
-                runtime_library_dirs=lib.runtime_library_dirs,
-                export_symbols=export_symbols,
-                extra_preargs=extra_preargs,
-                extra_postargs=extra_link_args,
-                debug=self.debug,
-                target_lang=language,
-                )
-            if sys.platform == 'darwin':
-                self.compiler.linker_so = linker_so
-        return
-
-    def get_lib_fullpath (self, lib, build_dir):
-        package_dir = (lib.package or '').split('.')
-        dest_dir = convert_path(lib.dest_dir or '')
-        output_dir = os.path.join(build_dir, *package_dir+[dest_dir])
-        lib_type =  lib.kind
-        if sys.platform != 'darwin':
-            if lib_type == 'dylib':
-                lib_type = 'shared'
-        lib_fullpath = self.compiler.library_filename(
-            lib.name, lib_type=lib_type, output_dir=output_dir)
-        return lib_fullpath
-
-    def get_source_files (self):
-        filenames = cmd_build_clib.build_clib.get_source_files(self)
-        self.check_library_list(self.libraries)
-        self.check_library_list(self.libraries_a)
-        self.check_library_list(self.libraries_so)
-        for (lib_name, build_info) in self.libraries:
-            filenames.extend(build_info.get(sources, []))
-        for lib in self.libraries_so + self.libraries_a:
-            filenames.extend(lib.sources)
-        return filenames
-
-    def get_outputs (self):
-        outputs = []
-        for lib in self.libraries_a:
-            lib_fullpath = self.get_lib_fullpath(lib, self.build_clib_a)
-            outputs.append(lib_fullpath)
-        for lib in self.libraries_so:
-            lib_fullpath = self.get_lib_fullpath(lib, self.build_clib_so)
-            outputs.append(lib_fullpath)
-        return outputs
-
-
 # Command class to build extension modules
 
 class build_ext(cmd_build_ext.build_ext):
@@ -1016,11 +731,6 @@ class build_ext(cmd_build_ext.build_ext):
             cmd_set_undefined_mpi_options(self, 'build')
 
     def run(self):
-        if self.distribution.has_c_libraries():
-            build_clib = self.get_finalized_command('build_clib')
-            if build_clib.libraries:
-                build_clib.run()
-
         self.build_sources()
         cmd_build_ext.build_ext.run(self)
 
@@ -1305,10 +1015,13 @@ class install_lib(cmd_install_lib.install_lib):
 
     def get_outputs(self):
         outputs = cmd_install_lib.install_lib.get_outputs(self)
-        for (build_cmd, build_dir) in (('build_clib', 'build_lib'),
-                                       ('build_exe',  'build_exe')):
-            outs = self._mutate_outputs(1, build_cmd, build_dir,
-                                        self.install_dir)
+        for (build_cmd, build_dir) in (
+            ('build_exe',  'build_exe')
+        ):
+            outs = self._mutate_outputs(
+                1, build_cmd, build_dir,
+                self.install_dir
+            )
             build_cmd = self.get_finalized_command(build_cmd)
             build_files = build_cmd.get_outputs()
             for out in outs:
