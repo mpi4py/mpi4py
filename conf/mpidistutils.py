@@ -52,7 +52,7 @@ from distutils.unixccompiler import UnixCCompiler
 rpath_option_orig = UnixCCompiler.runtime_library_dir_option
 def rpath_option(compiler, dir):
     option = rpath_option_orig(compiler, dir)
-    if sys.platform.startswith('linux'):
+    if sys.platform == 'linux':
         if option.startswith('-R'):
             option =  option.replace('-R', '-Wl,-rpath,', 1)
         elif option.startswith('-Wl,-R,'):
@@ -112,9 +112,11 @@ def customize_compiler(compiler, lang=None,
                 ld += shlex.split(os.environ[envvar])
     if sys.platform == 'darwin':
         badcflags = ['-mno-fused-madd']
-        for attr in ('preprocessor',
-                     'compiler', 'compiler_cxx', 'compiler_so',
-                     'linker_so', 'linker_exe'):
+        for attr in (
+            'preprocessor',
+            'compiler', 'compiler_cxx', 'compiler_so',
+            'linker_so', 'linker_exe',
+        ):
             compiler_cmd = getattr(compiler, attr, None)
             if compiler_cmd is None: continue
             for flag in badcflags:
@@ -157,7 +159,8 @@ def customize_compiler(compiler, lang=None,
             for attr in (
                 'preprocessor',
                 'compiler', 'compiler_cxx', 'compiler_so',
-                'linker_so', 'linker_exe'):
+                'linker_so', 'linker_exe',
+            ):
                 try: getattr(compiler, attr).remove('-mno-cygwin')
                 except: pass
         # Add required define and compiler flags for AMD64
@@ -165,7 +168,8 @@ def customize_compiler(compiler, lang=None,
             for attr in (
                 'preprocessor',
                 'compiler', 'compiler_cxx', 'compiler_so',
-                'linker_so', 'linker_exe'):
+                'linker_so', 'linker_exe',
+            ):
                 getattr(compiler, attr).insert(1, '-DMS_WIN64')
                 getattr(compiler, attr).insert(1, '-m64')
     if compiler.compiler_type == 'msvc':
@@ -214,8 +218,9 @@ def configure_compiler(compiler, config, lang=None):
         compiler.add_runtime_library_dir(v)
     for v in config.get('extra_objects', []):
         compiler.add_link_object(v)
-    if compiler.compiler_type in \
-        ('unix', 'intel', 'cygwin', 'mingw32'):
+    if compiler.compiler_type in (
+        'unix', 'intel', 'cygwin', 'mingw32',
+    ):
         cc_args = config.get('extra_compile_args', [])
         ld_args = config.get('extra_link_args', [])
         compiler.compiler += cc_args
@@ -505,10 +510,11 @@ def setup(**attrs):
     if 'cmdclass' not in attrs:
         attrs['cmdclass'] = {}
     cmdclass = attrs['cmdclass']
-    for cmd in (config, build, install, clean,
-                build_src, build_ext, build_exe,
-                install_lib, install_data, install_exe,
-                ):
+    for cmd in (
+        config, build, install, clean,
+        build_src, build_ext, build_exe,
+        install_lib, install_data, install_exe,
+    ):
         if cmd.__name__ not in cmdclass:
             cmdclass[cmd.__name__] = cmd
     return fcn_setup(**attrs)
@@ -816,7 +822,8 @@ class build_ext(cmd_build_ext.build_ext):
                 fullname = self.get_ext_fullname(ext.name)
                 filename = os.path.join(
                     self.build_lib,
-                    self.get_ext_filename(fullname))
+                    self.get_ext_filename(fullname)
+                )
                 dest_dir = os.path.dirname(filename)
                 mpi_cfg = os.path.join(dest_dir, 'mpi.cfg')
                 outputs.append(mpi_cfg)
@@ -1016,7 +1023,7 @@ class install_lib(cmd_install_lib.install_lib):
     def get_outputs(self):
         outputs = cmd_install_lib.install_lib.get_outputs(self)
         for (build_cmd, build_dir) in (
-            ('build_exe',  'build_exe')
+            ('build_exe',  'build_exe'),
         ):
             outs = self._mutate_outputs(
                 1, build_cmd, build_dir,
@@ -1140,11 +1147,12 @@ class clean(cmd_clean.clean):
 
         if self.all:
             # remove build directories
-            for directory in (self.build_lib,
-                              self.build_exe,
-                              self.build_scripts,
-                              self.bdist_base,
-                              ):
+            for directory in (
+                self.build_lib,
+                self.build_exe,
+                self.build_scripts,
+                self.bdist_base,
+            ):
                 if os.path.exists(directory):
                     remove_tree(directory, dry_run=self.dry_run)
                 else:
