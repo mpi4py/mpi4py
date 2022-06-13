@@ -251,7 +251,8 @@ def configure_pyexe(exe, config_cmd):
     library_dirs = []
     runtime_dirs = []
     link_args = []
-    if pyver >= (3, 8) or not cfg_vars.get('Py_ENABLE_SHARED'):
+    py_enable_shared = cfg_vars.get('Py_ENABLE_SHARED')
+    if pyver >= (3, 8) or not py_enable_shared:
         py_version = sysconfig.get_python_version()
         py_abiflags = getattr(sys, 'abiflags', '')
         libraries = ['python' + py_version + py_abiflags]
@@ -263,12 +264,19 @@ def configure_pyexe(exe, config_cmd):
         if (fwkdir and fwkdir != 'no-framework' and
             fwkdir in cfg_vars.get('LINKFORSHARED', '')):
             del libraries[:]
-    for var in ('LIBDIR', 'LIBPL'):
-        library_dirs += shlex.split(cfg_vars.get(var, ''))
-    for var in ('LIBDIR',):
-        runtime_dirs += shlex.split(cfg_vars.get(var, ''))
+    #
+    libdir = shlex.split(cfg_vars.get('LIBDIR', ''))
+    libpl = shlex.split(cfg_vars.get('LIBPL', ''))
+    if py_enable_shared:
+        library_dirs += libdir
+        if sys.exec_prefix != '/usr':
+            runtime_dirs += libdir
+    else:
+        library_dirs += libdir
+        library_dirs += libpl
     for var in ('LIBS', 'MODLIBS', 'SYSLIBS', 'LDLAST'):
         link_args += shlex.split(cfg_vars.get(var, ''))
+    #
     exe.libraries += libraries
     exe.library_dirs += library_dirs
     exe.runtime_library_dirs += runtime_dirs

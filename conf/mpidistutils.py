@@ -1015,24 +1015,20 @@ class build_ext(cmd_build_ext.build_ext):
         if isinstance(build_cmd,  build):
             cmd_set_undefined_mpi_options(self, 'build')
         #
-        if ((sys.platform.startswith('linux') or
-             sys.platform.startswith('gnu') or
-             sys.platform.startswith('sunos')) and
-            sysconfig.get_config_var('Py_ENABLE_SHARED')):
+        if (sysconfig.get_config_var('Py_ENABLE_SHARED') and
+            (os.name == 'posix' and sys.platform != 'darwin')):
             # Remove <prefix>/lib[64]/pythonX.Y/config
-            libdir = os.path.dirname(sysconfig.get_makefile_filename())
-            if libdir in self.library_dirs:
-                self.library_dirs.remove(bad_libdir)
-            # Add <prefix>/lib[64]
+            baddir = os.path.dirname(sysconfig.get_makefile_filename())
+            while baddir in self.library_dirs:
+                self.library_dirs.remove(baddir)
+            # Append <prefix>/lib[64]
             libdir = sysconfig.get_config_var("LIBDIR")
             if libdir not in self.library_dirs:
                 self.library_dirs.append(libdir)
-            if libdir not in self.rpath:
-                self.rpath.append(libdir)
-            # Special-case
+            # Remove /usr/lib[64]
             if sys.exec_prefix == '/usr':
-                self.library_dirs.remove(libdir)
-                self.rpath.remove(libdir)
+                while libdir in self.library_dirs:
+                    self.library_dirs.remove(libdir)
 
     def run(self):
         if self.distribution.has_c_libraries():
