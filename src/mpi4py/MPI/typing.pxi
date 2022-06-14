@@ -15,6 +15,8 @@ cdef Tuple
 cdef List
 cdef Dict
 
+cdef PathLike
+
 cdef Buffer
 cdef Bottom
 cdef InPlace

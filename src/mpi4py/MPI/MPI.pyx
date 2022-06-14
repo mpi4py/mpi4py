@@ -13,6 +13,7 @@ initialize()
 
 include "allocate.pxi"
 include "asstring.pxi"
+include "asfspath.pxi"
 include "asbuffer.pxi"
 include "asarray.pxi"
 include "helpers.pxi"

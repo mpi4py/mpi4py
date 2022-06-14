@@ -82,7 +82,7 @@ cdef class File:
     def Open(
         cls,
         Intracomm comm: Intracomm,
-        filename: str,
+        filename: Union[PathLike, str, bytes],
         int amode: int = MODE_RDONLY,
         Info info: Info = INFO_NULL,
     ) -> File:
@@ -90,7 +90,7 @@ cdef class File:
         Open a file
         """
         cdef char *cfilename = NULL
-        filename = asmpistr(filename, &cfilename)
+        filename = asmpifspath(filename, &cfilename)
         cdef File file = File.__new__(File)
         with nogil: CHKERR( MPI_File_open(
             comm.ob_mpi, cfilename, amode, info.ob_mpi, &file.ob_mpi) )
@@ -104,17 +104,21 @@ cdef class File:
         with nogil: CHKERR( MPI_File_close(&self.ob_mpi) )
 
     @classmethod
-    def Delete(cls, filename: str, Info info: Info = INFO_NULL) -> None:
+    def Delete(
+        cls,
+        filename: Union[PathLike, str, bytes],
+        Info info: Info = INFO_NULL,
+    ) -> None:
         """
         Delete a file
         """
         cdef char *cfilename = NULL
-        filename = asmpistr(filename, &cfilename)
+        filename = asmpifspath(filename, &cfilename)
         with nogil: CHKERR( MPI_File_delete(cfilename, info.ob_mpi) )
 
     def Set_size(self, Offset size: int) -> None:
         """
-        Sets the file size
+        Set the file size
         """
         with nogil: CHKERR( MPI_File_set_size(self.ob_mpi, size) )
 

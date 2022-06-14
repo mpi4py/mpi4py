@@ -338,6 +338,7 @@ else:
         List,
         Dict,
     )
+from os import PathLike
 """
 
 OVERRIDE = {

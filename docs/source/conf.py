@@ -83,8 +83,10 @@ nitpick_ignore_regex = [
 
 autodoc_typehints = 'description'
 autodoc_typehints_format = 'short'
-autodoc_type_aliases = {}
 autodoc_mock_imports = []
+autodoc_type_aliases = {
+    'PathLike': '~os.PathLike',
+}
 
 autosummary_context = {
     'synopsis': {},
