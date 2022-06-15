@@ -1,6 +1,7 @@
 import mpi4py
 import unittest
 import warnings
+import pathlib
 import os
 
 
@@ -61,28 +62,49 @@ class TestConfig(unittest.TestCase):
 class TestProfile(unittest.TestCase):
 
     def testProfile(self):
-        import platform, sysconfig
-        bits = platform.architecture()[0][:-3]
+        import struct
+        import sysconfig
+        bits = struct.calcsize('P') * 8
         triplet = sysconfig.get_config_var('MULTIARCH') or ''
         libpath = [
             f"{prefix}{suffix}"
             for prefix in ("/lib", "/usr/lib")
             for suffix in (bits, f"/{triplet}", "")
         ]
+        fspath = (
+            os.fsencode,
+            os.fsdecode,
+            pathlib.Path
+        )
+        libraries = (
+            'c', 'libc.so.6',
+            'm', 'libm.so.6',
+            'dl', 'libdl.so.2',
+        )
         def mpi4py_profile(*args, **kwargs):
             try:
                 mpi4py.profile(*args, **kwargs)
             except ValueError:
                 pass
+        if os.name != 'posix':
+            with warnings.catch_warnings():
+                warnings.simplefilter('error')
+                with self.assertRaises(UserWarning):
+                    mpi4py.profile(MPI.__file__)
+            return
         with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            for libname in libraries:
+                mpi4py_profile(libname, path=libpath)
+                for fs in fspath:
+                    mpi4py_profile(libname, path=map(fs, libpath))
+                for path in libpath:
+                    mpi4py_profile(libname, path=path)
+                    for fsp in fspath:
+                        mpi4py_profile(libname, path=fsp(path))
             warnings.simplefilter('error')
             with self.assertRaises(UserWarning):
                 mpi4py.profile('hosts', path=["/etc"])
-            warnings.simplefilter('ignore')
-            for libname in ('c', 'm', 'dl', 'libdl.so.2'):
-                mpi4py_profile(libname, path=libpath)
-                for path in libpath:
-                    mpi4py_profile(libname, path=path)
             with self.assertRaises(ValueError):
                 mpi4py.profile('@querty')
             with self.assertRaises(ValueError):
