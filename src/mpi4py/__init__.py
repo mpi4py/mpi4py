@@ -120,14 +120,19 @@ def profile(name, *, path=None):
     # pylint: disable=import-outside-toplevel
     import os
     import sys
-    from .dl import dlopen, dlerror, RTLD_NOW, RTLD_GLOBAL
+    import warnings
 
-    def lookup_dylib(name, path):
+    try:
+        from _ctypes import dlopen
+        from os import RTLD_NOW, RTLD_GLOBAL
+    except ImportError as exc:  # pragma: no cover
+        warnings.warn(exc.args[0])
+        return
+
+    def find_library(name, path):
         # pylint: disable=missing-docstring
         pattern = [('', '')]
-        if sys.platform.startswith('win'):  # pragma: no cover
-            pattern.append(('', '.dll'))
-        elif sys.platform == 'darwin':  # pragma: no cover
+        if sys.platform == 'darwin':  # pragma: no cover
             pattern.append(('lib', '.dylib'))
         elif os.name == 'posix':  # pragma: no cover
             pattern.append(('lib', '.so'))
@@ -140,18 +145,23 @@ def profile(name, *, path=None):
 
     if path is None:
         path = ['']
+    elif isinstance(path, os.PathLike):
+        path = [path]
     elif isinstance(path, str):
         path = path.split(os.pathsep)
-    else:
-        path = list(path)
-    filename = lookup_dylib(name, path)
+    elif isinstance(path, bytes):
+        path = path.split(os.fsencode(os.pathsep))
+
+    name = os.fsdecode(name)
+    path = list(map(os.fsdecode, path))
+    filename = find_library(name, path)
     if filename is None:
         raise ValueError(f"profiler '{name}' not found")
 
-    handle = dlopen(filename, RTLD_NOW | RTLD_GLOBAL)
-    if handle:
+    try:
+        handle = dlopen(filename, RTLD_NOW | RTLD_GLOBAL)
+    except OSError as exc:
+        warnings.warn(exc.args[0])
+    else:
         registry = vars(profile).setdefault('registry', [])
         registry.append((name, (handle, filename)))
-    else:
-        from warnings import warn
-        warn(dlerror())
