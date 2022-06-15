@@ -1,19 +1,35 @@
 Release 4.0.0 [2022-XX-XX]
 ==========================
 
-* Add support for the MPI-4.0 standard.
+* New features:
 
-  + Use large count MPI-4 rutines.
+  + Add support for the MPI-4.0 standard.
 
-  + Add persistent collective communication.
+    - Use large count MPI-4 routines.
+    - Add persistent collective communication.
+    - Add partitioned point-to-point communication.
+    - Add new communicator constructors.
+    - Add the `Session` class and its methods.
 
-  + Add partitioned point-to-point communication.
+  + Add runtime check for mismatch between `mpiexec` and MPI library.
 
-  + Add new communicator constructors.
+  + Support `scikit-build`_ as an alternative build backend.
 
-  + Add the `Session` class and its methods.
+  .. _scikit-build: https://scikit-build.readthedocs.io/en/latest/
 
-* `mpi4py.util.pkl5`: Add support for collective communication.
+* Enhancements:
+
+  + `mpi4py.futures`: Report exception tracebacks in workers.
+
+  + `mpi4py.util.pkl5`: Add support for collective communication.
+
+* Backward-incompatible changes:
+
+  * Python 2 is no longer supported, Python 3.6+ is required, but
+    typing stubs are supported for Python 3.7+.
+
+  * The `Intracomm.Create_group()` method is no longer defined in the
+    base `Comm` class.
 
 
 Release 3.1.3 [2021-11-25]
