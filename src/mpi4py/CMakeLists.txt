@@ -22,7 +22,15 @@ set(SKBUILD "${SKBUILD}")
 # mpi4py/mpi.cfg
 set(mpi.cfg "${BINDIR}/mpi.cfg")
 file(WRITE ${mpi.cfg} "[mpi]\n")
-file(APPEND ${mpi.cfg} "mpicc = ${MPI_C_COMPILER}\n")
+if (MPI_C_COMPILER)
+  file(APPEND ${mpi.cfg} "mpicc = ${MPI_C_COMPILER}\n")
+endif()
+if (MPI_CXX_COMPILER)
+  file(APPEND ${mpi.cfg} "mpicxx = ${MPI_CXX_COMPILER}\n")
+endif()
+if (MPI_Fortran_COMPILER)
+  file(APPEND ${mpi.cfg} "mpifort = ${MPI_Fortran_COMPILER}\n")
+endif()
 install(FILES ${mpi.cfg} DESTINATION src/mpi4py)
 
 
