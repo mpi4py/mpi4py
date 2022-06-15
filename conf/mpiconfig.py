@@ -438,7 +438,7 @@ class Config(object):
         elif hasattr(filename, 'write'):
             parser.write(filename)
         elif isinstance(filename, str):
-            with open(filename, 'w') as f:
+            with open(filename, 'w', encoding='utf-8') as f:
                 parser.write(f)
         return parser
 

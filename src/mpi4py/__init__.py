@@ -100,8 +100,9 @@ def get_config():
     # pylint: disable=import-outside-toplevel
     from os.path import join, dirname
     from configparser import ConfigParser
+    config = join(dirname(__file__), 'mpi.cfg')
     parser = ConfigParser()
-    parser.read(join(dirname(__file__), 'mpi.cfg'))
+    parser.read(config, encoding='utf-8')
     return dict(parser.items('mpi'))
 
 
