@@ -2,13 +2,13 @@
 
 cdef extern from "Python.h":
     object PyOS_FSPath(object)
+    object PyUnicode_EncodeFSDefault(object)
 
-cdef os_fsencode
-from os import fsencode as os_fsencode
 
 cdef object asmpifspath(object path, char *p[]):
     path = PyOS_FSPath(path)
-    path = os_fsencode(path)
+    if PyUnicode_Check(path):
+        path = PyUnicode_EncodeFSDefault(path)
     PyBytes_AsStringAndSize(path, p, NULL)
     return path
 
