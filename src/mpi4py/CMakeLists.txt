@@ -5,13 +5,6 @@ find_package(PythonExtensions REQUIRED)
 find_package(Cython REQUIRED)
 find_package(MPI REQUIRED)
 
-if(CMAKE_DL_LIBS)
-  find_library(DL_LIBS ${CMAKE_DL_LIBS})
-endif()
-if(NOT DL_LIBS)
-  set(DL_LIBS "")
-endif()
-
 set(BINDIR ${CMAKE_CURRENT_BINARY_DIR})
 set(PKGDIR ${CMAKE_CURRENT_SOURCE_DIR})
 get_filename_component(SRCDIR ${PKGDIR} DIRECTORY)
@@ -61,13 +54,6 @@ target_compile_definitions(MPI PRIVATE OMPI_WANT_MPI_INTERFACE_WARNING=0)
 target_link_libraries(MPI ${MPI_C_LIBRARIES})
 python_extension_module(MPI)
 install(TARGETS MPI LIBRARY DESTINATION src/mpi4py)
-
-
-# mpi4py.dl
-add_library(dl MODULE ${SRCDIR}/dynload.c)
-target_link_libraries(dl ${DL_LIBS})
-python_extension_module(dl)
-install(TARGETS dl LIBRARY DESTINATION src/mpi4py)
 
 
 # mpi4py/bin/python-mpi

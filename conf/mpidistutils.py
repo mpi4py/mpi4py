@@ -797,15 +797,10 @@ class build_ext(cmd_build_ext.build_ext):
             log.debug("skipping '%s' extension (up-to-date)", ext.name)
             return
         #
-        # XXX -- this is a Vile HACK!
         self.compiler = self.compiler_mpi
-        if ext.name == 'mpi4py.dl':
-            self.compiler = self.compiler_sys
-        #
         self.config_extension(ext)
         cmd_build_ext.build_ext.build_extension(self, ext)
         #
-        # XXX -- this is a Vile HACK!
         if ext.name == 'mpi4py.MPI':
             dest_dir = os.path.dirname(filename)
             self.mkpath(dest_dir)

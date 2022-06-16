@@ -284,17 +284,6 @@ def configure_pyexe(exe, config_cmd):
 
 
 def extensions():
-    modules = []
-    # custom dl extension module
-    dl = dict(
-        name='mpi4py.dl',
-        optional=True,
-        sources=['src/dynload.c'],
-        depends=['src/dynload.h'],
-        configure=configure_dl,
-    )
-    if os.name == 'posix':
-        modules.append(dl)
     # MPI extension module
     MPI = dict(
         name='mpi4py.MPI',
@@ -313,9 +302,8 @@ def extensions():
         ],
         configure=configure_mpi,
     )
-    modules.append(MPI)
     #
-    return modules
+    return [MPI]
 
 
 def executables():
