@@ -7,9 +7,11 @@ Support for building mpi4py with distutils/setuptools.
 
 # -----------------------------------------------------------------------------
 
-import sys
 import os
+import re
+import sys
 import copy
+import glob
 import shlex
 import shutil
 import platform
@@ -519,6 +521,113 @@ def setup(**attrs):
             cmdclass[cmd.__name__] = cmd
     return fcn_setup(**attrs)
 
+# --------------------------------------------------------------------
+
+# Cython
+
+def cython_req():
+    confdir = os.path.dirname(__file__)
+    with open(os.path.join(confdir, 'builder.py')) as f:
+        m = re.search(r"CYTHON\s*=\s*'cython\s*>=+\s*(.*)'", f.read())
+    assert m is not None
+    cython_version = m.groups()[0]
+    return cython_version
+
+def cython_chk(VERSION, verbose=True):
+    from mpidistutils import log
+    if verbose:
+        warn = lambda msg='': sys.stderr.write(msg+'\n')
+    else:
+        warn = lambda msg='': None
+    #
+    try:
+        import Cython
+    except ImportError:
+        warn("*"*80)
+        warn()
+        warn(" You need Cython to generate C source files.\n")
+        warn("   $ python -m pip install cython")
+        warn()
+        warn("*"*80)
+        return False
+    #
+    REQUIRED = VERSION
+    CYTHON_VERSION = Cython.__version__
+    if VERSION is not None:
+        m = re.match(r"(\d+\.\d+(?:\.\d+)?).*", CYTHON_VERSION)
+        if m:
+            REQUIRED  = Version(VERSION)
+            AVAILABLE = Version(m.groups()[0])
+        else:
+            REQUIRED  = LegacyVersion(VERSION)
+            AVAILABLE = LegacyVersion(CYTHON_VERSION)
+        if AVAILABLE < REQUIRED:
+            warn("*"*80)
+            warn()
+            warn(" You need Cython >= {0} (you have version {1}).\n"
+                 .format(REQUIRED, CYTHON_VERSION))
+            warn("   $ python -m pip install --upgrade cython")
+            warn()
+            warn("*"*80)
+            return False
+    #
+    if verbose:
+        log.info("using Cython version %s" % CYTHON_VERSION)
+    return True
+
+def cython_run(
+    source, target=None,
+    depends=(), includes=(),
+    destdir_c=None, destdir_h=None,
+    workdir=None, force=False,
+    VERSION=None,
+):
+    if target is None:
+        target = os.path.splitext(source)[0]+'.c'
+    cwd = os.getcwd()
+    try:
+        if workdir:
+            os.chdir(workdir)
+        alldeps = [source]
+        for dep in depends:
+            alldeps += glob.glob(dep)
+        if not (force or dep_util.newer_group(alldeps, target)):
+            log.debug("skipping '%s' -> '%s' (up-to-date)",
+                      source, target)
+            return
+    finally:
+        os.chdir(cwd)
+    require = 'Cython'
+    if VERSION is not None:
+        require += '>=%s' % VERSION
+    if not cython_chk(VERSION, verbose=False):
+        try:
+            import warnings
+            import setuptools
+            install_setup_requires = setuptools._install_setup_requires
+            with warnings.catch_warnings():
+                category = setuptools.SetuptoolsDeprecationWarning
+                warnings.simplefilter('ignore', category)
+                log.info("fetching build requirement %s" % require)
+                install_setup_requires(dict(setup_requires=[require]))
+        except Exception:
+            log.info("failed to fetch build requirement %s" % require)
+    if not cython_chk(VERSION):
+        raise DistutilsError("requires %s" % require)
+    #
+    log.info("cythonizing '%s' -> '%s'", source, target)
+    from cythonize import cythonize
+    err = cythonize(
+        source, target,
+        includes=includes,
+        destdir_c=destdir_c,
+        destdir_h=destdir_h,
+        wdir=workdir,
+    )
+    if err:
+        raise DistutilsError(
+            "Cython failure: '%s' -> '%s'" % (source, target))
+
 # -----------------------------------------------------------------------------
 
 # A minimalistic MPI program :-)
@@ -723,20 +832,32 @@ class build(cmd_build.build):
 
 
 class build_src(Command):
+
     description = "build C sources from Cython files"
+
     user_options = [
         ('force', 'f',
          "forcibly build everything (ignore file timestamps)"),
         ]
+
     boolean_options = ['force']
+
     def initialize_options(self):
         self.force = False
+
     def finalize_options(self):
         self.set_undefined_options('build',
                                    ('force', 'force'),
                                    )
     def run(self):
-        pass
+        sources = getattr(self, 'sources', [])
+        require = cython_req()
+        for source in sources:
+            cython_run(
+                **source,
+                force=self.force,
+                VERSION=require,
+            )
 
 
 # Command class to build extension modules
