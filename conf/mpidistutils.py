@@ -578,7 +578,6 @@ def cython_chk(VERSION, verbose=True):
 def cython_run(
     source, target=None,
     depends=(), includes=(),
-    destdir_c=None, destdir_h=None,
     workdir=None, force=False,
     VERSION=None,
 ):
@@ -620,13 +619,12 @@ def cython_run(
     err = cythonize(
         source, target,
         includes=includes,
-        destdir_c=destdir_c,
-        destdir_h=destdir_h,
-        wdir=workdir,
+        workdir=workdir,
     )
     if err:
         raise DistutilsError(
-            "Cython failure: '%s' -> '%s'" % (source, target))
+            "Cython failure: '%s' -> '%s'" % (source, target)
+        )
 
 # -----------------------------------------------------------------------------
 
