@@ -540,12 +540,12 @@ class config(cmd_config.config):
 
     user_options = cmd_config.config.user_options + cmd_mpi_opts
 
-    def initialize_options (self):
+    def initialize_options(self):
         cmd_config.config.initialize_options(self)
         cmd_initialize_mpi_options(self)
         self.noisy = 0
 
-    def finalize_options (self):
+    def finalize_options(self):
         cmd_config.config.finalize_options(self)
         if not self.noisy:
             self.dump_source = 0
@@ -557,7 +557,9 @@ class config(cmd_config.config):
                     self.temp_files.append(fn)
         cmd_config.config._clean(self, *a, **kw)
 
-    def check_header (self, header, headers=None, include_dirs=None):
+    def check_header(
+        self, header, headers=None, include_dirs=None,
+    ):
         if headers is None: headers = []
         log.info("checking for header '%s' ..." % header)
         body = "int main(int n, char**v) { (void)n; (void)v; return 0; }"
@@ -565,37 +567,47 @@ class config(cmd_config.config):
         log.info(ok and 'success!' or 'failure.')
         return ok
 
-    def check_macro (self, macro, headers=None, include_dirs=None):
+    def check_macro(
+        self, macro, headers=None, include_dirs=None,
+    ):
         log.info("checking for macro '%s' ..." % macro)
-        body = ("#ifndef %s\n"
-                "#error macro '%s' not defined\n"
-                "#endif\n") % (macro, macro)
+        body = "\n".join([
+            "#ifndef %s",
+            "#error macro '%s' not defined",
+            "#endif",
+        ]) % (macro, macro)
         body += "int main(int n, char**v) { (void)n; (void)v; return 0; }"
         ok = self.try_compile(body, headers, include_dirs)
         return ok
 
-    def check_library (self, library, library_dirs=None,
-                   headers=None, include_dirs=None,
-                   other_libraries=[], lang="c"):
+    def check_library(
+        self, library, library_dirs=None,
+        headers=None, include_dirs=None,
+        other_libraries=[], lang="c",
+    ):
         if sys.platform == "darwin":
             self.compiler.linker_exe.append('-flat_namespace')
             self.compiler.linker_exe.append('-undefined')
             self.compiler.linker_exe.append('suppress')
         log.info("checking for library '%s' ..." % library)
         body = "int main(int n, char**v) { (void)n; (void)v; return 0; }"
-        ok = self.try_link(body,  headers, include_dirs,
-                           [library]+other_libraries, library_dirs,
-                           lang=lang)
+        ok = self.try_link(
+            body,  headers, include_dirs,
+            [library]+other_libraries, library_dirs,
+            lang=lang,
+        )
         if sys.platform == "darwin":
             self.compiler.linker_exe.remove('-flat_namespace')
             self.compiler.linker_exe.remove('-undefined')
             self.compiler.linker_exe.remove('suppress')
         return ok
 
-    def check_function (self, function,
-                        headers=None, include_dirs=None,
-                        libraries=None, library_dirs=None,
-                        decl=0, call=0, lang="c"):
+    def check_function(
+        self, function,
+        headers=None, include_dirs=None,
+        libraries=None, library_dirs=None,
+        decl=0, call=0, lang="c",
+    ):
         log.info("checking for function '%s' ..." % function)
         body = []
         if decl:
@@ -603,9 +615,11 @@ class config(cmd_config.config):
             else:    proto = "int %s;"
             if lang == "c":
                 proto = "\n".join([
-                        "#ifdef __cplusplus",
-                        "extern \"C\"",
-                        "#endif", proto])
+                    "#ifdef __cplusplus",
+                    "extern \"C\"",
+                    "#endif",
+                    proto
+                ])
             body.append(proto % function)
         body.append(    "int main (int n, char**v) {")
         if call:
@@ -616,14 +630,19 @@ class config(cmd_config.config):
         body.append(    "  return 0;")
         body.append(    "}")
         body = "\n".join(body) + "\n"
-        ok = self.try_link(body, headers, include_dirs,
-                           libraries, library_dirs, lang=lang)
+        ok = self.try_link(
+            body, headers, include_dirs,
+            libraries, library_dirs,
+            lang=lang,
+        )
         return ok
 
-    def check_symbol (self, symbol, type="int",
-                      headers=None, include_dirs=None,
-                      libraries=None, library_dirs=None,
-                      decl=0, lang="c"):
+    def check_symbol(
+        self, symbol, type="int",
+        headers=None, include_dirs=None,
+        libraries=None, library_dirs=None,
+        decl=0, lang="c",
+    ):
         log.info("checking for symbol '%s' ..." % symbol)
         body = []
         if decl:
@@ -634,14 +653,19 @@ class config(cmd_config.config):
         body.append("  return 0;")
         body.append("}")
         body = "\n".join(body) + "\n"
-        ok = self.try_link(body, headers, include_dirs,
-                           libraries, library_dirs, lang=lang)
+        ok = self.try_link(
+            body, headers, include_dirs,
+            libraries, library_dirs,
+            lang=lang,
+        )
         return ok
 
-    def check_function_call (self, function, args='',
-                             headers=None, include_dirs=None,
-                             libraries=None, library_dirs=None,
-                             lang="c"):
+    def check_function_call(
+        self, function, args='',
+        headers=None, include_dirs=None,
+        libraries=None, library_dirs=None,
+        lang="c",
+    ):
         log.info("checking for function '%s' ..." % function)
         body = []
         body.append("int main (int n, char**v) {")
@@ -650,27 +674,22 @@ class config(cmd_config.config):
         body.append("  return 0;")
         body.append("}")
         body = "\n".join(body) + "\n"
-        ok = self.try_link(body, headers, include_dirs,
-                           libraries, library_dirs, lang=lang)
+        ok = self.try_link(
+            body, headers, include_dirs,
+            libraries, library_dirs,
+            lang=lang,
+        )
         return ok
 
-    check_hdr  = check_header
-    check_lib  = check_library
-    check_func = check_function
-    check_sym  = check_symbol
-
     def run(self):
-        #
         config = configuration(self, verbose=True)
         # test MPI C compiler
-        self.compiler = getattr(
-            self.compiler, 'compiler_type', self.compiler)
+        self.compiler = getattr(self.compiler, 'compiler_type', self.compiler)
         self._check_compiler()
         configure_compiler(self.compiler, config, lang='c')
         self.try_link(ConfigTest, headers=['mpi.h'], lang='c')
         # test MPI C++ compiler
-        self.compiler = getattr(
-            self.compiler, 'compiler_type', self.compiler)
+        self.compiler = getattr(self.compiler, 'compiler_type', self.compiler)
         self._check_compiler()
         configure_compiler(self.compiler, config, lang='c++')
         self.try_link(ConfigTest, headers=['mpi.h'], lang='c++')

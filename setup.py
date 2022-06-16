@@ -156,14 +156,16 @@ metadata_extra = {
 def configure_dl(ext, config_cmd):
     from mpidistutils import log
     log.info("checking for dlopen() availability ...")
-    ok = config_cmd.check_header('dlfcn.h')
-    if ok: ext.define_macros += [('HAVE_DLFCN_H', 1)]
-    ok = config_cmd.check_library('dl')
-    if ok: ext.libraries += ['dl']
-    ok = config_cmd.check_function('dlopen',
-                                   libraries=['dl'],
-                                   decl=1, call=1)
-    if ok: ext.define_macros += [('HAVE_DLOPEN', 1)]
+    dlfcn = config_cmd.check_header('dlfcn.h')
+    libdl = config_cmd.check_library('dl')
+    libs = ['dl'] if libdl else None
+    dlopen = config_cmd.check_function(
+        'dlopen', libraries=libs, decl=1, call=1,
+    )
+    if dlfcn:
+        ext.define_macros += [('HAVE_DLFCN_H', 1)]
+    if dlopen:
+        ext.define_macros += [('HAVE_DLOPEN', 1)]
 
 
 def configure_mpi(ext, config_cmd):
@@ -188,8 +190,8 @@ def configure_mpi(ext, config_cmd):
     if not ok: raise DistutilsPlatformError(errmsg % "link")
     #
     log.info("checking for missing MPI functions/symbols ...")
-    tests  = ["defined(%s)" % macro for macro in
-              ("OPEN_MPI", "MSMPI_VER",)]
+    impls = ("OPEN_MPI", "MSMPI_VER")
+    tests = ["defined(%s)" % macro for macro in impls]
     tests += ["(defined(MPICH_NAME)&&(MPICH_NAME>=3))"]
     tests += ["(defined(MPICH_NAME)&&(MPICH_NAME==2))"]
     ConfigTest = dedent("""\
@@ -197,9 +199,11 @@ def configure_mpi(ext, config_cmd):
     #error "Unknown MPI implementation"
     #endif
     """) % "||".join(tests)
-    ok = config_cmd.try_compile(ConfigTest, headers=headers)
     config = os.environ.get('MPI4PY_BUILD_CONFIGURE') or None
-    if not ok or config:
+    if not config:
+        ok = config_cmd.try_compile(ConfigTest, headers=headers)
+        config = not ok
+    if config:
         if not config_cmd.check_macro("HAVE_CONFIG_H"):
             from mpidistutils import ConfigureMPI
             configure = ConfigureMPI(config_cmd)
@@ -213,18 +217,20 @@ def configure_mpi(ext, config_cmd):
             ('MPI_Type_create_f90_complex', '0,0,(MPI_Datatype*)0'),
             ('MPI_Status_c2f', '(MPI_Status*)0,(MPI_Fint*)0'),
             ('MPI_Status_f2c', '(MPI_Fint*)0,(MPI_Status*)0'),
-            ):
+        ):
             ok = config_cmd.check_function_call(
-                function, arglist, headers=headers)
+                function, arglist, headers=headers,
+            )
             if not ok:
                 macro = 'PyMPI_MISSING_' + function
                 ext.define_macros += [(macro, 1)]
         for symbol, stype in (
             ('MPI_LB', 'MPI_Datatype'),
             ('MPI_UB', 'MPI_Datatype'),
-            ):
+        ):
             ok = config_cmd.check_symbol(
-                symbol, type=stype, headers=headers)
+                symbol, type=stype, headers=headers,
+            )
             if not ok:
                 macro = 'PyMPI_MISSING_' + symbol
                 ext.define_macros += [(macro, 1)]
