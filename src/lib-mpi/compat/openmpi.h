@@ -24,7 +24,7 @@
 #if OPENMPI_DLOPEN_LIBMPI
 #if HAVE_DLOPEN
 
-#include "../../dynload.h"
+#include "../dynload.h"
 
 /*
 static void * my_dlopen(const char *name, int mode) {

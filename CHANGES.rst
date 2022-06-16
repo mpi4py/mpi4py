@@ -31,6 +31,8 @@ Release 4.0.0 [2022-XX-XX]
   * The `Intracomm.Create_group()` method is no longer defined in the
     base `Comm` class.
 
+  * The `mpi4py.dl` module is no longer available.
+
 
 Release 3.1.3 [2021-11-25]
 ==========================
