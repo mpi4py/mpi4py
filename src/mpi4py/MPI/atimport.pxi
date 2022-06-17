@@ -257,7 +257,7 @@ cdef int check_mpiexec() nogil except -1:
             b"from a different MPI implementation.",
             bad_env, getenv(bad_env), vendor,
         )
-    return  0
+    if check: return 0  # XXX silence clang -Wunreachable-code
 
 # -----------------------------------------------------------------------------
 
