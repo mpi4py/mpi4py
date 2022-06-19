@@ -528,7 +528,7 @@ def setup(**attrs):
 def cython_req():
     confdir = os.path.dirname(__file__)
     with open(os.path.join(confdir, 'builder.py')) as f:
-        m = re.search(r"CYTHON\s*=\s*'cython\s*>=+\s*(.*)'", f.read())
+        m = re.search(r'CYTHON\s*=\s*"cython\s*>=+\s*(.*)"', f.read())
     assert m is not None
     cython_version = m.groups()[0]
     return cython_version
