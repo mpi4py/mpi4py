@@ -225,11 +225,20 @@ jobs:
         os:
           - ubuntu-18.04
           - ubuntu-20.04
+          - macos-11
+          - macos-12
         mpi:
           - mpich
           - openmpi
         py:
           - 3
+        include:
+           - os: windows-2022
+             mpi: msmpi
+             py: 3
+           - os: windows-2019
+             mpi: msmpi
+             py: 3
 
     steps:
 
@@ -249,16 +258,8 @@ jobs:
     - name: Install packaging tools
       run:  python -m pip install build
 
-    - name: Build sdist
-      run:  python -m build -s
-
-    - name: Unpack sdist
-      run:  |
-        mkdir /tmp/mpi4py
-        tar -zxf dist/mpi4py-*.tar.gz -C /tmp/mpi4py
-
-    - name: Build wheel
-      run:  python -m build -o dist -w /tmp/mpi4py/mpi4py-*
+    - name: Build sdist and wheel
+      run:  python -m build
       env:
         MPI4PY_BUILD_BACKEND: skbuild
         MPI4PY_LOCAL_VERSION: ${{ matrix.mpi }}
