@@ -382,9 +382,7 @@ cdef class Datatype:
         CHKERR( MPI_Type_free(&self.ob_mpi) )
         cdef Datatype t = self
         cdef MPI_Datatype p = MPI_DATATYPE_NULL
-        if   t is __UB__                     : p = MPI_UB
-        elif t is __LB__                     : p = MPI_LB
-        elif t is __PACKED__                 : p = MPI_PACKED
+        if   t is __PACKED__                 : p = MPI_PACKED
         elif t is __BYTE__                   : p = MPI_BYTE
         elif t is __AINT__                   : p = MPI_AINT
         elif t is __OFFSET__                 : p = MPI_OFFSET
@@ -1043,9 +1041,6 @@ def Aint_diff(Aint addr1: int, Aint addr2: int) -> int:
 
 cdef Datatype __DATATYPE_NULL__ = new_Datatype( MPI_DATATYPE_NULL )
 
-cdef Datatype __UB__ = new_Datatype( MPI_UB )
-cdef Datatype __LB__ = new_Datatype( MPI_LB )
-
 cdef Datatype __PACKED__ = new_Datatype( MPI_PACKED )
 cdef Datatype __BYTE__   = new_Datatype( MPI_BYTE   )
 cdef Datatype __AINT__   = new_Datatype( MPI_AINT   )
@@ -1135,9 +1130,6 @@ include "typestr.pxi"
 # ---------------------------
 
 DATATYPE_NULL = __DATATYPE_NULL__ #: Null datatype handle
-# Deprecated datatypes (since MPI-2)
-UB = __UB__ #: upper-bound marker
-LB = __LB__ #: lower-bound marker
 # MPI-specific datatypes
 PACKED = __PACKED__
 BYTE   = __BYTE__

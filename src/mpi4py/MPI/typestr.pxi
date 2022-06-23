@@ -12,8 +12,6 @@ def _typecode(Datatype datatype: Datatype) -> Optional[str]:
 cdef inline const char* Datatype2String(MPI_Datatype datatype) nogil:
     if datatype == MPI_DATATYPE_NULL: return NULL
     # MPI
-    elif datatype == MPI_LB     : return NULL
-    elif datatype == MPI_UB     : return NULL
     elif datatype == MPI_PACKED : return "B"
     elif datatype == MPI_BYTE   : return "B"
     elif datatype == MPI_AINT   : return "p"

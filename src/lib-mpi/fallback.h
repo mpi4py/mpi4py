@@ -269,7 +269,7 @@ static int PyMPI_Type_create_subarray(int ndims,
         tmp1 = tmp2;
       }
     }
-    /* add displacement and UB */
+    /* add displacement and upper bound */
     disps[1] = starts[0];
     size = 1;
     for (i=1; i<ndims; i++) {
@@ -295,7 +295,7 @@ static int PyMPI_Type_create_subarray(int ndims,
         tmp1 = tmp2;
       }
     }
-    /* add displacement and UB */
+    /* add displacement and upper bound */
     disps[1] = starts[ndims-1];
     size = 1;
     for (i=ndims-2; i>=0; i--) {
@@ -580,7 +580,7 @@ static int PyMPI_Type_create_darray(int size,
       }
       type_old = type_new;
     }
-    /* add displacement and UB */
+    /* add displacement and upper bound */
     disps[1] = offsets[0];
     tmp_size = 1;
     for (i=1; i<ndims; i++) {
@@ -621,7 +621,7 @@ static int PyMPI_Type_create_darray(int size,
       }
       type_old = type_new;
     }
-    /* add displacement and UB */
+    /* add displacement and upper bound */
     disps[1] = offsets[ndims-1];
     tmp_size = 1;
     for (i=ndims-2; i>=0; i--) {
@@ -656,6 +656,26 @@ static int PyMPI_Type_create_darray(int size,
 #undef  MPI_Type_create_darray
 #define MPI_Type_create_darray PyMPI_Type_create_darray
 #endif
+
+#ifndef PyMPI_HAVE_MPI_Type_create_resized
+int PyMPI_Type_create_resized(MPI_Datatype oldtype,
+                              MPI_Aint lb,
+                              MPI_Aint extent,
+                              MPI_Datatype *newtype)
+{
+  int blens[3];
+  MPI_Aint disps[3];
+  MPI_Datatype types[3];
+  MPI_Aint ub = extent - lb;
+  blens[0] = 1; disps[0] = lb; types[0] = MPI_LB;
+  blens[1] = 1; disps[1] = 0;  types[1] = oldtype;
+  blens[2] = 1; disps[2] = ub; types[2] = MPI_UB;
+  return MPI_Type_struct(3, blens, disps, types, newtype);
+}
+#undef  MPI_Type_create_resized
+#define MPI_Type_create_resized PyMPI_Type_create_resized
+#endif
+
 
 #ifndef PyMPI_HAVE_MPI_Type_size_x
 static int PyMPI_Type_size_x(MPI_Datatype datatype,
