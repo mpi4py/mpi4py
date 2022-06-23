@@ -55,8 +55,6 @@ cdef inline Datatype ref_Datatype(MPI_Datatype ob):
 cdef inline int del_Datatype(MPI_Datatype* ob):
     if ob    == NULL                        : return 0
     if ob[0] == MPI_DATATYPE_NULL           : return 0
-    if ob[0] == MPI_UB                      : return 0
-    if ob[0] == MPI_LB                      : return 0
     if ob[0] == MPI_PACKED                  : return 0
     if ob[0] == MPI_BYTE                    : return 0
     if ob[0] == MPI_AINT                    : return 0

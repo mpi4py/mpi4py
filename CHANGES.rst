@@ -31,6 +31,9 @@ Release 4.0.0 [2022-XX-XX]
   * The `Intracomm.Create_group()` method is no longer defined in the
     base `Comm` class.
 
+  * The `LB` and `UB` datatypes are no longer available, use
+    `Datatype.Create_resized()` instead.
+
   * The `mpi4py.dl` module is no longer available.
 
 

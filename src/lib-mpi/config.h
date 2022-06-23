@@ -43,11 +43,3 @@
 #ifdef PyMPI_MISSING_MPI_Status_f2c
 #undef PyMPI_HAVE_MPI_Status_f2c
 #endif
-
-#ifdef PyMPI_MISSING_MPI_LB
-#undef PyMPI_HAVE_MPI_LB
-#endif
-
-#ifdef PyMPI_MISSING_MPI_UB
-#undef PyMPI_HAVE_MPI_UB
-#endif

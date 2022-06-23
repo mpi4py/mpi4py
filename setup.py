@@ -224,16 +224,6 @@ def configure_mpi(ext, config_cmd):
             if not ok:
                 macro = 'PyMPI_MISSING_' + function
                 ext.define_macros += [(macro, 1)]
-        for symbol, stype in (
-            ('MPI_LB', 'MPI_Datatype'),
-            ('MPI_UB', 'MPI_Datatype'),
-        ):
-            ok = config_cmd.check_symbol(
-                symbol, type=stype, headers=headers,
-            )
-            if not ok:
-                macro = 'PyMPI_MISSING_' + symbol
-                ext.define_macros += [(macro, 1)]
     #
     if os.name == 'posix':
         configure_dl(ext, config_cmd)
@@ -321,7 +311,6 @@ def extensions():
         define_macros=[
             ('MPICH_SKIP_MPICXX', 1),
             ('OMPI_SKIP_MPICXX', 1),
-            ('OMPI_WANT_MPI_INTERFACE_WARNING', 0),
         ],
         configure=configure_mpi,
     )

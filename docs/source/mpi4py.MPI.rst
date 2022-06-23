@@ -328,8 +328,6 @@ Attributes
    MAX_LIBRARY_VERSION_STRING
 
    DATATYPE_NULL
-   UB
-   LB
    PACKED
    BYTE
    AINT
