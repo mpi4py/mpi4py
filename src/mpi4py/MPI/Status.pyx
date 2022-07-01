@@ -160,19 +160,18 @@ cdef class Status:
         cdef MPI_Fint *f_status = NULL
         cdef tmp = allocate(n+1, sizeof(MPI_Fint), &f_status)
         CHKERR( MPI_Status_c2f(c_status, f_status) )
-        return [f_status[i] for i from 0 <= i < n]
+        return [f_status[i] for i in range(n)]
 
     @classmethod
     def f2py(cls, arg: List[int]) -> Status:
         """
         """
         cdef Status status = Status.__new__(Status)
-        cdef Py_ssize_t i = 0
         cdef Py_ssize_t n = <int>(sizeof(MPI_Status)/sizeof(int))
         cdef MPI_Status *c_status = &status.ob_mpi
         cdef MPI_Fint *f_status = NULL
         cdef tmp = allocate(n+1, sizeof(MPI_Fint), &f_status)
-        for i from 0 <= i < n: f_status[i] = arg[i]
+        for i in range(n): f_status[i] = arg[i]
         CHKERR( MPI_Status_f2c(f_status, c_status) )
         return status
 

@@ -205,7 +205,7 @@ cdef object pickle_load(Pickle pkl, void *p, MPI_Count n):
 
 
 cdef object pickle_dumpv(Pickle pkl, object obj, void **p, int n, MPI_Count cnt[], MPI_Aint dsp[]):
-    cdef Py_ssize_t i=0, m=n
+    cdef Py_ssize_t m=n
     cdef object items
     if obj is None: items = [None] * m
     else:           items = list(obj)
@@ -214,7 +214,7 @@ cdef object pickle_dumpv(Pickle pkl, object obj, void **p, int n, MPI_Count cnt[
         f"expecting {n} items, got {m}")
     cdef MPI_Count c=0
     cdef MPI_Aint  d=0
-    for i from 0 <= i < m:
+    for i in range(m):
         items[i] = pickle_dump(pkl, items[i], p, &c)
         cnt[i] = c; dsp[i] = d; d = d + <MPI_Aint>c
     cdef object buf = PyBytes_Join(b'', items)
@@ -222,10 +222,10 @@ cdef object pickle_dumpv(Pickle pkl, object obj, void **p, int n, MPI_Count cnt[
     return buf
 
 cdef object pickle_loadv(Pickle pkl, void *p, int n, MPI_Count cnt[], MPI_Aint dsp[]):
-    cdef Py_ssize_t i=0, m=n
+    cdef Py_ssize_t m=n
     cdef object items = [None] * m
     if p == NULL: return items
-    for i from 0 <= i < m:
+    for i in range(m):
         items[i] = pickle_load(pkl, <char*>p + dsp[i], cnt[i])
     return items
 
@@ -236,9 +236,8 @@ cdef object pickle_alloc(void **p, MPI_Count n):
     return buf
 
 cdef object pickle_allocv(void **p, int n, MPI_Count cnt[], MPI_Aint dsp[]):
-    cdef int i=0
     cdef MPI_Count d=0
-    for i from 0 <= i < n:
+    for i in range(n):
         dsp[i] = <MPI_Aint> d
         d += cnt[i]
     return pickle_alloc(p, d)
@@ -586,11 +585,11 @@ cdef object PyMPI_waitall(requests, statuses):
     cdef tmp = acquire_rs(requests, True, &count, &irequests, &istatuses)
     try:
         with nogil: CHKERR( MPI_Waitall(count, irequests, istatuses) )
-        bufs = [(<Request>requests[i]).ob_buf for i from 0 <= i < count]
+        bufs = [(<Request>requests[i]).ob_buf for i in range(count)]
     finally:
         release_rs(requests, statuses, count, irequests, count, istatuses)
     #
-    return [PyMPI_load(&istatuses[i], bufs[i]) for i from 0 <= i < count]
+    return [PyMPI_load(&istatuses[i], bufs[i]) for i in range(count)]
 
 cdef object PyMPI_testall(requests, int *flag, statuses):
     cdef object bufs = None
@@ -603,12 +602,12 @@ cdef object PyMPI_testall(requests, int *flag, statuses):
     try:
         with nogil: CHKERR( MPI_Testall(count, irequests, flag, istatuses) )
         if flag[0]:
-            bufs = [(<Request>requests[i]).ob_buf for i from 0 <= i < count]
+            bufs = [(<Request>requests[i]).ob_buf for i in range(count)]
     finally:
         release_rs(requests, statuses, count, irequests, count, istatuses)
     #
     if not flag[0]: return None
-    return [PyMPI_load(&istatuses[i], bufs[i]) for i from 0 <= i < count]
+    return [PyMPI_load(&istatuses[i], bufs[i]) for i in range(count)]
 
 cdef object PyMPI_waitsome(requests, statuses):
     cdef object bufs = None
@@ -626,15 +625,16 @@ cdef object PyMPI_waitsome(requests, statuses):
         with nogil: CHKERR( MPI_Waitsome(
             incount, irequests, &outcount, iindices, istatuses) )
         if outcount != MPI_UNDEFINED:
-            bufs = [(<Request>requests[iindices[i]]).ob_buf
-                    for i from 0 <= i < outcount]
+            bufs = [
+                (<Request>requests[iindices[i]]).ob_buf
+                for i in range(outcount)
+            ]
     finally:
         release_rs(requests, statuses, incount, irequests, outcount, istatuses)
     #
     if outcount != MPI_UNDEFINED:
-        indices = [iindices[i] for i from 0 <= i < outcount]
-        objects = [PyMPI_load(&istatuses[i], bufs[i])
-                   for i from 0 <= i < outcount]
+        indices = [iindices[i] for i in range(outcount)]
+        objects = [PyMPI_load(&istatuses[i], bufs[i]) for i in range(outcount)]
     return (indices, objects)
 
 cdef object PyMPI_testsome(requests, statuses):
@@ -653,15 +653,16 @@ cdef object PyMPI_testsome(requests, statuses):
         with nogil: CHKERR( MPI_Testsome(
             incount, irequests, &outcount, iindices, istatuses) )
         if outcount != MPI_UNDEFINED:
-            bufs = [(<Request>requests[iindices[i]]).ob_buf
-                    for i from 0 <= i < outcount]
+            bufs = [
+                (<Request>requests[iindices[i]]).ob_buf
+                for i in range(outcount)
+            ]
     finally:
         release_rs(requests, statuses, incount, irequests, outcount, istatuses)
     #
     if outcount != MPI_UNDEFINED:
-        indices = [iindices[i] for i from 0 <= i < outcount]
-        objects = [PyMPI_load(&istatuses[i], bufs[i])
-                   for i from 0 <= i < outcount]
+        indices = [iindices[i] for i in range(outcount)]
+        objects = [PyMPI_load(&istatuses[i], bufs[i])for i in range(outcount)]
     return (indices, objects)
 
 # -----------------------------------------------------------------------------
@@ -984,7 +985,7 @@ cdef object PyMPI_neighbor_allgather(object sendobj, MPI_Comm comm):
     cdef MPI_Aint  *rdispls = NULL
     cdef MPI_Datatype rtype = MPI_BYTE
     #
-    cdef int i=0, rsize=0
+    cdef int rsize=0
     comm_neighbors_count(comm, &rsize, NULL)
     #
     cdef object tmps = None
@@ -992,7 +993,7 @@ cdef object PyMPI_neighbor_allgather(object sendobj, MPI_Comm comm):
     cdef object tmp1
     #
     tmp1 = allocate_count_displ(rsize, &rcounts, &rdispls)
-    for i from 0 <= i < rsize: rcounts[i] = 0
+    for i in range(rsize): rcounts[i] = 0
     tmps = pickle_dump(pickle, sendobj, &sbuf, &scount)
     with PyMPI_Lock(comm, "neighbor_allgather"):
         with nogil: CHKERR( MPI_Neighbor_allgather_c(
@@ -1021,7 +1022,7 @@ cdef object PyMPI_neighbor_alltoall(object sendobj, MPI_Comm comm):
     cdef MPI_Aint  *rdispls = NULL
     cdef MPI_Datatype rtype = MPI_BYTE
     #
-    cdef int i=0, ssize=0, rsize=0
+    cdef int ssize=0, rsize=0
     comm_neighbors_count(comm, &rsize, &ssize)
     #
     cdef object tmps = None
@@ -1030,7 +1031,7 @@ cdef object PyMPI_neighbor_alltoall(object sendobj, MPI_Comm comm):
     #
     tmp1 = allocate_count_displ(ssize, &scounts, &sdispls)
     tmp2 = allocate_count_displ(rsize, &rcounts, &rdispls)
-    for i from 0 <= i < rsize: rcounts[i] = 0
+    for i in range(rsize): rcounts[i] = 0
     tmps = pickle_dumpv(pickle, sendobj, &sbuf, ssize, scounts, sdispls)
     with PyMPI_Lock(comm, "neighbor_alltoall"):
         with nogil: CHKERR( MPI_Neighbor_alltoall_c(
@@ -1050,18 +1051,16 @@ cdef object PyMPI_neighbor_alltoall(object sendobj, MPI_Comm comm):
 
 cdef inline object _py_reduce(object seq, object op):
     if seq is None: return None
-    cdef Py_ssize_t i = 0
     cdef Py_ssize_t n = len(seq)
     cdef object res = seq[0]
-    for i from 1 <= i < n:
+    for i in range(1, n):
         res = op(res, seq[i])
     return res
 
 cdef inline object _py_scan(object seq, object op):
     if seq is None: return None
-    cdef Py_ssize_t i = 0
     cdef Py_ssize_t n = len(seq)
-    for i from 1 <= i < n:
+    for i in range(1, n):
         seq[i] = op(seq[i-1], seq[i])
     return seq
 

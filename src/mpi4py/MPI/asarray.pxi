@@ -16,11 +16,10 @@ cdef inline object newarray(Py_ssize_t n, integral_t **p):
     return allocate(n, sizeof(integral_t), p)
 
 cdef inline object getarray(object ob, count_t *n, integral_t **p):
-    cdef Py_ssize_t i = 0
     cdef Py_ssize_t size = len(ob)
     cdef integral_t *base = NULL
     cdef object mem = newarray(size, &base)
-    for i from 0 <= i < size: base[i] = ob[i]
+    for i in range(size): base[i] = ob[i]
     if count_t is int:
         if size > <Py_ssize_t>INT_MAX:
             raise OverflowError("integer {size} does not fit in 'int'")
@@ -41,19 +40,17 @@ cdef inline object chkarray(object ob, count_t n, integral_t **p):
 
 cdef inline object asarray_Datatype(object sequence,
                                     MPI_Count size, MPI_Datatype **p):
-     cdef MPI_Count i = 0
      cdef MPI_Datatype *array = NULL
      if size != len(sequence): raise ValueError(
          f"expecting {size} items, got {len(sequence)}")
      cdef object ob = allocate(size, sizeof(MPI_Datatype), &array)
-     for i from 0 <= i < size:
+     for i in range(size):
          array[i] = (<Datatype?>sequence[i]).ob_mpi
      p[0] = array
      return ob
 
 cdef inline object asarray_Info(object sequence,
                                 MPI_Count size, MPI_Info **p):
-     cdef MPI_Count i = 0
      cdef MPI_Info *array = NULL
      cdef MPI_Info info = MPI_INFO_NULL
      cdef object ob
@@ -61,13 +58,13 @@ cdef inline object asarray_Info(object sequence,
          if sequence is not None:
              info = (<Info?>sequence).ob_mpi
          ob = allocate(size, sizeof(MPI_Info), &array)
-         for i from 0 <= i < size:
+         for i in range(size):
              array[i] = info
      else:
          if size != len(sequence): raise ValueError(
              f"expecting {size} items, got {len(sequence)}")
          ob = allocate(size, sizeof(MPI_Datatype), &array)
-         for i from 0 <= i < size:
+         for i in range(size):
              array[i] = (<Info?>sequence[i]).ob_mpi
      p[0] = array
      return ob
@@ -91,9 +88,9 @@ cdef inline object asstring(object ob, char *s[]):
 
 cdef inline object asarray_str(object sequence, char ***p):
      cdef char** array = NULL
-     cdef Py_ssize_t i = 0, size = len(sequence)
+     cdef Py_ssize_t size = len(sequence)
      cdef object ob = allocate(size+1, sizeof(char*), &array)
-     for i from 0 <= i < size:
+     for i in range(size):
          sequence[i] = asstring(sequence[i], &array[i])
      array[size] = NULL
      p[0] = array
@@ -126,11 +123,10 @@ cdef inline object asarray_argvs(object sequence, int size, char ****p):
          sequence = list(sequence)
          if size != len(sequence): raise ValueError(
              f"expecting {size} items, got {len(sequence)}")
-     cdef int i = 0
      cdef char*** array = NULL
      cdef object ob = allocate(size+1, sizeof(char**), &array)
      cdef object argv
-     for i from 0 <= i < size:
+     for i in range(size):
          argv = sequence[i]
          if argv is None: argv = []
          sequence[i] = asarray_argv(argv, &array[i])
@@ -141,12 +137,12 @@ cdef inline object asarray_argvs(object sequence, int size, char ****p):
 cdef inline object asarray_nprocs(object sequence, int size, int **p):
      cdef object ob
      cdef int *array = NULL
-     cdef int i = 0, value = 1
+     cdef int value = 1
      if sequence is None or is_integral(sequence):
          if sequence is not None:
              value = sequence
          ob = newarray(size, &array)
-         for i from 0 <= i < size:
+         for i in range(size):
              array[i] = value
      else:
          ob = chkarray(sequence, size, &array)

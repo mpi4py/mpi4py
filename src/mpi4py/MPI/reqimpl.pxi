@@ -13,15 +13,15 @@ cdef object acquire_rs(object requests,
      cdef MPI_Request *array_r = NULL
      cdef MPI_Status  *array_s = NULL
      cdef object ob_r = None, ob_s = None
-     cdef Py_ssize_t i = 0, n = len(requests)
+     cdef Py_ssize_t n = len(requests)
      count[0] = <int>n
      ob_r = allocate(n, sizeof(MPI_Request), &array_r)
-     for i from 0 <= i < n:
+     for i in range(n):
          array_r[i] = (<Request?>requests[i]).ob_mpi
      rp[0] = array_r
      if statuses is not None:
          ob_s = allocate(n, sizeof(MPI_Status), &array_s)
-         for i from 0 <= i < n:
+         for i in range(n):
              array_s[i] = empty_status
          sp[0] = array_s
      return (ob_r, ob_s)
@@ -32,9 +32,9 @@ cdef int release_rs(object requests,
                     MPI_Request rp[],
                     Py_ssize_t  outcount,
                     MPI_Status  sp[]) except -1:
-    cdef Py_ssize_t i = 0, nr = incount, ns = 0
+    cdef Py_ssize_t nr = incount, ns = 0
     cdef Request req = None
-    for i from 0 <= i < nr:
+    for i in range(nr):
         req = <Request>requests[i]
         req.ob_mpi = rp[i]
         if rp[i] == MPI_REQUEST_NULL:
@@ -43,10 +43,12 @@ cdef int release_rs(object requests,
         ns = len(statuses)
         if outcount > ns:
             if isinstance(statuses, list):
-                statuses += [Status.__new__(Status)
-                             for _ from ns <= _ < outcount]
+                statuses += [
+                    Status.__new__(Status)
+                    for _ in range (ns, outcount)
+                ]
                 ns = outcount
-        for i from 0 <= i < min(nr, ns):
+        for i in range(min(nr, ns)):
             (<Status?>statuses[i]).ob_mpi = sp[i]
     return 0
 

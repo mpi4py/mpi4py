@@ -314,7 +314,6 @@ cdef _p_message message_vector(object msg,
     cdef _p_message m = message_basic(o_buf, o_type, readonly,
                                       &baddr, &bsize, &btype)
     # counts and displacements
-    cdef int i=0
     cdef MPI_Count *counts = NULL
     cdef MPI_Aint  *displs = NULL
     cdef MPI_Count extent=0, lb=0
@@ -335,26 +334,26 @@ cdef _p_message message_vector(object msg,
                 f"datatype extent {extent} (lb:{lb}, ub:{lb+extent})")
             csize = bsize // extent
         o_counts = newarray(blocks, &counts)
-        for i from 0 <= i < blocks:
+        for i in range(blocks):
             cvalue = (csize // blocks) + (csize % blocks > i)
             counts[i] = cvalue
     elif is_integral(o_counts):
         cvalue = <MPI_Count> o_counts
         o_counts = newarray(blocks, &counts)
-        for i from 0 <= i < blocks:
+        for i in range(blocks):
             counts[i] = cvalue
     else:
         o_counts = chkarray(o_counts, blocks, &counts)
     if o_displs is None: # contiguous
         avalue = 0
         o_displs = newarray(blocks, &displs)
-        for i from 0 <= i < blocks:
+        for i in range(blocks):
             displs[i] = avalue
             avalue += <MPI_Aint> counts[i]
     elif is_integral(o_displs): # strided
         avalue = <MPI_Aint> o_displs
         o_displs = newarray(blocks, &displs)
-        for i from 0 <= i < blocks:
+        for i in range(blocks):
             displs[i] = avalue * i
     else: # general
         o_displs = chkarray(o_displs, blocks, &displs)
@@ -376,7 +375,6 @@ cdef tuple message_vector_w(object msg,
                             MPI_Aint     **_displs,
                             MPI_Datatype **_types,
                             ):
-    cdef int i = 0
     cdef Py_ssize_t nargs = len(msg)
     cdef object o_buffer, o_counts, o_displs, o_types
     if nargs == 2:
@@ -401,7 +399,7 @@ cdef tuple message_vector_w(object msg,
     if o_counts is None and o_displs is None:
         o_counts = newarray(blocks, _counts)
         o_displs = newarray(blocks, _displs)
-        for i from 0 <= i < blocks:
+        for i in range(blocks):
             _counts[0][i] = 1
             _displs[0][i] = 0
     else:
@@ -801,9 +799,8 @@ cdef class _p_msg_cco:
         else:
             self._rcnt = chkarray(rcnt, size, &self.rcounts)
         # total sum or receive counts
-        cdef int i=0
         cdef MPI_Count sumrcounts=0
-        for i from 0 <= i < size:
+        for i in range(size):
             sumrcounts += self.rcounts[i]
         # check counts and datatypes
         if self.sbuf != MPI_IN_PLACE:
