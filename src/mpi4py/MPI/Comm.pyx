@@ -166,7 +166,7 @@ cdef class Comm:
                 &comm.ob_mpi, &request.ob_mpi) )
         else:
             with nogil: CHKERR( MPI_Comm_idup_with_info(
-                self.ob_mpi, info.ob_mpi,
+                self.ob_mpi, cinfo,
                 &comm.ob_mpi, &request.ob_mpi) )
         comm_set_eh(comm.ob_mpi)
         return (comm, request)
