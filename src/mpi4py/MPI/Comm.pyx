@@ -2391,7 +2391,6 @@ cdef class Intracomm(Comm):
             cmd, argv, maxprocs, info.ob_mpi, root,
             self.ob_mpi, &comm.ob_mpi, ierrcodes) )
         #
-        cdef int i=0
         if errcodes is not None:
             errcodes[:] = [ierrcodes[i] for i from 0 <= i < maxprocs]
         #
@@ -2438,9 +2437,9 @@ cdef class Intracomm(Comm):
             count, cmds, argvs, imaxprocs, infos, root,
             self.ob_mpi, &comm.ob_mpi, ierrcodes) )
         #
-        cdef int j=0, p=0, q=0
+        cdef int p=0, q=0
         if errcodes is not None:
-            errcodes[:] = [[] for j from 0 <= j < count]
+            errcodes[:] = [[] for _ from 0 <= _ < count]
             for i from 0 <= i < count:
                 q = p + imaxprocs[i]
                 errcodes[i][:] = [ierrcodes[j] for j from p <= j < q]
@@ -2896,7 +2895,6 @@ cdef class Cartcomm(Topocomm):
         cdef int *icoords = NULL
         cdef tmp3 = newarray(ndim, &icoords)
         CHKERR( MPI_Cart_get(self.ob_mpi, ndim, idims, iperiods, icoords) )
-        cdef int i = 0
         cdef object dims    = [idims[i]    for i from 0 <= i < ndim]
         cdef object periods = [iperiods[i] for i from 0 <= i < ndim]
         cdef object coords  = [icoords[i]  for i from 0 <= i < ndim]
@@ -2941,7 +2939,7 @@ cdef class Cartcomm(Topocomm):
         """
         Translate ranks to logical coordinates
         """
-        cdef int i = 0, ndim = 0, *icoords = NULL
+        cdef int ndim = 0, *icoords = NULL
         CHKERR( MPI_Cartdim_get(self.ob_mpi, &ndim) )
         cdef tmp = newarray(ndim, &icoords)
         CHKERR( MPI_Cart_coords(self.ob_mpi, rank, ndim, icoords) )
@@ -2984,7 +2982,7 @@ def Compute_dims(int nnodes: int, dims: Union[int, Sequence[int]]) -> List[int]:
     Return a balanced distribution of
     processes per coordinate direction
     """
-    cdef int i = 0, ndims = 0, *idims = NULL
+    cdef int ndims = 0, *idims = NULL
     try:
         ndims = <int>len(dims)
     except:
@@ -3046,7 +3044,6 @@ cdef class Graphcomm(Topocomm):
         cdef int *iedges = NULL
         cdef tmp2 = newarray(nedges, &iedges)
         CHKERR( MPI_Graph_get(self.ob_mpi, nindex, nedges, iindex, iedges) )
-        cdef int i = 0
         cdef object index = [iindex[i] for i from 0 <= i < nindex]
         cdef object edges = [iedges[i] for i from 0 <= i < nedges]
         return (index, edges)
@@ -3087,7 +3084,7 @@ cdef class Graphcomm(Topocomm):
         """
         Return list of neighbors of a process
         """
-        cdef int i = 0, nneighbors = 0, *ineighbors = NULL
+        cdef int nneighbors = 0, *ineighbors = NULL
         CHKERR( MPI_Graph_neighbors_count(
                 self.ob_mpi, rank, &nneighbors) )
         cdef tmp = newarray(nneighbors, &ineighbors)

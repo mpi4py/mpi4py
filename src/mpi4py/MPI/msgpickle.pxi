@@ -456,7 +456,6 @@ cdef object PyMPI_issend(object obj, int dest, int tag,
 
 cdef object PyMPI_irecv(object obj, int source, int tag,
                         MPI_Comm comm, MPI_Request *request):
-    cdef Pickle pickle = PyMPI_PICKLE
     #
     cdef void *rbuf = NULL
     cdef MPI_Aint rlen = 0
@@ -580,7 +579,6 @@ cdef object PyMPI_testany(requests, int *index, int *flag, Status status):
 cdef object PyMPI_waitall(requests, statuses):
     cdef object bufs = None
     #
-    cdef Py_ssize_t i = 0
     cdef int count = 0
     cdef MPI_Request *irequests = NULL
     cdef MPI_Status *istatuses = MPI_STATUSES_IGNORE
@@ -597,7 +595,6 @@ cdef object PyMPI_waitall(requests, statuses):
 cdef object PyMPI_testall(requests, int *flag, statuses):
     cdef object bufs = None
     #
-    cdef Py_ssize_t i = 0
     cdef int count = 0
     cdef MPI_Request *irequests = NULL
     cdef MPI_Status *istatuses = MPI_STATUSES_IGNORE
@@ -618,7 +615,6 @@ cdef object PyMPI_waitsome(requests, statuses):
     cdef object indices = None
     cdef object objects = None
     #
-    cdef Py_ssize_t i = 0
     cdef int incount = 0
     cdef MPI_Request *irequests = NULL
     cdef int outcount = MPI_UNDEFINED, *iindices = NULL
@@ -646,7 +642,6 @@ cdef object PyMPI_testsome(requests, statuses):
     cdef object indices = None
     cdef object objects = None
     #
-    cdef Py_ssize_t i = 0
     cdef int incount = 0
     cdef MPI_Request *irequests = NULL
     cdef int outcount = MPI_UNDEFINED, *iindices = NULL
@@ -684,7 +679,6 @@ cdef object PyMPI_iprobe(int source, int tag,
 
 cdef object PyMPI_mprobe(int source, int tag, MPI_Comm comm,
                          MPI_Message *message, MPI_Status *status):
-    cdef Pickle pickle = PyMPI_PICKLE
     cdef void* rbuf = NULL
     cdef MPI_Count rcount = 0
     cdef MPI_Datatype rtype = MPI_BYTE
@@ -698,7 +692,6 @@ cdef object PyMPI_mprobe(int source, int tag, MPI_Comm comm,
 
 cdef object PyMPI_improbe(int source, int tag, MPI_Comm comm, int *flag,
                           MPI_Message *message, MPI_Status *status):
-    cdef Pickle pickle = PyMPI_PICKLE
     cdef void* rbuf = NULL
     cdef MPI_Count rcount = 0
     cdef MPI_Datatype rtype = MPI_BYTE

@@ -44,7 +44,7 @@ cdef int release_rs(object requests,
         if outcount > ns:
             if isinstance(statuses, list):
                 statuses += [Status.__new__(Status)
-                             for i from ns <= i < outcount]
+                             for _ from ns <= _ < outcount]
                 ns = outcount
         for i from 0 <= i < min(nr, ns):
             (<Status?>statuses[i]).ob_mpi = sp[i]

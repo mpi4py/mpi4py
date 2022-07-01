@@ -41,7 +41,7 @@ cdef inline object chkarray(object ob, count_t n, integral_t **p):
 
 cdef inline object asarray_Datatype(object sequence,
                                     MPI_Count size, MPI_Datatype **p):
-     cdef int MPI_Count = 0
+     cdef MPI_Count i = 0
      cdef MPI_Datatype *array = NULL
      if size != len(sequence): raise ValueError(
          f"expecting {size} items, got {len(sequence)}")

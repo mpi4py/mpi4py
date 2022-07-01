@@ -67,7 +67,7 @@ cdef class Group:
         """
         cdef MPI_Group grp1 = MPI_GROUP_NULL
         cdef MPI_Group grp2 = MPI_GROUP_NULL
-        cdef int i = 0, n = 0, *iranks1 = NULL, *iranks2 = NULL
+        cdef int n = 0, *iranks1 = NULL, *iranks2 = NULL
         cdef tmp1 = getarray(ranks1, &n, &iranks1)
         cdef tmp2 = newarray(n, &iranks2)
         #
