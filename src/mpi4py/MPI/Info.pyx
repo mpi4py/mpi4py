@@ -184,9 +184,9 @@ cdef class Info:
         """info keys"""
         if not self: return []
         cdef list keys = []
-        cdef int k = 0, nkeys = self.Get_nkeys()
+        cdef int nkeys = self.Get_nkeys()
         cdef object key
-        for k from 0 <= k < nkeys:
+        for k in range(nkeys):
             key = self.Get_nthkey(k)
             keys.append(key)
         return keys
@@ -195,9 +195,9 @@ cdef class Info:
         """info values"""
         if not self: return []
         cdef list values = []
-        cdef int k = 0, nkeys = self.Get_nkeys()
+        cdef int nkeys = self.Get_nkeys()
         cdef object key, val
-        for k from 0 <= k < nkeys:
+        for k in range(nkeys):
             key = self.Get_nthkey(k)
             val = self.Get(key)
             values.append(val)
@@ -207,9 +207,9 @@ cdef class Info:
         """info items"""
         if not self: return []
         cdef list items = []
-        cdef int k = 0, nkeys = self.Get_nkeys()
+        cdef int nkeys = self.Get_nkeys()
         cdef object key, value
-        for k from 0 <= k < nkeys:
+        for k in range(nkeys):
             key = self.Get_nthkey(k)
             value = self.Get(key)
             items.append((key, value))

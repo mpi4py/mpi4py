@@ -189,7 +189,7 @@ cdef class Request:
         #
         cdef object indices = None
         if outcount != MPI_UNDEFINED:
-            indices = [iindices[i] for i from 0 <= i < outcount]
+            indices = [iindices[i] for i in range(outcount)]
         return indices
 
     @classmethod
@@ -219,7 +219,7 @@ cdef class Request:
         #
         cdef object indices = None
         if outcount != MPI_UNDEFINED:
-            indices = [iindices[i] for i from 0 <= i < outcount]
+            indices = [iindices[i] for i in range(outcount)]
         return indices
 
     # Cancel

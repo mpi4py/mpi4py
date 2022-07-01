@@ -83,7 +83,7 @@ cdef class Group:
             if group2 is None:
                 CHKERR( MPI_Group_free(&grp2) )
         #
-        cdef object ranks2 = [iranks2[i] for i from 0 <= i < n]
+        cdef object ranks2 = [iranks2[i] for i in range(n)]
         return ranks2
 
     @classmethod
@@ -170,9 +170,9 @@ cdef class Group:
         """
         cdef int *p = NULL, (*ranges)[3]# = NULL ## XXX cython fails
         ranges = NULL
-        cdef int i = 0, n = <int>len(ranks)
+        cdef int n = <int>len(ranks)
         cdef tmp1 = allocate(n, sizeof(int[3]), &ranges)
-        for i from 0 <= i < n:
+        for i in range(n):
             p = <int*> ranges[i]
             p[0], p[1], p[2] = ranks[i]
         cdef Group group = Group.__new__(Group)
@@ -186,9 +186,9 @@ cdef class Group:
         """
         cdef int *p = NULL, (*ranges)[3]# = NULL ## XXX cython fails
         ranges = NULL
-        cdef int i = 0, n = <int>len(ranks)
+        cdef int n = <int>len(ranks)
         cdef tmp1 = allocate(n, sizeof(int[3]), &ranges)
-        for i from 0 <= i < n:
+        for i in range(n):
             p = <int*> ranges[i]
             p[0], p[1], p[2] = ranks[i]
         cdef Group group = Group.__new__(Group)

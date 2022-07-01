@@ -2147,12 +2147,12 @@ cdef class Intracomm(Comm):
         """
         Create distributed graph communicator
         """
-        cdef int nv = 0, ne = 0, i = 0
+        cdef int nv = 0, ne = 0
         cdef int *isource = NULL, *idegree = NULL,
         cdef int *idest = NULL, *iweight = MPI_UNWEIGHTED
         sources = getarray(sources, &nv, &isource)
         degrees = chkarray(degrees,  nv, &idegree)
-        for i from 0 <= i < nv: ne += idegree[i]
+        for i in range(nv): ne += idegree[i]
         destinations = chkarray(destinations, ne, &idest)
         weights = asarray_weights(weights, ne, &iweight)
         #
@@ -2392,7 +2392,7 @@ cdef class Intracomm(Comm):
             self.ob_mpi, &comm.ob_mpi, ierrcodes) )
         #
         if errcodes is not None:
-            errcodes[:] = [ierrcodes[i] for i from 0 <= i < maxprocs]
+            errcodes[:] = [ierrcodes[i] for i in range(maxprocs)]
         #
         comm_set_eh(comm.ob_mpi)
         return comm
@@ -2424,12 +2424,12 @@ cdef class Intracomm(Comm):
             tmp2 = asarray_argvs(args, count, &argvs)
             tmp3 = asarray_nprocs(maxprocs, count, &imaxprocs)
             tmp4 = asarray_Info(info, count, &infos)
-        cdef int i=0, np=0
+        cdef int np = 0
         if errcodes is not None:
             if root != rank:
                 count = <int>len(maxprocs)
                 tmp3 = asarray_nprocs(maxprocs, count, &imaxprocs)
-            for i from 0 <= i < count: np += imaxprocs[i]
+            for i in range(count): np += imaxprocs[i]
             tmp5 = newarray(np, &ierrcodes)
         #
         cdef Intercomm comm = Intercomm.__new__(Intercomm)
@@ -2439,10 +2439,10 @@ cdef class Intracomm(Comm):
         #
         cdef int p=0, q=0
         if errcodes is not None:
-            errcodes[:] = [[] for _ from 0 <= _ < count]
-            for i from 0 <= i < count:
+            errcodes[:] = [[] for _ in range(count)]
+            for i in range(count):
                 q = p + imaxprocs[i]
-                errcodes[i][:] = [ierrcodes[j] for j from p <= j < q]
+                errcodes[i][:] = [ierrcodes[j] for j in range(p, q)]
                 p = q
         #
         comm_set_eh(comm.ob_mpi)
@@ -2895,9 +2895,9 @@ cdef class Cartcomm(Topocomm):
         cdef int *icoords = NULL
         cdef tmp3 = newarray(ndim, &icoords)
         CHKERR( MPI_Cart_get(self.ob_mpi, ndim, idims, iperiods, icoords) )
-        cdef object dims    = [idims[i]    for i from 0 <= i < ndim]
-        cdef object periods = [iperiods[i] for i from 0 <= i < ndim]
-        cdef object coords  = [icoords[i]  for i from 0 <= i < ndim]
+        cdef object dims    = [idims[i]    for i in range(ndim)]
+        cdef object periods = [iperiods[i] for i in range(ndim)]
+        cdef object coords  = [icoords[i]  for i in range(ndim)]
         return (dims, periods, coords)
 
     property topo:
@@ -2943,7 +2943,7 @@ cdef class Cartcomm(Topocomm):
         CHKERR( MPI_Cartdim_get(self.ob_mpi, &ndim) )
         cdef tmp = newarray(ndim, &icoords)
         CHKERR( MPI_Cart_coords(self.ob_mpi, rank, ndim, icoords) )
-        cdef object coords = [icoords[i] for i from 0 <= i < ndim]
+        cdef object coords = [icoords[i] for i in range(ndim)]
         return coords
 
     # Cartesian Shift Function
@@ -2990,7 +2990,7 @@ def Compute_dims(int nnodes: int, dims: Union[int, Sequence[int]]) -> List[int]:
         dims = [0] * ndims
     cdef tmp = chkarray(dims, ndims, &idims)
     CHKERR( MPI_Dims_create(nnodes, ndims, idims) )
-    dims = [idims[i] for i from 0 <= i < ndims]
+    dims = [idims[i] for i in range(ndims)]
     return dims
 
 
@@ -3044,8 +3044,8 @@ cdef class Graphcomm(Topocomm):
         cdef int *iedges = NULL
         cdef tmp2 = newarray(nedges, &iedges)
         CHKERR( MPI_Graph_get(self.ob_mpi, nindex, nedges, iindex, iedges) )
-        cdef object index = [iindex[i] for i from 0 <= i < nindex]
-        cdef object edges = [iedges[i] for i from 0 <= i < nedges]
+        cdef object index = [iindex[i] for i in range(nindex)]
+        cdef object edges = [iedges[i] for i in range(nedges)]
         return (index, edges)
 
     property topo:
@@ -3090,7 +3090,7 @@ cdef class Graphcomm(Topocomm):
         cdef tmp = newarray(nneighbors, &ineighbors)
         CHKERR( MPI_Graph_neighbors(
                 self.ob_mpi, rank, nneighbors, ineighbors) )
-        cdef object neighbors = [ineighbors[i] for i from 0 <= i < nneighbors]
+        cdef object neighbors = [ineighbors[i] for i in range(nneighbors)]
         return neighbors
 
     property neighbors:
@@ -3142,24 +3142,25 @@ cdef class Distgraphcomm(Topocomm):
         cdef tmp1, tmp2, tmp3, tmp4
         tmp1 = newarray(maxindegree,  &sources)
         tmp2 = newarray(maxoutdegree, &destinations)
-        cdef int i = 0
         if weighted:
-            tmp3 = newarray(maxindegree,  &sourceweights)
-            for i from 0 <= i < maxindegree:  sourceweights[i] = 1
+            tmp3 = newarray(maxindegree, &sourceweights)
+            for i in range(maxindegree):
+                sourceweights[i] = 1
             tmp4 = newarray(maxoutdegree, &destweights)
-            for i from 0 <= i < maxoutdegree: destweights[i]   = 1
+            for i in range(maxoutdegree):
+                destweights[i]   = 1
         #
         CHKERR( MPI_Dist_graph_neighbors(
                 self.ob_mpi,
                 maxindegree,  sources,      sourceweights,
                 maxoutdegree, destinations, destweights) )
         #
-        cdef object src = [sources[i]      for i from 0 <= i < maxindegree]
-        cdef object dst = [destinations[i] for i from 0 <= i < maxoutdegree]
+        cdef object src = [sources[i]      for i in range(maxindegree)]
+        cdef object dst = [destinations[i] for i in range(maxoutdegree)]
         if not weighted: return (src, dst, None)
         #
-        cdef object sw = [sourceweights[i] for i from 0 <= i < maxindegree]
-        cdef object dw = [destweights[i]   for i from 0 <= i < maxoutdegree]
+        cdef object sw = [sourceweights[i] for i in range(maxindegree)]
+        cdef object dw = [destweights[i]   for i in range(maxoutdegree)]
         return (src, dst, (sw, dw))
 
 

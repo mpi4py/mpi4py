@@ -76,7 +76,7 @@ cdef inline int dlpack_is_contig(const DLTensor *dltensor, char order) nogil:
     else:
         start = ndim - 1
         step = -1
-    for i from 0 <= i < ndim:
+    for i in range(ndim):
         index = start + step * i
         if size != strides[index]:
             return 0
@@ -89,11 +89,11 @@ cdef inline int dlpack_check_shape(const DLTensor *dltensor) except -1:
         raise BufferError("dlpack: number of dimensions is negative")
     if ndim > 0 and dltensor.shape == NULL:
         raise BufferError("dlpack: shape is NULL")
-    for i from 0 <= i < ndim:
+    for i in range(ndim):
         if dltensor.shape[i] < 0:
             raise BufferError("dlpack: shape item is negative")
     if dltensor.strides != NULL:
-        for i from 0 <= i < ndim:
+        for i in range(ndim):
             if dltensor.strides[i] < 0:
                 raise BufferError("dlpack: strides item is negative")
     return 0
@@ -113,7 +113,7 @@ cdef inline Py_ssize_t dlpack_get_size(const DLTensor *dltensor) nogil:
     cdef Py_ssize_t bits = dltensor.dtype.bits
     cdef Py_ssize_t lanes = dltensor.dtype.lanes
     cdef Py_ssize_t size = 1
-    for i from 0 <= i < ndim:
+    for i in range(ndim):
         size *= <Py_ssize_t> shape[i]
     size *= (bits * lanes + 7) // 8
     return size
