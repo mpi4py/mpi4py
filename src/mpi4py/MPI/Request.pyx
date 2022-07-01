@@ -187,7 +187,6 @@ cdef class Request:
                        incount, irequests,
                        outcount, istatuses)
         #
-        cdef int i = 0
         cdef object indices = None
         if outcount != MPI_UNDEFINED:
             indices = [iindices[i] for i from 0 <= i < outcount]
@@ -218,7 +217,6 @@ cdef class Request:
                        incount, irequests,
                        outcount, istatuses)
         #
-        cdef int i = 0
         cdef object indices = None
         if outcount != MPI_UNDEFINED:
             indices = [iindices[i] for i from 0 <= i < outcount]

@@ -193,6 +193,7 @@ cdef int Py_GetDLPackBuffer(object obj, Py_buffer *view, int flags) except -1:
         capsule = dlpack()
     else:
         capsule = dlpack(stream=-1)
+        <void> device_id # unused
     if not PyCapsule_IsValid(capsule, b"dltensor"):
         raise BufferError("dlpack: invalid capsule object")
 

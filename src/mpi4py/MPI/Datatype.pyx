@@ -537,7 +537,6 @@ cdef class Datatype:
         cdef tmp4 = allocate(nd, sizeof(MPI_Datatype), &d)
         CHKERR( MPI_Type_get_contents_c(
             self.ob_mpi, ni, na, nc, nd, i, a, c, d) )
-        cdef MPI_Count k = 0
         cdef object integers  = [i[k] for k from 0 <= k < ni]
         cdef object addresses = [a[k] for k from 0 <= k < na]
         cdef object counts    = [c[k] for k from 0 <= k < nc]
@@ -573,7 +572,6 @@ cdef class Datatype:
         CHKERR( MPI_Type_get_contents_c(
             self.ob_mpi, ni, na, nc, nd, i, a, c, d) )
         # manage in advance the contained datatypes
-        cdef MPI_Count k = 0
         cdef object oldtype = None
         if combiner == MPI_COMBINER_STRUCT:
             oldtype = [ref_Datatype(d[k]) for k from 0 <= k < nd]
