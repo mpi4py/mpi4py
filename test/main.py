@@ -89,7 +89,14 @@ def setup_parser(parser):
 
 
 def getbuilddir():
-    from distutils.util import get_platform
+    try:
+        import setuptools
+    except ImportError:
+        pass
+    try:
+        from distutils.util import get_platform
+    except ImportError:
+        from sysconfig import get_platform
     plat_name = get_platform()
     x, y = sys.version_info[:2]
     buildlib = f"lib.{plat_name}-{x}.{y}"
