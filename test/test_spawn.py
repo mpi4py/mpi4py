@@ -58,9 +58,9 @@ def using_GPU():
     # Note: This seems to be a partial fix. Even if we are running cpu-only
     # tests, if MPI is built with CUDA support we can still fail. Unfortunately
     # there is no runtime check for us to detect if it's the case...
-    disabled_cupy = (sys.modules.get('cupy', -1) is None)
-    disabled_numba = (sys.modules.get('numba', -1) is None)
-    return False if (disabled_cupy and disabled_numba) else True
+    using_cupy = (sys.modules.get('cupy') is not None)
+    using_numba = (sys.modules.get('numba') is not None)
+    return using_cupy or using_numba
 
 
 @unittest.skipMPI('MPI(<2.0)')
