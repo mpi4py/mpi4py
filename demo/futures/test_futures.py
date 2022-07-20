@@ -1428,7 +1428,7 @@ if name == 'MPICH':
         if version >= (3, 4) and version < (4, 0):
             SKIP_POOL_TEST = True
     if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
-        SKIP_POOL_TEST = True
+        SKIP_POOL_TEST = (version < (4, 1))
     try:
         port = MPI.Open_port()
         MPI.Close_port(port)

@@ -86,8 +86,8 @@ class TestWorldAttrs(unittest.TestCase):
         if appnum is not None:
             self.assertTrue(appnum == MPI.UNDEFINED or appnum >= 0)
 
-    @unittest.skipMPI('MPICH(>1.2.0)', appnum() is None)
-    @unittest.skipMPI('MVAPICH2', appnum() is None)
+    @unittest.skipMPI('mpich(<4.1.0)', appnum() is None)
+    @unittest.skipMPI('mvapich2', appnum() is None)
     @unittest.skipMPI('MPICH2', appnum() is None)
     @unittest.skipIf(MPI.UNIVERSE_SIZE == MPI.KEYVAL_INVALID, 'mpi-universe-size')
     def testUniverseSize(self):
