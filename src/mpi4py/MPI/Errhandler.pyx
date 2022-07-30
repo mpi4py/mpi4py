@@ -6,21 +6,14 @@ cdef class Errhandler:
 
     def __cinit__(self, Errhandler errhandler: Optional[Errhandler] = None):
         self.ob_mpi = MPI_ERRHANDLER_NULL
-        if errhandler is None: return
-        self.ob_mpi = errhandler.ob_mpi
+        cinit(self, errhandler)
 
     def __dealloc__(self):
-        if not (self.flags & PyMPI_OWNED): return
-        CHKERR( del_Errhandler(&self.ob_mpi) )
+        dealloc(self)
 
     def __richcmp__(self, other, int op):
         if not isinstance(other, Errhandler): return NotImplemented
-        cdef Errhandler s = <Errhandler>self, o = <Errhandler>other
-        if   op == Py_EQ: return (s.ob_mpi == o.ob_mpi)
-        elif op == Py_NE: return (s.ob_mpi != o.ob_mpi)
-        cdef mod = type(self).__module__
-        cdef cls = type(self).__name__
-        raise TypeError(f"unorderable type: '{mod}.{cls}'")
+        return richcmp(self, other, op)
 
     def __bool__(self) -> bool:
         return self.ob_mpi != MPI_ERRHANDLER_NULL
@@ -46,16 +39,14 @@ cdef class Errhandler:
     def f2py(cls, arg: int) -> Errhandler:
         """
         """
-        cdef Errhandler errhandler = Errhandler.__new__(Errhandler)
-        errhandler.ob_mpi = MPI_Errhandler_f2c(arg)
-        return errhandler
+        return PyMPIErrhandler_New(MPI_Errhandler_f2c(arg))
 
 
 
-cdef Errhandler __ERRHANDLER_NULL__  = new_Errhandler(MPI_ERRHANDLER_NULL)
-cdef Errhandler __ERRORS_RETURN__    = new_Errhandler(MPI_ERRORS_RETURN)
-cdef Errhandler __ERRORS_ABORT__     = new_Errhandler(MPI_ERRORS_ABORT)
-cdef Errhandler __ERRORS_ARE_FATAL__ = new_Errhandler(MPI_ERRORS_ARE_FATAL)
+cdef Errhandler __ERRHANDLER_NULL__  = def_Errhandler( MPI_ERRHANDLER_NULL  )
+cdef Errhandler __ERRORS_RETURN__    = def_Errhandler( MPI_ERRORS_RETURN    )
+cdef Errhandler __ERRORS_ABORT__     = def_Errhandler( MPI_ERRORS_ABORT     )
+cdef Errhandler __ERRORS_ARE_FATAL__ = def_Errhandler( MPI_ERRORS_ARE_FATAL )
 
 
 # Predefined errhandler handles

@@ -6,24 +6,14 @@ cdef class Op:
 
     def __cinit__(self, Op op: Optional[Op] = None):
         self.ob_mpi = MPI_OP_NULL
-        if op is None: return
-        self.ob_mpi = op.ob_mpi
-        self.ob_func = op.ob_func
-        self.ob_usrid = op.ob_usrid
+        cinit(self, op)
 
     def __dealloc__(self):
-        if not (self.flags & PyMPI_OWNED): return
-        CHKERR( del_Op(&self.ob_mpi) )
-        op_user_del(&self.ob_usrid)
+        dealloc(self)
 
     def __richcmp__(self, other, int op):
         if not isinstance(other, Op): return NotImplemented
-        cdef Op s = <Op>self, o = <Op>other
-        if   op == Py_EQ: return (s.ob_mpi == o.ob_mpi)
-        elif op == Py_NE: return (s.ob_mpi != o.ob_mpi)
-        cdef mod = type(self).__module__
-        cdef cls = type(self).__name__
-        raise TypeError(f"unorderable type: '{mod}.{cls}'")
+        return richcmp(self, other, op)
 
     def __bool__(self) -> bool:
         return self.ob_mpi != MPI_OP_NULL
@@ -140,27 +130,25 @@ cdef class Op:
     def f2py(cls, arg: int) -> Op:
         """
         """
-        cdef Op op = Op.__new__(Op)
-        op.ob_mpi = MPI_Op_f2c(arg)
-        return op
+        return PyMPIOp_New(MPI_Op_f2c(arg))
 
 
 
-cdef Op __OP_NULL__ = new_Op( MPI_OP_NULL )
-cdef Op __MAX__     = new_Op( MPI_MAX     )
-cdef Op __MIN__     = new_Op( MPI_MIN     )
-cdef Op __SUM__     = new_Op( MPI_SUM     )
-cdef Op __PROD__    = new_Op( MPI_PROD    )
-cdef Op __LAND__    = new_Op( MPI_LAND    )
-cdef Op __BAND__    = new_Op( MPI_BAND    )
-cdef Op __LOR__     = new_Op( MPI_LOR     )
-cdef Op __BOR__     = new_Op( MPI_BOR     )
-cdef Op __LXOR__    = new_Op( MPI_LXOR    )
-cdef Op __BXOR__    = new_Op( MPI_BXOR    )
-cdef Op __MAXLOC__  = new_Op( MPI_MAXLOC  )
-cdef Op __MINLOC__  = new_Op( MPI_MINLOC  )
-cdef Op __REPLACE__ = new_Op( MPI_REPLACE )
-cdef Op __NO_OP__   = new_Op( MPI_NO_OP   )
+cdef Op __OP_NULL__ = def_Op( MPI_OP_NULL )
+cdef Op __MAX__     = def_Op( MPI_MAX     )
+cdef Op __MIN__     = def_Op( MPI_MIN     )
+cdef Op __SUM__     = def_Op( MPI_SUM     )
+cdef Op __PROD__    = def_Op( MPI_PROD    )
+cdef Op __LAND__    = def_Op( MPI_LAND    )
+cdef Op __BAND__    = def_Op( MPI_BAND    )
+cdef Op __LOR__     = def_Op( MPI_LOR     )
+cdef Op __BOR__     = def_Op( MPI_BOR     )
+cdef Op __LXOR__    = def_Op( MPI_LXOR    )
+cdef Op __BXOR__    = def_Op( MPI_BXOR    )
+cdef Op __MAXLOC__  = def_Op( MPI_MAXLOC  )
+cdef Op __MINLOC__  = def_Op( MPI_MINLOC  )
+cdef Op __REPLACE__ = def_Op( MPI_REPLACE )
+cdef Op __NO_OP__   = def_Op( MPI_NO_OP   )
 
 
 # Predefined operation handles

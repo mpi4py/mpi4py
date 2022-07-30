@@ -6,22 +6,14 @@ cdef class Request:
 
     def __cinit__(self, Request request: Optional[Request] = None):
         self.ob_mpi = MPI_REQUEST_NULL
-        if request is None: return
-        self.ob_mpi = request.ob_mpi
-        self.ob_buf = request.ob_buf
+        cinit(self, request)
 
     def __dealloc__(self):
-        if not (self.flags & PyMPI_OWNED): return
-        CHKERR( del_Request(&self.ob_mpi) )
+        dealloc(self)
 
     def __richcmp__(self, other, int op):
         if not isinstance(other, Request): return NotImplemented
-        cdef Request s = <Request>self, o = <Request>other
-        if   op == Py_EQ: return (s.ob_mpi == o.ob_mpi)
-        elif op == Py_NE: return (s.ob_mpi != o.ob_mpi)
-        cdef mod = type(self).__module__
-        cdef cls = type(self).__name__
-        raise TypeError(f"unorderable type: '{mod}.{cls}'")
+        return richcmp(self, other, op)
 
     def __bool__(self) -> bool:
         return self.ob_mpi != MPI_REQUEST_NULL
@@ -243,13 +235,11 @@ cdef class Request:
     def f2py(cls, arg: int) -> Request:
         """
         """
-        cdef Request request = Request.__new__(Request)
         if issubclass(cls, Prequest):
-            request = <Request>Prequest.__new__(Prequest)
+            return PyMPIPrequest_New(MPI_Request_f2c(arg))
         if issubclass(cls, Grequest):
-            request = <Request>Grequest.__new__(Grequest)
-        request.ob_mpi = MPI_Request_f2c(arg)
-        return request
+            return PyMPIGrequest_New(MPI_Request_f2c(arg))
+        return PyMPIRequest_New(MPI_Request_f2c(arg))
 
     # Python Communication
     # --------------------
@@ -491,7 +481,7 @@ cdef class Grequest(Request):
 
 
 
-cdef Request __REQUEST_NULL__ = new_Request(MPI_REQUEST_NULL)
+cdef Request __REQUEST_NULL__ = def_Request( MPI_REQUEST_NULL )
 
 
 # Predefined request handles

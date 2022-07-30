@@ -18,9 +18,9 @@ cdef class Status:
         cdef int ne = memcmp(&s.ob_mpi, &o.ob_mpi, sizeof(MPI_Status))
         if   op == Py_EQ: return (ne == 0)
         elif op == Py_NE: return (ne != 0)
-        cdef mod = type(self).__module__
-        cdef cls = type(self).__name__
-        raise TypeError(f"unorderable type: '{mod}.{cls}'")
+        cdef str mod = type(self).__module__
+        cdef str cls = type(self).__name__
+        raise TypeError(f"unorderable type '{mod}.{cls}'")
 
     def Get_source(self) -> int:
         """
