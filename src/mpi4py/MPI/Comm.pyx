@@ -38,21 +38,14 @@ cdef class Comm:
 
     def __cinit__(self, Comm comm: Optional[Comm] = None):
         self.ob_mpi = MPI_COMM_NULL
-        if comm is None: return
-        self.ob_mpi = comm.ob_mpi
+        cinit(self, comm)
 
     def __dealloc__(self):
-        if not (self.flags & PyMPI_OWNED): return
-        CHKERR( del_Comm(&self.ob_mpi) )
+        dealloc(self)
 
     def __richcmp__(self, other, int op):
         if not isinstance(other, Comm): return NotImplemented
-        cdef Comm s = <Comm>self, o = <Comm>other
-        if   op == Py_EQ: return (s.ob_mpi == o.ob_mpi)
-        elif op == Py_NE: return (s.ob_mpi != o.ob_mpi)
-        cdef mod = type(self).__module__
-        cdef cls = type(self).__name__
-        raise TypeError(f"unorderable type: '{mod}.{cls}'")
+        return richcmp(self, other, op)
 
     def __bool__(self) -> bool:
         return self.ob_mpi != MPI_COMM_NULL
@@ -119,8 +112,8 @@ cdef class Comm:
         """
         Clone an existing communicator
         """
-        cdef type comm_type = type(self)
-        cdef Comm comm = <Comm>comm_type.__new__(comm_type)
+        cdef type cls = type(self)
+        cdef Comm comm = <Comm>cls.__new__(cls)
         with nogil: CHKERR( MPI_Comm_dup(self.ob_mpi, &comm.ob_mpi) )
         comm_set_eh(comm.ob_mpi)
         return comm
@@ -130,8 +123,8 @@ cdef class Comm:
         Duplicate an existing communicator
         """
         cdef MPI_Info cinfo = arg_Info(info)
-        cdef type comm_type = type(self)
-        cdef Comm comm = <Comm>comm_type.__new__(comm_type)
+        cdef type cls = type(self)
+        cdef Comm comm = <Comm>cls.__new__(cls)
         if info is None:
             with nogil: CHKERR( MPI_Comm_dup(
                 self.ob_mpi, &comm.ob_mpi) )
@@ -145,8 +138,8 @@ cdef class Comm:
         """
         Duplicate an existing communicator
         """
-        cdef type comm_type = type(self)
-        cdef Comm comm = <Comm>comm_type.__new__(comm_type)
+        cdef type cls = type(self)
+        cdef Comm comm = <Comm>cls.__new__(cls)
         with nogil: CHKERR( MPI_Comm_dup_with_info(
             self.ob_mpi, info.ob_mpi, &comm.ob_mpi) )
         comm_set_eh(comm.ob_mpi)
@@ -157,8 +150,8 @@ cdef class Comm:
         Nonblocking duplicate an existing communicator
         """
         cdef MPI_Info cinfo = arg_Info(info)
-        cdef type comm_type = type(self)
-        cdef Comm comm = <Comm>comm_type.__new__(comm_type)
+        cdef type cls = type(self)
+        cdef Comm comm = <Comm>cls.__new__(cls)
         cdef Request request = Request.__new__(Request)
         if info is None:
             with nogil: CHKERR( MPI_Comm_idup(
@@ -175,8 +168,8 @@ cdef class Comm:
         """
         Duplicate an existing communicator
         """
-        cdef type comm_type = type(self)
-        cdef Comm comm = <Comm>comm_type.__new__(comm_type)
+        cdef type cls = type(self)
+        cdef Comm comm = <Comm>cls.__new__(cls)
         cdef Request request = Request.__new__(Request)
         with nogil: CHKERR( MPI_Comm_idup_with_info(
             self.ob_mpi, info.ob_mpi,
@@ -188,10 +181,10 @@ cdef class Comm:
         """
         Create communicator from group
         """
-        cdef type comm_type = Comm
-        if   isinstance(self, Intracomm): comm_type = Intracomm
-        elif isinstance(self, Intercomm): comm_type = Intercomm
-        cdef Comm comm = <Comm>comm_type.__new__(comm_type)
+        cdef type cls = Comm
+        if   isinstance(self, Intracomm): cls = Intracomm
+        elif isinstance(self, Intercomm): cls = Intercomm
+        cdef Comm comm = <Comm>cls.__new__(cls)
         with nogil: CHKERR( MPI_Comm_create(
             self.ob_mpi, group.ob_mpi, &comm.ob_mpi) )
         comm_set_eh(comm.ob_mpi)
@@ -201,10 +194,10 @@ cdef class Comm:
         """
         Split communicator by color and key
         """
-        cdef type comm_type = Comm
-        if   isinstance(self, Intracomm): comm_type = Intracomm
-        elif isinstance(self, Intercomm): comm_type = Intercomm
-        cdef Comm comm = <Comm>comm_type.__new__(comm_type)
+        cdef type cls = Comm
+        if   isinstance(self, Intracomm): cls = Intracomm
+        elif isinstance(self, Intercomm): cls = Intercomm
+        cdef Comm comm = <Comm>cls.__new__(cls)
         with nogil: CHKERR( MPI_Comm_split(
             self.ob_mpi, color, key, &comm.ob_mpi) )
         comm_set_eh(comm.ob_mpi)
@@ -219,10 +212,10 @@ cdef class Comm:
         """
         Split communicator by split type
         """
-        cdef type comm_type = Comm
-        if   isinstance(self, Intracomm): comm_type = Intracomm
-        elif isinstance(self, Intercomm): comm_type = Intercomm
-        cdef Comm comm = <Comm>comm_type.__new__(comm_type)
+        cdef type cls = Comm
+        if   isinstance(self, Intracomm): cls = Intracomm
+        elif isinstance(self, Intercomm): cls = Intercomm
+        cdef Comm comm = <Comm>cls.__new__(cls)
         with nogil: CHKERR( MPI_Comm_split_type(
             self.ob_mpi, split_type, key, info.ob_mpi, &comm.ob_mpi) )
         comm_set_eh(comm.ob_mpi)
@@ -1775,8 +1768,7 @@ cdef class Comm:
     def f2py(cls, arg: int) -> Comm:
         """
         """
-        cdef MPI_Comm comm = MPI_Comm_f2c(arg)
-        return PyMPIComm_New(comm)
+        return PyMPIComm_New(MPI_Comm_f2c(arg))
 
     # Python Communication
     # --------------------
@@ -3250,10 +3242,10 @@ cdef class Intercomm(Comm):
 
 
 
-cdef Comm      __COMM_NULL__   = new_Comm      ( MPI_COMM_NULL  )
-cdef Intracomm __COMM_SELF__   = new_Intracomm ( MPI_COMM_SELF  )
-cdef Intracomm __COMM_WORLD__  = new_Intracomm ( MPI_COMM_WORLD )
-cdef Intercomm __COMM_PARENT__ = new_Intercomm ( MPI_COMM_NULL  )
+cdef Comm      __COMM_NULL__   = def_Comm      ( MPI_COMM_NULL  )
+cdef Intracomm __COMM_SELF__   = def_Intracomm ( MPI_COMM_SELF  )
+cdef Intracomm __COMM_WORLD__  = def_Intracomm ( MPI_COMM_WORLD )
+cdef Intercomm __COMM_PARENT__ = def_Intercomm ( MPI_COMM_NULL  )
 
 
 # Predefined communicators

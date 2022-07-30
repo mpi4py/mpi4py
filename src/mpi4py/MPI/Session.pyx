@@ -6,21 +6,14 @@ cdef class Session:
 
     def __cinit__(self, Session session: Optional[Session] = None):
         self.ob_mpi = MPI_SESSION_NULL
-        if session is None: return
-        self.ob_mpi = session.ob_mpi
+        cinit(self, session)
 
     def __dealloc__(self):
-        if not (self.flags & PyMPI_OWNED): return
-        CHKERR( del_Session(&self.ob_mpi) )
+        dealloc(self)
 
     def __richcmp__(self, other, int op):
         if not isinstance(other, Session): return NotImplemented
-        cdef Session s = <Session>self, o = <Session>other
-        if   op == Py_EQ: return (s.ob_mpi == o.ob_mpi)
-        elif op == Py_NE: return (s.ob_mpi != o.ob_mpi)
-        cdef mod = type(self).__module__
-        cdef cls = type(self).__name__
-        raise TypeError("unorderable type: '%s.%s'" % (mod, cls))
+        return richcmp(self, other, op)
 
     def __bool__(self) -> bool:
         return self.ob_mpi != MPI_SESSION_NULL
@@ -133,13 +126,11 @@ cdef class Session:
     def f2py(cls, arg: int) -> Session:
         """
         """
-        cdef Session session = Session.__new__(Session)
-        session.ob_mpi = MPI_Session_f2c(arg)
-        return session
+        return PyMPISession_New(MPI_Session_f2c(arg))
 
 
 
-cdef Session __SESSION_NULL__ = new_Session(MPI_SESSION_NULL)
+cdef Session __SESSION_NULL__ = def_Session( MPI_SESSION_NULL )
 
 
 # Predefined session handle

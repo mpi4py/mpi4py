@@ -45,11 +45,14 @@ cdef inline object PyMPI_attr_call(
     cdef object ob
     cdef object result
     if PyMPI_attr_type is MPI_Datatype:
-        ob = new_Datatype(hdl)
+        ob = Datatype.__new__(Datatype)
+        (<Datatype>ob).ob_mpi = hdl
     if PyMPI_attr_type is MPI_Comm:
-        ob = new_Comm(hdl)
+        ob = Comm.__new__(Comm)
+        (<Comm>ob).ob_mpi = hdl
     if PyMPI_attr_type is MPI_Win:
-        ob = new_Win (hdl)
+        ob = Win.__new__(Win)
+        (<Win>ob).ob_mpi = hdl
     try:
         result = function(ob, keyval, attrval)
     finally:

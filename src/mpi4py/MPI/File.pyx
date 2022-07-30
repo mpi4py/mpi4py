@@ -56,21 +56,14 @@ cdef class File:
 
     def __cinit__(self, File file: Optional[File] = None):
         self.ob_mpi = MPI_FILE_NULL
-        if file is None: return
-        self.ob_mpi = file.ob_mpi
+        cinit(self, file)
 
     def __dealloc__(self):
-        if not (self.flags & PyMPI_OWNED): return
-        CHKERR( del_File(&self.ob_mpi) )
+        dealloc(self)
 
     def __richcmp__(self, other, int op):
         if not isinstance(other, File): return NotImplemented
-        cdef File s = <File>self, o = <File>other
-        if   op == Py_EQ: return (s.ob_mpi == o.ob_mpi)
-        elif op == Py_NE: return (s.ob_mpi != o.ob_mpi)
-        cdef mod = type(self).__module__
-        cdef cls = type(self).__name__
-        raise TypeError(f"unorderable type: '{mod}.{cls}'")
+        return richcmp(self, other, op)
 
     def __bool__(self) -> bool:
         return self.ob_mpi != MPI_FILE_NULL
@@ -224,15 +217,15 @@ cdef class File:
         Return the file view
         """
         cdef MPI_Offset disp = 0
-        cdef Datatype etype = Datatype.__new__(Datatype)
-        cdef Datatype ftype = Datatype.__new__(Datatype)
+        cdef MPI_Datatype cetype = MPI_DATATYPE_NULL
+        cdef MPI_Datatype cftype = MPI_DATATYPE_NULL
         cdef char cdatarep[MPI_MAX_DATAREP_STRING+1]
         cdatarep[0] = 0 # just in case
         with nogil: CHKERR( MPI_File_get_view(
-            self.ob_mpi, &disp, &etype.ob_mpi, &ftype.ob_mpi, cdatarep) )
+            self.ob_mpi, &disp, &cetype, &cftype, cdatarep) )
         cdatarep[MPI_MAX_DATAREP_STRING] = 0 # just in case
-        #if builtin_Datatype(etype.ob_mpi): etype.flags = 0
-        #if builtin_Datatype(ftype.ob_mpi): ftype.flags = 0
+        cdef Datatype etype = ref_Datatype(cetype)
+        cdef Datatype ftype = ref_Datatype(cftype)
         cdef object datarep = mpistr(cdatarep)
         return (disp, etype, ftype, datarep)
 
@@ -839,13 +832,11 @@ cdef class File:
     def f2py(cls, arg: int) -> File:
         """
         """
-        cdef File file = File.__new__(File)
-        file.ob_mpi = MPI_File_f2c(arg)
-        return file
+        return PyMPIFile_New(MPI_File_f2c(arg))
 
 
 
-cdef File __FILE_NULL__ = new_File(MPI_FILE_NULL)
+cdef File __FILE_NULL__ = def_File( MPI_FILE_NULL )
 
 
 # Predefined file handles

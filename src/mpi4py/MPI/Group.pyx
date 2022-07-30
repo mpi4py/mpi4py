@@ -6,21 +6,14 @@ cdef class Group:
 
     def __cinit__(self, Group group: Optional[Group] = None):
         self.ob_mpi = MPI_GROUP_NULL
-        if group is None: return
-        self.ob_mpi = group.ob_mpi
+        cinit(self, group)
 
     def __dealloc__(self):
-        if not (self.flags & PyMPI_OWNED): return
-        CHKERR( del_Group(&self.ob_mpi) )
+        dealloc(self)
 
     def __richcmp__(self, other, int op):
         if not isinstance(other, Group): return NotImplemented
-        cdef Group s = <Group>self, o = <Group>other
-        if   op == Py_EQ: return (s.ob_mpi == o.ob_mpi)
-        elif op == Py_NE: return (s.ob_mpi != o.ob_mpi)
-        cdef mod = type(self).__module__
-        cdef cls = type(self).__name__
-        raise TypeError(f"unorderable type: '{mod}.{cls}'")
+        return richcmp(self, other, op)
 
     def __bool__(self) -> bool:
         return self.ob_mpi != MPI_GROUP_NULL
@@ -233,14 +226,12 @@ cdef class Group:
     def f2py(cls, arg: int) -> Group:
         """
         """
-        cdef Group group = Group.__new__(Group)
-        group.ob_mpi = MPI_Group_f2c(arg)
-        return group
+        return PyMPIGroup_New(MPI_Group_f2c(arg))
 
 
 
-cdef Group __GROUP_NULL__  = new_Group ( MPI_GROUP_NULL  )
-cdef Group __GROUP_EMPTY__ = new_Group ( MPI_GROUP_EMPTY )
+cdef Group __GROUP_NULL__  = def_Group ( MPI_GROUP_NULL  )
+cdef Group __GROUP_EMPTY__ = def_Group ( MPI_GROUP_EMPTY )
 
 
 # Predefined group handles

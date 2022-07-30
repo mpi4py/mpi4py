@@ -6,22 +6,14 @@ cdef class Message:
 
     def __cinit__(self, Message message: Optional[Message] = None):
         self.ob_mpi = MPI_MESSAGE_NULL
-        if message is None: return
-        self.ob_mpi = message.ob_mpi
-        self.ob_buf = message.ob_buf
+        cinit(self, message)
 
     def __dealloc__(self):
-        if not (self.flags & PyMPI_OWNED): return
-        CHKERR( del_Message(&self.ob_mpi) )
+        dealloc(self)
 
     def __richcmp__(self, other, int op):
         if not isinstance(other, Message): return NotImplemented
-        cdef Message s = <Message>self, o = <Message>other
-        if   op == Py_EQ: return (s.ob_mpi == o.ob_mpi)
-        elif op == Py_NE: return (s.ob_mpi != o.ob_mpi)
-        cdef mod = type(self).__module__
-        cdef cls = type(self).__name__
-        raise TypeError(f"unorderable type: '{mod}.{cls}'")
+        return richcmp(self, other, op)
 
     def __bool__(self) -> bool:
         return self.ob_mpi != MPI_MESSAGE_NULL
@@ -44,7 +36,7 @@ cdef class Message:
         cdef MPI_Status *statusp = arg_Status(status)
         with nogil: CHKERR( MPI_Mprobe(
             source, tag, comm.ob_mpi, &cmessage, statusp) )
-        cdef Message message = <Message>Message.__new__(cls)
+        cdef Message message = <Message>cls.__new__(cls)
         message.ob_mpi = cmessage
         return message
 
@@ -65,7 +57,7 @@ cdef class Message:
         with nogil: CHKERR( MPI_Improbe(
              source, tag, comm.ob_mpi, &flag, &cmessage, statusp) )
         if flag == 0: return None
-        cdef Message message = <Message>Message.__new__(cls)
+        cdef Message message = <Message>cls.__new__(cls)
         message.ob_mpi = cmessage
         return message
 
@@ -176,13 +168,11 @@ cdef class Message:
     def f2py(cls, arg: int) -> Message:
         """
         """
-        cdef Message message = Message.__new__(Message)
-        message.ob_mpi = MPI_Message_f2c(arg)
-        return message
+        return PyMPIMessage_New(MPI_Message_f2c(arg))
 
 
-cdef Message __MESSAGE_NULL__    = new_Message ( MPI_MESSAGE_NULL    )
-cdef Message __MESSAGE_NO_PROC__ = new_Message ( MPI_MESSAGE_NO_PROC )
+cdef Message __MESSAGE_NULL__    = def_Message ( MPI_MESSAGE_NULL    )
+cdef Message __MESSAGE_NO_PROC__ = def_Message ( MPI_MESSAGE_NO_PROC )
 
 
 # Predefined message handles

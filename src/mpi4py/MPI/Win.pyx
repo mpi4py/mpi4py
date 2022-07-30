@@ -32,22 +32,14 @@ cdef class Win:
 
     def __cinit__(self, Win win: Optional[Win] = None):
         self.ob_mpi = MPI_WIN_NULL
-        if win is None: return
-        self.ob_mpi =  win.ob_mpi
-        self.ob_mem =  win.ob_mem
+        cinit(self, win)
 
     def __dealloc__(self):
-        if not (self.flags & PyMPI_OWNED): return
-        CHKERR( del_Win(&self.ob_mpi) )
+        dealloc(self)
 
     def __richcmp__(self, other, int op):
         if not isinstance(other, Win): return NotImplemented
-        cdef Win s = <Win>self, o = <Win>other
-        if   op == Py_EQ: return (s.ob_mpi == o.ob_mpi)
-        elif op == Py_NE: return (s.ob_mpi != o.ob_mpi)
-        cdef mod = type(self).__module__
-        cdef cls = type(self).__name__
-        raise TypeError(f"unorderable type: '{mod}.{cls}'")
+        return richcmp(self, other, op)
 
     def __bool__(self) -> bool:
         return self.ob_mpi != MPI_WIN_NULL
@@ -717,13 +709,11 @@ cdef class Win:
     def f2py(cls, arg: int) -> Win:
         """
         """
-        cdef Win win = Win.__new__(Win)
-        win.ob_mpi = MPI_Win_f2c(arg)
-        return win
+        return PyMPIWin_New(MPI_Win_f2c(arg))
 
 
 
-cdef Win __WIN_NULL__ = new_Win(MPI_WIN_NULL)
+cdef Win __WIN_NULL__ = def_Win( MPI_WIN_NULL )
 
 
 # Predefined window handles

@@ -6,21 +6,14 @@ cdef class Info:
 
     def __cinit__(self, Info info: Optional[Info] =None):
         self.ob_mpi = MPI_INFO_NULL
-        if info is None: return
-        self.ob_mpi = info.ob_mpi
+        cinit(self, info)
 
     def __dealloc__(self):
-        if not (self.flags & PyMPI_OWNED): return
-        CHKERR( del_Info(&self.ob_mpi) )
+        dealloc(self)
 
     def __richcmp__(self, other, int op):
         if not isinstance(other, Info): return NotImplemented
-        cdef Info s = <Info>self, o = <Info>other
-        if   op == Py_EQ: return (s.ob_mpi == o.ob_mpi)
-        elif op == Py_NE: return (s.ob_mpi != o.ob_mpi)
-        cdef mod = type(self).__module__
-        cdef cls = type(self).__name__
-        raise TypeError(f"unorderable type: '{mod}.{cls}'")
+        return richcmp(self, other, op)
 
     def __bool__(self) -> bool:
         return self.ob_mpi != MPI_INFO_NULL
@@ -134,9 +127,7 @@ cdef class Info:
     def f2py(cls, arg: int) -> Info:
         """
         """
-        cdef Info info = Info.__new__(Info)
-        info.ob_mpi = MPI_Info_f2c(arg)
-        return info
+        return PyMPIInfo_New(MPI_Info_f2c(arg))
 
     # Python mapping emulation
     # ------------------------
@@ -273,8 +264,8 @@ cdef class Info:
 
 
 
-cdef Info __INFO_NULL__ = new_Info(MPI_INFO_NULL)
-cdef Info __INFO_ENV__  = new_Info(MPI_INFO_ENV)
+cdef Info __INFO_NULL__ = def_Info( MPI_INFO_NULL )
+cdef Info __INFO_ENV__  = def_Info( MPI_INFO_ENV  )
 
 
 # Predefined info handles
