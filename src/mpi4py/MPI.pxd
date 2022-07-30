@@ -79,8 +79,7 @@ ctypedef public api class Op [
     cdef MPI_Op   ob_mpi
     cdef unsigned flags
     cdef object __weakref__
-    cdef object   (*ob_func)(object, object)
-    cdef int      ob_usrid
+    cdef int      ob_uid
 
 ctypedef public api class Group [
     type   PyMPIGroup_Type,

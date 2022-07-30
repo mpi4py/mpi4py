@@ -1,52 +1,52 @@
 # -----------------------------------------------------------------------------
 
-cdef object _op_MAX(object x, object y):
+cdef object op_MAX(object x, object y):
     """maximum"""
     if y > x:
         return y
     else:
         return x
 
-cdef object _op_MIN(object x, object y):
+cdef object op_MIN(object x, object y):
     """minimum"""
     if y < x:
         return y
     else:
         return x
 
-cdef object _op_SUM(object x, object y):
+cdef object op_SUM(object x, object y):
     """sum"""
     return x + y
 
-cdef object _op_PROD(object x, object y):
+cdef object op_PROD(object x, object y):
     """product"""
     return x * y
 
-cdef object _op_BAND(object x, object y):
+cdef object op_BAND(object x, object y):
     """bit-wise and"""
     return x & y
 
-cdef object _op_BOR(object x, object y):
+cdef object op_BOR(object x, object y):
     """bit-wise or"""
     return x | y
 
-cdef object _op_BXOR(object x, object y):
+cdef object op_BXOR(object x, object y):
     """bit-wise xor"""
     return x ^ y
 
-cdef object _op_LAND(object x, object y):
+cdef object op_LAND(object x, object y):
     """logical and"""
     return bool(x) & bool(y)
 
-cdef object _op_LOR(object x, object y):
+cdef object op_LOR(object x, object y):
     """logical or"""
     return bool(x) | bool(y)
 
-cdef object _op_LXOR(object x, object y):
+cdef object op_LXOR(object x, object y):
     """logical xor"""
     return bool(x) ^ bool(y)
 
-cdef object _op_MAXLOC(object x, object y):
+cdef object op_MAXLOC(object x, object y):
     """maximum and location"""
     cdef object i, j, u, v
     u, i = x
@@ -60,7 +60,7 @@ cdef object _op_MAXLOC(object x, object y):
     else:
         return u, i
 
-cdef object _op_MINLOC(object x, object y):
+cdef object op_MINLOC(object x, object y):
     """minimum and location"""
     cdef object i, j, u, v
     u, i = x
@@ -74,11 +74,11 @@ cdef object _op_MINLOC(object x, object y):
     else:
         return u, i
 
-cdef object _op_REPLACE(object x, object y):
+cdef object op_REPLACE(object x, object y):
     """replace,  (x, y) -> y"""
     return y
 
-cdef object _op_NO_OP(object x, object y):
+cdef object op_NO_OP(object x, object y):
     """no-op,  (x, y) -> x"""
     return x
 
@@ -294,5 +294,25 @@ cdef int op_user_del(int *indexp) except -1:
     indexp[0] = 0 # clear the value
     op_user_registry[index] = None
     return 0
+
+# -----------------------------------------------------------------------------
+
+cdef object op_call(MPI_Op op, int index, object x, object y):
+    if op == MPI_MAX     : return op_MAX(x, y)
+    if op == MPI_MIN     : return op_MIN(x, y)
+    if op == MPI_SUM     : return op_SUM(x, y)
+    if op == MPI_PROD    : return op_PROD(x, y)
+    if op == MPI_LAND    : return op_LAND(x, y)
+    if op == MPI_BAND    : return op_BAND(x, y)
+    if op == MPI_LOR     : return op_LOR(x, y)
+    if op == MPI_BOR     : return op_BOR(x, y)
+    if op == MPI_LXOR    : return op_LXOR(x, y)
+    if op == MPI_BXOR    : return op_BXOR(x, y)
+    if op == MPI_MAXLOC  : return op_MAXLOC(x, y)
+    if op == MPI_MINLOC  : return op_MINLOC(x, y)
+    if op == MPI_REPLACE : return op_REPLACE(x, y)
+    if op == MPI_NO_OP   : return op_NO_OP(x, y)
+    if index > 0         : return op_user_py(index, x, y, None)
+    raise ValueError("cannot call user-defined operation")
 
 # -----------------------------------------------------------------------------

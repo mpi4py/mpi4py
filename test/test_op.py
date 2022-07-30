@@ -93,23 +93,26 @@ class TestOp(unittest.TestCase):
 
     def _test_call(self, op, args, res):
         self.assertEqual(op(*args), res)
+        self.assertEqual(MPI.Op(op)(*args), res)
 
     def testCall(self):
+        self.assertRaises(TypeError, MPI.OP_NULL)
+        self.assertRaises(TypeError, MPI.OP_NULL, None)
+        self.assertRaises(ValueError, MPI.OP_NULL, None, None)
         self._test_call(MPI.MIN,  (2,3), 2)
         self._test_call(MPI.MAX,  (2,3), 3)
         self._test_call(MPI.SUM,  (2,3), 5)
         self._test_call(MPI.PROD, (2,3), 6)
-        def xor(x,y): return bool(x) ^ bool(y)
-        for x, y in ((0, 0),
-                     (0, 1),
-                     (1, 0),
-                     (1, 1)):
-            self._test_call(MPI.LAND,  (x,y), x and y)
-            self._test_call(MPI.LOR,   (x,y), x or  y)
-            self._test_call(MPI.LXOR,  (x,y), xor(x, y))
-            self._test_call(MPI.BAND,  (x,y), x  &  y)
-            self._test_call(MPI.BOR,   (x,y), x  |  y)
-            self._test_call(MPI.BXOR,  (x,y), x  ^  y)
+        for x in (False, True):
+            for y in (False, True):
+                self._test_call(MPI.LAND,  (x,y), x and y)
+                self._test_call(MPI.LOR,   (x,y), x or  y)
+                self._test_call(MPI.LXOR,  (x,y), x ^ y)
+        for x in range(5):
+            for y in range(5):
+                self._test_call(MPI.BAND,  (x,y), x  &  y)
+                self._test_call(MPI.BOR,   (x,y), x  |  y)
+                self._test_call(MPI.BXOR,  (x,y), x  ^  y)
         if MPI.REPLACE:
             self._test_call(MPI.REPLACE, (2,3), 3)
             self._test_call(MPI.REPLACE, (3,2), 2)

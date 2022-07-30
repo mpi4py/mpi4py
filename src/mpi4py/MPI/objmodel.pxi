@@ -207,8 +207,7 @@ cdef inline int cinit(PyMPIClass self, PyMPIClass arg) except -1:
     if PyMPIClass is Message:
         self.ob_buf = arg.ob_buf
     if PyMPIClass is Op:
-        self.ob_func = arg.ob_func
-        self.ob_usrid = arg.ob_usrid
+        self.ob_uid = arg.ob_uid
     if PyMPIClass is Win:
         self.ob_mem = arg.ob_mem
     return 0
@@ -314,21 +313,6 @@ cdef inline Op def_Op(MPI_Op arg):
     cdef Op obj = Op.__new__(Op)
     obj.ob_mpi = arg
     obj.flags |= PyMPI_FLAGS_CONST
-    if   arg == MPI_OP_NULL : obj.ob_func = NULL
-    elif arg == MPI_MAX     : obj.ob_func = _op_MAX
-    elif arg == MPI_MIN     : obj.ob_func = _op_MIN
-    elif arg == MPI_SUM     : obj.ob_func = _op_SUM
-    elif arg == MPI_PROD    : obj.ob_func = _op_PROD
-    elif arg == MPI_LAND    : obj.ob_func = _op_LAND
-    elif arg == MPI_BAND    : obj.ob_func = _op_BAND
-    elif arg == MPI_LOR     : obj.ob_func = _op_LOR
-    elif arg == MPI_BOR     : obj.ob_func = _op_BOR
-    elif arg == MPI_LXOR    : obj.ob_func = _op_LXOR
-    elif arg == MPI_BXOR    : obj.ob_func = _op_BXOR
-    elif arg == MPI_MAXLOC  : obj.ob_func = _op_MAXLOC
-    elif arg == MPI_MINLOC  : obj.ob_func = _op_MINLOC
-    elif arg == MPI_REPLACE : obj.ob_func = _op_REPLACE
-    elif arg == MPI_NO_OP   : obj.ob_func = _op_NO_OP
     return obj
 
 #------------------------------------------------------------------------------
