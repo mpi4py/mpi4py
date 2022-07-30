@@ -19,10 +19,7 @@ cdef class Op:
         return self.ob_mpi != MPI_OP_NULL
 
     def __call__(self, x: Any, y: Any) -> Any:
-        if self.ob_func != NULL:
-            return self.ob_func(x, y)
-        else:
-            return op_user_py(self.ob_usrid, x, y, None)
+        return op_call(self.ob_mpi, self.ob_uid, x, y)
 
     @classmethod
     def Create(
@@ -36,7 +33,7 @@ cdef class Op:
         cdef Op op = Op.__new__(Op)
         cdef MPI_User_function   *fn_i = NULL
         cdef MPI_User_function_c *fn_c = NULL
-        op.ob_usrid = op_user_new(function, &fn_i, &fn_c)
+        op.ob_uid = op_user_new(function, &fn_i, &fn_c)
         try:
             CHKERR( MPI_Op_create_c(fn_c, commute, &op.ob_mpi) )
         except NotImplementedError:
@@ -48,7 +45,7 @@ cdef class Op:
         Free the operation
         """
         CHKERR( MPI_Op_free(&self.ob_mpi) )
-        op_user_del(&self.ob_usrid)
+        op_user_del(&self.ob_uid)
         if   self is __MAX__     : self.ob_mpi =  MPI_MAX
         elif self is __MIN__     : self.ob_mpi =  MPI_MIN
         elif self is __SUM__     : self.ob_mpi =  MPI_SUM
