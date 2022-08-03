@@ -8,7 +8,7 @@ cdef inline int cuda_is_contig(tuple shape,
                                Py_ssize_t itemsize,
                                char order) except -1:
     cdef Py_ssize_t i, ndim = len(shape)
-    cdef Py_ssize_t start, step, index
+    cdef Py_ssize_t start, step, index, dim, size = itemsize
     if order == c'F':
         start = 0
         step = 1
@@ -17,9 +17,10 @@ cdef inline int cuda_is_contig(tuple shape,
         step = -1
     for i from 0 <= i < ndim:
         index = start + step * i
-        if itemsize != <Py_ssize_t>strides[index]:
+        dim = <Py_ssize_t>shape[index]
+        if dim > 1 and size != <Py_ssize_t>strides[index]:
             return 0
-        itemsize *= <Py_ssize_t>shape[index]
+        size *= dim
     return 1
 
 cdef inline char* cuda_get_format(char typekind, Py_ssize_t itemsize) nogil:
