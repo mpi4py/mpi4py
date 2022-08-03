@@ -65,7 +65,7 @@ cdef inline int dlpack_is_contig(const DLTensor *dltensor, char order) nogil:
     cdef int i, ndim = dltensor.ndim
     cdef int64_t *shape = dltensor.shape
     cdef int64_t *strides = dltensor.strides
-    cdef int64_t start, step, index, size = 1
+    cdef int64_t start, step, index, dim, size = 1
     if strides == NULL:
         if ndim > 1 and order == c'F':
             return 0
@@ -78,9 +78,10 @@ cdef inline int dlpack_is_contig(const DLTensor *dltensor, char order) nogil:
         step = -1
     for i in range(ndim):
         index = start + step * i
-        if size != strides[index]:
+        dim = shape[index]
+        if dim > 1 and size != strides[index]:
             return 0
-        size *= shape[index]
+        size *= dim
     return 1
 
 cdef inline int dlpack_check_shape(const DLTensor *dltensor) except -1:

@@ -634,6 +634,18 @@ class TestMessageDLPackCPUBuf(unittest.TestCase):
         self.assertRaises(BufferError, MPI.Get_address, buf)
         del s
         #
+        dltensor.ndim, dltensor.shape, dltensor.strides = \
+            dlpack.make_dl_shape([1, 3, 1], order='C')
+        s = dltensor.strides
+        MPI.Get_address(buf)
+        for i in range(4):
+            for j in range(4):
+                s[0], s[2] = i, j
+                MPI.Get_address(buf)
+        s[1] = 0
+        self.assertRaises(BufferError, MPI.Get_address, buf)
+        del s
+        #
         del dltensor
 
     def testByteOffset(self):
@@ -661,8 +673,12 @@ class TestMessageCAIBuf(unittest.TestCase):
     def testNonContiguous(self):
         smsg = CAIBuf('i', [1,2,3])
         rmsg = CAIBuf('i', [0,0,0])
+        Sendrecv(smsg, rmsg)
         strides = rmsg.__cuda_array_interface__['strides']
-        bad_strides = strides[:-1] + (7,)
+        good_strides = strides[:-2] + (0, 7)
+        rmsg.__cuda_array_interface__['strides'] = good_strides
+        Sendrecv(smsg, rmsg)
+        bad_strides = (7,) + strides[1:]
         rmsg.__cuda_array_interface__['strides'] = bad_strides
         self.assertRaises(BufferError, Sendrecv, smsg, rmsg)
 
