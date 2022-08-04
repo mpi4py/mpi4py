@@ -11,7 +11,7 @@ from Cython.Compiler.AutoDocTransforms import (
 class ExpressionWriter(BaseExpressionWriter):
 
     def visit_UnicodeNode(self, node):
-        self.emit_string(node)
+        self.emit_string(node, "")
 
 
 class AnnotationWriter(ExpressionWriter, BaseAnnotationWriter):
@@ -24,6 +24,9 @@ class EmbedSignature(CythonTransform):
         super(EmbedSignature, self).__init__(context)
         self.class_name = None
         self.class_node = None
+
+    def _select_format(self, embed, clinic):
+        return embed
 
     def _fmt_expr(self, node):
         writer = ExpressionWriter()
@@ -40,19 +43,18 @@ class EmbedSignature(CythonTransform):
     def _fmt_arg(self, arg):
         annotation = None
         if arg.is_self_arg:
-            doc = arg.name  # clinic: '$self'
+            doc = self._select_format(arg.name, '$self')
         elif arg.is_type_arg:
-            doc = arg.name  # clinic: '$type'
+            doc = self._select_format(arg.name, '$type')
         else:
             doc = arg.name
             if arg.type is PyrexTypes.py_object_type:
-                annotation = None  # XXX use 'Any' ?
+                annotation = None
             else:
                 annotation = arg.type.declaration_code('', for_display=1)
-                #if arg.default and arg.default.is_none:
-                #    annotation = 'Optional[%s]' % annotation
         if arg.annotation:
             annotation = self._fmt_annotation(arg.annotation)
+        annotation = self._select_format(annotation, None)
         if annotation:
             doc = doc + (': %s' % annotation)
             if arg.default:
@@ -109,20 +111,21 @@ class EmbedSignature(CythonTransform):
         arglist_doc = ', '.join(arglist)
         func_doc = '%s(%s)' % (func_name, arglist_doc)
         if cls_name:
-            func_doc = '%s.%s' % (cls_name, func_doc)
+            namespace = self._select_format('%s.' % cls_name, '')
+            func_doc = '%s%s' % (namespace, func_doc)
         ret_doc = None
         if return_expr:
             ret_doc = self._fmt_annotation(return_expr)
         elif return_type:
             ret_doc = self._fmt_ret_type(return_type)
         if ret_doc:
-            docfmt = '%s -> %s'  # clinic: '%s -> (%s)'
+            docfmt = self._select_format('%s -> %s', '%s -> (%s)')
             func_doc = docfmt % (func_doc, ret_doc)
         return func_doc
 
     def _embed_signature(self, signature, node_doc):
         if node_doc:
-            docfmt = "%s\n%s" # clinic: "%s\n--\n\n%s
+            docfmt = self._select_format("%s\n%s", "%s\n--\n\n%s")
             return docfmt % (signature, node_doc)
         else:
             return signature
@@ -239,7 +242,8 @@ class EmbedSignature(CythonTransform):
                     continue
                 cls_name = self.class_name
                 if cls_name:
-                    prop_name = '%s.%s' % (cls_name, prop_name)
+                    namespace = self._select_format('%s.' % cls_name, '')
+                    prop_name = '%s%s' % (namespace, prop_name)
                 ret_annotation = stat.return_type_annotation
                 if ret_annotation:
                     type_name = self._fmt_annotation(ret_annotation)
