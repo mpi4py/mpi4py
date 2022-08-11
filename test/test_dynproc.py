@@ -164,26 +164,27 @@ class TestDPM(unittest.TestCase):
         rank = MPI.COMM_WORLD.Get_rank()
         server = client = address = None
         host = socket.gethostname()
-        addresses = socket.getaddrinfo(host, None, 0, socket.SOCK_STREAM)
-        address_families = [ a[0] for a in addresses ]
+        addrinfo = socket.getaddrinfo(host, None, type=socket.SOCK_STREAM)
+        addr_families = [info[0] for info in addrinfo]
         # if both INET and INET6 are available, don't assume the order
-        # is the same on both server and client. Select INET if available.
-        if socket.AF_INET in address_families:
-            socket_family = socket.AF_INET
-        elif socket.AF_INET6 in address_families:
-            socket_family = socket.AF_INET6
-        elif address_families:
-            # allow for AF_UNIX (or other families)
-            socket_family = address_families[0]
-        else:
-            self.skipTest("socket")
+        # is the same on both server and client. Prefer INET if available.
+        addr_family = None
+        if socket.AF_INET in addr_families:
+            addr_family = socket.AF_INET
+        elif socket.AF_INET6 in addr_families:
+            addr_family = socket.AF_INET6
+        addr_family = MPI.COMM_WORLD.bcast(addr_family, root=0)
+        supported = (addr_family in addr_families)
+        supported = MPI.COMM_WORLD.allreduce(supported, op=MPI.LAND)
+        if not supported:
+            self.skipTest("socket-inet")
         # create server/client sockets
         if rank == 0: # server
-            server = socket.socket(socket_family, socket.SOCK_STREAM)
+            server = socket.socket(addr_family, socket.SOCK_STREAM)
             server.bind((host, 0))
             server.listen(0)
         if rank == 1: # client
-            client = socket.socket(socket_family, socket.SOCK_STREAM)
+            client = socket.socket(addr_family, socket.SOCK_STREAM)
         # communicate address
         if rank == 0:
             address = server.getsockname()
