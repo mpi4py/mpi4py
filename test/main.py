@@ -90,22 +90,19 @@ def setup_parser(parser):
 
 def getbuilddir():
     try:
-        import setuptools
-    except ImportError:
-        pass
-    try:
-        from distutils.util import get_platform
-    except ImportError:
-        from sysconfig import get_platform
-    plat_name = get_platform()
-    x, y = sys.version_info[:2]
-    buildlib = f"lib.{plat_name}-{x}.{y}"
-    if hasattr(sys, 'pyston_version_info'):
-        x, y = sys.pyston_version_info[:2]
-        buildlib = f"{buildlib}-pyston{x}.{y}"
-    if hasattr(sys, 'gettotalrefcount'):
-        buildlib = f"{buildlib}-pydebug"
-    return os.path.join("build", buildlib)
+        try:
+            from setuptools.dist import Distribution
+        except ImportError:
+            from distutils.dist import Distribution
+        try:
+            from setuptools.command.build import build
+        except ImportError:
+            from distutils.command.build import build
+        cmd_obj = build(Distribution())
+        cmd_obj.finalize_options()
+        return cmd_obj.build_platlib
+    except Exception:
+        return None
 
 
 def getprocessorinfo():
@@ -143,12 +140,13 @@ def getpackageinfo(pkg):
 
 
 def setup_python(options):
-    testdir = os.path.dirname(__file__)
-    rootdir = os.path.dirname(testdir)
-    builddir = os.path.join(rootdir, getbuilddir())
     if options.builddir:
-        if os.path.isdir(builddir):
-            sys.path.insert(0, builddir)
+        testdir = os.path.dirname(__file__)
+        rootdir = os.path.dirname(testdir)
+        builddir = os.path.join(rootdir, getbuilddir())
+        if builddir is not None:
+            if os.path.isdir(builddir):
+                sys.path.insert(0, builddir)
     if options.path:
         for path in reversed(options.path):
             for pth in path.split(os.path.pathsep):
