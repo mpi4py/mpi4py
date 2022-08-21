@@ -755,7 +755,9 @@ class TestMessageCAIBuf(unittest.TestCase):
         byteorder = '>' if sys.byteorder == 'little' else '<'
         typestr = byteorder + typestr[1:]
         smsg.__cuda_array_interface__['typestr'] = typestr
+        smsg.__cuda_array_interface__['descr'][0] = ('', typestr)
         self.assertRaises(BufferError, Sendrecv, smsg, rmsg)
+        Sendrecv([smsg, MPI.INT], [rmsg, MPI.INT])
 
     def testTypestrItemsize(self):
         smsg = CAIBuf('B', [1,2,3])
