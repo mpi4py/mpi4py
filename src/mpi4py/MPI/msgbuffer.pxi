@@ -86,12 +86,12 @@ cdef inline const char *getformat(const char format[]) except NULL:
     if byteorder == c'@': # native
         return format + 1
     if byteorder == c'<': # little-endian
-        if not is_little_endian(): raise ValueError(
+        if not is_little_endian(): raise BufferError(
             f"format string {pystr(format)!r} "
             f"with non-native byte order")
         return format + 1
     if byteorder == c'>': # big-endian
-        if not is_big_endian(): raise ValueError(
+        if not is_big_endian(): raise BufferError(
             f"format string {pystr(format)!r} "
             f"with non-native byte order")
         return format + 1

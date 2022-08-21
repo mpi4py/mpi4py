@@ -390,8 +390,8 @@ class TestMessageSimpleNumPy(unittest.TestCase,
         byteorder = '>' if sys.byteorder == 'little' else '<'
         sbuf = sbuf.newbyteorder(byteorder)
         rbuf = rbuf.newbyteorder(byteorder)
-        self.assertRaises(ValueError,
-                          Sendrecv, sbuf, rbuf)
+        self.assertRaises(BufferError, Sendrecv, sbuf, rbuf)
+        Sendrecv([sbuf, MPI.INT], [rbuf, MPI.INT])
 
     def testOrderC(self):
         sbuf = numpy.ones([3,2])
