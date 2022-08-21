@@ -95,28 +95,29 @@ cdef int Py_GetCAIBuffer(object obj, Py_buffer *view, int flags) except -1:
     typekind = <char>ord(typestr[1:2])
     itemsize = <Py_ssize_t>int(typestr[2:])
 
+    if (flags & PyBUF_FORMAT) == PyBUF_FORMAT:
+        if byteorder == c'<': # little-endian
+            if not is_little_endian():
+                raise BufferError(
+                    f"__cuda_array_interface__: "
+                    f"typestr {typestr!r} "
+                    f"with non-native byte order")
+        elif byteorder == c'>': # big-endian
+            if not is_big_endian():
+                raise BufferError(
+                    f"__cuda_array_interface__: "
+                    f"typestr {typestr!r} "
+                    f"with non-native byte order")
+        elif byteorder != c'|':
+            raise BufferError(
+                f"__cuda_array_interface__: "
+                f"typestr {typestr!r} "
+                f"with unrecognized byte order")
     if mask is not None:
         raise BufferError(
             "__cuda_array_interface__: "
             "cannot handle masked arrays"
         )
-    if byteorder == c'<': # little-endian
-        if not is_little_endian():
-            raise BufferError(
-                f"__cuda_array_interface__: "
-                f"typestr {typestr!r} "
-                f"with non-native byte order")
-    elif byteorder == c'>': # little-endian
-        if not is_big_endian():
-            raise BufferError(
-                f"__cuda_array_interface__: "
-                f"typestr {typestr!r} "
-                f"with non-native byte order")
-    elif byteorder != c'|':
-        raise BufferError(
-            f"__cuda_array_interface__: "
-            f"typestr {typestr!r} "
-            f"with unrecognized byte order")
     if size < 0:
         raise BufferError(
             f"__cuda_array_interface__: "
