@@ -23,9 +23,14 @@ class BaseTestIO(object):
 
     def setUp(self):
         comm = self.COMM
+        world_size = MPI.COMM_WORLD.Get_size()
+        world_rank = MPI.COMM_WORLD.Get_rank()
+        prefix = self.prefix
+        if comm.Get_size() < world_size:
+            prefix += ('%d-' % world_rank)
         fname = None
         if comm.Get_rank() == 0:
-            fd, fname = tempfile.mkstemp(prefix=self.prefix)
+            fd, fname = tempfile.mkstemp(prefix=prefix)
             os.close(fd)
         fname = comm.bcast(fname, 0)
         amode  = MPI.MODE_RDWR | MPI.MODE_CREATE
@@ -43,6 +48,9 @@ class BaseTestIO(object):
         if self.FILE:
             self.FILE.Close()
         self.COMM.Barrier()
+
+
+class BaseTestIOBasic(BaseTestIO):
 
     # non-collective
 
@@ -412,25 +420,362 @@ class BaseTestIO(object):
                 self.assertEqual(rbuf[-1], -1)
                 comm.Barrier()
 
+
+class BaseTestIOView(BaseTestIO):
+
+    def _test_contiguous(self, combiner):
+        comm = self.COMM
+        size = comm.Get_size()
+        rank = comm.Get_rank()
+        fh = self.FILE
+        for array, typecode in arrayimpl_loop_io():
+            with arrayimpl.test(self):
+                comm.Barrier()
+                fh.Set_size(0)
+                btype = array.TypeMap[typecode]
+                if combiner == MPI.COMBINER_NAMED:
+                    etype = btype
+                    ftype = btype
+                if combiner == MPI.COMBINER_DUP:
+                    etype = btype.Dup().Commit()
+                    ftype = etype.Dup().Commit()
+                if combiner == MPI.COMBINER_CONTIGUOUS:
+                    etype = btype
+                    ftype = etype.Create_contiguous(7).Commit()
+                fh.Set_view(0, etype, ftype)
+                for i in range(3):
+                    wval = 10*(rank+1)+i
+                    wbuf = array(wval, typecode, 7)
+                    fh.Write_ordered(wbuf.as_raw())
+                fh.Sync()
+                comm.Barrier()
+                fh.Set_view(0, etype, ftype)
+                for i in range(3):
+                    rval = 10*(rank+1)+i
+                    rbuf = array(0, typecode, 7)
+                    fh.Read_ordered(rbuf.as_raw())
+                    for value in rbuf:
+                        self.assertEqual(value, rval)
+                if ftype != btype:
+                    ftype.Free()
+                fh.Set_view(0, etype, etype)
+                for i in range(3):
+                    for r in range(size):
+                        rval = 10*(r+1)+i
+                        rbuf = array(0, typecode, 7)
+                        fh.Read_all(rbuf.as_raw())
+                        for value in rbuf:
+                            self.assertEqual(value, rval)
+                if etype != btype:
+                    etype.Free()
+
+    def _test_strided(self, combiner):
+        comm = self.COMM
+        size = comm.Get_size()
+        rank = comm.Get_rank()
+        fh = self.FILE
+        for array, typecode in arrayimpl_loop_io():
+            with arrayimpl.test(self):
+                comm.Barrier()
+                fh.Set_size(0)
+                etype = array.TypeMap[typecode]
+                esize = etype.size
+                index1 = [0, 2, 4, 6]
+                index2 = [1, 3, 5]
+                if combiner in (
+                    MPI.COMBINER_VECTOR,
+                    MPI.COMBINER_HVECTOR,
+                ):
+                    if combiner == MPI.COMBINER_VECTOR:
+                        ftype1 = etype.Create_vector(4, 1, 2).Commit()
+                    if combiner == MPI.COMBINER_HVECTOR:
+                        ftype1 = etype.Create_hvector(4, 1, esize*2).Commit()
+                    fbase2 = etype.Create_indexed([1]*3, index2)
+                    ftype2 = fbase2.Create_resized(0, ftype1.extent).Commit()
+                    fbase2.Free()
+                if combiner in (
+                    MPI.COMBINER_INDEXED,
+                    MPI.COMBINER_INDEXED_BLOCK,
+                    MPI.COMBINER_HINDEXED,
+                    MPI.COMBINER_HINDEXED_BLOCK,
+                ):
+                    INDEXED        = MPI.COMBINER_INDEXED
+                    INDEXED_BLOCK  = MPI.COMBINER_INDEXED_BLOCK
+                    HINDEXED       = MPI.COMBINER_HINDEXED
+                    HINDEXED_BLOCK = MPI.COMBINER_HINDEXED_BLOCK
+                    if combiner == INDEXED:
+                        Create = MPI.Datatype.Create_indexed
+                    if combiner == HINDEXED:
+                        Create = MPI.Datatype.Create_hindexed
+                    if combiner == INDEXED_BLOCK:
+                        Create = MPI.Datatype.Create_indexed_block
+                    if combiner == HINDEXED_BLOCK:
+                        Create = MPI.Datatype.Create_hindexed_block
+                    if combiner in (INDEXED, HINDEXED):
+                        blens1 = [1] * 4
+                        blens2 = [1] * 3
+                    if combiner in (INDEXED_BLOCK, HINDEXED_BLOCK):
+                        blens1 = 1
+                        blens2 = 1
+                    if combiner in (INDEXED, INDEXED_BLOCK):
+                        disps1 = index1
+                        disps2 = index2
+                    if combiner in ( HINDEXED, HINDEXED_BLOCK):
+                        disps1 = [esize*i for i in index1]
+                        disps2 = [esize*i for i in index2]
+                    ftype1 = Create(etype, blens1, disps1).Commit()
+                    fbase2 = Create(etype, blens2, disps2)
+                    ftype2 = fbase2.Create_resized(0, ftype1.extent).Commit()
+                    fbase2.Free()
+                if combiner == MPI.COMBINER_STRUCT:
+                    ftype1 = MPI.Datatype.Create_struct(
+                        [1] * 4,
+                        [esize*i for i in index1],
+                        [etype] * 4,
+                    ).Commit()
+                    fbase2 = MPI.Datatype.Create_struct(
+                        [1] * 3,
+                        [esize*i for i in index2],
+                        [etype] * 3,
+                    )
+                    ftype2 = fbase2.Create_resized(
+                        0, ftype1.extent,
+                    ).Commit()
+                    fbase2.Free()
+                #
+                fh.Set_view(0, etype, ftype1)
+                for i in range(3):
+                    wval = 10*(rank+1)+i
+                    warg = [wval+j for j in range(0,7,2)]
+                    wbuf = array(warg, typecode)
+                    fh.Write_ordered(wbuf.as_raw())
+                fh.Set_view(0, etype, ftype2)
+                for i in range(3):
+                    wval = 10*(rank+1)+i
+                    warg = [wval+j for j in range(1,7,2)]
+                    wbuf = array(warg, typecode)
+                    fh.Write_ordered(wbuf.as_raw())
+                fh.Sync()
+                comm.Barrier()
+                fh.Set_view(0, etype, ftype1)
+                for i in range(3):
+                    rval = 10*(rank+1)+i
+                    rbuf = array(0, typecode, 4)
+                    fh.Read_ordered(rbuf.as_raw())
+                    for value, j in zip(rbuf, range(0,7,2)):
+                        self.assertEqual(value, rval+j)
+                fh.Set_view(0, etype, ftype2)
+                for i in range(3):
+                    rval = 10*(rank+1)+i
+                    rbuf = array(0, typecode, 3)
+                    fh.Read_ordered(rbuf.as_raw())
+                    for value, j in zip(rbuf, range(1,7,2)):
+                        self.assertEqual(value, rval+j)
+                ftype1.Free()
+                ftype2.Free()
+                fh.Set_view(0, etype, etype)
+                for i in range(3):
+                    for r in range(size):
+                        rval = 10*(r+1)+i
+                        rbuf = array(0, typecode, 7)
+                        fh.Read_all(rbuf.as_raw())
+                        for j, value in enumerate(rbuf):
+                            self.assertEqual(value, rval+j)
+
+    def testNamed(self):
+        self._test_contiguous(MPI.COMBINER_NAMED)
+
+    def testDup(self):
+        self._test_contiguous(MPI.COMBINER_DUP)
+
+    def testContiguous(self):
+        self._test_contiguous(MPI.COMBINER_CONTIGUOUS)
+
+    def testVector(self):
+        self._test_strided(MPI.COMBINER_VECTOR)
+
+    def testHVector(self):
+        self._test_strided(MPI.COMBINER_HVECTOR)
+
+    def testIndexed(self):
+        self._test_strided(MPI.COMBINER_INDEXED)
+
+    def testHIndexed(self):
+        self._test_strided(MPI.COMBINER_HINDEXED)
+
+    def testIndexedBlock(self):
+        self._test_strided(MPI.COMBINER_INDEXED_BLOCK)
+
+    def testHIndexedBlock(self):
+        self._test_strided(MPI.COMBINER_HINDEXED_BLOCK)
+
+    def testStruct(self):
+        self._test_strided(MPI.COMBINER_STRUCT)
+
+    def testSubarray(self):
+        comm = self.COMM
+        size = comm.Get_size()
+        rank = comm.Get_rank()
+        fh = self.FILE
+        for array, typecode in arrayimpl_loop_io():
+            with arrayimpl.test(self):
+                comm.Barrier()
+                fh.Set_size(0)
+                etype = array.TypeMap[typecode]
+                ftype = etype.Create_subarray(
+                    [size*7, 5],
+                    [7, 5],
+                    [rank*7, 0],
+                ).Commit()
+                fh.Set_view(0, etype, ftype)
+                for i in range(3):
+                    wval = 10*(rank+1)+i
+                    wbuf = array(wval, typecode, 7*5)
+                    fh.Write_all(wbuf.as_raw())
+                fh.Sync()
+                comm.Barrier()
+                fh.Set_view(0, etype, ftype)
+                for i in range(3):
+                    rval = 10*(rank+1)+i
+                    rbuf = array(0, typecode, 7*5)
+                    fh.Read_all(rbuf.as_raw())
+                    for value in rbuf:
+                        self.assertEqual(value, rval)
+                ftype.Free()
+                fh.Set_view(0, etype, etype)
+                for i in range(3):
+                    for r in range(size):
+                        rval = 10*(r+1)+i
+                        rbuf = array(0, typecode, 7*5)
+                        fh.Read_all(rbuf.as_raw())
+                        for value in rbuf:
+                            self.assertEqual(value, rval)
+
+    def testDarrayBlock(self):
+        comm = self.COMM
+        size = comm.Get_size()
+        rank = comm.Get_rank()
+        fh = self.FILE
+        block = MPI.DISTRIBUTE_BLOCK
+        none = MPI.DISTRIBUTE_NONE
+        dflt = MPI.DISTRIBUTE_DFLT_DARG
+        for array, typecode in arrayimpl_loop_io():
+            with arrayimpl.test(self):
+                comm.Barrier()
+                fh.Set_size(0)
+                etype = array.TypeMap[typecode]
+                ftype = etype.Create_darray(
+                    size, rank,
+                    [size*7, 5],
+                    [block, none],
+                    [dflt, dflt],
+                    [size, 1],
+                ).Commit()
+                fh.Set_view(0, etype, ftype)
+                for i in range(3):
+                    wval = 10*(rank+1)+i
+                    wbuf = array(wval, typecode, 7*5)
+                    fh.Write_all(wbuf.as_raw())
+                fh.Sync()
+                comm.Barrier()
+                fh.Set_view(0, etype, ftype)
+                for i in range(3):
+                    rval = 10*(rank+1)+i
+                    rbuf = array(0, typecode, 7*5)
+                    fh.Read_all(rbuf.as_raw())
+                    for value in rbuf:
+                        self.assertEqual(value, rval)
+                ftype.Free()
+                fh.Set_view(0, etype, etype)
+                for i in range(3):
+                    for r in range(size):
+                        for j in range(7):
+                            rval = 10*(r+1)+i
+                            rbuf = array(0, typecode, 5)
+                            fh.Read_all(rbuf.as_raw())
+                            for value in rbuf:
+                                self.assertEqual(value, rval)
+
+    def testDarrayCyclic(self):
+        comm = self.COMM
+        size = comm.Get_size()
+        rank = comm.Get_rank()
+        fh = self.FILE
+        cyclic = MPI.DISTRIBUTE_CYCLIC
+        none = MPI.DISTRIBUTE_NONE
+        dflt = MPI.DISTRIBUTE_DFLT_DARG
+        for array, typecode in arrayimpl_loop_io():
+            with arrayimpl.test(self):
+                comm.Barrier()
+                fh.Set_size(0)
+                etype = array.TypeMap[typecode]
+                ftype = etype.Create_darray(
+                    size, rank,
+                    [size*7, 5],
+                    [cyclic, none],
+                    [1, dflt],
+                    [size, 1],
+                ).Commit()
+                fh.Set_view(0, etype, ftype)
+                for i in range(3):
+                    wval = 10*(rank+1)+i
+                    wbuf = array(wval, typecode, 7*5)
+                    fh.Write_all(wbuf.as_raw())
+                fh.Sync()
+                comm.Barrier()
+                fh.Set_view(0, etype, ftype)
+                for i in range(3):
+                    rval = 10*(rank+1)+i
+                    rbuf = array(0, typecode, 7*5)
+                    fh.Read_all(rbuf.as_raw())
+                    for value in rbuf:
+                        self.assertEqual(value, rval)
+                ftype.Free()
+                fh.Set_view(0, etype, etype)
+                for i in range(3):
+                    for j in range(7):
+                        for r in range(size):
+                            rval = 10*(r+1)+i
+                            rbuf = array(0, typecode, 5)
+                            fh.Read_all(rbuf.as_raw())
+                            for value in rbuf:
+                                self.assertEqual(value, rval)
+
+
 @unittest.skipMPI('MPICH1')
 @unittest.skipMPI('LAM/MPI')
-class TestIOSelf(BaseTestIO, unittest.TestCase):
+class TestIOBasicSelf(BaseTestIOBasic, unittest.TestCase):
     COMM = MPI.COMM_SELF
-    prefix = BaseTestIO.prefix + ('%d-' % MPI.COMM_WORLD.Get_rank())
 
 @unittest.skipMPI('openmpi(<2.2.0)')
 @unittest.skipMPI('msmpi')
 @unittest.skipMPI('MPICH2')
 @unittest.skipMPI('MPICH1')
 @unittest.skipMPI('LAM/MPI')
-class TestIOWorld(BaseTestIO, unittest.TestCase):
+class TestIOBasicWorld(BaseTestIOBasic, unittest.TestCase):
+    COMM = MPI.COMM_WORLD
+
+@unittest.skipMPI('mpich(>=4.0.0,<4.1.0)')
+@unittest.skipMPI('openmpi(<2.2.0)')
+@unittest.skipMPI('MPICH1')
+@unittest.skipMPI('LAM/MPI')
+class TestIOViewSelf(BaseTestIOView, unittest.TestCase):
+    COMM = MPI.COMM_SELF
+
+@unittest.skipMPI('mpich(>=4.0.0,<4.1.0)')
+@unittest.skipMPI('openmpi(<2.2.0)')
+@unittest.skipMPI('msmpi')
+@unittest.skipMPI('MPICH2')
+@unittest.skipMPI('MPICH1')
+@unittest.skipMPI('LAM/MPI')
+class TestIOViewWorld(BaseTestIOView, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
 
 def have_feature():
     case = BaseTestIO()
-    case.COMM = TestIOSelf.COMM
-    case.prefix = TestIOSelf.prefix
+    case.COMM = TestIOBasicSelf.COMM
+    case.prefix = TestIOBasicSelf.prefix
     case.setUp()
     case.tearDown()
 try:
