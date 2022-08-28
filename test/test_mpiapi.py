@@ -15,6 +15,7 @@ mpi_small_count_allowed = [
 class TestMPIAPI(unittest.TestCase):
 
     @unittest.skipIf(shutil.which('nm') is None, 'nm')
+    @unittest.skipUnless(hasattr(os, 'posix_spawn'), 'os.posix_spawn')
     def testLargeCountSymbols(self):
         mpiname = r"MPI_[A-Z][a-z0-9_]+"
 
@@ -30,10 +31,13 @@ class TestMPIAPI(unittest.TestCase):
         self.assertTrue(large_count)
 
         nm = shutil.which('nm')
-        nm_output = sp.check_output([nm, '-Pu', mod_file])
+        cmd = [nm, '-Pu', mod_file]
+        out = sp.check_output(cmd, close_fds=False)
+        nm_output = out.decode()
+
         regex = re.compile(rf"^_?({mpiname}) U.*$")
         mpi_symbols = set()
-        for line in map(bytes.decode, nm_output.split(b"\n")):
+        for line in nm_output.split("\n"):
             match = regex.search(line)
             if match:
                 fcn = match.groups()[0]
