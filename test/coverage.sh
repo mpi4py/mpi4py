@@ -3,6 +3,7 @@
 MPIEXEC=${MPIEXEC-mpiexec}
 PYTHON=${1-${PYTHON-python}}
 export PYTHONDONTWRITEBYTECODE=1
+export PYTHONWARNINGS=error
 
 $PYTHON -m coverage erase
 
@@ -36,8 +37,8 @@ $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.run --help > /dev/null
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py --version  > /dev/null
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py --help     > /dev/null
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py -          < /dev/null
-$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py -rc threads=0 -c ""                > /dev/null
-$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py --rc=thread_level=single -c ""     > /dev/null
+$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py -rc threads=0 -c "import mpi4py.MPI"
+$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py --rc=thread_level=single -c "import mpi4py.MPI"
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py                                    > /dev/null 2>&1 || true
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py -m                                 > /dev/null 2>&1 || true
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py -c                                 > /dev/null 2>&1 || true

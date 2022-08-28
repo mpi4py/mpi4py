@@ -150,15 +150,16 @@ def main():
                     else:
                         arg0 = arg0[1:]
                 if arg0 == '-rc':
+                    from ast import literal_eval
                     for entry in poparg(args).split(','):
                         key, _, val = entry.partition('=')
                         if not key or not val:
                             raise ValueError(entry)
                         try:
-                            # pylint: disable=eval-used
-                            options.rc_args[key] = eval(val, {})
-                        except NameError:
-                            options.rc_args[key] = val
+                            val = literal_eval(val)
+                        except ValueError:
+                            pass
+                        options.rc_args[key] = val
                 else:
                     usage('Unknown option: ' + args[0])
                 del args[0]
