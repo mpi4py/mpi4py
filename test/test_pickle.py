@@ -3,11 +3,6 @@ import mpiunittest as unittest
 import sys
 
 try:
-    import cPickle
-except ImportError:
-    cPickle = None
-
-try:
     import pickle as pyPickle
 except ImportError:
     pyPickle = None
@@ -78,22 +73,6 @@ class TestPickle(unittest.TestCase):
         protocols.append(None)
         for proto in protocols:
             pickle.__init__(protocol=proto)
-            for obj in OBJS:
-                self.do_pickle(obj, pickle)
-            self.do_pickle(OBJS, pickle)
-
-    def testCPickle(self):
-        if cPickle is None: return
-        pickle = self.pickle
-        dumps = cPickle.dumps
-        loads = cPickle.loads
-        protocols = [0, 1, 2, 3, 4]
-        if sys.version_info[:2] >= (3, 8):
-            protocols.append(5)
-        protocols.append(-1)
-        protocols.append(None)
-        for proto in protocols:
-            pickle.__init__(dumps, loads, proto)
             for obj in OBJS:
                 self.do_pickle(obj, pickle)
             self.do_pickle(OBJS, pickle)
