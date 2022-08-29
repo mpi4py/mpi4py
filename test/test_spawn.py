@@ -62,6 +62,9 @@ def using_GPU():
     using_numba = (sys.modules.get('numba') is not None)
     return using_cupy or using_numba
 
+def github_actions():
+    return os.environ.get('GITHUB_ACTIONS') == 'true'
+
 
 @unittest.skipMPI('MPI(<2.0)')
 @unittest.skipMPI('openmpi(<3.0.0)')
@@ -156,6 +159,7 @@ class BaseTestSpawnSingle(BaseTestSpawn):
         self.COMM.Barrier()
 
 
+@unittest.skipMPI('openmpi(==4.1.2)', github_actions())
 class BaseTestSpawnMultiple(BaseTestSpawn):
 
     def testCommSpawn(self):

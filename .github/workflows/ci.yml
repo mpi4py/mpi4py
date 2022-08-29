@@ -22,8 +22,8 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - ubuntu-20.04
-          - macos-11
+          - ubuntu-22.04
+          - macos-12
           - windows-2022
         mpi:
           - mpich
@@ -39,9 +39,9 @@ jobs:
           - "pypy-3.8"
           - "pypy-3.9"
         exclude:
-          - os: ubuntu-20.04
+          - os: ubuntu-22.04
             mpi: msmpi
-          - os: macos-11
+          - os: macos-12
             mpi: msmpi
           - os: windows-2022
             mpi: mpich
@@ -83,13 +83,13 @@ jobs:
       if:   (runner.os == 'Linux' || !startsWith(matrix.py, 'pypy-')) && !endsWith(matrix.py, '-dev')
     - name: Install package for testing
       run:  python -m pip install --no-index --find-links=dist mpi4py
-    - name: Test package
+    - name: Test package (np=1)
       run:  mpiexec -n 1 python test/runtests.py -v
-    - name: Test package
+    - name: Test package (np=2)
       run:  mpiexec -n 2 python test/runtests.py -v -f -e spawn
-    - name: Test subpackage
+    - name: Test subpackage (np=1)
       run:  mpiexec -n 1 python demo/futures/test_futures.py -v
-    - name: Test subpackage
+    - name: Test subpackage (np=2)
       run:  mpiexec -n 2 python demo/futures/test_futures.py -v
     - name: Test subpackage
       run:  python demo/test-run/test_run.py -v
@@ -101,7 +101,7 @@ jobs:
       run:  python -m pip uninstall --yes mpi4py
 
   conf:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
 
@@ -135,7 +135,7 @@ jobs:
         git diff && test -z "$(git diff)"
 
   lint:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
 
@@ -173,7 +173,7 @@ jobs:
       run:  pylint mpi4py
 
   type:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
@@ -224,10 +224,11 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - ubuntu-18.04
+          - ubuntu-22.04
           - ubuntu-20.04
-          - macos-11
+          - ubuntu-18.04
           - macos-12
+          - macos-11
         mpi:
           - mpich
           - openmpi
