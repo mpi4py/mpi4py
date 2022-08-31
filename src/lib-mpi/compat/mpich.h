@@ -2,6 +2,18 @@
 #define PyMPI_COMPAT_MPICH_H
 #if defined(MPICH_NUMVERSION)
 
+#if (MPICH_NUMVERSION >= 40000000 && MPICH_NUMVERSION < 40100000)
+
+static int PyMPI_MPICH_MPI_Status_set_elements_c(MPI_Status *status,
+                                                 MPI_Datatype datatype,
+                                                 MPI_Count elements)
+{
+  return MPI_Status_set_elements_x(status, datatype, elements);
+}
+#define MPI_Status_set_elements_c PyMPI_MPICH_MPI_Status_set_elements_c
+
+#endif
+
 #if (MPICH_NUMVERSION >= 30000000 && MPICH_NUMVERSION < 40000000)
 
 static int PyMPI_MPICH_MPI_Type_get_extent_x(MPI_Datatype datatype,
