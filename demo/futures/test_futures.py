@@ -1423,6 +1423,8 @@ if name == 'Open MPI':
         SKIP_POOL_TEST = True
     if version == (4,0,2) and sys.platform=='darwin':
         SKIP_POOL_TEST = True
+    if version == (4,1,2) and sys.platform=='linux':
+        SKIP_POOL_TEST = (os.environ.get('GITHUB_ACTIONS') == 'true')
 if name == 'MPICH':
     if sys.platform == 'darwin':
         if version >= (3, 4) and version < (4, 0):
