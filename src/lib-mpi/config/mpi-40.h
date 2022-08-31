@@ -25,6 +25,7 @@
 #define PyMPI_HAVE_MPI_Pack_external_size_c 1
 #define PyMPI_HAVE_MPI_Get_count_c 1
 #define PyMPI_HAVE_MPI_Get_elements_c 1
+#define PyMPI_HAVE_MPI_Status_set_elements_c 1
 #define PyMPI_HAVE_MPI_Pready 1
 #define PyMPI_HAVE_MPI_Pready_range 1
 #define PyMPI_HAVE_MPI_Pready_list 1
