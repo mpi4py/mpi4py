@@ -63,7 +63,7 @@ jobs:
         mpi: ${{ matrix.mpi }}
 
     - name: Use Python ${{ matrix.py }}
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.py }}
         architecture: x64
@@ -109,7 +109,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Use Python
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v4
       with:
         python-version: 3
 
@@ -143,7 +143,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Use Python
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v4
       with:
         python-version: 3
 
@@ -189,7 +189,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Use Python
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.py }}
 
@@ -253,7 +253,7 @@ jobs:
         mpi: ${{ matrix.mpi }}
 
     - name: Use Python ${{ matrix.py }}
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.py }}
 
