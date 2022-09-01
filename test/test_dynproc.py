@@ -30,6 +30,7 @@ def badport():
 @unittest.skipMPI('openmpi(<2.0.0)')
 @unittest.skipMPI('MVAPICH2')
 @unittest.skipMPI('msmpi(<8.1.0)')
+@unittest.skipIf(MPI.COMM_WORLD.Get_size() < 2, 'mpi-world-size<2')
 class TestDPM(unittest.TestCase):
 
     message = [
@@ -45,10 +46,6 @@ class TestDPM(unittest.TestCase):
         {1:2},
     ]
 
-    @unittest.skipMPI('mpich', appnum() is None)
-    @unittest.skipMPI('MPICH2', appnum() is None)
-    @unittest.skipMPI('MPICH1', appnum() is None)
-    @unittest.skipMPI('msmpi(<8.1.0)', appnum() is None)
     def testNamePublishing(self):
         rank = MPI.COMM_WORLD.Get_rank()
         service = "mpi4py-%d" % rank
@@ -59,7 +56,6 @@ class TestDPM(unittest.TestCase):
         MPI.Unpublish_name(service, port)
         MPI.Close_port(port)
 
-    @unittest.skipIf(MPI.COMM_WORLD.Get_size() < 2, 'mpi-world-size<2')
     @unittest.skipMPI('mpich(==3.4.1)', ch4_ofi())
     def testAcceptConnect(self):
         comm_self  = MPI.COMM_SELF
@@ -108,7 +104,6 @@ class TestDPM(unittest.TestCase):
             self.assertEqual(message, TestDPM.message)
         intercomm.Free()
 
-    @unittest.skipIf(MPI.COMM_WORLD.Get_size() < 2, 'mpi-world-size<2')
     def testConnectAccept(self):
         comm_self  = MPI.COMM_SELF
         comm_world = MPI.COMM_WORLD
@@ -157,7 +152,6 @@ class TestDPM(unittest.TestCase):
             self.assertEqual(message, TestDPM.message)
         intercomm.Free()
 
-    @unittest.skipIf(MPI.COMM_WORLD.Get_size() < 2, 'mpi-world-size<2')
     @unittest.skipIf(socket is None, 'socket')
     def testJoin(self):
         size = MPI.COMM_WORLD.Get_size()
