@@ -8,6 +8,10 @@ import unittest
 import mpi4py
 
 
+on_win = sys.platform == 'win32'
+on_gha = os.environ.get('GITHUB_ACTIONS') == 'true'
+
+
 def find_executable(exe):
     command = shlex.split(exe)
     executable = shutil.which(command[0])
@@ -66,6 +70,7 @@ def execute(np, cmd, args=''):
 
 
 @unittest.skipIf(not find_mpiexec(), 'mpiexec')
+@unittest.skipIf(on_gha and on_win, 'github-actions windows')
 class BaseTestRun(unittest.TestCase):
 
     def assertMPIAbort(self, stdout, stderr, message=None):
