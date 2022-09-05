@@ -126,15 +126,15 @@ class Backoff:
         self.tval = min(self.tmax, max(self.tmin, self.tval * 2))
 
 
-class Queue(collections.deque):
+class TaskQueue(collections.deque):
     put = collections.deque.append
     pop = collections.deque.popleft
     add = collections.deque.appendleft
 
 
-class Stack(collections.deque):
-    put = collections.deque.append
-    pop = collections.deque.pop
+class WorkerSet(collections.deque):
+    add = collections.deque.append
+    pop = collections.deque.popleft
 
 
 THREADS_QUEUES = weakref.WeakKeyDictionary()  # type: weakref.WeakKeyDictionary
@@ -159,7 +159,7 @@ class Pool:
     def __init__(self, executor, manager, *args):
         self.size = None
         self.event = threading.Event()
-        self.queue = queue = Queue()
+        self.queue = queue = TaskQueue()
         self.exref = weakref.ref(executor, lambda _, q=queue: q.put(None))
 
         args = (self, executor._options) + args
@@ -300,7 +300,7 @@ def _manager_comm(pool, options, comm, full=True):
         return
     size = comm.Get_remote_size()
     queue = pool.setup(size)
-    workers = Stack(reversed(range(size)))
+    workers = WorkerSet(range(size))
     client_exec(comm, options, 0, workers, queue)
     serialized(client_close)(comm)
 
@@ -421,7 +421,7 @@ class SharedPoolCtx:
             if self.on_root:
                 size = self.comm.Get_remote_size()
                 self.counter = itertools.count(0)
-                self.workers = Stack(reversed(range(size)))
+                self.workers = WorkerSet(range(size))
         _set_shared_pool(self)
         return self if self.on_root else None
 
@@ -569,7 +569,7 @@ def client_init(comm, options):
     return success
 
 
-def client_exec(comm, options, tag, worker_pool, task_queue):
+def client_exec(comm, options, tag, worker_set, task_queue):
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-statements
     assert comm.Is_inter()
@@ -603,7 +603,7 @@ def client_exec(comm, options, tag, worker_pool, task_queue):
         except BaseException:
             task = (None, sys_exception())
         pid = status.source
-        worker_pool.put(pid)
+        worker_set.add(pid)
 
         future, request = pending.pop(pid)
         request_free(request)
@@ -619,26 +619,26 @@ def client_exec(comm, options, tag, worker_pool, task_queue):
             return True
 
         try:
-            pid = worker_pool.pop()
+            pid = worker_set.pop()
         except LookupError:  # pragma: no cover
             task_queue.add(item)
             return False
 
         future, task = item
         if not future.set_running_or_notify_cancel():
-            worker_pool.put(pid)
+            worker_set.add(pid)
             return False
 
         try:
             request = comm_isend(task, pid, tag)
             pending[pid] = (future, request)
         except BaseException:
-            worker_pool.put(pid)
+            worker_set.add(pid)
             future.set_exception(sys_exception())
         return None
 
     while True:
-        if task_queue and worker_pool:
+        if task_queue and worker_set:
             backoff.reset()
             stop = send()
             if stop:
