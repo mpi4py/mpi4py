@@ -111,6 +111,13 @@ def os_environ_get(name, default=None):
 BACKOFF = 0.001
 
 
+def _getopt_backoff(options):
+    backoff = options.get('backoff')
+    if backoff is None:
+        backoff = os_environ_get('BACKOFF', BACKOFF)
+    return float(backoff)
+
+
 class Backoff:
 
     def __init__(self, seconds=BACKOFF):
@@ -255,7 +262,7 @@ def _manager_thread(pool, options):
         return True
 
     def worker():
-        backoff = Backoff(options.get('backoff', BACKOFF))
+        backoff = Backoff(_getopt_backoff(options))
         if not init():
             queue.put(None)
             return
@@ -576,7 +583,7 @@ def client_exec(comm, options, tag, worker_set, task_queue):
     assert comm.Get_size() == 1
     assert tag >= 0
 
-    backoff = Backoff(options.get('backoff', BACKOFF))
+    backoff = Backoff(_getopt_backoff(options))
 
     status = MPI.Status()
     comm_recv = serialized(comm.recv)
@@ -691,7 +698,7 @@ def server_exec(comm, options):
     assert comm.Is_inter()
     assert comm.Get_remote_size() == 1
 
-    backoff = Backoff(options.get('backoff', BACKOFF))
+    backoff = Backoff(_getopt_backoff(options))
 
     status = MPI.Status()
     comm_recv = comm.recv

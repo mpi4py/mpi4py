@@ -133,6 +133,15 @@ only) thread until they are signaled for completion.
      benefit applications dealing with large buffer-like objects like NumPy
      arrays. See :mod:`mpi4py.util.pkl5` for additional information.
 
+   * *backoff*: :class:`float` value specifying the maximum number of seconds a
+     worker thread or process suspends execution with :func:`time.sleep()`
+     while idle-waiting. If not set, its value is determined from the
+     :envvar:`MPI4PY_FUTURES_BACKOFF` environment variable if set, otherwise
+     the default value of 0.001 seconds is used. Lower values will reduce
+     latency and increase execution throughput for very short-lived tasks,
+     albeit at the expense of spinning CPU cores and increased energy
+     consumption.
+
    .. method:: submit(func, *args, **kwargs)
 
       Schedule the callable, *func*, to be executed as ``func(*args,
@@ -228,6 +237,8 @@ only) thread until they are signaled for completion.
    provides a fallback value for the maximum number of MPI worker processes to
    spawn.
 
+   .. versionadded:: 3.1.0
+
 .. envvar:: MPI4PY_FUTURES_USE_PKL5
 
    If the *use_pkl5* keyword argument to :class:`MPIPoolExecutor` is `None` or
@@ -240,7 +251,22 @@ only) thread until they are signaled for completion.
    with large buffer-like objects like NumPy arrays. See
    :mod:`mpi4py.util.pkl5` for additional information.
 
+   .. versionadded:: 4.0.0
+
    .. _YAML boolean: https://yaml.org/type/bool.html
+
+.. envvar:: MPI4PY_FUTURES_BACKOFF
+
+   If the *backoff* keyword argument to :class:`MPIPoolExecutor` is not given,
+   the :envvar:`MPI4PY_FUTURES_BACKOFF` environment variable can be set to a
+   :class:`float` value specifying the maximum number of seconds a worker
+   thread or process suspends execution with :func:`time.sleep()` while
+   idle-waiting. If not set, the default backoff value is 0.001 seconds. Lower
+   values will reduce latency and increase execution throughput for very
+   short-lived tasks, albeit at the expense of spinning CPU cores and increased
+   energy consumption.
+
+   .. versionadded:: 4.0.0
 
 .. note::
 

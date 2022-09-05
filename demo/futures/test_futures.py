@@ -159,6 +159,7 @@ class ProcessPoolInitTest(ProcessPoolMixin,
             wdir=os.getcwd(),
             env={},
             use_pkl5=None,
+            backoff=0.001,
             )
         futures = [executor.submit(time.sleep, 0)
                    for _ in range(self.worker_count)]
