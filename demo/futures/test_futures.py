@@ -514,7 +514,7 @@ class WaitTestMixin:
 
     def test_first_exception_some_already_complete(self):
         future1 = self.executor.submit(divmod, 21, 0)
-        future2 = self.executor.submit(time.sleep, 0.2)
+        future2 = self.executor.submit(time.sleep, 0.4)
 
         finished, pending = futures.wait(
                 [SUCCESSFUL_FUTURE,
@@ -566,7 +566,7 @@ class WaitTestMixin:
                  EXCEPTION_FUTURE,
                  SUCCESSFUL_FUTURE,
                  future1, future2],
-                timeout=0.2,
+                timeout=0.25,
                 return_when=futures.ALL_COMPLETED)
 
         self.assertEqual(set([CANCELLED_AND_NOTIFIED_FUTURE,
