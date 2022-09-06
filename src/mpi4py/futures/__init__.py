@@ -22,3 +22,21 @@ from .pool import MPICommExecutor
 
 from .pool import ThreadPoolExecutor
 from .pool import ProcessPoolExecutor
+
+__all__ = [
+    'Future',
+    'Executor',
+    'wait',
+    'FIRST_COMPLETED',
+    'FIRST_EXCEPTION',
+    'ALL_COMPLETED',
+    'as_completed',
+    'CancelledError',
+    'TimeoutError',
+    'InvalidStateError',
+    'BrokenExecutor',
+    'MPIPoolExecutor',
+    'MPICommExecutor',
+    'ThreadPoolExecutor',
+    'ProcessPoolExecutor',
+]
