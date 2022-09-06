@@ -1,3 +1,5 @@
+from typing import List
+
 from ._core import (
     Future as Future,
     Executor as Executor,
@@ -21,3 +23,5 @@ from .pool import (
     ThreadPoolExecutor as ThreadPoolExecutor,
     ProcessPoolExecutor as ProcessPoolExecutor,
 )
+
+__all__: List[str] = ...
