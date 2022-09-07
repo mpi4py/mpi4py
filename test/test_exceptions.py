@@ -204,6 +204,105 @@ class TestExcGroup(BaseTestCase):
 
 # --------------------------------------------------------------------
 
+class TestExcSessionNull(BaseTestCase):
+
+    def testGetNumPsets(self):
+        self.assertRaisesMPI(
+            MPI.ERR_SESSION,
+            MPI.SESSION_NULL.Get_num_psets,
+        )
+
+    def testGetNthPset(self):
+        self.assertRaisesMPI(
+            MPI.ERR_SESSION,
+            MPI.SESSION_NULL.Get_nth_pset,
+            0,
+        )
+
+    def testGetInfo(self):
+        self.assertRaisesMPI(
+            MPI.ERR_SESSION,
+            MPI.SESSION_NULL.Get_info,
+        )
+
+    def testGetPsetInfo(self):
+        self.assertRaisesMPI(
+            MPI.ERR_SESSION,
+            MPI.SESSION_NULL.Get_pset_info,
+            "mpi://SELF",
+        )
+
+    def testCreateGroup(self):
+        self.assertRaisesMPI(
+            MPI.ERR_SESSION,
+            MPI.SESSION_NULL.Create_group,
+            "mpi://SELF",
+        )
+
+    def testGetErrhandler(self):
+        self.assertRaisesMPI(
+            MPI.ERR_SESSION,
+            MPI.SESSION_NULL.Get_errhandler,
+        )
+
+    def testSetErrhandler(self):
+        self.assertRaisesMPI(
+            MPI.ERR_SESSION,
+            MPI.SESSION_NULL.Set_errhandler,
+            MPI.ERRORS_RETURN,
+        )
+
+
+class TestExcSession(BaseTestCase):
+
+    def setUp(self):
+        super(TestExcSession, self).setUp()
+        self.SESSION = MPI.Session.Init()
+        self.SESSION.Set_errhandler(MPI.ERRORS_RETURN)
+
+    def tearDown(self):
+        self.SESSION.Finalize()
+        self.SESSION = None
+        super(TestExcSession, self).tearDown()
+
+    def testGetNthPsetNeg(self):
+        self.assertRaisesMPI(
+            MPI.ERR_ARG,
+            self.SESSION.Get_nth_pset,
+            -1,
+        )
+
+    @unittest.skipMPI('mpich(<4.1.0)')
+    def testGetNthPsetPos(self):
+        self.assertRaisesMPI(
+            MPI.ERR_ARG,
+            self.SESSION.Get_nth_pset,
+            self.SESSION.Get_num_psets(),
+        )
+
+    def testGetPsetInfo(self):
+        self.assertRaisesMPI(
+            MPI.ERR_ARG,
+            self.SESSION.Get_pset_info,
+            "@qerty!#$",
+        )
+
+    def testCreateGroup(self):
+        self.assertRaisesMPI(
+            MPI.ERR_ARG,
+            self.SESSION.Create_group,
+            "@qerty!#$",
+        )
+
+
+try:
+    MPI.Session.Init().Finalize()
+except NotImplementedError:
+    unittest.disable(TestExcSessionNull, 'mpi-session')
+    unittest.disable(TestExcSession, 'mpi-session')
+
+# --------------------------------------------------------------------
+
 class TestExcCommNull(BaseTestCase):
 
     ERR_COMM = MPI.ERR_COMM
