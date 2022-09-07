@@ -35,6 +35,15 @@ class BaseTestComm(object):
         self.assertEqual(comm.Is_inter(), comm.is_inter)
         self.assertEqual(comm.Get_topology(), comm.topology)
 
+    def testSize(self):
+        size = self.COMM.Get_size()
+        self.assertTrue(size >= 1)
+
+    def testRank(self):
+        size = self.COMM.Get_size()
+        rank = self.COMM.Get_rank()
+        self.assertTrue(rank >= 0 and rank < size)
+
     def testGroup(self):
         comm  = self.COMM
         group = self.COMM.Get_group()
@@ -143,29 +152,35 @@ class BaseTestComm(object):
     def testCreateGroup(self):
         group = self.COMM.Get_group()
         try:
-            try:
-                comm = self.COMM.Create_group(group)
-                ccmp = MPI.Comm.Compare(self.COMM, comm)
-                self.assertEqual(ccmp, MPI.CONGRUENT)
-                comm.Free()
-            finally:
-                group.Free()
+            comm = self.COMM.Create_group(group)
         except NotImplementedError:
+            self.assertTrue(MPI.VERSION < 3)
             self.skipTest('mpi-comm-create_group')
+        else:
+            ccmp = MPI.Comm.Compare(self.COMM, comm)
+            comm.Free()
+            self.assertEqual(ccmp, MPI.CONGRUENT)
+        finally:
+            group.Free()
 
+    #@unittest.skipMPI('openmpi(<5.2.0)')
     def testCreateFromGroup(self):
         group = self.COMM.Get_group()
         try:
-            try:
-                comm = MPI.Intracomm.Create_from_group(group)
-                ccmp = MPI.Comm.Compare(self.COMM, comm)
-                comm.Free()
-                self.assertEqual(ccmp, MPI.CONGRUENT)
-            finally:
-                group.Free()
+            comm = MPI.Intracomm.Create_from_group(group)
         except NotImplementedError:
             self.assertTrue(MPI.VERSION < 4)
             self.skipTest('mpi-comm-create_from_group')
+        except MPI.Exception as exc:  # openmpi
+            UNSUPPORTED = MPI.ERR_UNSUPPORTED_OPERATION
+            if exc.Get_error_class() != UNSUPPORTED:
+                raise
+        else:
+            ccmp = MPI.Comm.Compare(self.COMM, comm)
+            comm.Free()
+            self.assertEqual(ccmp, MPI.CONGRUENT)
+        finally:
+            group.Free()
 
     @unittest.skipMPI('openmpi(==2.0.0)')
     def testSplitTypeShared(self):
@@ -173,8 +188,8 @@ class BaseTestComm(object):
             MPI.COMM_SELF.Split_type(MPI.COMM_TYPE_SHARED).Free()
         except NotImplementedError:
             self.skipTest('mpi-comm-split_type')
-        #comm = self.COMM.Split_type(MPI.UNDEFINED)
-        #self.assertEqual(comm, MPI.COMM_NULL)
+        comm = self.COMM.Split_type(MPI.UNDEFINED)
+        self.assertEqual(comm, MPI.COMM_NULL)
         comm = self.COMM.Split_type(MPI.COMM_TYPE_SHARED)
         self.assertNotEqual(comm, MPI.COMM_NULL)
         size = self.COMM.Get_size()
@@ -275,23 +290,22 @@ class BaseTestComm(object):
 class TestCommSelf(BaseTestComm, unittest.TestCase):
     def setUp(self):
         self.COMM = MPI.COMM_SELF
+
     def testSize(self):
         size = self.COMM.Get_size()
         self.assertEqual(size, 1)
+
     def testRank(self):
         rank = self.COMM.Get_rank()
         self.assertEqual(rank, 0)
 
+    @unittest.skipMPI('openmpi(<5.2.0)')  # open-mpi/ompi#10895
+    def testCreateFromGroup(self):
+        super().testCreateFromGroup()
+
 class TestCommWorld(BaseTestComm, unittest.TestCase):
     def setUp(self):
         self.COMM = MPI.COMM_WORLD
-    def testSize(self):
-        size = self.COMM.Get_size()
-        self.assertTrue(size >= 1)
-    def testRank(self):
-        size = self.COMM.Get_size()
-        rank = self.COMM.Get_rank()
-        self.assertTrue(rank >= 0 and rank < size)
 
 class TestCommSelfDup(TestCommSelf):
     def setUp(self):

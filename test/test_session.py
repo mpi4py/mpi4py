@@ -41,10 +41,15 @@ class TestSession(unittest.TestCase):
         num_psets = session.Get_num_psets()
         for n in range(num_psets):
             name = session.Get_nth_pset(n)
-            group = session.Create_group(name)
-            group.Free()
-            group = MPI.Group.Create_from_session_pset(session, name)
-            group.Free()
+            try:
+                group = session.Create_group(name)
+                group.Free()
+                group = MPI.Group.Create_from_session_pset(session, name)
+                group.Free()
+            except MPI.Exception as exc:  # openmpi
+                UNSUPPORTED = MPI.ERR_OTHER
+                if exc.Get_error_class() != UNSUPPORTED:
+                    raise
         session.Finalize()
 
     def testSessionSELF(self):

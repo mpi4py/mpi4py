@@ -70,18 +70,22 @@ class BaseTestIntercomm(object):
         lgroup = self.INTERCOMM.Get_group()
         rgroup = self.INTERCOMM.Get_remote_group()
         try:
-            try:
-                Create_from_groups = MPI.Intercomm.Create_from_groups
-                intercomm = Create_from_groups(lgroup, 0, rgroup, 0)
-                ccmp = MPI.Comm.Compare(self.INTERCOMM, intercomm)
-                intercomm.Free()
-                self.assertEqual(ccmp, MPI.CONGRUENT)
-            finally:
-                lgroup.Free()
-                rgroup.Free()
+            Create_from_groups = MPI.Intercomm.Create_from_groups
+            intercomm = Create_from_groups(lgroup, 0, rgroup, 0)
         except NotImplementedError:
             self.assertTrue(MPI.VERSION < 4)
             self.skipTest('mpi-comm-create_from_group')
+        except MPI.Exception as exc:
+            UNSUPPORTED = MPI.ERR_UNSUPPORTED_OPERATION
+            if exc.Get_error_class() != UNSUPPORTED:
+                raise
+        else:
+            ccmp = MPI.Comm.Compare(self.INTERCOMM, intercomm)
+            intercomm.Free()
+            self.assertEqual(ccmp, MPI.CONGRUENT)
+        finally:
+            lgroup.Free()
+            rgroup.Free()
 
 
 class TestIntercomm(BaseTestIntercomm, unittest.TestCase):
