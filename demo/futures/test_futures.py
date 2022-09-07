@@ -667,7 +667,7 @@ class ExecutorTestMixin:
         self.assertEqual(16, future.result())
 
     def test_submit_cancel(self):
-        future1 = self.executor.submit(time.sleep, 0.25)
+        future1 = self.executor.submit(time.sleep, 0.5)
         future2 = self.executor.submit(time.sleep, 0)
         future2.cancel()
         self.assertEqual(None,  future1.result())
