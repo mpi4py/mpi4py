@@ -151,6 +151,17 @@ class TestRunScript(BaseTestRun):
                 self.assertMPIAbort(stdout, stderr, exitmsg)
                 self.assertTrue('Traceback' not in stderr)
 
+    def testInterrupt(self):
+        from signal import SIGINT
+        excmess = 'KeyboardInterrupt'
+        for np in (1, 2):
+            for rank in range(0, np):
+                args = ['--rank', str(rank), '--interrupt']
+                status, stdout, stderr = self.execute(args, np)
+                if not hasattr(sys, 'pypy_version_info'):
+                    self.assertEqual(status, SIGINT + 128)
+                self.assertMPIAbort(stdout, stderr, excmess)
+
 
 class TestRunDirectory(TestRunScript):
     directory = 'run-directory'
