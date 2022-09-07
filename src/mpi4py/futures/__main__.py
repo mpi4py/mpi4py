@@ -62,7 +62,10 @@ def main():
     except UsageExit:
         raise
     except SystemExit as exc:
-        set_abort_status(exc.code)
+        set_abort_status(exc)
+        raise
+    except KeyboardInterrupt as exc:
+        set_abort_status(exc)
         raise
     except:
         set_abort_status(1)

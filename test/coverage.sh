@@ -76,14 +76,15 @@ $MPIEXEC -n 2 $PYTHON -m coverage run -m mpi4py.futures - </dev/null
 $MPIEXEC -n 2 $PYTHON -m coverage run -m mpi4py.futures -c "raise SystemExit"
 $MPIEXEC -n 2 $PYTHON -m coverage run -m mpi4py.futures -c "raise SystemExit()"
 $MPIEXEC -n 2 $PYTHON -m coverage run -m mpi4py.futures -c "raise SystemExit(0)"
-$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.futures                           > /dev/null 2>&1 || true
-$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.futures xy                        > /dev/null 2>&1 || true
-$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.futures -c                        > /dev/null 2>&1 || true
-$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.futures -m                        > /dev/null 2>&1 || true
-$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.futures -x                        > /dev/null 2>&1 || true
-$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.futures -c "1/0"                  > /dev/null 2>&1 || true
-$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.futures -c "raise SystemExit(11)" > /dev/null 2>&1 || true
-$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.futures -c "raise SystemExit('')" > /dev/null 2>&1 || true
+$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.futures                              > /dev/null 2>&1 || true
+$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.futures xy                           > /dev/null 2>&1 || true
+$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.futures -c                           > /dev/null 2>&1 || true
+$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.futures -m                           > /dev/null 2>&1 || true
+$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.futures -x                           > /dev/null 2>&1 || true
+$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.futures -c "1/0"                     > /dev/null 2>&1 || true
+$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.futures -c "raise SystemExit(11)"    > /dev/null 2>&1 || true
+$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.futures -c "raise SystemExit('')"    > /dev/null 2>&1 || true
+$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.futures -c "raise KeyboardInterrupt" > /dev/null 2>&1 || true
 if [ $(command -v mpichversion) ]; then
     testdir=demo/futures
     $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.futures.server --xyz > /dev/null 2>&1 || true

@@ -57,8 +57,13 @@ def set_abort_status(status):
     """
     # pylint: disable=import-outside-toplevel
     import sys
-    status = (status if isinstance(status, int)
-              else 0 if status is None else 1)
+    if isinstance(status, SystemExit):
+        status = status.code
+    elif isinstance(status, KeyboardInterrupt):
+        from _signal import SIGINT
+        status = SIGINT + 128
+    if not isinstance(status, int):
+        status = 0 if status is None else 1
     pkg = __spec__.parent
     mpi = sys.modules.get(f'{pkg}.MPI')
     if mpi is not None and status:
@@ -181,7 +186,10 @@ def main():
     try:
         run_command_line(args)
     except SystemExit as exc:
-        set_abort_status(exc.code)
+        set_abort_status(exc)
+        raise
+    except KeyboardInterrupt as exc:
+        set_abort_status(exc)
         raise
     except:
         set_abort_status(1)
