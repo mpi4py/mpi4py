@@ -23,7 +23,6 @@ def run_command_line(args=None):
 
     def run_string(string, init_globals=None, run_name=None,
                    filename='<string>', argv0='-c'):
-        # pylint: disable=missing-docstring
         from runpy import _run_module_code
         code = compile(string, filename, 'exec', 0, 1)
         kwargs = {'script_name': argv0}
@@ -74,7 +73,6 @@ def set_abort_status(status):
 
 def main():
     """Entry-point for ``python -m mpi4py.run ...``."""
-    # pylint: disable=missing-docstring
     # pylint: disable=too-many-statements
     # pylint: disable=import-outside-toplevel
     import os
@@ -124,6 +122,7 @@ def main():
 
         class Options:
             # pylint: disable=too-few-public-methods
+            # pylint: disable=missing-class-docstring
             rc_args = {}
 
         def poparg(args):

@@ -130,7 +130,6 @@ def profile(name, *, path=None):
         return
 
     def find_library(name, path):
-        # pylint: disable=missing-docstring
         pattern = [('', '')]
         if sys.platform == 'darwin':  # pragma: no cover
             pattern.append(('lib', '.dylib'))
