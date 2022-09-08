@@ -137,9 +137,9 @@ def _send(comm, send, obj, dest, tag):
 
 
 def _isend(comm, isend, obj, dest, tag):
-    sreqs = []
     def send(comm, buf, dest, tag):
         sreqs.append(isend(comm, buf, dest, tag))
+    sreqs = []
     _send(comm, send, obj, dest, tag)
     request = Request(sreqs)
     return request
@@ -251,12 +251,12 @@ def _mrecv(message, status):
 
 
 def _imrecv(message):
-    rreqs = []
     def mrecv(rmsg, buf):
         rreqs.append(MPI.Message.Irecv(rmsg, buf))
+    rreqs = []
     data, bufs = _mrecv_data(message, mrecv)
     request = Request(rreqs)
-    setattr(request, '_data_bufs', (data, bufs))
+    setattr(request, '_data_bufs', (data, bufs))  # noqa: B010
     return request
 
 

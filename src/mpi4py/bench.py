@@ -215,9 +215,9 @@ def pingpong(comm, args=None, verbose=True):
     if use_outband:
         comm = pkl5.Intracomm(comm)
     if protocol is not None:
-        setattr(MPI.pickle, 'PROTOCOL', protocol)
+        MPI.pickle.PROTOCOL = protocol
     if threshold is not None:
-        setattr(pkl5.pickle, 'THRESHOLD', threshold)
+        pkl5.pickle.THRESHOLD = threshold
 
     buf_sizes = [1 << i for i in range(33)]
     buf_sizes = [n for n in buf_sizes if min_size <= n <= max_size]

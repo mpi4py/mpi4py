@@ -5,7 +5,7 @@
 # pylint: disable=redefined-builtin
 # pylint: disable=missing-module-docstring
 
-from concurrent.futures import (
+from concurrent.futures import (  # noqa: F401
     FIRST_COMPLETED,
     FIRST_EXCEPTION,
     ALL_COMPLETED,

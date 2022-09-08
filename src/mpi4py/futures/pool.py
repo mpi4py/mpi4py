@@ -119,7 +119,8 @@ class MPIPoolExecutor(Executor):
     if sys.version_info >= (3, 8):  # pragma: no branch
         submit.__text_signature__ = '($self, fn, /, *args, **kwargs)'
 
-    def map(self, fn, *iterables, timeout=None, chunksize=1, unordered=False):
+    def map(self, fn, *iterables,
+            timeout=None, chunksize=1, unordered=False):  # noqa: D402
         """Return an iterator equivalent to ``map(fn, *iterables)``.
 
         Args:
@@ -147,7 +148,7 @@ class MPIPoolExecutor(Executor):
         return self.starmap(fn, zip(*iterables), timeout, chunksize, unordered)
 
     def starmap(self, fn, iterable,
-                timeout=None, chunksize=1, unordered=False):
+                timeout=None, chunksize=1, unordered=False):  # noqa: D402
         """Return an iterator equivalent to ``itertools.starmap(...)``.
 
         Args:
@@ -239,7 +240,7 @@ def _starmap_helper(submit, function, iterable, timeout, unordered):
                 else:
                     while futures:
                         yield futures.pop().result(end_time - timer())
-        except:
+        except BaseException:
             while futures:
                 futures.pop().cancel()
             raise
@@ -357,11 +358,13 @@ class MPICommExecutor:
             return True
 
 
-class ThreadPoolExecutor(MPIPoolExecutor):  # noqa: D204
+class ThreadPoolExecutor(MPIPoolExecutor):
     """`MPIPoolExecutor` subclass using a pool of threads."""
+
     _make_pool = staticmethod(_lib.ThreadPool)
 
 
-class ProcessPoolExecutor(MPIPoolExecutor):  # noqa: D204
+class ProcessPoolExecutor(MPIPoolExecutor):
     """`MPIPoolExecutor` subclass using a pool of processes."""
+
     _make_pool = staticmethod(_lib.SpawnPool)

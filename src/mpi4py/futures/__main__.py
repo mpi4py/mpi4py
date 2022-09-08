@@ -67,7 +67,7 @@ def main():
     except KeyboardInterrupt as exc:
         set_abort_status(exc)
         raise
-    except:
+    except BaseException:
         set_abort_status(1)
         raise
 
