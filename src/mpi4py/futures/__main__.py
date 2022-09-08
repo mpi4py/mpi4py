@@ -11,7 +11,6 @@ submitted from the master process.
 
 def main():
     """Entry point for ``python -m mpi4py.futures ...``."""
-    # pylint: disable=missing-docstring
     # pylint: disable=import-outside-toplevel
     import os
     import sys
@@ -20,6 +19,7 @@ def main():
     from ._lib import SharedPoolCtx
 
     class UsageExit(SystemExit):
+        # pylint: disable=missing-class-docstring
         pass
 
     def usage(error=None):

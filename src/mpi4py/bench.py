@@ -64,7 +64,6 @@ def ringtest(comm, args=None, verbose=True):
 
     def ring(comm, n=1, loop=1, skip=0):
         # pylint: disable=invalid-name
-        # pylint: disable=missing-docstring
         from array import array
         from . import MPI
         iterations = list(range((loop + skip)))

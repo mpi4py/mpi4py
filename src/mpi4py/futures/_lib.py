@@ -4,8 +4,9 @@
 # pylint: disable=broad-except
 # pylint: disable=too-many-lines
 # pylint: disable=protected-access
-# pylint: disable=missing-docstring
 # pylint: disable=import-outside-toplevel
+# pylint: disable=missing-class-docstring
+# pylint: disable=missing-function-docstring
 
 import os
 import sys
@@ -382,7 +383,6 @@ def _set_shared_pool(obj):
 
 
 def _manager_shared(pool, options, comm, tag, workers):
-    # pylint: disable=too-many-arguments
     if tag == 0:
         comm = MPI.Intercomm(comm)
         serialized(client_sync)(comm, options)
@@ -401,7 +401,6 @@ def _manager_shared(pool, options, comm, tag, workers):
 
 
 class SharedPoolCtx:
-    # pylint: disable=too-few-public-methods
 
     def __init__(self):
         self.comm = MPI.COMM_NULL
@@ -799,7 +798,6 @@ def import_main(mod_name, mod_path, init_globals, run_name):
     class TempModulePatch(runpy._TempModule):
         # pylint: disable=too-few-public-methods
         def __init__(self, mod_name):
-            # pylint: disable=no-member
             super().__init__(mod_name)
             assert self.module.__name__ == run_name  # noqa: S101
             self.module = module
@@ -1012,7 +1010,7 @@ def client_lookup(address):
     sock = socket()
     sock.connect(address)
     try:
-        fdes = sock.fileno()  # pylint: disable=no-member
+        fdes = sock.fileno()
         peer = MPI.Comm.Join(fdes)
     finally:
         sock.close()
@@ -1037,7 +1035,7 @@ def server_publish(address, mpi_port):
     finally:
         serversock.close()
     try:
-        fdes = sock.fileno()  # pylint: disable=no-member
+        fdes = sock.fileno()
         peer = MPI.Comm.Join(fdes)
     finally:
         sock.close()

@@ -381,7 +381,6 @@ def _get_p2p_backend():
 
 
 def _gather(comm, obj, root):
-    # pylint: disable=too-many-branches
     reqs, send, recv = _get_p2p_backend()
     if comm.Is_inter():
         comm, tag, *_ = _commctx_inter(comm)
@@ -549,13 +548,11 @@ class Request(tuple):
 
     def cancel(self):
         """Cancel a communication request."""
-        # pylint: disable=invalid-name
         for req in self:
             req.Cancel()
 
     def get_status(self, status=None):
         """Non-destructive test for the completion of a request."""
-        # pylint: disable=invalid-name
         statuses = [status] + [None] * max(len(self) - 1, 0)
         return all(map(MPI.Request.Get_status, self, statuses))
 

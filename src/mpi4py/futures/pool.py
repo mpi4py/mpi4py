@@ -144,7 +144,6 @@ class MPIPoolExecutor(Executor):
             Exception: If ``fn(*args)`` raises for any values.
 
         """
-        # pylint: disable=arguments-differ
         return self.starmap(fn, zip(*iterables), timeout, chunksize, unordered)
 
     def starmap(self, fn, iterable,
@@ -221,7 +220,7 @@ def _starmap_helper(submit, function, iterable, timeout, unordered):
     if unordered:
         futures = set(futures)
 
-    def result_iterator():  # pylint: disable=missing-docstring
+    def result_iterator():
         try:
             if unordered:
                 if timeout is None:
@@ -294,8 +293,6 @@ class MPICommExecutor:
                 executor.map(...)
     """
 
-    # pylint: disable=too-few-public-methods
-
     def __init__(self, comm=None, root=0, **kwargs):
         """Initialize a new MPICommExecutor instance.
 
@@ -322,7 +319,6 @@ class MPICommExecutor:
 
     def __enter__(self):
         """Return `MPIPoolExecutor` instance at the root."""
-        # pylint: disable=protected-access
         if self._executor is not None:
             raise RuntimeError("__enter__")
 
