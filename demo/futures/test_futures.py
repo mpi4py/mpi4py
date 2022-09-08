@@ -479,7 +479,7 @@ class WaitTestMixin:
 
     def test_first_completed(self):
         future1 = self.executor.submit(mul, 21, 2)
-        future2 = self.executor.submit(time.sleep, 0.2)
+        future2 = self.executor.submit(time.sleep, 0.25)
 
         done, not_done = futures.wait(
                 [CANCELLED_FUTURE, future1, future2],
@@ -489,7 +489,7 @@ class WaitTestMixin:
         self.assertEqual(set([CANCELLED_FUTURE, future2]), not_done)
 
     def test_first_completed_some_already_completed(self):
-        future1 = self.executor.submit(time.sleep, 0.2)
+        future1 = self.executor.submit(time.sleep, 0.5)
 
         finished, pending = futures.wait(
                  [CANCELLED_AND_NOTIFIED_FUTURE, SUCCESSFUL_FUTURE, future1],
@@ -502,8 +502,8 @@ class WaitTestMixin:
 
     def test_first_exception(self):
         future1 = self.executor.submit(mul, 2, 21)
-        future2 = self.executor.submit(sleep_and_raise, 0.2)
-        future3 = self.executor.submit(time.sleep, 0.4)
+        future2 = self.executor.submit(sleep_and_raise, 0.25)
+        future3 = self.executor.submit(time.sleep, 0.5)
 
         finished, pending = futures.wait(
                 [future1, future2, future3],
@@ -514,7 +514,7 @@ class WaitTestMixin:
 
     def test_first_exception_some_already_complete(self):
         future1 = self.executor.submit(divmod, 21, 0)
-        future2 = self.executor.submit(time.sleep, 0.4)
+        future2 = self.executor.submit(time.sleep, 0.5)
 
         finished, pending = futures.wait(
                 [SUCCESSFUL_FUTURE,
@@ -529,7 +529,7 @@ class WaitTestMixin:
         self.assertEqual(set([CANCELLED_FUTURE, future2]), pending)
 
     def test_first_exception_one_already_failed(self):
-        future1 = self.executor.submit(time.sleep, 0.2)
+        future1 = self.executor.submit(time.sleep, 0.25)
 
         finished, pending = futures.wait(
                  [EXCEPTION_FUTURE, future1],
@@ -559,14 +559,14 @@ class WaitTestMixin:
 
     def test_timeout(self):
         future1 = self.executor.submit(mul, 6, 7)
-        future2 = self.executor.submit(time.sleep, 0.5)
+        future2 = self.executor.submit(time.sleep, 0.75)
 
         finished, pending = futures.wait(
                 [CANCELLED_AND_NOTIFIED_FUTURE,
                  EXCEPTION_FUTURE,
                  SUCCESSFUL_FUTURE,
                  future1, future2],
-                timeout=0.25,
+                timeout=0.5,
                 return_when=futures.ALL_COMPLETED)
 
         self.assertEqual(set([CANCELLED_AND_NOTIFIED_FUTURE,
