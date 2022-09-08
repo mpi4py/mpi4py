@@ -412,6 +412,9 @@ class TestUtilDTLib(unittest.TestCase):
         mt = MPI.INT.Create_resized(0, 32)
         self.assertRaises(ValueError, tonumpy, mt)
         mt.Free()
+        mt = MPI.INT.Create_subarray([2], [1], [0])
+        self.assertRaises(ValueError, tonumpy, mt)
+        mt.Free()
 
 
 if __name__ == '__main__':
