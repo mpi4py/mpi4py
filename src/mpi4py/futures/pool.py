@@ -331,7 +331,6 @@ class MPICommExecutor:
         executor = None
 
         if _lib.SharedPool:
-            assert root == 0
             executor = MPIPoolExecutor(**options)
             executor._pool = _lib.SharedPool(executor)
         elif comm.Get_size() == 1:

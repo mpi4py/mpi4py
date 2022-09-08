@@ -507,7 +507,6 @@ def _get_mpi(comm):
 
 
 def barrier(comm):
-    assert comm.Is_inter()
     try:
         request = comm.Ibarrier()
         backoff = Backoff()
@@ -527,8 +526,6 @@ def barrier(comm):
 
 
 def bcast_send(comm, data):
-    assert comm.Is_inter()
-    assert comm.Get_size() == 1
     if MPI.VERSION >= 2:
         comm.bcast(data, MPI.ROOT)
     else:  # pragma: no cover
@@ -540,8 +537,6 @@ def bcast_send(comm, data):
 
 
 def bcast_recv(comm):
-    assert comm.Is_inter()
-    assert comm.Get_remote_size() == 1
     if MPI.VERSION >= 2:
         data = comm.bcast(None, 0)
     else:  # pragma: no cover
@@ -554,8 +549,6 @@ def bcast_recv(comm):
 
 
 def client_sync(comm, options, full=True):
-    assert comm.Is_inter()
-    assert comm.Get_size() == 1
     barrier(comm)
     _setopt_use_pkl5(options)
     if full:
@@ -579,10 +572,6 @@ def client_init(comm, options):
 def client_exec(comm, options, tag, worker_set, task_queue):
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-statements
-    assert comm.Is_inter()
-    assert comm.Get_size() == 1
-    assert tag >= 0
-
     backoff = Backoff(_getopt_backoff(options))
 
     status = MPI.Status()
@@ -660,7 +649,6 @@ def client_exec(comm, options, tag, worker_set, task_queue):
 
 
 def client_close(comm):
-    assert comm.Is_inter()
     _get_mpi(comm).Request.waitall([
         comm.issend(None, dest=pid, tag=0)
         for pid in range(comm.Get_remote_size())])
@@ -671,8 +659,6 @@ def client_close(comm):
 
 
 def server_sync(comm, full=True):
-    assert comm.Is_inter()
-    assert comm.Get_remote_size() == 1
     barrier(comm)
     options = bcast_recv(comm)
     if full:
@@ -690,14 +676,10 @@ def server_init(comm):
     sbuf = bytearray([success])
     rbuf = bytearray([True])
     comm.Allreduce(sbuf, rbuf, op=MPI.LAND)
-    assert bool(rbuf[0]) is False
     return success
 
 
 def server_exec(comm, options):
-    assert comm.Is_inter()
-    assert comm.Get_remote_size() == 1
-
     backoff = Backoff(_getopt_backoff(options))
 
     status = MPI.Status()
@@ -767,11 +749,7 @@ def get_comm_world():
 
 
 def comm_split(comm, root=0):
-    assert not comm.Is_inter()
-    assert comm.Get_size() > 1
-    assert 0 <= root < comm.Get_size()
     rank = comm.Get_rank()
-
     if MPI.Get_version() >= (2, 2):
         allgroup = comm.Get_group()
         if rank == root:
@@ -1080,9 +1058,6 @@ def client_connect(service, mpi_info=None):
 
 def server_accept(service, mpi_info=None,
                   root=0, comm=MPI.COMM_WORLD):
-    assert not comm.Is_inter()
-    assert 0 <= root < comm.Get_size()
-
     info = MPI.INFO_NULL
     if comm.Get_rank() == root:
         if mpi_info:
