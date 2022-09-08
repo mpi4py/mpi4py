@@ -27,12 +27,14 @@ from ._core import BrokenExecutor
 
 
 def serialized(function):
-    if serialized.lock is None:
-        return function
     def wrapper(*args, **kwargs):
         with serialized.lock:
             return function(*args, **kwargs)
+    if serialized.lock is None:
+        return function
     return wrapper
+
+
 serialized.lock = None  # type: ignore[attr-defined]
 
 
@@ -50,6 +52,8 @@ def setup_mpi_threads():
             "should be at least MPI_THREAD_SERIALIZED",
             RuntimeWarning, 2,
         )
+
+
 setup_mpi_threads.lock = threading.Lock()  # type: ignore[attr-defined]
 setup_mpi_threads.thread_level = None      # type: ignore[attr-defined]
 
@@ -298,7 +302,9 @@ def _manager_thread(pool, options):
 
 
 def _manager_comm(pool, options, comm, full=True):
-    assert comm != MPI.COMM_NULL
+    assert comm != MPI.COMM_NULL  # noqa: S101
+    assert comm.Is_inter()        # noqa: S101
+    assert comm.Get_size() == 1   # noqa: S101
     serialized(client_sync)(comm, options, full)
     comm = client_comm(comm, options)
     if not client_init(comm, options):
@@ -405,7 +411,7 @@ class SharedPoolCtx:
         self.threads = weakref.WeakKeyDictionary()
 
     def __call__(self, executor):
-        assert SharedPool is self
+        assert SharedPool is self  # noqa: S101
         if self.comm != MPI.COMM_NULL and self.on_root:
             tag = next(self.counter)
             if tag == 0:
@@ -421,7 +427,7 @@ class SharedPoolCtx:
         return pool
 
     def __enter__(self):
-        assert SharedPool is None
+        assert SharedPool is None  # noqa: S101
         self.on_root = MPI.COMM_WORLD.Get_rank() == 0
         if MPI.COMM_WORLD.Get_size() >= 2:
             self.comm = comm_split(MPI.COMM_WORLD, root=0)
@@ -433,7 +439,7 @@ class SharedPoolCtx:
         return self if self.on_root else None
 
     def __exit__(self, *args):
-        assert SharedPool is self
+        assert SharedPool is self  # noqa: S101
         if self.on_root:
             join_threads(self.threads)
         if self.comm != MPI.COMM_NULL:
@@ -795,7 +801,7 @@ def import_main(mod_name, mod_path, init_globals, run_name):
         def __init__(self, mod_name):
             # pylint: disable=no-member
             super().__init__(mod_name)
-            assert self.module.__name__ == run_name
+            assert self.module.__name__ == run_name  # noqa: S101
             self.module = module
 
     TempModule = runpy._TempModule  # pylint: disable=invalid-name
@@ -812,7 +818,7 @@ def import_main(mod_name, mod_path, init_globals, run_name):
                 sys.path[0] = os.path.realpath(os.path.dirname(mod_path))
             runpy.run_path(mod_path, run_name=run_name)
         sys.modules['__main__'] = sys.modules[run_name] = module
-    except:  # pragma: no cover
+    except BaseException:  # pragma: no cover
         sys.modules['__main__'] = main_module
         raise
     finally:
@@ -1088,7 +1094,9 @@ def server_accept(service, mpi_info=None,
 
 
 def server_main_comm(comm, full=True):
-    assert comm != MPI.COMM_NULL
+    assert comm != MPI.COMM_NULL        # noqa: S101
+    assert comm.Is_inter()              # noqa: S101
+    assert comm.Get_remote_size() == 1  # noqa: S101
     options = server_sync(comm, full)
     comm = server_comm(comm, options)
     server_init(comm)
@@ -1133,7 +1141,7 @@ def server_main():
             server_main_spawn()
         else:
             server_main_service()
-    except:
+    except BaseException:
         set_abort_status(1)
         raise
 
