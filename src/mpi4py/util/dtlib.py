@@ -190,7 +190,7 @@ def to_numpy_dtype(datatype):
         typecode = _get_typecode(datatype)
         if typecode is not None:
             return np_dtype(typecode)
-        raise ValueError("cannot convert MPI datatype to NumPy")
+        raise ValueError("cannot convert named MPI datatype to NumPy")
 
     # user-defined datatype
     basetype, _, info = datatype.decode()
@@ -213,11 +213,11 @@ def to_numpy_dtype(datatype):
             subsizes = info['subsizes']
             starts = info['starts']
             order = info['order']
-            assert subsizes == sizes
-            assert min(starts) == max(starts) == 0
-            if order == MPI.ORDER_FORTRAN:
-                sizes = sizes[::-1]
-            return np_dtype((dtype, tuple(sizes)))
+            if subsizes == sizes and min(starts) == max(starts) == 0:
+                if order == MPI.ORDER_FORTRAN:
+                    sizes = sizes[::-1]
+                return np_dtype((dtype, tuple(sizes)))
+            raise ValueError("cannot convert subarray MPI datatype to NumPy")
 
         # struct datatype
         aligned = True
