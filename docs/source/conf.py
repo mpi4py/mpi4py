@@ -1,7 +1,6 @@
 # Configuration file for the Sphinx documentation builder.
 #
-# This file only contains a selection of the most common options. For a full
-# list see the documentation:
+# For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 # -- Path setup --------------------------------------------------------------
@@ -20,6 +19,7 @@ _today = datetime.datetime.now()
 
 
 # -- Project information -----------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 package = 'mpi4py'
 
@@ -39,18 +39,13 @@ project = 'MPI for Python'
 author = 'Lisandro Dalcin'
 copyright = f'{_today.year}, {author}'
 
-# The full version, including alpha/beta/rc tags
 release = pkg_version()
 version = release.rsplit('.', 1)[0]
 
 
 # -- General configuration ---------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-needs_sphinx = '4.5.0'
-
-# Add any Sphinx extension module names here, as strings. They can be
-# extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
-# ones.
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
@@ -58,13 +53,10 @@ extensions = [
     'sphinx.ext.napoleon',
 ]
 
-# Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
-
-# List of patterns, relative to source directory, that match files and
-# directories to ignore when looking for source files.
-# This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+
+needs_sphinx = '5.0.0'
 
 default_role = 'any'
 
@@ -129,45 +121,25 @@ def _setup_numpy_typing():
             npt.__all__.append(attr)
 
 
-def _patch_util_inspect():
-    import sphinx
-    if sphinx.version_info < (5, 0):
-        from sphinx.util import inspect
-        inspect.TypeAliasForwardRef.__repr__ = lambda self: self.name
-        inspect.TypeAliasForwardRef.__hash__ = lambda self: hash(self.name)
-
-
 def _patch_domain_python():
-    from sphinx.domains import python
     try:
         from numpy.typing import __all__ as numpy_types
-        numpy_types = [f'numpy.typing.{name}' for name in numpy_types]
     except ImportError:
         numpy_types = []
     try:
         from mpi4py.typing import __all__ as mpi4py_types
-        mpi4py_types = [f'{name}' for name in mpi4py_types]
     except ImportError:
         mpi4py_types = []
 
     numpy_types = set(numpy_types)
     mpi4py_types = set(mpi4py_types)
     for name in numpy_types:
-        autodoc_type_aliases[name] = f'{name}'
+        autodoc_type_aliases[name] = f'~numpy.typing.{name}'
     for name in mpi4py_types:
-        autodoc_type_aliases[name] = f'{name}'
+        autodoc_type_aliases[name] = f'~mpi4py.typing.{name}'
 
-    def make_xref(self, rolename, domain, target, *args, **kwargs):
-        if target in ('None', 'True', 'False'):
-            rolename = 'obj'
-        elif target in numpy_types:
-            rolename = 'data'
-        elif target in mpi4py_types:
-            rolename = 'data'
-        return make_xref_orig(self, rolename, domain, target, *args, *kwargs)
-
-    make_xref_orig = python.PyXrefMixin.make_xref
-    python.PyXrefMixin.make_xref = make_xref
+    from sphinx.domains.python import PythonDomain
+    PythonDomain.object_types['data'].roles += ('class',)
 
 
 def _setup_autodoc(app):
@@ -227,7 +199,6 @@ def _patch_autosummary():
 
 def setup(app):
     _setup_numpy_typing()
-    _patch_util_inspect()
     _patch_domain_python()
     _setup_autodoc(app)
     _patch_autosummary()
@@ -279,10 +250,8 @@ def setup(app):
 
 
 # -- Options for HTML output -------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-# The theme to use for HTML and HTML Help pages.  See the documentation for
-# a list of builtin themes.
-#
 html_theme = (
     'sphinx_rtd_theme' if 'sphinx_rtd_theme' in extensions else 'default'
 )
@@ -295,9 +264,6 @@ if html_theme == 'sphinx_rtd_theme':
         'analytics_id': 'UA-48837848-1',
     }
 
-# Add any paths that contain custom static files (such as style sheets) here,
-# relative to this directory. They are copied after the builtin static files,
-# so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
 if html_theme == 'sphinx_rtd_theme':
