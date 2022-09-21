@@ -304,6 +304,235 @@ def pingpong(comm, args=None, verbose=True):
     return result
 
 
+def _fn_identity(arg):  # pragma: no cover
+    return arg
+
+
+def futures(comm, args=None, verbose=True):
+    """Measure mpi4py.futures task throughput."""
+    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-statements
+    # pylint: disable=import-outside-toplevel
+    from argparse import ArgumentParser
+    parser = ArgumentParser(prog=_prog("futures"))
+    parser.add_argument(
+        "-q", "--quiet", help="quiet output",
+        action="store_false", dest="verbose", default=verbose,
+    )
+    parser.add_argument(
+        "-e", "--executor", help="executor backend",
+        action="store", dest="executor", default="mpi",
+        choices=["mpi", "process", "thread"],
+    )
+    parser.add_argument(
+        "-w", "--num-workers", help="number or workers",
+        type=int, dest="workers", default=None,
+    )
+    parser.add_argument(
+        "-t", "--num-tasks", help="number of tasks per worker",
+        type=int, dest="tasks", default=50,
+    )
+    parser.add_argument(
+        "-m", "--min-size", help="minimum task data size",
+        type=int, dest="min_size", default=0,
+    )
+    parser.add_argument(
+        "-n", "--max-size", help="maximum task data size",
+        type=int, dest="max_size", default=1 << 20,
+    )
+    parser.add_argument(
+        "-a", "--allocator", help="task data allocator",
+        action="store", dest="allocator", default="numpy",
+        choices=["numpy", "array", "bytes"],
+    )
+    parser.add_argument(
+        "-c", "--chunksize", help="chunksize parameter",
+        type=int, dest="chunksize", default=1,
+    )
+    parser.add_argument(
+        "-b", "--backoff", help="backoff parameter",
+        type=float, dest="backoff", default=0.0,
+    )
+    parser.add_argument(
+        "-o", "--outband", help="use out-of-band pickle",
+        action="store_true", dest="outband", default=False,
+    )
+    parser.add_argument(
+        "-s", "--skip", help="number of warm-up iterations",
+        type=int, dest="skip", default=1,
+    )
+    parser.add_argument(
+        "-l", "--loop", help="number of sample iterations",
+        type=int, dest="loop", default=10,
+    )
+    parser.add_argument(
+        "--skip-large",
+        type=int, dest="skip_large", default=1,
+    )
+    parser.add_argument(
+        "--loop-large",
+        type=int, dest="loop_large", default=5,
+    )
+    parser.add_argument(
+        "--large-size",
+        type=int, dest="large_size", default=1 << 16,
+    )
+    parser.add_argument(
+        "--skip-huge",
+        type=int, dest="skip_huge", default=1,
+    )
+    parser.add_argument(
+        "--loop-huge",
+        type=int, dest="loop_huge", default=3,
+    )
+    parser.add_argument(
+        "--huge-size",
+        type=int, dest="huge_size", default=1 << 18,
+    )
+    parser.add_argument(
+        "--no-header",
+        action="store_false", dest="print_header", default=True,
+    )
+    parser.add_argument(
+        "--no-stats",
+        action="store_false", dest="print_stats", default=True,
+    )
+    options = parser.parse_args(args)
+
+    import time
+    import statistics
+    import concurrent.futures
+    from .futures import MPIPoolExecutor
+
+    executor_type = options.executor
+    workers = options.workers
+    tasks = options.tasks
+    allocator = options.allocator
+    backoff = options.backoff
+    use_pkl5 = options.outband
+    chunksize = options.chunksize
+
+    skip = options.skip
+    loop = options.loop
+    min_size = options.min_size
+    max_size = options.max_size
+    skip_large = options.skip_large
+    loop_large = options.loop_large
+    large_size = options.large_size
+    skip_huge = options.skip_huge
+    loop_huge = options.loop_huge
+    huge_size = options.huge_size
+
+    buf_sizes = [1 << i for i in range(33)]
+    buf_sizes = [n for n in buf_sizes if min_size <= n <= max_size]
+
+    wtime = time.perf_counter
+
+    numpy = array = None
+    if allocator == 'numpy':
+        try:
+            import numpy
+        except ImportError:  # pragma: no cover
+            pass
+    elif allocator == 'array':
+        import array
+
+    def allocate(nbytes):
+        if numpy:
+            return numpy.zeros(nbytes, 'B')
+        if array:
+            buf = array.array('B', [])
+            buf.frombytes(bytes(nbytes))
+            return buf
+        return bytes(nbytes)
+
+    def create_executor():
+        if executor_type == "process":
+            return concurrent.futures.ProcessPoolExecutor(
+                max_workers=workers,
+            )
+        if executor_type == "thread":
+            return concurrent.futures.ThreadPoolExecutor(
+                max_workers=workers,
+            )
+        assert executor_type == "mpi"  # noqa: S101
+        return MPIPoolExecutor(
+            max_workers=workers,
+            backoff=backoff,
+            use_pkl5=use_pkl5,
+        )
+
+    def get_num_workers():
+        return executor._max_workers  # pylint: disable=protected-access
+
+    def prime_executor():
+        executor_map(time.sleep, [0.001] * get_num_workers())
+
+    def executor_map(task, data):
+        iterator = executor.map(
+            task, data,
+            chunksize=chunksize,
+        )
+        for _ in iterator:
+            pass
+
+    def run_futures():
+        t_start = wtime()
+        executor_map(_fn_identity, data)
+        t_end = wtime()
+        return t_end - t_start
+
+    executor = create_executor()
+    num_workers = get_num_workers()
+    num_tasks = num_workers * tasks
+
+    result = []
+    prime_executor()
+    for nbytes in buf_sizes:
+        if nbytes > large_size:
+            skip = min(skip, skip_large)
+            loop = min(loop, loop_large)
+        if nbytes > huge_size:
+            skip = min(skip, skip_huge)
+            loop = min(loop, loop_huge)
+        iterations = list(range(loop + skip))
+
+        data = [allocate(nbytes) for _ in range(num_tasks)]
+
+        t_list = []
+        for i in iterations:
+            elapsed = run_futures()
+            if i >= skip:
+                t_list.append(elapsed)
+
+        data = None
+
+        t_mean = statistics.mean(t_list) if t_list else float('nan')
+        t_stdev = statistics.stdev(t_list) if len(t_list) > 1 else 0.0
+        result.append((nbytes, t_mean, t_stdev))
+
+        if options.verbose and comm.rank == 0:
+            if options.print_header:
+                options.print_header = False
+                print(
+                    f"# {type(executor).__name__} - "
+                    f"{num_workers} workers, "
+                    f"{tasks} tasks/worker"
+                )
+                header = "# Size [B]  Tasks/s"
+                if options.print_stats:
+                    header += " | Time Mean [s] \u00b1 StdDev [s]  Samples"
+                print(header, flush=True)
+            throughput = num_tasks / t_mean
+            message = f"{nbytes:10d}{throughput:9.0f}"
+            if options.print_stats:
+                message += f" | {t_mean:.7e} \u00b1 {t_stdev:.4e} {loop:8d}"
+            print(message, flush=True)
+
+    executor.shutdown()
+    return result
+
+
 def main(args=None):
     """Entry-point for ``python -m mpi4py.bench``."""
     # pylint: disable=import-outside-toplevel
@@ -350,6 +579,7 @@ main.commands = {  # type: ignore[attr-defined]
     'helloworld': helloworld,
     'ringtest': ringtest,
     'pingpong': pingpong,
+    'futures': futures,
 }
 
 if __name__ == '__main__':
