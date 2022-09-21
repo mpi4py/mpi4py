@@ -135,7 +135,7 @@ def pingpong(comm, args=None, verbose=True):
                         help="quiet output")
     parser.add_argument("-m", "--min-size", type=int,
                         dest="min_size", default=1,
-                        help="maximum message size")
+                        help="minimum message size")
     parser.add_argument("-n", "--max-size", type=int,
                         dest="max_size", default=1 << 30,
                         help="maximum message size")
