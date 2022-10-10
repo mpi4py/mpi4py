@@ -22,7 +22,7 @@ This package supports:
 * Fast communication of Python object exposing the *Python buffer
   interface* (NumPy arrays, builtin bytes/string/array objects)
 
-  + point-to-point (blocking/nonbloking/persistent send & receive)
+  + point-to-point (blocking/nonblocking/persistent send & receive)
   + collective (broadcast, block/vector scatter & gather, reductions)
 
 * Process groups and communication domains
@@ -33,7 +33,7 @@ This package supports:
 * Parallel input/output:
 
   + read & write
-  + blocking/nonbloking & collective/noncollective
+  + blocking/nonblocking & collective/noncollective
   + individual/shared file pointers & explicit offset
 
 * Dynamic process management
@@ -45,8 +45,8 @@ This package supports:
 * One-sided operations
 
   + remote memory access (put, get, accumulate)
-  + passive target syncronization (start/complete & post/wait)
-  + active target syncronization (lock & unlock)
+  + passive target synchronization (start/complete & post/wait)
+  + active target synchronization (lock & unlock)
 
 
 Citation

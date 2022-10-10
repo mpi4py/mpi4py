@@ -310,7 +310,7 @@ processes. The master process gets access to an :class:`MPIPoolExecutor`
 instance to submit tasks. Meanwhile, the worker process follow a different
 execution path and team-up to execute the tasks submitted from the master.
 
-Besides alleviating the lack of dynamic process managment features in legacy
+Besides alleviating the lack of dynamic process management features in legacy
 MPI-1 or partial MPI-2 implementations, the :class:`MPICommExecutor` context
 manager may be useful in classic MPI-based Python applications willing to take
 advantage of the simple, task-based, master/worker approach available in the
@@ -339,7 +339,7 @@ advantage of the simple, task-based, master/worker approach available in the
 .. warning::
 
    If :class:`MPICommExecutor` is passed a communicator of size one (e.g.,
-   `MPI.COMM_SELF`), then the executor instace assigned to the target of the
+   `MPI.COMM_SELF`), then the executor instance assigned to the target of the
    :keyword:`with` statement will execute all submitted tasks in a single
    worker thread, thus ensuring that task execution still progress
    asynchronously. However, the :term:`GIL` will prevent the main and worker
@@ -356,7 +356,7 @@ Command line
 ------------
 
 Recalling the issues related to the lack of support for dynamic process
-managment features in MPI implementations, :mod:`mpi4py.futures` supports an
+management features in MPI implementations, :mod:`mpi4py.futures` supports an
 alternative usage pattern where Python code (either from scripts, modules, or
 zip files) is run under command line control of the :mod:`mpi4py.futures`
 package by passing :samp:`-m mpi4py.futures` to the :program:`python`

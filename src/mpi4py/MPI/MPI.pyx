@@ -271,7 +271,7 @@ cdef extern from *:
 
 def get_vendor() -> Tuple[str, Tuple[int, int, int]]:
     """
-    Infomation about the underlying MPI implementation
+    Information about the underlying MPI implementation
 
     Returns:
       - a string with the name of the MPI implementation

@@ -217,7 +217,7 @@ Support for GPU-aware MPI
 -------------------------
 
 Several MPI implementations, including Open MPI and MVAPICH, support
-passing GPU pointers to MPI calls to avoid explict data movement
+passing GPU pointers to MPI calls to avoid explicit data movement
 between the host and the device. On the Python side, GPU arrays have
 been implemented by many libraries that need GPU computation, such as
 CuPy, Numba, PyTorch, and PyArrow. In order to increase library

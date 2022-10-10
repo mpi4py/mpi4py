@@ -1,4 +1,4 @@
-# Jacobi computation, using persitent requests
+# Jacobi computation, using persistent requests
 
 from mpi4py import MPI
 try:
@@ -36,7 +36,7 @@ A.fill(1)
 A[0, :] = A[-1, :] = 0
 A[:, 0] = A[:, -1] = 0
 
-# create persintent requests
+# create persistent requests
 tag = 0
 sreq1 = MPI.COMM_WORLD.Send_init((B[:,  0], MPI.DOUBLE), left,  tag)
 sreq2 = MPI.COMM_WORLD.Send_init((B[:, -1], MPI.DOUBLE), right, tag)
@@ -89,6 +89,6 @@ while not converged:
                              op=MPI.LAND)
     converged = bool(glb_conv)
 
-# free persintent requests
+# free persistent requests
 for req in reqlist:
     req.Free()

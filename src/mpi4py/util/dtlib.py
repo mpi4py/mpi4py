@@ -79,7 +79,7 @@ def _get_alignment(datatype):
 
 
 def _is_aligned(datatype, offset=0):
-    """Dermine whether an MPI datatype is aligned."""
+    """Determine whether an MPI datatype is aligned."""
     if datatype.is_predefined:
         if offset == 0:
             return True

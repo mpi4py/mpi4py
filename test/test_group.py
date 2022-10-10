@@ -116,7 +116,7 @@ class BaseTestGroup(object):
 
 class TestGroupNull(unittest.TestCase):
 
-    def testContructor(self):
+    def testConstructor(self):
         group = MPI.Group()
         self.assertFalse(group is MPI.GROUP_NULL)
         self.assertEqual(group, MPI.GROUP_NULL)

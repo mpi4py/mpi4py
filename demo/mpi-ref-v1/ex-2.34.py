@@ -1,6 +1,6 @@
 ## mpiexec -n 2 python ex-2.34.py
 
-# Use of ready-mode and synchonous-mode
+# Use of ready-mode and synchronous-mode
 
 # --------------------------------------------------------------------
 
