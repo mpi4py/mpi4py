@@ -177,7 +177,7 @@ jobs:
           - "3.7"
           - "3.8"
           - "3.9"
-          - "3.10.6"  # python/mypy#13627
+          - "3.10"
 
     steps:
 
@@ -201,9 +201,7 @@ jobs:
         git diff && test -z "$(git diff)"
 
     - name: Install type dependencies
-      run:  python -m pip install
-              mypy
-              numpy
+      run:  python -m pip install --upgrade -r conf/requirements-type.txt
 
     - name: mypy (typecheck)
       run:  mypy -p mpi4py
