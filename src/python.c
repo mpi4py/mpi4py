@@ -28,7 +28,7 @@ main(int argc, char **argv)
 {
   int status = 0, flag = 1, finalize = 0;
 
-  /* MPI initalization */
+  /* MPI initialization */
   (void)MPI_Initialized(&flag);
   if (!flag) {
 #if defined(MPI_VERSION) && (MPI_VERSION > 1)

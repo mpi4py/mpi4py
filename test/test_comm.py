@@ -3,26 +3,26 @@ import mpiunittest as unittest
 
 class TestCommNull(unittest.TestCase):
 
-    def testContructor(self):
+    def testConstructor(self):
         comm = MPI.Comm()
         self.assertEqual(comm, MPI.COMM_NULL)
         self.assertFalse(comm is MPI.COMM_NULL)
         def construct(): MPI.Comm((1,2,3))
         self.assertRaises(TypeError, construct)
 
-    def testContructorIntra(self):
+    def testConstructorIntra(self):
         comm_null = MPI.Intracomm()
         self.assertFalse(comm_null is MPI.COMM_NULL)
         self.assertEqual(comm_null, MPI.COMM_NULL)
 
-    def testContructorInter(self):
+    def testConstructorInter(self):
         comm_null = MPI.Intercomm()
         self.assertFalse(comm_null is MPI.COMM_NULL)
         self.assertEqual(comm_null, MPI.COMM_NULL)
 
 class BaseTestComm(object):
 
-    def testContructor(self):
+    def testConstructor(self):
         comm = MPI.Comm(self.COMM)
         self.assertEqual(comm, self.COMM)
         self.assertFalse(comm is self.COMM)

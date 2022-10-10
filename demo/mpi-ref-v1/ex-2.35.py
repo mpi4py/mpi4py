@@ -14,9 +14,9 @@ except ImportError:
 
 # --------------------------------------------------------------------
 
-BUFSISE = 10000 + MPI.BSEND_OVERHEAD
+BUFSIZE = 10000 + MPI.BSEND_OVERHEAD
 
-buff = empty(BUFSISE, dtype='b')
+buff = empty(BUFSIZE, dtype='b')
 
 MPI.Attach_buffer(buff)
 
@@ -29,6 +29,6 @@ MPI.Detach_buffer()
 
 # --------------------------------------------------------------------
 
-assert len(buff2) == BUFSISE
+assert len(buff2) == BUFSIZE
 
 # --------------------------------------------------------------------

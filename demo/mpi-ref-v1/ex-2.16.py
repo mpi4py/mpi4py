@@ -1,7 +1,7 @@
 ## mpiexec -n 4 python ex-2.16.py
 
 # Jacobi code
-# version of parallel code using sendrecv and null proceses.
+# version of parallel code using sendrecv and null processes.
 
 # --------------------------------------------------------------------
 
