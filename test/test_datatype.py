@@ -1,6 +1,5 @@
 from mpi4py import MPI
 import mpiunittest as unittest
-import sys
 
 datatypes_c = [
 MPI.CHAR, MPI.WCHAR,
@@ -45,9 +44,11 @@ class TestDatatype(unittest.TestCase):
 
     def testBoolEqNe(self):
         for dtype in datatypes:
-            self.assertTrue (not not dtype)
-            self.assertTrue (dtype == MPI.Datatype(dtype))
-            self.assertFalse(dtype != MPI.Datatype(dtype))
+            self.assertTrue(not not dtype)
+            eq = (dtype == MPI.Datatype(dtype))
+            ne = (dtype != MPI.Datatype(dtype))
+            self.assertTrue(eq)
+            self.assertFalse(ne)
 
     def testGetExtent(self):
         for dtype in datatypes:
@@ -78,7 +79,8 @@ class TestDatatype(unittest.TestCase):
             except NotImplementedError:
                 self.skipTest('mpi-type-get_envelope')
             if ('LAM/MPI' == MPI.get_vendor()[0] and
-                "COMPLEX" in dtype.name): continue
+                "COMPLEX" in dtype.name):
+                continue
             ni, na, nc, nd, combiner = envelope
             self.assertEqual(combiner, MPI.COMBINER_NAMED)
             self.assertEqual(ni, 0)
@@ -90,7 +92,7 @@ class TestDatatype(unittest.TestCase):
             self.assertTrue(dtype.is_named)
             self.assertTrue(dtype.is_predefined)
             otype = dtype.decode()
-            self.assertTrue(dtype is otype)
+            self.assertIs(dtype, otype)
 
     def check_datatype_contents(self, oldtype, factory, newtype):
         try:
@@ -104,7 +106,7 @@ class TestDatatype(unittest.TestCase):
         self.assertEqual(na, len(a))
         self.assertEqual(nc, len(c))
         self.assertEqual(nd, len(d))
-        self.assertTrue(combiner != MPI.COMBINER_NAMED)
+        self.assertNotEqual(combiner, MPI.COMBINER_NAMED)
         self.assertEqual(newtype.envelope, envelope)
         self.assertEqual(newtype.contents, contents)
         self.assertEqual(newtype.combiner, combiner)

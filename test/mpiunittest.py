@@ -1,8 +1,5 @@
-import os
-import sys
-import glob
-import unittest
 from collections import namedtuple
+import unittest
 
 
 class TestCase(unittest.TestCase):
@@ -28,11 +25,9 @@ class TestCase(unittest.TestCase):
                 else:
                     IErrClassName = ErrClsName(IErrClass)
                 raise self.failureException(
-                    "generated error class is '{}' ({}), "
-                    "but expected '{}' ({})".format(
-                        ErrClsName(error_class), error_class,
-                        IErrClassName, IErrClass,
-                    )
+                    f"generated error class "
+                    f"is '{ErrClsName(error_class)}' ({error_class}), "
+                    f"but expected '{IErrClassName}' ({IErrClass})"
                 )
         else:
             raise self.failureException(f"{excClass.__name__} not raised")
@@ -118,7 +113,8 @@ def mpi_predicate(predicate):
     else:
         name, version = MPI.get_vendor()
     if vp.name == key(name):
-        if vp.satisfied_by('%d.%d.%d' % version):
+        x, y, z = version
+        if vp.satisfied_by(f'{x}.{y}.{z}'):
             return vp
     return None
 

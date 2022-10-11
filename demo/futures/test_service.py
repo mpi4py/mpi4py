@@ -5,11 +5,10 @@ from mpi4py.futures import MPIPoolExecutor
 def main():
     def getarg(opt, default=None):
         try:
-            return sys.argv[sys.argv.index('--'+opt)+1]
+            return sys.argv[sys.argv.index('--' + opt) + 1]
         except ValueError:
             return default
 
-    options = {}
     if '--host' in sys.argv or '--port' in sys.argv:
         service = (getarg('host'), getarg('port'))
     else:

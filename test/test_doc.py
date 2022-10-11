@@ -1,6 +1,6 @@
 from mpi4py import MPI
 import mpiunittest as unittest
-import sys, types
+import sys
 
 ModuleType = type(MPI)
 ClassType = type(MPI.Comm)
@@ -13,7 +13,7 @@ def getdocstr(mc, docstrings, namespace=None):
     if name is None: return
     if name in ('__builtin__', 'builtins'): return
     if name.startswith('_'): return
-    if namespace: name = '%s.%s' % (namespace, name)
+    if namespace: name = f'{namespace}.{name}'
     if type(mc) in (ModuleType, ClassType):
         doc = getattr(mc, '__doc__', None)
         if doc == "<undocumented>": return
@@ -39,15 +39,15 @@ class TestDoc(unittest.TestCase):
             if not k.startswith('_'):
                 doc = docs[k]
                 if doc is None:
-                    print ("'%s': missing docstring" % k)
+                    print (f"'{k}': missing docstring")
                     missing = True
                 else:
                     doc = doc.strip()
                     if not doc:
-                        print ("'%s': empty docstring" % k)
+                        print (f"'{k}': empty docstring")
                         missing = True
                     if 'mpi4py.MPI' in doc:
-                        print ("'%s': bad format docstring" % k)
+                        print (f"'{k}': bad format docstring")
         self.assertFalse(missing)
 
 

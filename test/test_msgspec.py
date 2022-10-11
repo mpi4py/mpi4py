@@ -61,7 +61,7 @@ class DLPackCPUBuf(BaseBuf):
         managed = self.managed
         if managed.dl_tensor.device.device_type == \
            dlpack.DLDeviceType.kDLCPU:
-            assert stream == None
+            assert stream is None
         capsule = dlpack.make_py_capsule(managed)
         return capsule
 
@@ -504,7 +504,7 @@ class TestMessageSimpleNumba(unittest.TestCase,
         # numba arrays do not have the .all() method
         for i in range(3):
             for j in range(2):
-                self.assertTrue(sbuf[i,j] == rbuf[i,j])
+                self.assertEqual(sbuf[i,j], rbuf[i,j])
 
     def testOrderFortran(self):
         sbuf = numba.cuda.device_array((6,))
@@ -517,7 +517,7 @@ class TestMessageSimpleNumba(unittest.TestCase,
         # numba arrays do not have the .all() method
         for i in range(3):
             for j in range(2):
-                self.assertTrue(sbuf[i,j] == rbuf[i,j])
+                self.assertEqual(sbuf[i,j], rbuf[i,j])
 
     def testNotContiguous(self):
         sbuf = numba.cuda.device_array((6,))
@@ -1203,7 +1203,7 @@ class TestMessageVectorW(unittest.TestCase):
         Alltoallw(smsg, rmsg)
         # numba arrays do not have the .all() method
         for i in range(3):
-            self.assertTrue(sbuf[i] == rbuf[i])
+            self.assertEqual(sbuf[i], rbuf[i])
 
 
 # ---
@@ -1326,7 +1326,7 @@ class TestMessageRMA(unittest.TestCase):
         PutGet(sbuf, rbuf)
         # numba arrays do not have the .all() method
         for i in range(3):
-            self.assertTrue(sbuf[i] == rbuf[i])
+            self.assertEqual(sbuf[i], rbuf[i])
 
 
 # ---

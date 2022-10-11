@@ -1,6 +1,5 @@
 from mpi4py import MPI
 import mpiunittest as unittest
-import sys
 
 try:
     import array
@@ -8,17 +7,10 @@ except ImportError:
     array = None
 
 def asarray(typecode, data):
-    try:
-        memoryview
-        _tobytes = lambda s: memoryview(s).tobytes()
-    except NameError:
-        _tobytes = lambda s: buffer(s)[:]
-    try:
-        _frombytes = array.array.frombytes
-    except AttributeError:
-        _frombytes = array.array.fromstring
+    tobytes = lambda s: memoryview(s).tobytes()
+    frombytes = array.array.frombytes
     a = array.array(typecode, [])
-    _frombytes(a, _tobytes(data))
+    frombytes(a, tobytes(data))
     return a
 
 def mysum_obj(a, b):
@@ -61,15 +53,15 @@ class TestOp(unittest.TestCase):
                         scale = sum(range(1,size+1))
                         for i in range(N):
                             self.assertEqual(b[i], scale*i)
-                        ret = myop(a, b)
-                        self.assertTrue(ret is b)
+                        res = myop(a, b)
+                        self.assertIs(res, b)
                         for i in range(N):
                             self.assertEqual(b[i], a[i]+scale*i)
                         myop2 = MPI.Op(myop)
                         a = array.array('i', [1]*N)
                         b = array.array('i', [2]*N)
-                        ret = myop2(a, b)
-                        self.assertTrue(ret is b)
+                        res = myop2(a, b)
+                        self.assertIs(res, b)
                         for i in range(N):
                             self.assertEqual(b[i], 3)
                         myop2 = None
@@ -123,61 +115,61 @@ class TestOp(unittest.TestCase):
     def testMinMax(self):
         x = [1]; y = [1]
         res = MPI.MIN(x, y)
-        self.assertTrue(res is x)
+        self.assertEqual(res, x)
         res = MPI.MAX(x, y)
-        self.assertTrue(res is x)
+        self.assertEqual(res, x)
 
     def testMinMaxLoc(self):
         x = [1]; i = [2]; u = [x, i]
         y = [2]; j = [1]; v = [y, j]
         res = MPI.MINLOC(u, v)
-        self.assertTrue(res[0] is x)
-        self.assertTrue(res[1] is i)
+        self.assertIs(res[0], x)
+        self.assertIs(res[1], i)
         res = MPI.MINLOC(v, u)
-        self.assertTrue(res[0] is x)
-        self.assertTrue(res[1] is i)
+        self.assertIs(res[0], x)
+        self.assertIs(res[1], i)
         res = MPI.MAXLOC(u, v)
-        self.assertTrue(res[0] is y)
-        self.assertTrue(res[1] is j)
+        self.assertIs(res[0], y)
+        self.assertIs(res[1], j)
         res = MPI.MAXLOC(v, u)
-        self.assertTrue(res[0] is y)
-        self.assertTrue(res[1] is j)
+        self.assertIs(res[0], y)
+        self.assertIs(res[1], j)
         #
         x = [1]; i = 0; u = [x, i]
         y = [1]; j = 1; v = [y, j]
         res = MPI.MINLOC(u, v)
-        self.assertTrue(res[0] is x)
-        self.assertTrue(res[1] is i)
+        self.assertIs(res[0], x)
+        self.assertIs(res[1], i)
         res = MPI.MAXLOC(u, v)
-        self.assertTrue(res[0] is x)
-        self.assertTrue(res[1] is i)
+        self.assertIs(res[0], x)
+        self.assertIs(res[1], i)
         #
         x = [1]; i = 1; u = [x, i]
         y = [1]; j = 0; v = [y, j]
         res = MPI.MINLOC(u, v)
-        self.assertTrue(res[0] is y)
-        self.assertTrue(res[1] is j)
+        self.assertIs(res[0], y)
+        self.assertIs(res[1], j)
         res = MPI.MAXLOC(u, v)
-        self.assertTrue(res[0] is y)
-        self.assertTrue(res[1] is j)
+        self.assertIs(res[0], y)
+        self.assertIs(res[1], j)
         #
         x = [1]; i = [0]; u = [x, i]
         y = [1]; j = [1]; v = [y, j]
         res = MPI.MINLOC(u, v)
-        self.assertTrue(res[0] is x)
-        self.assertTrue(res[1] is i)
+        self.assertIs(res[0], x)
+        self.assertIs(res[1], i)
         res = MPI.MAXLOC(u, v)
-        self.assertTrue(res[0] is x)
-        self.assertTrue(res[1] is i)
+        self.assertIs(res[0], x)
+        self.assertIs(res[1], i)
         #
         x = [1]; i = [1]; u = [x, i]
         y = [1]; j = [0]; v = [y, j]
         res = MPI.MINLOC(u, v)
-        self.assertTrue(res[0] is y)
-        self.assertTrue(res[1] is j)
+        self.assertIs(res[0], y)
+        self.assertIs(res[1], j)
         res = MPI.MAXLOC(u, v)
-        self.assertTrue(res[0] is y)
-        self.assertTrue(res[1] is j)
+        self.assertIs(res[0], y)
+        self.assertIs(res[1], j)
 
     @unittest.skipMPI('openmpi(<=1.8.1)')
     def testIsCommutative(self):
@@ -185,12 +177,14 @@ class TestOp(unittest.TestCase):
             MPI.SUM.Is_commutative()
         except NotImplementedError:
             self.skipTest('mpi-op-is_commutative')
-        ops = [MPI.MAX,    MPI.MIN,
-               MPI.SUM,    MPI.PROD,
-               MPI.LAND,   MPI.BAND,
-               MPI.LOR,    MPI.BOR,
-               MPI.LXOR,   MPI.BXOR,
-               MPI.MAXLOC, MPI.MINLOC,]
+        ops = [
+            MPI.MAX,    MPI.MIN,
+            MPI.SUM,    MPI.PROD,
+            MPI.LAND,   MPI.BAND,
+            MPI.LOR,    MPI.BOR,
+            MPI.LXOR,   MPI.BXOR,
+            MPI.MAXLOC, MPI.MINLOC,
+        ]
         for op in ops:
             flag = op.Is_commutative()
             self.assertEqual(flag, op.is_commutative)

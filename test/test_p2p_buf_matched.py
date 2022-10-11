@@ -49,19 +49,19 @@ class BaseTestP2PMatched(object):
         comm = self.COMM.Dup()
         try:
             m = comm.Improbe()
-            self.assertEqual(m, None)
+            self.assertIsNone(m)
             m = comm.Improbe(MPI.ANY_SOURCE)
-            self.assertEqual(m, None)
+            self.assertIsNone(m)
             m = comm.Improbe(MPI.ANY_SOURCE, MPI.ANY_TAG)
-            self.assertEqual(m, None)
+            self.assertIsNone(m)
             status = MPI.Status()
             m = comm.Improbe(MPI.ANY_SOURCE, MPI.ANY_TAG, status)
-            self.assertEqual(m, None)
+            self.assertIsNone(m)
             self.assertEqual(status.source, MPI.ANY_SOURCE)
             self.assertEqual(status.tag,    MPI.ANY_TAG)
             self.assertEqual(status.error,  MPI.SUCCESS)
             m = MPI.Message.Iprobe(comm)
-            self.assertEqual(m, None)
+            self.assertIsNone(m)
             buf = [None, 0, MPI.BYTE]
             s = comm.Isend(buf, comm.rank, 0)
             r = comm.Mprobe(comm.rank, 0).Irecv(buf)
@@ -81,10 +81,10 @@ class BaseTestP2PMatched(object):
                         rbuf = array(-1, typecode, s)
                         if size == 1:
                             n = comm.Improbe(0, 0)
-                            self.assertEqual(n, None)
+                            self.assertIsNone(n)
                             sr = comm.Isend(sbuf.as_mpi(), 0, 0)
                             m = comm.Mprobe(0, 0)
-                            self.assertTrue(isinstance(m, MPI.Message))
+                            self.assertIsInstance(m, MPI.Message)
                             self.assertTrue(m)
                             rr = m.Irecv(rbuf.as_raw())
                             self.assertFalse(m)
@@ -95,38 +95,38 @@ class BaseTestP2PMatched(object):
                             self.assertFalse(rr)
                             #
                             n = comm.Improbe(0, 0)
-                            self.assertEqual(n, None)
+                            self.assertIsNone(n)
                             r = comm.Isend(sbuf.as_mpi(), 0, 0)
                             m = MPI.Message.Probe(comm, 0, 0)
-                            self.assertTrue(isinstance(m, MPI.Message))
+                            self.assertIsInstance(m, MPI.Message)
                             self.assertTrue(m)
                             m.Recv(rbuf.as_raw())
                             self.assertFalse(m)
                             r.Wait()
                             #
                             n = MPI.Message.Iprobe(comm, 0, 0)
-                            self.assertEqual(n, None)
+                            self.assertIsNone(n)
                             r = comm.Isend(sbuf.as_mpi(), 0, 0)
                             comm.Probe(0, 0)
                             m = MPI.Message.Iprobe(comm, 0, 0)
-                            self.assertTrue(isinstance(m, MPI.Message))
+                            self.assertIsInstance(m, MPI.Message)
                             self.assertTrue(m)
                             m.Recv(rbuf.as_raw())
                             self.assertFalse(m)
                             r.Wait()
                             #
                             n = MPI.Message.Iprobe(comm, 0, 0)
-                            self.assertEqual(n, None)
+                            self.assertIsNone(n)
                             r = comm.Isend(sbuf.as_mpi(), 0, 0)
                             m = comm.Mprobe(0, 0)
-                            self.assertTrue(isinstance(m, MPI.Message))
+                            self.assertIsInstance(m, MPI.Message)
                             self.assertTrue(m)
                             m.Recv(rbuf.as_raw())
                             self.assertFalse(m)
                             r.Wait()
                         elif rank == 0:
                             n = comm.Improbe(0, 0)
-                            self.assertEqual(n, None)
+                            self.assertIsNone(n)
                             #
                             comm.Send(sbuf.as_mpi(), 1, 0)
                             m = comm.Mprobe(1, 0)
@@ -135,7 +135,7 @@ class BaseTestP2PMatched(object):
                             self.assertFalse(m)
                             #
                             n = comm.Improbe(0, 0)
-                            self.assertEqual(n, None)
+                            self.assertIsNone(n)
                             comm.Send(sbuf.as_mpi(), 1, 1)
                             m = None
                             while not m:
@@ -143,7 +143,7 @@ class BaseTestP2PMatched(object):
                             m.Irecv(rbuf.as_raw()).Wait()
                         elif rank == 1:
                             n = comm.Improbe(1, 0)
-                            self.assertEqual(n, None)
+                            self.assertIsNone(n)
                             #
                             m = comm.Mprobe(0, 0)
                             self.assertTrue(m)
@@ -151,7 +151,7 @@ class BaseTestP2PMatched(object):
                             self.assertFalse(m)
                             #
                             n = comm.Improbe(1, 0)
-                            self.assertEqual(n, None)
+                            self.assertIsNone(n)
                             comm.Send(sbuf.as_mpi(), 0, 0)
                             m = None
                             while not m:

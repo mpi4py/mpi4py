@@ -1,6 +1,5 @@
 from mpi4py import MPI
 import mpiunittest as unittest
-import sys
 
 # ---
 
@@ -16,22 +15,26 @@ class BaseTestBaseComm(object):
         self.comm = self.CommType(self.COMM_BASE)
 
     def testSubType(self):
-        self.assertTrue(type(self.comm) not in [
+        self.assertNotIn(
+            type(self.comm),
+            [
                 MPI.Comm,
                 MPI.Intracomm,
                 MPI.Cartcomm,
                 MPI.Graphcomm,
                 MPI.Distgraphcomm,
-                MPI.Intercomm])
-        self.assertTrue(isinstance(self.comm, self.CommType))
+                MPI.Intercomm,
+            ]
+        )
+        self.assertIsInstance(self.comm, self.CommType)
 
     def testCloneFree(self):
         if self.COMM_BASE != MPI.COMM_NULL:
             comm = self.comm.Clone()
         else:
             comm = self.CommType()
-        self.assertTrue(isinstance(comm, MPI.Comm))
-        self.assertTrue(isinstance(comm, self.CommType))
+        self.assertIsInstance(comm, MPI.Comm)
+        self.assertIsInstance(comm, self.CommType)
         comm.free()
 
     def tearDown(self):
@@ -162,9 +165,9 @@ class BaseTestMyRequest(object):
         self.req = self.MyRequestType(MPI.REQUEST_NULL)
 
     def testSubType(self):
-        self.assertTrue(type(self.req) is not self.MPIRequestType)
-        self.assertTrue(isinstance(self.req, self.MPIRequestType))
-        self.assertTrue(isinstance(self.req, self.MyRequestType))
+        self.assertIsNot(type(self.req), self.MPIRequestType)
+        self.assertIsInstance(self.req, self.MPIRequestType)
+        self.assertIsInstance(self.req, self.MyRequestType)
         self.req.test()
 
 class TestMyRequest(BaseTestMyRequest, unittest.TestCase):
@@ -227,9 +230,9 @@ class BaseTestMyWin(object):
         self.win.free()
 
     def testSubType(self):
-        self.assertTrue(type(self.win) is not MPI.Win)
-        self.assertTrue(isinstance(self.win, MPI.Win))
-        self.assertTrue(isinstance(self.win, MyWin))
+        self.assertIsNot(type(self.win), MPI.Win)
+        self.assertIsInstance(self.win, MPI.Win)
+        self.assertIsInstance(self.win, MyWin)
 
     def testFree(self):
         self.assertTrue(self.win)
@@ -281,9 +284,9 @@ class BaseTestMyFile(object):
         self.file.close()
 
     def testSubType(self):
-        self.assertTrue(type(self.file) is not MPI.File)
-        self.assertTrue(isinstance(self.file, MPI.File))
-        self.assertTrue(isinstance(self.file, MyFile))
+        self.assertIsNot(type(self.file), MPI.File)
+        self.assertIsInstance(self.file, MPI.File)
+        self.assertIsInstance(self.file, MyFile)
 
     def testFree(self):
         self.assertTrue(self.file)

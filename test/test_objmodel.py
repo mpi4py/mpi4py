@@ -1,6 +1,5 @@
 from mpi4py import MPI
 import mpiunittest as unittest
-import sys
 import weakref
 
 
@@ -25,43 +24,43 @@ class TestObjModel(unittest.TestCase):
         for i, obj1 in enumerate(self.objects):
             objects = self.objects[:]
             obj2 = objects[i]
-            self.assertTrue(obj1 == obj2)
-            self.assertFalse(obj1 != obj2)
+            self.assertTrue (bool(obj1 == obj2))
+            self.assertFalse(bool(obj1 != obj2))
             del objects[i]
             for obj2 in objects:
-                self.assertTrue(obj1 != obj2)
-                self.assertTrue(obj2 != obj1)
-                self.assertFalse(obj1 == obj2)
-                self.assertFalse(obj2 == obj1)
-            self.assertFalse(None == obj1 )
-            self.assertFalse(obj1 == None )
-            self.assertFalse(obj1 == True )
-            self.assertFalse(obj1 == False)
-            self.assertFalse(obj1 == 12345)
-            self.assertFalse(obj1 == "abc")
-            self.assertFalse(obj1 == [123])
-            self.assertFalse(obj1 == (1,2))
-            self.assertFalse(obj1 == {0:0})
-            self.assertFalse(obj1 == set())
+                self.assertTrue (bool(obj1 != obj2))
+                self.assertTrue (bool(obj2 != obj1))
+                self.assertFalse(bool(obj1 == obj2))
+                self.assertFalse(bool(obj2 == obj1))
+            self.assertFalse(bool(None == obj1 ))
+            self.assertFalse(bool(obj1 == None ))
+            self.assertFalse(bool(obj1 == True ))
+            self.assertFalse(bool(obj1 == False))
+            self.assertFalse(bool(obj1 == 12345))
+            self.assertFalse(bool(obj1 == "abc"))
+            self.assertFalse(bool(obj1 == [123]))
+            self.assertFalse(bool(obj1 == (1,2)))
+            self.assertFalse(bool(obj1 == {0:0}))
+            self.assertFalse(bool(obj1 == set()))
 
     def testNe(self):
         for i, obj1 in enumerate(self.objects):
             objects = self.objects[:]
             obj2 = objects[i]
-            self.assertFalse(obj1 != obj2)
+            self.assertFalse(bool(obj1 != obj2))
             del objects[i]
             for obj2 in objects:
-                self.assertTrue (obj1 != obj2)
-            self.assertTrue(None != obj1 )
-            self.assertTrue(obj1 != None )
-            self.assertTrue(obj1 != True )
-            self.assertTrue(obj1 != False)
-            self.assertTrue(obj1 != 12345)
-            self.assertTrue(obj1 != "abc")
-            self.assertTrue(obj1 != [123])
-            self.assertTrue(obj1 != (1,2))
-            self.assertTrue(obj1 != {0:0})
-            self.assertTrue(obj1 != set())
+                self.assertTrue(bool(obj1 != obj2))
+            self.assertTrue(bool(None != obj1 ))
+            self.assertTrue(bool(obj1 != None ))
+            self.assertTrue(bool(obj1 != True ))
+            self.assertTrue(bool(obj1 != False))
+            self.assertTrue(bool(obj1 != 12345))
+            self.assertTrue(bool(obj1 != "abc"))
+            self.assertTrue(bool(obj1 != [123]))
+            self.assertTrue(bool(obj1 != (1,2)))
+            self.assertTrue(bool(obj1 != {0:0}))
+            self.assertTrue(bool(obj1 != set()))
 
     def testBool(self):
         for obj in self.objects[1:]:
@@ -94,10 +93,10 @@ class TestObjModel(unittest.TestCase):
     def testWeakRef(self):
         for obj in self.objects:
             wr = weakref.ref(obj)
-            self.assertTrue(wr() is obj)
-            self.assertTrue(wr in weakref.getweakrefs(obj))
+            self.assertIs(wr(), obj)
+            self.assertIn(wr, weakref.getweakrefs(obj))
             wr = weakref.proxy(obj)
-            self.assertTrue(wr in weakref.getweakrefs(obj))
+            self.assertIn(wr, weakref.getweakrefs(obj))
 
     def testSizeOf(self):
         for obj in self.objects:
@@ -108,6 +107,7 @@ class TestObjModel(unittest.TestCase):
     def testAddressOf(self):
         for obj in self.objects:
             addr = MPI._addressof(obj)
+            self.assertNotEqual(addr, 0)
 
     def testAHandleOf(self):
         for obj in self.objects:
@@ -116,6 +116,7 @@ class TestObjModel(unittest.TestCase):
                 self.assertRaises(NotImplementedError, hdl)
                 continue
             hdl = MPI._handleof(obj)
+            self.assertGreaterEqual(hdl, 0)
 
 
 if __name__ == '__main__':

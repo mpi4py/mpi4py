@@ -14,7 +14,7 @@ class BaseTestGroup(object):
         group = MPI.COMM_WORLD.Get_group()
         gcmp = MPI.Group.Compare(self.GROUP, group)
         group.Free()
-        self.assertTrue(gcmp in results)
+        self.assertIn(gcmp, results)
         gcmp = MPI.Group.Compare(self.GROUP, self.GROUP)
         self.assertEqual(gcmp, MPI.IDENT)
 
@@ -118,7 +118,7 @@ class TestGroupNull(unittest.TestCase):
 
     def testConstructor(self):
         group = MPI.Group()
-        self.assertFalse(group is MPI.GROUP_NULL)
+        self.assertIsNot(group, MPI.GROUP_NULL)
         self.assertEqual(group, MPI.GROUP_NULL)
 
     def testNull(self):
@@ -162,7 +162,7 @@ class TestGroupWorld(BaseTestGroup, unittest.TestCase):
         self.GROUP.Free()
     def testSize(self):
         size = self.GROUP.Get_size()
-        self.assertTrue(size >= 1)
+        self.assertGreaterEqual(size, 1)
     def testRank(self):
         size = self.GROUP.Get_size()
         rank = self.GROUP.Get_rank()

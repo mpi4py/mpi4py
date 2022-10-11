@@ -1,5 +1,7 @@
+import os
+import sys
+import optparse
 from mpi4py import MPI
-import sys, os, optparse
 
 assert __name__ == '__main__'
 assert sys.path[0] == os.path.dirname(__file__)

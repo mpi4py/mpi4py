@@ -1,20 +1,21 @@
 from mpi4py import MPI
 import mpiunittest as unittest
 
-_basic = [None,
-          True, False,
-          -7, 0, 7, 2**31,
-          -2**63+1, 2**63-1,
-          -2.17, 0.0, 3.14,
-          1+2j, 2-3j,
-          'mpi4py',
-          ]
-messages = _basic
-messages += [ list(_basic),
-              tuple(_basic),
-              dict([('k%d' % key, val)
-                    for key, val in enumerate(_basic)])
-              ]
+_basic = [
+    None,
+    True, False,
+    -7, 0, 7, 2**31,
+    -2**63+1, 2**63-1,
+    -2.17, 0.0, 3.14,
+    1+2j, 2-3j,
+    'mpi4py',
+]
+messages = list(_basic)
+messages += [
+    list(_basic),
+    tuple(_basic),
+    dict((f'k{k}', v) for k, v in enumerate(_basic)),
+]
 messages = messages + [messages]
 
 def create_topo_comms(comm):

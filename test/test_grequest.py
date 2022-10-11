@@ -19,7 +19,7 @@ class GReqCtx(object):
         self.cancel_called = True
         if completed is not self.completed:
             raise MPI.Exception(MPI.ERR_PENDING)
-        
+
 
 @unittest.skipMPI('MPI(<2.0)')
 @unittest.skipMPI('openmpi(==4.1.0)')

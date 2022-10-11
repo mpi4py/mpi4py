@@ -78,12 +78,12 @@ class BaseTestPackExternal(object):
             with arrayimpl.test(self):
                 if typecode in self.skipdtype: continue
                 datatype = array.TypeMap[typecode]
-                itemsize = datatype.Get_size()
                 overhead = datatype.Pack_external_size(EXT32, 0)
                 for count in range(10):
                     with self.subTest(count=count):
                         pack_size = datatype.Pack_external_size(EXT32, count)
                         real_size = pack_size - overhead
+                        self.assertGreaterEqual(real_size, 0)
 
     def testPackUnpackExternal(self):
         for array, typecode1 in arrayimpl.loop():

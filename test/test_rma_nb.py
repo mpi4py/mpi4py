@@ -1,7 +1,6 @@
 from mpi4py import MPI
 import mpiunittest as unittest
 import arrayimpl
-import sys
 
 def mkzeros(n):
     return bytearray(n)

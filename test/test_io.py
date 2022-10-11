@@ -1,7 +1,7 @@
 from mpi4py import MPI
 import mpiunittest as unittest
 import arrayimpl
-import sys, os, tempfile
+import os, tempfile
 import platform
 
 
@@ -27,7 +27,7 @@ class BaseTestIO(object):
         world_rank = MPI.COMM_WORLD.Get_rank()
         prefix = self.prefix
         if comm.Get_size() < world_size:
-            prefix += ('%d-' % world_rank)
+            prefix += f'{world_rank}-'
         fname = None
         if comm.Get_rank() == 0:
             fd, fname = tempfile.mkstemp(prefix=prefix)

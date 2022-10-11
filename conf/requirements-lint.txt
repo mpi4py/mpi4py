@@ -2,6 +2,7 @@ pycodestyle
 pydocstyle
 pylint
 flake8
+flake8-assertive
 flake8-bandit
 flake8-bugbear
 flake8-use-fstring

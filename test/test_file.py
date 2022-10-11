@@ -1,6 +1,6 @@
 from mpi4py import MPI
 import mpiunittest as unittest
-import sys, os, tempfile, pathlib
+import os, tempfile, pathlib
 
 
 def maketemp(prefix):
@@ -185,13 +185,13 @@ class TestFileNull(unittest.TestCase):
 
 class TestFileSelf(BaseTestFile, unittest.TestCase):
     COMM = MPI.COMM_SELF
-    prefix = BaseTestFile.prefix + ('-%d' % MPI.COMM_WORLD.Get_rank())
+    prefix = BaseTestFile.prefix + (f'-{MPI.COMM_WORLD.Get_rank()}')
 
 
 class TestFilePath(BaseTestFile, unittest.TestCase):
 
     COMM = MPI.COMM_SELF
-    prefix = BaseTestFile.prefix + ('-%d' % MPI.COMM_WORLD.Get_rank())
+    prefix = BaseTestFile.prefix + (f'-{MPI.COMM_WORLD.Get_rank()}')
 
     @staticmethod
     def _test_open_close(path):

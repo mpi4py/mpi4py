@@ -45,20 +45,19 @@ class TestConfig(unittest.TestCase):
 
     def testGetInclude(self):
         path = mpi4py.get_include()
-        self.assertTrue(isinstance(path, str))
+        self.assertIsInstance(path, str)
         self.assertTrue(os.path.isdir(path))
         header = os.path.join(path, 'mpi4py', 'mpi4py.h')
         self.assertTrue(os.path.isfile(header))
 
     def testGetConfig(self):
         conf = mpi4py.get_config()
-        self.assertTrue(isinstance(conf, dict))
+        self.assertIsInstance(conf, dict)
         mpicc = conf.get('mpicc')
         if mpicc is not None:
             self.assertTrue(os.path.exists(mpicc))
 
 
-@unittest.skipIf(os.name != 'posix', 'not-posix')
 class TestProfile(unittest.TestCase):
 
     def testProfile(self):
@@ -90,7 +89,7 @@ class TestProfile(unittest.TestCase):
             with warnings.catch_warnings():
                 warnings.simplefilter('error')
                 with self.assertRaises(UserWarning):
-                    mpi4py.profile(MPI.__file__)
+                    mpi4py.profile(struct.__file__)
             return
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
@@ -130,6 +129,8 @@ class TestPackage(unittest.TestCase):
         import mpi4py.util.pkl5
         import mpi4py.util.dtlib
         import mpi4py.run
+        import mpi4py
+        del mpi4py
 
 
 if __name__ == '__main__':

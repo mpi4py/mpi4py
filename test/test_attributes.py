@@ -23,22 +23,22 @@ class BaseTestAttr(object):
         self.keyval = cls.Create_keyval(copy_fn, delete_fn)
         self.assertNotEqual(self.keyval, MPI.KEYVAL_INVALID)
         attr = obj.Get_attr(self.keyval)
-        self.assertEqual(attr, None)
+        self.assertIsNone(attr)
         attrval = [1,2,3]
         obj.Set_attr(self.keyval, attrval)
         attr = obj.Get_attr(self.keyval)
-        self.assertTrue(attr is attrval)
+        self.assertIs(attr, attrval)
         if hasattr(obj, 'Dup'):
             dup = obj.Dup()
             attr = dup.Get_attr(self.keyval)
             if copy_fn is True:
-                self.assertTrue(attr is attrval)
+                self.assertIs(attr, attrval)
             elif not copy_fn:
-                self.assertTrue(attr is None)
+                self.assertIsNone(attr)
             dup.Free()
         obj.Delete_attr(self.keyval)
         attr = obj.Get_attr(self.keyval)
-        self.assertTrue(attr is None)
+        self.assertIsNone(attr)
 
     def testAttrCopyFalse(self):
         self.testAttr(False)
@@ -55,19 +55,19 @@ class BaseTestAttr(object):
         self.keyval = cls.Create_keyval(copy_fn, None)
         self.assertNotEqual(self.keyval, MPI.KEYVAL_INVALID)
         attr = obj.Get_attr(self.keyval)
-        self.assertEqual(attr, None)
+        self.assertIsNone(attr)
         attrval = [1,2,3]
         obj.Set_attr(self.keyval, attrval)
         attr = obj.Get_attr(self.keyval)
-        self.assertTrue(attr is attrval)
+        self.assertIs(attr, attrval)
         if hasattr(obj, 'Dup'):
             dup = obj.Dup()
             attr = dup.Get_attr(self.keyval)
-            self.assertTrue(attr is None)
+            self.assertIsNone(attr)
             dup.Free()
         obj.Delete_attr(self.keyval)
         attr = obj.Get_attr(self.keyval)
-        self.assertTrue(attr is None)
+        self.assertIsNone(attr)
 
     def testAttrNoPython(self, intval=123456789):
         cls, obj = type(self.obj), self.obj
@@ -81,7 +81,7 @@ class BaseTestAttr(object):
         self.keyval = cls.Create_keyval(copy_fn, del_fn, nopython=True)
         self.assertNotEqual(self.keyval, MPI.KEYVAL_INVALID)
         attr = obj.Get_attr(self.keyval)
-        self.assertEqual(attr, None)
+        self.assertIsNone(attr)
         obj.Set_attr(self.keyval, intval)
         attr = obj.Get_attr(self.keyval)
         self.assertEqual(attr, intval)
@@ -92,7 +92,7 @@ class BaseTestAttr(object):
             dup.Free()
         obj.Delete_attr(self.keyval)
         attr = obj.Get_attr(self.keyval)
-        self.assertTrue(attr is None)
+        self.assertIsNone(attr)
 
     @unittest.skipMPI('openmpi(<=1.10.2)')
     def testAttrNoPythonZero(self):
@@ -127,14 +127,14 @@ class BaseTestCommAttr(BaseTestAttr):
         obj1 = obj
         dup1 = obj1.Dup()
         obj1.Set_attr(self.keyval, dup1)
-        self.assertTrue(dup1 != null)
+        self.assertNotEqual(dup1, null)
         obj2 = obj1.Dup()
         dup2 = obj2.Get_attr(self.keyval)
-        self.assertTrue(dup1 != dup2)
+        self.assertNotEqual(dup1, dup2)
         obj2.Free()
-        self.assertTrue(dup2 == null)
+        self.assertEqual(dup2, null)
         self.obj.Delete_attr(self.keyval)
-        self.assertTrue(dup1 == null)
+        self.assertEqual(dup1, null)
 
 class TestCommAttrWorld(BaseTestCommAttr, unittest.TestCase):
     def setUp(self):
@@ -159,14 +159,14 @@ class BaseTestDatatypeAttr(BaseTestAttr):
         obj1 = obj
         dup1 = obj1.Dup()
         obj1.Set_attr(self.keyval, dup1)
-        self.assertTrue(dup1 != null)
+        self.assertNotEqual(dup1, null)
         obj2 = obj1.Dup()
         dup2 = obj2.Get_attr(self.keyval)
-        self.assertTrue(dup1 != dup2)
+        self.assertNotEqual(dup1, dup2)
         obj2.Free()
-        self.assertTrue(dup2 == null)
+        self.assertEqual(dup2, null)
         self.obj.Delete_attr(self.keyval)
-        self.assertTrue(dup1 == null)
+        self.assertEqual(dup1, null)
 
 class TestDatatypeAttrBYTE(BaseTestDatatypeAttr, unittest.TestCase):
     def setUp(self):
@@ -203,9 +203,9 @@ class TestWinAttr(BaseTestAttr, unittest.TestCase):
         win = MPI.Win.Create(MPI.BOTTOM, 1,
                              MPI.INFO_NULL, MPI.COMM_SELF)
         self.obj.Set_attr(self.keyval, win)
-        self.assertTrue(win != null)
+        self.assertNotEqual(win, null)
         self.obj.Delete_attr(self.keyval)
-        self.assertTrue(win == null)
+        self.assertEqual(win, null)
 
 
 try:
