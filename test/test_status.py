@@ -36,7 +36,7 @@ class TestStatus(unittest.TestCase):
 
     def testIsCancelled(self):
         flag = self.STATUS.Is_cancelled()
-        self.assertTrue(type(flag) is bool)
+        self.assertIs(type(flag), bool)
         self.assertFalse(flag)
 
     def testSetCancelled(self):
@@ -62,7 +62,7 @@ class TestStatus(unittest.TestCase):
     def testConstructor(self):
         self.assertRaises(TypeError, MPI.Status, 123)
         self.assertRaises(TypeError, MPI.Status, "abc")
-        
+
     def testCopyConstructor(self):
         self.STATUS.source = 1
         self.STATUS.tag    = 2

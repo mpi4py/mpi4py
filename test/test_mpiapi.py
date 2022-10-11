@@ -1,6 +1,6 @@
 from mpi4py import MPI
 import mpiunittest as unittest
-import sys, os, re
+import os, re
 import subprocess as sp
 import shutil
 
@@ -45,7 +45,7 @@ class TestMPIAPI(unittest.TestCase):
         self.assertTrue(mpi_symbols)
 
         for symbol in mpi_small_count_allowed:
-            self.assertTrue(symbol in mpi_symbols, symbol)
+            self.assertIn(symbol, mpi_symbols)
             mpi_symbols.remove(symbol)
 
         small_count = {fcn[:-2] for fcn in large_count}

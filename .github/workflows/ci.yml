@@ -165,6 +165,9 @@ jobs:
     - name: flake8
       run:  flake8 src/mpi4py
 
+    - name: flake8 (testsuite)
+      run:  flake8 --select=A test
+
     - name: pylint
       run:  pylint mpi4py
 

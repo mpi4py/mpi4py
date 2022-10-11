@@ -1,6 +1,5 @@
 from mpi4py import MPI
 import mpiunittest as unittest
-import sys, os
 
 # --------------------------------------------------------------------
 
@@ -52,7 +51,7 @@ class TestExcDatatype(BaseTestCase):
         for dtype in self.DATATYPES:
             if dtype != MPI.DATATYPE_NULL:
                 self.assertRaisesMPI(self.ERR_TYPE, dtype.Free)
-                self.assertTrue(dtype != MPI.DATATYPE_NULL)
+                self.assertNotEqual(dtype, MPI.DATATYPE_NULL)
 
     def testKeyvalInvalid(self):
         for dtype in self.DATATYPES:
@@ -450,7 +449,7 @@ class TestExcErrhandlerNull(BaseTestCase):
             MPI.ERR_ARG, MPI.COMM_WORLD.Set_errhandler, MPI.ERRHANDLER_NULL)
 
 # class TestExcErrhandler(BaseTestCase):
-# 
+#
 #     def testFreePredefined(self):
 #         self.assertRaisesMPI(MPI.ERR_ARG, MPI.ERRORS_ARE_FATAL.Free)
 #         self.assertRaisesMPI(MPI.ERR_ARG, MPI.ERRORS_RETURN.Free)

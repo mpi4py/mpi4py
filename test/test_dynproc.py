@@ -48,7 +48,7 @@ class TestDPM(unittest.TestCase):
 
     def testNamePublishing(self):
         rank = MPI.COMM_WORLD.Get_rank()
-        service = "mpi4py-%d" % rank
+        service = f"mpi4py-{rank}"
         port = MPI.Open_port()
         MPI.Publish_name(service, port)
         found =  MPI.Lookup_name(service)
@@ -60,7 +60,6 @@ class TestDPM(unittest.TestCase):
     def testAcceptConnect(self):
         comm_self  = MPI.COMM_SELF
         comm_world = MPI.COMM_WORLD
-        wsize = comm_world.Get_size()
         wrank = comm_world.Get_rank()
         group_world = comm_world.Get_group()
         group = group_world.Excl([0])
@@ -99,7 +98,7 @@ class TestDPM(unittest.TestCase):
             root = 0
         message = intercomm.bcast(message, root)
         if wrank == 0:
-            self.assertEqual(message, None)
+            self.assertIsNone(message)
         else:
             self.assertEqual(message, TestDPM.message)
         intercomm.Free()
@@ -107,7 +106,6 @@ class TestDPM(unittest.TestCase):
     def testConnectAccept(self):
         comm_self  = MPI.COMM_SELF
         comm_world = MPI.COMM_WORLD
-        wsize = comm_world.Get_size()
         wrank = comm_world.Get_rank()
         group_world = comm_world.Get_group()
         group = group_world.Excl([0])
@@ -147,7 +145,7 @@ class TestDPM(unittest.TestCase):
             root = 0
         message = intercomm.bcast(message, root)
         if wrank == 0:
-            self.assertEqual(message, None)
+            self.assertIsNone(message)
         else:
             self.assertEqual(message, TestDPM.message)
         intercomm.Free()
@@ -216,7 +214,7 @@ class TestDPM(unittest.TestCase):
                     root = 0
                 message = intercomm.bcast(message, root)
                 if rank == 0:
-                    self.assertEqual(message, None)
+                    self.assertIsNone(message)
                 else:
                     self.assertEqual(message, TestDPM.message)
                 intercomm.Free()

@@ -5,20 +5,21 @@ from functools import reduce
 cumsum  = lambda seq: reduce(lambda x, y: x+y, seq, 0)
 cumprod = lambda seq: reduce(lambda x, y: x*y, seq, 1)
 
-_basic = [None,
-          True, False,
-          -7, 0, 7, 2**31,
-          -2**63+1, 2**63-1,
-          -2.17, 0.0, 3.14,
-          1+2j, 2-3j,
-          'mpi4py',
-          ]
-messages = _basic
-messages += [ list(_basic),
-              tuple(_basic),
-              dict([('k%d' % key, val)
-                    for key, val in enumerate(_basic)])
-              ]
+_basic = [
+    None,
+    True, False,
+    -7, 0, 7, 2**31,
+    -2**63+1, 2**63-1,
+    -2.17, 0.0, 3.14,
+    1+2j, 2-3j,
+    'mpi4py',
+]
+messages = list(_basic)
+messages += [
+    list(_basic),
+    tuple(_basic),
+    dict((f'k{k}', v) for k, v in enumerate(_basic)),
+]
 
 class BaseTestCCOObj(object):
 
@@ -42,7 +43,7 @@ class BaseTestCCOObj(object):
                 if rank == root:
                     self.assertEqual(rmess, [smess] * size)
                 else:
-                    self.assertEqual(rmess, None)
+                    self.assertIsNone(rmess)
 
     def testScatter(self):
         size = self.COMM.Get_size()
@@ -84,7 +85,7 @@ class BaseTestCCOObj(object):
                     sendobj = rank
                 value = self.COMM.reduce(sendobj, op=op, root=root)
                 if rank != root:
-                    self.assertTrue(value is None)
+                    self.assertIsNone(value)
                 else:
                     if op == MPI.SUM:
                         self.assertEqual(value, cumsum(range(size)))
@@ -164,21 +165,21 @@ class BaseTestCCOObj(object):
         # --
         sscan = self.COMM.exscan(size, op=MPI.SUM)
         if rank == 0:
-            self.assertTrue(sscan is None)
+            self.assertIsNone(sscan)
         else:
             self.assertEqual(sscan, cumsum([size]*(rank)))
         # --
         rscan = self.COMM.exscan(rank, op=MPI.SUM)
         if rank == 0:
-            self.assertTrue(rscan is None)
+            self.assertIsNone(sscan)
         else:
             self.assertEqual(rscan, cumsum(range(rank)))
         # --
         minloc = self.COMM.exscan((rank, rank), op=MPI.MINLOC)
         maxloc = self.COMM.exscan((rank, rank), op=MPI.MAXLOC)
         if rank == 0:
-            self.assertEqual(minloc, None)
-            self.assertEqual(maxloc, None)
+            self.assertIsNone(minloc)
+            self.assertIsNone(maxloc)
         else:
             self.assertEqual(minloc, (0, 0))
             self.assertEqual(maxloc, (rank-1, rank-1))
@@ -186,14 +187,14 @@ class BaseTestCCOObj(object):
         if MPI.REPLACE != MPI.OP_NULL:
             rscan = self.COMM.exscan(rank, op=MPI.REPLACE)
             if rank == 0:
-                self.assertTrue(rscan is None)
+                self.assertIsNone(rscan)
             else:
                 self.assertEqual(rscan, rank-1)
         # --
         if MPI.NO_OP != MPI.OP_NULL:
             rscan = self.COMM.exscan(rank, op=MPI.NO_OP)
             if rank == 0:
-                self.assertTrue(rscan is None)
+                self.assertIsNone(rscan)
             else:
                 self.assertEqual(rscan, 0)
 

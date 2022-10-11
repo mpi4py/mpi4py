@@ -253,12 +253,12 @@ class BaseTestP2PBuf(object):
                         reqlist = [sendreq, recvreq]
                         MPI.Prequest.Startall(reqlist)
                         index1 = MPI.Prequest.Waitany(reqlist)
-                        self.assertTrue(index1 in [0, 1])
+                        self.assertIn(index1, [0, 1])
                         self.assertNotEqual(reqlist[index1], MPI.REQUEST_NULL)
                         index2 = MPI.Prequest.Waitany(reqlist)
-                        self.assertTrue(index2 in [0, 1])
+                        self.assertIn(index2, [0, 1])
                         self.assertNotEqual(reqlist[index2], MPI.REQUEST_NULL)
-                        self.assertTrue(index1 != index2)
+                        self.assertNotEqual(index1, index2)
                         index3 = MPI.Prequest.Waitany(reqlist)
                         self.assertEqual(index3, MPI.UNDEFINED)
                         for preq in reqlist:

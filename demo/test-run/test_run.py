@@ -91,7 +91,7 @@ class BaseTestRun(unittest.TestCase):
         ))
         if aborted:
             if message is not None and not ci:
-                self.assertTrue(message in stderr)
+                self.assertIn(message, stderr)
             return
         if ci:
             warnings.warn(
@@ -122,8 +122,8 @@ class TestRunScript(BaseTestRun):
             self.assertEqual(stderr, '')
 
     def testException(self):
-        message = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-        excmess = 'RuntimeError: {0}'.format(message)
+        message = r'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+        excmess = f'RuntimeError: {message}'
         for np in (1, 2):
             for rank in range(0, np):
                 args = ['--rank', str(rank), '--exception', message]
@@ -137,9 +137,9 @@ class TestRunScript(BaseTestRun):
             for r in sorted(set([0, np - 1])):
                 args = ['--rank', str(r), '--sys-exit', str(errcode)]
                 status, stdout, stderr = self.execute(args, np)
-                self.assertTrue(status in (errcode, 1))
+                self.assertIn(status, (errcode, 1))
                 self.assertMPIAbort(stdout, stderr)
-                self.assertTrue('Traceback' not in stderr)
+                self.assertNotIn('Traceback', stderr)
 
     def testSysExitMess(self):
         exitmsg = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -149,7 +149,7 @@ class TestRunScript(BaseTestRun):
                 status, stdout, stderr = self.execute(args, np)
                 self.assertEqual(status, 1)
                 self.assertMPIAbort(stdout, stderr, exitmsg)
-                self.assertTrue('Traceback' not in stderr)
+                self.assertNotIn('Traceback', stderr)
 
     def testInterrupt(self):
         from signal import SIGINT

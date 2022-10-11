@@ -9,43 +9,43 @@ class TestEnviron(unittest.TestCase):
 
     def testIsInitialized(self):
         flag = MPI.Is_initialized()
-        self.assertTrue(type(flag) is bool)
+        self.assertIs(type(flag), bool)
         self.assertTrue(flag)
 
     def testIsFinalized(self):
         flag = MPI.Is_finalized()
-        self.assertTrue(type(flag) is bool)
+        self.assertIs(type(flag), bool)
         self.assertFalse(flag)
 
     def testGetVersion(self):
         version = MPI.Get_version()
         self.assertEqual(len(version), 2)
         major, minor = version
-        self.assertTrue(type(major) is int)
-        self.assertTrue(major >= 1)
-        self.assertTrue(type(minor) is int)
-        self.assertTrue(minor >= 0)
+        self.assertIs(type(major), int)
+        self.assertIs(type(minor), int)
+        self.assertGreaterEqual(major, 1)
+        self.assertGreaterEqual(minor, 0)
 
     def testGetLibraryVersion(self):
         version = MPI.Get_library_version()
-        self.assertTrue(isinstance(version, str))
-        self.assertTrue(len(version) > 0)
+        self.assertIsInstance(version, str)
+        self.assertGreater(len(version), 0)
 
     def testGetProcessorName(self):
         procname = MPI.Get_processor_name()
-        self.assertTrue(isinstance(procname, str))
+        self.assertIsInstance(procname, str)
 
     def testWTime(self):
         time1 = MPI.Wtime()
-        self.assertTrue(type(time1) is float)
+        self.assertIs(type(time1), float)
         time2 = MPI.Wtime()
-        self.assertTrue(type(time2) is float)
-        self.assertTrue(time2 >= time1)
+        self.assertIs(type(time2), float)
+        self.assertGreaterEqual(time2, time1)
 
     def testWTick(self):
         tick = MPI.Wtick()
-        self.assertTrue(type(tick) is float)
-        self.assertTrue(tick > 0.0)
+        self.assertIs(type(tick), float)
+        self.assertGreater(tick, 0.0)
 
     def testPControl(self):
         for level in (2, 1, 0):
@@ -57,28 +57,22 @@ class TestWorldAttrs(unittest.TestCase):
     def testWTimeIsGlobal(self):
         wtg = MPI.COMM_WORLD.Get_attr(MPI.WTIME_IS_GLOBAL)
         if wtg is not None:
-            self.assertTrue(wtg in (True, False))
-
-    def testWTimeIsGlobal(self):
-        wtg = MPI.COMM_WORLD.Get_attr(MPI.WTIME_IS_GLOBAL)
-        if wtg is not None:
-            self.assertTrue(wtg in (True, False))
+            self.assertIn(wtg, (True, False))
 
     def testHostPorcessor(self):
         size = MPI.COMM_WORLD.Get_size()
         vals = list(range(size)) + [MPI.PROC_NULL]
         hostproc = MPI.COMM_WORLD.Get_attr(MPI.HOST)
         if hostproc is not None:
-            self.assertTrue(hostproc in vals)
+            self.assertIn(hostproc, vals)
 
     def testIOProcessor(self):
         size = MPI.COMM_WORLD.Get_size()
-        vals = list(range(size)) + [MPI.UNDEFINED,
-                                    MPI.ANY_SOURCE,
-                                    MPI.PROC_NULL]
+        vals = list(range(size))
+        vals += [MPI.UNDEFINED, MPI.ANY_SOURCE, MPI.PROC_NULL]
         ioproc = MPI.COMM_WORLD.Get_attr(MPI.IO)
         if ioproc is not None:
-            self.assertTrue(ioproc in vals)
+            self.assertIn(ioproc, vals)
 
     @unittest.skipIf(MPI.APPNUM == MPI.KEYVAL_INVALID, 'mpi-appnum')
     def testAppNum(self):
@@ -98,7 +92,7 @@ class TestWorldAttrs(unittest.TestCase):
     @unittest.skipIf(MPI.LASTUSEDCODE == MPI.KEYVAL_INVALID, 'mpi-lastusedcode')
     def testLastUsedCode(self):
         lastuc = MPI.COMM_WORLD.Get_attr(MPI.LASTUSEDCODE)
-        self.assertTrue(lastuc >= 0)
+        self.assertGreaterEqual(lastuc, 0)
 
 
 if __name__ == '__main__':

@@ -1,20 +1,21 @@
 from mpi4py import MPI
 import mpiunittest as unittest
 
-_basic = [None,
-          True, False,
-          -7, 0, 7,
-          -2**63+1, 2**63-1,
-          -2.17, 0.0, 3.14,
-          1+2j, 2-3j,
-          'mpi4py',
-          ]
+_basic = [
+    None,
+    True, False,
+    -7, 0, 7,
+    -2**63+1, 2**63-1,
+    -2.17, 0.0, 3.14,
+    1+2j, 2-3j,
+    'mpi4py',
+]
 messages = list(_basic)
-messages += [ list(_basic),
-              tuple(_basic),
-              dict([('k%d' % key, val)
-                    for key, val in enumerate(_basic)])
-              ]
+messages += [
+    list(_basic),
+    tuple(_basic),
+    dict((f'k{k}', v) for k, v in enumerate(_basic)),
+]
 
 @unittest.skipIf(MPI.MESSAGE_NULL == MPI.MESSAGE_NO_PROC, 'mpi-message')
 class TestMessage(unittest.TestCase):
@@ -69,19 +70,19 @@ class BaseTestP2PMatched(object):
         comm = self.COMM.Dup()
         try:
             m = comm.improbe()
-            self.assertEqual(m, None)
+            self.assertIsNone(m)
             m = comm.improbe(MPI.ANY_SOURCE)
-            self.assertEqual(m, None)
+            self.assertIsNone(m)
             m = comm.improbe(MPI.ANY_SOURCE, MPI.ANY_TAG)
-            self.assertEqual(m, None)
+            self.assertIsNone(m)
             status = MPI.Status()
             m = comm.improbe(MPI.ANY_SOURCE, MPI.ANY_TAG, status)
-            self.assertEqual(m, None)
+            self.assertIsNone(m)
             self.assertEqual(status.source, MPI.ANY_SOURCE)
             self.assertEqual(status.tag,    MPI.ANY_TAG)
             self.assertEqual(status.error,  MPI.SUCCESS)
             m = MPI.Message.iprobe(comm)
-            self.assertEqual(m, None)
+            self.assertIsNone(m)
             s = comm.isend(None, comm.rank, 0)
             r = comm.mprobe(comm.rank, 0).irecv()
             MPI.Request.waitall([s,r])
@@ -96,7 +97,7 @@ class BaseTestP2PMatched(object):
             if size == 1:
                 sr = comm.isend(smsg, 0, 0)
                 m = comm.mprobe(0, 0)
-                self.assertTrue(isinstance(m, MPI.Message))
+                self.assertIsInstance(m, MPI.Message)
                 self.assertTrue(m)
                 rr = m.irecv()
                 self.assertFalse(m)
@@ -108,7 +109,7 @@ class BaseTestP2PMatched(object):
                 #
                 r = comm.isend(smsg, 0, 0)
                 m = MPI.Message.probe(comm, 0, 0)
-                self.assertTrue(isinstance(m, MPI.Message))
+                self.assertIsInstance(m, MPI.Message)
                 self.assertTrue(m)
                 rmsg = m.recv()
                 self.assertFalse(m)

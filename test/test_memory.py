@@ -1,6 +1,5 @@
 from mpi4py import MPI
 import mpiunittest as unittest
-import sys
 
 try:
     import array
@@ -13,9 +12,9 @@ class TestMemory(unittest.TestCase):
         memory = MPI.memory
         mem = memory()
         self.assertEqual(mem.address, 0)
-        self.assertEqual(mem.obj, None)
+        self.assertIsNone(mem.obj)
         self.assertEqual(mem.nbytes, 0)
-        self.assertEqual(mem.readonly, False)
+        self.assertFalse(mem.readonly)
         self.assertEqual(mem.format, 'B')
         self.assertEqual(mem.itemsize, 1)
         self.assertEqual(len(mem), 0)
@@ -25,7 +24,7 @@ class TestMemory(unittest.TestCase):
         self.assertEqual(m.format, 'B')
         self.assertEqual(m.itemsize, 1)
         self.assertEqual(m.ndim, 1)
-        self.assertEqual(m.readonly, False)
+        self.assertIs(m.readonly, False)
         self.assertEqual(m.shape, (0,))
         self.assertEqual(m.strides, (1,))
         self.assertEqual(m.tobytes(), b"")
@@ -33,7 +32,7 @@ class TestMemory(unittest.TestCase):
         mem.release()
         self.assertEqual(mem.address, 0)
         self.assertEqual(mem.nbytes, 0)
-        self.assertEqual(mem.readonly, False)
+        self.assertFalse(mem.readonly)
 
     def testNewBad(self):
         memory = MPI.memory
@@ -46,7 +45,7 @@ class TestMemory(unittest.TestCase):
         mem = memory(obj)
         self.assertEqual(mem.obj, obj)
         self.assertEqual(mem.nbytes, len(obj))
-        self.assertEqual(mem.readonly, True)
+        self.assertIs(mem.readonly, True)
 
     def testNewBytearray(self):
         memory = MPI.memory
@@ -54,7 +53,7 @@ class TestMemory(unittest.TestCase):
         mem = memory(obj)
         self.assertEqual(mem.obj, obj)
         self.assertEqual(mem.nbytes, len(obj))
-        self.assertEqual(mem.readonly, False)
+        self.assertFalse(mem.readonly)
 
     @unittest.skipIf(array is None, 'array')
     def testNewArray(self):
@@ -63,7 +62,7 @@ class TestMemory(unittest.TestCase):
         mem = memory(obj)
         self.assertEqual(mem.obj, obj)
         self.assertEqual(mem.nbytes, len(obj)*obj.itemsize)
-        self.assertEqual(mem.readonly, False)
+        self.assertFalse(mem.readonly)
 
     def testAllocate(self):
         memory = MPI.memory
@@ -93,7 +92,7 @@ class TestMemory(unittest.TestCase):
         self.assertEqual(type(mem.obj), bytes)
         self.assertEqual(mem.obj, b"abc")
         self.assertEqual(mem.nbytes, 3)
-        self.assertEqual(mem.readonly, True)
+        self.assertTrue (mem.readonly)
         self.assertEqual(mem.format, 'B')
         self.assertEqual(mem.itemsize, 1)
         self.assertEqual(len(mem), 3)
@@ -101,7 +100,7 @@ class TestMemory(unittest.TestCase):
         self.assertEqual(m.format, 'B')
         self.assertEqual(m.itemsize, 1)
         self.assertEqual(m.ndim, 1)
-        self.assertEqual(m.readonly, True)
+        self.assertTrue (m.readonly)
         self.assertEqual(m.shape, (3,))
         self.assertEqual(m.strides, (1,))
         self.assertEqual(m.tobytes(), b"abc")
@@ -109,7 +108,7 @@ class TestMemory(unittest.TestCase):
         mem.release()
         self.assertEqual(mem.address, 0)
         self.assertEqual(mem.nbytes, 0)
-        self.assertEqual(mem.readonly, False)
+        self.assertFalse(mem.readonly)
 
     @unittest.skipIf(array is None, 'array')
     def testFromBufferArrayRO(self):
@@ -119,7 +118,7 @@ class TestMemory(unittest.TestCase):
         self.assertNotEqual(mem.address, 0)
         self.assertEqual(type(mem.obj), array.array)
         self.assertEqual(mem.nbytes, 3)
-        self.assertEqual(mem.readonly, True)
+        self.assertTrue (mem.readonly)
         self.assertEqual(mem.format, 'B')
         self.assertEqual(mem.itemsize, 1)
         self.assertEqual(len(mem), 3)
@@ -127,7 +126,7 @@ class TestMemory(unittest.TestCase):
         self.assertEqual(m.format, 'B')
         self.assertEqual(m.itemsize, 1)
         self.assertEqual(m.ndim, 1)
-        self.assertEqual(m.readonly, True)
+        self.assertTrue (m.readonly)
         self.assertEqual(m.shape, (3,))
         self.assertEqual(m.strides, (1,))
         self.assertEqual(m.tobytes(), b"\1\2\3")
@@ -135,7 +134,7 @@ class TestMemory(unittest.TestCase):
         mem.release()
         self.assertEqual(mem.address, 0)
         self.assertEqual(mem.nbytes, 0)
-        self.assertEqual(mem.readonly, False)
+        self.assertFalse(mem.readonly)
 
     @unittest.skipIf(array is None, 'array')
     def testFromBufferArrayRW(self):
@@ -144,13 +143,13 @@ class TestMemory(unittest.TestCase):
         mem = memory.frombuffer(obj, readonly=False)
         self.assertNotEqual(mem.address, 0)
         self.assertEqual(mem.nbytes, 3)
-        self.assertEqual(mem.readonly, False)
+        self.assertFalse(mem.readonly)
         self.assertEqual(len(mem), 3)
         m = memoryview(mem)
         self.assertEqual(m.format, 'B')
         self.assertEqual(m.itemsize, 1)
         self.assertEqual(m.ndim, 1)
-        self.assertEqual(m.readonly, False)
+        self.assertFalse(m.readonly)
         self.assertEqual(m.shape, (3,))
         self.assertEqual(m.strides, (1,))
         self.assertEqual(m.tobytes(), b"\1\2\3")
@@ -164,7 +163,7 @@ class TestMemory(unittest.TestCase):
         mem.release()
         self.assertEqual(mem.address, 0)
         self.assertEqual(mem.nbytes, 0)
-        self.assertEqual(mem.readonly, False)
+        self.assertFalse(mem.readonly)
 
     @unittest.skipIf(array is None, 'array')
     def testFromAddress(self):
@@ -175,13 +174,13 @@ class TestMemory(unittest.TestCase):
         mem = memory.fromaddress(addr, nbytes, readonly=False)
         self.assertNotEqual(mem.address, 0)
         self.assertEqual(mem.nbytes, 3)
-        self.assertEqual(mem.readonly, False)
+        self.assertFalse(mem.readonly)
         self.assertEqual(len(mem), 3)
         m = memoryview(mem)
         self.assertEqual(m.format, 'B')
         self.assertEqual(m.itemsize, 1)
         self.assertEqual(m.ndim, 1)
-        self.assertEqual(m.readonly, False)
+        self.assertFalse(m.readonly)
         self.assertEqual(m.shape, (3,))
         self.assertEqual(m.strides, (1,))
         self.assertEqual(m.tobytes(), b"\1\2\3")
@@ -195,15 +194,15 @@ class TestMemory(unittest.TestCase):
         mem.release()
         self.assertEqual(mem.address, 0)
         self.assertEqual(mem.nbytes, 0)
-        self.assertEqual(mem.readonly, False)
+        self.assertFalse(mem.readonly)
 
     def testToReadonly(self):
         memory = MPI.memory
         obj = bytearray(b"abc")
         mem1 = memory.frombuffer(obj)
         mem2 = mem1.toreadonly()
-        self.assertEqual(mem1.readonly, False)
-        self.assertEqual(mem2.readonly, True)
+        self.assertFalse(mem1.readonly)
+        self.assertTrue (mem2.readonly)
         self.assertEqual(mem1.address, mem2.address)
         self.assertEqual(mem1.obj, mem2.obj)
         self.assertEqual(type(mem1.obj), type(mem2.obj))
@@ -216,10 +215,10 @@ class TestMemory(unittest.TestCase):
         except NotImplementedError:
             self.skipTest('mpi-alloc_mem')
         try:
-            self.assertTrue(type(mem) is MPI.memory)
-            self.assertTrue(mem.address != 0)
+            self.assertIs(type(mem), MPI.memory)
+            self.assertNotEqual(mem.address, 0)
             self.assertEqual(mem.nbytes, n)
-            self.assertEqual(mem.readonly, False)
+            self.assertFalse(mem.readonly)
             self.assertEqual(len(mem), n)
             def delitem():  del mem[n]
             def getitem1(): return mem[n]
@@ -274,7 +273,7 @@ class TestMemory(unittest.TestCase):
             MPI.Free_mem(mem)
             self.assertEqual(mem.address, 0)
             self.assertEqual(mem.nbytes, 0)
-            self.assertEqual(mem.readonly, False)
+            self.assertFalse(mem.readonly)
 
 try:
     MPI.memory

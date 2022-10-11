@@ -6,26 +6,26 @@ class TestCommNull(unittest.TestCase):
     def testConstructor(self):
         comm = MPI.Comm()
         self.assertEqual(comm, MPI.COMM_NULL)
-        self.assertFalse(comm is MPI.COMM_NULL)
+        self.assertIsNot(comm, MPI.COMM_NULL)
         def construct(): MPI.Comm((1,2,3))
         self.assertRaises(TypeError, construct)
 
     def testConstructorIntra(self):
         comm_null = MPI.Intracomm()
-        self.assertFalse(comm_null is MPI.COMM_NULL)
         self.assertEqual(comm_null, MPI.COMM_NULL)
+        self.assertIsNot(comm_null, MPI.COMM_NULL)
 
     def testConstructorInter(self):
         comm_null = MPI.Intercomm()
-        self.assertFalse(comm_null is MPI.COMM_NULL)
         self.assertEqual(comm_null, MPI.COMM_NULL)
+        self.assertIsNot(comm_null, MPI.COMM_NULL)
 
 class BaseTestComm(object):
 
     def testConstructor(self):
         comm = MPI.Comm(self.COMM)
         self.assertEqual(comm, self.COMM)
-        self.assertFalse(comm is self.COMM)
+        self.assertIsNot(comm, self.COMM)
 
     def testPyProps(self):
         comm = self.COMM
@@ -37,12 +37,13 @@ class BaseTestComm(object):
 
     def testSize(self):
         size = self.COMM.Get_size()
-        self.assertTrue(size >= 1)
+        self.assertGreaterEqual(size, 1)
 
     def testRank(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
-        self.assertTrue(rank >= 0 and rank < size)
+        self.assertGreaterEqual(rank, 0)
+        self.assertLess(rank, size)
 
     def testGroup(self):
         comm  = self.COMM
@@ -60,7 +61,7 @@ class BaseTestComm(object):
     def testCompare(self):
         results = (MPI.IDENT, MPI.CONGRUENT, MPI.SIMILAR, MPI.UNEQUAL)
         ccmp = MPI.Comm.Compare(self.COMM, MPI.COMM_WORLD)
-        self.assertTrue(ccmp in results)
+        self.assertIn(ccmp, results)
         ccmp = MPI.Comm.Compare(self.COMM, self.COMM)
         self.assertEqual(ccmp, MPI.IDENT)
         comm = self.COMM.Dup()
@@ -70,7 +71,7 @@ class BaseTestComm(object):
 
     def testIsInter(self):
         is_inter = self.COMM.Is_inter()
-        self.assertTrue(type(is_inter) is bool)
+        self.assertIs(type(is_inter), bool)
 
     def testGetSetName(self):
         try:
@@ -85,6 +86,7 @@ class BaseTestComm(object):
     def testGetParent(self):
         try:
             parent = MPI.Comm.Get_parent()
+            self.assertIsInstance(parent, MPI.Intercomm)
         except NotImplementedError:
             self.skipTest('mpi-comm-get_parent')
 
@@ -154,7 +156,7 @@ class BaseTestComm(object):
         try:
             comm = self.COMM.Create_group(group)
         except NotImplementedError:
-            self.assertTrue(MPI.VERSION < 3)
+            self.assertLess(MPI.VERSION, 3)
             self.skipTest('mpi-comm-create_group')
         else:
             ccmp = MPI.Comm.Compare(self.COMM, comm)
@@ -163,13 +165,12 @@ class BaseTestComm(object):
         finally:
             group.Free()
 
-    #@unittest.skipMPI('openmpi(<5.2.0)')
     def testCreateFromGroup(self):
         group = self.COMM.Get_group()
         try:
             comm = MPI.Intracomm.Create_from_group(group)
         except NotImplementedError:
-            self.assertTrue(MPI.VERSION < 4)
+            self.assertLess(MPI.VERSION, 4)
             self.skipTest('mpi-comm-create_from_group')
         except MPI.Exception as exc:  # openmpi
             UNSUPPORTED = MPI.ERR_UNSUPPORTED_OPERATION
@@ -279,7 +280,7 @@ class BaseTestComm(object):
             )
             if comm != MPI.COMM_NULL:
                 self.assertTrue(info.Get("mpi_hw_resource_type"))
-                self.assertTrue(comm.Get_size() < hwcomm[-1].Get_size())
+                self.assertLess(comm.Get_size(), hwcomm[-1].Get_size())
             info.Free()
             if comm == MPI.COMM_NULL:
                 break

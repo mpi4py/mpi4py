@@ -21,10 +21,10 @@ except ImportError:
     np_version = None
 
 typecodes = list("?cbhilqpBHILQfdgFDG")
-typecodes += ['b{:d}'.format(n) for n in (1,)]
-typecodes += ['i{:d}'.format(n) for n in (1,2,4,8)]
-typecodes += ['u{:d}'.format(n) for n in (1,2,4,8)]
-typecodes += ['f{:d}'.format(n) for n in (4,8)]
+typecodes += [f'b{n:d}' for n in (1,)]
+typecodes += [f'i{n:d}' for n in (1,2,4,8)]
+typecodes += [f'u{n:d}' for n in (1,2,4,8)]
+typecodes += [f'f{n:d}' for n in (4,8)]
 
 if np_version and np_version < (1, 17):
     typecodes.remove('L')
@@ -88,7 +88,7 @@ class TestUtilDTLib(unittest.TestCase):
     def testSubarray1(self):
         shapes = [(1,), (1, 1), (1, 1, 1), (3,), (3, 4), (2, 3, 4),]
         for dt, shape in itertools.product(typecodes, shapes):
-            spec = "{}{}".format(shape, dt)
+            spec = f"{shape}{dt}"
             with self.subTest(spec=spec):
                 self.check(spec)
 
@@ -110,7 +110,8 @@ class TestUtilDTLib(unittest.TestCase):
         iterN = itertools.product(iter1, iter2)
         iterA = iter([False, True])
         for nt, align in itertools.product(iterN, iterA):
-            spec = "{}{},{}{}".format(*sum(nt, ()))
+            s1, t1, s2, t2 = sum(nt, ())
+            spec = f"{s1}{t1},{s2}{t2}"
             with self.subTest(spec=spec, align=align):
                 self.check(spec, align)
 
@@ -122,7 +123,8 @@ class TestUtilDTLib(unittest.TestCase):
         iterN = itertools.product(iter1, iter2, iter3)
         iterA = iter([False, True])
         for tp, align in itertools.product(iterN, iterA):
-            spec = "{},{},{}".format(*tp)
+            t1, t2, t3 = tp
+            spec = f"{t1},{t2},{t3}"
             with self.subTest(spec=spec, align=align):
                 self.check(spec, align)
 
@@ -335,7 +337,8 @@ class TestUtilDTLib(unittest.TestCase):
                 if np_dtype is not None:
                     self.assertEqual(dt.kind, 'i')
                     self.assertEqual(dt.itemsize, mt.extent)
-                    tstr = 'i{}'.format(mt.Get_size())
+                    size = mt.Get_size()
+                    tstr = f'i{size}'
                     stp, mtp = self.makeStruct(tstr, mt)
                     self.assertEqual(stp.itemsize, mtp.extent)
                     self.check(mtp)
@@ -356,7 +359,8 @@ class TestUtilDTLib(unittest.TestCase):
                 if np_dtype is not None:
                     self.assertEqual(dt.kind, 'f')
                     self.assertEqual(dt.itemsize, mt.extent)
-                    tstr = 'f{}'.format(mt.Get_size())
+                    size = mt.Get_size()
+                    tstr = f'i{size}'
                     stp, mtp = self.makeStruct(tstr, mt)
                     self.assertEqual(stp.itemsize, mtp.extent)
                     self.check(mtp)
@@ -393,13 +397,13 @@ class TestUtilDTLib(unittest.TestCase):
 
     def testAlignment(self):
         from mpi4py.util import dtlib
-        complexcodes = ['c{}'.format(n) for n in (8, 16)]
+        complexcodes = [f'c{n}' for n in (8, 16)]
         for t in typecodes + complexcodes:
             with self.subTest(typecode=t):
                 alignment1 = dtlib._get_alignment_ctypes(t)
                 if np_dtype is not None:
                     alignment2 = numpy.dtype(t).alignment
-                    self.assertTrue(alignment1, alignment2)
+                    self.assertEqual(alignment1, alignment2)
 
     @unittest.skipIf(numpy is None, 'numpy')
     def testFailures(self):

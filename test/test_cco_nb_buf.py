@@ -102,7 +102,7 @@ class BaseTestCCOBuf(object):
         num = complex(second-first)
         den = complex(second+first)/2 or 1.0
         if (abs(num/den) > 1e-2):
-            raise self.failureException('%r != %r' % (first, second))
+            raise self.failureException(f'{first!r} != {second!r}')
 
     def testReduce(self):
         size = self.COMM.Get_size()
@@ -418,7 +418,7 @@ class BaseTestCCOBufInplace(object):
         num = complex(second-first)
         den = complex(second+first)/2 or 1.0
         if (abs(num/den) > 1e-2):
-            raise self.failureException('%r != %r' % (first, second))
+            raise self.failureException(f'{first!r} != {second!r}')
 
     def testReduce(self):
         size = self.COMM.Get_size()
@@ -429,7 +429,6 @@ class BaseTestCCOBufInplace(object):
             for op in (MPI.SUM, MPI.PROD, MPI.MAX, MPI.MIN):
                 if skip_op(typecode, op): continue
                 for root in range(size):
-                    count = size
                     if rank == root:
                         buf  = array(range(size), typecode)
                         sbuf = MPI.IN_PLACE

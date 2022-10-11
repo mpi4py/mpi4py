@@ -25,6 +25,7 @@ class TestSession(unittest.TestCase):
         num_psets = session.Get_num_psets()
         for n in range(num_psets):
             name = session.Get_nth_pset(n)
+            self.assertGreater(len(name), 0)
         session.Finalize()
 
     def testSessionPsetInfo(self):

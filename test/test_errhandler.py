@@ -97,7 +97,7 @@ class TestErrhandlerFile(BaseTestErrhandler, unittest.TestCase):
     def setUp(self):
         import os, tempfile
         rank = MPI.COMM_WORLD.Get_rank()
-        fd, filename = tempfile.mkstemp(prefix='mpi4py-', suffix="-%d"%rank)
+        fd, filename = tempfile.mkstemp(prefix='mpi4py-', suffix=f"-{rank}")
         os.close(fd)
         amode = MPI.MODE_WRONLY | MPI.MODE_CREATE | MPI.MODE_DELETE_ON_CLOSE
         try:

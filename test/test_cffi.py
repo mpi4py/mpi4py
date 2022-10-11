@@ -49,13 +49,15 @@ class TestCFFI(unittest.TestCase):
 
     def testHandleAddress(self):
         ffi = cffi.FFI()
-        typemap = {ffi.sizeof('int'): 'int',
-                   ffi.sizeof('void*'): 'void*'}
+        typemap = {
+            ffi.sizeof('int'): 'int',
+            ffi.sizeof('void*'): 'void*',
+        }
         typename = lambda t: t.__name__.rsplit('.', 1)[-1]
         for tp in self.mpitypes:
             handle_t = typemap[MPI._sizeof(tp)]
             mpi_t = 'MPI_' + typename(tp)
-            ffi.cdef("typedef %s %s;" % (handle_t, mpi_t))
+            ffi.cdef(f"typedef {handle_t} {mpi_t};")
         for obj in self.objects:
             if isinstance(obj, MPI.Comm):
                 mpi_t = 'MPI_Comm'

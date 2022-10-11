@@ -22,10 +22,10 @@ class TestMPIThreads(unittest.TestCase):
                   MPI.THREAD_SERIALIZED,
                   MPI.THREAD_MULTIPLE]
         for i in range(len(levels)-1):
-            self.assertTrue(levels[i] < levels[i+1])
+            self.assertLess(levels[i], levels[i+1])
         try:
             provided = MPI.Query_thread()
-            self.assertTrue(provided in levels)
+            self.assertIn(provided, levels)
         except NotImplementedError:
             self.skipTest('mpi-query_thread')
 
@@ -39,7 +39,7 @@ class TestMPIThreads(unittest.TestCase):
         self.assertEqual(flag, main)
         if VERBOSE:
             log = lambda m: sys.stderr.write(m+'\n')
-            log("%s: MPI.Is_thread_main() -> %s" % (name, flag))
+            log(f"{name}: MPI.Is_thread_main() -> {flag}")
 
     def testIsThreadMainInThread(self):
         try:
