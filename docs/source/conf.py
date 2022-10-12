@@ -71,6 +71,9 @@ nitpick_ignore_regex = [
     (r'envvar', r'(LD_LIBRARY_)?PATH'),
     (r'envvar', r'(MPICH|OMPI|MPIEXEC)_.*'),
 ]
+
+toc_object_entries = False
+toc_object_entries_show_parents = 'hide'
 # python_use_unqualified_type_names = True
 
 autodoc_typehints = 'description'
