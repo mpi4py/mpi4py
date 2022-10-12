@@ -22,9 +22,9 @@ from .MPI import (
     BottomType,
     InPlaceType,
 )
-if sys.version_info >= (3, 8):
+if sys.version_info >= (3, 8):  # pragma: no branch
     from typing import Protocol
-else:
+else:  # pragma: no cover
     try:
         from typing_extensions import Protocol
     except ImportError:
@@ -66,7 +66,7 @@ class SupportsBuffer(Protocol):
 
     def __buffer__(self, flags: int) -> memoryview:
         """Create a buffer from a Python object."""
-        ...
+        ...  # pragma: no cover
 
 
 class SupportsDLPack(Protocol):
@@ -78,11 +78,11 @@ class SupportsDLPack(Protocol):
 
     def __dlpack__(self, *, stream: Optional[_Stream] = None) -> _PyCapsule:
         """Export data for consumption as a DLPack capsule."""
-        ...
+        ...  # pragma: no cover
 
     def __dlpack_device__(self) -> Tuple[_DeviceType, _DeviceID]:
         """Get device type and device ID in DLPack format."""
-        ...
+        ...  # pragma: no cover
 
 
 class SupportsCAI(Protocol):
@@ -95,7 +95,7 @@ class SupportsCAI(Protocol):
     @property
     def __cuda_array_interface__(self) -> Dict[str, Any]:
         """CAI protocol data."""
-        ...
+        ...  # pragma: no cover
 
 
 Buffer = Union[
