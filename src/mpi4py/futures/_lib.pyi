@@ -2,9 +2,9 @@ import weakref
 import threading
 from ..MPI  import Info, Intracomm, Intercomm
 from ._core import Executor, Future
-from typing import Any, Optional, Union, Generic, TypeVar
+from typing import Any, Generic, Optional, TypeVar, Union
 from typing import Callable, Iterable, Iterator, Sequence, Mapping
-from typing import List, Tuple, Dict
+from typing import Dict, List, Tuple
 
 _T = TypeVar("_T")
 _Task = Tuple[Callable[..., _T], Tuple, Dict[str, Any]]

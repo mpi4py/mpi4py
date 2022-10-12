@@ -1,8 +1,9 @@
 import sys
 from ..MPI import Intracomm, COMM_WORLD
 from ._core import Executor, Future
-from typing import Any, Optional, Tuple, Type, TypeVar, Union
+from typing import Any, Optional, Type, TypeVar, Union
 from typing import Callable, Iterable, Iterator, Mapping, Sequence
+from typing import Tuple
 if sys.version_info >= (3, 10):
     from typing import ParamSpec
 else:
