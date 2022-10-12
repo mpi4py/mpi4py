@@ -186,7 +186,7 @@ scientific computing and software development with Python.
 
 .. _Cython:    https://cython.org/
 
-.. _SWIG:      http://www.swig.org/
+.. _SWIG:      https://www.swig.org/
 
 
 .. _OOMPI:     https://web.archive.org/web/20100614170656/http://www.osl.iu.edu/research/oompi/overview.php
