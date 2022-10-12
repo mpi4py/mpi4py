@@ -15,12 +15,6 @@ _typedict = TypeDict
 AddTypeMap(TypeDict, "?" , __CXX_BOOL__ ) # PEP-3118 & NumPy
 # boolean (C99)
 AddTypeMap(TypeDict, "?" , __C_BOOL__   ) # PEP-3118 & NumPy
-# character
-AddTypeMap(TypeDict, "c" , __CHAR__     ) # PEP-3118 & NumPy
-AddTypeMap(TypeDict, "S" , __CHAR__     ) # NumPy
-AddTypeMap(TypeDict, "S1", __CHAR__     ) # NumPy
-AddTypeMap(TypeDict, "s",  __CHAR__     ) # PEP-3118
-AddTypeMap(TypeDict, "1s", __CHAR__     ) # PEP-3118
 # (signed) integer
 AddTypeMap(TypeDict, "b" , __SIGNED_CHAR__ ) # MPI-2
 AddTypeMap(TypeDict, "h" , __SHORT__       )
@@ -138,6 +132,13 @@ if sizeof(Py_intptr_t) == sizeof(int):
 if sizeof(Py_intptr_t) == sizeof(MPI_Aint):
     AddTypeMap(TypeDict, "p" , __AINT__               ) # NumPy
 
+# character
+AddTypeMap(TypeDict, "c" , __CHAR__ ) # PEP-3118 & NumPy
+AddTypeMap(TypeDict, "a" , __CHAR__ ) # NumPy
+AddTypeMap(TypeDict, "S" , __CHAR__ ) # NumPy
+AddTypeMap(TypeDict, "S1", __CHAR__ ) # NumPy
+AddTypeMap(TypeDict, "s",  __CHAR__ ) # PEP-3118
+AddTypeMap(TypeDict, "1s", __CHAR__ ) # PEP-3118
 # wide character
 if sizeof(wchar_t) == 4:
     AddTypeMap(TypeDict, "U" , __WCHAR__          ) # NumPy
@@ -162,6 +163,12 @@ if 4 == 4:
 if sizeof(wchar_t) == 4:
     AddTypeMap(TypeDict, "w" , __WCHAR__          ) # PEP-3118
     AddTypeMap(TypeDict, "1w", __WCHAR__          ) # PEP-3118
+# datetime
+AddTypeMap(TypeDict, "M" , __INT64_T__ ) # NumPy
+AddTypeMap(TypeDict, "M8", __INT64_T__ ) # NumPy
+# timedelta
+AddTypeMap(TypeDict, "m" , __INT64_T__ ) # NumPy
+AddTypeMap(TypeDict, "m8", __INT64_T__ ) # NumPy
 
 # -----------------------------------------------------------------------------
 
@@ -220,18 +227,18 @@ if sizeof(long double) == 16:
 cdef dict FTypeDict = { }
 _typedict_f = FTypeDict
 
-AddTypeMap(FTypeDict, "?"   , __LOGICAL__          )
+AddTypeMap(FTypeDict, "l"   , __LOGICAL__          )
 AddTypeMap(FTypeDict, "i"   , __INTEGER__          )
-AddTypeMap(FTypeDict, "s"   , __REAL__             )
 AddTypeMap(FTypeDict, "r"   , __REAL__             )
+AddTypeMap(FTypeDict, "s"   , __REAL__             )
 AddTypeMap(FTypeDict, "d"   , __DOUBLE_PRECISION__ )
 AddTypeMap(FTypeDict, "c"   , __COMPLEX__          )
 AddTypeMap(FTypeDict, "z"   , __DOUBLE_COMPLEX__   )
 
-AddTypeMap(FTypeDict, "?1"  , __LOGICAL1__  )
-AddTypeMap(FTypeDict, "?2"  , __LOGICAL2__  )
-AddTypeMap(FTypeDict, "?4"  , __LOGICAL4__  )
-AddTypeMap(FTypeDict, "?8"  , __LOGICAL8__  )
+AddTypeMap(FTypeDict, "l1"  , __LOGICAL1__  )
+AddTypeMap(FTypeDict, "l2"  , __LOGICAL2__  )
+AddTypeMap(FTypeDict, "l4"  , __LOGICAL4__  )
+AddTypeMap(FTypeDict, "l8"  , __LOGICAL8__  )
 
 AddTypeMap(FTypeDict, "i1"  , __INTEGER1__  )
 AddTypeMap(FTypeDict, "i2"  , __INTEGER2__  )

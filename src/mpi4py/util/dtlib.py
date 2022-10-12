@@ -15,8 +15,7 @@ except ImportError:  # pragma: no cover
 
 
 def _get_datatype(dtype):
-    # pylint: disable=protected-access
-    return MPI._typedict.get(dtype.char)
+    return MPI.Datatype.fromcode(dtype.char)
 
 
 def _get_typecode(datatype):
@@ -24,58 +23,9 @@ def _get_typecode(datatype):
     return MPI._typecode(datatype)
 
 
-def _get_alignment_ctypes(typecode):
-    # pylint: disable=protected-access
-    # pylint: disable=import-outside-toplevel
-    import ctypes as ct
-    if typecode in ('p', 'n', 'P', 'N'):
-        kind = 'i' if typecode in ('p', 'n') else 'u'
-        size = ct.sizeof(ct.c_void_p)
-        typecode = f'{kind}{size}'
-    if typecode in ('F', 'D', 'G'):
-        typecode = typecode.lower()
-    if len(typecode) > 1:
-        mapping = {
-            'b': (ct.c_bool,),
-            'i': (ct.c_int8, ct.c_int16, ct.c_int32, ct.c_int64),
-            'u': (ct.c_uint8, ct.c_uint16, ct.c_uint32, ct.c_uint64),
-            'f': (ct.c_float, ct.c_double, ct.c_longdouble),
-        }
-        kind, size = typecode[0], int(typecode[1:])
-        if kind == 'c':
-            kind, size = 'f', size // 2
-        for c_type in mapping[kind]:
-            if ct.sizeof(c_type) == size:
-                typecode = c_type._type_
-    c_type_base = ct._SimpleCData
-    c_type = type('c_type', (c_type_base,), dict(_type_=typecode))
-    fields = [('base', ct.c_char), ('c_type', c_type)]
-    struct = type('S', (ct.Structure,), dict(_fields_=fields))
-    return struct.c_type.offset
-
-
 def _get_alignment(datatype):
-    typecode = _get_typecode(datatype)
-    if typecode is None:
-        combiner = datatype.combiner
-        combiner_f90 = (
-            MPI.COMBINER_F90_INTEGER,
-            MPI.COMBINER_F90_REAL,
-            MPI.COMBINER_F90_COMPLEX,
-        )
-        if combiner in combiner_f90:
-            typesize = datatype.Get_size()
-            typekind = 'ifc'[combiner_f90.index(combiner)]
-            typecode = f'{typekind}{typesize}'
-    if typecode is None:
-        # pylint: disable=import-outside-toplevel
-        from struct import calcsize
-        alignment = datatype.Get_size()
-        return min(max(1, alignment), calcsize('P'))
-    try:
-        return _np_dtype(typecode).alignment
-    except NameError:  # pragma: no cover
-        return _get_alignment_ctypes(typecode)
+    # pylint: disable=protected-access
+    return MPI._typealign(datatype)
 
 
 def _is_aligned(datatype, offset=0):
@@ -115,7 +65,7 @@ def from_numpy_dtype(dtype):
     """Convert NumPy datatype to MPI datatype."""
     try:
         dtype = _np_dtype(dtype)
-    except NameError:  # pragma: no cover
+    except NameError:
         # pylint: disable=raise-missing-from
         raise RuntimeError("NumPy is not available")
 
@@ -162,8 +112,6 @@ def from_numpy_dtype(dtype):
 
     # elementary data type
     datatype = _get_datatype(dtype)
-    if datatype is None:
-        raise ValueError("cannot convert NumPy datatype to MPI")
     return datatype.Dup()
 
 
@@ -174,23 +122,29 @@ def to_numpy_dtype(datatype):
         dtype = to_numpy_dtype(datatype)
         return dtype if count == 1 else (dtype, count)
 
-    def np_dtype(spec):
+    def np_dtype(spec, **kwargs):
         try:
-            return _np_dtype(spec)
-        except NameError:  # pragma: no cover
-            return spec
+            return _np_dtype(spec, **kwargs)
+        except NameError:
+            return spec if not kwargs else (spec, kwargs)
 
     if datatype == MPI.DATATYPE_NULL:
         raise ValueError("cannot convert null MPI datatype to NumPy")
 
     combiner = datatype.combiner
 
-    # predefined datatype
+    # named elementary datatype
     if combiner == MPI.COMBINER_NAMED:
+        # elementary datatype
         typecode = _get_typecode(datatype)
         if typecode is not None:
             return np_dtype(typecode)
-        raise ValueError("cannot convert named MPI datatype to NumPy")
+        # pair datatype for MINLOC/MAXLOC reductions
+        names = ('SHORT', 'INT', 'LONG', 'FLOAT', 'DOUBLE', 'LONG_DOUBLE')
+        types = [getattr(MPI, f'{name}_INT') for name in names]
+        typename = names[types.index(datatype)]
+        typecode = _get_typecode(getattr(MPI, typename))
+        return np_dtype(f'{typecode},i', align=True)
 
     # user-defined datatype
     basetype, _, info = datatype.decode()
@@ -316,9 +270,8 @@ def to_numpy_dtype(datatype):
         )
         if combiner in combiner_f90:
             datatypes.pop()
-            typesize = datatype.Get_size()
-            typecode = 'ifc'[combiner_f90.index(combiner)]
-            return np_dtype(f'{typecode}{typesize}')
+            typecode = _get_typecode(datatype)
+            return np_dtype(typecode)
 
         raise ValueError("cannot convert MPI datatype to NumPy")
     finally:

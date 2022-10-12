@@ -23,6 +23,10 @@ Release 4.0.0 [2022-XX-XX]
 
   + `mpi4py.util.pkl5`: Add support for collective communication.
 
+  + Add methods `Datatype.fromcode()`, `Datatype.tocode()` and
+    attributes `Datatype.typestr`, `Datatype.typechar` to simplify
+    NumPy interoperability for simple cases.
+
 * Backward-incompatible changes:
 
   * Python 2 is no longer supported, Python 3.6+ is required, but
