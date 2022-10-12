@@ -1,13 +1,18 @@
 # Author:  Lisandro Dalcin
 # Contact: dalcinl@gmail.com
 """Typing support."""
+# pylint: disable=unnecessary-ellipsis
+# pylint: disable=too-few-public-methods
 
+import sys
 from typing import (
     Any,
     Union,
-    List,
-    Tuple,
+    Optional,
     Sequence,
+    List,
+    Dict,
+    Tuple,
 )
 from numbers import (
     Integral,
@@ -17,8 +22,19 @@ from .MPI import (
     BottomType,
     InPlaceType,
 )
+if sys.version_info >= (3, 8):
+    from typing import Protocol
+else:
+    try:
+        from typing_extensions import Protocol
+    except ImportError:
+        Protocol = object
+del sys
 
 __all__ = [
+    'SupportsBuffer',
+    'SupportsDLPack',
+    'SupportsCAI',
     'Buffer',
     'Bottom',
     'InPlace',
@@ -35,7 +51,58 @@ __all__ = [
 ]
 
 
-Buffer = Any
+_Stream = Union[int, Any]
+_PyCapsule = object
+_DeviceType = int
+_DeviceID = int
+
+
+class SupportsBuffer(Protocol):
+    """
+    Python buffer protocol.
+
+    .. seealso:: :ref:`python:bufferobjects`
+    """
+
+    def __buffer__(self, flags: int) -> memoryview:
+        """Create a buffer from a Python object."""
+        ...
+
+
+class SupportsDLPack(Protocol):
+    """
+    DLPack data interchange protocol.
+
+    .. seealso:: :ref:`dlpack:python-spec`
+    """
+
+    def __dlpack__(self, *, stream: Optional[_Stream] = None) -> _PyCapsule:
+        """Export data for consumption as a DLPack capsule."""
+        ...
+
+    def __dlpack_device__(self) -> Tuple[_DeviceType, _DeviceID]:
+        """Get device type and device ID in DLPack format."""
+        ...
+
+
+class SupportsCAI(Protocol):
+    """
+    CUDA Array Interface (CAI) protocol.
+
+    .. seealso:: :ref:`numba:cuda-array-interface`
+    """
+
+    @property
+    def __cuda_array_interface__(self) -> Dict[str, Any]:
+        """CAI protocol data."""
+        ...
+
+
+Buffer = Union[
+    SupportsBuffer,
+    SupportsDLPack,
+    SupportsCAI,
+]
 """
 Buffer-like object.
 """

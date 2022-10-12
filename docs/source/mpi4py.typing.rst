@@ -21,6 +21,9 @@ within the :mod:`~mpi4py.MPI` module.
 .. rubric:: Types Summary
 
 .. autosummary::
+   SupportsBuffer
+   SupportsDLPack
+   SupportsCAI
    Buffer
    Bottom
    InPlace
@@ -37,6 +40,9 @@ within the :mod:`~mpi4py.MPI` module.
 
 .. rubric:: Types Documentation
 
+.. autotype:: SupportsBuffer
+.. autotype:: SupportsDLPack
+.. autotype:: SupportsCAI
 .. autotype:: Buffer
 .. autotype:: Bottom
 .. autotype:: InPlace
