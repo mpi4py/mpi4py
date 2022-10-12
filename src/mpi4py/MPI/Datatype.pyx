@@ -413,7 +413,7 @@ cdef class Datatype:
         elif t is __CXX_DOUBLE_COMPLEX__     : p = MPI_CXX_DOUBLE_COMPLEX
         elif t is __CXX_LONG_DOUBLE_COMPLEX__: p = MPI_CXX_LONG_DOUBLE_COMPLEX
         elif t is __SHORT_INT__              : p = MPI_SHORT_INT
-        elif t is __TWOINT__                 : p = MPI_2INT
+        elif t is __INT_INT__                : p = MPI_2INT
         elif t is __LONG_INT__               : p = MPI_LONG_INT
         elif t is __FLOAT_INT__              : p = MPI_FLOAT_INT
         elif t is __DOUBLE_INT__             : p = MPI_DOUBLE_INT
@@ -1000,6 +1000,43 @@ cdef class Datatype:
         """
         return PyMPIDatatype_New(MPI_Type_f2c(arg))
 
+    # Python/NumPy interoperability
+    # -----------------------------
+
+    def tocode(self) -> str:
+        """
+        Get character code or type string from predefined MPI datatype
+        """
+        cdef const char *s = DatatypeCode(self.ob_mpi)
+        if s != NULL: return pystr(s)
+        raise ValueError(f"cannot map to character code or type string")
+
+    @classmethod
+    def fromcode(cls, code: str) -> Datatype:
+        """
+        Get predefined MPI datatype from character code or type string
+        """
+        try:
+            return <Datatype?> TypeDict[code]
+        except KeyError:
+            raise ValueError(f"cannot map code {code!r} to MPI datatype")
+
+    property typestr:
+        """type string"""
+        def __get__(self) -> str:
+            if self.ob_mpi == MPI_DATATYPE_NULL: return ""
+            cdef const char *s = DatatypeStr(self.ob_mpi)
+            if s != NULL: return pystr(s)
+            return f"V{mpiextent(self.ob_mpi)}"
+
+    property typechar:
+        """character code"""
+        def __get__(self) -> str:
+            if self.ob_mpi == MPI_DATATYPE_NULL: return ""
+            cdef const char *s = DatatypeChar(self.ob_mpi)
+            if s != NULL: return pystr(s)
+            return "V"
+
 
 # Address Functions
 # -----------------
@@ -1079,7 +1116,7 @@ cdef Datatype __CXX_LONG_DOUBLE_COMPLEX__ = def_Datatype(
                                                 MPI_CXX_LONG_DOUBLE_COMPLEX )
 
 cdef Datatype __SHORT_INT__        = def_Datatype( MPI_SHORT_INT       )
-cdef Datatype __TWOINT__           = def_Datatype( MPI_2INT            )
+cdef Datatype __INT_INT__          = def_Datatype( MPI_2INT            )
 cdef Datatype __LONG_INT__         = def_Datatype( MPI_LONG_INT        )
 cdef Datatype __FLOAT_INT__        = def_Datatype( MPI_FLOAT_INT       )
 cdef Datatype __DOUBLE_INT__       = def_Datatype( MPI_DOUBLE_INT      )
@@ -1162,7 +1199,7 @@ CXX_DOUBLE_COMPLEX      = __CXX_DOUBLE_COMPLEX__
 CXX_LONG_DOUBLE_COMPLEX = __CXX_LONG_DOUBLE_COMPLEX__
 # C Datatypes for reduction operations
 SHORT_INT        = __SHORT_INT__
-INT_INT = TWOINT = __TWOINT__
+INT_INT = TWOINT = __INT_INT__
 LONG_INT         = __LONG_INT__
 FLOAT_INT        = __FLOAT_INT__
 DOUBLE_INT       = __DOUBLE_INT__

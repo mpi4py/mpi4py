@@ -369,6 +369,52 @@ class TestDatatype(unittest.TestCase):
         for dtype in datatypes:
             dtype.Commit()
 
+    def testCodeCharStr(self):
+        f90datatypes = []
+        try:
+            try:
+                for r in (1, 2, 4):
+                    f90datatypes.append(MPI.Datatype.Create_f90_integer(r))
+                for p, r in ((6, 30), (15,  300)):
+                    f90datatypes.append(MPI.Datatype.Create_f90_real(p, r))
+                    f90datatypes.append(MPI.Datatype.Create_f90_complex(p, r))
+            except MPI.Exception:
+                if not unittest.is_mpi('msmpi'): raise
+            f90datatypes = [
+                dtype for dtype in f90datatypes
+                if dtype and dtype.size > 0
+            ]
+        except NotImplementedError:
+            f90datatypes = []
+            pass
+        for dtype in datatypes + f90datatypes:
+            with self.subTest(datatype=dtype.name or "f90"):
+                code = dtype.tocode()
+                self.assertIsNotNone(code)
+                mpitype = MPI.Datatype.fromcode(code)
+                self.assertEqual(dtype.typechar, mpitype.typechar)
+                self.assertEqual(dtype.typestr,  mpitype.typestr)
+                try:
+                    mpitypedup1 = mpitype.Dup()
+                    self.assertEqual(mpitypedup1.tocode(), mpitype.tocode())
+                    self.assertEqual(mpitypedup1.typestr,  mpitype.typestr)
+                    self.assertEqual(mpitypedup1.typechar, mpitype.typechar)
+                    mpitypedup2 = mpitypedup1.Dup()
+                    self.assertEqual(mpitypedup2.tocode(), mpitype.tocode())
+                    self.assertEqual(mpitypedup2.typestr,  mpitype.typestr)
+                    self.assertEqual(mpitypedup2.typechar, mpitype.typechar)
+                finally:
+                    mpitypedup1.Free()
+                    mpitypedup2.Free()
+        with self.assertRaises(ValueError):
+            MPI.Datatype.fromcode("abc@xyz")
+        with self.assertRaises(ValueError):
+            MPI.DATATYPE_NULL.tocode()
+        with self.assertRaises(ValueError):
+            MPI.INT_INT.tocode()
+        self.assertEqual(MPI.INT_INT.typechar, 'V')
+        self.assertEqual(MPI.INT_INT.typestr, f'V{MPI.INT.extent*2}')
+
 
 name, version = MPI.get_vendor()
 if name == 'LAM/MPI':
