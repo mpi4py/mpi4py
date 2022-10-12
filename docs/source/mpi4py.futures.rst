@@ -416,7 +416,7 @@ iterator yields scanlines in-order as the tasks complete. Finally, each
 scanline is dumped to disk.
 
 .. _`Julia set`: https://en.wikipedia.org/wiki/Julia_set
-.. _`PGM`: http://netpbm.sourceforge.net/doc/pgm.html
+.. _`PGM`: https://netpbm.sourceforge.net/doc/pgm.html
 
 .. code-block:: python
    :name: julia-py

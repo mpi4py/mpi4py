@@ -19,9 +19,9 @@ Tutorial
    most Python exercises use NumPy arrays and communication routines
    involving buffer-like objects.
 
-   .. _Rolf Rabenseifner: https://www.hlrs.de/people/rabenseifner/
+   .. _Rolf Rabenseifner: https://www.hlrs.de/people/rolf-rabenseifner
    .. _HLRS: https://www.hlrs.de/
-   .. _hlrs-mpi: https://www.hlrs.de/training/par-prog-ws/MPI-course-material
+   .. _hlrs-mpi: https://www.hlrs.de/training/self-study-materials/mpi-course-material
 
 .. tip::
 
@@ -31,7 +31,7 @@ Tutorial
    book covers parallel programming with MPI and OpenMP in C/C++ and
    Fortran, and MPI in Python using mpi4py.
 
-   .. _Victor Eijkhout: https://tacc.utexas.edu/~eijkhout/
+   .. _Victor Eijkhout: https://www.tacc.utexas.edu/about/directory/victor-eijkhout
    .. _TACC: https://www.tacc.utexas.edu/
    .. _ppse-pdf: https://tinyurl.com/vle335course
    .. _ppse-html: https://theartofhpc.com/pcse/index.html

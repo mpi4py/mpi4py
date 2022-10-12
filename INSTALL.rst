@@ -133,4 +133,4 @@ Python Package Index (PyPI) using ``pip``::
 Windows wheels require a separate, system-wide installation of the
 `Microsoft MPI <MSMPI_>`_ runtime package.
 
-.. _MSMPI: https://docs.microsoft.com/message-passing-interface
+.. _MSMPI: https://learn.microsoft.com/message-passing-interface/microsoft-mpi
