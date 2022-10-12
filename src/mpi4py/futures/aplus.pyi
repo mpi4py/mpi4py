@@ -1,5 +1,6 @@
 from ._core import Future
-from typing import Callable, Generic, Optional, TypeVar, Union
+from typing import Generic, Optional, TypeVar, Union
+from typing import Callable
 
 _T = TypeVar("_T")
 
