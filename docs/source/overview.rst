@@ -218,15 +218,18 @@ Support for GPU-aware MPI
 
 Several MPI implementations, including Open MPI and MVAPICH, support
 passing GPU pointers to MPI calls to avoid explicit data movement
-between the host and the device. On the Python side, GPU arrays have
-been implemented by many libraries that need GPU computation, such as
-CuPy, Numba, PyTorch, and PyArrow. In order to increase library
-interoperability, two kinds of zero-copy data exchange protocols are
-defined and agreed upon: `DLPack`_ and `CUDA Array Interface`_. For
-example, a CuPy array can be passed to a Numba CUDA-jit kernel.
+between host and device. On the Python side, support for handling GPU
+arrays have been implemented in many libraries related GPU computation
+such as `CuPy`_, `Numba`_, `PyTorch`_, and `PyArrow`_. To maximize
+interoperability across library boundaries, two kinds of zero-copy
+data exchange protocols have been defined and agreed upon: `DLPack
+<dlpack:python-spec>` and `CUDA Array Interface (CAI)
+<numba:cuda-array-interface>`.
 
-.. _DLPack: https://data-apis.org/array-api/latest/design_topics/data_interchange.html
-.. _CUDA Array Interface: https://numba.readthedocs.io/en/stable/cuda/cuda_array_interface.html
+.. _CuPy: https://cupy.dev/
+.. _Numba: https://numba.pydata.org/
+.. _PyTorch: https://pytorch.org/
+.. _PyArrow: https://arrow.apache.org/docs/python/
 
 *MPI for Python* provides an experimental support for GPU-aware MPI.
 This feature requires:

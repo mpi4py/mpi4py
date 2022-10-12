@@ -1,9 +1,13 @@
+from __future__ import annotations
+import sys
 from typing import (
     Any,
     Union,
-    List,
-    Tuple,
+    Optional,
     Sequence,
+    List,
+    Dict,
+    Tuple,
 )
 from numbers import (
     Integral,
@@ -13,8 +17,16 @@ from .MPI import (
     BottomType,
     InPlaceType,
 )
+if sys.version_info >= (3, 8):
+    from typing import Protocol
+else:
+    from typing_extensions import Protocol
+del sys
 
 __all__: List[str] = [
+    'SupportsBuffer',
+    'SupportsDLPack',
+    'SupportsCAI',
     'Buffer',
     'Bottom',
     'InPlace',
@@ -30,7 +42,27 @@ __all__: List[str] = [
     'TargetSpec',
 ]
 
-Buffer = Any
+_Stream = Union[int, Any]
+_PyCapsule = object
+_DeviceType = int
+_DeviceID = int
+
+class SupportsBuffer(Protocol):
+    def __buffer__(self, __flags: int) -> memoryview: ...
+
+class SupportsDLPack(Protocol):
+    def __dlpack__(self, *, stream: Optional[_Stream] = None) -> _PyCapsule: ...
+    def __dlpack_device__(self) -> Tuple[_DeviceType, _DeviceID]: ...
+
+class SupportsCAI(Protocol):
+    @property
+    def __cuda_array_interface__(self) -> Dict[str, Any]: ...
+
+Buffer = Union[
+    SupportsBuffer,
+    SupportsDLPack,
+    SupportsCAI,
+]
 
 Bottom = Union[BottomType, None]
 

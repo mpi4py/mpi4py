@@ -91,6 +91,8 @@ autosummary_context = {
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3/', None),
     'numpy': ('https://numpy.org/doc/stable/', None),
+    'dlpack': ('https://dmlc.github.io/dlpack/latest/', None),
+    'numba': ('https://numba.readthedocs.io/en/stable/', None),
 }
 
 napoleon_preprocess_types = True
