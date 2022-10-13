@@ -212,12 +212,12 @@ class FunctionProto(NodeFuncProto):
 class FunctionC2F(NodeFuncProto):
     REGEX = Re.FUNCTION_C2F
     MISSING = ' '.join(['#define %(cname)s(%(cargsnamed)s)',
-                       '((%(crett)s)0)'])
+                       '((void)%(cargsnamed)s,(%(crett)s)0)'])
 
 class FunctionF2C(NodeFuncProto):
     REGEX = Re.FUNCTION_F2C
     MISSING = ' '.join(['#define %(cname)s(%(cargsnamed)s)',
-                       '%(cretv)s'])
+                       '((void)%(cargsnamed)s,%(cretv)s)'])
     def __init__(self, *a, **k):
         NodeFuncProto.__init__(self, *a, **k)
         self.cretv =  self.crett.upper() + '_NULL'
