@@ -163,7 +163,7 @@ cdef extern from *:
    template<typename T> struct pympi_alignof_struct {char c; T member;};
    #define pympi_alignof(type) offsetof(pympi_alignof_struct<type>, member)
    #else
-   #define pympi_alignof(type) offsetof(struct {char c; type member;}, member)
+   #define pympi_alignof(type) offsetof(struct _{char c; type member;}, member)
    #endif
    """
    const size_t alignof_bool       "pympi_alignof(char)"
