@@ -678,12 +678,13 @@ class config(cmd_config.config):
         self, macro, headers=None, include_dirs=None,
     ):
         log.info("checking for macro '%s' ..." % macro)
-        body = "\n".join([
-            "#ifndef %s",
-            "#error macro '%s' not defined",
+        body = [
+            "#ifndef %s" % macro,
+            "#error macro '%s' not defined" % macro,
             "#endif",
-        ]) % (macro, macro)
-        body += "int main(int n, char**v) { (void)n; (void)v; return 0; }"
+            "int main(int n, char**v) { (void)n; (void)v; return 0; }"
+        ]
+        body = "\n".join(body) + "\n"
         ok = self.try_compile(body, headers, include_dirs)
         return ok
 
