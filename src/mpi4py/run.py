@@ -68,7 +68,6 @@ def set_abort_status(status):
     if mpi is not None and status:
         # pylint: disable=protected-access
         mpi._set_abort_status(status)
-    return sys.exc_info()
 
 
 def main():
