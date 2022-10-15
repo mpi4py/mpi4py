@@ -137,7 +137,6 @@ if name == 'MPICH':
     if version < (4, 0, 0):
         BaseTestPackExternal.skipdtype += 'ldgFDG'
 elif name == 'Open MPI':
-    BaseTestPackExternal.skipdtype += 'gG' # XXX TODO
     if version < (5, 0, 0):
         BaseTestPackExternal.skipdtype += 'gG'
 elif name == 'Intel MPI':
