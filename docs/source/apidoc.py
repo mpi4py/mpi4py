@@ -5,28 +5,46 @@ from textwrap import dedent
 from textwrap import indent
 
 
+def is_cyfunction(obj):
+    return type(obj).__name__ == 'cython_function_or_method'
+
+
 def is_function(obj):
-    return inspect.isbuiltin(obj) or type(obj) is type(ord)
+    return (
+        inspect.isbuiltin(obj) or
+        is_cyfunction(obj) or
+        type(obj) is type(ord)
+    )
 
 
 def is_method(obj):
-    return inspect.ismethoddescriptor(obj) or type(obj) in (
-        type(str.index),
-        type(str.__add__),
-        type(str.__new__),
+    return (
+        inspect.ismethoddescriptor(obj) or
+        inspect.ismethod(obj) or
+        is_cyfunction(obj) or
+        type(obj) in (
+            type(str.index),
+            type(str.__add__),
+            type(str.__new__),
+        )
     )
 
 
 def is_classmethod(obj):
-    return inspect.isbuiltin(obj) or type(obj).__name__ in (
-        'classmethod',
-        'classmethod_descriptor',
+    return (
+        inspect.isbuiltin(obj) or
+        type(obj).__name__ in (
+            'classmethod',
+            'classmethod_descriptor',
+        )
     )
 
 
 def is_staticmethod(obj):
-    return type(obj).__name__ in (
-        'staticmethod',
+    return (
+        type(obj).__name__ in (
+            'staticmethod',
+        )
     )
 
 

@@ -61,7 +61,10 @@ cdef extern from "Python.h":
 
 #------------------------------------------------------------------------------
 
-cdef inline int dlpack_is_contig(const DLTensor *dltensor, char order) nogil:
+cdef inline int dlpack_is_contig(
+    const DLTensor *dltensor,
+    char order,
+) noexcept nogil:
     cdef int i, ndim = dltensor.ndim
     cdef int64_t *shape = dltensor.shape
     cdef int64_t *strides = dltensor.strides
@@ -105,10 +108,14 @@ cdef inline int dlpack_check_contig(const DLTensor *dltensor) except -1:
     if dlpack_is_contig(dltensor, c'F'): return 0
     raise BufferError("dlpack: buffer is not contiguous")
 
-cdef inline void *dlpack_get_data(const DLTensor *dltensor) nogil:
+cdef inline void *dlpack_get_data(
+    const DLTensor *dltensor,
+) noexcept nogil:
     return <char*> dltensor.data + dltensor.byte_offset
 
-cdef inline Py_ssize_t dlpack_get_size(const DLTensor *dltensor) nogil:
+cdef inline Py_ssize_t dlpack_get_size(
+    const DLTensor *dltensor,
+) noexcept nogil:
     cdef int i, ndim = dltensor.ndim
     cdef int64_t *shape = dltensor.shape
     cdef Py_ssize_t bits = dltensor.dtype.bits
@@ -119,7 +126,9 @@ cdef inline Py_ssize_t dlpack_get_size(const DLTensor *dltensor) nogil:
     size *= (bits * lanes + 7) // 8
     return size
 
-cdef inline char *dlpack_get_format(const DLTensor *dltensor) nogil:
+cdef inline char *dlpack_get_format(
+    const DLTensor *dltensor,
+) noexcept nogil:
     cdef unsigned int code = dltensor.dtype.code
     cdef unsigned int bits = dltensor.dtype.bits
     if dltensor.dtype.lanes != 1:
@@ -152,7 +161,9 @@ cdef inline char *dlpack_get_format(const DLTensor *dltensor) nogil:
         if bits ==  8*2*sizeof(long double): return b"Zg"
     return BYTE_FMT
 
-cdef inline Py_ssize_t dlpack_get_itemsize(const DLTensor *dltensor) nogil:
+cdef inline Py_ssize_t dlpack_get_itemsize(
+    const DLTensor *dltensor,
+) noexcept nogil:
     cdef unsigned int code = dltensor.dtype.code
     cdef unsigned int bits = dltensor.dtype.bits
     if dltensor.dtype.lanes != 1:

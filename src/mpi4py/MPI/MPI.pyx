@@ -266,8 +266,8 @@ MAX_STRINGTAG_LEN  = MPI_MAX_STRINGTAG_LEN
 
 # --------------------------------------------------------------------
 
-cdef extern from *:
-    int PyMPI_Get_vendor(const char**,int*,int*,int*) nogil
+cdef extern from * nogil:
+    int PyMPI_Get_vendor(const char**,int*,int*,int*)
 
 def get_vendor() -> Tuple[str, Tuple[int, int, int]]:
     """

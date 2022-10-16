@@ -3,10 +3,12 @@
 # CUDA array interface for interoperating Python CUDA GPU libraries
 # See https://numba.pydata.org/numba-doc/latest/cuda/cuda_array_interface.html
 
-cdef inline int cuda_is_contig(tuple shape,
-                               tuple strides,
-                               Py_ssize_t itemsize,
-                               char order) except -1:
+cdef inline int cuda_is_contig(
+    tuple shape,
+    tuple strides,
+    Py_ssize_t itemsize,
+    char order,
+) except -1:
     cdef Py_ssize_t ndim = len(shape)
     cdef Py_ssize_t start, step, index, dim, size = itemsize
     if order == c'F':
@@ -23,7 +25,10 @@ cdef inline int cuda_is_contig(tuple shape,
         size *= dim
     return 1
 
-cdef inline char* cuda_get_format(char typekind, Py_ssize_t itemsize) nogil:
+cdef inline char* cuda_get_format(
+    char typekind,
+    Py_ssize_t itemsize,
+) noexcept nogil:
    if typekind == c'b':
        if itemsize == sizeof(char): return b"?"
    if typekind == c'i':

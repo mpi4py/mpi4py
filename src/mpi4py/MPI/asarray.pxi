@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 
-cdef extern from *:
+cdef extern from * nogil:
     int INT_MAX
 
 ctypedef fused count_t:

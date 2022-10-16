@@ -137,7 +137,7 @@ cdef int datarep_read_fn(
     void *filebuf,
     MPI_Offset position,
     void *extra_state
-    ) nogil:
+    ) noexcept nogil:
     if extra_state == NULL:
         return MPI_ERR_INTERN
     if not Py_IsInitialized():
@@ -153,7 +153,7 @@ cdef int datarep_write_fn(
     void *filebuf,
     MPI_Offset position,
     void *extra_state
-    ) nogil:
+    ) noexcept nogil:
     if extra_state == NULL:
         return MPI_ERR_INTERN
     if not Py_IsInitialized():
@@ -166,7 +166,7 @@ cdef int datarep_extent_fn(
     MPI_Datatype datatype,
     MPI_Aint *file_extent,
     void *extra_state
-    ) nogil:
+    ) noexcept nogil:
     if extra_state == NULL:
         return MPI_ERR_INTERN
     if not Py_IsInitialized():

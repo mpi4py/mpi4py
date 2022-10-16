@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 
-cdef extern from *:
+cdef extern from * nogil:
     """
     #include "lib-mpi/config.h"
     #include "lib-mpi/missing.h"
@@ -25,7 +25,7 @@ cdef extern from "Python.h":
     """
     const char *Py_GETENV(const char[]) nogil
 
-cdef extern from *:
+cdef extern from * nogil:
     """
     #if defined(PYPY_VERSION)
     #  define PyMPI_RUNTIME_PYPY 1
@@ -46,7 +46,7 @@ cdef extern from "Python.h":
 
 # -----------------------------------------------------------------------------
 
-cdef extern from *:
+cdef extern from * nogil:
     """
     #if !defined(PyMPI_USE_MATCHED_RECV)
     #  if defined(PyMPI_HAVE_MPI_Mprobe) && defined(PyMPI_HAVE_MPI_Mrecv)
@@ -193,7 +193,7 @@ cdef int getOptions(Options* opts) except -1:
 
 # -----------------------------------------------------------------------------
 
-cdef extern from *:
+cdef extern from * nogil:
     """
     #if defined(MPICH)
     #  define PyMPI_HAVE_MPICH   1
@@ -209,7 +209,7 @@ cdef extern from *:
     enum: MPICH   "PyMPI_HAVE_MPICH"
     enum: OPENMPI "PyMPI_HAVE_OPENMPI"
 
-cdef int check_mpiexec() nogil except -1:
+cdef int check_mpiexec() except -1 nogil:
     cdef int ierr, size = 0
     ierr = MPI_Comm_size(MPI_COMM_WORLD, &size)
     if ierr != MPI_SUCCESS: return 0
@@ -262,10 +262,10 @@ cdef int check_mpiexec() nogil except -1:
 # -----------------------------------------------------------------------------
 
 cdef extern from "Python.h":
-    int Py_AtExit(void (*)())
+    int Py_AtExit(void (*)() noexcept nogil)
 
-cdef extern from *:
-    int PyMPI_Commctx_finalize() nogil
+cdef extern from * nogil:
+    int PyMPI_Commctx_finalize()
 
 cdef int bootstrap() except -1:
     # Get options from 'mpi4py.rc' module
@@ -299,7 +299,7 @@ cdef int bootstrap() except -1:
             f"MPI_Init() failed [error code: {ierr}]")
     return 0
 
-cdef inline int mpi_active() nogil:
+cdef inline int mpi_active() noexcept nogil:
     cdef int ierr = MPI_SUCCESS
     # MPI initialized ?
     cdef int initialized = 0
@@ -312,20 +312,20 @@ cdef inline int mpi_active() nogil:
     # MPI should be active ...
     return 1
 
-cdef int initialize() nogil except -1:
+cdef int initialize() except -1 nogil:
     if not mpi_active(): return 0
     check_mpiexec()
     comm_set_eh(MPI_COMM_SELF)
     comm_set_eh(MPI_COMM_WORLD)
     return 0
 
-cdef void finalize() nogil:
+cdef void finalize() noexcept nogil:
     if not mpi_active(): return
     <void>PyMPI_Commctx_finalize()
 
 cdef int abort_status = 0
 
-cdef void atexit() nogil:
+cdef void atexit() noexcept nogil:
     if not mpi_active(): return
     if abort_status:
         <void>MPI_Abort(MPI_COMM_WORLD, abort_status)
@@ -345,7 +345,7 @@ def _set_abort_status(object status: Any) -> None:
 
 # Vile hack for raising a exception and not contaminate the traceback
 
-cdef extern from *:
+cdef extern from * nogil:
     enum: PyMPI_ERR_UNAVAILABLE
 
 cdef object MPIException = <object>PyExc_RuntimeError
@@ -360,7 +360,7 @@ cdef int PyMPI_Raise(int ierr) except -1 with gil:
         PyErr_SetObject(<object>PyExc_RuntimeError, <long>ierr)
     return 0
 
-cdef inline int CHKERR(int ierr) nogil except -1:
+cdef inline int CHKERR(int ierr) except -1 nogil:
     if ierr == MPI_SUCCESS: return 0
     PyMPI_Raise(ierr)
     return -1
@@ -377,11 +377,11 @@ cdef inline void print_traceback():
 # PyPy: Py_IsInitialized() cannot be called without the GIL
 
 cdef extern from "Python.h":
-    int _Py_IsInitialized"Py_IsInitialized"() nogil
+    int _Py_IsInitialized"Py_IsInitialized"() noexcept nogil
 
 cdef object _pypy_sentinel = None
 
-cdef inline int Py_IsInitialized() nogil:
+cdef inline int Py_IsInitialized() noexcept nogil:
     if PYPY and (<void*>_pypy_sentinel) == NULL: return 0
     return _Py_IsInitialized()
 

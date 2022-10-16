@@ -16,7 +16,7 @@ def _typealign(Datatype datatype: Datatype) -> Optional[int]:
 
 # -----------------------------------------------------------------------------
 
-cdef inline const char* typechr(const char kind[], size_t size) nogil:
+cdef inline const char* typechr(const char kind[], size_t size) noexcept nogil:
     cdef char k = kind[0]
     if k == c'b': # boolean
         if size == 1: return "?"
@@ -50,7 +50,7 @@ cdef inline const char* typechr(const char kind[], size_t size) nogil:
         return NULL
     return NULL
 
-cdef inline const char* typestr(const char kind[], size_t size) nogil:
+cdef inline const char* typestr(const char kind[], size_t size) noexcept nogil:
     cdef char k = kind[0]
     if k == c'b': # boolean
         if size ==  1: return "b1"
@@ -86,7 +86,7 @@ cdef inline const char* typestr(const char kind[], size_t size) nogil:
         return NULL
     return NULL
 
-cdef inline const char* typechr_to_typestr(const char tchr[]) nogil:
+cdef inline const char* typechr_to_typestr(const char tchr[]) noexcept nogil:
     if tchr == NULL: return NULL
     cdef char c = tchr[0]
     # boolean
@@ -123,43 +123,50 @@ cdef inline const char* typechr_to_typestr(const char tchr[]) nogil:
     if c == c'w': return "U1" # PEP 3118
     return NULL
 
-cdef inline const char* mpiaddrchr(size_t size) nogil:
+cdef inline const char* mpiaddrchr(size_t size) noexcept nogil:
     if size == sizeof(MPI_Aint)  : return "p"
     if size == sizeof(long long) : return "q"
     if size == sizeof(long)      : return "l"
     if size == sizeof(int)       : return "i"
     return NULL
 
-cdef inline int mpicombiner(MPI_Datatype datatype) nogil:
+cdef inline int mpicombiner(MPI_Datatype datatype) noexcept nogil:
     if not mpi_active(): return MPI_COMBINER_NAMED
     cdef int combiner = MPI_COMBINER_NAMED
     cdef MPI_Count ni = 0, na = 0, nc = 0, nd = 0
     <void> MPI_Type_get_envelope_c(datatype, &ni, &na, &nc, &nd, &combiner)
     return combiner
 
-cdef inline MPI_Count mpiextent(MPI_Datatype datatype) nogil:
+cdef inline MPI_Count mpiextent(MPI_Datatype datatype) noexcept nogil:
     if not mpi_active(): return 0
     cdef MPI_Count lb = 0, extent = 0
     <void> MPI_Type_get_extent_c(datatype, &lb, &extent)
     return extent
 
-cdef inline const char* mpifortchr(const char kind[], MPI_Datatype dtp) nogil:
-    return typechr(kind, <size_t> mpiextent(dtp))
+cdef inline const char* mpifortchr(
+    const char kind[],
+    MPI_Datatype datatype,
+) noexcept nogil:
+    return typechr(kind, <size_t> mpiextent(datatype))
 
-cdef inline const char* mpifortstr(const char kind[], MPI_Datatype dtp) nogil:
-    return typestr(kind, <size_t> mpiextent(dtp))
-
-cdef inline const char* typeDUP(
-    const char *(*convert)(MPI_Datatype) nogil,
+cdef inline const char* mpifortstr(
+    const char kind[],
     MPI_Datatype datatype,
 ) nogil:
+    return typestr(kind, <size_t> mpiextent(datatype))
+
+cdef inline const char* typeDUP(
+    const char *(*convert)(MPI_Datatype) noexcept nogil,
+    MPI_Datatype datatype,
+) noexcept nogil:
     cdef MPI_Datatype basetype = MPI_DATATYPE_NULL
-    <void> MPI_Type_get_contents_c(datatype, 0, 0, 0, 1, NULL, NULL, NULL, &basetype)
+    <void> MPI_Type_get_contents_c(
+        datatype, 0, 0, 0, 1, NULL, NULL, NULL, &basetype)
     cdef const char *result = convert(basetype)
     if not predefined(basetype): <void> MPI_Type_free(&basetype)
     return result
 
-cdef extern from *:
+cdef extern from * nogil:
    """
    #include <stddef.h>
    #if defined(__cplusplus)
@@ -181,7 +188,7 @@ cdef extern from *:
    const size_t alignof_wchar      "pympi_alignof(wchar_t)"
    const size_t alignof_voidp      "pympi_alignof(void*)"
 
-cdef inline size_t typealign(const char tchr[]) nogil:
+cdef inline size_t typealign(const char tchr[]) noexcept nogil:
     if tchr == NULL: return 0
     cdef char c = tchr[0]
     # bool
@@ -217,14 +224,17 @@ cdef inline size_t typealign(const char tchr[]) nogil:
     if c == c'P': return alignof_voidp
     return 0
 
-cdef inline size_t typealignpair(const char tc_a[], const char tc_b[]) nogil:
-     cdef size_t align_a = typealign(tc_a)
-     cdef size_t align_b = typealign(tc_b)
-     return align_a if align_a > align_b else align_b
+cdef inline size_t typealignpair(
+    const char tc_a[],
+    const char tc_b[],
+) noexcept nogil:
+    cdef size_t align_a = typealign(tc_a)
+    cdef size_t align_b = typealign(tc_b)
+    return align_a if align_a > align_b else align_b
 
 # -----------------------------------------------------------------------------
 
-cdef inline const char* DatatypeChar(MPI_Datatype datatype) nogil:
+cdef inline const char* DatatypeChar(MPI_Datatype datatype) noexcept nogil:
     if datatype == MPI_DATATYPE_NULL: return NULL
     # MPI
     if datatype == MPI_PACKED : return "B"
@@ -311,7 +321,7 @@ cdef inline const char* DatatypeChar(MPI_Datatype datatype) nogil:
 
 # -----------------------------------------------------------------------------
 
-cdef inline const char* DatatypeStr(MPI_Datatype datatype) nogil:
+cdef inline const char* DatatypeStr(MPI_Datatype datatype) noexcept nogil:
     if datatype == MPI_DATATYPE_NULL : return NULL
     # C99
     if datatype == MPI_C_BOOL   : return typestr('b', 1)
@@ -352,7 +362,7 @@ cdef inline const char* DatatypeStr(MPI_Datatype datatype) nogil:
 
 # -----------------------------------------------------------------------------
 
-cdef inline const char* DatatypeCode(MPI_Datatype datatype) nogil:
+cdef inline const char* DatatypeCode(MPI_Datatype datatype) noexcept nogil:
     if datatype == MPI_DATATYPE_NULL : return NULL
     # C99
     if datatype == MPI_C_BOOL   : return typestr('b', 1)
@@ -393,7 +403,7 @@ cdef inline const char* DatatypeCode(MPI_Datatype datatype) nogil:
 
 # -----------------------------------------------------------------------------
 
-cdef inline size_t DatatypeAlign(MPI_Datatype datatype) nogil:
+cdef inline size_t DatatypeAlign(MPI_Datatype datatype) noexcept nogil:
     cdef size_t align = typealign(DatatypeChar(datatype))
     if align > 0: return align
     if datatype == MPI_SHORT_INT       : return typealignpair("h", "i")

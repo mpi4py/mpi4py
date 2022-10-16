@@ -46,7 +46,7 @@ cdef extern from * nogil:
     """
     int PyMPI_strcasecmp(const char[],const char[])
 
-cdef int cstr2bool(const char s[]) nogil:
+cdef int cstr2bool(const char s[]) noexcept nogil:
     cdef const char **T = [b"true",  b"yes", b"on",  b"y", b"1"], *t = NULL
     cdef const char **F = [b"false", b"no",  b"off", b"n", b"0"], *f = NULL
     if s == NULL:

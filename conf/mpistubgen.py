@@ -1,15 +1,21 @@
 from textwrap import dedent
 import inspect
 
+def is_cyfunction(obj):
+    return type(obj).__name__ == 'cython_function_or_method'
+
 def is_function(obj):
     return (
         inspect.isbuiltin(obj) or
+        is_cyfunction(obj) or
         type(obj) is type(ord)
     )
 
 def is_method(obj):
     return (
         inspect.ismethoddescriptor(obj) or
+        inspect.ismethod(obj) or
+        is_cyfunction(obj) or
         type(obj) in (
             type(str.index),
             type(str.__add__),
