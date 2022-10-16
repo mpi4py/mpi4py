@@ -13,7 +13,7 @@ ctypedef fused handle_t:
     MPI_Win
     MPI_File
 
-cdef inline int named_Datatype(MPI_Datatype arg) nogil:
+cdef inline int named_Datatype(MPI_Datatype arg) noexcept nogil:
     if arg == MPI_DATATYPE_NULL           : return 1
     if arg == MPI_PACKED                  : return 1
     if arg == MPI_BYTE                    : return 1
@@ -84,7 +84,7 @@ cdef inline int named_Datatype(MPI_Datatype arg) nogil:
     if arg == MPI_COMPLEX32               : return 1
     return 0
 
-cdef inline int predef_Datatype(MPI_Datatype arg) nogil:
+cdef inline int predef_Datatype(MPI_Datatype arg) noexcept nogil:
     if named_Datatype(arg): return 1
     cdef MPI_Count ni = 0, na = 0, nc = 0, nd = 0
     cdef int combiner = MPI_UNDEFINED
@@ -98,16 +98,16 @@ cdef inline int predef_Datatype(MPI_Datatype arg) nogil:
         combiner == MPI_COMBINER_F90_COMPLEX
     )
 
-cdef inline int predef_Request(MPI_Request arg) nogil:
+cdef inline int predef_Request(MPI_Request arg) noexcept nogil:
     if arg == MPI_REQUEST_NULL : return 1
     return 0
 
-cdef inline int predef_Message(MPI_Message arg) nogil:
+cdef inline int predef_Message(MPI_Message arg) noexcept nogil:
     if arg == MPI_MESSAGE_NULL    : return 1
     if arg == MPI_MESSAGE_NO_PROC : return 1
     return 0
 
-cdef inline int predef_Op(MPI_Op arg) nogil:
+cdef inline int predef_Op(MPI_Op arg) noexcept nogil:
     if arg == MPI_OP_NULL : return 1
     if arg == MPI_MAX     : return 1
     if arg == MPI_MIN     : return 1
@@ -125,42 +125,42 @@ cdef inline int predef_Op(MPI_Op arg) nogil:
     if arg == MPI_NO_OP   : return 1
     return 0
 
-cdef inline int predef_Group(MPI_Group arg) nogil:
+cdef inline int predef_Group(MPI_Group arg) noexcept nogil:
     if arg == MPI_GROUP_NULL  : return 1
     if arg == MPI_GROUP_EMPTY : return 1
     return 0
 
-cdef inline int predef_Info(MPI_Info arg) nogil:
+cdef inline int predef_Info(MPI_Info arg) noexcept nogil:
     if arg == MPI_INFO_NULL : return 1
     if arg == MPI_INFO_ENV  : return 1
     return 0
 
-cdef inline int predef_Errhandler(MPI_Errhandler arg) nogil:
+cdef inline int predef_Errhandler(MPI_Errhandler arg) noexcept nogil:
     if arg == MPI_ERRHANDLER_NULL  : return 1
     if arg == MPI_ERRORS_RETURN    : return 1
     if arg == MPI_ERRORS_ABORT     : return 1
     if arg == MPI_ERRORS_ARE_FATAL : return 1
     return 0
 
-cdef inline int predef_Session(MPI_Session arg) nogil:
+cdef inline int predef_Session(MPI_Session arg) noexcept nogil:
     if arg == MPI_SESSION_NULL : return 1
     return 0
 
-cdef inline int predef_Comm(MPI_Comm arg) nogil:
+cdef inline int predef_Comm(MPI_Comm arg) noexcept nogil:
     if arg == MPI_COMM_NULL  : return 1
     if arg == MPI_COMM_SELF  : return 1
     if arg == MPI_COMM_WORLD : return 1
     return 0
 
-cdef inline int predef_Win(MPI_Win arg) nogil:
+cdef inline int predef_Win(MPI_Win arg) noexcept nogil:
     if arg == MPI_WIN_NULL : return 1
     return 0
 
-cdef inline int predef_File(MPI_File arg) nogil:
+cdef inline int predef_File(MPI_File arg) noexcept nogil:
     if arg == MPI_FILE_NULL : return 1
     return 0
 
-cdef inline int predefined(handle_t arg) nogil:
+cdef inline int predefined(handle_t arg) noexcept nogil:
     cdef int result = 0
     if handle_t is MPI_Datatype   : result = predef_Datatype(arg)
     if handle_t is MPI_Request    : result = predef_Request(arg)
@@ -190,7 +190,7 @@ ctypedef fused PyMPIClass:
     Win
     File
 
-cdef extern from *:
+cdef extern from * nogil:
     """
     #define PyMPI_FLAGS_READY   (1U<<0)
     #define PyMPI_FLAGS_CONST   (1U<<1)
