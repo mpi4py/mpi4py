@@ -258,13 +258,10 @@ class BaseTestP2PObj(object):
             flag = MPI.Request.Testall(reqs)
             if not flag:
                 index, flag = MPI.Request.Testany(reqs)
+                if not flag:
+                    self.assertEqual(index, MPI.UNDEFINED)
                 indices = MPI.Request.Testsome(reqs)
-                if indices is None:
-                    count = MPI.UNDEFINED
-                    indices = []
-                else:
-                    count = len(indices)
-                self.assertIn(count, [0, MPI.UNDEFINED])
+                self.assertIsInstance(indices, list)
             for k in range(3):
                 rmess = self.COMM.recv(None, rank, 0)
                 self.assertEqual(rmess, smess)
@@ -279,9 +276,8 @@ class BaseTestP2PObj(object):
                     indices = []
                 else:
                     count = len(indices)
+                    indices = sorted(indices)
                 self.assertGreaterEqual(count, 2)
-                indices = list(indices)
-                indices.sort()
                 self.assertEqual(indices[:2], [1, 2])
             for k in range(3):
                 rmess = self.COMM.recv(None, rank, 0)
@@ -298,7 +294,6 @@ class BaseTestP2PObj(object):
                 self.assertEqual(rmess, smess)
             index = MPI.Request.Waitany(reqs)
             self.assertEqual(index, 0)
-            self.assertTrue(flag)
             indices1 = MPI.Request.Waitsome(reqs)
             if indices1 is None:
                 count1 = MPI.UNDEFINED
@@ -321,6 +316,39 @@ class BaseTestP2PObj(object):
             indices.sort()
             self.assertEqual(indices, list(range(6)))
             MPI.Request.Waitall(reqs)
+
+    def testManyISSendAndRecv(self):
+        size = self.COMM.Get_size()
+        rank = self.COMM.Get_rank()
+        for smess in messages:
+            reqs = []
+            for k in range(6):
+                r = self.COMM.issend(smess, rank, 0)
+                reqs.append(r)
+            flag = MPI.Request.Testall(reqs)
+            self.assertFalse(flag)
+            for k in range(3):
+                rmess = self.COMM.recv(None, rank, 0)
+                self.assertEqual(rmess, smess)
+            flag = MPI.Request.Testall(reqs)
+            self.assertFalse(flag)
+            index, flag = MPI.Request.Testany(reqs)
+            if flag:
+                self.assertEqual(index, 0)
+            indices = MPI.Request.Testsome(reqs)
+            if indices is not None:
+                target = [0, 1, 2]
+                if flag:
+                    del target[0]
+                for index in indices:
+                    self.assertIn(index, target)
+            for k in range(3):
+                flag = MPI.Request.Testall(reqs)
+                self.assertFalse(flag)
+                rmess = self.COMM.recv(None, rank, 0)
+                self.assertEqual(rmess, smess)
+            flag = MPI.Request.Testall(reqs)
+            self.assertTrue(flag)
 
     def testSSendAndRecv(self):
         size = self.COMM.Get_size()
