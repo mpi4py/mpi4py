@@ -626,9 +626,6 @@ class TestCCOBufInplaceSelf(BaseTestCCOBufInplace, unittest.TestCase):
 
 class TestCCOBufInplaceWorld(BaseTestCCOBufInplace, unittest.TestCase):
     COMM = MPI.COMM_WORLD
-    @unittest.skipMPI('IntelMPI', MPI.COMM_WORLD.Get_size() > 1)
-    def testReduceScatter(self):
-        super(TestCCOBufInplaceWorld, self).testReduceScatter()
 
 class TestCCOBufSelfDup(TestCCOBufSelf):
     def setUp(self):
