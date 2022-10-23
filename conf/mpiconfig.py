@@ -154,9 +154,12 @@ class Config(object):
         arch = platform.architecture()[0][:2]
         archdir = {'32':'ia32', '64':'intel64'}[arch]
         mpi_dir = os.path.join(I_MPI_ROOT, archdir)
-        if not os.path.isdir(mpi_dir): return
+        if not os.path.isdir(mpi_dir): mpi_dir = I_MPI_ROOT
         IMPI_INC = os.path.join(mpi_dir, 'include')
-        IMPI_LIB = os.path.join(mpi_dir, 'lib', 'release')
+        for libdir in (('lib', 'release'), ('lib',)):
+            IMPI_LIB = os.path.join(mpi_dir, *libdir)
+            library = os.path.join(IMPI_LIB, 'impi.lib')
+            if os.path.exists(library): break
         if not os.path.isdir(IMPI_INC): return
         if not os.path.isdir(IMPI_LIB): return
         self.library_info.update(

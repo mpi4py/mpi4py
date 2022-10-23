@@ -174,10 +174,6 @@ def customize_compiler(compiler, lang=None,
             ):
                 getattr(compiler, attr).insert(1, '-DMS_WIN64')
                 getattr(compiler, attr).insert(1, '-m64')
-    if compiler.compiler_type == 'msvc':
-        if not compiler.initialized: compiler.initialize()
-        compiler.ldflags_shared.append('/MANIFEST')
-        compiler.ldflags_shared_debug.append('/MANIFEST')
 
 # -----------------------------------------------------------------------------
 
