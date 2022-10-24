@@ -1,6 +1,7 @@
 from mpi4py import MPI
 import mpiunittest as unittest
 import arrayimpl
+import os
 
 
 def allclose(a, b, rtol=1.e-5, atol=1.e-8):
@@ -141,6 +142,8 @@ elif name == 'Open MPI':
         BaseTestPackExternal.skipdtype += 'gG'
 elif name == 'Intel MPI':
     BaseTestPackExternal.skipdtype += 'ldgFDG'
+    if os.name == 'nt':
+        BaseTestPackExternal.skipdtype += 'q'
 elif name == 'Microsoft MPI':
     BaseTestPackExternal.skipdtype += 'gFDG'
 elif name == 'MVAPICH2':

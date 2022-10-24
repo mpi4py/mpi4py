@@ -1,5 +1,6 @@
 from mpi4py import MPI
 import mpiunittest as unittest
+import os
 
 def appnum():
     if MPI.APPNUM == MPI.KEYVAL_INVALID: return None
@@ -42,6 +43,7 @@ class TestEnviron(unittest.TestCase):
         self.assertIs(type(time2), float)
         self.assertGreaterEqual(time2, time1)
 
+    @unittest.skipMPI("intelmpi", os.name == 'nt')
     def testWTick(self):
         tick = MPI.Wtick()
         self.assertIs(type(tick), float)

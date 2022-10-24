@@ -357,6 +357,7 @@ class TestUtilDTLib(unittest.TestCase):
                 self.assertEqual(dt.itemsize, mt.extent)
 
     @unittest.skipMPI('msmpi')
+    @unittest.skipMPI("intelmpi", os.name == 'nt')
     def testF90(self):
         for mt in mpif90types:
             if mt == MPI.DATATYPE_NULL:

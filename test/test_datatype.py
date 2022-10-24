@@ -1,5 +1,6 @@
 from mpi4py import MPI
 import mpiunittest as unittest
+import os
 
 datatypes_c = [
 MPI.CHAR, MPI.WCHAR,
@@ -387,8 +388,14 @@ class TestDatatype(unittest.TestCase):
         except NotImplementedError:
             f90datatypes = []
             pass
+        largef90datatypes = [
+            MPI.INTEGER16,
+            MPI.REAL16,
+            MPI.COMPLEX32
+        ] if os.name == 'nt' else []
         for dtype in datatypes + f90datatypes:
             with self.subTest(datatype=dtype.name or "f90"):
+                if dtype in largef90datatypes: continue  # TODO
                 code = dtype.tocode()
                 self.assertIsNotNone(code)
                 mpitype = MPI.Datatype.fromcode(code)
