@@ -95,8 +95,10 @@ cdef int getOptions(Options* opts) except -1:
     except: pass
     try: errors = rc.errors
     except: pass
+    initialize   = getEnv(rc, b"initialize",   initialize)
     threads      = getEnv(rc, b"threads",      threads)
     thread_level = getEnv(rc, b"thread_level", thread_level)
+    finalize     = getEnv(rc, b"finalize",     finalize)
     fast_reduce  = getEnv(rc, b"fast_reduce",  fast_reduce)
     recv_mprobe  = getEnv(rc, b"recv_mprobe",  recv_mprobe)
     errors       = getEnv(rc, b"errors",       errors)
