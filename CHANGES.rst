@@ -6,6 +6,18 @@ CHANGES: MPI for Python
 :Contact: dalcinl@gmail.com
 
 
+Release 3.1.4 [2022-11-02]
+==========================
+
+.. warning:: This is the last release supporting Python 2.
+
+* Rebuild C sources with Cython 0.29.32 to support Python 3.11.
+
+* Fix contiguity check for DLPack and CAI buffers.
+
+* Workaround build failures with setuptools v60.
+
+
 Release 3.1.3 [2021-11-25]
 ==========================
 
