@@ -41,6 +41,18 @@ Release 4.0.0 [2022-XX-XX]
   * The `mpi4py.dl` module is no longer available.
 
 
+Release 3.1.4 [2022-11-02]
+==========================
+
+.. warning:: This is the last release supporting Python 2.
+
+* Rebuild C sources with Cython 0.29.32 to support Python 3.11.
+
+* Fix contiguity check for DLPack and CAI buffers.
+
+* Workaround build failures with setuptools v60.
+
+
 Release 3.1.3 [2021-11-25]
 ==========================
 
