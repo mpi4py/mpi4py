@@ -55,7 +55,6 @@ build: off
 build_script:
   - "%PYTHON%\\python.exe setup.py build"
   - "%PYTHON%\\python.exe setup.py --quiet bdist_wheel"
-  - "%PYTHON%\\python.exe setup.py --quiet bdist_msi"
 
 test: off
 test_script:
