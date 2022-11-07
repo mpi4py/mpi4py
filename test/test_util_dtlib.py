@@ -357,12 +357,18 @@ class TestUtilDTLib(unittest.TestCase):
                 self.assertEqual(dt.itemsize, mt.extent)
 
     @unittest.skipMPI('msmpi')
-    @unittest.skipMPI("intelmpi", os.name == 'nt')
     def testF90(self):
+        largef90datatypes = [
+            MPI.INTEGER16,
+            MPI.REAL16,
+            MPI.COMPLEX32,
+        ] if os.name == 'nt' else []
         for mt in mpif90types:
             if mt == MPI.DATATYPE_NULL:
                 continue
             if mt.Get_size() == 0:
+                continue
+            if mt in largef90datatypes:
                 continue
             dt = tonumpy(mt)
             if np_dtype is not None:

@@ -146,6 +146,9 @@ cdef inline MPI_Count mpiextent(MPI_Datatype datatype) nogil:
 cdef inline const char* mpifortchr(const char kind[], MPI_Datatype dtp) nogil:
     return typechr(kind, <size_t> mpiextent(dtp))
 
+cdef inline const char* mpifortstr(const char kind[], MPI_Datatype dtp) nogil:
+    return typestr(kind, <size_t> mpiextent(dtp))
+
 cdef inline const char* typeDUP(
     const char *(*convert)(MPI_Datatype) nogil,
     MPI_Datatype datatype,
@@ -309,6 +312,42 @@ cdef inline const char* DatatypeChar(MPI_Datatype datatype) nogil:
 # -----------------------------------------------------------------------------
 
 cdef inline const char* DatatypeStr(MPI_Datatype datatype) nogil:
+    if datatype == MPI_DATATYPE_NULL : return NULL
+    # C99
+    if datatype == MPI_C_BOOL   : return typestr('b', 1)
+    if datatype == MPI_INT8_T   : return typestr('i', 1)
+    if datatype == MPI_INT16_T  : return typestr('i', 2)
+    if datatype == MPI_INT32_T  : return typestr('i', 4)
+    if datatype == MPI_INT64_T  : return typestr('i', 8)
+    if datatype == MPI_UINT8_T  : return typestr('u', 1)
+    if datatype == MPI_UINT16_T : return typestr('u', 2)
+    if datatype == MPI_UINT32_T : return typestr('u', 4)
+    if datatype == MPI_UINT64_T : return typestr('u', 8)
+    # Fortran 90
+    if datatype == MPI_LOGICAL1  : return typestr('b',  1)
+    if datatype == MPI_LOGICAL2  : return typestr('b',  2)
+    if datatype == MPI_LOGICAL4  : return typestr('b',  4)
+    if datatype == MPI_LOGICAL8  : return typestr('b',  8)
+    if datatype == MPI_INTEGER1  : return typestr('i',  1)
+    if datatype == MPI_INTEGER2  : return typestr('i',  2)
+    if datatype == MPI_INTEGER4  : return typestr('i',  4)
+    if datatype == MPI_INTEGER8  : return typestr('i',  8)
+    if datatype == MPI_INTEGER16 : return typestr('i', 16)
+    if datatype == MPI_REAL2     : return typestr('f',  2)
+    if datatype == MPI_REAL4     : return typestr('f',  4)
+    if datatype == MPI_REAL8     : return typestr('f',  8)
+    if datatype == MPI_REAL16    : return typestr('f', 16)
+    if datatype == MPI_COMPLEX4  : return typestr('c',  4)
+    if datatype == MPI_COMPLEX8  : return typestr('c',  8)
+    if datatype == MPI_COMPLEX16 : return typestr('c', 16)
+    if datatype == MPI_COMPLEX32 : return typestr('c', 32)
+    cdef int combiner = mpicombiner(datatype)
+    if combiner == MPI_COMBINER_F90_INTEGER : return mpifortstr('i', datatype)
+    if combiner == MPI_COMBINER_F90_REAL    : return mpifortstr('f', datatype)
+    if combiner == MPI_COMBINER_F90_COMPLEX : return mpifortstr('c', datatype)
+    # duplicate
+    if combiner == MPI_COMBINER_DUP: return typeDUP(DatatypeStr, datatype)
+    # fallback
     return typechr_to_typestr(DatatypeChar(datatype))
 
 # -----------------------------------------------------------------------------
@@ -316,36 +355,37 @@ cdef inline const char* DatatypeStr(MPI_Datatype datatype) nogil:
 cdef inline const char* DatatypeCode(MPI_Datatype datatype) nogil:
     if datatype == MPI_DATATYPE_NULL : return NULL
     # C99
-    if datatype == MPI_INT8_T    : return DatatypeStr(datatype)
-    if datatype == MPI_INT16_T   : return DatatypeStr(datatype)
-    if datatype == MPI_INT32_T   : return DatatypeStr(datatype)
-    if datatype == MPI_INT64_T   : return DatatypeStr(datatype)
-    if datatype == MPI_UINT8_T   : return DatatypeStr(datatype)
-    if datatype == MPI_UINT16_T  : return DatatypeStr(datatype)
-    if datatype == MPI_UINT32_T  : return DatatypeStr(datatype)
-    if datatype == MPI_UINT64_T  : return DatatypeStr(datatype)
+    if datatype == MPI_C_BOOL   : return typestr('b', 1)
+    if datatype == MPI_INT8_T   : return typestr('i', 1)
+    if datatype == MPI_INT16_T  : return typestr('i', 2)
+    if datatype == MPI_INT32_T  : return typestr('i', 4)
+    if datatype == MPI_INT64_T  : return typestr('i', 8)
+    if datatype == MPI_UINT8_T  : return typestr('u', 1)
+    if datatype == MPI_UINT16_T : return typestr('u', 2)
+    if datatype == MPI_UINT32_T : return typestr('u', 4)
+    if datatype == MPI_UINT64_T : return typestr('u', 8)
     # Fortran 90
-    if datatype == MPI_LOGICAL1  : return DatatypeStr(datatype)
-    if datatype == MPI_LOGICAL2  : return DatatypeStr(datatype)
-    if datatype == MPI_LOGICAL4  : return DatatypeStr(datatype)
-    if datatype == MPI_LOGICAL8  : return DatatypeStr(datatype)
-    if datatype == MPI_INTEGER1  : return DatatypeStr(datatype)
-    if datatype == MPI_INTEGER2  : return DatatypeStr(datatype)
-    if datatype == MPI_INTEGER4  : return DatatypeStr(datatype)
-    if datatype == MPI_INTEGER8  : return DatatypeStr(datatype)
-    if datatype == MPI_INTEGER16 : return DatatypeStr(datatype)
-    if datatype == MPI_REAL2     : return DatatypeStr(datatype)
-    if datatype == MPI_REAL4     : return DatatypeStr(datatype)
-    if datatype == MPI_REAL8     : return DatatypeStr(datatype)
-    if datatype == MPI_REAL16    : return DatatypeStr(datatype)
-    if datatype == MPI_COMPLEX4  : return DatatypeStr(datatype)
-    if datatype == MPI_COMPLEX8  : return DatatypeStr(datatype)
-    if datatype == MPI_COMPLEX16 : return DatatypeStr(datatype)
-    if datatype == MPI_COMPLEX32 : return DatatypeStr(datatype)
+    if datatype == MPI_LOGICAL1  : return typestr('b',  1)
+    if datatype == MPI_LOGICAL2  : return typestr('b',  2)
+    if datatype == MPI_LOGICAL4  : return typestr('b',  4)
+    if datatype == MPI_LOGICAL8  : return typestr('b',  8)
+    if datatype == MPI_INTEGER1  : return typestr('i',  1)
+    if datatype == MPI_INTEGER2  : return typestr('i',  2)
+    if datatype == MPI_INTEGER4  : return typestr('i',  4)
+    if datatype == MPI_INTEGER8  : return typestr('i',  8)
+    if datatype == MPI_INTEGER16 : return typestr('i', 16)
+    if datatype == MPI_REAL2     : return typestr('f',  2)
+    if datatype == MPI_REAL4     : return typestr('f',  4)
+    if datatype == MPI_REAL8     : return typestr('f',  8)
+    if datatype == MPI_REAL16    : return typestr('f', 16)
+    if datatype == MPI_COMPLEX4  : return typestr('c',  4)
+    if datatype == MPI_COMPLEX8  : return typestr('c',  8)
+    if datatype == MPI_COMPLEX16 : return typestr('c', 16)
+    if datatype == MPI_COMPLEX32 : return typestr('c', 32)
     cdef int combiner = mpicombiner(datatype)
-    if combiner == MPI_COMBINER_F90_INTEGER : return DatatypeStr(datatype)
-    if combiner == MPI_COMBINER_F90_REAL    : return DatatypeStr(datatype)
-    if combiner == MPI_COMBINER_F90_COMPLEX : return DatatypeStr(datatype)
+    if combiner == MPI_COMBINER_F90_INTEGER : return mpifortstr('i', datatype)
+    if combiner == MPI_COMBINER_F90_REAL    : return mpifortstr('f', datatype)
+    if combiner == MPI_COMBINER_F90_COMPLEX : return mpifortstr('c', datatype)
     # duplicate
     if combiner == MPI_COMBINER_DUP: return typeDUP(DatatypeCode, datatype)
     # fallback
