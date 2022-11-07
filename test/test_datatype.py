@@ -391,11 +391,11 @@ class TestDatatype(unittest.TestCase):
         largef90datatypes = [
             MPI.INTEGER16,
             MPI.REAL16,
-            MPI.COMPLEX32
+            MPI.COMPLEX32,
         ] if os.name == 'nt' else []
         for dtype in datatypes + f90datatypes:
             with self.subTest(datatype=dtype.name or "f90"):
-                if dtype in largef90datatypes: continue  # TODO
+                if dtype in largef90datatypes: continue
                 code = dtype.tocode()
                 self.assertIsNotNone(code)
                 mpitype = MPI.Datatype.fromcode(code)
