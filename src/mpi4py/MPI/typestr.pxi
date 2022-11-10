@@ -139,7 +139,7 @@ cdef inline int mpicombiner(MPI_Datatype datatype) nogil:
 
 cdef inline MPI_Count mpiextent(MPI_Datatype datatype) nogil:
     if not mpi_active(): return 0
-    cdef MPI_Count lb, extent = 0
+    cdef MPI_Count lb = 0, extent = 0
     <void> MPI_Type_get_extent_c(datatype, &lb, &extent)
     return extent
 
