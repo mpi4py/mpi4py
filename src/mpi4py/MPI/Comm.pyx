@@ -310,7 +310,7 @@ cdef class Comm:
         sendbuf: BufSpec,
         int dest: int,
         int sendtag: int = 0,
-        recvbuf: BufSpec = None,
+        recvbuf: Optional[BufSpec] = None,
         int source: int = ANY_SOURCE,
         int recvtag: int = ANY_TAG,
         Status status: Optional[Status] = None,
@@ -406,7 +406,7 @@ cdef class Comm:
         sendbuf: BufSpec,
         int dest: int,
         int sendtag: int = 0,
-        recvbuf: BufSpec = None,
+        recvbuf: Optional[BufSpec] = None,
         int source: int = ANY_SOURCE,
         int recvtag: int = ANY_TAG,
     ) -> Request:
