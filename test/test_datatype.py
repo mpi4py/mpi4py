@@ -1,6 +1,6 @@
 from mpi4py import MPI
 import mpiunittest as unittest
-import os
+import struct
 
 datatypes_c = [
 MPI.CHAR, MPI.WCHAR,
@@ -388,11 +388,11 @@ class TestDatatype(unittest.TestCase):
         except NotImplementedError:
             f90datatypes = []
             pass
-        largef90datatypes = [
-            MPI.INTEGER16,
-            MPI.REAL16,
-            MPI.COMPLEX32,
-        ] if os.name == 'nt' else []
+        largef90datatypes = []
+        if MPI.INTEGER16 != MPI.DATATYPE_NULL:
+            largef90datatypes += [MPI.INTEGER16]
+        if struct.calcsize('P') == 4 or MPI.DOUBLE.extent == MPI.LONG_DOUBLE.extent:
+            largef90datatypes += [MPI.REAL16,  MPI.COMPLEX32]
         for dtype in datatypes + f90datatypes:
             with self.subTest(datatype=dtype.name or "f90"):
                 if dtype in largef90datatypes: continue
