@@ -1,3 +1,8 @@
+* M. Rogowski, S. Aseeri, D. Keyes, and L. Dalcin,
+  *mpi4py.futures: MPI-Based Asynchronous Task Execution for Python*,
+  IEEE Transactions on Parallel and Distributed Systems, 34(2):611-622, 2023.
+  https://doi.org/10.1109/TPDS.2022.3225481
+
 * L. Dalcin and Y.-L. L. Fang,
   *mpi4py: Status Update After 12 Years of Development*,
   Computing in Science & Engineering, 23(4):47-54, 2021.

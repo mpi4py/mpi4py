@@ -517,6 +517,19 @@ the tasks submitted by the master.
      See :term:`global interpreter lock`.
 
 
+Citation
+--------
+
+If :mod:`mpi4py.futures` been significant to a project that leads to an
+academic publication, please acknowledge our work by citing the following
+article [mpi4py-futures]_:
+
+.. [mpi4py-futures] M. Rogowski, S. Aseeri, D. Keyes, and L. Dalcin,
+  *mpi4py.futures: MPI-Based Asynchronous Task Execution for Python*,
+  IEEE Transactions on Parallel and Distributed Systems, 34(2):611-622, 2023.
+  https://doi.org/10.1109/TPDS.2022.3225481
+
+
 .. Local variables:
 .. fill-column: 79
 .. End:
