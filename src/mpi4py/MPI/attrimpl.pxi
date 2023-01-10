@@ -75,7 +75,7 @@ cdef inline int PyMPI_attr_copy(
     cdef _p_keyval state = <_p_keyval>extra_state
     if state.copy_fn is None: return 0
     cdef int p = not state.nopython
-    if p: assert attrval_in != NULL
+    if p and attrval_in == NULL: raise RuntimeError
     cdef object attrval
     if p: attrval = <object>attrval_in
     else: attrval = PyLong_FromVoidPtr(attrval_in)
@@ -97,7 +97,7 @@ cdef inline int PyMPI_attr_delete(
     void *extra_state) except -1:
     cdef _p_keyval state = <_p_keyval>extra_state
     cdef int p = not state.nopython
-    if p: assert attrval_in != NULL
+    if p and attrval_in == NULL: raise RuntimeError
     cdef object attrval
     if p: attrval = <object>attrval_in
     else: attrval = PyLong_FromVoidPtr(attrval_in)
