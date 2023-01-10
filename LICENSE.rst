@@ -1,4 +1,4 @@
-Copyright (c) 2022, Lisandro Dalcin.
+Copyright (c) 2023, Lisandro Dalcin.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions

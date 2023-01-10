@@ -1,4 +1,4 @@
-Release 4.0.0 [2022-XX-XX]
+Release 4.0.0 [2023-XX-XX]
 ==========================
 
 * New features:
