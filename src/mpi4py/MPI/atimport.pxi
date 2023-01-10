@@ -19,7 +19,7 @@ cdef extern from "Python.h":
 
 cdef extern from "Python.h":
     """
-    #if !defined(Py_GETENV)
+    #if PY_VERSION_HEX < 0x030B0000 && !defined(Py_GETENV)
     #  define Py_GETENV(s) (Py_IgnoreEnvironmentFlag ? NULL : getenv(s))
     #endif
     """
