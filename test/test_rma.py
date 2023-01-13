@@ -1,5 +1,6 @@
 from mpi4py import MPI
 import mpiunittest as unittest
+import contextlib
 import arrayimpl
 import sys
 
@@ -11,6 +12,22 @@ def memzero(m):
         m[:] = 0
     except IndexError: # cffi buffer
         m[0:len(m)] = b'\0'*len(m)
+
+@contextlib.contextmanager
+def win_lock(win, rank, *args, **kwargs):
+    win.Lock(rank, *args, **kwargs)
+    try:
+        yield
+    finally:
+        win.Unlock(rank)
+
+@contextlib.contextmanager
+def win_lock_all(win, *args, **kwargs):
+    win.Lock_all(*args, **kwargs)
+    try:
+        yield
+    finally:
+        win.Unlock_all()
 
 class BaseTestRMA(object):
 
@@ -145,16 +162,15 @@ class BaseTestRMA(object):
                                 MPI.MAX, MPI.MIN,
                                 MPI.REPLACE, MPI.NO_OP,
                             ):
-                                self.WIN.Lock(rank)
-                                self.WIN.Put(ones.as_mpi(), rank)
-                                self.WIN.Flush(rank)
-                                self.WIN.Get_accumulate(sbuf.as_mpi(),
-                                                        rbuf.as_mpi_c(count),
-                                                        rank, op=op)
-                                self.WIN.Flush(rank)
-                                self.WIN.Get(gbuf.as_mpi_c(count), rank)
-                                self.WIN.Flush(rank)
-                                self.WIN.Unlock(rank)
+                                with win_lock(self.WIN, rank):
+                                    self.WIN.Put(ones.as_mpi(), rank)
+                                    self.WIN.Flush(rank)
+                                    self.WIN.Get_accumulate(sbuf.as_mpi(),
+                                                            rbuf.as_mpi_c(count),
+                                                            rank, op=op)
+                                    self.WIN.Flush(rank)
+                                    self.WIN.Get(gbuf.as_mpi_c(count), rank)
+                                    self.WIN.Flush(rank)
                                 #
                                 for i in range(count):
                                     self.assertEqual(sbuf[i], i)
@@ -202,14 +218,12 @@ class BaseTestRMA(object):
                     for rank in range(size):
                         for disp in range(3):
                             with self.subTest(disp=disp, rank=rank):
-                                self.WIN.Lock(rank)
-                                self.WIN.Fetch_and_op(obuf.as_mpi(),
-                                                      rbuf.as_mpi_c(1),
-                                                      rank,
-                                                      disp * datatype.size,
-                                                      op=op)
-
-                                self.WIN.Unlock(rank)
+                                with win_lock(self.WIN, rank):
+                                    self.WIN.Fetch_and_op(obuf.as_mpi(),
+                                                          rbuf.as_mpi_c(1),
+                                                          rank,
+                                                          disp * datatype.size,
+                                                          op=op)
                                 self.assertEqual(rbuf[1], -1)
 
     @unittest.skipMPI('mpich(>=4.0,<4.1)', sys.platform == 'darwin')
@@ -250,14 +264,12 @@ class BaseTestRMA(object):
                 for rank in range(size):
                     for disp in range(3):
                         with self.subTest(disp=disp, rank=rank):
-                            self.WIN.Lock(rank)
-                            self.WIN.Compare_and_swap(obuf.as_mpi(),
-                                                      cbuf.as_mpi(),
-                                                      rbuf.as_mpi_c(1),
-                                                      rank,
-                                                      disp * datatype.size)
-
-                            self.WIN.Unlock(rank)
+                            with win_lock(self.WIN, rank):
+                                self.WIN.Compare_and_swap(obuf.as_mpi(),
+                                                          cbuf.as_mpi(),
+                                                          rbuf.as_mpi_c(1),
+                                                          rank,
+                                                          disp * datatype.size)
                             self.assertEqual(rbuf[1], -1)
 
     def testPutProcNull(self):
@@ -421,9 +433,8 @@ class BaseTestRMA(object):
         win = self.WIN
         comm = self.COMM
         rank = comm.Get_rank()
-        win.Lock(rank)
-        win.Sync()
-        win.Unlock(rank)
+        with win_lock(win, rank):
+            win.Sync()
         comm.Barrier()
 
     @unittest.skipMPI('MPI(<3.0)')
@@ -434,27 +445,23 @@ class BaseTestRMA(object):
         rank = comm.Get_rank()
         #
         for i in range(size):
-            win.Lock(i)
-            win.Flush(i)
-            win.Unlock(i)
+            with win_lock(win, i):
+                win.Flush(i)
         comm.Barrier()
         for i in range(size):
             if i == rank:
-                win.Lock_all()
-                win.Flush_all()
-                win.Unlock_all()
+                with win_lock_all(win):
+                    win.Flush_all()
             comm.Barrier()
         #
         for i in range(size):
-            win.Lock(i)
-            win.Flush_local(i)
-            win.Unlock(i)
+            with win_lock(win, i):
+                win.Flush_local(i)
         comm.Barrier()
         for i in range(size):
             if i == rank:
-                win.Lock_all()
-                win.Flush_local_all()
-                win.Unlock_all()
+                with win_lock_all(win):
+                    win.Flush_local_all()
             comm.Barrier()
 
 class TestRMASelf(BaseTestRMA, unittest.TestCase):
