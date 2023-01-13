@@ -251,13 +251,14 @@ class BaseTestRMA(object):
                     for disp in range(3):
                         with self.subTest(disp=disp, rank=rank):
                             self.WIN.Lock(rank)
-                            self.WIN.Compare_and_swap(obuf.as_mpi(),
-                                                      cbuf.as_mpi(),
-                                                      rbuf.as_mpi_c(1),
-                                                      rank,
-                                                      disp * datatype.size)
-
-                            self.WIN.Unlock(rank)
+                            try:
+                                self.WIN.Compare_and_swap(obuf.as_mpi(),
+                                                        cbuf.as_mpi(),
+                                                        rbuf.as_mpi_c(1),
+                                                        rank,
+                                                        disp * datatype.size)
+                            finally:
+                                self.WIN.Unlock(rank)
                             self.assertEqual(rbuf[1], -1)
 
     def testPutProcNull(self):
