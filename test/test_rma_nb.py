@@ -1,5 +1,6 @@
 from mpi4py import MPI
 import mpiunittest as unittest
+import contextlib
 import arrayimpl
 
 def mkzeros(n):
@@ -10,6 +11,14 @@ def memzero(m):
         m[:] = 0
     except IndexError: # cffi buffer
         m[0:len(m)] = b'\0'*len(m)
+
+@contextlib.contextmanager
+def win_lock(win, rank, *args, **kwargs):
+    win.Lock(rank, *args, **kwargs)
+    try:
+        yield
+    finally:
+        win.Unlock(rank)
 
 class BaseTestRMA(object):
 
@@ -47,13 +56,12 @@ class BaseTestRMA(object):
                             sbuf = array([rank]*count, typecode)
                             rbuf = array(-1, typecode, count+1)
                             self.WIN.Fence()
-                            self.WIN.Lock(rank)
-                            r = self.WIN.Rput(sbuf.as_mpi(), rank)
-                            r.Wait()
-                            self.WIN.Flush(rank)
-                            r = self.WIN.Rget(rbuf.as_mpi_c(count), rank)
-                            r.Wait()
-                            self.WIN.Unlock(rank)
+                            with win_lock(self.WIN, rank):
+                                r = self.WIN.Rput(sbuf.as_mpi(), rank)
+                                r.Wait()
+                                self.WIN.Flush(rank)
+                                r = self.WIN.Rget(rbuf.as_mpi_c(count), rank)
+                                r.Wait()
                             for i in range(count):
                                 self.assertEqual(sbuf[i], rank)
                                 self.assertEqual(rbuf[i], rank)
@@ -80,16 +88,15 @@ class BaseTestRMA(object):
                                 MPI.MAX, MPI.MIN,
                                 MPI.REPLACE,
                             ):
-                                self.WIN.Lock(rank)
-                                self.WIN.Put(ones.as_mpi(), rank)
-                                self.WIN.Flush(rank)
-                                r = self.WIN.Raccumulate(sbuf.as_mpi(),
-                                                         rank, op=op)
-                                r.Wait()
-                                self.WIN.Flush(rank)
-                                r = self.WIN.Rget(rbuf.as_mpi_c(count), rank)
-                                r.Wait()
-                                self.WIN.Unlock(rank)
+                                with win_lock(self.WIN, rank):
+                                    self.WIN.Put(ones.as_mpi(), rank)
+                                    self.WIN.Flush(rank)
+                                    r = self.WIN.Raccumulate(sbuf.as_mpi(),
+                                                             rank, op=op)
+                                    r.Wait()
+                                    self.WIN.Flush(rank)
+                                    r = self.WIN.Rget(rbuf.as_mpi_c(count), rank)
+                                    r.Wait()
                                 #
                                 for i in range(count):
                                     self.assertEqual(sbuf[i], i)
@@ -118,17 +125,16 @@ class BaseTestRMA(object):
                                 MPI.MAX, MPI.MIN,
                                 MPI.REPLACE, MPI.NO_OP,
                             ):
-                                self.WIN.Lock(rank)
-                                self.WIN.Put(ones.as_mpi(), rank)
-                                self.WIN.Flush(rank)
-                                r = self.WIN.Rget_accumulate(sbuf.as_mpi(),
-                                                             rbuf.as_mpi_c(count),
-                                                             rank, op=op)
-                                r.Wait()
-                                self.WIN.Flush(rank)
-                                r = self.WIN.Rget(gbuf.as_mpi_c(count), rank)
-                                r.Wait()
-                                self.WIN.Unlock(rank)
+                                with win_lock(self.WIN, rank):
+                                    self.WIN.Put(ones.as_mpi(), rank)
+                                    self.WIN.Flush(rank)
+                                    r = self.WIN.Rget_accumulate(sbuf.as_mpi(),
+                                                                 rbuf.as_mpi_c(count),
+                                                                 rank, op=op)
+                                    r.Wait()
+                                    self.WIN.Flush(rank)
+                                    r = self.WIN.Rget(gbuf.as_mpi_c(count), rank)
+                                    r.Wait()
                                 #
                                 for i in range(count):
                                     self.assertEqual(sbuf[i], i)
@@ -139,37 +145,33 @@ class BaseTestRMA(object):
 
     def testPutProcNull(self):
         rank = self.COMM.Get_rank()
-        self.WIN.Lock(rank)
-        r = self.WIN.Rput(None, MPI.PROC_NULL, None)
-        r.Wait()
-        self.WIN.Unlock(rank)
+        with win_lock(self.WIN, rank):
+            r = self.WIN.Rput(None, MPI.PROC_NULL, None)
+            r.Wait()
 
     def testGetProcNull(self):
         rank = self.COMM.Get_rank()
-        self.WIN.Lock(rank)
-        r = self.WIN.Rget(None, MPI.PROC_NULL, None)
-        r.Wait()
-        self.WIN.Unlock(rank)
+        with win_lock(self.WIN, rank):
+            r = self.WIN.Rget(None, MPI.PROC_NULL, None)
+            r.Wait()
 
     def testAccumulateProcNullReplace(self):
         rank = self.COMM.Get_rank()
         zeros = mkzeros(8)
-        self.WIN.Lock(rank)
-        r = self.WIN.Raccumulate([zeros, MPI.INT], MPI.PROC_NULL, None, MPI.REPLACE)
-        r.Wait()
-        r = self.WIN.Raccumulate([zeros, MPI.INT], MPI.PROC_NULL, None, MPI.REPLACE)
-        r.Wait()
-        self.WIN.Unlock(rank)
+        with win_lock(self.WIN, rank):
+            r = self.WIN.Raccumulate([zeros, MPI.INT], MPI.PROC_NULL, None, MPI.REPLACE)
+            r.Wait()
+            r = self.WIN.Raccumulate([zeros, MPI.INT], MPI.PROC_NULL, None, MPI.REPLACE)
+            r.Wait()
 
     def testAccumulateProcNullSum(self):
         rank = self.COMM.Get_rank()
         zeros = mkzeros(8)
-        self.WIN.Lock(rank)
-        r = self.WIN.Raccumulate([zeros, MPI.INT], MPI.PROC_NULL, None, MPI.SUM)
-        r.Wait()
-        r = self.WIN.Raccumulate([None, MPI.INT], MPI.PROC_NULL, None, MPI.SUM)
-        r.Wait()
-        self.WIN.Unlock(rank)
+        with win_lock(self.WIN, rank):
+            r = self.WIN.Raccumulate([zeros, MPI.INT], MPI.PROC_NULL, None, MPI.SUM)
+            r.Wait()
+            r = self.WIN.Raccumulate([None, MPI.INT], MPI.PROC_NULL, None, MPI.SUM)
+            r.Wait()
 
 
 @unittest.skipMPI('MPI(<3.0)')
