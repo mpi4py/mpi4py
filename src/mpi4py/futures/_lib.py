@@ -899,24 +899,24 @@ def _check_recursive_spawn():  # pragma: no cover
 
 
 FLAG_OPT_MAP = {
+    'debug': 'd',
     'inspect': 'i',
     'interactive': 'i',
-    'debug': 'd',
     'optimize': 'O',
+    'dont_write_bytecode': 'B',
     'no_user_site': 's',
     'no_site': 'S',
-    'isolated': 'I',
     'ignore_environment': 'E',
-    'dont_write_bytecode': 'B',
-    'hash_randomization': 'R',
     'verbose': 'v',
     'bytes_warning': 'b',
     'quiet': 'q',
-    # 'hash_randomization', 'R',
+    'hash_randomization': 'R',
+    'isolated': 'I',
     # 'dev_mode': 'Xdev',
     # 'utf8_mode': 'Xutf8',
     # 'warn_default_encoding': 'Xwarn_default_encoding',
     'safe_path': 'P',
+    # 'int_max_str_digits': 'Xint_max_str_digits=0'
 }
 
 
