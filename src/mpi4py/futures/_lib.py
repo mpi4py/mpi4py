@@ -878,9 +878,9 @@ def _check_recursive_spawn():  # pragma: no cover
     main_name, main_path = import_main.sentinel
     main_info = "\n"
     if main_name is not None:
-        main_info += f"    main name: '{main_name}'\n"
+        main_info += f"    main name: {main_name!r}\n"
     if main_path is not None:
-        main_info += f"    main path: '{main_path}'\n"
+        main_info += f"    main path: {main_path!r}\n"
     main_info += "\n"
     sys.stderr.write("""
     The main script or module attempted to spawn new MPI worker processes.
