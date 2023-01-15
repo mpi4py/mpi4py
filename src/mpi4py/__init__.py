@@ -60,13 +60,13 @@ class Rc:
 
     def __setattr__(self, name, value):
         if not hasattr(self, name):
-            raise TypeError(f"object has no attribute '{name}'")
+            raise TypeError(f"object has no attribute {name!r}")
         super().__setattr__(name, value)
 
     def __call__(self, **kwargs):
         for key in kwargs:
             if not hasattr(self, key):
-                raise TypeError(f"unexpected argument '{key}'")
+                raise TypeError(f"unexpected argument {key!r}")
         for key, value in kwargs.items():
             setattr(self, key, value)
 
@@ -155,7 +155,7 @@ def profile(name, *, path=None):
     path = list(map(os.fsdecode, path))
     filename = find_library(name, path)
     if filename is None:
-        raise ValueError(f"profiler '{name}' not found")
+        raise ValueError(f"profiler {name!r} not found")
 
     try:
         handle = dlopen(filename, RTLD_NOW | RTLD_GLOBAL)

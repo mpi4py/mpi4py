@@ -568,7 +568,7 @@ def main(args=None):
     comm = MPI.COMM_WORLD
     if options.command not in main.commands:
         if comm.rank == 0:
-            parser.error(f"unknown command '{options.command}'")
+            parser.error(f"unknown command {options.command!r}")
         parser.exit(2)
     command = main.commands[options.command]
     command(comm, options.args)
