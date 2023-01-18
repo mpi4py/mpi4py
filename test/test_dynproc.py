@@ -221,12 +221,5 @@ class TestDPM(unittest.TestCase):
         MPI.COMM_WORLD.Barrier()
 
 
-MVAPICH2 = MPI.get_vendor()[0] == 'MVAPICH2'
-try:
-    if MVAPICH2: raise NotImplementedError
-except NotImplementedError:
-    unittest.disable(TestDPM, 'mpi-dpm')
-
-
 if __name__ == '__main__':
     unittest.main()
