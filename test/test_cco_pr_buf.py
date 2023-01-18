@@ -389,7 +389,6 @@ class BaseTestCCOBufInplace(object):
                 for value in buf.flat:
                     self.assertEqual(value, root)
 
-    @unittest.skipMPI('msmpi(==10.0.0)')
     def testScatter(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
@@ -527,7 +526,6 @@ class BaseTestCCOBufInplace(object):
                             elif op == MPI.MIN:
                                 self.assertEqual(value, 0)
 
-    @unittest.skipMPI('MVAPICH2')
     def testReduceScatter(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()

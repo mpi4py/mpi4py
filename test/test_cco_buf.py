@@ -497,7 +497,6 @@ class BaseTestCCOBufInplace(object):
                             elif op == MPI.MIN:
                                 self.assertEqual(value, 0)
 
-    @unittest.skipMPI('MVAPICH2')
     def testReduceScatter(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
@@ -646,6 +645,7 @@ class TestCCOBufInplaceSelf(BaseTestCCOBufInplace, unittest.TestCase):
 @unittest.skipIf(MPI.IN_PLACE == MPI.BOTTOM, 'mpi-in-place')
 class TestCCOBufInplaceWorld(BaseTestCCOBufInplace, unittest.TestCase):
     COMM = MPI.COMM_WORLD
+    @unittest.skipMPI('MVAPICH2', MPI.COMM_WORLD.Get_size() > 1)
     @unittest.skipMPI('intelmpi', MPI.COMM_WORLD.Get_size() > 1)
     def testReduceScatter(self):
         super(TestCCOBufInplaceWorld, self).testReduceScatter()
