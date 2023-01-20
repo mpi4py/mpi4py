@@ -66,7 +66,7 @@ def ringtest(comm, args=None, verbose=True):
         # pylint: disable=invalid-name
         from array import array
         from . import MPI
-        iterations = list(range((loop + skip)))
+        iterations = list(range(loop + skip))
         size = comm.Get_size()
         rank = comm.Get_rank()
         source = (rank - 1) % size

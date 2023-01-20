@@ -865,7 +865,7 @@ def _sync_set_data(data):
 def _init_get_data(options):
     keys = ('initializer', 'initargs', 'initkwargs')
     vals = (None, (), {})
-    data = dict((k, options.pop(k, v)) for k, v in zip(keys, vals))
+    data = {k: options.pop(k, v) for k, v in zip(keys, vals)}
     return data
 
 
