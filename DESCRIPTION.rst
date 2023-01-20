@@ -49,6 +49,14 @@ This package supports:
   + active target synchronization (lock & unlock)
 
 
+Install
+=======
+
+See `INSTALL.rst <INSTALL.rst>`_.
+
+.. include:: INSTALL.rst
+
+
 Citation
 ========
 
@@ -59,11 +67,3 @@ project.
 See `CITATION.rst <CITATION.rst>`_.
 
 .. include:: CITATION.rst
-
-
-Install
-=======
-
-See `INSTALL.rst <INSTALL.rst>`_.
-
-.. include:: INSTALL.rst
