@@ -174,7 +174,7 @@ class Pool:
         self.queue = queue = TaskQueue()
         self.exref = weakref.ref(executor, lambda _, q=queue: q.put(None))
 
-        args = (self, executor._options) + args
+        args = (self, executor._options, *args)
         thread = threading.Thread(target=manager, args=args)
         self.thread = thread
 

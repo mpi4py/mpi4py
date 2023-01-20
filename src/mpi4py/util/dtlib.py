@@ -67,7 +67,7 @@ def from_numpy_dtype(dtype):
         dtype = _np_dtype(dtype)
     except NameError:
         # pylint: disable=raise-missing-from
-        raise RuntimeError("NumPy is not available")
+        raise RuntimeError("NumPy is not available") from None
 
     if dtype.hasobject:
         raise ValueError("NumPy datatype with object entries")
