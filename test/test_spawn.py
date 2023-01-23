@@ -84,7 +84,7 @@ def github_actions():
 @unittest.skipMPI('MPICH2')
 @unittest.skipMPI('MPICH1')
 @unittest.skipIf(using_GPU(), 'using CUDA')
-class BaseTestSpawn(object):
+class BaseTestSpawn:
 
     COMM = MPI.COMM_NULL
     COMMAND = sys.executable

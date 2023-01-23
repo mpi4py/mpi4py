@@ -5,7 +5,7 @@ from sys import argv
 
 cmd = './cpi-worker-py.exe'
 if len(argv) > 1: cmd = argv[1]
-print("%s -> %s" % (argv[0], cmd))
+print(f"{argv[0]} -> {cmd}")
 
 worker = MPI.COMM_SELF.Spawn(cmd, None, 5)
 
@@ -20,4 +20,4 @@ pi = pi[0]
 
 worker.Disconnect()
 
-print('pi: %.16f, error: %.16f' % (pi, abs(PI-pi)))
+print(f"pi: {pi:.16f}, error: {abs(PI-pi):.16f}")

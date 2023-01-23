@@ -1,4 +1,4 @@
-class Seq(object):
+class Seq:
 
     """
     Sequential execution

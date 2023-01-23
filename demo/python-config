@@ -6,13 +6,23 @@ import os
 import sys
 import sysconfig
 
-valid_opts = ['prefix', 'exec-prefix', 'includes', 'libs', 'cflags',
-              'ldflags', 'extension-suffix', 'help', 'abiflags', 'configdir',
-              'embed']
+valid_opts = [
+    'prefix',
+    'exec-prefix',
+    'includes',
+    'libs',
+    'cflags',
+    'ldflags',
+    'extension-suffix',
+    'help',
+    'abiflags',
+    'configdir',
+    'embed',
+]
 
 def exit_with_usage(code=1):
-    print("Usage: {0} [{1}]".format(
-        sys.argv[0], '|'.join('--'+opt for opt in valid_opts)), file=sys.stderr)
+    opts = '|'.join('--'+opt for opt in valid_opts)
+    print(f"Usage: {sys.argv[0]} [{opts}]", file=sys.stderr)
     sys.exit(code)
 
 try:

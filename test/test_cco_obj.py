@@ -21,7 +21,7 @@ messages += [
     dict((f'k{k}', v) for k, v in enumerate(_basic)),
 ]
 
-class BaseTestCCOObj(object):
+class BaseTestCCOObj:
 
     COMM = MPI.COMM_NULL
 

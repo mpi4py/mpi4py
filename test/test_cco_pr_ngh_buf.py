@@ -49,7 +49,7 @@ def StartWaitFree(request):
     request.Free()
 
 
-class BaseTestCCONghBuf(object):
+class BaseTestCCONghBuf:
 
     COMM = MPI.COMM_NULL
 

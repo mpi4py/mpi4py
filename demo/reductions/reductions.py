@@ -7,7 +7,7 @@ class Intracomm(MPI.Intracomm):
     """
 
     def __new__(cls, comm=None):
-        return super(Intracomm, cls).__new__(cls, comm)
+        return super().__new__(cls, comm)
 
     def reduce(self, sendobj=None, recvobj=None, op=MPI.SUM, root=0):
         size = self.size

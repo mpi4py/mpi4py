@@ -14,7 +14,7 @@ def ring(comm, count=1, loop=1, skip=0):
     sbuf = ffi.new('unsigned char[]', [42]*count)
     rbuf = ffi.new('unsigned char[]', [ 0]*count)
 
-    iterations = list(range((loop+skip)))
+    iterations = list(range(loop+skip))
 
     if size == 1:
         for i in iterations:

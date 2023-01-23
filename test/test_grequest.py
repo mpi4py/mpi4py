@@ -1,7 +1,7 @@
 from mpi4py import MPI
 import mpiunittest as unittest
 
-class GReqCtx(object):
+class GReqCtx:
 
     source = 3
     tag    = 7

@@ -1,7 +1,7 @@
 from mpi4py import MPI
 import mpiunittest as unittest
 
-class BaseTestTopo(object):
+class BaseTestTopo:
 
     COMM = MPI.COMM_NULL
 

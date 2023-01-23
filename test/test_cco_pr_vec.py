@@ -22,7 +22,7 @@ def StartWaitFree(request):
     request.Free()
 
 
-class BaseTestCCOVec(object):
+class BaseTestCCOVec:
 
     COMM = MPI.COMM_NULL
 
@@ -325,7 +325,7 @@ class BaseTestCCOVec(object):
                 for value in rbuf.flat:
                     self.assertEqual(value, n)
 
-class BaseTestCCOVecInplace(object):
+class BaseTestCCOVecInplace:
 
     COMM = MPI.COMM_NULL
 

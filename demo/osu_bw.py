@@ -29,7 +29,7 @@ def osu_bw(
     r_buf = allocate(MAX_MSG_SIZE)
 
     if myid == 0:
-        print ('# %s' % (BENCHMARH,))
+        print (f'# {BENCHMARH}')
     if myid == 0:
         print ('# %-8s%20s' % ("Size [B]", "Bandwidth [MB/s]"))
 
@@ -77,7 +77,7 @@ def allocate(n):
     try:
         import mmap
         return mmap.mmap(-1, n)
-    except (ImportError, EnvironmentError):
+    except (ImportError, OSError):
         try:
             from numpy import zeros
             return zeros(n, 'B')

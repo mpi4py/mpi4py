@@ -34,7 +34,7 @@ def osu_latency(
     status = lib.MPI_STATUS_IGNORE
 
     if myid == 0:
-        print ('# %s' % (BENCHMARH,))
+        print (f'# {BENCHMARH}')
     if myid == 0:
         print ('# %-8s%20s' % ("Size [B]", "Latency [us]"))
 

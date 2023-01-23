@@ -62,7 +62,7 @@ class TestMessage(unittest.TestCase):
         self.assertEqual(message, MPI.MESSAGE_NO_PROC)
 
 @unittest.skipIf(MPI.MESSAGE_NULL == MPI.MESSAGE_NO_PROC, 'mpi-message')
-class BaseTestP2PMatched(object):
+class BaseTestP2PMatched:
 
     COMM = MPI.COMM_NULL
 

@@ -25,7 +25,7 @@ except ImportError:
 
 # -----------------------------------------------------------------------------
 
-class Counter(object):
+class Counter:
 
     def __init__(self, comm, init=0):
         #
@@ -97,7 +97,7 @@ class Counter(object):
 
 # -----------------------------------------------------------------------------
 
-class Mutex(object):
+class Mutex:
 
     def __init__(self, comm):
         self.counter = Counter(comm)

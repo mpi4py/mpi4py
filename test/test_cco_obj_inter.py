@@ -25,7 +25,7 @@ messages += [
 @unittest.skipMPI('MPICH1')
 @unittest.skipIf(MPI.ROOT == MPI.PROC_NULL, 'mpi-root')
 @unittest.skipIf(MPI.COMM_WORLD.Get_size() < 2, 'mpi-world-size<2')
-class BaseTestCCOObjInter(object):
+class BaseTestCCOObjInter:
 
     BASECOMM  = MPI.COMM_NULL
     INTRACOMM = MPI.COMM_NULL
@@ -179,20 +179,20 @@ class TestCCOObjInter(BaseTestCCOObjInter, unittest.TestCase):
 class TestCCOObjInterDup(TestCCOObjInter):
     def setUp(self):
         self.BASECOMM = self.BASECOMM.Dup()
-        super(TestCCOObjInterDup, self).setUp()
+        super().setUp()
     def tearDown(self):
         self.BASECOMM.Free()
-        super(TestCCOObjInterDup, self).tearDown()
+        super().tearDown()
 
 class TestCCOObjInterDupDup(TestCCOObjInterDup):
     BASECOMM = MPI.COMM_WORLD
     INTERCOMM_ORIG = MPI.COMM_NULL
     def setUp(self):
-        super(TestCCOObjInterDupDup, self).setUp()
+        super().setUp()
         self.INTERCOMM_ORIG = self.INTERCOMM
         self.INTERCOMM = self.INTERCOMM.Dup()
     def tearDown(self):
-        super(TestCCOObjInterDupDup, self).tearDown()
+        super().tearDown()
         self.INTERCOMM_ORIG.Free()
 
 

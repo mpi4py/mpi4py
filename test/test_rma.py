@@ -29,7 +29,7 @@ def win_lock_all(win, *args, **kwargs):
     finally:
         win.Unlock_all()
 
-class BaseTestRMA(object):
+class BaseTestRMA:
 
     COMM = MPI.COMM_NULL
     INFO = MPI.INFO_NULL

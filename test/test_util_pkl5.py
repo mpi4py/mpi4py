@@ -34,7 +34,7 @@ except ImportError:
     numpy = None
 
 
-class BaseTest(object):
+class BaseTest:
 
     COMM = MPI.COMM_NULL
     CommType = MPI.Intracomm
@@ -848,20 +848,20 @@ class BaseTest(object):
             self.testBcastInter([(c, c.copy())], check2)
 
 
-class BaseTestPKL5(object):
+class BaseTestPKL5:
     CommType = pkl5.Intracomm
     MessageType = pkl5.Message
     RequestType = pkl5.Request
 
     def setUp(self):
-        super(BaseTestPKL5, self).setUp()
+        super().setUp()
         self.pickle_prev = pkl5.pickle
         self.pickle = pkl5.Pickle()
         self.pickle.THRESHOLD = 0
         pkl5.pickle = self.pickle
 
     def tearDown(self):
-        super(BaseTestPKL5, self).tearDown()
+        super().tearDown()
         pkl5.pickle = self.pickle_prev
 
     @unittest.skipIf(numpy is None, 'numpy')

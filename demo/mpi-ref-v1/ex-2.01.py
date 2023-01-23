@@ -12,16 +12,16 @@ if MPI.COMM_WORLD.Get_size() < 2:
 
 # --------------------------------------------------------------------
 
-s = "Hello there"
+s = b"Hello there"
 
-msg = array.array('c', '\0'*20)
+msg = array.array('B', b'\0'*20)
 tag = 99
 status = MPI.Status()
 
 myrank = MPI.COMM_WORLD.Get_rank()
 
 if myrank == 0:
-    msg[:len(s)] = array.array('c', s)
+    msg[:len(s)] = array.array('B', s)
     MPI.COMM_WORLD.Send([msg, len(s)+1, MPI.CHAR], 1, tag)
 elif myrank == 1:
     MPI.COMM_WORLD.Recv([msg, 20, MPI.CHAR], 0, tag, status)
@@ -30,7 +30,7 @@ elif myrank == 1:
 
 if myrank == 1:
     assert list(msg[:len(s)]) == list(s)
-    assert msg[len(s)] == '\0'
+    assert msg[len(s)] == 0
     assert status.source == 0
     assert status.tag == tag
     assert status.error == MPI.SUCCESS

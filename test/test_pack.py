@@ -19,7 +19,7 @@ def allclose(a, b, rtol=1.e-5, atol=1.e-8):
     return True
 
 
-class BaseTestPack(object):
+class BaseTestPack:
 
     COMM = MPI.COMM_NULL
 
@@ -70,7 +70,7 @@ class BaseTestPack(object):
 
 EXT32 = 'external32'
 
-class BaseTestPackExternal(object):
+class BaseTestPackExternal:
 
     skipdtype = []
 

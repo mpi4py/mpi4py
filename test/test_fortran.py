@@ -1,7 +1,7 @@
 from mpi4py import MPI
 import mpiunittest as unittest
 
-class BaseTestFortran(object):
+class BaseTestFortran:
     HANDLES = []
     def testFortran(self):
         for handle1 in self.HANDLES:
@@ -27,7 +27,7 @@ class TestFortranStatus(BaseTestFortran, unittest.TestCase):
 
     @unittest.skipMPI('MPICH1')
     def testFortran(self):
-        super(TestFortranStatus, self).testFortran()
+        super().testFortran()
 
     def testFintArray(self):
         s = MPI.F_SOURCE

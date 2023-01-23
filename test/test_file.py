@@ -9,7 +9,7 @@ def maketemp(prefix):
     return name
 
 
-class BaseTestFile(object):
+class BaseTestFile:
 
     COMM = MPI.COMM_NULL
     FILE = MPI.FILE_NULL

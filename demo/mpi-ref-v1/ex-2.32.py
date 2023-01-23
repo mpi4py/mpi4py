@@ -14,7 +14,7 @@ p = MPI.COMM_WORLD.Get_size()
 myrank = MPI.COMM_WORLD.Get_rank()
 
 # compute size of local block
-m = n/p
+m = n//p
 if myrank < (n - p * m):
     m = m + 1
 
@@ -29,8 +29,8 @@ else:
     right = myrank + 1
 
 # allocate local arrays
-A = numpy.empty((n+2, m+2), dtype=float, order='fortran')
-B = numpy.empty((n, m), dtype=float, order='fortran')
+A = numpy.empty((n+2, m+2), dtype=float, order='f')
+B = numpy.empty((n, m), dtype=float, order='f')
 
 A.fill(1)
 A[0, :] = A[-1, :] = 0

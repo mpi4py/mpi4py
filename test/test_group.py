@@ -2,7 +2,7 @@ from mpi4py import MPI
 import mpiunittest as unittest
 
 
-class BaseTestGroup(object):
+class BaseTestGroup:
 
     def testProperties(self):
         group = self.GROUP
@@ -141,7 +141,7 @@ class TestGroupEmpty(BaseTestGroup, unittest.TestCase):
         self.assertEqual(rank, MPI.UNDEFINED)
     @unittest.skipMPI('MPICH1')
     def testTranslRanks(self):
-        super(TestGroupEmpty, self).testTranslRanks()
+        super().testTranslRanks()
 
 class TestGroupSelf(BaseTestGroup, unittest.TestCase):
     def setUp(self):

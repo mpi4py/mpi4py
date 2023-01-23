@@ -159,13 +159,13 @@ class TestExcInfoNull(BaseTestCase):
 class TestExcInfo(BaseTestCase):
 
     def setUp(self):
-        super(TestExcInfo, self).setUp()
+        super().setUp()
         self.INFO  = MPI.Info.Create()
 
     def tearDown(self):
         self.INFO.Free()
         self.INFO = None
-        super(TestExcInfo, self).tearDown()
+        super().tearDown()
 
     def testDelete(self):
         self.assertRaisesMPI(
@@ -255,14 +255,14 @@ class TestExcSessionNull(BaseTestCase):
 class TestExcSession(BaseTestCase):
 
     def setUp(self):
-        super(TestExcSession, self).setUp()
+        super().setUp()
         self.SESSION = MPI.Session.Init()
         self.SESSION.Set_errhandler(MPI.ERRORS_RETURN)
 
     def tearDown(self):
         self.SESSION.Finalize()
         self.SESSION = None
-        super(TestExcSession, self).tearDown()
+        super().tearDown()
 
     def testGetNthPsetNeg(self):
         self.assertRaisesMPI(
@@ -411,14 +411,14 @@ class TestExcWinNull(BaseTestCase):
 class TestExcWin(BaseTestCase):
 
     def setUp(self):
-        super(TestExcWin, self).setUp()
+        super().setUp()
         self.WIN = MPI.Win.Create(None, 1, MPI.INFO_NULL, MPI.COMM_SELF)
         self.WIN.Set_errhandler(MPI.ERRORS_RETURN)
 
     def tearDown(self):
         self.WIN.Free()
         self.WIN = None
-        super(TestExcWin, self).tearDown()
+        super().tearDown()
 
     def testKeyvalInvalid(self):
         self.assertRaisesMPI(

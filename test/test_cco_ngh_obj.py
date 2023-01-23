@@ -71,7 +71,7 @@ def have_feature():
 
 
 @unittest.skipIf(not have_feature(), 'mpi-neighbor')
-class BaseTestCCONghObj(object):
+class BaseTestCCONghObj:
 
     COMM = MPI.COMM_NULL
 

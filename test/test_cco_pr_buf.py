@@ -29,7 +29,7 @@ def StartWaitFree(request):
     request.Free()
 
 
-class BaseTestCCOBuf(object):
+class BaseTestCCOBuf:
 
     COMM = MPI.COMM_NULL
 
@@ -363,7 +363,7 @@ class BaseTestCCOBuf(object):
                             self.assertEqual(value, i)
 
 
-class BaseTestCCOBufInplace(object):
+class BaseTestCCOBufInplace:
 
     def testGather(self):
         size = self.COMM.Get_size()

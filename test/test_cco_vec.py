@@ -16,7 +16,7 @@ def maxvalue(a):
         return 2 ** (a.itemsize * 7) - 1
 
 
-class BaseTestCCOVec(object):
+class BaseTestCCOVec:
 
     COMM = MPI.COMM_NULL
 
@@ -330,7 +330,7 @@ class BaseTestCCOVec(object):
 @unittest.skipMPI('msmpi(<8.1.0)')
 @unittest.skipMPI('openmpi(<1.8.0)')
 @unittest.skipIf(MPI.BOTTOM == MPI.IN_PLACE, 'mpi-in-place')
-class BaseTestCCOVecInplace(object):
+class BaseTestCCOVecInplace:
 
     COMM = MPI.COMM_NULL
 

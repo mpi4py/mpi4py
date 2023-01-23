@@ -4,7 +4,7 @@ import sys
 try:
     sys.getrefcount
 except AttributeError:
-    class getrefcount(object):
+    class getrefcount:
         def __init__(self, arg):
             pass
         def __eq__(self, other):
@@ -21,7 +21,7 @@ def memzero(m):
         m[0:len(m)] = b'\0'*len(m)
 
 
-class BaseTestWin(object):
+class BaseTestWin:
 
     COMM = MPI.COMM_NULL
     INFO = MPI.INFO_NULL

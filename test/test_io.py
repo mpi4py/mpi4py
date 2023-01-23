@@ -14,7 +14,7 @@ def arrayimpl_loop_io():
         yield array, typecode
 
 
-class BaseTestIO(object):
+class BaseTestIO:
 
     COMM = MPI.COMM_NULL
     FILE = MPI.FILE_NULL

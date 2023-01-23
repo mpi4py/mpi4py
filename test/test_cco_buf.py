@@ -24,7 +24,7 @@ def maxvalue(a):
         return 2 ** (a.itemsize * 7) - 1
 
 
-class BaseTestCCOBuf(object):
+class BaseTestCCOBuf:
 
     COMM = MPI.COMM_NULL
 
@@ -331,7 +331,7 @@ class BaseTestCCOBuf(object):
                             self.assertEqual(value, i)
 
 
-class BaseTestCCOBufInplace(object):
+class BaseTestCCOBufInplace:
 
     def testGather(self):
         size = self.COMM.Get_size()
@@ -648,7 +648,7 @@ class TestCCOBufInplaceWorld(BaseTestCCOBufInplace, unittest.TestCase):
     @unittest.skipMPI('MVAPICH2', MPI.COMM_WORLD.Get_size() > 1)
     @unittest.skipMPI('intelmpi', MPI.COMM_WORLD.Get_size() > 1)
     def testReduceScatter(self):
-        super(TestCCOBufInplaceWorld, self).testReduceScatter()
+        super().testReduceScatter()
 
 class TestCCOBufSelfDup(TestCCOBufSelf):
     def setUp(self):
