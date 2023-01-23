@@ -7,9 +7,9 @@ import subprocess
 import unittest
 import mpi4py
 
-
 on_win = sys.platform == 'win32'
 on_gha = os.environ.get('GITHUB_ACTIONS') == 'true'
+on_pypy = hasattr(sys, 'pypy_version_info')
 
 
 def find_executable(exe):
@@ -74,14 +74,20 @@ def execute(np, cmd, args=''):
 class BaseTestRun(unittest.TestCase):
 
     def assertMPIAbort(self, stdout, stderr, message=None):
+        patterns = (
+            'MPI_Abort',                # MPICH
+            'MPI_ABORT',                # Open MPI
+            'aborting MPI_COMM_WORLD',  # Microsoft MPI
+        )
+        if on_pypy and message == 'KeyboardInterrupt':
+            patterns += (
+                'EXIT STRING: Interrupt (signal 2)',  # MPICH
+                'exited on signal 2 (Interrupt)',     # Open MPI
+            )
         aborted = any(
             mpiabort in output
             for output in (stdout, stderr)
-            for mpiabort in (
-                'MPI_Abort',                # MPICH
-                'MPI_ABORT',                # Open MPI
-                'aborting MPI_COMM_WORLD',  # Microsoft MPI
-            )
+            for mpiabort in patterns
         )
         ci = any((
             os.environ.get('GITHUB_ACTIONS') == 'true',
@@ -93,7 +99,7 @@ class BaseTestRun(unittest.TestCase):
             if message is not None and not ci:
                 self.assertIn(message, stderr)
             return
-        if ci:
+        if not (stdout or stderr) or ci:
             warnings.warn(
                 "expecting MPI_Abort() message in stdout/stderr",
                 RuntimeWarning, 2,
@@ -158,7 +164,7 @@ class TestRunScript(BaseTestRun):
             for rank in range(0, np):
                 args = ['--rank', str(rank), '--interrupt']
                 status, stdout, stderr = self.execute(args, np)
-                if not hasattr(sys, 'pypy_version_info'):
+                if not on_pypy:
                     self.assertEqual(status, SIGINT + 128)
                 self.assertMPIAbort(stdout, stderr, excmess)
 
