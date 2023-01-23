@@ -20,7 +20,7 @@ class TestCommNull(unittest.TestCase):
         self.assertEqual(comm_null, MPI.COMM_NULL)
         self.assertIsNot(comm_null, MPI.COMM_NULL)
 
-class BaseTestComm(object):
+class BaseTestComm:
 
     def testConstructor(self):
         comm = MPI.Comm(self.COMM)

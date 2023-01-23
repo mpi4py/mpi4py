@@ -1,4 +1,5 @@
-execfile('ex-3.02.py')
+with open('ex-3.02.py') as source:
+    exec(source.read())
 
 B = (3, 1)
 D = (4 * dtype.extent, 0)

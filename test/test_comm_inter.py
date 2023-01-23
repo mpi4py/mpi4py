@@ -3,7 +3,7 @@ import mpiunittest as unittest
 
 
 @unittest.skipIf(MPI.COMM_WORLD.Get_size() < 2, 'mpi-world-size<2')
-class BaseTestIntercomm(object):
+class BaseTestIntercomm:
 
     BASECOMM  = MPI.COMM_NULL
     INTRACOMM = MPI.COMM_NULL
@@ -94,14 +94,14 @@ class TestIntercomm(BaseTestIntercomm, unittest.TestCase):
 class TestIntercommDup(TestIntercomm):
     def setUp(self):
         self.BASECOMM = self.BASECOMM.Dup()
-        super(TestIntercommDup, self).setUp()
+        super().setUp()
     def tearDown(self):
         self.BASECOMM.Free()
-        super(TestIntercommDup, self).tearDown()
+        super().tearDown()
 
 class TestIntercommDupDup(TestIntercomm):
     def setUp(self):
-        super(TestIntercommDupDup, self).setUp()
+        super().setUp()
         INTERCOMM = self.INTERCOMM
         self.INTERCOMM = self.INTERCOMM.Dup()
         INTERCOMM.Free()

@@ -20,7 +20,7 @@ def win_lock(win, rank, *args, **kwargs):
     finally:
         win.Unlock(rank)
 
-class BaseTestRMA(object):
+class BaseTestRMA:
 
     COMM = MPI.COMM_NULL
     INFO = MPI.INFO_NULL

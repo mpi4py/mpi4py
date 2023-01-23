@@ -14,7 +14,7 @@ typemap = MPI._typedict
 
 # ---
 
-class BaseBuf(object):
+class BaseBuf:
 
     def __init__(self, typecode, initializer):
         self._buf = array.array(typecode, initializer)
@@ -44,7 +44,7 @@ except ImportError:
 class DLPackCPUBuf(BaseBuf):
 
     def __init__(self, typecode, initializer):
-        super(DLPackCPUBuf, self).__init__(typecode, initializer)
+        super().__init__(typecode, initializer)
         self.managed = dlpack.make_dl_managed_tensor(self._buf)
 
     def __del__(self):
@@ -106,7 +106,7 @@ if cupy is not None:
 class CAIBuf(BaseBuf):
 
     def __init__(self, typecode, initializer, readonly=False):
-        super(CAIBuf, self).__init__(typecode, initializer)
+        super().__init__(typecode, initializer)
         address = self._buf.buffer_info()[0]
         typecode = self._buf.typecode
         itemsize = self._buf.itemsize
@@ -223,7 +223,7 @@ class TestMessageBlock(unittest.TestCase):
         MPI.Free_mem(buf)
 
 
-class BaseTestMessageSimpleArray(object):
+class BaseTestMessageSimpleArray:
 
     TYPECODES = "bhil"+"BHIL"+"fd"
 
@@ -624,13 +624,13 @@ class TestMessageDLPackCPUBuf(unittest.TestCase):
             dlpack.make_dl_shape([2, 2, 2], order='C')
         s = dltensor.strides
         strides = [s[i] for i in range(dltensor.ndim)]
-        s[0], s[1], s[2] = [strides[i] for i in [0, 1, 2]]
+        s[0], s[1], s[2] = (strides[i] for i in [0, 1, 2])
         MPI.Get_address(buf)
-        s[0], s[1], s[2] = [strides[i] for i in [2, 1, 0]]
+        s[0], s[1], s[2] = (strides[i] for i in [2, 1, 0])
         MPI.Get_address(buf)
-        s[0], s[1], s[2] = [strides[i] for i in [0, 2, 1]]
+        s[0], s[1], s[2] = (strides[i] for i in [0, 2, 1])
         self.assertRaises(BufferError, MPI.Get_address, buf)
-        s[0], s[1], s[2] = [strides[i] for i in [1, 0, 2]]
+        s[0], s[1], s[2] = (strides[i] for i in [1, 0, 2])
         self.assertRaises(BufferError, MPI.Get_address, buf)
         del s
         #
@@ -915,7 +915,7 @@ class TestMessageVector(unittest.TestCase):
 
 
 @unittest.skipMPI('msmpi(<8.0.0)')
-class BaseTestMessageVectorArray(object):
+class BaseTestMessageVectorArray:
 
     TYPECODES = "bhil"+"BHIL"+"fd"
 

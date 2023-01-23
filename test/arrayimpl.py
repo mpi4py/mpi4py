@@ -103,7 +103,7 @@ def add_backend(cls):
     return cls
 
 
-class BaseArray(object):
+class BaseArray:
 
     backend = None
 
@@ -250,7 +250,7 @@ except ImportError:
     dlpack = None
 
 
-class BaseDLPackCPU(object):
+class BaseDLPackCPU:
 
     def __dlpack_device__(self):
         return (dlpack.DLDeviceType.kDLCPU, 0)
@@ -272,7 +272,7 @@ if dlpack is not None and array is not None:
         backend = 'dlpack-array'
 
         def __init__(self, arg, typecode, shape=None):
-            super(DLPackArray, self).__init__(arg, typecode, shape)
+            super().__init__(arg, typecode, shape)
 
 
 if dlpack is not None and numpy is not None:
@@ -283,7 +283,7 @@ if dlpack is not None and numpy is not None:
         backend = 'dlpack-numpy'
 
         def __init__(self, arg, typecode, shape=None):
-            super(DLPackNumPy, self).__init__(arg, typecode, shape)
+            super().__init__(arg, typecode, shape)
 
 
 def typestr(typecode, itemsize):
@@ -306,7 +306,7 @@ def typestr(typecode, itemsize):
     return typestr
 
 
-class BaseFakeGPUArray(object):
+class BaseFakeGPUArray:
 
     def set_interface(self, shape, readonly=False):
         self.__cuda_array_interface__ = dict(
@@ -326,7 +326,7 @@ if array is not None:
     class FakeGPUArrayBasic(BaseFakeGPUArray, ArrayArray):
 
         def __init__(self, arg, typecode, shape=None, readonly=False):
-            super(FakeGPUArrayBasic, self).__init__(arg, typecode, shape)
+            super().__init__(arg, typecode, shape)
             self.set_interface((len(self),), readonly)
 
 
@@ -336,7 +336,7 @@ if numpy is not None:
     class FakeGPUArrayNumPy(BaseFakeGPUArray, ArrayNumPy):
 
         def __init__(self, arg, typecode, shape=None, readonly=False):
-            super(FakeGPUArrayNumPy, self).__init__(arg, typecode, shape)
+            super().__init__(arg, typecode, shape)
             self.set_interface(self.array.shape, readonly)
 
 

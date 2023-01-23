@@ -17,7 +17,7 @@ if MPI.COMM_WORLD.Get_size() < 2:
 
 comm = MPI.COMM_WORLD
 
-buff = numpy.empty((1000,2), dtype='f', order='fortran')
+buff = numpy.empty((1000,2), dtype='f', order='f')
 
 rank = comm.Get_rank()
 

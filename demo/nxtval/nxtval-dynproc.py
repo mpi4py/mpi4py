@@ -3,7 +3,7 @@
 from mpi4py import MPI
 import sys, os
 
-class Counter(object):
+class Counter:
 
     def __init__(self, comm):
         assert not comm.Is_inter()

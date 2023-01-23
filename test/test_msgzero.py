@@ -2,7 +2,7 @@ from mpi4py import MPI
 import mpiunittest as unittest
 
 
-class BaseTestMessageZero(object):
+class BaseTestMessageZero:
 
     null_b = [None, MPI.INT]
     null_v = [None, (0, None), MPI.INT]

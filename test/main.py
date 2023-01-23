@@ -202,10 +202,10 @@ def print_banner(options):
         sys.stderr.flush()
 
     if options.verbosity:
-        writeln((getpythoninfo()))
-        writeln((getpackageinfo('numpy')))
-        writeln((getlibraryinfo()))
-        writeln((getpackageinfo('mpi4py')))
+        writeln(getpythoninfo())
+        writeln(getpackageinfo('numpy'))
+        writeln(getlibraryinfo())
+        writeln(getpackageinfo('mpi4py'))
 
 
 class TestLoader(unittest.TestLoader):

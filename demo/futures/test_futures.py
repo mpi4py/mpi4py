@@ -490,8 +490,8 @@ class WaitTestMixin:
                 [CANCELLED_FUTURE, future1, future2],
                 return_when=futures.FIRST_COMPLETED)
 
-        self.assertEqual(set([future1]), done)
-        self.assertEqual(set([CANCELLED_FUTURE, future2]), not_done)
+        self.assertEqual({future1}, done)
+        self.assertEqual({CANCELLED_FUTURE, future2}, not_done)
 
     def test_first_completed_some_already_completed(self):
         future1 = self.executor.submit(time.sleep, 0.5)
@@ -500,10 +500,11 @@ class WaitTestMixin:
                  [CANCELLED_AND_NOTIFIED_FUTURE, SUCCESSFUL_FUTURE, future1],
                  return_when=futures.FIRST_COMPLETED)
 
-        self.assertEqual(
-                set([CANCELLED_AND_NOTIFIED_FUTURE, SUCCESSFUL_FUTURE]),
-                finished)
-        self.assertEqual(set([future1]), pending)
+        self.assertEqual({
+            CANCELLED_AND_NOTIFIED_FUTURE,
+            SUCCESSFUL_FUTURE},
+            finished)
+        self.assertEqual({future1}, pending)
 
     def test_first_exception(self):
         future1 = self.executor.submit(mul, 2, 21)
@@ -514,8 +515,8 @@ class WaitTestMixin:
                 [future1, future2, future3],
                 return_when=futures.FIRST_EXCEPTION)
 
-        self.assertEqual(set([future1, future2]), finished)
-        self.assertEqual(set([future3]), pending)
+        self.assertEqual({future1, future2}, finished)
+        self.assertEqual({future3}, pending)
 
     def test_first_exception_some_already_complete(self):
         future1 = self.executor.submit(divmod, 21, 0)
@@ -528,20 +529,25 @@ class WaitTestMixin:
                  future1, future2],
                 return_when=futures.FIRST_EXCEPTION)
 
-        self.assertEqual(set([SUCCESSFUL_FUTURE,
-                              CANCELLED_AND_NOTIFIED_FUTURE,
-                              future1]), finished)
-        self.assertEqual(set([CANCELLED_FUTURE, future2]), pending)
+        self.assertEqual({
+            SUCCESSFUL_FUTURE,
+            CANCELLED_AND_NOTIFIED_FUTURE,
+            future1},
+            finished)
+        self.assertEqual({
+            CANCELLED_FUTURE,
+            future2},
+            pending)
 
     def test_first_exception_one_already_failed(self):
         future1 = self.executor.submit(time.sleep, 0.25)
 
         finished, pending = futures.wait(
-                 [EXCEPTION_FUTURE, future1],
-                 return_when=futures.FIRST_EXCEPTION)
+            [EXCEPTION_FUTURE, future1],
+            return_when=futures.FIRST_EXCEPTION)
 
-        self.assertEqual(set([EXCEPTION_FUTURE]), finished)
-        self.assertEqual(set([future1]), pending)
+        self.assertEqual({EXCEPTION_FUTURE}, finished)
+        self.assertEqual({future1}, pending)
 
     def test_all_completed(self):
         future1 = self.executor.submit(divmod, 2, 0)
@@ -555,11 +561,13 @@ class WaitTestMixin:
                  future2],
                 return_when=futures.ALL_COMPLETED)
 
-        self.assertEqual(set([SUCCESSFUL_FUTURE,
-                              CANCELLED_AND_NOTIFIED_FUTURE,
-                              EXCEPTION_FUTURE,
-                              future1,
-                              future2]), finished)
+        self.assertEqual({
+            SUCCESSFUL_FUTURE,
+            CANCELLED_AND_NOTIFIED_FUTURE,
+            EXCEPTION_FUTURE,
+            future1,
+            future2},
+            finished)
         self.assertEqual(set(), pending)
 
     def test_timeout(self):
@@ -574,11 +582,13 @@ class WaitTestMixin:
                 timeout=0.5,
                 return_when=futures.ALL_COMPLETED)
 
-        self.assertEqual(set([CANCELLED_AND_NOTIFIED_FUTURE,
-                              EXCEPTION_FUTURE,
-                              SUCCESSFUL_FUTURE,
-                              future1]), finished)
-        self.assertEqual(set([future2]), pending)
+        self.assertEqual({
+            CANCELLED_AND_NOTIFIED_FUTURE,
+            EXCEPTION_FUTURE,
+            SUCCESSFUL_FUTURE,
+            future1},
+            finished)
+        self.assertEqual({future2}, pending)
 
 
 class ProcessPoolWaitTest(ProcessPoolMixin,
@@ -598,12 +608,12 @@ class AsCompletedTestMixin:
                  EXCEPTION_FUTURE,
                  SUCCESSFUL_FUTURE,
                  future1, future2]))
-        self.assertEqual(set(
-                [CANCELLED_AND_NOTIFIED_FUTURE,
-                 EXCEPTION_FUTURE,
-                 SUCCESSFUL_FUTURE,
-                 future1, future2]),
-                completed)
+        self.assertEqual({
+            CANCELLED_AND_NOTIFIED_FUTURE,
+            EXCEPTION_FUTURE,
+            SUCCESSFUL_FUTURE,
+            future1, future2},
+            completed)
 
     def test_zero_timeout(self):
         future1 = self.executor.submit(time.sleep, 0.5)
@@ -619,10 +629,11 @@ class AsCompletedTestMixin:
         except futures.TimeoutError:
             pass
 
-        self.assertEqual(set([CANCELLED_AND_NOTIFIED_FUTURE,
-                              EXCEPTION_FUTURE,
-                              SUCCESSFUL_FUTURE]),
-                         completed_futures)
+        self.assertEqual({
+            CANCELLED_AND_NOTIFIED_FUTURE,
+            EXCEPTION_FUTURE,
+            SUCCESSFUL_FUTURE},
+            completed_futures)
 
     def test_nonzero_timeout(self):
         future1 = self.executor.submit(time.sleep, 0.0)
@@ -639,11 +650,12 @@ class AsCompletedTestMixin:
         except futures.TimeoutError:
             pass
 
-        self.assertEqual(set([CANCELLED_AND_NOTIFIED_FUTURE,
-                              EXCEPTION_FUTURE,
-                              SUCCESSFUL_FUTURE,
-                              future1]),
-                         completed_futures)
+        self.assertEqual({
+            CANCELLED_AND_NOTIFIED_FUTURE,
+            EXCEPTION_FUTURE,
+            SUCCESSFUL_FUTURE,
+            future1},
+            completed_futures)
 
     def test_duplicate_futures(self):
         # Issue 20367. Duplicate futures should not raise exceptions or give
@@ -874,7 +886,7 @@ def inout(arg):
     return arg
 
 
-class GoodPickle(object):
+class GoodPickle:
 
     def __init__(self, value=0):
         self.value = value
@@ -890,7 +902,7 @@ class GoodPickle(object):
         self.value = state[0]
 
 
-class BadPickle(object):
+class BadPickle:
 
     def __init__(self):
         self.pickled = False
@@ -903,7 +915,7 @@ class BadPickle(object):
         pass
 
 
-class BadUnpickle(object):
+class BadUnpickle:
 
     def __init__(self):
         self.pickled = False
@@ -1138,28 +1150,28 @@ class ThenTest(unittest.TestCase):
         base_f = ThenableFuture()
         new_f = base_f.then()
 
-        self.assert_(base_f is not new_f)
-        self.assert_(not base_f.done())
-        self.assert_(not new_f.done())
+        self.assertTrue(base_f is not new_f)
+        self.assertTrue(not base_f.done())
+        self.assertTrue(not new_f.done())
 
         base_f._invoke_callbacks()
-        self.assert_(new_f.cancelled())
+        self.assertTrue(new_f.cancelled())
 
     def test_cancel(self):
 
         base_f = ThenableFuture()
         new_f = base_f.then()
 
-        self.assert_(base_f is not new_f)
-        self.assert_(not base_f.done())
-        self.assert_(not new_f.done())
+        self.assertTrue(base_f is not new_f)
+        self.assertTrue(not base_f.done())
+        self.assertTrue(not new_f.done())
 
         base_f.cancel()
-        self.assert_(base_f.done())
-        self.assert_(new_f.done())
+        self.assertTrue(base_f.done())
+        self.assertTrue(new_f.done())
 
-        self.assert_(base_f.cancelled())
-        self.assert_(new_f.cancelled())
+        self.assertTrue(base_f.cancelled())
+        self.assertTrue(new_f.cancelled())
 
     def test_then_multiple(self):
 
@@ -1168,42 +1180,42 @@ class ThenTest(unittest.TestCase):
         new_f2 = base_f.then()
         new_f3 = base_f.then()
 
-        self.assert_(base_f is not new_f1)
-        self.assert_(base_f is not new_f2)
-        self.assert_(base_f is not new_f3)
-        self.assert_(not base_f.done())
-        self.assert_(not new_f1.done())
-        self.assert_(not new_f2.done())
-        self.assert_(not new_f3.done())
+        self.assertTrue(base_f is not new_f1)
+        self.assertTrue(base_f is not new_f2)
+        self.assertTrue(base_f is not new_f3)
+        self.assertTrue(not base_f.done())
+        self.assertTrue(not new_f1.done())
+        self.assertTrue(not new_f2.done())
+        self.assertTrue(not new_f3.done())
 
         base_f.set_result('done')
-        self.assert_(base_f.done())
-        self.assert_(new_f1.done())
-        self.assert_(new_f2.done())
-        self.assert_(new_f3.done())
+        self.assertTrue(base_f.done())
+        self.assertTrue(new_f1.done())
+        self.assertTrue(new_f2.done())
+        self.assertTrue(new_f3.done())
 
-        self.assert_(not new_f1.exception())
-        self.assert_(not new_f2.exception())
-        self.assert_(not new_f3.exception())
-        self.assert_(new_f1.result() == 'done')
-        self.assert_(new_f2.result() == 'done')
-        self.assert_(new_f3.result() == 'done')
+        self.assertTrue(not new_f1.exception())
+        self.assertTrue(not new_f2.exception())
+        self.assertTrue(not new_f3.exception())
+        self.assertTrue(new_f1.result() == 'done')
+        self.assertTrue(new_f2.result() == 'done')
+        self.assertTrue(new_f3.result() == 'done')
 
     def test_no_callbacks_and_success(self):
 
         base_f = ThenableFuture()
         new_f = base_f.then()
 
-        self.assert_(base_f is not new_f)
-        self.assert_(not base_f.done())
-        self.assert_(not new_f.done())
+        self.assertTrue(base_f is not new_f)
+        self.assertTrue(not base_f.done())
+        self.assertTrue(not new_f.done())
 
         base_f.set_result('done')
-        self.assert_(base_f.done())
-        self.assert_(new_f.done())
+        self.assertTrue(base_f.done())
+        self.assertTrue(new_f.done())
 
-        self.assert_(not new_f.exception())
-        self.assert_(new_f.result() == 'done')
+        self.assertTrue(not new_f.exception())
+        self.assertTrue(new_f.result() == 'done')
 
     def test_no_callbacks_and_failure(self):
 
@@ -1213,34 +1225,34 @@ class ThenTest(unittest.TestCase):
         base_f = ThenableFuture()
         new_f = base_f.then()
 
-        self.assert_(base_f is not new_f)
-        self.assert_(not base_f.done())
-        self.assert_(not new_f.done())
+        self.assertTrue(base_f is not new_f)
+        self.assertTrue(not base_f.done())
+        self.assertTrue(not new_f.done())
 
         base_f.set_exception(MyException('sad'))
-        self.assert_(base_f.done())
-        self.assert_(new_f.done())
+        self.assertTrue(base_f.done())
+        self.assertTrue(new_f.done())
 
-        self.assert_(new_f.exception())
+        self.assertTrue(new_f.exception())
         with self.assertRaises(MyException) as catcher:
             new_f.result()
-        self.assert_(catcher.exception.args[0] == 'sad')
+        self.assertTrue(catcher.exception.args[0] == 'sad')
 
     def test_success_callback_and_success(self):
 
         base_f = ThenableFuture()
         new_f = base_f.then(lambda result: result + ' manipulated')
 
-        self.assert_(base_f is not new_f)
-        self.assert_(not base_f.done())
-        self.assert_(not new_f.done())
+        self.assertTrue(base_f is not new_f)
+        self.assertTrue(not base_f.done())
+        self.assertTrue(not new_f.done())
 
         base_f.set_result('done')
-        self.assert_(base_f.done())
-        self.assert_(new_f.done())
+        self.assertTrue(base_f.done())
+        self.assertTrue(new_f.done())
 
-        self.assert_(not new_f.exception())
-        self.assert_(new_f.result() == 'done manipulated')
+        self.assertTrue(not new_f.exception())
+        self.assertTrue(new_f.result() == 'done manipulated')
 
     def test_err_callback_and_failure_repackage(self):
 
@@ -1262,18 +1274,18 @@ class ThenTest(unittest.TestCase):
         base_f = ThenableFuture()
         new_f = base_f.then(None, on_failure)
 
-        self.assert_(base_f is not new_f)
-        self.assert_(not base_f.done())
-        self.assert_(not new_f.done())
+        self.assertTrue(base_f is not new_f)
+        self.assertTrue(not base_f.done())
+        self.assertTrue(not new_f.done())
 
         base_f.set_exception(MyException('sad'))
-        self.assert_(base_f.done())
-        self.assert_(new_f.done())
+        self.assertTrue(base_f.done())
+        self.assertTrue(new_f.done())
 
-        self.assert_(new_f.exception())
+        self.assertTrue(new_f.exception())
         with self.assertRaises(MyRepackagedException) as catcher:
             new_f.result()
-        self.assert_(catcher.exception.args[0] == 'sad repackaged')
+        self.assertTrue(catcher.exception.args[0] == 'sad repackaged')
 
     def test_err_callback_and_failure_raised(self):
 
@@ -1289,18 +1301,18 @@ class ThenTest(unittest.TestCase):
         base_f = ThenableFuture()
         new_f = base_f.then(None, raise_something_else)
 
-        self.assert_(base_f is not new_f)
-        self.assert_(not base_f.done())
-        self.assert_(not new_f.done())
+        self.assertTrue(base_f is not new_f)
+        self.assertTrue(not base_f.done())
+        self.assertTrue(not new_f.done())
 
         base_f.set_exception(MyException('sad'))
-        self.assert_(base_f.done())
-        self.assert_(new_f.done())
+        self.assertTrue(base_f.done())
+        self.assertTrue(new_f.done())
 
-        self.assert_(new_f.exception())
+        self.assertTrue(new_f.exception())
         with self.assertRaises(MyRepackagedException) as catcher:
             new_f.result()
-        self.assert_(catcher.exception.args[0] == 'sad repackaged')
+        self.assertTrue(catcher.exception.args[0] == 'sad repackaged')
 
     def test_err_callback_convert_to_success(self):
 
@@ -1319,32 +1331,32 @@ class ThenTest(unittest.TestCase):
         base_f = ThenableFuture()
         new_f = base_f.catch(on_failure)
 
-        self.assert_(base_f is not new_f)
-        self.assert_(not base_f.done())
-        self.assert_(not new_f.done())
+        self.assertTrue(base_f is not new_f)
+        self.assertTrue(not base_f.done())
+        self.assertTrue(not new_f.done())
 
         base_f.set_exception(MyException('sad'))
-        self.assert_(base_f.done())
-        self.assert_(new_f.done())
+        self.assertTrue(base_f.done())
+        self.assertTrue(new_f.done())
 
-        self.assert_(not new_f.exception())
-        self.assert_(new_f.result() == 'sad repackaged')
+        self.assertTrue(not new_f.exception())
+        self.assertTrue(new_f.result() == 'sad repackaged')
 
     def test_err_catch_ignore(self):
 
         base_f = ThenableFuture()
         new_f = base_f.catch()
 
-        self.assert_(base_f is not new_f)
-        self.assert_(not base_f.done())
-        self.assert_(not new_f.done())
+        self.assertTrue(base_f is not new_f)
+        self.assertTrue(not base_f.done())
+        self.assertTrue(not new_f.done())
 
         base_f.set_exception(Exception('sad'))
-        self.assert_(base_f.done())
-        self.assert_(new_f.done())
+        self.assertTrue(base_f.done())
+        self.assertTrue(new_f.done())
 
-        self.assert_(new_f.exception() is None)
-        self.assert_(new_f.result() is None)
+        self.assertTrue(new_f.exception() is None)
+        self.assertTrue(new_f.result() is None)
 
     def test_success_callback_and_failure_raised(self):
 
@@ -1357,15 +1369,15 @@ class ThenTest(unittest.TestCase):
         base_f = ThenableFuture()
         new_f = base_f.then(raise_something_else)
 
-        self.assert_(base_f is not new_f)
-        self.assert_(not base_f.done())
-        self.assert_(not new_f.done())
+        self.assertTrue(base_f is not new_f)
+        self.assertTrue(not base_f.done())
+        self.assertTrue(not new_f.done())
 
         base_f.set_result('sad')
-        self.assert_(base_f.done())
-        self.assert_(new_f.done())
+        self.assertTrue(base_f.done())
+        self.assertTrue(new_f.done())
 
-        self.assert_(new_f.exception())
+        self.assertTrue(new_f.exception())
         with self.assertRaises(MyException) as catcher:
             new_f.result()
         assert catcher.exception.args[0] == 'sad repackaged'
@@ -1383,16 +1395,16 @@ class ThenTest(unittest.TestCase):
         base_f = ThenableFuture()
         new_f = base_f.then(transform)
 
-        self.assert_(base_f is not new_f)
-        self.assert_(not base_f.done())
-        self.assert_(not new_f.done())
+        self.assertTrue(base_f is not new_f)
+        self.assertTrue(not base_f.done())
+        self.assertTrue(not new_f.done())
 
         base_f.set_result(1)
-        self.assert_(base_f.done())
-        self.assert_(new_f.done())
+        self.assertTrue(base_f.done())
+        self.assertTrue(new_f.done())
 
-        self.assert_(not new_f.exception())
-        self.assert_(new_f.result() == 5)
+        self.assertTrue(not new_f.exception())
+        self.assertTrue(new_f.result() == 5)
 
     def test_detect_circular_chains(self):
 
@@ -1413,18 +1425,18 @@ class ThenTest(unittest.TestCase):
         base_f = ThenableFuture()
         new_f = base_f.then(transform)
 
-        self.assert_(base_f is not new_f)
-        self.assert_(not base_f.done())
-        self.assert_(not new_f.done())
+        self.assertTrue(base_f is not new_f)
+        self.assertTrue(not base_f.done())
+        self.assertTrue(not new_f.done())
 
         base_f.set_result(1)
-        self.assert_(base_f.done())
-        self.assert_(new_f.done())
+        self.assertTrue(base_f.done())
+        self.assertTrue(new_f.done())
 
-        self.assert_(new_f.exception())
+        self.assertTrue(new_f.exception())
         with self.assertRaises(RuntimeError) as catcher:
             new_f.result()
-        self.assert_(
+        self.assertTrue(
             'Circular future chain detected'
             in catcher.exception.args[0],
         )

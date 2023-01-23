@@ -4,7 +4,7 @@ from mpi4py import MPI
 from array import array as _array
 import struct as _struct
 
-class Counter(object):
+class Counter:
 
     def __init__(self, comm):
         #

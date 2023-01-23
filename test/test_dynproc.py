@@ -193,7 +193,7 @@ class TestDPM(unittest.TestCase):
             try:
                 client.connect(address)
                 connected = True
-            except socket.error:
+            except OSError:
                 raise
         connected = MPI.COMM_WORLD.bcast(connected, root=1)
         # test Comm.Join()

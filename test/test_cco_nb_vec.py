@@ -18,7 +18,7 @@ def maxvalue(a):
 
 @unittest.skipMPI('msmpi(<8.1.0)')
 @unittest.skipMPI('openmpi(<2.0.0)')
-class BaseTestCCOVec(object):
+class BaseTestCCOVec:
 
     COMM = MPI.COMM_NULL
 
@@ -327,7 +327,7 @@ class BaseTestCCOVec(object):
 
 @unittest.skipMPI('msmpi(<8.1.0)')
 @unittest.skipMPI('openmpi(<2.0.0)')
-class BaseTestCCOVecInplace(object):
+class BaseTestCCOVecInplace:
 
     COMM = MPI.COMM_NULL
 

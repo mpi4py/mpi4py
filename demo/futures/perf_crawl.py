@@ -52,8 +52,10 @@ def download_urls_with_executor(executor, urls, timeout=60):
     if executor is None: return {}
     try:
         url_to_content = {}
-        future_to_url = dict((executor.submit(load_url, url, timeout), url)
-                             for url in urls)
+        future_to_url = {
+            executor.submit(load_url, url, timeout): url
+            for url in urls
+        }
         for future in as_completed(future_to_url):
             try:
                 url_to_content[future_to_url[future]] = future.result()

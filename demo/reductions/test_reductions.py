@@ -7,7 +7,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from reductions import Intracomm
 del sys.path[0]
 
-class BaseTest(object):
+class BaseTest:
 
     def test_reduce(self):
         rank = self.comm.rank

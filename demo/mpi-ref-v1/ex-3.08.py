@@ -6,8 +6,8 @@ except ImportError:
 
 # extract the section a[0:6:2, 0:5:2] and store it in e[:,:]
 
-a = numpy.empty((6, 5), dtype=float, order='fortran')
-e = numpy.empty((3, 3), dtype=float, order='fortran')
+a = numpy.empty((6, 5), dtype=float, order='f')
+e = numpy.empty((3, 3), dtype=float, order='f')
 a.flat = numpy.arange(a.size, dtype=float)
 
 lb, sizeofdouble = MPI.DOUBLE.Get_extent()

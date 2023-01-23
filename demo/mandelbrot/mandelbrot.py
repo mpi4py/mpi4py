@@ -35,8 +35,8 @@ if rank == 0:
 comm.Bcast([rmsg, MPI.FLOAT], root=0)
 comm.Bcast([imsg, MPI.INT], root=0)
 
-x1, x2, y1, y2 = [float(r) for r in rmsg]
-w, h, maxit    = [int(i) for i in imsg]
+x1, x2, y1, y2 = (float(r) for r in rmsg)
+w, h, maxit    = (int(i) for i in imsg)
 dx = (x2 - x1) / w
 dy = (y2 - y1) / h
 

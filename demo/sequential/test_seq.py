@@ -13,8 +13,10 @@ def test():
     name = MPI.Get_processor_name()
     with Seq(MPI.COMM_WORLD, 1, 10):
         print(
-            "Hello, World! I am process %d of %d on %s."
-            % (rank, size, name))
+            f"Hello, World! I am process {rank} of {size} on {name}.",
+            flush=True,
+        )
+
 
 if __name__ == "__main__":
     test()

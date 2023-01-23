@@ -3,7 +3,7 @@ import mpiunittest as unittest
 import arrayimpl
 
 
-class BaseTestP2PBufPart(object):
+class BaseTestP2PBufPart:
 
     COMM = MPI.COMM_NULL
 

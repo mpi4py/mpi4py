@@ -19,14 +19,13 @@ def osu_alltoallv(
 
     s_buf = allocate(MAX_MSG_SIZE*numprocs)
     r_buf = allocate(MAX_MSG_SIZE*numprocs)
-    array_int = lambda n: array('i', [0]*n) 
-    s_counts = array_int(numprocs) 
-    s_displs = array_int(numprocs)
-    r_counts = array_int(numprocs)
-    r_displs = array_int(numprocs)
+    s_counts = array('i', [0] * numprocs)
+    s_displs = array('i', [0] * numprocs)
+    r_counts = array('i', [0] * numprocs)
+    r_displs = array('i', [0] * numprocs)
 
     if myid == 0:
-        print ('# %s' % (BENCHMARH,))
+        print (f'# {BENCHMARH}')
     if myid == 0:
         print ('# %-8s%20s' % ("Size [B]", "Latency [us]"))
 
@@ -64,7 +63,7 @@ def allocate(n):
     try:
         import mmap
         return mmap.mmap(-1, n)
-    except (ImportError, EnvironmentError):
+    except (ImportError, OSError):
         try:
             from numpy import zeros
             return zeros(n, 'B')

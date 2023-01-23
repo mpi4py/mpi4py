@@ -140,7 +140,7 @@ class TestRunScript(BaseTestRun):
     def testSysExitCode(self):
         errcode = 7
         for np in (1, 2):
-            for r in sorted(set([0, np - 1])):
+            for r in sorted({0, np - 1}):
                 args = ['--rank', str(r), '--sys-exit', str(errcode)]
                 status, stdout, stderr = self.execute(args, np)
                 self.assertIn(status, (errcode, 1))
@@ -150,7 +150,7 @@ class TestRunScript(BaseTestRun):
     def testSysExitMess(self):
         exitmsg = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
         for np in (1, 2):
-            for r in sorted(set([0, np - 1])):
+            for r in sorted({0, np - 1}):
                 args = ['--rank', str(r), '--sys-exit-msg', exitmsg]
                 status, stdout, stderr = self.execute(args, np)
                 self.assertEqual(status, 1)

@@ -54,7 +54,7 @@ def have_feature():
         cartcomm.Free()
 
 @unittest.skipIf(not have_feature(), 'mpi-neighbor')
-class BaseTestCCONghBuf(object):
+class BaseTestCCONghBuf:
 
     COMM = MPI.COMM_NULL
 

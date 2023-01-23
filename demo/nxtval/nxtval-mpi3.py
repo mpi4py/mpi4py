@@ -4,7 +4,7 @@ import struct as _struct
 
 # --------------------------------------------------------------------
 
-class Counter(object):
+class Counter:
 
     def __init__(self, comm):
         rank = comm.Get_rank()
@@ -34,7 +34,7 @@ class Counter(object):
 
 # -----------------------------------------------------------------------------
 
-class Mutex(object):
+class Mutex:
 
     def __init__(self, comm):
         self.counter = Counter(comm)

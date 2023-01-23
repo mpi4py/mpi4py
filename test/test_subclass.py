@@ -3,13 +3,13 @@ import mpiunittest as unittest
 
 # ---
 
-class MyBaseComm(object):
+class MyBaseComm:
 
     def free(self):
         if self != MPI.COMM_NULL:
             MPI.Comm.Free(self)
 
-class BaseTestBaseComm(object):
+class BaseTestBaseComm:
 
     def setUp(self):
         self.comm = self.CommType(self.COMM_BASE)
@@ -48,7 +48,7 @@ class MyComm(MPI.Comm, MyBaseComm):
         if comm is not None:
             if comm != MPI.COMM_NULL:
                 comm = comm.Clone()
-        return super(MyComm, cls).__new__(cls, comm)
+        return super().__new__(cls, comm)
 
 class BaseTestMyComm(BaseTestBaseComm):
     CommType = MyComm
@@ -70,7 +70,7 @@ class MyIntracomm(MPI.Intracomm, MyBaseComm):
         if comm is not None:
             if comm != MPI.COMM_NULL:
                 comm = comm.Dup()
-        return super(MyIntracomm, cls).__new__(cls, comm)
+        return super().__new__(cls, comm)
 
 class BaseTestMyIntracomm(BaseTestBaseComm):
     CommType = MyIntracomm
@@ -93,7 +93,7 @@ class MyCartcomm(MPI.Cartcomm, MyBaseComm):
             if comm != MPI.COMM_NULL:
                 dims = [comm.size]
                 comm = comm.Create_cart(dims)
-        return super(MyCartcomm, cls).__new__(cls, comm)
+        return super().__new__(cls, comm)
 
 class BaseTestMyCartcomm(BaseTestBaseComm):
     CommType = MyCartcomm
@@ -117,7 +117,7 @@ class MyGraphcomm(MPI.Graphcomm, MyBaseComm):
                 index = list(range(0, comm.size+1))
                 edges = list(range(0, comm.size))
                 comm = comm.Create_graph(index, edges)
-        return super(MyGraphcomm, cls).__new__(cls, comm)
+        return super().__new__(cls, comm)
 
 class BaseTestMyGraphcomm(BaseTestBaseComm):
     CommType = MyGraphcomm
@@ -135,7 +135,7 @@ class TestMyGraphcommWORLD(BaseTestMyGraphcomm, unittest.TestCase):
 
 class MyRequest(MPI.Request):
     def __new__(cls, request=None):
-        return super(MyRequest, cls).__new__(cls, request)
+        return super().__new__(cls, request)
     def test(self):
         return super(type(self), self).Test()
     def wait(self):
@@ -143,7 +143,7 @@ class MyRequest(MPI.Request):
 
 class MyPrequest(MPI.Prequest):
     def __new__(cls, request=None):
-        return super(MyPrequest, cls).__new__(cls, request)
+        return super().__new__(cls, request)
     def test(self):
         return super(type(self), self).Test()
     def wait(self):
@@ -153,13 +153,13 @@ class MyPrequest(MPI.Prequest):
 
 class MyGrequest(MPI.Grequest):
     def __new__(cls, request=None):
-        return super(MyGrequest, cls).__new__(cls, request)
+        return super().__new__(cls, request)
     def test(self):
         return super(type(self), self).Test()
     def wait(self):
         return super(type(self), self).Wait()
 
-class BaseTestMyRequest(object):
+class BaseTestMyRequest:
 
     def setUp(self):
         self.req = self.MyRequestType(MPI.REQUEST_NULL)
@@ -220,7 +220,7 @@ class MyWin(MPI.Win):
         if self != MPI.WIN_NULL:
             MPI.Win.Free(self)
 
-class BaseTestMyWin(object):
+class BaseTestMyWin:
 
     def setUp(self):
         w = MPI.Win.Create(MPI.BOTTOM)
@@ -263,7 +263,7 @@ class MyFile(MPI.File):
             MPI.File.Close(self)
 
 
-class BaseTestMyFile(object):
+class BaseTestMyFile:
 
     def openfile(self):
         fd, fname = tempfile.mkstemp(prefix='mpi4py')

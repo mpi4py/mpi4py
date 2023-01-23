@@ -465,7 +465,7 @@ class TestUtilDTLib(unittest.TestCase):
 
     def testAlignment(self):
         complexcodes = list('FDG')
-        complexcodes += ['c{}'.format(n) for n in (8, 16)]
+        complexcodes += [f'c{n}' for n in (8, 16)]
         for t in typecodes + complexcodes:
             with self.subTest(typecode=t):
                 datatype = MPI.Datatype.fromcode(t)

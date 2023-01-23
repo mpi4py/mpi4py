@@ -4,7 +4,7 @@ from mpi4py import MPI
 from array import array
 from threading import Thread
 
-class Counter(object):
+class Counter:
 
     def __init__(self, comm):
         # duplicate communicator

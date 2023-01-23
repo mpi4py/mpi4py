@@ -22,7 +22,7 @@ messages += [
     dict((f'k{k}', v) for k, v in enumerate(_basic)),
 ]
 
-class BaseTestP2PObj(object):
+class BaseTestP2PObj:
 
     COMM = MPI.COMM_NULL
 

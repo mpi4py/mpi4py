@@ -9,7 +9,7 @@ with open("libmpi.c.in") as f:
 with open("libmpi.h") as f:
     ffi.cdef(f.read())
 
-class mpicompiler(object):
+class mpicompiler:
 
     from cffi import ffiplatform
 

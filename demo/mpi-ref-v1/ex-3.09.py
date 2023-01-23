@@ -6,8 +6,8 @@ except ImportError:
 
 # transpose a matrix a into b
 
-a = numpy.empty((100, 100), dtype=float, order='fortran')
-b = numpy.empty((100, 100), dtype=float, order='fortran')
+a = numpy.empty((100, 100), dtype=float, order='f')
+b = numpy.empty((100, 100), dtype=float, order='f')
 a.flat = numpy.arange(a.size, dtype=float)
 
 lb, sizeofdouble = MPI.DOUBLE.Get_extent()

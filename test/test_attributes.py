@@ -7,7 +7,7 @@ except ImportError:
     array = None
 
 
-class BaseTestAttr(object):
+class BaseTestAttr:
 
     keyval = MPI.KEYVAL_INVALID
 

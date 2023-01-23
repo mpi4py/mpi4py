@@ -4,7 +4,7 @@ import itertools
 import arrayimpl
 
 
-class BaseTestP2PBuf(object):
+class BaseTestP2PBuf:
 
     COMM = MPI.COMM_NULL
 
