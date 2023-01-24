@@ -17,11 +17,14 @@ class DLDeviceType(IntEnum):
     kDLROCMHost = 11
     kDLExtDev = 12
     kDLCUDAManaged = 13
+    kDLOneAPI = 14
+    kDLWebGPU = 15
+    kDLHexagon = 16
 
 class DLDevice(ctypes.Structure):
   _fields_ = [
       ("device_type", ctypes.c_uint),
-      ("device_id", ctypes.c_int),
+      ("device_id", ctypes.c_int32),
   ]
 
 class DLDataTypeCode(IntEnum):
@@ -31,6 +34,7 @@ class DLDataTypeCode(IntEnum):
     kDLOpaqueHandle = 3
     kDLBfloat = 4
     kDLComplex = 5
+    kDLBool = 6
 
 class DLDataType(ctypes.Structure):
   _fields_ = [
@@ -43,7 +47,7 @@ class DLTensor(ctypes.Structure):
   _fields_ = [
       ("data", ctypes.c_void_p),
       ("device", DLDevice),
-      ("ndim", ctypes.c_int),
+      ("ndim", ctypes.c_int32),
       ("dtype", DLDataType),
       ("shape", ctypes.POINTER(ctypes.c_int64)),
       ("strides", ctypes.POINTER(ctypes.c_int64)),
@@ -98,6 +102,8 @@ def make_dl_datatype(typecode, itemsize):
     code = None
     bits = itemsize * 8
     lanes = 1
+    if typecode in "?":
+        code = DLDataTypeCode.kDLBool
     if typecode in "bhilqnp":
         code = DLDataTypeCode.kDLInt
     if typecode in "BHILQNP":
