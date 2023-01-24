@@ -6,6 +6,8 @@ from functools import reduce
 prod = lambda sequence,start=1: reduce(lambda x, y: x*y, sequence, start)
 
 def skip_op(typecode, op):
+    if typecode in '?':
+        return True
     if typecode in 'FDG':
         if op in (MPI.MAX, MPI.MIN):
             return True

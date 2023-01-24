@@ -1,10 +1,11 @@
 #------------------------------------------------------------------------------
 
-# From dlpack.h (as of v0.6)
+# From dlpack.h (as of v0.8)
 
 cdef extern from * nogil:
     ctypedef unsigned char      uint8_t
     ctypedef unsigned short     uint16_t
+    ctypedef          int       int32_t
     ctypedef signed   long long int64_t
     ctypedef unsigned long long uint64_t
 
@@ -20,10 +21,13 @@ ctypedef enum DLDeviceType:
     kDLROCMHost = 11
     kDLExtDev = 12
     kDLCUDAManaged = 13
+    kDLOneAPI = 14
+    kDLWebGPU = 15
+    kDLHexagon = 16
 
 ctypedef struct DLDevice:
     DLDeviceType device_type
-    int device_id
+    int32_t device_id
 
 ctypedef enum DLDataTypeCode:
     kDLInt = 0
@@ -32,6 +36,7 @@ ctypedef enum DLDataTypeCode:
     kDLOpaqueHandle = 3
     kDLBfloat = 4
     kDLComplex = 5
+    kDLBool = 6
 
 ctypedef struct DLDataType:
     uint8_t code
@@ -41,7 +46,7 @@ ctypedef struct DLDataType:
 ctypedef struct DLTensor:
     void *data
     DLDevice device
-    int ndim
+    int32_t ndim
     DLDataType dtype
     int64_t *shape
     int64_t *strides
@@ -137,6 +142,8 @@ cdef inline char *dlpack_get_format(
             if bits == 8*sizeof(double):      return b"Zd"
             if bits == 8*sizeof(long double): return b"Zg"
         return BYTE_FMT
+    if code == kDLBool:
+        if bits == 8: return b"?"
     if code == kDLInt:
         if bits == 8*sizeof(char):      return b"b"
         if bits == 8*sizeof(short):     return b"h"

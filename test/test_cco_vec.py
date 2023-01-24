@@ -301,6 +301,7 @@ class BaseTestCCOVec:
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array, typecode in arrayimpl.loop():
+            if unittest.is_mpi_gpu('openmpi', array): continue
             for n in range(1, size+1):
                 sbuf = array( n, typecode, (size, n))
                 rbuf = array(-1, typecode, (size, n))

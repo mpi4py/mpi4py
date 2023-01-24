@@ -155,6 +155,7 @@ class BaseTestCCONghBuf:
         for comm in create_topo_comms(self.COMM):
             rsize, ssize = get_neighbors_count(comm)
             for array, typecode in arrayimpl.loop():
+                if unittest.is_mpi_gpu('openmpi', array): continue
                 for n in range(1,4):
                     for v in range(3):
                         sbuf = array( v, typecode, (ssize, n))
