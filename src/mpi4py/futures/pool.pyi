@@ -1,19 +1,21 @@
 import sys
 from ..MPI import Intracomm, COMM_WORLD
-from ._core import Executor, Future
-from typing import Any, Optional, Type, TypeVar, Union
+from ._core import Executor, Future  # noqa: F401
+from typing import Any, Optional, TypeVar, Union
 from typing import Callable, Iterable, Iterator, Mapping, Sequence
 from typing import Tuple
 if sys.version_info >= (3, 10):
     from typing import ParamSpec
+    from typing import TypeAlias
 else:
     from typing_extensions import ParamSpec
+    from typing_extensions import TypeAlias
 
 _T = TypeVar("_T")
 _P = ParamSpec("_P")
 
 class MPIPoolExecutor(Executor):
-    Future: Any = ...  # _type: Union[Type[Future], Callable[[], Future]]
+    Future: TypeAlias = Future  # noqa: F811
     def __init__(
         self,
         max_workers: Optional[int] = None,

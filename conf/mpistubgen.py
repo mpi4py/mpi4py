@@ -433,13 +433,10 @@ OVERRIDE.update({
 })
 
 TYPING = """
-from .typing import (
+from .typing import (  # noqa: E402
     Buffer,
     Bottom,
     InPlace,
-    Count,
-    Displ,
-    TypeSpec,
     BufSpec,
     BufSpecB,
     BufSpecV,

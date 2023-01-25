@@ -1,28 +1,28 @@
 from __future__ import annotations
-import sys
-from .. import MPI
-from ..MPI import ROOT, PROC_NULL, ANY_SOURCE, ANY_TAG
-from ..MPI import Status, Datatype
-from ..MPI import Pickle
-from ..typing import Buffer
 from typing import Any, Optional
-from typing import Callable, Iterable, Sequence
+from typing import Iterable, Sequence
 from typing import Dict, List, Tuple
 from typing import overload
-if sys.version_info >= (3, 8):
-    from typing import Literal
-else:
-    from typing_extensions import Literal
+from .. import MPI
+from ..MPI import (
+    ROOT as ROOT,
+    PROC_NULL as PROC_NULL,
+    ANY_SOURCE as ANY_SOURCE,
+    ANY_TAG as ANY_TAG,
+    Status as Status,
+    Pickle as Pickle,
+)
+from ..typing import Buffer
 
 pickle: Pickle = ...
 
 class _BigMPI:
     blocksize: int = ...
-    cache: Dict[int, Datatype] = ...
+    cache: Dict[int, MPI.Datatype] = ...
     def __init__(self) -> None: ...
     def __enter__(self) -> _BigMPI: ...
     def __exit__(self, *exc: Any) -> None: ...
-    def __call__(self, buf: Buffer) -> Tuple[Buffer, int, Datatype]: ...
+    def __call__(self, buf: Buffer) -> Tuple[Buffer, int, MPI.Datatype]: ...
 
 _bigmpi: _BigMPI = ...
 
