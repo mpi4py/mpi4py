@@ -67,26 +67,27 @@ class BaseTestCCONghBuf:
                     if array.backend == 'numba':
                         continue
                 for v in range(3):
+                    check = arrayimpl.scalar(v)
                     sbuf = array( v, typecode, 3)
                     rbuf = array(-1, typecode, (rsize, 3))
                     comm.Neighbor_allgather(sbuf.as_mpi(), rbuf.as_mpi())
                     for value in rbuf.flat:
-                        self.assertEqual(value, v)
+                        self.assertEqual(value, check)
                     sbuf = array( v, typecode, 3)
                     rbuf = array(-1, typecode, (rsize, 3))
                     comm.Neighbor_allgatherv(sbuf.as_mpi_c(3), rbuf.as_mpi_c(3))
                     for value in rbuf.flat:
-                        self.assertEqual(value, v)
+                        self.assertEqual(value, check)
                     sbuf = array( v, typecode, 3)
                     rbuf = array(-1, typecode, (rsize, 3))
                     comm.Ineighbor_allgather(sbuf.as_mpi(), rbuf.as_mpi()).Wait()
                     for value in rbuf.flat:
-                        self.assertEqual(value, v)
+                        self.assertEqual(value, check)
                     sbuf = array( v, typecode, 3)
                     rbuf = array(-1, typecode, (rsize, 3))
                     comm.Ineighbor_allgatherv(sbuf.as_mpi_c(3), rbuf.as_mpi_c(3)).Wait()
                     for value in rbuf.flat:
-                        self.assertEqual(value, v)
+                        self.assertEqual(value, check)
             comm.Free()
 
     def testNeighborAlltoall(self):
@@ -94,31 +95,32 @@ class BaseTestCCONghBuf:
             rsize, ssize = get_neighbors_count(comm)
             for array, typecode in arrayimpl.loop():
                 for v in range(3):
+                    check = arrayimpl.scalar(v)
                     sbuf = array( v, typecode, (ssize, 3))
                     rbuf = array(-1, typecode, (rsize, 3))
                     comm.Neighbor_alltoall(sbuf.as_mpi(), rbuf.as_mpi_c(3))
                     for value in rbuf.flat:
-                        self.assertEqual(value, v)
+                        self.assertEqual(value, check)
                     sbuf = array( v, typecode, (ssize, 3))
                     rbuf = array(-1, typecode, (rsize, 3))
                     comm.Neighbor_alltoall(sbuf.as_mpi(), rbuf.as_mpi())
                     for value in rbuf.flat:
-                        self.assertEqual(value, v)
+                        self.assertEqual(value, check)
                     sbuf = array( v, typecode, (ssize, 3))
                     rbuf = array(-1, typecode, (rsize, 3))
                     comm.Neighbor_alltoallv(sbuf.as_mpi_c(3), rbuf.as_mpi_c(3))
                     for value in rbuf.flat:
-                        self.assertEqual(value, v)
+                        self.assertEqual(value, check)
                     sbuf = array( v, typecode, (ssize, 3))
                     rbuf = array(-1, typecode, (rsize, 3))
                     comm.Ineighbor_alltoall(sbuf.as_mpi(), rbuf.as_mpi()).Wait()
                     for value in rbuf.flat:
-                        self.assertEqual(value, v)
+                        self.assertEqual(value, check)
                     sbuf = array( v, typecode, (ssize, 3))
                     rbuf = array(-1, typecode, (rsize, 3))
                     comm.Ineighbor_alltoallv(sbuf.as_mpi_c(3), rbuf.as_mpi_c(3)).Wait()
                     for value in rbuf.flat:
-                        self.assertEqual(value, v)
+                        self.assertEqual(value, check)
             comm.Free()
 
     def testNeighborAlltoallw(self):
@@ -126,8 +128,9 @@ class BaseTestCCONghBuf:
         for comm in create_topo_comms(self.COMM):
             rsize, ssize = get_neighbors_count(comm)
             for array, typecode in arrayimpl.loop():
-                for n in range(1,4):
+                for n in range(1, 4):
                     for v in range(3):
+                        check = arrayimpl.scalar(v)
                         sbuf = array( v, typecode, (ssize, n))
                         rbuf = array(-1, typecode, (rsize, n))
                         sdt, rdt = sbuf.mpidtype, rbuf.mpidtype
@@ -140,14 +143,15 @@ class BaseTestCCONghBuf:
                         except NotImplementedError:
                             self.skipTest('mpi-neighbor_alltoallw')
                         for value in rbuf.flat:
-                            self.assertEqual(value, v)
+                            self.assertEqual(value, check)
+                        check = arrayimpl.scalar(v+1)
                         smsg[0] = array(v+1, typecode, (ssize, n)).as_raw()
                         try:
                             comm.Ineighbor_alltoallw(smsg, rmsg).Wait()
                         except NotImplementedError:
                             self.skipTest('mpi-ineighbor_alltoallw')
                         for value in rbuf.flat:
-                            self.assertEqual(value, v+1)
+                            self.assertEqual(value, check)
             comm.Free()
 
     def testNeighborAlltoallwBottom(self):
@@ -158,6 +162,7 @@ class BaseTestCCONghBuf:
                 if unittest.is_mpi_gpu('openmpi', array): continue
                 for n in range(1,4):
                     for v in range(3):
+                        check = arrayimpl.scalar(v)
                         sbuf = array( v, typecode, (ssize, n))
                         rbuf = array(-1, typecode, (rsize, n))
                         saddr = MPI.Get_address(sbuf.as_raw())
@@ -174,14 +179,15 @@ class BaseTestCCONghBuf:
                         except NotImplementedError:
                             self.skipTest('mpi-neighbor_alltoallw')
                         for value in rbuf.flat:
-                            self.assertEqual(value, v)
-                        sbuf.flat[:] = array( v+1, typecode, (ssize, n)).flat
+                            self.assertEqual(value, check)
+                        check = arrayimpl.scalar(v+1)
+                        sbuf.flat[:] = array(v+1, typecode, (ssize, n)).flat
                         try:
                             comm.Ineighbor_alltoallw(smsg, rmsg).Wait()
                         except NotImplementedError:
                             self.skipTest('mpi-neighbor_alltoallw')
                         for value in rbuf.flat:
-                            self.assertEqual(value, v+1)
+                            self.assertEqual(value, check)
             comm.Free()
 
 

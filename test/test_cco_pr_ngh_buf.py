@@ -58,20 +58,21 @@ class BaseTestCCONghBuf:
             rsize, ssize = get_neighbors_count(comm)
             for array, typecode in arrayimpl.loop():
                 for v in range(3):
+                    check = arrayimpl.scalar(v)
                     sbuf = array( v, typecode, 3)
                     rbuf = array(-1, typecode, (rsize, 3))
                     StartWaitFree(
                     comm.Neighbor_allgather_init(sbuf.as_mpi(), rbuf.as_mpi())
                     )
                     for value in rbuf.flat:
-                        self.assertEqual(value, v)
+                        self.assertEqual(value, check)
                     sbuf = array( v, typecode, 3)
                     rbuf = array(-1, typecode, (rsize, 3))
                     StartWaitFree(
                     comm.Neighbor_allgatherv_init(sbuf.as_mpi_c(3), rbuf.as_mpi_c(3))
                     )
                     for value in rbuf.flat:
-                        self.assertEqual(value, v)
+                        self.assertEqual(value, check)
             comm.Free()
 
     def testNeighborAlltoall(self):
@@ -79,27 +80,28 @@ class BaseTestCCONghBuf:
             rsize, ssize = get_neighbors_count(comm)
             for array, typecode in arrayimpl.loop():
                 for v in range(3):
+                    check = arrayimpl.scalar(v)
                     sbuf = array( v, typecode, (ssize, 3))
                     rbuf = array(-1, typecode, (rsize, 3))
                     StartWaitFree(
                     comm.Neighbor_alltoall_init(sbuf.as_mpi(), rbuf.as_mpi_c(3))
                     )
                     for value in rbuf.flat:
-                        self.assertEqual(value, v)
+                        self.assertEqual(value, check)
                     sbuf = array( v, typecode, (ssize, 3))
                     rbuf = array(-1, typecode, (rsize, 3))
                     StartWaitFree(
                     comm.Neighbor_alltoall_init(sbuf.as_mpi(), rbuf.as_mpi())
                     )
                     for value in rbuf.flat:
-                        self.assertEqual(value, v)
+                        self.assertEqual(value, check)
                     sbuf = array( v, typecode, (ssize, 3))
                     rbuf = array(-1, typecode, (rsize, 3))
                     StartWaitFree(
                     comm.Neighbor_alltoallv_init(sbuf.as_mpi_c(3), rbuf.as_mpi_c(3))
                     )
                     for value in rbuf.flat:
-                        self.assertEqual(value, v)
+                        self.assertEqual(value, check)
             comm.Free()
 
     def testNeighborAlltoallw(self):
@@ -109,6 +111,7 @@ class BaseTestCCONghBuf:
             for array, typecode in arrayimpl.loop():
                 for n in range(1,4):
                     for v in range(3):
+                        check = arrayimpl.scalar(v)
                         sbuf = array( v, typecode, (ssize, n))
                         rbuf = array(-1, typecode, (rsize, n))
                         sdt, rdt = sbuf.mpidtype, rbuf.mpidtype
@@ -120,7 +123,7 @@ class BaseTestCCONghBuf:
                         comm.Neighbor_alltoallw_init(smsg, rmsg)
                         )
                         for value in rbuf.flat:
-                            self.assertEqual(value, v)
+                            self.assertEqual(value, check)
             comm.Free()
 
 

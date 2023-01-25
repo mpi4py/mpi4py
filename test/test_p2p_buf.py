@@ -21,9 +21,11 @@ class BaseTestP2PBuf:
                         rbuf = array(-1, typecode, s+1)
                         self.COMM.Sendrecv(sbuf.as_mpi(), dest,   0,
                                            rbuf.as_mpi(), source, 0)
+                        check = arrayimpl.scalar(s)
                         for value in rbuf[:-1]:
-                            self.assertEqual(value, s)
-                        self.assertEqual(rbuf[-1], -1)
+                            self.assertEqual(value, check)
+                        check = arrayimpl.scalar(-1)
+                        self.assertEqual(rbuf[-1], check)
 
     def testISendrecv(self):
         size = self.COMM.Get_size()
@@ -48,9 +50,11 @@ class BaseTestP2PBuf:
                             sbuf.as_mpi(), dest,   0,
                             rbuf.as_mpi(), source, 0,
                         ).Wait()
+                        check = arrayimpl.scalar(s)
                         for value in rbuf[:-1]:
-                            self.assertEqual(value, s)
-                        self.assertEqual(rbuf[-1], -1)
+                            self.assertEqual(value, check)
+                        check = arrayimpl.scalar(-1)
+                        self.assertEqual(rbuf[-1], check)
 
     def testSendrecvReplace(self):
         size = self.COMM.Get_size()
@@ -63,8 +67,9 @@ class BaseTestP2PBuf:
                     with self.subTest(s=s):
                         buf = array(rank, typecode, s);
                         self.COMM.Sendrecv_replace(buf.as_mpi(), dest, 0, source, 0)
+                        check = arrayimpl.scalar(source)
                         for value in buf:
-                            self.assertEqual(value, source)
+                            self.assertEqual(value, check)
 
     def testISendrecvReplace(self):
         size = self.COMM.Get_size()
@@ -86,8 +91,9 @@ class BaseTestP2PBuf:
                         self.COMM.Isendrecv_replace(
                             buf.as_mpi(), dest, 0, source, 0
                         ).Wait()
+                        check = arrayimpl.scalar(source)
                         for value in buf:
-                            self.assertEqual(value, source)
+                            self.assertEqual(value, check)
 
     def testSendRecv(self):
         size = self.COMM.Get_size()
@@ -130,8 +136,9 @@ class BaseTestP2PBuf:
                             self.COMM.Ssend(sbuf.as_mpi(), 0, 0)
                         else:
                             rbuf = sbuf
+                        check = arrayimpl.scalar(s)
                         for value in rbuf:
-                            self.assertEqual(value, s)
+                            self.assertEqual(value, check)
                         #
                         rank = self.COMM.Get_rank()
                         sbuf = array( s, typecode, s)
@@ -140,13 +147,13 @@ class BaseTestP2PBuf:
                         self.COMM.Rsend(sbuf.as_mpi(), rank, 0)
                         rreq.Wait()
                         for value in rbuf:
-                            self.assertEqual(value, s)
+                            self.assertEqual(value, check)
                         rbuf = array(-1, typecode, s)
                         rreq = self.COMM.Irecv(rbuf.as_mpi(), rank, 0)
                         self.COMM.Irsend(sbuf.as_mpi(), rank, 0).Wait()
                         rreq.Wait()
                         for value in rbuf:
-                            self.assertEqual(value, s)
+                            self.assertEqual(value, check)
 
     def testProcNull(self):
         comm = self.COMM
@@ -241,10 +248,12 @@ class BaseTestP2PBuf:
                         recvreq.Free()
                         self.assertEqual(sendreq, MPI.REQUEST_NULL)
                         self.assertEqual(recvreq, MPI.REQUEST_NULL)
+                        check = arrayimpl.scalar(s)
                         for value in rbuf[:s]:
-                            self.assertEqual(value, s)
+                            self.assertEqual(value, check)
+                        check = arrayimpl.scalar(-1)
                         for value in rbuf[s:]:
-                            self.assertEqual(value, -1)
+                            self.assertEqual(value, check)
                         #
                         sbuf = array(s,  typecode, s)
                         rbuf = array(-1, typecode, s+xs)
@@ -265,10 +274,12 @@ class BaseTestP2PBuf:
                             self.assertNotEqual(preq, MPI.REQUEST_NULL)
                             preq.Free()
                             self.assertEqual(preq, MPI.REQUEST_NULL)
+                        check = arrayimpl.scalar(s)
                         for value in rbuf[:s]:
-                            self.assertEqual(value, s)
+                            self.assertEqual(value, check)
+                        check = arrayimpl.scalar(-1)
                         for value in rbuf[s:]:
-                            self.assertEqual(value, -1)
+                            self.assertEqual(value, check)
                         #
                         sbuf = array( s, typecode, s)
                         rbuf = array(-1, typecode, s+xs)
@@ -284,10 +295,12 @@ class BaseTestP2PBuf:
                         recvreq.Free()
                         self.assertEqual(sendreq, MPI.REQUEST_NULL)
                         self.assertEqual(recvreq, MPI.REQUEST_NULL)
+                        check = arrayimpl.scalar(s)
                         for value in rbuf[:s]:
-                            self.assertEqual(value, s)
+                            self.assertEqual(value, check)
+                        check = arrayimpl.scalar(-1)
                         for value in rbuf[s:]:
-                            self.assertEqual(value, -1)
+                            self.assertEqual(value, check)
                         #
                         mem = array( 0, typecode, s+MPI.BSEND_OVERHEAD).as_raw()
                         sbuf = array( s, typecode, s)
@@ -306,10 +319,12 @@ class BaseTestP2PBuf:
                         recvreq.Free()
                         self.assertEqual(sendreq, MPI.REQUEST_NULL)
                         self.assertEqual(recvreq, MPI.REQUEST_NULL)
+                        check = arrayimpl.scalar(s)
                         for value in rbuf[:s]:
-                            self.assertEqual(value, s)
+                            self.assertEqual(value, check)
+                        check = arrayimpl.scalar(-1)
                         for value in rbuf[s:]:
-                            self.assertEqual(value, -1)
+                            self.assertEqual(value, check)
                         #
                         rank = self.COMM.Get_rank()
                         sbuf = array( s, typecode, s)
@@ -326,10 +341,12 @@ class BaseTestP2PBuf:
                         recvreq.Free()
                         self.assertEqual(sendreq, MPI.REQUEST_NULL)
                         self.assertEqual(recvreq, MPI.REQUEST_NULL)
+                        check = arrayimpl.scalar(s)
                         for value in rbuf[:s]:
-                            self.assertEqual(value, s)
+                            self.assertEqual(value, check)
+                        check = arrayimpl.scalar(-1)
                         for value in rbuf[s:]:
-                            self.assertEqual(value, -1)
+                            self.assertEqual(value, check)
 
     def testProbe(self):
         comm = self.COMM.Dup()

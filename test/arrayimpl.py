@@ -14,6 +14,7 @@ except ImportError:
 
 try:
     import cupy
+    cupy_version = tuple(map(int, cupy.__version__.split('.', 2)[:2]))
 except ImportError:
     cupy = None
 
@@ -30,6 +31,7 @@ try:
             )
         except RuntimeWarning:
             pass
+        del numba_version
         numba = None
 except ImportError:
     numba = None
@@ -204,9 +206,9 @@ if numpy is not None:
         backend = 'numpy'
 
         TypeMap = make_typemap([])
-        #TypeMap.update(TypeMapBool)
+        TypeMap.update(TypeMapBool)
         TypeMap.update(TypeMapInteger)
-        #TypeMap.update(TypeMapUnsigned)
+        TypeMap.update(TypeMapUnsigned)
         TypeMap.update(TypeMapFloat)
         TypeMap.update(TypeMapComplex)
 
@@ -219,9 +221,11 @@ if numpy is not None:
                     shape = len(arg)
             self.array = numpy.zeros(shape, typecode)
             if isinstance(arg, (int, float, complex)):
+                arg = numpy.asarray(arg).astype(typecode)
                 self.array.fill(arg)
             else:
-                self.array[:] = numpy.asarray(arg, typecode)
+                arg = numpy.asarray(arg).astype(typecode)
+                self.array[...] = arg
 
         @property
         def address(self):
@@ -348,9 +352,10 @@ if cupy is not None:
         backend = 'cupy'
 
         TypeMap = make_typemap([])
-        #TypeMap.update(TypeMapBool)
+        if cupy_version >= (11, 6):
+            TypeMap.update(TypeMapBool)
         TypeMap.update(TypeMapInteger)
-        #TypeMap.update(TypeMapUnsigned)
+        TypeMap.update(TypeMapUnsigned)
         TypeMap.update(TypeMapFloat)
         TypeMap.update(TypeMapComplex)
         try:
@@ -447,9 +452,9 @@ if numba is not None:
         backend = 'numba'
 
         TypeMap = make_typemap([])
-        #TypeMap.update(TypeMapBool)
+        TypeMap.update(TypeMapBool)
         TypeMap.update(TypeMapInteger)
-        #TypeMap.update(TypeMapUnsigned)
+        TypeMap.update(TypeMapUnsigned)
         TypeMap.update(TypeMapFloat)
         TypeMap.update(TypeMapComplex)
 
@@ -513,6 +518,8 @@ if numba is not None:
 
 
 def loop(*args):
+    loop.array = None
+    loop.typecode = None
     for array in ArrayBackends:
         loop.array = array
         for typecode in array.TypeMap:
@@ -532,3 +539,7 @@ def test(case, **kargs):
         backend=loop.array.backend,
         **kargs,
     )
+
+
+def scalar(arg):
+    return loop.array(arg, loop.typecode, 1)[0]

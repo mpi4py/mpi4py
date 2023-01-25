@@ -204,6 +204,8 @@ def print_banner(options):
     if options.verbosity:
         writeln(getpythoninfo())
         writeln(getpackageinfo('numpy'))
+        writeln(getpackageinfo('numba'))
+        writeln(getpackageinfo('cupy'))
         writeln(getlibraryinfo())
         writeln(getpackageinfo('mpi4py'))
 

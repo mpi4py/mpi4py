@@ -38,8 +38,9 @@ class BaseTestP2PBufPart:
                                 sreq.Wait()
                                 self.assertNotEqual(sreq, MPI.REQUEST_NULL)
                                 self.assertNotEqual(rreq, MPI.REQUEST_NULL)
+                                check = arrayimpl.scalar(s)
                                 for value in rbuf:
-                                    self.assertEqual(value, s)
+                                    self.assertEqual(value, check)
                             rreq.Free()
                             sreq.Free()
                             self.assertEqual(sreq, MPI.REQUEST_NULL)
@@ -79,8 +80,9 @@ class BaseTestP2PBufPart:
                                 self.assertNotEqual(sreq, MPI.REQUEST_NULL)
                                 self.assertNotEqual(rreq, MPI.REQUEST_NULL)
                                 self.COMM.Barrier()
+                                check = arrayimpl.scalar(s)
                                 for value in rbuf:
-                                    self.assertEqual(value, s)
+                                    self.assertEqual(value, check)
                             rreq.Free()
                             sreq.Free()
                             self.assertEqual(sreq, MPI.REQUEST_NULL)
