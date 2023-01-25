@@ -1154,13 +1154,10 @@ _typedict: Final[Dict[str, Datatype]] = ...
 _typedict_c: Final[Dict[str, Datatype]] = ...
 _typedict_f: Final[Dict[str, Datatype]] = ...
 
-from .typing import (
+from .typing import (  # noqa: E402
     Buffer,
     Bottom,
     InPlace,
-    Count,
-    Displ,
-    TypeSpec,
     BufSpec,
     BufSpecB,
     BufSpecV,
