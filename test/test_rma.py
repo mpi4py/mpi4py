@@ -4,6 +4,8 @@ import contextlib
 import arrayimpl
 import sys
 
+scalar = arrayimpl.scalar
+
 def mkzeros(n):
     return bytearray(n)
 
@@ -70,9 +72,9 @@ class BaseTestRMA:
                             self.WIN.Get(rbuf.as_mpi_c(count), rank)
                             self.WIN.Fence()
                             for i in range(count):
-                                self.assertEqual(sbuf[i], i)
-                                self.assertNotEqual(rbuf[i], -1)
-                            self.assertEqual(rbuf[-1], -1)
+                                self.assertEqual(sbuf[i], scalar(i))
+                                self.assertEqual(rbuf[i], scalar(i))
+                            self.assertEqual(rbuf[-1], scalar(-1))
                             #
                             sbuf = array(range(count), typecode)
                             rbuf = array(-1, typecode, count+1)
@@ -83,9 +85,9 @@ class BaseTestRMA:
                             self.WIN.Get(rbuf.as_mpi_c(count), rank, target)
                             self.WIN.Fence()
                             for i in range(count):
-                                self.assertEqual(sbuf[i], i)
-                                self.assertNotEqual(rbuf[i], -1)
-                            self.assertEqual(rbuf[-1], -1)
+                                self.assertEqual(sbuf[i], scalar(i))
+                                self.assertEqual(rbuf[i], scalar(i))
+                            self.assertEqual(rbuf[-1], scalar(-1))
                             #
                             sbuf = array(range(count), typecode)
                             rbuf = array(-1, typecode, count+1)
@@ -97,9 +99,9 @@ class BaseTestRMA:
                             self.WIN.Get(rbuf.as_mpi_c(count), rank, target)
                             self.WIN.Fence()
                             for i in range(count):
-                                self.assertEqual(sbuf[i], i)
-                                self.assertNotEqual(rbuf[i], -1)
-                            self.assertEqual(rbuf[-1], -1)
+                                self.assertEqual(sbuf[i], scalar(i))
+                                self.assertEqual(rbuf[i], scalar(i))
+                            self.assertEqual(rbuf[-1], scalar(-1))
 
     def testAccumulate(self):
         group = self.WIN.Get_group()
@@ -109,6 +111,7 @@ class BaseTestRMA:
             with arrayimpl.test(self):
                 if unittest.is_mpi_gpu('openmpi', array): continue
                 if unittest.is_mpi_gpu('mvapich2', array): continue
+                if typecode in '?': continue
                 if typecode in 'FDG': continue
                 for count in range(10):
                     for rank in range(size):
@@ -122,9 +125,9 @@ class BaseTestRMA:
                                 self.WIN.Get(rbuf.as_mpi_c(count), rank)
                                 self.WIN.Fence()
                                 for i in range(count):
-                                    self.assertEqual(sbuf[i], i)
-                                    self.assertNotEqual(rbuf[i], -1)
-                                self.assertEqual(rbuf[-1], -1)
+                                    self.assertEqual(sbuf[i], scalar(i))
+                                    self.assertNotEqual(rbuf[i], scalar(-1))
+                                self.assertEqual(rbuf[-1], scalar(-1))
 
     @unittest.skipMPI('openmpi(>=1.10,<1.11)')
     def testGetAccumulate(self):
@@ -149,6 +152,7 @@ class BaseTestRMA:
             with arrayimpl.test(self):
                 if unittest.is_mpi_gpu('openmpi', array): continue
                 if unittest.is_mpi_gpu('mvapich2', array): continue
+                if typecode in '?': continue
                 if typecode in 'FDG': continue
                 for count in range(10):
                     for rank in range(size):
@@ -173,11 +177,11 @@ class BaseTestRMA:
                                     self.WIN.Flush(rank)
                                 #
                                 for i in range(count):
-                                    self.assertEqual(sbuf[i], i)
-                                    self.assertEqual(rbuf[i], 1)
-                                    self.assertEqual(gbuf[i], op(1, i))
-                                self.assertEqual(rbuf[-1], -1)
-                                self.assertEqual(gbuf[-1], -1)
+                                    self.assertEqual(sbuf[i], scalar(i))
+                                    self.assertEqual(rbuf[i], scalar(1))
+                                    self.assertEqual(gbuf[i], scalar(op(1, i)))
+                                self.assertEqual(rbuf[-1], scalar(-1))
+                                self.assertEqual(gbuf[-1], scalar(-1))
 
     def testFetchAndOp(self):
         typemap = MPI._typedict
@@ -206,6 +210,7 @@ class BaseTestRMA:
             with arrayimpl.test(self):
                 if unittest.is_mpi_gpu('openmpi', array): continue
                 if unittest.is_mpi_gpu('mvapich2', array): continue
+                if typecode in '?': continue
                 if typecode in 'FDG': continue
                 obuf = array(+1, typecode)
                 rbuf = array(-1, typecode, 2)
@@ -224,7 +229,7 @@ class BaseTestRMA:
                                                           rank,
                                                           disp * datatype.size,
                                                           op=op)
-                                self.assertEqual(rbuf[1], -1)
+                                self.assertEqual(rbuf[1], scalar(-1))
 
     @unittest.skipMPI('mpich(>=4.0,<4.1)', sys.platform == 'darwin')
     def testCompareAndSwap(self):
@@ -270,7 +275,7 @@ class BaseTestRMA:
                                                           rbuf.as_mpi_c(1),
                                                           rank,
                                                           disp * datatype.size)
-                            self.assertEqual(rbuf[1], -1)
+                            self.assertEqual(rbuf[1], scalar(-1))
 
     def testPutProcNull(self):
         self.WIN.Fence()

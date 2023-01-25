@@ -14,6 +14,8 @@ def allclose(a, b, rtol=1.e-5, atol=1.e-8):
     except TypeError:
         b = [b]
     for x, y in zip(a, b):
+        if x == y:
+            continue
         if abs(x - y) > (atol + rtol * abs(y)):
             return False
     return True
@@ -136,20 +138,20 @@ class TestPackExternal(BaseTestPackExternal, unittest.TestCase):
 name, version = MPI.get_vendor()
 if name == 'MPICH':
     if version < (4, 0, 0):
-        BaseTestPackExternal.skipdtype += 'ldgFDG'
+        BaseTestPackExternal.skipdtype += 'ldgLFDG'
 elif name == 'Open MPI':
     if version < (5, 0, 0):
         BaseTestPackExternal.skipdtype += 'gG'
 elif name == 'Intel MPI':
-    BaseTestPackExternal.skipdtype += 'ldgFDG'
+    BaseTestPackExternal.skipdtype += 'ldgLFDG'
     if os.name == 'nt':
         BaseTestPackExternal.skipdtype += 'q'
 elif name == 'Microsoft MPI':
     BaseTestPackExternal.skipdtype += 'gFDG'
 elif name == 'MVAPICH2':
-    BaseTestPackExternal.skipdtype += 'ldgFDG'
+    BaseTestPackExternal.skipdtype += 'ldgLFDG'
 elif name =='MPICH2':
-    BaseTestPackExternal.skipdtype += 'ldgFDG'
+    BaseTestPackExternal.skipdtype += 'ldgLFDG'
 else:
     try:
         MPI.BYTE.Pack_external_size(EXT32, 0)

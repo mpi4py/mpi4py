@@ -3,6 +3,8 @@ import mpiunittest as unittest
 import contextlib
 import arrayimpl
 
+scalar = arrayimpl.scalar
+
 def mkzeros(n):
     return bytearray(n)
 
@@ -50,7 +52,7 @@ class BaseTestRMA:
         for array, typecode in arrayimpl.loop():
             with arrayimpl.test(self):
                 if unittest.is_mpi_gpu('mvapich2', array): continue
-                for count in range(self.COUNT_MIN, 10):
+                for count in range(10):
                     for rank in range(size):
                         with self.subTest(rank=rank, count=count):
                             sbuf = array([rank]*count, typecode)
@@ -63,9 +65,9 @@ class BaseTestRMA:
                                 r = self.WIN.Rget(rbuf.as_mpi_c(count), rank)
                                 r.Wait()
                             for i in range(count):
-                                self.assertEqual(sbuf[i], rank)
-                                self.assertEqual(rbuf[i], rank)
-                            self.assertEqual(rbuf[-1], -1)
+                                self.assertEqual(sbuf[i], scalar(rank))
+                                self.assertEqual(rbuf[i], scalar(rank))
+                            self.assertEqual(rbuf[-1], scalar(-1))
 
     @unittest.skipMPI('openmpi(>=1.10.0,<1.11.0)')
     def testAccumulate(self):
@@ -76,8 +78,9 @@ class BaseTestRMA:
             with arrayimpl.test(self):
                 if unittest.is_mpi_gpu('openmpi', array): continue
                 if unittest.is_mpi_gpu('mvapich2', array): continue
+                if typecode in '?': continue
                 if typecode in 'FDG': continue
-                for count in range(self.COUNT_MIN, 10):
+                for count in range(10):
                     for rank in range(size):
                         with self.subTest(rank=rank, count=count):
                             ones = array([1]*count, typecode)
@@ -99,9 +102,9 @@ class BaseTestRMA:
                                     r.Wait()
                                 #
                                 for i in range(count):
-                                    self.assertEqual(sbuf[i], i)
-                                    self.assertEqual(rbuf[i], op(1, i))
-                                self.assertEqual(rbuf[-1], -1)
+                                    self.assertEqual(sbuf[i], scalar(i))
+                                    self.assertEqual(rbuf[i], scalar(op(1, i)))
+                                self.assertEqual(rbuf[-1], scalar(-1))
 
     @unittest.skipMPI('openmpi(>=1.10,<1.11)')
     def testGetAccumulate(self):
@@ -112,8 +115,9 @@ class BaseTestRMA:
             with arrayimpl.test(self):
                 if unittest.is_mpi_gpu('openmpi', array): continue
                 if unittest.is_mpi_gpu('mvapich2', array): continue
+                if typecode in '?': continue
                 if typecode in 'FDG': continue
-                for count in range(self.COUNT_MIN, 10):
+                for count in range(10):
                     for rank in range(size):
                         with self.subTest(rank=rank, count=count):
                             ones = array([1]*count, typecode)
@@ -137,11 +141,11 @@ class BaseTestRMA:
                                     r.Wait()
                                 #
                                 for i in range(count):
-                                    self.assertEqual(sbuf[i], i)
-                                    self.assertEqual(rbuf[i], 1)
-                                    self.assertEqual(gbuf[i], op(1, i))
-                                self.assertEqual(rbuf[-1], -1)
-                                self.assertEqual(gbuf[-1], -1)
+                                    self.assertEqual(sbuf[i], scalar(i))
+                                    self.assertEqual(rbuf[i], scalar(1))
+                                    self.assertEqual(gbuf[i], scalar(op(1, i)))
+                                self.assertEqual(rbuf[-1], scalar(-1))
+                                self.assertEqual(gbuf[-1], scalar(-1))
 
     def testPutProcNull(self):
         rank = self.COMM.Get_rank()

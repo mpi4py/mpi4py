@@ -160,8 +160,9 @@ class BaseTestP2PMatched:
                             comm.Send(sbuf.as_mpi(), 0, 1)
                         else:
                             rbuf = sbuf
+                        check = arrayimpl.scalar(s)
                         for value in rbuf:
-                            self.assertEqual(value, s)
+                            self.assertEqual(value, check)
 
 
 class TestP2PMatchedSelf(BaseTestP2PMatched, unittest.TestCase):

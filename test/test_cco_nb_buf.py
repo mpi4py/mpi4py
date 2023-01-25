@@ -39,19 +39,21 @@ class BaseTestCCOBuf:
         rank = self.COMM.Get_rank()
         for array, typecode in arrayimpl.loop():
             for root in range(size):
+                check = arrayimpl.scalar(root)
                 if rank == root:
                     buf = array(root, typecode, root)
                 else:
                     buf = array(  -1, typecode, root)
                 self.COMM.Ibcast(buf.as_mpi(), root=root).Wait()
                 for value in buf:
-                    self.assertEqual(value, root)
+                    self.assertEqual(value, check)
 
     def testGather(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array, typecode in arrayimpl.loop():
             for root in range(size):
+                check = arrayimpl.scalar(root)
                 sbuf = array(root, typecode, root+1)
                 if rank == root:
                     rbuf = array(-1, typecode, (size,root+1))
@@ -61,13 +63,14 @@ class BaseTestCCOBuf:
                                   root=root).Wait()
                 if rank == root:
                     for value in rbuf.flat:
-                        self.assertEqual(value, root)
+                        self.assertEqual(value, check)
 
     def testScatter(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array, typecode in arrayimpl.loop():
             for root in range(size):
+                check = arrayimpl.scalar(root)
                 rbuf = array(-1, typecode, size)
                 if rank == root:
                     sbuf = array(root, typecode, (size, size))
@@ -76,29 +79,31 @@ class BaseTestCCOBuf:
                 self.COMM.Iscatter(sbuf.as_mpi(), rbuf.as_mpi(),
                                    root=root).Wait()
                 for value in rbuf:
-                    self.assertEqual(value, root)
+                    self.assertEqual(value, check)
 
     def testAllgather(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array, typecode in arrayimpl.loop():
             for root in range(size):
+                check = arrayimpl.scalar(root)
                 sbuf = array(root, typecode, root+1)
                 rbuf = array(  -1, typecode, (size, root+1))
                 self.COMM.Iallgather(sbuf.as_mpi(), rbuf.as_mpi()).Wait()
                 for value in rbuf.flat:
-                    self.assertEqual(value, root)
+                    self.assertEqual(value, check)
 
     def testAlltoall(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
         for array, typecode in arrayimpl.loop():
             for root in range(size):
+                check = arrayimpl.scalar(root)
                 sbuf = array(root, typecode, (size, root+1))
                 rbuf = array(  -1, typecode, (size, root+1))
                 self.COMM.Ialltoall(sbuf.as_mpi(), rbuf.as_mpi_c(root+1)).Wait()
                 for value in rbuf.flat:
-                    self.assertEqual(value, root)
+                    self.assertEqual(value, check)
 
     def assertAlmostEqual(self, first, second):
         num = complex(second-first)
@@ -123,7 +128,8 @@ class BaseTestCCOBuf:
                     max_val = maxvalue(rbuf)
                     for i, value in enumerate(rbuf):
                         if rank != root:
-                            self.assertEqual(value, -1)
+                            check = arrayimpl.scalar(-1)
+                            self.assertEqual(value, check)
                             continue
                         if op == MPI.SUM:
                             if (i * size) < max_val:
@@ -321,10 +327,8 @@ class BaseTestCCOBuf:
                 newtype.Free()
                 if rank != root:
                     for i, value in enumerate(buf):
-                        if (i % 2):
-                            self.assertEqual(value, -1)
-                        else:
-                            self.assertEqual(value, i)
+                        check = arrayimpl.scalar(-1 if (i % 2) else i)
+                        self.assertEqual(value, check)
 
                 #
                 if rank == root:
@@ -339,10 +343,8 @@ class BaseTestCCOBuf:
                 newtype.Free()
                 if rank != root:
                     for i, value in enumerate(buf):
-                        if not (i % 2):
-                            self.assertEqual(value, -1)
-                        else:
-                            self.assertEqual(value, i)
+                        check = arrayimpl.scalar(-1 if not (i % 2) else i)
+                        self.assertEqual(value, check)
 
 
 @unittest.skipMPI('msmpi(<8.1.0)')
@@ -353,6 +355,7 @@ class BaseTestCCOBufInplace:
         rank = self.COMM.Get_rank()
         for array, typecode in arrayimpl.loop():
             for root in range(size):
+                check = arrayimpl.scalar(root)
                 count = root+3
                 if rank == root:
                     sbuf = MPI.IN_PLACE
@@ -360,7 +363,7 @@ class BaseTestCCOBufInplace:
                     #buf.flat[(rank*count):((rank+1)*count)] = \
                     #    array(root, typecode, count)
                     s, e = rank*count, (rank+1)*count
-                    for i in range(s, e): buf.flat[i] = root
+                    for i in range(s, e): buf.flat[i] = check
                     rbuf = buf.as_mpi()
                 else:
                     buf = array(root, typecode, count)
@@ -368,12 +371,12 @@ class BaseTestCCOBufInplace:
                     rbuf = None
                 self.COMM.Igather(sbuf, rbuf, root=root).Wait()
                 for value in buf.flat:
-                    self.assertEqual(value, root)
+                    self.assertEqual(value, check)
                 if rank == root:
                     sbuf = None
                 self.COMM.Igather(sbuf, rbuf, root=root).Wait()
                 for value in buf.flat:
-                    self.assertEqual(value, root)
+                    self.assertEqual(value, check)
 
     @unittest.skipMPI('msmpi(==10.0.0)')
     def testScatter(self):
@@ -381,6 +384,7 @@ class BaseTestCCOBufInplace:
         rank = self.COMM.Get_rank()
         for array, typecode in arrayimpl.loop():
             for root in range(size):
+                check = arrayimpl.scalar(root)
                 for count in range(1, 10):
                     if rank == root:
                         buf = array(root, typecode, (size, count))
@@ -392,12 +396,12 @@ class BaseTestCCOBufInplace:
                         rbuf = buf.as_mpi()
                     self.COMM.Iscatter(sbuf, rbuf, root=root).Wait()
                     for value in buf.flat:
-                        self.assertEqual(value, root)
+                        self.assertEqual(value, check)
                     if rank == root:
                         rbuf = None
                     self.COMM.Iscatter(sbuf, rbuf, root=root).Wait()
                     for value in buf.flat:
-                        self.assertEqual(value, root)
+                        self.assertEqual(value, check)
 
 
     def testAllgather(self):
@@ -405,15 +409,16 @@ class BaseTestCCOBufInplace:
         rank = self.COMM.Get_rank()
         for array, typecode in arrayimpl.loop():
             for count in range(1, 10):
+                check = arrayimpl.scalar(count)
                 buf = array(-1, typecode, (size, count))
                 s, e = rank*count, (rank+1)*count
-                for i in range(s, e): buf.flat[i] = count
+                for i in range(s, e): buf.flat[i] = check
                 self.COMM.Iallgather(MPI.IN_PLACE, buf.as_mpi()).Wait()
                 for value in buf.flat:
-                    self.assertEqual(value, count)
+                    self.assertEqual(value, check)
                 self.COMM.Iallgather(None, buf.as_mpi()).Wait()
                 for value in buf.flat:
-                    self.assertEqual(value, count)
+                    self.assertEqual(value, check)
 
     def assertAlmostEqual(self, first, second):
         num = complex(second-first)
