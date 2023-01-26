@@ -944,19 +944,31 @@ class build_ext(cmd_build_ext.build_ext):
             if not self.dry_run:
                 self.config.dump(filename=mpi_cfg)
 
+    def copy_extensions_to_source(self):
+        build_py = self.get_finalized_command('build_py')
+        cmd_build_ext.build_ext.copy_extensions_to_source(self)
+        for ext in self.extensions:
+            if ext.name == 'mpi4py.MPI':
+                fullname = self.get_ext_fullname(ext.name)
+                filename = self.get_ext_filename(fullname)
+                dirname = os.path.dirname(filename)
+                dest_dir = os.path.join(self.build_lib, dirname)
+                regular_file = os.path.join(dest_dir, 'mpi.cfg')
+                package = fullname.rpartition('.')[0]
+                package_dir = build_py.get_package_dir(package)
+                inplace_file = os.path.join(package_dir, 'mpi.cfg')
+                self.copy_file(regular_file, inplace_file, level=self.verbose)
+
     def get_outputs(self):
         outputs = cmd_build_ext.build_ext.get_outputs(self)
         for ext in self.extensions:
-            # XXX -- this is a Vile HACK!
             if ext.name == 'mpi4py.MPI':
                 fullname = self.get_ext_fullname(ext.name)
-                filename = os.path.join(
-                    self.build_lib,
-                    self.get_ext_filename(fullname)
-                )
-                dest_dir = os.path.dirname(filename)
-                mpi_cfg = os.path.join(dest_dir, 'mpi.cfg')
-                outputs.append(mpi_cfg)
+                filename = self.get_ext_filename(fullname)
+                dirname = os.path.dirname(filename)
+                dest_dir = os.path.join(self.build_lib, dirname)
+                output_file = os.path.join(dest_dir, 'mpi.cfg')
+                outputs.append(output_file)
         return outputs
 
 
