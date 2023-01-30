@@ -58,8 +58,7 @@ _DeviceID = int
 
 
 class SupportsBuffer(Protocol):
-    """
-    Python buffer protocol.
+    """Python buffer protocol.
 
     .. seealso:: :ref:`python:bufferobjects`
     """
@@ -70,8 +69,7 @@ class SupportsBuffer(Protocol):
 
 
 class SupportsDLPack(Protocol):
-    """
-    DLPack data interchange protocol.
+    """DLPack data interchange protocol.
 
     .. seealso:: :ref:`dlpack:python-spec`
     """
@@ -86,8 +84,7 @@ class SupportsDLPack(Protocol):
 
 
 class SupportsCAI(Protocol):
-    """
-    CUDA Array Interface (CAI) protocol.
+    """CUDA Array Interface (CAI) protocol.
 
     .. seealso:: :ref:`numba:cuda-array-interface`
     """
