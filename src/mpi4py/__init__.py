@@ -1,6 +1,6 @@
 # Author:  Lisandro Dalcin
 # Contact: dalcinl@gmail.com
-"""This is the **MPI for Python** package.
+"""The **MPI for Python** package.
 
 The *Message Passing Interface* (MPI) is a standardized and portable
 message-passing system designed to function on a wide variety of
