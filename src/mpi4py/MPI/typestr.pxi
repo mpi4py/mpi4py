@@ -37,13 +37,13 @@ cdef inline const char* typechr(const char kind[], size_t size) nogil:
         if size == sizeof(long long) : return "Q"
         return NULL
     if k == c'f': # real floating
-        if size == sizeof(float)/2     : return "e"
+        if size == sizeof(float)//2    : return "e"
         if size == sizeof(float)       : return "f"
         if size == sizeof(double)      : return "d"
         if size == sizeof(long double) : return "g"
         return NULL
     if k == c'c': # complex floating
-        if size == 2*sizeof(float)/2     : return "E"
+        if size == 2*sizeof(float)//2    : return "E"
         if size == 2*sizeof(float)       : return "F"
         if size == 2*sizeof(double)      : return "D"
         if size == 2*sizeof(long double) : return "G"
@@ -106,12 +106,12 @@ cdef inline const char* typechr_to_typestr(const char tchr[]) nogil:
     if c == c'Q': return typestr('u', sizeof(long long))
     if c == c'P': return typestr('u', sizeof(MPI_Aint))
     # floating real
-    if c == c'e': return typestr('f', sizeof(float)/2)
+    if c == c'e': return typestr('f', sizeof(float)//2)
     if c == c'f': return typestr('f', sizeof(float))
     if c == c'd': return typestr('f', sizeof(double))
     if c == c'g': return typestr('f', sizeof(long double))
     # floating complex
-    if c == c'E': return typestr('c', 2*sizeof(float)/2)
+    if c == c'E': return typestr('c', 2*sizeof(float)//2)
     if c == c'F': return typestr('c', 2*sizeof(float))
     if c == c'D': return typestr('c', 2*sizeof(double))
     if c == c'G': return typestr('c', 2*sizeof(long double))
@@ -199,12 +199,12 @@ cdef inline size_t typealign(const char tchr[]) nogil:
     if c == c'L': return alignof_long
     if c == c'Q': return alignof_longlong
     # floating real
-    if c == c'e': return alignof_float/2
+    if c == c'e': return alignof_float//2
     if c == c'f': return alignof_float
     if c == c'd': return alignof_double
     if c == c'g': return alignof_longdouble
     # floating complex
-    if c == c'E': return alignof_float/2
+    if c == c'E': return alignof_float//2
     if c == c'F': return alignof_float
     if c == c'D': return alignof_double
     if c == c'G': return alignof_longdouble
