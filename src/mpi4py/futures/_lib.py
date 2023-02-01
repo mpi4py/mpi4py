@@ -455,7 +455,7 @@ class SharedPoolCtx:
             comm = self.comm
             if self.on_root:
                 if next(self.counter) == 0:
-                    options = dict(main=False)
+                    options = {'main': False}
                     client_sync(comm, options)
                     comm = client_comm(comm, options)
                     client_init(comm, options)
@@ -975,7 +975,7 @@ def client_spawn(python_exe=None,
     if max_workers is None:
         max_workers = get_max_workers()
     if mpi_info is None:
-        mpi_info = dict(soft=f'1:{max_workers}')
+        mpi_info = {'soft': f'1:{max_workers}'}
 
     args = get_python_flags() + list(python_args)
     args.extend(['-m', get_spawn_module()])
