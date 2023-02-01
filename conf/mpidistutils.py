@@ -596,6 +596,10 @@ def cython_run(
     if VERSION is not None:
         require += '>=%s' % VERSION
     if not cython_chk(VERSION, verbose=False):
+        pkgname = re.compile(r'cython(\.|$)', re.IGNORECASE)
+        for modname in list(sys.modules.keys()):
+            if pkgname.match(modname):
+                del sys.modules[modname]
         try:
             import warnings
             import setuptools
