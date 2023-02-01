@@ -76,6 +76,7 @@ def github_actions():
 @unittest.skipMPI('openmpi(==4.0.0)')
 @unittest.skipMPI('openmpi(==4.0.1)', sys.platform=='darwin')
 @unittest.skipMPI('openmpi(==4.0.2)', sys.platform=='darwin')
+@unittest.skipMPI('openmpi(==4.1.2)', github_actions())
 @unittest.skipMPI('mpich(<4.1.0)', appnum() is None)
 @unittest.skipMPI('mpich', badport())
 @unittest.skipMPI('msmpi(<8.1.0)')
@@ -164,7 +165,6 @@ class BaseTestSpawnSingle(BaseTestSpawn):
         self.COMM.Barrier()
 
 
-@unittest.skipMPI('openmpi(==4.1.2)', github_actions())
 class BaseTestSpawnMultiple(BaseTestSpawn):
 
     def testCommSpawn(self):
