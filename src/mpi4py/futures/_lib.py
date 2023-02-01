@@ -360,14 +360,17 @@ def ServicePool(executor):
     return Pool(executor, _manager_service)
 
 
-def WorkerPool(executor):
+def WorkerPool(executor, comm=None, root=0):
     # pylint: disable=invalid-name
     if SharedPool is not None:
         return SharedPool(executor)
+    if comm is not None:
+        if comm.Get_size() == 1:
+            return ThreadPool(executor)
+        return SplitPool(executor, comm, root)
     if 'service' in executor._options:
         return ServicePool(executor)
-    else:
-        return SpawnPool(executor)
+    return SpawnPool(executor)
 
 
 # ---
