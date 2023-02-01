@@ -311,6 +311,9 @@ class MPICommExecutor:
             raise ValueError("Expecting an intracommunicator")
         if root < 0 or root >= comm.Get_size():
             raise ValueError("Expecting root in range(comm.size)")
+        if _lib.SharedPool is not None:
+            comm = _lib.get_comm_world()
+            root = comm.Get_rank()
 
         self._comm = comm
         self._root = root
@@ -327,15 +330,9 @@ class MPICommExecutor:
         options = self._options
         executor = None
 
-        if _lib.SharedPool:
+        if comm.Get_rank() == root:
             executor = MPIPoolExecutor(**options)
-            executor._pool = _lib.SharedPool(executor)
-        elif comm.Get_size() == 1:
-            executor = MPIPoolExecutor(**options)
-            executor._pool = _lib.ThreadPool(executor)
-        elif comm.Get_rank() == root:
-            executor = MPIPoolExecutor(**options)
-            executor._pool = _lib.SplitPool(executor, comm, root)
+            executor._pool = _lib.WorkerPool(executor, comm, root)
         else:
             _lib.server_main_split(comm, root)
 
