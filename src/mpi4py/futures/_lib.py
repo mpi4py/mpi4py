@@ -93,8 +93,15 @@ def _format_exc(exc, comm):
     return f'\n{info}"""\n{body}"""'
 
 
-def sys_exception():
-    return sys.exc_info()[1]
+if sys.version_info > (3, 11):
+
+    def sys_exception():
+        return sys.exception()
+
+else:  # pragma: no cover
+
+    def sys_exception():
+        return sys.exc_info()[1]
 
 
 def os_environ_get(name, default=None):

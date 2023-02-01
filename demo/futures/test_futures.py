@@ -64,9 +64,8 @@ class ExecutorMixin:
         self.t1 = time.time()
         try:
             self.executor = self.executor_type(max_workers=self.worker_count)
-        except NotImplementedError:
-            e = sys.exc_info()[1]
-            self.skipTest(str(e))
+        except NotImplementedError as exc:
+            self.skipTest(str(exc))
         self._prime_executor()
 
     def tearDown(self):
