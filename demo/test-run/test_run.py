@@ -93,7 +93,6 @@ class BaseTestRun(unittest.TestCase):
             os.environ.get('GITHUB_ACTIONS') == 'true',
             os.environ.get('TF_BUILD') == 'True',
             os.environ.get('CIRCLECI') == 'true',
-            os.environ.get('TRAVIS') == 'true',
         ))
         if aborted:
             if message is not None and not ci:
