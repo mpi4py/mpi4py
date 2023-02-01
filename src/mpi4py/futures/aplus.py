@@ -103,10 +103,15 @@ def _chain_future(new_future, future):
     future.add_done_callback(done_cb)
 
 
-def _sys_exception():
-    exc = sys.exc_info()[1]
-    exc.__traceback__ = None
-    return exc
+if sys.version_info > (3, 11):
+
+    def _sys_exception():
+        return sys.exception()
+
+else:  # pragma: no cover
+
+    def _sys_exception():
+        return sys.exc_info()[1]
 
 
 def _done_cb(new_future, future, on_success=None, on_failure=None):
