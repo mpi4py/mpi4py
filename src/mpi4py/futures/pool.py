@@ -120,7 +120,7 @@ class MPIPoolExecutor(Executor):
         submit.__text_signature__ = '($self, fn, /, *args, **kwargs)'
 
     def map(self, fn, *iterables,
-            timeout=None, chunksize=1, unordered=False):  # noqa: D402
+            timeout=None, chunksize=1, unordered=False):
         """Return an iterator equivalent to ``map(fn, *iterables)``.
 
         Args:
@@ -143,11 +143,11 @@ class MPIPoolExecutor(Executor):
                 before the given timeout.
             Exception: If ``fn(*args)`` raises for any values.
 
-        """
+        """  # noqa: D402
         return self.starmap(fn, zip(*iterables), timeout, chunksize, unordered)
 
     def starmap(self, fn, iterable,
-                timeout=None, chunksize=1, unordered=False):  # noqa: D402
+                timeout=None, chunksize=1, unordered=False):
         """Return an iterator equivalent to ``itertools.starmap(...)``.
 
         Args:
@@ -169,7 +169,7 @@ class MPIPoolExecutor(Executor):
                 before the given timeout.
             Exception: If ``fn(*args)`` raises for any values.
 
-        """
+        """  # noqa: D402
         # pylint: disable=too-many-arguments
         if chunksize < 1:
             raise ValueError("chunksize must be >= 1.")

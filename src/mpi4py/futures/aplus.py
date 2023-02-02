@@ -18,12 +18,12 @@ from ._core import Future
 class ThenableFuture(Future):
     """*Thenable* `Future` subclass."""
 
-    def then(self, on_success=None, on_failure=None):  # noqa: D402
-        """Return ``then(self, on_success, on_failure)``."""
+    def then(self, on_success=None, on_failure=None):
+        """Return ``then(self, on_success, on_failure)``."""  # noqa: D402
         return then(self, on_success, on_failure)
 
-    def catch(self, on_failure=None):  # noqa: D402
-        """Return ``catch(self, on_failure)``."""
+    def catch(self, on_failure=None):
+        """Return ``catch(self, on_failure)``."""  # noqa: D402
         return catch(self, on_failure)
 
 

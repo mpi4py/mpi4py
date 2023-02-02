@@ -31,7 +31,7 @@ pip install pip --upgrade
 
 echo "Installing dependencies"
 pip install Cython
-pip install pydocstyle pylint coverage --upgrade
+pip install pylint coverage --upgrade
 
 echo "Loading MPI module: $MPI"
 module purge
@@ -40,9 +40,6 @@ hash -r
 
 echo "Installing package"
 pip -vvv install .
-
-echo "Running pydocstyle"
-pydocstyle src/mpi4py | tee pydocstyle-$PY-$MPI.out
 
 echo "Running pylint"
 pylint mpi4py | tee pylint-$PY-$MPI.out
