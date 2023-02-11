@@ -108,7 +108,7 @@ cdef class Comm:
     # Communicator Constructors
     # -------------------------
 
-    def Clone(self) -> Comm:
+    def Clone(self) -> Self:
         """
         Clone an existing communicator
         """
@@ -118,7 +118,7 @@ cdef class Comm:
         comm_set_eh(comm.ob_mpi)
         return comm
 
-    def Dup(self, Info info: Optional[Info] = None) -> Comm:
+    def Dup(self, Info info: Optional[Info] = None) -> Self:
         """
         Duplicate an existing communicator
         """
@@ -134,7 +134,7 @@ cdef class Comm:
         comm_set_eh(comm.ob_mpi)
         return comm
 
-    def Dup_with_info(self, Info info: Info) -> Comm:
+    def Dup_with_info(self, Info info: Info) -> Self:
         """
         Duplicate an existing communicator
         """
@@ -145,7 +145,7 @@ cdef class Comm:
         comm_set_eh(comm.ob_mpi)
         return comm
 
-    def Idup(self, Info info: Optional[Info] = None) -> Tuple[Comm, Request]:
+    def Idup(self, Info info: Optional[Info] = None) -> Tuple[Self, Request]:
         """
         Nonblocking duplicate an existing communicator
         """
@@ -164,7 +164,7 @@ cdef class Comm:
         comm_set_eh(comm.ob_mpi)
         return (comm, request)
 
-    def Idup_with_info(self, Info info: Info) ->  Tuple[Comm, Request]:
+    def Idup_with_info(self, Info info: Info) ->  Tuple[Self, Request]:
         """
         Duplicate an existing communicator
         """
