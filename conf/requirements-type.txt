@@ -1,3 +1,2 @@
-mypy
+mypy >= 1.0.0
 numpy
-
