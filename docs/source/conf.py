@@ -80,6 +80,7 @@ autodoc_typehints = 'description'
 autodoc_typehints_format = 'short'
 autodoc_mock_imports = []
 autodoc_type_aliases = {
+    'Self': '~typing.Self',
     'PathLike': '~os.PathLike',
 }
 
