@@ -254,6 +254,17 @@ class EmbedSignature(CythonTransform):
         return node
 
 
-# Monkeypatch EmbedSignature transform
+# Monkeypatch AutoDocTransforms.EmbedSignature
 from Cython.Compiler import AutoDocTransforms
 AutoDocTransforms.EmbedSignature = EmbedSignature
+
+# Monkeypatch Nodes.raise_utility_code
+try:
+    from Cython.Compiler.Nodes import raise_utility_code
+    code = raise_utility_code.impl
+    ipos = code.index("if (tb) {\n#if CYTHON_COMPILING_IN_PYPY\n")
+    raise_utility_code.impl = code[:ipos] + code[ipos:].replace(
+        'CYTHON_COMPILING_IN_PYPY', '!CYTHON_FAST_THREAD_STATE', 1)
+    del raise_utility_code, code, ipos
+except:
+    pass
