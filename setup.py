@@ -138,6 +138,7 @@ metadata = {
 }
 
 require_python = (3, 6)
+maxknow_python = (3, 11)
 
 metadata_extra = {
     'project_urls': {
@@ -316,6 +317,15 @@ def extensions():
         ],
         configure=configure_mpi,
     )
+    if sys.version_info[:2] > maxknow_python:
+        MPI['define_macros'].extend([
+            ('CYTHON_FAST_PYCALL', 0),
+            ('CYTHON_FAST_THREAD_STATE', 0),
+            ('CYTHON_USE_DICT_VERSIONS', 0),
+            ('CYTHON_USE_PYLONG_INTERNALS', 0),
+            ('CYTHON_USE_PYLIST_INTERNALS', 0),
+            ('CYTHON_USE_UNICODE_INTERNALS', 0),
+        ])
     #
     return [MPI]
 
