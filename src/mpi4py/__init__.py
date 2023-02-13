@@ -126,7 +126,7 @@ def profile(name, *, path=None):
         from _ctypes import dlopen
         from os import RTLD_NOW, RTLD_GLOBAL
     except ImportError as exc:  # pragma: no cover
-        warnings.warn(exc.args[0])
+        warnings.warn(exc.args[0], stacklevel=2)
         return
 
     def find_library(name, path):
@@ -160,7 +160,7 @@ def profile(name, *, path=None):
     try:
         handle = dlopen(filename, RTLD_NOW | RTLD_GLOBAL)
     except OSError as exc:
-        warnings.warn(exc.args[0])
+        warnings.warn(exc.args[0], stacklevel=2)
     else:
         registry = vars(profile).setdefault('registry', [])
         registry.append((name, (handle, filename)))
