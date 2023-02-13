@@ -99,10 +99,10 @@ def ringtest(comm, args=None, verbose=True):
                     Send(sendmsg, dest, 0)
         toc = Wtime()
         if comm.rank == 0 and sendmsg != recvmsg:  # pragma: no cover
-            import warnings
+            from warnings import warn
             import traceback
             try:
-                warnings.warn("received message does not match!")
+                warn("received message does not match!", stacklevel=1)
             except UserWarning:
                 traceback.print_exc()
                 comm.Abort(2)
