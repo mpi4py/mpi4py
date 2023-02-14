@@ -1700,6 +1700,21 @@ cdef class Comm:
     # Error handling
     # --------------
 
+    @classmethod
+    def Create_errhandler(
+        cls,
+        errhandler_fn: Callable[[Comm, int], None],
+    ) -> Errhandler:
+        """
+        Create a new error handler for communicators
+        """
+        cdef Errhandler errhandler = Errhandler.__new__(Errhandler)
+        cdef MPI_Comm_errhandler_function *fn = NULL
+        cdef int index = errhdl_new(errhandler_fn, &fn)
+        try: CHKERR( MPI_Comm_create_errhandler(fn, &errhandler.ob_mpi) )
+        except: errhdl_del(&index, fn); raise
+        return errhandler
+
     def Get_errhandler(self) -> Errhandler:
         """
         Get the error handler for a communicator

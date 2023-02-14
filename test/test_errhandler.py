@@ -18,6 +18,41 @@ class TestErrhandler(unittest.TestCase):
 
 class BaseTestErrhandler:
 
+    def testCreate(self):
+        mpiobj = self.mpiobj
+        called = False
+        check = False
+
+        def errhandler_fn(arg, err):
+            nonlocal called
+            nonlocal check
+            called = True
+            check = True
+            check &= (arg == mpiobj)
+            check &= (err == MPI.ERR_OTHER)
+
+        try:
+            errhdl = mpiobj.Create_errhandler(errhandler_fn)
+        except NotImplementedError:
+            clsname = type(mpiobj).__name__.lower()
+            self.skipTest(f'mpi-{clsname}-create_errhandler')
+        self.assertIsInstance(errhdl, MPI.Errhandler)
+        self.assertNotEqual(errhdl, MPI.ERRHANDLER_NULL)
+
+        save = mpiobj.Get_errhandler()
+        mpiobj.Set_errhandler(errhdl)
+        try:
+            mpiobj.Call_errhandler(MPI.ERR_OTHER)
+        except NotImplementedError:
+            if MPI.VERSION >= 2: raise
+            clsname = type(mpiobj).__name__.lower()
+            self.skipTest(f'mpi-{clsname}-call_errhandler')
+        finally:
+            mpiobj.Set_errhandler(save)
+            errhdl.Free()
+        self.assertTrue(called)
+        self.assertTrue(check)
+
     def testCall(self):
         mpiobj = self.mpiobj
         mpiobj.Set_errhandler(MPI.ERRORS_RETURN)
@@ -27,7 +62,7 @@ class BaseTestErrhandler:
         except NotImplementedError:
             if MPI.VERSION >= 2: raise
             clsname = type(mpiobj).__name__.lower()
-            self.skipTest(f'mpi-{clsname}-call-errhandler')
+            self.skipTest(f'mpi-{clsname}-call_errhandler')
 
     def testGetFree(self):
         mpiobj = self.mpiobj
@@ -127,6 +162,10 @@ class TestErrhandlerSession(BaseTestErrhandler, unittest.TestCase):
 
     def tearDown(self):
         self.mpiobj.Finalize()
+
+    @unittest.skipMPI('openmpi')  # TODO
+    def testCreate(self):
+        super().testCreate()
 
 
 if __name__ == '__main__':

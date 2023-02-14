@@ -94,6 +94,21 @@ cdef class Session:
     # Error handling
     # --------------
 
+    @classmethod
+    def Create_errhandler(
+        cls,
+        errhandler_fn: Callable[[Session, int], None],
+    ) -> Errhandler:
+        """
+        Create a new error handler for sessions
+        """
+        cdef Errhandler errhandler = Errhandler.__new__(Errhandler)
+        cdef MPI_Session_errhandler_function *fn = NULL
+        cdef int index = errhdl_new(errhandler_fn, &fn)
+        try: CHKERR( MPI_Session_create_errhandler(fn, &errhandler.ob_mpi) )
+        except: errhdl_del(&index, fn); raise
+        return errhandler
+
     def Get_errhandler(self) -> Errhandler:
         """
         Get the error handler for a session

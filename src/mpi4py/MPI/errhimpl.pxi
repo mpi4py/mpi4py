@@ -1,5 +1,263 @@
 # -----------------------------------------------------------------------------
 
+ctypedef fused mpi_scwf_t:
+    MPI_Session
+    MPI_Comm
+    MPI_Win
+    MPI_File
+
+ctypedef fused mpi_ehfn_t:
+    MPI_Session_errhandler_function
+    MPI_Comm_errhandler_function
+    MPI_Win_errhandler_function
+    MPI_File_errhandler_function
+
+cdef list errhdl_registry = [
+    [None]*(1+32),  # Session
+    [None]*(1+32),  # Comm
+    [None]*(1+32),  # Win
+    [None]*(1+32),  # File
+]
+
+cdef inline void errhdl_call_py(
+    int index,
+    mpi_scwf_t handle, int errcode,
+) with gil:
+    cdef object pyhandle = None
+    cdef object registry = None
+    # errors in user-defined error handler functions are unrecoverable
+    try:
+        if mpi_scwf_t is MPI_Session:
+            pyhandle = PyMPISession_New(handle)
+            registry = errhdl_registry[0]
+        if mpi_scwf_t is MPI_Comm:
+            pyhandle = PyMPIComm_New(handle)
+            registry = errhdl_registry[1]
+        if mpi_scwf_t is MPI_Win:
+            pyhandle = PyMPIWin_New(handle)
+            registry = errhdl_registry[2]
+        if mpi_scwf_t is MPI_File:
+            pyhandle = PyMPIFile_New(handle)
+            registry = errhdl_registry[3]
+        try:
+            registry[index](pyhandle, errcode)
+        finally:
+            if mpi_scwf_t is MPI_Session:
+                (<Session>pyhandle).ob_mpi = MPI_SESSION_NULL
+            if mpi_scwf_t is MPI_Comm:
+                (<Comm>pyhandle).ob_mpi = MPI_COMM_NULL
+            if mpi_scwf_t is MPI_Win:
+                (<Win>pyhandle).ob_mpi = MPI_WIN_NULL
+            if mpi_scwf_t is MPI_File:
+                (<File>pyhandle).ob_mpi = MPI_FILE_NULL
+    except:
+        # print the full exception traceback and abort
+        PySys_WriteStderr(
+            b"Fatal Python error: %s\n",
+            b"exception in user-defined error handler function",
+        )
+        try:
+            print_traceback()
+        finally:
+            <void>MPI_Abort(MPI_COMM_WORLD, 1)
+
+cdef inline void errhdl_call(
+    int index,
+    mpi_scwf_t handle, int errcode,
+) noexcept nogil:
+    # make it abort if Python has finalized
+    if not Py_IsInitialized():
+        <void>MPI_Abort(MPI_COMM_WORLD, 1)
+    # make it abort if module cleanup has been done
+    if (<void*>errhdl_registry) == NULL:
+        <void>MPI_Abort(MPI_COMM_WORLD, 1)
+    # make the actual GIL-safe Python call
+    errhdl_call_py(index, handle, errcode)
+
+@cython.callspec("MPIAPI")
+cdef void errhdl_01(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
+    errhdl_call(  1, handle[0], errcode[0])
+@cython.callspec("MPIAPI")
+cdef void errhdl_02(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
+    errhdl_call(  2, handle[0], errcode[0])
+@cython.callspec("MPIAPI")
+cdef void errhdl_03(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
+    errhdl_call(  3, handle[0], errcode[0])
+@cython.callspec("MPIAPI")
+cdef void errhdl_04(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
+    errhdl_call(  4, handle[0], errcode[0])
+@cython.callspec("MPIAPI")
+cdef void errhdl_05(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
+    errhdl_call(  5, handle[0], errcode[0])
+@cython.callspec("MPIAPI")
+cdef void errhdl_06(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
+    errhdl_call(  6, handle[0], errcode[0])
+@cython.callspec("MPIAPI")
+cdef void errhdl_07(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
+    errhdl_call(  7, handle[0], errcode[0])
+@cython.callspec("MPIAPI")
+cdef void errhdl_08(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
+    errhdl_call(  8, handle[0], errcode[0])
+@cython.callspec("MPIAPI")
+cdef void errhdl_09(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
+    errhdl_call(  9, handle[0], errcode[0])
+@cython.callspec("MPIAPI")
+cdef void errhdl_10(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
+    errhdl_call( 10, handle[0], errcode[0])
+@cython.callspec("MPIAPI")
+cdef void errhdl_11(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
+    errhdl_call( 11, handle[0], errcode[0])
+@cython.callspec("MPIAPI")
+cdef void errhdl_12(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
+    errhdl_call( 12, handle[0], errcode[0])
+@cython.callspec("MPIAPI")
+cdef void errhdl_13(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
+    errhdl_call( 13, handle[0], errcode[0])
+@cython.callspec("MPIAPI")
+cdef void errhdl_14(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
+    errhdl_call( 14, handle[0], errcode[0])
+@cython.callspec("MPIAPI")
+cdef void errhdl_15(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
+    errhdl_call( 15, handle[0], errcode[0])
+@cython.callspec("MPIAPI")
+cdef void errhdl_16(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
+    errhdl_call( 16, handle[0], errcode[0])
+@cython.callspec("MPIAPI")
+cdef void errhdl_17(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
+    errhdl_call( 17, handle[0], errcode[0])
+@cython.callspec("MPIAPI")
+cdef void errhdl_18(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
+    errhdl_call( 18, handle[0], errcode[0])
+@cython.callspec("MPIAPI")
+cdef void errhdl_19(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
+    errhdl_call( 19, handle[0], errcode[0])
+@cython.callspec("MPIAPI")
+cdef void errhdl_20(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
+    errhdl_call( 20, handle[0], errcode[0])
+@cython.callspec("MPIAPI")
+cdef void errhdl_21(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
+    errhdl_call( 21, handle[0], errcode[0])
+@cython.callspec("MPIAPI")
+cdef void errhdl_22(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
+    errhdl_call( 22, handle[0], errcode[0])
+@cython.callspec("MPIAPI")
+cdef void errhdl_23(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
+    errhdl_call( 23, handle[0], errcode[0])
+@cython.callspec("MPIAPI")
+cdef void errhdl_24(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
+    errhdl_call( 24, handle[0], errcode[0])
+@cython.callspec("MPIAPI")
+cdef void errhdl_25(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
+    errhdl_call( 25, handle[0], errcode[0])
+@cython.callspec("MPIAPI")
+cdef void errhdl_26(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
+    errhdl_call( 26, handle[0], errcode[0])
+@cython.callspec("MPIAPI")
+cdef void errhdl_27(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
+    errhdl_call( 27, handle[0], errcode[0])
+@cython.callspec("MPIAPI")
+cdef void errhdl_28(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
+    errhdl_call( 28, handle[0], errcode[0])
+@cython.callspec("MPIAPI")
+cdef void errhdl_29(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
+    errhdl_call( 29, handle[0], errcode[0])
+@cython.callspec("MPIAPI")
+cdef void errhdl_30(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
+    errhdl_call( 30, handle[0], errcode[0])
+@cython.callspec("MPIAPI")
+cdef void errhdl_31(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
+    errhdl_call( 31, handle[0], errcode[0])
+@cython.callspec("MPIAPI")
+cdef void errhdl_32(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
+    errhdl_call( 32, handle[0], errcode[0])
+
+cdef inline void errhdl_map(int index, mpi_ehfn_t **fn) noexcept nogil:
+    if   index ==  1: fn[0] = errhdl_01
+    elif index ==  2: fn[0] = errhdl_02
+    elif index ==  3: fn[0] = errhdl_03
+    elif index ==  4: fn[0] = errhdl_04
+    elif index ==  5: fn[0] = errhdl_05
+    elif index ==  6: fn[0] = errhdl_06
+    elif index ==  7: fn[0] = errhdl_07
+    elif index ==  8: fn[0] = errhdl_08
+    elif index ==  9: fn[0] = errhdl_09
+    elif index == 10: fn[0] = errhdl_10
+    elif index == 11: fn[0] = errhdl_11
+    elif index == 12: fn[0] = errhdl_12
+    elif index == 13: fn[0] = errhdl_13
+    elif index == 14: fn[0] = errhdl_14
+    elif index == 15: fn[0] = errhdl_15
+    elif index == 16: fn[0] = errhdl_16
+    elif index == 17: fn[0] = errhdl_17
+    elif index == 18: fn[0] = errhdl_18
+    elif index == 19: fn[0] = errhdl_19
+    elif index == 20: fn[0] = errhdl_20
+    elif index == 21: fn[0] = errhdl_21
+    elif index == 22: fn[0] = errhdl_22
+    elif index == 23: fn[0] = errhdl_23
+    elif index == 24: fn[0] = errhdl_24
+    elif index == 25: fn[0] = errhdl_25
+    elif index == 26: fn[0] = errhdl_26
+    elif index == 27: fn[0] = errhdl_27
+    elif index == 28: fn[0] = errhdl_28
+    elif index == 29: fn[0] = errhdl_29
+    elif index == 30: fn[0] = errhdl_30
+    elif index == 31: fn[0] = errhdl_31
+    elif index == 32: fn[0] = errhdl_32
+    else:             fn[0] = NULL
+
+cdef inline int errhdl_new(
+    object function,
+    mpi_ehfn_t **fn,
+) except -1:
+    # find a free slot in the registry
+    cdef object registry = None
+    if mpi_ehfn_t is MPI_Session_errhandler_function:
+        registry = errhdl_registry[0]
+    if mpi_ehfn_t is MPI_Comm_errhandler_function:
+        registry = errhdl_registry[1]
+    if mpi_ehfn_t is MPI_Win_errhandler_function:
+        registry = errhdl_registry[2]
+    if mpi_ehfn_t is MPI_File_errhandler_function:
+        registry = errhdl_registry[3]
+    cdef int index = 0
+    try:
+        index = registry.index(None, 1)
+    except ValueError:
+        raise RuntimeError(
+            "cannot create too many user-defined error handlers",
+        )
+    # check whether the function is callable
+    function.__call__
+    # register the Python function, map it to the associated C
+    # function, and return the slot index in the registry
+    registry[index] = function
+    errhdl_map(index, fn)
+    return index
+
+cdef inline int errhdl_del(
+    int *indexp,
+    mpi_ehfn_t *fn,
+) except -1:
+    <void> fn # unused
+    # clear index value
+    cdef int index = indexp[0]
+    indexp[0] = 0
+    # free slot in the registry
+    cdef object registry = None
+    if mpi_ehfn_t is MPI_Session_errhandler_function:
+        registry = errhdl_registry[0]
+    if mpi_ehfn_t is MPI_Comm_errhandler_function:
+        registry = errhdl_registry[1]
+    if mpi_ehfn_t is MPI_Win_errhandler_function:
+        registry = errhdl_registry[2]
+    if mpi_ehfn_t is MPI_File_errhandler_function:
+        registry = errhdl_registry[3]
+    registry[index] = None
+    return 0
+
+# -----------------------------------------------------------------------------
+
 cdef inline int session_set_eh(MPI_Session ob) except -1 nogil:
     if ob == MPI_SESSION_NULL: return 0
     cdef int opt = options.errors

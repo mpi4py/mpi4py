@@ -649,6 +649,21 @@ cdef class Win:
     # Error Handling
     # --------------
 
+    @classmethod
+    def Create_errhandler(
+        cls,
+        errhandler_fn: Callable[[Win, int], None],
+    ) -> Errhandler:
+        """
+        Create a new error handler for windows
+        """
+        cdef Errhandler errhandler = Errhandler.__new__(Errhandler)
+        cdef MPI_Win_errhandler_function *fn = NULL
+        cdef int index = errhdl_new(errhandler_fn, &fn)
+        try: CHKERR( MPI_Win_create_errhandler(fn, &errhandler.ob_mpi) )
+        except: errhdl_del(&index, fn); raise
+        return errhandler
+
     def Get_errhandler(self) -> Errhandler:
         """
         Get the error handler for a window
