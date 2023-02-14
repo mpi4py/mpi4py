@@ -440,11 +440,12 @@ MPI timer functionalities are available through the `Wtime` and
 Error Handling
 ^^^^^^^^^^^^^^
 
-In order facilitate handle sharing with other Python modules
+In order to facilitate handle sharing with other Python modules
 interfacing MPI-based parallel libraries, the predefined MPI error
 handlers `ERRORS_RETURN` and `ERRORS_ARE_FATAL` can be assigned to and
 retrieved from communicators using methods `Comm.Set_errhandler` and
-`Comm.Get_errhandler`, and similarly for windows and files.
+`Comm.Get_errhandler`, and similarly for windows and files. New custom
+error handlers can be created with `Comm.Create_errhandler`.
 
 When the predefined error handler `ERRORS_RETURN` is set, errors
 returned from MPI calls within Python code will raise an instance of

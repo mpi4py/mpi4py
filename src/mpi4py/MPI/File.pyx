@@ -800,6 +800,21 @@ cdef class File:
     # Error Handling
     # --------------
 
+    @classmethod
+    def Create_errhandler(
+        cls,
+        errhandler_fn: Callable[[File, int], None],
+    ) -> Errhandler:
+        """
+        Create a new error handler for files
+        """
+        cdef Errhandler errhandler = Errhandler.__new__(Errhandler)
+        cdef MPI_File_errhandler_function *fn = NULL
+        cdef int index = errhdl_new(errhandler_fn, &fn)
+        try: CHKERR( MPI_File_create_errhandler(fn, &errhandler.ob_mpi) )
+        except: errhdl_del(&index, fn); raise
+        return errhandler
+
     def Get_errhandler(self) -> Errhandler:
         """
         Get the error handler for a file

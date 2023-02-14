@@ -27,6 +27,9 @@ Release 4.0.0 [2023-XX-XX]
     attributes `Datatype.typestr`, `Datatype.typechar` to simplify
     NumPy interoperability for simple cases.
 
+  + Add methods `Comm.Create_errhandler()`, `Win.Create_errhandler()`,
+    and `File.Create_errhandler()` to create custom error handlers.
+
 * Backward-incompatible changes:
 
   * Python 2 is no longer supported, Python 3.6+ is required, but
