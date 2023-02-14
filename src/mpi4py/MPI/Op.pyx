@@ -35,9 +35,13 @@ cdef class Op:
         cdef MPI_User_function_c *fn_c = NULL
         op.ob_uid = op_user_new(function, &fn_i, &fn_c)
         try:
-            CHKERR( MPI_Op_create_c(fn_c, commute, &op.ob_mpi) )
-        except NotImplementedError:
-            CHKERR( MPI_Op_create(fn_i, commute, &op.ob_mpi) )
+            try:
+                CHKERR( MPI_Op_create_c(fn_c, commute, &op.ob_mpi) )
+            except NotImplementedError:
+                CHKERR( MPI_Op_create(fn_i, commute, &op.ob_mpi) )
+        except:
+            op_user_del(&op.ob_uid)
+            raise
         return op
 
     def Free(self) -> None:

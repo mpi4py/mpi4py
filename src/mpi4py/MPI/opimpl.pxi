@@ -103,7 +103,7 @@ cdef inline void op_user_mpi(
         finally:
             datatype.ob_mpi = MPI_DATATYPE_NULL
     except:
-        # print the full exception traceback and abort.
+        # print the full exception traceback and abort
         PySys_WriteStderr(
             b"Fatal Python error: %s\n",
             b"exception in user-defined reduction operation",
@@ -270,32 +270,35 @@ cdef void op_user_map(int index, op_usrfn_t **fn) noexcept nogil:
     elif index == 32: fn[0] = op_user_32
     else:             fn[0] = NULL
 
-cdef int op_user_new(object function,
-                     MPI_User_function   **fn_i,
-                     MPI_User_function_c **fn_c,
-                     ) except -1:
+cdef int op_user_new(
+    object function,
+    MPI_User_function   **fn_i,
+    MPI_User_function_c **fn_c,
+) except -1:
     # find a free slot in the registry
     cdef int index = 0
     try:
         index = op_user_registry.index(None, 1)
     except ValueError:
-        raise RuntimeError("cannot create too many "
-                           "user-defined reduction operations")
-    # the line below will fail
-    # if the function is not callable
+        raise RuntimeError(
+            "cannot create too many user-defined reduction operations",
+        )
+    # check whether the function is callable
     function.__call__
-    # register the Python function,
-    # map it to the associated C function,
-    # and return the slot index in registry
+    # register the Python function, map it to the associated C
+    # function, and return the slot index in the registry
     op_user_registry[index] = function
     op_user_map(index, fn_i)
     op_user_map(index, fn_c)
     return index
 
-cdef int op_user_del(int *indexp) except -1:
-    # free slot in the registry
+cdef int op_user_del(
+    int *indexp,
+) except -1:
+    # clear index value
     cdef int index = indexp[0]
-    indexp[0] = 0 # clear the value
+    indexp[0] = 0
+    # free slot in the registry
     op_user_registry[index] = None
     return 0
 
