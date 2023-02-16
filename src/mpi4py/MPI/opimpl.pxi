@@ -76,10 +76,12 @@ cdef object op_MINLOC(object x, object y):
 
 cdef object op_REPLACE(object x, object y):
     """replace,  (x, y) -> y"""
+    <void> x # unused
     return y
 
 cdef object op_NO_OP(object x, object y):
     """no-op,  (x, y) -> x"""
+    <void> y # unused
     return x
 
 # -----------------------------------------------------------------------------

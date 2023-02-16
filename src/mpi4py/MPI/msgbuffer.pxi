@@ -51,6 +51,7 @@ cdef class BottomType(int):
         if a != b : raise ValueError("cannot create instance")
 
     def __repr__(self):
+        <void> self # unused
         return 'BOTTOM'
 
 
@@ -65,6 +66,7 @@ cdef class InPlaceType(int):
         if a != b : raise ValueError("cannot create instance")
 
     def __repr__(self):
+        <void> self # unused
         return 'IN_PLACE'
 
 

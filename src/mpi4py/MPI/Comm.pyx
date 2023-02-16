@@ -2026,6 +2026,7 @@ cdef class Intracomm(Comm):
     """
 
     def __cinit__(self, Comm comm: Optional[Comm] = None):
+        <void> comm # unused
         if self.ob_mpi == MPI_COMM_NULL: return
         cdef int inter = 1
         CHKERR( MPI_Comm_test_inter(self.ob_mpi, &inter) )
@@ -2509,6 +2510,7 @@ cdef class Topocomm(Intracomm):
     """
 
     def __cinit__(self, Comm comm: Optional[Comm] = None):
+        <void> comm # unused
         if self.ob_mpi == MPI_COMM_NULL: return
         cdef int topo = MPI_UNDEFINED
         CHKERR( MPI_Topo_test(self.ob_mpi, &topo) )
@@ -2862,6 +2864,7 @@ cdef class Cartcomm(Topocomm):
     """
 
     def __cinit__(self, Comm comm: Optional[Comm] = None):
+        <void> comm # unused
         if self.ob_mpi == MPI_COMM_NULL: return
         cdef int topo = MPI_UNDEFINED
         CHKERR( MPI_Topo_test(self.ob_mpi, &topo) )
@@ -3008,6 +3011,7 @@ cdef class Graphcomm(Topocomm):
     """
 
     def __cinit__(self, Comm comm: Optional[Comm] = None):
+        <void> comm # unused
         if self.ob_mpi == MPI_COMM_NULL: return
         cdef int topo = MPI_UNDEFINED
         CHKERR( MPI_Topo_test(self.ob_mpi, &topo) )
@@ -3114,6 +3118,7 @@ cdef class Distgraphcomm(Topocomm):
     """
 
     def __cinit__(self, Comm comm: Optional[Comm] = None):
+        <void> comm # unused
         if self.ob_mpi == MPI_COMM_NULL: return
         cdef int topo = MPI_UNDEFINED
         CHKERR( MPI_Topo_test(self.ob_mpi, &topo) )
@@ -3178,6 +3183,7 @@ cdef class Intercomm(Comm):
     """
 
     def __cinit__(self, Comm comm: Optional[Comm] = None):
+        <void> comm # unused
         if self.ob_mpi == MPI_COMM_NULL: return
         cdef int inter = 0
         CHKERR( MPI_Comm_test_inter(self.ob_mpi, &inter) )
