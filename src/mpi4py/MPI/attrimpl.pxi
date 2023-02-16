@@ -20,14 +20,18 @@ cdef class _p_keyval:
         self.delete_fn = delete_fn
         self.nopython  = nopython
 
-cdef dict type_keyval = {}
-cdef dict comm_keyval = {}
-cdef dict  win_keyval = {}
+cdef object keyval_lock_type = Lock()
+cdef object keyval_lock_comm = Lock()
+cdef object keyval_lock_win  = Lock()
+
+cdef dict   keyval_registry_type = {}
+cdef dict   keyval_registry_comm = {}
+cdef dict   keyval_registry_win  = {}
 
 _keyval_registry = {
-'Datatype' : type_keyval,
-'Comm'     : comm_keyval,
-'Win'      :  win_keyval,
+    'Datatype' : keyval_registry_type,
+    'Comm'     : keyval_registry_comm,
+    'Win'      : keyval_registry_win,
 }
 
 #------------------------------------------------------------------------------
@@ -37,32 +41,32 @@ ctypedef fused PyMPI_attr_type:
     MPI_Comm
     MPI_Win
 
+
 cdef inline object PyMPI_attr_call(
     object function,
     PyMPI_attr_type hdl,
     int keyval,
-    object attrval):
-    cdef object ob
+    object attrval,
+):
+    cdef object handle
     cdef object result
     if PyMPI_attr_type is MPI_Datatype:
-        ob = Datatype.__new__(Datatype)
-        (<Datatype>ob).ob_mpi = hdl
+        handle = PyMPIDatatype_New(hdl)
     if PyMPI_attr_type is MPI_Comm:
-        ob = Comm.__new__(Comm)
-        (<Comm>ob).ob_mpi = hdl
+        handle = PyMPIComm_New(hdl)
     if PyMPI_attr_type is MPI_Win:
-        ob = Win.__new__(Win)
-        (<Win>ob).ob_mpi = hdl
+        handle = PyMPIWin_New(hdl)
     try:
-        result = function(ob, keyval, attrval)
+        result = function(handle, keyval, attrval)
     finally:
         if PyMPI_attr_type is MPI_Datatype:
-            (<Datatype>ob).ob_mpi = MPI_DATATYPE_NULL
+            (<Datatype>handle).ob_mpi = MPI_DATATYPE_NULL
         if PyMPI_attr_type is MPI_Comm:
-            (<Comm>ob).ob_mpi = MPI_COMM_NULL
+            (<Comm>handle).ob_mpi = MPI_COMM_NULL
         if PyMPI_attr_type is MPI_Win:
-            (<Win>ob).ob_mpi = MPI_WIN_NULL
+            (<Win>handle).ob_mpi = MPI_WIN_NULL
     return result
+
 
 cdef inline int PyMPI_attr_copy(
     PyMPI_attr_type hdl,
@@ -70,7 +74,8 @@ cdef inline int PyMPI_attr_copy(
     void *extra_state,
     void *attrval_in,
     void *attrval_out,
-    int *flag) except -1:
+    int *flag,
+) except -1:
     if flag != NULL: flag[0] = 0
     cdef _p_keyval state = <_p_keyval>extra_state
     if state.copy_fn is None: return 0
@@ -90,11 +95,13 @@ cdef inline int PyMPI_attr_copy(
     Py_INCREF(state)
     return 0
 
+
 cdef inline int PyMPI_attr_delete(
     PyMPI_attr_type hdl,
     int keyval,
     void *attrval_in,
-    void *extra_state) except -1:
+    void *extra_state,
+) except -1:
     cdef _p_keyval state = <_p_keyval>extra_state
     cdef int p = not state.nopython
     if p and attrval_in == NULL: raise RuntimeError
@@ -107,6 +114,8 @@ cdef inline int PyMPI_attr_delete(
     Py_DECREF(state)
     return 0
 
+# ---
+
 cdef inline int PyMPI_attr_copy_cb(
     PyMPI_attr_type hdl,
     int keyval,
@@ -114,12 +123,14 @@ cdef inline int PyMPI_attr_copy_cb(
     void *attrval_in,
     void *attrval_out,
     int *flag,
-    ) except MPI_ERR_UNKNOWN with gil:
+) except MPI_ERR_UNKNOWN with gil:
     cdef int ierr = MPI_SUCCESS
     cdef object exc
     try:
-        PyMPI_attr_copy(hdl, keyval, extra_state,
-                        attrval_in, attrval_out, flag)
+        PyMPI_attr_copy(
+            hdl, keyval, extra_state,
+            attrval_in, attrval_out, flag,
+        )
     except MPIException as exc:
         print_traceback()
         ierr = exc.Get_error_code()
@@ -127,17 +138,20 @@ cdef inline int PyMPI_attr_copy_cb(
         print_traceback()
         ierr = MPI_ERR_OTHER
     return ierr
+
 
 cdef inline int PyMPI_attr_delete_cb(
     PyMPI_attr_type hdl,
     int keyval,
     void *attrval,
     void *extra_state,
-    ) except MPI_ERR_UNKNOWN with gil:
+) except MPI_ERR_UNKNOWN with gil:
     cdef int ierr = MPI_SUCCESS
     cdef object exc
     try:
-        PyMPI_attr_delete(hdl, keyval, attrval, extra_state)
+        PyMPI_attr_delete(
+            hdl, keyval, attrval, extra_state,
+        )
     except MPIException as exc:
         print_traceback()
         ierr = exc.Get_error_code()
@@ -146,14 +160,17 @@ cdef inline int PyMPI_attr_delete_cb(
         ierr = MPI_ERR_OTHER
     return ierr
 
+# ---
 
 @cython.callspec("MPIAPI")
-cdef int PyMPI_attr_copy_fn(PyMPI_attr_type hdl,
-                          int keyval,
-                          void *extra_state,
-                          void *attrval_in,
-                          void *attrval_out,
-                          int *flag) noexcept nogil:
+cdef int PyMPI_attr_copy_fn(
+    PyMPI_attr_type hdl,
+    int keyval,
+    void *extra_state,
+    void *attrval_in,
+    void *attrval_out,
+    int *flag,
+) noexcept nogil:
     if flag != NULL: flag[0] = 0
     if extra_state == NULL:
         return MPI_ERR_INTERN
@@ -161,49 +178,106 @@ cdef int PyMPI_attr_copy_fn(PyMPI_attr_type hdl,
         return MPI_ERR_INTERN
     if not Py_IsInitialized():
         return MPI_SUCCESS
-    return PyMPI_attr_copy_cb(hdl, keyval, extra_state,
-                              attrval_in, attrval_out, flag)
+    if not py_module_alive():
+        return MPI_SUCCESS
+    return PyMPI_attr_copy_cb(
+        hdl, keyval, extra_state,
+        attrval_in, attrval_out, flag,
+    )
+
 
 @cython.callspec("MPIAPI")
-cdef int PyMPI_attr_delete_fn(PyMPI_attr_type hdl,
-                            int keyval,
-                            void *attrval,
-                            void *extra_state) noexcept nogil:
+cdef int PyMPI_attr_delete_fn(
+    PyMPI_attr_type hdl,
+    int keyval,
+    void *attrval,
+    void *extra_state,
+) noexcept nogil:
     if extra_state == NULL:
         return MPI_ERR_INTERN
     if not Py_IsInitialized():
         return MPI_SUCCESS
-    return PyMPI_attr_delete_cb(hdl, keyval, attrval, extra_state)
+    if not py_module_alive():
+        return MPI_SUCCESS
+    return PyMPI_attr_delete_cb(
+        hdl, keyval, attrval, extra_state
+    )
 
-#------------------------------------------------------------------------------
+# ---
 
-cdef inline _p_keyval PyMPI_attr_state(
+cdef inline _p_keyval PyMPI_attr_state_get(
     PyMPI_attr_type hdl,
-    int keyval):
-    <void>hdl # unused
+    int keyval,
+):
+    <void> hdl # unused
     if PyMPI_attr_type is MPI_Datatype:
-        return <_p_keyval>type_keyval.get(keyval)
-    elif PyMPI_attr_type is MPI_Comm:
-        return <_p_keyval>comm_keyval.get(keyval)
-    elif PyMPI_attr_type is MPI_Win:
-        return <_p_keyval>win_keyval.get(keyval)
+        with keyval_lock_type:
+            return <_p_keyval>keyval_registry_type.get(keyval)
+    if PyMPI_attr_type is MPI_Comm:
+        with keyval_lock_comm:
+            return <_p_keyval>keyval_registry_comm.get(keyval)
+    if PyMPI_attr_type is MPI_Win:
+        with keyval_lock_win:
+            return <_p_keyval>keyval_registry_win.get(keyval)
+
+
+cdef inline int PyMPI_attr_state_set(
+    PyMPI_attr_type hdl,
+    int keyval,
+    _p_keyval state,
+) except -1:
+    <void> hdl # unused
+    if PyMPI_attr_type is MPI_Datatype:
+        with keyval_lock_type:
+            keyval_registry_type[keyval] = state
+    if PyMPI_attr_type is MPI_Comm:
+        with keyval_lock_comm:
+            keyval_registry_comm[keyval] = state
+    if PyMPI_attr_type is MPI_Win:
+        with keyval_lock_win:
+            keyval_registry_win[keyval] = state
+    return 0
+
+
+cdef inline int PyMPI_attr_state_del(
+    PyMPI_attr_type hdl,
+    int keyval,
+) except -1:
+    <void> hdl # unused
+    try:
+        if PyMPI_attr_type is MPI_Datatype:
+            with keyval_lock_type:
+                del keyval_registry_type[keyval]
+        if PyMPI_attr_type is MPI_Comm:
+            with keyval_lock_comm:
+                del keyval_registry_comm[keyval]
+        if PyMPI_attr_type is MPI_Win:
+            with keyval_lock_win:
+                del keyval_registry_win[keyval]
+    except KeyError:
+        pass
+    return 0
+
+# ---
 
 cdef inline object PyMPI_attr_get(
     PyMPI_attr_type hdl,
     int keyval,
-    void *attrval):
-    cdef _p_keyval state = PyMPI_attr_state(hdl, keyval)
+    void *attrval,
+):
+    cdef _p_keyval state = PyMPI_attr_state_get(hdl, keyval)
     if state is not None and not state.nopython:
         return <object>attrval
     else:
         return PyLong_FromVoidPtr(attrval)
 
+
 cdef inline int PyMPI_attr_set(
     PyMPI_attr_type hdl,
     int keyval,
     object attrval,
-    ) except -1:
-    cdef _p_keyval state = PyMPI_attr_state(hdl, keyval)
+) except -1:
+    cdef _p_keyval state = PyMPI_attr_state_get(hdl, keyval)
     cdef void *valptr = NULL
     if state is not None and not state.nopython:
         valptr = <void *>attrval

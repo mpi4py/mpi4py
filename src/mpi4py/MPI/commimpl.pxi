@@ -32,7 +32,6 @@ cdef object __UNWEIGHTED__    = <MPI_Aint>MPI_UNWEIGHTED
 cdef object __WEIGHTS_EMPTY__ = <MPI_Aint>MPI_WEIGHTS_EMPTY
 
 
-
 cdef inline bint is_UNWEIGHTED(object weights):
     return is_constant(weights, __UNWEIGHTED__)
 
@@ -55,10 +54,11 @@ cdef object asarray_weights(object weights, int nweight, int **iweight):
 
 # -----------------------------------------------------------------------------
 
-cdef inline int comm_neighbors_count(MPI_Comm comm,
-                                     int *incoming,
-                                     int *outgoing,
-                                     ) except -1:
+cdef inline int comm_neighbors_count(
+    MPI_Comm comm,
+    int *incoming,
+    int *outgoing,
+) except -1:
     cdef int topo = MPI_UNDEFINED
     cdef int size=0, ndims=0, rank=0, nneighbors=0
     cdef int indegree=0, outdegree=0, weighted=0
@@ -83,62 +83,80 @@ cdef inline int comm_neighbors_count(MPI_Comm comm,
 
 # -----------------------------------------------------------------------------
 
-cdef object Lock = None
+cdef int    commlock_keyval   = MPI_KEYVAL_INVALID
+cdef object commlock_lock     = Lock()
+cdef dict   commlock_registry = {}
 
-if PY_VERSION_HEX >= 0x030900F0:
-    from _thread import allocate_lock as Lock
-else:
+
+cdef inline int commlock_free_cb(
+    MPI_Comm comm,
+) except MPI_ERR_UNKNOWN with gil:
     try:
-        from _thread import allocate_lock as Lock
-    except ImportError:
-        from _dummy_thread import allocate_lock as Lock
-
-cdef int  lock_keyval   = MPI_KEYVAL_INVALID
-cdef dict lock_registry = {}
-
-cdef inline int lock_free_cb(MPI_Comm comm) \
-    except MPI_ERR_UNKNOWN with gil:
-    try: del lock_registry[<Py_uintptr_t>comm]
-    except KeyError: pass
+        with commlock_lock:
+            del commlock_registry[<Py_uintptr_t>comm]
+    except KeyError:
+        pass
     return MPI_SUCCESS
 
+
 @cython.callspec("MPIAPI")
-cdef int lock_free_fn(MPI_Comm comm, int keyval,
-                      void *attrval, void *xstate) noexcept nogil:
+cdef int commlock_free_fn(
+    MPI_Comm comm,
+    int keyval,
+    void *attrval,
+    void *xstate,
+) noexcept nogil:
+    <void> keyval  # unused
+    <void> attrval # unused
+    <void> xstate  # unused
     if comm == MPI_COMM_SELF:
-        return MPI_Comm_free_keyval(&lock_keyval)
+        return MPI_Comm_free_keyval(&commlock_keyval)
     if not Py_IsInitialized():
         return MPI_SUCCESS
-    if <void*>lock_registry == NULL:
+    if not py_module_alive():
         return MPI_SUCCESS
-    return lock_free_cb(comm)
+    return commlock_free_cb(comm)
 
-cdef inline dict PyMPI_Lock_table(MPI_Comm comm):
-    cdef dict table
-    cdef int  found = 0
+
+cdef inline dict commlock_table(MPI_Comm comm):
+    cdef int found = 0
     cdef void *attrval = NULL
-    if lock_keyval == MPI_KEYVAL_INVALID:
+    cdef dict table
+    if commlock_keyval == MPI_KEYVAL_INVALID:
         CHKERR( MPI_Comm_create_keyval(
-            MPI_COMM_NULL_COPY_FN, lock_free_fn, &lock_keyval, NULL) )
-        lock_registry[<Py_uintptr_t>MPI_COMM_SELF] = table = {}
-        CHKERR( MPI_Comm_set_attr(MPI_COMM_SELF, lock_keyval, <void*> table) )
-    CHKERR( MPI_Comm_get_attr(comm, lock_keyval, &attrval, &found) )
+            MPI_COMM_NULL_COPY_FN,
+            commlock_free_fn,
+            &commlock_keyval, NULL) )
+    CHKERR( MPI_Comm_get_attr(
+        comm, commlock_keyval, &attrval, &found) )
     if not found:
-        lock_registry[<Py_uintptr_t>comm] = table = {}
-        CHKERR( MPI_Comm_set_attr(comm, lock_keyval, <void*> table) )
+        table = {}
+        CHKERR( MPI_Comm_set_attr(
+            comm, commlock_keyval, <void*> table) )
+        commlock_registry[<Py_uintptr_t>comm] = table
+    elif PYPY:
+        table = commlock_registry[<Py_uintptr_t>comm]
     else:
-        if PYPY: table = lock_registry[<Py_uintptr_t>comm]
-        else:    table = <dict> attrval
+        table = <dict> attrval
     return table
 
+
 cdef inline object PyMPI_Lock(MPI_Comm comm, object key):
-    cdef dict   table = PyMPI_Lock_table(comm)
+    cdef dict table
     cdef object lock
-    try:
-        lock = table[key]
-    except KeyError:
-        lock = table[key] = Lock()
-    return lock
+    with commlock_lock:
+        table = commlock_table(comm)
+        try:
+            lock = table[key]
+        except KeyError:
+            lock = Lock()
+            table[key] = lock
+        return lock
+
+
+cdef inline tuple PyMPI_Lock_table(MPI_Comm comm):
+    with commlock_lock:
+        return commlock_table(comm)
 
 
 def _comm_lock(Comm comm: Comm, object key: Hashable = None) -> Lock:
