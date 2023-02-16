@@ -86,7 +86,8 @@ cdef object op_NO_OP(object x, object y):
 
 # -----------------------------------------------------------------------------
 
-cdef list op_user_registry = [None]*(1+32)
+cdef object op_user_lock     = Lock()
+cdef list   op_user_registry = [None]*(1+32)
 
 cdef inline object op_user_py(int index, object x, object y, object dt):
     return op_user_registry[index](x, y, dt)
@@ -123,7 +124,7 @@ cdef inline void op_user_call(
     if not Py_IsInitialized():
         <void>MPI_Abort(MPI_COMM_WORLD, 1)
     # make it abort if module cleanup has been done
-    if (<void*>op_user_registry) == NULL:
+    if not py_module_alive():
         <void>MPI_Abort(MPI_COMM_WORLD, 1)
     # compute the byte-size of memory buffers
     cdef MPI_Count lb=0, extent=0
@@ -277,19 +278,21 @@ cdef int op_user_new(
     MPI_User_function   **fn_i,
     MPI_User_function_c **fn_c,
 ) except -1:
+    # check whether the function is callable
+    function.__call__
     # find a free slot in the registry
+    # and register the Python function
     cdef int index = 0
     try:
-        index = op_user_registry.index(None, 1)
+        with op_user_lock:
+            index = op_user_registry.index(None, 1)
+            op_user_registry[index] = function
     except ValueError:
         raise RuntimeError(
             "cannot create too many user-defined reduction operations",
         )
-    # check whether the function is callable
-    function.__call__
-    # register the Python function, map it to the associated C
-    # function, and return the slot index in the registry
-    op_user_registry[index] = function
+    # map slot index to the associated C callback,
+    # and return the slot index in the registry
     op_user_map(index, fn_i)
     op_user_map(index, fn_c)
     return index
@@ -301,7 +304,8 @@ cdef int op_user_del(
     cdef int index = indexp[0]
     indexp[0] = 0
     # free slot in the registry
-    op_user_registry[index] = None
+    with op_user_lock:
+        op_user_registry[index] = None
     return 0
 
 # -----------------------------------------------------------------------------

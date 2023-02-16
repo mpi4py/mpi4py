@@ -261,13 +261,12 @@ cdef class Win:
         """
         Create a new attribute key for windows
         """
-        cdef object state = _p_keyval(copy_fn, delete_fn, nopython)
         cdef int keyval = MPI_KEYVAL_INVALID
         cdef MPI_Win_copy_attr_function *_copy = PyMPI_attr_copy_fn
         cdef MPI_Win_delete_attr_function *_del = PyMPI_attr_delete_fn
-        cdef void *extra_state = <void *>state
-        CHKERR( MPI_Win_create_keyval(_copy, _del, &keyval, extra_state) )
-        win_keyval[keyval] = state
+        cdef _p_keyval state = _p_keyval(copy_fn, delete_fn, nopython)
+        CHKERR( MPI_Win_create_keyval(_copy, _del, &keyval, <void *>state) )
+        PyMPI_attr_state_set(MPI_WIN_NULL, keyval, state)
         return keyval
 
     @classmethod
@@ -277,8 +276,7 @@ cdef class Win:
         """
         cdef int keyval_save = keyval
         CHKERR( MPI_Win_free_keyval(&keyval) )
-        try: del win_keyval[keyval_save]
-        except KeyError: pass
+        PyMPI_attr_state_del(MPI_WIN_NULL, keyval_save)
         return keyval
 
     property attrs:

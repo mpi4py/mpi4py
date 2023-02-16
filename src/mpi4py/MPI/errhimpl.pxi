@@ -12,12 +12,14 @@ ctypedef fused mpi_ehfn_t:
     MPI_Win_errhandler_function
     MPI_File_errhandler_function
 
-cdef list errhdl_registry = [
+cdef object errhdl_lock = Lock()
+cdef list   errhdl_registry = [
     [None]*(1+32),  # Session
     [None]*(1+32),  # Comm
     [None]*(1+32),  # Win
     [None]*(1+32),  # File
 ]
+
 
 cdef inline void errhdl_call_py(
     int index,
@@ -61,6 +63,7 @@ cdef inline void errhdl_call_py(
         finally:
             <void>MPI_Abort(MPI_COMM_WORLD, 1)
 
+
 cdef inline void errhdl_call(
     int index,
     mpi_scwf_t handle, int errcode,
@@ -69,10 +72,11 @@ cdef inline void errhdl_call(
     if not Py_IsInitialized():
         <void>MPI_Abort(MPI_COMM_WORLD, 1)
     # make it abort if module cleanup has been done
-    if (<void*>errhdl_registry) == NULL:
+    if not py_module_alive():
         <void>MPI_Abort(MPI_COMM_WORLD, 1)
     # make the actual GIL-safe Python call
     errhdl_call_py(index, handle, errcode)
+
 
 @cython.callspec("MPIAPI")
 cdef void errhdl_01(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
@@ -171,6 +175,7 @@ cdef void errhdl_31(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
 cdef void errhdl_32(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
     errhdl_call( 32, handle[0], errcode[0])
 
+
 cdef inline void errhdl_map(int index, mpi_ehfn_t **fn) noexcept nogil:
     if   index ==  1: fn[0] = errhdl_01
     elif index ==  2: fn[0] = errhdl_02
@@ -206,12 +211,16 @@ cdef inline void errhdl_map(int index, mpi_ehfn_t **fn) noexcept nogil:
     elif index == 32: fn[0] = errhdl_32
     else:             fn[0] = NULL
 
+
 cdef inline int errhdl_new(
     object function,
     mpi_ehfn_t **fn,
 ) except -1:
+    # check whether the function is callable
+    function.__call__
     # find a free slot in the registry
-    cdef object registry = None
+    # and register the Python function
+    cdef list registry = None
     if mpi_ehfn_t is MPI_Session_errhandler_function:
         registry = errhdl_registry[0]
     if mpi_ehfn_t is MPI_Comm_errhandler_function:
@@ -222,18 +231,18 @@ cdef inline int errhdl_new(
         registry = errhdl_registry[3]
     cdef int index = 0
     try:
-        index = registry.index(None, 1)
+        with errhdl_lock:
+            index = registry.index(None, 1)
+            registry[index] = function
     except ValueError:
         raise RuntimeError(
             "cannot create too many user-defined error handlers",
         )
-    # check whether the function is callable
-    function.__call__
-    # register the Python function, map it to the associated C
-    # function, and return the slot index in the registry
-    registry[index] = function
+    # map slot index to the associated C callback,
+    # and return the slot index in the registry
     errhdl_map(index, fn)
     return index
+
 
 cdef inline int errhdl_del(
     int *indexp,
@@ -253,7 +262,8 @@ cdef inline int errhdl_del(
         registry = errhdl_registry[2]
     if mpi_ehfn_t is MPI_File_errhandler_function:
         registry = errhdl_registry[3]
-    registry[index] = None
+    with errhdl_lock:
+        registry[index] = None
     return 0
 
 # -----------------------------------------------------------------------------
@@ -267,6 +277,7 @@ cdef inline int session_set_eh(MPI_Session ob) except -1 nogil:
     elif opt == 3: CHKERR( MPI_Session_set_errhandler(ob, MPI_ERRORS_ARE_FATAL) )
     return 0
 
+
 cdef inline int comm_set_eh(MPI_Comm ob) except -1 nogil:
     if ob == MPI_COMM_NULL: return 0
     cdef int opt = options.errors
@@ -276,6 +287,7 @@ cdef inline int comm_set_eh(MPI_Comm ob) except -1 nogil:
     elif opt == 3: CHKERR( MPI_Comm_set_errhandler(ob, MPI_ERRORS_ARE_FATAL) )
     return 0
 
+
 cdef inline int win_set_eh(MPI_Win ob) except -1 nogil:
     if ob == MPI_WIN_NULL: return 0
     cdef int opt = options.errors
@@ -284,6 +296,7 @@ cdef inline int win_set_eh(MPI_Win ob) except -1 nogil:
     elif opt == 2: CHKERR( MPI_Win_set_errhandler(ob, MPI_ERRORS_ABORT) )
     elif opt == 3: CHKERR( MPI_Win_set_errhandler(ob, MPI_ERRORS_ARE_FATAL) )
     return 0
+
 
 cdef inline int file_set_eh(MPI_File ob) except -1 nogil:
     if ob == MPI_FILE_NULL: return 0

@@ -1,5 +1,17 @@
 #------------------------------------------------------------------------------
 
+cdef object Lock = None
+
+if PY_VERSION_HEX >= 0x030900F0:
+    from _thread import allocate_lock as Lock
+else:
+    try:
+        from _thread import allocate_lock as Lock
+    except ImportError:
+        from _dummy_thread import allocate_lock as Lock
+
+#------------------------------------------------------------------------------
+
 ctypedef fused handle_t:
     MPI_Datatype
     MPI_Request

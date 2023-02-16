@@ -458,8 +458,8 @@ cdef class Grequest(Request):
         Create and return a user-defined request
         """
         cdef Grequest request = Grequest.__new__(Grequest)
-        cdef _p_greq state = \
-             _p_greq(query_fn, free_fn, cancel_fn, args, kwargs)
+        cdef _p_greq state = _p_greq(
+            query_fn, free_fn, cancel_fn,args, kwargs)
         with nogil: CHKERR( MPI_Grequest_start(
             greq_query_fn, greq_free_fn, greq_cancel_fn,
             <void*>state, &request.ob_mpi) )

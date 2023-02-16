@@ -374,15 +374,20 @@ cdef inline void print_traceback():
 
 # -----------------------------------------------------------------------------
 
+cdef object _py_module_sentinel = None
+
+cdef inline int py_module_alive() noexcept nogil:
+    return NULL != <void *>_py_module_sentinel
+
+# -----------------------------------------------------------------------------
+
 # PyPy: Py_IsInitialized() cannot be called without the GIL
 
 cdef extern from "Python.h":
     int _Py_IsInitialized"Py_IsInitialized"() noexcept nogil
 
-cdef object _pypy_sentinel = None
-
 cdef inline int Py_IsInitialized() noexcept nogil:
-    if PYPY and (<void*>_pypy_sentinel) == NULL: return 0
+    if PYPY and not py_module_alive(): return 0
     return _Py_IsInitialized()
 
 # -----------------------------------------------------------------------------
