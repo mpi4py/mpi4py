@@ -36,6 +36,8 @@ cdef class Pickle:
     cdef object ob_THRES
 
     def __cinit__(self, *args, **kwargs):
+        <void> args   # unused
+        <void> kwargs # unused
         self.ob_dumps = PyPickle_dumps
         self.ob_loads = PyPickle_loads
         self.ob_PROTO = PyPickle_PROTOCOL
@@ -327,7 +329,7 @@ cdef object PyMPI_recv_obarg(object obj, int source, int tag,
             rcount = <MPI_Count> rlen
         if status == MPI_STATUS_IGNORE:
             status = &rsts
-        <void>rmsg
+        <void> rmsg
     with nogil:
         CHKERR( MPI_Recv_c(
             rbuf, rcount, rtype,
@@ -349,7 +351,7 @@ cdef object PyMPI_recv_match(object obj, int source, int tag,
     #
     cdef MPI_Message match = MPI_MESSAGE_NULL
     cdef MPI_Status rsts
-    <void>obj # unused
+    <void> obj # unused
     #
     with nogil:
         CHKERR( MPI_Mprobe(source, tag, comm, &match, &rsts) )
@@ -373,7 +375,7 @@ cdef object PyMPI_recv_probe(object obj, int source, int tag,
     #
     cdef MPI_Status rsts
     cdef object tmpr
-    <void>obj # unused
+    <void> obj # unused
     #
     with PyMPI_Lock(comm, "recv"):
         with nogil:

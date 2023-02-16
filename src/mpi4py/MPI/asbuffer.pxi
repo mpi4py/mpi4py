@@ -183,6 +183,7 @@ cdef class memory:
 
     def tobytes(self, order: Optional[str] = None) -> bytes:
         """Return the data in the buffer as a byte string"""
+        <void> order # unused
         return PyBytes_FromStringAndSize(<char*>self.view.buf, self.view.len)
 
     def toreadonly(self) -> memory:
