@@ -203,7 +203,7 @@ process) `Comm.Scatterv`, `Comm.Gatherv`, `Comm.Allgatherv`,
 `Comm.Alltoallv` and `Comm.Alltoallw` are also supported, they can
 only communicate objects exposing memory buffers.
 
-Global reducion operations on memory buffers are accessible through
+Global reduction operations on memory buffers are accessible through
 the `Comm.Reduce`, `Comm.Reduce_scatter`, `Comm.Allreduce`,
 `Intracomm.Scan` and `Intracomm.Exscan` methods. The lower-case
 variants `Comm.reduce`, `Comm.allreduce`, `Intracomm.scan` and
