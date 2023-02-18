@@ -1009,6 +1009,7 @@ cdef import from "<mpi.h>" nogil:
     enum: MPI_ERR_TYPE                   #:= MPI_ERR_LASTCODE
     enum: MPI_ERR_REQUEST                #:= MPI_ERR_LASTCODE
     enum: MPI_ERR_OP                     #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_ERRHANDLER             #:= MPI_ERR_LASTCODE
     # Communication
     enum: MPI_ERR_BUFFER                 #:= MPI_ERR_LASTCODE
     enum: MPI_ERR_COUNT                  #:= MPI_ERR_LASTCODE

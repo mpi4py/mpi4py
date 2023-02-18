@@ -7,7 +7,8 @@ class TestErrorCode(unittest.TestCase):
     errorclasses = [item[1] for item in vars(MPI).items()
                     if item[0].startswith('ERR_')]
     errorclasses.insert(0, MPI.SUCCESS)
-    errorclasses.remove(MPI.ERR_LASTCODE)
+    while MPI.ERR_LASTCODE in errorclasses:
+        errorclasses.remove(MPI.ERR_LASTCODE)
 
     def testGetErrorClass(self):
         self.assertEqual(self.errorclasses[0], 0)
