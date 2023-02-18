@@ -8,6 +8,7 @@
 #include "mpi-30.h"
 #include "mpi-31.h"
 #include "mpi-40.h"
+#include "mpi-41.h"
 
 #ifndef OMPI_HAVE_FORTRAN_LOGICAL1
 #define OMPI_HAVE_FORTRAN_LOGICAL1 0

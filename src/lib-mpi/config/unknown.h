@@ -8,6 +8,7 @@
 #include "mpi-30.h"
 #include "mpi-31.h"
 #include "mpi-40.h"
+#include "mpi-41.h"
 
 /* These types are difficult to implement portably */
 #undef PyMPI_HAVE_MPI_INTEGER16

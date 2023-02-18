@@ -8,6 +8,7 @@
 #include "mpi-30.h"
 #include "mpi-31.h"
 #include "mpi-40.h"
+#include "mpi-41.h"
 
 #if MSMPI_VER >= 0x402
 #define PyMPI_HAVE_MPI_AINT 1
