@@ -15,6 +15,7 @@ import glob
 import shlex
 import shutil
 import platform
+import warnings
 
 from distutils import log
 from distutils import sysconfig
@@ -1144,6 +1145,12 @@ class build_exe(build_ext):
 
 
 class install(cmd_install.install):
+
+    def initialize_options(self):
+        with warnings.catch_warnings():
+            category = setuptools.SetuptoolsDeprecationWarning
+            warnings.simplefilter('ignore', category)
+            cmd_install.install.initialize_options(self)
 
     def run(self):
         cmd_install.install.run(self)
