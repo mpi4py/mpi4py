@@ -72,6 +72,7 @@ WIN_FLAVOR        = MPI_WIN_CREATE_FLAVOR
 WIN_MODEL         = MPI_WIN_MODEL
 
 
+include "ErrorCode.pyx"
 include "Exception.pyx"
 include "Datatype.pyx"
 include "Status.pyx"

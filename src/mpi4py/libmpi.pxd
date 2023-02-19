@@ -998,85 +998,82 @@ cdef import from "<mpi.h>" nogil:
     int MPI_Add_error_code(int,int*)
     int MPI_Add_error_string(int,char[])
 
-    # Error classes
-    # -------------
-    # Actually no errors
+    # no errors
     enum: MPI_SUCCESS                    #:= 0
     enum: MPI_ERR_LASTCODE               #:= 1
-    # MPI Objects
-    enum: MPI_ERR_COMM                   #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_GROUP                  #:= MPI_ERR_LASTCODE
+    # object handles
     enum: MPI_ERR_TYPE                   #:= MPI_ERR_LASTCODE
     enum: MPI_ERR_REQUEST                #:= MPI_ERR_LASTCODE
     enum: MPI_ERR_OP                     #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_GROUP                  #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_INFO                   #:= MPI_ERR_LASTCODE
     enum: MPI_ERR_ERRHANDLER             #:= MPI_ERR_LASTCODE
-    # Communication
+    enum: MPI_ERR_SESSION                #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_COMM                   #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_WIN                    #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_FILE                   #:= MPI_ERR_LASTCODE
+    # communication arguments
     enum: MPI_ERR_BUFFER                 #:= MPI_ERR_LASTCODE
     enum: MPI_ERR_COUNT                  #:= MPI_ERR_LASTCODE
     enum: MPI_ERR_TAG                    #:= MPI_ERR_LASTCODE
     enum: MPI_ERR_RANK                   #:= MPI_ERR_LASTCODE
     enum: MPI_ERR_ROOT                   #:= MPI_ERR_LASTCODE
     enum: MPI_ERR_TRUNCATE               #:= MPI_ERR_LASTCODE
-    # Multiple completion
+    # multiple completion
     enum: MPI_ERR_IN_STATUS              #:= MPI_ERR_LASTCODE
     enum: MPI_ERR_PENDING                #:= MPI_ERR_LASTCODE
-    # Topology
+    # topology
     enum: MPI_ERR_TOPOLOGY               #:= MPI_ERR_LASTCODE
     enum: MPI_ERR_DIMS                   #:= MPI_ERR_LASTCODE
-    # Arguments
+    # other arguments
     enum: MPI_ERR_ARG                    #:= MPI_ERR_LASTCODE
-    # Other errors
+    # other errors
     enum: MPI_ERR_OTHER                  #:= MPI_ERR_LASTCODE
     enum: MPI_ERR_UNKNOWN                #:= MPI_ERR_LASTCODE
     enum: MPI_ERR_INTERN                 #:= MPI_ERR_LASTCODE
-    # Attributes
-    enum: MPI_ERR_KEYVAL                 #:= MPI_ERR_ARG
-    # Memory Allocation
-    enum: MPI_ERR_NO_MEM                 #:= MPI_ERR_UNKNOWN
-    # Info Object
-    enum: MPI_ERR_INFO                   #:= MPI_ERR_ARG
-    enum: MPI_ERR_INFO_KEY               #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_INFO_VALUE             #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_INFO_NOKEY             #:= MPI_ERR_UNKNOWN
-    # Dynamic Process Management
-    enum: MPI_ERR_SPAWN                  #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_PORT                   #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_SERVICE                #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_NAME                   #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_PROC_ABORTED           #:= MPI_ERR_UNKNOWN
-    # Input/Ouput
-    enum: MPI_ERR_FILE                   #:= MPI_ERR_ARG
-    enum: MPI_ERR_NOT_SAME               #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_BAD_FILE               #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_NO_SUCH_FILE           #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_FILE_EXISTS            #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_FILE_IN_USE            #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_AMODE                  #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_ACCESS                 #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_READ_ONLY              #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_NO_SPACE               #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_QUOTA                  #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_UNSUPPORTED_DATAREP    #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_UNSUPPORTED_OPERATION  #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_CONVERSION             #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_DUP_DATAREP            #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_IO                     #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_VALUE_TOO_LARGE        #:= MPI_ERR_UNKNOWN
-    # One-Sided Communications
-    enum: MPI_ERR_WIN                    #:= MPI_ERR_ARG
-    enum: MPI_ERR_BASE                   #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_SIZE                   #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_DISP                   #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_ASSERT                 #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_LOCKTYPE               #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_RMA_CONFLICT           #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_RMA_SYNC               #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_RMA_RANGE              #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_RMA_ATTACH             #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_RMA_SHARED             #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_RMA_FLAVOR             #:= MPI_ERR_UNKNOWN
-    # Sessions
-    enum: MPI_ERR_SESSION                #:= MPI_ERR_ARG
+    # attributes
+    enum: MPI_ERR_KEYVAL                 #:= MPI_ERR_LASTCODE
+    # memory allocation
+    enum: MPI_ERR_NO_MEM                 #:= MPI_ERR_LASTCODE
+    # info object
+    enum: MPI_ERR_INFO_KEY               #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_INFO_VALUE             #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_INFO_NOKEY             #:= MPI_ERR_LASTCODE
+    # dynamic process management
+    enum: MPI_ERR_SPAWN                  #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_PORT                   #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_SERVICE                #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_NAME                   #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_PROC_ABORTED           #:= MPI_ERR_LASTCODE
+    # one-sided communications
+    enum: MPI_ERR_BASE                   #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_SIZE                   #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_DISP                   #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_ASSERT                 #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_LOCKTYPE               #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_RMA_CONFLICT           #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_RMA_SYNC               #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_RMA_RANGE              #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_RMA_ATTACH             #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_RMA_SHARED             #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_RMA_FLAVOR             #:= MPI_ERR_LASTCODE
+    # input/ouput
+    enum: MPI_ERR_BAD_FILE               #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_NO_SUCH_FILE           #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_FILE_EXISTS            #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_FILE_IN_USE            #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_AMODE                  #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_ACCESS                 #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_READ_ONLY              #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_NO_SPACE               #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_QUOTA                  #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_UNSUPPORTED_OPERATION  #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_NOT_SAME               #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_IO                     #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_UNSUPPORTED_DATAREP    #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_CONVERSION             #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_DUP_DATAREP            #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_VALUE_TOO_LARGE        #:= MPI_ERR_LASTCODE
 
     #-----------------------------------------------------------------
 
