@@ -265,6 +265,9 @@ jobs:
       run:  python -m pip install --no-index --find-links=dist mpi4py
 
     - name: Test wheel after install
+      run:  mpiexec -n 1 python test/test_package.py
+
+    - name: Test wheel after install
       run:  mpiexec -n 2 python -m mpi4py.bench helloworld
 
     - name: Uninstall wheel after testing

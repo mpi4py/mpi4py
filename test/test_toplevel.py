@@ -114,24 +114,5 @@ class TestProfile(unittest.TestCase):
                 mpi4py.profile('@querty')
 
 
-class TestPackage(unittest.TestCase):
-
-    def testImports(self):
-        import mpi4py
-        import mpi4py.MPI
-        import mpi4py.typing
-        import mpi4py.__main__
-        import mpi4py.bench
-        import mpi4py.futures
-        import mpi4py.futures.__main__
-        import mpi4py.futures.server
-        import mpi4py.util
-        import mpi4py.util.pkl5
-        import mpi4py.util.dtlib
-        import mpi4py.run
-        import mpi4py
-        del mpi4py
-
-
 if __name__ == '__main__':
     unittest.main()
