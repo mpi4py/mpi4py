@@ -58,6 +58,7 @@ $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py --rc=a                          
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py --rc=a=                            > /dev/null 2>&1 || true
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py --rc==a                            > /dev/null 2>&1 || true
 
+$MPIEXEC -n 1 $PYTHON -m coverage run test/test_package.py    -q 2> /dev/null
 $MPIEXEC -n 1 $PYTHON -m coverage run test/test_toplevel.py   -q 2> /dev/null
 $MPIEXEC -n 1 $PYTHON -m coverage run test/test_util_pkl5.py  -q 2> /dev/null
 $MPIEXEC -n 2 $PYTHON -m coverage run test/test_util_pkl5.py  -q 2> /dev/null
