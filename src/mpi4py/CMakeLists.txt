@@ -29,7 +29,7 @@ install(FILES ${mpi.cfg} DESTINATION src/mpi4py)
 
 
 # Cython
-set(cythoncmd ${TOPDIR}/conf/cythoncmd.py --cleanup 3)
+set(cythoncmd ${TOPDIR}/conf/cythoncmd.py)
 set(CYTHON_EXECUTABLE ${PYTHON_EXECUTABLE} ${cythoncmd})
 add_cython_target(MPI MPI.pyx OUTPUT_VAR MPI.c PY3)
 file(GLOB_RECURSE MPI.pyx ${PKGDIR}/MPI/*.pyx ${PKGDIR}/MPI/*.pxi)
