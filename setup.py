@@ -25,15 +25,21 @@ def get_name():
     return 'mpi4py'
 
 def get_version():
+    try:
+        return get_version.result
+    except AttributeError:
+        pass
     srcdir = os.path.join(topdir, 'src')
     with open(os.path.join(srcdir, 'mpi4py', '__init__.py')) as f:
         m = re.search(r"__version__\s*=\s*'(.*)'", f.read())
     public_version = m.groups()[0]
     local_version = os.environ.get('MPI4PY_LOCAL_VERSION')
     if local_version:
-        return '{0}+{1}'.format(public_version, local_version)
+        version = '{0}+{1}'.format(public_version, local_version)
     else:
-        return public_version
+        version = public_version
+    get_version.result = version
+    return version
 
 def description():
     return __doc__.strip()
@@ -61,21 +67,20 @@ def readthedocs(*args):
     return '/'.join((base,) + args)
 
 def download_url():
+    version = get_version().partition('+')[0]
     if '.dev' in version:
         path = 'tarball'
         archive = 'master'
     else:
-        path = 'releases/download/' + version
-        archive = name + '-' + version + '.tar.gz'
+        path = 'releases/download/{0}'.format(version)
+        archive = 'mpi4py-{0}.tar.gz'.format(version)
     return github(path, archive)
 
 def documentation_url():
+    version = get_version().partition('+')[0]
     language = 'en'
     location = 'latest' if '.dev' in version else version
     return readthedocs(language, location, '')
-
-name = get_name()
-version = get_version()
 
 classifiers = """
 Development Status :: 5 - Production/Stable
@@ -123,8 +128,8 @@ Windows
 """
 
 metadata = {
-    'name'             : name,
-    'version'          : version,
+    'name'             : get_name(),
+    'version'          : get_version(),
     'description'      : description(),
     'long_description' : long_description(),
     'url'              : homepage(),
