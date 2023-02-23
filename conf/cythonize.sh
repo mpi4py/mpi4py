@@ -1,2 +1,5 @@
 #!/bin/sh
-python -m cython -3 --cleanup 3 -w src $@ mpi4py/MPI.pyx
+topdir=$(cd $(dirname "$0")/.. && pwd)
+python "$topdir/conf/cythonize.py" \
+    --working "$topdir/src" $@ \
+    "mpi4py/MPI.pyx"

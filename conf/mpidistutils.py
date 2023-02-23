@@ -617,11 +617,13 @@ def cython_run(
     #
     log.info("cythonizing '%s' -> '%s'", source, target)
     from cythonize import cythonize
-    err = cythonize(
-        source, target,
-        includes=includes,
-        workdir=workdir,
-    )
+    args = []
+    if workdir:
+        args += ['--working', workdir]
+    args += [source]
+    if target:
+        args += ['--output-file', target]
+    err = cythonize(args)
     if err:
         raise DistutilsError(
             "Cython failure: '%s' -> '%s'" % (source, target)
