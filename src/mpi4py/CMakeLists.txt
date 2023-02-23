@@ -29,8 +29,9 @@ install(FILES ${mpi.cfg} DESTINATION src/mpi4py)
 
 
 # Cython
-set(cythoncmd ${TOPDIR}/conf/cythoncmd.py)
-set(CYTHON_EXECUTABLE ${PYTHON_EXECUTABLE} ${cythoncmd})
+set(cythonize ${TOPDIR}/conf/cythonize.py)
+set(CYTHON_EXECUTABLE ${PYTHON_EXECUTABLE} ${cythonize})
+set(CYTHON_FLAGS --working ${SRCDIR})
 add_cython_target(MPI MPI.pyx OUTPUT_VAR MPI.c PY3)
 file(GLOB_RECURSE MPI.pyx ${PKGDIR}/MPI/*.pyx ${PKGDIR}/MPI/*.pxi)
 foreach(file MPI.h MPI_api.h)
@@ -41,7 +42,7 @@ add_custom_command(
   DEPENDS ${MPI.pyx}
   BYPRODUCTS ${MPI.h}
   APPEND
-  )
+)
 install(FILES ${MPI.h} DESTINATION src/mpi4py)
 
 
