@@ -105,7 +105,14 @@ jobs:
       run:  python -m pip uninstall --yes mpi4py
 
   conf:
-    runs-on: ubuntu-22.04
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
 
     steps:
 
@@ -129,14 +136,13 @@ jobs:
     - name: Check build configuration
       run:  |
         # check nompi config.h
-        a=conf/nompi/config/config.h
-        b=src/lib-mpi/config/config.h
-        diff -u $a $b
+        cp "src/lib-mpi/config/config.h" "conf/nompi/config/config.h"
+        git diff --exit-code
 
     - name: Check code generation
       run:  |
         python conf/mpiscanner.py
-        git diff && test -z "$(git diff)"
+        git diff --exit-code
 
   lint:
     runs-on: ubuntu-22.04
@@ -197,10 +203,10 @@ jobs:
         MPICFG: nompi-fast
         CFLAGS: -O0
 
-    - name: Check stubs generation
+    - name: Check stub generation
       run:  |
         python conf/mpistubgen.py
-        git diff && test -z "$(git diff)"
+        git diff --exit-code
 
     - name: Install type dependencies
       run:  python -m pip install --upgrade -r conf/requirements-type.txt

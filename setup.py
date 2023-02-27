@@ -179,6 +179,7 @@ def configure_dl(ext, config_cmd):
 def configure_mpi(ext, config_cmd):
     from textwrap import dedent
     from mpidistutils import log
+    from mpidistutils import capture_stderr
     from mpidistutils import DistutilsPlatformError
     headers = ['stdlib.h', 'mpi.h']
     #
@@ -209,15 +210,21 @@ def configure_mpi(ext, config_cmd):
     """) % "||".join(tests)
     config = os.environ.get('MPI4PY_BUILD_CONFIGURE') or None
     if not config:
-        ok = config_cmd.try_compile(ConfigTest, headers=headers)
+        with capture_stderr():
+            ok = config_cmd.try_compile(ConfigTest, headers=headers)
         config = not ok
     if config:
-        if not config_cmd.check_macro("HAVE_CONFIG_H"):
+        guard = "HAVE_CONFIG_H"
+        with capture_stderr():
+            ok = config_cmd.check_macro(guard)
+        config = not ok
+        if config:
             from mpidistutils import ConfigureMPI
             configure = ConfigureMPI(config_cmd)
-            results = configure.run()
+            with capture_stderr():
+                results = configure.run()
             configure.dump(results)
-            ext.define_macros += [('HAVE_CONFIG_H', 1)]
+            ext.define_macros += [(guard, 1)]
     else:
         for function, arglist in (
             ('MPI_Type_create_f90_integer',   '0,(MPI_Datatype*)0'),
