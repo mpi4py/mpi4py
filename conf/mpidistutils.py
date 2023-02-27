@@ -16,6 +16,7 @@ import shlex
 import shutil
 import platform
 import warnings
+import contextlib
 
 from distutils import log
 from distutils import sysconfig
@@ -49,6 +50,22 @@ if hasattr(cygcc, 'get_versions'):
         distutils.spawn.find_executable = find_executable_orig
         return versions
     cygcc.get_versions = get_versions
+
+# Workaround distutils.ccompiler.CCompiler._fix_lib_args
+from distutils.ccompiler import CCompiler
+cc_fix_compile_args_orig = getattr(CCompiler, '_fix_compile_args', None)
+cc_fix_lib_args_orig = getattr(CCompiler, '_fix_lib_args', None)
+def cc_fix_compile_args(self, out_dir, macros, inc_dirs):
+    if macros is None: macros = []
+    if inc_dirs is None: inc_dirs = []
+    return cc_fix_compile_args_orig(self, out_dir, macros, inc_dirs)
+def cc_fix_lib_args(self, libs, lib_dirs, rt_lib_dirs):
+    if libs is None: libs = []
+    if lib_dirs is None: lib_dirs = []
+    if rt_lib_dirs is None: rt_lib_dirs = []
+    return cc_fix_lib_args_orig(self, libs, lib_dirs, rt_lib_dirs)
+CCompiler._fix_compile_args = cc_fix_compile_args
+CCompiler._fix_lib_args = cc_fix_lib_args
 
 # Normalize linker flags for runtime library dirs
 from distutils.unixccompiler import UnixCCompiler
@@ -104,9 +121,12 @@ def fix_linker_cmd(ld, mpild):
         del ld[i]
     ld[i:i+1] = shlex.split(mpild)
 
-def customize_compiler(compiler, lang=None,
-                       mpicc=None, mpicxx=None, mpild=None,
-                       ):
+def customize_compiler(
+    compiler, lang=None,
+    mpicc=None,
+    mpicxx=None,
+    mpild=None,
+):
     sysconfig.customize_compiler(compiler)
     if compiler.compiler_type == 'unix':
         ld = compiler.linker_exe
@@ -200,8 +220,12 @@ def configure_compiler(compiler, config, lang=None):
         if lang == 'c++': mpild = mpicxx
         if not mpild:     mpild = mpicc or mpicxx
     #
-    customize_compiler(compiler, lang,
-                       mpicc=mpicc, mpicxx=mpicxx, mpild=mpild)
+    customize_compiler(
+        compiler, lang,
+        mpicc=mpicc,
+        mpicxx=mpicxx,
+        mpild=mpild,
+    )
     #
     for k, v in config.get('define_macros', []):
         compiler.define_macro(k, v)
@@ -239,6 +263,24 @@ except ImportError:
             raise NotImplementedError(
                 "You forgot to grab 'mpiscanner.py'")
 
+
+@contextlib.contextmanager
+def capture_stderr(filename=os.devnull):
+    stream = sys.stderr
+    file_obj = None
+    fno_save = None
+    try:
+        file_obj = open(filename, 'w')
+        fno_save = os.dup(stream.fileno())
+        os.dup2(file_obj.fileno(), stream.fileno())
+        yield
+    finally:
+        if file_obj is not None:
+            file_obj.close()
+        if fno_save is not None:
+            os.dup2(fno_save, stream.fileno())
+
+
 class ConfigureMPI(object):
 
     SRCDIR = 'src'
@@ -271,24 +313,28 @@ class ConfigureMPI(object):
             name = node.name
             testcode = node.config()
             confcode = node.missing(guard=False)
-            log.info("checking for '%s' ..." % name)
+            log.info("checking for '%s'..." % name)
             ok = self.run_test(testcode)
             if not ok:
                 log.info("**** failed check for '%s'" % name)
                 with open('_configtest.h', 'a') as f:
                     f.write(confcode)
             results.append((name, ok))
-        try: os.remove('_configtest.h')
-        except OSError: pass
+        try:
+            os.remove('_configtest.h')
+        except OSError:
+            pass
         return results
 
     def gen_test(self, code):
-        body = ['#include "_configtest.h"',
-                'int main(int argc, char **argv) {',
-                '\n'.join(['  ' + line for line in code.split('\n')]),
-                '  (void)argc; (void)argv;',
-                '  return 0;',
-                '}']
+        body = [
+            '#include "_configtest.h"',
+            'int main(int argc, char **argv) {',
+            '\n'.join(['  ' + line for line in code.split('\n')]),
+            '  (void)argc; (void)argv;',
+            '  return 0;',
+            '}',
+        ]
         body = '\n'.join(body) + '\n'
         return body
 
@@ -890,11 +936,7 @@ class build_ext(cmd_build_ext.build_ext):
     def build_extensions(self):
         # First, sanity-check the 'extensions' list
         self.check_extensions_list(self.extensions)
-        # customize compiler
-        self.compiler_sys = copy.deepcopy(self.compiler)
-        customize_compiler(self.compiler_sys)
         # parse configuration file and configure compiler
-        self.compiler_mpi = self.compiler
         self.config = configuration(self, verbose=True)
         configure_compiler(self.compiler, self.config)
         # extra configuration, check for all MPI symbols
@@ -939,7 +981,6 @@ class build_ext(cmd_build_ext.build_ext):
             log.debug("skipping '%s' extension (up-to-date)", ext.name)
             return
         #
-        self.compiler = self.compiler_mpi
         self.config_extension(ext)
         cmd_build_ext.build_ext.build_extension(self, ext)
         #
