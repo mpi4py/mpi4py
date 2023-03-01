@@ -220,12 +220,13 @@ class Pool:
             if item is None:
                 queue.put(None)
                 break
-            future, _ = item
+            future, task = item
             if handler:
                 handler(future)
             else:
                 future.cancel()
-            del item, future
+                future.set_running_or_notify_cancel()
+            del future, task, item
 
     def broken(self, message):
         lock = None
@@ -288,17 +289,20 @@ def _manager_thread(pool, options):
             if item is None:
                 queue.put(None)
                 break
+
             future, task = item
-            if not future.set_running_or_notify_cancel():
-                continue
-            func, args, kwargs = task
-            try:
-                result = func(*args, **kwargs)
-                future.set_result(result)
-            except BaseException:
-                exception = sys_exception()
-                future.set_exception(exception)
-            del item, future
+            if future.set_running_or_notify_cancel():
+                func, args, kwargs = task
+                result = exception = None
+                try:
+                    result = func(*args, **kwargs)
+                    future.set_result(result)
+                except BaseException:
+                    exception = sys_exception()
+                    future.set_exception(exception)
+                del result, exception
+                del func, args, kwargs
+            del future, task, item
 
     threads = [threading.Thread(target=worker) for _ in range(size - 1)]
     for thread in threads:
@@ -624,16 +628,24 @@ def client_exec(comm, options, tag, worker_set, task_queue):
         else:
             future.set_exception(exception)
 
-    def send():
-        item = task_queue.pop()
-        if item is None:
-            return True
+        del result, exception
+        del future, task
 
+    def send():
         try:
             pid = worker_set.pop()
         except LookupError:  # pragma: no cover
-            task_queue.add(item)
             return False
+
+        try:
+            item = task_queue.pop()
+        except LookupError:  # pragma: no cover
+            worker_set.add(pid)
+            return False
+
+        if item is None:
+            worker_set.add(pid)
+            return True
 
         future, task = item
         if not future.set_running_or_notify_cancel():
@@ -646,6 +658,8 @@ def client_exec(comm, options, tag, worker_set, task_queue):
         except BaseException:
             worker_set.add(pid)
             future.set_exception(sys_exception())
+
+        del future, task, item
         return None
 
     while True:
