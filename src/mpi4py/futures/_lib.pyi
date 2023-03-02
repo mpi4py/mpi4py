@@ -1,7 +1,7 @@
 import weakref
 import threading
 from ..MPI  import Info, Intracomm, Intercomm
-from ._core import Executor, Future
+from ._base import Executor, Future
 from typing import Any, Generic, Optional, TypeVar, Union
 from typing import Callable, Iterable, Iterator, Sequence, Mapping
 from typing import Dict, List, Tuple

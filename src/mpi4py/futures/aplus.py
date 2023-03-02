@@ -12,7 +12,7 @@ import weakref
 import threading
 import functools
 
-from ._core import Future
+from ._base import Future
 
 
 class ThenableFuture(Future):

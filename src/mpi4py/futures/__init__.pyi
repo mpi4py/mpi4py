@@ -1,6 +1,6 @@
 from typing import List
 
-from ._core import (
+from ._base import (
     Future as Future,
     Executor as Executor,
     wait as wait,

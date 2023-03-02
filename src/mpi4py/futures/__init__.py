@@ -3,7 +3,7 @@
 """Execute computations asynchronously using MPI processes."""
 # pylint: disable=redefined-builtin
 
-from ._core import (
+from ._base import (
     Future,
     Executor,
     wait,
