@@ -220,6 +220,15 @@ def _starmap_helper(submit, function, iterable, timeout, unordered):
     if unordered:
         futures = set(futures)
 
+    def result(future, timeout=None):
+        try:
+            try:
+                return future.result(timeout)
+            finally:
+                future.cancel()
+        finally:
+            del future
+
     def result_iterator():
         try:
             if unordered:
@@ -230,19 +239,18 @@ def _starmap_helper(submit, function, iterable, timeout, unordered):
                 for future in iterator:
                     futures.remove(future)
                     future = [future]
-                    yield future.pop().result()
+                    yield result(future.pop())
             else:
                 futures.reverse()
                 if timeout is None:
                     while futures:
-                        yield futures.pop().result()
+                        yield result(futures.pop())
                 else:
                     while futures:
-                        yield futures.pop().result(end_time - timer())
-        except BaseException:
+                        yield result(futures.pop(), end_time - timer())
+        finally:
             while futures:
                 futures.pop().cancel()
-            raise
     return result_iterator()
 
 
