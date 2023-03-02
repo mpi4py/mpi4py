@@ -1,6 +1,6 @@
 import sys
 from ..MPI import Intracomm, COMM_WORLD
-from ._core import Executor, Future  # noqa: F401
+from ._base import Executor, Future  # noqa: F401
 from typing import Any, Optional, TypeVar, Union
 from typing import Callable, Iterable, Iterator, Mapping, Sequence
 from typing import Tuple

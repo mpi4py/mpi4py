@@ -8,9 +8,9 @@ import functools
 import itertools
 import threading
 
-from ._core import Future
-from ._core import Executor
-from ._core import as_completed
+from ._base import Future
+from ._base import Executor
+from ._base import as_completed
 
 from . import _lib
 

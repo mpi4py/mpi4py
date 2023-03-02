@@ -21,7 +21,7 @@ import collections
 
 from .. import MPI
 from ..util import pkl5
-from ._core import BrokenExecutor
+from ._base import BrokenExecutor
 
 
 # ---
