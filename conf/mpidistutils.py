@@ -466,22 +466,12 @@ from distutils.errors import DistutilsModuleError
 from distutils.errors import CCompilerError
 
 try:
-    from packaging.version import (
-        Version,
-        LegacyVersion,
-    )
+    from packaging.version import Version
 except ImportError:
     try:
-        from setuptools.extern.packaging.version import (
-            Version,
-            LegacyVersion,
-        )
+        from setuptools.extern.packaging.version import Version
     except ImportError:
-        from distutils.version import (
-            StrictVersion as Version,
-            LooseVersion  as LegacyVersion
-        )
-
+        from distutils.version import StrictVersion as Version
 try:
     from setuptools import dep_util
 except ImportError:
@@ -577,52 +567,47 @@ def cython_req():
     return cython_version
 
 def cython_chk(VERSION, verbose=True):
-    from mpidistutils import log
-    if verbose:
-        warn = lambda msg='': sys.stderr.write(msg+'\n')
-    else:
-        warn = lambda msg='': None
+    #
+    def warn(message):
+        if not verbose: return
+        ruler, ws, nl = "*"*80, " " ,"\n"
+        pyexe = sys.executable
+        advise = "$ %s -m pip install --upgrade cython" % pyexe
+        def printer(*s): print(*s, file=sys.stderr)
+        printer(ruler, nl)
+        printer(ws, message, nl)
+        printer(ws, ws, advise, nl)
+        printer(ruler)
     #
     try:
         import Cython
     except ImportError:
-        warn("*"*80)
-        warn()
-        warn(" You need Cython to generate C source files.\n")
-        warn("   $ python -m pip install cython")
-        warn()
-        warn("*"*80)
+        warn("You need Cython to generate C source files.")
         return False
     #
-    REQUIRED = VERSION
     CYTHON_VERSION = Cython.__version__
-    if VERSION is not None:
-        m = re.match(r"(\d+\.\d+(?:\.\d+)?).*", CYTHON_VERSION)
-        if m:
-            REQUIRED  = Version(VERSION)
-            AVAILABLE = Version(m.groups()[0])
-        else:
-            REQUIRED  = LegacyVersion(VERSION)
-            AVAILABLE = LegacyVersion(CYTHON_VERSION)
-        if AVAILABLE < REQUIRED:
-            warn("*"*80)
-            warn()
-            warn(" You need Cython >= {0} (you have version {1}).\n"
-                 .format(REQUIRED, CYTHON_VERSION))
-            warn("   $ python -m pip install --upgrade cython")
-            warn()
-            warn("*"*80)
-            return False
+    m = re.match(r"(\d+\.\d+(?:\.\d+)?).*", CYTHON_VERSION)
+    if not m:
+        warn("Cannot parse Cython version string {0!r}"
+             .format(CYTHON_VERSION))
+        return False
+    REQUIRED = Version(VERSION)
+    PROVIDED = Version(m.groups()[0])
+    if PROVIDED < REQUIRED:
+        warn("You need Cython >= {0} (you have version {1})"
+             .format(VERSION, CYTHON_VERSION))
+        return False
     #
     if verbose:
-        log.info("using Cython version %s" % CYTHON_VERSION)
+        log.info("using Cython %s" % CYTHON_VERSION)
     return True
+
 
 def cython_run(
     source, target=None,
     depends=(), includes=(),
     workdir=None, force=False,
-    VERSION=None,
+    VERSION="0.0",
 ):
     if target is None:
         target = os.path.splitext(source)[0]+'.c'
@@ -639,27 +624,26 @@ def cython_run(
             return
     finally:
         os.chdir(cwd)
-    require = 'Cython'
-    if VERSION is not None:
-        require += '>=%s' % VERSION
-    if not cython_chk(VERSION, verbose=False):
-        pkgname = re.compile(r'cython(\.|$)', re.IGNORECASE)
-        for modname in list(sys.modules.keys()):
-            if pkgname.match(modname):
-                del sys.modules[modname]
+    require = 'Cython >= %s' % VERSION
+    if not cython_chk(VERSION, verbose=False) and setuptools:
+        if sys.modules.get('Cython'):
+            removed = getattr(sys.modules['Cython'], '__version__', '')
+            log.info("removing Cython %s from sys.modules" % removed)
+            pkgname = re.compile(r'cython(\.|$)', re.IGNORECASE)
+            for modname in list(sys.modules.keys()):
+                if pkgname.match(modname):
+                    del sys.modules[modname]
         try:
-            import warnings
-            import setuptools
             install_setup_requires = setuptools._install_setup_requires
             with warnings.catch_warnings():
                 category = setuptools.SetuptoolsDeprecationWarning
                 warnings.simplefilter('ignore', category)
-                log.info("fetching build requirement %s" % require)
+                log.info("fetching build requirement '%s'" % require)
                 install_setup_requires(dict(setup_requires=[require]))
         except Exception:
-            log.info("failed to fetch build requirement %s" % require)
+            log.info("failed to fetch build requirement '%s'" % require)
     if not cython_chk(VERSION):
-        raise DistutilsError("requires %s" % require)
+        raise DistutilsError("missing build requirement '%s'" % require)
     #
     log.info("cythonizing '%s' -> '%s'", source, target)
     from cythonize import cythonize
