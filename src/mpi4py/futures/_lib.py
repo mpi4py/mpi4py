@@ -390,7 +390,6 @@ SharedPool = None  # pylint: disable=invalid-name
 
 
 def _set_shared_pool(obj):
-    # pylint: disable=invalid-name
     # pylint: disable=global-statement
     global SharedPool
     SharedPool = obj
