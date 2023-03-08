@@ -1071,8 +1071,8 @@ class build_exe(build_ext):
             if (exe.sources is None or
                 type(exe.sources) not in (ListType, TupleType)):
                 raise DistutilsSetupError(
-                    ("in 'executables' option (executable '%s'), " +
-                     "'sources' must be present and must be " +
+                    ("in 'executables' option (executable '%s'), "
+                     "'sources' must be present and must be "
                      "a list of source filenames") % exe.name)
 
     def get_exe_fullpath(self, exe, build_dir=None):
@@ -1191,9 +1191,11 @@ class install(cmd_install.install):
 
     def initialize_options(self):
         with warnings.catch_warnings():
-            category = setuptools.SetuptoolsDeprecationWarning
-            warnings.simplefilter('ignore', category)
+            if setuptools:
+                category = setuptools.SetuptoolsDeprecationWarning
+                warnings.simplefilter('ignore', category)
             cmd_install.install.initialize_options(self)
+        self.old_and_unmanageable = True
 
     def run(self):
         cmd_install.install.run(self)
@@ -1221,15 +1223,16 @@ class install_lib(cmd_install_lib.install_lib):
         for (build_cmd, build_dir) in (
             ('build_exe',  'build_exe'),
         ):
-            outs = self._mutate_outputs(
-                1, build_cmd, build_dir,
-                self.install_dir
+            cmd_obj = self.get_finalized_command(build_cmd)
+            build_files = cmd_obj.get_outputs()
+            exe_outputs = self._mutate_outputs(
+                self.distribution.has_executables(),
+                build_cmd, build_dir,
+                self.install_dir,
             )
-            build_cmd = self.get_finalized_command(build_cmd)
-            build_files = build_cmd.get_outputs()
-            for out in outs:
-                if os.path.exists(out):
-                    outputs.append(out)
+            for src, dest in zip(build_files, exe_outputs):
+                if os.path.exists(src):
+                    outputs.append(dest)
         return outputs
 
 
