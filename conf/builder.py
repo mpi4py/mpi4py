@@ -4,11 +4,6 @@ import shutil
 import contextlib
 import setuptools.build_meta as _st_bm
 
-CYTHON = "cython >= 0.29.32"
-SKBUILD = "scikit-build >= 0.13"
-CMAKE = "cmake >= 3.12"
-NINJA = "ninja; platform_system!='Windows'"
-
 
 def get_backend_name(default='default'):
     return os.environ.get(
@@ -16,15 +11,20 @@ def get_backend_name(default='default'):
     ).lower().replace('_', '-')
 
 
+def read_build_requires(package):
+    confdir = os.path.dirname(__file__)
+    basename = f'requirements-build-{package}.txt'
+    with open(os.path.join(confdir, basename)) as f:
+        return [req for req in map(str.strip, f) if req]
+
+
 def get_build_requires():
     name = get_backend_name()
     use_skbuild = name in ('scikit-build', 'skbuild')
-    requires = []
-    requires.append(CYTHON)
+    requires = read_build_requires('cython')
     if use_skbuild:
-        requires.append(SKBUILD)
-        requires.append(CMAKE)
-        requires.append(NINJA)
+        for req in read_build_requires('skbuild'):
+            requires.append(req)
     return requires
 
 
