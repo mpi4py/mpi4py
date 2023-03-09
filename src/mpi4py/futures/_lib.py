@@ -267,12 +267,38 @@ def initialize(options):
 def _manager_thread(pool, options):
     size = options.pop('max_workers', 1)
     queue = pool.setup(size)
+    threads = collections.deque()
+    max_threads = size - 1
 
     def init():
         if not initialize(options):
             pool.broken("initializer failed")
             return False
         return True
+
+    def adjust():
+        if len(threads) < max_threads:
+            thread = threading.Thread(target=worker)
+            thread.start()
+            threads.append(thread)
+
+    def execute(future, task):
+        func, args, kwargs = task
+        result = exception = None
+        try:
+            result = func(*args, **kwargs)
+            future.set_result(result)
+        except BaseException:
+            exception = sys_exception()
+            future.set_exception(exception)
+        del result, exception
+        del func, args, kwargs
+        del future, task
+
+    def finalize():
+        for thread in threads:
+            thread.join()
+        queue.pop()
 
     def worker():
         backoff = Backoff(_getopt_backoff(options))
@@ -289,28 +315,15 @@ def _manager_thread(pool, options):
             if item is None:
                 queue.put(None)
                 break
-
             future, task = item
             if future.set_running_or_notify_cancel():
-                func, args, kwargs = task
-                result = exception = None
-                try:
-                    result = func(*args, **kwargs)
-                    future.set_result(result)
-                except BaseException:
-                    exception = sys_exception()
-                    future.set_exception(exception)
-                del result, exception
-                del func, args, kwargs
+                if queue:
+                    adjust()
+                execute(future, task)
             del future, task, item
 
-    threads = [threading.Thread(target=worker) for _ in range(size - 1)]
-    for thread in threads:
-        thread.start()
     worker()
-    for thread in threads:
-        thread.join()
-    queue.pop()
+    finalize()
 
 
 def _manager_comm(pool, options, comm, full=True):
