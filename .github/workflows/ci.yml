@@ -141,7 +141,7 @@ jobs:
 
     - name: Check code generation
       run:  |
-        python conf/mpiscanner.py
+        python conf/mpiapigen.py
         git diff --exit-code
 
   lint:

@@ -1,19 +1,126 @@
 # Very, very naive RE-based way for collecting declarations inside
 # 'cdef extern from *' Cython blocks in in source files, and next
-# generate compatibility headers for MPI-2 partially implemented or
-# built, or MPI-1 implementations, perhaps providing a subset of MPI-2
+# generate compatibility headers for partially implemented MPIs.
 
+import re
 from textwrap import indent, dedent
-from warnings import warn
-import mpiregexes as Re
+import warnings
 
-class Node(object):
+def anyof(*args):
+    return r'(?:%s)' % '|'.join(args)
+
+def join(*args):
+    tokens = []
+    for tok in args:
+        if isinstance(tok, (list, tuple)):
+            tok = '(%s)' % r'\s*'.join(tok)
+        tokens.append(tok)
+    return r'\s*'.join(tokens)
+
+def r_(*args):
+    return re.compile(join(*args))
+
+lparen   = r'\('
+rparen   = r'\)'
+colon    = r'\:'
+asterisk = r'\*'
+ws       = r'\s*'
+sol      = r'^'
+eol      = r'$'
+opt      = r'?'
+
+enum    = join('enum', colon)
+typedef = 'ctypedef'
+pointer = asterisk
+struct  = join(typedef, 'struct')
+
+integral_type_names = [
+    'Aint',
+    'Offset',
+    'Count',
+    'Fint',
+]
+
+struct_type_names = [
+    'Status',
+    'F08_status',
+]
+
+handle_type_names = [
+    'Datatype',
+    'Request',
+    'Message',
+    'Op',
+    'Info',
+    'Group',
+    'Errhandler',
+    'Session',
+    'Comm',
+    'Win',
+    'File',
+]
+
+basic_type    = r'(?:void|int|char\s*\*{1,3})'
+integral_type = r'MPI_(?:%s)' % '|'.join(integral_type_names)
+struct_type   = r'MPI_(?:%s)' % '|'.join(struct_type_names)
+opaque_type   = r'MPI_(?:%s)' % '|'.join(handle_type_names)
+any_mpi_type  = r'(?:%s|%s|%s)' % (struct_type, integral_type, opaque_type)
+
+upper_name  = r'MPI_[A-Z0-9_]+'
+camel_name  = r'MPI_[A-Z][a-z0-9_]+'
+usrfun_name = camel_name + r'_(?:function|function_c|fn)'
+
+arg_list = r'.*'
+ret_type = r'void|int|double|MPI_Aint'
+
+canyint = anyof(r'int', r'long(?:\s+long)?')
+canyptr = join(r'\w+', pointer+'?')
+
+annotation = r'\#\:\='
+fallback_value = r'\(?[A-Za-z0-9_\+\-\(\)\*]+\)?'
+fallback = r'(?:%s)?' % join (annotation, [fallback_value])
+
+fint_type = r'MPI_Fint'
+fmpi_type = opaque_type.replace('Datatype', 'Type')
+c2f_name  = fmpi_type+'_c2f'
+f2c_name  = fmpi_type+'_f2c'
+
+
+class Re:
+
+    INTEGRAL_TYPE   = r_(sol, typedef, [canyint], [integral_type], fallback, eol)
+    STRUCT_TYPE     = r_(sol, struct,  [struct_type], colon+opt, fallback,  eol)
+    OPAQUE_TYPE     = r_(sol, typedef, canyptr,  [opaque_type], eol)
+    FUNCTION_TYPE   = r_(sol, typedef, [ret_type], [camel_name], lparen, [arg_list], rparen, fallback, eol)
+
+    ENUM_VALUE      = r_(sol, enum, [upper_name], fallback, eol)
+    HANDLE_VALUE    = r_(sol, [opaque_type], [upper_name], fallback, eol)
+    BASIC_PTRVAL    = r_(sol, [basic_type,  pointer], [upper_name], fallback, eol)
+    INTEGRAL_PTRVAL = r_(sol, [integral_type, pointer], [upper_name], fallback, eol)
+    STRUCT_PTRVAL   = r_(sol, [struct_type, pointer], [upper_name], fallback, eol)
+    FUNCTION_PTRVAL = r_(sol, [usrfun_name, pointer], [upper_name], fallback, eol)
+    FUNCTION_PROTO  = r_(sol, [ret_type], [camel_name], lparen, [arg_list], rparen, fallback, eol)
+
+    FUNCTION_C2F    = r_(sol, [fint_type],   [c2f_name], lparen, [opaque_type], rparen, fallback, eol)
+    FUNCTION_F2C    = r_(sol, [opaque_type], [f2c_name], lparen, [fint_type],   rparen, fallback, eol)
+
+    IGNORE = r_(anyof(
+        join(sol, r'cdef.*', eol),
+        join(sol, struct, r'_mpi_\w+_t', eol),
+        join(sol, 'int', r'MPI_(?:SOURCE|TAG|ERROR)', eol),
+        join(sol, r'#.*', eol),
+        join(sol, eol),
+    ))
+
+
+class Node:
 
     REGEX = None
+
+    @classmethod
     def match(self, line):
-        m = self.REGEX.search(line)
-        if m: return m.groups()
-    match = classmethod(match)
+        m = self.REGEX.match(line)
+        return m.groups() if m else None
 
     HEADER = None
     CONFIG = None
@@ -32,13 +139,16 @@ class Node(object):
         assert name is not None
         self.name = name
         self.__dict__.update(kwargs)
+
     def header(self):
         line = dedent(self.HEADER) % vars(self)
         line = line.replace('\n', '')
         line = line.replace('  ', ' ')
         return line + '\n'
+
     def config(self):
         return dedent(self.CONFIG) % vars(self)
+
     def missing(self, guard=True):
         if guard:
             head = dedent(self.MISSING_HEAD)
@@ -121,11 +231,11 @@ class NodeFuncProto(Node):
     MISSING = ' '. join(['#define %(cname)s(%(cargsnamed)s)',
                         'PyMPI_UNAVAILABLE("%(name)s"%(comma)s%(cargsnamed)s)'])
     def __init__(self, crett, cname, cargs, calias=None):
-        self.init(name=cname,
-                  cname=cname)
+        self.init(name=cname, cname=cname)
         self.crett = crett
         self.cargs = cargs or 'void'
-        if cargs == 'void': cargs = ''
+        if cargs == 'void':
+            cargs = ''
         if cargs:
             cargs = [c.strip() for c in cargs.split(',')]
             if cargs[-1] == '...':
@@ -134,8 +244,7 @@ class NodeFuncProto(Node):
             cargs = []
         self.cargstype = cargs
         nargs = len(cargs)
-        if nargs: self.comma = ','
-        else:     self.comma = ''
+        self.comma = ',' if nargs else ''
         cargscall = ['(%s)0' % ctypefix(a) for a in cargs]
         self.cargscall = ','.join(cargscall)
         cargsnamed = ['a%d' % (a+1) for a in range(nargs)]
@@ -204,7 +313,7 @@ class StructPtrVal(NodePtrVal):
     REGEX = Re.STRUCT_PTRVAL
 
 class FunctionPtrVal(NodePtrVal):
-    REGEX = Re.FUNCT_PTRVAL
+    REGEX = Re.FUNCTION_PTRVAL
 
 class FunctionProto(NodeFuncProto):
     REGEX = Re.FUNCTION_PROTO
@@ -222,7 +331,7 @@ class FunctionF2C(NodeFuncProto):
         NodeFuncProto.__init__(self, *a, **k)
         self.cretv =  self.crett.upper() + '_NULL'
 
-class Scanner(object):
+class Generator:
 
     NODE_TYPES = [
         IntegralType,
@@ -247,7 +356,8 @@ class Scanner(object):
             self.parse_line(line)
 
     def parse_line(self, line):
-        if Re.IGNORE.match(line): return
+        if Re.IGNORE.match(line):
+            return
         nodemap  = self.nodemap
         nodelist = self.nodes
         for nodetype in self.NODE_TYPES:
@@ -259,7 +369,7 @@ class Scanner(object):
                 nodelist.append(node)
                 break
         if not args:
-            warn('unmatched line:\n%s' % line)
+            warnings.warn('unmatched line:\n%s' % line)
 
     def __iter__(self):
         return iter(self.nodes)
@@ -314,19 +424,13 @@ class Scanner(object):
 
     #ifndef PyMPI_UNUSED
     # if defined(__GNUC__)
-    #   if !defined(__cplusplus) || (__GNUC__>3||(__GNUC__==3&&__GNUC_MINOR__>=4))
-    #     define PyMPI_UNUSED __attribute__ ((__unused__))
-    #   else
-    #     define PyMPI_UNUSED
-    #   endif
-    # elif defined(__INTEL_COMPILER) || defined(__ICC)
     #   define PyMPI_UNUSED __attribute__ ((__unused__))
     # else
     #   define PyMPI_UNUSED
     # endif
     #endif
 
-    #define PyMPI_ERR_UNAVAILABLE (-1431655766) /*0xaaaaaaaa*/
+    #define PyMPI_ERR_UNAVAILABLE (-1431655766) /*0xAAAAAAAA*/
 
     static PyMPI_UNUSED
     int PyMPI_UNAVAILABLE(const char *name,...)
@@ -504,7 +608,7 @@ class Scanner(object):
     #endif /* !PyMPI_LARGECNT_H */
     """
 
-    LARGECNT_RE = Re.re.compile(r'^mpi_(%s)_c$' % '|'.join([
+    LARGECNT_RE = re.compile(r'^mpi_(%s)_c$' % '|'.join([
         r'(i?(b|s|r|p)?send(_init)?(recv(_replace)?)?)',
         r'(i?m?p?recv(_init)?)',
         r'(buffer_(at|de)tach|get_count)',
@@ -599,7 +703,8 @@ class Scanner(object):
                     if t1.endswith('[]'):
                         t1, t2, n = t1[:-2], t2[:-2], 'n'
                         argstemp += [declare(t2, '*b%d' % i, 'NULL')]
-                        if is_neighbor: n = ('ns', 'nr')[dtypeidx]
+                        if is_neighbor:
+                            n = ('ns', 'nr')[dtypeidx]
                         subs = (t2, i, t1, i, n)
                         argsconv += [CASTARRAY % subs]
                         if is_nonblocking:
@@ -667,30 +772,31 @@ class Scanner(object):
 # -----------------------------------------
 
 if __name__ == '__main__':
-    import sys, os
-    sources = [os.path.join('src', 'mpi4py', 'libmpi.pxd')]
-    log = lambda msg: sys.stderr.write(msg + '\n')
-    scanner = Scanner()
-    for filename in sources:
-        log('parsing file %s' % filename)
-        scanner.parse_file(filename)
-    log('processed %d definitions' % len(scanner.nodes))
+    import os
+
+    log = print
+    generator = Generator()
+
+    libmpi_pxd = os.path.join('src', 'mpi4py', 'libmpi.pxd')
+    log('parsing file %s' % libmpi_pxd)
+    generator.parse_file(libmpi_pxd)
+    log('processed %d definitions' % len(generator.nodes))
 
     #config_h  = os.path.join('src', 'lib-mpi', 'config', 'config.h')
     #log('writing file %s' % config_h)
-    #scanner.dump_config_h(config_h, None)
+    #generator.dump_config_h(config_h, None)
 
     missing_h = os.path.join('src', 'lib-mpi', 'missing.h')
     log('writing file %s' % missing_h)
-    scanner.dump_missing_h(missing_h, None)
+    generator.dump_missing_h(missing_h, None)
 
     largecnt_h = os.path.join('src', 'lib-mpi', 'largecnt.h')
     log('writing file %s' % largecnt_h)
-    scanner.dump_largecnt_h(largecnt_h)
-    log('generated %d large count fallbacks' % scanner.largecnt)
+    generator.dump_largecnt_h(largecnt_h)
+    log('generated %d large count fallbacks' % generator.largecnt)
 
     #libmpi_h = os.path.join('.', 'libmpi.h')
     #log('writing file %s' % libmpi_h)
-    #scanner.dump_header_h(libmpi_h)
+    #generator.dump_header_h(libmpi_h)
 
 # -----------------------------------------

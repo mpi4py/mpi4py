@@ -256,12 +256,12 @@ def configure_compiler(compiler, config, lang=None):
 # -----------------------------------------------------------------------------
 
 try:
-    from mpiscanner import Scanner
+    from mpiapigen import Generator
 except ImportError:
-    class Scanner(object):
+    class Generator(object):
         def parse_file(self, *args):
             raise NotImplementedError(
-                "You forgot to grab 'mpiscanner.py'")
+                "You forgot to grab 'mpiapigen.py'")
 
 
 @contextlib.contextmanager
@@ -299,17 +299,17 @@ class ConfigureMPI(object):
 """
 
     def __init__(self, config_cmd):
-        self.scanner = Scanner()
+        self.generator = Generator()
         for filename in self.SOURCES:
             fullname = os.path.join(self.SRCDIR, filename)
-            self.scanner.parse_file(fullname)
+            self.generator.parse_file(fullname)
         self.config_cmd = config_cmd
 
     def run(self):
         results = []
         with open('_configtest.h', 'w') as f:
             f.write(self.CONFIGTEST_H)
-        for node in self.scanner:
+        for node in self.generator:
             name = node.name
             testcode = node.config()
             confcode = node.missing(guard=False)
@@ -356,9 +356,9 @@ class ConfigureMPI(object):
         config_h  = os.path.join(destdir, self.CONFIG_H)
         missing_h = os.path.join(destdir, self.MISSING_H)
         log.info("writing '%s'", config_h)
-        self.scanner.dump_config_h(config_h, results)
+        self.generator.dump_config_h(config_h, results)
         log.info("writing '%s'", missing_h)
-        self.scanner.dump_missing_h(missing_h, None)
+        self.generator.dump_missing_h(missing_h, None)
 
 # -----------------------------------------------------------------------------
 
