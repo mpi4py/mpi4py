@@ -3,19 +3,13 @@
 
 #ifndef PyMPI_UNUSED
 # if defined(__GNUC__)
-#   if !defined(__cplusplus) || (__GNUC__>3||(__GNUC__==3&&__GNUC_MINOR__>=4))
-#     define PyMPI_UNUSED __attribute__ ((__unused__))
-#   else
-#     define PyMPI_UNUSED
-#   endif
-# elif defined(__INTEL_COMPILER) || defined(__ICC)
 #   define PyMPI_UNUSED __attribute__ ((__unused__))
 # else
 #   define PyMPI_UNUSED
 # endif
 #endif
 
-#define PyMPI_ERR_UNAVAILABLE (-1431655766) /*0xaaaaaaaa*/
+#define PyMPI_ERR_UNAVAILABLE (-1431655766) /*0xAAAAAAAA*/
 
 static PyMPI_UNUSED
 int PyMPI_UNAVAILABLE(const char *name,...)

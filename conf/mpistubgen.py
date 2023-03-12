@@ -133,13 +133,14 @@ def stubgen_class(cls, done=None):
     lines = Lines()
 
     try:
-        class sub(cls): pass
+        class sub(cls):
+            pass
         final = False
     except TypeError:
         final = True
     base = cls.__base__
     if final:
-        lines.add = f"@final"
+        lines.add = "@final"
     if base is object:
         lines.add = f"class {cls.__name__}:"
     else:
@@ -185,9 +186,9 @@ def stubgen_class(cls, done=None):
             if name == attr.__name__:
                 obj = dct[name]
                 if is_classmethod(obj):
-                    lines.add = f"@classmethod"
+                    lines.add = "@classmethod"
                 elif is_staticmethod(obj):
-                    lines.add = f"@staticmethod"
+                    lines.add = "@staticmethod"
                 lines.add = stubgen_method(attr)
             else:
                 lines.add = f"{name} = {attr.__name__}"
@@ -472,7 +473,7 @@ def stubgen_mpi4py_MPI(done=None):
 
 
 def main():
-    import sys, os
+    import os
     output = os.path.join('src', 'mpi4py', 'MPI.pyi')
     with open(output, 'w') as f:
         for line in stubgen_mpi4py_MPI():
