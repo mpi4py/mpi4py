@@ -76,6 +76,7 @@ toc_object_entries = False
 toc_object_entries_show_parents = 'hide'
 # python_use_unqualified_type_names = True
 
+autodoc_class_signature = 'separated'
 autodoc_typehints = 'description'
 autodoc_typehints_format = 'short'
 autodoc_mock_imports = []
@@ -149,11 +150,43 @@ def _patch_domain_python():
 
 
 def _setup_autodoc(app):
-    from sphinx.locale import _
+    from sphinx.ext import autodoc
+    from sphinx.ext import autosummary
     from sphinx.util.typing import restify
-    from sphinx.ext.autodoc import ModuleDocumenter
-    from sphinx.ext.autodoc import ClassDocumenter
-    from sphinx.ext.autodoc import DataDocumenter
+    from sphinx.locale import _
+
+    #
+
+    class ClassDocumenterMixin:
+
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            if self.config.autodoc_class_signature == 'separated':
+                members = self.options.members
+                special_members = self.options.special_members
+                if special_members is not None:
+                    for name in ('__new__', '__init__'):
+                        if name in members:
+                            members.remove(name)
+                        if name in special_members:
+                            special_members.remove(name)
+
+    class ClassDocumenter(
+        ClassDocumenterMixin,
+        autodoc.ClassDocumenter,
+    ):
+        pass
+
+    class ExceptionDocumenter(
+        ClassDocumenterMixin,
+        autodoc.ExceptionDocumenter,
+    ):
+        pass
+
+    app.add_autodocumenter(ClassDocumenter, override=True)
+    app.add_autodocumenter(ExceptionDocumenter, override=True)
+
+    #
 
     def istypealias(obj):
         if isinstance(obj, type):
@@ -162,14 +195,14 @@ def _setup_autodoc(app):
             typing.Any,
         )
 
-    class TypeDocumenter(DataDocumenter):
+    class TypeDocumenter(autodoc.DataDocumenter):
         objtype = 'type'
         directivetype = 'data'
-        priority = ClassDocumenter.priority + 1
+        priority = autodoc.ClassDocumenter.priority + 1
 
         @classmethod
         def can_document_member(cls, member, membername, isattr, parent):
-            return (isinstance(parent, ModuleDocumenter) and
+            return (isinstance(parent, autodoc.ModuleDocumenter) and
                     parent.name == 'mpi4py.typing' and
                     istypealias(member))
 
@@ -182,13 +215,9 @@ def _setup_autodoc(app):
 
     app.add_autodocumenter(TypeDocumenter)
 
+    #
 
-def _patch_autosummary():
-    from sphinx.ext import autodoc
-    from sphinx.ext import autosummary
-    from sphinx.ext.autosummary import generate
-
-    class ExceptionDocumenter(autodoc.ExceptionDocumenter):
+    class ExceptionDocumenterCustom(ExceptionDocumenter):
         objtype = 'class'
 
     def get_documenter(app, obj, parent):
@@ -197,9 +226,10 @@ def _patch_autosummary():
             if caller == 'generate_autosummary_content':
                 if obj.__module__ == 'mpi4py.MPI':
                     if obj.__name__ == 'Exception':
-                        return ExceptionDocumenter
+                        return ExceptionDocumenterCustom
         return autosummary.get_documenter(app, obj, parent)
 
+    from sphinx.ext.autosummary import generate
     generate.get_documenter = get_documenter
 
 
@@ -207,7 +237,6 @@ def setup(app):
     _setup_numpy_typing()
     _patch_domain_python()
     _setup_autodoc(app)
-    _patch_autosummary()
 
     try:
         from mpi4py import MPI
