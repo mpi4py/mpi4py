@@ -701,12 +701,16 @@ class ExecutorTestMixin:
         self.assertEqual(16, future.result())
 
     def test_submit_cancel(self):
-        future1 = self.executor.submit(time.sleep, 0.5)
-        future2 = self.executor.submit(time.sleep, 0)
-        future2.cancel()
-        self.assertIsNone(future1.result())
-        self.assertFalse(future1.cancelled())
-        self.assertTrue(future2.cancelled())
+        fs = []
+        num_workers = self.executor._max_workers
+        for _ in range(num_workers*100):
+            f = self.executor.submit(time.sleep, 0.1)
+            fs.append(f)
+        future = self.executor.submit(time.sleep, 0)
+        future.cancel()
+        self.assertTrue(future.cancelled())
+        for f in fs:
+            f.cancel()
 
     def test_map(self):
         self.assertEqual(
