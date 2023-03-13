@@ -8,11 +8,9 @@ Python bindings for MPI
 """
 
 import os
-import re
 import sys
 import glob
 import shlex
-import shutil
 
 topdir = os.path.abspath(os.path.dirname(__file__))
 sys.path.insert(0, os.path.join(topdir, 'conf'))
@@ -25,14 +23,12 @@ def get_name():
     return 'mpi4py'
 
 def get_version():
+    import getversion
     try:
         return get_version.result
     except AttributeError:
         pass
-    srcdir = os.path.join(topdir, 'src')
-    with open(os.path.join(srcdir, 'mpi4py', '__init__.py')) as f:
-        m = re.search(r"__version__\s*=\s*'(.*)'", f.read())
-    public_version = m.groups()[0]
+    public_version = getversion.version()
     local_version = os.environ.get('MPI4PY_LOCAL_VERSION')
     if local_version:
         version = '{0}+{1}'.format(public_version, local_version)
@@ -194,9 +190,11 @@ def configure_mpi(ext, config_cmd):
     """)
     errmsg = "Cannot %s MPI programs. Check your configuration!!!"
     ok = config_cmd.try_compile(ConfigTest, headers=headers)
-    if not ok: raise DistutilsPlatformError(errmsg % "compile")
+    if not ok:
+        raise DistutilsPlatformError(errmsg % "compile")
     ok = config_cmd.try_link(ConfigTest, headers=headers)
-    if not ok: raise DistutilsPlatformError(errmsg % "link")
+    if not ok:
+        raise DistutilsPlatformError(errmsg % "link")
     #
     log.info("checking for missing MPI functions/symbols ...")
     impls = ("OPEN_MPI", "MSMPI_VER")
