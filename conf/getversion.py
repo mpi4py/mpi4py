@@ -8,7 +8,11 @@ def version():
     srcdir = p.abspath(p.join(here, p.pardir, 'src'))
     with open(p.join(srcdir, 'mpi4py', '__init__.py')) as f:
         m = re.search(r"__version__\s*=\s*'(.*)'", f.read())
-    return m.groups()[0]
+    version = m.groups()[0]
+    local_version = os.environ.get('MPI4PY_LOCAL_VERSION')
+    if local_version:
+        version = f'{version}+{local_version}'
+    return version
 
 
 if __name__ == '__main__':
