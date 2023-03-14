@@ -202,9 +202,11 @@ def _setup_autodoc(app):
 
         @classmethod
         def can_document_member(cls, member, membername, isattr, parent):
-            return (isinstance(parent, autodoc.ModuleDocumenter) and
-                    parent.name == 'mpi4py.typing' and
-                    istypealias(member))
+            return (
+                isinstance(parent, autodoc.ModuleDocumenter)
+                and parent.name == 'mpi4py.typing'
+                and istypealias(member)
+            )
 
         def update_content(self, more_content):
             if istypealias(self.object):

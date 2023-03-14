@@ -2,6 +2,8 @@
 # 'cdef extern from *' Cython blocks in in source files, and next
 # generate compatibility headers for partially implemented MPIs.
 
+# ruff: noqa: E501
+
 import re
 from textwrap import indent, dedent
 import warnings
@@ -64,7 +66,6 @@ basic_type    = r'(?:void|int|char\s*\*{1,3})'
 integral_type = r'MPI_(?:%s)' % '|'.join(integral_type_names)
 struct_type   = r'MPI_(?:%s)' % '|'.join(struct_type_names)
 opaque_type   = r'MPI_(?:%s)' % '|'.join(handle_type_names)
-any_mpi_type  = r'(?:%s|%s|%s)' % (struct_type, integral_type, opaque_type)
 
 upper_name  = r'MPI_[A-Z0-9_]+'
 camel_name  = r'MPI_[A-Z][a-z0-9_]+'
@@ -136,7 +137,6 @@ class Node:
     """
 
     def init(self, name, **kwargs):
-        assert name is not None
         self.name = name
         self.__dict__.update(kwargs)
 
@@ -178,7 +178,7 @@ class NodeStructType(NodeType):
     #define %(ctype)s PyMPI_%(ctype)s"""
 
     def __init__(self, ctype, cfields):
-        super(NodeStructType, self).__init__(ctype)
+        super().__init__(ctype)
         self.cfields = '\n'.join(['  %s %s;' % field
                                   for field in cfields])
 
@@ -261,7 +261,7 @@ class IntegralType(NodeType):
     typedef %(ctdef)s PyMPI_%(ctype)s;
     #define %(ctype)s PyMPI_%(ctype)s"""
     def __init__(self, cbase, ctype, calias=None):
-        super(IntegralType, self).__init__(ctype)
+        super().__init__(ctype)
         self.cbase = cbase
         if calias is not None:
             self.ctdef = calias
@@ -275,7 +275,7 @@ class StructType(NodeStructType):
         if ctype == 'MPI_Status':
             cnames = ['MPI_SOURCE', 'MPI_TAG', 'MPI_ERROR']
             cfields = list(zip(['int']*3, cnames))
-        super(StructType, self).__init__(ctype, cfields)
+        super().__init__(ctype, cfields)
         if calias is not None:
             self.MISSING = '#define %(cname)s %(calias)s'
             self.calias = calias
@@ -364,7 +364,6 @@ class Generator:
             args = nodetype.match(line)
             if args:
                 node = nodetype(*args)
-                assert node.name not in nodemap, node.name
                 nodemap[node.name] = len(nodelist)
                 nodelist.append(node)
                 break
@@ -406,15 +405,14 @@ class Generator:
         fileobj.write(head)
         if suite is None:
             for node in self:
-                line = '#undef %s\n' % ((macro % node.name))
+                line = '#undef %s\n' % (macro % node.name)
                 fileobj.write(line)
         else:
             for name, result in suite:
-                assert name in self.nodemap
                 if result:
-                    line = '#define %s 1\n' % ((macro % name))
+                    line = '#define %s 1\n' % (macro % name)
                 else:
-                    line = '#undef  %s\n' % ((macro % name))
+                    line = '#undef  %s\n' % (macro % name)
                 fileobj.write(line)
         fileobj.write(tail)
 
@@ -636,12 +634,12 @@ class Generator:
             t = t.strip()
             if t.endswith('[]'):
                 t = t[:-2].strip()
-                code = '%s *%s' % (t, v)
+                code = f'{t} *{v}'
             elif t.endswith('*'):
                 t = t[:-1].strip()
-                code = '%s *%s' % (t, v)
+                code = f'{t} *{v}'
             else:
-                code = '%s %s' % (t, v)
+                code = f'{t} {v}'
             if init is not None:
                 code += ' = %s' % init
             return code
@@ -654,7 +652,6 @@ class Generator:
 
             cargstype1 = node1.cargstype
             cargstype2 = node2.cargstype
-            assert len(cargstype1) == len(cargstype2)
             argstype = list(zip(cargstype1, cargstype2))
 
             convert_array = False
@@ -668,7 +665,7 @@ class Generator:
                         break
             commid = None
             if convert_array:
-                for i, (t1, t2) in enumerate(argstype, start=1):
+                for i, (t1, _) in enumerate(argstype, start=1):
                     if t1 == 'MPI_Comm':
                         commid = i
                         break
@@ -726,12 +723,12 @@ class Generator:
                         argscall += ['b%d' % i]
 
             tab = '  '
-            subs = dict(
-                name=name,
-                argsdecl=(',\n'+' '*(len(name)+20)).join(argslist),
-                argscall=', '.join(argscall),
-                commid=commid,
-            )
+            subs = {
+                'name':     name,
+                'argsdecl': (',\n'+' '*(len(name)+20)).join(argslist),
+                'argscall': ', '.join(argscall),
+                'commid':   commid,
+            }
             begin = self.LARGECNT_BEGIN % subs
             if commid is None:
                 setup = ''

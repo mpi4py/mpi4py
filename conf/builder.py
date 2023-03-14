@@ -1,6 +1,4 @@
 import os
-import sys
-import shutil
 import contextlib
 import setuptools.build_meta as _st_bm
 

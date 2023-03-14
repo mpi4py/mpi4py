@@ -166,6 +166,9 @@ jobs:
     - name: Install lint dependencies
       run:  python -m pip install --upgrade -r conf/requirements-lint.txt
 
+    - name: ruff
+      run:  ruff conf docs src
+
     - name: flake8
       run:  flake8 src/mpi4py
 

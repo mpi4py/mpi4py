@@ -1,3 +1,4 @@
+# ruff: noqa: S101
 import os
 import sys
 import inspect
@@ -11,18 +12,18 @@ def is_cyfunction(obj):
 
 def is_function(obj):
     return (
-        inspect.isbuiltin(obj) or
-        is_cyfunction(obj) or
-        type(obj) is type(ord)
+        inspect.isbuiltin(obj)
+        or is_cyfunction(obj)
+        or type(obj) is type(ord)
     )
 
 
 def is_method(obj):
     return (
-        inspect.ismethoddescriptor(obj) or
-        inspect.ismethod(obj) or
-        is_cyfunction(obj) or
-        type(obj) in (
+        inspect.ismethoddescriptor(obj)
+        or inspect.ismethod(obj)
+        or is_cyfunction(obj)
+        or type(obj) in (
             type(str.index),
             type(str.__add__),
             type(str.__new__),
@@ -32,8 +33,8 @@ def is_method(obj):
 
 def is_classmethod(obj):
     return (
-        inspect.isbuiltin(obj) or
-        type(obj).__name__ in (
+        inspect.isbuiltin(obj)
+        or type(obj).__name__ in (
             'classmethod',
             'classmethod_descriptor',
         )
@@ -250,9 +251,9 @@ def apidoc_class(cls, done=None):
             if name == attr.__name__:
                 obj = dct[name]
                 if is_classmethod(obj):
-                    lines.add = f"@classmethod"
+                    lines.add = "@classmethod"
                 elif is_staticmethod(obj):
-                    lines.add = f"@staticmethod"
+                    lines.add = "@staticmethod"
                 lines.add = apidoc_method(attr)
             elif False:
                 lines.add = f"{name} = {attr.__name__}"
@@ -475,6 +476,7 @@ from typing import (
 from .typing import *
 """
 
+
 def apidoc_mpi4py_MPI(done=None):
     from mpi4py import MPI
     lines = Lines()
@@ -505,7 +507,7 @@ def load_module(filename, name=None):
     module.__file__ = filename
     module.__package__ = name.rsplit('.', 1)[0]
     with open(filename) as f:
-        exec(f.read(), module.__dict__)
+        exec(f.read(), module.__dict__)  # noqa: S102
     return module
 
 
@@ -528,7 +530,7 @@ def restore_module(module):
 def annotate(dest, source):
     try:
         dest.__annotations__ = source.__annotations__
-    except Exception:
+    except AttributeError:
         pass
     if isinstance(dest, type):
         for name in dest.__dict__.keys():

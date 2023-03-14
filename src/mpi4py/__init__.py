@@ -56,14 +56,17 @@ class Rc:
     errors = 'exception'
 
     def __init__(self, **kwargs):
+        """Initialize options."""
         self(**kwargs)
 
     def __setattr__(self, name, value):
+        """Set option."""
         if not hasattr(self, name):
             raise TypeError(f"object has no attribute {name!r}")
         super().__setattr__(name, value)
 
     def __call__(self, **kwargs):
+        """Update options."""
         for key in kwargs:
             if not hasattr(self, key):
                 raise TypeError(f"unexpected argument {key!r}")
@@ -71,6 +74,7 @@ class Rc:
             setattr(self, key, value)
 
     def __repr__(self):
+        """Return repr(self)."""
         return f'<{__name__}.rc>'
 
 

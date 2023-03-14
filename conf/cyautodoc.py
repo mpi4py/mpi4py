@@ -1,3 +1,4 @@
+# ruff: noqa: UP008,UP031
 from Cython.Compiler import Options
 from Cython.Compiler import PyrexTypes
 from Cython.Compiler.Visitor import CythonTransform
@@ -255,11 +256,14 @@ class EmbedSignature(CythonTransform):
 
 
 # Monkeypatch AutoDocTransforms.EmbedSignature
-from Cython.Compiler import AutoDocTransforms
-AutoDocTransforms.EmbedSignature = EmbedSignature
+try:
+    from Cython.Compiler import AutoDocTransforms
+    AutoDocTransforms.EmbedSignature = EmbedSignature
+except Exception as exc:
+    import logging
+    logging.Logger(__name__).exception(exc)
 
 # Monkeypatch Nodes.raise_utility_code
-import logging
 try:
     from Cython.Compiler.Nodes import raise_utility_code
     code = raise_utility_code.impl
@@ -268,4 +272,5 @@ try:
         'CYTHON_COMPILING_IN_PYPY', '!CYTHON_FAST_THREAD_STATE', 1)
     del raise_utility_code, code, ipos
 except Exception as exc:
+    import logging
     logging.Logger(__name__).exception(exc)
