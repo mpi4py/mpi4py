@@ -27,12 +27,7 @@ def get_version():
         return get_version.result
     except AttributeError:
         pass
-    public_version = getversion.version()
-    local_version = os.environ.get('MPI4PY_LOCAL_VERSION')
-    if local_version:
-        version = '{0}+{1}'.format(public_version, local_version)
-    else:
-        version = public_version
+    version = getversion.version()
     get_version.result = version
     return version
 
