@@ -12,21 +12,20 @@ from configparser import Error as ConfigParserError
 _logger = logging.getLogger("mpiconfig")
 _logger.setLevel(logging.INFO)
 
-
-class Config(object):
+class Config:
 
     def __init__(self, logger=None):
         self.log = logger or _logger
         self.section  = None
         self.filename = None
         self.compiler_info = OrderedDict((
-                ('mpicc'  , None),
-                ('mpicxx' , None),
-                ('mpifort', None),
-                ('mpif90' , None),
-                ('mpif77' , None),
-                ('mpild'  , None),
-                ))
+            ('mpicc'  , None),
+            ('mpicxx' , None),
+            ('mpifort', None),
+            ('mpif90' , None),
+            ('mpif77' , None),
+            ('mpild'  , None),
+        ))
         self.library_info = OrderedDict((
             ('define_macros'        , []),
             ('undef_macros'         , []),
@@ -39,7 +38,7 @@ class Config(object):
             ('extra_compile_args'   , []),
             ('extra_link_args'      , []),
             ('extra_objects'        , []),
-            ))
+        ))
 
     def __bool__(self):
         for v in self.compiler_info.values():
@@ -60,7 +59,8 @@ class Config(object):
         return d
 
     def info(self, log=None):
-        if log is None: log = self.log
+        if log is None:
+            log = self.log
         mpicc   = self.compiler_info.get('mpicc')
         mpicxx  = self.compiler_info.get('mpicxx')
         mpifort = self.compiler_info.get('mpifort')
@@ -68,17 +68,17 @@ class Config(object):
         mpif77  = self.compiler_info.get('mpif77')
         mpild   = self.compiler_info.get('mpild')
         if mpicc:
-            log.info(f"MPI C compiler:    {mpicc}")
+            log.info("MPI C compiler:    %s", mpicc)
         if mpicxx:
-            log.info(f"MPI C++ compiler:  {mpicxx}")
+            log.info("MPI C++ compiler:  %s", mpicxx)
         if mpifort:
-            log.info(f"MPI F compiler:    {mpifort}")
+            log.info("MPI F compiler:    %s", mpifort)
         if mpif90:
-            log.info(f"MPI F90 compiler:  {mpif90}")
+            log.info("MPI F90 compiler:  %s", mpif90)
         if mpif77:
-            log.info(f"MPI F77 compiler:  {mpif77}")
+            log.info("MPI F77 compiler:  %s", mpif77)
         if mpild:
-            log.info(f"MPI linker:        {mpild}")
+            log.info("MPI linker:        %s", mpild)
 
     def update(self, config, **more):
         if hasattr(config, 'keys'):
@@ -92,7 +92,8 @@ class Config(object):
             self.update(more)
 
     def setup(self, options, environ=None):
-        if environ is None: environ = os.environ
+        if environ is None:
+            environ = os.environ
         self.setup_library_info(options, environ)
         self.setup_compiler_info(options, environ)
 
@@ -110,16 +111,21 @@ class Config(object):
                 filename = mpiopt
             else:
                 section = mpiopt
-        if not filename: filename = "mpi.cfg"
-        if not section:  section  = "mpi"
+        if not filename:
+            filename = "mpi.cfg"
+        if not section:
+            section  = "mpi"
 
         mach = platform.machine()
         arch = platform.architecture()[0]
         plat = sys.platform
         osnm = os.name
-        if   'linux' == plat[:5]: plat = 'linux'
-        elif 'sunos' == plat[:5]: plat = 'solaris'
-        elif 'win'   == plat[:3]: plat = 'windows'
+        if plat.startswith('linux'):
+            plat = 'linux'
+        elif plat.startswith('sunos'):
+            plat = 'solaris'
+        elif plat.startswith('win'):
+            plat = 'windows'
         suffixes = []
         suffixes.append(plat+'-'+mach)
         suffixes.append(plat+'-'+arch)
@@ -149,19 +155,25 @@ class Config(object):
 
     def _setup_windows_intelmpi(self):
         I_MPI_ROOT = os.environ.get('I_MPI_ROOT', '')
-        if not I_MPI_ROOT: return
-        if not os.path.isdir(I_MPI_ROOT): return
+        if not I_MPI_ROOT:
+            return None
+        if not os.path.isdir(I_MPI_ROOT):
+            return None
         arch = platform.architecture()[0][:2]
         archdir = {'32':'ia32', '64':'intel64'}[arch]
         mpi_dir = os.path.join(I_MPI_ROOT, archdir)
-        if not os.path.isdir(mpi_dir): mpi_dir = I_MPI_ROOT
+        if not os.path.isdir(mpi_dir):
+            mpi_dir = I_MPI_ROOT
         IMPI_INC = os.path.join(mpi_dir, 'include')
         for libdir in (('lib', 'release'), ('lib',)):
             IMPI_LIB = os.path.join(mpi_dir, *libdir)
             library = os.path.join(IMPI_LIB, 'impi.lib')
-            if os.path.exists(library): break
-        if not os.path.isdir(IMPI_INC): return
-        if not os.path.isdir(IMPI_LIB): return
+            if os.path.exists(library):
+                break
+        if not os.path.isdir(IMPI_INC):
+            return None
+        if not os.path.isdir(IMPI_LIB):
+            return None
         self.library_info.update(
             include_dirs=[IMPI_INC],
             library_dirs=[IMPI_LIB],
@@ -183,16 +195,21 @@ class Config(object):
                 with winreg.OpenKey(HKLM, subkey) as key:
                     for i in range(winreg.QueryInfoKey(key)[1]):
                         name, value, type = winreg.EnumValue(key, i)
-                        if name != "Version": continue
+                        if name != "Version":
+                            continue
                         major, minor = value.split('.')[:2]
                         return (int(major), int(minor))
-            except: pass
+            except Exception:  # noqa: S110
+                pass
             return (1, 0)
         def setup_msmpi(MSMPI_INC, MSMPI_LIB):
             from os.path import join, isfile
-            ok = (MSMPI_INC and isfile(join(MSMPI_INC, 'mpi.h')) and
-                  MSMPI_LIB and isfile(join(MSMPI_LIB, 'msmpi.lib')))
-            if not ok: return False
+            ok = (
+                MSMPI_INC and isfile(join(MSMPI_INC, 'mpi.h')) and
+                MSMPI_LIB and isfile(join(MSMPI_LIB, 'msmpi.lib'))
+            )
+            if not ok:
+                return False
             major, minor = msmpi_ver()
             MSMPI_VER = hex((major<<8)|(minor&0xFF))
             MSMPI_INC = os.path.normpath(MSMPI_INC)
@@ -209,7 +226,8 @@ class Config(object):
         # Look for Microsoft MPI in the environment
         MSMPI_INC = os.environ.get('MSMPI_INC')
         MSMPI_LIB = os.environ.get('MSMPI_LIB'+arch)
-        if setup_msmpi(MSMPI_INC, MSMPI_LIB): return
+        if setup_msmpi(MSMPI_INC, MSMPI_LIB):
+            return
         # Look for Microsoft MPI v7/v6/v5 in default install path
         for ProgramFiles in ('ProgramFiles', 'ProgramFiles(x86)'):
             ProgramFiles = os.environ.get(ProgramFiles, '')
@@ -217,7 +235,8 @@ class Config(object):
             MSMPI_DIR = os.path.join(ProgramFiles, 'Microsoft SDKs', 'MPI')
             MSMPI_INC = os.path.join(MSMPI_DIR, 'Include')
             MSMPI_LIB = os.path.join(MSMPI_DIR, 'Lib', archdir)
-            if setup_msmpi(MSMPI_INC, MSMPI_LIB): return
+            if setup_msmpi(MSMPI_INC, MSMPI_LIB):
+                return
         # Look for Microsoft HPC Pack 2012 R2 in default install path
         for ProgramFiles in ('ProgramFiles', 'ProgramFiles(x86)'):
             ProgramFiles = os.environ.get(ProgramFiles, '')
@@ -225,10 +244,10 @@ class Config(object):
             MSMPI_DIR = os.path.join(ProgramFiles, 'Microsoft MPI')
             MSMPI_INC = os.path.join(MSMPI_DIR, 'Inc')
             MSMPI_LIB = os.path.join(MSMPI_DIR, 'Lib', archdir)
-            if setup_msmpi(MSMPI_INC, MSMPI_LIB): return
+            if setup_msmpi(MSMPI_INC, MSMPI_LIB):
+                return
 
         # Microsoft MPI (legacy) and others
-        from glob import glob
         ProgramFiles = os.environ.get('ProgramFiles', '')
         CCP_HOME = os.environ.get('CCP_HOME', '')
         for (name, prefix, suffix) in (
@@ -239,9 +258,10 @@ class Config(object):
             ('msmpi',    ProgramFiles, 'Microsoft HPC Pack 2008 R2'),
             ('msmpi',    ProgramFiles, 'Microsoft HPC Pack 2008'),
             ('msmpi',    ProgramFiles, 'Microsoft HPC Pack 2008 SDK'),
-            ):
+        ):
             mpi_dir = os.path.join(prefix, suffix)
-            if not mpi_dir or not os.path.isdir(mpi_dir): continue
+            if not mpi_dir or not os.path.isdir(mpi_dir):
+                continue
             define_macros = []
             include_dir = os.path.join(mpi_dir, 'include')
             library = 'mpi'
@@ -269,14 +289,16 @@ class Config(object):
 
     def setup_compiler_info(self, options, environ):
         def find_exe(cmd, path=None):
-            if not cmd: return None
+            if not cmd:
+                return None
             parts = shlex.split(cmd)
             exe, args = parts[0], parts[1:]
             if not os.path.isabs(exe) and path:
                 exe = os.path.basename(exe)
             exe = shutil.which(exe, path=path)
-            if not exe: return None
-            return ' '.join([exe]+args)
+            if not exe:
+                return None
+            return ' '.join([exe, *args])
         COMPILERS = (
             ('mpicc',   ['mpicc']),
             ('mpicxx',  ['mpicxx',  'mpic++', 'mpiCC']),
@@ -284,7 +306,7 @@ class Config(object):
             ('mpif90',  ['mpif90']),
             ('mpif77',  ['mpif77']),
             ('mpild',   []),
-            )
+        )
         #
         compiler_info = {}
         PATH = environ.get('PATH', '')
@@ -358,9 +380,10 @@ class Config(object):
         expandvars = os.path.expandvars
         library_info = type(self.library_info)()
         for k, v in parser_items:
-            if k in ('define_macros',
-                     'undef_macros',
-                     ):
+            if k in (
+                'define_macros',
+                'undef_macros',
+            ):
                 macros = [e.strip() for e in v.split(',')]
                 if k == 'define_macros':
                     for i, m in enumerate(macros):
@@ -371,24 +394,32 @@ class Config(object):
                             macro = (m, None)
                         macros[i] = macro
                 library_info[k] = macros
-            elif k in ('include_dirs',
-                       'library_dirs',
-                       'runtime_dirs',
-                       'runtime_library_dirs',
-                       ):
-                if k == 'runtime_dirs': k = 'runtime_library_dirs'
+            elif k in (
+                'include_dirs',
+                'library_dirs',
+                'rpath',
+                'runtime_dirs',
+                'runtime_library_dirs',
+            ):
+                if k in ('rpath', 'runtime_dirs'):
+                    k = 'runtime_library_dirs'
                 pathlist = [p.strip() for p in v.split(pathsep)]
-                library_info[k] = [expanduser(expandvars(p))
-                                   for p in pathlist if p]
+                library_info[k] = [
+                    expanduser(expandvars(p))
+                    for p in pathlist if p
+                ]
             elif k == 'libraries':
                 library_info[k] = [e.strip() for e in shlex.split(v)]
-            elif k in ('extra_compile_args',
-                       'extra_link_args',
-                       ):
+            elif k in (
+                'extra_compile_args',
+                'extra_link_args',
+            ):
                 library_info[k] = shlex.split(v)
             elif k == 'extra_objects':
-                library_info[k] = [expanduser(expandvars(e))
-                                   for e in shlex.split(v)]
+                library_info[k] = [
+                    expanduser(expandvars(e))
+                    for e in shlex.split(v)
+                ]
             elif hasattr(self, k):
                 library_info[k] = v.strip()
             else:
@@ -405,9 +436,10 @@ class Config(object):
         compiler_info   = self.compiler_info.copy()
         library_info = self.library_info.copy()
         for k in library_info:
-            if k in ('define_macros',
-                     'undef_macros',
-                     ):
+            if k in (
+                'define_macros',
+                'undef_macros',
+            ):
                 macros = library_info[k]
                 if k == 'define_macros':
                     for i, (m, v) in enumerate(macros):
@@ -416,10 +448,11 @@ class Config(object):
                         else:
                             macros[i] = f'{m}={v}'
                 library_info[k] = ','.join(macros)
-            elif k in ('include_dirs',
-                       'library_dirs',
-                       'runtime_library_dirs',
-                       ):
+            elif k in (
+                'include_dirs',
+                'library_dirs',
+                'runtime_library_dirs',
+            ):
                 library_info[k] = os.path.pathsep.join(library_info[k])
             elif isinstance(library_info[k], list):
                 library_info[k] = ' '.join(library_info[k])
@@ -430,10 +463,12 @@ class Config(object):
             parser = ConfigParser()
         parser.add_section(section)
         for option, value in compiler_info.items():
-            if not value: continue
+            if not value:
+                continue
             parser.set(section, option, value)
         for option, value in library_info.items():
-            if not value: continue
+            if not value:
+                continue
             parser.set(section, option, value)
         # save configuration file
         if filename is None:
@@ -456,7 +491,7 @@ if __name__ == '__main__':
     parser.add_option("--mpif90",  type="string")
     parser.add_option("--mpif77",  type="string")
     parser.add_option("--mpild",   type="string")
-    (opts, args) = parser.parse_args()
+    opts, args = parser.parse_args()
 
     cfg = Config()
     cfg.setup(opts)

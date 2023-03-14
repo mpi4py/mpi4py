@@ -156,142 +156,6 @@ metadata_extra = {
 # Extension modules
 # --------------------------------------------------------------------
 
-
-def configure_dl(ext, config_cmd):
-    from mpidistutils import log
-    log.info("checking for dlopen() availability ...")
-    dlfcn = config_cmd.check_header('dlfcn.h')
-    libdl = config_cmd.check_library('dl')
-    libs = ['dl'] if libdl else None
-    dlopen = config_cmd.check_function(
-        'dlopen', libraries=libs, decl=1, call=1,
-    )
-    if dlfcn:
-        ext.define_macros += [('HAVE_DLFCN_H', 1)]
-    if dlopen:
-        ext.define_macros += [('HAVE_DLOPEN', 1)]
-
-
-def configure_mpi(ext, config_cmd):
-    from textwrap import dedent
-    from mpidistutils import log
-    from mpidistutils import capture_stderr
-    from mpidistutils import DistutilsPlatformError
-    headers = ['stdlib.h', 'mpi.h']
-    #
-    log.info("checking for MPI compile and link ...")
-    ConfigTest = dedent("""\
-    int main(int argc, char **argv)
-    {
-      (void)MPI_Init(&argc, &argv);
-      (void)MPI_Finalize();
-      return 0;
-    }
-    """)
-    errmsg = "Cannot %s MPI programs. Check your configuration!!!"
-    ok = config_cmd.try_compile(ConfigTest, headers=headers)
-    if not ok:
-        raise DistutilsPlatformError(errmsg % "compile")
-    ok = config_cmd.try_link(ConfigTest, headers=headers)
-    if not ok:
-        raise DistutilsPlatformError(errmsg % "link")
-    #
-    log.info("checking for missing MPI functions/symbols ...")
-    impls = ("OPEN_MPI", "MSMPI_VER")
-    tests = ["defined(%s)" % macro for macro in impls]
-    tests += ["(defined(MPICH_NAME)&&(MPICH_NAME>=3))"]
-    tests += ["(defined(MPICH_NAME)&&(MPICH_NAME==2))"]
-    ConfigTest = dedent("""\
-    #if !(%s)
-    #error "Unknown MPI implementation"
-    #endif
-    """) % "||".join(tests)
-    config = os.environ.get('MPI4PY_BUILD_CONFIGURE') or None
-    if not config:
-        with capture_stderr():
-            ok = config_cmd.try_compile(ConfigTest, headers=headers)
-        config = not ok
-    if config:
-        guard = "HAVE_CONFIG_H"
-        with capture_stderr():
-            ok = config_cmd.check_macro(guard)
-        config = not ok
-        if config:
-            from mpidistutils import ConfigureMPI
-            configure = ConfigureMPI(config_cmd)
-            with capture_stderr():
-                results = configure.run()
-            configure.dump(results)
-            ext.define_macros += [(guard, 1)]
-    else:
-        for function, arglist in (
-            ('MPI_Type_create_f90_integer',   '0,(MPI_Datatype*)0'),
-            ('MPI_Type_create_f90_real',    '0,0,(MPI_Datatype*)0'),
-            ('MPI_Type_create_f90_complex', '0,0,(MPI_Datatype*)0'),
-            ('MPI_Status_c2f', '(MPI_Status*)0,(MPI_Fint*)0'),
-            ('MPI_Status_f2c', '(MPI_Fint*)0,(MPI_Status*)0'),
-        ):
-            ok = config_cmd.check_function_call(
-                function, arglist, headers=headers,
-            )
-            if not ok:
-                macro = 'PyMPI_MISSING_' + function
-                ext.define_macros += [(macro, 1)]
-    #
-    if os.name == 'posix':
-        configure_dl(ext, config_cmd)
-
-
-def configure_pyexe(exe, config_cmd):
-    from mpidistutils import sysconfig
-    if sys.platform.startswith('win'):
-        return
-    if (sys.platform == 'darwin' and
-        ('Anaconda' in sys.version or
-         'Continuum Analytics' in sys.version)):
-        py_version = sysconfig.get_python_version()
-        py_abiflags = getattr(sys, 'abiflags', '')
-        exe.libraries += ['python' + py_version + py_abiflags]
-        return
-    #
-    pyver = sys.version_info[:2]
-    cfg_vars = sysconfig.get_config_vars()
-    libraries = []
-    library_dirs = []
-    runtime_dirs = []
-    link_args = []
-    py_enable_shared = cfg_vars.get('Py_ENABLE_SHARED')
-    if pyver >= (3, 8) or not py_enable_shared:
-        py_version = sysconfig.get_python_version()
-        py_abiflags = getattr(sys, 'abiflags', '')
-        libraries = ['python' + py_version + py_abiflags]
-        if hasattr(sys, 'pypy_version_info'):
-            py_tag = py_version[0].replace('2', '')
-            libraries = ['pypy%s-c' % py_tag]
-    if sys.platform == 'darwin':
-        fwkdir = cfg_vars.get('PYTHONFRAMEWORKDIR')
-        if (fwkdir and fwkdir != 'no-framework' and
-            fwkdir in cfg_vars.get('LINKFORSHARED', '')):
-            del libraries[:]
-    #
-    libdir = shlex.split(cfg_vars.get('LIBDIR', ''))
-    libpl = shlex.split(cfg_vars.get('LIBPL', ''))
-    if py_enable_shared:
-        library_dirs += libdir
-        if sys.exec_prefix != '/usr':
-            runtime_dirs += libdir
-    else:
-        library_dirs += libdir
-        library_dirs += libpl
-    for var in ('LIBS', 'MODLIBS', 'SYSLIBS', 'LDLAST'):
-        link_args += shlex.split(cfg_vars.get(var, ''))
-    #
-    exe.libraries += libraries
-    exe.library_dirs += library_dirs
-    exe.runtime_library_dirs += runtime_dirs
-    exe.extra_link_args += link_args
-
-
 def sources():
     # mpi4py.MPI
     MPI = dict(
@@ -310,6 +174,7 @@ def sources():
 
 
 def extensions():
+    import mpidistutils
     # MPI extension module
     MPI = dict(
         name='mpi4py.MPI',
@@ -325,7 +190,7 @@ def extensions():
             ('MPICH_SKIP_MPICXX', 1),
             ('OMPI_SKIP_MPICXX', 1),
         ],
-        configure=configure_mpi,
+        configure=mpidistutils.configure_mpi,
     )
     if sys.version_info[:2] > maxknow_python:
         MPI['define_macros'].extend([
@@ -341,6 +206,7 @@ def extensions():
 
 
 def executables():
+    import mpidistutils
     # MPI-enabled Python interpreter
     pyexe = dict(
         name='python-mpi',
@@ -348,7 +214,7 @@ def executables():
         package='mpi4py',
         dest_dir='bin',
         sources=['src/python.c'],
-        configure=configure_pyexe,
+        configure=mpidistutils.configure_pyexe,
     )
     #
     return [pyexe]

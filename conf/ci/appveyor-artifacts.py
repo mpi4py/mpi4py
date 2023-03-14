@@ -25,7 +25,7 @@ ACCOUNT = options.account
 BRANCH  = options.branch
 
 branch_url = APIURL + '/projects/' + ACCOUNT + "/branch/" + BRANCH
-branch = requests.get(branch_url).json()
+branch = requests.get(branch_url, timeout=60).json()
 jobs = branch['build']['jobs']
 jobids = [job['jobId'] for job in jobs]
 
@@ -34,13 +34,13 @@ if options.verbose:
           "account={} branch={}".format(ACCOUNT, BRANCH))
 for jobid in jobids:
     artifacts_url = APIURL + '/buildjobs/' + jobid + '/artifacts'
-    artifacts = requests.get(artifacts_url).json()
+    artifacts = requests.get(artifacts_url, timeout=60).json()
     filenames = [a['fileName'] for a in artifacts]
     for filename in filenames:
         download_url = artifacts_url + '/' + filename
         if options.verbose:
             print(download_url)
         if options.download:
-            data = requests.get(download_url).content
+            data = requests.get(download_url, timeout=60).content
             with open(os.path.basename(filename), "wb") as f:
                 f.write(data)

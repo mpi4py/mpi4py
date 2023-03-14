@@ -5,3 +5,4 @@ flake8-bugbear
 flake8-docstrings
 flake8-use-fstring
 pylint
+ruff

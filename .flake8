@@ -1,0 +1,6 @@
+[flake8]
+ignore =
+per-file-ignores =
+  conf/*: D
+  docs/*: D,W503
+  src/mpi4py/futures/_lib.py: D

@@ -1,0 +1,48 @@
+src = ["src"]
+target-version = "py37"
+
+select = [
+"A",
+"B",
+"C",
+"D",
+"E",
+"F",
+"G",
+"I",
+"Q",
+"S",
+"W",
+"UP",
+"ISC",
+"PIE",
+#"PTH",
+"RET",
+"RUF",
+#"TRY",
+"YTT",
+]
+
+ignore = [
+"A001",
+"A002",
+"A003",
+"C901",
+"I001",
+"Q000",
+"UP006",
+"UP007",
+"UP036",
+"RET504",
+"RET505",
+]
+
+[per-file-ignores]
+"conf/*" = ["D",]
+"demo/*" = ["D",]
+"docs/*" = ["D",]
+"test/*" = ["D",]
+"*.pyi"  = ["D", "E501", "E701"]
+
+[pydocstyle]
+convention = "pep257"

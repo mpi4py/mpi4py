@@ -206,7 +206,8 @@ def stubgen_class(cls, done=None):
 
     leftovers = [name for name in keys if
                  name not in done and name not in skip]
-    assert not leftovers, f"leftovers: {leftovers}"
+    if leftovers:
+        raise RuntimeError(f"leftovers: {leftovers}")
 
     lines.level -= 1
     return lines
@@ -290,7 +291,8 @@ def stubgen_module(module, done=None):
 
     leftovers = [name for name in keys if
                  name not in done and name not in skip]
-    assert not leftovers, f"leftovers: {leftovers}"
+    if leftovers:
+        raise RuntimeError(f"leftovers: {leftovers}")
     return lines
 
 
