@@ -1,0 +1,7 @@
+# Add Intel MPI to Python 3.8+ DLL search path on Windows
+import os; I_MPI_ROOT = os.getenv('I_MPI_ROOT')
+import os; library_kind = os.getenv('library_kind') or 'release'
+import os; add_dll_directory = getattr(os, 'add_dll_directory', None)
+import os; d = I_MPI_ROOT and os.path.join(I_MPI_ROOT, 'bin', library_kind)
+import os; d = d and os.path.exists(d) and os.path.isdir(d) and d
+import os; d and add_dll_directory and add_dll_directory(d)

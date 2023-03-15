@@ -12,6 +12,17 @@ get_filename_component(TOPDIR ${SRCDIR} DIRECTORY)
 set(SKBUILD "${SKBUILD}")
 
 
+# intelmpi.pth
+include(CheckSymbolExists)
+set(CMAKE_REQUIRED_INCLUDES ${MPI_C_INCLUDE_PATH})
+check_symbol_exists(I_MPI_VERSION "mpi.h" HAVE_I_MPI_VERSION)
+if (HAVE_I_MPI_VERSION AND WIN32)
+  set(intelmpi.pth "${BINDIR}/intelmpi.pth")
+  configure_file(${TOPDIR}/conf/intelmpi.pth ${intelmpi.pth} COPYONLY)
+  install(FILES ${intelmpi.pth} DESTINATION src)
+endif()
+
+
 # mpi4py/mpi.cfg
 set(mpi.cfg "${BINDIR}/mpi.cfg")
 set(config "[mpi]\n")
