@@ -165,7 +165,8 @@ class Config:
         if not os.path.isdir(mpi_dir):
             mpi_dir = I_MPI_ROOT
         IMPI_INC = os.path.join(mpi_dir, 'include')
-        for libdir in (('lib', 'release'), ('lib',)):
+        lib_kind = os.environ.get('library_kind') or 'release'
+        for libdir in (('lib', lib_kind), ('lib',)):
             IMPI_LIB = os.path.join(mpi_dir, *libdir)
             library = os.path.join(IMPI_LIB, 'impi.lib')
             if os.path.exists(library):

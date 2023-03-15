@@ -10,7 +10,6 @@ Python bindings for MPI
 import os
 import sys
 import glob
-import shlex
 
 topdir = os.path.abspath(os.path.dirname(__file__))
 sys.path.insert(0, os.path.join(topdir, 'conf'))
@@ -290,6 +289,10 @@ def run_skbuild():
         cmake_source_dir = 'src/mpi4py',
     )
     metadata.update(metadata_extra)
+    #
+    package_info['package_data']['mpi4py'].append('../*.pth')
+    builder_args['cmake_process_manifest_hook'] = \
+        lambda fl: [f for f in fl if not f.endswith('.pth')]
     #
     setup_args = dict(i for d in (
         metadata,
