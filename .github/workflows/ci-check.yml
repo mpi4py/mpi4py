@@ -1,0 +1,150 @@
+name: ci-check
+
+on:
+  schedule:
+    - cron: '0 3 * * 0'
+  workflow_call:
+    inputs:
+      py:
+        description: 'Python version'
+        required: false
+        default: 3
+        type: string
+  workflow_dispatch:
+    inputs:
+      py:
+        description: 'Python version'
+        required: true
+        default: 3
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+
+  conf:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Setup Python (${{ github.event.inputs.py || 3 }})
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ github.event.inputs.py || 3 }}
+
+    - name: Install Python packages (build)
+      run:  python -m pip install --upgrade cython
+
+    - name: Build package
+      run:  python setup.py build
+      env:
+        MPICFG: nompi
+        CFLAGS: -O0
+
+    - name: Check build configuration
+      run:  |
+        # check nompi config.h
+        cp "src/lib-mpi/config/config.h" "conf/nompi/config/config.h"
+        git diff --exit-code
+
+    - name: Check code generation
+      run:  |
+        python conf/mpiapigen.py
+        git diff --exit-code
+
+  lint:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Setup Python (${{ github.event.inputs.py || 3 }})
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ github.event.inputs.py || 3 }}
+
+    - name: Install package for linting
+      run:  python -m pip install .
+      env:
+        MPICFG: nompi-fast
+        CFLAGS: -O0
+
+    - name: Install Python packages (lint)
+      run:  python -m pip install --upgrade -r conf/requirements-lint.txt
+
+    - name: ruff
+      run:  ruff conf docs src
+
+    - name: flake8
+      run:  flake8 src/mpi4py
+
+    - name: flake8 (testsuite)
+      run:  flake8 --select=A test
+
+    - name: pylint
+      run:  pylint mpi4py
+
+  type:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        py:
+          - "3.7"
+          - "3.8"
+          - "3.9"
+          - "3.10"
+          - "3.11"
+
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Setup Python (${{ matrix.py }})
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.py }}
+
+    - name: Install package for typing
+      run:  python -m pip install .
+      env:
+        MPICFG: nompi-fast
+        CFLAGS: -O0
+
+    - name: Check stub generation
+      run:  |
+        python conf/mpistubgen.py
+        git diff --exit-code
+
+    - name: Install Python packages (type)
+      run:  python -m pip install --upgrade -r conf/requirements-type.txt
+
+    - name: mypy (typecheck)
+      run:  mypy -p mpi4py
+
+    - name: mypy (stubtest)
+      run:  stubtest mpi4py
+              ${{ matrix.py == '3.8' && '$(
+              echo mpi4py.*.Executor.submit > allowlist &&
+              echo --allowlist=allowlist )' || '' }}

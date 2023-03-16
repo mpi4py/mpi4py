@@ -24,7 +24,7 @@ jobs:
            latexmk \
            texinfo
 
-    - name: Setup Python ${{ matrix.py }}
+    - name: Setup Python
       uses: actions/setup-python@v4
       with:
         python-version: 3

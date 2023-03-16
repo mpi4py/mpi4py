@@ -1,0 +1,104 @@
+name: ci-test
+
+on:
+  schedule:
+    - cron: '0 3 * * 0'
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-22.04
+          - macos-12
+          - windows-2022
+        mpi:
+          - mpich
+          - openmpi
+          - msmpi
+        py:
+          - "3.7"
+          - "3.8"
+          - "3.9"
+          - "3.10"
+          - "3.11"
+          - "3.12-dev"
+          - "pypy-3.7"
+          - "pypy-3.8"
+          - "pypy-3.9"
+        exclude:
+          - os: ubuntu-22.04
+            mpi: msmpi
+          - os: macos-12
+            mpi: msmpi
+          - os: windows-2022
+            mpi: mpich
+          - os: windows-2022
+            mpi: openmpi
+
+    steps:
+
+    - name: Configure hostname
+      if:   runner.os == 'Linux' || runner.os == 'macOS'
+      run:  echo 127.0.0.1 `hostname` | sudo tee -a /etc/hosts > /dev/null
+
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Setup MPI (${{ matrix.mpi }})
+      uses: mpi4py/setup-mpi@v1
+      with:
+        mpi: ${{ matrix.mpi }}
+
+    - name: Setup Python (${{ matrix.py }})
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.py }}
+        architecture: x64
+
+    - name: Install Python packages (build)
+      run:  python -m pip install --upgrade setuptools pip
+
+    - name: Build package
+      run:  python -m pip wheel -vvv --wheel-dir=dist .
+    - name: Upload package artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: mpi4py-${{ matrix.os }}-${ {matrix.mpi }}
+        path: dist/mpi4py-*.whl
+
+    - name: Install package for testing
+      run:  python -m pip install mpi4py
+              --verbose --no-index --find-links=dist
+
+    - name: Install Python packages (test)
+      run:  python -m pip install --upgrade -r conf/requirements-test.txt
+      if:   (runner.os == 'Linux' || !startsWith(matrix.py, 'pypy-')) && !endsWith(matrix.py, '-dev')
+
+    - name: Test mpi4py (np=1)
+      run:  mpiexec -n 1 python test/runtests.py -v
+    - name: Test mpi4py (np=2)
+      run:  mpiexec -n 2 python test/runtests.py -v -f -e spawn
+
+    - name: Test mpi4py.futures (np=1)
+      run:  mpiexec -n 1 python demo/futures/test_futures.py -v
+    - name: Test mpi4py.futures (np=2)
+      run:  mpiexec -n 2 python demo/futures/test_futures.py -v
+
+    - name: Test mpi4py.run
+      run:  python demo/test-run/test_run.py -v
+    - name: Test init-fini
+      run:  bash demo/init-fini/run.sh
+    - name: Test check-mpiexec
+      run:  bash demo/check-mpiexec/run.sh
+
+    - name: Uninstall package after testing
+      run:  python -m pip uninstall --yes mpi4py
