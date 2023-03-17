@@ -76,6 +76,12 @@ jobs:
         MPI4PY_BUILD_BACKEND: skbuild
         MPI4PY_LOCAL_VERSION: ${{ matrix.mpi }}
 
+    - name: Upload wheel
+      uses: actions/upload-artifact@v3
+      with:
+        name: mpi4py-skbuild-${{ matrix.os }}
+        path: dist/mpi4py-*.whl
+
     - name: Install wheel
       run:  python -m pip install mpi4py
               --verbose --no-index --find-links=dist
@@ -90,13 +96,24 @@ jobs:
       run:  python -m pip uninstall mpi4py
               --verbose --yes
 
-    - name: Upload wheel
-      uses: actions/upload-artifact@v3
-      with:
-        name: mpi4py-skbuild-${{ matrix.os }}
-        path: dist/mpi4py-*.whl
+    - name: Install package (pip)
+      run:  python -m pip install .
+              --verbose
+      env:
+        MPI4PY_BUILD_BACKEND: skbuild
+        MPI4PY_LOCAL_VERSION: ${{ matrix.mpi }}
 
-  meson:
+    - name: Test package after install (test_package)
+      run:  mpiexec -n 1 python test/main.py test_package
+
+    - name: Test package after install (helloworld)
+      run:  mpiexec -n 2 python -m mpi4py.bench helloworld
+
+    - name: Uninstall package after testing
+      run:  python -m pip uninstall mpi4py
+              --verbose --yes
+
+  mesonpy:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -137,8 +154,14 @@ jobs:
     - name: Build sdist and wheel
       run:  python -m build
       env:
+        MPI4PY_BUILD_BACKEND: mesonpy
         MPI4PY_LOCAL_VERSION: ${{ matrix.mpi }}
-        CC: mpicc
+
+    - name: Upload wheel
+      uses: actions/upload-artifact@v3
+      with:
+        name: mpi4py-meson-${{ matrix.os }}
+        path: dist/mpi4py-*.whl
 
     - name: Install wheel
       run:  python -m pip install mpi4py
@@ -154,8 +177,19 @@ jobs:
       run:  python -m pip uninstall mpi4py
               --verbose --yes
 
-    - name: Upload wheel
-      uses: actions/upload-artifact@v3
-      with:
-        name: mpi4py-meson-${{ matrix.os }}
-        path: dist/mpi4py-*.whl
+    - name: Install package (pip)
+      run:  python -m pip install .
+              --verbose
+      env:
+        MPI4PY_BUILD_BACKEND: mesonpy
+        MPI4PY_LOCAL_VERSION: ${{ matrix.mpi }}
+
+    - name: Test package after install (test_package)
+      run:  mpiexec -n 1 python test/main.py test_package
+
+    - name: Test package after install (helloworld)
+      run:  mpiexec -n 2 python -m mpi4py.bench helloworld
+
+    - name: Uninstall package after testing
+      run:  python -m pip uninstall mpi4py
+              --verbose --yes
