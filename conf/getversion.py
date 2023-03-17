@@ -11,7 +11,7 @@ def version():
     version = m.groups()[0]
     local_version = os.environ.get('MPI4PY_LOCAL_VERSION')
     if local_version:
-        version = f'{version}+{local_version}'
+        version = '{version}+{local_version}'.format(**vars())
     return version
 
 
