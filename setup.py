@@ -301,22 +301,15 @@ def run_skbuild():
 # --------------------------------------------------------------------
 
 
-def get_backend_name(default='default'):
-    return os.environ.get(
-        'MPI4PY_BUILD_BACKEND', default
-    ).lower().replace('_', '-')
-
-
 def main():
-    backend = get_backend_name()
-    if backend == 'default':
+    import builder
+    name = builder.get_backend_name()
+    if name == 'setuptools':
         run_setup()
-    elif backend in ('setuptools', 'distutils'):
-        run_setup()
-    elif backend in ('scikit-build', 'skbuild'):
+    elif name == 'scikit-build':
         run_skbuild()
     else:
-        sys.exit("Unknown build backend '{}'".format(backend))
+        sys.exit("Unknown build backend " + repr(name))
 
 
 if __name__ == '__main__':
