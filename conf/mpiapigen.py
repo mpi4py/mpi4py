@@ -368,7 +368,7 @@ class Generator:
                 nodelist.append(node)
                 break
         if not args:
-            warnings.warn('unmatched line:\n%s' % line)
+            warnings.warn('unmatched line:\n%s' % line, stacklevel=1)
 
     def __iter__(self):
         return iter(self.nodes)

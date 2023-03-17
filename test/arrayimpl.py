@@ -27,7 +27,7 @@ try:
         try:
             warnings.warn(
                 'To test Numba GPU arrays, use Numba v0.48.0+.',
-                RuntimeWarning,
+                RuntimeWarning, stacklevel=1,
             )
         except RuntimeWarning:
             pass
