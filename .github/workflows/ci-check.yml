@@ -96,7 +96,7 @@ jobs:
       run:  ruff conf docs src
 
     - name: flake8
-      run:  flake8 src/mpi4py
+      run:  flake8 docs src
 
     - name: flake8 (testsuite)
       run:  flake8 --select=A test

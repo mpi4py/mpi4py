@@ -1,9 +1,7 @@
-# ruff: noqa: S101
 import os
 import sys
 import inspect
-from textwrap import dedent
-from textwrap import indent
+import textwrap
 
 
 def is_cyfunction(obj):
@@ -75,7 +73,7 @@ class Lines(list):
         if lines is None:
             return
         if isinstance(lines, str):
-            lines = dedent(lines).strip().split("\n")
+            lines = textwrap.dedent(lines).strip().split('\n')
         indent = self.INDENT * self.level
         for line in lines:
             self.append(indent + line)
@@ -90,36 +88,36 @@ def signature(obj):
 def docstring(obj):
     doc = obj.__doc__
     doc = doc.split('\n', 1)[1]
-    doc = dedent(doc).strip()
+    doc = textwrap.dedent(doc).strip()
     doc = f'"""{doc}"""'
-    doc = indent(doc, Lines.INDENT)
+    doc = textwrap.indent(doc, Lines.INDENT)
     return doc
 
 
-def apidoc_data(constant):
+def visit_constant(constant):
     name, value = constant
     typename = type(value).__name__
-    kind = "Constant" if isinstance(value, int) else "Object"
+    kind = "Constant" if isinstance(value, (str, int, float)) else "Object"
     init = f"_def({typename}, '{name}')"
     doc = f"#: {kind} ``{name}`` of type :class:`{typename}`"
     return f"{name}: {typename} = {init}  {doc}\n"
 
 
-def apidoc_function(function):
+def visit_function(function):
     sig = signature(function)
     doc = docstring(function)
     body = Lines.INDENT + "..."
     return f"def {sig}:\n{doc}\n{body}\n"
 
 
-def apidoc_method(method):
+def visit_method(method):
     sig = signature(method)
     doc = docstring(method)
     body = Lines.INDENT + "..."
     return f"def {sig}:\n{doc}\n{body}\n"
 
 
-def apidoc_datadescr(datadescr, name=None):
+def visit_datadescr(datadescr, name=None):
     sig = signature(datadescr)
     doc = docstring(datadescr)
     name = sig.split(':')[0].strip()
@@ -129,18 +127,18 @@ def apidoc_datadescr(datadescr, name=None):
     return f"@property\ndef {sig}:\n{doc}\n{body}\n"
 
 
-def apidoc_property(prop, name=None):
+def visit_property(prop, name=None):
     sig = signature(prop.fget)
     name = name or prop.fget.__name__
     type = sig.rsplit('->', 1)[-1].strip()
     sig = f"{name}(self) -> {type}"
     doc = f'"""{prop.__doc__}"""'
-    doc = indent(doc, Lines.INDENT)
+    doc = textwrap.indent(doc, Lines.INDENT)
     body = Lines.INDENT + "..."
     return f"@property\ndef {sig}:\n{doc}\n{body}\n"
 
 
-def apidoc_constructor(cls, name='__init__', args=None):
+def visit_constructor(cls, name='__init__', args=None):
     init = (name == '__init__')
     argname = cls.__mro__[-2].__name__.lower()
     argtype = cls.__name__
@@ -154,9 +152,10 @@ def apidoc_constructor(cls, name='__init__', args=None):
     return f"def {sig}:\n{body}"
 
 
-def apidoc_class(cls, done=None):
+def visit_class(cls, done=None):
     skip = {
         '__doc__',
+        '__dict__',
         '__module__',
         '__weakref__',
         '__pyx_vtable__',
@@ -173,13 +172,13 @@ def apidoc_class(cls, done=None):
         '__index__': "__int__(self) -> int",
         '__str__': "__str__(self) -> str",
         '__repr__': "__repr__(self) -> str",
-        '__eq__': "__eq__(self, other: Any) -> bool",
-        '__ne__': "__ne__(self, other: Any) -> bool",
+        '__eq__': "__eq__(self, other: object) -> bool",
+        '__ne__': "__ne__(self, other: object) -> bool",
     }
-    constructor = {
+    constructor = (
         '__new__',
         '__init__',
-    }
+    )
 
     override = OVERRIDE.get(cls.__name__, {})
     done = set() if done is None else done
@@ -201,7 +200,7 @@ def apidoc_class(cls, done=None):
             done.update(constructor)
             args = sig.strip().split('->', 1)[0].strip()
             args = args[args.index('('):][1:-1]
-            lines.add = apidoc_constructor(cls, name, args)
+            lines.add = visit_constructor(cls, name, args)
 
     for name in constructor:
         if name in done:
@@ -212,7 +211,7 @@ def apidoc_class(cls, done=None):
             break
         if name in cls.__dict__:
             done.update(constructor)
-            lines.add = apidoc_constructor(cls, name)
+            lines.add = visit_constructor(cls, name)
             break
 
     if '__hash__' in cls.__dict__:
@@ -239,11 +238,6 @@ def apidoc_class(cls, done=None):
             lines.add = f"def {sig}: ..."
             continue
 
-        if name in constructor:
-            done.update(constructor)
-            lines.add = apidoc_constructor(cls)
-            continue
-
         attr = getattr(cls, name)
 
         if is_method(attr):
@@ -254,30 +248,31 @@ def apidoc_class(cls, done=None):
                     lines.add = "@classmethod"
                 elif is_staticmethod(obj):
                     lines.add = "@staticmethod"
-                lines.add = apidoc_method(attr)
+                lines.add = visit_method(attr)
             elif False:
                 lines.add = f"{name} = {attr.__name__}"
             continue
 
         if is_datadescr(attr):
             done.add(name)
-            lines.add = apidoc_datadescr(attr)
+            lines.add = visit_datadescr(attr)
             continue
 
         if is_property(attr):
             done.add(name)
-            lines.add = apidoc_property(attr, name)
+            lines.add = visit_property(attr, name)
             continue
 
     leftovers = [name for name in keys if
                  name not in done and name not in skip]
-    assert not leftovers, f"leftovers: {leftovers}"
+    if leftovers:
+        raise RuntimeError(f"leftovers: {leftovers}")
 
     lines.level -= 1
     return lines
 
 
-def apidoc_module(module, done=None):
+def visit_module(module, done=None):
     skip = {
         '__doc__',
         '__name__',
@@ -286,7 +281,6 @@ def apidoc_module(module, done=None):
         '__file__',
         '__package__',
         '__builtins__',
-        '__pyx_capi__',
     }
 
     done = set() if done is None else done
@@ -309,14 +303,14 @@ def apidoc_module(module, done=None):
             continue
         if cls.__module__ == module.__name__:
             done.add(name)
-            lines.add = apidoc_class(cls)
+            lines.add = visit_class(cls)
             lines.add = ""
     for name, value in constants:
         done.add(name)
         if name in OVERRIDE:
             lines.add = OVERRIDE[name]
         else:
-            lines.add = apidoc_data((name, value))
+            lines.add = visit_constant((name, value))
     if constants:
         lines.add = ""
 
@@ -327,7 +321,7 @@ def apidoc_module(module, done=None):
 
         if is_class(value):
             done.add(name)
-            lines.add = apidoc_class(value)
+            lines.add = visit_class(value)
             lines.add = ""
             instances = [
                 (k, getattr(module, k)) for k in keys
@@ -338,7 +332,7 @@ def apidoc_module(module, done=None):
             ]
             for attrname, attrvalue in instances:
                 done.add(attrname)
-                lines.add = apidoc_data((attrname, attrvalue))
+                lines.add = visit_constant((attrname, attrvalue))
             if instances:
                 lines.add = ""
             continue
@@ -346,7 +340,7 @@ def apidoc_module(module, done=None):
         if is_function(value):
             done.add(name)
             if name == value.__name__:
-                lines.add = apidoc_function(value)
+                lines.add = visit_function(value)
             else:
                 lines.add = f"{name} = {value.__name__}"
             continue
@@ -360,16 +354,38 @@ def apidoc_module(module, done=None):
         if name in OVERRIDE:
             lines.add = OVERRIDE[name]
         else:
-            lines.add = apidoc_data((name, value))
+            lines.add = visit_constant((name, value))
 
     leftovers = [name for name in keys if
                  name not in done and name not in skip]
-    assert not leftovers, f"leftovers: {leftovers}"
+    if leftovers:
+        raise RuntimeError(f"leftovers: {leftovers}")
     return lines
 
 
 IMPORTS = """
 from __future__ import annotations
+from typing import (
+    Any,
+    Union,
+    Optional,
+    NoReturn,
+    Final,
+    Literal,
+)
+from typing import (
+    Callable,
+    Hashable,
+    Iterable,
+    Iterator,
+    Sequence,
+    Mapping,
+)
+from typing import (
+    Tuple,
+    List,
+    Dict,
+)
 """
 
 HELPERS = """
@@ -433,59 +449,40 @@ OVERRIDE = {
             "-> None: ..."),
         '__delitem__': None,
     },
+    '__pyx_capi__': None,
     '_typedict': "_typedict: Dict[str, Datatype] = {}",
     '_typedict_c': "_typedict_c: Dict[str, Datatype] = {}",
     '_typedict_f': "_typedict_f: Dict[str, Datatype] = {}",
     '_keyval_registry': None,
 }
-
-ConstantTypes = (
-    'BottomType',
-    'InPlaceType',
-)
-for cls in ConstantTypes:
-    OVERRIDE[cls] = {
+OVERRIDE.update({
+    subtype: {
         '__new__': (
-            f"def __new__(cls) -> {cls}:\n"
-            f"    return super().__new__({cls})"),
+            f"def __new__(cls) -> {subtype}:\n"
+            f"    return super().__new__({subtype})"),
         '__repr__': "def __repr__(self) -> str: return self._name",
     }
+    for subtype in (
+        'BottomType',
+        'InPlaceType',
+    )
+})
 
 TYPING = """
-from typing import (
-    Any,
-    Union,
-    Literal,
-    Optional,
-    NoReturn,
-    Final,
-)
-from typing import (
-    Callable,
-    Hashable,
-    Iterable,
-    Iterator,
-    Sequence,
-    Mapping,
-)
-from typing import (
-    Tuple,
-    List,
-    Dict,
-)
 from .typing import *
 """
 
 
-def apidoc_mpi4py_MPI(done=None):
-    from mpi4py import MPI
+def visit_mpi4py_MPI(done=None):
+    from mpi4py import MPI as module
     lines = Lines()
-    lines.add = f'"""{MPI.__doc__}"""'
+    lines.add = f'"""{module.__doc__}"""'
+    lines.add = "# flake8: noqa"
     lines.add = IMPORTS
     lines.add = ""
     lines.add = HELPERS
     lines.add = ""
-    lines.add = apidoc_module(MPI)
+    lines.add = visit_module(module)
     lines.add = ""
     lines.add = TYPING
     return lines
@@ -495,7 +492,7 @@ def generate(filename):
     dirname = os.path.dirname(filename)
     os.makedirs(dirname, exist_ok=True)
     with open(filename, 'w') as f:
-        for line in apidoc_mpi4py_MPI():
+        for line in visit_mpi4py_MPI():
             print(line, file=f)
 
 
@@ -516,14 +513,14 @@ _sys_modules = {}
 
 def replace_module(module):
     name = module.__name__
-    assert name not in _sys_modules
+    assert name not in _sys_modules  # noqa: S101
     _sys_modules[name] = sys.modules[name]
     sys.modules[name] = module
 
 
 def restore_module(module):
     name = module.__name__
-    assert name in _sys_modules
+    assert name in _sys_modules  # noqa: S101
     sys.modules[name] = _sys_modules[name]
 
 
