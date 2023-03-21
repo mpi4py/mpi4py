@@ -12,10 +12,6 @@ cdef Iterator
 cdef Sequence
 cdef Mapping
 
-cdef Tuple
-cdef List
-cdef Dict
-
 cdef PathLike
 
 cdef Buffer

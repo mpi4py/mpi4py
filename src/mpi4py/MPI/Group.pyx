@@ -56,7 +56,7 @@ cdef class Group:
         Group group1: Group,
         ranks1: Sequence[int],
         Group group2: Optional[Group] = None,
-    ) -> List[int]:
+    ) -> list[int]:
         """
         Translate the ranks of processes in
         one group to those in another group
@@ -159,10 +159,10 @@ cdef class Group:
         CHKERR( MPI_Group_excl(self.ob_mpi, n, iranks, &group.ob_mpi) )
         return group
 
-    def Range_incl(self, ranks: Sequence[Tuple[int, int, int]]) -> Self:
+    def Range_incl(self, ranks: Sequence[tuple[int, int, int]]) -> Self:
         """
-        Create a new group from ranges of
-        of ranks in an existing group
+        Create a new group from ranges
+        of members in an existing group
         """
         cdef int *p = NULL, (*ranges)[3]# = NULL ## XXX cython fails
         ranges = NULL
@@ -175,10 +175,10 @@ cdef class Group:
         CHKERR( MPI_Group_range_incl(self.ob_mpi, n, ranges, &group.ob_mpi) )
         return group
 
-    def Range_excl(self, ranks: Sequence[Tuple[int, int, int]]) -> Self:
+    def Range_excl(self, ranks: Sequence[tuple[int, int, int]]) -> Self:
         """
         Create a new group by excluding ranges
-        of processes from an existing group
+        of members from an existing group
         """
         cdef int *p = NULL, (*ranges)[3]# = NULL ## XXX cython fails
         ranges = NULL

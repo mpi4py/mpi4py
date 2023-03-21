@@ -93,7 +93,7 @@ cdef class Request:
         cls,
         requests: Sequence[Request],
         Status status: Optional[Status] = None,
-    ) -> Tuple[int, bool]:
+    ) -> tuple[int, bool]:
         """
         Test for completion of any previously initiated request
         """
@@ -116,7 +116,7 @@ cdef class Request:
     def Waitall(
         cls,
         requests: Sequence[Request],
-        statuses: Optional[List[Status]] = None,
+        statuses: Optional[list[Status]] = None,
     ) -> Literal[True]:
         """
         Wait for all previously initiated requests to complete
@@ -138,7 +138,7 @@ cdef class Request:
     def Testall(
         cls,
         requests: Sequence[Request],
-        statuses: Optional[List[Status]] = None,
+        statuses: Optional[list[Status]] = None,
     ) -> bool:
         """
         Test for completion of all previously initiated requests
@@ -161,8 +161,8 @@ cdef class Request:
     def Waitsome(
         cls,
         requests: Sequence[Request],
-        statuses: Optional[List[Status]] = None,
-    ) -> Optional[List[int]]:
+        statuses: Optional[list[Status]] = None,
+    ) -> Optional[list[int]]:
         """
         Wait for some previously initiated requests to complete
         """
@@ -191,8 +191,8 @@ cdef class Request:
     def Testsome(
         cls,
         requests: Sequence[Request],
-        statuses: Optional[List[Status]] = None,
-    ) -> Optional[List[int]]:
+        statuses: Optional[list[Status]] = None,
+    ) -> Optional[list[int]]:
         """
         Test for completion of some previously initiated requests
         """
@@ -260,7 +260,7 @@ cdef class Request:
     def test(
         self,
             Status status: Optional[Status] = None,
-    ) -> Tuple[bool, Optional[Any]]:
+    ) -> tuple[bool, Optional[Any]]:
         """
         Test for the completion of a send or receive
         """
@@ -286,7 +286,7 @@ cdef class Request:
         cls,
         requests: Sequence[Request],
         Status status: Optional[Status] = None
-    ) -> Tuple[int, Any]:
+    ) -> tuple[int, Any]:
         """
         Wait for any previously initiated request to complete
         """
@@ -299,7 +299,7 @@ cdef class Request:
         cls,
         requests: Sequence[Request],
         Status status: Optional[Status] = None,
-    ) -> Tuple[int, bool, Optional[Any]]:
+    ) -> tuple[int, bool, Optional[Any]]:
         """
         Test for completion of any previously initiated request
         """
@@ -312,8 +312,8 @@ cdef class Request:
     def waitall(
         cls,
         requests: Sequence[Request],
-        statuses: Optional[List[Status]] = None,
-    ) -> List[Any]:
+        statuses: Optional[list[Status]] = None,
+    ) -> list[Any]:
         """
         Wait for all previously initiated requests to complete
         """
@@ -324,8 +324,8 @@ cdef class Request:
     def testall(
         cls,
         requests: Sequence[Request],
-        statuses: Optional[List[Status]] = None
-    ) -> Tuple[bool, Optional[List[Any]]]:
+        statuses: Optional[list[Status]] = None
+    ) -> tuple[bool, Optional[list[Any]]]:
         """
         Test for completion of all previously initiated requests
         """
@@ -337,8 +337,8 @@ cdef class Request:
     def waitsome(
         cls,
         requests: Sequence[Request],
-        statuses: Optional[List[Status]] = None,
-    ) -> Tuple[Optional[List[int]], Optional[List[Any]]]:
+        statuses: Optional[list[Status]] = None,
+    ) -> tuple[Optional[list[int]], Optional[list[Any]]]:
         """
         Wait for some previously initiated requests to complete
         """
@@ -348,8 +348,8 @@ cdef class Request:
     def testsome(
         cls,
         requests: Sequence[Request],
-        statuses: Optional[List[Status]] = None,
-    ) -> Tuple[Optional[List[int]], Optional[List[Any]]]:
+        statuses: Optional[list[Status]] = None,
+    ) -> tuple[Optional[list[int]], Optional[list[Any]]]:
         """
         Test for completion of some previously initiated requests
         """
@@ -379,7 +379,7 @@ cdef class Prequest(Request):
         with nogil: CHKERR( MPI_Start(&self.ob_mpi) )
 
     @classmethod
-    def Startall(cls, requests: List[Prequest]) -> None:
+    def Startall(cls, requests: list[Prequest]) -> None:
         """
         Start a collection of persistent requests
         """
@@ -454,8 +454,8 @@ cdef class Grequest(Request):
         query_fn: Callable[..., None],
         free_fn: Callable[..., None],
         cancel_fn: Callable[..., None],
-        args: Optional[Tuple[Any]] = None,
-        kwargs: Optional[Dict[str, Any]] = None,
+        args: Optional[tuple[Any]] = None,
+        kwargs: Optional[dict[str, Any]] = None,
     ) -> Grequest:
         """
         Create and return a user-defined request

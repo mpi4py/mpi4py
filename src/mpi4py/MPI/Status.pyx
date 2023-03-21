@@ -25,7 +25,7 @@ cdef class Status:
     def __reduce__(self) -> tuple[Any, tuple[Any, ...], dict[str, Any]]:
         return (__newobj__, (type(self),), self.__getstate__())
 
-    def __getstate__(self) -> Dict[str, int]:
+    def __getstate__(self) -> dict[str, int]:
         cdef dict state = {
             'source': self.Get_source(),
             'tag': self.Get_tag(),
@@ -41,7 +41,7 @@ cdef class Status:
             pass
         return state
 
-    def __setstate__(self, state: Dict[str, int]) -> None:
+    def __setstate__(self, state: dict[str, int]) -> None:
         self.Set_source(state['source'])
         self.Set_tag(state['tag'])
         self.Set_error(state['error'])
@@ -181,7 +181,7 @@ cdef class Status:
     # Fortran Handle
     # --------------
 
-    def py2f(self) -> List[int]:
+    def py2f(self) -> list[int]:
         """
         """
         cdef Status status = <Status> self
@@ -193,7 +193,7 @@ cdef class Status:
         return [f_status[i] for i in range(n)]
 
     @classmethod
-    def f2py(cls, arg: List[int]) -> Self:
+    def f2py(cls, arg: list[int]) -> Self:
         """
         """
         cdef Status status = <Status>New(cls)

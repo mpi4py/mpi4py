@@ -152,8 +152,32 @@ def _patch_domain_python():
 def _setup_autodoc(app):
     from sphinx.ext import autodoc
     from sphinx.ext import autosummary
-    from sphinx.util.typing import restify
+    from sphinx.util import inspect
+    from sphinx.util import typing
     from sphinx.locale import _
+
+    #
+
+    def stringify_annotation(annotation, mode='fully-qualified-except-typing'):
+        qualname = getattr(annotation, '__qualname__', '')
+        module = getattr(annotation, '__module__', '')
+        args = getattr(annotation, '__args__', None)
+        if module == 'builtins' and qualname and args is not None:
+            args = ', '.join(stringify_annotation(a, mode) for a in args)
+            return f'{qualname}[{args}]'
+        return stringify_annotation_orig(annotation, mode)
+
+    try:
+        stringify_annotation_orig = typing.stringify_annotation
+        inspect.stringify_annotation = stringify_annotation
+        typing.stringify_annotation = stringify_annotation
+        autodoc.stringify_annotation = stringify_annotation
+        autodoc.typehints.stringify_annotation = stringify_annotation
+    except AttributeError:
+        stringify_annotation_orig = typing.stringify
+        inspect.stringify_annotation = stringify_annotation
+        typing.stringify = stringify_annotation
+        autodoc.stringify_typehint = stringify_annotation
 
     #
 
@@ -211,7 +235,7 @@ def _setup_autodoc(app):
         def update_content(self, more_content):
             if istypealias(self.object):
                 more_content.append(
-                    _('alias of %s') % restify(self.object), '')
+                    _('alias of %s') % typing.restify(self.object), '')
                 more_content.append('', '')
             super().update_content(more_content)
 

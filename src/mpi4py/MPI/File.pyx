@@ -215,7 +215,7 @@ cdef class File:
         with nogil: CHKERR( MPI_File_set_view(
             self.ob_mpi, disp, cetype, cftype, cdatarep, info.ob_mpi) )
 
-    def Get_view(self) -> Tuple[int, Datatype, Datatype, str]:
+    def Get_view(self) -> tuple[int, Datatype, Datatype, str]:
         """
         Return the file view
         """

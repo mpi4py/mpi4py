@@ -113,7 +113,7 @@ cdef class Win:
         win_set_eh(win.ob_mpi)
         return win
 
-    def Shared_query(self, int rank: int) -> Tuple[memory, int]:
+    def Shared_query(self, int rank: int) -> tuple[memory, int]:
         """
         Query the process-local address
         for remote memory segments
@@ -284,7 +284,7 @@ cdef class Win:
 
     property attrs:
         "window attributes"
-        def __get__(self) -> Tuple[int, int, int]:
+        def __get__(self) -> tuple[int, int, int]:
             cdef void *base = NULL
             cdef MPI_Aint size = 0
             cdef int disp_unit = 1

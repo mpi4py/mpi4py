@@ -1,5 +1,3 @@
-from typing import List
-
 from ._base import (
     Future as Future,
     Executor as Executor,
@@ -24,7 +22,7 @@ from .pool import (
     ProcessPoolExecutor as ProcessPoolExecutor,
 )
 
-__all__: List[str] = [
+__all__: list[str] = [
     'Future',
     'Executor',
     'wait',
