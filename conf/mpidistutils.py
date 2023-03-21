@@ -979,16 +979,28 @@ def configure_pyexe(exe, config_cmd):
 class build(cmd_build.build):
 
     user_options = cmd_build.build.user_options + cmd_mpi_opts
+    boolean_options = cmd_build.build.boolean_options
+
+    user_options += [(
+        'inplace',
+        'i',
+        "ignore build-lib and put compiled extensions into the source "
+        "directory alongside your pure Python modules",
+    )]
+    boolean_options += ['inplace']
 
     def initialize_options(self):
         cmd_build.build.initialize_options(self)
         cmd_initialize_mpi_options(self)
+        self.inplace = None
 
     def finalize_options(self):
         cmd_build.build.finalize_options(self)
         config_cmd = self.get_finalized_command('config')
         if isinstance(config_cmd, config):
             cmd_set_undefined_mpi_options(self, 'config')
+        if self.inplace is None:
+            self.inplace = False
 
     def has_executables (self):
         return self.distribution.has_executables()
@@ -1041,8 +1053,10 @@ class build_ext(cmd_build_ext.build_ext):
     def initialize_options(self):
         cmd_build_ext.build_ext.initialize_options(self)
         cmd_initialize_mpi_options(self)
+        self.inplace = None
 
     def finalize_options(self):
+        self.set_undefined_options('build', ('inplace', 'inplace'))
         cmd_build_ext.build_ext.finalize_options(self)
         build_cmd = self.get_finalized_command('build')
         if isinstance(build_cmd,  build):
