@@ -3,7 +3,6 @@ from ..MPI import Intracomm, COMM_WORLD
 from ._base import Executor, Future  # noqa: F401
 from typing import Any, Optional, TypeVar, Union
 from typing import Callable, Iterable, Iterator, Mapping, Sequence
-from typing import Tuple
 if sys.version_info >= (3, 10):
     from typing import ParamSpec
     from typing import TypeAlias
@@ -23,17 +22,17 @@ class MPIPoolExecutor(Executor):
     def __init__(
         self,
         max_workers: Optional[int] = None,
-        initializer: Optional[Callable[..., None]] = None,
-        initargs: Tuple = (),
+        initializer: Optional[Callable[..., object]] = None,
+        initargs: Iterable[Any] = (),
         *,
         python_exe: str = ...,
         python_args: Sequence[str] = ...,
-        mpi_info: Union[Mapping[str, str], Iterable[Tuple[str, str]]] = ...,
-        globals: Union[Mapping[str, str], Iterable[Tuple[str, str]]] = ...,
+        mpi_info: Union[Mapping[str, str], Iterable[tuple[str, str]]] = ...,
+        globals: Union[Mapping[str, str], Iterable[tuple[str, str]]] = ...,
         main: bool = True,
         path: Sequence[str] = ...,
         wdir: str = ...,
-        env: Union[Mapping[str, str], Iterable[Tuple[str, str]]] = ...,
+        env: Union[Mapping[str, str], Iterable[tuple[str, str]]] = ...,
         **kwargs: Any,
     ) -> None: ...
     def bootup(

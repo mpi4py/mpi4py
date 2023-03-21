@@ -190,7 +190,7 @@ def Is_finalized() -> bool:
 VERSION    = MPI_VERSION
 SUBVERSION = MPI_SUBVERSION
 
-def Get_version() -> Tuple[int, int]:
+def Get_version() -> tuple[int, int]:
     """
     Obtain the version number of the MPI standard supported
     by the implementation as a tuple ``(version, subversion)``
@@ -270,7 +270,7 @@ MAX_STRINGTAG_LEN  = MPI_MAX_STRINGTAG_LEN
 cdef extern from * nogil:
     int PyMPI_Get_vendor(const char**,int*,int*,int*)
 
-def get_vendor() -> Tuple[str, Tuple[int, int, int]]:
+def get_vendor() -> tuple[str, tuple[int, int, int]]:
     """
     Information about the underlying MPI implementation
 

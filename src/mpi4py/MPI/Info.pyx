@@ -27,7 +27,7 @@ cdef class Info:
         items: Union[
             Info,
             Mapping[str, str],
-            Iterable[Tuple[str, str]],
+            Iterable[tuple[str, str]],
             None,
         ] = None,
     ) -> Self:
@@ -194,7 +194,7 @@ cdef class Info:
         if value is None: return default
         return value
 
-    def keys(self) -> List[str]:
+    def keys(self) -> list[str]:
         """info keys"""
         if not self: return []
         cdef list keys = []
@@ -205,7 +205,7 @@ cdef class Info:
             keys.append(key)
         return keys
 
-    def values(self) -> List[str]:
+    def values(self) -> list[str]:
         """info values"""
         if not self: return []
         cdef list values = []
@@ -217,7 +217,7 @@ cdef class Info:
             values.append(val)
         return values
 
-    def items(self) -> List[Tuple[str, str]]:
+    def items(self) -> list[tuple[str, str]]:
         """info items"""
         if not self: return []
         cdef list items = []
@@ -234,7 +234,7 @@ cdef class Info:
         items: Union[
             Info,
             Mapping[str, str],
-            Iterable[Tuple[str, str]]
+            Iterable[tuple[str, str]]
         ] = (),
         **kwds: str,
     ) -> None:
@@ -263,7 +263,7 @@ cdef class Info:
             return value
         raise KeyError(key)
 
-    def popitem(self) -> Tuple[str, str]:
+    def popitem(self) -> tuple[str, str]:
         """info popitem"""
         if not self: raise KeyError
         cdef object key, value

@@ -85,7 +85,7 @@ cdef class Pickle:
     def dumps_oob(
         self,
         obj: Any,
-    ) -> Tuple[bytes, List[memory]]:
+    ) -> tuple[bytes, list[memory]]:
         """
         Serialize object to pickle data stream and out-of-band buffers.
         """
@@ -1287,7 +1287,7 @@ cdef int PyMPI_Commctx_INTER(MPI_Comm comm,
 
 def _commctx_intra(
     Intracomm comm: Intracomm,
-) -> Tuple[Intracomm, int]:
+) -> tuple[Intracomm, int]:
     "Create/get intracommunicator duplicate"
     cdef int tag = MPI_UNDEFINED
     cdef Intracomm dupcomm = <Intracomm>New(Intracomm)
@@ -1296,7 +1296,7 @@ def _commctx_intra(
 
 def _commctx_inter(
     Intercomm comm: Intercomm,
-) -> Tuple[Intercomm, int, Intracomm, bool]:
+) -> tuple[Intercomm, int, Intracomm, bool]:
     "Create/get intercommunicator duplicate"
     cdef int tag = MPI_UNDEFINED, low_group = 0
     cdef Intercomm dupcomm = <Intercomm>New(Intercomm)

@@ -262,7 +262,7 @@ cdef inline int datatype_visit(
 def _datatype_create(
     Datatype datatype: Datatype,
     str combiner: str,
-    dict params: Dict[str, Any],
+    dict params: dict[str, Any],
     bint free: bool = False,
 ) -> Datatype:
     """
@@ -274,7 +274,7 @@ def _datatype_create(
 def _datatype_decode(
     Datatype datatype: Datatype,
     bint mark: bool = False,
-) -> Tuple[Datatype, str, Dict[str, Any]]:
+) -> tuple[Datatype, str, dict[str, Any]]:
     """
     Create datatype to base datatype, combiner name, and parameters
     """

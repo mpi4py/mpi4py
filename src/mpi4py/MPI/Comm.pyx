@@ -145,7 +145,7 @@ cdef class Comm:
         comm_set_eh(comm.ob_mpi)
         return comm
 
-    def Idup(self, Info info: Optional[Info] = None) -> Tuple[Self, Request]:
+    def Idup(self, Info info: Optional[Info] = None) -> tuple[Self, Request]:
         """
         Nonblocking duplicate an existing communicator
         """
@@ -163,7 +163,7 @@ cdef class Comm:
         comm_set_eh(comm.ob_mpi)
         return (comm, request)
 
-    def Idup_with_info(self, Info info: Info) ->  Tuple[Self, Request]:
+    def Idup_with_info(self, Info info: Info) ->  tuple[Self, Request]:
         """
         Duplicate an existing communicator
         """
@@ -1965,7 +1965,7 @@ cdef class Comm:
         self,
         sendobj: Any,
         int root: int = 0,
-    ) -> Optional[List[Any]]:
+    ) -> Optional[list[Any]]:
         """Gather"""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_gather(sendobj, root, comm)
@@ -1982,7 +1982,7 @@ cdef class Comm:
     def allgather(
         self,
         sendobj: Any,
-    ) -> List[Any]:
+    ) -> list[Any]:
         """Gather to All"""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_allgather(sendobj, comm)
@@ -1990,7 +1990,7 @@ cdef class Comm:
     def alltoall(
         self,
         sendobj: Sequence[Any],
-    ) -> List[Any]:
+    ) -> list[Any]:
         """All to All Scatter/Gather"""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_alltoall(sendobj, comm)
@@ -2515,7 +2515,7 @@ cdef class Topocomm(Intracomm):
 
     property degrees:
         "number of incoming and outgoing neighbors"
-        def __get__(self) -> Tuple[int, int]:
+        def __get__(self) -> tuple[int, int]:
             cdef object dim, rank
             cdef object nneighbors
             if isinstance(self, Cartcomm):
@@ -2542,7 +2542,7 @@ cdef class Topocomm(Intracomm):
 
     property inoutedges:
         "incoming and outgoing neighbors"
-        def __get__(self) -> Tuple[List[int], List[int]]:
+        def __get__(self) -> tuple[list[int], list[int]]:
             cdef object direction, source, dest, rank
             cdef object neighbors
             if isinstance(self, Cartcomm):
@@ -2563,12 +2563,12 @@ cdef class Topocomm(Intracomm):
 
     property inedges:
         "incoming neighbors"
-        def __get__(self) -> List[int]:
+        def __get__(self) -> list[int]:
             return self.inoutedges[0]
 
     property outedges:
         "outgoing neighbors"
-        def __get__(self) -> List[int]:
+        def __get__(self) -> list[int]:
             return self.inoutedges[1]
 
     # Neighborhood Collectives
@@ -2842,12 +2842,12 @@ cdef class Topocomm(Intracomm):
 
     # Python Communication
     #
-    def neighbor_allgather(self, sendobj: Any) -> List[Any]:
+    def neighbor_allgather(self, sendobj: Any) -> list[Any]:
         """Neighbor Gather to All"""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_neighbor_allgather(sendobj, comm)
     #
-    def neighbor_alltoall(self, sendobj: List[Any]) -> List[Any]:
+    def neighbor_alltoall(self, sendobj: list[Any]) -> list[Any]:
         """Neighbor All to All Scatter/Gather"""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_neighbor_alltoall(sendobj, comm)
@@ -2888,7 +2888,7 @@ cdef class Cartcomm(Topocomm):
         def __get__(self) -> int:
             return self.Get_dim()
 
-    def Get_topo(self) -> Tuple[List[int], List[int], List[int]]:
+    def Get_topo(self) -> tuple[list[int], list[int], list[int]]:
         """
         Return information on the cartesian topology
         """
@@ -2908,22 +2908,22 @@ cdef class Cartcomm(Topocomm):
 
     property topo:
         """topology information"""
-        def __get__(self) -> Tuple[List[int], List[int], List[int]]:
+        def __get__(self) -> tuple[list[int], list[int], list[int]]:
             return self.Get_topo()
 
     property dims:
         """dimensions"""
-        def __get__(self) -> List[int]:
+        def __get__(self) -> list[int]:
             return self.Get_topo()[0]
 
     property periods:
         """periodicity"""
-        def __get__(self) -> List[int]:
+        def __get__(self) -> list[int]:
             return self.Get_topo()[1]
 
     property coords:
         """coordinates"""
-        def __get__(self) -> List[int]:
+        def __get__(self) -> list[int]:
             return self.Get_topo()[2]
 
 
@@ -2941,7 +2941,7 @@ cdef class Cartcomm(Topocomm):
         CHKERR( MPI_Cart_rank(self.ob_mpi, icoords, &rank) )
         return rank
 
-    def Get_coords(self, int rank: int) -> List[int]:
+    def Get_coords(self, int rank: int) -> list[int]:
         """
         Translate ranks to logical coordinates
         """
@@ -2955,7 +2955,7 @@ cdef class Cartcomm(Topocomm):
     # Cartesian Shift Function
     # ------------------------
 
-    def Shift(self, int direction: int, int disp: int) -> Tuple[int, int]:
+    def Shift(self, int direction: int, int disp: int) -> tuple[int, int]:
         """
         Return a tuple (source, dest) of process ranks
         for data shifting with Comm.Sendrecv()
@@ -2983,7 +2983,7 @@ cdef class Cartcomm(Topocomm):
 
 # Cartesian Convenience Function
 
-def Compute_dims(int nnodes: int, dims: Union[int, Sequence[int]]) -> List[int]:
+def Compute_dims(int nnodes: int, dims: Union[int, Sequence[int]]) -> list[int]:
     """
     Return a balanced distribution of
     processes per coordinate direction
@@ -3017,7 +3017,7 @@ cdef class Graphcomm(Topocomm):
     # Graph Inquiry Functions
     # -----------------------
 
-    def Get_dims(self) -> Tuple[int, int]:
+    def Get_dims(self) -> tuple[int, int]:
         """
         Return the number of nodes and edges
         """
@@ -3027,7 +3027,7 @@ cdef class Graphcomm(Topocomm):
 
     property dims:
         """number of nodes and edges"""
-        def __get__(self) -> Tuple[int, int]:
+        def __get__(self) -> tuple[int, int]:
             return self.Get_dims()
 
     property nnodes:
@@ -3040,7 +3040,7 @@ cdef class Graphcomm(Topocomm):
         def __get__(self) -> int:
             return self.Get_dims()[1]
 
-    def Get_topo(self) -> Tuple[List[int], List[int]]:
+    def Get_topo(self) -> tuple[list[int], list[int]]:
         """
         Return index and edges
         """
@@ -3057,17 +3057,17 @@ cdef class Graphcomm(Topocomm):
 
     property topo:
         """topology information"""
-        def __get__(self) -> Tuple[List[int], List[int]]:
+        def __get__(self) -> tuple[list[int], list[int]]:
             return self.Get_topo()
 
     property index:
         """index"""
-        def __get__(self) -> List[int]:
+        def __get__(self) -> list[int]:
             return self.Get_topo()[0]
 
     property edges:
         """edges"""
-        def __get__(self) -> List[int]:
+        def __get__(self) -> list[int]:
             return self.Get_topo()[1]
 
     # Graph Information Functions
@@ -3087,7 +3087,7 @@ cdef class Graphcomm(Topocomm):
             cdef int rank = self.Get_rank()
             return self.Get_neighbors_count(rank)
 
-    def Get_neighbors(self, int rank: int) -> List[int]:
+    def Get_neighbors(self, int rank: int) -> list[int]:
         """
         Return list of neighbors of a process
         """
@@ -3102,7 +3102,7 @@ cdef class Graphcomm(Topocomm):
 
     property neighbors:
         """neighbors"""
-        def __get__(self) -> List[int]:
+        def __get__(self) -> list[int]:
             cdef int rank = self.Get_rank()
             return self.Get_neighbors(rank)
 
@@ -3136,7 +3136,7 @@ cdef class Distgraphcomm(Topocomm):
         return (indegree, outdegree, <bint>weighted)
 
     def Get_dist_neighbors(self) \
-        -> Tuple[List[int], List[int], Optional[Tuple[List[int], List[int]]]]:
+        -> tuple[list[int], list[int], Optional[tuple[list[int], list[int]]]]:
         """
         Return adjacency information for a distributed graph topology
         """

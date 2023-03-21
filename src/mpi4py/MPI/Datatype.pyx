@@ -82,7 +82,7 @@ cdef class Datatype:
             CHKERR( MPI_Type_size_c(self.ob_mpi, &size) )
             return size
 
-    def Get_extent(self) -> Tuple[int, int]:
+    def Get_extent(self) -> tuple[int, int]:
         """
         Return lower bound and extent of datatype
         """
@@ -461,7 +461,7 @@ cdef class Datatype:
 
     Resized = Create_resized #: compatibility alias
 
-    def Get_true_extent(self) -> Tuple[int, int]:
+    def Get_true_extent(self) -> tuple[int, int]:
         """
         Return the true lower bound and extent of a datatype
         """
@@ -497,7 +497,7 @@ cdef class Datatype:
     # Decoding a Datatype
     # -------------------
 
-    def Get_envelope(self) -> Tuple[int, int, int, int, int]:
+    def Get_envelope(self) -> tuple[int, int, int, int, int]:
         """
         Return information on the number and type of input arguments
         used in the call that created a datatype
@@ -510,11 +510,11 @@ cdef class Datatype:
 
     property envelope:
         """datatype envelope"""
-        def __get__(self) -> Tuple[int, int, int, int, int]:
+        def __get__(self) -> tuple[int, int, int, int, int]:
             return self.Get_envelope()
 
     def Get_contents(self) \
-        -> Tuple[List[int], List[int], List[int], List[Datatype]]:
+        -> tuple[list[int], list[int], list[int], list[Datatype]]:
         """
         Retrieve the actual arguments used in the call that created a
         datatype
@@ -542,10 +542,10 @@ cdef class Datatype:
     property contents:
         """datatype contents"""
         def __get__(self) \
-            -> Tuple[List[int], List[int], List[int], List[Datatype]]:
+            -> tuple[list[int], list[int], list[int], list[Datatype]]:
             return self.Get_contents()
 
-    def decode(self) -> Tuple[Datatype, str, Dict[str, Any]]:
+    def decode(self) -> tuple[Datatype, str, dict[str, Any]]:
         """
         Convenience method for decoding a datatype
         """

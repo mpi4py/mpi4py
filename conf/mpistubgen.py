@@ -363,11 +363,6 @@ if sys.version_info >= (3, 9):
         Sequence,
         Mapping,
     )
-    from typing import (
-        Tuple,
-        List,
-        Dict,
-    )
 else:
     from typing import (
         Callable,
@@ -376,11 +371,6 @@ else:
         Iterator,
         Sequence,
         Mapping,
-    )
-    from typing import (
-        Tuple,
-        List,
-        Dict,
     )
 if sys.version_info >= (3, 11):
     from typing import Self
@@ -450,10 +440,10 @@ OVERRIDE = {
         ) -> None: ...
         """,
     },
-    '__pyx_capi__': "__pyx_capi__: Final[Dict[str, Any]] = ...",
-    '_typedict': "_typedict: Final[Dict[str, Datatype]] = ...",
-    '_typedict_c': "_typedict_c: Final[Dict[str, Datatype]] = ...",
-    '_typedict_f': "_typedict_f: Final[Dict[str, Datatype]] = ...",
+    '__pyx_capi__': "__pyx_capi__: Final[dict[str, Any]] = ...",
+    '_typedict': "_typedict: Final[dict[str, Datatype]] = ...",
+    '_typedict_c': "_typedict_c: Final[dict[str, Datatype]] = ...",
+    '_typedict_f': "_typedict_f: Final[dict[str, Datatype]] = ...",
     '_keyval_registry': None,
 }
 OVERRIDE.update({

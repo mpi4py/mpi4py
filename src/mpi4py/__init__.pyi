@@ -1,13 +1,12 @@
 from typing import Any, Optional, Union
 from typing import Sequence
-from typing import Dict, List
 
 __version__: str = ...
 __author__: str = ...
 __credits__: str = ...
 
 from . import MPI
-__all__: List[str] = ['MPI']
+__all__: list[str] = ['MPI']
 
 class Rc:
     initialize: bool = True
@@ -26,7 +25,7 @@ rc: Rc = ...
 
 def get_include() -> str: ...
 
-def get_config() -> Dict[str, str]: ...
+def get_config() -> dict[str, str]: ...
 
 def profile(
     name: str, *,

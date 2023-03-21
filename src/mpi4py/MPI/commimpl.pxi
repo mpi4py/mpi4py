@@ -167,7 +167,7 @@ def _comm_lock(Comm comm: Comm, object key: Hashable = None) -> Lock:
     "Create/get communicator lock"
     return PyMPI_Lock(comm.ob_mpi, key)
 
-def _comm_lock_table(Comm comm: Comm) -> Dict[Hashable, Lock]:
+def _comm_lock_table(Comm comm: Comm) -> dict[Hashable, Lock]:
     "Internal communicator lock table"
     return PyMPI_Lock_table(comm.ob_mpi)
 

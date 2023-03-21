@@ -382,11 +382,6 @@ from typing import (
     Sequence,
     Mapping,
 )
-from typing import (
-    Tuple,
-    List,
-    Dict,
-)
 """
 
 HELPERS = """
