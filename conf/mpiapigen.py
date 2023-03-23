@@ -179,8 +179,9 @@ class NodeStructType(NodeType):
 
     def __init__(self, ctype, cfields):
         super().__init__(ctype)
-        self.cfields = '\n'.join(['  %s %s;' % field
-                                  for field in cfields])
+        self.cfields = '\n'.join(
+            [f'  {ctype} {cname};' for ctype, cname in cfields]
+        )
 
 class NodeFuncType(NodeType):
     HEADER = """\
