@@ -110,7 +110,7 @@ cdef int commlock_free_fn(
     <void> attrval # unused
     <void> xstate  # unused
     if comm == MPI_COMM_SELF:
-        return MPI_Comm_free_keyval(&commlock_keyval)
+        <void>MPI_Comm_free_keyval(&commlock_keyval)
     if not Py_IsInitialized():
         return MPI_SUCCESS
     if not py_module_alive():
@@ -127,6 +127,10 @@ cdef inline dict commlock_table(MPI_Comm comm):
             MPI_COMM_NULL_COPY_FN,
             commlock_free_fn,
             &commlock_keyval, NULL) )
+        table = {}
+        CHKERR( MPI_Comm_set_attr(
+            MPI_COMM_SELF, commlock_keyval, <void*> table) )
+        commlock_registry[<Py_uintptr_t>MPI_COMM_SELF] = table
     CHKERR( MPI_Comm_get_attr(
         comm, commlock_keyval, &attrval, &found) )
     if not found:
