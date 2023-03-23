@@ -1,4 +1,4 @@
 pickle5; python_version < '3.8' and implementation_name == 'cpython'
-numpy
+numpy; python_version < '3.12'
 cffi
 pyyaml
