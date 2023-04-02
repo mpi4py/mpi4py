@@ -143,7 +143,7 @@ metadata_extra = {
         "Documentation" : documentation_url(),
     },
     'python_requires': '>=' + '.'.join(map(str, require_python)),
-    'long_description_content_type': 'text/rst',
+    'long_description_content_type': 'text/x-rst',
 }
 
 # --------------------------------------------------------------------
