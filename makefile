@@ -1,5 +1,6 @@
 .PHONY: default
 default: build
+default: opt=--inplace
 
 PYTHON  = python$(py)
 MPIEXEC = mpiexec
