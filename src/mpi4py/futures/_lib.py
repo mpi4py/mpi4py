@@ -167,9 +167,9 @@ def join_threads(threads_queues=THREADS_QUEUES):
         thread.join()
 
 
-try:
-    threading._register_atexit(join_threads)  # type: ignore[attr-defined]
-except AttributeError:  # pragma: no cover
+if hasattr(threading, '_register_atexit'):
+    threading._register_atexit(join_threads)
+else:  # pragma: no cover
     atexit.register(join_threads)
 
 
@@ -186,10 +186,7 @@ class Pool:
         self.thread = thread
 
         setup_mpi_threads()
-        try:
-            threading._register_atexit
-        except AttributeError:  # pragma: no cover
-            thread.daemon = True
+        thread.daemon = not hasattr(threading, '_register_atexit')
         thread.start()
         THREADS_QUEUES[thread] = queue
 
