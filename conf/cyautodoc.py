@@ -267,9 +267,13 @@ except Exception as exc:
 try:
     from Cython.Compiler.Nodes import raise_utility_code
     code = raise_utility_code.impl
-    ipos = code.index("if (tb) {\n#if CYTHON_COMPILING_IN_PYPY\n")
-    raise_utility_code.impl = code[:ipos] + code[ipos:].replace(
-        'CYTHON_COMPILING_IN_PYPY', '!CYTHON_FAST_THREAD_STATE', 1)
+    try:
+        ipos = code.index("if (tb) {\n#if CYTHON_COMPILING_IN_PYPY\n")
+    except ValueError:
+        ipos = None
+    else:
+        raise_utility_code.impl = code[:ipos] + code[ipos:].replace(
+            'CYTHON_COMPILING_IN_PYPY', '!CYTHON_FAST_THREAD_STATE', 1)
     del raise_utility_code, code, ipos
 except Exception as exc:
     import logging
