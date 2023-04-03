@@ -15,6 +15,21 @@ class TestErrhandler(unittest.TestCase):
         else:
             self.assertFalse(MPI.ERRORS_ABORT)
 
+    def testPickle(self):
+        from pickle import dumps, loads
+        for errhandler in [
+            MPI.ERRHANDLER_NULL,
+            MPI.ERRORS_ARE_FATAL,
+            MPI.ERRORS_RETURN,
+            MPI.ERRORS_ABORT,
+        ]:
+            if not errhandler: continue
+            errh = loads(dumps(errhandler))
+            self.assertIs(errh, errhandler)
+            errh = loads(dumps(MPI.Errhandler(errhandler)))
+            self.assertIsNot(errh, errhandler)
+            self.assertEqual(errh, errhandler)
+
 
 class BaseTestErrhandler:
 
@@ -38,6 +53,9 @@ class BaseTestErrhandler:
             self.skipTest(f'mpi-{clsname}-create_errhandler')
         self.assertIsInstance(errhdl, MPI.Errhandler)
         self.assertNotEqual(errhdl, MPI.ERRHANDLER_NULL)
+
+        from pickle import dumps
+        self.assertRaises(ValueError, dumps, errhdl)
 
         save = mpiobj.Get_errhandler()
         mpiobj.Set_errhandler(errhdl)

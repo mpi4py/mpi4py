@@ -215,6 +215,34 @@ class TestOp(unittest.TestCase):
         for op in ops:
             self.assertTrue(op.is_predefined)
 
+    def testPicklePredefined(self):
+        from pickle import dumps, loads
+        ops = [
+            MPI.MAX,     MPI.MIN,
+            MPI.SUM,     MPI.PROD,
+            MPI.LAND,    MPI.BAND,
+            MPI.LOR,     MPI.BOR,
+            MPI.LXOR,    MPI.BXOR,
+            MPI.MAXLOC,  MPI.MINLOC,
+            MPI.OP_NULL, MPI.NO_OP,
+        ]
+        for op in ops:
+            newop = loads(dumps(op))
+            self.assertIs(newop, op)
+            newop = loads(dumps(MPI.Op(op)))
+            self.assertIsNot(newop, op)
+            self.assertEqual(newop, op)
+
+    def testPickleUserDefined(self):
+        from pickle import dumps, loads
+        for commute in [True, False]:
+            myop1 = MPI.Op.Create(mysum, commute)
+            myop2 = loads(dumps(myop1))
+            self.assertNotEqual(myop1, myop2)
+            myop1.Free()
+            self.assertEqual(myop2([2], [3]), [5])
+            self.assertEqual(myop2.Is_commutative(), commute)
+            myop2.Free()
 
 if __name__ == '__main__':
     unittest.main()

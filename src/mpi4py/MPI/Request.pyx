@@ -18,6 +18,9 @@ cdef class Request:
     def __bool__(self) -> bool:
         return self.ob_mpi != MPI_REQUEST_NULL
 
+    def __reduce__(self) -> Union[str, tuple[Any, ...]]:
+        return reduce_default(self)
+
     # Completion Operations
     # ---------------------
 
@@ -457,7 +460,7 @@ cdef class Grequest(Request):
         """
         Create and return a user-defined request
         """
-        cdef Grequest request = Grequest.__new__(Grequest)
+        cdef Grequest request = <Grequest>New(Grequest)
         cdef _p_greq state = _p_greq(
             query_fn, free_fn, cancel_fn,args, kwargs)
         with nogil: CHKERR( MPI_Grequest_start(
@@ -481,7 +484,7 @@ cdef class Grequest(Request):
 
 
 
-cdef Request __REQUEST_NULL__ = def_Request( MPI_REQUEST_NULL )
+cdef Request __REQUEST_NULL__ = def_Request( MPI_REQUEST_NULL , "REQUEST_NULL" )
 
 
 # Predefined request handles

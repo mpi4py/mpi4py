@@ -68,6 +68,37 @@ class TestObjModel(unittest.TestCase):
             self.assertTrue(not obj)
             self.assertFalse(obj)
 
+    def testReduce(self):
+        import pickle
+        import copy
+
+        def functions(obj):
+            for protocol in range(0, pickle.HIGHEST_PROTOCOL + 1):
+                yield lambda ob: pickle.loads(pickle.dumps(ob, protocol))
+            yield copy.copy
+            yield copy.deepcopy
+
+        for obj in self.objects:
+            for copier in functions(obj):
+                dup = copier(obj)
+                self.assertIs(type(dup), type(obj))
+                if isinstance(obj, MPI.Status):
+                    self.assertIsNot(dup, obj)
+                else:
+                    self.assertIs(dup, obj)
+                cls = type(obj)
+                dup = copier(cls(obj))
+                self.assertIs(type(dup), cls)
+                self.assertIsNot(dup, obj)
+                cls = type(f'My{type(obj).__name__}', (type(obj),), {})
+                main = __import__('__main__')
+                cls.__module__ = main.__name__
+                setattr(main, cls.__name__, cls)
+                dup = copier(cls(obj))
+                delattr(main, cls.__name__)
+                self.assertIs(type(dup), cls)
+                self.assertIsNot(dup, obj)
+
     def testHash(self):
         for obj in self.objects:
             ob_hash = lambda: hash(obj)

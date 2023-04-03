@@ -18,6 +18,9 @@ cdef class Errhandler:
     def __bool__(self) -> bool:
         return self.ob_mpi != MPI_ERRHANDLER_NULL
 
+    def __reduce__(self) -> Union[str, tuple[Any, ...]]:
+        return reduce_default(self)
+
     def Free(self) -> None:
         """
         Free an error handler
@@ -42,11 +45,10 @@ cdef class Errhandler:
         return PyMPIErrhandler_New(MPI_Errhandler_f2c(arg))
 
 
-
-cdef Errhandler __ERRHANDLER_NULL__  = def_Errhandler( MPI_ERRHANDLER_NULL  )
-cdef Errhandler __ERRORS_RETURN__    = def_Errhandler( MPI_ERRORS_RETURN    )
-cdef Errhandler __ERRORS_ABORT__     = def_Errhandler( MPI_ERRORS_ABORT     )
-cdef Errhandler __ERRORS_ARE_FATAL__ = def_Errhandler( MPI_ERRORS_ARE_FATAL )
+cdef Errhandler __ERRHANDLER_NULL__  = def_Errhandler( MPI_ERRHANDLER_NULL  , "ERRHANDLER_NULL"  )
+cdef Errhandler __ERRORS_RETURN__    = def_Errhandler( MPI_ERRORS_RETURN    , "ERRORS_RETURN"    )
+cdef Errhandler __ERRORS_ABORT__     = def_Errhandler( MPI_ERRORS_ABORT     , "ERRORS_ABORT"     )
+cdef Errhandler __ERRORS_ARE_FATAL__ = def_Errhandler( MPI_ERRORS_ARE_FATAL , "ERRORS_ARE_FATAL" )
 
 
 # Predefined errhandler handles

@@ -211,6 +211,74 @@ class TestMyPrequest2(TestMyPrequest):
 
 # ---
 
+class MyInfo(MPI.Info):
+
+    def __new__(cls, info=None):
+        return MPI.Info.__new__(cls, info)
+
+    def free(self):
+        if self != MPI.INFO_NULL:
+            MPI.Info.Free(self)
+
+class BaseTestMyInfo:
+
+    def setUp(self):
+        info = MPI.Info.Create()
+        self.info = MyInfo(info)
+
+    def tearDown(self):
+        self.info.free()
+
+    def testSubType(self):
+        self.assertIsNot(type(self.info), MPI.Info)
+        self.assertIsInstance(self.info, MPI.Info)
+        self.assertIsInstance(self.info, MyInfo)
+
+    def testFree(self):
+        self.assertTrue(self.info)
+        self.info.free()
+        self.assertFalse(self.info)
+
+    def testCreateDupType(self):
+        for info in (
+            MyInfo.Create(),
+            self.info.Dup(),
+            self.info.copy(),
+        ):
+            self.assertIsNot(type(info), MPI.Info)
+            self.assertIsInstance(info, MPI.Info)
+            self.assertIsInstance(info, MyInfo)
+            info.free()
+
+    def testCreateEnvType(self):
+        try:
+            info = MyInfo.Create_env()
+        except NotImplementedError:
+            if MPI.Get_version() >= (4, 0): raise
+            raise unittest.SkipTest("mpi-info-create-env")
+        self.assertIsNot(type(info), MPI.Info)
+        self.assertIsInstance(info, MPI.Info)
+        self.assertIsInstance(info, MyInfo)
+
+    def testPickle(self):
+        from pickle import dumps, loads
+        items = list(zip("abc", "123"))
+        self.info.update(items)
+        info = loads(dumps(self.info))
+        self.assertIs(type(info), MyInfo)
+        self.assertEqual(info.items(), items)
+        info.free()
+
+class TestMyInfo(BaseTestMyInfo, unittest.TestCase):
+    pass
+
+try:
+    MPI.Info.Create().Free()
+except (NotImplementedError, MPI.Exception):
+    unittest.disable(BaseTestMyInfo, 'mpi-info')
+
+# ---
+
 class MyWin(MPI.Win):
 
     def __new__(cls, win=None):
@@ -302,6 +370,7 @@ try:
 except NotImplementedError:
     unittest.disable(BaseTestMyFile, 'mpi-file')
 
+# ---
 
 if __name__ == '__main__':
     unittest.main()

@@ -35,9 +35,9 @@ COMBINER_STRUCT           = MPI_COMBINER_STRUCT
 COMBINER_SUBARRAY         = MPI_COMBINER_SUBARRAY
 COMBINER_DARRAY           = MPI_COMBINER_DARRAY
 COMBINER_RESIZED          = MPI_COMBINER_RESIZED
+COMBINER_F90_INTEGER      = MPI_COMBINER_F90_INTEGER
 COMBINER_F90_REAL         = MPI_COMBINER_F90_REAL
 COMBINER_F90_COMPLEX      = MPI_COMBINER_F90_COMPLEX
-COMBINER_F90_INTEGER      = MPI_COMBINER_F90_INTEGER
 
 
 cdef class Datatype:
@@ -59,6 +59,9 @@ cdef class Datatype:
 
     def __bool__(self) -> bool:
         return self.ob_mpi != MPI_DATATYPE_NULL
+
+    def __reduce__(self) -> Union[str, tuple[Any, ...]]:
+        return reduce_Datatype(self)
 
     # Datatype Accessors
     # ------------------
@@ -111,21 +114,21 @@ cdef class Datatype:
     # Datatype Constructors
     # ---------------------
 
-    def Dup(self) -> Datatype:
+    def Dup(self) -> Self:
         """
         Duplicate a datatype
         """
-        cdef Datatype datatype = Datatype.__new__(Datatype)
+        cdef Datatype datatype = <Datatype>New(type(self))
         CHKERR( MPI_Type_dup(self.ob_mpi, &datatype.ob_mpi) )
         return datatype
 
     Create_dup = Dup #: convenience alias
 
-    def Create_contiguous(self, Count count: int) -> Datatype:
+    def Create_contiguous(self, Count count: int) -> Self:
         """
         Create a contiguous datatype
         """
-        cdef Datatype datatype = Datatype.__new__(Datatype)
+        cdef Datatype datatype = <Datatype>New(type(self))
         CHKERR( MPI_Type_contiguous_c(
             count,
             self.ob_mpi, &datatype.ob_mpi) )
@@ -136,11 +139,11 @@ cdef class Datatype:
         Count count: int,
         Count blocklength: int,
         Count stride: int,
-    ) -> Datatype:
+    ) -> Self:
         """
         Create a vector (strided) datatype
         """
-        cdef Datatype datatype = Datatype.__new__(Datatype)
+        cdef Datatype datatype = <Datatype>New(type(self))
         CHKERR( MPI_Type_vector_c(
             count, blocklength, stride,
             self.ob_mpi, &datatype.ob_mpi) )
@@ -151,11 +154,11 @@ cdef class Datatype:
         Count count: int,
         Count blocklength: int,
         Count stride: int,
-    ) -> Datatype:
+    ) -> Self:
         """
         Create a vector (strided) datatype
         """
-        cdef Datatype datatype = Datatype.__new__(Datatype)
+        cdef Datatype datatype = <Datatype>New(type(self))
         CHKERR( MPI_Type_create_hvector_c(
             count, blocklength, stride,
             self.ob_mpi, &datatype.ob_mpi) )
@@ -165,7 +168,7 @@ cdef class Datatype:
         self,
         blocklengths: Sequence[int],
         displacements: Sequence[int],
-    ) -> Datatype:
+    ) -> Self:
         """
         Create an indexed datatype
         """
@@ -173,7 +176,7 @@ cdef class Datatype:
         blocklengths  = getarray(blocklengths,  &count, &iblen)
         displacements = chkarray(displacements,  count, &idisp)
         #
-        cdef Datatype datatype = Datatype.__new__(Datatype)
+        cdef Datatype datatype = <Datatype>New(type(self))
         CHKERR( MPI_Type_indexed_c(
             count, iblen, idisp,
             self.ob_mpi, &datatype.ob_mpi) )
@@ -183,7 +186,7 @@ cdef class Datatype:
         self,
         blocklengths: Sequence[int],
         displacements: Sequence[int],
-    ) -> Datatype:
+    ) -> Self:
         """
         Create an indexed datatype
         with displacements in bytes
@@ -192,7 +195,7 @@ cdef class Datatype:
         blocklengths = getarray(blocklengths, &count, &iblen)
         displacements = chkarray(displacements, count, &idisp)
         #
-        cdef Datatype datatype = Datatype.__new__(Datatype)
+        cdef Datatype datatype = <Datatype>New(type(self))
         CHKERR( MPI_Type_create_hindexed_c(
             count, iblen, idisp,
             self.ob_mpi,
@@ -203,7 +206,7 @@ cdef class Datatype:
         self,
         Count blocklength: int,
         displacements: Sequence[int],
-    ) -> Datatype:
+    ) -> Self:
         """
         Create an indexed datatype
         with constant-sized blocks
@@ -211,7 +214,7 @@ cdef class Datatype:
         cdef Count count = 0, *idisp = NULL
         displacements = getarray(displacements, &count, &idisp)
         #
-        cdef Datatype datatype = Datatype.__new__(Datatype)
+        cdef Datatype datatype = <Datatype>New(type(self))
         CHKERR( MPI_Type_create_indexed_block_c(
             count, blocklength, idisp,
             self.ob_mpi, &datatype.ob_mpi) )
@@ -221,7 +224,7 @@ cdef class Datatype:
         self,
         Count blocklength: int,
         displacements: Sequence[int],
-    ) -> Datatype:
+    ) -> Self:
         """
         Create an indexed datatype
         with constant-sized blocks
@@ -230,7 +233,7 @@ cdef class Datatype:
         cdef MPI_Count count = 0, *idisp = NULL
         displacements = getarray(displacements, &count, &idisp)
         #
-        cdef Datatype datatype = Datatype.__new__(Datatype)
+        cdef Datatype datatype = <Datatype>New(type(self))
         CHKERR( MPI_Type_create_hindexed_block_c(
             count, blocklength, idisp,
             self.ob_mpi, &datatype.ob_mpi) )
@@ -242,7 +245,7 @@ cdef class Datatype:
         blocklengths: Sequence[int],
         displacements: Sequence[int],
         datatypes: Sequence[Datatype],
-    ) -> Datatype:
+    ) -> Self:
         """
         Create an datatype from a general set of
         block sizes, displacements and datatypes
@@ -253,7 +256,7 @@ cdef class Datatype:
         displacements = chkarray(displacements, count, &idisp)
         datatypes = asarray_Datatype(datatypes, count, &ptype)
         #
-        cdef Datatype datatype = Datatype.__new__(Datatype)
+        cdef Datatype datatype = <Datatype>New(cls)
         CHKERR( MPI_Type_create_struct_c(
             count, iblen, idisp, ptype,
             &datatype.ob_mpi) )
@@ -268,7 +271,7 @@ cdef class Datatype:
         subsizes: Sequence[int],
         starts: Sequence[int],
         int order: int = ORDER_C,
-    ) -> Datatype:
+    ) -> Self:
         """
         Create a datatype for a subarray of
         a regular, multidimensional array
@@ -281,7 +284,7 @@ cdef class Datatype:
         subsizes = chkarray(subsizes, ndims, &isubsizes)
         starts   = chkarray(starts,   ndims, &istarts  )
         #
-        cdef Datatype datatype = Datatype.__new__(Datatype)
+        cdef Datatype datatype = <Datatype>New(type(self))
         CHKERR( MPI_Type_create_subarray_c(
             ndims, isizes, isubsizes, istarts, order,
             self.ob_mpi, &datatype.ob_mpi) )
@@ -299,7 +302,7 @@ cdef class Datatype:
         dargs: Sequence[int],
         psizes: Sequence[int],
         int order: int = ORDER_C,
-    ) -> Datatype:
+    ) -> Self:
         """
         Create a datatype representing an HPF-like
         distributed array on Cartesian process grids
@@ -312,7 +315,7 @@ cdef class Datatype:
         dargs    = chkarray(dargs,    ndims, &idargs    )
         psizes   = chkarray(psizes,   ndims, &ipsizes   )
         #
-        cdef Datatype datatype = Datatype.__new__(Datatype)
+        cdef Datatype datatype = <Datatype>New(type(self))
         CHKERR( MPI_Type_create_darray_c(
             size, rank, ndims, igsizes,
             idistribs, idargs, ipsizes, order,
@@ -323,45 +326,45 @@ cdef class Datatype:
     # ------------------------------------------------
 
     @classmethod
-    def Create_f90_integer(cls, int r: int) -> Datatype:
+    def Create_f90_integer(cls, int r: int) -> Self:
         """
         Return a bounded integer datatype
         """
-        cdef Datatype datatype = ftn_Datatype(MPI_DATATYPE_NULL)
+        cdef Datatype datatype = <Datatype>New(cls)
         CHKERR( MPI_Type_create_f90_integer(r, &datatype.ob_mpi) )
         return datatype
 
     @classmethod
-    def Create_f90_real(cls, int p: int, int r: int) -> Datatype:
+    def Create_f90_real(cls, int p: int, int r: int) -> Self:
         """
         Return a bounded real datatype
         """
-        cdef Datatype datatype = ftn_Datatype(MPI_DATATYPE_NULL)
+        cdef Datatype datatype = <Datatype>New(cls)
         CHKERR( MPI_Type_create_f90_real(p, r, &datatype.ob_mpi) )
         return datatype
 
     @classmethod
-    def Create_f90_complex(cls, int p: int, int r: int) -> Datatype:
+    def Create_f90_complex(cls, int p: int, int r: int) -> Self:
         """
         Return a bounded complex datatype
         """
-        cdef Datatype datatype = ftn_Datatype(MPI_DATATYPE_NULL)
+        cdef Datatype datatype = <Datatype>New(cls)
         CHKERR( MPI_Type_create_f90_complex(p, r, &datatype.ob_mpi) )
         return datatype
 
     @classmethod
-    def Match_size(cls, int typeclass: int, int size: int) -> Datatype:
+    def Match_size(cls, int typeclass: int, int size: int) -> Self:
         """
         Find a datatype matching a specified size in bytes
         """
-        cdef Datatype datatype = ftn_Datatype(MPI_DATATYPE_NULL)
+        cdef Datatype datatype = <Datatype>New(cls)
         CHKERR( MPI_Type_match_size(typeclass, size, &datatype.ob_mpi) )
         return datatype
 
     # Use of Derived Datatypes
     # ------------------------
 
-    def Commit(self) -> Datatype:
+    def Commit(self) -> Self:
         """
         Commit the datatype
         """
@@ -447,11 +450,11 @@ cdef class Datatype:
     # Datatype Resizing
     # -----------------
 
-    def Create_resized(self, Count lb: int, Count extent: int) -> Datatype:
+    def Create_resized(self, Count lb: int, Count extent: int) -> Self:
         """
         Create a datatype with a new lower bound and extent
         """
-        cdef Datatype datatype = Datatype.__new__(Datatype)
+        cdef Datatype datatype = <Datatype>New(type(self))
         CHKERR( MPI_Type_create_resized_c(
             self.ob_mpi, lb, extent, &datatype.ob_mpi) )
         return datatype
@@ -546,191 +549,7 @@ cdef class Datatype:
         """
         Convenience method for decoding a datatype
         """
-        # get the datatype envelope
-        cdef int combiner = MPI_UNDEFINED
-        cdef MPI_Count ni = 0, na = 0, nc = 0, nd = 0
-        CHKERR( MPI_Type_get_envelope_c(
-            self.ob_mpi, &ni, &na, &nc, &nd, &combiner) )
-        # return self immediately for named datatypes
-        if combiner == MPI_COMBINER_NAMED: return self
-        # get the datatype contents
-        cdef int *i = NULL
-        cdef MPI_Aint *a = NULL
-        cdef MPI_Count *c = NULL
-        cdef MPI_Datatype *d = NULL
-        cdef tmp1 = allocate(ni, sizeof(int), &i)
-        cdef tmp2 = allocate(na, sizeof(MPI_Aint), &a)
-        cdef tmp3 = allocate(nc, sizeof(MPI_Count), &c)
-        cdef tmp4 = allocate(nd, sizeof(MPI_Datatype), &d)
-        CHKERR( MPI_Type_get_contents_c(
-            self.ob_mpi, ni, na, nc, nd, i, a, c, d) )
-        # manage in advance the contained datatypes
-        cdef object oldtype = None
-        if combiner == MPI_COMBINER_STRUCT:
-            oldtype = [ref_Datatype(d[k]) for k in range(nd)]
-        elif (combiner != MPI_COMBINER_F90_INTEGER and
-              combiner != MPI_COMBINER_F90_REAL and
-              combiner != MPI_COMBINER_F90_COMPLEX):
-            oldtype = ref_Datatype(d[0])
-        # dispatch depending on the combiner value
-        cdef int use_count = 1 if (nc > 0) else 0
-        cdef MPI_Count s1, e1, s2, e2, s3, e3, s4, e4
-        cdef object count, blklen, stride, displs
-        cdef object sizes, subsizes, starts, order
-        cdef object lbound, extent
-        if combiner == MPI_COMBINER_DUP:
-            return (oldtype, ('DUP'), {})
-        elif combiner == MPI_COMBINER_CONTIGUOUS:
-            count = c[0] if use_count else i[0]
-            return (oldtype, ('CONTIGUOUS'),
-                    {('count') : count})
-        elif combiner == MPI_COMBINER_VECTOR:
-            count  = c[0] if use_count else i[0]
-            blklen = c[1] if use_count else i[1]
-            stride = c[2] if use_count else i[2]
-            return (oldtype, ('VECTOR'),
-                    {('count')       : count ,
-                     ('blocklength') : blklen,
-                     ('stride')      : stride})
-        elif combiner == MPI_COMBINER_HVECTOR:
-            count  = c[0] if use_count else i[0]
-            blklen = c[1] if use_count else i[1]
-            stride = c[2] if use_count else a[0]
-            return (oldtype, ('HVECTOR'),
-                    {('count')       : count ,
-                     ('blocklength') : blklen,
-                     ('stride')      : stride})
-        elif combiner == MPI_COMBINER_INDEXED:
-            if use_count:
-                s1 =      1; e1 =   c[0]
-                s2 = c[0]+1; e2 = 2*c[0]
-                blklen = [c[k] for k from s1 <= k <= e1]
-                displs = [c[k] for k from s2 <= k <= e2]
-            else:
-                s1 =      1; e1 =   i[0]
-                s2 = i[0]+1; e2 = 2*i[0]
-                blklen = [i[k] for k from s1 <= k <= e1]
-                displs = [i[k] for k from s2 <= k <= e2]
-            return (oldtype, ('INDEXED'),
-                    {('blocklengths')  : blklen,
-                     ('displacements') : displs})
-        elif combiner == MPI_COMBINER_HINDEXED:
-            if use_count:
-                s1 =      1; e1 =   c[0]
-                s2 = c[0]+1; e2 = 2*c[0]
-                blklen = [c[k] for k from s1 <= k <= e1]
-                displs = [c[k] for k from s2 <= k <= e2]
-            else:
-                s1 = 1; e1 = i[0]
-                s2 = 0; e2 = i[0]-1
-                blklen = [i[k] for k from s1 <= k <= e1]
-                displs = [a[k] for k from s2 <= k <= e2]
-            return (oldtype, ('HINDEXED'),
-                    {('blocklengths')  : blklen,
-                     ('displacements') : displs})
-        elif combiner == MPI_COMBINER_INDEXED_BLOCK:
-            if use_count:
-                s2 = 2; e2 = c[0]+1
-                blklen = c[1]
-                displs = [c[k] for k from s2 <= k <= e2]
-            else:
-                s2 = 2; e2 = i[0]+1
-                blklen = i[1]
-                displs = [i[k] for k from s2 <= k <= e2]
-            return (oldtype, ('INDEXED_BLOCK'),
-                    {('blocklength')   : blklen,
-                     ('displacements') : displs})
-        elif combiner == MPI_COMBINER_HINDEXED_BLOCK:
-            if use_count:
-                s2 = 2; e2 = c[0]+1
-                blklen = c[1]
-                displs = [c[k] for k from s2 <= k <= e2]
-            else:
-                s2 = 0; e2 = i[0]-1
-                blklen = i[1]
-                displs = [a[k] for k from s2 <= k <= e2]
-            return (oldtype, ('HINDEXED_BLOCK'),
-                    {('blocklength')   : blklen,
-                     ('displacements') : displs})
-        elif combiner == MPI_COMBINER_STRUCT:
-            if use_count:
-                s1 =      1; e1 =   c[0]
-                s2 = c[0]+1; e2 = 2*c[0]
-                blklen = [c[k] for k from s1 <= k <= e1]
-                displs = [c[k] for k from s2 <= k <= e2]
-            else:
-                s1 = 1; e1 = i[0]
-                s2 = 0; e2 = i[0]-1
-                blklen = [i[k] for k from s1 <= k <= e1]
-                displs = [a[k] for k from s2 <= k <= e2]
-            return (DATATYPE_NULL, ('STRUCT'),
-                    {('blocklengths')  : blklen,
-                     ('displacements') : displs,
-                     ('datatypes')     : oldtype})
-        elif combiner == MPI_COMBINER_SUBARRAY:
-            if use_count:
-                s1 = 0*i[0]; e1 = 1*i[0]-1
-                s2 = 1*i[0]; e2 = 2*i[0]-1
-                s3 = 2*i[0]; e3 = 3*i[0]-1
-                sizes    = [c[k] for k from s1 <= k <= e1]
-                subsizes = [c[k] for k from s2 <= k <= e2]
-                starts   = [c[k] for k from s3 <= k <= e3]
-                order    = i[1]
-            else:
-                s1 = 0*i[0]+1; e1 = 1*i[0]
-                s2 = 1*i[0]+1; e2 = 2*i[0]
-                s3 = 2*i[0]+1; e3 = 3*i[0]
-                sizes    = [i[k] for k from s1 <= k <= e1]
-                subsizes = [i[k] for k from s2 <= k <= e2]
-                starts   = [i[k] for k from s3 <= k <= e3]
-                order    = i[3*i[0]+1]
-            return (oldtype, ('SUBARRAY'),
-                    {('sizes')    : sizes,
-                     ('subsizes') : subsizes,
-                     ('starts')   : starts,
-                     ('order')    : order})
-        elif combiner == MPI_COMBINER_DARRAY:
-            if use_count:
-                s1 = 0*i[2]+0; e1 = 1*i[2]+0-1
-                s2 = 0*i[2]+3; e2 = 1*i[2]+3-1
-                s3 = 1*i[2]+3; e3 = 2*i[2]+3-1
-                s4 = 2*i[2]+3; e4 = 3*i[2]+3-1
-                sizes = [c[k] for k from s1 <= k <= e1]
-                order = i[3*i[2]+3]
-            else:
-                s1 = 0*i[2]+3; e1 = 1*i[2]+3-1
-                s2 = 1*i[2]+3; e2 = 2*i[2]+3-1
-                s3 = 2*i[2]+3; e3 = 3*i[2]+3-1
-                s4 = 3*i[2]+3; e4 = 4*i[2]+3-1
-                sizes = [i[k] for k from s1 <= k <= e1]
-                order = i[4*i[2]+3]
-            return (oldtype, ('DARRAY'),
-                    {('size')     : i[0],
-                     ('rank')     : i[1],
-                     ('gsizes')   : sizes,
-                     ('distribs') : [i[k] for k from s2 <= k <= e2],
-                     ('dargs')    : [i[k] for k from s3 <= k <= e3],
-                     ('psizes')   : [i[k] for k from s4 <= k <= e4],
-                     ('order')    : order})
-        elif combiner == MPI_COMBINER_RESIZED:
-            lbound = c[0] if use_count else a[0]
-            extent = c[1] if use_count else a[1]
-            return (oldtype, ('RESIZED'),
-                    {('lb')     : lbound,
-                     ('extent') : extent})
-        elif combiner == MPI_COMBINER_F90_INTEGER:
-            return (DATATYPE_NULL, ('F90_INTEGER'),
-                    {('r') : i[0]})
-        elif combiner == MPI_COMBINER_F90_REAL:
-            return (DATATYPE_NULL, ('F90_REAL'),
-                    {('p') : i[0],
-                     ('r') : i[1]})
-        elif combiner == MPI_COMBINER_F90_COMPLEX:
-            return (DATATYPE_NULL, ('F90_COMPLEX'),
-                    {('p') : i[0],
-                     ('r') : i[1]})
-        else:
-            return None
+        return datatype_decode(self, mark=False)
 
     property combiner:
         """datatype combiner"""
@@ -1063,91 +882,86 @@ def Aint_diff(Aint addr1: int, Aint addr2: int) -> int:
     return MPI_Aint_diff(addr1, addr2)
 
 
-cdef Datatype __DATATYPE_NULL__ = def_Datatype( MPI_DATATYPE_NULL )
+cdef Datatype __DATATYPE_NULL__ = def_Datatype( MPI_DATATYPE_NULL , "DATATYPE_NULL" )
 
-cdef Datatype __PACKED__ = def_Datatype( MPI_PACKED )
-cdef Datatype __BYTE__   = def_Datatype( MPI_BYTE   )
-cdef Datatype __AINT__   = def_Datatype( MPI_AINT   )
-cdef Datatype __OFFSET__ = def_Datatype( MPI_OFFSET )
-cdef Datatype __COUNT__  = def_Datatype( MPI_COUNT  )
+cdef Datatype __PACKED__ = def_Datatype( MPI_PACKED , "PACKED" )
+cdef Datatype __BYTE__   = def_Datatype( MPI_BYTE   , "BYTE"   )
+cdef Datatype __AINT__   = def_Datatype( MPI_AINT   , "AINT"   )
+cdef Datatype __OFFSET__ = def_Datatype( MPI_OFFSET , "OFFSET" )
+cdef Datatype __COUNT__  = def_Datatype( MPI_COUNT  , "COUNT"  )
 
-cdef Datatype __CHAR__               = def_Datatype( MPI_CHAR               )
-cdef Datatype __WCHAR__              = def_Datatype( MPI_WCHAR              )
-cdef Datatype __SIGNED_CHAR__        = def_Datatype( MPI_SIGNED_CHAR        )
-cdef Datatype __SHORT__              = def_Datatype( MPI_SHORT              )
-cdef Datatype __INT__                = def_Datatype( MPI_INT                )
-cdef Datatype __LONG__               = def_Datatype( MPI_LONG               )
-cdef Datatype __LONG_LONG__          = def_Datatype( MPI_LONG_LONG          )
-cdef Datatype __UNSIGNED_CHAR__      = def_Datatype( MPI_UNSIGNED_CHAR      )
-cdef Datatype __UNSIGNED_SHORT__     = def_Datatype( MPI_UNSIGNED_SHORT     )
-cdef Datatype __UNSIGNED__           = def_Datatype( MPI_UNSIGNED           )
-cdef Datatype __UNSIGNED_LONG__      = def_Datatype( MPI_UNSIGNED_LONG      )
-cdef Datatype __UNSIGNED_LONG_LONG__ = def_Datatype( MPI_UNSIGNED_LONG_LONG )
-cdef Datatype __FLOAT__              = def_Datatype( MPI_FLOAT              )
-cdef Datatype __DOUBLE__             = def_Datatype( MPI_DOUBLE             )
-cdef Datatype __LONG_DOUBLE__        = def_Datatype( MPI_LONG_DOUBLE        )
+cdef Datatype __CHAR__               = def_Datatype( MPI_CHAR               , "CHAR"               )
+cdef Datatype __WCHAR__              = def_Datatype( MPI_WCHAR              , "WCHAR"              )
+cdef Datatype __SIGNED_CHAR__        = def_Datatype( MPI_SIGNED_CHAR        , "SIGNED_CHAR"        )
+cdef Datatype __SHORT__              = def_Datatype( MPI_SHORT              , "SHORT"              )
+cdef Datatype __INT__                = def_Datatype( MPI_INT                , "INT"                )
+cdef Datatype __LONG__               = def_Datatype( MPI_LONG               , "LONG"               )
+cdef Datatype __LONG_LONG__          = def_Datatype( MPI_LONG_LONG          , "LONG_LONG"          )
+cdef Datatype __UNSIGNED_CHAR__      = def_Datatype( MPI_UNSIGNED_CHAR      , "UNSIGNED_CHAR"      )
+cdef Datatype __UNSIGNED_SHORT__     = def_Datatype( MPI_UNSIGNED_SHORT     , "UNSIGNED_SHORT"     )
+cdef Datatype __UNSIGNED__           = def_Datatype( MPI_UNSIGNED           , "UNSIGNED"           )
+cdef Datatype __UNSIGNED_LONG__      = def_Datatype( MPI_UNSIGNED_LONG      , "UNSIGNED_LONG"      )
+cdef Datatype __UNSIGNED_LONG_LONG__ = def_Datatype( MPI_UNSIGNED_LONG_LONG , "UNSIGNED_LONG_LONG" )
+cdef Datatype __FLOAT__              = def_Datatype( MPI_FLOAT              , "FLOAT"              )
+cdef Datatype __DOUBLE__             = def_Datatype( MPI_DOUBLE             , "DOUBLE"             )
+cdef Datatype __LONG_DOUBLE__        = def_Datatype( MPI_LONG_DOUBLE        , "LONG_DOUBLE"        )
 
-cdef Datatype __C_BOOL__                = def_Datatype( MPI_C_BOOL      )
-cdef Datatype __INT8_T__                = def_Datatype( MPI_INT8_T      )
-cdef Datatype __INT16_T__               = def_Datatype( MPI_INT16_T     )
-cdef Datatype __INT32_T__               = def_Datatype( MPI_INT32_T     )
-cdef Datatype __INT64_T__               = def_Datatype( MPI_INT64_T     )
-cdef Datatype __UINT8_T__               = def_Datatype( MPI_UINT8_T     )
-cdef Datatype __UINT16_T__              = def_Datatype( MPI_UINT16_T    )
-cdef Datatype __UINT32_T__              = def_Datatype( MPI_UINT32_T    )
-cdef Datatype __UINT64_T__              = def_Datatype( MPI_UINT64_T    )
-cdef Datatype __C_COMPLEX__             = def_Datatype(
-                                              MPI_C_COMPLEX             )
-cdef Datatype __C_FLOAT_COMPLEX__       = def_Datatype(
-                                              MPI_C_FLOAT_COMPLEX       )
-cdef Datatype __C_DOUBLE_COMPLEX__      = def_Datatype(
-                                              MPI_C_DOUBLE_COMPLEX      )
-cdef Datatype __C_LONG_DOUBLE_COMPLEX__ = def_Datatype(
-                                              MPI_C_LONG_DOUBLE_COMPLEX )
+cdef Datatype __C_BOOL__                = def_Datatype( MPI_C_BOOL   , "C_BOOL"   )
+cdef Datatype __INT8_T__                = def_Datatype( MPI_INT8_T   , "INT8_T"   )
+cdef Datatype __INT16_T__               = def_Datatype( MPI_INT16_T  , "INT16_T"  )
+cdef Datatype __INT32_T__               = def_Datatype( MPI_INT32_T  , "INT32_T"  )
+cdef Datatype __INT64_T__               = def_Datatype( MPI_INT64_T  , "INT64_T"  )
+cdef Datatype __UINT8_T__               = def_Datatype( MPI_UINT8_T  , "UINT8_T"  )
+cdef Datatype __UINT16_T__              = def_Datatype( MPI_UINT16_T , "UINT16_T" )
+cdef Datatype __UINT32_T__              = def_Datatype( MPI_UINT32_T , "UINT32_T" )
+cdef Datatype __UINT64_T__              = def_Datatype( MPI_UINT64_T , "UINT64_T" )
 
-cdef Datatype __CXX_BOOL__                = def_Datatype( MPI_CXX_BOOL      )
-cdef Datatype __CXX_FLOAT_COMPLEX__       = def_Datatype(
-                                                MPI_CXX_FLOAT_COMPLEX       )
-cdef Datatype __CXX_DOUBLE_COMPLEX__      = def_Datatype(
-                                                MPI_CXX_DOUBLE_COMPLEX      )
-cdef Datatype __CXX_LONG_DOUBLE_COMPLEX__ = def_Datatype(
-                                                MPI_CXX_LONG_DOUBLE_COMPLEX )
+cdef Datatype __C_COMPLEX__             = def_Datatype( MPI_C_COMPLEX             , "C_COMPLEX"             )
+cdef Datatype __C_FLOAT_COMPLEX__       = __C_COMPLEX__
+cdef Datatype __C_DOUBLE_COMPLEX__      = def_Datatype( MPI_C_DOUBLE_COMPLEX      , "C_DOUBLE_COMPLEX"      )
+cdef Datatype __C_LONG_DOUBLE_COMPLEX__ = def_Datatype( MPI_C_LONG_DOUBLE_COMPLEX , "C_LONG_DOUBLE_COMPLEX" )
 
-cdef Datatype __SHORT_INT__        = def_Datatype( MPI_SHORT_INT       )
-cdef Datatype __INT_INT__          = def_Datatype( MPI_2INT            )
-cdef Datatype __LONG_INT__         = def_Datatype( MPI_LONG_INT        )
-cdef Datatype __FLOAT_INT__        = def_Datatype( MPI_FLOAT_INT       )
-cdef Datatype __DOUBLE_INT__       = def_Datatype( MPI_DOUBLE_INT      )
-cdef Datatype __LONG_DOUBLE_INT__  = def_Datatype( MPI_LONG_DOUBLE_INT )
+cdef Datatype __CXX_BOOL__                = def_Datatype( MPI_CXX_BOOL                , "CXX_BOOL"                )
+cdef Datatype __CXX_FLOAT_COMPLEX__       = def_Datatype( MPI_CXX_FLOAT_COMPLEX       , "CXX_FLOAT_COMPLEX"       )
+cdef Datatype __CXX_DOUBLE_COMPLEX__      = def_Datatype( MPI_CXX_DOUBLE_COMPLEX      , "CXX_DOUBLE_COMPLEX"      )
+cdef Datatype __CXX_LONG_DOUBLE_COMPLEX__ = def_Datatype( MPI_CXX_LONG_DOUBLE_COMPLEX , "CXX_LONG_DOUBLE_COMPLEX" )
 
-cdef Datatype __CHARACTER__        = def_Datatype( MPI_CHARACTER        )
-cdef Datatype __LOGICAL__          = def_Datatype( MPI_LOGICAL          )
-cdef Datatype __INTEGER__          = def_Datatype( MPI_INTEGER          )
-cdef Datatype __REAL__             = def_Datatype( MPI_REAL             )
-cdef Datatype __DOUBLE_PRECISION__ = def_Datatype( MPI_DOUBLE_PRECISION )
-cdef Datatype __COMPLEX__          = def_Datatype( MPI_COMPLEX          )
-cdef Datatype __DOUBLE_COMPLEX__   = def_Datatype( MPI_DOUBLE_COMPLEX   )
+cdef Datatype __SHORT_INT__        = def_Datatype( MPI_SHORT_INT       , "SHORT_INT"       )
+cdef Datatype __INT_INT__          = def_Datatype( MPI_2INT            , "INT_INT"         )
+cdef Datatype __LONG_INT__         = def_Datatype( MPI_LONG_INT        , "LONG_INT"        )
+cdef Datatype __FLOAT_INT__        = def_Datatype( MPI_FLOAT_INT       , "FLOAT_INT"       )
+cdef Datatype __DOUBLE_INT__       = def_Datatype( MPI_DOUBLE_INT      , "DOUBLE_INT"      )
+cdef Datatype __LONG_DOUBLE_INT__  = def_Datatype( MPI_LONG_DOUBLE_INT , "LONG_DOUBLE_INT" )
 
-cdef Datatype __LOGICAL1__  = def_Datatype( MPI_LOGICAL1  )
-cdef Datatype __LOGICAL2__  = def_Datatype( MPI_LOGICAL2  )
-cdef Datatype __LOGICAL4__  = def_Datatype( MPI_LOGICAL4  )
-cdef Datatype __LOGICAL8__  = def_Datatype( MPI_LOGICAL8  )
-cdef Datatype __INTEGER1__  = def_Datatype( MPI_INTEGER1  )
-cdef Datatype __INTEGER2__  = def_Datatype( MPI_INTEGER2  )
-cdef Datatype __INTEGER4__  = def_Datatype( MPI_INTEGER4  )
-cdef Datatype __INTEGER8__  = def_Datatype( MPI_INTEGER8  )
-cdef Datatype __INTEGER16__ = def_Datatype( MPI_INTEGER16 )
-cdef Datatype __REAL2__     = def_Datatype( MPI_REAL2     )
-cdef Datatype __REAL4__     = def_Datatype( MPI_REAL4     )
-cdef Datatype __REAL8__     = def_Datatype( MPI_REAL8     )
-cdef Datatype __REAL16__    = def_Datatype( MPI_REAL16    )
-cdef Datatype __COMPLEX4__  = def_Datatype( MPI_COMPLEX4  )
-cdef Datatype __COMPLEX8__  = def_Datatype( MPI_COMPLEX8  )
-cdef Datatype __COMPLEX16__ = def_Datatype( MPI_COMPLEX16 )
-cdef Datatype __COMPLEX32__ = def_Datatype( MPI_COMPLEX32 )
+cdef Datatype __CHARACTER__        = def_Datatype( MPI_CHARACTER        , "CHARACTER"        )
+cdef Datatype __LOGICAL__          = def_Datatype( MPI_LOGICAL          , "LOGICAL"          )
+cdef Datatype __INTEGER__          = def_Datatype( MPI_INTEGER          , "INTEGER"          )
+cdef Datatype __REAL__             = def_Datatype( MPI_REAL             , "REAL"             )
+cdef Datatype __DOUBLE_PRECISION__ = def_Datatype( MPI_DOUBLE_PRECISION , "DOUBLE_PRECISION" )
+cdef Datatype __COMPLEX__          = def_Datatype( MPI_COMPLEX          , "COMPLEX"          )
+cdef Datatype __DOUBLE_COMPLEX__   = def_Datatype( MPI_DOUBLE_COMPLEX   , "DOUBLE_COMPLEX"   )
+
+cdef Datatype __LOGICAL1__  = def_Datatype( MPI_LOGICAL1  , "LOGICAL1"  )
+cdef Datatype __LOGICAL2__  = def_Datatype( MPI_LOGICAL2  , "LOGICAL2"  )
+cdef Datatype __LOGICAL4__  = def_Datatype( MPI_LOGICAL4  , "LOGICAL4"  )
+cdef Datatype __LOGICAL8__  = def_Datatype( MPI_LOGICAL8  , "LOGICAL8"  )
+cdef Datatype __INTEGER1__  = def_Datatype( MPI_INTEGER1  , "INTEGER1"  )
+cdef Datatype __INTEGER2__  = def_Datatype( MPI_INTEGER2  , "INTEGER2"  )
+cdef Datatype __INTEGER4__  = def_Datatype( MPI_INTEGER4  , "INTEGER4"  )
+cdef Datatype __INTEGER8__  = def_Datatype( MPI_INTEGER8  , "INTEGER8"  )
+cdef Datatype __INTEGER16__ = def_Datatype( MPI_INTEGER16 , "INTEGER16" )
+cdef Datatype __REAL2__     = def_Datatype( MPI_REAL2     , "REAL2"     )
+cdef Datatype __REAL4__     = def_Datatype( MPI_REAL4     , "REAL4"     )
+cdef Datatype __REAL8__     = def_Datatype( MPI_REAL8     , "REAL8"     )
+cdef Datatype __REAL16__    = def_Datatype( MPI_REAL16    , "REAL16"    )
+cdef Datatype __COMPLEX4__  = def_Datatype( MPI_COMPLEX4  , "COMPLEX4"  )
+cdef Datatype __COMPLEX8__  = def_Datatype( MPI_COMPLEX8  , "COMPLEX8"  )
+cdef Datatype __COMPLEX16__ = def_Datatype( MPI_COMPLEX16 , "COMPLEX16" )
+cdef Datatype __COMPLEX32__ = def_Datatype( MPI_COMPLEX32 , "COMPLEX32" )
 
 include "typemap.pxi"
 include "typestr.pxi"
+include "typedec.pxi"
 
 
 # Predefined datatype handles

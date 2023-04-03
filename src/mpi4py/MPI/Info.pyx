@@ -18,23 +18,46 @@ cdef class Info:
     def __bool__(self) -> bool:
         return self.ob_mpi != MPI_INFO_NULL
 
-    @classmethod
-    def Create(cls) -> Info:
-        """
-        Create a new, empty info object
-        """
-        cdef Info info = Info.__new__(Info)
-        CHKERR( MPI_Info_create(&info.ob_mpi) )
-        return info
+    def __reduce__(self) -> Union[str, tuple[Any, ...]]:
+        return reduce_Info(self)
 
     @classmethod
-    def Create_env(cls, args: Optional[Sequence[str]] = None) -> Info:
+    def Create(
+        cls,
+        items: Union[
+            Info,
+            Mapping[str, str],
+            Iterable[Tuple[str, str]],
+            None,
+        ] = None,
+    ) -> Self:
         """
         Create a new info object
         """
+        cdef Info info = <Info>New(cls)
+        CHKERR( MPI_Info_create(&info.ob_mpi) )
+        if items is None: return info
+        cdef object key, value
+        try:
+            if hasattr(items, 'keys'):
+                for key in items.keys():
+                    info.Set(key, items[key])
+            else:
+                for key, value in items:
+                    info.Set(key, value)
+        except:
+            CHKERR( MPI_Info_free(&info.ob_mpi) )
+            raise
+        return info
+
+    @classmethod
+    def Create_env(cls, args: Optional[Sequence[str]] = None) -> Self:
+        """
+        Create a new environment info object
+        """
         cdef int argc = 0
         cdef char **argv = MPI_ARGV_NULL
-        cdef Info info = Info.__new__(Info)
+        cdef Info info = <Info>New(cls)
         args = asarray_argv(args, &argv)
         while argv and argv[argc]: argc += 1
         CHKERR( MPI_Info_create_env(argc, argv, &info.ob_mpi) )
@@ -42,17 +65,17 @@ cdef class Info:
 
     def Free(self) -> None:
         """
-        Free a info object
+        Free an info object
         """
         CHKERR( MPI_Info_free(&self.ob_mpi) )
         if self is __INFO_ENV__: self.ob_mpi = MPI_INFO_ENV
 
-    def Dup(self) -> Info:
+    def Dup(self) -> Self:
         """
         Duplicate an existing info object, creating a new object, with
         the same (key, value) pairs and the same ordering of keys
         """
-        cdef Info info = Info.__new__(Info)
+        cdef Info info = <Info>New(type(self))
         CHKERR( MPI_Info_dup(self.ob_mpi, &info.ob_mpi) )
         return info
 
@@ -208,17 +231,21 @@ cdef class Info:
 
     def update(
         self,
-        other: Union[Info, Mapping[str, str], Iterable[Tuple[str, str]]] = (),
+        items: Union[
+            Info,
+            Mapping[str, str],
+            Iterable[Tuple[str, str]]
+        ] = (),
         **kwds: str,
     ) -> None:
         """info update"""
         if not self: raise KeyError
         cdef object key, value
-        if hasattr(other, 'keys'):
-            for key in other.keys():
-                self.Set(key, other[key])
+        if hasattr(items, 'keys'):
+            for key in items.keys():
+                self.Set(key, items[key])
         else:
-            for key, value in other:
+            for key, value in items:
                 self.Set(key, value)
         for key, value in kwds.items():
             self.Set(key, value)
@@ -247,9 +274,9 @@ cdef class Info:
         self.Delete(key)
         return (key, value)
 
-    def copy(self) -> Info:
+    def copy(self) -> Self:
         """info copy"""
-        if not self: return Info()
+        if not self: return <Info>New(type(self))
         return self.Dup()
 
     def clear(self) -> None:
@@ -264,8 +291,8 @@ cdef class Info:
 
 
 
-cdef Info __INFO_NULL__ = def_Info( MPI_INFO_NULL )
-cdef Info __INFO_ENV__  = def_Info( MPI_INFO_ENV  )
+cdef Info __INFO_NULL__ = def_Info( MPI_INFO_NULL , "INFO_NULL" )
+cdef Info __INFO_ENV__  = def_Info( MPI_INFO_ENV  , "INFO_ENV"  )
 
 
 # Predefined info handles

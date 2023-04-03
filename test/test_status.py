@@ -93,6 +93,16 @@ class TestStatus(unittest.TestCase):
         except NotImplementedError:
             pass
 
+    def testPickle(self):
+        from pickle import dumps, loads
+        self.STATUS.source = 1
+        self.STATUS.tag    = 2
+        self.STATUS.error  = MPI.ERR_ARG
+        status = loads(dumps(self.STATUS))
+        self.assertEqual(status.source, 1)
+        self.assertEqual(status.tag,    2)
+        self.assertEqual(status.error,  MPI.ERR_ARG)
+
 
 if __name__ == '__main__':
     unittest.main()
