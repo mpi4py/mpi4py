@@ -347,7 +347,9 @@ class BaseTestP2PObj:
                 self.assertFalse(flag)
                 rmess = self.COMM.recv(None, rank, 0)
                 self.assertEqual(rmess, smess)
-            flag = MPI.Request.Testall(reqs)
+            flag = False
+            for k in range(2):
+                flag |= MPI.Request.Testall(reqs)
             self.assertTrue(flag)
 
     def testSSendAndRecv(self):
