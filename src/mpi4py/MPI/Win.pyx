@@ -44,6 +44,9 @@ cdef class Win:
     def __bool__(self) -> bool:
         return self.ob_mpi != MPI_WIN_NULL
 
+    def __reduce__(self) -> Union[str, tuple[Any, ...]]:
+        return reduce_default(self)
+
     # Window Creation
     # ---------------
 
@@ -54,7 +57,7 @@ cdef class Win:
         Aint disp_unit: int = 1,
         Info info: Info = INFO_NULL,
         Intracomm comm: Intracomm = COMM_SELF,
-    ) -> Win:
+    ) -> Self:
         """
         Create an window object for one-sided communication
         """
@@ -64,7 +67,7 @@ cdef class Win:
             memory = None
         if memory is not None:
             memory = asbuffer_w(memory, &base, &size)
-        cdef Win win = Win.__new__(Win)
+        cdef Win win = <Win>New(cls)
         with nogil: CHKERR( MPI_Win_create_c(
             base, size, disp_unit,
             info.ob_mpi, comm.ob_mpi, &win.ob_mpi) )
@@ -79,12 +82,12 @@ cdef class Win:
         Aint disp_unit: int = 1,
         Info info: Info = INFO_NULL,
         Intracomm comm: Intracomm = COMM_SELF,
-    ) -> Win:
+    ) -> Self:
         """
         Create an window object for one-sided communication
         """
         cdef void *base = NULL
-        cdef Win win = Win.__new__(Win)
+        cdef Win win = <Win>New(cls)
         with nogil: CHKERR( MPI_Win_allocate_c(
             size, disp_unit, info.ob_mpi,
             comm.ob_mpi, &base, &win.ob_mpi) )
@@ -98,12 +101,12 @@ cdef class Win:
         Aint disp_unit: int = 1,
         Info info: Info = INFO_NULL,
         Intracomm comm: Intracomm = COMM_SELF,
-        ) -> Win:
+    ) -> Self:
         """
         Create an window object for one-sided communication
         """
         cdef void *base = NULL
-        cdef Win win = Win.__new__(Win)
+        cdef Win win = <Win>New(cls)
         with nogil: CHKERR( MPI_Win_allocate_shared_c(
             size, disp_unit, info.ob_mpi,
             comm.ob_mpi, &base, &win.ob_mpi) )
@@ -129,11 +132,11 @@ cdef class Win:
         cls,
         Info info: Info = INFO_NULL,
         Intracomm comm: Intracomm = COMM_SELF,
-    ) -> Win:
+    ) -> Self:
         """
         Create an window object for one-sided communication
         """
-        cdef Win win = Win.__new__(Win)
+        cdef Win win = <Win>New(cls)
         with nogil: CHKERR( MPI_Win_create_dynamic(
             info.ob_mpi, comm.ob_mpi, &win.ob_mpi) )
         win_set_eh(win.ob_mpi)
@@ -184,7 +187,7 @@ cdef class Win:
         Return the hints for a windows
         that are currently in use
         """
-        cdef Info info = Info.__new__(Info)
+        cdef Info info = <Info>New(Info)
         with nogil: CHKERR( MPI_Win_get_info( self.ob_mpi, &info.ob_mpi) )
         return info
 
@@ -453,7 +456,7 @@ cdef class Win:
         """
         cdef _p_msg_rma msg = message_rma()
         msg.for_put(origin, target_rank, target)
-        cdef Request request = Request.__new__(Request)
+        cdef Request request = <Request>New(Request)
         with nogil: CHKERR( MPI_Rput_c(
             msg.oaddr, msg.ocount, msg.otype,
             target_rank,
@@ -473,7 +476,7 @@ cdef class Win:
         """
         cdef _p_msg_rma msg = message_rma()
         msg.for_get(origin, target_rank, target)
-        cdef Request request = Request.__new__(Request)
+        cdef Request request = <Request>New(Request)
         with nogil: CHKERR( MPI_Rget_c(
             msg.oaddr, msg.ocount, msg.otype,
             target_rank,
@@ -494,7 +497,7 @@ cdef class Win:
         """
         cdef _p_msg_rma msg = message_rma()
         msg.for_acc(origin, target_rank, target)
-        cdef Request request = Request.__new__(Request)
+        cdef Request request = <Request>New(Request)
         with nogil: CHKERR( MPI_Raccumulate_c(
             msg.oaddr, msg.ocount, msg.otype,
             target_rank,
@@ -517,7 +520,7 @@ cdef class Win:
         """
         cdef _p_msg_rma msg = message_rma()
         msg.for_get_acc(origin, result, target_rank, target)
-        cdef Request request = Request.__new__(Request)
+        cdef Request request = <Request>New(Request)
         with nogil: CHKERR( MPI_Rget_accumulate_c(
             msg.oaddr, msg.ocount, msg.otype,
             msg.raddr, msg.rcount, msg.rtype,
@@ -655,7 +658,7 @@ cdef class Win:
         """
         Create a new error handler for windows
         """
-        cdef Errhandler errhandler = Errhandler.__new__(Errhandler)
+        cdef Errhandler errhandler = <Errhandler>New(Errhandler)
         cdef MPI_Win_errhandler_function *fn = NULL
         cdef int index = errhdl_new(errhandler_fn, &fn)
         try: CHKERR( MPI_Win_create_errhandler(fn, &errhandler.ob_mpi) )
@@ -666,7 +669,7 @@ cdef class Win:
         """
         Get the error handler for a window
         """
-        cdef Errhandler errhandler = Errhandler.__new__(Errhandler)
+        cdef Errhandler errhandler = <Errhandler>New(Errhandler)
         CHKERR( MPI_Win_get_errhandler(self.ob_mpi, &errhandler.ob_mpi) )
         return errhandler
 
@@ -725,8 +728,7 @@ cdef class Win:
         return PyMPIWin_New(MPI_Win_f2c(arg))
 
 
-
-cdef Win __WIN_NULL__ = def_Win( MPI_WIN_NULL )
+cdef Win __WIN_NULL__ = def_Win( MPI_WIN_NULL , "WIN_NULL" )
 
 
 # Predefined window handles

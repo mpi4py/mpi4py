@@ -109,7 +109,7 @@ cdef class memory:
         if size < 0:
             raise ValueError("expecting non-negative size")
         cdef object ob = rawalloc(size, 1, clear, &buf)
-        cdef memory mem = memory.__new__(memory)
+        cdef memory mem = <memory>New(memory)
         PyBuffer_FillInfo(&mem.view, ob, buf, size, 0, PyBUF_SIMPLE)
         return mem
 
@@ -121,7 +121,7 @@ cdef class memory:
         """Memory from buffer-like object"""
         cdef int flags = PyBUF_SIMPLE
         if not readonly: flags |= PyBUF_WRITABLE
-        cdef memory mem = memory.__new__(memory)
+        cdef memory mem = <memory>New(memory)
         PyMPI_GetBuffer(obj, &mem.view, flags)
         mem.view.readonly = readonly
         return mem
@@ -139,7 +139,7 @@ cdef class memory:
             raise ValueError("expecting non-negative buffer length")
         elif size > 0 and buf == NULL:
             raise ValueError("expecting non-NULL address")
-        cdef memory mem = memory.__new__(memory)
+        cdef memory mem = <memory>New(memory)
         PyBuffer_FillInfo(&mem.view, <object>NULL,
                           buf, size, readonly, PyBUF_SIMPLE)
         return mem
@@ -193,7 +193,7 @@ cdef class memory:
         cdef object obj = self
         if self.view.obj != NULL:
             obj = <object>self.view.obj
-        cdef memory mem = memory.__new__(memory)
+        cdef memory mem = <memory>New(memory)
         PyBuffer_FillInfo(&mem.view, obj,
                           buf, size, 1, PyBUF_SIMPLE)
         return mem
@@ -262,7 +262,7 @@ cdef class memory:
 #------------------------------------------------------------------------------
 
 cdef inline memory newbuffer():
-    return memory.__new__(memory)
+    return <memory>New(memory)
 
 cdef inline memory getbuffer(object ob, bint readonly, bint format):
     cdef memory buf = newbuffer()

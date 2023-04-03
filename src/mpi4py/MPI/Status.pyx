@@ -22,6 +22,34 @@ cdef class Status:
         cdef str cls = type(self).__name__
         raise TypeError(f"unorderable type '{mod}.{cls}'")
 
+    def __reduce__(self) -> tuple[Any, tuple[Any, ...], dict[str, Any]]:
+        return (__newobj__, (type(self),), self.__getstate__())
+
+    def __getstate__(self) -> Dict[str, int]:
+        cdef dict state = {
+            'source': self.Get_source(),
+            'tag': self.Get_tag(),
+            'error': self.Get_error(),
+        }
+        try:
+            state['count'] = self.Get_elements(__BYTE__)
+        except NotImplementedError:
+            pass
+        try:
+            state['cancelled'] = self.Is_cancelled()
+        except NotImplementedError:
+            pass
+        return state
+
+    def __setstate__(self, state: Dict[str, int]) -> None:
+        self.Set_source(state['source'])
+        self.Set_tag(state['tag'])
+        self.Set_error(state['error'])
+        if 'count' in state:
+            self.Set_elements(__BYTE__, state['count'])
+        if 'cancelled' in state:
+            self.Set_cancelled(state['cancelled'])
+
     def Get_source(self) -> int:
         """
         Get message source
@@ -98,6 +126,8 @@ cdef class Status:
         """byte count"""
         def __get__(self) -> int:
             return self.Get_count(__BYTE__)
+        def __set__(self, value: int):
+            self.Set_elements(__BYTE__, value)
 
     def Get_elements(self, Datatype datatype: Datatype) -> int:
         """
@@ -134,7 +164,7 @@ cdef class Status:
         """
         Set the cancelled state associated with a status
 
-        .. note:: This should be only used when implementing
+        .. note:: This should be used only when implementing
            query callback functions for generalized requests
         """
         CHKERR( MPI_Status_set_cancelled(&self.ob_mpi, flag) )
@@ -145,7 +175,7 @@ cdef class Status:
         """
         def __get__(self) -> bool:
             return self.Is_cancelled()
-        def __set__(self, value: int):
+        def __set__(self, value: bool):
             self.Set_cancelled(value)
 
     # Fortran Handle
@@ -163,10 +193,10 @@ cdef class Status:
         return [f_status[i] for i in range(n)]
 
     @classmethod
-    def f2py(cls, arg: List[int]) -> Status:
+    def f2py(cls, arg: List[int]) -> Self:
         """
         """
-        cdef Status status = Status.__new__(Status)
+        cdef Status status = <Status>New(cls)
         cdef Py_ssize_t n = <int>(sizeof(MPI_Status)//sizeof(int))
         cdef MPI_Status *c_status = &status.ob_mpi
         cdef MPI_Fint *f_status = NULL
@@ -174,7 +204,6 @@ cdef class Status:
         for i in range(n): f_status[i] = arg[i]
         CHKERR( MPI_Status_f2c(f_status, c_status) )
         return status
-
 
 
 F_SOURCE      = MPI_F_SOURCE

@@ -8,6 +8,14 @@ class TestInfoNull(unittest.TestCase):
     def testTruth(self):
         self.assertFalse(bool(MPI.INFO_NULL))
 
+    def testPickle(self):
+        from pickle import dumps, loads
+        null = loads(dumps(MPI.INFO_NULL))
+        self.assertIs(null, MPI.INFO_NULL)
+        null = loads(dumps(MPI.Info()))
+        self.assertIsNot(null, MPI.INFO_NULL)
+        self.assertEqual(null, MPI.INFO_NULL)
+
     def testPyMethods(self):
         inull = MPI.INFO_NULL
         def getitem(): return inull['k']
@@ -48,6 +56,14 @@ class TestInfoEnv(unittest.TestCase):
 
     def testTruth(self):
         self.assertTrue(bool(MPI.INFO_ENV))
+
+    def testPickle(self):
+        from pickle import dumps, loads
+        ienv = loads(dumps(MPI.INFO_ENV))
+        self.assertIs(ienv, MPI.INFO_ENV)
+        ienv = loads(dumps(MPI.Info(MPI.INFO_ENV)))
+        self.assertIsNot(ienv, MPI.INFO_ENV)
+        self.assertEqual(ienv, MPI.INFO_ENV)
 
     def testPyMethods(self):
         env = MPI.INFO_ENV
@@ -137,6 +153,22 @@ class TestInfo(unittest.TestCase):
         self.assertEqual(nkeys, 0)
         value = INFO.Get('key')
         self.assertIsNone(value)
+
+    def testPickle(self):
+        from pickle import dumps, loads
+        mold = self.INFO
+        info = loads(dumps(mold))
+        self.assertIsNot(info, mold)
+        self.assertNotEqual(info, mold)
+        self.assertEqual(info.items(), mold.items())
+        info.Free()
+        mold = self.INFO
+        mold.update([("foo", "bar"), ("answer", "42")])
+        info = loads(dumps(mold))
+        self.assertIsNot(info, mold)
+        self.assertNotEqual(info, mold)
+        self.assertEqual(info.items(), mold.items())
+        info.Free()
 
     def testPyMethods(self):
         INFO = self.INFO

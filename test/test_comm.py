@@ -20,6 +20,14 @@ class TestCommNull(unittest.TestCase):
         self.assertEqual(comm_null, MPI.COMM_NULL)
         self.assertIsNot(comm_null, MPI.COMM_NULL)
 
+    def testPickle(self):
+        from pickle import dumps, loads
+        comm_null = loads(dumps(MPI.COMM_NULL))
+        self.assertIs(comm_null, MPI.COMM_NULL)
+        comm_null = loads(dumps(MPI.Comm(MPI.COMM_NULL)))
+        self.assertIsNot(comm_null, MPI.COMM_NULL)
+        self.assertEqual(comm_null, MPI.COMM_NULL)
+
 class BaseTestComm:
 
     def testConstructor(self):
@@ -288,6 +296,19 @@ class BaseTestComm:
         for comm in hwcomm[1:]:
             comm.Free()
 
+    def testPickle(self):
+        from pickle import dumps, loads
+        COMM = self.COMM
+        if COMM in (MPI.COMM_SELF, MPI.COMM_WORLD):
+            comm = loads(dumps(COMM))
+            self.assertIs(comm, COMM)
+            comm = loads(dumps(MPI.Intracomm(COMM)))
+            self.assertIsNot(comm, COMM)
+            self.assertEqual(comm, COMM)
+        else:
+            self.assertRaises(ValueError, dumps, COMM)
+
+
 class TestCommSelf(BaseTestComm, unittest.TestCase):
     def setUp(self):
         self.COMM = MPI.COMM_SELF
@@ -304,20 +325,26 @@ class TestCommSelf(BaseTestComm, unittest.TestCase):
     def testCreateFromGroup(self):
         super().testCreateFromGroup()
 
+
 class TestCommWorld(BaseTestComm, unittest.TestCase):
+
     def setUp(self):
         self.COMM = MPI.COMM_WORLD
 
 class TestCommSelfDup(TestCommSelf):
+
     def setUp(self):
         self.COMM = MPI.COMM_SELF.Dup()
+
     def tearDown(self):
         self.COMM.Free()
 
 @unittest.skipMPI('openmpi(<1.4.0)', MPI.Query_thread() > MPI.THREAD_SINGLE)
 class TestCommWorldDup(TestCommWorld):
+
     def setUp(self):
         self.COMM = MPI.COMM_WORLD.Dup()
+
     def tearDown(self):
         self.COMM.Free()
 

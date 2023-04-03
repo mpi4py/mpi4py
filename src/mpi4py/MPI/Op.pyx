@@ -18,6 +18,9 @@ cdef class Op:
     def __bool__(self) -> bool:
         return self.ob_mpi != MPI_OP_NULL
 
+    def __reduce__(self) -> Union[str, tuple[Any, ...]]:
+        return reduce_Op(self)
+
     def __call__(self, x: Any, y: Any) -> Any:
         return op_call(self.ob_mpi, self.ob_uid, x, y)
 
@@ -26,23 +29,23 @@ cdef class Op:
         cls,
         function: Callable[[Buffer, Buffer, Datatype], None],
         bint commute: bool = False,
-    ) -> Op:
+    ) -> Self:
         """
         Create a user-defined operation
         """
-        cdef Op op = Op.__new__(Op)
+        cdef Op self = <Op>New(cls)
         cdef MPI_User_function   *fn_i = NULL
         cdef MPI_User_function_c *fn_c = NULL
-        op.ob_uid = op_user_new(function, &fn_i, &fn_c)
+        self.ob_uid = op_user_new(function, &fn_i, &fn_c)
         try:
             try:
-                CHKERR( MPI_Op_create_c(fn_c, commute, &op.ob_mpi) )
+                CHKERR( MPI_Op_create_c(fn_c, commute, &self.ob_mpi) )
             except NotImplementedError:
-                CHKERR( MPI_Op_create(fn_i, commute, &op.ob_mpi) )
+                CHKERR( MPI_Op_create(fn_i, commute, &self.ob_mpi) )
         except:
-            op_user_del(&op.ob_uid)
+            op_user_del(&self.ob_uid)
             raise
-        return op
+        return self
 
     def Free(self) -> None:
         """
@@ -134,22 +137,21 @@ cdef class Op:
         return PyMPIOp_New(MPI_Op_f2c(arg))
 
 
-
-cdef Op __OP_NULL__ = def_Op( MPI_OP_NULL )
-cdef Op __MAX__     = def_Op( MPI_MAX     )
-cdef Op __MIN__     = def_Op( MPI_MIN     )
-cdef Op __SUM__     = def_Op( MPI_SUM     )
-cdef Op __PROD__    = def_Op( MPI_PROD    )
-cdef Op __LAND__    = def_Op( MPI_LAND    )
-cdef Op __BAND__    = def_Op( MPI_BAND    )
-cdef Op __LOR__     = def_Op( MPI_LOR     )
-cdef Op __BOR__     = def_Op( MPI_BOR     )
-cdef Op __LXOR__    = def_Op( MPI_LXOR    )
-cdef Op __BXOR__    = def_Op( MPI_BXOR    )
-cdef Op __MAXLOC__  = def_Op( MPI_MAXLOC  )
-cdef Op __MINLOC__  = def_Op( MPI_MINLOC  )
-cdef Op __REPLACE__ = def_Op( MPI_REPLACE )
-cdef Op __NO_OP__   = def_Op( MPI_NO_OP   )
+cdef Op __OP_NULL__ = def_Op( MPI_OP_NULL , "OP_NULL" )
+cdef Op __MAX__     = def_Op( MPI_MAX     , "MAX"     )
+cdef Op __MIN__     = def_Op( MPI_MIN     , "MIN"     )
+cdef Op __SUM__     = def_Op( MPI_SUM     , "SUM"     )
+cdef Op __PROD__    = def_Op( MPI_PROD    , "PROD"    )
+cdef Op __LAND__    = def_Op( MPI_LAND    , "LAND"    )
+cdef Op __BAND__    = def_Op( MPI_BAND    , "BAND"    )
+cdef Op __LOR__     = def_Op( MPI_LOR     , "LOR"     )
+cdef Op __BOR__     = def_Op( MPI_BOR     , "BOR"     )
+cdef Op __LXOR__    = def_Op( MPI_LXOR    , "LXOR"    )
+cdef Op __BXOR__    = def_Op( MPI_BXOR    , "BXOR"    )
+cdef Op __MAXLOC__  = def_Op( MPI_MAXLOC  , "MAXLOC"  )
+cdef Op __MINLOC__  = def_Op( MPI_MINLOC  , "MINLOC"  )
+cdef Op __REPLACE__ = def_Op( MPI_REPLACE , "REPLACE" )
+cdef Op __NO_OP__   = def_Op( MPI_NO_OP   , "NO_OP"   )
 
 
 # Predefined operation handles

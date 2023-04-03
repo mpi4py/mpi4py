@@ -18,6 +18,9 @@ cdef class Group:
     def __bool__(self) -> bool:
         return self.ob_mpi != MPI_GROUP_NULL
 
+    def __reduce__(self) -> Union[str, tuple[Any, ...]]:
+        return reduce_default(self)
+
     # Group Accessors
     # ---------------
 
@@ -91,32 +94,32 @@ cdef class Group:
     # Group Constructors
     # ------------------
 
-    def Dup(self) -> Group:
+    def Dup(self) -> Self:
         """
         Duplicate a group
         """
-        cdef Group group = Group.__new__(Group)
+        cdef Group group = <Group>New(type(self))
         CHKERR( MPI_Group_union(self.ob_mpi, MPI_GROUP_EMPTY, &group.ob_mpi) )
         return group
 
     @classmethod
-    def Union(cls, Group group1: Group, Group group2: Group) -> Group:
+    def Union(cls, Group group1: Group, Group group2: Group) -> Self:
         """
         Produce a group by combining
         two existing groups
         """
-        cdef Group group = Group.__new__(Group)
+        cdef Group group = <Group>New(cls)
         CHKERR( MPI_Group_union(
                 group1.ob_mpi, group2.ob_mpi, &group.ob_mpi) )
         return group
 
     @classmethod
-    def Intersection(cls, Group group1: Group, Group group2: Group) -> Group:
+    def Intersection(cls, Group group1: Group, Group group2: Group) -> Self:
         """
         Produce a group as the intersection
         of two existing groups
         """
-        cdef Group group = Group.__new__(Group)
+        cdef Group group = <Group>New(cls)
         CHKERR( MPI_Group_intersection(
                 group1.ob_mpi, group2.ob_mpi, &group.ob_mpi) )
         return group
@@ -124,39 +127,39 @@ cdef class Group:
     Intersect = Intersection
 
     @classmethod
-    def Difference(cls, Group group1: Group, Group group2: Group) -> Group:
+    def Difference(cls, Group group1: Group, Group group2: Group) -> Self:
         """
         Produce a group from the difference
         of two existing groups
         """
-        cdef Group group = Group.__new__(Group)
+        cdef Group group = <Group>New(cls)
         CHKERR( MPI_Group_difference(
                 group1.ob_mpi, group2.ob_mpi, &group.ob_mpi) )
         return group
 
-    def Incl(self, ranks: Sequence[int]) -> Group:
+    def Incl(self, ranks: Sequence[int]) -> Self:
         """
         Produce a group by reordering an existing
         group and taking only listed members
         """
         cdef int n = 0, *iranks = NULL
         ranks = getarray(ranks, &n, &iranks)
-        cdef Group group = Group.__new__(Group)
+        cdef Group group = <Group>New(type(self))
         CHKERR( MPI_Group_incl(self.ob_mpi, n, iranks, &group.ob_mpi) )
         return group
 
-    def Excl(self, ranks: Sequence[int]) -> Group:
+    def Excl(self, ranks: Sequence[int]) -> Self:
         """
         Produce a group by reordering an existing
         group and taking only unlisted members
         """
         cdef int n = 0, *iranks = NULL
         ranks = getarray(ranks, &n, &iranks)
-        cdef Group group = Group.__new__(Group)
+        cdef Group group = <Group>New(type(self))
         CHKERR( MPI_Group_excl(self.ob_mpi, n, iranks, &group.ob_mpi) )
         return group
 
-    def Range_incl(self, ranks: Sequence[Tuple[int, int, int]]) -> Group:
+    def Range_incl(self, ranks: Sequence[Tuple[int, int, int]]) -> Self:
         """
         Create a new group from ranges of
         of ranks in an existing group
@@ -168,11 +171,11 @@ cdef class Group:
         for i in range(n):
             p = <int*> ranges[i]
             p[0], p[1], p[2] = ranks[i]
-        cdef Group group = Group.__new__(Group)
+        cdef Group group = <Group>New(type(self))
         CHKERR( MPI_Group_range_incl(self.ob_mpi, n, ranges, &group.ob_mpi) )
         return group
 
-    def Range_excl(self, ranks: Sequence[Tuple[int, int, int]]) -> Group:
+    def Range_excl(self, ranks: Sequence[Tuple[int, int, int]]) -> Self:
         """
         Create a new group by excluding ranges
         of processes from an existing group
@@ -184,7 +187,7 @@ cdef class Group:
         for i in range(n):
             p = <int*> ranges[i]
             p[0], p[1], p[2] = ranks[i]
-        cdef Group group = Group.__new__(Group)
+        cdef Group group = <Group>New(type(self))
         CHKERR( MPI_Group_range_excl(self.ob_mpi, n, ranges, &group.ob_mpi) )
         return group
 
@@ -193,13 +196,13 @@ cdef class Group:
         cls,
         Session session: Session,
         pset_name: str,
-    ) -> Group:
+    ) -> Self:
         """
         Create a new group from session and process set
         """
         cdef char *cname = NULL
         pset_name = asmpistr(pset_name, &cname)
-        cdef Group group = Group.__new__(Group)
+        cdef Group group = <Group>New(cls)
         CHKERR( MPI_Group_from_session_pset(
             session.ob_mpi, cname, &group.ob_mpi) )
         return group
@@ -229,9 +232,8 @@ cdef class Group:
         return PyMPIGroup_New(MPI_Group_f2c(arg))
 
 
-
-cdef Group __GROUP_NULL__  = def_Group ( MPI_GROUP_NULL  )
-cdef Group __GROUP_EMPTY__ = def_Group ( MPI_GROUP_EMPTY )
+cdef Group __GROUP_NULL__  = def_Group ( MPI_GROUP_NULL  , "GROUP_NULL"  )
+cdef Group __GROUP_EMPTY__ = def_Group ( MPI_GROUP_EMPTY , "GROUP_EMPTY" )
 
 
 # Predefined group handles

@@ -30,6 +30,12 @@ Release 4.0.0 [2023-XX-XX]
   + Add methods `Comm.Create_errhandler()`, `Win.Create_errhandler()`,
     and `File.Create_errhandler()` to create custom error handlers.
 
+  * Add support for pickle serialization of instances of MPI types.
+    All instances of `Datatype`, `Info`, and `Status` can be
+    serialized. Instances of `Op` can be serialized only if created
+    through `mpi4py` by calling `Op.Create()`. Instances of other MPI
+    types can be serialized only if they reference predefined handles.
+
 * Backward-incompatible changes:
 
   * Python 2 is no longer supported, Python 3.6+ is required, but

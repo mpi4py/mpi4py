@@ -18,6 +18,9 @@ cdef class Message:
     def __bool__(self) -> bool:
         return self.ob_mpi != MPI_MESSAGE_NULL
 
+    def __reduce__(self) -> Union[str, tuple[Any, ...]]:
+        return reduce_default(self)
+
     # Matching Probe
     # --------------
 
@@ -28,7 +31,7 @@ cdef class Message:
         int source: int = ANY_SOURCE,
         int tag: int = ANY_TAG,
         Status status: Optional[Status] = None,
-    ) -> Message:
+    ) -> Self:
         """
         Blocking test for a matched message
         """
@@ -36,7 +39,7 @@ cdef class Message:
         cdef MPI_Status *statusp = arg_Status(status)
         with nogil: CHKERR( MPI_Mprobe(
             source, tag, comm.ob_mpi, &cmessage, statusp) )
-        cdef Message message = <Message>cls.__new__(cls)
+        cdef Message message = <Message>New(cls)
         message.ob_mpi = cmessage
         return message
 
@@ -47,7 +50,7 @@ cdef class Message:
         int source: int = ANY_SOURCE,
         int tag: int = ANY_TAG,
         Status status: Optional[Status] = None,
-    ) -> Optional[Message]:
+    ) -> Optional[Self]:
         """
         Nonblocking test for a matched message
         """
@@ -57,7 +60,7 @@ cdef class Message:
         with nogil: CHKERR( MPI_Improbe(
              source, tag, comm.ob_mpi, &flag, &cmessage, statusp) )
         if flag == 0: return None
-        cdef Message message = <Message>cls.__new__(cls)
+        cdef Message message = <Message>New(cls)
         message.ob_mpi = cmessage
         return message
 
@@ -93,7 +96,7 @@ cdef class Message:
         if message == MPI_MESSAGE_NO_PROC:
             source = MPI_PROC_NULL
         cdef _p_msg_p2p rmsg = message_p2p_recv(buf, source)
-        cdef Request request = Request.__new__(Request)
+        cdef Request request = <Request>New(Request)
         with nogil: CHKERR( MPI_Imrecv_c(
             rmsg.buf, rmsg.count, rmsg.dtype,
             &message, &request.ob_mpi) )
@@ -112,9 +115,9 @@ cdef class Message:
         int source: int = ANY_SOURCE,
         int tag: int = ANY_TAG,
         Status status: Optional[Status] = None,
-    ) -> Message:
+    ) -> Self:
         """Blocking test for a matched message"""
-        cdef Message message = <Message>Message.__new__(cls)
+        cdef Message message = <Message>New(cls)
         cdef MPI_Status *statusp = arg_Status(status)
         message.ob_buf = PyMPI_mprobe(source, tag, comm.ob_mpi,
                                       &message.ob_mpi, statusp)
@@ -122,14 +125,15 @@ cdef class Message:
     #
     @classmethod
     def iprobe(
-        cls, Comm comm: Comm,
+        cls,
+        Comm comm: Comm,
         int source: int = ANY_SOURCE,
         int tag: int = ANY_TAG,
         Status status: Optional[Status] = None,
-    ) -> Optional[Message]:
+    ) -> Optional[Self]:
         """Nonblocking test for a matched message"""
         cdef int flag = 0
-        cdef Message message = <Message>Message.__new__(cls)
+        cdef Message message = <Message>New(cls)
         cdef MPI_Status *statusp = arg_Status(status)
         message.ob_buf = PyMPI_improbe(source, tag, comm.ob_mpi, &flag,
                                        &message.ob_mpi, statusp)
@@ -150,7 +154,7 @@ cdef class Message:
         """Nonblocking receive of matched message"""
         cdef object rmsg = self.ob_buf
         cdef MPI_Message message = self.ob_mpi
-        cdef Request request = Request.__new__(Request)
+        cdef Request request = <Request>New(Request)
         request.ob_buf = PyMPI_imrecv(rmsg, &message, &request.ob_mpi)
         if self is not __MESSAGE_NO_PROC__: self.ob_mpi = message
         if self.ob_mpi == MPI_MESSAGE_NULL: self.ob_buf = None
@@ -171,8 +175,8 @@ cdef class Message:
         return PyMPIMessage_New(MPI_Message_f2c(arg))
 
 
-cdef Message __MESSAGE_NULL__    = def_Message ( MPI_MESSAGE_NULL    )
-cdef Message __MESSAGE_NO_PROC__ = def_Message ( MPI_MESSAGE_NO_PROC )
+cdef Message __MESSAGE_NULL__    = def_Message ( MPI_MESSAGE_NULL    , "MESSAGE_NULL"    )
+cdef Message __MESSAGE_NO_PROC__ = def_Message ( MPI_MESSAGE_NO_PROC , "MESSAGE_NO_PROC" )
 
 
 # Predefined message handles

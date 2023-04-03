@@ -31,7 +31,7 @@ cdef class _p_datarep:
         cdef MPI_Count flen = <MPI_Count> PY_SSIZE_T_MAX # XXX
         cdef object ubuf = mpibuf(userbuf, ulen)
         cdef object fbuf = mpibuf(filebuf, flen)
-        cdef Datatype dtype = Datatype.__new__(Datatype)
+        cdef Datatype dtype = <Datatype>New(Datatype)
         dtype.ob_mpi = datatype
         try: self.read_fn(ubuf, dtype, count, fbuf, position)
         finally: dtype.ob_mpi = MPI_DATATYPE_NULL
@@ -52,7 +52,7 @@ cdef class _p_datarep:
         cdef MPI_Count flen = <MPI_Count> PY_SSIZE_T_MAX # XXX
         cdef object ubuf = mpibuf(userbuf, ulen)
         cdef object fbuf = mpibuf(filebuf, flen)
-        cdef Datatype dtype = Datatype.__new__(Datatype)
+        cdef Datatype dtype = <Datatype>New(Datatype)
         dtype.ob_mpi = datatype
         try: self.write_fn(ubuf, dtype, count, fbuf, position)
         finally: dtype.ob_mpi = MPI_DATATYPE_NULL
@@ -63,7 +63,7 @@ cdef class _p_datarep:
         MPI_Datatype datatype,
         MPI_Aint *file_extent,
     ) except -1:
-        cdef Datatype dtype = Datatype.__new__(Datatype)
+        cdef Datatype dtype = <Datatype>New(Datatype)
         dtype.ob_mpi = datatype
         try: file_extent[0] = self.extent_fn(dtype)
         finally: dtype.ob_mpi = MPI_DATATYPE_NULL

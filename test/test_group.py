@@ -113,6 +113,10 @@ class BaseTestGroup:
         for rank in ranks2:
             self.assertEqual(rank, MPI.UNDEFINED)
 
+    def testPickle(self):
+        from pickle import dumps
+        self.assertRaises(ValueError, dumps, self.GROUP)
+
 
 class TestGroupNull(unittest.TestCase):
 
@@ -128,41 +132,73 @@ class TestGroupNull(unittest.TestCase):
         self.assertFalse(group_null)
         self.assertEqual(group_null, GROUP_NULL)
 
+    def testPickle(self):
+        from pickle import dumps, loads
+        group_null = loads(dumps(MPI.GROUP_NULL))
+        self.assertIs(group_null, MPI.GROUP_NULL)
+        group_null = loads(dumps(MPI.Group(MPI.GROUP_NULL)))
+        self.assertIsNot(group_null, MPI.GROUP_NULL)
+        self.assertEqual(group_null, MPI.GROUP_NULL)
+
+
 class TestGroupEmpty(BaseTestGroup, unittest.TestCase):
+
     def setUp(self):
         self.GROUP = MPI.GROUP_EMPTY
+
     def testEmpty(self):
         self.assertTrue(self.GROUP)
+
     def testSize(self):
         size = self.GROUP.Get_size()
         self.assertEqual(size, 0)
+
     def testRank(self):
         rank = self.GROUP.Get_rank()
         self.assertEqual(rank, MPI.UNDEFINED)
+
     @unittest.skipMPI('MPICH1')
     def testTranslRanks(self):
         super().testTranslRanks()
 
+    def testPickle(self):
+        from pickle import dumps, loads
+        group_empty = loads(dumps(MPI.GROUP_EMPTY))
+        self.assertIs(group_empty, MPI.GROUP_EMPTY)
+        group_empty = loads(dumps(MPI.Group(MPI.GROUP_EMPTY)))
+        self.assertIsNot(group_empty, MPI.GROUP_EMPTY)
+        self.assertEqual(group_empty, MPI.GROUP_EMPTY)
+
+
 class TestGroupSelf(BaseTestGroup, unittest.TestCase):
+
     def setUp(self):
         self.GROUP = MPI.COMM_SELF.Get_group()
+
     def tearDown(self):
         self.GROUP.Free()
+
     def testSize(self):
         size = self.GROUP.Get_size()
         self.assertEqual(size, 1)
+
     def testRank(self):
         rank = self.GROUP.Get_rank()
         self.assertEqual(rank, 0)
 
+
 class TestGroupWorld(BaseTestGroup, unittest.TestCase):
+
     def setUp(self):
         self.GROUP = MPI.COMM_WORLD.Get_group()
+
     def tearDown(self):
         self.GROUP.Free()
+
     def testSize(self):
         size = self.GROUP.Get_size()
         self.assertGreaterEqual(size, 1)
+
     def testRank(self):
         size = self.GROUP.Get_size()
         rank = self.GROUP.Get_rank()

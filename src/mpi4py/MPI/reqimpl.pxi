@@ -48,7 +48,7 @@ cdef int release_rs(
         if outcount > ns:
             if isinstance(statuses, list):
                 statuses += [
-                    Status.__new__(Status)
+                    <Status>New(Status)
                     for _ in range (ns, outcount)
                 ]
                 ns = outcount
@@ -81,7 +81,7 @@ cdef class _p_greq:
         <void>PyMPI_Status_set_error(status, MPI_SUCCESS)
         <void>MPI_Status_set_elements_c(status, MPI_BYTE, 0)
         <void>MPI_Status_set_cancelled(status, 0)
-        cdef Status sts = Status.__new__(Status)
+        cdef Status sts = <Status>New(Status)
         if self.query_fn is not None:
             sts.ob_mpi = status[0]
             self.query_fn(sts, *self.args, **self.kwargs)

@@ -12,6 +12,11 @@ else:
 
 #------------------------------------------------------------------------------
 
+cdef inline object New(type cls):
+    return cls.__new__(cls)
+
+#------------------------------------------------------------------------------
+
 ctypedef fused handle_t:
     MPI_Datatype
     MPI_Request
@@ -187,6 +192,12 @@ cdef inline int predefined(handle_t arg) noexcept nogil:
     if handle_t is MPI_File       : result = predef_File(arg)
     return result
 
+cdef inline int named(handle_t arg) noexcept nogil:
+    if handle_t is MPI_Datatype:
+        return named_Datatype(arg)
+    else:
+        return predefined(arg)
+
 #------------------------------------------------------------------------------
 
 ctypedef fused PyMPIClass:
@@ -206,9 +217,11 @@ cdef extern from * nogil:
     """
     #define PyMPI_FLAGS_READY   (1U<<0)
     #define PyMPI_FLAGS_CONST   (1U<<1)
+    #define PyMPI_FLAGS_TEMP    (1U<<2)
     """
     enum: PyMPI_FLAGS_READY
     enum: PyMPI_FLAGS_CONST
+    enum: PyMPI_FLAGS_TEMP
 
 cdef inline int cinit(PyMPIClass self, PyMPIClass arg) except -1:
     self.flags |= PyMPI_FLAGS_READY
@@ -224,9 +237,24 @@ cdef inline int cinit(PyMPIClass self, PyMPIClass arg) except -1:
         self.ob_mem = arg.ob_mem
     return 0
 
+cdef inline int marktemp(PyMPIClass self) except -1:
+    if not predefined(self.ob_mpi):
+        self.flags |= PyMPI_FLAGS_TEMP
+    return 0
+
+cdef inline int freetemp(PyMPIClass self) except -1:
+    if PyMPIClass is Datatype:
+        if named_Datatype(self.ob_mpi): return 0
+    if not mpi_active(): return 0
+    if predefined(self.ob_mpi): return 0
+    if PyMPIClass is Datatype:
+        CHKERR( MPI_Type_free(&self.ob_mpi) )
+    return 0
+
 cdef inline int dealloc(PyMPIClass self) except -1:
     if not (self.flags & PyMPI_FLAGS_READY): return 0
     if (self.flags & PyMPI_FLAGS_CONST): return 0
+    if (self.flags & PyMPI_FLAGS_TEMP):  return freetemp(self)
     if self.flags: return 0 # TODO: this always return
     if not mpi_active(): return 0
     if predefined(self.ob_mpi): return 0
@@ -255,6 +283,62 @@ cdef inline object richcmp(PyMPIClass self, object other, int op):
     cdef str cls = type(self).__name__
     raise TypeError(f"unorderable type '{mod}.{cls}'")
 
+
+#------------------------------------------------------------------------------
+
+cdef dict def_registry = {}
+
+cdef inline type def_class(handle_t handle):
+    <void> handle # unused
+    cdef type result = None
+    if handle_t is MPI_Datatype   : result = Datatype
+    if handle_t is MPI_Request    : result = Request
+    if handle_t is MPI_Message    : result = Message
+    if handle_t is MPI_Op         : result = Op
+    if handle_t is MPI_Group      : result = Group
+    if handle_t is MPI_Info       : result = Info
+    if handle_t is MPI_Errhandler : result = Errhandler
+    if handle_t is MPI_Session    : result = Session
+    if handle_t is MPI_Comm       : result = Comm
+    if handle_t is MPI_Win        : result = Win
+    if handle_t is MPI_File       : result = File
+    return result
+
+cdef inline int def_register(
+    handle_t handle,
+    object   pyobj,
+    object   name,
+) except -1:
+    cdef type cls = def_class(handle)
+    cdef dict registry = def_registry.get(cls)
+    cdef object key = <Py_uintptr_t> handle
+    if registry is None:
+        registry = def_registry[cls] = {}
+    if key not in registry:
+        registry[key] = (pyobj, name)
+    return 0
+
+cdef inline object def_lookup(handle_t handle):
+    cdef type cls = def_class(handle)
+    cdef dict registry = def_registry[cls]
+    cdef object key = <Py_uintptr_t> handle
+    return registry[key]
+
+cdef __newobj__ = None
+from copyreg import __newobj__
+
+cdef inline object def_reduce(PyMPIClass self):
+    cdef object pyobj, name
+    pyobj, name = def_lookup(self.ob_mpi)
+    if self is pyobj: return name
+    return (__newobj__, (type(self), pyobj))
+
+cdef inline object reduce_default(PyMPIClass self):
+    if named(self.ob_mpi): return def_reduce(self)
+    cdef str mod = type(self).__module__
+    cdef str cls = type(self).__name__
+    raise ValueError(f"cannot serialize '{mod}.{cls}' instance")
+
 #------------------------------------------------------------------------------
 
 # Status
@@ -275,15 +359,11 @@ cdef inline MPI_Status *arg_Status(object status) except *:
 
 # Datatype
 
-cdef inline Datatype def_Datatype(MPI_Datatype arg):
+cdef inline Datatype def_Datatype(MPI_Datatype arg, object name):
     cdef Datatype obj = Datatype.__new__(Datatype)
     obj.ob_mpi = arg
     obj.flags |= PyMPI_FLAGS_CONST
-    return obj
-
-cdef inline Datatype ftn_Datatype(MPI_Datatype arg):
-    cdef Datatype obj = Datatype.__new__(Datatype)
-    obj.ob_mpi = arg
+    def_register(arg, obj, name)
     return obj
 
 cdef inline Datatype ref_Datatype(MPI_Datatype arg):
@@ -293,26 +373,37 @@ cdef inline Datatype ref_Datatype(MPI_Datatype arg):
         obj.flags |= 0 # TODO
     return obj
 
+cdef inline object reduce_Datatype(Datatype self):
+    # named
+    if named_Datatype(self.ob_mpi):
+        return def_reduce(self)
+    # predefined and user-defined
+    cdef object basetype, combiner, params
+    basetype, combiner, params = datatype_decode(self, True)
+    return (_datatype_create, (basetype, combiner, params, True))
+
 #------------------------------------------------------------------------------
 
 # Request
 
 include "reqimpl.pxi"
 
-cdef inline Request def_Request(MPI_Request arg):
+cdef inline Request def_Request(MPI_Request arg, object name):
     cdef Request obj = Request.__new__(Request)
     obj.ob_mpi = arg
     obj.flags |= PyMPI_FLAGS_CONST
+    def_register(arg, obj, name)
     return obj
 
 #------------------------------------------------------------------------------
 
 # Message
 
-cdef inline Message def_Message(MPI_Message arg):
+cdef inline Message def_Message(MPI_Message arg, object name):
     cdef Message obj = Message.__new__(Message)
     obj.ob_mpi = arg
     obj.flags |= PyMPI_FLAGS_CONST
+    def_register(arg, obj, name)
     return obj
 
 #------------------------------------------------------------------------------
@@ -321,45 +412,70 @@ cdef inline Message def_Message(MPI_Message arg):
 
 include "opimpl.pxi"
 
-cdef inline Op def_Op(MPI_Op arg):
+cdef dict def_op = {}
+
+cdef inline Op def_Op(MPI_Op arg, object name):
     cdef Op obj = Op.__new__(Op)
     obj.ob_mpi = arg
     obj.flags |= PyMPI_FLAGS_CONST
+    def_register(arg, obj, name)
     return obj
+
+cdef inline object reduce_Op(Op self):
+    # predefined
+    if named(self.ob_mpi):
+         return def_reduce(self)
+    # user-defined
+    cdef int index = self.ob_uid
+    if index == 0: raise ValueError(
+        "cannot pickle user-defined reduction operation")
+    cdef object function = op_user_registry[index]
+    cdef object commute = self.Is_commutative()
+    return (type(self).Create, (function, commute,))
 
 #------------------------------------------------------------------------------
 
 # Group
 
-cdef inline Group def_Group(MPI_Group arg):
+cdef inline Group def_Group(MPI_Group arg, object name):
     cdef Group obj = Group.__new__(Group)
     obj.ob_mpi = arg
     obj.flags |= PyMPI_FLAGS_CONST
+    def_register(arg, obj, name)
     return obj
 
 #------------------------------------------------------------------------------
 
 # Info
 
-cdef inline Info def_Info(MPI_Info arg):
+cdef inline Info def_Info(MPI_Info arg, object name):
     cdef Info obj = Info.__new__(Info)
     obj.ob_mpi = arg
     obj.flags |= PyMPI_FLAGS_CONST
+    def_register(arg, obj, name)
     return obj
 
 
 cdef inline MPI_Info arg_Info(object obj):
     if obj is None: return MPI_INFO_NULL
-    return (<Info>obj).ob_mpi
+    return (<Info?>obj).ob_mpi
+
+cdef inline object reduce_Info(Info self):
+    # predefined
+    if named(self.ob_mpi):
+         return def_reduce(self)
+    # user-defined
+    return (type(self).Create, (self.items(),))
 
 #------------------------------------------------------------------------------
 
 # Errhandler
 
-cdef inline Errhandler def_Errhandler(MPI_Errhandler arg):
+cdef inline Errhandler def_Errhandler(MPI_Errhandler arg, object name):
     cdef Errhandler obj = Errhandler.__new__(Errhandler)
     obj.ob_mpi = arg
     obj.flags |= PyMPI_FLAGS_CONST
+    def_register(arg, obj, name)
     return obj
 
 cdef inline MPI_Errhandler arg_Errhandler(object obj) except *:
@@ -376,10 +492,11 @@ cdef inline MPI_Errhandler arg_Errhandler(object obj) except *:
 
 # Session
 
-cdef inline Session def_Session(MPI_Session arg):
+cdef inline Session def_Session(MPI_Session arg, object name):
     cdef Session obj = Session.__new__(Session)
     obj.ob_mpi = arg
     obj.flags |= PyMPI_FLAGS_CONST
+    def_register(arg, obj, name)
     return obj
 
 #------------------------------------------------------------------------------
@@ -388,16 +505,18 @@ cdef inline Session def_Session(MPI_Session arg):
 
 include "commimpl.pxi"
 
-cdef inline Comm def_Comm(MPI_Comm arg):
+cdef inline Comm def_Comm(MPI_Comm arg, object name):
     cdef Comm obj = Comm.__new__(Comm)
     obj.ob_mpi = arg
     obj.flags |= PyMPI_FLAGS_CONST
+    def_register(arg, obj, name)
     return obj
 
-cdef inline Intracomm def_Intracomm(MPI_Comm arg):
+cdef inline Intracomm def_Intracomm(MPI_Comm arg, object name):
     cdef Intracomm obj = Intracomm.__new__(Intracomm)
     obj.ob_mpi = arg
     obj.flags |= PyMPI_FLAGS_CONST
+    def_register(arg, obj, name)
     return obj
 
 cdef inline Intercomm def_Intercomm(MPI_Comm arg):
@@ -412,10 +531,11 @@ cdef inline Intercomm def_Intercomm(MPI_Comm arg):
 
 include "winimpl.pxi"
 
-cdef inline Win def_Win(MPI_Win arg):
+cdef inline Win def_Win(MPI_Win arg, object name):
     cdef Win obj = Win.__new__(Win)
     obj.ob_mpi = arg
     obj.flags |= PyMPI_FLAGS_CONST
+    def_register(arg, obj, name)
     return obj
 
 #------------------------------------------------------------------------------
@@ -424,10 +544,11 @@ cdef inline Win def_Win(MPI_Win arg):
 
 include "drepimpl.pxi"
 
-cdef inline File def_File(MPI_File arg):
+cdef inline File def_File(MPI_File arg, object name):
     cdef File obj = File.__new__(File)
     obj.ob_mpi = arg
     obj.flags |= PyMPI_FLAGS_CONST
+    def_register(arg, obj, name)
     return obj
 
 #------------------------------------------------------------------------------

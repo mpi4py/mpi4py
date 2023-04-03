@@ -18,17 +18,20 @@ cdef class Session:
     def __bool__(self) -> bool:
         return self.ob_mpi != MPI_SESSION_NULL
 
+    def __reduce__(self) -> Union[str, tuple[Any, ...]]:
+        return reduce_default(self)
+
     @classmethod
     def Init(
         cls,
         Info info: Info = INFO_NULL,
         Errhandler errhandler: Optional[Errhandler] = None,
-    ) -> Session:
+    ) -> Self:
         """
         Create a new session
         """
         cdef MPI_Errhandler cerrhdl = arg_Errhandler(errhandler)
-        cdef Session session = Session.__new__(Session)
+        cdef Session session = <Session>New(cls)
         CHKERR( MPI_Session_init(
             info.ob_mpi, cerrhdl, &session.ob_mpi) )
         session_set_eh(session.ob_mpi)
@@ -59,23 +62,23 @@ cdef class Session:
         CHKERR( MPI_Session_get_nth_pset(
             self.ob_mpi, info.ob_mpi, n, &nlen, pset_name) )
         return mpistr(pset_name)
-    
+
     def Get_info(self) -> Info:
         """
         Return the hints for a session
         """
-        cdef Info info = Info.__new__(Info)
+        cdef Info info = <Info>New(Info)
         CHKERR( MPI_Session_get_info(
             self.ob_mpi, &info.ob_mpi) )
         return info
-    
+
     def Get_pset_info(self, pset_name: str) -> Info:
         """
         Return the hints for a session and process set
         """
         cdef char *cname = NULL
         pset_name = asmpistr(pset_name, &cname)
-        cdef Info info = Info.__new__(Info)
+        cdef Info info = <Info>New(Info)
         CHKERR( MPI_Session_get_pset_info(
             self.ob_mpi, cname, &info.ob_mpi) )
         return info
@@ -86,7 +89,7 @@ cdef class Session:
         """
         cdef char *cname = NULL
         pset_name = asmpistr(pset_name, &cname)
-        cdef Group group = Group.__new__(Group)
+        cdef Group group = <Group>New(Group)
         CHKERR( MPI_Group_from_session_pset(
             self.ob_mpi, cname, &group.ob_mpi) )
         return group
@@ -102,7 +105,7 @@ cdef class Session:
         """
         Create a new error handler for sessions
         """
-        cdef Errhandler errhandler = Errhandler.__new__(Errhandler)
+        cdef Errhandler errhandler = <Errhandler>New(Errhandler)
         cdef MPI_Session_errhandler_function *fn = NULL
         cdef int index = errhdl_new(errhandler_fn, &fn)
         try: CHKERR( MPI_Session_create_errhandler(fn, &errhandler.ob_mpi) )
@@ -113,7 +116,7 @@ cdef class Session:
         """
         Get the error handler for a session
         """
-        cdef Errhandler errhandler = Errhandler.__new__(Errhandler)
+        cdef Errhandler errhandler = <Errhandler>New(Errhandler)
         CHKERR( MPI_Session_get_errhandler(self.ob_mpi, &errhandler.ob_mpi) )
         return errhandler
 
@@ -144,8 +147,7 @@ cdef class Session:
         return PyMPISession_New(MPI_Session_f2c(arg))
 
 
-
-cdef Session __SESSION_NULL__ = def_Session( MPI_SESSION_NULL )
+cdef Session __SESSION_NULL__ = def_Session( MPI_SESSION_NULL , "SESSION_NULL" )
 
 
 # Predefined session handle
