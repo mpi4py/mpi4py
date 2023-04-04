@@ -9,6 +9,10 @@ from typing import (
     Dict,
     Tuple,
 )
+if sys.version_info >= (3, 8):
+    from typing import Protocol
+else:
+    from typing_extensions import Protocol
 from numbers import (
     Integral,
 )
@@ -17,10 +21,6 @@ from .MPI import (
     BottomType,
     InPlaceType,
 )
-if sys.version_info >= (3, 8):
-    from typing import Protocol
-else:
-    from typing_extensions import Protocol
 del sys
 
 __all__: List[str] = [

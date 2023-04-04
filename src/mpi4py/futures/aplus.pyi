@@ -1,6 +1,6 @@
-from ._base import Future
 from typing import Generic, TypeVar
 from typing import Callable
+from ._base import Future
 
 _T = TypeVar("_T")
 
