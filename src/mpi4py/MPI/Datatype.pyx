@@ -60,7 +60,7 @@ cdef class Datatype:
     def __bool__(self) -> bool:
         return self.ob_mpi != MPI_DATATYPE_NULL
 
-    def __reduce__(self) -> Union[str, tuple[Any, ...]]:
+    def __reduce__(self) -> str | tuple[Any, ...]:
         return reduce_Datatype(self)
 
     # Datatype Accessors
@@ -724,7 +724,7 @@ cdef class Datatype:
     # Attributes
     # ----------
 
-    def Get_attr(self, int keyval: int) -> Union[int, Any, None]:
+    def Get_attr(self, int keyval: int) -> int | Any | None:
         """
         Retrieve attribute value by key
         """
@@ -858,7 +858,7 @@ cdef class Datatype:
 # Address Functions
 # -----------------
 
-def Get_address(location: Union[Buffer, Bottom]) -> int:
+def Get_address(location: Buffer | Bottom) -> int:
     """
     Get the address of a location in memory
     """

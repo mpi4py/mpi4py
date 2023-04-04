@@ -337,7 +337,6 @@ import sys
 from threading import Lock
 from typing import (
     Any,
-    Union,
     NoReturn,
     overload,
 )

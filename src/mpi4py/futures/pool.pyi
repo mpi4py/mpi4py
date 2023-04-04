@@ -1,7 +1,7 @@
 import sys
 from ..MPI import Intracomm, COMM_WORLD
 from ._base import Executor, Future  # noqa: F401
-from typing import Any, TypeVar, Union
+from typing import Any, TypeVar
 from typing import Callable, Iterable, Iterator, Mapping, Sequence
 if sys.version_info >= (3, 10):
     from typing import ParamSpec
@@ -27,12 +27,12 @@ class MPIPoolExecutor(Executor):
         *,
         python_exe: str = ...,
         python_args: Sequence[str] = ...,
-        mpi_info: Union[Mapping[str, str], Iterable[tuple[str, str]]] = ...,
-        globals: Union[Mapping[str, str], Iterable[tuple[str, str]]] = ...,
+        mpi_info: Mapping[str, str] | Iterable[tuple[str, str]] = ...,
+        globals: Mapping[str, str] | Iterable[tuple[str, str]] = ...,
         main: bool = True,
         path: Sequence[str] = ...,
         wdir: str = ...,
-        env: Union[Mapping[str, str], Iterable[tuple[str, str]]] = ...,
+        env: Mapping[str, str] | Iterable[tuple[str, str]] = ...,
         **kwargs: Any,
     ) -> None: ...
     def bootup(

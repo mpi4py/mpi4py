@@ -18,7 +18,7 @@ cdef class Op:
     def __bool__(self) -> bool:
         return self.ob_mpi != MPI_OP_NULL
 
-    def __reduce__(self) -> Union[str, tuple[Any, ...]]:
+    def __reduce__(self) -> str | tuple[Any, ...]:
         return reduce_Op(self)
 
     def __call__(self, x: Any, y: Any) -> Any:

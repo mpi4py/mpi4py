@@ -44,7 +44,7 @@ cdef class Win:
     def __bool__(self) -> bool:
         return self.ob_mpi != MPI_WIN_NULL
 
-    def __reduce__(self) -> Union[str, tuple[Any, ...]]:
+    def __reduce__(self) -> str | tuple[Any, ...]:
         return reduce_default(self)
 
     # Window Creation
@@ -53,7 +53,7 @@ cdef class Win:
     @classmethod
     def Create(
         cls,
-        memory: Union[Buffer, Bottom],
+        memory: Buffer | Bottom,
         Aint disp_unit: int = 1,
         Info info: Info = INFO_NULL,
         Intracomm comm: Intracomm = COMM_SELF,
@@ -218,7 +218,7 @@ cdef class Win:
     # Window Attributes
     # -----------------
 
-    def Get_attr(self, int keyval: int) -> Union[int, Any, None]:
+    def Get_attr(self, int keyval: int) -> int | Any | None:
         """
         Retrieve attribute value by key
         """
