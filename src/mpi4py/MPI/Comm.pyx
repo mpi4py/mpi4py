@@ -36,7 +36,7 @@ cdef class Comm:
     Communicator
     """
 
-    def __cinit__(self, Comm comm: Optional[Comm] = None):
+    def __cinit__(self, Comm comm: Comm | None = None):
         self.ob_mpi = MPI_COMM_NULL
         cinit(self, comm)
 
@@ -120,7 +120,7 @@ cdef class Comm:
         comm_set_eh(comm.ob_mpi)
         return comm
 
-    def Dup(self, Info info: Optional[Info] = None) -> Self:
+    def Dup(self, Info info: Info | None = None) -> Self:
         """
         Duplicate an existing communicator
         """
@@ -145,7 +145,7 @@ cdef class Comm:
         comm_set_eh(comm.ob_mpi)
         return comm
 
-    def Idup(self, Info info: Optional[Info] = None) -> tuple[Self, Request]:
+    def Idup(self, Info info: Info | None = None) -> tuple[Self, Request]:
         """
         Nonblocking duplicate an existing communicator
         """
@@ -287,7 +287,7 @@ cdef class Comm:
         buf: BufSpec,
         int source: int = ANY_SOURCE,
         int tag: int = ANY_TAG,
-        Status status: Optional[Status] = None,
+        Status status: Status | None = None,
     ) -> None:
         """
         Blocking receive
@@ -308,10 +308,10 @@ cdef class Comm:
         sendbuf: BufSpec,
         int dest: int,
         int sendtag: int = 0,
-        recvbuf: Optional[BufSpec] = None,
+        recvbuf: BufSpec | None = None,
         int source: int = ANY_SOURCE,
         int recvtag: int = ANY_TAG,
-        Status status: Optional[Status] = None,
+        Status status: Status | None = None,
     ) -> None:
         """
         Send and receive a message
@@ -339,7 +339,7 @@ cdef class Comm:
         int sendtag: int = 0,
         int source: int = ANY_SOURCE,
         int recvtag: int = ANY_TAG,
-        Status status: Optional[Status] = None,
+        Status status: Status | None = None,
     ) -> None:
         """
         Send and receive a message
@@ -404,7 +404,7 @@ cdef class Comm:
         sendbuf: BufSpec,
         int dest: int,
         int sendtag: int = 0,
-        recvbuf: Optional[BufSpec] = None,
+        recvbuf: BufSpec | None = None,
         int source: int = ANY_SOURCE,
         int recvtag: int = ANY_TAG,
     ) -> Request:
@@ -459,7 +459,7 @@ cdef class Comm:
         self,
         int source: int = ANY_SOURCE,
         int tag: int = ANY_TAG,
-        Status status: Optional[Status] = None,
+        Status status: Status | None = None,
     ) -> Literal[True]:
         """
         Blocking test for a message
@@ -475,7 +475,7 @@ cdef class Comm:
         self,
         int source: int = ANY_SOURCE,
         int tag: int = ANY_TAG,
-        Status status: Optional[Status] = None,
+        Status status: Status | None = None,
     ) -> bool:
         """
         Nonblocking test for a message
@@ -493,7 +493,7 @@ cdef class Comm:
         self,
         int source: int = ANY_SOURCE,
         int tag: int = ANY_TAG,
-        Status status: Optional[Status] = None,
+        Status status: Status | None = None,
     ) -> Message:
         """
         Blocking test for a matched message
@@ -510,8 +510,8 @@ cdef class Comm:
         self,
         int source: int = ANY_SOURCE,
         int tag: int = ANY_TAG,
-        Status status: Optional[Status] = None,
-    ) -> Optional[Message]:
+        Status status: Status | None = None,
+    ) -> Message | None:
         """
         Nonblocking test for a matched message
         """
@@ -789,7 +789,7 @@ cdef class Comm:
     def Gather(
         self,
         sendbuf: Union[BufSpec, InPlace],
-        recvbuf: Optional[BufSpecB],
+        recvbuf: BufSpecB | None,
         int root: int = 0,
     ) -> None:
         """
@@ -805,7 +805,7 @@ cdef class Comm:
     def Gatherv(
         self,
         sendbuf: Union[BufSpec, InPlace],
-        recvbuf: Optional[BufSpecV],
+        recvbuf: BufSpecV | None,
         int root: int = 0,
     ) -> None:
         """
@@ -822,7 +822,7 @@ cdef class Comm:
 
     def Scatter(
         self,
-        sendbuf: Optional[BufSpecB],
+        sendbuf: BufSpecB | None,
         recvbuf: Union[BufSpec, InPlace],
         int root: int = 0,
     ) -> None:
@@ -839,7 +839,7 @@ cdef class Comm:
 
     def Scatterv(
         self,
-        sendbuf: Optional[BufSpecV],
+        sendbuf: BufSpecV | None,
         recvbuf: Union[BufSpec, InPlace],
         int root: int = 0,
     ) -> None:
@@ -944,7 +944,7 @@ cdef class Comm:
     def Reduce(
         self,
         sendbuf: Union[BufSpec, InPlace],
-        recvbuf: Optional[BufSpec],
+        recvbuf: BufSpec | None,
         Op op: Op = SUM,
         int root: int = 0,
     ) -> None:
@@ -991,7 +991,7 @@ cdef class Comm:
         self,
         sendbuf: Union[BufSpec, InPlace],
         recvbuf: BufSpec,
-        recvcounts: Optional[Sequence[int]] = None,
+        recvcounts: Sequence[int] | None = None,
         Op op: Op = SUM,
     ) -> None:
         """
@@ -1035,7 +1035,7 @@ cdef class Comm:
     def Igather(
         self,
         sendbuf: Union[BufSpec, InPlace],
-        recvbuf: Optional[BufSpecB],
+        recvbuf: BufSpecB | None,
         int root: int = 0,
     ) -> Request:
         """
@@ -1054,7 +1054,7 @@ cdef class Comm:
     def Igatherv(
         self,
         sendbuf: Union[BufSpec, InPlace],
-        recvbuf: Optional[BufSpecV],
+        recvbuf: BufSpecV | None,
         int root: int = 0,
     ) -> Request:
         """
@@ -1072,7 +1072,7 @@ cdef class Comm:
 
     def Iscatter(
         self,
-        sendbuf: Optional[BufSpecB],
+        sendbuf: BufSpecB | None,
         recvbuf: Union[BufSpec, InPlace],
         int root: int = 0,
     ) -> Request:
@@ -1091,7 +1091,7 @@ cdef class Comm:
 
     def Iscatterv(
         self,
-        sendbuf: Optional[BufSpecV],
+        sendbuf: BufSpecV | None,
         recvbuf: Union[BufSpec, InPlace],
         int root: int = 0,
     ) -> Request:
@@ -1200,7 +1200,7 @@ cdef class Comm:
     def Ireduce(
         self,
         sendbuf: Union[BufSpec, InPlace],
-        recvbuf: Optional[BufSpec],
+        recvbuf: BufSpec | None,
         Op op: Op = SUM,
         int root: int = 0,
     ) -> Request:
@@ -1253,7 +1253,7 @@ cdef class Comm:
         self,
         sendbuf: Union[BufSpec, InPlace],
         recvbuf: BufSpec,
-        recvcounts: Optional[Sequence[int]] = None,
+        recvcounts: Sequence[int] | None = None,
         Op op: Op = SUM,
     ) -> Request:
         """
@@ -1305,7 +1305,7 @@ cdef class Comm:
     def Gather_init(
         self,
         sendbuf: Union[BufSpec, InPlace],
-        recvbuf: Optional[BufSpecB],
+        recvbuf: BufSpecB | None,
         int root: int = 0,
         Info info: Info = INFO_NULL,
     ) -> Prequest:
@@ -1325,7 +1325,7 @@ cdef class Comm:
     def Gatherv_init(
         self,
         sendbuf: Union[BufSpec, InPlace],
-        recvbuf: Optional[BufSpecV],
+        recvbuf: BufSpecV | None,
         int root: int = 0,
         Info info: Info = INFO_NULL,
     ) -> Prequest:
@@ -1344,7 +1344,7 @@ cdef class Comm:
 
     def Scatter_init(
         self,
-        sendbuf: Optional[BufSpecB],
+        sendbuf: BufSpecB | None,
         recvbuf: Union[BufSpec, InPlace],
         int root: int = 0,
         Info info: Info = INFO_NULL,
@@ -1364,7 +1364,7 @@ cdef class Comm:
 
     def Scatterv_init(
         self,
-        sendbuf: Optional[BufSpecV],
+        sendbuf: BufSpecV | None,
         recvbuf: Union[BufSpec, InPlace],
         int root: int = 0,
         Info info: Info = INFO_NULL,
@@ -1479,7 +1479,7 @@ cdef class Comm:
     def Reduce_init(
         self,
         sendbuf: Union[BufSpec, InPlace],
-        recvbuf: Optional[BufSpec],
+        recvbuf: BufSpec | None,
         Op op: Op = SUM,
         int root: int = 0,
         Info info: Info = INFO_NULL,
@@ -1535,7 +1535,7 @@ cdef class Comm:
         self,
         sendbuf: Union[BufSpec, InPlace],
         recvbuf: BufSpec,
-        recvcounts: Optional[Sequence[int]] = None,
+        recvcounts: Sequence[int] | None = None,
         Op op: Op = SUM,
         Info info: Info = INFO_NULL,
     ) -> Prequest:
@@ -1630,7 +1630,7 @@ cdef class Comm:
     # Attributes
     # ----------
 
-    def Get_attr(self, int keyval: int) -> Optional[Union[int, Any]]:
+    def Get_attr(self, int keyval: int) -> Union[int, Any, None]:
         """
         Retrieve attribute value by key
         """
@@ -1668,8 +1668,8 @@ cdef class Comm:
     @classmethod
     def Create_keyval(
         cls,
-        copy_fn: Optional[Callable[[Comm, int, Any], Any]] = None,
-        delete_fn: Optional[Callable[[Comm, int, Any], None]] = None,
+        copy_fn: Callable[[Comm, int, Any], Any] | None = None,
+        delete_fn: Callable[[Comm, int, Any], None] | None = None,
         nopython: bool = False,
     ) -> int:
         """
@@ -1816,10 +1816,10 @@ cdef class Comm:
     #
     def recv(
         self,
-        buf: Optional[Buffer] = None,
+        buf: Buffer | None = None,
         int source: int = ANY_SOURCE,
         int tag: int = ANY_TAG,
-        Status status: Optional[Status] = None,
+        Status status: Status | None = None,
     ) -> Any:
         """Receive"""
         cdef MPI_Comm comm = self.ob_mpi
@@ -1831,10 +1831,10 @@ cdef class Comm:
         sendobj: Any,
         int dest: int,
         int sendtag: int = 0,
-        recvbuf: Optional[Buffer] = None,
+        recvbuf: Buffer | None = None,
         int source: int = ANY_SOURCE,
         int recvtag: int = ANY_TAG,
-        Status status: Optional[Status] = None,
+        Status status: Status | None = None,
     ) -> Any:
         """Send and Receive"""
         cdef MPI_Comm comm = self.ob_mpi
@@ -1881,7 +1881,7 @@ cdef class Comm:
     #
     def irecv(
         self,
-        buf: Optional[Buffer] = None,
+        buf: Buffer | None = None,
         int source: int = ANY_SOURCE,
         int tag: int = ANY_TAG,
     ) -> Request:
@@ -1895,7 +1895,7 @@ cdef class Comm:
         self,
         int source: int = ANY_SOURCE,
         int tag: int = ANY_TAG,
-        Status status: Optional[Status] = None,
+        Status status: Status | None = None,
     ) -> Literal[True]:
         """Blocking test for a message"""
         cdef MPI_Comm comm = self.ob_mpi
@@ -1906,7 +1906,7 @@ cdef class Comm:
         self,
         int source: int = ANY_SOURCE,
         int tag: int = ANY_TAG,
-        Status status: Optional[Status] = None,
+        Status status: Status | None = None,
     ) -> bool:
         """Nonblocking test for a message"""
         cdef MPI_Comm comm = self.ob_mpi
@@ -1917,7 +1917,7 @@ cdef class Comm:
         self,
         int source: int = ANY_SOURCE,
         int tag: int = ANY_TAG,
-        Status status: Optional[Status] = None,
+        Status status: Status | None = None,
     ) -> Message:
         """Blocking test for a matched message"""
         cdef MPI_Comm comm = self.ob_mpi
@@ -1931,8 +1931,8 @@ cdef class Comm:
         self,
         int source: int = ANY_SOURCE,
         int tag: int = ANY_TAG,
-        Status status: Optional[Status] = None,
-    ) -> Optional[Message]:
+        Status status: Status | None = None,
+    ) -> Message | None:
         """Nonblocking test for a matched message"""
         cdef int flag = 0
         cdef MPI_Comm comm = self.ob_mpi
@@ -1965,14 +1965,14 @@ cdef class Comm:
         self,
         sendobj: Any,
         int root: int = 0,
-    ) -> Optional[list[Any]]:
+    ) -> list[Any] | None:
         """Gather"""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_gather(sendobj, root, comm)
     #
     def scatter(
         self,
-        sendobj: Optional[Sequence[Any]],
+        sendobj: Sequence[Any] | None,
         int root: int = 0,
     ) -> Any:
         """Scatter"""
@@ -2000,7 +2000,7 @@ cdef class Comm:
         sendobj: Any,
         op: Union[Op, Callable[[Any, Any], Any]] = SUM,
         int root: int = 0,
-    ) -> Optional[Any]:
+    ) -> Any | None:
         """Reduce to Root"""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_reduce(sendobj, op, root, comm)
@@ -2021,7 +2021,7 @@ cdef class Intracomm(Comm):
     Intracommunicator
     """
 
-    def __cinit__(self, Comm comm: Optional[Comm] = None):
+    def __cinit__(self, Comm comm: Comm | None = None):
         <void> comm # unused
         if self.ob_mpi == MPI_COMM_NULL: return
         cdef int inter = 1
@@ -2048,7 +2048,7 @@ cdef class Intracomm(Comm):
         Group group: Group,
         stringtag: str = "org.mpi4py",
         Info info: Info = INFO_NULL,
-        Errhandler errhandler: Optional[Errhandler] = None,
+        Errhandler errhandler: Errhandler | None = None,
     ) -> Intracomm:
         """
         Create communicator from group
@@ -2064,7 +2064,7 @@ cdef class Intracomm(Comm):
     def Create_cart(
         self,
         dims: Sequence[int],
-        periods: Optional[Sequence[bool]] = None,
+        periods: Sequence[bool] | None = None,
         bint reorder: bool = False,
     ) -> Cartcomm:
         """
@@ -2109,8 +2109,8 @@ cdef class Intracomm(Comm):
         self,
         sources: Sequence[int],
         destinations: Sequence[int],
-        sourceweights: Optional[Sequence[int]] = None,
-        destweights: Optional[Sequence[int]] = None,
+        sourceweights: Sequence[int] | None = None,
+        destweights: Sequence[int] | None = None,
         Info info: Info = INFO_NULL,
         bint reorder: bool = False,
     ) -> Distgraphcomm:
@@ -2144,7 +2144,7 @@ cdef class Intracomm(Comm):
         sources: Sequence[int],
         degrees: Sequence[int],
         destinations: Sequence[int],
-        weights: Optional[Sequence[int]] = None,
+        weights: Sequence[int] | None = None,
         Info info: Info = INFO_NULL,
         bint reorder: bool = False,
     ) -> Distgraphcomm:
@@ -2192,7 +2192,7 @@ cdef class Intracomm(Comm):
     def Cart_map(
         self,
         dims: Sequence[int],
-        periods: Optional[Sequence[bool]] = None,
+        periods: Sequence[bool] | None = None,
     ) -> int:
         """
         Return an optimal placement for the
@@ -2368,11 +2368,11 @@ cdef class Intracomm(Comm):
     def Spawn(
         self,
         command: str,
-        args: Optional[Sequence[str]] = None,
+        args: Sequence[str] | None = None,
         int maxprocs: int = 1,
         Info info: Info = INFO_NULL,
         int root: int = 0,
-        errcodes: Optional[list] = None,
+        errcodes: list | None = None,
     ) -> Intercomm:
         """
         Spawn instances of a single MPI application
@@ -2404,11 +2404,11 @@ cdef class Intracomm(Comm):
     def Spawn_multiple(
         self,
         command: Sequence[str],
-        args: Optional[Sequence[Sequence[str]]] = None,
-        maxprocs: Optional[Sequence[int]] = None,
+        args: Sequence[Sequence[str]] | None = None,
+        maxprocs: Sequence[int] | None = None,
         info: Union[Info, Sequence[Info]] = INFO_NULL,
         int root: int = 0,
-        errcodes: Optional[list] = None,
+        errcodes: list | None = None,
     ) -> Intercomm:
         """
         Spawn instances of multiple MPI applications
@@ -2505,7 +2505,7 @@ cdef class Topocomm(Intracomm):
     Topology intracommunicator
     """
 
-    def __cinit__(self, Comm comm: Optional[Comm] = None):
+    def __cinit__(self, Comm comm: Comm | None = None):
         <void> comm # unused
         if self.ob_mpi == MPI_COMM_NULL: return
         cdef int topo = MPI_UNDEFINED
@@ -2859,7 +2859,7 @@ cdef class Cartcomm(Topocomm):
     Cartesian topology intracommunicator
     """
 
-    def __cinit__(self, Comm comm: Optional[Comm] = None):
+    def __cinit__(self, Comm comm: Comm | None = None):
         <void> comm # unused
         if self.ob_mpi == MPI_COMM_NULL: return
         cdef int topo = MPI_UNDEFINED
@@ -3006,7 +3006,7 @@ cdef class Graphcomm(Topocomm):
     General graph topology intracommunicator
     """
 
-    def __cinit__(self, Comm comm: Optional[Comm] = None):
+    def __cinit__(self, Comm comm: Comm | None = None):
         <void> comm # unused
         if self.ob_mpi == MPI_COMM_NULL: return
         cdef int topo = MPI_UNDEFINED
@@ -3113,7 +3113,7 @@ cdef class Distgraphcomm(Topocomm):
     Distributed graph topology intracommunicator
     """
 
-    def __cinit__(self, Comm comm: Optional[Comm] = None):
+    def __cinit__(self, Comm comm: Comm | None = None):
         <void> comm # unused
         if self.ob_mpi == MPI_COMM_NULL: return
         cdef int topo = MPI_UNDEFINED
@@ -3136,7 +3136,7 @@ cdef class Distgraphcomm(Topocomm):
         return (indegree, outdegree, <bint>weighted)
 
     def Get_dist_neighbors(self) \
-        -> tuple[list[int], list[int], Optional[tuple[list[int], list[int]]]]:
+        -> tuple[list[int], list[int], tuple[list[int], list[int]] | None]:
         """
         Return adjacency information for a distributed graph topology
         """
@@ -3178,7 +3178,7 @@ cdef class Intercomm(Comm):
     Intercommunicator
     """
 
-    def __cinit__(self, Comm comm: Optional[Comm] = None):
+    def __cinit__(self, Comm comm: Comm | None = None):
         <void> comm # unused
         if self.ob_mpi == MPI_COMM_NULL: return
         cdef int inter = 0
@@ -3198,7 +3198,7 @@ cdef class Intercomm(Comm):
         int remote_leader: int,
         stringtag: str = "org.mpi4py",
         Info info: Info = INFO_NULL,
-        Errhandler errhandler: Optional[Errhandler] = None,
+        Errhandler errhandler: Errhandler | None = None,
     ) -> Intracomm:
         """
         Create communicator from group

@@ -46,7 +46,7 @@ cdef class Datatype:
     Datatype object
     """
 
-    def __cinit__(self, Datatype datatype: Optional[Datatype] = None):
+    def __cinit__(self, Datatype datatype: Datatype | None = None):
         self.ob_mpi = MPI_DATATYPE_NULL
         cinit(self, datatype)
 
@@ -724,7 +724,7 @@ cdef class Datatype:
     # Attributes
     # ----------
 
-    def Get_attr(self, int keyval: int) -> Optional[Union[int, Any]]:
+    def Get_attr(self, int keyval: int) -> Union[int, Any, None]:
         """
         Retrieve attribute value by key
         """
@@ -751,8 +751,8 @@ cdef class Datatype:
     @classmethod
     def Create_keyval(
         cls,
-        copy_fn: Optional[Callable[[Datatype, int, Any], Any]] = None,
-        delete_fn: Optional[Callable[[Datatype, int, Any], None]] = None,
+        copy_fn: Callable[[Datatype, int, Any], Any] | None = None,
+        delete_fn: Callable[[Datatype, int, Any], None] | None = None,
         nopython: bool = False,
     ) -> int:
         """

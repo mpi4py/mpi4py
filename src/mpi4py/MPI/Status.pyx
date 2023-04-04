@@ -4,7 +4,7 @@ cdef class Status:
     Status object
     """
 
-    def __cinit__(self, Status status: Optional[Status] = None):
+    def __cinit__(self, Status status: Status | None = None):
         cdef MPI_Status *s = &self.ob_mpi
         CHKERR( PyMPI_Status_set_source (s, MPI_ANY_SOURCE ) )
         CHKERR( PyMPI_Status_set_tag    (s, MPI_ANY_TAG    ) )

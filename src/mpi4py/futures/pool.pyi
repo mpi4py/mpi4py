@@ -1,7 +1,7 @@
 import sys
 from ..MPI import Intracomm, COMM_WORLD
 from ._base import Executor, Future  # noqa: F401
-from typing import Any, Optional, TypeVar, Union
+from typing import Any, TypeVar, Union
 from typing import Callable, Iterable, Iterator, Mapping, Sequence
 if sys.version_info >= (3, 10):
     from typing import ParamSpec
@@ -21,8 +21,8 @@ class MPIPoolExecutor(Executor):
     Future: TypeAlias = Future  # noqa: F811
     def __init__(
         self,
-        max_workers: Optional[int] = None,
-        initializer: Optional[Callable[..., object]] = None,
+        max_workers: int | None = None,
+        initializer: Callable[..., object] | None = None,
         initargs: Iterable[Any] = (),
         *,
         python_exe: str = ...,
@@ -64,7 +64,7 @@ class MPIPoolExecutor(Executor):
         self,
         fn: Callable[..., _T],
         *iterables: Iterable[Any],
-        timeout: Optional[float] = None,
+        timeout: float | None = None,
         chunksize: int = 1,
         unordered: bool = False,
     ) -> Iterator[_T]: ...
@@ -72,7 +72,7 @@ class MPIPoolExecutor(Executor):
         self,
         fn: Callable[..., _T],
         iterable: Iterable[Any],
-        timeout: Optional[float] = None,
+        timeout: float | None = None,
         chunksize: int = 1,
         unordered: bool = False,
     ) -> Iterator[_T]: ...
@@ -86,12 +86,12 @@ class MPIPoolExecutor(Executor):
 class MPICommExecutor:
     def __init__(
         self,
-        comm: Optional[Intracomm] = COMM_WORLD,
+        comm: Intracomm | None = COMM_WORLD,
         root: int = 0,
         **kwargs: Any,
     ) -> None: ...
-    def __enter__(self) -> Optional[Self]: ...
-    def __exit__(self, *args: Any) -> Optional[bool]: ...
+    def __enter__(self) -> Self | None: ...
+    def __exit__(self, *args: Any) -> bool | None: ...
 
 class ThreadPoolExecutor(MPIPoolExecutor): ...
 class ProcessPoolExecutor(MPIPoolExecutor): ...

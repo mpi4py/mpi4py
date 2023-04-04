@@ -4,7 +4,7 @@ cdef class Request:
     Request handle
     """
 
-    def __cinit__(self, Request request: Optional[Request] = None):
+    def __cinit__(self, Request request: Request | None = None):
         self.ob_mpi = MPI_REQUEST_NULL
         cinit(self, request)
 
@@ -24,7 +24,7 @@ cdef class Request:
     # Completion Operations
     # ---------------------
 
-    def Wait(self, Status status: Optional[Status] = None) -> Literal[True]:
+    def Wait(self, Status status: Status | None = None) -> Literal[True]:
         """
         Wait for a send or receive to complete
         """
@@ -35,7 +35,7 @@ cdef class Request:
             self.ob_buf = None
         return True
 
-    def Test(self, Status status: Optional[Status] = None) -> bool:
+    def Test(self, Status status: Status | None = None) -> bool:
         """
         Test for the completion of a send or receive
         """
@@ -53,7 +53,7 @@ cdef class Request:
         """
         with nogil: CHKERR( MPI_Request_free(&self.ob_mpi) )
 
-    def Get_status(self, Status status: Optional[Status] = None) -> bool:
+    def Get_status(self, Status status: Status | None = None) -> bool:
         """
         Non-destructive test for the completion of a request
         """
@@ -70,7 +70,7 @@ cdef class Request:
     def Waitany(
         cls,
         requests: Sequence[Request],
-        Status status: Optional[Status] = None,
+        Status status: Status | None = None,
     ) -> int:
         """
         Wait for any previously initiated request to complete
@@ -92,7 +92,7 @@ cdef class Request:
     def Testany(
         cls,
         requests: Sequence[Request],
-        Status status: Optional[Status] = None,
+        Status status: Status | None = None,
     ) -> tuple[int, bool]:
         """
         Test for completion of any previously initiated request
@@ -116,7 +116,7 @@ cdef class Request:
     def Waitall(
         cls,
         requests: Sequence[Request],
-        statuses: Optional[list[Status]] = None,
+        statuses: list[Status] | None = None,
     ) -> Literal[True]:
         """
         Wait for all previously initiated requests to complete
@@ -138,7 +138,7 @@ cdef class Request:
     def Testall(
         cls,
         requests: Sequence[Request],
-        statuses: Optional[list[Status]] = None,
+        statuses: list[Status] | None = None,
     ) -> bool:
         """
         Test for completion of all previously initiated requests
@@ -161,8 +161,8 @@ cdef class Request:
     def Waitsome(
         cls,
         requests: Sequence[Request],
-        statuses: Optional[list[Status]] = None,
-    ) -> Optional[list[int]]:
+        statuses: list[Status] | None = None,
+    ) -> list[int] | None:
         """
         Wait for some previously initiated requests to complete
         """
@@ -191,8 +191,8 @@ cdef class Request:
     def Testsome(
         cls,
         requests: Sequence[Request],
-        statuses: Optional[list[Status]] = None,
-    ) -> Optional[list[int]]:
+        statuses: list[Status] | None = None,
+    ) -> list[int] | None:
         """
         Test for completion of some previously initiated requests
         """
@@ -249,7 +249,7 @@ cdef class Request:
     #
     def wait(
         self,
-        Status status: Optional[Status] = None,
+        Status status: Status | None = None,
     ) -> Any:
         """
         Wait for a send or receive to complete
@@ -259,8 +259,8 @@ cdef class Request:
     #
     def test(
         self,
-            Status status: Optional[Status] = None,
-    ) -> tuple[bool, Optional[Any]]:
+            Status status: Status | None = None,
+    ) -> tuple[bool, Any | None]:
         """
         Test for the completion of a send or receive
         """
@@ -270,7 +270,7 @@ cdef class Request:
     #
     def get_status(
         self,
-        Status status: Optional[Status] = None,
+        Status status: Status | None = None,
     ) -> bool:
         """
         Non-destructive test for the completion of a request
@@ -285,7 +285,7 @@ cdef class Request:
     def waitany(
         cls,
         requests: Sequence[Request],
-        Status status: Optional[Status] = None
+        Status status: Status | None = None
     ) -> tuple[int, Any]:
         """
         Wait for any previously initiated request to complete
@@ -298,8 +298,8 @@ cdef class Request:
     def testany(
         cls,
         requests: Sequence[Request],
-        Status status: Optional[Status] = None,
-    ) -> tuple[int, bool, Optional[Any]]:
+        Status status: Status | None = None,
+    ) -> tuple[int, bool, Any | None]:
         """
         Test for completion of any previously initiated request
         """
@@ -312,7 +312,7 @@ cdef class Request:
     def waitall(
         cls,
         requests: Sequence[Request],
-        statuses: Optional[list[Status]] = None,
+        statuses: list[Status] | None = None,
     ) -> list[Any]:
         """
         Wait for all previously initiated requests to complete
@@ -324,8 +324,8 @@ cdef class Request:
     def testall(
         cls,
         requests: Sequence[Request],
-        statuses: Optional[list[Status]] = None
-    ) -> tuple[bool, Optional[list[Any]]]:
+        statuses: list[Status] | None = None
+    ) -> tuple[bool, list[Any] | None]:
         """
         Test for completion of all previously initiated requests
         """
@@ -337,8 +337,8 @@ cdef class Request:
     def waitsome(
         cls,
         requests: Sequence[Request],
-        statuses: Optional[list[Status]] = None,
-    ) -> tuple[Optional[list[int]], Optional[list[Any]]]:
+        statuses: list[Status] | None = None,
+    ) -> tuple[list[int] | None, list[Any] | None]:
         """
         Wait for some previously initiated requests to complete
         """
@@ -348,8 +348,8 @@ cdef class Request:
     def testsome(
         cls,
         requests: Sequence[Request],
-        statuses: Optional[list[Status]] = None,
-    ) -> tuple[Optional[list[int]], Optional[list[Any]]]:
+        statuses: list[Status] | None = None,
+    ) -> tuple[list[int] | None, list[Any] | None]:
         """
         Test for completion of some previously initiated requests
         """
@@ -368,7 +368,7 @@ cdef class Prequest(Request):
     Persistent request handle
     """
 
-    def __cinit__(self, Request request: Optional[Request] = None):
+    def __cinit__(self, Request request: Request | None = None):
         if self.ob_mpi == MPI_REQUEST_NULL: return
         <void>(<Prequest?>request)
 
@@ -443,7 +443,7 @@ cdef class Grequest(Request):
     Generalized request handle
     """
 
-    def __cinit__(self, Request request: Optional[Request] = None):
+    def __cinit__(self, Request request: Request | None = None):
         self.ob_grequest = self.ob_mpi
         if self.ob_mpi == MPI_REQUEST_NULL: return
         <void>(<Grequest?>request)
@@ -454,8 +454,8 @@ cdef class Grequest(Request):
         query_fn: Callable[..., None],
         free_fn: Callable[..., None],
         cancel_fn: Callable[..., None],
-        args: Optional[tuple[Any]] = None,
-        kwargs: Optional[dict[str, Any]] = None,
+        args: tuple[Any] | None = None,
+        kwargs: dict[str, Any] | None = None,
     ) -> Grequest:
         """
         Create and return a user-defined request

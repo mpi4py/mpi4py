@@ -1,13 +1,13 @@
 # -----------------------------------------------------------------------------
 
-def _typecode(Datatype datatype: Datatype) -> Optional[str]:
+def _typecode(Datatype datatype: Datatype) -> str | None:
     """
     Map MPI datatype to character code or type string
     """
     cdef const char *tc = DatatypeCode(datatype.ob_mpi)
     return pystr(tc) if tc != NULL else None
 
-def _typealign(Datatype datatype: Datatype) -> Optional[int]:
+def _typealign(Datatype datatype: Datatype) -> int | None:
     """
     Get MPI datatype alignment
     """

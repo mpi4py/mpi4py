@@ -4,7 +4,7 @@ cdef class Errhandler:
     Error handler
     """
 
-    def __cinit__(self, Errhandler errhandler: Optional[Errhandler] = None):
+    def __cinit__(self, Errhandler errhandler: Errhandler | None = None):
         self.ob_mpi = MPI_ERRHANDLER_NULL
         cinit(self, errhandler)
 

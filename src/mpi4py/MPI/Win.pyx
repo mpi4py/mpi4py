@@ -30,7 +30,7 @@ cdef class Win:
     Window handle
     """
 
-    def __cinit__(self, Win win: Optional[Win] = None):
+    def __cinit__(self, Win win: Win | None = None):
         self.ob_mpi = MPI_WIN_NULL
         cinit(self, win)
 
@@ -218,7 +218,7 @@ cdef class Win:
     # Window Attributes
     # -----------------
 
-    def Get_attr(self, int keyval: int) -> Optional[Union[int, Any]]:
+    def Get_attr(self, int keyval: int) -> Union[int, Any, None]:
         """
         Retrieve attribute value by key
         """
@@ -257,8 +257,8 @@ cdef class Win:
     @classmethod
     def Create_keyval(
         cls,
-        copy_fn: Optional[Callable[[Win, int, Any], Any]] = None,
-        delete_fn: Optional[Callable[[Win, int, Any], None]] = None,
+        copy_fn: Callable[[Win, int, Any], Any] | None = None,
+        delete_fn: Callable[[Win, int, Any], None] | None = None,
         nopython: bool = False,
     ) -> int:
         """
@@ -339,7 +339,7 @@ cdef class Win:
         self,
         origin: BufSpec,
         int target_rank: int,
-        target: Optional[TargetSpec] = None,
+        target: TargetSpec | None = None,
     ) -> None:
         """
         Put data into a memory window on a remote process.
@@ -356,7 +356,7 @@ cdef class Win:
         self,
         origin: BufSpec,
         int target_rank: int,
-        target: Optional[TargetSpec] = None,
+        target: TargetSpec | None = None,
     ) -> None:
         """
         Get data from a memory window on a remote process.
@@ -373,7 +373,7 @@ cdef class Win:
         self,
         origin: BufSpec,
         int target_rank: int,
-        target: Optional[TargetSpec] = None,
+        target: TargetSpec | None = None,
         Op op: Op = SUM,
     ) -> None:
         """
@@ -392,7 +392,7 @@ cdef class Win:
         origin: BufSpec,
         result: BufSpec,
         int target_rank: int,
-        target: Optional[TargetSpec] = None,
+        target: TargetSpec | None = None,
         Op op: Op = SUM,
     ) -> None:
         """
@@ -449,7 +449,7 @@ cdef class Win:
         self,
         origin: BufSpec,
         int target_rank: int,
-        target: Optional[TargetSpec] = None,
+        target: TargetSpec | None = None,
     ) -> Request:
         """
         Put data into a memory window on a remote process.
@@ -469,7 +469,7 @@ cdef class Win:
         self,
         origin: BufSpec,
         int target_rank: int,
-        target: Optional[TargetSpec] = None,
+        target: TargetSpec | None = None,
     ) -> Request:
         """
         Get data from a memory window on a remote process.
@@ -489,7 +489,7 @@ cdef class Win:
         self,
         origin: BufSpec,
         int target_rank: int,
-        target: Optional[TargetSpec] = None,
+        target: TargetSpec | None = None,
         Op op: Op = SUM,
     ) -> Request:
         """
@@ -511,7 +511,7 @@ cdef class Win:
         origin: BufSpec,
         result: BufSpec,
         int target_rank: int,
-        target: Optional[TargetSpec] = None,
+        target: TargetSpec | None = None,
         Op op: Op = SUM,
     ) -> Request:
         """
