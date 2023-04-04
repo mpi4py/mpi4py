@@ -1,4 +1,4 @@
-from typing import Any, Union
+from typing import Any
 from typing import Sequence
 
 __version__: str = ...
@@ -29,5 +29,5 @@ def get_config() -> dict[str, str]: ...
 
 def profile(
     name: str, *,
-    path: Union[str, Sequence[str]] | None = None,
+    path: str | Sequence[str] | None = None,
 ) -> None: ...

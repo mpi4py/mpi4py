@@ -50,7 +50,7 @@ cdef class Comm:
     def __bool__(self) -> bool:
         return self.ob_mpi != MPI_COMM_NULL
 
-    def __reduce__(self) -> Union[str, tuple[Any, ...]]:
+    def __reduce__(self) -> str | tuple[Any, ...]:
         return reduce_default(self)
 
     # Group
@@ -788,7 +788,7 @@ cdef class Comm:
 
     def Gather(
         self,
-        sendbuf: Union[BufSpec, InPlace],
+        sendbuf: BufSpec | InPlace,
         recvbuf: BufSpecB | None,
         int root: int = 0,
     ) -> None:
@@ -804,7 +804,7 @@ cdef class Comm:
 
     def Gatherv(
         self,
-        sendbuf: Union[BufSpec, InPlace],
+        sendbuf: BufSpec | InPlace,
         recvbuf: BufSpecV | None,
         int root: int = 0,
     ) -> None:
@@ -823,7 +823,7 @@ cdef class Comm:
     def Scatter(
         self,
         sendbuf: BufSpecB | None,
-        recvbuf: Union[BufSpec, InPlace],
+        recvbuf: BufSpec | InPlace,
         int root: int = 0,
     ) -> None:
         """
@@ -840,7 +840,7 @@ cdef class Comm:
     def Scatterv(
         self,
         sendbuf: BufSpecV | None,
-        recvbuf: Union[BufSpec, InPlace],
+        recvbuf: BufSpec | InPlace,
         int root: int = 0,
     ) -> None:
         """
@@ -857,7 +857,7 @@ cdef class Comm:
 
     def Allgather(
         self,
-        sendbuf: Union[BufSpec, InPlace],
+        sendbuf: BufSpec | InPlace,
         recvbuf: BufSpecB,
     ) -> None:
         """
@@ -873,7 +873,7 @@ cdef class Comm:
 
     def Allgatherv(
         self,
-        sendbuf: Union[BufSpec, InPlace],
+        sendbuf: BufSpec | InPlace,
         recvbuf: BufSpecV,
     ) -> None:
         """
@@ -890,7 +890,7 @@ cdef class Comm:
 
     def Alltoall(
         self,
-        sendbuf: Union[BufSpecB, InPlace],
+        sendbuf: BufSpecB | InPlace,
         recvbuf: BufSpecB,
     ) -> None:
         """
@@ -906,7 +906,7 @@ cdef class Comm:
 
     def Alltoallv(
         self,
-        sendbuf: Union[BufSpecV, InPlace],
+        sendbuf: BufSpecV | InPlace,
         recvbuf: BufSpecV,
     ) -> None:
         """
@@ -923,7 +923,7 @@ cdef class Comm:
 
     def Alltoallw(
         self,
-        sendbuf: Union[BufSpecW, InPlace],
+        sendbuf: BufSpecW | InPlace,
         recvbuf: BufSpecW,
     ) -> None:
         """
@@ -943,7 +943,7 @@ cdef class Comm:
 
     def Reduce(
         self,
-        sendbuf: Union[BufSpec, InPlace],
+        sendbuf: BufSpec | InPlace,
         recvbuf: BufSpec | None,
         Op op: Op = SUM,
         int root: int = 0,
@@ -959,7 +959,7 @@ cdef class Comm:
 
     def Allreduce(
         self,
-        sendbuf: Union[BufSpec, InPlace],
+        sendbuf: BufSpec | InPlace,
         recvbuf: BufSpec,
         Op op: Op = SUM,
     ) -> None:
@@ -974,8 +974,8 @@ cdef class Comm:
 
     def Reduce_scatter_block(
         self,
-        sendbuf: Union[BufSpecB, InPlace],
-        recvbuf: Union[BufSpec, BufSpecB],
+        sendbuf: BufSpecB | InPlace,
+        recvbuf: BufSpec | BufSpecB,
         Op op: Op = SUM,
     ) -> None:
         """
@@ -989,7 +989,7 @@ cdef class Comm:
 
     def Reduce_scatter(
         self,
-        sendbuf: Union[BufSpec, InPlace],
+        sendbuf: BufSpec | InPlace,
         recvbuf: BufSpec,
         recvcounts: Sequence[int] | None = None,
         Op op: Op = SUM,
@@ -1034,7 +1034,7 @@ cdef class Comm:
 
     def Igather(
         self,
-        sendbuf: Union[BufSpec, InPlace],
+        sendbuf: BufSpec | InPlace,
         recvbuf: BufSpecB | None,
         int root: int = 0,
     ) -> Request:
@@ -1053,7 +1053,7 @@ cdef class Comm:
 
     def Igatherv(
         self,
-        sendbuf: Union[BufSpec, InPlace],
+        sendbuf: BufSpec | InPlace,
         recvbuf: BufSpecV | None,
         int root: int = 0,
     ) -> Request:
@@ -1073,7 +1073,7 @@ cdef class Comm:
     def Iscatter(
         self,
         sendbuf: BufSpecB | None,
-        recvbuf: Union[BufSpec, InPlace],
+        recvbuf: BufSpec | InPlace,
         int root: int = 0,
     ) -> Request:
         """
@@ -1092,7 +1092,7 @@ cdef class Comm:
     def Iscatterv(
         self,
         sendbuf: BufSpecV | None,
-        recvbuf: Union[BufSpec, InPlace],
+        recvbuf: BufSpec | InPlace,
         int root: int = 0,
     ) -> Request:
         """
@@ -1110,7 +1110,7 @@ cdef class Comm:
 
     def Iallgather(
         self,
-        sendbuf: Union[BufSpec, InPlace],
+        sendbuf: BufSpec | InPlace,
         recvbuf: BufSpecB,
     ) -> Request:
         """
@@ -1128,7 +1128,7 @@ cdef class Comm:
 
     def Iallgatherv(
         self,
-        sendbuf: Union[BufSpec, InPlace],
+        sendbuf: BufSpec | InPlace,
         recvbuf: BufSpecV,
     ) -> Request:
         """
@@ -1145,7 +1145,7 @@ cdef class Comm:
 
     def Ialltoall(
         self,
-        sendbuf: Union[BufSpecB, InPlace],
+        sendbuf: BufSpecB | InPlace,
         recvbuf: BufSpecB,
     ) -> Request:
         """
@@ -1163,7 +1163,7 @@ cdef class Comm:
 
     def Ialltoallv(
         self,
-        sendbuf: Union[BufSpecV, InPlace],
+        sendbuf: BufSpecV | InPlace,
         recvbuf: BufSpecV,
     ) -> Request:
         """
@@ -1181,7 +1181,7 @@ cdef class Comm:
 
     def Ialltoallw(
         self,
-        sendbuf: Union[BufSpecW, InPlace],
+        sendbuf: BufSpecW | InPlace,
         recvbuf: BufSpecW,
     ) -> Request:
         """
@@ -1199,7 +1199,7 @@ cdef class Comm:
 
     def Ireduce(
         self,
-        sendbuf: Union[BufSpec, InPlace],
+        sendbuf: BufSpec | InPlace,
         recvbuf: BufSpec | None,
         Op op: Op = SUM,
         int root: int = 0,
@@ -1217,7 +1217,7 @@ cdef class Comm:
 
     def Iallreduce(
         self,
-        sendbuf: Union[BufSpec, InPlace],
+        sendbuf: BufSpec | InPlace,
         recvbuf: BufSpec,
         Op op: Op = SUM,
     ) -> Request:
@@ -1234,8 +1234,8 @@ cdef class Comm:
 
     def Ireduce_scatter_block(
         self,
-        sendbuf: Union[BufSpecB, InPlace],
-        recvbuf: Union[BufSpec, BufSpecB],
+        sendbuf: BufSpecB | InPlace,
+        recvbuf: BufSpec | BufSpecB,
         Op op: Op = SUM,
     ) -> Request:
         """
@@ -1251,7 +1251,7 @@ cdef class Comm:
 
     def Ireduce_scatter(
         self,
-        sendbuf: Union[BufSpec, InPlace],
+        sendbuf: BufSpec | InPlace,
         recvbuf: BufSpec,
         recvcounts: Sequence[int] | None = None,
         Op op: Op = SUM,
@@ -1304,7 +1304,7 @@ cdef class Comm:
 
     def Gather_init(
         self,
-        sendbuf: Union[BufSpec, InPlace],
+        sendbuf: BufSpec | InPlace,
         recvbuf: BufSpecB | None,
         int root: int = 0,
         Info info: Info = INFO_NULL,
@@ -1324,7 +1324,7 @@ cdef class Comm:
 
     def Gatherv_init(
         self,
-        sendbuf: Union[BufSpec, InPlace],
+        sendbuf: BufSpec | InPlace,
         recvbuf: BufSpecV | None,
         int root: int = 0,
         Info info: Info = INFO_NULL,
@@ -1345,7 +1345,7 @@ cdef class Comm:
     def Scatter_init(
         self,
         sendbuf: BufSpecB | None,
-        recvbuf: Union[BufSpec, InPlace],
+        recvbuf: BufSpec | InPlace,
         int root: int = 0,
         Info info: Info = INFO_NULL,
     ) -> Prequest:
@@ -1365,7 +1365,7 @@ cdef class Comm:
     def Scatterv_init(
         self,
         sendbuf: BufSpecV | None,
-        recvbuf: Union[BufSpec, InPlace],
+        recvbuf: BufSpec | InPlace,
         int root: int = 0,
         Info info: Info = INFO_NULL,
     ) -> Prequest:
@@ -1384,7 +1384,7 @@ cdef class Comm:
 
     def Allgather_init(
         self,
-        sendbuf: Union[BufSpec, InPlace],
+        sendbuf: BufSpec | InPlace,
         recvbuf: BufSpecB,
         Info info: Info = INFO_NULL,
     ) -> Prequest:
@@ -1403,7 +1403,7 @@ cdef class Comm:
 
     def Allgatherv_init(
         self,
-        sendbuf: Union[BufSpec, InPlace],
+        sendbuf: BufSpec | InPlace,
         recvbuf: BufSpecV,
         Info info: Info = INFO_NULL,
     ) -> Prequest:
@@ -1421,7 +1421,7 @@ cdef class Comm:
 
     def Alltoall_init(
         self,
-        sendbuf: Union[BufSpecB, InPlace],
+        sendbuf: BufSpecB | InPlace,
         recvbuf: BufSpecB,
         Info info: Info = INFO_NULL,
     ) -> Prequest:
@@ -1440,7 +1440,7 @@ cdef class Comm:
 
     def Alltoallv_init(
         self,
-        sendbuf: Union[BufSpecV, InPlace],
+        sendbuf: BufSpecV | InPlace,
         recvbuf: BufSpecV,
         Info info: Info = INFO_NULL,
     ) -> Prequest:
@@ -1459,7 +1459,7 @@ cdef class Comm:
 
     def Alltoallw_init(
         self,
-        sendbuf: Union[BufSpecW, InPlace],
+        sendbuf: BufSpecW | InPlace,
         recvbuf: BufSpecW,
         Info info: Info = INFO_NULL,
     ) -> Prequest:
@@ -1478,7 +1478,7 @@ cdef class Comm:
 
     def Reduce_init(
         self,
-        sendbuf: Union[BufSpec, InPlace],
+        sendbuf: BufSpec | InPlace,
         recvbuf: BufSpec | None,
         Op op: Op = SUM,
         int root: int = 0,
@@ -1497,7 +1497,7 @@ cdef class Comm:
 
     def Allreduce_init(
         self,
-        sendbuf: Union[BufSpec, InPlace],
+        sendbuf: BufSpec | InPlace,
         recvbuf: BufSpec,
         Op op: Op = SUM,
         Info info: Info = INFO_NULL,
@@ -1515,8 +1515,8 @@ cdef class Comm:
 
     def Reduce_scatter_block_init(
         self,
-        sendbuf: Union[BufSpecB, InPlace],
-        recvbuf: Union[BufSpec, BufSpecB],
+        sendbuf: BufSpecB | InPlace,
+        recvbuf: BufSpec | BufSpecB,
         Op op: Op = SUM,
         Info info: Info = INFO_NULL,
     ) -> Prequest:
@@ -1533,7 +1533,7 @@ cdef class Comm:
 
     def Reduce_scatter_init(
         self,
-        sendbuf: Union[BufSpec, InPlace],
+        sendbuf: BufSpec | InPlace,
         recvbuf: BufSpec,
         recvcounts: Sequence[int] | None = None,
         Op op: Op = SUM,
@@ -1630,7 +1630,7 @@ cdef class Comm:
     # Attributes
     # ----------
 
-    def Get_attr(self, int keyval: int) -> Union[int, Any, None]:
+    def Get_attr(self, int keyval: int) -> int | Any | None:
         """
         Retrieve attribute value by key
         """
@@ -1998,7 +1998,7 @@ cdef class Comm:
     def reduce(
         self,
         sendobj: Any,
-        op: Union[Op, Callable[[Any, Any], Any]] = SUM,
+        op: Op | Callable[[Any, Any], Any] = SUM,
         int root: int = 0,
     ) -> Any | None:
         """Reduce to Root"""
@@ -2008,7 +2008,7 @@ cdef class Comm:
     def allreduce(
         self,
         sendobj: Any,
-        op: Union[Op, Callable[[Any, Any], Any]] = SUM,
+        op: Op | Callable[[Any, Any], Any] = SUM,
     ) -> Any:
         """Reduce to All"""
         cdef MPI_Comm comm = self.ob_mpi
@@ -2234,7 +2234,7 @@ cdef class Intracomm(Comm):
 
     def Scan(
         self,
-        sendbuf: Union[BufSpec, InPlace],
+        sendbuf: BufSpec | InPlace,
         recvbuf: BufSpec,
         Op op: Op = SUM,
     ) -> None:
@@ -2251,7 +2251,7 @@ cdef class Intracomm(Comm):
 
     def Exscan(
         self,
-        sendbuf: Union[BufSpec, InPlace],
+        sendbuf: BufSpec | InPlace,
         recvbuf: BufSpec,
         Op op: Op = SUM,
     ) -> None:
@@ -2268,7 +2268,7 @@ cdef class Intracomm(Comm):
 
     def Iscan(
         self,
-        sendbuf: Union[BufSpec, InPlace],
+        sendbuf: BufSpec | InPlace,
         recvbuf: BufSpec,
         Op op: Op = SUM,
     ) -> Request:
@@ -2285,7 +2285,7 @@ cdef class Intracomm(Comm):
 
     def Iexscan(
         self,
-        sendbuf: Union[BufSpec, InPlace],
+        sendbuf: BufSpec | InPlace,
         recvbuf: BufSpec,
         Op op: Op = SUM,
     ) -> Request:
@@ -2304,7 +2304,7 @@ cdef class Intracomm(Comm):
 
     def Scan_init(
         self,
-        sendbuf: Union[BufSpec, InPlace],
+        sendbuf: BufSpec | InPlace,
         recvbuf: BufSpec,
         Op op: Op = SUM,
         Info info: Info = INFO_NULL,
@@ -2323,7 +2323,7 @@ cdef class Intracomm(Comm):
 
     def Exscan_init(
         self,
-        sendbuf: Union[BufSpec, InPlace],
+        sendbuf: BufSpec | InPlace,
         recvbuf: BufSpec,
         Op op: Op = SUM,
         Info info: Info = INFO_NULL,
@@ -2345,7 +2345,7 @@ cdef class Intracomm(Comm):
     def scan(
         self,
         sendobj: Any,
-        op: Union[Op, Callable[[Any, Any], Any]] = SUM,
+        op: Op | Callable[[Any, Any], Any] = SUM,
     ) -> Any:
         """Inclusive Scan"""
         cdef MPI_Comm comm = self.ob_mpi
@@ -2354,7 +2354,7 @@ cdef class Intracomm(Comm):
     def exscan(
         self,
         sendobj: Any,
-        op: Union[Op, Callable[[Any, Any], Any]] = SUM,
+        op: Op | Callable[[Any, Any], Any] = SUM,
     ) -> Any:
         """Exclusive Scan"""
         cdef MPI_Comm comm = self.ob_mpi
@@ -2406,7 +2406,7 @@ cdef class Intracomm(Comm):
         command: Sequence[str],
         args: Sequence[Sequence[str]] | None = None,
         maxprocs: Sequence[int] | None = None,
-        info: Union[Info, Sequence[Info]] = INFO_NULL,
+        info: Info | Sequence[Info] = INFO_NULL,
         int root: int = 0,
         errcodes: list | None = None,
     ) -> Intercomm:
@@ -2983,7 +2983,7 @@ cdef class Cartcomm(Topocomm):
 
 # Cartesian Convenience Function
 
-def Compute_dims(int nnodes: int, dims: Union[int, Sequence[int]]) -> list[int]:
+def Compute_dims(int nnodes: int, dims: int | Sequence[int]) -> list[int]:
     """
     Return a balanced distribution of
     processes per coordinate direction

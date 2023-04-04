@@ -368,7 +368,6 @@ IMPORTS = """
 from __future__ import annotations
 from typing import (
     Any,
-    Union,
     NoReturn,
     Final,
     Literal,
@@ -435,12 +434,12 @@ OVERRIDE = {
             "    return super().__new__(cls)"),
         '__getitem__': (
             "def __getitem__(self, "
-            "item: Union[int, slice]) "
-            "-> Union[int, memory]: ..."),
+            "item: int | slice) "
+            "-> int | memory: ..."),
         '__setitem__': (
             "def __setitem__(self, "
-            "item: Union[int, slice], "
-            "value: Union[int, Buffer]) "
+            "item: int | slice, "
+            "value:int | Buffer) "
             "-> None: ..."),
         '__delitem__': None,
     },

@@ -18,18 +18,18 @@ cdef class Info:
     def __bool__(self) -> bool:
         return self.ob_mpi != MPI_INFO_NULL
 
-    def __reduce__(self) -> Union[str, tuple[Any, ...]]:
+    def __reduce__(self) -> str | tuple[Any, ...]:
         return reduce_Info(self)
 
     @classmethod
     def Create(
         cls,
-        items: Union[
-            Info,
-            Mapping[str, str],
-            Iterable[tuple[str, str]],
-            None,
-        ] = None,
+        items: (
+            Info |
+            Mapping[str, str] |
+            Iterable[tuple[str, str]] |
+            None
+        ) = None,
     ) -> Self:
         """
         Create a new info object
@@ -231,11 +231,7 @@ cdef class Info:
 
     def update(
         self,
-        items: Union[
-            Info,
-            Mapping[str, str],
-            Iterable[tuple[str, str]]
-        ] = (),
+        items: Info | Mapping[str, str] | Iterable[tuple[str, str]] = (),
         **kwds: str,
     ) -> None:
         """info update"""

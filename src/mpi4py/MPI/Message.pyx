@@ -18,7 +18,7 @@ cdef class Message:
     def __bool__(self) -> bool:
         return self.ob_mpi != MPI_MESSAGE_NULL
 
-    def __reduce__(self) -> Union[str, tuple[Any, ...]]:
+    def __reduce__(self) -> str | tuple[Any, ...]:
         return reduce_default(self)
 
     # Matching Probe

@@ -2,20 +2,20 @@ import weakref
 import threading
 from ..MPI  import Info, Intracomm, Intercomm
 from ._base import Executor, Future
-from typing import Any, Generic, TypeVar, Union
+from typing import Any, Generic, TypeVar
 from typing import Callable, Iterable, Iterator, Sequence, Mapping
 
 _T = TypeVar("_T")
 _Task = tuple[Callable[..., _T], tuple, dict[str, Any]]
 _Item = tuple[Future[_T], _Task[_T]]
-_Info = Union[Info, Mapping[str, str], Iterable[tuple[str, str]]]
+_Info = Info | Mapping[str, str] | Iterable[tuple[str, str]]
 
 def serialized(function: Callable[..., Any]) -> Callable[..., Any]: ...
 def setup_mpi_threads() -> None: ...
 
 class RemoteTraceback(Exception): pass
 def sys_exception() -> BaseException: ...
-def os_environ_get(name: str, default: _T | None = None) -> Union[str, _T, None]: ...
+def os_environ_get(name: str, default: _T | None = None) -> str | _T | None: ...
 
 BACKOFF: float = ...
 
@@ -130,10 +130,10 @@ def get_server_port() -> int: ...
 _Address = tuple[str | None, int | None]
 def client_lookup(address: _Address): ...
 def server_publish(address: _Address, mpi_port: str) -> None: ...
-def client_connect(service: Union[str, _Address],
+def client_connect(service: str | _Address,
                    mpi_info: _Info | None = ...,
                    ) -> Intercomm: ...
-def server_accept(service: Union[str, _Address],
+def server_accept(service: str | _Address,
                   mpi_info: _Info | None = ...,
                   root: int = ...,
                   comm: Intracomm = ...,

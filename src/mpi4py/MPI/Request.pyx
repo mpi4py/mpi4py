@@ -18,7 +18,7 @@ cdef class Request:
     def __bool__(self) -> bool:
         return self.ob_mpi != MPI_REQUEST_NULL
 
-    def __reduce__(self) -> Union[str, tuple[Any, ...]]:
+    def __reduce__(self) -> str | tuple[Any, ...]:
         return reduce_default(self)
 
     # Completion Operations

@@ -68,7 +68,7 @@ cdef class File:
     def __bool__(self) -> bool:
         return self.ob_mpi != MPI_FILE_NULL
 
-    def __reduce__(self) -> Union[str, tuple[Any, ...]]:
+    def __reduce__(self) -> str | tuple[Any, ...]:
         return reduce_default(self)
 
     # File Manipulation
@@ -78,7 +78,7 @@ cdef class File:
     def Open(
         cls,
         Intracomm comm: Intracomm,
-        filename: Union[PathLike, str, bytes],
+        filename: PathLike | str | bytes,
         int amode: int = MODE_RDONLY,
         Info info: Info = INFO_NULL,
     ) -> Self:
@@ -102,7 +102,7 @@ cdef class File:
     @classmethod
     def Delete(
         cls,
-        filename: Union[PathLike, str, bytes],
+        filename: PathLike | str | bytes,
         Info info: Info = INFO_NULL,
     ) -> None:
         """

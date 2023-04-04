@@ -1,6 +1,5 @@
 cdef Any
 cdef Self
-cdef Union
 cdef Literal
 cdef NoReturn
 
