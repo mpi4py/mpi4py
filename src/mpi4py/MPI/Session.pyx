@@ -4,7 +4,7 @@ cdef class Session:
     Session
     """
 
-    def __cinit__(self, Session session: Optional[Session] = None):
+    def __cinit__(self, Session session: Session | None = None):
         self.ob_mpi = MPI_SESSION_NULL
         cinit(self, session)
 
@@ -25,7 +25,7 @@ cdef class Session:
     def Init(
         cls,
         Info info: Info = INFO_NULL,
-        Errhandler errhandler: Optional[Errhandler] = None,
+        Errhandler errhandler: Errhandler | None = None,
     ) -> Self:
         """
         Create a new session

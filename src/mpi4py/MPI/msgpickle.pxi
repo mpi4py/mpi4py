@@ -45,10 +45,10 @@ cdef class Pickle:
 
     def __init__(
         self,
-        dumps: Optional[Callable[[Any, int], bytes]] = None,
-        loads: Optional[Callable[[Buffer], Any]] = None,
-        protocol: Optional[int] = None,
-        threshold: Optional[int] = None,
+        dumps: Callable[[Any, int], bytes] | None = None,
+        loads: Callable[[Buffer], Any] | None = None,
+        protocol: int | None = None,
+        threshold: int | None = None,
     ) -> None:
         if dumps is None:
             dumps = PyPickle_dumps
@@ -103,9 +103,9 @@ cdef class Pickle:
 
     property PROTOCOL:
         """protocol version"""
-        def __get__(self) -> Optional[int]:
+        def __get__(self) -> int | None:
             return self.ob_PROTO
-        def __set__(self, protocol: Optional[int]):
+        def __set__(self, protocol: int | None):
             if protocol is None:
                 if self.ob_dumps is PyPickle_dumps:
                     protocol = PyPickle_PROTOCOL
@@ -115,7 +115,7 @@ cdef class Pickle:
         """out-of-band threshold"""
         def __get__(self) -> int:
             return self.ob_THRES
-        def __set__(self, threshold: Optional[int]):
+        def __set__(self, threshold: int | None):
             if threshold is None:
                 threshold = PyPickle_THRESHOLD
             self.ob_THRES = threshold

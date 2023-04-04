@@ -54,7 +54,7 @@ cdef class File:
     File handle
     """
 
-    def __cinit__(self, File file: Optional[File] = None):
+    def __cinit__(self, File file: File | None = None):
         self.ob_mpi = MPI_FILE_NULL
         cinit(self, file)
 
@@ -200,7 +200,7 @@ cdef class File:
         self,
         Offset disp: int = 0,
         Datatype etype: Datatype = BYTE,
-        Datatype filetype: Optional[Datatype] = None,
+        Datatype filetype: Datatype | None = None,
         datarep: str = "native",
         Info info: Info = INFO_NULL,
     ) -> None:
@@ -242,7 +242,7 @@ cdef class File:
         self,
         Offset offset: int,
         buf: BufSpec,
-        Status status: Optional[Status] = None,
+        Status status: Status | None = None,
     ) -> None:
         """
         Read using explicit offset
@@ -256,7 +256,7 @@ cdef class File:
         self,
         Offset offset: int,
         buf: BufSpec,
-        Status status: Optional[Status] = None,
+        Status status: Status | None = None,
     ) -> None:
         """
         Collective read using explicit offset
@@ -270,7 +270,7 @@ cdef class File:
         self,
         Offset offset: int,
         buf: BufSpec,
-        Status status:Optional[Status] = None,
+        Status status:Status | None = None,
     ) -> None:
         """
         Write using explicit offset
@@ -284,7 +284,7 @@ cdef class File:
         self,
         Offset offset: int,
         buf: BufSpec,
-        Status status: Optional[Status] = None,
+        Status status: Status | None = None,
     ) -> None:
         """
         Collective write using explicit offset
@@ -360,7 +360,7 @@ cdef class File:
     def Read(
         self,
         buf: BufSpec,
-        Status status: Optional[Status] = None,
+        Status status: Status | None = None,
     ) -> None:
         """
         Read using individual file pointer
@@ -373,7 +373,7 @@ cdef class File:
     def Read_all(
         self,
         buf: BufSpec,
-        Status status: Optional[Status] = None,
+        Status status: Status | None = None,
     ) -> None:
         """
         Collective read using individual file pointer
@@ -386,7 +386,7 @@ cdef class File:
     def Write(
         self,
         buf: BufSpec,
-        Status status: Optional[Status] = None,
+        Status status: Status | None = None,
     ) -> None:
         """
         Write using individual file pointer
@@ -399,7 +399,7 @@ cdef class File:
     def Write_all(
         self,
         buf: BufSpec,
-        Status status: Optional[Status] = None,
+        Status status: Status | None = None,
     ) -> None:
         """
         Collective write using individual file pointer
@@ -496,7 +496,7 @@ cdef class File:
     def Read_shared(
         self,
         buf: BufSpec,
-        Status status: Optional[Status] = None,
+        Status status: Status | None = None,
     ) -> None:
         """
         Read using shared file pointer
@@ -509,7 +509,7 @@ cdef class File:
     def Write_shared(
         self,
         buf: BufSpec,
-        Status status: Optional[Status] = None,
+        Status status: Status | None = None,
     ) -> None:
         """
         Write using shared file pointer
@@ -550,7 +550,7 @@ cdef class File:
     def Read_ordered(
         self,
         buf: BufSpec,
-        Status status: Optional[Status] = None,
+        Status status: Status | None = None,
     ) -> None:
         """
         Collective read using shared file pointer
@@ -563,7 +563,7 @@ cdef class File:
     def Write_ordered(
         self,
         buf: BufSpec,
-        Status status: Optional[Status] = None,
+        Status status: Status | None = None,
     ) -> None:
         """
         Collective write using shared file pointer
@@ -614,7 +614,7 @@ cdef class File:
     def Read_at_all_end(
         self,
         buf: BufSpec,
-        Status status: Optional[Status] = None,
+        Status status: Status | None = None,
     ) -> None:
         """
         Complete a split collective read using explict offset
@@ -639,7 +639,7 @@ cdef class File:
     def Write_at_all_end(
         self,
         buf: BufSpec,
-        Status status: Optional[Status] = None,
+        Status status: Status | None = None,
     ) -> None:
         """
         Complete a split collective write using explict offset
@@ -666,7 +666,7 @@ cdef class File:
     def Read_all_end(
         self,
         buf: BufSpec,
-        Status status: Optional[Status] = None,
+        Status status: Status | None = None,
     ) -> None:
         """
         Complete a split collective read
@@ -692,7 +692,7 @@ cdef class File:
     def Write_all_end(
         self,
         buf: BufSpec,
-        Status status: Optional[Status] = None,
+        Status status: Status | None = None,
     ) -> None:
         """
         Complete a split collective write
@@ -720,7 +720,7 @@ cdef class File:
     def Read_ordered_end(
         self,
         buf: BufSpec,
-        Status status: Optional[Status] = None,
+        Status status: Status | None = None,
     ) -> None:
         """
         Complete a split collective read
@@ -746,7 +746,7 @@ cdef class File:
     def Write_ordered_end(
         self,
         buf: BufSpec,
-        Status status: Optional[Status] = None,
+        Status status: Status | None = None,
     ) -> None:
         """
         Complete a split collective write

@@ -4,7 +4,7 @@ cdef class Message:
     Matched message handle
     """
 
-    def __cinit__(self, Message message: Optional[Message] = None):
+    def __cinit__(self, Message message: Message | None = None):
         self.ob_mpi = MPI_MESSAGE_NULL
         cinit(self, message)
 
@@ -30,7 +30,7 @@ cdef class Message:
         Comm comm: Comm,
         int source: int = ANY_SOURCE,
         int tag: int = ANY_TAG,
-        Status status: Optional[Status] = None,
+        Status status: Status | None = None,
     ) -> Self:
         """
         Blocking test for a matched message
@@ -49,8 +49,8 @@ cdef class Message:
         Comm comm: Comm,
         int source: int = ANY_SOURCE,
         int tag: int = ANY_TAG,
-        Status status: Optional[Status] = None,
-    ) -> Optional[Self]:
+        Status status: Status | None = None,
+    ) -> Self | None:
         """
         Nonblocking test for a matched message
         """
@@ -70,7 +70,7 @@ cdef class Message:
     def Recv(
         self,
         buf: BufSpec,
-        Status status: Optional[Status] = None,
+        Status status: Status | None = None,
     ) -> None:
         """
         Blocking receive of matched message
@@ -114,7 +114,7 @@ cdef class Message:
         Comm comm: Comm,
         int source: int = ANY_SOURCE,
         int tag: int = ANY_TAG,
-        Status status: Optional[Status] = None,
+        Status status: Status | None = None,
     ) -> Self:
         """Blocking test for a matched message"""
         cdef Message message = <Message>New(cls)
@@ -129,8 +129,8 @@ cdef class Message:
         Comm comm: Comm,
         int source: int = ANY_SOURCE,
         int tag: int = ANY_TAG,
-        Status status: Optional[Status] = None,
-    ) -> Optional[Self]:
+        Status status: Status | None = None,
+    ) -> Self | None:
         """Nonblocking test for a matched message"""
         cdef int flag = 0
         cdef Message message = <Message>New(cls)
@@ -140,7 +140,7 @@ cdef class Message:
         if flag == 0: return None
         return message
     #
-    def recv(self, Status status: Optional[Status] = None) -> Any:
+    def recv(self, Status status: Status | None = None) -> Any:
         """Blocking receive of matched message"""
         cdef object rmsg = self.ob_buf
         cdef MPI_Message message = self.ob_mpi

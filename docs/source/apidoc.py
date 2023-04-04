@@ -143,7 +143,7 @@ def visit_constructor(cls, name='__init__', args=None):
     init = (name == '__init__')
     argname = cls.__mro__[-2].__name__.lower()
     argtype = cls.__name__
-    initarg = args or f"{argname}: Optional[{argtype}] = None"
+    initarg = args or f"{argname}: {argtype} | None = None"
     selfarg = 'self' if init else 'cls'
     rettype = 'None' if init else argtype
     arglist = f"{selfarg}, {initarg}"
@@ -369,7 +369,6 @@ from __future__ import annotations
 from typing import (
     Any,
     Union,
-    Optional,
     NoReturn,
     Final,
     Literal,

@@ -2,7 +2,6 @@ cdef Any
 cdef Self
 cdef Union
 cdef Literal
-cdef Optional
 cdef NoReturn
 
 cdef Callable

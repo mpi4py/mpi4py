@@ -153,7 +153,7 @@ cdef class memory:
 
     property obj:
         """The underlying object of the memory"""
-        def __get__(self) -> Optional[Buffer]:
+        def __get__(self) -> Buffer | None:
             if self.view.obj == NULL: return None
             return <object>self.view.obj
 
@@ -181,7 +181,7 @@ cdef class memory:
 
     # convenience methods
 
-    def tobytes(self, order: Optional[str] = None) -> bytes:
+    def tobytes(self, order: str | None = None) -> bytes:
         """Return the data in the buffer as a byte string"""
         <void> order # unused
         return PyBytes_FromStringAndSize(<char*>self.view.buf, self.view.len)

@@ -4,7 +4,7 @@ cdef class Info:
     Info object
     """
 
-    def __cinit__(self, Info info: Optional[Info] =None):
+    def __cinit__(self, Info info: Info | None = None):
         self.ob_mpi = MPI_INFO_NULL
         cinit(self, info)
 
@@ -51,7 +51,7 @@ cdef class Info:
         return info
 
     @classmethod
-    def Create_env(cls, args: Optional[Sequence[str]] = None) -> Self:
+    def Create_env(cls, args: Sequence[str] | None = None) -> Self:
         """
         Create a new environment info object
         """
@@ -79,7 +79,7 @@ cdef class Info:
         CHKERR( MPI_Info_dup(self.ob_mpi, &info.ob_mpi) )
         return info
 
-    def Get(self, key: str) -> Optional[str]:
+    def Get(self, key: str) -> str | None:
         """
         Retrieve the value associated with a key
         """
@@ -104,7 +104,7 @@ cdef class Info:
         key = asmpistr(key, &ckey)
         CHKERR( MPI_Info_delete(self.ob_mpi, ckey) )
 
-    def Get_string(self, key: str) -> Optional[str]:
+    def Get_string(self, key: str) -> str | None:
         """
         Retrieve the value associated with a key
         """
@@ -187,7 +187,7 @@ cdef class Info:
         if key not in self: raise KeyError(key)
         self.Delete(key)
 
-    def get(self, key: str, default: Optional[str] = None) -> Optional[str]:
+    def get(self, key: str, default: str | None = None) -> str | None:
         """info get"""
         if not self: return default
         cdef object value = self.Get(key)

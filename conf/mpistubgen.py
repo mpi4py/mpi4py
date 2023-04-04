@@ -124,7 +124,7 @@ def visit_constructor(cls, name='__init__', args=None):
     init = (name == '__init__')
     argname = cls.__name__.lower()
     argtype = cls.__name__
-    initarg = args or f"{argname}: Optional[{argtype}] = None"
+    initarg = args or f"{argname}: {argtype} | None = None"
     selfarg = 'self' if init else 'cls'
     rettype = 'None' if init else argtype
     arglist = f"{selfarg}, {initarg}"
@@ -338,7 +338,6 @@ from threading import Lock
 from typing import (
     Any,
     Union,
-    Optional,
     NoReturn,
     overload,
 )
@@ -430,13 +429,13 @@ OVERRIDE = {
         def __init__(self,
             dumps: Callable[[Any, int], bytes],
             loads: Callable[[Buffer], Any],
-            protocol: Optional[int] = None,
-            threshold: Optional[int] = None,
+            protocol: int | None = None,
+            threshold: int | None = None,
         ) -> None: ...
         @overload
         def __init__(self,
-            dumps: Optional[Callable[[Any], bytes]] = None,
-            loads: Optional[Callable[[Buffer], Any]] = None,
+            dumps: Callable[[Any], bytes] | None = None,
+            loads: Callable[[Buffer], Any] | None = None,
         ) -> None: ...
         """,
     },
@@ -458,7 +457,7 @@ OVERRIDE.update({
 OVERRIDE.update({
     subtype: {
         '__new__': """
-        def __new__(cls, {}: Optional[{}] = None) -> {}: ...
+        def __new__(cls, {}: {} | None = None) -> {}: ...
         """.format(basetype.lower(), basetype, subtype)
     }
     for basetype, subtype in (

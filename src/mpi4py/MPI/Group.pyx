@@ -4,7 +4,7 @@ cdef class Group:
     Group of processes
     """
 
-    def __cinit__(self, Group group: Optional[Group] = None):
+    def __cinit__(self, Group group: Group | None = None):
         self.ob_mpi = MPI_GROUP_NULL
         cinit(self, group)
 
@@ -55,7 +55,7 @@ cdef class Group:
         cls,
         Group group1: Group,
         ranks1: Sequence[int],
-        Group group2: Optional[Group] = None,
+        Group group2: Group | None = None,
     ) -> list[int]:
         """
         Translate the ranks of processes in

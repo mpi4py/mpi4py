@@ -4,7 +4,7 @@ cdef class Op:
     Operation object
     """
 
-    def __cinit__(self, Op op: Optional[Op] = None):
+    def __cinit__(self, Op op: Op | None = None):
         self.ob_mpi = MPI_OP_NULL
         cinit(self, op)
 

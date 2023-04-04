@@ -1,4 +1,4 @@
-from typing import Any, Optional, Union
+from typing import Any, Union
 from typing import Sequence
 
 __version__: str = ...
@@ -12,7 +12,7 @@ class Rc:
     initialize: bool = True
     threads: bool = True
     thread_level: str = 'multiple'
-    finalize: Optional[bool] = None
+    finalize: bool | None = None
     fast_reduce: bool = True
     recv_mprobe: bool = True
     errors: str = 'exception'
@@ -29,5 +29,5 @@ def get_config() -> dict[str, str]: ...
 
 def profile(
     name: str, *,
-    path: Optional[Union[str, Sequence[str]]] = None,
+    path: Union[str, Sequence[str]] | None = None,
 ) -> None: ...
