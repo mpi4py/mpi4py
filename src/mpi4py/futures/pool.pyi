@@ -1,6 +1,4 @@
 import sys
-from ..MPI import Intracomm, COMM_WORLD
-from ._base import Executor, Future  # noqa: F401
 from typing import Any, TypeVar
 from typing import Callable, Iterable, Iterator, Mapping, Sequence
 if sys.version_info >= (3, 10):
@@ -13,6 +11,8 @@ if sys.version_info >= (3, 11):
     from typing import Self
 else:
     from typing_extensions import Self
+from ..MPI import Intracomm, COMM_WORLD
+from ._base import Executor, Future  # noqa: F401
 
 _T = TypeVar("_T")
 _P = ParamSpec("_P")

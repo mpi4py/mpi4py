@@ -14,6 +14,13 @@ from typing import (
     Dict,
     Tuple,
 )
+try:  # pragma: no branch
+    from typing import Protocol
+except ImportError:  # pragma: no cover
+    try:
+        from typing_extensions import Protocol
+    except ImportError:
+        from builtins import object as Protocol
 from numbers import (
     Integral,
 )
@@ -22,13 +29,6 @@ from .MPI import (
     BottomType,
     InPlaceType,
 )
-if sys.version_info >= (3, 8):  # pragma: no branch
-    from typing import Protocol
-else:  # pragma: no cover
-    try:
-        from typing_extensions import Protocol
-    except ImportError:
-        Protocol = object
 del sys
 
 __all__ = [

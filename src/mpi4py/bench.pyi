@@ -1,5 +1,5 @@
-from .MPI import Intracomm
 from typing import Sequence
+from .MPI import Intracomm
 
 def helloworld(comm: Intracomm, args: Sequence[str] | None = None, verbose: bool = True) -> str: ...
 def ringtest(comm: Intracomm, args: Sequence[str] | None = None, verbose: bool = True) -> float: ...

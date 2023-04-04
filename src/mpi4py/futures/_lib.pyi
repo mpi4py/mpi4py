@@ -1,9 +1,9 @@
+from typing import Any, Generic, TypeVar
+from typing import Callable, Iterable, Iterator, Sequence, Mapping
 import weakref
 import threading
 from ..MPI  import Info, Intracomm, Intercomm
 from ._base import Executor, Future
-from typing import Any, Generic, TypeVar
-from typing import Callable, Iterable, Iterator, Sequence, Mapping
 
 _T = TypeVar("_T")
 _Task = tuple[Callable[..., _T], tuple, dict[str, Any]]
