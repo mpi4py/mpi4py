@@ -368,9 +368,9 @@ IMPORTS = """
 from __future__ import annotations
 from typing import (
     Any,
-    NoReturn,
     Final,
     Literal,
+    NoReturn,
 )
 from typing import (
     Callable,
@@ -380,6 +380,11 @@ from typing import (
     Sequence,
     Mapping,
 )
+try:
+    from typing import Self
+except ImportError:
+    Self = 'Self'
+from os import PathLike
 """
 
 HELPERS = """
