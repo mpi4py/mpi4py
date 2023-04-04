@@ -80,10 +80,7 @@ autodoc_class_signature = 'separated'
 autodoc_typehints = 'description'
 autodoc_typehints_format = 'short'
 autodoc_mock_imports = []
-autodoc_type_aliases = {
-    'Self': '~typing.Self',
-    'PathLike': '~os.PathLike',
-}
+autodoc_type_aliases = {}
 
 autosummary_context = {
     'synopsis': {},
