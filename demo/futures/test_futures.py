@@ -1077,7 +1077,8 @@ class MPICommExecutorTest(unittest.TestCase):
                 else:
                     self.assertIsNone(executor)
 
-    def test_arg_root_bad(self):
+    @unittest.skipIf(SHARED_POOL, 'shared-pool')
+    def test_arg_bad_root(self):
         size = MPI.COMM_WORLD.Get_size()
         with self.assertRaises(ValueError):
             self.MPICommExecutor(root=-size)
@@ -1087,7 +1088,7 @@ class MPICommExecutorTest(unittest.TestCase):
             self.MPICommExecutor(root=+size)
 
     @unittest.skipIf(SHARED_POOL, 'shared-pool')
-    def test_arg_comm_bad(self):
+    def test_arg_bad_comm(self):
         if MPI.COMM_WORLD.Get_size() == 1: return
         intercomm = futures._lib.comm_split(MPI.COMM_WORLD)
         try:
@@ -1506,7 +1507,8 @@ if MPI.Get_version() < (2,0):
 
 if SHARED_POOL:
     del MPICommExecutorTest.test_arg_root
-    del MPICommExecutorTest.test_arg_comm_bad
+    del MPICommExecutorTest.test_arg_bad_root
+    del MPICommExecutorTest.test_arg_bad_comm
     del MPICommExecutorTest.test_initializer
     del MPICommExecutorTest.test_initializer_error
     del MPICommExecutorTest.test_initializer_error_del
