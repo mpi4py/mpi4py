@@ -12,8 +12,9 @@ within the intersection of Python and MPI.
 .. toctree::
    :maxdepth: 1
 
-   mpi4py.util.pkl5
    mpi4py.util.dtlib
+   mpi4py.util.pkl5
+   mpi4py.util.pool
 
 
 .. Local variables:

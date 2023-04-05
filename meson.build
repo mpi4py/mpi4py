@@ -133,7 +133,7 @@ package = {
     '__init__.py',
     'pkl5.py',
     'dtlib.py',
-    #'pool.py',
+    'pool.py',
   ],
 }
 
