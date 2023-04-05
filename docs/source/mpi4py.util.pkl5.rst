@@ -1,5 +1,5 @@
 mpi4py.util.pkl5
------------------
+----------------
 
 .. module:: mpi4py.util.pkl5
    :synopsis: Pickle-based communication using protocol 5.

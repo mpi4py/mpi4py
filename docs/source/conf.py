@@ -295,8 +295,8 @@ def setup(app):
     modules = [
         'mpi4py',
         'mpi4py.run',
-        'mpi4py.util.pkl5',
         'mpi4py.util.dtlib',
+        'mpi4py.util.pkl5',
     ]
     typing_overload = typing.overload
     typing.overload = lambda arg: arg

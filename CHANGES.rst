@@ -11,6 +11,8 @@ Release 4.0.0 [2023-XX-XX]
     - Add new communicator constructors.
     - Add the `Session` class and its methods.
 
+  + `mpi4py.util.pool`: New drop-in replacement for `multiprocessing.pool`.
+
   + Add runtime check for mismatch between `mpiexec` and MPI library.
 
   + Support `scikit-build`_ as an alternative build backend.

@@ -27,8 +27,9 @@ class TestImport(unittest.TestCase):
 
     def testImportUtil(self):
         import mpi4py.util
-        import mpi4py.util.pkl5
         import mpi4py.util.dtlib
+        import mpi4py.util.pkl5
+        import mpi4py.util.pool
 
 
 class TestDataFiles(unittest.TestCase):

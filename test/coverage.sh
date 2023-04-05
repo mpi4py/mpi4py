@@ -60,10 +60,11 @@ $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py --rc==a                         
 
 $MPIEXEC -n 1 $PYTHON -m coverage run test/test_package.py    -q 2> /dev/null
 $MPIEXEC -n 1 $PYTHON -m coverage run test/test_toplevel.py   -q 2> /dev/null
+$MPIEXEC -n 1 $PYTHON -m coverage run test/test_util_dtlib.py -q 2> /dev/null
 $MPIEXEC -n 1 $PYTHON -m coverage run test/test_util_pkl5.py  -q 2> /dev/null
 $MPIEXEC -n 2 $PYTHON -m coverage run test/test_util_pkl5.py  -q 2> /dev/null
 $MPIEXEC -n 3 $PYTHON -m coverage run test/test_util_pkl5.py  -q 2> /dev/null
-$MPIEXEC -n 1 $PYTHON -m coverage run test/test_util_dtlib.py -q 2> /dev/null
+$MPIEXEC -n 1 $PYTHON -m coverage run test/test_util_pool.py  -q 2> /dev/null
 $PYTHON -m coverage run demo/test-run/test_run.py             -q 2> /dev/null
 
 $MPIEXEC -n 1 $PYTHON -m coverage run demo/futures/test_futures.py -q 2> /dev/null
