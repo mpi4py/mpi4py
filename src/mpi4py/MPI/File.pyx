@@ -78,7 +78,7 @@ cdef class File:
     def Open(
         cls,
         Intracomm comm: Intracomm,
-        filename: PathLike | str | bytes,
+        filename: PathLike[AnyStr] | str | bytes,
         int amode: int = MODE_RDONLY,
         Info info: Info = INFO_NULL,
     ) -> Self:
@@ -102,7 +102,7 @@ cdef class File:
     @classmethod
     def Delete(
         cls,
-        filename: PathLike | str | bytes,
+        filename: PathLike[AnyStr] | str | bytes,
         Info info: Info = INFO_NULL,
     ) -> None:
         """

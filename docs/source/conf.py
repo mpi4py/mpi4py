@@ -108,9 +108,11 @@ def _setup_numpy_typing():
     try:
         import numpy as np
     except ImportError:
+        from types import new_class
+        from typing import Generic, TypeVar
         np = type(sys)('numpy')
         sys.modules[np.__name__] = np
-        np.dtype = type('dtype', (), {})
+        np.dtype = new_class('dtype', (Generic[TypeVar('T')],))
         np.dtype.__module__ = np.__name__
 
     try:
