@@ -1,7 +1,8 @@
 cdef Any
-cdef Self
+cdef AnyStr
 cdef Literal
 cdef NoReturn
+cdef Self
 
 cdef Callable
 cdef Hashable

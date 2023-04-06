@@ -2372,7 +2372,7 @@ cdef class Intracomm(Comm):
         int maxprocs: int = 1,
         Info info: Info = INFO_NULL,
         int root: int = 0,
-        errcodes: list | None = None,
+        errcodes: list[int] | None = None,
     ) -> Intercomm:
         """
         Spawn instances of a single MPI application
@@ -2408,7 +2408,7 @@ cdef class Intracomm(Comm):
         maxprocs: Sequence[int] | None = None,
         info: Info | Sequence[Info] = INFO_NULL,
         int root: int = 0,
-        errcodes: list | None = None,
+        errcodes: list[int] | None = None,
     ) -> Intercomm:
         """
         Spawn instances of multiple MPI applications
