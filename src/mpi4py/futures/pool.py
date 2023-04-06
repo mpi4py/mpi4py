@@ -54,7 +54,7 @@ class MPIPoolExecutor(Executor):
             if not callable(initializer):
                 raise TypeError("initializer must be a callable")
             kwargs['initializer'] = initializer
-            kwargs['initargs'] = initargs
+            kwargs['initargs'] = tuple(initargs)
 
         self._options = kwargs
         self._shutdown = False
