@@ -22,7 +22,7 @@ class MPIPoolExecutor(Executor):
     def __init__(
         self,
         max_workers: int | None = None,
-        initializer: Callable[..., object] | None = None,
+        initializer: Callable[..., None] | None = None,
         initargs: Iterable[Any] = (),
         *,
         python_exe: str = ...,
@@ -41,13 +41,6 @@ class MPIPoolExecutor(Executor):
     ) -> Self: ...
     if sys.version_info >= (3, 9):
         def submit(
-            self,
-            __fn: Callable[_P, _T],
-            *args: _P.args,
-            **kwargs: _P.kwargs,
-        ) -> Future[_T]: ...
-    elif sys.version_info >= (3, 8):
-        def submit(  # type: ignore[override]
             self,
             __fn: Callable[_P, _T],
             *args: _P.args,

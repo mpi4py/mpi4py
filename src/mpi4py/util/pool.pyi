@@ -34,7 +34,7 @@ class Pool:
     def __init__(
         self,
         processes: int | None = None,
-        initializer: Callable[..., object] | None = None,
+        initializer: Callable[..., None] | None = None,
         initargs: Iterable[Any] = (),
         **kwargs: Any,
     ) -> None: ...
