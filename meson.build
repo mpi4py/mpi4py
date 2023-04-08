@@ -1,6 +1,6 @@
 project(
   'mpi4py',
-  'c', 'cython',
+  'c',  # 'cython',
   version: run_command(
     find_program('python3'),
     files('conf' / 'getversion.py'),

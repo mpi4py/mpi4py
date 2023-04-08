@@ -276,18 +276,14 @@ def run_setup():
 
 def run_skbuild():
     """
-    Call skbuild.setup(*args, **kwargs)
+    Call setuptools.setup(*args, **kwargs)
     """
-    from skbuild import setup
+    from setuptools import setup
     #
     builder_args = dict(
         cmake_source_dir = 'src/mpi4py',
     )
     metadata.update(metadata_extra)
-    #
-    package_info['package_data']['mpi4py'].append('../*.pth')
-    builder_args['cmake_process_manifest_hook'] = \
-        lambda fl: [f for f in fl if not f.endswith('.pth')]
     #
     setup_args = dict(i for d in (
         metadata,
@@ -302,14 +298,16 @@ def run_skbuild():
 
 
 def main():
-    import builder
-    name = builder.get_backend_name()
+    try:
+        import builder
+        name = builder.get_build_backend_name()
+    except RuntimeError as exc:
+        sys.exit(exc)
+
     if name == 'setuptools':
         run_setup()
-    elif name == 'scikit-build':
+    if name == 'skbuild':
         run_skbuild()
-    else:
-        sys.exit("Unknown build backend " + repr(name))
 
 
 if __name__ == '__main__':
