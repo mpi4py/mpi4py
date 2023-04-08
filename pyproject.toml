@@ -1,4 +1,4 @@
 [build-system]
-requires = ["setuptools >= 42"]
+requires = ["setuptools >= 42", "build"]
 build-backend = "builder"
 backend-path = ["conf"]

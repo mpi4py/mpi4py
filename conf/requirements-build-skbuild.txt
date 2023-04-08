@@ -1,3 +1,1 @@
-scikit-build >= 0.13
-cmake >= 3.12
-ninja; platform_system != 'Windows'
+scikit-build-core
