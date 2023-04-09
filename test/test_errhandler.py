@@ -181,10 +181,6 @@ class TestErrhandlerSession(BaseTestErrhandler, unittest.TestCase):
     def tearDown(self):
         self.mpiobj.Finalize()
 
-    @unittest.skipMPI('openmpi')  # TODO
-    def testCreate(self):
-        super().testCreate()
-
 
 if __name__ == '__main__':
     unittest.main()
