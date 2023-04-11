@@ -281,7 +281,7 @@ def run_skbuild():
     from setuptools import setup
     #
     builder_args = dict(
-        cmake_source_dir = 'src/mpi4py',
+        cmake_source_dir = '.',
     )
     metadata.update(metadata_extra)
     #
