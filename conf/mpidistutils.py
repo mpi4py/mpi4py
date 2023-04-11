@@ -1138,8 +1138,10 @@ class build_ext(cmd_build_ext.build_ext):
                 intelmpi = config_cmd.check_macro('I_MPI_VERSION', headers)
             if intelmpi:
                 confdir = os.path.dirname(__file__)
+                topdir = os.path.dirname(confdir)
+                srcdir = os.path.join(topdir, 'src')
                 pthfile = 'intelmpi.pth'
-                source = os.path.join(confdir, pthfile)
+                source = os.path.join(srcdir, pthfile)
                 target = os.path.join(self.build_lib, pthfile)
                 if os.path.exists(source):
                     log.info("writing %s", target)
@@ -1177,7 +1179,7 @@ class build_ext(cmd_build_ext.build_ext):
             if ext.name == 'mpi4py.MPI' and sys.platform == 'win32':
                 pthfile = 'intelmpi.pth'
                 output_file = os.path.join(self.build_lib, pthfile)
-                if os.path.exists(output_file):
+                if 'I_MPI_ROOT' in os.environ or os.path.exists(output_file):
                     outputs.append(output_file)
         return outputs
 

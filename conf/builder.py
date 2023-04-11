@@ -2,6 +2,7 @@ import contextlib
 import importlib
 import os
 import shutil
+import sys
 
 # ---
 
@@ -17,6 +18,10 @@ def get_build_backend_name(name=None):
         name = os.environ.get('MPI4PY_BUILD_BACKEND', '')
         name = name.lower().replace('_', '-')
     if name in ('default', ''):
+        for name, module_name in BACKENDS.items():
+            if name != 'setuptools':
+                if module_name in sys.modules:
+                    return name
         return 'setuptools'
     if name in ('setuptools', 'setup'):
         return 'setuptools'

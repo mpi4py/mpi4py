@@ -1,3 +1,6 @@
+# Author:  Lisandro Dalcin
+# Contact: dalcinl@gmail.com
+
 project(
   'mpi4py',
   'c',  # 'cython',
@@ -61,7 +64,7 @@ install_intelmpi_pth = (
   compiler.has_header_symbol('mpi.h', 'I_MPI_VERSION')
 )
 custom_target(
-  input: files('conf' / 'intelmpi.pth'),
+  input: files(srcdir / 'intelmpi.pth'),
   output: 'intelmpi.pth',
   command: copy + ['@INPUT@', '@OUTPUT0@'],
   install: install_intelmpi_pth,
@@ -77,15 +80,6 @@ custom_target(
   command: echo + mpi_cfg,
   install: true,
   install_dir: dstdir / 'mpi4py',
-)
-
-executable(
-  'python-mpi',
-  sources: srcdir / 'python.c',
-  implicit_include_directories: false,
-  dependencies: [py.dependency(embed: true), mpi],
-  install: true,
-  install_dir: dstdir / 'mpi4py' / 'bin',
 )
 
 cython = files('conf' / 'cythonize.py')
@@ -106,6 +100,15 @@ py.extension_module(
   dependencies: [mpi],
   subdir: 'mpi4py',
   install: true,
+)
+
+executable(
+  'python-mpi',
+  sources: srcdir / 'python.c',
+  implicit_include_directories: false,
+  dependencies: [py.dependency(embed: true), mpi],
+  install: true,
+  install_dir: dstdir / 'mpi4py' / 'bin',
 )
 
 package = {
