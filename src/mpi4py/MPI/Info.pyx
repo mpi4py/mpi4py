@@ -83,7 +83,15 @@ cdef class Info:
         """
         Retrieve the value associated with a key
         """
-        return self.Get_string(key)
+        cdef char *ckey = NULL
+        cdef char *cvalue = NULL
+        cdef int buflen = MPI_MAX_INFO_VAL
+        cdef int flag = 0
+        key = asmpistr(key, &ckey)
+        cdef tmp = allocate(buflen+1, sizeof(char), &cvalue)
+        CHKERR( MPI_Info_get_string(self.ob_mpi, ckey, &buflen, cvalue, &flag) )
+        if not flag: return None
+        return mpistr(cvalue)
 
     def Set(self, key: str, value: str) -> None:
         """
@@ -103,20 +111,6 @@ cdef class Info:
         cdef char *ckey = NULL
         key = asmpistr(key, &ckey)
         CHKERR( MPI_Info_delete(self.ob_mpi, ckey) )
-
-    def Get_string(self, key: str) -> str | None:
-        """
-        Retrieve the value associated with a key
-        """
-        cdef char *ckey = NULL
-        cdef char *cvalue = NULL
-        cdef int buflen = MPI_MAX_INFO_VAL
-        cdef int flag = 0
-        key = asmpistr(key, &ckey)
-        cdef tmp = allocate(buflen+1, sizeof(char), &cvalue)
-        CHKERR( MPI_Info_get_string(self.ob_mpi, ckey, &buflen, cvalue, &flag) )
-        if not flag: return None
-        return mpistr(cvalue)
 
     def Get_nkeys(self) -> int:
         """
