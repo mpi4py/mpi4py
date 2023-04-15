@@ -60,6 +60,12 @@ jobs:
           - os:  windows-2019
             mpi: openmpi
 
+          # Broken with Python 3.12.3 + CMake 3.26.3
+          - backend: skbuild
+            os: macos-12
+          - backend: skbuild
+            os:  macos-11
+
     steps:
 
     - name: Checkout
