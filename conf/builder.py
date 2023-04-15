@@ -210,11 +210,6 @@ if get_build_backend_name() == 'setuptools':
         del build_editable
     del st_bm
 
-if get_build_backend_name() == 'skbuild':
-    del get_requires_for_build_editable
-    del prepare_metadata_for_build_editable
-    del build_editable
-
 if get_build_backend_name() == 'mesonpy':
     setup_env_mpicc()
     del prepare_metadata_for_build_wheel
