@@ -110,7 +110,7 @@ class TestInfoEnv(unittest.TestCase):
 class TestInfo(unittest.TestCase):
 
     def setUp(self):
-        self.INFO  = MPI.Info.Create()
+        self.INFO = MPI.Info.Create()
 
     def tearDown(self):
         self.INFO.Free()
@@ -119,6 +119,16 @@ class TestInfo(unittest.TestCase):
 
     def testTruth(self):
         self.assertTrue(bool(self.INFO))
+
+    def testCreate(self):
+        data = {'key1': 'value1', 'key2': 'value2'}
+        for items in (None, {}, [], data, list(data.items())):
+            info = MPI.Info.Create(items)
+            if items is not None:
+                self.assertEqual(info.Get_nkeys(), len(items))
+                for k, v in dict(items).items():
+                    self.assertEqual(info.Get(k), v)
+            info.Free()
 
     def testDup(self):
         info = self.INFO.Dup()
