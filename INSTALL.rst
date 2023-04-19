@@ -58,6 +58,8 @@ MPICH and many of its derivatives are ABI-compatible. You can provide
 the package specification ``mpich=X.Y.*=external_*`` (where ``X`` and
 ``Y`` are the major and minor version numbers) to request the conda
 package manager to use system-provided MPICH (or derivative)
+libraries. Similarly, you can provide the package specification
+``openmpi=X.Y.*=external_*`` to use system-provided Open MPI
 libraries.
 
 The ``openmpi`` package on conda-forge has built-in CUDA support, but
@@ -65,7 +67,19 @@ it is disabled by default. To enable it, follow the instruction
 outlined during ``conda install``. Additionally, UCX support is also
 available once the ``ucx`` package is installed.
 
+.. warning::
+
+   Binary conda-forge packages are built with a focus on
+   compatibility. The MPICH and Open MPI packages are build in a
+   constrained environment with relatively dated OS images. Therefore,
+   they may lack support for high-performance features like
+   cross-memory attach (XPMEM/CMA). In production scenarios, it is
+   recommended to use external (either custom-built or system-provided)
+   MPI installations. See the relevant conda-forge documentation about
+   `using external MPI libraries <cf-mpi-docs_>`_ .
+
 .. _conda-forge: https://conda-forge.org/
+.. _cf-mpi-docs: https://conda-forge.org/docs/user/tipsandtricks.html#using-external-message-passing-interface-mpi-libraries
 
 
 Linux
