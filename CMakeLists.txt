@@ -15,6 +15,11 @@ find_package(MPI REQUIRED)
 separate_arguments(MPI_C_COMPILE_OPTIONS NATIVE_COMMAND)
 separate_arguments(MPI_C_LINK_FLAGS NATIVE_COMMAND)
 
+include(CheckSymbolExists)
+set(CMAKE_REQUIRED_INCLUDES ${MPI_C_INCLUDE_DIRS})
+set(CMAKE_REQUIRED_DEFINITIONS ${MPI_C_COMPILE_DEFINITIONS})
+set(CMAKE_REQUIRED_FLAGS ${MPI_C_COMPILE_OPTIONS})
+
 
 set(BINDIR ${CMAKE_CURRENT_BINARY_DIR})
 set(TOPDIR ${CMAKE_CURRENT_SOURCE_DIR})
@@ -22,13 +27,12 @@ set(SRCDIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 
 # intelmpi.pth
-include(CheckSymbolExists)
-set(CMAKE_REQUIRED_INCLUDES ${MPI_C_INCLUDE_PATH})
-check_symbol_exists(I_MPI_VERSION "mpi.h" HAVE_I_MPI_VERSION)
-if (HAVE_I_MPI_VERSION AND WIN32)
-  set(intelmpi.pth ${BINDIR}/intelmpi.pth)
-  configure_file(${SRCDIR}/intelmpi.pth ${intelmpi.pth} COPYONLY)
-  install(FILES ${intelmpi.pth} DESTINATION .)
+set(intelmpi.pth ${SRCDIR}/intelmpi.pth)
+if (WIN32)
+  check_symbol_exists(I_MPI_VERSION "mpi.h" install_intelmpi_pth)
+  if (install_intelmpi_pth)
+    install(FILES ${intelmpi.pth} DESTINATION .)
+  endif()
 endif()
 
 
