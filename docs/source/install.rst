@@ -4,19 +4,17 @@ Installation
 Build backends
 --------------
 
-mpi4py supports two different build backends: `setuptools`_ (default)
-and `scikit-build`_. The build backend can be selected by setting the
+mpi4py supports two different build backends: `setuptools`_ (default),
+`scikit-build-core`_ (`CMake`_-based), and `meson-python`_
+(`Meson`_-based). The build backend can be selected by setting the
 :envvar:`MPI4PY_BUILD_BACKEND` environment variable.
 
 .. envvar:: MPI4PY_BUILD_BACKEND
 
-  :choices: ``"setuptools"``, ``"scikit-build"``
+  :choices: ``"setuptools"``, ``"scikit-build-core"``, ``"meson-python"``
   :default: ``"setuptools"``
 
   Request a build backend for building mpi4py from sources.
-
-.. _setuptools:   https://setuptools.pypa.io/
-.. _scikit-build: https://scikit-build.readthedocs.io/
 
 
 Using **setuptools**
@@ -26,6 +24,8 @@ Using **setuptools**
 
    Set the :envvar:`MPI4PY_BUILD_BACKEND` environment variable to
    ``"setuptools"`` to use the `setuptools`_ build backend.
+
+.. _setuptools: https://setuptools.pypa.io/
 
 When using the default `setuptools`_ build backend, mpi4py relies on
 the legacy Python distutils framework to build C extension modules.
@@ -89,16 +89,16 @@ creation.
    Convenience alias for :envvar:`MPI4PY_BUILD_MPICFG`.
 
 
-Using **scikit-build**
-~~~~~~~~~~~~~~~~~~~~~~
+Using **scikit-build-core**
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. tip::
 
    Set the :envvar:`MPI4PY_BUILD_BACKEND` environment variable to
-   ``"scikit-build"`` to use the `scikit-build`_ build backend.
+   ``"scikit-build-core"`` to use the `scikit-build-core`_ build backend.
 
-When using the `scikit-build`_ build backend, mpi4py delegates all of
-MPI build configuration to `CMake`_'s `FindMPI`_ module. Besides the
+When using the `scikit-build-core`_ build backend, mpi4py delegates all
+of MPI build configuration to `CMake`_'s `FindMPI`_ module. Besides the
 obvious advantage of cross-platform support, this delegation to CMake
 may be convenient in build environments exposing vendor software
 stacks via intricate module systems. Note however that mpi4py will not
@@ -108,8 +108,31 @@ version the MPI implementation advertises to support (via the
 in the :file:`mpi.h` header file), any missing MPI constant or symbol
 will prevent a successful build.
 
-.. _CMake:        https://cmake.org/
-.. _FindMPI:      https://cmake.org/cmake/help/latest/module/FindMPI.html
+.. _CMake: https://cmake.org/
+.. _FindMPI: https://cmake.org/cmake/help/latest/module/FindMPI.html
+.. _scikit-build-core: https://scikit-build-core.readthedocs.io/
+
+
+Using **meson-python**
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. tip::
+
+   Set the :envvar:`MPI4PY_BUILD_BACKEND` environment variable to
+   ``"meson-python"`` to use the `meson-python`_ build backend.
+
+When using the `meson-python`_ build backend, mpi4py delegates build
+tasks to the `Meson`_ build system.
+
+.. warning::
+
+   mpi4py support for the `meson-python`_ build backend is
+   experimental. For the time being, users must set the :envvar:`CC`
+   environment variable to the command or path corresponding to the
+   :program:`mpicc` C compiler wrapper.
+
+.. _Meson: https://mesonbuild.com/
+.. _meson-python: https://meson-python.readthedocs.io/
 
 
 .. include:: ../../INSTALL.rst

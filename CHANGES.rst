@@ -15,9 +15,13 @@ Release 4.0.0 [2023-XX-XX]
 
   + Add runtime check for mismatch between `mpiexec` and MPI library.
 
-  + Support `scikit-build`_ as an alternative build backend.
+  + Support `scikit-build-core`_ as an alternative build backend.
 
-  .. _scikit-build: https://scikit-build.readthedocs.io/en/latest/
+  .. _scikit-build-core: https://scikit-build.readthedocs.io/
+
+  + Support `meson-python`_ as an alternative build backend.
+
+  .. _meson-python: https://meson-python.readthedocs.io/
 
 * Enhancements:
 
