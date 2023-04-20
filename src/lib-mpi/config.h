@@ -10,8 +10,8 @@
 #  define MPIAPI
 #endif
 
-#if defined(HAVE_CONFIG_H)
-#include "config/config.h"
+#if defined(HAVE_PYMPICONF_H)
+#include "pympiconf.h"
 #elif defined(MSMPI_VER)
 #include "config/msmpi.h"
 #elif defined(MPICH_NAME) && (MPICH_NAME >= 3)

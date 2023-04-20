@@ -8,10 +8,12 @@
 #undef PETSC_HAVE_HIP
 #undef PETSC_HAVE_CUDA
 #undef PETSC_HAVE_FORTRAN
+#include <petscmacros.h>
 #include <petsc/mpiuni/mpi.h>
 
 #define PETSCSYS_H
 #define PETSCIMPL_H
+#define PETSCDEVICE_CUPM_H
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
