@@ -54,8 +54,8 @@ jobs:
 
     - name: Check build configuration
       run:  |
-        # check nompi config.h
-        cp "src/lib-mpi/config/config.h" "conf/nompi/config/config.h"
+        # check nompi pympiconf.h
+        cp "src/lib-mpi/pympiconf.h" "conf/nompi/pympiconf.h"
         git diff --exit-code
 
     - name: Check code generation

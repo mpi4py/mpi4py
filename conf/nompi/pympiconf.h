@@ -1,5 +1,5 @@
-#ifndef PyMPI_CONFIG_H
-#define PyMPI_CONFIG_H
+#ifndef PyMPI_PYMPICONF_H
+#define PyMPI_PYMPICONF_H
 
 #undef  PyMPI_HAVE_MPI_Aint
 #undef  PyMPI_HAVE_MPI_Offset
@@ -925,4 +925,4 @@
 #undef  PyMPI_HAVE_MPI_COMBINER_HINDEXED_INTEGER
 #undef  PyMPI_HAVE_MPI_COMBINER_STRUCT_INTEGER
 
-#endif /* !PyMPI_CONFIG_H */
+#endif /* !PyMPI_PYMPICONF_H */

@@ -293,7 +293,7 @@ class ConfigureMPI:
     SRCDIR = 'src'
     SOURCES = [os.path.join('mpi4py', 'libmpi.pxd')]
     DESTDIR = os.path.join('src', 'lib-mpi')
-    CONFIG_H = os.path.join('config', 'config.h')
+    CONFIG_H = 'pympiconf.h'
     MISSING_H = 'missing.h'
 
     CONFIGTEST_H = """\
@@ -893,12 +893,13 @@ def configure_mpi(ext, config_cmd):
     #endif
     """)
     config = os.environ.get('MPI4PY_BUILD_CONFIGURE') or None
+    config = getattr(config_cmd, 'configure', None) or config
     if not config:
         with capture_stderr():
             ok = config_cmd.try_compile(ConfigTest, headers=headers)
         config = not ok
     if config:
-        guard = "HAVE_CONFIG_H"
+        guard = "HAVE_PYMPICONF_H"
         with capture_stderr():
             ok = config_cmd.check_macro(guard)
         config = not ok
@@ -1077,18 +1078,6 @@ class build_ext(cmd_build_ext.build_ext):
         # parse configuration file and configure compiler
         self.config = configuration(self, verbose=True)
         configure_compiler(self.compiler, self.config)
-        # extra configuration, check for all MPI symbols
-        if self.configure:
-            log.info('testing for missing MPI symbols')
-            config_cmd = self.get_finalized_command('config')
-            config_cmd.compiler = self.compiler # fix compiler
-            configure = ConfigureMPI(config_cmd)
-            results = configure.run()
-            configure.dump(results)
-            #
-            macro = 'HAVE_CONFIG_H'
-            log.info("defining preprocessor macro '%s'", macro)
-            self.compiler.define_macro(macro, 1)
         # build extensions
         for ext in self.extensions:
             try:
@@ -1108,6 +1097,7 @@ class build_ext(cmd_build_ext.build_ext):
             return
         config_cmd = self.get_finalized_command('config')
         config_cmd.compiler = self.compiler # fix compiler
+        config_cmd.configure = self.configure
         configure(ext, config_cmd)
 
     def build_extension (self, ext):

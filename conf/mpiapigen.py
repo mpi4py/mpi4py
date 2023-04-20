@@ -386,14 +386,14 @@ class Generator:
             fileobj.write(node.header())
 
     CONFIG_HEAD = """\
-    #ifndef PyMPI_CONFIG_H
-    #define PyMPI_CONFIG_H
+    #ifndef PyMPI_PYMPICONF_H
+    #define PyMPI_PYMPICONF_H
 
     """
     CONFIG_MACRO = 'PyMPI_HAVE_%s'
     CONFIG_TAIL = """\
 
-    #endif /* !PyMPI_CONFIG_H */
+    #endif /* !PyMPI_PYMPICONF_H */
     """
     def dump_config_h(self, fileobj, suite):
         if isinstance(fileobj, str):
@@ -771,16 +771,33 @@ class Generator:
 
 if __name__ == '__main__':
     import os
+    import sys
+    import argparse
 
-    log = print
+    parser = argparse.ArgumentParser(description='MPI API generator')
+    parser.add_argument('-q', '--quiet', action='store_true')
+    parser.add_argument('-l', '--list', action='store_true')
+    args = parser.parse_args()
+
+    if args.list:
+        args.quiet = True
+
+    def log(message):
+        if not args.quiet:
+            print(message)
+
     generator = Generator()
-
     libmpi_pxd = os.path.join('src', 'mpi4py', 'libmpi.pxd')
     log('parsing file %s' % libmpi_pxd)
     generator.parse_file(libmpi_pxd)
     log('processed %d definitions' % len(generator.nodes))
 
-    #config_h  = os.path.join('src', 'lib-mpi', 'config', 'config.h')
+    if args.list:
+        for node in generator:
+            print(node.name)
+        sys.exit(0)
+
+    #config_h  = os.path.join('src', 'lib-mpi', 'pympiconf.h')
     #log('writing file %s' % config_h)
     #generator.dump_config_h(config_h, None)
 
