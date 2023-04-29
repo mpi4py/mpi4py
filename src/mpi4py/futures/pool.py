@@ -120,7 +120,7 @@ class MPIPoolExecutor(Executor):
         submit.__text_signature__ = '($self, fn, /, *args, **kwargs)'
 
     def map(self, fn, *iterables,
-            timeout=None, chunksize=1, unordered=False):
+            callback=None, timeout=None, chunksize=1, unordered=False):
         """Return an iterator equivalent to ``map(fn, *iterables)``.
 
         Args:
@@ -128,6 +128,7 @@ class MPIPoolExecutor(Executor):
                 passed iterables.
             iterables: Iterables yielding positional arguments to be passed to
                 the callable.
+            callback: A callable to be called with the result of each worker.
             timeout: The maximum number of seconds to wait. If ``None``, then
                 there is no limit on the wait time.
             chunksize: The size of the chunks the iterable will be broken into
@@ -144,16 +145,24 @@ class MPIPoolExecutor(Executor):
             Exception: If ``fn(*args)`` raises for any values.
 
         """  # noqa: D402
-        return self.starmap(fn, zip(*iterables), timeout, chunksize, unordered)
+        return self.starmap(
+            fn, 
+            zip(*iterables), 
+            callback=callback,
+            timeout=timeout, 
+            chunksize=chunksize, 
+            unordered=unordered
+        )
 
     def starmap(self, fn, iterable,
-                timeout=None, chunksize=1, unordered=False):
+                callback=None, timeout=None, chunksize=1, unordered=False):
         """Return an iterator equivalent to ``itertools.starmap(...)``.
 
         Args:
             fn: A callable that will take positional argument from iterable.
             iterable: An iterable yielding ``args`` tuples to be used as
                 positional arguments to call ``fn(*args)``.
+            callback: A callable to be called with the result of each worker.
             timeout: The maximum number of seconds to wait. If ``None``, then
                 there is no limit on the wait time.
             chunksize: The size of the chunks the iterable will be broken into
@@ -175,10 +184,10 @@ class MPIPoolExecutor(Executor):
             raise ValueError("chunksize must be >= 1.")
         if chunksize == 1:
             return _starmap_helper(self.submit, fn, iterable,
-                                   timeout, unordered)
+                                   timeout, unordered, callback)
         else:
             return _starmap_chunks(self.submit, fn, iterable,
-                                   timeout, unordered, chunksize)
+                                   timeout, unordered, chunksize, callback)
 
     def shutdown(self, wait=True, *, cancel_futures=False):
         """Clean-up the resources associated with the executor.
@@ -211,10 +220,17 @@ class MPIPoolExecutor(Executor):
             pool.join()
 
 
-def _starmap_helper(submit, function, iterable, timeout, unordered):
+def _default_callback(x):
+    return x
+
+
+def _starmap_helper(submit, function, iterable, timeout, unordered, callback=None):
     if timeout is not None:
         timer = getattr(time, 'monotonic', time.time)
         end_time = timeout + timer()
+
+    if callback is None:
+        callback = _default_callback
 
     futures = [submit(function, *args) for args in iterable]
     if unordered:
@@ -223,7 +239,9 @@ def _starmap_helper(submit, function, iterable, timeout, unordered):
     def result(future, timeout=None):
         try:
             try:
-                return future.result(timeout)
+                res = future.result(timeout)
+                callback(res)
+                return res
             finally:
                 future.cancel()
         finally:
@@ -275,12 +293,12 @@ def _chain_from_iterable_of_lists(iterable):
 
 
 def _starmap_chunks(submit, function, iterable,
-                    timeout, unordered, chunksize):
+                    timeout, unordered, chunksize, callback):
     # pylint: disable=too-many-arguments
     function = functools.partial(_apply_chunks, function)
     iterable = _build_chunks(chunksize, iterable)
     result = _starmap_helper(submit, function, iterable,
-                             timeout, unordered)
+                             timeout, unordered, callback)
     return _chain_from_iterable_of_lists(result)
 
 
