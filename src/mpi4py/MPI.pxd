@@ -21,7 +21,7 @@ from mpi4py.libmpi cimport MPI_File
 
 # --
 
-cdef import from *:
+cdef extern from *:
     ctypedef MPI_Aint   Aint   "MPI_Aint"
     ctypedef MPI_Offset Offset "MPI_Offset"
     ctypedef MPI_Count  Count  "MPI_Count"
