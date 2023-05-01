@@ -82,12 +82,13 @@ custom_target(
   install_dir: dstdir / 'mpi4py',
 )
 
-cython = files('conf' / 'cythonize.py')
+cython = [py, files('conf' / 'cythonize.py')]
+cython_flags = ['--3str', '--cleanup', '3']
 MPI_ch = custom_target(
   'MPI.[ch]',
   input: srcdir / 'mpi4py' / 'MPI.pyx',
   output: ['MPI.c', 'MPI.h', 'MPI_api.h'],
-  command: [py, cython, '@INPUT@', '--output-file', '@OUTPUT0@'],
+  command: [cython, cython_flags, '@INPUT@', '--output-file', '@OUTPUT0@'],
   install: true,
   install_dir: [false, dstdir / 'mpi4py', dstdir / 'mpi4py']
 )

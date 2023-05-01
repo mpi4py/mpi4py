@@ -11,7 +11,7 @@ from Cython.Compiler.Main import main as cython_main  # noqa: E402
 
 
 def cythonize(args=None):
-    """Run `cython -3 --cleanup 3 <args>...`."""
+    """Run `cython --3str --cleanup 3 <args>...`."""
     if args is None:
         argv = sys.argv[:]
     else:
@@ -19,8 +19,8 @@ def cythonize(args=None):
 
     if '--cleanup' not in argv:
         argv[1:1] = ['--cleanup', '3']
-    if '-3' not in argv:
-        argv[1:1] = ['-3']
+    if '--3str' not in argv:
+        argv[1:1] = ['--3str']
 
     cwd = os.getcwd()
     sys_argv = sys.argv[:]

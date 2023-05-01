@@ -1,4 +1,4 @@
-#cython: language_level=3
+#cython: language_level=3str
 #cython: embedsignature=True
 #cython: annotation_typing=False
 #cython: cdivision=True
