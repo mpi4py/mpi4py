@@ -55,7 +55,7 @@ install(FILES ${mpi.cfg} DESTINATION mpi4py)
 # Cython
 set(cythonize ${TOPDIR}/conf/cythonize.py)
 set(Cython_COMMAND ${Python_EXECUTABLE} ${cythonize})
-set(Cython_OPTIONS -3 --cleanup 3)
+set(Cython_OPTIONS --3str --cleanup 3)
 set(MPI.pyx ${SRCDIR}/mpi4py/MPI.pyx)
 file(
   GLOB_RECURSE MPI.deps
