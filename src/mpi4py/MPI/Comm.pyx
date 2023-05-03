@@ -98,14 +98,13 @@ cdef class Comm:
         def __get__(self) -> int:
             return self.Get_rank()
 
-    @classmethod
-    def Compare(cls, Comm comm1: Comm, Comm comm2: Comm) -> int:
+    def Compare(self, Comm comm: Comm) -> int:
         """
         Compare two communicators
         """
         cdef int flag = MPI_UNEQUAL
         with nogil: CHKERR( MPI_Comm_compare(
-            comm1.ob_mpi, comm2.ob_mpi, &flag) )
+            self.ob_mpi, comm.ob_mpi, &flag) )
         return flag
 
     # Communicator Constructors

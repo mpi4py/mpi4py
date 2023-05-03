@@ -155,6 +155,8 @@ class BaseTestComm:
         comm = self.COMM.Create(group)
         ccmp = MPI.Comm.Compare(self.COMM, comm)
         self.assertEqual(ccmp, MPI.CONGRUENT)
+        ccmp = self.COMM.Compare(comm)
+        self.assertEqual(ccmp, MPI.CONGRUENT)
         comm.Free()
         group.Free()
 
