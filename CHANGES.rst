@@ -50,6 +50,14 @@ Release 4.0.0 [2023-XX-XX]
   * The `Intracomm.Create_group()` method is no longer defined in the
     base `Comm` class.
 
+  * `Group.Compare()` and `Comm.Compare()` are no longer class methods
+    but instance methods. Existing codes using the former class
+    methods are expected to continue working.
+
+  * `Group.Translate_ranks()` is no longer a class method but a
+    instance method. Existing codes using the former class method are
+    expected to continue working.
+
   * The `LB` and `UB` datatypes are no longer available, use
     `Datatype.Create_resized()` instead.
 

@@ -50,45 +50,49 @@ cdef class Group:
         def __get__(self) -> int:
             return self.Get_rank()
 
-    @classmethod
     def Translate_ranks(
-        cls,
-        Group group1: Group,
-        ranks1: Sequence[int],
-        Group group2: Group | None = None,
+        self,
+        ranks: Sequence[int] | None = None,
+        Group group: Group | None = None,
     ) -> list[int]:
         """
-        Translate the ranks of processes in
-        one group to those in another group
+        Translate ranks of processes in one group to those in another group
         """
-        cdef MPI_Group grp1 = MPI_GROUP_NULL
-        cdef MPI_Group grp2 = MPI_GROUP_NULL
+        cdef MPI_Group group1 = MPI_GROUP_NULL
+        cdef MPI_Group group2 = MPI_GROUP_NULL
         cdef int n = 0, *iranks1 = NULL, *iranks2 = NULL
-        cdef tmp1 = getarray(ranks1, &n, &iranks1)
+        #
+        cdef tmp1 = None
+        if ranks is not None:
+            tmp1 = getarray(ranks, &n, &iranks1)
+        else:
+            CHKERR( MPI_Group_size(self.ob_mpi, &n) )
+            tmp1 = newarray(n, &iranks1)
+            for i in range(n): iranks1[i] = i
         cdef tmp2 = newarray(n, &iranks2)
         #
-        grp1 = group1.ob_mpi
-        if group2 is not None:
-            grp2 = group2.ob_mpi
+        group1 = self.ob_mpi
+        if group is not None:
+            group2 = group.ob_mpi
         else:
-            CHKERR( MPI_Comm_group(MPI_COMM_WORLD, &grp2) )
+            CHKERR( MPI_Comm_group(MPI_COMM_WORLD, &group2) )
         try:
-            CHKERR( MPI_Group_translate_ranks(grp1, n, iranks1,
-                                              grp2, iranks2) )
+            CHKERR( MPI_Group_translate_ranks(
+                group1, n, iranks1, group2, iranks2) )
         finally:
-            if group2 is None:
-                CHKERR( MPI_Group_free(&grp2) )
+            if group is None:
+                CHKERR( MPI_Group_free(&group2) )
         #
         cdef object ranks2 = [iranks2[i] for i in range(n)]
         return ranks2
 
-    @classmethod
-    def Compare(cls, Group group1: Group, Group group2: Group) -> int:
+    def Compare(self, Group group: Group) -> int:
         """
         Compare two groups
         """
         cdef int flag = MPI_UNEQUAL
-        CHKERR( MPI_Group_compare(group1.ob_mpi, group2.ob_mpi, &flag) )
+        CHKERR( MPI_Group_compare(
+            self.ob_mpi, group.ob_mpi, &flag) )
         return flag
 
     # Group Constructors
@@ -105,8 +109,7 @@ cdef class Group:
     @classmethod
     def Union(cls, Group group1: Group, Group group2: Group) -> Self:
         """
-        Produce a group by combining
-        two existing groups
+        Create a new group from the union of two existing groups
         """
         cdef Group group = <Group>New(cls)
         CHKERR( MPI_Group_union(
@@ -116,8 +119,7 @@ cdef class Group:
     @classmethod
     def Intersection(cls, Group group1: Group, Group group2: Group) -> Self:
         """
-        Produce a group as the intersection
-        of two existing groups
+        Create a new group from the intersection of two existing groups
         """
         cdef Group group = <Group>New(cls)
         CHKERR( MPI_Group_intersection(
@@ -129,8 +131,7 @@ cdef class Group:
     @classmethod
     def Difference(cls, Group group1: Group, Group group2: Group) -> Self:
         """
-        Produce a group from the difference
-        of two existing groups
+        Create a new group from the difference of two existing groups
         """
         cdef Group group = <Group>New(cls)
         CHKERR( MPI_Group_difference(
@@ -139,8 +140,7 @@ cdef class Group:
 
     def Incl(self, ranks: Sequence[int]) -> Self:
         """
-        Produce a group by reordering an existing
-        group and taking only listed members
+        Create a new group by including listed members
         """
         cdef int n = 0, *iranks = NULL
         ranks = getarray(ranks, &n, &iranks)
@@ -150,8 +150,7 @@ cdef class Group:
 
     def Excl(self, ranks: Sequence[int]) -> Self:
         """
-        Produce a group by reordering an existing
-        group and taking only unlisted members
+        Create a new group by excluding listed members
         """
         cdef int n = 0, *iranks = NULL
         ranks = getarray(ranks, &n, &iranks)
@@ -161,8 +160,7 @@ cdef class Group:
 
     def Range_incl(self, ranks: Sequence[tuple[int, int, int]]) -> Self:
         """
-        Create a new group from ranges
-        of members in an existing group
+        Create a new group by including ranges of members
         """
         cdef int *p = NULL, (*ranges)[3]# = NULL ## XXX cython fails
         ranges = NULL
@@ -177,8 +175,7 @@ cdef class Group:
 
     def Range_excl(self, ranks: Sequence[tuple[int, int, int]]) -> Self:
         """
-        Create a new group by excluding ranges
-        of members from an existing group
+        Create a new group by excluding ranges of members
         """
         cdef int *p = NULL, (*ranges)[3]# = NULL ## XXX cython fails
         ranges = NULL

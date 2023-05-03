@@ -17,6 +17,8 @@ class BaseTestGroup:
         self.assertIn(gcmp, results)
         gcmp = MPI.Group.Compare(self.GROUP, self.GROUP)
         self.assertEqual(gcmp, MPI.IDENT)
+        gcmp = self.GROUP.Compare(self.GROUP)
+        self.assertEqual(gcmp, MPI.IDENT)
 
     def testDup(self):
         group = self.GROUP.Dup()
@@ -93,6 +95,13 @@ class BaseTestGroup:
         ranks2 = MPI.Group.Translate_ranks(group1, ranks1)
         ranks2 = MPI.Group.Translate_ranks(group1, ranks1, group2)
         self.assertEqual(list(ranks1), list(ranks2))
+        group =  self.GROUP
+        ranks1 = list(range(group.Get_size()))
+        ranks2 = group.Translate_ranks(group=group)
+        self.assertEqual(list(ranks1), list(ranks2))
+        ranks2 = group.Translate_ranks()
+        self.assertEqual(len(ranks2), group.Get_size())
+        self.assertNotIn(MPI.UNDEFINED, set(ranks2))
 
     @unittest.skipMPI('MPICH1')
     @unittest.skipMPI('LAM/MPI')
