@@ -110,6 +110,7 @@ class TestIntercommDupDup(TestIntercomm):
 @unittest.skipIf(MPI.COMM_WORLD.Get_size() < 2, 'mpi-world-size<2')
 class TestIntercommCreateFromGroups(unittest.TestCase):
 
+    @unittest.skipMPI('openmpi', MPI.COMM_WORLD.Get_size() > 2)
     def testPair(self):
         done = True
         rank = MPI.COMM_WORLD.Get_rank()
