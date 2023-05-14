@@ -503,7 +503,7 @@ def _getenv_use_pkl5():
         return True
     warnings.warn(
         f"environment variable MPI4PY_FUTURES_USE_PKL5: "
-        f"unexpected value {repr(value)}",
+        f"unexpected value {value!r}",
         RuntimeWarning, stacklevel=1,
     )
     return False
