@@ -38,9 +38,28 @@ cdef extern from * nogil:
 # -----------------------------------------------------------------------------
 
 cdef extern from "Python.h":
+    """
+    #if PY_VERSION_HEX < 0x30C00A7 && !defined(PyErr_DisplayException)
+    #define PyErr_DisplayException PyErr_DisplayException_312
+    static void PyErr_DisplayException(PyObject *exc)
+    {
+      PyObject *et = NULL;
+      PyObject *tb = NULL;
+      #if defined(PYPY_VERSION)
+      et = PyObject_Type(exc);
+      tb = PyException_GetTraceback(exc);
+      #endif
+      PyErr_Display(et, exc, tb);
+      if (et) Py_DecRef(et);
+      if (tb) Py_DecRef(tb);
+    }
+    #endif
+    """
     void *PyExc_RuntimeError
     void *PyExc_NotImplementedError
+    void PyErr_SetNone(object)
     void PyErr_SetObject(object, object)
+    void PyErr_DisplayException(object)
     int  PyErr_WarnFormat(object, Py_ssize_t, const char[], ...) except -1
     void PySys_WriteStderr(const char[], ...)
 
@@ -84,11 +103,7 @@ cdef object getOpt(object rc, const char name[], object value):
     cdef const char *cname  = <const char*>bname
     cdef const char *cvalue = Py_GETENV(cname)
     if cvalue == NULL:
-        try:
-            value = getattr(rc, pystr(name), value)
-        except:
-            pass
-        return value
+        return getattr(rc, pystr(name), value)
     cdef int bvalue = cstr2bool(cvalue)
     cdef object svalue = None
     if bvalue >= 0:
@@ -105,13 +120,12 @@ cdef int warnOpt(const char name[], object value) except -1:
     value = PyUnicode_AsUTF8String(repr(value))
     PyErr_WarnFormat(
         RuntimeWarning, 1,
-        b"mpi4py.rc.%s: unexpected value '%.200s'",
+        b"mpi4py.rc.%s: unexpected value %.200s",
         name, <const char*>value,
     )
     return 0
 
 cdef int getOptions(Options* opts) except -1:
-    cdef object rc
     opts.initialize = 1
     opts.threads = 1
     opts.thread_level = MPI_THREAD_MULTIPLE
@@ -119,8 +133,12 @@ cdef int getOptions(Options* opts) except -1:
     opts.fast_reduce = 1
     opts.recv_mprobe = USE_MATCHED_RECV
     opts.errors = 1
-    try: from . import rc
-    except: return 0
+    #
+    cdef object rc
+    try:
+        from . import rc
+    except (ImportError, ImportWarning):
+        rc = None
     #
     cdef object initialize   = getOpt(rc, b"initialize"   , True        )
     cdef object threads      = getOpt(rc, b"threads"      , True        )
@@ -182,8 +200,8 @@ cdef int getOptions(Options* opts) except -1:
         opts.errors = 0
     elif errors == 'exception':
         opts.errors = 1
-    elif errors == 'abort' and MPI_ERRORS_ABORT != MPI_ERRHANDLER_NULL:
-        opts.errors = 2
+    elif errors == 'abort':
+        opts.errors = 2 if MPI_ERRORS_ABORT != MPI_ERRHANDLER_NULL else 3
     elif errors == 'fatal':
         opts.errors = 3
     else:
@@ -248,13 +266,13 @@ cdef int check_mpiexec() except -1 nogil:
     cdef const char *openmpi = b"OMPI_COMM_WORLD_SIZE"
     cdef const char *bad_env = NULL
     if MPICH:
-        if getenv(mpich) == NULL and getenv(hydra) == NULL:
-            if getenv(openmpi) != NULL:
-                bad_env = openmpi
+        if getenv(mpich) == NULL and getenv(hydra) == NULL:      #> mpich
+            if getenv(openmpi) != NULL:                          #> mpich
+                bad_env = openmpi                                #> mpich
     if OPENMPI:
-        if getenv(openmpi) == NULL:
-            if getenv(mpich) != NULL and getenv(hydra) != NULL:
-                bad_env = mpich
+        if getenv(openmpi) == NULL:                              #> openmpi
+            if getenv(mpich) != NULL and getenv(hydra) != NULL:  #> openmpi
+                bad_env = mpich                                  #> openmpi
     if bad_env != NULL:
         warn_mpiexec(bad_env)
     return 0
@@ -272,16 +290,16 @@ cdef int bootstrap() except -1:
     getOptions(&options)
     # Cleanup at (the very end of) Python exit
     if Py_AtExit(atexit) < 0:
-        PySys_WriteStderr(
-            b"WARNING: %s\n",
-            b"could not register cleanup with Py_AtExit()",
+        PySys_WriteStderr(                                   #> no cover
+            b"WARNING: %s\n",                                #> no cover
+            b"could not register cleanup with Py_AtExit()",  #> no cover
         )
     # Do we have to initialize MPI?
     cdef int initialized = 1
     <void>MPI_Initialized(&initialized)
     if initialized:
-        options.finalize = 0
-        return 0
+        options.finalize = 0  #> TODO
+        return 0              #> TODO
     if not options.initialize:
         return 0
     # MPI initialization
@@ -291,14 +309,19 @@ cdef int bootstrap() except -1:
     if options.threads:
         required = options.thread_level
         ierr = MPI_Init_thread(NULL, NULL, required, &provided)
-        if ierr != MPI_SUCCESS: raise RuntimeError(
-            f"MPI_Init_thread() failed [error code: {ierr}]")
+        if ierr != MPI_SUCCESS:
+            raise RuntimeError(               #> no cover
+                f"MPI_Init_thread() failed "  #> no cover
+                f"[error code: {ierr}]")      #> no cover
     else:
         ierr = MPI_Init(NULL, NULL)
-        if ierr != MPI_SUCCESS: raise RuntimeError(
-            f"MPI_Init() failed [error code: {ierr}]")
+        if ierr != MPI_SUCCESS:
+            raise RuntimeError(               #> no cover
+                f"MPI_Init() failed "         #> no cover
+                f"[error code: {ierr}]")      #> no cover
     return 0
 
+@cython.linetrace(False)
 cdef inline int mpi_active() noexcept nogil:
     cdef int ierr = MPI_SUCCESS
     # MPI initialized ?
@@ -319,12 +342,14 @@ cdef int initialize() except -1 nogil:
     comm_set_eh(MPI_COMM_WORLD)
     return 0
 
+@cython.linetrace(False)
 cdef void finalize() noexcept nogil:
     if not mpi_active(): return
     <void>PyMPI_Commctx_finalize()
 
 cdef int abort_status = 0
 
+@cython.linetrace(False)
 cdef void atexit() noexcept nogil:
     if not mpi_active(): return
     if abort_status:
@@ -333,17 +358,14 @@ cdef void atexit() noexcept nogil:
     if options.finalize:
         <void>MPI_Finalize()
 
-def _set_abort_status(object status: Any) -> None:
+def _set_abort_status(int status: int) -> None:
     "Helper for ``python -m mpi4py.run ...``"
     global abort_status
-    try:
-        abort_status = status
-    except:
-        abort_status = 1 if status else 0
+    abort_status = status
 
 # -----------------------------------------------------------------------------
 
-# Vile hack for raising a exception and not contaminate the traceback
+# Raise exceptions without adding to traceback
 
 cdef extern from * nogil:
     enum: PyMPI_ERR_UNAVAILABLE
@@ -352,12 +374,12 @@ cdef object MPIException = <object>PyExc_RuntimeError
 
 cdef int PyMPI_Raise(int ierr) except -1 with gil:
     if ierr == PyMPI_ERR_UNAVAILABLE:
-        PyErr_SetObject(<object>PyExc_NotImplementedError, None)
-        return 0
-    if (<void*>MPIException) != NULL:
-        PyErr_SetObject(MPIException, <long>ierr)
-    else:
-        PyErr_SetObject(<object>PyExc_RuntimeError, <long>ierr)
+        PyErr_SetObject(<object>PyExc_NotImplementedError, None)  #> no cover
+        return 0                                                  #> no cover
+    if (<void*>MPIException) == NULL:
+        PyErr_SetObject(<object>PyExc_RuntimeError, <long>ierr)   #> no cover
+        return 0                                                  #> no cover
+    PyErr_SetObject(MPIException, <long>ierr)
     return 0
 
 cdef inline int CHKERR(int ierr) except -1 nogil:
@@ -365,17 +387,18 @@ cdef inline int CHKERR(int ierr) except -1 nogil:
     PyMPI_Raise(ierr)
     return -1
 
-cdef inline void print_traceback():
-    cdef object sys, traceback
-    import sys, traceback
-    traceback.print_exc()
-    try: sys.stderr.flush()
-    except: pass
+cdef int PyMPI_HandleException(object exc) noexcept:
+    PyErr_DisplayException(exc)
+    if (<void*>MPIException) != NULL:
+        if isinstance(exc, Exception):
+            return (<Exception>exc).ob_mpi
+    return MPI_ERR_OTHER
 
 # -----------------------------------------------------------------------------
 
 cdef object _py_module_sentinel = None
 
+@cython.linetrace(False)
 cdef inline int py_module_alive() noexcept nogil:
     return NULL != <void *>_py_module_sentinel
 
@@ -386,6 +409,7 @@ cdef inline int py_module_alive() noexcept nogil:
 cdef extern from "Python.h":
     int _Py_IsInitialized"Py_IsInitialized"() noexcept nogil
 
+@cython.linetrace(False)
 cdef inline int Py_IsInitialized() noexcept nogil:
     if PYPY and not py_module_alive(): return 0
     return _Py_IsInitialized()

@@ -2,18 +2,8 @@
 
 cdef extern from "Python.h":
     ctypedef struct PyObject
-    PyObject *Py_None
-    void Py_CLEAR(PyObject*)
-
-cdef extern from "Python.h":
-    int PyIndex_Check(object)
-    int PySlice_Check(object)
-    int PySlice_GetIndicesEx(object, Py_ssize_t,
-                             Py_ssize_t *, Py_ssize_t *,
-                             Py_ssize_t *, Py_ssize_t *) except -1
-    Py_ssize_t PyNumber_AsSsize_t(object, object) except? -1
-
-#------------------------------------------------------------------------------
+    object PyLong_FromVoidPtr(void*)
+    void*  PyLong_AsVoidPtr(object) except? NULL
 
 # Python 3 buffer interface (PEP 3118)
 cdef extern from "Python.h":
@@ -42,25 +32,20 @@ cdef extern from "Python.h":
                            void *, Py_ssize_t,
                            bint, int) except -1
 
-cdef extern from "Python.h":
-    object PyLong_FromVoidPtr(void*)
-    void*  PyLong_AsVoidPtr(object) except? NULL
-
-cdef char BYTE_FMT[2]
-BYTE_FMT[0] = c'B'
-BYTE_FMT[1] = 0
-
-#------------------------------------------------------------------------------
 
 cdef inline int is_big_endian() noexcept nogil:
     cdef int i = 1
     return (<char*>&i)[0] == 0
 
+
 cdef inline int is_little_endian() noexcept nogil:
     cdef int i = 1
     return (<char*>&i)[0] != 0
 
-#------------------------------------------------------------------------------
+
+cdef char BYTE_FMT[2]
+BYTE_FMT[0] = c'B'
+BYTE_FMT[1] = 0
 
 include "asdlpack.pxi"
 include "ascaibuf.pxi"
@@ -69,15 +54,30 @@ cdef int PyMPI_GetBuffer(object obj, Py_buffer *view, int flags) except -1:
     try:
         return PyObject_GetBuffer(obj, view, flags)
     except BaseException:
-        try: return Py_GetDLPackBuffer(obj, view, flags)
-        except NotImplementedError: pass
-        except BaseException: raise
-        try: return Py_GetCAIBuffer(obj, view, flags)
-        except NotImplementedError: pass
-        except BaseException: raise
+        try:
+            return Py_GetDLPackBuffer(obj, view, flags)
+        except NotImplementedError:
+            pass
+        except BaseException:
+            raise
+        try:
+            return Py_GetCAIBuffer(obj, view, flags)
+        except NotImplementedError:
+            pass
+        except BaseException:
+            raise
         raise
 
 #------------------------------------------------------------------------------
+
+cdef extern from "Python.h":
+    int PyIndex_Check(object)
+    int PySlice_Check(object)
+    int PySlice_GetIndicesEx(object, Py_ssize_t,
+                             Py_ssize_t *, Py_ssize_t *,
+                             Py_ssize_t *, Py_ssize_t *) except -1
+    Py_ssize_t PyNumber_AsSsize_t(object, object) except? -1
+
 
 @cython.final
 cdef class memory:
@@ -293,16 +293,15 @@ cdef inline memory asbuffer_w(object ob, void **base, MPI_Aint *size):
     return asbuffer(ob, base, size, 0)
 
 cdef inline memory tobuffer(object ob, void *base, MPI_Aint size, bint ro):
-    if size < 0:
-        raise ValueError("expecting non-negative buffer length")
+    if size < 0: raise ValueError("expecting non-negative buffer length")
     cdef memory buf = newbuffer()
     PyBuffer_FillInfo(&buf.view, ob, base, size, ro, PyBUF_SIMPLE)
     return buf
 
 cdef inline memory mpibuf(void *base, MPI_Count count):
     cdef MPI_Aint size = <MPI_Aint>count
-    if count != <MPI_Count>size:
-        raise OverflowError("integer {size} does not fit in 'MPI_Aint'")
+    cdef int neq = (count != <MPI_Count>size)
+    if neq: raise OverflowError("length {count} does not fit in 'MPI_Aint'")
     return tobuffer(<object>NULL, base, size, 0)
 
 #------------------------------------------------------------------------------

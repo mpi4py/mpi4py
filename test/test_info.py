@@ -40,6 +40,7 @@ class TestInfoNull(unittest.TestCase):
         self.assertEqual(inull.copy(), inull)
         inull.clear()
 
+
 class TestInfoEnv(unittest.TestCase):
 
     KEYS = (
@@ -107,6 +108,7 @@ class TestInfoEnv(unittest.TestCase):
             MPI.Info.Create_env(args).Free()
             MPI.Info.Create_env(args=args).Free()
 
+
 class TestInfo(unittest.TestCase):
 
     def setUp(self):
@@ -129,6 +131,10 @@ class TestInfo(unittest.TestCase):
                 for k, v in dict(items).items():
                     self.assertEqual(info.Get(k), v)
             info.Free()
+
+    def testCreateBad(self):
+        with self.assertRaises(TypeError):
+            MPI.Info.Create(items=123)
 
     def testDup(self):
         info = self.INFO.Dup()

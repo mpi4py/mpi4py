@@ -75,9 +75,7 @@ cdef inline int dlpack_is_contig(
     cdef int64_t *strides = dltensor.strides
     cdef int64_t start, step, index, dim, size = 1
     if strides == NULL:
-        if ndim > 1 and order == c'F':
-            return 0
-        return 1
+        return order != c'F' or ndim <= 1
     if order == c'F':
         start = 0
         step = 1
@@ -108,7 +106,6 @@ cdef inline int dlpack_check_shape(const DLTensor *dltensor) except -1:
     return 0
 
 cdef inline int dlpack_check_contig(const DLTensor *dltensor) except -1:
-    if dltensor.strides == NULL: return 0
     if dlpack_is_contig(dltensor, c'C'): return 0
     if dlpack_is_contig(dltensor, c'F'): return 0
     raise BufferError("dlpack: buffer is not contiguous")
@@ -141,7 +138,7 @@ cdef inline char *dlpack_get_format(
             if bits == 8*sizeof(float):       return b"Zf"
             if bits == 8*sizeof(double):      return b"Zd"
             if bits == 8*sizeof(long double): return b"Zg"
-        return BYTE_FMT
+        return b"B"
     if code == kDLBool:
         if bits == 8: return b"?"
     if code == kDLInt:
@@ -149,13 +146,13 @@ cdef inline char *dlpack_get_format(
         if bits == 8*sizeof(short):     return b"h"
         if bits == 8*sizeof(int):       return b"i"
         if bits == 8*sizeof(long):      return b"l"
-        if bits == 8*sizeof(long long): return b"q"
+        if bits == 8*sizeof(long long): return b"q"  #> long
     if code == kDLUInt:
         if bits == 8*sizeof(char):      return b"B"
         if bits == 8*sizeof(short):     return b"H"
         if bits == 8*sizeof(int):       return b"I"
         if bits == 8*sizeof(long):      return b"L"
-        if bits == 8*sizeof(long long): return b"Q"
+        if bits == 8*sizeof(long long): return b"Q"  #> long
     if code == kDLFloat:
         if bits ==  8*sizeof(float)//2:    return b"e"
         if bits ==  8*sizeof(float):       return b"f"
@@ -165,7 +162,7 @@ cdef inline char *dlpack_get_format(
         if bits ==  8*2*sizeof(float)//2:    return b"Ze"
         if bits ==  8*2*sizeof(float):       return b"Zf"
         if bits ==  8*2*sizeof(double):      return b"Zd"
-        if bits ==  8*2*sizeof(long double): return b"Zg"
+        if bits ==  8*2*sizeof(long double): return b"Zg"  #> no cover
     return BYTE_FMT
 
 cdef inline Py_ssize_t dlpack_get_itemsize(
@@ -179,14 +176,14 @@ cdef inline Py_ssize_t dlpack_get_itemsize(
                 bits == 8*sizeof(double) or
                 bits == 8*sizeof(long double)):
                 return <Py_ssize_t> bits // 8 * 2
-        return 1
+        bits = 1
     return <Py_ssize_t> (bits + 7) // 8
 
 #------------------------------------------------------------------------------
 
-cdef int Py_CheckDLPackBuffer(object obj):
-    try: return <bint>hasattr(obj, '__dlpack__')
-    except: return 0
+cdef int Py_CheckDLPackBuffer(object obj) noexcept:
+    try:    return <bint>hasattr(obj, '__dlpack__')
+    except: return 0  #> no cover
 
 cdef int Py_GetDLPackBuffer(object obj, Py_buffer *view, int flags) except -1:
     cdef object dlpack

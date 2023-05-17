@@ -17,7 +17,7 @@ cdef inline str combinername(int combiner):
     if combiner == MPI_COMBINER_F90_INTEGER    : return 'F90_INTEGER'
     if combiner == MPI_COMBINER_F90_REAL       : return 'F90_REAL'
     if combiner == MPI_COMBINER_F90_COMPLEX    : return 'F90_COMPLEX'
-    raise ValueError(f"unknown combiner value {combiner}")  # unreachable
+    raise ValueError(f"unknown combiner value {combiner}")  #> unreachable
 
 cdef inline list makelist(integral_t *p, MPI_Count start, MPI_Count last):
     return [p[i] for i from start <= i <= last]
@@ -33,7 +33,7 @@ cdef inline tuple datatype_decode(
         self.ob_mpi, &ni, &na, &nc, &nd, &combiner) )
     # return self immediately for named datatypes
     if combiner == MPI_COMBINER_NAMED:
-        return (self, ('NAMED'), {})
+        return (self, combinername(combiner), {})
     # get the datatype contents
     cdef int *i = NULL
     cdef MPI_Aint *a = NULL
@@ -92,10 +92,10 @@ cdef inline tuple datatype_decode(
             blklen = makelist(c, s1, e1)
             displs = makelist(c, s2, e2)
         else:
-            s1 =      1; e1 =   i[0]
-            s2 = i[0]+1; e2 = 2*i[0]
-            blklen = makelist(i, s1, e1)
-            displs = makelist(i, s2, e2)
+            s1 =      1; e1 =   i[0]      #> no cover
+            s2 = i[0]+1; e2 = 2*i[0]      #> no cover
+            blklen = makelist(i, s1, e1)  #> no cover
+            displs = makelist(i, s2, e2)  #> no cover
         params = {
             ('blocklengths')  : blklen,
             ('displacements') : displs,
@@ -107,10 +107,10 @@ cdef inline tuple datatype_decode(
             blklen = makelist(c, s1, e1)
             displs = makelist(c, s2, e2)
         else:
-            s1 = 1; e1 = i[0]
-            s2 = 0; e2 = i[0]-1
-            blklen = makelist(i, s1, e1)
-            displs = makelist(a, s2, e2)
+            s1 = 1; e1 = i[0]             #> no cover
+            s2 = 0; e2 = i[0]-1           #> no cover
+            blklen = makelist(i, s1, e1)  #> no cover
+            displs = makelist(a, s2, e2)  #> no cover
         params = {
             ('blocklengths')  : blklen,
             ('displacements') : displs,
@@ -121,9 +121,9 @@ cdef inline tuple datatype_decode(
             blklen = c[1]
             displs = makelist(c, s2, e2)
         else:
-            s2 = 2; e2 = i[0]+1
-            blklen = i[1]
-            displs = makelist(i, s2, e2)
+            s2 = 2; e2 = i[0]+1          #> no cover
+            blklen = i[1]                #> no cover
+            displs = makelist(i, s2, e2) #> no cover
         params = {
             ('blocklength')   : blklen,
             ('displacements') : displs,
@@ -134,9 +134,9 @@ cdef inline tuple datatype_decode(
             blklen = c[1]
             displs = makelist(c, s2, e2)
         else:
-            s2 = 0; e2 = i[0]-1
-            blklen = i[1]
-            displs = makelist(a, s2, e2)
+            s2 = 0; e2 = i[0]-1          #> no cover
+            blklen = i[1]                #> no cover
+            displs = makelist(a, s2, e2) #> no cover
         params = {
             ('blocklength')   : blklen,
             ('displacements') : displs,
@@ -148,10 +148,10 @@ cdef inline tuple datatype_decode(
             blklen = makelist(c, s1, e1)
             displs = makelist(c, s2, e2)
         else:
-            s1 = 1; e1 = i[0]
-            s2 = 0; e2 = i[0]-1
-            blklen = makelist(i, s1, e1)
-            displs = makelist(a, s2, e2)
+            s1 = 1; e1 = i[0]             #> no cover
+            s2 = 0; e2 = i[0]-1           #> no cover
+            blklen = makelist(i, s1, e1)  #> no cover
+            displs = makelist(a, s2, e2)  #> no cover
         params = {
             ('blocklengths')  : blklen,
             ('displacements') : displs,
@@ -167,13 +167,13 @@ cdef inline tuple datatype_decode(
             starts   = makelist(c, s3, e3)
             order    = i[1]
         else:
-            s1 = 0*i[0]+1; e1 = 1*i[0]
-            s2 = 1*i[0]+1; e2 = 2*i[0]
-            s3 = 2*i[0]+1; e3 = 3*i[0]
-            sizes    = makelist(i, s1, e1)
-            subsizes = makelist(i, s2, e2)
-            starts   = makelist(i, s3, e3)
-            order    = i[3*i[0]+1]
+            s1 = 0*i[0]+1; e1 = 1*i[0]      #> no cover
+            s2 = 1*i[0]+1; e2 = 2*i[0]      #> no cover
+            s3 = 2*i[0]+1; e3 = 3*i[0]      #> no cover
+            sizes    = makelist(i, s1, e1)  #> no cover
+            subsizes = makelist(i, s2, e2)  #> no cover
+            starts   = makelist(i, s3, e3)  #> no cover
+            order    = i[3*i[0]+1]          #> no cover
         params = {
             ('sizes')    : sizes,
             ('subsizes') : subsizes,
@@ -189,12 +189,12 @@ cdef inline tuple datatype_decode(
             sizes = makelist(c, s1, e1)
             order = i[3*i[2]+3]
         else:
-            s1 = 0*i[2]+3; e1 = 1*i[2]+3-1
-            s2 = 1*i[2]+3; e2 = 2*i[2]+3-1
-            s3 = 2*i[2]+3; e3 = 3*i[2]+3-1
-            s4 = 3*i[2]+3; e4 = 4*i[2]+3-1
-            sizes = makelist(i, s1, e1)
-            order = i[4*i[2]+3]
+            s1 = 0*i[2]+3; e1 = 1*i[2]+3-1  #> no cover
+            s2 = 1*i[2]+3; e2 = 2*i[2]+3-1  #> no cover
+            s3 = 2*i[2]+3; e3 = 3*i[2]+3-1  #> no cover
+            s4 = 3*i[2]+3; e4 = 4*i[2]+3-1  #> no cover
+            sizes = makelist(i, s1, e1)     #> no cover
+            order = i[4*i[2]+3]             #> no cover
         params = {
             ('size')     : i[0],
             ('rank')     : i[1],
@@ -237,16 +237,16 @@ cdef inline Datatype datatype_create(
     bint free,
 ):
     cdef object factory
-    combiner = combiner.lower()
-    if combiner == 'named':
-        return datatype
+    cdef Datatype newtype
     cdef list datatypes = params.get('datatypes') or [datatype]
     try:
+        combiner = combiner.lower()
         factory = getattr(datatype, f'Create_{combiner}')
-        return factory(**params).Commit()
+        newtype = factory(**params).Commit()
     finally:
         if free:
             datatype_visit(freetemp, datatypes)
+    return newtype
 
 
 cdef inline int datatype_visit(
@@ -278,6 +278,6 @@ def _datatype_decode(
     """
     Decode datatype to base datatype, combiner name, and parameters
     """
-    return datatype_decode(datatype, mark)
+    return datatype_decode(datatype, mark)  #> TODO
 
 # -----------------------------------------------------------------------------

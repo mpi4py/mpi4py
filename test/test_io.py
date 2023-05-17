@@ -773,6 +773,34 @@ class TestIOViewWorld(BaseTestIOView, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
 
+@unittest.skipMPI('msmpi')
+@unittest.skipMPI('openmpi')
+@unittest.skipMPI('intelmpi', os.name == 'nt')
+class TestDatarep(unittest.TestCase):
+
+    def testRegister(self):
+        def extent_fn(dtype):
+            return dtype.extent
+        try:
+            MPI.Register_datarep(
+                "mpi4py-datarep-dummy",
+                read_fn=None,
+                write_fn=None,
+                extent_fn=extent_fn,
+            )
+        except NotImplementedError:
+            self.skipTest('mpi-register-datrep')
+        with self.assertRaises(MPI.Exception) as cm:
+            MPI.Register_datarep(
+                "mpi4py-datarep-dummy",
+                read_fn=None,
+                write_fn=None,
+                extent_fn=extent_fn,
+            )
+        ierr = cm.exception.Get_error_class()
+        self.assertEqual(ierr, MPI.ERR_DUP_DATAREP)
+
+
 def have_feature():
     case = BaseTestIO()
     case.COMM = TestIOBasicSelf.COMM

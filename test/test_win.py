@@ -37,6 +37,7 @@ class BaseTestWin:
 
     def testMemory(self):
         memory = self.WIN.tomemory()
+        self.assertEqual(memory.format, 'B')
         pointer = MPI.Get_address(memory)
         length = len(memory)
         base, size, dunit = self.WIN.attrs
@@ -89,6 +90,7 @@ class BaseTestWin:
             self.assertEqual(self.WIN.Get_name(), 'mywin')
             self.WIN.Set_name(name)
             self.assertEqual(self.WIN.Get_name(), name)
+            self.WIN.name = self.WIN.name
         except NotImplementedError:
             self.skipTest('mpi-win-name')
 
@@ -109,6 +111,31 @@ class BaseTestWin:
         model = self.WIN.Get_attr(MPI.WIN_MODEL)
         self.assertIn(model, models)
         self.assertEqual(model, self.WIN.model)
+
+    def testPyProps(self):
+        win = self.WIN
+        #
+        group = win.group
+        self.assertEqual(type(group), MPI.Group)
+        group.Free()
+        #
+        info = win.info
+        self.assertIs(type(info), MPI.Info)
+        win.info = info
+        info.Free()
+        #
+        self.assertEqual(type(win.attrs), tuple)
+        self.assertEqual(type(win.flavor), int)
+        self.assertEqual(type(win.model), int)
+        self.assertEqual(type(win.name), str)
+        win.name = "mywin"
+        self.assertEqual(win.name, "mywin")
+
+    def testPickle(self):
+        from pickle import dumps, loads
+        with self.assertRaises(ValueError):
+            loads(dumps(self.WIN))
+
 
 class BaseTestWinCreate(BaseTestWin):
 
@@ -181,6 +208,7 @@ class BaseTestWinCreateDynamic(BaseTestWin):
 
     def testMemory(self):
         memory = self.WIN.tomemory()
+        self.assertEqual(memory.format, 'B')
         base = MPI.Get_address(memory)
         size = len(memory)
         self.assertEqual(base, 0)

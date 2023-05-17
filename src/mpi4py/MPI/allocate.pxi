@@ -38,9 +38,9 @@ cdef class _PyMem:
 
 cdef inline _PyMem allocate(Py_ssize_t m, size_t b, void *buf):
   if m > PY_SSIZE_T_MAX // <Py_ssize_t>b:
-      raise MemoryError("memory allocation size too large")
-  if m < 0:
-      raise RuntimeError("memory allocation with negative size")
+      raise MemoryError("memory allocation size too large")  #> no cover
+  elif m < 0:
+      raise RuntimeError("memory allocation with negative size")  #> no cover
   cdef _PyMem ob = <_PyMem>New(_PyMem)
   ob.len  = m * <Py_ssize_t>b
   ob.free = PyMem_Free
@@ -52,9 +52,9 @@ cdef inline _PyMem allocate(Py_ssize_t m, size_t b, void *buf):
 
 cdef inline _PyMem rawalloc(Py_ssize_t m, size_t b, bint clear, void *buf):
   if m > PY_SSIZE_T_MAX // <Py_ssize_t>b:
-      raise MemoryError("memory allocation size too large")
-  if m < 0:
-      raise RuntimeError("memory allocation with negative size")
+      raise MemoryError("memory allocation size too large")  #> no cover
+  elif m < 0:
+      raise RuntimeError("memory allocation with negative size")  #> no cover
   cdef _PyMem ob = <_PyMem>New(_PyMem)
   ob.len = m * <Py_ssize_t>b
   ob.free = PyMem_RawFree

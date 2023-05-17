@@ -110,6 +110,41 @@ class BaseTestAttr:
         attr = obj.Get_attr(self.keyval)
         self.assertEqual(attr, addr)
 
+    @unittest.skip('broken')
+    def testAttrCopyException(self):
+        cls, obj = type(self.obj), self.obj
+        if not isinstance(obj, MPI.Datatype): return
+        if not hasattr(cls, 'Dup'): return
+        def copy_fn(o, k, v):
+            raise ValueError
+        self.keyval = cls.Create_keyval(copy_fn, None)
+        obj.Set_attr(self.keyval, "value")
+        with self.assertRaises(MPI.Exception) as exc_cm:
+            with unittest.capture_stderr() as stderr:
+                obj.Dup().Free()
+        ierr = exc_cm.exception.Get_error_code()
+        self.assertEqual(ierr, MPI.ERR_OTHER)
+        self.assertIn('ValueError', stderr.getvalue())
+
+    @unittest.skip('broken')
+    def testAttrDeleteException(self):
+        cls, obj = type(self.obj), self.obj
+        if not isinstance(obj, MPI.Win): return  # TODO: review
+        raise_flag = True
+        def delete_fn(o, k, v):
+            if raise_flag:
+                raise ValueError
+        self.keyval = cls.Create_keyval(None, delete_fn)
+        obj.Set_attr(self.keyval, "value")
+        with self.assertRaises(MPI.Exception) as exc_cm:
+            with unittest.capture_stderr() as stderr:
+                obj.Delete_attr(self.keyval)
+        ierr = exc_cm.exception.Get_error_code()
+        self.assertEqual(ierr, MPI.ERR_OTHER)
+        self.assertIn('ValueError', stderr.getvalue())
+        raise_flag = False
+        obj.Delete_attr(self.keyval)
+
 
 class BaseTestCommAttr(BaseTestAttr):
 
@@ -200,8 +235,7 @@ class TestWinAttr(BaseTestAttr, unittest.TestCase):
         self.keyval = MPI.Win.Create_keyval(delete_fn=delete_fn)
         self.assertNotEqual(self.keyval, MPI.KEYVAL_INVALID)
         #
-        win = MPI.Win.Create(MPI.BOTTOM, 1,
-                             MPI.INFO_NULL, MPI.COMM_SELF)
+        win = MPI.Win.Create(MPI.BOTTOM, 1, MPI.INFO_NULL, MPI.COMM_SELF)
         self.obj.Set_attr(self.keyval, win)
         self.assertNotEqual(win, null)
         self.obj.Delete_attr(self.keyval)

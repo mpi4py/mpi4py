@@ -40,11 +40,11 @@ cdef class Op:
         try:
             try:
                 CHKERR( MPI_Op_create_c(fn_c, commute, &self.ob_mpi) )
-            except NotImplementedError:
-                CHKERR( MPI_Op_create(fn_i, commute, &self.ob_mpi) )
-        except:
-            op_user_del(&self.ob_uid)
-            raise
+            except NotImplementedError:                               #> legacy
+                CHKERR( MPI_Op_create(fn_i, commute, &self.ob_mpi) )  #> legacy
+        except:                        #> no cover
+            op_user_del(&self.ob_uid)  #> no cover
+            raise                      #> no cover
         return self
 
     def Free(self) -> None:
@@ -90,14 +90,9 @@ cdef class Op:
         """
         # get *in* and *inout* buffers
         cdef _p_msg_cco m = message_cco()
-        m.for_cro_send(inbuf, 0)
         m.for_cro_recv(inoutbuf, 0)
-        # check counts and datatypes
-        if m.scount != m.rcount: raise ValueError(
-            f"mismatch in inbuf count {m.scount} "
-            f"and inoutbuf count {m.rcount}")
-        if (m.stype != m.rtype): raise ValueError(
-            "mismatch in inbuf and inoutbuf MPI datatypes")
+        m.for_cro_send(inbuf, 0)
+        m.chk_cro_args()
         # do local reduction
         with nogil: CHKERR( MPI_Reduce_local_c(
             m.sbuf, m.rbuf, m.rcount, m.rtype, self.ob_mpi) )

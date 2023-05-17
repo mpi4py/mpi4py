@@ -46,6 +46,8 @@ class TestMemory(unittest.TestCase):
         self.assertEqual(mem.obj, obj)
         self.assertEqual(mem.nbytes, len(obj))
         self.assertIs(mem.readonly, True)
+        with self.assertRaises(TypeError):
+            mem[:] = 0
 
     def testNewBytearray(self):
         memory = MPI.memory
@@ -54,6 +56,8 @@ class TestMemory(unittest.TestCase):
         self.assertEqual(mem.obj, obj)
         self.assertEqual(mem.nbytes, len(obj))
         self.assertFalse(mem.readonly)
+        with self.assertRaises(ValueError):
+            mem[0:1] = mem[1:3]
 
     @unittest.skipIf(array is None, 'array')
     def testNewArray(self):
@@ -70,6 +74,8 @@ class TestMemory(unittest.TestCase):
             mem = memory.allocate(size)
             self.assertEqual(mem.nbytes, size)
             self.assertNotEqual(mem.address, 0)
+            view = memoryview(mem.obj)
+            self.assertEqual(mem.nbytes, view.nbytes)
         for clear in (False, True):
             mem = memory.allocate(1024, clear)
             self.assertEqual(mem.nbytes, 1024)
@@ -195,6 +201,11 @@ class TestMemory(unittest.TestCase):
         self.assertEqual(mem.address, 0)
         self.assertEqual(mem.nbytes, 0)
         self.assertFalse(mem.readonly)
+        with self.assertRaises(ValueError):
+            memory.fromaddress(addr, -1)
+        with self.assertRaises(ValueError):
+            memory.fromaddress(0, 1)
+
 
     def testToReadonly(self):
         memory = MPI.memory
@@ -274,6 +285,11 @@ class TestMemory(unittest.TestCase):
             self.assertEqual(mem.address, 0)
             self.assertEqual(mem.nbytes, 0)
             self.assertFalse(mem.readonly)
+
+    def testAttachBufferReadonly(self):
+        buf = MPI.memory(b"abc")
+        self.assertRaises(BufferError, MPI.Attach_buffer, buf)
+
 
 try:
     MPI.memory

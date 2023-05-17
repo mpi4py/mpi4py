@@ -21,7 +21,6 @@ cdef api object PyMPIStatus_New(MPI_Status *arg):
         arg != MPI_STATUS_IGNORE and
         arg != MPI_STATUSES_IGNORE):
         obj.ob_mpi = arg[0]
-    else: pass  # XXX should fail ?
     return obj
 
 cdef api MPI_Status* PyMPIStatus_Get(object arg) except? NULL:
@@ -39,13 +38,14 @@ cdef api object PyMPIRequest_New(MPI_Request arg):
     return obj
 
 cdef api object PyMPIPrequest_New(MPI_Request arg):
-    cdef Request obj = Prequest.__new__(Request)
+    cdef Prequest obj = Prequest.__new__(Prequest)
     obj.ob_mpi = arg
     obj.flags |= 0
     return obj
 
 cdef api object PyMPIGrequest_New(MPI_Request arg):
-    cdef Request obj = Grequest.__new__(Request)
+    cdef Grequest obj = Grequest.__new__(Grequest)
+    obj.ob_grequest = arg
     obj.ob_mpi = arg
     obj.flags |= 0
     return obj
@@ -152,8 +152,6 @@ cdef api object PyMPIComm_New(MPI_Comm arg):
                 cls = Graphcomm
             elif topo == MPI_DIST_GRAPH:
                 cls = Distgraphcomm
-            else:
-                cls = Intracomm
     cdef Comm obj = <Comm>cls.__new__(cls)
     obj.ob_mpi = arg
     obj.flags |= 0

@@ -1,7 +1,7 @@
 # -----------------------------------------------------------------------------
 
 cdef extern from * nogil:
-    int INT_MAX
+    const int INT_MAX
 
 ctypedef fused count_t:
     int
@@ -12,28 +12,29 @@ ctypedef fused integral_t:
     MPI_Aint
     MPI_Count
 
+cdef inline int chklength(Py_ssize_t size) except -1:
+    cdef int overflow = (size > (<Py_ssize_t>INT_MAX))
+    if overflow: raise OverflowError("length {size} larger than {INT_MAX}")
+    return 0
+
 cdef inline object newarray(Py_ssize_t n, integral_t **p):
     return allocate(n, sizeof(integral_t), p)
 
 cdef inline object getarray(object ob, count_t *n, integral_t **p):
     cdef Py_ssize_t size = len(ob)
+    if count_t is int: chklength(size)
     cdef integral_t *base = NULL
     cdef object mem = newarray(size, &base)
     for i in range(size): base[i] = ob[i]
-    if count_t is int:
-        if size > <Py_ssize_t>INT_MAX:
-            raise OverflowError("integer {size} does not fit in 'int'")
-        n[0] = <int>size
-    else:
-        n[0] = size
+    n[0] = <count_t> size
     p[0] = base
     return mem
 
 cdef inline object chkarray(object ob, count_t n, integral_t **p):
     cdef count_t size = 0
     cdef object mem = getarray(ob, &size, p)
-    if n != size: raise ValueError(
-        f"expecting {n} items, got {size}")
+    if n != size:
+        raise ValueError(f"expecting {n} items, got {size}")
     return mem
 
 # -----------------------------------------------------------------------------
@@ -41,8 +42,8 @@ cdef inline object chkarray(object ob, count_t n, integral_t **p):
 cdef inline object asarray_Datatype(object sequence,
                                     MPI_Count size, MPI_Datatype **p):
      cdef MPI_Datatype *array = NULL
-     if size != len(sequence): raise ValueError(
-         f"expecting {size} items, got {len(sequence)}")
+     if size != len(sequence):
+         raise ValueError(f"expecting {size} items, got {len(sequence)}")
      cdef object ob = allocate(size, sizeof(MPI_Datatype), &array)
      for i in range(size):
          array[i] = (<Datatype?>sequence[i]).ob_mpi
@@ -61,8 +62,8 @@ cdef inline object asarray_Info(object sequence,
          for i in range(size):
              array[i] = info
      else:
-         if size != len(sequence): raise ValueError(
-             f"expecting {size} items, got {len(sequence)}")
+         if size != len(sequence):
+             raise ValueError(f"expecting {size} items, got {len(sequence)}")
          ob = allocate(size, sizeof(MPI_Datatype), &array)
          for i in range(size):
              array[i] = (<Info?>sequence[i]).ob_mpi
@@ -121,8 +122,8 @@ cdef inline object asarray_argvs(object sequence, int size, char ****p):
          sequence = [sequence] * size
      else:
          sequence = list(sequence)
-         if size != len(sequence): raise ValueError(
-             f"expecting {size} items, got {len(sequence)}")
+         if size != len(sequence):
+             raise ValueError(f"expecting {size} items, got {len(sequence)}")
      cdef char*** array = NULL
      cdef object ob = allocate(size+1, sizeof(char**), &array)
      cdef object argv

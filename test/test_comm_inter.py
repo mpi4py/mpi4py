@@ -2,6 +2,11 @@ from mpi4py import MPI
 import mpiunittest as unittest
 
 
+def mpich_ch3_nemesis():
+    libinfo = MPI.Get_library_version()
+    return 'MPICH Device:\tch3:nemesis' in libinfo.split('\n')
+
+
 @unittest.skipIf(MPI.COMM_WORLD.Get_size() < 2, 'mpi-world-size<2')
 class BaseTestIntercomm:
 
@@ -26,6 +31,12 @@ class BaseTestIntercomm:
                                           self.LOCAL_LEADER,
                                           self.BASECOMM,
                                           self.REMOTE_LEADER)
+
+    def testConstructor(self):
+        with self.assertRaises(TypeError):
+            MPI.Intercomm(self.INTRACOMM)
+        with self.assertRaises(TypeError):
+            MPI.Intracomm(self.INTERCOMM)
 
     def tearDown(self):
         self.INTRACOMM.Free()
@@ -86,6 +97,52 @@ class BaseTestIntercomm:
         finally:
             lgroup.Free()
             rgroup.Free()
+
+    def testSplit(self):
+        base = self.INTERCOMM
+        comm = base.Split(42, 42)
+        self.assertEqual(comm.Get_rank(), base.Get_rank())
+        self.assertEqual(comm.Get_size(), base.Get_size())
+        self.assertEqual(comm.Get_remote_size(), base.Get_remote_size())
+        comm.Free()
+        color = base.Get_rank()
+        comm = base.Split(color, 42)
+        if comm != MPI.COMM_NULL:
+            self.assertEqual(comm.Get_rank(), 0)
+            self.assertEqual(comm.Get_size(), 1)
+            self.assertEqual(comm.Get_remote_size(), 1)
+            comm.Free()
+
+    @unittest.skipMPI('msmpi')
+    @unittest.skipMPI('openmpi')  # TODO: open-mpi/ompi#11672
+    @unittest.skipMPI('mpich(<4.2.0)', mpich_ch3_nemesis())
+    def testSplitTypeShared(self):
+        try:
+            comm = self.INTERCOMM.Split_type(MPI.COMM_TYPE_SHARED)
+        except NotImplementedError:
+            self.skipTest('mpi-comm-split_type')
+        if comm != MPI.COMM_NULL:
+            comm.Free()
+        comm = self.INTERCOMM.Split_type(MPI.UNDEFINED)
+        self.assertEqual(comm, MPI.COMM_NULL)
+
+    def testPyProps(self):
+        comm = self.INTERCOMM
+        #
+        self.assertEqual(comm.rank, comm.Get_rank())
+        self.assertEqual(comm.size, comm.Get_size())
+        self.assertEqual(comm.remote_size, comm.Get_remote_size())
+        #
+        group = comm.remote_group
+        self.assertEqual(type(group), MPI.Group)
+        group.Free()
+        #
+        info = comm.info
+        self.assertEqual(type(info), MPI.Info)
+        info.Free()
+        #
+        self.assertTrue(comm.is_inter)
+        self.assertFalse(comm.is_intra)
 
 
 class TestIntercomm(BaseTestIntercomm, unittest.TestCase):

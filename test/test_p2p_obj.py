@@ -1,5 +1,7 @@
 from mpi4py import MPI
 import mpiunittest as unittest
+import threading
+import warnings
 
 def allocate(n):
     return bytearray(n)
@@ -710,6 +712,35 @@ class BaseTestP2PObj:
         self.assertIsNone(idxs)
         self.assertIsNone(objs)
         self.assertFalse(any(reqs))
+        comm.Free()
+
+    def testRecvObjArg(self):
+        comm = self.COMM
+        rank = comm.Get_rank()
+        req1 = comm.isend("42", rank)
+        req2 = comm.isend([42], rank)
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            with self.assertRaises(UserWarning):
+                comm.recv(bytearray(0), MPI.PROC_NULL)
+            warnings.simplefilter("ignore")
+            obj = comm.recv(128, rank)
+            self.assertEqual(obj, "42")
+            req1.wait()
+            obj = comm.recv(bytearray(128), rank)
+            self.assertEqual(obj, [42])
+            req2.wait()
+
+    def testCommLock(self):
+        comm = self.COMM.Dup()
+        table = MPI._comm_lock_table(comm)
+        self.assertIsInstance(table, dict)
+        self.assertNotIn('bcast', table)
+        comm.bcast(None, root=0)
+        self.assertIn('bcast', table)
+        lock = table['bcast']
+        lock_type = type(threading.Lock())
+        self.assertIsInstance(lock, lock_type)
         comm.Free()
 
 

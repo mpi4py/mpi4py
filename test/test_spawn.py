@@ -282,6 +282,21 @@ class BaseTestSpawnMultiple(BaseTestSpawn):
             os.remove(script)
         self.COMM.Barrier()
 
+    def testArgsBad(self):
+        if self.COMM.Get_size() > 1: return
+        CMDS = [self.COMMAND]
+        ARGS = [self.ARGS]
+        MAXP = [self.MAXPROCS]
+        INFO = [self.INFO]
+        with self.assertRaises(ValueError):
+            self.COMM.Spawn_multiple(CMDS[0], ARGS, MAXP, INFO, root=0)
+        with self.assertRaises(ValueError):
+            self.COMM.Spawn_multiple(CMDS, ARGS*2, MAXP, INFO, root=0)
+        with self.assertRaises(ValueError):
+            self.COMM.Spawn_multiple(CMDS, ARGS[0][0], MAXP*2, INFO, root=0)
+        with self.assertRaises(ValueError):
+            self.COMM.Spawn_multiple(CMDS, ARGS, MAXP[0], INFO*2, root=0)
+
 
 class TestSpawnSingleSelf(BaseTestSpawnSingle, unittest.TestCase):
     COMM = MPI.COMM_SELF

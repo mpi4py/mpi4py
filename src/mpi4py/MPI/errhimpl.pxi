@@ -20,11 +20,10 @@ cdef list   errhdl_registry = [
     [None]*(1+32),  # File
 ]
 
-
-cdef inline void errhdl_call_py(
+cdef inline void errhdl_call_mpi(
     int index,
     mpi_scwf_t handle, int errcode,
-) with gil:
+) noexcept with gil:
     cdef object pyhandle = None
     cdef object registry = None
     # errors in user-defined error handler functions are unrecoverable
@@ -44,24 +43,22 @@ cdef inline void errhdl_call_py(
         try:
             registry[index](pyhandle, errcode)
         finally:
-            if mpi_scwf_t is MPI_Session:
+            if False: pass
+            elif mpi_scwf_t is MPI_Session:
                 (<Session>pyhandle).ob_mpi = MPI_SESSION_NULL
-            if mpi_scwf_t is MPI_Comm:
+            elif mpi_scwf_t is MPI_Comm:
                 (<Comm>pyhandle).ob_mpi = MPI_COMM_NULL
-            if mpi_scwf_t is MPI_Win:
+            elif mpi_scwf_t is MPI_Win:
                 (<Win>pyhandle).ob_mpi = MPI_WIN_NULL
-            if mpi_scwf_t is MPI_File:
+            elif mpi_scwf_t is MPI_File:
                 (<File>pyhandle).ob_mpi = MPI_FILE_NULL
-    except:
-        # print the full exception traceback and abort
-        PySys_WriteStderr(
-            b"Fatal Python error: %s\n",
-            b"exception in user-defined error handler function",
-        )
-        try:
-            print_traceback()
-        finally:
-            <void>MPI_Abort(MPI_COMM_WORLD, 1)
+    except BaseException as exc:                                  #> no cover
+        PyErr_DisplayException(exc)                               #> no cover
+        PySys_WriteStderr(                                        #> no cover
+            b"Fatal Python error: %s\n",                          #> no cover
+            b"exception in user-defined error handler function",  #> no cover
+        )                                                         #> no cover
+        <void>MPI_Abort(MPI_COMM_WORLD, 1)                        #> no cover
 
 
 cdef inline void errhdl_call(
@@ -69,13 +66,11 @@ cdef inline void errhdl_call(
     mpi_scwf_t handle, int errcode,
 ) noexcept nogil:
     # make it abort if Python has finalized
-    if not Py_IsInitialized():
-        <void>MPI_Abort(MPI_COMM_WORLD, 1)
+    if not Py_IsInitialized(): <void>MPI_Abort(MPI_COMM_WORLD, 1)
     # make it abort if module cleanup has been done
-    if not py_module_alive():
-        <void>MPI_Abort(MPI_COMM_WORLD, 1)
+    if not py_module_alive():  <void>MPI_Abort(MPI_COMM_WORLD, 1)
     # make the actual GIL-safe Python call
-    errhdl_call_py(index, handle, errcode)
+    errhdl_call_mpi(index, handle, errcode)
 
 
 @cython.callspec("MPIAPI")
@@ -209,7 +204,6 @@ cdef inline void errhdl_map(int index, mpi_ehfn_t **fn) noexcept nogil:
     elif index == 30: fn[0] = errhdl_30
     elif index == 31: fn[0] = errhdl_31
     elif index == 32: fn[0] = errhdl_32
-    else:             fn[0] = NULL
 
 
 cdef inline int errhdl_new(
@@ -244,6 +238,7 @@ cdef inline int errhdl_new(
     return index
 
 
+@cython.linetrace(False)  #> TODO
 cdef inline int errhdl_del(
     int *indexp,
     mpi_ehfn_t *fn,

@@ -79,6 +79,13 @@ class TestSession(unittest.TestCase):
         group.Free()
         session.Finalize()
 
+    def testPickle(self):
+        from pickle import dumps, loads
+        session = MPI.Session.Init()
+        with self.assertRaises(ValueError):
+            loads(dumps(session))
+        session.Finalize()
+
 
 try:
     MPI.Session.Init().Finalize()

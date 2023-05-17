@@ -1,4 +1,5 @@
 from collections import namedtuple
+import contextlib
 import unittest
 
 
@@ -149,6 +150,19 @@ def skipMPI(predicate, *conditions):
 
 def disable(what, reason):
     return unittest.skip(reason)(what)
+
+
+@contextlib.contextmanager
+def capture_stderr():
+    import io
+    import sys
+    stderr = sys.stderr
+    stream = io.StringIO()
+    sys.stderr = stream
+    try:
+        yield stream
+    finally:
+        sys.stderr = stderr
 
 
 def main(*args, **kwargs):

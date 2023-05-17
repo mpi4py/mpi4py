@@ -224,12 +224,28 @@ class BaseTestRMA:
                         for disp in range(3):
                             with self.subTest(disp=disp, rank=rank):
                                 with win_lock(self.WIN, rank):
-                                    self.WIN.Fetch_and_op(obuf.as_mpi(),
-                                                          rbuf.as_mpi_c(1),
-                                                          rank,
-                                                          disp * datatype.size,
-                                                          op=op)
+                                    self.WIN.Fetch_and_op(
+                                        obuf.as_mpi(),
+                                        rbuf.as_mpi_c(1),
+                                        rank,
+                                        disp * datatype.size,
+                                        op=op
+                                    )
                                 self.assertEqual(rbuf[1], scalar(-1))
+        big = bytearray(MPI.INT.Get_size())
+        buf1 = bytearray(1)
+        buf2 = bytearray(1)
+        with win_lock(self.WIN, rank):
+            self.WIN.Fetch_and_op(buf1, buf2, rank, op=MPI.NO_OP)
+        with self.assertRaises(ValueError):
+            with win_lock(self.WIN, rank):
+                self.WIN.Fetch_and_op(big, buf2, rank, op=MPI.NO_OP)
+        with self.assertRaises(ValueError):
+            with win_lock(self.WIN, rank):
+                self.WIN.Fetch_and_op(buf1, big, rank, op=MPI.NO_OP)
+        with self.assertRaises(ValueError):
+            with win_lock(self.WIN, rank):
+                self.WIN.Fetch_and_op(buf1, [big, MPI.INT], rank, op=MPI.NO_OP)
 
     @unittest.skipMPI('mpich(>=4.0,<4.1)', sys.platform == 'darwin')
     def testCompareAndSwap(self):
@@ -270,12 +286,35 @@ class BaseTestRMA:
                     for disp in range(3):
                         with self.subTest(disp=disp, rank=rank):
                             with win_lock(self.WIN, rank):
-                                self.WIN.Compare_and_swap(obuf.as_mpi(),
-                                                          cbuf.as_mpi(),
-                                                          rbuf.as_mpi_c(1),
-                                                          rank,
-                                                          disp * datatype.size)
+                                self.WIN.Compare_and_swap(
+                                    obuf.as_mpi(),
+                                    cbuf.as_mpi(),
+                                    rbuf.as_mpi_c(1),
+                                    rank,
+                                    disp * datatype.size
+                                )
                             self.assertEqual(rbuf[1], scalar(-1))
+        big = bytearray(MPI.INT.Get_size())
+        buf1 = bytearray(1)
+        buf2 = bytearray(1)
+        buf3 = bytearray(1)
+        with win_lock(self.WIN, rank):
+            self.WIN.Compare_and_swap(buf1, buf2, buf3, rank)
+        with self.assertRaises(ValueError):
+            with win_lock(self.WIN, rank):
+                self.WIN.Compare_and_swap(big, buf2, buf3, rank)
+        with self.assertRaises(ValueError):
+            with win_lock(self.WIN, rank):
+                self.WIN.Compare_and_swap(buf1, big, buf3, rank)
+        with self.assertRaises(ValueError):
+            with win_lock(self.WIN, rank):
+                self.WIN.Compare_and_swap(buf1, buf2, big, rank)
+        with self.assertRaises(ValueError):
+            with win_lock(self.WIN, rank):
+                self.WIN.Compare_and_swap(buf1, [big, MPI.INT], buf3, rank)
+        with self.assertRaises(ValueError):
+            with win_lock(self.WIN, rank):
+                self.WIN.Compare_and_swap(buf1, buf2, [big, MPI.INT], rank)
 
     def testPutProcNull(self):
         self.WIN.Fence()

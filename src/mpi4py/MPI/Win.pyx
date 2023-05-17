@@ -151,9 +151,11 @@ cdef class Win:
         cdef MPI_Aint size = 0
         memory = asbuffer_w(memory, &base, &size)
         with nogil: CHKERR( MPI_Win_attach(self.ob_mpi, base, size) )
-        if self.ob_mem is None: self.ob_mem = {}
-        try: (<dict>self.ob_mem)[<MPI_Aint>base] = memory
-        except: pass
+        try:
+            if self.ob_mem is None: self.ob_mem = {}
+            (<dict>self.ob_mem)[<MPI_Aint>base] = memory
+        except:   #> no cover
+            pass  #> no cover
 
     def Detach(self, memory: Buffer) -> None:
         """
@@ -162,8 +164,11 @@ cdef class Win:
         cdef void *base = NULL
         memory = asbuffer_w(memory, &base, NULL)
         with nogil: CHKERR( MPI_Win_detach(self.ob_mpi, base) )
-        try: del (<dict>self.ob_mem)[<MPI_Aint>base]
-        except: pass
+        try:
+            if self.ob_mem is None: return
+            del (<dict>self.ob_mem)[<MPI_Aint>base]
+        except:   #> no cover
+            pass  #> no cover
 
     def Free(self) -> None:
         """
@@ -297,25 +302,27 @@ cdef class Win:
         """window create flavor"""
         def __get__(self) -> int:
             cdef int keyval = MPI_WIN_CREATE_FLAVOR
-            cdef int *attrval = NULL
-            cdef int flag = 0
+            cdef int *attrval = NULL, flag = 0
+            cdef int flavor = MPI_WIN_FLAVOR_CREATE
             if keyval != MPI_KEYVAL_INVALID:
                 CHKERR( MPI_Win_get_attr(self.ob_mpi, keyval,
                                          <void*>&attrval, &flag) )
-                if flag and attrval != NULL: return attrval[0]
-            return MPI_WIN_FLAVOR_CREATE
+                if flag and attrval != NULL:
+                    flavor = attrval[0]
+            return flavor
 
     property model:
         """window memory model"""
         def __get__(self) -> int:
             cdef int keyval = MPI_WIN_MODEL
-            cdef int *attrval = NULL
-            cdef int flag = 0
+            cdef int *attrval = NULL, flag = 0
+            cdef int model = MPI_WIN_SEPARATE
             if keyval != MPI_KEYVAL_INVALID:
                 CHKERR( MPI_Win_get_attr(self.ob_mpi, keyval,
                                          <void*>&attrval, &flag) )
-                if flag and attrval != NULL: return attrval[0]
-            return MPI_WIN_SEPARATE
+                if flag and attrval != NULL:
+                    model = attrval[0]
+            return model
 
     def tomemory(self) -> memory:
         """
@@ -661,8 +668,11 @@ cdef class Win:
         cdef Errhandler errhandler = <Errhandler>New(Errhandler)
         cdef MPI_Win_errhandler_function *fn = NULL
         cdef int index = errhdl_new(errhandler_fn, &fn)
-        try: CHKERR( MPI_Win_create_errhandler(fn, &errhandler.ob_mpi) )
-        except: errhdl_del(&index, fn); raise
+        try:
+            CHKERR( MPI_Win_create_errhandler(fn, &errhandler.ob_mpi) )
+        except:                     #> no cover
+            errhdl_del(&index, fn)  #> no cover
+            raise                   #> no cover
         return errhandler
 
     def Get_errhandler(self) -> Errhandler:

@@ -159,6 +159,31 @@ class BaseTestFile:
         self.assertEqual(eh, MPI.ERRORS_RETURN)
         eh.Free()
 
+    def testPyProps(self):
+        file = self.FILE
+        #
+        self.assertEqual(file.size, 0)
+        self.assertEqual(file.amode, self.amode)
+        #
+        group = file.group
+        self.assertEqual(type(group), MPI.Group)
+        group.Free()
+        #
+        info = file.info
+        self.assertEqual(type(info), MPI.Info)
+        file.info = info
+        info.Free()
+        #
+        self.assertEqual(type(file.atomicity), bool)
+        for atomicity in [True, False] * 4:
+            file.atomicity = atomicity
+            self.assertEqual(file.atomicity, atomicity)
+
+    def testPickle(self):
+        from pickle import dumps, loads
+        with self.assertRaises(ValueError):
+            loads(dumps(self.FILE))
+
 
 class TestFileNull(unittest.TestCase):
 

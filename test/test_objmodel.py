@@ -1,6 +1,9 @@
 from mpi4py import MPI
 import mpiunittest as unittest
+import ctypes
+import operator
 import weakref
+import sys
 
 
 class TestObjModel(unittest.TestCase):
@@ -61,6 +64,13 @@ class TestObjModel(unittest.TestCase):
             self.assertTrue(bool(obj1 != (1,2)))
             self.assertTrue(bool(obj1 != {0:0}))
             self.assertTrue(bool(obj1 != set()))
+
+    def testCmp(self):
+        for obj in self.objects:
+            for binop in ('lt', 'le', 'gt', 'ge'):
+                binop = getattr(operator, binop)
+                with self.assertRaises(TypeError):
+                    binop(obj, obj)
 
     def testBool(self):
         for obj in self.objects[1:]:
@@ -129,25 +139,104 @@ class TestObjModel(unittest.TestCase):
             wr = weakref.proxy(obj)
             self.assertIn(wr, weakref.getweakrefs(obj))
 
+    def testConstants(self):
+        import pickle
+        self.assertEqual(repr(MPI.BOTTOM), 'BOTTOM')
+        self.assertEqual(repr(MPI.IN_PLACE), 'IN_PLACE')
+        for name in ('BOTTOM', 'IN_PLACE'):
+            constant = getattr(MPI, name)
+            with self.assertRaises(ValueError):
+                type(constant)(constant + 1)
+            self.assertEqual(repr(constant), name)
+            self.assertEqual(constant.__reduce__(), name)
+            for protocol in range(pickle.HIGHEST_PROTOCOL):
+                value = pickle.loads(pickle.dumps(constant, protocol))
+                self.assertIs(type(value), type(constant))
+                self.assertEqual(value, constant)
+
     def testSizeOf(self):
         for obj in self.objects:
             n1 = MPI._sizeof(obj)
             n2 = MPI._sizeof(type(obj))
             self.assertEqual(n1, n2)
+        with self.assertRaises(TypeError):
+            MPI._sizeof(None)
 
     def testAddressOf(self):
         for obj in self.objects:
             addr = MPI._addressof(obj)
             self.assertNotEqual(addr, 0)
+        with self.assertRaises(TypeError):
+            MPI._addressof(None)
 
     def testAHandleOf(self):
         for obj in self.objects:
-            if isinstance(obj, MPI.Status):
-                hdl = lambda: MPI._handleof(obj)
-                self.assertRaises(NotImplementedError, hdl)
-                continue
             hdl = MPI._handleof(obj)
             self.assertGreaterEqual(hdl, 0)
+        with self.assertRaises(TypeError):
+            MPI._handleof(None)
+
+    @unittest.skipUnless(sys.implementation.name == 'cpython', "cpython")
+    @unittest.skipUnless(hasattr(MPI, '__pyx_capi__'), "cython")
+    def testCAPI(self):
+        status = MPI.Status()
+        status.source = 0
+        status.tag = 1
+        status.error = MPI.ERR_OTHER
+        extra_objects = [
+            status,
+            MPI.INT,
+            MPI.SUM,
+            MPI.INFO_ENV,
+            MPI.MESSAGE_NO_PROC,
+            MPI.ERRORS_RETURN,
+            MPI.GROUP_EMPTY,
+            MPI.COMM_SELF,
+        ]
+
+        pyapi = ctypes.pythonapi
+        PyCapsule_GetPointer = pyapi.PyCapsule_GetPointer
+        PyCapsule_GetPointer.restype = ctypes.c_void_p
+        PyCapsule_GetPointer.argtypes = [ctypes.py_object, ctypes.c_char_p]
+
+        pyx_capi = MPI.__pyx_capi__
+
+        for obj in self.objects + extra_objects:
+            cls = type(obj)
+            if issubclass(cls, MPI.Comm):
+                cls = MPI.Comm
+            typename = cls.__name__
+            modifier = ''
+            if isinstance(obj, MPI.Status):
+                mpi_type = ctypes.c_void_p
+                modifier = ' *'
+            elif MPI._sizeof(cls) == ctypes.sizeof(ctypes.c_uint32):
+                mpi_type = ctypes.c_uint32
+            elif MPI._sizeof(cls) == ctypes.sizeof(ctypes.c_uint64):
+                mpi_type = ctypes.c_uint64
+
+            new_functype = ctypes.PYFUNCTYPE(ctypes.py_object, mpi_type)
+            get_functype = ctypes.PYFUNCTYPE(ctypes.c_void_p, ctypes.py_object)
+            new_capsule = pyx_capi[f'PyMPI{typename}_New']
+            get_capsule = pyx_capi[f'PyMPI{typename}_Get']
+            new_signature = f'PyObject *(MPI_{typename}{modifier})'.encode()
+            get_signature = f'MPI_{typename} *(PyObject *)'.encode()
+            PyCapsule_GetPointer.restype = new_functype
+            pympi_new = PyCapsule_GetPointer(new_capsule, new_signature)
+            PyCapsule_GetPointer.restype = get_functype
+            pympi_get = PyCapsule_GetPointer(get_capsule, get_signature)
+            PyCapsule_GetPointer.restype = ctypes.c_void_p
+
+            objptr = pympi_get(obj)
+            if isinstance(obj, MPI.Status):
+                newarg = objptr
+            else:
+                newarg = mpi_type.from_address(objptr).value
+            self.assertEqual(objptr, MPI._addressof(obj))
+            self.assertEqual(newarg, MPI._handleof(obj))
+            newobj = pympi_new(newarg)
+            self.assertIs(type(newobj), type(obj))
+            self.assertEqual(newobj, obj)
 
 
 if __name__ == '__main__':

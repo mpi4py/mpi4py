@@ -58,10 +58,13 @@ class DLPackCPUBuf(BaseBuf):
         return (device.device_type, device.device_id)
 
     def __dlpack__(self, stream=None):
+        kDLCPU = dlpack.DLDeviceType.kDLCPU
         managed = self.managed
-        if managed.dl_tensor.device.device_type == \
-           dlpack.DLDeviceType.kDLCPU:
+        device = managed.dl_tensor.device
+        if device.device_type == kDLCPU:
             assert stream is None
+        else:
+            assert stream == -1
         capsule = dlpack.make_py_capsule(managed)
         return capsule
 
@@ -100,6 +103,15 @@ if cupy is not None:
             else:
                 return self._buf.toDlpack()
 
+else:
+
+    class DLPackGPUBuf(DLPackCPUBuf):
+
+        def __init__(self, *args):
+            super().__init__(*args)
+            kDLCUDA = dlpack.DLDeviceType.kDLCUDA
+            device = self.managed.dl_tensor.device
+            device.device_type = kDLCUDA
 
 # ---
 
@@ -176,6 +188,8 @@ class TestMessageSimple(unittest.TestCase):
         self.assertRaises(TypeError, f)
         def f(): Sendrecv(b"abc", b"abc")
         self.assertRaises((BufferError, TypeError, ValueError), f)
+        def f(): Sendrecv(object, empty)
+        self.assertRaises(TypeError, f)
 
     def testMessageNone(self):
         empty = [None, 0, "B"]
@@ -438,14 +452,12 @@ class TestMessageSimpleDLPackCPUBuf(unittest.TestCase,
     def array(self, typecode, initializer):
         return DLPackCPUBuf(typecode, initializer)
 
-
-@unittest.skipIf(cupy is None, 'cupy')
+@unittest.skipIf(cupy is None and (array is None or dlpack is None), 'cupy')
 class TestMessageSimpleDLPackGPUBuf(unittest.TestCase,
                                     BaseTestMessageSimpleArray):
 
     def array(self, typecode, initializer):
         return DLPackGPUBuf(typecode, initializer)
-
 
 @unittest.skipIf(array is None, 'array')
 class TestMessageSimpleCAIBuf(unittest.TestCase,
@@ -595,6 +607,7 @@ class TestMessageDLPackCPUBuf(unittest.TestCase):
         #
         dltensor.ndim = 0
         dltensor.shape = None
+        dltensor.strides = None
         MPI.Get_address(buf)
         #
         dltensor.ndim = 1
@@ -615,6 +628,27 @@ class TestMessageDLPackCPUBuf(unittest.TestCase):
             self.assertRaises(BufferError, MPI.Get_address, buf)
         #
         del dltensor
+
+    def testDtypeCode(self):
+        sbuf = DLPackCPUBuf('H', range(4))
+        rbuf = DLPackCPUBuf('H', [0]*4)
+        dtype = sbuf.managed.dl_tensor.dtype
+        dtype.code = dlpack.DLDataTypeCode.kDLOpaqueHandle
+        dtype = None
+        Sendrecv(sbuf, rbuf)
+        for i in range(4):
+            self.assertEqual(rbuf[i], i)
+
+    def testDtypeLanes(self):
+        sbuf = DLPackCPUBuf('I', range(4))
+        rbuf = DLPackCPUBuf('I', [0]*4)
+        dtype = sbuf.managed.dl_tensor.dtype
+        dtype.bits //= 2
+        dtype.lanes *= 2
+        dtype = None
+        Sendrecv(sbuf, rbuf)
+        for i in range(4):
+            self.assertEqual(rbuf[i], i)
 
     def testContiguous(self):
         buf = DLPackCPUBuf('i', range(8))
@@ -730,6 +764,14 @@ class TestMessageCAIBuf(unittest.TestCase):
         rmsg.__cuda_array_interface__['data'] = (dev_ptr, False, None)
         self.assertRaises(ValueError, Sendrecv, smsg, rmsg)
 
+    def testMask(self):
+        smsg = CAIBuf('B', [1,2,3])
+        rmsg = CAIBuf('B', [0,0,0])
+        rmsg.__cuda_array_interface__['mask'] = None
+        Sendrecv(smsg, rmsg)
+        rmsg.__cuda_array_interface__['mask'] = True
+        self.assertRaises(BufferError, Sendrecv, smsg, rmsg)
+
     def testTypestrMissing(self):
         smsg = CAIBuf('B', [1,2,3])
         rmsg = CAIBuf('B', [0,0,0])
@@ -757,7 +799,14 @@ class TestMessageCAIBuf(unittest.TestCase):
         smsg.__cuda_array_interface__['typestr'] = typestr
         smsg.__cuda_array_interface__['descr'][0] = ('', typestr)
         self.assertRaises(BufferError, Sendrecv, smsg, rmsg)
-        Sendrecv([smsg, MPI.INT], [rmsg, MPI.INT])
+        typestr = '#' + typestr[1:]
+        smsg.__cuda_array_interface__['typestr'] = typestr
+        smsg.__cuda_array_interface__['descr'][0] = ('', typestr)
+        self.assertRaises(BufferError, Sendrecv, smsg, rmsg)
+        typestr = '|' + typestr[1:]
+        smsg.__cuda_array_interface__['typestr'] = typestr
+        smsg.__cuda_array_interface__['descr'][0] = ('', typestr)
+        Sendrecv(smsg, rmsg)
 
     def testTypestrItemsize(self):
         smsg = CAIBuf('B', [1,2,3])
@@ -885,6 +934,8 @@ class TestMessageVector(unittest.TestCase):
         self.assertRaises(TypeError, f)
         buf = {1:2,3:4}
         def f(): Alltoallv([buf, 0,  0, "i"], empty)
+        self.assertRaises(TypeError, f)
+        def f(): Alltoallv(object, empty)
         self.assertRaises(TypeError, f)
 
     def testMessageNone(self):
@@ -1061,6 +1112,21 @@ class TestMessageVectorNumPy(unittest.TestCase,
     def array(self, typecode, initializer):
         return numpy.array(initializer, dtype=typecode)
 
+    def testCountNumPyScalar(self):
+        sbuf = bytearray(b"abc")
+        rbuf = bytearray(4)
+        count = numpy.array([3])[0]
+        displ = numpy.array([1])[0]
+        Alltoallv([sbuf, count], [rbuf, (3, [displ])])
+        self.assertEqual(sbuf, rbuf[displ:])
+
+    def testCountNumPyZeroDim(self):
+        sbuf = bytearray(b"xabc")
+        rbuf = bytearray(3)
+        count = numpy.array(3)
+        displ = numpy.array(1)
+        Alltoallv([sbuf, (3, [displ])], [rbuf, count])
+        self.assertEqual(sbuf[displ:], rbuf)
 
 @unittest.skipIf(array is None, 'array')
 class TestMessageVectorCAIBuf(unittest.TestCase,
@@ -1113,6 +1179,12 @@ class TestMessageVectorW(unittest.TestCase):
         self.assertRaises(ValueError, f)
         def f(): Alltoallw([sbuf, [0], [0], [MPI.BYTE]],
                            [rbuf, [0], [0], [MPI.BYTE], None])
+        self.assertRaises(ValueError, f)
+        def f(): Alltoallw([MPI.BOTTOM, None, [0], [MPI.BYTE]],
+                           [rbuf, [0], [0], [MPI.BYTE]])
+        self.assertRaises(ValueError, f)
+        def f(): Alltoallw([MPI.BOTTOM, [0], None, [MPI.BYTE]],
+                           [rbuf, [0], [0], [MPI.BYTE]])
         self.assertRaises(ValueError, f)
         MPI.Free_mem(sbuf)
         MPI.Free_mem(rbuf)
@@ -1204,6 +1276,62 @@ class TestMessageVectorW(unittest.TestCase):
         # numba arrays do not have the .all() method
         for i in range(3):
             self.assertEqual(sbuf[i], rbuf[i])
+
+
+# ---
+
+def Reduce(smsg, rmsg):
+    MPI.COMM_SELF.Reduce(smsg, rmsg, MPI.SUM, 0)
+
+
+def ReduceScatter(smsg, rmsg, rcounts):
+    MPI.COMM_SELF.Reduce_scatter(smsg, rmsg, rcounts, MPI.SUM)
+
+
+class TestMessageReduce(unittest.TestCase):
+
+    def testMessageBad(self):
+        sbuf = MPI.Alloc_mem(8)
+        rbuf = MPI.Alloc_mem(8)
+        with self.assertRaises(ValueError):
+            Reduce([sbuf, 1, MPI.INT], [rbuf, 1, MPI.FLOAT])
+        with self.assertRaises(ValueError):
+            Reduce([sbuf, 1, MPI.INT], [rbuf, 2, MPI.INT])
+        MPI.Free_mem(sbuf)
+        MPI.Free_mem(rbuf)
+
+
+class TestMessageReduceScatter(unittest.TestCase):
+
+    def testMessageBad(self):
+        sbuf = MPI.Alloc_mem(16)
+        rbuf = MPI.Alloc_mem(16)
+        with self.assertRaises(ValueError):
+            ReduceScatter(
+                [sbuf, 1, MPI.INT],
+                [rbuf, 1, MPI.FLOAT],
+                [1],
+            )
+        with self.assertRaises(ValueError):
+            ReduceScatter(
+                [sbuf, 2, MPI.INT],
+                [rbuf, 1, MPI.INT],
+                [1],
+            )
+        with self.assertRaises(ValueError):
+            ReduceScatter(
+                [sbuf, 2, MPI.INT],
+                [rbuf, 1, MPI.INT],
+                [2],
+            )
+        with self.assertRaises(ValueError):
+            ReduceScatter(
+                MPI.IN_PLACE,
+                [rbuf, 1, MPI.INT],
+                [2],
+            )
+        MPI.Free_mem(sbuf)
+        MPI.Free_mem(rbuf)
 
 
 # ---

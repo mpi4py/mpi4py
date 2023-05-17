@@ -41,7 +41,7 @@ cdef class Exception(RuntimeError):
 
     def __str__(self) -> str:
         if MPI_VERSION < 4 and not mpi_active():
-            return f"error code: {self.ob_mpi}"
+            return f"error code: {self.ob_mpi}"  #> legacy
         return self.Get_error_string()
 
     def Get_error_code(self) -> int:

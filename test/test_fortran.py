@@ -84,6 +84,10 @@ class TestFortranGroup(BaseTestFortran, unittest.TestCase):
                MPI.GROUP_EMPTY,
                ]
 
+class TestFortranSession(BaseTestFortran, unittest.TestCase):
+    HANDLES = [MPI.SESSION_NULL,
+               ]
+
 class TestFortranComm(BaseTestFortran, unittest.TestCase):
     HANDLES = [MPI.COMM_NULL,
                MPI.COMM_SELF,
