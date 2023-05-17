@@ -1,3 +1,5 @@
+# -----------------------------------------------------------------------------
+
 __doc__ = """
 Message Passing Interface.
 """
@@ -19,10 +21,16 @@ include "asarray.pxi"
 include "objmodel.pxi"
 include "attrimpl.pxi"
 include "errhimpl.pxi"
+include "reqimpl.pxi"
+include "opimpl.pxi"
+include "commimpl.pxi"
+include "winimpl.pxi"
+include "drepimpl.pxi"
 include "msgbuffer.pxi"
 include "msgpickle.pxi"
 include "CAPI.pxi"
 
+# -----------------------------------------------------------------------------
 
 # Assorted constants
 # ------------------
@@ -265,7 +273,13 @@ MAX_LIBRARY_VERSION_STRING = MPI_MAX_LIBRARY_VERSION_STRING
 MAX_PSET_NAME_LEN  = MPI_MAX_PSET_NAME_LEN
 MAX_STRINGTAG_LEN  = MPI_MAX_STRINGTAG_LEN
 
-# --------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+
+include "typemap.pxi"
+include "typestr.pxi"
+include "typedec.pxi"
+
+# -----------------------------------------------------------------------------
 
 cdef extern from * nogil:
     int PyMPI_Get_vendor(const char**,int*,int*,int*)
@@ -283,7 +297,7 @@ def get_vendor() -> tuple[str, tuple[int, int, int]]:
     CHKERR( PyMPI_Get_vendor(&name, &major, &minor, &micro) )
     return (mpistr(name), (major, minor, micro))
 
-# --------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 cdef extern from "Python.h":
     ctypedef ssize_t Py_intptr_t
@@ -352,7 +366,7 @@ def _handleof(arg: Any) -> int:
     Unsigned integer value with the underlying MPI handle
     """
     if isinstance(arg, Status):
-        raise NotImplementedError
+        return <Py_uintptr_t>&((<Status>arg).ob_mpi)
     elif isinstance(arg, Datatype):
         return <Py_uintptr_t>((<Datatype>arg).ob_mpi)
     elif isinstance(arg, Request):
@@ -378,4 +392,4 @@ def _handleof(arg: Any) -> int:
     else:
         raise TypeError("expecting an MPI instance")
 
-# --------------------------------------------------------------------
+# -----------------------------------------------------------------------------

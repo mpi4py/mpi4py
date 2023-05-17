@@ -67,8 +67,8 @@ if sizeof(short) == 2:
     AddTypeMap(TypeDict, "i2" ,  __SHORT__              ) # NumPy
     AddTypeMap(TypeDict, "u2" ,  __UNSIGNED_SHORT__     ) # NumPy
 if sizeof(long) == 4:
-    AddTypeMap(TypeDict, "i4" ,  __LONG__               ) # NumPy
-    AddTypeMap(TypeDict, "u4" ,  __UNSIGNED_LONG__      ) # NumPy
+    AddTypeMap(TypeDict, "i4" ,  __LONG__               ) # NumPy  #> 32bit
+    AddTypeMap(TypeDict, "u4" ,  __UNSIGNED_LONG__      ) # NumPy  #> 32bit
 if sizeof(int) == 4:
     AddTypeMap(TypeDict, "i4" ,  __INT__                ) # NumPy
     AddTypeMap(TypeDict, "u4" ,  __UNSIGNED__           ) # NumPy
@@ -98,9 +98,9 @@ if sizeof(double) == 8:
     AddTypeMap(TypeDict, "c16" , __CXX_DOUBLE_COMPLEX__ ) # NumPy
     AddTypeMap(TypeDict, "c16" , __C_DOUBLE_COMPLEX__   ) # NumPy
 if sizeof(long double) == 12:
-    AddTypeMap(TypeDict, "f12" , __LONG_DOUBLE__             ) # NumPy
-    AddTypeMap(TypeDict, "c24" , __CXX_LONG_DOUBLE_COMPLEX__ ) # NumPy
-    AddTypeMap(TypeDict, "c24" , __C_LONG_DOUBLE_COMPLEX__   ) # NumPy
+    AddTypeMap(TypeDict, "f12" , __LONG_DOUBLE__             ) # NumPy  #> i386
+    AddTypeMap(TypeDict, "c24" , __CXX_LONG_DOUBLE_COMPLEX__ ) # NumPy  #> i386
+    AddTypeMap(TypeDict, "c24" , __C_LONG_DOUBLE_COMPLEX__   ) # NumPy  #> i386
 if sizeof(long double) == 16:
     AddTypeMap(TypeDict, "f16" , __LONG_DOUBLE__             ) # NumPy
     AddTypeMap(TypeDict, "c32" , __CXX_LONG_DOUBLE_COMPLEX__ ) # NumPy
@@ -114,8 +114,8 @@ if sizeof(size_t) == sizeof(long):
     AddTypeMap(TypeDict, "n" , __LONG__               )
     AddTypeMap(TypeDict, "N" , __UNSIGNED_LONG__      )
 if sizeof(size_t) == sizeof(int):
-    AddTypeMap(TypeDict, "n" , __INT__                )
-    AddTypeMap(TypeDict, "N" , __UNSIGNED__           )
+    AddTypeMap(TypeDict, "n" , __INT__                )  #> 32bit
+    AddTypeMap(TypeDict, "N" , __UNSIGNED__           )  #> 32bit
 if sizeof(size_t) == sizeof(MPI_Count):
     AddTypeMap(TypeDict, "n" , __COUNT__              )
 
@@ -127,8 +127,8 @@ if sizeof(Py_intptr_t) == sizeof(long):
     AddTypeMap(TypeDict, "p" , __LONG__               ) # NumPy
     AddTypeMap(TypeDict, "P" , __UNSIGNED_LONG__      ) # NumPy
 if sizeof(Py_intptr_t) == sizeof(int):
-    AddTypeMap(TypeDict, "p" , __INT__                ) # NumPy
-    AddTypeMap(TypeDict, "P" , __UNSIGNED__           ) # NumPy
+    AddTypeMap(TypeDict, "p" , __INT__                ) # NumPy  #> 32bit
+    AddTypeMap(TypeDict, "P" , __UNSIGNED__           ) # NumPy  #> 32bit
 if sizeof(Py_intptr_t) == sizeof(MPI_Aint):
     AddTypeMap(TypeDict, "p" , __AINT__               ) # NumPy
 
@@ -151,8 +151,8 @@ if 2 == 2:
     AddTypeMap(TypeDict, "u" , __UINT16_T__       ) # PEP-3118
     AddTypeMap(TypeDict, "1u", __UINT16_T__       ) # PEP-3118
 if sizeof(wchar_t) == 2:
-    AddTypeMap(TypeDict, "u" , __WCHAR__          ) # PEP-3118
-    AddTypeMap(TypeDict, "1u", __WCHAR__          ) # PEP-3118
+    AddTypeMap(TypeDict, "u" , __WCHAR__          ) # PEP-3118  #> win32
+    AddTypeMap(TypeDict, "1u", __WCHAR__          ) # PEP-3118  #> win32
 # UTF-32/UCS-4
 if sizeof(int) == 4:
     AddTypeMap(TypeDict, "w" , __UNSIGNED__       ) # PEP-3118
@@ -216,8 +216,8 @@ if sizeof(double) == 8:
     AddTypeMap(CTypeDict, "f8"  , __DOUBLE__           )
     AddTypeMap(CTypeDict, "c16" , __C_DOUBLE_COMPLEX__ )
 if sizeof(long double) == 12:
-    AddTypeMap(CTypeDict, "f12" , __LONG_DOUBLE__           )
-    AddTypeMap(CTypeDict, "c24" , __C_LONG_DOUBLE_COMPLEX__ )
+    AddTypeMap(CTypeDict, "f12" , __LONG_DOUBLE__           )  #> i386
+    AddTypeMap(CTypeDict, "c24" , __C_LONG_DOUBLE_COMPLEX__ )  #> i386
 if sizeof(long double) == 16:
     AddTypeMap(CTypeDict, "f16" , __LONG_DOUBLE__           )
     AddTypeMap(CTypeDict, "c32" , __C_LONG_DOUBLE_COMPLEX__ )

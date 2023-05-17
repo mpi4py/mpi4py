@@ -1706,8 +1706,11 @@ cdef class Comm:
         cdef Errhandler errhandler = <Errhandler>New(Errhandler)
         cdef MPI_Comm_errhandler_function *fn = NULL
         cdef int index = errhdl_new(errhandler_fn, &fn)
-        try: CHKERR( MPI_Comm_create_errhandler(fn, &errhandler.ob_mpi) )
-        except: errhdl_del(&index, fn); raise
+        try:
+            CHKERR( MPI_Comm_create_errhandler(fn, &errhandler.ob_mpi) )
+        except:                     #> no cover
+            errhdl_del(&index, fn)  #> no cover
+            raise                   #> no cover
         return errhandler
 
     def Get_errhandler(self) -> Errhandler:
@@ -1737,7 +1740,7 @@ cdef class Comm:
 
         .. warning:: This is a direct call, use it with care!!!.
         """
-        CHKERR( MPI_Abort(self.ob_mpi, errorcode) )
+        CHKERR( MPI_Abort(self.ob_mpi, errorcode) )  #> no cover
 
     # Naming Objects
     # --------------
@@ -2025,8 +2028,8 @@ cdef class Intracomm(Comm):
         if self.ob_mpi == MPI_COMM_NULL: return
         cdef int inter = 1
         CHKERR( MPI_Comm_test_inter(self.ob_mpi, &inter) )
-        if inter: raise TypeError(
-            "expecting an intracommunicator")
+        if inter:
+            raise TypeError("expecting an intracommunicator")
 
     # Communicator Constructors
     # -------------------------
@@ -2405,9 +2408,9 @@ cdef class Intracomm(Comm):
         command: Sequence[str],
         args: Sequence[Sequence[str]] | None = None,
         maxprocs: Sequence[int] | None = None,
-        info: Info | Sequence[Info] = INFO_NULL,
+        info: Sequence[Info] | Info = INFO_NULL,
         int root: int = 0,
-        errcodes: list[int] | None = None,
+        errcodes: list[list[int]] | None = None,
     ) -> Intercomm:
         """
         Spawn instances of multiple MPI applications
@@ -2432,7 +2435,8 @@ cdef class Intracomm(Comm):
             if root != rank:
                 count = <int>len(maxprocs)
                 tmp3 = asarray_nprocs(maxprocs, count, &imaxprocs)
-            for i in range(count): np += imaxprocs[i]
+            for i in range(count):
+                np += imaxprocs[i]
             tmp5 = newarray(np, &ierrcodes)
         #
         cdef Intercomm comm = <Intercomm>New(Intercomm)
@@ -2509,8 +2513,8 @@ cdef class Topocomm(Intracomm):
         if self.ob_mpi == MPI_COMM_NULL: return
         cdef int topo = MPI_UNDEFINED
         CHKERR( MPI_Topo_test(self.ob_mpi, &topo) )
-        if topo == MPI_UNDEFINED: raise TypeError(
-            "expecting a topology communicator")
+        if topo == MPI_UNDEFINED:
+            raise TypeError("expecting a topology communicator")
 
     property degrees:
         "number of incoming and outgoing neighbors"
@@ -2527,7 +2531,7 @@ cdef class Topocomm(Intracomm):
             if isinstance(self, Distgraphcomm):
                 nneighbors = self.Get_dist_neighbors_count()[:2]
                 return nneighbors
-            raise TypeError("expecting a topology communicator")
+            raise TypeError("expecting a topology communicator")  #> unreachable
 
     property indegree:
         "number of incoming neighbors"
@@ -2558,7 +2562,7 @@ cdef class Topocomm(Intracomm):
             if isinstance(self, Distgraphcomm):
                 neighbors = self.Get_dist_neighbors()[:2]
                 return neighbors
-            raise TypeError("expecting a topology communicator")
+            raise TypeError("expecting a topology communicator")  #> unreachable
 
     property inedges:
         "incoming neighbors"
@@ -2863,8 +2867,8 @@ cdef class Cartcomm(Topocomm):
         if self.ob_mpi == MPI_COMM_NULL: return
         cdef int topo = MPI_UNDEFINED
         CHKERR( MPI_Topo_test(self.ob_mpi, &topo) )
-        if topo != MPI_CART: raise TypeError(
-            "expecting a Cartesian communicator")
+        if topo != MPI_CART:
+            raise TypeError("expecting a Cartesian communicator")
 
     # Cartesian Inquiry Functions
     # ---------------------------
@@ -3010,8 +3014,8 @@ cdef class Graphcomm(Topocomm):
         if self.ob_mpi == MPI_COMM_NULL: return
         cdef int topo = MPI_UNDEFINED
         CHKERR( MPI_Topo_test(self.ob_mpi, &topo) )
-        if topo != MPI_GRAPH: raise TypeError(
-            "expecting a general graph communicator")
+        if topo != MPI_GRAPH:
+            raise TypeError("expecting a general graph communicator")
 
     # Graph Inquiry Functions
     # -----------------------
@@ -3117,8 +3121,8 @@ cdef class Distgraphcomm(Topocomm):
         if self.ob_mpi == MPI_COMM_NULL: return
         cdef int topo = MPI_UNDEFINED
         CHKERR( MPI_Topo_test(self.ob_mpi, &topo) )
-        if topo != MPI_DIST_GRAPH: raise TypeError(
-            "expecting a distributed graph communicator")
+        if topo != MPI_DIST_GRAPH:
+            raise TypeError("expecting a distributed graph communicator")
 
     # Topology Inquiry Functions
     # --------------------------
@@ -3182,8 +3186,8 @@ cdef class Intercomm(Comm):
         if self.ob_mpi == MPI_COMM_NULL: return
         cdef int inter = 0
         CHKERR( MPI_Comm_test_inter(self.ob_mpi, &inter) )
-        if not inter: raise TypeError(
-            "expecting an intercommunicator")
+        if not inter:
+            raise TypeError("expecting an intercommunicator")
 
     # Intercommunicator Constructors
     # ------------------------------
@@ -3330,13 +3334,11 @@ def Close_port(port_name: str) -> None:
 def Publish_name(
     service_name: str,
     port_name: str,
-    info: Info = INFO_NULL,
+    Info info: Info = INFO_NULL,
 ) -> None:
     """
     Publish a service name
     """
-    if isinstance(port_name, Info): # backward compatibility
-        port_name, info = info, port_name
     cdef char *csrvcname = NULL
     service_name = asmpistr(service_name, &csrvcname)
     cdef char *cportname = NULL
@@ -3347,13 +3349,11 @@ def Publish_name(
 def Unpublish_name(
     service_name: str,
     port_name: str,
-    info: Info = INFO_NULL,
+    Info info: Info = INFO_NULL,
 ) -> None:
     """
     Unpublish a service name
     """
-    if isinstance(port_name, Info): # backward compatibility
-        port_name, info = info, port_name
     cdef char *csrvcname = NULL
     service_name = asmpistr(service_name, &csrvcname)
     cdef char *cportname = NULL

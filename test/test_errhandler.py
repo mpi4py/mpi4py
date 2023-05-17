@@ -34,42 +34,56 @@ class TestErrhandler(unittest.TestCase):
 class BaseTestErrhandler:
 
     def testCreate(self):
+        MAX_USER_EH = 32  # max user-defined error handlers
         mpiobj = self.mpiobj
-        called = False
-        check = False
+        index = None
+        called = check = False
 
-        def errhandler_fn(arg, err):
-            nonlocal called
-            nonlocal check
-            called = True
-            check = True
-            check &= (arg == mpiobj)
-            check &= (err == MPI.ERR_OTHER)
+        def get_errhandler_fn(idx):
+            def errhandler_fn(arg, err):
+                nonlocal mpiobj, index
+                nonlocal called, check
+                called = check = True
+                check &= (arg == mpiobj)
+                check &= (err == MPI.ERR_OTHER)
+                check &= (idx == index)
+            return errhandler_fn
 
+        errhandlers = []
+        for index in range(MAX_USER_EH):
+            try:
+                fn = get_errhandler_fn(index)
+                eh = type(mpiobj).Create_errhandler(fn)
+                errhandlers.append(eh)
+            except NotImplementedError:
+                clsname = type(mpiobj).__name__.lower()
+                self.skipTest(f'mpi-{clsname}-create_errhandler')
+        with self.assertRaises(RuntimeError):
+            type(mpiobj).Create_errhandler(lambda arg, err: None)
+
+        for eh in errhandlers:
+            self.assertTrue(eh)
+            with self.assertRaises(ValueError):
+                eh.__reduce__()
+
+        eh_orig = mpiobj.Get_errhandler()
         try:
-            errhdl = mpiobj.Create_errhandler(errhandler_fn)
-        except NotImplementedError:
-            clsname = type(mpiobj).__name__.lower()
-            self.skipTest(f'mpi-{clsname}-create_errhandler')
-        self.assertIsInstance(errhdl, MPI.Errhandler)
-        self.assertNotEqual(errhdl, MPI.ERRHANDLER_NULL)
-
-        from pickle import dumps
-        self.assertRaises(ValueError, dumps, errhdl)
-
-        save = mpiobj.Get_errhandler()
-        mpiobj.Set_errhandler(errhdl)
-        try:
-            mpiobj.Call_errhandler(MPI.ERR_OTHER)
-        except NotImplementedError:
-            if MPI.VERSION >= 2: raise
-            clsname = type(mpiobj).__name__.lower()
-            self.skipTest(f'mpi-{clsname}-call_errhandler')
+            for index, eh in enumerate(errhandlers):
+                called = check = False
+                mpiobj.Set_errhandler(eh)
+                try:
+                    mpiobj.Call_errhandler(MPI.SUCCESS)
+                    mpiobj.Call_errhandler(MPI.ERR_OTHER)
+                except NotImplementedError:
+                    if MPI.VERSION >= 2: raise
+                else:
+                    self.assertTrue(called)
+                    self.assertTrue(check)
+                finally:
+                    mpiobj.Set_errhandler(eh_orig)
         finally:
-            mpiobj.Set_errhandler(save)
-            errhdl.Free()
-        self.assertTrue(called)
-        self.assertTrue(check)
+            for eh in errhandlers:
+                eh.Free()
 
     def testCall(self):
         mpiobj = self.mpiobj

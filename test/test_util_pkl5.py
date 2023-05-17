@@ -872,8 +872,9 @@ class BaseTestPKL5:
         protocols = list(range(-2, pickle.PROTOCOL+1))
         for protocol in [None] + protocols:
             pickle.PROTOCOL = protocol
-            for threshold in (-1, 0, 64, 256):
+            for threshold in (-1, 0, 64, 256, None):
                 pickle.THRESHOLD = threshold
+                threshold = pickle.THRESHOLD
                 for slen in (0, 32, 64, 128, 256, 512):
                     sobj = numpy.empty(slen, dtype='i')
                     sobj.fill(rank)

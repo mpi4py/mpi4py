@@ -222,6 +222,23 @@ class BaseTestP2PBuf:
         req = comm.Recv_init(None, MPI.PROC_NULL)
         req.Start(); req.Wait(); req.Free()
 
+    def testConstructor(self):
+        preq = self.COMM.Send_init(b"", MPI.PROC_NULL, 0)
+        dupe = MPI.Prequest(preq)
+        self.assertIs(type(dupe), MPI.Prequest)
+        self.assertEqual(dupe, preq)
+        dupe = MPI.Prequest.f2py(preq.py2f())
+        self.assertIs(type(dupe), MPI.Prequest)
+        self.assertEqual(dupe, preq)
+        dupe = MPI.Request(preq)
+        self.assertIs(type(dupe), MPI.Request)
+        self.assertEqual(dupe, preq)
+        with self.assertRaises(TypeError):
+            dupe = MPI.Grequest(preq)
+        preq.Start()
+        preq.Wait()
+        preq.Free()
+
     def testPersistent(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()

@@ -5,10 +5,10 @@ cdef object Lock = None
 if PY_VERSION_HEX >= 0x030900F0:
     from _thread import allocate_lock as Lock
 else:
-    try:
-        from _thread import allocate_lock as Lock
-    except ImportError:
-        from _dummy_thread import allocate_lock as Lock
+    try:                                                 #> legacy
+        from _thread import allocate_lock as Lock        #> legacy
+    except ImportError:                                  #> legacy
+        from _dummy_thread import allocate_lock as Lock  #> legacy
 
 #------------------------------------------------------------------------------
 
@@ -242,29 +242,27 @@ cdef inline int marktemp(PyMPIClass self) except -1:
         self.flags |= PyMPI_FLAGS_TEMP
     return 0
 
+@cython.linetrace(False)
 cdef inline int freetemp(PyMPIClass self) except -1:
-    if PyMPIClass is Datatype:
-        if named_Datatype(self.ob_mpi): return 0
+    if named(self.ob_mpi): return 0
     if not mpi_active(): return 0
-    if predefined(self.ob_mpi): return 0
     if PyMPIClass is Datatype:
         CHKERR( MPI_Type_free(&self.ob_mpi) )
     return 0
 
+@cython.linetrace(False)
 cdef inline int dealloc(PyMPIClass self) except -1:
     if not (self.flags & PyMPI_FLAGS_READY): return 0
     if (self.flags & PyMPI_FLAGS_CONST): return 0
-    if (self.flags & PyMPI_FLAGS_TEMP):  return freetemp(self)
+    if (self.flags & PyMPI_FLAGS_TEMP ): return freetemp(self)
     if self.flags: return 0 # TODO: this always return
+
     if not mpi_active(): return 0
     if predefined(self.ob_mpi): return 0
-
-    cdef str mod = type(self).__module__
-    cdef str cls = type(self).__name__
     PyErr_WarnFormat(
         RuntimeWarning, 1,
-        b"collecting %.200U.%.200U object with MPI handle %p",
-        <PyObject*> mod, <PyObject*> cls,
+        b"collecting object with %.200U handle %p",
+        <PyObject*> cython.typeof(self.ob_mpi),
         <void*> <Py_uintptr_t> self.ob_mpi,
     )
 
@@ -334,7 +332,8 @@ cdef inline object def_reduce(PyMPIClass self):
     return (__newobj__, (type(self), pyobj))
 
 cdef inline object reduce_default(PyMPIClass self):
-    if named(self.ob_mpi): return def_reduce(self)
+    if named(self.ob_mpi):
+        return def_reduce(self)
     cdef str mod = type(self).__module__
     cdef str cls = type(self).__name__
     raise ValueError(f"cannot serialize '{mod}.{cls}' instance")
@@ -375,7 +374,7 @@ cdef inline Datatype ref_Datatype(MPI_Datatype arg):
 
 cdef inline object reduce_Datatype(Datatype self):
     # named
-    if named_Datatype(self.ob_mpi):
+    if named(self.ob_mpi):
         return def_reduce(self)
     # predefined and user-defined
     cdef object basetype, combiner, params
@@ -385,8 +384,6 @@ cdef inline object reduce_Datatype(Datatype self):
 #------------------------------------------------------------------------------
 
 # Request
-
-include "reqimpl.pxi"
 
 cdef inline Request def_Request(MPI_Request arg, object name):
     cdef Request obj = Request.__new__(Request)
@@ -410,8 +407,6 @@ cdef inline Message def_Message(MPI_Message arg, object name):
 
 # Op
 
-include "opimpl.pxi"
-
 cdef dict def_op = {}
 
 cdef inline Op def_Op(MPI_Op arg, object name):
@@ -427,8 +422,8 @@ cdef inline object reduce_Op(Op self):
          return def_reduce(self)
     # user-defined
     cdef int index = self.ob_uid
-    if index == 0: raise ValueError(
-        "cannot pickle user-defined reduction operation")
+    if index == 0:
+        raise ValueError("cannot pickle user-defined reduction operation")
     cdef object function = op_user_registry[index]
     cdef object commute = self.Is_commutative()
     return (type(self).Create, (function, commute,))
@@ -480,13 +475,12 @@ cdef inline Errhandler def_Errhandler(MPI_Errhandler arg, object name):
 
 cdef inline MPI_Errhandler arg_Errhandler(object obj) except *:
     if obj is not None: return (<Errhandler?>obj).ob_mpi
-    cdef MPI_Errhandler eh_default = MPI_ERRORS_ARE_FATAL
     cdef int opt = options.errors
-    if   opt == 0: return eh_default
+    if   opt == 0: pass
     elif opt == 1: return MPI_ERRORS_RETURN
     elif opt == 2: return MPI_ERRORS_ABORT
     elif opt == 3: return MPI_ERRORS_ARE_FATAL
-    else:          return eh_default
+    return MPI_ERRORS_ARE_FATAL
 
 #------------------------------------------------------------------------------
 
@@ -502,8 +496,6 @@ cdef inline Session def_Session(MPI_Session arg, object name):
 #------------------------------------------------------------------------------
 
 # Comm
-
-include "commimpl.pxi"
 
 cdef inline Comm def_Comm(MPI_Comm arg, object name):
     cdef Comm obj = Comm.__new__(Comm)
@@ -529,8 +521,6 @@ cdef inline Intercomm def_Intercomm(MPI_Comm arg):
 
 # Win
 
-include "winimpl.pxi"
-
 cdef inline Win def_Win(MPI_Win arg, object name):
     cdef Win obj = Win.__new__(Win)
     obj.ob_mpi = arg
@@ -541,8 +531,6 @@ cdef inline Win def_Win(MPI_Win arg, object name):
 #------------------------------------------------------------------------------
 
 # File
-
-include "drepimpl.pxi"
 
 cdef inline File def_File(MPI_File arg, object name):
     cdef File obj = File.__new__(File)

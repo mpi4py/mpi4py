@@ -47,7 +47,8 @@ cdef object asarray_weights(object weights, int nweight, int **iweight):
         iweight[0] = MPI_UNWEIGHTED
         return None
     if is_WEIGHTS_EMPTY(weights):
-        if nweight > 0: raise ValueError("empty weights but nonzero degree")
+        if nweight > 0:
+            raise ValueError("empty weights but nonzero degree")
         iweight[0] = MPI_WEIGHTS_EMPTY
         return None
     return chkarray(weights, nweight, iweight)
@@ -63,9 +64,9 @@ cdef inline int comm_neighbors_count(
     cdef int size=0, ndims=0, rank=0, nneighbors=0
     cdef int indegree=0, outdegree=0, weighted=0
     CHKERR( MPI_Topo_test(comm, &topo) )
-    if topo == MPI_UNDEFINED: # XXX
-        CHKERR( MPI_Comm_size(comm, &size) )
-        indegree = outdegree = size
+    if topo == MPI_UNDEFINED:                 #> unreachable
+        CHKERR( MPI_Comm_size(comm, &size) )  #> unreachable
+        indegree = outdegree = size           #> unreachable
     elif topo == MPI_CART:
         CHKERR( MPI_Cartdim_get(comm, &ndims) )
         indegree = outdegree = <int>2*ndims
@@ -91,14 +92,14 @@ cdef dict   commlock_registry = {}
 cdef inline int commlock_free_cb(
     MPI_Comm comm,
 ) except MPI_ERR_UNKNOWN with gil:
-    try:
-        with commlock_lock:
-            del commlock_registry[<Py_uintptr_t>comm]
-    except KeyError:
-        pass
+    cdef object key = <Py_uintptr_t>comm
+    with commlock_lock:
+        if key in commlock_registry:
+            del commlock_registry[key]
     return MPI_SUCCESS
 
 
+@cython.linetrace(False)
 @cython.callspec("MPIAPI")
 cdef int commlock_free_fn(
     MPI_Comm comm,
@@ -109,12 +110,9 @@ cdef int commlock_free_fn(
     <void> keyval  # unused
     <void> attrval # unused
     <void> xstate  # unused
-    if comm == MPI_COMM_SELF:
-        <void>MPI_Comm_free_keyval(&commlock_keyval)
-    if not Py_IsInitialized():
-        return MPI_SUCCESS
-    if not py_module_alive():
-        return MPI_SUCCESS
+    if comm == MPI_COMM_SELF:  <void>MPI_Comm_free_keyval(&commlock_keyval)
+    if not Py_IsInitialized(): return MPI_SUCCESS
+    if not py_module_alive():  return MPI_SUCCESS
     return commlock_free_cb(comm)
 
 
@@ -139,7 +137,7 @@ cdef inline dict commlock_table(MPI_Comm comm):
             comm, commlock_keyval, <void*> table) )
         commlock_registry[<Py_uintptr_t>comm] = table
     elif PYPY:
-        table = commlock_registry[<Py_uintptr_t>comm]
+        table = commlock_registry[<Py_uintptr_t>comm]  #> pypy
     else:
         table = <dict> attrval
     return table
@@ -158,7 +156,7 @@ cdef inline object PyMPI_Lock(MPI_Comm comm, object key):
         return lock
 
 
-cdef inline tuple PyMPI_Lock_table(MPI_Comm comm):
+cdef inline object PyMPI_Lock_table(MPI_Comm comm):
     with commlock_lock:
         return commlock_table(comm)
 
@@ -170,7 +168,5 @@ def _comm_lock(Comm comm: Comm, object key: Hashable = None) -> Lock:
 def _comm_lock_table(Comm comm: Comm) -> dict[Hashable, Lock]:
     "Internal communicator lock table"
     return PyMPI_Lock_table(comm.ob_mpi)
-
-_lock_table = _comm_lock_table  # backward-compatibility
 
 # -----------------------------------------------------------------------------

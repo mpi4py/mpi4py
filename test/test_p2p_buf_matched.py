@@ -39,6 +39,27 @@ class TestMessage(unittest.TestCase):
         request.Wait()
         self.assertEqual(request, MPI.REQUEST_NULL)
 
+    def testPickle(self):
+        from pickle import dumps, loads
+        for message in (
+            MPI.MESSAGE_NULL,
+            MPI.MESSAGE_NO_PROC,
+        ):
+            msg = loads(dumps(message))
+            self.assertIs(msg, message)
+            msg = loads(dumps(MPI.Message(message)))
+            self.assertIsNot(msg, message)
+            self.assertEqual(msg, message)
+        comm = MPI.COMM_SELF
+        request = comm.Isend(b"", 0, 0)
+        with self.assertRaises(ValueError):
+            loads(dumps(request))
+        message = comm.Mprobe(0, 0)
+        with self.assertRaises(ValueError):
+            loads(dumps(message))
+        message.Recv(bytearray(1))
+        request.Wait()
+
 
 @unittest.skipIf(MPI.MESSAGE_NULL == MPI.MESSAGE_NO_PROC, 'mpi-message')
 class BaseTestP2PMatched:

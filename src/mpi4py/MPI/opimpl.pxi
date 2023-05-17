@@ -89,49 +89,44 @@ cdef object op_NO_OP(object x, object y):
 cdef object op_user_lock     = Lock()
 cdef list   op_user_registry = [None]*(1+32)
 
-cdef inline object op_user_py(int index, object x, object y, object dt):
+cdef inline object op_user_call_py(int index, object x, object y, object dt):
     return op_user_registry[index](x, y, dt)
 
-cdef inline void op_user_mpi(
+cdef inline void op_user_call_mpi(
     int index,
     void *a, void *b, MPI_Count n, MPI_Datatype t,
-) with gil:
+) noexcept with gil:
     cdef Datatype datatype
     # errors in user-defined reduction operations are unrecoverable
     try:
         datatype = <Datatype>New(Datatype)
         datatype.ob_mpi = t
         try:
-            op_user_py(index, mpibuf(a, n), mpibuf(b, n), datatype)
+            op_user_call_py(index, mpibuf(a, n), mpibuf(b, n), datatype)
         finally:
             datatype.ob_mpi = MPI_DATATYPE_NULL
-    except:
-        # print the full exception traceback and abort
-        PySys_WriteStderr(
-            b"Fatal Python error: %s\n",
-            b"exception in user-defined reduction operation",
-        )
-        try:
-            print_traceback()
-        finally:
-            <void>MPI_Abort(MPI_COMM_WORLD, 1)
+    except BaseException as exc:                               #> no cover
+        PyErr_DisplayException(exc)                            #> no cover
+        PySys_WriteStderr(                                     #> no cover
+            b"Fatal Python error: %s\n",                       #> no cover
+            b"exception in user-defined reduction operation",  #> no cover
+        )                                                      #> no cover
+        <void>MPI_Abort(MPI_COMM_WORLD, 1)                     #> no cover
 
 cdef inline void op_user_call(
     int index,
     void *a, void *b, MPI_Count count, MPI_Datatype t,
 ) noexcept nogil:
     # make it abort if Python has finalized
-    if not Py_IsInitialized():
-        <void>MPI_Abort(MPI_COMM_WORLD, 1)
+    if not Py_IsInitialized(): <void>MPI_Abort(MPI_COMM_WORLD, 1)
     # make it abort if module cleanup has been done
-    if not py_module_alive():
-        <void>MPI_Abort(MPI_COMM_WORLD, 1)
+    if not py_module_alive():  <void>MPI_Abort(MPI_COMM_WORLD, 1)
     # compute the byte-size of memory buffers
     cdef MPI_Count lb=0, extent=0
     <void>MPI_Type_get_extent_c(t, &lb, &extent)
     cdef MPI_Count n = count * extent
     # make the actual GIL-safe Python call
-    op_user_mpi(index, a, b, n, t)
+    op_user_call_mpi(index, a, b, n, t)
 
 ctypedef fused op_count_t:
     int
@@ -238,7 +233,7 @@ cdef void op_user_31(void *a, void *b, op_count_t *n, MPI_Datatype *t) noexcept 
 cdef void op_user_32(void *a, void *b, op_count_t *n, MPI_Datatype *t) noexcept nogil:
     op_user_call(32, a, b, n[0], t[0])
 
-cdef void op_user_map(int index, op_usrfn_t **fn) noexcept nogil:
+cdef inline void op_user_map(int index, op_usrfn_t **fn) noexcept nogil:
     if   index ==  1: fn[0] = op_user_01
     elif index ==  2: fn[0] = op_user_02
     elif index ==  3: fn[0] = op_user_03
@@ -271,9 +266,8 @@ cdef void op_user_map(int index, op_usrfn_t **fn) noexcept nogil:
     elif index == 30: fn[0] = op_user_30
     elif index == 31: fn[0] = op_user_31
     elif index == 32: fn[0] = op_user_32
-    else:             fn[0] = NULL
 
-cdef int op_user_new(
+cdef inline int op_user_new(
     object function,
     MPI_User_function   **fn_i,
     MPI_User_function_c **fn_c,
@@ -297,7 +291,7 @@ cdef int op_user_new(
     op_user_map(index, fn_c)
     return index
 
-cdef int op_user_del(
+cdef inline int op_user_del(
     int *indexp,
 ) except -1:
     # clear index value
@@ -310,7 +304,7 @@ cdef int op_user_del(
 
 # -----------------------------------------------------------------------------
 
-cdef object op_call(MPI_Op op, int index, object x, object y):
+cdef inline object op_call(MPI_Op op, int index, object x, object y):
     if op == MPI_MAX     : return op_MAX(x, y)
     if op == MPI_MIN     : return op_MIN(x, y)
     if op == MPI_SUM     : return op_SUM(x, y)
@@ -325,7 +319,7 @@ cdef object op_call(MPI_Op op, int index, object x, object y):
     if op == MPI_MINLOC  : return op_MINLOC(x, y)
     if op == MPI_REPLACE : return op_REPLACE(x, y)
     if op == MPI_NO_OP   : return op_NO_OP(x, y)
-    if index > 0         : return op_user_py(index, x, y, None)
+    if index > 0         : return op_user_call_py(index, x, y, None)
     raise ValueError("cannot call user-defined operation")
 
 # -----------------------------------------------------------------------------

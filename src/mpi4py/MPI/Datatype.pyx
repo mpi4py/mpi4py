@@ -959,11 +959,6 @@ cdef Datatype __COMPLEX8__  = def_Datatype( MPI_COMPLEX8  , "COMPLEX8"  )
 cdef Datatype __COMPLEX16__ = def_Datatype( MPI_COMPLEX16 , "COMPLEX16" )
 cdef Datatype __COMPLEX32__ = def_Datatype( MPI_COMPLEX32 , "COMPLEX32" )
 
-include "typemap.pxi"
-include "typestr.pxi"
-include "typedec.pxi"
-
-
 # Predefined datatype handles
 # ---------------------------
 

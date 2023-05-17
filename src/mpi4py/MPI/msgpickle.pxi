@@ -126,24 +126,24 @@ pickle = PyMPI_PICKLE
 
 # -----------------------------------------------------------------------------
 
-cdef int have_pickle5 = -1
-cdef object PyPickle5_dumps = None
-cdef object PyPickle5_loads = None
+cdef int have_pickle5 = -1                                #> legacy
+cdef object PyPickle5_dumps = None                        #> legacy
+cdef object PyPickle5_loads = None                        #> legacy
 
-cdef int import_pickle5() except -1:
-    global have_pickle5
-    global PyPickle5_dumps
-    global PyPickle5_loads
-    if have_pickle5 < 0:
-        try:
-            from pickle5 import dumps as PyPickle5_dumps
-            from pickle5 import loads as PyPickle5_loads
-            have_pickle5 = 1
-        except ImportError:
-            PyPickle5_dumps = None
-            PyPickle5_loads = None
-            have_pickle5 = 0
-    return have_pickle5
+cdef int import_pickle5() except -1:                      #> legacy
+    global have_pickle5                                   #> legacy
+    global PyPickle5_dumps                                #> legacy
+    global PyPickle5_loads                                #> legacy
+    if have_pickle5 < 0:                                  #> legacy
+        try:                                              #> legacy
+            from pickle5 import dumps as PyPickle5_dumps  #> legacy
+            from pickle5 import loads as PyPickle5_loads  #> legacy
+            have_pickle5 = 1                              #> legacy
+        except ImportError:                               #> legacy
+            PyPickle5_dumps = None                        #> legacy
+            PyPickle5_loads = None                        #> legacy
+            have_pickle5 = 0                              #> legacy
+    return have_pickle5                                   #> legacy
 
 
 cdef object get_buffer_callback(list buffers, Py_ssize_t threshold):
@@ -158,14 +158,14 @@ cdef object get_buffer_callback(list buffers, Py_ssize_t threshold):
 
 cdef object cdumps_oob(Pickle pkl, object obj):
     cdef object pkl_dumps = pkl.ob_dumps
-    if PY_VERSION_HEX < 0x03080000:
-        if pkl_dumps is PyPickle_dumps:
-            if not import_pickle5():
-                return cdumps(pkl, obj), []
-            pkl_dumps = PyPickle5_dumps
+    if PY_VERSION_HEX < 0x03080000:          #> legacy
+        if pkl_dumps is PyPickle_dumps:      #> legacy
+            if not import_pickle5():         #> legacy
+                return cdumps(pkl, obj), []  #> legacy
+            pkl_dumps = PyPickle5_dumps      #> legacy
     cdef object protocol = pkl.ob_PROTO
     if protocol is None:
-        protocol = PyPickle_PROTOCOL
+        protocol = PyPickle_PROTOCOL  #> no cover
     protocol = max(protocol, 5)
     cdef list buffers = []
     cdef Py_ssize_t threshold = pkl.ob_THRES
@@ -175,11 +175,11 @@ cdef object cdumps_oob(Pickle pkl, object obj):
 
 cdef object cloads_oob(Pickle pkl, object data, object buffers):
     cdef object pkl_loads = pkl.ob_loads
-    if PY_VERSION_HEX < 0x03080000:
-        if pkl_loads is PyPickle_loads:
-            if not import_pickle5():
-                return cloads(pkl, data)
-            pkl_loads = PyPickle5_loads
+    if PY_VERSION_HEX < 0x03080000:       #> legacy
+        if pkl_loads is PyPickle_loads:   #> legacy
+            if not import_pickle5():      #> legacy
+                return cloads(pkl, data)  #> legacy
+            pkl_loads = PyPickle5_loads   #> legacy
     return pkl_loads(data, buffers=buffers)
 
 
@@ -212,8 +212,8 @@ cdef object pickle_dumpv(Pickle pkl, object obj, void **p, int n, MPI_Count cnt[
     if obj is None: items = [None] * m
     else:           items = list(obj)
     m = len(items)
-    if m != n: raise ValueError(
-        f"expecting {n} items, got {m}")
+    if m != n:
+        raise ValueError(f"expecting {n} items, got {m}")
     cdef MPI_Count c=0
     cdef MPI_Aint  d=0
     for i in range(m):
@@ -719,7 +719,7 @@ cdef object PyMPI_mrecv(object rmsg,
     elif PyBytes_CheckExact(rmsg):
         rmsg = asbuffer_r(rmsg, &rbuf, &rlen)
     else:
-        rmsg = asbuffer_w(rmsg, &rbuf, &rlen)
+        rmsg = asbuffer_w(rmsg, &rbuf, &rlen)  #> unreachable
     cdef MPI_Count rcount = <MPI_Count> rlen
     with nogil: CHKERR( MPI_Mrecv_c(
         rbuf, rcount, rtype, message, status) )
@@ -738,7 +738,7 @@ cdef object PyMPI_imrecv(object rmsg,
     elif PyBytes_CheckExact(rmsg):
         rmsg = asbuffer_r(rmsg, &rbuf, &rlen)
     else:
-        rmsg = asbuffer_w(rmsg, &rbuf, &rlen)
+        rmsg = asbuffer_w(rmsg, &rbuf, &rlen)  #> unreachable
     cdef MPI_Count rcount = <MPI_Count> rlen
     with nogil: CHKERR( MPI_Imrecv_c(
         rbuf, rcount, rtype, message, request) )
@@ -1053,7 +1053,7 @@ cdef object PyMPI_neighbor_alltoall(object sendobj, MPI_Comm comm):
 
 cdef inline object _py_reduce(object seq, object op):
     if seq is None: return None
-    cdef Py_ssize_t n = len(seq)
+    cdef Py_ssize_t i, n = len(seq)
     cdef object res = seq[0]
     for i in range(1, n):
         res = op(res, seq[i])
@@ -1061,7 +1061,7 @@ cdef inline object _py_reduce(object seq, object op):
 
 cdef inline object _py_scan(object seq, object op):
     if seq is None: return None
-    cdef Py_ssize_t n = len(seq)
+    cdef Py_ssize_t i, n = len(seq)
     for i in range(1, n):
         seq[i] = op(seq[i-1], seq[i])
     return seq

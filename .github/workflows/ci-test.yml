@@ -72,7 +72,7 @@ jobs:
     - name: Upload package artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: mpi4py-${{ matrix.os }}-${ {matrix.mpi }}
+        name: mpi4py-${{ matrix.os }}-${{ matrix.mpi }}
         path: dist/mpi4py-*.whl
 
     - name: Install package for testing

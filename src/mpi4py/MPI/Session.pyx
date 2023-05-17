@@ -108,8 +108,11 @@ cdef class Session:
         cdef Errhandler errhandler = <Errhandler>New(Errhandler)
         cdef MPI_Session_errhandler_function *fn = NULL
         cdef int index = errhdl_new(errhandler_fn, &fn)
-        try: CHKERR( MPI_Session_create_errhandler(fn, &errhandler.ob_mpi) )
-        except: errhdl_del(&index, fn); raise
+        try:
+            CHKERR( MPI_Session_create_errhandler(fn, &errhandler.ob_mpi) )
+        except:                     #> no cover
+            errhdl_del(&index, fn)  #> no cover
+            raise                   #> no cover
         return errhandler
 
     def Get_errhandler(self) -> Errhandler:

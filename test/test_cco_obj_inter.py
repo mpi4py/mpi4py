@@ -55,7 +55,7 @@ class BaseTestCCOObjInter:
 
     @unittest.skipMPI('MPICH2(<1.0.8)')
     def testBarrier(self):
-        self.INTERCOMM.Barrier()
+        self.INTERCOMM.barrier()
 
     def testBcast(self):
         rank = self.INTERCOMM.Get_rank()
@@ -155,6 +155,12 @@ class BaseTestCCOObjInter:
                     for root in range(rsize):
                         value = self.INTERCOMM.reduce(rank, op=op, root=root)
                         self.assertIsNone(value)
+        badroots = {-3, -2, -1, rsize}.difference({MPI.ROOT, MPI.PROC_NULL})
+        for root in badroots:
+            with self.assertRaises(MPI.Exception) as cm:
+                self.INTERCOMM.reduce(None, op=MPI.NO_OP, root=root)
+            ierr = cm.exception.Get_error_class()
+            self.assertEqual(ierr, MPI.ERR_ROOT)
 
     @unittest.skipMPI('MPICH2(<1.0.8)')
     def testAllreduce(self):

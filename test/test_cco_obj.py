@@ -105,6 +105,12 @@ class BaseTestCCOObj:
                         self.assertEqual(value, size-1)
                     elif op == MPI.NO_OP:
                         self.assertEqual(value, 0)
+        badroots = {-size, size}
+        for root in badroots:
+            with self.assertRaises(MPI.Exception) as cm:
+                self.COMM.reduce(None, op=MPI.NO_OP, root=root)
+            ierr = cm.exception.Get_error_class()
+            self.assertEqual(ierr, MPI.ERR_ROOT)
 
     def testAllreduce(self):
         size = self.COMM.Get_size()

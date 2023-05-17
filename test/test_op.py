@@ -29,6 +29,12 @@ def mysum(ba, bb, dt):
     else:
         return mysum_buf(ba, bb, dt)
 
+def mybor(a, b, dt):
+    assert dt == MPI.BYTE
+    assert len(a) == len(b)
+    for i in range(len(a)):
+        b[i] = a[i] | b[i]
+
 
 class TestOp(unittest.TestCase):
 
@@ -69,19 +75,49 @@ class TestOp(unittest.TestCase):
                         myop.Free()
 
     def testCreateMany(self):
-        N = 32 # max user-defined operations
-        #
+        MAX_USER_OP = 32 # max user-defined operations
+        # create
         ops = []
-        for i in range(N):
+        for i in range(MAX_USER_OP):
             o = MPI.Op.Create(mysum)
             ops.append(o)
-        for o in ops: o.Free() # cleanup
+        with self.assertRaises(RuntimeError):
+            MPI.Op.Create(mysum)
+        # cleanup
+        for o in ops:
+            o.Free()
         # another round
         ops = []
-        for i in range(N):
-            o = MPI.Op.Create(mysum)
-            ops.append(o)
-        for o in ops: o.Free() # cleanup
+        for i in range(MAX_USER_OP):
+            op = MPI.Op.Create(mybor)
+            ops.append(op)
+        with self.assertRaises(RuntimeError):
+            MPI.Op.Create(mybor)
+        # local reductions
+        try:
+            b1 = bytearray([2] * 3)
+            b2 = bytearray([4] * 3)
+            for op in ops:
+                ibuf = [b1, MPI.BYTE]
+                obuf = [b2, MPI.BYTE]
+                op.Reduce_local(ibuf, obuf)
+                for c1, c2 in zip(b1, b2):
+                    self.assertEqual(c1, 2)
+                    self.assertEqual(c2, 6)
+        except NotImplementedError:
+            pass
+        # pickling support
+        try:
+            for op in ops:
+                op.__reduce__()
+                clon = MPI.Op.f2py(op.py2f())
+                with self.assertRaises(ValueError):
+                    clon.__reduce__()
+        except NotImplementedError:
+            pass
+        # cleanup
+        for op in ops:
+            op.Free()
 
     def _test_call(self, op, args, res):
         self.assertEqual(op(*args), res)

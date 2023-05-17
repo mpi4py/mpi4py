@@ -59,11 +59,12 @@ cdef inline object PyMPI_attr_call(
     try:
         result = function(handle, keyval, attrval)
     finally:
-        if PyMPI_attr_type is MPI_Datatype:
+        if False: pass
+        elif PyMPI_attr_type is MPI_Datatype:
             (<Datatype>handle).ob_mpi = MPI_DATATYPE_NULL
-        if PyMPI_attr_type is MPI_Comm:
+        elif PyMPI_attr_type is MPI_Comm:
             (<Comm>handle).ob_mpi = MPI_COMM_NULL
-        if PyMPI_attr_type is MPI_Win:
+        elif PyMPI_attr_type is MPI_Win:
             (<Win>handle).ob_mpi = MPI_WIN_NULL
     return result
 
@@ -123,7 +124,7 @@ cdef inline int PyMPI_attr_copy_cb(
     void *attrval_in,
     void *attrval_out,
     int *flag,
-) except MPI_ERR_UNKNOWN with gil:
+) noexcept with gil:
     cdef int ierr = MPI_SUCCESS
     cdef object exc
     try:
@@ -131,12 +132,8 @@ cdef inline int PyMPI_attr_copy_cb(
             hdl, keyval, extra_state,
             attrval_in, attrval_out, flag,
         )
-    except MPIException as exc:
-        print_traceback()
-        ierr = exc.Get_error_code()
-    except:
-        print_traceback()
-        ierr = MPI_ERR_OTHER
+    except BaseException as exc:           #> TODO
+        ierr = PyMPI_HandleException(exc)  #> TODO
     return ierr
 
 
@@ -145,19 +142,15 @@ cdef inline int PyMPI_attr_delete_cb(
     int keyval,
     void *attrval,
     void *extra_state,
-) except MPI_ERR_UNKNOWN with gil:
+) noexcept with gil:
     cdef int ierr = MPI_SUCCESS
     cdef object exc
     try:
         PyMPI_attr_delete(
             hdl, keyval, attrval, extra_state,
         )
-    except MPIException as exc:
-        print_traceback()
-        ierr = exc.Get_error_code()
-    except:
-        print_traceback()
-        ierr = MPI_ERR_OTHER
+    except BaseException as exc:           #> TODO
+        ierr = PyMPI_HandleException(exc)  #> TODO
     return ierr
 
 # ---
@@ -172,14 +165,10 @@ cdef int PyMPI_attr_copy_fn(
     int *flag,
 ) noexcept nogil:
     if flag != NULL: flag[0] = 0
-    if extra_state == NULL:
-        return MPI_ERR_INTERN
-    if attrval_out == NULL:
-        return MPI_ERR_INTERN
-    if not Py_IsInitialized():
-        return MPI_SUCCESS
-    if not py_module_alive():
-        return MPI_SUCCESS
+    if extra_state == NULL:    return MPI_ERR_INTERN
+    if attrval_out == NULL:    return MPI_ERR_INTERN
+    if not Py_IsInitialized(): return MPI_SUCCESS
+    if not py_module_alive():  return MPI_SUCCESS
     return PyMPI_attr_copy_cb(
         hdl, keyval, extra_state,
         attrval_in, attrval_out, flag,
@@ -193,12 +182,9 @@ cdef int PyMPI_attr_delete_fn(
     void *attrval,
     void *extra_state,
 ) noexcept nogil:
-    if extra_state == NULL:
-        return MPI_ERR_INTERN
-    if not Py_IsInitialized():
-        return MPI_SUCCESS
-    if not py_module_alive():
-        return MPI_SUCCESS
+    if extra_state == NULL:    return MPI_ERR_INTERN
+    if not Py_IsInitialized(): return MPI_SUCCESS
+    if not py_module_alive():  return MPI_SUCCESS
     return PyMPI_attr_delete_cb(
         hdl, keyval, attrval, extra_state
     )
@@ -254,7 +240,7 @@ cdef inline int PyMPI_attr_state_del(
         if PyMPI_attr_type is MPI_Win:
             with keyval_lock_win:
                 del keyval_registry_win[keyval]
-    except KeyError:
+    except KeyError:  #> no cover
         pass
     return 0
 

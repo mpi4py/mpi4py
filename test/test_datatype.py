@@ -124,6 +124,7 @@ class TestDatatype(unittest.TestCase):
                 self.assertTrue(name)
                 dtype.Set_name(name)
                 self.assertEqual(name, dtype.Get_name())
+                dtype.name = dtype.name
             except NotImplementedError:
                 self.skipTest('mpi-type-name')
 
@@ -220,6 +221,10 @@ class BaseTestDatatypeCreateMixin:
         else:
             self.assertFalse(newtype.is_predefined)
         for dt in d:
+            self.free(dt)
+        contents = newtype.contents
+        self.assertEqual(contents[:-1], (i, a, c))
+        for dt in contents[-1]:
             self.free(dt)
 
     def check_recreate(self, factory, newtype):
@@ -358,6 +363,9 @@ class BaseTestDatatypeCreateMixin:
                 args = [[1, 1], [0, dt.extent*2], (dt, dt)]
                 self.check(None, factory, *args)
                 dt.Free()
+        with self.assertRaises(ValueError):
+            factory = MPI.Datatype.Create_struct
+            factory([1], [0], [MPI.INT, MPI.FLOAT])
 
     def testSubarray(self):
         for dtype in datatypes:

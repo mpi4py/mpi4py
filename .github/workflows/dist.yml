@@ -1,9 +1,6 @@
 name: dist
 
 on:
-  push:
-    branches:
-      - gh-workflow/dist
   workflow_dispatch:
 
 jobs:

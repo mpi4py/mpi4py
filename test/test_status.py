@@ -58,6 +58,22 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(self.STATUS.source, 1)
         self.assertEqual(self.STATUS.tag,    2)
         self.assertEqual(self.STATUS.error,  MPI.ERR_ARG)
+        try:
+            self.assertIs(type(self.STATUS.count), int)
+            self.assertEqual(self.STATUS.count, 0)
+            self.STATUS.count = 7
+            self.assertEqual(self.STATUS.count, 7)
+            self.STATUS.count = 0
+        except NotImplementedError:
+            if MPI.Get_version() >= (2,0): raise
+        try:
+            self.assertIs(type(self.STATUS.cancelled), bool)
+            self.assertFalse(self.STATUS.cancelled)
+            self.STATUS.cancelled = True
+            self.assertTrue(self.STATUS.cancelled)
+            self.STATUS.cancelled = False
+        except NotImplementedError:
+            if MPI.Get_version() >= (2,0): raise
 
     def testConstructor(self):
         self.assertRaises(TypeError, MPI.Status, 123)

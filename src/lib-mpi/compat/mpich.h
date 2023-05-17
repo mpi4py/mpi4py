@@ -12,6 +12,16 @@ static int PyMPI_MPICH_MPI_Status_set_elements_c(MPI_Status *status,
 }
 #define MPI_Status_set_elements_c PyMPI_MPICH_MPI_Status_set_elements_c
 
+static int PyMPI_MPICH_MPI_Reduce_c(const void *sendbuf, void *recvbuf,
+                                    MPI_Count count, MPI_Datatype datatype,
+                                    MPI_Op op, int root, MPI_Comm comm)
+{
+  const char dummy[1] = {0};
+  if (!sendbuf && (root == MPI_ROOT || root == MPI_PROC_NULL)) sendbuf = dummy;
+  return MPI_Reduce_c(sendbuf, recvbuf, count, datatype, op, root, comm);
+}
+#define MPI_Reduce_c PyMPI_MPICH_MPI_Reduce_c
+
 #endif
 
 #if (MPICH_NUMVERSION >= 30000000 && MPICH_NUMVERSION < 40000000)

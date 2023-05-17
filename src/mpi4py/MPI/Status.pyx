@@ -33,12 +33,12 @@ cdef class Status:
         }
         try:
             state['count'] = self.Get_elements(__BYTE__)
-        except NotImplementedError:
-            pass
+        except NotImplementedError:  #> legacy
+            pass                     #> legacy
         try:
             state['cancelled'] = self.Is_cancelled()
-        except NotImplementedError:
-            pass
+        except NotImplementedError:  #> legacy
+            pass                     #> legacy
         return state
 
     def __setstate__(self, state: dict[str, int]) -> None:
@@ -196,14 +196,14 @@ cdef class Status:
     def f2py(cls, arg: list[int]) -> Self:
         """
         """
-        cdef Status status = <Status>New(cls)
+        cdef MPI_Status status
+        cdef MPI_Status *c_status = &status
         cdef Py_ssize_t n = <int>(sizeof(MPI_Status)//sizeof(int))
-        cdef MPI_Status *c_status = &status.ob_mpi
         cdef MPI_Fint *f_status = NULL
         cdef tmp = allocate(n+1, sizeof(MPI_Fint), &f_status)
         for i in range(n): f_status[i] = arg[i]
         CHKERR( MPI_Status_f2c(f_status, c_status) )
-        return status
+        return PyMPIStatus_New(c_status)
 
 
 F_SOURCE      = MPI_F_SOURCE

@@ -25,19 +25,20 @@ typecodes += [f'b{n:d}' for n in (1,)]
 typecodes += [f'i{n:d}' for n in (1,2,4,8)]
 typecodes += [f'u{n:d}' for n in (1,2,4,8)]
 typecodes += [f'f{n:d}' for n in (4,8)]
+if os.environ.get('COVERAGE_RUN') == 'true':
+    typecodes = list("cif") + ['b1', 'i8', 'f8']
 
 if np_version and np_version < (1, 17):
-    typecodes.remove('L')
-    typecodes.remove('F')
-    typecodes.remove('D')
-    typecodes.remove('G')
+    for tc in 'LFDG':
+        if tc in typecodes:
+            typecodes.remove(tc)
 
 name, version = MPI.get_vendor()
 mpich_lt_400 = (name == 'MPICH') and version < (4, 0, 0)
 if mpich_lt_400:
-    typecodes.remove('F')
-    typecodes.remove('D')
-    typecodes.remove('G')
+    for tc in 'FDG':
+        if tc in typecodes:
+            typecodes.remove(tc)
 
 datatypes = [MPI.Datatype.fromcode(t) for t in typecodes]
 datatypes += [
@@ -463,7 +464,7 @@ class TestUtilDTLib(unittest.TestCase):
                 if np_dtype is not None:
                     self.assertTrue(dt.isalignedstruct)
 
-    def testAlignment(self):
+    def testAlignmentComplex(self):
         complexcodes = list('FDG')
         complexcodes += [f'c{n}' for n in (8, 16)]
         for t in typecodes + complexcodes:
@@ -473,6 +474,23 @@ class TestUtilDTLib(unittest.TestCase):
                 if np_dtype is not None:
                     alignment2 = np_dtype(t).alignment
                     self.assertEqual(alignment1, alignment2)
+
+    def testAlignmentPair(self):
+        for pairtype in mpipairtypes:
+            alignment1 = MPI._typealign(pairtype)
+            self.assertIn(alignment1, (2, 4, 8, 16))
+            if np_dtype is not None:
+                alignment2 = tonumpy(pairtype).alignment
+                self.assertEqual(alignment1, alignment2)
+
+    def testAlignmentStruct(self):
+        off = MPI.DOUBLE.extent
+        structtype = MPI.Datatype.Create_struct(
+            [1, 1], [0, off], [MPI.INT, MPI.DOUBLE],
+        )
+        alignment = MPI._typealign(structtype)
+        self.assertIsNone(alignment)
+        structtype.Free()
 
     def testMissingNumPy(self):
         from mpi4py.util import dtlib

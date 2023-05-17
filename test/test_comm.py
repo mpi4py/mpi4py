@@ -35,14 +35,6 @@ class BaseTestComm:
         self.assertEqual(comm, self.COMM)
         self.assertIsNot(comm, self.COMM)
 
-    def testPyProps(self):
-        comm = self.COMM
-        self.assertEqual(comm.Get_size(), comm.size)
-        self.assertEqual(comm.Get_rank(), comm.rank)
-        self.assertEqual(comm.Is_intra(), comm.is_intra)
-        self.assertEqual(comm.Is_inter(), comm.is_inter)
-        self.assertEqual(comm.Get_topology(), comm.topology)
-
     def testSize(self):
         size = self.COMM.Get_size()
         self.assertGreaterEqual(size, 1)
@@ -88,6 +80,7 @@ class BaseTestComm:
             self.assertEqual(self.COMM.Get_name(), 'comm')
             self.COMM.Set_name(name)
             self.assertEqual(self.COMM.Get_name(), name)
+            self.COMM.name = self.COMM.name
         except NotImplementedError:
             self.skipTest('mpi-comm-name')
 
@@ -141,8 +134,6 @@ class BaseTestComm:
         new_info.Free()
 
     def testGetSetInfo(self):
-        #info = MPI.INFO_NULL
-        #self.COMM.Set_info(info)
         info = MPI.Info.Create()
         self.COMM.Set_info(info)
         info.Free()
@@ -192,6 +183,18 @@ class BaseTestComm:
             self.assertEqual(ccmp, MPI.CONGRUENT)
         finally:
             group.Free()
+
+    def testSplit(self):
+        base = self.COMM
+        comm = base.Split(42, 42)
+        self.assertEqual(comm.Get_rank(), base.Get_rank())
+        self.assertEqual(comm.Get_size(), base.Get_size())
+        comm.Free()
+        color = base.Get_rank()
+        comm = base.Split(color, 42)
+        self.assertEqual(comm.Get_rank(), 0)
+        self.assertEqual(comm.Get_size(), 1)
+        comm.Free()
 
     @unittest.skipMPI('openmpi(==2.0.0)')
     def testSplitTypeShared(self):
@@ -309,6 +312,23 @@ class BaseTestComm:
             self.assertEqual(comm, COMM)
         else:
             self.assertRaises(ValueError, dumps, COMM)
+
+    def testPyProps(self):
+        comm = self.COMM
+        self.assertEqual(comm.Get_size(), comm.size)
+        self.assertEqual(comm.Get_rank(), comm.rank)
+        self.assertEqual(comm.Is_intra(), comm.is_intra)
+        self.assertEqual(comm.Is_inter(), comm.is_inter)
+        self.assertEqual(comm.Get_topology(), comm.topology)
+        #
+        group = comm.group
+        self.assertEqual(type(group), MPI.Group)
+        group.Free()
+        #
+        info = comm.info
+        self.assertIs(type(info), MPI.Info)
+        comm.info = info
+        info.Free()
 
 
 class TestCommSelf(BaseTestComm, unittest.TestCase):

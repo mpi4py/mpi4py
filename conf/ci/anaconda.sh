@@ -15,6 +15,7 @@ install-anaconda() {
 test-package() {
   unset PY
   unset MPI
+  unset RUNTESTS
   unset COVERAGE
   for arg in $@; do
     case $arg in
@@ -26,14 +27,17 @@ test-package() {
         MPI="${arg#*=}";;
       mpi=?*)
         MPI="${arg#*=}";;
+      runtests=?*)
+        RUNTESTS="${arg#*=}";;
       coverage=?*)
         COVERAGE="${arg#*=}";;
       *)
         break
     esac
   done
-  PY=${PY-2.7}
+  PY=${PY-3}
   MPI=${MPI-mpich}
+  RUNTESTS=${RUNTESTS-yes}
   COVERAGE=${COVERAGE-no}
   RUN source $ANACONDA/bin/activate root
   RUN rm -rf $ANACONDA/envs/test
@@ -44,13 +48,15 @@ test-package() {
   RUN python setup.py --quiet clean --all
   if [[ "$MPI" == "mpich"   ]]; then P=2; else P=5; fi
   export MPIEXEC=${MPIEXEC-mpiexec}
-  RUN $MPIEXEC -n 1  python $PWD/test/runtests.py
-  RUN $MPIEXEC -n $P python $PWD/test/runtests.py -f
-  RUN $MPIEXEC -n 1  python $PWD/demo/futures/test_futures.py
-  RUN $MPIEXEC -n $P python $PWD/demo/futures/test_futures.py -f
-  RUN $MPIEXEC -n 1  python -m mpi4py.futures $PWD/demo/futures/test_futures.py
-  RUN $MPIEXEC -n $P python -m mpi4py.futures $PWD/demo/futures/test_futures.py -f
-  RUN python $PWD/demo/test-run/test_run.py
+  if [[ "$RUNTESTS" == "yes" ]]; then
+      RUN $MPIEXEC -n 1  python $PWD/test/runtests.py
+      RUN $MPIEXEC -n $P python $PWD/test/runtests.py -f
+      RUN $MPIEXEC -n 1  python $PWD/demo/futures/test_futures.py
+      RUN $MPIEXEC -n $P python $PWD/demo/futures/test_futures.py -f
+      RUN $MPIEXEC -n 1  python -m mpi4py.futures $PWD/demo/futures/test_futures.py
+      RUN $MPIEXEC -n $P python -m mpi4py.futures $PWD/demo/futures/test_futures.py -f
+      RUN python $PWD/demo/test-run/test_run.py
+  fi
   if [[ "$COVERAGE" == "yes" ]]; then
       RUN ./test/coverage.sh
       RUN coverage report
