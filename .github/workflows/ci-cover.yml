@@ -29,6 +29,7 @@ jobs:
       matrix:
         mpi:
           - mpich
+          - openmpi
         py:
           - ${{ github.event.inputs.py || 3 }}
     defaults:
@@ -67,6 +68,15 @@ jobs:
         PIP_NO_CACHE_DIR: "true"
         PIP_NO_BUILD_ISOLATION: "false"  # pypa/pip#5735
         PIP_DISABLE_PIP_VERSION_CHECK: "true"
+
+    - name: Tweak MPI
+      run: |
+        openmpi_mca_params=$HOME/.openmpi/mca-params.conf
+        mkdir -p $(dirname $openmpi_mca_params)
+        echo plm=isolated >> $openmpi_mca_params
+        echo rmaps_base_oversubscribe=true >> $openmpi_mca_params
+        echo btl_base_warn_component_unused=false >> $openmpi_mca_params
+        echo btl_vader_single_copy_mechanism=none >> $openmpi_mca_params
 
     - name: Set PYTHONPATH=$PWD
       run:  echo "PYTHONPATH=${PWD}" >> $GITHUB_ENV
