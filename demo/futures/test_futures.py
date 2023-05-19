@@ -198,6 +198,8 @@ class ProcessPoolInitTest(ProcessPoolMixin,
                     value += getattr(sys.flags, name)
             with executor_type(python_args=[flag]) as executor:
                 result = executor.submit(sys_flags_get, name).result()
+            if isinstance(value, bool):
+                result = bool(result)
             self.assertEqual(value, result, f"sys.flags.{name}")
 
     @unittest.skipIf(SHARED_POOL, 'shared-pool')
