@@ -70,11 +70,11 @@ add_custom_command(
   OUTPUT ${MPI.c}
   BYPRODUCTS ${MPI.h}
   DEPENDS ${MPI.deps}
+  WORKING_DIRECTORY ${TOPDIR}
   VERBATIM
   COMMAND
   ${Cython_COMMAND} ${Cython_OPTIONS}
-  --working ${SRCDIR} ${MPI.pyx}
-  --output-file ${MPI.c}
+  ${MPI.pyx} --output-file ${MPI.c}
 )
 install(FILES ${MPI.h} DESTINATION mpi4py)
 

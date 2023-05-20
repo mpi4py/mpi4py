@@ -29,7 +29,7 @@ srcclean:
 clean:
 	$(PYTHON) setup.py clean --all
 distclean: clean
-	-$(RM) -r build _configtest* _skbuild
+	-$(RM) -r build _configtest*
 	-$(RM) -r .ruff_cache .mypy_cache
 	-$(RM) -r htmlcov .coverage .coverage.*
 	-$(RM) -r conf/__pycache__ test/__pycache__
