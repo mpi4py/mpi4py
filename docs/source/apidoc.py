@@ -82,7 +82,6 @@ class Lines(list):
 def signature(obj):
     doc = obj.__doc__
     sig = doc.partition('\n')[0]
-    sig = sig.split('.', 1)[-1]
     return sig or None
 
 
