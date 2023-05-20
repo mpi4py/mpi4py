@@ -170,9 +170,7 @@ cdef class Status:
         CHKERR( MPI_Status_set_cancelled(&self.ob_mpi, flag) )
 
     property cancelled:
-        """
-        cancelled state
-        """
+        """cancelled state"""
         def __get__(self) -> bool:
             return self.Is_cancelled()
         def __set__(self, value: bool):
