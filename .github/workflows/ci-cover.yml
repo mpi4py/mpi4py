@@ -82,7 +82,7 @@ jobs:
       run:  echo "PYTHONPATH=${PWD}" >> $GITHUB_ENV
 
     - name: Run coverage
-      run:  bash -x ./test/coverage.sh
+      run:  test/coverage.sh
 
     - name: Prepare coverage data
       run:  mv .coverage .coverage.${TAG}

@@ -2,7 +2,6 @@
 
 RUN() { echo + $@; $@; }
 RUN export ANACONDA=${ANACONDA-/opt/anaconda}
-RUN export CFLAGS=-O0
 
 install-anaconda() {
   MINICONDA=Miniconda3-latest-Linux-$(arch).sh
@@ -37,7 +36,7 @@ test-package() {
   done
   PY=${PY-3}
   MPI=${MPI-mpich}
-  RUNTESTS=${RUNTESTS-yes}
+  RUNTESTS=${RUNTESTS-no}
   COVERAGE=${COVERAGE-no}
   RUN source $ANACONDA/bin/activate root
   RUN rm -rf $ANACONDA/envs/test
@@ -46,9 +45,9 @@ test-package() {
   RUN python setup.py build_src --force
   RUN python setup.py install
   RUN python setup.py --quiet clean --all
-  if [[ "$MPI" == "mpich"   ]]; then P=2; else P=5; fi
-  export MPIEXEC=${MPIEXEC-mpiexec}
   if [[ "$RUNTESTS" == "yes" ]]; then
+      if [[ "$MPI" == "mpich"   ]]; then local P=2; else local P=5; fi
+      local MPIEXEC=${MPIEXEC-mpiexec}
       RUN $MPIEXEC -n 1  python $PWD/test/runtests.py
       RUN $MPIEXEC -n $P python $PWD/test/runtests.py -f
       RUN $MPIEXEC -n 1  python $PWD/demo/futures/test_futures.py
@@ -58,10 +57,10 @@ test-package() {
       RUN python $PWD/demo/test-run/test_run.py
   fi
   if [[ "$COVERAGE" == "yes" ]]; then
-      RUN ./test/coverage.sh
+      RUN test/coverage.sh
       RUN coverage report
       RUN coverage xml
-      RUN mv coverage.xml coverage-py$PY-$MPI.xml
+      RUN mv coverage.xml coverage-py$PY-$MPI-$(uname).xml
   fi
   RUN conda deactivate
 }

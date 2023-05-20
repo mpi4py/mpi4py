@@ -1,4 +1,6 @@
 version: 2.1
+orbs:
+  codecov: codecov/codecov@3.2.3
 
 jobs:
   test:
@@ -13,7 +15,7 @@ jobs:
     steps:
       - checkout
       - run: .circleci/test-package py=<< parameters.py >> mpi=<< parameters.mpi >>
-      - run: .circleci/upload-coverage
+      - codecov/upload
 
 executors:
   linux:

@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eu
+set -eux
 
 MPIEXEC=${MPIEXEC:-mpiexec}
 PYTHON=${PYTHON:-python${py:-}}
@@ -60,22 +60,22 @@ $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py --rc=a                          
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py --rc=a=                            > /dev/null 2>&1 || true
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py --rc==a                            > /dev/null 2>&1 || true
 
-$MPIEXEC -n 1 $PYTHON -m coverage run test/test_package.py    -q 2> /dev/null
-$MPIEXEC -n 1 $PYTHON -m coverage run test/test_toplevel.py   -q 2> /dev/null
-$MPIEXEC -n 1 $PYTHON -m coverage run test/test_util_dtlib.py -q 2> /dev/null
-$MPIEXEC -n 1 $PYTHON -m coverage run test/test_util_pkl5.py  -q 2> /dev/null
-$MPIEXEC -n 2 $PYTHON -m coverage run test/test_util_pkl5.py  -q 2> /dev/null
-$MPIEXEC -n 3 $PYTHON -m coverage run test/test_util_pkl5.py  -q 2> /dev/null
-$MPIEXEC -n 1 $PYTHON -m coverage run test/test_util_pool.py  -q 2> /dev/null
-$PYTHON -m coverage run demo/test-run/test_run.py             -q 2> /dev/null
+$MPIEXEC -n 1 $PYTHON -m coverage run test/test_package.py
+$MPIEXEC -n 1 $PYTHON -m coverage run test/test_toplevel.py
+$MPIEXEC -n 1 $PYTHON -m coverage run test/test_util_dtlib.py
+$MPIEXEC -n 1 $PYTHON -m coverage run test/test_util_pkl5.py
+$MPIEXEC -n 2 $PYTHON -m coverage run test/test_util_pkl5.py
+$MPIEXEC -n 3 $PYTHON -m coverage run test/test_util_pkl5.py
+$MPIEXEC -n 1 $PYTHON -m coverage run test/test_util_pool.py
+$PYTHON -m coverage run demo/test-run/test_run.py
 
-$MPIEXEC -n 1 $PYTHON -m coverage run demo/futures/test_futures.py -q 2> /dev/null
-$MPIEXEC -n 2 $PYTHON -m coverage run demo/futures/test_futures.py -q 2> /dev/null
+$MPIEXEC -n 1 $PYTHON -m coverage run demo/futures/test_futures.py
+$MPIEXEC -n 2 $PYTHON -m coverage run demo/futures/test_futures.py
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.run -rc threads=False demo/futures/test_futures.py -q 2> /dev/null || true
 $MPIEXEC -n 2 $PYTHON -m coverage run -m mpi4py.run -rc threads=False demo/futures/test_futures.py -q 2> /dev/null || true
-$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.futures demo/futures/test_futures.py -q                       2> /dev/null
-$MPIEXEC -n 2 $PYTHON -m coverage run -m mpi4py.futures demo/futures/test_futures.py -q ASharedPoolInitTest   2> /dev/null
-$MPIEXEC -n 2 $PYTHON -m coverage run -m mpi4py.futures demo/futures/test_futures.py -q ProcessPoolPickleTest 2> /dev/null
+$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.futures demo/futures/test_futures.py
+$MPIEXEC -n 2 $PYTHON -m coverage run -m mpi4py.futures demo/futures/test_futures.py ASharedPoolInitTest
+$MPIEXEC -n 2 $PYTHON -m coverage run -m mpi4py.futures demo/futures/test_futures.py ProcessPoolPickleTest
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.futures -h > /dev/null
 $MPIEXEC -n 2 $PYTHON -m coverage run -m mpi4py.futures -h > /dev/null
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.futures -m this > /dev/null
@@ -122,12 +122,12 @@ fi
 
 if grep -q 'cython: linetrace=True' src/mpi4py/MPI.pyx; then
     export PYTHONWARNINGS=default
-    $MPIEXEC -n 2 $PYTHON -m coverage run test/main.py -f -e test_util_ -e test_cco_obj
-    $MPIEXEC -n 3 $PYTHON -m coverage run test/test_cco_buf_inter.py -f TestCCOBufInter
-    $MPIEXEC -n 3 $PYTHON -m coverage run test/test_cco_obj_inter.py -f TestCCOObjInter
-    $MPIEXEC -n 4 $PYTHON -m coverage run test/test_cco_obj.py -f TestCCOObjWorld
-    env MPI4PY_RC_RECV_MPROBE=false $MPIEXEC -n 2 $PYTHON -m coverage run test/test_p2p_obj.py -f TestP2PObjWorld
-    env MPI4PY_RC_FAST_REDUCE=false $MPIEXEC -n 2 $PYTHON -m coverage run test/test_cco_obj.py -f TestCCOObjWorld
+    $MPIEXEC -n 2 $PYTHON -m coverage run test/main.py -f -e test_util_
+    $MPIEXEC -n 3 $PYTHON -m coverage run test/main.py -f test_cco_buf_inter.TestCCOBufInter
+    $MPIEXEC -n 3 $PYTHON -m coverage run test/main.py -f test_cco_obj_inter.TestCCOObjInter
+    $MPIEXEC -n 4 $PYTHON -m coverage run test/main.py -f test_cco_obj.TestCCOObjWorld
+    env MPI4PY_RC_RECV_MPROBE=false $MPIEXEC -n 2 $PYTHON -m coverage run test/main.py -f test_p2p_obj.TestP2PObjWorld
+    env MPI4PY_RC_FAST_REDUCE=false $MPIEXEC -n 2 $PYTHON -m coverage run test/main.py -f test_cco_obj.TestCCOObjWorld
     env MPIEXEC="$MPIEXEC" PYTHON="$PYTHON -m coverage run -m mpi4py" demo/init-fini/run.sh
     env MPIEXEC="$MPIEXEC" PYTHON="$PYTHON -m coverage run -m mpi4py" demo/check-mpiexec/run.sh
 fi

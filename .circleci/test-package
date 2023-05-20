@@ -8,5 +8,11 @@ export OMPI_MCA_btl_base_warn_component_unused=false
 export OMPI_MCA_btl_vader_single_copy_mechanism=none
 export OMPI_ALLOW_RUN_AS_ROOT=1
 export OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
+export CFLAGS="-O0"
+
+conf/cycoverage.sh;
+export CFLAGS="$CFLAGS -DCYTHON_TRACE_NOGIL=1"
+export PYTHONPATH=$PWD
+
 source conf/ci/anaconda.sh
 test-package coverage=yes $@
