@@ -2,7 +2,6 @@
 /dist/**
 /.eggs/**
 /MANIFEST
-/_skbuild/**
 /.tox/**
 **/__pycache__/
 

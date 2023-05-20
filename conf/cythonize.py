@@ -40,10 +40,9 @@ def main():
     args = sys.argv[1:]
     if not args:
         topdir = os.path.dirname(appdir)
-        srcdir = os.path.join(topdir, 'src')
-        source = os.path.join('mpi4py', 'MPI.pyx')
-        target = os.path.join('mpi4py', 'MPI.c')
-        args += ['--working', srcdir]
+        source = os.path.join('src', 'mpi4py', 'MPI.pyx')
+        target = os.path.join('src', 'mpi4py', 'MPI.c')
+        args += ['--working', topdir]
         args += [source, '--output-file', target]
     sys.exit(cythonize(args))
 

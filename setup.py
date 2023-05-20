@@ -153,15 +153,14 @@ metadata_extra = {
 def sources():
     # mpi4py.MPI
     MPI = dict(
-        source='mpi4py/MPI.pyx',
+        source='src/mpi4py/MPI.pyx',
         depends=[
-            'mpi4py/*.pyx',
-            'mpi4py/*.pxd',
-            'mpi4py/MPI/*.pyx',
-            'mpi4py/MPI/*.pxd',
-            'mpi4py/MPI/*.pxi',
+            'src/mpi4py/*.pyx',
+            'src/mpi4py/*.pxd',
+            'src/mpi4py/MPI/*.pyx',
+            'src/mpi4py/MPI/*.pxd',
+            'src/mpi4py/MPI/*.pxi',
         ],
-        workdir='src',
     )
     #
     return [MPI]
