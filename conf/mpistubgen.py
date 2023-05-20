@@ -80,13 +80,13 @@ class Lines(list):
 
 def signature(obj):
     doc = obj.__doc__
-    sig = doc.split('\n', 1)[0].split('.', 1)[-1]
+    sig = doc.partition('\n')[0]
     return sig or None
 
 
 def docstring(obj):
     doc = obj.__doc__
-    doc = doc.split('\n', 1)[1]
+    doc = doc.partition('\n')[2]
     doc = textwrap.dedent(doc).strip()
     doc = f'"""{doc}"""'
     doc = textwrap.indent(doc, Lines.INDENT)
