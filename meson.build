@@ -24,6 +24,7 @@ dstdir = py.get_install_dir(pure: false)
 # ---
 
 mpi = dependency('', required: false)
+pyembed = py.dependency(embed: true, disabler: true)
 compiler = meson.get_compiler('c')
 
 configtest_c = '''
@@ -107,7 +108,7 @@ executable(
   'python-mpi',
   sources: srcdir / 'python.c',
   implicit_include_directories: false,
-  dependencies: [py.dependency(embed: true), mpi],
+  dependencies: [pyembed, mpi],
   install: true,
   install_dir: dstdir / 'mpi4py' / 'bin',
 )
