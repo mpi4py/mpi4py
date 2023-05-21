@@ -57,10 +57,13 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.py }}
-        architecture: x64
+        cache: pip
+        cache-dependency-path: |
+          conf/requirements-build-cython.txt
+          conf/requirements-test.txt
 
-    - name: Install Python packages (build)
-      run:  python -m pip install --upgrade setuptools pip
+    - name: Upgrade pip
+      run:  python -m pip install -U pip
 
     - name: Build package
       run:  python -m pip wheel -vvv --wheel-dir=dist .
@@ -75,7 +78,7 @@ jobs:
               --verbose --no-index --find-links=dist
 
     - name: Install Python packages (test)
-      run:  python -m pip install --upgrade -r conf/requirements-test.txt
+      run:  python -m pip install -U -r conf/requirements-test.txt
       if:   runner.os == 'Linux' || !startsWith(matrix.py, 'pypy-')
 
     - name: Test mpi4py (np=1)

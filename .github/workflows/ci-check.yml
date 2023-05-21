@@ -42,9 +42,15 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: ${{ github.event.inputs.py || 3 }}
+        cache: pip
+        cache-dependency-path: |
+          conf/requirements-build-cython.txt
+
+    - name: Upgrade pip
+      run:  python -m pip install -U pip
 
     - name: Install Python packages (build)
-      run:  python -m pip install --upgrade cython
+      run:  python -m pip install -U -r conf/requirements-build-cython.txt
 
     - name: Build package
       run:  python setup.py build
@@ -75,6 +81,13 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: ${{ github.event.inputs.py || 3 }}
+        cache: pip
+        cache-dependency-path: |
+          conf/requirements-build-cython.txt
+          conf/requirements-build-lint.txt
+
+    - name: Upgrade pip
+      run:  python -m pip install -U pip
 
     - name: Install package for linting
       run:  python -m pip install .
@@ -83,7 +96,7 @@ jobs:
         CFLAGS: -O0
 
     - name: Install Python packages (lint)
-      run:  python -m pip install --upgrade -r conf/requirements-lint.txt
+      run:  python -m pip install -U -r conf/requirements-lint.txt
 
     - name: ruff
       run:  ruff conf docs src
@@ -109,6 +122,13 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: ${{ github.event.inputs.py || 3 }}
+        cache: pip
+        cache-dependency-path: |
+          conf/requirements-build-cython.txt
+          conf/requirements-build-type.txt
+
+    - name: Upgrade pip
+      run:  python -m pip install -U pip
 
     - name: Install package for typing
       run:  python -m pip install .
@@ -122,7 +142,7 @@ jobs:
         git diff --exit-code
 
     - name: Install Python packages (type)
-      run:  python -m pip install --upgrade -r conf/requirements-type.txt
+      run:  python -m pip install -U -r conf/requirements-type.txt
 
     - name: mypy (typecheck)
       run:  |
