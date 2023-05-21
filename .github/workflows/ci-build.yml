@@ -34,6 +34,7 @@ jobs:
         os:
           - ubuntu-22.04
           - ubuntu-20.04
+        # - macos-13
           - macos-12
           - macos-11
           - windows-2022
@@ -47,6 +48,8 @@ jobs:
             os:  windows-2022
           - backend: mesonpy
             os:  windows-2019
+          - os:  macos-13
+            mpi: intelmpi
           - os:  macos-12
             mpi: intelmpi
           - os:  macos-11

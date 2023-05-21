@@ -18,26 +18,21 @@ jobs:
       matrix:
         os:
           - ubuntu-22.04
-          - macos-12
+          - macos-13
           - windows-2022
         mpi:
           - mpich
           - openmpi
           - msmpi
         py:
-          - "3.7"
-          - "3.8"
-          - "3.9"
           - "3.10"
           - "3.11"
           - "3.12-dev"
-          - "pypy-3.7"
-          - "pypy-3.8"
           - "pypy-3.9"
         exclude:
           - os: ubuntu-22.04
             mpi: msmpi
-          - os: macos-12
+          - os: macos-13
             mpi: msmpi
           - os: windows-2022
             mpi: mpich
