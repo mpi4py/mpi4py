@@ -99,15 +99,17 @@ class BaseTestRun(unittest.TestCase):
                 self.assertIn(message, stderr)
             return
         if not (stdout or stderr) or ci:
-            warnings.warn(
-                "expecting MPI_Abort() message in stdout/stderr",
-                RuntimeWarning, 2,
-            )
-        else:
-            raise self.failureException(
-                "expecting MPI_Abort() message in stdout/stderr:\n"
-                f"[stdout]:\n{stdout}\n[stderr]:\n{stderr}\n"
-            )
+            with warnings.catch_warnings():
+                warnings.simplefilter("always")
+                warnings.warn(
+                    "expecting MPI_Abort() message in stdout/stderr",
+                    RuntimeWarning, 2,
+                )
+            return
+        raise self.failureException(
+            "expecting MPI_Abort() message in stdout/stderr:\n"
+            f"[stdout]:\n{stdout}\n[stderr]:\n{stderr}\n"
+        )
 
 
 class TestRunScript(BaseTestRun):

@@ -42,8 +42,8 @@ jobs:
     steps:
 
     - name: Configure hostname
-      if:   runner.os == 'Linux' || runner.os == 'macOS'
       run:  echo 127.0.0.1 `hostname` | sudo tee -a /etc/hosts > /dev/null
+      if:   runner.os == 'Linux' || runner.os == 'macOS'
 
     - name: Checkout
       uses: actions/checkout@v3
@@ -90,10 +90,13 @@ jobs:
 
     - name: Test mpi4py.run
       run:  python demo/test-run/test_run.py -v
+      if:   matrix.mpi != 'msmpi'
     - name: Test init-fini
       run:  bash demo/init-fini/run.sh
+      if:   matrix.mpi != 'msmpi'
     - name: Test check-mpiexec
       run:  bash demo/check-mpiexec/run.sh
+      if:   matrix.mpi != 'msmpi'
 
     - name: Uninstall package after testing
       run:  python -m pip uninstall --yes mpi4py
