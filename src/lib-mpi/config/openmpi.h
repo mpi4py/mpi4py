@@ -214,4 +214,18 @@
 #endif
 #endif
 
+#if MPI_VERSION < 5
+
+#ifdef MPI_ERR_REVOKED
+#define PyMPI_HAVE_MPI_ERR_REVOKED 1
+#endif
+#ifdef MPI_ERR_PROC_FAILED
+#define PyMPI_HAVE_MPI_ERR_PROC_FAILED 1
+#endif
+#ifdef MPI_ERR_PROC_FAILED_PENDING
+#define PyMPI_HAVE_MPI_ERR_PROC_FAILED_PENDING 1
+#endif
+
+#endif
+
 #endif /* !PyMPI_CONFIG_OPENMPI_H */

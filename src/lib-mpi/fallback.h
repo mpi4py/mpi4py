@@ -1570,6 +1570,10 @@ static int PyMPI_Register_datarep_c(const char *datarep,
 
 /* ---------------------------------------------------------------- */
 
+#include "mpiulfm.h"
+
+/* ---------------------------------------------------------------- */
+
 #endif /* !PyMPI_FALLBACK_H */
 
 /*

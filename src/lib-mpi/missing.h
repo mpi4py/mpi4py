@@ -2917,6 +2917,46 @@ typedef void (MPIAPI PyMPI_MPI_Session_errhandler_function)(MPI_Session*,int*,..
 #define MPI_Neighbor_alltoallw_init_c(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11) PyMPI_UNAVAILABLE("MPI_Neighbor_alltoallw_init_c",a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11)
 #endif
 
+#ifndef PyMPI_HAVE_MPI_Comm_revoke
+#undef  MPI_Comm_revoke
+#define MPI_Comm_revoke(a1) PyMPI_UNAVAILABLE("MPI_Comm_revoke",a1)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Comm_is_revoked
+#undef  MPI_Comm_is_revoked
+#define MPI_Comm_is_revoked(a1,a2) PyMPI_UNAVAILABLE("MPI_Comm_is_revoked",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Comm_get_failed
+#undef  MPI_Comm_get_failed
+#define MPI_Comm_get_failed(a1,a2) PyMPI_UNAVAILABLE("MPI_Comm_get_failed",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Comm_ack_failed
+#undef  MPI_Comm_ack_failed
+#define MPI_Comm_ack_failed(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Comm_ack_failed",a1,a2,a3)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Comm_agree
+#undef  MPI_Comm_agree
+#define MPI_Comm_agree(a1,a2) PyMPI_UNAVAILABLE("MPI_Comm_agree",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Comm_iagree
+#undef  MPI_Comm_iagree
+#define MPI_Comm_iagree(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Comm_iagree",a1,a2,a3)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Comm_shrink
+#undef  MPI_Comm_shrink
+#define MPI_Comm_shrink(a1,a2) PyMPI_UNAVAILABLE("MPI_Comm_shrink",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Comm_ishrink
+#undef  MPI_Comm_ishrink
+#define MPI_Comm_ishrink(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Comm_ishrink",a1,a2,a3)
+#endif
+
 #ifndef PyMPI_HAVE_MPI_WIN_NULL
 #undef  MPI_WIN_NULL
 #define MPI_WIN_NULL ((MPI_Win)0)
@@ -4252,6 +4292,21 @@ typedef int (MPIAPI PyMPI_MPI_Datarep_conversion_function_c)(void*,MPI_Datatype,
 #ifndef PyMPI_HAVE_MPI_ERR_VALUE_TOO_LARGE
 #undef  MPI_ERR_VALUE_TOO_LARGE
 #define MPI_ERR_VALUE_TOO_LARGE (MPI_ERR_LASTCODE)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_ERR_REVOKED
+#undef  MPI_ERR_REVOKED
+#define MPI_ERR_REVOKED (MPI_ERR_UNKNOWN)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_ERR_PROC_FAILED
+#undef  MPI_ERR_PROC_FAILED
+#define MPI_ERR_PROC_FAILED (MPI_ERR_UNKNOWN)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_ERR_PROC_FAILED_PENDING
+#undef  MPI_ERR_PROC_FAILED_PENDING
+#define MPI_ERR_PROC_FAILED_PENDING (MPI_ERR_UNKNOWN)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Alloc_mem
