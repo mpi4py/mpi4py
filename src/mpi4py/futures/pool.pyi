@@ -35,6 +35,8 @@ class MPIPoolExecutor(Executor):
         env: Mapping[str, str] | Iterable[tuple[str, str]] = ...,
         **kwargs: Any,
     ) -> None: ...
+    @property
+    def num_workers(self) -> int: ...
     def bootup(
         self,
         wait: bool = True,

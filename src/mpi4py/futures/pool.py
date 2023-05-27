@@ -70,11 +70,16 @@ class MPIPoolExecutor(Executor):
 
     @property
     def _max_workers(self):
+        return self.num_workers
+
+    @property
+    def num_workers(self):
+        """Number or worker processes."""
         with self._lock:
             if self._broken:
-                return None
+                return 0
             if self._shutdown:
-                return None
+                return 0
             self._bootstrap()
             self._pool.wait()
             return self._pool.size
