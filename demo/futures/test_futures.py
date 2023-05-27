@@ -221,9 +221,11 @@ class ProcessPoolInitTest(ProcessPoolMixin,
     @unittest.skipIf(SHARED_POOL and WORLD_SIZE > 2, 'shared-pool')
     def test_max_workers(self):
         executor = self.executor_type(max_workers=1)
-        self.assertEqual(executor._max_workers, 1)
+        self.assertEqual(executor.num_workers, 1)
+        self.assertEqual(executor.num_workers, executor._max_workers)
         executor.shutdown()
-        self.assertIsNone(executor._max_workers)
+        self.assertEqual(executor.num_workers, 0)
+        self.assertEqual(executor.num_workers, executor._max_workers)
 
     @unittest.skipIf(SHARED_POOL and WORLD_SIZE > 2, 'shared-pool')
     def test_max_workers_environ(self):
@@ -234,9 +236,9 @@ class ProcessPoolInitTest(ProcessPoolMixin,
             executor.submit(time.sleep, 0).result()
             executor.shutdown()
             executor = self.executor_type()
-            self.assertEqual(executor._max_workers, 1)
+            self.assertEqual(executor.num_workers, 1)
             executor.shutdown()
-            self.assertIsNone(executor._max_workers)
+            self.assertEqual(executor.num_workers, 0)
         finally:
             del os.environ['MPI4PY_FUTURES_MAX_WORKERS']
             if save is not None:
@@ -304,7 +306,7 @@ class ProcessPoolInitTest(ProcessPoolMixin,
             future.result()
         with self.assertRaises(futures.BrokenExecutor):
             executor.submit(time.sleep, 0)
-        self.assertIsNone(executor._max_workers)
+        self.assertEqual(executor.num_workers, 0)
 
     @unittest.skipIf(SHARED_POOL, 'shared-pool')
     def test_initializer_error_del(self):
@@ -414,7 +416,7 @@ class ProcessPoolShutdownTest(ProcessPoolMixin,
     def test_submit_shutdown_cancel(self):
         executor = self.executor_type(max_workers=1)
         executor.bootup()
-        num_workers = executor._max_workers
+        num_workers = executor.num_workers
         for _ in range(num_workers*100):
             executor.submit(time.sleep, 0.1)
         fut = executor.submit(time.sleep, 0)
@@ -426,7 +428,7 @@ class ProcessPoolShutdownTest(ProcessPoolMixin,
     def test_submit_shutdown_cancel_wait(self):
         executor = self.executor_type(max_workers=1)
         executor.bootup()
-        num_workers = executor._max_workers
+        num_workers = executor.num_workers
         fut1 = executor.submit(time.sleep, 0.1)
         for _ in range(num_workers*100):
             executor.submit(time.sleep, 0.1)
@@ -704,7 +706,7 @@ class ExecutorTestMixin:
 
     def test_submit_cancel(self):
         fs = []
-        num_workers = self.executor._max_workers
+        num_workers = self.executor.num_workers
         for _ in range(num_workers*100):
             f = self.executor.submit(time.sleep, 0.1)
             fs.append(f)
@@ -805,7 +807,7 @@ class ProcessPoolExecutorTest(ProcessPoolMixin,
 
     def test_map_unordered_timeout(self):
         map_unordered = functools.partial(self.executor.map, unordered=True)
-        num_workers = self.executor._max_workers
+        num_workers = self.executor.num_workers
         results = []
         try:
             args = [1] + [0]*(num_workers-1)
@@ -901,7 +903,7 @@ class ProcessPoolSubmitTest(unittest.TestCase):
         world_size = MPI.COMM_WORLD.Get_size()
         num_workers = max(1, world_size - 1)
         for e in executors:
-            self.assertEqual(e._max_workers, num_workers)
+            self.assertEqual(e.num_workers, num_workers)
         del e, executors
 
 
