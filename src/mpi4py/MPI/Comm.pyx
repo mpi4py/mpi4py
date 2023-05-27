@@ -229,6 +229,106 @@ cdef class Comm:
         if self is __COMM_SELF__:  self.ob_mpi = MPI_COMM_SELF
         if self is __COMM_WORLD__: self.ob_mpi = MPI_COMM_WORLD
 
+    # Process Fault Tolerance
+    # -----------------------
+
+    def Revoke(self) -> None:
+        """
+        Revoke a communicator
+        """
+        with nogil: CHKERR( MPI_Comm_revoke(self.ob_mpi) )
+
+    def Is_revoked(self) -> bool:
+        """
+        Indicate whether the communicator has been revoked
+        """
+        cdef int flag = 0
+        with nogil: CHKERR( MPI_Comm_is_revoked(self.ob_mpi, &flag) )
+        return <bint>flag
+
+    def Get_failed(self) -> Group:
+        """
+        Extract the group of failed processes
+        """
+        cdef Group group = <Group>New(Group)
+        with nogil: CHKERR( MPI_Comm_get_failed(self.ob_mpi, &group.ob_mpi) )
+        return group
+
+    def Ack_failed(self, num_to_ack: int | None = None) -> int:
+        """
+        Acknowledge failures on a communicator
+        """
+        cdef int num_acked = MPI_UNDEFINED
+        cdef int c_num_to_ack = MPI_UNDEFINED
+        if num_to_ack is not None:
+            c_num_to_ack = num_to_ack
+        else:
+            CHKERR( MPI_Comm_size(self.ob_mpi, &c_num_to_ack) )
+        with nogil: CHKERR( MPI_Comm_ack_failed(
+            self.ob_mpi, c_num_to_ack, &num_acked) )
+        return num_acked
+
+    def Agree(self,int flag: int) -> int:
+        """
+        Blocking agreement
+        """
+        with nogil: CHKERR( MPI_Comm_agree(self.ob_mpi, &flag) )
+        return flag
+
+    def Iagree(self, flag: Buffer) -> Request:
+        """
+        Non blocking agreement
+        """
+        cdef int *flag_ptr = NULL
+        cdef MPI_Aint flag_len = 0
+        flag = aspybuffer(flag, <void **>&flag_ptr, &flag_len, 0, b"i")
+        if flag_len != 1: raise ValueError(
+            "flag: expecting int buffer of lenght one")
+        cdef Request request = <Request>New(Request)
+        with nogil: CHKERR( MPI_Comm_iagree(
+            self.ob_mpi, flag_ptr, &request.ob_mpi) )
+        request.ob_buf = flag
+        return request
+
+    def Shrink(self) -> Comm:
+        """
+        Shrink a communicator to remove all failed processes
+        """
+        cdef type cls = Comm
+        if   isinstance(self, Intracomm): cls = Intracomm
+        elif isinstance(self, Intercomm): cls = Intercomm
+        cdef Comm comm = <Comm>New(cls)
+        with nogil: CHKERR( MPI_Comm_shrink(self.ob_mpi, &comm.ob_mpi) )
+        comm_set_eh(comm.ob_mpi)
+        return comm
+
+    def Ishrink(self) -> tuple[Comm, Request]:
+        """
+        Nonblocking shrink a communicator to remove all failed processes
+        """
+        cdef type cls = Comm
+        if   isinstance(self, Intracomm): cls = Intracomm
+        elif isinstance(self, Intercomm): cls = Intercomm
+        cdef Comm comm = <Comm>New(cls)
+        cdef Request request = <Request>New(Request)
+        with nogil: CHKERR( MPI_Comm_ishrink(
+            self.ob_mpi, &comm.ob_mpi, &request.ob_mpi) )
+        comm_set_eh(comm.ob_mpi)
+        return (comm, request)
+
+    # Legacy ULFM interface
+
+    def _Failure_ack(self) -> None:
+        PyErr_WarnFormat(DeprecationWarning, 1, "legacy ULFM interface")
+        with nogil: CHKERR( MPIX_Comm_failure_ack(self.ob_mpi) )
+
+    def _Failure_get_acked(self) -> Group:
+        PyErr_WarnFormat(DeprecationWarning, 1, "legacy ULFM interface")
+        cdef Group group = <Group>New(Group)
+        with nogil: CHKERR( MPIX_Comm_failure_get_acked(
+            self.ob_mpi, &group.ob_mpi) )
+        return group
+
     # Communicator Info
     # -----------------
 

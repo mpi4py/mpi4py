@@ -11,6 +11,10 @@ Release 4.0.0 [2023-XX-XX]
     - Add new communicator constructors.
     - Add the `Session` class and its methods.
 
+  + Add prelimiary support for the upcoming MPI-5.0 standard.
+
+    - User-level failure mitigation (ULFM).
+
   + `mpi4py.util.pool`: New drop-in replacement for `multiprocessing.pool`.
 
   + Add runtime check for mismatch between `mpiexec` and MPI library.

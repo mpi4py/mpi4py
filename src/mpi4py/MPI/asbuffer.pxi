@@ -305,3 +305,34 @@ cdef inline memory mpibuf(void *base, MPI_Count count):
     return tobuffer(<object>NULL, base, size, 0)
 
 #------------------------------------------------------------------------------
+
+cdef extern from "Python.h":
+    enum: PyBUF_READ
+    enum: PyBUF_WRITE
+    object PyMemoryView_GetContiguous(object, int, char)
+
+cdef inline object aspybuffer(object obj,
+                              void **base, MPI_Aint *size,
+                              bint readonly,
+                              const char format[]):
+    cdef int buftype = PyBUF_READ if readonly else PyBUF_WRITE
+    obj = PyMemoryView_GetContiguous(obj, buftype, c'A')
+    cdef Py_buffer view
+    cdef int flags = PyBUF_ANY_CONTIGUOUS
+    if not readonly:
+        flags |= PyBUF_WRITABLE
+    if format != NULL:
+        flags |= PyBUF_FORMAT
+    PyObject_GetBuffer(obj, &view, flags)
+    if format != NULL and view.format != NULL:
+        if strncmp(format, view.format, 4) != 0:
+            PyBuffer_Release(&view)
+            raise ValueError(
+                f"expecting buffer with format {pystr(format)!r}, "
+                f"got {pystr(view.format)!r}")
+    if base != NULL: base[0] = view.buf
+    if size != NULL: size[0] = view.len // view.itemsize
+    PyBuffer_Release(&view)
+    return obj
+
+#------------------------------------------------------------------------------

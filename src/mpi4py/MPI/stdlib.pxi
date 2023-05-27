@@ -7,6 +7,10 @@ cdef extern from * nogil: # "stdlib.h"
     const char *getenv(const char *)
 
 cdef extern from * nogil: # "string.h"
+    int strcmp(const char *, const char *)
+    int strncmp(const char *, const char *, size_t)
+
+cdef extern from * nogil: # "string.h"
     int memcmp(const void *, const void *, size_t)
     void *memset(void *, int, size_t)
     void *memcpy(void *, const void *, size_t)

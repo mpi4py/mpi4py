@@ -1572,6 +1572,166 @@ static int PyMPI_Register_datarep_c(const char *datarep,
 
 #include "mpiulfm.h"
 
+#ifndef PyMPI_HAVE_MPI_Comm_revoke
+#ifndef PyMPI_HAVE_MPIX_Comm_revoke
+
+#ifndef PyMPI_HAVE_MPI_Comm_is_revoked
+#ifndef PyMPI_HAVE_MPIX_Comm_is_revoked
+static int PyMPI_Comm_is_revoked(MPI_Comm comm, int *flag)
+{
+  if (!flag) {
+    (void) MPI_Comm_call_errhandler(comm, MPI_ERR_ARG);
+    return MPI_ERR_ARG;
+  }
+  {
+    int dummy, ierr;
+    ierr = MPI_Comm_test_inter(comm, &dummy);
+    if (ierr != MPI_SUCCESS) return ierr;
+  }
+  *flag = 0;
+  return MPI_SUCCESS;
+}
+#undef  MPI_Comm_is_revoked
+#define MPI_Comm_is_revoked PyMPI_Comm_is_revoked
+#endif
+#endif
+
+#endif
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Comm_get_failed
+#ifndef PyMPI_HAVE_MPIX_Comm_get_failed
+static int PyMPI_Comm_get_failed(MPI_Comm comm, MPI_Group *group)
+{
+  {
+    int dummy, ierr;
+    ierr = MPI_Comm_test_inter(comm, &dummy);
+    if (ierr != MPI_SUCCESS) return ierr;
+  }
+  if (!group) {
+    (void) MPI_Comm_call_errhandler(comm, MPI_ERR_ARG);
+    return MPI_ERR_ARG;
+  }
+  return MPI_Group_union(MPI_GROUP_EMPTY, MPI_GROUP_EMPTY, group);
+}
+#undef  MPI_Comm_get_failed
+#define MPI_Comm_get_failed PyMPI_Comm_get_failed
+#endif
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Comm_ack_failed
+#ifndef PyMPI_HAVE_MPIX_Comm_ack_failed
+static int PyMPI_Comm_ack_failed(MPI_Comm comm,
+                                 int num_to_ack,
+                                 int *num_acked)
+{
+  {
+    int dummy, ierr;
+    ierr = MPI_Comm_test_inter(comm, &dummy);
+    if (ierr != MPI_SUCCESS) return ierr;
+  }
+  if (!num_acked) {
+    (void) MPI_Comm_call_errhandler(comm, MPI_ERR_ARG);
+    return MPI_ERR_ARG;
+  }
+  *num_acked = 0;
+  return MPI_SUCCESS;
+}
+#undef  MPI_Comm_ack_failed
+#define MPI_Comm_ack_failed PyMPI_Comm_ack_failed
+#endif
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Comm_agree
+#ifndef PyMPI_HAVE_MPIX_Comm_agree
+static int PyMPI_Comm_agree(MPI_Comm comm, int *flag)
+{
+  int ibuf = flag ? *flag : 0;
+  return MPI_Allreduce_c(&ibuf, flag, 1, MPI_INT, MPI_BAND, comm);
+}
+#undef  MPI_Comm_agree
+#define MPI_Comm_agree PyMPI_Comm_agree
+#endif
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Comm_iagree
+#ifndef PyMPI_HAVE_MPIX_Comm_iagree
+static int MPIAPI PyMPI_iagree_free_fn(MPI_Comm c, int k, void *v, void *xs)
+{ return (void) c, (void) xs, PyMPI_FREE(v), MPI_Comm_free_keyval(&k); }
+static int PyMPI_Comm_iagree(MPI_Comm comm, int *flag, MPI_Request *request)
+{
+  int ierr, keyval, *ibuf;
+  MPI_Comm_copy_attr_function *copy_fn = MPI_COMM_NULL_COPY_FN;
+  MPI_Comm_delete_attr_function *free_fn = PyMPI_iagree_free_fn;
+  ierr = MPI_Comm_create_keyval(copy_fn, free_fn, &keyval, NULL);
+  if (ierr != MPI_SUCCESS) return ierr;
+  ibuf = (int *) PyMPI_MALLOC(sizeof(int));
+  ierr = MPI_Comm_set_attr(comm, keyval, ibuf);
+  if (ierr != MPI_SUCCESS) return PyMPI_FREE(ibuf), ierr;
+  ibuf[0] = flag ? *flag : 0;
+  return MPI_Iallreduce_c(ibuf, flag, 1, MPI_INT, MPI_BAND, comm, request);
+}
+#undef  MPI_Comm_iagree
+#define MPI_Comm_iagree PyMPI_Comm_iagree
+#endif
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Comm_shrink
+#ifndef PyMPI_HAVE_MPIX_Comm_shrink
+static int PyMPI_Comm_shrink(MPI_Comm comm, MPI_Comm *newcomm)
+{
+  return MPI_Comm_dup(comm, newcomm);
+}
+#undef  MPI_Comm_shrink
+#define MPI_Comm_shrink PyMPI_Comm_shrink
+#endif
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Comm_ishrink
+#ifndef PyMPI_HAVE_MPIX_Comm_ishrink
+static int PyMPI_Comm_ishrink(MPI_Comm comm,
+                              MPI_Comm *newcomm,
+                              MPI_Request *request)
+{
+  return MPI_Comm_idup(comm, newcomm, request);
+}
+#undef  MPI_Comm_ishrink
+#define MPI_Comm_ishrink PyMPI_Comm_ishrink
+#endif
+#endif
+
+#ifndef PyMPI_HAVE_MPIX_Comm_failure_ack
+static int PyMPIX_Comm_failure_ack(MPI_Comm comm)
+{
+  {
+    int dummy, ierr;
+    ierr = MPI_Comm_test_inter(comm, &dummy);
+    if (ierr != MPI_SUCCESS) return ierr;
+  }
+  return MPI_SUCCESS;
+}
+#undef  MPIX_Comm_failure_ack
+#define MPIX_Comm_failure_ack PyMPIX_Comm_failure_ack
+#endif
+
+#ifndef PyMPI_HAVE_MPIX_Comm_failure_get_acked
+static int PyMPIX_Comm_failure_get_acked(MPI_Comm comm, MPI_Group *group)
+{
+  {
+    int dummy, ierr;
+    ierr = MPI_Comm_test_inter(comm, &dummy);
+    if (ierr != MPI_SUCCESS) return ierr;
+  }
+  if (!group) {
+    (void) MPI_Comm_call_errhandler(comm, MPI_ERR_ARG);
+    return MPI_ERR_ARG;
+  }
+  return MPI_Group_union(MPI_GROUP_EMPTY, MPI_GROUP_EMPTY, group);
+}
+#undef  MPIX_Comm_failure_get_acked
+#define MPIX_Comm_failure_get_acked PyMPIX_Comm_failure_get_acked
+#endif
+
 /* ---------------------------------------------------------------- */
 
 #endif /* !PyMPI_FALLBACK_H */

@@ -1,5 +1,13 @@
 # -----------------------------------------------------------------------------
 
+# Legacy ULFM interface
+
+cdef extern from * nogil:
+    int MPIX_Comm_failure_ack(MPI_Comm)
+    int MPIX_Comm_failure_get_acked(MPI_Comm, MPI_Group*)
+
+# -----------------------------------------------------------------------------
+
 cdef memory _buffer = None
 
 cdef inline int attach_buffer(ob, void **p, MPI_Count *n) except -1:
