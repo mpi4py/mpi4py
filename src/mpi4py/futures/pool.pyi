@@ -12,13 +12,13 @@ if sys.version_info >= (3, 11):
 else:
     from typing_extensions import Self
 from ..MPI import Intracomm, COMM_WORLD
-from ._base import Executor, Future  # noqa: F401
+from ._base import Executor, Future
 
 _T = TypeVar("_T")
 _P = ParamSpec("_P")
 
 class MPIPoolExecutor(Executor):
-    Future: TypeAlias = Future  # noqa: F811
+    Future: TypeAlias = Future
     def __init__(
         self,
         max_workers: int | None = None,
