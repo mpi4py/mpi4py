@@ -143,8 +143,9 @@ def setup_python(options):
     if options.builddir:
         testdir = os.path.dirname(__file__)
         rootdir = os.path.dirname(testdir)
-        builddir = os.path.join(rootdir, getbuilddir())
+        builddir = getbuilddir()
         if builddir is not None:
+            builddir = os.path.join(rootdir, builddir)
             if os.path.isdir(builddir):
                 sys.path.insert(0, builddir)
     if options.path:
