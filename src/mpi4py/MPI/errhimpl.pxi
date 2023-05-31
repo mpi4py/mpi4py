@@ -52,13 +52,13 @@ cdef inline void errhdl_call_mpi(
                 (<Win>pyhandle).ob_mpi = MPI_WIN_NULL
             elif mpi_scwf_t is MPI_File:
                 (<File>pyhandle).ob_mpi = MPI_FILE_NULL
-    except BaseException as exc:                                  #> no cover
-        PyErr_DisplayException(exc)                               #> no cover
-        PySys_WriteStderr(                                        #> no cover
-            b"Fatal Python error: %s\n",                          #> no cover
-            b"exception in user-defined error handler function",  #> no cover
-        )                                                         #> no cover
-        <void>MPI_Abort(MPI_COMM_WORLD, 1)                        #> no cover
+    except BaseException as exc:                                  #~> uncovered
+        PyErr_DisplayException(exc)                               #~> uncovered
+        PySys_WriteStderr(                                        #~> uncovered
+            b"Fatal Python error: %s\n",                          #~> uncovered
+            b"exception in user-defined error handler function",  #~> uncovered
+        )                                                         #~> uncovered
+        <void>MPI_Abort(MPI_COMM_WORLD, 1)                        #~> uncovered
 
 
 cdef inline void errhdl_call(
@@ -238,7 +238,7 @@ cdef inline int errhdl_new(
     return index
 
 
-@cython.linetrace(False)  #> TODO
+@cython.linetrace(False)  #~> TODO
 cdef inline int errhdl_del(
     int *indexp,
     mpi_ehfn_t *fn,

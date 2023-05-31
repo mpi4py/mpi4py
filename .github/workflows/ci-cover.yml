@@ -19,6 +19,10 @@ on:
 permissions:
   contents: read
 
+env:
+  MPI4PY_COVERAGE_PLUGIN: cycoverage
+  PYTHONPATH: ${{ github.workspace }}/conf
+
 jobs:
 
   cover:
@@ -58,16 +62,14 @@ jobs:
              numpy
     - run: mamba list
 
-    - run: conf/cycoverage.sh
-    - run: conf/cythonize.sh
-
     - run: python -m pip install .
       env:
-        CFLAGS: "-O0 -DCYTHON_TRACE_NOGIL=1"
-        PIP_VERBOSE: "3"
-        PIP_NO_CACHE_DIR: "true"
-        PIP_NO_BUILD_ISOLATION: "false"  # pypa/pip#5735
-        PIP_DISABLE_PIP_VERSION_CHECK: "true"
+        CFLAGS: -O0
+        CPPFLAGS: -O0 -Wp,-U_FORTIFY_SOURCE
+        PIP_VERBOSE: 3
+        PIP_NO_CACHE_DIR: true
+        PIP_NO_BUILD_ISOLATION: false # pypa/pip#5735
+        PIP_DISABLE_PIP_VERSION_CHECK: true
 
     - name: Tweak MPI
       run: |
@@ -77,9 +79,6 @@ jobs:
         echo rmaps_base_oversubscribe=true >> $openmpi_mca_params
         echo btl_base_warn_component_unused=false >> $openmpi_mca_params
         echo btl_vader_single_copy_mechanism=none >> $openmpi_mca_params
-
-    - name: Set PYTHONPATH=$PWD
-      run:  echo "PYTHONPATH=${PWD}" >> $GITHUB_ENV
 
     - name: Run coverage
       run:  test/coverage.sh
@@ -114,8 +113,7 @@ jobs:
 
     - run: python -m pip install -U -r conf/requirements-build-cython.txt
     - run: python -m pip install -U coverage
-    - run: conf/cycoverage.sh
-    - run: conf/cythonize.sh
+    - run: python setup.py build_src
 
     - name: Download coverage data
       uses: actions/download-artifact@v3

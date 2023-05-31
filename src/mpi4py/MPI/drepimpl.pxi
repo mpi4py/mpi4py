@@ -3,7 +3,7 @@
 cdef object datarep_lock     = Lock()
 cdef dict   datarep_registry = {}
 
-@cython.linetrace(False)  #> TODO
+@cython.linetrace(False)  #~> TODO
 @cython.final
 @cython.internal
 cdef class _p_datarep:
@@ -76,7 +76,7 @@ cdef class _p_datarep:
 
 # ---
 
-@cython.linetrace(False)  #> TODO
+@cython.linetrace(False)  #~> TODO
 cdef int datarep_read(
     void *userbuf,
     MPI_Datatype datatype,
@@ -94,7 +94,7 @@ cdef int datarep_read(
         ierr = PyMPI_HandleException(exc)
     return ierr
 
-@cython.linetrace(False)  #> TODO
+@cython.linetrace(False)  #~> TODO
 cdef int datarep_write(
     void *userbuf,
     MPI_Datatype datatype,
@@ -112,7 +112,7 @@ cdef int datarep_write(
         ierr = PyMPI_HandleException(exc)
     return ierr
 
-@cython.linetrace(False)  #> TODO
+@cython.linetrace(False)  #~> TODO
 cdef int datarep_extent(
     MPI_Datatype datatype,
     MPI_Aint *file_extent,
@@ -129,7 +129,7 @@ cdef int datarep_extent(
 
 # ---
 
-@cython.linetrace(False)  #> TODO
+@cython.linetrace(False)  #~> TODO
 @cython.callspec("MPIAPI")
 cdef int datarep_read_fn(
     void *userbuf,
@@ -147,7 +147,7 @@ cdef int datarep_read_fn(
         filebuf, position, extra_state,
     )
 
-@cython.linetrace(False)  #> TODO
+@cython.linetrace(False)  #~> TODO
 @cython.callspec("MPIAPI")
 cdef int datarep_write_fn(
     void *userbuf,
@@ -165,7 +165,7 @@ cdef int datarep_write_fn(
         filebuf, position, extra_state,
     )
 
-@cython.linetrace(False)  #> TODO
+@cython.linetrace(False)  #~> TODO
 @cython.callspec("MPIAPI")
 cdef int datarep_extent_fn(
     MPI_Datatype datatype,

@@ -14,7 +14,7 @@ CYTHON_EXTENSIONS = {".pxd", ".pyx", ".pxi"}
 class CythonCoveragePlugin(CoveragePlugin):
 
     def configure(self, config):
-        config.get_option("report:exclude_lines")
+        self.exclude = config.get_option("report:exclude_lines")
 
     def file_tracer(self, filename):
         filename = canonical_filename(os.path.abspath(filename))
@@ -27,7 +27,7 @@ class CythonCoveragePlugin(CoveragePlugin):
         filename = canonical_filename(os.path.abspath(filename))
         _, ext = os.path.splitext(filename)
         if ext in CYTHON_EXTENSIONS:
-            return CythonFileReporter(filename)
+            return CythonFileReporter(filename, self.exclude)
         return None
 
 
@@ -41,18 +41,18 @@ class CythonFileTracer(FileTracer):
         return self.source_file
 
 
-
 class CythonFileReporter(FileReporter):
 
-    def __init__(self, filename):
+    def __init__(self, filename, exclude=None):
         super().__init__(filename)
+        self.exclude = exclude
 
     def lines(self):
-        _setup_lines()
+        _setup_lines(self.exclude)
         return self._get_lines(CODE_LINES)
 
     def excluded_lines(self):
-        _setup_lines()
+        _setup_lines(self.exclude)
         return self._get_lines(EXCL_LINES)
 
     def _get_lines(self, lines_map):
@@ -60,19 +60,20 @@ class CythonFileReporter(FileReporter):
         lines = lines_map.get(key, {})
         return set(lines)
 
+
 TOPDIR = os.path.dirname(__file__)
 SRCDIR = os.path.join(os.path.dirname(TOPDIR), 'src')
 CODE_LINES = None
 EXCL_LINES = None
 
-def _setup_lines():
+def _setup_lines(exclude):
     global CODE_LINES, EXCL_LINES
     if CODE_LINES is None or EXCL_LINES is None:
         source = os.path.join(SRCDIR, 'mpi4py', 'MPI.c')
-        CODE_LINES, EXCL_LINES = _parse_cfile_lines(source)
+        CODE_LINES, EXCL_LINES = _parse_cfile_lines(source, exclude)
 
 
-def _parse_cfile_lines(c_file):
+def _parse_cfile_lines(c_file, exclude_list):
     import re
     from collections import defaultdict
 
@@ -88,23 +89,9 @@ def _parse_cfile_lines(c_file):
             r'(\s+[^:]+|)\s*:',
         ])
     ).match
-    excluded_line_patterns = [
-        r'.*\s*#> TODO$',
-        r'.*\s*#> no cover$',
-        r'.*\s*#> unreachable$',
-        r'.*\s*#> pypy$',
-        r'.*\s*#> big-endian$',
-        r'.*\s*#> i386$',
-        r'.*\s*#> 32bit$',
-        r'.*\s*#> win32$',
-        r'.*\s*#> legacy$',
-        r'.*\s*#> long$',
-        r'.*\s*#> openmpi$',
-    ]
-
-    if excluded_line_patterns:
+    if exclude_list:
         line_is_excluded = re.compile("|".join([
-            "(?:%s)" % regex for regex in excluded_line_patterns
+            "(?:%s)" % regex for regex in exclude_list
         ])).search
     else:
         def line_is_excluded(_):

@@ -562,6 +562,43 @@ def setup(**attrs):
 
 # --------------------------------------------------------------------
 
+def with_coverage():
+    return bool(os.environ.get('MPI4PY_COVERAGE_PLUGIN'))
+
+
+def coverage_merger(filename, out=None):
+    dirname = os.path.dirname(filename)
+    with open(filename, encoding='utf-8') as fileobj:
+        code_lines = fileobj.readlines()
+    #
+    if out is None:
+        log.info("rewrite '%s'", filename)
+        stream = open(filename, mode='w', encoding='utf-8')
+    else:
+        log.info("merging '%s' ...", filename)
+        stream = out
+    #
+    is_include = re.compile(r'^include\s+"(.*)"\s*\n$').match
+    if out is None:
+        stream.write("#cython: linetrace=True\n")
+    for line in code_lines:
+        match = is_include(line)
+        if match:
+            include = os.path.join(dirname, match.group(1))
+            stream.write(f"#include: {include}\n")
+            coverage_merger(include, stream)
+        else:
+            stream.write(line)
+    #
+    if out is None:
+        stream.close()
+        log.info("rewrote '%s'", filename)
+        return filename
+    #
+    return None
+
+# --------------------------------------------------------------------
+
 # Cython
 
 def cython_req():
@@ -653,6 +690,8 @@ def cython_run(
     if not cython_chk(VERSION):
         raise DistutilsError(f"missing build requirement {require!r}")
     #
+    if with_coverage():
+        source = coverage_merger(source)
     log.info("cythonizing '%s' -> '%s'", source, target)
     from cythonize import cythonize
     args = []
@@ -1093,12 +1132,13 @@ class build_ext(cmd_build_ext.build_ext):
 
     def config_extension (self, ext):
         configure = getattr(ext, 'configure', None)
-        if not configure:
-            return
-        config_cmd = self.get_finalized_command('config')
-        config_cmd.compiler = self.compiler # fix compiler
-        config_cmd.configure = self.configure
-        configure(ext, config_cmd)
+        if configure:
+            config_cmd = self.get_finalized_command('config')
+            config_cmd.compiler = self.compiler # fix compiler
+            config_cmd.configure = self.configure
+            configure(ext, config_cmd)
+        if with_coverage():
+            ext.define_macros += [('CYTHON_TRACE_NOGIL', 1)]
 
     def build_extension (self, ext):
         fullname = self.get_ext_fullname(ext.name)

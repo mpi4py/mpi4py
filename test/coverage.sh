@@ -5,6 +5,7 @@ MPIEXEC=${MPIEXEC:-mpiexec}
 PYTHON=${PYTHON:-python${py:-}}
 
 export PYTHONDONTWRITEBYTECODE=1
+export PYTHONUNBUFFERED=1
 export PYTHONWARNINGS=error
 
 $PYTHON -m coverage erase

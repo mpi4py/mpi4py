@@ -146,13 +146,13 @@ cdef inline char *dlpack_get_format(
         if bits == 8*sizeof(short):     return b"h"
         if bits == 8*sizeof(int):       return b"i"
         if bits == 8*sizeof(long):      return b"l"
-        if bits == 8*sizeof(long long): return b"q"  #> long
+        if bits == 8*sizeof(long long): return b"q"  #~> long
     if code == kDLUInt:
         if bits == 8*sizeof(char):      return b"B"
         if bits == 8*sizeof(short):     return b"H"
         if bits == 8*sizeof(int):       return b"I"
         if bits == 8*sizeof(long):      return b"L"
-        if bits == 8*sizeof(long long): return b"Q"  #> long
+        if bits == 8*sizeof(long long): return b"Q"  #~> long
     if code == kDLFloat:
         if bits ==  8*sizeof(float)//2:    return b"e"
         if bits ==  8*sizeof(float):       return b"f"
@@ -162,7 +162,7 @@ cdef inline char *dlpack_get_format(
         if bits ==  8*2*sizeof(float)//2:    return b"Ze"
         if bits ==  8*2*sizeof(float):       return b"Zf"
         if bits ==  8*2*sizeof(double):      return b"Zd"
-        if bits ==  8*2*sizeof(long double): return b"Zg"  #> no cover
+        if bits ==  8*2*sizeof(long double): return b"Zg"  #~> uncovered
     return BYTE_FMT
 
 cdef inline Py_ssize_t dlpack_get_itemsize(
@@ -183,7 +183,7 @@ cdef inline Py_ssize_t dlpack_get_itemsize(
 
 cdef int Py_CheckDLPackBuffer(object obj) noexcept:
     try:    return <bint>hasattr(obj, '__dlpack__')
-    except: return 0  #> no cover
+    except: return 0  #~> uncovered
 
 cdef int Py_GetDLPackBuffer(object obj, Py_buffer *view, int flags) except -1:
     cdef object dlpack

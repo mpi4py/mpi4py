@@ -132,8 +132,8 @@ cdef inline int PyMPI_attr_copy_cb(
             hdl, keyval, extra_state,
             attrval_in, attrval_out, flag,
         )
-    except BaseException as exc:           #> TODO
-        ierr = PyMPI_HandleException(exc)  #> TODO
+    except BaseException as exc:           #~> TODO
+        ierr = PyMPI_HandleException(exc)  #~> TODO
     return ierr
 
 
@@ -149,8 +149,8 @@ cdef inline int PyMPI_attr_delete_cb(
         PyMPI_attr_delete(
             hdl, keyval, attrval, extra_state,
         )
-    except BaseException as exc:           #> TODO
-        ierr = PyMPI_HandleException(exc)  #> TODO
+    except BaseException as exc:           #~> TODO
+        ierr = PyMPI_HandleException(exc)  #~> TODO
     return ierr
 
 # ---
@@ -240,7 +240,7 @@ cdef inline int PyMPI_attr_state_del(
         if PyMPI_attr_type is MPI_Win:
             with keyval_lock_win:
                 del keyval_registry_win[keyval]
-    except KeyError:  #> no cover
+    except KeyError:  #~> uncovered
         pass
     return 0
 

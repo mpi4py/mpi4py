@@ -154,8 +154,8 @@ cdef class Win:
         try:
             if self.ob_mem is None: self.ob_mem = {}
             (<dict>self.ob_mem)[<MPI_Aint>base] = memory
-        except:   #> no cover
-            pass  #> no cover
+        except:   #~> uncovered
+            pass  #~> uncovered
 
     def Detach(self, memory: Buffer) -> None:
         """
@@ -167,8 +167,8 @@ cdef class Win:
         try:
             if self.ob_mem is None: return
             del (<dict>self.ob_mem)[<MPI_Aint>base]
-        except:   #> no cover
-            pass  #> no cover
+        except:   #~> uncovered
+            pass  #~> uncovered
 
     def Free(self) -> None:
         """
@@ -670,9 +670,9 @@ cdef class Win:
         cdef int index = errhdl_new(errhandler_fn, &fn)
         try:
             CHKERR( MPI_Win_create_errhandler(fn, &errhandler.ob_mpi) )
-        except:                     #> no cover
-            errhdl_del(&index, fn)  #> no cover
-            raise                   #> no cover
+        except:                     #~> uncovered
+            errhdl_del(&index, fn)  #~> uncovered
+            raise                   #~> uncovered
         return errhandler
 
     def Get_errhandler(self) -> Errhandler:

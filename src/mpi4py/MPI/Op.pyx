@@ -40,11 +40,11 @@ cdef class Op:
         try:
             try:
                 CHKERR( MPI_Op_create_c(fn_c, commute, &self.ob_mpi) )
-            except NotImplementedError:                               #> legacy
-                CHKERR( MPI_Op_create(fn_i, commute, &self.ob_mpi) )  #> legacy
-        except:                        #> no cover
-            op_user_del(&self.ob_uid)  #> no cover
-            raise                      #> no cover
+            except NotImplementedError:                               #~> legacy
+                CHKERR( MPI_Op_create(fn_i, commute, &self.ob_mpi) )  #~> legacy
+        except:                        #~> uncovered
+            op_user_del(&self.ob_uid)  #~> uncovered
+            raise                      #~> uncovered
         return self
 
     def Free(self) -> None:
