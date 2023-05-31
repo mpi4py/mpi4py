@@ -81,19 +81,19 @@ cdef inline bint is_IN_PLACE(object obj):
 cdef inline const char *getformat(const char format[]) except NULL:
     cdef char byteorder = format[0]
     if byteorder == c'@': # native
-        return format + 1  #> no cover
+        return format + 1                            #~> uncovered
     if byteorder == c'<': # little-endian
         if not is_little_endian():
-            raise BufferError(                       #> big-endian
-                f"format string {pystr(format)!r} "  #> big-endian
-                f"with non-native byte order")       #> big-endian
-        return format + 1                            #> little-endian
+            raise BufferError(                       #~> big-endian
+                f"format string {pystr(format)!r} "  #~> big-endian
+                f"with non-native byte order")       #~> big-endian
+        return format + 1                            #~> little-endian
     if byteorder == c'>': # big-endian
         if not is_big_endian():
-            raise BufferError(                       #> little-endian
-                f"format string {pystr(format)!r} "  #> little-endian
-                f"with non-native byte order")       #> little-endian
-        return format + 1                            #> big-endian
+            raise BufferError(                       #~> little-endian
+                f"format string {pystr(format)!r} "  #~> little-endian
+                f"with non-native byte order")       #~> little-endian
+        return format + 1                            #~> big-endian
     # passthrough
     return format
 

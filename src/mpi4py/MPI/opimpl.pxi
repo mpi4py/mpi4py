@@ -105,13 +105,13 @@ cdef inline void op_user_call_mpi(
             op_user_call_py(index, mpibuf(a, n), mpibuf(b, n), datatype)
         finally:
             datatype.ob_mpi = MPI_DATATYPE_NULL
-    except BaseException as exc:                               #> no cover
-        PyErr_DisplayException(exc)                            #> no cover
-        PySys_WriteStderr(                                     #> no cover
-            b"Fatal Python error: %s\n",                       #> no cover
-            b"exception in user-defined reduction operation",  #> no cover
-        )                                                      #> no cover
-        <void>MPI_Abort(MPI_COMM_WORLD, 1)                     #> no cover
+    except BaseException as exc:                               #~> uncovered
+        PyErr_DisplayException(exc)                            #~> uncovered
+        PySys_WriteStderr(                                     #~> uncovered
+            b"Fatal Python error: %s\n",                       #~> uncovered
+            b"exception in user-defined reduction operation",  #~> uncovered
+        )                                                      #~> uncovered
+        <void>MPI_Abort(MPI_COMM_WORLD, 1)                     #~> uncovered
 
 cdef inline void op_user_call(
     int index,

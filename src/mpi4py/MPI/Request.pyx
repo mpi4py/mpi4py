@@ -476,7 +476,7 @@ cdef class Grequest(Request):
         """
         if self.ob_mpi != MPI_REQUEST_NULL:
             if self.ob_mpi != self.ob_grequest:
-                raise MPIException(MPI_ERR_REQUEST)  #> unreachable
+                raise MPIException(MPI_ERR_REQUEST)  #~> unreachable
         cdef MPI_Request grequest = self.ob_grequest
         self.ob_grequest = self.ob_mpi ## or MPI_REQUEST_NULL ??
         with nogil: CHKERR( MPI_Grequest_complete(grequest) )

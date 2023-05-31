@@ -1,17 +1,21 @@
 #!/bin/bash
 
 RUN() { echo + $@; $@; }
-RUN export ANACONDA=${ANACONDA-/opt/anaconda}
+RUN export ANACONDA=${ANACONDA-/opt/conda}
 
-install-anaconda() {
-  MINICONDA=Miniconda3-latest-Linux-$(arch).sh
-  RUN curl -s -o ~/$MINICONDA https://repo.anaconda.com/miniconda/$MINICONDA
-  RUN bash ~/$MINICONDA -b -f -p $ANACONDA
-  RUN source $ANACONDA/bin/activate root
+install-mambaforge() {
+  local PROJECT=https://github.com/conda-forge/miniforge
+  local BASEURL=$PROJECT/releases/latest/download
+  local INSTALLER=Mambaforge-Linux-x86_64.sh
+  RUN curl -sSL -o ~/$INSTALLER $BASEURL/$INSTALLER
+  RUN bash ~/$INSTALLER -b -f -p $ANACONDA
+  RUN source $ANACONDA/bin/activate base
+  RUN conda config --set channel_priority strict
   RUN conda config --set show_channel_urls yes
+  RUN conda deactivate
 }
 
-test-package() {
+parse-args() {
   unset PY
   unset MPI
   unset RUNTESTS
@@ -36,15 +40,33 @@ test-package() {
   done
   PY=${PY-3}
   MPI=${MPI-mpich}
+  ENV=py$PY-$MPI
   RUNTESTS=${RUNTESTS-no}
   COVERAGE=${COVERAGE-no}
-  RUN source $ANACONDA/bin/activate root
-  RUN rm -rf $ANACONDA/envs/test
-  RUN conda create --quiet --yes -n test -c conda-forge python=$PY $MPI $MPI-mpicc numpy cython coverage
-  RUN conda activate test
+}
+
+create-env() {
+  parse-args $@
+  RUN rm -rf $ANACONDA/envs/$ENV
+  RUN source $ANACONDA/bin/activate base
+  local packages=(python=$PY $MPI $MPI-mpicc numpy cython coverage)
+  RUN mamba create --yes -n $ENV ${packages[@]}
+  RUN conda deactivate
+}
+
+package-install() {
+  parse-args $@
+  RUN source $ANACONDA/bin/activate $ENV
   RUN python setup.py build_src --force
   RUN python setup.py install
   RUN python setup.py --quiet clean --all
+  RUN conda deactivate
+}
+
+package-testing() {
+  parse-args $@
+  RUN source $ANACONDA/bin/activate $ENV
+  RUN python -m mpi4py --version
   if [[ "$RUNTESTS" == "yes" ]]; then
       if [[ "$MPI" == "mpich"   ]]; then local P=2; else local P=5; fi
       local MPIEXEC=${MPIEXEC-mpiexec}

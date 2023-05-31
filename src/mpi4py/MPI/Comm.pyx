@@ -1808,9 +1808,9 @@ cdef class Comm:
         cdef int index = errhdl_new(errhandler_fn, &fn)
         try:
             CHKERR( MPI_Comm_create_errhandler(fn, &errhandler.ob_mpi) )
-        except:                     #> no cover
-            errhdl_del(&index, fn)  #> no cover
-            raise                   #> no cover
+        except:                     #~> uncovered
+            errhdl_del(&index, fn)  #~> uncovered
+            raise                   #~> uncovered
         return errhandler
 
     def Get_errhandler(self) -> Errhandler:
@@ -1840,7 +1840,7 @@ cdef class Comm:
 
         .. warning:: This is a direct call, use it with care!!!.
         """
-        CHKERR( MPI_Abort(self.ob_mpi, errorcode) )  #> no cover
+        CHKERR( MPI_Abort(self.ob_mpi, errorcode) )  #~> uncovered
 
     # Naming Objects
     # --------------
@@ -2631,7 +2631,7 @@ cdef class Topocomm(Intracomm):
             if isinstance(self, Distgraphcomm):
                 nneighbors = self.Get_dist_neighbors_count()[:2]
                 return nneighbors
-            raise TypeError("expecting a topology communicator")  #> unreachable
+            raise TypeError("expecting a topology communicator")  #~> unreachable
 
     property indegree:
         "number of incoming neighbors"
@@ -2662,7 +2662,7 @@ cdef class Topocomm(Intracomm):
             if isinstance(self, Distgraphcomm):
                 neighbors = self.Get_dist_neighbors()[:2]
                 return neighbors
-            raise TypeError("expecting a topology communicator")  #> unreachable
+            raise TypeError("expecting a topology communicator")  #~> unreachable
 
     property inedges:
         "incoming neighbors"

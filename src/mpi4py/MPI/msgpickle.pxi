@@ -126,24 +126,24 @@ pickle = PyMPI_PICKLE
 
 # -----------------------------------------------------------------------------
 
-cdef int have_pickle5 = -1                                #> legacy
-cdef object PyPickle5_dumps = None                        #> legacy
-cdef object PyPickle5_loads = None                        #> legacy
+cdef int have_pickle5 = -1                                #~> legacy
+cdef object PyPickle5_dumps = None                        #~> legacy
+cdef object PyPickle5_loads = None                        #~> legacy
 
-cdef int import_pickle5() except -1:                      #> legacy
-    global have_pickle5                                   #> legacy
-    global PyPickle5_dumps                                #> legacy
-    global PyPickle5_loads                                #> legacy
-    if have_pickle5 < 0:                                  #> legacy
-        try:                                              #> legacy
-            from pickle5 import dumps as PyPickle5_dumps  #> legacy
-            from pickle5 import loads as PyPickle5_loads  #> legacy
-            have_pickle5 = 1                              #> legacy
-        except ImportError:                               #> legacy
-            PyPickle5_dumps = None                        #> legacy
-            PyPickle5_loads = None                        #> legacy
-            have_pickle5 = 0                              #> legacy
-    return have_pickle5                                   #> legacy
+cdef int import_pickle5() except -1:                      #~> legacy
+    global have_pickle5                                   #~> legacy
+    global PyPickle5_dumps                                #~> legacy
+    global PyPickle5_loads                                #~> legacy
+    if have_pickle5 < 0:                                  #~> legacy
+        try:                                              #~> legacy
+            from pickle5 import dumps as PyPickle5_dumps  #~> legacy
+            from pickle5 import loads as PyPickle5_loads  #~> legacy
+            have_pickle5 = 1                              #~> legacy
+        except ImportError:                               #~> legacy
+            PyPickle5_dumps = None                        #~> legacy
+            PyPickle5_loads = None                        #~> legacy
+            have_pickle5 = 0                              #~> legacy
+    return have_pickle5                                   #~> legacy
 
 
 cdef object get_buffer_callback(list buffers, Py_ssize_t threshold):
@@ -158,14 +158,14 @@ cdef object get_buffer_callback(list buffers, Py_ssize_t threshold):
 
 cdef object cdumps_oob(Pickle pkl, object obj):
     cdef object pkl_dumps = pkl.ob_dumps
-    if PY_VERSION_HEX < 0x03080000:          #> legacy
-        if pkl_dumps is PyPickle_dumps:      #> legacy
-            if not import_pickle5():         #> legacy
-                return cdumps(pkl, obj), []  #> legacy
-            pkl_dumps = PyPickle5_dumps      #> legacy
+    if PY_VERSION_HEX < 0x03080000:          #~> legacy
+        if pkl_dumps is PyPickle_dumps:      #~> legacy
+            if not import_pickle5():         #~> legacy
+                return cdumps(pkl, obj), []  #~> legacy
+            pkl_dumps = PyPickle5_dumps      #~> legacy
     cdef object protocol = pkl.ob_PROTO
     if protocol is None:
-        protocol = PyPickle_PROTOCOL  #> no cover
+        protocol = PyPickle_PROTOCOL         #~> uncovered
     protocol = max(protocol, 5)
     cdef list buffers = []
     cdef Py_ssize_t threshold = pkl.ob_THRES
@@ -175,11 +175,11 @@ cdef object cdumps_oob(Pickle pkl, object obj):
 
 cdef object cloads_oob(Pickle pkl, object data, object buffers):
     cdef object pkl_loads = pkl.ob_loads
-    if PY_VERSION_HEX < 0x03080000:       #> legacy
-        if pkl_loads is PyPickle_loads:   #> legacy
-            if not import_pickle5():      #> legacy
-                return cloads(pkl, data)  #> legacy
-            pkl_loads = PyPickle5_loads   #> legacy
+    if PY_VERSION_HEX < 0x03080000:       #~> legacy
+        if pkl_loads is PyPickle_loads:   #~> legacy
+            if not import_pickle5():      #~> legacy
+                return cloads(pkl, data)  #~> legacy
+            pkl_loads = PyPickle5_loads   #~> legacy
     return pkl_loads(data, buffers=buffers)
 
 
@@ -719,7 +719,7 @@ cdef object PyMPI_mrecv(object rmsg,
     elif PyBytes_CheckExact(rmsg):
         rmsg = asbuffer_r(rmsg, &rbuf, &rlen)
     else:
-        rmsg = asbuffer_w(rmsg, &rbuf, &rlen)  #> unreachable
+        rmsg = asbuffer_w(rmsg, &rbuf, &rlen)  #~> unreachable
     cdef MPI_Count rcount = <MPI_Count> rlen
     with nogil: CHKERR( MPI_Mrecv_c(
         rbuf, rcount, rtype, message, status) )
@@ -738,7 +738,7 @@ cdef object PyMPI_imrecv(object rmsg,
     elif PyBytes_CheckExact(rmsg):
         rmsg = asbuffer_r(rmsg, &rbuf, &rlen)
     else:
-        rmsg = asbuffer_w(rmsg, &rbuf, &rlen)  #> unreachable
+        rmsg = asbuffer_w(rmsg, &rbuf, &rlen)  #~> unreachable
     cdef MPI_Count rcount = <MPI_Count> rlen
     with nogil: CHKERR( MPI_Imrecv_c(
         rbuf, rcount, rtype, message, request) )

@@ -72,9 +72,9 @@ cdef inline int comm_neighbors_count(
     cdef int size=0, ndims=0, rank=0, nneighbors=0
     cdef int indegree=0, outdegree=0, weighted=0
     CHKERR( MPI_Topo_test(comm, &topo) )
-    if topo == MPI_UNDEFINED:                 #> unreachable
-        CHKERR( MPI_Comm_size(comm, &size) )  #> unreachable
-        indegree = outdegree = size           #> unreachable
+    if topo == MPI_UNDEFINED:                 #~> unreachable
+        CHKERR( MPI_Comm_size(comm, &size) )  #~> unreachable
+        indegree = outdegree = size           #~> unreachable
     elif topo == MPI_CART:
         CHKERR( MPI_Cartdim_get(comm, &ndims) )
         indegree = outdegree = <int>2*ndims
@@ -145,7 +145,7 @@ cdef inline dict commlock_table(MPI_Comm comm):
             comm, commlock_keyval, <void*> table) )
         commlock_registry[<Py_uintptr_t>comm] = table
     elif PYPY:
-        table = commlock_registry[<Py_uintptr_t>comm]  #> pypy
+        table = commlock_registry[<Py_uintptr_t>comm]  #~> pypy
     else:
         table = <dict> attrval
     return table

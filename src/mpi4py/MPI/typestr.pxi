@@ -21,70 +21,70 @@ cdef inline const char* typechr(const char kind[], size_t size) noexcept nogil:
     if k == c'b': # boolean
         if size == 1: return "?"
         if size >= 2: return typechr('i', size)
-        return NULL  #> unreachable
+        return NULL  #~> unreachable
     if k == c'i': # signed integral
         if size == sizeof(char)      : return "b"
         if size == sizeof(short)     : return "h"
         if size == sizeof(int)       : return "i"
         if size == sizeof(long)      : return "l"
-        if size == sizeof(long long) : return "q"  #> no cover
-        return NULL  #> unreachable
+        if size == sizeof(long long) : return "q"  #~> uncovered
+        return NULL  #~> unreachable
     if k == c'u': # unsigned integral
         if size == sizeof(char)      : return "B"
         if size == sizeof(short)     : return "H"
         if size == sizeof(int)       : return "I"
         if size == sizeof(long)      : return "L"
-        if size == sizeof(long long) : return "Q"  #> no cover
-        return NULL  #> unreachable
+        if size == sizeof(long long) : return "Q"  #~> uncovered
+        return NULL  #~> unreachable
     if k == c'f': # real floating
         if size == sizeof(float)//2    : return "e"
         if size == sizeof(float)       : return "f"
         if size == sizeof(double)      : return "d"
         if size == sizeof(long double) : return "g"
-        return NULL  #> unreachable
+        return NULL  #~> unreachable
     if k == c'c': # complex floating
         if size == 2*sizeof(float)//2    : return "E"
         if size == 2*sizeof(float)       : return "F"
         if size == 2*sizeof(double)      : return "D"
         if size == 2*sizeof(long double) : return "G"
-        return NULL  #> unreachable
-    return NULL  #> unreachable
+        return NULL  #~> unreachable
+    return NULL  #~> unreachable
 
 cdef inline const char* typestr(const char kind[], size_t size) noexcept nogil:
     cdef char k = kind[0]
     if k == c'b': # boolean
         if size ==  1: return "b1"
-        if size >=  2: return typestr('i', size)  #> no cover
-        return NULL  #> unreachable
+        if size >=  2: return typestr('i', size)  #~> uncovered
+        return NULL  #~> unreachable
     if k == c'i': # signed integral
         if size ==  1: return "i1"
         if size ==  2: return "i2"
         if size ==  4: return "i4"
         if size ==  8: return "i8"
-        if size == 16: return "i16"  #> no cover
-        return NULL  #> unreachable
+        if size == 16: return "i16"  #~> uncovered
+        return NULL  #~> unreachable
     if k == c'u': # unsigned integral
         if size ==  1: return "u1"
         if size ==  2: return "u2"
         if size ==  4: return "u4"
         if size ==  8: return "u8"
-        if size == 16: return "u16"  #> no cover
-        return NULL  #> unreachable
+        if size == 16: return "u16"  #~> uncovered
+        return NULL  #~> unreachable
     if k == c'f': # real floating
         if size ==  2: return "f2"
         if size ==  4: return "f4"
         if size ==  8: return "f8"
         if size == 12: return "f12"
         if size == 16: return "f16"
-        return NULL  #> unreachable
+        return NULL  #~> unreachable
     if k == c'c': # complex floating
         if size ==  4: return "c4"
         if size ==  8: return "c8"
         if size == 16: return "c16"
         if size == 24: return "c24"
         if size == 32: return "c32"
-        return NULL  #> unreachable
-    return NULL  #> unreachable
+        return NULL  #~> unreachable
+    return NULL  #~> unreachable
 
 cdef inline const char* typechr_to_typestr(const char tchr[]) noexcept nogil:
     if tchr == NULL: return NULL
@@ -119,16 +119,16 @@ cdef inline const char* typechr_to_typestr(const char tchr[]) noexcept nogil:
     if c == c'S': return "S1" # NumPy
     if c == c'U': return "U1" # NumPy
     if c == c'c': return "S1" # PEP 3118
-    if c == c'u': return "u2" # PEP 3118  #> no cover
-    if c == c'w': return "U1" # PEP 3118  #> no cover
-    return NULL  #> no cover
+    if c == c'u': return "u2" # PEP 3118  #~> uncovered
+    if c == c'w': return "U1" # PEP 3118  #~> uncovered
+    return NULL  #~> uncovered
 
 cdef inline const char* mpiaddrchr(size_t size) noexcept nogil:
     if size == sizeof(MPI_Aint)  : return "p"
-    if size == sizeof(long long) : return "q"  #> no cover
-    if size == sizeof(long)      : return "l"  #> no cover
-    if size == sizeof(int)       : return "i"  #> no cover
-    return NULL  #> no cover
+    if size == sizeof(long long) : return "q"  #~> uncovered
+    if size == sizeof(long)      : return "l"  #~> uncovered
+    if size == sizeof(int)       : return "i"  #~> uncovered
+    return NULL  #~> uncovered
 
 cdef inline int mpicombiner(MPI_Datatype datatype) noexcept nogil:
     if not mpi_active(): return MPI_COMBINER_NAMED
@@ -221,8 +221,8 @@ cdef inline size_t typealign(const char tchr[]) noexcept nogil:
     if c == c'U': return alignof_wchar
     # pointer
     if c == c'p': return alignof_voidp
-    if c == c'P': return alignof_voidp  #> no cover
-    return 0  #> unreachable
+    if c == c'P': return alignof_voidp  #~> uncovered
+    return 0  #~> unreachable
 
 cdef inline size_t typealignpair(
     const char tc_a[],

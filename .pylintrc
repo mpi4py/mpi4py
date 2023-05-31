@@ -1,3 +1,5 @@
+# https://pylint.readthedocs.io # -*- mode: conf -*-
+
 [MASTER]
 disable = locally-disabled,file-ignored,no-else-return
 enable = useless-suppression

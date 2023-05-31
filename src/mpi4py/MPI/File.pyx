@@ -816,9 +816,9 @@ cdef class File:
         cdef int index = errhdl_new(errhandler_fn, &fn)
         try:
             CHKERR( MPI_File_create_errhandler(fn, &errhandler.ob_mpi) )
-        except:                     #> no cover
-            errhdl_del(&index, fn)  #> no cover
-            raise                   #> no cover
+        except:                     #~> uncovered
+            errhdl_del(&index, fn)  #~> uncovered
+            raise                   #~> uncovered
         return errhandler
 
     def Get_errhandler(self) -> Errhandler:

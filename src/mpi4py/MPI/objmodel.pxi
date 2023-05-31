@@ -5,10 +5,10 @@ cdef object Lock = None
 if PY_VERSION_HEX >= 0x030900F0:
     from _thread import allocate_lock as Lock
 else:
-    try:                                                 #> legacy
-        from _thread import allocate_lock as Lock        #> legacy
-    except ImportError:                                  #> legacy
-        from _dummy_thread import allocate_lock as Lock  #> legacy
+    try:                                                 #~> legacy
+        from _thread import allocate_lock as Lock        #~> legacy
+    except ImportError:                                  #~> legacy
+        from _dummy_thread import allocate_lock as Lock  #~> legacy
 
 #------------------------------------------------------------------------------
 

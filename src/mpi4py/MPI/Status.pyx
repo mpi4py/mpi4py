@@ -33,12 +33,12 @@ cdef class Status:
         }
         try:
             state['count'] = self.Get_elements(__BYTE__)
-        except NotImplementedError:  #> legacy
-            pass                     #> legacy
+        except NotImplementedError:  #~> legacy
+            pass                     #~> legacy
         try:
             state['cancelled'] = self.Is_cancelled()
-        except NotImplementedError:  #> legacy
-            pass                     #> legacy
+        except NotImplementedError:  #~> legacy
+            pass                     #~> legacy
         return state
 
     def __setstate__(self, state: dict[str, int]) -> None:

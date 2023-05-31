@@ -14,13 +14,16 @@ jobs:
     executor: << parameters.os >>
     steps:
       - checkout
-      - run: .circleci/test-package py=<< parameters.py >> mpi=<< parameters.mpi >>
+      - run: .circleci/step-setup    py=<< parameters.py >> mpi=<< parameters.mpi >>
+      - run: .circleci/step-install  py=<< parameters.py >> mpi=<< parameters.mpi >>
+      - run: .circleci/step-coverage py=<< parameters.py >> mpi=<< parameters.mpi >>
+      - run: mamba install --quiet --yes curl gnupg # required by codecov/upload
       - codecov/upload
 
 executors:
   linux:
     docker:
-      - image: condaforge/linux-anvil-cos7-x86_64
+      - image: condaforge/mambaforge
 
 workflows:
   test-all:
@@ -38,8 +41,6 @@ workflows:
               os:
                 - linux
               py:
-                - "3.6"
-                - "3.7"
                 - "3.8"
                 - "3.9"
                 - "3.10"

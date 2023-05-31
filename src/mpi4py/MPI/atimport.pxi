@@ -266,13 +266,13 @@ cdef int check_mpiexec() except -1 nogil:
     cdef const char *openmpi = b"OMPI_COMM_WORLD_SIZE"
     cdef const char *bad_env = NULL
     if MPICH:
-        if getenv(mpich) == NULL and getenv(hydra) == NULL:      #> mpich
-            if getenv(openmpi) != NULL:                          #> mpich
-                bad_env = openmpi                                #> mpich
+        if getenv(mpich) == NULL and getenv(hydra) == NULL:      #~> mpich
+            if getenv(openmpi) != NULL:                          #~> mpich
+                bad_env = openmpi                                #~> mpich
     if OPENMPI:
-        if getenv(openmpi) == NULL:                              #> openmpi
-            if getenv(mpich) != NULL and getenv(hydra) != NULL:  #> openmpi
-                bad_env = mpich                                  #> openmpi
+        if getenv(openmpi) == NULL:                              #~> openmpi
+            if getenv(mpich) != NULL and getenv(hydra) != NULL:  #~> openmpi
+                bad_env = mpich                                  #~> openmpi
     if bad_env != NULL:
         warn_mpiexec(bad_env)
     return 0
@@ -290,16 +290,16 @@ cdef int bootstrap() except -1:
     getOptions(&options)
     # Cleanup at (the very end of) Python exit
     if Py_AtExit(atexit) < 0:
-        PySys_WriteStderr(                                   #> no cover
-            b"WARNING: %s\n",                                #> no cover
-            b"could not register cleanup with Py_AtExit()",  #> no cover
+        PySys_WriteStderr(                                   #~> uncovered
+            b"WARNING: %s\n",                                #~> uncovered
+            b"could not register cleanup with Py_AtExit()",  #~> uncovered
         )
     # Do we have to initialize MPI?
     cdef int initialized = 1
     <void>MPI_Initialized(&initialized)
     if initialized:
-        options.finalize = 0  #> TODO
-        return 0              #> TODO
+        options.finalize = 0  #~> TODO
+        return 0              #~> TODO
     if not options.initialize:
         return 0
     # MPI initialization
@@ -310,15 +310,15 @@ cdef int bootstrap() except -1:
         required = options.thread_level
         ierr = MPI_Init_thread(NULL, NULL, required, &provided)
         if ierr != MPI_SUCCESS:
-            raise RuntimeError(               #> no cover
-                f"MPI_Init_thread() failed "  #> no cover
-                f"[error code: {ierr}]")      #> no cover
+            raise RuntimeError(               #~> uncovered
+                f"MPI_Init_thread() failed "  #~> uncovered
+                f"[error code: {ierr}]")      #~> uncovered
     else:
         ierr = MPI_Init(NULL, NULL)
         if ierr != MPI_SUCCESS:
-            raise RuntimeError(               #> no cover
-                f"MPI_Init() failed "         #> no cover
-                f"[error code: {ierr}]")      #> no cover
+            raise RuntimeError(               #~> uncovered
+                f"MPI_Init() failed "         #~> uncovered
+                f"[error code: {ierr}]")      #~> uncovered
     return 0
 
 @cython.linetrace(False)
@@ -374,11 +374,11 @@ cdef object MPIException = <object>PyExc_RuntimeError
 
 cdef int PyMPI_Raise(int ierr) except -1 with gil:
     if ierr == PyMPI_ERR_UNAVAILABLE:
-        PyErr_SetObject(<object>PyExc_NotImplementedError, None)  #> no cover
-        return 0                                                  #> no cover
+        PyErr_SetObject(<object>PyExc_NotImplementedError, None)  #~> uncovered
+        return 0                                                  #~> uncovered
     if (<void*>MPIException) == NULL:
-        PyErr_SetObject(<object>PyExc_RuntimeError, <long>ierr)   #> no cover
-        return 0                                                  #> no cover
+        PyErr_SetObject(<object>PyExc_RuntimeError, <long>ierr)   #~> uncovered
+        return 0                                                  #~> uncovered
     PyErr_SetObject(MPIException, <long>ierr)
     return 0
 
