@@ -1,0 +1,11 @@
+# https://github.com/codespell-project/codespell #-*- mode: conf -*-
+
+[codespell]
+check-hidden =
+check-filenames =
+skip = build,.git,.tox,.*_cache,*/mpi4py/MPI.c
+ignore-words-list =
+  ccompiler,
+  improbe,
+  inout,
+  nd,

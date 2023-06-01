@@ -275,7 +275,7 @@ Release 2.0.0 [2015-10-18]
 * Backward-incompatible changes:
 
   + Python 2.4, 2.5, 3.0 and 3.1 are no longer supported.
-  + Default MPI error handling policies are overriden. After import,
+  + Default MPI error handling policies are overridden. After import,
     mpi4py sets the ``ERRORS_RETURN`` error handler in ``COMM_SELF``
     and ``COMM_WORLD``, as well as any new ``Comm``, ``Win``, or
     ``File`` instance created through mpi4py, thus effectively
@@ -390,7 +390,7 @@ Release 1.2.1 [2010-02-26]
 * Fix distutils-related issues in Mac OS X. Now ARCHFLAGS environment
   variable is honored of all Python's ``config/Makefile`` variables.
 
-* Fix issues with Open MPI < 1.4.2 releated to error checking and
+* Fix issues with Open MPI < 1.4.2 related to error checking and
   ``MPI_XXX_NULL`` handles.
 
 

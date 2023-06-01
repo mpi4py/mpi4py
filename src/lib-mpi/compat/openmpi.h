@@ -5,7 +5,7 @@
 /* ------------------------------------------------------------------------- */
 
 /*
- * The hackery below redefines the actuall calls to 'MPI_Init()' and
+ * The hackery below redefines the actual calls to 'MPI_Init()' and
  * 'MPI_Init_thread()' in order to preload the main MPI dynamic
  * library with appropriate flags to 'dlopen()' ensuring global
  * availability of library symbols.

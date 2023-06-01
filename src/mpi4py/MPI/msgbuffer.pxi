@@ -213,16 +213,16 @@ cdef _p_message message_simple(object msg,
         displ = <MPI_Aint> o_displ
         if displ < 0:
             raise ValueError(
-                f"message: negative diplacement {displ}")
+                f"message: negative displacement {displ}")
         if displ > 0:
             if btype == MPI_DATATYPE_NULL:
                 raise ValueError(
-                    f"message: cannot handle diplacement, "
+                    f"message: cannot handle displacement, "
                     f"datatype is null")
             CHKERR( MPI_Type_get_extent_c(btype, &lb, &extent) )
             if extent <= 0:
                 raise ValueError(
-                    f"message: cannot handle diplacement, "
+                    f"message: cannot handle displacement, "
                     f"datatype extent {extent} (lb:{lb}, ub:{lb+extent})")
             if displ*extent > length:
                 raise ValueError(

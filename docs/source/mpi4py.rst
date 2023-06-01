@@ -100,7 +100,7 @@ Runtime configuration options
 
 MPI for Python features automatic initialization and finalization of the MPI
 execution environment. By using the `mpi4py.rc` object, MPI initialization and
-finalization can be handled programatically::
+finalization can be handled programmatically::
 
   import mpi4py
   mpi4py.rc.initialize = False  # do not initialize MPI automatically

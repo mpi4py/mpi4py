@@ -283,7 +283,7 @@ cdef class Comm:
         cdef MPI_Aint flag_len = 0
         flag = aspybuffer(flag, <void **>&flag_ptr, &flag_len, 0, b"i")
         if flag_len != 1: raise ValueError(
-            "flag: expecting int buffer of lenght one")
+            "flag: expecting int buffer of length one")
         cdef Request request = <Request>New(Request)
         with nogil: CHKERR( MPI_Comm_iagree(
             self.ob_mpi, flag_ptr, &request.ob_mpi) )
