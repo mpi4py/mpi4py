@@ -116,7 +116,7 @@ known MPI and Python related open source projects from the Internet.
     for message passing. It does permit interactive parallel runs,
     which are useful for learning and debugging.
 
-  + It provides an interface suitable for basic parallel programing.
+  + It provides an interface suitable for basic parallel programming.
     There is not full support for defining new communicators or process
     topologies.
 

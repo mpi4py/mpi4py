@@ -61,7 +61,7 @@ Communicators
 -------------
 
 In *MPI for Python*, `Comm` is the base class of communicators. The
-`Intracomm` and `Intercomm` classes are sublcasses of the `Comm`
+`Intracomm` and `Intercomm` classes are subclasses of the `Comm`
 class.  The `Comm.Is_inter` method (and `Comm.Is_intra`, provided for
 convenience but not part of the MPI specification) is defined for
 communicator objects and can be used to determine the particular

@@ -95,7 +95,7 @@ class Pool:
 
         Block until all results are ready and return them in a `list`.
 
-        The *iterable* is choped into a number of chunks which are submited as
+        The *iterable* is choped into a number of chunks which are submitted as
         separate tasks. The (approximate) size of these chunks can be specified
         by setting *chunksize* to a positive integer.
 
@@ -140,7 +140,7 @@ class Pool:
 
         Block until all results are ready and return them in a `list`.
 
-        The *iterable* is choped into a number of chunks which are submited as
+        The *iterable* is choped into a number of chunks which are submitted as
         separate tasks. The (approximate) size of these chunks can be specified
         by setting *chunksize* to a positive integer.
 

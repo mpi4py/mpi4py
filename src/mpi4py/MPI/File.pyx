@@ -605,7 +605,7 @@ cdef class File:
         buf: BufSpec,
     ) -> None:
         """
-        Start a split collective read using explict offset
+        Start a split collective read using explicit offset
         """
         cdef _p_msg_io m = message_io_read(buf)
         with nogil: CHKERR( MPI_File_read_at_all_begin_c(
@@ -617,7 +617,7 @@ cdef class File:
         Status status: Status | None = None,
     ) -> None:
         """
-        Complete a split collective read using explict offset
+        Complete a split collective read using explicit offset
         """
         cdef _p_msg_io m = message_io_read(buf)
         cdef MPI_Status *statusp = arg_Status(status)
@@ -630,7 +630,7 @@ cdef class File:
         buf: BufSpec,
     ) -> None:
         """
-        Start a split collective write using explict offset
+        Start a split collective write using explicit offset
         """
         cdef _p_msg_io m = message_io_write(buf)
         with nogil: CHKERR( MPI_File_write_at_all_begin_c(
@@ -642,7 +642,7 @@ cdef class File:
         Status status: Status | None = None,
     ) -> None:
         """
-        Complete a split collective write using explict offset
+        Complete a split collective write using explicit offset
         """
         cdef _p_msg_io m = message_io_write(buf)
         cdef MPI_Status *statusp = arg_Status(status)

@@ -110,6 +110,9 @@ jobs:
     - name: pylint
       run:  pylint mpi4py
 
+    - name: codespell
+      run:  codespell
+
   type:
     runs-on: ubuntu-latest
 

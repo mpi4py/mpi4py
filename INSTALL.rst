@@ -20,7 +20,7 @@ or::
 
 .. warning::
 
-   ``pip`` keeps previouly built wheel files on its cache for future
+   ``pip`` keeps previously built wheel files on its cache for future
    reuse. If you want to reinstall the ``mpi4py`` package using a
    different or updated MPI implementation, you have to either first
    remove the cached wheel file with::

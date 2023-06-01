@@ -1067,7 +1067,7 @@ cdef extern from "<mpi.h>" nogil:
     enum: MPI_ERR_RMA_ATTACH             #:= MPI_ERR_LASTCODE
     enum: MPI_ERR_RMA_SHARED             #:= MPI_ERR_LASTCODE
     enum: MPI_ERR_RMA_FLAVOR             #:= MPI_ERR_LASTCODE
-    # input/ouput
+    # input/output
     enum: MPI_ERR_BAD_FILE               #:= MPI_ERR_LASTCODE
     enum: MPI_ERR_NO_SUCH_FILE           #:= MPI_ERR_LASTCODE
     enum: MPI_ERR_FILE_EXISTS            #:= MPI_ERR_LASTCODE

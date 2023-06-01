@@ -300,7 +300,7 @@ standard. Additionally, job schedulers and batch systems in supercomputing
 facilities may pose additional complications to applications using the
 :c:func:`MPI_Comm_spawn` routine.
 
-With these issues in mind, :mod:`mpi4py.futures` supports an additonal, more
+With these issues in mind, :mod:`mpi4py.futures` supports an additional, more
 traditional, SPMD-like usage pattern requiring MPI-1 calls only. Python
 applications are started the usual way, e.g., using the :program:`mpiexec`
 command. Python code should make a collective call to the
