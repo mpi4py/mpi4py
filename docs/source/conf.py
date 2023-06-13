@@ -103,6 +103,18 @@ try:
 except ImportError:
     sphinx_rtd_theme = None
 
+try:
+    import sphinx_copybutton
+    if 'sphinx_copybutton' not in extensions:
+        extensions.append('sphinx_copybutton')
+except ImportError:
+    sphinx_copybutton = None
+
+copybutton_exclude = '.linenos, .gp, .go'
+copybutton_prompt_text = r'\$ |>>> |\.\.\. '
+copybutton_prompt_is_regexp = True
+copybutton_line_continuation_character = '\\'
+
 
 def _setup_numpy_typing():
     try:
