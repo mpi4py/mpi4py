@@ -402,6 +402,7 @@ MPI execution environment.
    :ref:`python:using-on-cmdline`
       Documentation on Python command line interface.
 
+
 Examples
 --------
 
@@ -480,7 +481,7 @@ manager, users can set the MPI universe size via the ``-usize`` argument to
 or, alternatively, by setting the :envvar:`MPIEXEC_UNIVERSE_SIZE` environment
 variable::
 
-  $ MPIEXEC_UNIVERSE_SIZE=17 mpiexec -n 1 python julia.py
+  $ env MPIEXEC_UNIVERSE_SIZE=17 mpiexec -n 1 python julia.py
 
 In the Open MPI implementation, the MPI universe size can be set via the
 ``-host`` argument to :program:`mpiexec`::
@@ -491,7 +492,7 @@ Another way to specify the number of workers is to use the
 :mod:`mpi4py.futures`-specific environment variable
 :envvar:`MPI4PY_FUTURES_MAX_WORKERS`::
 
-  $ MPI4PY_FUTURES_MAX_WORKERS=16 mpiexec -n 1 python julia.py
+  $ env MPI4PY_FUTURES_MAX_WORKERS=16 mpiexec -n 1 python julia.py
 
 Note that in this case, the MPI universe size is ignored.
 
@@ -509,12 +510,6 @@ the tasks submitted by the master.
 .. [#] When using an MPI implementation other than MPICH or Open MPI, please
    check the documentation of the implementation and/or batch
    system for the ways to specify the desired MPI universe size.
-
-
-.. glossary::
-
-   GIL
-     See :term:`global interpreter lock`.
 
 
 Citation
