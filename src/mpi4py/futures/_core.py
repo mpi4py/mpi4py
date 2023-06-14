@@ -26,6 +26,8 @@ from ._base import BrokenExecutor
 
 # ---
 
+_tls = threading.local()
+
 
 def serialized(function):
     def wrapper(*args, **kwargs):
@@ -395,12 +397,18 @@ class SharedPoolCtx:
     def __init__(self):
         self.lock = threading.Lock()
         self.comm = MPI.COMM_NULL
+        self.intracomm = MPI.COMM_NULL
         self.on_root = None
         self.counter = None
         self.workers = None
         self.threads = weakref.WeakKeyDictionary()
 
     def _manager(self, pool, options):
+        if self.counter is None:
+            options['max_workers'] = 1
+            set_comm_server(MPI.COMM_SELF)
+            _manager_thread(pool, options)
+            return
         with self.lock:
             tag = next(self.counter)
             if tag == 0:
@@ -420,11 +428,7 @@ class SharedPoolCtx:
     def __call__(self, executor):
         assert SharedPool is self  # noqa: S101
         with self.lock:
-            if self.comm != MPI.COMM_NULL and self.on_root:
-                manager = self._manager
-            else:
-                manager = _manager_thread
-            pool = Pool(executor, manager)
+            pool = Pool(executor, self._manager)
             del THREADS_QUEUES[pool.thread]
             self.threads[pool.thread] = pool.queue
         return pool
@@ -433,7 +437,7 @@ class SharedPoolCtx:
         assert SharedPool is None  # noqa: S101
         comm, root = MPI.COMM_WORLD, 0
         self.on_root = comm.Get_rank() == root
-        self.comm = comm_split(comm, root)
+        self.comm, self.intracomm = comm_split(comm, root)
         if self.comm != MPI.COMM_NULL and self.on_root:
             size = self.comm.Get_remote_size()
             self.counter = itertools.count(0)
@@ -454,14 +458,15 @@ class SharedPoolCtx:
                     client_init(comm, options)
                 client_stop(comm)
             else:
-                comm, options = server_sync(comm)
-                server_init(comm)
-                server_exec(comm, options)
-                server_stop(comm)
+                intracomm = self.intracomm
+                set_comm_server(intracomm)
+                server_main_comm(comm)
+                intracomm.Free()
         if not self.on_root:
             join_threads(self.threads)
         _set_shared_pool(None)
         self.comm = MPI.COMM_NULL
+        self.intracomm = MPI.COMM_NULL
         self.on_root = None
         self.counter = None
         self.workers = None
@@ -474,7 +479,9 @@ class SharedPoolCtx:
 
 def comm_split(comm, root):
     if comm.Get_size() == 1:
-        return MPI.Intercomm(MPI.COMM_NULL)
+        comm = MPI.Intercomm(MPI.COMM_NULL)
+        intracomm = MPI.Intracomm(MPI.COMM_NULL)
+        return comm, intracomm
     rank = comm.Get_rank()
     if MPI.Get_version() >= (2, 2):
         allgroup = comm.Get_group()
@@ -497,8 +504,9 @@ def comm_split(comm, root):
         remote_leader = root
     intercomm = intracomm.Create_intercomm(
         local_leader, comm, remote_leader, tag=0)
-    intracomm.Free()
-    return intercomm
+    if rank == root:
+        intracomm.Free()
+    return intercomm, intracomm
 
 
 # ---
@@ -507,20 +515,25 @@ def comm_split(comm, root):
 def _comm_executor_helper(executor, comm, root):
 
     def _manager(pool, options, comm, root):
-        comm = serialized(comm_split)(comm, root)
+        if comm.Get_size() == 1:
+            options['max_workers'] = 1
+            set_comm_server(MPI.COMM_SELF)
+            _manager_thread(pool, options)
+            return
+        comm, _ = serialized(comm_split)(comm, root)
         _manager_comm(pool, options, comm, sync=False)
 
     if comm.Get_rank() == root:
         if SharedPool is not None:
             pool = SharedPool(executor)
-        elif comm.Get_size() == 1:
-            pool = ThreadPool(executor)
         else:
             pool = Pool(executor, _manager, comm, root)
         executor._pool = pool
     else:
-        comm = comm_split(comm, root)
+        comm, intracomm = comm_split(comm, root)
+        set_comm_server(intracomm)
         server_main_comm(comm, sync=False)
+        intracomm.Free()
 
 
 # ---
@@ -1126,6 +1139,18 @@ def server_accept(
 
 # ---
 
+def get_comm_server():
+    try:
+        return _tls.comm_server
+    except AttributeError:
+        raise RuntimeError(
+            "communicator is not accessible"
+        ) from None
+
+
+def set_comm_server(intracomm):
+    _tls.comm_server = intracomm
+
 
 def server_main_comm(comm, sync=True):
     assert comm != MPI.COMM_NULL        # noqa: S101
@@ -1139,6 +1164,7 @@ def server_main_comm(comm, sync=True):
 
 def server_main_spawn():
     comm = MPI.Comm.Get_parent()
+    set_comm_server(MPI.COMM_WORLD)
     server_main_comm(comm)
 
 
@@ -1158,6 +1184,7 @@ def server_main_service():
     info = dict(k_v.split('=', 1) for k_v in info if k_v)
 
     comm = server_accept(service, info)
+    set_comm_server(MPI.COMM_WORLD)
     server_main_comm(comm)
 
 

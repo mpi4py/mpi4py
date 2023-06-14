@@ -22,6 +22,10 @@ from .pool import (
     ProcessPoolExecutor as ProcessPoolExecutor,
 )
 
+from .pool import (
+    get_comm_workers as get_comm_workers,
+)
+
 __all__: list[str] = [
     'Future',
     'Executor',
@@ -38,4 +42,5 @@ __all__: list[str] = [
     'MPICommExecutor',
     'ThreadPoolExecutor',
     'ProcessPoolExecutor',
+    'get_comm_workers',
 ]
