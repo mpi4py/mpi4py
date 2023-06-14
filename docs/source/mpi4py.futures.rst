@@ -407,10 +407,48 @@ MPI execution environment.
       Documentation on Python command line interface.
 
 
+Parallel tasks
+--------------
+
+The :mod:`mpi4py.futures` package favors an embarrassingly parallel execution
+model involving a series of sequential tasks independent of each other and
+executed asynchronously. Albeit unnatural, :attr:`MPIPoolExecutor` can still be
+used for handling workloads involving parallel tasks, where worker processes
+communicate and coordinate each other via MPI.
+
+.. function:: get_comm_workers()
+
+   Access an intracommunicator grouping MPI worker processes.
+
+Executing parallel tasks with :mod:`mpi4py.futures` requires following some
+rules, cf. highlighted lines in example :ref:`cpi-py` :
+
+* Use :attr:`MPIPoolExecutor.num_workers` to determine the number of worker
+  processes in the executor and **submit exactly one callable per worker
+  process** using the :meth:`MPIPoolExecutor.submit` method.
+
+* The submitted callable must use :func:`get_comm_workers` to access an
+  intracommunicator grouping MPI worker processes. Afterwards, it is highly
+  recommended calling the :meth:`~mpi4py.MPI.Comm.Barrier` method on the
+  communicator. The barrier synchronization ensures that every worker process
+  is executing the submitted callable exactly once. Afterwards, the parallel
+  task can safely perform any kind of point-to-point or collective operation
+  using the returned communicator.
+
+* The :class:`~concurrent.futures.Future` instances returned by
+  :meth:`MPIPoolExecutor.submit` should be collected in a sequence.
+  Use :func:`~concurrent.futures.wait` with the sequence of
+  :class:`~concurrent.futures.Future` instances to ensure logical completion of
+  the parallel task.
+
+
 Examples
 --------
 
-The following :file:`julia.py` script computes the `Julia set`_ and dumps an
+Computing the Julia set
++++++++++++++++++++++++
+
+The following :ref:`julia-py` script computes the `Julia set`_ and dumps an
 image to disk in binary `PGM`_ format. The code starts by importing
 :class:`MPIPoolExecutor` from the :mod:`mpi4py.futures` package. Next, some
 global constants and functions implement the computation of the Julia set. The
@@ -476,6 +514,8 @@ spawns the pool of 16 worker processes. The master submits tasks to the workers
 and waits for the results. The workers receive incoming tasks, execute them,
 and send back the results to the master.
 
+.. highlight:: console
+
 When using MPICH implementation or its derivatives based on the Hydra process
 manager, users can set the MPI universe size via the ``-usize`` argument to
 :program:`mpiexec`::
@@ -490,7 +530,7 @@ variable::
 In the Open MPI implementation, the MPI universe size can be set via the
 ``-host`` argument to :program:`mpiexec`::
 
-  $ mpiexec -n 1 -host <hostname>:17 python julia.py
+  $ mpiexec -n 1 -host localhost:17 python julia.py
 
 Another way to specify the number of workers is to use the
 :mod:`mpi4py.futures`-specific environment variable
@@ -514,6 +554,97 @@ the tasks submitted by the master.
 .. [#] When using an MPI implementation other than MPICH or Open MPI, please
    check the documentation of the implementation and/or batch
    system for the ways to specify the desired MPI universe size.
+
+
+Computing Pi (parallel task)
+++++++++++++++++++++++++++++
+
+The number :math:`\pi` can be approximated via numerical integration with the
+simple midpoint rule, that is:
+
+.. math::
+
+   \pi = \int_{0}^{1} \frac{4}{1+x^2} \,dx \approx
+   \frac{1}{n} \sum_{i=1}^{n}
+   \frac{4}{1 + \left[\frac{1}{n} \left(i-\frac{1}{2}\right) \right]^2} .
+
+The following :ref:`cpi-py` script computes such approximations using
+:mod:`mpi4py.futures` with a parallel task involving a collective reduction
+operation. Highlighted lines correspond to the rules discussed in `Parallel
+tasks`_.
+
+.. code-block:: python
+   :name: cpi-py
+   :caption: :file:`cpi.py`
+   :emphasize-lines: 9-10,21,35-36,39
+   :linenos:
+
+   import math
+   import sys
+   from mpi4py.futures import MPIPoolExecutor, wait
+   from mpi4py.futures import get_comm_workers
+
+
+   def compute_pi(n):
+       # Access intracommunicator and synchronize
+       comm = get_comm_workers()
+       comm.Barrier()
+
+       rank = comm.Get_rank()
+       size = comm.Get_size()
+
+       # Local computation
+       h = 1.0 / n
+       s = 0.0
+       for i in range(rank + 1, n + 1, size):
+           x = h * (i - 0.5)
+           s += 4.0 / (1.0 + x**2)
+       pi_partial = s * h
+
+       # Parallel reduce-to-all
+       pi = comm.allreduce(pi_partial)
+
+       # All workers return the same value
+       return pi
+
+
+   if __name__ == '__main__':
+       n = int(sys.argv[1]) if len(sys.argv) > 1 else 256
+
+       with MPIPoolExecutor() as executor:
+           # Submit exactly one callable per worker
+           P = executor.num_workers
+           fs = [executor.submit(compute_pi, n) for _ in range(P)]
+
+           # Wait for all workers to finish
+           wait(fs)
+
+           # Get result from the first future object.
+           # In this particular example, due to using reduce-to-all,
+           # all the other future objects hold the same result value.
+           pi = fs[0].result()
+           print(
+               f"pi: {pi:.16f}, error: {abs(pi - math.pi):.3e}",
+               f"({n:d} intervals, {P:d} workers)",
+           )
+
+.. highlight:: console
+
+To run in modern MPI-2 mode::
+
+  $ env MPI4PY_FUTURES_MAX_WORKERS=4 mpiexec -n 1 python cpi.py 128
+  pi: 3.1415977398528137, error: 5.086e-06 (128 intervals, 4 workers)
+
+  $ env MPI4PY_FUTURES_MAX_WORKERS=8 mpiexec -n 1 python cpi.py 512
+  pi: 3.1415929714812316, error: 3.179e-07 (512 intervals, 8 workers)
+
+To run in legacy MPI-1 mode::
+
+  $ mpiexec -n 5 python -m mpi4py.futures cpi.py 128
+  pi: 3.1415977398528137, error: 5.086e-06 (128 intervals, 4 workers)
+
+  $ mpiexec -n 9 python -m mpi4py.futures cpi.py 512
+  pi: 3.1415929714812316, error: 3.179e-07 (512 intervals, 8 workers)
 
 
 Citation

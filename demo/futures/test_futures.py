@@ -53,6 +53,11 @@ def check_run_name(name):
     return __name__ == name
 
 
+def check_comm_workers():
+    comm = futures.get_comm_workers()
+    return comm.Get_size()
+
+
 def sys_flags_get(name):
     return getattr(sys.flags, name)
 
@@ -248,6 +253,12 @@ class ProcessPoolInitTest(ProcessPoolMixin,
         for number in (0, -1):
             with self.assertRaises(ValueError):
                 self.executor_type(max_workers=number)
+
+    def test_get_comm_workers(self):
+        executor = self.executor_type()
+        num_workers = executor.submit(check_comm_workers).result()
+        self.assertTrue(executor.num_workers, num_workers)
+        self.assertRaises(RuntimeError, check_comm_workers)
 
     @unittest.skipIf(SHARED_POOL, 'shared-pool')
     def test_use_pkl5_kwarg(self):
@@ -1094,12 +1105,14 @@ class MPICommExecutorTest(unittest.TestCase):
     @unittest.skipIf(SHARED_POOL, 'shared-pool')
     def test_arg_bad_comm(self):
         if MPI.COMM_WORLD.Get_size() == 1: return
-        intercomm = futures._core.comm_split(MPI.COMM_WORLD, 0)
+        intercomm, intracomm = futures._core.comm_split(MPI.COMM_WORLD, 0)
         try:
             with self.assertRaises(ValueError):
                 self.MPICommExecutor(intercomm)
         finally:
             intercomm.Free()
+            if intracomm:
+                intracomm.Free()
 
     def test_with_bad(self):
         mpicommexecutor = self.MPICommExecutor(MPI.COMM_SELF)
@@ -1163,6 +1176,24 @@ class MPICommExecutorTest(unittest.TestCase):
                 executor.bootup(wait=False)
                 executor.shutdown(wait=False)
                 del executor
+
+    def test_get_comm_workers(self):
+        for comm in (MPI.COMM_SELF, MPI.COMM_WORLD):
+            with self.MPICommExecutor(MPI.COMM_SELF) as executor:
+                num_workers = executor.submit(check_comm_workers).result()
+                self.assertTrue(executor.num_workers, num_workers)
+        self.assertRaises(RuntimeError, check_comm_workers)
+
+
+class ThreadPoolMixin(ExecutorMixin):
+    executor_type = futures.ThreadPoolExecutor
+
+
+class ThreadPoolTest(ThreadPoolMixin,
+                     ExecutorTestMixin,
+                     ExecutorShutdownTestMixin,
+                     unittest.TestCase):
+    pass
 
 
 from mpi4py.futures.aplus import ThenableFuture

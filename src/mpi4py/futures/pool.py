@@ -372,3 +372,8 @@ class ProcessPoolExecutor(MPIPoolExecutor):
     """`MPIPoolExecutor` subclass using a pool of processes."""
 
     _make_pool = staticmethod(_core.SpawnPool)
+
+
+def get_comm_workers():
+    """Access an intracommunicator grouping MPI worker processes."""
+    return _core.get_comm_server()

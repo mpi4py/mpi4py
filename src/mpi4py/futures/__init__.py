@@ -23,6 +23,8 @@ from .pool import MPICommExecutor
 from .pool import ThreadPoolExecutor
 from .pool import ProcessPoolExecutor
 
+from .pool import get_comm_workers
+
 __all__ = [
     'Future',
     'Executor',
@@ -39,4 +41,5 @@ __all__ = [
     'MPICommExecutor',
     'ThreadPoolExecutor',
     'ProcessPoolExecutor',
+    'get_comm_workers',
 ]
