@@ -17,7 +17,7 @@ jobs:
       - run: .circleci/step-setup    py=<< parameters.py >> mpi=<< parameters.mpi >>
       - run: .circleci/step-install  py=<< parameters.py >> mpi=<< parameters.mpi >>
       - run: .circleci/step-coverage py=<< parameters.py >> mpi=<< parameters.mpi >>
-      - run: mamba install --quiet --yes curl gnupg # required by codecov/upload
+      - run: apt-get update && apt-get install --yes curl gnupg # for codecov/upload
       - codecov/upload
 
 executors:
