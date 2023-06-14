@@ -16,7 +16,7 @@ def main():
     import sys
     from ..run import run_command_line
     from ..run import set_abort_status
-    from ._lib import SharedPoolCtx
+    from ._core import SharedPoolCtx
 
     class UsageExit(SystemExit):
         # pylint: disable=missing-class-docstring

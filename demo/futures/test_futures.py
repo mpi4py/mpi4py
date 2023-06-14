@@ -16,7 +16,7 @@ from concurrent.futures._base import (
 )
 
 
-SHARED_POOL = futures._lib.SharedPool is not None
+SHARED_POOL = futures._core.SharedPool is not None
 WORLD_SIZE  = MPI.COMM_WORLD.Get_size()
 
 
@@ -214,7 +214,7 @@ class ProcessPoolInitTest(ProcessPoolMixin,
     @unittest.skipIf(SHARED_POOL and WORLD_SIZE == 1, 'shared-pool')
     def test_run_name(self):
         executor = self.executor_type()
-        run_name = futures._lib.MAIN_RUN_NAME
+        run_name = futures._core.MAIN_RUN_NAME
         future = executor.submit(check_run_name, run_name)
         self.assertTrue(future.result())
 
@@ -871,9 +871,9 @@ class ProcessPoolSubmitTest(unittest.TestCase):
         executor1 = executor2 = executor3 = None
 
     def test_mpi_serialized_support(self):
-        futures._lib.setup_mpi_threads()
-        threading = futures._lib.threading
-        serialized = futures._lib.serialized
+        futures._core.setup_mpi_threads()
+        threading = futures._core.threading
+        serialized = futures._core.serialized
         lock_save = serialized.lock
         try:
             if lock_save is None:
@@ -1019,7 +1019,7 @@ class ProcessPoolPickleTest(unittest.TestCase):
         exc = f.exception()
         self.assertIsInstance(exc, ZeroDivisionError)
         cause = exc.__cause__
-        self.assertIsInstance(cause, futures._lib.RemoteTraceback)
+        self.assertIsInstance(cause, futures._core.RemoteTraceback)
 
 
 class MPICommExecutorTest(unittest.TestCase):
@@ -1094,7 +1094,7 @@ class MPICommExecutorTest(unittest.TestCase):
     @unittest.skipIf(SHARED_POOL, 'shared-pool')
     def test_arg_bad_comm(self):
         if MPI.COMM_WORLD.Get_size() == 1: return
-        intercomm = futures._lib.comm_split(MPI.COMM_WORLD)
+        intercomm = futures._core.comm_split(MPI.COMM_WORLD)
         try:
             with self.assertRaises(ValueError):
                 self.MPICommExecutor(intercomm)
