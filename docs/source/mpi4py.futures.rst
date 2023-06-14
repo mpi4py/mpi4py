@@ -229,6 +229,10 @@ only) thread until they are signaled for completion.
       allocated in the first call to :meth:`~MPIPoolExecutor.submit`, thus
       calling :meth:`~MPIPoolExecutor.bootup` explicitly is seldom needed.
 
+   .. attribute:: num_workers
+
+      Number or worker processes in the pool.
+
 
 .. envvar:: MPI4PY_FUTURES_MAX_WORKERS
 
