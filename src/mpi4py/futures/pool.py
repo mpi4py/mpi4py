@@ -12,7 +12,7 @@ from ._base import Future
 from ._base import Executor
 from ._base import as_completed
 
-from . import _lib
+from . import _core
 
 
 class MPIPoolExecutor(Executor):
@@ -62,7 +62,7 @@ class MPIPoolExecutor(Executor):
         self._lock = threading.Lock()
         self._pool = None
 
-    _make_pool = staticmethod(_lib.WorkerPool)
+    _make_pool = staticmethod(_core.WorkerPool)
 
     def _bootstrap(self):
         if self._pool is None:
@@ -113,7 +113,7 @@ class MPIPoolExecutor(Executor):
         # pylint: disable=arguments-differ
         with self._lock:
             if self._broken:
-                raise _lib.BrokenExecutor(self._broken)
+                raise _core.BrokenExecutor(self._broken)
             if self._shutdown:
                 raise RuntimeError("cannot submit after shutdown")
             self._bootstrap()
@@ -319,13 +319,13 @@ class MPICommExecutor:
 
         """
         if comm is None:
-            comm = _lib.get_comm_world()
+            comm = _core.get_comm_world()
         if comm.Is_inter():
             raise ValueError("Expecting an intracommunicator")
         if root < 0 or root >= comm.Get_size():
             raise ValueError("Expecting root in range(comm.size)")
-        if _lib.SharedPool is not None:
-            comm = _lib.get_comm_world()
+        if _core.SharedPool is not None:
+            comm = _core.get_comm_world()
             root = comm.Get_rank()
 
         self._comm = comm
@@ -345,9 +345,9 @@ class MPICommExecutor:
 
         if comm.Get_rank() == root:
             executor = MPIPoolExecutor(**options)
-            executor._pool = _lib.WorkerPool(executor, comm, root)
+            executor._pool = _core.WorkerPool(executor, comm, root)
         else:
-            _lib.server_main_split(comm, root)
+            _core.server_main_split(comm, root)
 
         self._executor = executor
         return executor
@@ -367,10 +367,10 @@ class MPICommExecutor:
 class ThreadPoolExecutor(MPIPoolExecutor):
     """`MPIPoolExecutor` subclass using a pool of threads."""
 
-    _make_pool = staticmethod(_lib.ThreadPool)
+    _make_pool = staticmethod(_core.ThreadPool)
 
 
 class ProcessPoolExecutor(MPIPoolExecutor):
     """`MPIPoolExecutor` subclass using a pool of processes."""
 
-    _make_pool = staticmethod(_lib.SpawnPool)
+    _make_pool = staticmethod(_core.SpawnPool)

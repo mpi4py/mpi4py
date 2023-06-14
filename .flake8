@@ -3,4 +3,4 @@ ignore = W503
 per-file-ignores =
   conf/*: D
   docs/*: D
-  src/mpi4py/futures/_lib.py: D
+  src/mpi4py/futures/_core.py: D

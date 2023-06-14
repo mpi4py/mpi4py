@@ -129,7 +129,7 @@ package = {
     '__init__.py',
     '__main__.py',
     '_base.py',
-    '_lib.py',
+    '_core.py',
     'pool.py',
     'server.py',
     'aplus.py',
