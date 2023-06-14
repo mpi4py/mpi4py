@@ -72,8 +72,8 @@ $PYTHON -m coverage run demo/test-run/test_run.py
 
 $MPIEXEC -n 1 $PYTHON -m coverage run demo/futures/test_futures.py
 $MPIEXEC -n 2 $PYTHON -m coverage run demo/futures/test_futures.py
-$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.run -rc threads=False demo/futures/test_futures.py -q 2> /dev/null || true
-$MPIEXEC -n 2 $PYTHON -m coverage run -m mpi4py.run -rc threads=False demo/futures/test_futures.py -q 2> /dev/null || true
+$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.run -rc threads=False demo/futures/test_futures.py -qf 2> /dev/null || true
+$MPIEXEC -n 2 $PYTHON -m coverage run -m mpi4py.run -rc threads=False demo/futures/test_futures.py -qf 2> /dev/null || true
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.futures demo/futures/test_futures.py
 $MPIEXEC -n 2 $PYTHON -m coverage run -m mpi4py.futures demo/futures/test_futures.py ASharedPoolInitTest
 $MPIEXEC -n 2 $PYTHON -m coverage run -m mpi4py.futures demo/futures/test_futures.py ProcessPoolPickleTest

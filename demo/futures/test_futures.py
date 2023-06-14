@@ -1094,7 +1094,7 @@ class MPICommExecutorTest(unittest.TestCase):
     @unittest.skipIf(SHARED_POOL, 'shared-pool')
     def test_arg_bad_comm(self):
         if MPI.COMM_WORLD.Get_size() == 1: return
-        intercomm = futures._core.comm_split(MPI.COMM_WORLD)
+        intercomm = futures._core.comm_split(MPI.COMM_WORLD, 0)
         try:
             with self.assertRaises(ValueError):
                 self.MPICommExecutor(intercomm)

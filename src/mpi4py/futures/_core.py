@@ -323,26 +323,20 @@ def _manager_thread(pool, options):
     finalize()
 
 
-def _manager_comm(pool, options, comm, full=True):
+def _manager_comm(pool, options, comm, sync=True):
     assert comm != MPI.COMM_NULL  # noqa: S101
     assert comm.Is_inter()        # noqa: S101
     assert comm.Get_size() == 1   # noqa: S101
-    serialized(client_sync)(comm, options, full)
-    comm = client_comm(comm, options)
+    comm = client_sync(comm, options, sync)
     if not client_init(comm, options):
         pool.broken("initializer failed")
-        serialized(client_close)(comm)
+        client_stop(comm)
         return
     size = comm.Get_remote_size()
     queue = pool.setup(size)
     workers = WorkerSet(range(size))
     client_exec(comm, options, 0, workers, queue)
-    serialized(client_close)(comm)
-
-
-def _manager_split(pool, options, comm, root):
-    comm = serialized(comm_split)(comm, root)
-    _manager_comm(pool, options, comm, full=False)
+    client_stop(comm)
 
 
 def _manager_spawn(pool, options):
@@ -366,11 +360,6 @@ def ThreadPool(executor):
     return Pool(executor, _manager_thread)
 
 
-def SplitPool(executor, comm, root):
-    # pylint: disable=invalid-name
-    return Pool(executor, _manager_split, comm, root)
-
-
 def SpawnPool(executor):
     # pylint: disable=invalid-name
     return Pool(executor, _manager_spawn)
@@ -381,14 +370,10 @@ def ServicePool(executor):
     return Pool(executor, _manager_service)
 
 
-def WorkerPool(executor, comm=None, root=0):
+def WorkerPool(executor):
     # pylint: disable=invalid-name
     if SharedPool is not None:
         return SharedPool(executor)
-    if comm is not None:
-        if comm.Get_size() == 1:
-            return ThreadPool(executor)
-        return SplitPool(executor, comm, root)
     if 'service' in executor._options:
         return ServicePool(executor)
     return SpawnPool(executor)
@@ -405,58 +390,54 @@ def _set_shared_pool(obj):
     SharedPool = obj
 
 
-def _manager_shared(pool, options, comm, tag, workers):
-    if tag == 0:
-        comm = MPI.Intercomm(comm)
-        serialized(client_sync)(comm, options)
-        comm = client_comm(comm, options)
-    if tag == 0:
-        if not client_init(comm, options):
-            pool.broken("initializer failed")
-            return
-    if tag >= 1:
-        if options.get('initializer') is not None:
-            pool.broken("cannot run initializer")
-            return
-    size = comm.Get_remote_size()
-    queue = pool.setup(size)
-    client_exec(comm, options, tag, workers, queue)
-
-
 class SharedPoolCtx:
 
     def __init__(self):
+        self.lock = threading.Lock()
         self.comm = MPI.COMM_NULL
         self.on_root = None
         self.counter = None
         self.workers = None
         self.threads = weakref.WeakKeyDictionary()
 
-    def __call__(self, executor):
-        assert SharedPool is self  # noqa: S101
-        if self.comm != MPI.COMM_NULL and self.on_root:
+    def _manager(self, pool, options):
+        with self.lock:
             tag = next(self.counter)
             if tag == 0:
-                options = executor._options
-                self.comm = client_comm(self.comm, options)
-            manager = _manager_shared
-            args = (self.comm, tag, self.workers)
-        else:
-            manager, args = _manager_thread, ()
-        pool = Pool(executor, manager, *args)
-        del THREADS_QUEUES[pool.thread]
-        self.threads[pool.thread] = pool.queue
+                self.comm = client_sync(self.comm, options)
+                if not client_init(self.comm, options):
+                    pool.broken("initializer failed")
+                    return
+            if tag >= 1:
+                if options.get('initializer') is not None:
+                    pool.broken("cannot run initializer")
+                    return
+        comm = self.comm
+        size = comm.Get_remote_size()
+        queue = pool.setup(size)
+        client_exec(comm, options, tag, self.workers, queue)
+
+    def __call__(self, executor):
+        assert SharedPool is self  # noqa: S101
+        with self.lock:
+            if self.comm != MPI.COMM_NULL and self.on_root:
+                manager = self._manager
+            else:
+                manager = _manager_thread
+            pool = Pool(executor, manager)
+            del THREADS_QUEUES[pool.thread]
+            self.threads[pool.thread] = pool.queue
         return pool
 
     def __enter__(self):
         assert SharedPool is None  # noqa: S101
-        self.on_root = MPI.COMM_WORLD.Get_rank() == 0
-        if MPI.COMM_WORLD.Get_size() >= 2:
-            self.comm = comm_split(MPI.COMM_WORLD, root=0)
-            if self.on_root:
-                size = self.comm.Get_remote_size()
-                self.counter = itertools.count(0)
-                self.workers = WorkerSet(range(size))
+        comm, root = MPI.COMM_WORLD, 0
+        self.on_root = comm.Get_rank() == root
+        self.comm = comm_split(comm, root)
+        if self.comm != MPI.COMM_NULL and self.on_root:
+            size = self.comm.Get_remote_size()
+            self.counter = itertools.count(0)
+            self.workers = WorkerSet(range(size))
         _set_shared_pool(self)
         return self if self.on_root else None
 
@@ -469,16 +450,14 @@ class SharedPoolCtx:
             if self.on_root:
                 if next(self.counter) == 0:
                     options = {'main': False}
-                    client_sync(comm, options)
-                    comm = client_comm(comm, options)
+                    comm = client_sync(comm, options)
                     client_init(comm, options)
-                client_close(comm)
+                client_stop(comm)
             else:
-                options = server_sync(comm)
-                comm = server_comm(comm, options)
+                comm, options = server_sync(comm)
                 server_init(comm)
                 server_exec(comm, options)
-                server_close(comm)
+                server_stop(comm)
         if not self.on_root:
             join_threads(self.threads)
         _set_shared_pool(None)
@@ -488,6 +467,60 @@ class SharedPoolCtx:
         self.workers = None
         self.threads.clear()
         return False
+
+
+# ---
+
+
+def comm_split(comm, root):
+    if comm.Get_size() == 1:
+        return MPI.Intercomm(MPI.COMM_NULL)
+    rank = comm.Get_rank()
+    if MPI.Get_version() >= (2, 2):
+        allgroup = comm.Get_group()
+        if rank == root:
+            group = allgroup.Incl([root])
+        else:
+            group = allgroup.Excl([root])
+        allgroup.Free()
+        intracomm = comm.Create(group)
+        group.Free()
+    else:  # pragma: no cover
+        color = 0 if rank == root else 1
+        intracomm = comm.Split(color, key=0)
+
+    if rank == root:
+        local_leader = 0
+        remote_leader = 0 if root else 1
+    else:
+        local_leader = 0
+        remote_leader = root
+    intercomm = intracomm.Create_intercomm(
+        local_leader, comm, remote_leader, tag=0)
+    intracomm.Free()
+    return intercomm
+
+
+# ---
+
+
+def _comm_executor_helper(executor, comm, root):
+
+    def _manager(pool, options, comm, root):
+        comm = serialized(comm_split)(comm, root)
+        _manager_comm(pool, options, comm, sync=False)
+
+    if comm.Get_rank() == root:
+        if SharedPool is not None:
+            pool = SharedPool(executor)
+        elif comm.Get_size() == 1:
+            pool = ThreadPool(executor)
+        else:
+            pool = Pool(executor, _manager, comm, root)
+        executor._pool = pool
+    else:
+        comm = comm_split(comm, root)
+        server_main_comm(comm, sync=False)
 
 
 # ---
@@ -524,11 +557,11 @@ def _get_comm(comm, options):
     return comm
 
 
-def _get_mpi(comm):
+def _get_request(comm):
     use_pkl5 = isinstance(comm, pkl5.Comm)
     if use_pkl5:
-        return pkl5
-    return MPI
+        return pkl5.Request
+    return MPI.Request
 
 
 # ---
@@ -558,10 +591,7 @@ def bcast_send(comm, data):
         comm.bcast(data, MPI.ROOT)
     else:  # pragma: no cover
         tag = MPI.COMM_WORLD.Get_attr(MPI.TAG_UB)
-        size = comm.Get_remote_size()
-        _get_mpi(comm).Request.waitall([
-            comm.issend(data, pid, tag)
-            for pid in range(size)])
+        sendtoall(comm, data, tag)
 
 
 def bcast_recv(comm):
@@ -573,19 +603,32 @@ def bcast_recv(comm):
     return data
 
 
+def sendtoall(comm, data, tag=0):
+    size = comm.Get_remote_size()
+    _get_request(comm).waitall([
+        comm.issend(data, pid, tag)
+        for pid in range(size)
+    ])
+
+
+def disconnect(comm):
+    try:
+        comm.Disconnect()
+    except NotImplementedError:  # pragma: no cover
+        comm.Free()
+
+
 # ---
 
 
-def client_sync(comm, options, full=True):
-    barrier(comm)
+def client_sync(comm, options, sync=True):
+    serialized(barrier)(comm)
     _setopt_use_pkl5(options)
-    if full:
+    if sync:
         options = _sync_get_data(options)
-    bcast_send(comm, options)
-
-
-def client_comm(comm, options):
-    return _get_comm(comm, options)
+    serialized(bcast_send)(comm, options)
+    comm = _get_comm(comm, options)
+    return comm
 
 
 def client_init(comm, options):
@@ -606,7 +649,7 @@ def client_exec(comm, options, tag, worker_set, task_queue):
     comm_recv = serialized(comm.recv)
     comm_isend = serialized(comm.issend)
     comm_iprobe = serialized(comm.iprobe)
-    request_free = serialized(_get_mpi(comm).Request.Free)
+    request_free = serialized(_get_request(comm).Free)
 
     pending = {}
 
@@ -686,26 +729,18 @@ def client_exec(comm, options, tag, worker_set, task_queue):
         recv()
 
 
-def client_close(comm):
-    _get_mpi(comm).Request.waitall([
-        comm.issend(None, dest=pid, tag=0)
-        for pid in range(comm.Get_remote_size())])
-    try:
-        comm.Disconnect()
-    except NotImplementedError:  # pragma: no cover
-        comm.Free()
+def client_stop(comm):
+    serialized(sendtoall)(comm, None)
+    serialized(disconnect)(comm)
 
 
-def server_sync(comm, full=True):
+def server_sync(comm, sync=True):
     barrier(comm)
     options = bcast_recv(comm)
-    if full:
+    if sync:
         options = _sync_set_data(options)
-    return options
-
-
-def server_comm(comm, options):
-    return _get_comm(comm, options)
+    comm = _get_comm(comm, options)
+    return comm, options
 
 
 def server_init(comm):
@@ -724,7 +759,7 @@ def server_exec(comm, options):
     comm_recv = comm.recv
     comm_isend = comm.issend
     comm_iprobe = comm.iprobe
-    request_test = _get_mpi(comm).Request.test
+    request_test = _get_request(comm).test
 
     def exception():
         exc = sys_exception()
@@ -772,49 +807,11 @@ def server_exec(comm, options):
         send(task)
 
 
-def server_close(comm):
-    try:
-        comm.Disconnect()
-    except NotImplementedError:  # pragma: no cover
-        comm.Free()
+def server_stop(comm):
+    disconnect(comm)
 
 
 # ---
-
-
-def get_comm_world():
-    return MPI.COMM_WORLD
-
-
-def comm_split(comm, root=0):
-    rank = comm.Get_rank()
-    if MPI.Get_version() >= (2, 2):
-        allgroup = comm.Get_group()
-        if rank == root:
-            group = allgroup.Incl([root])
-        else:
-            group = allgroup.Excl([root])
-        allgroup.Free()
-        intracomm = comm.Create(group)
-        group.Free()
-    else:  # pragma: no cover
-        color = 0 if rank == root else 1
-        intracomm = comm.Split(color, key=0)
-
-    if rank == root:
-        local_leader = 0
-        remote_leader = 0 if root else 1
-    else:
-        local_leader = 0
-        remote_leader = root
-    intercomm = intracomm.Create_intercomm(
-        local_leader, comm, remote_leader, tag=0)
-    intracomm.Free()
-    return intercomm
-
-
-# ---
-
 
 MAIN_RUN_NAME = '__worker__'
 
@@ -986,10 +983,12 @@ def get_spawn_module():
     return __spec__.parent + '.server'
 
 
-def client_spawn(python_exe=None,
-                 python_args=None,
-                 max_workers=None,
-                 mpi_info=None):
+def client_spawn(
+    python_exe=None,
+    python_args=None,
+    max_workers=None,
+    mpi_info=None,
+):
     _check_recursive_spawn()
     if python_exe is None:
         python_exe = sys.executable
@@ -1093,8 +1092,12 @@ def client_connect(service, mpi_info=None):
     return comm
 
 
-def server_accept(service, mpi_info=None,
-                  root=0, comm=MPI.COMM_WORLD):
+def server_accept(
+    service,
+    mpi_info=None,
+    comm=MPI.COMM_WORLD,
+    root=0,
+):
     info = MPI.INFO_NULL
     if comm.Get_rank() == root:
         if mpi_info:
@@ -1124,20 +1127,14 @@ def server_accept(service, mpi_info=None,
 # ---
 
 
-def server_main_comm(comm, full=True):
+def server_main_comm(comm, sync=True):
     assert comm != MPI.COMM_NULL        # noqa: S101
     assert comm.Is_inter()              # noqa: S101
     assert comm.Get_remote_size() == 1  # noqa: S101
-    options = server_sync(comm, full)
-    comm = server_comm(comm, options)
+    comm, options = server_sync(comm, sync)
     server_init(comm)
     server_exec(comm, options)
-    server_close(comm)
-
-
-def server_main_split(comm, root):
-    comm = comm_split(comm, root)
-    server_main_comm(comm, full=False)
+    server_stop(comm)
 
 
 def server_main_spawn():
