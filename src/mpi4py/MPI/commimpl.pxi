@@ -169,7 +169,7 @@ cdef inline object PyMPI_Lock_table(MPI_Comm comm):
         return commlock_table(comm)
 
 
-def _comm_lock(Comm comm: Comm, object key: Hashable = None) -> Lock:
+def _comm_lock(Comm comm: Comm, object key: Hashable | None = None) -> Lock:
     "Create/get communicator lock"
     return PyMPI_Lock(comm.ob_mpi, key)
 
