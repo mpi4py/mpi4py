@@ -403,6 +403,26 @@ class SharedPoolCtx:
         self.workers = None
         self.threads = weakref.WeakKeyDictionary()
 
+    def __reduce__(self):
+        return 'SharedPool'
+
+    def _initialize_remote(self):
+        barrier(self.intracomm)
+        server_init(self.comm)
+
+    def _initialize(self, options, tag):
+        if tag == 0:
+            self.comm = client_sync(self.comm, options)
+            return client_init(self.comm, options)
+        if options.get('initializer') is None:
+            return True
+        task = (self._initialize_remote, (), {})
+        reqs = isendtoall(self.comm, task, tag)
+        waitall(self.comm, reqs, poll=True)
+        success = client_init(self.comm, options)
+        recvfromall(self.comm, tag)
+        return success
+
     def _manager(self, pool, options):
         if self.counter is None:
             options['max_workers'] = 1
@@ -411,15 +431,9 @@ class SharedPoolCtx:
             return
         with self.lock:
             tag = next(self.counter)
-            if tag == 0:
-                self.comm = client_sync(self.comm, options)
-                if not client_init(self.comm, options):
-                    pool.broken("initializer failed")
-                    return
-            if tag >= 1:
-                if options.get('initializer') is not None:
-                    pool.broken("cannot run initializer")
-                    return
+            if not self._initialize(options, tag):
+                pool.broken("initializer failed")
+                return
         comm = self.comm
         size = comm.Get_remote_size()
         queue = pool.setup(size)
@@ -454,8 +468,7 @@ class SharedPoolCtx:
             if self.on_root:
                 if next(self.counter) == 0:
                     options = {'main': False}
-                    comm = client_sync(comm, options)
-                    client_init(comm, options)
+                    self._initialize(options, 0)
                 client_stop(comm)
             else:
                 intracomm = self.intracomm
@@ -590,7 +603,11 @@ def barrier(comm):
         buf = [None, 0, MPI.BYTE]
         tag = MPI.COMM_WORLD.Get_attr(MPI.TAG_UB)
         sendreqs, recvreqs = [], []
-        for pid in range(comm.Get_remote_size()):
+        if comm.Is_inter():
+            size = comm.Get_remote_size()
+        else:
+            size = comm.Get_size()
+        for pid in range(size):
             recvreqs.append(comm.Irecv(buf, pid, tag))
             sendreqs.append(comm.Issend(buf, pid, tag))
         backoff = Backoff()
@@ -616,12 +633,33 @@ def bcast_recv(comm):
     return data
 
 
-def sendtoall(comm, data, tag=0):
+def isendtoall(comm, data, tag=0):
     size = comm.Get_remote_size()
-    _get_request(comm).waitall([
-        comm.issend(data, pid, tag)
-        for pid in range(size)
-    ])
+    return [comm.issend(data, pid, tag) for pid in range(size)]
+
+
+def waitall(comm, requests, poll=False):
+    if poll:
+        request_testall = _get_request(comm).testall
+        backoff = Backoff()
+        while True:
+            done, objs = request_testall(requests)
+            if done:
+                return objs
+            backoff.sleep()
+    else:
+        request_waitall = _get_request(comm).waitall
+        return request_waitall(requests)
+
+
+def sendtoall(comm, data, tag=0):
+    requests = isendtoall(comm, data, tag)
+    waitall(comm, requests)
+
+
+def recvfromall(comm, tag=0):
+    size = comm.Get_remote_size()
+    return [comm.recv(None, pid, tag) for pid in range(size)]
 
 
 def disconnect(comm):
