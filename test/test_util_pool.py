@@ -371,7 +371,6 @@ class BaseTestPool:
 # ---
 
 def broken_mpi_spawn():
-    linux = (sys.platform == 'linux')
     darwin = (sys.platform == 'darwin')
     windows = (sys.platform == 'win32')
     name, version = MPI.get_vendor()
@@ -384,7 +383,7 @@ def broken_mpi_spawn():
             return True
         if version == (4,0,2) and darwin:
             return True
-        if version == (4,1,2) and linux:
+        if version >= (4,1,0) and version < (4,2,0):
             if os.environ.get('GITHUB_ACTIONS') == 'true':
                 return True
     if name == 'MPICH':
