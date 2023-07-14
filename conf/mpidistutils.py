@@ -633,14 +633,12 @@ def cython_chk(VERSION, verbose=True):
     CYTHON_VERSION = Cython.__version__
     m = re.match(r"(\d+\.\d+(?:\.\d+)?).*", CYTHON_VERSION)
     if not m:
-        warn("Cannot parse Cython version string {!r}"
-             .format(CYTHON_VERSION))
+        warn(f"Cannot parse Cython version string {CYTHON_VERSION!r}")
         return False
     REQUIRED = Version(VERSION)
     PROVIDED = Version(m.groups()[0])
     if PROVIDED < REQUIRED:
-        warn("You need Cython >= {} (you have version {})"
-             .format(VERSION, CYTHON_VERSION))
+        warn(f"You need Cython >= {VERSION} (you have version {CYTHON_VERSION})")
         return False
     #
     if verbose:
