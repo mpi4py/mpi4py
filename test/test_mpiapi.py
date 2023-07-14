@@ -11,6 +11,12 @@ mpi_small_count_allowed = [
     'MPI_Op_create',
 ]
 
+mpi_fortran = [
+    'MPI_Type_create_f90_integer',
+    'MPI_Type_create_f90_real',
+    'MPI_Type_create_f90_complex',
+]
+
 mpi_deprecated = [
     'MPI_Attr_delete',
     'MPI_Attr_get',
@@ -120,6 +126,8 @@ class TestMPIAPI(unittest.TestCase):
             if sym.endswith("_x"):
                 uncovered.discard(sym[:-2])
                 uncovered.discard(sym[:-2] + '_c')
+        if MPI.REAL == MPI.DATATYPE_NULL or MPI.REAL.Get_size() == 0:
+            uncovered.difference_update(mpi_fortran)
         self.assertFalse(uncovered)
 
 
