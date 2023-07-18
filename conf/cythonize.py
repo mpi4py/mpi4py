@@ -2,12 +2,7 @@
 """Run Cython with custom options."""
 import os
 import sys
-
-appdir = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, appdir)
-
-import cyautodoc  # noqa: F401,E402
-from Cython.Compiler.Main import main as cython_main  # noqa: E402
+from Cython.Compiler.Main import main as cython_main
 
 
 def cythonize(args=None):
@@ -39,6 +34,7 @@ def main():
     """Entry-point to run Cython with custom options."""
     args = sys.argv[1:]
     if not args:
+        appdir = os.path.dirname(os.path.abspath(__file__))
         topdir = os.path.dirname(appdir)
         source = os.path.join('src', 'mpi4py', 'MPI.pyx')
         target = os.path.join('src', 'mpi4py', 'MPI.c')

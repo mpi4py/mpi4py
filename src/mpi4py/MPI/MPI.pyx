@@ -7,7 +7,6 @@ Message Passing Interface.
 from mpi4py.libmpi cimport *
 
 include "stdlib.pxi"
-include "typing.pxi"
 include "atimport.pxi"
 
 bootstrap()

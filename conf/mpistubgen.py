@@ -473,6 +473,14 @@ OVERRIDE.update({
         ('Request', 'Grequest'),
     )
 })
+OVERRIDE.update({  # python/mypy#15717
+    'Group': {
+        'Intersect': """
+        @classmethod  # python/mypy#15717
+        def Intersect(cls, group1: Group, group2: Group) -> Self: ...
+        """
+    }
+})
 
 TYPING = """
 from .typing import (  # noqa: E402
@@ -503,6 +511,8 @@ def generate(filename):
     dirname = os.path.dirname(filename)
     os.makedirs(dirname, exist_ok=True)
     with open(filename, 'w') as f:
+        script = os.path.basename(__file__)
+        print(f"# Generated with `python conf/{script}`", file=f)
         for line in visit_mpi4py_MPI():
             print(line, file=f)
 

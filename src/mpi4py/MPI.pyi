@@ -1,3 +1,4 @@
+# Generated with `python conf/mpistubgen.py`
 from __future__ import annotations
 import sys
 from threading import Lock
@@ -554,7 +555,8 @@ class Group:
     def f2py(cls, arg: int) -> Group: ...
     size: int
     rank: int
-    Intersect = Intersection
+    @classmethod  # python/mypy#15717
+    def Intersect(cls, group1: Group, group2: Group) -> Self: ...
 
 GROUP_NULL: Final[Group] = ...
 GROUP_EMPTY: Final[Group] = ...
