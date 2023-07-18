@@ -1,5 +1,6 @@
 #cython: language_level=3str
 #cython: embedsignature=True
+#cython: embedsignature.format=python
 #cython: annotation_typing=False
 #cython: cdivision=True
 #cython: auto_pickle=False
@@ -8,9 +9,9 @@
 #cython: autotestdict=False
 #cython: warn.multiple_declarators=False
 #cython: optimize.use_switch=False
+#cython: binding=True
 
-#cython: binding=False
-#from __future__ import annotations
-
+from __future__ import annotations
 cimport cython
+
 include "MPI/MPI.pyx"

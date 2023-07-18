@@ -35,9 +35,6 @@ Dependencies
   `Open MPI <https://www.open-mpi.org/>`_ built with shared/dynamic
   libraries.
 
-* To work with the in-development version, you need to install `Cython
-  <https://cython.org/>`_.
-
 Documentation
 -------------
 

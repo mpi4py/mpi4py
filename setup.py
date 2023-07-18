@@ -134,7 +134,7 @@ metadata = {
 }
 
 require_python = (3, 6)
-maxknow_python = (3, 11)
+maxknow_python = (3, 12)
 
 metadata_extra = {
     'project_urls': {
@@ -187,13 +187,9 @@ def extensions():
         configure=mpidistutils.configure_mpi,
     )
     if sys.version_info[:2] > maxknow_python:
+        api = '0x{:02x}{:02x}0000'.format(*maxknow_python)
         MPI['define_macros'].extend([
-            ('CYTHON_FAST_PYCALL', 0),
-            ('CYTHON_FAST_THREAD_STATE', 0),
-            ('CYTHON_USE_DICT_VERSIONS', 0),
-            ('CYTHON_USE_PYLONG_INTERNALS', 0),
-            ('CYTHON_USE_PYLIST_INTERNALS', 0),
-            ('CYTHON_USE_UNICODE_INTERNALS', 0),
+            ('CYTHON_LIMITED_API', api),
         ])
     #
     return [MPI]
@@ -248,8 +244,10 @@ def run_setup():
     """
     try:
         import setuptools
-    except ImportError:
+    except ImportError as exc:
         setuptools = None
+        if sys.version_info >= (3, 12):
+            sys.exit(exc)
     from mpidistutils import setup
     from mpidistutils import Extension  as Ext
     from mpidistutils import Executable as Exe
