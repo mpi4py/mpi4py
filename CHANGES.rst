@@ -49,7 +49,7 @@ Release 4.0.0 [2023-XX-XX]
 * Backward-incompatible changes:
 
   * Python 2 is no longer supported, Python 3.6+ is required, but
-    typing stubs are supported for Python 3.7+.
+    typing stubs are supported for Python 3.8+.
 
   * The `Intracomm.Create_group()` method is no longer defined in the
     base `Comm` class.

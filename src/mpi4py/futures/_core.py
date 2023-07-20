@@ -95,7 +95,7 @@ def _format_exc(exc, comm):
     return f'\n{info}"""\n{body}"""'
 
 
-if sys.version_info > (3, 11):
+if sys.version_info >= (3, 11):
 
     def sys_exception():
         return sys.exception()

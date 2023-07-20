@@ -103,7 +103,7 @@ def _chain_future(new_future, future):
     future.add_done_callback(done_cb)
 
 
-if sys.version_info > (3, 11):
+if sys.version_info >= (3, 11):
 
     def _sys_exception():
         return sys.exception()

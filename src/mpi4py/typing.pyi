@@ -4,15 +4,12 @@ from typing import (
     Any,
     Union,
     Optional,
+    Protocol,
     Sequence,
     List,
     Dict,
     Tuple,
 )
-if sys.version_info >= (3, 8):
-    from typing import Protocol
-else:
-    from typing_extensions import Protocol
 from numbers import (
     Integral,
 )
