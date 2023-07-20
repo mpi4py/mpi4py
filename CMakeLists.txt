@@ -112,20 +112,22 @@ file(
   GLOB mpi4py_SOURCES
   RELATIVE ${SRCDIR}
   ${SRCDIR}/mpi4py/*.py
-  ${SRCDIR}/mpi4py/*.pyi
-  ${SRCDIR}/mpi4py/*.pxd
-  ${SRCDIR}/mpi4py/py.typed
   ${SRCDIR}/mpi4py/futures/*.py
-  ${SRCDIR}/mpi4py/futures/*.pyi
   ${SRCDIR}/mpi4py/util/*.py
-  ${SRCDIR}/mpi4py/util/*.pyi
 )
 file(
   GLOB mpi4py_HEADERS
   RELATIVE ${SRCDIR}
+  ${SRCDIR}/mpi4py/*.pxd
   ${SRCDIR}/mpi4py/include/mpi4py/*.[hi]
   ${SRCDIR}/mpi4py/include/mpi4py/*.px[di]
 )
+if (Python_VERSION VERSION_GREATER_EQUAL 3.11)
+  list(APPEND mpi4py_HEADERS mpi4py/py.typed)
+  foreach(file ${mpi4py_SOURCES})
+    list(APPEND mpi4py_HEADERS ${file}i)
+  endforeach()
+endif()
 foreach(file ${mpi4py_SOURCES} ${mpi4py_HEADERS})
   get_filename_component(dir ${file} DIRECTORY)
   install(FILES ${SRCDIR}/${file} DESTINATION ${dir})

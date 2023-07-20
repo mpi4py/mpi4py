@@ -123,7 +123,6 @@ package = {
     '__init__.pxd',
     'libmpi.pxd',
     'MPI.pxd',
-    'py.typed',
   ],
   'mpi4py.futures': [
     '__init__.py',
@@ -147,12 +146,6 @@ foreach pkg, src : package
   sources = []
   foreach fn : src
     sources += srcdir / subdir / fn
-    if fn.endswith('.py')
-      pyi = srcdir / subdir / fn + 'i'
-      if fs.exists(pyi)
-        sources += pyi
-      endif
-    endif
   endforeach
   py.install_sources(
     sources,
@@ -165,5 +158,25 @@ install_subdir(
   srcdir / 'mpi4py' / 'include',
   install_dir: dstdir / 'mpi4py',
 )
+
+if py.language_version().version_compare('>=3.8')
+  foreach pkg, src : package
+    subdir = join_paths(pkg.split('.'))
+    sources = []
+    if not pkg.contains('.')
+      sources += srcdir / subdir / 'py.typed'
+    endif
+    foreach fn : src
+      if fn.endswith('.py')
+        sources += srcdir / subdir / fn + 'i'
+      endif
+    endforeach
+    py.install_sources(
+      sources,
+      pure: false,
+      subdir: subdir,
+    )
+  endforeach
+endif
 
 # ---

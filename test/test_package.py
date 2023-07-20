@@ -34,15 +34,18 @@ class TestImport(unittest.TestCase):
 
 class TestDataFiles(unittest.TestCase):
 
-    @unittest.skipIf(sys.version_info < (3, 7), 'py36')
     def testTyping(self):
+        if sys.version_info < (3, 8):
+            check = self.assertFalse
+        else:
+            check = self.assertTrue
         py_typed = os.path.join(pkgdir, 'py.typed')
-        self.assertTrue(os.path.exists(py_typed))
+        check(os.path.exists(py_typed))
         for root, dirs, files in os.walk(pkgdir):
             for fname in files:
                 if fname.endswith(".py"):
                     pyi = os.path.join(root, f"{fname}i")
-                    self.assertTrue(os.path.exists(pyi))
+                    check(os.path.exists(pyi))
 
     def testCython(self):
         for fname in [
