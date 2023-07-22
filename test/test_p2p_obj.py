@@ -2,6 +2,7 @@ from mpi4py import MPI
 import mpiunittest as unittest
 import threading
 import warnings
+import sys
 
 def allocate(n):
     return bytearray(n)
@@ -352,6 +353,8 @@ class BaseTestP2PObj:
             flag = False
             for k in range(2):
                 flag |= MPI.Request.Testall(reqs)
+            if unittest.is_mpi('intelmpi') and sys.platform == 'win32':
+                flag |= MPI.Request.Waitall(reqs)
             self.assertTrue(flag)
 
     def testSSendAndRecv(self):
