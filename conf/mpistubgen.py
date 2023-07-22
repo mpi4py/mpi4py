@@ -456,9 +456,9 @@ OVERRIDE.update({
 })
 OVERRIDE.update({
     subtype: {
-        '__new__': """
+        '__new__': str.format("""
         def __new__(cls, {}: {} | None = None) -> {}: ...
-        """.format(basetype.lower(), basetype, subtype)
+        """, basetype.lower(), basetype, subtype)
     }
     for basetype, subtype in (
         ('Comm', 'Comm'),
