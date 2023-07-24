@@ -18,13 +18,13 @@ MPI message, at the expense of additional CPU and memory overhead in the
 pickling and unpickling steps.
 
 The :mod:`mpi4py.util.pkl5` module provides communicator wrapper classes
-reimplementing pickle-based point-to-point communication methods using pickle
-protocol 5. Handling out-of-band buffers necessarily involve multiple MPI
-messages, thus increasing latency and hurting performance in case of small size
-data. However, in case of large size data, the zero-copy savings of out-of-band
-buffer handling more than offset the extra latency costs.  Additionally, these
-wrapper methods overcome the infamous 2 GiB message count limit (MPI-1 to
-MPI-3).
+reimplementing pickle-based point-to-point and collective communication methods
+using pickle protocol 5. Handling out-of-band buffers necessarily involves
+multiple MPI messages, thus increasing latency and hurting performance in case
+of small size data. However, in case of large size data, the zero-copy savings
+of out-of-band buffer handling more than offset the extra latency costs.
+Additionally, these wrapper methods overcome the infamous 2 GiB message count
+limit (MPI-1 to MPI-3).
 
 .. note::
 
