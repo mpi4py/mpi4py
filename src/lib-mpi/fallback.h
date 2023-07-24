@@ -77,6 +77,7 @@ static int PyMPI_Init_thread(int *argc, char ***argv,
   if (!provided) return MPI_ERR_ARG;
   ierr = MPI_Init(argc, argv);
   if (ierr != MPI_SUCCESS) return ierr;
+  (void)required;
   *provided = MPI_THREAD_SINGLE;
   return MPI_SUCCESS;
 }
@@ -88,7 +89,7 @@ static int PyMPI_Init_thread(int *argc, char ***argv,
 static int PyMPI_Query_thread(int *provided)
 {
   if (!provided) return MPI_ERR_ARG;
-  provided = MPI_THREAD_SINGLE;
+  *provided = MPI_THREAD_SINGLE;
   return MPI_SUCCESS;
 }
 #undef  MPI_Query_thread
@@ -170,7 +171,7 @@ static int PyMPI_Type_create_indexed_block(int count,
                                            MPI_Datatype oldtype,
                                            MPI_Datatype *newtype)
 {
-  int i, *blocklengths = 0, ierr = MPI_SUCCESS;
+  int i, *blocklengths = NULL, ierr = MPI_SUCCESS;
   if (count > 0) {
     blocklengths = (int *) PyMPI_MALLOC((size_t)count*sizeof(int));
     if (!blocklengths) return MPI_ERR_INTERN;
@@ -193,7 +194,7 @@ static int PyMPI_Type_create_hindexed_block(int count,
                                             MPI_Datatype oldtype,
                                             MPI_Datatype *newtype)
 {
-  int i, *blocklengths = 0, ierr = MPI_SUCCESS;
+  int i, *blocklengths = NULL, ierr = MPI_SUCCESS;
   if (count > 0) {
     blocklengths = (int *) PyMPI_MALLOC((size_t)count*sizeof(int));
     if (!blocklengths) return MPI_ERR_INTERN;
@@ -500,8 +501,8 @@ static int PyMPI_Type_create_darray(int size,
   MPI_Aint orig_extent, disps[3];
   MPI_Datatype type_old, type_new, types[3];
 
-  int      *coords  = 0;
-  MPI_Aint *offsets = 0;
+  int      *coords  = NULL;
+  MPI_Aint *offsets = NULL;
 
   orig_extent=0;
   type_old = type_new = MPI_DATATYPE_NULL;
@@ -817,7 +818,7 @@ static int PyMPI_Reduce_scatter_block(void *sendbuf, void *recvbuf,
                                       MPI_Op op, MPI_Comm comm)
 {
   int ierr = MPI_SUCCESS;
-  int n = 1, *recvcounts = 0;
+  int n = 1, *recvcounts = NULL;
   ierr = MPI_Comm_size(comm, &n);
   if (ierr != MPI_SUCCESS) return ierr;
   recvcounts = (int *) PyMPI_MALLOC((size_t)n*sizeof(int));
@@ -913,14 +914,14 @@ static int * const PyMPI_WEIGHTS_EMPTY = (int*)PyMPI_WEIGHTS_EMPTY_ARRAY;
 
 static int PyMPI_Alloc_mem(MPI_Aint size, MPI_Info info, void *baseptr)
 {
-  char *buf = 0, **basebuf = 0;
+  char *buf = NULL;
   if (size < 0) return MPI_ERR_ARG;
   if (!baseptr) return MPI_ERR_ARG;
   if (size == 0) size = 1;
   buf = (char *) PyMPI_MALLOC((size_t)size);
   if (!buf) return MPI_ERR_NO_MEM;
-  basebuf = (char **) baseptr;
-  *basebuf = buf;
+  (void)info;
+  *(char **)baseptr = buf;
   return MPI_SUCCESS;
 }
 #undef  MPI_Alloc_mem
@@ -1634,6 +1635,7 @@ static int PyMPI_Comm_ack_failed(MPI_Comm comm,
     (void) MPI_Comm_call_errhandler(comm, MPI_ERR_ARG);
     return MPI_ERR_ARG;
   }
+  (void)num_to_ack;
   *num_acked = 0;
   return MPI_SUCCESS;
 }
