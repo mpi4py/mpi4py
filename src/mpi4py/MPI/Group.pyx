@@ -1,7 +1,6 @@
 cdef class Group:
-
     """
-    Group of processes
+    Group of processes.
     """
 
     def __cinit__(self, Group group: Group | None = None):
@@ -26,27 +25,27 @@ cdef class Group:
 
     def Get_size(self) -> int:
         """
-        Return the size of a group
+        Return the number of processes in a group.
         """
         cdef int size = -1
         CHKERR( MPI_Group_size(self.ob_mpi, &size) )
         return size
 
     property size:
-        """number of processes in group"""
+        """Number of processes."""
         def __get__(self) -> int:
             return self.Get_size()
 
     def Get_rank(self) -> int:
         """
-        Return the rank of this process in a group
+        Return the rank of this process in a group.
         """
         cdef int rank = -1
         CHKERR( MPI_Group_rank(self.ob_mpi, &rank) )
         return rank
 
     property rank:
-        """rank of this process in group"""
+        """Rank of this process."""
         def __get__(self) -> int:
             return self.Get_rank()
 
@@ -56,7 +55,7 @@ cdef class Group:
         Group group: Group | None = None,
     ) -> list[int]:
         """
-        Translate ranks of processes in one group to those in another group
+        Translate ranks in a group to those in another group.
         """
         cdef MPI_Group group1 = MPI_GROUP_NULL
         cdef MPI_Group group2 = MPI_GROUP_NULL
@@ -88,7 +87,7 @@ cdef class Group:
 
     def Compare(self, Group group: Group) -> int:
         """
-        Compare two groups
+        Compare two groups.
         """
         cdef int flag = MPI_UNEQUAL
         CHKERR( MPI_Group_compare(
@@ -100,7 +99,7 @@ cdef class Group:
 
     def Dup(self) -> Self:
         """
-        Duplicate a group
+        Duplicate a group.
         """
         cdef Group group = <Group>New(type(self))
         CHKERR( MPI_Group_union(self.ob_mpi, MPI_GROUP_EMPTY, &group.ob_mpi) )
@@ -109,7 +108,7 @@ cdef class Group:
     @classmethod
     def Union(cls, Group group1: Group, Group group2: Group) -> Self:
         """
-        Create a new group from the union of two existing groups
+        Create a new group from the union of two existing groups.
         """
         cdef Group group = <Group>New(cls)
         CHKERR( MPI_Group_union(
@@ -119,7 +118,7 @@ cdef class Group:
     @classmethod
     def Intersection(cls, Group group1: Group, Group group2: Group) -> Self:
         """
-        Create a new group from the intersection of two existing groups
+        Create a new group from the intersection of two existing groups.
         """
         cdef Group group = <Group>New(cls)
         CHKERR( MPI_Group_intersection(
@@ -131,7 +130,7 @@ cdef class Group:
     @classmethod
     def Difference(cls, Group group1: Group, Group group2: Group) -> Self:
         """
-        Create a new group from the difference of two existing groups
+        Create a new group from the difference of two existing groups.
         """
         cdef Group group = <Group>New(cls)
         CHKERR( MPI_Group_difference(
@@ -140,7 +139,7 @@ cdef class Group:
 
     def Incl(self, ranks: Sequence[int]) -> Self:
         """
-        Create a new group by including listed members
+        Create a new group by including listed members.
         """
         cdef int n = 0, *iranks = NULL
         ranks = getarray(ranks, &n, &iranks)
@@ -150,7 +149,7 @@ cdef class Group:
 
     def Excl(self, ranks: Sequence[int]) -> Self:
         """
-        Create a new group by excluding listed members
+        Create a new group by excluding listed members.
         """
         cdef int n = 0, *iranks = NULL
         ranks = getarray(ranks, &n, &iranks)
@@ -160,7 +159,7 @@ cdef class Group:
 
     def Range_incl(self, ranks: Sequence[tuple[int, int, int]]) -> Self:
         """
-        Create a new group by including ranges of members
+        Create a new group by including ranges of members.
         """
         cdef int *p = NULL, (*ranges)[3]# = NULL ## XXX cython fails
         ranges = NULL
@@ -175,7 +174,7 @@ cdef class Group:
 
     def Range_excl(self, ranks: Sequence[tuple[int, int, int]]) -> Self:
         """
-        Create a new group by excluding ranges of members
+        Create a new group by excluding ranges of members.
         """
         cdef int *p = NULL, (*ranges)[3]# = NULL ## XXX cython fails
         ranges = NULL
@@ -195,7 +194,7 @@ cdef class Group:
         pset_name: str,
     ) -> Self:
         """
-        Create a new group from session and process set
+        Create a new group from session and process set.
         """
         cdef char *cname = NULL
         pset_name = asmpistr(pset_name, &cname)
@@ -209,7 +208,7 @@ cdef class Group:
 
     def Free(self) -> None:
         """
-        Free a group
+        Free a group.
         """
         CHKERR( MPI_Group_free(&self.ob_mpi) )
         if self is __GROUP_EMPTY__: self.ob_mpi = MPI_GROUP_EMPTY

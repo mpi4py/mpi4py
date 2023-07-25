@@ -6,9 +6,8 @@ cdef extern from "Python.h":
         pass
 
 cdef class Exception(RuntimeError):
-
     """
-    Exception class
+    Exception class.
     """
 
     cdef int ob_mpi
@@ -46,33 +45,33 @@ cdef class Exception(RuntimeError):
 
     def Get_error_code(self) -> int:
         """
-        Error code
+        Error code.
         """
         cdef int errorcode = MPI_SUCCESS
         errorcode = self.ob_mpi
         return errorcode
 
     property error_code:
-        """error code"""
+        """Error code."""
         def __get__(self) -> int:
             return self.Get_error_code()
 
     def Get_error_class(self) -> int:
         """
-        Error class
+        Error class.
         """
         cdef int errorclass = MPI_SUCCESS
         CHKERR( MPI_Error_class(self.ob_mpi, &errorclass) )
         return errorclass
 
     property error_class:
-        """error class"""
+        """Error class."""
         def __get__(self) -> int:
             return self.Get_error_class()
 
     def Get_error_string(self) -> str:
         """
-        Error string
+        Error string.
         """
         cdef char string[MPI_MAX_ERROR_STRING+1]
         cdef int resultlen = 0
@@ -80,7 +79,7 @@ cdef class Exception(RuntimeError):
         return tompistr(string, resultlen)
 
     property error_string:
-        """error string"""
+        """Error string."""
         def __get__(self) -> str:
             return self.Get_error_string()
 

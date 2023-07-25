@@ -89,7 +89,7 @@ def docstring(obj):
     doc = obj.__doc__
     doc = doc.partition('\n')[2]
     doc = textwrap.dedent(doc).strip()
-    doc = f'"""{doc}"""'
+    doc = f'"""{doc}\n"""'
     doc = textwrap.indent(doc, Lines.INDENT)
     return doc
 

@@ -25,9 +25,8 @@ if Py_GETENV(b"MPI4PY_PICKLE_THRESHOLD") != NULL:
     PyPickle_THRESHOLD = int(Py_GETENV(b"MPI4PY_PICKLE_THRESHOLD"))
 
 cdef class Pickle:
-
     """
-    Pickle/unpickle Python objects
+    Pickle/unpickle Python objects.
     """
 
     cdef object ob_dumps
@@ -102,7 +101,7 @@ cdef class Pickle:
         return cloads_oob(self, data, buffers)
 
     property PROTOCOL:
-        """protocol version"""
+        """Protocol version."""
         def __get__(self) -> int | None:
             return self.ob_PROTO
         def __set__(self, protocol: int | None):
@@ -112,7 +111,7 @@ cdef class Pickle:
             self.ob_PROTO = protocol
 
     property THRESHOLD:
-        """out-of-band threshold"""
+        """Out-of-band threshold."""
         def __get__(self) -> int:
             return self.ob_THRES
         def __set__(self, threshold: int | None):
@@ -1288,7 +1287,9 @@ cdef int PyMPI_Commctx_INTER(MPI_Comm comm,
 def _commctx_intra(
     Intracomm comm: Intracomm,
 ) -> tuple[Intracomm, int]:
-    "Create/get intracommunicator duplicate"
+    """
+    Create/get intracommunicator duplicate.
+    """
     cdef int tag = MPI_UNDEFINED
     cdef Intracomm dupcomm = <Intracomm>New(Intracomm)
     PyMPI_Commctx_INTRA(comm.ob_mpi, &dupcomm.ob_mpi, &tag)
@@ -1297,7 +1298,9 @@ def _commctx_intra(
 def _commctx_inter(
     Intercomm comm: Intercomm,
 ) -> tuple[Intercomm, int, Intracomm, bool]:
-    "Create/get intercommunicator duplicate"
+    """
+    Create/get intercommunicator duplicate.
+    """
     cdef int tag = MPI_UNDEFINED, low_group = 0
     cdef Intercomm dupcomm = <Intercomm>New(Intercomm)
     cdef Intracomm localcomm = <Intracomm>New(Intracomm)

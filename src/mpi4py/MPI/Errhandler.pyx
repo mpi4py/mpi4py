@@ -1,7 +1,6 @@
 cdef class Errhandler:
-
     """
-    Error handler
+    Error handler.
     """
 
     def __cinit__(self, Errhandler errhandler: Errhandler | None = None):
@@ -23,7 +22,7 @@ cdef class Errhandler:
 
     def Free(self) -> None:
         """
-        Free an error handler
+        Free an error handler.
         """
         CHKERR( MPI_Errhandler_free(&self.ob_mpi) )
         if self is __ERRORS_RETURN__:    self.ob_mpi = MPI_ERRORS_RETURN

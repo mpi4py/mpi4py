@@ -1,7 +1,6 @@
 cdef class Op:
-
     """
-    Operation object
+    Reduction operation.
     """
 
     def __cinit__(self, Op op: Op | None = None):
@@ -31,7 +30,7 @@ cdef class Op:
         bint commute: bool = False,
     ) -> Self:
         """
-        Create a user-defined operation
+        Create a user-defined reduction operation.
         """
         cdef Op self = <Op>New(cls)
         cdef MPI_User_function   *fn_i = NULL
@@ -49,7 +48,7 @@ cdef class Op:
 
     def Free(self) -> None:
         """
-        Free the operation
+        Free a user-defined reduction operation.
         """
         CHKERR( MPI_Op_free(&self.ob_mpi) )
         op_user_del(&self.ob_uid)
@@ -73,20 +72,20 @@ cdef class Op:
 
     def Is_commutative(self) -> bool:
         """
-        Query reduction operations for their commutativity
+        Query reduction operations for their commutativity.
         """
         cdef int flag = 0
         CHKERR( MPI_Op_commutative(self.ob_mpi, &flag) )
         return <bint>flag
 
     property is_commutative:
-        """is commutative"""
+        """Is a commutative operation."""
         def __get__(self) -> bool:
             return self.Is_commutative()
 
     def Reduce_local(self, inbuf: BufSpec, inoutbuf: BufSpec) -> None:
         """
-        Apply a reduction operator to local data
+        Apply a reduction operation to local data.
         """
         # get *in* and *inout* buffers
         cdef _p_msg_cco m = message_cco()
@@ -98,7 +97,7 @@ cdef class Op:
             m.sbuf, m.rbuf, m.rcount, m.rtype, self.ob_mpi) )
 
     property is_predefined:
-        """is a predefined operation"""
+        """Is a predefined operation."""
         def __get__(self) -> bool:
             cdef MPI_Op op = self.ob_mpi
             return (op == MPI_OP_NULL or

@@ -1,7 +1,6 @@
 cdef class Status:
-
     """
-    Status object
+    Status object.
     """
 
     def __cinit__(self, Status status: Status | None = None):
@@ -52,7 +51,7 @@ cdef class Status:
 
     def Get_source(self) -> int:
         """
-        Get message source
+        Get message source.
         """
         cdef int source = MPI_ANY_SOURCE
         CHKERR( PyMPI_Status_get_source(&self.ob_mpi, &source) )
@@ -60,12 +59,12 @@ cdef class Status:
 
     def Set_source(self, int source: int) -> None:
         """
-        Set message source
+        Set message source.
         """
         CHKERR( PyMPI_Status_set_source(&self.ob_mpi, source) )
 
     property source:
-        """source"""
+        """Message source."""
         def __get__(self) -> int:
             return self.Get_source()
         def __set__(self, value: int):
@@ -73,7 +72,7 @@ cdef class Status:
 
     def Get_tag(self) -> int:
         """
-        Get message tag
+        Get message tag.
         """
         cdef int tag = MPI_ANY_TAG
         CHKERR( PyMPI_Status_get_tag(&self.ob_mpi, &tag) )
@@ -81,12 +80,12 @@ cdef class Status:
 
     def Set_tag(self, int tag: int) -> None:
         """
-        Set message tag
+        Set message tag.
         """
         CHKERR( PyMPI_Status_set_tag(&self.ob_mpi, tag) )
 
     property tag:
-        """tag"""
+        """Message tag."""
         def __get__(self) -> int:
             return self.Get_tag()
         def __set__(self, value: int):
@@ -94,7 +93,7 @@ cdef class Status:
 
     def Get_error(self) -> int:
         """
-        Get message error
+        Get message error.
         """
         cdef int error = MPI_SUCCESS
         CHKERR( PyMPI_Status_get_error(&self.ob_mpi, &error) )
@@ -102,12 +101,12 @@ cdef class Status:
 
     def Set_error(self, int error: int) -> None:
         """
-        Set message error
+        Set message error.
         """
         CHKERR( PyMPI_Status_set_error(&self.ob_mpi, error) )
 
     property error:
-        """error"""
+        """Message error."""
         def __get__(self) -> int:
             return self.Get_error()
         def __set__(self, value: int):
@@ -115,7 +114,7 @@ cdef class Status:
 
     def Get_count(self, Datatype datatype: Datatype = BYTE) -> int:
         """
-        Get the number of *top level* elements
+        Get the number of *top level* elements.
         """
         cdef MPI_Datatype dtype = datatype.ob_mpi
         cdef MPI_Count count = MPI_UNDEFINED
@@ -123,7 +122,7 @@ cdef class Status:
         return count
 
     property count:
-        """byte count"""
+        """Byte count."""
         def __get__(self) -> int:
             return self.Get_count(__BYTE__)
         def __set__(self, value: int):
@@ -131,7 +130,7 @@ cdef class Status:
 
     def Get_elements(self, Datatype datatype: Datatype) -> int:
         """
-        Get the number of basic elements in a datatype
+        Get the number of basic elements in a datatype.
         """
         cdef MPI_Datatype dtype = datatype.ob_mpi
         cdef MPI_Count elements = MPI_UNDEFINED
@@ -144,17 +143,17 @@ cdef class Status:
         Count count: int,
     ) -> None:
         """
-        Set the number of elements in a status
+        Set the number of elements in a status.
 
-        .. note:: This should be only used when implementing
-           query callback functions for generalized requests
+        .. note:: This method should be only used when implementing
+           query callback functions for generalized requests.
         """
         cdef MPI_Datatype dtype = datatype.ob_mpi
         CHKERR( MPI_Status_set_elements_c(&self.ob_mpi, dtype, count) )
 
     def Is_cancelled(self) -> bool:
         """
-        Test to see if a request was cancelled
+        Test to see if a request was cancelled.
         """
         cdef int flag = 0
         CHKERR( MPI_Test_cancelled(&self.ob_mpi, &flag) )
@@ -162,15 +161,15 @@ cdef class Status:
 
     def Set_cancelled(self, bint flag: bool) -> None:
         """
-        Set the cancelled state associated with a status
+        Set the cancelled state associated with a status.
 
-        .. note:: This should be used only when implementing
-           query callback functions for generalized requests
+        .. note:: This method should be used only when implementing
+           query callback functions for generalized requests.
         """
         CHKERR( MPI_Status_set_cancelled(&self.ob_mpi, flag) )
 
     property cancelled:
-        """cancelled state"""
+        """Cancelled state."""
         def __get__(self) -> bool:
             return self.Is_cancelled()
         def __set__(self, value: bool):

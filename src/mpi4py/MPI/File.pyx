@@ -49,9 +49,8 @@ DISP_CUR = MPI_DISPLACEMENT_CURRENT
 
 
 cdef class File:
-
     """
-    File handle
+    File I/O context.
     """
 
     def __cinit__(self, File file: File | None = None):
@@ -83,7 +82,7 @@ cdef class File:
         Info info: Info = INFO_NULL,
     ) -> Self:
         """
-        Open a file
+        Open a file.
         """
         cdef char *cfilename = NULL
         filename = asmpifspath(filename, &cfilename)
@@ -95,7 +94,7 @@ cdef class File:
 
     def Close(self) -> None:
         """
-        Close a file
+        Close a file.
         """
         with nogil: CHKERR( MPI_File_close(&self.ob_mpi) )
 
@@ -106,7 +105,7 @@ cdef class File:
         Info info: Info = INFO_NULL,
     ) -> None:
         """
-        Delete a file
+        Delete a file.
         """
         cdef char *cfilename = NULL
         filename = asmpifspath(filename, &cfilename)
@@ -114,39 +113,39 @@ cdef class File:
 
     def Set_size(self, Offset size: int) -> None:
         """
-        Set the file size
+        Set the file size.
         """
         with nogil: CHKERR( MPI_File_set_size(self.ob_mpi, size) )
 
     def Preallocate(self, Offset size: int) -> None:
         """
-        Preallocate storage space for a file
+        Preallocate storage space for a file.
         """
         with nogil: CHKERR( MPI_File_preallocate(self.ob_mpi, size) )
 
     def Get_size(self) -> int:
         """
-        Return the file size
+        Return the file size.
         """
         cdef MPI_Offset size = 0
         with nogil: CHKERR( MPI_File_get_size(self.ob_mpi, &size) )
         return size
 
     property size:
-        """file size"""
+        """Size (in bytes)."""
         def __get__(self) -> int:
             return self.Get_size()
 
     def Get_amode(self) -> int:
         """
-        Return the file access mode
+        Return the file access mode.
         """
         cdef int amode = 0
         with nogil: CHKERR( MPI_File_get_amode(self.ob_mpi, &amode) )
         return amode
 
     property amode:
-        """file access mode"""
+        """Access mode."""
         def __get__(self) -> int:
             return self.Get_amode()
 
@@ -155,15 +154,14 @@ cdef class File:
 
     def Get_group(self) -> Group:
         """
-        Return the group of processes
-        that opened the file
+        Access the group of processes that opened the file.
         """
         cdef Group group = <Group>New(Group)
         with nogil: CHKERR( MPI_File_get_group(self.ob_mpi, &group.ob_mpi) )
         return group
 
     property group:
-        """file group"""
+        """Group."""
         def __get__(self) -> Group:
             return self.Get_group()
 
@@ -172,22 +170,20 @@ cdef class File:
 
     def Set_info(self, Info info: Info) -> None:
         """
-        Set new values for the hints
-        associated with a file
+        Set new values for the hints associated with a file.
         """
         with nogil: CHKERR( MPI_File_set_info(self.ob_mpi, info.ob_mpi) )
 
     def Get_info(self) -> Info:
         """
-        Return the hints for a file that
-        that are currently in use
+        Return the current hints for a file.
         """
         cdef Info info = <Info>New(Info)
         with nogil: CHKERR( MPI_File_get_info(self.ob_mpi, &info.ob_mpi) )
         return info
 
     property info:
-        """file info"""
+        """Info hints."""
         def __get__(self) -> Info:
             return self.Get_info()
         def __set__(self, value: Info):
@@ -205,7 +201,7 @@ cdef class File:
         Info info: Info = INFO_NULL,
     ) -> None:
         """
-        Set the file view
+        Set the file view.
         """
         cdef char *cdatarep = b"native"
         if datarep is not None: datarep = asmpistr(datarep, &cdatarep)
@@ -217,7 +213,7 @@ cdef class File:
 
     def Get_view(self) -> tuple[int, Datatype, Datatype, str]:
         """
-        Return the file view
+        Return the file view.
         """
         cdef MPI_Offset disp = 0
         cdef MPI_Datatype cetype = MPI_DATATYPE_NULL
@@ -245,7 +241,7 @@ cdef class File:
         Status status: Status | None = None,
     ) -> None:
         """
-        Read using explicit offset
+        Read using explicit offset.
         """
         cdef _p_msg_io m = message_io_read(buf)
         cdef MPI_Status *statusp = arg_Status(status)
@@ -259,7 +255,7 @@ cdef class File:
         Status status: Status | None = None,
     ) -> None:
         """
-        Collective read using explicit offset
+        Collective read using explicit offset.
         """
         cdef _p_msg_io m = message_io_read(buf)
         cdef MPI_Status *statusp = arg_Status(status)
@@ -273,7 +269,7 @@ cdef class File:
         Status status:Status | None = None,
     ) -> None:
         """
-        Write using explicit offset
+        Write using explicit offset.
         """
         cdef _p_msg_io m = message_io_write(buf)
         cdef MPI_Status *statusp = arg_Status(status)
@@ -287,7 +283,7 @@ cdef class File:
         Status status: Status | None = None,
     ) -> None:
         """
-        Collective write using explicit offset
+        Collective write using explicit offset.
         """
         cdef _p_msg_io m = message_io_write(buf)
         cdef MPI_Status *statusp = arg_Status(status)
@@ -300,7 +296,7 @@ cdef class File:
         buf: BufSpec,
     ) -> Request:
         """
-        Nonblocking read using explicit offset
+        Nonblocking read using explicit offset.
         """
         cdef _p_msg_io m = message_io_read(buf)
         cdef Request request = <Request>New(Request)
@@ -315,7 +311,7 @@ cdef class File:
         buf: BufSpec,
     ) -> Request:
         """
-        Nonblocking collective read using explicit offset
+        Nonblocking collective read using explicit offset.
         """
         cdef _p_msg_io m = message_io_read(buf)
         cdef Request request = <Request>New(Request)
@@ -330,7 +326,7 @@ cdef class File:
         buf: BufSpec,
     ) -> Request:
         """
-        Nonblocking write using explicit offset
+        Nonblocking write using explicit offset.
         """
         cdef _p_msg_io m = message_io_write(buf)
         cdef Request request = <Request>New(Request)
@@ -345,7 +341,7 @@ cdef class File:
         buf: BufSpec,
     ) -> Request:
         """
-        Nonblocking collective write using explicit offset
+        Nonblocking collective write using explicit offset.
         """
         cdef _p_msg_io m = message_io_write(buf)
         cdef Request request = <Request>New(Request)
@@ -363,7 +359,7 @@ cdef class File:
         Status status: Status | None = None,
     ) -> None:
         """
-        Read using individual file pointer
+        Read using individual file pointer.
         """
         cdef _p_msg_io m = message_io_read(buf)
         cdef MPI_Status *statusp = arg_Status(status)
@@ -376,7 +372,7 @@ cdef class File:
         Status status: Status | None = None,
     ) -> None:
         """
-        Collective read using individual file pointer
+        Collective read using individual file pointer.
         """
         cdef _p_msg_io m = message_io_read(buf)
         cdef MPI_Status *statusp = arg_Status(status)
@@ -389,7 +385,7 @@ cdef class File:
         Status status: Status | None = None,
     ) -> None:
         """
-        Write using individual file pointer
+        Write using individual file pointer.
         """
         cdef _p_msg_io m = message_io_write(buf)
         cdef MPI_Status *statusp = arg_Status(status)
@@ -402,7 +398,7 @@ cdef class File:
         Status status: Status | None = None,
     ) -> None:
         """
-        Collective write using individual file pointer
+        Collective write using individual file pointer.
         """
         cdef _p_msg_io m = message_io_write(buf)
         cdef MPI_Status *statusp = arg_Status(status)
@@ -414,7 +410,7 @@ cdef class File:
         buf: BufSpec,
     ) -> Request:
         """
-        Nonblocking read using individual file pointer
+        Nonblocking read using individual file pointer.
         """
         cdef _p_msg_io m = message_io_read(buf)
         cdef Request request = <Request>New(Request)
@@ -428,7 +424,7 @@ cdef class File:
         buf: BufSpec,
     ) -> Request:
         """
-        Nonblocking collective read using individual file pointer
+        Nonblocking collective read using individual file pointer.
         """
         cdef _p_msg_io m = message_io_read(buf)
         cdef Request request = <Request>New(Request)
@@ -442,7 +438,7 @@ cdef class File:
         buf: BufSpec,
     ) -> Request:
         """
-        Nonblocking write using individual file pointer
+        Nonblocking write using individual file pointer.
         """
         cdef _p_msg_io m = message_io_write(buf)
         cdef Request request = <Request>New(Request)
@@ -456,7 +452,7 @@ cdef class File:
         buf: BufSpec,
     ) -> Request:
         """
-        Nonblocking collective write using individual file pointer
+        Nonblocking collective write using individual file pointer.
         """
         cdef _p_msg_io m = message_io_write(buf)
         cdef Request request = <Request>New(Request)
@@ -467,14 +463,16 @@ cdef class File:
 
     def Seek(self, Offset offset: int, int whence: int = SEEK_SET) -> None:
         """
-        Update the individual file pointer
+        Update the individual file pointer.
         """
         with nogil: CHKERR( MPI_File_seek(self.ob_mpi, offset, whence) )
 
     def Get_position(self) -> int:
         """
-        Return the current position of the individual file pointer
-        in etype units relative to the current view
+        Return the current position of the individual file pointer.
+
+        .. note:: Position is measured in etype units
+           relative to the current file view.
         """
         cdef MPI_Offset offset = 0
         with nogil: CHKERR( MPI_File_get_position(self.ob_mpi, &offset) )
@@ -482,8 +480,10 @@ cdef class File:
 
     def Get_byte_offset(self, Offset offset: int) -> int:
         """
-        Return the absolute byte position in the file corresponding
-        to 'offset' etypes relative to the current view
+        Return the absolute byte position in the file.
+
+        .. note:: Input *offset* is measured in etype units
+           relative to the current file view.
         """
         cdef MPI_Offset disp = 0
         with nogil: CHKERR( MPI_File_get_byte_offset(
@@ -499,7 +499,7 @@ cdef class File:
         Status status: Status | None = None,
     ) -> None:
         """
-        Read using shared file pointer
+        Read using shared file pointer.
         """
         cdef _p_msg_io m = message_io_read(buf)
         cdef MPI_Status *statusp = arg_Status(status)
@@ -512,7 +512,7 @@ cdef class File:
         Status status: Status | None = None,
     ) -> None:
         """
-        Write using shared file pointer
+        Write using shared file pointer.
         """
         cdef _p_msg_io m = message_io_write(buf)
         cdef MPI_Status *statusp = arg_Status(status)
@@ -524,7 +524,7 @@ cdef class File:
         buf: BufSpec,
     ) -> Request:
         """
-        Nonblocking read using shared file pointer
+        Nonblocking read using shared file pointer.
         """
         cdef _p_msg_io m = message_io_read(buf)
         cdef Request request = <Request>New(Request)
@@ -538,7 +538,7 @@ cdef class File:
         buf: BufSpec,
     ) -> Request:
         """
-        Nonblocking write using shared file pointer
+        Nonblocking write using shared file pointer.
         """
         cdef _p_msg_io m = message_io_write(buf)
         cdef Request request = <Request>New(Request)
@@ -553,7 +553,7 @@ cdef class File:
         Status status: Status | None = None,
     ) -> None:
         """
-        Collective read using shared file pointer
+        Collective read using shared file pointer.
         """
         cdef _p_msg_io m = message_io_read(buf)
         cdef MPI_Status *statusp = arg_Status(status)
@@ -566,7 +566,7 @@ cdef class File:
         Status status: Status | None = None,
     ) -> None:
         """
-        Collective write using shared file pointer
+        Collective write using shared file pointer.
         """
         cdef _p_msg_io m = message_io_write(buf)
         cdef MPI_Status *statusp = arg_Status(status)
@@ -579,15 +579,17 @@ cdef class File:
         int whence: int = SEEK_SET,
     ) -> None:
         """
-        Update the shared file pointer
+        Update the shared file pointer.
         """
         with nogil: CHKERR( MPI_File_seek_shared(
             self.ob_mpi, offset, whence) )
 
     def Get_position_shared(self) -> int:
         """
-        Return the current position of the shared file pointer
-        in etype units relative to the current view
+        Return the current position of the shared file pointer.
+
+        .. note:: Position is measured in etype units
+           relative to the current view.
         """
         cdef MPI_Offset offset = 0
         with nogil: CHKERR( MPI_File_get_position_shared(
@@ -605,7 +607,7 @@ cdef class File:
         buf: BufSpec,
     ) -> None:
         """
-        Start a split collective read using explicit offset
+        Start a split collective read using explicit offset.
         """
         cdef _p_msg_io m = message_io_read(buf)
         with nogil: CHKERR( MPI_File_read_at_all_begin_c(
@@ -617,7 +619,7 @@ cdef class File:
         Status status: Status | None = None,
     ) -> None:
         """
-        Complete a split collective read using explicit offset
+        Complete a split collective read using explicit offset.
         """
         cdef _p_msg_io m = message_io_read(buf)
         cdef MPI_Status *statusp = arg_Status(status)
@@ -630,7 +632,7 @@ cdef class File:
         buf: BufSpec,
     ) -> None:
         """
-        Start a split collective write using explicit offset
+        Start a split collective write using explicit offset.
         """
         cdef _p_msg_io m = message_io_write(buf)
         with nogil: CHKERR( MPI_File_write_at_all_begin_c(
@@ -642,7 +644,7 @@ cdef class File:
         Status status: Status | None = None,
     ) -> None:
         """
-        Complete a split collective write using explicit offset
+        Complete a split collective write using explicit offset.
         """
         cdef _p_msg_io m = message_io_write(buf)
         cdef MPI_Status *statusp = arg_Status(status)
@@ -656,8 +658,7 @@ cdef class File:
         buf: BufSpec,
     ) -> None:
         """
-        Start a split collective read
-        using individual file pointer
+        Start a split collective read using individual file pointer.
         """
         cdef _p_msg_io m = message_io_read(buf)
         with nogil: CHKERR( MPI_File_read_all_begin_c(
@@ -669,8 +670,7 @@ cdef class File:
         Status status: Status | None = None,
     ) -> None:
         """
-        Complete a split collective read
-        using individual file pointer
+        Complete a split collective read using individual file pointer.
         """
         cdef _p_msg_io m = message_io_read(buf)
         cdef MPI_Status *statusp = arg_Status(status)
@@ -682,8 +682,7 @@ cdef class File:
         buf: BufSpec,
     ) -> None:
         """
-        Start a split collective write
-        using individual file pointer
+        Start a split collective write using individual file pointer.
         """
         cdef _p_msg_io m = message_io_write(buf)
         with nogil: CHKERR( MPI_File_write_all_begin_c(
@@ -695,8 +694,7 @@ cdef class File:
         Status status: Status | None = None,
     ) -> None:
         """
-        Complete a split collective write
-        using individual file pointer
+        Complete a split collective write using individual file pointer.
         """
         cdef _p_msg_io m = message_io_write(buf)
         cdef MPI_Status *statusp = arg_Status(status)
@@ -710,8 +708,7 @@ cdef class File:
         buf: BufSpec,
     ) -> None:
         """
-        Start a split collective read
-        using shared file pointer
+        Start a split collective read using shared file pointer.
         """
         cdef _p_msg_io m = message_io_read(buf)
         with nogil: CHKERR( MPI_File_read_ordered_begin_c(
@@ -723,8 +720,7 @@ cdef class File:
         Status status: Status | None = None,
     ) -> None:
         """
-        Complete a split collective read
-        using shared file pointer
+        Complete a split collective read using shared file pointer.
         """
         cdef _p_msg_io m = message_io_read(buf)
         cdef MPI_Status *statusp = arg_Status(status)
@@ -736,8 +732,7 @@ cdef class File:
         buf: BufSpec,
     ) -> None:
         """
-        Start a split collective write using
-        shared file pointer
+        Start a split collective write using shared file pointer.
         """
         cdef _p_msg_io m = message_io_write(buf)
         with nogil: CHKERR( MPI_File_write_ordered_begin_c(
@@ -749,8 +744,7 @@ cdef class File:
         Status status: Status | None = None,
     ) -> None:
         """
-        Complete a split collective write
-        using shared file pointer
+        Complete a split collective write using shared file pointer.
         """
         cdef _p_msg_io m = message_io_write(buf)
         cdef MPI_Status *statusp = arg_Status(status)
@@ -762,7 +756,7 @@ cdef class File:
 
     def Get_type_extent(self, Datatype datatype: Datatype) -> int:
         """
-        Return the extent of datatype in the file
+        Return the extent of datatype in the file.
         """
         cdef MPI_Count extent = 0
         with nogil: CHKERR( MPI_File_get_type_extent_c(
@@ -774,20 +768,20 @@ cdef class File:
 
     def Set_atomicity(self, bint flag: bool) -> None:
         """
-        Set the atomicity mode
+        Set the atomicity mode.
         """
         with nogil: CHKERR( MPI_File_set_atomicity(self.ob_mpi, flag) )
 
     def Get_atomicity(self) -> bool:
         """
-        Return the atomicity mode
+        Return the atomicity mode.
         """
         cdef int flag = 0
         with nogil: CHKERR( MPI_File_get_atomicity(self.ob_mpi, &flag) )
         return <bint>flag
 
     property atomicity:
-        """atomicity"""
+        """Atomicity mode."""
         def __get__(self) -> bool:
             return self.Get_atomicity()
         def __set__(self, value: bool):
@@ -795,8 +789,7 @@ cdef class File:
 
     def Sync(self) -> None:
         """
-        Causes all previous writes to be
-        transferred to the storage device
+        Causes all previous writes to be transferred to the storage device.
         """
         with nogil: CHKERR( MPI_File_sync(self.ob_mpi) )
 
@@ -809,7 +802,7 @@ cdef class File:
         errhandler_fn: Callable[[File, int], None],
     ) -> Errhandler:
         """
-        Create a new error handler for files
+        Create a new error handler for files.
         """
         cdef Errhandler errhandler = <Errhandler>New(Errhandler)
         cdef MPI_File_errhandler_function *fn = NULL
@@ -823,7 +816,7 @@ cdef class File:
 
     def Get_errhandler(self) -> Errhandler:
         """
-        Get the error handler for a file
+        Get the error handler for a file.
         """
         cdef Errhandler errhandler = <Errhandler>New(Errhandler)
         CHKERR( MPI_File_get_errhandler(self.ob_mpi, &errhandler.ob_mpi) )
@@ -831,13 +824,13 @@ cdef class File:
 
     def Set_errhandler(self, Errhandler errhandler: Errhandler) -> None:
         """
-        Set the error handler for a file
+        Set the error handler for a file.
         """
         CHKERR( MPI_File_set_errhandler(self.ob_mpi, errhandler.ob_mpi) )
 
     def Call_errhandler(self, int errorcode: int) -> None:
         """
-        Call the error handler installed on a file
+        Call the error handler installed on a file.
         """
         CHKERR( MPI_File_call_errhandler(self.ob_mpi, errorcode) )
 
@@ -875,7 +868,7 @@ def Register_datarep(
     extent_fn: Callable[[Datatype], int],
 ) -> None:
     """
-    Register user-defined data representations
+    Register user-defined data representations.
     """
     cdef char *cdatarep = NULL
     datarep = asmpistr(datarep, &cdatarep)

@@ -81,9 +81,8 @@ cdef extern from "Python.h":
 
 @cython.final
 cdef class memory:
-
     """
-    Memory buffer
+    Memory buffer.
     """
 
     cdef Py_buffer view
@@ -103,7 +102,7 @@ cdef class memory:
         Aint nbytes: int,
         bint clear: bool = False,
     ) -> memory:
-        """Memory allocation"""
+        """Memory allocation."""
         cdef void *buf = NULL
         cdef Py_ssize_t size = nbytes
         if size < 0:
@@ -118,7 +117,7 @@ cdef class memory:
         obj: Buffer,
         bint readonly: bool = False,
     ) -> memory:
-        """Memory from buffer-like object"""
+        """Memory from buffer-like object."""
         cdef int flags = PyBUF_SIMPLE
         if not readonly: flags |= PyBUF_WRITABLE
         cdef memory mem = <memory>New(memory)
@@ -132,7 +131,7 @@ cdef class memory:
         Aint nbytes: int,
         bint readonly: bool = False,
     ) -> memory:
-        """Memory from address and size in bytes"""
+        """Memory from address and size in bytes."""
         cdef void *buf = PyLong_AsVoidPtr(address)
         cdef Py_ssize_t size = nbytes
         if size < 0:
@@ -147,47 +146,47 @@ cdef class memory:
     # properties
 
     property address:
-        """Memory address"""
+        """Memory address."""
         def __get__(self) -> int:
             return PyLong_FromVoidPtr(self.view.buf)
 
     property obj:
-        """The underlying object of the memory"""
+        """Object exposing the memory."""
         def __get__(self) -> Buffer | None:
             if self.view.obj == NULL: return None
             return <object>self.view.obj
 
     property nbytes:
-        """Memory size (in bytes)"""
+        """Memory size (in bytes)."""
         def __get__(self) -> int:
             return self.view.len
 
     property readonly:
-        """Boolean indicating whether the memory is read-only"""
+        """Memory is read-only."""
         def __get__(self) -> bool:
             return self.view.readonly
 
     property format:
-        """A string with the format of each element"""
+        """Format of each element."""
         def __get__(self) -> str:
             if self.view.format != NULL:
                 return pystr(self.view.format)
             return pystr(BYTE_FMT)
 
     property itemsize:
-        """The size in bytes of each element"""
+        """Size (in bytes) of each element."""
         def __get__(self) -> int:
             return self.view.itemsize
 
     # convenience methods
 
     def tobytes(self, order: str | None = None) -> bytes:
-        """Return the data in the buffer as a byte string"""
+        """Return the data in the buffer as a byte string."""
         <void> order # unused
         return PyBytes_FromStringAndSize(<char*>self.view.buf, self.view.len)
 
     def toreadonly(self) -> memory:
-        """Return a readonly version of the memory object"""
+        """Return a readonly version of the memory object."""
         cdef void *buf = self.view.buf
         cdef Py_ssize_t size = self.view.len
         cdef object obj = self
@@ -199,7 +198,7 @@ cdef class memory:
         return mem
 
     def release(self) -> None:
-        """Release the underlying buffer exposed by the memory object"""
+        """Release the underlying buffer exposed by the memory object."""
         PyBuffer_Release(&self.view)
         PyBuffer_FillInfo(&self.view, <object>NULL,
                           NULL, 0, 0, PyBUF_SIMPLE)

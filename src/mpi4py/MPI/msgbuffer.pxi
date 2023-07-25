@@ -28,7 +28,7 @@ cdef inline bint is_constant(object obj, object CONST):
 @cython.final
 cdef class BottomType(int):
     """
-    Type of `BOTTOM`
+    Type of `BOTTOM`.
     """
 
     def __cinit__(self):
@@ -48,7 +48,7 @@ cdef class BottomType(int):
 @cython.final
 cdef class InPlaceType(int):
     """
-    Type of `IN_PLACE`
+    Type of `IN_PLACE`.
     """
 
     def __cinit__(self):
