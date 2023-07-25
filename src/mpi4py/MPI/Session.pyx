@@ -1,7 +1,6 @@
 cdef class Session:
-
     """
-    Session
+    Session context.
     """
 
     def __cinit__(self, Session session: Session | None = None):
@@ -28,7 +27,7 @@ cdef class Session:
         Errhandler errhandler: Errhandler | None = None,
     ) -> Self:
         """
-        Create a new session
+        Create a new session.
         """
         cdef MPI_Errhandler cerrhdl = arg_Errhandler(errhandler)
         cdef Session session = <Session>New(cls)
@@ -39,13 +38,13 @@ cdef class Session:
 
     def Finalize(self) -> None:
         """
-        Finalize a session
+        Finalize a session.
         """
         CHKERR( MPI_Session_finalize(&self.ob_mpi) )
 
     def Get_num_psets(self, Info info: Info = INFO_NULL) -> int:
         """
-        Number of available process sets
+        Number of available process sets.
         """
         cdef int num_psets = -1
         CHKERR( MPI_Session_get_num_psets(
@@ -54,7 +53,7 @@ cdef class Session:
 
     def Get_nth_pset(self, int n: int, Info info: Info = INFO_NULL) -> str:
         """
-        Name of the nth process set
+        Name of the *n*-th process set.
         """
         cdef int nlen = MPI_MAX_PSET_NAME_LEN
         cdef char *pset_name = NULL
@@ -65,7 +64,7 @@ cdef class Session:
 
     def Get_info(self) -> Info:
         """
-        Return the hints for a session
+        Return the current hints for a session.
         """
         cdef Info info = <Info>New(Info)
         CHKERR( MPI_Session_get_info(
@@ -74,7 +73,7 @@ cdef class Session:
 
     def Get_pset_info(self, pset_name: str) -> Info:
         """
-        Return the hints for a session and process set
+        Return the current hints for a session and process set.
         """
         cdef char *cname = NULL
         pset_name = asmpistr(pset_name, &cname)
@@ -85,7 +84,7 @@ cdef class Session:
 
     def Create_group(self, pset_name: str) -> Group:
         """
-        Create a new group from session and process set
+        Create a new group from session and process set.
         """
         cdef char *cname = NULL
         pset_name = asmpistr(pset_name, &cname)
@@ -103,7 +102,7 @@ cdef class Session:
         errhandler_fn: Callable[[Session, int], None],
     ) -> Errhandler:
         """
-        Create a new error handler for sessions
+        Create a new error handler for sessions.
         """
         cdef Errhandler errhandler = <Errhandler>New(Errhandler)
         cdef MPI_Session_errhandler_function *fn = NULL
@@ -117,7 +116,7 @@ cdef class Session:
 
     def Get_errhandler(self) -> Errhandler:
         """
-        Get the error handler for a session
+        Get the error handler for a session.
         """
         cdef Errhandler errhandler = <Errhandler>New(Errhandler)
         CHKERR( MPI_Session_get_errhandler(self.ob_mpi, &errhandler.ob_mpi) )
@@ -125,13 +124,13 @@ cdef class Session:
 
     def Set_errhandler(self, Errhandler errhandler: Errhandler) -> None:
         """
-        Set the error handler for a session
+        Set the error handler for a session.
         """
         CHKERR( MPI_Session_set_errhandler(self.ob_mpi, errhandler.ob_mpi) )
 
     def Call_errhandler(self, int errorcode: int) -> None:
         """
-        Call the error handler installed on a session
+        Call the error handler installed on a session.
         """
         CHKERR( MPI_Session_call_errhandler(self.ob_mpi, errorcode) )
 

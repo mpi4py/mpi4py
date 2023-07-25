@@ -1,7 +1,6 @@
 cdef class Request:
-
     """
-    Request handle
+    Request handler.
     """
 
     def __cinit__(self, Request request: Request | None = None):
@@ -26,7 +25,7 @@ cdef class Request:
 
     def Wait(self, Status status: Status | None = None) -> Literal[True]:
         """
-        Wait for a send or receive to complete
+        Wait for a non-blocking operation to complete.
         """
         cdef MPI_Status *statusp = arg_Status(status)
         with nogil: CHKERR( MPI_Wait(
@@ -37,7 +36,7 @@ cdef class Request:
 
     def Test(self, Status status: Status | None = None) -> bool:
         """
-        Test for the completion of a send or receive
+        Test for the completion of a non-blocking operation.
         """
         cdef int flag = 0
         cdef MPI_Status *statusp = arg_Status(status)
@@ -49,13 +48,13 @@ cdef class Request:
 
     def Free(self) -> None:
         """
-        Free a communication request
+        Free a communication request.
         """
         with nogil: CHKERR( MPI_Request_free(&self.ob_mpi) )
 
     def Get_status(self, Status status: Status | None = None) -> bool:
         """
-        Non-destructive test for the completion of a request
+        Non-destructive test for the completion of a request.
         """
         cdef int flag = 0
         cdef MPI_Status *statusp = arg_Status(status)
@@ -73,7 +72,7 @@ cdef class Request:
         Status status: Status | None = None,
     ) -> int:
         """
-        Wait for any previously initiated request to complete
+        Wait for any previously initiated request to complete.
         """
         cdef int count = 0
         cdef MPI_Request *irequests = NULL
@@ -95,7 +94,7 @@ cdef class Request:
         Status status: Status | None = None,
     ) -> tuple[int, bool]:
         """
-        Test for completion of any previously initiated request
+        Test for completion of any previously initiated request.
         """
         cdef int count = 0
         cdef MPI_Request *irequests = NULL
@@ -119,7 +118,7 @@ cdef class Request:
         statuses: list[Status] | None = None,
     ) -> Literal[True]:
         """
-        Wait for all previously initiated requests to complete
+        Wait for all previously initiated requests to complete.
         """
         cdef int count = 0
         cdef MPI_Request *irequests = NULL
@@ -141,7 +140,7 @@ cdef class Request:
         statuses: list[Status] | None = None,
     ) -> bool:
         """
-        Test for completion of all previously initiated requests
+        Test for completion of all previously initiated requests.
         """
         cdef int count = 0
         cdef MPI_Request *irequests = NULL
@@ -164,7 +163,7 @@ cdef class Request:
         statuses: list[Status] | None = None,
     ) -> list[int] | None:
         """
-        Wait for some previously initiated requests to complete
+        Wait for some previously initiated requests to complete.
         """
         cdef int incount = 0
         cdef MPI_Request *irequests = NULL
@@ -194,7 +193,7 @@ cdef class Request:
         statuses: list[Status] | None = None,
     ) -> list[int] | None:
         """
-        Test for completion of some previously initiated requests
+        Test for completion of some previously initiated requests.
         """
         cdef int incount = 0
         cdef MPI_Request *irequests = NULL
@@ -222,7 +221,7 @@ cdef class Request:
 
     def Cancel(self) -> None:
         """
-        Cancel a communication request
+        Cancel a request.
         """
         with nogil: CHKERR( MPI_Cancel(&self.ob_mpi) )
 
@@ -252,7 +251,7 @@ cdef class Request:
         Status status: Status | None = None,
     ) -> Any:
         """
-        Wait for a send or receive to complete
+        Wait for a non-blocking operation to complete.
         """
         cdef msg = PyMPI_wait(self, status)
         return msg
@@ -262,7 +261,7 @@ cdef class Request:
             Status status: Status | None = None,
     ) -> tuple[bool, Any | None]:
         """
-        Test for the completion of a send or receive
+        Test for the completion of a non-blocking operation.
         """
         cdef int flag = 0
         cdef msg = PyMPI_test(self, &flag, status)
@@ -273,7 +272,7 @@ cdef class Request:
         Status status: Status | None = None,
     ) -> bool:
         """
-        Non-destructive test for the completion of a request
+        Non-destructive test for the completion of a request.
         """
         cdef int flag = 0
         cdef MPI_Status *statusp = arg_Status(status)
@@ -288,7 +287,7 @@ cdef class Request:
         Status status: Status | None = None
     ) -> tuple[int, Any]:
         """
-        Wait for any previously initiated request to complete
+        Wait for any previously initiated request to complete.
         """
         cdef int index = MPI_UNDEFINED
         cdef msg = PyMPI_waitany(requests, &index, status)
@@ -301,7 +300,7 @@ cdef class Request:
         Status status: Status | None = None,
     ) -> tuple[int, bool, Any | None]:
         """
-        Test for completion of any previously initiated request
+        Test for completion of any previously initiated request.
         """
         cdef int index = MPI_UNDEFINED
         cdef int flag  = 0
@@ -315,7 +314,7 @@ cdef class Request:
         statuses: list[Status] | None = None,
     ) -> list[Any]:
         """
-        Wait for all previously initiated requests to complete
+        Wait for all previously initiated requests to complete.
         """
         cdef msg = PyMPI_waitall(requests, statuses)
         return msg
@@ -327,7 +326,7 @@ cdef class Request:
         statuses: list[Status] | None = None
     ) -> tuple[bool, list[Any] | None]:
         """
-        Test for completion of all previously initiated requests
+        Test for completion of all previously initiated requests.
         """
         cdef int flag = 0
         cdef msg = PyMPI_testall(requests, &flag, statuses)
@@ -340,7 +339,7 @@ cdef class Request:
         statuses: list[Status] | None = None,
     ) -> tuple[list[int] | None, list[Any] | None]:
         """
-        Wait for some previously initiated requests to complete
+        Wait for some previously initiated requests to complete.
         """
         return PyMPI_waitsome(requests, statuses)
     #
@@ -351,21 +350,20 @@ cdef class Request:
         statuses: list[Status] | None = None,
     ) -> tuple[list[int] | None, list[Any] | None]:
         """
-        Test for completion of some previously initiated requests
+        Test for completion of some previously initiated requests.
         """
         return PyMPI_testsome(requests, statuses)
     #
     def cancel(self) -> None:
         """
-        Cancel a communication request
+        Cancel a request.
         """
         with nogil: CHKERR( MPI_Cancel(&self.ob_mpi) )
 
 
 cdef class Prequest(Request):
-
     """
-    Persistent request handle
+    Persistent request handler.
     """
 
     def __cinit__(self, Request request: Request | None = None):
@@ -374,14 +372,14 @@ cdef class Prequest(Request):
 
     def Start(self) -> None:
         """
-        Initiate a communication with a persistent request
+        Initiate a communication with a persistent request.
         """
         with nogil: CHKERR( MPI_Start(&self.ob_mpi) )
 
     @classmethod
     def Startall(cls, requests: list[Prequest]) -> None:
         """
-        Start a collection of persistent requests
+        Start a collection of persistent requests.
         """
         cdef int count = 0
         cdef MPI_Request *irequests = NULL
@@ -400,7 +398,7 @@ cdef class Prequest(Request):
         int partition: int,
     ) -> None:
         """
-        Mark a given partition as ready
+        Mark a given partition as ready.
         """
         CHKERR( MPI_Pready(partition, self.ob_mpi) )
 
@@ -410,7 +408,7 @@ cdef class Prequest(Request):
         int partition_high: int,
     ) -> None:
         """
-        Mark a range of partitions as ready
+        Mark a range of partitions as ready.
         """
         CHKERR( MPI_Pready_range(partition_low, partition_high, self.ob_mpi) )
 
@@ -419,7 +417,7 @@ cdef class Prequest(Request):
         partitions: Sequence[int],
     ) -> None:
         """
-        Mark a sequence of partitions as ready
+        Mark a sequence of partitions as ready.
         """
         cdef int length = 0, *array_of_partitions = NULL
         partitions = getarray(partitions, &length, &array_of_partitions)
@@ -430,7 +428,7 @@ cdef class Prequest(Request):
         int partition: int,
     ) -> bool:
         """
-        Test partial completion of a partitioned receive operation
+        Test partial completion of a partitioned receive operation.
         """
         cdef int flag = 0
         CHKERR( MPI_Parrived(self.ob_mpi, partition, &flag) )
@@ -438,9 +436,8 @@ cdef class Prequest(Request):
 
 
 cdef class Grequest(Request):
-
     """
-    Generalized request handle
+    Generalized request handler.
     """
 
     def __cinit__(self, Request request: Request | None = None):
@@ -458,7 +455,7 @@ cdef class Grequest(Request):
         kwargs: dict[str, Any] | None = None,
     ) -> Grequest:
         """
-        Create and return a user-defined request
+        Create and return a user-defined request.
         """
         cdef Grequest request = <Grequest>New(Grequest)
         cdef _p_greq state = _p_greq(
@@ -472,7 +469,7 @@ cdef class Grequest(Request):
 
     def Complete(self) -> None:
         """
-        Notify that a user-defined request is complete
+        Notify that a user-defined request is complete.
         """
         if self.ob_mpi != MPI_REQUEST_NULL:
             if self.ob_mpi != self.ob_grequest:

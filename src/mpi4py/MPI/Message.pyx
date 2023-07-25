@@ -1,7 +1,6 @@
 cdef class Message:
-
     """
-    Matched message handle
+    Matched message.
     """
 
     def __cinit__(self, Message message: Message | None = None):
@@ -33,7 +32,7 @@ cdef class Message:
         Status status: Status | None = None,
     ) -> Self:
         """
-        Blocking test for a matched message
+        Blocking test for a matched message.
         """
         cdef MPI_Message cmessage = MPI_MESSAGE_NULL
         cdef MPI_Status *statusp = arg_Status(status)
@@ -52,7 +51,7 @@ cdef class Message:
         Status status: Status | None = None,
     ) -> Self | None:
         """
-        Nonblocking test for a matched message
+        Nonblocking test for a matched message.
         """
         cdef int flag = 0
         cdef MPI_Message cmessage = MPI_MESSAGE_NULL
@@ -73,7 +72,7 @@ cdef class Message:
         Status status: Status | None = None,
     ) -> None:
         """
-        Blocking receive of matched message
+        Blocking receive of matched message.
         """
         cdef MPI_Message message = self.ob_mpi
         cdef int source = MPI_ANY_SOURCE
@@ -89,7 +88,7 @@ cdef class Message:
 
     def Irecv(self, buf: BufSpec) -> Request:
         """
-        Nonblocking receive of matched message
+        Nonblocking receive of matched message.
         """
         cdef MPI_Message message = self.ob_mpi
         cdef int source = MPI_ANY_SOURCE
@@ -116,7 +115,9 @@ cdef class Message:
         int tag: int = ANY_TAG,
         Status status: Status | None = None,
     ) -> Self:
-        """Blocking test for a matched message"""
+        """
+        Blocking test for a matched message.
+        """
         cdef Message message = <Message>New(cls)
         cdef MPI_Status *statusp = arg_Status(status)
         message.ob_buf = PyMPI_mprobe(source, tag, comm.ob_mpi,
@@ -131,7 +132,9 @@ cdef class Message:
         int tag: int = ANY_TAG,
         Status status: Status | None = None,
     ) -> Self | None:
-        """Nonblocking test for a matched message"""
+        """
+        Nonblocking test for a matched message.
+        """
         cdef int flag = 0
         cdef Message message = <Message>New(cls)
         cdef MPI_Status *statusp = arg_Status(status)
@@ -141,7 +144,9 @@ cdef class Message:
         return message
     #
     def recv(self, Status status: Status | None = None) -> Any:
-        """Blocking receive of matched message"""
+        """
+        Blocking receive of matched message.
+        """
         cdef object rmsg = self.ob_buf
         cdef MPI_Message message = self.ob_mpi
         cdef MPI_Status *statusp = arg_Status(status)
@@ -151,7 +156,9 @@ cdef class Message:
         return rmsg
     #
     def irecv(self) -> Request:
-        """Nonblocking receive of matched message"""
+        """
+        Nonblocking receive of matched message.
+        """
         cdef object rmsg = self.ob_buf
         cdef MPI_Message message = self.ob_mpi
         cdef Request request = <Request>New(Request)

@@ -266,7 +266,7 @@ def _datatype_create(
     bint free: bool = False,
 ) -> Datatype:
     """
-    Create datatype from base datatype, combiner name, and parameters
+    Create datatype from base datatype, combiner name, and parameters.
     """
     return datatype_create(datatype, combiner, params, free)
 
@@ -276,7 +276,7 @@ def _datatype_decode(
     bint mark: bool = False,
 ) -> tuple[Datatype, str, dict[str, Any]]:
     """
-    Decode datatype to base datatype, combiner name, and parameters
+    Decode datatype to base datatype, combiner name, and parameters.
     """
     return datatype_decode(datatype, mark)  #~> TODO
 

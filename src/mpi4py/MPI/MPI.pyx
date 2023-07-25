@@ -1,8 +1,6 @@
 # -----------------------------------------------------------------------------
 
-__doc__ = """
-Message Passing Interface.
-"""
+__doc__ = """Message Passing Interface."""
 
 from mpi4py.libmpi cimport *
 
@@ -100,7 +98,7 @@ include "File.pyx"
 
 def Alloc_mem(Aint size: int, Info info: Info = INFO_NULL) -> memory:
     """
-    Allocate memory for message passing and RMA
+    Allocate memory for message passing and remote memory access.
     """
     cdef void *base = NULL
     CHKERR( MPI_Alloc_mem(size, info.ob_mpi, &base) )
@@ -108,7 +106,7 @@ def Alloc_mem(Aint size: int, Info info: Info = INFO_NULL) -> memory:
 
 def Free_mem(mem: memory) -> None:
     """
-    Free memory allocated with `Alloc_mem()`
+    Free memory allocated with `Alloc_mem`.
     """
     cdef void *base = NULL
     cdef memory buf = asbuffer(mem, &base, NULL, 1)
@@ -120,14 +118,14 @@ def Free_mem(mem: memory) -> None:
 
 def Init() -> None:
     """
-    Initialize the MPI execution environment
+    Initialize the MPI execution environment.
     """
     CHKERR( MPI_Init(NULL, NULL) )
     initialize()
 
 def Finalize() -> None:
     """
-    Terminate the MPI execution environment
+    Terminate the MPI execution environment.
     """
     finalize()
     CHKERR( MPI_Finalize() )
@@ -149,7 +147,7 @@ THREAD_MULTIPLE   = MPI_THREAD_MULTIPLE
 
 def Init_thread(int required: int = THREAD_MULTIPLE) -> int:
     """
-    Initialize the MPI execution environment
+    Initialize the MPI execution environment.
     """
     cdef int provided = MPI_THREAD_SINGLE
     CHKERR( MPI_Init_thread(NULL, NULL, required, &provided) )
@@ -158,7 +156,7 @@ def Init_thread(int required: int = THREAD_MULTIPLE) -> int:
 
 def Query_thread() -> int:
     """
-    Return the level of thread support provided by the MPI library
+    Return the level of thread support provided by the MPI library.
     """
     cdef int provided = MPI_THREAD_SINGLE
     CHKERR( MPI_Query_thread(&provided) )
@@ -166,7 +164,7 @@ def Query_thread() -> int:
 
 def Is_thread_main() -> bool:
     """
-    Indicate whether this thread called `Init` or `Init_thread`
+    Indicate whether this thread called `Init` or `Init_thread`.
     """
     cdef int flag = 1
     CHKERR( MPI_Is_thread_main(&flag) )
@@ -174,7 +172,7 @@ def Is_thread_main() -> bool:
 
 def Is_initialized() -> bool:
     """
-    Indicates whether `Init` has been called
+    Indicate whether `Init` has been called.
     """
     cdef int flag = 0
     CHKERR( MPI_Initialized(&flag) )
@@ -182,7 +180,7 @@ def Is_initialized() -> bool:
 
 def Is_finalized() -> bool:
     """
-    Indicates whether `Finalize` has completed
+    Indicate whether `Finalize` has completed.
     """
     cdef int flag = 0
     CHKERR( MPI_Finalized(&flag) )
@@ -199,8 +197,7 @@ SUBVERSION = MPI_SUBVERSION
 
 def Get_version() -> tuple[int, int]:
     """
-    Obtain the version number of the MPI standard supported
-    by the implementation as a tuple ``(version, subversion)``
+    Obtain the version number of the MPI standard.
     """
     cdef int version = 1
     cdef int subversion = 0
@@ -209,7 +206,7 @@ def Get_version() -> tuple[int, int]:
 
 def Get_library_version() -> str:
     """
-    Obtain the version string of the MPI library
+    Obtain the version string of the MPI library.
     """
     cdef char name[MPI_MAX_LIBRARY_VERSION_STRING+1]
     cdef int nlen = 0
@@ -221,7 +218,7 @@ def Get_library_version() -> str:
 
 def Get_processor_name() -> str:
     """
-    Obtain the name of the calling processor
+    Obtain the name of the calling processor.
     """
     cdef char name[MPI_MAX_PROCESSOR_NAME+1]
     cdef int nlen = 0
@@ -233,13 +230,13 @@ def Get_processor_name() -> str:
 
 def Wtime() -> float:
     """
-    Return an elapsed time on the calling processor
+    Return an elapsed time on the calling processor.
     """
     return MPI_Wtime()
 
 def Wtick() -> float:
     """
-    Return the resolution of `Wtime`
+    Return the resolution of `Wtime`.
     """
     return MPI_Wtick()
 
@@ -248,7 +245,7 @@ def Wtick() -> float:
 
 def Pcontrol(int level: int) -> None:
     """
-    Control profiling
+    Control profiling.
     """
     if level < 0 or level > 2: CHKERR( MPI_ERR_ARG )
     CHKERR( MPI_Pcontrol(level) )
@@ -285,11 +282,11 @@ cdef extern from * nogil:
 
 def get_vendor() -> tuple[str, tuple[int, int, int]]:
     """
-    Information about the underlying MPI implementation
+    Information about the underlying MPI implementation.
 
     Returns:
-      - a string with the name of the MPI implementation
-      - an integer 3-tuple version ``(major, minor, micro)``
+      - string with the name of the MPI implementation.
+      - integer 3-tuple version number ``(major, minor, micro)``.
     """
     cdef const char *name=NULL
     cdef int major=0, minor=0, micro=0
@@ -311,7 +308,7 @@ cdef inline int _mpi_type(object arg, type cls) except -1:
 
 def _sizeof(arg: Any) -> int:
     """
-    Size in bytes of the underlying MPI handle
+    Size in bytes of the underlying MPI handle.
     """
     if _mpi_type(arg, Status):     return sizeof(MPI_Status)
     if _mpi_type(arg, Datatype):   return sizeof(MPI_Datatype)
@@ -329,7 +326,7 @@ def _sizeof(arg: Any) -> int:
 
 def _addressof(arg: Any) -> int:
     """
-    Memory address of the underlying MPI handle
+    Memory address of the underlying MPI handle.
     """
     cdef void *ptr = NULL
     if isinstance(arg, Status):
@@ -362,7 +359,7 @@ def _addressof(arg: Any) -> int:
 
 def _handleof(arg: Any) -> int:
     """
-    Unsigned integer value with the underlying MPI handle
+    Unsigned integer value with the underlying MPI handle.
     """
     if isinstance(arg, Status):
         return <Py_uintptr_t>&((<Status>arg).ob_mpi)

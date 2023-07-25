@@ -31,9 +31,8 @@ COMM_TYPE_HW_UNGUIDED = MPI_COMM_TYPE_HW_UNGUIDED
 
 
 cdef class Comm:
-
     """
-    Communicator
+    Communication context.
     """
 
     def __cinit__(self, Comm comm: Comm | None = None):
@@ -58,14 +57,14 @@ cdef class Comm:
 
     def Get_group(self) -> Group:
         """
-        Access the group associated with a communicator
+        Access the group associated with a communicator.
         """
         cdef Group group = <Group>New(Group)
         with nogil: CHKERR( MPI_Comm_group(self.ob_mpi, &group.ob_mpi) )
         return group
 
     property group:
-        """communicator group"""
+        """Group."""
         def __get__(self) -> Group:
             return self.Get_group()
 
@@ -74,33 +73,33 @@ cdef class Comm:
 
     def Get_size(self) -> int:
         """
-        Return the number of processes in a communicator
+        Return the number of processes in a communicator.
         """
         cdef int size = -1
         CHKERR( MPI_Comm_size(self.ob_mpi, &size) )
         return size
 
     property size:
-        """number of processes in communicator"""
+        """Number of processes."""
         def __get__(self) -> int:
             return self.Get_size()
 
     def Get_rank(self) -> int:
         """
-        Return the rank of this process in a communicator
+        Return the rank of this process in a communicator.
         """
         cdef int rank = MPI_PROC_NULL
         CHKERR( MPI_Comm_rank(self.ob_mpi, &rank) )
         return rank
 
     property rank:
-        """rank of this process in communicator"""
+        """Rank of this process."""
         def __get__(self) -> int:
             return self.Get_rank()
 
     def Compare(self, Comm comm: Comm) -> int:
         """
-        Compare two communicators
+        Compare two communicators.
         """
         cdef int flag = MPI_UNEQUAL
         with nogil: CHKERR( MPI_Comm_compare(
@@ -112,7 +111,7 @@ cdef class Comm:
 
     def Clone(self) -> Self:
         """
-        Clone an existing communicator
+        Clone an existing communicator.
         """
         cdef Comm comm = <Comm>New(type(self))
         with nogil: CHKERR( MPI_Comm_dup(self.ob_mpi, &comm.ob_mpi) )
@@ -121,7 +120,7 @@ cdef class Comm:
 
     def Dup(self, Info info: Info | None = None) -> Self:
         """
-        Duplicate an existing communicator
+        Duplicate a communicator.
         """
         cdef MPI_Info cinfo = arg_Info(info)
         cdef Comm comm = <Comm>New(type(self))
@@ -136,7 +135,7 @@ cdef class Comm:
 
     def Dup_with_info(self, Info info: Info) -> Self:
         """
-        Duplicate an existing communicator
+        Duplicate a communicator with hints.
         """
         cdef Comm comm = <Comm>New(type(self))
         with nogil: CHKERR( MPI_Comm_dup_with_info(
@@ -146,7 +145,7 @@ cdef class Comm:
 
     def Idup(self, Info info: Info | None = None) -> tuple[Self, Request]:
         """
-        Nonblocking duplicate an existing communicator
+        Nonblocking duplicate a communicator.
         """
         cdef MPI_Info cinfo = arg_Info(info)
         cdef Comm comm = <Comm>New(type(self))
@@ -164,7 +163,7 @@ cdef class Comm:
 
     def Idup_with_info(self, Info info: Info) ->  tuple[Self, Request]:
         """
-        Duplicate an existing communicator
+        Nonblocking duplicate a communicator with hints.
         """
         cdef Comm comm = <Comm>New(type(self))
         cdef Request request = <Request>New(Request)
@@ -176,7 +175,7 @@ cdef class Comm:
 
     def Create(self, Group group: Group) -> Comm:
         """
-        Create communicator from group
+        Create communicator from group.
         """
         cdef type cls = Comm
         if   isinstance(self, Intracomm): cls = Intracomm
@@ -189,7 +188,7 @@ cdef class Comm:
 
     def Split(self, int color: int = 0, int key: int = 0) -> Comm:
         """
-        Split communicator by color and key
+        Split communicator by color and key.
         """
         cdef type cls = Comm
         if   isinstance(self, Intracomm): cls = Intracomm
@@ -207,7 +206,7 @@ cdef class Comm:
         Info info: Info = INFO_NULL,
     ) -> Comm:
         """
-        Split communicator by split type
+        Split communicator by split type.
         """
         cdef type cls = Comm
         if   isinstance(self, Intracomm): cls = Intracomm
@@ -223,7 +222,7 @@ cdef class Comm:
 
     def Free(self) -> None:
         """
-        Free a communicator
+        Free a communicator.
         """
         with nogil: CHKERR( MPI_Comm_free(&self.ob_mpi) )
         if self is __COMM_SELF__:  self.ob_mpi = MPI_COMM_SELF
@@ -234,13 +233,13 @@ cdef class Comm:
 
     def Revoke(self) -> None:
         """
-        Revoke a communicator
+        Revoke a communicator.
         """
         with nogil: CHKERR( MPI_Comm_revoke(self.ob_mpi) )
 
     def Is_revoked(self) -> bool:
         """
-        Indicate whether the communicator has been revoked
+        Indicate whether the communicator has been revoked.
         """
         cdef int flag = 0
         with nogil: CHKERR( MPI_Comm_is_revoked(self.ob_mpi, &flag) )
@@ -248,7 +247,7 @@ cdef class Comm:
 
     def Get_failed(self) -> Group:
         """
-        Extract the group of failed processes
+        Extract the group of failed processes.
         """
         cdef Group group = <Group>New(Group)
         with nogil: CHKERR( MPI_Comm_get_failed(self.ob_mpi, &group.ob_mpi) )
@@ -256,7 +255,7 @@ cdef class Comm:
 
     def Ack_failed(self, num_to_ack: int | None = None) -> int:
         """
-        Acknowledge failures on a communicator
+        Acknowledge failures on a communicator.
         """
         cdef int num_acked = MPI_UNDEFINED
         cdef int c_num_to_ack = MPI_UNDEFINED
@@ -270,14 +269,14 @@ cdef class Comm:
 
     def Agree(self,int flag: int) -> int:
         """
-        Blocking agreement
+        Blocking agreement.
         """
         with nogil: CHKERR( MPI_Comm_agree(self.ob_mpi, &flag) )
         return flag
 
     def Iagree(self, flag: Buffer) -> Request:
         """
-        Non blocking agreement
+        Nonblocking agreement.
         """
         cdef int *flag_ptr = NULL
         cdef MPI_Aint flag_len = 0
@@ -292,7 +291,7 @@ cdef class Comm:
 
     def Shrink(self) -> Comm:
         """
-        Shrink a communicator to remove all failed processes
+        Shrink a communicator to remove all failed processes.
         """
         cdef type cls = Comm
         if   isinstance(self, Intracomm): cls = Intracomm
@@ -304,7 +303,7 @@ cdef class Comm:
 
     def Ishrink(self) -> tuple[Comm, Request]:
         """
-        Nonblocking shrink a communicator to remove all failed processes
+        Nonblocking shrink a communicator to remove all failed processes.
         """
         cdef type cls = Comm
         if   isinstance(self, Intracomm): cls = Intracomm
@@ -334,16 +333,14 @@ cdef class Comm:
 
     def Set_info(self, Info info: Info) -> None:
         """
-        Set new values for the hints
-        associated with a communicator
+        Set new values for the hints associated with a communicator.
         """
         with nogil: CHKERR( MPI_Comm_set_info(
             self.ob_mpi, info.ob_mpi) )
 
     def Get_info(self) -> Info:
         """
-        Return the hints for a communicator
-        that are currently in use
+        Return the current hints for a communicator.
         """
         cdef Info info = <Info>New(Info)
         with nogil: CHKERR( MPI_Comm_get_info(
@@ -351,7 +348,7 @@ cdef class Comm:
         return info
 
     property info:
-        """communicator info"""
+        """Info hints."""
         def __get__(self) -> Info:
             return self.Get_info()
         def __set__(self, value: Info):
@@ -370,11 +367,11 @@ cdef class Comm:
         int tag: int = 0,
     ) -> None:
         """
-        Blocking send
+        Blocking send.
 
-        .. note:: This function may block until the message is
-           received. Whether or not `Send` blocks depends on
-           several factors and is implementation dependent
+        .. note:: This function may block until the message is received.
+           Whether `Send` blocks or not depends on several factors and is
+           implementation dependent.
         """
         cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
         with nogil: CHKERR( MPI_Send_c(
@@ -389,9 +386,9 @@ cdef class Comm:
         Status status: Status | None = None,
     ) -> None:
         """
-        Blocking receive
+        Blocking receive.
 
-        .. note:: This function blocks until the message is received
+        .. note:: This function blocks until the message is received.
         """
         cdef _p_msg_p2p rmsg = message_p2p_recv(buf, source)
         cdef MPI_Status *statusp = arg_Status(status)
@@ -413,15 +410,14 @@ cdef class Comm:
         Status status: Status | None = None,
     ) -> None:
         """
-        Send and receive a message
+        Send and receive a message.
 
-        .. note:: This function is guaranteed not to deadlock in
-           situations where pairs of blocking sends and receives may
+        .. note:: This function is guaranteed not to deadlock in situations
+           where pairs of blocking sends and receives may deadlock.
+
+        .. caution:: A common mistake when using this function is to mismatch
+           the tags with the source and destination ranks, which can result in
            deadlock.
-
-        .. caution:: A common mistake when using this function is to
-           mismatch the tags with the source and destination ranks,
-           which can result in deadlock.
         """
         cdef _p_msg_p2p smsg = message_p2p_send(sendbuf, dest)
         cdef _p_msg_p2p rmsg = message_p2p_recv(recvbuf, source)
@@ -441,15 +437,14 @@ cdef class Comm:
         Status status: Status | None = None,
     ) -> None:
         """
-        Send and receive a message
+        Send and receive a message.
 
-        .. note:: This function is guaranteed not to deadlock in
-           situations where pairs of blocking sends and receives may
+        .. note:: This function is guaranteed not to deadlock in situations
+           where pairs of blocking sends and receives may deadlock.
+
+        .. caution:: A common mistake when using this function is to mismatch
+           the tags with the source and destination ranks, which can result in
            deadlock.
-
-        .. caution:: A common mistake when using this function is to
-           mismatch the tags with the source and destination ranks,
-           which can result in deadlock.
         """
         cdef int rank = MPI_PROC_NULL
         if dest   != MPI_PROC_NULL: rank = dest
@@ -471,7 +466,7 @@ cdef class Comm:
         int tag: int = 0,
     ) -> Request:
         """
-        Nonblocking send
+        Nonblocking send.
         """
         cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
         cdef Request request = <Request>New(Request)
@@ -488,7 +483,7 @@ cdef class Comm:
         int tag: int = ANY_TAG,
     ) -> Request:
         """
-        Nonblocking receive
+        Nonblocking receive.
         """
         cdef _p_msg_p2p rmsg = message_p2p_recv(buf, source)
         cdef Request request = <Request>New(Request)
@@ -508,7 +503,7 @@ cdef class Comm:
         int recvtag: int = ANY_TAG,
     ) -> Request:
         """
-        Nonblocking send and receive
+        Nonblocking send and receive.
         """
         cdef _p_msg_p2p smsg = message_p2p_send(sendbuf, dest)
         cdef _p_msg_p2p rmsg = message_p2p_recv(recvbuf, source)
@@ -529,15 +524,14 @@ cdef class Comm:
         int recvtag: int = ANY_TAG,
     ) -> Request:
         """
-        Send and receive a message
+        Send and receive a message.
 
-        .. note:: This function is guaranteed not to deadlock in
-           situations where pairs of blocking sends and receives may
+        .. note:: This function is guaranteed not to deadlock in situations
+           where pairs of blocking sends and receives may deadlock.
+
+        .. caution:: A common mistake when using this function is to mismatch
+           the tags with the source and destination ranks, which can result in
            deadlock.
-
-        .. caution:: A common mistake when using this function is to
-           mismatch the tags with the source and destination ranks,
-           which can result in deadlock.
         """
         cdef int rank = MPI_PROC_NULL
         if dest   != MPI_PROC_NULL: rank = dest
@@ -561,7 +555,7 @@ cdef class Comm:
         Status status: Status | None = None,
     ) -> Literal[True]:
         """
-        Blocking test for a message
+        Blocking test for a message.
 
         .. note:: This function blocks until the message arrives.
         """
@@ -577,7 +571,7 @@ cdef class Comm:
         Status status: Status | None = None,
     ) -> bool:
         """
-        Nonblocking test for a message
+        Nonblocking test for a message.
         """
         cdef int flag = 0
         cdef MPI_Status *statusp = arg_Status(status)
@@ -595,7 +589,7 @@ cdef class Comm:
         Status status: Status | None = None,
     ) -> Message:
         """
-        Blocking test for a matched message
+        Blocking test for a matched message.
         """
         cdef MPI_Message cmessage = MPI_MESSAGE_NULL
         cdef MPI_Status *statusp = arg_Status(status)
@@ -612,7 +606,7 @@ cdef class Comm:
         Status status: Status | None = None,
     ) -> Message | None:
         """
-        Nonblocking test for a matched message
+        Nonblocking test for a matched message.
         """
         cdef int flag = 0
         cdef MPI_Message cmessage = MPI_MESSAGE_NULL
@@ -634,7 +628,7 @@ cdef class Comm:
         int tag: int = 0,
     ) -> Prequest:
         """
-        Create a persistent request for a standard send
+        Create a persistent request for a standard send.
         """
         cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
         cdef Prequest request = <Prequest>New(Prequest)
@@ -651,7 +645,7 @@ cdef class Comm:
         int tag: int = ANY_TAG,
     ) -> Prequest:
         """
-        Create a persistent request for a receive
+        Create a persistent request for a receive.
         """
         cdef _p_msg_p2p rmsg = message_p2p_recv(buf, source)
         cdef Prequest request = <Prequest>New(Prequest)
@@ -673,7 +667,7 @@ cdef class Comm:
         Info info: Info = INFO_NULL,
     ) -> Prequest:
         """
-        Create request for a partitioned send operation
+        Create request for a partitioned send operation.
         """
         cdef _p_msg_p2p smsg = message_p2p_psend(buf, dest, partitions)
         cdef Prequest request = <Prequest>New(Prequest)
@@ -692,7 +686,7 @@ cdef class Comm:
         Info info: Info = INFO_NULL,
     ) -> Prequest:
         """
-        Create request for a partitioned recv operation
+        Create request for a partitioned recv operation.
         """
         cdef _p_msg_p2p rmsg = message_p2p_precv(buf, source, partitions)
         cdef Prequest request = <Prequest>New(Prequest)
@@ -714,7 +708,7 @@ cdef class Comm:
         int tag: int = 0,
     ) -> None:
         """
-        Blocking send in buffered mode
+        Blocking send in buffered mode.
         """
         cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
         with nogil: CHKERR( MPI_Bsend_c(
@@ -728,7 +722,7 @@ cdef class Comm:
         int tag: int = 0,
     ) -> None:
         """
-        Blocking send in synchronous mode
+        Blocking send in synchronous mode.
         """
         cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
         with nogil: CHKERR( MPI_Ssend_c(
@@ -742,7 +736,7 @@ cdef class Comm:
         int tag: int = 0,
     ) -> None:
         """
-        Blocking send in ready mode
+        Blocking send in ready mode.
         """
         cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
         with nogil: CHKERR( MPI_Rsend_c(
@@ -758,7 +752,7 @@ cdef class Comm:
         int tag: int = 0,
     ) -> Request:
         """
-        Nonblocking send in buffered mode
+        Nonblocking send in buffered mode.
         """
         cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
         cdef Request request = <Request>New(Request)
@@ -775,7 +769,7 @@ cdef class Comm:
         int tag: int = 0,
     ) -> Request:
         """
-        Nonblocking send in synchronous mode
+        Nonblocking send in synchronous mode.
         """
         cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
         cdef Request request = <Request>New(Request)
@@ -792,7 +786,7 @@ cdef class Comm:
         int tag: int = 0,
     ) -> Request:
         """
-        Nonblocking send in ready mode
+        Nonblocking send in ready mode.
         """
         cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
         cdef Request request = <Request>New(Request)
@@ -811,7 +805,7 @@ cdef class Comm:
         int tag: int = 0,
     ) -> Request:
         """
-        Persistent request for a send in buffered mode
+        Persistent request for a send in buffered mode.
         """
         cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
         cdef Prequest request = <Prequest>New(Prequest)
@@ -828,7 +822,7 @@ cdef class Comm:
         int tag: int = 0,
     ) -> Request:
         """
-        Persistent request for a send in synchronous mode
+        Persistent request for a send in synchronous mode.
         """
         cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
         cdef Prequest request = <Prequest>New(Prequest)
@@ -845,7 +839,7 @@ cdef class Comm:
         int tag: int = 0,
     ) -> Request:
         """
-        Persistent request for a send in ready mode
+        Persistent request for a send in ready mode.
         """
         cdef _p_msg_p2p smsg = message_p2p_send(buf, dest)
         cdef Prequest request = <Prequest>New(Prequest)
@@ -863,7 +857,7 @@ cdef class Comm:
 
     def Barrier(self) -> None:
         """
-        Barrier synchronization
+        Barrier synchronization.
         """
         with nogil: CHKERR( MPI_Barrier(self.ob_mpi) )
 
@@ -876,8 +870,7 @@ cdef class Comm:
         int root: int = 0,
     ) -> None:
         """
-        Broadcast a message from one process
-        to all other processes in a group
+        Broadcast data from one process to all other processes.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_bcast(buf, root, self.ob_mpi)
@@ -892,7 +885,7 @@ cdef class Comm:
         int root: int = 0,
     ) -> None:
         """
-        Gather together values from a group of processes
+        Gather data to one process from all other processes.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_gather(0, sendbuf, recvbuf, root, self.ob_mpi)
@@ -908,9 +901,10 @@ cdef class Comm:
         int root: int = 0,
     ) -> None:
         """
-        Gather Vector, gather data to one process from all other
-        processes in a group providing different amount of data and
-        displacements at the receiving sides
+        Gather Vector.
+
+        Gather data to one process from all other processes
+        providing different amounts of data and displacements.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_gather(1, sendbuf, recvbuf, root, self.ob_mpi)
@@ -926,8 +920,7 @@ cdef class Comm:
         int root: int = 0,
     ) -> None:
         """
-        Scatter data from one process
-        to all other processes in a group
+        Scatter data from one process to all other processes.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_scatter(0, sendbuf, recvbuf, root, self.ob_mpi)
@@ -943,9 +936,10 @@ cdef class Comm:
         int root: int = 0,
     ) -> None:
         """
-        Scatter Vector, scatter data from one process to all other
-        processes in a group providing different amount of data and
-        displacements at the sending side
+        Scatter Vector.
+
+        Scatter data from one process to all other processes
+        providing different amounts of data and displacements.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_scatter(1, sendbuf, recvbuf, root, self.ob_mpi)
@@ -960,8 +954,10 @@ cdef class Comm:
         recvbuf: BufSpecB,
     ) -> None:
         """
-        Gather to All, gather data from all processes and
-        distribute it to all other processes in a group
+        Gather to All.
+
+        Gather data from all processes and broadcast the combined data to all
+        other processes.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_allgather(0, sendbuf, recvbuf, self.ob_mpi)
@@ -976,9 +972,10 @@ cdef class Comm:
         recvbuf: BufSpecV,
     ) -> None:
         """
-        Gather to All Vector, gather data from all processes and
-        distribute it to all other processes in a group providing
-        different amount of data and displacements
+        Gather to All Vector.
+
+        Gather data from all processes and send it to all other processes
+        providing different amounts of data and displacements.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_allgather(1, sendbuf, recvbuf, self.ob_mpi)
@@ -993,8 +990,9 @@ cdef class Comm:
         recvbuf: BufSpecB,
     ) -> None:
         """
-        All to All Scatter/Gather, send data from all to all
-        processes in a group
+        All to All Scatter/Gather.
+
+        Send data to all processes and recv data from all processes.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_alltoall(0, sendbuf, recvbuf, self.ob_mpi)
@@ -1009,9 +1007,10 @@ cdef class Comm:
         recvbuf: BufSpecV,
     ) -> None:
         """
-        All to All Scatter/Gather Vector, send data from all to all
-        processes in a group providing different amount of data and
-        displacements
+        All to All Scatter/Gather Vector.
+
+        Send data to all processes and recv data from all processes
+        providing different amounts of data and displacements.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_alltoall(1, sendbuf, recvbuf, self.ob_mpi)
@@ -1026,8 +1025,10 @@ cdef class Comm:
         recvbuf: BufSpecW,
     ) -> None:
         """
-        Generalized All-to-All communication allowing different
-        counts, displacements and datatypes for each partner
+        All to All Scatter/Gather General.
+
+        Send/recv data to/from all processes allowing the specification of
+        different counts, displacements, and datatypes for each dest/source.
         """
         cdef _p_msg_ccow m = message_ccow()
         m.for_alltoallw(sendbuf, recvbuf, self.ob_mpi)
@@ -1048,7 +1049,7 @@ cdef class Comm:
         int root: int = 0,
     ) -> None:
         """
-        Reduce to Root
+        Reduce to Root.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_reduce(sendbuf, recvbuf, root, self.ob_mpi)
@@ -1063,7 +1064,7 @@ cdef class Comm:
         Op op: Op = SUM,
     ) -> None:
         """
-        Reduce to All
+        Reduce to All.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_allreduce(sendbuf, recvbuf, self.ob_mpi)
@@ -1078,7 +1079,7 @@ cdef class Comm:
         Op op: Op = SUM,
     ) -> None:
         """
-        Reduce-Scatter Block (regular, non-vector version)
+        Reduce-Scatter Block (regular, non-vector version).
         """
         cdef _p_msg_cco m = message_cco()
         m.for_reduce_scatter_block(sendbuf, recvbuf, self.ob_mpi)
@@ -1094,7 +1095,7 @@ cdef class Comm:
         Op op: Op = SUM,
     ) -> None:
         """
-        Reduce-Scatter (vector version)
+        Reduce-Scatter (vector version).
         """
         cdef _p_msg_cco m = message_cco()
         m.for_reduce_scatter(sendbuf, recvbuf,
@@ -1108,7 +1109,7 @@ cdef class Comm:
 
     def Ibarrier(self) -> Request:
         """
-        Nonblocking Barrier
+        Nonblocking Barrier.
         """
         cdef Request request = <Request>New(Request)
         with nogil: CHKERR( MPI_Ibarrier(self.ob_mpi, &request.ob_mpi) )
@@ -1120,7 +1121,7 @@ cdef class Comm:
         int root: int = 0,
     ) -> Request:
         """
-        Nonblocking Broadcast
+        Nonblocking Broadcast.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_bcast(buf, root, self.ob_mpi)
@@ -1138,7 +1139,7 @@ cdef class Comm:
         int root: int = 0,
     ) -> Request:
         """
-        Nonblocking Gather
+        Nonblocking Gather.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_gather(0, sendbuf, recvbuf, root, self.ob_mpi)
@@ -1157,7 +1158,7 @@ cdef class Comm:
         int root: int = 0,
     ) -> Request:
         """
-        Nonblocking Gather Vector
+        Nonblocking Gather Vector.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_gather(1, sendbuf, recvbuf, root, self.ob_mpi)
@@ -1176,7 +1177,7 @@ cdef class Comm:
         int root: int = 0,
     ) -> Request:
         """
-        Nonblocking Scatter
+        Nonblocking Scatter.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_scatter(0, sendbuf, recvbuf, root, self.ob_mpi)
@@ -1195,7 +1196,7 @@ cdef class Comm:
         int root: int = 0,
     ) -> Request:
         """
-        Nonblocking Scatter Vector
+        Nonblocking Scatter Vector.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_scatter(1, sendbuf, recvbuf, root, self.ob_mpi)
@@ -1213,7 +1214,7 @@ cdef class Comm:
         recvbuf: BufSpecB,
     ) -> Request:
         """
-        Nonblocking Gather to All
+        Nonblocking Gather to All.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_allgather(0, sendbuf, recvbuf, self.ob_mpi)
@@ -1231,7 +1232,7 @@ cdef class Comm:
         recvbuf: BufSpecV,
     ) -> Request:
         """
-        Nonblocking Gather to All Vector
+        Nonblocking Gather to All Vector.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_allgather(1, sendbuf, recvbuf, self.ob_mpi)
@@ -1248,7 +1249,7 @@ cdef class Comm:
         recvbuf: BufSpecB,
     ) -> Request:
         """
-        Nonblocking All to All Scatter/Gather
+        Nonblocking All to All Scatter/Gather.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_alltoall(0, sendbuf, recvbuf, self.ob_mpi)
@@ -1266,7 +1267,7 @@ cdef class Comm:
         recvbuf: BufSpecV,
     ) -> Request:
         """
-        Nonblocking All to All Scatter/Gather Vector
+        Nonblocking All to All Scatter/Gather Vector.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_alltoall(1, sendbuf, recvbuf, self.ob_mpi)
@@ -1284,7 +1285,7 @@ cdef class Comm:
         recvbuf: BufSpecW,
     ) -> Request:
         """
-        Nonblocking Generalized All-to-All
+        Nonblocking All to All Scatter/Gather General.
         """
         cdef _p_msg_ccow m = message_ccow()
         m.for_alltoallw(sendbuf, recvbuf, self.ob_mpi)
@@ -1304,7 +1305,7 @@ cdef class Comm:
         int root: int = 0,
     ) -> Request:
         """
-        Nonblocking Reduce to Root
+        Nonblocking Reduce to Root.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_reduce(sendbuf, recvbuf, root, self.ob_mpi)
@@ -1321,7 +1322,7 @@ cdef class Comm:
         Op op: Op = SUM,
     ) -> Request:
         """
-        Nonblocking Reduce to All
+        Nonblocking Reduce to All.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_allreduce(sendbuf, recvbuf, self.ob_mpi)
@@ -1338,7 +1339,7 @@ cdef class Comm:
         Op op: Op = SUM,
     ) -> Request:
         """
-        Nonblocking Reduce-Scatter Block (regular, non-vector version)
+        Nonblocking Reduce-Scatter Block (regular, non-vector version).
         """
         cdef _p_msg_cco m = message_cco()
         m.for_reduce_scatter_block(sendbuf, recvbuf, self.ob_mpi)
@@ -1356,7 +1357,7 @@ cdef class Comm:
         Op op: Op = SUM,
     ) -> Request:
         """
-        Nonblocking Reduce-Scatter (vector version)
+        Nonblocking Reduce-Scatter (vector version).
         """
         cdef _p_msg_cco m = message_cco()
         m.for_reduce_scatter(sendbuf, recvbuf,
@@ -1375,7 +1376,7 @@ cdef class Comm:
         Info info: Info = INFO_NULL,
     ) -> Prequest:
         """
-        Persistent Barrier
+        Persistent Barrier.
         """
         cdef Prequest request = <Prequest>New(Prequest)
         with nogil: CHKERR( MPI_Barrier_init(
@@ -1390,7 +1391,7 @@ cdef class Comm:
         Info info: Info = INFO_NULL,
     ) -> Prequest:
         """
-        Persistent Broadcast
+        Persistent Broadcast.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_bcast(buf, root, self.ob_mpi)
@@ -1409,7 +1410,7 @@ cdef class Comm:
         Info info: Info = INFO_NULL,
     ) -> Prequest:
         """
-        Persistent Gather
+        Persistent Gather.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_gather(0, sendbuf, recvbuf, root, self.ob_mpi)
@@ -1429,7 +1430,7 @@ cdef class Comm:
         Info info: Info = INFO_NULL,
     ) -> Prequest:
         """
-        Persistent Gather Vector
+        Persistent Gather Vector.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_gather(1, sendbuf, recvbuf, root, self.ob_mpi)
@@ -1449,7 +1450,7 @@ cdef class Comm:
         Info info: Info = INFO_NULL,
     ) -> Prequest:
         """
-        Persistent Scatter
+        Persistent Scatter.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_scatter(0, sendbuf, recvbuf, root, self.ob_mpi)
@@ -1469,7 +1470,7 @@ cdef class Comm:
         Info info: Info = INFO_NULL,
     ) -> Prequest:
         """
-        Persistent Scatter Vector
+        Persistent Scatter Vector.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_scatter(1, sendbuf, recvbuf, root, self.ob_mpi)
@@ -1488,7 +1489,7 @@ cdef class Comm:
         Info info: Info = INFO_NULL,
     ) -> Prequest:
         """
-        Persistent Gather to All
+        Persistent Gather to All.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_allgather(0, sendbuf, recvbuf, self.ob_mpi)
@@ -1507,7 +1508,7 @@ cdef class Comm:
         Info info: Info = INFO_NULL,
     ) -> Prequest:
         """
-        Persistent Gather to All Vector
+        Persistent Gather to All Vector.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_allgather(1, sendbuf, recvbuf, self.ob_mpi)
@@ -1525,7 +1526,7 @@ cdef class Comm:
         Info info: Info = INFO_NULL,
     ) -> Prequest:
         """
-        Persistent All to All Scatter/Gather
+        Persistent All to All Scatter/Gather.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_alltoall(0, sendbuf, recvbuf, self.ob_mpi)
@@ -1544,7 +1545,7 @@ cdef class Comm:
         Info info: Info = INFO_NULL,
     ) -> Prequest:
         """
-        Persistent All to All Scatter/Gather Vector
+        Persistent All to All Scatter/Gather Vector.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_alltoall(1, sendbuf, recvbuf, self.ob_mpi)
@@ -1563,7 +1564,7 @@ cdef class Comm:
         Info info: Info = INFO_NULL,
     ) -> Prequest:
         """
-        Persistent Generalized All-to-All
+        Persistent All to All Scatter/Gather General.
         """
         cdef _p_msg_ccow m = message_ccow()
         m.for_alltoallw(sendbuf, recvbuf, self.ob_mpi)
@@ -1584,7 +1585,7 @@ cdef class Comm:
         Info info: Info = INFO_NULL,
     ) -> Prequest:
         """
-        Persistent Reduce
+        Persistent Reduce to Root.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_reduce(sendbuf, recvbuf, root, self.ob_mpi)
@@ -1602,7 +1603,7 @@ cdef class Comm:
         Info info: Info = INFO_NULL,
     ) -> Prequest:
         """
-        Persistent All Reduce
+        Persistent Reduce to All.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_allreduce(sendbuf, recvbuf, self.ob_mpi)
@@ -1620,7 +1621,7 @@ cdef class Comm:
         Info info: Info = INFO_NULL,
     ) -> Prequest:
         """
-        Persistent Reduce-Scatter Block (regular, non-vector version)
+        Persistent Reduce-Scatter Block (regular, non-vector version).
         """
         cdef _p_msg_cco m = message_cco()
         m.for_reduce_scatter_block(sendbuf, recvbuf, self.ob_mpi)
@@ -1639,7 +1640,7 @@ cdef class Comm:
         Info info: Info = INFO_NULL,
     ) -> Prequest:
         """
-        Persistent Reduce-Scatter (vector version)
+        Persistent Reduce-Scatter (vector version).
         """
         cdef _p_msg_cco m = message_cco()
         m.for_reduce_scatter(sendbuf, recvbuf,
@@ -1655,44 +1656,43 @@ cdef class Comm:
 
     def Is_inter(self) -> bool:
         """
-        Test to see if a comm is an intercommunicator
+        Return whether the communicator is an intercommunicator.
         """
         cdef int flag = 0
         CHKERR( MPI_Comm_test_inter(self.ob_mpi, &flag) )
         return <bint>flag
 
     property is_inter:
-        """is intercommunicator"""
+        """Is intercommunicator."""
         def __get__(self) -> bool:
             return self.Is_inter()
 
     def Is_intra(self) -> bool:
         """
-        Test to see if a comm is an intracommunicator
+        Return whether the communicator is an intracommunicator.
         """
         return not self.Is_inter()
 
     property is_intra:
-        """is intracommunicator"""
+        """Is intracommunicator."""
         def __get__(self) -> bool:
             return self.Is_intra()
 
     def Get_topology(self) -> int:
         """
-        Determine the type of topology (if any)
-        associated with a communicator
+        Return the type of topology (if any) associated with a communicator.
         """
         cdef int topo = MPI_UNDEFINED
         CHKERR( MPI_Topo_test(self.ob_mpi, &topo) )
         return topo
 
     property topology:
-        """communicator topology type"""
+        """Topology type."""
         def __get__(self) -> int:
             return self.Get_topology()
 
     property is_topo:
-        """is a topology communicator"""
+        """Is a topology."""
         def __get__(self) -> bool:
             return self.Get_topology() != MPI_UNDEFINED
 
@@ -1702,7 +1702,7 @@ cdef class Comm:
     @classmethod
     def Get_parent(cls) -> Intercomm:
         """
-        Return the parent intercommunicator for this process
+        Return the parent intercommunicator for this process.
         """
         cdef Intercomm comm = __COMM_PARENT__
         with nogil: CHKERR( MPI_Comm_get_parent(&comm.ob_mpi) )
@@ -1711,15 +1711,14 @@ cdef class Comm:
 
     def Disconnect(self) -> None:
         """
-        Disconnect from a communicator
+        Disconnect from a communicator.
         """
         with nogil: CHKERR( MPI_Comm_disconnect(&self.ob_mpi) )
 
     @classmethod
     def Join(cls, int fd: int) -> Intercomm:
         """
-        Create a intercommunicator by joining
-        two processes connected by a socket
+        Interconnect two processes connected by a socket.
         """
         cdef Intercomm comm = <Intercomm>New(Intercomm)
         with nogil: CHKERR( MPI_Comm_join(fd, &comm.ob_mpi) )
@@ -1731,7 +1730,7 @@ cdef class Comm:
 
     def Get_attr(self, int keyval: int) -> int | Any | None:
         """
-        Retrieve attribute value by key
+        Retrieve attribute value by key.
         """
         cdef void *attrval = NULL
         cdef int  flag = 0
@@ -1754,13 +1753,13 @@ cdef class Comm:
 
     def Set_attr(self, int keyval: int, attrval: Any) -> None:
         """
-        Store attribute value associated with a key
+        Store attribute value associated with a key.
         """
         PyMPI_attr_set(self.ob_mpi, keyval, attrval)
 
     def Delete_attr(self, int keyval: int) -> None:
         """
-        Delete attribute value associated with a key
+        Delete attribute value associated with a key.
         """
         CHKERR( MPI_Comm_delete_attr(self.ob_mpi, keyval) )
 
@@ -1772,7 +1771,7 @@ cdef class Comm:
         nopython: bool = False,
     ) -> int:
         """
-        Create a new attribute key for communicators
+        Create a new attribute key for communicators.
         """
         cdef int keyval = MPI_KEYVAL_INVALID
         cdef MPI_Comm_copy_attr_function *_copy = PyMPI_attr_copy_fn
@@ -1785,7 +1784,7 @@ cdef class Comm:
     @classmethod
     def Free_keyval(cls, int keyval: int) -> int:
         """
-        Free an attribute key for communicators
+        Free an attribute key for communicators.
         """
         cdef int keyval_save = keyval
         CHKERR( MPI_Comm_free_keyval(&keyval) )
@@ -1801,7 +1800,7 @@ cdef class Comm:
         errhandler_fn: Callable[[Comm, int], None],
     ) -> Errhandler:
         """
-        Create a new error handler for communicators
+        Create a new error handler for communicators.
         """
         cdef Errhandler errhandler = <Errhandler>New(Errhandler)
         cdef MPI_Comm_errhandler_function *fn = NULL
@@ -1815,7 +1814,7 @@ cdef class Comm:
 
     def Get_errhandler(self) -> Errhandler:
         """
-        Get the error handler for a communicator
+        Get the error handler for a communicator.
         """
         cdef Errhandler errhandler = <Errhandler>New(Errhandler)
         CHKERR( MPI_Comm_get_errhandler(self.ob_mpi, &errhandler.ob_mpi) )
@@ -1823,22 +1822,25 @@ cdef class Comm:
 
     def Set_errhandler(self, Errhandler errhandler: Errhandler) -> None:
         """
-        Set the error handler for a communicator
+        Set the error handler for a communicator.
         """
         CHKERR( MPI_Comm_set_errhandler(self.ob_mpi, errhandler.ob_mpi) )
 
     def Call_errhandler(self, int errorcode: int) -> None:
         """
-        Call the error handler installed on a communicator
+        Call the error handler installed on a communicator.
         """
         CHKERR( MPI_Comm_call_errhandler(self.ob_mpi, errorcode) )
 
 
     def Abort(self, int errorcode: int = 0) -> NoReturn:
         """
-        Terminate MPI execution environment
+        Terminate the MPI execution environment.
 
-        .. warning:: This is a direct call, use it with care!!!.
+        .. warning:: The invocation of this method prevents the execution of
+           various Python exit and cleanup mechanisms. Use this method as a
+           last resort to prevent parallel deadlocks in case of unrecoverable
+           errors.
         """
         CHKERR( MPI_Abort(self.ob_mpi, errorcode) )  #~> uncovered
 
@@ -1847,7 +1849,7 @@ cdef class Comm:
 
     def Get_name(self) -> str:
         """
-        Get the print name for this communicator
+        Get the print name for this communicator.
         """
         cdef char name[MPI_MAX_OBJECT_NAME+1]
         cdef int nlen = 0
@@ -1856,14 +1858,14 @@ cdef class Comm:
 
     def Set_name(self, name: str) -> None:
         """
-        Set the print name for this communicator
+        Set the print name for this communicator.
         """
         cdef char *cname = NULL
         name = asmpistr(name, &cname)
         CHKERR( MPI_Comm_set_name(self.ob_mpi, cname) )
 
     property name:
-        """communicator name"""
+        """Print name."""
         def __get__(self) -> str:
             return self.Get_name()
         def __set__(self, value: str):
@@ -1892,7 +1894,7 @@ cdef class Comm:
         int dest: int,
         int tag: int = 0,
     ) -> None:
-        """Send"""
+        """Send in standard mode."""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_send(obj, dest, tag, comm)
     #
@@ -1902,7 +1904,7 @@ cdef class Comm:
         int dest: int,
         int tag: int = 0,
     ) -> None:
-        """Send in buffered mode"""
+        """Send in buffered mode."""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_bsend(obj, dest, tag, comm)
     #
@@ -1912,7 +1914,7 @@ cdef class Comm:
         int dest: int,
         int tag: int = 0,
     ) -> None:
-        """Send in synchronous mode"""
+        """Send in synchronous mode."""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_ssend(obj, dest, tag, comm)
     #
@@ -1923,7 +1925,7 @@ cdef class Comm:
         int tag: int = ANY_TAG,
         Status status: Status | None = None,
     ) -> Any:
-        """Receive"""
+        """Receive."""
         cdef MPI_Comm comm = self.ob_mpi
         cdef MPI_Status *statusp = arg_Status(status)
         return PyMPI_recv(buf, source, tag, comm, statusp)
@@ -1938,7 +1940,7 @@ cdef class Comm:
         int recvtag: int = ANY_TAG,
         Status status: Status | None = None,
     ) -> Any:
-        """Send and Receive"""
+        """Send and Receive."""
         cdef MPI_Comm comm = self.ob_mpi
         cdef MPI_Status *statusp = arg_Status(status)
         return PyMPI_sendrecv(sendobj, dest,   sendtag,
@@ -1951,7 +1953,7 @@ cdef class Comm:
         int dest: int,
         int tag: int = 0,
     ) -> Request:
-        """Nonblocking send"""
+        """Nonblocking send."""
         cdef MPI_Comm comm = self.ob_mpi
         cdef Request request = <Request>New(Request)
         request.ob_buf = PyMPI_isend(obj, dest, tag, comm, &request.ob_mpi)
@@ -1963,7 +1965,7 @@ cdef class Comm:
         int dest: int,
         int tag: int = 0,
     ) -> Request:
-        """Nonblocking send in buffered mode"""
+        """Nonblocking send in buffered mode."""
         cdef MPI_Comm comm = self.ob_mpi
         cdef Request request = <Request>New(Request)
         request.ob_buf = PyMPI_ibsend(obj, dest, tag, comm, &request.ob_mpi)
@@ -1975,7 +1977,7 @@ cdef class Comm:
         int dest: int,
         int tag: int = 0,
     ) -> Request:
-        """Nonblocking send in synchronous mode"""
+        """Nonblocking send in synchronous mode."""
         cdef MPI_Comm comm = self.ob_mpi
         cdef Request request = <Request>New(Request)
         request.ob_buf = PyMPI_issend(obj, dest, tag, comm, &request.ob_mpi)
@@ -1987,7 +1989,7 @@ cdef class Comm:
         int source: int = ANY_SOURCE,
         int tag: int = ANY_TAG,
     ) -> Request:
-        """Nonblocking receive"""
+        """Nonblocking receive."""
         cdef MPI_Comm comm = self.ob_mpi
         cdef Request request = <Request>New(Request)
         request.ob_buf = PyMPI_irecv(buf, source, tag, comm, &request.ob_mpi)
@@ -1999,7 +2001,7 @@ cdef class Comm:
         int tag: int = ANY_TAG,
         Status status: Status | None = None,
     ) -> Literal[True]:
-        """Blocking test for a message"""
+        """Blocking test for a message."""
         cdef MPI_Comm comm = self.ob_mpi
         cdef MPI_Status *statusp = arg_Status(status)
         return PyMPI_probe(source, tag, comm, statusp)
@@ -2010,7 +2012,7 @@ cdef class Comm:
         int tag: int = ANY_TAG,
         Status status: Status | None = None,
     ) -> bool:
-        """Nonblocking test for a message"""
+        """Nonblocking test for a message."""
         cdef MPI_Comm comm = self.ob_mpi
         cdef MPI_Status *statusp = arg_Status(status)
         return PyMPI_iprobe(source, tag, comm, statusp)
@@ -2021,7 +2023,7 @@ cdef class Comm:
         int tag: int = ANY_TAG,
         Status status: Status | None = None,
     ) -> Message:
-        """Blocking test for a matched message"""
+        """Blocking test for a matched message."""
         cdef MPI_Comm comm = self.ob_mpi
         cdef MPI_Status *statusp = arg_Status(status)
         cdef Message message = <Message>New(Message)
@@ -2035,7 +2037,7 @@ cdef class Comm:
         int tag: int = ANY_TAG,
         Status status: Status | None = None,
     ) -> Message | None:
-        """Nonblocking test for a matched message"""
+        """Nonblocking test for a matched message."""
         cdef int flag = 0
         cdef MPI_Comm comm = self.ob_mpi
         cdef MPI_Status *statusp = arg_Status(status)
@@ -2047,9 +2049,9 @@ cdef class Comm:
     #
     def barrier(self) -> None:
         """
-        Barrier synchronization
+        Barrier synchronization.
 
-        .. note:: This method is equivalent to `Comm.Barrier()`
+        .. note:: This method is equivalent to `Barrier`.
         """
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_barrier(comm)
@@ -2059,7 +2061,7 @@ cdef class Comm:
         obj: Any,
         int root: int = 0,
     ) -> Any:
-        """Broadcast"""
+        """Broadcast."""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_bcast(obj, root, comm)
     #
@@ -2068,7 +2070,7 @@ cdef class Comm:
         sendobj: Any,
         int root: int = 0,
     ) -> list[Any] | None:
-        """Gather"""
+        """Gather."""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_gather(sendobj, root, comm)
     #
@@ -2077,7 +2079,7 @@ cdef class Comm:
         sendobj: Sequence[Any] | None,
         int root: int = 0,
     ) -> Any:
-        """Scatter"""
+        """Scatter."""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_scatter(sendobj, root, comm)
     #
@@ -2085,7 +2087,7 @@ cdef class Comm:
         self,
         sendobj: Any,
     ) -> list[Any]:
-        """Gather to All"""
+        """Gather to All."""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_allgather(sendobj, comm)
     #
@@ -2093,7 +2095,7 @@ cdef class Comm:
         self,
         sendobj: Sequence[Any],
     ) -> list[Any]:
-        """All to All Scatter/Gather"""
+        """All to All Scatter/Gather."""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_alltoall(sendobj, comm)
     #
@@ -2103,7 +2105,7 @@ cdef class Comm:
         op: Op | Callable[[Any, Any], Any] = SUM,
         int root: int = 0,
     ) -> Any | None:
-        """Reduce to Root"""
+        """Reduce to Root."""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_reduce(sendobj, op, root, comm)
     #
@@ -2112,15 +2114,14 @@ cdef class Comm:
         sendobj: Any,
         op: Op | Callable[[Any, Any], Any] = SUM,
     ) -> Any:
-        """Reduce to All"""
+        """Reduce to All."""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_allreduce(sendobj, op, comm)
 
 
 cdef class Intracomm(Comm):
-
     """
-    Intracommunicator
+    Intracommunicator.
     """
 
     def __cinit__(self, Comm comm: Comm | None = None):
@@ -2136,7 +2137,7 @@ cdef class Intracomm(Comm):
 
     def Create_group(self, Group group: Group, int tag: int = 0) -> Intracomm:
         """
-        Create communicator from group
+        Create communicator from group.
         """
         cdef Intracomm comm = <Intracomm>New(Intracomm)
         with nogil: CHKERR( MPI_Comm_create_group(
@@ -2153,7 +2154,7 @@ cdef class Intracomm(Comm):
         Errhandler errhandler: Errhandler | None = None,
     ) -> Intracomm:
         """
-        Create communicator from group
+        Create communicator from group.
         """
         cdef char *cstringtag = NULL
         stringtag = asmpistr(stringtag, &cstringtag)
@@ -2170,7 +2171,7 @@ cdef class Intracomm(Comm):
         bint reorder: bool = False,
     ) -> Cartcomm:
         """
-        Create cartesian communicator
+        Create cartesian communicator.
         """
         cdef int ndims = 0, *idims = NULL, *iperiods = NULL
         dims = getarray(dims, &ndims, &idims)
@@ -2191,7 +2192,7 @@ cdef class Intracomm(Comm):
         bint reorder: bool = False,
     ) -> Graphcomm:
         """
-        Create graph communicator
+        Create graph communicator.
         """
         cdef int nnodes = 0, *iindex = NULL
         index = getarray(index, &nnodes, &iindex)
@@ -2217,7 +2218,7 @@ cdef class Intracomm(Comm):
         bint reorder: bool = False,
     ) -> Distgraphcomm:
         """
-        Create distributed graph communicator
+        Create distributed graph communicator.
         """
         cdef int indegree  = 0, *isource = NULL
         cdef int outdegree = 0, *idest   = NULL
@@ -2251,7 +2252,7 @@ cdef class Intracomm(Comm):
         bint reorder: bool = False,
     ) -> Distgraphcomm:
         """
-        Create distributed graph communicator
+        Create distributed graph communicator.
         """
         cdef int nv = 0, ne = 0
         cdef int *isource = NULL, *idegree = NULL,
@@ -2278,7 +2279,7 @@ cdef class Intracomm(Comm):
         int tag: int = 0,
     ) -> Intercomm:
         """
-        Create intercommunicator
+        Create intercommunicator.
         """
         cdef Intercomm comm = <Intercomm>New(Intercomm)
         with nogil: CHKERR( MPI_Intercomm_create(
@@ -2297,8 +2298,7 @@ cdef class Intracomm(Comm):
         periods: Sequence[bool] | None = None,
     ) -> int:
         """
-        Return an optimal placement for the
-        calling process on the physical machine
+        Determine optimal process placement on a Cartesian topology.
         """
         cdef int ndims = 0, *idims = NULL, *iperiods = NULL
         dims = getarray(dims, &ndims, &idims)
@@ -2315,8 +2315,7 @@ cdef class Intracomm(Comm):
         edges: Sequence[int],
     ) -> int:
         """
-        Return an optimal placement for the
-        calling process on the physical machine
+        Determine optimal process placement on a graph topology.
         """
         cdef int nnodes = 0, *iindex = NULL
         index = getarray(index, &nnodes, &iindex)
@@ -2341,7 +2340,7 @@ cdef class Intracomm(Comm):
         Op op: Op = SUM,
     ) -> None:
         """
-        Inclusive Scan
+        Inclusive Scan.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_scan(sendbuf, recvbuf, self.ob_mpi)
@@ -2358,7 +2357,7 @@ cdef class Intracomm(Comm):
         Op op: Op = SUM,
     ) -> None:
         """
-        Exclusive Scan
+        Exclusive Scan.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_exscan(sendbuf, recvbuf, self.ob_mpi)
@@ -2375,7 +2374,7 @@ cdef class Intracomm(Comm):
         Op op: Op = SUM,
     ) -> Request:
         """
-        Inclusive Scan
+        Inclusive Scan.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_scan(sendbuf, recvbuf, self.ob_mpi)
@@ -2392,7 +2391,7 @@ cdef class Intracomm(Comm):
         Op op: Op = SUM,
     ) -> Request:
         """
-        Inclusive Scan
+        Inclusive Scan.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_exscan(sendbuf, recvbuf, self.ob_mpi)
@@ -2412,7 +2411,7 @@ cdef class Intracomm(Comm):
         Info info: Info = INFO_NULL,
     ) -> Prequest:
         """
-        Inclusive Scan
+        Persistent Inclusive Scan.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_scan(sendbuf, recvbuf, self.ob_mpi)
@@ -2431,7 +2430,7 @@ cdef class Intracomm(Comm):
         Info info: Info = INFO_NULL,
     ) -> Prequest:
         """
-        Inclusive Scan
+        Persistent Exclusive Scan.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_exscan(sendbuf, recvbuf, self.ob_mpi)
@@ -2449,7 +2448,7 @@ cdef class Intracomm(Comm):
         sendobj: Any,
         op: Op | Callable[[Any, Any], Any] = SUM,
     ) -> Any:
-        """Inclusive Scan"""
+        """Inclusive Scan."""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_scan(sendobj, op, comm)
     #
@@ -2458,7 +2457,7 @@ cdef class Intracomm(Comm):
         sendobj: Any,
         op: Op | Callable[[Any, Any], Any] = SUM,
     ) -> Any:
-        """Exclusive Scan"""
+        """Exclusive Scan."""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_exscan(sendobj, op, comm)
 
@@ -2477,7 +2476,7 @@ cdef class Intracomm(Comm):
         errcodes: list[int] | None = None,
     ) -> Intercomm:
         """
-        Spawn instances of a single MPI application
+        Spawn instances of a single MPI application.
         """
         cdef char *cmd = NULL
         cdef char **argv = MPI_ARGV_NULL
@@ -2513,7 +2512,7 @@ cdef class Intracomm(Comm):
         errcodes: list[list[int]] | None = None,
     ) -> Intercomm:
         """
-        Spawn instances of multiple MPI applications
+        Spawn instances of multiple MPI applications.
         """
         cdef int count = 0
         cdef char **cmds = NULL
@@ -2564,7 +2563,7 @@ cdef class Intracomm(Comm):
         int root: int = 0,
     ) -> Intercomm:
         """
-        Accept a request to form a new intercommunicator
+        Accept a request to form a new intercommunicator.
         """
         cdef char *cportname = NULL
         cdef int rank = MPI_UNDEFINED
@@ -2587,7 +2586,7 @@ cdef class Intracomm(Comm):
         int root: int = 0,
     ) -> Intercomm:
         """
-        Make a request to form a new intercommunicator
+        Make a request to form a new intercommunicator.
         """
         cdef char *cportname = NULL
         cdef int rank = MPI_UNDEFINED
@@ -2603,9 +2602,8 @@ cdef class Intracomm(Comm):
 
 
 cdef class Topocomm(Intracomm):
-
     """
-    Topology intracommunicator
+    Topology intracommunicator.
     """
 
     def __cinit__(self, Comm comm: Comm | None = None):
@@ -2617,7 +2615,7 @@ cdef class Topocomm(Intracomm):
             raise TypeError("expecting a topology communicator")
 
     property degrees:
-        "number of incoming and outgoing neighbors"
+        """Number of incoming and outgoing neighbors."""
         def __get__(self) -> tuple[int, int]:
             cdef object dim, rank
             cdef object nneighbors
@@ -2634,17 +2632,17 @@ cdef class Topocomm(Intracomm):
             raise TypeError("expecting a topology communicator")  #~> unreachable
 
     property indegree:
-        "number of incoming neighbors"
+        """Number of incoming neighbors."""
         def __get__(self) -> int:
             return self.degrees[0]
 
     property outdegree:
-        "number of outgoing neighbors"
+        """Number of outgoing neighbors."""
         def __get__(self) -> int:
             return self.degrees[1]
 
     property inoutedges:
-        "incoming and outgoing neighbors"
+        """Incoming and outgoing neighbors."""
         def __get__(self) -> tuple[list[int], list[int]]:
             cdef object direction, source, dest, rank
             cdef object neighbors
@@ -2665,12 +2663,12 @@ cdef class Topocomm(Intracomm):
             raise TypeError("expecting a topology communicator")  #~> unreachable
 
     property inedges:
-        "incoming neighbors"
+        """Incoming neighbors."""
         def __get__(self) -> list[int]:
             return self.inoutedges[0]
 
     property outedges:
-        "outgoing neighbors"
+        """Outgoing neighbors."""
         def __get__(self) -> list[int]:
             return self.inoutedges[1]
 
@@ -2683,7 +2681,7 @@ cdef class Topocomm(Intracomm):
         recvbuf: BufSpecB,
     ) -> None:
         """
-        Neighbor Gather to All
+        Neighbor Gather to All.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_neighbor_allgather(0, sendbuf, recvbuf, self.ob_mpi)
@@ -2698,7 +2696,7 @@ cdef class Topocomm(Intracomm):
         recvbuf: BufSpecV,
     ) -> None:
         """
-        Neighbor Gather to All Vector
+        Neighbor Gather to All Vector.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_neighbor_allgather(1, sendbuf, recvbuf, self.ob_mpi)
@@ -2713,7 +2711,7 @@ cdef class Topocomm(Intracomm):
         recvbuf: BufSpecB,
     ) -> None:
         """
-        Neighbor All-to-All
+        Neighbor All to All.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_neighbor_alltoall(0, sendbuf, recvbuf, self.ob_mpi)
@@ -2728,7 +2726,7 @@ cdef class Topocomm(Intracomm):
         recvbuf: BufSpecV,
     ) -> None:
         """
-        Neighbor All-to-All Vector
+        Neighbor All to All Vector.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_neighbor_alltoall(1, sendbuf, recvbuf, self.ob_mpi)
@@ -2743,7 +2741,7 @@ cdef class Topocomm(Intracomm):
         recvbuf: BufSpecW,
     ) -> None:
         """
-        Neighbor All-to-All Generalized
+        Neighbor All to All General.
         """
         cdef _p_msg_ccow m = message_ccow()
         m.for_neighbor_alltoallw(sendbuf, recvbuf, self.ob_mpi)
@@ -2761,7 +2759,7 @@ cdef class Topocomm(Intracomm):
         recvbuf: BufSpecB,
     ) -> Request:
         """
-        Nonblocking Neighbor Gather to All
+        Nonblocking Neighbor Gather to All.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_neighbor_allgather(0, sendbuf, recvbuf, self.ob_mpi)
@@ -2779,7 +2777,7 @@ cdef class Topocomm(Intracomm):
         recvbuf: BufSpecV,
     ) -> Request:
         """
-        Nonblocking Neighbor Gather to All Vector
+        Nonblocking Neighbor Gather to All Vector.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_neighbor_allgather(1, sendbuf, recvbuf, self.ob_mpi)
@@ -2797,7 +2795,7 @@ cdef class Topocomm(Intracomm):
         recvbuf: BufSpecB,
     ) -> Request:
         """
-        Nonblocking Neighbor All-to-All
+        Nonblocking Neighbor All to All.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_neighbor_alltoall(0, sendbuf, recvbuf, self.ob_mpi)
@@ -2815,7 +2813,7 @@ cdef class Topocomm(Intracomm):
         recvbuf: BufSpecV,
     ) -> Request:
         """
-        Nonblocking Neighbor All-to-All Vector
+        Nonblocking Neighbor All to All Vector.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_neighbor_alltoall(1, sendbuf, recvbuf, self.ob_mpi)
@@ -2833,7 +2831,7 @@ cdef class Topocomm(Intracomm):
         recvbuf: BufSpecW,
     ) -> Request:
         """
-        Nonblocking Neighbor All-to-All Generalized
+        Nonblocking Neighbor All to All General.
         """
         cdef _p_msg_ccow m = message_ccow()
         m.for_neighbor_alltoallw(sendbuf, recvbuf, self.ob_mpi)
@@ -2855,7 +2853,7 @@ cdef class Topocomm(Intracomm):
         Info info: Info = INFO_NULL,
     ) -> Prequest:
         """
-        Persistent Neighbor Gather to All
+        Persistent Neighbor Gather to All.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_neighbor_allgather(0, sendbuf, recvbuf, self.ob_mpi)
@@ -2874,7 +2872,7 @@ cdef class Topocomm(Intracomm):
         Info info: Info = INFO_NULL,
     ) -> Prequest:
         """
-        Persistent Neighbor Gather to All Vector
+        Persistent Neighbor Gather to All Vector.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_neighbor_allgather(1, sendbuf, recvbuf, self.ob_mpi)
@@ -2893,7 +2891,7 @@ cdef class Topocomm(Intracomm):
         Info info: Info = INFO_NULL,
     ) -> Prequest:
         """
-        Persistent Neighbor All-to-All
+        Persistent Neighbor All to All.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_neighbor_alltoall(0, sendbuf, recvbuf, self.ob_mpi)
@@ -2912,7 +2910,7 @@ cdef class Topocomm(Intracomm):
         Info info: Info = INFO_NULL,
     ) -> Prequest:
         """
-        Persistent Neighbor All-to-All Vector
+        Persistent Neighbor All to All Vector.
         """
         cdef _p_msg_cco m = message_cco()
         m.for_neighbor_alltoall(1, sendbuf, recvbuf, self.ob_mpi)
@@ -2931,7 +2929,7 @@ cdef class Topocomm(Intracomm):
         Info info: Info = INFO_NULL,
     ) -> Prequest:
         """
-        Persistent Neighbor All-to-All Generalized
+        Persistent Neighbor All to All General.
         """
         cdef _p_msg_ccow m = message_ccow()
         m.for_neighbor_alltoallw(sendbuf, recvbuf, self.ob_mpi)
@@ -2946,20 +2944,19 @@ cdef class Topocomm(Intracomm):
     # Python Communication
     #
     def neighbor_allgather(self, sendobj: Any) -> list[Any]:
-        """Neighbor Gather to All"""
+        """Neighbor Gather to All."""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_neighbor_allgather(sendobj, comm)
     #
     def neighbor_alltoall(self, sendobj: list[Any]) -> list[Any]:
-        """Neighbor All to All Scatter/Gather"""
+        """Neighbor All to All."""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_neighbor_alltoall(sendobj, comm)
 
 
 cdef class Cartcomm(Topocomm):
-
     """
-    Cartesian topology intracommunicator
+    Cartesian topology intracommunicator.
     """
 
     def __cinit__(self, Comm comm: Comm | None = None):
@@ -2975,25 +2972,25 @@ cdef class Cartcomm(Topocomm):
 
     def Get_dim(self) -> int:
         """
-        Return number of dimensions
+        Return number of dimensions.
         """
         cdef int dim = 0
         CHKERR( MPI_Cartdim_get(self.ob_mpi, &dim) )
         return dim
 
     property dim:
-        """number of dimensions"""
+        """Number of dimensions."""
         def __get__(self) -> int:
             return self.Get_dim()
 
     property ndim:
-        """number of dimensions"""
+        """Number of dimensions."""
         def __get__(self) -> int:
             return self.Get_dim()
 
     def Get_topo(self) -> tuple[list[int], list[int], list[int]]:
         """
-        Return information on the cartesian topology
+        Return information on the cartesian topology.
         """
         cdef int ndim = 0
         CHKERR( MPI_Cartdim_get(self.ob_mpi, &ndim) )
@@ -3010,22 +3007,22 @@ cdef class Cartcomm(Topocomm):
         return (dims, periods, coords)
 
     property topo:
-        """topology information"""
+        """Topology information."""
         def __get__(self) -> tuple[list[int], list[int], list[int]]:
             return self.Get_topo()
 
     property dims:
-        """dimensions"""
+        """Dimensions."""
         def __get__(self) -> list[int]:
             return self.Get_topo()[0]
 
     property periods:
-        """periodicity"""
+        """Periodicity."""
         def __get__(self) -> list[int]:
             return self.Get_topo()[1]
 
     property coords:
-        """coordinates"""
+        """Coordinates."""
         def __get__(self) -> list[int]:
             return self.Get_topo()[2]
 
@@ -3035,7 +3032,7 @@ cdef class Cartcomm(Topocomm):
 
     def Get_cart_rank(self, coords: Sequence[int]) -> int:
         """
-        Translate logical coordinates to ranks
+        Translate logical coordinates to ranks.
         """
         cdef int ndim = 0, *icoords = NULL
         CHKERR( MPI_Cartdim_get( self.ob_mpi, &ndim) )
@@ -3046,7 +3043,7 @@ cdef class Cartcomm(Topocomm):
 
     def Get_coords(self, int rank: int) -> list[int]:
         """
-        Translate ranks to logical coordinates
+        Translate ranks to logical coordinates.
         """
         cdef int ndim = 0, *icoords = NULL
         CHKERR( MPI_Cartdim_get(self.ob_mpi, &ndim) )
@@ -3060,8 +3057,7 @@ cdef class Cartcomm(Topocomm):
 
     def Shift(self, int direction: int, int disp: int) -> tuple[int, int]:
         """
-        Return a tuple (source, dest) of process ranks
-        for data shifting with Comm.Sendrecv()
+        Return a process ranks for data shifting with `Sendrecv`.
         """
         cdef int source = MPI_PROC_NULL, dest = MPI_PROC_NULL
         CHKERR( MPI_Cart_shift(self.ob_mpi, direction, disp, &source, &dest) )
@@ -3072,8 +3068,7 @@ cdef class Cartcomm(Topocomm):
 
     def Sub(self, remain_dims: Sequence[bool]) -> Cartcomm:
         """
-        Return cartesian communicators
-        that form lower-dimensional subgrids
+        Return a lower-dimensional Cartesian topology.
         """
         cdef int ndim = 0, *iremdims = NULL
         CHKERR( MPI_Cartdim_get(self.ob_mpi, &ndim) )
@@ -3088,8 +3083,7 @@ cdef class Cartcomm(Topocomm):
 
 def Compute_dims(int nnodes: int, dims: int | Sequence[int]) -> list[int]:
     """
-    Return a balanced distribution of
-    processes per coordinate direction
+    Return a balanced distribution of processes per coordinate direction.
     """
     cdef int ndims = 0, *idims = NULL
     try:
@@ -3104,9 +3098,8 @@ def Compute_dims(int nnodes: int, dims: int | Sequence[int]) -> list[int]:
 
 
 cdef class Graphcomm(Topocomm):
-
     """
-    General graph topology intracommunicator
+    General graph topology intracommunicator.
     """
 
     def __cinit__(self, Comm comm: Comm | None = None):
@@ -3122,30 +3115,30 @@ cdef class Graphcomm(Topocomm):
 
     def Get_dims(self) -> tuple[int, int]:
         """
-        Return the number of nodes and edges
+        Return the number of nodes and edges.
         """
         cdef int nnodes = 0, nedges = 0
         CHKERR( MPI_Graphdims_get(self.ob_mpi, &nnodes, &nedges) )
         return (nnodes, nedges)
 
     property dims:
-        """number of nodes and edges"""
+        """Number of nodes and edges."""
         def __get__(self) -> tuple[int, int]:
             return self.Get_dims()
 
     property nnodes:
-        """number of nodes"""
+        """Number of nodes."""
         def __get__(self) -> int:
             return self.Get_dims()[0]
 
     property nedges:
-        """number of edges"""
+        """Number of edges."""
         def __get__(self) -> int:
             return self.Get_dims()[1]
 
     def Get_topo(self) -> tuple[list[int], list[int]]:
         """
-        Return index and edges
+        Return index and edges.
         """
         cdef int nindex = 0, nedges = 0
         CHKERR( MPI_Graphdims_get( self.ob_mpi, &nindex, &nedges) )
@@ -3159,17 +3152,17 @@ cdef class Graphcomm(Topocomm):
         return (index, edges)
 
     property topo:
-        """topology information"""
+        """Topology information."""
         def __get__(self) -> tuple[list[int], list[int]]:
             return self.Get_topo()
 
     property index:
-        """index"""
+        """Index."""
         def __get__(self) -> list[int]:
             return self.Get_topo()[0]
 
     property edges:
-        """edges"""
+        """Edges."""
         def __get__(self) -> list[int]:
             return self.Get_topo()[1]
 
@@ -3178,21 +3171,21 @@ cdef class Graphcomm(Topocomm):
 
     def Get_neighbors_count(self, int rank: int) -> int:
         """
-        Return number of neighbors of a process
+        Return number of neighbors of a process.
         """
         cdef int nneighbors = 0
         CHKERR( MPI_Graph_neighbors_count(self.ob_mpi, rank, &nneighbors) )
         return nneighbors
 
     property nneighbors:
-        """number of neighbors"""
+        """Number of neighbors."""
         def __get__(self) -> int:
             cdef int rank = self.Get_rank()
             return self.Get_neighbors_count(rank)
 
     def Get_neighbors(self, int rank: int) -> list[int]:
         """
-        Return list of neighbors of a process
+        Return list of neighbors of a process.
         """
         cdef int nneighbors = 0, *ineighbors = NULL
         CHKERR( MPI_Graph_neighbors_count(
@@ -3204,16 +3197,15 @@ cdef class Graphcomm(Topocomm):
         return neighbors
 
     property neighbors:
-        """neighbors"""
+        """Neighbors."""
         def __get__(self) -> list[int]:
             cdef int rank = self.Get_rank()
             return self.Get_neighbors(rank)
 
 
 cdef class Distgraphcomm(Topocomm):
-
     """
-    Distributed graph topology intracommunicator
+    Distributed graph topology intracommunicator.
     """
 
     def __cinit__(self, Comm comm: Comm | None = None):
@@ -3229,7 +3221,7 @@ cdef class Distgraphcomm(Topocomm):
 
     def Get_dist_neighbors_count(self) -> int:
         """
-        Return adjacency information for a distributed graph topology
+        Return adjacency information for a distributed graph topology.
         """
         cdef int indegree = 0
         cdef int outdegree = 0
@@ -3241,7 +3233,7 @@ cdef class Distgraphcomm(Topocomm):
     def Get_dist_neighbors(self) \
         -> tuple[list[int], list[int], tuple[list[int], list[int]] | None]:
         """
-        Return adjacency information for a distributed graph topology
+        Return adjacency information for a distributed graph topology.
         """
         cdef int maxindegree = 0, maxoutdegree = 0, weighted = 0
         CHKERR( MPI_Dist_graph_neighbors_count(
@@ -3276,9 +3268,8 @@ cdef class Distgraphcomm(Topocomm):
 
 
 cdef class Intercomm(Comm):
-
     """
-    Intercommunicator
+    Intercommunicator.
     """
 
     def __cinit__(self, Comm comm: Comm | None = None):
@@ -3304,7 +3295,7 @@ cdef class Intercomm(Comm):
         Errhandler errhandler: Errhandler | None = None,
     ) -> Intracomm:
         """
-        Create communicator from group
+        Create communicator from group.
         """
         cdef char *cstringtag = NULL
         stringtag = asmpistr(stringtag, &cstringtag)
@@ -3321,8 +3312,7 @@ cdef class Intercomm(Comm):
 
     def Get_remote_group(self) -> Group:
         """
-        Access the remote group associated
-        with the inter-communicator
+        Access the remote group associated with the inter-communicator.
         """
         cdef Group group = <Group>New(Group)
         with nogil: CHKERR( MPI_Comm_remote_group(
@@ -3330,20 +3320,20 @@ cdef class Intercomm(Comm):
         return group
 
     property remote_group:
-        """remote group"""
+        """Remote group."""
         def __get__(self) -> Group:
             return self.Get_remote_group()
 
     def Get_remote_size(self) -> int:
         """
-        Intercommunicator remote size
+        Intercommunicator remote size.
         """
         cdef int size = -1
         CHKERR( MPI_Comm_remote_size(self.ob_mpi, &size) )
         return size
 
     property remote_size:
-        """number of remote processes"""
+        """Number of remote processes."""
         def __get__(self) -> int:
             return self.Get_remote_size()
 
@@ -3352,7 +3342,7 @@ cdef class Intercomm(Comm):
 
     def Merge(self, bint high: bool = False) -> Intracomm:
         """
-        Merge intercommunicator
+        Merge intercommunicator into an intracommunicator.
         """
         cdef Intracomm comm = <Intracomm>New(Intracomm)
         with nogil: CHKERR( MPI_Intercomm_merge(
@@ -3384,8 +3374,7 @@ BSEND_OVERHEAD = MPI_BSEND_OVERHEAD
 
 def Attach_buffer(buf: Buffer) -> None:
     """
-    Attach a user-provided buffer for
-    sending in buffered mode
+    Attach a user-provided buffer for sending in buffered mode.
     """
     cdef void *base = NULL
     cdef MPI_Count size = 0
@@ -3394,7 +3383,7 @@ def Attach_buffer(buf: Buffer) -> None:
 
 def Detach_buffer() -> Buffer:
     """
-    Remove an existing attached buffer
+    Remove an existing attached buffer.
     """
     cdef void *base = NULL
     cdef MPI_Count size = 0
@@ -3402,17 +3391,15 @@ def Detach_buffer() -> Buffer:
     return detach_buffer(base, size)
 
 
-# --------------------------------------------------------------------
 # Process Creation and Management
-# --------------------------------------------------------------------
+# -------------------------------
 
 # Server Routines
 # ---------------
 
 def Open_port(Info info: Info = INFO_NULL) -> str:
     """
-    Return an address that can be used to establish
-    connections between groups of MPI processes
+    Return an address used to connect group of processes.
     """
     cdef char cportname[MPI_MAX_PORT_NAME+1]
     cportname[0] = 0 # just in case
@@ -3422,7 +3409,7 @@ def Open_port(Info info: Info = INFO_NULL) -> str:
 
 def Close_port(port_name: str) -> None:
     """
-    Close a port
+    Close a port.
     """
     cdef char *cportname = NULL
     port_name = asmpistr(port_name, &cportname)
@@ -3437,7 +3424,7 @@ def Publish_name(
     Info info: Info = INFO_NULL,
 ) -> None:
     """
-    Publish a service name
+    Publish a service name.
     """
     cdef char *csrvcname = NULL
     service_name = asmpistr(service_name, &csrvcname)
@@ -3452,7 +3439,7 @@ def Unpublish_name(
     Info info: Info = INFO_NULL,
 ) -> None:
     """
-    Unpublish a service name
+    Unpublish a service name.
     """
     cdef char *csrvcname = NULL
     service_name = asmpistr(service_name, &csrvcname)
@@ -3466,7 +3453,7 @@ def Lookup_name(
     info: Info = INFO_NULL,
 ) -> str:
     """
-    Lookup a port name given a service name
+    Lookup a port name given a service name.
     """
     cdef char *csrvcname = NULL
     service_name = asmpistr(service_name, &csrvcname)

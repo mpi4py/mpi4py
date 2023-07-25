@@ -360,7 +360,9 @@ cdef void atexit() noexcept nogil:
         <void>MPI_Finalize()
 
 def _set_abort_status(int status: int) -> None:
-    "Helper for ``python -m mpi4py.run ...``"
+    """
+    Helper for ``python -m mpi4py.run ...``.
+    """
     global abort_status
     abort_status = status
 

@@ -41,9 +41,8 @@ COMBINER_F90_COMPLEX      = MPI_COMBINER_F90_COMPLEX
 
 
 cdef class Datatype:
-
     """
-    Datatype object
+    Datatype object.
     """
 
     def __cinit__(self, Datatype datatype: Datatype | None = None):
@@ -68,15 +67,14 @@ cdef class Datatype:
 
     def Get_size(self) -> int:
         """
-        Return the number of bytes occupied
-        by entries in the datatype
+        Return the number of bytes occupied by entries in the datatype.
         """
         cdef MPI_Count size = 0
         CHKERR( MPI_Type_size_c(self.ob_mpi, &size) )
         return size
 
     property size:
-        """size (in bytes)"""
+        """Size (in bytes)."""
         def __get__(self) -> int:
             cdef MPI_Count size = 0
             CHKERR( MPI_Type_size_c(self.ob_mpi, &size) )
@@ -84,28 +82,28 @@ cdef class Datatype:
 
     def Get_extent(self) -> tuple[int, int]:
         """
-        Return lower bound and extent of datatype
+        Return lower bound and extent of datatype.
         """
         cdef MPI_Count lb = 0, extent = 0
         CHKERR( MPI_Type_get_extent_c(self.ob_mpi, &lb, &extent) )
         return (lb, extent)
 
     property extent:
-        """extent"""
+        """Extent."""
         def __get__(self) -> int:
             cdef MPI_Count lb = 0, extent = 0
             CHKERR( MPI_Type_get_extent_c(self.ob_mpi, &lb, &extent) )
             return extent
 
     property lb:
-        """lower bound"""
+        """Lower bound."""
         def __get__(self) -> int:
             cdef MPI_Count lb = 0, extent = 0
             CHKERR( MPI_Type_get_extent_c(self.ob_mpi, &lb, &extent) )
             return lb
 
     property ub:
-        """upper bound"""
+        """Upper bound."""
         def __get__(self) -> int:
             cdef MPI_Count lb = 0, extent = 0
             CHKERR( MPI_Type_get_extent_c(self.ob_mpi, &lb, &extent) )
@@ -116,7 +114,7 @@ cdef class Datatype:
 
     def Dup(self) -> Self:
         """
-        Duplicate a datatype
+        Duplicate a datatype.
         """
         cdef Datatype datatype = <Datatype>New(type(self))
         CHKERR( MPI_Type_dup(self.ob_mpi, &datatype.ob_mpi) )
@@ -126,7 +124,7 @@ cdef class Datatype:
 
     def Create_contiguous(self, Count count: int) -> Self:
         """
-        Create a contiguous datatype
+        Create a contiguous datatype.
         """
         cdef Datatype datatype = <Datatype>New(type(self))
         CHKERR( MPI_Type_contiguous_c(
@@ -141,7 +139,7 @@ cdef class Datatype:
         Count stride: int,
     ) -> Self:
         """
-        Create a vector (strided) datatype
+        Create a vector (strided) datatype.
         """
         cdef Datatype datatype = <Datatype>New(type(self))
         CHKERR( MPI_Type_vector_c(
@@ -156,7 +154,7 @@ cdef class Datatype:
         Count stride: int,
     ) -> Self:
         """
-        Create a vector (strided) datatype
+        Create a vector (strided) datatype with stride in bytes.
         """
         cdef Datatype datatype = <Datatype>New(type(self))
         CHKERR( MPI_Type_create_hvector_c(
@@ -170,7 +168,7 @@ cdef class Datatype:
         displacements: Sequence[int],
     ) -> Self:
         """
-        Create an indexed datatype
+        Create an indexed datatype.
         """
         cdef MPI_Count count = 0, *iblen = NULL, *idisp = NULL
         blocklengths  = getarray(blocklengths,  &count, &iblen)
@@ -188,8 +186,9 @@ cdef class Datatype:
         displacements: Sequence[int],
     ) -> Self:
         """
-        Create an indexed datatype
-        with displacements in bytes
+        Create an indexed datatype.
+
+        .. note:: Displacements are measured in bytes.
         """
         cdef MPI_Count count = 0, *iblen = NULL, *idisp = NULL
         blocklengths = getarray(blocklengths, &count, &iblen)
@@ -208,8 +207,7 @@ cdef class Datatype:
         displacements: Sequence[int],
     ) -> Self:
         """
-        Create an indexed datatype
-        with constant-sized blocks
+        Create an indexed datatype with constant-sized blocks.
         """
         cdef Count count = 0, *idisp = NULL
         displacements = getarray(displacements, &count, &idisp)
@@ -226,9 +224,9 @@ cdef class Datatype:
         displacements: Sequence[int],
     ) -> Self:
         """
-        Create an indexed datatype
-        with constant-sized blocks
-        and displacements in bytes
+        Create an indexed datatype with constant-sized blocks.
+
+        .. note:: Displacements are measured in bytes.
         """
         cdef MPI_Count count = 0, *idisp = NULL
         displacements = getarray(displacements, &count, &idisp)
@@ -247,8 +245,9 @@ cdef class Datatype:
         datatypes: Sequence[Datatype],
     ) -> Self:
         """
-        Create an datatype from a general set of
-        block sizes, displacements and datatypes
+        Create a general composite (struct) datatype.
+
+        .. note:: Displacements are measured in bytes.
         """
         cdef MPI_Count count = 0, *iblen = NULL, *idisp = NULL
         cdef MPI_Datatype *ptype = NULL
@@ -273,8 +272,7 @@ cdef class Datatype:
         int order: int = ORDER_C,
     ) -> Self:
         """
-        Create a datatype for a subarray of
-        a regular, multidimensional array
+        Create a datatype for a subarray of a multidimensional array.
         """
         cdef int ndims = 0
         cdef MPI_Count *isizes = NULL
@@ -304,8 +302,7 @@ cdef class Datatype:
         int order: int = ORDER_C,
     ) -> Self:
         """
-        Create a datatype representing an HPF-like
-        distributed array on Cartesian process grids
+        Create a datatype for a distributed array on Cartesian process grids.
         """
         cdef int ndims = 0
         cdef MPI_Count *igsizes = NULL
@@ -328,7 +325,7 @@ cdef class Datatype:
     @classmethod
     def Create_f90_integer(cls, int r: int) -> Self:
         """
-        Return a bounded integer datatype
+        Return a bounded integer datatype.
         """
         cdef Datatype datatype = <Datatype>New(cls)
         CHKERR( MPI_Type_create_f90_integer(r, &datatype.ob_mpi) )
@@ -337,7 +334,7 @@ cdef class Datatype:
     @classmethod
     def Create_f90_real(cls, int p: int, int r: int) -> Self:
         """
-        Return a bounded real datatype
+        Return a bounded real datatype.
         """
         cdef Datatype datatype = <Datatype>New(cls)
         CHKERR( MPI_Type_create_f90_real(p, r, &datatype.ob_mpi) )
@@ -346,7 +343,7 @@ cdef class Datatype:
     @classmethod
     def Create_f90_complex(cls, int p: int, int r: int) -> Self:
         """
-        Return a bounded complex datatype
+        Return a bounded complex datatype.
         """
         cdef Datatype datatype = <Datatype>New(cls)
         CHKERR( MPI_Type_create_f90_complex(p, r, &datatype.ob_mpi) )
@@ -355,7 +352,7 @@ cdef class Datatype:
     @classmethod
     def Match_size(cls, int typeclass: int, int size: int) -> Self:
         """
-        Find a datatype matching a specified size in bytes
+        Find a datatype matching a specified size in bytes.
         """
         cdef Datatype datatype = <Datatype>New(cls)
         CHKERR( MPI_Type_match_size(typeclass, size, &datatype.ob_mpi) )
@@ -366,14 +363,14 @@ cdef class Datatype:
 
     def Commit(self) -> Self:
         """
-        Commit the datatype
+        Commit the datatype.
         """
         CHKERR( MPI_Type_commit(&self.ob_mpi) )
         return self
 
     def Free(self) -> None:
         """
-        Free the datatype
+        Free the datatype.
         """
         CHKERR( MPI_Type_free(&self.ob_mpi) )
         cdef Datatype t = self
@@ -452,7 +449,7 @@ cdef class Datatype:
 
     def Create_resized(self, Count lb: int, Count extent: int) -> Self:
         """
-        Create a datatype with a new lower bound and extent
+        Create a datatype with a new lower bound and extent.
         """
         cdef Datatype datatype = <Datatype>New(type(self))
         CHKERR( MPI_Type_create_resized_c(
@@ -463,7 +460,7 @@ cdef class Datatype:
 
     def Get_true_extent(self) -> tuple[int, int]:
         """
-        Return the true lower bound and extent of a datatype
+        Return the true lower bound and extent of a datatype.
         """
         cdef MPI_Count lb = 0, extent = 0
         CHKERR( MPI_Type_get_true_extent_c(
@@ -471,7 +468,7 @@ cdef class Datatype:
         return (lb, extent)
 
     property true_extent:
-        """true extent"""
+        """True extent."""
         def __get__(self) -> int:
             cdef MPI_Count lb = 0, extent = 0
             CHKERR( MPI_Type_get_true_extent_c(
@@ -479,7 +476,7 @@ cdef class Datatype:
             return extent
 
     property true_lb:
-        """true lower bound"""
+        """True lower bound."""
         def __get__(self) -> int:
             cdef MPI_Count lb = 0, extent = 0
             CHKERR( MPI_Type_get_true_extent_c(
@@ -487,7 +484,7 @@ cdef class Datatype:
             return lb
 
     property true_ub:
-        """true upper bound"""
+        """True upper bound."""
         def __get__(self) -> int:
             cdef MPI_Count lb = 0, extent = 0
             CHKERR( MPI_Type_get_true_extent_c(
@@ -499,8 +496,7 @@ cdef class Datatype:
 
     def Get_envelope(self) -> tuple[int, int, int, int, int]:
         """
-        Return information on the number and type of input arguments
-        used in the call that created a datatype
+        Return the number of input arguments used to create a datatype.
         """
         cdef int combiner = MPI_UNDEFINED
         cdef MPI_Count ni = 0, na = 0, nc = 0, nd = 0
@@ -509,15 +505,14 @@ cdef class Datatype:
         return (ni, na, nc, nd, combiner)
 
     property envelope:
-        """datatype envelope"""
+        """Envelope."""
         def __get__(self) -> tuple[int, int, int, int, int]:
             return self.Get_envelope()
 
     def Get_contents(self) \
         -> tuple[list[int], list[int], list[int], list[Datatype]]:
         """
-        Retrieve the actual arguments used in the call that created a
-        datatype
+        Return the input arguments used to create a datatype.
         """
         cdef int combiner = MPI_UNDEFINED
         cdef MPI_Count ni = 0, na = 0, nc = 0, nd = 0
@@ -540,31 +535,31 @@ cdef class Datatype:
         return (integers, addresses, counts, datatypes)
 
     property contents:
-        """datatype contents"""
+        """Contents."""
         def __get__(self) \
             -> tuple[list[int], list[int], list[int], list[Datatype]]:
             return self.Get_contents()
 
     def decode(self) -> tuple[Datatype, str, dict[str, Any]]:
         """
-        Convenience method for decoding a datatype
+        Convenience method for decoding a datatype.
         """
         return datatype_decode(self, mark=False)
 
     property combiner:
-        """datatype combiner"""
+        """Combiner."""
         def __get__(self) -> int:
             cdef int combiner = self.Get_envelope()[-1]
             return combiner
 
     property is_named:
-        """is a named datatype"""
+        """Is a named datatype."""
         def __get__(self) -> bool:
             cdef int combiner = self.Get_envelope()[-1]
             return combiner == MPI_COMBINER_NAMED
 
     property is_predefined:
-        """is a predefined datatype"""
+        """Is a predefined datatype."""
         def __get__(self) -> bool:
             if self.ob_mpi == MPI_DATATYPE_NULL: return True
             cdef int combiner = self.Get_envelope()[-1]
@@ -634,8 +629,9 @@ cdef class Datatype:
         Comm comm: Comm,
     ) -> int:
         """
-        Return the upper bound on the amount of space (in bytes)
-        needed to pack a message according to datatype.
+        Determine the amount of space needed to pack a message.
+
+        .. note:: Returns an upper bound measured in bytes.
         """
         cdef MPI_Count size = 0
         CHKERR( MPI_Pack_size_c(
@@ -654,8 +650,9 @@ cdef class Datatype:
         Count position: int,
     ) -> int:
         """
-        Pack into contiguous memory according to datatype,
-        using a portable data representation (**external32**).
+        Pack into contiguous memory according to datatype.
+
+        Uses the portable data representation **external32**.
         """
         cdef char *cdatarep = NULL
         datarep = asmpistr(datarep, &cdatarep)
@@ -683,8 +680,9 @@ cdef class Datatype:
         outbuf: BufSpec,
     ) -> int:
         """
-        Unpack from contiguous memory according to datatype,
-        using a portable data representation (**external32**).
+        Unpack from contiguous memory according to datatype.
+
+        Uses the portable data representation **external32**.
         """
         cdef char *cdatarep = NULL
         datarep = asmpistr(datarep, &cdatarep)
@@ -710,9 +708,11 @@ cdef class Datatype:
         Count count: int,
     ) -> int:
         """
-        Return the upper bound on the amount of space (in bytes)
-        needed to pack a message according to datatype,
-        using a portable data representation (**external32**).
+        Determine the amount of space needed to pack a message.
+
+        Uses the portable data representation **external32**.
+
+        .. note:: Returns an upper bound measured in bytes.
         """
         cdef char *cdatarep = NULL
         cdef MPI_Count size = 0
@@ -726,7 +726,7 @@ cdef class Datatype:
 
     def Get_attr(self, int keyval: int) -> int | Any | None:
         """
-        Retrieve attribute value by key
+        Retrieve attribute value by key.
         """
         cdef void *attrval = NULL
         cdef int flag = 0
@@ -738,13 +738,13 @@ cdef class Datatype:
 
     def Set_attr(self, int keyval: int, attrval: Any) -> None:
         """
-        Store attribute value associated with a key
+        Store attribute value associated with a key.
         """
         PyMPI_attr_set(self.ob_mpi, keyval, attrval)
 
     def Delete_attr(self, int keyval: int) -> None:
         """
-        Delete attribute value associated with a key
+        Delete attribute value associated with a key.
         """
         CHKERR( MPI_Type_delete_attr(self.ob_mpi, keyval) )
 
@@ -756,7 +756,7 @@ cdef class Datatype:
         nopython: bool = False,
     ) -> int:
         """
-        Create a new attribute key for datatypes
+        Create a new attribute key for datatypes.
         """
         cdef int keyval = MPI_KEYVAL_INVALID
         cdef MPI_Type_copy_attr_function *_copy = PyMPI_attr_copy_fn
@@ -769,7 +769,7 @@ cdef class Datatype:
     @classmethod
     def Free_keyval(cls, int keyval: int) -> int:
         """
-        Free an attribute key for datatypes
+        Free an attribute key for datatypes.
         """
         cdef int keyval_save = keyval
         CHKERR( MPI_Type_free_keyval(&keyval) )
@@ -781,7 +781,7 @@ cdef class Datatype:
 
     def Get_name(self) -> str:
         """
-        Get the print name for this datatype
+        Get the print name for this datatype.
         """
         cdef char name[MPI_MAX_OBJECT_NAME+1]
         cdef int nlen = 0
@@ -790,14 +790,14 @@ cdef class Datatype:
 
     def Set_name(self, name: str) -> None:
         """
-        Set the print name for this datatype
+        Set the print name for this datatype.
         """
         cdef char *cname = NULL
         name = asmpistr(name, &cname)
         CHKERR( MPI_Type_set_name(self.ob_mpi, cname) )
 
     property name:
-        """datatype name"""
+        """Print name."""
         def __get__(self) -> str:
             return self.Get_name()
         def __set__(self, value: str):
@@ -822,7 +822,7 @@ cdef class Datatype:
 
     def tocode(self) -> str:
         """
-        Get character code or type string from predefined MPI datatype
+        Get character code or type string from predefined MPI datatype.
         """
         cdef const char *s = DatatypeCode(self.ob_mpi)
         if s != NULL: return pystr(s)
@@ -831,7 +831,7 @@ cdef class Datatype:
     @classmethod
     def fromcode(cls, code: str) -> Datatype:
         """
-        Get predefined MPI datatype from character code or type string
+        Get predefined MPI datatype from character code or type string.
         """
         try:
             return <Datatype?> TypeDict[code]
@@ -839,7 +839,7 @@ cdef class Datatype:
             raise ValueError(f"cannot map code {code!r} to MPI datatype")
 
     property typestr:
-        """type string"""
+        """Type string."""
         def __get__(self) -> str:
             if self.ob_mpi == MPI_DATATYPE_NULL: return ""
             cdef const char *s = DatatypeStr(self.ob_mpi)
@@ -847,7 +847,7 @@ cdef class Datatype:
             return f"V{mpiextent(self.ob_mpi)}"
 
     property typechar:
-        """character code"""
+        """Character code."""
         def __get__(self) -> str:
             if self.ob_mpi == MPI_DATATYPE_NULL: return ""
             cdef const char *s = DatatypeChar(self.ob_mpi)
@@ -860,7 +860,7 @@ cdef class Datatype:
 
 def Get_address(location: Buffer | Bottom) -> int:
     """
-    Get the address of a location in memory
+    Get the address of a location in memory.
     """
     cdef void *baseptr = MPI_BOTTOM
     if not is_BOTTOM(location):
@@ -871,13 +871,13 @@ def Get_address(location: Buffer | Bottom) -> int:
 
 def Aint_add(Aint base: int, Aint disp: int) -> int:
     """
-    Return the sum of base address and displacement
+    Return the sum of base address and displacement.
     """
     return MPI_Aint_add(base, disp)
 
 def Aint_diff(Aint addr1: int, Aint addr2: int) -> int:
     """
-    Return the difference between absolute addresses
+    Return the difference between absolute addresses.
     """
     return MPI_Aint_diff(addr1, addr2)
 

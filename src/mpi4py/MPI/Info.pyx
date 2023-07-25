@@ -1,7 +1,6 @@
 cdef class Info:
-
     """
-    Info object
+    Info object.
     """
 
     def __cinit__(self, Info info: Info | None = None):
@@ -32,7 +31,7 @@ cdef class Info:
         ) = None,
     ) -> Self:
         """
-        Create a new info object
+        Create a new info object.
         """
         cdef Info info = <Info>New(cls)
         CHKERR( MPI_Info_create(&info.ob_mpi) )
@@ -53,7 +52,7 @@ cdef class Info:
     @classmethod
     def Create_env(cls, args: Sequence[str] | None = None) -> Self:
         """
-        Create a new environment info object
+        Create a new environment info object.
         """
         cdef int argc = 0
         cdef char **argv = MPI_ARGV_NULL
@@ -65,15 +64,14 @@ cdef class Info:
 
     def Free(self) -> None:
         """
-        Free an info object
+        Free an info object.
         """
         CHKERR( MPI_Info_free(&self.ob_mpi) )
         if self is __INFO_ENV__: self.ob_mpi = MPI_INFO_ENV
 
     def Dup(self) -> Self:
         """
-        Duplicate an existing info object, creating a new object, with
-        the same (key, value) pairs and the same ordering of keys
+        Duplicate an existing info object.
         """
         cdef Info info = <Info>New(type(self))
         CHKERR( MPI_Info_dup(self.ob_mpi, &info.ob_mpi) )
@@ -81,7 +79,7 @@ cdef class Info:
 
     def Get(self, key: str) -> str | None:
         """
-        Retrieve the value associated with a key
+        Retrieve the value associated with a key.
         """
         cdef char *ckey = NULL
         cdef char *cvalue = NULL
@@ -95,8 +93,7 @@ cdef class Info:
 
     def Set(self, key: str, value: str) -> None:
         """
-        Add the (key, value) pair to info, and overrides the value if
-        a value for the same key was previously set
+        Store a value associated with a key.
         """
         cdef char *ckey = NULL
         cdef char *cvalue = NULL
@@ -106,7 +103,7 @@ cdef class Info:
 
     def Delete(self, key: str) -> None:
         """
-        Remove a (key, value) pair from info
+        Remove a (key, value) pair from info.
         """
         cdef char *ckey = NULL
         key = asmpistr(key, &ckey)
@@ -114,7 +111,7 @@ cdef class Info:
 
     def Get_nkeys(self) -> int:
         """
-        Return the number of currently defined keys in info
+        Return the number of currently defined keys in info.
         """
         cdef int nkeys = 0
         CHKERR( MPI_Info_get_nkeys(self.ob_mpi, &nkeys) )
@@ -122,9 +119,7 @@ cdef class Info:
 
     def Get_nthkey(self, int n: int) -> str:
         """
-        Return the nth defined key in info. Keys are numbered in the
-        range [0, N) where N is the value returned by
-        `Info.Get_nkeys()`
+        Return the *n*-th defined key in info.
         """
         cdef char ckey[MPI_MAX_INFO_KEY+1]
         ckey[0] = 0 # just in case
@@ -182,14 +177,14 @@ cdef class Info:
         self.Delete(key)
 
     def get(self, key: str, default: str | None = None) -> str | None:
-        """info get"""
+        """Retrieve value by key."""
         if not self: return default
         cdef object value = self.Get(key)
         if value is None: return default
         return value
 
     def keys(self) -> list[str]:
-        """info keys"""
+        """Return list of keys."""
         if not self: return []
         cdef list keys = []
         cdef int nkeys = self.Get_nkeys()
@@ -200,7 +195,7 @@ cdef class Info:
         return keys
 
     def values(self) -> list[str]:
-        """info values"""
+        """Return list of values."""
         if not self: return []
         cdef list values = []
         cdef int nkeys = self.Get_nkeys()
@@ -212,7 +207,7 @@ cdef class Info:
         return values
 
     def items(self) -> list[tuple[str, str]]:
-        """info items"""
+        """Return list of items."""
         if not self: return []
         cdef list items = []
         cdef int nkeys = self.Get_nkeys()
@@ -228,7 +223,7 @@ cdef class Info:
         items: Info | Mapping[str, str] | Iterable[tuple[str, str]] = (),
         **kwds: str,
     ) -> None:
-        """info update"""
+        """Update contents."""
         if not self: raise KeyError
         cdef object key, value
         if hasattr(items, 'keys'):
@@ -241,7 +236,7 @@ cdef class Info:
             self.Set(key, value)
 
     def pop(self, key: str, *default: str) -> str:
-        """info pop"""
+        """Pop value by key."""
         cdef object value = None
         if self:
             value = self.Get(key)
@@ -254,7 +249,7 @@ cdef class Info:
         raise KeyError(key)
 
     def popitem(self) -> tuple[str, str]:
-        """info popitem"""
+        """Pop first item."""
         if not self: raise KeyError
         cdef object key, value
         cdef int nkeys = self.Get_nkeys()
@@ -265,12 +260,12 @@ cdef class Info:
         return (key, value)
 
     def copy(self) -> Self:
-        """info copy"""
+        """Copy contents."""
         if not self: return <Info>New(type(self))
         return self.Dup()
 
     def clear(self) -> None:
-        """info clear"""
+        """Clear contents."""
         if not self: return None
         cdef object key
         cdef int k = 0, nkeys = self.Get_nkeys()

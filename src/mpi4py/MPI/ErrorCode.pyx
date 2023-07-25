@@ -85,7 +85,7 @@ ERR_PROC_FAILED_PENDING = MPI_ERR_PROC_FAILED_PENDING
 
 def Get_error_class(int errorcode: int) -> int:
     """
-    Convert an *error code* into an *error class*
+    Convert an *error code* into an *error class*.
     """
     cdef int errorclass = MPI_SUCCESS
     CHKERR( MPI_Error_class(errorcode, &errorclass) )
@@ -93,8 +93,7 @@ def Get_error_class(int errorcode: int) -> int:
 
 def Get_error_string(int errorcode: int) -> str:
     """
-    Return the *error string* for a given
-    *error class* or *error code*
+    Return the *error string* for a given *error class* or *error code*.
     """
     cdef char string[MPI_MAX_ERROR_STRING+1]
     cdef int resultlen = 0
@@ -103,7 +102,7 @@ def Get_error_string(int errorcode: int) -> str:
 
 def Add_error_class() -> int:
     """
-    Add an *error class* to the known error classes
+    Add an *error class* to the known error classes.
     """
     cdef int errorclass = MPI_SUCCESS
     CHKERR( MPI_Add_error_class(&errorclass) )
@@ -111,7 +110,7 @@ def Add_error_class() -> int:
 
 def Add_error_code(int errorclass: int) -> int:
     """
-    Add an *error code* to an *error class*
+    Add an *error code* to an *error class*.
     """
     cdef int errorcode = MPI_SUCCESS
     CHKERR( MPI_Add_error_code(errorclass, &errorcode) )
@@ -119,8 +118,7 @@ def Add_error_code(int errorclass: int) -> int:
 
 def Add_error_string(int errorcode: int, string: str) -> None:
     """
-    Associate an *error string* with an
-    *error class* or *errorcode*
+    Associate an *error string* with an *error class* or *error code*.
     """
     cdef char *cstring = NULL
     string = asmpistr(string, &cstring)
