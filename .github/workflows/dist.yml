@@ -3,14 +3,17 @@ name: dist
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
 
-  dist:
+  docs:
     runs-on: ubuntu-latest
 
     steps:
 
-    - name: Install LaTeX distribution
+    - name: Install LaTeX
       run:  |
         # Install Tex Live
         sudo apt update && \
@@ -21,28 +24,64 @@ jobs:
            latexmk \
            texinfo
 
+    - name: Checkout
+      uses: actions/checkout@v3
+
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
         python-version: 3
-        architecture: x64
 
     - name: Upgrade pip
       run:  python -m pip install -U pip
 
-    - name: Install Python packages
+    - name: Install tox
       run:  python -m pip install -U tox
+
+    - name: Build documentation
+      run:  python -m tox run -m docs
+
+    - name: Archive documentation
+      run: |
+        ZIP=mpi4py-docs.zip
+        ln -s docs ${ZIP%.zip}
+        python -m zipfile -c $ZIP ${ZIP%.zip}
+
+    - name: Upload documentation artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: mpi4py-docs
+        path: mpi4py-docs.zip
+
+  sdist:
+    runs-on: ubuntu-latest
+
+    steps:
 
     - name: Checkout
       uses: actions/checkout@v3
 
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3
+
+    - name: Upgrade pip
+      run:  python -m pip install -U pip
+
+    - name: Install build and twine
+      run:  python -m pip install -U build twine
+
     - name: Build source distribution
-      run:  tox run -m dist
+      run:  python -m build --sdist
+
+    - name: Check source distribution
+      run:  python -m twine check dist/mpi4py-*.tar.gz
 
     - name: Compute SHA256
-      run:  sha256sum dist/mpi4py-*.tar.gz
+      run:  sha256sum dist/mpi4py-*.tar.gz | tee sha256sum.txt
 
-    - name: Upload artifact
+    - name: Upload distribution artifact
       uses: actions/upload-artifact@v3
       with:
         name: mpi4py-dist

@@ -10,6 +10,8 @@
 /docs/*.info
 /docs/*.[137]
 /docs/html/**
+/docs/source/_build/**
+/docs/source/reference/**
 
 /src/mpi4py/MPI.c
 /src/mpi4py/MPI.h

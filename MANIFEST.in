@@ -1,25 +1,21 @@
-include setup.py CMakeLists.txt meson.build *.toml *.cfg *.rst
+include setup.py pyproject.toml *.cfg *.rst
+include CMakeLists.txt meson.build
+exclude .*
 
-recursive-include demo *.py *.txt *.pyx *.i *.h *.c *.cxx *.f90 *.f08
-recursive-include demo [M,m]akefile *.sh python-config
-recursive-include conf *.py *.sh *.txt *.conf *.ini *.h
+recursive-include demo *.py *.pyx *.i *.h *.c *.cxx *.f90 *.f08
+recursive-include demo [M,m]akefile python-config *.sh *.txt
+recursive-include conf *.py *.sh *.txt *.h
 recursive-include src  *.py py.typed *.pyi *.pyx *.px[di]
 recursive-include src  *.pth *.h *.c *.i
 recursive-include test *.py *.sh
 
+prune conf/ci
 exclude src/mpi4py/MPI.c
 exclude src/mpi4py/MPI.h
 exclude src/mpi4py/MPI_api.h
 
-include docs/*.html
-include docs/*.pdf
-include docs/*.info
-include docs/*.[137]
 include docs/*.rst
 include docs/*.bib
-graft   docs/html
-graft   docs/source
-prune   docs/source/reference
-prune   docs/source/_build
-
-prune conf/ci
+graft docs/source
+prune docs/source/_build
+prune docs/source/reference
