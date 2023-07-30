@@ -19,7 +19,11 @@ sys.path.insert(0, os.path.join(topdir, 'conf'))
 # --------------------------------------------------------------------
 
 def get_name():
-    return 'mpi4py'
+    name = 'mpi4py'
+    suffix = os.environ.get('MPI4PY_DIST_SUFFIX')
+    if suffix:
+        name = '{name}-{suffix}'.format(**vars())
+    return name
 
 def get_version():
     import getversion
