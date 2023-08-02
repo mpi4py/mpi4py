@@ -4,7 +4,7 @@
 
 /* -------------------------------------------------------------------------- */
 
-#if (MPICH_NUMVERSION >= 30000000)
+#if (MPICH_NUMVERSION >= 30000000) || defined(CIBUILDWHEEL)
 static int PyMPI_MPICH_MPI_Type_get_extent_x(MPI_Datatype datatype,
                                              MPI_Count   *lb,
                                              MPI_Count   *extent)
@@ -34,7 +34,7 @@ static int PyMPI_MPICH_MPI_Type_get_extent_x(MPI_Datatype datatype,
 #define MPI_Type_get_extent_x PyMPI_MPICH_MPI_Type_get_extent_x
 #endif
 
-#if (MPICH_NUMVERSION >= 30400000)
+#if (MPICH_NUMVERSION >= 30400000) || defined(CIBUILDWHEEL)
 static int PyMPI_MPICH_MPI_Initialized(int *flag)
 {
   int ierr;
@@ -46,7 +46,7 @@ static int PyMPI_MPICH_MPI_Initialized(int *flag)
 #define MPI_Initialized PyMPI_MPICH_MPI_Initialized
 #endif
 
-#if (MPICH_NUMVERSION >= 30400000)
+#if (MPICH_NUMVERSION >= 30400000) || defined(CIBUILDWHEEL)
 static int PyMPI_MPICH_MPI_Win_get_attr(MPI_Win win,
                                         int keyval,
                                         void *attrval,
