@@ -77,10 +77,31 @@ def main():
     import os
     import sys
 
+    def prefix():
+        prefix = os.path.dirname(__spec__.origin)
+        print(prefix, file=sys.stdout)
+        sys.exit(0)
+
     def version():
         from . import __version__
         package = __spec__.parent
-        print(package, __version__, file=sys.stdout)
+        print(f"{package} {__version__}", file=sys.stdout)
+        sys.exit(0)
+
+    def mpi_std_version():
+        from . import rc
+        rc.initialize = rc.finalize = False
+        from . import MPI
+        version, subversion = MPI.Get_version()
+        print(f"MPI {version}.{subversion}", file=sys.stdout)
+        sys.exit(0)
+
+    def mpi_lib_version():
+        from . import rc
+        rc.initialize = rc.finalize = False
+        from . import MPI
+        library_version = MPI.Get_library_version()
+        print(library_version, file=sys.stdout)
         sys.exit(0)
 
     def usage(errmess=None):
@@ -101,7 +122,10 @@ def main():
 
         options = dedent("""
         options:
+          --prefix             show install path and exit
           --version            show version number and exit
+          --mpi-std-version    show MPI standard version and exit
+          --mpi-lib-version    show MPI library version and exit
           -h|--help            show this help message and exit
           -rc <key=value,...>  set 'mpi4py.rc.key=value'
         """).strip()
@@ -136,8 +160,14 @@ def main():
                 break  # Stop processing options
             if args[0] in ('-h', '-help', '--help'):
                 usage()  # Print help and exit
+            if args[0] in ('-prefix', '--prefix'):
+                prefix()  # Print install path and exit
             if args[0] in ('-version', '--version'):
-                version()  # Print version and exit
+                version()  # Print version number and exit
+            if args[0] in ('-mpi-std-version', '--mpi-std-version'):
+                mpi_std_version()  # Print MPI standard version and exit
+            if args[0] in ('-mpi-lib-version', '--mpi-lib-version'):
+                mpi_lib_version()  # Print MPI library version and exit
             try:
                 arg0 = args[0]
                 if arg0.startswith('--'):
