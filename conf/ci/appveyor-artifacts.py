@@ -31,7 +31,7 @@ jobids = [job['jobId'] for job in jobs]
 
 if options.verbose:
     print("Downloading AppVeyor artifacts "
-          "account={} branch={}".format(ACCOUNT, BRANCH))
+          f"account={ACCOUNT} branch={BRANCH}")
 for jobid in jobids:
     artifacts_url = APIURL + '/buildjobs/' + jobid + '/artifacts'
     artifacts = requests.get(artifacts_url, timeout=60).json()
