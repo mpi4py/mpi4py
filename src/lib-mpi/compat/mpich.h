@@ -2,18 +2,20 @@
 #define PyMPI_COMPAT_MPICH_H
 #if defined(MPICH_NUMVERSION)
 
-#if (MPICH_NUMVERSION < 40100000) || defined(CIBUILDWHEEL)
+#if (MPICH_NUMVERSION < 40003300) || defined(CIBUILDWHEEL)
 static int PyMPI_MPICH_MPI_Status_set_elements_c(MPI_Status *status,
                                                  MPI_Datatype datatype,
                                                  MPI_Count elements)
 {
   return MPI_Status_set_elements_x(status, datatype, elements);
 }
-#if defined(CIBUILDWHEEL) && defined(__linux__)
-#pragma weak MPI_Status_set_elements_c = PyMPI_MPICH_MPI_Status_set_elements_c
-#else
 #define MPI_Status_set_elements_c PyMPI_MPICH_MPI_Status_set_elements_c
 #endif
+
+#if defined(CIBUILDWHEEL) && defined(__linux__)
+#undef MPI_Status_set_elements_c
+extern int MPI_Status_set_elements_c(MPI_Status *, MPI_Datatype, MPI_Count)
+__attribute__((weak, alias("PyMPI_MPICH_MPI_Status_set_elements_c")));
 #endif
 
 #if (MPICH_NUMVERSION < 40100000) || defined(CIBUILDWHEEL)

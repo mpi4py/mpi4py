@@ -54,7 +54,7 @@ if MPI.Get_version() < (5, 0):
         'MPI_Comm_shrink',
     ]
 name, version = MPI.get_vendor()
-if name == 'MPICH' and version < (4, 1, 0):
+if name == 'MPICH' and version < (4, 0, 3):
     mpi_missing += [
         'MPI_Status_set_elements_c',
     ]
