@@ -44,23 +44,26 @@ jobs:
 
     - uses: actions/checkout@v3
 
-    - uses: conda-incubator/setup-miniconda@v2
+    - uses: mamba-org/setup-micromamba@v1
       with:
-        miniforge-variant: Mambaforge
-        miniforge-version: latest
-        channel-priority: strict
-        use-mamba: true
-        python-version: ${{ matrix.py }}
-        add-pip-as-python-dependency: true
-    - run: mamba info
-
-    - run: mamba install
-             ${{ matrix.mpi }}
-             ${{ matrix.mpi }}-mpicc
-             cython
-             coverage
-             numpy
-    - run: mamba list
+        init-shell: bash
+        post-cleanup: none
+        environment-name: cover
+        create-args: >-
+          ${{ matrix.mpi }}
+          ${{ matrix.mpi }}-mpicc
+          python=${{ matrix.py }}
+          pip
+          setuptools
+          cython
+          coverage
+          numpy
+        condarc: |
+          show_channel_urls: true
+          channel_priority: strict
+          channels:
+            - conda-forge
+            - nodefaults
 
     - run: python -m pip install .
       env:
