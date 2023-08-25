@@ -33,3 +33,14 @@ jobs:
 
   cover:
     uses: ./.github/workflows/ci-cover.yml
+
+  ci-status:
+    runs-on: ubuntu-latest
+    if: ${{ success() || failure() }}
+    needs:
+      - test
+      - build
+      - check
+      - cover
+    steps:
+    - run: ${{ !(contains(needs.*.result, 'failure')) }}
