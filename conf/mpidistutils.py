@@ -134,19 +134,15 @@ def customize_compiler(
         for envvar in ('LDFLAGS', 'CFLAGS', 'CPPFLAGS'):
             if envvar in os.environ:
                 ld += shlex.split(os.environ[envvar])
-    if sys.platform == 'darwin':
-        badcflags = ['-mno-fused-madd']
-        for attr in (
-            'preprocessor',
-            'compiler', 'compiler_cxx', 'compiler_so',
-            'linker_so', 'linker_exe',
-        ):
-            compiler_cmd = getattr(compiler, attr, None)
-            if compiler_cmd is None:
-                continue
-            for flag in badcflags:
-                while flag in compiler_cmd:
-                    compiler_cmd.remove(flag)
+    if os.environ.get('SOURCE_DATE_EPOCH') is not None:
+        # Linker tweaks for reproducible build
+        if sys.platform == 'darwin':
+            os.environ['ZERO_AR_DATE'] = 'YES'
+        if compiler.compiler_type == 'msvc':
+            if not compiler.initialized:
+                compiler.initialize()
+            for flags in compiler._ldflags.values():
+                flags.append('/BREPRO')
     if compiler.compiler_type == 'unix':
         # Compiler command overriding
         if mpicc:
