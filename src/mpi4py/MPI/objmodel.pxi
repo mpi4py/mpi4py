@@ -350,7 +350,7 @@ cdef extern from * nogil:
     int PyMPI_Status_get_error(MPI_Status*, int*)
     int PyMPI_Status_set_error(MPI_Status*, int)
 
-cdef inline MPI_Status *arg_Status(object status) except *:
+cdef inline MPI_Status *arg_Status(object status) except? NULL:
     if status is None: return MPI_STATUS_IGNORE
     return &((<Status?>status).ob_mpi)
 
@@ -451,7 +451,10 @@ cdef inline Info def_Info(MPI_Info arg, object name):
     return obj
 
 
-cdef inline MPI_Info arg_Info(object obj):
+cdef extern from *:
+    const MPI_Info _info_null "MPI_INFO_NULL"
+
+cdef inline MPI_Info arg_Info(object obj) except? _info_null:
     if obj is None: return MPI_INFO_NULL
     return (<Info?>obj).ob_mpi
 
@@ -473,7 +476,10 @@ cdef inline Errhandler def_Errhandler(MPI_Errhandler arg, object name):
     def_register(arg, obj, name)
     return obj
 
-cdef inline MPI_Errhandler arg_Errhandler(object obj) except *:
+cdef extern from *:
+    const MPI_Errhandler _errhandler_null "MPI_ERRHANDLER_NULL"
+
+cdef inline MPI_Errhandler arg_Errhandler(object obj) except? _errhandler_null:
     if obj is not None: return (<Errhandler?>obj).ob_mpi
     cdef int opt = options.errors
     if   opt == 0: pass
