@@ -14,6 +14,7 @@ class Rc:
     finalize: bool | None = None
     fast_reduce: bool = True
     recv_mprobe: bool = True
+    irecv_bufsz: int = 32768
     errors: str = 'exception'
     def __init__(self, **kwargs: bool | str) -> None: ...
     def __setattr__(self, name: str, value: bool | str) -> None: ...

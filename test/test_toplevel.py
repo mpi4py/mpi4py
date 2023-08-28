@@ -16,6 +16,7 @@ class TestRC(unittest.TestCase):
         rc(finalize     = rc.finalize)
         rc(fast_reduce  = rc.fast_reduce)
         rc(recv_mprobe  = rc.recv_mprobe)
+        rc(irecv_bufsz  = rc.irecv_bufsz)
         rc(errors       = rc.errors)
         return rc
 

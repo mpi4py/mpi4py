@@ -18,15 +18,16 @@ Runtime configuration options
 .. table::
    :widths: grid
 
-   ==============  ==========================================
+   ==============  ========================================================
    `initialize`    Automatic MPI initialization at import
    `threads`       Request initialization with thread support
    `thread_level`  Level of thread support to request
    `finalize`      Automatic MPI finalization at exit
    `fast_reduce`   Use tree-based reductions for objects
    `recv_mprobe`   Use matched probes to receive objects
+   `irecv_bufsz`   Default buffer size in bytes for :meth:`~MPI.Comm.irecv`
    `errors`        Error handling policy
-   ==============  ==========================================
+   ==============  ========================================================
 
 .. rubric:: Attributes Documentation
 
@@ -84,6 +85,16 @@ Runtime configuration options
    :default: :obj:`True`
 
    .. seealso:: :envvar:`MPI4PY_RC_RECV_MPROBE`
+
+.. attribute:: mpi4py.rc.irecv_bufsz
+
+   Default buffer size in bytes for :meth:`~MPI.Comm.irecv`.
+
+   :type: :class:`int`
+   :default: ``32768``
+
+   .. seealso:: :envvar:`MPI4PY_RC_IRECV_BUFSZ`
+   .. versionadded:: 4.0.0
 
 .. attribute:: mpi4py.rc.errors
 
@@ -189,6 +200,16 @@ the :data:`mpi4py.rc` and :data:`MPI.pickle` objects at import time of the
   Whether to use matched probes to receive objects.
 
   .. seealso:: :attr:`mpi4py.rc.recv_mprobe`
+
+.. envvar:: MPI4PY_RC_IRECV_BUFSZ
+
+  :type: :class:`bool`
+  :default: :obj:`True`
+
+  Default buffer size in bytes for :meth:`~MPI.Comm.irecv`.
+
+  .. seealso:: :attr:`mpi4py.rc.irecv_bufsz`
+  .. versionadded:: 4.0.0
 
 .. envvar:: MPI4PY_RC_ERRORS
 

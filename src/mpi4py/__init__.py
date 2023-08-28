@@ -42,6 +42,8 @@ class Rc:
         Use tree-based reductions for objects (default: True).
     recv_mprobe : bool
         Use matched probes to receive objects (default: True).
+    irecv_bufsz : int
+        Default buffer size in bytes for ``irecv()`` (default = 32768).
     errors : {"exception", "default", "abort", "fatal"}
         Error handling policy (default: "exception").
 
@@ -53,6 +55,7 @@ class Rc:
     finalize = None
     fast_reduce = True
     recv_mprobe = True
+    irecv_bufsz = 32768
     errors = 'exception'
 
     def __init__(self, **kwargs):
