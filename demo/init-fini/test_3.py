@@ -11,6 +11,7 @@ os.environ['MPI4PY_RC_FINALIZE']     = 'true'
 os.environ['MPI4PY_RC_THREADS']      = 'false'
 os.environ['MPI4PY_RC_THREAD_LEVEL'] = 'single'
 
+os.environ['MPI4PY_RC_IRECV_BUFSZ'] = str(2048)
 os.environ['MPI4PY_PICKLE_PROTOCOL']  =  str(3)
 os.environ['MPI4PY_PICKLE_THRESHOLD'] =  str(1024)
 
@@ -22,3 +23,7 @@ assert rc.initialize   is False
 assert rc.finalize     is True
 assert rc.threads      is False
 assert rc.thread_level == 'single'
+
+assert rc.irecv_bufsz == 2048
+assert MPI.pickle.PROTOCOL == 3
+assert MPI.pickle.THRESHOLD == 1024

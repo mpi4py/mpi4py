@@ -81,13 +81,14 @@ cdef extern from * nogil:
     enum: USE_MATCHED_RECV "PyMPI_USE_MATCHED_RECV"
 
 ctypedef struct Options:
-    int initialize
-    int threads
-    int thread_level
-    int finalize
-    int fast_reduce
-    int recv_mprobe
-    int errors
+    bint      initialize
+    bint      threads
+    int       thread_level
+    bint      finalize
+    bint      fast_reduce
+    bint      recv_mprobe
+    MPI_Count irecv_bufsz
+    int       errors
 
 cdef Options options
 options.initialize = 1
@@ -96,6 +97,7 @@ options.thread_level = MPI_THREAD_MULTIPLE
 options.finalize = 1
 options.fast_reduce = 1
 options.recv_mprobe = 1
+options.irecv_bufsz = 32768
 options.errors = 1
 
 cdef object getOpt(object rc, const char name[], object value):
@@ -104,17 +106,17 @@ cdef object getOpt(object rc, const char name[], object value):
     cdef const char *cvalue = Py_GETENV(cname)
     if cvalue == NULL:
         return getattr(rc, pystr(name), value)
-    cdef int bvalue = cstr2bool(cvalue)
-    cdef object svalue = None
-    if bvalue >= 0:
-        svalue = <bint>bvalue
+    if cstr_is_uint(cvalue) and (type(value) is int):
+        value = int(pystr(cvalue))
+    elif cstr_is_bool(cvalue):
+        value = <bint>cstr2bool(cvalue)
     else:
-        svalue = pystr(cvalue).lower()
+        value = pystr(cvalue).lower()
     try:
-        setattr(rc, pystr(name), svalue)
+        setattr(rc, pystr(name), value)
     except:
         pass
-    return svalue
+    return value
 
 cdef int warnOpt(const char name[], object value) except -1:
     value = PyUnicode_AsUTF8String(repr(value))
@@ -132,6 +134,7 @@ cdef int getOptions(Options* opts) except -1:
     opts.finalize = 1
     opts.fast_reduce = 1
     opts.recv_mprobe = USE_MATCHED_RECV
+    opts.irecv_bufsz = 32768
     opts.errors = 1
     #
     cdef object rc
@@ -146,6 +149,7 @@ cdef int getOptions(Options* opts) except -1:
     cdef object finalize     = getOpt(rc, b"finalize"     , None        )
     cdef object fast_reduce  = getOpt(rc, b"fast_reduce"  , True        )
     cdef object recv_mprobe  = getOpt(rc, b"recv_mprobe"  , True        )
+    cdef object irecv_bufsz  = getOpt(rc, b"irecv_bufsz"  , 32768       )
     cdef object errors       = getOpt(rc, b"errors"       , 'exception' )
     #
     if initialize in (True, 'yes'):
@@ -195,6 +199,11 @@ cdef int getOptions(Options* opts) except -1:
         opts.recv_mprobe = 0
     else:
         warnOpt(b"recv_mprobe", recv_mprobe)
+    #
+    if type(irecv_bufsz) is int and irecv_bufsz >= 0:
+        opts.irecv_bufsz = irecv_bufsz
+    else:
+        warnOpt(b"irecv_bufsz", irecv_bufsz)
     #
     if errors == 'default':
         opts.errors = 0

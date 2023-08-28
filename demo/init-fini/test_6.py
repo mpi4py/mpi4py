@@ -3,7 +3,7 @@ from warnings import catch_warnings
 from mpi4py import rc
 
 ATTRS = set(a for a in dir(rc) if not a.startswith('_'))
-VALUE = 123456789
+VALUE = -123456789
 
 for attr in ATTRS:
     environ.pop(f"MPI4PY_RC_{attr.upper()}", None)

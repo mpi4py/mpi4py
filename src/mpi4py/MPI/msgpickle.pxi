@@ -465,7 +465,7 @@ cdef object PyMPI_irecv(object obj, int source, int tag,
     cdef object rmsg = None
     if source != MPI_PROC_NULL:
         if obj is None:
-            rcount = <MPI_Count> (1<<15)
+            rcount = options.irecv_bufsz
             obj = pickle_alloc(&rbuf, rcount)
             rmsg = asbuffer_r(obj, NULL, NULL)
         elif is_integral(obj):

@@ -2,7 +2,13 @@ import os
 import sys
 from mpi4py import rc
 
-vmap = {'true': True, 'false': False}
+vmap = {
+    'true': True,
+    'false': False,
+    '0': 0,
+    '1': 1,
+    '1024': 1024,
+}
 for arg in sys.argv[1:]:
     attr, value = arg.split('=')
     setattr(rc, attr, vmap.get(value, value))

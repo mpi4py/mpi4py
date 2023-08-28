@@ -50,8 +50,7 @@ cdef int cstr2bool(const char s[]) noexcept nogil:
     cdef const char **T = [b"true",  b"yes", b"on",  b"y", b"1"], *t = NULL
     cdef const char **F = [b"false", b"no",  b"off", b"n", b"0"], *f = NULL
     if s == NULL: return 0
-    if PyMPI_strcasecmp(s, b"") == 0:
-        return 0
+    if s[0] == 0: return 0
     for f in F[:5]:
         if PyMPI_strcasecmp(s, f) == 0:
             return 0
@@ -59,5 +58,18 @@ cdef int cstr2bool(const char s[]) noexcept nogil:
         if PyMPI_strcasecmp(s, t) == 0:
             return 1
     return -1
+
+cdef int cstr_is_bool(const char s[]) noexcept nogil:
+    return cstr2bool(s) >= 0
+
+cdef int cstr_is_uint(const char s[]) noexcept nogil:
+    if s == NULL: return 0
+    if s[0] == 0: return 0
+    for i in range(<Py_ssize_t>64):
+        if s[i] == c' ' or s[i] == c'\t': continue
+        if s[i] >= c'0' and s[i] <= c'9': continue
+        if s[i] == 0: return 1
+        break
+    return 0
 
 #------------------------------------------------------------------------------
