@@ -43,17 +43,28 @@ jobs:
           - mpich
           - openmpi
           - intelmpi
+          - msmpi
         exclude:
           - backend: mesonpy
             os:  windows-2022
           - backend: mesonpy
             os:  windows-2019
+          - os:  ubuntu-22.04
+            mpi: msmpi
+          - os:  ubuntu-20.04
+            mpi: msmpi
           - os:  macos-13
             mpi: intelmpi
+          - os:  macos-13
+            mpi: msmpi
           - os:  macos-12
             mpi: intelmpi
+          - os:  macos-12
+            mpi: msmpi
           - os:  macos-11
             mpi: intelmpi
+          - os:  macos-11
+            mpi: msmpi
           - os:  windows-2022
             mpi: mpich
           - os:  windows-2022
@@ -68,11 +79,11 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
-    #- name: Setup MSVC
-    #  if:   matrix.backend == 'mesonpy' && runner.os == 'Windows'
-    #  uses: bus1/cabuild/action/msdevshell@v1
-    #  with:
-    #    architecture: x64
+    # - name: Setup MSVC
+    #   if:   matrix.backend == 'mesonpy' && runner.os == 'Windows'
+    #   uses: bus1/cabuild/action/msdevshell@v1
+    #   with:
+    #     architecture: x64
 
     - name: Setup MPI (${{ matrix.mpi }})
       uses: mpi4py/setup-mpi@v1
@@ -110,6 +121,9 @@ jobs:
       run:  python -m pip install mpi4py
               --verbose --no-index --find-links=dist
 
+    - name: Test wheel after install (cmdline)
+      run:  mpiexec -n 1 python -m mpi4py --mpi-lib-version
+
     - name: Test wheel after install (test_package)
       run:  mpiexec -n 1 python test/main.py test_package
 
@@ -126,6 +140,9 @@ jobs:
       env:
         MPI4PY_BUILD_BACKEND: ${{ matrix.backend }}
         MPI4PY_LOCAL_VERSION: ${{ matrix.mpi }}
+
+    - name: Test wheel after install (cmdline)
+      run:  mpiexec -n 1 python -m mpi4py --mpi-lib-version
 
     - name: Test package after install (test_package)
       run:  mpiexec -n 1 python test/main.py test_package
