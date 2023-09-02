@@ -71,7 +71,7 @@ jobs:
         CPPFLAGS: -O0 -Wp,-U_FORTIFY_SOURCE
         PIP_VERBOSE: 3
         PIP_NO_CACHE_DIR: true
-        PIP_NO_BUILD_ISOLATION: false # pypa/pip#5735
+        PIP_NO_BUILD_ISOLATION: false  # pypa/pip#5735
         PIP_DISABLE_PIP_VERSION_CHECK: true
 
     - name: Tweak MPI
