@@ -59,20 +59,31 @@ def get_backend_requires_fast(backend, dist, config_settings=None):
 
 
 def get_backend_requires_hook(name, dist, config_settings=None):
-    from build.env import IsolatedEnvBuilder
     try:
         from pyproject_hooks import BuildBackendHookCaller
     except ImportError:
         from pep517.wrappers import Pep517HookCaller as BuildBackendHookCaller
+    try:
+        from build.env import DefaultIsolatedEnv
+    except ImportError:
+        from build.env import IsolatedEnvBuilder
+        class DefaultIsolatedEnv(IsolatedEnvBuilder):
+            def __enter__(self):
+                env = super().__enter__()
+                env.python_executable = env.executable
+                def make_extra_environ():
+                    path = os.environ.get('PATH')
+                    return {'PATH':
+                        os.pathsep.join([env.scripts_dir, path])
+                        if path is not None else env.scripts_dir
+                    }
+                env.make_extra_environ = make_extra_environ
+                return env
 
     @contextlib.contextmanager
-    def environment(scripts_dir):
-        os_path = os.environ.get('PATH')
-        paths = os_path.split(os.pathsep) if os_path else []
-        while scripts_dir in paths:
-            paths.remove(scripts_dir)
-        paths.insert(0, scripts_dir)
-        os.environ['PATH'] = os.pathsep.join(paths)
+    def environment(path):
+        os_path = os.environ['PATH']
+        os.environ['PATH'] = path
         build_backend = os.environ.pop('PEP517_BUILD_BACKEND', None)
         backend_path = os.environ.pop('PEP517_BACKEND_PATH', None)
         try:
@@ -86,13 +97,15 @@ def get_backend_requires_hook(name, dist, config_settings=None):
                 os.environ['PEP517_BACKEND_PATH'] = backend_path
 
     requires = read_build_requires(name)
-    with IsolatedEnvBuilder() as env:
-        with environment(env.scripts_dir):
+    with DefaultIsolatedEnv() as env:
+        path = env.make_extra_environ()['PATH']
+        python_executable = env.python_executable
+        with environment(path):
             env.install(requires)
             hook = BuildBackendHookCaller(
                 source_dir=os.getcwd(),
                 build_backend=BACKENDS[name],
-                python_executable=env.executable,
+                python_executable=python_executable,
             )
             requires += get_backend_requires_fast(hook, dist, config_settings)
     return requires
