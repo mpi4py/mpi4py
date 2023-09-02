@@ -148,13 +148,13 @@ class Config:
         pass
 
     def _setup_windows(self):
-        if 'I_MPI_ROOT' in os.environ:
-            self._setup_windows_intelmpi()
-        else:
-            self._setup_windows_msmpi()
+        if self._setup_windows_intelmpi():
+            return
+        if self._setup_windows_msmpi():
+            return
 
     def _setup_windows_intelmpi(self):
-        I_MPI_ROOT = os.environ.get('I_MPI_ROOT', '')
+        I_MPI_ROOT = os.environ.get('I_MPI_ROOT')
         if not I_MPI_ROOT:
             return None
         if not os.path.isdir(I_MPI_ROOT):
@@ -165,8 +165,10 @@ class Config:
         if not os.path.isdir(mpi_dir):
             mpi_dir = I_MPI_ROOT
         IMPI_INC = os.path.join(mpi_dir, 'include')
-        lib_kind = os.environ.get('library_kind') or 'release'
-        for libdir in (('lib', lib_kind), ('lib',)):
+        I_MPI_LIBRARY_KIND = os.environ.get('I_MPI_LIBRARY_KIND')
+        library_kind = os.getenv('library_kind')
+        kind = I_MPI_LIBRARY_KIND or library_kind or 'release'
+        for libdir in (('lib', kind), ('lib',)):
             IMPI_LIB = os.path.join(mpi_dir, *libdir)
             library = os.path.join(IMPI_LIB, 'impi.lib')
             if os.path.exists(library):
@@ -228,7 +230,7 @@ class Config:
         MSMPI_INC = os.environ.get('MSMPI_INC')
         MSMPI_LIB = os.environ.get('MSMPI_LIB'+arch)
         if setup_msmpi(MSMPI_INC, MSMPI_LIB):
-            return
+            return True
         # Look for Microsoft MPI v7/v6/v5 in default install path
         for ProgramFiles in ('ProgramFiles', 'ProgramFiles(x86)'):
             ProgramFiles = os.environ.get(ProgramFiles, '')
@@ -237,7 +239,7 @@ class Config:
             MSMPI_INC = os.path.join(MSMPI_DIR, 'Include')
             MSMPI_LIB = os.path.join(MSMPI_DIR, 'Lib', archdir)
             if setup_msmpi(MSMPI_INC, MSMPI_LIB):
-                return
+                return True
         # Look for Microsoft HPC Pack 2012 R2 in default install path
         for ProgramFiles in ('ProgramFiles', 'ProgramFiles(x86)'):
             ProgramFiles = os.environ.get(ProgramFiles, '')
@@ -246,8 +248,7 @@ class Config:
             MSMPI_INC = os.path.join(MSMPI_DIR, 'Inc')
             MSMPI_LIB = os.path.join(MSMPI_DIR, 'Lib', archdir)
             if setup_msmpi(MSMPI_INC, MSMPI_LIB):
-                return
-
+                return True
         # Microsoft MPI (legacy) and others
         ProgramFiles = os.environ.get('ProgramFiles', '')
         CCP_HOME = os.environ.get('CCP_HOME', '')
@@ -285,7 +286,8 @@ class Config:
                 )
             self.section = name
             self.filename = [mpi_dir]
-            break
+            return True
+        return None
 
 
     def setup_compiler_info(self, options, environ):

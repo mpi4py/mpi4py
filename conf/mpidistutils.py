@@ -1156,24 +1156,19 @@ class build_ext(cmd_build_ext.build_ext):
                 self.config.dump(filename=mpi_cfg)
         #
         if ext.name == 'mpi4py.MPI' and sys.platform == 'win32':
-            config_cmd = self.get_finalized_command('config')
-            with capture_stderr():
-                headers = ['stdlib.h', 'mpi.h']
-                intelmpi = config_cmd.check_macro('I_MPI_VERSION', headers)
-            if intelmpi:
-                confdir = os.path.dirname(__file__)
-                topdir = os.path.dirname(confdir)
-                srcdir = os.path.join(topdir, 'src')
-                pthfile = 'intelmpi.pth'
-                source = os.path.join(srcdir, pthfile)
-                target = os.path.join(self.build_lib, pthfile)
-                if os.path.exists(source):
-                    log.info("writing %s", target)
-                    copy_file(
-                        source, target,
-                        verbose=False,
-                        dry_run=self.dry_run,
-                    )
+            confdir = os.path.dirname(__file__)
+            topdir = os.path.dirname(confdir)
+            srcdir = os.path.join(topdir, 'src')
+            pthfile = 'mpi.pth'
+            source = os.path.join(srcdir, pthfile)
+            target = os.path.join(self.build_lib, pthfile)
+            if os.path.exists(source):
+                log.info("writing %s", target)
+                copy_file(
+                    source, target,
+                    verbose=False,
+                    dry_run=self.dry_run,
+                )
 
     def copy_extensions_to_source(self):
         build_py = self.get_finalized_command('build_py')
@@ -1201,10 +1196,9 @@ class build_ext(cmd_build_ext.build_ext):
                 output_file = os.path.join(dest_dir, 'mpi.cfg')
                 outputs.append(output_file)
             if ext.name == 'mpi4py.MPI' and sys.platform == 'win32':
-                pthfile = 'intelmpi.pth'
+                pthfile = 'mpi.pth'
                 output_file = os.path.join(self.build_lib, pthfile)
-                if 'I_MPI_ROOT' in os.environ or os.path.exists(output_file):
-                    outputs.append(output_file)
+                outputs.append(output_file)
         return outputs
 
 

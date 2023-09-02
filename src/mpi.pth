@@ -1,0 +1,23 @@
+# Add Intel MPI to Python 3.8+ DLL search path on Windows
+import os; I_MPI_ROOT = os.getenv('I_MPI_ROOT')
+import os; I_MPI_LIBRARY_KIND = os.getenv('I_MPI_LIBRARY_KIND')
+import os; library_kind = os.getenv('library_kind')
+import os; kind = I_MPI_LIBRARY_KIND or library_kind or 'release'
+import os; d1 = I_MPI_ROOT and os.path.join(I_MPI_ROOT, 'bin', kind)
+import os; d2 = I_MPI_ROOT and os.path.join(I_MPI_ROOT, 'bin')
+import os; d1 = d1 and os.path.isfile(os.path.join(d1, 'impi.dll')) and d1
+import os; d2 = d2 and os.path.isfile(os.path.join(d2, 'impi.dll')) and d2
+import os; dlldir = d1 or d2
+import os; add_dll_directory = getattr(os, 'add_dll_directory', None)
+import os; add_dll_directory and dlldir and add_dll_directory(dlldir)
+import sys; verbose = add_dll_directory and dlldir and sys.flags.verbose >= 1
+import sys; verbose and print("# add DLL directory: ", dlldir, file=sys.stderr)
+
+# Add Microsoft MPI to Python 3.8+ DLL search path on Windows
+import os; MSMPI_BIN = os.getenv('MSMPI_BIN')
+import os; dll = MSMPI_BIN and os.path.join(MSMPI_BIN, 'msmpi.dll')
+import os; dlldir = dll and os.path.isfile(dll) and MSMPI_BIN
+import os; add_dll_directory = getattr(os, 'add_dll_directory', None)
+import os; add_dll_directory and dlldir and add_dll_directory(dlldir)
+import sys; verbose = add_dll_directory and dlldir and sys.flags.verbose >= 1
+import sys; verbose and print("# add DLL directory: ", dlldir, file=sys.stderr)
