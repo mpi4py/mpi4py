@@ -60,15 +60,12 @@ endif
 echo = [py, '-c', 'import sys; print(*sys.argv[1:], sep=chr(10))']
 copy = [py, '-c', 'import shutil, sys; shutil.copy(*sys.argv[1:])']
 
-install_intelmpi_pth = (
-  host_machine.system() == 'windows' and
-  compiler.has_header_symbol('mpi.h', 'I_MPI_VERSION')
-)
+install_mpi_pth = (host_machine.system() == 'windows')
 custom_target(
-  input: files(srcdir / 'intelmpi.pth'),
-  output: 'intelmpi.pth',
+  input: files(srcdir / 'mpi.pth'),
+  output: 'mpi.pth',
   command: copy + ['@INPUT@', '@OUTPUT0@'],
-  install: install_intelmpi_pth,
+  install: install_mpi_pth,
   install_dir: dstdir,
 )
 

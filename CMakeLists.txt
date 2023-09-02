@@ -26,13 +26,10 @@ set(TOPDIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(SRCDIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 
-# intelmpi.pth
-set(intelmpi.pth ${SRCDIR}/intelmpi.pth)
+# mpi.pth
+set(mpi.pth ${SRCDIR}/mpi.pth)
 if (WIN32)
-  check_symbol_exists(I_MPI_VERSION "mpi.h" install_intelmpi_pth)
-  if (install_intelmpi_pth)
-    install(FILES ${intelmpi.pth} DESTINATION .)
-  endif()
+  install(FILES ${mpi.pth} DESTINATION .)
 endif()
 
 
