@@ -26,27 +26,23 @@ init:
 install:
   # Python
   - "%PYTHON%\\python.exe --version"
-  - "%PYTHON%\\python.exe -m pip install --upgrade pip"
+  - "%PYTHON%\\python.exe -m pip install --upgrade pip setuptools wheel"
   - "%PYTHON%\\python.exe -m pip --version"
-  - "%PYTHON%\\python.exe -m pip install --upgrade setuptools"
-  - "%PYTHON%\\python.exe -m pip install --upgrade wheel"
   - "%PYTHON%\\python.exe -m wheel version"
-  # Cython
-  - "%PYTHON%\\python.exe -m pip install Cython"
-  - "%PYTHON%\\python.exe -m cython --version"
   # Microsoft MPI
   - "powershell .azure\\install-msmpi.ps1"
   - "SetEnvMPI.cmd"
 
 build: off
 build_script:
-  - "%PYTHON%\\python.exe setup.py build"
-  - "%PYTHON%\\python.exe setup.py --quiet bdist_wheel"
+  - "%PYTHON%\\python.exe -m pip wheel -v --wheel-dir=dist ."
 
 test: off
 test_script:
-  - "%PYTHON%\\python.exe -m pip install --no-cache-dir --no-index --find-links=dist\\ mpi4py"
-  - "\"%MSMPI_BIN%\\mpiexec.exe\" -n 1 %PYTHON%\\python.exe %CD%\\test\\runtests.py -v -f --no-builddir"
+  - "%PYTHON%\\python.exe -m pip install mpi4py --no-cache-dir --no-index --find-links=dist"
+  - "\"%MSMPI_BIN%\\mpiexec.exe\" -n 1 %PYTHON%\\python.exe -m mpi4py --mpi-std-version"
+  - "\"%MSMPI_BIN%\\mpiexec.exe\" -n 1 %PYTHON%\\python.exe -m mpi4py --mpi-lib-version"
+  - "\"%MSMPI_BIN%\\mpiexec.exe\" -n 1 %PYTHON%\\python.exe %CD%\\test\\runtests.py -v"
   - "\"%MSMPI_BIN%\\mpiexec.exe\" -n 1 %PYTHON%\\python.exe %CD%\\demo\\futures\\test_futures.py -v"
   - "\"%MSMPI_BIN%\\mpiexec.exe\" -n 2 %PYTHON%\\python.exe %CD%\\demo\\futures\\test_futures.py -v"
   - "%PYTHON%\\python.exe %CD%\\demo\\test-run\\test_run.py -v"
