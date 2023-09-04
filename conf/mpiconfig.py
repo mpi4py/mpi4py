@@ -204,7 +204,16 @@ class Config:
                         return (int(major), int(minor))
             except Exception:  # noqa: S110
                 pass
-            return (1, 0)
+            MSMPI_VER = os.environ.get('MSMPI_VER')
+            if MSMPI_VER:
+                try:
+                    major, minor = MSMPI_VER.split('.')[:2]
+                    return (int(major), int(minor))
+                except Exception:
+                    raise RuntimeError(
+                        f"invalid environment: MSMPI_VER={MSMPI_VER}"
+                    ) from None
+            return None
         def setup_msmpi(MSMPI_INC, MSMPI_LIB):
             from os.path import join, isfile
             ok = (
@@ -213,15 +222,20 @@ class Config:
             )
             if not ok:
                 return False
-            major, minor = msmpi_ver()
-            MSMPI_VER = hex((major<<8)|(minor&0xFF))
+            version = msmpi_ver()
+            if version is not None:
+                major, minor = version
+                MSMPI_VER = hex((major<<8)|(minor&0xFF))
+                self.library_info.update(
+                    define_macros=[('MSMPI_VER', MSMPI_VER)],
+                )
             MSMPI_INC = os.path.normpath(MSMPI_INC)
             MSMPI_LIB = os.path.normpath(MSMPI_LIB)
             self.library_info.update(
-                define_macros=[('MSMPI_VER', MSMPI_VER)],
                 include_dirs=[MSMPI_INC],
                 library_dirs=[MSMPI_LIB],
-                libraries=['msmpi'])
+                libraries=['msmpi'],
+            )
             self.section = 'msmpi'
             self.filename = [os.path.dirname(MSMPI_INC)]
             return True
