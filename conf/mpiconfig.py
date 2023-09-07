@@ -243,6 +243,7 @@ class Config:
         # Look for Microsoft MPI in the environment
         MSMPI_INC = os.environ.get('MSMPI_INC')
         MSMPI_LIB = os.environ.get('MSMPI_LIB'+arch)
+        MSMPI_LIB = MSMPI_LIB or os.environ.get('MSMPI_LIB')
         if setup_msmpi(MSMPI_INC, MSMPI_LIB):
             return True
         # Look for Microsoft MPI v7/v6/v5 in default install path
