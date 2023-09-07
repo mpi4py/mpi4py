@@ -154,35 +154,38 @@ class Config:
             return
 
     def _setup_windows_intelmpi(self):
+        from os.path import join, isdir, isfile
         I_MPI_ROOT = os.environ.get('I_MPI_ROOT')
         if not I_MPI_ROOT:
             return None
-        if not os.path.isdir(I_MPI_ROOT):
+        if not isdir(I_MPI_ROOT):
             return None
         arch = platform.architecture()[0][:2]
         archdir = {'32':'ia32', '64':'intel64'}[arch]
-        mpi_dir = os.path.join(I_MPI_ROOT, archdir)
-        if not os.path.isdir(mpi_dir):
+        mpi_dir = join(I_MPI_ROOT, archdir)
+        if not isdir(mpi_dir):
             mpi_dir = I_MPI_ROOT
-        IMPI_INC = os.path.join(mpi_dir, 'include')
+        IMPI_INC = join(mpi_dir, 'include')
+        IMPI_LIB = join(mpi_dir, 'lib')
         I_MPI_LIBRARY_KIND = os.environ.get('I_MPI_LIBRARY_KIND')
         library_kind = os.getenv('library_kind')
         kind = I_MPI_LIBRARY_KIND or library_kind or 'release'
-        for libdir in (('lib', kind), ('lib',)):
-            IMPI_LIB = os.path.join(mpi_dir, *libdir)
-            library = os.path.join(IMPI_LIB, 'impi.lib')
-            if os.path.exists(library):
-                break
-        if not os.path.isdir(IMPI_INC):
-            return None
-        if not os.path.isdir(IMPI_LIB):
-            return None
+        if isfile(join(IMPI_LIB, kind, 'impi.lib')):
+            IMPI_LIB = join(IMPI_LIB, kind)
+        ok = (
+            IMPI_INC and isfile(join(IMPI_INC, 'mpi.h')) and
+            IMPI_LIB and isfile(join(IMPI_LIB, 'impi.lib'))
+        )
+        if not ok:
+            return False
+        IMPI_INC = os.path.normpath(IMPI_INC)
+        IMPI_LIB = os.path.normpath(IMPI_LIB)
         self.library_info.update(
             include_dirs=[IMPI_INC],
             library_dirs=[IMPI_LIB],
             libraries=['impi'])
-        self.section = 'intelmpi'
-        self.filename = [mpi_dir]
+        self.section = 'impi'
+        self.filename = [os.path.dirname(IMPI_INC)]
         return True
 
     def _setup_windows_msmpi(self):
