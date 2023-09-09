@@ -1215,19 +1215,7 @@ class ThenTest(unittest.TestCase):
 
     assert_ = unittest.TestCase.assertTrue
 
-    def test_not_done(self):
-
-        base_f = ThenableFuture()
-        new_f = base_f.then()
-
-        self.assertTrue(base_f is not new_f)
-        self.assertTrue(not base_f.done())
-        self.assertTrue(not new_f.done())
-
-        base_f._invoke_callbacks()
-        self.assertTrue(new_f.cancelled())
-
-    def test_cancel(self):
+    def test_cancel_base(self):
 
         base_f = ThenableFuture()
         new_f = base_f.then()
@@ -1241,6 +1229,23 @@ class ThenTest(unittest.TestCase):
         self.assertTrue(new_f.done())
 
         self.assertTrue(base_f.cancelled())
+        self.assertTrue(new_f.cancelled())
+
+    def test_cancel_new(self):
+
+        base_f = ThenableFuture()
+        new_f = base_f.then()
+
+        self.assertTrue(base_f is not new_f)
+        self.assertTrue(not base_f.done())
+        self.assertTrue(not new_f.done())
+
+        new_f.cancel()
+        self.assertTrue(not base_f.done())
+        self.assertTrue(new_f.done())
+
+        base_f.set_result(1)
+        self.assertTrue(base_f.done())
         self.assertTrue(new_f.cancelled())
 
     def test_then_multiple(self):
@@ -1476,7 +1481,29 @@ class ThenTest(unittest.TestCase):
         self.assertTrue(not new_f.exception())
         self.assertTrue(new_f.result() == 5)
 
-    def test_detect_circular_chains(self):
+    def test_chained_failure_callback_and_success(self):
+
+        def transform(exc):
+            self.assertIsInstance(exc, RuntimeError)
+            f = ThenableFuture()
+            f.set_result(5)
+            return f
+
+        base_f = ThenableFuture()
+        new_f = base_f.catch(transform)
+
+        self.assertTrue(base_f is not new_f)
+        self.assertTrue(not base_f.done())
+        self.assertTrue(not new_f.done())
+
+        base_f.set_exception(RuntimeError())
+        self.assertTrue(base_f.done())
+        self.assertTrue(new_f.done())
+
+        self.assertTrue(not new_f.exception())
+        self.assertTrue(new_f.result() == 5)
+
+    def test_detect_cycle_chain(self):
 
         f1 = ThenableFuture()
         f2 = ThenableFuture()
@@ -1507,7 +1534,28 @@ class ThenTest(unittest.TestCase):
         with self.assertRaises(RuntimeError) as catcher:
             new_f.result()
         self.assertTrue(
-            'Circular future chain detected'
+            'chain cycle detected'
+            in catcher.exception.args[0],
+        )
+
+    def test_detect_self_chain(self):
+
+        base_f = ThenableFuture()
+        new_f = base_f.then(lambda arg: new_f)
+
+        self.assertTrue(base_f is not new_f)
+        self.assertTrue(not base_f.done())
+        self.assertTrue(not new_f.done())
+
+        base_f.set_result(1)
+        self.assertTrue(base_f.done())
+        self.assertTrue(new_f.done())
+
+        self.assertTrue(new_f.exception())
+        with self.assertRaises(RuntimeError) as catcher:
+            new_f.result()
+        self.assertTrue(
+            'chain cycle detected'
             in catcher.exception.args[0],
         )
 
