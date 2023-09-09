@@ -29,6 +29,8 @@ Release 4.0.0 [2023-XX-XX]
 
 * Enhancements:
 
+  + `mpi4py.futures`: Support for parallel tasks.
+
   + `mpi4py.futures`: Report exception tracebacks in workers.
 
   + `mpi4py.util.pkl5`: Add support for collective communication.
