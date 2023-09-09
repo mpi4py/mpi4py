@@ -321,9 +321,9 @@ class MPICommExecutor:
         if comm is None:
             comm = _core.MPI.COMM_WORLD
         if comm.Is_inter():
-            raise ValueError("Expecting an intracommunicator")
+            raise ValueError("expecting an intracommunicator")
         if root < 0 or root >= comm.Get_size():
-            raise ValueError("Expecting root in range(comm.size)")
+            raise ValueError("expecting root in range(comm.size)")
         if _core.SharedPool is not None:
             comm = _core.MPI.COMM_WORLD
             root = comm.Get_rank()
