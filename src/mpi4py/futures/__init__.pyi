@@ -15,15 +15,13 @@ from ._base import (
 from .pool import (
     MPIPoolExecutor as MPIPoolExecutor,
     MPICommExecutor as MPICommExecutor,
-)
-
-from .pool import (
     ThreadPoolExecutor as ThreadPoolExecutor,
     ProcessPoolExecutor as ProcessPoolExecutor,
-)
-
-from .pool import (
     get_comm_workers as get_comm_workers,
+)
+from .util import (
+    collect as collect,
+    compose as compose,
 )
 
 __all__: list[str] = [
@@ -43,4 +41,6 @@ __all__: list[str] = [
     'ThreadPoolExecutor',
     'ProcessPoolExecutor',
     'get_comm_workers',
+    'collect',
+    'compose',
 ]

@@ -16,14 +16,17 @@ from ._base import (
     InvalidStateError,
     BrokenExecutor,
 )
-
-from .pool import MPIPoolExecutor
-from .pool import MPICommExecutor
-
-from .pool import ThreadPoolExecutor
-from .pool import ProcessPoolExecutor
-
-from .pool import get_comm_workers
+from .pool import (
+    MPIPoolExecutor,
+    MPICommExecutor,
+    ThreadPoolExecutor,
+    ProcessPoolExecutor,
+    get_comm_workers,
+)
+from .util import (
+    collect,
+    compose,
+)
 
 __all__ = [
     'Future',
@@ -42,4 +45,6 @@ __all__ = [
     'ThreadPoolExecutor',
     'ProcessPoolExecutor',
     'get_comm_workers',
+    'collect',
+    'compose',
 ]
