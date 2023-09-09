@@ -442,6 +442,17 @@ rules, cf. highlighted lines in example :ref:`cpi-py` :
   the parallel task.
 
 
+Utilities
+---------
+
+The :mod:`mpi4py.futures` package provides additional utilities for handling
+:class:`~concurrent.futures.Future` instances.
+
+.. autofunction:: mpi4py.futures.collect
+
+.. autofunction:: mpi4py.futures.compose
+
+
 Examples
 --------
 

@@ -1560,6 +1560,164 @@ class ThenTest(unittest.TestCase):
         )
 
 
+class CollectTest(unittest.TestCase):
+
+    def test_empty(self):
+        future = futures.collect([])
+        self.assertFalse(future.cancelled())
+        self.assertFalse(future.running())
+        self.assertTrue(future.done())
+        self.assertEqual(future.result(), [])
+
+    def test_item_success(self):
+        fs = [futures.Future() for _ in range(5)]
+        future = futures.collect(fs)
+        self.assertFalse(future.cancelled())
+        self.assertFalse(future.running())
+        self.assertFalse(future.done())
+        for i in range(5):
+            fs[i].set_result(i)
+        self.assertFalse(future.cancelled())
+        self.assertFalse(future.running())
+        self.assertTrue(future.done())
+        self.assertEqual(future.result(), list(range(5)))
+
+    def test_item_failure(self):
+        fs = [futures.Future() for _ in range(5)]
+        future = futures.collect(fs)
+        for i in range(2, 4):
+            fs[i].set_result(i)
+        fs[-1].set_exception(RuntimeError())
+        self.assertFalse(future.cancelled())
+        self.assertFalse(future.running())
+        self.assertTrue(future.done())
+        self.assertIsInstance(future.exception(), RuntimeError)
+        for i in range(0, 2):
+            self.assertTrue(fs[i].cancelled())
+        for i in range(2, 4):
+            self.assertFalse(fs[i].cancelled())
+        self.assertFalse(fs[-1].cancelled())
+
+    def test_item_done(self):
+        fs = [futures.Future() for _ in range(5)]
+        for i in range(5):
+            fs[i].set_result(i)
+        future = futures.collect(fs)
+        self.assertFalse(future.cancelled())
+        self.assertFalse(future.running())
+        self.assertTrue(future.done())
+        self.assertEqual(future.result(), list(range(5)))
+
+    def test_item_cancel(self):
+        fs = [futures.Future() for _ in range(5)]
+        future = futures.collect(fs)
+        for i in range(2, 4):
+            fs[i].set_result(i)
+        fs[-1].cancel()
+        self.assertTrue(future.cancelled())
+        self.assertFalse(future.running())
+        self.assertTrue(future.done())
+        for i in range(0, 2):
+            self.assertTrue(fs[i].cancelled())
+        for i in range(2, 4):
+            self.assertFalse(fs[i].cancelled())
+        self.assertTrue(fs[-1].cancelled())
+
+    def test_cancel(self):
+        fs = [futures.Future() for _ in range(5)]
+        future = futures.collect(fs)
+        future.cancel()
+        for f in fs:
+            self.assertTrue(f.cancelled())
+
+    def test_cancel_pending(self):
+        class MyFuture(futures.Future):
+            def cancel(self):
+                pass
+        fs = [MyFuture() for _ in range(5)]
+        future = futures.collect(fs)
+        self.assertIs(type(future), MyFuture)
+        super(MyFuture, future).cancel()
+        for f in fs:
+            self.assertFalse(f.cancelled())
+            f.set_result(None)
+
+
+class ComposeTest(unittest.TestCase):
+
+    def test_result(self):
+        base = futures.Future()
+        future = futures.compose(base)
+        self.assertIs(type(future), type(base))
+        self.assertFalse(future.cancelled())
+        self.assertFalse(future.running())
+        self.assertFalse(future.done())
+        base.set_result(42)
+        self.assertFalse(future.cancelled())
+        self.assertFalse(future.running())
+        self.assertTrue(future.done())
+        self.assertEqual(future.result(), 42)
+
+    def test_except(self):
+        base = futures.Future()
+        future = futures.compose(base)
+        self.assertIs(type(future), type(base))
+        self.assertFalse(future.cancelled())
+        self.assertFalse(future.running())
+        self.assertFalse(future.done())
+        base.set_exception(RuntimeError(42))
+        self.assertFalse(future.cancelled())
+        self.assertFalse(future.running())
+        self.assertTrue(future.done())
+        self.assertIs(type(future.exception()), RuntimeError)
+        self.assertEqual(future.exception().args, (42,))
+
+    def test_cancel_new(self):
+        base = futures.Future()
+        future = futures.compose(base)
+        base.cancel()
+        self.assertTrue(future.cancelled())
+
+    def test_cancel_old(self):
+        base = futures.Future()
+        future = futures.compose(base)
+        future.cancel()
+        self.assertTrue(base.cancelled())
+
+    def test_result_hook(self):
+        base = futures.Future()
+        future = futures.compose(base, int)
+        base.set_result('42')
+        self.assertEqual(future.result(), 42)
+
+    def test_result_hook_failure(self):
+        base = futures.Future()
+        future = futures.compose(base, resulthook=lambda x: 1/0)
+        base.set_result(42)
+        self.assertIs(type(future.exception()), ZeroDivisionError)
+
+    def test_except_hook(self):
+        base = futures.Future()
+        future = futures.compose(base, excepthook=lambda exc: exc.args[0])
+        base.set_exception(RuntimeError(42))
+        self.assertEqual(future.result(), 42)
+
+    def test_except_hook_except(self):
+        base = futures.Future()
+        future = futures.compose(
+            base, excepthook=lambda exc: RuntimeError(exc.args[0])
+        )
+        base.set_exception(ValueError(42))
+        self.assertIs(type(future.exception()), RuntimeError)
+        self.assertEqual(future.exception().args, (42,))
+
+    def test_except_hook_failure(self):
+        base = futures.Future()
+        future = futures.compose(base, excepthook=lambda exc: 1/0)
+        base.set_exception(ValueError(42))
+        self.assertIs(type(future.exception()), ZeroDivisionError)
+
+
 SKIP_POOL_TEST = False
 name, version = MPI.get_vendor()
 if name == 'Open MPI':

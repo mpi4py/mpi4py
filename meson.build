@@ -127,6 +127,7 @@ package = {
     '_base.py',
     '_core.py',
     'pool.py',
+    'util.py',
     'server.py',
     'aplus.py',
   ],
