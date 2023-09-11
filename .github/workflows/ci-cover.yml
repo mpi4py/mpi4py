@@ -42,7 +42,7 @@ jobs:
 
     steps:
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - uses: mamba-org/setup-micromamba@v1
       with:
@@ -105,7 +105,7 @@ jobs:
 
     steps:
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: actions/setup-python@v4
       with:
         python-version: ${{ github.event.inputs.py || 3 }}
