@@ -92,8 +92,10 @@ def main():
         from . import rc
         rc.initialize = rc.finalize = False
         from . import MPI
-        version, subversion = MPI.Get_version()
-        print(f"MPI {version}.{subversion}", file=sys.stdout)
+        version = ".".join(map(str, (MPI.VERSION, MPI.SUBVERSION)))
+        rtversion = ".".join(map(str, MPI.Get_version()))
+        note = f" (runtime: MPI {rtversion})" if rtversion != version else ""
+        print(f"MPI {version}{note}", file=sys.stdout)
         sys.exit(0)
 
     def mpi_lib_version():
