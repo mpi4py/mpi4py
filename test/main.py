@@ -141,7 +141,8 @@ def getpackageinfo(pkg):
 
 def setup_python(options):
     if options.builddir:
-        testdir = os.path.dirname(__file__)
+        script = os.path.abspath(__file__)
+        testdir = os.path.dirname(script)
         rootdir = os.path.dirname(testdir)
         builddir = getbuilddir()
         if builddir is not None:

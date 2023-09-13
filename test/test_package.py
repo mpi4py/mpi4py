@@ -57,12 +57,11 @@ class TestDataFiles(unittest.TestCase):
             self.assertTrue(os.path.exists(pxd))
 
     def testHeaders(self):
-        incdir = mpi4py.get_include()
         for fname in [
-            os.path.join(pkgdir, "MPI.h"),
-            os.path.join(pkgdir, "MPI_api.h"),
-            os.path.join(incdir, "mpi4py", "mpi4py.h"),
-            os.path.join(incdir, "mpi4py", "mpi4py.i"),
+            os.path.join("MPI.h"),
+            os.path.join("MPI_api.h"),
+            os.path.join("include", "mpi4py", "mpi4py.h"),
+            os.path.join("include", "mpi4py", "mpi4py.i"),
         ]:
             hdr = os.path.join(pkgdir, fname)
             self.assertTrue(os.path.exists(hdr))
