@@ -226,8 +226,6 @@ if get_build_backend_name() == 'setuptools':
 if get_build_backend_name() == 'mesonpy':
     setup_env_mpicc()
     del prepare_metadata_for_build_wheel
-    del get_requires_for_build_editable
     del prepare_metadata_for_build_editable
-    del build_editable
 
 # ---
