@@ -27,11 +27,23 @@ static int PyMPI_Get_vendor(const char **vendor_name,
   major = MSMPI_VER >> 8;
   minor = MSMPI_VER & 0xFF;
 
+#elif defined(MVAPICH_VERSION) || defined(MVAPICH_NUMVERSION)
+
+  name = "MVAPICH";
+  #if defined(MVAPICH_NUMVERSION)
+  {int version = MVAPICH_NUMVERSION/1000; if (version<1000) version *= 100;
+  major = version/10000; version -= major*10000;
+  minor = version/100;   version -= minor*100;
+  micro = version/1;     version -= micro*1; }
+  #elif defined(MVAPICH_VERSION)
+  (void)sscanf(MVAPICH_VERSION,"%d.%d.%d",&major,&minor,&micro);
+  #endif
+
 #elif defined(MVAPICH2_VERSION) || defined(MVAPICH2_NUMVERSION)
 
   name = "MVAPICH2";
   #if defined(MVAPICH2_NUMVERSION)
-  {int version = MVAPICH2_NUMVERSION/1000;
+  {int version = MVAPICH2_NUMVERSION/1000; if (version<1000) version *= 100;
   major = version/10000; version -= major*10000;
   minor = version/100;   version -= minor*100;
   micro = version/1;     version -= micro*1; }

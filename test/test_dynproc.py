@@ -28,8 +28,8 @@ def badport():
 
 @unittest.skipMPI('mpich', badport())
 @unittest.skipMPI('openmpi(<2.0.0)')
-@unittest.skipMPI('MVAPICH2')
 @unittest.skipMPI('msmpi(<8.1.0)')
+@unittest.skipMPI('MVAPICH2')
 @unittest.skipIf(MPI.COMM_WORLD.Get_size() < 2, 'mpi-world-size<2')
 class TestDPM(unittest.TestCase):
 
@@ -57,6 +57,7 @@ class TestDPM(unittest.TestCase):
         MPI.Close_port(port)
 
     @unittest.skipMPI('mpich(==3.4.1)', ch4_ofi())
+    @unittest.skipMPI('mvapich', ch4_ofi())
     def testAcceptConnect(self):
         comm_self  = MPI.COMM_SELF
         comm_world = MPI.COMM_WORLD

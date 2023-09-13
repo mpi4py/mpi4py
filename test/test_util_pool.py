@@ -405,11 +405,14 @@ def broken_mpi_spawn():
             return True
         if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
             return True
-    if name == 'MVAPICH2':
-        return True
+    if name == 'MVAPICH':
+        if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
+            return True
     if name == 'MPICH2':
         if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
             return True
+    if name == 'MVAPICH2':
+        return True
     if MPI.Get_version() < (2,0):
         return True
     if any(map(sys.modules.get, ('cupy', 'numba'))):
