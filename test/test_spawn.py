@@ -81,8 +81,10 @@ def github_actions():
 @unittest.skipMPI('mpich', badport())
 @unittest.skipMPI('msmpi(<8.1.0)')
 @unittest.skipMPI('msmpi', appnum() is None)
-@unittest.skipMPI('MVAPICH2')
+@unittest.skipMPI('mvapich', appnum() is None)
+@unittest.skipMPI('mvapich', badport())
 @unittest.skipMPI('MPICH2')
+@unittest.skipMPI('MVAPICH2')
 @unittest.skipMPI('MPICH1')
 @unittest.skipIf(using_GPU(), 'using CUDA')
 class BaseTestSpawn:

@@ -1,7 +1,13 @@
 from mpi4py import MPI
 from mpi4py.util import pkl5
-import unittest
 import sys
+try:
+    import mpiunittest as unittest
+except ImportError:
+    sys.path.append(
+        os.path.abspath(
+            os.path.dirname(__file__)))
+    import mpiunittest as unittest
 
 _basic = [
     None,
@@ -257,6 +263,7 @@ class BaseTest:
         flag, _ = self.RequestType.testall(requests)
         self.assertTrue(flag)
 
+    @unittest.skipMPI('mvapich', MPI.COMM_WORLD.Get_size() > 1)
     def testWaitAll(self):
         comm = self.COMM
         size = comm.Get_size()

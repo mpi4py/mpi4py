@@ -1745,16 +1745,18 @@ if name == 'MPICH':
     if port == "":
         SKIP_POOL_TEST = True
     del port
-if name == 'MVAPICH2':
-    SKIP_POOL_TEST = True
-if name == 'MPICH2':
-    if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
-        SKIP_POOL_TEST = True
 if name == 'Microsoft MPI':
     if version < (8,1,0):
         SKIP_POOL_TEST = True
     if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
         SKIP_POOL_TEST = True
+if name == 'MVAPICH':
+    SKIP_POOL_TEST = True
+if name == 'MPICH2':
+    if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
+        SKIP_POOL_TEST = True
+if name == 'MVAPICH2':
+    SKIP_POOL_TEST = True
 if MPI.Get_version() < (2,0):
     SKIP_POOL_TEST = True
 
