@@ -99,7 +99,7 @@ jobs:
       run:  python -m pip install -U -r conf/requirements-lint.txt
 
     - name: ruff
-      run:  ruff conf docs src
+      run:  ruff .
 
     - name: flake8
       run:  flake8 docs src

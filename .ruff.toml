@@ -38,6 +38,11 @@ ignore = [
 "RUF012",
 ]
 
+exclude = [
+"demo",
+"test",
+]
+
 [per-file-ignores]
 "conf/*" = ["D",]
 "demo/*" = ["D",]
