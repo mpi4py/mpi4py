@@ -15,6 +15,9 @@ find_package(MPI REQUIRED)
 separate_arguments(MPI_C_COMPILE_OPTIONS NATIVE_COMMAND)
 separate_arguments(MPI_C_LINK_FLAGS NATIVE_COMMAND)
 
+set(CIBUILDWHEEL $<BOOL:$ENV{CIBUILDWHEEL}>)
+add_compile_definitions($<${CIBUILDWHEEL}:CIBUILDWHEEL=1>)
+
 include(CheckSymbolExists)
 set(CMAKE_REQUIRED_INCLUDES ${MPI_C_INCLUDE_DIRS})
 set(CMAKE_REQUIRED_DEFINITIONS ${MPI_C_COMPILE_DEFINITIONS})
@@ -87,6 +90,7 @@ target_link_directories(mpi4py.MPI PRIVATE ${MPI_C_LIBRARY_DIRS})
 target_link_libraries(mpi4py.MPI PRIVATE ${MPI_C_LIBRARIES})
 target_link_options(mpi4py.MPI PRIVATE ${MPI_C_LINK_FLAGS})
 install(TARGETS mpi4py.MPI LIBRARY DESTINATION mpi4py)
+
 
 # mpi4py/bin/python-mpi
 if (Python_Development.Embed_FOUND)
