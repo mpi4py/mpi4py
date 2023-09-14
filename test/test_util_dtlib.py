@@ -7,8 +7,8 @@ try:
     import mpiunittest as unittest
 except ImportError:
     sys.path.append(
-        os.path.abspath(
-            os.path.dirname(__file__)))
+        os.path.dirname(
+            os.path.abspath(__file__)))
     import mpiunittest as unittest
 
 try:

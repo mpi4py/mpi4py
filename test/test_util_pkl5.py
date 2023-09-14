@@ -1,12 +1,12 @@
 from mpi4py import MPI
 from mpi4py.util import pkl5
-import sys
+import sys, os
 try:
     import mpiunittest as unittest
 except ImportError:
     sys.path.append(
-        os.path.abspath(
-            os.path.dirname(__file__)))
+        os.path.dirname(
+            os.path.abspath(__file__)))
     import mpiunittest as unittest
 
 _basic = [
