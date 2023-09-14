@@ -6,7 +6,7 @@ project(
   'c',  # 'cython',
   version: run_command(
     find_program('python3'),
-    files('conf' / 'getversion.py'),
+    files('conf' / 'metadata.py'), 'version',
     check: true,
   ).stdout().strip(),
   license: 'BSD-2-Clause',

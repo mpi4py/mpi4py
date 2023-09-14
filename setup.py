@@ -1,155 +1,48 @@
 #!/usr/bin/env python
 # Author:  Lisandro Dalcin
 # Contact: dalcinl@gmail.com
-
-__doc__ = \
-"""
-Python bindings for MPI
-"""
-
+"""mpi4py: Python bindings for MPI."""
+# ruff: noqa: C408
+# ruff: noqa: D103
+# ruff: noqa: S101
 import os
 import sys
 import glob
 
-topdir = os.path.abspath(os.path.dirname(__file__))
+topdir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(topdir, 'conf'))
 
 # --------------------------------------------------------------------
 # Metadata
 # --------------------------------------------------------------------
 
-def get_name():
-    name = 'mpi4py'
-    suffix = os.environ.get('MPI4PY_DIST_SUFFIX')
-    if suffix:
-        name = '{name}-{suffix}'.format(**vars())
-    return name
-
-def get_version():
-    import getversion
-    try:
-        return get_version.result
-    except AttributeError:
-        pass
-    version = getversion.version()
-    get_version.result = version
-    return version
-
-def description():
-    return __doc__.strip()
-
-def long_description():
-    filelist = ('DESCRIPTION.rst', 'CITATION.rst', 'INSTALL.rst')
-    template = "See `{0} <{0}>`_.\n\n"
-    template += ".. include:: {0}\n"
-    text = template.format(filelist[0])
-    for filename in filelist:
-        with open(os.path.join(topdir, filename)) as f:
-            includeline = template.format(filename)
-            text = text.replace(includeline, f.read())
-    return text
-
-def homepage():
-    return 'https://mpi4py.github.io'
-
-def github(*args):
-    base = 'https://github.com/mpi4py/mpi4py'
-    return '/'.join((base,) + args)
-
-def readthedocs(*args):
-    base = 'https://mpi4py.readthedocs.io'
-    return '/'.join((base,) + args)
-
-def download_url():
-    version = get_version().partition('+')[0]
-    if '.dev' in version:
-        path = 'tarball'
-        archive = 'master'
-    else:
-        path = 'releases/download/{0}'.format(version)
-        archive = 'mpi4py-{0}.tar.gz'.format(version)
-    return github(path, archive)
-
-def documentation_url():
-    version = get_version().partition('+')[0]
-    language = 'en'
-    location = 'latest' if '.dev' in version else version
-    return readthedocs(language, location, '')
-
-classifiers = """
-Development Status :: 5 - Production/Stable
-Intended Audience :: Developers
-Intended Audience :: Science/Research
-License :: OSI Approved :: BSD License
-Operating System :: MacOS
-Operating System :: MacOS :: MacOS X
-Operating System :: Microsoft :: Windows
-Operating System :: POSIX
-Operating System :: POSIX :: BSD
-Operating System :: POSIX :: Linux
-Operating System :: Unix
-Programming Language :: C
-Programming Language :: Cython
-Programming Language :: Python
-Programming Language :: Python :: 3
-Programming Language :: Python :: 3 :: Only
-Programming Language :: Python :: 3.6
-Programming Language :: Python :: 3.7
-Programming Language :: Python :: 3.8
-Programming Language :: Python :: 3.9
-Programming Language :: Python :: 3.10
-Programming Language :: Python :: 3.11
-Programming Language :: Python :: 3.12
-Programming Language :: Python :: Implementation :: CPython
-Programming Language :: Python :: Implementation :: PyPy
-Topic :: Scientific/Engineering
-Topic :: Software Development :: Libraries :: Python Modules
-Topic :: System :: Distributed Computing
-"""
-
-keywords = """
-scientific computing
-parallel computing
-message passing interface
-MPI
-"""
-
-platforms = """
-POSIX
-Linux
-macOS
-FreeBSD
-Windows
-"""
-
-metadata = {
-    'name'             : get_name(),
-    'version'          : get_version(),
-    'description'      : description(),
-    'long_description' : long_description(),
-    'url'              : homepage(),
-    'download_url'     : download_url(),
-    'classifiers'      : classifiers.strip().split('\n'),
-    'keywords'         : keywords.strip().split('\n'),
-    'platforms'        : platforms.strip().split('\n'),
-    'license'          : 'BSD-2-Clause',
-    'author'           : 'Lisandro Dalcin',
-    'author_email'     : 'dalcinl@gmail.com',
-}
-
 require_python = (3, 6)
 maxknow_python = (3, 12)
 
-metadata_extra = {
-    'project_urls': {
-        "Source Code"   : github(),
-        "Bug Tracker"   : github('issues'),
-        "Discussions"   : github('discussions'),
-        "Documentation" : documentation_url(),
-    },
-    'python_requires': '>=' + '.'.join(map(str, require_python)),
-    'long_description_content_type': 'text/x-rst',
-}
+
+def get_metadata():
+    import metadata as md
+    req_py = '>={}.{}'.format(*require_python)
+    assert req_py == md.requires_python
+    author = md.authors[0]
+    readme = md.get_readme()
+    return {
+        # distutils
+        'name'             : md.get_name(),
+        'version'          : md.get_version(),
+        'description'      : md.description,
+        'long_description' : readme['text'],
+        'classifiers'      : md.classifiers,
+        'keywords'         : md.keywords,
+        'license'          : md.license,
+        'author'           : author['name'],
+        'author_email'     : author['email'],
+        # setuptools
+        'project_urls': md.urls,
+        'python_requires': md.requires_python,
+        'long_description_content_type': readme['content-type'],
+    }
+
 
 # --------------------------------------------------------------------
 # Extension modules
@@ -247,9 +140,7 @@ if sys.version_info < (3, 8):
 
 
 def run_setup():
-    """
-    Call setuptools.setup(*args, **kwargs)
-    """
+    """Call setuptools.setup(*args, **kwargs)."""
     try:
         import setuptools
     except ImportError as exc:
@@ -263,13 +154,17 @@ def run_setup():
     from mpidistutils import build_src
     build_src.sources = sources()
     #
+    metadata = get_metadata()
     builder_args = dict(
         ext_modules = [Ext(**ext) for ext in extensions()],
         executables = [Exe(**exe) for exe in executables()],
     )
     if setuptools:
         builder_args['zip_safe'] = False
-        metadata.update(metadata_extra)
+    else:
+        metadata.pop('project_urls')
+        metadata.pop('python_requires')
+        metadata.pop('long_description_content_type')
     #
     setup_args = dict(i for d in (
         metadata,
@@ -281,15 +176,13 @@ def run_setup():
 
 
 def run_skbuild():
-    """
-    Call setuptools.setup(*args, **kwargs)
-    """
+    """Call setuptools.setup(*args, **kwargs)."""
     from setuptools import setup
     #
+    metadata = get_metadata()
     builder_args = dict(
         cmake_source_dir = '.',
     )
-    metadata.update(metadata_extra)
     #
     setup_args = dict(i for d in (
         metadata,
@@ -320,7 +213,7 @@ if __name__ == '__main__':
     if sys.version_info < require_python:
         raise SystemExit(
             "error: requires Python version " +
-            metadata_extra['python_requires']
+            ".".join(map(str, require_python))
         )
     main()
 

@@ -1,0 +1,61 @@
+[project]
+name = "mpi4py"
+dynamic = ["version", "readme"]
+description = "Python bindings for MPI"
+requires-python = ">=3.6"
+license = {text = 'BSD-2-Clause'}
+authors = [
+  {name = "Lisandro Dalcin", email = "dalcinl@gmail.com"},
+]
+keywords = [
+  "scientific computing",
+  "parallel computing",
+  "message passing interface",
+  "MPI",
+]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: BSD License",
+  "Operating System :: MacOS",
+  "Operating System :: MacOS :: MacOS X",
+  "Operating System :: Microsoft :: Windows",
+  "Operating System :: POSIX",
+  "Operating System :: POSIX :: BSD",
+  "Operating System :: POSIX :: Linux",
+  "Operating System :: Unix",
+  "Programming Language :: C",
+  "Programming Language :: Cython",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.6",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+  "Topic :: Scientific/Engineering",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: System :: Distributed Computing",
+]
+[project.urls]
+Homepage      = "https://mpi4py.github.io"
+Documentation = "https://mpi4py.readthedocs.io/en/latest/"
+Source        = "https://github.com/mpi4py/mpi4py"
+Issues        = "https://github.com/mpi4py/mpi4py/issues"
+Discussions   = "https://github.com/mpi4py/mpi4py/discussions"
+Downloads     = "https://github.com/mpi4py/mpi4py/releases"
+
+
+[tool.scikit-build]
+minimum-version = "0.5"
+experimental = true
+sdist.exclude = [".*", "conf/ci"]
+[tool.scikit-build.metadata]
+version = {provider = "metadata", provider-path = "conf"}
+readme  = {provider = "metadata", provider-path = "conf"}
