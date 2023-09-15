@@ -1,4 +1,4 @@
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # From dlpack.h (as of v0.8)
 
@@ -57,14 +57,14 @@ ctypedef struct DLManagedTensor:
     void *manager_ctx
     void (*deleter)(DLManagedTensor *)
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 cdef extern from "Python.h":
     void* PyCapsule_GetPointer(object, const char[]) except? NULL
     int PyCapsule_SetName(object, const char[]) except -1
     int PyCapsule_IsValid(object, const char[])
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 cdef inline int dlpack_is_contig(
     const DLTensor *dltensor,
@@ -179,7 +179,7 @@ cdef inline Py_ssize_t dlpack_get_itemsize(
         bits = 1
     return <Py_ssize_t> (bits + 7) // 8
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 cdef int Py_CheckDLPackBuffer(object obj) noexcept:
     try:    return <bint>hasattr(obj, '__dlpack__')
@@ -240,4 +240,4 @@ cdef int Py_GetDLPackBuffer(object obj, Py_buffer *view, int flags) except -1:
         del capsule
     return 0
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------

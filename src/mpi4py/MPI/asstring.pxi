@@ -1,4 +1,4 @@
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 cdef extern from "Python.h":
     int    PyUnicode_Check(object)
@@ -9,7 +9,7 @@ cdef extern from "Python.h":
     object PyBytes_FromStringAndSize(const char[],Py_ssize_t)
     int    PyBytes_AsStringAndSize(object,char*[],Py_ssize_t*) except -1
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 cdef inline object asmpistr(object ob, char *s[]):
     if PyUnicode_Check(ob):
@@ -26,7 +26,7 @@ cdef inline object mpistr(const char s[]):
 cdef inline object pystr(const char s[]):
     return PyUnicode_FromString(s)
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 cdef extern from * nogil:
     """
@@ -72,4 +72,4 @@ cdef int cstr_is_uint(const char s[]) noexcept nogil:
         break
     return 0
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 cdef extern from "Python.h":
     ctypedef struct PyObject
@@ -68,7 +68,7 @@ cdef int PyMPI_GetBuffer(object obj, Py_buffer *view, int flags) except -1:
             raise
         raise
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 cdef extern from "Python.h":
     int PyIndex_Check(object)
@@ -258,7 +258,7 @@ cdef class memory:
         else:
             raise TypeError("index must be integer or slice")
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 cdef inline memory newbuffer():
     return <memory>New(memory)
@@ -303,7 +303,7 @@ cdef inline memory mpibuf(void *base, MPI_Count count):
     if neq: raise OverflowError("length {count} does not fit in 'MPI_Aint'")
     return tobuffer(<object>NULL, base, size, 0)
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 cdef extern from "Python.h":
     enum: PyBUF_READ
@@ -334,4 +334,4 @@ cdef inline object aspybuffer(object obj,
     PyBuffer_Release(&view)
     return obj
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------

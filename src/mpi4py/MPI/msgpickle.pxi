@@ -1091,7 +1091,7 @@ cdef object PyMPI_exscan_naive(object sendobj, object op, MPI_Comm comm):
     items = _py_exscan(items, op)
     return PyMPI_scatter(items, 0, comm)
 
-# -----
+# ---
 
 cdef inline object PyMPI_copy(object obj):
     cdef Pickle pickle = PyMPI_PICKLE
@@ -1263,7 +1263,7 @@ cdef object PyMPI_exscan_p2p(object sendobj, object op,
         result = None
     return result
 
-# -----
+# ---
 
 cdef extern from * nogil:
     int PyMPI_Commctx_intra(MPI_Comm,MPI_Comm*,int*)
@@ -1308,7 +1308,7 @@ def _commctx_inter(
                         &localcomm.ob_mpi, &low_group)
     return (dupcomm, tag, localcomm, <bint>low_group)
 
-# -----
+# ---
 
 cdef object PyMPI_reduce_intra(object sendobj, object op,
                                int root, MPI_Comm comm):
@@ -1369,7 +1369,7 @@ cdef object PyMPI_exscan_intra(object sendobj, object op, MPI_Comm comm):
     PyMPI_Commctx_INTRA(comm, &comm, &tag)
     return PyMPI_exscan_p2p(sendobj, op, comm, tag)
 
-# -----
+# ---
 
 cdef inline bint comm_is_intra(MPI_Comm comm) except -1 nogil:
     cdef int inter = 0

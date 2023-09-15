@@ -124,7 +124,7 @@ if [ $(command -v mpichversion) ] && [ $(command -v hydra_nameserver) ]; then
     wait $nameserver 2>/dev/null || true
 fi
 
-if grep -q 'cython: linetrace=True' src/mpi4py/MPI.pyx; then
+if test -f src/mpi4py/MPI.pyx_src; then
     export PYTHONWARNINGS=default
     $MPIEXEC -n 2 $PYTHON -m coverage run test/main.py -f -e test_util_
     $MPIEXEC -n 3 $PYTHON -m coverage run test/main.py -f test_cco_buf_inter.TestCCOBufInter

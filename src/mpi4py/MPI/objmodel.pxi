@@ -1,4 +1,4 @@
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 cdef object Lock = None
 
@@ -10,12 +10,12 @@ else:
     except ImportError:                                  #~> legacy
         from _dummy_thread import allocate_lock as Lock  #~> legacy
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 cdef inline object New(type cls):
     return cls.__new__(cls)
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 ctypedef fused handle_t:
     MPI_Datatype
@@ -198,7 +198,7 @@ cdef inline int named(handle_t arg) noexcept nogil:
     else:
         return predefined(arg)
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 ctypedef fused PyMPIClass:
     Datatype
@@ -282,7 +282,7 @@ cdef inline object richcmp(PyMPIClass self, object other, int op):
     raise TypeError(f"unorderable type '{mod}.{cls}'")
 
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 cdef dict def_registry = {}
 
@@ -338,7 +338,7 @@ cdef inline object reduce_default(PyMPIClass self):
     cdef str cls = type(self).__name__
     raise ValueError(f"cannot serialize '{mod}.{cls}' instance")
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # Status
 
@@ -354,7 +354,7 @@ cdef inline MPI_Status *arg_Status(object status) except? NULL:
     if status is None: return MPI_STATUS_IGNORE
     return &((<Status?>status).ob_mpi)
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # Datatype
 
@@ -381,7 +381,7 @@ cdef inline object reduce_Datatype(Datatype self):
     basetype, combiner, params = datatype_decode(self, True)
     return (_datatype_create, (basetype, combiner, params, True))
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # Request
 
@@ -392,7 +392,7 @@ cdef inline Request def_Request(MPI_Request arg, object name):
     def_register(arg, obj, name)
     return obj
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # Message
 
@@ -403,7 +403,7 @@ cdef inline Message def_Message(MPI_Message arg, object name):
     def_register(arg, obj, name)
     return obj
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # Op
 
@@ -428,7 +428,7 @@ cdef inline object reduce_Op(Op self):
     cdef object commute = self.Is_commutative()
     return (type(self).Create, (function, commute,))
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # Group
 
@@ -439,7 +439,7 @@ cdef inline Group def_Group(MPI_Group arg, object name):
     def_register(arg, obj, name)
     return obj
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # Info
 
@@ -465,7 +465,7 @@ cdef inline object reduce_Info(Info self):
     # user-defined
     return (type(self).Create, (self.items(),))
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # Errhandler
 
@@ -488,7 +488,7 @@ cdef inline MPI_Errhandler arg_Errhandler(object obj) except? _errhandler_null:
     elif opt == 3: return MPI_ERRORS_ARE_FATAL
     return MPI_ERRORS_ARE_FATAL
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # Session
 
@@ -499,7 +499,7 @@ cdef inline Session def_Session(MPI_Session arg, object name):
     def_register(arg, obj, name)
     return obj
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # Comm
 
@@ -523,7 +523,7 @@ cdef inline Intercomm def_Intercomm(MPI_Comm arg):
     obj.flags |= PyMPI_FLAGS_CONST
     return obj
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # Win
 
@@ -534,7 +534,7 @@ cdef inline Win def_Win(MPI_Win arg, object name):
     def_register(arg, obj, name)
     return obj
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # File
 
@@ -545,4 +545,4 @@ cdef inline File def_File(MPI_File arg, object name):
     def_register(arg, obj, name)
     return obj
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------

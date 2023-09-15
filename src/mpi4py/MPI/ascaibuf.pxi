@@ -1,4 +1,4 @@
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # CUDA array interface for interoperating Python CUDA GPU libraries
 # See https://numba.pydata.org/numba-doc/latest/cuda/cuda_array_interface.html
@@ -55,7 +55,7 @@ cdef inline char* cuda_get_format(
        if itemsize == 2*sizeof(long double): return b"Zg"
    return BYTE_FMT
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 cdef int Py_CheckCAIBuffer(object obj) noexcept:
     try:    return <bint>hasattr(obj, '__cuda_array_interface__')
@@ -158,4 +158,4 @@ cdef int Py_GetCAIBuffer(object obj, Py_buffer *view, int flags) except -1:
             view.itemsize = itemsize
     return 0
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------

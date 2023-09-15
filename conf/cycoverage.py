@@ -8,7 +8,7 @@ from coverage.files import (
     canonical_filename,
 )
 
-CYTHON_EXTENSIONS = {".pxd", ".pyx", ".pxi"}
+CYTHON_EXTENSIONS = {".pxd", ".pyx", ".pxi", ".pyx_src"}
 
 
 class CythonCoveragePlugin(CoveragePlugin):

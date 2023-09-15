@@ -568,10 +568,11 @@ def coverage_merger(filename, out=None):
         code_lines = fileobj.readlines()
     #
     if out is None:
-        log.info("rewrite '%s'", filename)
+        filename = f'{filename}_src'
+        log.info("write '%s'", filename)
         stream = open(filename, mode='w', encoding='utf-8')
     else:
-        log.info("merging '%s' ...", filename)
+        log.info("merge '%s' ...", filename)
         stream = out
     #
     is_include = re.compile(r'^include\s+"(.*)"\s*\n$').match
@@ -581,14 +582,15 @@ def coverage_merger(filename, out=None):
         match = is_include(line)
         if match:
             include = os.path.join(dirname, match.group(1))
-            stream.write(f"#include: {include}\n")
+            stream.write(f"# +include: {include}\n")
             coverage_merger(include, stream)
+            stream.write(f"# -include: {include}\n")
         else:
             stream.write(line)
     #
     if out is None:
         stream.close()
-        log.info("rewrote '%s'", filename)
+        log.info("wrote '%s'", filename)
         return filename
     #
     return None

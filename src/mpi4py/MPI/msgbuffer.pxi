@@ -1,4 +1,4 @@
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 cdef extern from "Python.h":
     int is_list     "PyList_Check"  (object)
@@ -23,7 +23,7 @@ cdef inline bint is_constant(object obj, object CONST):
     if PYPY: return type(obj) is type(CONST) and obj == CONST
     return obj is CONST
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 @cython.final
 cdef class BottomType(int):
@@ -76,7 +76,7 @@ cdef inline bint is_BOTTOM(object obj):
 cdef inline bint is_IN_PLACE(object obj):
     return obj is None or is_constant(obj, __IN_PLACE__)
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 cdef inline const char *getformat(const char format[]) except NULL:
     cdef char byteorder = format[0]
@@ -423,7 +423,7 @@ cdef tuple message_vector_w(object msg,
     o_types  = asarray_Datatype(o_types, blocks, _types)
     return (o_buffer, o_counts, o_displs, o_types)
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 @cython.final
 @cython.internal
@@ -477,7 +477,7 @@ cdef inline _p_msg_p2p message_p2p_precv(object recvbuf, int source, int parts):
     msg.for_recv(recvbuf, source, parts)
     return msg
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 @cython.final
 @cython.internal
@@ -862,7 +862,7 @@ cdef inline _p_msg_cco message_cco():
     cdef _p_msg_cco msg = _p_msg_cco.__new__(_p_msg_cco)
     return msg
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 @cython.final
 @cython.internal
@@ -929,7 +929,7 @@ cdef inline _p_msg_ccow message_ccow():
     cdef _p_msg_ccow msg = _p_msg_ccow.__new__(_p_msg_ccow)
     return msg
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 @cython.final
 @cython.internal
@@ -1091,7 +1091,7 @@ cdef inline _p_msg_rma message_rma():
     cdef _p_msg_rma msg = _p_msg_rma.__new__(_p_msg_rma)
     return msg
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 @cython.final
 @cython.internal
@@ -1135,4 +1135,4 @@ cdef inline _p_msg_io message_io_write(object buf):
     msg.for_write(buf)
     return msg
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
