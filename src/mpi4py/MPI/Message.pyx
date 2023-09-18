@@ -4,7 +4,6 @@ cdef class Message:
     """
 
     def __cinit__(self, Message message: Message | None = None):
-        self.ob_mpi = MPI_MESSAGE_NULL
         cinit(self, message)
 
     def __dealloc__(self):
@@ -15,7 +14,7 @@ cdef class Message:
         return richcmp(self, other, op)
 
     def __bool__(self) -> bool:
-        return self.ob_mpi != MPI_MESSAGE_NULL
+        return nonnull(self)
 
     def __reduce__(self) -> str | tuple[Any, ...]:
         return reduce_default(self)

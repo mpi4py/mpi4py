@@ -36,7 +36,6 @@ cdef class Comm:
     """
 
     def __cinit__(self, Comm comm: Comm | None = None):
-        self.ob_mpi = MPI_COMM_NULL
         cinit(self, comm)
 
     def __dealloc__(self):
@@ -47,7 +46,7 @@ cdef class Comm:
         return richcmp(self, other, op)
 
     def __bool__(self) -> bool:
-        return self.ob_mpi != MPI_COMM_NULL
+        return nonnull(self)
 
     def __reduce__(self) -> str | tuple[Any, ...]:
         return reduce_default(self)

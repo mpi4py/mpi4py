@@ -4,7 +4,6 @@ cdef class Errhandler:
     """
 
     def __cinit__(self, Errhandler errhandler: Errhandler | None = None):
-        self.ob_mpi = MPI_ERRHANDLER_NULL
         cinit(self, errhandler)
 
     def __dealloc__(self):
@@ -15,7 +14,7 @@ cdef class Errhandler:
         return richcmp(self, other, op)
 
     def __bool__(self) -> bool:
-        return self.ob_mpi != MPI_ERRHANDLER_NULL
+        return nonnull(self)
 
     def __reduce__(self) -> str | tuple[Any, ...]:
         return reduce_default(self)

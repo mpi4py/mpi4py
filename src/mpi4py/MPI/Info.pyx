@@ -4,7 +4,6 @@ cdef class Info:
     """
 
     def __cinit__(self, Info info: Info | None = None):
-        self.ob_mpi = MPI_INFO_NULL
         cinit(self, info)
 
     def __dealloc__(self):
@@ -15,7 +14,7 @@ cdef class Info:
         return richcmp(self, other, op)
 
     def __bool__(self) -> bool:
-        return self.ob_mpi != MPI_INFO_NULL
+        return nonnull(self)
 
     def __reduce__(self) -> str | tuple[Any, ...]:
         return reduce_Info(self)
