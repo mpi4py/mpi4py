@@ -4,7 +4,6 @@ cdef class Group:
     """
 
     def __cinit__(self, Group group: Group | None = None):
-        self.ob_mpi = MPI_GROUP_NULL
         cinit(self, group)
 
     def __dealloc__(self):
@@ -15,7 +14,7 @@ cdef class Group:
         return richcmp(self, other, op)
 
     def __bool__(self) -> bool:
-        return self.ob_mpi != MPI_GROUP_NULL
+        return nonnull(self)
 
     def __reduce__(self) -> str | tuple[Any, ...]:
         return reduce_default(self)

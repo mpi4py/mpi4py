@@ -4,7 +4,6 @@ cdef class Request:
     """
 
     def __cinit__(self, Request request: Request | None = None):
-        self.ob_mpi = MPI_REQUEST_NULL
         cinit(self, request)
 
     def __dealloc__(self):
@@ -15,7 +14,7 @@ cdef class Request:
         return richcmp(self, other, op)
 
     def __bool__(self) -> bool:
-        return self.ob_mpi != MPI_REQUEST_NULL
+        return nonnull(self)
 
     def __reduce__(self) -> str | tuple[Any, ...]:
         return reduce_default(self)

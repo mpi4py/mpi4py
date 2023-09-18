@@ -54,7 +54,6 @@ cdef class File:
     """
 
     def __cinit__(self, File file: File | None = None):
-        self.ob_mpi = MPI_FILE_NULL
         cinit(self, file)
 
     def __dealloc__(self):
@@ -65,7 +64,7 @@ cdef class File:
         return richcmp(self, other, op)
 
     def __bool__(self) -> bool:
-        return self.ob_mpi != MPI_FILE_NULL
+        return nonnull(self)
 
     def __reduce__(self) -> str | tuple[Any, ...]:
         return reduce_default(self)

@@ -30,6 +30,21 @@ ctypedef fused handle_t:
     MPI_Win
     MPI_File
 
+cdef inline handle_t mpinull(handle_t _) noexcept nogil:
+    cdef handle_t null
+    if handle_t is MPI_Datatype   : null = MPI_DATATYPE_NULL
+    if handle_t is MPI_Request    : null = MPI_REQUEST_NULL
+    if handle_t is MPI_Message    : null = MPI_MESSAGE_NULL
+    if handle_t is MPI_Op         : null = MPI_OP_NULL
+    if handle_t is MPI_Group      : null = MPI_GROUP_NULL
+    if handle_t is MPI_Info       : null = MPI_INFO_NULL
+    if handle_t is MPI_Errhandler : null = MPI_ERRHANDLER_NULL
+    if handle_t is MPI_Session    : null = MPI_SESSION_NULL
+    if handle_t is MPI_Comm       : null = MPI_COMM_NULL
+    if handle_t is MPI_Win        : null = MPI_WIN_NULL
+    if handle_t is MPI_File       : null = MPI_FILE_NULL
+    return null
+
 cdef inline int named_Datatype(MPI_Datatype arg) noexcept nogil:
     if arg == MPI_DATATYPE_NULL           : return 1
     if arg == MPI_PACKED                  : return 1
@@ -224,6 +239,7 @@ cdef extern from * nogil:
     enum: PyMPI_FLAGS_TEMP
 
 cdef inline int cinit(PyMPIClass self, PyMPIClass arg) except -1:
+    self.ob_mpi = mpinull(self.ob_mpi)
     self.flags |= PyMPI_FLAGS_READY
     if arg is None: return 0
     self.ob_mpi = arg.ob_mpi
@@ -281,6 +297,8 @@ cdef inline object richcmp(PyMPIClass self, object other, int op):
     cdef str cls = type(self).__name__
     raise TypeError(f"unorderable type '{mod}.{cls}'")
 
+cdef inline int nonnull(PyMPIClass self) noexcept nogil:
+     return self.ob_mpi != mpinull(self.ob_mpi)
 
 # -----------------------------------------------------------------------------
 

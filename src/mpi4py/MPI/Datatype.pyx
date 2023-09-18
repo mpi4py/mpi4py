@@ -46,7 +46,6 @@ cdef class Datatype:
     """
 
     def __cinit__(self, Datatype datatype: Datatype | None = None):
-        self.ob_mpi = MPI_DATATYPE_NULL
         cinit(self, datatype)
 
     def __dealloc__(self):
@@ -57,7 +56,7 @@ cdef class Datatype:
         return richcmp(self, other, op)
 
     def __bool__(self) -> bool:
-        return self.ob_mpi != MPI_DATATYPE_NULL
+        return nonnull(self)
 
     def __reduce__(self) -> str | tuple[Any, ...]:
         return reduce_Datatype(self)
