@@ -51,11 +51,11 @@ cdef inline object PyMPI_attr_call(
     cdef object handle
     cdef object result
     if PyMPI_attr_type is MPI_Datatype:
-        handle = PyMPIDatatype_New(hdl)
+        handle = fromhandle(hdl)
     if PyMPI_attr_type is MPI_Comm:
-        handle = PyMPIComm_New(hdl)
+        handle = fromhandle(hdl)
     if PyMPI_attr_type is MPI_Win:
-        handle = PyMPIWin_New(hdl)
+        handle = fromhandle(hdl)
     try:
         result = function(handle, keyval, attrval)
     finally:

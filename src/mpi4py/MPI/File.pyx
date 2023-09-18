@@ -69,6 +69,18 @@ cdef class File:
     def __reduce__(self) -> str | tuple[Any, ...]:
         return reduce_default(self)
 
+    property handle:
+        """MPI handle."""
+        def __get__(self) -> int:
+            return tohandle(self)
+
+    @classmethod
+    def fromhandle(cls, handle: int) -> File:
+        """
+        Create object from MPI handle.
+        """
+        return fromhandle(<MPI_File> <Py_uintptr_t> handle)
+
     # File Manipulation
     # -----------------
 
@@ -845,7 +857,7 @@ cdef class File:
     def f2py(cls, arg: int) -> File:
         """
         """
-        return PyMPIFile_New(MPI_File_f2c(arg))
+        return fromhandle(MPI_File_f2c(arg))
 
 
 cdef File __FILE_NULL__ = def_File( MPI_FILE_NULL , "FILE_NULL" )

@@ -19,6 +19,21 @@ cdef class Errhandler:
     def __reduce__(self) -> str | tuple[Any, ...]:
         return reduce_default(self)
 
+    property handle:
+        """MPI handle."""
+        def __get__(self) -> int:
+            return tohandle(self)
+
+    @classmethod
+    def fromhandle(cls, handle: int) -> Errhandler:
+        """
+        Create object from MPI handle.
+        """
+        return fromhandle(<MPI_Errhandler> <Py_uintptr_t> handle)
+
+    # Freeing Errorhandlers
+    # ---------------------
+
     def Free(self) -> None:
         """
         Free an error handler.
@@ -40,7 +55,7 @@ cdef class Errhandler:
     def f2py(cls, arg: int) -> Errhandler:
         """
         """
-        return PyMPIErrhandler_New(MPI_Errhandler_f2c(arg))
+        return fromhandle(MPI_Errhandler_f2c(arg))
 
 
 cdef Errhandler __ERRHANDLER_NULL__  = def_Errhandler( MPI_ERRHANDLER_NULL  , "ERRHANDLER_NULL"  )

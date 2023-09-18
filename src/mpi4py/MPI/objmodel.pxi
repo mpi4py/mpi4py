@@ -358,6 +358,26 @@ cdef inline object reduce_default(PyMPIClass self):
 
 # -----------------------------------------------------------------------------
 
+cdef inline Py_uintptr_t tohandle(PyMPIClass self):
+    return <Py_uintptr_t> self.ob_mpi
+
+cdef inline object fromhandle(handle_t arg):
+    cdef object obj = None
+    if handle_t is MPI_Datatype   : obj = PyMPIDatatype_New(arg)
+    if handle_t is MPI_Request    : obj = PyMPIRequest_New(arg)
+    if handle_t is MPI_Message    : obj = PyMPIMessage_New(arg)
+    if handle_t is MPI_Op         : obj = PyMPIOp_New(arg)
+    if handle_t is MPI_Group      : obj = PyMPIGroup_New(arg)
+    if handle_t is MPI_Info       : obj = PyMPIInfo_New(arg)
+    if handle_t is MPI_Errhandler : obj = PyMPIErrhandler_New(arg)
+    if handle_t is MPI_Session    : obj = PyMPISession_New(arg)
+    if handle_t is MPI_Comm       : obj = PyMPIComm_New(arg)
+    if handle_t is MPI_Win        : obj = PyMPIWin_New(arg)
+    if handle_t is MPI_File       : obj = PyMPIFile_New(arg)
+    return obj
+
+# -----------------------------------------------------------------------------
+
 # Status
 
 cdef extern from * nogil:
@@ -520,6 +540,29 @@ cdef inline Session def_Session(MPI_Session arg, object name):
 # -----------------------------------------------------------------------------
 
 # Comm
+
+cdef inline type CommType(MPI_Comm arg):
+    if arg == MPI_COMM_NULL:
+        return Comm
+    if arg == MPI_COMM_SELF:
+        return Intracomm
+    if arg == MPI_COMM_WORLD:
+        return Intracomm
+    cdef int inter = 0
+    CHKERR( MPI_Comm_test_inter(arg, &inter) )
+    if inter:
+        return Intercomm
+    cdef int topo  = MPI_UNDEFINED
+    CHKERR( MPI_Topo_test(arg, &topo) )
+    if topo == MPI_UNDEFINED:
+        return Intracomm
+    if topo == MPI_CART:
+        return Cartcomm
+    if topo == MPI_GRAPH:
+        return Graphcomm
+    if topo == MPI_DIST_GRAPH:
+        return Distgraphcomm
+    return Comm  #~> unreachable
 
 cdef inline Comm def_Comm(MPI_Comm arg, object name):
     cdef Comm obj = Comm.__new__(Comm)

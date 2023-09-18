@@ -48,6 +48,11 @@ Release 4.0.0 [2023-XX-XX]
     through `mpi4py` by calling `Op.Create()`. Instances of other MPI
     types can be serialized only if they reference predefined handles.
 
+  * Add `handle` attribute and `fromhandle()` class method to MPI
+    classes to ease interoperability with external code. The handle
+    value is a unsigned integer guaranteed to fit on the platform's
+    ``uintptr_t`` C type.
+
 * Backward-incompatible changes:
 
   * Python 2 is no longer supported, Python 3.6+ is required, but

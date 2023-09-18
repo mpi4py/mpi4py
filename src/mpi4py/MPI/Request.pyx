@@ -19,6 +19,22 @@ cdef class Request:
     def __reduce__(self) -> str | tuple[Any, ...]:
         return reduce_default(self)
 
+    property handle:
+        """MPI handle."""
+        def __get__(self) -> int:
+            return tohandle(self)
+
+    @classmethod
+    def fromhandle(cls, handle: int) -> Request:
+        """
+        Create object from MPI handle.
+        """
+        if issubclass(cls, Prequest):
+            return PyMPIPrequest_New(<MPI_Request> <Py_uintptr_t> handle)
+        if issubclass(cls, Grequest):
+            return PyMPIGrequest_New(<MPI_Request> <Py_uintptr_t> handle)
+        return fromhandle(<MPI_Request> <Py_uintptr_t> handle)
+
     # Completion Operations
     # ---------------------
 
@@ -240,7 +256,7 @@ cdef class Request:
             return PyMPIPrequest_New(MPI_Request_f2c(arg))
         if issubclass(cls, Grequest):
             return PyMPIGrequest_New(MPI_Request_f2c(arg))
-        return PyMPIRequest_New(MPI_Request_f2c(arg))
+        return fromhandle(MPI_Request_f2c(arg))
 
     # Python Communication
     # --------------------
