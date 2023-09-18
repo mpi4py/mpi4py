@@ -45,6 +45,18 @@ cdef class Win:
     def __reduce__(self) -> str | tuple[Any, ...]:
         return reduce_default(self)
 
+    property handle:
+        """MPI handle."""
+        def __get__(self) -> int:
+            return tohandle(self)
+
+    @classmethod
+    def fromhandle(cls, handle: int) -> Win:
+        """
+        Create object from MPI handle.
+        """
+        return fromhandle(<MPI_Win> <Py_uintptr_t> handle)
+
     # Window Creation
     # ---------------
 
@@ -727,7 +739,7 @@ cdef class Win:
     def f2py(cls, arg: int) -> Win:
         """
         """
-        return PyMPIWin_New(MPI_Win_f2c(arg))
+        return fromhandle(MPI_Win_f2c(arg))
 
 
 cdef Win __WIN_NULL__ = def_Win( MPI_WIN_NULL , "WIN_NULL" )

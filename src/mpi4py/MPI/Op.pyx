@@ -22,6 +22,21 @@ cdef class Op:
     def __call__(self, x: Any, y: Any) -> Any:
         return op_call(self.ob_mpi, self.ob_uid, x, y)
 
+    property handle:
+        """MPI handle."""
+        def __get__(self) -> int:
+            return tohandle(self)
+
+    @classmethod
+    def fromhandle(cls, handle: int) -> Op:
+        """
+        Create object from MPI handle.
+        """
+        return fromhandle(<MPI_Op> <Py_uintptr_t> handle)
+
+    # User-Defined Reduction Operations
+    # ---------------------------------
+
     @classmethod
     def Create(
         cls,
@@ -127,7 +142,7 @@ cdef class Op:
     def f2py(cls, arg: int) -> Op:
         """
         """
-        return PyMPIOp_New(MPI_Op_f2c(arg))
+        return fromhandle(MPI_Op_f2c(arg))
 
 
 cdef Op __OP_NULL__ = def_Op( MPI_OP_NULL , "OP_NULL" )

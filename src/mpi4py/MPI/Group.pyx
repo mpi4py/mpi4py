@@ -19,6 +19,18 @@ cdef class Group:
     def __reduce__(self) -> str | tuple[Any, ...]:
         return reduce_default(self)
 
+    property handle:
+        """MPI handle."""
+        def __get__(self) -> int:
+            return tohandle(self)
+
+    @classmethod
+    def fromhandle(cls, handle: int) -> Group:
+        """
+        Create object from MPI handle.
+        """
+        return fromhandle(<MPI_Group> <Py_uintptr_t> handle)
+
     # Group Accessors
     # ---------------
 
@@ -224,7 +236,7 @@ cdef class Group:
     def f2py(cls, arg: int) -> Group:
         """
         """
-        return PyMPIGroup_New(MPI_Group_f2c(arg))
+        return fromhandle(MPI_Group_f2c(arg))
 
 
 cdef Group __GROUP_NULL__  = def_Group ( MPI_GROUP_NULL  , "GROUP_NULL"  )

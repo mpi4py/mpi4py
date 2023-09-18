@@ -51,6 +51,18 @@ cdef class Comm:
     def __reduce__(self) -> str | tuple[Any, ...]:
         return reduce_default(self)
 
+    property handle:
+        """MPI handle."""
+        def __get__(self) -> int:
+            return tohandle(self)
+
+    @classmethod
+    def fromhandle(cls, handle: int) -> Comm:
+        """
+        Create object from MPI handle.
+        """
+        return fromhandle(<MPI_Comm> <Py_uintptr_t> handle)
+
     # Group
     # -----
 
@@ -1882,7 +1894,7 @@ cdef class Comm:
     def f2py(cls, arg: int) -> Comm:
         """
         """
-        return PyMPIComm_New(MPI_Comm_f2c(arg))
+        return fromhandle(MPI_Comm_f2c(arg))
 
     # Python Communication
     # --------------------

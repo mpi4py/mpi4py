@@ -16,6 +16,8 @@ cdef extern from * nogil:
 
 cdef extern from "Python.h":
     enum: PY_VERSION_HEX
+    ctypedef ssize_t Py_intptr_t
+    ctypedef size_t  Py_uintptr_t
 
 cdef extern from "Python.h":
     """

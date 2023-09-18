@@ -135,23 +135,7 @@ cdef api MPI_Session* PyMPISession_Get(object arg) except NULL:
 # Comm
 
 cdef api object PyMPIComm_New(MPI_Comm arg):
-    cdef type cls   = Comm
-    cdef int  inter = 0
-    cdef int  topo  = MPI_UNDEFINED
-    if arg != MPI_COMM_NULL:
-        CHKERR( MPI_Comm_test_inter(arg, &inter) )
-        if inter:
-            cls = Intercomm
-        else:
-            CHKERR( MPI_Topo_test(arg, &topo) )
-            if topo == MPI_UNDEFINED:
-                cls = Intracomm
-            elif topo == MPI_CART:
-                cls = Cartcomm
-            elif topo == MPI_GRAPH:
-                cls = Graphcomm
-            elif topo == MPI_DIST_GRAPH:
-                cls = Distgraphcomm
+    cdef type cls = CommType(arg)
     cdef Comm obj = <Comm>cls.__new__(cls)
     obj.ob_mpi = arg
     obj.flags |= 0

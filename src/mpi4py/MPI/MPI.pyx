@@ -295,10 +295,6 @@ def get_vendor() -> tuple[str, tuple[int, int, int]]:
 
 # -----------------------------------------------------------------------------
 
-cdef extern from "Python.h":
-    ctypedef ssize_t Py_intptr_t
-    ctypedef size_t  Py_uintptr_t
-
 cdef inline int _mpi_type(object arg, type cls) except -1:
     if isinstance(arg, type):
         if issubclass(arg, cls): return 1

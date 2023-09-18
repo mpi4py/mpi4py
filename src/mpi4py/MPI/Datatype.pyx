@@ -61,6 +61,18 @@ cdef class Datatype:
     def __reduce__(self) -> str | tuple[Any, ...]:
         return reduce_Datatype(self)
 
+    property handle:
+        """MPI handle."""
+        def __get__(self) -> int:
+            return tohandle(self)
+
+    @classmethod
+    def fromhandle(cls, handle: int) -> Datatype:
+        """
+        Create object from MPI handle.
+        """
+        return fromhandle(<MPI_Datatype> <Py_uintptr_t> handle)
+
     # Datatype Accessors
     # ------------------
 
@@ -814,7 +826,7 @@ cdef class Datatype:
     def f2py(cls, arg: int) -> Datatype:
         """
         """
-        return PyMPIDatatype_New(MPI_Type_f2c(arg))
+        return fromhandle(MPI_Type_f2c(arg))
 
     # Python/NumPy interoperability
     # -----------------------------

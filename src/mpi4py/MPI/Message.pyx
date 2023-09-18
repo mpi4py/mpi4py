@@ -19,6 +19,18 @@ cdef class Message:
     def __reduce__(self) -> str | tuple[Any, ...]:
         return reduce_default(self)
 
+    property handle:
+        """MPI handle."""
+        def __get__(self) -> int:
+            return tohandle(self)
+
+    @classmethod
+    def fromhandle(cls, handle: int) -> Message:
+        """
+        Create object from MPI handle.
+        """
+        return fromhandle(<MPI_Message> <Py_uintptr_t> handle)
+
     # Matching Probe
     # --------------
 
@@ -178,7 +190,7 @@ cdef class Message:
     def f2py(cls, arg: int) -> Message:
         """
         """
-        return PyMPIMessage_New(MPI_Message_f2c(arg))
+        return fromhandle(MPI_Message_f2c(arg))
 
 
 cdef Message __MESSAGE_NULL__    = def_Message ( MPI_MESSAGE_NULL    , "MESSAGE_NULL"    )

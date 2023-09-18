@@ -139,6 +139,37 @@ class TestObjModel(unittest.TestCase):
             wr = weakref.proxy(obj)
             self.assertIn(wr, weakref.getweakrefs(obj))
 
+    def testHandle(self):
+        objects = self.objects[:]
+        objects += [
+            MPI.INT,
+            MPI.FLOAT,
+            MPI.Request(MPI.REQUEST_NULL),
+            MPI.Prequest(MPI.REQUEST_NULL),
+            MPI.Grequest(MPI.REQUEST_NULL),
+            MPI.INFO_ENV,
+            MPI.GROUP_EMPTY,
+            MPI.ERRORS_RETURN,
+            MPI.ERRORS_ABORT,
+            MPI.ERRORS_ARE_FATAL,
+            MPI.COMM_SELF,
+            MPI.COMM_WORLD,
+        ]
+        for obj in objects:
+            if isinstance(obj, MPI.Status):
+                continue
+            self.assertGreaterEqual(obj.handle, 0)
+            newobj = type(obj).fromhandle(obj.handle)
+            self.assertEqual(newobj, obj)
+            self.assertEqual(type(newobj), type(obj))
+            self.assertEqual(newobj.handle, obj.handle)
+            with self.assertRaises(AttributeError):
+                newobj.handle = None
+            with self.assertRaises(AttributeError):
+                newobj.handle = obj.handle
+            with self.assertRaises(AttributeError):
+                del newobj.handle
+
     def testConstants(self):
         import pickle
         self.assertEqual(repr(MPI.BOTTOM), 'BOTTOM')

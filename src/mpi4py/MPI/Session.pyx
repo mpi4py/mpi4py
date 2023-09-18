@@ -19,6 +19,18 @@ cdef class Session:
     def __reduce__(self) -> str | tuple[Any, ...]:
         return reduce_default(self)
 
+    property handle:
+        """MPI handle."""
+        def __get__(self) -> int:
+            return tohandle(self)
+
+    @classmethod
+    def fromhandle(cls, handle: int) -> Session:
+        """
+        Create object from MPI handle.
+        """
+        return fromhandle(<MPI_Session> <Py_uintptr_t> handle)
+
     @classmethod
     def Init(
         cls,
@@ -145,7 +157,7 @@ cdef class Session:
     def f2py(cls, arg: int) -> Session:
         """
         """
-        return PyMPISession_New(MPI_Session_f2c(arg))
+        return fromhandle(MPI_Session_f2c(arg))
 
 
 cdef Session __SESSION_NULL__ = def_Session( MPI_SESSION_NULL , "SESSION_NULL" )

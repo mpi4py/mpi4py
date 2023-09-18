@@ -29,16 +29,16 @@ cdef inline void errhdl_call_mpi(
     # errors in user-defined error handler functions are unrecoverable
     try:
         if mpi_scwf_t is MPI_Session:
-            pyhandle = PyMPISession_New(handle)
+            pyhandle = fromhandle(handle)
             registry = errhdl_registry[0]
         if mpi_scwf_t is MPI_Comm:
-            pyhandle = PyMPIComm_New(handle)
+            pyhandle = fromhandle(handle)
             registry = errhdl_registry[1]
         if mpi_scwf_t is MPI_Win:
-            pyhandle = PyMPIWin_New(handle)
+            pyhandle = fromhandle(handle)
             registry = errhdl_registry[2]
         if mpi_scwf_t is MPI_File:
-            pyhandle = PyMPIFile_New(handle)
+            pyhandle = fromhandle(handle)
             registry = errhdl_registry[3]
         try:
             registry[index](pyhandle, errcode)
