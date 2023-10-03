@@ -880,7 +880,6 @@ def import_main(mod_name, mod_path, init_globals, run_name):
         # pylint: disable=too-few-public-methods
         def __init__(self, mod_name):
             super().__init__(mod_name)
-            assert self.module.__name__ == run_name  # noqa: S101
             self.module = module
 
     TempModule = runpy._TempModule  # pylint: disable=invalid-name
