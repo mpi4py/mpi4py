@@ -394,16 +394,16 @@ class TestMessageSimpleNumPy(unittest.TestCase,
     def testByteOrder(self):
         sbuf = numpy.zeros([3], 'i')
         rbuf = numpy.zeros([3], 'i')
-        sbuf = sbuf.newbyteorder('=')
-        rbuf = rbuf.newbyteorder('=')
+        sbuf = sbuf.view(sbuf.dtype.newbyteorder('='))
+        rbuf = rbuf.view(rbuf.dtype.newbyteorder('='))
         Sendrecv(sbuf, rbuf)
         byteorder = '<' if sys.byteorder == 'little' else '>'
-        sbuf = sbuf.newbyteorder(byteorder)
-        rbuf = rbuf.newbyteorder(byteorder)
+        sbuf = sbuf.view(sbuf.dtype.newbyteorder(byteorder))
+        rbuf = rbuf.view(rbuf.dtype.newbyteorder(byteorder))
         Sendrecv(sbuf, rbuf)
         byteorder = '>' if sys.byteorder == 'little' else '<'
-        sbuf = sbuf.newbyteorder(byteorder)
-        rbuf = rbuf.newbyteorder(byteorder)
+        sbuf = sbuf.view(sbuf.dtype.newbyteorder(byteorder))
+        rbuf = rbuf.view(rbuf.dtype.newbyteorder(byteorder))
         self.assertRaises(BufferError, Sendrecv, sbuf, rbuf)
         Sendrecv([sbuf, MPI.INT], [rbuf, MPI.INT])
 
