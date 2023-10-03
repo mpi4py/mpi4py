@@ -149,6 +149,7 @@ jobs:
 
     - name: mypy (typecheck)
       run:  |
+        mypy --python-version 3.12 -p mpi4py
         mypy --python-version 3.11 -p mpi4py
         mypy --python-version 3.10 -p mpi4py
         mypy --python-version 3.9  -p mpi4py
