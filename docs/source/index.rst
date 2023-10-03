@@ -9,8 +9,7 @@ MPI for Python
 
 .. topic:: Abstract
 
-   This document describes the *MPI for Python* package. *MPI for
-   Python* provides Python bindings for the *Message Passing
+   *MPI for Python* provides Python bindings for the *Message Passing
    Interface* (MPI) standard, allowing Python applications to exploit
    multiple processors on workstations, clusters and supercomputers.
 
