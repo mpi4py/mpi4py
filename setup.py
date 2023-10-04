@@ -82,6 +82,8 @@ Programming Language :: Python :: 3.7
 Programming Language :: Python :: 3.8
 Programming Language :: Python :: 3.9
 Programming Language :: Python :: 3.10
+Programming Language :: Python :: 3.11
+Programming Language :: Python :: 3.12
 Programming Language :: Python :: Implementation :: CPython
 Programming Language :: Python :: Implementation :: PyPy
 Topic :: Scientific/Engineering
@@ -485,7 +487,7 @@ def run_setup():
         has_git = os.path.isdir(os.path.join(topdir, '.git'))
         has_hg  = os.path.isdir(os.path.join(topdir, '.hg'))
         if not has_src or has_git or has_hg:
-            setup_args['setup_requires'] += ['Cython>='+CYTHON]
+            setup_args['setup_requires'] += ['Cython>='+CYTHON+',<3.0.0']
     #
     setup(
         packages = [

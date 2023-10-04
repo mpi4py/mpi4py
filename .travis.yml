@@ -46,7 +46,7 @@ addons:
     update: true
 
 before_install:
-  - python -m pip install Cython
+  - python -m pip install -r conf/requirements-build-cython.txt
   - python -m pip install numpy
   - source .azure/install-$MPI.sh
   - python --version

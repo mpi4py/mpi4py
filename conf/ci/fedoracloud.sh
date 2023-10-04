@@ -30,7 +30,7 @@ source venv-$PY-$MPI/bin/activate
 pip install pip --upgrade
 
 echo "Installing dependencies"
-pip install Cython
+pip install -r conf/requirements-build-cython.txt
 pip install pydocstyle pylint coverage --upgrade
 
 echo "Loading MPI module: $MPI"

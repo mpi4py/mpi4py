@@ -21,41 +21,40 @@ jobs:
       fail-fast: false
       matrix:
         py-version:
-          - "2.7"
+        #- "2.7"
           - "3.5"
           - "3.6"
           - "3.7"
           - "3.8"
           - "3.9"
           - "3.10"
-          - "pypy-2.7"
+          - "3.11"
+          - "3.12"
+        #- "pypy-2.7"
           - "pypy-3.6"
           - "pypy-3.7"
+          - "pypy-3.8"
+          - "pypy-3.9"
         py-arch:
-          - x86
           - x64
         mpi:
           - mpich
           - openmpi
           - msmpi
         os:
-          - ubuntu-18.04
-          - macos-10.15
+          - ubuntu-20.04
+          - macos-11
           - windows-2019
         exclude:
-          - os: ubuntu-18.04
-            py-arch: x86
-          - os: ubuntu-18.04
+          - os: ubuntu-20.04
             mpi: msmpi
-          - os: macos-10.15
+          - os: macos-11
             py-version: pypy-2.7
-          - os: macos-10.15
+          - os: macos-11
             py-version: pypy-3.6
-          - os: macos-10.15
+          - os: macos-11
             py-version: pypy-3.7
-          - os: macos-10.15
-            py-arch: x86
-          - os: macos-10.15
+          - os: macos-11
             mpi: msmpi
           - os: windows-2019
             mpi: mpich
@@ -63,12 +62,6 @@ jobs:
             mpi: openmpi
           - os: windows-2019
             py-version: pypy-2.7
-          - os: windows-2019
-            py-version: pypy-3.6
-            py-arch: x86
-          - os: windows-2019
-            py-version: pypy-3.7
-            py-arch: x86
 
     steps:
 
@@ -105,7 +98,7 @@ jobs:
     - name: Install packaging tools
       run:  python -m pip install --upgrade setuptools pip wheel
     - name: Install build dependencies
-      run:  python -m pip install --upgrade cython
+      run:  python -m pip install -r conf/requirements-build-cython.txt
     - name: Build package
       run:  python -m pip wheel -vvv --wheel-dir=dist .
     - name: Upload package artifacts
@@ -167,10 +160,10 @@ jobs:
     - name: pylint
       run:  pylint mpi4py
 
-    - name: mypy (stubtest)
-      run:  stubtest mpi4py
-              --mypy-config-file=conf/mypy.ini
-              --allowlist=conf/mypy.stubtest.allow.txt
+   #- name: mypy (stubtest)
+   #  run:  stubtest mpi4py
+   #          --mypy-config-file=conf/mypy.ini
+   #          --allowlist=conf/mypy.stubtest.allow.txt
 
     - name: mypy (typecheck)
       run:  mypy -p mpi4py

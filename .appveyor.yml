@@ -47,7 +47,7 @@ install:
   - "%PYTHON%\\python.exe -m pip install --upgrade wheel"
   - "%PYTHON%\\python.exe -m wheel version"
   # Cython
-  - "%PYTHON%\\python.exe -m pip install Cython"
+  - "%PYTHON%\\python.exe -m pip install -r conf\\requirements-build-cython.txt"
   - "%PYTHON%\\python.exe -m cython --version"
   # Microsoft MPI
   - "powershell .azure\\install-msmpi.ps1"

@@ -76,11 +76,20 @@ def getoptionparser():
     return parser
 
 def getbuilddir():
-    from distutils.util import get_platform
-    plat_name, (x, y) = get_platform(), sys.version_info[:2]
-    s = os.path.join("build", "lib.%s-%d.%d" % (plat_name, x, y))
-    if hasattr(sys, 'gettotalrefcount'): s += '-pydebug'
-    return s
+    try:
+        try:
+            from setuptools.dist import Distribution
+        except ImportError:
+            from distutils.dist import Distribution
+        try:
+            from setuptools.command.build import build
+        except ImportError:
+            from distutils.command.build import build
+        cmd_obj = build(Distribution())
+        cmd_obj.finalize_options()
+        return cmd_obj.build_platlib
+    except Exception:
+        return None
 
 def setup_python(options):
     rootdir = os.path.dirname(os.path.dirname(__file__))
