@@ -27,7 +27,7 @@ jobs:
         py:
           - "3.10"
           - "3.11"
-          - "3.12-dev"
+          - "3.12"
           - "pypy-3.9"
         exclude:
           - os: ubuntu-22.04
