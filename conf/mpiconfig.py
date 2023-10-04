@@ -106,6 +106,8 @@ class Config(object):
         if mpiopt:
             if ',' in mpiopt:
                 section, filename = mpiopt.split(',', 1)
+            elif ':' in mpiopt:
+                filename, section = mpiopt.split(':', 1)
             elif os.path.isfile(mpiopt):
                 filename = mpiopt
             else:
@@ -142,29 +144,44 @@ class Config(object):
         pass
 
     def _setup_windows(self):
-        if 'I_MPI_ROOT' in os.environ:
-            self._setup_windows_intelmpi()
-        else:
-            self._setup_windows_msmpi()
+        if self._setup_windows_intelmpi():
+            return
+        if self._setup_windows_msmpi():
+            return
 
     def _setup_windows_intelmpi(self):
-        I_MPI_ROOT = os.environ.get('I_MPI_ROOT', '')
-        if not I_MPI_ROOT: return
-        if not os.path.isdir(I_MPI_ROOT): return
+        from os.path import join, isdir, isfile
+        I_MPI_ROOT = os.environ.get('I_MPI_ROOT')
+        if not I_MPI_ROOT:
+            return None
+        if not isdir(I_MPI_ROOT):
+            return None
         arch = platform.architecture()[0][:2]
         archdir = {'32':'ia32', '64':'intel64'}[arch]
-        mpi_dir = os.path.join(I_MPI_ROOT, archdir)
-        if not os.path.isdir(mpi_dir): return
-        IMPI_INC = os.path.join(mpi_dir, 'include')
-        IMPI_LIB = os.path.join(mpi_dir, 'lib', 'release')
-        if not os.path.isdir(IMPI_INC): return
-        if not os.path.isdir(IMPI_LIB): return
+        mpi_dir = join(I_MPI_ROOT, archdir)
+        if not isdir(mpi_dir):
+            mpi_dir = I_MPI_ROOT
+        IMPI_INC = join(mpi_dir, 'include')
+        IMPI_LIB = join(mpi_dir, 'lib')
+        I_MPI_LIBRARY_KIND = os.environ.get('I_MPI_LIBRARY_KIND')
+        library_kind = os.getenv('library_kind')
+        kind = I_MPI_LIBRARY_KIND or library_kind or 'release'
+        if isfile(join(IMPI_LIB, kind, 'impi.lib')):
+            IMPI_LIB = join(IMPI_LIB, kind)
+        ok = (
+            IMPI_INC and isfile(join(IMPI_INC, 'mpi.h')) and
+            IMPI_LIB and isfile(join(IMPI_LIB, 'impi.lib'))
+        )
+        if not ok:
+            return False
+        IMPI_INC = os.path.normpath(IMPI_INC)
+        IMPI_LIB = os.path.normpath(IMPI_LIB)
         self.library_info.update(
             include_dirs=[IMPI_INC],
             library_dirs=[IMPI_LIB],
             libraries=['impi'])
-        self.section = 'intelmpi'
-        self.filename = [mpi_dir]
+        self.section = 'impi'
+        self.filename = [os.path.dirname(IMPI_INC)]
         return True
 
     def _setup_windows_msmpi(self):
@@ -180,25 +197,44 @@ class Config(object):
                 with winreg.OpenKey(HKLM, subkey) as key:
                     for i in range(winreg.QueryInfoKey(key)[1]):
                         name, value, type = winreg.EnumValue(key, i)
-                        if name != "Version": continue
+                        if name != "Version":
+                            continue
                         major, minor = value.split('.')[:2]
                         return (int(major), int(minor))
-            except: pass
-            return (1, 0)
+            except Exception:  # noqa: S110
+                pass
+            MSMPI_VER = os.environ.get('MSMPI_VER')
+            if MSMPI_VER:
+                try:
+                    major, minor = MSMPI_VER.split('.')[:2]
+                    return (int(major), int(minor))
+                except Exception:
+                    raise RuntimeError(
+                        "invalid environment: MSMPI_VER="+MSMPI_VER
+                    )
+            return None
         def setup_msmpi(MSMPI_INC, MSMPI_LIB):
             from os.path import join, isfile
-            ok = (MSMPI_INC and isfile(join(MSMPI_INC, 'mpi.h')) and
-                  MSMPI_LIB and isfile(join(MSMPI_LIB, 'msmpi.lib')))
-            if not ok: return False
-            major, minor = msmpi_ver()
-            MSMPI_VER = hex((major<<8)|(minor&0xFF))
+            ok = (
+                MSMPI_INC and isfile(join(MSMPI_INC, 'mpi.h')) and
+                MSMPI_LIB and isfile(join(MSMPI_LIB, 'msmpi.lib'))
+            )
+            if not ok:
+                return False
+            version = msmpi_ver()
+            if version is not None:
+                major, minor = version
+                MSMPI_VER = hex((major<<8)|(minor&0xFF))
+                self.library_info.update(
+                    define_macros=[('MSMPI_VER', MSMPI_VER)],
+                )
             MSMPI_INC = os.path.normpath(MSMPI_INC)
             MSMPI_LIB = os.path.normpath(MSMPI_LIB)
             self.library_info.update(
-                define_macros=[('MSMPI_VER', MSMPI_VER)],
                 include_dirs=[MSMPI_INC],
                 library_dirs=[MSMPI_LIB],
-                libraries=['msmpi'])
+                libraries=['msmpi'],
+            )
             self.section = 'msmpi'
             self.filename = [os.path.dirname(MSMPI_INC)]
             return True
@@ -206,7 +242,9 @@ class Config(object):
         # Look for Microsoft MPI in the environment
         MSMPI_INC = os.environ.get('MSMPI_INC')
         MSMPI_LIB = os.environ.get('MSMPI_LIB'+arch)
-        if setup_msmpi(MSMPI_INC, MSMPI_LIB): return
+        MSMPI_LIB = MSMPI_LIB or os.environ.get('MSMPI_LIB')
+        if setup_msmpi(MSMPI_INC, MSMPI_LIB):
+            return True
         # Look for Microsoft MPI v7/v6/v5 in default install path
         for ProgramFiles in ('ProgramFiles', 'ProgramFiles(x86)'):
             ProgramFiles = os.environ.get(ProgramFiles, '')
@@ -214,7 +252,8 @@ class Config(object):
             MSMPI_DIR = os.path.join(ProgramFiles, 'Microsoft SDKs', 'MPI')
             MSMPI_INC = os.path.join(MSMPI_DIR, 'Include')
             MSMPI_LIB = os.path.join(MSMPI_DIR, 'Lib', archdir)
-            if setup_msmpi(MSMPI_INC, MSMPI_LIB): return
+            if setup_msmpi(MSMPI_INC, MSMPI_LIB):
+                return True
         # Look for Microsoft HPC Pack 2012 R2 in default install path
         for ProgramFiles in ('ProgramFiles', 'ProgramFiles(x86)'):
             ProgramFiles = os.environ.get(ProgramFiles, '')
@@ -222,10 +261,9 @@ class Config(object):
             MSMPI_DIR = os.path.join(ProgramFiles, 'Microsoft MPI')
             MSMPI_INC = os.path.join(MSMPI_DIR, 'Inc')
             MSMPI_LIB = os.path.join(MSMPI_DIR, 'Lib', archdir)
-            if setup_msmpi(MSMPI_INC, MSMPI_LIB): return
-
+            if setup_msmpi(MSMPI_INC, MSMPI_LIB):
+                return True
         # Microsoft MPI (legacy) and others
-        from glob import glob
         ProgramFiles = os.environ.get('ProgramFiles', '')
         CCP_HOME = os.environ.get('CCP_HOME', '')
         for (name, prefix, suffix) in (
@@ -236,9 +274,10 @@ class Config(object):
             ('msmpi',    ProgramFiles, 'Microsoft HPC Pack 2008 R2'),
             ('msmpi',    ProgramFiles, 'Microsoft HPC Pack 2008'),
             ('msmpi',    ProgramFiles, 'Microsoft HPC Pack 2008 SDK'),
-            ):
+        ):
             mpi_dir = os.path.join(prefix, suffix)
-            if not mpi_dir or not os.path.isdir(mpi_dir): continue
+            if not mpi_dir or not os.path.isdir(mpi_dir):
+                continue
             define_macros = []
             include_dir = os.path.join(mpi_dir, 'include')
             library = 'mpi'
@@ -261,7 +300,8 @@ class Config(object):
                 )
             self.section = name
             self.filename = [mpi_dir]
-            break
+            return True
+        return None
 
 
     def setup_compiler_info(self, options, environ):
