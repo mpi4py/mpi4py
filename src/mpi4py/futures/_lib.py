@@ -724,8 +724,8 @@ def import_main(mod_name, mod_path, init_globals, run_name):
     TempModule = runpy._TempModule  # pylint: disable=invalid-name
     runpy._TempModule = TempModulePatch
     import_main.sentinel = (mod_name, mod_path)
+    main_module = sys.modules['__main__']
     try:
-        main_module = sys.modules['__main__']
         sys.modules['__main__'] = sys.modules[run_name] = module
         if mod_name:  # pragma: no cover
             runpy.run_module(mod_name, run_name=run_name, alter_sys=True)

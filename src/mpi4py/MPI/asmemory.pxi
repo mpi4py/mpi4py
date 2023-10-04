@@ -10,7 +10,7 @@ cdef extern from "Python.h":
 cdef extern from * nogil:
     """
     #if PY_VERSION_HEX < 0x03050000
-    #   define PyMPI_RawMalloc(n)    malloc((n)?(n):1)
+    #   define PyMPI_RawMalloc(n)    malloc(((n)!=0)?(n):1)
     #   define PyMPI_RawCalloc(n,s)  ((n)&&(s))?calloc((n),(s)):calloc(1,1)
     #   define PyMPI_RawRealloc(p,n) realloc((p),(n)?(n):1))
     #   define PyMPI_RawFree         free
