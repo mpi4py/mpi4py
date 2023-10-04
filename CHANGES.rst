@@ -75,6 +75,14 @@ Release 4.0.0 [2023-XX-XX]
   * The `mpi4py.dl` module is no longer available.
 
 
+Release 3.1.5 [2023-10-04]
+==========================
+
+.. warning:: This is the last release supporting Python 2.
+
+* Rebuild C sources with Cython 0.29.36 to support Python 3.12.
+
+
 Release 3.1.4 [2022-11-02]
 ==========================
 
