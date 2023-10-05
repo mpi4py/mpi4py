@@ -1622,10 +1622,10 @@ if timestamp is not None:
     class TarInfo(tarfile.TarInfo):
         mode = TarInfoMode()
         mtime = TarInfoAttr(timestamp)
-        uid = TarInfoAttr(1000)
-        gid = TarInfoAttr(100)
-        uname = TarInfoAttr('user')
-        gname = TarInfoAttr('users')
+        uid = TarInfoAttr(0)
+        gid = TarInfoAttr(0)
+        uname = TarInfoAttr('')
+        gname = TarInfoAttr('')
 
     def make_tarball(*args, **kwargs):
         tarinfo_orig = tarfile.TarFile.tarinfo
