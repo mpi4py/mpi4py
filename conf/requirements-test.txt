@@ -1,4 +1,4 @@
-pickle5; python_version < '3.8' and implementation_name == 'cpython'
-numpy
-cffi
-pyyaml
+pickle5 ; implementation_name == 'cpython' and python_version < '3.8'
+numpy   ; implementation_name == 'cpython' or (sys_platform == 'linux' and python_version < '3.10')
+cffi    ; implementation_name == 'cpython'
+pyyaml  ; implementation_name == 'cpython'

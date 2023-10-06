@@ -29,6 +29,7 @@ jobs:
           - "3.11"
           - "3.12"
           - "pypy-3.9"
+          - "pypy-3.10"
         exclude:
           - os: ubuntu-22.04
             mpi: msmpi
@@ -79,7 +80,6 @@ jobs:
 
     - name: Install Python packages (test)
       run:  python -m pip install -U -r conf/requirements-test.txt
-      if:   runner.os == 'Linux' || !startsWith(matrix.py, 'pypy-')
 
     - name: Test mpi4py (np=1)
       run:  mpiexec -n 1 python test/runtests.py -v
