@@ -7,6 +7,7 @@ export PYTHONPATH=$PWD/conf
 
 export HYDRA_LAUNCHER=fork
 export OMPI_MCA_plm=isolated
+export OMPI_MCA_btl=tcp,self
 export OMPI_MCA_rmaps_base_oversubscribe=true
 export OMPI_MCA_btl_base_warn_component_unused=false
 export OMPI_MCA_btl_vader_single_copy_mechanism=none
