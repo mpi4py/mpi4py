@@ -5,16 +5,16 @@ cdef extern from "Python.h":
     int is_tuple    "PyTuple_Check" (object)
     int is_integral "PyIndex_Check" (object)
 
-cdef inline int is_buffer(object ob):
+cdef inline int is_buffer(object ob) noexcept:
     return PyObject_CheckBuffer(ob)
 
-cdef inline int is_dlpack_buffer(object ob):
+cdef inline int is_dlpack_buffer(object ob) noexcept:
     return Py_CheckDLPackBuffer(ob)
 
-cdef inline int is_cai_buffer(object ob):
+cdef inline int is_cai_buffer(object ob) noexcept:
     return Py_CheckCAIBuffer(ob)
 
-cdef inline int is_datatype(object ob):
+cdef inline int is_datatype(object ob) except -1:
     if isinstance(ob, Datatype): return 1
     if isinstance(ob, str): return 1
     return 0

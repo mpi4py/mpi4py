@@ -73,9 +73,7 @@ cdef inline object asarray_Info(object sequence,
 # -----------------------------------------------------------------------------
 
 cdef inline int is_string(object obj):
-     return (isinstance(obj, str) or
-             isinstance(obj, bytes) or
-             isinstance(obj, unicode))
+     return isinstance(obj, str) or isinstance(obj, bytes)
 
 cdef inline object asstring(object ob, char *s[]):
      cdef Py_ssize_t n = 0

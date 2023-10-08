@@ -152,7 +152,7 @@ cdef inline const char* mpifortchr(
 cdef inline const char* mpifortstr(
     const char kind[],
     MPI_Datatype datatype,
-) nogil:
+) noexcept nogil:
     return typestr(kind, <size_t> mpiextent(datatype))
 
 cdef inline const char* typeDUP(

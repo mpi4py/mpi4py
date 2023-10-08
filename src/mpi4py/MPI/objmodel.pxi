@@ -358,7 +358,7 @@ cdef inline object reduce_default(PyMPIClass self):
 
 # -----------------------------------------------------------------------------
 
-cdef inline Py_uintptr_t tohandle(PyMPIClass self):
+cdef inline Py_uintptr_t tohandle(PyMPIClass self) noexcept nogil:
     return <Py_uintptr_t> self.ob_mpi
 
 cdef inline object fromhandle(handle_t arg):
