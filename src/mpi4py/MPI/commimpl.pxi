@@ -8,29 +8,29 @@ cdef extern from * nogil:
 
 # -----------------------------------------------------------------------------
 
-cdef memory _buffer = None
+cdef buffer _mpi_buffer = None
 
 cdef inline int attach_buffer(ob, void **p, MPI_Count *n) except -1:
-    global _buffer
+    global _mpi_buffer
     cdef void *bptr = NULL
     cdef MPI_Aint blen = 0
-    _buffer = asbuffer_w(ob, &bptr, &blen)
+    _mpi_buffer = asbuffer_w(ob, &bptr, &blen)
     p[0] = bptr
     n[0] = blen
     return 0
 
 cdef inline object detach_buffer(void *p, MPI_Count n):
-    global _buffer
+    global _mpi_buffer
     cdef object ob = None
     try:
-        if (_buffer is not None and
-            _buffer.view.buf == p and
-            _buffer.view.obj != NULL):
-            ob = <object>_buffer.view.obj
+        if (_mpi_buffer is not None and
+            _mpi_buffer.view.buf == p and
+            _mpi_buffer.view.obj != NULL):
+            ob = <object>_mpi_buffer.view.obj
         else:
             ob = mpibuf(p, n)
     finally:
-        _buffer = None
+        _mpi_buffer = None
     return ob
 
 # -----------------------------------------------------------------------------

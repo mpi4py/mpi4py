@@ -123,7 +123,7 @@ cdef class Win:
         win_set_eh(win.ob_mpi)
         return win
 
-    def Shared_query(self, int rank: int) -> tuple[memory, int]:
+    def Shared_query(self, int rank: int) -> tuple[buffer, int]:
         """
         Query the process-local address for remote memory segments.
         """
@@ -329,7 +329,7 @@ cdef class Win:
                     model = attrval[0]
             return model
 
-    def tomemory(self) -> memory:
+    def tomemory(self) -> buffer:
         """
         Return window memory buffer.
         """

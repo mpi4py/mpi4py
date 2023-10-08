@@ -111,7 +111,7 @@ def _info_unpack(info):
 
 
 def _new_buffer(size):
-    return MPI.memory.allocate(size)
+    return MPI.buffer.allocate(size)
 
 
 def _send_raw(comm, send, data, bufs, dest, tag):

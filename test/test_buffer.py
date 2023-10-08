@@ -6,21 +6,21 @@ try:
 except ImportError:
     array = None
 
-class TestMemory(unittest.TestCase):
+class TestBuffer(unittest.TestCase):
 
     def testNewEmpty(self):
-        memory = MPI.memory
-        mem = memory()
-        self.assertEqual(mem.address, 0)
-        self.assertIsNone(mem.obj)
-        self.assertEqual(mem.nbytes, 0)
-        self.assertFalse(mem.readonly)
-        self.assertEqual(mem.format, 'B')
-        self.assertEqual(mem.itemsize, 1)
-        self.assertEqual(len(mem), 0)
-        mem[:] = 0
-        mem[:] = memory()
-        m = memoryview(mem)
+        buffer = MPI.buffer
+        buf = buffer()
+        self.assertEqual(buf.address, 0)
+        self.assertIsNone(buf.obj)
+        self.assertEqual(buf.nbytes, 0)
+        self.assertFalse(buf.readonly)
+        self.assertEqual(buf.format, 'B')
+        self.assertEqual(buf.itemsize, 1)
+        self.assertEqual(len(buf), 0)
+        buf[:] = 0
+        buf[:] = buffer()
+        m = memoryview(buf)
         self.assertEqual(m.format, 'B')
         self.assertEqual(m.itemsize, 1)
         self.assertEqual(m.ndim, 1)
@@ -29,80 +29,80 @@ class TestMemory(unittest.TestCase):
         self.assertEqual(m.strides, (1,))
         self.assertEqual(m.tobytes(), b"")
         self.assertEqual(m.tolist(), [])
-        mem.release()
-        self.assertEqual(mem.address, 0)
-        self.assertEqual(mem.nbytes, 0)
-        self.assertFalse(mem.readonly)
+        buf.release()
+        self.assertEqual(buf.address, 0)
+        self.assertEqual(buf.nbytes, 0)
+        self.assertFalse(buf.readonly)
 
     def testNewBad(self):
-        memory = MPI.memory
+        buffer = MPI.buffer
         for obj in (None, 0, 0.0, [], (), []):
-            self.assertRaises(TypeError,  memory, obj)
+            self.assertRaises(TypeError,  buffer, obj)
 
     def testNewBytes(self):
-        memory = MPI.memory
+        buffer = MPI.buffer
         obj = b"abc"
-        mem = memory(obj)
-        self.assertEqual(mem.obj, obj)
-        self.assertEqual(mem.nbytes, len(obj))
-        self.assertIs(mem.readonly, True)
+        buf = buffer(obj)
+        self.assertEqual(buf.obj, obj)
+        self.assertEqual(buf.nbytes, len(obj))
+        self.assertIs(buf.readonly, True)
         with self.assertRaises(TypeError):
-            mem[:] = 0
+            buf[:] = 0
 
     def testNewBytearray(self):
-        memory = MPI.memory
+        buffer = MPI.buffer
         obj = bytearray([1,2,3])
-        mem = memory(obj)
-        self.assertEqual(mem.obj, obj)
-        self.assertEqual(mem.nbytes, len(obj))
-        self.assertFalse(mem.readonly)
+        buf = buffer(obj)
+        self.assertEqual(buf.obj, obj)
+        self.assertEqual(buf.nbytes, len(obj))
+        self.assertFalse(buf.readonly)
         with self.assertRaises(ValueError):
-            mem[0:1] = mem[1:3]
+            buf[0:1] = buf[1:3]
 
     @unittest.skipIf(array is None, 'array')
     def testNewArray(self):
-        memory = MPI.memory
+        buffer = MPI.buffer
         obj = array.array('i', [1,2,3])
-        mem = memory(obj)
-        self.assertEqual(mem.obj, obj)
-        self.assertEqual(mem.nbytes, len(obj)*obj.itemsize)
-        self.assertFalse(mem.readonly)
+        buf = buffer(obj)
+        self.assertEqual(buf.obj, obj)
+        self.assertEqual(buf.nbytes, len(obj)*obj.itemsize)
+        self.assertFalse(buf.readonly)
 
     def testAllocate(self):
-        memory = MPI.memory
+        buffer = MPI.buffer
         for size in (0, 1, 2):
-            mem = memory.allocate(size)
-            self.assertEqual(mem.nbytes, size)
-            self.assertNotEqual(mem.address, 0)
-            view = memoryview(mem.obj)
-            self.assertEqual(mem.nbytes, view.nbytes)
+            buf = buffer.allocate(size)
+            self.assertEqual(buf.nbytes, size)
+            self.assertNotEqual(buf.address, 0)
+            view = memoryview(buf.obj)
+            self.assertEqual(buf.nbytes, view.nbytes)
         for clear in (False, True):
-            mem = memory.allocate(1024, clear)
-            self.assertEqual(mem.nbytes, 1024)
-            self.assertNotEqual(mem.address, 0)
+            buf = buffer.allocate(1024, clear)
+            self.assertEqual(buf.nbytes, 1024)
+            self.assertNotEqual(buf.address, 0)
             if clear:
-                self.assertEqual(mem[0], 0)
-                self.assertEqual(mem[-1], 0)
-        self.assertRaises(TypeError,  memory.allocate, None)
-        self.assertRaises(ValueError, memory.allocate, -1)
+                self.assertEqual(buf[0], 0)
+                self.assertEqual(buf[-1], 0)
+        self.assertRaises(TypeError,  buffer.allocate, None)
+        self.assertRaises(ValueError, buffer.allocate, -1)
 
     def testFromBufferBad(self):
-        memory = MPI.memory
+        buffer = MPI.buffer
         for obj in (None, 0, 0.0, [], (), []):
-            self.assertRaises(TypeError,  memory.frombuffer, obj)
+            self.assertRaises(TypeError,  buffer.frombuffer, obj)
 
     def testFromBufferBytes(self):
-        memory = MPI.memory
-        mem = memory.frombuffer(b"abc", readonly=True)
-        self.assertNotEqual(mem.address, 0)
-        self.assertEqual(type(mem.obj), bytes)
-        self.assertEqual(mem.obj, b"abc")
-        self.assertEqual(mem.nbytes, 3)
-        self.assertTrue (mem.readonly)
-        self.assertEqual(mem.format, 'B')
-        self.assertEqual(mem.itemsize, 1)
-        self.assertEqual(len(mem), 3)
-        m = memoryview(mem)
+        buffer = MPI.buffer
+        buf = buffer.frombuffer(b"abc", readonly=True)
+        self.assertNotEqual(buf.address, 0)
+        self.assertEqual(type(buf.obj), bytes)
+        self.assertEqual(buf.obj, b"abc")
+        self.assertEqual(buf.nbytes, 3)
+        self.assertTrue (buf.readonly)
+        self.assertEqual(buf.format, 'B')
+        self.assertEqual(buf.itemsize, 1)
+        self.assertEqual(len(buf), 3)
+        m = memoryview(buf)
         self.assertEqual(m.format, 'B')
         self.assertEqual(m.itemsize, 1)
         self.assertEqual(m.ndim, 1)
@@ -111,24 +111,24 @@ class TestMemory(unittest.TestCase):
         self.assertEqual(m.strides, (1,))
         self.assertEqual(m.tobytes(), b"abc")
         self.assertEqual(m.tolist(), [ord(c) for c in "abc"])
-        mem.release()
-        self.assertEqual(mem.address, 0)
-        self.assertEqual(mem.nbytes, 0)
-        self.assertFalse(mem.readonly)
+        buf.release()
+        self.assertEqual(buf.address, 0)
+        self.assertEqual(buf.nbytes, 0)
+        self.assertFalse(buf.readonly)
 
     @unittest.skipIf(array is None, 'array')
     def testFromBufferArrayRO(self):
-        memory = MPI.memory
+        buffer = MPI.buffer
         obj = array.array('B', [1,2,3])
-        mem = memory.frombuffer(obj, readonly=True)
-        self.assertNotEqual(mem.address, 0)
-        self.assertEqual(type(mem.obj), array.array)
-        self.assertEqual(mem.nbytes, 3)
-        self.assertTrue (mem.readonly)
-        self.assertEqual(mem.format, 'B')
-        self.assertEqual(mem.itemsize, 1)
-        self.assertEqual(len(mem), 3)
-        m = memoryview(mem)
+        buf = buffer.frombuffer(obj, readonly=True)
+        self.assertNotEqual(buf.address, 0)
+        self.assertEqual(type(buf.obj), array.array)
+        self.assertEqual(buf.nbytes, 3)
+        self.assertTrue (buf.readonly)
+        self.assertEqual(buf.format, 'B')
+        self.assertEqual(buf.itemsize, 1)
+        self.assertEqual(len(buf), 3)
+        m = memoryview(buf)
         self.assertEqual(m.format, 'B')
         self.assertEqual(m.itemsize, 1)
         self.assertEqual(m.ndim, 1)
@@ -137,21 +137,21 @@ class TestMemory(unittest.TestCase):
         self.assertEqual(m.strides, (1,))
         self.assertEqual(m.tobytes(), b"\1\2\3")
         self.assertEqual(m.tolist(), [1,2,3])
-        mem.release()
-        self.assertEqual(mem.address, 0)
-        self.assertEqual(mem.nbytes, 0)
-        self.assertFalse(mem.readonly)
+        buf.release()
+        self.assertEqual(buf.address, 0)
+        self.assertEqual(buf.nbytes, 0)
+        self.assertFalse(buf.readonly)
 
     @unittest.skipIf(array is None, 'array')
     def testFromBufferArrayRW(self):
-        memory = MPI.memory
+        buffer = MPI.buffer
         obj = array.array('B', [1,2,3])
-        mem = memory.frombuffer(obj, readonly=False)
-        self.assertNotEqual(mem.address, 0)
-        self.assertEqual(mem.nbytes, 3)
-        self.assertFalse(mem.readonly)
-        self.assertEqual(len(mem), 3)
-        m = memoryview(mem)
+        buf = buffer.frombuffer(obj, readonly=False)
+        self.assertNotEqual(buf.address, 0)
+        self.assertEqual(buf.nbytes, 3)
+        self.assertFalse(buf.readonly)
+        self.assertEqual(len(buf), 3)
+        m = memoryview(buf)
         self.assertEqual(m.format, 'B')
         self.assertEqual(m.itemsize, 1)
         self.assertEqual(m.ndim, 1)
@@ -160,29 +160,29 @@ class TestMemory(unittest.TestCase):
         self.assertEqual(m.strides, (1,))
         self.assertEqual(m.tobytes(), b"\1\2\3")
         self.assertEqual(m.tolist(), [1,2,3])
-        mem[:] = 1
+        buf[:] = 1
         self.assertEqual(obj, array.array('B', [1]*3))
-        mem[1:] = array.array('B', [7]*2)
+        buf[1:] = array.array('B', [7]*2)
         self.assertEqual(obj, array.array('B', [1,7,7]))
-        mem[1:2] = array.array('B', [8]*1)
+        buf[1:2] = array.array('B', [8]*1)
         self.assertEqual(obj, array.array('B', [1,8,7]))
-        mem.release()
-        self.assertEqual(mem.address, 0)
-        self.assertEqual(mem.nbytes, 0)
-        self.assertFalse(mem.readonly)
+        buf.release()
+        self.assertEqual(buf.address, 0)
+        self.assertEqual(buf.nbytes, 0)
+        self.assertFalse(buf.readonly)
 
     @unittest.skipIf(array is None, 'array')
     def testFromAddress(self):
-        memory = MPI.memory
+        buffer = MPI.buffer
         obj = array.array('B', [1,2,3])
         addr, size = obj.buffer_info()
         nbytes = size * obj.itemsize
-        mem = memory.fromaddress(addr, nbytes, readonly=False)
-        self.assertNotEqual(mem.address, 0)
-        self.assertEqual(mem.nbytes, 3)
-        self.assertFalse(mem.readonly)
-        self.assertEqual(len(mem), 3)
-        m = memoryview(mem)
+        buf = buffer.fromaddress(addr, nbytes, readonly=False)
+        self.assertNotEqual(buf.address, 0)
+        self.assertEqual(buf.nbytes, 3)
+        self.assertFalse(buf.readonly)
+        self.assertEqual(len(buf), 3)
+        m = memoryview(buf)
         self.assertEqual(m.format, 'B')
         self.assertEqual(m.itemsize, 1)
         self.assertEqual(m.ndim, 1)
@@ -191,33 +191,33 @@ class TestMemory(unittest.TestCase):
         self.assertEqual(m.strides, (1,))
         self.assertEqual(m.tobytes(), b"\1\2\3")
         self.assertEqual(m.tolist(), [1,2,3])
-        mem[:] = 1
+        buf[:] = 1
         self.assertEqual(obj, array.array('B', [1]*3))
-        mem[1:] = array.array('B', [7]*2)
+        buf[1:] = array.array('B', [7]*2)
         self.assertEqual(obj, array.array('B', [1,7,7]))
-        mem[1:2] = array.array('B', [8]*1)
+        buf[1:2] = array.array('B', [8]*1)
         self.assertEqual(obj, array.array('B', [1,8,7]))
-        mem.release()
-        self.assertEqual(mem.address, 0)
-        self.assertEqual(mem.nbytes, 0)
-        self.assertFalse(mem.readonly)
+        buf.release()
+        self.assertEqual(buf.address, 0)
+        self.assertEqual(buf.nbytes, 0)
+        self.assertFalse(buf.readonly)
         with self.assertRaises(ValueError):
-            memory.fromaddress(addr, -1)
+            buffer.fromaddress(addr, -1)
         with self.assertRaises(ValueError):
-            memory.fromaddress(0, 1)
+            buffer.fromaddress(0, 1)
 
 
     def testToReadonly(self):
-        memory = MPI.memory
+        buffer = MPI.buffer
         obj = bytearray(b"abc")
-        mem1 = memory.frombuffer(obj)
-        mem2 = mem1.toreadonly()
-        self.assertFalse(mem1.readonly)
-        self.assertTrue (mem2.readonly)
-        self.assertEqual(mem1.address, mem2.address)
-        self.assertEqual(mem1.obj, mem2.obj)
-        self.assertEqual(type(mem1.obj), type(mem2.obj))
-        self.assertEqual(mem1.nbytes, mem2.nbytes)
+        buf1 = buffer.frombuffer(obj)
+        buf2 = buf1.toreadonly()
+        self.assertFalse(buf1.readonly)
+        self.assertTrue (buf2.readonly)
+        self.assertEqual(buf1.address, buf2.address)
+        self.assertEqual(buf1.obj, buf2.obj)
+        self.assertEqual(type(buf1.obj), type(buf2.obj))
+        self.assertEqual(buf1.nbytes, buf2.nbytes)
 
     def testSequence(self):
         n = 16
@@ -226,7 +226,7 @@ class TestMemory(unittest.TestCase):
         except NotImplementedError:
             self.skipTest('mpi-alloc_mem')
         try:
-            self.assertIs(type(mem), MPI.memory)
+            self.assertIs(type(mem), MPI.buffer)
             self.assertNotEqual(mem.address, 0)
             self.assertEqual(mem.nbytes, n)
             self.assertFalse(mem.readonly)
@@ -287,14 +287,14 @@ class TestMemory(unittest.TestCase):
             self.assertFalse(mem.readonly)
 
     def testAttachBufferReadonly(self):
-        buf = MPI.memory(b"abc")
+        buf = MPI.buffer(b"abc")
         self.assertRaises(BufferError, MPI.Attach_buffer, buf)
 
 
 try:
-    MPI.memory
+    MPI.buffer
 except AttributeError:
-    unittest.disable(TestMemory, 'mpi4py-memory')
+    unittest.disable(TestBuffer, 'mpi4py-buffer')
 
 
 if __name__ == '__main__':

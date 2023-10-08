@@ -96,7 +96,7 @@ include "File.pyx"
 # Memory Allocation
 # -----------------
 
-def Alloc_mem(Aint size: int, Info info: Info = INFO_NULL) -> memory:
+def Alloc_mem(Aint size: int, Info info: Info = INFO_NULL) -> buffer:
     """
     Allocate memory for message passing and remote memory access.
     """
@@ -104,12 +104,12 @@ def Alloc_mem(Aint size: int, Info info: Info = INFO_NULL) -> memory:
     CHKERR( MPI_Alloc_mem(size, info.ob_mpi, &base) )
     return mpibuf(base, size)
 
-def Free_mem(mem: memory) -> None:
+def Free_mem(mem: buffer) -> None:
     """
     Free memory allocated with `Alloc_mem`.
     """
     cdef void *base = NULL
-    cdef memory buf = asbuffer(mem, &base, NULL, 1)
+    cdef buffer buf = asbuffer(mem, &base, NULL, 1)
     CHKERR( MPI_Free_mem(base) )
     buf.release()
 
