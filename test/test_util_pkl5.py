@@ -902,7 +902,7 @@ class BaseTestPKL5:
                     )
                     if sobj.nbytes >= threshold and have_pickle5:
                         self.assertEqual(len(bufs), 1)
-                        self.assertIs(type(bufs[0]), MPI.memory)
+                        self.assertIs(type(bufs[0]), MPI.buffer)
                     else:
                         self.assertEqual(len(bufs), 0)
 

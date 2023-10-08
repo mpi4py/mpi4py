@@ -96,7 +96,7 @@ class BaseTestULFM:
             comm.Iagree(0)
         with self.assertRaises(ValueError):
             comm.Iagree(bytearray(8))
-        ibuf = MPI.memory.allocate(struct.calcsize('i'))
+        ibuf = MPI.buffer.allocate(struct.calcsize('i'))
         flag = memoryview(ibuf).cast('i')
         for i in range(5):
             flag[0] = i

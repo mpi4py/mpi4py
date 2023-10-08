@@ -80,9 +80,9 @@ cdef extern from "Python.h":
 
 
 @cython.final
-cdef class memory:
+cdef class buffer:
     """
-    Memory buffer.
+    Buffer.
     """
 
     cdef Py_buffer view
@@ -101,68 +101,68 @@ cdef class memory:
     def allocate(
         Aint nbytes: int,
         bint clear: bool = False,
-    ) -> memory:
-        """Memory allocation."""
-        cdef void *buf = NULL
+    ) -> buffer:
+        """Buffer allocation."""
+        cdef void *addr = NULL
         cdef Py_ssize_t size = nbytes
         if size < 0:
             raise ValueError("expecting non-negative size")
-        cdef object ob = rawalloc(size, 1, clear, &buf)
-        cdef memory mem = <memory>New(memory)
-        PyBuffer_FillInfo(&mem.view, ob, buf, size, 0, PyBUF_SIMPLE)
-        return mem
+        cdef object ob = rawalloc(size, 1, clear, &addr)
+        cdef buffer buf = <buffer>New(buffer)
+        PyBuffer_FillInfo(&buf.view, ob, addr, size, 0, PyBUF_SIMPLE)
+        return buf
 
     @staticmethod
     def frombuffer(
         obj: Buffer,
         bint readonly: bool = False,
-    ) -> memory:
-        """Memory from buffer-like object."""
+    ) -> buffer:
+        """Buffer from buffer-like object."""
         cdef int flags = PyBUF_SIMPLE
         if not readonly: flags |= PyBUF_WRITABLE
-        cdef memory mem = <memory>New(memory)
-        PyMPI_GetBuffer(obj, &mem.view, flags)
-        mem.view.readonly = readonly
-        return mem
+        cdef buffer buf = <buffer>New(buffer)
+        PyMPI_GetBuffer(obj, &buf.view, flags)
+        buf.view.readonly = readonly
+        return buf
 
     @staticmethod
     def fromaddress(
         address: int,
         Aint nbytes: int,
         bint readonly: bool = False,
-    ) -> memory:
-        """Memory from address and size in bytes."""
-        cdef void *buf = PyLong_AsVoidPtr(address)
+    ) -> buffer:
+        """Buffer from address and size in bytes."""
+        cdef void *addr = PyLong_AsVoidPtr(address)
         cdef Py_ssize_t size = nbytes
         if size < 0:
             raise ValueError("expecting non-negative buffer length")
-        elif size > 0 and buf == NULL:
+        elif size > 0 and addr == NULL:
             raise ValueError("expecting non-NULL address")
-        cdef memory mem = <memory>New(memory)
-        PyBuffer_FillInfo(&mem.view, <object>NULL,
-                          buf, size, readonly, PyBUF_SIMPLE)
-        return mem
+        cdef buffer buf = <buffer>New(buffer)
+        PyBuffer_FillInfo(&buf.view, <object>NULL,
+                          addr, size, readonly, PyBUF_SIMPLE)
+        return buf
 
     # properties
 
     property address:
-        """Memory address."""
+        """Buffer address."""
         def __get__(self) -> int:
             return PyLong_FromVoidPtr(self.view.buf)
 
     property obj:
-        """Object exposing the memory."""
+        """Object exposing buffer."""
         def __get__(self) -> Buffer | None:
             if self.view.obj == NULL: return None
             return <object>self.view.obj
 
     property nbytes:
-        """Memory size (in bytes)."""
+        """Buffer size (in bytes)."""
         def __get__(self) -> int:
             return self.view.len
 
     property readonly:
-        """Memory is read-only."""
+        """Buffer is read-only."""
         def __get__(self) -> bool:
             return self.view.readonly
 
@@ -185,20 +185,20 @@ cdef class memory:
         <void> order # unused
         return PyBytes_FromStringAndSize(<char*>self.view.buf, self.view.len)
 
-    def toreadonly(self) -> memory:
-        """Return a readonly version of the memory object."""
-        cdef void *buf = self.view.buf
+    def toreadonly(self) -> buffer:
+        """Return a readonly version of the buffer object."""
+        cdef void *addr = self.view.buf
         cdef Py_ssize_t size = self.view.len
         cdef object obj = self
         if self.view.obj != NULL:
             obj = <object>self.view.obj
-        cdef memory mem = <memory>New(memory)
-        PyBuffer_FillInfo(&mem.view, obj,
-                          buf, size, 1, PyBUF_SIMPLE)
-        return mem
+        cdef buffer buf = <buffer>New(buffer)
+        PyBuffer_FillInfo(&buf.view, obj,
+                          addr, size, 1, PyBUF_SIMPLE)
+        return buf
 
     def release(self) -> None:
-        """Release the underlying buffer exposed by the memory object."""
+        """Release the underlying buffer exposed by the buffer object."""
         PyBuffer_Release(&self.view)
         PyBuffer_FillInfo(&self.view, <object>NULL,
                           NULL, 0, 0, PyBUF_SIMPLE)
@@ -234,11 +234,11 @@ cdef class memory:
 
     def __setitem__(self, object item, object value):
         if self.view.readonly:
-            raise TypeError("memory buffer is read-only")
+            raise TypeError("buffer is read-only")
         cdef Py_ssize_t start=0, stop=0, step=1, slen=0
         cdef unsigned char *buf = <unsigned char*>self.view.buf
         cdef Py_ssize_t blen = self.view.len
-        cdef memory inmem
+        cdef buffer inbuf
         if PyIndex_Check(item):
             start = PyNumber_AsSsize_t(item, IndexError)
             if start < 0: start += blen
@@ -251,20 +251,23 @@ cdef class memory:
             if PyIndex_Check(value):
                 <void>memset(buf+start, <unsigned char>value, <size_t>slen)
             else:
-                inmem = getbuffer(value, 1, 0)
-                if inmem.view.len != slen:
+                inbuf = getbuffer(value, 1, 0)
+                if inbuf.view.len != slen:
                     raise ValueError("slice length does not match buffer")
-                <void>memmove(buf+start, inmem.view.buf, <size_t>slen)
+                <void>memmove(buf+start, inbuf.view.buf, <size_t>slen)
         else:
             raise TypeError("index must be integer or slice")
 
+
+memory = buffer  # Backward compatibility alias
+
 # -----------------------------------------------------------------------------
 
-cdef inline memory newbuffer():
-    return <memory>New(memory)
+cdef inline buffer newbuffer():
+    return <buffer>New(buffer)
 
-cdef inline memory getbuffer(object ob, bint readonly, bint format):
-    cdef memory buf = newbuffer()
+cdef inline buffer getbuffer(object ob, bint readonly, bint format):
+    cdef buffer buf = newbuffer()
     cdef int flags = PyBUF_ANY_CONTIGUOUS
     if not readonly:
         flags |= PyBUF_WRITABLE
@@ -273,10 +276,10 @@ cdef inline memory getbuffer(object ob, bint readonly, bint format):
     PyMPI_GetBuffer(ob, &buf.view, flags)
     return buf
 
-cdef inline memory asbuffer(object ob, void **base, MPI_Aint *size, bint ro):
-    cdef memory buf
-    if type(ob) is memory:
-        buf = <memory> ob
+cdef inline buffer asbuffer(object ob, void **base, MPI_Aint *size, bint ro):
+    cdef buffer buf
+    if type(ob) is buffer:
+        buf = <buffer> ob
         if buf.view.readonly and not ro:
             raise BufferError("Object is not writable")
     else:
@@ -285,19 +288,19 @@ cdef inline memory asbuffer(object ob, void **base, MPI_Aint *size, bint ro):
     if size != NULL: size[0] = buf.view.len
     return buf
 
-cdef inline memory asbuffer_r(object ob, void **base, MPI_Aint *size):
+cdef inline buffer asbuffer_r(object ob, void **base, MPI_Aint *size):
     return asbuffer(ob, base, size, 1)
 
-cdef inline memory asbuffer_w(object ob, void **base, MPI_Aint *size):
+cdef inline buffer asbuffer_w(object ob, void **base, MPI_Aint *size):
     return asbuffer(ob, base, size, 0)
 
-cdef inline memory tobuffer(object ob, void *base, MPI_Aint size, bint ro):
+cdef inline buffer tobuffer(object ob, void *base, MPI_Aint size, bint ro):
     if size < 0: raise ValueError("expecting non-negative buffer length")
-    cdef memory buf = newbuffer()
+    cdef buffer buf = newbuffer()
     PyBuffer_FillInfo(&buf.view, ob, base, size, ro, PyBUF_SIMPLE)
     return buf
 
-cdef inline memory mpibuf(void *base, MPI_Count count):
+cdef inline buffer mpibuf(void *base, MPI_Count count):
     cdef MPI_Aint size = <MPI_Aint>count
     cdef int neq = (count != <MPI_Count>size)
     if neq: raise OverflowError("length {count} does not fit in 'MPI_Aint'")

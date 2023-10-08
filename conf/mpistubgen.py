@@ -291,6 +291,18 @@ def visit_module(module, done=None):
             done.add(name)
             lines.add = visit_class(value)
             lines.add = ""
+            aliases = [
+                (k, getattr(module, k)) for k in keys
+                if all((
+                    k not in done and k not in skip,
+                    getattr(module, k) is value,
+                ))
+            ]
+            for aliasname, target in aliases:
+                done.add(aliasname)
+                lines.add = f"{aliasname} = {target.__name__}"
+            if aliases:
+                lines.add = ""
             instances = [
                 (k, getattr(module, k)) for k in keys
                 if all((
@@ -401,18 +413,18 @@ OVERRIDE = {
     'Op': {
         '__call__': "def __call__(self, x: Any, y: Any) -> Any: ...",
     },
-    'memory': {
+    'buffer': {
         '__new__': """
         @overload
-        def __new__(cls) -> memory: ...
+        def __new__(cls) -> buffer: ...
         @overload
-        def __new__(cls, __buf: Buffer) -> memory: ...
+        def __new__(cls, __buf: Buffer) -> buffer: ...
         """,
         '__getitem__': """
         @overload
         def __getitem__(self, item: int) -> int: ...
         @overload
-        def __getitem__(self, item: slice) -> memory: ...
+        def __getitem__(self, item: slice) -> buffer: ...
         """,
         '__setitem__': """
         @overload

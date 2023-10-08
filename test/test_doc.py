@@ -5,7 +5,7 @@ import sys
 ModuleType = type(MPI)
 ClassType = type(MPI.Comm)
 FunctionType = type(MPI.Init)
-StaticMethodType = type(MPI.memory.allocate)
+StaticMethodType = type(MPI.buffer.allocate)
 ClassMethodType = type(MPI.Comm.Get_parent)
 MethodDescrType = type(MPI.Comm.Get_rank)
 GetSetDescrType = type(MPI.Comm.rank)

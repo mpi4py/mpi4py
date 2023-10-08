@@ -72,6 +72,9 @@ Release 4.0.0 [2023-XX-XX]
   * The `LB` and `UB` datatypes are no longer available, use
     `Datatype.Create_resized()` instead.
 
+  * The `MPI.memory` class has been renamed to `MPI.buffer`. The old
+    name is still available as an alias to the new name.
+
   * The `mpi4py.dl` module is no longer available.
 
 

@@ -84,7 +84,7 @@ cdef class Pickle:
     def dumps_oob(
         self,
         obj: Any,
-    ) -> tuple[bytes, list[memory]]:
+    ) -> tuple[bytes, list[buffer]]:
         """
         Serialize object to pickle data stream and out-of-band buffers.
         """
@@ -147,7 +147,7 @@ cdef int import_pickle5() except -1:                      #~> legacy
 
 cdef object get_buffer_callback(list buffers, Py_ssize_t threshold):
     def buffer_callback(ob):
-        cdef memory buf = getbuffer(ob, 1, 0)
+        cdef buffer buf = getbuffer(ob, 1, 0)
         if buf.view.len >= threshold:
             buffers.append(buf)
             return False
@@ -497,10 +497,10 @@ cdef object PyMPI_load(MPI_Status *status, object ob):
     cdef Pickle pickle = PyMPI_PICKLE
     cdef MPI_Count rcount = 0
     cdef MPI_Datatype rtype = MPI_BYTE
-    if type(ob) is not memory: return None
+    if type(ob) is not buffer: return None
     CHKERR( MPI_Get_count_c(status, rtype, &rcount) )
     if rcount <= 0: return None
-    cdef void *rbuf = (<memory>ob).view.buf
+    cdef void *rbuf = (<buffer>ob).view.buf
     return pickle_load(pickle, rbuf, rcount)
 
 

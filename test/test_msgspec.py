@@ -689,7 +689,7 @@ class TestMessageDLPackCPUBuf(unittest.TestCase):
         dltensor.ndim = 1
         for i in range(len(buf)):
             dltensor.byte_offset = i
-            mem = MPI.memory(buf)
+            mem = MPI.buffer(buf)
             self.assertEqual(mem[0], buf[i])
         #
         del dltensor

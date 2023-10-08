@@ -323,6 +323,18 @@ def visit_module(module, done=None):
             done.add(name)
             lines.add = visit_class(value)
             lines.add = ""
+            aliases = [
+                (k, getattr(module, k)) for k in keys
+                if all((
+                    k not in done and k not in skip,
+                    getattr(module, k) is value,
+                ))
+            ]
+            for aliasname, target in aliases:
+                done.add(aliasname)
+                lines.add = f"{aliasname} = {target.__name__}"
+            if aliases:
+                lines.add = ""
             instances = [
                 (k, getattr(module, k)) for k in keys
                 if all((
@@ -400,7 +412,7 @@ def _def(cls, name):
     if cls is int:
        cls = _Int
     obj = cls()
-    if cls.__name__ in ('Pickle', 'memory'):
+    if cls.__name__ in ('Pickle', 'buffer'):
         return obj
     obj._name = name
     if '__repr__' not in cls.__dict__:
@@ -433,14 +445,14 @@ OVERRIDE = {
     'Op': {
         '__call__': "def __call__(self, x: Any, y: Any) -> Any: ...",
     },
-    'memory': {
+    'buffer': {
         '__new__': (
-            "def __new__(cls, buf: Buffer) -> memory:\n"
+            "def __new__(cls, buf: Buffer) -> buffer:\n"
             "    return super().__new__(cls)"),
         '__getitem__': (
             "def __getitem__(self, "
             "item: int | slice) "
-            "-> int | memory: ..."),
+            "-> int | buffer: ..."),
         '__setitem__': (
             "def __setitem__(self, "
             "item: int | slice, "

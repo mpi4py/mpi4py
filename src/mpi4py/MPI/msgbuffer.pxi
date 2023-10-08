@@ -115,7 +115,7 @@ cdef inline Datatype getdatatype(const char format[]):
 @cython.final
 @cython.internal
 cdef class _p_message:
-    cdef memory buf
+    cdef buffer buf
     cdef object count
     cdef object displ
     cdef Datatype type
