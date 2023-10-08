@@ -47,7 +47,7 @@ cdef inline bint is_WEIGHTS_EMPTY(object weights):
     return is_constant(weights, __WEIGHTS_EMPTY__)
 
 
-cdef object asarray_weights(object weights, int nweight, int **iweight):
+cdef inline object asarray_weights(object weights, int nweight, int **iweight):
     if weights is None:
         iweight[0] = MPI_UNWEIGHTED
         return None

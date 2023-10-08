@@ -244,7 +244,7 @@ cdef object pickle_allocv(void **p, int n, MPI_Count cnt[], MPI_Aint dsp[]):
     return pickle_alloc(p, d)
 
 
-cdef inline object allocate_count_displ(int n, MPI_Count **p, MPI_Aint **q):
+cdef object allocate_count_displ(int n, MPI_Count **p, MPI_Aint **q):
     cdef object mem1 = allocate(n, sizeof(MPI_Count), p)
     cdef object mem2 = allocate(n, sizeof(MPI_Aint),  q)
     return (mem1, mem2)
@@ -1093,7 +1093,7 @@ cdef object PyMPI_exscan_naive(object sendobj, object op, MPI_Comm comm):
 
 # ---
 
-cdef inline object PyMPI_copy(object obj):
+cdef object PyMPI_copy(object obj):
     cdef Pickle pickle = PyMPI_PICKLE
     cdef void *buf = NULL
     cdef MPI_Count count = 0
@@ -1269,15 +1269,19 @@ cdef extern from * nogil:
     int PyMPI_Commctx_intra(MPI_Comm,MPI_Comm*,int*)
     int PyMPI_Commctx_inter(MPI_Comm,MPI_Comm*,int*,MPI_Comm*,int*)
 
-cdef int PyMPI_Commctx_INTRA(MPI_Comm comm,
-                             MPI_Comm *dupcomm, int *tag) except -1:
+cdef int PyMPI_Commctx_INTRA(
+    MPI_Comm comm,
+    MPI_Comm *dupcomm, int *tag,
+) except -1:
     with PyMPI_Lock(comm, "@commctx_intra"):
         CHKERR( PyMPI_Commctx_intra(comm, dupcomm, tag) )
     return 0
 
-cdef int PyMPI_Commctx_INTER(MPI_Comm comm,
-                             MPI_Comm *dupcomm, int *tag,
-                             MPI_Comm *localcomm, int *low_group) except -1:
+cdef int PyMPI_Commctx_INTER(
+    MPI_Comm comm,
+    MPI_Comm *dupcomm, int *tag,
+    MPI_Comm *localcomm, int *low_group,
+) except -1:
     with PyMPI_Lock(comm, "@commctx_inter"):
         CHKERR( PyMPI_Commctx_inter(comm, dupcomm, tag,
                                     localcomm, low_group) )

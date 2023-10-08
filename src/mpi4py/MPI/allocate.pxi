@@ -3,15 +3,15 @@
 cdef extern from "Python.h":
     enum: PY_SSIZE_T_MAX
 
-    void *PyMem_Malloc(size_t)
-    void *PyMem_Calloc(size_t, size_t)
-    void *PyMem_Realloc(void*, size_t)
-    void  PyMem_Free(void*)
+    void *PyMem_Malloc(size_t) noexcept
+    void *PyMem_Calloc(size_t, size_t) noexcept
+    void *PyMem_Realloc(void*, size_t) noexcept
+    void  PyMem_Free(void*) noexcept
 
-    void *PyMem_RawMalloc(size_t)
-    void *PyMem_RawCalloc(size_t, size_t)
-    void *PyMem_RawRealloc(void*, size_t)
-    void  PyMem_RawFree(void*)
+    void *PyMem_RawMalloc(size_t) noexcept nogil
+    void *PyMem_RawCalloc(size_t, size_t) noexcept nogil
+    void *PyMem_RawRealloc(void*, size_t) noexcept nogil
+    void  PyMem_RawFree(void*) noexcept nogil
 
 # -----------------------------------------------------------------------------
 
@@ -21,7 +21,7 @@ cdef class _PyMem:
 
     cdef void *buf
     cdef Py_ssize_t len
-    cdef void (*free)(void*)
+    cdef void (*free)(void*) noexcept
 
     def __cinit__(self):
         self.buf = NULL
