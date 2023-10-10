@@ -281,18 +281,21 @@ cdef extern from "<mpi.h>" nogil:
 
     MPI_Request MPI_REQUEST_NULL  #:= 0
 
-    int MPI_Request_free(MPI_Request*)
     int MPI_Wait(MPI_Request*, MPI_Status*)
     int MPI_Test(MPI_Request*, int*, MPI_Status*)
     int MPI_Request_get_status(MPI_Request, int*, MPI_Status*)
-    int MPI_Cancel(MPI_Request*)
 
     int MPI_Waitany(int, MPI_Request[], int*, MPI_Status*)
     int MPI_Testany(int, MPI_Request[], int*, int*, MPI_Status*)
+
     int MPI_Waitall(int, MPI_Request[], MPI_Status[])
     int MPI_Testall(int, MPI_Request[], int*, MPI_Status[])
+
     int MPI_Waitsome(int, MPI_Request[], int*, int[], MPI_Status[])
     int MPI_Testsome(int, MPI_Request[], int*, int[], MPI_Status[])
+
+    int MPI_Cancel(MPI_Request*)
+    int MPI_Request_free(MPI_Request*)
 
     int MPI_Start(MPI_Request*)
     int MPI_Startall(int, MPI_Request*)
