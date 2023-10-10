@@ -1056,11 +1056,6 @@ typedef int (MPIAPI PyMPI_MPI_Type_delete_attr_function)(MPI_Datatype,int,void*,
 #define MPI_REQUEST_NULL ((MPI_Request)0)
 #endif
 
-#ifndef PyMPI_HAVE_MPI_Request_free
-#undef  MPI_Request_free
-#define MPI_Request_free(a1) PyMPI_UNAVAILABLE("MPI_Request_free",a1)
-#endif
-
 #ifndef PyMPI_HAVE_MPI_Wait
 #undef  MPI_Wait
 #define MPI_Wait(a1,a2) PyMPI_UNAVAILABLE("MPI_Wait",a1,a2)
@@ -1074,11 +1069,6 @@ typedef int (MPIAPI PyMPI_MPI_Type_delete_attr_function)(MPI_Datatype,int,void*,
 #ifndef PyMPI_HAVE_MPI_Request_get_status
 #undef  MPI_Request_get_status
 #define MPI_Request_get_status(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Request_get_status",a1,a2,a3)
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Cancel
-#undef  MPI_Cancel
-#define MPI_Cancel(a1) PyMPI_UNAVAILABLE("MPI_Cancel",a1)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Waitany
@@ -1109,6 +1099,16 @@ typedef int (MPIAPI PyMPI_MPI_Type_delete_attr_function)(MPI_Datatype,int,void*,
 #ifndef PyMPI_HAVE_MPI_Testsome
 #undef  MPI_Testsome
 #define MPI_Testsome(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Testsome",a1,a2,a3,a4,a5)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Cancel
+#undef  MPI_Cancel
+#define MPI_Cancel(a1) PyMPI_UNAVAILABLE("MPI_Cancel",a1)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Request_free
+#undef  MPI_Request_free
+#define MPI_Request_free(a1) PyMPI_UNAVAILABLE("MPI_Request_free",a1)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Start

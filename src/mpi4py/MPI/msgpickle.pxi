@@ -536,134 +536,106 @@ cdef object PyMPI_test(Request request, int *flag, Status status):
 
 cdef object PyMPI_waitany(requests, int *index, Status status):
     cdef object buf = None
-    #
-    cdef int count = 0
-    cdef MPI_Request *irequests = NULL
+    cdef object obj = None
     cdef MPI_Status rsts
-    #
-    cdef tmp = acquire_rs(requests, None, &count, &irequests, NULL)
+    cdef _p_rs rs = _p_rs.__new__(_p_rs)
+    rs.acquire(requests)
     try:
-        with nogil: CHKERR( MPI_Waitany(count, irequests, index, &rsts) )
+        with nogil: CHKERR( MPI_Waitany(
+            rs.count, rs.requests, index, &rsts) )
         if index[0] != MPI_UNDEFINED:
             buf = (<Request>requests[index[0]]).ob_buf
+            obj = PyMPI_load(&rsts, buf)
         if status is not None:
             status.ob_mpi = rsts
     finally:
-        release_rs(requests, None, count, irequests, 0, NULL)
-    #
-    if index[0] == MPI_UNDEFINED: return None
-    return PyMPI_load(&rsts, buf)
+        rs.release()
+    return obj
 
 
 cdef object PyMPI_testany(requests, int *index, int *flag, Status status):
     cdef object buf = None
-    #
-    cdef int count = 0
-    cdef MPI_Request *irequests = NULL
+    cdef object obj = None
     cdef MPI_Status rsts
-    #
-    cdef tmp = acquire_rs(requests, None, &count, &irequests, NULL)
+    cdef _p_rs rs = _p_rs.__new__(_p_rs)
+    rs.acquire(requests)
     try:
-        with nogil: CHKERR( MPI_Testany(count, irequests, index, flag, &rsts) )
-        if index[0] != MPI_UNDEFINED:
+        with nogil: CHKERR( MPI_Testany(
+            rs.count, rs.requests, index, flag, &rsts) )
+        if index[0] != MPI_UNDEFINED and flag[0]:
             buf = (<Request>requests[index[0]]).ob_buf
+            obj = PyMPI_load(&rsts, buf)
         if status is not None:
             status.ob_mpi = rsts
     finally:
-        release_rs(requests, None, count, irequests, 0, NULL)
-    #
-    if index[0] == MPI_UNDEFINED: return None
-    if not flag[0]: return None
-    return PyMPI_load(&rsts, buf)
+        rs.release()
+    return obj
+
 
 cdef object PyMPI_waitall(requests, statuses):
-    cdef object bufs = None
-    #
-    cdef int count = 0
-    cdef MPI_Request *irequests = NULL
-    cdef MPI_Status *istatuses = MPI_STATUSES_IGNORE
-    #
-    cdef tmp = acquire_rs(requests, True, &count, &irequests, &istatuses)
+    cdef object objects = None
+    cdef _p_rs rs = _p_rs.__new__(_p_rs)
+    rs.acquire(requests)
+    rs.add_statuses()
     try:
-        with nogil: CHKERR( MPI_Waitall(count, irequests, istatuses) )
-        bufs = [(<Request>requests[i]).ob_buf for i in range(count)]
+        with nogil: CHKERR( MPI_Waitall(
+            rs.count, rs.requests, rs.statuses) )
+        objects = rs.get_objects()
     finally:
-        release_rs(requests, statuses, count, irequests, count, istatuses)
-    #
-    return [PyMPI_load(&istatuses[i], bufs[i]) for i in range(count)]
+        rs.release(statuses)
+    return objects
+
 
 cdef object PyMPI_testall(requests, int *flag, statuses):
-    cdef object bufs = None
-    #
-    cdef int count = 0
-    cdef MPI_Request *irequests = NULL
-    cdef MPI_Status *istatuses = MPI_STATUSES_IGNORE
-    #
-    cdef tmp = acquire_rs(requests, True, &count, &irequests, &istatuses)
+    cdef object objects = None
+    cdef _p_rs rs = _p_rs.__new__(_p_rs)
+    rs.acquire(requests)
+    rs.add_statuses()
     try:
-        with nogil: CHKERR( MPI_Testall(count, irequests, flag, istatuses) )
+        with nogil: CHKERR( MPI_Testall(
+            rs.count, rs.requests, flag, rs.statuses) )
         if flag[0]:
-            bufs = [(<Request>requests[i]).ob_buf for i in range(count)]
+            objects = rs.get_objects()
     finally:
-        release_rs(requests, statuses, count, irequests, count, istatuses)
-    #
-    if not flag[0]: return None
-    return [PyMPI_load(&istatuses[i], bufs[i]) for i in range(count)]
+        rs.release(statuses)
+    return objects
+
 
 cdef object PyMPI_waitsome(requests, statuses):
-    cdef object bufs = None
     cdef object indices = None
     cdef object objects = None
     #
-    cdef int incount = 0
-    cdef MPI_Request *irequests = NULL
-    cdef int outcount = MPI_UNDEFINED, *iindices = NULL
-    cdef MPI_Status *istatuses = MPI_STATUSES_IGNORE
-    #
-    cdef tmp1 = acquire_rs(requests, True, &incount, &irequests, &istatuses)
-    cdef tmp2 = newarray(incount, &iindices)
+    cdef _p_rs rs = _p_rs.__new__(_p_rs)
+    rs.acquire(requests)
+    rs.add_indices()
+    rs.add_statuses()
     try:
         with nogil: CHKERR( MPI_Waitsome(
-            incount, irequests, &outcount, iindices, istatuses) )
-        if outcount != MPI_UNDEFINED:
-            bufs = [
-                (<Request>requests[iindices[i]]).ob_buf
-                for i in range(outcount)
-            ]
+            rs.count, rs.requests, &rs.outcount, rs.indices, rs.statuses) )
+        indices = rs.get_indices()
+        objects = rs.get_objects()
     finally:
-        release_rs(requests, statuses, incount, irequests, outcount, istatuses)
+        rs.release(statuses)
     #
-    if outcount != MPI_UNDEFINED:
-        indices = [iindices[i] for i in range(outcount)]
-        objects = [PyMPI_load(&istatuses[i], bufs[i]) for i in range(outcount)]
     return (indices, objects)
 
+
 cdef object PyMPI_testsome(requests, statuses):
-    cdef object bufs = None
     cdef object indices = None
     cdef object objects = None
     #
-    cdef int incount = 0
-    cdef MPI_Request *irequests = NULL
-    cdef int outcount = MPI_UNDEFINED, *iindices = NULL
-    cdef MPI_Status *istatuses = MPI_STATUSES_IGNORE
-    #
-    cdef tmp1 = acquire_rs(requests, True, &incount, &irequests, &istatuses)
-    cdef tmp2 = newarray(incount, &iindices)
+    cdef _p_rs rs = _p_rs.__new__(_p_rs)
+    rs.acquire(requests)
+    rs.add_indices()
+    rs.add_statuses()
     try:
         with nogil: CHKERR( MPI_Testsome(
-            incount, irequests, &outcount, iindices, istatuses) )
-        if outcount != MPI_UNDEFINED:
-            bufs = [
-                (<Request>requests[iindices[i]]).ob_buf
-                for i in range(outcount)
-            ]
+            rs.count, rs.requests, &rs.outcount, rs.indices, rs.statuses) )
+        indices = rs.get_indices()
+        objects = rs.get_objects()
     finally:
-        release_rs(requests, statuses, incount, irequests, outcount, istatuses)
+        rs.release(statuses)
     #
-    if outcount != MPI_UNDEFINED:
-        indices = [iindices[i] for i in range(outcount)]
-        objects = [PyMPI_load(&istatuses[i], bufs[i])for i in range(outcount)]
     return (indices, objects)
 
 # -----------------------------------------------------------------------------
