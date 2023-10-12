@@ -2,6 +2,13 @@
 #define PyMPI_COMPAT_MPICH_H
 #if defined(MPICH_NUMVERSION)
 
+/* -------------------------------------------------------------------------- */
+
+/* https://github.com/pmodels/mpich/issues/5413 */
+/* https://github.com/pmodels/mpich/pull/6146   */
+
+#if MPI_VERSION == 4 && MPI_SUBVERSION == 0
+
 #if (MPICH_NUMVERSION < 40003300) || defined(CIBUILDWHEEL)
 static int PyMPI_MPICH_MPI_Status_set_elements_c(MPI_Status *status,
                                                  MPI_Datatype datatype,
@@ -18,7 +25,16 @@ extern int MPI_Status_set_elements_c(MPI_Status *, MPI_Datatype, MPI_Count)
 __attribute__((weak, alias("PyMPI_MPICH_MPI_Status_set_elements_c")));
 #endif
 
-#if (MPICH_NUMVERSION < 40100000) || defined(CIBUILDWHEEL)
+#endif
+
+/* -------------------------------------------------------------------------- */
+
+/* https://github.com/pmodels/mpich/issues/6351 */
+/* https://github.com/pmodels/mpich/pull/6354   */
+
+#if MPI_VERSION == 4 && MPI_SUBVERSION == 0
+
+#if (MPICH_NUMVERSION < 40100300) || defined(CIBUILDWHEEL)
 static int PyMPI_MPICH_MPI_Reduce_c(const void *sendbuf, void *recvbuf,
                                     MPI_Count count, MPI_Datatype datatype,
                                     MPI_Op op, int root, MPI_Comm comm)
@@ -30,6 +46,9 @@ static int PyMPI_MPICH_MPI_Reduce_c(const void *sendbuf, void *recvbuf,
 #define MPI_Reduce_c PyMPI_MPICH_MPI_Reduce_c
 #endif
 
+#endif
+
+/* -------------------------------------------------------------------------- */
 
 #endif /* !MPICH_NUMVERSION      */
 #endif /* !PyMPI_COMPAT_MPICH_H */
