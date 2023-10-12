@@ -25,8 +25,8 @@ Interface* (`MPI <https://www.mpi-forum.org/>`_) standard. It is
 implemented on top of the MPI specification and exposes an API which
 grounds on the standard MPI-2 C++ bindings.
 
-Dependencies
-------------
+Prerequisites
+-------------
 
 * `Python <https://www.python.org/>`_ 3.6 or above,
   or `PyPy <https://www.pypy.org/>`_ 7.2 or above.

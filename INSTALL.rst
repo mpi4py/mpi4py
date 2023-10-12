@@ -1,7 +1,8 @@
 Using **pip**
 -------------
 
-You can install mpi4py from its source distribution using ``pip``::
+You can install the latest mpi4py release from its source distribution
+at `PyPI <https://pypi.org/project/mpi4py/>`_ using ``pip``::
 
   $ python -m pip install mpi4py
 
@@ -15,8 +16,10 @@ or::
 
 .. note::
 
-   Installing mpi4py from sources requires a C compiler and an MPI
-   implementation with development headers and libraries.
+   Installing mpi4py from its source distribution (available at PyPI)
+   or Git source code repository (available at GitHub) requires a C
+   compiler and a working MPI implementation with development headers
+   and libraries.
 
 .. warning::
 
