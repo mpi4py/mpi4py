@@ -908,13 +908,41 @@ def configure_mpi(ext, config_cmd):
       return 0;
     }
     """)
-    errmsg = "Cannot {} MPI programs. Check your configuration!!!"
+    errmsg = [
+        "Cannot {} MPI programs. Check your configuration!!!",
+        "Installing mpi4py requires a working MPI implementation.",
+    ]
+    if sys.platform == 'linux':
+        errmsg += [
+            "If you are running on a supercomputer or cluster, check with",
+            "the system administrator or refer to the system user guide.",
+            "Otherwise, if you are running on a laptop or desktop computer,",
+            "your may be missing the MPICH or Open MPI development package:",
+            "* On Fedora/RHEL systems, run:",
+            "  $ sudo dnf install mpich-devel     # for MPICH",
+            "  $ sudo dnf install openmpi-devel   # for Open MPI",
+            "* On Debian/Ubuntu systems, run:",
+            "  $ sudo apt install libmpich-dev    # for MPICH",
+            "  $ sudo apt install libopenmpi-dev  # for Open MPI",
+        ]
+    if sys.platform == 'darwin':
+        errmsg += [
+            "Install MPICH or Open MPI with Homebrew or MacPorts:"
+            "  $ brew install mpich|openmpi  # Homebrew",
+            "  $ port install mpich|openmpi  # MacPorts",
+        ]
+    if sys.platform == 'win32':
+        errmsg += [
+            "Please install *Intel MPI* or *Microsoft MPI*."
+        ]
     ok = config_cmd.try_compile(ConfigTest, headers=headers)
     if not ok:
-        raise DistutilsPlatformError(errmsg.format("compile"))
+        message = "\n".join(errmsg).format("compile")
+        raise DistutilsPlatformError(message)
     ok = config_cmd.try_link(ConfigTest, headers=headers)
     if not ok:
-        raise DistutilsPlatformError(errmsg.format("link"))
+        message = errmsg[0].format("link")
+        raise DistutilsPlatformError(message)
     #
     log.info("checking for missing MPI functions/symbols ...")
     impls = ("OPEN_MPI", "MSMPI_VER")
