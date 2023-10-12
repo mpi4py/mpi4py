@@ -323,8 +323,7 @@ class Config:
         COMPILERS = (
             ('mpicc',   ['mpicc']),
             ('mpicxx',  ['mpicxx',  'mpic++', 'mpiCC']),
-            ('mpifort', ['mpifort', 'mpifc', 'mpif90', 'mpif77']),
-            ('mpifc',   ['mpifc', 'mpifort', 'mpif90', 'mpif77']),
+            ('mpifort', ['mpifc', 'mpifort', 'mpif90', 'mpif77']),
             ('mpif90',  ['mpif90']),
             ('mpif77',  ['mpif77']),
             ('mpild',   []),
