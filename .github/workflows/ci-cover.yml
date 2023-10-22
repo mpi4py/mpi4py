@@ -113,7 +113,7 @@ jobs:
         cache: pip
         cache-dependency-path: |
           conf/requirements-build-cython.txt
-    - run: python -m pip install -U pip
+    - run: python -m pip install -U pip setuptools
 
     - run: python -m pip install -U -r conf/requirements-build-cython.txt
     - run: python -m pip install -U coverage
