@@ -11,9 +11,9 @@ contact:
     email: mpi4py@googlegroups.com
     website: https://groups.google.com/g/mpi4py
 
-version: 3.1.4
-date-released: 2022-11-02
-doi: 10.5281/zenodo.7274317
+version: 3.1.5
+date-released: 2023-10-04
+doi: 10.5281/zenodo.8405756
 authors:
   - family-names: Dalcin
     given-names: Lisandro
