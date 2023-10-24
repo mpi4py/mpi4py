@@ -1,4 +1,3 @@
-from __future__ import annotations
 import sys
 from typing import (
     Any,
@@ -10,6 +9,10 @@ from typing import (
     Dict,
     Tuple,
 )
+if sys.version_info >= (3, 10):
+    from typing import TypeAlias
+else:
+    from typing_extensions import TypeAlias
 from numbers import (
     Integral,
 )
@@ -39,10 +42,10 @@ __all__: List[str] = [
     'TargetSpec',
 ]
 
-_Stream = Union[int, Any]
-_PyCapsule = object
-_DeviceType = int
-_DeviceID = int
+_Stream: TypeAlias = Union[int, Any]
+_PyCapsule: TypeAlias = object
+_DeviceType: TypeAlias = int
+_DeviceID: TypeAlias = int
 
 class SupportsBuffer(Protocol):
     def __buffer__(self, __flags: int) -> memoryview: ...
@@ -55,27 +58,27 @@ class SupportsCAI(Protocol):
     @property
     def __cuda_array_interface__(self) -> Dict[str, Any]: ...
 
-Buffer = Union[
+Buffer: TypeAlias = Union[
     SupportsBuffer,
     SupportsDLPack,
     SupportsCAI,
 ]
 
-Bottom = Union[BottomType, None]
+Bottom: TypeAlias = Union[BottomType, None]
 
-InPlace = Union[InPlaceType, None]
+InPlace: TypeAlias = Union[InPlaceType, None]
 
-Aint = Integral
+Aint: TypeAlias = Integral
 
-Count = Integral
+Count: TypeAlias = Integral
 
-Displ = Integral
+Displ: TypeAlias = Integral
 
-Offset = Integral
+Offset: TypeAlias = Integral
 
-TypeSpec = Union[Datatype, str]
+TypeSpec: TypeAlias = Union[Datatype, str]
 
-BufSpec = Union[
+BufSpec: TypeAlias = Union[
     Buffer,
     Tuple[Buffer, Count],
     Tuple[Buffer, TypeSpec],
@@ -84,7 +87,7 @@ BufSpec = Union[
     List,
 ]
 
-BufSpecB = Union[
+BufSpecB: TypeAlias = Union[
     Buffer,
     Tuple[Buffer, Count],
     Tuple[Buffer, TypeSpec],
@@ -92,7 +95,7 @@ BufSpecB = Union[
     List,
 ]
 
-BufSpecV = Union[
+BufSpecV: TypeAlias = Union[
     Buffer,
     Tuple[Buffer, Sequence[Count]],
     Tuple[Buffer, Tuple[Sequence[Count], Sequence[Displ]]],
@@ -105,7 +108,7 @@ BufSpecV = Union[
     List,
 ]
 
-BufSpecW = Union[
+BufSpecW: TypeAlias = Union[
     Tuple[Buffer, Sequence[Datatype]],
     Tuple[Buffer, Tuple[Sequence[Count], Sequence[Displ]], Sequence[Datatype]],
     Tuple[Buffer, Sequence[Count], Sequence[Displ], Sequence[Datatype]],
@@ -114,7 +117,7 @@ BufSpecW = Union[
     List,
 ]
 
-TargetSpec = Union[
+TargetSpec: TypeAlias = Union[
     Displ,
     Tuple[()],
     Tuple[Displ],

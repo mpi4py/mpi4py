@@ -126,7 +126,7 @@ def visit_constructor(cls, name='__init__', args=None):
     argtype = cls.__name__
     initarg = args or f"{argname}: {argtype} | None = None"
     selfarg = 'self' if init else 'cls'
-    rettype = 'None' if init else argtype
+    rettype = 'None' if init else 'Self'
     arglist = f"{selfarg}, {initarg}"
     sig = f"{name}({arglist}) -> {rettype}"
     return f"def {sig}: ..."
@@ -143,6 +143,8 @@ def visit_class(cls, done=None):
         '__le__',
         '__ge__',
         '__gt__',
+        '__str__',
+        '__repr__',
     }
     special = {
         '__len__': "__len__(self) -> int",
@@ -150,8 +152,6 @@ def visit_class(cls, done=None):
         '__hash__': "__hash__(self) -> int",
         '__int__': "__int__(self) -> int",
         '__index__': "__int__(self) -> int",
-        '__str__': "__str__(self) -> str",
-        '__repr__': "__repr__(self) -> str",
         '__eq__': "__eq__(self, other: object) -> bool",
         '__ne__': "__ne__(self, other: object) -> bool",
     }
@@ -344,7 +344,6 @@ def visit_module(module, done=None):
 
 
 IMPORTS = """
-from __future__ import annotations
 import sys
 from threading import Lock
 from typing import (
@@ -392,7 +391,7 @@ from os import PathLike
 
 OVERRIDE = {
     'Exception': {
-        '__new__': "def __new__(cls, ierr: int = SUCCESS) -> Exception: ...",
+        '__new__': "def __new__(cls, ierr: int = SUCCESS) -> Self: ...",
         "__lt__": "def __lt__(self, other: int) -> bool: ...",
         "__le__": "def __le__(self, other: int) -> bool: ...",
         "__gt__": "def __gt__(self, other: int) -> bool: ...",
@@ -416,9 +415,9 @@ OVERRIDE = {
     'buffer': {
         '__new__': """
         @overload
-        def __new__(cls) -> buffer: ...
+        def __new__(cls) -> Self: ...
         @overload
-        def __new__(cls, __buf: Buffer) -> buffer: ...
+        def __new__(cls, __buf: Buffer) -> Self: ...
         """,
         '__getitem__': """
         @overload
@@ -459,7 +458,7 @@ OVERRIDE = {
 }
 OVERRIDE.update({
     subtype: {
-        '__new__': f"def __new__(cls) -> {subtype}: ...",
+        '__new__': "def __new__(cls) -> Self: ...",
     }
     for subtype in (
         'BottomType',
@@ -469,8 +468,8 @@ OVERRIDE.update({
 OVERRIDE.update({
     subtype: {
         '__new__': str.format("""
-        def __new__(cls, {}: {} | None = None) -> {}: ...
-        """, basetype.lower(), basetype, subtype)
+        def __new__(cls, {}: {} | None = None) -> Self: ...
+        """, basetype.lower(), basetype)
     }
     for basetype, subtype in (
         ('Comm', 'Comm'),
