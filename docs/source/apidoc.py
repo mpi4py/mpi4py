@@ -144,7 +144,7 @@ def visit_constructor(cls, name='__init__', args=None):
     argtype = cls.__name__
     initarg = args or f"{argname}: {argtype} | None = None"
     selfarg = 'self' if init else 'cls'
-    rettype = 'None' if init else argtype
+    rettype = 'None' if init else 'Self'
     arglist = f"{selfarg}, {initarg}"
     sig = f"{name}({arglist}) -> {rettype}"
     ret = '...' if init else 'return super().__new__(cls)'
@@ -376,7 +376,6 @@ def visit_module(module, done=None):
 
 
 IMPORTS = """
-from __future__ import annotations
 from typing import (
     Any,
     AnyStr,
@@ -423,7 +422,7 @@ def _def(cls, name):
 OVERRIDE = {
     'Exception': {
         '__new__': (
-            "def __new__(cls, ierr: int = SUCCESS) -> Exception:\n"
+            "def __new__(cls, ierr: int = SUCCESS) -> Self:\n"
             "    return super().__new__(cls, ierr)"),
         "__lt__": "def __lt__(self, other: int) -> bool: ...",
         "__le__": "def __le__(self, other: int) -> bool: ...",
@@ -447,7 +446,7 @@ OVERRIDE = {
     },
     'buffer': {
         '__new__': (
-            "def __new__(cls, buf: Buffer) -> buffer:\n"
+            "def __new__(cls, buf: Buffer) -> Self:\n"
             "    return super().__new__(cls)"),
         '__getitem__': (
             "def __getitem__(self, "
@@ -469,7 +468,7 @@ OVERRIDE = {
 OVERRIDE.update({
     subtype: {
         '__new__': (
-            f"def __new__(cls) -> {subtype}:\n"
+            f"def __new__(cls) -> Self:\n"
             f"    return super().__new__({subtype})"),
         '__repr__': "def __repr__(self) -> str: return self._name",
     }
@@ -515,7 +514,15 @@ def load_module(filename, name=None):
     module.__file__ = filename
     module.__package__ = name.rsplit('.', 1)[0]
     with open(filename) as f:
-        exec(f.read(), module.__dict__)  # noqa: S102
+        preamble = "from __future__ import annotations"
+        codelines = f.read().split("\n")
+        for lineno, line in enumerate(codelines):
+            match = line.strip().startswith
+            if not any(map(match, "'\"#")):
+                codelines.insert(lineno, preamble)
+                break
+        code = "\n".join(codelines)
+        exec(code, module.__dict__)  # noqa: S102
     return module
 
 
