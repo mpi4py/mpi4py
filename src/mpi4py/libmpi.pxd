@@ -1020,7 +1020,6 @@ cdef extern from "<mpi.h>" nogil:
     enum: MPI_ERR_OP                     #:= MPI_ERR_LASTCODE
     enum: MPI_ERR_GROUP                  #:= MPI_ERR_LASTCODE
     enum: MPI_ERR_INFO                   #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_ERRHANDLER             #:= MPI_ERR_LASTCODE
     enum: MPI_ERR_SESSION                #:= MPI_ERR_LASTCODE
     enum: MPI_ERR_COMM                   #:= MPI_ERR_LASTCODE
     enum: MPI_ERR_WIN                    #:= MPI_ERR_LASTCODE
