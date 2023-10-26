@@ -4014,11 +4014,6 @@ typedef int (MPIAPI PyMPI_MPI_Datarep_conversion_function_c)(void*,MPI_Datatype,
 #define MPI_ERR_INFO (MPI_ERR_LASTCODE)
 #endif
 
-#ifndef PyMPI_HAVE_MPI_ERR_ERRHANDLER
-#undef  MPI_ERR_ERRHANDLER
-#define MPI_ERR_ERRHANDLER (MPI_ERR_LASTCODE)
-#endif
-
 #ifndef PyMPI_HAVE_MPI_ERR_SESSION
 #undef  MPI_ERR_SESSION
 #define MPI_ERR_SESSION (MPI_ERR_LASTCODE)
