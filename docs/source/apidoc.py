@@ -163,17 +163,18 @@ def visit_class(cls, done=None):
         '__le__',
         '__ge__',
         '__gt__',
+        '__str__',
+        '__repr__',
     }
     special = {
-        '__len__': "__len__(self) -> int",
-        '__bool__': "__bool__(self) -> bool",
-        '__hash__': "__hash__(self) -> int",
-        '__int__': "__int__(self) -> int",
-        '__index__': "__int__(self) -> int",
-        '__str__': "__str__(self) -> str",
-        '__repr__': "__repr__(self) -> str",
-        '__eq__': "__eq__(self, other: object) -> bool",
-        '__ne__': "__ne__(self, other: object) -> bool",
+        '__len__': ("self", "int", None),
+        '__bool__': ("self",  "bool", None),
+        '__hash__': ("self", "int", None),
+        '__int__': ("self", "int", None),
+        '__index__': ("self", "int", None),
+        '__eq__': ("self", "other: object", "bool", None),
+        '__ne__': ("self", "other: object", "bool", None),
+        '__buffer__': ("self", "flags: int", "memoryview", (3, 12)),
     }
     constructor = (
         '__new__',
@@ -234,8 +235,14 @@ def visit_class(cls, done=None):
 
         if name in special:
             done.add(name)
-            sig = special[name]
+            *args, retv, py = special[name]
+            sig = f"{name}({', '.join(args)}) -> {retv}"
+            if py is not None:
+                lines.add = f"if sys.version_info >= {py}:"
+                lines.level += 1
             lines.add = f"def {sig}: ..."
+            if py is not None:
+                lines.level -= 1
             continue
 
         attr = getattr(cls, name)
@@ -376,6 +383,7 @@ def visit_module(module, done=None):
 
 
 IMPORTS = """
+import sys
 from typing import (
     Any,
     AnyStr,

@@ -147,13 +147,14 @@ def visit_class(cls, done=None):
         '__repr__',
     }
     special = {
-        '__len__': "__len__(self) -> int",
-        '__bool__': "__bool__(self) -> bool",
-        '__hash__': "__hash__(self) -> int",
-        '__int__': "__int__(self) -> int",
-        '__index__': "__int__(self) -> int",
-        '__eq__': "__eq__(self, other: object) -> bool",
-        '__ne__': "__ne__(self, other: object) -> bool",
+        '__len__': ("self", "int", None),
+        '__bool__': ("self",  "bool", None),
+        '__hash__': ("self", "int", None),
+        '__int__': ("self", "int", None),
+        '__index__': ("self", "int", None),
+        '__eq__': ("self", "other: object", "bool", None),
+        '__ne__': ("self", "other: object", "bool", None),
+        '__buffer__': ("self", "__flags: int", "memoryview", (3, 12)),
     }
     constructor = (
         '__new__',
@@ -211,8 +212,14 @@ def visit_class(cls, done=None):
 
         if name in special:
             done.add(name)
-            sig = special[name]
+            *args, retv, py = special[name]
+            sig = f"{name}({', '.join(args)}) -> {retv}"
+            if py is not None:
+                lines.add = f"if sys.version_info >= {py}:"
+                lines.level += 1
             lines.add = f"def {sig}: ..."
+            if py is not None:
+                lines.level -= 1
             continue
 
         attr = getattr(cls, name)
