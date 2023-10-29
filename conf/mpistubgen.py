@@ -152,8 +152,8 @@ def visit_class(cls, done=None):
         '__hash__': ("self", "int", None),
         '__int__': ("self", "int", None),
         '__index__': ("self", "int", None),
-        '__eq__': ("self", "other: object", "bool", None),
-        '__ne__': ("self", "other: object", "bool", None),
+        '__eq__': ("self", "__other: object", "bool", None),
+        '__ne__': ("self", "__other: object", "bool", None),
         '__buffer__': ("self", "__flags: int", "memoryview", (3, 12)),
     }
     constructor = (
@@ -399,22 +399,22 @@ from os import PathLike
 OVERRIDE = {
     'Exception': {
         '__new__': "def __new__(cls, ierr: int = SUCCESS) -> Self: ...",
-        "__lt__": "def __lt__(self, other: int) -> bool: ...",
-        "__le__": "def __le__(self, other: int) -> bool: ...",
-        "__gt__": "def __gt__(self, other: int) -> bool: ...",
-        "__ge__": "def __ge__(self, other: int) -> bool: ...",
+        "__lt__": "def __lt__(self, __other: int) -> bool: ...",
+        "__le__": "def __le__(self, __other: int) -> bool: ...",
+        "__gt__": "def __gt__(self, __other: int) -> bool: ...",
+        "__ge__": "def __ge__(self, __other: int) -> bool: ...",
     },
     'Info': {
         '__iter__':
         "def __iter__(self) -> Iterator[str]: ...",
         '__getitem__':
-        "def __getitem__(self, item: str) -> str: ...",
+        "def __getitem__(self, __item: str) -> str: ...",
         '__setitem__':
-        "def __setitem__(self, item: str, value: str) -> None: ...",
+        "def __setitem__(self, __item: str, __value: str) -> None: ...",
         '__delitem__':
-        "def __delitem__(self, item: str) -> None: ...",
+        "def __delitem__(self, __item: str) -> None: ...",
         '__contains__':
-        "def __contains__(self, value: str) -> bool: ...",
+        "def __contains__(self, __value: str) -> bool: ...",
     },
     'Op': {
         '__call__': "def __call__(self, x: Any, y: Any) -> Any: ...",
@@ -428,15 +428,15 @@ OVERRIDE = {
         """,
         '__getitem__': """
         @overload
-        def __getitem__(self, item: int) -> int: ...
+        def __getitem__(self, __item: int) -> int: ...
         @overload
-        def __getitem__(self, item: slice) -> buffer: ...
+        def __getitem__(self, __item: slice) -> buffer: ...
         """,
         '__setitem__': """
         @overload
-        def __setitem__(self, item: int, value: int) -> None: ...
+        def __setitem__(self, __item: int, __value: int) -> None: ...
         @overload
-        def __setitem__(self, item: slice, value: Buffer) -> None: ...
+        def __setitem__(self, __item: slice, __value: Buffer) -> None: ...
         """,
         '__delitem__': None,
     },
