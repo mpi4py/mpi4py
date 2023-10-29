@@ -296,7 +296,7 @@ def pingpong(comm, args=None, verbose=True):
                     header += " | Time Mean [s] \u00b1 StdDev [s]  Samples"
                 print(header, flush=True)
             bandwidth = nbytes / t_mean
-            message = f"{nbytes:10d}{bandwidth/1e6:18.2f}"
+            message = f"{nbytes:10d}{bandwidth / 1e6:18.2f}"
             if options.print_stats:
                 message += f" | {t_mean:.7e} \u00b1 {t_stdev:.4e} {loop:8d}"
             print(message, flush=True)
