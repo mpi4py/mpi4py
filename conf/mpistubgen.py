@@ -148,7 +148,7 @@ def visit_class(cls, done=None):
     }
     special = {
         '__len__': ("self", "int", None),
-        '__bool__': ("self",  "bool", None),
+        '__bool__': ("self", "bool", None),
         '__hash__': ("self", "int", None),
         '__int__': ("self", "int", None),
         '__index__': ("self", "int", None),
