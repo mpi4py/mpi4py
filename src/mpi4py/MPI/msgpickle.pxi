@@ -5,7 +5,6 @@ cdef extern from "Python.h":
     char*      PyBytes_AsString(object) except NULL
     Py_ssize_t PyBytes_Size(object) except -1
     object     PyBytes_FromStringAndSize(char*,Py_ssize_t)
-    object     PyBytes_Join"_PyBytes_Join"(object,object)
 
 # -----------------------------------------------------------------------------
 
@@ -218,7 +217,7 @@ cdef object pickle_dumpv(Pickle pkl, object obj, void **p, int n, MPI_Count cnt[
     for i in range(m):
         items[i] = pickle_dump(pkl, items[i], p, &c)
         cnt[i] = c; dsp[i] = d; d = d + <MPI_Aint>c
-    cdef object buf = PyBytes_Join(b'', items)
+    cdef object buf = b''.join(items)
     p[0] = PyBytes_AsString(buf)
     return buf
 
