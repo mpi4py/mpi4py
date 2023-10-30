@@ -25,9 +25,9 @@ jobs:
           - openmpi
           - msmpi
         py:
-          - "3.10"
           - "3.11"
           - "3.12"
+          - "3.13-dev"
           - "pypy-3.9"
           - "pypy-3.10"
         exclude:
@@ -80,6 +80,7 @@ jobs:
 
     - name: Install Python packages (test)
       run:  python -m pip install -U -r conf/requirements-test.txt
+      if:   ${{ !endsWith(matrix.py, '-dev') }}
 
     - name: Test mpi4py (np=1)
       run:  mpiexec -n 1 python test/runtests.py -v
