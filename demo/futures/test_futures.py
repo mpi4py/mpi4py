@@ -1745,6 +1745,10 @@ if name == 'MPICH':
     if port == "":
         SKIP_POOL_TEST = True
     del port
+if name == 'Intel MPI':
+    import mpi4py
+    if mpi4py.rc.recv_mprobe:
+        SKIP_POOL_TEST = True
 if name == 'Microsoft MPI':
     if version < (8,1,0):
         SKIP_POOL_TEST = True

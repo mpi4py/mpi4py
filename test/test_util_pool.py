@@ -398,6 +398,9 @@ def broken_mpi_spawn():
         except:
             return True
     if name == 'Intel MPI':
+        import mpi4py
+        if mpi4py.rc.recv_mprobe:
+            return True
         if MPI.COMM_WORLD.Get_size() > 1 and windows:
             return True
     if name == 'Microsoft MPI':
