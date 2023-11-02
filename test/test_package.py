@@ -35,17 +35,26 @@ class TestImport(unittest.TestCase):
 class TestDataFiles(unittest.TestCase):
 
     def testTyping(self):
+        import importlib.machinery
         if sys.version_info < (3, 8):
             check = self.assertFalse
         else:
             check = self.assertTrue
-        py_typed = os.path.join(pkgdir, 'py.typed')
+        py_typed = os.path.join(pkgdir, "py.typed")
         check(os.path.exists(py_typed))
+        suffixes = [
+            *importlib.machinery.SOURCE_SUFFIXES,
+            *importlib.machinery.EXTENSION_SUFFIXES,
+        ]
         for root, dirs, files in os.walk(pkgdir):
             for fname in files:
-                if fname.endswith(".py"):
-                    pyi = os.path.join(root, f"{fname}i")
-                    check(os.path.exists(pyi))
+                name, _, extra = fname.partition(".")
+                suffix = f".{extra}"
+                for entry in suffixes:
+                    if suffix.endswith(entry):
+                        pyi = os.path.join(root, f"{name}.pyi")
+                        check(os.path.exists(pyi))
+                        break
 
     def testCython(self):
         for fname in [

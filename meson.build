@@ -163,6 +163,7 @@ if py.language_version().version_compare('>=3.8')
     sources = []
     if not pkg.contains('.')
       sources += srcdir / subdir / 'py.typed'
+      sources += srcdir / subdir / 'MPI.pyi'
     endif
     foreach fn : src
       if fn.endswith('.py')
