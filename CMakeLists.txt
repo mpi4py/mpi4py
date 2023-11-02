@@ -125,6 +125,7 @@ file(
 )
 if (Python_VERSION VERSION_GREATER_EQUAL 3.11)
   list(APPEND mpi4py_HEADERS mpi4py/py.typed)
+  list(APPEND mpi4py_HEADERS mpi4py/MPI.pyi)
   foreach(file ${mpi4py_SOURCES})
     list(APPEND mpi4py_HEADERS ${file}i)
   endforeach()
