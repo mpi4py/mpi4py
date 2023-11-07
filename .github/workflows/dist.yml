@@ -27,6 +27,12 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
+    - name: Set SOURCE_DATE_EPOCH
+      run:  |
+        SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)
+        echo SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH >> $GITHUB_ENV
+        echo $(git log -1 --pretty=%ci) [timestamp=$SOURCE_DATE_EPOCH]
+
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
@@ -60,6 +66,12 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@v4
+
+    - name: Set SOURCE_DATE_EPOCH
+      run:  |
+        SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)
+        echo SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH >> $GITHUB_ENV
+        echo $(git log -1 --pretty=%ci) [timestamp=$SOURCE_DATE_EPOCH]
 
     - name: Setup Python
       uses: actions/setup-python@v4
