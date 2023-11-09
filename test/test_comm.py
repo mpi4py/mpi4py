@@ -20,6 +20,10 @@ class TestCommNull(unittest.TestCase):
         self.assertEqual(comm_null, MPI.COMM_NULL)
         self.assertIsNot(comm_null, MPI.COMM_NULL)
 
+    def testGetName(self):
+        name = MPI.COMM_NULL.Get_name()
+        self.assertEqual(name, "MPI_COMM_NULL")
+
     def testPickle(self):
         from pickle import dumps, loads
         comm_null = loads(dumps(MPI.COMM_NULL))
@@ -76,8 +80,8 @@ class BaseTestComm:
     def testGetSetName(self):
         try:
             name = self.COMM.Get_name()
-            self.COMM.Set_name('comm')
-            self.assertEqual(self.COMM.Get_name(), 'comm')
+            self.COMM.Set_name("mycomm")
+            self.assertEqual(self.COMM.Get_name(), "mycomm")
             self.COMM.Set_name(name)
             self.assertEqual(self.COMM.Get_name(), name)
             self.COMM.name = self.COMM.name
