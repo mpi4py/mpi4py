@@ -27,6 +27,15 @@ static int PyMPI_Get_vendor(const char **vendor_name,
   major = MSMPI_VER >> 8;
   minor = MSMPI_VER & 0xFF;
 
+#elif defined(CRAY_MPICH_VERSION)
+
+  name = "Cray MPICH";
+# define str(s) #s
+# define xstr(s) str(s)
+  (void)sscanf(xstr(CRAY_MPICH_VERSION),"%d.%d.%d",&major,&minor,&micro);
+# undef xstr
+# undef str
+
 #elif defined(MVAPICH_VERSION) || defined(MVAPICH_NUMVERSION)
 
   name = "MVAPICH";
