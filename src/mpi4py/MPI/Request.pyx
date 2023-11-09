@@ -116,6 +116,27 @@ cdef class Request:
         return (index, <bint>flag)
 
     @classmethod
+    def Get_status_any(
+        cls,
+        requests: Sequence[Request],
+        Status status: Status | None = None,
+    ) -> tuple[int, bool]:
+        """
+        Non-destructive test for the completion of any requests.
+        """
+        cdef int index = MPI_UNDEFINED
+        cdef int flag = 0
+        cdef MPI_Status *statusp = arg_Status(status)
+        cdef _p_rs rs = _p_rs.__new__(_p_rs)
+        rs.acquire(requests)
+        try:
+            with nogil: CHKERR( MPI_Request_get_status_any(
+                rs.count, rs.requests, &index, &flag, statusp) )
+        finally:
+            rs.release()            #~> MPI-4.1
+        return (index, <bint>flag)  #~> MPI-4.1
+
+    @classmethod
     def Waitall(
         cls,
         requests: Sequence[Request],
@@ -151,6 +172,25 @@ cdef class Request:
         finally:
             rs.release(statuses)
         return <bint>flag
+
+    @classmethod
+    def Get_status_all(
+        cls,
+        requests: Sequence[Request],
+        statuses: list[Status] | None = None,
+    ) -> bool:
+        """
+        Non-destructive test for the completion of all requests.
+        """
+        cdef int flag = 0
+        cdef _p_rs rs = _p_rs.__new__(_p_rs)
+        rs.acquire(requests, statuses)
+        try:
+            with nogil: CHKERR( MPI_Request_get_status_all(
+                rs.count, rs.requests, &flag, rs.statuses) )
+        finally:
+            rs.release(statuses)  #~> MPI-4.1
+        return <bint>flag         #~> MPI-4.1
 
     @classmethod
     def Waitsome(
@@ -193,6 +233,27 @@ cdef class Request:
         finally:
             rs.release(statuses)
         return indices
+
+    @classmethod
+    def Get_status_some(
+        cls,
+        requests: Sequence[Request],
+        statuses: list[Status] | None = None,
+    ) -> list[int] | None:
+        """
+        Non-destructive test for completion of some requests.
+        """
+        cdef object indices = None
+        cdef _p_rs rs = _p_rs.__new__(_p_rs)
+        rs.acquire(requests, statuses)
+        rs.add_indices()
+        try:
+            with nogil: CHKERR( MPI_Request_get_status_some(
+                rs.count, rs.requests, &rs.outcount, rs.indices, rs.statuses) )
+            indices = rs.get_indices()  #~> MPI-4.1
+        finally:
+            rs.release(statuses)  #~> MPI-4.1
+        return indices            #~> MPI-4.1
 
     # Cancel
     # ------
