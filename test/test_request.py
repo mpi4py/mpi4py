@@ -83,23 +83,20 @@ class TestRequestArray(unittest.TestCase):
         MPI.Request.testany(self.REQUESTS, self.STATUSES[0])
 
     def testGetStatusAny(self):
-        try:
+        with self.catchNotImplementedError(4, 1):
+            status = self.STATUS
             index, flag = MPI.Request.Get_status_any(self.REQUESTS)
             self.assertEqual(index, MPI.UNDEFINED)
             self.assertTrue(flag)
-        except NotImplementedError:
-            mpi = (MPI.VERSION, MPI.SUBVERSION)
-            self.assertLess(mpi, (4, 1))
-            return
-        index, flag = MPI.Request.Get_status_any(self.REQUESTS, None)
-        self.assertEqual(index, MPI.UNDEFINED)
-        self.assertTrue(flag)
-        index, flag = MPI.Request.Get_status_any(self.REQUESTS, self.STATUS)
-        self.assertEqual(index, MPI.UNDEFINED)
-        self.assertTrue(flag)
-        self.assertEqual(self.STATUS.source, MPI.ANY_SOURCE)
-        self.assertEqual(self.STATUS.tag, MPI.ANY_TAG)
-        self.assertEqual(self.STATUS.error, MPI.SUCCESS)
+            index, flag = MPI.Request.Get_status_any(self.REQUESTS, None)
+            self.assertEqual(index, MPI.UNDEFINED)
+            self.assertTrue(flag)
+            index, flag = MPI.Request.Get_status_any(self.REQUESTS, status)
+            self.assertEqual(index, MPI.UNDEFINED)
+            self.assertTrue(flag)
+            self.assertEqual(status.source, MPI.ANY_SOURCE)
+            self.assertEqual(status.tag, MPI.ANY_TAG)
+            self.assertEqual(status.error, MPI.SUCCESS)
 
     def testWaitall(self):
         MPI.Request.Waitall(self.REQUESTS)
@@ -130,21 +127,18 @@ class TestRequestArray(unittest.TestCase):
             self.assertEqual(len(statuses), len(self.REQUESTS))
 
     def testGetStatusAll(self):
-        try:
+        with self.catchNotImplementedError(4, 1):
+            statuses = self.STATUSES
             flag = MPI.Request.Get_status_all(self.REQUESTS)
             self.assertTrue(flag)
-        except NotImplementedError:
-            mpi = (MPI.VERSION, MPI.SUBVERSION)
-            self.assertLess(mpi, (4, 1))
-            return
-        flag = MPI.Request.Get_status_all(self.REQUESTS, None)
-        self.assertTrue(flag)
-        flag = MPI.Request.Get_status_all(self.REQUESTS, self.STATUSES)
-        self.assertTrue(flag)
-        for status in self.STATUSES:
-            self.assertEqual(status.source, MPI.ANY_SOURCE)
-            self.assertEqual(status.tag, MPI.ANY_TAG)
-            self.assertEqual(status.error, MPI.SUCCESS)
+            flag = MPI.Request.Get_status_all(self.REQUESTS, None)
+            self.assertTrue(flag)
+            flag = MPI.Request.Get_status_all(self.REQUESTS, statuses)
+            self.assertTrue(flag)
+            for status in statuses:
+                self.assertEqual(status.source, MPI.ANY_SOURCE)
+                self.assertEqual(status.tag, MPI.ANY_TAG)
+                self.assertEqual(status.error, MPI.SUCCESS)
 
     def testWaitsome(self):
         ret = MPI.Request.Waitsome(self.REQUESTS)
@@ -169,17 +163,14 @@ class TestRequestArray(unittest.TestCase):
             self.assertEqual(len(statuses), slen)
 
     def testGetStatusSome(self):
-        try:
+        with self.catchNotImplementedError(4, 1):
+            statuses = self.STATUSES
             indices = MPI.Request.Get_status_some(self.REQUESTS)
             self.assertIsNone(indices)
-        except NotImplementedError:
-            mpi = (MPI.VERSION, MPI.SUBVERSION)
-            self.assertLess(mpi, (4, 1))
-            return
-        indices = MPI.Request.Get_status_some(self.REQUESTS, None)
-        self.assertIsNone(indices)
-        indices = MPI.Request.Get_status_some(self.REQUESTS, self.STATUSES)
-        self.assertIsNone(indices)
+            indices = MPI.Request.Get_status_some(self.REQUESTS, None)
+            self.assertIsNone(indices)
+            indices = MPI.Request.Get_status_some(self.REQUESTS, statuses)
+            self.assertIsNone(indices)
 
 
 if __name__ == '__main__':

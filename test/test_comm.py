@@ -356,31 +356,22 @@ class BaseTestComm:
             comm.Free()
 
     def testBuffering(self):
-        import contextlib
-        @contextlib.contextmanager
-        def catch_NotImplementedError():
-            try:
-                yield
-            except NotImplementedError:
-                mpi = (MPI.VERSION, MPI.SUBVERSION)
-                self.assertLess(mpi, (4, 1))
-        #
         comm = self.COMM.Dup()
         buf = MPI.Alloc_mem((1<<16)+MPI.BSEND_OVERHEAD)
         try:
-            with catch_NotImplementedError():
+            with self.catchNotImplementedError(4, 1):
                 comm.Attach_buffer(buf)
-            with catch_NotImplementedError():
+            with self.catchNotImplementedError(4, 1):
                 comm.Flush_buffer()
-            with catch_NotImplementedError():
+            with self.catchNotImplementedError(4, 1):
                 comm.Iflush_buffer().Wait()
         finally:
-            with catch_NotImplementedError():
+            with self.catchNotImplementedError(4, 1):
                 oldbuf = comm.Detach_buffer()
                 self.assertEqual(oldbuf.address, buf.address)
                 self.assertEqual(oldbuf.nbytes, buf.nbytes)
             MPI.Free_mem(buf)
-            with catch_NotImplementedError():
+            with self.catchNotImplementedError(4, 1):
                 comm.Attach_buffer(MPI.BUFFER_AUTOMATIC)
                 bufauto = comm.Detach_buffer()
                 self.assertEqual(bufauto, MPI.BUFFER_AUTOMATIC)

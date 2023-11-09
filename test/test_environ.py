@@ -37,12 +37,9 @@ class TestEnviron(unittest.TestCase):
         self.assertIsInstance(procname, str)
 
     def testGetHWResourceInfo(self):
-        try:
+        with self.catchNotImplementedError(4, 1):
             info = MPI.Get_hw_resource_info()
             self.assertIsInstance(info, MPI.Info)
-        except NotImplementedError:
-            mpi = (MPI.VERSION, MPI.SUBVERSION)
-            self.assertLess(mpi, (4, 1))
 
     def testWTime(self):
         time1 = MPI.Wtime()

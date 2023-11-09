@@ -5,50 +5,15 @@ import unittest
 
 class TestCase(unittest.TestCase):
 
-    def assertRaisesMPI(self, IErrClass, callableObj, *args, **kwargs):
-        from mpi4py import MPI
-        excClass = MPI.Exception
+    @contextlib.contextmanager
+    def catchNotImplementedError(self, version=None, subversion=0):
         try:
-            callableObj(*args, **kwargs)
+            yield
         except NotImplementedError:
-            if MPI.Get_version() < (2, 0):
-                raise self.failureException("raised NotImplementedError")
-        except excClass as excValue:
-            error_class = excValue.Get_error_class()
-            if isinstance(IErrClass, (list, tuple)):
-                match = (error_class in IErrClass)
-            else:
-                match = (error_class == IErrClass)
-            if not match:
-                if isinstance(IErrClass, (list, tuple)):
-                    IErrClassName = [ErrClsName(e) for e in IErrClass]
-                    IErrClassName = type(IErrClass)(IErrClassName)
-                else:
-                    IErrClassName = ErrClsName(IErrClass)
-                raise self.failureException(
-                    f"generated error class "
-                    f"is '{ErrClsName(error_class)}' ({error_class}), "
-                    f"but expected '{IErrClassName}' ({IErrClass})"
-                )
-        else:
-            raise self.failureException(f"{excClass.__name__} not raised")
-
-
-ErrClsMap = {}
-
-
-def ErrClsName(ierr):
-    if not ErrClsMap:
-        from mpi4py import MPI
-        ErrClsMap[MPI.SUCCESS] = 'SUCCESS'
-        for entry in dir(MPI):
-            if entry.startswith('ERR_'):
-                errcls = getattr(MPI, entry)
-                ErrClsMap[errcls] = entry
-    try:
-        return ErrClsMap[ierr]
-    except KeyError:
-        return '<unknown>'
+            if version is not None:
+                from mpi4py import MPI
+                mpi_version = (MPI.VERSION, MPI.SUBVERSION)
+                self.assertLess(mpi_version, (version, subversion))
 
 
 _Version = namedtuple("_Version", ["major", "minor", "patch"])
