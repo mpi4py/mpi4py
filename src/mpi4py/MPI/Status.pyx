@@ -5,9 +5,9 @@ cdef class Status:
 
     def __cinit__(self, Status status: Status | None = None):
         cdef MPI_Status *s = &self.ob_mpi
-        CHKERR( PyMPI_Status_set_source (s, MPI_ANY_SOURCE ) )
-        CHKERR( PyMPI_Status_set_tag    (s, MPI_ANY_TAG    ) )
-        CHKERR( PyMPI_Status_set_error  (s, MPI_SUCCESS    ) )
+        CHKERR( MPI_Status_set_source (s, MPI_ANY_SOURCE ) )
+        CHKERR( MPI_Status_set_tag    (s, MPI_ANY_TAG    ) )
+        CHKERR( MPI_Status_set_error  (s, MPI_SUCCESS    ) )
         if status is None: return
         self.ob_mpi = status.ob_mpi
 
@@ -54,14 +54,14 @@ cdef class Status:
         Get message source.
         """
         cdef int source = MPI_ANY_SOURCE
-        CHKERR( PyMPI_Status_get_source(&self.ob_mpi, &source) )
+        CHKERR( MPI_Status_get_source(&self.ob_mpi, &source) )
         return source
 
     def Set_source(self, int source: int) -> None:
         """
         Set message source.
         """
-        CHKERR( PyMPI_Status_set_source(&self.ob_mpi, source) )
+        CHKERR( MPI_Status_set_source(&self.ob_mpi, source) )
 
     property source:
         """Message source."""
@@ -75,14 +75,14 @@ cdef class Status:
         Get message tag.
         """
         cdef int tag = MPI_ANY_TAG
-        CHKERR( PyMPI_Status_get_tag(&self.ob_mpi, &tag) )
+        CHKERR( MPI_Status_get_tag(&self.ob_mpi, &tag) )
         return tag
 
     def Set_tag(self, int tag: int) -> None:
         """
         Set message tag.
         """
-        CHKERR( PyMPI_Status_set_tag(&self.ob_mpi, tag) )
+        CHKERR( MPI_Status_set_tag(&self.ob_mpi, tag) )
 
     property tag:
         """Message tag."""
@@ -96,14 +96,14 @@ cdef class Status:
         Get message error.
         """
         cdef int error = MPI_SUCCESS
-        CHKERR( PyMPI_Status_get_error(&self.ob_mpi, &error) )
+        CHKERR( MPI_Status_get_error(&self.ob_mpi, &error) )
         return error
 
     def Set_error(self, int error: int) -> None:
         """
         Set message error.
         """
-        CHKERR( PyMPI_Status_set_error(&self.ob_mpi, error) )
+        CHKERR( MPI_Status_set_error(&self.ob_mpi, error) )
 
     property error:
         """Message error."""

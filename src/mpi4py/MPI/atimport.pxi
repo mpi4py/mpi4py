@@ -8,7 +8,6 @@ cdef extern from * nogil:
     #include "lib-mpi/compat.h"
 
     #include "pympivendor.h"
-    #include "pympistatus.h"
     #include "pympicommctx.h"
     """
 
