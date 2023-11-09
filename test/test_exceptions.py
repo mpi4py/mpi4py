@@ -438,15 +438,24 @@ except (NotImplementedError, MPI.Exception):
 class TestExcErrhandlerNull(BaseTestCase):
 
     def testFree(self):
-        self.assertRaisesMPI(MPI.ERR_ARG, MPI.ERRHANDLER_NULL.Free)
+        self.assertRaisesMPI(
+            [MPI.ERR_ERRHANDLER, MPI.ERR_ARG],
+            MPI.ERRHANDLER_NULL.Free,
+        )
 
     def testCommSelfSetErrhandler(self):
         self.assertRaisesMPI(
-            MPI.ERR_ARG, MPI.COMM_SELF.Set_errhandler, MPI.ERRHANDLER_NULL)
+            [MPI.ERR_ERRHANDLER, MPI.ERR_ARG],
+            MPI.COMM_SELF.Set_errhandler,
+            MPI.ERRHANDLER_NULL
+        )
 
     def testCommWorldSetErrhandler(self):
         self.assertRaisesMPI(
-            MPI.ERR_ARG, MPI.COMM_WORLD.Set_errhandler, MPI.ERRHANDLER_NULL)
+            [MPI.ERR_ERRHANDLER, MPI.ERR_ARG],
+            MPI.COMM_WORLD.Set_errhandler,
+            MPI.ERRHANDLER_NULL,
+        )
 
 # class TestExcErrhandler(BaseTestCase):
 #
