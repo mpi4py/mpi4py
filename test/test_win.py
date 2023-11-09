@@ -282,24 +282,19 @@ class TestWinCreateDynamicWorld(BaseTestWinCreateDynamic, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
 
-SpectrumMPI = MPI.get_vendor()[0] == 'Spectrum MPI'
 try:
-    if SpectrumMPI: raise NotImplementedError
     MPI.Win.Create(MPI.BOTTOM, 1, MPI.INFO_NULL, MPI.COMM_SELF).Free()
 except (NotImplementedError, MPI.Exception):
     unittest.disable(BaseTestWinCreate, 'mpi-win-create')
 try:
-    if SpectrumMPI: raise NotImplementedError
     MPI.Win.Allocate(1, 1, MPI.INFO_NULL, MPI.COMM_SELF).Free()
 except (NotImplementedError, MPI.Exception):
     unittest.disable(BaseTestWinAllocate, 'mpi-win-allocate')
 try:
-    if SpectrumMPI: raise NotImplementedError
     MPI.Win.Allocate_shared(1, 1, MPI.INFO_NULL, MPI.COMM_SELF).Free()
 except (NotImplementedError, MPI.Exception):
     unittest.disable(BaseTestWinAllocateShared, 'mpi-win-shared')
 try:
-    if SpectrumMPI: raise NotImplementedError
     MPI.Win.Create_dynamic(MPI.INFO_NULL, MPI.COMM_SELF).Free()
 except (NotImplementedError, MPI.Exception):
     unittest.disable(BaseTestWinCreateDynamic, 'mpi-win-dynamic')

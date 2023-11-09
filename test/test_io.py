@@ -234,7 +234,6 @@ class BaseTestIOBasic(BaseTestIO):
                 self.assertEqual(rbuf[-1], scalar(-1))
                 comm.Barrier()
 
-    @unittest.skipMPI('SpectrumMPI')
     def testIReadIWriteAtAll(self):
         comm = self.COMM
         size = comm.Get_size()
@@ -312,7 +311,6 @@ class BaseTestIOBasic(BaseTestIO):
                 self.assertEqual(rbuf[-1], scalar(-1))
                 comm.Barrier()
 
-    @unittest.skipMPI('SpectrumMPI')
     def testIReadIWriteAll(self):
         comm = self.COMM
         size = comm.Get_size()

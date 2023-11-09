@@ -154,7 +154,6 @@ class TestErrhandlerWin(BaseTestErrhandler, unittest.TestCase):
     def tearDown(self):
         self.mpiobj.Free()
 
-    @unittest.skipMPI('SpectrumMPI')
     def testCall(self):
         super().testCall()
 
