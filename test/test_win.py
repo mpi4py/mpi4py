@@ -14,11 +14,16 @@ except AttributeError:
         def __sub__(self, other):
             return self
 
+
 def memzero(m):
     try:
         m[:] = 0
     except IndexError: # cffi buffer
         m[0:len(m)] = b'\0'*len(m)
+
+def ch3_sock():
+    return 'ch3:sock' in MPI.Get_library_version()
+
 
 class TestWinNull(unittest.TestCase):
 
@@ -272,6 +277,7 @@ class TestWinAllocateWorld(BaseTestWinAllocate, unittest.TestCase):
 class TestWinAllocateSharedSelf(BaseTestWinAllocateShared, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
+@unittest.skipMPI('mpich', ch3_sock() and MPI.COMM_WORLD.Get_size() > 1)
 class TestWinAllocateSharedWorld(BaseTestWinAllocateShared, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 

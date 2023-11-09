@@ -2,9 +2,8 @@ from mpi4py import MPI
 import mpiunittest as unittest
 
 
-def mpich_ch3_nemesis():
-    libinfo = MPI.Get_library_version()
-    return 'MPICH Device:\tch3:nemesis' in libinfo.split('\n')
+def ch3_nemesis():
+    return 'ch3:nemesis' in MPI.Get_library_version()
 
 
 @unittest.skipIf(MPI.COMM_WORLD.Get_size() < 2, 'mpi-world-size<2')
@@ -115,7 +114,7 @@ class BaseTestIntercomm:
 
     @unittest.skipMPI('msmpi')
     @unittest.skipMPI('openmpi')  # TODO: open-mpi/ompi#11672
-    @unittest.skipMPI('mpich(<4.2.0)', mpich_ch3_nemesis())
+    @unittest.skipMPI('mpich(<4.2.0)', ch3_nemesis())
     def testSplitTypeShared(self):
         try:
             comm = self.INTERCOMM.Split_type(MPI.COMM_TYPE_SHARED)
