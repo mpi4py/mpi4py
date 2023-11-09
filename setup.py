@@ -76,11 +76,8 @@ def extensions():
             glob.glob('src/lib-mpi/config/*.h') +
             glob.glob('src/lib-mpi/compat/*.h')
         ),
-        include_dirs = ['src'],
-        define_macros=[
-            ('MPICH_SKIP_MPICXX', 1),
-            ('OMPI_SKIP_MPICXX', 1),
-        ],
+        include_dirs=['src'],
+        define_macros=[],
         configure=mpidistutils.configure_mpi,
     )
     if sys.version_info[:2] > maxknow_python:

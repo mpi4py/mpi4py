@@ -222,6 +222,12 @@ cdef int getOptions(Options* opts) except -1:
 
 # -----------------------------------------------------------------------------
 
+cdef extern from "Python.h":
+    """
+    #define MPICH_SKIP_MPICXX 1
+    #define OMPI_SKIP_MPICXX  1
+    """
+
 cdef extern from * nogil:
     """
     #if defined(MPICH)
