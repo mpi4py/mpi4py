@@ -107,7 +107,7 @@ class TestErrorCode(unittest.TestCase):
         self.assertEqual(MPI.Get_error_class(errcode2), errclass)
         self.assertEqual(MPI.Get_error_string(errcode2), "error code 2")
         #
-        try:
+        with self.catchNotImplementedError(4, 1):
             with self.assertRaises(MPI.Exception):
                 MPI.Remove_error_class(errclass)
             with self.assertRaises(MPI.Exception):
@@ -135,9 +135,6 @@ class TestErrorCode(unittest.TestCase):
             MPI.Remove_error_class(errclass)
             with self.assertRaises(MPI.Exception):
                 MPI.Remove_error_class(errclass)
-        except NotImplementedError:
-            mpi_xy = (MPI.VERSION, MPI.SUBVERSION)
-            self.assertLess(mpi_xy, (4, 1))
         #
         try:
             MPI.Remove_error_class(0)
