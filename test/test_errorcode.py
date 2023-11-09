@@ -65,9 +65,25 @@ class TestErrorCode(unittest.TestCase):
         except NotImplementedError:
             self.skipTest('mpi-add_error_class')
         self.assertGreaterEqual(errclass, MPI.ERR_LASTCODE)
+        try:
+            MPI.Remove_error_class(errclass)
+        except NotImplementedError:
+            pass
+
+    @unittest.skipMPI('openmpi(<1.10.0)')
+    def testAddErrorCode(self):
+        try:
+            errcode = MPI.Add_error_code(MPI.ERR_OTHER)
+        except NotImplementedError:
+            self.skipTest('mpi-add_error_code')
+        try:
+            MPI.Remove_error_code(errcode)
+        except NotImplementedError:
+            pass
 
     @unittest.skipMPI('openmpi(<1.10.0)')
     def testAddErrorClassCodeString(self):
+        LASTUSED = MPI.COMM_WORLD.Get_attr(MPI.LASTUSEDCODE)
         try:
             errclass = MPI.Add_error_class()
         except NotImplementedError:
@@ -90,6 +106,54 @@ class TestErrorCode(unittest.TestCase):
         MPI.Add_error_string(errcode2, "error code 2")
         self.assertEqual(MPI.Get_error_class(errcode2), errclass)
         self.assertEqual(MPI.Get_error_string(errcode2), "error code 2")
+        #
+        try:
+            with self.assertRaises(MPI.Exception):
+                MPI.Remove_error_class(errclass)
+            with self.assertRaises(MPI.Exception):
+                MPI.Remove_error_code(errcode2)
+            MPI.Remove_error_string(errcode2)
+            self.assertEqual(MPI.Get_error_string(errcode2), "")
+            MPI.Remove_error_code(errcode2)
+            with self.assertRaises(MPI.Exception):
+                MPI.Remove_error_code(errcode2)
+            #
+            with self.assertRaises(MPI.Exception):
+                MPI.Remove_error_class(errclass)
+            with self.assertRaises(MPI.Exception):
+                MPI.Remove_error_code(errcode1)
+            MPI.Remove_error_string(errcode1)
+            self.assertEqual(MPI.Get_error_string(errcode1), "")
+            MPI.Remove_error_code(errcode1)
+            with self.assertRaises(MPI.Exception):
+                MPI.Remove_error_code(errcode1)
+            #
+            with self.assertRaises(MPI.Exception):
+                MPI.Remove_error_class(errclass)
+            MPI.Remove_error_string(errclass)
+            self.assertEqual(MPI.Get_error_string(errclass), "")
+            MPI.Remove_error_class(errclass)
+            with self.assertRaises(MPI.Exception):
+                MPI.Remove_error_class(errclass)
+        except NotImplementedError:
+            mpi_xy = (MPI.VERSION, MPI.SUBVERSION)
+            self.assertLess(mpi_xy, (4, 1))
+        #
+        try:
+            MPI.Remove_error_class(0)
+            self.fail("expected Exception")
+        except (MPI.Exception, NotImplementedError):
+            pass
+        try:
+            MPI.Remove_error_code(0)
+            self.fail("expected Exception")
+        except (MPI.Exception, NotImplementedError):
+            pass
+        try:
+            MPI.Remove_error_string(0)
+            self.fail("expected Exception")
+        except (MPI.Exception, NotImplementedError):
+            pass
 
 
 if __name__ == '__main__':
