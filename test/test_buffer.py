@@ -286,6 +286,35 @@ class TestBuffer(unittest.TestCase):
             self.assertEqual(mem.nbytes, 0)
             self.assertFalse(mem.readonly)
 
+    def testBuffering(self):
+        import contextlib
+        @contextlib.contextmanager
+        def catch_NotImplementedError():
+            try:
+                yield
+            except NotImplementedError:
+                mpi = (MPI.VERSION, MPI.SUBVERSION)
+                self.assertLess(mpi, (4, 1))
+        #
+        buf = MPI.Alloc_mem((1<<16)+MPI.BSEND_OVERHEAD)
+        MPI.Attach_buffer(buf)
+        try:
+            with catch_NotImplementedError():
+                MPI.Flush_buffer()
+            with catch_NotImplementedError():
+                MPI.Iflush_buffer().Wait()
+        finally:
+            oldbuf = MPI.Detach_buffer()
+            self.assertEqual(oldbuf.address, buf.address)
+            self.assertEqual(oldbuf.nbytes, buf.nbytes)
+            MPI.Free_mem(buf)
+        #
+        mpi = (MPI.VERSION, MPI.SUBVERSION)
+        if MPI.BUFFER_AUTOMATIC or mpi >= (4, 1):
+            MPI.Attach_buffer(MPI.BUFFER_AUTOMATIC)
+            bufauto = MPI.Detach_buffer()
+            self.assertEqual(bufauto, MPI.BUFFER_AUTOMATIC)
+
     def testAttachBufferReadonly(self):
         buf = MPI.buffer(b"abc")
         self.assertRaises(BufferError, MPI.Attach_buffer, buf)

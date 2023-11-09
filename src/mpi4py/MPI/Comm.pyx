@@ -369,6 +369,45 @@ cdef class Comm:
     # Point to Point communication
     # ----------------------------
 
+    # Buffer Allocation and Usage
+    # ---------------------------
+
+    def Attach_buffer(self, buf: Buffer | None) -> None:
+        """
+        Attach a user-provided buffer for sending in buffered mode.
+        """
+        cdef void *base = NULL
+        cdef MPI_Count size = 0
+        buf = attach_buffer(buf, &base, &size)
+        with nogil: CHKERR( MPI_Comm_attach_buffer_c(
+            self.ob_mpi, base, size) )
+        detach_buffer_set(self, buf)  #~> MPI-4.1
+
+    def Detach_buffer(self) -> Buffer | None:
+        """
+        Remove an existing attached buffer.
+        """
+        cdef void *base = NULL
+        cdef MPI_Count size = 0
+        with nogil: CHKERR( MPI_Comm_detach_buffer_c(
+            self.ob_mpi, &base, &size) )
+        return detach_buffer_get(self, base, size)  #~> MPI-4.1
+
+    def Flush_buffer(self) -> None:
+        """
+        Block until all buffered messages have been transmitted.
+        """
+        with nogil: CHKERR( MPI_Comm_flush_buffer(self.ob_mpi) )
+
+    def Iflush_buffer(self) -> Request:
+        """
+        Nonblocking flush for buffered messages.
+        """
+        cdef Request request = <Request>New(Request)
+        with nogil: CHKERR( MPI_Comm_iflush_buffer(
+            self.ob_mpi, &request.ob_mpi) )
+        return request  #~> MPI-4.1
+
     # Blocking Send and Receive Operations
     # ------------------------------------
 
@@ -3384,23 +3423,41 @@ COMM_WORLD = __COMM_WORLD__  #: World communicator handle
 BSEND_OVERHEAD = MPI_BSEND_OVERHEAD
 #: Upper bound of memory overhead for sending in buffered mode
 
-def Attach_buffer(buf: Buffer) -> None:
+BUFFER_AUTOMATIC = __BUFFER_AUTOMATIC__
+#: Special address for automatic buffering
+
+def Attach_buffer(buf: Buffer | None) -> None:
     """
     Attach a user-provided buffer for sending in buffered mode.
     """
     cdef void *base = NULL
     cdef MPI_Count size = 0
-    attach_buffer(buf, &base, &size)
+    buf = attach_buffer(buf, &base, &size)
     with nogil: CHKERR( MPI_Buffer_attach_c(base, size) )
+    detach_buffer_set(0, buf)
 
-def Detach_buffer() -> Buffer:
+def Detach_buffer() -> Buffer | None:
     """
     Remove an existing attached buffer.
     """
     cdef void *base = NULL
     cdef MPI_Count size = 0
     with nogil: CHKERR( MPI_Buffer_detach_c(&base, &size) )
-    return detach_buffer(base, size)
+    return detach_buffer_get(0, base, size)
+
+def Flush_buffer() -> None:
+    """
+    Block until all buffered messages have been transmitted.
+    """
+    with nogil: CHKERR( MPI_Buffer_flush() )
+
+def Iflush_buffer() -> Request:
+    """
+    Nonblocking flush for buffered messages.
+    """
+    cdef Request request = <Request>New(Request)
+    with nogil: CHKERR( MPI_Buffer_iflush(&request.ob_mpi) )
+    return request  #~> MPI-4.1
 
 
 # Process Creation and Management

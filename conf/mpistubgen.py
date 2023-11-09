@@ -470,6 +470,7 @@ OVERRIDE.update({
     for subtype in (
         'BottomType',
         'InPlaceType',
+        'BufferAutomaticType',
     )
 })
 OVERRIDE.update({
