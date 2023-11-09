@@ -64,7 +64,7 @@ cdef extern from "<mpi.h>" nogil:
     void* MPI_IN_PLACE   #:= 0
 
     enum: MPI_KEYVAL_INVALID   #:= 0
-    enum: MPI_MAX_OBJECT_NAME  #:= 1
+    enum: MPI_MAX_OBJECT_NAME  #:= 64
 
     #-----------------------------------------------------------------
 
@@ -183,6 +183,7 @@ cdef extern from "<mpi.h>" nogil:
     enum: MPI_TYPECLASS_REAL     #:= MPI_UNDEFINED
     enum: MPI_TYPECLASS_COMPLEX  #:= MPI_UNDEFINED
     int MPI_Type_match_size(int, int, MPI_Datatype*)
+    int MPI_Type_get_value_index(MPI_Datatype, MPI_Datatype, MPI_Datatype*)
 
     int MPI_Type_commit(MPI_Datatype*)
     int MPI_Type_free(MPI_Datatype*)
@@ -203,6 +204,7 @@ cdef extern from "<mpi.h>" nogil:
     enum: MPI_COMBINER_F90_COMPLEX     #:= MPI_UNDEFINED
     enum: MPI_COMBINER_F90_INTEGER     #:= MPI_UNDEFINED
     enum: MPI_COMBINER_RESIZED         #:= MPI_UNDEFINED
+    enum: MPI_COMBINER_VALUE_INDEX     #:= MPI_COMBINER_NAMED
     int MPI_Type_get_envelope(MPI_Datatype, int*, int*, int*, int*)
     int MPI_Type_get_contents(MPI_Datatype, int, int, int, int[], MPI_Aint[], MPI_Datatype[])
 
@@ -277,6 +279,15 @@ cdef extern from "<mpi.h>" nogil:
     int MPI_Get_elements_c(MPI_Status*, MPI_Datatype, MPI_Count*) #:= MPI_Get_elements_x
     int MPI_Status_set_elements_c(MPI_Status*, MPI_Datatype, MPI_Count) #:= MPI_Status_set_elements_x
 
+    # MPI-41 getters and setters
+
+    int MPI_Status_get_source(MPI_Status*, int*)
+    int MPI_Status_set_source(MPI_Status*, int)
+    int MPI_Status_get_tag(MPI_Status*, int*)
+    int MPI_Status_set_tag(MPI_Status*, int)
+    int MPI_Status_get_error(MPI_Status*, int*)
+    int MPI_Status_set_error(MPI_Status*, int)
+
     #-----------------------------------------------------------------
 
     MPI_Request MPI_REQUEST_NULL  #:= 0
@@ -287,12 +298,15 @@ cdef extern from "<mpi.h>" nogil:
 
     int MPI_Waitany(int, MPI_Request[], int*, MPI_Status*)
     int MPI_Testany(int, MPI_Request[], int*, int*, MPI_Status*)
+    int MPI_Request_get_status_any(int, MPI_Request[], int*, int*, MPI_Status*)
 
     int MPI_Waitall(int, MPI_Request[], MPI_Status[])
     int MPI_Testall(int, MPI_Request[], int*, MPI_Status[])
+    int MPI_Request_get_status_all(int, MPI_Request [], int*, MPI_Status[])
 
     int MPI_Waitsome(int, MPI_Request[], int*, int[], MPI_Status[])
     int MPI_Testsome(int, MPI_Request[], int*, int[], MPI_Status[])
+    int MPI_Request_get_status_some(int, MPI_Request[], int*, int[], MPI_Status[])
 
     int MPI_Cancel(MPI_Request*)
     int MPI_Request_free(MPI_Request*)
@@ -427,8 +441,21 @@ cdef extern from "<mpi.h>" nogil:
     int MPI_Abort(MPI_Comm, int)
 
     enum: MPI_BSEND_OVERHEAD #:= 0
+    void* MPI_BUFFER_AUTOMATIC #:= 0
     int MPI_Buffer_attach(void*, int)
     int MPI_Buffer_detach(void*, int*)
+    int MPI_Buffer_flush()
+    int MPI_Buffer_iflush(MPI_Request*)
+
+    int MPI_Comm_attach_buffer(MPI_Comm, void*, int)
+    int MPI_Comm_detach_buffer(MPI_Comm, void*, int*)
+    int MPI_Comm_flush_buffer(MPI_Comm)
+    int MPI_Comm_iflush_buffer(MPI_Comm,MPI_Request*)
+
+    int MPI_Session_attach_buffer(MPI_Session, void*, int)
+    int MPI_Session_detach_buffer(MPI_Session, void*, int*)
+    int MPI_Session_flush_buffer(MPI_Session)
+    int MPI_Session_iflush_buffer(MPI_Session,MPI_Request*)
 
     int MPI_Send(void*, int, MPI_Datatype, int, int, MPI_Comm)
     int MPI_Recv(void*, int, MPI_Datatype, int, int, MPI_Comm, MPI_Status*)
@@ -555,6 +582,7 @@ cdef extern from "<mpi.h>" nogil:
     enum: MPI_COMM_TYPE_SHARED #:= MPI_UNDEFINED
     enum: MPI_COMM_TYPE_HW_GUIDED #:= MPI_UNDEFINED
     enum: MPI_COMM_TYPE_HW_UNGUIDED #:= MPI_UNDEFINED
+    enum: MPI_COMM_TYPE_RESOURCE_GUIDED #:= MPI_UNDEFINED
     int MPI_Comm_split_type(MPI_Comm, int, int, MPI_Info, MPI_Comm*)
     int MPI_Comm_set_info(MPI_Comm, MPI_Info)
     int MPI_Comm_get_info(MPI_Comm, MPI_Info*)
@@ -647,6 +675,12 @@ cdef extern from "<mpi.h>" nogil:
 
     int MPI_Buffer_attach_c(void*, MPI_Count)
     int MPI_Buffer_detach_c(void*, MPI_Count*)
+
+    int MPI_Comm_attach_buffer_c(MPI_Comm, void*, MPI_Count)
+    int MPI_Comm_detach_buffer_c(MPI_Comm, void*, MPI_Count*)
+
+    int MPI_Session_attach_buffer_c(MPI_Session, void*, MPI_Count)
+    int MPI_Session_detach_buffer_c(MPI_Session, void*, MPI_Count*)
 
     int MPI_Send_c(void*, MPI_Count, MPI_Datatype, int, int, MPI_Comm)
     int MPI_Recv_c(void*, MPI_Count, MPI_Datatype, int, int, MPI_Comm, MPI_Status*)
@@ -1008,8 +1042,11 @@ cdef extern from "<mpi.h>" nogil:
     int MPI_Error_string(int, char[], int*)
 
     int MPI_Add_error_class(int*)
+    int MPI_Remove_error_class(int)
     int MPI_Add_error_code(int,int*)
+    int MPI_Remove_error_code(int)
     int MPI_Add_error_string(int,char[])
+    int MPI_Remove_error_string(int)
 
     # no errors
     enum: MPI_SUCCESS                    #:= 0
@@ -1020,6 +1057,7 @@ cdef extern from "<mpi.h>" nogil:
     enum: MPI_ERR_OP                     #:= MPI_ERR_LASTCODE
     enum: MPI_ERR_GROUP                  #:= MPI_ERR_LASTCODE
     enum: MPI_ERR_INFO                   #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_ERRHANDLER             #:= MPI_ERR_LASTCODE
     enum: MPI_ERR_SESSION                #:= MPI_ERR_LASTCODE
     enum: MPI_ERR_COMM                   #:= MPI_ERR_LASTCODE
     enum: MPI_ERR_WIN                    #:= MPI_ERR_LASTCODE
@@ -1122,6 +1160,7 @@ cdef extern from "<mpi.h>" nogil:
 
     enum: MPI_MAX_PROCESSOR_NAME #:= 1
     int MPI_Get_processor_name(char[], int*)
+    int MPI_Get_hw_resource_info(MPI_Info*)
 
     #-----------------------------------------------------------------
 

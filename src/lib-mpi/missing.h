@@ -171,7 +171,7 @@ typedef void *PyMPI_MPI_File;
 
 #ifndef PyMPI_HAVE_MPI_MAX_OBJECT_NAME
 #undef  MPI_MAX_OBJECT_NAME
-#define MPI_MAX_OBJECT_NAME (1)
+#define MPI_MAX_OBJECT_NAME (64)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_DATATYPE_NULL
@@ -689,6 +689,11 @@ typedef void *PyMPI_MPI_File;
 #define MPI_Type_match_size(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Type_match_size",a1,a2,a3)
 #endif
 
+#ifndef PyMPI_HAVE_MPI_Type_get_value_index
+#undef  MPI_Type_get_value_index
+#define MPI_Type_get_value_index(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Type_get_value_index",a1,a2,a3)
+#endif
+
 #ifndef PyMPI_HAVE_MPI_Type_commit
 #undef  MPI_Type_commit
 #define MPI_Type_commit(a1) PyMPI_UNAVAILABLE("MPI_Type_commit",a1)
@@ -777,6 +782,11 @@ typedef void *PyMPI_MPI_File;
 #ifndef PyMPI_HAVE_MPI_COMBINER_RESIZED
 #undef  MPI_COMBINER_RESIZED
 #define MPI_COMBINER_RESIZED (MPI_UNDEFINED)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_COMBINER_VALUE_INDEX
+#undef  MPI_COMBINER_VALUE_INDEX
+#define MPI_COMBINER_VALUE_INDEX (MPI_COMBINER_NAMED)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Type_get_envelope
@@ -1051,6 +1061,36 @@ typedef int (MPIAPI PyMPI_MPI_Type_delete_attr_function)(MPI_Datatype,int,void*,
 #define MPI_Status_set_elements_c MPI_Status_set_elements_x
 #endif
 
+#ifndef PyMPI_HAVE_MPI_Status_get_source
+#undef  MPI_Status_get_source
+#define MPI_Status_get_source(a1,a2) PyMPI_UNAVAILABLE("MPI_Status_get_source",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Status_set_source
+#undef  MPI_Status_set_source
+#define MPI_Status_set_source(a1,a2) PyMPI_UNAVAILABLE("MPI_Status_set_source",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Status_get_tag
+#undef  MPI_Status_get_tag
+#define MPI_Status_get_tag(a1,a2) PyMPI_UNAVAILABLE("MPI_Status_get_tag",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Status_set_tag
+#undef  MPI_Status_set_tag
+#define MPI_Status_set_tag(a1,a2) PyMPI_UNAVAILABLE("MPI_Status_set_tag",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Status_get_error
+#undef  MPI_Status_get_error
+#define MPI_Status_get_error(a1,a2) PyMPI_UNAVAILABLE("MPI_Status_get_error",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Status_set_error
+#undef  MPI_Status_set_error
+#define MPI_Status_set_error(a1,a2) PyMPI_UNAVAILABLE("MPI_Status_set_error",a1,a2)
+#endif
+
 #ifndef PyMPI_HAVE_MPI_REQUEST_NULL
 #undef  MPI_REQUEST_NULL
 #define MPI_REQUEST_NULL ((MPI_Request)0)
@@ -1081,6 +1121,11 @@ typedef int (MPIAPI PyMPI_MPI_Type_delete_attr_function)(MPI_Datatype,int,void*,
 #define MPI_Testany(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Testany",a1,a2,a3,a4,a5)
 #endif
 
+#ifndef PyMPI_HAVE_MPI_Request_get_status_any
+#undef  MPI_Request_get_status_any
+#define MPI_Request_get_status_any(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Request_get_status_any",a1,a2,a3,a4,a5)
+#endif
+
 #ifndef PyMPI_HAVE_MPI_Waitall
 #undef  MPI_Waitall
 #define MPI_Waitall(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Waitall",a1,a2,a3)
@@ -1091,6 +1136,11 @@ typedef int (MPIAPI PyMPI_MPI_Type_delete_attr_function)(MPI_Datatype,int,void*,
 #define MPI_Testall(a1,a2,a3,a4) PyMPI_UNAVAILABLE("MPI_Testall",a1,a2,a3,a4)
 #endif
 
+#ifndef PyMPI_HAVE_MPI_Request_get_status_all
+#undef  MPI_Request_get_status_all
+#define MPI_Request_get_status_all(a1,a2,a3,a4) PyMPI_UNAVAILABLE("MPI_Request_get_status_all",a1,a2,a3,a4)
+#endif
+
 #ifndef PyMPI_HAVE_MPI_Waitsome
 #undef  MPI_Waitsome
 #define MPI_Waitsome(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Waitsome",a1,a2,a3,a4,a5)
@@ -1099,6 +1149,11 @@ typedef int (MPIAPI PyMPI_MPI_Type_delete_attr_function)(MPI_Datatype,int,void*,
 #ifndef PyMPI_HAVE_MPI_Testsome
 #undef  MPI_Testsome
 #define MPI_Testsome(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Testsome",a1,a2,a3,a4,a5)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Request_get_status_some
+#undef  MPI_Request_get_status_some
+#define MPI_Request_get_status_some(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Request_get_status_some",a1,a2,a3,a4,a5)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Cancel
@@ -1567,6 +1622,11 @@ typedef void (MPIAPI PyMPI_MPI_Session_errhandler_function)(MPI_Session*,int*,..
 #define MPI_BSEND_OVERHEAD (0)
 #endif
 
+#ifndef PyMPI_HAVE_MPI_BUFFER_AUTOMATIC
+#undef  MPI_BUFFER_AUTOMATIC
+#define MPI_BUFFER_AUTOMATIC ((void*)0)
+#endif
+
 #ifndef PyMPI_HAVE_MPI_Buffer_attach
 #undef  MPI_Buffer_attach
 #define MPI_Buffer_attach(a1,a2) PyMPI_UNAVAILABLE("MPI_Buffer_attach",a1,a2)
@@ -1575,6 +1635,56 @@ typedef void (MPIAPI PyMPI_MPI_Session_errhandler_function)(MPI_Session*,int*,..
 #ifndef PyMPI_HAVE_MPI_Buffer_detach
 #undef  MPI_Buffer_detach
 #define MPI_Buffer_detach(a1,a2) PyMPI_UNAVAILABLE("MPI_Buffer_detach",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Buffer_flush
+#undef  MPI_Buffer_flush
+#define MPI_Buffer_flush() PyMPI_UNAVAILABLE("MPI_Buffer_flush")
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Buffer_iflush
+#undef  MPI_Buffer_iflush
+#define MPI_Buffer_iflush(a1) PyMPI_UNAVAILABLE("MPI_Buffer_iflush",a1)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Comm_attach_buffer
+#undef  MPI_Comm_attach_buffer
+#define MPI_Comm_attach_buffer(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Comm_attach_buffer",a1,a2,a3)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Comm_detach_buffer
+#undef  MPI_Comm_detach_buffer
+#define MPI_Comm_detach_buffer(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Comm_detach_buffer",a1,a2,a3)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Comm_flush_buffer
+#undef  MPI_Comm_flush_buffer
+#define MPI_Comm_flush_buffer(a1) PyMPI_UNAVAILABLE("MPI_Comm_flush_buffer",a1)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Comm_iflush_buffer
+#undef  MPI_Comm_iflush_buffer
+#define MPI_Comm_iflush_buffer(a1,a2) PyMPI_UNAVAILABLE("MPI_Comm_iflush_buffer",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Session_attach_buffer
+#undef  MPI_Session_attach_buffer
+#define MPI_Session_attach_buffer(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Session_attach_buffer",a1,a2,a3)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Session_detach_buffer
+#undef  MPI_Session_detach_buffer
+#define MPI_Session_detach_buffer(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Session_detach_buffer",a1,a2,a3)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Session_flush_buffer
+#undef  MPI_Session_flush_buffer
+#define MPI_Session_flush_buffer(a1) PyMPI_UNAVAILABLE("MPI_Session_flush_buffer",a1)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Session_iflush_buffer
+#undef  MPI_Session_iflush_buffer
+#define MPI_Session_iflush_buffer(a1,a2) PyMPI_UNAVAILABLE("MPI_Session_iflush_buffer",a1,a2)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Send
@@ -2117,6 +2227,11 @@ typedef void (MPIAPI PyMPI_MPI_Session_errhandler_function)(MPI_Session*,int*,..
 #define MPI_COMM_TYPE_HW_UNGUIDED (MPI_UNDEFINED)
 #endif
 
+#ifndef PyMPI_HAVE_MPI_COMM_TYPE_RESOURCE_GUIDED
+#undef  MPI_COMM_TYPE_RESOURCE_GUIDED
+#define MPI_COMM_TYPE_RESOURCE_GUIDED (MPI_UNDEFINED)
+#endif
+
 #ifndef PyMPI_HAVE_MPI_Comm_split_type
 #undef  MPI_Comm_split_type
 #define MPI_Comm_split_type(a1,a2,a3,a4,a5) PyMPI_UNAVAILABLE("MPI_Comm_split_type",a1,a2,a3,a4,a5)
@@ -2490,6 +2605,26 @@ typedef void (MPIAPI PyMPI_MPI_Session_errhandler_function)(MPI_Session*,int*,..
 #ifndef PyMPI_HAVE_MPI_Buffer_detach_c
 #undef  MPI_Buffer_detach_c
 #define MPI_Buffer_detach_c(a1,a2) PyMPI_UNAVAILABLE("MPI_Buffer_detach_c",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Comm_attach_buffer_c
+#undef  MPI_Comm_attach_buffer_c
+#define MPI_Comm_attach_buffer_c(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Comm_attach_buffer_c",a1,a2,a3)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Comm_detach_buffer_c
+#undef  MPI_Comm_detach_buffer_c
+#define MPI_Comm_detach_buffer_c(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Comm_detach_buffer_c",a1,a2,a3)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Session_attach_buffer_c
+#undef  MPI_Session_attach_buffer_c
+#define MPI_Session_attach_buffer_c(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Session_attach_buffer_c",a1,a2,a3)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Session_detach_buffer_c
+#undef  MPI_Session_detach_buffer_c
+#define MPI_Session_detach_buffer_c(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Session_detach_buffer_c",a1,a2,a3)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Send_c
@@ -3969,14 +4104,29 @@ typedef int (MPIAPI PyMPI_MPI_Datarep_conversion_function_c)(void*,MPI_Datatype,
 #define MPI_Add_error_class(a1) PyMPI_UNAVAILABLE("MPI_Add_error_class",a1)
 #endif
 
+#ifndef PyMPI_HAVE_MPI_Remove_error_class
+#undef  MPI_Remove_error_class
+#define MPI_Remove_error_class(a1) PyMPI_UNAVAILABLE("MPI_Remove_error_class",a1)
+#endif
+
 #ifndef PyMPI_HAVE_MPI_Add_error_code
 #undef  MPI_Add_error_code
 #define MPI_Add_error_code(a1,a2) PyMPI_UNAVAILABLE("MPI_Add_error_code",a1,a2)
 #endif
 
+#ifndef PyMPI_HAVE_MPI_Remove_error_code
+#undef  MPI_Remove_error_code
+#define MPI_Remove_error_code(a1) PyMPI_UNAVAILABLE("MPI_Remove_error_code",a1)
+#endif
+
 #ifndef PyMPI_HAVE_MPI_Add_error_string
 #undef  MPI_Add_error_string
 #define MPI_Add_error_string(a1,a2) PyMPI_UNAVAILABLE("MPI_Add_error_string",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Remove_error_string
+#undef  MPI_Remove_error_string
+#define MPI_Remove_error_string(a1) PyMPI_UNAVAILABLE("MPI_Remove_error_string",a1)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_SUCCESS
@@ -4012,6 +4162,11 @@ typedef int (MPIAPI PyMPI_MPI_Datarep_conversion_function_c)(void*,MPI_Datatype,
 #ifndef PyMPI_HAVE_MPI_ERR_INFO
 #undef  MPI_ERR_INFO
 #define MPI_ERR_INFO (MPI_ERR_LASTCODE)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_ERR_ERRHANDLER
+#undef  MPI_ERR_ERRHANDLER
+#define MPI_ERR_ERRHANDLER (MPI_ERR_LASTCODE)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_ERR_SESSION
@@ -4402,6 +4557,11 @@ typedef int (MPIAPI PyMPI_MPI_Datarep_conversion_function_c)(void*,MPI_Datatype,
 #ifndef PyMPI_HAVE_MPI_Get_processor_name
 #undef  MPI_Get_processor_name
 #define MPI_Get_processor_name(a1,a2) PyMPI_UNAVAILABLE("MPI_Get_processor_name",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Get_hw_resource_info
+#undef  MPI_Get_hw_resource_info
+#define MPI_Get_hw_resource_info(a1) PyMPI_UNAVAILABLE("MPI_Get_hw_resource_info",a1)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Wtime
