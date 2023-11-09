@@ -225,6 +225,14 @@ def Get_processor_name() -> str:
     CHKERR( MPI_Get_processor_name(name, &nlen) )
     return tompistr(name, nlen)
 
+def Get_hw_resource_info() -> Info:
+    """
+    Obtain information about the hardware platform of the calling processor.
+    """
+    cdef Info info = <Info>New(Info)
+    CHKERR( MPI_Get_hw_resource_info(&info.ob_mpi) )
+    return info  #~> MPI-4.1
+
 # Timers and Synchronization
 # --------------------------
 
