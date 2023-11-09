@@ -247,9 +247,7 @@ try:
     k = MPI.Datatype.Free_keyval(k)
 except NotImplementedError:
     unittest.disable(BaseTestDatatypeAttr, 'mpi-type-attr')
-SpectrumMPI = MPI.get_vendor()[0] == 'Spectrum MPI'
 try:
-    if SpectrumMPI: raise NotImplementedError
     MPI.Win.Create(MPI.BOTTOM, 1, MPI.INFO_NULL, MPI.COMM_SELF).Free()
     k = MPI.Win.Create_keyval()
     k = MPI.Win.Free_keyval(k)

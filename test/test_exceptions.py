@@ -425,9 +425,7 @@ class TestExcWin(BaseTestCase):
             [MPI.ERR_KEYVAL, MPI.ERR_OTHER],
             self.WIN.Get_attr, MPI.KEYVAL_INVALID)
 
-SpectrumMPI = MPI.get_vendor()[0] == 'Spectrum MPI'
 try:
-    if SpectrumMPI: raise NotImplementedError
     MPI.Win.Create(None, 1, MPI.INFO_NULL, MPI.COMM_SELF).Free()
 except (NotImplementedError, MPI.Exception):
     unittest.disable(TestExcWin, 'mpi-win')

@@ -443,7 +443,6 @@ class BaseTestDatatypeCreateMixin:
 
     @unittest.skipMPI('openmpi(<3.0.0)')
     @unittest.skipMPI('msmpi')
-    @unittest.skipMPI('SpectrumMPI')
     def testF90RealSingle(self):
         (p, r) = (6, 30)
         factory = MPI.Datatype.Create_f90_real
@@ -452,7 +451,6 @@ class BaseTestDatatypeCreateMixin:
 
     @unittest.skipMPI('openmpi(<3.0.0)')
     @unittest.skipMPI('msmpi')
-    @unittest.skipMPI('SpectrumMPI')
     def testF90RealDouble(self):
         (p, r) = (15, 300)
         factory = MPI.Datatype.Create_f90_real
@@ -461,7 +459,6 @@ class BaseTestDatatypeCreateMixin:
 
     @unittest.skipMPI('openmpi(<3.0.0)')
     @unittest.skipMPI('msmpi')
-    @unittest.skipMPI('SpectrumMPI')
     def testF90ComplexSingle(self):
         (p, r) = (6, 30)
         factory = MPI.Datatype.Create_f90_complex
@@ -470,7 +467,6 @@ class BaseTestDatatypeCreateMixin:
 
     @unittest.skipMPI('openmpi(<3.0.0)')
     @unittest.skipMPI('msmpi')
-    @unittest.skipMPI('SpectrumMPI')
     def testF90ComplexDouble(self):
         (p, r) = (15, 300)
         factory = MPI.Datatype.Create_f90_complex

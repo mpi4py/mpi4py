@@ -31,7 +31,6 @@ class BaseTestMessageZero:
         comm.Alltoallv(self.null_v, self.null_v)
 
     @unittest.skipMPI('openmpi')
-    @unittest.skipMPI('SpectrumMPI')
     def testReductions(self):
         comm = self.COMM
         comm.Reduce(self.null_b, self.null_b)
