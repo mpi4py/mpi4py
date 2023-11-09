@@ -9,7 +9,39 @@ static int PyMPI_Get_vendor(const char **vendor_name,
   const char *name = "unknown";
   int major=0, minor=0, micro=0;
 
-#if defined(I_MPI_VERSION)
+#if defined(CIBUILDWHEEL)
+
+  int ierr, len = 0, cnt;
+  char lib[MPI_MAX_LIBRARY_VERSION_STRING] = {0}, *str;
+
+  ierr = MPI_Get_library_version(lib, &len);
+  if (ierr != MPI_SUCCESS) return ierr;
+
+  cnt = sscanf(lib, "MPICH Version: %d.%d.%d", &major, &minor, &micro);
+  if (cnt > 0) { name = "MPICH"; goto done; }
+
+  cnt = sscanf(lib, "Open MPI v%d.%d.%d", &major, &minor, &micro);
+  if (cnt > 0) { name = "Open MPI"; goto done; }
+
+  cnt = sscanf(lib, "Intel(R) MPI Library %d.%d.%d", &major, &minor, &micro);
+  if (cnt > 0) { name = "Intel MPI"; goto done; }
+
+  cnt = sscanf(lib, "Microsoft MPI %d.%d", &major, &minor);
+  if (cnt > 0) { name = "Microsoft MPI"; goto done; }
+
+  str = strstr(lib, "CRAY MPICH version"); if (!str) str = lib;
+  cnt = sscanf(str, "CRAY MPICH version %d.%d.%d", &major, &minor, &micro);
+  if (cnt > 0) { name = "Cray MPI"; goto done; }
+
+  cnt = sscanf(lib, "MVAPICH Version: %d.%d.%d", &major, &minor, &micro);
+  if (cnt > 0) { name = "MVAPICH"; goto done; }
+
+  cnt = sscanf(lib, "MVAPICH2 Version: %d.%d.%d", &major, &minor, &micro);
+  if (cnt > 0) { name = "MVAPICH2"; goto done; }
+
+ done:
+
+#elif defined(I_MPI_VERSION)
 
   name = "Intel MPI";
   #if defined(I_MPI_NUMVERSION)
@@ -124,7 +156,7 @@ static int PyMPI_Get_vendor(const char **vendor_name,
   if (version_minor) *version_minor = minor;
   if (version_micro) *version_micro = micro;
 
-  return 0;
+  return MPI_SUCCESS;
 }
 
 /*
