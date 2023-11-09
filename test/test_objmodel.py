@@ -172,10 +172,18 @@ class TestObjModel(unittest.TestCase):
 
     def testConstants(self):
         import pickle
-        self.assertEqual(repr(MPI.BOTTOM), 'BOTTOM')
-        self.assertEqual(repr(MPI.IN_PLACE), 'IN_PLACE')
-        for name in ('BOTTOM', 'IN_PLACE'):
+        names = (
+            'BOTTOM',
+            'IN_PLACE',
+            'BUFFER_AUTOMATIC',
+        )
+        for name in names:
             constant = getattr(MPI, name)
+            self.assertEqual(repr(constant), name)
+            self.assertEqual(memoryview(constant).nbytes, 0)
+            self.assertEqual(MPI.Get_address(constant), constant)
+            if sys.implementation.name != 'pypy':
+                self.assertIsNone(memoryview(constant).obj)
             with self.assertRaises(ValueError):
                 type(constant)(constant + 1)
             self.assertEqual(repr(constant), name)

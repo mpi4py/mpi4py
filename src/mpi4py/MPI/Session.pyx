@@ -104,6 +104,45 @@ cdef class Session:
             self.ob_mpi, cname, &group.ob_mpi) )
         return group
 
+    # Buffer Allocation and Usage
+    # ---------------------------
+
+    def Attach_buffer(self, buf: Buffer | None) -> None:
+        """
+        Attach a user-provided buffer for sending in buffered mode.
+        """
+        cdef void *base = NULL
+        cdef MPI_Count size = 0
+        buf = attach_buffer(buf, &base, &size)
+        with nogil: CHKERR( MPI_Session_attach_buffer_c(
+            self.ob_mpi, base, size) )
+        detach_buffer_set(self, buf)  #~> MPI-4.1
+
+    def Detach_buffer(self) -> Buffer | None:
+        """
+        Remove an existing attached buffer.
+        """
+        cdef void *base = NULL
+        cdef MPI_Count size = 0
+        with nogil: CHKERR( MPI_Session_detach_buffer_c(
+            self.ob_mpi, &base, &size) )
+        return detach_buffer_get(self, base, size)  #~> MPI-4.1
+
+    def Flush_buffer(self) -> None:
+        """
+        Block until all buffered messages have been transmitted.
+        """
+        with nogil: CHKERR( MPI_Session_flush_buffer(self.ob_mpi) )
+
+    def Iflush_buffer(self) -> Request:
+        """
+        Nonblocking flush for buffered messages.
+        """
+        cdef Request request = <Request>New(Request)
+        with nogil: CHKERR( MPI_Session_iflush_buffer(
+            self.ob_mpi, &request.ob_mpi) )
+        return request  #~> MPI-4.1
+
     # Error handling
     # --------------
 

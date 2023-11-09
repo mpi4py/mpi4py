@@ -36,6 +36,9 @@ cdef class BottomType(int):
         if a != b :
             raise ValueError("cannot create instance")
 
+    def __getbuffer__(self, Py_buffer *view, int flags):
+        PyBuffer_FillInfo(view, <object>NULL, MPI_BOTTOM, 0, 0, flags)
+
     def __repr__(self) -> str:
         <void> self # unused
         return 'BOTTOM'
@@ -55,6 +58,9 @@ cdef class InPlaceType(int):
         cdef MPI_Aint a = self, b = <MPI_Aint>MPI_IN_PLACE
         if a != b:
             raise ValueError("cannot create instance")
+
+    def __getbuffer__(self, Py_buffer *view, int flags):
+        PyBuffer_FillInfo(view, <object>NULL, MPI_IN_PLACE, 0, 0, flags)
 
     def __repr__(self) -> str:
         <void> self # unused
