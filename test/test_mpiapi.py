@@ -42,6 +42,34 @@ mpi_removed = [
 
 mpi_missing = []
 
+if MPI.Get_version() < (4, 1):
+    mpi_missing += [
+        f'MPI_Remove_error_{func}'
+        for func in ('class', 'code', 'string')
+    ]
+    mpi_missing += [
+        f'MPI_Status_{func}_{attr}'
+        for func in ('get', 'set')
+        for attr in ('source', 'tag', 'error')
+    ]
+    mpi_missing += [
+        f'MPI_Request_get_status_{func}'
+        for func in ('any', 'all', 'some')
+    ]
+    mpi_missing += [
+        f'MPI_Buffer_{func}'
+        for func in ('flush', 'iflush')
+    ] + [
+        f'MPI_{cls}_{func}_buffer{kind}'
+        for cls in ('Comm', 'Session')
+        for func in ('attach', 'detach', 'flush', 'iflush')
+        for kind in (('',) if 'flush' in func else ('', '_c'))
+    ]
+    mpi_missing += [
+        'MPI_Type_get_value_index',
+        'MPI_Get_hw_resource_info',
+    ]
+
 if MPI.Get_version() < (5, 0):
     mpi_missing += [
         'MPI_Comm_ack_failed',
