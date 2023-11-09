@@ -125,6 +125,7 @@ cdef inline int predef_Datatype(MPI_Datatype arg) noexcept nogil:
     if ierr != MPI_SUCCESS: return 0 # XXX Error?
     return (
         combiner == MPI_COMBINER_NAMED       or
+        combiner == MPI_COMBINER_VALUE_INDEX or
         combiner == MPI_COMBINER_F90_INTEGER or
         combiner == MPI_COMBINER_F90_REAL    or
         combiner == MPI_COMBINER_F90_COMPLEX

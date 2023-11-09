@@ -35,6 +35,7 @@ COMBINER_STRUCT           = MPI_COMBINER_STRUCT
 COMBINER_SUBARRAY         = MPI_COMBINER_SUBARRAY
 COMBINER_DARRAY           = MPI_COMBINER_DARRAY
 COMBINER_RESIZED          = MPI_COMBINER_RESIZED
+COMBINER_VALUE_INDEX      = MPI_COMBINER_VALUE_INDEX
 COMBINER_F90_INTEGER      = MPI_COMBINER_F90_INTEGER
 COMBINER_F90_REAL         = MPI_COMBINER_F90_REAL
 COMBINER_F90_COMPLEX      = MPI_COMBINER_F90_COMPLEX
@@ -330,6 +331,23 @@ cdef class Datatype:
             self.ob_mpi, &datatype.ob_mpi) )
         return datatype
 
+    # Pair Datatype
+    # -------------
+
+    @classmethod
+    def Get_value_index(
+        cls,
+        Datatype value: Datatype,
+        Datatype index: Datatype,
+    ) -> Self:
+        """
+        Return a predefined pair datatype.
+        """
+        cdef Datatype datatype = <Datatype>New(cls)
+        CHKERR( MPI_Type_get_value_index(
+            value.ob_mpi, index.ob_mpi, &datatype.ob_mpi) )
+        return datatype
+
     # Parametrized and size-specific Fortran Datatypes
     # ------------------------------------------------
 
@@ -575,6 +593,7 @@ cdef class Datatype:
             if self.ob_mpi == MPI_DATATYPE_NULL: return True
             cdef int combiner = self.Get_envelope()[-1]
             return (combiner == MPI_COMBINER_NAMED or
+                    combiner == MPI_COMBINER_VALUE_INDEX or
                     combiner == MPI_COMBINER_F90_INTEGER or
                     combiner == MPI_COMBINER_F90_REAL or
                     combiner == MPI_COMBINER_F90_COMPLEX)
