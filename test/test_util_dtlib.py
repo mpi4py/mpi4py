@@ -442,6 +442,21 @@ class TestUtilDTLib(unittest.TestCase):
                 if np_dtype is not None:
                     self.assertTrue(dt.isalignedstruct)
                     self.assertEqual(dt.itemsize, mt.extent)
+        integral = 'bhilqpBHILQP'
+        floating = 'fdg'
+        vtypes = integral + floating
+        itypes = integral
+        for vcode, icode in itertools.product(vtypes, itypes):
+            value = MPI.Datatype.fromcode(vcode)
+            index = MPI.Datatype.fromcode(icode)
+            pair  = MPI.Datatype.Get_value_index(value, index)
+            if pair == MPI.DATATYPE_NULL:
+                continue
+            vt, it, pt = map(tonumpy, (value, index, pair))
+            dt = (f'{vt},{it}', {'align': True})
+            if np_dtype is not None:
+                dt = np_dtype(dt[0], **dt[1])
+            self.assertEqual(pt, dt)
 
     def testPairStruct(self):
         cases = [mpipairtypes]*3 +[[False, True]]

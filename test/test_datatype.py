@@ -106,6 +106,17 @@ class TestDatatype(unittest.TestCase):
             datatype = MPI.Datatype.Match_size(typeclass, size)
             self.assertEqual(size, datatype.size)
 
+    def testGetValueIndex(self):
+        typenames = ('SHORT', 'INT', 'LONG', 'FLOAT', 'DOUBLE', 'LONG_DOUBLE')
+        value_types = [getattr(MPI, f'{attr}') for attr in typenames]
+        pair_types = [getattr(MPI, f'{attr}_INT') for attr in typenames]
+        for value, pair in zip(value_types, pair_types):
+            result = MPI.Datatype.Get_value_index(value, MPI.INT)
+            self.assertEqual(result, pair)
+        for value in value_types:
+            result = MPI.Datatype.Get_value_index(value, MPI.FLOAT)
+            self.assertEqual(result, MPI.DATATYPE_NULL)
+
     def testGetEnvelope(self):
         for dtype in datatypes:
             try:
@@ -244,6 +255,7 @@ class BaseTestDatatypeCreateMixin:
 
     def check_recreate(self, factory, newtype):
         name = factory.__name__
+        name = name.replace('Get_value_index', 'Create_value_index')
         NAME = name.replace('Create_', '').upper()
         symbol = getattr(MPI, 'COMBINER_' + NAME)
         if symbol == MPI.UNDEFINED: return
@@ -253,7 +265,8 @@ class BaseTestDatatypeCreateMixin:
         self.assertEqual(symbol, newtype.combiner)
         decoded1 = newtype.decode()
         oldtype, constructor, kwargs = decoded1
-        constructor = 'Create_' + constructor.lower()
+        prefix = 'create' if constructor != 'VALUE_INDEX' else 'get'
+        constructor = prefix.title() + '_' + constructor.lower()
         newtype2 = getattr(oldtype, constructor)(**kwargs)
         decoded2 = newtype2.decode()
         types1 = decoded1[2].pop('datatypes', [])
@@ -471,6 +484,21 @@ class BaseTestDatatypeCreateMixin:
                     factory = MPI.Datatype.Create_resized
                     args = lb, extent
                     self.check(dtype, factory, *args)
+
+    def testValueIndex(self):
+        integral_types = datatypes_c[2:-3] + datatypes_c99[1:9]
+        floating_types = datatypes_c[-3:]
+        value_types = integral_types + floating_types
+        index_types = integral_types
+        for value in value_types:
+            if value == MPI.DATATYPE_NULL: continue
+            for index in index_types:
+                if index == MPI.DATATYPE_NULL: continue
+                factory = MPI.Datatype.Get_value_index
+                pair = factory(value, index)
+                if pair == MPI.DATATYPE_NULL: continue
+                if pair.is_named: continue
+                self.check(None, factory, value, index)
 
 
 class TestDatatypeCreate(BaseTestDatatypeCreateMixin, unittest.TestCase):

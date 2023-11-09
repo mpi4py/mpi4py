@@ -172,6 +172,19 @@ def to_numpy_dtype(datatype):
                 return np_dtype((dtype, tuple(sizes)))
             raise ValueError("cannot convert subarray MPI datatype to NumPy")
 
+        # value-index datatype
+        if combiner == MPI.COMBINER_VALUE_INDEX:  # pragma: no cover
+            value = to_numpy_dtype(info['value'])
+            index = to_numpy_dtype(info['index'])
+            datatypes = [value, index]
+            return np_dtype(
+                [
+                    ('f0', value),
+                    ('f1', index),
+                ],
+                align=True,
+            )
+
         # struct datatype
         aligned = True
         if combiner == MPI.COMBINER_RESIZED:

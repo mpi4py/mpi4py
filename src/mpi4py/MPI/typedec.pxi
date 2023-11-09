@@ -14,6 +14,7 @@ cdef inline str combinername(int combiner):
     if combiner == MPI_COMBINER_SUBARRAY       : return 'SUBARRAY'
     if combiner == MPI_COMBINER_DARRAY         : return 'DARRAY'
     if combiner == MPI_COMBINER_RESIZED        : return 'RESIZED'
+    if combiner == MPI_COMBINER_VALUE_INDEX    : return 'VALUE_INDEX'
     if combiner == MPI_COMBINER_F90_INTEGER    : return 'F90_INTEGER'
     if combiner == MPI_COMBINER_F90_REAL       : return 'F90_REAL'
     if combiner == MPI_COMBINER_F90_COMPLEX    : return 'F90_COMPLEX'
@@ -49,11 +50,12 @@ cdef inline tuple datatype_decode(
     cdef Datatype oldtype = __DATATYPE_NULL__
     cdef dict params = {}
     cdef list datatypes = []
-    if combiner == MPI_COMBINER_STRUCT:
-        datatypes = [ref_Datatype(d[k]) for k in range(nd)]
-    elif nd == 1:
+    if nd == 1:
         oldtype = ref_Datatype(d[0])
         datatypes = [oldtype]
+    elif nd > 1:
+        datatypes = [ref_Datatype(d[k]) for k in range(nd)]
+
     # dispatch depending on the combiner value
     cdef int use_count = 1 if (nc > 0) else 0
     cdef MPI_Count s1, e1, s2, e2, s3, e3, s4, e4
@@ -211,6 +213,11 @@ cdef inline tuple datatype_decode(
             ('lb')     : lbound,
             ('extent') : extent,
         }
+    elif combiner == MPI_COMBINER_VALUE_INDEX:
+        params = {
+            ('value') : datatypes[0],  #~> MPI-4.1
+            ('index') : datatypes[1],  #~> MPI-4.1
+        }
     elif combiner == MPI_COMBINER_F90_INTEGER:
         params = {
             ('r') : i[0],
@@ -238,7 +245,13 @@ cdef inline Datatype datatype_create(
 ):
     cdef object factory
     cdef Datatype newtype
-    cdef list datatypes = params.get('datatypes') or [datatype]
+    cdef list datatypes
+    if 'datatypes' in params:
+        datatypes = params['datatypes']
+    elif 'value' in params and 'index' in params:
+        datatypes = list(params.values())  #~> MPI-4.1
+    else:
+        datatypes = [datatype]
     try:
         combiner = combiner.lower()
         factory = getattr(datatype, f'Create_{combiner}')
