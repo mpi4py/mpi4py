@@ -20,6 +20,19 @@ def memzero(m):
     except IndexError: # cffi buffer
         m[0:len(m)] = b'\0'*len(m)
 
+class TestWinNull(unittest.TestCase):
+
+    def testConstructor(self):
+        win = MPI.Win()
+        self.assertEqual(win, MPI.WIN_NULL)
+        self.assertIsNot(win, MPI.WIN_NULL)
+        def construct(): MPI.Win((1,2,3))
+        self.assertRaises(TypeError, construct)
+
+    def testGetName(self):
+        name = MPI.WIN_NULL.Get_name()
+        self.assertEqual(name, "MPI_WIN_NULL")
+
 
 class BaseTestWin:
 
@@ -86,8 +99,8 @@ class BaseTestWin:
     def testGetSetName(self):
         try:
             name = self.WIN.Get_name()
-            self.WIN.Set_name('mywin')
-            self.assertEqual(self.WIN.Get_name(), 'mywin')
+            self.WIN.Set_name("mywin")
+            self.assertEqual(self.WIN.Get_name(), "mywin")
             self.WIN.Set_name(name)
             self.assertEqual(self.WIN.Get_name(), name)
             self.WIN.name = self.WIN.name

@@ -41,6 +41,19 @@ datatypes = [t for t in datatypes if t != MPI.DATATYPE_NULL]
 
 combiner_map = {}
 
+class TestDatatypeNull(unittest.TestCase):
+
+    def testConstructor(self):
+        datatype = MPI.Datatype()
+        self.assertEqual(datatype, MPI.DATATYPE_NULL)
+        self.assertIsNot(datatype, MPI.DATATYPE_NULL)
+        def construct(): MPI.Datatype((1,2,3))
+        self.assertRaises(TypeError, construct)
+
+    def testGetName(self):
+        name = MPI.DATATYPE_NULL.Get_name()
+        self.assertEqual(name, "MPI_DATATYPE_NULL")
+
 class TestDatatype(unittest.TestCase):
 
     def testBoolEqNe(self):
@@ -118,6 +131,8 @@ class TestDatatype(unittest.TestCase):
             self.assertEqual(params, {})
 
     def testGetSetName(self):
+        name = MPI.DATATYPE_NULL.Get_name()
+        self.assertEqual(name, "MPI_DATATYPE_NULL")
         for dtype in datatypes:
             try:
                 name = dtype.Get_name()
