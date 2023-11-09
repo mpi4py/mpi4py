@@ -380,14 +380,6 @@ cdef inline object fromhandle(handle_t arg):
 
 # Status
 
-cdef extern from * nogil:
-    int PyMPI_Status_get_source(MPI_Status*, int*)
-    int PyMPI_Status_set_source(MPI_Status*, int)
-    int PyMPI_Status_get_tag(MPI_Status*, int*)
-    int PyMPI_Status_set_tag(MPI_Status*, int)
-    int PyMPI_Status_get_error(MPI_Status*, int*)
-    int PyMPI_Status_set_error(MPI_Status*, int)
-
 cdef inline MPI_Status *arg_Status(object status) except? NULL:
     if status is None: return MPI_STATUS_IGNORE
     return &((<Status?>status).ob_mpi)

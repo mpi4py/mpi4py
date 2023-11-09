@@ -126,6 +126,82 @@ static MPI_Status PyMPI_STATUSES_IGNORE[PyMPI_MPI_STATUSES_IGNORE_SIZE];
 #define MPI_STATUSES_IGNORE ((MPI_Status*)(PyMPI_STATUSES_IGNORE))
 #endif
 
+#define PyMPI_Status_GET_ATTR(name, NAME) \
+static int PyMPI_Status_get_##name(MPI_Status *s, int *i) \
+{ if (s && i) { *i = s->MPI_##NAME; } return MPI_SUCCESS; }
+
+#define PyMPI_Status_SET_ATTR(name, NAME) \
+static int PyMPI_Status_set_##name(MPI_Status *s, int i) \
+{ if (s) { s->MPI_##NAME = i; } return MPI_SUCCESS; }
+
+#ifndef PyMPI_HAVE_MPI_Status_get_source
+#if defined(MPIX_HAVE_MPI_STATUS_GETSET)
+#define PyMPI_Status_get_source MPIX_Status_get_source
+#else
+PyMPI_Status_GET_ATTR(source, SOURCE)
+#endif
+#undef  MPI_Status_get_source
+#define MPI_Status_get_source PyMPI_Status_get_source
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Status_set_source
+#if defined(MPIX_HAVE_MPI_STATUS_GETSET)
+#define PyMPI_Status_set_source MPIX_Status_set_source
+#else
+PyMPI_Status_SET_ATTR(source, SOURCE)
+#endif
+#undef  MPI_Status_set_source
+#define MPI_Status_set_source PyMPI_Status_set_source
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Status_get_tag
+#if defined(MPIX_HAVE_MPI_STATUS_GETSET)
+#define PyMPI_Status_get_tag MPIX_Status_get_tag
+#else
+PyMPI_Status_GET_ATTR(tag, TAG)
+#endif
+#undef  MPI_Status_get_tag
+#define MPI_Status_get_tag PyMPI_Status_get_tag
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Status_set_tag
+#if defined(MPIX_HAVE_MPI_STATUS_GETSET)
+#define PyMPI_Status_set_tag MPIX_Status_set_tag
+#else
+PyMPI_Status_SET_ATTR(tag, TAG)
+#endif
+#undef  MPI_Status_set_tag
+#define MPI_Status_set_tag PyMPI_Status_set_tag
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Status_get_error
+#if defined(MPIX_HAVE_MPI_STATUS_GETSET)
+#define PyMPI_Status_get_error MPIX_Status_get_error
+#else
+PyMPI_Status_GET_ATTR(error, ERROR)
+#endif
+#undef  MPI_Status_get_error
+#define MPI_Status_get_error PyMPI_Status_get_error
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Status_set_error
+#if defined(MPIX_HAVE_MPI_STATUS_GETSET)
+#define PyMPI_Status_set_error MPIX_Status_set_error
+#else
+PyMPI_Status_SET_ATTR(error, ERROR)
+#endif
+#undef  MPI_Status_set_error
+#define MPI_Status_set_error PyMPI_Status_set_error
+#endif
+
+#ifdef PyMPI_Status_GET_ATTR
+#undef PyMPI_Status_GET_ATTR
+#endif
+
+#ifdef PyMPI_Status_SET_ATTR
+#undef PyMPI_Status_SET_ATTR
+#endif
+
 /* ---------------------------------------------------------------- */
 
 /* Datatypes */

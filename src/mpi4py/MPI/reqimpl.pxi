@@ -38,9 +38,9 @@ cdef class _p_rs:
     cdef int add_statuses(self) except -1:
         cdef MPI_Status empty_status
         <void>memset(&empty_status, 0, sizeof(MPI_Status))
-        <void>PyMPI_Status_set_source ( &empty_status, MPI_ANY_SOURCE )
-        <void>PyMPI_Status_set_tag    ( &empty_status, MPI_ANY_TAG    )
-        <void>PyMPI_Status_set_error  ( &empty_status, MPI_SUCCESS    )
+        <void>MPI_Status_set_source ( &empty_status, MPI_ANY_SOURCE )
+        <void>MPI_Status_set_tag    ( &empty_status, MPI_ANY_TAG    )
+        <void>MPI_Status_set_error  ( &empty_status, MPI_SUCCESS    )
         self.buf_sts = allocate(self.count, sizeof(MPI_Status), &self.statuses)
         for i in range(self.count):
             self.statuses[i] = empty_status
@@ -120,9 +120,9 @@ cdef class _p_greq:
         self.kwargs = dict(kwargs) if kwargs is not None else {}
 
     cdef int query(self, MPI_Status *status) except -1:
-        <void>PyMPI_Status_set_source(status, MPI_ANY_SOURCE)
-        <void>PyMPI_Status_set_tag(status, MPI_ANY_TAG)
-        <void>PyMPI_Status_set_error(status, MPI_SUCCESS)
+        <void>MPI_Status_set_source(status, MPI_ANY_SOURCE)
+        <void>MPI_Status_set_tag(status, MPI_ANY_TAG)
+        <void>MPI_Status_set_error(status, MPI_SUCCESS)
         <void>MPI_Status_set_elements_c(status, MPI_BYTE, 0)
         <void>MPI_Status_set_cancelled(status, 0)
         cdef Status sts = <Status>New(Status)
