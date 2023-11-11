@@ -153,7 +153,7 @@ BufSpec = Union[
     Tuple[Buffer, TypeSpec],
     Tuple[Buffer, Count, TypeSpec],
     Tuple[Bottom, Count, Datatype],
-    List,
+    List[Any],
 ]
 """
 Buffer specification.
@@ -171,7 +171,7 @@ BufSpecB = Union[
     Tuple[Buffer, Count],
     Tuple[Buffer, TypeSpec],
     Tuple[Buffer, Count, TypeSpec],
-    List,
+    List[Any],
 ]
 """
 Buffer specification (block).
@@ -193,7 +193,7 @@ BufSpecV = Union[
     Tuple[Buffer, Sequence[Count], Sequence[Displ], TypeSpec],
     Tuple[Bottom, Tuple[Sequence[Count], Sequence[Displ]], Datatype],
     Tuple[Bottom, Sequence[Count], Sequence[Displ], Datatype],
-    List,
+    List[Any],
 ]
 """
 Buffer specification (vector).
@@ -216,7 +216,7 @@ BufSpecW = Union[
     Tuple[Buffer, Sequence[Count], Sequence[Displ], Sequence[Datatype]],
     Tuple[Bottom, Tuple[Sequence[Count], Sequence[Displ]], Sequence[Datatype]],
     Tuple[Bottom, Sequence[Count], Sequence[Displ], Sequence[Datatype]],
-    List,
+    List[Any],
 ]
 """
 Buffer specification (generalized).
@@ -237,7 +237,7 @@ TargetSpec = Union[
     Tuple[Displ],
     Tuple[Displ, Count],
     Tuple[Displ, Count, TypeSpec],
-    List,
+    List[Any],
 ]
 """
 Target specification.

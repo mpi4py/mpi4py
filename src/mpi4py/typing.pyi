@@ -84,7 +84,7 @@ BufSpec: TypeAlias = Union[
     Tuple[Buffer, TypeSpec],
     Tuple[Buffer, Count, TypeSpec],
     Tuple[Bottom, Count, Datatype],
-    List,
+    List[Any],
 ]
 
 BufSpecB: TypeAlias = Union[
@@ -92,7 +92,7 @@ BufSpecB: TypeAlias = Union[
     Tuple[Buffer, Count],
     Tuple[Buffer, TypeSpec],
     Tuple[Buffer, Count, TypeSpec],
-    List,
+    List[Any],
 ]
 
 BufSpecV: TypeAlias = Union[
@@ -105,7 +105,7 @@ BufSpecV: TypeAlias = Union[
     Tuple[Buffer, Sequence[Count], Sequence[Displ], TypeSpec],
     Tuple[Bottom, Tuple[Sequence[Count], Sequence[Displ]], Datatype],
     Tuple[Bottom, Sequence[Count], Sequence[Displ], Datatype],
-    List,
+    List[Any],
 ]
 
 BufSpecW: TypeAlias = Union[
@@ -114,7 +114,7 @@ BufSpecW: TypeAlias = Union[
     Tuple[Buffer, Sequence[Count], Sequence[Displ], Sequence[Datatype]],
     Tuple[Bottom, Tuple[Sequence[Count], Sequence[Displ]], Sequence[Datatype]],
     Tuple[Bottom, Sequence[Count], Sequence[Displ], Sequence[Datatype]],
-    List,
+    List[Any],
 ]
 
 TargetSpec: TypeAlias = Union[
@@ -123,5 +123,5 @@ TargetSpec: TypeAlias = Union[
     Tuple[Displ],
     Tuple[Displ, Count],
     Tuple[Displ, Count, TypeSpec],
-    List,
+    List[Any],
 ]
