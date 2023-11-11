@@ -144,6 +144,7 @@ def apidoc_class(cls, done=None):
         '__le__',
         '__ge__',
         '__gt__',
+        '__buffer__',
     }
     special = {
         '__len__': "__len__(self) -> int",
