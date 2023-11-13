@@ -85,6 +85,8 @@ Release 4.0.0 [2023-XX-XX]
 
   * The `mpi4py.dl` module is no longer available.
 
+  * The `mpi4py.get_config` function returns an empty dictionary.
+
 
 Release 3.1.5 [2023-10-04]
 ==========================

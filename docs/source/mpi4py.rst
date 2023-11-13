@@ -251,9 +251,9 @@ Miscellaneous functions
 
 .. autofunction:: mpi4py.profile
 
-.. autofunction:: mpi4py.get_config
-
 .. autofunction:: mpi4py.get_include
+
+.. autofunction:: mpi4py.get_config
 
 
 .. Local variables:

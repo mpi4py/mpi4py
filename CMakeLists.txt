@@ -36,22 +36,6 @@ if (WIN32)
 endif()
 
 
-# mpi4py/mpi.cfg
-set(mpi.cfg ${BINDIR}/mpi.cfg)
-set(config "[mpi]\n")
-if (MPI_C_COMPILER)
-  set(config "${config}mpicc = ${MPI_C_COMPILER}\n")
-endif()
-if (MPI_CXX_COMPILER)
-  set(config "${config}mpicxx = ${MPI_CXX_COMPILER}\n")
-endif()
-if (MPI_Fortran_COMPILER)
-  set(config "${config}mpifort = ${MPI_Fortran_COMPILER}\n")
-endif()
-file(GENERATE OUTPUT ${mpi.cfg} CONTENT ${config})
-install(FILES ${mpi.cfg} DESTINATION mpi4py)
-
-
 # Cython
 set(cythonize ${TOPDIR}/conf/cythonize.py)
 set(Cython_COMMAND ${Python_EXECUTABLE} ${cythonize})

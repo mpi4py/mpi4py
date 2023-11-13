@@ -103,13 +103,25 @@ def get_include():
 
 
 def get_config():
-    """Return a dictionary with information about MPI."""
+    """Return a dictionary with information about MPI.
+
+    .. versionchanged:: 4.0.0
+       By default, this function returns an empty dictionary. However,
+       downstream packagers and distributors may alter such behavior.
+       To that end, MPI information must be provided under an ``mpi``
+       section within a UTF-8 encoded INI-style configuration file
+       :file:`mpi.cfg` located at the top-level package directory.
+       The configuration file is read and parsed using the
+       `configparser` module.
+
+    """
     # pylint: disable=import-outside-toplevel
-    from os.path import join, dirname
     from configparser import ConfigParser
-    config = join(dirname(__file__), 'mpi.cfg')
+    from os.path import join, dirname
     parser = ConfigParser()
-    parser.read(config, encoding='utf-8')
+    parser.add_section('mpi')
+    mpicfg = join(dirname(__file__), 'mpi.cfg')
+    parser.read(mpicfg, encoding='utf-8')
     return dict(parser.items('mpi'))
 
 

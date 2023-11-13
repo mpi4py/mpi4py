@@ -372,21 +372,6 @@ cmd_mpi_opts = [
      "overridden by environment variable 'MPILD' "
      "(defaults to 'mpicc' or 'mpicxx' if any is available)"),
 
-    ('mpif77=',  None,
-     "MPI F77 compiler command, "
-     "overridden by environment variable 'MPIF77' "
-     "(defaults to 'mpif77' if available)"),
-
-    ('mpif90=',  None,
-     "MPI F90 compiler command, "
-     "overridden by environment variable 'MPIF90' "
-     "(defaults to 'mpif90' if available)"),
-
-    ('mpifort=',  None,
-     "MPI Fortran compiler command, "
-     "overridden by environment variable 'MPIFORT' "
-     "(defaults to 'mpifort' if available)"),
-
     ('mpicxx=',  None,
      "MPI C++ compiler command, "
      "overridden by environment variable 'MPICXX' "
@@ -1177,14 +1162,6 @@ class build_ext(cmd_build_ext.build_ext):
         self.config_extension(ext)
         cmd_build_ext.build_ext.build_extension(self, ext)
         #
-        if ext.name == 'mpi4py.MPI':
-            dest_dir = os.path.dirname(filename)
-            self.mkpath(dest_dir)
-            mpi_cfg = os.path.join(dest_dir, 'mpi.cfg')
-            log.info("writing %s", mpi_cfg)
-            if not self.dry_run:
-                self.config.dump(filename=mpi_cfg)
-        #
         if ext.name == 'mpi4py.MPI' and sys.platform == 'win32':
             confdir = os.path.dirname(__file__)
             topdir = os.path.dirname(confdir)
@@ -1200,31 +1177,9 @@ class build_ext(cmd_build_ext.build_ext):
                     dry_run=self.dry_run,
                 )
 
-    def copy_extensions_to_source(self):
-        build_py = self.get_finalized_command('build_py')
-        cmd_build_ext.build_ext.copy_extensions_to_source(self)
-        for ext in self.extensions:
-            if ext.name == 'mpi4py.MPI':
-                fullname = self.get_ext_fullname(ext.name)
-                filename = self.get_ext_filename(fullname)
-                dirname = os.path.dirname(filename)
-                dest_dir = os.path.join(self.build_lib, dirname)
-                regular_file = os.path.join(dest_dir, 'mpi.cfg')
-                package = fullname.rpartition('.')[0]
-                package_dir = build_py.get_package_dir(package)
-                inplace_file = os.path.join(package_dir, 'mpi.cfg')
-                self.copy_file(regular_file, inplace_file, level=self.verbose)
-
     def get_outputs(self):
         outputs = cmd_build_ext.build_ext.get_outputs(self)
         for ext in self.extensions:
-            if ext.name == 'mpi4py.MPI':
-                fullname = self.get_ext_fullname(ext.name)
-                filename = self.get_ext_filename(fullname)
-                dirname = os.path.dirname(filename)
-                dest_dir = os.path.join(self.build_lib, dirname)
-                output_file = os.path.join(dest_dir, 'mpi.cfg')
-                outputs.append(output_file)
             if ext.name == 'mpi4py.MPI' and sys.platform == 'win32':
                 pthfile = 'mpi.pth'
                 output_file = os.path.join(self.build_lib, pthfile)
