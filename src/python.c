@@ -61,6 +61,8 @@ main(int argc, char **argv)
 #if !defined(PYPY_VERSION)
 #if PY_MAJOR_VERSION >= 3 && PY_VERSION_HEX < 0x03070000
 
+#include <stdlib.h>
+#include <string.h>
 #include <locale.h>
 
 static wchar_t **mk_wargs(int, char **);

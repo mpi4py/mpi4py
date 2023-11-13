@@ -1,6 +1,9 @@
 /* Author:  Lisandro Dalcin   */
 /* Contact: dalcinl@gmail.com */
 
+#include <stdio.h>
+#include <string.h>
+
 static int PyMPI_Get_vendor(const char **vendor_name,
                             int         *version_major,
                             int         *version_minor,
