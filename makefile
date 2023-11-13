@@ -28,30 +28,22 @@ srcclean:
 .PHONY: clean distclean fullclean
 clean:
 	$(PYTHON) setup.py clean --all
-distclean: clean
-	-$(RM) -r build _configtest*
-	-$(RM) -r .ruff_cache .mypy_cache
-	-$(RM) -r htmlcov .coverage .coverage.*
-	-$(RM) -r conf/__pycache__ test/__pycache__
-	-$(RM) -r demo/__pycache__ src/mpi4py/__pycache__
-fullclean: distclean srcclean
-	-find . -name '*~' -exec rm -f {} ';'
-
-# ----
-
-.PHONY: develop develop-uninstall
-develop:
-	$(PYTHON) setup.py develop --prefix='' --user $(opt)
-develop-uninstall:
-	$(PYTHON) setup.py develop --prefix='' --user --uninstall $(opt)
+distclean: clean srcclean
+	$(RM) -r build _configtest*
+	$(RM) .*_cache .eggs .tox
+	$(RM) -r htmlcov .coverage .coverage.*
+	$(RM) src/mpi4py/MPI.*.so src/mpi4py/mpi.cfg
+	find . -name __pycache__ | xargs $(RM) -r
+fullclean: distclean
+	find . -name '*~' -exec $(RM) -f {} ';'
 
 # ----
 
 .PHONY: install uninstall
+
 install:
-	$(PYTHON) setup.py install --prefix='' --user $(opt)
+	$(PYTHON) -m pip install $(opt) .
 uninstall:
-	-$(RM) -r $(shell $(PYTHON) -m site --user-site)/mpi4py
-	-$(RM) -r $(shell $(PYTHON) -m site --user-site)/mpi4py-*-py*.egg-info
+	$(PYTHON) -m pip uninstall $(opt) mpi4py
 
 # ----
