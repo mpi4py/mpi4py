@@ -17,5 +17,4 @@
 /src/mpi4py/MPI.h
 /src/mpi4py/MPI_api.h
 /src/mpi4py/MPI.*.so
-/src/mpi4py/mpi.cfg
 /src/mpi4py.egg-info/**

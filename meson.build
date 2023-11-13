@@ -69,17 +69,6 @@ custom_target(
   install_dir: dstdir,
 )
 
-mpicc = compiler.cmd_array()[0]
-mpicc = find_program(mpicc).full_path()
-mpi_cfg = ['[mpi]', 'mpicc = @0@'.format(mpicc)]
-custom_target(
-  output: 'mpi.cfg',
-  capture: true,
-  command: echo + mpi_cfg,
-  install: true,
-  install_dir: dstdir / 'mpi4py',
-)
-
 cython = [py, files('conf' / 'cythonize.py')]
 cython_flags = ['--3str', '--cleanup', '3']
 MPI_ch = custom_target(

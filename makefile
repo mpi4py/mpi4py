@@ -32,7 +32,7 @@ distclean: clean srcclean
 	$(RM) -r build _configtest*
 	$(RM) .*_cache .eggs .tox
 	$(RM) -r htmlcov .coverage .coverage.*
-	$(RM) src/mpi4py/MPI.*.so src/mpi4py/mpi.cfg
+	$(RM) src/mpi4py/MPI.*.so
 	find . -name __pycache__ | xargs $(RM) -r
 fullclean: distclean
 	find . -name '*~' -exec $(RM) -f {} ';'

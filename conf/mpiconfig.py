@@ -1,5 +1,5 @@
-import sys
 import os
+import sys
 import shlex
 import shutil
 import logging
@@ -21,9 +21,6 @@ class Config:
         self.compiler_info = OrderedDict((
             ('mpicc'  , None),
             ('mpicxx' , None),
-            ('mpifort', None),
-            ('mpif90' , None),
-            ('mpif77' , None),
             ('mpild'  , None),
         ))
         self.library_info = OrderedDict((
@@ -61,22 +58,13 @@ class Config:
     def info(self, log=None):
         if log is None:
             log = self.log
-        mpicc   = self.compiler_info.get('mpicc')
-        mpicxx  = self.compiler_info.get('mpicxx')
-        mpifort = self.compiler_info.get('mpifort')
-        mpif90  = self.compiler_info.get('mpif90')
-        mpif77  = self.compiler_info.get('mpif77')
-        mpild   = self.compiler_info.get('mpild')
+        mpicc  = self.compiler_info.get('mpicc')
+        mpicxx = self.compiler_info.get('mpicxx')
+        mpild  = self.compiler_info.get('mpild')
         if mpicc:
             log.info("MPI C compiler:    %s", mpicc)
         if mpicxx:
             log.info("MPI C++ compiler:  %s", mpicxx)
-        if mpifort:
-            log.info("MPI F compiler:    %s", mpifort)
-        if mpif90:
-            log.info("MPI F90 compiler:  %s", mpif90)
-        if mpif77:
-            log.info("MPI F77 compiler:  %s", mpif77)
         if mpild:
             log.info("MPI linker:        %s", mpild)
 
@@ -323,9 +311,6 @@ class Config:
         COMPILERS = (
             ('mpicc',   ['mpicc']),
             ('mpicxx',  ['mpicxx',  'mpic++', 'mpiCC']),
-            ('mpifort', ['mpifc', 'mpifort', 'mpif90', 'mpif77']),
-            ('mpif90',  ['mpif90']),
-            ('mpif77',  ['mpif77']),
             ('mpild',   []),
         )
         #
@@ -505,13 +490,10 @@ class Config:
 if __name__ == '__main__':
     import optparse
     parser = optparse.OptionParser()
-    parser.add_option("--mpi",     type="string")
-    parser.add_option("--mpicc",   type="string")
-    parser.add_option("--mpicxx",  type="string")
-    parser.add_option("--mpifort", type="string")
-    parser.add_option("--mpif90",  type="string")
-    parser.add_option("--mpif77",  type="string")
-    parser.add_option("--mpild",   type="string")
+    parser.add_option("--mpi",    type="string")
+    parser.add_option("--mpicc",  type="string")
+    parser.add_option("--mpicxx", type="string")
+    parser.add_option("--mpild",  type="string")
     opts, args = parser.parse_args()
 
     cfg = Config()
