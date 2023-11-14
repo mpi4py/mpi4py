@@ -70,8 +70,8 @@ package-testing() {
   if [[ "$RUNTESTS" == "yes" ]]; then
       if [[ "$MPI" == "mpich"   ]]; then local P=2; else local P=5; fi
       local MPIEXEC=${MPIEXEC-mpiexec}
-      RUN $MPIEXEC -n 1  python $PWD/test/runtests.py
-      RUN $MPIEXEC -n $P python $PWD/test/runtests.py -f
+      RUN $MPIEXEC -n 1  python $PWD/test/main.py
+      RUN $MPIEXEC -n $P python $PWD/test/main.py -f
       RUN $MPIEXEC -n 1  python $PWD/demo/futures/test_futures.py
       RUN $MPIEXEC -n $P python $PWD/demo/futures/test_futures.py -f
       RUN $MPIEXEC -n 1  python -m mpi4py.futures $PWD/demo/futures/test_futures.py

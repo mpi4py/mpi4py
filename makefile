@@ -13,9 +13,9 @@ config:
 build:
 	$(PYTHON) setup.py build $(opt)
 test:
-	$(VALGRIND) $(PYTHON) $(PWD)/test/runtests.py $(opt)
+	$(VALGRIND) $(PYTHON) $(PWD)/test/main.py $(opt)
 test-%:
-	$(MPIEXEC) -n $* $(VALGRIND) $(PYTHON) $(PWD)/test/runtests.py $(opt)
+	$(MPIEXEC) -n $* $(VALGRIND) $(PYTHON) $(PWD)/test/main.py $(opt)
 
 .PHONY: srcbuild srcclean
 srcbuild:
