@@ -83,9 +83,9 @@ jobs:
       if:   ${{ !endsWith(matrix.py, '-dev') }}
 
     - name: Test mpi4py (np=1)
-      run:  mpiexec -n 1 python test/runtests.py -v
+      run:  mpiexec -n 1 python test/main.py -v
     - name: Test mpi4py (np=2)
-      run:  mpiexec -n 2 python test/runtests.py -v -f -e spawn
+      run:  mpiexec -n 2 python test/main.py -v -f -e spawn
 
     - name: Test mpi4py.futures (np=1)
       run:  mpiexec -n 1 python demo/futures/test_futures.py -v

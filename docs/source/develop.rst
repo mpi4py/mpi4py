@@ -162,7 +162,7 @@ test script :file:`demo/helloworld.py` from the source distribution.
 
 You can also run all the *unittest* scripts::
 
-  $ mpiexec -n 5 python test/runtests.py
+  $ mpiexec -n 5 python test/main.py
 
 or, if you have `nose`_ unit testing framework installed::
 

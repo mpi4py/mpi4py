@@ -43,7 +43,7 @@ test_script:
   - "%PYTHON%\\python.exe -m pip install mpi4py --no-cache-dir --no-index --find-links=dist"
   - "\"%MSMPI_BIN%\\mpiexec.exe\" -n 1 %PYTHON%\\python.exe -m mpi4py --mpi-std-version"
   - "\"%MSMPI_BIN%\\mpiexec.exe\" -n 1 %PYTHON%\\python.exe -m mpi4py --mpi-lib-version"
-  - "\"%MSMPI_BIN%\\mpiexec.exe\" -n 1 %PYTHON%\\python.exe %CD%\\test\\runtests.py -v"
+  - "\"%MSMPI_BIN%\\mpiexec.exe\" -n 1 %PYTHON%\\python.exe %CD%\\test\\main.py -v"
   - "\"%MSMPI_BIN%\\mpiexec.exe\" -n 1 %PYTHON%\\python.exe %CD%\\demo\\futures\\test_futures.py -v"
   - "\"%MSMPI_BIN%\\mpiexec.exe\" -n 2 %PYTHON%\\python.exe %CD%\\demo\\futures\\test_futures.py -v"
   - "%PYTHON%\\python.exe %CD%\\demo\\test-run\\test_run.py -v"

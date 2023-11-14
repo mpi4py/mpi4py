@@ -61,19 +61,19 @@ esac
 set -e
 case "$MPI" in
     mpich)
-        mpiexec -n 1 python test/runtests.py -v
-        mpiexec -n 2 python test/runtests.py -v -f -e spawn
-        mpiexec -n 3 python test/runtests.py -v -f -e spawn
-       #mpiexec -n 8 python test/runtests.py -v -f -e spawn
+        mpiexec -n 1 python test/main.py -v
+        mpiexec -n 2 python test/main.py -v -f -e spawn
+        mpiexec -n 3 python test/main.py -v -f -e spawn
+       #mpiexec -n 8 python test/main.py -v -f -e spawn
         mpiexec -n 1 python demo/futures/test_futures.py -v
         mpiexec -n 2 python -m mpi4py.futures demo/futures/test_futures.py -v -f
         mpiexec -n 3 python -m mpi4py.futures demo/futures/test_futures.py -v -f
         ;;
     openmpi)
-        mpiexec -n 1 python test/runtests.py --no-threads -v -f
-        mpiexec -n 2 python test/runtests.py --no-threads -v -f -e spawn
-        mpiexec -n 3 python test/runtests.py --no-threads -v -f -e spawn
-       #mpiexec -n 8 python test/runtests.py --no-threads -v -f -e spawn
+        mpiexec -n 1 python test/main.py --no-threads -v -f
+        mpiexec -n 2 python test/main.py --no-threads -v -f -e spawn
+        mpiexec -n 3 python test/main.py --no-threads -v -f -e spawn
+       #mpiexec -n 8 python test/main.py --no-threads -v -f -e spawn
         mpiexec -n 1 python demo/futures/test_futures.py -v
         mpiexec -n 2 python -m mpi4py.futures demo/futures/test_futures.py -v -f
         mpiexec -n 3 python -m mpi4py.futures demo/futures/test_futures.py -v -f
