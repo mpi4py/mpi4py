@@ -299,9 +299,6 @@ cdef int check_mpiexec() except -1 nogil:
 cdef extern from "Python.h":
     int Py_AtExit(void (*)() noexcept nogil)
 
-cdef extern from * nogil:
-    int PyMPI_Commctx_finalize()
-
 cdef int bootstrap() except -1:
     # Get options from 'mpi4py.rc' module
     getOptions(&options)
