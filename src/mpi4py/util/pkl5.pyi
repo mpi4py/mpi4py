@@ -52,6 +52,12 @@ class Request(tuple[MPI.Request, ...]):
         status: Status | None = None,
     ) -> Any: ...
     @classmethod
+    def get_status_all(
+        cls,
+        requests: Sequence[Request],
+        statuses: list[Status] | None = None,
+    ) -> bool: ...
+    @classmethod
     def testall(
         cls,
         requests: Sequence[Request],
@@ -61,7 +67,7 @@ class Request(tuple[MPI.Request, ...]):
     def waitall(
         cls,
         requests: Sequence[Request],
-            statuses: list[Status] | None = None,
+        statuses: list[Status] | None = None,
     ) -> list[Any]: ...
 
 class Message(tuple[MPI.Message, ...]):

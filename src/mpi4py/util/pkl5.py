@@ -565,6 +565,16 @@ class Request(tuple):
         return _test(self, MPI.Request.Waitall, status)[1]
 
     @classmethod
+    def get_status_all(cls, requests, statuses=None):
+        """Non-destructive test for the completion of all requests."""
+        arglist = [requests]
+        if statuses is not None:
+            ns, nr = len(statuses), len(requests)
+            statuses += [Status() for _ in range(ns, nr)]
+            arglist.append(statuses)
+        return all(map(Request.get_status, *arglist))
+
+    @classmethod
     def testall(cls, requests, statuses=None):
         """Test for the completion of all requests."""
         return _testall(requests, MPI.Request.Testall, statuses)

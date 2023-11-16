@@ -97,6 +97,10 @@ class TestRequestArray(unittest.TestCase):
             self.assertEqual(status.source, MPI.ANY_SOURCE)
             self.assertEqual(status.tag, MPI.ANY_TAG)
             self.assertEqual(status.error, MPI.SUCCESS)
+        with self.catchNotImplementedError(4, 1):
+            index, flag = MPI.Request.get_status_any(self.REQUESTS)
+            self.assertEqual(index, MPI.UNDEFINED)
+            self.assertTrue(flag)
 
     def testWaitall(self):
         MPI.Request.Waitall(self.REQUESTS)
@@ -139,6 +143,9 @@ class TestRequestArray(unittest.TestCase):
                 self.assertEqual(status.source, MPI.ANY_SOURCE)
                 self.assertEqual(status.tag, MPI.ANY_TAG)
                 self.assertEqual(status.error, MPI.SUCCESS)
+        with self.catchNotImplementedError(4, 1):
+            flag = MPI.Request.get_status_all(self.REQUESTS)
+            self.assertTrue(flag)
 
     def testWaitsome(self):
         ret = MPI.Request.Waitsome(self.REQUESTS)
@@ -170,6 +177,9 @@ class TestRequestArray(unittest.TestCase):
             indices = MPI.Request.Get_status_some(self.REQUESTS, None)
             self.assertIsNone(indices)
             indices = MPI.Request.Get_status_some(self.REQUESTS, statuses)
+            self.assertIsNone(indices)
+        with self.catchNotImplementedError(4, 1):
+            indices = MPI.Request.get_status_some(self.REQUESTS)
             self.assertIsNone(indices)
 
 

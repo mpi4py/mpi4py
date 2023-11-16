@@ -357,6 +357,17 @@ cdef class Request:
         return (index, <bint>flag, msg)
     #
     @classmethod
+    def get_status_any(
+        cls,
+        requests: Sequence[Request],
+        Status status: Status | None = None,
+    ) -> tuple[int, bool]:
+        """
+        Non-destructive test for the completion of any requests.
+        """
+        return Request.Get_status_any(requests, status)
+    #
+    @classmethod
     def waitall(
         cls,
         requests: Sequence[Request],
@@ -382,6 +393,17 @@ cdef class Request:
         return (<bint>flag, msg)
     #
     @classmethod
+    def get_status_all(
+        cls,
+        requests: Sequence[Request],
+        statuses: list[Status] | None = None,
+    ) -> bool:
+        """
+        Non-destructive test for the completion of all requests.
+        """
+        return Request.Get_status_all(requests, statuses)
+    #
+    @classmethod
     def waitsome(
         cls,
         requests: Sequence[Request],
@@ -402,6 +424,17 @@ cdef class Request:
         Test for completion of some previously initiated requests.
         """
         return PyMPI_testsome(requests, statuses)
+    #
+    @classmethod
+    def get_status_some(
+        cls,
+        requests: Sequence[Request],
+        statuses: list[Status] | None = None,
+    ) -> list[int] | None:
+        """
+        Non-destructive test for completion of some requests.
+        """
+        return Request.Get_status_some(requests, statuses)
     #
     def cancel(self) -> None:
         """

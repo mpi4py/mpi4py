@@ -239,6 +239,33 @@ class BaseTest:
                 req.Free()
             self.assertFalse(req)
 
+    def testGetStatusAll(self):
+        comm = self.COMM
+        size = comm.Get_size()
+        rank = comm.Get_rank()
+        requests = []
+        for smess in messages:
+            req = comm.issend(smess, rank)
+            requests.append(req)
+        with self.catchNotImplementedError(4, 1):
+            flag = self.RequestType.get_status_all(requests)
+            self.assertFalse(flag)
+        comm.barrier()
+        for smess in messages:
+            rmess = comm.recv(None, rank)
+            self.assertEqual(rmess, smess)
+        with self.catchNotImplementedError(4, 1):
+            flag = False
+            statuses = []
+            while not flag:
+                flag = self.RequestType.get_status_all(requests, statuses)
+            self.assertEqual(len(statuses), len(requests))
+            for status in statuses:
+                self.assertIsInstance(status, MPI.Status)
+        flag, obj = self.RequestType.testall(requests)
+        self.assertTrue(flag)
+        self.assertEqual(obj, [None]*len(messages))
+
     def testTestAll(self):
         comm = self.COMM
         size = comm.Get_size()
