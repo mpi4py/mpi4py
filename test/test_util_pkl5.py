@@ -262,6 +262,8 @@ class BaseTest:
             self.assertEqual(len(statuses), len(requests))
             for status in statuses:
                 self.assertIsInstance(status, MPI.Status)
+        if not flag:
+            self.RequestType.waitall(requests)
         flag, obj = self.RequestType.testall(requests)
         self.assertTrue(flag)
         self.assertEqual(obj, [None]*len(messages))
