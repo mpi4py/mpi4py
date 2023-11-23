@@ -1,9 +1,8 @@
 # -----------------------------------------------------------------------------
 
 cdef extern from "Python.h":
-    int is_list     "PyList_Check"  (object)
-    int is_tuple    "PyTuple_Check" (object)
-    int is_integral "PyIndex_Check" (object)
+    int is_list  "PyList_Check"  (object)
+    int is_tuple "PyTuple_Check" (object)
 
 cdef inline int is_buffer(object ob) noexcept:
     return PyObject_CheckBuffer(ob)

@@ -1112,6 +1112,14 @@ class TestMessageVectorNumPy(unittest.TestCase,
     def array(self, typecode, initializer):
         return numpy.array(initializer, dtype=typecode)
 
+    def testCountNumPyArray(self):
+        sbuf = bytearray(b"abc")
+        rbuf = bytearray(4)
+        count = numpy.array([3])
+        displ = numpy.array([1])
+        Alltoallv([sbuf, count], [rbuf, (3, displ)])
+        self.assertEqual(sbuf, rbuf[displ[0]:])
+
     def testCountNumPyScalar(self):
         sbuf = bytearray(b"abc")
         rbuf = bytearray(4)
