@@ -320,7 +320,7 @@ cdef object PyMPI_recv_obarg(object obj, int source, int tag,
     #
     if source != MPI_PROC_NULL:
         if is_integral(obj):
-            rcount = <MPI_Count> obj
+            rcount = <MPI_Count> PyNumber_Index(obj)
             rmsg = pickle_alloc(&rbuf, rcount)
         else:
             rmsg = asbuffer_w(obj, &rbuf, &rlen)
@@ -468,7 +468,7 @@ cdef object PyMPI_irecv(object obj, int source, int tag,
             obj = pickle_alloc(&rbuf, rcount)
             rmsg = asbuffer_r(obj, NULL, NULL)
         elif is_integral(obj):
-            rcount = <MPI_Count> obj
+            rcount = <MPI_Count> PyNumber_Index(obj)
             obj = pickle_alloc(&rbuf, rcount)
             rmsg = asbuffer_r(obj, NULL, NULL)
         else:
