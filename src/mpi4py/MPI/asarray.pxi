@@ -1,5 +1,23 @@
 # -----------------------------------------------------------------------------
 
+cdef extern from "Python.h":
+    int PyIndex_Check(object)
+    int PySequence_Check(object)
+    object PyNumber_Index(object)
+    Py_ssize_t PySequence_Size(object) except -1
+
+cdef inline int is_integral(object ob) noexcept:
+    if not PyIndex_Check(ob):    return 0
+    if not PySequence_Check(ob): return 1
+    try: PySequence_Size(ob)
+    except: pass
+    else: return 0
+    try: PyNumber_Index(ob)
+    except: return 0
+    else: return 1
+
+# -----------------------------------------------------------------------------
+
 cdef extern from * nogil:
     const int INT_MAX
 
@@ -25,7 +43,8 @@ cdef inline object getarray(object ob, count_t *n, integral_t **p):
     if count_t is int: chklength(size)
     cdef integral_t *base = NULL
     cdef object mem = newarray(size, &base)
-    for i in range(size): base[i] = ob[i]
+    for i in range(size):
+        base[i] = PyNumber_Index(ob[i])
     n[0] = <count_t> size
     p[0] = base
     return mem
