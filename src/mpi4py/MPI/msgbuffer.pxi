@@ -215,7 +215,7 @@ cdef _p_message message_simple(object msg,
     cdef MPI_Count length = bsize     # in bytes
     cdef MPI_Aint  offset = 0         # from base buffer, in bytes
     if o_displ is not None:
-        displ = <MPI_Aint> o_displ
+        displ = <MPI_Aint> PyNumber_Index(o_displ)
         if displ < 0:
             raise ValueError(
                 f"message: negative displacement {displ}")
@@ -236,7 +236,7 @@ cdef _p_message message_simple(object msg,
             offset = <MPI_Aint> (displ * extent)
             length -= offset
     if o_count is not None:
-        count = <MPI_Count> o_count
+        count = <MPI_Count> PyNumber_Index(o_count)
         if count < 0:
             raise ValueError(
                 f"message: negative count {count}")
@@ -358,7 +358,7 @@ cdef _p_message message_vector(object msg,
             cvalue = (csize // blocks) + (csize % blocks > i)
             counts[i] = cvalue
     elif is_integral(o_counts):
-        cvalue = <MPI_Count> o_counts
+        cvalue = <MPI_Count> PyNumber_Index(o_counts)
         o_counts = newarray(blocks, &counts)
         for i in range(blocks):
             counts[i] = cvalue
@@ -371,7 +371,7 @@ cdef _p_message message_vector(object msg,
             displs[i] = avalue
             avalue += <MPI_Aint> counts[i]
     elif is_integral(o_displs): # strided
-        avalue = <MPI_Aint> o_displs
+        avalue = <MPI_Aint> PyNumber_Index(o_displs)
         o_displs = newarray(blocks, &displs)
         for i in range(blocks):
             displs[i] = avalue * i
@@ -992,7 +992,7 @@ cdef class _p_msg_rma:
             self.tcount = self.ocount
             self.ttype  = self.otype
         elif is_integral(target):
-            self.tdisp  = <MPI_Aint>target
+            self.tdisp  = <MPI_Aint> PyNumber_Index(target)
             self.tcount = self.ocount
             self.ttype  = self.otype
         elif is_list(target) or is_tuple(target):
@@ -1001,9 +1001,9 @@ cdef class _p_msg_rma:
             self.ttype  = self.otype
             nargs = len(target)
             if nargs >= 1:
-                self.tdisp  = <MPI_Aint> target[0]
+                self.tdisp  = <MPI_Aint> PyNumber_Index(target[0])
             if nargs >= 2:
-                self.tcount = <MPI_Count> target[1]
+                self.tcount = <MPI_Count> PyNumber_Index(target[1])
             if nargs >= 3:
                 self.ttype  = asdatatype(target[2]).ob_mpi
             if nargs >= 4:

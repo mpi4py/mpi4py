@@ -1119,6 +1119,10 @@ class TestMessageVectorNumPy(unittest.TestCase,
         displ = numpy.array([1])
         Alltoallv([sbuf, count], [rbuf, (3, displ)])
         self.assertEqual(sbuf, rbuf[displ[0]:])
+        with self.assertRaises(TypeError):
+            count = numpy.array([3.1])
+            displ = numpy.array([1.1])
+            Alltoallv([sbuf, count], [rbuf, (3, displ)])
 
     def testCountNumPyScalar(self):
         sbuf = bytearray(b"abc")
@@ -1127,6 +1131,10 @@ class TestMessageVectorNumPy(unittest.TestCase,
         displ = numpy.array([1])[0]
         Alltoallv([sbuf, count], [rbuf, (3, [displ])])
         self.assertEqual(sbuf, rbuf[displ:])
+        with self.assertRaises(TypeError):
+            count = numpy.array([3.1])[0]
+            displ = numpy.array([1.1])[0]
+            Alltoallv([sbuf, (3, [displ])], [rbuf, count])
 
     def testCountNumPyZeroDim(self):
         sbuf = bytearray(b"xabc")
@@ -1135,6 +1143,11 @@ class TestMessageVectorNumPy(unittest.TestCase,
         displ = numpy.array(1)
         Alltoallv([sbuf, (3, [displ])], [rbuf, count])
         self.assertEqual(sbuf[displ:], rbuf)
+        with self.assertRaises(TypeError):
+            count = numpy.array(3.0)
+            displ = numpy.array(1.0)
+            Alltoallv([sbuf, (3, [displ])], [rbuf, count])
+
 
 @unittest.skipIf(array is None, 'array')
 class TestMessageVectorCAIBuf(unittest.TestCase,
