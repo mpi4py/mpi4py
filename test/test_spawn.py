@@ -303,32 +303,25 @@ class BaseTestSpawnMultiple(BaseTestSpawn):
 class TestSpawnSingleSelf(BaseTestSpawnSingle, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
-@unittest.skipMPI('intelmpi', windows() and not sequential())
 class TestSpawnSingleWorld(BaseTestSpawnSingle, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
-@unittest.skipMPI('intelmpi', windows() and not sequential())
 class TestSpawnSingleSelfMany(TestSpawnSingleSelf):
     MAXPROCS = MPI.COMM_WORLD.Get_size()
 
-@unittest.skipMPI('intelmpi', windows() and not sequential())
 class TestSpawnSingleWorldMany(TestSpawnSingleWorld):
     MAXPROCS = MPI.COMM_WORLD.Get_size()
 
 
-@unittest.skipMPI('intelmpi', windows() and not sequential())
 class TestSpawnMultipleSelf(BaseTestSpawnMultiple, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
-@unittest.skipMPI('intelmpi', windows() and not sequential())
 class TestSpawnMultipleWorld(BaseTestSpawnMultiple, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
-@unittest.skipMPI('intelmpi', windows() and not sequential())
 class TestSpawnMultipleSelfMany(TestSpawnMultipleSelf):
     MAXPROCS = MPI.COMM_WORLD.Get_size()
 
-@unittest.skipMPI('intelmpi', windows() and not sequential())
 class TestSpawnMultipleWorldMany(TestSpawnMultipleWorld):
     MAXPROCS = MPI.COMM_WORLD.Get_size()
 
