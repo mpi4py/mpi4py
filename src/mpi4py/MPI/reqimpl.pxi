@@ -62,7 +62,7 @@ cdef class _p_rs:
         cdef Py_ssize_t nr = self.count
         cdef Request req = None
         for i in range(nr):
-            req = <Request>self.arg_requests[i]
+            req = <Request>requests[i]
             req.ob_mpi = self.requests[i]
             if req.ob_mpi == MPI_REQUEST_NULL:
                 if req.ob_buf is not None:

@@ -551,10 +551,10 @@ cdef class Datatype:
         cdef MPI_Aint *a = NULL
         cdef MPI_Count *c = NULL
         cdef MPI_Datatype *d = NULL
-        cdef tmp1 = allocate(ni, sizeof(int), &i)
-        cdef tmp2 = allocate(na, sizeof(MPI_Aint), &a)
-        cdef tmp3 = allocate(nc, sizeof(MPI_Count), &c)
-        cdef tmp4 = allocate(nd, sizeof(MPI_Datatype), &d)
+        cdef unused1 = allocate(ni, sizeof(int), &i)
+        cdef unused2 = allocate(na, sizeof(MPI_Aint), &a)
+        cdef unused3 = allocate(nc, sizeof(MPI_Count), &c)
+        cdef unused4 = allocate(nd, sizeof(MPI_Datatype), &d)
         CHKERR( MPI_Type_get_contents_c(
             self.ob_mpi, ni, na, nc, nd, i, a, c, d) )
         cdef object integers  = [i[k] for k in range(ni)]
@@ -616,8 +616,8 @@ cdef class Datatype:
         #
         cdef void *ibptr = NULL, *obptr = NULL
         cdef MPI_Aint iblen = 0, oblen = 0
-        cdef tmp1 = asbuffer_r(inbuf,  &ibptr, &iblen)
-        cdef tmp2 = asbuffer_w(outbuf, &obptr, &oblen)
+        cdef unused1 = asbuffer_r(inbuf,  &ibptr, &iblen)
+        cdef unused2 = asbuffer_w(outbuf, &obptr, &oblen)
         cdef MPI_Count icount = iblen // extent
         cdef MPI_Count ocount = oblen
         #
@@ -642,8 +642,8 @@ cdef class Datatype:
         #
         cdef void *ibptr = NULL, *obptr = NULL
         cdef MPI_Aint iblen = 0, oblen = 0
-        cdef tmp1 = asbuffer_r(inbuf,  &ibptr, &iblen)
-        cdef tmp2 = asbuffer_w(outbuf, &obptr, &oblen)
+        cdef unused1 = asbuffer_r(inbuf,  &ibptr, &iblen)
+        cdef unused2 = asbuffer_w(outbuf, &obptr, &oblen)
         cdef MPI_Count icount = iblen
         cdef MPI_Count ocount = oblen // extent
         #
@@ -691,8 +691,8 @@ cdef class Datatype:
         #
         cdef void *ibptr = NULL, *obptr = NULL
         cdef MPI_Aint iblen = 0, oblen = 0
-        cdef tmp1 = asbuffer_r(inbuf,  &ibptr, &iblen)
-        cdef tmp2 = asbuffer_w(outbuf, &obptr, &oblen)
+        cdef unused1 = asbuffer_r(inbuf,  &ibptr, &iblen)
+        cdef unused2 = asbuffer_w(outbuf, &obptr, &oblen)
         cdef MPI_Count icount = iblen // extent
         cdef MPI_Count ocount = oblen
         #
@@ -721,8 +721,8 @@ cdef class Datatype:
         #
         cdef void *ibptr = NULL, *obptr = NULL
         cdef MPI_Aint iblen = 0, oblen = 0
-        cdef tmp1 = asbuffer_r(inbuf,  &ibptr, &iblen)
-        cdef tmp2 = asbuffer_w(outbuf, &obptr, &oblen)
+        cdef unused1 = asbuffer_r(inbuf,  &ibptr, &iblen)
+        cdef unused2 = asbuffer_w(outbuf, &obptr, &oblen)
         cdef MPI_Count icount = iblen
         cdef MPI_Count ocount = oblen // extent
         #
@@ -856,7 +856,7 @@ cdef class Datatype:
         """
         cdef const char *s = DatatypeCode(self.ob_mpi)
         if s != NULL: return pystr(s)
-        raise ValueError(f"cannot map to character code or type string")
+        raise ValueError("cannot map to character code or type string")
 
     @classmethod
     def fromcode(cls, code: str) -> Datatype:

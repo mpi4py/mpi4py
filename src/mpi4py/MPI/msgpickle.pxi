@@ -258,9 +258,9 @@ cdef object PyMPI_send(object obj, int dest, int tag,
     cdef MPI_Count scount = 0
     cdef MPI_Datatype stype = MPI_BYTE
     #
-    cdef object tmps = None
+    cdef object unuseds = None
     if dest != MPI_PROC_NULL:
-        tmps = pickle_dump(pickle, obj, &sbuf, &scount)
+        unuseds = pickle_dump(pickle, obj, &sbuf, &scount)
     with nogil: CHKERR( MPI_Send_c(
         sbuf, scount, stype,
         dest, tag, comm) )
@@ -275,9 +275,9 @@ cdef object PyMPI_bsend(object obj, int dest, int tag,
     cdef MPI_Count scount = 0
     cdef MPI_Datatype stype = MPI_BYTE
     #
-    cdef object tmps = None
+    cdef object unuseds = None
     if dest != MPI_PROC_NULL:
-        tmps = pickle_dump(pickle, obj, &sbuf, &scount)
+        unuseds = pickle_dump(pickle, obj, &sbuf, &scount)
     with nogil: CHKERR( MPI_Bsend_c(
         sbuf, scount, stype,
         dest, tag, comm) )
@@ -292,9 +292,9 @@ cdef object PyMPI_ssend(object obj, int dest, int tag,
     cdef MPI_Count scount = 0
     cdef MPI_Datatype stype = MPI_BYTE
     #
-    cdef object tmps = None
+    cdef object unuseds = None
     if dest != MPI_PROC_NULL:
-        tmps = pickle_dump(pickle, obj, &sbuf, &scount)
+        unuseds = pickle_dump(pickle, obj, &sbuf, &scount)
     with nogil: CHKERR( MPI_Ssend_c(
         sbuf, scount, stype,
             dest, tag, comm) )
@@ -354,7 +354,7 @@ cdef object PyMPI_recv_match(object obj, int source, int tag,
     with nogil:
         CHKERR( MPI_Mprobe(source, tag, comm, &match, &rsts) )
         CHKERR( MPI_Get_count_c(&rsts, rtype, &rcount) )
-    cdef object tmpr = pickle_alloc(&rbuf, rcount)
+    cdef object unusedr = pickle_alloc(&rbuf, rcount)
     with nogil:
         CHKERR( MPI_Mrecv_c(
             rbuf, rcount, rtype, &match, status) )
@@ -372,7 +372,7 @@ cdef object PyMPI_recv_probe(object obj, int source, int tag,
     cdef MPI_Datatype rtype = MPI_BYTE
     #
     cdef MPI_Status rsts
-    cdef object tmpr
+    cdef object unusedr
     <void> obj # unused
     #
     with PyMPI_Lock(comm, "recv"):
@@ -381,7 +381,7 @@ cdef object PyMPI_recv_probe(object obj, int source, int tag,
             CHKERR( MPI_Get_count_c(&rsts, rtype, &rcount) )
             CHKERR( MPI_Status_get_source(&rsts, &source) )
             CHKERR( MPI_Status_get_tag(&rsts, &tag) )
-        tmpr = pickle_alloc(&rbuf, rcount)
+        unusedr = pickle_alloc(&rbuf, rcount)
         with nogil:
             CHKERR( MPI_Recv_c(
                 rbuf, rcount, rtype,
@@ -794,12 +794,12 @@ cdef object PyMPI_gather(object sendobj, int root, MPI_Comm comm):
         else:
             dosend=1; dorecv=0;
     #
-    cdef object tmps = None
+    cdef object unuseds = None
     cdef object rmsg = None
-    cdef object tmp1
+    cdef object unused1
     #
-    if dorecv: tmp1 = allocate_count_displ(size, &rcounts, &rdispls)
-    if dosend: tmps = pickle_dump(pickle, sendobj, &sbuf, &scount)
+    if dorecv: unused1 = allocate_count_displ(size, &rcounts, &rdispls)
+    if dosend: unuseds = pickle_dump(pickle, sendobj, &sbuf, &scount)
     with PyMPI_Lock(comm, "gather"):
         with nogil: CHKERR( MPI_Gather_c(
             &scount, 1, MPI_COUNT,
@@ -845,12 +845,12 @@ cdef object PyMPI_scatter(object sendobj, int root, MPI_Comm comm):
         else:
             dosend=0; dorecv=1;
     #
-    cdef object tmps = None
+    cdef object unuseds = None
     cdef object rmsg = None
-    cdef object tmp1
+    cdef object unused1
     #
-    if dosend: tmp1 = allocate_count_displ(size, &scounts, &sdispls)
-    if dosend: tmps = pickle_dumpv(pickle, sendobj, &sbuf, size, scounts, sdispls)
+    if dosend: unused1 = allocate_count_displ(size, &scounts, &sdispls)
+    if dosend: unuseds = pickle_dumpv(pickle, sendobj, &sbuf, size, scounts, sdispls)
     with PyMPI_Lock(comm, "scatter"):
         with nogil: CHKERR( MPI_Scatter_c(
             scounts, 1, MPI_COUNT,
@@ -884,12 +884,12 @@ cdef object PyMPI_allgather(object sendobj, MPI_Comm comm):
     else:
         CHKERR( MPI_Comm_size(comm, &size) )
     #
-    cdef object tmps = None
+    cdef object unuseds = None
     cdef object rmsg = None
-    cdef object tmp1
+    cdef object unused1
     #
-    tmp1 = allocate_count_displ(size, &rcounts, &rdispls)
-    tmps = pickle_dump(pickle, sendobj, &sbuf, &scount)
+    unused1 = allocate_count_displ(size, &rcounts, &rdispls)
+    unuseds = pickle_dump(pickle, sendobj, &sbuf, &scount)
     with PyMPI_Lock(comm, "allgather"):
         with nogil: CHKERR( MPI_Allgather_c(
             &scount, 1, MPI_COUNT,
@@ -924,13 +924,13 @@ cdef object PyMPI_alltoall(object sendobj, MPI_Comm comm):
     else:
         CHKERR( MPI_Comm_size(comm, &size) )
     #
-    cdef object tmps = None
+    cdef object unuseds = None
     cdef object rmsg = None
-    cdef object tmp1, tmp2
+    cdef object unused1, unused2
     #
-    tmp1 = allocate_count_displ(size, &scounts, &sdispls)
-    tmp2 = allocate_count_displ(size, &rcounts, &rdispls)
-    tmps = pickle_dumpv(pickle, sendobj, &sbuf, size, scounts, sdispls)
+    unused1 = allocate_count_displ(size, &scounts, &sdispls)
+    unused2 = allocate_count_displ(size, &rcounts, &rdispls)
+    unuseds = pickle_dumpv(pickle, sendobj, &sbuf, size, scounts, sdispls)
     with PyMPI_Lock(comm, "alltoall"):
         with nogil: CHKERR( MPI_Alltoall_c(
             scounts, 1, MPI_COUNT,
@@ -960,13 +960,13 @@ cdef object PyMPI_neighbor_allgather(object sendobj, MPI_Comm comm):
     cdef int rsize=0
     comm_neighbors_count(comm, &rsize, NULL)
     #
-    cdef object tmps = None
+    cdef object unuseds = None
     cdef object rmsg = None
-    cdef object tmp1
+    cdef object unused1
     #
-    tmp1 = allocate_count_displ(rsize, &rcounts, &rdispls)
+    unused1 = allocate_count_displ(rsize, &rcounts, &rdispls)
     for i in range(rsize): rcounts[i] = 0
-    tmps = pickle_dump(pickle, sendobj, &sbuf, &scount)
+    unuseds = pickle_dump(pickle, sendobj, &sbuf, &scount)
     with PyMPI_Lock(comm, "neighbor_allgather"):
         with nogil: CHKERR( MPI_Neighbor_allgather_c(
             &scount, 1, MPI_COUNT,
@@ -997,14 +997,14 @@ cdef object PyMPI_neighbor_alltoall(object sendobj, MPI_Comm comm):
     cdef int ssize=0, rsize=0
     comm_neighbors_count(comm, &rsize, &ssize)
     #
-    cdef object tmps = None
+    cdef object unuseds = None
     cdef object rmsg = None
-    cdef object tmp1, tmp2
+    cdef object unused1, unused2
     #
-    tmp1 = allocate_count_displ(ssize, &scounts, &sdispls)
-    tmp2 = allocate_count_displ(rsize, &rcounts, &rdispls)
+    unused1 = allocate_count_displ(ssize, &scounts, &sdispls)
+    unused2 = allocate_count_displ(rsize, &rcounts, &rdispls)
     for i in range(rsize): rcounts[i] = 0
-    tmps = pickle_dumpv(pickle, sendobj, &sbuf, ssize, scounts, sdispls)
+    unuseds = pickle_dumpv(pickle, sendobj, &sbuf, ssize, scounts, sdispls)
     with PyMPI_Lock(comm, "neighbor_alltoall"):
         with nogil: CHKERR( MPI_Neighbor_alltoall_c(
             scounts, 1, MPI_COUNT,
@@ -1076,7 +1076,7 @@ cdef object PyMPI_send_p2p(object obj, int dst, int tag, MPI_Comm comm):
     cdef void *sbuf = NULL
     cdef MPI_Count scount = 0
     cdef MPI_Datatype stype = MPI_BYTE
-    cdef object tmps = pickle_dump(pickle, obj, &sbuf, &scount)
+    cdef object unuseds = pickle_dump(pickle, obj, &sbuf, &scount)
     with nogil: CHKERR( MPI_Send_c(&scount, 1, MPI_COUNT, dst, tag, comm) )
     with nogil: CHKERR( MPI_Send_c(sbuf, scount, stype, dst, tag, comm) )
     return None
@@ -1088,7 +1088,7 @@ cdef object PyMPI_recv_p2p(int src, int tag, MPI_Comm comm):
     cdef MPI_Datatype rtype = MPI_BYTE
     cdef MPI_Status *status = MPI_STATUS_IGNORE
     with nogil: CHKERR( MPI_Recv_c(&rcount, 1, MPI_COUNT, src, tag, comm, status) )
-    cdef object tmpr = pickle_alloc(&rbuf, rcount)
+    cdef object unusedr = pickle_alloc(&rbuf, rcount)
     with nogil: CHKERR( MPI_Recv_c(rbuf, rcount, rtype, src, tag, comm, status) )
     return pickle_load(pickle, rbuf, rcount)
 
@@ -1100,12 +1100,12 @@ cdef object PyMPI_sendrecv_p2p(object obj,
     cdef void *sbuf = NULL, *rbuf = NULL
     cdef MPI_Count scount = 0, rcount = 0
     cdef MPI_Datatype dtype = MPI_BYTE
-    cdef object tmps = pickle_dump(pickle, obj, &sbuf, &scount)
+    cdef object unuseds = pickle_dump(pickle, obj, &sbuf, &scount)
     with nogil: CHKERR( MPI_Sendrecv_c(
             &scount, 1, MPI_COUNT, dst, stag,
             &rcount, 1, MPI_COUNT, src, rtag,
             comm, MPI_STATUS_IGNORE) )
-    cdef object tmpr = pickle_alloc(&rbuf, rcount)
+    cdef object unusedr = pickle_alloc(&rbuf, rcount)
     with nogil: CHKERR( MPI_Sendrecv_c(
             sbuf, scount, dtype, dst, stag,
             rbuf, rcount, dtype, src, rtag,
@@ -1139,7 +1139,7 @@ cdef object PyMPI_reduce_p2p(object sendobj, object op, int root,
         raise MPIException(MPI_ERR_ROOT)
     #
     cdef object result = PyMPI_copy(sendobj)
-    cdef object tmp
+    cdef object unused
     # Compute reduction at process 0
     cdef unsigned int umask = <unsigned int> 1
     cdef unsigned int usize = <unsigned int> size
@@ -1152,8 +1152,8 @@ cdef object PyMPI_reduce_p2p(object sendobj, object op, int root,
         else:
             target = <int> (urank | umask)
             if target < size:
-                tmp = PyMPI_recv_p2p(target, tag, comm)
-                result = op(result, tmp)
+                unused = PyMPI_recv_p2p(target, tag, comm)
+                result = op(result, unused)
         umask <<= 1
     # Send reduction to root
     if root != 0:
@@ -1176,7 +1176,7 @@ cdef object PyMPI_scan_p2p(object sendobj, object op,
     #
     cdef object result  = PyMPI_copy(sendobj)
     cdef object partial = result
-    cdef object tmp
+    cdef object unused
     # Compute prefix reduction
     cdef unsigned int umask = <unsigned int> 1
     cdef unsigned int usize = <unsigned int> size
@@ -1185,14 +1185,14 @@ cdef object PyMPI_scan_p2p(object sendobj, object op,
     while umask < usize:
         target = <int> (urank ^ umask)
         if target < size:
-            tmp = PyMPI_sendrecv_p2p(partial, target, tag,
+            unused = PyMPI_sendrecv_p2p(partial, target, tag,
                                      target, tag, comm)
             if rank > target:
-                partial = op(tmp, partial)
-                result = op(tmp, result)
+                partial = op(unused, partial)
+                result = op(unused, result)
             else:
-                tmp = op(partial, tmp)
-                partial = tmp
+                unused = op(partial, unused)
+                partial = unused
         umask <<= 1
     #
     return result
@@ -1207,7 +1207,7 @@ cdef object PyMPI_exscan_p2p(object sendobj, object op,
     #
     cdef object result  = PyMPI_copy(sendobj)
     cdef object partial = result
-    cdef object tmp
+    cdef object unused
     # Compute prefix reduction
     cdef unsigned int umask = <unsigned int> 1
     cdef unsigned int usize = <unsigned int> size
@@ -1217,17 +1217,17 @@ cdef object PyMPI_exscan_p2p(object sendobj, object op,
     while umask < usize:
         target = <int> (urank ^ umask)
         if target < size:
-            tmp = PyMPI_sendrecv_p2p(partial, target, tag,
+            unused = PyMPI_sendrecv_p2p(partial, target, tag,
                                      target, tag, comm)
             if rank > target:
-                partial = op(tmp, partial)
+                partial = op(unused, partial)
                 if uflag == 0:
-                    result = tmp; uflag = 1
+                    result = unused; uflag = 1
                 else:
-                    result = op(tmp, result)
+                    result = op(unused, result)
             else:
-                tmp = op(partial, tmp)
-                partial = tmp
+                unused = op(partial, unused)
+                partial = unused
         umask <<= 1
     #
     if rank == 0:

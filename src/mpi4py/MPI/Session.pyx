@@ -68,7 +68,7 @@ cdef class Session:
         """
         cdef int nlen = MPI_MAX_PSET_NAME_LEN
         cdef char *pset_name = NULL
-        cdef tmp = allocate(nlen+1, sizeof(char), &pset_name)
+        cdef unused = allocate(nlen+1, sizeof(char), &pset_name)
         CHKERR( MPI_Session_get_nth_pset(
             self.ob_mpi, info.ob_mpi, n, &nlen, pset_name) )
         return mpistr(pset_name)

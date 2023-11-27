@@ -100,7 +100,7 @@ cdef class Info:
         cdef int buflen = MPI_MAX_INFO_VAL
         cdef int flag = 0
         key = asmpistr(key, &ckey)
-        cdef tmp = allocate(buflen+1, sizeof(char), &cvalue)
+        cdef unused = allocate(buflen+1, sizeof(char), &cvalue)
         CHKERR( MPI_Info_get_string(self.ob_mpi, ckey, &buflen, cvalue, &flag) )
         if not flag: return None
         return mpistr(cvalue)

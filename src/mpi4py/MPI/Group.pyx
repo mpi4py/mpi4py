@@ -72,14 +72,14 @@ cdef class Group:
         cdef MPI_Group group2 = MPI_GROUP_NULL
         cdef int n = 0, *iranks1 = NULL, *iranks2 = NULL
         #
-        cdef tmp1 = None
+        cdef unused1 = None
         if ranks is not None:
-            tmp1 = getarray(ranks, &n, &iranks1)
+            unused1 = getarray(ranks, &n, &iranks1)
         else:
             CHKERR( MPI_Group_size(self.ob_mpi, &n) )
-            tmp1 = newarray(n, &iranks1)
+            unused1 = newarray(n, &iranks1)
             for i in range(n): iranks1[i] = i
-        cdef tmp2 = newarray(n, &iranks2)
+        cdef unused2 = newarray(n, &iranks2)
         #
         group1 = self.ob_mpi
         if group is not None:
@@ -175,7 +175,7 @@ cdef class Group:
         cdef int *p = NULL, (*ranges)[3]# = NULL ## XXX cython fails
         ranges = NULL
         cdef int n = <int>len(ranks)
-        cdef tmp1 = allocate(n, sizeof(int[3]), &ranges)
+        cdef unused1 = allocate(n, sizeof(int[3]), &ranges)
         for i in range(n):
             p = <int*> ranges[i]
             p[0], p[1], p[2] = ranks[i]
@@ -190,7 +190,7 @@ cdef class Group:
         cdef int *p = NULL, (*ranges)[3]# = NULL ## XXX cython fails
         ranges = NULL
         cdef int n = <int>len(ranks)
-        cdef tmp1 = allocate(n, sizeof(int[3]), &ranges)
+        cdef unused1 = allocate(n, sizeof(int[3]), &ranges)
         for i in range(n):
             p = <int*> ranges[i]
             p[0], p[1], p[2] = ranks[i]
