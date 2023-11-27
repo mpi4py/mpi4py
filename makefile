@@ -30,7 +30,7 @@ clean:
 	$(PYTHON) setup.py clean --all
 distclean: clean srcclean
 	$(RM) -r build _configtest*
-	$(RM) .*_cache .eggs .tox
+	$(RM) -r .*_cache .eggs .tox
 	$(RM) -r htmlcov .coverage .coverage.*
 	$(RM) src/mpi4py/MPI.*.so
 	find . -name __pycache__ | xargs $(RM) -r
