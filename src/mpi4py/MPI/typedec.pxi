@@ -40,10 +40,10 @@ cdef inline tuple datatype_decode(
     cdef MPI_Aint *a = NULL
     cdef MPI_Count *c = NULL
     cdef MPI_Datatype *d = NULL
-    cdef tmp1 = allocate(ni, sizeof(int), &i)
-    cdef tmp2 = allocate(na, sizeof(MPI_Aint), &a)
-    cdef tmp3 = allocate(nc, sizeof(MPI_Count), &c)
-    cdef tmp4 = allocate(nd, sizeof(MPI_Datatype), &d)
+    cdef unused1 = allocate(ni, sizeof(int), &i)
+    cdef unused2 = allocate(na, sizeof(MPI_Aint), &a)
+    cdef unused3 = allocate(nc, sizeof(MPI_Count), &c)
+    cdef unused4 = allocate(nd, sizeof(MPI_Datatype), &d)
     CHKERR( MPI_Type_get_contents_c(
         self.ob_mpi, ni, na, nc, nd, i, a, c, d) )
     # process datatypes in advance

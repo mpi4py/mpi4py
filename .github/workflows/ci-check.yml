@@ -113,6 +113,9 @@ jobs:
     - name: codespell
       run:  codespell
 
+    - name: cython
+      run:  conf/cythonize.sh -Wextra -Werror
+
   type:
     runs-on: ubuntu-latest
 

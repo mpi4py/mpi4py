@@ -60,12 +60,16 @@ cdef inline int detach_buffer_set(
     PyMPI_attach_buffer_type obj,
     object buf,
 ) except -1:
+    cdef Py_uintptr_t handle
     if PyMPI_attach_buffer_type is Py_uintptr_t:
+        handle = <Py_uintptr_t>obj; <void>handle;  # unused
         _mpi_buffer_comm[None] = buf
     if PyMPI_attach_buffer_type is Comm:
-        _mpi_buffer_comm[<Py_uintptr_t>obj.ob_mpi] = buf  #~> MPI-4.1
+        handle = <Py_uintptr_t>obj.ob_mpi  #~> MPI-4.1
+        _mpi_buffer_comm[handle] = buf     #~> MPI-4.1
     if PyMPI_attach_buffer_type is Session:
-        _mpi_buffer_session[<Py_uintptr_t>obj.ob_mpi] = buf  #~> MPI-4.1
+        handle = <Py_uintptr_t>obj.ob_mpi  #~> MPI-4.1
+        _mpi_buffer_session[handle] = buf  #~> MPI-4.1
     return 0
 
 cdef inline object detach_buffer_get(
@@ -76,6 +80,7 @@ cdef inline object detach_buffer_get(
     cdef Py_uintptr_t handle
     cdef buffer buf = <buffer>None
     if PyMPI_attach_buffer_type is Py_uintptr_t:
+        handle = <Py_uintptr_t>obj; <void>handle;  # unused
         buf = <buffer>_mpi_buffer_comm.pop(None, None)
     if PyMPI_attach_buffer_type is Comm:
         handle = <Py_uintptr_t>obj.ob_mpi                 #~> MPI-4.1

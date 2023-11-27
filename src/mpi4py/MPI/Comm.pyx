@@ -2535,12 +2535,12 @@ cdef class Intracomm(Comm):
         #
         cdef int rank = MPI_UNDEFINED
         CHKERR( MPI_Comm_rank(self.ob_mpi, &rank) )
-        cdef tmp1, tmp2, tmp3
+        cdef object unused1, unused2, unused3
         if root == rank:
-            tmp1 = asmpistr(command, &cmd)
-            tmp2 = asarray_argv(args, &argv)
+            unused1 = asmpistr(command, &cmd)
+            unused2 = asarray_argv(args, &argv)
         if errcodes is not None:
-            tmp3 = newarray(maxprocs, &ierrcodes)
+            unused3 = newarray(maxprocs, &ierrcodes)
         #
         cdef Intercomm comm = <Intercomm>New(Intercomm)
         with nogil: CHKERR( MPI_Comm_spawn(
@@ -2574,20 +2574,20 @@ cdef class Intracomm(Comm):
         #
         cdef int rank = MPI_UNDEFINED
         CHKERR( MPI_Comm_rank(self.ob_mpi, &rank) )
-        cdef tmp1, tmp2, tmp3, tmp4, tmp5
+        cdef object unused1, unused2, unused3, unused4, unused5
         if root == rank:
-            tmp1 = asarray_cmds(command, &count, &cmds)
-            tmp2 = asarray_argvs(args, count, &argvs)
-            tmp3 = asarray_nprocs(maxprocs, count, &imaxprocs)
-            tmp4 = asarray_Info(info, count, &infos)
+            unused1 = asarray_cmds(command, &count, &cmds)
+            unused2 = asarray_argvs(args, count, &argvs)
+            unused3 = asarray_nprocs(maxprocs, count, &imaxprocs)
+            unused4 = asarray_Info(info, count, &infos)
         cdef int np = 0
         if errcodes is not None:
             if root != rank:
                 count = <int>len(maxprocs)
-                tmp3 = asarray_nprocs(maxprocs, count, &imaxprocs)
+                unused3 = asarray_nprocs(maxprocs, count, &imaxprocs)
             for i in range(count):
                 np += imaxprocs[i]
-            tmp5 = newarray(np, &ierrcodes)
+            unused5 = newarray(np, &ierrcodes)
         #
         cdef Intercomm comm = <Intercomm>New(Intercomm)
         with nogil: CHKERR( MPI_Comm_spawn_multiple(
@@ -3046,11 +3046,11 @@ cdef class Cartcomm(Topocomm):
         cdef int ndim = 0
         CHKERR( MPI_Cartdim_get(self.ob_mpi, &ndim) )
         cdef int *idims = NULL
-        cdef tmp1 = newarray(ndim, &idims)
+        cdef unused1 = newarray(ndim, &idims)
         cdef int *iperiods = NULL
-        cdef tmp2 = newarray(ndim, &iperiods)
+        cdef unused2 = newarray(ndim, &iperiods)
         cdef int *icoords = NULL
-        cdef tmp3 = newarray(ndim, &icoords)
+        cdef unused3 = newarray(ndim, &icoords)
         CHKERR( MPI_Cart_get(self.ob_mpi, ndim, idims, iperiods, icoords) )
         cdef object dims    = [idims[i]    for i in range(ndim)]
         cdef object periods = [iperiods[i] for i in range(ndim)]
@@ -3098,7 +3098,7 @@ cdef class Cartcomm(Topocomm):
         """
         cdef int ndim = 0, *icoords = NULL
         CHKERR( MPI_Cartdim_get(self.ob_mpi, &ndim) )
-        cdef tmp = newarray(ndim, &icoords)
+        cdef unused = newarray(ndim, &icoords)
         CHKERR( MPI_Cart_coords(self.ob_mpi, rank, ndim, icoords) )
         cdef object coords = [icoords[i] for i in range(ndim)]
         return coords
@@ -3142,7 +3142,7 @@ def Compute_dims(int nnodes: int, dims: int | Sequence[int]) -> list[int]:
     except:
         ndims = dims
         dims = [0] * ndims
-    cdef tmp = chkarray(dims, ndims, &idims)
+    cdef unused = chkarray(dims, ndims, &idims)
     CHKERR( MPI_Dims_create(nnodes, ndims, idims) )
     dims = [idims[i] for i in range(ndims)]
     return dims
@@ -3194,9 +3194,9 @@ cdef class Graphcomm(Topocomm):
         cdef int nindex = 0, nedges = 0
         CHKERR( MPI_Graphdims_get( self.ob_mpi, &nindex, &nedges) )
         cdef int *iindex = NULL
-        cdef tmp1 = newarray(nindex, &iindex)
+        cdef unused1 = newarray(nindex, &iindex)
         cdef int *iedges = NULL
-        cdef tmp2 = newarray(nedges, &iedges)
+        cdef unused2 = newarray(nedges, &iedges)
         CHKERR( MPI_Graph_get(self.ob_mpi, nindex, nedges, iindex, iedges) )
         cdef object index = [iindex[i] for i in range(nindex)]
         cdef object edges = [iedges[i] for i in range(nedges)]
@@ -3241,7 +3241,7 @@ cdef class Graphcomm(Topocomm):
         cdef int nneighbors = 0, *ineighbors = NULL
         CHKERR( MPI_Graph_neighbors_count(
                 self.ob_mpi, rank, &nneighbors) )
-        cdef tmp = newarray(nneighbors, &ineighbors)
+        cdef unused = newarray(nneighbors, &ineighbors)
         CHKERR( MPI_Graph_neighbors(
                 self.ob_mpi, rank, nneighbors, ineighbors) )
         cdef object neighbors = [ineighbors[i] for i in range(nneighbors)]
@@ -3293,14 +3293,14 @@ cdef class Distgraphcomm(Topocomm):
         cdef int *sources = NULL, *destinations = NULL
         cdef int *sourceweights = MPI_UNWEIGHTED
         cdef int *destweights   = MPI_UNWEIGHTED
-        cdef tmp1, tmp2, tmp3, tmp4
-        tmp1 = newarray(maxindegree,  &sources)
-        tmp2 = newarray(maxoutdegree, &destinations)
+        cdef object unused1, unused2, unused3, unused4
+        unused1 = newarray(maxindegree,  &sources)
+        unused2 = newarray(maxoutdegree, &destinations)
         if weighted:
-            tmp3 = newarray(maxindegree, &sourceweights)
+            unused3 = newarray(maxindegree, &sourceweights)
             for i in range(maxindegree):
                 sourceweights[i] = 1
-            tmp4 = newarray(maxoutdegree, &destweights)
+            unused4 = newarray(maxoutdegree, &destweights)
             for i in range(maxoutdegree):
                 destweights[i]   = 1
         #

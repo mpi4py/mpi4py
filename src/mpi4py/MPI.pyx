@@ -12,6 +12,6 @@
 #cython: binding=True
 
 from __future__ import annotations
-cimport cython
+cimport cython  # no-cython-lint
 
 include "MPI/MPI.pyx"
