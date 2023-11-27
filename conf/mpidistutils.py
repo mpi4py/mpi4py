@@ -460,9 +460,12 @@ except ImportError:
     except ImportError:
         from distutils.version import StrictVersion as Version
 try:
-    from setuptools import dep_util
+    from setuptools.modified import newer_group
 except ImportError:
-    from distutils import dep_util
+    try:
+        from setuptools.dep_util import newer_group
+    except ImportError:
+        from distutils.dep_util import newer_group
 
 # -----------------------------------------------------------------------------
 
@@ -644,9 +647,8 @@ def cython_run(
         alldeps = [source]
         for dep in depends:
             alldeps += glob.glob(dep)
-        if not (force or dep_util.newer_group(alldeps, target)):
-            log.debug("skipping '%s' -> '%s' (up-to-date)",
-                      source, target)
+        if not (force or newer_group(alldeps, target, 'newer')):
+            log.debug("skipping '%s' -> '%s' (up-to-date)", source, target)
             return
     finally:
         os.chdir(cwd)
@@ -1154,8 +1156,7 @@ class build_ext(cmd_build_ext.build_ext):
         filename = os.path.join(
             self.build_lib, self.get_ext_filename(fullname))
         depends = ext.sources + ext.depends
-        if not (self.force or
-                dep_util.newer_group(depends, filename, 'newer')):
+        if not (self.force or newer_group(depends, filename, 'newer')):
             log.debug("skipping '%s' extension (up-to-date)", ext.name)
             return
         #
@@ -1260,8 +1261,7 @@ class build_exe(build_ext):
         depends = list(exe.depends)
         exe_fullpath = self.get_exe_fullpath(exe)
         depends = sources + depends
-        if not (self.force or
-                dep_util.newer_group(depends, exe_fullpath, 'newer')):
+        if not (self.force or newer_group(depends, exe_fullpath, 'newer')):
             log.debug("skipping '%s' executable (up-to-date)", exe.name)
             return
 
