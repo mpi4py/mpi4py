@@ -16,7 +16,7 @@ Release 4.0.0 [2023-XX-XX]
     - Add non-destructive completion test for multiple requests.
     - Add value-index datatype constructor.
     - Add communicator/session buffer attach/detach/flush.
-    - Support for removal or error classes/codes/strings.
+    - Support for removal of error classes/codes/strings.
     - Support for querying hardware resource information.
 
   + Add prelimiary support for the upcoming MPI-5.0 standard.
