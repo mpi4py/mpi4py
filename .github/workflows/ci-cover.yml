@@ -35,7 +35,7 @@ jobs:
           - mpich
           - openmpi
         py:
-          - ${{ github.event.inputs.py || '3.11' }}  # TODO: revert to '3'
+          - ${{ github.event.inputs.py || 3 }}
     defaults:
       run:
         shell: bash -el {0}
