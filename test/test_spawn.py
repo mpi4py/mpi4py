@@ -64,19 +64,25 @@ def using_GPU():
 def sequential():
     return MPI.COMM_WORLD.Get_size() == 1
 
+def macos():
+    return sys.platform == 'darwin'
+
 def windows():
     return sys.platform == 'win32'
 
-def github_actions():
+def github():
     return os.environ.get('GITHUB_ACTIONS') == 'true'
+
+def azure():
+    return os.environ.get('TF_BUILD') == 'True'
 
 
 @unittest.skipMPI('MPI(<2.0)')
 @unittest.skipMPI('openmpi(<3.0.0)')
 @unittest.skipMPI('openmpi(==4.0.0)')
-@unittest.skipMPI('openmpi(==4.0.1)', sys.platform=='darwin')
-@unittest.skipMPI('openmpi(==4.0.2)', sys.platform=='darwin')
-@unittest.skipMPI('openmpi(>=4.1.0,<4.2.0)', github_actions())
+@unittest.skipMPI('openmpi(==4.0.1)', macos())
+@unittest.skipMPI('openmpi(==4.0.2)', macos())
+@unittest.skipMPI('openmpi(>=4.1.0,<4.2.0)', github())
 @unittest.skipMPI('mpich(<4.1.0)', appnum() is None)
 @unittest.skipMPI('mpich', badport())
 @unittest.skipMPI('msmpi(<8.1.0)')
@@ -167,6 +173,7 @@ class BaseTestSpawnSingle(BaseTestSpawn):
         self.COMM.Barrier()
 
 
+@unittest.skipMPI('openmpi(==5.0.0)', macos() and azure())
 class BaseTestSpawnMultiple(BaseTestSpawn):
 
     def testCommSpawn(self):
