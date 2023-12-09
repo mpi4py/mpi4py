@@ -21,7 +21,6 @@ from .MPI import (
     BottomType,
     InPlaceType,
 )
-del sys
 
 __all__: List[str] = [
     'SupportsBuffer',
@@ -48,7 +47,8 @@ _DeviceType: TypeAlias = int
 _DeviceID: TypeAlias = int
 
 class SupportsBuffer(Protocol):
-    def __buffer__(self, __flags: int) -> memoryview: ...
+    if sys.version_info >= (3, 12):
+        def __buffer__(self, __flags: int) -> memoryview: ...
 
 class SupportsDLPack(Protocol):
     def __dlpack__(self, *, stream: Optional[_Stream] = None) -> _PyCapsule: ...

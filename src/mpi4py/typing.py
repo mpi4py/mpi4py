@@ -29,7 +29,6 @@ from .MPI import (
     BottomType,
     InPlaceType,
 )
-del sys
 
 __all__ = [
     'SupportsBuffer',
@@ -63,9 +62,10 @@ class SupportsBuffer(Protocol):
     .. seealso:: :ref:`python:bufferobjects`
     """
 
-    def __buffer__(self, flags: int) -> memoryview:
-        """Create a buffer from a Python object."""
-        ...  # pragma: no cover
+    if sys.version_info >= (3, 12):  # pragma: no branch
+        def __buffer__(self, flags: int) -> memoryview:
+            """Create a buffer from a Python object."""
+            ...  # pragma: no cover
 
 
 class SupportsDLPack(Protocol):
