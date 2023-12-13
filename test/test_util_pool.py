@@ -392,11 +392,12 @@ def broken_mpi_spawn():
         if version < (4, 1):
             if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
                 return True
-        try:
-            port = MPI.Open_port()
-            MPI.Close_port(port)
-        except:
-            return True
+        if version < (4, 3):
+            try:
+                port = MPI.Open_port()
+                MPI.Close_port(port)
+            except:
+                return True
     if name == 'Intel MPI':
         import mpi4py
         if mpi4py.rc.recv_mprobe:

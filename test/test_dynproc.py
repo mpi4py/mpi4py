@@ -26,7 +26,7 @@ def badport():
         port = ""
     return port == ""
 
-@unittest.skipMPI('mpich', badport())
+@unittest.skipMPI('mpich(<4.3.0)', badport())
 @unittest.skipMPI('openmpi(<2.0.0)')
 @unittest.skipMPI('msmpi(<8.1.0)')
 @unittest.skipMPI('MVAPICH2')

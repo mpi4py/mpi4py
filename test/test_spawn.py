@@ -84,7 +84,7 @@ def azure():
 @unittest.skipMPI('openmpi(==4.0.2)', macos())
 @unittest.skipMPI('openmpi(>=4.1.0,<4.2.0)', github())
 @unittest.skipMPI('mpich(<4.1.0)', appnum() is None)
-@unittest.skipMPI('mpich', badport())
+@unittest.skipMPI('mpich(<4.3.0)', badport())
 @unittest.skipMPI('msmpi(<8.1.0)')
 @unittest.skipMPI('msmpi', appnum() is None)
 @unittest.skipMPI('mvapich', appnum() is None)
