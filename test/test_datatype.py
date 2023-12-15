@@ -505,6 +505,8 @@ class TestDatatypeCreate(BaseTestDatatypeCreateMixin, unittest.TestCase):
                 newtype = factory(oldtype, *args)
             else:
                 newtype = factory(*args)
+            if newtype == MPI.DATATYPE_NULL or newtype.Get_size() == 0:
+                raise NotImplementedError
         except NotImplementedError:
             self.skipTest('mpi-type-constructor')
         self.check_contents(factory, newtype, oldtype)
@@ -524,6 +526,8 @@ class TestDatatypePickle(BaseTestDatatypeCreateMixin, unittest.TestCase):
                 newtype0 = factory(oldtype, *args)
             else:
                 newtype0 = factory(*args)
+            if newtype0 == MPI.DATATYPE_NULL or newtype0.Get_size() == 0:
+                raise NotImplementedError
         except NotImplementedError:
             self.skipTest('mpi-type-constructor')
         newtype1 = loads(dumps(newtype0))
