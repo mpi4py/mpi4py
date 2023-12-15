@@ -7,8 +7,6 @@ import subprocess
 import unittest
 import mpi4py
 
-on_win = sys.platform == 'win32'
-on_gha = os.environ.get('GITHUB_ACTIONS') == 'true'
 on_pypy = hasattr(sys, 'pypy_version_info')
 
 
@@ -27,10 +25,17 @@ def find_mpiexec(mpiexec='mpiexec'):
     mpiexec = os.environ.get('MPIEXEC') or mpiexec
     mpiexec = find_executable(mpiexec)
     if not mpiexec and sys.platform.startswith('win'):
+        I_MPI_DIR = os.environ.get('I_MPI_DIR', '')
+        mpiexec = os.path.join(I_MPI_DIR, 'bin', 'mpiexec.exe')
+        mpiexec = shutil.which(mpiexec)
+        if mpiexec:
+            mpiexec = shlex.quote(mpiexec)
+    if not mpiexec and sys.platform.startswith('win'):
         MSMPI_BIN = os.environ.get('MSMPI_BIN', '')
         mpiexec = os.path.join(MSMPI_BIN, 'mpiexec.exe')
         mpiexec = shutil.which(mpiexec)
-        mpiexec = shlex.quote(mpiexec)
+        if mpiexec:
+            mpiexec = shlex.quote(mpiexec)
     return mpiexec
 
 
@@ -70,7 +75,6 @@ def execute(np, cmd, args=''):
 
 
 @unittest.skipIf(not find_mpiexec(), 'mpiexec')
-@unittest.skipIf(on_gha and on_win, 'github-actions windows')
 class BaseTestRun(unittest.TestCase):
 
     def assertMPIAbort(self, stdout, stderr, message=None):
