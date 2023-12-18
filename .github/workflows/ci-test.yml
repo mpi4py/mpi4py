@@ -69,7 +69,7 @@ jobs:
     - name: Build package
       run:  python -m pip wheel -v --wheel-dir=dist .
     - name: Upload package artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: mpi4py-${{ matrix.os }}-${{ matrix.mpi }}
         path: dist/mpi4py-*.whl

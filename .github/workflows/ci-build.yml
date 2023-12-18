@@ -107,7 +107,7 @@ jobs:
         MPI4PY_LOCAL_VERSION: ${{ matrix.mpi }}
 
     - name: Upload wheel
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: mpi4py-${{ matrix.backend }}-${{ matrix.os }}
         path: dist/mpi4py-*.whl
