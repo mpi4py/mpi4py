@@ -97,9 +97,9 @@ jobs:
         TAG: ${{ runner.os }}.${{ matrix.mpi }}.py${{ matrix.py }}
 
     - name: Upload coverage data
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: coverage-data
+        name: coverage-data-${{ runner.os }}-${{ matrix.mpi }}-py${{ matrix.py }}
         path: ".coverage.*"
         if-no-files-found: ignore
 
@@ -124,9 +124,10 @@ jobs:
     - run: python setup.py build_src
 
     - name: Download coverage data
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
-        name: coverage-data
+        pattern: coverage-data-*
+        merge-multiple: true
 
     - name: Report coverage
       run: |
@@ -137,7 +138,7 @@ jobs:
         python -m coverage report --fail-under=100
 
     - name: Upload HTML report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: coverage-html
         path: htmlcov
