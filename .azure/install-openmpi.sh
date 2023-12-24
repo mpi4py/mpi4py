@@ -11,7 +11,7 @@ esac
 
 openmpi_mca_params=$HOME/.openmpi/mca-params.conf
 mkdir -p $(dirname $openmpi_mca_params)
-echo plm_rsh_agent=false >> $openmpi_mca_params
+echo plm_ssh_agent=false >> $openmpi_mca_params
 echo btl=tcp,self >> $openmpi_mca_params
 echo mpi_yield_when_idle=true >> $openmpi_mca_params
 echo rmaps_base_oversubscribe=true >> $openmpi_mca_params
