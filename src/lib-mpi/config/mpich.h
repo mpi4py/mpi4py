@@ -11,9 +11,10 @@
 #include "mpi-41.h"
 #include "mpi-50.h"
 
-/* These types are difficult to implement portably */
+#ifndef MPI_REAL2
 #undef PyMPI_HAVE_MPI_REAL2
 #undef PyMPI_HAVE_MPI_COMPLEX4
+#endif
 
 #ifndef ROMIO_VERSION
 #include "mpi-io.h"
