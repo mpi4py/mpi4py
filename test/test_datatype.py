@@ -37,7 +37,11 @@ datatypes += datatypes_c99
 datatypes += datatypes_f
 datatypes += datatypes_f90
 datatypes += datatypes_mpi
-datatypes = [t for t in datatypes if t != MPI.DATATYPE_NULL]
+datatypes = [
+    t for t in datatypes
+    if t != MPI.DATATYPE_NULL
+    and t.Get_size() != 0
+]
 
 combiner_map = {}
 
@@ -554,21 +558,19 @@ elif name == 'MPICH1':
     combiner_map[MPI.COMBINER_HVECTOR] = None
     combiner_map[MPI.COMBINER_INDEXED] = None
     combiner_map[MPI.COMBINER_HINDEXED_BLOCK] = None
-    for t in datatypes_f: datatypes.remove(t)
+    for t in datatypes_f:
+        if t in datatypes:
+            datatypes.remove(t)
 elif MPI.Get_version() < (2,0):
     combiner_map = None
 if name == 'Open MPI':
-    for t in datatypes_f + datatypes_f90:
-        if t != MPI.DATATYPE_NULL:
-            if t.Get_size() == 0:
-                if t in datatypes:
-                    datatypes.remove(t)
     if (1,6,0) < version < (1,7,0):
         TestDatatype.match_size_complex[:] = []
     if version < (1,5,2):
         for t in datatypes_f90[-4:]:
             if t != MPI.DATATYPE_NULL:
-                datatypes.remove(t)
+                if t in datatypes:
+                    datatypes.remove(t)
 
 
 if __name__ == '__main__':
