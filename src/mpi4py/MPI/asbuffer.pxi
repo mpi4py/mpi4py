@@ -187,14 +187,12 @@ cdef class buffer:
 
     def toreadonly(self) -> buffer:
         """Return a readonly version of the buffer object."""
-        cdef void *addr = self.view.buf
-        cdef Py_ssize_t size = self.view.len
         cdef object obj = self
         if self.view.obj != NULL:
             obj = <object>self.view.obj
         cdef buffer buf = <buffer>New(buffer)
-        PyBuffer_FillInfo(&buf.view, obj,
-                          addr, size, 1, PyBUF_SIMPLE)
+        PyMPI_GetBuffer(obj, &buf.view, PyBUF_SIMPLE)
+        buf.view.readonly = 1
         return buf
 
     def release(self) -> None:
