@@ -12,7 +12,7 @@ static int PyMPI_Get_vendor(const char **vendor_name,
   const char *name = "unknown";
   int major=0, minor=0, micro=0;
 
-#if defined(CIBUILDWHEEL)
+#if defined(MPI_ABI) || defined(CIBUILDWHEEL)
 
   int ierr, len = 0, cnt;
   char lib[MPI_MAX_LIBRARY_VERSION_STRING] = {0}, *str;

@@ -932,7 +932,7 @@ def configure_mpi(ext, config_cmd):
         raise DistutilsPlatformError(message)
     #
     log.info("checking for missing MPI functions/symbols ...")
-    impls = ("OPEN_MPI", "MSMPI_VER")
+    impls = ("MPI_ABI", "OPEN_MPI", "MSMPI_VER")
     tests = [f"defined({macro})" for macro in impls]
     tests += ["(defined(MPICH_NAME)&&(MPICH_NAME>=3))"]
     tests += ["(defined(MPICH_NAME)&&(MPICH_NAME==2))"]
