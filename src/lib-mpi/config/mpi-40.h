@@ -213,7 +213,6 @@
 #define PyMPI_HAVE_MPI_File_write_ordered_begin_c 1
 #define PyMPI_HAVE_MPI_File_get_type_extent_c 1
 #define PyMPI_HAVE_MPI_Datarep_conversion_function_c 1
-#define PyMPI_HAVE_MPI_Datarep_extent_function_c 1
 #define PyMPI_HAVE_MPI_CONVERSION_FN_NULL_C 1
 #define PyMPI_HAVE_MPI_Register_datarep_c 1
 #define PyMPI_HAVE_MPI_ERR_PROC_ABORTED 1
