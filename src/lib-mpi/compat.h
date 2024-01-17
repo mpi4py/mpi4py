@@ -1,4 +1,6 @@
-#if   defined(MSMPI_VER)
+#if defined(MPI_ABI)
+#include "compat/mpiabi.h"
+#elif defined(MSMPI_VER)
 #include "compat/msmpi.h"
 #elif defined(MPICH_NAME) && (MPICH_NAME >= 4)
 #include "compat/mpich.h"
