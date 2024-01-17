@@ -12,6 +12,8 @@
 
 #if defined(HAVE_PYMPICONF_H)
 #include "pympiconf.h"
+#elif defined(MPI_ABI)
+#include "config/mpiapi.h"
 #elif defined(MSMPI_VER)
 #include "config/msmpi.h"
 #elif defined(MPICH_NAME) && (MPICH_NAME >= 3)
