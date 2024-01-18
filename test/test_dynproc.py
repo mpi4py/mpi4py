@@ -1,10 +1,14 @@
 from mpi4py import MPI
 import mpiunittest as unittest
+import os
 try:
     import socket
 except ImportError:
     socket = None
 
+
+def github():
+    return os.environ.get('GITHUB_ACTIONS') == 'true'
 
 def ch4_ucx():
     return 'ch4:ucx' in MPI.Get_library_version()
@@ -58,6 +62,7 @@ class TestDPM(unittest.TestCase):
 
     @unittest.skipMPI('mpich(==3.4.1)', ch4_ofi())
     @unittest.skipMPI('mvapich', ch4_ofi())
+    @unittest.skipMPI('intelmpi', MPI.COMM_WORLD.Get_size() > 2 and github())
     def testAcceptConnect(self):
         comm_self  = MPI.COMM_SELF
         comm_world = MPI.COMM_WORLD
