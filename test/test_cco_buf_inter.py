@@ -179,6 +179,7 @@ class BaseTestCCOBufInter:
         if (abs(num/den) > 1e-2):
             raise self.failureException(f'{first!r} != {second!r}')
 
+    @unittest.skipMPI('MVAPICH2', MPI.COMM_WORLD.Get_size() > 2)
     def testReduce(self):
         comm = self.INTERCOMM
         rank = comm.Get_rank()

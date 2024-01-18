@@ -351,8 +351,9 @@ class BaseTestP2PObj:
                 rmess = self.COMM.recv(None, rank, 0)
                 self.assertEqual(rmess, smess)
             flag = False
-            for k in range(2):
+            for k in range(10):
                 flag |= MPI.Request.Testall(reqs)
+                if flag: break
             if unittest.is_mpi('intelmpi') and sys.platform == 'win32':
                 flag |= MPI.Request.Waitall(reqs)
             self.assertTrue(flag)

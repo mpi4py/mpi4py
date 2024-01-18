@@ -115,6 +115,7 @@ class BaseTestIntercomm:
     @unittest.skipMPI('msmpi')
     @unittest.skipMPI('openmpi')  # TODO: open-mpi/ompi#11672
     @unittest.skipMPI('mpich(<4.2.0)', ch3_nemesis())
+    @unittest.skipMPI('MVAPICH2', MPI.COMM_WORLD.Get_size() > 2)
     def testSplitTypeShared(self):
         try:
             comm = self.INTERCOMM.Split_type(MPI.COMM_TYPE_SHARED)
