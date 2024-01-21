@@ -34,7 +34,7 @@ static int PyMPI_Get_vendor(const char **vendor_name,
 
   str = strstr(lib, "CRAY MPICH version"); if (!str) str = lib;
   cnt = sscanf(str, "CRAY MPICH version %d.%d.%d", &major, &minor, &micro);
-  if (cnt > 0) { name = "Cray MPI"; goto done; }
+  if (cnt > 0) { name = "Cray MPICH"; goto done; }
 
   cnt = sscanf(lib, "MVAPICH Version: %d.%d.%d", &major, &minor, &micro);
   if (cnt > 0) { name = "MVAPICH"; goto done; }
