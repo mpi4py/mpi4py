@@ -48,6 +48,15 @@ datatypes += [
     MPI.COUNT,
 ]
 
+mpipairtypes = [
+    MPI.SHORT_INT,
+    MPI.INT_INT,
+    MPI.LONG_INT,
+    MPI.FLOAT_INT,
+    MPI.DOUBLE_INT,
+    MPI.LONG_DOUBLE_INT,
+]
+
 mpif77types = [
     MPI.CHARACTER,
     MPI.LOGICAL,
@@ -78,15 +87,14 @@ mpif90types = [
     MPI.COMPLEX32,
 ]
 
-mpipairtypes = [
-    MPI.SHORT_INT,
-    MPI.INT_INT,
-    MPI.LONG_INT,
-    MPI.FLOAT_INT,
-    MPI.DOUBLE_INT,
-    MPI.LONG_DOUBLE_INT,
-]
-
+for typelist in [mpif77types, mpif90types]:
+    typelist[:] = [
+        t for t in datatypes
+        if t != MPI.DATATYPE_NULL
+        and t.Get_name() != 'MPI_DATATYPE_NULL'
+        and t.Get_size() != 0
+    ]
+del typelist
 
 class TestUtilDTLib(unittest.TestCase):
 
@@ -349,28 +357,13 @@ class TestUtilDTLib(unittest.TestCase):
     @unittest.skipMPI('msmpi')
     def testF77(self):
         for mt in mpif77types:
-            if mt == MPI.DATATYPE_NULL:
-                continue
-            if mt.Get_size() == 0:
-                continue
             dt = tonumpy(mt)
             if np_dtype is not None:
                 self.assertEqual(dt.itemsize, mt.extent)
 
     @unittest.skipMPI('msmpi')
     def testF90(self):
-        largef90datatypes = [
-            MPI.INTEGER16,
-            MPI.REAL16,
-            MPI.COMPLEX32,
-        ] if os.name == 'nt' else []
         for mt in mpif90types:
-            if mt == MPI.DATATYPE_NULL:
-                continue
-            if mt.Get_size() == 0:
-                continue
-            if mt in largef90datatypes:
-                continue
             dt = tonumpy(mt)
             if np_dtype is not None:
                 self.assertEqual(dt.itemsize, mt.extent)
