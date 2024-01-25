@@ -84,6 +84,7 @@ def azure():
 @unittest.skipMPI('openmpi(==4.0.2)', macos())
 @unittest.skipMPI('openmpi(>=4.1.0,<4.2.0)', github())
 @unittest.skipMPI('openmpi(==5.1.0)', 'PMIX_RANK' not in os.environ)
+@unittest.skipMPI('openmpi(==5.1.0)', MPI.COMM_WORLD.Get_size() > 3)
 @unittest.skipMPI('mpich(<4.1.0)', appnum() is None)
 @unittest.skipMPI('mpich(<4.3.0)', badport())
 @unittest.skipMPI('msmpi(<8.1.0)')
