@@ -1731,6 +1731,8 @@ if name == 'Open MPI':
         SKIP_POOL_TEST = True
     if version == (4,1,2) and sys.platform=='linux':
         SKIP_POOL_TEST = (os.environ.get('GITHUB_ACTIONS') == 'true')
+    if version == (5,1,0):
+        SKIP_POOL_TEST = ('PMIX_RANK' not in os.environ)
 if name == 'MPICH':
     if sys.platform == 'darwin':
         if version >= (3, 4) and version < (4, 0):

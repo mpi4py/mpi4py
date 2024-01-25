@@ -386,6 +386,8 @@ def broken_mpi_spawn():
         if version >= (4,1,0) and version < (4,2,0):
             if os.environ.get('GITHUB_ACTIONS') == 'true':
                 return True
+        if version == (5,1,0):
+            return ('PMIX_RANK' not in os.environ)
     if name == 'MPICH':
         if version >= (3, 4) and version < (4, 0) and darwin:
             return True
