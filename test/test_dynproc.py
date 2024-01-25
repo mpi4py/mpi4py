@@ -63,6 +63,7 @@ class TestDPM(unittest.TestCase):
     @unittest.skipMPI('mpich(==3.4.1)', ch4_ofi())
     @unittest.skipMPI('mvapich', ch4_ofi())
     @unittest.skipMPI('intelmpi', MPI.COMM_WORLD.Get_size() > 2 and github())
+    @unittest.skipMPI('openmpi(==5.1.0)')
     def testAcceptConnect(self):
         comm_self  = MPI.COMM_SELF
         comm_world = MPI.COMM_WORLD
@@ -109,6 +110,7 @@ class TestDPM(unittest.TestCase):
             self.assertEqual(message, TestDPM.message)
         intercomm.Free()
 
+    @unittest.skipMPI('openmpi(==5.1.0)')
     def testConnectAccept(self):
         comm_self  = MPI.COMM_SELF
         comm_world = MPI.COMM_WORLD
