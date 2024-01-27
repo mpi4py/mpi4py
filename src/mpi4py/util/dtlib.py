@@ -11,7 +11,7 @@ from .. import MPI
 try:
     from numpy import dtype as _np_dtype
 except ImportError:  # pragma: no cover
-    pass
+    _np_dtype = None
 
 
 def _get_datatype(dtype):
@@ -33,7 +33,7 @@ def _is_aligned(datatype, offset=0):
     if datatype.is_predefined:
         if offset == 0:
             return True
-        alignment = _get_alignment(datatype)
+        alignment = _get_alignment(datatype) or 0
         return offset % alignment == 0
 
     combiner = datatype.combiner
@@ -63,10 +63,9 @@ def _is_aligned(datatype, offset=0):
 
 def from_numpy_dtype(dtype):
     """Convert NumPy datatype to MPI datatype."""
-    try:
-        dtype = _np_dtype(dtype)
-    except NameError:
+    if _np_dtype is None:
         raise RuntimeError("NumPy is not available") from None
+    dtype = _np_dtype(dtype)
 
     if dtype.hasobject:
         raise ValueError("NumPy datatype with object entries")
@@ -80,7 +79,7 @@ def from_numpy_dtype(dtype):
         displacements = []
         datatypes = []
         try:
-            for name in dtype.names:
+            for name in dtype.names or ():
                 ftype, fdisp, *_ = fields[name]
                 blocklengths.append(1)
                 displacements.append(fdisp)
@@ -122,10 +121,9 @@ def to_numpy_dtype(datatype):
         return dtype if count == 1 else (dtype, count)
 
     def np_dtype(spec, **kwargs):
-        try:
-            return _np_dtype(spec, **kwargs)
-        except NameError:
+        if _np_dtype is None:
             return spec if not kwargs else (spec, kwargs)
+        return _np_dtype(spec, **kwargs)
 
     if datatype == MPI.DATATYPE_NULL:
         raise ValueError("cannot convert null MPI datatype to NumPy")

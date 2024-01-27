@@ -502,9 +502,8 @@ class TestUtilDTLib(unittest.TestCase):
 
     def testMissingNumPy(self):
         from mpi4py.util import dtlib
-        np_dtype = getattr(dtlib, '_np_dtype', None)
-        if np_dtype is not None:
-            delattr(dtlib, '_np_dtype')
+        np_dtype = dtlib._np_dtype
+        dtlib._np_dtype = None
         try:
             for t in typecodes:
                 with self.subTest(typecode=t):
@@ -531,8 +530,7 @@ class TestUtilDTLib(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 fromnumpy(None)
         finally:
-            if np_dtype is not None:
-                setattr(dtlib, '_np_dtype', np_dtype)
+            dtlib._np_dtype = np_dtype
 
     @unittest.skipIf(numpy is None, 'numpy')
     def testFailures(self):
