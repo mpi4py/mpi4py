@@ -27,20 +27,20 @@ def compose(
 @overload
 def compose(
     future: Future[_T],
-    resulthook: Callable[[_T], _U] = ...,
+    resulthook: Callable[[_T], _U],
     excepthook: None = None,
 ) -> Future[_U]: ...
 
 @overload
 def compose(
     future: Future[_T],
-    resulthook: None = None,
-    excepthook: Callable[[BaseException], BaseException | _V] = ...,
+    resulthook: None = None, *,
+    excepthook: Callable[[BaseException], BaseException | _V],
 ) -> Future[_T | _V]: ...
 
 @overload
 def compose(
     future: Future[_T],
-    resulthook: Callable[[_T], _U] = ...,
-    excepthook: Callable[[BaseException], BaseException | _V] = ...,
+    resulthook: Callable[[_T], _U],
+    excepthook: Callable[[BaseException], BaseException | _V],
 ) -> Future[_U | _V]: ...

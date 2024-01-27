@@ -26,22 +26,22 @@ def then(
 @overload
 def then(
     future: Future[_T],
-    on_success: Callable[[_T], _S | Future[_S]] = ...,
+    on_success: Callable[[_T], _S | Future[_S]],
     on_failure: None = None,
 ) -> Future[_S]: ...
 
 @overload
 def then(
     future: Future[_T],
-    on_success: None = None,
-    on_failure: Callable[[BaseException], BaseException | _F | Future[_F]] = ...,
+    on_success: None = None, *,
+    on_failure: Callable[[BaseException], BaseException | _F | Future[_F]],
 ) -> Future[_T | _F]: ...
 
 @overload
 def then(
     future: Future[_T],
-    on_success: Callable[[_T], _S | Future[_S]] = ...,
-    on_failure: Callable[[BaseException], BaseException | _F | Future[_F]] = ...,
+    on_success: Callable[[_T], _S | Future[_S]],
+    on_failure: Callable[[BaseException], BaseException | _F | Future[_F]],
 ) -> Future[_S | _F]: ...
 
 @overload
