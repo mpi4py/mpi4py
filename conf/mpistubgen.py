@@ -356,21 +356,12 @@ from threading import Lock
 from typing import (
     Any,
     AnyStr,
+    Final,
+    Literal,
     NoReturn,
+    final,
     overload,
 )
-if sys.version_info >= (3, 8):
-    from typing import (
-        final,
-        Final,
-        Literal,
-    )
-else:
-    from typing_extensions import (
-        final,
-        Final,
-        Literal,
-    )
 if sys.version_info >= (3, 9):
     from collections.abc import (
         Callable,
