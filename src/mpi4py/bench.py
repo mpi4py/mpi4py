@@ -77,6 +77,7 @@ def ringtest(comm, args=None, verbose=True):
         Wtime = MPI.Wtime
         sendmsg = array('B', [+42]) * n
         recvmsg = array('B', [0x0]) * n
+        tic = Wtime()
         if size == 1:
             for i in iterations:
                 if i == skip:

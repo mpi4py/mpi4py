@@ -217,8 +217,9 @@ class MPIPoolExecutor(Executor):
 
 
 def _starmap_helper(submit, function, iterable, timeout, unordered):
+    timer = time.monotonic
+    end_time = sys.float_info.max
     if timeout is not None:
-        timer = getattr(time, 'monotonic', time.time)
         end_time = timeout + timer()
 
     futures = [submit(function, *args) for args in iterable]

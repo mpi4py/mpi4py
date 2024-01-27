@@ -81,7 +81,7 @@ def from_numpy_dtype(dtype):
         datatypes = []
         try:
             for name in dtype.names:
-                ftype, fdisp = fields[name]
+                ftype, fdisp, *_ = fields[name]
                 blocklengths.append(1)
                 displacements.append(fdisp)
                 datatypes.append(from_numpy_dtype(ftype))
@@ -253,6 +253,7 @@ def to_numpy_dtype(datatype):
             dtype = to_numpy_dtype(basetype)
             stride = 1
             aligned = _is_aligned(basetype)
+            blocklengths = []
             displacements = info['displacements']
             if combiner in combiner_indexed[:2]:
                 blocklengths = info['blocklengths']
