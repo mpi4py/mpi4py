@@ -1,6 +1,9 @@
 name: dist
 
 on:
+  release:
+    types:
+      - published
   workflow_dispatch:
 
 permissions:
@@ -98,3 +101,25 @@ jobs:
       with:
         name: mpi4py-dist
         path: dist/mpi4py-*.tar.gz
+
+  pypi-publish:
+
+    if: ${{ github.event_name == 'release' }}
+    runs-on: ubuntu-latest
+    needs: sdist
+    environment:
+      name: pypi
+      url: https://pypi.org/p/mpi4py/
+    permissions:
+      id-token: write
+
+    steps:
+
+    - name: Download distribution artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: mpi4py-dist
+        path: dist
+
+    - name: Publish package distributions to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
