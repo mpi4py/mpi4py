@@ -1,9 +1,9 @@
 # Author:  Lisandro Dalcin
 # Contact: dalcinl@gmail.com
 """`multiprocessing.pool` interface via `mpi4py.futures`."""
-from os import cpu_count as _cpu_count
 import functools as _functools
 import operator as _operator
+import os as _os
 import threading as _threading
 import warnings as _warnings
 import weakref as _weakref
@@ -300,6 +300,8 @@ def _async_future_callback(future, event, callback, error_callback):
     finally:
         event.set()
 
+
+_cpu_count = getattr(_os, 'process_cpu_count', _os.cpu_count)
 
 _async_executor_lock = _threading.Lock()
 
