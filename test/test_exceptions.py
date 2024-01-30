@@ -389,7 +389,7 @@ class TestExcSession(BaseTestCase):
 
     def testCreateGroup(self):
         self.assertRaisesMPI(
-            MPI.ERR_ARG,
+            [MPI.ERR_ARG, MPI.ERR_UNSUPPORTED_OPERATION],
             self.SESSION.Create_group, "@qerty!#$",
         )
 
