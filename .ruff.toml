@@ -1,7 +1,13 @@
-src = ["src"]
 target-version = "py37"
 
-select = [
+src = ["src"]
+
+exclude = [
+"demo",
+"test",
+]
+
+lint.select = [
 "A",
 "B",
 "C",
@@ -24,7 +30,7 @@ select = [
 "YTT",
 ]
 
-ignore = [
+lint.ignore = [
 "A001",
 "A002",
 "A003",
@@ -40,17 +46,12 @@ ignore = [
 "RUF012",
 ]
 
-exclude = [
-"demo",
-"test",
-]
-
-[per-file-ignores]
+[lint.per-file-ignores]
 "conf/*" = ["D",]
 "demo/*" = ["D",]
 "docs/*" = ["D",]
 "test/*" = ["D",]
 "*.pyi"  = ["D", "E501", "E701"]
 
-[pydocstyle]
+[lint.pydocstyle]
 convention = "pep257"
