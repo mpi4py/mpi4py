@@ -1,7 +1,7 @@
 from mpi4py import MPI
 import mpiunittest as unittest
 import arrayimpl
-import os
+import os, sys, platform
 
 
 def allclose(a, b, rtol=1.e-5, atol=1.e-8):
@@ -143,6 +143,8 @@ if name == 'MPICH':
 elif name == 'Open MPI':
     if version < (5, 0, 0):
         BaseTestPackExternal.skipdtype += 'gG'
+    if (platform.system(), platform.machine()) == ('Darwin', 'arm64'):
+        BaseTestPackExternal.skipdtype += 'G'
 elif name == 'Intel MPI':
     BaseTestPackExternal.skipdtype += 'lgLG'
     BaseTestPackExternal.skipdtype += 'D'
