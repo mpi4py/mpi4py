@@ -2,6 +2,8 @@
 #define PyMPI_COMPAT_MPICH3_H
 #if defined(MPICH_NUMVERSION)
 
+#include "mpich.h"
+
 /* -------------------------------------------------------------------------- */
 
 #if (MPICH_NUMVERSION >= 30000000) || defined(CIBUILDWHEEL)

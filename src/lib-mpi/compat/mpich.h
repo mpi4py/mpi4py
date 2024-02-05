@@ -100,5 +100,45 @@ static int PyMPI_MPICH_MPI_Reduce_c(const void *sendbuf, void *recvbuf,
 
 /* -------------------------------------------------------------------------- */
 
+#if defined(CIBUILDWHEEL)
+
+#define PyMPI_MPICH_CALL_WEAK_SYMBOL(function, ...) \
+  if (function) return function(__VA_ARGS__); \
+  return PyMPI_UNAVAILABLE(#function, __VA_ARGS__); \
+
+#undef MPI_Type_create_f90_integer
+#pragma weak MPI_Type_create_f90_integer
+static int PyMPI_MPICH_MPI_Type_create_f90_integer(int r, MPI_Datatype *t)
+{ PyMPI_MPICH_CALL_WEAK_SYMBOL(MPI_Type_create_f90_integer, r, t); }
+#define MPI_Type_create_f90_integer PyMPI_MPICH_MPI_Type_create_f90_integer
+
+#undef MPI_Type_create_f90_real
+#pragma weak MPI_Type_create_f90_real
+static int PyMPI_MPICH_MPI_Type_create_f90_real(int p, int r, MPI_Datatype *t)
+{ PyMPI_MPICH_CALL_WEAK_SYMBOL(MPI_Type_create_f90_real, p, r, t); }
+#define MPI_Type_create_f90_real PyMPI_MPICH_MPI_Type_create_f90_real
+
+#undef MPI_Type_create_f90_complex
+#pragma weak MPI_Type_create_f90_complex
+static int PyMPI_MPICH_MPI_Type_create_f90_complex(int p, int r, MPI_Datatype *t)
+{ PyMPI_MPICH_CALL_WEAK_SYMBOL(MPI_Type_create_f90_complex, p, r, t);}
+#define MPI_Type_create_f90_complex PyMPI_MPICH_MPI_Type_create_f90_complex
+
+#undef MPI_Status_c2f
+#pragma weak MPI_Status_c2f
+static int PyMPI_MPICH_MPI_Status_c2f(const MPI_Status *cs, MPI_Fint *fs)
+{ PyMPI_MPICH_CALL_WEAK_SYMBOL(MPI_Status_c2f, cs, fs);}
+#define MPI_Status_c2f PyMPI_MPICH_MPI_Status_c2f
+
+#undef MPI_Status_f2c
+#pragma weak MPI_Status_f2c
+static int PyMPI_MPICH_MPI_Status_f2c(const MPI_Fint *fs, MPI_Status *cs)
+{ PyMPI_MPICH_CALL_WEAK_SYMBOL(MPI_Status_f2c, fs, cs);}
+#define MPI_Status_f2c PyMPI_MPICH_MPI_Status_f2c
+
+#endif
+
+/* -------------------------------------------------------------------------- */
+
 #endif /* !MPICH_NUMVERSION      */
 #endif /* !PyMPI_COMPAT_MPICH_H */
