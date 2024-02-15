@@ -21,8 +21,12 @@ if hasattr(sys, 'pypy_version_info'):
         if name not in config_vars:
             config_vars[name] = os.path.normpath(getattr(sys, name))
     if sys.platform == 'darwin' and 'LDSHARED' in config_vars:
-        if '-undefined' not in config_vars['LDSHARED']:
-            config_vars['LDSHARED'] += ' -undefined dynamic_lookup'
+        ldshared = shlex.split(config_vars['LDSHARED'])
+        while '-shared' in ldshared:
+            ldshared[ldshared.index('-shared')] = '-bundle'
+        if '-undefined' not in ldshared:
+            ldshared.extend('-undefined dynamic_lookup'.split())
+        config_vars['LDSHARED'] = ' '.join(ldshared)
 
 # Workaround distutils.cygwinccompiler.get_versions()
 # failing when the compiler path contains spaces
