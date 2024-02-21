@@ -309,12 +309,14 @@ class BaseTestSpawnMultiple(BaseTestSpawn):
             self.COMM.Spawn_multiple(CMDS, ARGS, MAXP[0], INFO*2, root=0)
 
 
+@unittest.skipMPI('openmpi(>=5.0.0,<=5.1.0)')
 class TestSpawnSingleSelf(BaseTestSpawnSingle, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
 class TestSpawnSingleWorld(BaseTestSpawnSingle, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
+@unittest.skipMPI('openmpi(>=5.0.0,<=5.1.0)')
 class TestSpawnSingleSelfMany(TestSpawnSingleSelf):
     MAXPROCS = MPI.COMM_WORLD.Get_size()
 
@@ -322,12 +324,14 @@ class TestSpawnSingleWorldMany(TestSpawnSingleWorld):
     MAXPROCS = MPI.COMM_WORLD.Get_size()
 
 
+@unittest.skipMPI('openmpi(>=5.0.0,<=5.1.0)')
 class TestSpawnMultipleSelf(BaseTestSpawnMultiple, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
 class TestSpawnMultipleWorld(BaseTestSpawnMultiple, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
+@unittest.skipMPI('openmpi(>=5.0.0,<=5.1.0)')
 class TestSpawnMultipleSelfMany(TestSpawnMultipleSelf):
     MAXPROCS = MPI.COMM_WORLD.Get_size()
 
