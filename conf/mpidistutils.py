@@ -7,7 +7,7 @@ Support for building mpi4py with distutils/setuptools.
 
 # -----------------------------------------------------------------------------
 
-import sys, os, platform
+import sys, os, shlex, platform
 from distutils import sysconfig
 from distutils.util import convert_path
 from distutils.util import split_quoted
