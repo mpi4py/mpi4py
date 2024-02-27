@@ -1,6 +1,7 @@
 # https://pylint.readthedocs.io # -*- mode: conf -*-
 
 [MASTER]
+ignore-patterns = .*\.pyi
 disable = locally-disabled,file-ignored,no-else-return
 enable = useless-suppression
 good-names = i,j,k,_,fs,fn,tb
