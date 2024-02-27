@@ -23,6 +23,11 @@ def setup_parser(parser):
         type=str, metavar="REGEX",
     )
     parser.add_argument(
+        "--inplace",
+        help="Enable testing from in-place build",
+        action="store_true", dest="inplace", default=False,
+    )
+    parser.add_argument(
         "--no-builddir",
         help="Disable testing from build directory",
         action="store_false", dest="builddir", default=True,
@@ -140,10 +145,13 @@ def getpackageinfo(pkg):
 
 
 def setup_python(options):
-    if options.builddir:
-        script = os.path.abspath(__file__)
-        testdir = os.path.dirname(script)
-        rootdir = os.path.dirname(testdir)
+    script = os.path.abspath(__file__)
+    testdir = os.path.dirname(script)
+    rootdir = os.path.dirname(testdir)
+    if options.inplace:
+        srcdir = os.path.join(rootdir, "src")
+        sys.path.insert(0, srcdir)
+    elif options.builddir:
         builddir = getbuilddir()
         if builddir is not None:
             builddir = os.path.join(rootdir, builddir)
