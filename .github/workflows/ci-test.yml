@@ -40,6 +40,14 @@ jobs:
           - os: windows-2022
             mpi: openmpi
 
+          # python/cpython#115582
+          - os: windows-2022
+            py: "3.13-dev"
+        include:
+          - os:  windows-2022
+            mpi: msmpi
+            py:  "3.13.0-alpha.3"
+
     steps:
 
     - name: Configure hostname
@@ -80,7 +88,8 @@ jobs:
 
     - name: Install Python packages (test)
       run:  python -m pip install -U -r conf/requirements-test.txt
-      if:   ${{ !endsWith(matrix.py, '-dev') }}
+      if:   ${{ !endsWith(matrix.py, '-dev') &&
+                !contains(matrix.py, '-alpha') }}
 
     - name: Test mpi4py (np=1)
       run:  mpiexec -n 1 python test/main.py -v
