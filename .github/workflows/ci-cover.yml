@@ -1,6 +1,6 @@
 name: ci-cover
 
-on:
+on:  # yamllint disable-line rule:truthy
   workflow_call:
     inputs:
       py:
@@ -98,7 +98,7 @@ jobs:
     - name: Upload coverage data
       uses: actions/upload-artifact@v4
       with:
-        name: coverage-data-${{ runner.os }}-${{ matrix.mpi }}-py${{ matrix.py }}
+        name: coverage-data-${{ runner.os }}-${{ matrix.mpi }}-${{ matrix.py }}
         path: ".coverage.*"
         if-no-files-found: ignore
 

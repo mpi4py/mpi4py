@@ -10,10 +10,10 @@ build:
     python: "3.12"
 
 python:
-   install:
-     - path: .
-     - requirements: conf/requirements-docs.txt
+  install:
+    - path: .
+    - requirements: conf/requirements-docs.txt
 
 sphinx:
-   configuration: docs/source/conf.py
-   fail_on_warning: true
+  configuration: docs/source/conf.py
+  fail_on_warning: true

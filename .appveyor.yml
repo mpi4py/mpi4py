@@ -33,11 +33,11 @@ install:
   - "powershell .azure\\install-msmpi.ps1"
   - "SetEnvMPI.cmd"
 
-build: off
+build: false
 build_script:
   - "%PYTHON%\\python.exe -m pip wheel -v --wheel-dir=dist ."
 
-test: off
+test: false
 test_script:
   - "%PYTHON%\\python.exe -m pip install mpi4py --no-cache-dir --no-index --find-links=dist"
   - "\"%MSMPI_BIN%\\mpiexec.exe\" -n 1 %PYTHON%\\python.exe -m mpi4py --mpi-std-version"
@@ -50,7 +50,3 @@ test_script:
 
 artifacts:
   - path: dist\*
-
-#cache:
-#  - C:\Downloads\MSMPI -> .azure\install-msmpi.ps1
-#  - '%LOCALAPPDATA%\pip\Cache'

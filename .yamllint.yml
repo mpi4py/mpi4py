@@ -1,0 +1,23 @@
+extends: default
+
+ignore-from-file:
+  - .gitignore
+
+rules:
+
+  document-start:
+    present: false
+
+  colons:
+    max-spaces-before: 0
+    max-spaces-after: -1
+
+  line-length:
+    max: 80
+    level: warning
+    ignore: |
+      /.appveyor.yml
+      /.circleci/config.yml
+
+  indentation:
+    indent-sequences: whatever

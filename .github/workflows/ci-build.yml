@@ -1,6 +1,6 @@
 name: ci-build
 
-on:
+on:  # yamllint disable-line rule:truthy
   schedule:
     - cron: '0 3 * * 0'
   workflow_call:
