@@ -43,7 +43,7 @@ fullclean: distclean
 
 install:
 	$(PYTHON) -m pip install $(opt) .
-editable: install
+editable:
 	$(PYTHON) -m pip install --editable $(opt) .
 uninstall:
 	$(PYTHON) -m pip uninstall $(opt) mpi4py
