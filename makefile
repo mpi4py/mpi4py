@@ -39,7 +39,7 @@ fullclean: distclean
 
 # ----
 
-.PHONY: install uninstall
+.PHONY: install editable uninstall
 
 install:
 	$(PYTHON) -m pip install $(opt) .
