@@ -5,16 +5,24 @@ PYTHON = python$(py)
 PYTHON_CONFIG = ${PYTHON} ../python-config
 
 
-SO = ${shell ${PYTHON_CONFIG} --extension-suffix}
-MPIF90 = mpif90
+MPIFORT = mpifort
 F2PY = f2py
-ifneq (${MPI_FORTRAN_MOD_DIR},)
-F2PYFLAGS += --f90flags=-I${MPI_FORTRAN_MOD_DIR}
+
+ldflags :=
+ifndef ldflags # mpich
+ldflags := $(shell $(MPIFORT) -link-info 2> /dev/null)
 endif
+ifndef ldflags # openmpi
+ldflags := $(shell $(MPIFORT) -show:link 2> /dev/null)
+endif
+export FC=$(MPIFORT)
+export LDFLAGS=$(wordlist 2,$(words $(ldflags)),$(ldflags))
+SO = ${shell ${PYTHON_CONFIG} --extension-suffix}
+
 .PHONY: build
 build: helloworld${SO}
 helloworld${SO}: helloworld.f90
-	${F2PY} ${F2PYFLAGS} --f90exec=${MPIF90} -m helloworld -c $<
+	${F2PY} -m helloworld -c $<
 
 
 MPIEXEC = mpiexec

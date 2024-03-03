@@ -1,10 +1,3 @@
-/*
- *  You can use safely use mpi4py between multiple
- *  Py_Initialize()/Py_Finalize() calls ...
- *  but do not blame me for the memory leaks ;-)
- *
- */
-
 #include <Python.h>
 #include <mpi.h>
 
@@ -19,7 +12,7 @@ const char helloworld[] = \
 
 int main(int argc, char *argv[])
 {
-  int i,n=5;
+  int i, n=1;
 
   MPI_Init(&argc, &argv);
 
@@ -29,10 +22,7 @@ int main(int argc, char *argv[])
     Py_Finalize();
   }
 
-  Py_Initialize();
-  PyRun_SimpleString(helloworld);
-  MPI_Finalize(); /* MPI should be finalized */
-  Py_Finalize();  /* after finalizing Python */
+  MPI_Finalize();
 
   Py_Initialize();
   PyRun_SimpleString("from mpi4py import MPI\n");

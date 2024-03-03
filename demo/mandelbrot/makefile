@@ -4,13 +4,10 @@ default: build test clean
 
 build: mandelbrot-worker.exe
 
-MPIF90=mpif90
-FFLAGS= -O3
-ifneq (${MPI_FORTRAN_MOD_DIR},)
-FFLAGS += -I${MPI_FORTRAN_MOD_DIR}
-endif
+MPIFORT = mpifort
+FFLAGS = -O3
 mandelbrot-worker.exe: mandelbrot-worker.f90
-	${MPIF90} ${FFLAGS} -o $@ $<
+	${MPIFORT} ${FFLAGS} -o $@ $<
 
 MPIEXEC = mpiexec
 NP_FLAG = -n

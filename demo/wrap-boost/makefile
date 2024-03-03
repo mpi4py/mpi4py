@@ -3,9 +3,10 @@ default: build test clean
 
 PYTHON = python$(py)
 PYTHON_CONFIG = ${PYTHON} ../python-config
-MPI4PY_INCLUDE = ${shell ${PYTHON} -c 'import mpi4py; print( mpi4py.get_include() )'}
+MPI4PY_INCLUDE = ${shell ${PYTHON} -c 'import mpi4py; print(mpi4py.get_include())'}
+BOOST_PYVER = ${shell ${PYTHON} -c 'import sys; print(*sys.version_info[:2], sep="")'}
 BOOST_INCS = 
-BOOST_LIBS = -lboost_python
+BOOST_LIBS = -lboost_python${BOOST_PYVER}
 
 
 MPICXX = mpicxx

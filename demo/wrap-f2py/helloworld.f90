@@ -1,5 +1,8 @@
 !
-! $ f2py --f90exec=mpif90 -m helloworld -c helloworld.f90
+! $ export FC=mpifort
+! $ fcld=($(mpifort -link-info)); unset fcld[0];
+! $ export LDFLAGS=$fcld
+! $ f2py -m helloworld -c helloworld.f90
 !
 
 subroutine sayhello(comm)

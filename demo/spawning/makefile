@@ -1,6 +1,6 @@
 .PHONY: default build test clean
 
-MPIEXEC=mpiexec -n 1
+MPIEXEC = mpiexec -n 1
 
 default: build test clean
 
@@ -9,7 +9,7 @@ WORKERS = cpi-worker-py.exe cpi-worker-c.exe cpi-worker-cxx.exe cpi-worker-f90.e
 
 build: ${MASTERS} ${WORKERS}
 
-LANGS=py c cxx f90
+LANGS = py c cxx f90
 test: build
 	@for i in ${LANGS}; do \
 	    for j in ${LANGS}; do \
@@ -21,12 +21,9 @@ clean:
 	${RM} -r ${MASTERS} ${WORKERS}
 
 
-MPICC=mpicc
-MPICXX=mpicxx
-MPIF90=mpif90
-ifneq (${MPI_FORTRAN_MOD_DIR},)
-FFLAGS += -I${MPI_FORTRAN_MOD_DIR}
-endif
+MPICC = mpicc
+MPICXX = mpicxx
+MPIFORT = mpifort
 
 # Python
 cpi-master-py.exe: cpi-master.py
@@ -52,6 +49,6 @@ cpi-worker-cxx.exe: cpi-worker.cxx
 
 # Fortran 90
 cpi-master-f90.exe: cpi-master.f90
-	${MPIF90} ${FFLAGS} $< -o $@
+	${MPIFORT} $< -o $@
 cpi-worker-f90.exe: cpi-worker.f90
-	${MPIF90} ${FFLAGS} $< -o $@
+	${MPIFORT} $< -o $@

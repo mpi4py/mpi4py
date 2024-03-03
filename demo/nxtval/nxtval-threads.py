@@ -27,8 +27,8 @@ class Counter:
                            status)
             if status.Get_tag() == 1:
                 return
-            self.comm.Send([ival, MPI.INT],
-                           status.Get_source(), 0)
+            self.comm.Ssend([ival, MPI.INT],
+                            status.Get_source(), 0)
             ival[0] += incr[0]
 
     def free(self):
@@ -36,7 +36,7 @@ class Counter:
         # stop counter thread
         rank = self.comm.Get_rank()
         if rank == 0:
-            self.comm.Send([None, MPI.INT], 0, 1)
+            self.comm.Ssend([None, MPI.INT], 0, 1)
             self.thread.join()
         #
         self.comm.Free()
@@ -44,7 +44,7 @@ class Counter:
     def next(self):
         incr = array('i', [1])
         ival = array('i', [0])
-        self.comm.Send([incr, MPI.INT], 0, 0)
+        self.comm.Ssend([incr, MPI.INT], 0, 0)
         self.comm.Recv([ival, MPI.INT], 0, 0)
         nxtval = ival[0]
         return nxtval

@@ -1,4 +1,4 @@
-! $ mpif90 -o mandelbrot.exe mandelbrot.f90
+! $ mpifort -o mandelbrot.exe mandelbrot.f90
 
 program main
 
@@ -13,6 +13,7 @@ program main
   integer              :: N
   integer, allocatable :: I(:)
   integer, allocatable :: C(:,:)
+  integer :: empty(0)
   integer :: j, k
   real    :: x, dx, y, dy
 
@@ -61,12 +62,12 @@ program main
 
   ! send indices of lines computed here
   call MPI_Gatherv(I, N, MPI_INTEGER, &
-                   MPI_BOTTOM, MPI_BOTTOM, MPI_BOTTOM, MPI_BYTE, &
+                   MPI_BOTTOM, empty, empty, MPI_BYTE, &
                    0, master, ierr)
 
   ! send data of lines computed here
   call MPI_Gatherv(C, N*w, MPI_INTEGER, &
-                   MPI_BOTTOM, MPI_BOTTOM, MPI_BOTTOM, MPI_BYTE, &
+                   MPI_BOTTOM, empty, empty, MPI_BYTE, &
                    0, master, ierr)
 
   deallocate(C)
