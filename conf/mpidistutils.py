@@ -648,6 +648,8 @@ def cython_run(
     args = []
     if with_coverage():
         args += ['-X', 'linetrace=True']
+    if includes:
+        args += [f'-I{incdir}' for incdir in includes]
     if workdir:
         args += ['--working', workdir]
     args += [source]
@@ -948,7 +950,7 @@ def configure_mpi(ext, config_cmd):
         configure_dl(ext, config_cmd)
 
 
-def configure_pyexe(exe, config_cmd):
+def configure_pyexe(exe, _config_cmd):
     if sys.platform.startswith('win'):
         return
     if (sys.platform == 'darwin' and
@@ -1027,7 +1029,7 @@ class build(cmd_build.build):
         return self.distribution.has_executables()
 
     sub_commands = [
-        ('build_src', lambda *args: True),
+        ('build_src', lambda *_: True),
          *cmd_build.build.sub_commands,
         ('build_exe', has_executables),
     ]

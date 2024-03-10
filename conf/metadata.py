@@ -3,7 +3,7 @@ import os
 import sys
 
 
-def get_name(settings=None):
+def get_name(settings=None):  # noqa: ARG001
     name = "mpi4py"
     suffix = os.environ.get("MPI4PY_DIST_SUFFIX")
     if suffix:
@@ -11,7 +11,7 @@ def get_name(settings=None):
     return name
 
 
-def get_version(settings=None):
+def get_version(settings=None):  # noqa: ARG001
     confdir = os.path.dirname(os.path.abspath(__file__))
     topdir = os.path.dirname(confdir)
     srcdir = os.path.join(topdir, "src")
@@ -25,7 +25,7 @@ def get_version(settings=None):
     return version
 
 
-def get_readme(settings=None):
+def get_readme(settings=None):  # noqa: ARG001
     confdir = os.path.dirname(__file__)
     topdir = os.path.dirname(confdir)
     filelist = ("DESCRIPTION.rst", "CITATION.rst", "INSTALL.rst")

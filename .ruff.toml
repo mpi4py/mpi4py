@@ -20,6 +20,7 @@ lint.select = [
 "S",
 "W",
 "UP",
+"ARG",
 "ISC",
 "PIE",
 #"PTH",

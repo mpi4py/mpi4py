@@ -506,7 +506,7 @@ from .typing import (  # noqa: E402
 """
 
 
-def visit_mpi4py_MPI(done=None):
+def visit_mpi4py_MPI():
     from mpi4py import MPI as module
     lines = Lines()
     lines.add = IMPORTS

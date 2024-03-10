@@ -674,7 +674,7 @@ class Comm(MPI.Comm):
         return _recv(self, MPI.Comm.Recv, buf, source, tag, status)
 
     def irecv(self,
-              buf=None, source=ANY_SOURCE, tag=ANY_TAG):
+              buf=None, source=ANY_SOURCE, tag=ANY_TAG):  # noqa: ARG002
         """Nonblocking receive."""
         raise RuntimeError("unsupported")
 

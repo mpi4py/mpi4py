@@ -170,7 +170,7 @@ def _parse_c_file(c_file, exclude_list):
     return code_lines, exec_lines, excluded_lines
 
 
-def coverage_init(reg, options):
+def coverage_init(reg, options):  # noqa: ARG001
     plugin = CythonCoveragePlugin()
     reg.add_configurer(plugin)
     reg.add_file_tracer(plugin)
