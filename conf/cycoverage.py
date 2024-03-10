@@ -8,7 +8,7 @@ from coverage.files import (
     canonical_filename,
 )
 
-CYTHON_EXTENSIONS = {".pxd", ".pyx", ".pxi", ".pyx_src"}
+CYTHON_EXTENSIONS = {".pxd", ".pyx", ".pxi"}
 
 
 class CythonCoveragePlugin(CoveragePlugin):
@@ -33,12 +33,12 @@ class CythonCoveragePlugin(CoveragePlugin):
 
 class CythonFileTracer(FileTracer):
 
-    def __init__(self, source_file):
+    def __init__(self, filename):
         super().__init__()
-        self.source_file = source_file
+        self.filename = filename
 
     def source_filename(self):
-        return self.source_file
+        return self.filename
 
 
 class CythonFileReporter(FileReporter):
@@ -55,32 +55,44 @@ class CythonFileReporter(FileReporter):
         _setup_lines(self.exclude)
         return self._get_lines(EXCL_LINES)
 
+    def translate_lines(self, lines):
+        _setup_lines(self.exclude)
+        exec_lines = self._get_lines(EXEC_LINES)
+        return set(lines).union(exec_lines)
+
     def _get_lines(self, lines_map):
-        key = os.path.relpath(self.filename, SRCDIR)
+        key = os.path.relpath(self.filename, TOPDIR)
         lines = lines_map.get(key, {})
         return set(lines)
 
 
-TOPDIR = os.path.dirname(__file__)
-SRCDIR = os.path.join(os.path.dirname(TOPDIR), 'src')
+TOPDIR = os.path.dirname(os.path.dirname(__file__))
+SRCDIR = os.path.join(TOPDIR, 'src')
 CODE_LINES = None
+EXEC_LINES = None
 EXCL_LINES = None
 
+
 def _setup_lines(exclude):
-    global CODE_LINES, EXCL_LINES
-    if CODE_LINES is None or EXCL_LINES is None:
+    global CODE_LINES, EXEC_LINES, EXCL_LINES
+    if CODE_LINES is None or EXEC_LINES is None or EXCL_LINES is None:
         source = os.path.join(SRCDIR, 'mpi4py', 'MPI.c')
-        CODE_LINES, EXCL_LINES = _parse_cfile_lines(source, exclude)
+        CODE_LINES, EXEC_LINES, EXCL_LINES = _parse_c_file(source, exclude)
 
 
-def _parse_cfile_lines(c_file, exclude_list):
-    import re
+def _parse_c_file(c_file, exclude_list):
     from collections import defaultdict
+    import re
 
+    match_filetab_begin = 'static const char *__pyx_f[] = {'
+    match_filetab_begin = re.compile(re.escape(match_filetab_begin)).match
+    match_filetab_entry = re.compile(r' *"(.*)",').match
     match_source_path_line = re.compile(r' */[*] +"(.*)":([0-9]+)$').match
     match_current_code_line = re.compile(r' *[*] (.*) # <<<<<<+$').match
     match_comment_end = re.compile(r' *[*]/$').match
-    match_trace_line = re.compile(r' *__Pyx_TraceLine\(([0-9]+),').match
+    match_trace_line = re.compile(
+        r' *__Pyx_TraceLine\((\d+),\d+,__PYX_ERR\((\d+),'
+    ).match
     not_executable = re.compile(
         '|'.join([
             r'\s*c(?:type)?def\s+'
@@ -97,23 +109,34 @@ def _parse_cfile_lines(c_file, exclude_list):
         def line_is_excluded(_):
             return False
 
+    filetab = []
+    modinit = False
     code_lines = defaultdict(dict)
+    exec_lines = defaultdict(dict)
     executable_lines = defaultdict(set)
     excluded_lines = defaultdict(set)
-    current_filename = None
 
     with open(c_file) as lines:
         lines = iter(lines)
         for line in lines:
+            if match_filetab_begin(line):
+                for line in lines:
+                    match = match_filetab_entry(line)
+                    if not match:
+                        break
+                    filename = match.group(1)
+                    filetab.append(filename)
             match = match_source_path_line(line)
             if not match:
-                if '__Pyx_TraceLine(' in line and current_filename is not None:
+                if '__Pyx_TraceCall("__Pyx_PyMODINIT_FUNC ' in line:
+                    modinit = True
+                if '__Pyx_TraceLine(' in line:
                     trace_line = match_trace_line(line)
                     if trace_line:
-                        executable_lines[current_filename].add(int(trace_line.group(1)))
+                        lineno, fid = map(int, trace_line.groups())
+                        executable_lines[filetab[fid]].add(lineno)
                 continue
             filename, lineno = match.groups()
-            current_filename = filename
             lineno = int(lineno)
             for comment_line in lines:
                 match = match_current_code_line(comment_line)
@@ -125,18 +148,26 @@ def _parse_cfile_lines(c_file, exclude_list):
                         excluded_lines[filename].add(lineno)
                         break
                     code_lines[filename][lineno] = code_line
+                    if modinit:
+                        exec_lines[filename][lineno] = code_line
                     break
                 if match_comment_end(comment_line):
                     # unexpected comment format - false positive?
                     break
 
     # Remove lines that generated code but are not traceable.
+
     for filename, lines in code_lines.items():
         dead_lines = set(lines).difference(executable_lines.get(filename, ()))
         for lineno in dead_lines:
             del lines[lineno]
 
-    return code_lines, excluded_lines
+    for filename, lines in exec_lines.items():
+        dead_lines = set(lines).difference(executable_lines.get(filename, ()))
+        for lineno in dead_lines:
+            del lines[lineno]
+
+    return code_lines, exec_lines, excluded_lines
 
 
 def coverage_init(reg, options):

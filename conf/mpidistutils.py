@@ -553,40 +553,6 @@ def setup(**attrs):
 def with_coverage():
     return bool(os.environ.get('MPI4PY_COVERAGE_PLUGIN'))
 
-
-def coverage_merger(filename, out=None):
-    dirname = os.path.dirname(filename)
-    with open(filename, encoding='utf-8') as fileobj:
-        code_lines = fileobj.readlines()
-    #
-    if out is None:
-        filename = f'{filename}_src'
-        log.info("write '%s'", filename)
-        stream = open(filename, mode='w', encoding='utf-8')
-    else:
-        log.info("merge '%s' ...", filename)
-        stream = out
-    #
-    is_include = re.compile(r'^include\s+"(.*)"\s*\n$').match
-    if out is None:
-        stream.write("#cython: linetrace=True\n")
-    for line in code_lines:
-        match = is_include(line)
-        if match:
-            include = os.path.join(dirname, match.group(1))
-            stream.write(f"# +include: {include}\n")
-            coverage_merger(include, stream)
-            stream.write(f"# -include: {include}\n")
-        else:
-            stream.write(line)
-    #
-    if out is None:
-        stream.close()
-        log.info("wrote '%s'", filename)
-        return filename
-    #
-    return None
-
 # --------------------------------------------------------------------
 
 # Cython
@@ -677,11 +643,11 @@ def cython_run(
     if not cython_chk(VERSION):
         raise DistutilsError(f"missing build requirement {require!r}")
     #
-    if with_coverage():
-        source = coverage_merger(source)
     log.info("cythonizing '%s' -> '%s'", source, target)
     from cythonize import cythonize
     args = []
+    if with_coverage():
+        args += ['-X', 'linetrace=True']
     if workdir:
         args += ['--working', workdir]
     args += [source]
