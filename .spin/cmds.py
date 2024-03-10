@@ -14,8 +14,7 @@ SHELL = shlex.split(os.environ.get("SHELL", "sh"))
 @click.option("-c", "--clean", is_flag=True, help="Clean build directory.")
 @click.option("-f", "--force", is_flag=True, help="Force build everything.")
 @click.option("-q", "--quiet", is_flag=True, help="Run quietly.")
-@click.pass_context
-def build(ctx, clean, force, quiet):
+def build(clean, force, quiet):
     """🔧 Build in-place."""
     opt_force = ["--force"] if force else []
     opt_quiet = ["--quiet"] if quiet else []
@@ -34,14 +33,6 @@ def test(ctx, n, singleton, test_args):
     ctx.invoke(build, quiet=True)
     launcher = [] if singleton else [*MPIEXEC, "-n", f"{n}"]
     run([*launcher, *PYTHON, "test/main.py", "--inplace", *test_args])
-
-
-@click.command()
-@click.option("-q", "--quiet", is_flag=True, help="Run quietly.")
-def clean(quiet):
-    """🔧 Clean build directory."""
-    opt_quiet = ["--quiet"] if quiet else []
-    run([*PYTHON, "setup.py", *opt_quiet, "clean", "--all"])
 
 
 def _get_site_packages():
@@ -89,15 +80,6 @@ def ipython(ctx, ipython_args):
     _setup_environment(ctx)
     ipython = [*PYTHON, "-m", "IPython"]
     run([*ipython, *ipython_args], replace=True)
-
-
-@click.command(context_settings={"ignore_unknown_options": True})
-@click.argument("args", nargs=-1)
-@click.pass_context
-def exec(ctx, args):
-    """🏁 Run command with PYTHONPATH set."""
-    _setup_environment(ctx)
-    run([*args], replace=True)
 
 
 @click.command(context_settings={"ignore_unknown_options": True})
