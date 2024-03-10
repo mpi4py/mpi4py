@@ -43,6 +43,9 @@ class BaseTestCase(unittest.TestCase):
             raise
         except excClass as excValue:
             error_class = excValue.Get_error_class()
+        else:
+            error_class = None
+        if error_class is not None:
             if isinstance(IErrClass, (list, tuple, set)):
                 match = (error_class in IErrClass)
             else:
