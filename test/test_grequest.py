@@ -63,7 +63,7 @@ class TestGrequest(unittest.TestCase):
             else:
                 chkcode = MPI.ERR_OTHER
                 excname = ValueError.__name__
-            ierr = exception.Get_error_code()
+            ierr = exception.Get_error_class()
             self.assertEqual(ierr, chkcode)
             self.assertTrue(output.startswith(header))
             self.assertIn(excname, output)
