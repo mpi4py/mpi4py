@@ -492,7 +492,7 @@ from .typing import *
 """
 
 
-def visit_mpi4py_MPI(done=None):
+def visit_mpi4py_MPI():
     from mpi4py import MPI as module
     lines = Lines()
     lines.add = f'"""{module.__doc__}"""'

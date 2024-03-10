@@ -123,7 +123,7 @@ def install(editable, quiet, pip_args):
 @click.option("-q", "--quiet", is_flag=True, help="Run quietly.")
 @click.argument("pip_args", nargs=-1)
 @click.pass_context
-def editable(ctx, quiet, pip_args):
+def editable(ctx, quiet, pip_args):  # noqa: ARG001
     """🔧 Install package in editable mode."""
     ctx.forward(install, editable=True)
 

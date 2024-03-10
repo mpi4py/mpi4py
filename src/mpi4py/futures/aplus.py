@@ -82,7 +82,7 @@ def catch(future, on_failure=None):
 
     """
     if on_failure is None:
-        return then(future, None, lambda exc: None)
+        return then(future, None, lambda _: None)
     return then(future, None, on_failure)
 
 

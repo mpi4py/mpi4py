@@ -212,7 +212,7 @@ def _setup_autodoc(app):
         priority = autodoc.ClassDocumenter.priority + 1
 
         @classmethod
-        def can_document_member(cls, member, membername, isattr, parent):
+        def can_document_member(cls, member, _membername, _isattr, parent):
             return (
                 isinstance(parent, autodoc.ModuleDocumenter)
                 and parent.name == 'mpi4py.typing'
