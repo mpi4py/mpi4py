@@ -262,7 +262,7 @@ cdef class Win:
         """
         Delete attribute value associated with a key.
         """
-        CHKERR( MPI_Win_delete_attr(self.ob_mpi, keyval) )
+        PyMPI_attr_del(self.ob_mpi, keyval)
 
     @classmethod
     def Create_keyval(
