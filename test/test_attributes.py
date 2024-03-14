@@ -110,7 +110,11 @@ class BaseTestAttr:
         attr = obj.Get_attr(self.keyval)
         self.assertEqual(attr, addr)
 
-    @unittest.skip('broken')
+    @unittest.skipMPI('intelmpi')
+    @unittest.skipMPI('mvapich')
+    @unittest.skipMPI('mvapich2')
+    @unittest.skipMPI('mpich(<4.2.1)')
+    @unittest.skipMPI('openmpi(<5.0.0)')
     def testAttrCopyException(self):
         cls, obj = type(self.obj), self.obj
         if not isinstance(obj, MPI.Datatype): return
@@ -118,32 +122,38 @@ class BaseTestAttr:
         def copy_fn(o, k, v):
             raise ValueError
         self.keyval = cls.Create_keyval(copy_fn, None)
-        obj.Set_attr(self.keyval, "value")
-        with self.assertRaises(MPI.Exception) as exc_cm:
-            with unittest.capture_stderr() as stderr:
-                obj.Dup().Free()
-        ierr = exc_cm.exception.Get_error_code()
-        self.assertEqual(ierr, MPI.ERR_OTHER)
-        self.assertIn('ValueError', stderr.getvalue())
+        try:
+            obj.Set_attr(self.keyval, "value")
+            with self.assertRaises(MPI.Exception) as exc_cm:
+                with unittest.capture_stderr() as stderr:
+                    obj.Dup().Free()
+            ierr = exc_cm.exception.Get_error_class()
+            self.assertEqual(ierr, MPI.ERR_OTHER)
+            self.assertIn('ValueError', stderr.getvalue())
+        finally:
+            obj.Delete_attr(self.keyval)
+            self.keyval = cls.Free_keyval(self.keyval)
 
-    @unittest.skip('broken')
+    @unittest.skipMPI('intelmpi')
+    @unittest.skipMPI('mvapich')
+    @unittest.skipMPI('mvapich2')
+    @unittest.skipMPI('mpich(<4.2.1)')
     def testAttrDeleteException(self):
         cls, obj = type(self.obj), self.obj
-        if not isinstance(obj, MPI.Win): return  # TODO: review
         raise_flag = True
         def delete_fn(o, k, v):
-            if raise_flag:
-                raise ValueError
+            raise ValueError
         self.keyval = cls.Create_keyval(None, delete_fn)
         obj.Set_attr(self.keyval, "value")
-        with self.assertRaises(MPI.Exception) as exc_cm:
-            with unittest.capture_stderr() as stderr:
-                obj.Delete_attr(self.keyval)
-        ierr = exc_cm.exception.Get_error_code()
-        self.assertEqual(ierr, MPI.ERR_OTHER)
-        self.assertIn('ValueError', stderr.getvalue())
-        raise_flag = False
-        obj.Delete_attr(self.keyval)
+        try:
+            with self.assertRaises(MPI.Exception) as exc_cm:
+                with unittest.capture_stderr() as stderr:
+                    obj.Delete_attr(self.keyval)
+            ierr = exc_cm.exception.Get_error_class()
+            self.assertEqual(ierr, MPI.ERR_OTHER)
+            self.assertIn('ValueError', stderr.getvalue())
+        finally:
+            self.keyval = cls.Free_keyval(self.keyval)
 
 
 class BaseTestCommAttr(BaseTestAttr):

@@ -12,6 +12,8 @@ cdef class _p_keyval:
     cdef public object copy_fn
     cdef public object delete_fn
     cdef public bint   nopython
+    cdef int    ierr
+    cdef object lock
     def __cinit__(self, copy_fn, delete_fn, nopython):
         if copy_fn   is False: copy_fn   = None
         if delete_fn is False: delete_fn = None
@@ -19,6 +21,8 @@ cdef class _p_keyval:
         self.copy_fn   = copy_fn
         self.delete_fn = delete_fn
         self.nopython  = nopython
+        self.ierr = MPI_SUCCESS
+        self.lock = RLock()
 
 cdef object keyval_lock_type = Lock()
 cdef object keyval_lock_comm = Lock()
@@ -109,10 +113,12 @@ cdef inline int PyMPI_attr_delete(
     cdef object attrval
     if p: attrval = <object>attrval_in
     else: attrval = PyLong_FromVoidPtr(attrval_in)
-    if state.delete_fn is not None:
-        PyMPI_attr_call(state.delete_fn, hdl, keyval, attrval)
-    if p: Py_DECREF(attrval)
-    Py_DECREF(state)
+    try:
+        if state.delete_fn is not None:
+            PyMPI_attr_call(state.delete_fn, hdl, keyval, attrval)
+    finally:
+        if p: Py_DECREF(attrval)
+        Py_DECREF(state)
     return 0
 
 # ---
@@ -132,8 +138,8 @@ cdef inline int PyMPI_attr_copy_cb(
             hdl, keyval, extra_state,
             attrval_in, attrval_out, flag,
         )
-    except BaseException as exc:           #~> TODO
-        ierr = PyMPI_HandleException(exc)  #~> TODO
+    except BaseException as exc:
+        ierr = PyMPI_HandleException(exc)
     return ierr
 
 
@@ -145,12 +151,15 @@ cdef inline int PyMPI_attr_delete_cb(
 ) noexcept with gil:
     cdef int ierr = MPI_SUCCESS
     cdef object exc
+    cdef _p_keyval state = <_p_keyval>extra_state
+    state.ierr = MPI_SUCCESS
     try:
         PyMPI_attr_delete(
             hdl, keyval, attrval, extra_state,
         )
-    except BaseException as exc:           #~> TODO
-        ierr = PyMPI_HandleException(exc)  #~> TODO
+    except BaseException as exc:
+        ierr = PyMPI_HandleException(exc)
+        state.ierr, ierr = ierr, MPI_SUCCESS
     return ierr
 
 # ---
@@ -186,7 +195,7 @@ cdef int PyMPI_attr_delete_fn(
     if not Py_IsInitialized(): return MPI_SUCCESS
     if not py_module_alive():  return MPI_SUCCESS
     return PyMPI_attr_delete_cb(
-        hdl, keyval, attrval, extra_state
+        hdl, keyval, attrval, extra_state,
     )
 
 # ---
@@ -258,6 +267,19 @@ cdef inline object PyMPI_attr_get(
         return PyLong_FromVoidPtr(attrval)
 
 
+cdef inline int PyMPI_set_attr(
+    PyMPI_attr_type hdl,
+    int keyval,
+    void *attrval,
+) except -1:
+    if PyMPI_attr_type is MPI_Datatype:
+        CHKERR( MPI_Type_set_attr(hdl, keyval, attrval) )
+    if PyMPI_attr_type is MPI_Comm:
+        CHKERR( MPI_Comm_set_attr(hdl, keyval, attrval) )
+    if PyMPI_attr_type is MPI_Win:
+        CHKERR( MPI_Win_set_attr(hdl, keyval, attrval) )
+    return 0
+
 cdef inline int PyMPI_attr_set(
     PyMPI_attr_type hdl,
     int keyval,
@@ -269,16 +291,35 @@ cdef inline int PyMPI_attr_set(
         valptr = <void *>attrval
     else:
         valptr = PyLong_AsVoidPtr(attrval)
-    if PyMPI_attr_type is MPI_Datatype:
-        CHKERR( MPI_Type_set_attr(hdl, keyval, valptr) )
-    if PyMPI_attr_type is MPI_Comm:
-        CHKERR( MPI_Comm_set_attr(hdl, keyval, valptr) )
-    if PyMPI_attr_type is MPI_Win:
-        CHKERR( MPI_Win_set_attr(hdl, keyval, valptr) )
+    PyMPI_set_attr(hdl, keyval, valptr)
     if state is not None:
         if not state.nopython:
             Py_INCREF(attrval)
         Py_INCREF(state)
     return 0
+
+cdef inline int PyMPI_delete_attr(
+    PyMPI_attr_type hdl,
+    int keyval,
+) except -1:
+    if PyMPI_attr_type is MPI_Datatype:
+        CHKERR( MPI_Type_delete_attr(hdl, keyval) )
+    if PyMPI_attr_type is MPI_Comm:
+        CHKERR( MPI_Comm_delete_attr(hdl, keyval) )
+    if PyMPI_attr_type is MPI_Win:
+        CHKERR( MPI_Win_delete_attr(hdl, keyval) )
+    return 0
+
+cdef inline int PyMPI_attr_del(
+    PyMPI_attr_type hdl,
+    int keyval,
+) except -1:
+    cdef int ierr = MPI_SUCCESS
+    cdef _p_keyval state = PyMPI_attr_state_get(hdl, keyval)
+    if state is None: return PyMPI_delete_attr(hdl, keyval)
+    with state.lock:
+        PyMPI_delete_attr(hdl, keyval)
+        ierr, state.ierr = state.ierr, ierr
+        CHKERR( ierr )
 
 # -----------------------------------------------------------------------------
