@@ -40,14 +40,6 @@ jobs:
           - os: windows-2022
             mpi: openmpi
 
-          # python/cpython#115582
-          - os: windows-2022
-            py: "3.13-dev"
-        include:
-          - os:  windows-2022
-            mpi: msmpi
-            py:  "3.13.0-alpha.3"
-
     steps:
 
     - name: Configure hostname

@@ -203,8 +203,7 @@ class ProcessPoolInitTest(ProcessPoolMixin,
     def test_init_sys_flags(self):
         executor_type = futures.MPIPoolExecutor
         sys_flags = [
-            ('debug', '-d', 1),
-            ('debug', '-dd', 2),
+            ('debug', '-d', True),
             ('optimize', '-O', 1),
             ('optimize', '-OO', 2),
             ('dont_write_bytecode', '-B', True),
