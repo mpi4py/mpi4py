@@ -15,6 +15,9 @@ set -x
 if command -v mpichversion > /dev/null; then
     badenv='OMPI_COMM_WORLD_SIZE=1'
 fi
+if command -v impi_info > /dev/null; then
+    badenv='OMPI_COMM_WORLD_SIZE=1'
+fi
 if command -v ompi_info > /dev/null; then
     badenv='PMI_SIZE=1 HYDI_CONTROL_FD=dummy'
 fi
