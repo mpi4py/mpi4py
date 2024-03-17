@@ -228,22 +228,6 @@ cdef extern from "Python.h":
     #define OMPI_SKIP_MPICXX  1
     """
 
-cdef extern from * nogil:
-    """
-    #if defined(MPICH)
-    #  define PyMPI_HAVE_MPICH   1
-    #  define PyMPI_HAVE_OPENMPI 0
-    #elif defined(OPEN_MPI)
-    #  define PyMPI_HAVE_MPICH   0
-    #  define PyMPI_HAVE_OPENMPI 1
-    #else
-    #  define PyMPI_HAVE_MPICH   0
-    #  define PyMPI_HAVE_OPENMPI 0
-    #endif
-    """
-    enum: MPICH   "PyMPI_HAVE_MPICH"
-    enum: OPENMPI "PyMPI_HAVE_OPENMPI"
-
 cdef int warn_environ(const char envvar[]) except -1 with gil:
     PyErr_WarnFormat(
         RuntimeWarning, 1,
@@ -252,9 +236,10 @@ cdef int warn_environ(const char envvar[]) except -1 with gil:
         envvar, getenv(envvar),
     )
 
-cdef int warn_mpiexec(const char envvar[]) except -1 with gil:
-    cdef const char *vendor = NULL
-    <void>PyMPI_Get_vendor(&vendor, NULL, NULL, NULL)
+cdef int warn_mpiexec(
+    const char envvar[],
+    const char vendor[],
+) except -1 with gil:
     PyErr_WarnFormat(
         RuntimeWarning, 1,
         b"suspicious MPI execution environment\n"
@@ -278,20 +263,35 @@ cdef int check_mpiexec() except -1 nogil:
     if check == -1: warn_environ(ename)
     if check <=  0: return 0
 
-    cdef const char *hydra   = b"HYDI_CONTROL_FD"
-    cdef const char *mpich   = b"PMI_SIZE"
+    cdef const char *vendor = NULL
+    <void>PyMPI_Get_vendor(&vendor, NULL, NULL, NULL)
+
+    cdef bint MPICH   = (strncmp(b"MPICH", vendor, 6) == 0)
+    cdef bint IMPI    = (strncmp(b"Intel MPI", vendor, 10) == 0)
+    cdef bint OPENMPI = (strncmp(b"Open MPI", vendor, 9) == 0)
+    cdef const char *mpich   = b"HYDI_CONTROL_FD"
+    cdef const char *impi    = b"I_MPI_HYDRA_TOPOLIB"
+    cdef const char *pmi_sz  = b"PMI_SIZE"
     cdef const char *openmpi = b"OMPI_COMM_WORLD_SIZE"
     cdef const char *bad_env = NULL
+    MPICH |= (strncmp(b"MVAPICH", vendor, 8) == 0)
+    MPICH |= (strncmp(b"MVAPICH2", vendor, 9) == 0)
     if MPICH:
-        if getenv(mpich) == NULL and getenv(hydra) == NULL:      #~> mpich
-            if getenv(openmpi) != NULL:                          #~> mpich
-                bad_env = openmpi                                #~> mpich
+        if getenv(mpich) == NULL and getenv(pmi_sz) == NULL:      #~> mpich
+            if getenv(openmpi) != NULL:                           #~> mpich
+                bad_env = openmpi                                 #~> mpich
+    if IMPI:
+        if getenv(impi) == NULL and getenv(pmi_sz) == NULL:       #~> impi
+            if getenv(openmpi) != NULL:                           #~> impi
+                bad_env = openmpi                                 #~> impi
     if OPENMPI:
-        if getenv(openmpi) == NULL:                              #~> openmpi
-            if getenv(mpich) != NULL and getenv(hydra) != NULL:  #~> openmpi
-                bad_env = mpich                                  #~> openmpi
+        if getenv(openmpi) == NULL:                               #~> openmpi
+            if getenv(mpich) != NULL and getenv(pmi_sz) != NULL:  #~> openmpi
+                bad_env = pmi_sz                                  #~> openmpi
+            if getenv(impi ) != NULL and getenv(pmi_sz) != NULL:  #~> openmpi
+                bad_env = pmi_sz                                  #~> openmpi
     if bad_env != NULL:
-        warn_mpiexec(bad_env)
+        warn_mpiexec(bad_env, vendor)
     return 0
 
 # -----------------------------------------------------------------------------
