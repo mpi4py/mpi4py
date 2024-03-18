@@ -90,7 +90,6 @@ class TestWorldAttrs(unittest.TestCase):
     @unittest.skipMPI('mpich(<4.1.0)', appnum() is None)
     @unittest.skipMPI('mvapich', appnum() is None)
     @unittest.skipMPI('MPICH2', appnum() is None)
-    @unittest.skipMPI('MVAPICH2', appnum() is None)
     @unittest.skipIf(MPI.UNIVERSE_SIZE == MPI.KEYVAL_INVALID, 'mpi-universe-size')
     def testUniverseSize(self):
         univsz = MPI.COMM_WORLD.Get_attr(MPI.UNIVERSE_SIZE)

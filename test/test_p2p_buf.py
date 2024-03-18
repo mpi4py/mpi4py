@@ -101,7 +101,7 @@ class BaseTestP2PBuf:
         for array, typecode in arrayimpl.loop():
             with arrayimpl.test(self):
                 if unittest.is_mpi_gpu('openmpi', array): continue
-                if unittest.is_mpi_gpu('mvapich2', array): continue
+                if unittest.is_mpi_gpu('mvapich', array): continue
                 for s in range(0, size+1):
                     with self.subTest(s=s):
                         #
@@ -250,7 +250,7 @@ class BaseTestP2PBuf:
         for array, typecode in arrayimpl.loop():
             with arrayimpl.test(self):
                 if unittest.is_mpi_gpu('openmpi', array): continue
-                if unittest.is_mpi_gpu('mvapich2', array): continue
+                if unittest.is_mpi_gpu('mvapich', array): continue
                 for s, xs in itertools.product(range(size+1), range(3)):
                     with self.subTest(s=s, xs=xs):
                         #

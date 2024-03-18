@@ -1456,7 +1456,6 @@ class TestMessageRMA(unittest.TestCase):
         self.assertEqual(sbuf, rbuf)
 
     @unittest.skipMPI('msmpi')
-    @unittest.skipMPI('MVAPICH2')
     @unittest.skipIf(cupy is None, 'cupy')
     def testMessageCuPy(self):
         sbuf = cupy.array([1,2,3], 'i')
@@ -1465,7 +1464,6 @@ class TestMessageRMA(unittest.TestCase):
         self.assertTrue((sbuf == rbuf).all())
 
     @unittest.skipMPI('msmpi')
-    @unittest.skipMPI('MVAPICH2')
     @unittest.skipIf(numba is None, 'numba')
     def testMessageNumba(self):
         sbuf = numba.cuda.device_array((3,), 'i')

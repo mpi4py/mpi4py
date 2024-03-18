@@ -90,7 +90,6 @@ class BaseTestULFM:
             flag = comm.Agree(flag)
             self.assertEqual(flag, i)
 
-    @unittest.skipMPI('MVAPICH2', MPI.COMM_WORLD.Get_size() > 3)
     def testIAgree(self):
         comm = self.COMM
         with self.assertRaises(TypeError):

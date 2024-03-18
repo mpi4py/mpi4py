@@ -91,8 +91,8 @@ def azure():
 @unittest.skipMPI('msmpi', appnum() is None)
 @unittest.skipMPI('mvapich', appnum() is None)
 @unittest.skipMPI('mvapich', badport())
+@unittest.skipMPI('mvapich(<3.0.0)')
 @unittest.skipMPI('MPICH2')
-@unittest.skipMPI('MVAPICH2')
 @unittest.skipMPI('MPICH1')
 @unittest.skipIf(using_GPU(), 'using CUDA')
 class BaseTestSpawn:

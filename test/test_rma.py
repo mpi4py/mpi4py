@@ -59,7 +59,7 @@ class BaseTestRMA:
         group.Free()
         for array, typecode in arrayimpl.loop():
             with arrayimpl.test(self):
-                if unittest.is_mpi_gpu('mvapich2', array): continue
+                if unittest.is_mpi_gpu('mvapich', array): continue
                 for count in range(10):
                     for rank in range(size):
                         with self.subTest(rank=rank, count=count):
@@ -110,7 +110,7 @@ class BaseTestRMA:
         for array, typecode in arrayimpl.loop():
             with arrayimpl.test(self):
                 if unittest.is_mpi_gpu('openmpi', array): continue
-                if unittest.is_mpi_gpu('mvapich2', array): continue
+                if unittest.is_mpi_gpu('mvapich', array): continue
                 if typecode in '?': continue
                 if typecode in 'FDG': continue
                 for count in range(10):
@@ -151,7 +151,7 @@ class BaseTestRMA:
         for array, typecode in arrayimpl.loop():
             with arrayimpl.test(self):
                 if unittest.is_mpi_gpu('openmpi', array): continue
-                if unittest.is_mpi_gpu('mvapich2', array): continue
+                if unittest.is_mpi_gpu('mvapich', array): continue
                 if typecode in '?': continue
                 if typecode in 'FDG': continue
                 for count in range(10):
@@ -209,7 +209,7 @@ class BaseTestRMA:
         for array, typecode in arrayimpl.loop():
             with arrayimpl.test(self):
                 if unittest.is_mpi_gpu('openmpi', array): continue
-                if unittest.is_mpi_gpu('mvapich2', array): continue
+                if unittest.is_mpi_gpu('mvapich', array): continue
                 if typecode in '?': continue
                 if typecode in 'FDG': continue
                 obuf = array(+1, typecode)
@@ -275,7 +275,7 @@ class BaseTestRMA:
         for array, typecode in arrayimpl.loop():
             with arrayimpl.test(self):
                 if unittest.is_mpi_gpu('openmpi', array): continue
-                if unittest.is_mpi_gpu('mvapich2', array): continue
+                if unittest.is_mpi_gpu('mvapich', array): continue
                 if typecode in 'fdg': continue
                 if typecode in 'FDG': continue
                 obuf = array(+1, typecode)

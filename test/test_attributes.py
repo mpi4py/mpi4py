@@ -112,7 +112,6 @@ class BaseTestAttr:
 
     @unittest.skipMPI('intelmpi')
     @unittest.skipMPI('mvapich')
-    @unittest.skipMPI('mvapich2')
     @unittest.skipMPI('mpich(<4.2.1)')
     @unittest.skipMPI('openmpi(<5.0.0)')
     def testAttrCopyException(self):
@@ -136,7 +135,6 @@ class BaseTestAttr:
 
     @unittest.skipMPI('intelmpi')
     @unittest.skipMPI('mvapich')
-    @unittest.skipMPI('mvapich2')
     @unittest.skipMPI('mpich(<4.2.1)')
     def testAttrDeleteException(self):
         cls, obj = type(self.obj), self.obj

@@ -94,7 +94,6 @@ class BaseTestPackExternal:
                 if unittest.is_mpi_gpu('mpich', array): continue
                 if unittest.is_mpi_gpu('openmpi', array): continue
                 if unittest.is_mpi_gpu('mvapich', array): continue
-                if unittest.is_mpi_gpu('mvapich2', array): continue
                 if typecode1 in self.skipdtype: continue
                 for typecode2 in array.TypeMap:
                     if typecode2 in self.skipdtype: continue
@@ -155,8 +154,6 @@ elif name == 'Microsoft MPI':
 elif name == 'MVAPICH':
     BaseTestPackExternal.skipdtype += 'lfdgLFDG'
 elif name == 'MPICH2':
-    BaseTestPackExternal.skipdtype += 'ldgLFDG'
-elif name == 'MVAPICH2':
     BaseTestPackExternal.skipdtype += 'ldgLFDG'
 else:
     try:

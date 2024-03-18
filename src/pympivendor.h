@@ -40,7 +40,7 @@ static int PyMPI_Get_vendor(const char **vendor_name,
   if (cnt > 0) { name = "MVAPICH"; goto done; }
 
   cnt = sscanf(lib, "MVAPICH2 Version: %d.%d.%d", &major, &minor, &micro);
-  if (cnt > 0) { name = "MVAPICH2"; goto done; }
+  if (cnt > 0) { name = "MVAPICH"; goto done; }
 
  done:
 
@@ -85,7 +85,7 @@ static int PyMPI_Get_vendor(const char **vendor_name,
 
 #elif defined(MVAPICH2_VERSION) || defined(MVAPICH2_NUMVERSION)
 
-  name = "MVAPICH2";
+  name = "MVAPICH";
   #if defined(MVAPICH2_NUMVERSION)
   {int version = MVAPICH2_NUMVERSION/1000; if (version<1000) version *= 100;
   major = version/10000; version -= major*10000;
