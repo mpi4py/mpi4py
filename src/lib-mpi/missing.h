@@ -2487,11 +2487,6 @@ typedef void (MPIAPI PyMPI_MPI_Session_errhandler_function)(MPI_Session*,int*,..
 #define MPI_TAG_UB (MPI_KEYVAL_INVALID)
 #endif
 
-#ifndef PyMPI_HAVE_MPI_HOST
-#undef  MPI_HOST
-#define MPI_HOST (MPI_KEYVAL_INVALID)
-#endif
-
 #ifndef PyMPI_HAVE_MPI_IO
 #undef  MPI_IO
 #define MPI_IO (MPI_KEYVAL_INVALID)
@@ -4733,6 +4728,11 @@ typedef int PyMPI_MPI_Fint;
 #ifndef PyMPI_HAVE_MPI_Errhandler_f2c
 #undef  MPI_Errhandler_f2c
 #define MPI_Errhandler_f2c(a1) ((void)a1,MPI_ERRHANDLER_NULL)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_HOST
+#undef  MPI_HOST
+#define MPI_HOST (MPI_KEYVAL_INVALID)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Info_get

@@ -1790,7 +1790,6 @@ cdef class Comm:
         if attrval == NULL: return 0
         # MPI-1 predefined attribute keyvals
         if (keyval == MPI_TAG_UB or
-            keyval == MPI_HOST or
             keyval == MPI_IO or
             keyval == MPI_WTIME_IS_GLOBAL):
             return (<int*>attrval)[0]

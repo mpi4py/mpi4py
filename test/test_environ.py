@@ -66,13 +66,6 @@ class TestWorldAttrs(unittest.TestCase):
         if wtg is not None:
             self.assertIn(wtg, (True, False))
 
-    def testHostPorcessor(self):
-        size = MPI.COMM_WORLD.Get_size()
-        vals = list(range(size)) + [MPI.PROC_NULL]
-        hostproc = MPI.COMM_WORLD.Get_attr(MPI.HOST)
-        if hostproc is not None:
-            self.assertIn(hostproc, vals)
-
     def testIOProcessor(self):
         size = MPI.COMM_WORLD.Get_size()
         vals = list(range(size))
