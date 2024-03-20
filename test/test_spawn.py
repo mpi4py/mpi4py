@@ -76,6 +76,11 @@ def github():
 def azure():
     return os.environ.get('TF_BUILD') == 'True'
 
+def skip_spawn():
+    return (
+        os.environ.get('MPI4PY_TEST_SPAWN')
+        in (None, '0', 'no', 'off', 'false')
+    )
 
 @unittest.skipMPI('MPI(<2.0)')
 @unittest.skipMPI('openmpi(<3.0.0)')
@@ -83,8 +88,7 @@ def azure():
 @unittest.skipMPI('openmpi(==4.0.1)', macos())
 @unittest.skipMPI('openmpi(==4.0.2)', macos())
 @unittest.skipMPI('openmpi(>=4.1.0,<4.2.0)', github())
-@unittest.skipMPI('openmpi(==5.1.0)', 'PMIX_RANK' not in os.environ)
-@unittest.skipMPI('openmpi(==5.1.0)', MPI.COMM_WORLD.Get_size() > 3)
+@unittest.skipMPI('openmpi(>=5.0.0,<=5.1.0)', skip_spawn())
 @unittest.skipMPI('mpich(<4.1.0)', appnum() is None)
 @unittest.skipMPI('mpich(<4.3.0)', badport())
 @unittest.skipMPI('msmpi(<8.1.0)')
@@ -175,7 +179,6 @@ class BaseTestSpawnSingle(BaseTestSpawn):
         self.COMM.Barrier()
 
 
-@unittest.skipMPI('openmpi(==5.0.0)', macos() and azure())
 class BaseTestSpawnMultiple(BaseTestSpawn):
 
     def testCommSpawn(self):
@@ -309,14 +312,12 @@ class BaseTestSpawnMultiple(BaseTestSpawn):
             self.COMM.Spawn_multiple(CMDS, ARGS, MAXP[0], INFO*2, root=0)
 
 
-@unittest.skipMPI('openmpi(>=5.0.0,<=5.1.0)')
 class TestSpawnSingleSelf(BaseTestSpawnSingle, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
 class TestSpawnSingleWorld(BaseTestSpawnSingle, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
-@unittest.skipMPI('openmpi(>=5.0.0,<=5.1.0)')
 class TestSpawnSingleSelfMany(TestSpawnSingleSelf):
     MAXPROCS = MPI.COMM_WORLD.Get_size()
 
@@ -324,14 +325,12 @@ class TestSpawnSingleWorldMany(TestSpawnSingleWorld):
     MAXPROCS = MPI.COMM_WORLD.Get_size()
 
 
-@unittest.skipMPI('openmpi(>=5.0.0,<=5.1.0)')
 class TestSpawnMultipleSelf(BaseTestSpawnMultiple, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
 class TestSpawnMultipleWorld(BaseTestSpawnMultiple, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
-@unittest.skipMPI('openmpi(>=5.0.0,<=5.1.0)')
 class TestSpawnMultipleSelfMany(TestSpawnMultipleSelf):
     MAXPROCS = MPI.COMM_WORLD.Get_size()
 
