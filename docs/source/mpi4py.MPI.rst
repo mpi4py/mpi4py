@@ -156,7 +156,6 @@ Attributes
    KEYVAL_INVALID
 
    TAG_UB
-   HOST
    IO
    WTIME_IS_GLOBAL
    UNIVERSE_SIZE

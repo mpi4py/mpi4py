@@ -644,13 +644,12 @@ cdef extern from "<mpi.h>" nogil:
     int MPI_Comm_set_name(MPI_Comm, char[])
 
     enum: MPI_TAG_UB          #:= MPI_KEYVAL_INVALID
-    enum: MPI_HOST            #:= MPI_KEYVAL_INVALID
     enum: MPI_IO              #:= MPI_KEYVAL_INVALID
     enum: MPI_WTIME_IS_GLOBAL #:= MPI_KEYVAL_INVALID
 
-    enum: MPI_UNIVERSE_SIZE #:= MPI_KEYVAL_INVALID
-    enum: MPI_APPNUM        #:= MPI_KEYVAL_INVALID
-    enum: MPI_LASTUSEDCODE  #:= MPI_KEYVAL_INVALID
+    enum: MPI_UNIVERSE_SIZE   #:= MPI_KEYVAL_INVALID
+    enum: MPI_APPNUM          #:= MPI_KEYVAL_INVALID
+    enum: MPI_LASTUSEDCODE    #:= MPI_KEYVAL_INVALID
 
     int MPI_Comm_get_attr(MPI_Comm, int, void*, int*)  #:= MPI_Attr_get
     int MPI_Comm_set_attr(MPI_Comm, int, void*)        #:= MPI_Attr_put
@@ -1219,7 +1218,10 @@ cdef extern from "<mpi.h>" nogil:
 
     #-----------------------------------------------------------------
 
-    # Deprecated since MPI-4
+    # Deprecated since MPI-4.1
+    enum: MPI_HOST #:= MPI_KEYVAL_INVALID
+
+    # Deprecated since MPI-4.0
     int MPI_Info_get(MPI_Info, char[], int, char[], int*)
     int MPI_Info_get_valuelen(MPI_Info, char[], int*, int*)
 

@@ -490,7 +490,6 @@
 #undef  PyMPI_HAVE_MPI_Comm_get_name
 #undef  PyMPI_HAVE_MPI_Comm_set_name
 #undef  PyMPI_HAVE_MPI_TAG_UB
-#undef  PyMPI_HAVE_MPI_HOST
 #undef  PyMPI_HAVE_MPI_IO
 #undef  PyMPI_HAVE_MPI_WTIME_IS_GLOBAL
 #undef  PyMPI_HAVE_MPI_UNIVERSE_SIZE
@@ -938,6 +937,7 @@
 #undef  PyMPI_HAVE_MPI_Win_f2c
 #undef  PyMPI_HAVE_MPI_File_f2c
 #undef  PyMPI_HAVE_MPI_Errhandler_f2c
+#undef  PyMPI_HAVE_MPI_HOST
 #undef  PyMPI_HAVE_MPI_Info_get
 #undef  PyMPI_HAVE_MPI_Info_get_valuelen
 #undef  PyMPI_HAVE_MPI_Attr_get
