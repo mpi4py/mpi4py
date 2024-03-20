@@ -373,6 +373,11 @@ class BaseTestPool:
 def broken_mpi_spawn():
     darwin = (sys.platform == 'darwin')
     windows = (sys.platform == 'win32')
+    github = (os.environ.get('GITHUB_ACTIONS') == 'true')
+    skip_spawn = (
+        os.environ.get('MPI4PY_TEST_SPAWN')
+        in (None, '0', 'no', 'off', 'false')
+    )
     name, version = MPI.get_vendor()
     if name == 'Open MPI':
         if version < (3,0,0):
@@ -384,10 +389,11 @@ def broken_mpi_spawn():
         if version == (4,0,2) and darwin:
             return True
         if version >= (4,1,0) and version < (4,2,0):
-            if os.environ.get('GITHUB_ACTIONS') == 'true':
+            if github:
                 return True
-        if version == (5,1,0):
-            return ('PMIX_RANK' not in os.environ)
+        if version >= (5,0,0) and version <= (5,1,0):
+            if skip_spawn:
+                return True
     if name == 'MPICH':
         if version >= (3, 4) and version < (4, 0) and darwin:
             return True
