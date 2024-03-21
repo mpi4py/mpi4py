@@ -6,7 +6,7 @@ import platform
 
 
 def arrayimpl_loop_io():
-    openmpi = unittest.mpi_predicate('openmpi(<5.0.0)')
+    openmpi = unittest.mpi_predicate('openmpi(<4.2.0)')
     is_i386 = platform.machine() in ('i386', 'i686')
     for array, typecode in arrayimpl.loop():
         if unittest.is_mpi_gpu('mvapich', array): continue
