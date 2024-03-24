@@ -6,6 +6,8 @@ import sys
 
 scalar = arrayimpl.scalar
 
+typemap = MPI.Datatype.fromcode
+
 def mkzeros(n):
     return bytearray(n)
 
@@ -53,7 +55,6 @@ class BaseTestRMA:
             MPI.Free_mem(self.mpi_memory)
 
     def testPutGet(self):
-        typemap = MPI._typedict
         group = self.WIN.Get_group()
         size = group.Get_size()
         group.Free()
@@ -91,7 +92,7 @@ class BaseTestRMA:
                             #
                             sbuf = array(range(count), typecode)
                             rbuf = array(-1, typecode, count+1)
-                            datatype = typemap[typecode]
+                            datatype = typemap(typecode)
                             target  = (sbuf.itemsize, count, datatype)
                             self.WIN.Fence()
                             self.WIN.Put(sbuf.as_mpi(), rank, target)
@@ -184,7 +185,6 @@ class BaseTestRMA:
                                 self.assertEqual(gbuf[-1], scalar(-1))
 
     def testFetchAndOp(self):
-        typemap = MPI._typedict
         group = self.WIN.Get_group()
         size = group.Get_size()
         rank = group.Get_rank()
@@ -214,7 +214,7 @@ class BaseTestRMA:
                 if typecode in 'FDG': continue
                 obuf = array(+1, typecode)
                 rbuf = array(-1, typecode, 2)
-                datatype = typemap[typecode]
+                datatype = typemap(typecode)
                 for op in (
                     MPI.SUM, MPI.PROD,
                     MPI.MAX, MPI.MIN,
@@ -249,7 +249,6 @@ class BaseTestRMA:
 
     @unittest.skipMPI('mpich(>=4.0,<4.1)', sys.platform == 'darwin')
     def testCompareAndSwap(self):
-        typemap = MPI._typedict
         group = self.WIN.Get_group()
         size = group.Get_size()
         rank = group.Get_rank()
@@ -281,7 +280,7 @@ class BaseTestRMA:
                 obuf = array(+1, typecode)
                 cbuf = array( 0, typecode)
                 rbuf = array(-1, typecode, 2)
-                datatype = typemap[typecode]
+                datatype = typemap(typecode)
                 for rank in range(size):
                     for disp in range(3):
                         with self.subTest(disp=disp, rank=rank):

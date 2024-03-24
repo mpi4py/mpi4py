@@ -15,7 +15,6 @@ from ..MPI import (
 
 from ..MPI import (
     Pickle,
-    _typedict,
     _comm_lock,
     _commctx_intra,
     _commctx_inter,
@@ -88,7 +87,7 @@ def _info_typecode():
 
 def _info_datatype():
     code = _info_typecode()
-    return _typedict[code]
+    return MPI.Datatype.fromcode(code)
 
 
 def _info_pack(info):

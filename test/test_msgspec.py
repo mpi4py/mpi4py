@@ -10,7 +10,7 @@ from arrayimpl import (
 )
 
 from arrayimpl import typestr
-typemap = MPI._typedict
+typemap = MPI.Datatype.fromcode
 
 # ---
 
@@ -251,7 +251,7 @@ class BaseTestMessageSimpleArray:
             self.assertEqual(a, b)
 
     def check2(self, z, s, r, typecode):
-        datatype = typemap[typecode]
+        datatype = typemap(typecode)
         for type in (None, typecode, datatype):
             r[:] = z
             Sendrecv([s, type],
@@ -298,7 +298,7 @@ class BaseTestMessageSimpleArray:
                     self.assertEqual(r[i], z[0])
 
     def check4(self, z, s, r, typecode):
-        datatype = typemap[typecode]
+        datatype = typemap(typecode)
         for type in (None, typecode, datatype):
             for count in (None, len(s)):
                 r[:] = z
@@ -308,7 +308,7 @@ class BaseTestMessageSimpleArray:
                     self.assertEqual(a, b)
 
     def check5(self, z, s, r, typecode):
-        datatype = typemap[typecode]
+        datatype = typemap(typecode)
         for type in (None, typecode, datatype):
             for p in range(0, len(s)):
                 r[:] = z
@@ -329,7 +329,7 @@ class BaseTestMessageSimpleArray:
                         self.assertEqual(a, b)
 
     def check6(self, z, s, r, typecode):
-        datatype = typemap[typecode]
+        datatype = typemap(typecode)
         for type in (None, typecode, datatype):
             for p in range(0, len(s)):
                 r[:] = z
@@ -980,7 +980,7 @@ class BaseTestMessageVectorArray:
             self.assertEqual(a, b)
 
     def check2(self, z, s, r, typecode):
-        datatype = typemap[typecode]
+        datatype = typemap(typecode)
         for type in (None, typecode, datatype):
             r[:] = z
             Alltoallv([s, type],
@@ -1019,7 +1019,7 @@ class BaseTestMessageVectorArray:
                     self.assertEqual(r[i], z[0])
 
     def check4(self, z, s, r, typecode):
-        datatype = typemap[typecode]
+        datatype = typemap(typecode)
         for type in (None, typecode, datatype):
             for count in (None, len(s)):
                 r[:] = z
@@ -1029,7 +1029,7 @@ class BaseTestMessageVectorArray:
                     self.assertEqual(a, b)
 
     def check5(self, z, s, r, typecode):
-        datatype = typemap[typecode]
+        datatype = typemap(typecode)
         for type in (None, typecode, datatype):
             for p in range(len(s)):
                 r[:] = z
@@ -1050,7 +1050,7 @@ class BaseTestMessageVectorArray:
                         self.assertEqual(a, b)
 
     def check6(self, z, s, r, typecode):
-        datatype = typemap[typecode]
+        datatype = typemap(typecode)
         for type in (None, typecode, datatype):
             for p in range(0, len(s)):
                 r[:] = z
