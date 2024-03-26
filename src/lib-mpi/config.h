@@ -1,3 +1,9 @@
+#if defined(MPI_ABI_VERSION)
+#  if MPI_ABI_VERSION >= 1
+#    define PyMPI_ABI 1
+#  endif
+#endif
+
 #if defined(MS_WINDOWS)
 #  if !defined(MSMPI_VER)
 #    if defined(MPICH2) && defined(MPIAPI)
@@ -12,7 +18,7 @@
 
 #if defined(HAVE_PYMPICONF_H)
 #include "pympiconf.h"
-#elif defined(MPI_ABI)
+#elif defined(PyMPI_ABI)
 #include "config/mpiapi.h"
 #elif defined(MSMPI_VER)
 #include "config/msmpi.h"
