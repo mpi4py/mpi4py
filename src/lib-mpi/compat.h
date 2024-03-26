@@ -1,4 +1,4 @@
-#if defined(MPI_ABI)
+#if defined(PyMPI_ABI)
 #include "compat/mpiabi.h"
 #elif defined(MSMPI_VER)
 #include "compat/msmpi.h"

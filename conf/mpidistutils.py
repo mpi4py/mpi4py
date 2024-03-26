@@ -903,35 +903,44 @@ def configure_mpi(ext, config_cmd):
         message = errmsg[0].format("link")
         raise DistutilsPlatformError(message)
     #
-    log.info("checking for missing MPI functions/symbols ...")
-    impls = ("MPI_ABI", "OPEN_MPI", "MSMPI_VER")
+    impls = ("OPEN_MPI", "MSMPI_VER")
     tests = [f"defined({macro})" for macro in impls]
     tests += ["(defined(MPICH_NAME)&&(MPICH_NAME>=3))"]
     tests += ["(defined(MPICH_NAME)&&(MPICH_NAME==2))"]
     tests = "||".join(tests)
-    ConfigTest = dedent(f"""\
+    ConfigTestAPI = dedent(f"""\
     #if !({tests})
     #error "Unknown MPI implementation"
     #endif
     """)
+    ConfigTestABI = dedent("""\
+    #if !(defined(MPI_ABI_VERSION)&&(MPI_ABI_VERSION>=1))
+    #error "MPI ABI not supported"
+    #endif
+    """)
+    with capture_stderr():
+        log.info("checking for MPI ABI support ...")
+        mpiabi = config_cmd.try_compile(ConfigTestABI, headers=headers)
     config = os.environ.get('MPI4PY_BUILD_CONFIGURE') or None
     config = getattr(config_cmd, 'configure', None) or config
-    if not config:
+    if not mpiabi and not config:
         with capture_stderr():
-            ok = config_cmd.try_compile(ConfigTest, headers=headers)
-        config = not ok
+            ok = config_cmd.try_compile(ConfigTestAPI, headers=headers)
+            config = not ok
     if config:
         guard = "HAVE_PYMPICONF_H"
         with capture_stderr():
             ok = config_cmd.check_macro(guard)
         config = not ok
         if config:
+            log.info("checking for missing MPI functions/symbols ...")
             configure = ConfigureMPI(config_cmd)
             with capture_stderr():
                 results = configure.run()
             configure.dump(results)
             ext.define_macros += [(guard, 1)]
-    else:
+    elif not mpiabi:
+        log.info("checking for missing MPI functions/symbols ...")
         for function, arglist in (
             ('MPI_Type_create_f90_integer',   '0,(MPI_Datatype*)0'),
             ('MPI_Type_create_f90_real',    '0,0,(MPI_Datatype*)0'),
@@ -946,7 +955,7 @@ def configure_mpi(ext, config_cmd):
                 macro = 'PyMPI_MISSING_' + function
                 ext.define_macros += [(macro, 1)]
     #
-    if os.name == 'posix':
+    if not mpiabi and os.name == 'posix':
         configure_dl(ext, config_cmd)
 
 
