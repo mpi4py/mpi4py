@@ -13,8 +13,6 @@
 #define PyMPI_HAVE_MPIX_ERR_PROC_FAILED 1
 #define PyMPI_HAVE_MPIX_ERR_PROC_FAILED_PENDING 1
 #define PyMPI_HAVE_MPIX_Comm_revoke 1
-#define PyMPI_HAVE_MPIX_Comm_failure_ack 1
-#define PyMPI_HAVE_MPIX_Comm_failure_get_acked 1
 #define PyMPI_HAVE_MPIX_Comm_agree 1
 #define PyMPI_HAVE_MPIX_Comm_shrink 1
 #endif
@@ -33,8 +31,6 @@
 #define PyMPI_HAVE_MPIX_ERR_PROC_FAILED_PENDING 1
 #define PyMPI_HAVE_MPIX_Comm_revoke 1
 #define PyMPI_HAVE_MPIX_Comm_is_revoked 1
-#define PyMPI_HAVE_MPIX_Comm_failure_ack 1
-#define PyMPI_HAVE_MPIX_Comm_failure_get_acked 1
 #define PyMPI_HAVE_MPIX_Comm_agree 1
 #define PyMPI_HAVE_MPIX_Comm_iagree 1
 #define PyMPI_HAVE_MPIX_Comm_shrink 1
@@ -128,20 +124,6 @@
 #undef  MPI_Comm_ishrink
 #define MPI_Comm_ishrink MPIX_Comm_ishrink
 #endif
-#endif
-
-/* Legacy ULFM interface */
-
-#ifndef PyMPI_HAVE_MPIX_Comm_failure_ack
-#undef  MPIX_Comm_failure_ack
-#define MPIX_Comm_failure_ack(comm) \
-  PyMPI_UNAVAILABLE("MPIX_Comm_failure_ack",comm)
-#endif
-
-#ifndef PyMPI_HAVE_MPIX_Comm_failure_get_acked
-#undef  MPIX_Comm_failure_get_acked
-#define MPIX_Comm_failure_get_acked(comm,group) \
-  PyMPI_UNAVAILABLE("MPIX_Comm_failure_get_acked",comm,group)
 #endif
 
 
