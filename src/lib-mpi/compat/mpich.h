@@ -132,19 +132,19 @@ static int PyMPI_MPICH_MPI_Type_create_f90_real(int p, int r, MPI_Datatype *t)
 #undef MPI_Type_create_f90_complex
 #pragma weak MPI_Type_create_f90_complex
 static int PyMPI_MPICH_MPI_Type_create_f90_complex(int p, int r, MPI_Datatype *t)
-{ PyMPI_MPICH_CALL_WEAK_SYMBOL(MPI_Type_create_f90_complex, p, r, t);}
+{ PyMPI_MPICH_CALL_WEAK_SYMBOL(MPI_Type_create_f90_complex, p, r, t); }
 #define MPI_Type_create_f90_complex PyMPI_MPICH_MPI_Type_create_f90_complex
 
 #undef MPI_Status_c2f
 #pragma weak MPI_Status_c2f
 static int PyMPI_MPICH_MPI_Status_c2f(const MPI_Status *cs, MPI_Fint *fs)
-{ PyMPI_MPICH_CALL_WEAK_SYMBOL(MPI_Status_c2f, cs, fs);}
+{ PyMPI_MPICH_CALL_WEAK_SYMBOL(MPI_Status_c2f, cs, fs); }
 #define MPI_Status_c2f PyMPI_MPICH_MPI_Status_c2f
 
 #undef MPI_Status_f2c
 #pragma weak MPI_Status_f2c
 static int PyMPI_MPICH_MPI_Status_f2c(const MPI_Fint *fs, MPI_Status *cs)
-{ PyMPI_MPICH_CALL_WEAK_SYMBOL(MPI_Status_f2c, fs, cs);}
+{ PyMPI_MPICH_CALL_WEAK_SYMBOL(MPI_Status_f2c, fs, cs); }
 #define MPI_Status_f2c PyMPI_MPICH_MPI_Status_f2c
 
 #endif
