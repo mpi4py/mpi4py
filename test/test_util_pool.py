@@ -415,7 +415,11 @@ def broken_mpi_spawn():
     if name == 'Microsoft MPI':
         if version < (8,1,0):
             return True
+        if skip_spawn:
+            return True
         if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
+            return True
+        if os.environ.get("PMI_APPNUM") is None:
             return True
     if name == 'MVAPICH':
         if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:

@@ -648,6 +648,8 @@ class BaseTest:
 
     @staticmethod
     def make_intercomm(basecomm):
+        if unittest.is_mpi('msmpi') and MPI.COMM_WORLD.Get_size() >= 3:
+            raise unittest.SkipTest("msmpi")
         size = basecomm.Get_size()
         rank = basecomm.Get_rank()
         if size == 1:

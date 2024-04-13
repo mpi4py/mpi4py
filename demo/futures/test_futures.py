@@ -1717,6 +1717,12 @@ class ComposeTest(unittest.TestCase):
         self.assertIs(type(future.exception()), ZeroDivisionError)
 
 
+def skip_spawn():
+    return (
+        os.environ.get('MPI4PY_TEST_SPAWN')
+        in (None, '0', 'no', 'off', 'false')
+    )
+
 SKIP_POOL_TEST = False
 name, version = MPI.get_vendor()
 if name == 'Open MPI':
@@ -1732,11 +1738,7 @@ if name == 'Open MPI':
         github = (os.environ.get('GITHUB_ACTIONS') == 'true')
         SKIP_POOL_TEST = github
     if version >= (5,0,0) and version <= (5,1,0):
-        skip_spawn = (
-            os.environ.get('MPI4PY_TEST_SPAWN')
-            in (None, '0', 'no', 'off', 'false')
-        )
-        SKIP_POOL_TEST = skip_spawn
+        SKIP_POOL_TEST = skip_spawn()
 if name == 'MPICH':
     if sys.platform == 'darwin':
         if version >= (3, 4) and version < (4, 0):
@@ -1760,7 +1762,11 @@ if name == 'Intel MPI':
 if name == 'Microsoft MPI':
     if version < (8,1,0):
         SKIP_POOL_TEST = True
+    if skip_spawn():
+        SKIP_POOL_TEST = True
     if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
+        SKIP_POOL_TEST = True
+    if os.environ.get("PMI_APPNUM") is None:
         SKIP_POOL_TEST = True
 if name == 'MVAPICH':
     SKIP_POOL_TEST = True

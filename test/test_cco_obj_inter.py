@@ -22,6 +22,7 @@ messages += [
 ]
 
 @unittest.skipMPI('openmpi(<1.6.0)')
+@unittest.skipMPI('msmpi', MPI.COMM_WORLD.Get_size() >= 3)
 @unittest.skipMPI('MPICH1')
 @unittest.skipIf(MPI.ROOT == MPI.PROC_NULL, 'mpi-root')
 @unittest.skipIf(MPI.COMM_WORLD.Get_size() < 2, 'mpi-world-size<2')
