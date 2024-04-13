@@ -68,6 +68,8 @@ from distutils.unixccompiler import UnixCCompiler
 rpath_option_orig = UnixCCompiler.runtime_library_dir_option
 def rpath_option(compiler, dir):
     option = rpath_option_orig(compiler, dir)
+    if not isinstance(option, str):
+        return option
     if sys.platform.startswith('linux'):
         if option.startswith('-R'):
             option =  option.replace('-R', '-Wl,-rpath,', 1)
