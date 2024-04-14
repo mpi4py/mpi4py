@@ -6,6 +6,14 @@ CHANGES: MPI for Python
 :Contact: dalcinl@gmail.com
 
 
+Release 3.1.6 [2024-04-14]
+==========================
+
+.. warning:: This is the last release supporting Python 2.
+
+* Fix various build issues.
+
+
 Release 3.1.5 [2023-10-04]
 ==========================
 
