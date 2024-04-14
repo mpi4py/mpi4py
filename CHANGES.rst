@@ -90,6 +90,14 @@ Release 4.0.0 [2024-XX-XX]
   * The `mpi4py.get_config` function returns an empty dictionary.
 
 
+Release 3.1.6 [2024-04-14]
+==========================
+
+.. warning:: This is the last release supporting Python 2.
+
+* Fix various build issues.
+
+
 Release 3.1.5 [2023-10-04]
 ==========================
 
