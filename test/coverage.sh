@@ -71,6 +71,9 @@ $MPIEXEC -n 1 $PYTHON -m coverage run test/test_util_pkl5.py
 $MPIEXEC -n 2 $PYTHON -m coverage run test/test_util_pkl5.py
 $MPIEXEC -n 3 $PYTHON -m coverage run test/test_util_pkl5.py
 $MPIEXEC -n 1 $PYTHON -m coverage run test/test_util_pool.py
+$MPIEXEC -n 1 $PYTHON -m coverage run test/test_util_sync.py
+$MPIEXEC -n 2 $PYTHON -m coverage run test/test_util_sync.py
+$MPIEXEC -n 3 $PYTHON -m coverage run test/test_util_sync.py
 $PYTHON -m coverage run demo/test-run/test_run.py
 
 $MPIEXEC -n 1 $PYTHON -m coverage run demo/futures/test_futures.py

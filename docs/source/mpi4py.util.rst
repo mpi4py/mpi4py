@@ -15,6 +15,7 @@ within the intersection of Python and MPI.
    mpi4py.util.dtlib
    mpi4py.util.pkl5
    mpi4py.util.pool
+   mpi4py.util.sync
 
 
 .. Local variables:

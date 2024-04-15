@@ -543,12 +543,18 @@ def replace_module(module):
     assert name not in _sys_modules  # noqa: S101
     _sys_modules[name] = sys.modules[name]
     sys.modules[name] = module
+    pkgname, _, modname = name.rpartition('.')
+    if pkgname:
+        setattr(sys.modules[pkgname], modname, module)
 
 
 def restore_module(module):
     name = module.__name__
     assert name in _sys_modules  # noqa: S101
     sys.modules[name] = _sys_modules[name]
+    pkgname, _, modname = name.rpartition('.')
+    if pkgname:
+        setattr(sys.modules[pkgname], modname, sys.modules[name])
 
 
 def annotate(dest, source):
