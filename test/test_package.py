@@ -30,6 +30,7 @@ class TestImport(unittest.TestCase):
         import mpi4py.util.dtlib
         import mpi4py.util.pkl5
         import mpi4py.util.pool
+        import mpi4py.util.sync
 
 
 class TestDataFiles(unittest.TestCase):
