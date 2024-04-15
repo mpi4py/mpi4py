@@ -29,37 +29,37 @@ cdef inline char* cuda_get_format(
     char typekind,
     Py_ssize_t itemsize,
 ) noexcept nogil:
-   if typekind == c'b':
-       if itemsize == sizeof(char): return b"?"
-   if typekind == c'i':
-       if itemsize == sizeof(char):      return b"b"
-       if itemsize == sizeof(short):     return b"h"
-       if itemsize == sizeof(int):       return b"i"
-       if itemsize == sizeof(long):      return b"l"
-       if itemsize == sizeof(long long): return b"q"  #~> long
-   if typekind == c'u':
-       if itemsize == sizeof(char):      return b"B"
-       if itemsize == sizeof(short):     return b"H"
-       if itemsize == sizeof(int):       return b"I"
-       if itemsize == sizeof(long):      return b"L"
-       if itemsize == sizeof(long long): return b"Q"  #~> long
-   if typekind == c'f':
-       if itemsize == sizeof(float)//2:    return b"e"
-       if itemsize == sizeof(float):       return b"f"
-       if itemsize == sizeof(double):      return b"d"
-       if itemsize == sizeof(long double): return b"g"
-   if typekind == c'c':
-       if itemsize == 2*sizeof(float)//2:    return b"Ze"
-       if itemsize == 2*sizeof(float):       return b"Zf"
-       if itemsize == 2*sizeof(double):      return b"Zd"
-       if itemsize == 2*sizeof(long double): return b"Zg"
-   return BYTE_FMT
+    if typekind == c'b':
+        if itemsize == sizeof(char): return b"?"
+    if typekind == c'i':
+        if itemsize == sizeof(char):      return b"b"
+        if itemsize == sizeof(short):     return b"h"
+        if itemsize == sizeof(int):       return b"i"
+        if itemsize == sizeof(long):      return b"l"
+        if itemsize == sizeof(long long): return b"q"  # ~> long
+    if typekind == c'u':
+        if itemsize == sizeof(char):      return b"B"
+        if itemsize == sizeof(short):     return b"H"
+        if itemsize == sizeof(int):       return b"I"
+        if itemsize == sizeof(long):      return b"L"
+        if itemsize == sizeof(long long): return b"Q"  # ~> long
+    if typekind == c'f':
+        if itemsize == sizeof(float)//2:    return b"e"
+        if itemsize == sizeof(float):       return b"f"
+        if itemsize == sizeof(double):      return b"d"
+        if itemsize == sizeof(long double): return b"g"
+    if typekind == c'c':
+        if itemsize == 2*sizeof(float)//2:    return b"Ze"
+        if itemsize == 2*sizeof(float):       return b"Zf"
+        if itemsize == 2*sizeof(double):      return b"Zd"
+        if itemsize == 2*sizeof(long double): return b"Zg"
+    return BYTE_FMT
 
 # -----------------------------------------------------------------------------
 
 cdef int Py_CheckCAIBuffer(object obj) noexcept:
     try:    return <bint>hasattr(obj, '__cuda_array_interface__')
-    except: return 0  #~> uncovered
+    except: return 0  # ~> uncovered  # noqa
 
 cdef int Py_GetCAIBuffer(object obj, Py_buffer *view, int flags) except -1:
     cdef dict cuda_array_interface
@@ -94,25 +94,25 @@ cdef int Py_GetCAIBuffer(object obj, Py_buffer *view, int flags) except -1:
 
     dev_ptr, readonly = data
     for s in shape: size *= s
-    if dev_ptr is None and size == 0: dev_ptr = 0 # XXX
+    if dev_ptr is None and size == 0: dev_ptr = 0
     buf = PyLong_AsVoidPtr(dev_ptr)
     byteorder = <char>ord(typestr[0:1])
     typekind = <char>ord(typestr[1:2])
     itemsize = <Py_ssize_t>int(typestr[2:])
 
     if (flags & PyBUF_FORMAT) == PyBUF_FORMAT:
-        if byteorder == c'<': # little-endian
+        if byteorder == c'<':  # little-endian
             if not is_little_endian():
-                raise BufferError(                  #~> big-endian
-                    f"__cuda_array_interface__: "   #~> big-endian
-                    f"typestr {typestr!r} "         #~> big-endian
-                    f"with non-native byte order")  #~> big-endian
-        elif byteorder == c'>': # big-endian
+                raise BufferError(                  # ~> big-endian
+                    f"__cuda_array_interface__: "   # ~> big-endian
+                    f"typestr {typestr!r} "         # ~> big-endian
+                    f"with non-native byte order")  # ~> big-endian
+        elif byteorder == c'>':  # big-endian
             if not is_big_endian():
-                raise BufferError(                  #~> little-endian
-                    f"__cuda_array_interface__: "   #~> little-endian
-                    f"typestr {typestr!r} "         #~> little-endian
-                    f"with non-native byte order")  #~> little-endian
+                raise BufferError(                  # ~> little-endian
+                    f"__cuda_array_interface__: "   # ~> little-endian
+                    f"typestr {typestr!r} "         # ~> little-endian
+                    f"with non-native byte order")  # ~> little-endian
         elif byteorder != c'|':
             raise BufferError(
                 f"__cuda_array_interface__: "
@@ -129,15 +129,17 @@ cdef int Py_GetCAIBuffer(object obj, Py_buffer *view, int flags) except -1:
             f"buffer with negative size "
             f"(shape:{shape}, size:{size})"
         )
-    if (strides is not None and
+    if (
+        strides is not None and
         not cuda_is_contig(shape, strides, itemsize, c'C') and
-        not cuda_is_contig(shape, strides, itemsize, c'F')):
+        not cuda_is_contig(shape, strides, itemsize, c'F')
+    ):
         raise BufferError(
             f"__cuda_array_interface__: "
             f"buffer is not contiguous "
             f"(shape:{shape}, strides:{strides}, itemsize:{itemsize})"
         )
-    if descr is not None and (len(descr) != 1 or descr[0] != ('', typestr)):
+    if  descr is not None and (len(descr) != 1 or descr[0] != ('', typestr)):
         PyErr_WarnFormat(
             RuntimeWarning, 1,
             b"__cuda_array_interface__: %s",
@@ -145,7 +147,7 @@ cdef int Py_GetCAIBuffer(object obj, Py_buffer *view, int flags) except -1:
         )
 
     if PYPY and readonly and ((flags & PyBUF_WRITABLE) == PyBUF_WRITABLE):
-        raise BufferError("Object is not writable")  #~> pypy
+        raise BufferError("Object is not writable")  # ~> pypy
 
     fixnull = (buf == NULL and size == 0)
     if fixnull: buf = &fixnull

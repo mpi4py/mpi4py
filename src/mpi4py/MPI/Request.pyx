@@ -133,8 +133,8 @@ cdef class Request:
             with nogil: CHKERR( MPI_Request_get_status_any(
                 rs.count, rs.requests, &index, &flag, statusp) )
         finally:
-            rs.release()            #~> MPI-4.1
-        return (index, <bint>flag)  #~> MPI-4.1
+            rs.release()            # ~> MPI-4.1
+        return (index, <bint>flag)  # ~> MPI-4.1
 
     @classmethod
     def Waitall(
@@ -189,8 +189,8 @@ cdef class Request:
             with nogil: CHKERR( MPI_Request_get_status_all(
                 rs.count, rs.requests, &flag, rs.statuses) )
         finally:
-            rs.release(statuses)  #~> MPI-4.1
-        return <bint>flag         #~> MPI-4.1
+            rs.release(statuses)  # ~> MPI-4.1
+        return <bint>flag         # ~> MPI-4.1
 
     @classmethod
     def Waitsome(
@@ -250,10 +250,10 @@ cdef class Request:
         try:
             with nogil: CHKERR( MPI_Request_get_status_some(
                 rs.count, rs.requests, &rs.outcount, rs.indices, rs.statuses) )
-            indices = rs.get_indices()  #~> MPI-4.1
+            indices = rs.get_indices()  # ~> MPI-4.1
         finally:
-            rs.release(statuses)  #~> MPI-4.1
-        return indices            #~> MPI-4.1
+            rs.release(statuses)  # ~> MPI-4.1
+        return indices            # ~> MPI-4.1
 
     # Cancel
     # ------
@@ -272,7 +272,6 @@ cdef class Request:
         Free a communication request.
         """
         with nogil: CHKERR( MPI_Request_free(&self.ob_mpi) )
-
 
     # Fortran Handle
     # --------------
@@ -294,7 +293,7 @@ cdef class Request:
 
     # Python Communication
     # --------------------
-    #
+
     def wait(
         self,
         Status status: Status | None = None,
@@ -304,7 +303,7 @@ cdef class Request:
         """
         cdef msg = PyMPI_wait(self, status)
         return msg
-    #
+
     def test(
         self,
             Status status: Status | None = None,
@@ -315,7 +314,7 @@ cdef class Request:
         cdef int flag = 0
         cdef msg = PyMPI_test(self, &flag, status)
         return (<bint>flag, msg)
-    #
+
     def get_status(
         self,
         Status status: Status | None = None,
@@ -328,7 +327,7 @@ cdef class Request:
         with nogil: CHKERR( MPI_Request_get_status(
             self.ob_mpi, &flag, statusp) )
         return <bint>flag
-    #
+
     @classmethod
     def waitany(
         cls,
@@ -341,7 +340,7 @@ cdef class Request:
         cdef int index = MPI_UNDEFINED
         cdef msg = PyMPI_waitany(requests, &index, status)
         return (index, msg)
-    #
+
     @classmethod
     def testany(
         cls,
@@ -355,7 +354,7 @@ cdef class Request:
         cdef int flag  = 0
         cdef msg = PyMPI_testany(requests, &index, &flag, status)
         return (index, <bint>flag, msg)
-    #
+
     @classmethod
     def get_status_any(
         cls,
@@ -366,7 +365,7 @@ cdef class Request:
         Non-destructive test for the completion of any requests.
         """
         return Request.Get_status_any(requests, status)
-    #
+
     @classmethod
     def waitall(
         cls,
@@ -378,7 +377,7 @@ cdef class Request:
         """
         cdef msg = PyMPI_waitall(requests, statuses)
         return msg
-    #
+
     @classmethod
     def testall(
         cls,
@@ -391,7 +390,7 @@ cdef class Request:
         cdef int flag = 0
         cdef msg = PyMPI_testall(requests, &flag, statuses)
         return (<bint>flag, msg)
-    #
+
     @classmethod
     def get_status_all(
         cls,
@@ -402,7 +401,7 @@ cdef class Request:
         Non-destructive test for the completion of all requests.
         """
         return Request.Get_status_all(requests, statuses)
-    #
+
     @classmethod
     def waitsome(
         cls,
@@ -413,7 +412,7 @@ cdef class Request:
         Wait for some previously initiated requests to complete.
         """
         return PyMPI_waitsome(requests, statuses)
-    #
+
     @classmethod
     def testsome(
         cls,
@@ -424,7 +423,7 @@ cdef class Request:
         Test for completion of some previously initiated requests.
         """
         return PyMPI_testsome(requests, statuses)
-    #
+
     @classmethod
     def get_status_some(
         cls,
@@ -435,7 +434,7 @@ cdef class Request:
         Non-destructive test for completion of some requests.
         """
         return Request.Get_status_some(requests, statuses)
-    #
+
     def cancel(self) -> None:
         """
         Cancel a request.
@@ -553,12 +552,11 @@ cdef class Grequest(Request):
         """
         if self.ob_mpi != MPI_REQUEST_NULL:
             if self.ob_mpi != self.ob_grequest:
-                raise MPIException(MPI_ERR_REQUEST)  #~> unreachable
+                raise MPIException(MPI_ERR_REQUEST)  # ~> unreachable
         cdef MPI_Request grequest = self.ob_grequest
-        self.ob_grequest = self.ob_mpi ## or MPI_REQUEST_NULL ??
+        self.ob_grequest = self.ob_mpi  # or MPI_REQUEST_NULL ??
         with nogil: CHKERR( MPI_Grequest_complete(grequest) )
-        self.ob_grequest = self.ob_mpi ## or MPI_REQUEST_NULL ??
-
+        self.ob_grequest = self.ob_mpi  # or MPI_REQUEST_NULL ??
 
 
 cdef Request __REQUEST_NULL__ = def_Request( MPI_REQUEST_NULL , "REQUEST_NULL" )

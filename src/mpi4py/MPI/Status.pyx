@@ -32,12 +32,12 @@ cdef class Status:
         }
         try:
             state['count'] = self.Get_elements(__BYTE__)
-        except NotImplementedError:  #~> legacy
-            pass                     #~> legacy
+        except NotImplementedError:  # ~> legacy
+            pass                     # ~> legacy
         try:
             state['cancelled'] = self.Is_cancelled()
-        except NotImplementedError:  #~> legacy
-            pass                     #~> legacy
+        except NotImplementedError:  # ~> legacy
+            pass                     # ~> legacy
         return state
 
     def __setstate__(self, state: dict[str, int]) -> None:
@@ -67,6 +67,7 @@ cdef class Status:
         """Message source."""
         def __get__(self) -> int:
             return self.Get_source()
+
         def __set__(self, value: int):
             self.Set_source(value)
 
@@ -88,6 +89,7 @@ cdef class Status:
         """Message tag."""
         def __get__(self) -> int:
             return self.Get_tag()
+
         def __set__(self, value: int):
             self.Set_tag(value)
 
@@ -109,6 +111,7 @@ cdef class Status:
         """Message error."""
         def __get__(self) -> int:
             return self.Get_error()
+
         def __set__(self, value: int):
             self.Set_error(value)
 
@@ -125,6 +128,7 @@ cdef class Status:
         """Byte count."""
         def __get__(self) -> int:
             return self.Get_count(__BYTE__)
+
         def __set__(self, value: int):
             self.Set_elements(__BYTE__, value)
 
@@ -172,6 +176,7 @@ cdef class Status:
         """Cancelled state."""
         def __get__(self) -> bool:
             return self.Is_cancelled()
+
         def __set__(self, value: bool):
             self.Set_cancelled(value)
 

@@ -134,7 +134,7 @@ cdef class Message:
         message.ob_buf = PyMPI_mprobe(source, tag, comm.ob_mpi,
                                       &message.ob_mpi, statusp)
         return message
-    #
+
     @classmethod
     def iprobe(
         cls,
@@ -153,7 +153,7 @@ cdef class Message:
                                        &message.ob_mpi, statusp)
         if flag == 0: return None
         return message
-    #
+
     def recv(self, Status status: Status | None = None) -> Any:
         """
         Blocking receive of matched message.
@@ -165,7 +165,7 @@ cdef class Message:
         if self is not __MESSAGE_NO_PROC__: self.ob_mpi = message
         if self.ob_mpi == MPI_MESSAGE_NULL: self.ob_buf = None
         return rmsg
-    #
+
     def irecv(self) -> Request:
         """
         Nonblocking receive of matched message.
@@ -193,12 +193,12 @@ cdef class Message:
         return fromhandle(MPI_Message_f2c(arg))
 
 
-cdef Message __MESSAGE_NULL__    = def_Message ( MPI_MESSAGE_NULL    , "MESSAGE_NULL"    )
-cdef Message __MESSAGE_NO_PROC__ = def_Message ( MPI_MESSAGE_NO_PROC , "MESSAGE_NO_PROC" )
+cdef Message __MESSAGE_NULL__    = def_Message ( MPI_MESSAGE_NULL    , "MESSAGE_NULL"    )  # noqa
+cdef Message __MESSAGE_NO_PROC__ = def_Message ( MPI_MESSAGE_NO_PROC , "MESSAGE_NO_PROC" )  # noqa
 
 
 # Predefined message handles
 # --------------------------
 
-MESSAGE_NULL    = __MESSAGE_NULL__    #: Null message handle
-MESSAGE_NO_PROC = __MESSAGE_NO_PROC__ #: No-proc message handle
+MESSAGE_NULL    = __MESSAGE_NULL__     #: Null message handle
+MESSAGE_NO_PROC = __MESSAGE_NO_PROC__  #: No-proc message handle

@@ -17,9 +17,11 @@ cdef api MPI_Datatype* PyMPIDatatype_Get(object arg) except NULL:
 
 cdef api object PyMPIStatus_New(MPI_Status *arg):
     cdef Status obj = Status.__new__(Status)
-    if (arg != NULL and
+    if (
+        arg != NULL and
         arg != MPI_STATUS_IGNORE and
-        arg != MPI_STATUSES_IGNORE):
+        arg != MPI_STATUSES_IGNORE
+    ):
         obj.ob_mpi = arg[0]
     return obj
 

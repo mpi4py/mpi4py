@@ -14,4 +14,4 @@ source =
 [report]
 exclude_lines =
   .*#\s*(pragma)[:\s]?\s*(no)\s*(cover)
-  .*#~>\s*
+  .*#\s*~>\s*

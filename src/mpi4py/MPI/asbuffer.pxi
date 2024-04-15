@@ -14,10 +14,10 @@ cdef extern from "Python.h":
         Py_ssize_t itemsize
         bint readonly
         char *format
-        #int ndim
-        #Py_ssize_t *shape
-        #Py_ssize_t *strides
-        #Py_ssize_t *suboffsets
+        # int ndim
+        # Py_ssize_t *shape
+        # Py_ssize_t *strides
+        # Py_ssize_t *suboffsets
     cdef enum:
         PyBUF_SIMPLE
         PyBUF_WRITABLE
@@ -182,7 +182,7 @@ cdef class buffer:
 
     def tobytes(self, order: str | None = None) -> bytes:
         """Return the data in the buffer as a byte string."""
-        <void> order # unused
+        <void> order  # unused
         return PyBytes_FromStringAndSize(<char*>self.view.buf, self.view.len)
 
     def toreadonly(self) -> buffer:

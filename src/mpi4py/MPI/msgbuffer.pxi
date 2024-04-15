@@ -24,6 +24,7 @@ cdef inline bint is_constant(object obj, object CONST):
 
 # -----------------------------------------------------------------------------
 
+
 @cython.final
 cdef class BottomType(int):
     """
@@ -39,11 +40,11 @@ cdef class BottomType(int):
         PyBuffer_FillInfo(view, <object>NULL, MPI_BOTTOM, 0, 0, flags)
 
     def __repr__(self) -> str:
-        <void> self # unused
+        <void> self  # unused
         return 'BOTTOM'
 
     def __reduce__(self) -> str:
-        <void> self # unused
+        <void> self  # unused
         return 'BOTTOM'
 
 
@@ -62,11 +63,11 @@ cdef class InPlaceType(int):
         PyBuffer_FillInfo(view, <object>NULL, MPI_IN_PLACE, 0, 0, flags)
 
     def __repr__(self) -> str:
-        <void> self # unused
+        <void> self  # unused
         return 'IN_PLACE'
 
     def __reduce__(self) -> str:
-        <void> self # unused
+        <void> self  # unused
         return 'IN_PLACE'
 
 
@@ -85,20 +86,20 @@ cdef inline bint is_IN_PLACE(object obj):
 
 cdef inline const char *getformat(const char format[]) except NULL:
     cdef char byteorder = format[0]
-    if byteorder == c'@': # native
-        return format + 1                            #~> uncovered
-    if byteorder == c'<': # little-endian
+    if byteorder == c'@':  # native
+        return format + 1                            # ~> uncovered
+    if byteorder == c'<':  # little-endian
         if not is_little_endian():
-            raise BufferError(                       #~> big-endian
-                f"format string {pystr(format)!r} "  #~> big-endian
-                f"with non-native byte order")       #~> big-endian
-        return format + 1                            #~> little-endian
-    if byteorder == c'>': # big-endian
+            raise BufferError(                       # ~> big-endian
+                f"format string {pystr(format)!r} "  # ~> big-endian
+                f"with non-native byte order")       # ~> big-endian
+        return format + 1                            # ~> little-endian
+    if byteorder == c'>':  # big-endian
         if not is_big_endian():
-            raise BufferError(                       #~> little-endian
-                f"format string {pystr(format)!r} "  #~> little-endian
-                f"with non-native byte order")       #~> little-endian
-        return format + 1                            #~> big-endian
+            raise BufferError(                       # ~> little-endian
+                f"format string {pystr(format)!r} "  # ~> little-endian
+                f"with non-native byte order")       # ~> little-endian
+        return format + 1                            # ~> big-endian
     # passthrough
     return format
 
@@ -116,6 +117,7 @@ cdef inline Datatype asdatatype(object datatype):
 cdef inline Datatype getdatatype(const char format[]):
     if format == BYTE_FMT: return __BYTE__
     return lookup_datatype(pystr(getformat(format)))
+
 
 @cython.final
 @cython.internal
@@ -209,11 +211,11 @@ cdef _p_message message_simple(object msg,
     cdef _p_message m = message_basic(o_buf, o_type, readonly,
                                       &baddr, &bsize, &btype)
     # buffer: count and displacement
-    cdef MPI_Count count = 0 # number of datatype entries
-    cdef MPI_Aint  displ = 0 # from base buffer, in datatype entries
-    cdef MPI_Count extent = 0, lb = 0 # datatype extent
-    cdef MPI_Count length = bsize     # in bytes
-    cdef MPI_Aint  offset = 0         # from base buffer, in bytes
+    cdef MPI_Count count = 0  # number of datatype entries
+    cdef MPI_Aint  displ = 0  # from base buffer, in datatype entries
+    cdef MPI_Count extent = 0, lb = 0  # datatype extent
+    cdef MPI_Count length = bsize      # in bytes
+    cdef MPI_Aint  offset = 0          # from base buffer, in bytes
     if o_displ is not None:
         displ = <MPI_Aint> PyNumber_Index(o_displ)
         if displ < 0:
@@ -364,18 +366,18 @@ cdef _p_message message_vector(object msg,
             counts[i] = cvalue
     else:
         o_counts = chkarray(o_counts, blocks, &counts)
-    if o_displs is None: # contiguous
+    if o_displs is None:  # contiguous
         avalue = 0
         o_displs = newarray(blocks, &displs)
         for i in range(blocks):
             displs[i] = avalue
             avalue += <MPI_Aint> counts[i]
-    elif is_integral(o_displs): # strided
+    elif is_integral(o_displs):  # strided
         avalue = <MPI_Aint> PyNumber_Index(o_displs)
         o_displs = newarray(blocks, &displs)
         for i in range(blocks):
             displs[i] = avalue * i
-    else: # general
+    else:  # general
         o_displs = chkarray(o_displs, blocks, &displs)
     # return collected message data
     m.count = o_counts
@@ -430,6 +432,7 @@ cdef tuple message_vector_w(object msg,
 
 # -----------------------------------------------------------------------------
 
+
 @cython.final
 @cython.internal
 cdef class _p_msg_p2p:
@@ -447,20 +450,25 @@ cdef class _p_msg_p2p:
         self.dtype = MPI_DATATYPE_NULL
 
     cdef int for_send(self, object msg, int rank, int parts) except -1:
-        self._msg = message_simple(msg, 1, # readonly
-                                   rank, parts,
-                                   &self.buf,
-                                   &self.count,
-                                   &self.dtype)
+        self._msg = message_simple(
+            msg, 1,  # readonly
+            rank, parts,
+            &self.buf,
+            &self.count,
+            &self.dtype,
+        )
         return 0
 
     cdef int for_recv(self, object msg, int rank, int parts) except -1:
-        self._msg = message_simple(msg, 0, # writable
-                                   rank, parts,
-                                   &self.buf,
-                                   &self.count,
-                                   &self.dtype)
+        self._msg = message_simple(
+            msg, 0,  # writable
+            rank, parts,
+            &self.buf,
+            &self.count,
+            &self.dtype,
+        )
         return 0
+
 
 cdef inline _p_msg_p2p message_p2p_send(object sendbuf, int dest):
     cdef _p_msg_p2p msg = _p_msg_p2p.__new__(_p_msg_p2p)
@@ -483,6 +491,7 @@ cdef inline _p_msg_p2p message_p2p_precv(object recvbuf, int source, int parts):
     return msg
 
 # -----------------------------------------------------------------------------
+
 
 @cython.final
 @cython.internal
@@ -509,15 +518,16 @@ cdef class _p_msg_cco:
     # -----------------------------------
 
     # sendbuf arguments
-    cdef int for_cco_send(self, bint VECTOR,
-                          object amsg,
-                          int rank, int blocks) except -1:
+    cdef int for_cco_send(
+        self, bint VECTOR, object amsg,
+        int rank, int blocks,
+    ) except -1:
         cdef bint readonly = 1
-        if not VECTOR: # block variant
+        if not VECTOR:  # block variant
             self._smsg = message_simple(
                 amsg, readonly, rank, blocks,
                 &self.sbuf, &self.scount, &self.stype)
-        else: # vector variant
+        else:  # vector variant
             self._smsg = message_vector(
                 amsg, readonly, rank, blocks,
                 &self.sbuf, &self.scounts,
@@ -525,15 +535,16 @@ cdef class _p_msg_cco:
         return 0
 
     # recvbuf arguments
-    cdef int for_cco_recv(self, bint VECTOR,
-                          object amsg,
-                          int rank, int blocks) except -1:
+    cdef int for_cco_recv(
+        self, bint VECTOR, object amsg,
+        int rank, int blocks,
+    ) except -1:
         cdef bint readonly = 0
-        if not VECTOR: # block variant
+        if not VECTOR:  # block variant
             self._rmsg = message_simple(
                 amsg, readonly, rank, blocks,
                 &self.rbuf, &self.rcount, &self.rtype)
-        else: # vector variant
+        else:  # vector variant
             self._rmsg = message_vector(
                 amsg, readonly, rank, blocks,
                 &self.rbuf, &self.rcounts,
@@ -541,13 +552,14 @@ cdef class _p_msg_cco:
         return 0
 
     # bcast
-    cdef int for_bcast(self,
-                       object msg, int root,
-                       MPI_Comm comm) except -1:
+    cdef int for_bcast(
+        self, object msg,
+        int root, MPI_Comm comm,
+    ) except -1:
         if comm == MPI_COMM_NULL: return 0
         cdef int inter=0, rank=0, sending=0
         CHKERR( MPI_Comm_test_inter(comm, &inter) )
-        if not inter: # intra-communication
+        if not inter:  # intra-communication
             CHKERR( MPI_Comm_rank(comm, &rank) )
             if root == rank:
                 self.for_cco_send(0, msg, root, 0)
@@ -555,9 +567,8 @@ cdef class _p_msg_cco:
             else:
                 self.for_cco_recv(0, msg, root, 0)
                 sending = 0
-        else: # inter-communication
-            if (root == MPI_ROOT or
-                root == MPI_PROC_NULL):
+        else:  # inter-communication
+            if root == MPI_ROOT or root == MPI_PROC_NULL:
                 self.for_cco_send(0, msg, root, 0)
                 sending = 1
             else:
@@ -574,13 +585,14 @@ cdef class _p_msg_cco:
         return 0
 
     # gather/gatherv
-    cdef int for_gather(self, int v,
-                        object smsg, object rmsg,
-                        int root, MPI_Comm comm) except -1:
+    cdef int for_gather(
+        self, int v, object smsg, object rmsg,
+        int root, MPI_Comm comm,
+    ) except -1:
         if comm == MPI_COMM_NULL: return 0
         cdef int inter=0, size=0, rank=0, null=MPI_PROC_NULL
         CHKERR( MPI_Comm_test_inter(comm, &inter) )
-        if not inter: # intra-communication
+        if not inter:  # intra-communication
             CHKERR( MPI_Comm_size(comm, &size) )
             CHKERR( MPI_Comm_rank(comm, &rank) )
             if root == rank:
@@ -592,10 +604,9 @@ cdef class _p_msg_cco:
             else:
                 self.for_cco_recv(v, rmsg, null, size)
                 self.for_cco_send(0, smsg, root, 0)
-        else: # inter-communication
+        else:  # inter-communication
             CHKERR( MPI_Comm_remote_size(comm, &size) )
-            if (root == MPI_ROOT or
-                root == MPI_PROC_NULL):
+            if root == MPI_ROOT or root == MPI_PROC_NULL:
                 self.for_cco_recv(v, rmsg, root, size)
                 self.for_cco_send(0, smsg, null, 0)
             else:
@@ -604,13 +615,15 @@ cdef class _p_msg_cco:
         return 0
 
     # scatter/scatterv
-    cdef int for_scatter(self, int v,
-                         object smsg, object rmsg,
-                         int root, MPI_Comm comm) except -1:
+    cdef int for_scatter(
+        self, int v,
+        object smsg, object rmsg,
+        int root, MPI_Comm comm,
+    ) except -1:
         if comm == MPI_COMM_NULL: return 0
         cdef int inter=0, size=0, rank=0, null=MPI_PROC_NULL
         CHKERR( MPI_Comm_test_inter(comm, &inter) )
-        if not inter: # intra-communication
+        if not inter:  # intra-communication
             CHKERR( MPI_Comm_size(comm, &size) )
             CHKERR( MPI_Comm_rank(comm, &rank) )
             if root == rank:
@@ -622,10 +635,9 @@ cdef class _p_msg_cco:
             else:
                 self.for_cco_send(v, smsg, null, size)
                 self.for_cco_recv(0, rmsg, root, 0)
-        else: # inter-communication
+        else:  # inter-communication
             CHKERR( MPI_Comm_remote_size(comm, &size) )
-            if (root == MPI_ROOT or
-                root == MPI_PROC_NULL):
+            if root == MPI_ROOT or root == MPI_PROC_NULL:
                 self.for_cco_send(v, smsg, root, size)
                 self.for_cco_recv(0, rmsg, null,  0)
             else:
@@ -634,15 +646,16 @@ cdef class _p_msg_cco:
         return 0
 
     # allgather/allgatherv
-    cdef int for_allgather(self, int v,
-                           object smsg, object rmsg,
-                           MPI_Comm comm) except -1:
+    cdef int for_allgather(
+        self, int v, object smsg, object rmsg,
+        MPI_Comm comm,
+    ) except -1:
         if comm == MPI_COMM_NULL: return 0
         cdef int inter=0, size=0
         CHKERR( MPI_Comm_test_inter(comm, &inter) )
-        if not inter: # intra-communication
+        if not inter:  # intra-communication
             CHKERR( MPI_Comm_size(comm, &size) )
-        else: # inter-communication
+        else:  # inter-communication
             CHKERR( MPI_Comm_remote_size(comm, &size) )
         #
         self.for_cco_recv(v, rmsg, 0, size)
@@ -653,15 +666,16 @@ cdef class _p_msg_cco:
         return 0
 
     # alltoall/alltoallv
-    cdef int for_alltoall(self, int v,
-                          object smsg, object rmsg,
-                          MPI_Comm comm) except -1:
+    cdef int for_alltoall(
+        self, int v, object smsg, object rmsg,
+        MPI_Comm comm,
+    ) except -1:
         if comm == MPI_COMM_NULL: return 0
         cdef int inter=0, size=0
         CHKERR( MPI_Comm_test_inter(comm, &inter) )
-        if not inter: # intra-communication
+        if not inter:  # intra-communication
             CHKERR( MPI_Comm_size(comm, &size) )
-        else: # inter-communication
+        else:  # inter-communication
             CHKERR( MPI_Comm_remote_size(comm, &size) )
         #
         self.for_cco_recv(v, rmsg, 0, size)
@@ -675,9 +689,10 @@ cdef class _p_msg_cco:
     # --------------------
 
     # neighbor allgather/allgatherv
-    cdef int for_neighbor_allgather(self, int v,
-                                    object smsg, object rmsg,
-                                    MPI_Comm comm) except -1:
+    cdef int for_neighbor_allgather(
+        self, int v, object smsg, object rmsg,
+        MPI_Comm comm,
+    ) except -1:
         if comm == MPI_COMM_NULL: return 0
         cdef int recvsize=0
         comm_neighbors_count(comm, &recvsize, NULL)
@@ -686,9 +701,10 @@ cdef class _p_msg_cco:
         return 0
 
     # neighbor alltoall/alltoallv
-    cdef int for_neighbor_alltoall(self, int v,
-                                   object smsg, object rmsg,
-                                   MPI_Comm comm) except -1:
+    cdef int for_neighbor_alltoall(
+        self, int v, object smsg, object rmsg,
+        MPI_Comm comm,
+    ) except -1:
         if comm == MPI_COMM_NULL: return 0
         cdef int sendsize=0, recvsize=0
         comm_neighbors_count(comm, &recvsize, &sendsize)
@@ -700,7 +716,9 @@ cdef class _p_msg_cco:
     # --------------------------------
 
     # sendbuf
-    cdef int for_cro_send(self, object amsg, int root) except -1:
+    cdef int for_cro_send(
+        self, object amsg, int root,
+    ) except -1:
         cdef bint readonly = 1
         self._smsg = message_simple(
             amsg, readonly, root, 0,
@@ -708,7 +726,9 @@ cdef class _p_msg_cco:
         return 0
 
     # recvbuf
-    cdef int for_cro_recv(self, object amsg, int root) except -1:
+    cdef int for_cro_recv(
+        self, object amsg, int root,
+    ) except -1:
         cdef bint readonly = 0
         self._rmsg = message_simple(
             amsg, readonly, root, 0,
@@ -727,14 +747,14 @@ cdef class _p_msg_cco:
                 f"and receive count {self.rcount}")
         return 0
 
-
-    cdef int for_reduce(self,
-                        object smsg, object rmsg,
-                        int root, MPI_Comm comm) except -1:
+    cdef int for_reduce(
+        self, object smsg, object rmsg,
+        int root, MPI_Comm comm,
+    ) except -1:
         if comm == MPI_COMM_NULL: return 0
         cdef int inter=0, rank=0, null=MPI_PROC_NULL
         CHKERR( MPI_Comm_test_inter(comm, &inter) )
-        if not inter: # intra-communication
+        if not inter:  # intra-communication
             CHKERR( MPI_Comm_rank(comm, &rank) )
             if root == rank:
                 self.for_cro_recv(rmsg, root)
@@ -748,9 +768,8 @@ cdef class _p_msg_cco:
                 self.for_cro_send(smsg, root)
                 self.rcount = self.scount
                 self.rtype  = self.stype
-        else: # inter-communication
-            if (root == MPI_ROOT or
-                root == MPI_PROC_NULL):
+        else:  # inter-communication
+            if root == MPI_ROOT or root == MPI_PROC_NULL:
                 self.for_cro_recv(rmsg, root)
                 self.scount = self.rcount
                 self.stype  = self.rtype
@@ -760,9 +779,10 @@ cdef class _p_msg_cco:
                 self.rtype  = self.stype
         return 0
 
-    cdef int for_allreduce(self,
-                           object smsg, object rmsg,
-                           MPI_Comm comm) except -1:
+    cdef int for_allreduce(
+        self, object smsg, object rmsg,
+        MPI_Comm comm,
+    ) except -1:
         if comm == MPI_COMM_NULL: return 0
         cdef int inter=0
         CHKERR( MPI_Comm_test_inter(comm, &inter) )
@@ -775,9 +795,10 @@ cdef class _p_msg_cco:
             self.chk_cro_args()
         return 0
 
-    cdef int for_reduce_scatter_block(self,
-                                      object smsg, object rmsg,
-                                      MPI_Comm comm) except -1:
+    cdef int for_reduce_scatter_block(
+        self, object smsg, object rmsg,
+        MPI_Comm comm,
+    ) except -1:
         if comm == MPI_COMM_NULL: return 0
         cdef int inter=0, size=0
         CHKERR( MPI_Comm_test_inter(comm, &inter) )
@@ -792,9 +813,10 @@ cdef class _p_msg_cco:
             self.chk_cro_args()
         return 0
 
-    cdef int for_reduce_scatter(self,
-                                object smsg, object rmsg, object rcnt,
-                                MPI_Comm comm) except -1:
+    cdef int for_reduce_scatter(
+        self, object smsg, object rmsg, object rcnt,
+        MPI_Comm comm,
+    ) except -1:
         if comm == MPI_COMM_NULL: return 0
         cdef int inter=0, size=0, rank=MPI_PROC_NULL
         CHKERR( MPI_Comm_test_inter(comm, &inter) )
@@ -838,9 +860,10 @@ cdef class _p_msg_cco:
                     f"and sum(counts) {sumrcounts}")
         return 0
 
-    cdef int for_scan(self,
-                      object smsg, object rmsg,
-                      MPI_Comm comm) except -1:
+    cdef int for_scan(
+        self, object smsg, object rmsg,
+        MPI_Comm comm,
+    ) except -1:
         if comm == MPI_COMM_NULL: return 0
         # get send and recv buffers
         self.for_cro_recv(rmsg, 0)
@@ -850,9 +873,10 @@ cdef class _p_msg_cco:
             self.for_cro_send(smsg, 0)
             self.chk_cro_args()
 
-    cdef int for_exscan(self,
-                        object smsg, object rmsg,
-                        MPI_Comm comm) except -1:
+    cdef int for_exscan(
+        self, object smsg, object rmsg,
+        MPI_Comm comm,
+    ) except -1:
         if comm == MPI_COMM_NULL: return 0
         # get send and recv buffers
         self.for_cro_recv(rmsg, 0)
@@ -868,6 +892,7 @@ cdef inline _p_msg_cco message_cco():
     return msg
 
 # -----------------------------------------------------------------------------
+
 
 @cython.final
 @cython.internal
@@ -888,15 +913,16 @@ cdef class _p_msg_ccow:
         self.stypes   = self.rtypes   = NULL
 
     # alltoallw
-    cdef int for_alltoallw(self,
-                          object smsg, object rmsg,
-                          MPI_Comm comm) except -1:
+    cdef int for_alltoallw(
+        self, object smsg, object rmsg,
+        MPI_Comm comm,
+    ) except -1:
         if comm == MPI_COMM_NULL: return 0
         cdef int inter=0, size=0
         CHKERR( MPI_Comm_test_inter(comm, &inter) )
-        if not inter: # intra-communication
+        if not inter:  # intra-communication
             CHKERR( MPI_Comm_size(comm, &size) )
-        else: # inter-communication
+        else:  # inter-communication
             CHKERR( MPI_Comm_remote_size(comm, &size) )
         #
         self._rmsg = message_vector_w(
@@ -913,9 +939,10 @@ cdef class _p_msg_ccow:
         return 0
 
     # neighbor alltoallw
-    cdef int for_neighbor_alltoallw(self,
-                                    object smsg, object rmsg,
-                                    MPI_Comm comm) except -1:
+    cdef int for_neighbor_alltoallw(
+        self, object smsg, object rmsg,
+        MPI_Comm comm,
+    ) except -1:
         if comm == MPI_COMM_NULL: return 0
         cdef int sendsize=0, recvsize=0
         comm_neighbors_count(comm, &recvsize, &sendsize)
@@ -935,6 +962,7 @@ cdef inline _p_msg_ccow message_ccow():
     return msg
 
 # -----------------------------------------------------------------------------
+
 
 @cython.final
 @cython.internal
@@ -979,10 +1007,12 @@ cdef class _p_msg_rma:
         self._origin = message_simple(
             origin, readonly, rank, 0,
             &self.oaddr,  &self.ocount,  &self.otype)
-        if ((rank == MPI_PROC_NULL) and
+        if (
+            (rank == MPI_PROC_NULL) and
             (origin is not None) and
             (is_list(origin) or is_tuple(origin)) and
-            (len(origin) > 0 and is_datatype(origin[-1]))):
+            (len(origin) > 0 and is_datatype(origin[-1]))
+        ):
             self.otype  = asdatatype(origin[-1]).ob_mpi
             self._origin = origin
         # TARGET
@@ -1092,11 +1122,13 @@ cdef class _p_msg_rma:
                 f"mismatch in origin and result MPI datatypes")
         return 0
 
+
 cdef inline _p_msg_rma message_rma():
     cdef _p_msg_rma msg = _p_msg_rma.__new__(_p_msg_rma)
     return msg
 
 # -----------------------------------------------------------------------------
+
 
 @cython.final
 @cython.internal
@@ -1115,20 +1147,25 @@ cdef class _p_msg_io:
         self.dtype = MPI_DATATYPE_NULL
 
     cdef int for_read(self, object msg) except -1:
-        self._msg = message_simple(msg, 0, # writable
-                                   0, 0,
-                                   &self.buf,
-                                   &self.count,
-                                   &self.dtype)
+        self._msg = message_simple(
+            msg, 0,  # writable
+            0, 0,
+            &self.buf,
+            &self.count,
+            &self.dtype,
+        )
         return 0
 
     cdef int for_write(self, object msg) except -1:
-        self._msg = message_simple(msg, 1, # readonly
-                                   0, 0,
-                                   &self.buf,
-                                   &self.count,
-                                   &self.dtype)
+        self._msg = message_simple(
+            msg, 1,  # readonly
+            0, 0,
+            &self.buf,
+            &self.count,
+            &self.dtype,
+        )
         return 0
+
 
 cdef inline _p_msg_io message_io_read(object buf):
     cdef _p_msg_io msg = _p_msg_io.__new__(_p_msg_io)

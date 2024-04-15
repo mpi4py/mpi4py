@@ -116,6 +116,9 @@ jobs:
     - name: cython
       run:  conf/cythonize.sh -Wextra -Werror
 
+    - name: cython-lint
+      run:  cython-lint .
+
     - name: yamllint
       run:  yamllint .
 

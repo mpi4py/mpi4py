@@ -4,10 +4,10 @@ cdef extern from "Python.h":
     int    PyUnicode_Check(object)
     object PyUnicode_AsUTF8String(object)
     object PyUnicode_FromString(const char[])
-    object PyUnicode_FromStringAndSize(const char[],Py_ssize_t)
+    object PyUnicode_FromStringAndSize(const char[], Py_ssize_t)
     object PyBytes_FromString(const char[])
-    object PyBytes_FromStringAndSize(const char[],Py_ssize_t)
-    int    PyBytes_AsStringAndSize(object,char*[],Py_ssize_t*) except -1
+    object PyBytes_FromStringAndSize(const char[], Py_ssize_t)
+    int    PyBytes_AsStringAndSize(object, char*[], Py_ssize_t*) except -1
 
 # -----------------------------------------------------------------------------
 
@@ -44,7 +44,7 @@ cdef extern from * nogil:
       return c1 - c2;
     }
     """
-    int PyMPI_strcasecmp(const char[],const char[])
+    int PyMPI_strcasecmp(const char[], const char[])
 
 cdef inline int cstr2bool(const char s[]) noexcept nogil:
     cdef const char **T = [b"true",  b"yes", b"on",  b"y", b"1"], *t = NULL

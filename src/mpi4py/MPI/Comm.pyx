@@ -1,18 +1,18 @@
 # Communicator Comparisons
 # ------------------------
 
-IDENT     = MPI_IDENT     #: Groups are identical, contexts are the same
-CONGRUENT = MPI_CONGRUENT #: Groups are identical, contexts are different
-SIMILAR   = MPI_SIMILAR   #: Groups are similar, rank order differs
-UNEQUAL   = MPI_UNEQUAL   #: Groups are different
+IDENT     = MPI_IDENT      #: Groups are identical, contexts are the same
+CONGRUENT = MPI_CONGRUENT  #: Groups are identical, contexts are different
+SIMILAR   = MPI_SIMILAR    #: Groups are similar, rank order differs
+UNEQUAL   = MPI_UNEQUAL    #: Groups are different
 
 
 # Communicator Topologies
 # -----------------------
 
-CART       = MPI_CART       #: Cartesian topology
-GRAPH      = MPI_GRAPH      #: General graph topology
-DIST_GRAPH = MPI_DIST_GRAPH #: Distributed graph topology
+CART       = MPI_CART        #: Cartesian topology
+GRAPH      = MPI_GRAPH       #: General graph topology
+DIST_GRAPH = MPI_DIST_GRAPH  #: Distributed graph topology
 
 
 # Graph Communicator Weights
@@ -279,7 +279,7 @@ cdef class Comm:
             self.ob_mpi, c_num_to_ack, &num_acked) )
         return num_acked
 
-    def Agree(self,int flag: int) -> int:
+    def Agree(self, int flag: int) -> int:
         """
         Blocking agreement.
         """
@@ -363,6 +363,7 @@ cdef class Comm:
         """Info hints."""
         def __get__(self) -> Info:
             return self.Get_info()
+
         def __set__(self, value: Info):
             self.Set_info(value)
 
@@ -381,7 +382,7 @@ cdef class Comm:
         buf = attach_buffer(buf, &base, &size)
         with nogil: CHKERR( MPI_Comm_attach_buffer_c(
             self.ob_mpi, base, size) )
-        detach_buffer_set(self, buf)  #~> MPI-4.1
+        detach_buffer_set(self, buf)  # ~> MPI-4.1
 
     def Detach_buffer(self) -> Buffer | None:
         """
@@ -391,7 +392,7 @@ cdef class Comm:
         cdef MPI_Count size = 0
         with nogil: CHKERR( MPI_Comm_detach_buffer_c(
             self.ob_mpi, &base, &size) )
-        return detach_buffer_get(self, base, size)  #~> MPI-4.1
+        return detach_buffer_get(self, base, size)  # ~> MPI-4.1
 
     def Flush_buffer(self) -> None:
         """
@@ -406,7 +407,7 @@ cdef class Comm:
         cdef Request request = <Request>New(Request)
         with nogil: CHKERR( MPI_Comm_iflush_buffer(
             self.ob_mpi, &request.ob_mpi) )
-        return request  #~> MPI-4.1
+        return request  # ~> MPI-4.1
 
     # Blocking Send and Receive Operations
     # ------------------------------------
@@ -562,7 +563,7 @@ cdef class Comm:
         with nogil: CHKERR( MPI_Isendrecv_c(
             smsg.buf, smsg.count, smsg.dtype, dest,   sendtag,
             rmsg.buf, rmsg.count, rmsg.dtype, source, recvtag,
-                self.ob_mpi, &request.ob_mpi) )
+            self.ob_mpi, &request.ob_mpi) )
         request.ob_buf = (smsg, rmsg)
         return request
 
@@ -1087,7 +1088,6 @@ cdef class Comm:
             m.sbuf, m.scounts, m.sdispls, m.stypes,
             m.rbuf, m.rcounts, m.rdispls, m.rtypes,
             self.ob_mpi) )
-
 
     # Global Reduction Operations
     # ---------------------------
@@ -1789,14 +1789,18 @@ cdef class Comm:
         if not flag: return None
         if attrval == NULL: return 0
         # MPI-1 predefined attribute keyvals
-        if (keyval == MPI_TAG_UB or
+        if (
+            keyval == MPI_TAG_UB or
             keyval == MPI_IO or
-            keyval == MPI_WTIME_IS_GLOBAL):
+            keyval == MPI_WTIME_IS_GLOBAL
+        ):
             return (<int*>attrval)[0]
         # MPI-2 predefined attribute keyvals
-        elif (keyval == MPI_UNIVERSE_SIZE or
-              keyval == MPI_APPNUM or
-              keyval == MPI_LASTUSEDCODE):
+        if (
+            keyval == MPI_UNIVERSE_SIZE or
+            keyval == MPI_APPNUM or
+            keyval == MPI_LASTUSEDCODE
+        ):
             return (<int*>attrval)[0]
         # user-defined attribute keyval
         return PyMPI_attr_get(self.ob_mpi, keyval, attrval)
@@ -1857,9 +1861,9 @@ cdef class Comm:
         cdef int index = errhdl_new(errhandler_fn, &fn)
         try:
             CHKERR( MPI_Comm_create_errhandler(fn, &errhandler.ob_mpi) )
-        except:                     #~> uncovered
-            errhdl_del(&index, fn)  #~> uncovered
-            raise                   #~> uncovered
+        except:                     # ~> uncovered  # noqa
+            errhdl_del(&index, fn)  # ~> uncovered
+            raise                   # ~> uncovered
         return errhandler
 
     def Get_errhandler(self) -> Errhandler:
@@ -1882,7 +1886,6 @@ cdef class Comm:
         """
         CHKERR( MPI_Comm_call_errhandler(self.ob_mpi, errorcode) )
 
-
     def Abort(self, int errorcode: int = 0) -> NoReturn:
         """
         Terminate the MPI execution environment.
@@ -1892,7 +1895,7 @@ cdef class Comm:
            last resort to prevent parallel deadlocks in case of unrecoverable
            errors.
         """
-        CHKERR( MPI_Abort(self.ob_mpi, errorcode) )  #~> uncovered
+        CHKERR( MPI_Abort(self.ob_mpi, errorcode) )  # ~> uncovered
 
     # Naming Objects
     # --------------
@@ -1918,6 +1921,7 @@ cdef class Comm:
         """Print name."""
         def __get__(self) -> str:
             return self.Get_name()
+
         def __set__(self, value: str):
             self.Set_name(value)
 
@@ -1937,7 +1941,7 @@ cdef class Comm:
 
     # Python Communication
     # --------------------
-    #
+
     def send(
         self,
         obj: Any,
@@ -1947,7 +1951,7 @@ cdef class Comm:
         """Send in standard mode."""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_send(obj, dest, tag, comm)
-    #
+
     def bsend(
         self,
         obj: Any,
@@ -1957,7 +1961,7 @@ cdef class Comm:
         """Send in buffered mode."""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_bsend(obj, dest, tag, comm)
-    #
+
     def ssend(
         self,
         obj: Any,
@@ -1967,7 +1971,7 @@ cdef class Comm:
         """Send in synchronous mode."""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_ssend(obj, dest, tag, comm)
-    #
+
     def recv(
         self,
         buf: Buffer | None = None,
@@ -1979,7 +1983,7 @@ cdef class Comm:
         cdef MPI_Comm comm = self.ob_mpi
         cdef MPI_Status *statusp = arg_Status(status)
         return PyMPI_recv(buf, source, tag, comm, statusp)
-    #
+
     def sendrecv(
         self,
         sendobj: Any,
@@ -1996,7 +2000,7 @@ cdef class Comm:
         return PyMPI_sendrecv(sendobj, dest,   sendtag,
                               recvbuf, source, recvtag,
                               comm, statusp)
-    #
+
     def isend(
         self,
         obj: Any,
@@ -2008,7 +2012,7 @@ cdef class Comm:
         cdef Request request = <Request>New(Request)
         request.ob_buf = PyMPI_isend(obj, dest, tag, comm, &request.ob_mpi)
         return request
-    #
+
     def ibsend(
         self,
         obj: Any,
@@ -2020,7 +2024,7 @@ cdef class Comm:
         cdef Request request = <Request>New(Request)
         request.ob_buf = PyMPI_ibsend(obj, dest, tag, comm, &request.ob_mpi)
         return request
-    #
+
     def issend(
         self,
         obj: Any,
@@ -2032,7 +2036,7 @@ cdef class Comm:
         cdef Request request = <Request>New(Request)
         request.ob_buf = PyMPI_issend(obj, dest, tag, comm, &request.ob_mpi)
         return request
-    #
+
     def irecv(
         self,
         buf: Buffer | None = None,
@@ -2044,7 +2048,7 @@ cdef class Comm:
         cdef Request request = <Request>New(Request)
         request.ob_buf = PyMPI_irecv(buf, source, tag, comm, &request.ob_mpi)
         return request
-    #
+
     def probe(
         self,
         int source: int = ANY_SOURCE,
@@ -2055,7 +2059,7 @@ cdef class Comm:
         cdef MPI_Comm comm = self.ob_mpi
         cdef MPI_Status *statusp = arg_Status(status)
         return PyMPI_probe(source, tag, comm, statusp)
-    #
+
     def iprobe(
         self,
         int source: int = ANY_SOURCE,
@@ -2066,7 +2070,7 @@ cdef class Comm:
         cdef MPI_Comm comm = self.ob_mpi
         cdef MPI_Status *statusp = arg_Status(status)
         return PyMPI_iprobe(source, tag, comm, statusp)
-    #
+
     def mprobe(
         self,
         int source: int = ANY_SOURCE,
@@ -2080,7 +2084,7 @@ cdef class Comm:
         message.ob_buf = PyMPI_mprobe(source, tag, comm,
                                       &message.ob_mpi, statusp)
         return message
-    #
+
     def improbe(
         self,
         int source: int = ANY_SOURCE,
@@ -2096,7 +2100,7 @@ cdef class Comm:
                                        &message.ob_mpi, statusp)
         if flag == 0: return None
         return message
-    #
+
     def barrier(self) -> None:
         """
         Barrier synchronization.
@@ -2105,7 +2109,7 @@ cdef class Comm:
         """
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_barrier(comm)
-    #
+
     def bcast(
         self,
         obj: Any,
@@ -2114,7 +2118,7 @@ cdef class Comm:
         """Broadcast."""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_bcast(obj, root, comm)
-    #
+
     def gather(
         self,
         sendobj: Any,
@@ -2123,7 +2127,7 @@ cdef class Comm:
         """Gather."""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_gather(sendobj, root, comm)
-    #
+
     def scatter(
         self,
         sendobj: Sequence[Any] | None,
@@ -2132,7 +2136,7 @@ cdef class Comm:
         """Scatter."""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_scatter(sendobj, root, comm)
-    #
+
     def allgather(
         self,
         sendobj: Any,
@@ -2140,7 +2144,7 @@ cdef class Comm:
         """Gather to All."""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_allgather(sendobj, comm)
-    #
+
     def alltoall(
         self,
         sendobj: Sequence[Any],
@@ -2148,7 +2152,7 @@ cdef class Comm:
         """All to All Scatter/Gather."""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_alltoall(sendobj, comm)
-    #
+
     def reduce(
         self,
         sendobj: Any,
@@ -2158,7 +2162,7 @@ cdef class Comm:
         """Reduce to Root."""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_reduce(sendobj, op, root, comm)
-    #
+
     def allreduce(
         self,
         sendobj: Any,
@@ -2175,7 +2179,7 @@ cdef class Intracomm(Comm):
     """
 
     def __cinit__(self, Comm comm: Comm | None = None):
-        <void> comm # unused
+        <void> comm  # unused
         if self.ob_mpi == MPI_COMM_NULL: return
         cdef int inter = 1
         CHKERR( MPI_Comm_test_inter(self.ob_mpi, &inter) )
@@ -2250,7 +2254,8 @@ cdef class Intracomm(Comm):
         edges = getarray(edges, &nedges, &iedges)
         # extension: 'standard' adjacency arrays
         if iindex[0]==0 and iindex[nnodes-1]==nedges:
-            nnodes -= 1; iindex += 1;
+            nnodes -= 1
+            iindex += 1
         #
         cdef Graphcomm comm = <Graphcomm>New(Graphcomm)
         with nogil: CHKERR( MPI_Graph_create(
@@ -2373,7 +2378,8 @@ cdef class Intracomm(Comm):
         edges = getarray(edges, &nedges, &iedges)
         # extension: accept more 'standard' adjacency arrays
         if iindex[0]==0 and iindex[nnodes-1]==nedges:
-            nnodes -= 1; iindex += 1;
+            nnodes -= 1
+            iindex += 1
         cdef int rank = MPI_PROC_NULL
         CHKERR( MPI_Graph_map(self.ob_mpi, nnodes, iindex, iedges, &rank) )
         return rank
@@ -2492,7 +2498,7 @@ cdef class Intracomm(Comm):
         return request
 
     # Python Communication
-    #
+
     def scan(
         self,
         sendobj: Any,
@@ -2501,7 +2507,7 @@ cdef class Intracomm(Comm):
         """Inclusive Scan."""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_scan(sendobj, op, comm)
-    #
+
     def exscan(
         self,
         sendobj: Any,
@@ -2657,7 +2663,7 @@ cdef class Topocomm(Intracomm):
     """
 
     def __cinit__(self, Comm comm: Comm | None = None):
-        <void> comm # unused
+        <void> comm  # unused
         if self.ob_mpi == MPI_COMM_NULL: return
         cdef int topo = MPI_UNDEFINED
         CHKERR( MPI_Topo_test(self.ob_mpi, &topo) )
@@ -2679,7 +2685,7 @@ cdef class Topocomm(Intracomm):
             if isinstance(self, Distgraphcomm):
                 nneighbors = self.Get_dist_neighbors_count()[:2]
                 return nneighbors
-            raise TypeError("expecting a topology communicator")  #~> unreachable
+            raise TypeError("expecting a topology communicator")  # ~> unreachable
 
     property indegree:
         """Number of incoming neighbors."""
@@ -2710,7 +2716,7 @@ cdef class Topocomm(Intracomm):
             if isinstance(self, Distgraphcomm):
                 neighbors = self.Get_dist_neighbors()[:2]
                 return neighbors
-            raise TypeError("expecting a topology communicator")  #~> unreachable
+            raise TypeError("expecting a topology communicator")  # ~> unreachable
 
     property inedges:
         """Incoming neighbors."""
@@ -2992,12 +2998,12 @@ cdef class Topocomm(Intracomm):
         return request
 
     # Python Communication
-    #
+
     def neighbor_allgather(self, sendobj: Any) -> list[Any]:
         """Neighbor Gather to All."""
         cdef MPI_Comm comm = self.ob_mpi
         return PyMPI_neighbor_allgather(sendobj, comm)
-    #
+
     def neighbor_alltoall(self, sendobj: list[Any]) -> list[Any]:
         """Neighbor All to All."""
         cdef MPI_Comm comm = self.ob_mpi
@@ -3010,7 +3016,7 @@ cdef class Cartcomm(Topocomm):
     """
 
     def __cinit__(self, Comm comm: Comm | None = None):
-        <void> comm # unused
+        <void> comm  # unused
         if self.ob_mpi == MPI_COMM_NULL: return
         cdef int topo = MPI_UNDEFINED
         CHKERR( MPI_Topo_test(self.ob_mpi, &topo) )
@@ -3076,7 +3082,6 @@ cdef class Cartcomm(Topocomm):
         def __get__(self) -> list[int]:
             return self.Get_topo()[2]
 
-
     # Cartesian Translator Functions
     # ------------------------------
 
@@ -3136,11 +3141,11 @@ def Compute_dims(int nnodes: int, dims: int | Sequence[int]) -> list[int]:
     Return a balanced distribution of processes per coordinate direction.
     """
     cdef int ndims = 0, *idims = NULL
-    try:
-        ndims = <int>len(dims)
-    except:
-        ndims = dims
+    if is_integral(dims):
+        ndims = <int> PyNumber_Index(dims)
         dims = [0] * ndims
+    else:
+        ndims = <int> len(dims)
     cdef unused = chkarray(dims, ndims, &idims)
     CHKERR( MPI_Dims_create(nnodes, ndims, idims) )
     dims = [idims[i] for i in range(ndims)]
@@ -3153,7 +3158,7 @@ cdef class Graphcomm(Topocomm):
     """
 
     def __cinit__(self, Comm comm: Comm | None = None):
-        <void> comm # unused
+        <void> comm  # unused
         if self.ob_mpi == MPI_COMM_NULL: return
         cdef int topo = MPI_UNDEFINED
         CHKERR( MPI_Topo_test(self.ob_mpi, &topo) )
@@ -3259,7 +3264,7 @@ cdef class Distgraphcomm(Topocomm):
     """
 
     def __cinit__(self, Comm comm: Comm | None = None):
-        <void> comm # unused
+        <void> comm  # unused
         if self.ob_mpi == MPI_COMM_NULL: return
         cdef int topo = MPI_UNDEFINED
         CHKERR( MPI_Topo_test(self.ob_mpi, &topo) )
@@ -3280,8 +3285,8 @@ cdef class Distgraphcomm(Topocomm):
                 self.ob_mpi, &indegree, &outdegree, &weighted) )
         return (indegree, outdegree, <bint>weighted)
 
-    def Get_dist_neighbors(self) \
-        -> tuple[list[int], list[int], tuple[list[int], list[int]] | None]:
+    def Get_dist_neighbors(self) -> \
+            tuple[list[int], list[int], tuple[list[int], list[int]] | None]:
         """
         Return adjacency information for a distributed graph topology.
         """
@@ -3323,7 +3328,7 @@ cdef class Intercomm(Comm):
     """
 
     def __cinit__(self, Comm comm: Comm | None = None):
-        <void> comm # unused
+        <void> comm  # unused
         if self.ob_mpi == MPI_COMM_NULL: return
         cdef int inter = 0
         CHKERR( MPI_Comm_test_inter(self.ob_mpi, &inter) )
@@ -3401,7 +3406,6 @@ cdef class Intercomm(Comm):
         return comm
 
 
-
 cdef Comm      __COMM_NULL__   = def_Comm      ( MPI_COMM_NULL  , "COMM_NULL"   )
 cdef Intracomm __COMM_SELF__   = def_Intracomm ( MPI_COMM_SELF  , "COMM_SELF"   )
 cdef Intracomm __COMM_WORLD__  = def_Intracomm ( MPI_COMM_WORLD , "COMM_WORLD"  )
@@ -3425,6 +3429,7 @@ BSEND_OVERHEAD = MPI_BSEND_OVERHEAD
 BUFFER_AUTOMATIC = __BUFFER_AUTOMATIC__
 #: Special address for automatic buffering
 
+
 def Attach_buffer(buf: Buffer | None) -> None:
     """
     Attach a user-provided buffer for sending in buffered mode.
@@ -3435,6 +3440,7 @@ def Attach_buffer(buf: Buffer | None) -> None:
     with nogil: CHKERR( MPI_Buffer_attach_c(base, size) )
     detach_buffer_set(0, buf)
 
+
 def Detach_buffer() -> Buffer | None:
     """
     Remove an existing attached buffer.
@@ -3444,11 +3450,13 @@ def Detach_buffer() -> Buffer | None:
     with nogil: CHKERR( MPI_Buffer_detach_c(&base, &size) )
     return detach_buffer_get(0, base, size)
 
+
 def Flush_buffer() -> None:
     """
     Block until all buffered messages have been transmitted.
     """
     with nogil: CHKERR( MPI_Buffer_flush() )
+
 
 def Iflush_buffer() -> Request:
     """
@@ -3456,7 +3464,7 @@ def Iflush_buffer() -> Request:
     """
     cdef Request request = <Request>New(Request)
     with nogil: CHKERR( MPI_Buffer_iflush(&request.ob_mpi) )
-    return request  #~> MPI-4.1
+    return request  # ~> MPI-4.1
 
 
 # Process Creation and Management
@@ -3470,10 +3478,11 @@ def Open_port(Info info: Info = INFO_NULL) -> str:
     Return an address used to connect group of processes.
     """
     cdef char cportname[MPI_MAX_PORT_NAME+1]
-    cportname[0] = 0 # just in case
+    cportname[0] = 0  # just in case
     with nogil: CHKERR( MPI_Open_port(info.ob_mpi, cportname) )
-    cportname[MPI_MAX_PORT_NAME] = 0 # just in case
+    cportname[MPI_MAX_PORT_NAME] = 0  # just in case
     return mpistr(cportname)
+
 
 def Close_port(port_name: str) -> None:
     """
@@ -3482,6 +3491,7 @@ def Close_port(port_name: str) -> None:
     cdef char *cportname = NULL
     port_name = asmpistr(port_name, &cportname)
     with nogil: CHKERR( MPI_Close_port(cportname) )
+
 
 # Name Publishing
 # ---------------
@@ -3501,6 +3511,7 @@ def Publish_name(
     cdef MPI_Info cinfo = arg_Info(<Info?>info)
     with nogil: CHKERR( MPI_Publish_name(csrvcname, cinfo, cportname) )
 
+
 def Unpublish_name(
     service_name: str,
     port_name: str,
@@ -3516,6 +3527,7 @@ def Unpublish_name(
     cdef MPI_Info cinfo = arg_Info(<Info?>info)
     with nogil: CHKERR( MPI_Unpublish_name(csrvcname, cinfo, cportname) )
 
+
 def Lookup_name(
     service_name: str,
     info: Info = INFO_NULL,
@@ -3527,7 +3539,7 @@ def Lookup_name(
     service_name = asmpistr(service_name, &csrvcname)
     cdef MPI_Info cinfo = arg_Info(<Info?>info)
     cdef char cportname[MPI_MAX_PORT_NAME+1]
-    cportname[0] = 0 # just in case
+    cportname[0] = 0  # just in case
     with nogil: CHKERR( MPI_Lookup_name(csrvcname, cinfo, cportname) )
-    cportname[MPI_MAX_PORT_NAME] = 0 # just in case
+    cportname[MPI_MAX_PORT_NAME] = 0  # just in case
     return mpistr(cportname)

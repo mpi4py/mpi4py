@@ -2,7 +2,6 @@ cdef extern from "mpi-compat.h": pass
 
 # ---------
 
-
 # Python-level module import
 # (file: mpi4py/MPI.so)
 
@@ -17,10 +16,7 @@ pname = MPI.Get_processor_name()
 hwmess = "Hello, World! I am process %d of %d on %s."
 print (hwmess % (rank, size, pname))
 
-
-
 # ---------
-
 
 # Cython-level cimport
 # this make available mpi4py's Python extension types
@@ -34,9 +30,7 @@ from mpi4py.MPI cimport Intracomm as IntracommType
 cdef MPI.Comm WORLD = MPI.COMM_WORLD
 cdef IntracommType SELF = MPI.COMM_SELF
 
-
 # ---------
-
 
 # Cython-level cimport with PXD file
 # this make available the native MPI C API
@@ -58,10 +52,9 @@ ierr1 = mpi.MPI_Comm_rank(mpi.MPI_COMM_WORLD, &rank1)
 cdef int rlen1=0
 cdef char pname1[mpi.MPI_MAX_PROCESSOR_NAME]
 ierr1 = mpi.MPI_Get_processor_name(pname1, &rlen1)
-pname1[rlen1] = 0 # just in case ;-)
+pname1[rlen1] = 0  # just in case ;-)
 
 hwmess = "Hello, World! I am process %d of %d on %s."
 print (hwmess % (rank1, size1, pname1))
-
 
 # ---------

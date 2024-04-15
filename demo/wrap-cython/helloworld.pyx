@@ -1,10 +1,11 @@
-cdef extern from "mpi-compat.h": pass
+cdef extern from "mpi-compat.h":
+    pass
+cdef extern from "stdio.h":
+    int printf(char*, ...)
 
 cimport mpi4py.MPI as MPI
 from mpi4py.libmpi cimport *
 
-cdef extern from "stdio.h":
-    int printf(char*, ...)
 
 cdef void c_sayhello(MPI_Comm comm):
     cdef int size, rank, plen
@@ -17,6 +18,7 @@ cdef void c_sayhello(MPI_Comm comm):
     MPI_Get_processor_name(pname, &plen)
     printf(b"Hello, World! I am process %d of %d on %s.\n",
            rank, size, pname)
+
 
 def sayhello(MPI.Comm comm not None ):
     cdef MPI_Comm c_comm = comm.ob_mpi

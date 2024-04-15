@@ -18,7 +18,7 @@ cdef inline str combinername(int combiner):
     if combiner == MPI_COMBINER_F90_INTEGER    : return 'F90_INTEGER'
     if combiner == MPI_COMBINER_F90_REAL       : return 'F90_REAL'
     if combiner == MPI_COMBINER_F90_COMPLEX    : return 'F90_COMPLEX'
-    raise ValueError(f"unknown combiner value {combiner}")  #~> unreachable
+    raise ValueError(f"unknown combiner value {combiner}")  # ~> unreachable
 
 cdef inline list makelist(integral_t *p, MPI_Count start, MPI_Count last):
     return [p[i] for i from start <= i <= last]
@@ -89,71 +89,71 @@ cdef inline tuple datatype_decode(
         }
     elif combiner == MPI_COMBINER_INDEXED:
         if use_count:
-            s1 =      1; e1 =   c[0]
-            s2 = c[0]+1; e2 = 2*c[0]
+            s1, e1 =      1,   c[0]
+            s2, e2 = c[0]+1, 2*c[0]
             blklen = makelist(c, s1, e1)
             displs = makelist(c, s2, e2)
         else:
-            s1 =      1; e1 =   i[0]      #~> uncovered
-            s2 = i[0]+1; e2 = 2*i[0]      #~> uncovered
-            blklen = makelist(i, s1, e1)  #~> uncovered
-            displs = makelist(i, s2, e2)  #~> uncovered
+            s1, e1 =      1,   i[0]       # ~> uncovered
+            s2, e2 = i[0]+1, 2*i[0]       # ~> uncovered
+            blklen = makelist(i, s1, e1)  # ~> uncovered
+            displs = makelist(i, s2, e2)  # ~> uncovered
         params = {
             ('blocklengths')  : blklen,
             ('displacements') : displs,
         }
     elif combiner == MPI_COMBINER_HINDEXED:
         if use_count:
-            s1 =      1; e1 =   c[0]
-            s2 = c[0]+1; e2 = 2*c[0]
+            s1, e1 =      1,   c[0]
+            s2, e2 = c[0]+1, 2*c[0]
             blklen = makelist(c, s1, e1)
             displs = makelist(c, s2, e2)
         else:
-            s1 = 1; e1 = i[0]             #~> uncovered
-            s2 = 0; e2 = i[0]-1           #~> uncovered
-            blklen = makelist(i, s1, e1)  #~> uncovered
-            displs = makelist(a, s2, e2)  #~> uncovered
+            s1, e1 = 1, i[0]              # ~> uncovered
+            s2, e2 = 0, i[0]-1            # ~> uncovered
+            blklen = makelist(i, s1, e1)  # ~> uncovered
+            displs = makelist(a, s2, e2)  # ~> uncovered
         params = {
             ('blocklengths')  : blklen,
             ('displacements') : displs,
         }
     elif combiner == MPI_COMBINER_INDEXED_BLOCK:
         if use_count:
-            s2 = 2; e2 = c[0]+1
+            s2, e2 = 2, c[0]+1
             blklen = c[1]
             displs = makelist(c, s2, e2)
         else:
-            s2 = 2; e2 = i[0]+1          #~> uncovered
-            blklen = i[1]                #~> uncovered
-            displs = makelist(i, s2, e2) #~> uncovered
+            s2, e2 = 2, i[0]+1            # ~> uncovered
+            blklen = i[1]                 # ~> uncovered
+            displs = makelist(i, s2, e2)  # ~> uncovered
         params = {
             ('blocklength')   : blklen,
             ('displacements') : displs,
         }
     elif combiner == MPI_COMBINER_HINDEXED_BLOCK:
         if use_count:
-            s2 = 2; e2 = c[0]+1
+            s2, e2 = 2, c[0]+1
             blklen = c[1]
             displs = makelist(c, s2, e2)
         else:
-            s2 = 0; e2 = i[0]-1          #~> uncovered
-            blklen = i[1]                #~> uncovered
-            displs = makelist(a, s2, e2) #~> uncovered
+            s2, e2 = 0, i[0]-1            # ~> uncovered
+            blklen = i[1]                 # ~> uncovered
+            displs = makelist(a, s2, e2)  # ~> uncovered
         params = {
             ('blocklength')   : blklen,
             ('displacements') : displs,
         }
     elif combiner == MPI_COMBINER_STRUCT:
         if use_count:
-            s1 =      1; e1 =   c[0]
-            s2 = c[0]+1; e2 = 2*c[0]
+            s1, e1 =      1,   c[0]
+            s2, e2 = c[0]+1, 2*c[0]
             blklen = makelist(c, s1, e1)
             displs = makelist(c, s2, e2)
         else:
-            s1 = 1; e1 = i[0]             #~> uncovered
-            s2 = 0; e2 = i[0]-1           #~> uncovered
-            blklen = makelist(i, s1, e1)  #~> uncovered
-            displs = makelist(a, s2, e2)  #~> uncovered
+            s1, e1 = 1, i[0]              # ~> uncovered
+            s2, e2 = 0, i[0]-1            # ~> uncovered
+            blklen = makelist(i, s1, e1)  # ~> uncovered
+            displs = makelist(a, s2, e2)  # ~> uncovered
         params = {
             ('blocklengths')  : blklen,
             ('displacements') : displs,
@@ -161,21 +161,21 @@ cdef inline tuple datatype_decode(
         }
     elif combiner == MPI_COMBINER_SUBARRAY:
         if use_count:
-            s1 = 0*i[0]; e1 = 1*i[0]-1
-            s2 = 1*i[0]; e2 = 2*i[0]-1
-            s3 = 2*i[0]; e3 = 3*i[0]-1
+            s1, e1 = 0*i[0], 1*i[0]-1
+            s2, e2 = 1*i[0], 2*i[0]-1
+            s3, e3 = 2*i[0], 3*i[0]-1
             sizes    = makelist(c, s1, e1)
             subsizes = makelist(c, s2, e2)
             starts   = makelist(c, s3, e3)
             order    = i[1]
         else:
-            s1 = 0*i[0]+1; e1 = 1*i[0]      #~> uncovered
-            s2 = 1*i[0]+1; e2 = 2*i[0]      #~> uncovered
-            s3 = 2*i[0]+1; e3 = 3*i[0]      #~> uncovered
-            sizes    = makelist(i, s1, e1)  #~> uncovered
-            subsizes = makelist(i, s2, e2)  #~> uncovered
-            starts   = makelist(i, s3, e3)  #~> uncovered
-            order    = i[3*i[0]+1]          #~> uncovered
+            s1, e1 = 0*i[0]+1, 1*i[0]       # ~> uncovered
+            s2, e2 = 1*i[0]+1, 2*i[0]       # ~> uncovered
+            s3, e3 = 2*i[0]+1, 3*i[0]       # ~> uncovered
+            sizes    = makelist(i, s1, e1)  # ~> uncovered
+            subsizes = makelist(i, s2, e2)  # ~> uncovered
+            starts   = makelist(i, s3, e3)  # ~> uncovered
+            order    = i[3*i[0]+1]          # ~> uncovered
         params = {
             ('sizes')    : sizes,
             ('subsizes') : subsizes,
@@ -184,19 +184,19 @@ cdef inline tuple datatype_decode(
         }
     elif combiner == MPI_COMBINER_DARRAY:
         if use_count:
-            s1 = 0*i[2]+0; e1 = 1*i[2]+0-1
-            s2 = 0*i[2]+3; e2 = 1*i[2]+3-1
-            s3 = 1*i[2]+3; e3 = 2*i[2]+3-1
-            s4 = 2*i[2]+3; e4 = 3*i[2]+3-1
+            s1, e1 = 0*i[2]+0, 1*i[2]+0-1
+            s2, e2 = 0*i[2]+3, 1*i[2]+3-1
+            s3, e3 = 1*i[2]+3, 2*i[2]+3-1
+            s4, e4 = 2*i[2]+3, 3*i[2]+3-1
             sizes = makelist(c, s1, e1)
             order = i[3*i[2]+3]
         else:
-            s1 = 0*i[2]+3; e1 = 1*i[2]+3-1  #~> uncovered
-            s2 = 1*i[2]+3; e2 = 2*i[2]+3-1  #~> uncovered
-            s3 = 2*i[2]+3; e3 = 3*i[2]+3-1  #~> uncovered
-            s4 = 3*i[2]+3; e4 = 4*i[2]+3-1  #~> uncovered
-            sizes = makelist(i, s1, e1)     #~> uncovered
-            order = i[4*i[2]+3]             #~> uncovered
+            s1, e1 = 0*i[2]+3, 1*i[2]+3-1  # ~> uncovered
+            s2, e2 = 1*i[2]+3, 2*i[2]+3-1  # ~> uncovered
+            s3, e3 = 2*i[2]+3, 3*i[2]+3-1  # ~> uncovered
+            s4, e4 = 3*i[2]+3, 4*i[2]+3-1  # ~> uncovered
+            sizes = makelist(i, s1, e1)    # ~> uncovered
+            order = i[4*i[2]+3]            # ~> uncovered
         params = {
             ('size')     : i[0],
             ('rank')     : i[1],
@@ -215,8 +215,8 @@ cdef inline tuple datatype_decode(
         }
     elif combiner == MPI_COMBINER_VALUE_INDEX:
         params = {
-            ('value') : datatypes[0],  #~> MPI-4.1
-            ('index') : datatypes[1],  #~> MPI-4.1
+            ('value') : datatypes[0],  # ~> MPI-4.1
+            ('index') : datatypes[1],  # ~> MPI-4.1
         }
     elif combiner == MPI_COMBINER_F90_INTEGER:
         params = {
@@ -249,7 +249,7 @@ cdef inline Datatype datatype_create(
     if 'datatypes' in params:
         datatypes = params['datatypes']
     elif 'value' in params and 'index' in params:
-        datatypes = list(params.values())  #~> MPI-4.1
+        datatypes = list(params.values())  # ~> MPI-4.1
     else:
         datatypes = [datatype]
     try:
@@ -270,7 +270,6 @@ cdef inline int datatype_visit(
     for datatype in datatypes:
         visit(datatype)
 
-# -----------------------------------------------------------------------------
 
 def _datatype_create(
     Datatype datatype: Datatype,
@@ -291,6 +290,7 @@ def _datatype_decode(
     """
     Decode datatype to base datatype, combiner name, and parameters.
     """
-    return datatype_decode(datatype, mark)  #~> TODO
+    return datatype_decode(datatype, mark)  # ~> TODO
+
 
 # -----------------------------------------------------------------------------
