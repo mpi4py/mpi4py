@@ -125,6 +125,7 @@ package = {
     'pkl5.py',
     'dtlib.py',
     'pool.py',
+    'sync.py',
   ],
 }
 
