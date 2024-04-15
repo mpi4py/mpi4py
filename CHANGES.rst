@@ -25,6 +25,8 @@ Release 4.0.0 [2024-XX-XX]
 
   + `mpi4py.util.pool`: New drop-in replacement for `multiprocessing.pool`.
 
+  + `mpi4py.util.sync`: New synchronization utilities.
+
   + Add runtime check for mismatch between `mpiexec` and MPI library.
 
   + Support `scikit-build-core`_ as an alternative build backend.
