@@ -58,7 +58,7 @@ cdef class Info:
             else:
                 for key, value in items:
                     info.Set(key, value)
-        except:
+        except:  # noqa
             CHKERR( MPI_Info_free(&info.ob_mpi) )
             raise
         return info
@@ -136,9 +136,9 @@ cdef class Info:
         Return the *n*-th defined key in info.
         """
         cdef char ckey[MPI_MAX_INFO_KEY+1]
-        ckey[0] = 0 # just in case
+        ckey[0] = 0  # just in case
         CHKERR( MPI_Info_get_nthkey(self.ob_mpi, n, ckey) )
-        ckey[MPI_MAX_INFO_KEY] = 0 # just in case
+        ckey[MPI_MAX_INFO_KEY] = 0  # just in case
         return mpistr(ckey)
 
     # Fortran Handle
@@ -287,7 +287,6 @@ cdef class Info:
             key = self.Get_nthkey(0)
             self.Delete(key)
             k += 1
-
 
 
 cdef Info __INFO_NULL__ = def_Info( MPI_INFO_NULL , "INFO_NULL" )

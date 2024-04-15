@@ -3,7 +3,8 @@
 cdef object datarep_lock     = Lock()
 cdef dict   datarep_registry = {}
 
-@cython.linetrace(False)  #~> TODO
+
+@cython.linetrace(False)  # ~> TODO
 @cython.final
 @cython.internal
 cdef class _p_datarep:
@@ -28,7 +29,7 @@ cdef class _p_datarep:
         cdef MPI_Count lb=0, extent=0
         CHKERR( MPI_Type_get_extent_c(datatype, &lb, &extent) )
         cdef MPI_Count ulen = (position + count) * extent
-        cdef MPI_Count flen = <MPI_Count> PY_SSIZE_T_MAX # XXX
+        cdef MPI_Count flen = <MPI_Count> PY_SSIZE_T_MAX
         cdef object ubuf = mpibuf(userbuf, ulen)
         cdef object fbuf = mpibuf(filebuf, flen)
         cdef Datatype dtype = <Datatype>New(Datatype)
@@ -50,7 +51,7 @@ cdef class _p_datarep:
         cdef MPI_Count lb=0, extent=0
         CHKERR( MPI_Type_get_extent_c(datatype, &lb, &extent) )
         cdef MPI_Count ulen = (position + count) * extent
-        cdef MPI_Count flen = <MPI_Count> PY_SSIZE_T_MAX # XXX
+        cdef MPI_Count flen = <MPI_Count> PY_SSIZE_T_MAX
         cdef object ubuf = mpibuf(userbuf, ulen)
         cdef object fbuf = mpibuf(filebuf, flen)
         cdef Datatype dtype = <Datatype>New(Datatype)
@@ -74,9 +75,11 @@ cdef class _p_datarep:
             dtype.ob_mpi = MPI_DATATYPE_NULL
         return 0
 
+
 # ---
 
-@cython.linetrace(False)  #~> TODO
+
+@cython.linetrace(False)  # ~> TODO
 cdef int datarep_read(
     void *userbuf,
     MPI_Datatype datatype,
@@ -94,7 +97,8 @@ cdef int datarep_read(
         ierr = PyMPI_HandleException(exc)
     return ierr
 
-@cython.linetrace(False)  #~> TODO
+
+@cython.linetrace(False)  # ~> TODO
 cdef int datarep_write(
     void *userbuf,
     MPI_Datatype datatype,
@@ -112,7 +116,8 @@ cdef int datarep_write(
         ierr = PyMPI_HandleException(exc)
     return ierr
 
-@cython.linetrace(False)  #~> TODO
+
+@cython.linetrace(False)  # ~> TODO
 cdef int datarep_extent(
     MPI_Datatype datatype,
     MPI_Aint *file_extent,
@@ -127,9 +132,11 @@ cdef int datarep_extent(
         ierr = PyMPI_HandleException(exc)
     return ierr
 
+
 # ---
 
-@cython.linetrace(False)  #~> TODO
+
+@cython.linetrace(False)  # ~> TODO
 @cython.callspec("MPIAPI")
 cdef int datarep_read_fn(
     void *userbuf,
@@ -147,7 +154,8 @@ cdef int datarep_read_fn(
         filebuf, position, extra_state,
     )
 
-@cython.linetrace(False)  #~> TODO
+
+@cython.linetrace(False)  # ~> TODO
 @cython.callspec("MPIAPI")
 cdef int datarep_write_fn(
     void *userbuf,
@@ -165,7 +173,8 @@ cdef int datarep_write_fn(
         filebuf, position, extra_state,
     )
 
-@cython.linetrace(False)  #~> TODO
+
+@cython.linetrace(False)  # ~> TODO
 @cython.callspec("MPIAPI")
 cdef int datarep_extent_fn(
     MPI_Datatype datatype,

@@ -45,9 +45,9 @@ cdef inline int comm_neighbors_count(
     cdef int size=0, ndims=0, rank=0, nneighbors=0
     cdef int indegree=0, outdegree=0, weighted=0
     CHKERR( MPI_Topo_test(comm, &topo) )
-    if topo == MPI_UNDEFINED:                 #~> unreachable
-        CHKERR( MPI_Comm_size(comm, &size) )  #~> unreachable
-        indegree = outdegree = size           #~> unreachable
+    if topo == MPI_UNDEFINED:                 # ~> unreachable
+        CHKERR( MPI_Comm_size(comm, &size) )  # ~> unreachable
+        indegree = outdegree = size           # ~> unreachable
     elif topo == MPI_CART:
         CHKERR( MPI_Cartdim_get(comm, &ndims) )
         indegree = outdegree = <int>2*ndims
@@ -88,9 +88,9 @@ cdef int commlock_free_fn(
     void *attrval,
     void *xstate,
 ) noexcept nogil:
-    <void> keyval  # unused
-    <void> attrval # unused
-    <void> xstate  # unused
+    <void> keyval   # unused
+    <void> attrval  # unused
+    <void> xstate   # unused
     if comm == MPI_COMM_SELF:  <void>MPI_Comm_free_keyval(&commlock_keyval)
     if not Py_IsInitialized(): return MPI_SUCCESS
     if not py_module_alive():  return MPI_SUCCESS
@@ -118,7 +118,7 @@ cdef inline dict commlock_table(MPI_Comm comm):
             comm, commlock_keyval, <void*> table) )
         commlock_registry[<Py_uintptr_t>comm] = table
     elif PYPY:
-        table = commlock_registry[<Py_uintptr_t>comm]  #~> pypy
+        table = commlock_registry[<Py_uintptr_t>comm]  # ~> pypy
     else:
         table = <dict> attrval
     return table
@@ -147,6 +147,7 @@ def _comm_lock(Comm comm: Comm, object key: Hashable | None = None) -> Lock:
     Create/get communicator lock.
     """
     return PyMPI_Lock(comm.ob_mpi, key)
+
 
 def _comm_lock_table(Comm comm: Comm) -> dict[Hashable, Lock]:
     """

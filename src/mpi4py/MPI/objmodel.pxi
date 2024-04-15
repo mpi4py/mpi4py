@@ -7,12 +7,12 @@ if PY_VERSION_HEX >= 0x030900F0:
     from _thread import allocate_lock as Lock
     from _thread import RLock as RLock
 else:
-    try:                                                  #~> legacy
-        from _thread import allocate_lock as Lock         #~> legacy
-        from _thread import RLock as RLock                #~> legacy
-    except ImportError:                                   #~> legacy
-        from _dummy_thread import allocate_lock as Lock   #~> legacy
-        from _dummy_thread import allocate_lock as RLock  #~> legacy
+    try:                                                  # ~> legacy
+        from _thread import allocate_lock as Lock         # ~> legacy
+        from _thread import RLock as RLock                # ~> legacy
+    except ImportError:                                   # ~> legacy
+        from _dummy_thread import allocate_lock as Lock   # ~> legacy
+        from _dummy_thread import allocate_lock as RLock  # ~> legacy
 
 # -----------------------------------------------------------------------------
 
@@ -126,7 +126,7 @@ cdef inline int predef_Datatype(MPI_Datatype arg) noexcept nogil:
     cdef int combiner = MPI_UNDEFINED
     cdef int ierr = MPI_Type_get_envelope_c(
         arg, &ni, &na, &nc, &nd, &combiner)
-    if ierr != MPI_SUCCESS: return 0 # XXX Error?
+    if ierr != MPI_SUCCESS: return 0  # XXX Error?
     return (
         combiner == MPI_COMBINER_NAMED       or
         combiner == MPI_COMBINER_VALUE_INDEX or
@@ -263,6 +263,7 @@ cdef inline int marktemp(PyMPIClass self) except -1:
         self.flags |= PyMPI_FLAGS_TEMP
     return 0
 
+
 @cython.linetrace(False)
 cdef inline int freetemp(PyMPIClass self) except -1:
     if named(self.ob_mpi): return 0
@@ -271,12 +272,13 @@ cdef inline int freetemp(PyMPIClass self) except -1:
         CHKERR( MPI_Type_free(&self.ob_mpi) )
     return 0
 
+
 @cython.linetrace(False)
 cdef inline int dealloc(PyMPIClass self) except -1:
     if not (self.flags & PyMPI_FLAGS_READY): return 0
     if (self.flags & PyMPI_FLAGS_CONST): return 0
     if (self.flags & PyMPI_FLAGS_TEMP ): return freetemp(self)
-    if self.flags: return 0 # TODO: this always return
+    if self.flags: return 0  # TODO: this always return
 
     if not mpi_active(): return 0
     if predefined(self.ob_mpi): return 0
@@ -303,14 +305,14 @@ cdef inline object richcmp(PyMPIClass self, object other, int op):
     raise TypeError(f"unorderable type '{mod}.{cls}'")
 
 cdef inline int nonnull(PyMPIClass self) noexcept nogil:
-     return self.ob_mpi != mpinull(self.ob_mpi)
+    return self.ob_mpi != mpinull(self.ob_mpi)
 
 # -----------------------------------------------------------------------------
 
 cdef dict def_registry = {}
 
 cdef inline type def_class(handle_t handle):
-    <void> handle # unused
+    <void> handle  # unused
     cdef type result = None
     if handle_t is MPI_Datatype   : result = Datatype
     if handle_t is MPI_Request    : result = Request
@@ -404,7 +406,7 @@ cdef inline Datatype ref_Datatype(MPI_Datatype arg):
     cdef Datatype obj = Datatype.__new__(Datatype)
     obj.ob_mpi = arg
     if not predefined(arg):
-        obj.flags |= 0 # TODO
+        obj.flags |= 0  # TODO
     return obj
 
 cdef inline object reduce_Datatype(Datatype self):
@@ -454,7 +456,7 @@ cdef inline Op def_Op(MPI_Op arg, object name):
 cdef inline object reduce_Op(Op self):
     # predefined
     if named(self.ob_mpi):
-         return def_reduce(self)
+        return def_reduce(self)
     # user-defined
     cdef int index = self.ob_uid
     if index == 0:
@@ -496,7 +498,7 @@ cdef inline MPI_Info arg_Info(object obj) except? _info_null:
 cdef inline object reduce_Info(Info self):
     # predefined
     if named(self.ob_mpi):
-         return def_reduce(self)
+        return def_reduce(self)
     # user-defined
     return (type(self).Create, (self.items(),))
 
@@ -559,7 +561,7 @@ cdef inline type CommType(MPI_Comm arg):
         return Graphcomm
     if topo == MPI_DIST_GRAPH:
         return Distgraphcomm
-    return Comm  #~> unreachable
+    return Comm  # ~> unreachable
 
 cdef inline Comm def_Comm(MPI_Comm arg, object name):
     cdef Comm obj = Comm.__new__(Comm)

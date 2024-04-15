@@ -58,16 +58,16 @@ cdef class Errhandler:
         return fromhandle(MPI_Errhandler_f2c(arg))
 
 
-cdef Errhandler __ERRHANDLER_NULL__  = def_Errhandler( MPI_ERRHANDLER_NULL  , "ERRHANDLER_NULL"  )
-cdef Errhandler __ERRORS_RETURN__    = def_Errhandler( MPI_ERRORS_RETURN    , "ERRORS_RETURN"    )
-cdef Errhandler __ERRORS_ABORT__     = def_Errhandler( MPI_ERRORS_ABORT     , "ERRORS_ABORT"     )
-cdef Errhandler __ERRORS_ARE_FATAL__ = def_Errhandler( MPI_ERRORS_ARE_FATAL , "ERRORS_ARE_FATAL" )
+cdef Errhandler __ERRHANDLER_NULL__  = def_Errhandler( MPI_ERRHANDLER_NULL  , "ERRHANDLER_NULL"  )  # noqa
+cdef Errhandler __ERRORS_RETURN__    = def_Errhandler( MPI_ERRORS_RETURN    , "ERRORS_RETURN"    )  # noqa
+cdef Errhandler __ERRORS_ABORT__     = def_Errhandler( MPI_ERRORS_ABORT     , "ERRORS_ABORT"     )  # noqa
+cdef Errhandler __ERRORS_ARE_FATAL__ = def_Errhandler( MPI_ERRORS_ARE_FATAL , "ERRORS_ARE_FATAL" )  # noqa
 
 
 # Predefined errhandler handles
 # -----------------------------
 
-ERRHANDLER_NULL  = __ERRHANDLER_NULL__  #: Null error handler
-ERRORS_RETURN    = __ERRORS_RETURN__    #: Errors return error handler
-ERRORS_ABORT     = __ERRORS_ABORT__     #: Errors abort error handler
-ERRORS_ARE_FATAL = __ERRORS_ARE_FATAL__ #: Errors are fatal error handler
+ERRHANDLER_NULL  = __ERRHANDLER_NULL__   #: Null error handler
+ERRORS_RETURN    = __ERRORS_RETURN__     #: Errors return error handler
+ERRORS_ABORT     = __ERRORS_ABORT__      #: Errors abort error handler
+ERRORS_ARE_FATAL = __ERRORS_ARE_FATAL__  #: Errors are fatal error handler

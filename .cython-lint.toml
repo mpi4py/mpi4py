@@ -1,0 +1,9 @@
+[tool.cython-lint]
+exclude = "libmpi\\.pxd"
+ignore = [
+    "E201",  # whitespace after '('
+    "E202",  # whitespace before ')'
+    "E221",  # multiple spaces before operator
+    "E222",  # multiple spaces after operator
+    "E701",  # multiple statements on one line (colon)
+]

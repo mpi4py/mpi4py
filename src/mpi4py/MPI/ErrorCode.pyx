@@ -91,6 +91,7 @@ def Get_error_class(int errorcode: int) -> int:
     CHKERR( MPI_Error_class(errorcode, &errorclass) )
     return errorclass
 
+
 def Get_error_string(int errorcode: int) -> str:
     """
     Return the *error string* for a given *error class* or *error code*.
@@ -100,6 +101,7 @@ def Get_error_string(int errorcode: int) -> str:
     CHKERR( MPI_Error_string(errorcode, string, &resultlen) )
     return tompistr(string, resultlen)
 
+
 def Add_error_class() -> int:
     """
     Add an *error class* to the known error classes.
@@ -108,11 +110,13 @@ def Add_error_class() -> int:
     CHKERR( MPI_Add_error_class(&errorclass) )
     return errorclass
 
+
 def Remove_error_class(int errorclass: int) -> None:
     """
     Remove an *error class* from the known error classes.
     """
     CHKERR( MPI_Remove_error_class(errorclass) )
+
 
 def Add_error_code(int errorclass: int) -> int:
     """
@@ -122,11 +126,13 @@ def Add_error_code(int errorclass: int) -> int:
     CHKERR( MPI_Add_error_code(errorclass, &errorcode) )
     return errorcode
 
+
 def Remove_error_code(int errorcode: int) -> None:
     """
     Remove an *error code* from the known error codes.
     """
     CHKERR( MPI_Remove_error_code(errorcode) )
+
 
 def Add_error_string(int errorcode: int, string: str) -> None:
     """
@@ -135,6 +141,7 @@ def Add_error_string(int errorcode: int, string: str) -> None:
     cdef char *cstring = NULL
     string = asmpistr(string, &cstring)
     CHKERR( MPI_Add_error_string(errorcode, cstring) )
+
 
 def Remove_error_string(int errorcode: int) -> None:
     """

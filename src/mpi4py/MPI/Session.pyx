@@ -116,7 +116,7 @@ cdef class Session:
         buf = attach_buffer(buf, &base, &size)
         with nogil: CHKERR( MPI_Session_attach_buffer_c(
             self.ob_mpi, base, size) )
-        detach_buffer_set(self, buf)  #~> MPI-4.1
+        detach_buffer_set(self, buf)  # ~> MPI-4.1
 
     def Detach_buffer(self) -> Buffer | None:
         """
@@ -126,7 +126,7 @@ cdef class Session:
         cdef MPI_Count size = 0
         with nogil: CHKERR( MPI_Session_detach_buffer_c(
             self.ob_mpi, &base, &size) )
-        return detach_buffer_get(self, base, size)  #~> MPI-4.1
+        return detach_buffer_get(self, base, size)  # ~> MPI-4.1
 
     def Flush_buffer(self) -> None:
         """
@@ -141,7 +141,7 @@ cdef class Session:
         cdef Request request = <Request>New(Request)
         with nogil: CHKERR( MPI_Session_iflush_buffer(
             self.ob_mpi, &request.ob_mpi) )
-        return request  #~> MPI-4.1
+        return request  # ~> MPI-4.1
 
     # Error handling
     # --------------
@@ -159,9 +159,9 @@ cdef class Session:
         cdef int index = errhdl_new(errhandler_fn, &fn)
         try:
             CHKERR( MPI_Session_create_errhandler(fn, &errhandler.ob_mpi) )
-        except:                     #~> uncovered
-            errhdl_del(&index, fn)  #~> uncovered
-            raise                   #~> uncovered
+        except:                     # ~> uncovered  # noqa
+            errhdl_del(&index, fn)  # ~> uncovered
+            raise                   # ~> uncovered
         return errhandler
 
     def Get_errhandler(self) -> Errhandler:

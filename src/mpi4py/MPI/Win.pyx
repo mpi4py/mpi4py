@@ -162,8 +162,8 @@ cdef class Win:
         try:
             if self.ob_mem is None: self.ob_mem = {}
             (<dict>self.ob_mem)[<MPI_Aint>base] = memory
-        except:   #~> uncovered
-            pass  #~> uncovered
+        except:   # ~> uncovered  # noqa
+            pass  # ~> uncovered
 
     def Detach(self, memory: Buffer) -> None:
         """
@@ -175,8 +175,8 @@ cdef class Win:
         try:
             if self.ob_mem is None: return
             del (<dict>self.ob_mem)[<MPI_Aint>base]
-        except:   #~> uncovered
-            pass  #~> uncovered
+        except:   # ~> uncovered  # noqa
+            pass  # ~> uncovered
 
     def Free(self) -> None:
         """
@@ -206,6 +206,7 @@ cdef class Win:
         """Info hints."""
         def __get__(self) -> Info:
             return self.Get_info()
+
         def __set__(self, value: Info):
             self.Set_info(value)
 
@@ -657,7 +658,6 @@ cdef class Win:
         """
         with nogil: CHKERR( MPI_Win_sync(self.ob_mpi) )
 
-
     # Error Handling
     # --------------
 
@@ -674,9 +674,9 @@ cdef class Win:
         cdef int index = errhdl_new(errhandler_fn, &fn)
         try:
             CHKERR( MPI_Win_create_errhandler(fn, &errhandler.ob_mpi) )
-        except:                     #~> uncovered
-            errhdl_del(&index, fn)  #~> uncovered
-            raise                   #~> uncovered
+        except:                     # ~> uncovered  # noqa
+            errhdl_del(&index, fn)  # ~> uncovered
+            raise                   # ~> uncovered
         return errhandler
 
     def Get_errhandler(self) -> Errhandler:
@@ -698,7 +698,6 @@ cdef class Win:
         Call the error handler installed on a window.
         """
         CHKERR( MPI_Win_call_errhandler(self.ob_mpi, errorcode) )
-
 
     # Naming Objects
     # --------------
@@ -724,6 +723,7 @@ cdef class Win:
         """Print name."""
         def __get__(self) -> str:
             return self.Get_name()
+
         def __set__(self, value: str):
             self.Set_name(value)
 

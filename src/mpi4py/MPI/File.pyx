@@ -197,6 +197,7 @@ cdef class File:
         """Info hints."""
         def __get__(self) -> Info:
             return self.Get_info()
+
         def __set__(self, value: Info):
             self.Set_info(value)
 
@@ -230,10 +231,10 @@ cdef class File:
         cdef MPI_Datatype cetype = MPI_DATATYPE_NULL
         cdef MPI_Datatype cftype = MPI_DATATYPE_NULL
         cdef char cdatarep[MPI_MAX_DATAREP_STRING+1]
-        cdatarep[0] = 0 # just in case
+        cdatarep[0] = 0  # just in case
         with nogil: CHKERR( MPI_File_get_view(
             self.ob_mpi, &disp, &cetype, &cftype, cdatarep) )
-        cdatarep[MPI_MAX_DATAREP_STRING] = 0 # just in case
+        cdatarep[MPI_MAX_DATAREP_STRING] = 0  # just in case
         cdef Datatype etype = ref_Datatype(cetype)
         cdef Datatype ftype = ref_Datatype(cftype)
         cdef object datarep = mpistr(cdatarep)
@@ -277,7 +278,7 @@ cdef class File:
         self,
         Offset offset: int,
         buf: BufSpec,
-        Status status:Status | None = None,
+        Status status: Status | None = None,
     ) -> None:
         """
         Write using explicit offset.
@@ -795,6 +796,7 @@ cdef class File:
         """Atomicity mode."""
         def __get__(self) -> bool:
             return self.Get_atomicity()
+
         def __set__(self, value: bool):
             self.Set_atomicity(value)
 
@@ -820,9 +822,9 @@ cdef class File:
         cdef int index = errhdl_new(errhandler_fn, &fn)
         try:
             CHKERR( MPI_File_create_errhandler(fn, &errhandler.ob_mpi) )
-        except:                     #~> uncovered
-            errhdl_del(&index, fn)  #~> uncovered
-            raise                   #~> uncovered
+        except:                     # ~> uncovered  # noqa
+            errhdl_del(&index, fn)  # ~> uncovered
+            raise                   # ~> uncovered
         return errhandler
 
     def Get_errhandler(self) -> Errhandler:

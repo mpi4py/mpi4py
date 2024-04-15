@@ -1,5 +1,6 @@
 codespell
 cython
+cython-lint
 flake8
 flake8-assertive
 flake8-bandit

@@ -6,14 +6,17 @@ cdef extern from "Python.h":
 
 # -----------------------------------------------------------------------------
 
+
 @cython.final
 @cython.internal
 cdef class _p_keyval:
+
     cdef public object copy_fn
     cdef public object delete_fn
     cdef public bint   nopython
     cdef int    ierr
     cdef object lock
+
     def __cinit__(self, copy_fn, delete_fn, nopython):
         if copy_fn   is False: copy_fn   = None
         if delete_fn is False: delete_fn = None
@@ -121,7 +124,6 @@ cdef inline int PyMPI_attr_delete(
         Py_DECREF(state)
     return 0
 
-# ---
 
 cdef inline int PyMPI_attr_copy_cb(
     PyMPI_attr_type hdl,
@@ -162,7 +164,6 @@ cdef inline int PyMPI_attr_delete_cb(
         state.ierr, ierr = ierr, MPI_SUCCESS
     return ierr
 
-# ---
 
 @cython.callspec("MPIAPI")
 cdef int PyMPI_attr_copy_fn(
@@ -204,7 +205,7 @@ cdef inline _p_keyval PyMPI_attr_state_get(
     PyMPI_attr_type hdl,
     int keyval,
 ):
-    <void> hdl # unused
+    <void> hdl  # unused
     if PyMPI_attr_type is MPI_Datatype:
         with keyval_lock_type:
             return <_p_keyval>keyval_registry_type.get(keyval)
@@ -221,7 +222,7 @@ cdef inline int PyMPI_attr_state_set(
     int keyval,
     _p_keyval state,
 ) except -1:
-    <void> hdl # unused
+    <void> hdl  # unused
     if PyMPI_attr_type is MPI_Datatype:
         with keyval_lock_type:
             keyval_registry_type[keyval] = state
@@ -238,7 +239,7 @@ cdef inline int PyMPI_attr_state_del(
     PyMPI_attr_type hdl,
     int keyval,
 ) except -1:
-    <void> hdl # unused
+    <void> hdl  # unused
     try:
         if PyMPI_attr_type is MPI_Datatype:
             with keyval_lock_type:
@@ -249,7 +250,7 @@ cdef inline int PyMPI_attr_state_del(
         if PyMPI_attr_type is MPI_Win:
             with keyval_lock_win:
                 del keyval_registry_win[keyval]
-    except KeyError:  #~> uncovered
+    except KeyError:  # ~> uncovered
         pass
     return 0
 

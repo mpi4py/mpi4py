@@ -53,11 +53,11 @@ cdef class Op:
         try:
             try:
                 CHKERR( MPI_Op_create_c(fn_c, commute, &self.ob_mpi) )
-            except NotImplementedError:                               #~> legacy
-                CHKERR( MPI_Op_create(fn_i, commute, &self.ob_mpi) )  #~> legacy
-        except:                        #~> uncovered
-            op_user_del(&self.ob_uid)  #~> uncovered
-            raise                      #~> uncovered
+            except NotImplementedError:                               # ~> legacy
+                CHKERR( MPI_Op_create(fn_i, commute, &self.ob_mpi) )  # ~> legacy
+        except:                        # ~> uncovered  # noqa
+            op_user_del(&self.ob_uid)  # ~> uncovered
+            raise                      # ~> uncovered
         return self
 
     def Free(self) -> None:
@@ -114,21 +114,23 @@ cdef class Op:
         """Is a predefined operation."""
         def __get__(self) -> bool:
             cdef MPI_Op op = self.ob_mpi
-            return (op == MPI_OP_NULL or
-                    op == MPI_MAX or
-                    op == MPI_MIN or
-                    op == MPI_SUM or
-                    op == MPI_PROD or
-                    op == MPI_LAND or
-                    op == MPI_BAND or
-                    op == MPI_LOR or
-                    op == MPI_BOR or
-                    op == MPI_LXOR or
-                    op == MPI_BXOR or
-                    op == MPI_MAXLOC or
-                    op == MPI_MINLOC or
-                    op == MPI_REPLACE or
-                    op == MPI_NO_OP)
+            return (
+                op == MPI_OP_NULL or
+                op == MPI_MAX or
+                op == MPI_MIN or
+                op == MPI_SUM or
+                op == MPI_PROD or
+                op == MPI_LAND or
+                op == MPI_BAND or
+                op == MPI_LOR or
+                op == MPI_BOR or
+                op == MPI_LXOR or
+                op == MPI_BXOR or
+                op == MPI_MAXLOC or
+                op == MPI_MINLOC or
+                op == MPI_REPLACE or
+                op == MPI_NO_OP
+            )
 
     # Fortran Handle
     # --------------

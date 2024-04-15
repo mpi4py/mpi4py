@@ -1,22 +1,22 @@
 # -----------------------------------------------------------------------------
 
-cdef extern from * nogil: # "stddef.h"
+cdef extern from * nogil:  # "stddef.h"
     ctypedef unsigned int wchar_t
 
-cdef extern from * nogil: # "stdlib.h"
+cdef extern from * nogil:  # "stdlib.h"
     const char *getenv(const char *)
 
-cdef extern from * nogil: # "string.h"
+cdef extern from * nogil:  # "string.h"
     int strcmp(const char *, const char *)
     int strncmp(const char *, const char *, size_t)
 
-cdef extern from * nogil: # "string.h"
+cdef extern from * nogil:  # "string.h"
     int memcmp(const void *, const void *, size_t)
     void *memset(void *, int, size_t)
     void *memcpy(void *, const void *, size_t)
     void *memmove(void *, const void *, size_t)
 
-cdef extern from * nogil: # "stdio.h"
+cdef extern from * nogil:  # "stdio.h"
     ctypedef struct FILE
     FILE *stdin, *stdout, *stderr
     int fprintf(FILE *, char *, ...)

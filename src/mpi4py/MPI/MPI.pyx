@@ -104,6 +104,7 @@ def Alloc_mem(Aint size: int, Info info: Info = INFO_NULL) -> buffer:
     CHKERR( MPI_Alloc_mem(size, info.ob_mpi, &base) )
     return mpibuf(base, size)
 
+
 def Free_mem(mem: buffer) -> None:
     """
     Free memory allocated with `Alloc_mem`.
@@ -112,6 +113,7 @@ def Free_mem(mem: buffer) -> None:
     cdef buffer buf = asbuffer(mem, &base, NULL, 1)
     CHKERR( MPI_Free_mem(base) )
     buf.release()
+
 
 # Initialization and Exit
 # -----------------------
@@ -123,12 +125,14 @@ def Init() -> None:
     CHKERR( MPI_Init(NULL, NULL) )
     initialize()
 
+
 def Finalize() -> None:
     """
     Terminate the MPI execution environment.
     """
     finalize()
     CHKERR( MPI_Finalize() )
+
 
 # Levels of MPI threading support
 # -------------------------------
@@ -145,6 +149,7 @@ THREAD_SERIALIZED = MPI_THREAD_SERIALIZED
 THREAD_MULTIPLE   = MPI_THREAD_MULTIPLE
 #: Multiple threads may call MPI
 
+
 def Init_thread(int required: int = THREAD_MULTIPLE) -> int:
     """
     Initialize the MPI execution environment.
@@ -154,6 +159,7 @@ def Init_thread(int required: int = THREAD_MULTIPLE) -> int:
     initialize()
     return provided
 
+
 def Query_thread() -> int:
     """
     Return the level of thread support provided by the MPI library.
@@ -161,6 +167,7 @@ def Query_thread() -> int:
     cdef int provided = MPI_THREAD_SINGLE
     CHKERR( MPI_Query_thread(&provided) )
     return provided
+
 
 def Is_thread_main() -> bool:
     """
@@ -170,6 +177,7 @@ def Is_thread_main() -> bool:
     CHKERR( MPI_Is_thread_main(&flag) )
     return <bint>flag
 
+
 def Is_initialized() -> bool:
     """
     Indicate whether `Init` has been called.
@@ -178,6 +186,7 @@ def Is_initialized() -> bool:
     CHKERR( MPI_Initialized(&flag) )
     return <bint>flag
 
+
 def Is_finalized() -> bool:
     """
     Indicate whether `Finalize` has completed.
@@ -185,6 +194,7 @@ def Is_finalized() -> bool:
     cdef int flag = 0
     CHKERR( MPI_Finalized(&flag) )
     return <bint>flag
+
 
 # Implementation Information
 # --------------------------
@@ -195,6 +205,7 @@ def Is_finalized() -> bool:
 VERSION    = MPI_VERSION
 SUBVERSION = MPI_SUBVERSION
 
+
 def Get_version() -> tuple[int, int]:
     """
     Obtain the version number of the MPI standard.
@@ -204,6 +215,7 @@ def Get_version() -> tuple[int, int]:
     CHKERR( MPI_Get_version(&version, &subversion) )
     return (version, subversion)
 
+
 def Get_library_version() -> str:
     """
     Obtain the version string of the MPI library.
@@ -212,6 +224,7 @@ def Get_library_version() -> str:
     cdef int nlen = 0
     CHKERR( MPI_Get_library_version(name, &nlen) )
     return tompistr(name, nlen)
+
 
 # Environmental Inquires
 # ----------------------
@@ -225,13 +238,15 @@ def Get_processor_name() -> str:
     CHKERR( MPI_Get_processor_name(name, &nlen) )
     return tompistr(name, nlen)
 
+
 def Get_hw_resource_info() -> Info:
     """
     Obtain information about the hardware platform of the calling processor.
     """
     cdef Info info = <Info>New(Info)
     CHKERR( MPI_Get_hw_resource_info(&info.ob_mpi) )
-    return info  #~> MPI-4.1
+    return info  # ~> MPI-4.1
+
 
 # Timers and Synchronization
 # --------------------------
@@ -242,11 +257,13 @@ def Wtime() -> float:
     """
     return MPI_Wtime()
 
+
 def Wtick() -> float:
     """
     Return the resolution of `Wtime`.
     """
     return MPI_Wtick()
+
 
 # Control of Profiling
 # --------------------
@@ -286,7 +303,8 @@ include "typedec.pxi"
 # -----------------------------------------------------------------------------
 
 cdef extern from * nogil:
-    int PyMPI_Get_vendor(const char**,int*,int*,int*)
+    int PyMPI_Get_vendor(const char**, int*, int*, int*)
+
 
 def get_vendor() -> tuple[str, tuple[int, int, int]]:
     """
@@ -301,6 +319,7 @@ def get_vendor() -> tuple[str, tuple[int, int, int]]:
     CHKERR( PyMPI_Get_vendor(&name, &major, &minor, &micro) )
     return (mpistr(name), (major, minor, micro))
 
+
 # -----------------------------------------------------------------------------
 
 cdef inline int _mpi_type(object arg, type cls) except -1:
@@ -309,6 +328,7 @@ cdef inline int _mpi_type(object arg, type cls) except -1:
     else:
         if isinstance(arg, cls): return 1
     return 0
+
 
 def _sizeof(arg: Any) -> int:
     """
@@ -327,6 +347,7 @@ def _sizeof(arg: Any) -> int:
     if _mpi_type(arg, Win):        return sizeof(MPI_Win)
     if _mpi_type(arg, File):       return sizeof(MPI_File)
     raise TypeError("expecting an MPI type or instance")
+
 
 def _addressof(arg: Any) -> int:
     """
@@ -360,6 +381,7 @@ def _addressof(arg: Any) -> int:
     else:
         raise TypeError("expecting an MPI instance")
     return PyLong_FromVoidPtr(ptr)
+
 
 def _handleof(arg: Any) -> int:
     """

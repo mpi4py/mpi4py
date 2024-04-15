@@ -172,7 +172,7 @@ cdef class Group:
         """
         Create a new group by including ranges of members.
         """
-        cdef int *p = NULL, (*ranges)[3]# = NULL ## XXX cython fails
+        cdef int *p = NULL, (*ranges)[3]  # = NULL ## XXX cython fails
         ranges = NULL
         cdef int n = <int>len(ranks)
         cdef unused1 = allocate(n, sizeof(int[3]), &ranges)
@@ -187,7 +187,7 @@ cdef class Group:
         """
         Create a new group by excluding ranges of members.
         """
-        cdef int *p = NULL, (*ranges)[3]# = NULL ## XXX cython fails
+        cdef int *p = NULL, (*ranges)[3]  # = NULL ## XXX cython fails
         ranges = NULL
         cdef int n = <int>len(ranks)
         cdef unused1 = allocate(n, sizeof(int[3]), &ranges)

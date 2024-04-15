@@ -115,7 +115,7 @@ cdef object getOpt(object rc, const char name[], object value):
         value = pystr(cvalue).lower()
     try:
         setattr(rc, pystr(name), value)
-    except:
+    except:  # noqa
         pass
     return value
 
@@ -277,19 +277,19 @@ cdef int check_mpiexec() except -1 nogil:
     MPICH |= (strncmp(b"MVAPICH", vendor, 8) == 0)
     MPICH |= (strncmp(b"MVAPICH2", vendor, 9) == 0)
     if MPICH:
-        if getenv(mpich) == NULL and getenv(pmi_sz) == NULL:      #~> mpich
-            if getenv(openmpi) != NULL:                           #~> mpich
-                bad_env = openmpi                                 #~> mpich
+        if getenv(mpich) == NULL and getenv(pmi_sz) == NULL:      # ~> mpich
+            if getenv(openmpi) != NULL:                           # ~> mpich
+                bad_env = openmpi                                 # ~> mpich
     if IMPI:
-        if getenv(impi) == NULL and getenv(pmi_sz) == NULL:       #~> impi
-            if getenv(openmpi) != NULL:                           #~> impi
-                bad_env = openmpi                                 #~> impi
+        if getenv(impi) == NULL and getenv(pmi_sz) == NULL:       # ~> impi
+            if getenv(openmpi) != NULL:                           # ~> impi
+                bad_env = openmpi                                 # ~> impi
     if OPENMPI:
-        if getenv(openmpi) == NULL:                               #~> openmpi
-            if getenv(mpich) != NULL and getenv(pmi_sz) != NULL:  #~> openmpi
-                bad_env = pmi_sz                                  #~> openmpi
-            if getenv(impi ) != NULL and getenv(pmi_sz) != NULL:  #~> openmpi
-                bad_env = pmi_sz                                  #~> openmpi
+        if getenv(openmpi) == NULL:                               # ~> openmpi
+            if getenv(mpich) != NULL and getenv(pmi_sz) != NULL:  # ~> openmpi
+                bad_env = pmi_sz                                  # ~> openmpi
+            if getenv(impi ) != NULL and getenv(pmi_sz) != NULL:  # ~> openmpi
+                bad_env = pmi_sz                                  # ~> openmpi
     if bad_env != NULL:
         warn_mpiexec(bad_env, vendor)
     return 0
@@ -304,16 +304,16 @@ cdef int bootstrap() except -1:
     getOptions(&options)
     # Cleanup at (the very end of) Python exit
     if Py_AtExit(atexit) < 0:
-        PySys_WriteStderr(                                   #~> uncovered
-            b"WARNING: %s\n",                                #~> uncovered
-            b"could not register cleanup with Py_AtExit()",  #~> uncovered
+        PySys_WriteStderr(                                   # ~> uncovered
+            b"WARNING: %s\n",                                # ~> uncovered
+            b"could not register cleanup with Py_AtExit()",  # ~> uncovered
         )
     # Do we have to initialize MPI?
     cdef int initialized = 1
     <void>MPI_Initialized(&initialized)
     if initialized:
-        options.finalize = 0  #~> TODO
-        return 0              #~> TODO
+        options.finalize = 0  # ~> TODO
+        return 0              # ~> TODO
     if not options.initialize:
         return 0
     # MPI initialization
@@ -324,16 +324,17 @@ cdef int bootstrap() except -1:
         required = options.thread_level
         ierr = MPI_Init_thread(NULL, NULL, required, &provided)
         if ierr != MPI_SUCCESS:
-            raise RuntimeError(               #~> uncovered
-                f"MPI_Init_thread() failed "  #~> uncovered
-                f"[error code: {ierr}]")      #~> uncovered
+            raise RuntimeError(               # ~> uncovered
+                f"MPI_Init_thread() failed "  # ~> uncovered
+                f"[error code: {ierr}]")      # ~> uncovered
     else:
         ierr = MPI_Init(NULL, NULL)
         if ierr != MPI_SUCCESS:
-            raise RuntimeError(               #~> uncovered
-                f"MPI_Init() failed "         #~> uncovered
-                f"[error code: {ierr}]")      #~> uncovered
+            raise RuntimeError(               # ~> uncovered
+                f"MPI_Init() failed "         # ~> uncovered
+                f"[error code: {ierr}]")      # ~> uncovered
     return 0
+
 
 @cython.linetrace(False)
 cdef inline int mpi_active() noexcept nogil:
@@ -349,6 +350,7 @@ cdef inline int mpi_active() noexcept nogil:
     # MPI should be active ...
     return 1
 
+
 cdef int initialize() except -1 nogil:
     if not mpi_active(): return 0
     check_mpiexec()
@@ -356,12 +358,15 @@ cdef int initialize() except -1 nogil:
     comm_set_eh(MPI_COMM_WORLD)
     return 0
 
+
 @cython.linetrace(False)
 cdef void finalize() noexcept nogil:
     if not mpi_active(): return
     <void>PyMPI_Commctx_finalize()
 
+
 cdef int abort_status = 0
+
 
 @cython.linetrace(False)
 cdef void atexit() noexcept nogil:
@@ -372,12 +377,14 @@ cdef void atexit() noexcept nogil:
     if options.finalize:
         <void>MPI_Finalize()
 
+
 def _set_abort_status(int status: int) -> None:
     """
     Helper for ``python -m mpi4py.run ...``.
     """
     global abort_status
     abort_status = status
+
 
 # -----------------------------------------------------------------------------
 
@@ -390,11 +397,11 @@ cdef object MPIException = <object>PyExc_RuntimeError
 
 cdef int PyMPI_Raise(int ierr) except -1 with gil:
     if ierr == PyMPI_ERR_UNAVAILABLE:
-        PyErr_SetObject(<object>PyExc_NotImplementedError, None)  #~> uncovered
-        return 0                                                  #~> uncovered
+        PyErr_SetObject(<object>PyExc_NotImplementedError, None)  # ~> uncovered
+        return 0                                                  # ~> uncovered
     if (<void*>MPIException) == NULL:
-        PyErr_SetObject(<object>PyExc_RuntimeError, <long>ierr)   #~> uncovered
-        return 0                                                  #~> uncovered
+        PyErr_SetObject(<object>PyExc_RuntimeError, <long>ierr)   # ~> uncovered
+        return 0                                                  # ~> uncovered
     PyErr_SetObject(MPIException, <long>ierr)
     return 0
 
@@ -412,18 +419,17 @@ cdef int PyMPI_HandleException(object exc) noexcept:
 
 # -----------------------------------------------------------------------------
 
+cdef extern from "Python.h":
+    # PyPy: Py_IsInitialized() cannot be called without the GIL
+    int _Py_IsInitialized"Py_IsInitialized"() noexcept nogil
+
 cdef object _py_module_sentinel = None
+
 
 @cython.linetrace(False)
 cdef inline int py_module_alive() noexcept nogil:
     return NULL != <void *>_py_module_sentinel
 
-# -----------------------------------------------------------------------------
-
-# PyPy: Py_IsInitialized() cannot be called without the GIL
-
-cdef extern from "Python.h":
-    int _Py_IsInitialized"Py_IsInitialized"() noexcept nogil
 
 @cython.linetrace(False)
 cdef inline int Py_IsInitialized() noexcept nogil:

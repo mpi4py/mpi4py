@@ -1,8 +1,8 @@
 # Storage order for arrays
 # ------------------------
-ORDER_C       = MPI_ORDER_C       #: C order (a.k.a. row major)
-ORDER_FORTRAN = MPI_ORDER_FORTRAN #: Fortran order (a.k.a. column major)
-ORDER_F       = MPI_ORDER_FORTRAN #: Convenience alias for ORDER_FORTRAN
+ORDER_C       = MPI_ORDER_C        #: C order (a.k.a. row major)
+ORDER_FORTRAN = MPI_ORDER_FORTRAN  #: Fortran order (a.k.a. column major)
+ORDER_F       = MPI_ORDER_FORTRAN  #: Convenience alias for ORDER_FORTRAN
 
 
 # Type classes for Fortran datatype matching
@@ -14,10 +14,10 @@ TYPECLASS_COMPLEX = MPI_TYPECLASS_COMPLEX
 
 # Type of distributions (HPF-like arrays)
 # ---------------------------------------
-DISTRIBUTE_NONE      = MPI_DISTRIBUTE_NONE      #: Dimension not distributed
-DISTRIBUTE_BLOCK     = MPI_DISTRIBUTE_BLOCK     #: Block distribution
-DISTRIBUTE_CYCLIC    = MPI_DISTRIBUTE_CYCLIC    #: Cyclic distribution
-DISTRIBUTE_DFLT_DARG = MPI_DISTRIBUTE_DFLT_DARG #: Default distribution
+DISTRIBUTE_NONE      = MPI_DISTRIBUTE_NONE       #: Dimension not distributed
+DISTRIBUTE_BLOCK     = MPI_DISTRIBUTE_BLOCK      #: Block distribution
+DISTRIBUTE_CYCLIC    = MPI_DISTRIBUTE_CYCLIC     #: Cyclic distribution
+DISTRIBUTE_DFLT_DARG = MPI_DISTRIBUTE_DFLT_DARG  #: Default distribution
 
 
 # Combiner values for datatype decoding
@@ -132,7 +132,7 @@ cdef class Datatype:
         CHKERR( MPI_Type_dup(self.ob_mpi, &datatype.ob_mpi) )
         return datatype
 
-    Create_dup = Dup #: convenience alias
+    Create_dup = Dup  #: convenience alias
 
     def Create_contiguous(self, Count count: int) -> Self:
         """
@@ -485,7 +485,7 @@ cdef class Datatype:
             self.ob_mpi, lb, extent, &datatype.ob_mpi) )
         return datatype
 
-    Resized = Create_resized #: compatibility alias
+    Resized = Create_resized  #: compatibility alias
 
     def Get_true_extent(self) -> tuple[int, int]:
         """
@@ -538,8 +538,8 @@ cdef class Datatype:
         def __get__(self) -> tuple[int, int, int, int, int]:
             return self.Get_envelope()
 
-    def Get_contents(self) \
-        -> tuple[list[int], list[int], list[int], list[Datatype]]:
+    def Get_contents(self) -> \
+            tuple[list[int], list[int], list[int], list[Datatype]]:
         """
         Return the input arguments used to create a datatype.
         """
@@ -565,8 +565,8 @@ cdef class Datatype:
 
     property contents:
         """Contents."""
-        def __get__(self) \
-            -> tuple[list[int], list[int], list[int], list[Datatype]]:
+        def __get__(self) -> \
+                tuple[list[int], list[int], list[int], list[Datatype]]:
             return self.Get_contents()
 
     def decode(self) -> tuple[Datatype, str, dict[str, Any]]:
@@ -830,6 +830,7 @@ cdef class Datatype:
         """Print name."""
         def __get__(self) -> str:
             return self.Get_name()
+
         def __set__(self, value: str):
             self.Set_name(value)
 
@@ -899,11 +900,13 @@ def Get_address(location: Buffer | Bottom) -> int:
     CHKERR( MPI_Get_address(baseptr, &address) )
     return address
 
+
 def Aint_add(Aint base: int, Aint disp: int) -> int:
     """
     Return the sum of base address and displacement.
     """
     return MPI_Aint_add(base, disp)
+
 
 def Aint_diff(Aint addr1: int, Aint addr2: int) -> int:
     """
@@ -912,7 +915,7 @@ def Aint_diff(Aint addr1: int, Aint addr2: int) -> int:
     return MPI_Aint_diff(addr1, addr2)
 
 
-cdef Datatype __DATATYPE_NULL__ = def_Datatype( MPI_DATATYPE_NULL , "DATATYPE_NULL" )
+cdef Datatype __DATATYPE_NULL__ = def_Datatype( MPI_DATATYPE_NULL , "DATATYPE_NULL" )  # noqa
 
 cdef Datatype __PACKED__ = def_Datatype( MPI_PACKED , "PACKED" )
 cdef Datatype __BYTE__   = def_Datatype( MPI_BYTE   , "BYTE"   )
@@ -920,56 +923,56 @@ cdef Datatype __AINT__   = def_Datatype( MPI_AINT   , "AINT"   )
 cdef Datatype __OFFSET__ = def_Datatype( MPI_OFFSET , "OFFSET" )
 cdef Datatype __COUNT__  = def_Datatype( MPI_COUNT  , "COUNT"  )
 
-cdef Datatype __CHAR__               = def_Datatype( MPI_CHAR               , "CHAR"               )
-cdef Datatype __WCHAR__              = def_Datatype( MPI_WCHAR              , "WCHAR"              )
-cdef Datatype __SIGNED_CHAR__        = def_Datatype( MPI_SIGNED_CHAR        , "SIGNED_CHAR"        )
-cdef Datatype __SHORT__              = def_Datatype( MPI_SHORT              , "SHORT"              )
-cdef Datatype __INT__                = def_Datatype( MPI_INT                , "INT"                )
-cdef Datatype __LONG__               = def_Datatype( MPI_LONG               , "LONG"               )
-cdef Datatype __LONG_LONG__          = def_Datatype( MPI_LONG_LONG          , "LONG_LONG"          )
-cdef Datatype __UNSIGNED_CHAR__      = def_Datatype( MPI_UNSIGNED_CHAR      , "UNSIGNED_CHAR"      )
-cdef Datatype __UNSIGNED_SHORT__     = def_Datatype( MPI_UNSIGNED_SHORT     , "UNSIGNED_SHORT"     )
-cdef Datatype __UNSIGNED__           = def_Datatype( MPI_UNSIGNED           , "UNSIGNED"           )
-cdef Datatype __UNSIGNED_LONG__      = def_Datatype( MPI_UNSIGNED_LONG      , "UNSIGNED_LONG"      )
-cdef Datatype __UNSIGNED_LONG_LONG__ = def_Datatype( MPI_UNSIGNED_LONG_LONG , "UNSIGNED_LONG_LONG" )
-cdef Datatype __FLOAT__              = def_Datatype( MPI_FLOAT              , "FLOAT"              )
-cdef Datatype __DOUBLE__             = def_Datatype( MPI_DOUBLE             , "DOUBLE"             )
-cdef Datatype __LONG_DOUBLE__        = def_Datatype( MPI_LONG_DOUBLE        , "LONG_DOUBLE"        )
+cdef Datatype __CHAR__               = def_Datatype( MPI_CHAR               , "CHAR"               )  # noqa
+cdef Datatype __WCHAR__              = def_Datatype( MPI_WCHAR              , "WCHAR"              )  # noqa
+cdef Datatype __SIGNED_CHAR__        = def_Datatype( MPI_SIGNED_CHAR        , "SIGNED_CHAR"        )  # noqa
+cdef Datatype __SHORT__              = def_Datatype( MPI_SHORT              , "SHORT"              )  # noqa
+cdef Datatype __INT__                = def_Datatype( MPI_INT                , "INT"                )  # noqa
+cdef Datatype __LONG__               = def_Datatype( MPI_LONG               , "LONG"               )  # noqa
+cdef Datatype __LONG_LONG__          = def_Datatype( MPI_LONG_LONG          , "LONG_LONG"          )  # noqa
+cdef Datatype __UNSIGNED_CHAR__      = def_Datatype( MPI_UNSIGNED_CHAR      , "UNSIGNED_CHAR"      )  # noqa
+cdef Datatype __UNSIGNED_SHORT__     = def_Datatype( MPI_UNSIGNED_SHORT     , "UNSIGNED_SHORT"     )  # noqa
+cdef Datatype __UNSIGNED__           = def_Datatype( MPI_UNSIGNED           , "UNSIGNED"           )  # noqa
+cdef Datatype __UNSIGNED_LONG__      = def_Datatype( MPI_UNSIGNED_LONG      , "UNSIGNED_LONG"      )  # noqa
+cdef Datatype __UNSIGNED_LONG_LONG__ = def_Datatype( MPI_UNSIGNED_LONG_LONG , "UNSIGNED_LONG_LONG" )  # noqa
+cdef Datatype __FLOAT__              = def_Datatype( MPI_FLOAT              , "FLOAT"              )  # noqa
+cdef Datatype __DOUBLE__             = def_Datatype( MPI_DOUBLE             , "DOUBLE"             )  # noqa
+cdef Datatype __LONG_DOUBLE__        = def_Datatype( MPI_LONG_DOUBLE        , "LONG_DOUBLE"        )  # noqa
 
-cdef Datatype __C_BOOL__                = def_Datatype( MPI_C_BOOL   , "C_BOOL"   )
-cdef Datatype __INT8_T__                = def_Datatype( MPI_INT8_T   , "INT8_T"   )
-cdef Datatype __INT16_T__               = def_Datatype( MPI_INT16_T  , "INT16_T"  )
-cdef Datatype __INT32_T__               = def_Datatype( MPI_INT32_T  , "INT32_T"  )
-cdef Datatype __INT64_T__               = def_Datatype( MPI_INT64_T  , "INT64_T"  )
-cdef Datatype __UINT8_T__               = def_Datatype( MPI_UINT8_T  , "UINT8_T"  )
-cdef Datatype __UINT16_T__              = def_Datatype( MPI_UINT16_T , "UINT16_T" )
-cdef Datatype __UINT32_T__              = def_Datatype( MPI_UINT32_T , "UINT32_T" )
-cdef Datatype __UINT64_T__              = def_Datatype( MPI_UINT64_T , "UINT64_T" )
+cdef Datatype __C_BOOL__                = def_Datatype( MPI_C_BOOL   , "C_BOOL"   )  # noqa
+cdef Datatype __INT8_T__                = def_Datatype( MPI_INT8_T   , "INT8_T"   )  # noqa
+cdef Datatype __INT16_T__               = def_Datatype( MPI_INT16_T  , "INT16_T"  )  # noqa
+cdef Datatype __INT32_T__               = def_Datatype( MPI_INT32_T  , "INT32_T"  )  # noqa
+cdef Datatype __INT64_T__               = def_Datatype( MPI_INT64_T  , "INT64_T"  )  # noqa
+cdef Datatype __UINT8_T__               = def_Datatype( MPI_UINT8_T  , "UINT8_T"  )  # noqa
+cdef Datatype __UINT16_T__              = def_Datatype( MPI_UINT16_T , "UINT16_T" )  # noqa
+cdef Datatype __UINT32_T__              = def_Datatype( MPI_UINT32_T , "UINT32_T" )  # noqa
+cdef Datatype __UINT64_T__              = def_Datatype( MPI_UINT64_T , "UINT64_T" )  # noqa
 
-cdef Datatype __C_COMPLEX__             = def_Datatype( MPI_C_COMPLEX             , "C_COMPLEX"             )
+cdef Datatype __C_COMPLEX__             = def_Datatype( MPI_C_COMPLEX             , "C_COMPLEX"             )  # noqa
 cdef Datatype __C_FLOAT_COMPLEX__       = __C_COMPLEX__
-cdef Datatype __C_DOUBLE_COMPLEX__      = def_Datatype( MPI_C_DOUBLE_COMPLEX      , "C_DOUBLE_COMPLEX"      )
-cdef Datatype __C_LONG_DOUBLE_COMPLEX__ = def_Datatype( MPI_C_LONG_DOUBLE_COMPLEX , "C_LONG_DOUBLE_COMPLEX" )
+cdef Datatype __C_DOUBLE_COMPLEX__      = def_Datatype( MPI_C_DOUBLE_COMPLEX      , "C_DOUBLE_COMPLEX"      )  # noqa
+cdef Datatype __C_LONG_DOUBLE_COMPLEX__ = def_Datatype( MPI_C_LONG_DOUBLE_COMPLEX , "C_LONG_DOUBLE_COMPLEX" )  # noqa
 
-cdef Datatype __CXX_BOOL__                = def_Datatype( MPI_CXX_BOOL                , "CXX_BOOL"                )
-cdef Datatype __CXX_FLOAT_COMPLEX__       = def_Datatype( MPI_CXX_FLOAT_COMPLEX       , "CXX_FLOAT_COMPLEX"       )
-cdef Datatype __CXX_DOUBLE_COMPLEX__      = def_Datatype( MPI_CXX_DOUBLE_COMPLEX      , "CXX_DOUBLE_COMPLEX"      )
-cdef Datatype __CXX_LONG_DOUBLE_COMPLEX__ = def_Datatype( MPI_CXX_LONG_DOUBLE_COMPLEX , "CXX_LONG_DOUBLE_COMPLEX" )
+cdef Datatype __CXX_BOOL__                = def_Datatype( MPI_CXX_BOOL                , "CXX_BOOL"                )  # noqa
+cdef Datatype __CXX_FLOAT_COMPLEX__       = def_Datatype( MPI_CXX_FLOAT_COMPLEX       , "CXX_FLOAT_COMPLEX"       )  # noqa
+cdef Datatype __CXX_DOUBLE_COMPLEX__      = def_Datatype( MPI_CXX_DOUBLE_COMPLEX      , "CXX_DOUBLE_COMPLEX"      )  # noqa
+cdef Datatype __CXX_LONG_DOUBLE_COMPLEX__ = def_Datatype( MPI_CXX_LONG_DOUBLE_COMPLEX , "CXX_LONG_DOUBLE_COMPLEX" )  # noqa
 
-cdef Datatype __SHORT_INT__        = def_Datatype( MPI_SHORT_INT       , "SHORT_INT"       )
-cdef Datatype __INT_INT__          = def_Datatype( MPI_2INT            , "INT_INT"         )
-cdef Datatype __LONG_INT__         = def_Datatype( MPI_LONG_INT        , "LONG_INT"        )
-cdef Datatype __FLOAT_INT__        = def_Datatype( MPI_FLOAT_INT       , "FLOAT_INT"       )
-cdef Datatype __DOUBLE_INT__       = def_Datatype( MPI_DOUBLE_INT      , "DOUBLE_INT"      )
-cdef Datatype __LONG_DOUBLE_INT__  = def_Datatype( MPI_LONG_DOUBLE_INT , "LONG_DOUBLE_INT" )
+cdef Datatype __SHORT_INT__        = def_Datatype( MPI_SHORT_INT       , "SHORT_INT"       )  # noqa
+cdef Datatype __INT_INT__          = def_Datatype( MPI_2INT            , "INT_INT"         )  # noqa
+cdef Datatype __LONG_INT__         = def_Datatype( MPI_LONG_INT        , "LONG_INT"        )  # noqa
+cdef Datatype __FLOAT_INT__        = def_Datatype( MPI_FLOAT_INT       , "FLOAT_INT"       )  # noqa
+cdef Datatype __DOUBLE_INT__       = def_Datatype( MPI_DOUBLE_INT      , "DOUBLE_INT"      )  # noqa
+cdef Datatype __LONG_DOUBLE_INT__  = def_Datatype( MPI_LONG_DOUBLE_INT , "LONG_DOUBLE_INT" )  # noqa
 
-cdef Datatype __CHARACTER__        = def_Datatype( MPI_CHARACTER        , "CHARACTER"        )
-cdef Datatype __LOGICAL__          = def_Datatype( MPI_LOGICAL          , "LOGICAL"          )
-cdef Datatype __INTEGER__          = def_Datatype( MPI_INTEGER          , "INTEGER"          )
-cdef Datatype __REAL__             = def_Datatype( MPI_REAL             , "REAL"             )
-cdef Datatype __DOUBLE_PRECISION__ = def_Datatype( MPI_DOUBLE_PRECISION , "DOUBLE_PRECISION" )
-cdef Datatype __COMPLEX__          = def_Datatype( MPI_COMPLEX          , "COMPLEX"          )
-cdef Datatype __DOUBLE_COMPLEX__   = def_Datatype( MPI_DOUBLE_COMPLEX   , "DOUBLE_COMPLEX"   )
+cdef Datatype __CHARACTER__        = def_Datatype( MPI_CHARACTER        , "CHARACTER"        )  # noqa
+cdef Datatype __LOGICAL__          = def_Datatype( MPI_LOGICAL          , "LOGICAL"          )  # noqa
+cdef Datatype __INTEGER__          = def_Datatype( MPI_INTEGER          , "INTEGER"          )  # noqa
+cdef Datatype __REAL__             = def_Datatype( MPI_REAL             , "REAL"             )  # noqa
+cdef Datatype __DOUBLE_PRECISION__ = def_Datatype( MPI_DOUBLE_PRECISION , "DOUBLE_PRECISION" )  # noqa
+cdef Datatype __COMPLEX__          = def_Datatype( MPI_COMPLEX          , "COMPLEX"          )  # noqa
+cdef Datatype __DOUBLE_COMPLEX__   = def_Datatype( MPI_DOUBLE_COMPLEX   , "DOUBLE_COMPLEX"   )  # noqa
 
 cdef Datatype __LOGICAL1__  = def_Datatype( MPI_LOGICAL1  , "LOGICAL1"  )
 cdef Datatype __LOGICAL2__  = def_Datatype( MPI_LOGICAL2  , "LOGICAL2"  )
@@ -992,7 +995,7 @@ cdef Datatype __COMPLEX32__ = def_Datatype( MPI_COMPLEX32 , "COMPLEX32" )
 # Predefined datatype handles
 # ---------------------------
 
-DATATYPE_NULL = __DATATYPE_NULL__ #: Null datatype handle
+DATATYPE_NULL = __DATATYPE_NULL__  #: Null datatype handle
 # MPI-specific datatypes
 PACKED = __PACKED__
 BYTE   = __BYTE__

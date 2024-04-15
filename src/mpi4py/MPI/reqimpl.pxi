@@ -1,5 +1,6 @@
 # -----------------------------------------------------------------------------
 
+
 @cython.final
 @cython.internal
 cdef class _p_rs:
@@ -102,6 +103,7 @@ cdef class _p_rs:
 
 # -----------------------------------------------------------------------------
 
+
 @cython.final
 @cython.internal
 cdef class _p_greq:
@@ -144,7 +146,6 @@ cdef class _p_greq:
             self.cancel_fn(completed, *self.args, **self.kwargs)
         return MPI_SUCCESS
 
-# ---
 
 cdef int greq_query(
     void *extra_state,
@@ -188,7 +189,6 @@ cdef int greq_cancel(
         ierr = PyMPI_HandleException(exc)
     return ierr
 
-# ---
 
 @cython.callspec("MPIAPI")
 cdef int greq_query_fn(
@@ -221,5 +221,6 @@ cdef int greq_cancel_fn(
     if not Py_IsInitialized(): return MPI_ERR_INTERN
     if not py_module_alive():  return MPI_ERR_INTERN
     return greq_cancel(extra_state, completed)
+
 
 # -----------------------------------------------------------------------------

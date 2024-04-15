@@ -76,18 +76,27 @@ cdef object op_MINLOC(object x, object y):
 
 cdef object op_REPLACE(object x, object y):
     """replace,  (x, y) -> y"""
-    <void> x # unused
+    <void> x  # unused
     return y
 
 cdef object op_NO_OP(object x, object y):
     """no-op,  (x, y) -> x"""
-    <void> y # unused
+    <void> y  # unused
     return x
 
 # -----------------------------------------------------------------------------
 
+ctypedef fused op_count_t:
+    int
+    MPI_Count
+
+ctypedef fused op_usrfn_t:
+    MPI_User_function
+    MPI_User_function_c
+
 cdef object op_user_lock     = Lock()
 cdef list   op_user_registry = [None]*(1+32)
+
 
 cdef inline object op_user_call_py(int index, object x, object y, object dt):
     return op_user_registry[index](x, y, dt)
@@ -105,13 +114,14 @@ cdef inline void op_user_call_mpi(
             op_user_call_py(index, mpibuf(a, n), mpibuf(b, n), datatype)
         finally:
             datatype.ob_mpi = MPI_DATATYPE_NULL
-    except BaseException as exc:                               #~> uncovered
-        PyErr_DisplayException(exc)                            #~> uncovered
-        PySys_WriteStderr(                                     #~> uncovered
-            b"Fatal Python error: %s\n",                       #~> uncovered
-            b"exception in user-defined reduction operation",  #~> uncovered
-        )                                                      #~> uncovered
-        <void>MPI_Abort(MPI_COMM_WORLD, 1)                     #~> uncovered
+    except BaseException as exc:                               # ~> uncovered
+        PyErr_DisplayException(exc)                            # ~> uncovered
+        PySys_WriteStderr(                                     # ~> uncovered
+            b"Fatal Python error: %s\n",                       # ~> uncovered
+            b"exception in user-defined reduction operation",  # ~> uncovered
+        )                                                      # ~> uncovered
+        <void>MPI_Abort(MPI_COMM_WORLD, 1)                     # ~> uncovered
+
 
 cdef inline void op_user_call(
     int index,
@@ -128,107 +138,162 @@ cdef inline void op_user_call(
     # make the actual GIL-safe Python call
     op_user_call_mpi(index, a, b, n, t)
 
-ctypedef fused op_count_t:
-    int
-    MPI_Count
-
-ctypedef fused op_usrfn_t:
-    MPI_User_function
-    MPI_User_function_c
 
 @cython.callspec("MPIAPI")
 cdef void op_user_01(void *a, void *b, op_count_t *n, MPI_Datatype *t) noexcept nogil:
     op_user_call( 1, a, b, n[0], t[0])
+
+
 @cython.callspec("MPIAPI")
 cdef void op_user_02(void *a, void *b, op_count_t *n, MPI_Datatype *t) noexcept nogil:
     op_user_call( 2, a, b, n[0], t[0])
+
+
 @cython.callspec("MPIAPI")
 cdef void op_user_03(void *a, void *b, op_count_t *n, MPI_Datatype *t) noexcept nogil:
     op_user_call( 3, a, b, n[0], t[0])
+
+
 @cython.callspec("MPIAPI")
 cdef void op_user_04(void *a, void *b, op_count_t *n, MPI_Datatype *t) noexcept nogil:
     op_user_call( 4, a, b, n[0], t[0])
+
+
 @cython.callspec("MPIAPI")
 cdef void op_user_05(void *a, void *b, op_count_t *n, MPI_Datatype *t) noexcept nogil:
     op_user_call( 5, a, b, n[0], t[0])
+
+
 @cython.callspec("MPIAPI")
 cdef void op_user_06(void *a, void *b, op_count_t *n, MPI_Datatype *t) noexcept nogil:
     op_user_call( 6, a, b, n[0], t[0])
+
+
 @cython.callspec("MPIAPI")
 cdef void op_user_07(void *a, void *b, op_count_t *n, MPI_Datatype *t) noexcept nogil:
     op_user_call( 7, a, b, n[0], t[0])
+
+
 @cython.callspec("MPIAPI")
 cdef void op_user_08(void *a, void *b, op_count_t *n, MPI_Datatype *t) noexcept nogil:
     op_user_call( 8, a, b, n[0], t[0])
+
+
 @cython.callspec("MPIAPI")
 cdef void op_user_09(void *a, void *b, op_count_t *n, MPI_Datatype *t) noexcept nogil:
     op_user_call( 9, a, b, n[0], t[0])
+
+
 @cython.callspec("MPIAPI")
 cdef void op_user_10(void *a, void *b, op_count_t *n, MPI_Datatype *t) noexcept nogil:
     op_user_call(10, a, b, n[0], t[0])
+
+
 @cython.callspec("MPIAPI")
 cdef void op_user_11(void *a, void *b, op_count_t *n, MPI_Datatype *t) noexcept nogil:
     op_user_call(11, a, b, n[0], t[0])
+
+
 @cython.callspec("MPIAPI")
 cdef void op_user_12(void *a, void *b, op_count_t *n, MPI_Datatype *t) noexcept nogil:
     op_user_call(12, a, b, n[0], t[0])
+
+
 @cython.callspec("MPIAPI")
 cdef void op_user_13(void *a, void *b, op_count_t *n, MPI_Datatype *t) noexcept nogil:
     op_user_call(13, a, b, n[0], t[0])
+
+
 @cython.callspec("MPIAPI")
 cdef void op_user_14(void *a, void *b, op_count_t *n, MPI_Datatype *t) noexcept nogil:
     op_user_call(14, a, b, n[0], t[0])
+
+
 @cython.callspec("MPIAPI")
 cdef void op_user_15(void *a, void *b, op_count_t *n, MPI_Datatype *t) noexcept nogil:
     op_user_call(15, a, b, n[0], t[0])
+
+
 @cython.callspec("MPIAPI")
 cdef void op_user_16(void *a, void *b, op_count_t *n, MPI_Datatype *t) noexcept nogil:
     op_user_call(16, a, b, n[0], t[0])
+
+
 @cython.callspec("MPIAPI")
 cdef void op_user_17(void *a, void *b, op_count_t *n, MPI_Datatype *t) noexcept nogil:
     op_user_call(17, a, b, n[0], t[0])
+
+
 @cython.callspec("MPIAPI")
 cdef void op_user_18(void *a, void *b, op_count_t *n, MPI_Datatype *t) noexcept nogil:
     op_user_call(18, a, b, n[0], t[0])
+
+
 @cython.callspec("MPIAPI")
 cdef void op_user_19(void *a, void *b, op_count_t *n, MPI_Datatype *t) noexcept nogil:
     op_user_call(19, a, b, n[0], t[0])
+
+
 @cython.callspec("MPIAPI")
 cdef void op_user_20(void *a, void *b, op_count_t *n, MPI_Datatype *t) noexcept nogil:
     op_user_call(20, a, b, n[0], t[0])
+
+
 @cython.callspec("MPIAPI")
 cdef void op_user_21(void *a, void *b, op_count_t *n, MPI_Datatype *t) noexcept nogil:
     op_user_call(21, a, b, n[0], t[0])
+
+
 @cython.callspec("MPIAPI")
 cdef void op_user_22(void *a, void *b, op_count_t *n, MPI_Datatype *t) noexcept nogil:
     op_user_call(22, a, b, n[0], t[0])
+
+
 @cython.callspec("MPIAPI")
 cdef void op_user_23(void *a, void *b, op_count_t *n, MPI_Datatype *t) noexcept nogil:
     op_user_call(23, a, b, n[0], t[0])
+
+
 @cython.callspec("MPIAPI")
 cdef void op_user_24(void *a, void *b, op_count_t *n, MPI_Datatype *t) noexcept nogil:
     op_user_call(24, a, b, n[0], t[0])
+
+
 @cython.callspec("MPIAPI")
 cdef void op_user_25(void *a, void *b, op_count_t *n, MPI_Datatype *t) noexcept nogil:
     op_user_call(25, a, b, n[0], t[0])
+
+
 @cython.callspec("MPIAPI")
 cdef void op_user_26(void *a, void *b, op_count_t *n, MPI_Datatype *t) noexcept nogil:
     op_user_call(26, a, b, n[0], t[0])
+
+
 @cython.callspec("MPIAPI")
 cdef void op_user_27(void *a, void *b, op_count_t *n, MPI_Datatype *t) noexcept nogil:
     op_user_call(27, a, b, n[0], t[0])
+
+
 @cython.callspec("MPIAPI")
 cdef void op_user_28(void *a, void *b, op_count_t *n, MPI_Datatype *t) noexcept nogil:
     op_user_call(28, a, b, n[0], t[0])
+
+
 @cython.callspec("MPIAPI")
 cdef void op_user_29(void *a, void *b, op_count_t *n, MPI_Datatype *t) noexcept nogil:
     op_user_call(29, a, b, n[0], t[0])
+
+
 @cython.callspec("MPIAPI")
 cdef void op_user_30(void *a, void *b, op_count_t *n, MPI_Datatype *t) noexcept nogil:
     op_user_call(30, a, b, n[0], t[0])
+
+
 @cython.callspec("MPIAPI")
 cdef void op_user_31(void *a, void *b, op_count_t *n, MPI_Datatype *t) noexcept nogil:
     op_user_call(31, a, b, n[0], t[0])
+
+
 @cython.callspec("MPIAPI")
 cdef void op_user_32(void *a, void *b, op_count_t *n, MPI_Datatype *t) noexcept nogil:
     op_user_call(32, a, b, n[0], t[0])

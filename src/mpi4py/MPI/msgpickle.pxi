@@ -4,14 +4,14 @@ cdef extern from "Python.h":
     bint       PyBytes_CheckExact(object)
     char*      PyBytes_AsString(object) except NULL
     Py_ssize_t PyBytes_Size(object) except -1
-    object     PyBytes_FromStringAndSize(char*,Py_ssize_t)
+    object     PyBytes_FromStringAndSize(char*, Py_ssize_t)
 
 # -----------------------------------------------------------------------------
 
 cdef object PyPickle_dumps = None
 cdef object PyPickle_loads = None
 cdef object PyPickle_PROTOCOL = None
-cdef object PyPickle_THRESHOLD = 1024**2 // 4 # 0.25 MiB
+cdef object PyPickle_THRESHOLD = 1024**2 // 4  # 0.25 MiB
 
 from pickle import dumps as PyPickle_dumps
 from pickle import loads as PyPickle_loads
@@ -34,8 +34,8 @@ cdef class Pickle:
     cdef object ob_THRES
 
     def __cinit__(self, *args, **kwargs):
-        <void> args   # unused
-        <void> kwargs # unused
+        <void> args    # unused
+        <void> kwargs  # unused
         self.ob_dumps = PyPickle_dumps
         self.ob_loads = PyPickle_loads
         self.ob_PROTO = PyPickle_PROTOCOL
@@ -103,6 +103,7 @@ cdef class Pickle:
         """Protocol version."""
         def __get__(self) -> int | None:
             return self.ob_PROTO
+
         def __set__(self, protocol: int | None):
             if protocol is None:
                 if self.ob_dumps is PyPickle_dumps:
@@ -113,6 +114,7 @@ cdef class Pickle:
         """Out-of-band threshold."""
         def __get__(self) -> int:
             return self.ob_THRES
+
         def __set__(self, threshold: int | None):
             if threshold is None:
                 threshold = PyPickle_THRESHOLD
@@ -124,24 +126,24 @@ pickle = PyMPI_PICKLE
 
 # -----------------------------------------------------------------------------
 
-cdef int have_pickle5 = -1                                #~> legacy
-cdef object PyPickle5_dumps = None                        #~> legacy
-cdef object PyPickle5_loads = None                        #~> legacy
+cdef int have_pickle5 = -1                                # ~> legacy
+cdef object PyPickle5_dumps = None                        # ~> legacy
+cdef object PyPickle5_loads = None                        # ~> legacy
 
-cdef int import_pickle5() except -1:                      #~> legacy
-    global have_pickle5                                   #~> legacy
-    global PyPickle5_dumps                                #~> legacy
-    global PyPickle5_loads                                #~> legacy
-    if have_pickle5 < 0:                                  #~> legacy
-        try:                                              #~> legacy
-            from pickle5 import dumps as PyPickle5_dumps  #~> legacy
-            from pickle5 import loads as PyPickle5_loads  #~> legacy
-            have_pickle5 = 1                              #~> legacy
-        except ImportError:                               #~> legacy
-            PyPickle5_dumps = None                        #~> legacy
-            PyPickle5_loads = None                        #~> legacy
-            have_pickle5 = 0                              #~> legacy
-    return have_pickle5                                   #~> legacy
+cdef int import_pickle5() except -1:                      # ~> legacy
+    global have_pickle5                                   # ~> legacy
+    global PyPickle5_dumps                                # ~> legacy
+    global PyPickle5_loads                                # ~> legacy
+    if have_pickle5 < 0:                                  # ~> legacy
+        try:                                              # ~> legacy
+            from pickle5 import dumps as PyPickle5_dumps  # ~> legacy
+            from pickle5 import loads as PyPickle5_loads  # ~> legacy
+            have_pickle5 = 1                              # ~> legacy
+        except ImportError:                               # ~> legacy
+            PyPickle5_dumps = None                        # ~> legacy
+            PyPickle5_loads = None                        # ~> legacy
+            have_pickle5 = 0                              # ~> legacy
+    return have_pickle5                                   # ~> legacy
 
 
 cdef object get_buffer_callback(list buffers, Py_ssize_t threshold):
@@ -156,14 +158,14 @@ cdef object get_buffer_callback(list buffers, Py_ssize_t threshold):
 
 cdef object cdumps_oob(Pickle pkl, object obj):
     cdef object pkl_dumps = pkl.ob_dumps
-    if PY_VERSION_HEX < 0x03080000:          #~> legacy
-        if pkl_dumps is PyPickle_dumps:      #~> legacy
-            if not import_pickle5():         #~> legacy
-                return cdumps(pkl, obj), []  #~> legacy
-            pkl_dumps = PyPickle5_dumps      #~> legacy
+    if PY_VERSION_HEX < 0x03080000:          # ~> legacy
+        if pkl_dumps is PyPickle_dumps:      # ~> legacy
+            if not import_pickle5():         # ~> legacy
+                return cdumps(pkl, obj), []  # ~> legacy
+            pkl_dumps = PyPickle5_dumps      # ~> legacy
     cdef object protocol = pkl.ob_PROTO
     if protocol is None:
-        protocol = PyPickle_PROTOCOL         #~> uncovered
+        protocol = PyPickle_PROTOCOL         # ~> uncovered
     protocol = max(protocol, 5)
     cdef list buffers = []
     cdef Py_ssize_t threshold = pkl.ob_THRES
@@ -173,11 +175,11 @@ cdef object cdumps_oob(Pickle pkl, object obj):
 
 cdef object cloads_oob(Pickle pkl, object data, object buffers):
     cdef object pkl_loads = pkl.ob_loads
-    if PY_VERSION_HEX < 0x03080000:       #~> legacy
-        if pkl_loads is PyPickle_loads:   #~> legacy
-            if not import_pickle5():      #~> legacy
-                return cloads(pkl, data)  #~> legacy
-            pkl_loads = PyPickle5_loads   #~> legacy
+    if PY_VERSION_HEX < 0x03080000:       # ~> legacy
+        if pkl_loads is PyPickle_loads:   # ~> legacy
+            if not import_pickle5():      # ~> legacy
+                return cloads(pkl, data)  # ~> legacy
+            pkl_loads = PyPickle5_loads   # ~> legacy
     return pkl_loads(data, buffers=buffers)
 
 
@@ -204,25 +206,33 @@ cdef object pickle_load(Pickle pkl, void *p, MPI_Count n):
     return cloads(pkl, mpibuf(p, n))
 
 
-cdef object pickle_dumpv(Pickle pkl, object obj, void **p, int n, MPI_Count cnt[], MPI_Aint dsp[]):
-    cdef Py_ssize_t m=n
+cdef object pickle_dumpv(
+    Pickle pkl, object obj,
+    void **p, int n, MPI_Count cnt[], MPI_Aint dsp[],
+):
+    cdef Py_ssize_t m = n
     cdef object items
     if obj is None: items = [None] * m
     else:           items = list(obj)
     m = len(items)
     if m != n:
         raise ValueError(f"expecting {n} items, got {m}")
-    cdef MPI_Count c=0
-    cdef MPI_Aint  d=0
+    cdef MPI_Count c = 0
+    cdef MPI_Aint  d = 0
     for i in range(m):
         items[i] = pickle_dump(pkl, items[i], p, &c)
-        cnt[i] = c; dsp[i] = d; d = d + <MPI_Aint>c
+        cnt[i] = c
+        dsp[i] = d
+        d = d + <MPI_Aint> c
     cdef object buf = b''.join(items)
     p[0] = PyBytes_AsString(buf)
     return buf
 
-cdef object pickle_loadv(Pickle pkl, void *p, int n, MPI_Count cnt[], MPI_Aint dsp[]):
-    cdef Py_ssize_t m=n
+cdef object pickle_loadv(
+    Pickle pkl,
+    void *p, int n, MPI_Count cnt[], MPI_Aint dsp[],
+):
+    cdef Py_ssize_t m = n
     cdef object items = [None] * m
     if p == NULL: return items
     for i in range(m):
@@ -296,8 +306,7 @@ cdef object PyMPI_ssend(object obj, int dest, int tag,
     if dest != MPI_PROC_NULL:
         unuseds = pickle_dump(pickle, obj, &sbuf, &scount)
     with nogil: CHKERR( MPI_Ssend_c(
-        sbuf, scount, stype,
-            dest, tag, comm) )
+        sbuf, scount, stype, dest, tag, comm) )
     return None
 
 # -----------------------------------------------------------------------------
@@ -349,7 +358,7 @@ cdef object PyMPI_recv_match(object obj, int source, int tag,
     #
     cdef MPI_Message match = MPI_MESSAGE_NULL
     cdef MPI_Status rsts
-    <void> obj # unused
+    <void> obj  # unused
     #
     with nogil:
         CHKERR( MPI_Mprobe(source, tag, comm, &match, &rsts) )
@@ -373,7 +382,7 @@ cdef object PyMPI_recv_probe(object obj, int source, int tag,
     #
     cdef MPI_Status rsts
     cdef object unusedr
-    <void> obj # unused
+    <void> obj  # unused
     #
     with PyMPI_Lock(comm, "recv"):
         with nogil:
@@ -689,7 +698,7 @@ cdef object PyMPI_mrecv(object rmsg,
     elif PyBytes_CheckExact(rmsg):
         rmsg = asbuffer_r(rmsg, &rbuf, &rlen)
     else:
-        rmsg = asbuffer_w(rmsg, &rbuf, &rlen)  #~> unreachable
+        rmsg = asbuffer_w(rmsg, &rbuf, &rlen)  # ~> unreachable
     cdef MPI_Count rcount = <MPI_Count> rlen
     with nogil: CHKERR( MPI_Mrecv_c(
         rbuf, rcount, rtype, message, status) )
@@ -708,7 +717,7 @@ cdef object PyMPI_imrecv(object rmsg,
     elif PyBytes_CheckExact(rmsg):
         rmsg = asbuffer_r(rmsg, &rbuf, &rlen)
     else:
-        rmsg = asbuffer_w(rmsg, &rbuf, &rlen)  #~> unreachable
+        rmsg = asbuffer_w(rmsg, &rbuf, &rlen)  # ~> unreachable
     cdef MPI_Count rcount = <MPI_Count> rlen
     with nogil: CHKERR( MPI_Imrecv_c(
         rbuf, rcount, rtype, message, request) )
@@ -733,17 +742,17 @@ cdef object PyMPI_bcast(object obj, int root, MPI_Comm comm):
     CHKERR( MPI_Comm_test_inter(comm, &inter) )
     if inter:
         if root == MPI_PROC_NULL:
-            dosend=0; dorecv=0;
+            dosend, dorecv = 0, 0
         elif root == MPI_ROOT:
-            dosend=1; dorecv=0;
+            dosend, dorecv = 1, 0
         else:
-            dosend=0; dorecv=1;
+            dosend, dorecv = 0, 1
     else:
         CHKERR( MPI_Comm_rank(comm, &rank) )
         if root == rank:
-            dosend=1; dorecv=1;
+            dosend, dorecv = 1, 1
         else:
-            dosend=0; dorecv=1;
+            dosend, dorecv = 0, 1
     #
     cdef object smsg = None
     cdef object rmsg = None
@@ -781,18 +790,18 @@ cdef object PyMPI_gather(object sendobj, int root, MPI_Comm comm):
     if inter:
         CHKERR( MPI_Comm_remote_size(comm, &size) )
         if root == MPI_PROC_NULL:
-            dosend=0; dorecv=0;
+            dosend, dorecv = 0, 0
         elif root == MPI_ROOT:
-            dosend=0; dorecv=1;
+            dosend, dorecv = 0, 1
         else:
-            dosend=1; dorecv=0;
+            dosend, dorecv = 1, 0
     else:
         CHKERR( MPI_Comm_size(comm, &size) )
         CHKERR( MPI_Comm_rank(comm, &rank) )
         if root == rank:
-            dosend=1; dorecv=1;
+            dosend, dorecv = 1, 1
         else:
-            dosend=1; dorecv=0;
+            dosend, dorecv = 1, 0
     #
     cdef object unuseds = None
     cdef object rmsg = None
@@ -832,18 +841,18 @@ cdef object PyMPI_scatter(object sendobj, int root, MPI_Comm comm):
     if inter:
         CHKERR( MPI_Comm_remote_size(comm, &size) )
         if root == MPI_PROC_NULL:
-            dosend=0; dorecv=0;
+            dosend, dorecv = 0, 0
         elif root == MPI_ROOT:
-            dosend=1; dorecv=0;
+            dosend, dorecv = 1, 0
         else:
-            dosend=0; dorecv=1;
+            dosend, dorecv = 0, 1
     else:
         CHKERR( MPI_Comm_size(comm, &size) )
         CHKERR( MPI_Comm_rank(comm, &rank) )
         if root == rank:
-            dosend=1; dorecv=1;
+            dosend, dorecv = 1, 1
         else:
-            dosend=0; dorecv=1;
+            dosend, dorecv = 0, 1
     #
     cdef object unuseds = None
     cdef object rmsg = None
@@ -1185,8 +1194,8 @@ cdef object PyMPI_scan_p2p(object sendobj, object op,
     while umask < usize:
         target = <int> (urank ^ umask)
         if target < size:
-            unused = PyMPI_sendrecv_p2p(partial, target, tag,
-                                     target, tag, comm)
+            unused = PyMPI_sendrecv_p2p(
+                partial, target, tag, target, tag, comm)
             if rank > target:
                 partial = op(unused, partial)
                 result = op(unused, result)
@@ -1217,12 +1226,13 @@ cdef object PyMPI_exscan_p2p(object sendobj, object op,
     while umask < usize:
         target = <int> (urank ^ umask)
         if target < size:
-            unused = PyMPI_sendrecv_p2p(partial, target, tag,
-                                     target, tag, comm)
+            unused = PyMPI_sendrecv_p2p(
+                partial, target, tag, target, tag, comm)
             if rank > target:
                 partial = op(unused, partial)
                 if uflag == 0:
-                    result = unused; uflag = 1
+                    uflag = 1
+                    result = unused
                 else:
                     result = op(unused, result)
             else:
@@ -1237,8 +1247,8 @@ cdef object PyMPI_exscan_p2p(object sendobj, object op,
 # ---
 
 cdef extern from * nogil:
-    int PyMPI_Commctx_intra(MPI_Comm,MPI_Comm*,int*)
-    int PyMPI_Commctx_inter(MPI_Comm,MPI_Comm*,int*,MPI_Comm*,int*)
+    int PyMPI_Commctx_intra(MPI_Comm, MPI_Comm*, int*)
+    int PyMPI_Commctx_inter(MPI_Comm, MPI_Comm*, int*, MPI_Comm*, int*)
     int PyMPI_Commctx_finalize()
 
 cdef int PyMPI_Commctx_INTRA(
@@ -1271,6 +1281,7 @@ def _commctx_intra(
     PyMPI_Commctx_INTRA(comm.ob_mpi, &dupcomm.ob_mpi, &tag)
     return (dupcomm, tag)
 
+
 def _commctx_inter(
     Intercomm comm: Intercomm,
 ) -> tuple[Intercomm, int, Intracomm, bool]:
@@ -1283,6 +1294,7 @@ def _commctx_inter(
     PyMPI_Commctx_INTER(comm.ob_mpi, &dupcomm.ob_mpi, &tag,
                         &localcomm.ob_mpi, &low_group)
     return (dupcomm, tag, localcomm, <bint>low_group)
+
 
 # ---
 
@@ -1307,11 +1319,11 @@ cdef object PyMPI_reduce_inter(object sendobj, object op,
         sendobj = PyMPI_reduce_p2p(sendobj, op, 0, localcomm, tag)
         if rank == 0: PyMPI_send_p2p(sendobj, root, tag, comm)
         return None
-    elif root == MPI_ROOT: # Receive from remote group
+    elif root == MPI_ROOT:  # Receive from remote group
         return PyMPI_recv_p2p(0, tag, comm)
-    elif root == MPI_PROC_NULL: # This process does nothing
+    elif root == MPI_PROC_NULL:  # This process does nothing
         return None
-    else: # Wrong root argument
+    else:  # Wrong root argument
         <void>MPI_Comm_call_errhandler(comm, MPI_ERR_ROOT)
         raise MPIException(MPI_ERR_ROOT)
 
