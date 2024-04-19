@@ -31,6 +31,12 @@ cdef class Errhandler:
         """
         return fromhandle(<MPI_Errhandler> <Py_uintptr_t> handle)
 
+    def free(self) -> None:
+        """
+        Call `Free` if not null.
+        """
+        safefree(self)
+
     # Freeing Errorhandlers
     # ---------------------
 

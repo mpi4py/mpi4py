@@ -31,6 +31,14 @@ cdef class Session:
         """
         return fromhandle(<MPI_Session> <Py_uintptr_t> handle)
 
+    def free(self) -> None:
+        """
+        Call `Finalize` if not null.
+        """
+        safefree(self)
+
+    #
+
     @classmethod
     def Init(
         cls,

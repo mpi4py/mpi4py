@@ -35,6 +35,12 @@ cdef class Request:
             return PyMPIGrequest_New(<MPI_Request> <Py_uintptr_t> handle)
         return fromhandle(<MPI_Request> <Py_uintptr_t> handle)
 
+    def free(self) -> None:
+        """
+        Call `Free` if not null.
+        """
+        safefree(self)
+
     # Completion Operations
     # ---------------------
 

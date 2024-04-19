@@ -31,6 +31,12 @@ cdef class Message:
         """
         return fromhandle(<MPI_Message> <Py_uintptr_t> handle)
 
+    def free(self) -> None:
+        """
+        Do nothing.
+        """
+        safefree(self)
+
     # Matching Probe
     # --------------
 

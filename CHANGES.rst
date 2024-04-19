@@ -63,6 +63,12 @@ Release 4.0.0 [2024-XX-XX]
     value is a unsigned integer guaranteed to fit on the platform's
     ``uintptr_t`` C type.
 
+  * Add lowercase `free()` method to MPI classes to ease MPI object
+    deallocation and cleanup. This method eventually attempts to call
+    `Free()`, but only if the object's MPI handle is not a null or
+    predefined handle, and such call is allowed within the World Model
+    init/finalize.
+
 * Backward-incompatible changes:
 
   * Python 2 is no longer supported, Python 3.6+ is required, but

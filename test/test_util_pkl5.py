@@ -484,6 +484,7 @@ class BaseTest:
                 flag, obj = request.test()
                 self.assertTrue(flag)
                 self.assertIsNone(obj)
+                message.free()
             for smess in messages:
                 request = comm.issend(smess, comm.rank, 123)
                 status = MPI.Status()
@@ -530,7 +531,7 @@ class BaseTest:
                 message = comm.mprobe(MPI.ANY_SOURCE, MPI.ANY_TAG)
                 rreq = message.irecv()
                 rreq.test()
-                request.Free()
+                request.free()
         finally:
             comm.Free()
 

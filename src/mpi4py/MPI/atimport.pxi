@@ -351,7 +351,14 @@ cdef inline int mpi_active() noexcept nogil:
     return 1
 
 
+cdef int mpi_version    = 0
+cdef int mpi_subversion = 0
+cdef int mpi_numversion = 0
+
 cdef int initialize() except -1 nogil:
+    global mpi_version, mpi_subversion, mpi_numversion
+    <void> MPI_Get_version(&mpi_version, &mpi_subversion)
+    mpi_numversion = 10 * mpi_version + mpi_subversion
     if not mpi_active(): return 0
     check_mpiexec()
     comm_set_eh(MPI_COMM_SELF)

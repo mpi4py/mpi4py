@@ -34,6 +34,12 @@ cdef class Op:
         """
         return fromhandle(<MPI_Op> <Py_uintptr_t> handle)
 
+    def free(self) -> None:
+        """
+        Call `Free` if not null or predefined.
+        """
+        safefree(self)
+
     # User-Defined Reduction Operations
     # ---------------------------------
 

@@ -545,6 +545,11 @@ class Request(tuple):
         for req in self:
             req.Free()
 
+    def free(self) -> None:
+        """Free a communication request."""
+        for req in self:
+            req.free()
+
     def cancel(self):
         """Cancel a communication request."""
         for req in self:
@@ -614,6 +619,11 @@ class Message(tuple):
     def __bool__(self):
         """Return ``bool(self)``."""
         return any(msg for msg in self)
+
+    def free(self) -> None:
+        """Do nothing."""
+        for msg in self:
+            msg.free()
 
     def recv(self, status=None):
         """Blocking receive of matched message."""

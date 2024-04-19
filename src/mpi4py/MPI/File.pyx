@@ -81,6 +81,12 @@ cdef class File:
         """
         return fromhandle(<MPI_File> <Py_uintptr_t> handle)
 
+    def free(self) -> None:
+        """
+        Call `Close` if not null.
+        """
+        safefree(self)
+
     # File Manipulation
     # -----------------
 

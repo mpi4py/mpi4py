@@ -31,6 +31,12 @@ cdef class Group:
         """
         return fromhandle(<MPI_Group> <Py_uintptr_t> handle)
 
+    def free(self) -> None:
+        """
+        Call `Free` if not null or predefined.
+        """
+        safefree(self)
+
     # Group Accessors
     # ---------------
 

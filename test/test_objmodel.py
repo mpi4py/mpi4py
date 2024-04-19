@@ -4,6 +4,7 @@ import ctypes
 import operator
 import weakref
 import sys
+import os
 
 
 class TestObjModel(unittest.TestCase):
@@ -169,6 +170,86 @@ class TestObjModel(unittest.TestCase):
                 newobj.handle = obj.handle
             with self.assertRaises(AttributeError):
                 del newobj.handle
+
+    def testSafeFreeNull(self):
+        objects = self.objects[:]
+        for obj in objects:
+            if isinstance(obj, MPI.Status):
+                continue
+            obj.free()
+            self.assertFalse(obj)
+            obj.free()
+            self.assertFalse(obj)
+
+    def testSafeFreeConstant(self):
+        objects = [
+            MPI.INT,
+            MPI.LONG,
+            MPI.FLOAT,
+            MPI.DOUBLE,
+            MPI.INFO_ENV,
+            MPI.SUM,
+            MPI.PROD,
+            MPI.GROUP_EMPTY,
+            MPI.ERRORS_ABORT,
+            MPI.ERRORS_ARE_FATAL,
+            MPI.ERRORS_RETURN,
+            MPI.MESSAGE_NO_PROC,
+            MPI.COMM_SELF,
+            MPI.COMM_WORLD,
+        ]
+        for obj in filter(None, objects):
+            self.assertTrue(obj)
+            for _ in range(3):
+                obj.free()
+                self.assertTrue(obj)
+            if not isinstance(obj, MPI.Errhandler):
+                clon = type(obj)(obj)
+                self.assertTrue(clon)
+                for _ in range(3):
+                    clon.free()
+                    self.assertFalse(clon)
+            if hasattr(obj, 'Dup'):
+                self.assertTrue(obj)
+                dup = obj.Dup()
+                self.assertTrue(dup)
+                for _ in range(3):
+                    dup.free()
+                    self.assertFalse(dup)
+            self.assertTrue(obj)
+            for _ in range(3):
+                obj.free()
+                self.assertTrue(obj)
+
+    def testSafeFreeCreated(self):
+        objects = [
+            MPI.COMM_SELF.Isend((None, 0, MPI.BYTE), MPI.PROC_NULL),
+            MPI.Op.Create(lambda *_: None),
+            MPI.COMM_SELF.Get_group(),
+            MPI.COMM_SELF.Get_errhandler(),
+        ]
+        try:
+            objects += [MPI.Info.Create()]
+        except (NotImplementedError, MPI.Exception):
+            pass
+        if os.name == 'posix':
+            try:
+                objects += [MPI.File.Open(MPI.COMM_SELF, "/dev/null")]
+            except NotImplementedError:
+                pass
+        try:
+            objects += [MPI.Win.Create(MPI.BOTTOM)]
+        except (NotImplementedError, MPI.Exception):
+            pass
+        try:
+            objects += [MPI.Session.Init()]
+        except NotImplementedError:
+            pass
+        for obj in objects:
+            self.assertTrue(obj)
+            for _ in range(3):
+                obj.free()
+                self.assertFalse(obj)
 
     def testConstants(self):
         import pickle
