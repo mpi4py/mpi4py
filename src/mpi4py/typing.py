@@ -19,7 +19,7 @@ except ImportError:  # pragma: no cover
     try:
         from typing_extensions import Protocol
     except ImportError:
-        from builtins import object as Protocol
+        Protocol = object
 from numbers import (
     Integral,
 )
