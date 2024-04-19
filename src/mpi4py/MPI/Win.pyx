@@ -57,6 +57,12 @@ cdef class Win:
         """
         return fromhandle(<MPI_Win> <Py_uintptr_t> handle)
 
+    def free(self) -> None:
+        """
+        Call `Free` if not null.
+        """
+        safefree(self)
+
     # Window Creation
     # ---------------
 

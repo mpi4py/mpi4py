@@ -74,6 +74,12 @@ cdef class Datatype:
         """
         return fromhandle(<MPI_Datatype> <Py_uintptr_t> handle)
 
+    def free(self) -> None:
+        """
+        Call `Free` if not null or predefined.
+        """
+        safefree(self)
+
     # Datatype Accessors
     # ------------------
 

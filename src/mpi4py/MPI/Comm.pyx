@@ -64,6 +64,12 @@ cdef class Comm:
         """
         return fromhandle(<MPI_Comm> <Py_uintptr_t> handle)
 
+    def free(self) -> None:
+        """
+        Call `Free` if not null or predefined.
+        """
+        safefree(self)
+
     # Group
     # -----
 

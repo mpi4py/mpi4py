@@ -385,6 +385,61 @@ cdef inline object fromhandle(handle_t arg):
 
 # -----------------------------------------------------------------------------
 
+cdef inline int nullify(PyMPIClass self) except -1:
+    self.ob_mpi = mpinull(self.ob_mpi)
+    return 0
+
+cdef inline int callfree(PyMPIClass self) except -1:
+    if PyMPIClass is not Errhandler:
+        if predefined(self.ob_mpi):
+            return nullify(self)
+    if PyMPIClass is Datatype:
+        self.Free()
+    if PyMPIClass is Request:
+        self.Free()
+    if PyMPIClass is Message:
+        pass
+    if PyMPIClass is Op:
+        self.Free()
+    if PyMPIClass is Group:
+        self.Free()
+    if PyMPIClass is Info:
+        self.Free()
+    if PyMPIClass is Errhandler:
+        self.Free()
+    if PyMPIClass is Session:
+        self.Finalize()
+    if PyMPIClass is Comm:
+        self.Free()
+    if PyMPIClass is Win:
+        self.Free()
+    if PyMPIClass is File:
+        self.Close()
+    return 0
+
+cdef inline int safefree(PyMPIClass self) except -1:
+    # skip freeing module constant objects
+    if self.flags & PyMPI_FLAGS_CONST:
+        return 0
+    # skip freeing objects with null handles
+    if self.ob_mpi == mpinull(self.ob_mpi):
+        return 0
+    # since MPI-4, some objects can be freeded
+    # before/after the world model init/finalize
+    if (
+        PyMPIClass is Info or
+        PyMPIClass is Session or
+        PyMPIClass is Errhandler
+    ) and mpi_version >= 4:
+        return callfree(self)
+    # skip freeing before/after init/finalize
+    if not mpi_active():
+        return nullify(self)  # ~> uncovered
+    # can safely free object
+    return callfree(self)
+
+# -----------------------------------------------------------------------------
+
 # Status
 
 cdef inline MPI_Status *arg_Status(object status) except? NULL:

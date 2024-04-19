@@ -31,6 +31,12 @@ cdef class Info:
         """
         return fromhandle(<MPI_Info> <Py_uintptr_t> handle)
 
+    def free(self) -> None:
+        """
+        Call `Free` if not null or predefined.
+        """
+        safefree(self)
+
     # The Info Object
     # ---------------
 
