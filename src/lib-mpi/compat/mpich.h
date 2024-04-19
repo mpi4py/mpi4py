@@ -54,6 +54,27 @@ static int PyMPI_MPICH_MPI_Lookup_name(const char *service_name,
 
 /* -------------------------------------------------------------------------- */
 
+/* https://github.com/pmodels/mpich/issues/6981 */
+
+#if MPI_VERSION == 4 && MPI_SUBVERSION <= 1
+
+#if (MPICH_NUMVERSION < 40300300) || defined(CIBUILDWHEEL)
+static int PyMPI_MPICH_MPI_Info_free(MPI_Info *info)
+{
+  if (info && *info == MPI_INFO_ENV) {
+    (void) MPI_Comm_call_errhandler(MPI_COMM_SELF, MPI_ERR_INFO);
+    return MPI_ERR_INFO;
+  }
+  return MPI_Info_free(info);
+}
+#undef  MPI_Info_free
+#define MPI_Info_free PyMPI_MPICH_MPI_Info_free
+#endif
+
+#endif
+
+/* -------------------------------------------------------------------------- */
+
 /* https://github.com/pmodels/mpich/issues/5413 */
 /* https://github.com/pmodels/mpich/pull/6146   */
 
@@ -66,6 +87,7 @@ static int PyMPI_MPICH_MPI_Status_set_elements_c(MPI_Status *status,
 {
   return MPI_Status_set_elements_x(status, datatype, elements);
 }
+#undef  MPI_Status_set_elements_c
 #define MPI_Status_set_elements_c PyMPI_MPICH_MPI_Status_set_elements_c
 #endif
 
@@ -93,6 +115,7 @@ static int PyMPI_MPICH_MPI_Reduce_c(const void *sendbuf, void *recvbuf,
   if (!sendbuf && (root == MPI_ROOT || root == MPI_PROC_NULL)) sendbuf = dummy;
   return MPI_Reduce_c(sendbuf, recvbuf, count, datatype, op, root, comm);
 }
+#undef  MPI_Reduce_c
 #define MPI_Reduce_c PyMPI_MPICH_MPI_Reduce_c
 #endif
 
