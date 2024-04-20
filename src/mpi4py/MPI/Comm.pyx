@@ -333,19 +333,6 @@ cdef class Comm:
         comm_set_eh(comm.ob_mpi)
         return (comm, request)
 
-    # Legacy ULFM interface
-
-    def _Failure_ack(self) -> None:
-        PyErr_WarnFormat(DeprecationWarning, 1, "legacy ULFM interface")
-        with nogil: CHKERR( MPIX_Comm_failure_ack(self.ob_mpi) )
-
-    def _Failure_get_acked(self) -> Group:
-        PyErr_WarnFormat(DeprecationWarning, 1, "legacy ULFM interface")
-        cdef Group group = <Group>New(Group)
-        with nogil: CHKERR( MPIX_Comm_failure_get_acked(
-            self.ob_mpi, &group.ob_mpi) )
-        return group
-
     # Communicator Info
     # -----------------
 
