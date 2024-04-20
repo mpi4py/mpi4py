@@ -4,10 +4,6 @@ import warnings
 import struct
 
 
-def mpi_threads():
-    return MPI.Query_thread() > MPI.THREAD_SINGLE
-
-
 @unittest.skipMPI('msmpi')
 @unittest.skipMPI('mvapich')
 @unittest.skipMPI('intelmpi')
@@ -156,11 +152,8 @@ class TestULFMSelf(BaseTestULFM, unittest.TestCase):
 class TestULFMWorld(BaseTestULFM, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
-    @unittest.skipMPI('openmpi(>=5.0.0)', mpi_threads())  # TODO
-    def testIShrink(self):
-        super().testIShrink()
 
-
+@unittest.skipMPI('openmpi(>=5.0.0,<5.0.5)')
 @unittest.skipIf(MPI.COMM_WORLD.Get_size() < 2, 'mpi-world-size<2')
 class TestULFMInter(BaseTestULFM, unittest.TestCase):
 
@@ -189,22 +182,6 @@ class TestULFMInter(BaseTestULFM, unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.COMM.Free()
-
-    @unittest.skipMPI('openmpi(>=5.0.0)')  # TODO
-    def testAgree(self):
-        super().testAgree()
-
-    @unittest.skipMPI('openmpi(>=5.0.0)')  # TODO
-    def testIAgree(self):
-        super().testIAgree()
-
-    @unittest.skipMPI('openmpi(>=5.0.0)')  # TODO
-    def testShrink(self):
-        super().testShrink()
-
-    @unittest.skipMPI('openmpi(>=5.0.0)')  # TODO
-    def testIShrink(self):
-        super().testIShrink()
 
 
 if __name__ == '__main__':
