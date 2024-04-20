@@ -1837,38 +1837,6 @@ static int PyMPI_Comm_ishrink(MPI_Comm comm,
 #endif
 #endif
 
-#ifndef PyMPI_HAVE_MPIX_Comm_failure_ack
-static int PyMPIX_Comm_failure_ack(MPI_Comm comm)
-{
-  {
-    int dummy, ierr;
-    ierr = MPI_Comm_test_inter(comm, &dummy);
-    if (ierr != MPI_SUCCESS) return ierr;
-  }
-  return MPI_SUCCESS;
-}
-#undef  MPIX_Comm_failure_ack
-#define MPIX_Comm_failure_ack PyMPIX_Comm_failure_ack
-#endif
-
-#ifndef PyMPI_HAVE_MPIX_Comm_failure_get_acked
-static int PyMPIX_Comm_failure_get_acked(MPI_Comm comm, MPI_Group *group)
-{
-  {
-    int dummy, ierr;
-    ierr = MPI_Comm_test_inter(comm, &dummy);
-    if (ierr != MPI_SUCCESS) return ierr;
-  }
-  if (!group) {
-    (void) MPI_Comm_call_errhandler(comm, MPI_ERR_ARG);
-    return MPI_ERR_ARG;
-  }
-  return MPI_Group_union(MPI_GROUP_EMPTY, MPI_GROUP_EMPTY, group);
-}
-#undef  MPIX_Comm_failure_get_acked
-#define MPIX_Comm_failure_get_acked PyMPIX_Comm_failure_get_acked
-#endif
-
 /* ---------------------------------------------------------------- */
 
 #endif /* !PyMPI_FALLBACK_H */

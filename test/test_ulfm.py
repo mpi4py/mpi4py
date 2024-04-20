@@ -148,21 +148,6 @@ class BaseTestULFM:
                              shrink.Get_remote_size())
         shrink.Free()
 
-    def testLegacyAck(self):
-        comm = self.COMM
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=DeprecationWarning)
-            comm._Failure_ack()
-
-    def testLegacyGetAcked(self):
-        comm = self.COMM
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=DeprecationWarning)
-            group = comm._Failure_get_acked()
-        gcmp = MPI.Group.Compare(group, MPI.GROUP_EMPTY)
-        group.Free()
-        self.assertIn(gcmp, [MPI.IDENT, MPI.CONGRUENT])
-
 
 class TestULFMSelf(BaseTestULFM, unittest.TestCase):
     COMM = MPI.COMM_SELF

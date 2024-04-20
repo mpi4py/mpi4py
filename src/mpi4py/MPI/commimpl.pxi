@@ -1,13 +1,5 @@
 # -----------------------------------------------------------------------------
 
-# Legacy ULFM interface
-
-cdef extern from * nogil:
-    int MPIX_Comm_failure_ack(MPI_Comm)
-    int MPIX_Comm_failure_get_acked(MPI_Comm, MPI_Group*)
-
-# -----------------------------------------------------------------------------
-
 cdef object __UNWEIGHTED__    = <MPI_Aint>MPI_UNWEIGHTED
 
 cdef object __WEIGHTS_EMPTY__ = <MPI_Aint>MPI_WEIGHTS_EMPTY
