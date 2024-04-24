@@ -153,7 +153,7 @@ class TestULFMWorld(BaseTestULFM, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
 
-@unittest.skipMPI('openmpi(>=5.0.0,<5.0.5)')
+@unittest.skipMPI('openmpi(>=5.0.0,<5.0.4)')
 @unittest.skipIf(MPI.COMM_WORLD.Get_size() < 2, 'mpi-world-size<2')
 class TestULFMInter(BaseTestULFM, unittest.TestCase):
 
