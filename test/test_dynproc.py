@@ -30,15 +30,9 @@ def badport():
         port = ""
     return port == ""
 
-def skip_dynproc():
-    return (
-        os.environ.get('MPI4PY_TEST_DYNPROC')
-        in (None, '0', 'no', 'off', 'false')
-    )
-
 @unittest.skipMPI('mpich(<4.3.0)', badport())
 @unittest.skipMPI('openmpi(<2.0.0)')
-@unittest.skipMPI('openmpi(>=5.0.0,<=5.1.0)', skip_dynproc())
+@unittest.skipMPI('openmpi(>=5.0.0,<5.0.4)')
 @unittest.skipMPI('msmpi(<8.1.0)')
 @unittest.skipMPI('mvapich(<3.0.0)')
 @unittest.skipIf(MPI.COMM_WORLD.Get_size() < 2, 'mpi-world-size<2')
