@@ -9,13 +9,13 @@ from textwrap import indent, dedent
 import warnings
 
 def anyof(*args):
-    return r'(?:%s)' % '|'.join(args)
+    return r'(?:{})'.format('|'.join(args))
 
 def join(*args):
     tokens = []
     for tok in args:
         if isinstance(tok, (list, tuple)):
-            tok = '(%s)' % r'\s*'.join(tok)
+            tok = '({})'.format(r'\s*'.join(tok))
         tokens.append(tok)
     return r'\s*'.join(tokens)
 
@@ -63,9 +63,9 @@ handle_type_names = [
 ]
 
 basic_type    = r'(?:void|int|char\s*\*{1,3})'
-integral_type = r'MPI_(?:%s)' % '|'.join(integral_type_names)
-struct_type   = r'MPI_(?:%s)' % '|'.join(struct_type_names)
-opaque_type   = r'MPI_(?:%s)' % '|'.join(handle_type_names)
+integral_type = r'MPI_(?:{})'.format('|'.join(integral_type_names))
+struct_type   = r'MPI_(?:{})'.format('|'.join(struct_type_names))
+opaque_type   = r'MPI_(?:{})'.format('|'.join(handle_type_names))
 
 upper_name  = r'MPI_[A-Z0-9_]+'
 camel_name  = r'MPI_[A-Z][a-z0-9_]+'
@@ -79,7 +79,7 @@ canyptr = join(r'\w+', pointer+'?')
 
 annotation = r'\#\:\='
 fallback_value = r'\(?[A-Za-z0-9_\+\-\(\)\*]+\)?'
-fallback = r'(?:%s)?' % join (annotation, [fallback_value])
+fallback = rf'(?:{join(annotation, [fallback_value])})?'
 
 fint_type = r'MPI_Fint'
 fmpi_type = opaque_type.replace('Datatype', 'Type')
@@ -246,7 +246,7 @@ class NodeFuncProto(Node):
         self.cargstype = cargs
         nargs = len(cargs)
         self.comma = ',' if nargs else ''
-        cargscall = ['(%s)0' % ctypefix(a) for a in cargs]
+        cargscall = [f'({ctypefix(a)})0' for a in cargs]
         self.cargscall = ','.join(cargscall)
         cargsnamed = ['a%d' % (a+1) for a in range(nargs)]
         self.cargsnamed = ','.join(cargsnamed)
@@ -369,7 +369,7 @@ class Generator:
                 nodelist.append(node)
                 break
         if not args:
-            warnings.warn('unmatched line:\n%s' % line, stacklevel=1)
+            warnings.warn(f'unmatched line:\n{line}', stacklevel=1)
 
     def __iter__(self):
         return iter(self.nodes)
@@ -607,7 +607,7 @@ class Generator:
     #endif /* !PyMPI_LARGECNT_H */
     """
 
-    LARGECNT_RE = re.compile(r'^mpi_(%s)_c$' % '|'.join([
+    LARGECNT_RE = re.compile(r'^mpi_({})_c$'.format('|'.join([
         r'(i?(b|s|r|p)?send(_init)?(recv(_replace)?)?)',
         r'(i?m?p?recv(_init)?)',
         r'(buffer_(at|de)tach|get_count)',
@@ -617,7 +617,7 @@ class Generator:
         r'(win_(create|allocate(_shared)?|shared_query))',
         r'(r?(put|get|(get_)?accumulate))',
         r'file_(((i)?(read|write).*)|get_type_extent)',
-    ]))
+    ])))
 
     def dump_largecnt_h(self, fileobj):
         if isinstance(fileobj, str):
@@ -642,7 +642,7 @@ class Generator:
             else:
                 code = f'{t} {v}'
             if init is not None:
-                code += ' = %s' % init
+                code += f' = {init}'
             return code
 
         def generate(name):
@@ -743,17 +743,17 @@ class Generator:
             end = self.LARGECNT_END % subs
 
             yield dedent(begin)
-            yield indent('%s;\n' % '; '.join(argsinit), tab)
-            yield indent('%s;\n' % '; '.join(argstemp), tab)
+            yield indent('{};\n'.format('; '.join(argsinit)), tab)
+            yield indent('{};\n'.format('; '.join(argstemp)), tab)
             yield indent(dedent(setup), tab)
             for line in argsconv:
-                yield indent('%s;\n' % line, tab)
+                yield indent(f'{line};\n', tab)
             yield indent(dedent(call), tab)
             for line in argsoutp:
-                yield indent('%s;\n' % line, tab)
+                yield indent(f'{line};\n', tab)
             yield indent('fn_exit:\n', tab[:-1])
             for line in argsfree:
-                yield indent('%s;\n' % line, tab)
+                yield indent(f'{line};\n', tab)
             yield dedent(end)
             yield '\n'
 
@@ -788,7 +788,7 @@ if __name__ == '__main__':
 
     generator = Generator()
     libmpi_pxd = os.path.join('src', 'mpi4py', 'libmpi.pxd')
-    log('parsing file %s' % libmpi_pxd)
+    log(f'parsing file {libmpi_pxd}')
     generator.parse_file(libmpi_pxd)
     log('processed %d definitions' % len(generator.nodes))
 
@@ -802,11 +802,11 @@ if __name__ == '__main__':
     #generator.dump_config_h(config_h, None)
 
     missing_h = os.path.join('src', 'lib-mpi', 'missing.h')
-    log('writing file %s' % missing_h)
+    log(f'writing file {missing_h}')
     generator.dump_missing_h(missing_h, None)
 
     largecnt_h = os.path.join('src', 'lib-mpi', 'largecnt.h')
-    log('writing file %s' % largecnt_h)
+    log(f'writing file {largecnt_h}')
     generator.dump_largecnt_h(largecnt_h)
     log('generated %d large count fallbacks' % generator.largecnt)
 

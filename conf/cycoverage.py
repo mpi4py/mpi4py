@@ -103,7 +103,7 @@ def _parse_c_file(c_file, exclude_list):
     ).match
     if exclude_list:
         line_is_excluded = re.compile("|".join([
-            "(?:%s)" % regex for regex in exclude_list
+            rf'(?:{regex})' for regex in exclude_list
         ])).search
     else:
         def line_is_excluded(_):
