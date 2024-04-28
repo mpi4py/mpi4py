@@ -257,9 +257,10 @@ def initialize(options):
     if initializer is not None:
         try:
             initializer(*initargs, **initkwargs)
-            return True
         except BaseException:
             return False
+        else:
+            return True
     return True
 
 
@@ -835,9 +836,10 @@ def server_exec(comm, options):
         func, args, kwargs = task
         try:
             result = func(*args, **kwargs)
-            return (result, None)
         except BaseException:
             return (None, exception())
+        else:
+            return (result, None)
 
     def send(task):
         pid, tag = status.source, status.tag

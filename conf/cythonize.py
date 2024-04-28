@@ -22,9 +22,10 @@ def cythonize(args=None):
     try:
         sys.argv[:] = argv
         cython_main(command_line=1)
-        return 0
     except SystemExit as exc:
         return exc.code
+    else:
+        return 0
     finally:
         os.chdir(cwd)
         sys.argv[:] = sys_argv

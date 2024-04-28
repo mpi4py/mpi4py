@@ -27,7 +27,7 @@ lint.select = [
 "PYI",
 "RET",
 "RUF",
-#"TRY",
+"TRY",
 "YTT",
 ]
 
@@ -45,6 +45,7 @@ lint.ignore = [
 "RET504",
 "RET505",
 "RUF012",
+"TRY003",
 ]
 
 [lint.per-file-ignores]
