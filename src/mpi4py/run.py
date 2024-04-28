@@ -158,48 +158,44 @@ def main():
         options = Options()
         args = sys.argv[1:] if args is None else args[:]
         while args and args[0].startswith('-'):
-            if args[0] in ('-m', '-c', '-'):
+            arg0 = args[0]
+            if arg0 in ('-m', '-c', '-'):
                 break  # Stop processing options
-            if args[0] in ('-h', '-help', '--help'):
+            if arg0 in ('-h', '-help', '--help'):
                 usage()  # Print help and exit
-            if args[0] in ('-prefix', '--prefix'):
+            if arg0 in ('-prefix', '--prefix'):
                 prefix()  # Print install path and exit
-            if args[0] in ('-version', '--version'):
+            if arg0 in ('-version', '--version'):
                 version()  # Print version number and exit
-            if args[0] in ('-mpi-std-version', '--mpi-std-version'):
+            if arg0 in ('-mpi-std-version', '--mpi-std-version'):
                 mpi_std_version()  # Print MPI standard version and exit
-            if args[0] in ('-mpi-lib-version', '--mpi-lib-version'):
+            if arg0 in ('-mpi-lib-version', '--mpi-lib-version'):
                 mpi_lib_version()  # Print MPI library version and exit
-            try:
-                arg0 = args[0]
-                if arg0.startswith('--'):
-                    if '=' in arg0:
-                        opt, _, arg = arg0[1:].partition('=')
-                        if opt in ('-rc',):
-                            arg0, args[1:1] = opt, [arg]
-                    else:
-                        arg0 = arg0[1:]
-                if arg0 == '-rc':
-                    from ast import literal_eval
-                    for entry in poparg(args).split(','):
-                        key, _, val = entry.partition('=')
-                        if not key or not val:
-                            usage('Cannot parse rc option: ' + entry)
-                        try:
-                            val = literal_eval(val)
-                        except ValueError:
-                            pass
-                        options.rc_args[key] = val
+            if arg0.startswith('--'):
+                if '=' in arg0:
+                    opt, _, arg = arg0[1:].partition('=')
+                    if opt in ('-rc',):
+                        arg0, args[1:1] = opt, [arg]
                 else:
-                    usage('Unknown option: ' + args[0])
-                del args[0]
-            except Exception:  # pylint: disable=broad-except
-                # Bad option, print usage and exit with error
-                usage('Cannot parse option: ' + args[0])
+                    arg0 = arg0[1:]
+            if arg0 == '-rc':
+                from ast import literal_eval
+                for entry in poparg(args).split(','):
+                    key, _, val = entry.partition('=')
+                    if not key or not val:
+                        usage('Cannot parse rc option: ' + entry)
+                    try:
+                        val = literal_eval(val)
+                    except ValueError:
+                        pass
+                    options.rc_args[key] = val
+            else:
+                usage('Unknown option: ' + args[0])
+            del args[0]
         # Check remaining args and return to caller
         if not args:
             usage("No path specified for execution")
-        elif args[0] in ('-m', '-c') and len(args) < 2:
+        if args[0] in ('-m', '-c') and len(args) < 2:
             usage("Argument expected for option: " + args[0])
         return options, args
 
