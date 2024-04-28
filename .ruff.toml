@@ -37,7 +37,7 @@ lint.ignore = [
 "A003",
 "C901",
 "I001",
-"Q000", "Q001", "Q002", # FIXME: astral-sh/ruff#10724
+"Q000",
 "PYI011",
 "UP006",
 "UP007",
