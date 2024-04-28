@@ -413,12 +413,12 @@ except ImportError:
 
 def import_command(cmd):
     from importlib import import_module
-    try:
-        if not setuptools:
-            raise ImportError
-        return import_module('setuptools.command.' + cmd)
-    except ImportError:
-        return import_module('distutils.command.' + cmd)
+    if setuptools:
+        try:
+            return import_module('setuptools.command.' + cmd)
+        except ImportError:
+            pass
+    return import_module('distutils.command.' + cmd)
 
 if setuptools:
     from setuptools import Distribution as cls_Distribution

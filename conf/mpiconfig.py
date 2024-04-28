@@ -331,7 +331,7 @@ class Config:
                     PATH = path + os.path.pathsep + PATH
                     compiler_info[name] = exe
                 else:
-                    self.log.error("error: '%s' not found", cmd)
+                    self.log.warning("warning: %s='%s' not found", name, cmd)
         #
         if not self and not compiler_info:
             for name, candidates in COMPILERS:
@@ -361,7 +361,7 @@ class Config:
         try:
             read_ok = parser.read(filenames)
         except ConfigParserError:
-            self.log.error(
+            self.log.exception(
                 "error: parsing configuration file/s '%s'",
                 os.path.pathsep.join(filenames))
             return None

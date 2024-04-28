@@ -184,7 +184,7 @@ def main():
                     for entry in poparg(args).split(','):
                         key, _, val = entry.partition('=')
                         if not key or not val:
-                            raise ValueError(entry)
+                            usage('Cannot parse rc option: ' + entry)
                         try:
                             val = literal_eval(val)
                         except ValueError:
