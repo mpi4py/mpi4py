@@ -82,19 +82,18 @@ def get_backend_requires_hook(name, dist, config_settings=None):
 
     @contextlib.contextmanager
     def environment(path):
-        os_path = os.environ['PATH']
+        environ_prev = [('PATH', os.environ['PATH'])]
+        for prefix in ('_PYPROJECT_HOOKS', 'PEP517'):
+            for suffix in ('BUILD_BACKEND', 'BACKEND_PATH'):
+                key = f'{prefix}_{suffix}'
+                if key in os.environ:
+                    val = os.environ.pop(key)
+                    environ_prev.append((key, val))
         os.environ['PATH'] = path
-        build_backend = os.environ.pop('PEP517_BUILD_BACKEND', None)
-        backend_path = os.environ.pop('PEP517_BACKEND_PATH', None)
         try:
             yield None
         finally:
-            if os_path is not None:
-                os.environ['PATH'] = os_path
-            if build_backend is not None:
-                os.environ['PEP517_BUILD_BACKEND'] = build_backend
-            if backend_path is not None:
-                os.environ['PEP517_BACKEND_PATH'] = backend_path
+            os.environ.update(environ_prev)
 
     requires = read_build_requires(name)
     with DefaultIsolatedEnv() as env:
