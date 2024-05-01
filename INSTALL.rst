@@ -82,7 +82,7 @@ available once the ``ucx`` package is installed.
    `using external MPI libraries <cf-mpi-docs_>`_ .
 
 .. _conda-forge: https://conda-forge.org/
-.. _cf-mpi-docs: https://conda-forge.org/docs/user/tipsandtricks.html#using-external-message-passing-interface-mpi-libraries
+.. _cf-mpi-docs: https://conda-forge.org/docs/user/tipsandtricks/#using-external-message-passing-interface-mpi-libraries
 
 
 Linux
