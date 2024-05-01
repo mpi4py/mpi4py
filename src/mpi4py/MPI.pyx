@@ -14,4 +14,4 @@
 from __future__ import annotations
 cimport cython  # no-cython-lint
 
-include "MPI/MPI.pyx"
+include "MPI.src/MPI.pyx"

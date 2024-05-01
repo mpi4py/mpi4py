@@ -55,9 +55,8 @@ def sources():
         depends=[
             'src/mpi4py/*.pyx',
             'src/mpi4py/*.pxd',
-            'src/mpi4py/MPI/*.pyx',
-            'src/mpi4py/MPI/*.pxd',
-            'src/mpi4py/MPI/*.pxi',
+            'src/mpi4py/MPI.src/*.pyx',
+            'src/mpi4py/MPI.src/*.pxi',
         ],
     )
     #
