@@ -45,8 +45,8 @@ file(
   GLOB_RECURSE MPI.deps
   ${SRCDIR}/mpi4py/*.pyx
   ${SRCDIR}/mpi4py/*.pxd
-  ${SRCDIR}/mpi4py/MPI/*.pyx
-  ${SRCDIR}/mpi4py/MPI/*.pxi
+  ${SRCDIR}/mpi4py/MPI.src/*.pyx
+  ${SRCDIR}/mpi4py/MPI.src/*.pxi
 )
 set(MPI.c ${BINDIR}/MPI.c)
 set(MPI.h ${BINDIR}/MPI.h ${BINDIR}/MPI_api.h)
