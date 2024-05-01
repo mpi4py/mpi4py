@@ -31,8 +31,8 @@ Tutorial
    book covers parallel programming with MPI and OpenMP in C/C++ and
    Fortran, and MPI in Python using mpi4py.
 
-   .. _Victor Eijkhout: https://www.tacc.utexas.edu/about/directory/victor-eijkhout
-   .. _TACC: https://www.tacc.utexas.edu/
+   .. _Victor Eijkhout: https://tacc.utexas.edu/about/directory/victor-eijkhout
+   .. _TACC: https://tacc.utexas.edu/
    .. _ppse-pdf: https://tinyurl.com/vle335course
    .. _ppse-html: https://theartofhpc.com/pcse/index.html
 
