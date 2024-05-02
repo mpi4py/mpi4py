@@ -141,8 +141,7 @@ class Counter:
         """Free counter resources."""
         window = self._window
         self._window = MPI.WIN_NULL
-        if window:
-            window.Free()
+        window.free()
 
 
 class Mutex:
@@ -293,8 +292,7 @@ class Mutex:
         window = self._window
         self._rank = MPI.PROC_NULL
         self._window = MPI.WIN_NULL
-        if window:
-            window.Free()
+        window.free()
 
 
 class RMutex:
