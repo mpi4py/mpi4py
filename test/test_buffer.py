@@ -219,6 +219,21 @@ class TestBuffer(unittest.TestCase):
         self.assertEqual(type(buf1.obj), type(buf2.obj))
         self.assertEqual(buf1.nbytes, buf2.nbytes)
 
+    def testCast(self):
+        buffer = MPI.buffer
+        buf = buffer.allocate(2 * 3 * 4)
+        mem = buf.cast('i')
+        for i in range(2 * 3):
+            mem[i] = i
+        mem = buf.cast('i', (2, 3))
+        for i in range(2):
+            for j in range(3):
+                self.assertEqual(mem[i, j], 3 * i + j)
+        mem = buf.cast('i', (3, 2))
+        for i in range(3):
+            for j in range(2):
+                self.assertEqual(mem[i, j], 2 * i + j)
+
     def testSequence(self):
         n = 16
         try:
