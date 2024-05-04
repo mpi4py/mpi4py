@@ -375,6 +375,27 @@ class BaseTestMessageSimpleArray:
     def testArray6(self):
         self.check(self.check6)
 
+    def testBuffer(self):
+        kDLCPU, kDLCUDA = 1, 2
+        obj = self.array('i', [0,1,2,3])
+        buf = MPI.buffer.frombuffer(obj)
+        device_type = kDLCPU
+        if hasattr(obj, '__dlpack_device__'):
+            device_type, _ = obj.__dlpack_device__()
+        elif hasattr(obj, '__cuda_array_interface__'):
+            device_type = kDLCUDA
+        if device_type == kDLCPU:
+            buf.cast('i')
+            buf.tobytes('i')
+            buf[0] = buf[0]
+        if device_type == kDLCUDA:
+            with self.assertRaises(BufferError):
+                buf.cast('i')
+            with self.assertRaises(BufferError):
+                buf.tobytes('i')
+            with self.assertRaises(BufferError):
+                buf[0] = buf[0]
+
 
 @unittest.skipIf(array is None, 'array')
 class TestMessageSimpleArray(unittest.TestCase,

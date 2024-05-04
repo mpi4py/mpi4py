@@ -86,6 +86,16 @@ cdef extern from "Python.h":
     Py_ssize_t PyNumber_AsSsize_t(object, object) except? -1
 
 
+cdef inline int check_cpu_accessible(int kind) except -1:
+    cdef unsigned device_type = <unsigned> kind
+    if device_type == 0              : return 0
+    if device_type == kDLCPU         : return 0
+    if device_type == kDLCUDAHost    : return 0  # ~> uncovered
+    if device_type == kDLROCMHost    : return 0  # ~> uncovered
+    if device_type == kDLCUDAManaged : return 0  # ~> uncovered
+    raise BufferError("buffer is not CPU-accessible")
+
+
 @cython.final
 cdef class buffer:
     """
@@ -93,10 +103,11 @@ cdef class buffer:
     """
 
     cdef Py_buffer view
+    cdef int       kind
 
     def __cinit__(self, *args):
         if args:
-            PyMPI_GetBuffer(args[0], &self.view, PyBUF_SIMPLE)
+            self.kind = PyMPI_GetBuffer(args[0], &self.view, PyBUF_SIMPLE)
         else:
             PyBuffer_FillInfo(&self.view, <object>NULL,
                               NULL, 0, 0, PyBUF_SIMPLE)
@@ -128,7 +139,7 @@ cdef class buffer:
         cdef int flags = PyBUF_SIMPLE
         if not readonly: flags |= PyBUF_WRITABLE
         cdef buffer buf = <buffer>New(buffer)
-        PyMPI_GetBuffer(obj, &buf.view, flags)
+        buf.kind = PyMPI_GetBuffer(obj, &buf.view, flags)
         buf.view.readonly = readonly
         return buf
 
@@ -197,6 +208,7 @@ cdef class buffer:
         """
         Cast to a `memoryview` with new format or shape.
         """
+        check_cpu_accessible(self.kind)
         if shape is Ellipsis:
             return PyMemoryView_FromObject(self).cast(format)
         else:
@@ -205,6 +217,7 @@ cdef class buffer:
     def tobytes(self, order: str | None = None) -> bytes:
         """Return the data in the buffer as a byte string."""
         <void> order  # unused
+        check_cpu_accessible(self.kind)
         return PyBytes_FromStringAndSize(<char*>self.view.buf, self.view.len)
 
     def toreadonly(self) -> buffer:
@@ -213,7 +226,7 @@ cdef class buffer:
         if self.view.obj != NULL:
             obj = <object>self.view.obj
         cdef buffer buf = <buffer>New(buffer)
-        PyMPI_GetBuffer(obj, &buf.view, PyBUF_SIMPLE)
+        buf.kind = PyMPI_GetBuffer(obj, &buf.view, PyBUF_SIMPLE)
         buf.view.readonly = 1
         return buf
 
@@ -222,6 +235,7 @@ cdef class buffer:
         PyBuffer_Release(&self.view)
         PyBuffer_FillInfo(&self.view, <object>NULL,
                           NULL, 0, 0, PyBUF_SIMPLE)
+        self.kind = 0
 
     # buffer interface (PEP 3118)
 
@@ -236,6 +250,7 @@ cdef class buffer:
         return self.view.len
 
     def __getitem__(self, object item):
+        check_cpu_accessible(self.kind)
         cdef Py_ssize_t start=0, stop=0, step=1, slen=0
         cdef unsigned char *buf = <unsigned char*>self.view.buf
         cdef Py_ssize_t blen = self.view.len
@@ -253,6 +268,7 @@ cdef class buffer:
             raise TypeError("index must be integer or slice")
 
     def __setitem__(self, object item, object value):
+        check_cpu_accessible(self.kind)
         if self.view.readonly:
             raise TypeError("buffer is read-only")
         cdef Py_ssize_t start=0, stop=0, step=1, slen=0
@@ -293,7 +309,7 @@ cdef inline buffer getbuffer(object ob, bint readonly, bint format):
         flags |= PyBUF_WRITABLE
     if format:
         flags |= PyBUF_FORMAT
-    PyMPI_GetBuffer(ob, &buf.view, flags)
+    buf.kind = PyMPI_GetBuffer(ob, &buf.view, flags)
     return buf
 
 cdef inline buffer asbuffer(object ob, void **base, MPI_Aint *size, bint ro):

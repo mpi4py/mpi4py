@@ -24,6 +24,7 @@ ctypedef enum DLDeviceType:
     kDLOneAPI = 14
     kDLWebGPU = 15
     kDLHexagon = 16
+    kDLMAIA = 17
 
 ctypedef struct DLDevice:
     DLDeviceType device_type
@@ -240,6 +241,7 @@ cdef int Py_GetDLPackBuffer(object obj, Py_buffer *view, int flags) except -1:
             managed.deleter(managed)
         PyCapsule_SetName(capsule, b"used_dltensor")
         del capsule
-    return 0
+
+    return <int> device_type
 
 # -----------------------------------------------------------------------------
