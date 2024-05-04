@@ -14,10 +14,11 @@ cdef extern from "Python.h":
         Py_ssize_t itemsize
         bint readonly
         char *format
-        # int ndim
-        # Py_ssize_t *shape
-        # Py_ssize_t *strides
-        # Py_ssize_t *suboffsets
+        int ndim
+        Py_ssize_t *shape
+        Py_ssize_t *strides
+        Py_ssize_t *suboffsets
+        void *internal
     cdef enum:
         PyBUF_SIMPLE
         PyBUF_WRITABLE
@@ -31,6 +32,12 @@ cdef extern from "Python.h":
     int  PyBuffer_FillInfo(Py_buffer *, object,
                            void *, Py_ssize_t,
                            bint, int) except -1
+
+cdef extern from "Python.h":
+    enum: PyBUF_READ
+    enum: PyBUF_WRITE
+    object PyMemoryView_FromObject(object)
+    object PyMemoryView_GetContiguous(object, int, char)
 
 
 cdef inline int is_big_endian() noexcept nogil:
@@ -150,6 +157,8 @@ cdef class buffer:
         def __get__(self) -> int:
             return PyLong_FromVoidPtr(self.view.buf)
 
+    # memoryview properties
+
     property obj:
         """Object exposing buffer."""
         def __get__(self) -> Buffer | None:
@@ -178,7 +187,20 @@ cdef class buffer:
         def __get__(self) -> int:
             return self.view.itemsize
 
-    # convenience methods
+    # memoryview methods
+
+    def cast(
+        self,
+        format: str,
+        shape: list[int] | tuple[int, ...] = ...,
+    ) -> memoryview:
+        """
+        Cast to a `memoryview` with new format or shape.
+        """
+        if shape is Ellipsis:
+            return PyMemoryView_FromObject(self).cast(format)
+        else:
+            return PyMemoryView_FromObject(self).cast(format, shape)
 
     def tobytes(self, order: str | None = None) -> bytes:
         """Return the data in the buffer as a byte string."""
@@ -304,17 +326,13 @@ cdef inline buffer mpibuf(void *base, MPI_Count count):
     if neq: raise OverflowError("length {count} does not fit in 'MPI_Aint'")
     return tobuffer(<object>NULL, base, size, 0)
 
-# -----------------------------------------------------------------------------
-
-cdef extern from "Python.h":
-    enum: PyBUF_READ
-    enum: PyBUF_WRITE
-    object PyMemoryView_GetContiguous(object, int, char)
-
-cdef inline object aspybuffer(object obj,
-                              void **base, MPI_Aint *size,
-                              bint readonly,
-                              const char format[]):
+cdef inline object aspybuffer(
+    object obj,
+    void **base,
+    MPI_Aint *size,
+    bint readonly,
+    const char format[],
+):
     cdef int buftype = PyBUF_READ if readonly else PyBUF_WRITE
     obj = PyMemoryView_GetContiguous(obj, buftype, c'A')
     cdef Py_buffer view
