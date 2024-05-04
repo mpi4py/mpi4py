@@ -158,6 +158,7 @@ cdef int Py_GetCAIBuffer(object obj, Py_buffer *view, int flags) except -1:
         view.format = cuda_get_format(typekind, itemsize)
         if view.format != BYTE_FMT:
             view.itemsize = itemsize
-    return 0
+
+    return <int> kDLCUDA
 
 # -----------------------------------------------------------------------------
