@@ -64,6 +64,10 @@ jobs:
 
   sdist:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
 
     steps:
 
@@ -111,6 +115,12 @@ jobs:
         path: |
           dist/mpi4py-*.tar.gz
           dist/sha256sum.txt
+
+    - if: ${{ github.event_name == 'release' }}
+      name: Attest distribution artifact
+      uses: actions/attest-build-provenance@v1
+      with:
+        subject-path: dist/mpi4py-*.tar.gz
 
   pypi-publish:
 
