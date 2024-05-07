@@ -26,14 +26,14 @@ Tutorial
 .. tip::
 
    `Victor Eijkhout`_ at `TACC`_ authored the book *Parallel
-   Programming for Science and Engineering*.  This book is available
-   online in `PDF <ppse-pdf_>`_ and `HTML <ppse-html_>`_ formats.  The
+   Programming for Science and Engineering*. This book is `available
+   online <ppse-book_>`_ in PDF and `HTML <ppse-html_>`_ formats. The
    book covers parallel programming with MPI and OpenMP in C/C++ and
    Fortran, and MPI in Python using mpi4py.
 
-   .. _Victor Eijkhout: https://tacc.utexas.edu/about/directory/victor-eijkhout
+   .. _Victor Eijkhout: https://tacc.utexas.edu/about/staff-directory/victor-eijkhout
    .. _TACC: https://tacc.utexas.edu/
-   .. _ppse-pdf: https://tinyurl.com/vle335course
+   .. _ppse-book: https://theartofhpc.com/pcse.html
    .. _ppse-html: https://theartofhpc.com/pcse/index.html
 
 
