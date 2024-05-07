@@ -93,14 +93,24 @@ jobs:
     - name: Check source distribution
       run:  python -m twine check dist/mpi4py-*.tar.gz
 
-    - name: Compute SHA256
-      run:  sha256sum dist/mpi4py-*.tar.gz | tee sha256sum.txt
+    - name: Compute SHA256 checksum
+      run:  sha256sum -b mpi4py-*.tar.gz >> sha256sum.txt
+      working-directory: dist
+
+    - name: Report SHA256 checksum
+      run:  |
+        echo '```'        >> $GITHUB_STEP_SUMMARY
+        cat sha256sum.txt >> $GITHUB_STEP_SUMMARY
+        echo '```'        >> $GITHUB_STEP_SUMMARY
+      working-directory: dist
 
     - name: Upload distribution artifact
       uses: actions/upload-artifact@v4
       with:
         name: mpi4py-dist
-        path: dist/mpi4py-*.tar.gz
+        path: |
+          dist/mpi4py-*.tar.gz
+          dist/sha256sum.txt
 
   pypi-publish:
 
