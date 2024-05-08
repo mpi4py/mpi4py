@@ -122,8 +122,34 @@ jobs:
       with:
         subject-path: dist/mpi4py-*.tar.gz
 
-  pypi-publish:
+  gh-publish:
+    if: ${{ github.event_name == 'release' }}
+    runs-on: ubuntu-latest
+    needs: sdist
+    environment:
+      name: gh
+      url: https://github.com/mpi4py/mpi4py/releases
+    permissions:
+      contents: write
 
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Download distribution artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: mpi4py-dist
+        path: dist
+
+    - name: Publish package distributions to GitHub Releases
+      run:  gh release upload $TAG dist/mpi4py-*.tar.gz
+      env:
+        TAG: ${{ github.event.release.tag_name }}
+        GITHUB_TOKEN: ${{ github.token }}
+
+  pypi-publish:
     if: ${{ github.event_name == 'release' }}
     runs-on: ubuntu-latest
     needs: sdist
