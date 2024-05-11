@@ -80,10 +80,21 @@ cdef int PyMPI_GetBuffer(object obj, Py_buffer *view, int flags) except -1:
 cdef extern from "Python.h":
     int PyIndex_Check(object)
     int PySlice_Check(object)
+    int PySlice_Unpack(object,
+                       Py_ssize_t *,
+                       Py_ssize_t *,
+                       Py_ssize_t *) except -1
+    Py_ssize_t PySlice_AdjustIndices(Py_ssize_t,
+                                     Py_ssize_t *,
+                                     Py_ssize_t *,
+                                     Py_ssize_t) noexcept nogil
+    Py_ssize_t PyNumber_AsSsize_t(object, object) except? -1
+
+cdef extern from "Python.h":
+    # TODO: PySlice_GetIndicesEx is deprecated since Python 3.6.1
     int PySlice_GetIndicesEx(object, Py_ssize_t,
                              Py_ssize_t *, Py_ssize_t *,
                              Py_ssize_t *, Py_ssize_t *) except -1
-    Py_ssize_t PyNumber_AsSsize_t(object, object) except? -1
 
 
 cdef inline int check_cpu_accessible(int kind) except -1:
@@ -261,6 +272,8 @@ cdef class buffer:
                 raise IndexError("index out of range")
             return <long>buf[start]
         elif PySlice_Check(item):
+            # PySlice_Unpack(item, &start, &stop, &step)
+            # slen = PySlice_AdjustIndices(blen, &start, &stop, step)
             PySlice_GetIndicesEx(item, blen, &start, &stop, &step, &slen)
             if step != 1: raise IndexError("slice with step not supported")
             return tobuffer(self, buf+start, slen, self.view.readonly)
