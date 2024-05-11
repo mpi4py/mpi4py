@@ -40,10 +40,11 @@ Using **conda**
 
 The `conda-forge`_ community provides ready-to-use binary packages
 from an ever growing collection of software libraries built around the
-multi-platform *conda* package manager. Three MPI implementations are
+multi-platform *conda* package manager. Four MPI implementations are
 available on conda-forge: Open MPI (Linux and macOS), MPICH (Linux and
-macOS), and Microsoft MPI (Windows). You can install mpi4py and your
-preferred MPI implementation using the ``conda`` package manager:
+macOS), Intel MPI (Linux and Windows) and Microsoft MPI (Windows).
+You can install mpi4py and your preferred MPI implementation using the
+``conda`` package manager:
 
 * to use MPICH do::
 
@@ -52,6 +53,10 @@ preferred MPI implementation using the ``conda`` package manager:
 * to use Open MPI do::
 
   $ conda install -c conda-forge mpi4py openmpi
+
+* to use Intel MPI do::
+
+  $ conda install -c conda-forge mpi4py impi_rt
 
 * to use Microsoft MPI do::
 
@@ -147,7 +152,19 @@ Python Package Index (PyPI) using ``pip``::
 
   $ python -m pip install mpi4py
 
-Windows wheels require a separate, system-wide installation of the
-`Microsoft MPI <MSMPI_>`_ runtime package.
+The Windows wheels available on PyPI are specially crafted to work
+with either the `Intel MPI <I_MPI_>`_ or the `Microsoft MPI <MSMPI_>`_
+runtime, therefore requiring a separate installation of any one of
+these packages.
 
+.. _I_MPI: https://software.intel.com/intel-mpi-library
 .. _MSMPI: https://learn.microsoft.com/message-passing-interface/microsoft-mpi
+
+Intel MPI is under active development and supports recent version of
+the MPI standard. Intel MPI can be installed with ``pip`` (see the
+`impi-rt`_ package on PyPI), being therefore straightforward to get it
+up and running within a Python environment. Intel MPI can also be
+installed system-wide as part of the Intel HPC Toolkit for Windows or
+via standalone online/offline installers.
+
+.. _impi-rt: https://pypi.org/project/impi-rt/
