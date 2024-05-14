@@ -41,11 +41,14 @@ try:
 except ImportError:
     dlpack = None
 
+
 class DLPackCPUBuf(BaseBuf):
+
+    versioned = True
 
     def __init__(self, typecode, initializer):
         super().__init__(typecode, initializer)
-        self.managed = dlpack.make_dl_managed_tensor(self._buf)
+        self.managed = dlpack.make_dl_managed_tensor(self._buf, self.versioned)
 
     def __del__(self):
         self.managed = None
@@ -57,7 +60,13 @@ class DLPackCPUBuf(BaseBuf):
         device = self.managed.dl_tensor.device
         return (device.device_type, device.device_id)
 
-    def __dlpack__(self, stream=None):
+    def __dlpack__(
+        self,
+        stream=None,
+        max_version=None,
+        dl_device=None,
+        copy=None,
+    ):
         kDLCPU = dlpack.DLDeviceType.kDLCPU
         managed = self.managed
         device = managed.dl_tensor.device
@@ -65,8 +74,16 @@ class DLPackCPUBuf(BaseBuf):
             assert stream is None
         else:
             assert stream == -1
-        capsule = dlpack.make_py_capsule(managed)
+        capsule = dlpack.make_py_capsule(managed, self.versioned)
         return capsule
+
+
+class DLPackCPUBufV0(DLPackCPUBuf):
+
+    versioned = False
+
+    def __dlpack__(self, stream=None):
+        return super().__dlpack__(stream=stream)
 
 
 if cupy is not None:
@@ -96,6 +113,25 @@ if cupy is not None:
             else:
                 return (self.dev_type, self._buf.device.id)
 
+        if False:  # TODO: wait until CuPy supports DLPack v1.0
+
+            def __dlpack__(self, stream=None, **kwargs):
+                assert self.has_dlpack
+                cupy.cuda.get_current_stream().synchronize()
+                return self._buf.__dlpack__(stream=-1, **kwargs)
+
+        else:
+
+            def __dlpack__(self, stream=None):
+                cupy.cuda.get_current_stream().synchronize()
+                if self.has_dlpack:
+                    return self._buf.__dlpack__(stream=-1)
+                else:
+                    return self._buf.toDlpack()
+
+
+    class DLPackGPUBufV0(DLPackGPUBuf):
+
         def __dlpack__(self, stream=None):
             cupy.cuda.get_current_stream().synchronize()
             if self.has_dlpack:
@@ -105,13 +141,19 @@ if cupy is not None:
 
 else:
 
-    class DLPackGPUBuf(DLPackCPUBuf):
+    class DLPackGPUBufInitMixin:
 
         def __init__(self, *args):
             super().__init__(*args)
             kDLCUDA = dlpack.DLDeviceType.kDLCUDA
             device = self.managed.dl_tensor.device
             device.device_type = kDLCUDA
+
+    class DLPackGPUBuf(DLPackGPUBufInitMixin, DLPackCPUBuf):
+        pass
+
+    class DLPackGPUBufV0(DLPackGPUBufInitMixin, DLPackCPUBufV0):
+        pass
 
 # ---
 
@@ -473,12 +515,22 @@ class TestMessageSimpleDLPackCPUBuf(unittest.TestCase,
     def array(self, typecode, initializer):
         return DLPackCPUBuf(typecode, initializer)
 
+class TestMessageSimpleDLPackCPUBufV0(TestMessageSimpleDLPackCPUBuf):
+
+    def array(self, typecode, initializer):
+        return DLPackCPUBufV0(typecode, initializer)
+
 @unittest.skipIf(cupy is None and (array is None or dlpack is None), 'cupy')
 class TestMessageSimpleDLPackGPUBuf(unittest.TestCase,
                                     BaseTestMessageSimpleArray):
 
     def array(self, typecode, initializer):
         return DLPackGPUBuf(typecode, initializer)
+
+class TestMessageSimpleDLPackGPUBufV0(TestMessageSimpleDLPackGPUBuf):
+
+    def array(self, typecode, initializer):
+        return DLPackGPUBufV0(typecode, initializer)
 
 @unittest.skipIf(array is None, 'array')
 class TestMessageSimpleCAIBuf(unittest.TestCase,
@@ -568,6 +620,19 @@ class TestMessageSimpleNumba(unittest.TestCase,
 @unittest.skipIf(dlpack is None, 'dlpack')
 class TestMessageDLPackCPUBuf(unittest.TestCase):
 
+    def testVersion(self):
+        buf = DLPackCPUBuf('i', [0,1,2,3])
+        buf.managed.version.major = 0
+        self.assertRaises(BufferError, MPI.Get_address, buf)
+
+    def testReadonly(self):
+        smsg = DLPackCPUBuf('i', [0,1,2,3])
+        rmsg = DLPackCPUBuf('i', [0,0,0,0])
+        smsg.managed.flags |= dlpack.DLPACK_FLAG_BITMASK_READ_ONLY
+        rmsg.managed.flags |= dlpack.DLPACK_FLAG_BITMASK_READ_ONLY
+        MPI.Get_address(smsg)
+        self.assertRaises(BufferError, Sendrecv, smsg, rmsg)
+
     def testDevice(self):
         buf = DLPackCPUBuf('i', [0,1,2,3])
         buf.__dlpack_device__ = None
@@ -601,7 +666,7 @@ class TestMessageDLPackCPUBuf(unittest.TestCase):
         del buf.__dlpack__
         del capsule
         #
-        buf.__dlpack__ = lambda *args, **kwargs:  None
+        buf.__dlpack__ = lambda *args, **kwargs: None
         self.assertRaises(BufferError, MPI.Get_address, buf)
         del buf.__dlpack__
 
@@ -720,9 +785,10 @@ class TestMessageDLPackCPUBuf(unittest.TestCase):
 @unittest.skipIf(array is None, 'array')
 class TestMessageCAIBuf(unittest.TestCase):
 
-    def testNonReadonly(self):
+    def testReadonly(self):
         smsg = CAIBuf('i', [1,2,3], readonly=True)
         rmsg = CAIBuf('i', [0,0,0], readonly=True)
+        MPI.Get_address(smsg)
         self.assertRaises(BufferError, Sendrecv, smsg, rmsg)
 
     def testNonContiguous(self):

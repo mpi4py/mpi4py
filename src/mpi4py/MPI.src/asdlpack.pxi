@@ -5,9 +5,14 @@
 cdef extern from * nogil:
     ctypedef unsigned char      uint8_t
     ctypedef unsigned short     uint16_t
-    ctypedef          int       int32_t
+    ctypedef signed   int       int32_t
+    ctypedef unsigned int       uint32_t
     ctypedef signed   long long int64_t
     ctypedef unsigned long long uint64_t
+
+ctypedef struct DLPackVersion:
+    uint32_t major
+    uint32_t minor
 
 ctypedef enum DLDeviceType:
     kDLCPU = 1
@@ -58,6 +63,17 @@ ctypedef struct DLManagedTensor:
     void *manager_ctx
     void (*deleter)(DLManagedTensor *)
 
+ctypedef enum:
+    DLPACK_FLAG_BITMASK_READ_ONLY = (1UL << 0UL)
+    DLPACK_FLAG_BITMASK_IS_COPIED = (1UL << 1UL)
+
+ctypedef struct DLManagedTensorVersioned:
+    DLPackVersion version
+    void *manager_ctx
+    void (*deleter)(DLManagedTensorVersioned *)
+    uint64_t flags
+    DLTensor dl_tensor
+
 # -----------------------------------------------------------------------------
 
 cdef extern from "Python.h":
@@ -66,6 +82,14 @@ cdef extern from "Python.h":
     int PyCapsule_IsValid(object, const char[])
 
 # -----------------------------------------------------------------------------
+
+cdef inline int dlpack_check_version(
+    const DLPackVersion *version,
+    unsigned version_major,
+) except -1:
+    if version == NULL: return 0
+    if version.major >= version_major: return 0
+    raise BufferError("dlpack: unexpected version")
 
 cdef inline int dlpack_is_contig(
     const DLTensor *dltensor,
@@ -189,15 +213,25 @@ cdef int Py_CheckDLPackBuffer(object obj) noexcept:
     except: return 0  # ~> uncovered  # noqa
 
 cdef int Py_GetDLPackBuffer(object obj, Py_buffer *view, int flags) except -1:
+    cdef unsigned version_major = 1
+    cdef const char *capsulename = b"dltensor_versioned"
+    cdef const char *usedcapsulename  = b"used_dltensor_versioned"
+    cdef uint64_t READONLY = DLPACK_FLAG_BITMASK_READ_ONLY
     cdef object dlpack
     cdef object dlpack_device
+    cdef tuple max_version
     cdef unsigned device_type
     cdef int device_id
     cdef object capsule
-    cdef DLManagedTensor *managed
+    cdef void *pointer
+    cdef DLManagedTensorVersioned *managed1 = NULL
+    cdef DLManagedTensor *managed0 = NULL
+    cdef const DLPackVersion *dlversion
     cdef const DLTensor *dltensor
     cdef void *buf
     cdef Py_ssize_t size
+    cdef Py_ssize_t itemsize
+    cdef char *format
     cdef bint readonly
 
     try:
@@ -207,36 +241,64 @@ cdef int Py_GetDLPackBuffer(object obj, Py_buffer *view, int flags) except -1:
         raise NotImplementedError("dlpack: missing support")
 
     device_type, device_id = dlpack_device()
-    if device_type == kDLCPU:
-        capsule = dlpack()
-    else:
-        capsule = dlpack(stream=-1)
-        <void> device_id  # unused
-    if not PyCapsule_IsValid(capsule, b"dltensor"):
-        raise BufferError("dlpack: invalid capsule object")
+    <void> device_id  # unused
 
-    managed = <DLManagedTensor*> PyCapsule_GetPointer(capsule, b"dltensor")
-    dltensor = &managed.dl_tensor
+    try:  # DLPack v1.0+
+        max_version = (version_major, 0)
+        if device_type == kDLCPU:
+            capsule = dlpack(max_version=max_version, copy=False)
+        else:
+            capsule = dlpack(stream=-1, max_version=max_version, copy=False)
+    except TypeError:  # DLPack v0.x
+        version_major = 0
+        capsulename = b"dltensor"
+        usedcapsulename = b"used_dltensor"
+        if device_type == kDLCPU:
+            capsule = dlpack()
+        else:
+            capsule = dlpack(stream=-1)
+
+    if not PyCapsule_IsValid(capsule, capsulename):
+        raise BufferError("dlpack: invalid capsule object")
+    pointer = PyCapsule_GetPointer(capsule, capsulename)
+    if version_major >= 1:
+        managed1  = <DLManagedTensorVersioned*> pointer
+        dlversion = &managed1.version
+        dltensor  = &managed1.dl_tensor
+        readonly  = (managed1.flags & READONLY) == READONLY
+    else:
+        managed0  = <DLManagedTensor*> pointer
+        dlversion = NULL
+        dltensor  = &managed0.dl_tensor
+        readonly  = 0
 
     try:
+        dlpack_check_version(dlversion, version_major)
         dlpack_check_shape(dltensor)
         dlpack_check_contig(dltensor)
-
         buf = dlpack_get_data(dltensor)
         size = dlpack_get_size(dltensor)
-        readonly = 0
-
-        PyBuffer_FillInfo(view, obj, buf, size, readonly, flags)
-
-        if (flags & PyBUF_FORMAT) == PyBUF_FORMAT:
-            view.format = dlpack_get_format(dltensor)
-            if view.format != BYTE_FMT:
-                view.itemsize = dlpack_get_itemsize(dltensor)
+        itemsize = dlpack_get_itemsize(dltensor)
+        format = dlpack_get_format(dltensor)
     finally:
-        if managed.deleter != NULL:
-            managed.deleter(managed)
-        PyCapsule_SetName(capsule, b"used_dltensor")
+        if managed1 != NULL:
+            if managed1.deleter != NULL:
+                managed1.deleter(managed1)
+        if managed0 != NULL:
+            if managed0.deleter != NULL:
+                managed0.deleter(managed0)
+        PyCapsule_SetName(capsule, usedcapsulename)
         del capsule
+
+    if PYPY and readonly and ((flags & PyBUF_WRITABLE) == PyBUF_WRITABLE):
+        raise BufferError("Object is not writable")  # ~> pypy
+
+    PyBuffer_FillInfo(view, obj, buf, size, readonly, flags)
+
+    if (flags & PyBUF_FORMAT) == PyBUF_FORMAT:
+        view.format = format
+        if view.format != BYTE_FMT:
+            view.itemsize = itemsize
 
     return <int> device_type
 
