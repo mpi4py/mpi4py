@@ -75,7 +75,6 @@ cdef int Py_GetCAIBuffer(object obj, Py_buffer *view, int flags) except -1:
     cdef Py_ssize_t itemsize = 1
     cdef char byteorder = c'|'
     cdef char typekind = c'u'
-    cdef bint fixnull = 0
 
     try:
         cuda_array_interface = obj.__cuda_array_interface__
@@ -149,10 +148,7 @@ cdef int Py_GetCAIBuffer(object obj, Py_buffer *view, int flags) except -1:
     if PYPY and readonly and ((flags & PyBUF_WRITABLE) == PyBUF_WRITABLE):
         raise BufferError("Object is not writable")  # ~> pypy
 
-    fixnull = (buf == NULL and size == 0)
-    if fixnull: buf = &fixnull
     PyBuffer_FillInfo(view, obj, buf, size*itemsize, readonly, flags)
-    if fixnull: view.buf = NULL
 
     if (flags & PyBUF_FORMAT) == PyBUF_FORMAT:
         view.format = cuda_get_format(typekind, itemsize)

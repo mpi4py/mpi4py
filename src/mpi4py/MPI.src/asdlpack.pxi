@@ -199,7 +199,6 @@ cdef int Py_GetDLPackBuffer(object obj, Py_buffer *view, int flags) except -1:
     cdef void *buf
     cdef Py_ssize_t size
     cdef bint readonly
-    cdef bint fixnull
 
     try:
         dlpack = obj.__dlpack__
@@ -227,10 +226,7 @@ cdef int Py_GetDLPackBuffer(object obj, Py_buffer *view, int flags) except -1:
         size = dlpack_get_size(dltensor)
         readonly = 0
 
-        fixnull = (buf == NULL and size == 0)
-        if fixnull: buf = &fixnull
         PyBuffer_FillInfo(view, obj, buf, size, readonly, flags)
-        if fixnull: view.buf = NULL
 
         if (flags & PyBUF_FORMAT) == PyBUF_FORMAT:
             view.format = dlpack_get_format(dltensor)
