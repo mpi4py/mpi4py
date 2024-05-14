@@ -73,6 +73,7 @@ cdef int Py_GetCAIBuffer(object obj, Py_buffer *view, int flags) except -1:
     cdef bint readonly = 0
     cdef Py_ssize_t s, size = 1
     cdef Py_ssize_t itemsize = 1
+    cdef char *format = BYTE_FMT
     cdef char byteorder = c'|'
     cdef char typekind = c'u'
 
@@ -98,6 +99,7 @@ cdef int Py_GetCAIBuffer(object obj, Py_buffer *view, int flags) except -1:
     byteorder = <char>ord(typestr[0:1])
     typekind = <char>ord(typestr[1:2])
     itemsize = <Py_ssize_t>int(typestr[2:])
+    format = cuda_get_format(typekind, itemsize)
 
     if (flags & PyBUF_FORMAT) == PyBUF_FORMAT:
         if byteorder == c'<':  # little-endian
@@ -151,7 +153,7 @@ cdef int Py_GetCAIBuffer(object obj, Py_buffer *view, int flags) except -1:
     PyBuffer_FillInfo(view, obj, buf, size*itemsize, readonly, flags)
 
     if (flags & PyBUF_FORMAT) == PyBUF_FORMAT:
-        view.format = cuda_get_format(typekind, itemsize)
+        view.format = format
         if view.format != BYTE_FMT:
             view.itemsize = itemsize
 
