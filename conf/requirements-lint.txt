@@ -8,6 +8,6 @@ flake8-bugbear
 flake8-docstrings
 flake8-unused-arguments
 flake8-use-fstring
-pylint
+pylint==3.1.*
 ruff
 yamllint
