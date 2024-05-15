@@ -19,7 +19,7 @@ Release 4.0.0 [2024-XX-XX]
     - Support for removal of error classes/codes/strings.
     - Support for querying hardware resource information.
 
-  + Add prelimiary support for the upcoming MPI-5.0 standard.
+  + Add preliminary support for the upcoming MPI-5.0 standard.
 
     - User-level failure mitigation (ULFM).
 
@@ -81,14 +81,14 @@ Release 4.0.0 [2024-XX-XX]
     but instance methods. Existing codes using the former class
     methods are expected to continue working.
 
-  * `Group.Translate_ranks()` is no longer a class method but a
+  * `Group.Translate_ranks()` is no longer a class method but an
     instance method. Existing codes using the former class method are
     expected to continue working.
 
   * The `LB` and `UB` datatypes are no longer available, use
     `Datatype.Create_resized()` instead.
 
-  * The `HOST` predefined attribute keyval is no longer available.
+  * The `HOST` predefined attribute key is no longer available.
 
   * The `MPI.memory` class has been renamed to `MPI.buffer`. The old
     name is still available as an alias to the new name.
