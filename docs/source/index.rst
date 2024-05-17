@@ -39,7 +39,6 @@ MPI for Python
    citation
    install
    develop
-   appendix
    license
    changes
 

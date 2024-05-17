@@ -14,20 +14,6 @@ build *MPI for Python*:
 * A working `MPI`_ implementation like `MPICH`_ or `Open MPI`_,
   preferably supporting MPI-4 and built with shared/dynamic libraries.
 
-  .. note::
-
-     If you want to build some MPI implementation from sources,
-     check the instructions at :ref:`building-mpi` in the appendix.
-
-  .. note::
-
-     Some MPI-1 implementations **do require** the actual
-     command line arguments to be passed in :c:func:`MPI_Init()`. In
-     this case, you will need to use a rebuilt, MPI-enabled, Python
-     interpreter executable. *MPI for Python* has some support for
-     alleviating you from this task. Check the instructions at
-     :ref:`python-mpi` in the appendix.
-
 Optionally, consider installing the following packages:
 
 * `NumPy`_ for enabling comprehensive testing of MPI communication.
