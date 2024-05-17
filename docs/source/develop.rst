@@ -4,8 +4,8 @@ Development
 Prerequisites
 -------------
 
-You need to have the following software properly installed in order to
-build *MPI for Python*:
+You need to have the following software properly installed to develop
+*MPI for Python*:
 
 * `Python`_ 3.6 or above.
 
@@ -20,7 +20,14 @@ Optionally, consider installing the following packages:
 
 * `CuPy`_ for enabling comprehensive testing with a GPU-aware MPI.
 
-* `Sphinx`_ to build documentation.
+* `Sphinx`_ to build the documentation.
+
+.. tip::
+
+   Most routine development tasks like building, installing in
+   editable mode, testing, and generating documentation can be
+   performed with the `spin`_ developer tool. Run :command:`spin` at
+   the top level source directory for a list of available subcommands.
 
 .. _Python:    https://www.python.org/
 .. _Cython:    https://cython.org/
@@ -30,6 +37,7 @@ Optionally, consider installing the following packages:
 .. _NumPy:     https://numpy.org/
 .. _CuPy:      https://cupy.dev/
 .. _Sphinx:    https://www.sphinx-doc.org/
+.. _spin:      https://github.com/scientific-python/spin
 
 
 Building
@@ -81,12 +89,12 @@ location, either via the :option:`--mpicc` command option or using the
 :envvar:`MPICC` environment variable::
 
   $ python setup.py build --mpicc=/path/to/mpicc
-  $ MPICC=/path/to/mpicc python setup.py build
+  $ env MPICC=/path/to/mpicc python setup.py build
 
 Alternatively, you can provide all the relevant information about your
 MPI implementation by editing the :file:`mpi.cfg` file located in the
 top level source directory. You can use the default section ``[mpi]``
-or add a new custom section, for example ``[other_mpi]`` (see the
+or add a new custom section, for example ``[vendor_mpi]`` (see the
 examples provided in the :file:`mpi.cfg` file as a starting point to
 write your own section):
 
@@ -98,7 +106,7 @@ write your own section):
   library_dirs         = /usr/local/mpi/lib
   runtime_library_dirs = /usr/local/mpi/lib
 
-  [other_mpi]
+  [vendor_mpi]
   include_dirs         = /opt/mpi/include ...
   libraries            = mpi ...
   library_dirs         = /opt/mpi/lib ...
@@ -109,18 +117,20 @@ write your own section):
 and then run the *build* command specifying you custom
 configuration section::
 
-  $ python setup.py build --mpi=other_mpi
-  $ MPICFG=other_mpi python setup.py build
+  $ python setup.py build --mpi=vendor_mpi
+  $ env MPICFG=vendor_mpi python setup.py build
 
-After building, the package is ready for installation in development
-mode::
 
-  $ python setup.py develop --user
+Installing
+----------
 
-Alternatively, you can generate a binary wheel file in the
-:file:`dist/` directory with::
+*MPI for Python* can be installed in editable mode::
 
-  $ python setup.py bdist_wheel
+  $ python -m pip install --editable .
+
+After modifying Cython sources, an in-place rebuild is needed::
+
+  $ python setup.py build --inplace
 
 
 Testing
@@ -144,7 +154,7 @@ at the command line::
   $ mpiexec -n 5 python demo/helloworld.py
 
 will launch a five-process run of the Python interpreter and run the
-test script :file:`demo/helloworld.py` from the source distribution.
+demo script :file:`demo/helloworld.py` from the source distribution.
 
 You can also run all the *unittest* scripts::
 
