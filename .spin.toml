@@ -8,6 +8,10 @@ name = 'mpi4py'
   ".spin/cmds.py:sdist",
   ".spin/cmds.py:wheel",
 ]
+"Check" = [
+  ".spin/cmds.py:lint",
+  ".spin/cmds.py:type",
+]
 "Environment" = [
   ".spin/cmds.py:shell",
   ".spin/cmds.py:ipython",

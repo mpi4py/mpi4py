@@ -1,6 +1,7 @@
 """https://github.com/scientific-python/spin"""  # noqa: D400
 import os
 import shlex
+import shutil
 import sys
 import click
 from spin.cmds.util import run
@@ -61,6 +62,41 @@ def _setup_environment(ctx, quiet=False):
     path = _get_site_packages()
     ctx.invoke(build, quiet=True)
     _set_pythonpath(path, quiet=quiet)
+
+
+def _run_check_commands(*commands):
+    for cmd, *args in commands:
+        if shutil.which(cmd) is not None:
+            run([cmd, *args])
+        else:
+            click.secho(
+                f'{cmd}: command not found...',
+                bold=True, fg="bright_red"
+            )
+
+
+@click.command()
+@click.pass_context
+def lint(ctx):
+    """🔦 Lint-check sources with linters."""
+    _setup_environment(ctx)
+    _run_check_commands(
+        ["ruff", "check", "--quiet"],
+        ["flake8", "docs", "src"],
+        ["pylint",  "mpi4py"],
+        ["cython-lint", "."],
+    )
+
+
+@click.command()
+@click.pass_context
+def type(ctx):
+    """🦆 Type-check sources with mypy."""
+    _setup_environment(ctx)
+    _run_check_commands(
+        ["stubtest", "mpi4py"],
+        ["mypy", "-p", "mpi4py"],
+    )
 
 
 @click.command(context_settings={"ignore_unknown_options": True})
