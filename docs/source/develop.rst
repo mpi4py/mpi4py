@@ -150,14 +150,8 @@ You can also run all the *unittest* scripts::
 
   $ mpiexec -n 5 python test/main.py
 
-or, if you have `nose`_ unit testing framework installed::
+or, if you have the `pytest`_ unit testing framework installed::
 
-  $ mpiexec -n 5 nosetests
+  $ mpiexec -n 5 pytest
 
-.. _nose: https://nose.readthedocs.io/
-
-or, if you have `py.test`_ unit testing framework installed::
-
-  $ mpiexec -n 5 py.test
-
-.. _py.test: https://docs.pytest.org/
+.. _pytest: https://docs.pytest.org/
