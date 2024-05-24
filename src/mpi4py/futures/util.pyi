@@ -1,46 +1,42 @@
-from typing import TypeVar
 from typing import Collection
 from typing import Callable
 from typing import overload
 from ._base import Future
+from ..typing import T, U, V
 
 __all__: list[str] = [
     'collect',
     'compose',
 ]
 
-_T = TypeVar("_T")
-_U = TypeVar("_U")
-_V = TypeVar("_V")
-
 def collect(
-    fs: Collection[Future[_T]],
-) -> Future[list[_T]]: ...
+    fs: Collection[Future[T]],
+) -> Future[list[T]]: ...
 
 @overload
 def compose(
-    future: Future[_T],
+    future: Future[T],
     resulthook: None = None,
     excepthook: None = None,
-) -> Future[_T]: ...
+) -> Future[T]: ...
 
 @overload
 def compose(
-    future: Future[_T],
-    resulthook: Callable[[_T], _U],
+    future: Future[T],
+    resulthook: Callable[[T], U],
     excepthook: None = None,
-) -> Future[_U]: ...
+) -> Future[U]: ...
 
 @overload
 def compose(
-    future: Future[_T],
+    future: Future[T],
     resulthook: None = None, *,
-    excepthook: Callable[[BaseException], BaseException | _V],
-) -> Future[_T | _V]: ...
+    excepthook: Callable[[BaseException], BaseException | V],
+) -> Future[T | V]: ...
 
 @overload
 def compose(
-    future: Future[_T],
-    resulthook: Callable[[_T], _U],
-    excepthook: Callable[[BaseException], BaseException | _V],
-) -> Future[_U | _V]: ...
+    future: Future[T],
+    resulthook: Callable[[T], U],
+    excepthook: Callable[[BaseException], BaseException | V],
+) -> Future[U | V]: ...

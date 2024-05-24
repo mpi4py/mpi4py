@@ -8,6 +8,7 @@ from typing import (
     List,
     Dict,
     Tuple,
+    TypeVar,
 )
 if sys.version_info >= (3, 10):
     from typing import TypeAlias
@@ -125,3 +126,8 @@ TargetSpec: TypeAlias = Union[
     Tuple[Displ, Count, TypeSpec],
     List[Any],
 ]
+
+S = TypeVar('S')  # noqa: PYI001
+T = TypeVar('T')  # noqa: PYI001
+U = TypeVar('U')  # noqa: PYI001
+V = TypeVar('V')  # noqa: PYI001

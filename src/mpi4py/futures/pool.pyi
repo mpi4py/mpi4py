@@ -1,5 +1,5 @@
 import sys
-from typing import Any, TypeVar
+from typing import Any
 from typing import Callable, Iterable, Iterator, Mapping, Sequence
 if sys.version_info >= (3, 10):
     from typing import ParamSpec
@@ -13,8 +13,8 @@ else:
     from typing_extensions import Self
 from ..MPI import Intracomm, COMM_WORLD
 from ._base import Executor, Future
+from ..typing import T
 
-_T = TypeVar("_T")
 _P = ParamSpec("_P")
 
 class MPIPoolExecutor(Executor):
@@ -44,33 +44,33 @@ class MPIPoolExecutor(Executor):
     if sys.version_info >= (3, 9):
         def submit(
             self,
-            __fn: Callable[_P, _T],
+            __fn: Callable[_P, T],
             *args: _P.args,
             **kwargs: _P.kwargs,
-        ) -> Future[_T]: ...
+        ) -> Future[T]: ...
     else:
         def submit(
             self,
-            fn: Callable[_P, _T],
+            fn: Callable[_P, T],
             *args: _P.args,
             **kwargs: _P.kwargs,
-        ) -> Future[_T]: ...
+        ) -> Future[T]: ...
     def map(
         self,
-        fn: Callable[..., _T],
+        fn: Callable[..., T],
         *iterables: Iterable[Any],
         timeout: float | None = None,
         chunksize: int = 1,
         unordered: bool = False,
-    ) -> Iterator[_T]: ...
+    ) -> Iterator[T]: ...
     def starmap(
         self,
-        fn: Callable[..., _T],
+        fn: Callable[..., T],
         iterable: Iterable[Any],
         timeout: float | None = None,
         chunksize: int = 1,
         unordered: bool = False,
-    ) -> Iterator[_T]: ...
+    ) -> Iterator[T]: ...
     def shutdown(
         self,
         wait: bool = True,

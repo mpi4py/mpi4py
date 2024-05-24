@@ -12,6 +12,7 @@ from typing import (
     List,
     Dict,
     Tuple,
+    TypeVar,
 )
 try:  # pragma: no branch
     from typing import Protocol
@@ -243,3 +244,9 @@ Target specification.
 * Tuple[`Displ`, `Count`]
 * Tuple[`Displ`, `Count`, `Datatype`]
 """
+
+
+S = TypeVar('S')
+T = TypeVar('T')
+U = TypeVar('U')
+V = TypeVar('V')

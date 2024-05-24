@@ -315,6 +315,7 @@ def setup(app):
         'mpi4py.run',
         'mpi4py.util.dtlib',
         'mpi4py.util.pkl5',
+        'mpi4py.util.pool',
         'mpi4py.util.sync',
     ]
     typing_overload = typing.overload
