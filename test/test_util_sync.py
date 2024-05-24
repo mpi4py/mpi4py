@@ -253,9 +253,17 @@ class BaseTestMutex:
             random_sleep()
             test_acquire_nonblocking()
 
-    def testFree(self):
+    def testAcquireFree(self):
         mutex = self.mutex
         mutex.acquire()
+        for _ in range(5):
+            mutex.free()
+        self.assertRaises(RuntimeError, mutex.acquire)
+        self.assertRaises(RuntimeError, mutex.release)
+        self.assertRaises(RuntimeError, mutex.locked)
+
+    def testFree(self):
+        mutex = self.mutex
         for _ in range(5):
             mutex.free()
         self.assertRaises(RuntimeError, mutex.acquire)
@@ -312,19 +320,26 @@ class BaseTestRMutex:
     def testAcquireRelease(self):
         def test_acquire_release():
             mutex = self.mutex
+            self.assertFalse(mutex.locked())
             self.assertEqual(mutex.count(), 0)
             self.assertRaises(RuntimeError, mutex.release)
             mutex.acquire()
+            self.assertTrue(mutex.locked())
             self.assertEqual(mutex.count(), 1)
             mutex.acquire()
+            self.assertTrue(mutex.locked())
             self.assertEqual(mutex.count(), 2)
             mutex.acquire()
+            self.assertTrue(mutex.locked())
             self.assertEqual(mutex.count(), 3)
             mutex.release()
+            self.assertTrue(mutex.locked())
             self.assertEqual(mutex.count(), 2)
             mutex.release()
+            self.assertTrue(mutex.locked())
             self.assertEqual(mutex.count(), 1)
             mutex.release()
+            self.assertFalse(mutex.locked())
             self.assertEqual(mutex.count(), 0)
             self.assertRaises(RuntimeError, mutex.release)
         for _ in range(5):
@@ -341,6 +356,7 @@ class BaseTestRMutex:
             self.assertEqual(mutex.count(), 0)
             comm.Barrier()
             locked = mutex.acquire(blocking=False)
+            self.assertEqual(mutex.locked(), locked)
             comm.Barrier()
             self.assertEqual(mutex.count(), int(locked))
             if locked:
@@ -357,6 +373,7 @@ class BaseTestRMutex:
                 self.assertEqual(mutex.count(), 1)
                 mutex.release()
             comm.Barrier()
+            self.assertFalse(mutex.locked())
             self.assertEqual(mutex.count(), 0)
             states = comm.allgather(locked)
             self.assertEqual(states.count(True), 1)
@@ -372,11 +389,18 @@ class BaseTestRMutex:
             random_sleep()
             test_acquire_nonblocking()
 
-    def testFree(self):
+    def testAcquireFree(self):
         mutex = self.mutex
         mutex.acquire()
         mutex.acquire()
         mutex.acquire()
+        for _ in range(5):
+            mutex.free()
+        self.assertRaises(RuntimeError, mutex.acquire)
+        self.assertRaises(RuntimeError, mutex.release)
+
+    def testFree(self):
+        mutex = self.mutex
         for _ in range(5):
             mutex.free()
         self.assertRaises(RuntimeError, mutex.acquire)

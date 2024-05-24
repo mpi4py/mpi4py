@@ -161,7 +161,6 @@ class Mutex:
         count = 3 if rank == tail_rank else 2
         unitsize = MPI.INT.Get_size()
         window = MPI.Win.Allocate(count * unitsize, unitsize, info, comm)
-        self._rank = rank
         self._window = window
 
         init = [False, null_rank, null_rank][:count]
@@ -171,21 +170,12 @@ class Mutex:
         window.Unlock(rank)
         comm.Barrier()
 
-    def __enter__(self):
-        """Acquire mutex."""
-        self.acquire()
-        return self
-
-    def __exit__(self, *exc):
-        """Release mutex."""
-        self.release()
-
     def _backoff(self):
         backoff = _new_backoff()
         return lambda: next(backoff)
 
     def _progress(self):
-        return lambda: self._window.Flush(self._rank)
+        return lambda: self._window.Flush(self._window.group_rank)
 
     def _spinloop(self, index, sentinel):
         window = self._window
@@ -199,6 +189,15 @@ class Mutex:
             window.Sync()
         return memory[index]
 
+    def __enter__(self):
+        """Acquire mutex."""
+        self.acquire()
+        return self
+
+    def __exit__(self, *exc):
+        """Release mutex."""
+        self.release()
+
     def acquire(self, blocking=True):
         """Acquire mutex, blocking or non-blocking.
 
@@ -206,7 +205,7 @@ class Mutex:
             blocking: If `True`, block until the mutex is held.
 
         Returns:
-            `True` if mutex is held, `False` otherwise.
+            `True` if the mutex is held, `False` otherwise.
 
         """
         null_rank, tail_rank = MPI.PROC_NULL, 0
@@ -218,12 +217,13 @@ class Mutex:
             raise RuntimeError("cannot acquire already held mutex")
 
         window = self._window
+        self_rank = window.group_rank
         window.Lock_all()
 
-        rank = _array.array('i', [self._rank])
+        rank = _array.array('i', [self_rank])
         null = _array.array('i', [null_rank])
         prev = _array.array('i', [null_rank])
-        window.Accumulate(null, self._rank, next_id, MPI.REPLACE)
+        window.Accumulate(null, self_rank, next_id, MPI.REPLACE)
         if blocking:
             window.Fetch_and_op(rank, prev, tail_rank, tail_id, MPI.REPLACE)
         else:
@@ -238,7 +238,7 @@ class Mutex:
 
         # Set the local lock flag
         flag = _array.array('i', [locked])
-        window.Accumulate(flag, self._rank, lock_id, MPI.REPLACE)
+        window.Accumulate(flag, self_rank, lock_id, MPI.REPLACE)
 
         window.Unlock_all()
         return locked
@@ -254,9 +254,10 @@ class Mutex:
             raise RuntimeError("cannot release unheld mutex")
 
         window = self._window
+        self_rank = window.group_rank
         window.Lock_all()
 
-        rank = _array.array('i', [self._rank])
+        rank = _array.array('i', [self_rank])
         null = _array.array('i', [null_rank])
         prev = _array.array('i', [null_rank])
         window.Compare_and_swap(null, rank, prev, tail_rank, tail_id)
@@ -270,7 +271,7 @@ class Mutex:
 
         # Set the local lock flag
         false = _array.array('i', [False])
-        window.Accumulate(false, self._rank, lock_id, MPI.REPLACE)
+        window.Accumulate(false, self_rank, lock_id, MPI.REPLACE)
 
         window.Unlock_all()
 
@@ -290,7 +291,6 @@ class Mutex:
             if self.locked():
                 self.release()
         window = self._window
-        self._rank = MPI.PROC_NULL
         self._window = MPI.WIN_NULL
         window.free()
 
@@ -325,7 +325,7 @@ class RMutex:
             blocking: If `True`, block until the mutex is held.
 
         Returns:
-            `True` if mutex is held, `False` otherwise.
+            `True` if the mutex is held, `False` otherwise.
 
         """
         if self._block.locked():
@@ -343,6 +343,10 @@ class RMutex:
         self._count = count = self._count - 1
         if not count:
             self._block.release()
+
+    def locked(self):
+        """Return whether the mutex is held."""
+        return self._block.locked()
 
     def count(self):
         """Return recursion count."""

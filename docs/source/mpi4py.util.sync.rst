@@ -95,6 +95,7 @@ Mutual exclusion
    .. automethod:: __exit__
    .. automethod:: acquire
    .. automethod:: release
+   .. automethod:: locked
    .. automethod:: count
    .. automethod:: free
 
