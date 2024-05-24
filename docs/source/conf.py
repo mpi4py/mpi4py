@@ -199,12 +199,15 @@ def _setup_autodoc(app):
 
     #
 
-    def istypealias(obj):
+    def istypealias(obj, name):
         if isinstance(obj, type):
-            return True
+            return name != getattr(obj, '__name__', None)
         return obj in (
             typing.Any,
         )
+
+    def istypevar(obj):
+        return isinstance(obj, typing.TypeVar)
 
     class TypeDocumenter(autodoc.DataDocumenter):
         objtype = 'type'
@@ -212,19 +215,44 @@ def _setup_autodoc(app):
         priority = autodoc.ClassDocumenter.priority + 1
 
         @classmethod
-        def can_document_member(cls, member, _membername, _isattr, parent):
+        def can_document_member(cls, member, membername, _isattr, parent):
             return (
                 isinstance(parent, autodoc.ModuleDocumenter)
                 and parent.name == 'mpi4py.typing'
-                and istypealias(member)
+                and (istypevar(member) or istypealias(member, membername))
             )
 
+        def add_directive_header(self, sig):
+            if istypevar(self.object):
+                obj = self.object
+                if not self.options.annotation:
+                    self.options.annotation = f' = TypeVar("{obj.__name__}")'
+            super().add_directive_header(sig)
+
         def update_content(self, more_content):
-            if istypealias(self.object):
-                more_content.append(
-                    _('alias of %s') % typing.restify(self.object), '')
+            obj = self.object
+            if istypevar(obj):
+                if obj.__covariant__:
+                    kind = _("Covariant")
+                elif obj.__contravariant__:
+                    kind = _("Contravariant")
+                else:
+                    kind = _("Invariant")
+                content = f"{kind} :class:`~typing.TypeVar`."
+                more_content.append(content, '')
+                more_content.append('', '')
+            if istypealias(obj, self.name):
+                content = _('alias of %s') % typing.restify(obj)
+                more_content.append(content, '')
                 more_content.append('', '')
             super().update_content(more_content)
+
+        def get_doc(self, *args, **kwargs):
+            obj = self.object
+            if istypevar(obj):
+                if obj.__doc__ == typing.TypeVar.__doc__:
+                    return []
+            return super().get_doc(*args, **kwargs)
 
     app.add_autodocumenter(TypeDocumenter)
 
