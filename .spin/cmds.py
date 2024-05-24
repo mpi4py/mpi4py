@@ -85,6 +85,8 @@ def lint(ctx):
         ["flake8", "docs", "src"],
         ["pylint",  "mpi4py"],
         ["cython-lint", "."],
+        ["codespell"],
+        ["yamllint", "."],
     )
 
 

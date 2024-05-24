@@ -3,8 +3,10 @@
 [codespell]
 check-hidden =
 check-filenames =
-skip = build,.eggs,.git,.tox,.*_cache,*/mpi4py/MPI.c
+skip = build,.eggs,.git,.tox,.*_cache,htmlcov,*/mpi4py/MPI.c
 ignore-words-list =
+  assertIn,
+  bootup,
   ccompiler,
   improbe,
   inout,
