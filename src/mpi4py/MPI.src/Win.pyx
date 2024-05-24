@@ -232,6 +232,30 @@ cdef class Win:
         def __get__(self) -> Group:
             return self.Get_group()
 
+    property group_size:
+        """Group size."""
+        def __get__(self) -> int:
+            cdef MPI_Group group = MPI_GROUP_NULL
+            cdef int group_size  = -1
+            CHKERR( MPI_Win_get_group(self.ob_mpi, &group) )
+            try:
+                CHKERR( MPI_Group_size(group, &group_size) )
+            finally:
+                CHKERR( MPI_Group_free(&group) )
+            return group_size
+
+    property group_rank:
+        """Group rank."""
+        def __get__(self) -> int:
+            cdef MPI_Group group = MPI_GROUP_NULL
+            cdef int group_rank  = MPI_PROC_NULL
+            CHKERR( MPI_Win_get_group(self.ob_mpi, &group) )
+            try:
+                CHKERR( MPI_Group_rank(group, &group_rank) )
+            finally:
+                CHKERR( MPI_Group_free(&group) )
+            return group_rank
+
     # Window Attributes
     # -----------------
 

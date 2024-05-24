@@ -135,6 +135,8 @@ class BaseTestWin:
         #
         group = win.group
         self.assertEqual(type(group), MPI.Group)
+        self.assertEqual(win.group_size, group.Get_size())
+        self.assertEqual(win.group_rank, group.Get_rank())
         group.Free()
         #
         info = win.info

@@ -167,6 +167,8 @@ class BaseTestFile:
         #
         group = file.group
         self.assertEqual(type(group), MPI.Group)
+        self.assertEqual(file.group_size, group.Get_size())
+        self.assertEqual(file.group_rank, group.Get_rank())
         group.Free()
         #
         info = file.info

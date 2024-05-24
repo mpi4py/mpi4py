@@ -57,7 +57,7 @@ cdef class Group:
         """
         Return the rank of this process in a group.
         """
-        cdef int rank = -1
+        cdef int rank = MPI_PROC_NULL
         CHKERR( MPI_Group_rank(self.ob_mpi, &rank) )
         return rank
 

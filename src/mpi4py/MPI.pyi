@@ -1020,6 +1020,8 @@ class Win:
     handle: int
     info: Info
     group: Group
+    group_size: int
+    group_rank: int
     attrs: tuple[int, int, int]
     flavor: int
     model: int
@@ -1105,6 +1107,8 @@ class File:
     size: int
     amode: int
     group: Group
+    group_size: int
+    group_rank: int
     info: Info
     atomicity: bool
 
