@@ -99,6 +99,32 @@ Mutual exclusion
    .. automethod:: count
    .. automethod:: free
 
+Condition variable
+++++++++++++++++++
+
+.. autoclass:: mpi4py.util.sync.Condition
+
+   A condition variable allows one or more processes to wait until they are
+   notified by another processes. The condition variable interface is close to
+   that of `threading.Condition`, allowing the use of either recursive or
+   non-recursive mutual exclusion. However, the condition variable should be
+   used within a group of MPI processes, not threads.
+
+   This condition variable implementation uses a MPI-3 RMA-based scalable and
+   fair circular queue algorithm to track the set of waiting processes.
+
+   .. automethod:: __init__
+   .. automethod:: __enter__
+   .. automethod:: __exit__
+   .. automethod:: acquire
+   .. automethod:: release
+   .. automethod:: locked
+   .. automethod:: wait
+   .. automethod:: wait_for
+   .. automethod:: notify
+   .. automethod:: notify_all
+   .. automethod:: free
+
 
 Examples
 ++++++++

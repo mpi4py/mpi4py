@@ -11,6 +11,7 @@ __all__ = [
     "Counter",
     "Mutex",
     "RMutex",
+    "Condition",
 ]
 
 
@@ -356,6 +357,250 @@ class RMutex:
         """Free mutex resources."""
         self._block.free()
         self._count = 0
+
+
+class Condition:
+    """Parallel condition variable."""
+
+    def __init__(
+        self,
+        comm,
+        lock=None,
+        info=MPI.INFO_NULL,
+    ):
+        """Initialize condition variable object.
+
+        Args:
+            comm: Intracommunicator context.
+            lock: Basic or recursive mutex object.
+            info: Info object for RMA context creation.
+
+        """
+        if lock is None:
+            self._lock = RMutex(comm, info)
+            self._lock_free = self._lock.free
+        else:
+            self._lock = lock
+            self._lock_free = lambda: None
+
+        null_rank, tail_rank = MPI.PROC_NULL, 0
+
+        rank = comm.Get_rank()
+        count = 3 if rank == tail_rank else 2
+        unitsize = MPI.INT.Get_size()
+        window = MPI.Win.Allocate(count * unitsize, unitsize, info, comm)
+        self._window = window
+
+        init = [0, null_rank, null_rank][:count]
+        init = _array.array('i', init)
+        window.Lock(rank, MPI.LOCK_SHARED)
+        window.Accumulate(init, rank, op=MPI.REPLACE)
+        window.Unlock(rank)
+        comm.Barrier()
+
+    def _enqueue(self, process):
+        null_rank, tail_rank = MPI.PROC_NULL, 0
+        next_id, tail_id = (1, 2)
+        window = self._window
+
+        rank = _array.array('i', [process])
+        prev = _array.array('i', [null_rank])
+        next = _array.array('i', [process])  # pylint: disable=W0622
+
+        window.Lock_all()
+        window.Fetch_and_op(rank, prev, tail_rank, tail_id, MPI.REPLACE)
+        window.Flush(tail_rank)
+        if prev[0] != null_rank:
+            window.Fetch_and_op(rank, next, prev[0], next_id, MPI.REPLACE)
+            window.Flush(prev[0])
+        window.Accumulate(next, rank[0], next_id, MPI.REPLACE)
+        window.Unlock_all()
+
+    def _dequeue(self, maxnumprocs):
+        null_rank, tail_rank = MPI.PROC_NULL, 0
+        next_id, tail_id = (1, 2)
+        window = self._window
+
+        null = _array.array('i', [null_rank])
+        prev = _array.array('i', [null_rank])
+        next = _array.array('i', [null_rank])  # pylint: disable=W0622
+
+        processes = []
+        maxnumprocs = max(0, min(maxnumprocs, window.group_size))
+        window.Lock_all()
+        window.Fetch_and_op(null, prev, tail_rank, tail_id, MPI.NO_OP)
+        window.Flush(tail_rank)
+        if prev[0] != null_rank:
+            empty = False
+            window.Fetch_and_op(null, next, prev[0], next_id, MPI.NO_OP)
+            window.Flush(prev[0])
+            while len(processes) < maxnumprocs and not empty:
+                rank = next[0]
+                processes.append(rank)
+                window.Fetch_and_op(null, next, rank, next_id, MPI.NO_OP)
+                window.Flush(rank)
+                empty = processes[0] == next[0]
+            if not empty:
+                window.Accumulate(next, prev[0], next_id, MPI.REPLACE)
+            else:
+                window.Accumulate(null, tail_rank, tail_id, MPI.REPLACE)
+        window.Unlock_all()
+        return processes
+
+    def _backoff(self):
+        backoff = _new_backoff()
+        return lambda: next(backoff)
+
+    def _progress(self):
+        return lambda: self._window.Flush(self._window.group_rank)
+
+    def _sleep(self):
+        flag_id = 0
+        window = self._window
+        memory = memoryview(window).cast('i')
+        backoff = self._backoff()
+        progress = self._progress()
+        window.Lock_all()
+        window.Sync()
+        while memory[flag_id] == 0:
+            backoff()
+            progress()
+            window.Sync()
+        memory[flag_id] = 0
+        window.Unlock_all()
+
+    def _wakeup(self, processes):
+        flag_id = 0
+        window = self._window
+        flag = _array.array('i', [1])
+        window.Lock_all()
+        for rank in processes:
+            window.Accumulate(flag, rank, flag_id, MPI.REPLACE)
+        window.Unlock_all()
+
+    def _release_save(self):
+        if isinstance(self._lock, RMutex):
+            # pylint: disable=protected-access
+            state = self._lock._count
+            self._lock._count = 0
+            self._lock._block.release()
+            return state
+        else:
+            self._lock.release()
+            return None
+
+    def _acquire_restore(self, state):
+        if isinstance(self._lock, RMutex):
+            # pylint: disable=protected-access
+            self._lock._block.acquire()
+            self._lock._count = state
+        else:
+            self._lock.acquire()
+
+    def _lock_reset(self):
+        # pylint: disable=protected-access
+        if isinstance(self._lock, RMutex):
+            self._lock._count = 0
+            mutex = self._lock._block
+        else:
+            mutex = self._lock
+        if mutex._window:
+            if mutex.locked():
+                mutex.release()
+
+    def __enter__(self):
+        """Acquire the underlying mutex."""
+        self.acquire()
+        return self
+
+    def __exit__(self, *exc):
+        """Release the underlying mutex."""
+        self.release()
+
+    def acquire(self, blocking=True):
+        """Acquire the underlying mutex."""
+        if not self._window:
+            raise RuntimeError("condition already freed")
+        return self._lock.acquire(blocking)
+
+    def release(self):
+        """Release the underlying mutex."""
+        if not self._window:
+            raise RuntimeError("condition already freed")
+        self._lock.release()
+
+    def locked(self):
+        """Return whether the underlying mutex is held."""
+        return self._lock.locked()
+
+    def wait(self):
+        """Wait until notified by another process.
+
+        Returns:
+            Always `True`.
+
+        """
+        if not self._window:
+            raise RuntimeError("condition already freed")
+        if not self.locked():
+            raise RuntimeError("cannot wait on unheld mutex")
+        self._enqueue(self._window.group_rank)
+        state = self._release_save()
+        self._sleep()
+        self._acquire_restore(state)
+        return True
+
+    def wait_for(self, predicate):
+        """Wait until a predicate evaluates to `True`.
+
+        Args:
+            predicate: callable returning a boolean.
+
+        Returns:
+            The result of predicate once it evaluates to `True`.
+
+        """
+        result = predicate()
+        while not result:
+            self.wait()
+            result = predicate()
+        return result
+
+    def notify(self, n=1):
+        """Wake up one or more processes waiting on this condition.
+
+        Args:
+            n: Maximum number of processes to wake up.
+
+        Returns:
+            The actual number of processes woken up.
+
+        """
+        if not self._window:
+            raise RuntimeError("condition already freed")
+        if not self.locked():
+            raise RuntimeError("cannot notify on unheld mutex")
+        processes = self._dequeue(n)
+        numprocs = len(processes)
+        self._wakeup(processes)
+        return numprocs
+
+    def notify_all(self):
+        """Wake up all processes waiting on this condition.
+
+        Returns:
+            The actual number of processes woken up.
+
+        """
+        return self.notify((1 << 31) - 1)
+
+    def free(self):
+        """Free condition resources."""
+        self._lock_reset()
+        self._lock_free()
+        window = self._window
+        self._window = MPI.WIN_NULL
+        window.free()
 
 
 _BACKOFF_DELAY_MAX = 1 / 1024

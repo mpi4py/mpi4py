@@ -418,11 +418,161 @@ class TestRMutexWorld(BaseTestRMutex, unittest.TestCase):
 
 # ---
 
+
+class BaseTestCondition:
+    COMM = MPI.COMM_NULL
+
+    def setUp(self):
+        self.mutex = None
+        self.condition = sync.Condition(self.COMM)
+
+    def tearDown(self):
+        self.condition.free()
+
+    def testWaitNotify(self):
+        comm = self.COMM
+        size = comm.Get_size()
+        rank = comm.Get_rank()
+        cv = self.condition
+        if rank == 0:
+            with cv:
+                num = cv.notify()
+            self.assertEqual(num, 0)
+            comm.Barrier()
+            while num < size - 1:
+                with cv:
+                    num += cv.notify()
+                    random_sleep()
+            with cv:
+                num = cv.notify()
+            self.assertEqual(num, 0)
+        else:
+            comm.Barrier()
+            with cv:
+                random_sleep()
+                cv.wait()
+        self.assertRaises(RuntimeError, cv.wait)
+        self.assertRaises(RuntimeError, cv.notify)
+
+    def testWaitForNotify(self):
+        comm = self.COMM
+        size = comm.Get_size()
+        rank = comm.Get_rank()
+        cv = self.condition
+        if rank == 0:
+            with cv:
+                num = cv.notify()
+            self.assertEqual(num, 0)
+            comm.Barrier()
+            reqs1 = [comm.isend(00, dest) for dest in range(1, size)]
+            reqs2 = [comm.isend(42, dest) for dest in range(1, size)]
+            while num < size - 1:
+                MPI.Request.Testall(reqs1)
+                with cv:
+                    num += cv.notify()
+                    random_sleep()
+            self.assertEqual(num, size - 1)
+            MPI.Request.Waitall(reqs2)
+            with cv:
+                num = cv.notify()
+            self.assertEqual(num, 0)
+        else:
+            comm.Barrier()
+            with cv:
+                random_sleep()
+                result = cv.wait_for(lambda: comm.recv())
+            self.assertEqual(result, 42)
+        self.assertRaises(RuntimeError, cv.wait_for, lambda: False)
+        self.assertRaises(RuntimeError, cv.notify)
+
+    def testWaitNotifyAll(self):
+        comm = self.COMM
+        size = comm.Get_size()
+        rank = comm.Get_rank()
+        cv = self.condition
+        if rank == 0:
+            with cv:
+                num = cv.notify_all()
+            self.assertEqual(num, 0)
+            comm.Barrier()
+            while num < size - 2:
+                with cv:
+                    num += cv.notify_all()
+                    random_sleep()
+            self.assertEqual(num, max(0, size - 2))
+            with cv:
+                num = cv.notify()
+            self.assertEqual(num, 0)
+        elif rank == 1:
+            comm.Barrier()
+        else:
+            comm.Barrier()
+            with cv:
+                random_sleep()
+                cv.wait()
+        self.assertRaises(RuntimeError, cv.wait)
+        self.assertRaises(RuntimeError, cv.notify_all)
+
+    def testAcquireFree(self):
+        cv = self.condition
+        cv.acquire()
+        for _ in range(5):
+            cv.free()
+
+    def testFree(self):
+        cv = self.condition
+        for _ in range(5):
+            cv.free()
+        self.assertRaises(RuntimeError, cv.acquire)
+        self.assertRaises(RuntimeError, cv.release)
+        self.assertRaises(RuntimeError, cv.wait)
+        self.assertRaises(RuntimeError, cv.wait_for, lambda: False)
+        self.assertRaises(RuntimeError, cv.notify)
+        self.assertRaises(RuntimeError, cv.notify_all)
+
+class TestConditionSelf(BaseTestCondition, unittest.TestCase):
+    COMM = MPI.COMM_SELF
+
+
+@unittest.skipMPI('msmpi')
+class TestConditionWorld(BaseTestCondition, unittest.TestCase):
+    COMM = MPI.COMM_WORLD
+
+
+# ---
+
+
+class BaseTestConditionMutex(BaseTestCondition):
+    COMM = MPI.COMM_NULL
+
+    def setUp(self):
+        comm = self.COMM
+        self.mutex = sync.Mutex(comm)
+        self.condition = sync.Condition(comm, self.mutex)
+
+    def tearDown(self):
+        self.mutex.free()
+        self.condition.free()
+
+
+class TestConditionMutexSelf(BaseTestConditionMutex, unittest.TestCase):
+    COMM = MPI.COMM_SELF
+
+
+@unittest.skipMPI('msmpi')
+class TestConditionMutexWorld(BaseTestConditionMutex, unittest.TestCase):
+    COMM = MPI.COMM_WORLD
+
+
+# ---
+
 try:
     MPI.Win.Allocate(1, 1, MPI.INFO_NULL, MPI.COMM_SELF).Free()
 except (NotImplementedError, MPI.Exception):
     unittest.skip('mpi-win-allocate')(BaseTestCounter)
     unittest.skip('mpi-win-allocate')(BaseTestMutex)
+    unittest.skip('mpi-win-allocate')(BaseTestRMutex)
+    unittest.skip('mpi-win-allocate')(BaseTestCondition)
 
 # ---
 
