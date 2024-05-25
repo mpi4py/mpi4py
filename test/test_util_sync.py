@@ -25,7 +25,7 @@ class BaseTestSequential:
     def testWith(self):
         comm = self.COMM
         for _ in range(3):
-            counter = sync.Counter(comm)
+            counter = sync.Counter(comm=comm)
             with sync.Sequential(comm):
                 value = next(counter)
             counter.free()
@@ -38,7 +38,7 @@ class BaseTestSequential:
         comm = self.COMM
         seq = sync.Sequential(comm)
         for _ in range(3):
-            counter = sync.Counter(comm)
+            counter = sync.Counter(comm=comm)
             seq.begin()
             value = next(counter)
             seq.end()
@@ -66,7 +66,7 @@ class BaseTestCounter:
     def testIter(self):
         comm = self.COMM
         size = comm.Get_size()
-        counter = sync.Counter(comm)
+        counter = sync.Counter(comm=comm)
         for value in counter:
             random_sleep()
             if value >= size - 1:
@@ -76,7 +76,7 @@ class BaseTestCounter:
     def testNext(self):
         comm = self.COMM
         size = comm.Get_size()
-        counter = sync.Counter(comm)
+        counter = sync.Counter(comm=comm)
         while True:
             value = next(counter)
             random_sleep()
@@ -95,7 +95,7 @@ class BaseTestCounter:
     def testDefault(self):
         comm = self.COMM
         size = comm.Get_size()
-        counter = sync.Counter(comm)
+        counter = sync.Counter(comm=comm)
         values = self.execute(counter, 5)
         counter.free()
         self.assertEqual(values, list(range(5 * size)))
@@ -103,7 +103,7 @@ class BaseTestCounter:
     def testStart(self):
         comm = self.COMM
         size = comm.Get_size()
-        counter = sync.Counter(comm, start=7)
+        counter = sync.Counter(start=7, comm=comm)
         values = self.execute(counter, 5)
         counter.free()
         self.assertEqual(values, list(range(7, 7 + 5 * size)))
@@ -111,16 +111,16 @@ class BaseTestCounter:
     def testStep(self):
         comm = self.COMM
         size = comm.Get_size()
-        counter = sync.Counter(comm, step=2)
+        counter = sync.Counter(step=2, comm=comm)
         values = self.execute(counter, 5)
         counter.free()
         self.assertEqual(values, list(range(0, 2 * 5 * size, 2)))
 
-    def testType(self):
+    def testTypechar(self):
         comm = self.COMM
         size = comm.Get_size()
         for typechar in ("hHiIlLqQ" + "fd"):
-            counter = sync.Counter(comm, typecode=typechar)
+            counter = sync.Counter(typecode=typechar, comm=comm)
             values = self.execute(counter, 3)
             counter.free()
             self.assertEqual(values, list(range(3 * size)))
@@ -130,14 +130,14 @@ class BaseTestCounter:
         size = comm.Get_size()
         rank = comm.Get_rank()
         for root in range(size):
-            counter = sync.Counter(comm, root=root)
+            counter = sync.Counter(comm=comm, root=root)
             values = self.execute(counter, 5, rank != root)
             counter.free()
             self.assertEqual(values, list(range(5 * (size - 1))))
 
     def testFree(self):
         comm = self.COMM
-        counter = sync.Counter(comm)
+        counter = sync.Counter(comm=comm)
         for _ in range(5):
             counter.free()
         self.assertRaises(RuntimeError, counter.next)
@@ -154,11 +154,11 @@ class TestCounterWorld(BaseTestCounter, unittest.TestCase):
 # ---
 
 
-class BaseTestMutex:
+class BaseTestMutexBasic:
     COMM = MPI.COMM_NULL
 
     def setUp(self):
-        self.mutex = sync.Mutex(self.COMM)
+        self.mutex = sync.Mutex(comm=self.COMM)
 
     def tearDown(self):
         self.mutex.free()
@@ -166,7 +166,7 @@ class BaseTestMutex:
     def testExclusion(self):
         comm = self.COMM
         mutex = self.mutex
-        counter = sync.Counter(comm)
+        counter = sync.Counter(comm=comm)
         values = []
         comm.Barrier()
         mutex.acquire()
@@ -183,7 +183,7 @@ class BaseTestMutex:
         comm = self.COMM
         mutex = self.mutex
         number = 0
-        counter = sync.Counter(comm)
+        counter = sync.Counter(comm=comm)
         while next(counter) < comm.Get_size() * 5:
             mutex.acquire()
             number += 1
@@ -214,7 +214,8 @@ class BaseTestMutex:
             mutex = self.mutex
             self.assertFalse(mutex.locked())
             self.assertRaises(RuntimeError, mutex.release)
-            mutex.acquire()
+            locked = mutex.acquire()
+            self.assertTrue(locked)
             self.assertTrue(mutex.locked())
             self.assertRaises(RuntimeError, mutex.acquire)
             mutex.release()
@@ -271,12 +272,12 @@ class BaseTestMutex:
         self.assertRaises(RuntimeError, mutex.locked)
 
 
-class TestMutexSelf(BaseTestMutex, unittest.TestCase):
+class TestMutexBasicSelf(BaseTestMutexBasic, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
 
-@unittest.skipMPI('msmpi', MPI.COMM_WORLD.Get_size() >= 3)
-class TestMutexWorld(BaseTestMutex, unittest.TestCase):
+@unittest.skipMPI('msmpi')
+class TestMutexBasicWorld(BaseTestMutexBasic, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
     @unittest.skipMPI('msmpi')
@@ -286,11 +287,11 @@ class TestMutexWorld(BaseTestMutex, unittest.TestCase):
 # ---
 
 
-class BaseTestRMutex:
+class BaseTestMutexRecursive:
     COMM = MPI.COMM_NULL
 
     def setUp(self):
-        self.mutex = sync.RMutex(self.COMM)
+        self.mutex = sync.Mutex(recursive=True, comm=self.COMM)
 
     def tearDown(self):
         self.mutex.free()
@@ -398,6 +399,7 @@ class BaseTestRMutex:
             mutex.free()
         self.assertRaises(RuntimeError, mutex.acquire)
         self.assertRaises(RuntimeError, mutex.release)
+        self.assertRaises(RuntimeError, mutex.count)
 
     def testFree(self):
         mutex = self.mutex
@@ -405,14 +407,15 @@ class BaseTestRMutex:
             mutex.free()
         self.assertRaises(RuntimeError, mutex.acquire)
         self.assertRaises(RuntimeError, mutex.release)
+        self.assertRaises(RuntimeError, mutex.count)
 
 
-class TestRMutexSelf(BaseTestRMutex, unittest.TestCase):
+class TestMutexRecursiveSelf(BaseTestMutexRecursive, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
 
-@unittest.skipMPI('msmpi', MPI.COMM_WORLD.Get_size() >= 3)
-class TestRMutexWorld(BaseTestRMutex, unittest.TestCase):
+@unittest.skipMPI('msmpi')
+class TestMutexRecursiveWorld(BaseTestMutexRecursive, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
 
@@ -424,7 +427,7 @@ class BaseTestCondition:
 
     def setUp(self):
         self.mutex = None
-        self.condition = sync.Condition(self.COMM)
+        self.condition = sync.Condition(comm=self.COMM)
 
     def tearDown(self):
         self.condition.free()
@@ -547,8 +550,8 @@ class BaseTestConditionMutex(BaseTestCondition):
 
     def setUp(self):
         comm = self.COMM
-        self.mutex = sync.Mutex(comm)
-        self.condition = sync.Condition(comm, self.mutex)
+        self.mutex = sync.Mutex(comm=comm)
+        self.condition = sync.Condition(self.mutex)
 
     def tearDown(self):
         self.mutex.free()
@@ -570,8 +573,8 @@ try:
     MPI.Win.Allocate(1, 1, MPI.INFO_NULL, MPI.COMM_SELF).Free()
 except (NotImplementedError, MPI.Exception):
     unittest.skip('mpi-win-allocate')(BaseTestCounter)
-    unittest.skip('mpi-win-allocate')(BaseTestMutex)
-    unittest.skip('mpi-win-allocate')(BaseTestRMutex)
+    unittest.skip('mpi-win-allocate')(BaseTestMutexBasic)
+    unittest.skip('mpi-win-allocate')(BaseTestMutexRecursive)
     unittest.skip('mpi-win-allocate')(BaseTestCondition)
 
 # ---

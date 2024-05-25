@@ -12,13 +12,13 @@ from ..MPI import (
     Info,
     INFO_NULL,
     Intracomm,
+    COMM_SELF,
 )
 
 __all__: list[str] = [
     "Sequential",
     "Counter",
     "Mutex",
-    "RMutex",
     "Condition",
 ]
 
@@ -38,12 +38,13 @@ class Sequential:
 class Counter:
     def __init__(
         self,
-        comm: Intracomm,
         start: int = 0,
         step: int = 1,
+        *,
         typecode: str = 'i',
-        root: int = 0,
+        comm: Intracomm = COMM_SELF,
         info: Info = INFO_NULL,
+        root: int = 0,
     ) -> None: ...
     def __iter__(self) -> Self: ...
     def __next__(self) -> int: ...
@@ -53,20 +54,9 @@ class Counter:
 class Mutex:
     def __init__(
         self,
-        comm: Intracomm,
-        info: Info = INFO_NULL,
-    ) -> None: ...
-    def __enter__(self) -> Self: ...
-    def __exit__(self, *exc: object) -> None: ...
-    def acquire(self, blocking: bool = True) -> bool: ...
-    def release(self) -> None: ...
-    def locked(self) -> bool: ...
-    def free(self) -> None: ...
-
-class RMutex:
-    def __init__(
-        self,
-        comm: Intracomm,
+        *,
+        recursive: bool = False,
+        comm: Intracomm = COMM_SELF,
         info: Info = INFO_NULL,
     ) -> None: ...
     def __enter__(self) -> Self: ...
@@ -80,8 +70,10 @@ class RMutex:
 class Condition:
     def __init__(
         self,
-        comm: Intracomm,
-        lock: Mutex | RMutex | None = None,
+        mutex: Mutex | None = None,
+        *,
+        recursive: bool = True,
+        comm: Intracomm = COMM_SELF,
         info: Info = INFO_NULL,
     ) -> None: ...
     def __enter__(self) -> Self: ...

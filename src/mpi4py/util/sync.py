@@ -10,7 +10,6 @@ __all__ = [
     "Sequential",
     "Counter",
     "Mutex",
-    "RMutex",
     "Condition",
 ]
 
@@ -64,26 +63,27 @@ class Sequential:
 
 
 class Counter:
-    """Parallel counter."""
+    """Global counter."""
 
     def __init__(
         self,
-        comm,
         start=0,
         step=1,
+        *,
         typecode='i',
-        root=0,
+        comm=MPI.COMM_SELF,
         info=MPI.INFO_NULL,
+        root=0,
     ):
-        """Initialize counter object.
+        """Initialize global counter.
 
         Args:
-            comm: Intracommunicator context.
             start: Start value.
             step: Increment value.
             typecode: Type code as defined in the `array` module.
-            root: Process rank holding the counter memory.
+            comm: Intracommunicator context.
             info: Info object for RMA context creation.
+            root: Process rank holding the counter memory.
 
         """
         # pylint: disable=too-many-arguments
@@ -98,6 +98,7 @@ class Counter:
         self._window = window
         self._typechar = typechar
         self._location = (root, 0)
+        self._comm = comm
 
         init = _array.array(typechar, [start] * count)
         window.Lock(rank, MPI.LOCK_SHARED)
@@ -128,31 +129,40 @@ class Counter:
 
         window = self._window
         typechar = self._typechar
-        rank, disp = self._location
+        root, disp = self._location
 
         incr = incr if incr is not None else self._step
         incr = _array.array(typechar, [incr])
         prev = _array.array(typechar, [0])
-        window.Lock(rank, MPI.LOCK_SHARED)
-        window.Fetch_and_op(incr, prev, rank, disp, MPI.SUM)
-        window.Unlock(rank)
+        op = MPI.SUM if incr[0] != 0 else MPI.NO_OP
+        window.Lock(root, MPI.LOCK_SHARED)
+        window.Fetch_and_op(incr, prev, root, disp, op)
+        window.Unlock(root)
         return prev[0]
 
     def free(self):
         """Free counter resources."""
         window = self._window
         self._window = MPI.WIN_NULL
+        self._comm = MPI.COMM_NULL
         window.free()
 
 
 class Mutex:
-    """Parallel mutex."""
+    """Mutual exclusion."""
 
-    def __init__(self, comm, info=MPI.INFO_NULL):
+    def __init__(
+        self,
+        *,
+        recursive=False,
+        comm=MPI.COMM_SELF,
+        info=MPI.INFO_NULL,
+    ):
         """Initialize mutex object.
 
         Args:
             comm: Intracommunicator context.
+            recursive: Whether to allow recursive acquisition.
             info: Info object for RMA context creation.
 
         """
@@ -162,7 +172,9 @@ class Mutex:
         count = 3 if rank == tail_rank else 2
         unitsize = MPI.INT.Get_size()
         window = MPI.Win.Allocate(count * unitsize, unitsize, info, comm)
+        self._recursive = bool(recursive)
         self._window = window
+        self._comm = comm
 
         init = [False, null_rank, null_rank][:count]
         init = _array.array('i', init)
@@ -171,51 +183,9 @@ class Mutex:
         window.Unlock(rank)
         comm.Barrier()
 
-    def _backoff(self):
-        backoff = _new_backoff()
-        return lambda: next(backoff)
-
-    def _progress(self):
-        return lambda: self._window.Flush(self._window.group_rank)
-
-    def _spinloop(self, index, sentinel):
-        window = self._window
-        memory = memoryview(window).cast('i')
-        backoff = self._backoff()
-        progress = self._progress()
-        window.Sync()
-        while memory[index] == sentinel:
-            backoff()
-            progress()
-            window.Sync()
-        return memory[index]
-
-    def __enter__(self):
-        """Acquire mutex."""
-        self.acquire()
-        return self
-
-    def __exit__(self, *exc):
-        """Release mutex."""
-        self.release()
-
-    def acquire(self, blocking=True):
-        """Acquire mutex, blocking or non-blocking.
-
-        Args:
-            blocking: If `True`, block until the mutex is held.
-
-        Returns:
-            `True` if the mutex is held, `False` otherwise.
-
-        """
+    def _acquire(self, blocking=True):
         null_rank, tail_rank = MPI.PROC_NULL, 0
         lock_id, next_id, tail_id = (0, 1, 2)
-
-        if not self._window:
-            raise RuntimeError("mutex already freed")
-        if self.locked():
-            raise RuntimeError("cannot acquire already held mutex")
 
         window = self._window
         self_rank = window.group_rank
@@ -230,29 +200,23 @@ class Mutex:
         else:
             window.Compare_and_swap(rank, null, prev, tail_rank, tail_id)
         window.Flush(tail_rank)
-        locked = bool(prev[0] == null_rank)
+        locked = int(prev[0] == null_rank)
         if blocking and not locked:
             # Add ourselves to the waiting queue
             window.Accumulate(rank, prev[0], next_id, MPI.REPLACE)
             # Spin until we are given the lock
-            locked = bool(self._spinloop(lock_id, 0))
+            locked = self._spinloop(lock_id, 0)
 
         # Set the local lock flag
         flag = _array.array('i', [locked])
         window.Accumulate(flag, self_rank, lock_id, MPI.REPLACE)
 
         window.Unlock_all()
-        return locked
+        return bool(locked)
 
-    def release(self):
-        """Release mutex."""
+    def _release(self):
         null_rank, tail_rank = MPI.PROC_NULL, 0
         lock_id, next_id, tail_id = (0, 1, 2)
-
-        if not self._window:
-            raise RuntimeError("mutex already freed")
-        if not self.locked():
-            raise RuntimeError("cannot release unheld mutex")
 
         window = self._window
         self_rank = window.group_rank
@@ -276,39 +240,32 @@ class Mutex:
 
         window.Unlock_all()
 
-    def locked(self):
-        """Return whether the mutex is held."""
+    def _count_fetch_and_op(self, value, op):
         lock_id = 0
-
-        if not self._window:
-            raise RuntimeError("mutex already freed")
-
-        memory = memoryview(self._window).cast('i')
-        return bool(memory[lock_id])
-
-    def free(self):
-        """Free mutex resources."""
-        if self._window:
-            if self.locked():
-                self.release()
         window = self._window
-        self._window = MPI.WIN_NULL
-        window.free()
+        self_rank = window.group_rank
+        incr = _array.array('i', [value])
+        prev = _array.array('i', [0])
+        window.Lock(self_rank, MPI.LOCK_SHARED)
+        window.Fetch_and_op(incr, prev, self_rank, lock_id, op)
+        window.Unlock(self_rank)
+        return prev[0]
 
+    def _acquire_restore(self, state):
+        self._acquire()
+        if self._recursive:
+            self._count_fetch_and_op(state, MPI.REPLACE)
 
-class RMutex:
-    """Parallel recursive mutex."""
+    def _release_save(self):
+        state = None
+        if self._recursive:
+            state = self._count_fetch_and_op(0, MPI.NO_OP)
+        self._release()
+        return state
 
-    def __init__(self, comm, info=MPI.INFO_NULL):
-        """Initialize recursive mutex object.
-
-        Args:
-            comm: Intracommunicator context.
-            info: Info object for RMA context creation.
-
-        """
-        self._block = Mutex(comm, info)
-        self._count = 0
+    def _spinloop(self, index, sentinel):
+        window = self._window
+        return _rma_spinloop(window, 'i', index, sentinel)
 
     def __enter__(self):
         """Acquire mutex."""
@@ -329,59 +286,78 @@ class RMutex:
             `True` if the mutex is held, `False` otherwise.
 
         """
-        if self._block.locked():
-            self._count += 1
-            return True
-        locked = self._block.acquire(blocking)
-        if locked:
-            self._count = 1
-        return locked
+        if not self._window:
+            raise RuntimeError("mutex already freed")
+        if self.locked():
+            if self._recursive:
+                self._count_fetch_and_op(+1, MPI.SUM)
+                return True
+            raise RuntimeError("cannot acquire already held mutex")
+        return self._acquire(blocking)
 
     def release(self):
         """Release mutex."""
-        if not self._block.locked():
+        if not self._window:
+            raise RuntimeError("mutex already freed")
+        if not self.locked():
             raise RuntimeError("cannot release unheld mutex")
-        self._count = count = self._count - 1
-        if not count:
-            self._block.release()
+        if self._recursive:
+            if self._count_fetch_and_op(-1, MPI.SUM) > 1:
+                return
+        self._release()
 
     def locked(self):
         """Return whether the mutex is held."""
-        return self._block.locked()
+        if not self._window:
+            raise RuntimeError("mutex already freed")
+        lock_id = 0
+        memory = memoryview(self._window).cast('i')
+        return bool(memory[lock_id])
 
     def count(self):
-        """Return recursion count."""
-        return self._count
+        """Return the recursion count."""
+        if not self._window:
+            raise RuntimeError("mutex already freed")
+        return self._count_fetch_and_op(0, MPI.NO_OP)
 
     def free(self):
         """Free mutex resources."""
-        self._block.free()
-        self._count = 0
+        if self._window:
+            if self.locked():
+                self._release()
+        window = self._window
+        self._window = MPI.WIN_NULL
+        self._comm = MPI.COMM_NULL
+        window.free()
 
 
 class Condition:
-    """Parallel condition variable."""
+    """Condition variable."""
 
     def __init__(
         self,
-        comm,
-        lock=None,
+        mutex=None,
+        *,
+        recursive=True,
+        comm=MPI.COMM_SELF,
         info=MPI.INFO_NULL,
     ):
-        """Initialize condition variable object.
+        """Initialize condition variable.
 
         Args:
+            mutex: Mutual exclusion object.
+            recursive: Whether to allow recursive acquisition.
             comm: Intracommunicator context.
-            lock: Basic or recursive mutex object.
             info: Info object for RMA context creation.
 
         """
-        if lock is None:
-            self._lock = RMutex(comm, info)
-            self._lock_free = self._lock.free
+        if mutex is None:
+            self._mutex = Mutex(recursive=recursive, comm=comm, info=info)
+            self._mutex_free = self._mutex.free
         else:
-            self._lock = lock
-            self._lock_free = lambda: None
+            self._mutex = mutex
+            self._mutex_free = lambda: None
+            comm = mutex._comm  # pylint disable=protected-access
 
         null_rank, tail_rank = MPI.PROC_NULL, 0
 
@@ -390,6 +366,7 @@ class Condition:
         unitsize = MPI.INT.Get_size()
         window = MPI.Win.Allocate(count * unitsize, unitsize, info, comm)
         self._window = window
+        self._comm = comm
 
         init = [0, null_rank, null_rank][:count]
         init = _array.array('i', init)
@@ -447,26 +424,11 @@ class Condition:
         window.Unlock_all()
         return processes
 
-    def _backoff(self):
-        backoff = _new_backoff()
-        return lambda: next(backoff)
-
-    def _progress(self):
-        return lambda: self._window.Flush(self._window.group_rank)
-
     def _sleep(self):
         flag_id = 0
         window = self._window
-        memory = memoryview(window).cast('i')
-        backoff = self._backoff()
-        progress = self._progress()
         window.Lock_all()
-        window.Sync()
-        while memory[flag_id] == 0:
-            backoff()
-            progress()
-            window.Sync()
-        memory[flag_id] = 0
+        _rma_spinloop(window, 'i', flag_id, 0, reset=True)
         window.Unlock_all()
 
     def _wakeup(self, processes):
@@ -479,34 +441,18 @@ class Condition:
         window.Unlock_all()
 
     def _release_save(self):
-        if isinstance(self._lock, RMutex):
-            # pylint: disable=protected-access
-            state = self._lock._count
-            self._lock._count = 0
-            self._lock._block.release()
-            return state
-        else:
-            self._lock.release()
-            return None
+        # pylint: disable=protected-access
+        return self._mutex._release_save()
 
     def _acquire_restore(self, state):
-        if isinstance(self._lock, RMutex):
-            # pylint: disable=protected-access
-            self._lock._block.acquire()
-            self._lock._count = state
-        else:
-            self._lock.acquire()
-
-    def _lock_reset(self):
         # pylint: disable=protected-access
-        if isinstance(self._lock, RMutex):
-            self._lock._count = 0
-            mutex = self._lock._block
-        else:
-            mutex = self._lock
-        if mutex._window:
-            if mutex.locked():
-                mutex.release()
+        self._mutex._acquire_restore(state)
+
+    def _mutex_reset(self):
+        # pylint: disable=protected-access
+        if self._mutex._window:
+            if self._mutex.locked():
+                self._mutex._release()
 
     def __enter__(self):
         """Acquire the underlying mutex."""
@@ -521,17 +467,17 @@ class Condition:
         """Acquire the underlying mutex."""
         if not self._window:
             raise RuntimeError("condition already freed")
-        return self._lock.acquire(blocking)
+        return self._mutex.acquire(blocking)
 
     def release(self):
         """Release the underlying mutex."""
         if not self._window:
             raise RuntimeError("condition already freed")
-        self._lock.release()
+        self._mutex.release()
 
     def locked(self):
         """Return whether the underlying mutex is held."""
-        return self._lock.locked()
+        return self._mutex.locked()
 
     def wait(self):
         """Wait until notified by another process.
@@ -596,10 +542,11 @@ class Condition:
 
     def free(self):
         """Free condition resources."""
-        self._lock_reset()
-        self._lock_free()
+        self._mutex_reset()
+        self._mutex_free()
         window = self._window
         self._window = MPI.WIN_NULL
+        self._comm = MPI.COMM_NULL
         window.free()
 
 
@@ -615,10 +562,33 @@ def _new_backoff(
     delay_init=_BACKOFF_DELAY_INIT,
     delay_ratio=_BACKOFF_DELAY_RATIO,
 ):
-    def backoff():
+    def backoff_iterator():
         delay = delay_init
         while True:
             _time.sleep(delay)
             delay = min(delay_max, max(delay_min, delay * delay_ratio))
             yield
-    return backoff()
+    backoff = backoff_iterator()
+    return lambda: next(backoff)
+
+
+def _rma_progress(window):
+    window.Flush(window.group_rank)
+
+
+def _rma_spinloop(
+    window, typecode, index, sentinel, reset=False,
+    backoff=None, progress=None,
+):  # pylint: disable=too-many-arguments
+    memory = memoryview(window).cast(typecode)
+    backoff = backoff or _new_backoff()
+    progress = progress or _rma_progress
+    window.Sync()
+    while memory[index] == sentinel:
+        backoff()
+        progress(window)
+        window.Sync()
+    value = memory[index]
+    if reset:
+        memory[index] = sentinel
+    return value

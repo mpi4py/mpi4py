@@ -49,11 +49,16 @@ Mutual exclusion
 
 .. autoclass:: mpi4py.util.sync.Mutex
 
-   Establish a critical section or mutual exclusion among MPI processes. The
-   mutex interface is close to that of `threading.Lock`. However, its intended
-   uses and specific semantics are somewhat different:
+   Establish a critical section or mutual exclusion among MPI processes.
 
-   * A mutex should be used within a group of MPI processes, not threads.
+   The mutex interface is close to that of `threading.Lock` and
+   `threading.RLock`, allowing the use of either recursive or non-recursive
+   mutual exclusion. However, a mutex should be used within a group of MPI
+   processes, not threads.
+
+   In non-recursive mode, the semantics of `Mutex` are somewhat different than
+   these of `threading.Lock`:
+
    * Once acquired, a mutex is held and owned by a process until released.
    * Trying to acquire a mutex already held raises `RuntimeError`.
    * Trying to release a mutex not yet held raises `RuntimeError`.
@@ -61,34 +66,6 @@ Mutual exclusion
    This mutex implementation uses the scalable and fair spinlock algorithm from
    [mcs-paper]_ and took inspiration from the MPI-3 RMA implementation of
    [uam-book]_.
-
-   .. [mcs-paper] John M. Mellor-Crummey and Michael L. Scott.
-      Algorithms for scalable synchronization on shared-memory multiprocessors.
-      ACM Transactions on Computer Systems, 9(1):21-65, February 1991.
-      https://doi.org/10.1145/103727.103729
-
-   .. [uam-book] William Gropp, Torsten Hoefler, Rajeev Thakur, Ewing Lusk.
-      Using Advanced MPI - Modern Features of the Message-Passing Interface.
-      Chapter 4, Section 4.7, Pages 130-131. The MIT Press, November 2014.
-      https://mitpress.mit.edu/9780262527637/using-advanced-mpi/
-
-   .. automethod:: __init__
-   .. automethod:: __enter__
-   .. automethod:: __exit__
-   .. automethod:: acquire
-   .. automethod:: release
-   .. automethod:: locked
-   .. automethod:: free
-
-.. autoclass:: mpi4py.util.sync.RMutex
-
-   Establish a critical section or mutual exclusion among MPI processes. The
-   mutex interface is close to that of `threading.RLock`, allowing for
-   recursive acquire and release operations. However, the mutex should be used
-   within a group of MPI processes, not threads.
-
-   The implementation is based on a `Mutex` providing mutual exclusion and a
-   counter tracking the recursion level.
 
    .. automethod:: __init__
    .. automethod:: __enter__
@@ -99,16 +76,28 @@ Mutual exclusion
    .. automethod:: count
    .. automethod:: free
 
+.. [mcs-paper] John M. Mellor-Crummey and Michael L. Scott.
+   Algorithms for scalable synchronization on shared-memory multiprocessors.
+   ACM Transactions on Computer Systems, 9(1):21-65, February 1991.
+   https://doi.org/10.1145/103727.103729
+
+.. [uam-book] William Gropp, Torsten Hoefler, Rajeev Thakur, Ewing Lusk.
+   Using Advanced MPI - Modern Features of the Message-Passing Interface.
+   Chapter 4, Section 4.7, Pages 130-131. The MIT Press, November 2014.
+   https://mitpress.mit.edu/9780262527637/using-advanced-mpi/
+
 Condition variable
 ++++++++++++++++++
 
 .. autoclass:: mpi4py.util.sync.Condition
 
-   A condition variable allows one or more processes to wait until they are
-   notified by another processes. The condition variable interface is close to
-   that of `threading.Condition`, allowing the use of either recursive or
-   non-recursive mutual exclusion. However, the condition variable should be
-   used within a group of MPI processes, not threads.
+   A condition variable allows one or more MPI processes to wait until they are
+   notified by another processes.
+
+   The condition variable interface is close to that of `threading.Condition`,
+   allowing the use of either recursive or non-recursive mutual exclusion.
+   However, the condition variable should be used within a group of MPI
+   processes, not threads.
 
    This condition variable implementation uses a MPI-3 RMA-based scalable and
    fair circular queue algorithm to track the set of waiting processes.
