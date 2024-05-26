@@ -114,6 +114,31 @@ Condition variable
    .. automethod:: notify_all
    .. automethod:: free
 
+Semaphore object
+++++++++++++++++
+
+.. autoclass:: mpi4py.util.sync.Semaphore
+
+   A semaphore object manages an internal counter which is decremented by each
+   `acquire()` call and incremented by each `release()` call. The internal
+   counter never reaches a value below zero; when `acquire()` finds that it is
+   zero, it blocks and waits until some other process calls `release()`.
+
+   The semaphore interface is close to that of `threading.Semaphore` and
+   `threading.BoundedSemaphore`, allowing the use of either bounded (default)
+   or unbounded semaphores. With a bounded semaphore, the internal counter
+   never exceeds its initial value; otherwise `release()` raises `ValueError`.
+
+   This semaphore implementation uses a global `Counter` and a `Condition`
+   variable to handle waiting and and notification.
+
+   .. automethod:: __init__
+   .. automethod:: __enter__
+   .. automethod:: __exit__
+   .. automethod:: acquire
+   .. automethod:: release
+   .. automethod:: free
+
 
 Examples
 ++++++++

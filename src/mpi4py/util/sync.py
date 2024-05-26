@@ -11,6 +11,7 @@ __all__ = [
     "Counter",
     "Mutex",
     "Condition",
+    "Semaphore",
 ]
 
 
@@ -548,6 +549,86 @@ class Condition:
         self._window = MPI.WIN_NULL
         self._comm = MPI.COMM_NULL
         window.free()
+
+
+class Semaphore:
+    """Semaphore object."""
+
+    def __init__(
+        self,
+        value=1,
+        *,
+        bounded=True,
+        comm=MPI.COMM_SELF,
+        info=MPI.INFO_NULL,
+    ):
+        """Initialize semaphore object.
+
+        Args:
+            value: Initial value for internal counter.
+            bounded: Bound internal counter to initial value.
+            comm: Intracommunicator context.
+            info: Info object for RMA context creation.
+
+        """
+        if value < 0:
+            raise ValueError("initial value must be non-negative")
+        self._bounded = bool(bounded)
+        self._counter = Counter(value, comm=comm, info=info)
+        self._condvar = Condition(recursive=False, comm=comm, info=info)
+        self._comm = comm
+
+    def __enter__(self):
+        """Acquire semaphore."""
+        self.acquire()
+        return self
+
+    def __exit__(self, *exc):
+        """Release semaphore."""
+        self.release()
+
+    def acquire(self, blocking=True):
+        """Acquire semaphore, decrementing the internal counter by one.
+
+        Args:
+            blocking: If `True`, block until the semaphore is acquired.
+
+        Returns:
+            `True` if the semaphore is acquired, `False` otherwise.
+
+        """
+        with self._condvar:
+            while self._counter.next(0) == 0:
+                if not blocking:
+                    return False
+                self._condvar.wait()
+            self._counter.next(-1)
+            return True
+
+    def release(self, n=1):
+        """Release semaphore, incrementing the internal counter by one or more.
+
+        Args:
+            n: Increment for the internal counter.
+
+        """
+        if n < 1:
+            raise ValueError('increment must be one or more')
+        with self._condvar:
+            if self._bounded:
+                # pylint: disable=protected-access
+                current = self._counter.next(0)
+                initial = self._counter._start
+                if current + n > initial:
+                    raise ValueError("semaphore released too many times")
+            self._counter.next(n)
+            self._condvar.notify(n)
+
+    def free(self):
+        """Free semaphore resources."""
+        self._counter.free()
+        self._condvar.free()
+        self._comm = MPI.COMM_NULL
 
 
 _BACKOFF_DELAY_MAX = 1 / 1024

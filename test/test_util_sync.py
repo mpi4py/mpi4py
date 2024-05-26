@@ -569,6 +569,129 @@ class TestConditionMutexWorld(BaseTestConditionMutex, unittest.TestCase):
 
 # ---
 
+
+class BaseTestSemaphore:
+    COMM = MPI.COMM_NULL
+
+    def setUp(self):
+        comm = self.COMM
+        value = max(1, comm.Get_size() - 1)
+        self.semaphore = sync.Semaphore(value, bounded=False, comm=comm)
+
+    def tearDown(self):
+        self.semaphore.free()
+
+    def testValue(self):
+        sem = self.semaphore
+        self.assertRaises(ValueError, sem.release, 0)
+        self.assertRaises(ValueError, sem.release, -1)
+        self.assertRaises(ValueError, sync.Semaphore, -1)
+
+    def testBounded(self):
+        sem = self.semaphore
+        comm = self.COMM
+        count = max(1, comm.size - 1)
+        sem._bounded = False
+        if comm.size > 1:
+            if comm.rank == 0:
+                sem.release()
+        comm.Barrier()
+        self.assertEqual(sem._counter.next(0), comm.size)
+        comm.Barrier()
+        if comm.size > 1:
+            if comm.rank == 0:
+                sem.acquire()
+        comm.Barrier()
+        self.assertEqual(sem._counter.next(0), count)
+        sem._bounded = True
+        self.assertRaises(ValueError, sem.release)
+        comm.Barrier()
+        sem.acquire()
+        sem.release()
+        comm.Barrier()
+        self.assertEqual(sem._counter.next(0), count)
+
+    def testWith(self):
+        def test_with():
+            sem = self.semaphore
+            with sem:
+                pass
+        for _ in range(5):
+            self.COMM.Barrier()
+            test_with()
+        for _ in range(5):
+            random_sleep()
+            test_with()
+
+    def testAcquireRelease(self):
+        def test_acquire_release():
+            sem = self.semaphore
+            locked = sem.acquire()
+            sem.release()
+            self.assertTrue(locked)
+        for _ in range(5):
+            self.COMM.Barrier()
+            test_acquire_release()
+        for _ in range(5):
+            random_sleep()
+            test_acquire_release()
+
+    def testAcquireNonblocking(self):
+        def test_acquire_nonblocking():
+            sem = self.semaphore
+            comm = self.COMM
+            count = max(1, comm.size - 1)
+            comm.Barrier()
+            locked = sem.acquire(blocking=False)
+            comm.Barrier()
+            self.assertEqual(sem._counter.next(0), 0)
+            comm.Barrier()
+            if locked:
+                sem.release()
+            comm.Barrier()
+            states = comm.allgather(locked)
+            self.assertEqual(states.count(True), count)
+            self.assertEqual(sem._counter.next(0), count)
+            comm.Barrier()
+            while not sem.acquire(blocking=False):
+                random_sleep()
+            sem.release()
+            comm.Barrier()
+            self.assertEqual(sem._counter.next(0), count)
+        for _ in range(5):
+            self.COMM.Barrier()
+            test_acquire_nonblocking()
+        for _ in range(5):
+            random_sleep()
+            test_acquire_nonblocking()
+
+    def testAcquireFree(self):
+        comm = self.COMM
+        sem = self.semaphore
+        if comm.rank > 0:
+            sem.acquire()
+        for _ in range(5):
+            sem.free()
+
+    def testFree(self):
+        sem = self.semaphore
+        for _ in range(5):
+            sem.free()
+        self.assertRaises(RuntimeError, sem.acquire)
+        self.assertRaises(RuntimeError, sem.release)
+
+
+class TestSemaphoreSelf(BaseTestSemaphore, unittest.TestCase):
+    COMM = MPI.COMM_SELF
+
+
+@unittest.skipMPI('msmpi')
+class TestSemaphoreWorld(BaseTestSemaphore, unittest.TestCase):
+    COMM = MPI.COMM_WORLD
+
+
+# ---
+
 try:
     MPI.Win.Allocate(1, 1, MPI.INFO_NULL, MPI.COMM_SELF).Free()
 except (NotImplementedError, MPI.Exception):
@@ -576,6 +699,7 @@ except (NotImplementedError, MPI.Exception):
     unittest.skip('mpi-win-allocate')(BaseTestMutexBasic)
     unittest.skip('mpi-win-allocate')(BaseTestMutexRecursive)
     unittest.skip('mpi-win-allocate')(BaseTestCondition)
+    unittest.skip('mpi-win-allocate')(BaseTestSemaphore)
 
 # ---
 
