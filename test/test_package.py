@@ -70,6 +70,7 @@ class TestDataFiles(unittest.TestCase):
         for fname in [
             os.path.join("MPI.h"),
             os.path.join("MPI_api.h"),
+            os.path.join("include", "mpi4py", "pycapi.h"),
             os.path.join("include", "mpi4py", "mpi4py.h"),
             os.path.join("include", "mpi4py", "mpi4py.i"),
         ]:

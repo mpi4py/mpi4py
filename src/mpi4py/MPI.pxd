@@ -26,7 +26,7 @@ cdef extern from *:
     ctypedef MPI_Offset Offset "MPI_Offset"
     ctypedef MPI_Count  Count  "MPI_Count"
 
-ctypedef public api class Datatype [
+ctypedef api class Datatype [
     type   PyMPIDatatype_Type,
     object PyMPIDatatypeObject,
 ]:
@@ -34,7 +34,7 @@ ctypedef public api class Datatype [
     cdef unsigned     flags
     cdef object     __weakref__
 
-ctypedef public api class Status [
+ctypedef api class Status [
     type   PyMPIStatus_Type,
     object PyMPIStatusObject,
 ]:
@@ -42,7 +42,7 @@ ctypedef public api class Status [
     cdef unsigned   flags
     cdef object   __weakref__
 
-ctypedef public api class Request [
+ctypedef api class Request [
     type   PyMPIRequest_Type,
     object PyMPIRequestObject,
 ]:
@@ -51,19 +51,19 @@ ctypedef public api class Request [
     cdef object    __weakref__
     cdef object      ob_buf
 
-ctypedef public api class Prequest(Request) [
+ctypedef api class Prequest(Request) [
     type   PyMPIPrequest_Type,
     object PyMPIPrequestObject,
 ]:
     pass
 
-ctypedef public api class Grequest(Request) [
+ctypedef api class Grequest(Request) [
     type   PyMPIGrequest_Type,
     object PyMPIGrequestObject,
 ]:
     cdef MPI_Request ob_grequest
 
-ctypedef public api class Message [
+ctypedef api class Message [
     type   PyMPIMessage_Type,
     object PyMPIMessageObject,
 ]:
@@ -72,7 +72,7 @@ ctypedef public api class Message [
     cdef object    __weakref__
     cdef object      ob_buf
 
-ctypedef public api class Op [
+ctypedef api class Op [
     type   PyMPIOp_Type,
     object PyMPIOpObject,
 ]:
@@ -81,7 +81,7 @@ ctypedef public api class Op [
     cdef object __weakref__
     cdef int      ob_uid
 
-ctypedef public api class Group [
+ctypedef api class Group [
     type   PyMPIGroup_Type,
     object PyMPIGroupObject,
 ]:
@@ -89,7 +89,7 @@ ctypedef public api class Group [
     cdef unsigned  flags
     cdef object  __weakref__
 
-ctypedef public api class Info [
+ctypedef api class Info [
     type   PyMPIInfo_Type,
     object PyMPIInfoObject,
 ]:
@@ -97,7 +97,7 @@ ctypedef public api class Info [
     cdef unsigned flags
     cdef object __weakref__
 
-ctypedef public api class Errhandler [
+ctypedef api class Errhandler [
     type   PyMPIErrhandler_Type,
     object PyMPIErrhandlerObject,
 ]:
@@ -105,7 +105,7 @@ ctypedef public api class Errhandler [
     cdef unsigned       flags
     cdef object       __weakref__
 
-ctypedef public api class Session [
+ctypedef api class Session [
     type   PyMPISession_Type,
     object PyMPISessionObject,
 ]:
@@ -113,7 +113,7 @@ ctypedef public api class Session [
     cdef unsigned    flags
     cdef object     __weakref__
 
-ctypedef public api class Comm [
+ctypedef api class Comm [
     type   PyMPIComm_Type,
     object PyMPICommObject,
 ]:
@@ -121,43 +121,43 @@ ctypedef public api class Comm [
     cdef unsigned flags
     cdef object __weakref__
 
-ctypedef public api class Intracomm(Comm) [
+ctypedef api class Intracomm(Comm) [
     type   PyMPIIntracomm_Type,
     object PyMPIIntracommObject,
 ]:
     pass
 
-ctypedef public api class Topocomm(Intracomm) [
+ctypedef api class Topocomm(Intracomm) [
     type   PyMPITopocomm_Type,
     object PyMPITopocommObject,
 ]:
     pass
 
-ctypedef public api class Cartcomm(Topocomm) [
+ctypedef api class Cartcomm(Topocomm) [
     type   PyMPICartcomm_Type,
     object PyMPICartcommObject,
 ]:
     pass
 
-ctypedef public api class Graphcomm(Topocomm) [
+ctypedef api class Graphcomm(Topocomm) [
     type   PyMPIGraphcomm_Type,
     object PyMPIGraphcommObject,
 ]:
     pass
 
-ctypedef public api class Distgraphcomm(Topocomm) [
+ctypedef api class Distgraphcomm(Topocomm) [
     type   PyMPIDistgraphcomm_Type,
     object PyMPIDistgraphcommObject,
 ]:
     pass
 
-ctypedef public api class Intercomm(Comm) [
+ctypedef api class Intercomm(Comm) [
     type   PyMPIIntercomm_Type,
     object PyMPIIntercommObject,
 ]:
     pass
 
-ctypedef public api class Win [
+ctypedef api class Win [
     type   PyMPIWin_Type,
     object PyMPIWinObject,
 ]:
@@ -166,7 +166,7 @@ ctypedef public api class Win [
     cdef object __weakref__
     cdef object   ob_mem
 
-ctypedef public api class File [
+ctypedef api class File [
     type   PyMPIFile_Type,
     object PyMPIFileObject,
 ]:

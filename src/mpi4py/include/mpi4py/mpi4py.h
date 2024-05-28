@@ -28,13 +28,14 @@ typedef void *PyMPI_MPI_Session;
 #define MPI_Session PyMPI_MPI_Session
 #endif
 
+#if defined(MPI4PY_LIMITED_API)
+#include "pycapi.h"
+#else
 #include "../../MPI_api.h"
+#endif
 
 static int import_mpi4py(void) {
-  if (import_mpi4py__MPI() < 0) goto bad;
-  return 0;
- bad:
-  return -1;
+  return import_mpi4py__MPI();
 }
 
 #endif /* MPI4PY_H */
