@@ -1,10 +1,11 @@
-MPIEXEC = mpiexec
-NP_FLAG = -n
-NP = 5
+include ../config.mk
+.PHONY: default build test clean
+default: build test clean
 
-PYTHON = python$(py)
+build:
 
-.PHONY: test
 test:
-	${MPIEXEC} ${NP_FLAG} ${NP} ${PYTHON} test_seq.py
-	${RM} -r *.py[co] __pycache__
+	$(MPIEXEC_PYTHON) test_seq.py
+
+clean:
+	$(RM) -r __pycache__

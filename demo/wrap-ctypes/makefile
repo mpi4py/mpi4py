@@ -1,24 +1,18 @@
-.PHONY: default
+include ../config.mk
+.PHONY: default build test clean
 default: build test clean
 
-PYTHON = python$(py)
+LIBRARY = helloworld
+SOURCE = $(LIBRARY).c
+TARGET = lib$(LIBRARY)$(LIB_SUFFIX)
 
-MPICC = mpicc
-LIBNAME = libhelloworld.so
-.PHONY: build
-build: ${LIBNAME}
-${LIBNAME}: helloworld.c
-	${MPICC} -shared -fPIC -o $@ $<
+$(TARGET): $(SOURCE)
+	$(MPICC) $(CC_FLAGS_SHARED) -o $@ $<
 
+build: $(TARGET)
 
-MPIEXEC = mpiexec
-NP_FLAG = -n
-NP = 5
-.PHONY: test
 test: build
-	${MPIEXEC} ${NP_FLAG} ${NP} ${PYTHON} test.py
+	$(MPIEXEC_PYTHON) test.py
 
-
-.PHONY: clean
 clean:
-	${RM} -r ${LIBNAME} *.pyc __pycache__
+	$(RM) -r $(TARGET) __pycache__

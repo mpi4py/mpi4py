@@ -6,16 +6,15 @@ _libdir = os.path.dirname(__file__)
 
 ffi = cffi.FFI()
 if MPI._sizeof(MPI.Comm) == ffi.sizeof('int'):
-    _mpi_comm_t = 'int'
+    MPI_Comm = 'int'
 else:
-    _mpi_comm_t = 'void*'
-ffi.cdef("""
-typedef %(_mpi_comm_t)s MPI_Comm;
+    MPI_Comm = 'void*'
+ffi.cdef(f"""
+typedef {MPI_Comm} MPI_Comm;
 void sayhello(MPI_Comm);
-""" % vars())
+""")
 lib = ffi.dlopen(os.path.join(_libdir, "libhelloworld.so"))
 
 def sayhello(comm):
-    comm_ptr = MPI._addressof(comm)
-    comm_val = ffi.cast('MPI_Comm*', comm_ptr)[0]
-    lib.sayhello(comm_val)
+    comm_c = ffi.cast('MPI_Comm', comm.handle)
+    lib.sayhello(comm_c)

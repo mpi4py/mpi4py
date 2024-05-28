@@ -1,35 +1,23 @@
-.PHONY: default
+include ../config.mk
+.PHONY: default build test clean src
 default: build test clean
 
-PYTHON = python$(py)
-PYTHON_CONFIG = ${PYTHON} ../python-config
+MODULE = helloworld
+SOURCE = $(MODULE).pyx
+GENSRC = $(MODULE).c
+TARGET = $(MODULE)$(EXT_SUFFIX)
 
+$(GENSRC): $(SOURCE)
+	$(CYTHON) $<
+$(TARGET): $(GENSRC)
+	$(MPICC) $(CC_FLAGS_SHARED) -o $@ $<
 
-CYTHON = cython
-.PHONY: src
-src: helloworld.c
-helloworld.c: helloworld.pyx
-	${CYTHON} $<
+src:  $(GENSRC)
 
+build: $(TARGET)
 
-MPICC = mpicc
-CFLAGS = -fPIC ${shell ${PYTHON_CONFIG} --includes}
-LDFLAGS = -shared ${shell ${PYTHON_CONFIG} --libs}
-SO = ${shell ${PYTHON_CONFIG} --extension-suffix}
-.PHONY: build
-build: helloworld${SO}
-helloworld${SO}: helloworld.c
-	${MPICC} ${CFLAGS} -o $@ $< ${LDFLAGS}
-
-
-MPIEXEC = mpiexec
-NP_FLAG = -n
-NP = 5
-.PHONY: test
 test: build
-	${MPIEXEC} ${NP_FLAG} ${NP} ${PYTHON} test.py
+	$(MPIEXEC_PYTHON) test.py
 
-
-.PHONY: clean
 clean:
-	${RM} helloworld.c helloworld${SO}
+	$(RM) -r $(TARGET) __pycache__ $(GENSRC)

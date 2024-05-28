@@ -15,9 +15,8 @@ lib.MPI_Get_processor_name(name_p, nlen_p)
 size = size_p[0]
 rank = rank_p[0]
 nlen = nlen_p[0]
-name = ffi.string(name_p[0:nlen])
+name = ffi.string(name_p[0:nlen]).decode()
 
-print("Hello, World! I am process %d of %d on %s."
-      % (rank, size, name))
+print(f"Hello, World! I am process {rank} of {size} on {name}.")
 
 lib.MPI_Finalize()

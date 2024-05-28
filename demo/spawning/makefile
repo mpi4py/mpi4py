@@ -1,29 +1,24 @@
+include ../config.mk
 .PHONY: default build test clean
-
-MPIEXEC = mpiexec -n 1
-
 default: build test clean
 
-MASTERS = cpi-master-py.exe cpi-master-c.exe cpi-master-cxx.exe cpi-master-f90.exe
-WORKERS = cpi-worker-py.exe cpi-worker-c.exe cpi-worker-cxx.exe cpi-worker-f90.exe
-
-build: ${MASTERS} ${WORKERS}
-
 LANGS = py c cxx f90
+MASTERS = $(foreach lang,$(LANGS),cpi-master-$(lang).exe)
+WORKERS = $(foreach lang,$(LANGS),cpi-worker-$(lang).exe)
+
+build: $(MASTERS) $(WORKERS)
+
+MPIEXEC = mpiexec -n 1
 test: build
-	@for i in ${LANGS}; do \
-	    for j in ${LANGS}; do \
-                 ${MPIEXEC} ./cpi-master-$$i.exe ./cpi-worker-$$j.exe; \
+	@for i in $(LANGS); do \
+	    for j in $(LANGS); do \
+                 $(MPIEXEC) ./cpi-master-$$i.exe ./cpi-worker-$$j.exe; \
 	    done; \
 	done 
 
 clean:
-	${RM} -r ${MASTERS} ${WORKERS}
+	$(RM) -r $(MASTERS) $(WORKERS) __pycache__
 
-
-MPICC = mpicc
-MPICXX = mpicxx
-MPIFORT = mpifort
 
 # Python
 cpi-master-py.exe: cpi-master.py
@@ -37,18 +32,18 @@ cpi-worker-py.exe: cpi-worker.py
 
 # C
 cpi-master-c.exe: cpi-master.c
-	${MPICC} $< -o $@
+	$(MPICC) $< -o $@
 cpi-worker-c.exe: cpi-worker.c
-	${MPICC} $< -o $@
+	$(MPICC) $< -o $@
 
 # C++
 cpi-master-cxx.exe: cpi-master.cxx
-	${MPICXX} $< -o $@
+	$(MPICXX) $< -o $@
 cpi-worker-cxx.exe: cpi-worker.cxx
-	${MPICXX} $< -o $@
+	$(MPICXX) $< -o $@
 
 # Fortran 90
 cpi-master-f90.exe: cpi-master.f90
-	${MPIFORT} $< -o $@
+	$(MPIFORT) $< -o $@
 cpi-worker-f90.exe: cpi-worker.f90
-	${MPIFORT} $< -o $@
+	$(MPIFORT) $< -o $@

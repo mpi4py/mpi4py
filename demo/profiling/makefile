@@ -1,26 +1,19 @@
-MPIEXEC = mpiexec
-N = 8
-
-PYTHON = python$(py)
-
-.PHONY: default
+include ../config.mk
+.PHONY: default build test clean
 default: build test clean
 
-
+NP = 8
 .PHONY: run-cpi run-ring run-threads run
 run:    run-cpi run-ring run-threads
 run-cpi:
-	${MPIEXEC} -n ${N} ${PYTHON} cpi.py
+	$(MPIEXEC_PYTHON) cpi.py
 run-ring:
-	${MPIEXEC} -n ${N} ${PYTHON} ring.py
+	$(MPIEXEC_PYTHON) ring.py
 run-threads:
-	${MPIEXEC} -n ${N} ${PYTHON} threads.py
+	$(MPIEXEC_PYTHON) threads.py
 
-.PHONY: build
 build:
 
-.PHONY: test
 test: run
 
-.PHONY: clean
 clean:

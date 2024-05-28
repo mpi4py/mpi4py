@@ -1,32 +1,24 @@
-.PHONY: default
+include ../config.mk
+.PHONY: default build test clean
 default: build test clean
 
-PYTHON = python$(py)
-PYTHON_CONFIG = ${PYTHON} ../python-config
-MPI4PY_INCLUDE = ${shell ${PYTHON} -c 'import mpi4py; print(mpi4py.get_include())'}
-BOOST_PYVER = ${shell ${PYTHON} -c 'import sys; print(*sys.version_info[:2], sep="")'}
-BOOST_INCS = 
-BOOST_LIBS = -lboost_python${BOOST_PYVER}
+MODULE = helloworld
+SOURCE = $(MODULE).cxx
+TARGET = $(MODULE)$(EXT_SUFFIX)
 
+BOOST_PYVER = $(shell $(PYTHON) -c 'import sys; print(*sys.version_info[:2], sep="")')
+BOOST_INCLUDE = 
+BOOST_LDFLAGS = -lboost_python$(BOOST_PYVER)
 
-MPICXX = mpicxx
-CXXFLAGS = -fPIC ${shell ${PYTHON_CONFIG} --includes} ${BOOST_INCS}
-LDFLAGS = -shared ${shell ${PYTHON_CONFIG} --libs} ${BOOST_LIBS}
-SO = ${shell ${PYTHON_CONFIG} --extension-suffix}
-.PHONY: build
-build: helloworld${SO}
-helloworld${SO}: helloworld.cxx
-	${MPICXX} ${CXXFLAGS} -I${MPI4PY_INCLUDE} -o $@ $< ${LDFLAGS}
+PYCCFLAGS += $(BOOST_INCLUDE)
+PYLDFLAGS += $(BOOST_LDFLAGS)
+$(TARGET): $(SOURCE)
+	$(MPICXX) $(MPI4PY_INCLUDE) $(CXX_FLAGS_SHARED) -o $@ $<
 
+build: $(TARGET)
 
-MPIEXEC = mpiexec
-NP_FLAG = -n
-NP = 5
-.PHONY: test
 test: build
-	${MPIEXEC} ${NP_FLAG} ${NP} ${PYTHON} test.py
+	$(MPIEXEC_PYTHON) test.py
 
-
-.PHONY: clean
 clean:
-	${RM} helloworld${SO}
+	$(RM) -r $(TARGET) __pycache__

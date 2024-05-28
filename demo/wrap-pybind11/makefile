@@ -3,11 +3,14 @@ include ../config.mk
 default: build test clean
 
 MODULE = helloworld
-SOURCE = $(MODULE).c
+SOURCE = $(MODULE).cxx
 TARGET = $(MODULE)$(EXT_SUFFIX)
 
+CXX_FLAGS += -std=c++11
+CXX_FLAGS += $(PYBIND11_INCLUDE)
+CXX_FLAGS += $(MPI4PY_INCLUDE)
 $(TARGET): $(SOURCE)
-	$(MPICC) $(MPI4PY_INCLUDE) $(CC_FLAGS_SHARED) -o $@ $<
+	$(MPICXX) $(CXX_FLAGS_SHARED) -o $@ $<
 
 build: $(TARGET)
 

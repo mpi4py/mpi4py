@@ -1,12 +1,10 @@
-.PHONY: default
+include ../config.mk
+.PHONY: default build test clean
 default: build test clean
 
-PYTHON = python$(py)
-PYTHON_CONFIG = ${PYTHON} ../python-config
-
-
-MPIFORT = mpifort
-F2PY = f2py
+MODULE = helloworld
+SOURCE = $(MODULE).f90
+TARGET = $(MODULE)$(EXT_SUFFIX)
 
 ldflags :=
 ifndef ldflags # mpich
@@ -17,22 +15,15 @@ ldflags := $(shell $(MPIFORT) -show:link 2> /dev/null)
 endif
 export FC=$(MPIFORT)
 export LDFLAGS=$(wordlist 2,$(words $(ldflags)),$(ldflags))
-SO = ${shell ${PYTHON_CONFIG} --extension-suffix}
 
-.PHONY: build
-build: helloworld${SO}
-helloworld${SO}: helloworld.f90
-	${F2PY} -m helloworld -c $<
+$(TARGET): $(SOURCE)
+	$(F2PY) -m $(MODULE) -c $<
 
 
-MPIEXEC = mpiexec
-NP_FLAG = -n
-NP = 5
-.PHONY: test
+build: $(TARGET)
+
 test: build
-	${MPIEXEC} ${NP_FLAG} ${NP} ${PYTHON} test.py
+	$(MPIEXEC_PYTHON) test.py
 
-
-.PHONY: clean
 clean:
-	${RM} helloworld${SO}
+	$(RM) -r $(TARGET) __pycache__

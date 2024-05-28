@@ -1,3 +1,7 @@
+#define Py_LIMITED_API 0x03060000
+#define MPI4PY_LIMITED_API 1
+#define MPI4PY_LIMITED_API_SKIP_MESSAGE 1
+#define MPI4PY_LIMITED_API_SKIP_SESSION 1
 #define MPICH_SKIP_MPICXX 1
 #define OMPI_SKIP_MPICXX  1
 #include <Python.h>
@@ -59,8 +63,8 @@ static struct PyModuleDef hw_module = {
   NULL          /* m_free */
 };
 
-PyMODINIT_FUNC
-PyInit_helloworld(void)
+PyMODINIT_FUNC PyInit_helloworld(void);
+PyMODINIT_FUNC PyInit_helloworld(void)
 {
   PyObject *m = NULL;
 

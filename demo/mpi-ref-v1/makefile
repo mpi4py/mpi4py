@@ -1,23 +1,23 @@
-.PHONY: default build test clean test_seq test_mpi
-
+include ../config.mk
+.PHONY: default build test clean
 default: build test clean
+
+.PHONY: run_seq
+run_seq:
+	-@for i in `ls ex-*.py`; do \
+	    echo $(PYTHON) $$i; \
+	    $(PYTHON) $$i; \
+	done
+
+.PHONY: run_mpi
+run_mpi:
+	-@for i in `ls ex-*.py`; do \
+	    echo $(MPIEXEC_PYTHON) $$i; \
+	    $(MPIEXEC_PYTHON) $$i; \
+	done
 
 build:
 
-PYTHON  = python
-MPIEXEC = mpiexec
-NP_FLAG = -n
-NP      = 3
-
-test_seq:
-	${MAKE} MPIEXEC= NP_FLAG= NP= test_mpi
-
-test_mpi:
-	-@for i in `ls ex-*.py`; do \
-	    echo ${MPIEXEC} ${NP_FLAG} ${NP} ${PYTHON} $$i; \
-	    ${MPIEXEC} ${NP_FLAG} ${NP} ${PYTHON} $$i; \
-	done
-
-test: test_seq test_mpi
+test: run_seq run_mpi
 
 clean:

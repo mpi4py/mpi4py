@@ -1,9 +1,10 @@
-PYTHON = python$(py)
-MPIEXEC = mpiexec
-NP_FLAG = -n
-NP = 2
+include ../config.mk
+.PHONY: default build test clean
+default: test
 
-.PHONY: test
+build:
+
+NP = 2
 test:
 	$(MPIEXEC) $(NP_FLAG) $(NP) $(PYTHON) test_0.py threads=true
 	$(MPIEXEC) $(NP_FLAG) $(NP) $(PYTHON) test_0.py threads=false
@@ -25,3 +26,5 @@ test:
 	$(MPIEXEC) $(NP_FLAG) $(NP) $(PYTHON) test_4.py
 	$(MPIEXEC) $(NP_FLAG) $(NP) $(PYTHON) test_5.py
 	$(MPIEXEC) $(NP_FLAG) $(NP) $(PYTHON) test_6.py
+
+clean:

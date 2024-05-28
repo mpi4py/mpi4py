@@ -1,24 +1,18 @@
-.PHONY: default
+include ../config.mk
+.PHONY: default build test clean
 default: build test clean
-
-PYTHON = python$(py)
-
-.PHONY: build
-build: libmpi.h libmpi.c.in
-	$(PYTHON) build.py
 
 libmpi.h libmpi.c.in:
 	$(PYTHON) apigen.py
 
-MPIEXEC = mpiexec
-NP_FLAG = -n
-.PHONY: test
-test: build
-	$(MPIEXEC) $(NP_FLAG) 5 $(PYTHON) test_helloworld.py
-	$(MPIEXEC) $(NP_FLAG) 4 $(PYTHON) test_ringtest.py
-	$(MPIEXEC) $(NP_FLAG) 2 $(PYTHON) test_latency.py
+build: libmpi.h libmpi.c.in
+	$(PYTHON) build.py
 
-.PHONY: clean
+NP = 2
+test: build
+	$(MPIEXEC_PYTHON) test_helloworld.py
+	$(MPIEXEC_PYTHON) test_ringtest.py
+	$(MPIEXEC_PYTHON) test_latency.py
+
 clean:
-	$(RM) -r libmpi.*
-	$(RM) -r *py[co] __pycache__
+	$(RM) -r libmpi.* __pycache__

@@ -1,28 +1,21 @@
-.PHONY: default
+include ../config.mk
+.PHONY: default build test clean
 default: build test clean
 
-PYTHON = python$(py)
+LIBRARY = helloworld
+SOURCE = $(LIBRARY).f08
+TARGET = lib$(LIBRARY)$(LIB_SUFFIX)
 
-MPIFC = mpifort
 ifneq ($(MPI_FORTRAN_MOD_DIR),)
 FCFLAGS += -I$(MPI_FORTRAN_MOD_DIR)
 endif
+$(TARGET): $(SOURCE)
+	$(MPIFORT) $(FC_FLAGS_SHARED) -o $@ $<
 
-LIBNAME = libhelloworld.so
-.PHONY: build
-build: $(LIBNAME)
-$(LIBNAME): helloworld.f08
-	$(MPIFC) -shared -fPIC $(FCFLAGS) -o $@ $<
+build: $(TARGET)
 
-
-MPIEXEC = mpiexec
-NP_FLAG = -n
-NP = 5
-.PHONY: test
 test: build
-	$(MPIEXEC) $(NP_FLAG) $(NP) $(PYTHON) test.py
+	$(MPIEXEC_PYTHON) test.py
 
-
-.PHONY: clean
 clean:
-	$(RM) -r $(LIBNAME) *.pyc __pycache__
+	$(RM) -r $(TARGET) __pycache__
