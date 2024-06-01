@@ -1737,7 +1737,7 @@ if name == 'Open MPI':
     if version == (4,1,2) and sys.platform=='linux':
         github = (os.environ.get('GITHUB_ACTIONS') == 'true')
         SKIP_POOL_TEST = github
-    if version >= (5,0,0) and version <= (5,1,0):
+    if version >= (5,0,0) and version < (5,1,0):
         SKIP_POOL_TEST = skip_spawn()
 if name == 'MPICH':
     if sys.platform == 'darwin':

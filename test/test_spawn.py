@@ -88,7 +88,7 @@ def skip_spawn():
 @unittest.skipMPI('openmpi(==4.0.1)', macos())
 @unittest.skipMPI('openmpi(==4.0.2)', macos())
 @unittest.skipMPI('openmpi(>=4.1.0,<4.2.0)', github())
-@unittest.skipMPI('openmpi(>=5.0.0,<=5.1.0)', skip_spawn())
+@unittest.skipMPI('openmpi(>=5.0.0,<5.1.0)', skip_spawn())
 @unittest.skipMPI('mpich(<4.1.0)', appnum() is None)
 @unittest.skipMPI('mpich(<4.3.0)', badport())
 @unittest.skipMPI('msmpi(<8.1.0)')
