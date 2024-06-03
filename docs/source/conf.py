@@ -337,11 +337,6 @@ html_theme = (
 if html_theme == 'default':
     html_copy_source = False
 
-if html_theme == 'sphinx_rtd_theme':
-    html_theme_options = {
-        'analytics_id': 'UA-48837848-1',
-    }
-
 html_static_path = ['_static']
 
 if html_theme == 'sphinx_rtd_theme':
