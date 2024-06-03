@@ -337,13 +337,6 @@ html_theme = (
 if html_theme == 'default':
     html_copy_source = False
 
-html_static_path = ['_static']
-
-if html_theme == 'sphinx_rtd_theme':
-    html_css_files = [
-        'css/custom.css',
-    ]
-
 
 # -- Options for HTMLHelp output ------------------------------------------
 
