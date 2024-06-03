@@ -334,6 +334,10 @@ html_theme = (
     'sphinx_rtd_theme' if 'sphinx_rtd_theme' in extensions else 'default'
 )
 
+html_logo = '../mpi4py.svg'
+
+html_favicon = '../mpi4py.svg'
+
 if html_theme == 'default':
     html_copy_source = False
 
