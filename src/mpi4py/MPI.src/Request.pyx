@@ -533,9 +533,9 @@ cdef class Grequest(Request):
     @classmethod
     def Start(
         cls,
-        query_fn: Callable[..., None],
-        free_fn: Callable[..., None],
-        cancel_fn: Callable[..., None],
+        query_fn: Callable[..., None] | None = None,
+        free_fn: Callable[..., None] | None = None,
+        cancel_fn: Callable[..., None] | None = None,
         args: tuple[Any] | None = None,
         kwargs: dict[str, Any] | None = None,
     ) -> Grequest:

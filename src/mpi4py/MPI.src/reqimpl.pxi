@@ -158,8 +158,9 @@ cdef class _p_greq:
         <void>MPI_Status_set_error(status, MPI_SUCCESS)
         <void>MPI_Status_set_elements_c(status, MPI_BYTE, 0)
         <void>MPI_Status_set_cancelled(status, 0)
-        cdef Status sts = <Status>New(Status)
+        cdef Status sts
         if self.query_fn is not None:
+            sts = <Status>New(Status)
             sts.ob_mpi = status[0]
             self.query_fn(sts, *self.args, **self.kwargs)
             status[0] = sts.ob_mpi
