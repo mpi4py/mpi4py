@@ -7,27 +7,44 @@ cdef class _p_rs:
 
     cdef int         count
     cdef MPI_Request *requests
+    cdef MPI_Status  *status, _status[1]
     cdef MPI_Status  *statuses
     cdef int         outcount
     cdef int         *indices
-    cdef object      arg_requests
+    cdef object      arg_req
     cdef object      buf_req
     cdef object      buf_sts
     cdef object      buf_ids
+    cdef MPI_Status  tmp_sts
 
     def __cinit__(self):
         self.count    = 0
         self.requests = NULL
+        self.status   = MPI_STATUS_IGNORE
         self.statuses = MPI_STATUSES_IGNORE
         self.outcount = MPI_UNDEFINED
         self.indices  = NULL
-        self.arg_requests = None
+        self.arg_req = None
         self.buf_req = None
         self.buf_sts = None
         self.buf_ids = None
 
+    cdef int set_request(self, Request request) except -1:
+        self.arg_req = request
+        return 0
+
+    cdef int set_status(self, Status status) except -1:
+        if status is not None:
+            self.status = &status.ob_mpi
+        else:
+            self.status = &self.tmp_sts
+            <void>MPI_Status_set_source ( self.status, MPI_ANY_SOURCE )
+            <void>MPI_Status_set_tag    ( self.status, MPI_ANY_TAG    )
+            <void>MPI_Status_set_error  ( self.status, MPI_SUCCESS    )
+        return 0
+
     cdef int set_requests(self, requests) except -1:
-        self.arg_requests = requests
+        self.arg_req = requests
         cdef Py_ssize_t count = len(requests)
         self.count = <int>count
         self.outcount = <int>count
@@ -37,14 +54,13 @@ cdef class _p_rs:
         return 0
 
     cdef int add_statuses(self) except -1:
-        cdef MPI_Status empty_status
-        <void>memset(&empty_status, 0, sizeof(MPI_Status))
-        <void>MPI_Status_set_source ( &empty_status, MPI_ANY_SOURCE )
-        <void>MPI_Status_set_tag    ( &empty_status, MPI_ANY_TAG    )
-        <void>MPI_Status_set_error  ( &empty_status, MPI_SUCCESS    )
+        cdef MPI_Status *status = &self.tmp_sts
+        <void>MPI_Status_set_source ( status, MPI_ANY_SOURCE )
+        <void>MPI_Status_set_tag    ( status, MPI_ANY_TAG    )
+        <void>MPI_Status_set_error  ( status, MPI_SUCCESS    )
         self.buf_sts = allocate(self.count, sizeof(MPI_Status), &self.statuses)
         for i in range(self.count):
-            self.statuses[i] = empty_status
+            self.statuses[i] = status[0]
         return 0
 
     cdef int add_indices(self) except -1:
@@ -59,15 +75,14 @@ cdef class _p_rs:
         return 0
 
     cdef int release(self, statuses=None) except -1:
-        cdef object requests = self.arg_requests
+        cdef Request request
         cdef Py_ssize_t nr = self.count
-        cdef Request req = None
         for i in range(nr):
-            req = <Request>requests[i]
-            req.ob_mpi = self.requests[i]
-            if req.ob_mpi == MPI_REQUEST_NULL:
-                if req.ob_buf is not None:
-                    req.ob_buf = None
+            request = <Request>self.arg_req[i]
+            request.ob_mpi = self.requests[i]
+            if request.ob_mpi == MPI_REQUEST_NULL:
+                if request.ob_buf is not None:
+                    request.ob_buf = None
         #
         if statuses is None:
             return 0
@@ -87,19 +102,35 @@ cdef class _p_rs:
         return 0
 
     cdef object get_buffer(self, Py_ssize_t index):
-        if self.indices != NULL: index = self.indices[index]
-        return (<Request>self.arg_requests[index]).ob_buf
+        cdef Request request
+        if index >= 0:
+            if self.indices != NULL:
+                index = self.indices[index]
+            request = <Request>self.arg_req[index]
+        else:
+            request = <Request>self.arg_req
+        cdef object buf = request.ob_buf
+        if request.ob_mpi == MPI_REQUEST_NULL:
+            if request.ob_buf is not None:
+                request.ob_buf = None
+        return buf
 
-    cdef object get_indices(self):
-        if self.outcount == MPI_UNDEFINED: return None
-        return [self.indices[i] for i in range(self.outcount)]
+    cdef object get_result(self):
+        return self.get_object(-1)
+
+    cdef object get_object(self, Py_ssize_t index):
+        return PyMPI_load(self.get_buffer(index), self.status)
 
     cdef object get_objects(self):
         if self.outcount == MPI_UNDEFINED: return None
         return [
-            PyMPI_load(&self.statuses[i], self.get_buffer(i))
+            PyMPI_load(self.get_buffer(i), &self.statuses[i])
             for i in range(self.outcount)
         ]
+
+    cdef object get_indices(self):
+        if self.outcount == MPI_UNDEFINED: return None
+        return [self.indices[i] for i in range(self.outcount)]
 
 # -----------------------------------------------------------------------------
 

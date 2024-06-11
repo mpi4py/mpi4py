@@ -483,6 +483,7 @@ cdef object PyMPI_irecv(object obj, int source, int tag,
         else:
             rmsg = asbuffer_w(obj, &rbuf, &rlen)
             rcount = <MPI_Count> rlen
+        rmsg = PyMPI_wrap_buffer(<buffer>rmsg)
     with nogil: CHKERR( MPI_Irecv_c(
         rbuf, rcount, rtype,
         source, tag, comm, request) )
@@ -501,90 +502,83 @@ cdef object PyMPI_sendrecv(object sobj, int dest,   int sendtag,
 
 # -----------------------------------------------------------------------------
 
-cdef object PyMPI_load(MPI_Status *status, object ob):
-    cdef Pickle pickle = PyMPI_PICKLE
+
+@cython.final
+@cython.internal
+cdef class _p_req_buf:
+    cdef buffer buf
+
+cdef inline object PyMPI_wrap_buffer(buffer buf):
+    cdef _p_req_buf ob = _p_req_buf.__new__(_p_req_buf)
+    ob.buf = buf
+    return ob
+
+cdef inline object PyMPI_load_buffer(_p_req_buf ob, MPI_Status *status):
     cdef MPI_Count rcount = 0
     cdef MPI_Datatype rtype = MPI_BYTE
-    if type(ob) is not buffer: return None
     CHKERR( MPI_Get_count_c(status, rtype, &rcount) )
     if rcount <= 0: return None
-    cdef void *rbuf = (<buffer>ob).view.buf
+    cdef Pickle pickle = PyMPI_PICKLE
+    cdef void *rbuf = ob.buf.view.buf
     return pickle_load(pickle, rbuf, rcount)
 
 
-cdef object PyMPI_wait(Request request, Status status):
-    cdef object buf
-    #
-    cdef MPI_Status rsts
-    with nogil: CHKERR( MPI_Wait(&request.ob_mpi, &rsts) )
-    buf = request.ob_buf
-    if status is not None:
-        status.ob_mpi = rsts
-    if request.ob_mpi == MPI_REQUEST_NULL:
-        request.ob_buf = None
-    #
-    return PyMPI_load(&rsts, buf)
+cdef inline object PyMPI_load(object ob, MPI_Status *status):
+    if type(ob) is _p_req_buf:
+        return PyMPI_load_buffer(<_p_req_buf>ob, status)
+    return None
 
+# -----------------------------------------------------------------------------
+
+cdef object PyMPI_wait(Request request, Status status):
+    cdef _p_rs rs = _p_rs.__new__(_p_rs)
+    rs.set_request(request)
+    rs.set_status(status)
+    with nogil: CHKERR( MPI_Wait(&request.ob_mpi, rs.status) )
+    return rs.get_result()
 
 cdef object PyMPI_test(Request request, int *flag, Status status):
-    cdef object buf = None
-    #
-    cdef MPI_Status rsts
-    with nogil: CHKERR( MPI_Test(&request.ob_mpi, flag, &rsts) )
-    if flag[0]:
-        buf = request.ob_buf
-    if status is not None:
-        status.ob_mpi = rsts
-    if request.ob_mpi == MPI_REQUEST_NULL:
-        request.ob_buf = None
-    #
-    if not flag[0]: return None
-    return PyMPI_load(&rsts, buf)
-
+    cdef _p_rs rs = _p_rs.__new__(_p_rs)
+    rs.set_request(request)
+    rs.set_status(status)
+    with nogil: CHKERR( MPI_Test(&request.ob_mpi, flag, rs.status) )
+    if not flag[0]:
+        return None
+    return rs.get_result()
 
 cdef object PyMPI_waitany(requests, int *index, Status status):
-    cdef object buf = None
-    cdef object obj = None
-    cdef MPI_Status rsts
     cdef _p_rs rs = _p_rs.__new__(_p_rs)
     rs.acquire(requests)
+    rs.set_status(status)
+    cdef object obj = None
     try:
         with nogil: CHKERR( MPI_Waitany(
-            rs.count, rs.requests, index, &rsts) )
+            rs.count, rs.requests, index, rs.status) )
         if index[0] != MPI_UNDEFINED:
-            buf = (<Request>requests[index[0]]).ob_buf
-            obj = PyMPI_load(&rsts, buf)
-        if status is not None:
-            status.ob_mpi = rsts
+            obj = rs.get_object(index[0])
     finally:
         rs.release()
     return obj
-
 
 cdef object PyMPI_testany(requests, int *index, int *flag, Status status):
-    cdef object buf = None
-    cdef object obj = None
-    cdef MPI_Status rsts
     cdef _p_rs rs = _p_rs.__new__(_p_rs)
     rs.acquire(requests)
+    rs.set_status(status)
+    cdef object obj = None
     try:
         with nogil: CHKERR( MPI_Testany(
-            rs.count, rs.requests, index, flag, &rsts) )
+            rs.count, rs.requests, index, flag, rs.status) )
         if index[0] != MPI_UNDEFINED and flag[0]:
-            buf = (<Request>requests[index[0]]).ob_buf
-            obj = PyMPI_load(&rsts, buf)
-        if status is not None:
-            status.ob_mpi = rsts
+            obj = rs.get_object(index[0])
     finally:
         rs.release()
     return obj
 
-
 cdef object PyMPI_waitall(requests, statuses):
-    cdef object objects = None
     cdef _p_rs rs = _p_rs.__new__(_p_rs)
     rs.acquire(requests)
     rs.add_statuses()
+    cdef object objects = None
     try:
         with nogil: CHKERR( MPI_Waitall(
             rs.count, rs.requests, rs.statuses) )
@@ -593,12 +587,11 @@ cdef object PyMPI_waitall(requests, statuses):
         rs.release(statuses)
     return objects
 
-
 cdef object PyMPI_testall(requests, int *flag, statuses):
-    cdef object objects = None
     cdef _p_rs rs = _p_rs.__new__(_p_rs)
     rs.acquire(requests)
     rs.add_statuses()
+    cdef object objects = None
     try:
         with nogil: CHKERR( MPI_Testall(
             rs.count, rs.requests, flag, rs.statuses) )
@@ -608,15 +601,13 @@ cdef object PyMPI_testall(requests, int *flag, statuses):
         rs.release(statuses)
     return objects
 
-
 cdef object PyMPI_waitsome(requests, statuses):
-    cdef object indices = None
-    cdef object objects = None
-    #
     cdef _p_rs rs = _p_rs.__new__(_p_rs)
     rs.acquire(requests)
     rs.add_indices()
     rs.add_statuses()
+    cdef object indices = None
+    cdef object objects = None
     try:
         with nogil: CHKERR( MPI_Waitsome(
             rs.count, rs.requests, &rs.outcount, rs.indices, rs.statuses) )
@@ -624,18 +615,15 @@ cdef object PyMPI_waitsome(requests, statuses):
         objects = rs.get_objects()
     finally:
         rs.release(statuses)
-    #
     return (indices, objects)
 
-
 cdef object PyMPI_testsome(requests, statuses):
-    cdef object indices = None
-    cdef object objects = None
-    #
     cdef _p_rs rs = _p_rs.__new__(_p_rs)
     rs.acquire(requests)
     rs.add_indices()
     rs.add_statuses()
+    cdef object indices = None
+    cdef object objects = None
     try:
         with nogil: CHKERR( MPI_Testsome(
             rs.count, rs.requests, &rs.outcount, rs.indices, rs.statuses) )
@@ -643,7 +631,6 @@ cdef object PyMPI_testsome(requests, statuses):
         objects = rs.get_objects()
     finally:
         rs.release(statuses)
-    #
     return (indices, objects)
 
 # -----------------------------------------------------------------------------
@@ -718,6 +705,8 @@ cdef object PyMPI_imrecv(object rmsg,
         rmsg = asbuffer_r(rmsg, &rbuf, &rlen)
     else:
         rmsg = asbuffer_w(rmsg, &rbuf, &rlen)  # ~> unreachable
+    if rmsg is not None:
+        rmsg = PyMPI_wrap_buffer(<buffer>rmsg)
     cdef MPI_Count rcount = <MPI_Count> rlen
     with nogil: CHKERR( MPI_Imrecv_c(
         rbuf, rcount, rtype, message, request) )
