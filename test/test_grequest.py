@@ -147,6 +147,38 @@ class TestGrequest(unittest.TestCase):
         self.assertFalse(status.Is_cancelled())
         greq.Wait()
 
+    def testPyCompleteTest(self):
+        greq = MPI.Grequest.Start()
+        self.assertFalse(greq.Test())
+        greq.cancel()
+        greq.complete(42)
+        status = MPI.Status()
+        flag, result = greq.test(status)
+        self.assertTrue(flag)
+        self.assertEqual(result, 42)
+        self.assertEqual(status.Get_source(), MPI.ANY_SOURCE)
+        self.assertEqual(status.Get_tag(), MPI.ANY_TAG)
+        self.assertEqual(status.Get_error(), MPI.SUCCESS)
+        self.assertFalse(status.Is_cancelled())
+        obj = greq.wait()
+        self.assertIsNone(obj)
+
+    def testPyCompleteWait(self):
+        greq = MPI.Grequest.Start()
+        self.assertFalse(greq.Test())
+        greq.cancel()
+        greq.complete(42)
+        status = MPI.Status()
+        result = greq.wait(status)
+        self.assertEqual(result, 42)
+        self.assertEqual(status.Get_source(), MPI.ANY_SOURCE)
+        self.assertEqual(status.Get_tag(), MPI.ANY_TAG)
+        self.assertEqual(status.Get_error(), MPI.SUCCESS)
+        self.assertFalse(status.Is_cancelled())
+        flag, obj = greq.test()
+        self.assertTrue(flag)
+        self.assertIsNone(obj)
+
 
 if __name__ == '__main__':
     unittest.main()

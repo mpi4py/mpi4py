@@ -523,9 +523,25 @@ cdef inline object PyMPI_load_buffer(_p_req_buf ob, MPI_Status *status):
     return pickle_load(pickle, rbuf, rcount)
 
 
+@cython.final
+@cython.internal
+cdef class _p_req_obj:
+    cdef object obj
+
+cdef inline object PyMPI_wrap_object(object obj):
+    cdef _p_req_obj ob = _p_req_obj.__new__(_p_req_obj)
+    ob.obj = obj
+    return ob
+
+cdef inline object PyMPI_load_object(_p_req_obj ob):
+    return ob.obj
+
+
 cdef inline object PyMPI_load(object ob, MPI_Status *status):
     if type(ob) is _p_req_buf:
         return PyMPI_load_buffer(<_p_req_buf>ob, status)
+    if type(ob) is _p_req_obj:
+        return PyMPI_load_object(<_p_req_obj>ob)
     return None
 
 # -----------------------------------------------------------------------------

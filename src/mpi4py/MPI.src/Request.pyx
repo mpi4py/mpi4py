@@ -564,6 +564,13 @@ cdef class Grequest(Request):
         with nogil: CHKERR( MPI_Grequest_complete(grequest) )
         self.ob_grequest = self.ob_mpi  # or MPI_REQUEST_NULL ??
 
+    def complete(self, obj: Any = None) -> None:
+        """
+        Notify that a user-defined request is complete.
+        """
+        self.ob_buf = PyMPI_wrap_object(obj)
+        Grequest.Complete(self)
+
 
 cdef Request __REQUEST_NULL__ = def_Request( MPI_REQUEST_NULL , "REQUEST_NULL" )
 
