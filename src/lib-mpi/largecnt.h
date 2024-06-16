@@ -3,6 +3,8 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include "bigmpi.h"
+
 #ifndef PyMPI_MALLOC
   #define PyMPI_MALLOC malloc
 #endif
@@ -158,92 +160,25 @@ static int PyMPI_Buffer_detach_c(void *a1,
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Send_c
-static int PyMPI_Send_c(void *a1,
-                        MPI_Count a2,
-                        MPI_Datatype a3,
-                        int a4,
-                        int a5,
-                        MPI_Comm a6)
-{
-  int ierr;
-  int b2;
-  PyMPICastValue(int, b2, MPI_Count, a2);
-  ierr = MPI_Send(a1, b2, a3, a4, a5, a6);
-  if (ierr != MPI_SUCCESS) goto fn_exit;
- fn_exit:
-  return ierr;
-}
+#define PyMPI_Send_c MPIX_Send_x
 #undef  MPI_Send_c
 #define MPI_Send_c PyMPI_Send_c
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Recv_c
-static int PyMPI_Recv_c(void *a1,
-                        MPI_Count a2,
-                        MPI_Datatype a3,
-                        int a4,
-                        int a5,
-                        MPI_Comm a6,
-                        MPI_Status *a7)
-{
-  int ierr;
-  int b2;
-  PyMPICastValue(int, b2, MPI_Count, a2);
-  ierr = MPI_Recv(a1, b2, a3, a4, a5, a6, a7);
-  if (ierr != MPI_SUCCESS) goto fn_exit;
- fn_exit:
-  return ierr;
-}
+#define PyMPI_Recv_c MPIX_Recv_x
 #undef  MPI_Recv_c
 #define MPI_Recv_c PyMPI_Recv_c
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Sendrecv_c
-static int PyMPI_Sendrecv_c(void *a1,
-                            MPI_Count a2,
-                            MPI_Datatype a3,
-                            int a4,
-                            int a5,
-                            void *a6,
-                            MPI_Count a7,
-                            MPI_Datatype a8,
-                            int a9,
-                            int a10,
-                            MPI_Comm a11,
-                            MPI_Status *a12)
-{
-  int ierr;
-  int b2; int b7;
-  PyMPICastValue(int, b2, MPI_Count, a2);
-  PyMPICastValue(int, b7, MPI_Count, a7);
-  ierr = MPI_Sendrecv(a1, b2, a3, a4, a5, a6, b7, a8, a9, a10, a11, a12);
-  if (ierr != MPI_SUCCESS) goto fn_exit;
- fn_exit:
-  return ierr;
-}
+#define PyMPI_Sendrecv_c MPIX_Sendrecv_x
 #undef  MPI_Sendrecv_c
 #define MPI_Sendrecv_c PyMPI_Sendrecv_c
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Sendrecv_replace_c
-static int PyMPI_Sendrecv_replace_c(void *a1,
-                                    MPI_Count a2,
-                                    MPI_Datatype a3,
-                                    int a4,
-                                    int a5,
-                                    int a6,
-                                    int a7,
-                                    MPI_Comm a8,
-                                    MPI_Status *a9)
-{
-  int ierr;
-  int b2;
-  PyMPICastValue(int, b2, MPI_Count, a2);
-  ierr = MPI_Sendrecv_replace(a1, b2, a3, a4, a5, a6, a7, a8, a9);
-  if (ierr != MPI_SUCCESS) goto fn_exit;
- fn_exit:
-  return ierr;
-}
+#define PyMPI_Sendrecv_replace_c MPIX_Sendrecv_replace_x
 #undef  MPI_Sendrecv_replace_c
 #define MPI_Sendrecv_replace_c PyMPI_Sendrecv_replace_c
 #endif
@@ -269,133 +204,37 @@ static int PyMPI_Bsend_c(void *a1,
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Ssend_c
-static int PyMPI_Ssend_c(void *a1,
-                         MPI_Count a2,
-                         MPI_Datatype a3,
-                         int a4,
-                         int a5,
-                         MPI_Comm a6)
-{
-  int ierr;
-  int b2;
-  PyMPICastValue(int, b2, MPI_Count, a2);
-  ierr = MPI_Ssend(a1, b2, a3, a4, a5, a6);
-  if (ierr != MPI_SUCCESS) goto fn_exit;
- fn_exit:
-  return ierr;
-}
+#define PyMPI_Ssend_c MPIX_Ssend_x
 #undef  MPI_Ssend_c
 #define MPI_Ssend_c PyMPI_Ssend_c
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Rsend_c
-static int PyMPI_Rsend_c(void *a1,
-                         MPI_Count a2,
-                         MPI_Datatype a3,
-                         int a4,
-                         int a5,
-                         MPI_Comm a6)
-{
-  int ierr;
-  int b2;
-  PyMPICastValue(int, b2, MPI_Count, a2);
-  ierr = MPI_Rsend(a1, b2, a3, a4, a5, a6);
-  if (ierr != MPI_SUCCESS) goto fn_exit;
- fn_exit:
-  return ierr;
-}
+#define PyMPI_Rsend_c MPIX_Rsend_x
 #undef  MPI_Rsend_c
 #define MPI_Rsend_c PyMPI_Rsend_c
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Isend_c
-static int PyMPI_Isend_c(void *a1,
-                         MPI_Count a2,
-                         MPI_Datatype a3,
-                         int a4,
-                         int a5,
-                         MPI_Comm a6,
-                         MPI_Request *a7)
-{
-  int ierr;
-  int b2;
-  PyMPICastValue(int, b2, MPI_Count, a2);
-  ierr = MPI_Isend(a1, b2, a3, a4, a5, a6, a7);
-  if (ierr != MPI_SUCCESS) goto fn_exit;
- fn_exit:
-  return ierr;
-}
+#define PyMPI_Isend_c MPIX_Isend_x
 #undef  MPI_Isend_c
 #define MPI_Isend_c PyMPI_Isend_c
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Irecv_c
-static int PyMPI_Irecv_c(void *a1,
-                         MPI_Count a2,
-                         MPI_Datatype a3,
-                         int a4,
-                         int a5,
-                         MPI_Comm a6,
-                         MPI_Request *a7)
-{
-  int ierr;
-  int b2;
-  PyMPICastValue(int, b2, MPI_Count, a2);
-  ierr = MPI_Irecv(a1, b2, a3, a4, a5, a6, a7);
-  if (ierr != MPI_SUCCESS) goto fn_exit;
- fn_exit:
-  return ierr;
-}
+#define PyMPI_Irecv_c MPIX_Irecv_x
 #undef  MPI_Irecv_c
 #define MPI_Irecv_c PyMPI_Irecv_c
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Isendrecv_c
-static int PyMPI_Isendrecv_c(void *a1,
-                             MPI_Count a2,
-                             MPI_Datatype a3,
-                             int a4,
-                             int a5,
-                             void *a6,
-                             MPI_Count a7,
-                             MPI_Datatype a8,
-                             int a9,
-                             int a10,
-                             MPI_Comm a11,
-                             MPI_Request *a12)
-{
-  int ierr;
-  int b2; int b7;
-  PyMPICastValue(int, b2, MPI_Count, a2);
-  PyMPICastValue(int, b7, MPI_Count, a7);
-  ierr = MPI_Isendrecv(a1, b2, a3, a4, a5, a6, b7, a8, a9, a10, a11, a12);
-  if (ierr != MPI_SUCCESS) goto fn_exit;
- fn_exit:
-  return ierr;
-}
+#define PyMPI_Isendrecv_c MPIX_Isendrecv_x
 #undef  MPI_Isendrecv_c
 #define MPI_Isendrecv_c PyMPI_Isendrecv_c
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Isendrecv_replace_c
-static int PyMPI_Isendrecv_replace_c(void *a1,
-                                     MPI_Count a2,
-                                     MPI_Datatype a3,
-                                     int a4,
-                                     int a5,
-                                     int a6,
-                                     int a7,
-                                     MPI_Comm a8,
-                                     MPI_Request *a9)
-{
-  int ierr;
-  int b2;
-  PyMPICastValue(int, b2, MPI_Count, a2);
-  ierr = MPI_Isendrecv_replace(a1, b2, a3, a4, a5, a6, a7, a8, a9);
-  if (ierr != MPI_SUCCESS) goto fn_exit;
- fn_exit:
-  return ierr;
-}
+#define PyMPI_Isendrecv_replace_c MPIX_Isendrecv_replace_x
 #undef  MPI_Isendrecv_replace_c
 #define MPI_Isendrecv_replace_c PyMPI_Isendrecv_replace_c
 #endif
@@ -422,43 +261,13 @@ static int PyMPI_Ibsend_c(void *a1,
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Issend_c
-static int PyMPI_Issend_c(void *a1,
-                          MPI_Count a2,
-                          MPI_Datatype a3,
-                          int a4,
-                          int a5,
-                          MPI_Comm a6,
-                          MPI_Request *a7)
-{
-  int ierr;
-  int b2;
-  PyMPICastValue(int, b2, MPI_Count, a2);
-  ierr = MPI_Issend(a1, b2, a3, a4, a5, a6, a7);
-  if (ierr != MPI_SUCCESS) goto fn_exit;
- fn_exit:
-  return ierr;
-}
+#define PyMPI_Issend_c MPIX_Issend_x
 #undef  MPI_Issend_c
 #define MPI_Issend_c PyMPI_Issend_c
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Irsend_c
-static int PyMPI_Irsend_c(void *a1,
-                          MPI_Count a2,
-                          MPI_Datatype a3,
-                          int a4,
-                          int a5,
-                          MPI_Comm a6,
-                          MPI_Request *a7)
-{
-  int ierr;
-  int b2;
-  PyMPICastValue(int, b2, MPI_Count, a2);
-  ierr = MPI_Irsend(a1, b2, a3, a4, a5, a6, a7);
-  if (ierr != MPI_SUCCESS) goto fn_exit;
- fn_exit:
-  return ierr;
-}
+#define PyMPI_Irsend_c MPIX_Irsend_x
 #undef  MPI_Irsend_c
 #define MPI_Irsend_c PyMPI_Irsend_c
 #endif
@@ -607,43 +416,13 @@ static int PyMPI_Imrecv_c(void *a1,
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Bcast_c
-static int PyMPI_Bcast_c(void *a1,
-                         MPI_Count a2,
-                         MPI_Datatype a3,
-                         int a4,
-                         MPI_Comm a5)
-{
-  int ierr;
-  int b2;
-  PyMPICastValue(int, b2, MPI_Count, a2);
-  ierr = MPI_Bcast(a1, b2, a3, a4, a5);
-  if (ierr != MPI_SUCCESS) goto fn_exit;
- fn_exit:
-  return ierr;
-}
+#define PyMPI_Bcast_c MPIX_Bcast_x
 #undef  MPI_Bcast_c
 #define MPI_Bcast_c PyMPI_Bcast_c
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Gather_c
-static int PyMPI_Gather_c(void *a1,
-                          MPI_Count a2,
-                          MPI_Datatype a3,
-                          void *a4,
-                          MPI_Count a5,
-                          MPI_Datatype a6,
-                          int a7,
-                          MPI_Comm a8)
-{
-  int ierr;
-  int b2; int b5;
-  PyMPICastValue(int, b2, MPI_Count, a2);
-  PyMPICastValue(int, b5, MPI_Count, a5);
-  ierr = MPI_Gather(a1, b2, a3, a4, b5, a6, a7, a8);
-  if (ierr != MPI_SUCCESS) goto fn_exit;
- fn_exit:
-  return ierr;
-}
+#define PyMPI_Gather_c MPIX_Gather_x
 #undef  MPI_Gather_c
 #define MPI_Gather_c PyMPI_Gather_c
 #endif
@@ -677,24 +456,7 @@ static int PyMPI_Gatherv_c(void *a1,
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Scatter_c
-static int PyMPI_Scatter_c(void *a1,
-                           MPI_Count a2,
-                           MPI_Datatype a3,
-                           void *a4,
-                           MPI_Count a5,
-                           MPI_Datatype a6,
-                           int a7,
-                           MPI_Comm a8)
-{
-  int ierr;
-  int b2; int b5;
-  PyMPICastValue(int, b2, MPI_Count, a2);
-  PyMPICastValue(int, b5, MPI_Count, a5);
-  ierr = MPI_Scatter(a1, b2, a3, a4, b5, a6, a7, a8);
-  if (ierr != MPI_SUCCESS) goto fn_exit;
- fn_exit:
-  return ierr;
-}
+#define PyMPI_Scatter_c MPIX_Scatter_x
 #undef  MPI_Scatter_c
 #define MPI_Scatter_c PyMPI_Scatter_c
 #endif
@@ -728,23 +490,7 @@ static int PyMPI_Scatterv_c(void *a1,
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Allgather_c
-static int PyMPI_Allgather_c(void *a1,
-                             MPI_Count a2,
-                             MPI_Datatype a3,
-                             void *a4,
-                             MPI_Count a5,
-                             MPI_Datatype a6,
-                             MPI_Comm a7)
-{
-  int ierr;
-  int b2; int b5;
-  PyMPICastValue(int, b2, MPI_Count, a2);
-  PyMPICastValue(int, b5, MPI_Count, a5);
-  ierr = MPI_Allgather(a1, b2, a3, a4, b5, a6, a7);
-  if (ierr != MPI_SUCCESS) goto fn_exit;
- fn_exit:
-  return ierr;
-}
+#define PyMPI_Allgather_c MPIX_Allgather_x
 #undef  MPI_Allgather_c
 #define MPI_Allgather_c PyMPI_Allgather_c
 #endif
@@ -777,23 +523,7 @@ static int PyMPI_Allgatherv_c(void *a1,
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Alltoall_c
-static int PyMPI_Alltoall_c(void *a1,
-                            MPI_Count a2,
-                            MPI_Datatype a3,
-                            void *a4,
-                            MPI_Count a5,
-                            MPI_Datatype a6,
-                            MPI_Comm a7)
-{
-  int ierr;
-  int b2; int b5;
-  PyMPICastValue(int, b2, MPI_Count, a2);
-  PyMPICastValue(int, b5, MPI_Count, a5);
-  ierr = MPI_Alltoall(a1, b2, a3, a4, b5, a6, a7);
-  if (ierr != MPI_SUCCESS) goto fn_exit;
- fn_exit:
-  return ierr;
-}
+#define PyMPI_Alltoall_c MPIX_Alltoall_x
 #undef  MPI_Alltoall_c
 #define MPI_Alltoall_c PyMPI_Alltoall_c
 #endif
@@ -1152,25 +882,7 @@ static int PyMPI_Ibcast_c(void *a1,
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Igather_c
-static int PyMPI_Igather_c(void *a1,
-                           MPI_Count a2,
-                           MPI_Datatype a3,
-                           void *a4,
-                           MPI_Count a5,
-                           MPI_Datatype a6,
-                           int a7,
-                           MPI_Comm a8,
-                           MPI_Request *a9)
-{
-  int ierr;
-  int b2; int b5;
-  PyMPICastValue(int, b2, MPI_Count, a2);
-  PyMPICastValue(int, b5, MPI_Count, a5);
-  ierr = MPI_Igather(a1, b2, a3, a4, b5, a6, a7, a8, a9);
-  if (ierr != MPI_SUCCESS) goto fn_exit;
- fn_exit:
-  return ierr;
-}
+#define PyMPI_Igather_c MPIX_Igather_x
 #undef  MPI_Igather_c
 #define MPI_Igather_c PyMPI_Igather_c
 #endif
@@ -1205,25 +917,7 @@ static int PyMPI_Igatherv_c(void *a1,
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Iscatter_c
-static int PyMPI_Iscatter_c(void *a1,
-                            MPI_Count a2,
-                            MPI_Datatype a3,
-                            void *a4,
-                            MPI_Count a5,
-                            MPI_Datatype a6,
-                            int a7,
-                            MPI_Comm a8,
-                            MPI_Request *a9)
-{
-  int ierr;
-  int b2; int b5;
-  PyMPICastValue(int, b2, MPI_Count, a2);
-  PyMPICastValue(int, b5, MPI_Count, a5);
-  ierr = MPI_Iscatter(a1, b2, a3, a4, b5, a6, a7, a8, a9);
-  if (ierr != MPI_SUCCESS) goto fn_exit;
- fn_exit:
-  return ierr;
-}
+#define PyMPI_Iscatter_c MPIX_Iscatter_x
 #undef  MPI_Iscatter_c
 #define MPI_Iscatter_c PyMPI_Iscatter_c
 #endif
@@ -1258,24 +952,7 @@ static int PyMPI_Iscatterv_c(void *a1,
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Iallgather_c
-static int PyMPI_Iallgather_c(void *a1,
-                              MPI_Count a2,
-                              MPI_Datatype a3,
-                              void *a4,
-                              MPI_Count a5,
-                              MPI_Datatype a6,
-                              MPI_Comm a7,
-                              MPI_Request *a8)
-{
-  int ierr;
-  int b2; int b5;
-  PyMPICastValue(int, b2, MPI_Count, a2);
-  PyMPICastValue(int, b5, MPI_Count, a5);
-  ierr = MPI_Iallgather(a1, b2, a3, a4, b5, a6, a7, a8);
-  if (ierr != MPI_SUCCESS) goto fn_exit;
- fn_exit:
-  return ierr;
-}
+#define PyMPI_Iallgather_c MPIX_Iallgather_x
 #undef  MPI_Iallgather_c
 #define MPI_Iallgather_c PyMPI_Iallgather_c
 #endif
@@ -1309,24 +986,7 @@ static int PyMPI_Iallgatherv_c(void *a1,
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Ialltoall_c
-static int PyMPI_Ialltoall_c(void *a1,
-                             MPI_Count a2,
-                             MPI_Datatype a3,
-                             void *a4,
-                             MPI_Count a5,
-                             MPI_Datatype a6,
-                             MPI_Comm a7,
-                             MPI_Request *a8)
-{
-  int ierr;
-  int b2; int b5;
-  PyMPICastValue(int, b2, MPI_Count, a2);
-  PyMPICastValue(int, b5, MPI_Count, a5);
-  ierr = MPI_Ialltoall(a1, b2, a3, a4, b5, a6, a7, a8);
-  if (ierr != MPI_SUCCESS) goto fn_exit;
- fn_exit:
-  return ierr;
-}
+#define PyMPI_Ialltoall_c MPIX_Ialltoall_x
 #undef  MPI_Ialltoall_c
 #define MPI_Ialltoall_c PyMPI_Ialltoall_c
 #endif
