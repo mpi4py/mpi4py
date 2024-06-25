@@ -99,7 +99,7 @@ def get_include():
     """
     # pylint: disable=import-outside-toplevel
     from os.path import join, dirname
-    return join(dirname(__file__), 'include')
+    return join(dirname(__spec__.origin), 'include')
 
 
 def get_config():
@@ -120,7 +120,7 @@ def get_config():
     from os.path import join, dirname
     parser = ConfigParser()
     parser.add_section('mpi')
-    mpicfg = join(dirname(__file__), 'mpi.cfg')
+    mpicfg = join(dirname(__spec__.origin), 'mpi.cfg')
     parser.read(mpicfg, encoding='utf-8')
     return dict(parser.items('mpi'))
 
