@@ -78,11 +78,11 @@ class Rc:
 
     def __repr__(self):
         """Return repr(self)."""
-        return f'<{__name__}.rc>'
+        return f'<{__spec__.name}.rc>'
 
 
 rc = Rc()
-__import__('sys').modules[__name__ + '.rc'] = rc
+__import__('sys').modules[__spec__.name + '.rc'] = rc
 
 
 def get_include():
