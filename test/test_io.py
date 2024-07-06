@@ -6,9 +6,7 @@ import platform
 
 
 def arrayimpl_loop_io():
-    intelmpi0 = unittest.mpi_predicate('intelmpi(==2021.12.0)')
-    intelmpi1 = unittest.mpi_predicate('intelmpi(==2021.12.1)')
-    intelmpi = intelmpi0 or intelmpi1
+    intelmpi = unittest.mpi_predicate('intelmpi(>=2021.12.0)')
     openmpi = unittest.mpi_predicate('openmpi(<4.2.0)')
     is_i386 = platform.machine() in ('i386', 'i686')
     is_win = os.name == 'nt'
