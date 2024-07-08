@@ -52,18 +52,18 @@ Release 4.0.0 [2024-XX-XX]
   + Add methods `Comm.Create_errhandler()`, `Win.Create_errhandler()`,
     and `File.Create_errhandler()` to create custom error handlers.
 
-  * Add support for pickle serialization of instances of MPI types.
+  + Add support for pickle serialization of instances of MPI types.
     All instances of `Datatype`, `Info`, and `Status` can be
     serialized. Instances of `Op` can be serialized only if created
     through `mpi4py` by calling `Op.Create()`. Instances of other MPI
     types can be serialized only if they reference predefined handles.
 
-  * Add `handle` attribute and `fromhandle()` class method to MPI
+  + Add `handle` attribute and `fromhandle()` class method to MPI
     classes to ease interoperability with external code. The handle
     value is a unsigned integer guaranteed to fit on the platform's
     ``uintptr_t`` C type.
 
-  * Add lowercase `free()` method to MPI classes to ease MPI object
+  + Add lowercase `free()` method to MPI classes to ease MPI object
     deallocation and cleanup. This method eventually attempts to call
     `Free()`, but only if the object's MPI handle is not a null or
     predefined handle, and such call is allowed within the World Model
@@ -71,31 +71,31 @@ Release 4.0.0 [2024-XX-XX]
 
 * Backward-incompatible changes:
 
-  * Python 2 is no longer supported, Python 3.6+ is required, but
+  + Python 2 is no longer supported, Python 3.6+ is required, but
     typing stubs are supported for Python 3.8+.
 
-  * The `Intracomm.Create_group()` method is no longer defined in the
+  + The `Intracomm.Create_group()` method is no longer defined in the
     base `Comm` class.
 
-  * `Group.Compare()` and `Comm.Compare()` are no longer class methods
+  + `Group.Compare()` and `Comm.Compare()` are no longer class methods
     but instance methods. Existing codes using the former class
     methods are expected to continue working.
 
-  * `Group.Translate_ranks()` is no longer a class method but an
+  + `Group.Translate_ranks()` is no longer a class method but an
     instance method. Existing codes using the former class method are
     expected to continue working.
 
-  * The `LB` and `UB` datatypes are no longer available, use
+  + The `LB` and `UB` datatypes are no longer available, use
     `Datatype.Create_resized()` instead.
 
-  * The `HOST` predefined attribute key is no longer available.
+  + The `HOST` predefined attribute key is no longer available.
 
-  * The `MPI.memory` class has been renamed to `MPI.buffer`. The old
+  + The `MPI.memory` class has been renamed to `MPI.buffer`. The old
     name is still available as an alias to the new name.
 
-  * The `mpi4py.dl` module is no longer available.
+  + The `mpi4py.dl` module is no longer available.
 
-  * The `mpi4py.get_config` function returns an empty dictionary.
+  + The `mpi4py.get_config` function returns an empty dictionary.
 
 
 Release 3.1.6 [2024-04-14]
