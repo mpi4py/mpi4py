@@ -69,7 +69,7 @@ Acknowledgments
 ---------------
 
 This project was partially supported by the
-Extreme Computing Research Center (ECRC),
+Advanced Algorithm and Numerical Simulations Laboratory (AANSLab),
 Division of Computer, Electrical, and
 Mathematical Sciences & Engineering (CEMSE),
 King Abdullah University of Science and Technology (KAUST).
