@@ -18,6 +18,7 @@ Classes
    Op
    Group
    Info
+   Session
 
 .. rubric:: Communication
 
@@ -51,7 +52,7 @@ Classes
 
 .. autosummary::
    Pickle
-   memory
+   buffer
 
 
 Functions
@@ -101,6 +102,9 @@ Functions
    Add_error_class
    Add_error_code
    Add_error_string
+   Remove_error_class
+   Remove_error_code
+   Remove_error_string
 
 .. rubric:: Dynamic process management
 
@@ -116,6 +120,8 @@ Functions
 .. autosummary::
    Attach_buffer
    Detach_buffer
+   Flush_buffer
+   Iflush_buffer
    Compute_dims
    Get_processor_name
    Register_datarep
@@ -152,6 +158,7 @@ Attributes
 
    BOTTOM
    IN_PLACE
+   BUFFER_AUTOMATIC
 
    KEYVAL_INVALID
 
@@ -176,6 +183,7 @@ Attributes
    ERR_TYPE
    ERR_REQUEST
    ERR_OP
+   ERR_ERRHANDLER
    ERR_BUFFER
    ERR_COUNT
    ERR_TAG
@@ -255,6 +263,7 @@ Attributes
    COMBINER_SUBARRAY
    COMBINER_DARRAY
    COMBINER_RESIZED
+   COMBINER_VALUE_INDEX
    COMBINER_F90_REAL
    COMBINER_F90_COMPLEX
    COMBINER_F90_INTEGER

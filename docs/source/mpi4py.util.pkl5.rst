@@ -46,6 +46,8 @@ limit (MPI-1 to MPI-3).
 
    .. automethod:: Free
 
+   .. automethod:: free
+
    .. automethod:: cancel
 
    .. automethod:: get_status
@@ -53,6 +55,10 @@ limit (MPI-1 to MPI-3).
    .. automethod:: test
 
    .. automethod:: wait
+
+   .. automethod:: get_status_all
+
+      :classmethod:
 
    .. automethod:: testall
 
@@ -68,6 +74,8 @@ limit (MPI-1 to MPI-3).
    Custom message class for matching probes.
 
    .. note:: :class:`Message` is not a subclass of :class:`mpi4py.MPI.Message`
+
+   .. automethod:: free
 
    .. automethod:: recv
 
