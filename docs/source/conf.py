@@ -115,6 +115,10 @@ copybutton_prompt_text = r'\$ |>>> |\.\.\. '
 copybutton_prompt_is_regexp = True
 copybutton_line_continuation_character = '\\'
 
+extensions.append('sphinx.ext.coverage')
+coverage_ignore_modules = [r'mpi4py\.(bench|run)']
+coverage_ignore_classes = [r'Rc', r'memory']
+
 
 def _setup_numpy_typing():
     try:
