@@ -176,7 +176,7 @@ def customize_compiler(
                 with contextlib.suppress(Exception):
                     getattr(compiler, attr).remove('-mno-cygwin')
         # Add required define and compiler flags for AMD64
-        if platform.architecture()[0] == '64bit':
+        if platform.architecture(None)[0] == '64bit':
             for attr in (
                 'preprocessor',
                 'compiler', 'compiler_cxx', 'compiler_so',
