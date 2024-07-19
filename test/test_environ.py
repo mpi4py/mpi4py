@@ -48,7 +48,7 @@ class TestEnviron(unittest.TestCase):
         self.assertIs(type(time2), float)
         self.assertGreaterEqual(time2, time1)
 
-    @unittest.skipMPI("intelmpi", os.name == 'nt')
+    @unittest.skipMPI('impi', os.name == 'nt')
     def testWTick(self):
         tick = MPI.Wtick()
         self.assertIs(type(tick), float)

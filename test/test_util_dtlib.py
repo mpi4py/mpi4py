@@ -40,7 +40,7 @@ if mpich_lt_400:
         if tc in typecodes:
             typecodes.remove(tc)
 
-if unittest.is_mpi('intelmpi(>=2021.12.0)') and os.name == 'nt':
+if unittest.is_mpi('impi(>=2021.12.0)') and os.name == 'nt':
     for tc in [*'lLg', 'i4', 'u4']:
         if tc in typecodes:
             typecodes.remove(tc)

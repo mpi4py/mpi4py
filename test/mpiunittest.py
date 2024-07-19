@@ -70,6 +70,7 @@ def mpi_predicate(predicate):
         s = s.replace(' ', '')
         s = s.replace('/', '')
         s = s.replace('-', '')
+        s = s.replace('Intel', 'I')
         s = s.replace('Microsoft', 'MS')
         return s.lower()
     vp = _VersionPredicate(key(predicate))

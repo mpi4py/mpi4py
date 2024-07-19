@@ -45,7 +45,7 @@ class BaseTestRMA:
         if self.mpi_memory:
             MPI.Free_mem(self.mpi_memory)
 
-    @unittest.skipMPI('intelmpi(>=2021.13.0)')
+    @unittest.skipMPI('impi(>=2021.13.0)')
     def testPutGet(self):
         group = self.WIN.Get_group()
         size = group.Get_size()
@@ -70,7 +70,7 @@ class BaseTestRMA:
                                 self.assertEqual(rbuf[i], scalar(rank))
                             self.assertEqual(rbuf[-1], scalar(-1))
 
-    @unittest.skipMPI('intelmpi(>=2021.13.0)')
+    @unittest.skipMPI('impi(>=2021.13.0)')
     @unittest.skipMPI('openmpi(>=1.10.0,<1.11.0)')
     def testAccumulate(self):
         group = self.WIN.Get_group()
@@ -108,7 +108,7 @@ class BaseTestRMA:
                                     self.assertEqual(rbuf[i], scalar(op(1, i)))
                                 self.assertEqual(rbuf[-1], scalar(-1))
 
-    @unittest.skipMPI('intelmpi(>=2021.13.0)')
+    @unittest.skipMPI('impi(>=2021.13.0)')
     @unittest.skipMPI('openmpi(>=1.10,<1.11)')
     def testGetAccumulate(self):
         group = self.WIN.Get_group()

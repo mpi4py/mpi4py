@@ -6,14 +6,14 @@ import platform
 
 
 def arrayimpl_loop_io():
-    intelmpi = unittest.mpi_predicate('intelmpi(>=2021.12.0)')
+    impi = unittest.mpi_predicate('impi(>=2021.12.0)')
     openmpi = unittest.mpi_predicate('openmpi(<4.2.0)')
     is_i386 = platform.machine() in ('i386', 'i686')
     is_win = os.name == 'nt'
     for array, typecode in arrayimpl.loop():
         if unittest.is_mpi_gpu('mvapich', array): continue
         if openmpi and is_i386 and typecode in ('g', 'G'): continue
-        if intelmpi and is_win and typecode in ('l', 'L', 'g'): continue
+        if impi and is_win and typecode in ('l', 'L', 'g'): continue
         yield array, typecode
 
 scalar = arrayimpl.scalar
@@ -776,7 +776,7 @@ class TestIOViewWorld(BaseTestIOView, unittest.TestCase):
 
 @unittest.skipMPI('msmpi')
 @unittest.skipMPI('openmpi')
-@unittest.skipMPI('intelmpi', os.name == 'nt')
+@unittest.skipMPI('impi', os.name == 'nt')
 class TestDatarep(unittest.TestCase):
 
     def testRegister(self):

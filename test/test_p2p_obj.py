@@ -354,7 +354,7 @@ class BaseTestP2PObj:
             for k in range(10):
                 flag |= MPI.Request.Testall(reqs)
                 if flag: break
-            if unittest.is_mpi('intelmpi') and sys.platform == 'win32':
+            if unittest.is_mpi('impi') and sys.platform == 'win32':
                 flag |= MPI.Request.Waitall(reqs)
             self.assertTrue(flag)
 

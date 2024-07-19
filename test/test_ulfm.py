@@ -6,7 +6,7 @@ import struct
 
 @unittest.skipMPI('msmpi')
 @unittest.skipMPI('mvapich')
-@unittest.skipMPI('intelmpi')
+@unittest.skipMPI('impi')
 class BaseTestULFM:
 
     COMM = MPI.COMM_NULL

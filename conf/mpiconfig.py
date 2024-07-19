@@ -136,12 +136,12 @@ class Config:
         pass
 
     def _setup_windows(self):
-        if self._setup_windows_intelmpi():
+        if self._setup_windows_impi():
             return
         if self._setup_windows_msmpi():
             return
 
-    def _setup_windows_intelmpi(self):
+    def _setup_windows_impi(self):
         from os.path import join, isdir, isfile
         I_MPI_ROOT = os.environ.get('I_MPI_ROOT')
         if not I_MPI_ROOT:

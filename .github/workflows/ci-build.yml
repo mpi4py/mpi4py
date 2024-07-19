@@ -42,7 +42,7 @@ jobs:
         mpi:
           - mpich
           - openmpi
-          - intelmpi
+          - impi
           - msmpi
         exclude:
           - backend: mesonpy
@@ -54,15 +54,15 @@ jobs:
           - os:  ubuntu-20.04
             mpi: msmpi
           - os:  macos-14
-            mpi: intelmpi
+            mpi: impi
           - os:  macos-14
             mpi: msmpi
           - os:  macos-13
-            mpi: intelmpi
+            mpi: impi
           - os:  macos-13
             mpi: msmpi
           - os:  macos-12
-            mpi: intelmpi
+            mpi: impi
           - os:  macos-12
             mpi: msmpi
           - os:  windows-2022
