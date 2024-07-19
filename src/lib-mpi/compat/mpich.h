@@ -123,17 +123,6 @@ static int PyMPI_MPICH_MPI_Reduce_c(const void *sendbuf, void *recvbuf,
 
 /* -------------------------------------------------------------------------- */
 
-/* https://github.com/mpi4py/mpi4py/issues/418#issuecomment-2026805886 */
-
-#if defined(I_MPI_NUMVERSION) && I_MPI_NUMVERSION == 20211200300
-#undef  MPI_Status_c2f
-#define MPI_Status_c2f PMPI_Status_c2f
-#undef  MPI_Status_f2c
-#define MPI_Status_f2c PMPI_Status_f2c
-#endif
-
-/* -------------------------------------------------------------------------- */
-
 #if defined(CIBUILDWHEEL)
 
 #define PyMPI_MPICH_CALL_WEAK_SYMBOL(function, ...) \

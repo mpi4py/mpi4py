@@ -1,5 +1,7 @@
 #if defined(PyMPI_ABI)
 #include "compat/mpiabi.h"
+#elif defined(I_MPI_NUMVERSION)
+#include "compat/impi.h"
 #elif defined(MSMPI_VER)
 #include "compat/msmpi.h"
 #elif defined(MPICH_NAME) && (MPICH_NAME >= 4)

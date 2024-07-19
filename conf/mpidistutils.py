@@ -935,9 +935,10 @@ def configure_mpi(ext, config_cmd):
             ('MPI_Status_c2f', '(MPI_Status*)0,(MPI_Fint*)0'),
             ('MPI_Status_f2c', '(MPI_Fint*)0,(MPI_Status*)0'),
         ):
-            ok = config_cmd.check_function_call(
-                function, arglist, headers=headers,
-            )
+            with capture_stderr():
+                ok = config_cmd.check_function_call(
+                    function, arglist, headers=headers,
+                )
             if not ok:
                 macro = 'PyMPI_MISSING_' + function
                 ext.define_macros += [(macro, 1)]

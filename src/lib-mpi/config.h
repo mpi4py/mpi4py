@@ -20,6 +20,8 @@
 #include "pympiconf.h"
 #elif defined(PyMPI_ABI)
 #include "config/mpiapi.h"
+#elif defined(I_MPI_NUMVERSION)
+#include "config/impi.h"
 #elif defined(MSMPI_VER)
 #include "config/msmpi.h"
 #elif defined(MPICH_NAME) && (MPICH_NAME >= 3)
