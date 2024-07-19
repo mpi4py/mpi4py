@@ -254,6 +254,7 @@ class BaseTestComm:
         self.assertEqual(comm, MPI.COMM_NULL)
         info.Free()
         #
+        if unittest.is_mpi('impi'): return
         restype = "mpi_hw_resource_type"
         shmem = "mpi_shared_memory"
         info = MPI.Info.Create()

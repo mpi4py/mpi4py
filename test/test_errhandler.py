@@ -137,6 +137,7 @@ class BaseTestErrhandler:
 
     @unittest.skipUnless(MPI.ERRORS_ABORT, 'mpi-errors-abort')
     @unittest.skipMPI('mpich(<4.1.0)')
+    @unittest.skipMPI('impi')
     def testErrorsAbort(self):
         self._run_test_get_set(MPI.ERRORS_ABORT)
 

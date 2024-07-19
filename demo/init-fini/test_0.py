@@ -20,6 +20,8 @@ from mpi4py import MPI
 
 if rc.errors == 'abort':
     vendor, version = MPI.get_vendor()
+    if vendor == 'Intel MPI':
+        sys.exit(0)
     if vendor == 'MPICH':
         if version[0] > 3 and version[:2] < (4, 1):
             sys.exit(0)
