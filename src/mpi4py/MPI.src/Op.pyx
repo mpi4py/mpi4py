@@ -20,7 +20,8 @@ cdef class Op:
         return reduce_Op(self)
 
     def __call__(self, x: Any, y: Any) -> Any:
-        return op_call(self.ob_mpi, self.ob_uid, x, y)
+        cdef int index = op_user_id_get(self)
+        return op_call(self.ob_mpi, index, x, y)
 
     property handle:
         """MPI handle."""
@@ -55,15 +56,15 @@ cdef class Op:
         cdef Op self = <Op>New(cls)
         cdef MPI_User_function   *fn_i = NULL
         cdef MPI_User_function_c *fn_c = NULL
-        self.ob_uid = op_user_new(function, &fn_i, &fn_c)
+        op_user_new(self, function, &fn_i, &fn_c)
         try:
             try:
                 CHKERR( MPI_Op_create_c(fn_c, commute, &self.ob_mpi) )
             except NotImplementedError:                               # ~> legacy
                 CHKERR( MPI_Op_create(fn_i, commute, &self.ob_mpi) )  # ~> legacy
-        except:                        # ~> uncovered  # noqa
-            op_user_del(&self.ob_uid)  # ~> uncovered
-            raise                      # ~> uncovered
+        except:                # ~> uncovered  # noqa
+            op_user_del(self)  # ~> uncovered
+            raise              # ~> uncovered
         return self
 
     def Free(self) -> None:
@@ -71,7 +72,7 @@ cdef class Op:
         Free a user-defined reduction operation.
         """
         CHKERR( MPI_Op_free(&self.ob_mpi) )
-        op_user_del(&self.ob_uid)
+        op_user_del(self)
         if   self is __MAX__     : self.ob_mpi =  MPI_MAX
         elif self is __MIN__     : self.ob_mpi =  MPI_MIN
         elif self is __SUM__     : self.ob_mpi =  MPI_SUM

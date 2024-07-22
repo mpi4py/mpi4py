@@ -332,7 +332,20 @@ cdef inline void op_user_map(int index, op_usrfn_t **fn) noexcept nogil:
     elif index == 31: fn[0] = op_user_31
     elif index == 32: fn[0] = op_user_32
 
+cdef inline void op_user_id_set(Op self, int index) noexcept nogil:
+    self.flags &= (1U << 24U) - 1U
+    self.flags |= <unsigned> index << 24U
+
+cdef inline int op_user_id_get(Op self) noexcept nogil:
+    return <int> (self.flags >> 24U)
+
+cdef inline int op_user_id_pop(Op self) noexcept nogil:
+    cdef int index = op_user_id_get(self)
+    self.flags &= (1U << 24U) - 1U
+    return index
+
 cdef inline int op_user_new(
+    Op self,
     object function,
     MPI_User_function   **fn_i,
     MPI_User_function_c **fn_c,
@@ -354,17 +367,25 @@ cdef inline int op_user_new(
     # and return the slot index in the registry
     op_user_map(index, fn_i)
     op_user_map(index, fn_c)
-    return index
+    op_user_id_set(self, index)
+    return 0
+
+cdef inline int op_user_cpy(
+    Op self,
+    Op other,
+) except -1:
+    cdef int index = op_user_id_get(other)
+    op_user_id_set(self, index)
+    return 0
 
 cdef inline int op_user_del(
-    int *indexp,
+    Op self,
 ) except -1:
-    # clear index value
-    cdef int index = indexp[0]
-    indexp[0] = 0
     # free slot in the registry
-    with op_user_lock:
-        op_user_registry[index] = None
+    cdef int index = op_user_id_pop(self)
+    if index > 0:
+        with op_user_lock:
+            op_user_registry[index] = None
     return 0
 
 # -----------------------------------------------------------------------------

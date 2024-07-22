@@ -253,7 +253,7 @@ cdef inline int cinit(PyMPIClass self, PyMPIClass arg) except -1:
     if PyMPIClass is Message:
         self.ob_buf = arg.ob_buf
     if PyMPIClass is Op:
-        self.ob_uid = arg.ob_uid
+        op_user_cpy(self, arg)
     if PyMPIClass is Win:
         self.ob_mem = arg.ob_mem
     return 0
@@ -513,7 +513,7 @@ cdef inline object reduce_Op(Op self):
     if named(self.ob_mpi):
         return def_reduce(self)
     # user-defined
-    cdef int index = self.ob_uid
+    cdef int index = op_user_id_get(self)
     if index == 0:
         raise ValueError("cannot pickle user-defined reduction operation")
     cdef object function = op_user_registry[index]
