@@ -3,7 +3,7 @@ name = "mpi4py"
 dynamic = ["version", "readme"]
 description = "Python bindings for MPI"
 requires-python = ">=3.6"
-license = {text = 'BSD-2-Clause'}
+license = {text = 'BSD-3-Clause'}
 authors = [
   {name = "Lisandro Dalcin", email = "dalcinl@gmail.com"},
 ]

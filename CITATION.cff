@@ -3,7 +3,7 @@ message: Please cite this software using the metadata from 'preferred-citation'.
 
 title: MPI for Python
 abstract: Python bindings for MPI
-license: BSD-2-Clause
+license: BSD-3-Clause
 url: https://mpi4py.github.io
 doi: 10.5281/zenodo.5645087
 repository-code: https://github.com/mpi4py/mpi4py

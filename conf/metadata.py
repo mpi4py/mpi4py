@@ -45,7 +45,7 @@ def get_readme(settings=None):  # noqa: ARG001
 
 description = "Python bindings for MPI"
 requires_python = ">=3.6"
-license = "BSD-2-Clause"
+license = "BSD-3-Clause"
 authors = [
     {"name": "Lisandro Dalcin", "email": "dalcinl@gmail.com"},
 ]

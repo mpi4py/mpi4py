@@ -9,7 +9,7 @@ project(
     files('conf' / 'metadata.py'), 'version',
     check: true,
   ).stdout().strip(),
-  license: 'BSD-2-Clause',
+  license: 'BSD-3-Clause',
   meson_version: '>=1.0.0',
 )
 

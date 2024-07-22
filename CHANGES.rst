@@ -99,6 +99,11 @@ Release 4.0.0 [2024-XX-XX]
 
 * Miscellaneous:
 
+  + The project is now licenced under the BSD-3-Clause license. This
+    change is fairly inconsequential for users and distributors. It
+    simply adds an additional clause against using contributor names
+    for promotional purposes without their consent.
+
   + Add a new guidelines section to documentation laying out new fair
     play rules. These rules ask companies and outside developers to
     refrain from reusing the ``mpi4py`` name in unaffiliated projects,
