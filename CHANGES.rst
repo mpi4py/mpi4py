@@ -97,6 +97,16 @@ Release 4.0.0 [2024-XX-XX]
 
   + The `mpi4py.get_config` function returns an empty dictionary.
 
+* Miscellaneous:
+
+  + Add a new guidelines section to documentation laying out new fair
+    play rules. These rules ask companies and outside developers to
+    refrain from reusing the ``mpi4py`` name in unaffiliated projects,
+    publishing binary mpi4py wheels on the main Python Package Index
+    (PyPI), and distributing modified versions with incompatible or
+    extended API changes. The primary motivation of these rules is to
+    avoid fragmentation and end-user confusion.
+
 
 Release 3.1.6 [2024-04-14]
 ==========================

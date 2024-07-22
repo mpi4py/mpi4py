@@ -39,6 +39,7 @@ MPI for Python
    citation
    install
    develop
+   guidelines
    license
    changes
 
