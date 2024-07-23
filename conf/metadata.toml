@@ -59,7 +59,7 @@ Downloads     = "https://github.com/mpi4py/mpi4py/releases"
 [tool.scikit-build]
 minimum-version = "0.5"
 experimental = true
-sdist.exclude = [".*", "conf/ci"]
+sdist.exclude = [".*"]
 wheel.packages = []
 [tool.scikit-build.metadata]
 version = {provider = "metadata", provider-path = "conf"}

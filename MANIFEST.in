@@ -9,7 +9,6 @@ recursive-include src  *.py py.typed *.pyi *.pyx *.px[di]
 recursive-include src  *.pth *.h *.c *.i
 recursive-include test *.py *.sh
 
-prune conf/ci
 exclude src/mpi4py/MPI.c
 exclude src/mpi4py/MPI.h
 exclude src/mpi4py/MPI_api.h

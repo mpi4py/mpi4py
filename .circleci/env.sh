@@ -16,4 +16,4 @@ export OMPI_ALLOW_RUN_AS_ROOT=1
 export OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
 
 export ANACONDA=${ANACONDA-/opt/conda}
-source conf/ci/anaconda.sh
+source .circleci/anaconda.sh
