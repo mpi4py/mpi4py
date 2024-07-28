@@ -60,7 +60,7 @@ Release 4.0.0 [2024-07-28]
 
   + Add `handle` attribute and `fromhandle()` class method to MPI
     classes to ease interoperability with external code. The handle
-    value is a unsigned integer guaranteed to fit on the platform's
+    value is an unsigned integer guaranteed to fit on the platform's
     ``uintptr_t`` C type.
 
   + Add lowercase `free()` method to MPI classes to ease MPI object
@@ -99,7 +99,7 @@ Release 4.0.0 [2024-07-28]
 
 * Miscellaneous:
 
-  + The project is now licenced under the BSD-3-Clause license. This
+  + The project is now licensed under the BSD-3-Clause license. This
     change is fairly inconsequential for users and distributors. It
     simply adds an additional clause against using contributor names
     for promotional purposes without their consent.
