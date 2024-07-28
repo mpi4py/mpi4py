@@ -114,9 +114,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: mpi4py-dist
-        path: |
-          dist/mpi4py-*.tar.gz
-          dist/sha256sum.txt
+        path: dist/mpi4py-*.tar.gz
 
     - if: ${{ github.event_name == 'release' }}
       name: Attest distribution artifact
