@@ -3,10 +3,10 @@
 RUN() { echo + $@; $@; }
 RUN export ANACONDA=${ANACONDA-/opt/conda}
 
-install-mambaforge() {
+install-miniforge() {
   local PROJECT=https://github.com/conda-forge/miniforge
   local BASEURL=$PROJECT/releases/latest/download
-  local INSTALLER=Mambaforge-Linux-x86_64.sh
+  local INSTALLER=Miniforge3-Linux-x86_64.sh
   RUN curl -sSL -o ~/$INSTALLER $BASEURL/$INSTALLER
   RUN bash ~/$INSTALLER -b -f -p $ANACONDA
   RUN source $ANACONDA/bin/activate base

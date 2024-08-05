@@ -23,7 +23,7 @@ jobs:
 executors:
   linux:
     docker:
-      - image: condaforge/mambaforge
+      - image: condaforge/miniforge3
 
 workflows:
   test-all:
