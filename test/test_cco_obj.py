@@ -18,7 +18,7 @@ messages = list(_basic)
 messages += [
     list(_basic),
     tuple(_basic),
-    dict((f'k{k}', v) for k, v in enumerate(_basic)),
+    {f'k{k}': v for k, v in enumerate(_basic)},
 ]
 
 class BaseTestCCOObj:

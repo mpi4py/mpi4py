@@ -22,7 +22,7 @@ messages += [
     tuple(_basic),
     set(_basic),
     frozenset(_basic),
-    dict((f'k{k}', v) for k, v in enumerate(_basic)),
+    {f'k{k}': v for k, v in enumerate(_basic)},
 ]
 
 class BaseTestP2PObj:

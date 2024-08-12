@@ -31,7 +31,7 @@ TIMEOUT1 = 0.1
 TIMEOUT2 = 0.2
 
 
-class TimingWrapper(object):
+class TimingWrapper:
 
     def __init__(self, func):
         self.func = func
