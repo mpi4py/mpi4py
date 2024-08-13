@@ -2,22 +2,38 @@
 MPI for Python
 ==============
 
-.. image::  https://img.shields.io/pypi/v/mpi4py.svg
-   :target: https://pypi.org/project/mpi4py/
-.. image::  https://github.com/mpi4py/mpi4py/workflows/ci/badge.svg?branch=master
-   :target: https://github.com/mpi4py/mpi4py/actions/
-.. image::  https://readthedocs.org/projects/mpi4py/badge/?version=latest
-   :target: https://mpi4py.readthedocs.io/en/latest/
-.. image::  https://dev.azure.com/mpi4py/mpi4py/_apis/build/status/ci?branchName=master
-   :target: https://dev.azure.com/mpi4py/mpi4py/_build
-.. image::  https://ci.appveyor.com/api/projects/status/whh5xovp217h0f7n?svg=true
-   :target: https://ci.appveyor.com/project/mpi4py/mpi4py
-.. image::  https://circleci.com/gh/mpi4py/mpi4py.svg?style=shield
-   :target: https://circleci.com/gh/mpi4py/mpi4py
-.. image::  https://codecov.io/gh/mpi4py/mpi4py/branch/master/graph/badge.svg
-   :target: https://codecov.io/gh/mpi4py/mpi4py
-.. image::  https://scan.coverity.com/projects/mpi4py-mpi4py/badge.svg
-   :target: https://scan.coverity.com/projects/mpi4py-mpi4py
+-  .. image:: https://github.com/mpi4py/mpi4py/workflows/ci/badge.svg?branch=master
+      :target: https://github.com/mpi4py/mpi4py/actions/
+   .. image:: https://readthedocs.org/projects/mpi4py/badge/?version=latest
+      :target: https://mpi4py.readthedocs.io/en/latest/
+   .. image:: https://dev.azure.com/mpi4py/mpi4py/_apis/build/status/ci?branchName=master
+      :target: https://dev.azure.com/mpi4py/mpi4py/_build
+   .. image:: https://ci.appveyor.com/api/projects/status/whh5xovp217h0f7n?svg=true
+      :target: https://ci.appveyor.com/project/mpi4py/mpi4py
+   .. image:: https://circleci.com/gh/mpi4py/mpi4py.svg?style=shield
+      :target: https://circleci.com/gh/mpi4py/mpi4py
+   .. image:: https://codecov.io/gh/mpi4py/mpi4py/branch/master/graph/badge.svg
+      :target: https://codecov.io/gh/mpi4py/mpi4py
+   .. image:: https://scan.coverity.com/projects/mpi4py-mpi4py/badge.svg
+      :target: https://scan.coverity.com/projects/mpi4py-mpi4py
+-  .. image:: https://img.shields.io/pypi/v/mpi4py.svg
+      :target: https://pypi.org/project/mpi4py/
+   .. image:: https://img.shields.io/conda/vn/anaconda/mpi4py
+      :target: https://anaconda.org/anaconda/mpi4py
+   .. image:: https://img.shields.io/conda/vn/conda-forge/mpi4py
+      :target: https://anaconda.org/conda-forge/mpi4py
+   .. image:: https://img.shields.io/conda/vn/mpi4py/mpi4py
+      :target: https://anaconda.org/mpi4py/mpi4py
+-  .. image:: https://img.shields.io/homebrew/v/mpi4py
+      :target: https://formulae.brew.sh/formula/mpi4py
+   .. image:: https://img.shields.io/debian/v/mpi4py
+      :target: https://packages.debian.org/source/stable/mpi4py
+   .. image:: https://img.shields.io/fedora/v/mpi4py-common
+      :target: https://packages.fedoraproject.org/pkgs/mpi4py/mpi4py-common/
+   .. image:: https://img.shields.io/ubuntu/v/mpi4py
+      :target: https://launchpad.net/ubuntu/+source/mpi4py
+   .. image:: https://img.shields.io/archlinux/v/extra/x86_64/python-mpi4py
+      :target: https://archlinux.org/packages/extra/x86_64/python-mpi4py/
 
 Overview
 --------
