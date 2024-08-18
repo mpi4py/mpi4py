@@ -4,12 +4,20 @@ import re
 import os
 import sys
 import argparse
+import fnmatch
 import unittest
 
 __unittest = True
 
 
 def setup_parser(parser):
+    parser.add_argument(
+        "-x",  # "--exclude-name",
+        help="Skip run tests which match the given substring",
+        action="append", dest="excludePatterns", default=[],
+        type=lambda p: f'*{p}*' if '*' not in p else p,
+        metavar="TESTNAMEPATTERNS",
+    )
     parser.add_argument(
         "-i",  # "--include",
         help="Include test module names matching REGEX",
@@ -222,6 +230,8 @@ def print_banner(options):
 
 class TestLoader(unittest.TestLoader):
 
+    excludePatterns = None
+
     def __init__(self, include=None, exclude=None):
         super().__init__()
         if include:
@@ -241,6 +251,20 @@ class TestLoader(unittest.TestLoader):
             if self.exclude(path):
                 return False
         return match
+
+    def getTestCaseNames(self, testCaseClass):
+        def exclude(name):
+            modname = testCaseClass.__module__
+            clsname = testCaseClass.__qualname__
+            fullname = f'{modname}.{clsname}.{name}'
+            return not any(map(
+                lambda pattern: fnmatch.fnmatchcase(fullname, pattern),
+                self.excludePatterns
+            ))
+        names = super().getTestCaseNames(testCaseClass)
+        if self.excludePatterns:
+            names = list(filter(exclude, names))
+        return names
 
 
 class TestProgram(unittest.TestProgram):
@@ -271,9 +295,13 @@ class TestProgram(unittest.TestProgram):
         if from_discovery:
             self.start = testdir
             self.pattern = 'test_*.py'
-            self.testLoader = TestLoader(self.include, self.exclude)
         elif testdir not in sys.path:
             sys.path.insert(0, testdir)
+        if not self.skip_mpi:
+            import mpiunittest
+            mpiunittest.skipMPI = lambda p, *c: lambda f: f
+        self.testLoader = TestLoader(self.include, self.exclude)
+        self.testLoader.excludePatterns = self.excludePatterns
         if sys.version_info < (3, 7):
             if from_discovery:
                 loader = self.testLoader if Loader is None else Loader()
