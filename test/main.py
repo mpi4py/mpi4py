@@ -98,6 +98,12 @@ def setup_parser(parser):
         help="Disable known failures with backend MPI",
         action="store_false", dest="skip_mpi", default=True,
     )
+    parser.add_argument(
+        "--xml",
+        help="Directory for storing XML reports",
+        action="store", dest="xmloutdir", default=None,
+        nargs="?", const=os.path.curdir,
+    )
     return parser
 
 
@@ -311,8 +317,30 @@ class TestProgram(unittest.TestProgram):
             return
         super().createTests(from_discovery, Loader)
 
+    def _setUpXMLRunner(self):
+        from mpi4py import MPI
+        size = MPI.COMM_WORLD.Get_size()
+        rank = MPI.COMM_WORLD.Get_rank()
+        try:
+            import xmlrunner
+        except ModuleNotFoundError:
+            if rank == 0:
+                print(
+                    "Cannot generate XML reports!",
+                    "Install 'unittest-xml-reporting'.",
+                    file=sys.stderr, flush=True,
+                )
+            sys.exit(1)
+        runner = xmlrunner.XMLTestRunner(output=self.xmloutdir)
+        runner.outsuffix += f"-{rank}" if size > 1 else ''
+        self.testRunner = runner
+        self.buffer = False
+        self.catchbreak = False
+
     def runTests(self):
         print_banner(self)
+        if self.xmloutdir:
+            self._setUpXMLRunner()
         try:
             super().runTests()
         except SystemExit:
