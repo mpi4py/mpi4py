@@ -10,13 +10,27 @@ import unittest
 __unittest = True
 
 
+def parse_pattern(pattern):
+    return f"*{pattern}*" if "*" not in pattern else pattern
+
+
+def parse_xfile(xfile):
+    with open(xfile) as f:
+        return list(map(parse_pattern, f.read().splitlines()))
+
+
 def setup_parser(parser):
     parser.add_argument(
         "-x",  # "--exclude-name",
         help="Skip run tests which match the given substring",
         action="append", dest="excludePatterns", default=[],
-        type=lambda p: f'*{p}*' if '*' not in p else p,
-        metavar="TESTNAMEPATTERNS",
+        type=parse_pattern, metavar="TESTNAMEPATTERNS",
+    )
+    parser.add_argument(  # Py3.8: use action="extend" on "excludePatterns"
+        "--xfile",
+        help="Skip run tests which match the substrings in the given files",
+        action="append", dest="excludeFile", default=[],
+        type=str, metavar="FILENAME",
     )
     parser.add_argument(
         "-i",  # "--include",
@@ -300,12 +314,14 @@ class TestProgram(unittest.TestProgram):
         testdir = os.path.dirname(__file__)
         if from_discovery:
             self.start = testdir
-            self.pattern = 'test_*.py'
+            self.pattern = "test_*.py"
         elif testdir not in sys.path:
             sys.path.insert(0, testdir)
         if not self.skip_mpi:
             import mpiunittest
             mpiunittest.skipMPI = lambda p, *c: lambda f: f
+        for xfile in self.excludeFile:
+            self.excludePatterns.extend(parse_xfile(xfile))
         self.testLoader = TestLoader(self.include, self.exclude)
         self.testLoader.excludePatterns = self.excludePatterns
         if sys.version_info < (3, 7):
@@ -332,7 +348,7 @@ class TestProgram(unittest.TestProgram):
                 )
             sys.exit(1)
         runner = xmlrunner.XMLTestRunner(output=self.xmloutdir)
-        runner.outsuffix += f"-{rank}" if size > 1 else ''
+        runner.outsuffix += f"-{rank}" if size > 1 else ""
         self.testRunner = runner
         self.buffer = False
         self.catchbreak = False
