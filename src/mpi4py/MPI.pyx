@@ -10,6 +10,7 @@
 # cython: warn.multiple_declarators=False
 # cython: optimize.use_switch=False
 # cython: binding=True
+# cython: freethreading_compatible=True
 
 from __future__ import annotations
 cimport cython  # no-cython-lint
