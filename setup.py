@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.join(topdir, 'conf'))
 # --------------------------------------------------------------------
 
 require_python = (3, 6)
-maxknow_python = (3, 12)
+maxknow_python = (3, 13)
 
 
 def get_metadata():
