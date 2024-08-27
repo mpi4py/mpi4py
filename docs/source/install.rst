@@ -4,7 +4,7 @@ Installation
 Build backends
 --------------
 
-mpi4py supports two different build backends: `setuptools`_ (default),
+mpi4py supports three different build backends: `setuptools`_ (default),
 `scikit-build-core`_ (`CMake`_-based), and `meson-python`_
 (`Meson`_-based). The build backend can be selected by setting the
 :envvar:`MPI4PY_BUILD_BACKEND` environment variable.
