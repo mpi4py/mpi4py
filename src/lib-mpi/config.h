@@ -24,8 +24,10 @@
 #include "config/impi.h"
 #elif defined(MSMPI_VER)
 #include "config/msmpi.h"
-#elif defined(MPICH_NAME) && (MPICH_NAME >= 3)
+#elif defined(MPICH_NAME) && (MPICH_NAME >= 4)
 #include "config/mpich.h"
+#elif defined(MPICH_NAME) && (MPICH_NAME == 3)
+#include "config/mpich3.h"
 #elif defined(MPICH_NAME) && (MPICH_NAME == 2)
 #include "config/mpich2.h"
 #elif defined(OPEN_MPI)

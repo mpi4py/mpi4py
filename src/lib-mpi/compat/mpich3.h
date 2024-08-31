@@ -7,9 +7,9 @@
 /* -------------------------------------------------------------------------- */
 
 #if (MPICH_NUMVERSION >= 30000000) || defined(CIBUILDWHEEL)
-static int PyMPI_MPICH_MPI_Type_get_extent_x(MPI_Datatype datatype,
-                                             MPI_Count   *lb,
-                                             MPI_Count   *extent)
+static int PyMPI_MPICH3_MPI_Type_get_extent_x(MPI_Datatype datatype,
+                                              MPI_Count   *lb,
+                                              MPI_Count   *extent)
 {
   int ierr;
   MPI_Aint lb_a = MPI_UNDEFINED;
@@ -33,11 +33,41 @@ static int PyMPI_MPICH_MPI_Type_get_extent_x(MPI_Datatype datatype,
  fn_exit:
   return ierr;
 }
-#define MPI_Type_get_extent_x PyMPI_MPICH_MPI_Type_get_extent_x
+#define MPI_Type_get_extent_x PyMPI_MPICH3_MPI_Type_get_extent_x
+#endif
+
+#if (MPICH_NUMVERSION >= 30000000) || defined(CIBUILDWHEEL)
+static int PyMPI_MPICH3_MPI_Type_get_true_extent_x(MPI_Datatype datatype,
+                                                   MPI_Count   *lb,
+                                                   MPI_Count   *extent)
+{
+  int ierr;
+  MPI_Aint lb_a = MPI_UNDEFINED;
+  MPI_Aint extent_a = MPI_UNDEFINED;
+  if (sizeof(MPI_Count) == sizeof(MPI_Aint)) {
+    ierr = MPI_Type_get_true_extent(datatype, &lb_a, &extent_a);
+    if (ierr) goto fn_exit;
+    if (lb) *lb = lb_a;
+    if (extent) *extent = extent_a;
+  } else {
+    ierr = MPI_Type_get_true_extent(datatype, &lb_a, &extent_a);
+    if (ierr) goto fn_exit;
+    if (lb_a != MPI_UNDEFINED && extent_a != MPI_UNDEFINED) {
+      if (lb) *lb = lb_a;
+      if (extent) *extent = extent_a;
+    } else {
+      ierr = MPI_Type_get_true_extent_x(datatype, lb, extent);
+      if (ierr) goto fn_exit;
+    }
+  }
+ fn_exit:
+  return ierr;
+}
+#define MPI_Type_get_true_extent_x PyMPI_MPICH3_MPI_Type_get_true_extent_x
 #endif
 
 #if (MPICH_NUMVERSION >= 30400000) || defined(CIBUILDWHEEL)
-static int PyMPI_MPICH_MPI_Initialized(int *flag)
+static int PyMPI_MPICH3_MPI_Initialized(int *flag)
 {
   int ierr;
   ierr = MPI_Initialized(flag); if (ierr) return ierr;
@@ -45,14 +75,14 @@ static int PyMPI_MPICH_MPI_Initialized(int *flag)
   ierr = MPI_Finalized(flag); if (ierr) return ierr;
   return MPI_SUCCESS;
 }
-#define MPI_Initialized PyMPI_MPICH_MPI_Initialized
+#define MPI_Initialized PyMPI_MPICH3_MPI_Initialized
 #endif
 
 #if (MPICH_NUMVERSION >= 30400000) || defined(CIBUILDWHEEL)
-static int PyMPI_MPICH_MPI_Win_get_attr(MPI_Win win,
-                                        int keyval,
-                                        void *attrval,
-                                        int *flag)
+static int PyMPI_MPICH3_MPI_Win_get_attr(MPI_Win win,
+                                         int keyval,
+                                         void *attrval,
+                                         int *flag)
 {
   int ierr; static MPI_Aint zero[1] = {0}; zero[0] = 0;
   ierr = MPI_Win_get_attr(win, keyval, attrval, flag); if (ierr) return ierr;
@@ -60,7 +90,7 @@ static int PyMPI_MPICH_MPI_Win_get_attr(MPI_Win win,
     if (**((MPI_Aint**)attrval) == -1) *((void**)attrval) = zero;
   return MPI_SUCCESS;
 }
-#define MPI_Win_get_attr PyMPI_MPICH_MPI_Win_get_attr
+#define MPI_Win_get_attr PyMPI_MPICH3_MPI_Win_get_attr
 #endif
 
 /* -------------------------------------------------------------------------- */
