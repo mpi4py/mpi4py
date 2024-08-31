@@ -651,6 +651,10 @@ class Message(tuple):
 class Comm(MPI.Comm):
     """Communicator."""
 
+    def __new__(cls, comm=None):
+        """Create and return a new communicator."""
+        return MPI.Comm.__new__(cls, comm)
+
     def send(self, obj, dest, tag=0):
         """Blocking send in standard mode."""
         _send(self, MPI.Comm.Send, obj, dest, tag)
