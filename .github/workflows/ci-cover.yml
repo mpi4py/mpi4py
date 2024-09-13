@@ -101,6 +101,7 @@ jobs:
         name: coverage-data-${{ runner.os }}-${{ matrix.mpi }}-${{ matrix.py }}
         path: ".coverage.*"
         if-no-files-found: ignore
+        include-hidden-files: true
 
   report:
     runs-on: ubuntu-latest
