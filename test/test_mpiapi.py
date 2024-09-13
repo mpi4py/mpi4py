@@ -1,6 +1,6 @@
 from mpi4py import MPI
 import mpiunittest as unittest
-import os, re
+import os, re, sys
 import subprocess as sp
 import shutil
 
@@ -106,7 +106,10 @@ class TestMPIAPI(unittest.TestCase):
 
     def get_mod_symbols(self):
         nm = shutil.which('nm')
-        cmd = [nm, '-Pu', mod_file]
+        nm_flags = ['-Pu']
+        if sys.platform == 'linux':
+            nm_flags.append('-D')
+        cmd = [nm, *nm_flags, mod_file]
         out = sp.check_output(cmd, close_fds=False)
         nm_output = out.decode()
 
