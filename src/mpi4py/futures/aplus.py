@@ -18,11 +18,11 @@ class ThenableFuture(Future):
     """*Thenable* `Future` subclass."""
 
     def then(self, on_success=None, on_failure=None):
-        """Return ``then(self, on_success, on_failure)``."""  # noqa: D402
+        """Return ``then(self, on_success, on_failure)``."""
         return then(self, on_success, on_failure)
 
     def catch(self, on_failure=None):
-        """Return ``catch(self, on_failure)``."""  # noqa: D402
+        """Return ``catch(self, on_failure)``."""
         return catch(self, on_failure)
 
 

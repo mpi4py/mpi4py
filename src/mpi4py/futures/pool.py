@@ -148,7 +148,7 @@ class MPIPoolExecutor(Executor):
                 before the given timeout.
             Exception: If ``fn(*args)`` raises for any values.
 
-        """  # noqa: D402
+        """
         return self.starmap(fn, zip(*iterables), timeout, chunksize, unordered)
 
     def starmap(self, fn, iterable,
@@ -174,7 +174,7 @@ class MPIPoolExecutor(Executor):
                 before the given timeout.
             Exception: If ``fn(*args)`` raises for any values.
 
-        """  # noqa: D402
+        """
         # pylint: disable=too-many-arguments
         if chunksize < 1:
             raise ValueError("chunksize must be >= 1.")
