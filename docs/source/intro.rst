@@ -121,7 +121,7 @@ known MPI and Python related open source projects from the Internet.
     topologies.
 
   + General (picklable) Python objects can be messaged between
-    processors. There is not support for numeric arrays.
+    processors. There is native support for numeric arrays.
 
 * `Scientific Python`_
 
