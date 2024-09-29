@@ -175,7 +175,7 @@ class MPIPoolExecutor(Executor):
             Exception: If ``fn(*args)`` raises for any values.
 
         """
-        # pylint: disable=too-many-arguments
+        # pylint: disable=too-many-arguments,too-many-positional-arguments
         if chunksize < 1:
             raise ValueError("chunksize must be >= 1.")
         if chunksize == 1:
@@ -282,7 +282,7 @@ def _chain_from_iterable_of_lists(iterable):
 
 def _starmap_chunks(submit, function, iterable,
                     timeout, unordered, chunksize):
-    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
     function = functools.partial(_apply_chunks, function)
     iterable = _build_chunks(chunksize, iterable)
     result = _starmap_helper(submit, function, iterable,

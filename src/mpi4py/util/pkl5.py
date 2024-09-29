@@ -114,7 +114,7 @@ def _new_buffer(size):
 
 
 def _send_raw(comm, send, data, bufs, dest, tag):
-    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
     info = [len(data)]
     info.extend(len(sbuf) for sbuf in bufs)
     infotype = _info_datatype()
@@ -145,7 +145,7 @@ def _isend(comm, isend, obj, dest, tag):
 
 
 def _recv_raw(comm, recv, buf, source, tag, status=None):
-    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
     if status is None:
         status = Status()
     MPI.Comm.Probe(comm, source, tag, status)
@@ -173,7 +173,7 @@ def _recv_raw(comm, recv, buf, source, tag, status=None):
 
 
 def _recv(comm, recv, buf, source, tag, status):
-    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
     if source == PROC_NULL:
         recv(comm, (None, 0, MPI.BYTE), source, tag, status)
         return None
@@ -696,7 +696,7 @@ class Comm(MPI.Comm):
                  recvbuf=None, source=ANY_SOURCE, recvtag=ANY_TAG,
                  status=None):
         """Send and receive."""
-        # pylint: disable=too-many-arguments
+        # pylint: disable=too-many-arguments,too-many-positional-arguments
         sreq = _isend(self, MPI.Comm.Isend, sendobj, dest, sendtag)
         robj = _recv(self, MPI.Comm.Recv, recvbuf, source, recvtag, status)
         MPI.Request.Waitall(sreq)

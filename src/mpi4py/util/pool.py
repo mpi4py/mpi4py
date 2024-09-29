@@ -83,7 +83,7 @@ class Pool:
         callback=None, error_callback=None,
     ):
         """Asynchronous version of `apply()` returning `ApplyResult`."""
-        # pylint: disable=too-many-arguments
+        # pylint: disable=too-many-arguments,too-many-positional-arguments
         # pylint: disable=dangerous-default-value
         future = self.executor.submit(func, *args, **kwds)
         return ApplyResult(future, callback, error_callback)
@@ -111,7 +111,7 @@ class Pool:
         callback=None, error_callback=None,
     ):
         """Asynchronous version of `map()` returning `MapResult`."""
-        # pylint: disable=too-many-arguments
+        # pylint: disable=too-many-arguments,too-many-positional-arguments
         iterable, chunksize = _chunksize(self, iterable, chunksize)
         result_iterator = self.imap(func, iterable, chunksize=chunksize)
         future = _async_executor(self).submit(list, result_iterator)
@@ -156,7 +156,7 @@ class Pool:
         callback=None, error_callback=None
     ):
         """Asynchronous version of `starmap()` returning `MapResult`."""
-        # pylint: disable=too-many-arguments
+        # pylint: disable=too-many-arguments,too-many-positional-arguments
         iterable, chunksize = _chunksize(self, iterable, chunksize)
         result_iterator = self.istarmap(func, iterable, chunksize=chunksize)
         future = _async_executor(self).submit(list, result_iterator)

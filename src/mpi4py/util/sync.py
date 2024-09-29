@@ -660,7 +660,7 @@ def _rma_progress(window):
 def _rma_spinloop(
     window, typecode, index, sentinel, reset=False,
     backoff=None, progress=None,
-):  # pylint: disable=too-many-arguments
+):  # pylint: disable=too-many-arguments,too-many-positional-arguments
     memory = memoryview(window).cast(typecode)
     backoff = backoff or _new_backoff()
     progress = progress or _rma_progress
