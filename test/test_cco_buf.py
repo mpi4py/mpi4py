@@ -104,12 +104,6 @@ class BaseTestCCOBuf:
                 for value in rbuf.flat:
                     self.assertEqual(value, check)
 
-    def assertAlmostEqual(self, first, second):
-        num = complex(second-first)
-        den = complex(second+first)/2 or 1.0
-        if (abs(num/den) > 1e-2):
-            raise self.failureException(f'{first!r} != {second!r}')
-
     def testReduce(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()
@@ -404,12 +398,6 @@ class BaseTestCCOBufInplace:
                 self.COMM.Allgather(None, buf.as_mpi())
                 for value in buf.flat:
                     self.assertEqual(value, check)
-
-    def assertAlmostEqual(self, first, second):
-        num = complex(second-first)
-        den = complex(second+first)/2 or 1.0
-        if (abs(num/den) > 1e-2):
-            raise self.failureException(f'{first!r} != {second!r}')
 
     def testReduce(self):
         size = self.COMM.Get_size()

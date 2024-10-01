@@ -174,12 +174,6 @@ class BaseTestCCOBufInter:
                         for value in rbuf.flat:
                             self.assertEqual(value, check)
 
-    def assertAlmostEqual(self, first, second):
-        num = complex(second-first)
-        den = complex(second+first)/2 or 1.0
-        if (abs(num/den) > 1e-2):
-            raise self.failureException(f'{first!r} != {second!r}')
-
     @unittest.skipMPI('mvapich', MPI.COMM_WORLD.Get_size() > 2)
     def testReduce(self):
         comm = self.INTERCOMM

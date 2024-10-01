@@ -5,6 +5,12 @@ import unittest
 
 class TestCase(unittest.TestCase):
 
+    def assertAlmostEqual(self, first, second):
+        num = complex(second) - complex(first)
+        den = max(abs(complex(second)), abs(complex(first))) or 1.0
+        if (abs(num/den) > 1e-2):
+            raise self.failureException(f'{first!r} != {second!r}')
+
     @contextlib.contextmanager
     def catchNotImplementedError(self, version=None, subversion=0):
         try:
