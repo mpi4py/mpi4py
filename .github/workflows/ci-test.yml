@@ -18,7 +18,7 @@ jobs:
       matrix:
         os:
           - ubuntu-22.04
-          - macos-14
+          - macos-15
           - windows-2022
         mpi:
           - mpich
@@ -33,7 +33,7 @@ jobs:
         exclude:
           - os: ubuntu-22.04
             mpi: msmpi
-          - os: macos-14
+          - os: macos-15
             mpi: msmpi
           - os: windows-2022
             mpi: mpich

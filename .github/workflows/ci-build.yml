@@ -34,6 +34,7 @@ jobs:
         os:
           - ubuntu-22.04
           - ubuntu-20.04
+          - macos-15
           - macos-14
           - macos-13
           - macos-12
@@ -52,6 +53,10 @@ jobs:
           - os:  ubuntu-22.04
             mpi: msmpi
           - os:  ubuntu-20.04
+            mpi: msmpi
+          - os:  macos-15
+            mpi: impi
+          - os:  macos-15
             mpi: msmpi
           - os:  macos-14
             mpi: impi
