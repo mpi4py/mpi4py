@@ -260,13 +260,15 @@ class TestObjModel(unittest.TestCase):
         )
         for name in names:
             constant = getattr(MPI, name)
-            self.assertEqual(repr(constant), name)
+            self.assertEqual(constant, constant)
+            self.assertEqual(constant, int(constant))
+            self.assertEqual(type(constant)(), constant)
             self.assertEqual(memoryview(constant).nbytes, 0)
             self.assertEqual(MPI.Get_address(constant), constant)
             if sys.implementation.name != 'pypy':
                 self.assertIsNone(memoryview(constant).obj)
-            with self.assertRaises(ValueError):
-                type(constant)(constant + 1)
+            with self.assertRaises(TypeError):
+                constant + 1
             self.assertEqual(repr(constant), name)
             self.assertEqual(constant.__reduce__(), name)
             for protocol in range(pickle.HIGHEST_PROTOCOL):
