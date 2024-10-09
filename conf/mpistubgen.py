@@ -114,10 +114,12 @@ def visit_datadescr(datadescr):
 
 
 def visit_property(prop, name=None):
-    sig = signature(prop.fget)
-    pname = name or prop.fget.__name__
-    ptype = sig.rsplit('->', 1)[-1].strip()
-    return f"{pname}: {ptype}"
+    gname = prop.fget.__name__
+    pname = name or gname
+    if pname == gname:
+        return ["@property", visit_method(prop.fget)]
+    else:
+        return f"{pname} = property({gname})"
 
 
 def visit_constructor(cls, name='__init__', args=None):
@@ -202,12 +204,12 @@ def visit_class(cls, done=None):
         if name in done:
             continue
 
-        if name in skip:
-            continue
-
         if name in override:
             done.add(name)
             lines.add = override[name]
+            continue
+
+        if name in skip:
             continue
 
         if name in special:
@@ -389,11 +391,11 @@ from os import PathLike
 
 OVERRIDE = {
     'Exception': {
-        '__new__': "def __new__(cls, ierr: int = SUCCESS) -> Self: ...",
-        "__lt__": "def __lt__(self, __other: int) -> bool: ...",
-        "__le__": "def __le__(self, __other: int) -> bool: ...",
-        "__gt__": "def __gt__(self, __other: int) -> bool: ...",
-        "__ge__": "def __ge__(self, __other: int) -> bool: ...",
+        '__init__': "def __init__(self, ierr: int = SUCCESS, /) -> None: ...",
+        '__lt__': "def __lt__(self, __other: int) -> bool: ...",
+        '__le__': "def __le__(self, __other: int) -> bool: ...",
+        '__gt__': "def __gt__(self, __other: int) -> bool: ...",
+        '__ge__': "def __ge__(self, __other: int) -> bool: ...",
     },
     'Info': {
         '__iter__':
