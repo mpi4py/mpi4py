@@ -4,6 +4,9 @@
 import os as _os
 import sys as _sys
 
+# pyright: reportArgumentType=false
+# pyright: reportAttributeAccessIssue=false
+
 
 def _prog(cmd=""):
     pyexe = _os.path.basename(_sys.executable)
@@ -192,9 +195,9 @@ def pingpong(comm, args=None, verbose=True):
         except ImportError:  # pragma: no cover
             pass
     elif options.array == 'cupy':  # pragma: no cover
-        import cupy
+        import cupy  # pyright: ignore
     elif options.array == 'numba':  # pragma: no cover
-        import numba.cuda
+        import numba.cuda  # pyright: ignore
 
     skip = options.skip
     loop = options.loop
@@ -567,21 +570,14 @@ def main(args=None):
 
     from . import MPI
     comm = MPI.COMM_WORLD
-    if options.command not in main.commands:
+    if options.command not in globals():
         if comm.rank == 0:
             parser.error(f"unknown command {options.command!r}")
         parser.exit(2)
-    command = main.commands[options.command]
+    command = globals()[options.command]
     command(comm, options.args)
     parser.exit()
 
-
-main.commands = {  # type: ignore[attr-defined]
-    'helloworld': helloworld,
-    'ringtest': ringtest,
-    'pingpong': pingpong,
-    'futures': futures,
-}
 
 if __name__ == '__main__':
     main()

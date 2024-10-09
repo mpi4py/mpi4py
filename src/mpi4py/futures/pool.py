@@ -10,6 +10,7 @@ import threading
 
 from ._base import Future
 from ._base import Executor
+from ._base import BrokenExecutor
 from ._base import as_completed
 
 from . import _core
@@ -67,6 +68,7 @@ class MPIPoolExecutor(Executor):
     def _bootstrap(self):
         if self._pool is None:
             self._pool = self._make_pool(self)
+        return self._pool
 
     @property
     def _max_workers(self):
@@ -80,9 +82,9 @@ class MPIPoolExecutor(Executor):
                 return 0
             if self._shutdown:
                 return 0
-            self._bootstrap()
-            self._pool.wait()
-            return self._pool.size
+            pool = self._bootstrap()
+            pool.wait()
+            return pool.size
 
     def bootup(self, wait=True):
         """Allocate executor resources eagerly.
@@ -95,9 +97,9 @@ class MPIPoolExecutor(Executor):
         with self._lock:
             if self._shutdown:
                 raise RuntimeError("cannot bootup after shutdown")
-            self._bootstrap()
+            pool = self._bootstrap()
             if wait:
-                self._pool.wait()
+                pool.wait()
             return self
 
     def submit(self, fn, *args, **kwargs):
@@ -113,16 +115,18 @@ class MPIPoolExecutor(Executor):
         # pylint: disable=arguments-differ
         with self._lock:
             if self._broken:
-                raise _core.BrokenExecutor(self._broken)
+                raise BrokenExecutor(self._broken)
             if self._shutdown:
                 raise RuntimeError("cannot submit after shutdown")
-            self._bootstrap()
+            pool = self._bootstrap()
             future = self.Future()
             task = (fn, args, kwargs)
-            self._pool.push((future, task))
+            pool.push((future, task))
             return future
     if sys.version_info >= (3, 8):  # pragma: no branch
-        submit.__text_signature__ = '($self, fn, /, *args, **kwargs)'
+        submit.__text_signature__ = (  # type: ignore
+            '($self, fn, /, *args, **kwargs)'
+        )
 
     def map(self, fn, *iterables,
             timeout=None, chunksize=1, unordered=False):
@@ -247,7 +251,7 @@ def _starmap_helper(submit, function, iterable, timeout, unordered):
                     future = [future]
                     yield result(future.pop())
             else:
-                futures.reverse()
+                futures.reverse()  # pyright: ignore
                 if timeout is None:
                     while futures:
                         yield result(futures.pop())
