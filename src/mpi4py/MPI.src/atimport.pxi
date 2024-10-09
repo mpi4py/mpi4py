@@ -7,6 +7,7 @@ cdef extern from * nogil:
     #include "lib-mpi/fallback.h"
     #include "lib-mpi/compat.h"
 
+    #include "pyapicompat.h"
     #include "pympivendor.h"
     #include "pympicommctx.h"
     """
@@ -19,11 +20,6 @@ cdef extern from "Python.h":
     ctypedef size_t  Py_uintptr_t
 
 cdef extern from "Python.h":
-    """
-    #if PY_VERSION_HEX < 0x030B0000 && !defined(Py_GETENV)
-    #  define Py_GETENV(s) (Py_IgnoreEnvironmentFlag ? NULL : getenv(s))
-    #endif
-    """
     const char *Py_GETENV(const char[]) nogil
 
 cdef extern from * nogil:
@@ -39,23 +35,6 @@ cdef extern from * nogil:
 # -----------------------------------------------------------------------------
 
 cdef extern from "Python.h":
-    """
-    #if PY_VERSION_HEX < 0x30C00A7 && !defined(PyErr_DisplayException)
-    #define PyErr_DisplayException PyErr_DisplayException_312
-    static void PyErr_DisplayException(PyObject *exc)
-    {
-      PyObject *et = NULL;
-      PyObject *tb = NULL;
-      #if defined(PYPY_VERSION)
-      et = PyObject_Type(exc);
-      tb = PyException_GetTraceback(exc);
-      #endif
-      PyErr_Display(et, exc, tb);
-      if (et) Py_DecRef(et);
-      if (tb) Py_DecRef(tb);
-    }
-    #endif
-    """
     void *PyExc_RuntimeError
     void *PyExc_NotImplementedError
     void PyErr_SetNone(object)
