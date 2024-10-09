@@ -93,10 +93,10 @@ class ProcessPoolMixin(ExecutorMixin):
     executor_type = futures.MPIPoolExecutor
 
     if 'coverage' in sys.modules:
-        executor_type = functools.partial(
+        executor_type = staticmethod(functools.partial(
             executor_type,
             python_args='-m coverage run'.split(),
-            )
+            ))
 
 
 @unittest.skipIf(not SHARED_POOL, 'not-shared-pool')
