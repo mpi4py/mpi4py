@@ -1,3 +1,23 @@
+Release 4.0.1 [2024-XX-XX]
+==========================
+
+* Update for Python 3.13 support:
+
+  + Enable Cython support for free-threaded CPython.
+  + Allow compiling Cython-generated C sources with the full Python C-API.
+  + Fix MPI DLL path workarounds on Windows after changes to `locals()`.
+
+* Enhancements to test suite:
+
+  + Support XML reports via `unittest-xml-reporting`.
+  + Add command line options to explude tests by pattern and files.
+  + Refactor Python 2 code to use Python 3 constructs using `pyupgrade`.
+
+* Minor and mostly inconsequential subclass fix in `mpi4py.util.pkl5`.
+
+* Update workarounds for legacy MPICH 3.0 release.
+
+
 Release 4.0.0 [2024-07-28]
 ==========================
 
