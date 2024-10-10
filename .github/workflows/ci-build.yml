@@ -37,7 +37,6 @@ jobs:
           - macos-15
           - macos-14
           - macos-13
-          - macos-12
           - windows-2022
           - windows-2019
         mpi:
@@ -65,10 +64,6 @@ jobs:
           - os:  macos-13
             mpi: impi
           - os:  macos-13
-            mpi: msmpi
-          - os:  macos-12
-            mpi: impi
-          - os:  macos-12
             mpi: msmpi
           - os:  windows-2022
             mpi: mpich
