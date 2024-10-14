@@ -1,37 +1,5 @@
 # -----------------------------------------------------------------------------
 
-@cython.final
-cdef class BufferAutomaticType(int):
-    """
-    Type of `BUFFER_AUTOMATIC`.
-    """
-
-    def __cinit__(self):
-        cdef MPI_Aint a = self, b = <MPI_Aint>MPI_BUFFER_AUTOMATIC
-        if a != b:
-            raise ValueError("cannot create instance")
-
-    def __getbuffer__(self, Py_buffer *view, int flags):
-        cdef void *bufauto = MPI_BUFFER_AUTOMATIC
-        PyBuffer_FillInfo(view, <object>NULL, bufauto, 0, 0, flags)
-
-    def __repr__(self) -> str:
-        <void> self  # unused
-        return 'BUFFER_AUTOMATIC'
-
-    def __reduce__(self) -> str:
-        <void> self  # unused
-        return 'BUFFER_AUTOMATIC'
-
-
-cdef object __BUFFER_AUTOMATIC__ = \
-    BufferAutomaticType(<MPI_Aint>MPI_BUFFER_AUTOMATIC)
-
-cdef inline bint is_BUFFER_AUTOMATIC(object obj):
-    return is_constant(obj, __BUFFER_AUTOMATIC__)
-
-# -----------------------------------------------------------------------------
-
 ctypedef fused PyMPI_attach_buffer_type:
     Py_uintptr_t
     Comm
