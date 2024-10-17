@@ -170,7 +170,7 @@ def join_threads(threads_queues=THREADS_QUEUES):
 
 
 if hasattr(threading, '_register_atexit'):
-    threading._register_atexit(join_threads)
+    threading._register_atexit(join_threads)  # type: ignore
 else:  # pragma: no cover
     atexit.register(join_threads)
 
@@ -397,8 +397,8 @@ class SharedPoolCtx:
 
     def __init__(self):
         self.lock = threading.Lock()
-        self.comm = MPI.COMM_NULL
-        self.intracomm = MPI.COMM_NULL
+        self.comm = MPI.Intercomm(MPI.COMM_NULL)
+        self.intracomm = MPI.Intracomm(MPI.COMM_NULL)
         self.on_root = None
         self.counter = None
         self.workers = None
@@ -479,8 +479,8 @@ class SharedPoolCtx:
         if not self.on_root:
             join_threads(self.threads)
         _set_shared_pool(None)
-        self.comm = MPI.COMM_NULL
-        self.intracomm = MPI.COMM_NULL
+        self.comm = MPI.Intercomm(MPI.COMM_NULL)
+        self.intracomm = MPI.Intracomm(MPI.COMM_NULL)
         self.on_root = None
         self.counter = None
         self.workers = None

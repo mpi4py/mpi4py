@@ -2,6 +2,8 @@
 # Contact: dalcinl@gmail.com
 """Typing support."""
 # pylint: disable=too-few-public-methods
+# pyright: reportGeneralTypeIssues=false
+# pyright: reportReturnType=false
 
 import sys
 from typing import (
@@ -113,25 +115,25 @@ In-place buffer argument.
 """
 
 
-Aint = Integral
+Aint = Union[Integral, int]
 """
 Address-sized integral type.
 """
 
 
-Count = Integral
+Count = Union[Integral, int]
 """
 Integral type for counts.
 """
 
 
-Displ = Integral
+Displ = Union[Integral, int]
 """
 Integral type for displacements.
 """
 
 
-Offset = Integral
+Offset = Union[Integral, int]
 """
 Integral type for offsets.
 """

@@ -22,7 +22,7 @@ __author__ = 'Lisandro Dalcin'
 __credits__ = 'MPI Forum, MPICH Team, Open MPI Team'
 
 
-__all__ = ['MPI']
+__all__ = ['MPI']  # pyright: ignore
 
 
 class Rc:
@@ -142,7 +142,7 @@ def profile(name, *, path=None):
     import warnings
 
     try:
-        from _ctypes import dlopen
+        from _ctypes import dlopen  # type: ignore
         from os import RTLD_NOW, RTLD_GLOBAL
     except ImportError as exc:  # pragma: no cover
         warnings.warn(exc.args[0], stacklevel=2)

@@ -69,13 +69,13 @@ Bottom: TypeAlias = Union[BottomType, None]
 
 InPlace: TypeAlias = Union[InPlaceType, None]
 
-Aint: TypeAlias = Integral
+Aint: TypeAlias = Union[Integral, int]
 
-Count: TypeAlias = Integral
+Count: TypeAlias = Union[Integral, int]
 
-Displ: TypeAlias = Integral
+Displ: TypeAlias = Union[Integral, int]
 
-Offset: TypeAlias = Integral
+Offset: TypeAlias = Union[Integral, int]
 
 TypeSpec: TypeAlias = Union[Datatype, str]
 

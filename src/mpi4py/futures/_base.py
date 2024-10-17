@@ -17,16 +17,20 @@ from concurrent.futures import (  # noqa: F401
     as_completed,
 )
 
-try:  # Python 3.7
+import sys
+
+if sys.version_info >= (3, 7):  # Python 3.7
     from concurrent.futures import BrokenExecutor
-except ImportError:  # pragma: no cover
+else:  # pragma: no cover
     class BrokenExecutor(RuntimeError):
         """The executor has become non-functional."""
 
-try:  # Python 3.8
+if sys.version_info >= (3, 8):  # Python 3.8
     from concurrent.futures import InvalidStateError
-except ImportError:  # pragma: no cover
+else:  # pragma: no cover
     # pylint: disable=too-few-public-methods
     # pylint: disable=useless-object-inheritance
     class InvalidStateError(CancelledError.__base__):
         """The operation is not allowed in this state."""
+
+del sys

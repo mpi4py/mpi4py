@@ -11,6 +11,7 @@ else:
     from typing_extensions import Self
 import weakref
 import threading
+from .. import MPI
 from ..MPI  import Info, Intracomm, Intercomm, Request
 from ._base import Executor, Future
 from ..typing import T
@@ -45,8 +46,7 @@ class WorkerSet(Generic[T]):
     def add(self, x: T) -> None: ...
     def pop(self) -> T: ...
 
-_WeakKeyDict: TypeAlias = weakref.WeakKeyDictionary
-_ThreadQueueMap: TypeAlias = _WeakKeyDict[threading.Thread, TaskQueue[_Item[Any] | None]]
+_ThreadQueueMap: TypeAlias = weakref.WeakKeyDictionary[threading.Thread, TaskQueue[_Item[Any] | None]]
 THREADS_QUEUES: _ThreadQueueMap = ...
 def join_threads(threads_queues: _ThreadQueueMap = ...) -> None: ...
 
@@ -83,6 +83,7 @@ SharedPool: Callable[[Executor], Pool] | None = ...
 
 class SharedPoolCtx:
     comm: Intercomm
+    intracomm: Intracomm
     on_root: bool | None
     counter: Iterator[int]
     workers: WorkerSet[int]
@@ -93,6 +94,7 @@ class SharedPoolCtx:
     def __exit__(self, *args: object) -> bool: ...
 
 def comm_split(comm: Intracomm, root: int) -> tuple[Intercomm, Intracomm]: ...
+def _comm_executor_helper(executor: Executor | None, comm: Intracomm, root: int) -> None: ...
 
 def barrier(comm: Intercomm) -> None: ...
 def bcast_send(comm: Intercomm, data: Any) -> None: ...
