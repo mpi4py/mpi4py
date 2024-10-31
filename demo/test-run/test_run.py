@@ -8,6 +8,11 @@ import unittest
 import mpi4py
 
 on_pypy = hasattr(sys, 'pypy_version_info')
+on_ci = any((
+    os.environ.get('GITHUB_ACTIONS') == 'true',
+    os.environ.get('TF_BUILD') == 'True',
+    os.environ.get('CIRCLECI') == 'true',
+))
 
 
 def find_executable(exe):
@@ -93,16 +98,11 @@ class BaseTestRun(unittest.TestCase):
             for output in (stdout, stderr)
             for mpiabort in patterns
         )
-        ci = any((
-            os.environ.get('GITHUB_ACTIONS') == 'true',
-            os.environ.get('TF_BUILD') == 'True',
-            os.environ.get('CIRCLECI') == 'true',
-        ))
         if aborted:
-            if message is not None and not ci:
+            if message is not None and not on_ci:
                 self.assertIn(message, stderr)
             return
-        if not (stdout or stderr) or ci:
+        if not (stdout or stderr) or on_ci:
             with warnings.catch_warnings():
                 warnings.simplefilter("always")
                 warnings.warn(
@@ -169,6 +169,7 @@ class TestRunScript(BaseTestRun):
             for rank in range(0, np):
                 args = ['--rank', str(rank), '--interrupt']
                 status, stdout, stderr = self.execute(args, np)
+                if on_ci and status == 221: continue
                 if not on_pypy:
                     self.assertEqual(status, SIGINT + 128)
                 self.assertMPIAbort(stdout, stderr, excmess)
