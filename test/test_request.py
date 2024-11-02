@@ -91,6 +91,7 @@ class TestRequestArray(unittest.TestCase):
             index, flag = MPI.Request.Get_status_any(self.REQUESTS, None)
             self.assertEqual(index, MPI.UNDEFINED)
             self.assertTrue(flag)
+            if unittest.is_mpi('impi(==2021.14.0)'): status.error = MPI.SUCCESS
             index, flag = MPI.Request.Get_status_any(self.REQUESTS, status)
             self.assertEqual(index, MPI.UNDEFINED)
             self.assertTrue(flag)
