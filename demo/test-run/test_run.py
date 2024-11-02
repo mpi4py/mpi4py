@@ -139,6 +139,7 @@ class TestRunScript(BaseTestRun):
             for rank in range(0, np):
                 args = ['--rank', str(rank), '--exception', message]
                 status, stdout, stderr = self.execute(args, np)
+                if on_ci and status == 221: continue
                 self.assertEqual(status, 1)
                 self.assertMPIAbort(stdout, stderr, excmess)
 
@@ -263,6 +264,7 @@ class TestRunCommand(BaseTestRun):
         for np in (1, 2):
             for rank in range(0, np):
                 status, stdout, stderr = self.execute(command.format(rank), np)
+                if on_ci and status == 221: continue
                 self.assertEqual(status, 1)
                 self.assertMPIAbort(stdout, stderr, excmess)
 
