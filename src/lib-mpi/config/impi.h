@@ -232,6 +232,35 @@
 #define PyMPI_HAVE_MPI_Reduce_local_c 1
 #endif
 
+#if I_MPI_NUMVERSION >= 20211400300
+#define PyMPI_HAVE_MPI_Status_get_source 1
+#define PyMPI_HAVE_MPI_Status_set_source 1
+#define PyMPI_HAVE_MPI_Status_get_tag 1
+#define PyMPI_HAVE_MPI_Status_set_tag 1
+#define PyMPI_HAVE_MPI_Status_get_error 1
+#define PyMPI_HAVE_MPI_Status_set_error 1
+#define PyMPI_HAVE_MPI_Request_get_status_any 1
+#define PyMPI_HAVE_MPI_Request_get_status_all 1
+#define PyMPI_HAVE_MPI_Request_get_status_some 1
+#define PyMPI_HAVE_MPI_Pready 1
+#define PyMPI_HAVE_MPI_Pready_range 1
+#define PyMPI_HAVE_MPI_Pready_list 1
+#define PyMPI_HAVE_MPI_Parrived 1
+#define PyMPI_HAVE_MPI_BUFFER_AUTOMATIC 1
+#define PyMPI_HAVE_MPI_Psend_init 1
+#define PyMPI_HAVE_MPI_Precv_init 1
+#define PyMPI_HAVE_MPI_Comm_idup_with_info 1
+#define PyMPI_HAVE_MPI_COMM_TYPE_HW_UNGUIDED 1
+#define PyMPI_HAVE_MPI_COMM_TYPE_RESOURCE_GUIDED 1
+#define PyMPI_HAVE_MPI_Intercomm_create_from_groups 1
+#define PyMPI_HAVE_MPI_ERR_PROC_ABORTED 1
+#define PyMPI_HAVE_MPI_ERR_VALUE_TOO_LARGE 1
+#define PyMPI_HAVE_MPI_F_SOURCE 1
+#define PyMPI_HAVE_MPI_F_TAG 1
+#define PyMPI_HAVE_MPI_F_ERROR 1
+#define PyMPI_HAVE_MPI_F_STATUS_SIZE 1
+#endif
+
 #endif
 
 #endif /* !PyMPI_CONFIG_IMPI_H */
