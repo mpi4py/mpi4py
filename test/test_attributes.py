@@ -110,7 +110,7 @@ class BaseTestAttr:
         attr = obj.Get_attr(self.keyval)
         self.assertEqual(attr, addr)
 
-    @unittest.skipMPI('impi')
+    @unittest.skipMPI('impi(<2021.14.0)')
     @unittest.skipMPI('mvapich')
     @unittest.skipMPI('mpich(<4.2.1)')
     @unittest.skipMPI('openmpi(<5.0.0)')
@@ -133,7 +133,7 @@ class BaseTestAttr:
             obj.Delete_attr(self.keyval)
             self.keyval = cls.Free_keyval(self.keyval)
 
-    @unittest.skipMPI('impi')
+    @unittest.skipMPI('impi(<2021.14.0)')
     @unittest.skipMPI('mvapich')
     @unittest.skipMPI('mpich(<4.2.1)')
     def testAttrDeleteException(self):
