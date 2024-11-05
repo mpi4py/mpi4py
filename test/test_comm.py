@@ -422,7 +422,7 @@ class TestCommSelf(BaseTestComm, unittest.TestCase):
         rank = self.COMM.Get_rank()
         self.assertEqual(rank, 0)
 
-    @unittest.skipMPI('openmpi(<5.2.0)')  # open-mpi/ompi#10895
+    @unittest.skipMPI('openmpi(<5.0.6)')
     def testCreateFromGroup(self):
         super().testCreateFromGroup()
 
