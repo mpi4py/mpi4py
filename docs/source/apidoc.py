@@ -56,7 +56,7 @@ def is_property(obj):
 
 
 def is_class(obj):
-    return inspect.isclass(obj) or type(obj) is type(int)
+    return inspect.isclass(obj)
 
 
 class Lines(list):
@@ -493,15 +493,15 @@ from .typing import *
 
 
 def visit_mpi4py_MPI():
-    from mpi4py import MPI as module
+    from mpi4py import MPI
     lines = Lines()
-    lines.add = f'"""{module.__doc__}"""'
+    lines.add = f'"""{MPI.__doc__}"""'
     lines.add = "# flake8: noqa"
     lines.add = IMPORTS
     lines.add = ""
     lines.add = HELPERS
     lines.add = ""
-    lines.add = visit_module(module)
+    lines.add = visit_module(MPI)
     lines.add = ""
     lines.add = TYPING
     return lines
