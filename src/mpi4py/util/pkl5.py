@@ -31,19 +31,6 @@ def _pickle_loads(data, bufs):
     return pickle.loads_oob(data, bufs)
 
 
-def _bigmpi_create_type(basetype, count, blocksize):
-    qsize, rsize = divmod(count, blocksize)
-    qtype = basetype.Create_vector(
-        qsize, blocksize, blocksize)
-    rtype = basetype.Create_contiguous(rsize)
-    rdisp = qtype.Get_extent()[1]
-    bigtype = MPI.Datatype.Create_struct(
-        (1, 1), (0, rdisp), (qtype, rtype))
-    qtype.Free()
-    rtype.Free()
-    return bigtype
-
-
 class _BigMPI:
     """Support for large message counts."""
 
@@ -71,10 +58,9 @@ class _BigMPI:
             return (buf, count, MPI.BYTE)
         cache = self.cache
         dtype = cache.get(count)
-        if dtype is not None:
-            return (buf, 1, dtype)
-        dtype = _bigmpi_create_type(MPI.BYTE, count, blocksize)
-        cache[count] = dtype.Commit()
+        if dtype is None:
+            dtype = MPI.BYTE.Create_contiguous(count)
+            cache[count] = dtype.Commit()
         return (buf, 1, dtype)
 
 

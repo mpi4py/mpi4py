@@ -1191,11 +1191,36 @@ static int PyMPI_Type_contiguous_c(MPI_Count count,
                                    MPI_Datatype oldtype,
                                    MPI_Datatype *newtype)
 {
-  int ierr; int c;
-  PyMPICastValue(int, c, MPI_Count, count);
-  ierr = MPI_Type_contiguous(c, oldtype, newtype);
- fn_exit:
-  return ierr;
+  if (count <= INT_MAX) {
+    int ierr; int c;
+    PyMPICastValue(int, c, MPI_Count, count);
+    ierr = MPI_Type_contiguous(c, oldtype, newtype);
+  fn_exit:
+    return ierr;
+  } else {
+    enum { blocksize = INT_MAX };
+    int ierr, b[2];
+    MPI_Aint lb, extent, d[2];
+    MPI_Datatype t[2];
+    MPI_Datatype qtype = MPI_DATATYPE_NULL;
+    MPI_Datatype rtype = MPI_DATATYPE_NULL;
+    MPI_Count q = count / blocksize;
+    MPI_Count r = count % blocksize;
+    ierr = MPI_Type_vector((int)q, blocksize, blocksize, oldtype, &qtype);
+    if (ierr != MPI_SUCCESS) goto fn_fail;
+    ierr = MPI_Type_contiguous((int)r, oldtype, &rtype);
+    if (ierr != MPI_SUCCESS) goto fn_fail;
+    ierr = MPI_Type_get_extent(oldtype, &lb, &extent);
+    if (ierr != MPI_SUCCESS) goto fn_fail;
+    t[0] = qtype; b[0] = 1; d[0] = 0;
+    t[1] = rtype; b[1] = 1; d[1] = (MPI_Aint)q * blocksize * extent;
+    ierr = MPI_Type_create_struct(2, b, d, t, newtype);
+    if (ierr != MPI_SUCCESS) goto fn_fail;
+  fn_fail:
+    if (qtype != MPI_DATATYPE_NULL) MPI_Type_free(&qtype);
+    if (rtype != MPI_DATATYPE_NULL) MPI_Type_free(&rtype);
+    return ierr;
+  }
 }
 #undef  MPI_Type_contiguous_c
 #define MPI_Type_contiguous_c PyMPI_Type_contiguous_c
