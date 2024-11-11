@@ -203,8 +203,8 @@ the :data:`mpi4py.rc` and :data:`MPI.pickle` objects at import time of the
 
 .. envvar:: MPI4PY_RC_IRECV_BUFSZ
 
-  :type: :class:`bool`
-  :default: :obj:`True`
+  :type: :class:`int`
+  :default: ``32768``
 
   Default buffer size in bytes for :meth:`~MPI.Comm.irecv`.
 
