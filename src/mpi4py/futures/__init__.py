@@ -12,7 +12,7 @@ from ._base import (
     ALL_COMPLETED,
     as_completed,
     CancelledError,
-    TimeoutError,
+    TimeoutError,  # noqa: A004
     InvalidStateError,
     BrokenExecutor,
 )

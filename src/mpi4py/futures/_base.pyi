@@ -3,7 +3,7 @@ from concurrent.futures import (
     FIRST_EXCEPTION as FIRST_EXCEPTION,
     ALL_COMPLETED as ALL_COMPLETED,
     CancelledError as CancelledError,
-    TimeoutError as TimeoutError,
+    TimeoutError as TimeoutError,  # noqa: A004
     BrokenExecutor as BrokenExecutor,
     InvalidStateError as InvalidStateError,
     Future as Future,

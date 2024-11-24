@@ -10,7 +10,7 @@ from concurrent.futures import (  # noqa: F401
     FIRST_EXCEPTION,
     ALL_COMPLETED,
     CancelledError,
-    TimeoutError,
+    TimeoutError,  # noqa: A004
     Future,
     Executor,
     wait,

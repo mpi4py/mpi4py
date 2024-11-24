@@ -2,7 +2,7 @@
 # 'cdef extern from *' Cython blocks in in source files, and next
 # generate compatibility headers for partially implemented MPIs.
 
-# ruff: noqa: E501
+# ruff: noqa: E501, UP031
 
 import re
 from textwrap import indent, dedent

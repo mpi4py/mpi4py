@@ -692,7 +692,7 @@ class config(cmd_config.config):
         log.info("checking for header '%s' ...", header)
         body = "int main(int n, char**v) { (void)n; (void)v; return 0; }"
         ok = self.try_compile(body, [*headers, header], include_dirs)
-        log.info(ok and 'success!' or 'failure.')
+        log.info('success!' if ok else 'failure.')
         return ok
 
     def check_macro(

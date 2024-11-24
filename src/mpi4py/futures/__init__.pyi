@@ -7,7 +7,7 @@ from ._base import (
     ALL_COMPLETED as ALL_COMPLETED,
     as_completed as as_completed,
     CancelledError as CancelledError,
-    TimeoutError as TimeoutError,
+    TimeoutError as TimeoutError,  # noqa: A004
     InvalidStateError as InvalidStateError,
     BrokenExecutor as BrokenExecutor,
 )
