@@ -1208,7 +1208,7 @@ def server_main_spawn():
 
 
 def server_main_service():
-    from getopt import getopt
+    from getopt import getopt  # pylint: disable=deprecated-module
     longopts = ['bind=', 'port=', 'service=', 'info=']
     optlist, _ = getopt(sys.argv[1:], '', longopts)
     optdict = {opt[2:]: val for opt, val in optlist}
