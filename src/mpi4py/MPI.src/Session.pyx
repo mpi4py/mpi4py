@@ -59,7 +59,9 @@ cdef class Session:
         """
         Finalize a session.
         """
+        cdef MPI_Session save = self.ob_mpi
         CHKERR( MPI_Session_finalize(&self.ob_mpi) )
+        if constobj(self): self.ob_mpi = save
 
     def Get_num_psets(self, Info info: Info = INFO_NULL) -> int:
         """

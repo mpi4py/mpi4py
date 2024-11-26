@@ -277,7 +277,9 @@ cdef class Request:
         """
         Free a communication request.
         """
+        cdef MPI_Request save = self.ob_mpi
         with nogil: CHKERR( MPI_Request_free(&self.ob_mpi) )
+        if constobj(self): self.ob_mpi = save
 
     # Fortran Handle
     # --------------

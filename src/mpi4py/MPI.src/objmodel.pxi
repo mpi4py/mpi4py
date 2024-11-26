@@ -307,6 +307,9 @@ cdef inline object richcmp(PyMPIClass self, object other, int op):
 cdef inline int nonnull(PyMPIClass self) noexcept nogil:
     return self.ob_mpi != mpinull(self.ob_mpi)
 
+cdef inline int constobj(PyMPIClass self) noexcept nogil:
+    return self.flags & PyMPI_FLAGS_CONST
+
 # -----------------------------------------------------------------------------
 
 cdef dict def_registry = {}

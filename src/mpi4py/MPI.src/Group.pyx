@@ -227,8 +227,9 @@ cdef class Group:
         """
         Free a group.
         """
+        cdef MPI_Group save = self.ob_mpi
         CHKERR( MPI_Group_free(&self.ob_mpi) )
-        if self is __GROUP_EMPTY__: self.ob_mpi = MPI_GROUP_EMPTY
+        if constobj(self): self.ob_mpi = save
 
     # Fortran Handle
     # --------------

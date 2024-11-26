@@ -188,7 +188,9 @@ cdef class Win:
         """
         Free a window.
         """
+        cdef MPI_Win save = self.ob_mpi
         with nogil: CHKERR( MPI_Win_free(&self.ob_mpi) )
+        if constobj(self): self.ob_mpi = save
         self.ob_mem = None
 
     # Window Info

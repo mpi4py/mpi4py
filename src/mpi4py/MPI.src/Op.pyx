@@ -71,22 +71,10 @@ cdef class Op:
         """
         Free a user-defined reduction operation.
         """
+        cdef MPI_Op save = self.ob_mpi
         CHKERR( MPI_Op_free(&self.ob_mpi) )
+        if constobj(self): self.ob_mpi = save
         op_user_del(self)
-        if   self is __MAX__     : self.ob_mpi =  MPI_MAX
-        elif self is __MIN__     : self.ob_mpi =  MPI_MIN
-        elif self is __SUM__     : self.ob_mpi =  MPI_SUM
-        elif self is __PROD__    : self.ob_mpi =  MPI_PROD
-        elif self is __LAND__    : self.ob_mpi =  MPI_LAND
-        elif self is __BAND__    : self.ob_mpi =  MPI_BAND
-        elif self is __LOR__     : self.ob_mpi =  MPI_LOR
-        elif self is __BOR__     : self.ob_mpi =  MPI_BOR
-        elif self is __LXOR__    : self.ob_mpi =  MPI_LXOR
-        elif self is __BXOR__    : self.ob_mpi =  MPI_BXOR
-        elif self is __MAXLOC__  : self.ob_mpi =  MPI_MAXLOC
-        elif self is __MINLOC__  : self.ob_mpi =  MPI_MINLOC
-        elif self is __REPLACE__ : self.ob_mpi =  MPI_REPLACE
-        elif self is __NO_OP__   : self.ob_mpi =  MPI_NO_OP
 
     # Process-local reduction
     # -----------------------

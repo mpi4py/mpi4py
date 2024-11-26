@@ -113,7 +113,9 @@ cdef class File:
         """
         Close a file.
         """
+        cdef MPI_File save = self.ob_mpi
         with nogil: CHKERR( MPI_File_close(&self.ob_mpi) )
+        if constobj(self): self.ob_mpi = save
 
     @classmethod
     def Delete(

@@ -242,9 +242,9 @@ cdef class Comm:
         """
         Free a communicator.
         """
+        cdef MPI_Comm save = self.ob_mpi
         with nogil: CHKERR( MPI_Comm_free(&self.ob_mpi) )
-        if self is __COMM_SELF__:  self.ob_mpi = MPI_COMM_SELF
-        if self is __COMM_WORLD__: self.ob_mpi = MPI_COMM_WORLD
+        if constobj(self): self.ob_mpi = save
 
     # Process Fault Tolerance
     # -----------------------

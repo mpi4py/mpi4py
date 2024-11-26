@@ -86,8 +86,9 @@ cdef class Info:
         """
         Free an info object.
         """
+        cdef MPI_Info save = self.ob_mpi
         CHKERR( MPI_Info_free(&self.ob_mpi) )
-        if self is __INFO_ENV__: self.ob_mpi = MPI_INFO_ENV
+        if constobj(self): self.ob_mpi = save
 
     def Dup(self) -> Self:
         """
