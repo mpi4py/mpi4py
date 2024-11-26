@@ -183,3 +183,9 @@ def profile(name, *, path=None):
     else:
         registry = vars(profile).setdefault('registry', [])
         registry.append((name, (handle, filename)))
+
+
+# Add MPI to Python DLL search path on Windows
+if __import__('os').name == 'nt':  # pragma: no cover
+    with __import__('contextlib').suppress(ImportError):
+        __import__('_mpi_dll_path').install()

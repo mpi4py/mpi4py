@@ -1,0 +1,2 @@
+# Add MPI to Python DLL search path on Windows
+import _mpi_dll_path; _mpi_dll_path.install()

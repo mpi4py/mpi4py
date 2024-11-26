@@ -1132,28 +1132,33 @@ class build_ext(cmd_build_ext.build_ext):
         self.config_extension(ext)
         cmd_build_ext.build_ext.build_extension(self, ext)
         #
-        if ext.name == 'mpi4py.MPI' and sys.platform == 'win32':
+        if sys.platform == 'win32' and ext.name == 'mpi4py.MPI':
             confdir = os.path.dirname(__file__)
             topdir = os.path.dirname(confdir)
             srcdir = os.path.join(topdir, 'src')
-            pthfile = 'mpi.pth'
-            source = os.path.join(srcdir, pthfile)
-            target = os.path.join(self.build_lib, pthfile)
-            if os.path.exists(source):
-                log.info("writing %s", target)
-                copy_file(
-                    source, target,
-                    verbose=False,
-                    dry_run=self.dry_run,
-                )
+            for pthfile in ('_mpi_dll_path.py', '_mpi_dll_path.pth'):
+                source = os.path.join(srcdir, pthfile)
+                target = os.path.join(self.build_lib, pthfile)
+                if os.path.exists(source):
+                    log.info("writing %s", target)
+                    copy_file(
+                        source, target,
+                        verbose=False,
+                        dry_run=self.dry_run,
+                    )
 
     def get_outputs(self):
         outputs = cmd_build_ext.build_ext.get_outputs(self)
         for ext in self.extensions:
-            if ext.name == 'mpi4py.MPI' and sys.platform == 'win32':
-                pthfile = 'mpi.pth'
-                output_file = os.path.join(self.build_lib, pthfile)
-                outputs.append(output_file)
+            if sys.platform == 'win32' and ext.name == 'mpi4py.MPI':
+                confdir = os.path.dirname(__file__)
+                topdir = os.path.dirname(confdir)
+                srcdir = os.path.join(topdir, 'src')
+                for pthfile in ('_mpi_dll_path.py', '_mpi_dll_path.pth'):
+                    source = os.path.join(srcdir, pthfile)
+                    target = os.path.join(self.build_lib, pthfile)
+                    if os.path.exists(source):
+                        outputs.append(target)
         return outputs
 
 
