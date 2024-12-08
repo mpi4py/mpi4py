@@ -32,8 +32,8 @@ jobs:
           - skbuild
           - mesonpy
         os:
+          - ubuntu-24.04
           - ubuntu-22.04
-          - ubuntu-20.04
           - macos-15
           - macos-14
           - macos-13
@@ -49,9 +49,9 @@ jobs:
             os:  windows-2022
           - backend: mesonpy
             os:  windows-2019
-          - os:  ubuntu-22.04
+          - os:  ubuntu-24.04
             mpi: msmpi
-          - os:  ubuntu-20.04
+          - os:  ubuntu-22.04
             mpi: msmpi
           - os:  macos-15
             mpi: impi
