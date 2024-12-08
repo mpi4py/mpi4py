@@ -373,6 +373,7 @@ class BaseTestPool:
 def broken_mpi_spawn():
     darwin = (sys.platform == 'darwin')
     windows = (sys.platform == 'win32')
+    azure = (os.environ.get('TF_BUILD') == 'True')
     github = (os.environ.get('GITHUB_ACTIONS') == 'true')
     skip_spawn = (
         os.environ.get('MPI4PY_TEST_SPAWN')
@@ -389,7 +390,7 @@ def broken_mpi_spawn():
         if version == (4,0,2) and darwin:
             return True
         if version >= (4,1,0) and version < (4,2,0):
-            if github:
+            if azure or github:
                 return True
         if version >= (5,0,0) and version < (5,1,0):
             if skip_spawn:

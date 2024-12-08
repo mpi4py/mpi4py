@@ -1735,8 +1735,9 @@ if name == 'Open MPI':
     if version == (4,0,2) and sys.platform=='darwin':
         SKIP_POOL_TEST = True
     if version == (4,1,2) and sys.platform=='linux':
+        azure = (os.environ.get('TF_BUILD') == 'True')
         github = (os.environ.get('GITHUB_ACTIONS') == 'true')
-        SKIP_POOL_TEST = github
+        SKIP_POOL_TEST = azure or github
     if version >= (5,0,0) and version < (5,1,0):
         SKIP_POOL_TEST = skip_spawn()
 if name == 'MPICH':
