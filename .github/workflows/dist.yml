@@ -118,7 +118,7 @@ jobs:
 
     - if: ${{ github.event_name == 'release' }}
       name: Attest distribution artifact
-      uses: actions/attest-build-provenance@v1
+      uses: actions/attest-build-provenance@v2
       with:
         subject-path: dist/mpi4py-*.tar.gz
 
