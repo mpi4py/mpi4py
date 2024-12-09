@@ -49,7 +49,7 @@ create-env() {
   parse-args $@
   RUN rm -rf $ANACONDA/envs/$ENV
   RUN source $ANACONDA/bin/activate base
-  local packages=(python=$PY $MPI $MPI-mpicc numpy cython coverage)
+  local packages=(python=$PY $MPI $MPI-mpicc setuptools numpy cython coverage)
   RUN mamba create --yes -n $ENV ${packages[@]}
   RUN conda deactivate
 }
