@@ -158,6 +158,8 @@ class TestDPM(unittest.TestCase):
         intercomm.Free()
 
     @unittest.skipIf(socket is None, 'socket')
+    @unittest.skipMPI('impi', MPI.COMM_WORLD.Get_size() > 2
+                      and github() and os.name == 'nt')
     def testJoin(self):
         size = MPI.COMM_WORLD.Get_size()
         rank = MPI.COMM_WORLD.Get_rank()
