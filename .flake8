@@ -9,4 +9,5 @@ per-file-ignores =
   src/mpi4py/futures/util.py: B036
   src/mpi4py/typing.py: U100
   src/mpi4py/util/pkl5.py: U100
+  src/_mpi_dll_path.py: W504
 unused-arguments-ignore-variadic-names = True
