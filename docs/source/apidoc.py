@@ -128,14 +128,19 @@ def visit_datadescr(datadescr, name=None):
 
 
 def visit_property(prop, name=None):
-    sig = signature(prop.fget)
-    name = name or prop.fget.__name__
-    type = sig.rsplit('->', 1)[-1].strip()
-    sig = f"{name}(self) -> {type}"
-    doc = f'"""{prop.__doc__}"""'
-    doc = textwrap.indent(doc, Lines.INDENT)
-    body = Lines.INDENT + "..."
-    return f"@property\ndef {sig}:\n{doc}\n{body}\n"
+    gname = prop.fget.__name__
+    pname = name or gname
+    if pname == gname:
+        meth = visit_method(prop.fget)
+    else:
+        sig = signature(prop.fget)
+        name = name or prop.fget.__name__
+        type = sig.rsplit('->', 1)[-1].strip()
+        sig = f"{name}(self) -> {type}"
+        doc = docstring(prop)
+        body = Lines.INDENT + "..."
+        meth = f"def {sig}:\n{doc}\n{body}\n"
+    return f"@property\n{meth}"
 
 
 def visit_constructor(cls, name='__init__', args=None):
@@ -225,12 +230,12 @@ def visit_class(cls, done=None):
         if name in done:
             continue
 
-        if name in skip:
-            continue
-
         if name in override:
             done.add(name)
             lines.add = override[name]
+            continue
+
+        if name in skip:
             continue
 
         if name in special:
@@ -429,9 +434,7 @@ def _def(cls, name):
 
 OVERRIDE = {
     'Exception': {
-        '__new__': (
-            "def __new__(cls, ierr: int = SUCCESS) -> Self:\n"
-            "    return super().__new__(cls, ierr)"),
+        '__init__':  "def __init__(self, ierr: int = SUCCESS) -> Self: ...",
         "__lt__": "def __lt__(self, other: int) -> bool: ...",
         "__le__": "def __le__(self, other: int) -> bool: ...",
         "__gt__": "def __gt__(self, other: int) -> bool: ...",
