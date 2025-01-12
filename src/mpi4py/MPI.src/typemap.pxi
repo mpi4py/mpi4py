@@ -239,6 +239,7 @@ AddTypeMap(FTypeDict, "l1"  , __LOGICAL1__  )
 AddTypeMap(FTypeDict, "l2"  , __LOGICAL2__  )
 AddTypeMap(FTypeDict, "l4"  , __LOGICAL4__  )
 AddTypeMap(FTypeDict, "l8"  , __LOGICAL8__  )
+AddTypeMap(FTypeDict, "l16" , __LOGICAL16__ )
 
 AddTypeMap(FTypeDict, "i1"  , __INTEGER1__  )
 AddTypeMap(FTypeDict, "i2"  , __INTEGER2__  )
