@@ -392,7 +392,7 @@ def broken_mpi_spawn():
         if version >= (4,1,0) and version < (4,2,0):
             if azure or github:
                 return True
-        if version >= (5,0,0) and version < (5,1,0):
+        if version >= (5,0,0) and version < (5,0,7):
             if skip_spawn:
                 return True
     if name == 'MPICH':
