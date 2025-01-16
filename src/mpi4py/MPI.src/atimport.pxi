@@ -1,6 +1,12 @@
 # -----------------------------------------------------------------------------
 
-cdef extern from * nogil:
+cdef extern from "Python.h":
+    """
+    #define MPICH_SKIP_MPICXX 1
+    #define OMPI_SKIP_MPICXX  1
+    """
+
+cdef extern from "<mpi.h>" nogil:
     """
     #include "lib-mpi/config.h"
     #include "lib-mpi/missing.h"
@@ -20,26 +26,17 @@ cdef extern from "Python.h":
 
 cdef extern from "Python.h":
     """
+    #ifdef Py_PYTHON_H
     #if PY_VERSION_HEX < 0x030B0000 && !defined(Py_GETENV)
     #  define Py_GETENV(s) (Py_IgnoreEnvironmentFlag ? NULL : getenv(s))
+    #endif
     #endif
     """
     const char *Py_GETENV(const char[]) nogil
 
-cdef extern from * nogil:
-    """
-    #if defined(PYPY_VERSION)
-    #  define PyMPI_RUNTIME_PYPY 1
-    #else
-    #  define PyMPI_RUNTIME_PYPY 0
-    #endif
-    """
-    enum: PYPY "PyMPI_RUNTIME_PYPY"
-
-# -----------------------------------------------------------------------------
-
 cdef extern from "Python.h":
     """
+    #ifdef Py_PYTHON_H
     #if PY_VERSION_HEX < 0x30C00A7 && !defined(PyErr_DisplayException)
     #define PyErr_DisplayException PyErr_DisplayException_312
     static void PyErr_DisplayException(PyObject *exc)
@@ -55,6 +52,7 @@ cdef extern from "Python.h":
       if (tb) Py_DecRef(tb);
     }
     #endif
+    #endif
     """
     void *PyExc_RuntimeError
     void *PyExc_NotImplementedError
@@ -63,6 +61,18 @@ cdef extern from "Python.h":
     void PyErr_DisplayException(object)
     int  PyErr_WarnFormat(object, Py_ssize_t, const char[], ...) except -1
     void PySys_WriteStderr(const char[], ...)
+
+# -----------------------------------------------------------------------------
+
+cdef extern from * nogil:
+    """
+    #if defined(PYPY_VERSION)
+    #  define PyMPI_RUNTIME_PYPY 1
+    #else
+    #  define PyMPI_RUNTIME_PYPY 0
+    #endif
+    """
+    enum: PYPY "PyMPI_RUNTIME_PYPY"
 
 # -----------------------------------------------------------------------------
 
@@ -221,12 +231,6 @@ cdef int getOptions(Options* opts) except -1:
     return 0
 
 # -----------------------------------------------------------------------------
-
-cdef extern from "Python.h":
-    """
-    #define MPICH_SKIP_MPICXX 1
-    #define OMPI_SKIP_MPICXX  1
-    """
 
 cdef int warn_environ(const char envvar[]) except -1 with gil:
     PyErr_WarnFormat(
