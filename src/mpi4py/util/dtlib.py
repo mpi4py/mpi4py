@@ -80,7 +80,7 @@ def from_numpy_dtype(dtype):
         datatypes = []
         try:
             for name in dtype.names or ():
-                ftype, fdisp, *_ = fields[name]
+                ftype, fdisp, *_ = fields[name]  # pyright: ignore
                 blocklengths.append(1)
                 displacements.append(fdisp)
                 datatypes.append(from_numpy_dtype(ftype))

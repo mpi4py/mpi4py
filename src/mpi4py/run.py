@@ -23,7 +23,7 @@ def run_command_line(args=None):
 
     def run_string(string, init_globals=None, run_name=None,
                    filename='<string>', argv0='-c'):
-        from runpy import _run_module_code
+        from runpy import _run_module_code  # type: ignore
         code = compile(string, filename, 'exec', 0, True)
         kwargs = {'script_name': argv0}
         return _run_module_code(code, init_globals, run_name, **kwargs)
@@ -59,7 +59,7 @@ def set_abort_status(status):
     if isinstance(status, SystemExit):
         status = status.code
     elif isinstance(status, KeyboardInterrupt):
-        from _signal import SIGINT
+        from _signal import SIGINT  # type: ignore
         status = SIGINT + 128
     if not isinstance(status, int):
         status = 0 if status is None else 1

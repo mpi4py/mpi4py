@@ -20,6 +20,8 @@ from ..MPI import (
     _commctx_inter,
 )
 
+# pyright: reportIncompatibleMethodOverride=false
+
 pickle = Pickle()
 
 

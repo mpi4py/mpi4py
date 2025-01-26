@@ -55,6 +55,8 @@ class _Collect:
 
     def _item_cb(self, item):
         with self.lock:
+            assert self.result is not None  # noqa: S101
+            assert self.pending is not None  # noqa: S101
             future = self.future
             result = self.result
             pending = self.pending
@@ -75,6 +77,7 @@ class _Collect:
 
     def _done_cb(self, future):
         with self.lock:
+            assert self.pending is not None  # noqa: S101
             for item in self.pending:
                 item.cancel()
             self.future = None

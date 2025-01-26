@@ -107,7 +107,7 @@ class Pool:
     def __exit__(self, *args: object) -> None: ...
 
 class ThreadPool(Pool):
-    Executor: type[futures.ThreadPoolExecutor]
+    Executor: type[futures.ThreadPoolExecutor]  # pyright: ignore
 
 class AsyncResult(Generic[T]):
     future: futures.Future[T]

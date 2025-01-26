@@ -17,6 +17,8 @@ from ..MPI import (
 )
 from ..typing import Buffer
 
+# pyright: reportIncompatibleMethodOverride=false
+
 pickle: Pickle = ...
 
 class _BigMPI:
