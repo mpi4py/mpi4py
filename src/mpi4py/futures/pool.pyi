@@ -22,7 +22,7 @@ class MPIPoolExecutor(Executor):
     def __init__(
         self,
         max_workers: int | None = None,
-        initializer: Callable[..., None] | None = None,
+        initializer: Callable[..., object] | None = None,
         initargs: Iterable[Any] = (),
         *,
         python_exe: str = ...,
