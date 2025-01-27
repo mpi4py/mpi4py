@@ -104,7 +104,7 @@ PyCapsule_New.argtypes = [ctypes.c_void_p, ctypes.c_char_p, PyCapsule_Destructor
 
 PyCapsule_IsValid = pyapi.PyCapsule_IsValid
 PyCapsule_IsValid.restype = ctypes.c_int
-PyCapsule_IsValid.argtypes = [ctypes.py_object]
+PyCapsule_IsValid.argtypes = [ctypes.py_object, ctypes.c_char_p]
 
 PyCapsule_GetPointer = pyapi.PyCapsule_GetPointer
 PyCapsule_GetPointer.restype = ctypes.c_void_p
