@@ -159,6 +159,9 @@ class TestMPIAPI(unittest.TestCase):
                 uncovered.discard(sym[:-2] + '_c')
         if MPI.REAL == MPI.DATATYPE_NULL or MPI.REAL.Get_size() == 0:
             uncovered.difference_update(mpi_fortran)
+        if name == 'MPICH' and MPI.DISPLACEMENT_CURRENT == 0:
+            mpiio = re.compile('MPI_(File_.*|Register_datarep)')
+            uncovered = set(filter( lambda s: not mpiio.match(s), uncovered))
         self.assertFalse(uncovered)
 
 

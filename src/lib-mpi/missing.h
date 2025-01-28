@@ -3682,7 +3682,7 @@ typedef void (MPIAPI PyMPI_MPI_Win_errhandler_fn)(MPI_Win*,int*,...);
 
 #ifndef PyMPI_HAVE_MPI_DISPLACEMENT_CURRENT
 #undef  MPI_DISPLACEMENT_CURRENT
-#define MPI_DISPLACEMENT_CURRENT (3)
+#define MPI_DISPLACEMENT_CURRENT (0)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_File_seek

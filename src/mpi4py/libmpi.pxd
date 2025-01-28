@@ -938,7 +938,7 @@ cdef extern from "<mpi.h>" nogil:
     enum: MPI_SEEK_SET              #:= 0
     enum: MPI_SEEK_CUR              #:= 1
     enum: MPI_SEEK_END              #:= 2
-    enum: MPI_DISPLACEMENT_CURRENT  #:= 3
+    enum: MPI_DISPLACEMENT_CURRENT  #:= 0
     int MPI_File_seek(MPI_File, MPI_Offset, int)
     int MPI_File_get_position(MPI_File, MPI_Offset*)
     int MPI_File_get_byte_offset(MPI_File, MPI_Offset, MPI_Offset*)
