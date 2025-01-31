@@ -23,7 +23,11 @@ dstdir = py.get_install_dir(pure: false)
 
 # ---
 
-mpi = dependency('', required: false)
+if host_machine.system() == 'windows'
+  mpi = dependency('mpi', required: true)
+else
+  mpi = dependency('', required: false)
+endif
 pyembed = py.dependency(embed: true, disabler: true)
 compiler = meson.get_compiler('c')
 
