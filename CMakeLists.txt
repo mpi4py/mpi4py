@@ -29,13 +29,6 @@ set(TOPDIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(SRCDIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 
-# mpi.pth
-set(mpi.pth ${SRCDIR}/mpi.pth)
-if (WIN32)
-  install(FILES ${mpi.pth} DESTINATION .)
-endif()
-
-
 # Cython
 set(cythonize ${TOPDIR}/conf/cythonize.py)
 set(Cython_COMMAND ${Python_EXECUTABLE} ${cythonize})
@@ -118,3 +111,12 @@ foreach(file ${mpi4py_SOURCES} ${mpi4py_HEADERS})
   get_filename_component(dir ${file} DIRECTORY)
   install(FILES ${SRCDIR}/${file} DESTINATION ${dir})
 endforeach()
+
+if (WIN32)
+  set(mpidllpath mpi.pth)
+  foreach(file ${mpidllpath})
+    if (EXISTS ${SRCDIR}/${file})
+      install(FILES ${SRCDIR}/${file} DESTINATION .)
+    endif()
+  endforeach()
+endif()

@@ -1120,6 +1120,18 @@ class build_ext(cmd_build_ext.build_ext):
         if with_coverage():
             ext.define_macros += [('CYTHON_TRACE_NOGIL', 1)]
 
+    def _get_pth_files(self, ext):
+        if ext.name == 'mpi4py.MPI' and sys.platform == 'win32':
+            confdir = os.path.dirname(__file__)
+            topdir = os.path.dirname(confdir)
+            srcdir = os.path.join(topdir, 'src')
+            dstdir = self.build_lib
+            for pthfile in ('mpi.pth', ):
+                source = os.path.join(srcdir, pthfile)
+                target = os.path.join(dstdir, pthfile)
+                if os.path.exists(source):
+                    yield (source, target)
+
     def build_extension (self, ext):
         fullname = self.get_ext_fullname(ext.name)
         filename = os.path.join(
@@ -1132,28 +1144,19 @@ class build_ext(cmd_build_ext.build_ext):
         self.config_extension(ext)
         cmd_build_ext.build_ext.build_extension(self, ext)
         #
-        if ext.name == 'mpi4py.MPI' and sys.platform == 'win32':
-            confdir = os.path.dirname(__file__)
-            topdir = os.path.dirname(confdir)
-            srcdir = os.path.join(topdir, 'src')
-            pthfile = 'mpi.pth'
-            source = os.path.join(srcdir, pthfile)
-            target = os.path.join(self.build_lib, pthfile)
-            if os.path.exists(source):
-                log.info("writing %s", target)
-                copy_file(
-                    source, target,
-                    verbose=False,
-                    dry_run=self.dry_run,
-                )
+        for source, target in self._get_pth_files(ext):
+            log.info("writing %s", target)
+            copy_file(
+                source, target,
+                verbose=False,
+                dry_run=self.dry_run
+            )
 
     def get_outputs(self):
         outputs = cmd_build_ext.build_ext.get_outputs(self)
         for ext in self.extensions:
-            if ext.name == 'mpi4py.MPI' and sys.platform == 'win32':
-                pthfile = 'mpi.pth'
-                output_file = os.path.join(self.build_lib, pthfile)
-                outputs.append(output_file)
+            for _, target in self._get_pth_files(ext):
+                outputs.append(target)
         return outputs
 
 
