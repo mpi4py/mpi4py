@@ -781,16 +781,6 @@ cdef extern from "<mpi.h>" nogil:
     int MPI_Neighbor_alltoallv_init_c(void*, MPI_Count[], MPI_Aint[], MPI_Datatype, void*, MPI_Count[], MPI_Aint[], MPI_Datatype, MPI_Comm, MPI_Info, MPI_Request*)
     int MPI_Neighbor_alltoallw_init_c(void*, MPI_Count[], MPI_Aint[], MPI_Datatype[], void*, MPI_Count[], MPI_Aint[], MPI_Datatype[], MPI_Comm, MPI_Info, MPI_Request*)
 
-    # MPI-5 process fault tolerance
-    int MPI_Comm_revoke(MPI_Comm)
-    int MPI_Comm_is_revoked(MPI_Comm, int*)
-    int MPI_Comm_get_failed(MPI_Comm, MPI_Group*)
-    int MPI_Comm_ack_failed(MPI_Comm, int, int*)
-    int MPI_Comm_agree(MPI_Comm, int*)
-    int MPI_Comm_iagree(MPI_Comm, int*, MPI_Request*)
-    int MPI_Comm_shrink(MPI_Comm, MPI_Comm*)
-    int MPI_Comm_ishrink(MPI_Comm, MPI_Comm*, MPI_Request*)
-
     #-----------------------------------------------------------------
 
     MPI_Win MPI_WIN_NULL  #:= 0
@@ -1123,10 +1113,6 @@ cdef extern from "<mpi.h>" nogil:
     enum: MPI_ERR_CONVERSION             #:= MPI_ERR_LASTCODE
     enum: MPI_ERR_DUP_DATAREP            #:= MPI_ERR_LASTCODE
     enum: MPI_ERR_VALUE_TOO_LARGE        #:= MPI_ERR_LASTCODE
-    # Process Fault Tolerance
-    enum: MPI_ERR_REVOKED                #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_PROC_FAILED            #:= MPI_ERR_UNKNOWN
-    enum: MPI_ERR_PROC_FAILED_PENDING    #:= MPI_ERR_UNKNOWN
 
     #-----------------------------------------------------------------
 
@@ -1256,5 +1242,20 @@ cdef extern from "<mpi.h>" nogil:
     enum: MPI_COMBINER_HVECTOR_INTEGER  #:= MPI_UNDEFINED
     enum: MPI_COMBINER_HINDEXED_INTEGER #:= MPI_UNDEFINED
     enum: MPI_COMBINER_STRUCT_INTEGER   #:= MPI_UNDEFINED
+
+    #-----------------------------------------------------------------
+
+    # MPI-6 process fault tolerance
+    enum: MPI_ERR_REVOKED                #:= MPI_ERR_UNKNOWN
+    enum: MPI_ERR_PROC_FAILED            #:= MPI_ERR_UNKNOWN
+    enum: MPI_ERR_PROC_FAILED_PENDING    #:= MPI_ERR_UNKNOWN
+    int MPI_Comm_revoke(MPI_Comm)
+    int MPI_Comm_is_revoked(MPI_Comm, int*)
+    int MPI_Comm_get_failed(MPI_Comm, MPI_Group*)
+    int MPI_Comm_ack_failed(MPI_Comm, int, int*)
+    int MPI_Comm_agree(MPI_Comm, int*)
+    int MPI_Comm_iagree(MPI_Comm, int*, MPI_Request*)
+    int MPI_Comm_shrink(MPI_Comm, MPI_Comm*)
+    int MPI_Comm_ishrink(MPI_Comm, MPI_Comm*, MPI_Request*)
 
     #-----------------------------------------------------------------

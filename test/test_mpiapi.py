@@ -70,7 +70,7 @@ if MPI.Get_version() < (4, 1):
         'MPI_Get_hw_resource_info',
     ]
 
-if MPI.Get_version() < (5, 0):
+if MPI.Get_version() < (6, 0):
     mpi_missing += [
         'MPI_Comm_ack_failed',
         'MPI_Comm_agree',

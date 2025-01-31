@@ -602,14 +602,6 @@
 #undef  PyMPI_HAVE_MPI_Neighbor_alltoall_init_c
 #undef  PyMPI_HAVE_MPI_Neighbor_alltoallv_init_c
 #undef  PyMPI_HAVE_MPI_Neighbor_alltoallw_init_c
-#undef  PyMPI_HAVE_MPI_Comm_revoke
-#undef  PyMPI_HAVE_MPI_Comm_is_revoked
-#undef  PyMPI_HAVE_MPI_Comm_get_failed
-#undef  PyMPI_HAVE_MPI_Comm_ack_failed
-#undef  PyMPI_HAVE_MPI_Comm_agree
-#undef  PyMPI_HAVE_MPI_Comm_iagree
-#undef  PyMPI_HAVE_MPI_Comm_shrink
-#undef  PyMPI_HAVE_MPI_Comm_ishrink
 #undef  PyMPI_HAVE_MPI_WIN_NULL
 #undef  PyMPI_HAVE_MPI_Win_free
 #undef  PyMPI_HAVE_MPI_Win_create
@@ -879,9 +871,6 @@
 #undef  PyMPI_HAVE_MPI_ERR_CONVERSION
 #undef  PyMPI_HAVE_MPI_ERR_DUP_DATAREP
 #undef  PyMPI_HAVE_MPI_ERR_VALUE_TOO_LARGE
-#undef  PyMPI_HAVE_MPI_ERR_REVOKED
-#undef  PyMPI_HAVE_MPI_ERR_PROC_FAILED
-#undef  PyMPI_HAVE_MPI_ERR_PROC_FAILED_PENDING
 #undef  PyMPI_HAVE_MPI_Alloc_mem
 #undef  PyMPI_HAVE_MPI_Free_mem
 #define PyMPI_HAVE_MPI_Init 1
@@ -966,5 +955,16 @@
 #undef  PyMPI_HAVE_MPI_COMBINER_HVECTOR_INTEGER
 #undef  PyMPI_HAVE_MPI_COMBINER_HINDEXED_INTEGER
 #undef  PyMPI_HAVE_MPI_COMBINER_STRUCT_INTEGER
+#undef  PyMPI_HAVE_MPI_ERR_REVOKED
+#undef  PyMPI_HAVE_MPI_ERR_PROC_FAILED
+#undef  PyMPI_HAVE_MPI_ERR_PROC_FAILED_PENDING
+#undef  PyMPI_HAVE_MPI_Comm_revoke
+#undef  PyMPI_HAVE_MPI_Comm_is_revoked
+#undef  PyMPI_HAVE_MPI_Comm_get_failed
+#undef  PyMPI_HAVE_MPI_Comm_ack_failed
+#undef  PyMPI_HAVE_MPI_Comm_agree
+#undef  PyMPI_HAVE_MPI_Comm_iagree
+#undef  PyMPI_HAVE_MPI_Comm_shrink
+#undef  PyMPI_HAVE_MPI_Comm_ishrink
 
 #endif /* !PyMPI_PYMPICONF_H */

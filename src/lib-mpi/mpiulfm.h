@@ -5,7 +5,7 @@
 #define PyMPI_SKIP_MPIULFM 0
 #endif
 
-#if MPI_VERSION < 5 && !PyMPI_SKIP_MPIULFM
+#if MPI_VERSION < 6 && !PyMPI_SKIP_MPIULFM
 
 #if defined(MPICH_NAME) && (MPICH_NAME >= 3)
 #if MPICH_NUMVERSION >= 30200000 && 0
