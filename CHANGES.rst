@@ -1,3 +1,15 @@
+Release 4.0.2 [2025-02-01]
+==========================
+
+* Support MPI-4 features within Intel MPI 2021.14.
+
+* Various fixes and updates to tests.
+
+* Minor fixes to typing support.
+
+* Minor fix to documentation.
+
+
 Release 4.0.1 [2024-10-11]
 ==========================
 
