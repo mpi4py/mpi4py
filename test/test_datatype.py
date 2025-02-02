@@ -22,7 +22,7 @@ MPI.REAL, MPI.DOUBLE_PRECISION,
 MPI.COMPLEX, MPI.DOUBLE_COMPLEX,
 ]
 datatypes_f90 = [
-MPI.LOGICAL1, MPI.LOGICAL2, MPI.LOGICAL4, MPI.LOGICAL8,
+MPI.LOGICAL1, MPI.LOGICAL2, MPI.LOGICAL4, MPI.LOGICAL8, MPI.LOGICAL16,
 MPI.INTEGER1, MPI.INTEGER2, MPI.INTEGER4, MPI.INTEGER8, MPI.INTEGER16,
 MPI.REAL2, MPI.REAL4, MPI.REAL8, MPI.REAL16,
 MPI.COMPLEX4, MPI.COMPLEX8, MPI.COMPLEX16, MPI.COMPLEX32,
@@ -94,17 +94,33 @@ class TestDatatype(unittest.TestCase):
             except NotImplementedError:
                 self.skipTest('mpi-type-get_true_extent')
 
-    match_size_integer = [1, 2, 4, 8]
+    match_size_logical = [1, 2, 4, 8, 16]
+    match_size_integer = [1, 2, 4, 8, 16]
     match_size_real    = [4, 8]
     match_size_complex = [8, 16]
     @unittest.skipMPI('MPI(<2.0)')
     @unittest.skipMPI('openmpi', (MPI.CHARACTER == MPI.DATATYPE_NULL or
                                   MPI.CHARACTER.Get_size() == 0))
     def testMatchSize(self):
+        typeclass = MPI.TYPECLASS_LOGICAL
+        for size in self.match_size_logical:
+            if typeclass == MPI.UNDEFINED: continue
+            try:
+                datatype = MPI.Datatype.Match_size(typeclass, size)
+            except MPI.Exception:
+                datatype = getattr(MPI, f'LOGICAL{size}')
+                if datatype != MPI.DATATYPE_NULL: raise
+            else:
+                self.assertEqual(size, datatype.size)
         typeclass = MPI.TYPECLASS_INTEGER
         for size in self.match_size_integer:
-            datatype = MPI.Datatype.Match_size(typeclass, size)
-            self.assertEqual(size, datatype.size)
+            try:
+                datatype = MPI.Datatype.Match_size(typeclass, size)
+            except MPI.Exception:
+                datatype = getattr(MPI, f'INTEGER{size}')
+                if datatype != MPI.DATATYPE_NULL: raise
+            else:
+                self.assertEqual(size, datatype.size)
         typeclass = MPI.TYPECLASS_REAL
         for size in self.match_size_real:
             datatype = MPI.Datatype.Match_size(typeclass, size)
