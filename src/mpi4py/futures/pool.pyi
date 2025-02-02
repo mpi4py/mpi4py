@@ -44,7 +44,8 @@ class MPIPoolExecutor(Executor):
     if sys.version_info >= (3, 9):
         def submit(
             self,
-            __fn: Callable[_P, T],
+            fn: Callable[_P, T],
+            /,
             *args: _P.args,
             **kwargs: _P.kwargs,
         ) -> Future[T]: ...

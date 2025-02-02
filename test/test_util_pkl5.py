@@ -928,11 +928,7 @@ class BaseTestPKL5:
                     self.assertIs(type(bufs), list)
                     robj = pickle.loads_oob(data, bufs)
                     self.assertTrue(numpy.all(sobj==robj))
-                    have_pickle5 = (
-                        sys.version_info >= (3, 8) or
-                        'pickle5' in sys.modules
-                    )
-                    if sobj.nbytes >= threshold and have_pickle5:
+                    if sobj.nbytes >= threshold:
                         self.assertEqual(len(bufs), 1)
                         self.assertIs(type(bufs[0]), MPI.buffer)
                     else:

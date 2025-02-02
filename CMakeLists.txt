@@ -100,7 +100,7 @@ file(
   ${SRCDIR}/mpi4py/include/mpi4py/*.[hi]
   ${SRCDIR}/mpi4py/include/mpi4py/*.px[di]
 )
-if (Python_VERSION VERSION_GREATER_EQUAL 3.11)
+if (TRUE)
   list(APPEND mpi4py_HEADERS mpi4py/py.typed)
   list(APPEND mpi4py_HEADERS mpi4py/MPI.pyi)
   foreach(file ${mpi4py_SOURCES})

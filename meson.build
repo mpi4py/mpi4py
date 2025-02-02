@@ -144,7 +144,7 @@ install_subdir(
   install_dir: dstdir / 'mpi4py',
 )
 
-if py.language_version().version_compare('>=3.8')
+if true
   foreach pkg, src : package
     subdir = join_paths(pkg.split('.'))
     sources = []

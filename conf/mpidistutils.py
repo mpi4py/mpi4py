@@ -958,28 +958,24 @@ def configure_pyexe(exe, _config_cmd):
         exe.libraries += ['python' + py_version + py_abiflags]
         return
     #
-    pyver = sys.version_info[:2]
     cfg_vars = sysconfig.get_config_vars()
-    libraries = []
-    library_dirs = []
-    runtime_dirs = []
-    link_args = []
-    py_enable_shared = cfg_vars.get('Py_ENABLE_SHARED')
-    if pyver >= (3, 8) or not py_enable_shared:
-        py_version = sysconfig.get_python_version()
-        py_abiflags = getattr(sys, 'abiflags', '')
-        libraries = ['python' + py_version + py_abiflags]
-        if hasattr(sys, 'pypy_version_info'):
-            py_tag = py_version[0].replace('2', '')
-            libraries = [f'pypy{py_tag}-c']
+    py_version = sysconfig.get_python_version()
+    py_abiflags = getattr(sys, 'abiflags', '')
+    libraries = ['python' + py_version + py_abiflags]
+    if hasattr(sys, 'pypy_version_info'):
+        py_tag = py_version[0].replace('2', '')
+        libraries = [f'pypy{py_tag}-c']
     if sys.platform == 'darwin':
         fwkdir = cfg_vars.get('PYTHONFRAMEWORKDIR')
         if (fwkdir and fwkdir != 'no-framework' and
             fwkdir in cfg_vars.get('LINKFORSHARED', '')):
             del libraries[:]
     #
+    py_enable_shared = cfg_vars.get('Py_ENABLE_SHARED')
     libdir = shlex.split(cfg_vars.get('LIBDIR', ''))
     libpl = shlex.split(cfg_vars.get('LIBPL', ''))
+    library_dirs = []
+    runtime_dirs = []
     if py_enable_shared:
         library_dirs += libdir
         if sys.exec_prefix != '/usr':
@@ -987,6 +983,8 @@ def configure_pyexe(exe, _config_cmd):
     else:
         library_dirs += libdir
         library_dirs += libpl
+    #
+    link_args = []
     for var in ('LIBS', 'MODLIBS', 'SYSLIBS', 'LDLAST'):
         link_args += shlex.split(cfg_vars.get(var, ''))
     #

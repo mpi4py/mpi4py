@@ -3,16 +3,12 @@
 cdef object Lock  = None
 cdef object RLock = None
 
-if PY_VERSION_HEX >= 0x030900F0:
+try:
     from _thread import allocate_lock as Lock
     from _thread import RLock as RLock
-else:
-    try:                                                  # ~> legacy
-        from _thread import allocate_lock as Lock         # ~> legacy
-        from _thread import RLock as RLock                # ~> legacy
-    except ImportError:                                   # ~> legacy
-        from _dummy_thread import allocate_lock as Lock   # ~> legacy
-        from _dummy_thread import allocate_lock as RLock  # ~> legacy
+except ImportError:                       # ~> uncovered
+    from threading import Lock  as Lock   # ~> uncovered
+    from threading import RLock as RLock  # ~> uncovered
 
 # -----------------------------------------------------------------------------
 

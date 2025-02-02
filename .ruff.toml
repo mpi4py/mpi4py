@@ -1,4 +1,4 @@
-target-version = "py37"
+target-version = "py38"
 
 src = ["src"]
 
@@ -42,7 +42,6 @@ lint.ignore = [
 "PYI011",
 "UP006",
 "UP007",
-"UP036",
 "RET504",
 "RET505",
 "RUF012",
@@ -55,7 +54,7 @@ lint.ignore = [
 "demo/*" = ["D",]
 "docs/*" = ["D",]
 "test/*" = ["D",]
-"*.pyi"  = ["D", "E501", "E701"]
+"*.pyi"  = ["D", "E501"]
 
 [lint.pydocstyle]
 convention = "pep257"

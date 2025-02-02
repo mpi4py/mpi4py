@@ -299,14 +299,6 @@ class TestProgram(unittest.TestProgram):
         setup_parser(parser)
         return parser
 
-    if sys.version_info < (3, 7):
-        def _do_discovery(self, argv, Loader=None):
-            if argv is not None:
-                if self._discovery_parser is None:
-                    self._initArgParsers()
-                self._discovery_parser.parse_args(argv, self)
-            self.createTests(from_discovery=True, Loader=Loader)
-
     def createTests(self, from_discovery=False, Loader=None):
         setup_python(self)
         setup_modules(self)
@@ -324,13 +316,6 @@ class TestProgram(unittest.TestProgram):
             self.excludePatterns.extend(parse_xfile(xfile))
         self.testLoader = TestLoader(self.include, self.exclude)
         self.testLoader.excludePatterns = self.excludePatterns
-        if sys.version_info < (3, 7):
-            if from_discovery:
-                loader = self.testLoader if Loader is None else Loader()
-                self.test = loader.discover(self.start, self.pattern, None)
-            else:
-                super().createTests()
-            return
         super().createTests(from_discovery, Loader)
 
     def _setUpXMLRunner(self):

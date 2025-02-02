@@ -5,6 +5,7 @@ from typing import (
     Optional,
     Protocol,
     Sequence,
+    SupportsIndex,
     List,
     Dict,
     Tuple,
@@ -14,9 +15,6 @@ if sys.version_info >= (3, 10):
     from typing import TypeAlias
 else:
     from typing_extensions import TypeAlias
-from numbers import (
-    Integral,
-)
 from .MPI import (
     Datatype,
     BottomType,
@@ -49,7 +47,7 @@ _DeviceID: TypeAlias = int
 
 class SupportsBuffer(Protocol):
     if sys.version_info >= (3, 12):
-        def __buffer__(self, __flags: int) -> memoryview: ...
+        def __buffer__(self, flags: int, /) -> memoryview: ...
 
 class SupportsDLPack(Protocol):
     def __dlpack__(self, *, stream: Optional[_Stream] = None) -> _PyCapsule: ...
@@ -69,13 +67,13 @@ Bottom: TypeAlias = Union[BottomType, None]
 
 InPlace: TypeAlias = Union[InPlaceType, None]
 
-Aint: TypeAlias = Integral
+Aint: TypeAlias = SupportsIndex
 
-Count: TypeAlias = Integral
+Count: TypeAlias = SupportsIndex
 
-Displ: TypeAlias = Integral
+Displ: TypeAlias = SupportsIndex
 
-Offset: TypeAlias = Integral
+Offset: TypeAlias = SupportsIndex
 
 TypeSpec: TypeAlias = Union[Datatype, str]
 

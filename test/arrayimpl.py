@@ -41,17 +41,11 @@ __all__ = ['loop', 'test']
 
 
 def make_typemap(entries):
-    if sys.version_info[:2] > (3, 7):
-        dict_type = dict
-    else:
-        from collections import OrderedDict
-        dict_type = OrderedDict
-    typemap = dict_type(
-        (typecode, datatype)
+    return {
+        typecode: datatype
         for typecode, datatype in entries
         if datatype != MPI.DATATYPE_NULL
-    )
-    return typemap
+    }
 
 TypeMap = make_typemap([
     ('b', MPI.SIGNED_CHAR),

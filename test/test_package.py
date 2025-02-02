@@ -37,12 +37,8 @@ class TestDataFiles(unittest.TestCase):
 
     def testTyping(self):
         import importlib.machinery
-        if sys.version_info < (3, 8):
-            check = self.assertFalse
-        else:
-            check = self.assertTrue
         py_typed = os.path.join(pkgdir, "py.typed")
-        check(os.path.exists(py_typed))
+        self.assertTrue(os.path.exists(py_typed))
         suffixes = [
             *importlib.machinery.SOURCE_SUFFIXES,
             *importlib.machinery.EXTENSION_SUFFIXES,
@@ -54,7 +50,7 @@ class TestDataFiles(unittest.TestCase):
                 for entry in suffixes:
                     if suffix.endswith(entry):
                         pyi = os.path.join(root, f"{name}.pyi")
-                        check(os.path.exists(pyi))
+                        self.assertTrue(os.path.exists(pyi))
                         break
 
     def testCython(self):

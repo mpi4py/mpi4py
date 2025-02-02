@@ -64,7 +64,6 @@ nitpicky = True
 nitpick_ignore = [
     ('c:func', r'atexit'),
     ('py:mod', r'__worker__'),
-    ('py:mod', r'pickle5'),
 ]
 nitpick_ignore_regex = [
     (r'c:.*', r'MPI_.*'),

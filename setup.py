@@ -16,7 +16,7 @@ sys.path.insert(0, os.path.join(topdir, 'conf'))
 # Metadata
 # --------------------------------------------------------------------
 
-require_python = (3, 6)
+require_python = (3, 8)
 maxknow_python = (3, 13)
 
 
@@ -131,8 +131,6 @@ package_info = dict(
     },
     package_dir = {'' : 'src'},
 )
-if sys.version_info < (3, 8):
-    del package_info['package_data']['mpi4py'][-3:]
 
 
 def run_setup():

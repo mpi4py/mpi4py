@@ -26,18 +26,6 @@ of out-of-band buffer handling more than offset the extra latency costs.
 Additionally, these wrapper methods overcome the infamous 2 GiB message count
 limit (MPI-1 to MPI-3).
 
-.. note::
-
-   Support for pickle protocol 5 is available in the :mod:`pickle` module
-   within the Python standard library since Python 3.8. Previous Python 3
-   releases can use the :mod:`pickle5` backport, which is available on `PyPI
-   <pickle5-pypi_>`_ and can be installed with::
-
-       python -m pip install pickle5
-
-   .. _pickle5-pypi: https://pypi.org/project/pickle5/
-
-
 .. autoclass:: Request
 
    Custom request class for nonblocking communications.

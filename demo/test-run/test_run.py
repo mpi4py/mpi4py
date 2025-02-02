@@ -20,10 +20,7 @@ def find_executable(exe):
     executable = shutil.which(command[0])
     if executable:
         command[0] = executable
-        try:  # Python 3.8
-            return shlex.join(command)
-        except AttributeError:
-            return ' '.join(shlex.quote(arg) for arg in command)
+        return shlex.join(command)
 
 
 def find_mpiexec(mpiexec='mpiexec'):

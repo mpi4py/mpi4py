@@ -8,21 +8,13 @@ from typing import (
     Any,
     Union,
     Optional,
+    Protocol,
     Sequence,
+    SupportsIndex,
     List,
     Dict,
     Tuple,
     TypeVar,
-)
-try:  # pragma: no branch
-    from typing import Protocol
-except ImportError:  # pragma: no cover
-    try:
-        from typing_extensions import Protocol
-    except ImportError:
-        Protocol = object
-from numbers import (
-    Integral,
 )
 from .MPI import (
     Datatype,
@@ -113,25 +105,25 @@ In-place buffer argument.
 """
 
 
-Aint = Integral
+Aint = SupportsIndex
 """
 Address-sized integral type.
 """
 
 
-Count = Integral
+Count = SupportsIndex
 """
 Integral type for counts.
 """
 
 
-Displ = Integral
+Displ = SupportsIndex
 """
 Integral type for displacements.
 """
 
 
-Offset = Integral
+Offset = SupportsIndex
 """
 Integral type for offsets.
 """

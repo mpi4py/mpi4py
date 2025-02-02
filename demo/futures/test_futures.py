@@ -207,12 +207,9 @@ class ProcessPoolInitTest(ProcessPoolMixin,
             ('optimize', '-O', 1),
             ('optimize', '-OO', 2),
             ('dont_write_bytecode', '-B', True),
+            ('dev_mode', '-Xdev', True),
+            ('utf8_mode', '-Xutf8', True),
         ]
-        if sys.version_info >= (3, 7):
-            sys_flags.extend([
-                ('dev_mode', '-Xdev', True),
-                ('utf8_mode', '-Xutf8', True),
-            ])
         if sys.version_info >= (3, 11):
             sys_flags.extend([
                 ('safe_path', '-P', True),

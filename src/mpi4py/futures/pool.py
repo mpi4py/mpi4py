@@ -42,7 +42,7 @@ class MPIPoolExecutor(Executor):
             path: List of paths to append to ``sys.path`` in workers.
             wdir: Path to set current working directory in workers.
             env: Environment variables to update ``os.environ`` in workers.
-            use_pkl5: If ``True``, use pickle5 out-of-band for communication.
+            use_pkl5: If ``True``, use out-of-band pickle for communication.
 
         """
         if max_workers is not None:
@@ -100,7 +100,7 @@ class MPIPoolExecutor(Executor):
                 self._pool.wait()
             return self
 
-    def submit(self, fn, *args, **kwargs):
+    def submit(self, fn, /, *args, **kwargs):
         """Submit a callable to be executed with the given arguments.
 
         Schedule the callable to be executed as ``fn(*args, **kwargs)`` and
@@ -110,7 +110,6 @@ class MPIPoolExecutor(Executor):
             A `Future` representing the given call.
 
         """
-        # pylint: disable=arguments-differ
         with self._lock:
             if self._broken:
                 raise _core.BrokenExecutor(self._broken)
@@ -121,8 +120,6 @@ class MPIPoolExecutor(Executor):
             task = (fn, args, kwargs)
             self._pool.push((future, task))
             return future
-    if sys.version_info >= (3, 8):  # pragma: no branch
-        submit.__text_signature__ = '($self, fn, /, *args, **kwargs)'
 
     def map(self, fn, *iterables,
             timeout=None, chunksize=1, unordered=False):

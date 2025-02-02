@@ -7,7 +7,7 @@ Prerequisites
 You need to have the following software properly installed to develop
 *MPI for Python*:
 
-* `Python`_ 3.6 or above.
+* `Python`_ 3.8 or above.
 
 * The `Cython`_ compiler.
 
