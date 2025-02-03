@@ -88,23 +88,89 @@ def main():
         print(f"{package} {__version__}", file=sys.stdout)
         sys.exit(0)
 
-    def mpi_std_version():
+    def mpi_library():
         from . import rc
         rc.initialize = rc.finalize = False
         from . import MPI
-        version = ".".join(map(str, (MPI.VERSION, MPI.SUBVERSION)))
-        rtversion = ".".join(map(str, MPI.Get_version()))
-        note = f" (runtime: MPI {rtversion})" if rtversion != version else ""
-        print(f"MPI {version}{note}", file=sys.stdout)
-        sys.exit(0)
 
-    def mpi_lib_version():
-        from . import rc
-        rc.initialize = rc.finalize = False
-        from . import MPI
-        library_version = MPI.Get_library_version()
-        print(library_version, file=sys.stdout)
-        sys.exit(0)
+        def get_mpi_library_posix():
+            import ctypes
+
+            class DL_Info(ctypes.Structure):
+                # pylint: disable=invalid-name
+                # pylint: disable=too-few-public-methods
+                # pylint: disable=missing-class-docstring
+                _fields_ = [
+                    ("dli_fname", ctypes.c_char_p),
+                    ("dli_fbase", ctypes.c_void_p),
+                    ("dli_sname", ctypes.c_char_p),
+                    ("dli_saddr", ctypes.c_void_p),
+                ]
+
+            libc = ctypes.CDLL(None)
+            dladdr = libc.dladdr
+            dladdr.restype = ctypes.c_int
+            dladdr.argtypes = [ctypes.c_void_p, ctypes.POINTER(DL_Info)]
+
+            module = ctypes.CDLL(MPI.__file__)
+            symbol = module.MPI_Init
+            dlinfo = DL_Info()
+            retval = dladdr(symbol, dlinfo)
+            if not retval:  # pragma: no cover
+                return None
+            return os.fsdecode(dlinfo.dli_fname)
+
+        def get_mpi_library_windows():  # pragma: no cover
+            import ctypes
+            import ctypes.wintypes
+
+            # pylint: disable-next=invalid-name
+            GetModuleHandleEx = ctypes.windll.kernel32.GetModuleHandleExW
+            GetModuleHandleEx.restype = ctypes.wintypes.BOOL
+            GetModuleHandleEx.argtypes = [
+                ctypes.wintypes.DWORD,
+                ctypes.wintypes.LPCVOID,
+                ctypes.POINTER(ctypes.wintypes.HMODULE),
+            ]
+            # pylint: disable-next=invalid-name
+            GetModuleFileName = ctypes.windll.kernel32.GetModuleFileNameW
+            GetModuleFileName.restype = ctypes.wintypes.DWORD
+            GetModuleFileName.argtypes = [
+                ctypes.wintypes.HMODULE,
+                ctypes.wintypes.LPWSTR,
+                ctypes.wintypes.DWORD,
+            ]
+
+            vendor, _ = MPI.get_vendor()
+            if vendor == "Intel MPI":
+                libmpi = "impi.dll"
+            elif vendor == "Microsoft MPI":
+                libmpi = "msmpi.dll"
+            else:
+                return None
+            module = ctypes.CDLL(libmpi)
+            symbol = module.MPI_Init
+            handle = ctypes.wintypes.HMODULE()
+            retval = GetModuleHandleEx(0x2 | 0x4, symbol, handle)
+            if not retval:
+                return None
+            wsbuf = ctypes.create_unicode_buffer(1024)
+            retval = GetModuleFileName(handle, wsbuf, ctypes.sizeof(wsbuf))
+            if not retval:
+                return None
+            return wsbuf.value
+
+        if os.name == "posix":
+            libmpi = get_mpi_library_posix()
+            print(libmpi, file=sys.stdout)
+            sys.exit(0)
+        elif os.name == "nt":  # pragma: no cover
+            libmpi = get_mpi_library_windows()
+            print(libmpi, file=sys.stdout)
+            sys.exit(0)
+        else:  # pragma: no cover
+            print(f"Unsupported platform: {sys.platform}", file=sys.stderr)
+            sys.exit(1)
 
     def usage(errmess=None):
         from textwrap import dedent
@@ -126,6 +192,7 @@ def main():
         options:
           --prefix             show install path and exit
           --version            show version number and exit
+          --mpi-library        show MPI library path and exit
           --mpi-std-version    show MPI standard version and exit
           --mpi-lib-version    show MPI library version and exit
           -h|--help            show this help message and exit
@@ -141,6 +208,24 @@ def main():
             print(cmdline, file=sys.stdout)
             print(options, file=sys.stdout)
             sys.exit(0)
+
+    def mpi_std_version():
+        from . import rc
+        rc.initialize = rc.finalize = False
+        from . import MPI
+        version = ".".join(map(str, (MPI.VERSION, MPI.SUBVERSION)))
+        rtversion = ".".join(map(str, MPI.Get_version()))
+        note = f" (runtime: MPI {rtversion})" if rtversion != version else ""
+        print(f"MPI {version}{note}", file=sys.stdout)
+        sys.exit(0)
+
+    def mpi_lib_version():
+        from . import rc
+        rc.initialize = rc.finalize = False
+        from . import MPI
+        library_version = MPI.Get_library_version()
+        print(library_version, file=sys.stdout)
+        sys.exit(0)
 
     def parse_command_line(args=None):
         # pylint: disable=too-many-branches
@@ -167,6 +252,8 @@ def main():
                 prefix()  # Print install path and exit
             if arg0 in ('-version', '--version'):
                 version()  # Print version number and exit
+            if arg0 in ('-mpi-library', '--mpi-library'):
+                mpi_library()  # Print MPI library path and exit
             if arg0 in ('-mpi-std-version', '--mpi-std-version'):
                 mpi_std_version()  # Print MPI standard version and exit
             if arg0 in ('-mpi-lib-version', '--mpi-lib-version'):

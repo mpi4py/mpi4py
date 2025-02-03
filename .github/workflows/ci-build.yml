@@ -124,6 +124,9 @@ jobs:
               --verbose --no-index --find-links=dist
 
     - name: Test wheel after install (cmdline)
+      run:  mpiexec -n 1 python -m mpi4py --mpi-library
+
+    - name: Test wheel after install (cmdline)
       run:  mpiexec -n 1 python -m mpi4py --mpi-lib-version
 
     - name: Test wheel after install (test_package)
@@ -142,6 +145,9 @@ jobs:
       env:
         MPI4PY_BUILD_BACKEND: ${{ matrix.backend }}
         MPI4PY_LOCAL_VERSION: ${{ matrix.mpi }}
+
+    - name: Test wheel after install (cmdline)
+      run:  mpiexec -n 1 python -m mpi4py --mpi-library
 
     - name: Test wheel after install (cmdline)
       run:  mpiexec -n 1 python -m mpi4py --mpi-lib-version
