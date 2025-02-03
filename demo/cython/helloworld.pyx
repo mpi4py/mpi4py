@@ -1,5 +1,4 @@
 # cython: language_level=3str
-cdef extern from "mpi-compat.h": pass
 
 # ---------
 

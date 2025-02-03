@@ -22,6 +22,21 @@ from mpi4py.libmpi cimport MPI_File
 # --
 
 cdef extern from *:
+    """
+    #if (MPI_VERSION < 3) && !defined(PyMPI_HAVE_MPI_Message)
+    #if !defined(MPI_Message) && !defined(MPI_MESSAGE_NULL)
+    typedef void *PyMPI_MPI_Message;
+    #define MPI_Message PyMPI_MPI_Message
+    #endif
+    #endif
+
+    #if (MPI_VERSION < 4) && !defined(PyMPI_HAVE_MPI_Session)
+    #if !defined(MPI_Session) && !defined(MPI_SESSION_NULL)
+    typedef void *PyMPI_MPI_Session;
+    #define MPI_Session PyMPI_MPI_Session
+    #endif
+    #endif
+    """
     ctypedef MPI_Aint   Aint   "MPI_Aint"
     ctypedef MPI_Offset Offset "MPI_Offset"
     ctypedef MPI_Count  Count  "MPI_Count"

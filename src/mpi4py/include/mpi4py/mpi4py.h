@@ -6,26 +6,18 @@
 
 #include <mpi.h>
 
-#if defined(MSMPI_VER) && !defined(PyMPI_HAVE_MPI_Message)
-#  if defined(MPI_MESSAGE_NULL)
-#    define PyMPI_HAVE_MPI_Message 1
-#  endif
-#endif
-
-#if defined(MSMPI_VER) && !defined(PyMPI_HAVE_MPI_Session)
-#  if defined(MPI_SESSION_NULL)
-#    define PyMPI_HAVE_MPI_Session 1
-#  endif
-#endif
-
 #if (MPI_VERSION < 3) && !defined(PyMPI_HAVE_MPI_Message)
+#if !defined(MPI_Message) && !defined(MPI_MESSAGE_NULL)
 typedef void *PyMPI_MPI_Message;
 #define MPI_Message PyMPI_MPI_Message
 #endif
+#endif
 
 #if (MPI_VERSION < 4) && !defined(PyMPI_HAVE_MPI_Session)
+#if !defined(MPI_Session) && !defined(MPI_SESSION_NULL)
 typedef void *PyMPI_MPI_Session;
 #define MPI_Session PyMPI_MPI_Session
+#endif
 #endif
 
 #if defined(MPI4PY_LIMITED_API)
