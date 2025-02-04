@@ -202,12 +202,12 @@ def visit_class(cls, done=None):
         if name in done:
             continue
 
-        if name in skip:
-            continue
-
         if name in override:
             done.add(name)
             lines.add = override[name]
+            continue
+
+        if name in skip:
             continue
 
         if name in special:
@@ -389,7 +389,7 @@ from os import PathLike
 
 OVERRIDE = {
     'Exception': {
-        '__new__': "def __new__(cls, ierr: int = SUCCESS) -> Self: ...",
+        '__new__': "def __new__(cls, ierr: int = SUCCESS, /) -> Self: ...",
         "__lt__": "def __lt__(self, other: int, /) -> bool: ...",
         "__le__": "def __le__(self, other: int, /) -> bool: ...",
         "__gt__": "def __gt__(self, other: int, /) -> bool: ...",
@@ -408,7 +408,7 @@ OVERRIDE = {
         "def __contains__(self, value: str, /) -> bool: ...",
     },
     'Op': {
-        '__call__': "def __call__(self, x: Any, y: Any) -> Any: ...",
+        '__call__': "def __call__(self, x: Any, y: Any, /) -> Any: ...",
     },
     'buffer': {
         '__new__': """

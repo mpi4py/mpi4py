@@ -225,12 +225,12 @@ def visit_class(cls, done=None):
         if name in done:
             continue
 
-        if name in skip:
-            continue
-
         if name in override:
             done.add(name)
             lines.add = override[name]
+            continue
+
+        if name in skip:
             continue
 
         if name in special:
@@ -430,40 +430,40 @@ def _def(cls, name):
 OVERRIDE = {
     'Exception': {
         '__new__': (
-            "def __new__(cls, ierr: int = SUCCESS) -> Self:\n"
+            "def __new__(cls, ierr: int = SUCCESS, /) -> Self:\n"
             "    return super().__new__(cls, ierr)"),
-        "__lt__": "def __lt__(self, other: int) -> bool: ...",
-        "__le__": "def __le__(self, other: int) -> bool: ...",
-        "__gt__": "def __gt__(self, other: int) -> bool: ...",
-        "__ge__": "def __ge__(self, other: int) -> bool: ...",
+        "__lt__": "def __lt__(self, other: int, /) -> bool: ...",
+        "__le__": "def __le__(self, other: int, /) -> bool: ...",
+        "__gt__": "def __gt__(self, other: int, /) -> bool: ...",
+        "__ge__": "def __ge__(self, other: int, /) -> bool: ...",
     },
     'Info': {
         '__iter__':
         "def __iter__(self) -> Iterator[str]: ...",
         '__getitem__':
-        "def __getitem__(self, item: str) -> str: ...",
+        "def __getitem__(self, item: str, /) -> str: ...",
         '__setitem__':
-        "def __setitem__(self, item: str, value: str) -> None: ...",
+        "def __setitem__(self, item: str, value: str, /) -> None: ...",
         '__delitem__':
-        "def __delitem__(self, item: str) -> None: ...",
+        "def __delitem__(self, item: str, /) -> None: ...",
         '__contains__':
-        "def __contains__(self, value: str) -> bool: ...",
+        "def __contains__(self, value: str, /) -> bool: ...",
     },
     'Op': {
-        '__call__': "def __call__(self, x: Any, y: Any) -> Any: ...",
+        '__call__': "def __call__(self, x: Any, y: Any, /) -> Any: ...",
     },
     'buffer': {
         '__new__': (
-            "def __new__(cls, buf: Buffer) -> Self:\n"
+            "def __new__(cls, buf: Buffer, /) -> Self:\n"
             "    return super().__new__(cls)"),
         '__getitem__': (
             "def __getitem__(self, "
-            "item: int | slice) "
+            "item: int | slice, /) "
             "-> int | buffer: ..."),
         '__setitem__': (
             "def __setitem__(self, "
             "item: int | slice, "
-            "value:int | Buffer) "
+            "value:int | Buffer, /) "
             "-> None: ..."),
         '__delitem__': None,
     },
