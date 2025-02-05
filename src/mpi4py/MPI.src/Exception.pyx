@@ -1,87 +1,102 @@
 # Exception Class
 # ---------------
 
-cdef extern from "Python.h":
-    ctypedef class __builtin__.RuntimeError [object PyBaseExceptionObject]:
-        pass
-
-cdef class Exception(RuntimeError):
+class Exception(RuntimeError):
     """
     Exception class.
     """
 
-    cdef int ob_mpi
-
-    def __cinit__(self, int ierr: int = 0, /):
+    def __init__(self, int ierr: int = SUCCESS, /) -> None:
+        """Initialize self."""
         if ierr < MPI_SUCCESS: ierr = MPI_ERR_UNKNOWN
-        self.ob_mpi = ierr
         RuntimeError.__init__(self, ierr)
 
-    def __richcmp__(Exception self, object error, int op):
-        cdef int ierr  = self.ob_mpi
-        if op == Py_LT: return ierr <  error
-        if op == Py_LE: return ierr <= error
-        if op == Py_EQ: return ierr == error
-        if op == Py_NE: return ierr != error
-        if op == Py_GT: return ierr >  error
-        if op == Py_GE: return ierr >= error
-
-    def __hash__(self) -> int:
-        return hash(self.ob_mpi)
+    def __int__(self) -> int:
+        """Return int(self)."""
+        return self.args[0]
 
     def __bool__(self) -> bool:
-        return self.ob_mpi != MPI_SUCCESS
+        """Return bool(self)."""
+        return <int>self != MPI_SUCCESS
 
-    def __int__(self) -> int:
-        return self.ob_mpi
+    def __hash__(self) -> int:
+        """Return hash(self)."""
+        return hash(int(self))
+
+    def __eq__(self, object other: object, /) -> bool:
+        """Return self==value."""
+        return int(self) == other
+
+    def __ne__(self, object other: object, /) -> bool:
+        """Return self!=other."""
+        return int(self) != other
+
+    def __lt__(self, object other: int, /) -> bool:
+        """Return self<other."""
+        return int(self) < other
+
+    def __le__(self, object other: int, /) -> bool:
+        """Return self<=other."""
+        return int(self) <= other
+
+    def __gt__(self, object other: int, /) -> bool:
+        """Return self>other."""
+        return int(self) > other
+
+    def __ge__(self, object other: int, /) -> bool:
+        """Return self>=other."""
+        return int(self) >= other
 
     def __repr__(self) -> str:
-        return f"MPI.Exception({self.ob_mpi})"
+        """Return repr(self)."""
+        return f"MPI.Exception({int(self)})"
 
     def __str__(self) -> str:
+        """Return str(self)."""
         if MPI_VERSION < 4 and not mpi_active():
-            return f"error code: {self.ob_mpi}"  # ~> legacy
+            return f"error code: {int(self)}"  # ~> legacy
         return self.Get_error_string()
 
     def Get_error_code(self) -> int:
         """
         Error code.
         """
-        cdef int errorcode = MPI_SUCCESS
-        errorcode = self.ob_mpi
+        cdef int errorcode = self
         return errorcode
-
-    property error_code:
-        """Error code."""
-        def __get__(self) -> int:
-            return self.Get_error_code()
 
     def Get_error_class(self) -> int:
         """
         Error class.
         """
+        cdef int errorcode = self
         cdef int errorclass = MPI_SUCCESS
-        CHKERR( MPI_Error_class(self.ob_mpi, &errorclass) )
+        CHKERR( MPI_Error_class(errorcode, &errorclass) )
         return errorclass
-
-    property error_class:
-        """Error class."""
-        def __get__(self) -> int:
-            return self.Get_error_class()
 
     def Get_error_string(self) -> str:
         """
         Error string.
         """
+        cdef int errorcode = self
         cdef char string[MPI_MAX_ERROR_STRING+1]
         cdef int resultlen = 0
-        CHKERR( MPI_Error_string(self.ob_mpi, string, &resultlen) )
+        CHKERR( MPI_Error_string(errorcode, string, &resultlen) )
         return tompistr(string, resultlen)
 
-    property error_string:
+    @property
+    def error_code(self) -> int:
+        """Error code."""
+        return self.Get_error_code()
+
+    @property
+    def error_class(self) -> int:
+        """Error class."""
+        return self.Get_error_class()
+
+    @property
+    def error_string(self) -> str:
         """Error string."""
-        def __get__(self) -> str:
-            return self.Get_error_string()
+        return self.Get_error_string()
 
 
 MPIException = Exception

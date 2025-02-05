@@ -128,14 +128,19 @@ def visit_datadescr(datadescr, name=None):
 
 
 def visit_property(prop, name=None):
-    sig = signature(prop.fget)
-    name = name or prop.fget.__name__
-    type = sig.rsplit('->', 1)[-1].strip()
-    sig = f"{name}(self) -> {type}"
-    doc = f'"""{prop.__doc__}"""'
-    doc = textwrap.indent(doc, Lines.INDENT)
-    body = Lines.INDENT + "..."
-    return f"@property\ndef {sig}:\n{doc}\n{body}\n"
+    gname = prop.fget.__name__
+    pname = name or gname
+    if pname == gname:
+        meth = visit_method(prop.fget)
+    else:
+        sig = signature(prop.fget)
+        name = name or prop.fget.__name__
+        type = sig.rsplit('->', 1)[-1].strip()
+        sig = f"{name}(self) -> {type}"
+        doc = docstring(prop)
+        body = Lines.INDENT + "..."
+        meth = f"def {sig}:\n{doc}\n{body}\n"
+    return f"@property\n{meth}"
 
 
 def visit_constructor(cls, name='__init__', args=None):
@@ -172,9 +177,9 @@ def visit_class(cls, done=None):
         '__hash__': ("self", "int", None),
         '__int__': ("self", "int", None),
         '__index__': ("self", "int", None),
-        '__eq__': ("self", "other: object", "bool", None),
-        '__ne__': ("self", "other: object", "bool", None),
-        '__buffer__': ("self", "flags: int", "memoryview", (3, 12)),
+        '__eq__': ("self", "other: object", "/", "bool", None),
+        '__ne__': ("self", "other: object", "/", "bool", None),
+        '__buffer__': ("self", "flags: int", "/", "memoryview", (3, 12)),
     }
     constructor = (
         '__new__',
@@ -184,6 +189,13 @@ def visit_class(cls, done=None):
     override = OVERRIDE.get(cls.__name__, {})
     done = set() if done is None else done
     lines = Lines()
+
+    if cls.__name__ == 'Exception':
+        skip = skip - {f'__{a}{b}__' for a in 'lg' for b in 'et'}
+        constructor = ()
+    if '__hash__' in cls.__dict__:
+        if cls.__hash__ is None:
+            done.add('__hash__')
 
     base = cls.__base__
     if base is object:
@@ -429,13 +441,9 @@ def _def(cls, name):
 
 OVERRIDE = {
     'Exception': {
-        '__new__': (
-            "def __new__(cls, ierr: int = SUCCESS, /) -> Self:\n"
-            "    return super().__new__(cls, ierr)"),
-        "__lt__": "def __lt__(self, other: int, /) -> bool: ...",
-        "__le__": "def __le__(self, other: int, /) -> bool: ...",
-        "__gt__": "def __gt__(self, other: int, /) -> bool: ...",
-        "__ge__": "def __ge__(self, other: int, /) -> bool: ...",
+        '__init__': (
+            "def __init__(self, ierr: int = SUCCESS, /) -> None:\n"
+            "    return super().__init__(ierr)"),
     },
     'Info': {
         '__iter__':

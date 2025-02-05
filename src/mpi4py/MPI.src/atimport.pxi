@@ -425,7 +425,7 @@ cdef int PyMPI_HandleException(object exc) noexcept:
     PyErr_DisplayException(exc)
     if (<void*>MPIException) != NULL:
         if isinstance(exc, Exception):
-            return (<Exception>exc).ob_mpi
+            return <int>exc
     return MPI_ERR_OTHER
 
 # -----------------------------------------------------------------------------

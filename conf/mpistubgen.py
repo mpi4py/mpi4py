@@ -114,10 +114,12 @@ def visit_datadescr(datadescr):
 
 
 def visit_property(prop, name=None):
-    sig = signature(prop.fget)
-    pname = name or prop.fget.__name__
-    ptype = sig.rsplit('->', 1)[-1].strip()
-    return f"{pname}: {ptype}"
+    gname = prop.fget.__name__
+    pname = name or gname
+    if pname == gname:
+        return ["@property", visit_method(prop.fget)]
+    else:
+        return f"{pname} = property({gname})"
 
 
 def visit_constructor(cls, name='__init__', args=None):
@@ -139,12 +141,12 @@ def visit_class(cls, done=None):
         '__module__',
         '__weakref__',
         '__pyx_vtable__',
+        '__str__',
+        '__repr__',
         '__lt__',
         '__le__',
         '__ge__',
         '__gt__',
-        '__str__',
-        '__repr__',
     }
     special = {
         '__len__': ("self", "int", None),
@@ -164,6 +166,13 @@ def visit_class(cls, done=None):
     override = OVERRIDE.get(cls.__name__, {})
     done = set() if done is None else done
     lines = Lines()
+
+    if cls.__name__ == 'Exception':
+        skip = skip - {f'__{a}{b}__' for a in 'lg' for b in 'et'}
+        constructor = ()
+    if '__hash__' in cls.__dict__:
+        if cls.__hash__ is None:
+            done.add('__hash__')
 
     try:
         class sub(cls):
@@ -191,10 +200,6 @@ def visit_class(cls, done=None):
             done.add(name)
             lines.add = visit_constructor(cls, name)
             continue
-
-    if '__hash__' in cls.__dict__:
-        if cls.__hash__ is None:
-            done.add('__hash__')
 
     dct = cls.__dict__
     keys = list(dct.keys())
@@ -388,13 +393,6 @@ from os import PathLike
 """
 
 OVERRIDE = {
-    'Exception': {
-        '__new__': "def __new__(cls, ierr: int = SUCCESS, /) -> Self: ...",
-        "__lt__": "def __lt__(self, other: int, /) -> bool: ...",
-        "__le__": "def __le__(self, other: int, /) -> bool: ...",
-        "__gt__": "def __gt__(self, other: int, /) -> bool: ...",
-        "__ge__": "def __ge__(self, other: int, /) -> bool: ...",
-    },
     'Info': {
         '__iter__':
         "def __iter__(self) -> Iterator[str]: ...",
