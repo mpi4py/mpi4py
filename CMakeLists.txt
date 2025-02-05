@@ -4,10 +4,17 @@ cmake_minimum_required(VERSION 3.15...3.26)
 
 project(mpi4py LANGUAGES C)
 
+if (SABI)
+  if (NOT SKBUILD_SABI_COMPONENT)
+    set(SKBUILD_SABI_COMPONENT Development.SABIModule)
+  endif()
+  set(WITH_SABI USE_SABI ${SABI})
+endif()
+
 find_package(
   Python REQUIRED
   COMPONENTS Interpreter
-  COMPONENTS Development.Module
+  COMPONENTS Development.Module ${SKBUILD_SABI_COMPONENT}
   OPTIONAL_COMPONENTS Development.Embed
 )
 
@@ -57,7 +64,7 @@ install(FILES ${MPI.h} DESTINATION mpi4py)
 
 
 # mpi4py.MPI
-python_add_library(mpi4py.MPI MODULE ${MPI.c} WITH_SOABI)
+python_add_library(mpi4py.MPI MODULE ${MPI.c} WITH_SOABI ${WITH_SABI})
 set_target_properties(mpi4py.MPI PROPERTIES OUTPUT_NAME "MPI" PREFIX "")
 target_include_directories(mpi4py.MPI PRIVATE ${SRCDIR})
 target_include_directories(mpi4py.MPI PRIVATE ${MPI_C_INCLUDE_DIRS})

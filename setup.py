@@ -18,6 +18,7 @@ sys.path.insert(0, os.path.join(topdir, 'conf'))
 
 require_python = (3, 8)
 maxknow_python = (3, 13)
+py_limited_api = (3, 10)
 
 
 def get_metadata():
@@ -42,6 +43,21 @@ def get_metadata():
         'python_requires': md.requires_python,
         'long_description_content_type': readme['content-type'],
     }
+
+
+def get_py_limited_api():
+    api = os.environ.get('PYLIMITEDAPI')
+    if api and sys.implementation.name == 'cpython':
+        if api == '1':
+            return py_limited_api
+        if api.startswith('cp'):
+            api = api[2:]
+        if '.' in api:
+            x, y = api.split('.')
+        else:
+            x, y = api[0], api[1:]
+        return (int(x), int(y))
+    return None
 
 
 # --------------------------------------------------------------------
@@ -160,6 +176,17 @@ def run_setup():
         metadata.pop('python_requires')
         metadata.pop('long_description_content_type')
     #
+    api = get_py_limited_api()
+    if api and setuptools:
+        api_tag = 'cp{}{}'.format(*api)
+        options = {'bdist_wheel': {'py_limited_api': api_tag}}
+        builder_args['options'] = options
+        api_ver = '0x{:02X}{:02X}0000'.format(*api)
+        defines = [('Py_LIMITED_API', api_ver)]
+        for ext in builder_args['ext_modules']:
+            ext.define_macros.extend(defines)
+            ext.py_limited_api = True
+    #
     setup_args = dict(i for d in (
         metadata,
         package_info,
@@ -177,6 +204,14 @@ def run_skbuild():
     builder_args = dict(
         cmake_source_dir = '.',
     )
+    #
+    api = get_py_limited_api()
+    if api:
+        api_tag = 'cp{}{}'.format(*api)
+        options = {'bdist_wheel': {'py_limited_api': api_tag}}
+        builder_args['options'] = options
+        cmake_args = ["-DSABI={}.{}".format(*api)]
+        builder_args['cmake_args'] = cmake_args
     #
     setup_args = dict(i for d in (
         metadata,
