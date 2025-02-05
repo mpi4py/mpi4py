@@ -24,66 +24,6 @@ cdef inline bint is_constant(object obj, object CONST):
 
 # -----------------------------------------------------------------------------
 
-
-@cython.final
-cdef class BottomType(int):
-    """
-    Type of `BOTTOM`.
-    """
-
-    def __cinit__(self):
-        cdef MPI_Aint a = self, b = <MPI_Aint>MPI_BOTTOM
-        if a != b :
-            raise ValueError("cannot create instance")
-
-    def __getbuffer__(self, Py_buffer *view, int flags):
-        PyBuffer_FillInfo(view, <object>NULL, MPI_BOTTOM, 0, 0, flags)
-
-    def __repr__(self) -> str:
-        <void> self  # unused
-        return 'BOTTOM'
-
-    def __reduce__(self) -> str:
-        <void> self  # unused
-        return 'BOTTOM'
-
-
-@cython.final
-cdef class InPlaceType(int):
-    """
-    Type of `IN_PLACE`.
-    """
-
-    def __cinit__(self):
-        cdef MPI_Aint a = self, b = <MPI_Aint>MPI_IN_PLACE
-        if a != b:
-            raise ValueError("cannot create instance")
-
-    def __getbuffer__(self, Py_buffer *view, int flags):
-        PyBuffer_FillInfo(view, <object>NULL, MPI_IN_PLACE, 0, 0, flags)
-
-    def __repr__(self) -> str:
-        <void> self  # unused
-        return 'IN_PLACE'
-
-    def __reduce__(self) -> str:
-        <void> self  # unused
-        return 'IN_PLACE'
-
-
-cdef object __BOTTOM__   = BottomType(<MPI_Aint>MPI_BOTTOM)
-
-cdef object __IN_PLACE__ = InPlaceType(<MPI_Aint>MPI_IN_PLACE)
-
-
-cdef inline bint is_BOTTOM(object obj):
-    return obj is None or is_constant(obj, __BOTTOM__)
-
-cdef inline bint is_IN_PLACE(object obj):
-    return obj is None or is_constant(obj, __IN_PLACE__)
-
-# -----------------------------------------------------------------------------
-
 cdef inline const char *getformat(const char format[]) except NULL:
     cdef char byteorder = format[0]
     if byteorder == c'@':  # native

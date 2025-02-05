@@ -260,19 +260,30 @@ class TestObjModel(unittest.TestCase):
         )
         for name in names:
             constant = getattr(MPI, name)
-            self.assertEqual(repr(constant), name)
+            self.assertTrue(operator.eq(constant, constant))
+            self.assertTrue(operator.eq(constant, int(constant)))
+            self.assertTrue(operator.ne(constant, None))
+            self.assertFalse(operator.ne(constant, constant))
+            self.assertFalse(operator.ne(constant, int(constant)))
+            self.assertFalse(operator.eq(constant, None))
+            self.assertEqual(constant, int(constant))
+            self.assertEqual(hash(constant), hash(int(constant)))
+            self.assertEqual(bool(constant), bool(int(constant)))
+            self.assertEqual(type(constant)(), constant)
             self.assertEqual(memoryview(constant).nbytes, 0)
             self.assertEqual(MPI.Get_address(constant), constant)
             if sys.implementation.name != 'pypy':
                 self.assertIsNone(memoryview(constant).obj)
-            with self.assertRaises(ValueError):
-                type(constant)(constant + 1)
+            with self.assertRaises(TypeError):
+                constant + 1
             self.assertEqual(repr(constant), name)
             self.assertEqual(constant.__reduce__(), name)
             for protocol in range(pickle.HIGHEST_PROTOCOL):
                 value = pickle.loads(pickle.dumps(constant, protocol))
                 self.assertIs(type(value), type(constant))
                 self.assertEqual(value, constant)
+        constant = MPI.BOTTOM
+        self.assertEqual(operator.index(constant), int(constant))
 
     def testSizeOf(self):
         for obj in self.objects:
