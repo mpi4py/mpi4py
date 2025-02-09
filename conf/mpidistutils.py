@@ -1124,7 +1124,7 @@ class build_ext(cmd_build_ext.build_ext):
             topdir = os.path.dirname(confdir)
             srcdir = os.path.join(topdir, 'src')
             dstdir = self.build_lib
-            for pthfile in ('mpi.pth', ):
+            for pthfile in ('_mpi_dll_path.py', 'mpi.pth'):
                 source = os.path.join(srcdir, pthfile)
                 target = os.path.join(dstdir, pthfile)
                 if os.path.exists(source):

@@ -166,7 +166,7 @@ if true
 endif
 
 if host_machine.system() == 'windows'
-  mpidllpath = ['mpi.pth']
+  mpidllpath = ['_mpi_dll_path.py', 'mpi.pth']
   foreach fn : mpidllpath
     if fs.exists(srcdir / fn)
       py.install_sources(
