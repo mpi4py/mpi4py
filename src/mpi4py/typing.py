@@ -55,7 +55,7 @@ class SupportsBuffer(Protocol):
     """
 
     if sys.version_info >= (3, 12):  # pragma: no branch
-        def __buffer__(self, flags: int) -> memoryview:
+        def __buffer__(self, flags: int, /) -> memoryview:
             """Create a buffer from a Python object."""
 
 
@@ -65,7 +65,7 @@ class SupportsDLPack(Protocol):
     .. seealso:: :ref:`dlpack:python-spec`
     """
 
-    def __dlpack__(self, *, stream: Optional[_Stream] = None) -> _PyCapsule:
+    def __dlpack__(self, /, *, stream: Optional[_Stream] = None) -> _PyCapsule:
         """Export data for consumption as a DLPack capsule."""
 
     def __dlpack_device__(self) -> Tuple[_DeviceType, _DeviceID]:
