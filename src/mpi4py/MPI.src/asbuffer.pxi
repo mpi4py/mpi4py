@@ -2,6 +2,7 @@
 
 cdef extern from "Python.h":
     ctypedef struct PyObject
+    void Py_CLEAR(PyObject*)
     object PyLong_FromVoidPtr(void*)
     void*  PyLong_AsVoidPtr(object) except? NULL
 
@@ -75,6 +76,14 @@ cdef int PyMPI_GetBuffer(object obj, Py_buffer *view, int flags) except -1:
             raise
         raise
 
+cdef void PyMPI_ReleaseBuffer(int kind, Py_buffer *view) noexcept:
+    if kind == 0:
+        # Python buffer interface
+        PyBuffer_Release(view)
+    else:
+        # DLPack/CAI buffer interface
+        Py_CLEAR(view.obj)
+
 # -----------------------------------------------------------------------------
 
 cdef extern from "Python.h":
@@ -117,7 +126,7 @@ cdef class buffer:
                               NULL, 0, 0, PyBUF_SIMPLE)
 
     def __dealloc__(self):
-        PyBuffer_Release(&self.view)
+        PyMPI_ReleaseBuffer(self.kind, &self.view)
 
     @staticmethod
     def allocate(
@@ -236,7 +245,7 @@ cdef class buffer:
 
     def release(self) -> None:
         """Release the underlying buffer exposed by the buffer object."""
-        PyBuffer_Release(&self.view)
+        PyMPI_ReleaseBuffer(self.kind, &self.view)
         PyBuffer_FillInfo(&self.view, <object>NULL,
                           NULL, 0, 0, PyBUF_SIMPLE)
         self.kind = 0
