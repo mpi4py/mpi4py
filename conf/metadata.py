@@ -88,7 +88,7 @@ classifiers = [
     "Typing :: Typed",
 ]
 urls = {
-    "Homepage":      "https://mpi4py.github.io",
+    "Homepage":      "https://mpi4py.github.io/mpi4py/",
     "Documentation": "https://mpi4py.readthedocs.io/en/stable/",
     "Source":        "https://github.com/mpi4py/mpi4py",
     "Issues":        "https://github.com/mpi4py/mpi4py/issues",

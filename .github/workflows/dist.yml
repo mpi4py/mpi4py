@@ -147,7 +147,56 @@ jobs:
       run:  gh release upload $TAG dist/mpi4py-*.tar.gz
       env:
         TAG: ${{ github.event.release.tag_name }}
-        GITHUB_TOKEN: ${{ github.token }}
+        GH_TOKEN: ${{ github.token }}
+
+  docs-publish:
+    if: ${{ github.event_name == 'release' }}
+    runs-on: ubuntu-latest
+    needs: docs
+    environment:
+      name: docs
+      url: https://mpi4py.github.io/mpi4py/
+
+    steps:
+
+    - name: Checkout documentation repository
+      uses: actions/checkout@v4
+      with:
+        repository: mpi4py/mpi4py.github.io
+        token: ${{ secrets.DOCS_PUBLISH_PAT }}
+
+    - name: Download documentation artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: mpi4py-docs
+        path: mpi4py
+
+    - name: Update documentation
+      run: |
+        # unarchive
+        docdir=mpi4py-docs
+        unzip -q $docdir.zip
+        mv $docdir/version .
+        version=$(cat version)
+        test ! -d $version
+        mv $docdir $version
+        rm -f stable
+        ln -sf $version stable
+      working-directory: mpi4py
+
+    - name: Publish documentation
+      run: |
+        # publish
+        git config user.name  "$(gh api /users/${GITHUB_ACTOR} | jq .name  -r)"
+        git config user.email "$(gh api /users/${GITHUB_ACTOR} | jq .email -r)"
+        version=$(cat version)
+        git add $version stable
+        git commit -m $version
+        git show --stat
+        git push
+      working-directory: mpi4py
+      env:
+        GH_TOKEN: ${{ github.token }}
 
   pypi-publish:
     if: ${{ github.event_name == 'release' }}
