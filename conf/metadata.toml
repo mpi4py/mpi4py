@@ -48,8 +48,8 @@ classifiers = [
   "Typing :: Typed",
 ]
 [project.urls]
-Homepage      = "https://mpi4py.github.io"
-Documentation = "https://mpi4py.readthedocs.io/en/latest/"
+Homepage      = "https://mpi4py.github.io/mpi4py/"
+Documentation = "https://mpi4py.readthedocs.io/en/stable/"
 Source        = "https://github.com/mpi4py/mpi4py"
 Issues        = "https://github.com/mpi4py/mpi4py/issues"
 Discussions   = "https://github.com/mpi4py/mpi4py/discussions"
