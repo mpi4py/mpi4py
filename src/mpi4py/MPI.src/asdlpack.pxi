@@ -131,9 +131,16 @@ cdef inline int dlpack_check_shape(const DLTensor *dltensor) except -1:
     return 0
 
 cdef inline int dlpack_check_contig(const DLTensor *dltensor) except -1:
-    if dlpack_is_contig(dltensor, c'C'): return 0
-    if dlpack_is_contig(dltensor, c'F'): return 0
-    raise BufferError("dlpack: buffer is not contiguous")
+    cdef bint c_contig = dlpack_is_contig(dltensor, c'C')
+    cdef bint f_contig = dlpack_is_contig(dltensor, c'F')
+    if not c_contig and not f_contig:
+        raise BufferError("dlpack: buffer is not contiguous")
+    return 0
+
+cdef inline int dlpack_check_rdonly(bint readonly, int flags) except -1:
+    if readonly and ((flags & PyBUF_WRITABLE) == PyBUF_WRITABLE):
+        raise BufferError("dlpack: buffer is not writable")
+    return 0
 
 cdef inline void *dlpack_get_data(
     const DLTensor *dltensor,
@@ -215,7 +222,6 @@ cdef int Py_CheckDLPackBuffer(object obj) noexcept:
 cdef int Py_GetDLPackBuffer(object obj, Py_buffer *view, int flags) except -1:
     cdef unsigned version_major = 1
     cdef const char *capsulename = b"dltensor_versioned"
-    cdef const char *usedcapsulename  = b"used_dltensor_versioned"
     cdef uint64_t READONLY = DLPACK_FLAG_BITMASK_READ_ONLY
     cdef object dlpack
     cdef object dlpack_device
@@ -252,7 +258,6 @@ cdef int Py_GetDLPackBuffer(object obj, Py_buffer *view, int flags) except -1:
     except TypeError:  # DLPack v0.x
         version_major = 0
         capsulename = b"dltensor"
-        usedcapsulename = b"used_dltensor"
         if device_type == kDLCPU:
             capsule = dlpack()
         else:
@@ -272,28 +277,17 @@ cdef int Py_GetDLPackBuffer(object obj, Py_buffer *view, int flags) except -1:
         dltensor  = &managed0.dl_tensor
         readonly  = 0
 
-    try:
-        dlpack_check_version(dlversion, version_major)
-        dlpack_check_shape(dltensor)
-        dlpack_check_contig(dltensor)
-        buf = dlpack_get_data(dltensor)
-        size = dlpack_get_size(dltensor)
-        itemsize = dlpack_get_itemsize(dltensor)
-        format = dlpack_get_format(dltensor)
-    finally:
-        if managed1 != NULL:
-            if managed1.deleter != NULL:
-                managed1.deleter(managed1)
-        if managed0 != NULL:
-            if managed0.deleter != NULL:
-                managed0.deleter(managed0)
-        PyCapsule_SetName(capsule, usedcapsulename)
-        del capsule
+    dlpack_check_version(dlversion, version_major)
+    dlpack_check_shape(dltensor)
+    dlpack_check_contig(dltensor)
+    dlpack_check_rdonly(readonly, flags)
 
-    if PYPY and readonly and ((flags & PyBUF_WRITABLE) == PyBUF_WRITABLE):
-        raise BufferError("Object is not writable")  # ~> pypy
+    buf = dlpack_get_data(dltensor)
+    size = dlpack_get_size(dltensor)
+    itemsize = dlpack_get_itemsize(dltensor)
+    format = dlpack_get_format(dltensor)
 
-    PyBuffer_FillInfo(view, obj, buf, size, readonly, flags)
+    PyBuffer_FillInfo(view, capsule, buf, size, readonly, flags)
 
     if (flags & PyBUF_FORMAT) == PyBUF_FORMAT:
         view.format = format

@@ -42,23 +42,31 @@ except ImportError:
     dlpack = None
 
 
-class DLPackCPUBuf(BaseBuf):
+class BaseDLPackBuf(BaseBuf):
 
-    versioned = True
+    def __del__(self):
+        if hasattr(sys, 'getrefcount'):
+            buf = self._buf
+            self.__dict__.clear()
+            if sys.getrefcount(buf) > 2:
+                leaks = sys.getrefcount(buf) - 2
+                message = f'dlpack: possible reference leaks ({leaks})'
+                raise RuntimeError(message)
+
+
+class DLPackCPUBuf(BaseDLPackBuf):
+
+    version = 1
 
     def __init__(self, typecode, initializer):
         super().__init__(typecode, initializer)
-        self.managed = dlpack.make_dl_managed_tensor(self._buf, self.versioned)
-
-    def __del__(self):
-        self.managed = None
-        if sys and not hasattr(sys, 'pypy_version_info'):
-            if sys.getrefcount(self._buf) > 2:
-                raise RuntimeError('dlpack: possible reference leak')
+        self.managed = dlpack.make_dl_managed_tensor(self._buf, self.version)
 
     def __dlpack_device__(self):
-        device = self.managed.dl_tensor.device
-        return (device.device_type, device.device_id)
+        return (
+            self.managed.dl_tensor.device.device_type,
+            self.managed.dl_tensor.device.device_id
+        )
 
     def __dlpack__(
         self,
@@ -68,19 +76,16 @@ class DLPackCPUBuf(BaseBuf):
         copy=None,
     ):
         kDLCPU = dlpack.DLDeviceType.kDLCPU
-        managed = self.managed
-        device = managed.dl_tensor.device
-        if device.device_type == kDLCPU:
+        if self.managed.dl_tensor.device.device_type == kDLCPU:
             assert stream is None
         else:
             assert stream == -1
-        capsule = dlpack.make_py_capsule(managed, self.versioned)
-        return capsule
+        return dlpack.make_py_capsule(self.managed, owned=False)
 
 
 class DLPackCPUBufV0(DLPackCPUBuf):
 
-    versioned = False
+    version = 0
 
     def __dlpack__(self, stream=None):
         return super().__dlpack__(stream=stream)
@@ -88,7 +93,7 @@ class DLPackCPUBufV0(DLPackCPUBuf):
 
 if cupy is not None:
 
-    class DLPackGPUBuf(BaseBuf):
+    class DLPackGPUBuf(BaseDLPackBuf):
 
         has_dlpack = None
         dev_type = None
@@ -101,11 +106,6 @@ if cupy is not None:
                 self.dev_type = dlpack.DLDeviceType.kDLROCM
             else:
                 self.dev_type = dlpack.DLDeviceType.kDLCUDA
-
-        def __del__(self):
-            if sys and not hasattr(sys, 'pypy_version_info'):
-                if sys.getrefcount(self._buf) > 2:
-                    raise RuntimeError('dlpack: possible reference leak')
 
         def __dlpack_device__(self):
             if self.has_dlpack:
@@ -659,9 +659,11 @@ class TestMessageDLPackCPUBuf(unittest.TestCase):
         del capsule
         #
         capsule = buf.__dlpack__()
-        retvals = [capsule] * 2
-        buf.__dlpack__ = lambda *args, **kwargs: retvals.pop()
+        buf.__dlpack__ = lambda *args, **kwargs: capsule
         MPI.Get_address(buf)
+        MPI.Get_address(buf)
+        dlpack.used_py_capsule(capsule)
+        self.assertRaises(BufferError, MPI.Get_address, buf)
         self.assertRaises(BufferError, MPI.Get_address, buf)
         del buf.__dlpack__
         del capsule

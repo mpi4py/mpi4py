@@ -96,7 +96,10 @@ Py_DecRef = pyapi.Py_DecRef
 Py_DecRef.restype = None
 Py_DecRef.argtypes = [ctypes.py_object]
 
-PyCapsule_Destructor = ctypes.CFUNCTYPE(None, ctypes.c_void_p)
+PyCapsule_Destructor = ctypes.PYFUNCTYPE(None, ctypes.c_void_p)
+PyCapsule_Destructor.from_param = classmethod(lambda cls, arg: (
+    ctypes._CFuncPtr.from_param(arg) if arg is not None else None
+))
 
 PyCapsule_New = pyapi.PyCapsule_New
 PyCapsule_New.restype = ctypes.py_object
@@ -105,6 +108,10 @@ PyCapsule_New.argtypes = [ctypes.c_void_p, ctypes.c_char_p, PyCapsule_Destructor
 PyCapsule_IsValid = pyapi.PyCapsule_IsValid
 PyCapsule_IsValid.restype = ctypes.c_int
 PyCapsule_IsValid.argtypes = [ctypes.py_object, ctypes.c_char_p]
+
+PyCapsule_SetName = pyapi.PyCapsule_SetName
+PyCapsule_SetName.restype = ctypes.c_int
+PyCapsule_SetName.argtypes = [ctypes.py_object, ctypes.c_char_p]
 
 PyCapsule_GetPointer = pyapi.PyCapsule_GetPointer
 PyCapsule_GetPointer.restype = ctypes.c_void_p
@@ -210,7 +217,6 @@ def make_dl_tensor(obj):
 
 def make_dl_manager_ctx(obj):
     py_obj = ctypes.py_object(obj)
-    if False: Py_IncRef(py_obj)
     void_p = ctypes.c_void_p.from_buffer(py_obj)
     return void_p
 
@@ -220,7 +226,8 @@ def dl_managed_tensor_deleter(void_p):
     managed = ctypes.cast(void_p, DLManagedTensor_p)
     manager_ctx = managed.contents.manager_ctx
     py_obj = ctypes.cast(manager_ctx, ctypes.py_object)
-    if False: Py_DecRef(py_obj)
+    obj = py_obj.value
+    del obj
 
 
 @DLManagedTensorVersionedDeleter
@@ -228,11 +235,14 @@ def dl_managed_tensor_versioned_deleter(void_p):
     managed = ctypes.cast(void_p, DLManagedTensorVersioned_p)
     manager_ctx = managed.contents.manager_ctx
     py_obj = ctypes.cast(manager_ctx, ctypes.py_object)
-    if False: Py_DecRef(py_obj)
+    obj = py_obj.value
+    del obj
 
 
-def make_dl_managed_tensor(obj, versioned=False):
-    if versioned:
+def make_dl_managed_tensor(obj, version=0):
+    if hasattr(sys, 'getrefcount'):
+        rc = sys.getrefcount(obj)
+    if version >= 1:
         managed = DLManagedTensorVersioned()
         managed.version = make_dl_version(1, 0)
         managed.manager_ctx = make_dl_manager_ctx(obj)
@@ -244,19 +254,49 @@ def make_dl_managed_tensor(obj, versioned=False):
         managed.dl_tensor = make_dl_tensor(obj)
         managed.manager_ctx = make_dl_manager_ctx(obj)
         managed.deleter = dl_managed_tensor_deleter
+    if hasattr(sys, 'getrefcount'):
+        assert sys.getrefcount(obj) == rc + 1
     return managed
-
-
-def make_py_context(context):
-    py_obj = ctypes.py_object(context)
-    Py_IncRef(py_obj)
-    context = ctypes.c_void_p.from_buffer(py_obj)
-    return ctypes.c_void_p(context.value)
 
 
 @PyCapsule_Destructor
 def py_capsule_destructor(void_p):
     capsule = ctypes.cast(void_p, ctypes.py_object)
+    used_py_capsule(capsule)
+    nullptr = ctypes.c_void_p(None)
+    context = PyCapsule_GetContext(capsule)
+    if context != nullptr:
+        PyCapsule_SetContext(capsule, nullptr)
+        managed = ctypes.cast(context, ctypes.py_object)
+        Py_DecRef(managed)
+
+
+def make_py_capsule(managed, owned=True):
+    if isinstance(managed, DLManagedTensorVersioned):
+        py_capsule_name = b"dltensor_versioned"
+    if isinstance(managed, DLManagedTensor):
+        py_capsule_name = b"dltensor"
+    destructor = None
+    if owned:
+        destructor = py_capsule_destructor
+    pointer = ctypes.byref(managed)
+    capsule = PyCapsule_New(pointer, py_capsule_name, destructor)
+    if owned:
+        context = ctypes.c_void_p.from_buffer(ctypes.py_object(managed))
+        if sys.implementation.name == 'cpython':
+            assert context.value == id(managed)
+        Py_IncRef(managed)
+        PyCapsule_SetContext(capsule, context)
+    return capsule
+
+
+_used = {
+    b"dltensor" + prefix: b"used_dltensor" + prefix
+    for prefix in (b"_versioned", b"")
+}
+
+
+def used_py_capsule(capsule):
     for py_capsule_name, dl_managed_tensor_type_p in (
         (b"dltensor_versioned", DLManagedTensorVersioned_p),
         (b"dltensor", DLManagedTensor_p),
@@ -267,23 +307,5 @@ def py_capsule_destructor(void_p):
             deleter = managed.contents.deleter
             if deleter:
                 deleter(managed)
+            PyCapsule_SetName(capsule, _used[py_capsule_name])
             break
-    context = PyCapsule_GetContext(capsule)
-    managed = ctypes.cast(context, ctypes.py_object)
-    Py_DecRef(managed)
-
-
-def make_py_capsule(managed, versioned=False):
-    if versioned >= 1:
-        py_capsule_name = b"dltensor_versioned"
-        if not isinstance(managed, DLManagedTensorVersioned):
-            managed = make_dl_managed_tensor_versioned(managed)
-    else:
-        py_capsule_name = b"dltensor"
-        if not isinstance(managed, DLManagedTensor):
-            managed = make_dl_managed_tensor(managed)
-    pointer = ctypes.pointer(managed)
-    capsule = PyCapsule_New(pointer, py_capsule_name, py_capsule_destructor)
-    context = make_py_context(managed)
-    PyCapsule_SetContext(capsule, context)
-    return capsule

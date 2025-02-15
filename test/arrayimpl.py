@@ -255,7 +255,8 @@ class BaseDLPackCPU:
 
     def __dlpack__(self, stream=None):
         assert stream is None
-        capsule = dlpack.make_py_capsule(self.array)
+        managed = dlpack.make_dl_managed_tensor(self.array)
+        capsule = dlpack.make_py_capsule(managed, owned=True)
         return capsule
 
     def as_raw(self):

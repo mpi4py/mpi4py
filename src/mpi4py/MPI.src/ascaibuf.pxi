@@ -140,15 +140,17 @@ cdef int Py_GetCAIBuffer(object obj, Py_buffer *view, int flags) except -1:
             f"buffer is not contiguous "
             f"(shape:{shape}, strides:{strides}, itemsize:{itemsize})"
         )
+    if readonly and ((flags & PyBUF_WRITABLE) == PyBUF_WRITABLE):
+        raise BufferError(
+            f"__cuda_array_interface__: "
+            f"buffer is not writable"
+        )
     if  descr is not None and (len(descr) != 1 or descr[0] != ('', typestr)):
         PyErr_WarnFormat(
             RuntimeWarning, 1,
             b"__cuda_array_interface__: %s",
             b"ignoring 'descr' key",
         )
-
-    if PYPY and readonly and ((flags & PyBUF_WRITABLE) == PyBUF_WRITABLE):
-        raise BufferError("Object is not writable")  # ~> pypy
 
     PyBuffer_FillInfo(view, obj, buf, size*itemsize, readonly, flags)
 
