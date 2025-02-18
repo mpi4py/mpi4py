@@ -772,6 +772,20 @@ cdef class Datatype:
         def __set__(self, value: str):
             self.Set_name(value)
 
+    # Integral Handle
+    # ---------------
+
+    def toint(self) -> int:
+        """
+        """
+        return MPI_Type_toint(self.ob_mpi)
+
+    @classmethod
+    def fromint(cls, arg: int, /) -> Datatype:
+        """
+        """
+        return fromhandle(MPI_Type_fromint(arg))
+
     # Fortran Handle
     # --------------
 

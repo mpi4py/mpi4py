@@ -148,6 +148,20 @@ cdef class Info:
         ckey[MPI_MAX_INFO_KEY] = 0  # just in case
         return mpistr(ckey)
 
+    # Integral Handle
+    # ---------------
+
+    def toint(self) -> int:
+        """
+        """
+        return MPI_Info_toint(self.ob_mpi)
+
+    @classmethod
+    def fromint(cls, arg: int, /) -> Info:
+        """
+        """
+        return fromhandle(MPI_Info_fromint(arg))
+
     # Fortran Handle
     # --------------
 

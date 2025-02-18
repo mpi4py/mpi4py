@@ -231,6 +231,20 @@ cdef class Group:
         CHKERR( MPI_Group_free(&self.ob_mpi) )
         if constobj(self): self.ob_mpi = save
 
+    # Integral Handle
+    # ---------------
+
+    def toint(self) -> int:
+        """
+        """
+        return MPI_Group_toint(self.ob_mpi)
+
+    @classmethod
+    def fromint(cls, arg: int, /) -> Group:
+        """
+        """
+        return fromhandle(MPI_Group_fromint(arg))
+
     # Fortran Handle
     # --------------
 

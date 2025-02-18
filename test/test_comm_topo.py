@@ -49,11 +49,17 @@ class BaseTestTopo:
 
     COMM = MPI.COMM_NULL
 
-    def checkFortran(self, oldcomm):
+    def checkHandle(self, oldcomm):
+        cint = oldcomm.toint()
+        if cint != -1:
+            newcomm = MPI.Comm.fromint(cint)
+            self.assertEqual(newcomm, oldcomm)
+            self.assertEqual(type(newcomm), type(oldcomm))
         fint = oldcomm.py2f()
-        newcomm = MPI.Comm.f2py(fint)
-        self.assertEqual(newcomm, oldcomm)
-        self.assertEqual(type(newcomm), type(oldcomm))
+        if fint != -1:
+            newcomm = MPI.Comm.f2py(fint)
+            self.assertEqual(newcomm, oldcomm)
+            self.assertEqual(type(newcomm), type(oldcomm))
 
     def testCartcomm(self):
         comm = self.COMM
@@ -65,7 +71,7 @@ class BaseTestTopo:
             topo = comm.Create_cart(dims, periods=periods)
             self.assertTrue(topo.is_topo)
             self.assertEqual(topo.topology, MPI.CART)
-            self.checkFortran(topo)
+            self.checkHandle(topo)
             self.assertEqual(topo.dim, len(dims))
             self.assertEqual(topo.ndim, len(dims))
             coords = topo.coords
@@ -137,7 +143,7 @@ class BaseTestTopo:
         topo = comm.Create_graph(index[1:], edges)
         self.assertTrue(topo.is_topo)
         self.assertEqual(topo.topology, MPI.GRAPH)
-        self.checkFortran(topo)
+        self.checkHandle(topo)
         topo.Free()
         topo = comm.Create_graph(index, edges)
         self.assertEqual(topo.dims, (len(index)-1, len(edges)))
@@ -177,7 +183,7 @@ class BaseTestTopo:
         topo = comm.Create_dist_graph_adjacent(sources, destinations)
         self.assertTrue(topo.is_topo)
         self.assertEqual(topo.topology, MPI.DIST_GRAPH)
-        self.checkFortran(topo)
+        self.checkHandle(topo)
         self.assertEqual(topo.Get_dist_neighbors_count(), (2, 2, False))
         self.assertEqual(topo.Get_dist_neighbors(), (sources, destinations, None))
         self.assertEqual(topo.indegree, len(sources))
@@ -230,7 +236,7 @@ class BaseTestTopo:
         topo = comm.Create_dist_graph(sources, degrees, destinations, MPI.UNWEIGHTED)
         self.assertTrue(topo.is_topo)
         self.assertEqual(topo.topology, MPI.DIST_GRAPH)
-        self.checkFortran(topo)
+        self.checkHandle(topo)
         self.assertEqual(topo.Get_dist_neighbors_count(), (3, 3, False))
         topo.Free()
         weights = list(range(1,4))

@@ -1,14 +1,24 @@
 from mpi4py import MPI
 import mpiunittest as unittest
 
-class BaseTestFortran:
+class BaseTestHandle:
 
     HANDLES = []
 
-    def check(self, handle1):
-        try:
-            fint = handle1.py2f()
-        except NotImplementedError:
+    def checkHandleMPI(self, handle1):
+        handle2 = type(handle1).fromhandle(handle1.handle)
+        self.assertEqual(handle1, handle2)
+
+    def checkHandleInt(self, handle1):
+        cint = handle1.toint()
+        if cint == -1:
+            self.skipTest(type(handle1).__name__)
+        handle2 = type(handle1).fromint(cint)
+        self.assertEqual(handle1, handle2)
+
+    def checkHandleFtn(self, handle1):
+        fint = handle1.py2f()
+        if fint == -1:
             self.skipTest(type(handle1).__name__)
         handle2 = type(handle1).f2py(fint)
         self.assertEqual(handle1, handle2)
@@ -58,16 +68,16 @@ class BaseTestFortran:
                 if hasattr(handle, method):
                     getattr(handle, method)()
 
-    def testFortran(self):
+    def execute(self, check):
         for handle in self.HANDLES:
-            self.check(handle)
+            check(handle)
             if not handle:
                 continue
             if not hasattr(handle, 'Dup'):
                 continue
             handle = handle.Dup()
             try:
-                self.check(handle)
+                check(handle)
             finally:
                 handle.Free()
         try:
@@ -76,11 +86,21 @@ class BaseTestFortran:
             klass = type(self.HANDLES[0])
             self.skipTest(klass.__name__)
         try:
-            self.check(handle)
+            check(handle)
         finally:
             self.destroy(handle)
 
-class TestFortranStatus(BaseTestFortran, unittest.TestCase):
+    def testHandleMPI(self):
+        self.execute(self.checkHandleMPI)
+
+    def testHandleInt(self):
+        self.execute(self.checkHandleInt)
+
+    def testFortran(self):
+        self.execute(self.checkHandleFtn)
+
+
+class TestHandleStatus(BaseTestHandle, unittest.TestCase):
 
     def setUp(self):
         s1 = MPI.Status()
@@ -93,6 +113,12 @@ class TestFortranStatus(BaseTestFortran, unittest.TestCase):
         s3.tag = 0
         s3.error = MPI.SUCCESS
         self.HANDLES = [s1, s2, s3]
+
+    def testHandleMPI(self):
+        pass
+
+    def testHandleInt(self):
+        pass
 
     @unittest.skipMPI('MPICH1')
     def testFortran(self):
@@ -112,7 +138,7 @@ class TestFortranStatus(BaseTestFortran, unittest.TestCase):
             self.assertEqual(f_status[e], status.Get_error())
             self.assertEqual(len(f_status), MPI.F_STATUS_SIZE)
 
-class TestFortranDatatype(BaseTestFortran, unittest.TestCase):
+class TestHandleDatatype(BaseTestHandle, unittest.TestCase):
     HANDLES = [
         MPI.DATATYPE_NULL,
         MPI.CHAR,  MPI.SHORT,
@@ -120,7 +146,7 @@ class TestFortranDatatype(BaseTestFortran, unittest.TestCase):
         MPI.FLOAT, MPI.DOUBLE,
     ]
 
-class TestFortranOp(BaseTestFortran, unittest.TestCase):
+class TestHandleOp(BaseTestHandle, unittest.TestCase):
     HANDLES = [
         MPI.OP_NULL,
         MPI.MAX, MPI.MIN,
@@ -131,53 +157,54 @@ class TestFortranOp(BaseTestFortran, unittest.TestCase):
         MPI.MAXLOC, MPI.MINLOC,
     ]
 
-class TestFortranRequest(BaseTestFortran, unittest.TestCase):
+class TestHandleRequest(BaseTestHandle, unittest.TestCase):
     HANDLES = [
         MPI.REQUEST_NULL,
     ]
 
-class TestFortranMessage(BaseTestFortran, unittest.TestCase):
+class TestHandleMessage(BaseTestHandle, unittest.TestCase):
     HANDLES = [
         MPI.MESSAGE_NULL,
         MPI.MESSAGE_NO_PROC,
     ]
 
-class TestFortranErrhandler(BaseTestFortran, unittest.TestCase):
+class TestHandleErrhandler(BaseTestHandle, unittest.TestCase):
     HANDLES = [
         MPI.ERRHANDLER_NULL,
         MPI.ERRORS_RETURN,
         MPI.ERRORS_ARE_FATAL,
+        MPI.ERRORS_ABORT,
     ]
 
-class TestFortranInfo(BaseTestFortran, unittest.TestCase):
+class TestHandleInfo(BaseTestHandle, unittest.TestCase):
     HANDLES = [
         MPI.INFO_NULL,
     ]
 
-class TestFortranGroup(BaseTestFortran, unittest.TestCase):
+class TestHandleGroup(BaseTestHandle, unittest.TestCase):
     HANDLES = [
         MPI.GROUP_NULL,
         MPI.GROUP_EMPTY,
     ]
 
-class TestFortranSession(BaseTestFortran, unittest.TestCase):
+class TestHandleSession(BaseTestHandle, unittest.TestCase):
     HANDLES = [
         MPI.SESSION_NULL,
     ]
 
-class TestFortranComm(BaseTestFortran, unittest.TestCase):
+class TestHandleComm(BaseTestHandle, unittest.TestCase):
     HANDLES = [
         MPI.COMM_NULL,
         MPI.COMM_SELF,
         MPI.COMM_WORLD,
     ]
 
-class TestFortranWin(BaseTestFortran, unittest.TestCase):
+class TestHandleWin(BaseTestHandle, unittest.TestCase):
     HANDLES = [
         MPI.WIN_NULL,
     ]
 
-class TestFortranFile(BaseTestFortran, unittest.TestCase):
+class TestHandleFile(BaseTestHandle, unittest.TestCase):
     HANDLES = [
         MPI.FILE_NULL,
     ]

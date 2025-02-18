@@ -230,9 +230,14 @@ class BaseTestP2PBuf:
         dupe = MPI.Prequest.fromhandle(preq.handle)
         self.assertIs(type(dupe), MPI.Prequest)
         self.assertEqual(dupe, preq)
-        dupe = MPI.Prequest.f2py(preq.py2f())
-        self.assertIs(type(dupe), MPI.Prequest)
-        self.assertEqual(dupe, preq)
+        if preq.toint() != -1:
+            dupe = MPI.Prequest.fromint(preq.toint())
+            self.assertIs(type(dupe), MPI.Prequest)
+            self.assertEqual(dupe, preq)
+        if preq.py2f() != -1:
+            dupe = MPI.Prequest.f2py(preq.py2f())
+            self.assertIs(type(dupe), MPI.Prequest)
+            self.assertEqual(dupe, preq)
         dupe = MPI.Request(preq)
         self.assertIs(type(dupe), MPI.Request)
         self.assertEqual(dupe, preq)

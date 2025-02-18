@@ -281,6 +281,24 @@ cdef class Request:
         with nogil: CHKERR( MPI_Request_free(&self.ob_mpi) )
         if constobj(self): self.ob_mpi = save
 
+    # Integral Handle
+    # ---------------
+
+    def toint(self) -> int:
+        """
+        """
+        return MPI_Request_toint(self.ob_mpi)
+
+    @classmethod
+    def fromint(cls, arg: int, /) -> Request:
+        """
+        """
+        if issubclass(cls, Prequest):
+            return PyMPIPrequest_New(MPI_Request_fromint(arg))
+        if issubclass(cls, Grequest):
+            return PyMPIGrequest_New(MPI_Request_fromint(arg))
+        return fromhandle(MPI_Request_fromint(arg))
+
     # Fortran Handle
     # --------------
 

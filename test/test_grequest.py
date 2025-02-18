@@ -34,9 +34,14 @@ class TestGrequest(unittest.TestCase):
         dupe = MPI.Grequest.fromhandle(greq.handle)
         self.assertIs(type(dupe), MPI.Grequest)
         self.assertEqual(dupe, greq)
-        dupe = MPI.Grequest.f2py(greq.py2f())
-        self.assertIs(type(dupe), MPI.Grequest)
-        self.assertEqual(dupe, greq)
+        if greq.toint() != -1:
+            dupe = MPI.Grequest.fromint(greq.toint())
+            self.assertIs(type(dupe), MPI.Grequest)
+            self.assertEqual(dupe, greq)
+        if greq.py2f() != -1:
+            dupe = MPI.Grequest.f2py(greq.py2f())
+            self.assertIs(type(dupe), MPI.Grequest)
+            self.assertEqual(dupe, greq)
         dupe = MPI.Request(greq)
         self.assertIs(type(dupe), MPI.Request)
         self.assertEqual(dupe, greq)

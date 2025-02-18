@@ -48,6 +48,20 @@ cdef class Errhandler:
         CHKERR( MPI_Errhandler_free(&self.ob_mpi) )
         if constobj(self): self.ob_mpi = save
 
+    # Integral Handle
+    # ---------------
+
+    def toint(self) -> int:
+        """
+        """
+        return MPI_Errhandler_toint(self.ob_mpi)
+
+    @classmethod
+    def fromint(cls, arg: int, /) -> Errhandler:
+        """
+        """
+        return fromhandle(MPI_Errhandler_fromint(arg))
+
     # Fortran Handle
     # --------------
 

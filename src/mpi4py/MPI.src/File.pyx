@@ -879,6 +879,20 @@ cdef class File:
         """
         CHKERR( MPI_File_call_errhandler(self.ob_mpi, errorcode) )
 
+    # Integral Handle
+    # ---------------
+
+    def toint(self) -> int:
+        """
+        """
+        return MPI_File_toint(self.ob_mpi)
+
+    @classmethod
+    def fromint(cls, arg: int, /) -> File:
+        """
+        """
+        return fromhandle(MPI_File_fromint(arg))
+
     # Fortran Handle
     # --------------
 
