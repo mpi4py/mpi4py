@@ -215,6 +215,7 @@ class BaseTestWinAllocateShared(BaseTestWin):
 
 @unittest.skipMPI('impi(==2021.14.0)', github())
 @unittest.skipMPI('impi(==2021.14.1)', github())
+@unittest.skipMPI('impi(==2021.14.2)', github())
 class BaseTestWinCreateDynamic(BaseTestWin):
 
     CREATE_FLAVOR = MPI.WIN_FLAVOR_DYNAMIC

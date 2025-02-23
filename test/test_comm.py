@@ -253,6 +253,7 @@ class BaseTestComm:
         comm = self.COMM.Split_type(split_type, info=info)
         if unittest.is_mpi('impi(==2021.14.0)'): comm.free()
         if unittest.is_mpi('impi(==2021.14.1)'): comm.free()
+        if unittest.is_mpi('impi(==2021.14.2)'): comm.free()
         self.assertEqual(comm, MPI.COMM_NULL)
         info.Free()
         #
@@ -306,6 +307,7 @@ class BaseTestComm:
         comm = self.COMM.Split_type(split_type, info=info)
         if unittest.is_mpi('impi(==2021.14.0)'): comm.free()
         if unittest.is_mpi('impi(==2021.14.1)'): comm.free()
+        if unittest.is_mpi('impi(==2021.14.2)'): comm.free()
         self.assertEqual(comm, MPI.COMM_NULL)
         info.Free()
         #
