@@ -1918,6 +1918,20 @@ cdef class Comm:
         def __set__(self, value: str):
             self.Set_name(value)
 
+    # Integral Handle
+    # ---------------
+
+    def toint(self) -> int:
+        """
+        """
+        return MPI_Comm_toint(self.ob_mpi)
+
+    @classmethod
+    def fromint(cls, arg: int, /) -> Comm:
+        """
+        """
+        return fromhandle(MPI_Comm_fromint(arg))
+
     # Fortran Handle
     # --------------
 

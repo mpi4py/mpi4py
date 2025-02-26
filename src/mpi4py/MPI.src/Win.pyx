@@ -759,6 +759,20 @@ cdef class Win:
         def __set__(self, value: str):
             self.Set_name(value)
 
+    # Integral Handle
+    # ---------------
+
+    def toint(self) -> int:
+        """
+        """
+        return MPI_Win_toint(self.ob_mpi)
+
+    @classmethod
+    def fromint(cls, arg: int, /) -> Win:
+        """
+        """
+        return fromhandle(MPI_Win_fromint(arg))
+
     # Fortran Handle
     # --------------
 

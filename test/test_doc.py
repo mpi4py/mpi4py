@@ -45,7 +45,7 @@ def getdocstr(mc, docstrings, namespace=None):
 class TestDoc(unittest.TestCase):
 
     def testDoc(self):
-        ignore = {'py2f', 'f2py'}
+        ignore = {'toint', 'fromint', 'py2f', 'f2py'}
         invalid = False
         missing = False
         docs = { }

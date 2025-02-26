@@ -49,13 +49,15 @@ class BaseTestErrhandler:
                 check &= (idx == index)
             return errhandler_fn
 
-        def check_fortran(eh):
-            try:
-                fint = eh.py2f()
-            except NotImplementedError:
-                return
-            clon = type(eh).f2py(fint)
-            self.assertEqual(eh, clon)
+        def check_handle(eh):
+            cint = eh.toint()
+            if cint != -1:
+                clon = type(eh).fromint(cint)
+                self.assertEqual(eh, clon)
+            fint = eh.py2f()
+            if fint != -1:
+                clon = type(eh).f2py(fint)
+                self.assertEqual(eh, clon)
 
         errhandlers = []
         for index in range(MAX_USER_EH):
@@ -71,7 +73,7 @@ class BaseTestErrhandler:
 
         for eh in errhandlers:
             self.assertTrue(eh)
-            check_fortran(eh)
+            check_handle(eh)
             with self.assertRaises(ValueError):
                 eh.__reduce__()
 

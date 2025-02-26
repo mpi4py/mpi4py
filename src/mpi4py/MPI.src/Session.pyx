@@ -194,6 +194,20 @@ cdef class Session:
         """
         CHKERR( MPI_Session_call_errhandler(self.ob_mpi, errorcode) )
 
+    # Integral Handle
+    # ---------------
+
+    def toint(self) -> int:
+        """
+        """
+        return MPI_Session_toint(self.ob_mpi)
+
+    @classmethod
+    def fromint(cls, arg: int, /) -> Session:
+        """
+        """
+        return fromhandle(MPI_Session_fromint(arg))
+
     # Fortran Handle
     # --------------
 
