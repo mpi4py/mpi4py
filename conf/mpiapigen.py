@@ -4,7 +4,9 @@
 
 # ruff: noqa: E501, UP031
 
-import re
+import os
+import sys
+from re import compile as re_compile
 from textwrap import indent, dedent
 import warnings
 
@@ -20,7 +22,7 @@ def join(*args):
     return r'\s*'.join(tokens)
 
 def r_(*args):
-    return re.compile(join(*args))
+    return re_compile(join(*args))
 
 lparen   = r'\('
 rparen   = r'\)'
@@ -229,8 +231,10 @@ class NodeFuncProto(Node):
     %(crett)s %(cname)s(%(cargs)s);"""
     CONFIG = """\
     %(crett)s v; v = %(cname)s(%(cargscall)s); (void)v;"""
-    MISSING = ' '. join(['#define %(cname)s(%(cargsnamed)s)',
-                        'PyMPI_UNAVAILABLE("%(name)s"%(comma)s%(cargsnamed)s)'])
+    MISSING = ' '. join([
+        '#define %(cname)s(%(cargsnamed)s)',
+        'PyMPI_UNAVAILABLE("%(name)s"%(comma)s%(cargsnamed)s)',
+    ])
     def __init__(self, crett, cname, cargs, calias=None):
         self.init(name=cname, cname=cname)
         self.crett = crett
@@ -239,11 +243,10 @@ class NodeFuncProto(Node):
             cargs = ''
         if cargs:
             cargs = [c.strip() for c in cargs.split(',')]
-            if cargs[-1] == '...':
-                del cargs[-1]
         else:
             cargs = []
-        self.cargstype = cargs
+        self.cargstype = cargs[:]
+        cargs = [a for a in cargs if a != '...']
         nargs = len(cargs)
         self.comma = ',' if nargs else ''
         cargscall = [f'({ctypefix(a)})0' for a in cargs]
@@ -334,6 +337,10 @@ class FunctionF2C(NodeFuncProto):
 
 class Generator:
 
+    PROLOG = f"""\
+    /* Generated with `python conf/{os.path.basename(__file__)}` */
+    """
+
     NODE_TYPES = [
         IntegralType,
         StructType, OpaqueType,
@@ -357,16 +364,22 @@ class Generator:
             self.parse_line(line)
 
     def parse_line(self, line):
-        if Re.IGNORE.match(line):
+        if '# Deprecated' in line:
+            self.deprecated = True
+            return
+        elif Re.IGNORE.match(line):
+            self.deprecated = False
             return
         nodemap  = self.nodemap
         nodelist = self.nodes
+        deprecated = getattr(self, 'deprecated', False)
         for nodetype in self.NODE_TYPES:
             args = nodetype.match(line)
             if args:
                 node = nodetype(*args)
                 nodemap[node.name] = len(nodelist)
                 nodelist.append(node)
+                node.deprecated = deprecated
                 break
         if not args:
             warnings.warn(f'unmatched line:\n{line}', stacklevel=1)
@@ -400,9 +413,11 @@ class Generator:
             with open(fileobj, 'w') as f:
                 self.dump_config_h(f, suite)
             return
+        prlg  = dedent(self.PROLOG)
         head  = dedent(self.CONFIG_HEAD)
         macro = dedent(self.CONFIG_MACRO)
         tail  = dedent(self.CONFIG_TAIL)
+        fileobj.write(prlg)
         fileobj.write(head)
         if suite is None:
             for node in self:
@@ -439,16 +454,30 @@ class Generator:
     MISSING_TAIL = """\
     #endif /* !PyMPI_MISSING_H */
     """
-    def dump_missing_h(self, fileobj, suite):
+    def dump_missing_h(self, fileobj, suite=None):
         if isinstance(fileobj, str):
             with open(fileobj, 'w') as f:
                 self.dump_missing_h(f, suite)
             return
+        prlg = dedent(self.PROLOG)
         head = dedent(self.MISSING_HEAD)
         tail = dedent(self.MISSING_TAIL)
         #
+        fileobj.write(prlg)
         fileobj.write(head)
         if suite is None:
+            for name in (
+                'MPI_Status_c2f',
+                'MPI_Status_f2c',
+                'MPI_Type_create_f90_integer',
+                'MPI_Type_create_f90_real',
+                'MPI_Type_create_f90_complex',
+            ):
+                fileobj.write(dedent(f"""\
+                #ifdef PyMPI_MISSING_{name}
+                #undef PyMPI_HAVE_{name}
+                #endif
+                \n"""))
             for node in self:
                 fileobj.write(node.missing())
         else:
@@ -607,7 +636,7 @@ class Generator:
     #endif /* !PyMPI_LARGECNT_H */
     """
 
-    LARGECNT_RE = re.compile(r'^mpi_({})_c$'.format('|'.join([
+    LARGECNT_RE = re_compile(r'^mpi_({})_c$'.format('|'.join([
         r'(i?(b|s|r|p)?send(_init)?(recv(_replace)?)?)',
         r'(i?m?p?recv(_init)?)',
         r'(buffer_(at|de)tach|get_count)',
@@ -757,9 +786,11 @@ class Generator:
             yield dedent(end)
             yield '\n'
 
+        prlg = dedent(self.PROLOG)
         head = dedent(self.LARGECNT_HEAD)
         tail = dedent(self.LARGECNT_TAIL)
         self.largecnt = 0
+        fileobj.write(prlg)
         fileobj.write(head)
         for name in largecount_functions():
             self.largecnt += 1
@@ -767,11 +798,10 @@ class Generator:
                 fileobj.write(code)
         fileobj.write(tail)
 
+
 # -----------------------------------------
 
 if __name__ == '__main__':
-    import os
-    import sys
     import argparse
 
     parser = argparse.ArgumentParser(description='MPI API generator')
@@ -803,7 +833,7 @@ if __name__ == '__main__':
 
     missing_h = os.path.join('src', 'lib-mpi', 'missing.h')
     log(f'writing file {missing_h}')
-    generator.dump_missing_h(missing_h, None)
+    generator.dump_missing_h(missing_h)
 
     largecnt_h = os.path.join('src', 'lib-mpi', 'largecnt.h')
     log(f'writing file {largecnt_h}')
