@@ -101,6 +101,7 @@ cdef inline int named_Datatype(MPI_Datatype arg) noexcept nogil:
     if arg == MPI_LOGICAL2                : return 1
     if arg == MPI_LOGICAL4                : return 1
     if arg == MPI_LOGICAL8                : return 1
+    if arg == MPI_LOGICAL16               : return 1
     if arg == MPI_INTEGER1                : return 1
     if arg == MPI_INTEGER2                : return 1
     if arg == MPI_INTEGER4                : return 1

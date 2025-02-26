@@ -132,6 +132,7 @@ cdef extern from "<mpi.h>" nogil:
     MPI_Datatype MPI_LOGICAL2  #:= MPI_DATATYPE_NULL
     MPI_Datatype MPI_LOGICAL4  #:= MPI_DATATYPE_NULL
     MPI_Datatype MPI_LOGICAL8  #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_LOGICAL16 #:= MPI_DATATYPE_NULL
     MPI_Datatype MPI_INTEGER1  #:= MPI_DATATYPE_NULL
     MPI_Datatype MPI_INTEGER2  #:= MPI_DATATYPE_NULL
     MPI_Datatype MPI_INTEGER4  #:= MPI_DATATYPE_NULL
@@ -179,6 +180,7 @@ cdef extern from "<mpi.h>" nogil:
     int MPI_Type_create_f90_integer(int, MPI_Datatype*)
     int MPI_Type_create_f90_real(int, int, MPI_Datatype*)
     int MPI_Type_create_f90_complex(int, int, MPI_Datatype*)
+    enum: MPI_TYPECLASS_LOGICAL  #:= MPI_UNDEFINED
     enum: MPI_TYPECLASS_INTEGER  #:= MPI_UNDEFINED
     enum: MPI_TYPECLASS_REAL     #:= MPI_UNDEFINED
     enum: MPI_TYPECLASS_COMPLEX  #:= MPI_UNDEFINED
