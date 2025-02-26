@@ -56,6 +56,22 @@ AddTypeMap(TypeDict, "F"  , __C_FLOAT_COMPLEX__         )  # NumPy
 AddTypeMap(TypeDict, "D"  , __C_DOUBLE_COMPLEX__        )  # NumPy
 AddTypeMap(TypeDict, "G"  , __C_LONG_DOUBLE_COMPLEX__   )  # NumPy
 
+# integer (F90)
+AddTypeMap(TypeDict, "i1"  , __INTEGER1__  )  # NumPy
+AddTypeMap(TypeDict, "i2"  , __INTEGER2__  )  # NumPy
+AddTypeMap(TypeDict, "i4"  , __INTEGER4__  )  # NumPy
+AddTypeMap(TypeDict, "i8"  , __INTEGER8__  )  # NumPy
+AddTypeMap(TypeDict, "i16" , __INTEGER16__ )
+# real floating (F90)
+AddTypeMap(TypeDict, "f2"  , __REAL2__     )  # NumPy
+AddTypeMap(TypeDict, "f4"  , __REAL4__     )  # NumPy
+AddTypeMap(TypeDict, "f8"  , __REAL8__     )  # NumPy
+AddTypeMap(TypeDict, "f16" , __REAL16__    )  # NumPy
+# complex floating (F90)
+AddTypeMap(TypeDict, "c4"  , __COMPLEX4__  )  # NumPy
+AddTypeMap(TypeDict, "c8"  , __COMPLEX8__  )  # NumPy
+AddTypeMap(TypeDict, "c16" , __COMPLEX16__ )  # NumPy
+AddTypeMap(TypeDict, "c32" , __COMPLEX32__ )  # NumPy
 # boolean (C99/C++)
 AddTypeMap(TypeDict, "b1" , __CXX_BOOL__ )  # NumPy
 AddTypeMap(TypeDict, "b1" , __C_BOOL__   )  # NumPy

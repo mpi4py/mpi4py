@@ -7,7 +7,7 @@
 #ifndef MPI_REAL2
 #undef PyMPI_HAVE_MPI_REAL2
 #endif
-#ifndef MPI_MPI_COMPLEX4
+#ifndef MPI_COMPLEX4
 #undef PyMPI_HAVE_MPI_COMPLEX4
 #endif
 
