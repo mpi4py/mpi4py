@@ -39,9 +39,9 @@ static int PyMPI_MPICH_MPI_Open_port(MPI_Info info, char *port_name)
 #undef  MPI_Open_port
 #define MPI_Open_port PyMPI_MPICH_MPI_Open_port
 
-static int PyMPI_MPICH_MPI_Lookup_name(char       *service_name,
-                                       MPI_Info   info,
-                                       char       *port_name)
+static int PyMPI_MPICH_MPI_Lookup_name(char     *service_name,
+                                       MPI_Info info,
+                                       char     *port_name)
 {
   int ierr;
   ierr = PyMPI_MPICH_port_info(info, &info); if (ierr) return ierr;
@@ -56,21 +56,19 @@ static int PyMPI_MPICH_MPI_Lookup_name(char       *service_name,
 
 /* https://github.com/pmodels/mpich/issues/6981 */
 
-#if MPI_VERSION == 4 && MPI_SUBVERSION <= 1
-
-#if (MPICH_NUMVERSION < 40300300) || defined(CIBUILDWHEEL)
+#if (MPICH_NUMVERSION < 40300300) || defined(PyMPI_WITH_LEGACY_ABI)
 static int PyMPI_MPICH_MPI_Info_free(MPI_Info *info)
 {
-  if (info && *info == MPI_INFO_ENV) {
-    (void) MPI_Comm_call_errhandler(MPI_COMM_SELF, MPI_ERR_INFO);
-    return MPI_ERR_INFO;
-  }
+  int numversion =  pympi_numversion();
+  if (numversion >= 40 && numversion <= 41)
+    if (info && *info == MPI_INFO_ENV) {
+      (void) MPI_Comm_call_errhandler(MPI_COMM_SELF, MPI_ERR_INFO);
+      return MPI_ERR_INFO;
+    }
   return MPI_Info_free(info);
 }
 #undef  MPI_Info_free
 #define MPI_Info_free PyMPI_MPICH_MPI_Info_free
-#endif
-
 #endif
 
 /* -------------------------------------------------------------------------- */
@@ -80,7 +78,7 @@ static int PyMPI_MPICH_MPI_Info_free(MPI_Info *info)
 
 #if MPI_VERSION == 4 && MPI_SUBVERSION == 0
 
-#if (MPICH_NUMVERSION < 40003300) || defined(CIBUILDWHEEL)
+#if (MPICH_NUMVERSION < 40003300) || defined(PyMPI_WITH_LEGACY_ABI)
 static int PyMPI_MPICH_MPI_Status_set_elements_c(MPI_Status *status,
                                                  MPI_Datatype datatype,
                                                  MPI_Count elements)
@@ -91,7 +89,7 @@ static int PyMPI_MPICH_MPI_Status_set_elements_c(MPI_Status *status,
 #define MPI_Status_set_elements_c PyMPI_MPICH_MPI_Status_set_elements_c
 #endif
 
-#if defined(CIBUILDWHEEL) && defined(__linux__)
+#if defined(PyMPI_WITH_LEGACY_ABI) && defined(__linux__)
 #undef MPI_Status_set_elements_c
 extern int MPI_Status_set_elements_c(MPI_Status *, MPI_Datatype, MPI_Count)
 __attribute__((weak, alias("PyMPI_MPICH_MPI_Status_set_elements_c")));
@@ -104,26 +102,24 @@ __attribute__((weak, alias("PyMPI_MPICH_MPI_Status_set_elements_c")));
 /* https://github.com/pmodels/mpich/issues/6351 */
 /* https://github.com/pmodels/mpich/pull/6354   */
 
-#if MPI_VERSION == 4 && MPI_SUBVERSION == 0
-
-#if (MPICH_NUMVERSION < 40100300) || defined(CIBUILDWHEEL)
+#if (MPICH_NUMVERSION < 40100300) || defined(PyMPI_WITH_LEGACY_ABI)
 static int PyMPI_MPICH_MPI_Reduce_c(void *sendbuf, void *recvbuf,
                                     MPI_Count count, MPI_Datatype datatype,
                                     MPI_Op op, int root, MPI_Comm comm)
 {
-  char dummy[1] = {0};
-  if (!sendbuf && (root == MPI_ROOT || root == MPI_PROC_NULL)) sendbuf = dummy;
+  double dummy[1] = {0};
+  if (pympi_numversion() == 40)
+    if (!sendbuf && (root == MPI_ROOT || root == MPI_PROC_NULL))
+      sendbuf = dummy;
   return MPI_Reduce_c(sendbuf, recvbuf, count, datatype, op, root, comm);
 }
 #undef  MPI_Reduce_c
 #define MPI_Reduce_c PyMPI_MPICH_MPI_Reduce_c
 #endif
 
-#endif
-
 /* -------------------------------------------------------------------------- */
 
-#if defined(CIBUILDWHEEL)
+#if defined(PyMPI_WITH_LEGACY_ABI)
 
 #define PyMPI_MPICH_CALL_WEAK_SYMBOL(function, ...) \
   if (function) return function(__VA_ARGS__); \

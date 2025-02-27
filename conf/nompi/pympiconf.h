@@ -968,4 +968,4 @@
 #undef  PyMPI_HAVE_MPI_Comm_shrink
 #undef  PyMPI_HAVE_MPI_Comm_ishrink
 
-#endif /* !PyMPI_PYMPICONF_H */
+#endif /* PyMPI_PYMPICONF_H */

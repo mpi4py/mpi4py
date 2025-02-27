@@ -442,7 +442,7 @@ class Generator:
     CONFIG_MACRO = 'PyMPI_HAVE_%s'
     CONFIG_TAIL = """\
 
-    #endif /* !PyMPI_PYMPICONF_H */
+    #endif /* PyMPI_PYMPICONF_H */
     """
     def dump_config_h(self, fileobj, suite):
         if isinstance(fileobj, str):
@@ -488,7 +488,7 @@ class Generator:
 
     """
     MISSING_TAIL = """\
-    #endif /* !PyMPI_MISSING_H */
+    #endif /* PyMPI_MISSING_H */
     """
     def dump_missing_h(self, fileobj, suite=None):
         if isinstance(fileobj, str):
@@ -638,7 +638,7 @@ class Generator:
     """
 
     LARGECNT_BEGIN = """\
-    #ifndef PyMPI_HAVE_%(name)s_c
+    #if !defined(PyMPI_HAVE_%(name)s_c) || PyMPI_WITH_LEGACY_ABI
     """
     LARGECNT_DECLARE = """\
     static int Py%(name)s_c(%(argsdecl)s)
@@ -673,7 +673,7 @@ class Generator:
     """
 
     LARGECNT_TAIL = """\
-    #endif /* !PyMPI_LARGECNT_H */
+    #endif /* PyMPI_LARGECNT_H */
     """
 
     LARGECNT_RE = re_compile(r'^mpi_({})_c$'.format('|'.join([
@@ -989,6 +989,164 @@ class Generator:
                 fileobj.write(code)
         fileobj.write(tail)
 
+    MPIABI_HEAD ="""\
+    #if defined(__linux__) || defined(__APPLE__)
+
+    #define _pympi_Pragma(arg) _Pragma(#arg)
+    #ifdef __linux__
+    #  define _pympi_WEAK(func) _pympi_Pragma(weak func)
+    #endif
+    #ifdef __APPLE__
+    #  define _pympi_WEAK(func) _pympi_Pragma(weak_import func)
+    #endif
+    #define _pympi_CALL(func, ...) \\
+    (func ? func(__VA_ARGS__) : _pympi__##func(__VA_ARGS__))
+
+    #ifdef __cplusplus
+    extern "C"
+    #endif
+    """
+
+    MPIABI_TAIL ="""
+    #ifdef __cplusplus
+    }
+    #endif
+
+    #undef _pympi_CALL
+    #undef _pympi_WEAK
+    #undef _pympi_Pragma
+
+    #endif /* linux || APPLE */
+    """
+
+    def dump_mpiabi_h(self, fileobj, std=True):
+        if isinstance(fileobj, str):
+            with open(fileobj, 'w') as f:
+                self.dump_mpiabi_h(f, std)
+            return
+
+        def abi_function(node):
+            name = node.name
+            rtype = node.crett
+            argsdecl, argscall = [], []
+            for i, t in enumerate(node.cargstype):
+                if t == '...':
+                    argsdecl.append(t)
+                else:
+                    try:
+                        p = t.index('[')
+                    except ValueError:
+                        p = len(t)
+                    t, a = t[:p], t[p:]
+                    argsdecl.append(f'{t} a{i}{a}')
+                    argscall.append(f'a{i}')
+            argsdecl = ','.join(argsdecl) if argsdecl else 'void'
+            argscall = ','.join(argscall) if argscall else ''
+            pympi0 = f'{name}'
+            pympi1 = f'_pympi_{name}'
+            pympi2 = f'_pympi__{name}'
+            fsign0 = f'{rtype} {pympi0}({argsdecl})'
+            fsign1 = f'{rtype} {pympi1}({argsdecl})'
+            fsign2 = f'{rtype} {pympi2}({argsdecl})'
+            fbody1 = f'{{ return _pympi_CALL({name},{argscall}); }}'
+            fbody2 = f'{{ return {name}({argscall}); }}'
+            return dedent(f"""
+            PyMPI_LOCAL {fsign2} {fbody2}
+            #undef {name}
+            #ifndef PyMPI_HAVE_{name}
+            extern {fsign0};
+            #endif
+            _pympi_WEAK({name})
+            PyMPI_LOCAL {fsign1} {fbody1}
+            #define {name} {pympi1}
+            """)
+
+        def abi_handle_openmpi(node):
+            name = node.name.lower()
+            oname = f'ompi_{name}'
+            if node.ctype == 'MPI_Datatype':
+                for old, new in (
+                    ('complex', 'cplex'),
+                    ('double_complex', 'dblcplex'),
+                    ('double_precision', 'dblprec'),
+                    ('long_double_int', 'longdbl_int'),
+                    ('cxx_float_complex', 'cxx_cplex'),
+                    ('cxx_double_complex', 'cxx_dblcplex'),
+                    ('cxx_long_double_complex', 'cxx_ldblcplex'),
+                ):
+                    if oname == f'ompi_mpi_{old}':
+                        oname = f'ompi_mpi_{new}'
+            if node.ctype == 'MPI_Op':
+                if not oname.endswith('_null'):
+                    oname = oname.replace('_mpi_', '_mpi_op_')
+            for htype in ('message', 'request'):
+                if name.startswith(f'mpi_{htype}_'):
+                    oname = f'o{name}'
+            if node.ctype == 'MPI_Session':
+                oname = oname.replace('session', 'instance')
+            return dedent(f"""\
+            _pympi_WEAK({oname})
+            """)
+
+        if std:
+            mpi_version_min = (5, 0)
+            mpi_version_max = (5, 0)
+        else:
+            mpi_version_min = (3, 0)
+            mpi_version_max = (999, 0)
+
+        prlg = dedent(self.PROLOG)
+        head = dedent(self.MPIABI_HEAD)
+        tail = dedent(self.MPIABI_TAIL)
+        fileobj.write(prlg)
+        fileobj.write(head)
+        if not std:
+            fileobj.write(dedent("""
+            #ifdef MPICH
+            """))
+            for node in self:
+                if not isinstance(node, (FunctionC2F, FunctionF2C)):
+                    continue
+                if node.deprecated:
+                    continue
+                if node.version > mpi_version_min:
+                    continue
+                fileobj.write(abi_function(node).lstrip())
+            fileobj.write(dedent("""\
+            #endif /* MPICH */
+            """))
+        if not std:
+            fileobj.write(dedent("""
+            #ifdef OPEN_MPI
+            """))
+            for node in self:
+                if not isinstance(node, HandleValue):
+                    continue
+                if node.deprecated:
+                    continue
+                fileobj.write(abi_handle_openmpi(node))
+            for name in ('MPI_Aint_add', 'MPI_Aint_diff'):
+                fileobj.write(dedent(f"""\
+                #ifdef {name}
+                #undef PyMPI_HAVE_{name}
+                #endif
+                """))
+            fileobj.write(dedent("""\
+            #endif /* OPEN_MPI */
+            """))
+        for node in self:
+            if not isinstance(node, NodeFuncProto):
+                continue
+            if node.deprecated:
+                continue
+            if node.version <= mpi_version_min:
+                continue
+            if node.version >= mpi_version_max:
+                continue
+            fileobj.write(abi_function(node))
+        fileobj.write(tail)
+
+
 
 # -----------------------------------------
 
@@ -1034,6 +1192,14 @@ if __name__ == '__main__':
     log(f'writing file {largecnt_h}')
     generator.dump_largecnt_h(largecnt_h)
     log('generated %d large count fallbacks' % generator.largecnt)
+
+    mpiabi0_h = os.path.join('src', 'lib-mpi', 'mpiabi0.h')
+    log(f'writing file {mpiabi0_h}')
+    generator.dump_mpiabi_h(mpiabi0_h, std=False)
+
+    mpiabi1_h = os.path.join('src', 'lib-mpi', 'mpiabi1.h')
+    log(f'writing file {mpiabi1_h}')
+    generator.dump_mpiabi_h(mpiabi1_h, std=True)
 
     #libmpi_h = os.path.join('.', 'libmpi.h')
     #log('writing file %s' % libmpi_h)

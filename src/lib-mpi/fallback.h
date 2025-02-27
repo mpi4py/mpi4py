@@ -832,44 +832,6 @@ static int PyMPI_Status_set_elements_x(MPI_Status *status,
 #define MPI_Status_set_elements_x PyMPI_Status_set_elements_x
 #endif
 
-#ifndef PyMPI_HAVE_MPI_Aint_add
-static MPI_Aint PyMPI_Aint_add(MPI_Aint base, MPI_Aint disp)
-{
-  return (MPI_Aint) ((char*)base + disp);
-}
-#undef  MPI_Aint_add
-#define MPI_Aint_add PyMPI_Aint_add
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Aint_diff
-static MPI_Aint PyMPI_Aint_diff(MPI_Aint addr1, MPI_Aint addr2)
-{
-  return (MPI_Aint) ((char*)addr1 - (char*)addr2);
-}
-#undef  MPI_Aint_diff
-#define MPI_Aint_diff PyMPI_Aint_diff
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Type_get_value_index
-static int PyMPI_Type_get_value_index(MPI_Datatype value,
-                                      MPI_Datatype index,
-                                      MPI_Datatype *pair)
-{
-  if (!pair) return MPI_ERR_ARG;
-  /**/ if (index != MPI_INT)          *pair = MPI_DATATYPE_NULL;
-  else if (value == MPI_FLOAT)        *pair = MPI_FLOAT_INT;
-  else if (value == MPI_DOUBLE)       *pair = MPI_DOUBLE_INT;
-  else if (value == MPI_LONG_DOUBLE)  *pair = MPI_LONG_DOUBLE_INT;
-  else if (value == MPI_LONG)         *pair = MPI_LONG_INT;
-  else if (value == MPI_INT)          *pair = MPI_2INT;
-  else if (value == MPI_SHORT)        *pair = MPI_SHORT_INT;
-  else                                *pair = MPI_DATATYPE_NULL;
-  return MPI_SUCCESS;
-}
-#undef  MPI_Type_get_value_index
-#define MPI_Type_get_value_index PyMPI_Type_get_value_index
-#endif
-
 /* ---------------------------------------------------------------- */
 
 #ifdef PyMPI_HAVE_MPI_Request_get_status
@@ -947,21 +909,6 @@ static int PyMPI_Comm_dup_with_info(MPI_Comm comm, MPI_Info info,
 }
 #undef  MPI_Comm_dup_with_info
 #define MPI_Comm_dup_with_info PyMPI_Comm_dup_with_info
-#endif
-
-#ifndef PyMPI_HAVE_MPI_Comm_idup_with_info
-static int PyMPI_Comm_idup_with_info(MPI_Comm comm, MPI_Info info,
-                                     MPI_Comm *newcomm, MPI_Request *request)
-{
-  int dummy, ierr;
-  if (info != MPI_INFO_NULL) {
-    ierr = MPI_Info_get_nkeys(info, &dummy);
-    if (ierr != MPI_SUCCESS) return ierr;
-  }
-  return MPI_Comm_idup(comm, newcomm, request);
-}
-#undef  MPI_Comm_idup_with_info
-#define MPI_Comm_idup_with_info PyMPI_Comm_idup_with_info
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Comm_set_info
@@ -1132,30 +1079,6 @@ static int PyMPI_Win_get_info(MPI_Win win, MPI_Info *info)
 
 /* ---------------------------------------------------------------- */
 
-#ifndef PyMPI_HAVE_MPI_Info_get_string
-static int PyMPI_Info_get_string(MPI_Info info,
-                                 char key[],
-                                 int *buflen,
-                                 char value[],
-                                 int *flag)
-{
-  int ierr, valuelen = buflen ? *buflen : 0;
-  if (valuelen) {
-    ierr = MPI_Info_get(info, key, valuelen-1, value, flag);
-    if (ierr != MPI_SUCCESS) return ierr;
-    if (value && flag && *flag) value[valuelen] = 0;
-  }
-  ierr = MPI_Info_get_valuelen(info, key, &valuelen, flag);
-  if (ierr != MPI_SUCCESS) return ierr;
-  if (buflen && flag && *flag) *buflen = valuelen + 1;
-  return MPI_SUCCESS;
-}
-#undef  MPI_Info_get_string
-#define MPI_Info_get_string PyMPI_Info_get_string
-#endif
-
-/* ---------------------------------------------------------------- */
-
 #if ((10 * MPI_VERSION + MPI_SUBVERSION) < 41)
 
 #define PyMPI_GET_NAME_NULLOBJ(MPI_HANDLE_NULL) \
@@ -1195,33 +1118,7 @@ static int PyMPI_Win_get_name(MPI_Win obj, char *name, int *rlen)
 
 /* ---------------------------------------------------------------- */
 
-#ifndef PyMPI_HAVE_MPI_F_SOURCE
-#define PyMPI_F_SOURCE ((int)(offsetof(MPI_Status,MPI_SOURCE)/sizeof(int)))
-#undef  MPI_F_SOURCE
-#define MPI_F_SOURCE PyMPI_F_SOURCE
-#endif
-
-#ifndef PyMPI_HAVE_MPI_F_TAG
-#define PyMPI_F_TAG ((int)(offsetof(MPI_Status,MPI_TAG)/sizeof(int)))
-#undef  MPI_F_TAG
-#define MPI_F_TAG PyMPI_F_TAG
-#endif
-
-#ifndef PyMPI_HAVE_MPI_F_ERROR
-#define PyMPI_F_ERROR ((int)(offsetof(MPI_Status,MPI_ERROR)/sizeof(int)))
-#undef  MPI_F_ERROR
-#define MPI_F_ERROR PyMPI_F_ERROR
-#endif
-
-#ifndef PyMPI_HAVE_MPI_F_STATUS_SIZE
-#define PyMPI_F_STATUS_SIZE ((int)(sizeof(MPI_Status)/sizeof(int)))
-#undef  MPI_F_STATUS_SIZE
-#define MPI_F_STATUS_SIZE PyMPI_F_STATUS_SIZE
-#endif
-
-/* ---------------------------------------------------------------- */
-
-#endif /* !PyMPI_FALLBACK_H */
+#endif /* PyMPI_FALLBACK_H */
 
 /*
   Local variables:

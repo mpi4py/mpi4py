@@ -113,7 +113,7 @@ class TestMPIAPI(unittest.TestCase):
         out = sp.check_output(cmd, close_fds=False)
         nm_output = out.decode()
 
-        regex = re.compile(rf"^_?({self.MPINAME}) U.*$")
+        regex = re.compile(rf"^_?({self.MPINAME}) [UWw].*$")
         mod_symbols = set()
         for line in nm_output.split("\n"):
             match = regex.search(line)

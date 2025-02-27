@@ -4899,4 +4899,4 @@ typedef void (MPIAPI PyMPI_MPI_Handler_function)(MPI_Comm*,int*,...);
 #define MPI_Comm_ishrink(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Comm_ishrink",a1,a2,a3)
 #endif
 
-#endif /* !PyMPI_MISSING_H */
+#endif /* PyMPI_MISSING_H */

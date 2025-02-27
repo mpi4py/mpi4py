@@ -261,4 +261,4 @@ static int PyMPI_Comm_ishrink(MPI_Comm comm,
 
 /* ---------------------------------------------------------------- */
 
-#endif /* !PyMPI_MPIULFM_H */
+#endif /* PyMPI_MPIULFM_H */

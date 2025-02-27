@@ -1,6 +1,6 @@
 #if defined(MPI_ABI_VERSION)
-#  if MPI_ABI_VERSION >= 1
-#    define PyMPI_ABI 1
+#  if MPI_ABI_VERSION < 1
+#    undef MPI_ABI_VERSION
 #  endif
 #endif
 
@@ -18,7 +18,7 @@
 
 #if defined(HAVE_PYMPICONF_H)
 #include "pympiconf.h"
-#elif defined(PyMPI_ABI)
+#elif defined(MPI_ABI_VERSION)
 #include "config/mpiapi.h"
 #elif defined(I_MPI_NUMVERSION)
 #include "config/impi.h"
@@ -34,4 +34,20 @@
 #include "config/openmpi.h"
 #else /* Unknown MPI*/
 #include "config/unknown.h"
+#endif
+
+#if !defined(MPI_ABI_VERSION) && defined(CIBUILDWHEEL)
+#  define PyMPI_WITH_LEGACY_ABI 1
+#else
+#  define PyMPI_WITH_LEGACY_ABI 0
+#endif
+
+#if !defined(PyMPI_LOCAL)
+#  if defined(__cplusplus)
+#    define PyMPI_LOCAL static inline
+#  elif (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L)
+#    define PyMPI_LOCAL static inline
+#  else
+#    define PyMPI_LOCAL static __inline
+#  endif
 #endif

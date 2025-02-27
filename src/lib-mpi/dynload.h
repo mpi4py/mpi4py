@@ -63,7 +63,7 @@
 #define RTLD_GLOBAL RTLD_LOCAL
 #endif
 
-#endif /* !PyMPI_DYNLOAD_H */
+#endif /* PyMPI_DYNLOAD_H */
 
 /*
   Local variables:
