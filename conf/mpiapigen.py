@@ -605,7 +605,7 @@ class Generator:
         if (ierr != MPI_SUCCESS) goto fn_exit;                       \\
       } while (0)                                                 /**/
 
-    #define PyMPICommLocGroupSize(comm, n)                           \\
+    #define PyMPICommLocalGroupSize(comm, n)                         \\
       do {                                                           \\
         ierr = MPI_Comm_size((comm), &(n));                          \\
         if (ierr != MPI_SUCCESS) goto fn_exit;                       \\
@@ -639,6 +639,8 @@ class Generator:
 
     LARGECNT_BEGIN = """\
     #ifndef PyMPI_HAVE_%(name)s_c
+    """
+    LARGECNT_DECLARE = """\
     static int Py%(name)s_c(%(argsdecl)s)
     {
     """
@@ -647,8 +649,8 @@ class Generator:
     PyMPICommSize(a%(commid)d, n);
     """
 
-    LARGECNT_LOCGROUP = """\
-    PyMPICommLocGroupSize(a%(commid)d, n);
+    LARGECNT_LOCALGROUP = """\
+    PyMPICommLocalGroupSize(a%(commid)d, n);
     """
 
     LARGECNT_NEIGHBOR = """\
@@ -656,13 +658,15 @@ class Generator:
     """
 
     LARGECNT_CALL = """\
-    ierr = %(name)s(%(argscall)s);
+    ierr = %(callname)s(%(argscall)s);
     if (ierr != MPI_SUCCESS) goto fn_exit;
     """
 
-    LARGECNT_END = """\
+    LARGECNT_RETURN = """\
       return ierr;
     }
+    """
+    LARGECNT_END = """\
     #undef  %(name)s_c
     #define %(name)s_c Py%(name)s_c
     #endif
@@ -673,6 +677,8 @@ class Generator:
     """
 
     LARGECNT_RE = re_compile(r'^mpi_({})_c$'.format('|'.join([
+        r'type_(.*)',
+        r'(pack|unpack)(_external)?(_size)?',
         r'(i?(b|s|r|p)?send(_init)?(recv(_replace)?)?)',
         r'(i?m?p?recv(_init)?)',
         r'(buffer_(at|de)tach|get_count)',
@@ -682,7 +688,124 @@ class Generator:
         r'(win_(create|allocate(_shared)?|shared_query))',
         r'(r?(put|get|(get_)?accumulate))',
         r'file_(((i)?(read|write).*)|get_type_extent)',
+        r'register_datarep',
     ])))
+
+    LARGECNT_CUSTOM = {
+        'MPI_Type_get_envelope': """\
+        static int PyMPI_Type_get_envelope_c(
+          MPI_Datatype datatype,
+          MPI_Count *num_integers,
+          MPI_Count *num_addresses,
+          MPI_Count *num_large_counts,
+          MPI_Count *num_datatypes,
+          int *combiner)
+        {
+          int ierr; int ni = 0, na = 0, nd = 0;
+          ierr = MPI_Type_get_envelope(datatype, &ni, &na, &nd, combiner);
+          if (ierr != MPI_SUCCESS) return ierr;
+          if (num_integers) *num_integers     = ni;
+          if (num_addresses) *num_addresses    = na;
+          if (num_large_counts) *num_large_counts = 0;
+          if (num_datatypes) *num_datatypes    = nd;
+          return ierr;
+        }
+        """,
+        'MPI_Type_get_contents': """\
+        static int PyMPI_Type_get_contents_c(
+          MPI_Datatype datatype,
+          MPI_Count max_integers,
+          MPI_Count max_addresses,
+          MPI_Count max_large_counts,
+          MPI_Count max_datatypes,
+          int integers[],
+          MPI_Aint addresses[],
+          MPI_Count large_counts[],
+          MPI_Datatype datatypes[])
+        {
+          int ierr; int ni, na, nd;
+          PyMPICastValue(int, ni, MPI_Count, max_integers);
+          PyMPICastValue(int, na, MPI_Count, max_addresses);
+          PyMPICastValue(int, nd, MPI_Count, max_datatypes);
+          ierr = MPI_Type_get_contents(datatype,
+                                       ni, na, nd,
+                                       integers,
+                                       addresses,
+                                       datatypes);
+          (void)max_large_counts;
+          (void)large_counts;
+         fn_exit:
+          return ierr;
+        }
+        """,
+        'MPI_Register_datarep': """\
+        typedef struct PyMPI_datarep_s {
+          MPI_Datarep_conversion_function_c *read_fn;
+          MPI_Datarep_conversion_function_c *write_fn;
+          MPI_Datarep_extent_function *extent_fn;
+          void *extra_state;
+        } PyMPI_datarep_t;
+
+        static int MPIAPI
+          PyMPI_datarep_read_fn(
+          void *userbuf,
+          MPI_Datatype datatype,
+          int count,
+          void *filebuf,
+          MPI_Offset position,
+          void *extra_state)
+        {
+          PyMPI_datarep_t *drep = (PyMPI_datarep_t *) extra_state;
+          return drep->read_fn(userbuf, datatype, count,
+                               filebuf, position,
+                               drep->extra_state);
+        }
+
+        static int MPIAPI
+        PyMPI_datarep_write_fn(
+          void *userbuf,
+          MPI_Datatype datatype,
+          int count,
+          void *filebuf,
+          MPI_Offset position,
+          void *extra_state)
+        {
+          PyMPI_datarep_t *drep = (PyMPI_datarep_t *) extra_state;
+          return drep->write_fn(userbuf, datatype, count,
+                                filebuf, position,
+                                drep->extra_state);
+        }
+
+        static int PyMPI_Register_datarep_c(
+          char *datarep,
+          MPI_Datarep_conversion_function_c *read_conversion_fn,
+          MPI_Datarep_conversion_function_c *write_conversion_fn,
+          MPI_Datarep_extent_function *dtype_file_extent_fn,
+          void *extra_state)
+        {
+          static int n = 0; enum {N=64};
+          static PyMPI_datarep_t registry[N];
+          PyMPI_datarep_t *drep = (n < N) ? &registry[n++] :
+            (PyMPI_datarep_t *) PyMPI_MALLOC(sizeof(PyMPI_datarep_t));
+
+          MPI_Datarep_conversion_function *r_fn = MPI_CONVERSION_FN_NULL;
+          MPI_Datarep_conversion_function *w_fn = MPI_CONVERSION_FN_NULL;
+          MPI_Datarep_extent_function *e_fn = dtype_file_extent_fn;
+
+          drep->read_fn = read_conversion_fn;
+          drep->write_fn = write_conversion_fn;
+          drep->extent_fn = dtype_file_extent_fn;
+          drep->extra_state = extra_state;
+
+          if (read_conversion_fn != MPI_CONVERSION_FN_NULL_C)
+            r_fn = PyMPI_datarep_read_fn;
+          if (write_conversion_fn != MPI_CONVERSION_FN_NULL_C)
+            w_fn = PyMPI_datarep_write_fn;
+
+          return MPI_Register_datarep(datarep, r_fn, w_fn, e_fn, drep);
+        }
+        """,
+    }
 
     def dump_largecnt_h(self, fileobj):
         if isinstance(fileobj, str):
@@ -711,15 +834,36 @@ class Generator:
             return code
 
         def generate(name):
-            is_neighbor = 'neighbor' in name.lower()
+            if name in self.LARGECNT_CUSTOM:
+                subs = {'name': name}
+                begin = self.LARGECNT_BEGIN % subs
+                end = self.LARGECNT_END % subs
+                code = self.LARGECNT_CUSTOM[name]
+                yield dedent(begin)
+                yield dedent(code)
+                yield dedent(end)
+                yield '\n'
+                return
+
+            subname = name[4:].lower()
+            is_neighbor = 'neighbor' in subname
             is_nonblocking = name.startswith('MPI_I')
-            node1 = self[name+'_c']
+            is_datatype = subname.startswith('type_')
+            is_datatype_darray = subname.endswith('_create_darray')
+            is_packunpack = any(map(subname.startswith, ('pack', 'unpack')))
+            is_packunpack_size = is_packunpack and subname.endswith('_size')
+
+            node1 = self[name + '_c']
             node2 = self[name]
+            try:
+                node2 = self[name + '_x']
+            except KeyError:
+                pass
+            callname = node2.name
 
             cargstype1 = node1.cargstype
             cargstype2 = node2.cargstype
             argstype = list(zip(cargstype1, cargstype2))
-
             convert_array = False
             for (t1, t2) in argstype:
                 if t1 != t2:
@@ -766,6 +910,8 @@ class Generator:
                     if t1.endswith('[]'):
                         t1, t2, n = t1[:-2], t2[:-2], 'n'
                         argstemp += [declare(t2, '*b%d' % i, 'NULL')]
+                        if is_datatype:
+                            n = 'a1' if 'darray' not in name else 'a3'
                         if is_neighbor:
                             n = ('ns', 'nr')[dtypeidx]
                         subs = (t2, i, t1, i, n)
@@ -782,6 +928,10 @@ class Generator:
                         argstemp += [declare(t2+'*', 'p%d' % i, pinit)]
                         argscall += ['p%d' % i]
                         argsoutp += ['if (a%d) *a%d = b%d' % (i, i, i)]
+                        if is_packunpack and not is_packunpack_size:
+                            subs = (t2, i, t1, f'a{i} ? *a{i} : 0')
+                            castvalue = CASTVALUE.replace('a%d', '%s')
+                            argsconv += [castvalue % subs]
                     else:
                         subs = (t2, i, t1, i)
                         argstemp += [declare(t2, 'b%d' % i)]
@@ -791,23 +941,27 @@ class Generator:
             tab = '  '
             subs = {
                 'name':     name,
+                'callname': callname,
                 'argsdecl': (',\n'+' '*(len(name)+20)).join(argslist),
                 'argscall': ', '.join(argscall),
                 'commid':   commid,
             }
             begin = self.LARGECNT_BEGIN % subs
+            fdecl = self.LARGECNT_DECLARE % subs
             if commid is None:
                 setup = ''
             elif is_neighbor:
                 setup = self.LARGECNT_NEIGHBOR % subs
             elif 'reduce_scatter' in name.lower():
-                setup = self.LARGECNT_LOCGROUP % subs
+                setup = self.LARGECNT_LOCALGROUP % subs
             else:
                 setup = self.LARGECNT_COLLECTIVE % subs
             call = self.LARGECNT_CALL % subs
+            ret = self.LARGECNT_RETURN % subs
             end = self.LARGECNT_END % subs
 
             yield dedent(begin)
+            yield dedent(fdecl)
             yield indent('{};\n'.format('; '.join(argsinit)), tab)
             yield indent('{};\n'.format('; '.join(argstemp)), tab)
             yield indent(dedent(setup), tab)
@@ -819,6 +973,7 @@ class Generator:
             yield indent('fn_exit:\n', tab[:-1])
             for line in argsfree:
                 yield indent(f'{line};\n', tab)
+            yield dedent(ret)
             yield dedent(end)
             yield '\n'
 
