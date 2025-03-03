@@ -70,6 +70,24 @@ if MPI.Get_version() < (4, 1):
         'MPI_Get_hw_resource_info',
     ]
 
+if MPI.Get_version() < (5, 0):
+    for _type in (
+        'Comm',
+        'Errhandler',
+        'File',
+        'Group',
+        'Info',
+        'Message',
+        'Op',
+        'Request',
+        'Session',
+        'Type',
+        'Win',
+    ):
+        mpi_missing += [
+            f'MPI_{_type}_fromint',
+            f'MPI_{_type}_toint',
+        ]
 if MPI.Get_version() < (6, 0):
     mpi_missing += [
         'MPI_Comm_ack_failed',

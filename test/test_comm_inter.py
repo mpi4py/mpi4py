@@ -41,12 +41,18 @@ class BaseTestIntercomm:
         self.INTRACOMM.Free()
         self.INTERCOMM.Free()
 
-    def testFortran(self):
+    def testHandle(self):
         intercomm = self.INTERCOMM
+        cint = intercomm.toint()
+        if cint != -1:
+            newcomm = MPI.Comm.fromint(cint)
+            self.assertEqual(newcomm, intercomm)
+            self.assertIs(type(newcomm), MPI.Intercomm)
         fint = intercomm.py2f()
-        newcomm = MPI.Comm.f2py(fint)
-        self.assertEqual(newcomm, intercomm)
-        self.assertIs(type(newcomm), MPI.Intercomm)
+        if fint != -1:
+            newcomm = MPI.Comm.f2py(fint)
+            self.assertEqual(newcomm, intercomm)
+            self.assertIs(type(newcomm), MPI.Intercomm)
 
     def testLocalGroupSizeRank(self):
         intercomm = self.INTERCOMM

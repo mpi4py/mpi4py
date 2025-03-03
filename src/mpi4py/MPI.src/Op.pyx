@@ -127,6 +127,22 @@ cdef class Op:
                 op == MPI_NO_OP
             )
 
+    # Integer Handle
+    # --------------
+
+    def toint(self) -> int:
+        """
+        Translate object to integer handle.
+        """
+        return MPI_Op_toint(self.ob_mpi)
+
+    @classmethod
+    def fromint(cls, arg: int, /) -> Op:
+        """
+        Translate integer handle to object.
+        """
+        return fromhandle(MPI_Op_fromint(arg))
+
     # Fortran Handle
     # --------------
 

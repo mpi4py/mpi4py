@@ -1204,6 +1204,34 @@ cdef extern from "<mpi.h>" nogil:
 
     #-----------------------------------------------------------------
 
+    # handle -> int
+    int MPI_Comm_toint       (MPI_Comm)
+    int MPI_Errhandler_toint (MPI_Errhandler)
+    int MPI_File_toint       (MPI_File)
+    int MPI_Group_toint      (MPI_Group)
+    int MPI_Info_toint       (MPI_Info)
+    int MPI_Message_toint    (MPI_Message)
+    int MPI_Op_toint         (MPI_Op)
+    int MPI_Request_toint    (MPI_Request)
+    int MPI_Session_toint    (MPI_Session)
+    int MPI_Type_toint       (MPI_Datatype)
+    int MPI_Win_toint        (MPI_Win)
+
+    # int -> handle
+    MPI_Comm       MPI_Comm_fromint       (int)
+    MPI_Errhandler MPI_Errhandler_fromint (int)
+    MPI_File       MPI_File_fromint       (int)
+    MPI_Group      MPI_Group_fromint      (int)
+    MPI_Info       MPI_Info_fromint       (int)
+    MPI_Message    MPI_Message_fromint    (int)
+    MPI_Op         MPI_Op_fromint         (int)
+    MPI_Request    MPI_Request_fromint    (int)
+    MPI_Session    MPI_Session_fromint    (int)
+    MPI_Datatype   MPI_Type_fromint       (int)
+    MPI_Win        MPI_Win_fromint        (int)
+
+    #-----------------------------------------------------------------
+
     # Deprecated since MPI-4.1
     enum: MPI_HOST #:= MPI_KEYVAL_INVALID
 

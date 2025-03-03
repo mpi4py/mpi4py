@@ -107,14 +107,12 @@ class TestOp(unittest.TestCase):
         except NotImplementedError:
             pass
         # pickling support
-        try:
-            for op in ops:
-                op.__reduce__()
-                clon = MPI.Op.f2py(op.py2f())
+        for op in ops:
+            op.__reduce__()
+            if op.toint() != -1:
+                clon = MPI.Op.fromint(op.toint())
                 with self.assertRaises(ValueError):
                     clon.__reduce__()
-        except NotImplementedError:
-            pass
         # cleanup
         for op in ops:
             op.Free()

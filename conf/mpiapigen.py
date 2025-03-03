@@ -81,6 +81,11 @@ annotation = r'\#\:\='
 fallback_value = r'\(?[A-Za-z0-9_\+\-\(\)\*]+\)?'
 fallback = rf'(?:{join(annotation, [fallback_value])})?'
 
+cint_type = r'int'
+cmpi_type = opaque_type.replace('Datatype', 'Type')
+h2i_name = cmpi_type+'_toint'
+i2h_name = cmpi_type+'_fromint'
+
 fint_type = r'MPI_Fint'
 fmpi_type = opaque_type.replace('Datatype', 'Type')
 c2f_name  = fmpi_type+'_c2f'
@@ -100,8 +105,10 @@ class Re:
     INTEGRAL_PTRVAL = r_(sol, [integral_type, pointer], [upper_name], fallback, eol)
     STRUCT_PTRVAL   = r_(sol, [struct_type, pointer], [upper_name], fallback, eol)
     FUNCTION_PTRVAL = r_(sol, [usrfun_name, pointer], [upper_name], fallback, eol)
-    FUNCTION_PROTO  = r_(sol, [ret_type], [camel_name], lparen, [arg_list], rparen, fallback, eol)
 
+    FUNCTION_PROTO  = r_(sol, [ret_type],  [camel_name], lparen, [arg_list],    rparen, fallback, eol)
+    FUNCTION_H2I    = r_(sol, [cint_type],   [h2i_name], lparen, [opaque_type], rparen, fallback, eol)
+    FUNCTION_I2H    = r_(sol, [opaque_type], [i2h_name], lparen, [cint_type],   rparen, fallback, eol)
     FUNCTION_C2F    = r_(sol, [fint_type],   [c2f_name], lparen, [opaque_type], rparen, fallback, eol)
     FUNCTION_F2C    = r_(sol, [opaque_type], [f2c_name], lparen, [fint_type],   rparen, fallback, eol)
 
@@ -319,30 +326,61 @@ class FunctionPtrVal(NodePtrVal):
 class FunctionProto(NodeFuncProto):
     REGEX = Re.FUNCTION_PROTO
 
+class FunctionH2I(NodeFuncProto):
+    REGEX = Re.FUNCTION_H2I
+    MISSING = ' '.join([
+        '#define %(cname)s(%(cargsnamed)s)',
+        '((int)%(fallback)s(%(cargsnamed)s))'])
+    def __init__(self, *a, **k):
+        NodeFuncProto.__init__(self, *a, **k)
+        self.fallback = self.name.replace('_toint', '_c2f')
+
+class FunctionI2H(NodeFuncProto):
+    REGEX = Re.FUNCTION_I2H
+    MISSING = ' '.join([
+        '#define %(cname)s(%(cargsnamed)s)',
+        '(%(fallback)s((int)%(cargsnamed)s))'])
+    def __init__(self, *a, **k):
+        NodeFuncProto.__init__(self, *a, **k)
+        self.fallback = self.name.replace('_fromint', '_f2c')
+
 class FunctionC2F(NodeFuncProto):
     REGEX = Re.FUNCTION_C2F
-    MISSING = ' '.join(['#define %(cname)s(%(cargsnamed)s)',
-                       '((void)%(cargsnamed)s,(%(crett)s)0)'])
+    MISSING = ' '.join([
+        '#define %(cname)s(%(cargsnamed)s)',
+        '((void)%(cargsnamed)s,%(cretv)s)'])
+    def __init__(self, *a, **k):
+        NodeFuncProto.__init__(self, *a, **k)
+        self.cretv =  f'({self.crett})-1'
 
 class FunctionF2C(NodeFuncProto):
     REGEX = Re.FUNCTION_F2C
-    MISSING = ' '.join(['#define %(cname)s(%(cargsnamed)s)',
-                       '((void)%(cargsnamed)s,%(cretv)s)'])
+    MISSING = ' '.join([
+        '#define %(cname)s(%(cargsnamed)s)',
+        '((void)%(cargsnamed)s,%(cretv)s)'])
     def __init__(self, *a, **k):
         NodeFuncProto.__init__(self, *a, **k)
-        self.cretv =  self.crett.upper() + '_NULL'
+        self.cretv =  f'({self.crett})0'
 
 class Generator:
 
     NODE_TYPES = [
         IntegralType,
-        StructType, OpaqueType,
-        HandleValue, EnumValue,
+        StructType,
+        OpaqueType,
+        FunctionType,
+        HandleValue,
+        EnumValue,
         BasicPtrVal,
-        IntegralPtrVal, StructPtrVal,
-        FunctionType, FunctionPtrVal,
-        FunctionProto, FunctionC2F, FunctionF2C,
-        ]
+        IntegralPtrVal,
+        StructPtrVal,
+        FunctionPtrVal,
+        FunctionH2I,
+        FunctionI2H,
+        FunctionC2F,
+        FunctionF2C,
+        FunctionProto,
+    ]
 
     def __init__(self):
         self.nodes = []

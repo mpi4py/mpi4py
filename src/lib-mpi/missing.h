@@ -4567,112 +4567,222 @@ typedef int PyMPI_MPI_Fint;
 
 #ifndef PyMPI_HAVE_MPI_Type_c2f
 #undef  MPI_Type_c2f
-#define MPI_Type_c2f(a1) ((void)a1,(MPI_Fint)0)
+#define MPI_Type_c2f(a1) ((void)a1,(MPI_Fint)-1)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Request_c2f
 #undef  MPI_Request_c2f
-#define MPI_Request_c2f(a1) ((void)a1,(MPI_Fint)0)
+#define MPI_Request_c2f(a1) ((void)a1,(MPI_Fint)-1)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Message_c2f
 #undef  MPI_Message_c2f
-#define MPI_Message_c2f(a1) ((void)a1,(MPI_Fint)0)
+#define MPI_Message_c2f(a1) ((void)a1,(MPI_Fint)-1)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Op_c2f
 #undef  MPI_Op_c2f
-#define MPI_Op_c2f(a1) ((void)a1,(MPI_Fint)0)
+#define MPI_Op_c2f(a1) ((void)a1,(MPI_Fint)-1)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Group_c2f
 #undef  MPI_Group_c2f
-#define MPI_Group_c2f(a1) ((void)a1,(MPI_Fint)0)
+#define MPI_Group_c2f(a1) ((void)a1,(MPI_Fint)-1)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Info_c2f
 #undef  MPI_Info_c2f
-#define MPI_Info_c2f(a1) ((void)a1,(MPI_Fint)0)
+#define MPI_Info_c2f(a1) ((void)a1,(MPI_Fint)-1)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Session_c2f
 #undef  MPI_Session_c2f
-#define MPI_Session_c2f(a1) ((void)a1,(MPI_Fint)0)
+#define MPI_Session_c2f(a1) ((void)a1,(MPI_Fint)-1)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Comm_c2f
 #undef  MPI_Comm_c2f
-#define MPI_Comm_c2f(a1) ((void)a1,(MPI_Fint)0)
+#define MPI_Comm_c2f(a1) ((void)a1,(MPI_Fint)-1)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Win_c2f
 #undef  MPI_Win_c2f
-#define MPI_Win_c2f(a1) ((void)a1,(MPI_Fint)0)
+#define MPI_Win_c2f(a1) ((void)a1,(MPI_Fint)-1)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_File_c2f
 #undef  MPI_File_c2f
-#define MPI_File_c2f(a1) ((void)a1,(MPI_Fint)0)
+#define MPI_File_c2f(a1) ((void)a1,(MPI_Fint)-1)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Errhandler_c2f
 #undef  MPI_Errhandler_c2f
-#define MPI_Errhandler_c2f(a1) ((void)a1,(MPI_Fint)0)
+#define MPI_Errhandler_c2f(a1) ((void)a1,(MPI_Fint)-1)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Type_f2c
 #undef  MPI_Type_f2c
-#define MPI_Type_f2c(a1) ((void)a1,MPI_DATATYPE_NULL)
+#define MPI_Type_f2c(a1) ((void)a1,(MPI_Datatype)0)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Request_f2c
 #undef  MPI_Request_f2c
-#define MPI_Request_f2c(a1) ((void)a1,MPI_REQUEST_NULL)
+#define MPI_Request_f2c(a1) ((void)a1,(MPI_Request)0)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Message_f2c
 #undef  MPI_Message_f2c
-#define MPI_Message_f2c(a1) ((void)a1,MPI_MESSAGE_NULL)
+#define MPI_Message_f2c(a1) ((void)a1,(MPI_Message)0)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Op_f2c
 #undef  MPI_Op_f2c
-#define MPI_Op_f2c(a1) ((void)a1,MPI_OP_NULL)
+#define MPI_Op_f2c(a1) ((void)a1,(MPI_Op)0)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Group_f2c
 #undef  MPI_Group_f2c
-#define MPI_Group_f2c(a1) ((void)a1,MPI_GROUP_NULL)
+#define MPI_Group_f2c(a1) ((void)a1,(MPI_Group)0)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Info_f2c
 #undef  MPI_Info_f2c
-#define MPI_Info_f2c(a1) ((void)a1,MPI_INFO_NULL)
+#define MPI_Info_f2c(a1) ((void)a1,(MPI_Info)0)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Session_f2c
 #undef  MPI_Session_f2c
-#define MPI_Session_f2c(a1) ((void)a1,MPI_SESSION_NULL)
+#define MPI_Session_f2c(a1) ((void)a1,(MPI_Session)0)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Comm_f2c
 #undef  MPI_Comm_f2c
-#define MPI_Comm_f2c(a1) ((void)a1,MPI_COMM_NULL)
+#define MPI_Comm_f2c(a1) ((void)a1,(MPI_Comm)0)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Win_f2c
 #undef  MPI_Win_f2c
-#define MPI_Win_f2c(a1) ((void)a1,MPI_WIN_NULL)
+#define MPI_Win_f2c(a1) ((void)a1,(MPI_Win)0)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_File_f2c
 #undef  MPI_File_f2c
-#define MPI_File_f2c(a1) ((void)a1,MPI_FILE_NULL)
+#define MPI_File_f2c(a1) ((void)a1,(MPI_File)0)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Errhandler_f2c
 #undef  MPI_Errhandler_f2c
-#define MPI_Errhandler_f2c(a1) ((void)a1,MPI_ERRHANDLER_NULL)
+#define MPI_Errhandler_f2c(a1) ((void)a1,(MPI_Errhandler)0)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Comm_toint
+#undef  MPI_Comm_toint
+#define MPI_Comm_toint(a1) ((int)MPI_Comm_c2f(a1))
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Errhandler_toint
+#undef  MPI_Errhandler_toint
+#define MPI_Errhandler_toint(a1) ((int)MPI_Errhandler_c2f(a1))
+#endif
+
+#ifndef PyMPI_HAVE_MPI_File_toint
+#undef  MPI_File_toint
+#define MPI_File_toint(a1) ((int)MPI_File_c2f(a1))
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Group_toint
+#undef  MPI_Group_toint
+#define MPI_Group_toint(a1) ((int)MPI_Group_c2f(a1))
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Info_toint
+#undef  MPI_Info_toint
+#define MPI_Info_toint(a1) ((int)MPI_Info_c2f(a1))
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Message_toint
+#undef  MPI_Message_toint
+#define MPI_Message_toint(a1) ((int)MPI_Message_c2f(a1))
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Op_toint
+#undef  MPI_Op_toint
+#define MPI_Op_toint(a1) ((int)MPI_Op_c2f(a1))
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Request_toint
+#undef  MPI_Request_toint
+#define MPI_Request_toint(a1) ((int)MPI_Request_c2f(a1))
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Session_toint
+#undef  MPI_Session_toint
+#define MPI_Session_toint(a1) ((int)MPI_Session_c2f(a1))
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Type_toint
+#undef  MPI_Type_toint
+#define MPI_Type_toint(a1) ((int)MPI_Type_c2f(a1))
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Win_toint
+#undef  MPI_Win_toint
+#define MPI_Win_toint(a1) ((int)MPI_Win_c2f(a1))
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Comm_fromint
+#undef  MPI_Comm_fromint
+#define MPI_Comm_fromint(a1) (MPI_Comm_f2c((int)a1))
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Errhandler_fromint
+#undef  MPI_Errhandler_fromint
+#define MPI_Errhandler_fromint(a1) (MPI_Errhandler_f2c((int)a1))
+#endif
+
+#ifndef PyMPI_HAVE_MPI_File_fromint
+#undef  MPI_File_fromint
+#define MPI_File_fromint(a1) (MPI_File_f2c((int)a1))
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Group_fromint
+#undef  MPI_Group_fromint
+#define MPI_Group_fromint(a1) (MPI_Group_f2c((int)a1))
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Info_fromint
+#undef  MPI_Info_fromint
+#define MPI_Info_fromint(a1) (MPI_Info_f2c((int)a1))
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Message_fromint
+#undef  MPI_Message_fromint
+#define MPI_Message_fromint(a1) (MPI_Message_f2c((int)a1))
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Op_fromint
+#undef  MPI_Op_fromint
+#define MPI_Op_fromint(a1) (MPI_Op_f2c((int)a1))
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Request_fromint
+#undef  MPI_Request_fromint
+#define MPI_Request_fromint(a1) (MPI_Request_f2c((int)a1))
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Session_fromint
+#undef  MPI_Session_fromint
+#define MPI_Session_fromint(a1) (MPI_Session_f2c((int)a1))
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Type_fromint
+#undef  MPI_Type_fromint
+#define MPI_Type_fromint(a1) (MPI_Type_f2c((int)a1))
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Win_fromint
+#undef  MPI_Win_fromint
+#define MPI_Win_fromint(a1) (MPI_Win_f2c((int)a1))
 #endif
 
 #ifndef PyMPI_HAVE_MPI_HOST

@@ -184,6 +184,22 @@ cdef class Message:
         if self.ob_mpi == MPI_MESSAGE_NULL: self.ob_buf = None
         return request
 
+    # Integer Handle
+    # --------------
+
+    def toint(self) -> int:
+        """
+        Translate object to integer handle.
+        """
+        return MPI_Message_toint(self.ob_mpi)
+
+    @classmethod
+    def fromint(cls, arg: int, /) -> Message:
+        """
+        Translate integer handle to object.
+        """
+        return fromhandle(MPI_Message_fromint(arg))
+
     # Fortran Handle
     # --------------
 

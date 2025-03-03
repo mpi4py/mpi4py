@@ -194,6 +194,22 @@ cdef class Session:
         """
         CHKERR( MPI_Session_call_errhandler(self.ob_mpi, errorcode) )
 
+    # Integer Handle
+    # --------------
+
+    def toint(self) -> int:
+        """
+        Translate object to integer handle.
+        """
+        return MPI_Session_toint(self.ob_mpi)
+
+    @classmethod
+    def fromint(cls, arg: int, /) -> Session:
+        """
+        Translate integer handle to object.
+        """
+        return fromhandle(MPI_Session_fromint(arg))
+
     # Fortran Handle
     # --------------
 
