@@ -7,6 +7,7 @@ ORDER_F       = MPI_ORDER_FORTRAN  #: Convenience alias for ORDER_FORTRAN
 
 # Type classes for Fortran datatype matching
 # ------------------------------------------
+TYPECLASS_LOGICAL = MPI_TYPECLASS_LOGICAL
 TYPECLASS_INTEGER = MPI_TYPECLASS_INTEGER
 TYPECLASS_REAL    = MPI_TYPECLASS_REAL
 TYPECLASS_COMPLEX = MPI_TYPECLASS_COMPLEX
@@ -932,6 +933,7 @@ cdef Datatype __LOGICAL1__  = def_Datatype( MPI_LOGICAL1  , "LOGICAL1"  )
 cdef Datatype __LOGICAL2__  = def_Datatype( MPI_LOGICAL2  , "LOGICAL2"  )
 cdef Datatype __LOGICAL4__  = def_Datatype( MPI_LOGICAL4  , "LOGICAL4"  )
 cdef Datatype __LOGICAL8__  = def_Datatype( MPI_LOGICAL8  , "LOGICAL8"  )
+cdef Datatype __LOGICAL16__ = def_Datatype( MPI_LOGICAL16 , "LOGICAL16" )
 cdef Datatype __INTEGER1__  = def_Datatype( MPI_INTEGER1  , "INTEGER1"  )
 cdef Datatype __INTEGER2__  = def_Datatype( MPI_INTEGER2  , "INTEGER2"  )
 cdef Datatype __INTEGER4__  = def_Datatype( MPI_INTEGER4  , "INTEGER4"  )
@@ -1011,6 +1013,7 @@ LOGICAL1  = __LOGICAL1__
 LOGICAL2  = __LOGICAL2__
 LOGICAL4  = __LOGICAL4__
 LOGICAL8  = __LOGICAL8__
+LOGICAL16 = __LOGICAL16__
 INTEGER1  = __INTEGER1__
 INTEGER2  = __INTEGER2__
 INTEGER4  = __INTEGER4__
