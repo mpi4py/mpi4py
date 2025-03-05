@@ -21,10 +21,15 @@ from mpi4py import MPI
 if rc.errors == 'abort':
     vendor, version = MPI.get_vendor()
     if vendor == 'Intel MPI':
-        sys.exit(0)
-    if vendor == 'MPICH':
-        if version[0] > 3 and version[:2] < (4, 1):
+        if version[:2] < (2021, 11):
             sys.exit(0)
+    if vendor == 'MPICH':
+        if version[:2] < (4, 1):
+            sys.exit(0)
+    if vendor == 'Open MPI':
+        if version[:2] < (5, 0):
+            sys.exit(0)
+
 
 def check_errhandler(obj):
     if rc.errors == 'default':
@@ -35,9 +40,8 @@ def check_errhandler(obj):
     elif rc.errors == 'exception':
         check_eh = MPI.ERRORS_RETURN
     elif rc.errors == 'abort':
-        if MPI.ERRORS_ABORT != MPI.ERRHANDLER_NULL:
-            check_eh = MPI.ERRORS_ABORT
-        else:
+        check_eh = MPI.ERRORS_ABORT
+        if MPI.ERRORS_ABORT == MPI.ERRHANDLER_NULL:
             check_eh = MPI.ERRORS_ARE_FATAL
     elif rc.errors == 'fatal':
         check_eh = MPI.ERRORS_ARE_FATAL

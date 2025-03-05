@@ -283,7 +283,7 @@ try:
 except NotImplementedError:
     unittest.disable(TestInfo, 'mpi-info')
     unittest.disable(TestInfoNull, 'mpi-info')
-if (MPI.VERSION < 3 and MPI.INFO_ENV == MPI.INFO_NULL):
+if (MPI.Get_version() < (3, 0) or MPI.INFO_ENV == MPI.INFO_NULL):
     unittest.disable(TestInfoEnv, 'mpi-info-env')
 
 

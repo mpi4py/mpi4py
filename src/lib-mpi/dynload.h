@@ -63,11 +63,4 @@
 #define RTLD_GLOBAL RTLD_LOCAL
 #endif
 
-#endif /* !PyMPI_DYNLOAD_H */
-
-/*
-  Local variables:
-  c-basic-offset: 2
-  indent-tabs-mode: nil
-  End:
-*/
+#endif /* PyMPI_DYNLOAD_H */

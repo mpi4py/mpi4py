@@ -1,4 +1,4 @@
-#if defined(PyMPI_ABI)
+#if defined(MPI_ABI_VERSION)
 #include "compat/mpiabi.h"
 #elif defined(I_MPI_NUMVERSION)
 #include "compat/impi.h"
@@ -17,3 +17,4 @@
 #elif defined(LAM_MPI)
 #include "compat/lammpi.h"
 #endif
+#include "compat/mpi-41.h"
