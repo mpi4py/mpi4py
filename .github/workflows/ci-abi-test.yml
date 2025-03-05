@@ -1,0 +1,24 @@
+name: ci-abi-test
+
+on:  # yamllint disable-line rule:truthy
+  push:  # TODO
+    branches:  # TODO
+      - refactor/mpiabi
+
+permissions:
+  contents: read
+
+jobs:
+
+  abi:
+    uses: ./.github/workflows/ci-abi.yml
+    with:
+      platform: ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - Linux-aarch64
+          - Linux-x86_64
+          - macOS-arm64
+          - macOS-x86_64

@@ -1,0 +1,245 @@
+name: ci-abi
+
+on:  # yamllint disable-line rule:truthy
+  schedule:
+    - cron: '0 3 * * 0'
+  workflow_call:
+    inputs:
+      py:
+        description: 'Python version'
+        required: false
+        default: 3
+        type: string
+      platform:
+        description: 'Platform'
+        required: true
+        default: Linux-x86_64
+        type: string
+  workflow_dispatch:
+    inputs:
+      py:
+        description: 'Python version'
+        required: false
+        default: 3
+        type: string
+      runs-on:
+        description: 'Platform'
+        required: true
+        default: Linux-x86_64
+        type: choice
+        options:
+          - Linux-aarch64
+          - Linux-x86_64
+          - macOS-arm64
+          - macOS-x86_64
+# push:  # TODO
+#   branches:  # TODO
+#     - refactor/mpiabi
+
+permissions:
+  contents: read
+
+jobs:
+
+  build:
+    name: build (${{ matrix.mpi.name }})
+    runs-on: ${{ matrix.runner[inputs.platform || 'Linux-x86_64'] }}
+    strategy:
+      fail-fast: false
+      matrix:
+        runner:
+          - Linux-aarch64: ubuntu-24.04-arm
+            Linux-x86_64:  ubuntu-24.04
+            macOS-arm64:   macos-15
+            macOS-x86_64:  macos-13
+        mpi:
+          - {name:   mpich}
+          - {name: openmpi}
+
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - id: micromamba
+      name: Download MPI (${{ matrix.mpi.name }})
+      uses: mamba-org/setup-micromamba@v2
+      with:
+        init-shell: none
+        post-cleanup: none
+        environment-name: ${{ matrix.mpi.name }}
+        create-args: >-
+          --relocate-prefix /opt/${{ matrix.mpi.name }}
+          ${{ matrix.mpi.name }}
+        condarc: |
+          show_channel_urls: true
+          channel_priority: strict
+          channels:
+            - conda-forge
+            - nodefaults
+
+    - name: Install MPI (${{ matrix.mpi.name }})
+      run: |
+        prefix=/opt/${{ matrix.mpi.name }}
+        envdir=${{ steps.micromamba.outputs.environment-path }}
+        sudo mv "$envdir" "$prefix"
+        echo "$prefix/bin" >> "$GITHUB_PATH"
+
+    - name: Tweak MPI environment
+      run: |
+        # Set C compiler for mpicc
+        echo MPICH_CC=cc >> "$GITHUB_ENV"
+        echo  OMPI_CC=cc >> "$GITHUB_ENV"
+
+    - name: Setup Python (${{ inputs.py || 3 }})
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.py || 3 }}
+        cache: pip
+        cache-dependency-path: |
+          conf/requirements-build-cython.txt
+          conf/requirements-build-${{ matrix.backend }}.txt
+
+    - name: Upgrade pip
+      run:  python -m pip install -U pip
+
+    - name: Install Python packages (build)
+      run:  python -m pip install -U build
+
+    - name: Build mpi4py wheel
+      run:  python -m build --verbose --wheel
+      env:
+        CFLAGS: "-O0"
+        CIBUILDWHEEL: 1
+
+    - name: Upload mpi4py wheel
+      uses: actions/upload-artifact@v4
+      with:
+        name: mpi4py-${{ matrix.mpi.name }}-${{ inputs.platform || runner.os }}
+        path: dist/mpi4py-*.whl
+
+  test:
+    needs: build
+    name: test (${{ matrix.mpi.name }}-${{ matrix.mpi.version }})
+    runs-on: ${{ matrix.runner[inputs.platform || 'Linux-x86_64'] }}
+    strategy:
+      fail-fast: false
+      matrix:
+        runner:
+          - Linux-aarch64: ubuntu-24.04-arm
+            Linux-x86_64:  ubuntu-24.04
+            macOS-arm64:   macos-15
+            macOS-x86_64:  macos-13
+        mpi:
+          - {name:   mpich, version: 3.4.3}
+          - {name:   mpich, version: 4.1.2}
+          - {name:   mpich, version: 4.3.0}
+          - {name: openmpi, version: 4.1.6}
+          - {name: openmpi, version: 5.0.7}
+
+    steps:
+
+    - id: micromamba
+      name: Download MPI (${{ matrix.mpi.name }}-${{ matrix.mpi.version }})
+      uses: mamba-org/setup-micromamba@v2
+      with:
+        init-shell: none
+        post-cleanup: none
+        environment-name: ${{ matrix.mpi.name }}
+        create-args: >-
+          --relocate-prefix /opt/${{ matrix.mpi.name }}
+          ${{ matrix.mpi.name }}=${{ matrix.mpi.version }}
+        condarc: |
+          show_channel_urls: true
+          channel_priority: strict
+          channels:
+            - conda-forge
+            - nodefaults
+
+    - name: Install MPI (${{ matrix.mpi.name }}-${{ matrix.mpi.version }})
+      run: |
+        prefix=/opt/${{ matrix.mpi.name }}
+        envdir=${{ steps.micromamba.outputs.environment-path }}
+        sudo mv "$envdir" "$prefix"
+        echo "$prefix/bin" >> $GITHUB_PATH
+
+    - name: Tweak MPI environment
+      run: |
+        mpiname=${{ matrix.mpi.name }}
+        version=${{ matrix.mpi.version }}
+        if [[ "$mpiname" == "openmpi" ]]; then
+        # Set OMPI/PRRTE MCA parameters
+        mca_params="$HOME/.openmpi/mca-params.conf"
+        mkdir -p "$(dirname "$mca_params")"
+        echo pml=ob1 >> $mca_params
+        echo btl=tcp,self >> $mca_params
+        echo mpi_param_check = true >> "$mca_params"
+        echo mpi_show_handle_leaks = true >> "$mca_params"
+        echo rmaps_base_oversubscribe = true >> "$mca_params"
+        mca_params="$HOME/.prte/mca-params.conf"
+        mkdir -p "$(dirname "$mca_params")"
+        echo rmaps_default_mapping_policy = :oversubscribe >> "$mca_params"
+        if [[ "${version%%.*}" -lt 5 ]]; then
+        # Use MPI_THREAD_LEVEL=MPI_THREAD_SERIALIZED with openmpi<5
+        echo MPI4PY_RC_THREAD_LEVEL=serialized >> $GITHUB_ENV
+        fi; fi;
+
+    - name: Setup Python (${{ inputs.py || 3 }})
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.py || 3 }}
+
+    - name: Upgrade pip
+      run:  python -m pip install -U pip
+
+    - name: Download mpi4py wheel
+      uses: actions/download-artifact@v4
+      with:
+        name: mpi4py-${{ matrix.mpi.name }}-${{ inputs.platform || runner.os }}
+        path: dist
+
+    - name: Install mpi4py wheel
+      run:  python -m pip install mpi4py
+              --verbose --no-index --find-links=dist
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Test mpi4py cmdline (mpi-library)
+      run:  mpiexec -n 1 python -m mpi4py --mpi-library
+    - name: Test mpi4py cmdline (mpi-std-version)
+      run:  mpiexec -n 1 python -m mpi4py --mpi-std-version
+    - name: Test mpi4py cmdline (mpi-lib-version)
+      run:  mpiexec -n 1 python -m mpi4py --mpi-lib-version
+    - name: Test mpi4py bench (helloworld)
+      run:  mpiexec -n 4 python -m mpi4py.bench helloworld
+    - name: Test mpi4py bench (ringtest)
+      run:  mpiexec -n 4 python -m mpi4py.bench ringtest
+
+    - name: Test mpi4py (np=1)
+      run:  mpiexec -n 1 python test/main.py -v
+    - name: Test mpi4py (np=2)
+      run:  mpiexec -n 2 python test/main.py -v -f -e spawn
+    - name: Test mpi4py (np=3)
+      run:  mpiexec -n 3 python test/main.py -v -f -e spawn
+
+    - name: Test mpi4py.futures (np=1)
+      run:  mpiexec -n 1 python demo/futures/test_futures.py -v
+    - name: Test mpi4py.futures (np=2)
+      run:  mpiexec -n 2 python demo/futures/test_futures.py -v
+    - name: Test mpi4py.futures (np=3)
+      run:  mpiexec -n 3 python demo/futures/test_futures.py -v
+
+    - name: Test mpi4py.run
+      run:  python demo/test-run/test_run.py -v
+      if:   matrix.mpi != 'msmpi'
+    - name: Test init-fini
+      run:  bash demo/init-fini/run.sh
+      if:   matrix.mpi != 'msmpi'
+    - name: Test check-mpiexec
+      run:  bash demo/check-mpiexec/run.sh
+      if:   matrix.mpi != 'msmpi'
+
+    - name: Uninstall mpi4py
+      run:  python -m pip uninstall mpi4py
+              --verbose --yes

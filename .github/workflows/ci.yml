@@ -25,6 +25,9 @@ jobs:
   test:
     uses: ./.github/workflows/ci-test.yml
 
+  abi:
+    uses: ./.github/workflows/ci-abi.yml
+
   build:
     uses: ./.github/workflows/ci-build.yml
 
@@ -39,6 +42,7 @@ jobs:
     if: ${{ success() || failure() }}
     needs:
       - test
+      - abi
       - build
       - check
       - cover
