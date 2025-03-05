@@ -301,7 +301,7 @@ static int PyMPI_OPENMPI_MPI_Mrecv(void *buf, int count, MPI_Datatype type,
 
 #if PyMPI_OPENMPI_VERSION < 11003
 
-static int PyMPI_OPENMPI_Get_address(const void *location, MPI_Aint *address)
+static int PyMPI_OPENMPI_Get_address(void *location, MPI_Aint *address)
 {
   if (location == MPI_BOTTOM && address) {
     *address = 0;

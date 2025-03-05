@@ -1134,7 +1134,7 @@ static int PyMPI_Win_get_info(MPI_Win win, MPI_Info *info)
 
 #ifndef PyMPI_HAVE_MPI_Info_get_string
 static int PyMPI_Info_get_string(MPI_Info info,
-                                 const char key[],
+                                 char key[],
                                  int *buflen,
                                  char value[],
                                  int *flag)
@@ -1241,8 +1241,8 @@ static int PyMPI_Type_create_hvector_c(MPI_Count count,
 
 #ifndef PyMPI_HAVE_MPI_Type_indexed_c
 static int PyMPI_Type_indexed_c(MPI_Count count,
-                                const MPI_Count blocklengths[],
-                                const MPI_Count displacements[],
+                                MPI_Count blocklengths[],
+                                MPI_Count displacements[],
                                 MPI_Datatype oldtype,
                                 MPI_Datatype *newtype)
 {
@@ -1262,8 +1262,8 @@ static int PyMPI_Type_indexed_c(MPI_Count count,
 
 #ifndef PyMPI_HAVE_MPI_Type_create_hindexed_c
 static int PyMPI_Type_create_hindexed_c(MPI_Count count,
-                                        const MPI_Count blocklengths[],
-                                        const MPI_Count displacements[],
+                                        MPI_Count blocklengths[],
+                                        MPI_Count displacements[],
                                         MPI_Datatype oldtype,
                                         MPI_Datatype *newtype)
 {
@@ -1284,7 +1284,7 @@ static int PyMPI_Type_create_hindexed_c(MPI_Count count,
 #ifndef PyMPI_HAVE_MPI_Type_create_indexed_block_c
 static int PyMPI_Type_create_indexed_block_c(MPI_Count count,
                                              MPI_Count blocklength,
-                                             const MPI_Count displacements[],
+                                             MPI_Count displacements[],
                                              MPI_Datatype oldtype,
                                              MPI_Datatype *newtype)
 {
@@ -1304,7 +1304,7 @@ static int PyMPI_Type_create_indexed_block_c(MPI_Count count,
 #ifndef PyMPI_HAVE_MPI_Type_create_hindexed_block_c
 static int PyMPI_Type_create_hindexed_block_c(MPI_Count count,
                                               MPI_Count blocklength,
-                                              const MPI_Count displacements[],
+                                              MPI_Count displacements[],
                                               MPI_Datatype oldtype,
                                               MPI_Datatype *newtype)
 {
@@ -1323,9 +1323,9 @@ static int PyMPI_Type_create_hindexed_block_c(MPI_Count count,
 
 #ifndef PyMPI_HAVE_MPI_Type_create_struct_c
 static int PyMPI_Type_create_struct_c(MPI_Count count,
-                                      const MPI_Count blocklengths[],
-                                      const MPI_Count displacements[],
-                                      const MPI_Datatype types[],
+                                      MPI_Count blocklengths[],
+                                      MPI_Count displacements[],
+                                      MPI_Datatype types[],
                                       MPI_Datatype *newtype)
 {
   int ierr; int c, *b = NULL; MPI_Aint *d = NULL;
@@ -1345,9 +1345,9 @@ static int PyMPI_Type_create_struct_c(MPI_Count count,
 
 #ifndef PyMPI_HAVE_MPI_Type_create_subarray_c
 static int PyMPI_Type_create_subarray_c(int ndims,
-                                        const MPI_Count sizes[],
-                                        const MPI_Count subsizes[],
-                                        const MPI_Count starts[],
+                                        MPI_Count sizes[],
+                                        MPI_Count subsizes[],
+                                        MPI_Count starts[],
                                         int order,
                                         MPI_Datatype oldtype,
                                         MPI_Datatype *newtype)
@@ -1371,10 +1371,10 @@ static int PyMPI_Type_create_subarray_c(int ndims,
 
 #ifndef PyMPI_HAVE_MPI_Type_create_darray_c
 static int PyMPI_Type_create_darray_c(int size, int rank, int ndims,
-                                      const MPI_Count gsizes[],
-                                      const int distribs[],
-                                      const int dargs[],
-                                      const int psizes[],
+                                      MPI_Count gsizes[],
+                                      int distribs[],
+                                      int dargs[],
+                                      int psizes[],
                                       int order,
                                       MPI_Datatype oldtype,
                                       MPI_Datatype *newtype)
@@ -1467,7 +1467,7 @@ static int PyMPI_Type_get_contents_c(MPI_Datatype datatype,
 /* ---------------------------------------------------------------- */
 
 #ifndef PyMPI_HAVE_MPI_Pack_c
-static int PyMPI_Pack_c(const void *inbuf,
+static int PyMPI_Pack_c(void *inbuf,
                         MPI_Count incount,
                         MPI_Datatype datatype,
                         void *outbuf,
@@ -1489,7 +1489,7 @@ static int PyMPI_Pack_c(const void *inbuf,
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Unpack_c
-static int PyMPI_Unpack_c(const void *inbuf,
+static int PyMPI_Unpack_c(void *inbuf,
                           MPI_Count insize,
                           MPI_Count *position,
                           void *outbuf,
@@ -1530,8 +1530,8 @@ static int PyMPI_Pack_size_c(MPI_Count count,
 /* ---------------------------------------------------------------- */
 
 #ifndef PyMPI_HAVE_MPI_Pack_external_c
-static int PyMPI_Pack_external_c(const char datarep[],
-                                 const void *inbuf,
+static int PyMPI_Pack_external_c(char datarep[],
+                                 void *inbuf,
                                  MPI_Count incount,
                                  MPI_Datatype datatype,
                                  void *outbuf,
@@ -1554,8 +1554,8 @@ static int PyMPI_Pack_external_c(const char datarep[],
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Unpack_external_c
-static int PyMPI_Unpack_external_c(const char datarep[],
-                                   const void *inbuf,
+static int PyMPI_Unpack_external_c(char datarep[],
+                                   void *inbuf,
                                    MPI_Count insize,
                                    MPI_Count *position,
                                    void *outbuf,
@@ -1578,7 +1578,7 @@ static int PyMPI_Unpack_external_c(const char datarep[],
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Pack_external_size_c
-static int PyMPI_Pack_external_size_c(const char datarep[],
+static int PyMPI_Pack_external_size_c(char datarep[],
                                       MPI_Count count,
                                       MPI_Datatype datatype,
                                       MPI_Count *size)
@@ -1633,7 +1633,7 @@ PyMPI_datarep_write_fn(void *userbuf,
                         drep->extra_state);
 }
 
-static int PyMPI_Register_datarep_c(const char *datarep,
+static int PyMPI_Register_datarep_c(char *datarep,
   MPI_Datarep_conversion_function_c *read_conversion_fn,
   MPI_Datarep_conversion_function_c *write_conversion_fn,
   MPI_Datarep_extent_function *dtype_file_extent_fn,
