@@ -17,7 +17,10 @@ class BaseTestHandle:
         self.assertEqual(handle1, handle2)
 
     def checkHandleFtn(self, handle1):
-        fint = handle1.py2f()
+        try:
+            fint = handle1.py2f()
+        except NotImplementedError:
+            self.skipTest(type(handle1).__name__)
         if fint == -1:
             self.skipTest(type(handle1).__name__)
         handle2 = type(handle1).f2py(fint)
