@@ -43,7 +43,6 @@
 #define PyMPI_HAVE_MPI_Type_extent 1
 #define PyMPI_HAVE_MPI_Type_lb 1
 #define PyMPI_HAVE_MPI_Type_ub 1
-#define PyMPI_HAVE_MPI_Type_dup 1
 #define PyMPI_HAVE_MPI_Type_contiguous 1
 #define PyMPI_HAVE_MPI_Type_vector 1
 #define PyMPI_HAVE_MPI_Type_indexed 1
@@ -66,7 +65,6 @@
 #define PyMPI_HAVE_MPI_Request_free 1
 #define PyMPI_HAVE_MPI_Wait 1
 #define PyMPI_HAVE_MPI_Test 1
-#define PyMPI_HAVE_MPI_Request_get_status 1
 #define PyMPI_HAVE_MPI_Cancel 1
 #define PyMPI_HAVE_MPI_Waitany 1
 #define PyMPI_HAVE_MPI_Testany 1
@@ -91,7 +89,6 @@
 #define PyMPI_HAVE_MPI_BXOR 1
 #define PyMPI_HAVE_MPI_MAXLOC 1
 #define PyMPI_HAVE_MPI_MINLOC 1
-#define PyMPI_HAVE_MPI_REPLACE 1
 #define PyMPI_HAVE_MPI_Op_free 1
 #define PyMPI_HAVE_MPI_User_function 1
 #define PyMPI_HAVE_MPI_Op_create 1
