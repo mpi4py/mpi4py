@@ -15,7 +15,7 @@
 /* https://github.com/pmodels/mpich/issues/7278 */
 #if MPICH_NUMVERSION < 40300000
 #ifndef ROMIO_VERSION
-#include "mpi-io.h"
+#include "mpiio.h"
 #endif
 #endif
 

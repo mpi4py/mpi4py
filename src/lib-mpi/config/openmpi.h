@@ -63,7 +63,7 @@
 
 #ifdef OMPI_PROVIDE_MPI_FILE_INTERFACE
 #if OMPI_PROVIDE_MPI_FILE_INTERFACE == 0
-#include "mpi-io.h"
+#include "mpiio.h"
 #endif
 #endif
 

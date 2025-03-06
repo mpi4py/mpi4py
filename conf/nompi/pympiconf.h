@@ -1,3 +1,4 @@
+/* Generated with `python conf/mpiapigen.py` */
 #ifndef PyMPI_PYMPICONF_H
 #define PyMPI_PYMPICONF_H
 

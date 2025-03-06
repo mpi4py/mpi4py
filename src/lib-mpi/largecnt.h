@@ -1,3 +1,4 @@
+/* Generated with `python conf/mpiapigen.py` */
 #ifndef PyMPI_LARGECNT_H
 #define PyMPI_LARGECNT_H
 

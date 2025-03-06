@@ -1,3 +1,4 @@
+/* Generated with `python conf/mpiapigen.py` */
 #ifndef PyMPI_MISSING_H
 #define PyMPI_MISSING_H
 
@@ -14,6 +15,26 @@
 static PyMPI_UNUSED
 int PyMPI_UNAVAILABLE(const char *name,...)
 { (void)name; return PyMPI_ERR_UNAVAILABLE; }
+
+#ifdef PyMPI_MISSING_MPI_Status_c2f
+#undef PyMPI_HAVE_MPI_Status_c2f
+#endif
+
+#ifdef PyMPI_MISSING_MPI_Status_f2c
+#undef PyMPI_HAVE_MPI_Status_f2c
+#endif
+
+#ifdef PyMPI_MISSING_MPI_Type_create_f90_integer
+#undef PyMPI_HAVE_MPI_Type_create_f90_integer
+#endif
+
+#ifdef PyMPI_MISSING_MPI_Type_create_f90_real
+#undef PyMPI_HAVE_MPI_Type_create_f90_real
+#endif
+
+#ifdef PyMPI_MISSING_MPI_Type_create_f90_complex
+#undef PyMPI_HAVE_MPI_Type_create_f90_complex
+#endif
 
 #ifndef PyMPI_HAVE_MPI_Aint
 #undef  MPI_Aint

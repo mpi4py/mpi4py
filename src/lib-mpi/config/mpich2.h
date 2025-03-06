@@ -20,7 +20,7 @@
 
 /* MPI I/O may not be available */
 #ifndef ROMIO_VERSION
-#include "mpi-io.h"
+#include "mpiio.h"
 #endif
 
 #if MPI_VERSION < 3 && defined(MPICH2_NUMVERSION)

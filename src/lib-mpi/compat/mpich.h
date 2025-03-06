@@ -14,8 +14,8 @@ static int PyMPI_MPICH_port_info(MPI_Info info, MPI_Info *port_info)
   int ierr;
 # define pympi_str_(s) #s
 # define pympi_str(s) pympi_str_(s)
-  const char *key = "port_name_size";
-  const char *val = pympi_str(MPI_MAX_PORT_NAME);
+  char key[] = "port_name_size";
+  char val[] = pympi_str(MPI_MAX_PORT_NAME);
 # undef pympi_str_
 # undef pympi_str
   if (info == MPI_INFO_NULL) {
@@ -39,7 +39,7 @@ static int PyMPI_MPICH_MPI_Open_port(MPI_Info info, char *port_name)
 #undef  MPI_Open_port
 #define MPI_Open_port PyMPI_MPICH_MPI_Open_port
 
-static int PyMPI_MPICH_MPI_Lookup_name(const char *service_name,
+static int PyMPI_MPICH_MPI_Lookup_name(char       *service_name,
                                        MPI_Info   info,
                                        char       *port_name)
 {
@@ -107,11 +107,11 @@ __attribute__((weak, alias("PyMPI_MPICH_MPI_Status_set_elements_c")));
 #if MPI_VERSION == 4 && MPI_SUBVERSION == 0
 
 #if (MPICH_NUMVERSION < 40100300) || defined(CIBUILDWHEEL)
-static int PyMPI_MPICH_MPI_Reduce_c(const void *sendbuf, void *recvbuf,
+static int PyMPI_MPICH_MPI_Reduce_c(void *sendbuf, void *recvbuf,
                                     MPI_Count count, MPI_Datatype datatype,
                                     MPI_Op op, int root, MPI_Comm comm)
 {
-  const char dummy[1] = {0};
+  char dummy[1] = {0};
   if (!sendbuf && (root == MPI_ROOT || root == MPI_PROC_NULL)) sendbuf = dummy;
   return MPI_Reduce_c(sendbuf, recvbuf, count, datatype, op, root, comm);
 }
@@ -149,13 +149,13 @@ static int PyMPI_MPICH_MPI_Type_create_f90_complex(int p, int r, MPI_Datatype *t
 
 #undef MPI_Status_c2f
 #pragma weak MPI_Status_c2f
-static int PyMPI_MPICH_MPI_Status_c2f(const MPI_Status *cs, MPI_Fint *fs)
+static int PyMPI_MPICH_MPI_Status_c2f(MPI_Status *cs, MPI_Fint *fs)
 { PyMPI_MPICH_CALL_WEAK_SYMBOL(MPI_Status_c2f, cs, fs); }
 #define MPI_Status_c2f PyMPI_MPICH_MPI_Status_c2f
 
 #undef MPI_Status_f2c
 #pragma weak MPI_Status_f2c
-static int PyMPI_MPICH_MPI_Status_f2c(const MPI_Fint *fs, MPI_Status *cs)
+static int PyMPI_MPICH_MPI_Status_f2c(MPI_Fint *fs, MPI_Status *cs)
 { PyMPI_MPICH_CALL_WEAK_SYMBOL(MPI_Status_f2c, fs, cs); }
 #define MPI_Status_f2c PyMPI_MPICH_MPI_Status_f2c
 
