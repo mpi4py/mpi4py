@@ -19,7 +19,7 @@
 #if defined(HAVE_PYMPICONF_H)
 #include "pympiconf.h"
 #elif defined(PyMPI_ABI)
-#include "config/mpiapi.h"
+#include "config/mpiabi.h"
 #elif defined(I_MPI_NUMVERSION)
 #include "config/impi.h"
 #elif defined(MSMPI_VER)

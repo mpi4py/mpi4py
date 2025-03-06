@@ -331,39 +331,45 @@ class FunctionProto(NodeFuncProto):
 
 class FunctionH2I(NodeFuncProto):
     REGEX = Re.FUNCTION_H2I
-    MISSING = ' '.join([
-        '#define %(cname)s(%(cargsnamed)s)',
-        '((int)%(fallback)s(%(cargsnamed)s))'])
+    MISSING="""\
+    #ifdef  PyMPI_HAVE_%(fallback)s
+    #define %(cname)s(%(cargsnamed)s) ((%(crett)s)%(fallback)s(%(cargsnamed)s))
+    #else
+    #define %(cname)s(%(cargsnamed)s) ((void)%(cargsnamed)s,%(cretv)s)
+    #endif"""
     def __init__(self, *a, **k):
         NodeFuncProto.__init__(self, *a, **k)
         self.fallback = self.name.replace('_toint', '_c2f')
+        self.cretv = f'({self.crett})-1'
 
 class FunctionI2H(NodeFuncProto):
     REGEX = Re.FUNCTION_I2H
-    MISSING = ' '.join([
-        '#define %(cname)s(%(cargsnamed)s)',
-        '(%(fallback)s((int)%(cargsnamed)s))'])
+    MISSING="""\
+    #ifdef  PyMPI_HAVE_%(fallback)s
+    #define %(cname)s(%(cargsnamed)s) (%(fallback)s((%(cargs)s)%(cargsnamed)s))
+    #else
+    #define %(cname)s(%(cargsnamed)s) ((void)%(cargsnamed)s,%(cretv)s)
+    #endif"""
     def __init__(self, *a, **k):
         NodeFuncProto.__init__(self, *a, **k)
         self.fallback = self.name.replace('_fromint', '_f2c')
+        self.cretv = f'({self.crett})0'
 
 class FunctionC2F(NodeFuncProto):
     REGEX = Re.FUNCTION_C2F
-    MISSING = ' '.join([
-        '#define %(cname)s(%(cargsnamed)s)',
-        '((void)%(cargsnamed)s,%(cretv)s)'])
+    MISSING = FunctionH2I.MISSING
     def __init__(self, *a, **k):
         NodeFuncProto.__init__(self, *a, **k)
-        self.cretv =  f'({self.crett})-1'
+        self.fallback = self.name.replace('_c2f', '_toint')
+        self.cretv = f'({self.crett})-1'
 
 class FunctionF2C(NodeFuncProto):
     REGEX = Re.FUNCTION_F2C
-    MISSING = ' '.join([
-        '#define %(cname)s(%(cargsnamed)s)',
-        '((void)%(cargsnamed)s,%(cretv)s)'])
+    MISSING = FunctionI2H.MISSING
     def __init__(self, *a, **k):
         NodeFuncProto.__init__(self, *a, **k)
-        self.cretv =  f'({self.crett})0'
+        self.fallback = self.name.replace('_f2c', '_fromint')
+        self.cretv = f'({self.crett})0'
 
 class Generator:
 

@@ -9,7 +9,6 @@
 #define PyMPI_HAVE_MPI_LOGICAL16 1
 */
 
-/*
 #define PyMPI_HAVE_MPI_Comm_toint 1
 #define PyMPI_HAVE_MPI_Errhandler_toint 1
 #define PyMPI_HAVE_MPI_File_toint 1
@@ -33,7 +32,6 @@
 #define PyMPI_HAVE_MPI_Session_fromint 1
 #define PyMPI_HAVE_MPI_Type_fromint 1
 #define PyMPI_HAVE_MPI_Win_fromint 1
-*/
 
 #endif
 #endif
