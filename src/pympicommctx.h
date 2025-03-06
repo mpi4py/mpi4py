@@ -23,10 +23,17 @@ typedef struct {
   int      low_group;
 } PyMPI_Commctx;
 
-static int PyMPI_Commctx_KEYVAL = MPI_KEYVAL_INVALID;
-static int PyMPI_Commctx_TAG_UB = -1;
+static int PyMPI_Commctx__KEYVAL = -1;
+#define PyMPI_Commctx_KEYVAL \
+  (PyMPI_Commctx__KEYVAL == -1 ? \
+   PyMPI_Commctx__KEYVAL = MPI_KEYVAL_INVALID, \
+   &PyMPI_Commctx__KEYVAL : &PyMPI_Commctx__KEYVAL)[0]
 
-static int PyMPI_Commctx_new(PyMPI_Commctx **_commctx)
+static int PyMPI_Commctx__TAG_UB = -1;
+#define PyMPI_Commctx_TAG_UB \
+  (&PyMPI_Commctx__TAG_UB)[0]
+
+static int PyMPI_Commctx_new(MPI_Comm comm, PyMPI_Commctx **_commctx)
 {
   PyMPI_Commctx *commctx;
   if (PyMPI_Commctx_TAG_UB < 0) {
@@ -34,13 +41,15 @@ static int PyMPI_Commctx_new(PyMPI_Commctx **_commctx)
     ierr = MPI_Comm_get_attr(MPI_COMM_WORLD, MPI_TAG_UB, &attrval, &flag); CHKERR(ierr);
     PyMPI_Commctx_TAG_UB = (flag && attrval) ? *attrval : 32767;
   }
-  commctx = (PyMPI_Commctx *)PyMPI_MALLOC(sizeof(PyMPI_Commctx));
-  if (commctx) {
-    commctx->dupcomm = MPI_COMM_NULL;
-    commctx->localcomm = MPI_COMM_NULL;
-    commctx->tag = 0;
-    commctx->low_group = -1;
+  commctx = (PyMPI_Commctx *) PyMPI_MALLOC(sizeof(PyMPI_Commctx));
+  if (!commctx) {
+    (void) MPI_Comm_call_errhandler(comm, MPI_ERR_INTERN);
+    return MPI_ERR_INTERN;
   }
+  commctx->dupcomm = MPI_COMM_NULL;
+  commctx->localcomm = MPI_COMM_NULL;
+  commctx->tag = 0;
+  commctx->low_group = -1;
   *_commctx = commctx;
   return MPI_SUCCESS;
 }
@@ -83,8 +92,7 @@ static int PyMPI_Commctx_lookup(MPI_Comm comm, PyMPI_Commctx **_commctx)
   ierr = MPI_Comm_get_attr(comm, keyval, &commctx, &found); CHKERR(ierr);
   if (found && commctx) goto fn_exit;
 
-  ierr = PyMPI_Commctx_new(&commctx); CHKERR(ierr);
-  if (!commctx) {(void)MPI_Comm_call_errhandler(comm, MPI_ERR_INTERN); return MPI_ERR_INTERN;}
+  ierr = PyMPI_Commctx_new(comm, &commctx); CHKERR(ierr);
   ierr = MPI_Comm_set_attr(comm, keyval, commctx); CHKERR(ierr);
   ierr = MPI_Comm_dup(comm, &commctx->dupcomm); CHKERR(ierr);
 
@@ -121,6 +129,7 @@ static int PyMPI_Commctx_inter(MPI_Comm comm, MPI_Comm *dupcomm, int *tag,
                                MPI_Comm *localcomm, int *low_group)
 {
   int ierr;
+  int version, subversion;
   PyMPI_Commctx *commctx = NULL;
   ierr = PyMPI_Commctx_lookup(comm, &commctx);CHKERR(ierr);
   if (commctx->localcomm == MPI_COMM_NULL) {
@@ -133,16 +142,15 @@ static int PyMPI_Commctx_inter(MPI_Comm comm, MPI_Comm *dupcomm, int *tag,
     commctx->low_group = ((localsize>remotesize) ? 0 :
                           (localsize<remotesize) ? 1 :
                           (mergerank<localsize));
-#if (MPI_VERSION > 2) || (MPI_VERSION == 2 && MPI_SUBVERSION >= 2)
-  {
-    MPI_Group localgroup = MPI_GROUP_NULL;
-    ierr = MPI_Comm_group(comm, &localgroup); CHKERR(ierr);
-    ierr = MPI_Comm_create(mergecomm, localgroup, &commctx->localcomm); CHKERR(ierr);
-    ierr = MPI_Group_free(&localgroup); CHKERR(ierr);
-  }
-#else
-    ierr = MPI_Comm_split(mergecomm, commctx->low_group, 0, &commctx->localcomm); CHKERR(ierr);
-#endif
+    ierr = MPI_Get_version(&version, &subversion);CHKERR(ierr);
+    if (version > 2 || (version == 2 && subversion >= 2)) {
+      MPI_Group localgroup = MPI_GROUP_NULL;
+      ierr = MPI_Comm_group(comm, &localgroup); CHKERR(ierr);
+      ierr = MPI_Comm_create(mergecomm, localgroup, &commctx->localcomm); CHKERR(ierr);
+      ierr = MPI_Group_free(&localgroup); CHKERR(ierr);
+    } else {
+      ierr = MPI_Comm_split(mergecomm, commctx->low_group, 0, &commctx->localcomm); CHKERR(ierr);
+    }
     ierr = MPI_Comm_free(&mergecomm); CHKERR(ierr);
   }
   if (dupcomm)
