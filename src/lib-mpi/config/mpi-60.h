@@ -12,6 +12,7 @@
 #define PyMPI_HAVE_MPI_Comm_agree 1
 #define PyMPI_HAVE_MPI_Comm_iagree 1
 #define PyMPI_HAVE_MPI_Comm_shrink 1
+#define PyMPI_HAVE_MPI_Comm_ishrink 1
 */
 
 #endif

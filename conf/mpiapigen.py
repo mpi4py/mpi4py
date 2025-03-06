@@ -392,6 +392,42 @@ class Generator:
     def __init__(self):
         self.nodes = []
         self.nodemap = {}
+        self.stdapi = {}
+
+    def parse_stdapi(self, filename):
+        dirname = os.path.dirname(filename)
+        header = re_compile(
+            r'^\s*#include\s+"mpi-(\d\d)\.h"\s*$'
+        )
+        define = re_compile(
+            r'^\s*#define\s*PyMPI_HAVE_(MPI_[A-Za-z0-9_]+)\s+1\s*$'
+        )
+        with open(filename) as f:
+            for line in f:
+                m = header.match(line)
+                if m is None:
+                    continue
+                numversion = int(m.groups()[0])
+                version = (numversion // 10, numversion % 10)
+                self.stdapi[version] = symlist = []
+                with open(os.path.join(dirname, f"mpi-{numversion}.h")) as h:
+                    for line in h:
+                        m = define.match(line)
+                        if m is None:
+                            continue
+                        symbol = m.groups()[0]
+                        index = self.nodemap.get(symbol)
+                        if index is None:
+                            continue
+                        node = self.nodes[index]
+                        node.version = version
+                        symlist.append(symbol)
+        for a, la in self.stdapi.items():
+            for b, lb in self.stdapi.items():
+                if a != b:
+                    common = set(la).intersection(set(lb))
+                    if common:
+                        raise AssertionError(f"{a} & {b} -> {common}")
 
     def parse_file(self, filename):
         with open(filename) as f:
@@ -859,6 +895,10 @@ if __name__ == '__main__':
     log(f'parsing file {libmpi_pxd}')
     generator.parse_file(libmpi_pxd)
     log('processed %d definitions' % len(generator.nodes))
+    mpiapi_h = os.path.join('src', 'lib-mpi', 'config', 'mpiapi.h')
+    log(f'parsing file {mpiapi_h}')
+    generator.parse_stdapi(mpiapi_h)
+    log('processed %d definitions' % sum(map(len, generator.stdapi.values())))
 
     if args.list:
         for node in generator:

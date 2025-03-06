@@ -2,6 +2,14 @@
 #if (MPI_VERSION >= 5)
 
 /*
+#define PyMPI_HAVE_MPI_LOGICAL1 1
+#define PyMPI_HAVE_MPI_LOGICAL2 1
+#define PyMPI_HAVE_MPI_LOGICAL4 1
+#define PyMPI_HAVE_MPI_LOGICAL8 1
+#define PyMPI_HAVE_MPI_LOGICAL16 1
+*/
+
+/*
 #define PyMPI_HAVE_MPI_Comm_toint 1
 #define PyMPI_HAVE_MPI_Errhandler_toint 1
 #define PyMPI_HAVE_MPI_File_toint 1
