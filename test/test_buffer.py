@@ -314,7 +314,7 @@ class TestBuffer(unittest.TestCase):
             self.assertEqual(oldbuf.address, buf.address)
             self.assertEqual(oldbuf.nbytes, buf.nbytes)
             MPI.Free_mem(buf)
-        if MPI.BUFFER_AUTOMATIC != 0:
+        if MPI.Get_version() >= (4, 1):
             MPI.Attach_buffer(MPI.BUFFER_AUTOMATIC)
             bufauto = MPI.Detach_buffer()
             self.assertEqual(bufauto, MPI.BUFFER_AUTOMATIC)

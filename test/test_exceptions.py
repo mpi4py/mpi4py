@@ -38,7 +38,7 @@ class BaseTestCase(unittest.TestCase):
         try:
             callableObj(*args, **kwargs)
         except NotImplementedError:
-            if (MPI.VERSION, MPI.SUBVERSION) < (2, 0):
+            if MPI.Get_version() < (2, 0):
                 raise self.failureException("raised NotImplementedError")
             raise
         except excClass as excValue:

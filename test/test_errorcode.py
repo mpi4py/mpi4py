@@ -4,18 +4,24 @@ import mpiunittest as unittest
 
 class TestErrorCode(unittest.TestCase):
 
-    errorclasses = [item[1] for item in vars(MPI).items()
-                    if item[0].startswith('ERR_')]
+    errorclasses = [
+        item[1] for item in vars(MPI).items()
+        if item[0].startswith('ERR_')
+    ]
     errorclasses.insert(0, MPI.SUCCESS)
     while MPI.ERR_LASTCODE in errorclasses:
         errorclasses.remove(MPI.ERR_LASTCODE)
 
+
     def testGetErrorClass(self):
+        is_openmpi = unittest.is_mpi('openmpi')
         self.assertEqual(self.errorclasses[0], 0)
         for ierr in self.errorclasses:
             errcls = MPI.Get_error_class(ierr)
             self.assertGreaterEqual(errcls, MPI.SUCCESS)
             self.assertLessEqual(errcls, MPI.ERR_LASTCODE)
+            if is_openmpi and errcls == MPI.ERR_UNKNOWN and errcls != ierr:
+                continue
             self.assertEqual(errcls, ierr)
 
     def testGetErrorStrings(self):

@@ -89,7 +89,7 @@ class BaseTestIntercomm:
             Create_from_groups = MPI.Intercomm.Create_from_groups
             intercomm = Create_from_groups(lgroup, 0, rgroup, 0)
         except NotImplementedError:
-            self.assertLess(MPI.VERSION, 4)
+            self.assertLess(MPI.Get_version(), (4, 0))
             self.skipTest('mpi-comm-create_from_group')
         except MPI.Exception as exc:
             UNSUPPORTED = MPI.ERR_UNSUPPORTED_OPERATION
@@ -197,7 +197,7 @@ class TestIntercommCreateFromGroups(unittest.TestCase):
                 remote_group.Free()
         done = MPI.COMM_WORLD.allreduce(done, op=MPI.LAND)
         if not done:
-            self.assertLess(MPI.VERSION, 4)
+            self.assertLess(MPI.Get_version(), (4, 0))
             self.skipTest('mpi-intercomm-create_from_groups')
 
     def testHalf(self):
@@ -229,7 +229,7 @@ class TestIntercommCreateFromGroups(unittest.TestCase):
             local_group.Free()
             remote_group.Free()
         if not done:
-            self.assertLess(MPI.VERSION, 4)
+            self.assertLess(MPI.Get_version(), (4, 0))
             self.skipTest('mpi-intercomm-create_from_groups')
 
 

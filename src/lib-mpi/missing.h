@@ -1,20 +1,4 @@
 /* Generated with `python conf/mpiapigen.py` */
-#ifndef PyMPI_MISSING_H
-#define PyMPI_MISSING_H
-
-#ifndef PyMPI_UNUSED
-# if defined(__GNUC__)
-#   define PyMPI_UNUSED __attribute__ ((__unused__))
-# else
-#   define PyMPI_UNUSED
-# endif
-#endif
-
-#define PyMPI_ERR_UNAVAILABLE (-1431655766) /*0xAAAAAAAA*/
-
-static PyMPI_UNUSED
-int PyMPI_UNAVAILABLE(const char *name,...)
-{ (void)name; return PyMPI_ERR_UNAVAILABLE; }
 
 #ifdef PyMPI_MISSING_MPI_Status_c2f
 #undef PyMPI_HAVE_MPI_Status_c2f
@@ -5185,4 +5169,4 @@ typedef void (MPIAPI PyMPI_MPI_Handler_function)(MPI_Comm*,int*,...);
 #define MPI_Comm_ishrink(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Comm_ishrink",a1,a2,a3)
 #endif
 
-#endif /* !PyMPI_MISSING_H */
+/* */

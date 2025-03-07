@@ -130,19 +130,40 @@ class TestMPIAPI(unittest.TestCase):
     def get_mod_symbols(self):
         nm = shutil.which('nm')
         nm_flags = ['-Pu']
+        if sys.platform == 'darwin':
+            nm_flags.append('-m')
         if sys.platform == 'linux':
             nm_flags.append('-D')
         cmd = [nm, *nm_flags, mod_file]
         out = sp.check_output(cmd, close_fds=False)
         nm_output = out.decode()
 
-        regex = re.compile(rf"^_?({self.MPINAME}) U.*$")
+        mpiname = self.MPINAME
+        if sys.platform == 'darwin':
+            regex = re.compile(
+                rf"^\s+\(undefined\)\s+"
+                r"(?:(?P<kind>w)eak)?\s*external\s+"
+                rf"_(?P<name>{mpiname}).*$"
+            )
+        else:
+            regex = re.compile(
+                rf"^_?(?P<name>{mpiname})\s+"
+                r"(?P<kind>[UVvWw]).*$"
+            )
         mod_symbols = set()
+        weak_symbols = set()
         for line in nm_output.split("\n"):
             match = regex.search(line)
             if match:
-                sym = match.groups()[0]
+                sym = match.group("name")
+                knd = match.group("kind") or "U"
                 mod_symbols.add(sym)
+                if knd.lower() in ("v", "w"):
+                    weak_symbols.add(sym)
+        for sym in weak_symbols:
+            if sym.endswith('_c'):
+                if sym[:-2] not in mpi_small_count_allowed:
+                    mod_symbols.discard(sym[:-2])
         return mod_symbols
 
     @unittest.skipIf(shutil.which('nm') is None, 'nm')
