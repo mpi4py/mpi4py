@@ -104,7 +104,6 @@ class BaseTestGroup:
         self.assertNotIn(MPI.UNDEFINED, set(ranks2))
 
     @unittest.skipMPI('MPICH1')
-    @unittest.skipMPI('LAM/MPI')
     def testTranslRanksProcNull(self):
         if self.GROUP == MPI.GROUP_EMPTY: return
         group1 = self.GROUP

@@ -131,9 +131,6 @@ class TestDatatype(unittest.TestCase):
                 envelope = dtype.Get_envelope()
             except NotImplementedError:
                 self.skipTest('mpi-type-get_envelope')
-            if ('LAM/MPI' == MPI.get_vendor()[0] and
-                "COMPLEX" in dtype.name):
-                continue
             ni, na, nc, nd, combiner = envelope
             self.assertEqual(combiner, MPI.COMBINER_NAMED)
             self.assertEqual(ni, 0)
@@ -555,9 +552,7 @@ class TestDatatypePickle(BaseTestDatatypeCreateMixin, unittest.TestCase):
 
 
 name, version = MPI.get_vendor()
-if name == 'LAM/MPI':
-    combiner_map[MPI.COMBINER_INDEXED_BLOCK] = MPI.COMBINER_INDEXED
-elif name == 'MPICH1':
+if name == 'MPICH1':
     combiner_map[MPI.COMBINER_VECTOR]  = None
     combiner_map[MPI.COMBINER_HVECTOR] = None
     combiner_map[MPI.COMBINER_INDEXED] = None

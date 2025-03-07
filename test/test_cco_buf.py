@@ -628,13 +628,11 @@ class TestCCOBufWorld(BaseTestCCOBuf, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
 @unittest.skipMPI('MPICH1')
-@unittest.skipMPI('LAM/MPI')
 @unittest.skipIf(MPI.IN_PLACE == MPI.BOTTOM, 'mpi-in-place')
 class TestCCOBufInplaceSelf(BaseTestCCOBufInplace, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
 @unittest.skipMPI('MPICH1')
-@unittest.skipMPI('LAM/MPI')
 @unittest.skipIf(MPI.IN_PLACE == MPI.BOTTOM, 'mpi-in-place')
 class TestCCOBufInplaceWorld(BaseTestCCOBufInplace, unittest.TestCase):
     COMM = MPI.COMM_WORLD
