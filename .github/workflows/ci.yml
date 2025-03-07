@@ -25,6 +25,19 @@ jobs:
   test:
     uses: ./.github/workflows/ci-test.yml
 
+  abi:
+    uses: ./.github/workflows/ci-abi.yml
+    with:
+      platform: ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - Linux-aarch64
+          - Linux-x86_64
+          - macOS-arm64
+          - macOS-x86_64
+
   build:
     uses: ./.github/workflows/ci-build.yml
 
@@ -39,6 +52,7 @@ jobs:
     if: ${{ success() || failure() }}
     needs:
       - test
+      - abi
       - build
       - check
       - cover
