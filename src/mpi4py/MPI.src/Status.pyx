@@ -180,6 +180,19 @@ cdef class Status:
         def __set__(self, value: bool):
             self.Set_cancelled(value)
 
+    # Memory
+    # ------
+
+    def tomemory(self) -> memoryview:
+        """
+        Return status memory view.
+        """
+        cdef buffer buf = newbuffer()
+        cdef void *base = <void*> &self.ob_mpi
+        cdef Py_ssize_t size = <Py_ssize_t> sizeof(MPI_Status)
+        PyBuffer_FillInfo(&buf.view, self, base, size, 0, PyBUF_SIMPLE)
+        return PyMemoryView_FromObject(buf).cast('i')
+
     # Fortran Handle
     # --------------
 

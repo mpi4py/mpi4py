@@ -119,6 +119,20 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(status.tag,    2)
         self.assertEqual(status.error,  MPI.ERR_ARG)
 
+    def testToMemory(self):
+        status = self.STATUS
+        status.source = 11
+        status.tag    = 22
+        status.error  = 33
+        mem = status.tomemory()
+        seq = list(mem)
+        mem[seq.index(11)] = 111
+        mem[seq.index(22)] = 222
+        mem[seq.index(33)] = 333
+        self.assertEqual(status.source, 111)
+        self.assertEqual(status.tag,    222)
+        self.assertEqual(status.error,  333)
+
 
 if __name__ == '__main__':
     unittest.main()
