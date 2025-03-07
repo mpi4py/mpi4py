@@ -88,6 +88,11 @@ if MPI.Get_version() < (5, 0):
             f'MPI_{_type}_fromint',
             f'MPI_{_type}_toint',
         ]
+else:
+    mpi_missing += [
+        'MPI_Status_c2f',
+        'MPI_Status_f2c',
+    ]
 if MPI.Get_version() < (6, 0):
     mpi_missing += [
         'MPI_Comm_ack_failed',

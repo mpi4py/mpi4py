@@ -104,9 +104,8 @@ static int PyMPI_MPICH3_MPI_Win_get_attr(MPI_Win win,
 static int PyMPI_MPICH_MPI_Status_c2f(MPI_Status *c_status,
                                       MPI_Fint *f_status)
 {
-  if (c_status == MPI_STATUS_IGNORE ||
-      c_status == MPI_STATUSES_IGNORE) return MPI_ERR_OTHER;
-  *(MPI_Status *)f_status = *c_status;
+  if (c_status == NULL || f_status == NULL) return MPI_ERR_ARG;
+  *(MPI_Status *)(char *)f_status = *c_status;
   return MPI_SUCCESS;
 }
 #define MPI_Status_c2f PyMPI_MPICH_MPI_Status_c2f
