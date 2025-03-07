@@ -176,10 +176,3 @@ static int PyMPI_Commctx_finalize(void)
 }
 
 #undef CHKERR
-
-/*
-   Local variables:
-   c-basic-offset: 2
-   indent-tabs-mode: nil
-   End:
-*/
