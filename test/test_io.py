@@ -451,6 +451,8 @@ class BaseTestIOView(BaseTestIO):
                     fh.Write_ordered(wbuf.as_raw())
                 fh.Sync()
                 comm.Barrier()
+                if unittest.is_mpi('openmpi(<4.0.0)'):
+                    fh.Seek_shared(0, MPI.SEEK_SET)
                 fh.Set_view(0, etype, ftype)
                 for i in range(3):
                     rval = 10*(rank+1)+i
@@ -461,6 +463,8 @@ class BaseTestIOView(BaseTestIO):
                 if ftype != btype:
                     ftype.Free()
                 fh.Set_view(0, etype, etype)
+                if unittest.is_mpi('openmpi(<4.0.0)'):
+                    fh.Seek_shared(0, MPI.SEEK_SET)
                 for i in range(3):
                     for r in range(size):
                         rval = 10*(r+1)+i
@@ -545,12 +549,16 @@ class BaseTestIOView(BaseTestIO):
                     ).Commit()
                     fbase2.Free()
                 #
+                if unittest.is_mpi('openmpi(<4.0.0)'):
+                    fh.Seek_shared(0, MPI.SEEK_SET)
                 fh.Set_view(0, etype, ftype1)
                 for i in range(3):
                     wval = 10*(rank+1)+i
                     warg = [wval+j for j in range(0,7,2)]
                     wbuf = array(warg, typecode)
                     fh.Write_ordered(wbuf.as_raw())
+                if unittest.is_mpi('openmpi(<4.0.0)'):
+                    fh.Seek_shared(0, MPI.SEEK_SET)
                 fh.Set_view(0, etype, ftype2)
                 for i in range(3):
                     wval = 10*(rank+1)+i
@@ -559,6 +567,8 @@ class BaseTestIOView(BaseTestIO):
                     fh.Write_ordered(wbuf.as_raw())
                 fh.Sync()
                 comm.Barrier()
+                if unittest.is_mpi('openmpi(<4.0.0)'):
+                    fh.Seek_shared(0, MPI.SEEK_SET)
                 fh.Set_view(0, etype, ftype1)
                 for i in range(3):
                     rval = 10*(rank+1)+i
@@ -566,6 +576,8 @@ class BaseTestIOView(BaseTestIO):
                     fh.Read_ordered(rbuf.as_raw())
                     for value, j in zip(rbuf, range(0,7,2)):
                         self.assertEqual(value, scalar(rval+j))
+                if unittest.is_mpi('openmpi(<4.0.0)'):
+                    fh.Seek_shared(0, MPI.SEEK_SET)
                 fh.Set_view(0, etype, ftype2)
                 for i in range(3):
                     rval = 10*(rank+1)+i
@@ -575,6 +587,8 @@ class BaseTestIOView(BaseTestIO):
                         self.assertEqual(value, scalar(rval+j))
                 ftype1.Free()
                 ftype2.Free()
+                if unittest.is_mpi('openmpi(<4.0.0)'):
+                    fh.Seek_shared(0, MPI.SEEK_SET)
                 fh.Set_view(0, etype, etype)
                 for i in range(3):
                     for r in range(size):

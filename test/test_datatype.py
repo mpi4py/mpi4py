@@ -359,7 +359,7 @@ class BaseTestDatatypeCreateMixin:
                 #args = (block, displacements) XXX
                 #self.check(dtype, factory, *args)  XXX
 
-    @unittest.skipMPI('openmpi(<=1.8.1)', MPI.VERSION == 3)
+    @unittest.skipMPI('openmpi(<=1.8.1)', MPI.Get_version()[0] == 3)
     def testHindexedBlock(self):
         for dtype in datatypes:
             for block in range(5):

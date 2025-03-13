@@ -1,6 +1,6 @@
 #if defined(MPI_ABI_VERSION)
-#  if MPI_ABI_VERSION >= 1
-#    define PyMPI_ABI 1
+#  if MPI_ABI_VERSION < 1
+#    undef MPI_ABI_VERSION
 #  endif
 #endif
 
@@ -18,7 +18,7 @@
 
 #if defined(HAVE_PYMPICONF_H)
 #include "pympiconf.h"
-#elif defined(PyMPI_ABI)
+#elif defined(MPI_ABI_VERSION)
 #include "config/mpiabi.h"
 #elif defined(I_MPI_NUMVERSION)
 #include "config/impi.h"

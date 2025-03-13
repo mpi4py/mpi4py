@@ -4,6 +4,7 @@
 
 # ruff: noqa: E501, UP031
 
+import glob
 import os
 import sys
 from re import compile as re_compile
@@ -233,6 +234,13 @@ def ctypefix(ct):
     ct = ct.replace('[]','*')
     return ct
 
+FALLBACK = {
+    'MPI_Aint_add': '(a0,a1) ((MPI_Aint)((char*)(a0)+(a1)))',
+    'MPI_Aint_diff': '(a0,a1) ((MPI_Aint)((char*)(a0)-(char*)(a1)))',
+    'MPI_Wtime': '() 0.0',
+    'MPI_Wtick': '() 0.0',
+}
+
 class NodeFuncProto(Node):
     HEADER = """\
     %(crett)s %(cname)s(%(cargs)s);"""
@@ -261,8 +269,10 @@ class NodeFuncProto(Node):
         cargsnamed = ['a%d' % (a+1) for a in range(nargs)]
         self.cargsnamed = ','.join(cargsnamed)
         if calias is not None:
-            self.MISSING = '#define %(cname)s %(calias)s'
             self.calias = calias
+            self.MISSING = '#define %(cname)s %(calias)s'
+        elif cname in FALLBACK:
+            self.MISSING = '#define %(cname)s' + FALLBACK[cname]
 
 class IntegralType(NodeType):
     REGEX = Re.INTEGRAL_TYPE
@@ -486,7 +496,7 @@ class Generator:
     CONFIG_MACRO = 'PyMPI_HAVE_%s'
     CONFIG_TAIL = """\
 
-    #endif /* !PyMPI_PYMPICONF_H */
+    #endif /* PyMPI_PYMPICONF_H */
     """
     def dump_config_h(self, fileobj, suite):
         if isinstance(fileobj, str):
@@ -512,27 +522,10 @@ class Generator:
                 fileobj.write(line)
         fileobj.write(tail)
 
-    MISSING_HEAD = """\
-    #ifndef PyMPI_MISSING_H
-    #define PyMPI_MISSING_H
-
-    #ifndef PyMPI_UNUSED
-    # if defined(__GNUC__)
-    #   define PyMPI_UNUSED __attribute__ ((__unused__))
-    # else
-    #   define PyMPI_UNUSED
-    # endif
-    #endif
-
-    #define PyMPI_ERR_UNAVAILABLE (-1431655766) /*0xAAAAAAAA*/
-
-    static PyMPI_UNUSED
-    int PyMPI_UNAVAILABLE(const char *name,...)
-    { (void)name; return PyMPI_ERR_UNAVAILABLE; }
-
+    MISSING_HEAD = """
     """
     MISSING_TAIL = """\
-    #endif /* !PyMPI_MISSING_H */
+    /* */
     """
     def dump_missing_h(self, fileobj, suite=None):
         if isinstance(fileobj, str):
@@ -568,22 +561,7 @@ class Generator:
         fileobj.write(tail)
 
 
-    LARGECNT_HEAD = """\
-    #ifndef PyMPI_LARGECNT_H
-    #define PyMPI_LARGECNT_H
-
-    #include <stdlib.h>
-    #include <string.h>
-    #ifndef PyMPI_MALLOC
-      #define PyMPI_MALLOC malloc
-    #endif
-    #ifndef PyMPI_FREE
-      #define PyMPI_FREE free
-    #endif
-    #ifndef PyMPI_MEMCPY
-      #define PyMPI_MEMCPY memcpy
-    #endif
-
+    LARGECNT_HEAD = """
     #define PyMPIAllocArray(dsttype, dst, len)                       \\
       do {                                                           \\
           size_t _m = (size_t) (len) * sizeof(dsttype);              \\
@@ -649,7 +627,7 @@ class Generator:
         if (ierr != MPI_SUCCESS) goto fn_exit;                       \\
       } while (0)                                                 /**/
 
-    #define PyMPICommLocGroupSize(comm, n)                           \\
+    #define PyMPICommLocalGroupSize(comm, n)                         \\
       do {                                                           \\
         ierr = MPI_Comm_size((comm), &(n));                          \\
         if (ierr != MPI_SUCCESS) goto fn_exit;                       \\
@@ -682,17 +660,23 @@ class Generator:
     """
 
     LARGECNT_BEGIN = """\
-    #ifndef PyMPI_HAVE_%(name)s_c
+    #if !defined(PyMPI_HAVE_%(name)s_c) || PyMPI_LEGACY_ABI
+    #undef %(name)s_c
+    """
+
+    LARGECNT_DECLARE = """\
     static int Py%(name)s_c(%(argsdecl)s)
     {
+      PyMPI_WEAK_CALL(%(name)s_c, %(argsorig)s);
+      {
     """
 
     LARGECNT_COLLECTIVE = """\
     PyMPICommSize(a%(commid)d, n);
     """
 
-    LARGECNT_LOCGROUP = """\
-    PyMPICommLocGroupSize(a%(commid)d, n);
+    LARGECNT_LOCALGROUP = """\
+    PyMPICommLocalGroupSize(a%(commid)d, n);
     """
 
     LARGECNT_NEIGHBOR = """\
@@ -700,26 +684,33 @@ class Generator:
     """
 
     LARGECNT_CALL = """\
-    ierr = %(name)s(%(argscall)s);
+    ierr = %(callname)s(%(argscall)s);
     if (ierr != MPI_SUCCESS) goto fn_exit;
     """
 
-    LARGECNT_END = """\
+    LARGECNT_RETURN = """\
       return ierr;
+      }
     }
+    """
+
+    LARGECNT_END = """\
     #undef  %(name)s_c
     #define %(name)s_c Py%(name)s_c
     #endif
     """
 
     LARGECNT_TAIL = """\
-    #endif /* !PyMPI_LARGECNT_H */
+    /* */
     """
 
     LARGECNT_RE = re_compile(r'^mpi_({})_c$'.format('|'.join([
+        r'type_(contiguous|vector|indexed|create|size|get_(true_)?extent).*',
+        r'(get|status_set)_elements|get_count',
+        r'(pack|unpack)(_external)?(_size)?',
         r'(i?(b|s|r|p)?send(_init)?(recv(_replace)?)?)',
         r'(i?m?p?recv(_init)?)',
-        r'(buffer_(at|de)tach|get_count)',
+        r'(buffer_(at|de)tach)|(comm|session)_(at|de)tach_buffer',
         r'(i?(bcast|gather(v)?|scatter(v?)|all(gather(v)?|toall(v|w)?))(_init)?)',
         r'(i?((all)?reduce(_local|(_scatter(_block)?)?)|(ex)?scan)(_init)?)',
         r'(i?neighbor_all(gather(v)?|toall(v|w)?)(_init)?)',
@@ -755,15 +746,24 @@ class Generator:
             return code
 
         def generate(name):
-            is_neighbor = 'neighbor' in name.lower()
+            subname = name[4:].lower()
+            is_neighbor = 'neighbor' in subname
             is_nonblocking = name.startswith('MPI_I')
-            node1 = self[name+'_c']
+            is_datatype = subname.startswith('type_')
+            is_packunpack = any(map(subname.startswith, ('pack', 'unpack')))
+            is_packunpack_size = is_packunpack and subname.endswith('_size')
+
+            node1 = self[name + '_c']
             node2 = self[name]
+            try:
+                node2 = self[name + '_x']
+            except KeyError:
+                pass
+            callname = node2.name
 
             cargstype1 = node1.cargstype
             cargstype2 = node2.cargstype
             argstype = list(zip(cargstype1, cargstype2))
-
             convert_array = False
             for (t1, t2) in argstype:
                 if t1 != t2:
@@ -782,6 +782,7 @@ class Generator:
 
             dtypeidx = 0
             argslist = []
+            argsorig = []
             argsinit = []
             argstemp = []
             argsconv = []
@@ -802,6 +803,7 @@ class Generator:
                     argsinit += ['int n']
             for i, (t1, t2) in enumerate(argstype, start=1):
                 argslist += [declare(t1, 'a%d' % i)]
+                argsorig += ['a%d' % i]
                 if t1.startswith('MPI_Datatype'):
                     dtypeidx += 1
                 if t1 == t2:
@@ -810,6 +812,9 @@ class Generator:
                     if t1.endswith('[]'):
                         t1, t2, n = t1[:-2], t2[:-2], 'n'
                         argstemp += [declare(t2, '*b%d' % i, 'NULL')]
+                        if is_datatype:
+                            is_darray = name.endswith('_darray')
+                            n = 'a1' if not is_darray else 'a3'
                         if is_neighbor:
                             n = ('ns', 'nr')[dtypeidx]
                         subs = (t2, i, t1, i, n)
@@ -826,6 +831,10 @@ class Generator:
                         argstemp += [declare(t2+'*', 'p%d' % i, pinit)]
                         argscall += ['p%d' % i]
                         argsoutp += ['if (a%d) *a%d = b%d' % (i, i, i)]
+                        if is_packunpack and not is_packunpack_size:
+                            subs = (t2, i, t1, f'a{i} ? *a{i} : 0')
+                            castvalue = CASTVALUE.replace('a%d', '%s')
+                            argsconv += [castvalue % subs]
                     else:
                         subs = (t2, i, t1, i)
                         argstemp += [declare(t2, 'b%d' % i)]
@@ -835,25 +844,32 @@ class Generator:
             tab = '  '
             subs = {
                 'name':     name,
+                'callname': callname,
                 'argsdecl': (',\n'+' '*(len(name)+20)).join(argslist),
+                'argsorig': ', '.join(argsorig),
                 'argscall': ', '.join(argscall),
                 'commid':   commid,
             }
             begin = self.LARGECNT_BEGIN % subs
+            fdecl = self.LARGECNT_DECLARE % subs
             if commid is None:
                 setup = ''
             elif is_neighbor:
                 setup = self.LARGECNT_NEIGHBOR % subs
             elif 'reduce_scatter' in name.lower():
-                setup = self.LARGECNT_LOCGROUP % subs
+                setup = self.LARGECNT_LOCALGROUP % subs
             else:
                 setup = self.LARGECNT_COLLECTIVE % subs
             call = self.LARGECNT_CALL % subs
+            ret = self.LARGECNT_RETURN % subs
             end = self.LARGECNT_END % subs
 
             yield dedent(begin)
-            yield indent('{};\n'.format('; '.join(argsinit)), tab)
-            yield indent('{};\n'.format('; '.join(argstemp)), tab)
+            yield dedent(fdecl)
+            if argsinit:
+                yield indent('{};\n'.format('; '.join(argsinit)), tab)
+            if argstemp:
+                yield indent('{};\n'.format('; '.join(argstemp)), tab)
             yield indent(dedent(setup), tab)
             for line in argsconv:
                 yield indent(f'{line};\n', tab)
@@ -863,6 +879,7 @@ class Generator:
             yield indent('fn_exit:\n', tab[:-1])
             for line in argsfree:
                 yield indent(f'{line};\n', tab)
+            yield dedent(ret)
             yield dedent(end)
             yield '\n'
 
@@ -877,6 +894,278 @@ class Generator:
             for code in generate(name):
                 fileobj.write(code)
         fileobj.write(tail)
+
+    MPIABI_HEAD = """
+    #define _pympi_CALL(fn, ...) \\
+    PyMPI_WEAK_CALL(fn, __VA_ARGS__); \\
+    return _pympi__##fn(__VA_ARGS__)
+    """
+    MPIABI_TAIL = """
+    #undef _pympi_CALL
+    /* */
+    """
+
+    def dump_mpiabi_h(self, fileobj, std=True):
+        if isinstance(fileobj, str):
+            with open(fileobj, 'w') as f:
+                self.dump_mpiabi_h(f, std)
+            return
+
+        def funcargs(node):
+            argsdecl, argscall = [], []
+            for i, t in enumerate(node.cargstype):
+                if t == '...':
+                    argsdecl.append(t)
+                else:
+                    try:
+                        p = t.index('[')
+                    except ValueError:
+                        p = len(t)
+                    t, a = t[:p], t[p:]
+                    argsdecl.append(f'{t} a{i}{a}')
+                    argscall.append(f'a{i}')
+            if node.name in ('MPI_Status_c2f', 'MPI_Status_f2c'):
+                if not argsdecl[0].startswith('const '):
+                    argsdecl[0] = 'const ' + argsdecl[0]
+            argsdecl = ','.join(argsdecl) if argsdecl else 'void'
+            argscall = ','.join(argscall) if argscall else ''
+            return (argsdecl, argscall)
+
+        def abi_function(node, fallback=None, guard=True):
+            name = node.name
+
+            rtype = node.crett
+            rvalue = f'PyMPI_UNAVAILABLE("{name}")'
+            if rtype != 'int':
+                rvalue = f'(({rtype})0)'
+            rvalue = getattr(node, 'cretv', rvalue)
+            argsdecl, argscall = funcargs(node)
+
+            pympi0 = f'{name}'
+            pympi1 = f'_pympi_{name}'
+            fsign0 = f'{rtype} {pympi0}({argsdecl})'
+            fsign1 = f'{rtype} {pympi1}({argsdecl})'
+            fbody1 = f'{{ _pympi_CALL({name},{argscall}); }}'
+
+            undef = dedent(f"""
+            #undef {name}
+            """)
+            if guard:
+                declare = dedent(f"""\
+                #ifndef PyMPI_HAVE_{name}
+                PyMPI_EXTERN {fsign0};
+                #endif
+                """)
+            else:
+                declare = dedent(f"""\
+                PyMPI_EXTERN {fsign0};
+                """)
+
+            if fallback is None:
+                pympiname = f'_pympi__{name}'
+                fallback = dedent(f"""\
+                #define {pympiname}(...) {rvalue}
+                """)
+            override = dedent(f"""\
+            PyMPI_LOCAL {fsign1} {fbody1}
+            #define {name} {pympi1}
+            """)
+            return [undef, declare, fallback, override]
+
+        def abi_handle_openmpi(node):
+            name = node.name.lower()
+            oname = f'ompi_{name}'
+            if node.ctype == 'MPI_Datatype':
+                if oname in (
+                    'ompi_mpi_long_long',  # ompi_mpi_long_long_int
+                    'ompi_mpi_c_complex',  # ompi_mpi_c_float_complex
+                ):
+                    return ""
+                for old, new in (
+                    ('complex', 'cplex'),
+                    ('double_complex', 'dblcplex'),
+                    ('double_precision', 'dblprec'),
+                    ('long_double_int', 'longdbl_int'),
+                    ('cxx_float_complex', 'cxx_cplex'),
+                    ('cxx_double_complex', 'cxx_dblcplex'),
+                    ('cxx_long_double_complex', 'cxx_ldblcplex'),
+                ):
+                    if oname == f'ompi_mpi_{old}':
+                        oname = f'ompi_mpi_{new}'
+            if node.ctype == 'MPI_Op':
+                if not oname.endswith('_null'):
+                    oname = oname.replace('_mpi_', '_mpi_op_')
+            for htype in ('message', 'request'):
+                if name.startswith(f'mpi_{htype}_'):
+                    oname = f'o{name}'
+            if node.ctype == 'MPI_Session':
+                oname = oname.replace('session', 'instance')
+            return dedent(f"""\
+            PyMPI_WEAK_LOAD({oname})
+            """)
+
+        mpi_version_min = (5, 0) if std else (3, 0)
+        mpi_version_max = (5, 0)
+
+        ftnconv = []
+        intconv = []
+        handles = []
+        fstatus = []
+        fortran = []
+        aintops = []
+        functions = []
+        for node in self:
+            if node.deprecated:
+                continue
+            if isinstance(node, (FunctionH2I, FunctionI2H)):
+                intconv.append(node)
+                continue
+            if isinstance(node, (FunctionC2F, FunctionF2C)):
+                ftnconv.append(node)
+                continue
+            if isinstance(node, HandleValue):
+                handles.append(node)
+                continue
+            if isinstance(node, FunctionProto):
+                if node.name in ('MPI_Status_c2f', 'MPI_Status_f2c'):
+                    fstatus.append(node)
+                    continue
+                if node.name.startswith('MPI_Type_create_f90_'):
+                    fortran.append(node)
+                    continue
+                if node.name in ('MPI_Aint_add', 'MPI_Aint_diff'):
+                    aintops.append(node)
+                    continue
+                functions.append(node)
+                continue
+
+        prlg = dedent(self.PROLOG)
+        head = dedent(self.MPIABI_HEAD)
+        tail = dedent(self.MPIABI_TAIL)
+        fileobj.write(prlg)
+        fileobj.write(head)
+
+        if not std:
+            fileobj.write(dedent("""
+            #ifdef OPEN_MPI
+            """))
+            for node in handles:
+                code = abi_handle_openmpi(node)
+                fileobj.write(code)
+            fileobj.write(dedent("""\
+            #endif /* OPEN_MPI */
+            """))
+
+        if not std:
+            fileobj.write(dedent("""
+            #ifdef MPICH
+            """))
+            for node in fortran:
+                for code in abi_function(node):
+                    fileobj.write(code)
+            fileobj.write(dedent("""
+            #endif /* MPICH */
+            """))
+
+        if not std:
+            argdcl = {'c': 'MPI_Status *c', 'f': 'MPI_Fint *f'}
+            argval = {'c': '*c', 'f': '*(MPI_Status *)(char *)f'}
+            for node in fstatus:
+                name = node.name
+                pympiname = f'_pympi__{name}'
+                a, _, b = name[-3:].partition('2')
+                args = f'(const {argdcl[a]}, {argdcl[b]})'
+                copy = f'({argval[b]} = {argval[a]})'
+                ok, err = 'MPI_SUCCESS', 'MPI_ERR_ARG'
+                body = f'{{ return (c && f) ? {copy}, {ok} : {err}; }}'
+                impl = dedent(f"""\
+                static int {pympiname}{args} {body}
+                """)
+                for code in abi_function(node, impl, guard=False):
+                    fileobj.write(code)
+            for node in ftnconv:
+                name = node.name
+                pympiname = f'_pympi__{name}'
+                rtype = node.crett
+                rval_o = node.cretv
+                rval_m = f'({rtype})arg'
+                if name.startswith('MPI_File_'):
+                    rval_m = node.cretv
+                impl = dedent(f"""\
+                #ifdef MPICH
+                #define {pympiname}(arg) ({rval_m})
+                #else
+                #define {pympiname}(arg) ({rval_o})
+                #endif
+                """)
+                for code in abi_function(node, impl, guard=False):
+                    fileobj.write(code)
+        if not std:
+            for node in intconv:
+                name = node.name
+                pympiname = f'_pympi__{name}'
+                if node.crett == 'int':
+                    rtype, atype = '(int)', ''
+                else:
+                    rtype, atype = '', '(int)'
+                body = f'{rtype}{node.fallback}({atype}arg)'
+                impl = dedent(f"""\
+                #define {pympiname}(arg) {body}
+                """)
+                for code in abi_function(node, impl):
+                    fileobj.write(code)
+
+        if not std:
+            for node in aintops:
+                name = node.name
+                pympiname = f'_pympi__{name}'
+                rtype = node.crett
+                argsdecl, argscall = funcargs(node)
+                signature = f'{rtype} {pympiname}({argsdecl})'
+                expr1 = f'{name}({argscall})'
+                expr2 = FALLBACK[name].partition(' ')[2]
+                impl = dedent(f"""
+                #ifdef {name}
+                static {signature} {{ return {expr1}; }}
+                #else
+                static {signature} {{ return {expr2}; }}
+                #endif
+                """)
+                code = abi_function(node, impl, guard=False)
+                undef, declare, fallback, override = code
+                code = [fallback, undef.lstrip(), declare, override]
+                while code:
+                    fileobj.write(code.pop(0))
+
+        outdir = os.path.dirname(fileobj.name)
+        wildcard = os.path.join(outdir, 'mpiapi??.h')
+        undef_re = re_compile(r'^\s*#undef\s+(MPI_.*)\s*$')
+        implemented = set()
+        for header in glob.glob(wildcard):
+            with open(header) as f:
+                for line in f:
+                    match = undef_re.match(line)
+                    if match:
+                        implemented.add(match.group(1))
+        for node in functions:
+            if node.name.endswith('_c'):
+                implemented.add(node.name)
+        implemented.discard('MPI_Op_create_c')
+
+        for node in functions:
+            if node.version <= mpi_version_min:
+                continue
+            if node.version >= mpi_version_max:
+                continue
+            code = abi_function(node)
+            fileobj.write(code.pop(0))
+            fileobj.write(code.pop(0))
+            if node.name not in implemented:
+                while code:
+                    fileobj.write(code.pop(0))
+
+        fileobj.write(tail)
+
 
 
 # -----------------------------------------
@@ -918,6 +1207,14 @@ if __name__ == '__main__':
     missing_h = os.path.join('src', 'lib-mpi', 'missing.h')
     log(f'writing file {missing_h}')
     generator.dump_missing_h(missing_h)
+
+    mpiabi0_h = os.path.join('src', 'lib-mpi', 'mpiabi0.h')
+    log(f'writing file {mpiabi0_h}')
+    generator.dump_mpiabi_h(mpiabi0_h, std=False)
+
+    mpiabi1_h = os.path.join('src', 'lib-mpi', 'mpiabi1.h')
+    log(f'writing file {mpiabi1_h}')
+    generator.dump_mpiabi_h(mpiabi1_h, std=True)
 
     largecnt_h = os.path.join('src', 'lib-mpi', 'largecnt.h')
     log(f'writing file {largecnt_h}')

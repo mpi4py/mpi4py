@@ -1,20 +1,4 @@
 /* Generated with `python conf/mpiapigen.py` */
-#ifndef PyMPI_MISSING_H
-#define PyMPI_MISSING_H
-
-#ifndef PyMPI_UNUSED
-# if defined(__GNUC__)
-#   define PyMPI_UNUSED __attribute__ ((__unused__))
-# else
-#   define PyMPI_UNUSED
-# endif
-#endif
-
-#define PyMPI_ERR_UNAVAILABLE (-1431655766) /*0xAAAAAAAA*/
-
-static PyMPI_UNUSED
-int PyMPI_UNAVAILABLE(const char *name,...)
-{ (void)name; return PyMPI_ERR_UNAVAILABLE; }
 
 #ifdef PyMPI_MISSING_MPI_Status_c2f
 #undef PyMPI_HAVE_MPI_Status_c2f
@@ -547,12 +531,12 @@ typedef void *PyMPI_MPI_File;
 
 #ifndef PyMPI_HAVE_MPI_Aint_add
 #undef  MPI_Aint_add
-#define MPI_Aint_add(a1,a2) PyMPI_UNAVAILABLE("MPI_Aint_add",a1,a2)
+#define MPI_Aint_add(a0,a1) ((MPI_Aint)((char*)(a0)+(a1)))
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Aint_diff
 #undef  MPI_Aint_diff
-#define MPI_Aint_diff(a1,a2) PyMPI_UNAVAILABLE("MPI_Aint_diff",a1,a2)
+#define MPI_Aint_diff(a0,a1) ((MPI_Aint)((char*)(a0)-(char*)(a1)))
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Type_dup
@@ -4527,12 +4511,12 @@ typedef int (MPIAPI PyMPI_MPI_Datarep_conversion_function_c)(void*,MPI_Datatype,
 
 #ifndef PyMPI_HAVE_MPI_Wtime
 #undef  MPI_Wtime
-#define MPI_Wtime() PyMPI_UNAVAILABLE("MPI_Wtime")
+#define MPI_Wtime() 0.0
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Wtick
 #undef  MPI_Wtick
-#define MPI_Wtick() PyMPI_UNAVAILABLE("MPI_Wtick")
+#define MPI_Wtick() 0.0
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Pcontrol
@@ -5185,4 +5169,4 @@ typedef void (MPIAPI PyMPI_MPI_Handler_function)(MPI_Comm*,int*,...);
 #define MPI_Comm_ishrink(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Comm_ishrink",a1,a2,a3)
 #endif
 
-#endif /* !PyMPI_MISSING_H */
+/* */

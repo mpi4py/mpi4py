@@ -1,5 +1,6 @@
 from mpi4py import MPI
 import mpiunittest as unittest
+import sys
 
 
 class TestErrhandler(unittest.TestCase):
@@ -8,7 +9,7 @@ class TestErrhandler(unittest.TestCase):
         self.assertFalse(MPI.ERRHANDLER_NULL)
         self.assertTrue(MPI.ERRORS_ARE_FATAL)
         self.assertTrue(MPI.ERRORS_RETURN)
-        if MPI.VERSION >= 4:
+        if MPI.Get_version() >= (4, 0):
             self.assertTrue(MPI.ERRORS_ABORT)
         elif MPI.ERRORS_ABORT != MPI.ERRHANDLER_NULL:
             self.assertTrue(MPI.ERRORS_ABORT)
@@ -86,7 +87,7 @@ class BaseTestErrhandler:
                     mpiobj.Call_errhandler(MPI.SUCCESS)
                     mpiobj.Call_errhandler(MPI.ERR_OTHER)
                 except NotImplementedError:
-                    if MPI.VERSION >= 2: raise
+                    if MPI.Get_version() >= (2, 0): raise
                 else:
                     self.assertTrue(called)
                     self.assertTrue(check)
@@ -103,7 +104,7 @@ class BaseTestErrhandler:
             mpiobj.Call_errhandler(MPI.SUCCESS)
             mpiobj.Call_errhandler(MPI.ERR_OTHER)
         except NotImplementedError:
-            if MPI.VERSION >= 2: raise
+            if MPI.Get_version() >= (2, 0): raise
             clsname = type(mpiobj).__name__.lower()
             self.skipTest(f'mpi-{clsname}-call_errhandler')
 
@@ -139,6 +140,7 @@ class BaseTestErrhandler:
 
     @unittest.skipUnless(MPI.ERRORS_ABORT, 'mpi-errors-abort')
     @unittest.skipMPI('mpich(<4.1.0)')
+    @unittest.skipMPI('openmpi(<5.0.0)')
     @unittest.skipMPI('impi(<2021.14.0)')
     def testErrorsAbort(self):
         self._run_test_get_set(MPI.ERRORS_ABORT)
@@ -153,6 +155,7 @@ class TestErrhandlerComm(BaseTestErrhandler, unittest.TestCase):
         self.mpiobj.Free()
 
 
+@unittest.skipMPI('openmpi(<4.1.0)', sys.platform == 'darwin')
 class TestErrhandlerWin(BaseTestErrhandler, unittest.TestCase):
 
     def setUp(self):

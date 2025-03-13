@@ -4,6 +4,11 @@
 
 /* -------------------------------------------------------------------------- */
 
+#define PyMPI_MPICH4_LT(NUMVERSION) \
+  ((MPICH_NUMVERSION >= 40000000) && (MPICH_NUMVERSION < NUMVERSION))
+
+/* -------------------------------------------------------------------------- */
+
 /* https://github.com/pmodels/mpich/pull/5467 */
 
 #undef  MPI_MAX_PORT_NAME
@@ -39,9 +44,9 @@ static int PyMPI_MPICH_MPI_Open_port(MPI_Info info, char *port_name)
 #undef  MPI_Open_port
 #define MPI_Open_port PyMPI_MPICH_MPI_Open_port
 
-static int PyMPI_MPICH_MPI_Lookup_name(char       *service_name,
-                                       MPI_Info   info,
-                                       char       *port_name)
+static int PyMPI_MPICH_MPI_Lookup_name(char     *service_name,
+                                       MPI_Info info,
+                                       char     *port_name)
 {
   int ierr;
   ierr = PyMPI_MPICH_port_info(info, &info); if (ierr) return ierr;
@@ -56,11 +61,12 @@ static int PyMPI_MPICH_MPI_Lookup_name(char       *service_name,
 
 /* https://github.com/pmodels/mpich/issues/6981 */
 
-#if MPI_VERSION == 4 && MPI_SUBVERSION <= 1
-
-#if (MPICH_NUMVERSION < 40300300) || defined(CIBUILDWHEEL)
+#if PyMPI_MPICH4_LT(40300300) || PyMPI_LEGACY_ABI
 static int PyMPI_MPICH_MPI_Info_free(MPI_Info *info)
 {
+#if PyMPI_LEGACY_ABI
+  if (pympi_numversion() >= 40 && pympi_numversion() <= 41)
+#endif
   if (info && *info == MPI_INFO_ENV) {
     (void) MPI_Comm_call_errhandler(MPI_COMM_SELF, MPI_ERR_INFO);
     return MPI_ERR_INFO;
@@ -71,6 +77,29 @@ static int PyMPI_MPICH_MPI_Info_free(MPI_Info *info)
 #define MPI_Info_free PyMPI_MPICH_MPI_Info_free
 #endif
 
+/* -------------------------------------------------------------------------- */
+
+/* https://github.com/pmodels/mpich/issues/6351 */
+/* https://github.com/pmodels/mpich/pull/6354   */
+
+#if PyMPI_MPICH4_LT(40100300) || PyMPI_LEGACY_ABI
+static int PyMPI_MPICH_MPI_Reduce_c(void *sendbuf, void *recvbuf,
+                                    MPI_Count count, MPI_Datatype datatype,
+                                    MPI_Op op, int root, MPI_Comm comm)
+{
+  double dummy[1] = {0};
+#if PyMPI_LEGACY_ABI
+  if (pympi_numversion() < 40)
+  if (root == MPI_PROC_NULL) datatype = MPI_UNSIGNED_CHAR;
+#endif
+#if PyMPI_LEGACY_ABI
+  if (pympi_numversion() == 40)
+#endif
+  if (!sendbuf && (root == MPI_ROOT || root == MPI_PROC_NULL)) sendbuf = dummy;
+  return MPI_Reduce_c(sendbuf, recvbuf, count, datatype, op, root, comm);
+}
+#undef  MPI_Reduce_c
+#define MPI_Reduce_c PyMPI_MPICH_MPI_Reduce_c
 #endif
 
 /* -------------------------------------------------------------------------- */
@@ -78,9 +107,7 @@ static int PyMPI_MPICH_MPI_Info_free(MPI_Info *info)
 /* https://github.com/pmodels/mpich/issues/5413 */
 /* https://github.com/pmodels/mpich/pull/6146   */
 
-#if MPI_VERSION == 4 && MPI_SUBVERSION == 0
-
-#if (MPICH_NUMVERSION < 40003300) || defined(CIBUILDWHEEL)
+#if PyMPI_MPICH4_LT(40100300) && !PyMPI_LEGACY_ABI
 static int PyMPI_MPICH_MPI_Status_set_elements_c(MPI_Status *status,
                                                  MPI_Datatype datatype,
                                                  MPI_Count elements)
@@ -91,74 +118,10 @@ static int PyMPI_MPICH_MPI_Status_set_elements_c(MPI_Status *status,
 #define MPI_Status_set_elements_c PyMPI_MPICH_MPI_Status_set_elements_c
 #endif
 
-#if defined(CIBUILDWHEEL) && defined(__linux__)
-#undef MPI_Status_set_elements_c
-extern int MPI_Status_set_elements_c(MPI_Status *, MPI_Datatype, MPI_Count)
-__attribute__((weak, alias("PyMPI_MPICH_MPI_Status_set_elements_c")));
-#endif
-
-#endif
-
 /* -------------------------------------------------------------------------- */
 
-/* https://github.com/pmodels/mpich/issues/6351 */
-/* https://github.com/pmodels/mpich/pull/6354   */
-
-#if MPI_VERSION == 4 && MPI_SUBVERSION == 0
-
-#if (MPICH_NUMVERSION < 40100300) || defined(CIBUILDWHEEL)
-static int PyMPI_MPICH_MPI_Reduce_c(void *sendbuf, void *recvbuf,
-                                    MPI_Count count, MPI_Datatype datatype,
-                                    MPI_Op op, int root, MPI_Comm comm)
-{
-  char dummy[1] = {0};
-  if (!sendbuf && (root == MPI_ROOT || root == MPI_PROC_NULL)) sendbuf = dummy;
-  return MPI_Reduce_c(sendbuf, recvbuf, count, datatype, op, root, comm);
-}
-#undef  MPI_Reduce_c
-#define MPI_Reduce_c PyMPI_MPICH_MPI_Reduce_c
-#endif
-
-#endif
-
-/* -------------------------------------------------------------------------- */
-
-#if defined(CIBUILDWHEEL)
-
-#define PyMPI_MPICH_CALL_WEAK_SYMBOL(function, ...) \
-  if (function) return function(__VA_ARGS__); \
-  return PyMPI_UNAVAILABLE(#function, __VA_ARGS__); \
-
-#undef MPI_Type_create_f90_integer
-#pragma weak MPI_Type_create_f90_integer
-static int PyMPI_MPICH_MPI_Type_create_f90_integer(int r, MPI_Datatype *t)
-{ PyMPI_MPICH_CALL_WEAK_SYMBOL(MPI_Type_create_f90_integer, r, t); }
-#define MPI_Type_create_f90_integer PyMPI_MPICH_MPI_Type_create_f90_integer
-
-#undef MPI_Type_create_f90_real
-#pragma weak MPI_Type_create_f90_real
-static int PyMPI_MPICH_MPI_Type_create_f90_real(int p, int r, MPI_Datatype *t)
-{ PyMPI_MPICH_CALL_WEAK_SYMBOL(MPI_Type_create_f90_real, p, r, t); }
-#define MPI_Type_create_f90_real PyMPI_MPICH_MPI_Type_create_f90_real
-
-#undef MPI_Type_create_f90_complex
-#pragma weak MPI_Type_create_f90_complex
-static int PyMPI_MPICH_MPI_Type_create_f90_complex(int p, int r, MPI_Datatype *t)
-{ PyMPI_MPICH_CALL_WEAK_SYMBOL(MPI_Type_create_f90_complex, p, r, t); }
-#define MPI_Type_create_f90_complex PyMPI_MPICH_MPI_Type_create_f90_complex
-
-#undef MPI_Status_c2f
-#pragma weak MPI_Status_c2f
-static int PyMPI_MPICH_MPI_Status_c2f(MPI_Status *cs, MPI_Fint *fs)
-{ PyMPI_MPICH_CALL_WEAK_SYMBOL(MPI_Status_c2f, cs, fs); }
-#define MPI_Status_c2f PyMPI_MPICH_MPI_Status_c2f
-
-#undef MPI_Status_f2c
-#pragma weak MPI_Status_f2c
-static int PyMPI_MPICH_MPI_Status_f2c(MPI_Fint *fs, MPI_Status *cs)
-{ PyMPI_MPICH_CALL_WEAK_SYMBOL(MPI_Status_f2c, fs, cs); }
-#define MPI_Status_f2c PyMPI_MPICH_MPI_Status_f2c
-
+#if PyMPI_LEGACY_ABI
+#include "mpich3.h"
 #endif
 
 /* -------------------------------------------------------------------------- */

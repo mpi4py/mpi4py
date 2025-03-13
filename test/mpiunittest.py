@@ -18,7 +18,7 @@ class TestCase(unittest.TestCase):
         except NotImplementedError:
             if version is not None:
                 from mpi4py import MPI
-                mpi_version = (MPI.VERSION, MPI.SUBVERSION)
+                mpi_version = MPI.Get_version()
                 self.assertLess(mpi_version, (version, subversion))
 
 

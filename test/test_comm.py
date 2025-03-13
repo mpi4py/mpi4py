@@ -161,7 +161,7 @@ class BaseTestComm:
         try:
             comm = self.COMM.Create_group(group)
         except NotImplementedError:
-            self.assertLess(MPI.VERSION, 3)
+            self.assertLess(MPI.Get_version(), (3, 0))
             self.skipTest('mpi-comm-create_group')
         else:
             ccmp = MPI.Comm.Compare(self.COMM, comm)
@@ -175,7 +175,7 @@ class BaseTestComm:
         try:
             comm = MPI.Intracomm.Create_from_group(group)
         except NotImplementedError:
-            self.assertLess(MPI.VERSION, 4)
+            self.assertLess(MPI.Get_version(), (4, 0))
             self.skipTest('mpi-comm-create_from_group')
         except MPI.Exception as exc:  # openmpi
             UNSUPPORTED = MPI.ERR_UNSUPPORTED_OPERATION
@@ -235,7 +235,7 @@ class BaseTestComm:
             MPI.COMM_SELF.Split_type(MPI.COMM_TYPE_SHARED).Free()
         except NotImplementedError:
             self.skipTest('mpi-comm-split_type')
-        if MPI.COMM_TYPE_HW_GUIDED == MPI.UNDEFINED:
+        if MPI.Get_version() < (4, 0):
             self.skipTest("mpi-comm-split_type-hw_guided")
         split_type = MPI.COMM_TYPE_HW_GUIDED
         #
@@ -289,7 +289,7 @@ class BaseTestComm:
             MPI.COMM_SELF.Split_type(MPI.COMM_TYPE_SHARED).Free()
         except NotImplementedError:
             self.skipTest('mpi-comm-split_type')
-        if MPI.COMM_TYPE_RESOURCE_GUIDED == MPI.UNDEFINED:
+        if MPI.Get_version() < (4, 1):
             self.skipTest("mpi-comm-split_type-resource_guided")
         split_type = MPI.COMM_TYPE_RESOURCE_GUIDED
         #
@@ -342,7 +342,7 @@ class BaseTestComm:
             MPI.COMM_SELF.Split_type(MPI.COMM_TYPE_SHARED).Free()
         except NotImplementedError:
             self.skipTest('mpi-comm-split_type')
-        if MPI.COMM_TYPE_HW_UNGUIDED == MPI.UNDEFINED:
+        if MPI.Get_version() < (4, 0):
             self.skipTest("mpi-comm-split_type-hw_unguided")
         hwcomm = [self.COMM]
         while len(hwcomm) < 32:
