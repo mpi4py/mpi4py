@@ -397,7 +397,6 @@ class BaseTestP2PBuf:
             comm.Free()
 
     @unittest.skipMPI('MPICH1')
-    @unittest.skipMPI('LAM/MPI')
     def testProbeCancel(self):
         comm = self.COMM.Dup()
         try:

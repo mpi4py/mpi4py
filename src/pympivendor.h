@@ -139,19 +139,6 @@ static int PyMPI_Get_vendor(const char **vendor_name,
   micro = OMPI_RELEASE_VERSION;
   #endif
 
-#elif defined(LAM_MPI)
-
-  name = "LAM/MPI";
-  #if defined(LAM_MAJOR_VERSION)
-  major = LAM_MAJOR_VERSION;
-  #endif
-  #if defined(LAM_MINOR_VERSION)
-  minor = LAM_MINOR_VERSION;
-  #endif
-  #if defined(LAM_RELEASE_VERSION)
-  micro = LAM_RELEASE_VERSION;
-  #endif
-
 #endif
 
   if (vendor_name)   *vendor_name   = name;

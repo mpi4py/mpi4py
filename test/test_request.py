@@ -29,7 +29,6 @@ class TestRequest(unittest.TestCase):
         self.assertEqual(self.REQUEST.test(), (True, None))
 
     @unittest.skipMPI('MPICH1')
-    @unittest.skipMPI('LAM/MPI')
     def testGetStatus(self):
         try:
             flag = self.REQUEST.Get_status()

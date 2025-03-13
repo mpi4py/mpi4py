@@ -745,7 +745,6 @@ class BaseTestIOView(BaseTestIO):
 
 
 @unittest.skipMPI('MPICH1')
-@unittest.skipMPI('LAM/MPI')
 class TestIOBasicSelf(BaseTestIOBasic, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
@@ -753,14 +752,12 @@ class TestIOBasicSelf(BaseTestIOBasic, unittest.TestCase):
 @unittest.skipMPI('msmpi')
 @unittest.skipMPI('MPICH2')
 @unittest.skipMPI('MPICH1')
-@unittest.skipMPI('LAM/MPI')
 class TestIOBasicWorld(BaseTestIOBasic, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
 @unittest.skipMPI('mpich(>=4.0.0,<4.1.0)')
 @unittest.skipMPI('openmpi(<2.2.0)')
 @unittest.skipMPI('MPICH1')
-@unittest.skipMPI('LAM/MPI')
 class TestIOViewSelf(BaseTestIOView, unittest.TestCase):
     COMM = MPI.COMM_SELF
 
@@ -769,7 +766,6 @@ class TestIOViewSelf(BaseTestIOView, unittest.TestCase):
 @unittest.skipMPI('msmpi')
 @unittest.skipMPI('MPICH2')
 @unittest.skipMPI('MPICH1')
-@unittest.skipMPI('LAM/MPI')
 class TestIOViewWorld(BaseTestIOView, unittest.TestCase):
     COMM = MPI.COMM_WORLD
 
