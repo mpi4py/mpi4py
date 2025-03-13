@@ -161,10 +161,3 @@ static int PyMPI_Get_vendor(const char **vendor_name,
 
   return MPI_SUCCESS;
 }
-
-/*
-   Local variables:
-   c-basic-offset: 2
-   indent-tabs-mode: nil
-   End:
-*/

@@ -47,10 +47,3 @@ int main(int argc, char **argv)
 }
 
 /* -------------------------------------------------------------------------- */
-
-/*
-   Local variables:
-   c-basic-offset: 2
-   indent-tabs-mode: nil
-   End:
-*/

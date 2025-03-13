@@ -183,10 +183,3 @@ static int PyMPI_MPICH1_MPI_File_set_errhandler(MPI_File file,
 /* ---------------------------------------------------------------- */
 
 #endif /* !PyMPI_COMPAT_MPICH1_H */
-
-/*
-  Local variables:
-  c-basic-offset: 2
-  indent-tabs-mode: nil
-  End:
-*/

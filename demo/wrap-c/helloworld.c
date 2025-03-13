@@ -82,10 +82,3 @@ PyMODINIT_FUNC PyInit_helloworld(void)
 }
 
 /* -------------------------------------------------------------------------- */
-
-/*
-  Local variables:
-  c-basic-offset: 2
-  indent-tabs-mode: nil
-  End:
-*/

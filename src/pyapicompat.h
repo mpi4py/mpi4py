@@ -105,10 +105,3 @@ PyAPI_FUNC(int)  PyBuffer_FillInfo(Py_buffer *, PyObject *,
 #endif
 
 /* -------------------------------------------------------------------------- */
-
-/*
-   Local variables:
-   c-basic-offset: 2
-   indent-tabs-mode: nil
-   End:
-*/
