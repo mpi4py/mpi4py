@@ -1,0 +1,355 @@
+name: ci-abi
+
+on:  # yamllint disable-line rule:truthy
+  workflow_call:
+    inputs:
+      py:
+        description: 'Python version'
+        required: false
+        default: 3
+        type: string
+      platform:
+        description: 'Platform'
+        required: false
+        default: ''
+        type: string
+  workflow_dispatch:
+    inputs:
+      py:
+        description: 'Python version'
+        required: false
+        default: 3
+        type: string
+      platform:
+        description: 'Platform'
+        required: false
+        default: Linux-x86_64
+        type: choice
+        options:
+          - Linux-aarch64
+          - Linux-x86_64
+          - macOS-arm64
+          - macOS-x86_64
+          - Windows-AMD64
+
+permissions:
+  contents: read
+
+jobs:
+
+  setup:
+    name: setup
+    runs-on: ubuntu-latest
+    outputs:
+      matrix-build: ${{ steps.matrix.outputs.matrix-build }}
+      matrix-test:  ${{ steps.matrix.outputs.matrix-test  }}
+    steps:
+    - id: matrix
+      name: setup build/test matrix
+      shell: python
+      run: |
+        # setup build/test matrix #"
+        MPI = {
+            "mpiabi": [
+            ],
+            "mpich": [
+                "3.4.3",
+                "4.1.2",
+                "4.3.0",
+            ],
+            "openmpi": [
+                "4.1.6",
+                "5.0.7",
+            ],
+            "impi": [
+                "2021.7.1.15761",
+                "2021.14.2.900",
+            ],
+        }
+        MPIABI_POSIX = ["mpiabi", "mpich", "openmpi"]
+        MPIABI_WINNT = ["impi"]
+        MPIABI = {
+            "Linux":   MPIABI_POSIX,
+            "macOS":   MPIABI_POSIX,
+            "Windows": MPIABI_WINNT,
+        }
+        RUNNER = {
+            "Linux": {
+                "aarch64": "ubuntu-24.04-arm",
+                "x86_64":  "ubuntu-24.04",
+            },
+            "macOS": {
+                "arm64": "macos-14",
+                "x86_64": "macos-13",
+            },
+            "Windows": {
+                "AMD64": "windows-2022",
+            },
+        }
+        PLATFORMS = (
+            [(os, arch) for os in RUNNER for arch in RUNNER[os]]
+            if not "${{ inputs.platform }}" else
+            [tuple("${{ inputs.platform }}".split("-", 1))]
+        )
+        # fill build/test matrix
+        build = [
+            {
+                "mpi": name,
+                "platform": f"{os}-{arch}",
+                "runner": RUNNER[os][arch],
+            }
+            for os, arch in PLATFORMS
+            for name in MPIABI[os]
+        ]
+        test = [
+            {
+                "mpi": name,
+                "mpi-version": version,
+                "platform": f"{os}-{arch}",
+                "runner": RUNNER[os][arch].replace("2022", "2019"),
+            }
+            for os, arch in PLATFORMS
+            for name in MPIABI[os]
+            for version in MPI[name]
+        ]
+        # output build/test matrix
+        import os, json
+        with open(os.getenv("GITHUB_OUTPUT"), "w") as out:
+            print(f"matrix-build={json.dumps(build)}", file=out)
+            print(f"matrix-test={json.dumps(test)}", file=out)
+        # "
+
+  build:
+    name: build (${{ matrix.platform }}, ${{ matrix.mpi }})
+    runs-on: ${{ matrix.runner }}
+    needs: setup
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.setup.outputs.matrix-build) }}
+
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - if: matrix.mpi == 'mpiabi'
+      name: Checkout MPI ABI stubs
+      uses: actions/checkout@v4
+      with:
+        repository: mpi-forum/mpi-abi-stubs
+        path: mpi-abi-stubs
+        ref: main
+
+    - if: runner.os != 'Windows' && matrix.mpi == 'mpiabi'
+      name: Install MPI ABI stubs
+      run: |
+        prefix=${{ runner.temp }}/mpi-abi-stubs
+        make install PREFIX="$prefix"
+        echo "$prefix/bin" >> "$GITHUB_PATH"
+      working-directory: mpi-abi-stubs
+      shell: bash
+
+    - if: runner.os != 'Windows' && matrix.mpi != 'mpiabi'
+      id: micromamba
+      name: Download MPI (${{ matrix.mpi }})
+      uses: mamba-org/setup-micromamba@v2
+      with:
+        init-shell: none
+        post-cleanup: none
+        environment-name: ${{ matrix.mpi }}
+        create-args: >-
+          --relocate-prefix /opt/${{ matrix.mpi }}
+          ${{ matrix.mpi }}
+        condarc: |
+          show_channel_urls: true
+          channel_priority: strict
+          channels:
+            - conda-forge
+            - nodefaults
+
+    - if: runner.os != 'Windows' && matrix.mpi != 'mpiabi'
+      name: Install MPI (${{ matrix.mpi }})
+      run: |
+        # install MPI
+        mpiname=${{ matrix.mpi }}
+        prefix=/opt/${{ matrix.mpi }}
+        envdir=${{ steps.micromamba.outputs.environment-path }}
+        # tweak environment
+        sudo mv "$envdir" "$prefix"
+        echo "$prefix/bin" >> "$GITHUB_PATH"
+        if [[ "$mpiname" == "mpich" ]]; then
+        echo MPICH_CC=cc >> "$GITHUB_ENV"; fi
+        if [[ "$mpiname" == "openmpi" ]]; then
+        echo OMPI_CC=cc >> "$GITHUB_ENV"
+        echo OMPI_MCA_pml=ob1 >> "$GITHUB_ENV"
+        echo OMPI_MCA_btl=tcp,self >> "$GITHUB_ENV"; fi
+
+    - if: runner.os == 'Windows' && matrix.mpi == 'impi'
+      name: Install Intel MPI
+      run: |
+        # install Intel MPI
+        mpiroot="$PWD/intelmpi"
+        mkdir -p "$mpiroot"
+        # install build package
+        impi=intelmpi.devel.win-x64
+        nuget install "$impi"
+        install=$(ls -d "$impi".*/build/native)
+        cp -a "$install/include" "$mpiroot"
+        cp -a "$install/win-x64/lib" "$mpiroot"
+        # install runtime package
+        impi=intelmpi.redist.win-x64
+        nuget install "$impi"
+        install=$(ls -d "$impi".*/runtimes/win-x64/native)
+        cp -a "$install/bin" "$mpiroot"
+        cp -a "$install/libfabric" "$mpiroot"
+        cp -a "$install/etc" "$mpiroot"
+        # tweak environment
+        echo "$(cygpath -w "$mpiroot/bin")" >> "$GITHUB_PATH"
+        echo "I_MPI_ROOT=$(cygpath -w "$mpiroot")" >> "$GITHUB_ENV"
+        echo "I_MPI_SPAWN=1" >> "$GITHUB_ENV"
+        echo "I_MPI_SPIN_COUNT=1" >> "$GITHUB_ENV"
+        echo "I_MPI_THREAD_YIELD=2" >> "$GITHUB_ENV"
+      working-directory: ${{ runner.temp }}
+      shell: bash
+
+    - name: Setup Python (${{ inputs.py || 3 }})
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.py || 3 }}
+        cache: pip
+        cache-dependency-path: |
+          conf/requirements-build-cython.txt
+          conf/requirements-build-${{ matrix.backend }}.txt
+
+    - name: Upgrade pip
+      run:  python -m pip install -U pip
+
+    - name: Install build
+      run:  python -m pip install -U build
+
+    - name: Build mpi4py wheel
+      run:  python -m build --verbose --wheel
+      env:
+        CFLAGS: "-O0"
+        CIBUILDWHEEL: 1
+
+    - name: Upload mpi4py wheel
+      uses: actions/upload-artifact@v4
+      with:
+        name: mpi4py-abi-${{ matrix.mpi }}-${{ matrix.platform }}
+        path: dist/mpi4py-*.whl
+
+  test:
+    name: >-
+      test (${{ format('{0}, {1}, {2}',
+      matrix.platform, matrix.mpi, matrix.mpi-version) }})
+    runs-on: ${{ matrix.runner }}
+    needs: [setup, build]
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.setup.outputs.matrix-test) }}
+
+    steps:
+
+    - if: runner.os != 'Windows'
+      id: micromamba
+      name: Download MPI (${{ matrix.mpi }}-${{ matrix.mpi-version }})
+      uses: mamba-org/setup-micromamba@v2
+      with:
+        init-shell: none
+        post-cleanup: none
+        environment-name: ${{ matrix.mpi }}
+        create-args: >-
+          --relocate-prefix /opt/${{ matrix.mpi }}
+          ${{ matrix.mpi }}=${{ matrix.mpi-version }}
+        condarc: |
+          show_channel_urls: true
+          channel_priority: strict
+          channels:
+            - conda-forge
+            - nodefaults
+
+    - if: runner.os != 'Windows'
+      name: Install MPI (${{ matrix.mpi }}-${{ matrix.mpi-version }})
+      run: |
+        mpiname=${{ matrix.mpi }} version=${{ matrix.mpi-version }}
+        prefix=/opt/${{ matrix.mpi }}
+        envdir=${{ steps.micromamba.outputs.environment-path }}
+        sudo mv "$envdir" "$prefix"
+        # tweak environment
+        echo "$prefix/bin" >> $GITHUB_PATH
+        if [[ "$mpiname" == "openmpi" ]]; then
+        # Set OMPI/PRRTE MCA parameters
+        mca_params="$HOME/.openmpi/mca-params.conf"
+        mkdir -p "$(dirname "$mca_params")"
+        echo pml=ob1 >> $mca_params
+        echo btl=tcp,self >> $mca_params
+        echo mpi_param_check = true >> "$mca_params"
+        echo mpi_show_handle_leaks = true >> "$mca_params"
+        echo rmaps_base_oversubscribe = true >> "$mca_params"
+        mca_params="$HOME/.prte/mca-params.conf"
+        mkdir -p "$(dirname "$mca_params")"
+        echo rmaps_default_mapping_policy = :oversubscribe >> "$mca_params"
+        if [[ "${version%%.*}" -lt 5 ]]; then
+        # Use MPI_THREAD_LEVEL=MPI_THREAD_SERIALIZED with openmpi<5
+        echo MPI4PY_RC_THREAD_LEVEL=serialized >> $GITHUB_ENV
+        fi; fi;
+
+    - if: runner.os == 'Windows' && matrix.mpi == 'impi'
+      name: Install Intel MPI (${{ matrix.mpi-version }})
+      run: |
+        package=intelmpi.redist.win-x64 version=${{ matrix.mpi-version }}
+        nuget install $package -Version $version
+        mpiroot="$PWD/$package.$version/runtimes/win-x64/native"
+        echo "$(cygpath -w "$mpiroot/bin")" >> "$GITHUB_PATH"
+        echo "I_MPI_ROOT=$(cygpath -w "$mpiroot")" >> "$GITHUB_ENV"
+        echo "I_MPI_SPAWN=1" >> "$GITHUB_ENV"
+        echo "I_MPI_SPIN_COUNT=1" >> "$GITHUB_ENV"
+        echo "I_MPI_THREAD_YIELD=2" >> "$GITHUB_ENV"
+      working-directory: ${{ runner.temp }}
+      shell: bash
+
+    - name: Setup Python (${{ inputs.py || 3 }})
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.py || 3 }}
+
+    - name: Upgrade pip
+      run:  python -m pip install -U pip
+
+    - name: Download mpi4py wheel
+      uses: actions/download-artifact@v4
+      with:
+        name: mpi4py-abi-${{ matrix.mpi }}-${{ matrix.platform }}
+        path: dist
+
+    - name: Install mpi4py wheel
+      run:  python -m pip install mpi4py
+              --verbose --no-index --find-links=dist
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Test mpi4py cmdline (mpi-library)
+      run:  mpiexec -n 1 python -m mpi4py --mpi-library
+    - name: Test mpi4py cmdline (mpi-std-version)
+      run:  mpiexec -n 1 python -m mpi4py --mpi-std-version
+    - name: Test mpi4py cmdline (mpi-lib-version)
+      run:  mpiexec -n 1 python -m mpi4py --mpi-lib-version
+    - name: Test mpi4py bench (helloworld)
+      run:  mpiexec -n 4 python -m mpi4py.bench helloworld
+    - name: Test mpi4py bench (ringtest)
+      run:  mpiexec -n 4 python -m mpi4py.bench ringtest
+
+    - name: Test mpi4py (np=1)
+      run:  mpiexec -n 1 python test/main.py -v -e 'spawn|dynproc|pool'
+    - name: Test mpi4py (np=2)
+      run:  mpiexec -n 2 python test/main.py -v -f -i 'comm|p2p|cco|rma'
+    - name: Test mpi4py (np=3)
+      run:  mpiexec -n 3 python test/main.py -v -f -i 'comm|p2p|cco|rma'
+
+    - name: Uninstall mpi4py
+      run:  python -m pip uninstall mpi4py
+              --verbose --yes
