@@ -65,9 +65,11 @@ jobs:
                 "2021.7.1.15761",
                 "2021.14.2.900",
             ],
+            "msmpi": [
+            ],
         }
         MPIABI_POSIX = ["mpiabi", "mpich", "openmpi"]
-        MPIABI_WINNT = ["mpiabi", "impi"]
+        MPIABI_WINNT = ["mpiabi", "impi", "msmpi"]
         MPIABI = {
             "Linux":   MPIABI_POSIX,
             "macOS":   MPIABI_POSIX,
@@ -190,7 +192,7 @@ jobs:
       name: Install Intel MPI
       run: |
         # install Intel MPI
-        mpiroot="$PWD/impi"
+        mpiroot="$(pwd)/impi"
         mkdir -p "$mpiroot"
         # install build package
         mpi=intelmpi.devel.win-x64
@@ -201,6 +203,28 @@ jobs:
         # tweak environment
         echo "$(cygpath -w "$mpiroot/bin")" >> "$GITHUB_PATH"
         echo "I_MPI_ROOT=$(cygpath -w "$mpiroot")" >> "$GITHUB_ENV"
+      working-directory: ${{ runner.temp }}
+      shell: bash
+
+    - if: runner.os == 'Windows' && matrix.mpi == 'msmpi'
+      name: Install Microsoft MPI
+      run: |
+        # install Intel MPI
+        mpiroot="$(pwd)/msmpi"
+        mkdir -p "$mpiroot"
+        # install SDK package
+        mpi=MSMPISDK
+        nuget install "$mpi"
+        install=$(ls -d "$mpi".*/)
+        cp -a "$install/include" "$mpiroot"
+        cp -a "$install/lib" "$mpiroot"
+        # tweak environment
+        msmpi_inc="$mpiroot/include"
+        msmpi_lib32="$mpiroot/lib/x86"
+        msmpi_lib64=$"$mpiroot/lib/x64"
+        echo "MSMPI_INC=$(cygpath -w "$msmpi_inc")" >> "$GITHUB_ENV"
+        echo "MSMPI_LIB32=$(cygpath -w "$msmpi_lib32")" >> "$GITHUB_ENV"
+        echo "MSMPI_LIB64=$(cygpath -w "$msmpi_lib64")" >> "$GITHUB_ENV"
       working-directory: ${{ runner.temp }}
       shell: bash
 
@@ -293,7 +317,7 @@ jobs:
       run: |
         mpi=intelmpi.redist.win-x64 version=${{ matrix.mpi-version }}
         nuget install $mpi -Version $version
-        mpiroot="$PWD/$mpi.$version/runtimes/win-x64/native"
+        mpiroot="$(pwd)/$mpi.$version/runtimes/win-x64/native"
         echo "$(cygpath -w "$mpiroot/bin")" >> "$GITHUB_PATH"
         echo "I_MPI_ROOT=$(cygpath -w "$mpiroot")" >> "$GITHUB_ENV"
         echo "I_MPI_SPAWN=1" >> "$GITHUB_ENV"
