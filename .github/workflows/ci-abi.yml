@@ -67,7 +67,7 @@ jobs:
             ],
         }
         MPIABI_POSIX = ["mpiabi", "mpich", "openmpi"]
-        MPIABI_WINNT = ["impi"]
+        MPIABI_WINNT = ["mpiabi", "impi"]
         MPIABI = {
             "Linux":   MPIABI_POSIX,
             "macOS":   MPIABI_POSIX,
@@ -141,12 +141,13 @@ jobs:
         path: mpi-abi-stubs
         ref: main
 
-    - if: runner.os != 'Windows' && matrix.mpi == 'mpiabi'
+    - if: matrix.mpi == 'mpiabi'
       name: Install MPI ABI stubs
       run: |
-        prefix=${{ runner.temp }}/mpi-abi-stubs
-        make install PREFIX="$prefix"
-        echo "$prefix/bin" >> "$GITHUB_PATH"
+        bash build-cmake.sh
+        echo "MPI_ABI_STUBS=$PREFIX" >> "$GITHUB_ENV"
+      env:
+        PREFIX: ${{ runner.temp }}/mpi-abi-stubs
       working-directory: mpi-abi-stubs
       shell: bash
 
