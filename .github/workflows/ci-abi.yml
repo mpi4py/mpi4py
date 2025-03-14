@@ -190,27 +190,17 @@ jobs:
       name: Install Intel MPI
       run: |
         # install Intel MPI
-        mpiroot="$PWD/intelmpi"
+        mpiroot="$PWD/impi"
         mkdir -p "$mpiroot"
         # install build package
-        impi=intelmpi.devel.win-x64
-        nuget install "$impi"
-        install=$(ls -d "$impi".*/build/native)
+        mpi=intelmpi.devel.win-x64
+        nuget install "$mpi"
+        install=$(ls -d "$mpi".*/build/native)
         cp -a "$install/include" "$mpiroot"
         cp -a "$install/win-x64/lib" "$mpiroot"
-        # install runtime package
-        impi=intelmpi.redist.win-x64
-        nuget install "$impi"
-        install=$(ls -d "$impi".*/runtimes/win-x64/native)
-        cp -a "$install/bin" "$mpiroot"
-        cp -a "$install/libfabric" "$mpiroot"
-        cp -a "$install/etc" "$mpiroot"
         # tweak environment
         echo "$(cygpath -w "$mpiroot/bin")" >> "$GITHUB_PATH"
         echo "I_MPI_ROOT=$(cygpath -w "$mpiroot")" >> "$GITHUB_ENV"
-        echo "I_MPI_SPAWN=1" >> "$GITHUB_ENV"
-        echo "I_MPI_SPIN_COUNT=1" >> "$GITHUB_ENV"
-        echo "I_MPI_THREAD_YIELD=2" >> "$GITHUB_ENV"
       working-directory: ${{ runner.temp }}
       shell: bash
 
@@ -301,9 +291,9 @@ jobs:
     - if: runner.os == 'Windows' && matrix.mpi == 'impi'
       name: Install Intel MPI (${{ matrix.mpi-version }})
       run: |
-        package=intelmpi.redist.win-x64 version=${{ matrix.mpi-version }}
-        nuget install $package -Version $version
-        mpiroot="$PWD/$package.$version/runtimes/win-x64/native"
+        mpi=intelmpi.redist.win-x64 version=${{ matrix.mpi-version }}
+        nuget install $mpi -Version $version
+        mpiroot="$PWD/$mpi.$version/runtimes/win-x64/native"
         echo "$(cygpath -w "$mpiroot/bin")" >> "$GITHUB_PATH"
         echo "I_MPI_ROOT=$(cygpath -w "$mpiroot")" >> "$GITHUB_ENV"
         echo "I_MPI_SPAWN=1" >> "$GITHUB_ENV"
