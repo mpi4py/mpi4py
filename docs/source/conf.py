@@ -63,6 +63,8 @@ default_role = 'any'
 nitpicky = True
 nitpick_ignore = [
     ('c:func', r'atexit'),
+    ('c:func', r'dlopen'),
+    ('c:func', r'dlsym'),
     ('py:mod', r'__worker__'),
 ]
 nitpick_ignore_regex = [

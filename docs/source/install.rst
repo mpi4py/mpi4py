@@ -70,6 +70,19 @@ The following environment variables affect the build configuration.
    the availability of all MPI constants, predefined handles, and
    routines.
 
+.. envvar:: MPI4PY_BUILD_ABI
+
+   Enable enhanced support for the MPI 5.0 standard ABI and the MPICH
+   or Open MPI legacy ABIs. The :mod:`mpi4py.MPI` extension module
+   will be able to dynamically link at runtime with older versions
+   (down to the MPI 3.0 standard) of the corresponding MPI
+   implementation used at compile time. This feature is only available
+   on Linux, macOS, and Windows. POSIX-like systems other than Linux
+   and macOS are not currently supported, although they could easily
+   be: all what is needed is for the platform to either support weak
+   symbols in shared modules/libraries, or support the standard POSIX
+   :c:func:`dlopen`/:c:func:`dlsym` APIs.
+
 The following environment variables are aliases for the ones described
 above. Having shorter names, they are convenient for occasional use in
 the command line. Its usage is not recommended in automation scenarios

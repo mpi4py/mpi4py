@@ -127,10 +127,18 @@ class Config:
         sections += [section]
         self.load(filename, sections)
         if not self:
+            self._setup_mpiabi()
+        if not self:
             if os.name == 'posix':
                 self._setup_posix()
             if sys.platform == 'win32':
                 self._setup_windows()
+
+    def _setup_mpiabi(self):
+        MPI_ABI_STUBS = os.environ.get('MPI_ABI_STUBS')
+        if MPI_ABI_STUBS:
+            self.load('mpi.cfg', 'mpiabi')
+            self.filename = [MPI_ABI_STUBS]
 
     def _setup_posix(self):
         pass
