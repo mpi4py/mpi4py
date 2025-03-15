@@ -92,13 +92,15 @@ mpif90types = [
     MPI.COMPLEX32,
 ]
 
+def supported(datatype):
+    if datatype == MPI.DATATYPE_NULL:
+        return False
+    if datatype.Get_size() in (0, MPI.UNDEFINED):
+        return False
+    return True
+
 for typelist in [mpif77types, mpif90types]:
-    typelist[:] = [
-        t for t in datatypes
-        if t != MPI.DATATYPE_NULL
-        and t.Get_name() != 'MPI_DATATYPE_NULL'
-        and t.Get_size() != 0
-    ]
+    typelist[:] = [t for t in typelist if supported(t)]
 del typelist
 
 class TestUtilDTLib(unittest.TestCase):
@@ -377,7 +379,7 @@ class TestUtilDTLib(unittest.TestCase):
     def testF90Integer(self):
         try:
             mt = MPI.Datatype.Create_f90_integer(1)
-            if mt == MPI.DATATYPE_NULL or mt.Get_size() == 0:
+            if not supported(mt):
                 raise NotImplementedError
         except NotImplementedError:
             self.skipTest('mpi-type-create-f90-integer')
@@ -399,7 +401,7 @@ class TestUtilDTLib(unittest.TestCase):
     def testF90Real(self):
         try:
             mt = MPI.Datatype.Create_f90_real(7, MPI.UNDEFINED)
-            if mt == MPI.DATATYPE_NULL or mt.Get_size() == 0:
+            if not supported(mt):
                 raise NotImplementedError
         except NotImplementedError:
             self.skipTest('mpi-type-create-f90-real')
@@ -421,7 +423,7 @@ class TestUtilDTLib(unittest.TestCase):
     def testF90Complex(self):
         try:
             mt = MPI.Datatype.Create_f90_complex(7, MPI.UNDEFINED)
-            if mt == MPI.DATATYPE_NULL or mt.Get_size() == 0:
+            if not supported(mt):
                 raise NotImplementedError
         except NotImplementedError:
             self.skipTest('mpi-type-create-f90-complex')

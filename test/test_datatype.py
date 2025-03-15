@@ -38,13 +38,15 @@ datatypes += datatypes_f
 datatypes += datatypes_f90
 datatypes += datatypes_mpi
 
+def supported(datatype):
+    if datatype == MPI.DATATYPE_NULL:
+        return False
+    if datatype.Get_size() in (0, MPI.UNDEFINED):
+        return False
+    return True
+
 for typelist in [datatypes, datatypes_f, datatypes_f90]:
-    typelist[:] = [
-        t for t in datatypes
-        if t != MPI.DATATYPE_NULL
-        and t.Get_name() != 'MPI_DATATYPE_NULL'
-        and t.Get_size() != 0
-    ]
+    typelist[:] = [t for t in typelist if supported(t)]
 del typelist
 
 combiner_map = {}
@@ -98,8 +100,7 @@ class TestDatatype(unittest.TestCase):
     match_size_real    = [4, 8]
     match_size_complex = [8, 16]
     @unittest.skipMPI('MPI(<2.0)')
-    @unittest.skipMPI('openmpi', (MPI.CHARACTER == MPI.DATATYPE_NULL or
-                                  MPI.CHARACTER.Get_size() == 0))
+    @unittest.skipMPI('openmpi', not supported(MPI.INTEGER))
     def testMatchSize(self):
         typeclass = MPI.TYPECLASS_INTEGER
         for size in self.match_size_integer:
