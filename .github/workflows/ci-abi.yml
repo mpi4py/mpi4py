@@ -246,8 +246,8 @@ jobs:
     - name: Build mpi4py wheel
       run:  python -m build --verbose --wheel
       env:
+        MPI4PY_BUILD_ABI: "1"
         CFLAGS: "-O0"
-        CIBUILDWHEEL: 1
 
     - name: Upload mpi4py wheel
       uses: actions/upload-artifact@v4

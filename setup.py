@@ -100,9 +100,9 @@ def extensions():
         MPI['define_macros'].extend([
             ('CYTHON_LIMITED_API', api),
         ])
-    if os.environ.get('CIBUILDWHEEL') == '1':
+    if os.environ.get('MPI4PY_BUILD_ABI') == '1':
         MPI['define_macros'].extend([
-            ('CIBUILDWHEEL', 1),
+            ('PYMPIBUILDABI', 1),
         ])
     #
     return [MPI]
