@@ -1,6 +1,7 @@
 from collections import namedtuple
 import contextlib
 import unittest
+from mpitestutil import import_MPI
 
 
 class TestCase(unittest.TestCase):
@@ -16,10 +17,11 @@ class TestCase(unittest.TestCase):
         try:
             yield
         except NotImplementedError:
-            if version is not None:
-                from mpi4py import MPI
-                mpi_version = MPI.Get_version()
-                self.assertLess(mpi_version, (version, subversion))
+            if version is None:
+                return
+            MPI = import_MPI()
+            mpi_version = MPI.Get_version()
+            self.assertLess(mpi_version, (version, subversion))
 
 
 _Version = namedtuple("_Version", ["major", "minor", "patch"])
@@ -71,7 +73,7 @@ class _VersionPredicate:
 
 
 def mpi_predicate(predicate):
-    from mpi4py import MPI
+    MPI = import_MPI()
     def key(s):
         s = s.replace(' ', '')
         s = s.replace('/', '')
@@ -112,29 +114,16 @@ skipIf = unittest.skipIf
 skipUnless = unittest.skipUnless
 
 
-def skipMPI(predicate, *conditions):
+def skipMPI(predicate, *conditions, reason=''):
     version = mpi_predicate(predicate)
     if version:
         if not conditions or any(conditions):
             return unittest.skip(str(version))
-    return unittest.skipIf(False, '')
+    return unittest.skipIf(False, reason)
 
 
 def disable(what, reason):
     return unittest.skip(reason)(what)
-
-
-@contextlib.contextmanager
-def capture_stderr():
-    import io
-    import sys
-    stderr = sys.stderr
-    stream = io.StringIO()
-    sys.stderr = stream
-    try:
-        yield stream
-    finally:
-        sys.stderr = stderr
 
 
 def main(*args, **kwargs):

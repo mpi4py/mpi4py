@@ -1,6 +1,9 @@
 from mpi4py import MPI
 import mpiunittest as unittest
-import sys, os, mpi4py
+import mpitestutil as testutil
+import mpi4py
+import sys
+import os
 
 MPI4PYPATH = os.path.abspath(
     os.path.dirname(mpi4py.__path__[0])
@@ -32,76 +35,8 @@ def childscript():
     os.chmod(script, int("770", 8))
     return script
 
-def ch4_ucx():
-    return 'ch4:ucx' in MPI.Get_library_version()
 
-def ch4_ofi():
-    return 'ch4:ofi' in MPI.Get_library_version()
-
-def appnum():
-    if MPI.APPNUM == MPI.KEYVAL_INVALID: return None
-    return MPI.COMM_WORLD.Get_attr(MPI.APPNUM)
-
-def badport():
-    if MPI.get_vendor()[0] != 'MPICH':
-        return False
-    try:
-        port = MPI.Open_port()
-        MPI.Close_port(port)
-    except:
-        port = ""
-    return port == ""
-
-def using_GPU():
-    # Once a CUDA context is created, the process cannot be forked.
-    # Note: This seems to be a partial fix. Even if we are running cpu-only
-    # tests, if MPI is built with CUDA support we can still fail. Unfortunately
-    # there is no runtime check for us to detect if it's the case...
-    using_cupy = (sys.modules.get('cupy') is not None)
-    using_numba = (sys.modules.get('numba') is not None)
-    return using_cupy or using_numba
-
-def sequential():
-    return MPI.COMM_WORLD.Get_size() == 1
-
-def macos():
-    return sys.platform == 'darwin'
-
-def windows():
-    return sys.platform == 'win32'
-
-def github():
-    return os.environ.get('GITHUB_ACTIONS') == 'true'
-
-def azure():
-    return os.environ.get('TF_BUILD') == 'True'
-
-def skip_spawn():
-    return (
-        os.environ.get('MPI4PY_TEST_SPAWN')
-        in (None, '0', 'no', 'off', 'false')
-    )
-
-@unittest.skipMPI('MPI(<2.0)')
-@unittest.skipMPI('openmpi(<3.0.0)')
-@unittest.skipMPI('openmpi(==4.0.0)')
-@unittest.skipMPI('openmpi(==4.0.1)', macos())
-@unittest.skipMPI('openmpi(==4.0.2)', macos())
-@unittest.skipMPI('openmpi(>=4.1.0,<4.2.0)', azure())
-@unittest.skipMPI('openmpi(>=4.1.0,<4.2.0)', github())
-@unittest.skipMPI('openmpi(>=5.0.0,<5.0.7)', skip_spawn())
-@unittest.skipMPI('mpich(<4.1.0)', appnum() is None)
-@unittest.skipMPI('mpich(<4.3.0)', badport())
-@unittest.skipMPI('msmpi(<8.1.0)')
-@unittest.skipMPI('msmpi', skip_spawn())
-@unittest.skipMPI('msmpi', appnum() is None)
-@unittest.skipMPI('msmpi', os.environ.get("PMI_APPNUM") is None)
-@unittest.skipMPI('mvapich', appnum() is None)
-@unittest.skipMPI('mvapich', badport())
-@unittest.skipMPI('mvapich(<3.0.0)')
-@unittest.skipMPI('MPICH2')
-@unittest.skipMPI('MPICH1')
-@unittest.skipIf(using_GPU(), 'using CUDA')
+@unittest.skipIf(testutil.disable_mpi_spawn(), 'mpi-spawn')
 class BaseTestSpawn:
 
     COMM = MPI.COMM_NULL
@@ -145,7 +80,7 @@ class BaseTestSpawnSingle(BaseTestSpawn):
             self.assertEqual(errcode, MPI.SUCCESS)
 
     @unittest.skipMPI('msmpi')
-    @unittest.skipMPI('mpich(==3.4.1)', ch4_ofi())
+    @unittest.skipMPI('mpich(==3.4.1)')
     def testArgsOnlyAtRoot(self):
         self.COMM.Barrier()
         if self.COMM.Get_rank() == self.ROOT:
@@ -300,7 +235,8 @@ class BaseTestSpawnMultiple(BaseTestSpawn):
         self.COMM.Barrier()
 
     def testArgsBad(self):
-        if self.COMM.Get_size() > 1: return
+        if self.COMM.Get_size() > 1:
+            return
         CMDS = [self.COMMAND]
         ARGS = [self.ARGS]
         MAXP = [self.MAXPROCS]

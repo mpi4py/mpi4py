@@ -1,5 +1,6 @@
 from mpi4py import MPI
 import mpiunittest as unittest
+import mpitestutil as testutil
 import os
 try:
     import socket
@@ -7,30 +8,14 @@ except ImportError:
     socket = None
 
 
-def github():
-    return os.environ.get('GITHUB_ACTIONS') == 'true'
-
 def ch4_ucx():
     return 'ch4:ucx' in MPI.Get_library_version()
 
 def ch4_ofi():
     return 'ch4:ofi' in MPI.Get_library_version()
 
-def appnum():
-    if MPI.APPNUM == MPI.KEYVAL_INVALID: return None
-    return MPI.COMM_WORLD.Get_attr(MPI.APPNUM)
 
-def badport():
-    if MPI.get_vendor()[0] != 'MPICH':
-        return False
-    try:
-        port = MPI.Open_port()
-        MPI.Close_port(port)
-    except:
-        port = ""
-    return port == ""
-
-@unittest.skipMPI('mpich(<4.3.0)', badport())
+@unittest.skipMPI('mpich(<4.3.0)', testutil.has_mpi_port())
 @unittest.skipMPI('openmpi(<2.0.0)')
 @unittest.skipMPI('openmpi(>=5.0.0,<5.0.4)')
 @unittest.skipMPI('msmpi(<8.1.0)')
@@ -158,10 +143,11 @@ class TestDPM(unittest.TestCase):
         intercomm.Free()
 
     @unittest.skipIf(socket is None, 'socket')
-    @unittest.skipMPI('impi', MPI.COMM_WORLD.Get_size() > 2
-                      and github() and os.name == 'nt')
+    @unittest.skipMPI('impi',
+                      MPI.COMM_WORLD.Get_size() > 2
+                      and testutil.github()
+                      and os.name == 'nt')
     def testJoin(self):
-        size = MPI.COMM_WORLD.Get_size()
         rank = MPI.COMM_WORLD.Get_rank()
         server = client = address = None
         host = socket.gethostname()
@@ -199,11 +185,8 @@ class TestDPM(unittest.TestCase):
             client = server.accept()[0]
             server.close()
         if rank == 1: # client
-            try:
-                client.connect(address)
-                connected = True
-            except OSError:
-                raise
+            client.connect(address)
+            connected = True
         connected = MPI.COMM_WORLD.bcast(connected, root=1)
         # test Comm.Join()
         MPI.COMM_WORLD.Barrier()

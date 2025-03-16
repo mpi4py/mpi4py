@@ -1,5 +1,6 @@
 from mpi4py import MPI
 import mpiunittest as unittest
+import mpitestutil as testutil
 
 class GReqCtx:
 
@@ -80,7 +81,7 @@ class TestGrequest(unittest.TestCase):
             greq = MPI.Grequest.Start(raise_fn, ctx.free, ctx.cancel)
             greq.Complete()
             with self.assertRaises(MPI.Exception) as exc_cm:
-                with unittest.capture_stderr() as stderr:
+                with testutil.capture_stderr() as stderr:
                     greq.Wait()
             if greq:
                 greq.Free()
@@ -89,7 +90,7 @@ class TestGrequest(unittest.TestCase):
             greq = MPI.Grequest.Start(ctx.query, raise_fn, ctx.cancel)
             greq.Complete()
             with self.assertRaises(MPI.Exception) as exc_cm:
-                with unittest.capture_stderr() as stderr:
+                with testutil.capture_stderr() as stderr:
                     greq.Wait()
             if greq:
                 greq.Free()
@@ -97,7 +98,7 @@ class TestGrequest(unittest.TestCase):
             #
             greq = MPI.Grequest.Start(ctx.query, ctx.free, raise_fn)
             with self.assertRaises(MPI.Exception) as exc_cm:
-                with unittest.capture_stderr() as stderr:
+                with testutil.capture_stderr() as stderr:
                     greq.Cancel()
             greq.Complete()
             greq.Wait()

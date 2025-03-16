@@ -24,15 +24,12 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(elements, 0)
 
     def testSetElements(self):
-        try:
+        with self.catchNotImplementedError(2, 0):
             self.STATUS.Set_elements(MPI.BYTE, 7)
             count = self.STATUS.Get_count(MPI.BYTE)
             self.assertEqual(count, 7)
             elements = self.STATUS.Get_elements(MPI.BYTE)
             self.assertEqual(elements, 7)
-        except NotImplementedError:
-            if MPI.Get_version() >= (2,0): raise
-            self.skipTest('mpi-status-set_elements')
 
     def testIsCancelled(self):
         flag = self.STATUS.Is_cancelled()
@@ -40,13 +37,10 @@ class TestStatus(unittest.TestCase):
         self.assertFalse(flag)
 
     def testSetCancelled(self):
-        try:
+        with self.catchNotImplementedError(2, 0):
             self.STATUS.Set_cancelled(True)
             flag = self.STATUS.Is_cancelled()
             self.assertTrue(flag)
-        except NotImplementedError:
-            if MPI.Get_version() >= (2,0): raise
-            self.skipTest('mpi-status-set_cancelled')
 
     def testPyProps(self):
         self.assertEqual(self.STATUS.Get_source(), self.STATUS.source)
@@ -58,22 +52,18 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(self.STATUS.source, 1)
         self.assertEqual(self.STATUS.tag,    2)
         self.assertEqual(self.STATUS.error,  MPI.ERR_ARG)
-        try:
+        with self.catchNotImplementedError(2, 0):
             self.assertIs(type(self.STATUS.count), int)
             self.assertEqual(self.STATUS.count, 0)
             self.STATUS.count = 7
             self.assertEqual(self.STATUS.count, 7)
             self.STATUS.count = 0
-        except NotImplementedError:
-            if MPI.Get_version() >= (2,0): raise
-        try:
+        with self.catchNotImplementedError(2, 0):
             self.assertIs(type(self.STATUS.cancelled), bool)
             self.assertFalse(self.STATUS.cancelled)
             self.STATUS.cancelled = True
             self.assertTrue(self.STATUS.cancelled)
             self.STATUS.cancelled = False
-        except NotImplementedError:
-            if MPI.Get_version() >= (2,0): raise
 
     def testConstructor(self):
         self.assertRaises(TypeError, MPI.Status, 123)
@@ -87,27 +77,19 @@ class TestStatus(unittest.TestCase):
         self.assertEqual(status.source, 1)
         self.assertEqual(status.tag,    2)
         self.assertEqual(status.error,  MPI.ERR_ARG)
-        try:
+        with self.catchNotImplementedError(2, 0):
             self.STATUS.Set_elements(MPI.BYTE, 7)
-        except NotImplementedError:
-            pass
-        try:
+        with self.catchNotImplementedError(2, 0):
             self.STATUS.Set_cancelled(True)
-        except NotImplementedError:
-            pass
         status = MPI.Status(self.STATUS)
-        try:
+        with self.catchNotImplementedError(2, 0):
             count = status.Get_count(MPI.BYTE)
             elems = status.Get_elements(MPI.BYTE)
             self.assertEqual(count, 7)
             self.assertEqual(elems, 7)
-        except NotImplementedError:
-            pass
-        try:
+        with self.catchNotImplementedError(2, 0):
             flag = status.Is_cancelled()
             self.assertTrue(flag)
-        except NotImplementedError:
-            pass
 
     def testPickle(self):
         from pickle import dumps, loads

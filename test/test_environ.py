@@ -1,10 +1,8 @@
 from mpi4py import MPI
 import mpiunittest as unittest
+import mpitestutil as testutil
 import os
 
-def appnum():
-    if MPI.APPNUM == MPI.KEYVAL_INVALID: return None
-    return MPI.COMM_WORLD.Get_attr(MPI.APPNUM)
 
 class TestEnviron(unittest.TestCase):
 
@@ -80,9 +78,9 @@ class TestWorldAttrs(unittest.TestCase):
         if appnum is not None:
             self.assertTrue(appnum == MPI.UNDEFINED or appnum >= 0)
 
-    @unittest.skipMPI('mpich(<4.1.0)', appnum() is None)
-    @unittest.skipMPI('mvapich', appnum() is None)
-    @unittest.skipMPI('MPICH2', appnum() is None)
+    @unittest.skipMPI('mpich(<4.1.0)', not testutil.has_mpi_appnum())
+    @unittest.skipMPI('mvapich', not testutil.has_mpi_appnum())
+    @unittest.skipMPI('MPICH2', not testutil.has_mpi_appnum())
     @unittest.skipIf(MPI.UNIVERSE_SIZE == MPI.KEYVAL_INVALID, 'mpi-universe-size')
     def testUniverseSize(self):
         univsz = MPI.COMM_WORLD.Get_attr(MPI.UNIVERSE_SIZE)

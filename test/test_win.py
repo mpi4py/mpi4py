@@ -1,5 +1,6 @@
 from mpi4py import MPI
 import mpiunittest as unittest
+import mpitestutil as testutil
 import sys, os
 try:
     sys.getrefcount
@@ -21,11 +22,9 @@ def memzero(m):
     except IndexError: # cffi buffer
         m[0:len(m)] = b'\0'*len(m)
 
+
 def ch3_sock():
     return 'ch3:sock' in MPI.Get_library_version()
-
-def github():
-    return os.environ.get('GITHUB_ACTIONS') == 'true'
 
 
 class TestWinNull(unittest.TestCase):
@@ -213,9 +212,9 @@ class BaseTestWinAllocateShared(BaseTestWin):
             self.assertEqual(size, memories[i][1])
             self.assertEqual(disp, 1)
 
-@unittest.skipMPI('impi(==2021.14.0)', github())
-@unittest.skipMPI('impi(==2021.14.1)', github())
-@unittest.skipMPI('impi(==2021.14.2)', github())
+@unittest.skipMPI('impi(==2021.14.0)', testutil.github())
+@unittest.skipMPI('impi(==2021.14.1)', testutil.github())
+@unittest.skipMPI('impi(==2021.14.2)', testutil.github())
 class BaseTestWinCreateDynamic(BaseTestWin):
 
     CREATE_FLAVOR = MPI.WIN_FLAVOR_DYNAMIC

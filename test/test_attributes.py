@@ -1,5 +1,6 @@
 from mpi4py import MPI
 import mpiunittest as unittest
+import mpitestutil as testutil
 
 try:
     import array
@@ -124,7 +125,7 @@ class BaseTestAttr:
         try:
             obj.Set_attr(self.keyval, "value")
             with self.assertRaises(MPI.Exception) as exc_cm:
-                with unittest.capture_stderr() as stderr:
+                with testutil.capture_stderr() as stderr:
                     obj.Dup().Free()
             ierr = exc_cm.exception.Get_error_class()
             self.assertEqual(ierr, MPI.ERR_OTHER)
@@ -145,7 +146,7 @@ class BaseTestAttr:
         obj.Set_attr(self.keyval, "value")
         try:
             with self.assertRaises(MPI.Exception) as exc_cm:
-                with unittest.capture_stderr() as stderr:
+                with testutil.capture_stderr() as stderr:
                     obj.Delete_attr(self.keyval)
             ierr = exc_cm.exception.Get_error_class()
             self.assertEqual(ierr, MPI.ERR_OTHER)

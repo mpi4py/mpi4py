@@ -8,6 +8,13 @@ import unittest
 import time
 import sys
 import os
+try:
+    import mpitestutil as testutil
+except ImportError:
+    sys.path.append(
+        os.path.dirname(
+            os.path.abspath(__file__)))
+    import mpitestutil as testutil
 
 
 def sqr(x, wait=0.0):
@@ -353,7 +360,7 @@ class BaseTestPool:
             self.Pool(0)
 
     def test_arg_initializer(self):
-        p = self.Pool(1, initializer=identity, initargs=(123,))
+        self.Pool(1, initializer=identity, initargs=(123,))
         with self.assertRaises(TypeError):
             self.Pool(initializer=123)
 
@@ -370,75 +377,8 @@ class BaseTestPool:
 
 # ---
 
-def broken_mpi_spawn():
-    darwin = (sys.platform == 'darwin')
-    windows = (sys.platform == 'win32')
-    azure = (os.environ.get('TF_BUILD') == 'True')
-    github = (os.environ.get('GITHUB_ACTIONS') == 'true')
-    skip_spawn = (
-        os.environ.get('MPI4PY_TEST_SPAWN')
-        in (None, '0', 'no', 'off', 'false')
-    )
-    name, version = MPI.get_vendor()
-    if name == 'Open MPI':
-        if version < (3,0,0):
-            return True
-        if version == (4,0,0):
-            return True
-        if version == (4,0,1) and darwin:
-            return True
-        if version == (4,0,2) and darwin:
-            return True
-        if version >= (4,1,0) and version < (4,2,0):
-            if azure or github:
-                return True
-        if version >= (5,0,0) and version < (5,0,7):
-            if skip_spawn:
-                return True
-    if name == 'MPICH':
-        if version >= (3, 4) and version < (4, 0) and darwin:
-            return True
-        if version < (4, 1):
-            if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
-                return True
-        if version < (4, 3):
-            try:
-                port = MPI.Open_port()
-                MPI.Close_port(port)
-            except:
-                return True
-    if name == 'Intel MPI':
-        import mpi4py
-        if mpi4py.rc.recv_mprobe:
-            return True
-        if MPI.COMM_WORLD.Get_size() > 1 and windows:
-            return True
-    if name == 'Microsoft MPI':
-        if version < (8,1,0):
-            return True
-        if skip_spawn:
-            return True
-        if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
-            return True
-        if os.environ.get("PMI_APPNUM") is None:
-            return True
-    if name == 'MVAPICH':
-        if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
-            return True
-        if version < (3,0,0):
-            return True
-    if name == 'MPICH2':
-        if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
-            return True
-    if MPI.Get_version() < (2,0):
-        return True
-    if any(map(sys.modules.get, ('cupy', 'numba'))):
-        return True
-    #
-    return False
 
-
-@unittest.skipIf(broken_mpi_spawn(), 'mpi-spawn')
+@unittest.skipIf(testutil.disable_mpi_spawn(), 'mpi-spawn')
 @unittest.skipIf(MPI.COMM_WORLD.Get_size() > 1, 'mpi-world-size>1')
 class TestProcessPool(BaseTestPool, unittest.TestCase):
     PoolType = pool.Pool

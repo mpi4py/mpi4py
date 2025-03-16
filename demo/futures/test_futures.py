@@ -6,6 +6,15 @@ import warnings
 import functools
 import threading
 import unittest
+sys.path.append(
+    os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__),
+            os.path.pardir, os.path.pardir, 'test',
+        )
+    )
+)
+import mpitestutil as testutil
 
 from mpi4py import MPI
 from mpi4py import futures
@@ -1714,68 +1723,7 @@ class ComposeTest(unittest.TestCase):
         self.assertIs(type(future.exception()), ZeroDivisionError)
 
 
-def skip_spawn():
-    return (
-        os.environ.get('MPI4PY_TEST_SPAWN')
-        in (None, '0', 'no', 'off', 'false')
-    )
-
-SKIP_POOL_TEST = False
-name, version = MPI.get_vendor()
-if name == 'Open MPI':
-    if version < (3,0,0):
-        SKIP_POOL_TEST = True
-    if version == (4,0,0):
-        SKIP_POOL_TEST = True
-    if version == (4,0,1) and sys.platform=='darwin':
-        SKIP_POOL_TEST = True
-    if version == (4,0,2) and sys.platform=='darwin':
-        SKIP_POOL_TEST = True
-    if version == (4,1,2) and sys.platform=='linux':
-        azure = (os.environ.get('TF_BUILD') == 'True')
-        github = (os.environ.get('GITHUB_ACTIONS') == 'true')
-        SKIP_POOL_TEST = azure or github
-    if version >= (5,0,0) and version < (5,0,7):
-        SKIP_POOL_TEST = skip_spawn()
-if name == 'MPICH':
-    if sys.platform == 'darwin':
-        if version >= (3, 4) and version < (4, 0):
-            SKIP_POOL_TEST = True
-    if version < (4, 1):
-        if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
-            SKIP_POOL_TEST = True
-    if version < (4, 3):
-        try:
-            port = MPI.Open_port()
-            MPI.Close_port(port)
-        except:
-            port = ""
-        if port == "":
-            SKIP_POOL_TEST = True
-        del port
-if name == 'Intel MPI':
-    import mpi4py
-    if mpi4py.rc.recv_mprobe:
-        SKIP_POOL_TEST = True
-if name == 'Microsoft MPI':
-    if version < (8,1,0):
-        SKIP_POOL_TEST = True
-    if skip_spawn():
-        SKIP_POOL_TEST = True
-    if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
-        SKIP_POOL_TEST = True
-    if os.environ.get("PMI_APPNUM") is None:
-        SKIP_POOL_TEST = True
-if name == 'MVAPICH':
-    SKIP_POOL_TEST = True
-if name == 'MPICH2':
-    if MPI.COMM_WORLD.Get_attr(MPI.APPNUM) is None:
-        SKIP_POOL_TEST = True
-if name == 'MVAPICH2':
-    SKIP_POOL_TEST = True
-if MPI.Get_version() < (2,0):
-    SKIP_POOL_TEST = True
-
+SKIP_POOL_TEST = testutil.disable_mpi_spawn()
 
 if SHARED_POOL:
     del ProcessPoolInitTest.test_init_sys_flags

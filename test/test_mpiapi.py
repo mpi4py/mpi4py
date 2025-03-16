@@ -1,5 +1,6 @@
 from mpi4py import MPI
 import mpiunittest as unittest
+import mpitestutil as testutil
 import os, re, sys
 import subprocess as sp
 import shutil
