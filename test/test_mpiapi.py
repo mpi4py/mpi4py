@@ -202,7 +202,7 @@ class TestMPIAPI(unittest.TestCase):
             if sym.endswith("_x"):
                 uncovered.discard(sym[:-2])
                 uncovered.discard(sym[:-2] + '_c')
-        if MPI.REAL == MPI.DATATYPE_NULL or MPI.REAL.Get_size() == 0:
+        if not testutil.has_datatype(MPI.INTEGER):
             uncovered.difference_update(mpi_fortran)
         if name == 'MPICH' and MPI.DISPLACEMENT_CURRENT == 0:
             mpiio = re.compile('MPI_(File_.*|Register_datarep)')

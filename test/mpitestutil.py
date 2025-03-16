@@ -16,6 +16,22 @@ def import_MPI():
     return importlib.import_module("mpi4py.MPI")
 
 
+def has_datatype(datatype):
+    # https://github.com/pmodels/mpich/issues/7341
+    MPI = import_MPI()
+    if datatype == MPI.DATATYPE_NULL:
+        return False
+    try:
+        size = datatype.Get_size()
+    except MPI.Exception as exc:
+        if exc.Get_error_class() != MPI.ERR_TYPE:
+            raise
+        return False
+    if size in (0, MPI.UNDEFINED):
+        return False
+    return True
+
+
 def appnum():
     MPI = import_MPI()
     if MPI.APPNUM != MPI.KEYVAL_INVALID:

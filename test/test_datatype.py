@@ -1,5 +1,6 @@
 from mpi4py import MPI
 import mpiunittest as unittest
+import mpitestutil as testutil
 import struct
 
 datatypes_c = [
@@ -16,7 +17,7 @@ MPI.UINT8_T, MPI.UINT16_T, MPI.UINT32_T, MPI.UINT64_T,
 MPI.C_COMPLEX, MPI.C_FLOAT_COMPLEX,
 MPI.C_DOUBLE_COMPLEX, MPI.C_LONG_DOUBLE_COMPLEX,
 ]
-datatypes_f = [
+datatypes_f77 = [
 MPI.CHARACTER, MPI.LOGICAL, MPI.INTEGER,
 MPI.REAL, MPI.DOUBLE_PRECISION,
 MPI.COMPLEX, MPI.DOUBLE_COMPLEX,
@@ -34,20 +35,19 @@ MPI.PACKED, MPI.BYTE, MPI.AINT, MPI.OFFSET,
 datatypes = []
 datatypes += datatypes_c
 datatypes += datatypes_c99
-datatypes += datatypes_f
+datatypes += datatypes_f77
 datatypes += datatypes_f90
 datatypes += datatypes_mpi
 
-for typelist in [datatypes, datatypes_f, datatypes_f90]:
+for typelist in [datatypes, datatypes_f77, datatypes_f90]:
     typelist[:] = [
-        t for t in datatypes
-        if t != MPI.DATATYPE_NULL
-        and t.Get_name() != 'MPI_DATATYPE_NULL'
-        and t.Get_size() != 0
+        t for t in typelist
+        if testutil.has_datatype(t)
     ]
 del typelist
 
 combiner_map = {}
+
 
 class TestDatatypeNull(unittest.TestCase):
 
@@ -98,8 +98,7 @@ class TestDatatype(unittest.TestCase):
     match_size_real    = [4, 8]
     match_size_complex = [8, 16]
     @unittest.skipMPI('MPI(<2.0)')
-    @unittest.skipMPI('openmpi', (MPI.CHARACTER == MPI.DATATYPE_NULL or
-                                  MPI.CHARACTER.Get_size() == 0))
+    @unittest.skipMPI('openmpi', not testutil.has_datatype(MPI.INTEGER))
     def testMatchSize(self):
         typeclass = MPI.TYPECLASS_INTEGER
         for size in self.match_size_integer:
@@ -557,12 +556,12 @@ if name == 'MPICH1':
     combiner_map[MPI.COMBINER_HVECTOR] = None
     combiner_map[MPI.COMBINER_INDEXED] = None
     combiner_map[MPI.COMBINER_HINDEXED_BLOCK] = None
-    for t in datatypes_f:
+    for t in datatypes_f77:
         if t in datatypes:
             datatypes.remove(t)
-        if t in datatypes_f:
-            datatypes_f.remove(t)
-elif MPI.Get_version() < (2,0):
+        if t in datatypes_f77:
+            datatypes_f77.remove(t)
+elif MPI.Get_version() < (2, 0):
     combiner_map = None
 if name == 'Open MPI':
     if (1,6,0) < version < (1,7,0):

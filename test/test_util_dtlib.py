@@ -1,15 +1,18 @@
 from mpi4py import MPI
 from mpi4py.util.dtlib import from_numpy_dtype as fromnumpy
 from mpi4py.util.dtlib import to_numpy_dtype   as tonumpy
-import sys, os
 import itertools
+import os
+import sys
 try:
     import mpiunittest as unittest
+    import mpitestutil as testutil
 except ImportError:
     sys.path.append(
         os.path.dirname(
             os.path.abspath(__file__)))
     import mpiunittest as unittest
+    import mpitestutil as testutil
 
 try:
     import numpy
@@ -92,14 +95,14 @@ mpif90types = [
     MPI.COMPLEX32,
 ]
 
+
 for typelist in [mpif77types, mpif90types]:
     typelist[:] = [
-        t for t in datatypes
-        if t != MPI.DATATYPE_NULL
-        and t.Get_name() != 'MPI_DATATYPE_NULL'
-        and t.Get_size() != 0
+        t for t in typelist
+        if testutil.has_datatype(t)
     ]
 del typelist
+
 
 class TestUtilDTLib(unittest.TestCase):
 
@@ -377,7 +380,7 @@ class TestUtilDTLib(unittest.TestCase):
     def testF90Integer(self):
         try:
             mt = MPI.Datatype.Create_f90_integer(1)
-            if mt == MPI.DATATYPE_NULL or mt.Get_size() == 0:
+            if not testutil.has_datatype(mt):
                 raise NotImplementedError
         except NotImplementedError:
             self.skipTest('mpi-type-create-f90-integer')
@@ -399,7 +402,7 @@ class TestUtilDTLib(unittest.TestCase):
     def testF90Real(self):
         try:
             mt = MPI.Datatype.Create_f90_real(7, MPI.UNDEFINED)
-            if mt == MPI.DATATYPE_NULL or mt.Get_size() == 0:
+            if not testutil.has_datatype(mt):
                 raise NotImplementedError
         except NotImplementedError:
             self.skipTest('mpi-type-create-f90-real')
@@ -421,7 +424,7 @@ class TestUtilDTLib(unittest.TestCase):
     def testF90Complex(self):
         try:
             mt = MPI.Datatype.Create_f90_complex(7, MPI.UNDEFINED)
-            if mt == MPI.DATATYPE_NULL or mt.Get_size() == 0:
+            if not testutil.has_datatype(mt):
                 raise NotImplementedError
         except NotImplementedError:
             self.skipTest('mpi-type-create-f90-complex')
