@@ -372,6 +372,12 @@ class TestUtilDTLib(unittest.TestCase):
     @unittest.skipMPI('msmpi')
     def testF90(self):
         for mt in mpif90types:
+            if np_dtype is not None:
+                typestr = mt.typestr
+                try:
+                    np_dtype(typestr)
+                except TypeError:
+                    continue
             dt = tonumpy(mt)
             if np_dtype is not None:
                 self.assertEqual(dt.itemsize, mt.extent)
