@@ -141,7 +141,7 @@ In *MPI for Python*, the `Comm.Isend` and `Comm.Irecv` methods
 initiate send and receive operations, respectively. These methods
 return a `Request` instance, uniquely identifying the started
 operation.  Its completion can be managed using the `Request.Test`,
-`Request.Wait` and `Request.Cancel` methods. The management of
+`Request.Wait`, and `Request.Cancel` methods. The management of
 `Request` objects and associated memory buffers involved in
 communication requires a careful, rather low-level coordination. Users
 must ensure that objects exposing their memory buffers are not
@@ -175,8 +175,7 @@ multiple processes of a group simultaneously. The syntax and semantics
 of collective functions is consistent with point-to-point
 communication. Collective functions communicate *typed* data, but
 messages are not paired with an associated *tag*; selectivity of
-messages is implied in the calling order. Additionally, collective
-functions come in blocking versions only.
+messages is implied in the calling order.
 
 The more commonly used collective communication operations are the
 following.
