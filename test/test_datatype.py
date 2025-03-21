@@ -14,6 +14,7 @@ datatypes_c99 = [
 MPI.C_BOOL,
 MPI.INT8_T, MPI.INT16_T, MPI.INT32_T, MPI.INT64_T,
 MPI.UINT8_T, MPI.UINT16_T, MPI.UINT32_T, MPI.UINT64_T,
+MPI.FLOAT16_T, MPI.FLOAT32_T, MPI.FLOAT64_T, MPI.BFLOAT16_T,
 MPI.C_COMPLEX, MPI.C_FLOAT_COMPLEX,
 MPI.C_DOUBLE_COMPLEX, MPI.C_LONG_DOUBLE_COMPLEX,
 ]
@@ -195,6 +196,7 @@ class TestDatatype(unittest.TestCase):
             largef90datatypes += [MPI.REAL16,  MPI.COMPLEX32]
         for dtype in datatypes + f90datatypes:
             with self.subTest(datatype=dtype.name or "f90"):
+                if dtype == MPI.BFLOAT16_T: continue
                 if dtype in largef90datatypes: continue
                 code = dtype.tocode()
                 self.assertIsNotNone(code)
@@ -580,6 +582,10 @@ if name == 'Open MPI':
                 datatypes.remove(t)
             if t in datatypes_f90:
                 datatypes_f90.remove(t)
+if name in ('MPICH', 'Intel MPI'):
+    if MPI.FLOAT16_T != MPI.DATATYPE_NULL:
+        if MPI.FLOAT16_T.Get_name() == '':
+            MPI.FLOAT16_T.Set_name('MPIX_C_FLOAT16')
 
 
 if __name__ == '__main__':

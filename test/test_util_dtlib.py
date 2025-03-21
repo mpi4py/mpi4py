@@ -23,11 +23,11 @@ except ImportError:
     np_dtype = None
     np_version = None
 
-typecodes = list("?cbhilqpBHILQPfdgFDG")
+typecodes = list("?cbhilqpBHILQPefdgFDG")
 typecodes += [f'b{n:d}' for n in (1,)]
 typecodes += [f'i{n:d}' for n in (1,2,4,8)]
 typecodes += [f'u{n:d}' for n in (1,2,4,8)]
-typecodes += [f'f{n:d}' for n in (4,8)]
+typecodes += [f'f{n:d}' for n in (2,4,8)]
 if os.environ.get('COVERAGE_RUN') == 'true':
     typecodes = list("cif") + ['b1', 'i8', 'f8']
 
@@ -36,15 +36,23 @@ if np_version and np_version < (1, 17):
         if tc in typecodes:
             typecodes.remove(tc)
 
-name, version = MPI.get_vendor()
-mpich_lt_400 = (name == 'MPICH') and version < (4, 0, 0)
-if mpich_lt_400:
+if (
+    MPI.FLOAT16_T == MPI.DATATYPE_NULL
+    or unittest.is_mpi('mpich(<5.0.0)')
+    or unittest.is_mpi('openmpi(<5.0.0)')
+    or unittest.is_mpi('impi')
+):
+    for tc in ('e', 'f2'):
+        if tc in typecodes:
+            typecodes.remove(tc)
+
+if unittest.is_mpi('mpich(<4.0.0)'):
     for tc in 'FDG':
         if tc in typecodes:
             typecodes.remove(tc)
 
 if unittest.is_mpi('impi(>=2021.12.0)') and os.name == 'nt':
-    for tc in [*'lLg', 'i4', 'u4']:
+    for tc in (*'lLg', 'i4', 'u4'):
         if tc in typecodes:
             typecodes.remove(tc)
 

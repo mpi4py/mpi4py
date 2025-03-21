@@ -76,6 +76,8 @@ cdef inline int named_Datatype(MPI_Datatype arg) noexcept nogil:
     if arg == MPI_UINT16_T                : return 1
     if arg == MPI_UINT32_T                : return 1
     if arg == MPI_UINT64_T                : return 1
+    if arg == MPI_FLOAT16_T               : return 1
+    if arg == MPI_BFLOAT16_T              : return 1
     if arg == MPI_C_COMPLEX               : return 1
     if arg == MPI_C_FLOAT_COMPLEX         : return 1
     if arg == MPI_C_DOUBLE_COMPLEX        : return 1
