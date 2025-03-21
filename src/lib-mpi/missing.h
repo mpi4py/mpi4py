@@ -334,6 +334,16 @@ typedef void *PyMPI_MPI_File;
 #define MPI_UINT64_T ((MPI_Datatype)MPI_DATATYPE_NULL)
 #endif
 
+#ifndef PyMPI_HAVE_MPI_FLOAT16_T
+#undef  MPI_FLOAT16_T
+#define MPI_FLOAT16_T ((MPI_Datatype)MPI_DATATYPE_NULL)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_BFLOAT16_T
+#undef  MPI_BFLOAT16_T
+#define MPI_BFLOAT16_T ((MPI_Datatype)MPI_DATATYPE_NULL)
+#endif
+
 #ifndef PyMPI_HAVE_MPI_C_COMPLEX
 #undef  MPI_C_COMPLEX
 #define MPI_C_COMPLEX ((MPI_Datatype)MPI_DATATYPE_NULL)
@@ -457,6 +467,11 @@ typedef void *PyMPI_MPI_File;
 #ifndef PyMPI_HAVE_MPI_LOGICAL8
 #undef  MPI_LOGICAL8
 #define MPI_LOGICAL8 ((MPI_Datatype)MPI_DATATYPE_NULL)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_LOGICAL16
+#undef  MPI_LOGICAL16
+#define MPI_LOGICAL16 ((MPI_Datatype)MPI_DATATYPE_NULL)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_INTEGER1
@@ -672,6 +687,11 @@ typedef void *PyMPI_MPI_File;
 #ifndef PyMPI_HAVE_MPI_Type_create_f90_complex
 #undef  MPI_Type_create_f90_complex
 #define MPI_Type_create_f90_complex(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Type_create_f90_complex",a1,a2,a3)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_TYPECLASS_LOGICAL
+#undef  MPI_TYPECLASS_LOGICAL
+#define MPI_TYPECLASS_LOGICAL (MPI_UNDEFINED)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_TYPECLASS_INTEGER

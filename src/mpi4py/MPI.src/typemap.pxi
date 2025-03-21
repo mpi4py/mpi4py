@@ -27,18 +27,17 @@ AddTypeMap(TypeDict, "H" , __UNSIGNED_SHORT__     )
 AddTypeMap(TypeDict, "I" , __UNSIGNED__           )
 AddTypeMap(TypeDict, "L" , __UNSIGNED_LONG__      )
 AddTypeMap(TypeDict, "Q" , __UNSIGNED_LONG_LONG__ )
-# (real) floating
+# real floating
+AddTypeMap(TypeDict, "e" , __REAL2__       )
+AddTypeMap(TypeDict, "e" , __FLOAT16_T__   )
 AddTypeMap(TypeDict, "f" , __FLOAT__       )
 AddTypeMap(TypeDict, "d" , __DOUBLE__      )
 AddTypeMap(TypeDict, "g" , __LONG_DOUBLE__ )  # PEP-3118 & NumPy
-# complex floating (F77)
-AddTypeMap(TypeDict, "Zf" , __COMPLEX__        )  # PEP-3118
-AddTypeMap(TypeDict, "Zd" , __DOUBLE_COMPLEX__ )  # PEP-3118
-AddTypeMap(TypeDict, "F"  , __COMPLEX__        )  # NumPy
-AddTypeMap(TypeDict, "D"  , __DOUBLE_COMPLEX__ )  # NumPy
 # complex floating (F90)
+AddTypeMap(TypeDict, "Ze" , __COMPLEX4__       )
 AddTypeMap(TypeDict, "Zf" , __COMPLEX8__       )  # PEP-3118
 AddTypeMap(TypeDict, "Zd" , __COMPLEX16__      )  # PEP-3118
+AddTypeMap(TypeDict, "E"  , __COMPLEX4__       )
 AddTypeMap(TypeDict, "F"  , __COMPLEX8__       )  # NumPy
 AddTypeMap(TypeDict, "D"  , __COMPLEX16__      )  # NumPy
 # complex floating (C++)
@@ -105,6 +104,7 @@ AddTypeMap(TypeDict, "u2" , __UINT16_T__ )  # NumPy
 AddTypeMap(TypeDict, "u4" , __UINT32_T__ )  # NumPy
 AddTypeMap(TypeDict, "u8" , __UINT64_T__ )  # NumPy
 # real (C) and complex (C99/C++) floating
+AddTypeMap(TypeDict, "f2" , __FLOAT16_T__ )  # NumPy
 if sizeof(float) == 4:
     AddTypeMap(TypeDict, "f4"  , __FLOAT__              )  # NumPy
     AddTypeMap(TypeDict, "c8"  , __CXX_FLOAT_COMPLEX__  )  # NumPy
@@ -225,6 +225,7 @@ AddTypeMap(CTypeDict, "u2" , __UINT16_T__ )
 AddTypeMap(CTypeDict, "u4" , __UINT32_T__ )
 AddTypeMap(CTypeDict, "u8" , __UINT64_T__ )
 
+AddTypeMap(CTypeDict, "f2" , __FLOAT16_T__ )
 if sizeof(float) == 4:
     AddTypeMap(CTypeDict, "f4"  , __FLOAT__            )
     AddTypeMap(CTypeDict, "c8"  , __C_FLOAT_COMPLEX__  )
@@ -255,6 +256,7 @@ AddTypeMap(FTypeDict, "l1"  , __LOGICAL1__  )
 AddTypeMap(FTypeDict, "l2"  , __LOGICAL2__  )
 AddTypeMap(FTypeDict, "l4"  , __LOGICAL4__  )
 AddTypeMap(FTypeDict, "l8"  , __LOGICAL8__  )
+AddTypeMap(FTypeDict, "l16" , __LOGICAL16__ )
 
 AddTypeMap(FTypeDict, "i1"  , __INTEGER1__  )
 AddTypeMap(FTypeDict, "i2"  , __INTEGER2__  )

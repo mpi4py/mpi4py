@@ -7,6 +7,7 @@ ORDER_F       = MPI_ORDER_FORTRAN  #: Convenience alias for ORDER_FORTRAN
 
 # Type classes for Fortran datatype matching
 # ------------------------------------------
+TYPECLASS_LOGICAL = MPI_TYPECLASS_LOGICAL
 TYPECLASS_INTEGER = MPI_TYPECLASS_INTEGER
 TYPECLASS_REAL    = MPI_TYPECLASS_REAL
 TYPECLASS_COMPLEX = MPI_TYPECLASS_COMPLEX
@@ -903,6 +904,10 @@ cdef Datatype __UINT16_T__              = def_Datatype( MPI_UINT16_T , "UINT16_T
 cdef Datatype __UINT32_T__              = def_Datatype( MPI_UINT32_T , "UINT32_T" )  # noqa
 cdef Datatype __UINT64_T__              = def_Datatype( MPI_UINT64_T , "UINT64_T" )  # noqa
 
+cdef Datatype __FLOAT16_T__             = def_Datatype( MPI_FLOAT16_T             , "FLOAT16_T"             )  # noqa
+cdef Datatype __FLOAT32_T__             = __FLOAT__
+cdef Datatype __FLOAT64_T__             = __DOUBLE__
+cdef Datatype __BFLOAT16_T__            = def_Datatype( MPI_BFLOAT16_T            , "BFLOAT16_T"            )  # noqa
 cdef Datatype __C_COMPLEX__             = def_Datatype( MPI_C_COMPLEX             , "C_COMPLEX"             )  # noqa
 cdef Datatype __C_FLOAT_COMPLEX__       = __C_COMPLEX__
 cdef Datatype __C_DOUBLE_COMPLEX__      = def_Datatype( MPI_C_DOUBLE_COMPLEX      , "C_DOUBLE_COMPLEX"      )  # noqa
@@ -932,6 +937,7 @@ cdef Datatype __LOGICAL1__  = def_Datatype( MPI_LOGICAL1  , "LOGICAL1"  )
 cdef Datatype __LOGICAL2__  = def_Datatype( MPI_LOGICAL2  , "LOGICAL2"  )
 cdef Datatype __LOGICAL4__  = def_Datatype( MPI_LOGICAL4  , "LOGICAL4"  )
 cdef Datatype __LOGICAL8__  = def_Datatype( MPI_LOGICAL8  , "LOGICAL8"  )
+cdef Datatype __LOGICAL16__ = def_Datatype( MPI_LOGICAL16 , "LOGICAL16" )
 cdef Datatype __INTEGER1__  = def_Datatype( MPI_INTEGER1  , "INTEGER1"  )
 cdef Datatype __INTEGER2__  = def_Datatype( MPI_INTEGER2  , "INTEGER2"  )
 cdef Datatype __INTEGER4__  = def_Datatype( MPI_INTEGER4  , "INTEGER4"  )
@@ -982,6 +988,10 @@ UINT8_T               = __UINT8_T__
 UINT16_T              = __UINT16_T__
 UINT32_T              = __UINT32_T__
 UINT64_T              = __UINT64_T__
+FLOAT16_T             = __FLOAT16_T__
+FLOAT32_T             = __FLOAT32_T__
+FLOAT64_T             = __FLOAT64_T__
+BFLOAT16_T            = __BFLOAT16_T__
 C_COMPLEX             = __C_COMPLEX__
 C_FLOAT_COMPLEX       = __C_FLOAT_COMPLEX__
 C_DOUBLE_COMPLEX      = __C_DOUBLE_COMPLEX__
@@ -1011,6 +1021,7 @@ LOGICAL1  = __LOGICAL1__
 LOGICAL2  = __LOGICAL2__
 LOGICAL4  = __LOGICAL4__
 LOGICAL8  = __LOGICAL8__
+LOGICAL16 = __LOGICAL16__
 INTEGER1  = __INTEGER1__
 INTEGER2  = __INTEGER2__
 INTEGER4  = __INTEGER4__

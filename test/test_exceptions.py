@@ -525,21 +525,25 @@ class TestExcComm(BaseTestCase):
 
 class TestExcWinNull(BaseTestCase):
 
+    ERRORS = [MPI.ERR_WIN, MPI.ERR_ARG]
+    if unittest.is_mpi("msmpi"):
+        ERRORS += [MPI.ERR_OTHER]
+
     def testFree(self):
         self.assertRaisesMPI(
-            [MPI.ERR_WIN, MPI.ERR_ARG],
+            self.ERRORS,
             MPI.WIN_NULL.Free,
         )
 
     def testGetErrhandler(self):
         self.assertRaisesMPI(
-            [MPI.ERR_WIN, MPI.ERR_ARG],
+            self.ERRORS,
             MPI.WIN_NULL.Get_errhandler,
         )
 
     def testSetErrhandler(self):
         self.assertRaisesMPI(
-            [MPI.ERR_WIN, MPI.ERR_ARG],
+            self.ERRORS,
             MPI.WIN_NULL.Set_errhandler, MPI.ERRORS_RETURN,
         )
 

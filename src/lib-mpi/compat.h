@@ -16,3 +16,4 @@
 #include "compat/openmpi.h"
 #endif
 #include "compat/mpi-41.h"
+#include "compat/mpi-51.h"

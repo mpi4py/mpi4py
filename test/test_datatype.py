@@ -14,6 +14,7 @@ datatypes_c99 = [
 MPI.C_BOOL,
 MPI.INT8_T, MPI.INT16_T, MPI.INT32_T, MPI.INT64_T,
 MPI.UINT8_T, MPI.UINT16_T, MPI.UINT32_T, MPI.UINT64_T,
+MPI.FLOAT16_T, MPI.FLOAT32_T, MPI.FLOAT64_T, MPI.BFLOAT16_T,
 MPI.C_COMPLEX, MPI.C_FLOAT_COMPLEX,
 MPI.C_DOUBLE_COMPLEX, MPI.C_LONG_DOUBLE_COMPLEX,
 ]
@@ -23,7 +24,7 @@ MPI.REAL, MPI.DOUBLE_PRECISION,
 MPI.COMPLEX, MPI.DOUBLE_COMPLEX,
 ]
 datatypes_f90 = [
-MPI.LOGICAL1, MPI.LOGICAL2, MPI.LOGICAL4, MPI.LOGICAL8,
+MPI.LOGICAL1, MPI.LOGICAL2, MPI.LOGICAL4, MPI.LOGICAL8, MPI.LOGICAL16,
 MPI.INTEGER1, MPI.INTEGER2, MPI.INTEGER4, MPI.INTEGER8, MPI.INTEGER16,
 MPI.REAL2, MPI.REAL4, MPI.REAL8, MPI.REAL16,
 MPI.COMPLEX4, MPI.COMPLEX8, MPI.COMPLEX16, MPI.COMPLEX32,
@@ -32,19 +33,24 @@ datatypes_mpi = [
 MPI.PACKED, MPI.BYTE, MPI.AINT, MPI.OFFSET,
 ]
 
+for typelist in [
+    datatypes_c,
+    datatypes_c99,
+    datatypes_f77,
+    datatypes_f90,
+]:
+    typelist[:] = [
+        t for t in typelist
+        if testutil.has_datatype(t)
+    ]
+del typelist
+
 datatypes = []
 datatypes += datatypes_c
 datatypes += datatypes_c99
 datatypes += datatypes_f77
 datatypes += datatypes_f90
 datatypes += datatypes_mpi
-
-for typelist in [datatypes, datatypes_f77, datatypes_f90]:
-    typelist[:] = [
-        t for t in typelist
-        if testutil.has_datatype(t)
-    ]
-del typelist
 
 combiner_map = {}
 
@@ -94,24 +100,27 @@ class TestDatatype(unittest.TestCase):
             except NotImplementedError:
                 self.skipTest('mpi-type-get_true_extent')
 
-    match_size_integer = [1, 2, 4, 8]
-    match_size_real    = [4, 8]
-    match_size_complex = [8, 16]
+    match_size_logical = [1, 2, 4, 8, 16]
+    match_size_integer = [1, 2, 4, 8, 16]
+    match_size_real    = [2, 4, 8]
+    match_size_complex = [4, 8, 16]
     @unittest.skipMPI('MPI(<2.0)')
     @unittest.skipMPI('openmpi', not testutil.has_datatype(MPI.INTEGER))
     def testMatchSize(self):
-        typeclass = MPI.TYPECLASS_INTEGER
-        for size in self.match_size_integer:
-            datatype = MPI.Datatype.Match_size(typeclass, size)
-            self.assertEqual(size, datatype.size)
-        typeclass = MPI.TYPECLASS_REAL
-        for size in self.match_size_real:
-            datatype = MPI.Datatype.Match_size(typeclass, size)
-            self.assertEqual(size, datatype.size)
-        typeclass  = MPI.TYPECLASS_COMPLEX
-        for size in self.match_size_complex:
-            datatype = MPI.Datatype.Match_size(typeclass, size)
-            self.assertEqual(size, datatype.size)
+        for key in ('logical', 'integer', 'real', 'complex'):
+            match_size = getattr(self, f'match_size_{key}')
+            typeclass = getattr(MPI, f'TYPECLASS_{key.upper()}')
+            if typeclass == MPI.UNDEFINED: continue
+            for size in match_size:
+                try:
+                    datatype = MPI.Datatype.Match_size(typeclass, size)
+                except MPI.Exception:
+                    datatype = getattr(MPI, f'{key.upper()}{size}')
+                    if testutil.has_datatype(datatype):
+                        raise
+                else:
+                    if testutil.has_datatype(datatype):
+                        self.assertEqual(datatype.size, size)
 
     def testGetValueIndex(self):
         typenames = ('SHORT', 'INT', 'LONG', 'FLOAT', 'DOUBLE', 'LONG_DOUBLE')
@@ -187,6 +196,7 @@ class TestDatatype(unittest.TestCase):
             largef90datatypes += [MPI.REAL16,  MPI.COMPLEX32]
         for dtype in datatypes + f90datatypes:
             with self.subTest(datatype=dtype.name or "f90"):
+                if dtype == MPI.BFLOAT16_T: continue
                 if dtype in largef90datatypes: continue
                 code = dtype.tocode()
                 self.assertIsNotNone(code)
@@ -572,6 +582,10 @@ if name == 'Open MPI':
                 datatypes.remove(t)
             if t in datatypes_f90:
                 datatypes_f90.remove(t)
+if name in ('MPICH', 'Intel MPI'):
+    if MPI.FLOAT16_T != MPI.DATATYPE_NULL:
+        if MPI.FLOAT16_T.Get_name() == '':
+            MPI.FLOAT16_T.Set_name('MPIX_C_FLOAT16')
 
 
 if __name__ == '__main__':

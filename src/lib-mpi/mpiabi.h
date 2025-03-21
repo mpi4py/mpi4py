@@ -65,7 +65,7 @@ PyMPI_EXTERN_C_BEGIN
 #include "mpiabi0.h"
 #endif
 
-#if PyMPI_LEGACY_ABI
+#if PyMPI_STANDARD_ABI || PyMPI_LEGACY_ABI
 PyMPI_LOCAL int pympi_numversion(void)
 {
   static int numversion = 0;
