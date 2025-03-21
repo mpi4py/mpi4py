@@ -99,24 +99,27 @@ class TestDatatype(unittest.TestCase):
             except NotImplementedError:
                 self.skipTest('mpi-type-get_true_extent')
 
-    match_size_integer = [1, 2, 4, 8]
-    match_size_real    = [4, 8]
-    match_size_complex = [8, 16]
+    match_size_logical = [1, 2, 4, 8, 16]
+    match_size_integer = [1, 2, 4, 8, 16]
+    match_size_real    = [2, 4, 8]
+    match_size_complex = [4, 8, 16]
     @unittest.skipMPI('MPI(<2.0)')
     @unittest.skipMPI('openmpi', not testutil.has_datatype(MPI.INTEGER))
     def testMatchSize(self):
-        typeclass = MPI.TYPECLASS_INTEGER
-        for size in self.match_size_integer:
-            datatype = MPI.Datatype.Match_size(typeclass, size)
-            self.assertEqual(size, datatype.size)
-        typeclass = MPI.TYPECLASS_REAL
-        for size in self.match_size_real:
-            datatype = MPI.Datatype.Match_size(typeclass, size)
-            self.assertEqual(size, datatype.size)
-        typeclass  = MPI.TYPECLASS_COMPLEX
-        for size in self.match_size_complex:
-            datatype = MPI.Datatype.Match_size(typeclass, size)
-            self.assertEqual(size, datatype.size)
+        for key in ('logical', 'integer', 'real', 'complex'):
+            match_size = getattr(self, f'match_size_{key}')
+            typeclass = getattr(MPI, f'TYPECLASS_{key.upper()}')
+            if typeclass == MPI.UNDEFINED: continue
+            for size in match_size:
+                try:
+                    datatype = MPI.Datatype.Match_size(typeclass, size)
+                except MPI.Exception:
+                    datatype = getattr(MPI, f'{key.upper()}{size}')
+                    if testutil.has_datatype(datatype):
+                        raise
+                else:
+                    if testutil.has_datatype(datatype):
+                        self.assertEqual(datatype.size, size)
 
     def testGetValueIndex(self):
         typenames = ('SHORT', 'INT', 'LONG', 'FLOAT', 'DOUBLE', 'LONG_DOUBLE')

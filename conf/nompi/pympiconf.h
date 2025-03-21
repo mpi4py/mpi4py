@@ -130,6 +130,7 @@
 #undef  PyMPI_HAVE_MPI_Type_create_f90_integer
 #undef  PyMPI_HAVE_MPI_Type_create_f90_real
 #undef  PyMPI_HAVE_MPI_Type_create_f90_complex
+#undef  PyMPI_HAVE_MPI_TYPECLASS_LOGICAL
 #undef  PyMPI_HAVE_MPI_TYPECLASS_INTEGER
 #undef  PyMPI_HAVE_MPI_TYPECLASS_REAL
 #undef  PyMPI_HAVE_MPI_TYPECLASS_COMPLEX

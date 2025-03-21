@@ -679,6 +679,11 @@ typedef void *PyMPI_MPI_File;
 #define MPI_Type_create_f90_complex(a1,a2,a3) PyMPI_UNAVAILABLE("MPI_Type_create_f90_complex",a1,a2,a3)
 #endif
 
+#ifndef PyMPI_HAVE_MPI_TYPECLASS_LOGICAL
+#undef  MPI_TYPECLASS_LOGICAL
+#define MPI_TYPECLASS_LOGICAL (MPI_UNDEFINED)
+#endif
+
 #ifndef PyMPI_HAVE_MPI_TYPECLASS_INTEGER
 #undef  MPI_TYPECLASS_INTEGER
 #define MPI_TYPECLASS_INTEGER (MPI_UNDEFINED)

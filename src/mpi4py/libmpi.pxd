@@ -180,6 +180,7 @@ cdef extern from "<mpi.h>" nogil:
     int MPI_Type_create_f90_integer(int, MPI_Datatype*)
     int MPI_Type_create_f90_real(int, int, MPI_Datatype*)
     int MPI_Type_create_f90_complex(int, int, MPI_Datatype*)
+    enum: MPI_TYPECLASS_LOGICAL  #:= MPI_UNDEFINED
     enum: MPI_TYPECLASS_INTEGER  #:= MPI_UNDEFINED
     enum: MPI_TYPECLASS_REAL     #:= MPI_UNDEFINED
     enum: MPI_TYPECLASS_COMPLEX  #:= MPI_UNDEFINED

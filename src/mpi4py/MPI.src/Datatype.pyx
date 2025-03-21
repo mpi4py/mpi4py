@@ -7,6 +7,7 @@ ORDER_F       = MPI_ORDER_FORTRAN  #: Convenience alias for ORDER_FORTRAN
 
 # Type classes for Fortran datatype matching
 # ------------------------------------------
+TYPECLASS_LOGICAL = MPI_TYPECLASS_LOGICAL
 TYPECLASS_INTEGER = MPI_TYPECLASS_INTEGER
 TYPECLASS_REAL    = MPI_TYPECLASS_REAL
 TYPECLASS_COMPLEX = MPI_TYPECLASS_COMPLEX
