@@ -48,8 +48,10 @@ if unittest.is_mpi('impi(>=2021.12.0)') and os.name == 'nt':
         if tc in typecodes:
             typecodes.remove(tc)
 
-datatypes = [MPI.Datatype.fromcode(t) for t in typecodes]
-datatypes += [
+datatypes_c = [
+    MPI.Datatype.fromcode(t)
+    for t in typecodes
+] + [
     MPI.BYTE,
     MPI.AINT,
     MPI.OFFSET,
@@ -80,6 +82,7 @@ mpif90types = [
     MPI.LOGICAL2,
     MPI.LOGICAL4,
     MPI.LOGICAL8,
+    MPI.LOGICAL16,
     MPI.INTEGER1,
     MPI.INTEGER2,
     MPI.INTEGER4,
@@ -95,13 +98,33 @@ mpif90types = [
     MPI.COMPLEX32,
 ]
 
-
-for typelist in [mpif77types, mpif90types]:
+for typelist in [
+    datatypes_c,
+    mpif77types,
+    mpif90types,
+]:
     typelist[:] = [
         t for t in typelist
         if testutil.has_datatype(t)
     ]
 del typelist
+
+datatypes = []
+datatypes += datatypes_c
+datatypes += mpif77types
+datatypes += mpif90types
+
+
+def try_dtype(*args):
+    for spec in args:
+        if isinstance(spec, MPI.Datatype):
+            spec = spec.typestr
+        if np_dtype is not None:
+            try:
+                np_dtype(spec)
+            except TypeError:
+                return False
+    return True
 
 
 class TestUtilDTLib(unittest.TestCase):
@@ -113,7 +136,8 @@ class TestUtilDTLib(unittest.TestCase):
                 dt1 = tonumpy(mt1)
                 mt1.Free()
             return
-
+        if not try_dtype(arg):
+            return
         if isinstance(arg, MPI.Datatype):
             mt1 = arg.Dup()
             dt1 = tonumpy(mt1)
@@ -161,6 +185,7 @@ class TestUtilDTLib(unittest.TestCase):
         shapes = [(1,), (1, 1), (1, 1, 1), (3,), (3, 4), (2, 3, 4),]
         orders = [MPI.ORDER_C, MPI.ORDER_FORTRAN]
         for mt, shape, order in itertools.product(datatypes, shapes, orders):
+            if not try_dtype(mt): continue
             with self.subTest(name=mt.name, shape=shape, order=order):
                 starts = (0,) * len(shape)
                 mt1 = mt.Create_subarray(shape, shape, starts, order)
@@ -263,6 +288,7 @@ class TestUtilDTLib(unittest.TestCase):
 
     def testVector(self):
         for mt in datatypes:
+            if not try_dtype(mt): continue
             with self.subTest(name=mt.name):
                 mt1 = mt.Create_vector(3, 4, 6)
                 mt2 = mt.Create_hvector(3, 4, 6*mt.extent)
@@ -289,6 +315,7 @@ class TestUtilDTLib(unittest.TestCase):
 
     def testHVector(self):
         for mt in datatypes:
+            if not try_dtype(mt): continue
             with self.subTest(name=mt.name):
                 mt1 = mt.Create_hvector(3, 4, 6*mt.extent+1)
                 mt2 = mt1.Dup()
@@ -316,6 +343,7 @@ class TestUtilDTLib(unittest.TestCase):
     def testIndexed(self):
         disps = [1, 6, 12]
         for mt in datatypes:
+            if not try_dtype(mt): continue
             with self.subTest(name=mt.name):
                 mt1 = mt.Create_indexed([4]*3,   disps)
                 mt2 = mt.Create_indexed_block(4, disps)
@@ -343,6 +371,7 @@ class TestUtilDTLib(unittest.TestCase):
     def testHIndexed(self):
         disps = [0, 6, 12]
         for mt in datatypes:
+            if not try_dtype(mt): continue
             with self.subTest(name=mt.name):
                 mt1 = mt.Create_hindexed([4]*3,   [d*mt.extent+1 for d in disps])
                 mt2 = mt.Create_hindexed_block(4, [d*mt.extent+1 for d in disps])

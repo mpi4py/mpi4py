@@ -27,18 +27,16 @@ AddTypeMap(TypeDict, "H" , __UNSIGNED_SHORT__     )
 AddTypeMap(TypeDict, "I" , __UNSIGNED__           )
 AddTypeMap(TypeDict, "L" , __UNSIGNED_LONG__      )
 AddTypeMap(TypeDict, "Q" , __UNSIGNED_LONG_LONG__ )
-# (real) floating
+# real floating
+AddTypeMap(TypeDict, "e" , __REAL2__       )
 AddTypeMap(TypeDict, "f" , __FLOAT__       )
 AddTypeMap(TypeDict, "d" , __DOUBLE__      )
 AddTypeMap(TypeDict, "g" , __LONG_DOUBLE__ )  # PEP-3118 & NumPy
-# complex floating (F77)
-AddTypeMap(TypeDict, "Zf" , __COMPLEX__        )  # PEP-3118
-AddTypeMap(TypeDict, "Zd" , __DOUBLE_COMPLEX__ )  # PEP-3118
-AddTypeMap(TypeDict, "F"  , __COMPLEX__        )  # NumPy
-AddTypeMap(TypeDict, "D"  , __DOUBLE_COMPLEX__ )  # NumPy
 # complex floating (F90)
+AddTypeMap(TypeDict, "Ze" , __COMPLEX4__       )
 AddTypeMap(TypeDict, "Zf" , __COMPLEX8__       )  # PEP-3118
 AddTypeMap(TypeDict, "Zd" , __COMPLEX16__      )  # PEP-3118
+AddTypeMap(TypeDict, "E"  , __COMPLEX4__       )
 AddTypeMap(TypeDict, "F"  , __COMPLEX8__       )  # NumPy
 AddTypeMap(TypeDict, "D"  , __COMPLEX16__      )  # NumPy
 # complex floating (C++)
@@ -255,6 +253,7 @@ AddTypeMap(FTypeDict, "l1"  , __LOGICAL1__  )
 AddTypeMap(FTypeDict, "l2"  , __LOGICAL2__  )
 AddTypeMap(FTypeDict, "l4"  , __LOGICAL4__  )
 AddTypeMap(FTypeDict, "l8"  , __LOGICAL8__  )
+AddTypeMap(FTypeDict, "l16" , __LOGICAL16__ )
 
 AddTypeMap(FTypeDict, "i1"  , __INTEGER1__  )
 AddTypeMap(FTypeDict, "i2"  , __INTEGER2__  )

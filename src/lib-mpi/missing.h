@@ -459,6 +459,11 @@ typedef void *PyMPI_MPI_File;
 #define MPI_LOGICAL8 ((MPI_Datatype)MPI_DATATYPE_NULL)
 #endif
 
+#ifndef PyMPI_HAVE_MPI_LOGICAL16
+#undef  MPI_LOGICAL16
+#define MPI_LOGICAL16 ((MPI_Datatype)MPI_DATATYPE_NULL)
+#endif
+
 #ifndef PyMPI_HAVE_MPI_INTEGER1
 #undef  MPI_INTEGER1
 #define MPI_INTEGER1 ((MPI_Datatype)MPI_DATATYPE_NULL)
