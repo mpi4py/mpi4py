@@ -79,6 +79,7 @@ class BaseTestWin:
         wgroup.Free()
         self.assertEqual(grpcmp, MPI.IDENT)
 
+    @unittest.skipMPI('impi(>=2021.15.0)')
     def testGetSetInfo(self):
         #info = MPI.INFO_NULL
         #self.WIN.Set_info(info)
@@ -141,10 +142,11 @@ class BaseTestWin:
         self.assertEqual(win.group_rank, group.Get_rank())
         group.Free()
         #
-        info = win.info
-        self.assertIs(type(info), MPI.Info)
-        win.info = info
-        info.Free()
+        if not unittest.is_mpi('impi(>=2021.15.0)'):
+            info = win.info
+            self.assertIs(type(info), MPI.Info)
+            win.info = info
+            info.Free()
         #
         self.assertEqual(type(win.attrs), tuple)
         self.assertEqual(type(win.flavor), int)
@@ -212,9 +214,7 @@ class BaseTestWinAllocateShared(BaseTestWin):
             self.assertEqual(size, memories[i][1])
             self.assertEqual(disp, 1)
 
-@unittest.skipMPI('impi(==2021.14.0)', testutil.github())
-@unittest.skipMPI('impi(==2021.14.1)', testutil.github())
-@unittest.skipMPI('impi(==2021.14.2)', testutil.github())
+@unittest.skipMPI('impi(>=2021.14.0,<2021.15.0)', testutil.github())
 class BaseTestWinCreateDynamic(BaseTestWin):
 
     CREATE_FLAVOR = MPI.WIN_FLAVOR_DYNAMIC
