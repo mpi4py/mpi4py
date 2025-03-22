@@ -13,6 +13,9 @@ on_ci = any((
     os.environ.get('TF_BUILD') == 'True',
     os.environ.get('CIRCLECI') == 'true',
 ))
+mpi4py.rc.initialize = False
+mpiname, version = __import__('mpi4py.MPI').MPI.get_vendor()
+mpich_420 = (mpiname, version) == ('MPICH', (4,2,0))
 
 
 def find_executable(exe):
@@ -129,6 +132,7 @@ class TestRunScript(BaseTestRun):
             self.assertEqual(stdout.count(success), np)
             self.assertEqual(stderr, '')
 
+    @unittest.skipIf(mpich_420, 'mpich==4.2.0')
     def testException(self):
         message = r'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
         excmess = f'RuntimeError: {message}'
@@ -140,6 +144,7 @@ class TestRunScript(BaseTestRun):
                 self.assertEqual(status, 1)
                 self.assertMPIAbort(stdout, stderr, excmess)
 
+    @unittest.skipIf(mpich_420, 'mpich==4.2.0')
     def testSysExitCode(self):
         errcode = 7
         for np in (1, 2):
@@ -150,6 +155,7 @@ class TestRunScript(BaseTestRun):
                 self.assertMPIAbort(stdout, stderr)
                 self.assertNotIn('Traceback', stderr)
 
+    @unittest.skipIf(mpich_420, 'mpich==4.2.0')
     def testSysExitMess(self):
         exitmsg = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
         for np in (1, 2):
@@ -248,6 +254,7 @@ class TestRunCommand(BaseTestRun):
             self.assertEqual(stdout, '')
             self.assertEqual(stderr, '')
 
+    @unittest.skipIf(mpich_420, 'mpich==4.2.0')
     def testException(self):
         command = '; '.join((
             'from mpi4py import MPI',
