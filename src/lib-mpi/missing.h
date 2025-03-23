@@ -334,6 +334,16 @@ typedef void *PyMPI_MPI_File;
 #define MPI_UINT64_T ((MPI_Datatype)MPI_DATATYPE_NULL)
 #endif
 
+#ifndef PyMPI_HAVE_MPI_FLOAT16_T
+#undef  MPI_FLOAT16_T
+#define MPI_FLOAT16_T ((MPI_Datatype)MPI_DATATYPE_NULL)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_BFLOAT16_T
+#undef  MPI_BFLOAT16_T
+#define MPI_BFLOAT16_T ((MPI_Datatype)MPI_DATATYPE_NULL)
+#endif
+
 #ifndef PyMPI_HAVE_MPI_C_COMPLEX
 #undef  MPI_C_COMPLEX
 #define MPI_C_COMPLEX ((MPI_Datatype)MPI_DATATYPE_NULL)

@@ -29,6 +29,7 @@ AddTypeMap(TypeDict, "L" , __UNSIGNED_LONG__      )
 AddTypeMap(TypeDict, "Q" , __UNSIGNED_LONG_LONG__ )
 # real floating
 AddTypeMap(TypeDict, "e" , __REAL2__       )
+AddTypeMap(TypeDict, "e" , __FLOAT16_T__   )
 AddTypeMap(TypeDict, "f" , __FLOAT__       )
 AddTypeMap(TypeDict, "d" , __DOUBLE__      )
 AddTypeMap(TypeDict, "g" , __LONG_DOUBLE__ )  # PEP-3118 & NumPy
@@ -103,6 +104,7 @@ AddTypeMap(TypeDict, "u2" , __UINT16_T__ )  # NumPy
 AddTypeMap(TypeDict, "u4" , __UINT32_T__ )  # NumPy
 AddTypeMap(TypeDict, "u8" , __UINT64_T__ )  # NumPy
 # real (C) and complex (C99/C++) floating
+AddTypeMap(TypeDict, "f2" , __FLOAT16_T__ )  # NumPy
 if sizeof(float) == 4:
     AddTypeMap(TypeDict, "f4"  , __FLOAT__              )  # NumPy
     AddTypeMap(TypeDict, "c8"  , __CXX_FLOAT_COMPLEX__  )  # NumPy
@@ -223,6 +225,7 @@ AddTypeMap(CTypeDict, "u2" , __UINT16_T__ )
 AddTypeMap(CTypeDict, "u4" , __UINT32_T__ )
 AddTypeMap(CTypeDict, "u8" , __UINT64_T__ )
 
+AddTypeMap(CTypeDict, "f2" , __FLOAT16_T__ )
 if sizeof(float) == 4:
     AddTypeMap(CTypeDict, "f4"  , __FLOAT__            )
     AddTypeMap(CTypeDict, "c8"  , __C_FLOAT_COMPLEX__  )

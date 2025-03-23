@@ -5,6 +5,7 @@ PyMPI_WEAK_CALL(fn, __VA_ARGS__); \
 return _pympi__##fn(__VA_ARGS__)
 
 #ifdef OPEN_MPI
+#include <mpi-ext.h>
 PyMPI_WEAK_LOAD(ompi_mpi_datatype_null)
 PyMPI_WEAK_LOAD(ompi_mpi_packed)
 PyMPI_WEAK_LOAD(ompi_mpi_byte)
@@ -35,6 +36,7 @@ PyMPI_WEAK_LOAD(ompi_mpi_uint8_t)
 PyMPI_WEAK_LOAD(ompi_mpi_uint16_t)
 PyMPI_WEAK_LOAD(ompi_mpi_uint32_t)
 PyMPI_WEAK_LOAD(ompi_mpi_uint64_t)
+PyMPI_WEAK_LOAD(ompi_mpi_short_float)
 PyMPI_WEAK_LOAD(ompi_mpi_c_float_complex)
 PyMPI_WEAK_LOAD(ompi_mpi_c_double_complex)
 PyMPI_WEAK_LOAD(ompi_mpi_c_long_double_complex)

@@ -103,6 +103,8 @@ cdef extern from "<mpi.h>" nogil:
     MPI_Datatype MPI_UINT16_T              #:= MPI_DATATYPE_NULL
     MPI_Datatype MPI_UINT32_T              #:= MPI_DATATYPE_NULL
     MPI_Datatype MPI_UINT64_T              #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_FLOAT16_T             #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_BFLOAT16_T            #:= MPI_DATATYPE_NULL
     MPI_Datatype MPI_C_COMPLEX             #:= MPI_DATATYPE_NULL
     MPI_Datatype MPI_C_FLOAT_COMPLEX       #:= MPI_DATATYPE_NULL
     MPI_Datatype MPI_C_DOUBLE_COMPLEX      #:= MPI_DATATYPE_NULL

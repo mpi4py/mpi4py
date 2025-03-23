@@ -285,7 +285,8 @@ cdef inline const char* DatatypeChar(MPI_Datatype datatype) noexcept nogil:
     if datatype == MPI_UINT16_T : return typechr('u', 2)
     if datatype == MPI_UINT32_T : return typechr('u', 4)
     if datatype == MPI_UINT64_T : return typechr('u', 8)
-    # C99 - complex floating
+    # C99 - real/complex floating
+    if datatype == MPI_FLOAT16_T             : return "e"
     if datatype == MPI_C_COMPLEX             : return "F"
     if datatype == MPI_C_FLOAT_COMPLEX       : return "F"
     if datatype == MPI_C_DOUBLE_COMPLEX      : return "D"

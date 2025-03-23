@@ -977,8 +977,9 @@ class Generator:
             oname = f'ompi_{name}'
             if node.ctype == 'MPI_Datatype':
                 if oname in (
-                    'ompi_mpi_long_long',  # ompi_mpi_long_long_int
-                    'ompi_mpi_c_complex',  # ompi_mpi_c_float_complex
+                    'ompi_mpi_long_long',   # ompi_mpi_long_long_int
+                    'ompi_mpi_c_complex',   # ompi_mpi_c_float_complex
+                    'ompi_mpi_bfloat16_t',  # unavailable
                 ):
                     return ""
                 for old, new in (
@@ -989,6 +990,7 @@ class Generator:
                     ('cxx_float_complex', 'cxx_cplex'),
                     ('cxx_double_complex', 'cxx_dblcplex'),
                     ('cxx_long_double_complex', 'cxx_ldblcplex'),
+                    ('float16_t', 'short_float'),
                 ):
                     if oname == f'ompi_mpi_{old}':
                         oname = f'ompi_mpi_{new}'
@@ -1048,6 +1050,7 @@ class Generator:
         if not std:
             fileobj.write(dedent("""
             #ifdef OPEN_MPI
+            #include <mpi-ext.h>
             """))
             for node in handles:
                 code = abi_handle_openmpi(node)
