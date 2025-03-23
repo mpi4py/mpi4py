@@ -15,7 +15,7 @@ def ch4_ofi():
     return 'ch4:ofi' in MPI.Get_library_version()
 
 
-@unittest.skipMPI('mpich(<4.3.0)', testutil.has_mpi_port())
+@unittest.skipMPI('mpich(<4.3.0)', not testutil.has_mpi_port())
 @unittest.skipMPI('openmpi(<2.0.0)')
 @unittest.skipMPI('openmpi(>=5.0.0,<5.0.4)')
 @unittest.skipMPI('msmpi(<8.1.0)')

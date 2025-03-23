@@ -19,7 +19,7 @@ jobs:
         os:
           - ubuntu-24.04
           - macos-15
-          - windows-2022
+          - windows-2025
         mpi:
           - mpich
           - openmpi
@@ -35,9 +35,9 @@ jobs:
             mpi: msmpi
           - os: macos-15
             mpi: msmpi
-          - os: windows-2022
+          - os: windows-2025
             mpi: mpich
-          - os: windows-2022
+          - os: windows-2025
             mpi: openmpi
 
     steps:
@@ -95,7 +95,7 @@ jobs:
 
     - name: Test mpi4py.run
       run:  python demo/test-run/test_run.py -v
-      if:   matrix.mpi != 'msmpi' && ! (matrix.mpi == 'mpich' && matrix.os == 'ubuntu-24.04')
+      if:   matrix.mpi != 'msmpi'
     - name: Test init-fini
       run:  bash demo/init-fini/run.sh
       if:   matrix.mpi != 'msmpi'

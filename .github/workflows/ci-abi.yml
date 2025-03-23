@@ -81,11 +81,11 @@ jobs:
                 "x86_64":  "ubuntu-24.04",
             },
             "macOS": {
-                "arm64": "macos-14",
+                "arm64": "macos-15",
                 "x86_64": "macos-13",
             },
             "Windows": {
-                "AMD64": "windows-2022",
+                "AMD64": "windows-2025",
             },
         }
         PLATFORMS = (
