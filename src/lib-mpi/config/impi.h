@@ -11,6 +11,8 @@
 #undef PyMPI_HAVE_MPI_COMPLEX4
 #endif
 
+#if MPI_VERSION < 4
+
 #if I_MPI_NUMVERSION >= 20210900300
 #define PyMPI_HAVE_MPI_Bcast_c 1
 #define PyMPI_HAVE_MPI_Gather_c 1
@@ -259,6 +261,17 @@
 #define PyMPI_HAVE_MPI_F_TAG 1
 #define PyMPI_HAVE_MPI_F_ERROR 1
 #define PyMPI_HAVE_MPI_F_STATUS_SIZE 1
+#endif
+
+#if I_MPI_NUMVERSION >= 20211500300
+#define PyMPI_HAVE_MPI_Info_create_env 1
+#define PyMPI_HAVE_MPI_Info_get_string 1
+#define PyMPI_HAVE_MPI_Isendrecv 1
+#define PyMPI_HAVE_MPI_Isendrecv_replace 1
+#define PyMPI_HAVE_MPI_Isendrecv_c 1
+#define PyMPI_HAVE_MPI_Isendrecv_replace_c 1
+#endif
+
 #endif
 
 #endif /* !PyMPI_CONFIG_IMPI_H */
