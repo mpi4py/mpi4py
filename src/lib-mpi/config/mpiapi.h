@@ -10,6 +10,7 @@
 #include "mpi-40.h"
 #include "mpi-41.h"
 #include "mpi-50.h"
+#include "mpi-51.h"
 #include "mpi-60.h"
 
 #endif /* !PyMPI_CONFIG_MPIAPI_H */
