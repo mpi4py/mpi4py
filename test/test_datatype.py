@@ -23,7 +23,7 @@ MPI.REAL, MPI.DOUBLE_PRECISION,
 MPI.COMPLEX, MPI.DOUBLE_COMPLEX,
 ]
 datatypes_f90 = [
-MPI.LOGICAL1, MPI.LOGICAL2, MPI.LOGICAL4, MPI.LOGICAL8,
+MPI.LOGICAL1, MPI.LOGICAL2, MPI.LOGICAL4, MPI.LOGICAL8, MPI.LOGICAL16,
 MPI.INTEGER1, MPI.INTEGER2, MPI.INTEGER4, MPI.INTEGER8, MPI.INTEGER16,
 MPI.REAL2, MPI.REAL4, MPI.REAL8, MPI.REAL16,
 MPI.COMPLEX4, MPI.COMPLEX8, MPI.COMPLEX16, MPI.COMPLEX32,
@@ -32,19 +32,24 @@ datatypes_mpi = [
 MPI.PACKED, MPI.BYTE, MPI.AINT, MPI.OFFSET,
 ]
 
+for typelist in [
+    datatypes_c,
+    datatypes_c99,
+    datatypes_f77,
+    datatypes_f90,
+]:
+    typelist[:] = [
+        t for t in typelist
+        if testutil.has_datatype(t)
+    ]
+del typelist
+
 datatypes = []
 datatypes += datatypes_c
 datatypes += datatypes_c99
 datatypes += datatypes_f77
 datatypes += datatypes_f90
 datatypes += datatypes_mpi
-
-for typelist in [datatypes, datatypes_f77, datatypes_f90]:
-    typelist[:] = [
-        t for t in typelist
-        if testutil.has_datatype(t)
-    ]
-del typelist
 
 combiner_map = {}
 

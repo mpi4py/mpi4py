@@ -139,23 +139,31 @@ cdef inline int mpicombiner(MPI_Datatype datatype) noexcept nogil:
     <void> MPI_Type_get_envelope_c(datatype, &ni, &na, &nc, &nd, &combiner)
     return combiner
 
+cdef inline size_t mpisizeof(MPI_Datatype datatype) noexcept nogil:
+    if not mpi_active(): return 0
+    cdef MPI_Count size = MPI_UNDEFINED
+    cdef int ierr = MPI_Type_size_c(datatype, &size)
+    if ierr != MPI_SUCCESS or size < 0: size = 0
+    return <size_t> size
+
 cdef inline MPI_Count mpiextent(MPI_Datatype datatype) noexcept nogil:
     if not mpi_active(): return 0
-    cdef MPI_Count lb = 0, extent = 0
-    <void> MPI_Type_get_extent_c(datatype, &lb, &extent)
+    cdef MPI_Count lb = 0, extent = MPI_UNDEFINED
+    cdef int ierr = MPI_Type_get_extent_c(datatype, &lb, &extent)
+    if ierr != MPI_SUCCESS or extent < 0: extent = 0
     return extent
 
 cdef inline const char* mpifortchr(
     const char kind[],
     MPI_Datatype datatype,
 ) noexcept nogil:
-    return typechr(kind, <size_t> mpiextent(datatype))
+    return typechr(kind, <size_t> mpisizeof(datatype))
 
 cdef inline const char* mpifortstr(
     const char kind[],
     MPI_Datatype datatype,
 ) noexcept nogil:
-    return typestr(kind, <size_t> mpiextent(datatype))
+    return typestr(kind, <size_t> mpisizeof(datatype))
 
 cdef inline const char* typeDUP(
     const char *(*convert)(MPI_Datatype) noexcept nogil,
@@ -189,6 +197,8 @@ cdef extern from * nogil:
     const size_t alignof_char       "pympi_alignof(char)"
     const size_t alignof_wchar      "pympi_alignof(wchar_t)"
     const size_t alignof_voidp      "pympi_alignof(void*)"
+    const size_t alignof_int128     "16"  # TODO: review
+    const size_t alignof_float128   "16"  # TODO: review
 
 cdef inline size_t typealign(const char tchr[]) noexcept nogil:
     if tchr == NULL: return 0
@@ -299,6 +309,7 @@ cdef inline const char* DatatypeChar(MPI_Datatype datatype) noexcept nogil:
     if datatype == MPI_LOGICAL2  : return typechr('b',  2)
     if datatype == MPI_LOGICAL4  : return typechr('b',  4)
     if datatype == MPI_LOGICAL8  : return typechr('b',  8)
+    if datatype == MPI_LOGICAL16 : return typechr('b', 16)
     if datatype == MPI_INTEGER1  : return typechr('i',  1)
     if datatype == MPI_INTEGER2  : return typechr('i',  2)
     if datatype == MPI_INTEGER4  : return typechr('i',  4)
@@ -340,6 +351,7 @@ cdef inline const char* DatatypeStr(MPI_Datatype datatype) noexcept nogil:
     if datatype == MPI_LOGICAL2  : return typestr('b',  2)
     if datatype == MPI_LOGICAL4  : return typestr('b',  4)
     if datatype == MPI_LOGICAL8  : return typestr('b',  8)
+    if datatype == MPI_LOGICAL16 : return typestr('b', 16)
     if datatype == MPI_INTEGER1  : return typestr('i',  1)
     if datatype == MPI_INTEGER2  : return typestr('i',  2)
     if datatype == MPI_INTEGER4  : return typestr('i',  4)
@@ -381,6 +393,7 @@ cdef inline const char* DatatypeCode(MPI_Datatype datatype) noexcept nogil:
     if datatype == MPI_LOGICAL2  : return typestr('b',  2)
     if datatype == MPI_LOGICAL4  : return typestr('b',  4)
     if datatype == MPI_LOGICAL8  : return typestr('b',  8)
+    if datatype == MPI_LOGICAL16 : return typestr('b', 16)
     if datatype == MPI_INTEGER1  : return typestr('i',  1)
     if datatype == MPI_INTEGER2  : return typestr('i',  2)
     if datatype == MPI_INTEGER4  : return typestr('i',  4)
@@ -406,6 +419,11 @@ cdef inline const char* DatatypeCode(MPI_Datatype datatype) noexcept nogil:
 # -----------------------------------------------------------------------------
 
 cdef inline size_t DatatypeAlign(MPI_Datatype datatype) noexcept nogil:
+    if datatype == MPI_DATATYPE_NULL   : return 0
+    if datatype == MPI_LOGICAL16       : return alignof_int128
+    if datatype == MPI_INTEGER16       : return alignof_int128
+    if datatype == MPI_REAL16          : return alignof_float128
+    if datatype == MPI_COMPLEX32       : return alignof_float128
     cdef size_t align = typealign(DatatypeChar(datatype))
     if align > 0: return align
     if datatype == MPI_SHORT_INT       : return typealignpair("h", "i")
