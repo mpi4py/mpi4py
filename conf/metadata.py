@@ -43,9 +43,12 @@ def get_readme(settings=None):  # noqa: ARG001
     }
 
 
+def get_license(settings=None):  # noqa: ARG001
+    return "BSD-3-Clause"
+
+
 description = "Python bindings for MPI"
 requires_python = ">=3.8"
-license = "BSD-3-Clause"
 authors = [
     {"name": "Lisandro Dalcin", "email": "dalcinl@gmail.com"},
 ]
@@ -79,6 +82,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
     "Topic :: Scientific/Engineering",

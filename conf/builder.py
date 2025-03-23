@@ -8,7 +8,7 @@ import sys
 
 BACKENDS = {
     'setuptools': 'setuptools.build_meta',
-    'skbuild': 'scikit_build_core.setuptools.build_meta',
+    'skbuild': 'scikit_build_core.build',
     'mesonpy': 'mesonpy',
 }
 

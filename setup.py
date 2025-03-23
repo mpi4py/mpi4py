@@ -27,6 +27,7 @@ def get_metadata():
     assert req_py == md.requires_python
     author = md.authors[0]
     readme = md.get_readme()
+    license = md.get_license()
     return {
         # distutils
         'name'             : md.get_name(),
@@ -35,7 +36,7 @@ def get_metadata():
         'long_description' : readme['text'],
         'classifiers'      : md.classifiers,
         'keywords'         : md.keywords,
-        'license'          : md.license,
+        'license'          : license,
         'author'           : author['name'],
         'author_email'     : author['email'],
         # setuptools
