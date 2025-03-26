@@ -227,6 +227,37 @@ def Get_library_version() -> str:
     return tompistr(name, nlen)
 
 
+# MPI ABI
+# -------
+
+def Get_abi_version() -> tuple[int, int]:
+    """
+    Obtain the MPI ABI version number.
+    """
+    cdef int version = 1
+    cdef int subversion = 0
+    CHKERR( MPI_Abi_get_version(&version, &subversion) )
+    return (version, subversion)
+
+
+def Get_abi_info() -> Info:
+    """
+    Obtain information about the MPI ABI.
+    """
+    cdef Info info = <Info>New(Info)
+    CHKERR( MPI_Abi_get_info(&info.ob_mpi) )
+    return info
+
+
+def Get_abi_fortran_info() -> Info:
+    """
+    Obtain information about the Fortran MPI ABI.
+    """
+    cdef Info info = <Info>New(Info)
+    CHKERR( MPI_Abi_get_fortran_info(&info.ob_mpi) )
+    return info
+
+
 # Environmental Inquires
 # ----------------------
 

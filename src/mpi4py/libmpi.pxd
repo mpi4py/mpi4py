@@ -1044,6 +1044,8 @@ cdef extern from "<mpi.h>" nogil:
     # no errors
     enum: MPI_SUCCESS                    #:= 0
     enum: MPI_ERR_LASTCODE               #:= 1
+    # ABI
+    enum: MPI_ERR_ABI                    #:= MPI_ERR_LASTCODE
     # object handles
     enum: MPI_ERR_TYPE                   #:= MPI_ERR_LASTCODE
     enum: MPI_ERR_REQUEST                #:= MPI_ERR_LASTCODE
@@ -1146,6 +1148,10 @@ cdef extern from "<mpi.h>" nogil:
 
     enum: MPI_MAX_LIBRARY_VERSION_STRING #:= 1
     int MPI_Get_library_version(char[], int*)
+
+    int MPI_Abi_get_version(int*, int*)
+    int MPI_Abi_get_info(MPI_Info*)
+    int MPI_Abi_get_fortran_info(MPI_Info*)
 
     enum: MPI_MAX_PROCESSOR_NAME #:= 1
     int MPI_Get_processor_name(char[], int*)

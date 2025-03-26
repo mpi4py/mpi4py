@@ -31,5 +31,10 @@
 #define PyMPI_HAVE_MPI_Type_fromint 1
 #define PyMPI_HAVE_MPI_Win_fromint 1
 
+#define PyMPI_HAVE_MPI_ERR_ABI 1
+#define PyMPI_HAVE_MPI_Abi_get_version 1
+#define PyMPI_HAVE_MPI_Abi_get_info 1
+#define PyMPI_HAVE_MPI_Abi_get_fortran_info 1
+
 #endif
 #endif
