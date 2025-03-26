@@ -224,6 +224,37 @@ class TestDatatype(unittest.TestCase):
         self.assertEqual(MPI.INT_INT.typechar, 'V')
         self.assertEqual(MPI.INT_INT.typestr, f'V{MPI.INT.extent*2}')
 
+    def testContiguousBigMPI(self):
+        int_max = (1 << (struct.calcsize('i') * 8 - 1)) - 1
+        mpitype = MPI.BYTE.Create_contiguous(int_max)
+        self.assertEqual(mpitype.size, int_max)
+        basetype, combiner, params = mpitype.decode()
+        self.assertEqual(basetype, MPI.BYTE)
+        self.assertEqual(combiner, 'CONTIGUOUS')
+        self.assertEqual(params, {'count': int_max})
+        mpitype.Free()
+        if MPI.Get_version() < (3, 1):
+            return
+        count = int_max + int_max // 1024
+        mpitype = MPI.BYTE.Create_contiguous(count)
+        self.assertEqual(mpitype.size, count)
+        basetype, combiner, params = mpitype.decode()
+        mpitype.Free()
+        if MPI.Get_version() >= (4, 0) or unittest.is_mpi('impi(>2021.12.0)'):
+            self.assertEqual(basetype, MPI.BYTE)
+            self.assertEqual(combiner, 'CONTIGUOUS')
+            self.assertEqual(params, {'count': count})
+        else:
+            self.assertEqual(basetype, MPI.DATATYPE_NULL)
+            self.assertEqual(combiner, 'STRUCT')
+            qtype, rtype = params['datatypes']
+            self.assertEqual(qtype.combiner, MPI.COMBINER_VECTOR)
+            self.assertEqual(qtype.size, (count // int_max) * int_max)
+            self.assertEqual(rtype.combiner, MPI.COMBINER_CONTIGUOUS)
+            self.assertEqual(rtype.size, count % int_max)
+            qtype.free()
+            rtype.free()
+
 
 class BaseTestDatatypeCreateMixin:
 

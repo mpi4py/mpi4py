@@ -95,27 +95,6 @@
     if (ierr != MPI_SUCCESS) goto fn_exit;                       \
   } while (0)                                                 /**/
 
-#if !defined(PyMPI_HAVE_MPI_Type_contiguous_c) || PyMPI_LEGACY_ABI
-#undef MPI_Type_contiguous_c
-static int PyMPI_Type_contiguous_c(MPI_Count a1,
-                                   MPI_Datatype a2,
-                                   MPI_Datatype *a3)
-{
-  PyMPI_WEAK_CALL(MPI_Type_contiguous_c, a1, a2, a3);
-  {
-  int ierr;
-  int b1;
-  PyMPICastValue(int, b1, MPI_Count, a1);
-  ierr = MPI_Type_contiguous(b1, a2, a3);
-  if (ierr != MPI_SUCCESS) goto fn_exit;
- fn_exit:
-  return ierr;
-  }
-}
-#undef  MPI_Type_contiguous_c
-#define MPI_Type_contiguous_c PyMPI_Type_contiguous_c
-#endif
-
 #if !defined(PyMPI_HAVE_MPI_Type_vector_c) || PyMPI_LEGACY_ABI
 #undef MPI_Type_vector_c
 static int PyMPI_Type_vector_c(MPI_Count a1,

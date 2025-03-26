@@ -31,25 +31,14 @@ def _pickle_loads(data, bufs):
     return pickle.loads_oob(data, bufs)
 
 
-def _bigmpi_create_type(basetype, count, blocksize):
-    qsize, rsize = divmod(count, blocksize)
-    qtype = basetype.Create_vector(
-        qsize, blocksize, blocksize)
-    rtype = basetype.Create_contiguous(rsize)
-    rdisp = qtype.Get_extent()[1]
-    bigtype = MPI.Datatype.Create_struct(
-        (1, 1), (0, rdisp), (qtype, rtype))
-    qtype.Free()
-    rtype.Free()
-    return bigtype
-
-
 class _BigMPI:
     """Support for large message counts."""
 
-    blocksize = 1024**3  # 1 GiB
-    if MPI.VERSION >= 4:  # pragma: no cover
-        blocksize = 1024**6  # 1 EiB
+    blocksize = (
+        (1 << (_struct.calcsize('q') * 8 - 1)) - 1
+        if MPI.Get_version() >= (4, 0) else
+        (1 << (_struct.calcsize('i') * 8 - 1)) - 1
+    )
 
     def __init__(self):
         self.cache = {}
@@ -58,23 +47,19 @@ class _BigMPI:
         return self
 
     def __exit__(self, *exc):
-        cache = self.cache
-        for dtype in cache.values():
+        for dtype in self.cache.values():
             dtype.Free()
-        cache.clear()
+        self.cache.clear()
 
     def __call__(self, buf):
         buf = memoryview(buf)
         count = buf.nbytes
-        blocksize = self.blocksize
-        if count < blocksize:
+        if count <= self.blocksize:
             return (buf, count, MPI.BYTE)
-        cache = self.cache
-        dtype = cache.get(count)
-        if dtype is not None:
-            return (buf, 1, dtype)
-        dtype = _bigmpi_create_type(MPI.BYTE, count, blocksize)
-        cache[count] = dtype.Commit()
+        dtype = self.cache.get(count)
+        if dtype is None:
+            dtype = MPI.BYTE.Create_contiguous(count)
+            self.cache[count] = dtype.Commit()
         return (buf, 1, dtype)
 
 

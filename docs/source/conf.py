@@ -308,6 +308,7 @@ def setup(app):
     if generate:
         apidoc.generate(source)
     module = apidoc.load_module(source)
+    module.Get_version.__code__ = (lambda: (4, 0)).__code__
     apidoc.replace_module(module)
 
     synopsis = autosummary_context['synopsis']

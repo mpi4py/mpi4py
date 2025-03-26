@@ -705,7 +705,8 @@ class Generator:
     """
 
     LARGECNT_RE = re_compile(r'^mpi_({})_c$'.format('|'.join([
-        r'type_(contiguous|vector|indexed|create|size|get_(true_)?extent).*',
+        # r'type_contiguous', # implemented
+        r'type_(vector|indexed|create|size|get_(true_)?extent).*',
         r'(get|status_set)_elements|get_count',
         r'(pack|unpack)(_external)?(_size)?',
         r'(i?(b|s|r|p)?send(_init)?(recv(_replace)?)?)',
