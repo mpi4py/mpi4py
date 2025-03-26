@@ -164,11 +164,14 @@ def _patch_domain_python():
     from sphinx.domains.python import PythonDomain
     PythonDomain.object_types['data'].roles += ('class',)
 
+    from sphinx.util.inspect import TypeAliasForwardRef
+    TypeAliasForwardRef.__repr__ = lambda self: self.name
+
 
 def _setup_autodoc(app):
     from sphinx.ext import autodoc
     from sphinx.ext import autosummary
-    from sphinx.util import typing
+    from sphinx.util.typing import restify
     from sphinx.locale import _
 
     #
@@ -247,7 +250,7 @@ def _setup_autodoc(app):
                 more_content.append(content, '')
                 more_content.append('', '')
             if istypealias(obj, self.name):
-                content = _('alias of %s') % typing.restify(obj)
+                content = _('alias of %s') % restify(obj)
                 more_content.append(content, '')
                 more_content.append('', '')
             super().update_content(more_content)
@@ -266,17 +269,26 @@ def _setup_autodoc(app):
     class ExceptionDocumenterCustom(ExceptionDocumenter):
         objtype = 'class'
 
-    def get_documenter(app, obj, parent):
+    def get_documenter(*args, **kwargs):
+        if hasattr(autosummary, '_get_documenter'):
+            obj, args = args[0], args[1:]
+            get_documenter = autosummary._get_documenter
+        else:
+            obj, args = args[1], (args[0], *args[2:])
+            get_documenter = autosummary.get_documenter
         if isinstance(obj, type) and issubclass(obj, BaseException):
             caller = sys._getframe().f_back.f_code.co_name
             if caller == 'generate_autosummary_content':
                 if obj.__module__ == 'mpi4py.MPI':
                     if obj.__name__ == 'Exception':
                         return ExceptionDocumenterCustom
-        return autosummary.get_documenter(app, obj, parent)
+        return get_documenter(obj, *args, **kwargs)
 
     from sphinx.ext.autosummary import generate
-    generate.get_documenter = get_documenter
+    if hasattr(generate, '_get_documenter'):
+        generate._get_documenter = get_documenter
+    else:
+        generate.get_documenter = get_documenter
 
 
 def setup(app):
