@@ -4,6 +4,8 @@
 # No Errors
 SUCCESS          = MPI_SUCCESS
 ERR_LASTCODE     = MPI_ERR_LASTCODE
+# ABI
+ERR_ABI          = MPI_ERR_ABI
 # Object Handles
 ERR_TYPE         = MPI_ERR_TYPE
 ERR_REQUEST      = MPI_ERR_REQUEST
