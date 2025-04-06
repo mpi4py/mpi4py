@@ -89,7 +89,14 @@ static int PyMPI_Type_get_value_index(MPI_Datatype value,
                                       MPI_Datatype *pair)
 {
   PyMPI_WEAK_CALL(MPI_Type_get_value_index, value, index, pair);
-  if (!pair) return MPI_ERR_ARG;
+  if (value == MPI_DATATYPE_NULL || index == MPI_DATATYPE_NULL) {
+    (void) MPI_Comm_call_errhandler(MPI_COMM_SELF, MPI_ERR_TYPE);
+    return MPI_ERR_TYPE;
+  }
+  if (!pair) {
+    (void) MPI_Comm_call_errhandler(MPI_COMM_SELF, MPI_ERR_ARG);
+    return MPI_ERR_ARG;
+  }
   /**/ if (index != MPI_INT)          *pair = MPI_DATATYPE_NULL;
   else if (value == MPI_FLOAT)        *pair = MPI_FLOAT_INT;
   else if (value == MPI_DOUBLE)       *pair = MPI_DOUBLE_INT;

@@ -132,6 +132,12 @@ class TestDatatype(unittest.TestCase):
         for value in value_types:
             result = MPI.Datatype.Get_value_index(value, MPI.FLOAT)
             self.assertEqual(result, MPI.DATATYPE_NULL)
+        with self.assertRaises(MPI.Exception) as catcher:
+            MPI.Datatype.Get_value_index(MPI.DATATYPE_NULL, MPI.INT)
+        self.assertEqual(catcher.exception.Get_error_class(), MPI.ERR_TYPE)
+        with self.assertRaises(MPI.Exception) as catcher:
+            MPI.Datatype.Get_value_index(MPI.INT, MPI.DATATYPE_NULL)
+        self.assertEqual(catcher.exception.Get_error_class(), MPI.ERR_TYPE)
 
     def testGetEnvelope(self):
         for dtype in datatypes:
