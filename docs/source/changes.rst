@@ -5,6 +5,4 @@
 CHANGES
 -------
 
-.. default-role:: literal
-
 .. include:: ../../CHANGES.rst

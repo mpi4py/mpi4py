@@ -1,3 +1,58 @@
+Release 4.1.0 [YYYY-MM-DD]
+==========================
+
+* New features:
+
+  + Add support for the MPI 5.0 standard.
+
+    - MPI handle serialization with integral values.
+    - Fixed-size Fortran ``LOGICAL`` datatypes.
+
+  + `MPI.Datatype.Create_contiguous` now uses `BigMPI`_'s approach
+    when using MPI implementations that do not yet support the MPI 4.0
+    large-count APIs.
+
+  .. _BigMPI: https://doi.org/10.1109/ExaMPI.2014.5
+
+  + Add support for `MPI.FLOAT16_T` and `MPI.BFLOAT16_T` datatypes.
+    These datatypes are not yet standard but available as extensions
+    in MPI implementations.
+
+  + Add `MPI.Status.tomemory` to expose the status contents as a
+    `memoryview` object.
+
+* Enhancements:
+
+  + Support (opt-in via `MPI4PY_BUILD_PYAPI`) for building with
+    `Py_LIMITED_API` under Python 3.10+. Requires Cython 3.1+
+    (currently under development).
+
+  + Support (opt-in via `MPI4PY_BUILD_MPIABI`) for building with the
+    MPI 5.0 standard ABI and the MPICH or Open MPI legacy ABIs. The
+    `MPI` extension module will be able to dynamically link at runtime
+    with older versions (down to the MPI 3.0 standard) of the MPI
+    implementation used at compile time. Only available on Linux,
+    macOS, and Windows.
+
+  + Improve ownership management of DLPack capsules.
+
+  + Reimplement MPI DLL search path on Windows.
+
+  + Minor fixes to typing stubs and documentation.
+
+* Backward-incompatible changes:
+
+  + Python 3.8+ is required.
+
+  + The `MPI.Exception` class is now a heap type.
+
+  + The types of the `MPI.BOTTOM`, `MPI.IN_PLACE`, and
+    `MPI.BUFFER_AUTOMATIC` are no longer subclasses of `int`.
+
+
+.. default-role:: literal
+
+
 Release 4.0.3 [2025-02-13]
 ==========================
 
