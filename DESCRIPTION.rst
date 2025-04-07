@@ -27,8 +27,8 @@ This package supports:
 
 * Process groups and communication domains
 
-  + Creation of new intra/inter communicators
-  + Cartesian & graph topologies
+  + creation of new intra/inter communicators
+  + creation/query of Cartesian & graph topologies
 
 * Parallel input/output:
 
