@@ -70,12 +70,20 @@ The following environment variables affect the build configuration.
    the availability of all MPI constants, predefined handles, and
    routines.
 
-.. envvar:: MPI4PY_BUILD_ABI
+.. envvar:: MPI4PY_BUILD_PYAPI
 
-   Enable enhanced support for the MPI 5.0 standard ABI and the MPICH
-   or Open MPI legacy ABIs. The :mod:`mpi4py.MPI` extension module
-   will be able to dynamically link at runtime with older versions
-   (down to the MPI 3.0 standard) of the corresponding MPI
+   Build with `Py_LIMITED_API` under CPython 3.10+. Setting the
+   :envvar:`MPI4PY_BUILD_PYAPI` environment variable to a string
+   ``"{major}.{minor}"`` defines the value for `Py_LIMITED_API` to use
+   for the build. A value of ``"1"`` is equivalent to ``"3.10"``.
+
+.. envvar:: MPI4PY_BUILD_MPIABI
+
+   Setting the :envvar:`MPI4PY_BUILD_MPIABI` environment variable to
+   ``"1"`` enables enhanced support for the MPI 5.0 standard ABI and
+   the MPICH or Open MPI legacy ABIs. The :mod:`mpi4py.MPI` extension
+   module is then able to dynamically link at runtime with older
+   versions (down to the MPI 3.0 standard) of the corresponding MPI
    implementation used at compile time. This feature is only available
    on Linux, macOS, and Windows. POSIX-like systems other than Linux
    and macOS are not currently supported, although they could easily

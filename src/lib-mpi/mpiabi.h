@@ -1,4 +1,4 @@
-#if defined(PYMPIBUILDABI)
+#if defined(PYMPIABI)
 #  if defined(MPI_ABI_VERSION) && MPI_ABI_VERSION >= 1
 #    define PyMPI_STANDARD_ABI 1
 #  else

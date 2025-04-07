@@ -45,8 +45,8 @@ def get_metadata():
     }
 
 
-def get_py_limited_api():
-    api = os.environ.get('PYLIMITEDAPI')
+def get_build_pyapi():
+    api = os.environ.get('MPI4PY_BUILD_PYAPI')
     if api and sys.implementation.name == 'cpython':
         if api == '1':
             return py_limited_api
@@ -58,6 +58,10 @@ def get_py_limited_api():
             x, y = api[0], api[1:]
         return (int(x), int(y))
     return None
+
+
+def get_build_mpiabi():
+    return os.environ.get('MPI4PY_BUILD_MPIABI') == '1'
 
 
 # --------------------------------------------------------------------
@@ -100,9 +104,9 @@ def extensions():
         MPI['define_macros'].extend([
             ('CYTHON_LIMITED_API', api),
         ])
-    if os.environ.get('MPI4PY_BUILD_ABI') == '1':
+    if get_build_mpiabi():
         MPI['define_macros'].extend([
-            ('PYMPIBUILDABI', 1),
+            ('PYMPIABI', 1),
         ])
     #
     return [MPI]
@@ -176,7 +180,7 @@ def run_setup():
         metadata.pop('python_requires')
         metadata.pop('long_description_content_type')
     #
-    api = get_py_limited_api()
+    api = get_build_pyapi()
     if api and setuptools:
         api_tag = 'cp{}{}'.format(*api)
         options = {'bdist_wheel': {'py_limited_api': api_tag}}
@@ -205,7 +209,7 @@ def run_skbuild():
         cmake_source_dir = '.',
     )
     #
-    api = get_py_limited_api()
+    api = get_build_pyapi()
     if api:
         api_tag = 'cp{}{}'.format(*api)
         options = {'bdist_wheel': {'py_limited_api': api_tag}}

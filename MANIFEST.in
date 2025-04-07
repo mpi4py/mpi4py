@@ -1,5 +1,5 @@
 include pyproject.toml setup.py tox.ini *.cfg *.rst
-include CMakeLists.txt meson.build
+include CMakeLists.txt meson.build meson.options
 exclude .*
 
 recursive-include demo *.py *.pyx *.i *.h *.c *.cxx *.f90 *.f08

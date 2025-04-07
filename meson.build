@@ -10,7 +10,7 @@ project(
     check: true,
   ).stdout().strip(),
   license: 'BSD-3-Clause',
-  meson_version: '>=1.0.0',
+  meson_version: '>=1.1.0',
 )
 
 # ---
@@ -77,6 +77,16 @@ MPI_ch = custom_target(
   install_dir: [false, dstdir / 'mpi4py', dstdir / 'mpi4py']
 )
 
+pyapi = get_option('pyapi')
+mpiabi = get_option('mpiabi')
+ext_args = {}
+if pyapi != ''
+  ext_args += {'limited_api': pyapi == '1' ? '3.10' : pyapi}
+endif
+if mpiabi
+  ext_args += {'c_args': mpiabi ? ['-DPYMPIABI=1'] : []}
+endif
+
 py.extension_module(
   'MPI',
   sources: MPI_ch[0],
@@ -85,6 +95,7 @@ py.extension_module(
   dependencies: [mpi],
   subdir: 'mpi4py',
   install: true,
+  kwargs: ext_args,
 )
 
 executable(
