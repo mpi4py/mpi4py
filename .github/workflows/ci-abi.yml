@@ -66,6 +66,8 @@ jobs:
                 "2021.15.0.494",
             ],
             "msmpi": [
+                "10.0.12498.5",
+                "10.1.12498.52",
             ],
         }
         MPIABI_POSIX = ["mpiabi", "mpich", "openmpi"]
@@ -323,6 +325,22 @@ jobs:
         echo "I_MPI_SPAWN=1" >> "$GITHUB_ENV"
         echo "I_MPI_SPIN_COUNT=1" >> "$GITHUB_ENV"
         echo "I_MPI_THREAD_YIELD=2" >> "$GITHUB_ENV"
+      working-directory: ${{ runner.temp }}
+      shell: bash
+
+    - if: runner.os == 'Windows' && matrix.mpi == 'msmpi'
+      name: Install Microsoft MPI (${{ matrix.mpi-version }})
+      run: |
+        mpi=MSMpiSetup.exe version=${{ matrix.mpi-version }}
+        url="https://download.microsoft.com/download/"
+        case "$version" in
+        10.0.*) hash="A/E/0/AE002626-9D9D-448D-8197-1EA510E297CE" ;;
+        10.1.*) hash="7/2/7/72731ebb-b63c-4170-ade7-836966263a8f" ;;
+        esac
+        curl -sSLO "${url}${hash}"/$mpi
+        ./MSMpiSetup.exe -unattend
+        cmd='[Environment]::GetEnvironmentVariable("MSMPI_BIN","Machine")'
+        echo "$(pwsh -c "$cmd")" >> "$GITHUB_PATH"
       working-directory: ${{ runner.temp }}
       shell: bash
 

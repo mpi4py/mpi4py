@@ -3,6 +3,11 @@
 
 #include "mpiapi.h"
 
+#if MSMPI_VER == 0x100
+#undef  MSMPI_VER
+#define MSMPI_VER 0xA00
+#endif
+
 #if MSMPI_VER >= 0x402
 #define PyMPI_HAVE_MPI_AINT 1
 #define PyMPI_HAVE_MPI_OFFSET 1

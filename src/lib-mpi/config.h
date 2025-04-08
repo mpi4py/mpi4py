@@ -4,14 +4,6 @@
 #  endif
 #endif
 
-#if defined(MS_WINDOWS)
-#  if !defined(MSMPI_VER)
-#    if defined(MPICH2) && defined(MPIAPI)
-#      define MSMPI_VER 0x100
-#    endif
-#  endif
-#endif
-
 #if !defined(MPIAPI)
 #  define MPIAPI
 #endif
