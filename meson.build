@@ -77,14 +77,14 @@ MPI_ch = custom_target(
   install_dir: [false, dstdir / 'mpi4py', dstdir / 'mpi4py']
 )
 
-pyapi = get_option('pyapi')
 mpiabi = get_option('mpiabi')
+pysabi = get_option('pysabi')
 ext_args = {}
-if pyapi != ''
-  ext_args += {'limited_api': pyapi == '1' ? '3.10' : pyapi}
-endif
 if mpiabi
-  ext_args += {'c_args': mpiabi ? ['-DPYMPIABI=1'] : []}
+  ext_args += {'c_args': ['-DPYMPIABI=1']}
+endif
+if pysabi != ''
+  ext_args += {'limited_api': pysabi}
 endif
 
 py.extension_module(

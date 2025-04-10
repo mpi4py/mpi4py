@@ -23,7 +23,7 @@ Release 4.1.0 [YYYY-MM-DD]
 
 * Enhancements:
 
-  + Support (opt-in via `MPI4PY_BUILD_PYAPI`) for building with
+  + Support (opt-in via `MPI4PY_BUILD_PYSABI`) for building with
     `Py_LIMITED_API` under Python 3.10+. Requires Cython 3.1+
     (currently under development).
 

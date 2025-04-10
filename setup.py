@@ -45,23 +45,24 @@ def get_metadata():
     }
 
 
-def get_build_pyapi():
-    api = os.environ.get('MPI4PY_BUILD_PYAPI')
-    if api and sys.implementation.name == 'cpython':
-        if api == '1':
+def get_build_mpiabi():
+    abi = os.environ.get('MPI4PY_BUILD_MPIABI')
+    return abi in {"true",  "yes", "on", "y", "1"}
+
+
+def get_build_pysabi():
+    abi = os.environ.get('MPI4PY_BUILD_PYSABI')
+    if abi and sys.implementation.name == 'cpython':
+        if abi == '1':
             return py_limited_api
-        if api.startswith('cp'):
-            api = api[2:]
-        if '.' in api:
-            x, y = api.split('.')
+        if abi.startswith('cp'):
+            abi = abi[2:]
+        if '.' in abi:
+            x, y = abi.split('.')
         else:
-            x, y = api[0], api[1:]
+            x, y = abi[0], abi[1:]
         return (int(x), int(y))
     return None
-
-
-def get_build_mpiabi():
-    return os.environ.get('MPI4PY_BUILD_MPIABI') == '1'
 
 
 # --------------------------------------------------------------------
@@ -99,14 +100,15 @@ def extensions():
         define_macros=[],
         configure=mpidistutils.configure_mpi,
     )
-    if sys.version_info[:2] > maxknow_python:
-        api = '0x{:02x}{:02x}0000'.format(*maxknow_python)
-        MPI['define_macros'].extend([
-            ('CYTHON_LIMITED_API', api),
-        ])
     if get_build_mpiabi():
         MPI['define_macros'].extend([
             ('PYMPIABI', 1),
+        ])
+    if sys.version_info[:2] > maxknow_python:
+        sabi = get_build_pysabi() or maxknow_python
+        lapi = '0x{:02x}{:02x}0000'.format(*sabi)
+        MPI['define_macros'].extend([
+            ('CYTHON_LIMITED_API', lapi),
         ])
     #
     return [MPI]
@@ -180,12 +182,12 @@ def run_setup():
         metadata.pop('python_requires')
         metadata.pop('long_description_content_type')
     #
-    api = get_build_pyapi()
-    if api and setuptools:
-        api_tag = 'cp{}{}'.format(*api)
+    sabi = get_build_pysabi()
+    if sabi and setuptools:
+        api_tag = 'cp{}{}'.format(*sabi)
         options = {'bdist_wheel': {'py_limited_api': api_tag}}
         builder_args['options'] = options
-        api_ver = '0x{:02X}{:02X}0000'.format(*api)
+        api_ver = '0x{:02X}{:02X}0000'.format(*sabi)
         defines = [('Py_LIMITED_API', api_ver)]
         for ext in builder_args['ext_modules']:
             ext.define_macros.extend(defines)
@@ -209,12 +211,18 @@ def run_skbuild():
         cmake_source_dir = '.',
     )
     #
-    api = get_build_pyapi()
-    if api:
-        api_tag = 'cp{}{}'.format(*api)
-        options = {'bdist_wheel': {'py_limited_api': api_tag}}
+    options = {}
+    cmake_args = []
+    if get_build_mpiabi():
+        cmake_args += ["-DMPIABI:BOOL=1"]
+    sabi = get_build_pysabi()
+    if sabi:
+        api_tag = 'cp{}{}'.format(*sabi)
+        options['bdist_wheel'] = {'py_limited_api': api_tag}
+        cmake_args += ["-DPYSABI:STRING={}.{}".format(*sabi)]
+    if options:
         builder_args['options'] = options
-        cmake_args = ["-DSABI={}.{}".format(*api)]
+    if cmake_args:
         builder_args['cmake_args'] = cmake_args
     #
     setup_args = dict(i for d in (

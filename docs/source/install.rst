@@ -70,13 +70,6 @@ The following environment variables affect the build configuration.
    the availability of all MPI constants, predefined handles, and
    routines.
 
-.. envvar:: MPI4PY_BUILD_PYAPI
-
-   Build with `Py_LIMITED_API` under CPython 3.10+. Setting the
-   :envvar:`MPI4PY_BUILD_PYAPI` environment variable to a string
-   ``"{major}.{minor}"`` defines the value for `Py_LIMITED_API` to use
-   for the build. A value of ``"1"`` is equivalent to ``"3.10"``.
-
 .. envvar:: MPI4PY_BUILD_MPIABI
 
    Setting the :envvar:`MPI4PY_BUILD_MPIABI` environment variable to
@@ -90,6 +83,13 @@ The following environment variables affect the build configuration.
    be: all what is needed is for the platform to either support weak
    symbols in shared modules/libraries, or support the standard POSIX
    :c:func:`dlopen`/:c:func:`dlsym` APIs.
+
+.. envvar:: MPI4PY_BUILD_PYSABI
+
+   Build with the CPython 3.10+ :ref:`Stable ABI <python:stable-abi>`.
+   Setting the :envvar:`MPI4PY_BUILD_PYSABI` environment variable to a
+   string ``"{major}.{minor}"`` defines the `Py_LIMITED_API` value to
+   use for building extension modules.
 
 The following environment variables are aliases for the ones described
 above. Having shorter names, they are convenient for occasional use in

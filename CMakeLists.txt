@@ -1,15 +1,23 @@
 # Author:  Lisandro Dalcin
 # Contact: dalcinl@gmail.com
 cmake_minimum_required(VERSION 3.15...3.26)
-
 project(mpi4py LANGUAGES C)
 
-if (SABI)
+set(
+  MPIABI $ENV{MPI4PY_BUILD_MPIABI} CACHE BOOL
+  "Use MPI ABI (standard or legacy)"
+)
+set(
+  PYSABI $ENV{MPI4PY_BUILD_PYSABI} CACHE STRING
+  "Use Python Stable ABI"
+)
+
+if (PYSABI)
   if (NOT SKBUILD_SABI_COMPONENT)
     set(SKBUILD_SABI_COMPONENT Development.SABIModule)
   endif()
   if (NOT SKBUILD_SABI_VERSION)
-    set(SKBUILD_SABI_VERSION ${SABI})
+    set(SKBUILD_SABI_VERSION ${PYSABI})
   endif()
 endif()
 if (SKBUILD_SABI_VERSION)
@@ -26,9 +34,6 @@ find_package(
 find_package(MPI REQUIRED)
 separate_arguments(MPI_C_COMPILE_OPTIONS NATIVE_COMMAND)
 separate_arguments(MPI_C_LINK_FLAGS NATIVE_COMMAND)
-
-set(PYMPIABI $<BOOL:$ENV{MPI4PY_BUILD_MPIABI}>)
-add_compile_definitions($<${PYMPIABI}:PYMPIABI=1>)
 
 include(CheckSymbolExists)
 set(CMAKE_REQUIRED_INCLUDES ${MPI_C_INCLUDE_DIRS})
@@ -71,6 +76,7 @@ install(FILES ${MPI.h} DESTINATION mpi4py)
 # mpi4py.MPI
 python_add_library(mpi4py.MPI MODULE ${MPI.c} WITH_SOABI ${WITH_SABI})
 set_target_properties(mpi4py.MPI PROPERTIES OUTPUT_NAME "MPI" PREFIX "")
+target_compile_definitions(mpi4py.MPI PRIVATE $<$<BOOL:${MPIABI}>:PYMPIABI=1>)
 target_include_directories(mpi4py.MPI PRIVATE ${SRCDIR})
 target_include_directories(mpi4py.MPI PRIVATE ${MPI_C_INCLUDE_DIRS})
 target_compile_definitions(mpi4py.MPI PRIVATE ${MPI_C_COMPILE_DEFINITIONS})
