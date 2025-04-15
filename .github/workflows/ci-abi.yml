@@ -44,6 +44,7 @@ jobs:
       matrix-build: ${{ steps.matrix.outputs.matrix-build }}
       matrix-test:  ${{ steps.matrix.outputs.matrix-test  }}
     steps:
+    - uses: step-security/harden-runner@v2
     - id: matrix
       name: setup build/test matrix
       shell: python
@@ -133,6 +134,10 @@ jobs:
         include: ${{ fromJSON(needs.setup.outputs.matrix-build) }}
 
     steps:
+
+    - uses: step-security/harden-runner@v2
+      with:
+        egress-policy: audit
 
     - name: Checkout
       uses: actions/checkout@v4
@@ -269,6 +274,10 @@ jobs:
         include: ${{ fromJSON(needs.setup.outputs.matrix-test) }}
 
     steps:
+
+    - uses: step-security/harden-runner@v2
+      with:
+        egress-policy: audit
 
     - if: runner.os != 'Windows'
       id: micromamba

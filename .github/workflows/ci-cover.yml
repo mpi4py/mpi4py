@@ -42,6 +42,10 @@ jobs:
 
     steps:
 
+    - uses: step-security/harden-runner@v2
+      with:
+        egress-policy: audit
+
     - uses: actions/checkout@v4
 
     - uses: mamba-org/setup-micromamba@v2
@@ -110,15 +114,20 @@ jobs:
 
     steps:
 
+    - uses: step-security/harden-runner@v2
+      with:
+        egress-policy: audit
+
     - uses: actions/checkout@v4
+
     - uses: actions/setup-python@v5
       with:
         python-version: ${{ github.event.inputs.py || 3 }}
         cache: pip
         cache-dependency-path: |
           conf/requirements-build-cython.txt
-    - run: python -m pip install -U pip setuptools
 
+    - run: python -m pip install -U pip setuptools
     - run: python -m pip install -U -r conf/requirements-build-cython.txt
     - run: python -m pip install -U coverage
     - run: python setup.py build_src
