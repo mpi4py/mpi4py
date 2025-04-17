@@ -1920,6 +1920,21 @@ PyMPI_EXTERN int MPI_Remove_error_string(int a0);
 PyMPI_LOCAL int _pympi_MPI_Remove_error_string(int a0) { _pympi_CALL(MPI_Remove_error_string,a0); }
 #define MPI_Remove_error_string _pympi_MPI_Remove_error_string
 
+#undef MPI_Abi_get_version
+#ifndef PyMPI_HAVE_MPI_Abi_get_version
+PyMPI_EXTERN int MPI_Abi_get_version(int* a0,int* a1);
+#endif
+
+#undef MPI_Abi_get_info
+#ifndef PyMPI_HAVE_MPI_Abi_get_info
+PyMPI_EXTERN int MPI_Abi_get_info(MPI_Info* a0);
+#endif
+
+#undef MPI_Abi_get_fortran_info
+#ifndef PyMPI_HAVE_MPI_Abi_get_fortran_info
+PyMPI_EXTERN int MPI_Abi_get_fortran_info(MPI_Info* a0);
+#endif
+
 #undef MPI_Get_hw_resource_info
 #ifndef PyMPI_HAVE_MPI_Get_hw_resource_info
 PyMPI_EXTERN int MPI_Get_hw_resource_info(MPI_Info* a0);

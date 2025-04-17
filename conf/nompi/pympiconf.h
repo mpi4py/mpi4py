@@ -815,6 +815,7 @@
 #undef  PyMPI_HAVE_MPI_Remove_error_string
 #undef  PyMPI_HAVE_MPI_SUCCESS
 #undef  PyMPI_HAVE_MPI_ERR_LASTCODE
+#undef  PyMPI_HAVE_MPI_ERR_ABI
 #undef  PyMPI_HAVE_MPI_ERR_TYPE
 #undef  PyMPI_HAVE_MPI_ERR_REQUEST
 #undef  PyMPI_HAVE_MPI_ERR_OP
@@ -894,6 +895,9 @@
 #undef  PyMPI_HAVE_MPI_Get_version
 #undef  PyMPI_HAVE_MPI_MAX_LIBRARY_VERSION_STRING
 #undef  PyMPI_HAVE_MPI_Get_library_version
+#undef  PyMPI_HAVE_MPI_Abi_get_version
+#undef  PyMPI_HAVE_MPI_Abi_get_info
+#undef  PyMPI_HAVE_MPI_Abi_get_fortran_info
 #undef  PyMPI_HAVE_MPI_MAX_PROCESSOR_NAME
 #undef  PyMPI_HAVE_MPI_Get_processor_name
 #undef  PyMPI_HAVE_MPI_Get_hw_resource_info

@@ -4119,6 +4119,11 @@ typedef int (MPIAPI PyMPI_MPI_Datarep_conversion_function_c)(void*,MPI_Datatype,
 #define MPI_ERR_LASTCODE (1)
 #endif
 
+#ifndef PyMPI_HAVE_MPI_ERR_ABI
+#undef  MPI_ERR_ABI
+#define MPI_ERR_ABI (MPI_ERR_LASTCODE)
+#endif
+
 #ifndef PyMPI_HAVE_MPI_ERR_TYPE
 #undef  MPI_ERR_TYPE
 #define MPI_ERR_TYPE (MPI_ERR_LASTCODE)
@@ -4512,6 +4517,21 @@ typedef int (MPIAPI PyMPI_MPI_Datarep_conversion_function_c)(void*,MPI_Datatype,
 #ifndef PyMPI_HAVE_MPI_Get_library_version
 #undef  MPI_Get_library_version
 #define MPI_Get_library_version(a1,a2) PyMPI_UNAVAILABLE("MPI_Get_library_version",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Abi_get_version
+#undef  MPI_Abi_get_version
+#define MPI_Abi_get_version(a1,a2) PyMPI_UNAVAILABLE("MPI_Abi_get_version",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Abi_get_info
+#undef  MPI_Abi_get_info
+#define MPI_Abi_get_info(a1) PyMPI_UNAVAILABLE("MPI_Abi_get_info",a1)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_Abi_get_fortran_info
+#undef  MPI_Abi_get_fortran_info
+#define MPI_Abi_get_fortran_info(a1) PyMPI_UNAVAILABLE("MPI_Abi_get_fortran_info",a1)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_MAX_PROCESSOR_NAME

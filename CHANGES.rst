@@ -7,6 +7,7 @@ Release 4.1.0 [YYYY-MM-DD]
 
     - MPI handle serialization with integral values.
     - Fixed-size Fortran ``LOGICAL`` datatypes.
+    - Query ABI version/info and Fortran ABI info.
 
   + `MPI.Datatype.Create_contiguous` now uses `BigMPI`_'s approach
     when using MPI implementations that do not yet support the MPI 4.0

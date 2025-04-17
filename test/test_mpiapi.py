@@ -72,6 +72,11 @@ if MPI.Get_version() < (4, 1):
     ]
 
 if MPI.Get_version() < (5, 0):
+    mpi_missing += [
+        'MPI_Abi_get_version',
+        'MPI_Abi_get_info',
+        'MPI_Abi_get_fortran_info',
+    ]
     for _type in (
         'Comm',
         'Errhandler',

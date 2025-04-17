@@ -1159,7 +1159,7 @@ class Generator:
         for node in functions:
             if node.version <= mpi_version_min:
                 continue
-            if node.version >= mpi_version_max:
+            if node.version > mpi_version_max:
                 continue
             code = abi_function(node)
             fileobj.write(code.pop(0))
