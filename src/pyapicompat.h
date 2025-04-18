@@ -32,7 +32,12 @@ static char* Py_GETENV(const char *name)
 /* -------------------------------------------------------------------------- */
 
 #if defined(Py_LIMITED_API) && Py_LIMITED_API+0 < 0x030D0000
-#if !defined(PyMem_RawMalloc)
+#if defined(MS_WINDOWS)
+static void *(*PyMem_RawMalloc)(size_t);
+static void *(*PyMem_RawCalloc)(size_t, size_t);
+static void *(*PyMem_RawRealloc)(void *, size_t);
+static void  (*PyMem_RawFree)(void *);
+#else
 PyAPI_FUNC(void *) PyMem_RawMalloc(size_t);
 PyAPI_FUNC(void *) PyMem_RawCalloc(size_t, size_t);
 PyAPI_FUNC(void *) PyMem_RawRealloc(void *, size_t);
@@ -65,7 +70,6 @@ PyAPI_FUNC(void)   PyMem_RawFree(void *);
 /* -------------------------------------------------------------------------- */
 
 #if defined(Py_LIMITED_API) && Py_LIMITED_API+0 < 0x030B0000
-
 #define Py_bf_getbuffer 1
 #define Py_bf_releasebuffer 2
 
@@ -83,12 +87,6 @@ typedef struct {
   void *internal;
 } Py_buffer;
 
-PyAPI_FUNC(int)  PyObject_CheckBuffer(PyObject *);
-PyAPI_FUNC(int)  PyObject_GetBuffer(PyObject *, Py_buffer *, int);
-PyAPI_FUNC(void) PyBuffer_Release(Py_buffer *);
-PyAPI_FUNC(int)  PyBuffer_FillInfo(Py_buffer *, PyObject *,
-                                   void *, Py_ssize_t, int, int);
-
 #define PyBUF_SIMPLE 0
 #define PyBUF_WRITABLE 0x0001
 
@@ -102,6 +100,66 @@ PyAPI_FUNC(int)  PyBuffer_FillInfo(Py_buffer *, PyObject *,
 #define PyBUF_READ  0x100
 #define PyBUF_WRITE 0x200
 
+#if defined(MS_WINDOWS)
+static int  (*PyObject_CheckBuffer)(PyObject *);
+static int  (*PyObject_GetBuffer)(PyObject *, Py_buffer *, int);
+static void (*PyBuffer_Release)(Py_buffer *);
+static int  (*PyBuffer_FillInfo)(Py_buffer *, PyObject *, void *,
+                                 Py_ssize_t, int, int);
+#else
+PyAPI_FUNC(int)  PyObject_CheckBuffer(PyObject *);
+PyAPI_FUNC(int)  PyObject_GetBuffer(PyObject *, Py_buffer *, int);
+PyAPI_FUNC(void) PyBuffer_Release(Py_buffer *);
+PyAPI_FUNC(int)  PyBuffer_FillInfo(Py_buffer *, PyObject *,
+                                   void *, Py_ssize_t, int, int);
+#endif
+#endif
+
+/* -------------------------------------------------------------------------- */
+
+#if defined(Py_LIMITED_API) && Py_LIMITED_API+0 < 0x030D0000
+#if defined(MS_WINDOWS)
+#include <windows.h>
+BOOL WINAPI DllMain(
+  HINSTANCE hinstDLL,
+  DWORD     fdwReason,
+  LPVOID    lpvReserved)
+{
+  DWORD   dwFlags = 0;
+  HMODULE hModule = NULL;
+  switch(fdwReason) {
+  case DLL_PROCESS_ATTACH:
+    dwFlags |= GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS;
+    dwFlags |= GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT;
+    GetModuleHandleEx(dwFlags, (LPCSTR) Py_Initialize, &hModule);
+    if (!hModule) return FALSE;
+#define PyMPI_LoadDLLSymbol(symbol) do { \
+    symbol = (__typeof__(symbol)) GetProcAddress(hModule, #symbol); \
+    if (!symbol) return FALSE; } while (0)
+#if Py_LIMITED_API+0 < 0x030D0000
+    PyMPI_LoadDLLSymbol(PyMem_RawMalloc);
+    PyMPI_LoadDLLSymbol(PyMem_RawCalloc);
+    PyMPI_LoadDLLSymbol(PyMem_RawRealloc);
+    PyMPI_LoadDLLSymbol(PyMem_RawFree);
+#endif
+#if Py_LIMITED_API+0 < 0x030B0000
+    PyMPI_LoadDLLSymbol(PyObject_CheckBuffer);
+    PyMPI_LoadDLLSymbol(PyObject_GetBuffer);
+    PyMPI_LoadDLLSymbol(PyBuffer_Release);
+    PyMPI_LoadDLLSymbol(PyBuffer_FillInfo);
+#endif
+#undef PyMPI_LoadDLLSymbol
+    break;
+  case DLL_PROCESS_DETACH:
+  case DLL_THREAD_ATTACH:
+  case DLL_THREAD_DETACH:
+    break;
+  }
+  (void) hinstDLL;
+  (void) lpvReserved;
+  return TRUE;
+}
+#endif
 #endif
 
 /* -------------------------------------------------------------------------- */
