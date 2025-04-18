@@ -3,29 +3,40 @@ name: ci-abi
 on:  # yamllint disable-line rule:truthy
   workflow_call:
     inputs:
-      py:
-        description: 'Python version'
-        required: false
-        default: 3
-        type: string
-      platform:
-        description: 'Platform'
+      py-build:
+        description: 'Python version (build)'
         required: false
         default: ''
         type: string
-  workflow_dispatch:
-    inputs:
-      py:
-        description: 'Python version'
+      py-test:
+        description: 'Python version (test)'
         required: false
-        default: 3
+        default: ''
         type: string
       platform:
         description: 'Platform'
         required: false
-        default: Linux-x86_64
+        default: '*'
+        type: string
+  workflow_dispatch:
+    inputs:
+      py-build:
+        description: 'Python version (build)'
+        required: false
+        default: ''
+        type: string
+      py-test:
+        description: 'Python version (test)'
+        required: false
+        default: ''
+        type: string
+      platform:
+        description: 'Platform'
+        required: false
+        default: '*'
         type: choice
         options:
+          - '*'
           - Linux-aarch64
           - Linux-x86_64
           - macOS-arm64
@@ -45,6 +56,7 @@ jobs:
       matrix-test:  ${{ steps.matrix.outputs.matrix-test  }}
     steps:
     - uses: step-security/harden-runner@v2
+      with: {egress-policy: audit}
     - id: matrix
       name: setup build/test matrix
       shell: python
@@ -93,27 +105,36 @@ jobs:
         }
         PLATFORMS = (
             [(os, arch) for os in RUNNER for arch in RUNNER[os]]
-            if not "${{ inputs.platform }}" else
+            if "${{ inputs.platform }}" in ("*", "") else
             [tuple("${{ inputs.platform }}".split("-", 1))]
         )
+        PYSABI = "3.10"
+        py_build = "${{ inputs.py-build }}"
+        py_test = "${{ inputs.py-test }}"
+        PY_BUILD = [py_build] if py_build else [PYSABI]
+        PY_TEST = [py_test] if py_test else [PYSABI, "3"]
         # fill build/test matrix
         build = [
             {
+                "py": py,
                 "mpi": name,
                 "platform": f"{os}-{arch}",
                 "runner": RUNNER[os][arch],
             }
             for os, arch in PLATFORMS
+            for py in PY_BUILD[:]
             for name in MPIABI[os]
         ]
         test = [
             {
+                "py": py,
                 "mpi": name,
                 "mpi-version": version,
                 "platform": f"{os}-{arch}",
                 "runner": RUNNER[os][arch].replace("2022", "2019"),
             }
             for os, arch in PLATFORMS
+            for py in PY_TEST[:]
             for name in MPIABI[os]
             for version in MPI[name]
         ]
@@ -235,14 +256,16 @@ jobs:
       working-directory: ${{ runner.temp }}
       shell: bash
 
-    - name: Setup Python (${{ inputs.py || 3 }})
+    - name: Require Cython 3.1
+      run: echo "cython >= 3.1.0b1" > conf/requirements-build-cython.txt
+
+    - name: Setup Python (${{ matrix.py }})
       uses: actions/setup-python@v5
       with:
-        python-version: ${{ inputs.py || 3 }}
+        python-version: ${{ matrix.py }}
         cache: pip
         cache-dependency-path: |
           conf/requirements-build-cython.txt
-          conf/requirements-build-${{ matrix.backend }}.txt
 
     - name: Upgrade pip
       run:  python -m pip install -U pip
@@ -253,6 +276,7 @@ jobs:
     - name: Build mpi4py wheel
       run:  python -m build --verbose --wheel
       env:
+        MPI4PY_BUILD_PYSABI: "1"
         MPI4PY_BUILD_MPIABI: "1"
         CFLAGS: "-O0"
 
@@ -264,8 +288,8 @@ jobs:
 
   test:
     name: >-
-      test (${{ format('{0}, {1}, {2}',
-      matrix.platform, matrix.mpi, matrix.mpi-version) }})
+      test (${{ format('{0}, {1}, {2}, {3}',
+      matrix.platform, matrix.py, matrix.mpi, matrix.mpi-version) }})
     runs-on: ${{ matrix.runner }}
     needs: [setup, build]
     strategy:
@@ -353,10 +377,10 @@ jobs:
       working-directory: ${{ runner.temp }}
       shell: bash
 
-    - name: Setup Python (${{ inputs.py || 3 }})
+    - name: Setup Python (${{ matrix.py }})
       uses: actions/setup-python@v5
       with:
-        python-version: ${{ inputs.py || 3 }}
+        python-version: ${{ matrix.py }}
 
     - name: Upgrade pip
       run:  python -m pip install -U pip
