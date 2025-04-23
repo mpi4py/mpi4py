@@ -1,6 +1,11 @@
 # Author:  Lisandro Dalcin
 # Contact: dalcinl@gmail.com
 """Add MPI to Python DLL search path on Windows."""
+
+# ruff: noqa: PTH100
+# ruff: noqa: PTH113
+# ruff: noqa: PTH118
+
 import os
 import sys
 
@@ -29,14 +34,13 @@ def _site_prefixes():
 def _mpi_dll_directories():
     impi_root = os.environ.get("I_MPI_ROOT")
     impi_library_kind = (
-        os.environ.get("I_MPI_LIBRARY_KIND") or
-        os.environ.get("library_kind") or
-        "release"
+        os.environ.get("I_MPI_LIBRARY_KIND")
+        or os.environ.get("library_kind")
+        or "release"
     )
-    impi_ofi_library_internal = (
-        os.environ.get("I_MPI_OFI_LIBRARY_INTERNAL", "").lower()
-        not in ("0", "no", "off", "false", "disable")
-    )
+    impi_ofi_library_internal = os.environ.get(
+        "I_MPI_OFI_LIBRARY_INTERNAL", ""
+    ).lower() not in ("0", "no", "off", "false", "disable")
     impi_ofi_library_path = (
         ("opt", "mpi", "libfabric", "bin"),
         ("libfabric", "bin"),

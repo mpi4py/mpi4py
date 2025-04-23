@@ -1,14 +1,15 @@
 # Author:  Lisandro Dalcin
 # Contact: dalcinl@gmail.com
 """`multiprocessing.pool` interface via `mpi4py.futures`."""
+
 import functools as _functools
 import operator as _operator
 import os as _os
 import threading as _threading
 import warnings as _warnings
 import weakref as _weakref
-from .. import futures as _futures
 
+from .. import futures as _futures
 
 __all__ = [
     "Pool",
@@ -69,7 +70,12 @@ class Pool:
             **kwargs,
         )
 
-    def apply(self, func, args=(), kwds={}):  # noqa: B006
+    def apply(
+        self,
+        func,
+        args=(),
+        kwds={},  # noqa: B006
+    ):
         """Call *func* with arguments *args* and keyword arguments *kwds*.
 
         Equivalent to ``func(*args, **kwds)``.
@@ -79,8 +85,12 @@ class Pool:
         return future.result()
 
     def apply_async(
-        self, func, args=(), kwds={},  # noqa: B006
-        callback=None, error_callback=None,
+        self,
+        func,
+        args=(),
+        kwds={},  # noqa: B006
+        callback=None,
+        error_callback=None,
     ):
         """Asynchronous version of `apply()` returning `ApplyResult`."""
         # pylint: disable=too-many-arguments,too-many-positional-arguments
@@ -88,7 +98,12 @@ class Pool:
         future = self.executor.submit(func, *args, **kwds)
         return ApplyResult(future, callback, error_callback)
 
-    def map(self, func, iterable, chunksize=None):
+    def map(
+        self,
+        func,
+        iterable,
+        chunksize=None,
+    ):
         """Apply *func* to each element in *iterable*.
 
         Equivalent to ``list(map(func, iterable))``.
@@ -107,8 +122,12 @@ class Pool:
         return list(self.imap(func, iterable, chunksize=chunksize))
 
     def map_async(
-        self, func, iterable, chunksize=None,
-        callback=None, error_callback=None,
+        self,
+        func,
+        iterable,
+        chunksize=None,
+        callback=None,
+        error_callback=None,
     ):
         """Asynchronous version of `map()` returning `MapResult`."""
         # pylint: disable=too-many-arguments,too-many-positional-arguments
@@ -117,23 +136,36 @@ class Pool:
         future = _async_executor(self).submit(list, result_iterator)
         return MapResult(future, callback, error_callback)
 
-    def imap(self, func, iterable, chunksize=1):
+    def imap(
+        self,
+        func,
+        iterable,
+        chunksize=1,
+    ):
         """Like `map()` but return an `iterator`.
 
         Equivalent to ``map(func, iterable)``.
 
         """
-        return self.executor.map(
-            func, iterable, chunksize=chunksize,
-        )
+        return self.executor.map(func, iterable, chunksize=chunksize)
 
-    def imap_unordered(self, func, iterable, chunksize=1):
+    def imap_unordered(
+        self,
+        func,
+        iterable,
+        chunksize=1,
+    ):
         """Like `imap()` but ordering of results is arbitrary."""
         return self.executor.map(
-            func, iterable, chunksize=chunksize, unordered=True,
+            func, iterable, chunksize=chunksize, unordered=True
         )
 
-    def starmap(self, func, iterable, chunksize=None):
+    def starmap(
+        self,
+        func,
+        iterable,
+        chunksize=None,
+    ):
         """Apply *func* to each argument tuple in *iterable*.
 
         Equivalent to ``list(itertools.starmap(func, iterable))``.
@@ -152,8 +184,12 @@ class Pool:
         return list(self.istarmap(func, iterable, chunksize=chunksize))
 
     def starmap_async(
-        self, func, iterable, chunksize=None,
-        callback=None, error_callback=None
+        self,
+        func,
+        iterable,
+        chunksize=None,
+        callback=None,
+        error_callback=None,
     ):
         """Asynchronous version of `starmap()` returning `MapResult`."""
         # pylint: disable=too-many-arguments,too-many-positional-arguments
@@ -162,20 +198,35 @@ class Pool:
         future = _async_executor(self).submit(list, result_iterator)
         return MapResult(future, callback, error_callback)
 
-    def istarmap(self, func, iterable, chunksize=1):
+    def istarmap(
+        self,
+        func,
+        iterable,
+        chunksize=1,
+    ):
         """Like `starmap()` but return an `iterator`.
 
         Equivalent to ``itertools.starmap(func, iterable)``.
 
         """
         return self.executor.starmap(
-            func, iterable, chunksize=chunksize,
+            func,
+            iterable,
+            chunksize=chunksize,
         )
 
-    def istarmap_unordered(self, func, iterable, chunksize=1):
+    def istarmap_unordered(
+        self,
+        func,
+        iterable,
+        chunksize=1,
+    ):
         """Like `istarmap()` but ordering of results is arbitrary."""
         return self.executor.starmap(
-            func, iterable, chunksize=chunksize, unordered=True,
+            func,
+            iterable,
+            chunksize=chunksize,
+            unordered=True,
         )
 
     def close(self):
@@ -301,16 +352,16 @@ def _async_future_callback(future, event, callback, error_callback):
         event.set()
 
 
-_cpu_count = getattr(_os, 'process_cpu_count', _os.cpu_count)
+_cpu_count = getattr(_os, "process_cpu_count", _os.cpu_count)
 
 _async_executor_lock = _threading.Lock()
 
-_async_executor_cache = _weakref.WeakKeyDictionary() \
-    # type: _weakref.WeakKeyDictionary[Pool, _futures.ThreadPoolExecutor]
+_async_executor_cache = _weakref.WeakKeyDictionary()
+# type: _weakref.WeakKeyDictionary[Pool, _futures.ThreadPoolExecutor]
 
 
 def _async_get_max_workers(pool):
-    max_workers = getattr(pool, '_async_max_workers', 0)
+    max_workers = getattr(pool, "_async_max_workers", 0)
     return max_workers or min(4, _cpu_count() or 1)
 
 

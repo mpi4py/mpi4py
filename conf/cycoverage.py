@@ -1,38 +1,47 @@
 import os
+import pathlib
+import re
+from collections import defaultdict
+
+from coverage.files import (
+    canonical_filename as _canonical_filename,
+)
 from coverage.plugin import (
     CoveragePlugin,
+    FileReporter,
     FileTracer,
-    FileReporter
-)
-from coverage.files import (
-    canonical_filename,
 )
 
 CYTHON_EXTENSIONS = {".pxd", ".pyx", ".pxi"}
 
 
-class CythonCoveragePlugin(CoveragePlugin):
+def canonical_filename(filename):
+    filename = pathlib.Path(filename).resolve()
+    filename = _canonical_filename(str(filename))
+    filename = pathlib.Path(filename)
+    return filename
 
+
+class CythonCoveragePlugin(CoveragePlugin):
     def configure(self, config):
         self.exclude = config.get_option("report:exclude_lines")
 
     def file_tracer(self, filename):
-        filename = canonical_filename(os.path.abspath(filename))
-        _, ext = os.path.splitext(filename)
+        filename = canonical_filename(filename)
+        ext = filename.suffix
         if ext in CYTHON_EXTENSIONS:
-            return CythonFileTracer(filename)
+            return CythonFileTracer(str(filename))
         return None
 
     def file_reporter(self, filename):
-        filename = canonical_filename(os.path.abspath(filename))
-        _, ext = os.path.splitext(filename)
+        filename = canonical_filename(filename)
+        ext = filename.suffix
         if ext in CYTHON_EXTENSIONS:
-            return CythonFileReporter(filename, self.exclude)
+            return CythonFileReporter(str(filename), self.exclude)
         return None
 
 
 class CythonFileTracer(FileTracer):
-
     def __init__(self, filename):
         super().__init__()
         self.filename = filename
@@ -42,7 +51,6 @@ class CythonFileTracer(FileTracer):
 
 
 class CythonFileReporter(FileReporter):
-
     def __init__(self, filename, exclude=None):
         super().__init__(filename)
         self.exclude = exclude
@@ -66,8 +74,8 @@ class CythonFileReporter(FileReporter):
         return set(lines)
 
 
-TOPDIR = os.path.dirname(os.path.dirname(__file__))
-SRCDIR = os.path.join(TOPDIR, 'src')
+TOPDIR = pathlib.Path(__file__).parent.parent
+SRCDIR = TOPDIR / "src"
 CODE_LINES = None
 EXEC_LINES = None
 EXCL_LINES = None
@@ -76,36 +84,34 @@ EXCL_LINES = None
 def _setup_lines(exclude):
     global CODE_LINES, EXEC_LINES, EXCL_LINES
     if CODE_LINES is None or EXEC_LINES is None or EXCL_LINES is None:
-        source = os.path.join(SRCDIR, 'mpi4py', 'MPI.c')
+        source = SRCDIR / "mpi4py" / "MPI.c"
         CODE_LINES, EXEC_LINES, EXCL_LINES = _parse_c_file(source, exclude)
 
 
 def _parse_c_file(c_file, exclude_list):
-    from collections import defaultdict
-    import re
-
-    match_filetab_begin = 'static const char *__pyx_f[] = {'
+    match_filetab_begin = "static const char *__pyx_f[] = {"
     match_filetab_begin = re.compile(re.escape(match_filetab_begin)).match
     match_filetab_entry = re.compile(r' *"(.*)",').match
     match_source_path_line = re.compile(r' */[*] +"(.*)":([0-9]+)$').match
-    match_current_code_line = re.compile(r' *[*] (.*) # <<<<<<+$').match
-    match_comment_end = re.compile(r' *[*]/$').match
+    match_current_code_line = re.compile(r" *[*] (.*) # <<<<<<+$").match
+    match_comment_end = re.compile(r" *[*]/$").match
     match_trace_line = re.compile(
-        r' *__Pyx_TraceLine\((\d+),\d+,__PYX_ERR\((\d+),'
+        r" *__Pyx_TraceLine\((\d+),\d+,__PYX_ERR\((\d+),"
     ).match
     not_executable = re.compile(
-        '|'.join([
-            r'\s*c(?:type)?def\s+'
-            r'(?:(?:public|external)\s+)?'
-            r'(?:struct|union|enum|class)'
-            r'(\s+[^:]+|)\s*:',
+        "|".join([
+            r"\s*c(?:type)?def\s+"
+            r"(?:(?:public|external)\s+)?"
+            r"(?:struct|union|enum|class)"
+            r"(\s+[^:]+|)\s*:",
         ])
     ).match
     if exclude_list:
-        line_is_excluded = re.compile("|".join([
-            rf'(?:{regex})' for regex in exclude_list
-        ])).search
+        line_is_excluded = re.compile(
+            "|".join([rf"(?:{regex})" for regex in exclude_list])
+        ).search
     else:
+
         def line_is_excluded(_):
             return False
 
@@ -116,7 +122,7 @@ def _parse_c_file(c_file, exclude_list):
     executable_lines = defaultdict(set)
     excluded_lines = defaultdict(set)
 
-    with open(c_file) as lines:
+    with pathlib.Path(c_file).open(encoding="utf-8") as lines:
         lines = iter(lines)
         for line in lines:
             if match_filetab_begin(line):
@@ -130,7 +136,7 @@ def _parse_c_file(c_file, exclude_list):
             if not match:
                 if '__Pyx_TraceCall("__Pyx_PyMODINIT_FUNC ' in line:
                     modinit = True
-                if '__Pyx_TraceLine(' in line:
+                if "__Pyx_TraceLine(" in line:
                     trace_line = match_trace_line(line)
                     if trace_line:
                         lineno, fid = map(int, trace_line.groups())

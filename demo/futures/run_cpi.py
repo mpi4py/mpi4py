@@ -1,7 +1,7 @@
 import math
 import sys
-from mpi4py.futures import MPIPoolExecutor, wait
-from mpi4py.futures import get_comm_workers
+
+from mpi4py.futures import MPIPoolExecutor, get_comm_workers, wait
 
 
 def compute_pi(n):
@@ -38,5 +38,5 @@ def main():
         )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

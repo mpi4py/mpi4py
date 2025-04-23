@@ -1,13 +1,13 @@
-from mpi4py import MPI
 import ctypes
-import os
+import pathlib
 
-_libdir = os.path.dirname(__file__)
+_libdir = pathlib.Path(__file__).parent
 
 MPI_Fint = ctypes.c_int
-lib = ctypes.CDLL(os.path.join(_libdir, "libhelloworld.so"))
+lib = ctypes.CDLL(_libdir / "libhelloworld.so")
 lib.sayhello_.restype = None
 lib.sayhello_.argtypes = [ctypes.POINTER(MPI_Fint)]
+
 
 def sayhello(comm):
     comm_f = MPI_Fint(comm.py2f())

@@ -1,5 +1,6 @@
 import sys
 import threading
+
 from mpi4py import MPI
 
 if MPI.Query_thread() < MPI.THREAD_MULTIPLE:
@@ -12,10 +13,11 @@ except ImportError:
     sys.stderr.write("NumPy package not available\n")
     sys.exit(0)
 
-send_msg = numpy.arange(1000000, dtype='i')
+send_msg = numpy.arange(1000000, dtype="i")
 recv_msg = numpy.zeros_like(send_msg)
 
 start_event = threading.Event()
+
 
 def self_send():
     start_event.wait()
@@ -23,11 +25,13 @@ def self_send():
     rank = comm.Get_rank()
     comm.Send([send_msg, MPI.INT], dest=rank, tag=0)
 
+
 def self_recv():
     start_event.wait()
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
     comm.Recv([recv_msg, MPI.INT], source=rank, tag=0)
+
 
 send_thread = threading.Thread(target=self_send)
 recv_thread = threading.Thread(target=self_recv)

@@ -1,4 +1,9 @@
 # Generated with `python conf/mpistubgen.py`
+# ruff: noqa: A001
+# ruff: noqa: A002
+# ruff: noqa: E501
+# ruff: noqa: Q000
+# fmt: off
 import sys
 from threading import Lock
 from typing import (
@@ -10,14 +15,15 @@ from typing import (
     final,
     overload,
 )
+
 if sys.version_info >= (3, 9):
     from collections.abc import (
         Callable,
         Hashable,
         Iterable,
         Iterator,
-        Sequence,
         Mapping,
+        Sequence,
     )
 else:
     from typing import (
@@ -25,8 +31,8 @@ else:
         Hashable,
         Iterable,
         Iterator,
-        Sequence,
         Mapping,
+        Sequence,
     )
 if sys.version_info >= (3, 11):
     from typing import Self
@@ -1234,14 +1240,16 @@ BUFFER_AUTOMATIC: Final[BufferAutomaticType] = ...
 
 class Pickle:
     @overload
-    def __init__(self,
+    def __init__(
+        self,
         dumps: Callable[[Any, int], bytes],
         loads: Callable[[Buffer], Any],
         protocol: int | None = None,
         threshold: int | None = None,
     ) -> None: ...
     @overload
-    def __init__(self,
+    def __init__(
+        self,
         dumps: Callable[[Any], bytes] | None = None,
         loads: Callable[[Buffer], Any] | None = None,
     ) -> None: ...
@@ -1335,10 +1343,12 @@ _typedict: Final[dict[str, Datatype]] = ...
 _typedict_c: Final[dict[str, Datatype]] = ...
 _typedict_f: Final[dict[str, Datatype]] = ...
 
-from .typing import (  # noqa: E402
+from .typing import (  # noqa: E402,I001
     Buffer,
     Bottom,
     InPlace,
+)
+from .typing import (  # noqa: E402
     BufSpec,
     BufSpecB,
     BufSpecV,

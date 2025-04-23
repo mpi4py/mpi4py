@@ -1,43 +1,48 @@
+# ruff: noqa: UP006
+# ruff: noqa: UP007
+# ruff: noqa: UP045
 import sys
 from typing import (
     Any,
-    Union,
+    Dict,
+    List,
     Optional,
     Protocol,
     Sequence,
     SupportsIndex,
-    List,
-    Dict,
     Tuple,
     TypeVar,
+    Union,
 )
+
 if sys.version_info >= (3, 10):
     from typing import TypeAlias
 else:
     from typing_extensions import TypeAlias
+
 from .MPI import (
-    Datatype,
     BottomType,
+    Datatype,
     InPlaceType,
 )
 
 __all__: List[str] = [
-    'SupportsBuffer',
-    'SupportsDLPack',
-    'SupportsCAI',
-    'Buffer',
-    'Bottom',
-    'InPlace',
-    'Aint',
-    'Count',
-    'Displ',
-    'Offset',
-    'TypeSpec',
-    'BufSpec',
-    'BufSpecB',
-    'BufSpecV',
-    'BufSpecW',
-    'TargetSpec',
+    "SupportsBuffer",
+    "SupportsDLPack",
+    "SupportsCAI",
+    "Buffer",
+    "Bottom",
+    "InPlace",
+    "Aint",
+    "Count",
+    "Displ",
+    "Offset",
+    "TypeSpec",
+    "BufSpec",
+    "BufSpecB",
+    "BufSpecV",
+    "BufSpecW",
+    "TargetSpec",
 ]
 
 _Stream: TypeAlias = Union[int, Any]
@@ -50,8 +55,12 @@ class SupportsBuffer(Protocol):
         def __buffer__(self, flags: int, /) -> memoryview: ...
 
 class SupportsDLPack(Protocol):
-    def __dlpack__(self, /, *, stream: Optional[_Stream] = None) -> _PyCapsule: ...
-    def __dlpack_device__(self) -> Tuple[_DeviceType, _DeviceID]: ...
+    def __dlpack__(
+        self, /, *, stream: Optional[_Stream] = None
+    ) -> _PyCapsule: ...
+    def __dlpack_device__(
+        self,
+    ) -> Tuple[_DeviceType, _DeviceID]: ...
 
 class SupportsCAI(Protocol):
     @property
@@ -125,7 +134,7 @@ TargetSpec: TypeAlias = Union[
     List[Any],
 ]
 
-S = TypeVar('S')  # noqa: PYI001
-T = TypeVar('T')  # noqa: PYI001
-U = TypeVar('U')  # noqa: PYI001
-V = TypeVar('V')  # noqa: PYI001
+S = TypeVar("S")  # noqa: PYI001
+T = TypeVar("T")  # noqa: PYI001
+U = TypeVar("U")  # noqa: PYI001
+V = TypeVar("V")  # noqa: PYI001

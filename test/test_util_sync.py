@@ -1,25 +1,29 @@
-from mpi4py import MPI
-import mpi4py.util.sync as sync
-import sys, os
+import pathlib
 import random
+import sys
 import time
+
+import mpi4py.util.sync as sync
+from mpi4py import MPI
+
 try:
     import mpiunittest as unittest
 except ImportError:
-    sys.path.append(
-        os.path.dirname(
-            os.path.abspath(__file__)))
+    sys.path.append(pathlib.Path(__file__).parent)
     import mpiunittest as unittest
 
 # ---
 
+
 def random_sleep(max_sleep=0.01):
-    time.sleep(max_sleep * random.random())  # noqa: S311
+    time.sleep(max_sleep * random.random())
+
 
 # ---
 
 
 class BaseTestSequential:
+    #
     COMM = MPI.COMM_NULL
 
     def testWith(self):
@@ -50,10 +54,12 @@ class BaseTestSequential:
 
 
 class TestSequentialSelf(BaseTestSequential, unittest.TestCase):
+    #
     COMM = MPI.COMM_SELF
 
 
 class TestSequentialWorld(BaseTestSequential, unittest.TestCase):
+    #
     COMM = MPI.COMM_WORLD
 
 
@@ -61,6 +67,7 @@ class TestSequentialWorld(BaseTestSequential, unittest.TestCase):
 
 
 class BaseTestCounter:
+    #
     COMM = MPI.COMM_NULL
 
     def testIter(self):
@@ -119,7 +126,7 @@ class BaseTestCounter:
     def testTypechar(self):
         comm = self.COMM
         size = comm.Get_size()
-        for typechar in ("hHiIlLqQ" + "fd"):
+        for typechar in "hHiIlLqQ" + "fd":
             counter = sync.Counter(typecode=typechar, comm=comm)
             values = self.execute(counter, 3)
             counter.free()
@@ -144,10 +151,12 @@ class BaseTestCounter:
 
 
 class TestCounterSelf(BaseTestCounter, unittest.TestCase):
+    #
     COMM = MPI.COMM_SELF
 
 
 class TestCounterWorld(BaseTestCounter, unittest.TestCase):
+    #
     COMM = MPI.COMM_WORLD
 
 
@@ -155,6 +164,7 @@ class TestCounterWorld(BaseTestCounter, unittest.TestCase):
 
 
 class BaseTestMutexBasic:
+    #
     COMM = MPI.COMM_NULL
 
     def setUp(self):
@@ -177,7 +187,7 @@ class BaseTestMutexBasic:
         first, last = values[0], values[-1]
         self.assertEqual(first % 10, 0)
         self.assertEqual(last - first + 1, 10)
-        self.assertEqual(values, list(range(first, last+1)))
+        self.assertEqual(values, list(range(first, last + 1)))
 
     def testFairness(self):
         comm = self.COMM
@@ -202,6 +212,7 @@ class BaseTestMutexBasic:
                 self.assertRaises(RuntimeError, mutex.acquire)
             self.assertFalse(mutex.locked())
             self.assertRaises(RuntimeError, mutex.release)
+
         for _ in range(5):
             self.COMM.Barrier()
             test_with()
@@ -221,6 +232,7 @@ class BaseTestMutexBasic:
             mutex.release()
             self.assertFalse(mutex.locked())
             self.assertRaises(RuntimeError, mutex.release)
+
         for _ in range(5):
             self.COMM.Barrier()
             test_acquire_release()
@@ -247,6 +259,7 @@ class BaseTestMutexBasic:
                 pass
             mutex.release()
             comm.Barrier()
+
         for _ in range(5):
             self.COMM.Barrier()
             test_acquire_nonblocking()
@@ -273,21 +286,25 @@ class BaseTestMutexBasic:
 
 
 class TestMutexBasicSelf(BaseTestMutexBasic, unittest.TestCase):
+    #
     COMM = MPI.COMM_SELF
 
 
-@unittest.skipMPI('msmpi')
+@unittest.skipMPI("msmpi")
 class TestMutexBasicWorld(BaseTestMutexBasic, unittest.TestCase):
+    #
     COMM = MPI.COMM_WORLD
 
-    @unittest.skipMPI('msmpi')
+    @unittest.skipMPI("msmpi")
     def testExclusion(self):
         super().testExclusion()
+
 
 # ---
 
 
 class BaseTestMutexRecursive:
+    #
     COMM = MPI.COMM_NULL
 
     def setUp(self):
@@ -311,6 +328,7 @@ class BaseTestMutexRecursive:
                 self.assertEqual(mutex.count(), 1)
             self.assertEqual(mutex.count(), 0)
             self.assertRaises(RuntimeError, mutex.release)
+
         for _ in range(5):
             self.COMM.Barrier()
             test_with()
@@ -343,6 +361,7 @@ class BaseTestMutexRecursive:
             self.assertFalse(mutex.locked())
             self.assertEqual(mutex.count(), 0)
             self.assertRaises(RuntimeError, mutex.release)
+
         for _ in range(5):
             self.COMM.Barrier()
             test_acquire_release()
@@ -383,6 +402,7 @@ class BaseTestMutexRecursive:
                 pass
             mutex.release()
             comm.Barrier()
+
         for _ in range(5):
             self.COMM.Barrier()
             test_acquire_nonblocking()
@@ -411,11 +431,13 @@ class BaseTestMutexRecursive:
 
 
 class TestMutexRecursiveSelf(BaseTestMutexRecursive, unittest.TestCase):
+    #
     COMM = MPI.COMM_SELF
 
 
-@unittest.skipMPI('msmpi')
+@unittest.skipMPI("msmpi")
 class TestMutexRecursiveWorld(BaseTestMutexRecursive, unittest.TestCase):
+    #
     COMM = MPI.COMM_WORLD
 
 
@@ -423,6 +445,7 @@ class TestMutexRecursiveWorld(BaseTestMutexRecursive, unittest.TestCase):
 
 
 class BaseTestCondition:
+    #
     COMM = MPI.COMM_NULL
 
     def setUp(self):
@@ -533,12 +556,15 @@ class BaseTestCondition:
         self.assertRaises(RuntimeError, cv.notify)
         self.assertRaises(RuntimeError, cv.notify_all)
 
+
 class TestConditionSelf(BaseTestCondition, unittest.TestCase):
+    #
     COMM = MPI.COMM_SELF
 
 
-@unittest.skipMPI('msmpi')
+@unittest.skipMPI("msmpi")
 class TestConditionWorld(BaseTestCondition, unittest.TestCase):
+    #
     COMM = MPI.COMM_WORLD
 
 
@@ -546,6 +572,7 @@ class TestConditionWorld(BaseTestCondition, unittest.TestCase):
 
 
 class BaseTestConditionMutex(BaseTestCondition):
+    #
     COMM = MPI.COMM_NULL
 
     def setUp(self):
@@ -559,11 +586,13 @@ class BaseTestConditionMutex(BaseTestCondition):
 
 
 class TestConditionMutexSelf(BaseTestConditionMutex, unittest.TestCase):
+    #
     COMM = MPI.COMM_SELF
 
 
-@unittest.skipMPI('msmpi')
+@unittest.skipMPI("msmpi")
 class TestConditionMutexWorld(BaseTestConditionMutex, unittest.TestCase):
+    #
     COMM = MPI.COMM_WORLD
 
 
@@ -571,6 +600,7 @@ class TestConditionMutexWorld(BaseTestConditionMutex, unittest.TestCase):
 
 
 class BaseTestSemaphore:
+    #
     COMM = MPI.COMM_NULL
 
     def setUp(self):
@@ -616,6 +646,7 @@ class BaseTestSemaphore:
             sem = self.semaphore
             with sem:
                 pass
+
         for _ in range(5):
             self.COMM.Barrier()
             test_with()
@@ -629,6 +660,7 @@ class BaseTestSemaphore:
             locked = sem.acquire()
             sem.release()
             self.assertTrue(locked)
+
         for _ in range(5):
             self.COMM.Barrier()
             test_acquire_release()
@@ -658,6 +690,7 @@ class BaseTestSemaphore:
             sem.release()
             comm.Barrier()
             self.assertEqual(sem._counter.next(0), count)
+
         for _ in range(5):
             self.COMM.Barrier()
             test_acquire_nonblocking()
@@ -682,11 +715,13 @@ class BaseTestSemaphore:
 
 
 class TestSemaphoreSelf(BaseTestSemaphore, unittest.TestCase):
+    #
     COMM = MPI.COMM_SELF
 
 
-@unittest.skipMPI('msmpi')
+@unittest.skipMPI("msmpi")
 class TestSemaphoreWorld(BaseTestSemaphore, unittest.TestCase):
+    #
     COMM = MPI.COMM_WORLD
 
 
@@ -695,11 +730,11 @@ class TestSemaphoreWorld(BaseTestSemaphore, unittest.TestCase):
 try:
     MPI.Win.Allocate(1, 1, MPI.INFO_NULL, MPI.COMM_SELF).Free()
 except (NotImplementedError, MPI.Exception):
-    unittest.skip('mpi-win-allocate')(BaseTestCounter)
-    unittest.skip('mpi-win-allocate')(BaseTestMutexBasic)
-    unittest.skip('mpi-win-allocate')(BaseTestMutexRecursive)
-    unittest.skip('mpi-win-allocate')(BaseTestCondition)
-    unittest.skip('mpi-win-allocate')(BaseTestSemaphore)
+    unittest.skip("mpi-win-allocate")(BaseTestCounter)
+    unittest.skip("mpi-win-allocate")(BaseTestMutexBasic)
+    unittest.skip("mpi-win-allocate")(BaseTestMutexRecursive)
+    unittest.skip("mpi-win-allocate")(BaseTestCondition)
+    unittest.skip("mpi-win-allocate")(BaseTestSemaphore)
 
 # ---
 

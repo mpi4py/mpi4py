@@ -1,7 +1,7 @@
-with open('ex-3.02.py') as source:
+with open("ex-3.02.py") as source:
     exec(source.read())
 
-count  = 3
+count = 3
 blklen = 1
 stride = -2
 newtype = dtype.Create_vector(count, blklen, stride)

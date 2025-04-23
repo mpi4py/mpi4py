@@ -1,5 +1,6 @@
-from mpi4py import MPI
 import helloworld as hw
+
+from mpi4py import MPI
 
 null = MPI.COMM_NULL
 hw.sayhello(null)
@@ -9,14 +10,7 @@ hw.sayhello(comm)
 
 try:
     hw.sayhello(None)
-except:
-    pass
-else:
-    assert 0, "exception not raised"
-
-try:
-    hw.sayhello(list())
-except:
+except (AttributeError, TypeError):
     pass
 else:
     assert 0, "exception not raised"

@@ -41,20 +41,17 @@ def _is_aligned(datatype, offset=0):
     types, disps = [basetype], [0]
     try:
         if combiner == MPI.COMBINER_RESIZED:
-            disps = [info['extent']]
+            disps = [info["extent"]]
         if combiner == MPI.COMBINER_STRUCT:
-            types = info['datatypes']
-            disps = info['displacements']
+            types = info["datatypes"]
+            disps = info["displacements"]
         if combiner == MPI.COMBINER_HVECTOR:
-            disps = [info['stride'] if info['count'] > 1 else 0]
+            disps = [info["stride"] if info["count"] > 1 else 0]
         if combiner == MPI.COMBINER_HINDEXED:
-            disps = info['displacements']
+            disps = info["displacements"]
         if combiner == MPI.COMBINER_HINDEXED_BLOCK:
-            disps = info['displacements']
-        return all(
-            _is_aligned(t, offset + d)
-            for t, d in zip(types, disps)
-        )
+            disps = info["displacements"]
+        return all(_is_aligned(t, offset + d) for (t, d) in zip(types, disps))
     finally:
         for _tp in types:
             if not _tp.is_predefined:
@@ -85,7 +82,7 @@ def from_numpy_dtype(dtype):
                 displacements.append(fdisp)
                 datatypes.append(from_numpy_dtype(ftype))
             datatype = MPI.Datatype.Create_struct(
-                blocklengths, displacements, datatypes,
+                blocklengths, displacements, datatypes
             )
         finally:
             for mtp in datatypes:
@@ -137,11 +134,11 @@ def to_numpy_dtype(datatype):
         if typecode is not None:
             return np_dtype(typecode)
         # pair datatype for MINLOC/MAXLOC reductions
-        names = ('SHORT', 'INT', 'LONG', 'FLOAT', 'DOUBLE', 'LONG_DOUBLE')
-        types = [getattr(MPI, f'{name}_INT') for name in names]
+        names = ("SHORT", "INT", "LONG", "FLOAT", "DOUBLE", "LONG_DOUBLE")
+        types = [getattr(MPI, f"{name}_INT") for name in names]
         typename = names[types.index(datatype)]
         typecode = _get_typecode(getattr(MPI, typename))
-        return np_dtype(f'{typecode},i', align=True)
+        return np_dtype(f"{typecode},i", align=True)
 
     # user-defined datatype
     basetype, _, info = datatype.decode()
@@ -154,16 +151,16 @@ def to_numpy_dtype(datatype):
         # contiguous datatype
         if combiner == MPI.COMBINER_CONTIGUOUS:
             dtype = to_numpy_dtype(basetype)
-            count = info['count']
+            count = info["count"]
             return np_dtype((dtype, (count,)))
 
         # subarray datatype
         if combiner == MPI.COMBINER_SUBARRAY:
             dtype = to_numpy_dtype(basetype)
-            sizes = info['sizes']
-            subsizes = info['subsizes']
-            starts = info['starts']
-            order = info['order']
+            sizes = info["sizes"]
+            subsizes = info["subsizes"]
+            starts = info["starts"]
+            order = info["order"]
             if subsizes == sizes and min(starts) == max(starts) == 0:
                 if order == MPI.ORDER_FORTRAN:
                     sizes = sizes[::-1]
@@ -172,13 +169,13 @@ def to_numpy_dtype(datatype):
 
         # value-index datatype
         if combiner == MPI.COMBINER_VALUE_INDEX:  # pragma: no cover
-            value = to_numpy_dtype(info['value'])
-            index = to_numpy_dtype(info['index'])
+            value = to_numpy_dtype(info["value"])
+            index = to_numpy_dtype(info["index"])
             datatypes = [value, index]
             return np_dtype(
                 [
-                    ('f0', value),
-                    ('f1', index),
+                    ("f0", value),
+                    ("f1", index),
                 ],
                 align=True,
             )
@@ -187,28 +184,26 @@ def to_numpy_dtype(datatype):
         aligned = True
         if combiner == MPI.COMBINER_RESIZED:
             if basetype.combiner == MPI.COMBINER_STRUCT:
-                aligned = _is_aligned(basetype, info['extent'])
+                aligned = _is_aligned(basetype, info["extent"])
                 combiner = MPI.COMBINER_STRUCT
                 _, _, info = basetype.decode()
                 datatypes.pop().Free()
         if combiner == MPI.COMBINER_STRUCT:
-            datatypes = info['datatypes']
-            blocklengths = info['blocklengths']
-            displacements = info['displacements']
-            names = [f'f{i}' for i in range(len(datatypes))]
+            datatypes = info["datatypes"]
+            blocklengths = info["blocklengths"]
+            displacements = info["displacements"]
+            names = [f"f{i}" for i in range(len(datatypes))]
             formats = list(map(mpi2npy, datatypes, blocklengths))
             offsets = displacements
             itemsize = datatype.extent
             aligned &= all(map(_is_aligned, datatypes, offsets))
-            return np_dtype(
-                {
-                    'names': names,
-                    'formats': formats,
-                    'offsets': offsets,
-                    'itemsize': itemsize,
-                    'aligned': aligned,
-                }
-            )
+            return np_dtype({
+                "names": names,
+                "formats": formats,
+                "offsets": offsets,
+                "itemsize": itemsize,
+                "aligned": aligned,
+            })
 
         # vector datatype
         combiner_vector = (
@@ -217,28 +212,26 @@ def to_numpy_dtype(datatype):
         )
         if combiner in combiner_vector:
             dtype = to_numpy_dtype(basetype)
-            count = info['count']
-            blocklength = info['blocklength']
-            stride = info['stride']
+            count = info["count"]
+            blocklength = info["blocklength"]
+            stride = info["stride"]
             if combiner == MPI.COMBINER_VECTOR:
                 stride *= basetype.extent
                 aligned = _is_aligned(basetype)
             if combiner == MPI.COMBINER_HVECTOR:
                 stride = stride if count > 1 else 0
                 aligned = _is_aligned(basetype, stride)
-            names = [f'f{i}' for i in range(count)]
+            names = [f"f{i}" for i in range(count)]
             formats = [(dtype, (blocklength,))] * count
             offsets = [stride * i for i in range(count)]
             itemsize = datatype.extent
-            return np_dtype(
-                {
-                    'names': names,
-                    'formats': formats,
-                    'offsets': offsets,
-                    'itemsize': itemsize,
-                    'aligned': aligned,
-                }
-            )
+            return np_dtype({
+                "names": names,
+                "formats": formats,
+                "offsets": offsets,
+                "itemsize": itemsize,
+                "aligned": aligned,
+            })
 
         # indexed datatype
         combiner_indexed = (
@@ -252,26 +245,24 @@ def to_numpy_dtype(datatype):
             stride = 1
             aligned = _is_aligned(basetype)
             blocklengths = []
-            displacements = info['displacements']
+            displacements = info["displacements"]
             if combiner in combiner_indexed[:2]:
-                blocklengths = info['blocklengths']
+                blocklengths = info["blocklengths"]
             if combiner in combiner_indexed[2:]:
-                blocklengths = [info['blocklength']] * len(displacements)
+                blocklengths = [info["blocklength"]] * len(displacements)
             if combiner in combiner_indexed[0::2]:
                 stride = basetype.extent
             if combiner in combiner_indexed[1::2]:
                 aligned &= all(_is_aligned(basetype, d) for d in displacements)
-            names = [f'f{i}' for i in range(len(displacements))]
+            names = [f"f{i}" for i in range(len(displacements))]
             formats = [(dtype, (blen,)) for blen in blocklengths]
             offsets = [disp * stride for disp in displacements]
-            return np_dtype(
-                {
-                    'names': names,
-                    'formats': formats,
-                    'offsets': offsets,
-                    'aligned': aligned,
-                }
-            )
+            return np_dtype({
+                "names": names,
+                "formats": formats,
+                "offsets": offsets,
+                "aligned": aligned,
+            })
 
         # Fortran 90 datatype
         combiner_f90 = (

@@ -1,10 +1,11 @@
-import os
 import inspect
+import pathlib
 import textwrap
+from collections import UserList
 
 
 def is_cyfunction(obj):
-    return type(obj).__name__ == 'cython_function_or_method'
+    return type(obj).__name__ == "cython_function_or_method"
 
 
 def is_function(obj):
@@ -12,7 +13,7 @@ def is_function(obj):
         inspect.isbuiltin(obj)
         or is_cyfunction(obj)
         or type(obj) is type(ord)
-    )
+    )  # fmt: skip
 
 
 def is_method(obj):
@@ -25,41 +26,36 @@ def is_method(obj):
             type(str.__add__),
             type(str.__new__),
         )
-    )
+    )  # fmt: skip
 
 
 def is_classmethod(obj):
     return (
         inspect.isbuiltin(obj)
         or type(obj).__name__ in (
-            'classmethod',
-            'classmethod_descriptor',
+            "classmethod",
+            "classmethod_descriptor",
         )
-    )
+    )  # fmt: skip
 
 
 def is_staticmethod(obj):
-    return (
-        type(obj).__name__ in (
-            'staticmethod',
-        )
-    )
+    return type(obj).__name__ == "staticmethod"
 
 
 def is_datadescr(obj):
-    return inspect.isdatadescriptor(obj) and not hasattr(obj, 'fget')
+    return inspect.isdatadescriptor(obj) and not hasattr(obj, "fget")
 
 
 def is_property(obj):
-    return inspect.isdatadescriptor(obj) and hasattr(obj, 'fget')
+    return inspect.isdatadescriptor(obj) and hasattr(obj, "fget")
 
 
 def is_class(obj):
     return inspect.isclass(obj) or type(obj) is type(int)
 
 
-class Lines(list):
-
+class Lines(UserList):
     INDENT = " " * 4
     level = 0
 
@@ -72,7 +68,7 @@ class Lines(list):
         if lines is None:
             return
         if isinstance(lines, str):
-            lines = textwrap.dedent(lines).strip().split('\n')
+            lines = textwrap.dedent(lines).strip().split("\n")
         indent = self.INDENT * self.level
         for line in lines:
             self.append(indent + line)
@@ -80,13 +76,13 @@ class Lines(list):
 
 def signature(obj):
     doc = obj.__doc__
-    sig = doc.partition('\n')[0]
+    sig = doc.partition("\n")[0]
     return sig or None
 
 
 def docstring(obj):
     doc = obj.__doc__
-    doc = doc.partition('\n')[2]
+    doc = doc.partition("\n")[2]
     doc = textwrap.dedent(doc).strip()
     doc = f'"""{doc}"""'
     doc = textwrap.indent(doc, Lines.INDENT)
@@ -122,13 +118,13 @@ def visit_property(prop, name=None):
         return f"{pname} = property({gname})"
 
 
-def visit_constructor(cls, name='__init__', args=None):
-    init = (name == '__init__')
+def visit_constructor(cls, name="__init__", args=None):
+    init = name == "__init__"
     argname = cls.__name__.lower()
     argtype = cls.__name__
     initarg = args or f"{argname}: {argtype} | None = None"
-    selfarg = 'self' if init else 'cls'
-    rettype = 'None' if init else 'Self'
+    selfarg = "self" if init else "cls"
+    rettype = "None" if init else "Self"
     arglist = f"{selfarg}, {initarg}"
     sig = f"{name}({arglist}) -> {rettype}"
     return f"def {sig}: ..."
@@ -136,47 +132,49 @@ def visit_constructor(cls, name='__init__', args=None):
 
 def visit_class(cls, done=None):
     skip = {
-        '__doc__',
-        '__dict__',
-        '__module__',
-        '__weakref__',
-        '__pyx_vtable__',
-        '__str__',
-        '__repr__',
-        '__lt__',
-        '__le__',
-        '__ge__',
-        '__gt__',
+        "__doc__",
+        "__dict__",
+        "__module__",
+        "__weakref__",
+        "__pyx_vtable__",
+        "__str__",
+        "__repr__",
+        "__lt__",
+        "__le__",
+        "__ge__",
+        "__gt__",
     }
     special = {
-        '__len__': ("self", "int", None),
-        '__bool__': ("self", "bool", None),
-        '__hash__': ("self", "int", None),
-        '__int__': ("self", "int", None),
-        '__index__': ("self", "int", None),
-        '__eq__': ("self", "other: object", "/", "bool", None),
-        '__ne__': ("self", "other: object", "/", "bool", None),
-        '__buffer__': ("self", "flags: int", "/", "memoryview", (3, 12)),
+        "__len__": ("self", "int", None),
+        "__bool__": ("self", "bool", None),
+        "__hash__": ("self", "int", None),
+        "__int__": ("self", "int", None),
+        "__index__": ("self", "int", None),
+        "__eq__": ("self", "other: object", "/", "bool", None),
+        "__ne__": ("self", "other: object", "/", "bool", None),
+        "__buffer__": ("self", "flags: int", "/", "memoryview", (3, 12)),
     }
     constructor = (
-        '__new__',
-        '__init__',
+        "__new__",
+        "__init__",
     )
 
     override = OVERRIDE.get(cls.__name__, {})
     done = set() if done is None else done
     lines = Lines()
 
-    if cls.__name__ == 'Exception':
-        skip = skip - {f'__{a}{b}__' for a in 'lg' for b in 'et'}
+    if cls.__name__ == "Exception":
+        skip = skip - {f"__{a}{b}__" for a in "lg" for b in "et"}
         constructor = ()
-    if '__hash__' in cls.__dict__:
+    if "__hash__" in cls.__dict__:
         if cls.__hash__ is None:
-            done.add('__hash__')
+            done.add("__hash__")
 
     try:
+
         class sub(cls):
             pass
+
         final = False
     except TypeError:
         final = True
@@ -252,8 +250,9 @@ def visit_class(cls, done=None):
             lines.add = visit_property(attr, name)
             continue
 
-    leftovers = [name for name in keys if
-                 name not in done and name not in skip]
+    leftovers = [
+        name for name in keys if name not in done and name not in skip
+    ]
     if leftovers:
         raise RuntimeError(f"leftovers: {leftovers}")
 
@@ -263,13 +262,13 @@ def visit_class(cls, done=None):
 
 def visit_module(module, done=None):
     skip = {
-        '__doc__',
-        '__name__',
-        '__loader__',
-        '__spec__',
-        '__file__',
-        '__package__',
-        '__builtins__',
+        "__doc__",
+        "__name__",
+        "__loader__",
+        "__spec__",
+        "__file__",
+        "__package__",
+        "__builtins__",
     }
 
     done = set() if done is None else done
@@ -279,7 +278,8 @@ def visit_module(module, done=None):
     keys.sort(key=lambda name: name.startswith("_"))
 
     constants = [
-        (name, getattr(module, name)) for name in keys
+        (name, getattr(module, name))
+        for name in keys
         if all((
             name not in done and name not in skip,
             isinstance(getattr(module, name), int),
@@ -304,7 +304,8 @@ def visit_module(module, done=None):
             lines.add = visit_class(value)
             lines.add = ""
             aliases = [
-                (k, getattr(module, k)) for k in keys
+                (k, getattr(module, k))
+                for k in keys
                 if all((
                     k not in done and k not in skip,
                     getattr(module, k) is value,
@@ -316,7 +317,8 @@ def visit_module(module, done=None):
             if aliases:
                 lines.add = ""
             instances = [
-                (k, getattr(module, k)) for k in keys
+                (k, getattr(module, k))
+                for k in keys
                 if all((
                     k not in done and k not in skip,
                     type(getattr(module, k)) is value,
@@ -348,8 +350,9 @@ def visit_module(module, done=None):
         else:
             lines.add = visit_constant((name, value))
 
-    leftovers = [name for name in keys if
-                 name not in done and name not in skip]
+    leftovers = [
+        name for name in keys if name not in done and name not in skip
+    ]
     if leftovers:
         raise RuntimeError(f"leftovers: {leftovers}")
     return lines
@@ -367,14 +370,15 @@ from typing import (
     final,
     overload,
 )
+
 if sys.version_info >= (3, 9):
     from collections.abc import (
         Callable,
         Hashable,
         Iterable,
         Iterator,
-        Sequence,
         Mapping,
+        Sequence,
     )
 else:
     from typing import (
@@ -382,8 +386,8 @@ else:
         Hashable,
         Iterable,
         Iterator,
-        Sequence,
         Mapping,
+        Sequence,
     )
 if sys.version_info >= (3, 11):
     from typing import Self
@@ -393,108 +397,109 @@ from os import PathLike
 """
 
 OVERRIDE = {
-    'Info': {
-        '__iter__':
-        "def __iter__(self) -> Iterator[str]: ...",
-        '__getitem__':
-        "def __getitem__(self, item: str, /) -> str: ...",
-        '__setitem__':
-        "def __setitem__(self, item: str, value: str, /) -> None: ...",
-        '__delitem__':
-        "def __delitem__(self, item: str, /) -> None: ...",
-        '__contains__':
-        "def __contains__(self, value: str, /) -> bool: ...",
+    "Info": {
+        "__iter__": "def __iter__(self) -> Iterator[str]: ...",
+        "__getitem__": "def __getitem__(self, item: str, /) -> str: ...",
+        "__setitem__": (
+            "def __setitem__(self, item: str, value: str, /) -> None: ..."
+        ),
+        "__delitem__": "def __delitem__(self, item: str, /) -> None: ...",
+        "__contains__": "def __contains__(self, value: str, /) -> bool: ...",
     },
-    'Op': {
-        '__call__': "def __call__(self, x: Any, y: Any, /) -> Any: ...",
+    "Op": {
+        "__call__": "def __call__(self, x: Any, y: Any, /) -> Any: ...",
     },
-    'buffer': {
-        '__new__': """
+    "buffer": {
+        "__new__": """
         @overload
         def __new__(cls) -> Self: ...
         @overload
         def __new__(cls, buf: Buffer, /) -> Self: ...
         """,
-        '__getitem__': """
+        "__getitem__": """
         @overload
         def __getitem__(self, item: int, /) -> int: ...
         @overload
         def __getitem__(self, item: slice, /) -> buffer: ...
         """,
-        '__setitem__': """
+        "__setitem__": """
         @overload
         def __setitem__(self, item: int, value: int, /) -> None: ...
         @overload
         def __setitem__(self, item: slice, value: Buffer, /) -> None: ...
         """,
-        '__delitem__': None,
+        "__delitem__": None,
     },
-    'Pickle': {
-        '__new__': None,
-        '__init__': """
+    "Pickle": {
+        "__new__": None,
+        "__init__": """
         @overload
-        def __init__(self,
+        def __init__(
+            self,
             dumps: Callable[[Any, int], bytes],
             loads: Callable[[Buffer], Any],
             protocol: int | None = None,
             threshold: int | None = None,
         ) -> None: ...
         @overload
-        def __init__(self,
+        def __init__(
+            self,
             dumps: Callable[[Any], bytes] | None = None,
             loads: Callable[[Buffer], Any] | None = None,
         ) -> None: ...
         """,
     },
-    '__pyx_capi__': "__pyx_capi__: Final[dict[str, Any]] = ...",
-    '_typedict': "_typedict: Final[dict[str, Datatype]] = ...",
-    '_typedict_c': "_typedict_c: Final[dict[str, Datatype]] = ...",
-    '_typedict_f': "_typedict_f: Final[dict[str, Datatype]] = ...",
-    '_keyval_registry': None,
+    "__pyx_capi__": "__pyx_capi__: Final[dict[str, Any]] = ...",
+    "_typedict": "_typedict: Final[dict[str, Datatype]] = ...",
+    "_typedict_c": "_typedict_c: Final[dict[str, Datatype]] = ...",
+    "_typedict_f": "_typedict_f: Final[dict[str, Datatype]] = ...",
+    "_keyval_registry": None,
 }
 OVERRIDE.update({
     subtype: {
-        '__new__': "def __new__(cls) -> Self: ...",
+        "__new__": "def __new__(cls) -> Self: ...",
     }
     for subtype in (
-        'BottomType',
-        'InPlaceType',
-        'BufferAutomaticType',
+        "BottomType",
+        "InPlaceType",
+        "BufferAutomaticType",
     )
-})
+})  # fmt: skip
 OVERRIDE.update({
     subtype: {
-        '__new__': str.format("""
+        "__new__": str.format("""
         def __new__(cls, {}: {} | None = None) -> Self: ...
         """, basetype.lower(), basetype)
     }
     for basetype, subtype in (
-        ('Comm', 'Comm'),
-        ('Comm', 'Intracomm'),
-        ('Comm', 'Topocomm'),
-        ('Comm', 'Cartcomm'),
-        ('Comm', 'Graphcomm'),
-        ('Comm', 'Distgraphcomm'),
-        ('Comm', 'Intercomm'),
-        ('Request', 'Request'),
-        ('Request', 'Prequest'),
-        ('Request', 'Grequest'),
+        ("Comm", "Comm"),
+        ("Comm", "Intracomm"),
+        ("Comm", "Topocomm"),
+        ("Comm", "Cartcomm"),
+        ("Comm", "Graphcomm"),
+        ("Comm", "Distgraphcomm"),
+        ("Comm", "Intercomm"),
+        ("Request", "Request"),
+        ("Request", "Prequest"),
+        ("Request", "Grequest"),
     )
-})
+})  # fmt: skip
 OVERRIDE.update({  # python/mypy#15717
-    'Group': {
-        'Intersect': """
+    "Group": {
+        "Intersect": """
         @classmethod  # python/mypy#15717
         def Intersect(cls, group1: Group, group2: Group) -> Self: ...
         """
     }
-})
+})  # fmt: skip
 
 TYPING = """
-from .typing import (  # noqa: E402
+from .typing import (  # noqa: E402,I001
     Buffer,
     Bottom,
     InPlace,
+)
+from .typing import (  # noqa: E402
     BufSpec,
     BufSpecB,
     BufSpecV,
@@ -506,7 +511,13 @@ from .typing import (  # noqa: E402
 
 def visit_mpi4py_MPI():
     from mpi4py import MPI as module
+
     lines = Lines()
+    lines.add = "# ruff: noqa: A001"
+    lines.add = "# ruff: noqa: A002"
+    lines.add = "# ruff: noqa: E501"
+    lines.add = "# ruff: noqa: Q000"
+    lines.add = "# fmt: off"
     lines.add = IMPORTS
     lines.add = ""
     lines.add = visit_module(module)
@@ -516,16 +527,17 @@ def visit_mpi4py_MPI():
 
 
 def generate(filename):
-    dirname = os.path.dirname(filename)
-    os.makedirs(dirname, exist_ok=True)
-    with open(filename, 'w') as f:
-        script = os.path.basename(__file__)
+    filename = pathlib.Path(filename)
+    filename.parent.mkdir(parents=True, exist_ok=True)
+    with filename.open("w", encoding="utf-8") as f:
+        script = pathlib.Path(__file__).name
         print(f"# Generated with `python conf/{script}`", file=f)
         for line in visit_mpi4py_MPI():
             print(line, file=f)
 
 
-OUTDIR = os.path.join('src', 'mpi4py')
+TOPDIR = pathlib.Path(__file__).parent.parent
+OUTDIR = TOPDIR / "src" / "mpi4py"
 
-if __name__ == '__main__':
-    generate(os.path.join(OUTDIR, 'MPI.pyi'))
+if __name__ == "__main__":
+    generate(OUTDIR / "MPI.pyi")

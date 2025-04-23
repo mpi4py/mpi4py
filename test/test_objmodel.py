@@ -1,14 +1,18 @@
-from mpi4py import MPI
-import mpiunittest as unittest
 import ctypes
 import operator
-import weakref
-import sys
 import os
+import sys
+import weakref
+
+import mpiunittest as unittest
+
+from mpi4py import MPI
+
+# ruff: noqa: B023
 
 
 class TestObjModel(unittest.TestCase):
-
+    #
     objects = [
         MPI.Status(),
         MPI.DATATYPE_NULL,
@@ -28,23 +32,23 @@ class TestObjModel(unittest.TestCase):
         for i, obj1 in enumerate(self.objects):
             objects = self.objects[:]
             obj2 = objects[i]
-            self.assertTrue (bool(obj1 == obj2))
+            self.assertTrue(bool(obj1 == obj2))
             self.assertFalse(bool(obj1 != obj2))
             del objects[i]
             for obj2 in objects:
-                self.assertTrue (bool(obj1 != obj2))
-                self.assertTrue (bool(obj2 != obj1))
+                self.assertTrue(bool(obj1 != obj2))
+                self.assertTrue(bool(obj2 != obj1))
                 self.assertFalse(bool(obj1 == obj2))
                 self.assertFalse(bool(obj2 == obj1))
-            self.assertFalse(bool(None == obj1 ))
-            self.assertFalse(bool(obj1 == None ))
-            self.assertFalse(bool(obj1 == True ))
-            self.assertFalse(bool(obj1 == False))
+            self.assertFalse(bool(None is obj1))
+            self.assertFalse(bool(obj1 is None))
+            self.assertFalse(bool(obj1 is True))
+            self.assertFalse(bool(obj1 is False))
             self.assertFalse(bool(obj1 == 12345))
             self.assertFalse(bool(obj1 == "abc"))
             self.assertFalse(bool(obj1 == [123]))
-            self.assertFalse(bool(obj1 == (1,2)))
-            self.assertFalse(bool(obj1 == {0:0}))
+            self.assertFalse(bool(obj1 == (1, 2)))
+            self.assertFalse(bool(obj1 == {0: 0}))
             self.assertFalse(bool(obj1 == set()))
 
     def testNe(self):
@@ -55,20 +59,20 @@ class TestObjModel(unittest.TestCase):
             del objects[i]
             for obj2 in objects:
                 self.assertTrue(bool(obj1 != obj2))
-            self.assertTrue(bool(None != obj1 ))
-            self.assertTrue(bool(obj1 != None ))
-            self.assertTrue(bool(obj1 != True ))
-            self.assertTrue(bool(obj1 != False))
+            self.assertTrue(bool(None is not obj1))
+            self.assertTrue(bool(obj1 is not None))
+            self.assertTrue(bool(obj1 is not True))
+            self.assertTrue(bool(obj1 is not False))
             self.assertTrue(bool(obj1 != 12345))
             self.assertTrue(bool(obj1 != "abc"))
             self.assertTrue(bool(obj1 != [123]))
-            self.assertTrue(bool(obj1 != (1,2)))
-            self.assertTrue(bool(obj1 != {0:0}))
+            self.assertTrue(bool(obj1 != (1, 2)))
+            self.assertTrue(bool(obj1 != {0: 0}))
             self.assertTrue(bool(obj1 != set()))
 
     def testCmp(self):
         for obj in self.objects:
-            for binop in ('lt', 'le', 'gt', 'ge'):
+            for binop in ("lt", "le", "gt", "ge"):
                 binop = getattr(operator, binop)
                 with self.assertRaises(TypeError):
                     binop(obj, obj)
@@ -80,11 +84,11 @@ class TestObjModel(unittest.TestCase):
             self.assertFalse(obj)
 
     def testReduce(self):
-        import pickle
         import copy
+        import pickle
 
-        def functions(obj):
-            for protocol in range(0, pickle.HIGHEST_PROTOCOL + 1):
+        def functions(_obj):
+            for protocol in range(pickle.HIGHEST_PROTOCOL + 1):
                 yield lambda ob: pickle.loads(pickle.dumps(ob, protocol))
             yield copy.copy
             yield copy.deepcopy
@@ -101,8 +105,8 @@ class TestObjModel(unittest.TestCase):
                 dup = copier(cls(obj))
                 self.assertIs(type(dup), cls)
                 self.assertIsNot(dup, obj)
-                cls = type(f'My{type(obj).__name__}', (type(obj),), {})
-                main = __import__('__main__')
+                cls = type(f"My{type(obj).__name__}", (type(obj),), {})
+                main = __import__("__main__")
                 cls.__module__ = main.__name__
                 setattr(main, cls.__name__, cls)
                 dup = copier(cls(obj))
@@ -112,7 +116,10 @@ class TestObjModel(unittest.TestCase):
 
     def testHash(self):
         for obj in self.objects:
-            ob_hash = lambda: hash(obj)
+
+            def ob_hash():
+                return hash(obj)
+
             self.assertRaises(TypeError, ob_hash)
 
     def testInit(self):
@@ -125,11 +132,20 @@ class TestObjModel(unittest.TestCase):
             objects = self.objects[:]
             del objects[i]
             for other in objects:
-                ob_init = lambda: klass(other)
+
+                def ob_init():
+                    return klass(other)
+
                 self.assertRaises(TypeError, ob_init)
-            ob_init = lambda: klass(1234)
+
+            def ob_init():
+                return klass(1234)
+
             self.assertRaises(TypeError, ob_init)
-            ob_init = lambda: klass("abc")
+
+            def ob_init():
+                return klass("abc")
+
             self.assertRaises(TypeError, ob_init)
 
     def testWeakRef(self):
@@ -209,7 +225,7 @@ class TestObjModel(unittest.TestCase):
                 for _ in range(3):
                     clon.free()
                     self.assertFalse(clon)
-            if hasattr(obj, 'Dup'):
+            if hasattr(obj, "Dup"):
                 self.assertTrue(obj)
                 dup = obj.Dup()
                 self.assertTrue(dup)
@@ -232,7 +248,7 @@ class TestObjModel(unittest.TestCase):
             objects += [MPI.Info.Create()]
         except (NotImplementedError, MPI.Exception):
             pass
-        if os.name == 'posix':
+        if os.name == "posix":
             try:
                 objects += [MPI.File.Open(MPI.COMM_SELF, "/dev/null")]
             except NotImplementedError:
@@ -253,10 +269,11 @@ class TestObjModel(unittest.TestCase):
 
     def testConstants(self):
         import pickle
+
         names = (
-            'BOTTOM',
-            'IN_PLACE',
-            'BUFFER_AUTOMATIC',
+            "BOTTOM",
+            "IN_PLACE",
+            "BUFFER_AUTOMATIC",
         )
         for name in names:
             constant = getattr(MPI, name)
@@ -272,7 +289,7 @@ class TestObjModel(unittest.TestCase):
             self.assertEqual(type(constant)(), constant)
             self.assertEqual(memoryview(constant).nbytes, 0)
             self.assertEqual(MPI.Get_address(constant), constant)
-            if sys.implementation.name != 'pypy':
+            if sys.implementation.name != "pypy":
                 self.assertIsNone(memoryview(constant).obj)
             with self.assertRaises(TypeError):
                 constant + 1
@@ -307,8 +324,8 @@ class TestObjModel(unittest.TestCase):
         with self.assertRaises(TypeError):
             MPI._handleof(None)
 
-    @unittest.skipUnless(sys.implementation.name == 'cpython', "cpython")
-    @unittest.skipUnless(hasattr(MPI, '__pyx_capi__'), "cython")
+    @unittest.skipUnless(sys.implementation.name == "cpython", "cpython")
+    @unittest.skipUnless(hasattr(MPI, "__pyx_capi__"), "cython")
     def testCAPI(self):
         status = MPI.Status()
         status.source = 0
@@ -337,10 +354,10 @@ class TestObjModel(unittest.TestCase):
             if issubclass(cls, MPI.Comm):
                 cls = MPI.Comm
             typename = cls.__name__
-            modifier = ''
+            modifier = ""
             if isinstance(obj, MPI.Status):
                 mpi_type = ctypes.c_void_p
-                modifier = ' *'
+                modifier = " *"
             elif MPI._sizeof(cls) == ctypes.sizeof(ctypes.c_uint32):
                 mpi_type = ctypes.c_uint32
             elif MPI._sizeof(cls) == ctypes.sizeof(ctypes.c_uint64):
@@ -348,10 +365,10 @@ class TestObjModel(unittest.TestCase):
 
             new_functype = ctypes.PYFUNCTYPE(ctypes.py_object, mpi_type)
             get_functype = ctypes.PYFUNCTYPE(ctypes.c_void_p, ctypes.py_object)
-            new_capsule = pyx_capi[f'PyMPI{typename}_New']
-            get_capsule = pyx_capi[f'PyMPI{typename}_Get']
-            new_signature = f'PyObject *(MPI_{typename}{modifier})'.encode()
-            get_signature = f'MPI_{typename} *(PyObject *)'.encode()
+            new_capsule = pyx_capi[f"PyMPI{typename}_New"]
+            get_capsule = pyx_capi[f"PyMPI{typename}_Get"]
+            new_signature = f"PyObject *(MPI_{typename}{modifier})".encode()
+            get_signature = f"MPI_{typename} *(PyObject *)".encode()
             PyCapsule_GetPointer.restype = new_functype
             pympi_new = PyCapsule_GetPointer(new_capsule, new_signature)
             PyCapsule_GetPointer.restype = get_functype
@@ -370,5 +387,5 @@ class TestObjModel(unittest.TestCase):
             self.assertEqual(newobj, obj)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

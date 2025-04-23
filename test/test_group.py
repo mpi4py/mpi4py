@@ -1,9 +1,10 @@
-from mpi4py import MPI
 import mpiunittest as unittest
+
+from mpi4py import MPI
 
 
 class BaseTestGroup:
-
+    #
     def testProperties(self):
         group = self.GROUP
         self.assertEqual(group.Get_size(), group.size)
@@ -69,21 +70,27 @@ class BaseTestGroup:
         group.Free()
 
     def testRangeIncl(self):
-        if self.GROUP == MPI.GROUP_EMPTY: return
+        if self.GROUP == MPI.GROUP_EMPTY:
+            return
         group = self.GROUP.Range_incl([])
         self.assertEqual(MPI.Group.Compare(group, MPI.GROUP_EMPTY), MPI.IDENT)
         group.Free()
-        ranges = [ (0, self.GROUP.Get_size()-1, 1), ]
+        ranges = [
+            (0, self.GROUP.Get_size() - 1, 1),
+        ]
         group = self.GROUP.Range_incl(ranges)
         self.assertEqual(MPI.Group.Compare(group, self.GROUP), MPI.IDENT)
         group.Free()
 
     def testRangeExcl(self):
-        if self.GROUP == MPI.GROUP_EMPTY: return
+        if self.GROUP == MPI.GROUP_EMPTY:
+            return
         group = self.GROUP.Range_excl([])
         self.assertEqual(MPI.Group.Compare(group, self.GROUP), MPI.IDENT)
         group.Free()
-        ranges = [ (0, self.GROUP.Get_size()-1, 1), ]
+        ranges = [
+            (0, self.GROUP.Get_size() - 1, 1),
+        ]
         group = self.GROUP.Range_excl(ranges)
         self.assertEqual(MPI.Group.Compare(group, MPI.GROUP_EMPTY), MPI.IDENT)
         group.Free()
@@ -95,7 +102,7 @@ class BaseTestGroup:
         ranks2 = MPI.Group.Translate_ranks(group1, ranks1)
         ranks2 = MPI.Group.Translate_ranks(group1, ranks1, group2)
         self.assertEqual(list(ranks1), list(ranks2))
-        group =  self.GROUP
+        group = self.GROUP
         ranks1 = list(range(group.Get_size()))
         ranks2 = group.Translate_ranks(group=group)
         self.assertEqual(list(ranks1), list(ranks2))
@@ -103,9 +110,10 @@ class BaseTestGroup:
         self.assertEqual(len(ranks2), group.Get_size())
         self.assertNotIn(MPI.UNDEFINED, set(ranks2))
 
-    @unittest.skipMPI('MPICH1')
+    @unittest.skipMPI("MPICH1")
     def testTranslRanksProcNull(self):
-        if self.GROUP == MPI.GROUP_EMPTY: return
+        if self.GROUP == MPI.GROUP_EMPTY:
+            return
         group1 = self.GROUP
         group2 = self.GROUP
         ranks1 = [MPI.PROC_NULL] * 10
@@ -113,7 +121,8 @@ class BaseTestGroup:
         self.assertEqual(list(ranks1), list(ranks2))
 
     def testTranslRanksGroupEmpty(self):
-        if self.GROUP == MPI.GROUP_EMPTY: return
+        if self.GROUP == MPI.GROUP_EMPTY:
+            return
         group1 = self.GROUP
         group2 = MPI.GROUP_EMPTY
         ranks1 = list(range(group1.Get_size())) * 2
@@ -123,11 +132,12 @@ class BaseTestGroup:
 
     def testPickle(self):
         from pickle import dumps
+
         self.assertRaises(ValueError, dumps, self.GROUP)
 
 
 class TestGroupNull(unittest.TestCase):
-
+    #
     def testConstructor(self):
         group = MPI.Group()
         self.assertIsNot(group, MPI.GROUP_NULL)
@@ -142,6 +152,7 @@ class TestGroupNull(unittest.TestCase):
 
     def testPickle(self):
         from pickle import dumps, loads
+
         group_null = loads(dumps(MPI.GROUP_NULL))
         self.assertIs(group_null, MPI.GROUP_NULL)
         group_null = loads(dumps(MPI.Group(MPI.GROUP_NULL)))
@@ -150,7 +161,7 @@ class TestGroupNull(unittest.TestCase):
 
 
 class TestGroupEmpty(BaseTestGroup, unittest.TestCase):
-
+    #
     def setUp(self):
         self.GROUP = MPI.GROUP_EMPTY
 
@@ -165,12 +176,13 @@ class TestGroupEmpty(BaseTestGroup, unittest.TestCase):
         rank = self.GROUP.Get_rank()
         self.assertEqual(rank, MPI.UNDEFINED)
 
-    @unittest.skipMPI('MPICH1')
+    @unittest.skipMPI("MPICH1")
     def testTranslRanks(self):
         super().testTranslRanks()
 
     def testPickle(self):
         from pickle import dumps, loads
+
         group_empty = loads(dumps(MPI.GROUP_EMPTY))
         self.assertIs(group_empty, MPI.GROUP_EMPTY)
         group_empty = loads(dumps(MPI.Group(MPI.GROUP_EMPTY)))
@@ -179,7 +191,7 @@ class TestGroupEmpty(BaseTestGroup, unittest.TestCase):
 
 
 class TestGroupSelf(BaseTestGroup, unittest.TestCase):
-
+    #
     def setUp(self):
         self.GROUP = MPI.COMM_SELF.Get_group()
 
@@ -196,7 +208,7 @@ class TestGroupSelf(BaseTestGroup, unittest.TestCase):
 
 
 class TestGroupWorld(BaseTestGroup, unittest.TestCase):
-
+    #
     def setUp(self):
         self.GROUP = MPI.COMM_WORLD.Get_group()
 
@@ -213,5 +225,5 @@ class TestGroupWorld(BaseTestGroup, unittest.TestCase):
         self.assertTrue(rank >= 0 and rank < size)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -5,11 +5,11 @@ import sys
 
 
 def github():
-    return os.environ.get('GITHUB_ACTIONS') == 'true'
+    return os.environ.get("GITHUB_ACTIONS") == "true"
 
 
 def azure():
-    return (os.environ.get('TF_BUILD') == 'True')
+    return os.environ.get("TF_BUILD") == "True"
 
 
 def import_MPI():
@@ -58,16 +58,19 @@ def has_mpi_port():
 
 def disable_mpi_spawn():
     MPI = import_MPI()
-    skip_spawn = (
-        os.environ.get('MPI4PY_TEST_SPAWN')
-        in ('0', 'n', 'no', 'off', 'false')
+    skip_spawn = os.environ.get("MPI4PY_TEST_SPAWN") in (
+        "0",
+        "n",
+        "no",
+        "off",
+        "false",
     )
     if skip_spawn:
         return True
-    macos = (sys.platform == 'darwin')
-    windows = (sys.platform == 'win32')
+    macos = sys.platform == "darwin"
+    windows = sys.platform == "win32"
     name, version = MPI.get_vendor()
-    if name == 'Open MPI':
+    if name == "Open MPI":
         if version < (3, 0, 0):
             return True
         if version == (4, 0, 0):
@@ -79,9 +82,9 @@ def disable_mpi_spawn():
         if (4, 1, 0) <= version < (4, 2, 0):
             if azure() or github():
                 return True
-    if name == 'MPICH':
+    if name == "MPICH":
         if (3, 4, 0) <= version < (4, 0, 0):
-            if  macos:
+            if macos:
                 return True
         if version < (4, 1):
             if not has_mpi_appnum():
@@ -92,30 +95,30 @@ def disable_mpi_spawn():
                 MPI.Close_port(port)
             except MPI.Exception:
                 return True
-    if name == 'Intel MPI':
-        import mpi4py
+    if name == "Intel MPI":
+        mpi4py = __import__("mpi4py")
         if mpi4py.rc.recv_mprobe:
             return True
         if MPI.COMM_WORLD.Get_size() > 1 and windows:
             return True
-    if name == 'Microsoft MPI':
+    if name == "Microsoft MPI":
         if version < (8, 1, 0):
             return True
-        if not has_mpi_appnum() is None:
+        if has_mpi_appnum() is not None:
             return True
         if os.environ.get("PMI_APPNUM") is None:
             return True
-    if name == 'MVAPICH':
+    if name == "MVAPICH":
         if version < (3, 0, 0):
             return True
         if not has_mpi_appnum():
             return True
-    if name == 'MPICH2':
+    if name == "MPICH2":
         if not has_mpi_appnum():
             return True
     if MPI.Get_version() < (2, 0):
         return True
-    if any(map(sys.modules.get, ('cupy', 'numba'))):
+    if any(map(sys.modules.get, ("cupy", "numba"))):
         return True
     #
     return False
@@ -123,10 +126,8 @@ def disable_mpi_spawn():
 
 @contextlib.contextmanager
 def capture_stderr():
-    import io
-    import sys
     stderr = sys.stderr
-    stream = io.StringIO()
+    stream = __import__("io").StringIO()
     sys.stderr = stream
     try:
         yield stream

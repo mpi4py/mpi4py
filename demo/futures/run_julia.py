@@ -14,6 +14,7 @@ h = 1200
 dx = (x1 - x0) / w
 dy = (y1 - y0) / h
 
+
 def julia(x, y):
     c = complex(0, 0.65)
     z = complex(x, y)
@@ -23,6 +24,7 @@ def julia(x, y):
         n -= 1
     return n
 
+
 def julia_line(k):
     line = bytearray(w)
     y = y1 - k * dy
@@ -31,32 +33,36 @@ def julia_line(k):
         line[j] = julia(x, y)
     return line
 
+
 def plot(image):
+    import contextlib
     import warnings
-    warnings.simplefilter('ignore', UserWarning)
+
+    warnings.simplefilter("ignore", UserWarning)
     try:
         from matplotlib import pyplot as plt
     except ImportError:
         return
     plt.figure()
-    plt.imshow(image, aspect='equal', cmap='cubehelix')
-    plt.axis('off')
-    try:
+    plt.imshow(image, aspect="equal", cmap="cubehelix")
+    plt.axis("off")
+    with contextlib.suppress(Exception):
         plt.draw()
         plt.pause(2)
-    except:
-        pass
+
 
 def test_julia():
     with MPICommExecutor() as executor:
-        if executor is None: return # worker process
+        if executor is None:
+            return  # worker process
         tic = time.time()
         image = list(executor.map(julia_line, range(h), chunksize=10))
         toc = time.time()
 
-    print("%s Set %dx%d in %.2f seconds." % ('Julia', w, h, toc-tic))
-    if len(sys.argv) > 1 and sys.argv[1] == '-plot':
+    print(f"Julia Set {w}x{h} in {toc - tic:.2f} seconds.")
+    if len(sys.argv) > 1 and sys.argv[1] == "-plot":
         plot(image)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     test_julia()

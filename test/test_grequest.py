@@ -1,11 +1,13 @@
-from mpi4py import MPI
-import mpiunittest as unittest
 import mpitestutil as testutil
+import mpiunittest as unittest
+
+from mpi4py import MPI
+
 
 class GReqCtx:
-
+    #
     source = 3
-    tag    = 7
+    tag = 7
     completed = False
 
     cancel_called = False
@@ -14,18 +16,20 @@ class GReqCtx:
     def query(self, status):
         status.Set_source(self.source)
         status.Set_tag(self.tag)
+
     def free(self):
         self.free_called = True
+
     def cancel(self, completed):
         self.cancel_called = True
         if completed is not self.completed:
             raise MPI.Exception(MPI.ERR_PENDING)
 
 
-@unittest.skipMPI('MPI(<2.0)')
-@unittest.skipMPI('openmpi(==4.1.0)')
+@unittest.skipMPI("MPI(<2.0)")
+@unittest.skipMPI("openmpi(==4.1.0)")
 class TestGrequest(unittest.TestCase):
-
+    #
     def testConstructor(self):
         ctx = GReqCtx()
         greq = MPI.Grequest.Start(ctx.query, ctx.free, ctx.cancel)
@@ -52,17 +56,19 @@ class TestGrequest(unittest.TestCase):
         greq.Complete()
         greq.Wait()
 
-    @unittest.skipMPI('openmpi')  # TODO: open-mpi/ompi#11681
+    @unittest.skipMPI("openmpi")  # TODO(dalcinl): open-mpi/ompi#11681
     def testExceptionHandling(self):
         ctx = GReqCtx()
 
-        def raise_mpi(*args):
+        def raise_mpi(*_args):
             raise MPI.Exception(MPI.ERR_BUFFER)
-        def raise_rte(*args):
+
+        def raise_rte(*_args):
             raise ValueError(42)
+
         def check_exc(exception, is_mpi, stderr):
             output = stderr.getvalue()
-            header = 'Traceback (most recent call last):\n'
+            header = "Traceback (most recent call last):\n"
             if is_mpi:
                 chkcode = MPI.ERR_BUFFER
                 excname = MPI.Exception.__name__
@@ -186,5 +192,5 @@ class TestGrequest(unittest.TestCase):
         self.assertIsNone(obj)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

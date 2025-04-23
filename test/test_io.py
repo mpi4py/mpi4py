@@ -1,29 +1,44 @@
-from mpi4py import MPI
-import mpiunittest as unittest
-import arrayimpl
-import os, tempfile
+import os
+import pathlib
 import platform
+import tempfile
+
+import arrayimpl
+import mpiunittest as unittest
+
+from mpi4py import MPI
+
+
+def maketemp(prefix):
+    fd, name = tempfile.mkstemp(prefix=prefix)
+    os.close(fd)
+    return name
 
 
 def arrayimpl_loop_io():
-    impi = unittest.mpi_predicate('impi(>=2021.12.0)')
-    openmpi = unittest.mpi_predicate('openmpi(<4.2.0)')
-    is_i386 = platform.machine() in ('i386', 'i686')
-    is_win = os.name == 'nt'
+    impi = unittest.mpi_predicate("impi(>=2021.12.0)")
+    openmpi = unittest.mpi_predicate("openmpi(<4.2.0)")
+    is_i386 = platform.machine() in ("i386", "i686")
+    is_win = os.name == "nt"
     for array, typecode in arrayimpl.loop():
-        if unittest.is_mpi_gpu('mvapich', array): continue
-        if openmpi and is_i386 and typecode in ('g', 'G'): continue
-        if impi and is_win and typecode in ('l', 'L', 'g'): continue
+        if unittest.is_mpi_gpu("mvapich", array):
+            continue
+        if openmpi and is_i386 and typecode in ("g", "G"):
+            continue
+        if impi and is_win and typecode in ("l", "L", "g"):
+            continue
         yield array, typecode
+
 
 scalar = arrayimpl.scalar
 
-class BaseTestIO:
 
+class BaseTestIO:
+    #
     COMM = MPI.COMM_NULL
     FILE = MPI.FILE_NULL
 
-    prefix = 'mpi4py-'
+    prefix = "mpi4py-"
 
     def setUp(self):
         comm = self.COMM
@@ -31,13 +46,13 @@ class BaseTestIO:
         world_rank = MPI.COMM_WORLD.Get_rank()
         prefix = self.prefix
         if comm.Get_size() < world_size:
-            prefix += f'{world_rank}-'
+            prefix += f"{world_rank}-"
         fname = None
         if comm.Get_rank() == 0:
-            fd, fname = tempfile.mkstemp(prefix=prefix)
-            os.close(fd)
+            fname = maketemp(prefix)
+            fname = pathlib.Path(fname)
         fname = comm.bcast(fname, 0)
-        amode  = MPI.MODE_RDWR | MPI.MODE_CREATE
+        amode = MPI.MODE_RDWR | MPI.MODE_CREATE
         amode |= MPI.MODE_DELETE_ON_CLOSE
         amode |= MPI.MODE_UNIQUE_OPEN
         info = MPI.INFO_NULL
@@ -45,7 +60,7 @@ class BaseTestIO:
             self.FILE = MPI.File.Open(comm, fname, amode, info)
         except Exception:
             if comm.Get_rank() == 0:
-                os.remove(fname)
+                fname.unlink()
             raise
 
     def tearDown(self):
@@ -55,12 +70,12 @@ class BaseTestIO:
 
 
 class BaseTestIOBasic(BaseTestIO):
-
+    #
     # non-collective
 
     def testReadWriteAt(self):
         comm = self.COMM
-        size = comm.Get_size()
+        comm.Get_size()
         rank = comm.Get_rank()
         fh = self.FILE
         for array, typecode in arrayimpl_loop_io():
@@ -70,12 +85,12 @@ class BaseTestIOBasic(BaseTestIO):
                 fh.Set_view(0, etype)
                 count = 13
                 wbuf = array(42, typecode, count)
-                fh.Write_at(count*rank, wbuf.as_raw())
+                fh.Write_at(count * rank, wbuf.as_raw())
                 fh.Sync()
                 comm.Barrier()
                 fh.Sync()
-                rbuf = array(-1, typecode, count+1)
-                fh.Read_at(count*rank, rbuf.as_mpi_c(count))
+                rbuf = array(-1, typecode, count + 1)
+                fh.Read_at(count * rank, rbuf.as_mpi_c(count))
                 for value in rbuf[:-1]:
                     self.assertEqual(value, scalar(42))
                 self.assertEqual(rbuf[-1], scalar(-1))
@@ -83,7 +98,7 @@ class BaseTestIOBasic(BaseTestIO):
 
     def testIReadIWriteAt(self):
         comm = self.COMM
-        size = comm.Get_size()
+        comm.Get_size()
         rank = comm.Get_rank()
         fh = self.FILE
         for array, typecode in arrayimpl_loop_io():
@@ -93,12 +108,12 @@ class BaseTestIOBasic(BaseTestIO):
                 fh.Set_view(0, etype)
                 count = 13
                 wbuf = array(42, typecode, count)
-                fh.Iwrite_at(count*rank, wbuf.as_raw()).Wait()
+                fh.Iwrite_at(count * rank, wbuf.as_raw()).Wait()
                 fh.Sync()
                 comm.Barrier()
                 fh.Sync()
-                rbuf = array(-1, typecode, count+1)
-                fh.Iread_at(count*rank, rbuf.as_mpi_c(count)).Wait()
+                rbuf = array(-1, typecode, count + 1)
+                fh.Iread_at(count * rank, rbuf.as_mpi_c(count)).Wait()
                 for value in rbuf[:-1]:
                     self.assertEqual(value, scalar(42))
                 self.assertEqual(rbuf[-1], scalar(-1))
@@ -123,8 +138,8 @@ class BaseTestIOBasic(BaseTestIO):
                     fh.Sync()
                     comm.Barrier()
                     fh.Sync()
-                    for n in range(0, len(wbuf)):
-                        rbuf = array(-1, typecode, n+1)
+                    for n in range(len(wbuf)):
+                        rbuf = array(-1, typecode, n + 1)
                         fh.Seek(0, MPI.SEEK_SET)
                         fh.Read(rbuf.as_mpi_c(n))
                         for value in rbuf[:-1]:
@@ -151,8 +166,8 @@ class BaseTestIOBasic(BaseTestIO):
                     fh.Sync()
                     comm.Barrier()
                     fh.Sync()
-                    for n in range(0, len(wbuf)):
-                        rbuf = array(-1, typecode, n+1)
+                    for n in range(len(wbuf)):
+                        rbuf = array(-1, typecode, n + 1)
                         fh.Seek(0, MPI.SEEK_SET)
                         fh.Iread(rbuf.as_mpi_c(n)).Wait()
                         for value in rbuf[:-1]:
@@ -162,7 +177,7 @@ class BaseTestIOBasic(BaseTestIO):
 
     def testReadWriteShared(self):
         comm = self.COMM
-        size = comm.Get_size()
+        comm.Get_size()
         rank = comm.Get_rank()
         fh = self.FILE
         for array, typecode in arrayimpl_loop_io():
@@ -171,24 +186,24 @@ class BaseTestIOBasic(BaseTestIO):
                 fh.Set_size(0)
                 fh.Set_view(0, etype)
                 count = 13
-                wbuf = array(rank%42, typecode, count)
+                wbuf = array(rank % 42, typecode, count)
                 fh.Seek_shared(0, MPI.SEEK_SET)
                 fh.Write_shared(wbuf.as_raw())
                 fh.Sync()
                 comm.Barrier()
                 fh.Sync()
-                rbuf = array(-1, typecode, count+1)
+                rbuf = array(-1, typecode, count + 1)
                 fh.Seek_shared(0, MPI.SEEK_SET)
                 fh.Read_shared(rbuf.as_mpi_c(count))
                 for value in rbuf[:-1]:
-                    self.assertTrue(0<=value<42)
+                    self.assertTrue(0 <= value < 42)
                     self.assertEqual(value, rbuf[0])
                 self.assertEqual(rbuf[-1], scalar(-1))
                 comm.Barrier()
 
     def testIReadIWriteShared(self):
         comm = self.COMM
-        size = comm.Get_size()
+        comm.Get_size()
         rank = comm.Get_rank()
         fh = self.FILE
         for array, typecode in arrayimpl_loop_io():
@@ -197,17 +212,17 @@ class BaseTestIOBasic(BaseTestIO):
                 fh.Set_size(0)
                 fh.Set_view(0, etype)
                 count = 13
-                wbuf = array(rank%42, typecode, count)
+                wbuf = array(rank % 42, typecode, count)
                 fh.Seek_shared(0, MPI.SEEK_SET)
                 fh.Iwrite_shared(wbuf.as_raw()).Wait()
                 fh.Sync()
                 comm.Barrier()
                 fh.Sync()
-                rbuf = array(-1, typecode, count+1)
+                rbuf = array(-1, typecode, count + 1)
                 fh.Seek_shared(0, MPI.SEEK_SET)
                 fh.Iread_shared(rbuf.as_mpi_c(count)).Wait()
                 for value in rbuf[:-1]:
-                    self.assertTrue(0<=value<42)
+                    self.assertTrue(0 <= value < 42)
                     self.assertEqual(value, rbuf[0])
                 self.assertEqual(rbuf[-1], scalar(-1))
                 comm.Barrier()
@@ -216,7 +231,7 @@ class BaseTestIOBasic(BaseTestIO):
 
     def testReadWriteAtAll(self):
         comm = self.COMM
-        size = comm.Get_size()
+        comm.Get_size()
         rank = comm.Get_rank()
         fh = self.FILE
         for array, typecode in arrayimpl_loop_io():
@@ -226,12 +241,12 @@ class BaseTestIOBasic(BaseTestIO):
                 fh.Set_view(0, etype)
                 count = 13
                 wbuf = array(42, typecode, count)
-                fh.Write_at_all(count*rank, wbuf.as_raw())
+                fh.Write_at_all(count * rank, wbuf.as_raw())
                 fh.Sync()
                 comm.Barrier()
                 fh.Sync()
-                rbuf = array(-1, typecode, count+1)
-                fh.Read_at_all(count*rank, rbuf.as_mpi_c(count))
+                rbuf = array(-1, typecode, count + 1)
+                fh.Read_at_all(count * rank, rbuf.as_mpi_c(count))
                 for value in rbuf[:-1]:
                     self.assertEqual(value, scalar(42))
                 self.assertEqual(rbuf[-1], scalar(-1))
@@ -239,34 +254,35 @@ class BaseTestIOBasic(BaseTestIO):
 
     def testIReadIWriteAtAll(self):
         comm = self.COMM
-        size = comm.Get_size()
+        comm.Get_size()
         rank = comm.Get_rank()
         fh = self.FILE
         for array, typecode in arrayimpl_loop_io():
             with arrayimpl.test(self):
-                try: # MPI 3.1
+                try:  # MPI 3.1
                     etype = array.TypeMap[typecode]
                     fh.Set_size(0)
                     fh.Set_view(0, etype)
                     count = 13
                     wbuf = array(42, typecode, count)
-                    fh.Iwrite_at_all(count*rank, wbuf.as_raw()).Wait()
+                    fh.Iwrite_at_all(count * rank, wbuf.as_raw()).Wait()
                     fh.Sync()
                     comm.Barrier()
                     fh.Sync()
-                    rbuf = array(-1, typecode, count+1)
-                    fh.Iread_at_all(count*rank, rbuf.as_mpi_c(count)).Wait()
+                    rbuf = array(-1, typecode, count + 1)
+                    fh.Iread_at_all(count * rank, rbuf.as_mpi_c(count)).Wait()
                     for value in rbuf[:-1]:
                         self.assertEqual(value, scalar(42))
                     self.assertEqual(rbuf[-1], scalar(-1))
                     comm.Barrier()
                 except NotImplementedError:
-                    if MPI.Get_version() >= (3, 1): raise
-                    self.skipTest('mpi-iwrite_at_all')
+                    if MPI.Get_version() >= (3, 1):
+                        raise
+                    self.skipTest("mpi-iwrite_at_all")
 
     def testReadWriteAtAllBeginEnd(self):
         comm = self.COMM
-        size = comm.Get_size()
+        comm.Get_size()
         rank = comm.Get_rank()
         fh = self.FILE
         for array, typecode in arrayimpl_loop_io():
@@ -276,13 +292,13 @@ class BaseTestIOBasic(BaseTestIO):
                 fh.Set_view(0, etype)
                 count = 13
                 wbuf = array(42, typecode, count)
-                fh.Write_at_all_begin(count*rank, wbuf.as_raw())
+                fh.Write_at_all_begin(count * rank, wbuf.as_raw())
                 fh.Write_at_all_end(wbuf.as_raw())
                 fh.Sync()
                 comm.Barrier()
                 fh.Sync()
-                rbuf = array(-1, typecode, count+1)
-                fh.Read_at_all_begin(count*rank, rbuf.as_mpi_c(count))
+                rbuf = array(-1, typecode, count + 1)
+                fh.Read_at_all_begin(count * rank, rbuf.as_mpi_c(count))
                 fh.Read_at_all_end(rbuf.as_raw())
                 for value in rbuf[:-1]:
                     self.assertEqual(value, scalar(42))
@@ -291,7 +307,7 @@ class BaseTestIOBasic(BaseTestIO):
 
     def testReadWriteAll(self):
         comm = self.COMM
-        size = comm.Get_size()
+        comm.Get_size()
         rank = comm.Get_rank()
         fh = self.FILE
         for array, typecode in arrayimpl_loop_io():
@@ -301,13 +317,13 @@ class BaseTestIOBasic(BaseTestIO):
                 fh.Set_view(0, etype)
                 count = 13
                 wbuf = array(42, typecode, count)
-                fh.Seek(count*rank, MPI.SEEK_SET)
+                fh.Seek(count * rank, MPI.SEEK_SET)
                 fh.Write_all(wbuf.as_raw())
                 fh.Sync()
                 comm.Barrier()
                 fh.Sync()
-                rbuf = array(-1, typecode, count+1)
-                fh.Seek(count*rank, MPI.SEEK_SET)
+                rbuf = array(-1, typecode, count + 1)
+                fh.Seek(count * rank, MPI.SEEK_SET)
                 fh.Read_all(rbuf.as_mpi_c(count))
                 for value in rbuf[:-1]:
                     self.assertEqual(value, scalar(42))
@@ -316,36 +332,37 @@ class BaseTestIOBasic(BaseTestIO):
 
     def testIReadIWriteAll(self):
         comm = self.COMM
-        size = comm.Get_size()
+        comm.Get_size()
         rank = comm.Get_rank()
         fh = self.FILE
         for array, typecode in arrayimpl_loop_io():
             with arrayimpl.test(self):
-                try: # MPI 3.1
+                try:  # MPI 3.1
                     etype = array.TypeMap[typecode]
                     fh.Set_size(0)
                     fh.Set_view(0, etype)
                     count = 13
                     wbuf = array(42, typecode, count)
-                    fh.Seek(count*rank, MPI.SEEK_SET)
+                    fh.Seek(count * rank, MPI.SEEK_SET)
                     fh.Iwrite_all(wbuf.as_raw()).Wait()
                     fh.Sync()
                     comm.Barrier()
                     fh.Sync()
-                    rbuf = array(-1, typecode, count+1)
-                    fh.Seek(count*rank, MPI.SEEK_SET)
+                    rbuf = array(-1, typecode, count + 1)
+                    fh.Seek(count * rank, MPI.SEEK_SET)
                     fh.Iread_all(rbuf.as_mpi_c(count)).Wait()
                     for value in rbuf[:-1]:
                         self.assertEqual(value, scalar(42))
                     self.assertEqual(rbuf[-1], scalar(-1))
                     comm.Barrier()
                 except NotImplementedError:
-                    if MPI.Get_version() >= (3, 1): raise
-                    self.skipTest('mpi-iwrite_all')
+                    if MPI.Get_version() >= (3, 1):
+                        raise
+                    self.skipTest("mpi-iwrite_all")
 
     def testReadWriteAllBeginEnd(self):
         comm = self.COMM
-        size = comm.Get_size()
+        comm.Get_size()
         rank = comm.Get_rank()
         fh = self.FILE
         for array, typecode in arrayimpl_loop_io():
@@ -355,14 +372,14 @@ class BaseTestIOBasic(BaseTestIO):
                 fh.Set_view(0, etype)
                 count = 13
                 wbuf = array(42, typecode, count)
-                fh.Seek(count*rank, MPI.SEEK_SET)
+                fh.Seek(count * rank, MPI.SEEK_SET)
                 fh.Write_all_begin(wbuf.as_raw())
                 fh.Write_all_end(wbuf.as_raw())
                 fh.Sync()
                 comm.Barrier()
                 fh.Sync()
-                rbuf = array(-1, typecode, count+1)
-                fh.Seek(count*rank, MPI.SEEK_SET)
+                rbuf = array(-1, typecode, count + 1)
+                fh.Seek(count * rank, MPI.SEEK_SET)
                 fh.Read_all_begin(rbuf.as_mpi_c(count))
                 fh.Read_all_end(rbuf.as_raw())
                 for value in rbuf[:-1]:
@@ -372,7 +389,7 @@ class BaseTestIOBasic(BaseTestIO):
 
     def testReadWriteOrdered(self):
         comm = self.COMM
-        size = comm.Get_size()
+        comm.Get_size()
         rank = comm.Get_rank()
         fh = self.FILE
         for array, typecode in arrayimpl_loop_io():
@@ -381,23 +398,23 @@ class BaseTestIOBasic(BaseTestIO):
                 fh.Set_size(0)
                 fh.Set_view(0, etype)
                 count = 13
-                wbuf = array(rank%42, typecode, count)
+                wbuf = array(rank % 42, typecode, count)
                 fh.Seek_shared(0, MPI.SEEK_SET)
                 fh.Write_ordered(wbuf.as_raw())
                 fh.Sync()
                 comm.Barrier()
                 fh.Sync()
-                rbuf = array(-1, typecode, count+1)
+                rbuf = array(-1, typecode, count + 1)
                 fh.Seek_shared(0, MPI.SEEK_SET)
                 fh.Read_ordered(rbuf.as_mpi_c(count))
                 for value in rbuf[:-1]:
-                    self.assertEqual(value, scalar(rank%42))
+                    self.assertEqual(value, scalar(rank % 42))
                 self.assertEqual(rbuf[-1], scalar(-1))
                 comm.Barrier()
 
     def testReadWriteOrderedBeginEnd(self):
         comm = self.COMM
-        size = comm.Get_size()
+        comm.Get_size()
         rank = comm.Get_rank()
         fh = self.FILE
         for array, typecode in arrayimpl_loop_io():
@@ -406,25 +423,25 @@ class BaseTestIOBasic(BaseTestIO):
                 fh.Set_size(0)
                 fh.Set_view(0, etype)
                 count = 13
-                wbuf = array(rank%42, typecode, count)
+                wbuf = array(rank % 42, typecode, count)
                 fh.Seek_shared(0, MPI.SEEK_SET)
                 fh.Write_ordered_begin(wbuf.as_raw())
                 fh.Write_ordered_end(wbuf.as_raw())
                 fh.Sync()
                 comm.Barrier()
                 fh.Sync()
-                rbuf = array(-1, typecode, count+1)
+                rbuf = array(-1, typecode, count + 1)
                 fh.Seek_shared(0, MPI.SEEK_SET)
                 fh.Read_ordered_begin(rbuf.as_mpi_c(count))
                 fh.Read_ordered_end(rbuf.as_raw())
                 for value in rbuf[:-1]:
-                    self.assertEqual(value, scalar(rank%42))
+                    self.assertEqual(value, scalar(rank % 42))
                 self.assertEqual(rbuf[-1], scalar(-1))
                 comm.Barrier()
 
 
 class BaseTestIOView(BaseTestIO):
-
+    #
     def _test_contiguous(self, combiner):
         comm = self.COMM
         size = comm.Get_size()
@@ -446,16 +463,16 @@ class BaseTestIOView(BaseTestIO):
                     ftype = etype.Create_contiguous(7).Commit()
                 fh.Set_view(0, etype, ftype)
                 for i in range(3):
-                    wval = 10*(rank+1)+i
+                    wval = 10 * (rank + 1) + i
                     wbuf = array(wval, typecode, 7)
                     fh.Write_ordered(wbuf.as_raw())
                 fh.Sync()
                 comm.Barrier()
-                if unittest.is_mpi('openmpi(<4.0.0)'):
+                if unittest.is_mpi("openmpi(<4.0.0)"):
                     fh.Seek_shared(0, MPI.SEEK_SET)
                 fh.Set_view(0, etype, ftype)
                 for i in range(3):
-                    rval = 10*(rank+1)+i
+                    rval = 10 * (rank + 1) + i
                     rbuf = array(0, typecode, 7)
                     fh.Read_ordered(rbuf.as_raw())
                     for value in rbuf:
@@ -463,11 +480,11 @@ class BaseTestIOView(BaseTestIO):
                 if ftype != btype:
                     ftype.Free()
                 fh.Set_view(0, etype, etype)
-                if unittest.is_mpi('openmpi(<4.0.0)'):
+                if unittest.is_mpi("openmpi(<4.0.0)"):
                     fh.Seek_shared(0, MPI.SEEK_SET)
                 for i in range(3):
                     for r in range(size):
-                        rval = 10*(r+1)+i
+                        rval = 10 * (r + 1) + i
                         rbuf = array(0, typecode, 7)
                         fh.Read_all(rbuf.as_raw())
                         for value in rbuf:
@@ -495,8 +512,8 @@ class BaseTestIOView(BaseTestIO):
                     if combiner == MPI.COMBINER_VECTOR:
                         ftype1 = etype.Create_vector(4, 1, 2).Commit()
                     if combiner == MPI.COMBINER_HVECTOR:
-                        ftype1 = etype.Create_hvector(4, 1, esize*2).Commit()
-                    fbase2 = etype.Create_indexed([1]*3, index2)
+                        ftype1 = etype.Create_hvector(4, 1, esize * 2).Commit()
+                    fbase2 = etype.Create_indexed([1] * 3, index2)
                     ftype2 = fbase2.Create_resized(0, ftype1.extent).Commit()
                     fbase2.Free()
                 if combiner in (
@@ -505,9 +522,9 @@ class BaseTestIOView(BaseTestIO):
                     MPI.COMBINER_HINDEXED,
                     MPI.COMBINER_HINDEXED_BLOCK,
                 ):
-                    INDEXED        = MPI.COMBINER_INDEXED
-                    INDEXED_BLOCK  = MPI.COMBINER_INDEXED_BLOCK
-                    HINDEXED       = MPI.COMBINER_HINDEXED
+                    INDEXED = MPI.COMBINER_INDEXED
+                    INDEXED_BLOCK = MPI.COMBINER_INDEXED_BLOCK
+                    HINDEXED = MPI.COMBINER_HINDEXED
                     HINDEXED_BLOCK = MPI.COMBINER_HINDEXED_BLOCK
                     if combiner == INDEXED:
                         Create = MPI.Datatype.Create_indexed
@@ -526,9 +543,9 @@ class BaseTestIOView(BaseTestIO):
                     if combiner in (INDEXED, INDEXED_BLOCK):
                         disps1 = index1
                         disps2 = index2
-                    if combiner in ( HINDEXED, HINDEXED_BLOCK):
-                        disps1 = [esize*i for i in index1]
-                        disps2 = [esize*i for i in index2]
+                    if combiner in (HINDEXED, HINDEXED_BLOCK):
+                        disps1 = [esize * i for i in index1]
+                        disps2 = [esize * i for i in index2]
                     ftype1 = Create(etype, blens1, disps1).Commit()
                     fbase2 = Create(etype, blens2, disps2)
                     ftype2 = fbase2.Create_resized(0, ftype1.extent).Commit()
@@ -536,67 +553,68 @@ class BaseTestIOView(BaseTestIO):
                 if combiner == MPI.COMBINER_STRUCT:
                     ftype1 = MPI.Datatype.Create_struct(
                         [1] * 4,
-                        [esize*i for i in index1],
+                        [esize * i for i in index1],
                         [etype] * 4,
                     ).Commit()
                     fbase2 = MPI.Datatype.Create_struct(
                         [1] * 3,
-                        [esize*i for i in index2],
+                        [esize * i for i in index2],
                         [etype] * 3,
                     )
                     ftype2 = fbase2.Create_resized(
-                        0, ftype1.extent,
+                        0,
+                        ftype1.extent,
                     ).Commit()
                     fbase2.Free()
                 #
-                if unittest.is_mpi('openmpi(<4.0.0)'):
+                if unittest.is_mpi("openmpi(<4.0.0)"):
                     fh.Seek_shared(0, MPI.SEEK_SET)
                 fh.Set_view(0, etype, ftype1)
                 for i in range(3):
-                    wval = 10*(rank+1)+i
-                    warg = [wval+j for j in range(0,7,2)]
+                    wval = 10 * (rank + 1) + i
+                    warg = [wval + j for j in range(0, 7, 2)]
                     wbuf = array(warg, typecode)
                     fh.Write_ordered(wbuf.as_raw())
-                if unittest.is_mpi('openmpi(<4.0.0)'):
+                if unittest.is_mpi("openmpi(<4.0.0)"):
                     fh.Seek_shared(0, MPI.SEEK_SET)
                 fh.Set_view(0, etype, ftype2)
                 for i in range(3):
-                    wval = 10*(rank+1)+i
-                    warg = [wval+j for j in range(1,7,2)]
+                    wval = 10 * (rank + 1) + i
+                    warg = [wval + j for j in range(1, 7, 2)]
                     wbuf = array(warg, typecode)
                     fh.Write_ordered(wbuf.as_raw())
                 fh.Sync()
                 comm.Barrier()
-                if unittest.is_mpi('openmpi(<4.0.0)'):
+                if unittest.is_mpi("openmpi(<4.0.0)"):
                     fh.Seek_shared(0, MPI.SEEK_SET)
                 fh.Set_view(0, etype, ftype1)
                 for i in range(3):
-                    rval = 10*(rank+1)+i
+                    rval = 10 * (rank + 1) + i
                     rbuf = array(0, typecode, 4)
                     fh.Read_ordered(rbuf.as_raw())
-                    for value, j in zip(rbuf, range(0,7,2)):
-                        self.assertEqual(value, scalar(rval+j))
-                if unittest.is_mpi('openmpi(<4.0.0)'):
+                    for value, j in zip(rbuf, range(0, 7, 2)):
+                        self.assertEqual(value, scalar(rval + j))
+                if unittest.is_mpi("openmpi(<4.0.0)"):
                     fh.Seek_shared(0, MPI.SEEK_SET)
                 fh.Set_view(0, etype, ftype2)
                 for i in range(3):
-                    rval = 10*(rank+1)+i
+                    rval = 10 * (rank + 1) + i
                     rbuf = array(0, typecode, 3)
                     fh.Read_ordered(rbuf.as_raw())
-                    for value, j in zip(rbuf, range(1,7,2)):
-                        self.assertEqual(value, scalar(rval+j))
+                    for value, j in zip(rbuf, range(1, 7, 2)):
+                        self.assertEqual(value, scalar(rval + j))
                 ftype1.Free()
                 ftype2.Free()
-                if unittest.is_mpi('openmpi(<4.0.0)'):
+                if unittest.is_mpi("openmpi(<4.0.0)"):
                     fh.Seek_shared(0, MPI.SEEK_SET)
                 fh.Set_view(0, etype, etype)
                 for i in range(3):
                     for r in range(size):
-                        rval = 10*(r+1)+i
+                        rval = 10 * (r + 1) + i
                         rbuf = array(0, typecode, 7)
                         fh.Read_all(rbuf.as_raw())
                         for j, value in enumerate(rbuf):
-                            self.assertEqual(value, scalar(rval+j))
+                            self.assertEqual(value, scalar(rval + j))
 
     def testNamed(self):
         self._test_contiguous(MPI.COMBINER_NAMED)
@@ -639,21 +657,21 @@ class BaseTestIOView(BaseTestIO):
                 fh.Set_size(0)
                 etype = array.TypeMap[typecode]
                 ftype = etype.Create_subarray(
-                    [size*7, 5],
+                    [size * 7, 5],
                     [7, 5],
-                    [rank*7, 0],
+                    [rank * 7, 0],
                 ).Commit()
                 fh.Set_view(0, etype, ftype)
                 for i in range(3):
-                    wval = 10*(rank+1)+i
-                    wbuf = array(wval, typecode, 7*5)
+                    wval = 10 * (rank + 1) + i
+                    wbuf = array(wval, typecode, 7 * 5)
                     fh.Write_all(wbuf.as_raw())
                 fh.Sync()
                 comm.Barrier()
                 fh.Set_view(0, etype, ftype)
                 for i in range(3):
-                    rval = 10*(rank+1)+i
-                    rbuf = array(0, typecode, 7*5)
+                    rval = 10 * (rank + 1) + i
+                    rbuf = array(0, typecode, 7 * 5)
                     fh.Read_all(rbuf.as_raw())
                     for value in rbuf:
                         self.assertEqual(value, scalar(rval))
@@ -661,8 +679,8 @@ class BaseTestIOView(BaseTestIO):
                 fh.Set_view(0, etype, etype)
                 for i in range(3):
                     for r in range(size):
-                        rval = 10*(r+1)+i
-                        rbuf = array(0, typecode, 7*5)
+                        rval = 10 * (r + 1) + i
+                        rbuf = array(0, typecode, 7 * 5)
                         fh.Read_all(rbuf.as_raw())
                         for value in rbuf:
                             self.assertEqual(value, scalar(rval))
@@ -681,23 +699,24 @@ class BaseTestIOView(BaseTestIO):
                 fh.Set_size(0)
                 etype = array.TypeMap[typecode]
                 ftype = etype.Create_darray(
-                    size, rank,
-                    [size*7, 5],
+                    size,
+                    rank,
+                    [size * 7, 5],
                     [block, none],
                     [dflt, dflt],
                     [size, 1],
                 ).Commit()
                 fh.Set_view(0, etype, ftype)
                 for i in range(3):
-                    wval = 10*(rank+1)+i
-                    wbuf = array(wval, typecode, 7*5)
+                    wval = 10 * (rank + 1) + i
+                    wbuf = array(wval, typecode, 7 * 5)
                     fh.Write_all(wbuf.as_raw())
                 fh.Sync()
                 comm.Barrier()
                 fh.Set_view(0, etype, ftype)
                 for i in range(3):
-                    rval = 10*(rank+1)+i
-                    rbuf = array(0, typecode, 7*5)
+                    rval = 10 * (rank + 1) + i
+                    rbuf = array(0, typecode, 7 * 5)
                     fh.Read_all(rbuf.as_raw())
                     for value in rbuf:
                         self.assertEqual(value, scalar(rval))
@@ -705,8 +724,8 @@ class BaseTestIOView(BaseTestIO):
                 fh.Set_view(0, etype, etype)
                 for i in range(3):
                     for r in range(size):
-                        for j in range(7):
-                            rval = 10*(r+1)+i
+                        for _j in range(7):
+                            rval = 10 * (r + 1) + i
                             rbuf = array(0, typecode, 5)
                             fh.Read_all(rbuf.as_raw())
                             for value in rbuf:
@@ -726,72 +745,81 @@ class BaseTestIOView(BaseTestIO):
                 fh.Set_size(0)
                 etype = array.TypeMap[typecode]
                 ftype = etype.Create_darray(
-                    size, rank,
-                    [size*7, 5],
+                    size,
+                    rank,
+                    [size * 7, 5],
                     [cyclic, none],
                     [1, dflt],
                     [size, 1],
                 ).Commit()
                 fh.Set_view(0, etype, ftype)
                 for i in range(3):
-                    wval = 10*(rank+1)+i
-                    wbuf = array(wval, typecode, 7*5)
+                    wval = 10 * (rank + 1) + i
+                    wbuf = array(wval, typecode, 7 * 5)
                     fh.Write_all(wbuf.as_raw())
                 fh.Sync()
                 comm.Barrier()
                 fh.Set_view(0, etype, ftype)
                 for i in range(3):
-                    rval = 10*(rank+1)+i
-                    rbuf = array(0, typecode, 7*5)
+                    rval = 10 * (rank + 1) + i
+                    rbuf = array(0, typecode, 7 * 5)
                     fh.Read_all(rbuf.as_raw())
                     for value in rbuf:
                         self.assertEqual(value, scalar(rval))
                 ftype.Free()
                 fh.Set_view(0, etype, etype)
                 for i in range(3):
-                    for j in range(7):
+                    for _j in range(7):
                         for r in range(size):
-                            rval = 10*(r+1)+i
+                            rval = 10 * (r + 1) + i
                             rbuf = array(0, typecode, 5)
                             fh.Read_all(rbuf.as_raw())
                             for value in rbuf:
                                 self.assertEqual(value, scalar(rval))
 
 
-@unittest.skipMPI('MPICH1')
+@unittest.skipMPI("MPICH1")
 class TestIOBasicSelf(BaseTestIOBasic, unittest.TestCase):
+    #
     COMM = MPI.COMM_SELF
 
-@unittest.skipMPI('openmpi(<2.2.0)')
-@unittest.skipMPI('msmpi')
-@unittest.skipMPI('MPICH2')
-@unittest.skipMPI('MPICH1')
+
+@unittest.skipMPI("openmpi(<2.2.0)")
+@unittest.skipMPI("msmpi")
+@unittest.skipMPI("MPICH2")
+@unittest.skipMPI("MPICH1")
 class TestIOBasicWorld(BaseTestIOBasic, unittest.TestCase):
+    #
     COMM = MPI.COMM_WORLD
 
-@unittest.skipMPI('mpich(>=4.0.0,<4.1.0)')
-@unittest.skipMPI('openmpi(<2.2.0)')
-@unittest.skipMPI('MPICH1')
+
+@unittest.skipMPI("mpich(>=4.0.0,<4.1.0)")
+@unittest.skipMPI("openmpi(<2.2.0)")
+@unittest.skipMPI("MPICH1")
 class TestIOViewSelf(BaseTestIOView, unittest.TestCase):
+    #
     COMM = MPI.COMM_SELF
 
-@unittest.skipMPI('mpich(>=4.0.0,<4.1.0)')
-@unittest.skipMPI('openmpi(<2.2.0)')
-@unittest.skipMPI('msmpi')
-@unittest.skipMPI('MPICH2')
-@unittest.skipMPI('MPICH1')
+
+@unittest.skipMPI("mpich(>=4.0.0,<4.1.0)")
+@unittest.skipMPI("openmpi(<2.2.0)")
+@unittest.skipMPI("msmpi")
+@unittest.skipMPI("MPICH2")
+@unittest.skipMPI("MPICH1")
 class TestIOViewWorld(BaseTestIOView, unittest.TestCase):
+    #
     COMM = MPI.COMM_WORLD
 
 
-@unittest.skipMPI('msmpi')
-@unittest.skipMPI('openmpi')
-@unittest.skipMPI('impi', os.name == 'nt')
+@unittest.skipMPI("msmpi")
+@unittest.skipMPI("openmpi")
+@unittest.skipMPI("impi", os.name == "nt")
 class TestDatarep(unittest.TestCase):
-
+    #
     def testRegister(self):
         def extent_fn(dtype):
             return dtype.extent
+
         try:
             MPI.Register_datarep(
                 "mpi4py-datarep-dummy",
@@ -800,7 +828,7 @@ class TestDatarep(unittest.TestCase):
                 extent_fn=extent_fn,
             )
         except NotImplementedError:
-            self.skipTest('mpi-register-datrep')
+            self.skipTest("mpi-register-datrep")
         with self.assertRaises(MPI.Exception) as cm:
             MPI.Register_datarep(
                 "mpi4py-datarep-dummy",
@@ -818,11 +846,13 @@ def have_feature():
     case.prefix = TestIOBasicSelf.prefix
     case.setUp()
     case.tearDown()
+
+
 try:
     have_feature()
 except NotImplementedError:
-    unittest.disable(BaseTestIO, 'mpi-io')
+    unittest.disable(BaseTestIO, "mpi-io")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

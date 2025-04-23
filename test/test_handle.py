@@ -1,8 +1,10 @@
-from mpi4py import MPI
 import mpiunittest as unittest
 
-class BaseTestHandle:
+from mpi4py import MPI
 
+
+class BaseTestHandle:
+    #
     HANDLES = []
 
     def checkHandleMPI(self, handle1):
@@ -53,12 +55,14 @@ class BaseTestHandle:
             handle = MPI.Win.Create(MPI.BOTTOM, comm=MPI.COMM_SELF)
         if issubclass(klass, MPI.File):
             import os
+
             name = os.devnull
             mode = MPI.MODE_RDONLY
-            if os.name != 'posix':
+            if os.name != "posix":
                 import tempfile
+
                 rank = MPI.COMM_WORLD.Get_rank()
-                fd, name = tempfile.mkstemp(prefix=f'mpi4py-{rank}-')
+                fd, name = tempfile.mkstemp(prefix=f"mpi4py-{rank}-")
                 os.close(fd)
                 mode |= MPI.MODE_CREATE
                 mode |= MPI.MODE_DELETE_ON_CLOSE
@@ -67,7 +71,7 @@ class BaseTestHandle:
 
     def destroy(self, handle):
         if handle:
-            for method in ('Free', 'Close', 'Finalize'):
+            for method in ("Free", "Close", "Finalize"):
                 if hasattr(handle, method):
                     getattr(handle, method)()
 
@@ -76,7 +80,7 @@ class BaseTestHandle:
             check(handle)
             if not handle:
                 continue
-            if not hasattr(handle, 'Dup'):
+            if not hasattr(handle, "Dup"):
                 continue
             handle = handle.Dup()
             try:
@@ -104,7 +108,7 @@ class BaseTestHandle:
 
 
 class TestHandleStatus(BaseTestHandle, unittest.TestCase):
-
+    #
     def setUp(self):
         s1 = MPI.Status()
         s2 = MPI.Status()
@@ -123,7 +127,7 @@ class TestHandleStatus(BaseTestHandle, unittest.TestCase):
     def testHandleInt(self):
         pass
 
-    @unittest.skipMPI('MPICH1')
+    @unittest.skipMPI("MPICH1")
     def testFortran(self):
         super().testFortran()
 
@@ -141,37 +145,56 @@ class TestHandleStatus(BaseTestHandle, unittest.TestCase):
             self.assertEqual(f_status[e], status.Get_error())
             self.assertEqual(len(f_status), MPI.F_STATUS_SIZE)
 
+
 class TestHandleDatatype(BaseTestHandle, unittest.TestCase):
+    #
     HANDLES = [
         MPI.DATATYPE_NULL,
-        MPI.CHAR,  MPI.SHORT,
-        MPI.INT,   MPI.LONG,
-        MPI.FLOAT, MPI.DOUBLE,
+        MPI.CHAR,
+        MPI.SHORT,
+        MPI.INT,
+        MPI.LONG,
+        MPI.FLOAT,
+        MPI.DOUBLE,
     ]
+
 
 class TestHandleOp(BaseTestHandle, unittest.TestCase):
+    #
     HANDLES = [
         MPI.OP_NULL,
-        MPI.MAX, MPI.MIN,
-        MPI.SUM, MPI.PROD,
-        MPI.LAND, MPI.BAND,
-        MPI.LOR, MPI.BOR,
-        MPI.LXOR, MPI.BXOR,
-        MPI.MAXLOC, MPI.MINLOC,
+        MPI.MAX,
+        MPI.MIN,
+        MPI.SUM,
+        MPI.PROD,
+        MPI.LAND,
+        MPI.BAND,
+        MPI.LOR,
+        MPI.BOR,
+        MPI.LXOR,
+        MPI.BXOR,
+        MPI.MAXLOC,
+        MPI.MINLOC,
     ]
 
+
 class TestHandleRequest(BaseTestHandle, unittest.TestCase):
+    #
     HANDLES = [
         MPI.REQUEST_NULL,
     ]
 
+
 class TestHandleMessage(BaseTestHandle, unittest.TestCase):
+    #
     HANDLES = [
         MPI.MESSAGE_NULL,
         MPI.MESSAGE_NO_PROC,
     ]
 
+
 class TestHandleErrhandler(BaseTestHandle, unittest.TestCase):
+    #
     HANDLES = [
         MPI.ERRHANDLER_NULL,
         MPI.ERRORS_RETURN,
@@ -179,39 +202,51 @@ class TestHandleErrhandler(BaseTestHandle, unittest.TestCase):
         MPI.ERRORS_ABORT,
     ]
 
+
 class TestHandleInfo(BaseTestHandle, unittest.TestCase):
+    #
     HANDLES = [
         MPI.INFO_NULL,
     ]
 
+
 class TestHandleGroup(BaseTestHandle, unittest.TestCase):
+    #
     HANDLES = [
         MPI.GROUP_NULL,
         MPI.GROUP_EMPTY,
     ]
 
+
 class TestHandleSession(BaseTestHandle, unittest.TestCase):
+    #
     HANDLES = [
         MPI.SESSION_NULL,
     ]
 
+
 class TestHandleComm(BaseTestHandle, unittest.TestCase):
+    #
     HANDLES = [
         MPI.COMM_NULL,
         MPI.COMM_SELF,
         MPI.COMM_WORLD,
     ]
 
+
 class TestHandleWin(BaseTestHandle, unittest.TestCase):
+    #
     HANDLES = [
         MPI.WIN_NULL,
     ]
 
+
 class TestHandleFile(BaseTestHandle, unittest.TestCase):
+    #
     HANDLES = [
         MPI.FILE_NULL,
     ]
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

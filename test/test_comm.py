@@ -1,13 +1,18 @@
-from mpi4py import MPI
 import mpiunittest as unittest
 
-class TestCommNull(unittest.TestCase):
+from mpi4py import MPI
 
+
+class TestCommNull(unittest.TestCase):
+    #
     def testConstructor(self):
         comm = MPI.Comm()
         self.assertEqual(comm, MPI.COMM_NULL)
         self.assertIsNot(comm, MPI.COMM_NULL)
-        def construct(): MPI.Comm((1,2,3))
+
+        def construct():
+            MPI.Comm((1, 2, 3))
+
         self.assertRaises(TypeError, construct)
 
     def testConstructorIntra(self):
@@ -26,14 +31,16 @@ class TestCommNull(unittest.TestCase):
 
     def testPickle(self):
         from pickle import dumps, loads
+
         comm_null = loads(dumps(MPI.COMM_NULL))
         self.assertIs(comm_null, MPI.COMM_NULL)
         comm_null = loads(dumps(MPI.Comm(MPI.COMM_NULL)))
         self.assertIsNot(comm_null, MPI.COMM_NULL)
         self.assertEqual(comm_null, MPI.COMM_NULL)
 
-class BaseTestComm:
 
+class BaseTestComm:
+    #
     def testConstructor(self):
         comm = MPI.Comm(self.COMM)
         self.assertEqual(comm, self.COMM)
@@ -50,7 +57,7 @@ class BaseTestComm:
         self.assertLess(rank, size)
 
     def testGroup(self):
-        comm  = self.COMM
+        comm = self.COMM
         group = self.COMM.Get_group()
         self.assertEqual(comm.Get_size(), group.Get_size())
         self.assertEqual(comm.Get_rank(), group.Get_rank())
@@ -86,14 +93,14 @@ class BaseTestComm:
             self.assertEqual(self.COMM.Get_name(), name)
             self.COMM.name = self.COMM.name
         except NotImplementedError:
-            self.skipTest('mpi-comm-name')
+            self.skipTest("mpi-comm-name")
 
     def testGetParent(self):
         try:
             parent = MPI.Comm.Get_parent()
             self.assertIsInstance(parent, MPI.Intercomm)
         except NotImplementedError:
-            self.skipTest('mpi-comm-get_parent')
+            self.skipTest("mpi-comm-get_parent")
 
     def testDupWithInfo(self):
         info = None
@@ -106,23 +113,23 @@ class BaseTestComm:
         self.COMM.Dup_with_info(info).Free()
         info.Free()
 
-    @unittest.skipMPI('mpich(<=3.1.0)', MPI.Query_thread() > MPI.THREAD_SINGLE)
+    @unittest.skipMPI("mpich(<=3.1.0)", MPI.Query_thread() > MPI.THREAD_SINGLE)
     def testIDup(self):
         try:
             comm, request = self.COMM.Idup()
         except NotImplementedError:
-            self.skipTest('mpi-comm-idup')
+            self.skipTest("mpi-comm-idup")
         request.Wait()
         ccmp = MPI.Comm.Compare(self.COMM, comm)
         comm.Free()
         self.assertEqual(ccmp, MPI.CONGRUENT)
 
-    @unittest.skipMPI('mpich(<=3.1.0)', MPI.Query_thread() > MPI.THREAD_SINGLE)
+    @unittest.skipMPI("mpich(<=3.1.0)", MPI.Query_thread() > MPI.THREAD_SINGLE)
     def testIDupWithInfo(self):
         try:
             comm, request = self.COMM.Idup_with_info(MPI.INFO_NULL)
         except NotImplementedError:
-            self.skipTest('mpi-comm-idup-info')
+            self.skipTest("mpi-comm-idup-info")
         request.Wait()
         ccmp = MPI.Comm.Compare(self.COMM, comm)
         comm.Free()
@@ -155,14 +162,14 @@ class BaseTestComm:
         comm.Free()
         group.Free()
 
-    @unittest.skipMPI('openmpi(<=1.8.1)')
+    @unittest.skipMPI("openmpi(<=1.8.1)")
     def testCreateGroup(self):
         group = self.COMM.Get_group()
         try:
             comm = self.COMM.Create_group(group)
         except NotImplementedError:
             self.assertLess(MPI.Get_version(), (3, 0))
-            self.skipTest('mpi-comm-create_group')
+            self.skipTest("mpi-comm-create_group")
         else:
             ccmp = MPI.Comm.Compare(self.COMM, comm)
             comm.Free()
@@ -176,7 +183,7 @@ class BaseTestComm:
             comm = MPI.Intracomm.Create_from_group(group)
         except NotImplementedError:
             self.assertLess(MPI.Get_version(), (4, 0))
-            self.skipTest('mpi-comm-create_from_group')
+            self.skipTest("mpi-comm-create_from_group")
         except MPI.Exception as exc:  # openmpi
             UNSUPPORTED = MPI.ERR_UNSUPPORTED_OPERATION
             if exc.Get_error_class() != UNSUPPORTED:
@@ -200,12 +207,12 @@ class BaseTestComm:
         self.assertEqual(comm.Get_size(), 1)
         comm.Free()
 
-    @unittest.skipMPI('openmpi(==2.0.0)')
+    @unittest.skipMPI("openmpi(==2.0.0)")
     def testSplitTypeShared(self):
         try:
             MPI.COMM_SELF.Split_type(MPI.COMM_TYPE_SHARED).Free()
         except NotImplementedError:
-            self.skipTest('mpi-comm-split_type')
+            self.skipTest("mpi-comm-split_type")
         comm = self.COMM.Split_type(MPI.UNDEFINED)
         self.assertEqual(comm, MPI.COMM_NULL)
         comm = self.COMM.Split_type(MPI.COMM_TYPE_SHARED)
@@ -234,7 +241,7 @@ class BaseTestComm:
         try:
             MPI.COMM_SELF.Split_type(MPI.COMM_TYPE_SHARED).Free()
         except NotImplementedError:
-            self.skipTest('mpi-comm-split_type')
+            self.skipTest("mpi-comm-split_type")
         if MPI.Get_version() < (4, 0):
             self.skipTest("mpi-comm-split_type-hw_guided")
         split_type = MPI.COMM_TYPE_HW_GUIDED
@@ -251,13 +258,17 @@ class BaseTestComm:
         self.assertEqual(comm, MPI.COMM_NULL)
         info.Set("mpi_hw_resource_type", "@dont-thread-on-me@")
         comm = self.COMM.Split_type(split_type, info=info)
-        if unittest.is_mpi('impi(==2021.14.0)'): comm.free()
-        if unittest.is_mpi('impi(==2021.14.1)'): comm.free()
-        if unittest.is_mpi('impi(==2021.14.2)'): comm.free()
+        if unittest.is_mpi("impi(==2021.14.0)"):
+            comm.free()
+        if unittest.is_mpi("impi(==2021.14.1)"):
+            comm.free()
+        if unittest.is_mpi("impi(==2021.14.2)"):
+            comm.free()
         self.assertEqual(comm, MPI.COMM_NULL)
         info.Free()
         #
-        if unittest.is_mpi('impi'): return
+        if unittest.is_mpi("impi"):
+            return
         restype = "mpi_hw_resource_type"
         shmem = "mpi_shared_memory"
         info = MPI.Info.Create()
@@ -288,7 +299,7 @@ class BaseTestComm:
         try:
             MPI.COMM_SELF.Split_type(MPI.COMM_TYPE_SHARED).Free()
         except NotImplementedError:
-            self.skipTest('mpi-comm-split_type')
+            self.skipTest("mpi-comm-split_type")
         if MPI.Get_version() < (4, 1):
             self.skipTest("mpi-comm-split_type-resource_guided")
         split_type = MPI.COMM_TYPE_RESOURCE_GUIDED
@@ -305,9 +316,12 @@ class BaseTestComm:
         self.assertEqual(comm, MPI.COMM_NULL)
         info.Set("mpi_hw_resource_type", "@dont-thread-on-me@")
         comm = self.COMM.Split_type(split_type, info=info)
-        if unittest.is_mpi('impi(==2021.14.0)'): comm.free()
-        if unittest.is_mpi('impi(==2021.14.1)'): comm.free()
-        if unittest.is_mpi('impi(==2021.14.2)'): comm.free()
+        if unittest.is_mpi("impi(==2021.14.0)"):
+            comm.free()
+        if unittest.is_mpi("impi(==2021.14.1)"):
+            comm.free()
+        if unittest.is_mpi("impi(==2021.14.2)"):
+            comm.free()
         self.assertEqual(comm, MPI.COMM_NULL)
         info.Free()
         #
@@ -341,7 +355,7 @@ class BaseTestComm:
         try:
             MPI.COMM_SELF.Split_type(MPI.COMM_TYPE_SHARED).Free()
         except NotImplementedError:
-            self.skipTest('mpi-comm-split_type')
+            self.skipTest("mpi-comm-split_type")
         if MPI.Get_version() < (4, 0):
             self.skipTest("mpi-comm-split_type-hw_unguided")
         hwcomm = [self.COMM]
@@ -350,7 +364,8 @@ class BaseTestComm:
             info = MPI.Info.Create()
             comm = hwcomm[-1].Split_type(
                 MPI.COMM_TYPE_HW_UNGUIDED,
-                key=rank, info=info,
+                key=rank,
+                info=info,
             )
             if comm != MPI.COMM_NULL:
                 self.assertTrue(info.Get("mpi_hw_resource_type"))
@@ -364,7 +379,7 @@ class BaseTestComm:
 
     def testBuffering(self):
         comm = self.COMM.Dup()
-        buf = MPI.Alloc_mem((1<<16)+MPI.BSEND_OVERHEAD)
+        buf = MPI.Alloc_mem((1 << 16) + MPI.BSEND_OVERHEAD)
         try:
             with self.catchNotImplementedError(4, 1):
                 comm.Attach_buffer(buf)
@@ -386,6 +401,7 @@ class BaseTestComm:
 
     def testPickle(self):
         from pickle import dumps, loads
+
         COMM = self.COMM
         if COMM in (MPI.COMM_SELF, MPI.COMM_WORLD):
             comm = loads(dumps(COMM))
@@ -415,6 +431,7 @@ class BaseTestComm:
 
 
 class TestCommSelf(BaseTestComm, unittest.TestCase):
+    #
     def setUp(self):
         self.COMM = MPI.COMM_SELF
 
@@ -426,27 +443,29 @@ class TestCommSelf(BaseTestComm, unittest.TestCase):
         rank = self.COMM.Get_rank()
         self.assertEqual(rank, 0)
 
-    @unittest.skipMPI('openmpi(<5.0.6)')
+    @unittest.skipMPI("openmpi(<5.0.6)")
     def testCreateFromGroup(self):
         super().testCreateFromGroup()
 
 
 class TestCommWorld(BaseTestComm, unittest.TestCase):
-
+    #
     def setUp(self):
         self.COMM = MPI.COMM_WORLD
 
-class TestCommSelfDup(TestCommSelf):
 
+class TestCommSelfDup(TestCommSelf):
+    #
     def setUp(self):
         self.COMM = MPI.COMM_SELF.Dup()
 
     def tearDown(self):
         self.COMM.Free()
 
-@unittest.skipMPI('openmpi(<1.4.0)', MPI.Query_thread() > MPI.THREAD_SINGLE)
-class TestCommWorldDup(TestCommWorld):
 
+@unittest.skipMPI("openmpi(<1.4.0)", MPI.Query_thread() > MPI.THREAD_SINGLE)
+class TestCommWorldDup(TestCommWorld):
+    #
     def setUp(self):
         self.COMM = MPI.COMM_WORLD.Dup()
 
@@ -454,5 +473,5 @@ class TestCommWorldDup(TestCommWorld):
         self.COMM.Free()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

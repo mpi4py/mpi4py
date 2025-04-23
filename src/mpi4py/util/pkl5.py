@@ -6,18 +6,15 @@ import struct as _struct
 
 from .. import MPI
 from ..MPI import (
-    ROOT,
-    PROC_NULL,
     ANY_SOURCE,
     ANY_TAG,
-    Status,
-)
-
-from ..MPI import (
+    PROC_NULL,
+    ROOT,
     Pickle,
+    Status,
     _comm_lock,
-    _commctx_intra,
     _commctx_inter,
+    _commctx_intra,
 )
 
 pickle = Pickle()
@@ -35,9 +32,9 @@ class _BigMPI:
     """Support for large message counts."""
 
     blocksize = (
-        (1 << (_struct.calcsize('q') * 8 - 1)) - 1
-        if MPI.Get_version() >= (4, 0) else
-        (1 << (_struct.calcsize('i') * 8 - 1)) - 1
+        (1 << (_struct.calcsize("q") * 8 - 1)) - 1
+        if MPI.Get_version() >= (4, 0)
+        else (1 << (_struct.calcsize("i") * 8 - 1)) - 1
     )
 
     def __init__(self):
@@ -67,7 +64,7 @@ _bigmpi = _BigMPI()
 
 
 def _info_typecode():
-    return 'q'
+    return "q"
 
 
 def _info_datatype():
@@ -116,13 +113,14 @@ def _send(comm, send, obj, dest, tag):
         send(comm, (None, 0, MPI.BYTE), dest, tag)
         return
     data, bufs = _pickle_dumps(obj)
-    with _comm_lock(comm, 'send'):
+    with _comm_lock(comm, "send"):
         _send_raw(comm, send, data, bufs, dest, tag)
 
 
 def _isend(comm, isend, obj, dest, tag):
     def send(comm, buf, dest, tag):
         sreqs.append(isend(comm, buf, dest, tag))
+
     sreqs = []
     _send(comm, send, obj, dest, tag)
     request = Request(sreqs)
@@ -142,9 +140,9 @@ def _recv_raw(comm, recv, buf, source, tag, status=None):
     MPI.Comm.Recv(comm, (info, infotype), source, tag, status)
     info = _info_unpack(info)
     if buf is not None:
-        buf = memoryview(buf).cast('B')
+        buf = memoryview(buf).cast("B")
         if len(buf) > info[0]:
-            buf = buf[:info[0]]
+            buf = buf[: info[0]]
         if len(buf) < info[0]:
             buf = None
     data = _new_buffer(info[0]) if buf is None else buf
@@ -162,7 +160,7 @@ def _recv(comm, recv, buf, source, tag, status):
     if source == PROC_NULL:
         recv(comm, (None, 0, MPI.BYTE), source, tag, status)
         return None
-    with _comm_lock(comm, 'recv'):
+    with _comm_lock(comm, "recv"):
         data, bufs = _recv_raw(comm, recv, buf, source, tag, status)
     return _pickle_loads(data, bufs)
 
@@ -173,7 +171,7 @@ def _mprobe(comm, mprobe, source, tag, status):
         return Message([rmsg])
     if status is None:
         status = Status()
-    with _comm_lock(comm, 'recv'):
+    with _comm_lock(comm, "recv"):
         message = []
         numbytes = 0
         rmsg = mprobe(comm, source, tag, status)
@@ -230,6 +228,7 @@ def _mrecv_data(message, mrecv, status=None):
 def _mrecv(message, status):
     def mrecv(rmsg, buf):
         MPI.Message.Recv(rmsg, buf)
+
     data, bufs = _mrecv_data(message, mrecv, status)
     return _pickle_loads(data, bufs)
 
@@ -237,17 +236,18 @@ def _mrecv(message, status):
 def _imrecv(message):
     def mrecv(rmsg, buf):
         rreqs.append(MPI.Message.Irecv(rmsg, buf))
+
     rreqs = []
     data, bufs = _mrecv_data(message, mrecv)
     request = Request(rreqs)
-    setattr(request, '_data_bufs', (data, bufs))  # noqa: B010
+    setattr(request, "_data_bufs", (data, bufs))  # noqa: B010
     return request
 
 
 def _req_load(request):
-    data_bufs = getattr(request, '_data_bufs', None)
+    data_bufs = getattr(request, "_data_bufs", None)
     if request == MPI.REQUEST_NULL and data_bufs is not None:
-        delattr(request, '_data_bufs')
+        delattr(request, "_data_bufs")
     if data_bufs is not None:
         data, bufs = data_bufs
         obj = _pickle_loads(data, bufs)
@@ -316,7 +316,7 @@ def _bcast_intra(comm, bcast, obj, root):
         data, bufs = _pickle_dumps(obj)
     else:
         data, bufs = _pickle_dumps(None)
-    with _comm_lock(comm, 'bcast'):
+    with _comm_lock(comm, "bcast"):
         data, bufs = _bcast_intra_raw(comm, bcast, data, bufs, root)
     return _pickle_loads(data, bufs)
 
@@ -338,7 +338,7 @@ def _bcast_inter(comm, bcast, obj, root):
             data, bufs = _recv_raw(comm, recv, None, root, tag)
         else:
             data, bufs = _pickle_dumps(None)
-        with _comm_lock(localcomm, 'bcast'):
+        with _comm_lock(localcomm, "bcast"):
             data, bufs = _bcast_intra_raw(localcomm, bcast, data, bufs, 0)
         return _pickle_loads(data, bufs)
     comm.Call_errhandler(MPI.ERR_ROOT)
@@ -619,16 +619,12 @@ class Message(tuple):
         return _imrecv(self)
 
     @classmethod
-    def probe(cls, comm,
-              source=ANY_SOURCE, tag=ANY_TAG,
-              status=None):
+    def probe(cls, comm, source=ANY_SOURCE, tag=ANY_TAG, status=None):
         """Blocking test for a matched message."""
         return _mprobe(comm, MPI.Comm.Mprobe, source, tag, status)
 
     @classmethod
-    def iprobe(cls, comm,
-               source=ANY_SOURCE, tag=ANY_TAG,
-               status=None):
+    def iprobe(cls, comm, source=ANY_SOURCE, tag=ANY_TAG, status=None):
         """Nonblocking test for a matched message."""
         return _mprobe(comm, MPI.Comm.Improbe, source, tag, status)
 
@@ -665,21 +661,24 @@ class Comm(MPI.Comm):
         """Nonblocking send in synchronous mode."""
         return _isend(self, MPI.Comm.Issend, obj, dest, tag)
 
-    def recv(self,
-             buf=None, source=ANY_SOURCE, tag=ANY_TAG,
-             status=None):
+    def recv(self, buf=None, source=ANY_SOURCE, tag=ANY_TAG, status=None):
         """Blocking receive."""
         return _recv(self, MPI.Comm.Recv, buf, source, tag, status)
 
-    def irecv(self,
-              buf=None, source=ANY_SOURCE, tag=ANY_TAG):  # noqa: ARG002
+    def irecv(self, buf=None, source=ANY_SOURCE, tag=ANY_TAG):  # noqa: ARG002
         """Nonblocking receive."""
         raise RuntimeError("unsupported")
 
-    def sendrecv(self,
-                 sendobj, dest, sendtag=0,
-                 recvbuf=None, source=ANY_SOURCE, recvtag=ANY_TAG,
-                 status=None):
+    def sendrecv(
+        self,
+        sendobj,
+        dest,
+        sendtag=0,
+        recvbuf=None,
+        source=ANY_SOURCE,
+        recvtag=ANY_TAG,
+        status=None,
+    ):
         """Send and receive."""
         # pylint: disable=too-many-arguments,too-many-positional-arguments
         sreq = _isend(self, MPI.Comm.Isend, sendobj, dest, sendtag)
@@ -687,15 +686,11 @@ class Comm(MPI.Comm):
         MPI.Request.Waitall(sreq)
         return robj
 
-    def mprobe(self,
-               source=ANY_SOURCE, tag=ANY_TAG,
-               status=None):
+    def mprobe(self, source=ANY_SOURCE, tag=ANY_TAG, status=None):
         """Blocking test for a matched message."""
         return _mprobe(self, MPI.Comm.Mprobe, source, tag, status)
 
-    def improbe(self,
-                source=ANY_SOURCE, tag=ANY_TAG,
-                status=None):
+    def improbe(self, source=ANY_SOURCE, tag=ANY_TAG, status=None):
         """Nonblocking test for a matched message."""
         return _mprobe(self, MPI.Comm.Improbe, source, tag, status)
 

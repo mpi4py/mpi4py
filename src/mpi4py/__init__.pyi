@@ -5,17 +5,18 @@ __author__: str = ...
 __credits__: str = ...
 
 from . import MPI
-__all__: list[str] = ['MPI']
+
+__all__: list[str] = ["MPI"]
 
 class Rc:
     initialize: bool = True
     threads: bool = True
-    thread_level: str = 'multiple'
+    thread_level: str = "multiple"
     finalize: bool | None = None
     fast_reduce: bool = True
     recv_mprobe: bool = True
     irecv_bufsz: int = 32768
-    errors: str = 'exception'
+    errors: str = "exception"
     def __init__(self, **kwargs: bool | str) -> None: ...
     def __setattr__(self, name: str, value: bool | str) -> None: ...
     def __call__(self, **kwargs: bool | str) -> None: ...
@@ -23,10 +24,9 @@ class Rc:
 rc: Rc = ...
 
 def get_include() -> str: ...
-
 def get_config() -> dict[str, str]: ...
-
 def profile(
-    name: str, *,
+    name: str,
+    *,
     path: str | Sequence[str] | None = None,
 ) -> None: ...

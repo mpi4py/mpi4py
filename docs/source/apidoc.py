@@ -1,11 +1,12 @@
-import os
-import sys
 import inspect
+import pathlib
+import sys
 import textwrap
+from collections import UserList
 
 
 def is_cyfunction(obj):
-    return type(obj).__name__ == 'cython_function_or_method'
+    return type(obj).__name__ == "cython_function_or_method"
 
 
 def is_function(obj):
@@ -13,7 +14,7 @@ def is_function(obj):
         inspect.isbuiltin(obj)
         or is_cyfunction(obj)
         or type(obj) is type(ord)
-    )
+    )  # fmt: skip
 
 
 def is_method(obj):
@@ -26,41 +27,36 @@ def is_method(obj):
             type(str.__add__),
             type(str.__new__),
         )
-    )
+    )  # fmt: skip
 
 
 def is_classmethod(obj):
     return (
         inspect.isbuiltin(obj)
         or type(obj).__name__ in (
-            'classmethod',
-            'classmethod_descriptor',
+            "classmethod",
+            "classmethod_descriptor",
         )
-    )
+    )  # fmt: skip
 
 
 def is_staticmethod(obj):
-    return (
-        type(obj).__name__ in (
-            'staticmethod',
-        )
-    )
+    return type(obj).__name__ == "staticmethod"
 
 
 def is_datadescr(obj):
-    return inspect.isdatadescriptor(obj) and not hasattr(obj, 'fget')
+    return inspect.isdatadescriptor(obj) and not hasattr(obj, "fget")
 
 
 def is_property(obj):
-    return inspect.isdatadescriptor(obj) and hasattr(obj, 'fget')
+    return inspect.isdatadescriptor(obj) and hasattr(obj, "fget")
 
 
 def is_class(obj):
     return inspect.isclass(obj) or type(obj) is type(int)
 
 
-class Lines(list):
-
+class Lines(UserList):
     INDENT = " " * 4
     level = 0
 
@@ -73,7 +69,7 @@ class Lines(list):
         if lines is None:
             return
         if isinstance(lines, str):
-            lines = textwrap.dedent(lines).strip().split('\n')
+            lines = textwrap.dedent(lines).strip().split("\n")
         indent = self.INDENT * self.level
         for line in lines:
             self.append(indent + line)
@@ -81,13 +77,13 @@ class Lines(list):
 
 def signature(obj):
     doc = obj.__doc__
-    sig = doc.partition('\n')[0]
+    sig = doc.partition("\n")[0]
     return sig or None
 
 
 def docstring(obj):
     doc = obj.__doc__
-    doc = doc.partition('\n')[2]
+    doc = doc.partition("\n")[2]
     doc = textwrap.dedent(doc).strip()
     doc = f'"""{doc}\n"""'
     doc = textwrap.indent(doc, Lines.INDENT)
@@ -120,8 +116,8 @@ def visit_method(method):
 def visit_datadescr(datadescr, name=None):
     sig = signature(datadescr)
     doc = docstring(datadescr)
-    name = sig.split(':')[0].strip()
-    type = sig.split(':')[1].strip()
+    name = sig.split(":")[0].strip()
+    type = sig.split(":")[1].strip()  # noqa: A001
     sig = f"{name}(self) -> {type}"
     body = Lines.INDENT + "..."
     return f"@property\ndef {sig}:\n{doc}\n{body}\n"
@@ -135,7 +131,7 @@ def visit_property(prop, name=None):
     else:
         sig = signature(prop.fget)
         name = name or prop.fget.__name__
-        type = sig.rsplit('->', 1)[-1].strip()
+        type = sig.rsplit("->", 1)[-1].strip()  # noqa: A001
         sig = f"{name}(self) -> {type}"
         doc = docstring(prop)
         body = Lines.INDENT + "..."
@@ -143,59 +139,59 @@ def visit_property(prop, name=None):
     return f"@property\n{meth}"
 
 
-def visit_constructor(cls, name='__init__', args=None):
-    init = (name == '__init__')
+def visit_constructor(cls, name="__init__", args=None):
+    init = name == "__init__"
     argname = cls.__mro__[-2].__name__.lower()
     argtype = cls.__name__
     initarg = args or f"{argname}: {argtype} | None = None"
-    selfarg = 'self' if init else 'cls'
-    rettype = 'None' if init else 'Self'
+    selfarg = "self" if init else "cls"
+    rettype = "None" if init else "Self"
     arglist = f"{selfarg}, {initarg}"
     sig = f"{name}({arglist}) -> {rettype}"
-    ret = '...' if init else 'return super().__new__(cls)'
+    ret = "..." if init else "return super().__new__(cls)"
     body = Lines.INDENT + ret
     return f"def {sig}:\n{body}"
 
 
 def visit_class(cls, done=None):
     skip = {
-        '__doc__',
-        '__dict__',
-        '__module__',
-        '__weakref__',
-        '__pyx_vtable__',
-        '__lt__',
-        '__le__',
-        '__ge__',
-        '__gt__',
-        '__str__',
-        '__repr__',
+        "__doc__",
+        "__dict__",
+        "__module__",
+        "__weakref__",
+        "__pyx_vtable__",
+        "__lt__",
+        "__le__",
+        "__ge__",
+        "__gt__",
+        "__str__",
+        "__repr__",
     }
     special = {
-        '__len__': ("self", "int", None),
-        '__bool__': ("self", "bool", None),
-        '__hash__': ("self", "int", None),
-        '__int__': ("self", "int", None),
-        '__index__': ("self", "int", None),
-        '__eq__': ("self", "other: object", "/", "bool", None),
-        '__ne__': ("self", "other: object", "/", "bool", None),
-        '__buffer__': ("self", "flags: int", "/", "memoryview", (3, 12)),
+        "__len__": ("self", "int", None),
+        "__bool__": ("self", "bool", None),
+        "__hash__": ("self", "int", None),
+        "__int__": ("self", "int", None),
+        "__index__": ("self", "int", None),
+        "__eq__": ("self", "other: object", "/", "bool", None),
+        "__ne__": ("self", "other: object", "/", "bool", None),
+        "__buffer__": ("self", "flags: int", "/", "memoryview", (3, 12)),
     }
     constructor = (
-        '__new__',
-        '__init__',
+        "__new__",
+        "__init__",
     )
 
     override = OVERRIDE.get(cls.__name__, {})
     done = set() if done is None else done
     lines = Lines()
 
-    if cls.__name__ == 'Exception':
-        skip = skip - {f'__{a}{b}__' for a in 'lg' for b in 'et'}
+    if cls.__name__ == "Exception":
+        skip = skip - {f"__{a}{b}__" for a in "lg" for b in "et"}
         constructor = ()
-    if '__hash__' in cls.__dict__:
+    if "__hash__" in cls.__dict__:
         if cls.__hash__ is None:
-            done.add('__hash__')
+            done.add("__hash__")
 
     base = cls.__base__
     if base is object:
@@ -211,8 +207,9 @@ def visit_class(cls, done=None):
         sig = signature(cls)
         if sig is not None:
             done.update(constructor)
-            args = sig.strip().split('->', 1)[0].strip()
-            args = args[args.index('('):][1:-1]
+            args = sig.strip().split("->", 1)[0].strip()
+            pidx = args.index("(")
+            args = args[pidx:][1:-1]
             lines.add = visit_constructor(cls, name, args)
 
     for name in constructor:
@@ -227,9 +224,9 @@ def visit_class(cls, done=None):
             lines.add = visit_constructor(cls, name)
             break
 
-    if '__hash__' in cls.__dict__:
+    if "__hash__" in cls.__dict__:
         if cls.__hash__ is None:
-            done.add('__hash__')
+            done.add("__hash__")
 
     dct = cls.__dict__
     keys = list(dct.keys())
@@ -282,8 +279,9 @@ def visit_class(cls, done=None):
             lines.add = visit_property(attr, name)
             continue
 
-    leftovers = [name for name in keys if
-                 name not in done and name not in skip]
+    leftovers = [
+        name for name in keys if name not in done and name not in skip
+    ]
     if leftovers:
         raise RuntimeError(f"leftovers: {leftovers}")
 
@@ -293,13 +291,13 @@ def visit_class(cls, done=None):
 
 def visit_module(module, done=None):
     skip = {
-        '__doc__',
-        '__name__',
-        '__loader__',
-        '__spec__',
-        '__file__',
-        '__package__',
-        '__builtins__',
+        "__doc__",
+        "__name__",
+        "__loader__",
+        "__spec__",
+        "__file__",
+        "__package__",
+        "__builtins__",
     }
 
     done = set() if done is None else done
@@ -309,7 +307,8 @@ def visit_module(module, done=None):
     keys.sort(key=lambda name: name.startswith("_"))
 
     constants = [
-        (name, getattr(module, name)) for name in keys
+        (name, getattr(module, name))
+        for name in keys
         if all((
             name not in done and name not in skip,
             isinstance(getattr(module, name), int),
@@ -343,7 +342,8 @@ def visit_module(module, done=None):
             lines.add = visit_class(value)
             lines.add = ""
             aliases = [
-                (k, getattr(module, k)) for k in keys
+                (k, getattr(module, k))
+                for k in keys
                 if all((
                     k not in done and k not in skip,
                     getattr(module, k) is value,
@@ -355,7 +355,8 @@ def visit_module(module, done=None):
             if aliases:
                 lines.add = ""
             instances = [
-                (k, getattr(module, k)) for k in keys
+                (k, getattr(module, k))
+                for k in keys
                 if all((
                     k not in done and k not in skip,
                     type(getattr(module, k)) is value,
@@ -387,8 +388,9 @@ def visit_module(module, done=None):
         else:
             lines.add = visit_constant((name, value))
 
-    leftovers = [name for name in keys if
-                 name not in done and name not in skip]
+    leftovers = [
+        name for name in keys if name not in done and name not in skip
+    ]
     if leftovers:
         raise RuntimeError(f"leftovers: {leftovers}")
     return lines
@@ -440,60 +442,60 @@ def _def(cls, name):
 """
 
 OVERRIDE = {
-    'Exception': {
-        '__init__': (
+    "Exception": {
+        "__init__": (
             "def __init__(self, ierr: int = SUCCESS, /) -> None:\n"
-            "    return super().__init__(ierr)"),
+            "    return super().__init__(ierr)"
+        ),
     },
-    'Info': {
-        '__iter__':
-        "def __iter__(self) -> Iterator[str]: ...",
-        '__getitem__':
-        "def __getitem__(self, item: str, /) -> str: ...",
-        '__setitem__':
-        "def __setitem__(self, item: str, value: str, /) -> None: ...",
-        '__delitem__':
-        "def __delitem__(self, item: str, /) -> None: ...",
-        '__contains__':
-        "def __contains__(self, value: str, /) -> bool: ...",
+    "Info": {
+        "__iter__": "def __iter__(self) -> Iterator[str]: ...",
+        "__getitem__": "def __getitem__(self, item: str, /) -> str: ...",
+        "__setitem__": (
+            "def __setitem__(self, item: str, value: str, /) -> None: ..."
+        ),
+        "__delitem__": "def __delitem__(self, item: str, /) -> None: ...",
+        "__contains__": "def __contains__(self, value: str, /) -> bool: ...",
     },
-    'Op': {
-        '__call__': "def __call__(self, x: Any, y: Any, /) -> Any: ...",
+    "Op": {
+        "__call__": "def __call__(self, x: Any, y: Any, /) -> Any: ...",
     },
-    'buffer': {
-        '__new__': (
+    "buffer": {
+        "__new__": (
             "def __new__(cls, buf: Buffer, /) -> Self:\n"
-            "    return super().__new__(cls)"),
-        '__getitem__': (
-            "def __getitem__(self, "
-            "item: int | slice, /) "
-            "-> int | buffer: ..."),
-        '__setitem__': (
+            "    return super().__new__(cls)"
+        ),
+        "__getitem__": (
+            "def __getitem__(self, item: int | slice, /) -> int | buffer: ..."
+        ),
+        "__setitem__": (
             "def __setitem__(self, "
             "item: int | slice, "
             "value:int | Buffer, /) "
-            "-> None: ..."),
-        '__delitem__': None,
+            "-> None: ..."
+        ),
+        "__delitem__": None,
     },
-    '__pyx_capi__': None,
-    '_typedict': "_typedict: Dict[str, Datatype] = {}",
-    '_typedict_c': "_typedict_c: Dict[str, Datatype] = {}",
-    '_typedict_f': "_typedict_f: Dict[str, Datatype] = {}",
-    '_keyval_registry': None,
+    "__pyx_capi__": None,
+    "_typedict": "_typedict: Dict[str, Datatype] = {}",
+    "_typedict_c": "_typedict_c: Dict[str, Datatype] = {}",
+    "_typedict_f": "_typedict_f: Dict[str, Datatype] = {}",
+    "_keyval_registry": None,
 }
 OVERRIDE.update({
     subtype: {
-        '__new__': (
+        "__new__": (
             f"def __new__(cls) -> Self:\n"
-            f"    return super().__new__({subtype})"),
-        '__repr__': "def __repr__(self) -> str: return self._name",
+            f"    return super().__new__({subtype})"
+        ),
+        "__repr__": "def __repr__(self) -> str: return self._name",
     }
     for subtype in (
-        'BottomType',
-        'InPlaceType',
-        'BufferAutomaticType',
+        "BottomType",
+        "InPlaceType",
+        "BufferAutomaticType",
     )
-})
+})  # fmt: skip
 
 TYPING = """
 from .typing import *
@@ -502,6 +504,7 @@ from .typing import *
 
 def visit_mpi4py_MPI():
     from mpi4py import MPI as module
+
     lines = Lines()
     lines.add = f'"""{module.__doc__}"""'
     lines.add = "# flake8: noqa"
@@ -516,30 +519,29 @@ def visit_mpi4py_MPI():
 
 
 def generate(filename):
-    dirname = os.path.dirname(filename)
-    os.makedirs(dirname, exist_ok=True)
-    with open(filename, 'w') as f:
+    filename = pathlib.Path(filename)
+    filename.parent.mkdir(parents=True, exist_ok=True)
+    with filename.open("w", encoding="utf-8") as f:
         for line in visit_mpi4py_MPI():
             print(line, file=f)
 
 
 def load_module(filename, name=None):
+    filename = pathlib.Path(filename)
     if name is None:
-        name, _ = os.path.splitext(
-            os.path.basename(filename))
+        name = filename.stem
     module = type(sys)(name)
-    module.__file__ = filename
-    module.__package__ = name.rsplit('.', 1)[0]
-    with open(filename) as f:
-        preamble = "from __future__ import annotations"
-        codelines = f.read().split("\n")
-        for lineno, line in enumerate(codelines):
-            match = line.strip().startswith
-            if not any(map(match, "'\"#")):
-                codelines.insert(lineno, preamble)
-                break
-        code = "\n".join(codelines)
-        exec(code, module.__dict__)  # noqa: S102
+    module.__file__ = str(filename)
+    module.__package__ = name.rsplit(".", 1)[0]
+    preamble = "from __future__ import annotations"
+    codelines = filename.read_text(encoding="utf-8").split("\n")
+    for lineno, line in enumerate(codelines):
+        match = line.strip().startswith
+        if not any(map(match, "'\"#")):
+            codelines.insert(lineno, preamble)
+            break
+    code = "\n".join(codelines)
+    exec(code, module.__dict__)
     return module
 
 
@@ -548,19 +550,19 @@ _sys_modules = {}
 
 def replace_module(module):
     name = module.__name__
-    assert name not in _sys_modules  # noqa: S101
+    assert name not in _sys_modules
     _sys_modules[name] = sys.modules[name]
     sys.modules[name] = module
-    pkgname, _, modname = name.rpartition('.')
+    pkgname, _, modname = name.rpartition(".")
     if pkgname:
         setattr(sys.modules[pkgname], modname, module)
 
 
 def restore_module(module):
     name = module.__name__
-    assert name in _sys_modules  # noqa: S101
+    assert name in _sys_modules
     sys.modules[name] = _sys_modules[name]
-    pkgname, _, modname = name.rpartition('.')
+    pkgname, _, modname = name.rpartition(".")
     if pkgname:
         setattr(sys.modules[pkgname], modname, sys.modules[name])
 
@@ -579,7 +581,7 @@ def annotate(dest, source):
         for name in dir(dest):
             if hasattr(source, name):
                 obj = getattr(dest, name)
-                mod = getattr(obj, '__module__', None)
+                mod = getattr(obj, "__module__", None)
                 if dest.__name__ == mod:
                     annotate(obj, getattr(source, name))
         for name in dir(source):
@@ -587,7 +589,7 @@ def annotate(dest, source):
                 setattr(dest, name, getattr(source, name))
 
 
-OUTDIR = 'reference'
+OUTDIR = pathlib.Path("reference")
 
-if __name__ == '__main__':
-    generate(os.path.join(OUTDIR, 'mpi4py.MPI.py'))
+if __name__ == "__main__":
+    generate(OUTDIR / "mpi4py.MPI.py")

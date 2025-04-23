@@ -1,16 +1,23 @@
-from mpi4py import MPI
+import os
+import pathlib
+import tempfile
+
 import mpiunittest as unittest
+
+from mpi4py import MPI
 
 # ---
 
-class MyBaseComm:
 
+class MyBaseComm:
+    #
     def free(self):
         if self != MPI.COMM_NULL:
             MPI.Comm.Free(self)
 
-class BaseTestBaseComm:
 
+class BaseTestBaseComm:
+    #
     def setUp(self):
         self.comm = self.CommType(self.COMM_BASE)
 
@@ -24,7 +31,7 @@ class BaseTestBaseComm:
                 MPI.Graphcomm,
                 MPI.Distgraphcomm,
                 MPI.Intercomm,
-            ]
+            ],
         )
         self.assertIsInstance(self.comm, self.CommType)
 
@@ -40,54 +47,76 @@ class BaseTestBaseComm:
     def tearDown(self):
         self.comm.free()
 
+
 # ---
 
-class MyComm(MPI.Comm, MyBaseComm):
 
+class MyComm(MPI.Comm, MyBaseComm):
+    #
     def __new__(cls, comm=None):
         if comm is not None:
             if comm != MPI.COMM_NULL:
                 comm = comm.Clone()
         return super().__new__(cls, comm)
 
+
 class BaseTestMyComm(BaseTestBaseComm):
+    #
     CommType = MyComm
 
+
 class TestMyCommNULL(BaseTestMyComm, unittest.TestCase):
+    #
     COMM_BASE = MPI.COMM_NULL
 
+
 class TestMyCommSELF(BaseTestMyComm, unittest.TestCase):
+    #
     COMM_BASE = MPI.COMM_SELF
 
+
 class TestMyCommWORLD(BaseTestMyComm, unittest.TestCase):
+    #
     COMM_BASE = MPI.COMM_WORLD
+
 
 # ---
 
-class MyIntracomm(MPI.Intracomm, MyBaseComm):
 
+class MyIntracomm(MPI.Intracomm, MyBaseComm):
+    #
     def __new__(cls, comm=None):
         if comm is not None:
             if comm != MPI.COMM_NULL:
                 comm = comm.Dup()
         return super().__new__(cls, comm)
 
+
 class BaseTestMyIntracomm(BaseTestBaseComm):
+    #
     CommType = MyIntracomm
 
+
 class TestMyIntracommNULL(BaseTestMyIntracomm, unittest.TestCase):
+    #
     COMM_BASE = MPI.COMM_NULL
 
+
 class TestMyIntracommSELF(BaseTestMyIntracomm, unittest.TestCase):
+    #
     COMM_BASE = MPI.COMM_SELF
 
+
 class TestMyIntracommWORLD(BaseTestMyIntracomm, unittest.TestCase):
+    #
     COMM_BASE = MPI.COMM_WORLD
+
 
 # ---
 
-class MyCartcomm(MPI.Cartcomm, MyBaseComm):
 
+class MyCartcomm(MPI.Cartcomm, MyBaseComm):
+    #
     def __new__(cls, comm=None):
         if comm is not None:
             if comm != MPI.COMM_NULL:
@@ -95,72 +124,105 @@ class MyCartcomm(MPI.Cartcomm, MyBaseComm):
                 comm = comm.Create_cart(dims)
         return super().__new__(cls, comm)
 
+
 class BaseTestMyCartcomm(BaseTestBaseComm):
+    #
     CommType = MyCartcomm
 
+
 class TestMyCartcommNULL(BaseTestMyCartcomm, unittest.TestCase):
+    #
     COMM_BASE = MPI.COMM_NULL
 
+
 class TestMyCartcommSELF(BaseTestMyCartcomm, unittest.TestCase):
+    #
     COMM_BASE = MPI.COMM_SELF
 
+
 class TestMyCartcommWORLD(BaseTestMyCartcomm, unittest.TestCase):
+    #
     COMM_BASE = MPI.COMM_WORLD
+
 
 # ---
 
-class MyGraphcomm(MPI.Graphcomm, MyBaseComm):
 
+class MyGraphcomm(MPI.Graphcomm, MyBaseComm):
+    #
     def __new__(cls, comm=None):
         if comm is not None:
             if comm != MPI.COMM_NULL:
-                index = list(range(0, comm.size+1))
-                edges = list(range(0, comm.size))
+                index = list(range(comm.size + 1))
+                edges = list(range(comm.size))
                 comm = comm.Create_graph(index, edges)
         return super().__new__(cls, comm)
 
+
 class BaseTestMyGraphcomm(BaseTestBaseComm):
+    #
     CommType = MyGraphcomm
 
+
 class TestMyGraphcommNULL(BaseTestMyGraphcomm, unittest.TestCase):
+    #
     COMM_BASE = MPI.COMM_NULL
 
+
 class TestMyGraphcommSELF(BaseTestMyGraphcomm, unittest.TestCase):
+    #
     COMM_BASE = MPI.COMM_SELF
 
+
 class TestMyGraphcommWORLD(BaseTestMyGraphcomm, unittest.TestCase):
+    #
     COMM_BASE = MPI.COMM_WORLD
+
 
 # ---
 
+
 class MyRequest(MPI.Request):
+    #
     def __new__(cls, request=None):
         return super().__new__(cls, request)
+
     def test(self):
         return super(type(self), self).Test()
+
     def wait(self):
         return super(type(self), self).Wait()
 
+
 class MyPrequest(MPI.Prequest):
+    #
     def __new__(cls, request=None):
         return super().__new__(cls, request)
+
     def test(self):
         return super(type(self), self).Test()
+
     def wait(self):
         return super(type(self), self).Wait()
+
     def start(self):
         return super(type(self), self).Start()
 
+
 class MyGrequest(MPI.Grequest):
+    #
     def __new__(cls, request=None):
         return super().__new__(cls, request)
+
     def test(self):
         return super(type(self), self).Test()
+
     def wait(self):
         return super(type(self), self).Wait()
 
-class BaseTestMyRequest:
 
+class BaseTestMyRequest:
+    #
     def setUp(self):
         self.req = self.MyRequestType(MPI.REQUEST_NULL)
 
@@ -170,49 +232,59 @@ class BaseTestMyRequest:
         self.assertIsInstance(self.req, self.MyRequestType)
         self.req.test()
 
+
 class TestMyRequest(BaseTestMyRequest, unittest.TestCase):
+    #
     MPIRequestType = MPI.Request
     MyRequestType = MyRequest
 
+
 class TestMyPrequest(BaseTestMyRequest, unittest.TestCase):
+    #
     MPIRequestType = MPI.Prequest
     MyRequestType = MyPrequest
 
+
 class TestMyGrequest(BaseTestMyRequest, unittest.TestCase):
+    #
     MPIRequestType = MPI.Grequest
     MyRequestType = MyGrequest
 
-class TestMyRequest2(TestMyRequest):
 
+class TestMyRequest2(TestMyRequest):
+    #
     def setUp(self):
         req = MPI.COMM_SELF.Isend(
-            [MPI.BOTTOM, 0, MPI.BYTE],
-            dest=MPI.PROC_NULL, tag=0)
+            [MPI.BOTTOM, 0, MPI.BYTE], dest=MPI.PROC_NULL, tag=0
+        )
         self.req = MyRequest(req)
 
-@unittest.skipMPI('mpich(==3.4.1)')
-class TestMyPrequest2(TestMyPrequest):
 
+@unittest.skipMPI("mpich(==3.4.1)")
+class TestMyPrequest2(TestMyPrequest):
+    #
     def setUp(self):
         req = MPI.COMM_SELF.Send_init(
-            [MPI.BOTTOM, 0, MPI.BYTE],
-            dest=MPI.PROC_NULL, tag=0)
+            [MPI.BOTTOM, 0, MPI.BYTE], dest=MPI.PROC_NULL, tag=0
+        )
         self.req = MyPrequest(req)
 
     def tearDown(self):
         self.req.Free()
 
     def testStart(self):
-        for i in range(5):
+        for _i in range(5):
             self.req.start()
             self.req.test()
             self.req.start()
             self.req.wait()
 
+
 # ---
 
-class MyInfo(MPI.Info):
 
+class MyInfo(MPI.Info):
+    #
     def __new__(cls, info=None):
         return MPI.Info.__new__(cls, info)
 
@@ -220,8 +292,9 @@ class MyInfo(MPI.Info):
         if self != MPI.INFO_NULL:
             MPI.Info.Free(self)
 
-class BaseTestMyInfo:
 
+class BaseTestMyInfo:
+    #
     def setUp(self):
         info = MPI.Info.Create()
         self.info = MyInfo(info)
@@ -254,14 +327,16 @@ class BaseTestMyInfo:
         try:
             info = MyInfo.Create_env()
         except NotImplementedError:
-            if MPI.Get_version() >= (4, 0): raise
-            raise unittest.SkipTest("mpi-info-create-env")
+            if MPI.Get_version() >= (4, 0):
+                raise
+            raise unittest.SkipTest("mpi-info-create-env") from None
         self.assertIsNot(type(info), MPI.Info)
         self.assertIsInstance(info, MPI.Info)
         self.assertIsInstance(info, MyInfo)
 
     def testPickle(self):
         from pickle import dumps, loads
+
         items = list(zip("abc", "123"))
         self.info.update(items)
         info = loads(dumps(self.info))
@@ -269,18 +344,22 @@ class BaseTestMyInfo:
         self.assertEqual(info.items(), items)
         info.free()
 
+
 class TestMyInfo(BaseTestMyInfo, unittest.TestCase):
+    #
     pass
+
 
 try:
     MPI.Info.Create().Free()
 except (NotImplementedError, MPI.Exception):
-    unittest.disable(BaseTestMyInfo, 'mpi-info')
+    unittest.disable(BaseTestMyInfo, "mpi-info")
 
 # ---
 
-class MyWin(MPI.Win):
 
+class MyWin(MPI.Win):
+    #
     def __new__(cls, win=None):
         return MPI.Win.__new__(cls, win)
 
@@ -288,8 +367,9 @@ class MyWin(MPI.Win):
         if self != MPI.WIN_NULL:
             MPI.Win.Free(self)
 
-class BaseTestMyWin:
 
+class BaseTestMyWin:
+    #
     def setUp(self):
         w = MPI.Win.Create(MPI.BOTTOM)
         self.win = MyWin(w)
@@ -307,20 +387,22 @@ class BaseTestMyWin:
         self.win.free()
         self.assertFalse(self.win)
 
+
 class TestMyWin(BaseTestMyWin, unittest.TestCase):
+    #
     pass
+
 
 try:
     MPI.Win.Create(MPI.BOTTOM).Free()
 except (NotImplementedError, MPI.Exception):
-    unittest.disable(BaseTestMyWin, 'mpi-win')
+    unittest.disable(BaseTestMyWin, "mpi-win")
 
 # ---
 
-import os, tempfile
 
 class MyFile(MPI.File):
-
+    #
     def __new__(cls, file=None):
         return MPI.File.__new__(cls, file)
 
@@ -330,17 +412,20 @@ class MyFile(MPI.File):
 
 
 class BaseTestMyFile:
-
+    #
     def openfile(self):
-        fd, fname = tempfile.mkstemp(prefix='mpi4py')
+        fd, fname = tempfile.mkstemp(prefix="mpi4py")
         os.close(fd)
+        fname = pathlib.Path(fname)
         amode = MPI.MODE_RDWR | MPI.MODE_CREATE | MPI.MODE_DELETE_ON_CLOSE
         try:
-            self.file = MPI.File.Open(MPI.COMM_SELF, fname, amode, MPI.INFO_NULL)
-            return self.file
+            self.file = MPI.File.Open(
+                MPI.COMM_SELF, fname, amode, MPI.INFO_NULL
+            )
         except Exception:
-            os.remove(fname)
+            fname.unlink()
             raise
+        return self.file
 
     def setUp(self):
         f = self.openfile()
@@ -359,16 +444,18 @@ class BaseTestMyFile:
         self.file.close()
         self.assertFalse(self.file)
 
+
 class TestMyFile(BaseTestMyFile, unittest.TestCase):
+    #
     pass
 
 
 try:
     BaseTestMyFile().openfile().Close()
 except NotImplementedError:
-    unittest.disable(BaseTestMyFile, 'mpi-file')
+    unittest.disable(BaseTestMyFile, "mpi-file")
 
 # ---
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

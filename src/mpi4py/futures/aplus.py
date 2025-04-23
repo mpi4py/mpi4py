@@ -89,7 +89,8 @@ def catch(future, on_failure=None):
 def _chain(future, on_success=None, on_failure=None):
     new_future = future.__class__()
     done_cb = functools.partial(
-        _chain_resolve, [new_future],
+        _chain_resolve,
+        [new_future],
         on_success=on_success,
         on_failure=on_failure,
     )
@@ -104,8 +105,7 @@ _chain_log_registry = weakref.WeakKeyDictionary()
 def _chain_check_cycle(new_future, future):
     if new_future is future:
         raise RuntimeError(
-            f"chain cycle detected: "
-            f"Future {future} chained with itself"
+            f"chain cycle detected: Future {future} chained with itself"
         )
     with _chain_log_lock:
         registry = _chain_log_registry
@@ -116,8 +116,7 @@ def _chain_check_cycle(new_future, future):
             registry[new_future] = log
         if future in log:
             raise RuntimeError(
-                f"chain cycle detected: "
-                f"Future {future} already in chain"
+                f"chain cycle detected: Future {future} already in chain"
             )
         log.add(future)
 

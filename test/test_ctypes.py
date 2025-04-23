@@ -1,5 +1,6 @@
-from mpi4py import MPI
 import mpiunittest as unittest
+
+from mpi4py import MPI
 
 try:
     import ctypes
@@ -7,9 +8,9 @@ except ImportError:
     ctypes = None
 
 
-@unittest.skipIf(ctypes is None, 'ctypes')
+@unittest.skipIf(ctypes is None, "ctypes")
 class TestCTYPES(unittest.TestCase):
-
+    #
     objects = [
         MPI.DATATYPE_NULL,
         MPI.INT,
@@ -36,8 +37,10 @@ class TestCTYPES(unittest.TestCase):
     ]
 
     def testHandleAdress(self):
-        typemap = {ctypes.sizeof(ctypes.c_int): ctypes.c_int,
-                   ctypes.sizeof(ctypes.c_void_p): ctypes.c_void_p}
+        typemap = {
+            ctypes.sizeof(ctypes.c_int): ctypes.c_int,
+            ctypes.sizeof(ctypes.c_void_p): ctypes.c_void_p,
+        }
         for obj in self.objects:
             handle_t = typemap[MPI._sizeof(obj)]
             oldobj = obj
@@ -48,13 +51,15 @@ class TestCTYPES(unittest.TestCase):
             self.assertEqual(obj, newobj)
 
     def testHandleValue(self):
-        typemap = {ctypes.sizeof(ctypes.c_uint32): ctypes.c_uint32,
-                   ctypes.sizeof(ctypes.c_uint64): ctypes.c_uint64}
+        typemap = {
+            ctypes.sizeof(ctypes.c_uint32): ctypes.c_uint32,
+            ctypes.sizeof(ctypes.c_uint64): ctypes.c_uint64,
+        }
         for obj in self.objects:
             uintptr_t = typemap[MPI._sizeof(obj)]
             handle = uintptr_t.from_address(MPI._addressof(obj))
             self.assertEqual(handle.value, MPI._handleof(obj))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

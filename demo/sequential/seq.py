@@ -1,5 +1,4 @@
 class Seq:
-
     """
     Sequential execution
     """
@@ -19,7 +18,6 @@ class Seq:
 
     def __exit__(self, *exc):
         self.end()
-        return None
 
     def begin(self):
         """
@@ -27,14 +25,15 @@ class Seq:
         """
         comm = self.comm
         size = comm.Get_size()
-        if size == 1: return
+        if size == 1:
+            return
         rank = comm.Get_rank()
         ng = self.ng
         tag = self.tag
         if rank != 0:
-            comm.Recv([None, 'B'], rank - 1, tag)
+            comm.Recv([None, "B"], rank - 1, tag)
         if rank != (size - 1) and (rank % ng) < (ng - 1):
-            comm.Send([None, 'B'], rank + 1, tag)
+            comm.Send([None, "B"], rank + 1, tag)
 
     def end(self):
         """
@@ -42,11 +41,12 @@ class Seq:
         """
         comm = self.comm
         size = comm.Get_size()
-        if size == 1: return
+        if size == 1:
+            return
         rank = comm.Get_rank()
         ng = self.ng
         tag = self.tag
         if rank == (size - 1) or (rank % ng) == (ng - 1):
-            comm.Send([None, 'B'], (rank + 1) % size, tag)
+            comm.Send([None, "B"], (rank + 1) % size, tag)
         if rank == 0:
-            comm.Recv([None, 'B'], size - 1, tag)
+            comm.Recv([None, "B"], size - 1, tag)

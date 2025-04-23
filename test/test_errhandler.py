@@ -1,10 +1,15 @@
-from mpi4py import MPI
-import mpiunittest as unittest
+import os
+import pathlib
 import sys
+import tempfile
+
+import mpiunittest as unittest
+
+from mpi4py import MPI
 
 
 class TestErrhandler(unittest.TestCase):
-
+    #
     def testPredefined(self):
         self.assertFalse(MPI.ERRHANDLER_NULL)
         self.assertTrue(MPI.ERRORS_ARE_FATAL)
@@ -18,13 +23,15 @@ class TestErrhandler(unittest.TestCase):
 
     def testPickle(self):
         from pickle import dumps, loads
+
         for errhandler in [
             MPI.ERRHANDLER_NULL,
             MPI.ERRORS_ARE_FATAL,
             MPI.ERRORS_RETURN,
             MPI.ERRORS_ABORT,
         ]:
-            if not errhandler: continue
+            if not errhandler:
+                continue
             errh = loads(dumps(errhandler))
             self.assertIs(errh, errhandler)
             errh = loads(dumps(MPI.Errhandler(errhandler)))
@@ -33,7 +40,7 @@ class TestErrhandler(unittest.TestCase):
 
 
 class BaseTestErrhandler:
-
+    #
     def testCreate(self):
         MAX_USER_EH = 32  # max user-defined error handlers
         mpiobj = self.mpiobj
@@ -42,12 +49,12 @@ class BaseTestErrhandler:
 
         def get_errhandler_fn(idx):
             def errhandler_fn(arg, err):
-                nonlocal mpiobj, index
-                nonlocal called, check
+                nonlocal mpiobj, index, called, check
                 called = check = True
-                check &= (arg == mpiobj)
-                check &= (err == MPI.ERR_OTHER)
-                check &= (idx == index)
+                check &= arg == mpiobj
+                check &= err == MPI.ERR_OTHER
+                check &= idx == index
+
             return errhandler_fn
 
         def check_handle(eh):
@@ -68,9 +75,9 @@ class BaseTestErrhandler:
                 errhandlers.append(eh)
             except NotImplementedError:
                 clsname = type(mpiobj).__name__.lower()
-                self.skipTest(f'mpi-{clsname}-create_errhandler')
+                self.skipTest(f"mpi-{clsname}-create_errhandler")
         with self.assertRaises(RuntimeError):
-            type(mpiobj).Create_errhandler(lambda arg, err: None)
+            type(mpiobj).Create_errhandler(lambda _arg, _err: None)
 
         for eh in errhandlers:
             self.assertTrue(eh)
@@ -80,14 +87,16 @@ class BaseTestErrhandler:
 
         eh_orig = mpiobj.Get_errhandler()
         try:
-            for index, eh in enumerate(errhandlers):
+            for i, eh in enumerate(errhandlers):
+                index = i
                 called = check = False
                 mpiobj.Set_errhandler(eh)
                 try:
                     mpiobj.Call_errhandler(MPI.SUCCESS)
                     mpiobj.Call_errhandler(MPI.ERR_OTHER)
                 except NotImplementedError:
-                    if MPI.Get_version() >= (2, 0): raise
+                    if MPI.Get_version() >= (2, 0):
+                        raise
                 else:
                     self.assertTrue(called)
                     self.assertTrue(check)
@@ -104,14 +113,15 @@ class BaseTestErrhandler:
             mpiobj.Call_errhandler(MPI.SUCCESS)
             mpiobj.Call_errhandler(MPI.ERR_OTHER)
         except NotImplementedError:
-            if MPI.Get_version() >= (2, 0): raise
+            if MPI.Get_version() >= (2, 0):
+                raise
             clsname = type(mpiobj).__name__.lower()
-            self.skipTest(f'mpi-{clsname}-call_errhandler')
+            self.skipTest(f"mpi-{clsname}-call_errhandler")
 
     def testGetFree(self):
         mpiobj = self.mpiobj
         errhdls = []
-        for i in range(100):
+        for _i in range(100):
             e = mpiobj.Get_errhandler()
             errhdls.append(e)
         for e in errhdls:
@@ -138,16 +148,16 @@ class BaseTestErrhandler:
     def testErrorsFatal(self):
         self._run_test_get_set(MPI.ERRORS_ARE_FATAL)
 
-    @unittest.skipUnless(MPI.ERRORS_ABORT, 'mpi-errors-abort')
-    @unittest.skipMPI('mpich(<4.1.0)')
-    @unittest.skipMPI('openmpi(<5.0.0)')
-    @unittest.skipMPI('impi(<2021.14.0)')
+    @unittest.skipUnless(MPI.ERRORS_ABORT, "mpi-errors-abort")
+    @unittest.skipMPI("mpich(<4.1.0)")
+    @unittest.skipMPI("openmpi(<5.0.0)")
+    @unittest.skipMPI("impi(<2021.14.0)")
     def testErrorsAbort(self):
         self._run_test_get_set(MPI.ERRORS_ABORT)
 
 
 class TestErrhandlerComm(BaseTestErrhandler, unittest.TestCase):
-
+    #
     def setUp(self):
         self.mpiobj = MPI.COMM_SELF.Dup()
 
@@ -155,16 +165,18 @@ class TestErrhandlerComm(BaseTestErrhandler, unittest.TestCase):
         self.mpiobj.Free()
 
 
-@unittest.skipMPI('openmpi(<4.1.0)', sys.platform == 'darwin')
+@unittest.skipMPI("openmpi(<4.1.0)", sys.platform == "darwin")
 class TestErrhandlerWin(BaseTestErrhandler, unittest.TestCase):
-
+    #
     def setUp(self):
         try:
-            self.mpiobj = MPI.Win.Create(MPI.BOTTOM, 1, MPI.INFO_NULL, MPI.COMM_SELF)
+            self.mpiobj = MPI.Win.Create(
+                MPI.BOTTOM, 1, MPI.INFO_NULL, MPI.COMM_SELF
+            )
         except NotImplementedError:
-            self.skipTest('mpi-win')
+            self.skipTest("mpi-win")
         except MPI.Exception:
-            self.skipTest('mpi-win')
+            self.skipTest("mpi-win")
 
     def tearDown(self):
         self.mpiobj.Free()
@@ -174,41 +186,42 @@ class TestErrhandlerWin(BaseTestErrhandler, unittest.TestCase):
 
 
 class TestErrhandlerFile(BaseTestErrhandler, unittest.TestCase):
-
+    #
     def setUp(self):
-        import os, tempfile
         rank = MPI.COMM_WORLD.Get_rank()
-        fd, filename = tempfile.mkstemp(prefix='mpi4py-', suffix=f"-{rank}")
+        fd, filename = tempfile.mkstemp(prefix="mpi4py-", suffix=f"-{rank}")
         os.close(fd)
         amode = MPI.MODE_WRONLY | MPI.MODE_CREATE | MPI.MODE_DELETE_ON_CLOSE
         try:
-            self.mpiobj = MPI.File.Open(MPI.COMM_SELF, filename, amode, MPI.INFO_NULL)
+            self.mpiobj = MPI.File.Open(
+                MPI.COMM_SELF, filename, amode, MPI.INFO_NULL
+            )
         except NotImplementedError:
             try:
-                os.remove(filename)
+                pathlib.Path(filename).unlink()
             except OSError:
                 pass
-            self.skipTest('mpi-file')
+            self.skipTest("mpi-file")
 
     def tearDown(self):
         self.mpiobj.Close()
 
-    @unittest.skipMPI('msmpi')
+    @unittest.skipMPI("msmpi")
     def testCall(self):
         super().testCall()
 
 
 class TestErrhandlerSession(BaseTestErrhandler, unittest.TestCase):
-
+    #
     def setUp(self):
         try:
             self.mpiobj = MPI.Session.Init()
         except NotImplementedError:
-            self.skipTest('mpi-session')
+            self.skipTest("mpi-session")
 
     def tearDown(self):
         self.mpiobj.Finalize()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

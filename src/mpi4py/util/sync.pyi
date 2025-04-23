@@ -3,17 +3,19 @@ from typing import (
     Callable,
     Literal,
 )
+
 if sys.version_info >= (3, 11):
     from typing import Self
 else:
     from typing_extensions import Self
-from ..typing import T
+
 from ..MPI import (
-    Info,
-    INFO_NULL,
-    Intracomm,
     COMM_SELF,
+    INFO_NULL,
+    Info,
+    Intracomm,
 )
+from ..typing import T
 
 __all__: list[str] = [
     "Sequential",
@@ -42,7 +44,7 @@ class Counter:
         start: int = 0,
         step: int = 1,
         *,
-        typecode: str = 'i',
+        typecode: str = "i",
         comm: Intracomm = COMM_SELF,
         info: Info = INFO_NULL,
         root: int = 0,

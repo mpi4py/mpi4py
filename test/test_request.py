@@ -1,12 +1,13 @@
-from mpi4py import MPI
 import mpiunittest as unittest
+
+from mpi4py import MPI
 
 
 class TestRequest(unittest.TestCase):
-
+    #
     def setUp(self):
         self.REQUEST = MPI.Request()
-        self.STATUS  = MPI.Status()
+        self.STATUS = MPI.Status()
 
     def testWait(self):
         self.REQUEST.Wait()
@@ -28,37 +29,37 @@ class TestRequest(unittest.TestCase):
         self.REQUEST.test(self.STATUS)
         self.assertEqual(self.REQUEST.test(), (True, None))
 
-    @unittest.skipMPI('MPICH1')
+    @unittest.skipMPI("MPICH1")
     def testGetStatus(self):
         try:
             flag = self.REQUEST.Get_status()
         except NotImplementedError:
-            self.skipTest('mpi-request-get_status')
+            self.skipTest("mpi-request-get_status")
         self.assertTrue(flag)
         flag = self.REQUEST.Get_status(self.STATUS)
         self.assertTrue(flag)
         self.assertEqual(self.STATUS.Get_source(), MPI.ANY_SOURCE)
-        self.assertEqual(self.STATUS.Get_tag(),    MPI.ANY_TAG)
-        self.assertEqual(self.STATUS.Get_error(),  MPI.SUCCESS)
-        self.assertEqual(self.STATUS.Get_count(MPI.BYTE),    0)
+        self.assertEqual(self.STATUS.Get_tag(), MPI.ANY_TAG)
+        self.assertEqual(self.STATUS.Get_error(), MPI.SUCCESS)
+        self.assertEqual(self.STATUS.Get_count(MPI.BYTE), 0)
         self.assertEqual(self.STATUS.Get_elements(MPI.BYTE), 0)
         try:
             self.assertFalse(self.STATUS.Is_cancelled())
         except NotImplementedError:
-            self.skipTest('mpi-status-is_cancelled')
+            self.skipTest("mpi-status-is_cancelled")
         flag = self.REQUEST.get_status()
         self.assertTrue(flag)
         flag = self.REQUEST.get_status(self.STATUS)
         self.assertEqual(self.STATUS.source, MPI.ANY_SOURCE)
-        self.assertEqual(self.STATUS.tag,    MPI.ANY_TAG)
-        self.assertEqual(self.STATUS.error,  MPI.SUCCESS)
+        self.assertEqual(self.STATUS.tag, MPI.ANY_TAG)
+        self.assertEqual(self.STATUS.error, MPI.SUCCESS)
 
 
 class TestRequestArray(unittest.TestCase):
-
+    #
     def setUp(self):
         self.REQUESTS = [MPI.Request() for i in range(5)]
-        self.STATUSES = [MPI.Status()  for i in range(5)]
+        self.STATUSES = [MPI.Status() for i in range(5)]
         self.STATUS = self.STATUSES[0]
         for status in self.STATUSES:
             status.source = 0
@@ -90,7 +91,8 @@ class TestRequestArray(unittest.TestCase):
             index, flag = MPI.Request.Get_status_any(self.REQUESTS, None)
             self.assertEqual(index, MPI.UNDEFINED)
             self.assertTrue(flag)
-            if unittest.is_mpi('impi(>=2021.14.0)'): status.error = MPI.SUCCESS
+            if unittest.is_mpi("impi(>=2021.14.0)"):
+                status.error = MPI.SUCCESS
             index, flag = MPI.Request.Get_status_any(self.REQUESTS, status)
             self.assertEqual(index, MPI.UNDEFINED)
             self.assertTrue(flag)
@@ -183,5 +185,5 @@ class TestRequestArray(unittest.TestCase):
             self.assertIsNone(indices)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

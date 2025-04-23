@@ -1,21 +1,24 @@
-from mpi4py import MPI
-import mpiunittest as unittest
+import contextlib
 import sys
 
+import mpiunittest as unittest
 from arrayimpl import (
     array,
-    numpy,
     cupy,
     numba,
+    numpy,
+    typestr,
 )
 
-from arrayimpl import typestr
+from mpi4py import MPI
+
 typemap = MPI.Datatype.fromcode
 
 # ---
 
-class BaseBuf:
 
+class BaseBuf:
+    #
     def __init__(self, typecode, initializer):
         self._buf = array.array(typecode, initializer)
 
@@ -34,6 +37,7 @@ class BaseBuf:
     def __setitem__(self, item, value):
         self._buf[item] = value._buf
 
+
 # ---
 
 try:
@@ -43,19 +47,19 @@ except ImportError:
 
 
 class BaseDLPackBuf(BaseBuf):
-
+    #
     def __del__(self):
-        if hasattr(sys, 'getrefcount'):
+        if hasattr(sys, "getrefcount"):
             buf = self._buf
             self.__dict__.clear()
             if sys.getrefcount(buf) > 2:
                 leaks = sys.getrefcount(buf) - 2
-                message = f'dlpack: possible reference leaks ({leaks})'
+                message = f"dlpack: possible reference leaks ({leaks})"
                 raise RuntimeError(message)
 
 
 class DLPackCPUBuf(BaseDLPackBuf):
-
+    #
     version = 1
 
     def __init__(self, typecode, initializer):
@@ -65,7 +69,7 @@ class DLPackCPUBuf(BaseDLPackBuf):
     def __dlpack_device__(self):
         return (
             self.managed.dl_tensor.device.device_type,
-            self.managed.dl_tensor.device.device_id
+            self.managed.dl_tensor.device.device_id,
         )
 
     def __dlpack__(
@@ -84,7 +88,7 @@ class DLPackCPUBuf(BaseDLPackBuf):
 
 
 class DLPackCPUBufV0(DLPackCPUBuf):
-
+    #
     version = 0
 
     def __dlpack__(self, stream=None):
@@ -95,13 +99,12 @@ if cupy is not None:
     cupy_version = tuple(map(int, cupy.__version__.split(".", 2)[:2]))
 
     class DLPackGPUBuf(BaseDLPackBuf):
-
         has_dlpack = None
         dev_type = None
 
         def __init__(self, typecode, initializer):
             self._buf = cupy.array(initializer, dtype=typecode)
-            self.has_dlpack = hasattr(self._buf, '__dlpack_device__')
+            self.has_dlpack = hasattr(self._buf, "__dlpack_device__")
             # TODO(leofang): test CUDA managed memory?
             if cupy.cuda.runtime.is_hip:
                 self.dev_type = dlpack.DLDeviceType.kDLROCM
@@ -130,9 +133,7 @@ if cupy is not None:
                 else:
                     return self._buf.toDlpack()
 
-
     class DLPackGPUBufV0(DLPackGPUBuf):
-
         def __dlpack__(self, stream=None):
             cupy.cuda.get_current_stream().synchronize()
             if self.has_dlpack:
@@ -143,7 +144,6 @@ if cupy is not None:
 else:
 
     class DLPackGPUBufInitMixin:
-
         def __init__(self, *args):
             super().__init__(*args)
             kDLCUDA = dlpack.DLDeviceType.kDLCUDA
@@ -158,80 +158,132 @@ else:
 
 # ---
 
-class CAIBuf(BaseBuf):
 
+class CAIBuf(BaseBuf):
+    #
     def __init__(self, typecode, initializer, readonly=False):
         super().__init__(typecode, initializer)
         address = self._buf.buffer_info()[0]
         typecode = self._buf.typecode
         itemsize = self._buf.itemsize
-        self.__cuda_array_interface__ = dict(
-            version = 0,
-            data    = (address, readonly),
-            typestr = typestr(typecode, itemsize),
-            shape   = (len(self._buf), 1, 1),
-            strides = (itemsize,) * 3,
-            descr   = [('', typestr(typecode, itemsize))],
-        )
+        self.__cuda_array_interface__ = {
+            "version": 0,
+            "data": (address, readonly),
+            "typestr": typestr(typecode, itemsize),
+            "shape": (len(self._buf), 1, 1),
+            "strides": (itemsize,) * 3,
+            "descr": [("", typestr(typecode, itemsize))],
+        }
 
 
 cupy_issue_2259 = False
 if cupy is not None:
     cupy_issue_2259 = not isinstance(
-        cupy.zeros((2,2)).T.__cuda_array_interface__['strides'],
-        tuple
+        cupy.zeros((2, 2)).T.__cuda_array_interface__["strides"], tuple
     )
 
 # ---
 
+
 def Sendrecv(smsg, rmsg):
-    MPI.COMM_SELF.Sendrecv(sendbuf=smsg, dest=0,   sendtag=0,
-                           recvbuf=rmsg, source=0, recvtag=0,
-                           status=MPI.Status())
+    MPI.COMM_SELF.Sendrecv(
+        sendbuf=smsg,
+        dest=0,
+        sendtag=0,
+        recvbuf=rmsg,
+        source=0,
+        recvtag=0,
+        status=MPI.Status(),
+    )
 
 
 class TestMessageSimple(unittest.TestCase):
-
+    #
     def testMessageBad(self):
         buf = MPI.Alloc_mem(5)
         empty = [None, 0, "B"]
-        def f(): Sendrecv([buf, 0, 0, "i", None], empty)
+
+        def f():
+            Sendrecv([buf, 0, 0, "i", None], empty)
+
         self.assertRaises(ValueError, f)
-        def f(): Sendrecv([buf,  0, "\0"], empty)
+
+        def f():
+            Sendrecv([buf, 0, "\0"], empty)
+
         self.assertRaises(KeyError, f)
-        def f(): Sendrecv([buf, -1, "i"], empty)
+
+        def f():
+            Sendrecv([buf, -1, "i"], empty)
+
         self.assertRaises(ValueError, f)
-        def f(): Sendrecv([buf, 0, -1, "i"], empty)
+
+        def f():
+            Sendrecv([buf, 0, -1, "i"], empty)
+
         self.assertRaises(ValueError, f)
-        def f(): Sendrecv([buf, 0, +2, "i"], empty)
+
+        def f():
+            Sendrecv([buf, 0, +2, "i"], empty)
+
         self.assertRaises(ValueError, f)
-        def f(): Sendrecv([None, 1,  0, "i"], empty)
+
+        def f():
+            Sendrecv([None, 1, 0, "i"], empty)
+
         self.assertRaises(ValueError, f)
-        def f(): Sendrecv([buf, None,  0, "i"], empty)
+
+        def f():
+            Sendrecv([buf, None, 0, "i"], empty)
+
         self.assertRaises(ValueError, f)
-        def f(): Sendrecv([buf, 0, 1, MPI.DATATYPE_NULL], empty)
+
+        def f():
+            Sendrecv([buf, 0, 1, MPI.DATATYPE_NULL], empty)
+
         self.assertRaises(ValueError, f)
-        def f(): Sendrecv([buf, None, 0, MPI.DATATYPE_NULL], empty)
+
+        def f():
+            Sendrecv([buf, None, 0, MPI.DATATYPE_NULL], empty)
+
         self.assertRaises(ValueError, f)
         try:
             t = MPI.INT.Create_resized(0, -4).Commit()
-            def f(): Sendrecv([buf, None, t], empty)
+
+            def f():
+                Sendrecv([buf, None, t], empty)
+
             self.assertRaises(ValueError, f)
-            def f(): Sendrecv([buf, 0, 1, t], empty)
+
+            def f():
+                Sendrecv([buf, 0, 1, t], empty)
+
             self.assertRaises(ValueError, f)
             t.Free()
         except NotImplementedError:
             pass
         MPI.Free_mem(buf)
-        buf = [1,2,3,4]
-        def f(): Sendrecv([buf, 4,  0, "i"], empty)
+        buf = [1, 2, 3, 4]
+
+        def f():
+            Sendrecv([buf, 4, 0, "i"], empty)
+
         self.assertRaises(TypeError, f)
-        buf = {1:2,3:4}
-        def f(): Sendrecv([buf, 4,  0, "i"], empty)
+        buf = {1: 2, 3: 4}
+
+        def f():
+            Sendrecv([buf, 4, 0, "i"], empty)
+
         self.assertRaises(TypeError, f)
-        def f(): Sendrecv(b"abc", b"abc")
+
+        def f():
+            Sendrecv(b"abc", b"abc")
+
         self.assertRaises((BufferError, TypeError, ValueError), f)
-        def f(): Sendrecv(object, empty)
+
+        def f():
+            Sendrecv(object, empty)
+
         self.assertRaises(TypeError, f)
 
     def testMessageNone(self):
@@ -263,31 +315,39 @@ class TestMessageSimple(unittest.TestCase):
         rbuf = bytearray(3)
         Sendrecv([sbuf, "c"], [rbuf, MPI.CHAR])
         self.assertEqual(sbuf, rbuf)
-        self.assertRaises((BufferError, TypeError, ValueError),
-                          Sendrecv, [rbuf, "c"], [sbuf, "c"])
+        self.assertRaises(
+            (BufferError, TypeError, ValueError),
+            Sendrecv,
+            [rbuf, "c"],
+            [sbuf, "c"],
+        )
 
 
-@unittest.skipMPI('msmpi(<8.0.0)')
+@unittest.skipMPI("msmpi(<8.0.0)")
 class TestMessageBlock(unittest.TestCase):
-
-    @unittest.skipIf(MPI.COMM_WORLD.Get_size() < 2, 'mpi-world-size<2')
+    #
+    @unittest.skipIf(MPI.COMM_WORLD.Get_size() < 2, "mpi-world-size<2")
     def testMessageBad(self):
         comm = MPI.COMM_WORLD
         buf = MPI.Alloc_mem(4)
         empty = [None, 0, "B"]
-        def f(): comm.Alltoall([buf, None, "i"], empty)
+
+        def f():
+            comm.Alltoall([buf, None, "i"], empty)
+
         self.assertRaises(ValueError, f)
         MPI.Free_mem(buf)
 
 
 class BaseTestMessageSimpleArray:
-
-    TYPECODES = "bhil"+"BHIL"+"fd"
+    #
+    TYPECODES = "bhil" + "BHIL" + "fd"
 
     def array(self, typecode, initializer):
         raise NotImplementedError
 
     def check1(self, z, s, r, typecode):
+        del typecode
         r[:] = z
         Sendrecv(s, r)
         for a, b in zip(s, r):
@@ -295,75 +355,92 @@ class BaseTestMessageSimpleArray:
 
     def check2(self, z, s, r, typecode):
         datatype = typemap(typecode)
-        for type in (None, typecode, datatype):
+        for typespec in (None, typecode, datatype):
             r[:] = z
-            Sendrecv([s, type],
-                     [r, type])
+            Sendrecv(
+                [s, typespec],
+                [r, typespec],
+            )
             for a, b in zip(s, r):
                 self.assertEqual(a, b)
 
     def check3(self, z, s, r, typecode):
+        del typecode
         size = len(r)
         for count in range(size):
             r[:] = z
-            Sendrecv([s, count],
-                     [r, count])
+            Sendrecv(
+                [s, count],
+                [r, count],
+            )
             for i in range(count):
                 self.assertEqual(r[i], s[i])
             for i in range(count, size):
                 self.assertEqual(r[i], z[0])
         for count in range(size):
             r[:] = z
-            Sendrecv([s, (count, None)],
-                     [r, (count, None)])
+            Sendrecv(
+                [s, (count, None)],
+                [r, (count, None)],
+            )
             for i in range(count):
                 self.assertEqual(r[i], s[i])
             for i in range(count, size):
                 self.assertEqual(r[i], z[0])
         for disp in range(size):
             r[:] = z
-            Sendrecv([s, (None, disp)],
-                     [r, (None, disp)])
+            Sendrecv(
+                [s, (None, disp)],
+                [r, (None, disp)],
+            )
             for i in range(disp):
                 self.assertEqual(r[i], z[0])
             for i in range(disp, size):
                 self.assertEqual(r[i], s[i])
         for disp in range(size):
-            for count in range(size-disp):
+            for count in range(size - disp):
                 r[:] = z
-                Sendrecv([s, (count, disp)],
-                         [r, (count, disp)])
-                for i in range(0, disp):
+                Sendrecv(
+                    [s, (count, disp)],
+                    [r, (count, disp)],
+                )
+                for i in range(disp):
                     self.assertEqual(r[i], z[0])
-                for i in range(disp, disp+count):
+                for i in range(disp, disp + count):
                     self.assertEqual(r[i], s[i])
-                for i in range(disp+count, size):
+                for i in range(disp + count, size):
                     self.assertEqual(r[i], z[0])
 
     def check4(self, z, s, r, typecode):
         datatype = typemap(typecode)
-        for type in (None, typecode, datatype):
+        for typespec in (None, typecode, datatype):
             for count in (None, len(s)):
                 r[:] = z
-                Sendrecv([s, count, type],
-                         [r, count, type])
+                Sendrecv(
+                    [s, count, typespec],
+                    [r, count, typespec],
+                )
                 for a, b in zip(s, r):
                     self.assertEqual(a, b)
 
     def check5(self, z, s, r, typecode):
         datatype = typemap(typecode)
-        for type in (None, typecode, datatype):
-            for p in range(0, len(s)):
+        for typespec in (None, typecode, datatype):
+            for p in range(len(s)):
                 r[:] = z
-                Sendrecv([s, (p, None), type],
-                         [r, (p, None), type])
+                Sendrecv(
+                    [s, (p, None), typespec],
+                    [r, (p, None), typespec],
+                )
                 for a, b in zip(s[:p], r[:p]):
                     self.assertEqual(a, b)
                 for q in range(p, len(s)):
-                    count, displ = q-p, p
+                    count, displ = q - p, p
                     r[:] = z
-                    Sendrecv([s, (count, displ), type],
-                             [r, (count, displ), type])
+                    Sendrecv(
+                        [s, (count, displ), typespec],
+                        [r, (count, displ), typespec],
+                    )
                     for a, b in zip(r[:p], z[:p]):
                         self.assertEqual(a, b)
                     for a, b in zip(r[p:q], s[p:q]):
@@ -373,18 +450,22 @@ class BaseTestMessageSimpleArray:
 
     def check6(self, z, s, r, typecode):
         datatype = typemap(typecode)
-        for type in (None, typecode, datatype):
-            for p in range(0, len(s)):
+        for typespec in (None, typecode, datatype):
+            for p in range(len(s)):
                 r[:] = z
-                Sendrecv([s, p, None, type],
-                         [r, p, None, type])
+                Sendrecv(
+                    [s, p, None, typespec],
+                    [r, p, None, typespec],
+                )
                 for a, b in zip(s[:p], r[:p]):
                     self.assertEqual(a, b)
                 for q in range(p, len(s)):
-                    count, displ = q-p, p
+                    count, displ = q - p, p
                     r[:] = z
-                    Sendrecv([s, count, displ, type],
-                             [r, count, displ, type])
+                    Sendrecv(
+                        [s, count, displ, typespec],
+                        [r, count, displ, typespec],
+                    )
                     for a, b in zip(r[:p], z[:p]):
                         self.assertEqual(a, b)
                     for a, b in zip(r[p:q], s[p:q]):
@@ -395,9 +476,9 @@ class BaseTestMessageSimpleArray:
     def check(self, test):
         for t in tuple(self.TYPECODES):
             for n in range(1, 10):
-                z = self.array(t, [0]*n)
+                z = self.array(t, [0] * n)
                 s = self.array(t, list(range(n)))
-                r = self.array(t, [0]*n)
+                r = self.array(t, [0] * n)
                 test(z, s, r, t)
 
     def testArray1(self):
@@ -420,66 +501,64 @@ class BaseTestMessageSimpleArray:
 
     def testBuffer(self):
         kDLCPU, kDLCUDA = 1, 2
-        obj = self.array('i', [0,1,2,3])
+        obj = self.array("i", [0, 1, 2, 3])
         buf = MPI.buffer.frombuffer(obj)
         device_type = kDLCPU
-        if hasattr(obj, '__dlpack_device__'):
+        if hasattr(obj, "__dlpack_device__"):
             device_type, _ = obj.__dlpack_device__()
-        elif hasattr(obj, '__cuda_array_interface__'):
+        elif hasattr(obj, "__cuda_array_interface__"):
             device_type = kDLCUDA
         if device_type == kDLCPU:
-            buf.cast('i')
-            buf.tobytes('i')
+            buf.cast("i")
+            buf.tobytes("i")
             buf[0] = buf[0]
         if device_type == kDLCUDA:
             with self.assertRaises(BufferError):
-                buf.cast('i')
+                buf.cast("i")
             with self.assertRaises(BufferError):
-                buf.tobytes('i')
+                buf.tobytes("i")
             with self.assertRaises(BufferError):
                 buf[0] = buf[0]
 
 
-@unittest.skipIf(array is None, 'array')
-class TestMessageSimpleArray(unittest.TestCase,
-                             BaseTestMessageSimpleArray):
-
+@unittest.skipIf(array is None, "array")
+class TestMessageSimpleArray(unittest.TestCase, BaseTestMessageSimpleArray):
+    #
     def array(self, typecode, initializer):
         return array.array(typecode, initializer)
 
 
-@unittest.skipIf(numpy is None, 'numpy')
-class TestMessageSimpleNumPy(unittest.TestCase,
-                             BaseTestMessageSimpleArray):
-
+@unittest.skipIf(numpy is None, "numpy")
+class TestMessageSimpleNumPy(unittest.TestCase, BaseTestMessageSimpleArray):
+    #
     def array(self, typecode, initializer):
         return numpy.array(initializer, dtype=typecode)
 
     def testByteOrder(self):
-        sbuf = numpy.zeros([3], 'i')
-        rbuf = numpy.zeros([3], 'i')
-        sbuf = sbuf.view(sbuf.dtype.newbyteorder('='))
-        rbuf = rbuf.view(rbuf.dtype.newbyteorder('='))
+        sbuf = numpy.zeros([3], "i")
+        rbuf = numpy.zeros([3], "i")
+        sbuf = sbuf.view(sbuf.dtype.newbyteorder("="))
+        rbuf = rbuf.view(rbuf.dtype.newbyteorder("="))
         Sendrecv(sbuf, rbuf)
-        byteorder = '<' if sys.byteorder == 'little' else '>'
+        byteorder = "<" if sys.byteorder == "little" else ">"
         sbuf = sbuf.view(sbuf.dtype.newbyteorder(byteorder))
         rbuf = rbuf.view(rbuf.dtype.newbyteorder(byteorder))
         Sendrecv(sbuf, rbuf)
-        byteorder = '>' if sys.byteorder == 'little' else '<'
+        byteorder = ">" if sys.byteorder == "little" else "<"
         sbuf = sbuf.view(sbuf.dtype.newbyteorder(byteorder))
         rbuf = rbuf.view(rbuf.dtype.newbyteorder(byteorder))
         self.assertRaises(BufferError, Sendrecv, sbuf, rbuf)
         Sendrecv([sbuf, MPI.INT], [rbuf, MPI.INT])
 
     def testOrderC(self):
-        sbuf = numpy.ones([3,2])
-        rbuf = numpy.zeros([3,2])
+        sbuf = numpy.ones([3, 2])
+        rbuf = numpy.zeros([3, 2])
         Sendrecv(sbuf, rbuf)
         self.assertTrue((sbuf == rbuf).all())
 
     def testOrderFortran(self):
-        sbuf = numpy.ones([3,2]).T
-        rbuf = numpy.zeros([3,2]).T
+        sbuf = numpy.ones([3, 2]).T
+        rbuf = numpy.zeros([3, 2]).T
         Sendrecv(sbuf, rbuf)
         self.assertTrue((sbuf == rbuf).all())
 
@@ -495,84 +574,85 @@ class TestMessageSimpleNumPy(unittest.TestCase,
         rbuf = numpy.zeros([3])
         rbuf.flags.writeable = False
         self.assertRaises(
-            (BufferError, ValueError, TypeError),
-            Sendrecv, sbuf, rbuf
+            (BufferError, ValueError, TypeError), Sendrecv, sbuf, rbuf
         )
 
     def testNotContiguous(self):
-        sbuf = numpy.ones([3,2])[:,0]
+        sbuf = numpy.ones([3, 2])[:, 0]
         rbuf = numpy.zeros([3])
         self.assertRaises(
             (BufferError, ValueError, TypeError),
-            Sendrecv, sbuf, rbuf,
+            Sendrecv,
+            sbuf,
+            rbuf,
         )
 
 
-@unittest.skipIf(array is None, 'array')
-@unittest.skipIf(dlpack is None, 'dlpack')
-class TestMessageSimpleDLPackCPUBuf(unittest.TestCase,
-                                    BaseTestMessageSimpleArray):
-
+@unittest.skipIf(array is None, "array")
+@unittest.skipIf(dlpack is None, "dlpack")
+class TestMessageSimpleDLPackCPUBuf(
+    unittest.TestCase, BaseTestMessageSimpleArray
+):
     def array(self, typecode, initializer):
         return DLPackCPUBuf(typecode, initializer)
 
-class TestMessageSimpleDLPackCPUBufV0(TestMessageSimpleDLPackCPUBuf):
 
+class TestMessageSimpleDLPackCPUBufV0(TestMessageSimpleDLPackCPUBuf):
+    #
     def array(self, typecode, initializer):
         return DLPackCPUBufV0(typecode, initializer)
 
-@unittest.skipIf(cupy is None and (array is None or dlpack is None), 'cupy')
-class TestMessageSimpleDLPackGPUBuf(unittest.TestCase,
-                                    BaseTestMessageSimpleArray):
 
+@unittest.skipIf(cupy is None and (array is None or dlpack is None), "cupy")
+class TestMessageSimpleDLPackGPUBuf(
+    unittest.TestCase, BaseTestMessageSimpleArray
+):
     def array(self, typecode, initializer):
         return DLPackGPUBuf(typecode, initializer)
 
-class TestMessageSimpleDLPackGPUBufV0(TestMessageSimpleDLPackGPUBuf):
 
+class TestMessageSimpleDLPackGPUBufV0(TestMessageSimpleDLPackGPUBuf):
+    #
     def array(self, typecode, initializer):
         return DLPackGPUBufV0(typecode, initializer)
 
-@unittest.skipIf(array is None, 'array')
-class TestMessageSimpleCAIBuf(unittest.TestCase,
-                              BaseTestMessageSimpleArray):
 
+@unittest.skipIf(array is None, "array")
+class TestMessageSimpleCAIBuf(unittest.TestCase, BaseTestMessageSimpleArray):
+    #
     def array(self, typecode, initializer):
         return CAIBuf(typecode, initializer)
 
 
-@unittest.skipIf(cupy is None, 'cupy')
-class TestMessageSimpleCuPy(unittest.TestCase,
-                            BaseTestMessageSimpleArray):
-
+@unittest.skipIf(cupy is None, "cupy")
+class TestMessageSimpleCuPy(unittest.TestCase, BaseTestMessageSimpleArray):
+    #
     def array(self, typecode, initializer):
         return cupy.array(initializer, dtype=typecode)
 
     def testOrderC(self):
-        sbuf = cupy.ones([3,2])
-        rbuf = cupy.zeros([3,2])
+        sbuf = cupy.ones([3, 2])
+        rbuf = cupy.zeros([3, 2])
         Sendrecv(sbuf, rbuf)
         self.assertTrue((sbuf == rbuf).all())
 
-    @unittest.skipIf(cupy_issue_2259, 'cupy-issue-2259')
+    @unittest.skipIf(cupy_issue_2259, "cupy-issue-2259")
     def testOrderFortran(self):
-        sbuf = cupy.ones([3,2]).T
-        rbuf = cupy.zeros([3,2]).T
+        sbuf = cupy.ones([3, 2]).T
+        rbuf = cupy.zeros([3, 2]).T
         Sendrecv(sbuf, rbuf)
         self.assertTrue((sbuf == rbuf).all())
 
-    @unittest.skipIf(cupy_issue_2259, 'cupy-issue-2259')
+    @unittest.skipIf(cupy_issue_2259, "cupy-issue-2259")
     def testNotContiguous(self):
-        sbuf = cupy.ones([3,2])[:,0]
+        sbuf = cupy.ones([3, 2])[:, 0]
         rbuf = cupy.zeros([3])
-        self.assertRaises((BufferError, ValueError),
-                          Sendrecv, sbuf, rbuf)
+        self.assertRaises((BufferError, ValueError), Sendrecv, sbuf, rbuf)
 
 
-@unittest.skipIf(numba is None, 'numba')
-class TestMessageSimpleNumba(unittest.TestCase,
-                             BaseTestMessageSimpleArray):
-
+@unittest.skipIf(numba is None, "numba")
+class TestMessageSimpleNumba(unittest.TestCase, BaseTestMessageSimpleArray):
+    #
     def array(self, typecode, initializer):
         n = len(initializer)
         arr = numba.cuda.device_array((n,), dtype=typecode)
@@ -582,60 +662,60 @@ class TestMessageSimpleNumba(unittest.TestCase,
     def testOrderC(self):
         sbuf = numba.cuda.device_array((6,))
         sbuf[:] = 1
-        sbuf = sbuf.reshape(3,2)
+        sbuf = sbuf.reshape(3, 2)
         rbuf = numba.cuda.device_array((6,))
         rbuf[:] = 0
-        rbuf = sbuf.reshape(3,2)
+        rbuf = sbuf.reshape(3, 2)
         Sendrecv(sbuf, rbuf)
         # numba arrays do not have the .all() method
         for i in range(3):
             for j in range(2):
-                self.assertEqual(sbuf[i,j], rbuf[i,j])
+                self.assertEqual(sbuf[i, j], rbuf[i, j])
 
     def testOrderFortran(self):
         sbuf = numba.cuda.device_array((6,))
         sbuf[:] = 1
-        sbuf = sbuf.reshape(3,2,order='F')
+        sbuf = sbuf.reshape(3, 2, order="F")
         rbuf = numba.cuda.device_array((6,))
         rbuf[:] = 0
-        rbuf = sbuf.reshape(3,2,order='F')
+        rbuf = sbuf.reshape(3, 2, order="F")
         Sendrecv(sbuf, rbuf)
         # numba arrays do not have the .all() method
         for i in range(3):
             for j in range(2):
-                self.assertEqual(sbuf[i,j], rbuf[i,j])
+                self.assertEqual(sbuf[i, j], rbuf[i, j])
 
     def testNotContiguous(self):
         sbuf = numba.cuda.device_array((6,))
         sbuf[:] = 1
-        sbuf = sbuf.reshape(3,2)[:,0]
+        sbuf = sbuf.reshape(3, 2)[:, 0]
         rbuf = numba.cuda.device_array((3,))
         rbuf[:] = 0
-        self.assertRaises((BufferError, ValueError),
-                          Sendrecv, sbuf, rbuf)
+        self.assertRaises((BufferError, ValueError), Sendrecv, sbuf, rbuf)
 
 
 # ---
 
-@unittest.skipIf(array is None, 'array')
-@unittest.skipIf(dlpack is None, 'dlpack')
-class TestMessageDLPackCPUBuf(unittest.TestCase):
 
+@unittest.skipIf(array is None, "array")
+@unittest.skipIf(dlpack is None, "dlpack")
+class TestMessageDLPackCPUBuf(unittest.TestCase):
+    #
     def testVersion(self):
-        buf = DLPackCPUBuf('i', [0,1,2,3])
+        buf = DLPackCPUBuf("i", [0, 1, 2, 3])
         buf.managed.version.major = 0
         self.assertRaises(BufferError, MPI.Get_address, buf)
 
     def testReadonly(self):
-        smsg = DLPackCPUBuf('i', [0,1,2,3])
-        rmsg = DLPackCPUBuf('i', [0,0,0,0])
+        smsg = DLPackCPUBuf("i", [0, 1, 2, 3])
+        rmsg = DLPackCPUBuf("i", [0, 0, 0, 0])
         smsg.managed.flags |= dlpack.DLPACK_FLAG_BITMASK_READ_ONLY
         rmsg.managed.flags |= dlpack.DLPACK_FLAG_BITMASK_READ_ONLY
         MPI.Get_address(smsg)
         self.assertRaises(BufferError, Sendrecv, smsg, rmsg)
 
     def testDevice(self):
-        buf = DLPackCPUBuf('i', [0,1,2,3])
+        buf = DLPackCPUBuf("i", [0, 1, 2, 3])
         buf.__dlpack_device__ = None
         self.assertRaises(TypeError, MPI.Get_address, buf)
         buf.__dlpack_device__ = lambda: None
@@ -652,7 +732,7 @@ class TestMessageDLPackCPUBuf(unittest.TestCase):
         MPI.Get_address(buf)
 
     def testCapsule(self):
-        buf = DLPackCPUBuf('i', [0,1,2,3])
+        buf = DLPackCPUBuf("i", [0, 1, 2, 3])
         #
         capsule = buf.__dlpack__()
         MPI.Get_address(buf)
@@ -660,7 +740,7 @@ class TestMessageDLPackCPUBuf(unittest.TestCase):
         del capsule
         #
         capsule = buf.__dlpack__()
-        buf.__dlpack__ = lambda *args, **kwargs: capsule
+        buf.__dlpack__ = lambda *_a, **_kw: capsule  # noqa: F821
         MPI.Get_address(buf)
         MPI.Get_address(buf)
         dlpack.used_py_capsule(capsule)
@@ -669,12 +749,12 @@ class TestMessageDLPackCPUBuf(unittest.TestCase):
         del buf.__dlpack__
         del capsule
         #
-        buf.__dlpack__ = lambda *args, **kwargs: None
+        buf.__dlpack__ = lambda *_a, **_kw: None
         self.assertRaises(BufferError, MPI.Get_address, buf)
         del buf.__dlpack__
 
     def testNdim(self):
-        buf = DLPackCPUBuf('i', [0,1,2,3])
+        buf = DLPackCPUBuf("i", [0, 1, 2, 3])
         dltensor = buf.managed.dl_tensor
         #
         for ndim in (2, 1, 0):
@@ -687,7 +767,7 @@ class TestMessageDLPackCPUBuf(unittest.TestCase):
         del dltensor
 
     def testShape(self):
-        buf = DLPackCPUBuf('i', [0,1,2,3])
+        buf = DLPackCPUBuf("i", [0, 1, 2, 3])
         dltensor = buf.managed.dl_tensor
         #
         dltensor.ndim = 1
@@ -706,12 +786,13 @@ class TestMessageDLPackCPUBuf(unittest.TestCase):
         del dltensor
 
     def testStrides(self):
-        buf = DLPackCPUBuf('i', range(8))
+        buf = DLPackCPUBuf("i", range(8))
         dltensor = buf.managed.dl_tensor
         #
-        for order in ('C', 'F'):
-            dltensor.ndim, dltensor.shape, dltensor.strides = \
+        for order in ("C", "F"):
+            dltensor.ndim, dltensor.shape, dltensor.strides = (
                 dlpack.make_dl_shape([2, 2, 2], order=order)
+            )
             MPI.Get_address(buf)
             dltensor.strides[0] = -1
             self.assertRaises(BufferError, MPI.Get_address, buf)
@@ -719,8 +800,8 @@ class TestMessageDLPackCPUBuf(unittest.TestCase):
         del dltensor
 
     def testDtypeCode(self):
-        sbuf = DLPackCPUBuf('H', range(4))
-        rbuf = DLPackCPUBuf('H', [0]*4)
+        sbuf = DLPackCPUBuf("H", range(4))
+        rbuf = DLPackCPUBuf("H", [0] * 4)
         dtype = sbuf.managed.dl_tensor.dtype
         dtype.code = dlpack.DLDataTypeCode.kDLOpaqueHandle
         dtype = None
@@ -729,8 +810,8 @@ class TestMessageDLPackCPUBuf(unittest.TestCase):
             self.assertEqual(rbuf[i], i)
 
     def testDtypeLanes(self):
-        sbuf = DLPackCPUBuf('I', range(4))
-        rbuf = DLPackCPUBuf('I', [0]*4)
+        sbuf = DLPackCPUBuf("I", range(4))
+        rbuf = DLPackCPUBuf("I", [0] * 4)
         dtype = sbuf.managed.dl_tensor.dtype
         dtype.bits //= 2
         dtype.lanes *= 2
@@ -740,11 +821,12 @@ class TestMessageDLPackCPUBuf(unittest.TestCase):
             self.assertEqual(rbuf[i], i)
 
     def testContiguous(self):
-        buf = DLPackCPUBuf('i', range(8))
+        buf = DLPackCPUBuf("i", range(8))
         dltensor = buf.managed.dl_tensor
         #
-        dltensor.ndim, dltensor.shape, dltensor.strides = \
-            dlpack.make_dl_shape([2, 2, 2], order='C')
+        dltensor.ndim, dltensor.shape, dltensor.strides = dlpack.make_dl_shape(
+            [2, 2, 2], order="C"
+        )
         s = dltensor.strides
         strides = [s[i] for i in range(dltensor.ndim)]
         s[0], s[1], s[2] = (strides[i] for i in [0, 1, 2])
@@ -757,8 +839,9 @@ class TestMessageDLPackCPUBuf(unittest.TestCase):
         self.assertRaises(BufferError, MPI.Get_address, buf)
         del s
         #
-        dltensor.ndim, dltensor.shape, dltensor.strides = \
-            dlpack.make_dl_shape([1, 3, 1], order='C')
+        dltensor.ndim, dltensor.shape, dltensor.strides = dlpack.make_dl_shape(
+            [1, 3, 1], order="C"
+        )
         s = dltensor.strides
         MPI.Get_address(buf)
         for i in range(4):
@@ -772,7 +855,7 @@ class TestMessageDLPackCPUBuf(unittest.TestCase):
         del dltensor
 
     def testByteOffset(self):
-        buf = DLPackCPUBuf('B', [0,1,2,3])
+        buf = DLPackCPUBuf("B", [0, 1, 2, 3])
         dltensor = buf.managed.dl_tensor
         #
         dltensor.ndim = 1
@@ -783,206 +866,209 @@ class TestMessageDLPackCPUBuf(unittest.TestCase):
         #
         del dltensor
 
+
 # ---
 
-@unittest.skipIf(array is None, 'array')
-class TestMessageCAIBuf(unittest.TestCase):
 
+@unittest.skipIf(array is None, "array")
+class TestMessageCAIBuf(unittest.TestCase):
+    #
     def testReadonly(self):
-        smsg = CAIBuf('i', [1,2,3], readonly=True)
-        rmsg = CAIBuf('i', [0,0,0], readonly=True)
+        smsg = CAIBuf("i", [1, 2, 3], readonly=True)
+        rmsg = CAIBuf("i", [0, 0, 0], readonly=True)
         MPI.Get_address(smsg)
         self.assertRaises(BufferError, Sendrecv, smsg, rmsg)
 
     def testNonContiguous(self):
-        smsg = CAIBuf('i', [1,2,3])
-        rmsg = CAIBuf('i', [0,0,0])
+        smsg = CAIBuf("i", [1, 2, 3])
+        rmsg = CAIBuf("i", [0, 0, 0])
         Sendrecv(smsg, rmsg)
-        strides = rmsg.__cuda_array_interface__['strides']
-        good_strides = strides[:-2] + (0, 7)
-        rmsg.__cuda_array_interface__['strides'] = good_strides
+        strides = rmsg.__cuda_array_interface__["strides"]
+        good_strides = (*strides[:-2], 0, 7)
+        rmsg.__cuda_array_interface__["strides"] = good_strides
         Sendrecv(smsg, rmsg)
-        bad_strides = (7,) + strides[1:]
-        rmsg.__cuda_array_interface__['strides'] = bad_strides
+        bad_strides = (7, *strides[1:])
+        rmsg.__cuda_array_interface__["strides"] = bad_strides
         self.assertRaises(BufferError, Sendrecv, smsg, rmsg)
 
     def testAttrNone(self):
-        smsg = CAIBuf('B', [1,2,3])
-        rmsg = CAIBuf('B', [0,0,0])
+        smsg = CAIBuf("B", [1, 2, 3])
+        rmsg = CAIBuf("B", [0, 0, 0])
         rmsg.__cuda_array_interface__ = None
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testAttrEmpty(self):
-        smsg = CAIBuf('B', [1,2,3])
-        rmsg = CAIBuf('B', [0,0,0])
-        rmsg.__cuda_array_interface__ = dict()
+        smsg = CAIBuf("B", [1, 2, 3])
+        rmsg = CAIBuf("B", [0, 0, 0])
+        rmsg.__cuda_array_interface__ = {}
         self.assertRaises(KeyError, Sendrecv, smsg, rmsg)
 
     def testAttrType(self):
-        smsg = CAIBuf('B', [1,2,3])
-        rmsg = CAIBuf('B', [0,0,0])
+        smsg = CAIBuf("B", [1, 2, 3])
+        rmsg = CAIBuf("B", [0, 0, 0])
         items = list(rmsg.__cuda_array_interface__.items())
         rmsg.__cuda_array_interface__ = items
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testDataMissing(self):
-        smsg = CAIBuf('B', [1,2,3])
-        rmsg = CAIBuf('B', [0,0,0])
-        del rmsg.__cuda_array_interface__['data']
+        smsg = CAIBuf("B", [1, 2, 3])
+        rmsg = CAIBuf("B", [0, 0, 0])
+        del rmsg.__cuda_array_interface__["data"]
         self.assertRaises(KeyError, Sendrecv, smsg, rmsg)
 
     def testDataNone(self):
-        smsg = CAIBuf('B', [1,2,3])
-        rmsg = CAIBuf('B', [0,0,0])
-        rmsg.__cuda_array_interface__['data'] = None
+        smsg = CAIBuf("B", [1, 2, 3])
+        rmsg = CAIBuf("B", [0, 0, 0])
+        rmsg.__cuda_array_interface__["data"] = None
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testDataType(self):
-        smsg = CAIBuf('B', [1,2,3])
-        rmsg = CAIBuf('B', [0,0,0])
-        rmsg.__cuda_array_interface__['data'] = 0
+        smsg = CAIBuf("B", [1, 2, 3])
+        rmsg = CAIBuf("B", [0, 0, 0])
+        rmsg.__cuda_array_interface__["data"] = 0
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testDataValue(self):
-        smsg = CAIBuf('B', [1,2,3])
-        rmsg = CAIBuf('B', [0,0,0])
-        dev_ptr = rmsg.__cuda_array_interface__['data'][0]
-        rmsg.__cuda_array_interface__['data'] = (dev_ptr, )
+        smsg = CAIBuf("B", [1, 2, 3])
+        rmsg = CAIBuf("B", [0, 0, 0])
+        dev_ptr = rmsg.__cuda_array_interface__["data"][0]
+        rmsg.__cuda_array_interface__["data"] = (dev_ptr,)
         self.assertRaises(ValueError, Sendrecv, smsg, rmsg)
-        rmsg.__cuda_array_interface__['data'] = ( )
+        rmsg.__cuda_array_interface__["data"] = ()
         self.assertRaises(ValueError, Sendrecv, smsg, rmsg)
-        rmsg.__cuda_array_interface__['data'] = (dev_ptr, False, None)
+        rmsg.__cuda_array_interface__["data"] = (dev_ptr, False, None)
         self.assertRaises(ValueError, Sendrecv, smsg, rmsg)
 
     def testMask(self):
-        smsg = CAIBuf('B', [1,2,3])
-        rmsg = CAIBuf('B', [0,0,0])
-        rmsg.__cuda_array_interface__['mask'] = None
+        smsg = CAIBuf("B", [1, 2, 3])
+        rmsg = CAIBuf("B", [0, 0, 0])
+        rmsg.__cuda_array_interface__["mask"] = None
         Sendrecv(smsg, rmsg)
-        rmsg.__cuda_array_interface__['mask'] = True
+        rmsg.__cuda_array_interface__["mask"] = True
         self.assertRaises(BufferError, Sendrecv, smsg, rmsg)
 
     def testTypestrMissing(self):
-        smsg = CAIBuf('B', [1,2,3])
-        rmsg = CAIBuf('B', [0,0,0])
-        del rmsg.__cuda_array_interface__['typestr']
+        smsg = CAIBuf("B", [1, 2, 3])
+        rmsg = CAIBuf("B", [0, 0, 0])
+        del rmsg.__cuda_array_interface__["typestr"]
         self.assertRaises(KeyError, Sendrecv, smsg, rmsg)
 
     def testTypestrNone(self):
-        smsg = CAIBuf('B', [1,2,3])
-        rmsg = CAIBuf('B', [0,0,0])
-        rmsg.__cuda_array_interface__['typestr'] = None
+        smsg = CAIBuf("B", [1, 2, 3])
+        rmsg = CAIBuf("B", [0, 0, 0])
+        rmsg.__cuda_array_interface__["typestr"] = None
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testTypestrType(self):
-        smsg = CAIBuf('B', [1,2,3])
-        rmsg = CAIBuf('B', [0,0,0])
-        rmsg.__cuda_array_interface__['typestr'] = 42
+        smsg = CAIBuf("B", [1, 2, 3])
+        rmsg = CAIBuf("B", [0, 0, 0])
+        rmsg.__cuda_array_interface__["typestr"] = 42
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testTypestrEndian(self):
-        smsg = CAIBuf('i', [1,2,3])
-        rmsg = CAIBuf('i', [0,0,0])
-        typestr = smsg.__cuda_array_interface__['typestr']
-        byteorder = '>' if sys.byteorder == 'little' else '<'
+        smsg = CAIBuf("i", [1, 2, 3])
+        rmsg = CAIBuf("i", [0, 0, 0])
+        typestr = smsg.__cuda_array_interface__["typestr"]
+        byteorder = ">" if sys.byteorder == "little" else "<"
         typestr = byteorder + typestr[1:]
-        smsg.__cuda_array_interface__['typestr'] = typestr
-        smsg.__cuda_array_interface__['descr'][0] = ('', typestr)
+        smsg.__cuda_array_interface__["typestr"] = typestr
+        smsg.__cuda_array_interface__["descr"][0] = ("", typestr)
         self.assertRaises(BufferError, Sendrecv, smsg, rmsg)
-        typestr = '#' + typestr[1:]
-        smsg.__cuda_array_interface__['typestr'] = typestr
-        smsg.__cuda_array_interface__['descr'][0] = ('', typestr)
+        typestr = "#" + typestr[1:]
+        smsg.__cuda_array_interface__["typestr"] = typestr
+        smsg.__cuda_array_interface__["descr"][0] = ("", typestr)
         self.assertRaises(BufferError, Sendrecv, smsg, rmsg)
-        typestr = '|' + typestr[1:]
-        smsg.__cuda_array_interface__['typestr'] = typestr
-        smsg.__cuda_array_interface__['descr'][0] = ('', typestr)
+        typestr = "|" + typestr[1:]
+        smsg.__cuda_array_interface__["typestr"] = typestr
+        smsg.__cuda_array_interface__["descr"][0] = ("", typestr)
         Sendrecv(smsg, rmsg)
 
     def testTypestrItemsize(self):
-        smsg = CAIBuf('B', [1,2,3])
-        rmsg = CAIBuf('B', [0,0,0])
-        typestr = rmsg.__cuda_array_interface__['typestr']
-        rmsg.__cuda_array_interface__['typestr'] = typestr[:2]+'X'
+        smsg = CAIBuf("B", [1, 2, 3])
+        rmsg = CAIBuf("B", [0, 0, 0])
+        typestr = rmsg.__cuda_array_interface__["typestr"]
+        rmsg.__cuda_array_interface__["typestr"] = typestr[:2] + "X"
         self.assertRaises(ValueError, Sendrecv, smsg, rmsg)
 
     def testShapeMissing(self):
-        smsg = CAIBuf('B', [1,2,3])
-        rmsg = CAIBuf('B', [0,0,0])
-        del rmsg.__cuda_array_interface__['shape']
+        smsg = CAIBuf("B", [1, 2, 3])
+        rmsg = CAIBuf("B", [0, 0, 0])
+        del rmsg.__cuda_array_interface__["shape"]
         self.assertRaises(KeyError, Sendrecv, smsg, rmsg)
 
     def testShapeNone(self):
-        smsg = CAIBuf('B', [1,2,3])
-        rmsg = CAIBuf('B', [0,0,0])
-        rmsg.__cuda_array_interface__['shape'] = None
+        smsg = CAIBuf("B", [1, 2, 3])
+        rmsg = CAIBuf("B", [0, 0, 0])
+        rmsg.__cuda_array_interface__["shape"] = None
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testShapeType(self):
-        smsg = CAIBuf('B', [1,2,3])
-        rmsg = CAIBuf('B', [0,0,0])
-        rmsg.__cuda_array_interface__['shape'] = 3
+        smsg = CAIBuf("B", [1, 2, 3])
+        rmsg = CAIBuf("B", [0, 0, 0])
+        rmsg.__cuda_array_interface__["shape"] = 3
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testShapeValue(self):
-        smsg = CAIBuf('B', [1,2,3])
-        rmsg = CAIBuf('B', [0,0,0])
-        rmsg.__cuda_array_interface__['shape'] = (3, -1)
-        rmsg.__cuda_array_interface__['strides'] = None
+        smsg = CAIBuf("B", [1, 2, 3])
+        rmsg = CAIBuf("B", [0, 0, 0])
+        rmsg.__cuda_array_interface__["shape"] = (3, -1)
+        rmsg.__cuda_array_interface__["strides"] = None
         self.assertRaises(BufferError, Sendrecv, smsg, rmsg)
 
     def testStridesMissing(self):
-        smsg = CAIBuf('B', [1,2,3])
-        rmsg = CAIBuf('B', [0,0,0])
-        del rmsg.__cuda_array_interface__['strides']
+        smsg = CAIBuf("B", [1, 2, 3])
+        rmsg = CAIBuf("B", [0, 0, 0])
+        del rmsg.__cuda_array_interface__["strides"]
         Sendrecv(smsg, rmsg)
         self.assertEqual(smsg, rmsg)
 
     def testStridesNone(self):
-        smsg = CAIBuf('B', [1,2,3])
-        rmsg = CAIBuf('B', [0,0,0])
-        rmsg.__cuda_array_interface__['strides'] = None
+        smsg = CAIBuf("B", [1, 2, 3])
+        rmsg = CAIBuf("B", [0, 0, 0])
+        rmsg.__cuda_array_interface__["strides"] = None
         Sendrecv(smsg, rmsg)
         self.assertEqual(smsg, rmsg)
 
     def testStridesType(self):
-        smsg = CAIBuf('B', [1,2,3])
-        rmsg = CAIBuf('B', [0,0,0])
-        rmsg.__cuda_array_interface__['strides'] = 42
+        smsg = CAIBuf("B", [1, 2, 3])
+        rmsg = CAIBuf("B", [0, 0, 0])
+        rmsg.__cuda_array_interface__["strides"] = 42
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testDescrMissing(self):
-        smsg = CAIBuf('d', [1,2,3])
-        rmsg = CAIBuf('d', [0,0,0])
-        del rmsg.__cuda_array_interface__['descr']
+        smsg = CAIBuf("d", [1, 2, 3])
+        rmsg = CAIBuf("d", [0, 0, 0])
+        del rmsg.__cuda_array_interface__["descr"]
         Sendrecv(smsg, rmsg)
         self.assertEqual(smsg, rmsg)
 
     def testDescrNone(self):
-        smsg = CAIBuf('d', [1,2,3])
-        rmsg = CAIBuf('d', [0,0,0])
-        rmsg.__cuda_array_interface__['descr'] = None
+        smsg = CAIBuf("d", [1, 2, 3])
+        rmsg = CAIBuf("d", [0, 0, 0])
+        rmsg.__cuda_array_interface__["descr"] = None
         Sendrecv(smsg, rmsg)
         self.assertEqual(smsg, rmsg)
 
     def testDescrType(self):
-        smsg = CAIBuf('B', [1,2,3])
-        rmsg = CAIBuf('B', [0,0,0])
-        rmsg.__cuda_array_interface__['descr'] = 42
+        smsg = CAIBuf("B", [1, 2, 3])
+        rmsg = CAIBuf("B", [0, 0, 0])
+        rmsg.__cuda_array_interface__["descr"] = 42
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testDescrWarning(self):
         m, n = 5, 3
-        smsg = CAIBuf('d', list(range(m*n)))
-        rmsg = CAIBuf('d', [0]*(m*n))
-        typestr = rmsg.__cuda_array_interface__['typestr']
+        smsg = CAIBuf("d", list(range(m * n)))
+        rmsg = CAIBuf("d", [0] * (m * n))
+        typestr = rmsg.__cuda_array_interface__["typestr"]
         itemsize = int(typestr[2:])
-        new_typestr = "|V"+str(itemsize*n)
-        new_descr = [('', typestr)]*n
-        rmsg.__cuda_array_interface__['shape'] = (m,)
-        rmsg.__cuda_array_interface__['strides'] = (itemsize*n,)
-        rmsg.__cuda_array_interface__['typestr'] = new_typestr
-        rmsg.__cuda_array_interface__['descr'] = new_descr
+        new_typestr = "|V" + str(itemsize * n)
+        new_descr = [("", typestr)] * n
+        rmsg.__cuda_array_interface__["shape"] = (m,)
+        rmsg.__cuda_array_interface__["strides"] = (itemsize * n,)
+        rmsg.__cuda_array_interface__["typestr"] = new_typestr
+        rmsg.__cuda_array_interface__["descr"] = new_descr
         import warnings
+
         with warnings.catch_warnings():
             warnings.simplefilter("error")
             self.assertRaises(RuntimeWarning, Sendrecv, smsg, rmsg)
@@ -992,40 +1078,65 @@ class TestMessageCAIBuf(unittest.TestCase):
 
 # ---
 
+
 def Alltoallv(smsg, rmsg):
     comm = MPI.COMM_SELF
     comm.Alltoallv(smsg, rmsg)
 
 
-@unittest.skipMPI('msmpi(<8.0.0)')
+@unittest.skipMPI("msmpi(<8.0.0)")
 class TestMessageVector(unittest.TestCase):
-
+    #
     def testMessageBad(self):
         buf = MPI.Alloc_mem(5)
         empty = [None, 0, [0], "B"]
-        def f(): Alltoallv([buf, 0, [0], "i", None], empty)
+
+        def f():
+            Alltoallv([buf, 0, [0], "i", None], empty)
+
         self.assertRaises(ValueError, f)
-        def f(): Alltoallv([buf, 0, [0], "\0"], empty)
+
+        def f():
+            Alltoallv([buf, 0, [0], "\0"], empty)
+
         self.assertRaises(KeyError, f)
-        def f(): Alltoallv([buf, None, [0], MPI.DATATYPE_NULL], empty)
+
+        def f():
+            Alltoallv([buf, None, [0], MPI.DATATYPE_NULL], empty)
+
         self.assertRaises(ValueError, f)
-        def f(): Alltoallv([buf, None, [0], "i"], empty)
+
+        def f():
+            Alltoallv([buf, None, [0], "i"], empty)
+
         self.assertRaises(ValueError, f)
         try:
             t = MPI.INT.Create_resized(0, -4).Commit()
-            def f(): Alltoallv([buf, None, [0], t], empty)
+
+            def f():
+                Alltoallv([buf, None, [0], t], empty)
+
             self.assertRaises(ValueError, f)
             t.Free()
         except NotImplementedError:
             pass
         MPI.Free_mem(buf)
-        buf = [1,2,3,4]
-        def f(): Alltoallv([buf, 0,  0, "i"], empty)
+        buf = [1, 2, 3, 4]
+
+        def f():
+            Alltoallv([buf, 0, 0, "i"], empty)
+
         self.assertRaises(TypeError, f)
-        buf = {1:2,3:4}
-        def f(): Alltoallv([buf, 0,  0, "i"], empty)
+        buf = {1: 2, 3: 4}
+
+        def f():
+            Alltoallv([buf, 0, 0, "i"], empty)
+
         self.assertRaises(TypeError, f)
-        def f(): Alltoallv(object, empty)
+
+        def f():
+            Alltoallv(object, empty)
+
         self.assertRaises(TypeError, f)
 
     def testMessageNone(self):
@@ -1055,15 +1166,16 @@ class TestMessageVector(unittest.TestCase):
         self.assertEqual(sbuf, rbuf)
 
 
-@unittest.skipMPI('msmpi(<8.0.0)')
+@unittest.skipMPI("msmpi(<8.0.0)")
 class BaseTestMessageVectorArray:
-
-    TYPECODES = "bhil"+"BHIL"+"fd"
+    #
+    TYPECODES = "bhil" + "BHIL" + "fd"
 
     def array(self, typecode, initializer):
         raise NotImplementedError
 
     def check1(self, z, s, r, typecode):
+        del typecode
         r[:] = z
         Alltoallv(s, r)
         for a, b in zip(s, r):
@@ -1071,67 +1183,79 @@ class BaseTestMessageVectorArray:
 
     def check2(self, z, s, r, typecode):
         datatype = typemap(typecode)
-        for type in (None, typecode, datatype):
+        for typespec in (None, typecode, datatype):
             r[:] = z
-            Alltoallv([s, type],
-                      [r, type])
+            Alltoallv(
+                [s, typespec],
+                [r, typespec],
+            )
             for a, b in zip(s, r):
                 self.assertEqual(a, b)
 
     def check3(self, z, s, r, typecode):
+        del typecode
         size = len(r)
         for count in range(size):
             r[:] = z
-            Alltoallv([s, count],
-                      [r, count])
+            Alltoallv([s, count], [r, count])
             for i in range(count):
                 self.assertEqual(r[i], s[i])
             for i in range(count, size):
                 self.assertEqual(r[i], z[0])
         for count in range(size):
             r[:] = z
-            Alltoallv([s, (count, None)],
-                      [r, (count, None)])
+            Alltoallv(
+                [s, (count, None)],
+                [r, (count, None)],
+            )
             for i in range(count):
                 self.assertEqual(r[i], s[i])
             for i in range(count, size):
                 self.assertEqual(r[i], z[0])
         for disp in range(size):
-            for count in range(size-disp):
+            for count in range(size - disp):
                 r[:] = z
-                Alltoallv([s, ([count], [disp])],
-                          [r, ([count], [disp])])
-                for i in range(0, disp):
+                Alltoallv(
+                    [s, ([count], [disp])],
+                    [r, ([count], [disp])],
+                )
+                for i in range(disp):
                     self.assertEqual(r[i], z[0])
-                for i in range(disp, disp+count):
+                for i in range(disp, disp + count):
                     self.assertEqual(r[i], s[i])
-                for i in range(disp+count, size):
+                for i in range(disp + count, size):
                     self.assertEqual(r[i], z[0])
 
     def check4(self, z, s, r, typecode):
         datatype = typemap(typecode)
-        for type in (None, typecode, datatype):
+        for typespec in (None, typecode, datatype):
             for count in (None, len(s)):
                 r[:] = z
-                Alltoallv([s, count, type],
-                          [r, count, type])
+                Alltoallv(
+                    [s, count, typespec],
+                    [r, count, typespec],
+                )
                 for a, b in zip(s, r):
                     self.assertEqual(a, b)
 
     def check5(self, z, s, r, typecode):
         datatype = typemap(typecode)
-        for type in (None, typecode, datatype):
+        for typespec in (None, typecode, datatype):
             for p in range(len(s)):
                 r[:] = z
-                Alltoallv([s, (p, None), type],
-                          [r, (p, None), type])
+                Alltoallv(
+                    [s, (p, None), typespec],
+                    [r, (p, None), typespec],
+                )
                 for a, b in zip(s[:p], r[:p]):
                     self.assertEqual(a, b)
                 for q in range(p, len(s)):
-                    count, displ = q-p, p
+                    count, displ = q - p, p
                     r[:] = z
-                    Alltoallv([s, (count, [displ]), type],
-                              [r, (count, [displ]), type])
+                    Alltoallv(
+                        [s, (count, [displ]), typespec],
+                        [r, (count, [displ]), typespec],
+                    )
                     for a, b in zip(r[:p], z[:p]):
                         self.assertEqual(a, b)
                     for a, b in zip(r[p:q], s[p:q]):
@@ -1141,18 +1265,22 @@ class BaseTestMessageVectorArray:
 
     def check6(self, z, s, r, typecode):
         datatype = typemap(typecode)
-        for type in (None, typecode, datatype):
-            for p in range(0, len(s)):
+        for typespec in (None, typecode, datatype):
+            for p in range(len(s)):
                 r[:] = z
-                Alltoallv([s, p, None, type],
-                          [r, p, None, type])
+                Alltoallv(
+                    [s, p, None, typespec],
+                    [r, p, None, typespec],
+                )
                 for a, b in zip(s[:p], r[:p]):
                     self.assertEqual(a, b)
                 for q in range(p, len(s)):
-                    count, displ = q-p, p
+                    count, displ = q - p, p
                     r[:] = z
-                    Alltoallv([s, count, [displ], type],
-                              [r, count, [displ], type])
+                    Alltoallv(
+                        [s, count, [displ], typespec],
+                        [r, count, [displ], typespec],
+                    )
                     for a, b in zip(r[:p], z[:p]):
                         self.assertEqual(a, b)
                     for a, b in zip(r[p:q], s[p:q]):
@@ -1163,9 +1291,9 @@ class BaseTestMessageVectorArray:
     def check(self, test):
         for t in tuple(self.TYPECODES):
             for n in range(1, 10):
-                z = self.array(t, [0]*n)
+                z = self.array(t, [0] * n)
                 s = self.array(t, list(range(n)))
-                r = self.array(t, [0]*n)
+                r = self.array(t, [0] * n)
                 test(z, s, r, t)
 
     def testArray1(self):
@@ -1187,18 +1315,16 @@ class BaseTestMessageVectorArray:
         self.check(self.check6)
 
 
-@unittest.skipIf(array is None, 'array')
-class TestMessageVectorArray(unittest.TestCase,
-                             BaseTestMessageVectorArray):
-
+@unittest.skipIf(array is None, "array")
+class TestMessageVectorArray(unittest.TestCase, BaseTestMessageVectorArray):
+    #
     def array(self, typecode, initializer):
         return array.array(typecode, initializer)
 
 
-@unittest.skipIf(numpy is None, 'numpy')
-class TestMessageVectorNumPy(unittest.TestCase,
-                             BaseTestMessageVectorArray):
-
+@unittest.skipIf(numpy is None, "numpy")
+class TestMessageVectorNumPy(unittest.TestCase, BaseTestMessageVectorArray):
+    #
     def array(self, typecode, initializer):
         return numpy.array(initializer, dtype=typecode)
 
@@ -1208,7 +1334,7 @@ class TestMessageVectorNumPy(unittest.TestCase,
         count = numpy.array([3])
         displ = numpy.array([1])
         Alltoallv([sbuf, count], [rbuf, (3, displ)])
-        self.assertEqual(sbuf, rbuf[displ[0]:])
+        self.assertEqual(sbuf, rbuf[displ[0] :])
         with self.assertRaises(TypeError):
             count = numpy.array([3.1])
             displ = numpy.array([1.1])
@@ -1239,26 +1365,23 @@ class TestMessageVectorNumPy(unittest.TestCase,
             Alltoallv([sbuf, (3, [displ])], [rbuf, count])
 
 
-@unittest.skipIf(array is None, 'array')
-class TestMessageVectorCAIBuf(unittest.TestCase,
-                              BaseTestMessageVectorArray):
-
+@unittest.skipIf(array is None, "array")
+class TestMessageVectorCAIBuf(unittest.TestCase, BaseTestMessageVectorArray):
+    #
     def array(self, typecode, initializer):
         return CAIBuf(typecode, initializer)
 
 
-@unittest.skipIf(cupy is None, 'cupy')
-class TestMessageVectorCuPy(unittest.TestCase,
-                            BaseTestMessageVectorArray):
-
+@unittest.skipIf(cupy is None, "cupy")
+class TestMessageVectorCuPy(unittest.TestCase, BaseTestMessageVectorArray):
+    #
     def array(self, typecode, initializer):
         return cupy.array(initializer, dtype=typecode)
 
 
-@unittest.skipIf(numba is None, 'numba')
-class TestMessageVectorNumba(unittest.TestCase,
-                             BaseTestMessageVectorArray):
-
+@unittest.skipIf(numba is None, "numba")
+class TestMessageVectorNumba(unittest.TestCase, BaseTestMessageVectorArray):
+    #
     def array(self, typecode, initializer):
         n = len(initializer)
         arr = numba.cuda.device_array((n,), dtype=typecode)
@@ -1268,34 +1391,60 @@ class TestMessageVectorNumba(unittest.TestCase,
 
 # ---
 
+
 def Alltoallw(smsg, rmsg):
     try:
         MPI.COMM_SELF.Alltoallw(smsg, rmsg)
     except NotImplementedError:
-        if isinstance(smsg, (list, tuple)): smsg = smsg[0]
-        if isinstance(rmsg, (list, tuple)): rmsg = rmsg[0]
-        try: rmsg[:] = smsg
-        except: pass
+        if isinstance(smsg, (list, tuple)):
+            smsg = smsg[0]
+        if isinstance(rmsg, (list, tuple)):
+            rmsg = rmsg[0]
+        with contextlib.suppress(Exception):
+            rmsg[:] = smsg
 
 
 class TestMessageVectorW(unittest.TestCase):
-
+    #
     def testMessageBad(self):
         sbuf = MPI.Alloc_mem(4)
         rbuf = MPI.Alloc_mem(4)
-        def f(): Alltoallw([sbuf],[rbuf])
+
+        def f():
+            Alltoallw([sbuf], [rbuf])
+
         self.assertRaises(ValueError, f)
-        def f(): Alltoallw([sbuf, [0], [0], [MPI.BYTE], None],
-                           [rbuf, [0], [0], [MPI.BYTE]])
+
+        def f():
+            Alltoallw(
+                [sbuf, [0], [0], [MPI.BYTE], None],
+                [rbuf, [0], [0], [MPI.BYTE]],
+            )
+
         self.assertRaises(ValueError, f)
-        def f(): Alltoallw([sbuf, [0], [0], [MPI.BYTE]],
-                           [rbuf, [0], [0], [MPI.BYTE], None])
+
+        def f():
+            Alltoallw(
+                [sbuf, [0], [0], [MPI.BYTE]],
+                [rbuf, [0], [0], [MPI.BYTE], None],
+            )
+
         self.assertRaises(ValueError, f)
-        def f(): Alltoallw([MPI.BOTTOM, None, [0], [MPI.BYTE]],
-                           [rbuf, [0], [0], [MPI.BYTE]])
+
+        def f():
+            Alltoallw(
+                [MPI.BOTTOM, None, [0], [MPI.BYTE]],
+                [rbuf, [0], [0], [MPI.BYTE]],
+            )
+
         self.assertRaises(ValueError, f)
-        def f(): Alltoallw([MPI.BOTTOM, [0], None, [MPI.BYTE]],
-                           [rbuf, [0], [0], [MPI.BYTE]])
+
+        def f():
+            Alltoallw(
+                [MPI.BOTTOM, [0], None, [MPI.BYTE]],
+                [rbuf, [0], [0], [MPI.BYTE]],
+            )
+
         self.assertRaises(ValueError, f)
         MPI.Free_mem(sbuf)
         MPI.Free_mem(rbuf)
@@ -1307,7 +1456,7 @@ class TestMessageVectorW(unittest.TestCase):
         raddr = MPI.Get_address(rbuf)
         stype = MPI.Datatype.Create_struct([6], [saddr], [MPI.CHAR]).Commit()
         rtype = MPI.Datatype.Create_struct([6], [raddr], [MPI.CHAR]).Commit()
-        smsg = [MPI.BOTTOM,  [1], [0] , [stype]]
+        smsg = [MPI.BOTTOM, [1], [0], [stype]]
         rmsg = [MPI.BOTTOM, ([1], [0]), [rtype]]
         try:
             Alltoallw(smsg, rmsg)
@@ -1339,48 +1488,48 @@ class TestMessageVectorW(unittest.TestCase):
         self.assertEqual(sbuf[0], rbuf[0])
         self.assertEqual(bytearray(2), rbuf[1:])
 
-    @unittest.skipIf(array is None, 'array')
+    @unittest.skipIf(array is None, "array")
     def testMessageArray(self):
-        sbuf = array.array('i', [1,2,3])
-        rbuf = array.array('i', [0,0,0])
+        sbuf = array.array("i", [1, 2, 3])
+        rbuf = array.array("i", [0, 0, 0])
         smsg = [sbuf, [3], [0], [MPI.INT]]
         rmsg = [rbuf, ([3], [0]), [MPI.INT]]
         Alltoallw(smsg, rmsg)
         self.assertEqual(sbuf, rbuf)
 
-    @unittest.skipIf(numpy is None, 'numpy')
+    @unittest.skipIf(numpy is None, "numpy")
     def testMessageNumPy(self):
-        sbuf = numpy.array([1,2,3], dtype='i')
-        rbuf = numpy.array([0,0,0], dtype='i')
+        sbuf = numpy.array([1, 2, 3], dtype="i")
+        rbuf = numpy.array([0, 0, 0], dtype="i")
         smsg = [sbuf, [3], [0], [MPI.INT]]
         rmsg = [rbuf, ([3], [0]), [MPI.INT]]
         Alltoallw(smsg, rmsg)
         self.assertTrue((sbuf == rbuf).all())
 
-    @unittest.skipIf(array is None, 'array')
+    @unittest.skipIf(array is None, "array")
     def testMessageCAIBuf(self):
-        sbuf = CAIBuf('i', [1,2,3], readonly=True)
-        rbuf = CAIBuf('i', [0,0,0], readonly=False)
+        sbuf = CAIBuf("i", [1, 2, 3], readonly=True)
+        rbuf = CAIBuf("i", [0, 0, 0], readonly=False)
         smsg = [sbuf, [3], [0], [MPI.INT]]
         rmsg = [rbuf, ([3], [0]), [MPI.INT]]
         Alltoallw(smsg, rmsg)
         self.assertEqual(sbuf, rbuf)
 
-    @unittest.skipIf(cupy is None, 'cupy')
+    @unittest.skipIf(cupy is None, "cupy")
     def testMessageCuPy(self):
-        sbuf = cupy.array([1,2,3], 'i')
-        rbuf = cupy.array([0,0,0], 'i')
+        sbuf = cupy.array([1, 2, 3], "i")
+        rbuf = cupy.array([0, 0, 0], "i")
         smsg = [sbuf, [3], [0], [MPI.INT]]
         rmsg = [rbuf, ([3], [0]), [MPI.INT]]
         Alltoallw(smsg, rmsg)
         self.assertTrue((sbuf == rbuf).all())
 
-    @unittest.skipIf(numba is None, 'numba')
+    @unittest.skipIf(numba is None, "numba")
     def testMessageNumba(self):
-        sbuf = numba.cuda.device_array((3,), 'i')
-        sbuf[:] = [1,2,3]
-        rbuf = numba.cuda.device_array((3,), 'i')
-        rbuf[:] = [0,0,0]
+        sbuf = numba.cuda.device_array((3,), "i")
+        sbuf[:] = [1, 2, 3]
+        rbuf = numba.cuda.device_array((3,), "i")
+        rbuf[:] = [0, 0, 0]
         smsg = [sbuf, [3], [0], [MPI.INT]]
         rmsg = [rbuf, ([3], [0]), [MPI.INT]]
         Alltoallw(smsg, rmsg)
@@ -1391,6 +1540,7 @@ class TestMessageVectorW(unittest.TestCase):
 
 # ---
 
+
 def Reduce(smsg, rmsg):
     MPI.COMM_SELF.Reduce(smsg, rmsg, MPI.SUM, 0)
 
@@ -1400,7 +1550,7 @@ def ReduceScatter(smsg, rmsg, rcounts):
 
 
 class TestMessageReduce(unittest.TestCase):
-
+    #
     def testMessageBad(self):
         sbuf = MPI.Alloc_mem(8)
         rbuf = MPI.Alloc_mem(8)
@@ -1413,7 +1563,7 @@ class TestMessageReduce(unittest.TestCase):
 
 
 class TestMessageReduceScatter(unittest.TestCase):
-
+    #
     def testMessageBad(self):
         sbuf = MPI.Alloc_mem(16)
         rbuf = MPI.Alloc_mem(16)
@@ -1447,63 +1597,92 @@ class TestMessageReduceScatter(unittest.TestCase):
 
 # ---
 
+
 def PutGet(smsg, rmsg, target=None):
-    try: win =  MPI.Win.Allocate(256, 1, MPI.INFO_NULL, MPI.COMM_SELF)
-    except NotImplementedError: win = MPI.WIN_NULL
     try:
-        try: win.Fence()
-        except NotImplementedError: pass
-        try: win.Put(smsg, 0, target)
-        except NotImplementedError: pass
-        try: win.Fence()
-        except NotImplementedError: pass
-        try: win.Get(rmsg, 0, target)
+        win = MPI.Win.Allocate(256, 1, MPI.INFO_NULL, MPI.COMM_SELF)
+    except NotImplementedError:
+        win = MPI.WIN_NULL
+    try:
+        try:
+            win.Fence()
         except NotImplementedError:
-            if isinstance(smsg, (list, tuple)): smsg = smsg[0]
-            if isinstance(rmsg, (list, tuple)): rmsg = rmsg[0]
-            try: rmsg[:] = smsg
-            except: pass
-        try: win.Fence()
-        except NotImplementedError: pass
+            pass
+        try:
+            win.Put(smsg, 0, target)
+        except NotImplementedError:
+            pass
+        try:
+            win.Fence()
+        except NotImplementedError:
+            pass
+        try:
+            win.Get(rmsg, 0, target)
+        except NotImplementedError:
+            if isinstance(smsg, (list, tuple)):
+                smsg = smsg[0]
+            if isinstance(rmsg, (list, tuple)):
+                rmsg = rmsg[0]
+            with contextlib.suppress(Exception):
+                rmsg[:] = smsg
+        with contextlib.suppress(NotImplementedError):
+            win.Fence()
     finally:
-        if win != MPI.WIN_NULL: win.Free()
+        if win != MPI.WIN_NULL:
+            win.Free()
 
 
 class TestMessageRMA(unittest.TestCase):
-
+    #
     def testMessageBad(self):
         sbuf = [None, 0, 0, "B", None]
         rbuf = [None, 0, 0, "B"]
         target = (0, 0, MPI.BYTE)
-        def f(): PutGet(sbuf, rbuf, target)
+
+        def f():
+            PutGet(sbuf, rbuf, target)
+
         self.assertRaises(ValueError, f)
         sbuf = [None, 0, 0, "B"]
         rbuf = [None, 0, 0, "B", None]
         target = (0, 0, MPI.BYTE)
-        def f(): PutGet(sbuf, rbuf, target)
+
+        def f():
+            PutGet(sbuf, rbuf, target)
+
         self.assertRaises(ValueError, f)
         sbuf = [None, 0, "B"]
         rbuf = [None, 0, "B"]
         target = (0, 0, MPI.BYTE, None)
-        def f(): PutGet(sbuf, rbuf, target)
+
+        def f():
+            PutGet(sbuf, rbuf, target)
+
         self.assertRaises(ValueError, f)
         sbuf = [None, 0, "B"]
         rbuf = [None, 0, "B"]
-        target = {1:2,3:4}
-        def f(): PutGet(sbuf, rbuf, target)
+        target = {1: 2, 3: 4}
+
+        def f():
+            PutGet(sbuf, rbuf, target)
+
         self.assertRaises(ValueError, f)
 
     def testMessageNone(self):
-        for empty in ([None, 0, 0, MPI.BYTE],
-                      [None, 0, MPI.BYTE],
-                      [None, MPI.BYTE]):
+        for empty in (
+            [None, 0, 0, MPI.BYTE],
+            [None, 0, MPI.BYTE],
+            [None, MPI.BYTE],
+        ):
             for target in (None, 0, [0, 0, MPI.BYTE]):
                 PutGet(empty, empty, target)
 
     def testMessageBottom(self):
-        for empty in ([MPI.BOTTOM, 0, 0, MPI.BYTE],
-                      [MPI.BOTTOM, 0, MPI.BYTE],
-                      [MPI.BOTTOM, MPI.BYTE]):
+        for empty in (
+            [MPI.BOTTOM, 0, 0, MPI.BYTE],
+            [MPI.BOTTOM, 0, MPI.BYTE],
+            [MPI.BOTTOM, MPI.BYTE],
+        ):
             for target in (None, 0, [0, 0, MPI.BYTE]):
                 PutGet(empty, empty, target)
 
@@ -1521,45 +1700,45 @@ class TestMessageRMA(unittest.TestCase):
             PutGet(sbuf, rbuf, target)
             self.assertEqual(sbuf, rbuf)
 
-    @unittest.skipMPI('msmpi')
-    @unittest.skipIf(array is None, 'array')
+    @unittest.skipMPI("msmpi")
+    @unittest.skipIf(array is None, "array")
     def testMessageArray(self):
-        sbuf = array.array('i', [1,2,3])
-        rbuf = array.array('i', [0,0,0])
+        sbuf = array.array("i", [1, 2, 3])
+        rbuf = array.array("i", [0, 0, 0])
         PutGet(sbuf, rbuf)
         self.assertEqual(sbuf, rbuf)
 
-    @unittest.skipMPI('msmpi')
-    @unittest.skipIf(numpy is None, 'numpy')
+    @unittest.skipMPI("msmpi")
+    @unittest.skipIf(numpy is None, "numpy")
     def testMessageNumPy(self):
-        sbuf = numpy.array([1,2,3], dtype='i')
-        rbuf = numpy.array([0,0,0], dtype='i')
+        sbuf = numpy.array([1, 2, 3], dtype="i")
+        rbuf = numpy.array([0, 0, 0], dtype="i")
         PutGet(sbuf, rbuf)
         self.assertTrue((sbuf == rbuf).all())
 
-    @unittest.skipMPI('msmpi')
-    @unittest.skipIf(array is None, 'array')
+    @unittest.skipMPI("msmpi")
+    @unittest.skipIf(array is None, "array")
     def testMessageCAIBuf(self):
-        sbuf = CAIBuf('i', [1,2,3], readonly=True)
-        rbuf = CAIBuf('i', [0,0,0], readonly=False)
+        sbuf = CAIBuf("i", [1, 2, 3], readonly=True)
+        rbuf = CAIBuf("i", [0, 0, 0], readonly=False)
         PutGet(sbuf, rbuf)
         self.assertEqual(sbuf, rbuf)
 
-    @unittest.skipMPI('msmpi')
-    @unittest.skipIf(cupy is None, 'cupy')
+    @unittest.skipMPI("msmpi")
+    @unittest.skipIf(cupy is None, "cupy")
     def testMessageCuPy(self):
-        sbuf = cupy.array([1,2,3], 'i')
-        rbuf = cupy.array([0,0,0], 'i')
+        sbuf = cupy.array([1, 2, 3], "i")
+        rbuf = cupy.array([0, 0, 0], "i")
         PutGet(sbuf, rbuf)
         self.assertTrue((sbuf == rbuf).all())
 
-    @unittest.skipMPI('msmpi')
-    @unittest.skipIf(numba is None, 'numba')
+    @unittest.skipMPI("msmpi")
+    @unittest.skipIf(numba is None, "numba")
     def testMessageNumba(self):
-        sbuf = numba.cuda.device_array((3,), 'i')
-        sbuf[:] = [1,2,3]
-        rbuf = numba.cuda.device_array((3,), 'i')
-        rbuf[:] = [0,0,0]
+        sbuf = numba.cuda.device_array((3,), "i")
+        sbuf[:] = [1, 2, 3]
+        rbuf = numba.cuda.device_array((3,), "i")
+        rbuf[:] = [0, 0, 0]
         PutGet(sbuf, rbuf)
         # numba arrays do not have the .all() method
         for i in range(3):
@@ -1568,5 +1747,5 @@ class TestMessageRMA(unittest.TestCase):
 
 # ---
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

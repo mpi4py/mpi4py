@@ -6,15 +6,15 @@
 # pylint: disable=missing-module-docstring
 
 from concurrent.futures import (  # noqa: F401
+    ALL_COMPLETED,
     FIRST_COMPLETED,
     FIRST_EXCEPTION,
-    ALL_COMPLETED,
-    CancelledError,
-    TimeoutError,  # noqa: A004
     BrokenExecutor,
-    InvalidStateError,
-    Future,
+    CancelledError,
     Executor,
-    wait,
+    Future,
+    InvalidStateError,
+    TimeoutError,  # noqa: A004
     as_completed,
+    wait,
 )

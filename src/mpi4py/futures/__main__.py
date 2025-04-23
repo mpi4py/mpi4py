@@ -14,8 +14,8 @@ def main():
     # pylint: disable=import-outside-toplevel
     import os
     import sys
-    from ..run import run_command_line
-    from ..run import set_abort_status
+
+    from ..run import run_command_line, set_abort_status
     from ._core import SharedPoolCtx
 
     class UsageExit(SystemExit):
@@ -23,8 +23,8 @@ def main():
         pass
 
     def usage(error=None):
-        from textwrap import dedent
-        python = os.path.basename(sys.executable)
+        dedent = __import__("textwrap").dedent
+        python = os.path.basename(sys.executable)  # noqa: PTH119
         program = __spec__.parent
         usage = dedent(f"""
         usage: {python} -m {program} <pyfile> [arg] ...
@@ -42,16 +42,16 @@ def main():
         args = sys.argv[1:]
         if not args:
             usage("No path specified for execution")
-        elif args[0] == '-':
+        elif args[0] == "-":
             pass
-        elif args[0] in ('-h', '--help'):
+        elif args[0] in ("-h", "--help"):
             usage()
-        elif args[0] in ('-m', '-c'):
+        elif args[0] in ("-m", "-c"):
             if len(args) < 2:
                 usage(f"Argument expected for option: {args[0]}")
-        elif args[0].startswith('-'):
+        elif args[0].startswith("-"):
             usage(f"Unknown option: {args[0]}")
-        elif not os.path.exists(args[0]):
+        elif not os.path.exists(args[0]):  # noqa: PTH110
             usage(f"Path does not exist: {args[0]}")
 
     try:
@@ -72,5 +72,5 @@ def main():
         raise
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -1,13 +1,13 @@
 from concurrent.futures import (
+    ALL_COMPLETED as ALL_COMPLETED,
     FIRST_COMPLETED as FIRST_COMPLETED,
     FIRST_EXCEPTION as FIRST_EXCEPTION,
-    ALL_COMPLETED as ALL_COMPLETED,
-    CancelledError as CancelledError,
-    TimeoutError as TimeoutError,  # noqa: A004
     BrokenExecutor as BrokenExecutor,
-    InvalidStateError as InvalidStateError,
-    Future as Future,
+    CancelledError as CancelledError,
     Executor as Executor,
-    wait as wait,
+    Future as Future,
+    InvalidStateError as InvalidStateError,
+    TimeoutError as TimeoutError,  # noqa: A004
     as_completed as as_completed,
+    wait as wait,
 )

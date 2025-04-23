@@ -1,27 +1,27 @@
-import sys, os.path as p
-wdir = p.abspath(p.dirname(__file__))
-topdir = p.normpath(p.join(wdir, p.pardir, p.pardir))
-srcdir = p.join(topdir, 'src')
-sys.path.insert(0, p.join(topdir, 'conf'))
+import pathlib
+import sys
 
-from mpiapigen import Generator
+wrkdir = pathlib.Path(__file__).parent
+topdir = wrkdir.parent.parent
+srcdir = topdir / "src"
+
+sys.path.insert(0, str(topdir / "conf"))
+from mpiapigen import Generator  # noqa: E402
+
 generator = Generator()
-libmpi_pxd = p.join(srcdir, 'mpi4py', 'libmpi.pxd')
+libmpi_pxd = srcdir / "mpi4py" / "libmpi.pxd"
 generator.parse_file(libmpi_pxd)
-libmpi_h = p.join(wdir, 'libmpi.h')
+libmpi_h = wrkdir / "libmpi.h"
 generator.dump_header_h(libmpi_h)
 
-#from io import StringIO
-#libmpi_h = StringIO()
-#generator.dump_header_h(libmpi_h)
-#print libmpi_h.read()
+# from io import StringIO
+# libmpi_h = StringIO()
+# generator.dump_header_h(libmpi_h)
+# print libmpi_h.read()
 
-libmpi_c = p.join(wdir, 'libmpi.c.in')
-with open(libmpi_c, 'w') as f:
+libmpi_c = wrkdir / "libmpi.c.in"
+with libmpi_c.open("w", encoding="utf-8") as f:
     f.write(f"""\
 #include <mpi.h>
-#include "{srcdir}/lib-mpi/config.h"
-#include "{srcdir}/lib-mpi/missing.h"
-#include "{srcdir}/lib-mpi/fallback.h"
-#include "{srcdir}/lib-mpi/compat.h"
+#include "{srcdir}/lib-mpi.h"
 """)

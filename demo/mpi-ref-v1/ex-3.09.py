@@ -1,13 +1,14 @@
 from mpi4py import MPI
+
 try:
     import numpy
 except ImportError:
-    raise SystemExit
+    raise SystemExit from None
 
 # transpose a matrix a into b
 
-a = numpy.empty((100, 100), dtype=float, order='f')
-b = numpy.empty((100, 100), dtype=float, order='f')
+a = numpy.empty((100, 100), dtype=float, order="f")
+b = numpy.empty((100, 100), dtype=float, order="f")
 a.flat = numpy.arange(a.size, dtype=float)
 
 lb, sizeofdouble = MPI.DOUBLE.Get_extent()
@@ -36,4 +37,3 @@ assert status.Get_count(MPI.DOUBLE) == b.size
 
 row.Free()
 xpose.Free()
-

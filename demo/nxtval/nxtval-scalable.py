@@ -1,32 +1,39 @@
+# -----------------------------------------------------------------------------
+import struct as _struct
+
 from mpi4py import MPI
 
-# -----------------------------------------------------------------------------
-
-import struct as _struct
 try:
     from numpy import empty as _empty
+
     def _array_new(size, typecode, init=0):
         a = _empty(size, typecode)
         a.fill(init)
         return a
+
     def _array_set(ary, value):
         ary.fill(value)
+
     def _array_sum(ary):
         return ary.sum()
+
 except ImportError:
     from array import array as _array
+
     def _array_new(size, typecode, init=0):
         return _array(typecode, [init]) * size
+
     def _array_set(ary, value):
         for i, _ in enumerate(ary):
             ary[i] = value
+
     def _array_sum(ary):
         return sum(ary, 0)
 
 # -----------------------------------------------------------------------------
 
-class Counter:
 
+class Counter:
     def __init__(self, comm, init=0):
         #
         size = comm.Get_size()
@@ -39,20 +46,20 @@ class Counter:
         get_idx = []
         acc_idx = []
         while mask >= 1:
-            left  = idx + 1
-            right = idx + (mask<<1)
+            left = idx + 1
+            right = idx + (mask << 1)
             if rank < mask:
-                acc_idx.append( left  )
-                get_idx.append( right )
+                acc_idx.append(left)
+                get_idx.append(right)
                 idx = left
             else:
-                acc_idx.append( right )
-                get_idx.append( left  )
+                acc_idx.append(right)
+                get_idx.append(left)
                 idx = right
             rank = rank % mask
             mask >>= 1
         #
-        typecode = 'i'
+        typecode = "i"
         datatype = MPI.INT
         itemsize = datatype.Get_size()
         #
@@ -60,8 +67,8 @@ class Counter:
         rank = comm.Get_rank()
         if rank == root:
             nlevels = len(get_idx) + 1
-            nentries = (1<<nlevels) - 1
-            self.mem = MPI.Alloc_mem(nentries*itemsize, MPI.INFO_NULL)
+            nentries = (1 << nlevels) - 1
+            self.mem = MPI.Alloc_mem(nentries * itemsize, MPI.INFO_NULL)
             self.mem[:] = _struct.pack(typecode, init) * nentries
         else:
             self.mem = None
@@ -95,10 +102,11 @@ class Counter:
         self.myval += increment
         return nxtval
 
+
 # -----------------------------------------------------------------------------
 
-class Mutex:
 
+class Mutex:
     def __init__(self, comm):
         self.counter = Counter(comm)
 
@@ -108,7 +116,7 @@ class Mutex:
 
     def __exit__(self, *exc):
         self.unlock()
-        return None
+        return
 
     def free(self):
         self.counter.free()
@@ -122,12 +130,14 @@ class Mutex:
     def unlock(self):
         self.counter.next(-1)
 
+
 # -----------------------------------------------------------------------------
+
 
 def test_counter():
     vals = []
     counter = Counter(MPI.COMM_WORLD)
-    for i in range(5):
+    for _i in range(5):
         c = counter.next()
         vals.append(c)
     counter.free()
@@ -135,13 +145,15 @@ def test_counter():
     vals = MPI.COMM_WORLD.allreduce(vals)
     assert sorted(vals) == list(range(len(vals)))
 
+
 def test_mutex():
     mutex = Mutex(MPI.COMM_WORLD)
     mutex.lock()
     mutex.unlock()
     mutex.free()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     test_counter()
     test_mutex()
 

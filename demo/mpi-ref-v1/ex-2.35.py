@@ -1,22 +1,24 @@
-## mpiexec -n 1 python ex-2.35.py
+# mpiexec -n 1 python ex-2.35.py
 
 # Calls to attach and detach buffers
 
 # --------------------------------------------------------------------
 
 from mpi4py import MPI
+
 try:
     from numpy import empty
 except ImportError:
     from array import array
+
     def empty(size, dtype):
-        return array(dtype, [0]*size)
+        return array(dtype, [0] * size)
 
 # --------------------------------------------------------------------
 
 BUFSIZE = 10000 + MPI.BSEND_OVERHEAD
 
-buff = empty(BUFSIZE, dtype='b')
+buff = empty(BUFSIZE, dtype="b")
 
 MPI.Attach_buffer(buff)
 

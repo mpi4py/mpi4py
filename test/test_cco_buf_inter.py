@@ -1,35 +1,39 @@
-from mpi4py import MPI
-import mpiunittest as unittest
 import arrayimpl
+import mpiunittest as unittest
+
+from mpi4py import MPI
+
 
 def skip_op(typecode, op):
-    if typecode in '?':
+    if typecode == "?":
         return True
-    if typecode in 'FDG':
+    if typecode in "FDG":
         if op in (MPI.MAX, MPI.MIN):
             return True
     return False
+
 
 def maxvalue(a):
     try:
         typecode = a.typecode
     except AttributeError:
         typecode = a.dtype.char
-    if typecode == ('f'):
+    if typecode == ("f"):
         return 1e30
-    elif typecode == ('d'):
+    elif typecode == ("d"):
         return 1e300
     else:
         return 2 ** (a.itemsize * 7) - 1
 
-@unittest.skipMPI('openmpi(<1.6.0)')
-@unittest.skipMPI('msmpi', MPI.COMM_WORLD.Get_size() >= 3)
-@unittest.skipMPI('MPICH1')
-@unittest.skipIf(MPI.ROOT == MPI.PROC_NULL, 'mpi-root')
-@unittest.skipIf(MPI.COMM_WORLD.Get_size() < 2, 'mpi-world-size<2')
-class BaseTestCCOBufInter:
 
-    BASECOMM  = MPI.COMM_NULL
+@unittest.skipMPI("openmpi(<1.6.0)")
+@unittest.skipMPI("msmpi", MPI.COMM_WORLD.Get_size() >= 3)
+@unittest.skipMPI("MPICH1")
+@unittest.skipIf(MPI.ROOT == MPI.PROC_NULL, "mpi-root")
+@unittest.skipIf(MPI.COMM_WORLD.Get_size() < 2, "mpi-world-size<2")
+class BaseTestCCOBufInter:
+    #
+    BASECOMM = MPI.COMM_NULL
     INTRACOMM = MPI.COMM_NULL
     INTERCOMM = MPI.COMM_NULL
 
@@ -70,13 +74,13 @@ class BaseTestCCOBufInter:
                 if self.COLOR == color:
                     for root in range(size):
                         if root == rank:
-                            buf = array(root, typecode, root+color)
+                            buf = array(root, typecode, root + color)
                             comm.Bcast(buf.as_mpi(), root=MPI.ROOT)
                         else:
                             comm.Bcast(None, root=MPI.PROC_NULL)
                 else:
                     for root in range(rsize):
-                        buf = array(-1, typecode, root+color)
+                        buf = array(-1, typecode, root + color)
                         comm.Bcast(buf.as_mpi(), root=root)
                         check = arrayimpl.scalar(root)
                         for value in buf:
@@ -92,7 +96,7 @@ class BaseTestCCOBufInter:
                 if self.COLOR == color:
                     for root in range(size):
                         if root == rank:
-                            rbuf = array(-1, typecode, (rsize, root+color))
+                            rbuf = array(-1, typecode, (rsize, root + color))
                             comm.Gather(None, rbuf.as_mpi(), root=MPI.ROOT)
                             check = arrayimpl.scalar(root)
                             for value in rbuf.flat:
@@ -101,7 +105,7 @@ class BaseTestCCOBufInter:
                             comm.Gather(None, None, root=MPI.PROC_NULL)
                 else:
                     for root in range(rsize):
-                        sbuf = array(root, typecode, root+color)
+                        sbuf = array(root, typecode, root + color)
                         comm.Gather(sbuf.as_mpi(), None, root=root)
 
     def testScatter(self):
@@ -114,13 +118,13 @@ class BaseTestCCOBufInter:
                 if self.COLOR == color:
                     for root in range(size):
                         if root == rank:
-                            sbuf = array(root, typecode, (rsize, root+color))
+                            sbuf = array(root, typecode, (rsize, root + color))
                             comm.Scatter(sbuf.as_mpi(), None, root=MPI.ROOT)
                         else:
                             comm.Scatter(None, None, root=MPI.PROC_NULL)
                 else:
                     for root in range(rsize):
-                        rbuf = array(root, typecode, root+color)
+                        rbuf = array(root, typecode, root + color)
                         comm.Scatter(None, rbuf.as_mpi(), root=root)
                         check = arrayimpl.scalar(root)
                         for value in rbuf:
@@ -128,22 +132,22 @@ class BaseTestCCOBufInter:
 
     def testAllgather(self):
         comm = self.INTERCOMM
-        rank = comm.Get_rank()
+        comm.Get_rank()
         size = comm.Get_size()
         rsize = comm.Get_remote_size()
         for array, typecode in arrayimpl.loop():
             for color in (0, 1):
                 if self.COLOR == color:
                     for n in range(size):
-                        sbuf = array( n, typecode, color)
-                        rbuf = array(-1, typecode, (rsize, n+color))
+                        sbuf = array(n, typecode, color)
+                        rbuf = array(-1, typecode, (rsize, n + color))
                         comm.Allgather(sbuf.as_mpi(), rbuf.as_mpi())
                         check = arrayimpl.scalar(n)
                         for value in rbuf.flat:
                             self.assertEqual(value, check)
                 else:
                     for n in range(rsize):
-                        sbuf = array( n, typecode, n+color)
+                        sbuf = array(n, typecode, n + color)
                         rbuf = array(-1, typecode, (rsize, color))
                         comm.Allgather(sbuf.as_mpi(), rbuf.as_mpi())
                         check = arrayimpl.scalar(n)
@@ -152,29 +156,29 @@ class BaseTestCCOBufInter:
 
     def testAlltoall(self):
         comm = self.INTERCOMM
-        rank = comm.Get_rank()
+        comm.Get_rank()
         size = comm.Get_size()
         rsize = comm.Get_remote_size()
         for array, typecode in arrayimpl.loop():
             for color in (0, 1):
                 if self.COLOR == color:
                     for n in range(size):
-                        sbuf = array( n, typecode, (rsize, (n+1)*color))
-                        rbuf = array(-1, typecode, (rsize, n+3*color))
+                        sbuf = array(n, typecode, (rsize, (n + 1) * color))
+                        rbuf = array(-1, typecode, (rsize, n + 3 * color))
                         comm.Alltoall(sbuf.as_mpi(), rbuf.as_mpi())
                         check = arrayimpl.scalar(n)
                         for value in rbuf.flat:
                             self.assertEqual(value, check)
                 else:
                     for n in range(rsize):
-                        sbuf = array( n, typecode, (rsize, n+3*color))
-                        rbuf = array(-1, typecode, (rsize, (n+1)*color))
+                        sbuf = array(n, typecode, (rsize, n + 3 * color))
+                        rbuf = array(-1, typecode, (rsize, (n + 1) * color))
                         comm.Alltoall(sbuf.as_mpi(), rbuf.as_mpi())
                         check = arrayimpl.scalar(n)
                         for value in rbuf.flat:
                             self.assertEqual(value, check)
 
-    @unittest.skipMPI('mvapich', MPI.COMM_WORLD.Get_size() > 2)
+    @unittest.skipMPI("mvapich", MPI.COMM_WORLD.Get_size() > 2)
     def testReduce(self):
         comm = self.INTERCOMM
         rank = comm.Get_rank()
@@ -182,49 +186,61 @@ class BaseTestCCOBufInter:
         rsize = comm.Get_remote_size()
         for array, typecode in arrayimpl.loop():
             for op in (MPI.SUM, MPI.PROD, MPI.MAX, MPI.MIN):
-                if skip_op(typecode, op): continue
+                if skip_op(typecode, op):
+                    continue
                 for color in (0, 1):
                     if self.COLOR == color:
                         for root in range(lsize):
                             if root == rank:
                                 rbuf = array(-1, typecode, rsize)
                                 comm.Reduce(
-                                    None, rbuf.as_mpi(),
-                                    op=op, root=MPI.ROOT,
+                                    None,
+                                    rbuf.as_mpi(),
+                                    op=op,
+                                    root=MPI.ROOT,
                                 )
                                 max_val = maxvalue(rbuf)
                                 for i, value in enumerate(rbuf):
                                     if op == MPI.SUM:
                                         if (i * rsize) < max_val:
-                                            self.assertAlmostEqual(value, i*rsize)
+                                            self.assertAlmostEqual(
+                                                value, i * rsize
+                                            )
                                     elif op == MPI.PROD:
-                                        if (i ** rsize) < max_val:
-                                            self.assertAlmostEqual(value, i**rsize)
+                                        if (i**rsize) < max_val:
+                                            self.assertAlmostEqual(
+                                                value, i**rsize
+                                            )
                                     elif op == MPI.MAX:
                                         self.assertEqual(value, i)
                                     elif op == MPI.MIN:
                                         self.assertEqual(value, i)
                             else:
                                 comm.Reduce(
-                                    None, None,
-                                    op=op, root=MPI.PROC_NULL,
+                                    None,
+                                    None,
+                                    op=op,
+                                    root=MPI.PROC_NULL,
                                 )
                     else:
                         for root in range(rsize):
                             sbuf = array(range(lsize), typecode)
                             comm.Reduce(
-                                sbuf.as_mpi(), None,
-                                op=op, root=root,
+                                sbuf.as_mpi(),
+                                None,
+                                op=op,
+                                root=root,
                             )
 
     def testAllreduce(self):
         comm = self.INTERCOMM
-        rank = comm.Get_rank()
-        size = comm.Get_size()
+        comm.Get_rank()
+        comm.Get_size()
         rsize = comm.Get_remote_size()
         for array, typecode in arrayimpl.loop():
             for op in (MPI.SUM, MPI.PROD, MPI.MAX, MPI.MIN):
-                if skip_op(typecode, op): continue
+                if skip_op(typecode, op):
+                    continue
                 sbuf = array(range(5), typecode)
                 rbuf = array([-1] * 5, typecode)
                 comm.Allreduce(sbuf.as_mpi(), rbuf.as_mpi(), op)
@@ -232,9 +248,9 @@ class BaseTestCCOBufInter:
                 for i, value in enumerate(rbuf):
                     if op == MPI.SUM:
                         if (i * rsize) < max_val:
-                            self.assertAlmostEqual(value, i*rsize)
+                            self.assertAlmostEqual(value, i * rsize)
                     elif op == MPI.PROD:
-                        if (i ** rsize) < max_val:
+                        if (i**rsize) < max_val:
                             self.assertAlmostEqual(value, i**rsize)
                     elif op == MPI.MAX:
                         self.assertEqual(value, i)
@@ -243,17 +259,20 @@ class BaseTestCCOBufInter:
 
 
 class TestCCOBufInter(BaseTestCCOBufInter, unittest.TestCase):
+    #
     BASECOMM = MPI.COMM_WORLD
 
 
 class TestCCOBufInterDup(TestCCOBufInter):
+    #
     def setUp(self):
         self.BASECOMM = self.BASECOMM.Dup()
         super().setUp()
+
     def tearDown(self):
         self.BASECOMM.Free()
         super().tearDown()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

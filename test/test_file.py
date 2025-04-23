@@ -1,6 +1,10 @@
-from mpi4py import MPI
+import os
+import pathlib
+import tempfile
+
 import mpiunittest as unittest
-import os, tempfile, pathlib
+
+from mpi4py import MPI
 
 
 def maketemp(prefix):
@@ -10,16 +14,16 @@ def maketemp(prefix):
 
 
 class BaseTestFile:
-
+    #
     COMM = MPI.COMM_NULL
     FILE = MPI.FILE_NULL
 
-    prefix = 'mpi4py'
+    prefix = "mpi4py"
 
     def setUp(self):
-        self.fname = maketemp(self.prefix)
+        self.fname = pathlib.Path(maketemp(self.prefix))
         self.amode = MPI.MODE_RDWR | MPI.MODE_CREATE
-        #self.amode |= MPI.MODE_DELETE_ON_CLOSE
+        # self.amode |= MPI.MODE_DELETE_ON_CLOSE
         try:
             self.FILE = MPI.File.Open(
                 self.COMM,
@@ -27,20 +31,21 @@ class BaseTestFile:
                 self.amode,
                 MPI.INFO_NULL,
             )
-            #self.fname=None
+            # self.fname=None
         except Exception:
-            os.remove(self.fname)
+            self.fname.unlink()
             raise
 
     def tearDown(self):
-        if self.FILE == MPI.FILE_NULL: return
+        if self.FILE == MPI.FILE_NULL:
+            return
         amode = self.FILE.amode
         self.FILE.Close()
         if not (amode & MPI.MODE_DELETE_ON_CLOSE):
             MPI.File.Delete(self.fname, MPI.INFO_NULL)
 
-    @unittest.skipMPI('openmpi(==2.0.0)')
-    @unittest.skipMPI('MPICH2(<1.1.0)')
+    @unittest.skipMPI("openmpi(==2.0.0)")
+    @unittest.skipMPI("MPICH2(<1.1.0)")
     def testPreallocate(self):
         size = self.FILE.Get_size()
         self.assertEqual(size, 0)
@@ -82,8 +87,8 @@ class BaseTestFile:
         self.assertEqual(self.FILE.amode, self.amode)
 
     def testGetSetInfo(self):
-        #info = MPI.INFO_NULL
-        #self.FILE.Set_info(info)
+        # info = MPI.INFO_NULL
+        # self.FILE.Set_info(info)
         info = MPI.Info.Create()
         self.FILE.Set_info(info)
         info.Free()
@@ -96,26 +101,31 @@ class BaseTestFile:
         self.FILE.Set_size(fsize)
         displacements = range(100)
         datatypes = [MPI.SHORT, MPI.INT, MPI.LONG, MPI.FLOAT, MPI.DOUBLE]
-        datareps  = ['native'] #['native', 'internal', 'external32']
+        datareps = ["native"]  # ['native', 'internal', 'external32']
         for disp in displacements:
             for dtype in datatypes:
                 for datarep in datareps:
                     etype, ftype = dtype, dtype
-                    self.FILE.Set_view(disp, etype, ftype,
-                                       datarep, MPI.INFO_NULL)
+                    self.FILE.Set_view(
+                        disp, etype, ftype, datarep, MPI.INFO_NULL
+                    )
                     of, et, ft, dr = self.FILE.Get_view()
                     self.assertEqual(disp, of)
                     self.assertEqual(etype.Get_extent(), et.Get_extent())
                     self.assertEqual(ftype.Get_extent(), ft.Get_extent())
                     self.assertEqual(datarep, dr)
                     try:
-                        if not et.is_predefined: et.Free()
+                        if not et.is_predefined:
+                            et.Free()
                     except NotImplementedError:
-                        if et != etype: et.Free()
+                        if et != etype:
+                            et.Free()
                     try:
-                        if not ft.is_predefined: ft.Free()
+                        if not ft.is_predefined:
+                            ft.Free()
                     except NotImplementedError:
-                        if ft != ftype: ft.Free()
+                        if ft != ftype:
+                            ft.Free()
 
     def testGetSetAtomicity(self):
         atom = self.FILE.Get_atomicity()
@@ -144,7 +154,7 @@ class BaseTestFile:
         pos = self.FILE.Get_position_shared()
         self.assertEqual(pos, offset)
 
-    @unittest.skipMPI('openmpi(==2.0.0)')
+    @unittest.skipMPI("openmpi(==2.0.0)")
     def testGetByteOffset(self):
         for offset in range(10):
             disp = self.FILE.Get_byte_offset(offset)
@@ -183,12 +193,13 @@ class BaseTestFile:
 
     def testPickle(self):
         from pickle import dumps, loads
+
         with self.assertRaises(ValueError):
             loads(dumps(self.FILE))
 
 
 class TestFileNull(unittest.TestCase):
-
+    #
     def setUp(self):
         self.eh_save = MPI.FILE_NULL.Get_errhandler()
 
@@ -211,14 +222,15 @@ class TestFileNull(unittest.TestCase):
 
 
 class TestFileSelf(BaseTestFile, unittest.TestCase):
+    #
     COMM = MPI.COMM_SELF
-    prefix = BaseTestFile.prefix + (f'-{MPI.COMM_WORLD.Get_rank()}')
+    prefix = BaseTestFile.prefix + (f"-{MPI.COMM_WORLD.Get_rank()}")
 
 
 class TestFilePath(BaseTestFile, unittest.TestCase):
-
+    #
     COMM = MPI.COMM_SELF
-    prefix = BaseTestFile.prefix + (f'-{MPI.COMM_WORLD.Get_rank()}')
+    prefix = BaseTestFile.prefix + (f"-{MPI.COMM_WORLD.Get_rank()}")
 
     @staticmethod
     def _test_open_close(path):
@@ -228,14 +240,14 @@ class TestFilePath(BaseTestFile, unittest.TestCase):
         try:
             fh = MPI.File.Open(comm, path, amode)
         except:
-            os.remove(path)
+            path.unlink()
             raise
         else:
             MPI.File.Close(fh)
 
     def testPath(self):
         name = maketemp(self.prefix)
-        path = pathlib.PurePath(name)
+        path = pathlib.Path(name)
         self._test_open_close(path)
 
     def testStr(self):
@@ -255,13 +267,15 @@ def have_feature():
     case.prefix = TestFileSelf.prefix
     case.setUp()
     case.tearDown()
+
+
 try:
     have_feature()
 except NotImplementedError:
-    unittest.disable(BaseTestFile, 'mpi-file')
-    unittest.disable(TestFileNull, 'mpi-file')
-    unittest.disable(TestFilePath, 'mpi-file')
+    unittest.disable(BaseTestFile, "mpi-file")
+    unittest.disable(TestFileNull, "mpi-file")
+    unittest.disable(TestFilePath, "mpi-file")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

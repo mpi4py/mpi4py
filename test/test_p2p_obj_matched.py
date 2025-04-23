@@ -1,25 +1,34 @@
-from mpi4py import MPI
 import mpiunittest as unittest
+
+from mpi4py import MPI
 
 _basic = [
     None,
-    True, False,
-    -7, 0, 7,
-    -2**63+1, 2**63-1,
-    -2.17, 0.0, 3.14,
-    1+2j, 2-3j,
-    'mpi4py',
+    True,
+    False,
+    -7,
+    0,
+    7,
+    -(2**63) + 1,
+    2**63 - 1,
+    -2.17,
+    0.0,
+    +1.62,
+    1 + 2j,
+    2 - 3j,
+    "mpi4py",
 ]
 messages = list(_basic)
 messages += [
     list(_basic),
     tuple(_basic),
-    {f'k{k}': v for k, v in enumerate(_basic)},
+    {f"k{k}": v for k, v in enumerate(_basic)},
 ]
 
-@unittest.skipIf(MPI.MESSAGE_NULL == MPI.MESSAGE_NO_PROC, 'mpi-message')
-class TestMessage(unittest.TestCase):
 
+@unittest.skipIf(MPI.MESSAGE_NULL == MPI.MESSAGE_NO_PROC, "mpi-message")
+class TestMessage(unittest.TestCase):
+    #
     def testMessageNull(self):
         null = MPI.MESSAGE_NULL
         self.assertFalse(null)
@@ -61,9 +70,10 @@ class TestMessage(unittest.TestCase):
         self.assertNotEqual(message, MPI.MESSAGE_NULL)
         self.assertEqual(message, MPI.MESSAGE_NO_PROC)
 
-@unittest.skipIf(MPI.MESSAGE_NULL == MPI.MESSAGE_NO_PROC, 'mpi-message')
-class BaseTestP2PMatched:
 
+@unittest.skipIf(MPI.MESSAGE_NULL == MPI.MESSAGE_NO_PROC, "mpi-message")
+class BaseTestP2PMatched:
+    #
     COMM = MPI.COMM_NULL
 
     def testIMProbe(self):
@@ -79,13 +89,13 @@ class BaseTestP2PMatched:
             m = comm.improbe(MPI.ANY_SOURCE, MPI.ANY_TAG, status)
             self.assertIsNone(m)
             self.assertEqual(status.source, MPI.ANY_SOURCE)
-            self.assertEqual(status.tag,    MPI.ANY_TAG)
-            self.assertEqual(status.error,  MPI.SUCCESS)
+            self.assertEqual(status.tag, MPI.ANY_TAG)
+            self.assertEqual(status.error, MPI.SUCCESS)
             m = MPI.Message.iprobe(comm)
             self.assertIsNone(m)
             s = comm.isend(None, comm.rank, 0)
             r = comm.mprobe(comm.rank, 0).irecv()
-            MPI.Request.waitall([s,r])
+            MPI.Request.waitall([s, r])
         finally:
             comm.Free()
 
@@ -103,7 +113,7 @@ class BaseTestP2PMatched:
                 self.assertFalse(m)
                 self.assertTrue(sr)
                 self.assertTrue(rr)
-                MPI.Request.Waitall([sr,rr])
+                MPI.Request.Waitall([sr, rr])
                 self.assertFalse(sr)
                 self.assertFalse(rr)
                 #
@@ -145,25 +155,34 @@ class BaseTestP2PMatched:
 
 
 class TestP2PMatchedSelf(BaseTestP2PMatched, unittest.TestCase):
+    #
     COMM = MPI.COMM_SELF
 
+
 class TestP2PMatchedWorld(BaseTestP2PMatched, unittest.TestCase):
+    #
     COMM = MPI.COMM_WORLD
 
-@unittest.skipMPI('openmpi(<1.8.5)', MPI.COMM_WORLD.Get_size() > 1)
+
+@unittest.skipMPI("openmpi(<1.8.5)", MPI.COMM_WORLD.Get_size() > 1)
 class TestP2PMatchedSelfDup(TestP2PMatchedSelf):
+    #
     def setUp(self):
         self.COMM = MPI.COMM_SELF.Dup()
+
     def tearDown(self):
         self.COMM.Free()
 
-@unittest.skipMPI('openmpi(<1.8.5)', MPI.COMM_WORLD.Get_size() > 1)
+
+@unittest.skipMPI("openmpi(<1.8.5)", MPI.COMM_WORLD.Get_size() > 1)
 class TestP2PMatchedWorldDup(TestP2PMatchedWorld):
+    #
     def setUp(self):
         self.COMM = MPI.COMM_WORLD.Dup()
+
     def tearDown(self):
         self.COMM.Free()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

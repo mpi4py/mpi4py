@@ -1,10 +1,11 @@
 # Author:  Lisandro Dalcin
 # Contact: dalcinl@gmail.com
 """Synchronization utilities."""
+
 import array as _array
 import time as _time
-from .. import MPI
 
+from .. import MPI
 
 __all__ = [
     "Sequential",
@@ -71,7 +72,7 @@ class Counter:
         start=0,
         step=1,
         *,
-        typecode='i',
+        typecode="i",
         comm=MPI.COMM_SELF,
         info=MPI.INFO_NULL,
         root=0,
@@ -178,7 +179,7 @@ class Mutex:
         self._comm = comm
 
         init = [False, null_rank, null_rank][:count]
-        init = _array.array('i', init)
+        init = _array.array("i", init)
         window.Lock(rank, MPI.LOCK_SHARED)
         window.Accumulate(init, rank, op=MPI.REPLACE)
         window.Unlock(rank)
@@ -192,9 +193,9 @@ class Mutex:
         self_rank = window.group_rank
         window.Lock_all()
 
-        rank = _array.array('i', [self_rank])
-        null = _array.array('i', [null_rank])
-        prev = _array.array('i', [null_rank])
+        rank = _array.array("i", [self_rank])
+        null = _array.array("i", [null_rank])
+        prev = _array.array("i", [null_rank])
         window.Accumulate(null, self_rank, next_id, MPI.REPLACE)
         if blocking:
             window.Fetch_and_op(rank, prev, tail_rank, tail_id, MPI.REPLACE)
@@ -209,7 +210,7 @@ class Mutex:
             locked = self._spinloop(lock_id, 0)
 
         # Set the local lock flag
-        flag = _array.array('i', [locked])
+        flag = _array.array("i", [locked])
         window.Accumulate(flag, self_rank, lock_id, MPI.REPLACE)
 
         window.Unlock_all()
@@ -223,20 +224,20 @@ class Mutex:
         self_rank = window.group_rank
         window.Lock_all()
 
-        rank = _array.array('i', [self_rank])
-        null = _array.array('i', [null_rank])
-        prev = _array.array('i', [null_rank])
+        rank = _array.array("i", [self_rank])
+        null = _array.array("i", [null_rank])
+        prev = _array.array("i", [null_rank])
         window.Compare_and_swap(null, rank, prev, tail_rank, tail_id)
         window.Flush(tail_rank)
         if prev[0] != rank[0]:
             # Spin until the next process notify us
             next_rank = self._spinloop(next_id, null_rank)
             # Pass the lock over to the next process
-            true = _array.array('i', [True])
+            true = _array.array("i", [True])
             window.Accumulate(true, next_rank, lock_id, MPI.REPLACE)
 
         # Set the local lock flag
-        false = _array.array('i', [False])
+        false = _array.array("i", [False])
         window.Accumulate(false, self_rank, lock_id, MPI.REPLACE)
 
         window.Unlock_all()
@@ -245,8 +246,8 @@ class Mutex:
         lock_id = 0
         window = self._window
         self_rank = window.group_rank
-        incr = _array.array('i', [value])
-        prev = _array.array('i', [0])
+        incr = _array.array("i", [value])
+        prev = _array.array("i", [0])
         window.Lock(self_rank, MPI.LOCK_SHARED)
         window.Fetch_and_op(incr, prev, self_rank, lock_id, op)
         window.Unlock(self_rank)
@@ -266,7 +267,7 @@ class Mutex:
 
     def _spinloop(self, index, sentinel):
         window = self._window
-        return _rma_spinloop(window, 'i', index, sentinel)
+        return _rma_spinloop(window, "i", index, sentinel)
 
     def __enter__(self):
         """Acquire mutex."""
@@ -312,7 +313,7 @@ class Mutex:
         if not self._window:
             raise RuntimeError("mutex already freed")
         lock_id = 0
-        memory = memoryview(self._window).cast('i')
+        memory = memoryview(self._window).cast("i")
         return bool(memory[lock_id])
 
     def count(self):
@@ -370,20 +371,21 @@ class Condition:
         self._comm = comm
 
         init = [0, null_rank, null_rank][:count]
-        init = _array.array('i', init)
+        init = _array.array("i", init)
         window.Lock(rank, MPI.LOCK_SHARED)
         window.Accumulate(init, rank, op=MPI.REPLACE)
         window.Unlock(rank)
         comm.Barrier()
 
     def _enqueue(self, process):
+        # pylint: disable=redefined-builtin
         null_rank, tail_rank = MPI.PROC_NULL, 0
         next_id, tail_id = (1, 2)
         window = self._window
 
-        rank = _array.array('i', [process])
-        prev = _array.array('i', [null_rank])
-        next = _array.array('i', [process])  # pylint: disable=W0622
+        rank = _array.array("i", [process])
+        prev = _array.array("i", [null_rank])
+        next = _array.array("i", [process])  # noqa: A001
 
         window.Lock_all()
         window.Fetch_and_op(rank, prev, tail_rank, tail_id, MPI.REPLACE)
@@ -395,13 +397,14 @@ class Condition:
         window.Unlock_all()
 
     def _dequeue(self, maxnumprocs):
+        # pylint: disable=redefined-builtin
         null_rank, tail_rank = MPI.PROC_NULL, 0
         next_id, tail_id = (1, 2)
         window = self._window
 
-        null = _array.array('i', [null_rank])
-        prev = _array.array('i', [null_rank])
-        next = _array.array('i', [null_rank])  # pylint: disable=W0622
+        null = _array.array("i", [null_rank])
+        prev = _array.array("i", [null_rank])
+        next = _array.array("i", [null_rank])  # noqa: A001
 
         processes = []
         maxnumprocs = max(0, min(maxnumprocs, window.group_size))
@@ -429,13 +432,13 @@ class Condition:
         flag_id = 0
         window = self._window
         window.Lock_all()
-        _rma_spinloop(window, 'i', flag_id, 0, reset=True)
+        _rma_spinloop(window, "i", flag_id, 0, reset=True)
         window.Unlock_all()
 
     def _wakeup(self, processes):
         flag_id = 0
         window = self._window
-        flag = _array.array('i', [1])
+        flag = _array.array("i", [1])
         window.Lock_all()
         for rank in processes:
             window.Accumulate(flag, rank, flag_id, MPI.REPLACE)
@@ -613,7 +616,7 @@ class Semaphore:
 
         """
         if n < 1:
-            raise ValueError('increment must be one or more')
+            raise ValueError("increment must be one or more")
         with self._condvar:
             if self._bounded:
                 # pylint: disable=protected-access
@@ -649,6 +652,7 @@ def _new_backoff(
             _time.sleep(delay)
             delay = min(delay_max, max(delay_min, delay * delay_ratio))
             yield
+
     backoff = backoff_iterator()
     return lambda: next(backoff)
 
@@ -658,8 +662,13 @@ def _rma_progress(window):
 
 
 def _rma_spinloop(
-    window, typecode, index, sentinel, reset=False,
-    backoff=None, progress=None,
+    window,
+    typecode,
+    index,
+    sentinel,
+    reset=False,
+    backoff=None,
+    progress=None,
 ):  # pylint: disable=too-many-arguments,too-many-positional-arguments
     memory = memoryview(window).cast(typecode)
     backoff = backoff or _new_backoff()

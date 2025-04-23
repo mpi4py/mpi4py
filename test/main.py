@@ -1,10 +1,12 @@
 # Author:  Lisandro Dalcin
 # Contact: dalcinl@gmail.com
-import re
-import os
-import sys
 import argparse
 import fnmatch
+import importlib
+import os
+import pathlib
+import re
+import sys
 import unittest
 
 __unittest = True
@@ -15,108 +17,151 @@ def parse_pattern(pattern):
 
 
 def parse_xfile(xfile):
-    with open(xfile) as f:
-        return list(map(parse_pattern, f.read().splitlines()))
+    content = pathlib.Path(xfile).read_text(encoding="utf-8")
+    return list(map(parse_pattern, content.splitlines()))
 
 
 def setup_parser(parser):
     parser.add_argument(
         "-x",  # "--exclude-name",
         help="Skip run tests which match the given substring",
-        action="append", dest="excludePatterns", default=[],
-        type=parse_pattern, metavar="TESTNAMEPATTERNS",
+        action="append",
+        dest="excludePatterns",
+        default=[],
+        type=parse_pattern,
+        metavar="TESTNAMEPATTERNS",
     )
     parser.add_argument(  # Py3.8: use action="extend" on "excludePatterns"
         "--xfile",
         help="Skip run tests which match the substrings in the given files",
-        action="append", dest="excludeFile", default=[],
-        type=str, metavar="FILENAME",
+        action="append",
+        dest="excludeFile",
+        default=[],
+        type=str,
+        metavar="FILENAME",
     )
     parser.add_argument(
         "-i",  # "--include",
         help="Include test module names matching REGEX",
-        action="append", dest="include", default=[],
-        type=str, metavar="REGEX",
+        action="append",
+        dest="include",
+        default=[],
+        type=str,
+        metavar="REGEX",
     )
     parser.add_argument(
         "-e",  # "--exclude",
         help="Exclude test module names matching REGEX",
-        action="append", dest="exclude", default=[],
-        type=str, metavar="REGEX",
+        action="append",
+        dest="exclude",
+        default=[],
+        type=str,
+        metavar="REGEX",
     )
     parser.add_argument(
         "--inplace",
         help="Enable testing from in-place build",
-        action="store_true", dest="inplace", default=False,
+        action="store_true",
+        dest="inplace",
+        default=False,
     )
     parser.add_argument(
         "--no-builddir",
         help="Disable testing from build directory",
-        action="store_false", dest="builddir", default=True,
+        action="store_false",
+        dest="builddir",
+        default=True,
     )
     parser.add_argument(
         "--path",
         help="Prepend PATH to sys.path",
-        action="append", dest="path", default=[],
-        type=str, metavar="PATH",
+        action="append",
+        dest="path",
+        default=[],
+        type=str,
+        metavar="PATH",
     )
     parser.add_argument(
         "--threads",
         help="Initialize MPI with thread support",
-        action="store_true", dest="threads", default=None,
+        action="store_true",
+        dest="threads",
+        default=None,
     )
     parser.add_argument(
         "--no-threads",
         help="Initialize MPI without thread support",
-        action="store_false", dest="threads", default=None,
+        action="store_false",
+        dest="threads",
+        default=None,
     )
     parser.add_argument(
         "--thread-level",
         help="Initialize MPI with required thread support",
         choices=["single", "funneled", "serialized", "multiple"],
-        action="store", dest="thread_level", default=None,
-        type=str, metavar="LEVEL",
+        action="store",
+        dest="thread_level",
+        default=None,
+        type=str,
+        metavar="LEVEL",
     )
     parser.add_argument(
         "--cupy",
         help="Enable testing with CuPy arrays",
-        action="store_true", dest="cupy", default=False,
+        action="store_true",
+        dest="cupy",
+        default=False,
     )
     parser.add_argument(
         "--no-cupy",
         help="Disable testing with CuPy arrays",
-        action="store_false", dest="cupy", default=False,
+        action="store_false",
+        dest="cupy",
+        default=False,
     )
     parser.add_argument(
         "--numba",
         help="Enable testing with Numba arrays",
-        action="store_true", dest="numba", default=False,
+        action="store_true",
+        dest="numba",
+        default=False,
     )
     parser.add_argument(
         "--no-numba",
         help="Disable testing with Numba arrays",
-        action="store_false", dest="numba", default=False,
+        action="store_false",
+        dest="numba",
+        default=False,
     )
     parser.add_argument(
         "--no-numpy",
         help="Disable testing with NumPy arrays",
-        action="store_false", dest="numpy", default=True,
+        action="store_false",
+        dest="numpy",
+        default=True,
     )
     parser.add_argument(
         "--no-array",
         help="Disable testing with builtin array module",
-        action="store_false", dest="array", default=True,
+        action="store_false",
+        dest="array",
+        default=True,
     )
     parser.add_argument(
         "--no-skip-mpi",
         help="Disable known failures with backend MPI",
-        action="store_false", dest="skip_mpi", default=True,
+        action="store_false",
+        dest="skip_mpi",
+        default=True,
     )
     parser.add_argument(
         "--xml",
         help="Directory for storing XML reports",
-        action="store", dest="xmloutdir", default=None,
-        nargs="?", const=os.path.curdir,
+        action="store",
+        dest="xmloutdir",
+        default=None,
+        nargs="?",
+        const=os.path.curdir,
     )
     return parser
 
@@ -133,20 +178,21 @@ def getbuilddir():
             from distutils.command.build import build
         cmd_obj = build(Distribution())
         cmd_obj.finalize_options()
-        return cmd_obj.build_platlib
+        builddir = pathlib.Path(cmd_obj.build_platlib)
     except Exception:
-        return None
+        builddir = None
+    return builddir
 
 
 def getprocessorinfo():
-    from mpi4py import MPI
+    MPI = importlib.import_module("mpi4py.MPI")
     rank = MPI.COMM_WORLD.Get_rank()
     name = MPI.Get_processor_name()
     return (rank, name)
 
 
 def getlibraryinfo():
-    from mpi4py import MPI
+    MPI = importlib.import_module("mpi4py.MPI")
     x, y = MPI.Get_version()
     info = f"MPI {x}.{y}"
     name, version = MPI.get_vendor()
@@ -173,58 +219,57 @@ def getpackageinfo(pkg):
 
 
 def setup_python(options):
-    script = os.path.abspath(__file__)
-    testdir = os.path.dirname(script)
-    rootdir = os.path.dirname(testdir)
+    script = pathlib.Path(__file__).resolve()
+    testdir = script.parent
+    rootdir = testdir.parent
     if options.inplace:
-        srcdir = os.path.join(rootdir, "src")
+        srcdir = str(rootdir / "src")
         sys.path.insert(0, srcdir)
     elif options.builddir:
         builddir = getbuilddir()
         if builddir is not None:
-            builddir = os.path.join(rootdir, builddir)
-            if os.path.isdir(builddir):
-                sys.path.insert(0, builddir)
+            builddir = rootdir / builddir
+            if builddir.is_dir():
+                sys.path.insert(0, str(builddir))
     if options.path:
         for path in reversed(options.path):
-            for pth in path.split(os.path.pathsep):
-                if os.path.exists(pth):
-                    sys.path.insert(0, pth)
+            for pth in map(pathlib.Path, path.split(os.path.pathsep)):
+                if pth.exists():
+                    sys.path.insert(0, str(pth))
 
 
 def setup_modules(options):
     #
     if not options.cupy:
-        sys.modules['cupy'] = None
+        sys.modules["cupy"] = None
     if not options.numba:
-        sys.modules['numba'] = None
+        sys.modules["numba"] = None
     if not options.numpy:
-        sys.modules['numpy'] = None
+        sys.modules["numpy"] = None
     if not options.array:
-        sys.modules['array'] = None
+        sys.modules["array"] = None
     #
-    import mpi4py
+    mpi4py = importlib.import_module("mpi4py")
     if options.threads is not None:
         mpi4py.rc.threads = options.threads
     if options.thread_level is not None:
         mpi4py.rc.thread_level = options.thread_level
-    #
-    import mpi4py.MPI
+    importlib.import_module("mpi4py.MPI")
 
 
-def setup_unittest(options):
+def setup_unittest(_options):
+    from contextlib import suppress
     from unittest.runner import _WritelnDecorator
+
     super_writeln = _WritelnDecorator.writeln
+
     def writeln(self, arg=None):
-        try:
+        with suppress(Exception):
             self.flush()
-        except:
-            pass
         super_writeln(self, arg)
-        try:
+        with suppress(Exception):
             self.flush()
-        except:
-            pass
+
     _WritelnDecorator.writeln = writeln
 
 
@@ -241,27 +286,27 @@ def print_banner(options):
 
     if options.verbosity:
         writeln(getpythoninfo())
-        writeln(getpackageinfo('numpy'))
-        writeln(getpackageinfo('numba'))
-        writeln(getpackageinfo('cupy'))
+        writeln(getpackageinfo("numpy"))
+        writeln(getpackageinfo("numba"))
+        writeln(getpackageinfo("cupy"))
         writeln(getlibraryinfo())
-        writeln(getpackageinfo('mpi4py'))
+        writeln(getpackageinfo("mpi4py"))
 
 
 class TestLoader(unittest.TestLoader):
-
+    #
     excludePatterns = None
 
     def __init__(self, include=None, exclude=None):
         super().__init__()
         if include:
-            self.include = re.compile('|'.join(include)).search
+            self.include = re.compile("|".join(include)).search
         else:
-            self.include = lambda arg: True
+            self.include = lambda _arg: True
         if exclude:
-            self.exclude = re.compile('|'.join(exclude)).search
+            self.exclude = re.compile("|".join(exclude)).search
         else:
-            self.exclude = lambda arg: False
+            self.exclude = lambda _arg: False
 
     def _match_path(self, path, full_path, pattern):
         match = super()._match_path(path, full_path, pattern)
@@ -276,11 +321,12 @@ class TestLoader(unittest.TestLoader):
         def exclude(name):
             modname = testCaseClass.__module__
             clsname = testCaseClass.__qualname__
-            fullname = f'{modname}.{clsname}.{name}'
-            return not any(map(
-                lambda pattern: fnmatch.fnmatchcase(fullname, pattern),
-                self.excludePatterns
-            ))
+            fullname = f"{modname}.{clsname}.{name}"
+            return not any(
+                fnmatch.fnmatchcase(fullname, pattern)
+                for pattern in self.excludePatterns
+            )
+
         names = super().getTestCaseNames(testCaseClass)
         if self.excludePatterns:
             names = list(filter(exclude, names))
@@ -288,7 +334,7 @@ class TestLoader(unittest.TestLoader):
 
 
 class TestProgram(unittest.TestProgram):
-
+    #
     def _getMainArgParser(self, parent):
         parser = super()._getMainArgParser(parent)
         setup_parser(parser)
@@ -303,15 +349,15 @@ class TestProgram(unittest.TestProgram):
         setup_python(self)
         setup_modules(self)
         setup_unittest(self)
-        testdir = os.path.dirname(__file__)
+        testdir = pathlib.Path(__file__).parent
         if from_discovery:
-            self.start = testdir
+            self.start = str(testdir)
             self.pattern = "test_*.py"
         elif testdir not in sys.path:
             sys.path.insert(0, testdir)
         if not self.skip_mpi:
-            import mpiunittest
-            mpiunittest.skipMPI = lambda p, *c: lambda f: f
+            mpiunittest = __import__("mpiunittest")
+            mpiunittest.skipMPI = lambda _p, *_c: lambda f: f
         for xfile in self.excludeFile:
             self.excludePatterns.extend(parse_xfile(xfile))
         self.testLoader = TestLoader(self.include, self.exclude)
@@ -319,7 +365,7 @@ class TestProgram(unittest.TestProgram):
         super().createTests(from_discovery, Loader)
 
     def _setUpXMLRunner(self):
-        from mpi4py import MPI
+        MPI = importlib.import_module("mpi4py.MPI")
         size = MPI.COMM_WORLD.Get_size()
         rank = MPI.COMM_WORLD.Get_rank()
         try:
@@ -329,7 +375,8 @@ class TestProgram(unittest.TestProgram):
                 print(
                     "Cannot generate XML reports!",
                     "Install 'unittest-xml-reporting'.",
-                    file=sys.stderr, flush=True,
+                    file=sys.stderr,
+                    flush=True,
                 )
             sys.exit(1)
         runner = xmlrunner.XMLTestRunner(output=self.xmloutdir)
@@ -348,7 +395,7 @@ class TestProgram(unittest.TestProgram):
             pass
         success = self.result.wasSuccessful()
         if not success and self.failfast:
-            from mpi4py import run
+            run = importlib.import_module("mpi4py.run")
             run.set_abort_status(1)
         sys.exit(not success)
 
@@ -356,6 +403,6 @@ class TestProgram(unittest.TestProgram):
 main = TestProgram
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.dont_write_bytecode = True
     main(module=None)

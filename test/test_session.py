@@ -1,9 +1,10 @@
-from mpi4py import MPI
 import mpiunittest as unittest
+
+from mpi4py import MPI
 
 
 class TestSession(unittest.TestCase):
-
+    #
     def testSessionInit(self):
         session = MPI.Session()
         self.assertFalse(session)
@@ -81,7 +82,7 @@ class TestSession(unittest.TestCase):
 
     def testBuffering(self):
         session = MPI.Session.Init()
-        buf = MPI.Alloc_mem((1<<16)+MPI.BSEND_OVERHEAD)
+        buf = MPI.Alloc_mem((1 << 16) + MPI.BSEND_OVERHEAD)
         try:
             with self.catchNotImplementedError(4, 1):
                 session.Attach_buffer(buf)
@@ -103,6 +104,7 @@ class TestSession(unittest.TestCase):
 
     def testPickle(self):
         from pickle import dumps, loads
+
         session = MPI.Session.Init()
         with self.assertRaises(ValueError):
             loads(dumps(session))
@@ -112,8 +114,8 @@ class TestSession(unittest.TestCase):
 try:
     MPI.Session.Init().Finalize()
 except NotImplementedError:
-    unittest.disable(TestSession, 'mpi-session')
+    unittest.disable(TestSession, "mpi-session")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

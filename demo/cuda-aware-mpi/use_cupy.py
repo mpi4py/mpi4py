@@ -5,21 +5,21 @@
 # Run this script using the following command:
 # mpiexec -n 2 python use_cupy.py
 
-from mpi4py import MPI
 import cupy
 
+from mpi4py import MPI
 
 comm = MPI.COMM_WORLD
 size = comm.Get_size()
 rank = comm.Get_rank()
 
 # Allreduce
-sendbuf = cupy.arange(10, dtype='i')
+sendbuf = cupy.arange(10, dtype="i")
 recvbuf = cupy.empty_like(sendbuf)
 # always make sure the GPU buffer is ready before any MPI operation
 cupy.cuda.get_current_stream().synchronize()
 comm.Allreduce(sendbuf, recvbuf)
-assert cupy.allclose(recvbuf, sendbuf*size)
+assert cupy.allclose(recvbuf, sendbuf * size)
 
 # Bcast
 if rank == 0:

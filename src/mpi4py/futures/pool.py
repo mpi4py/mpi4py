@@ -2,17 +2,14 @@
 # Contact: dalcinl@gmail.com
 """Implements MPIPoolExecutor."""
 
-import sys
-import time
 import functools
 import itertools
+import sys
 import threading
-
-from ._base import Future
-from ._base import Executor
-from ._base import as_completed
+import time
 
 from . import _core
+from ._base import Executor, Future, as_completed
 
 
 class MPIPoolExecutor(Executor):
@@ -20,8 +17,9 @@ class MPIPoolExecutor(Executor):
 
     Future = Future
 
-    def __init__(self, max_workers=None,
-                 initializer=None, initargs=(), **kwargs):
+    def __init__(
+        self, max_workers=None, initializer=None, initargs=(), **kwargs
+    ):
         """Initialize a new MPIPoolExecutor instance.
 
         Args:
@@ -49,12 +47,12 @@ class MPIPoolExecutor(Executor):
             max_workers = int(max_workers)
             if max_workers <= 0:
                 raise ValueError("max_workers must be greater than 0")
-            kwargs['max_workers'] = max_workers
+            kwargs["max_workers"] = max_workers
         if initializer is not None:
             if not callable(initializer):
                 raise TypeError("initializer must be a callable")
-            kwargs['initializer'] = initializer
-            kwargs['initargs'] = tuple(initargs)
+            kwargs["initializer"] = initializer
+            kwargs["initargs"] = tuple(initargs)
 
         self._options = kwargs
         self._shutdown = False
@@ -121,8 +119,7 @@ class MPIPoolExecutor(Executor):
             self._pool.push((future, task))
             return future
 
-    def map(self, fn, *iterables,
-            timeout=None, chunksize=1, unordered=False):
+    def map(self, fn, *iterables, timeout=None, chunksize=1, unordered=False):
         """Return an iterator equivalent to ``map(fn, *iterables)``.
 
         Args:
@@ -148,8 +145,9 @@ class MPIPoolExecutor(Executor):
         """
         return self.starmap(fn, zip(*iterables), timeout, chunksize, unordered)
 
-    def starmap(self, fn, iterable,
-                timeout=None, chunksize=1, unordered=False):
+    def starmap(
+        self, fn, iterable, timeout=None, chunksize=1, unordered=False
+    ):
         """Return an iterator equivalent to ``itertools.starmap(...)``.
 
         Args:
@@ -176,11 +174,13 @@ class MPIPoolExecutor(Executor):
         if chunksize < 1:
             raise ValueError("chunksize must be >= 1.")
         if chunksize == 1:
-            return _starmap_helper(self.submit, fn, iterable,
-                                   timeout, unordered)
+            return _starmap_helper(
+                self.submit, fn, iterable, timeout, unordered
+            )
         else:
-            return _starmap_chunks(self.submit, fn, iterable,
-                                   timeout, unordered, chunksize)
+            return _starmap_chunks(
+                self.submit, fn, iterable, timeout, unordered, chunksize
+            )
 
     def shutdown(self, wait=True, *, cancel_futures=False):
         """Clean-up the resources associated with the executor.
@@ -254,11 +254,12 @@ def _starmap_helper(submit, function, iterable, timeout, unordered):
         finally:
             while futures:
                 futures.pop().cancel()
+
     return result_iterator()
 
 
 def _apply_chunks(function, chunk):
-    return [function(*args) for args in chunk]
+    return list(itertools.starmap(function, chunk))
 
 
 def _build_chunks(chunksize, iterable):
@@ -277,13 +278,11 @@ def _chain_from_iterable_of_lists(iterable):
             yield item.pop()
 
 
-def _starmap_chunks(submit, function, iterable,
-                    timeout, unordered, chunksize):
+def _starmap_chunks(submit, function, iterable, timeout, unordered, chunksize):
     # pylint: disable=too-many-arguments,too-many-positional-arguments
     function = functools.partial(_apply_chunks, function)
     iterable = _build_chunks(chunksize, iterable)
-    result = _starmap_helper(submit, function, iterable,
-                             timeout, unordered)
+    result = _starmap_helper(submit, function, iterable, timeout, unordered)
     return _chain_from_iterable_of_lists(result)
 
 
@@ -299,7 +298,7 @@ class MPICommExecutor:
     Example::
 
         with MPICommExecutor(MPI.COMM_WORLD, root=0) as executor:
-            if executor is not None: # master process
+            if executor is not None:  # master process
                 executor.submit(...)
                 executor.map(...)
     """

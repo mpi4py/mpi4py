@@ -11,8 +11,8 @@ import threading as _threading
 from . import _base
 
 __all__ = [
-    'collect',
-    'compose',
+    "collect",
+    "compose",
 ]
 
 
@@ -30,7 +30,7 @@ def collect(fs):
 
 
 class _Collect:
-
+    #
     def __init__(self):
         self.lock = _threading.RLock()
         self.future = None

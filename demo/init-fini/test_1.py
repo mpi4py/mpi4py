@@ -1,7 +1,9 @@
 from mpi4py import rc
+
 rc.initialize = False
 
-from mpi4py import MPI
+from mpi4py import MPI  # noqa: E402
+
 assert not MPI.Is_initialized()
 assert not MPI.Is_finalized()
 

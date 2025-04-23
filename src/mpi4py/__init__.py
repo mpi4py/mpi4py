@@ -17,12 +17,12 @@ oriented interface which closely follows MPI-2 C++ bindings.
 
 """
 
-__version__ = '4.1.0.dev0'
-__author__ = 'Lisandro Dalcin'
-__credits__ = 'MPI Forum, MPICH Team, Open MPI Team'
+__version__ = "4.1.0.dev0"
+__author__ = "Lisandro Dalcin"
+__credits__ = "MPI Forum, MPICH Team, Open MPI Team"
 
 
-__all__ = ['MPI']
+__all__ = ["MPI"]  # noqa: F822
 
 
 class Rc:
@@ -51,12 +51,12 @@ class Rc:
 
     initialize = True
     threads = True
-    thread_level = 'multiple'
+    thread_level = "multiple"
     finalize = None
     fast_reduce = True
     recv_mprobe = True
     irecv_bufsz = 32768
-    errors = 'exception'
+    errors = "exception"
 
     def __init__(self, **kwargs):
         """Initialize options."""
@@ -78,11 +78,11 @@ class Rc:
 
     def __repr__(self):
         """Return repr(self)."""
-        return f'<{__spec__.name}.rc>'
+        return f"<{__spec__.name}.rc>"
 
 
 rc = Rc()
-__import__('sys').modules[__spec__.name + '.rc'] = rc
+__import__("sys").modules[__spec__.name + ".rc"] = rc
 
 
 def get_include():
@@ -97,9 +97,8 @@ def get_include():
                 include_dirs=[..., mpi4py.get_include()])
 
     """
-    # pylint: disable=import-outside-toplevel
-    from os.path import join, dirname
-    return join(dirname(__spec__.origin), 'include')
+    prefix = __import__("pathlib").Path(__spec__.origin).parent
+    return str(prefix / "include")
 
 
 def get_config():
@@ -115,14 +114,11 @@ def get_config():
        `configparser` module.
 
     """
-    # pylint: disable=import-outside-toplevel
-    from configparser import ConfigParser
-    from os.path import join, dirname
-    parser = ConfigParser()
-    parser.add_section('mpi')
-    mpicfg = join(dirname(__spec__.origin), 'mpi.cfg')
-    parser.read(mpicfg, encoding='utf-8')
-    return dict(parser.items('mpi'))
+    prefix = __import__("pathlib").Path(__spec__.origin).parent
+    parser = __import__("configparser").ConfigParser()
+    parser.add_section("mpi")
+    parser.read(prefix / "mpi.cfg", encoding="utf-8")
+    return dict(parser.items("mpi"))
 
 
 def profile(name, *, path=None):
@@ -138,31 +134,32 @@ def profile(name, *, path=None):
     """
     # pylint: disable=import-outside-toplevel
     import os
+    import pathlib
     import sys
     import warnings
 
     try:
         from _ctypes import dlopen
-        from os import RTLD_NOW, RTLD_GLOBAL
+        from os import RTLD_GLOBAL, RTLD_NOW
     except ImportError as exc:  # pragma: no cover
         warnings.warn(exc.args[0], stacklevel=2)
         return
 
     def find_library(name, path):
-        pattern = [('', '')]
-        if sys.platform == 'darwin':  # pragma: no cover
-            pattern.append(('lib', '.dylib'))
-        elif os.name == 'posix':  # pragma: no cover
-            pattern.append(('lib', '.so'))
-        for pth in path:
-            for (lib, dso) in pattern:
-                filename = os.path.join(pth, lib + name + dso)
-                if os.path.isfile(filename):
-                    return os.path.abspath(filename)
+        pattern = [("", "")]
+        if sys.platform == "darwin":  # pragma: no cover
+            pattern.append(("lib", ".dylib"))
+        elif os.name == "posix":  # pragma: no cover
+            pattern.append(("lib", ".so"))
+        for pth in map(pathlib.Path, path):
+            for lib, dso in pattern:
+                filename = pth / f"{lib}{name}{dso}"
+                if filename.is_file():
+                    return str(filename.resolve())
         return None
 
     if path is None:
-        path = ['']
+        path = [""]
     elif isinstance(path, os.PathLike):
         path = [path]
     elif isinstance(path, str):
@@ -181,5 +178,5 @@ def profile(name, *, path=None):
     except OSError as exc:
         warnings.warn(exc.args[0], stacklevel=2)
     else:
-        registry = vars(profile).setdefault('registry', [])
+        registry = vars(profile).setdefault("registry", [])
         registry.append((name, (handle, filename)))

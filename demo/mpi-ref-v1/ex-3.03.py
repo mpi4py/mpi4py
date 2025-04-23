@@ -1,4 +1,4 @@
-with open('ex-3.02.py') as source:
+with open("ex-3.02.py") as source:
     exec(source.read())
 
 assert dtype.size == MPI.DOUBLE.size + MPI.CHAR.size

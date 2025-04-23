@@ -8,5 +8,5 @@ types = (MPI.DOUBLE, MPI.CHAR)
 
 dtype = MPI.Datatype.Create_struct(blens, disps, types)
 
-if 'ex-3.02' in __file__:
+if "ex-3.02" in __file__:
     dtype.Free()

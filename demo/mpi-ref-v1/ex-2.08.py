@@ -1,26 +1,27 @@
-## mpiexec -n 2 python ex-2.08.py
+# mpiexec -n 2 python ex-2.08.py
 
 # An exchange of messages
 
 # --------------------------------------------------------------------
 
-from mpi4py import MPI
 import array
 
+from mpi4py import MPI
+
 if MPI.COMM_WORLD.Get_size() < 2:
-    raise SystemExit
+    raise SystemExit from None
 
 # --------------------------------------------------------------------
 
-sendbuf = array.array('d', [0]*10)
-recvbuf = array.array('d', [0]*10)
+sendbuf = array.array("d", [0] * 10)
+recvbuf = array.array("d", [0] * 10)
 tag = 0
 status = MPI.Status()
 
 myrank = MPI.COMM_WORLD.Get_rank()
 
 if myrank == 0:
-    sendbuf[:] = array.array('d', range(len(sendbuf)))
+    sendbuf[:] = array.array("d", range(len(sendbuf)))
     MPI.COMM_WORLD.Send([sendbuf, MPI.DOUBLE], 1, tag)
     MPI.COMM_WORLD.Recv([recvbuf, MPI.DOUBLE], 1, tag, status)
 elif myrank == 1:

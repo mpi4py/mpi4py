@@ -1,21 +1,22 @@
 import sys
+
 from mpi4py.futures import MPIPoolExecutor
 
 
 def main():
     def getarg(opt, default=None):
         try:
-            return sys.argv[sys.argv.index('--' + opt) + 1]
+            return sys.argv[sys.argv.index("--" + opt) + 1]
         except ValueError:
             return default
 
-    if '--host' in sys.argv or '--port' in sys.argv:
-        service = (getarg('host'), getarg('port'))
+    if "--host" in sys.argv or "--port" in sys.argv:
+        service = (getarg("host"), getarg("port"))
     else:
-        service = getarg('service')
-    if '--info' in sys.argv:
-        info = getarg('info').split(',')
-        info = dict(entry.split('=') for entry in info if entry)
+        service = getarg("service")
+    if "--info" in sys.argv:
+        info = getarg("info").split(",")
+        info = dict(entry.split("=") for entry in info if entry)
     else:
         info = None
 
@@ -26,5 +27,5 @@ def main():
     assert fut2.result(0) == 42
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

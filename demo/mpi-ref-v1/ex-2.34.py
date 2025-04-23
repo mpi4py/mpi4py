@@ -1,23 +1,24 @@
-## mpiexec -n 2 python ex-2.34.py
+# mpiexec -n 2 python ex-2.34.py
 
 # Use of ready-mode and synchronous-mode
 
 # --------------------------------------------------------------------
 
 from mpi4py import MPI
+
 try:
     import numpy
 except ImportError:
-    raise SystemExit
+    raise SystemExit from None
 
 if MPI.COMM_WORLD.Get_size() < 2:
-    raise SystemExit
+    raise SystemExit from None
 
 # --------------------------------------------------------------------
 
 comm = MPI.COMM_WORLD
 
-buff = numpy.empty((1000,2), dtype='f', order='f')
+buff = numpy.empty((1000, 2), dtype="f", order="f")
 
 rank = comm.Get_rank()
 
@@ -34,14 +35,12 @@ elif rank == 1:
 
 # --------------------------------------------------------------------
 
-all = numpy.all
-
 if rank == 0:
-    assert all(buff[:, 0] == 5)
-    assert all(buff[:, 1] == 7)
+    assert numpy.all(buff[:, 0] == 5)
+    assert numpy.all(buff[:, 1] == 7)
     assert status[0].source == 1
-    assert status[0].tag ==  1
+    assert status[0].tag == 1
     assert status[1].source == 1
-    assert status[1].tag ==  2
+    assert status[1].tag == 2
 
 # --------------------------------------------------------------------

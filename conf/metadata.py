@@ -1,5 +1,6 @@
-import re
 import os
+import pathlib
+import re
 import sys
 
 
@@ -12,12 +13,10 @@ def get_name(settings=None):  # noqa: ARG001
 
 
 def get_version(settings=None):  # noqa: ARG001
-    confdir = os.path.dirname(os.path.abspath(__file__))
-    topdir = os.path.dirname(confdir)
-    srcdir = os.path.join(topdir, "src")
-    source = os.path.join(srcdir, "mpi4py", "__init__.py")
-    with open(source, encoding="utf-8") as f:
-        m = re.search(r"__version__\s*=\s*'(.*)'", f.read())
+    topdir = pathlib.Path(__file__).resolve().parent.parent
+    source = topdir / "src" / "mpi4py" / "__init__.py"
+    content = source.read_text(encoding="utf-8")
+    m = re.search(r'__version__\s*=\s*"(.*)"', content)
     version = m.groups()[0]
     local_version = os.environ.get("MPI4PY_LOCAL_VERSION")
     if local_version:
@@ -26,15 +25,14 @@ def get_version(settings=None):  # noqa: ARG001
 
 
 def get_readme(settings=None):  # noqa: ARG001
-    confdir = os.path.dirname(__file__)
-    topdir = os.path.dirname(confdir)
+    topdir = pathlib.Path(__file__).resolve().parent.parent
     filelist = ("DESCRIPTION.rst", "CITATION.rst", "INSTALL.rst")
     template = "See `{0} <{0}>`_.\n\n"
     template += ".. include:: {0}\n"
     text = template.format(filelist[0])
     for filename in filelist:
-        source = os.path.join(topdir, filename)
-        with open(source, encoding="utf-8") as f:
+        source = topdir / filename
+        with source.open(encoding="utf-8") as f:
             includeline = template.format(filename)
             text = text.replace(includeline, f.read())
     return {
@@ -45,7 +43,7 @@ def get_readme(settings=None):  # noqa: ARG001
 
 description = "Python bindings for MPI"
 requires_python = ">=3.8"
-license = "BSD-3-Clause"
+license = "BSD-3-Clause"  # noqa: A001
 authors = [
     {"name": "Lisandro Dalcin", "email": "dalcinl@gmail.com"},
 ]
@@ -93,7 +91,7 @@ urls = {
     "Issues":        "https://github.com/mpi4py/mpi4py/issues",
     "Discussions":   "https://github.com/mpi4py/mpi4py/discussions",
     "Downloads":     "https://github.com/mpi4py/mpi4py/releases",
-}
+}  # fmt: skip
 
 
 def dynamic_metadata(field, settings=None):

@@ -8,21 +8,20 @@
 # pylint: disable=missing-class-docstring
 # pylint: disable=missing-function-docstring
 
+import atexit
+import collections
+import itertools
 import os
 import sys
-import time
-import atexit
-import weakref
-import warnings
-import itertools
 import threading
+import time
 import traceback
-import collections
+import warnings
+import weakref
 
 from .. import MPI
 from ..util import pkl5
 from ._base import BrokenExecutor
-
 
 # ---
 
@@ -33,6 +32,7 @@ def serialized(function):
     def wrapper(*args, **kwargs):
         with serialized.lock:
             return function(*args, **kwargs)
+
     if serialized.lock is None:
         return function
     return wrapper
@@ -53,15 +53,17 @@ def setup_mpi_threads():
         warnings.warn(
             "the level of thread support in MPI "
             "should be at least MPI_THREAD_SERIALIZED",
-            RuntimeWarning, stacklevel=2,
+            RuntimeWarning,
+            stacklevel=2,
         )
 
 
 setup_mpi_threads.lock = threading.Lock()  # type: ignore[attr-defined]
-setup_mpi_threads.thread_level = None      # type: ignore[attr-defined]
+setup_mpi_threads.thread_level = None  # type: ignore[attr-defined]
 
 
 # ---
+
 
 class RemoteTraceback(Exception):
     pass
@@ -107,13 +109,14 @@ else:  # pragma: no cover
 
 
 def os_environ_get(name, default=None):
-    varname = f'MPI4PY_FUTURES_{name}'
+    varname = f"MPI4PY_FUTURES_{name}"
     if varname not in os.environ:
-        oldname = f'MPI4PY_{name}'
+        oldname = f"MPI4PY_{name}"
         if oldname in os.environ:  # pragma: no cover
             warnings.warn(
                 f"environment variable {oldname} is deprecated, use {varname}",
-                DeprecationWarning, stacklevel=1,
+                DeprecationWarning,
+                stacklevel=1,
             )
             return os.environ[oldname]
     return os.environ.get(varname, default)
@@ -126,14 +129,14 @@ BACKOFF = 0.001
 
 
 def _getopt_backoff(options):
-    backoff = options.get('backoff')
+    backoff = options.get("backoff")
     if backoff is None:
-        backoff = os_environ_get('BACKOFF', BACKOFF)
+        backoff = os_environ_get("BACKOFF", BACKOFF)
     return float(backoff)
 
 
 class Backoff:
-
+    #
     def __init__(self, seconds=BACKOFF):
         self.tval = 0.0
         self.tmax = max(float(seconds), 0.0)
@@ -163,20 +166,20 @@ THREADS_QUEUES = weakref.WeakKeyDictionary()  # type: weakref.WeakKeyDictionary
 
 def join_threads(threads_queues=THREADS_QUEUES):
     items = list(threads_queues.items())
-    for _, queue in items:   # pragma: no cover
+    for _, queue in items:  # pragma: no cover
         queue.put(None)
     for thread, _ in items:  # pragma: no cover
         thread.join()
 
 
-if hasattr(threading, '_register_atexit'):
+if hasattr(threading, "_register_atexit"):
     threading._register_atexit(join_threads)
 else:  # pragma: no cover
     atexit.register(join_threads)
 
 
 class Pool:
-
+    #
     def __init__(self, executor, manager, *args):
         self.size = None
         self.event = threading.Event()
@@ -188,7 +191,7 @@ class Pool:
         self.thread = thread
 
         setup_mpi_threads()
-        thread.daemon = not hasattr(threading, '_register_atexit')
+        thread.daemon = not hasattr(threading, "_register_atexit")
         thread.start()
         THREADS_QUEUES[thread] = queue
 
@@ -251,9 +254,9 @@ class Pool:
 
 
 def initialize(options):
-    initializer = options.pop('initializer', None)
-    initargs = options.pop('initargs', ())
-    initkwargs = options.pop('initkwargs', {})
+    initializer = options.pop("initializer", None)
+    initargs = options.pop("initargs", ())
+    initkwargs = options.pop("initkwargs", {})
     if initializer is not None:
         try:
             initializer(*initargs, **initkwargs)
@@ -265,7 +268,7 @@ def initialize(options):
 
 
 def _manager_thread(pool, options):
-    size = options.pop('max_workers', 1)
+    size = options.pop("max_workers", 1)
     queue = pool.setup(size)
     threads = collections.deque()
     max_threads = size - 1
@@ -328,8 +331,8 @@ def _manager_thread(pool, options):
 
 def _manager_comm(pool, options, comm, sync=True):
     assert comm != MPI.COMM_NULL  # noqa: S101
-    assert comm.Is_inter()        # noqa: S101
-    assert comm.Get_size() == 1   # noqa: S101
+    assert comm.Is_inter()  # noqa: S101
+    assert comm.Get_size() == 1  # noqa: S101
     comm = client_sync(comm, options, sync)
     if not client_init(comm, options):
         pool.broken("initializer failed")
@@ -343,17 +346,17 @@ def _manager_comm(pool, options, comm, sync=True):
 
 
 def _manager_spawn(pool, options):
-    pyexe = options.pop('python_exe', None)
-    pyargs = options.pop('python_args', None)
-    nprocs = options.pop('max_workers', None)
-    info = options.pop('mpi_info', None)
+    pyexe = options.pop("python_exe", None)
+    pyargs = options.pop("python_args", None)
+    nprocs = options.pop("max_workers", None)
+    info = options.pop("mpi_info", None)
     comm = serialized(client_spawn)(pyexe, pyargs, nprocs, info)
     _manager_comm(pool, options, comm)
 
 
 def _manager_service(pool, options):
-    service = options.pop('service', None)
-    info = options.pop('mpi_info', None)
+    service = options.pop("service", None)
+    info = options.pop("mpi_info", None)
     comm = serialized(client_connect)(service, info)
     _manager_comm(pool, options, comm)
 
@@ -377,7 +380,7 @@ def WorkerPool(executor):
     # pylint: disable=invalid-name
     if SharedPool is not None:
         return SharedPool(executor)
-    if 'service' in executor._options:
+    if "service" in executor._options:
         return ServicePool(executor)
     return SpawnPool(executor)
 
@@ -394,7 +397,7 @@ def _set_shared_pool(obj):
 
 
 class SharedPoolCtx:
-
+    #
     def __init__(self):
         self.lock = threading.Lock()
         self.comm = MPI.COMM_NULL
@@ -405,7 +408,7 @@ class SharedPoolCtx:
         self.threads = weakref.WeakKeyDictionary()
 
     def __reduce__(self):
-        return 'SharedPool'
+        return "SharedPool"
 
     def _initialize_remote(self):
         barrier(self.intracomm)
@@ -415,7 +418,7 @@ class SharedPoolCtx:
         if tag == 0:
             self.comm = client_sync(self.comm, options)
             return client_init(self.comm, options)
-        if options.get('initializer') is None:
+        if options.get("initializer") is None:
             return True
         task = (self._initialize_remote, (), {})
         reqs = isendtoall(self.comm, task, tag)
@@ -426,7 +429,7 @@ class SharedPoolCtx:
 
     def _manager(self, pool, options):
         if self.counter is None:
-            options['max_workers'] = 1
+            options["max_workers"] = 1
             set_comm_server(MPI.COMM_SELF)
             _manager_thread(pool, options)
             return
@@ -468,7 +471,7 @@ class SharedPoolCtx:
             comm = self.comm
             if self.on_root:
                 if next(self.counter) == 0:
-                    options = {'main': False}
+                    options = {"main": False}
                     self._initialize(options, 0)
                 client_stop(comm)
             else:
@@ -517,7 +520,8 @@ def comm_split(comm, root):
         local_leader = 0
         remote_leader = root
     intercomm = intracomm.Create_intercomm(
-        local_leader, comm, remote_leader, tag=0)
+        local_leader, comm, remote_leader, tag=0
+    )
     if rank == root:
         intracomm.Free()
     return intercomm, intracomm
@@ -527,10 +531,9 @@ def comm_split(comm, root):
 
 
 def _comm_executor_helper(executor, comm, root):
-
     def _manager(pool, options, comm, root):
         if comm.Get_size() == 1:
-            options['max_workers'] = 1
+            options["max_workers"] = 1
             set_comm_server(MPI.COMM_SELF)
             _manager_thread(pool, options)
             return
@@ -554,31 +557,32 @@ def _comm_executor_helper(executor, comm, root):
 
 
 def _getenv_use_pkl5():
-    value = os_environ_get('USE_PKL5')
+    value = os_environ_get("USE_PKL5")
     if value is None:
         return None
-    if value.lower() in ('false', 'no', 'off', 'n', '0'):
+    if value.lower() in ("false", "no", "off", "n", "0"):
         return False
-    if value.lower() in ('true', 'yes', 'on', 'y', '1'):
+    if value.lower() in ("true", "yes", "on", "y", "1"):
         return True
     warnings.warn(
         f"environment variable MPI4PY_FUTURES_USE_PKL5: "
         f"unexpected value {value!r}",
-        RuntimeWarning, stacklevel=1,
+        RuntimeWarning,
+        stacklevel=1,
     )
     return False
 
 
 def _setopt_use_pkl5(options):
-    use_pkl5 = options.get('use_pkl5')
+    use_pkl5 = options.get("use_pkl5")
     if use_pkl5 is None:
         use_pkl5 = _getenv_use_pkl5()
     if use_pkl5 is not None:
-        options['use_pkl5'] = use_pkl5
+        options["use_pkl5"] = use_pkl5
 
 
 def _get_comm(comm, options):
-    use_pkl5 = options.pop('use_pkl5', None)
+    use_pkl5 = options.pop("use_pkl5", None)
     if use_pkl5:
         return pkl5.Intercomm(comm)
     return comm
@@ -866,12 +870,12 @@ def server_stop(comm):
 
 # ---
 
-MAIN_RUN_NAME = '__worker__'
+MAIN_RUN_NAME = "__worker__"
 
 
 def import_main(mod_name, mod_path, init_globals, run_name):
-    import types
     import runpy
+    import types
 
     module = types.ModuleType(run_name)
     if init_globals is not None:
@@ -887,19 +891,20 @@ def import_main(mod_name, mod_path, init_globals, run_name):
     TempModule = runpy._TempModule  # pylint: disable=invalid-name
     runpy._TempModule = TempModulePatch
     import_main.sentinel = (mod_name, mod_path)
-    main_module = sys.modules['__main__']
+    main_module = sys.modules["__main__"]
     try:
-        sys.modules['__main__'] = sys.modules[run_name] = module
+        sys.modules["__main__"] = sys.modules[run_name] = module
         if mod_name:  # pragma: no cover
             runpy.run_module(mod_name, run_name=run_name, alter_sys=True)
         elif mod_path:  # pragma: no branch
-            safe_path = getattr(sys.flags, 'safe_path', sys.flags.isolated)
+            safe_path = getattr(sys.flags, "safe_path", sys.flags.isolated)
             if not safe_path:  # pragma: no branch
-                sys.path[0] = os.path.realpath(os.path.dirname(mod_path))
+                dir_path = os.path.dirname(mod_path)  # noqa: PTH120
+                sys.path[0] = os.path.realpath(dir_path)
             runpy.run_path(mod_path, run_name=run_name)
-        sys.modules['__main__'] = sys.modules[run_name] = module
+        sys.modules["__main__"] = sys.modules[run_name] = module
     except BaseException:  # pragma: no cover
-        sys.modules['__main__'] = main_module
+        sys.modules["__main__"] = main_module
         raise
     finally:
         del import_main.sentinel
@@ -907,45 +912,45 @@ def import_main(mod_name, mod_path, init_globals, run_name):
 
 
 def _sync_get_data(options):
-    main = sys.modules['__main__']
+    main = sys.modules["__main__"]
     sys.modules.setdefault(MAIN_RUN_NAME, main)
-    import_main_module = options.pop('main', True)
+    import_main_module = options.pop("main", True)
 
     data = options.copy()
-    data.pop('initializer', None)
-    data.pop('initargs', None)
-    data.pop('initkwargs', None)
+    data.pop("initializer", None)
+    data.pop("initargs", None)
+    data.pop("initkwargs", None)
 
     if import_main_module:
-        spec = getattr(main, '__spec__', None)
-        name = getattr(spec, 'name', None)
-        path = getattr(main, '__file__', None)
+        spec = getattr(main, "__spec__", None)
+        name = getattr(spec, "name", None)
+        path = getattr(main, "__file__", None)
         if name is not None:  # pragma: no cover
-            data['@main:mod_name'] = name
+            data["@main:mod_name"] = name
         if path is not None:  # pragma: no branch
-            data['@main:mod_path'] = path
+            data["@main:mod_path"] = path
 
     return data
 
 
 def _sync_set_data(data):
-    if 'path' in data:
-        sys.path.extend(data.pop('path'))
-    if 'wdir' in data:
-        os.chdir(data.pop('wdir'))
-    if 'env' in data:
-        os.environ.update(data.pop('env'))
+    if "path" in data:
+        sys.path.extend(data.pop("path"))
+    if "wdir" in data:
+        os.chdir(data.pop("wdir"))
+    if "env" in data:
+        os.environ.update(data.pop("env"))
 
-    mod_name = data.pop('@main:mod_name', None)
-    mod_path = data.pop('@main:mod_path', None)
-    mod_glbs = data.pop('globals', None)
+    mod_name = data.pop("@main:mod_name", None)
+    mod_path = data.pop("@main:mod_path", None)
+    mod_glbs = data.pop("globals", None)
     import_main(mod_name, mod_path, mod_glbs, MAIN_RUN_NAME)
 
     return data
 
 
 def _init_get_data(options):
-    keys = ('initializer', 'initargs', 'initkwargs')
+    keys = ("initializer", "initargs", "initkwargs")
     vals = (None, (), {})
     data = {k: options.pop(k, v) for k, v in zip(keys, vals)}
     return data
@@ -955,7 +960,7 @@ def _init_get_data(options):
 
 
 def _check_recursive_spawn():  # pragma: no cover
-    if not hasattr(import_main, 'sentinel'):
+    if not hasattr(import_main, "sentinel"):
         return
     main_name, main_path = import_main.sentinel
     main_info = "\n"
@@ -964,7 +969,8 @@ def _check_recursive_spawn():  # pragma: no cover
     if main_path is not None:
         main_info += f"    main path: {main_path!r}\n"
     main_info += "\n"
-    sys.stderr.write("""
+    sys.stderr.write(
+        """
     The main script or module attempted to spawn new MPI worker processes.
     This probably means that you have forgotten to use the proper idiom in
     your main script or module:
@@ -974,30 +980,32 @@ def _check_recursive_spawn():  # pragma: no cover
 
     This error is unrecoverable. The MPI execution environment had to be
     aborted. The name/path of the offending main script/module follows:
-    """ + main_info)
+    """
+        + main_info
+    )
     sys.stderr.flush()
     time.sleep(1)
     MPI.COMM_WORLD.Abort(1)
 
 
 FLAG_OPT_MAP = {
-    'debug': 'd',
-    'inspect': 'i',
-    'interactive': 'i',
-    'optimize': 'O',
-    'dont_write_bytecode': 'B',
-    'no_user_site': 's',
-    'no_site': 'S',
-    'ignore_environment': 'E',
-    'verbose': 'v',
-    'bytes_warning': 'b',
-    'quiet': 'q',
-    'hash_randomization': 'R',
-    'isolated': 'I',
+    "debug": "d",
+    "inspect": "i",
+    "interactive": "i",
+    "optimize": "O",
+    "dont_write_bytecode": "B",
+    "no_user_site": "s",
+    "no_site": "S",
+    "ignore_environment": "E",
+    "verbose": "v",
+    "bytes_warning": "b",
+    "quiet": "q",
+    "hash_randomization": "R",
+    "isolated": "I",
     # 'dev_mode': 'Xdev',
     # 'utf8_mode': 'Xutf8',
     # 'warn_default_encoding': 'Xwarn_default_encoding',
-    'safe_path': 'P',
+    "safe_path": "P",
     # 'int_max_str_digits': 'Xint_max_str_digits=0'
 }
 
@@ -1006,21 +1014,20 @@ def get_python_flags():
     args = []
     for flag, opt in FLAG_OPT_MAP.items():
         val = getattr(sys.flags, flag, 0)
-        val = val if opt[0] != 'i' else 0
-        val = val if opt[0] != 'Q' else min(val, 1)
+        val = val if opt[0] != "i" else 0
+        val = val if opt[0] != "Q" else min(val, 1)
         if val > 0:
-            args.append('-' + opt * val)
+            args.append("-" + opt * val)
     for opt in sys.warnoptions:  # pragma: no cover
-        args.append('-W' + opt)
-    sys_xoptions = getattr(sys, '_xoptions', {})
+        args.append("-W" + opt)
+    sys_xoptions = getattr(sys, "_xoptions", {})
     for opt, val in sys_xoptions.items():  # pragma: no cover
-        args.append('-X' + opt if val is True else
-                    '-X' + opt + '=' + val)
+        args.append("-X" + opt if val is True else "-X" + opt + "=" + val)
     return args
 
 
 def get_max_workers():
-    max_workers = os_environ_get('MAX_WORKERS')
+    max_workers = os_environ_get("MAX_WORKERS")
     if max_workers is not None:
         return int(max_workers)
     if MPI.UNIVERSE_SIZE != MPI.KEYVAL_INVALID:  # pragma: no branch
@@ -1032,7 +1039,7 @@ def get_max_workers():
 
 
 def get_spawn_module():
-    return __spec__.parent + '.server'
+    return __spec__.parent + ".server"
 
 
 def client_spawn(
@@ -1049,10 +1056,10 @@ def client_spawn(
     if max_workers is None:
         max_workers = get_max_workers()
     if mpi_info is None:
-        mpi_info = {'soft': f'1:{max_workers}'}
+        mpi_info = {"soft": f"1:{max_workers}"}
 
     args = get_python_flags() + list(python_args)
-    args.extend(['-m', get_spawn_module()])
+    args.extend(["-m", get_spawn_module()])
     info = MPI.Info.Create()
     info.update(mpi_info)
     comm = MPI.COMM_SELF.Spawn(python_exe, args, max_workers, info)
@@ -1064,29 +1071,30 @@ def client_spawn(
 
 
 SERVICE = __spec__.parent
-SERVER_HOST = 'localhost'
-SERVER_BIND = ''
+SERVER_HOST = "localhost"
+SERVER_BIND = ""
 SERVER_PORT = 31415
 
 
 def get_service():
-    return os_environ_get('SERVICE', SERVICE)
+    return os_environ_get("SERVICE", SERVICE)
 
 
 def get_server_host():
-    return os_environ_get('SERVER_HOST', SERVER_HOST)
+    return os_environ_get("SERVER_HOST", SERVER_HOST)
 
 
 def get_server_bind():
-    return os_environ_get('SERVER_BIND', SERVER_BIND)
+    return os_environ_get("SERVER_BIND", SERVER_BIND)
 
 
 def get_server_port():
-    return int(os_environ_get('SERVER_PORT', SERVER_PORT))
+    return int(os_environ_get("SERVER_PORT", SERVER_PORT))
 
 
 def client_lookup(address):
     from socket import socket
+
     host, port = address
     host = host or get_server_host()
     port = port or get_server_port()
@@ -1104,8 +1112,8 @@ def client_lookup(address):
 
 
 def server_publish(address, mpi_port):
-    from socket import socket
-    from socket import SOL_SOCKET, SO_REUSEADDR
+    from socket import SO_REUSEADDR, SOL_SOCKET, socket
+
     host, port = address
     host = host or get_server_bind()
     port = port or get_server_port()
@@ -1178,12 +1186,13 @@ def server_accept(
 
 # ---
 
+
 def get_comm_server():
     try:
         return _tls.comm_server
     except AttributeError:
         raise RuntimeError(
-            "communicator is not accessible"
+            "communicator is not accessible",
         ) from None
 
 
@@ -1192,8 +1201,8 @@ def set_comm_server(intracomm):
 
 
 def server_main_comm(comm, sync=True):
-    assert comm != MPI.COMM_NULL        # noqa: S101
-    assert comm.Is_inter()              # noqa: S101
+    assert comm != MPI.COMM_NULL  # noqa: S101
+    assert comm.Is_inter()  # noqa: S101
     assert comm.Get_remote_size() == 1  # noqa: S101
     comm, options = server_sync(comm, sync)
     server_init(comm)
@@ -1209,18 +1218,19 @@ def server_main_spawn():
 
 def server_main_service():
     from getopt import getopt
-    longopts = ['bind=', 'port=', 'service=', 'info=']
-    optlist, _ = getopt(sys.argv[1:], '', longopts)
+
+    longopts = ["bind=", "port=", "service=", "info="]
+    optlist, _ = getopt(sys.argv[1:], "", longopts)
     optdict = {opt[2:]: val for opt, val in optlist}
 
-    if 'bind' in optdict or 'port' in optdict:
-        bind = optdict.get('bind') or get_server_bind()
-        port = optdict.get('port') or get_server_port()
+    if "bind" in optdict or "port" in optdict:
+        bind = optdict.get("bind") or get_server_bind()
+        port = optdict.get("port") or get_server_port()
         service = (bind, int(port))
     else:
-        service = optdict.get('service') or get_service()
-    info = optdict.get('info', '').split(',')
-    info = dict(k_v.split('=', 1) for k_v in info if k_v)
+        service = optdict.get("service") or get_service()
+    info = optdict.get("info", "").split(",")
+    info = dict(k_v.split("=", 1) for k_v in info if k_v)
 
     comm = server_accept(service, info)
     set_comm_server(MPI.COMM_WORLD)
@@ -1229,6 +1239,7 @@ def server_main_service():
 
 def server_main():
     from ..run import set_abort_status
+
     try:
         comm = MPI.Comm.Get_parent()
         if comm != MPI.COMM_NULL:

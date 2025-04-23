@@ -1,78 +1,83 @@
-import mpi4py
+import importlib
+import os
+import pathlib
 import unittest
-import sys, os
 
-pkgdir = os.path.dirname(mpi4py.__file__)
+import mpi4py
+
+pkgdir = pathlib.Path(mpi4py.__file__).resolve().parent
 
 
 class TestImport(unittest.TestCase):
-
+    #
+    #
     def testImportMPI(self):
-        import mpi4py.MPI
+        importlib.import_module("mpi4py.MPI")
 
     def testImportBench(self):
-        import mpi4py.bench
+        importlib.import_module("mpi4py.bench")
 
     def testImportFutures(self):
-        import mpi4py.futures
-        import mpi4py.futures.server
-        import mpi4py.futures.__main__
+        importlib.import_module("mpi4py.futures")
+        importlib.import_module("mpi4py.futures.server")
+        importlib.import_module("mpi4py.futures.__main__")
 
     def testImportRun(self):
-        import mpi4py.run
-        import mpi4py.__main__
+        importlib.import_module("mpi4py.run")
+        importlib.import_module("mpi4py.__main__")
 
     def testImportTyping(self):
-        import mpi4py.typing
+        importlib.import_module("mpi4py.typing")
 
     def testImportUtil(self):
-        import mpi4py.util
-        import mpi4py.util.dtlib
-        import mpi4py.util.pkl5
-        import mpi4py.util.pool
-        import mpi4py.util.sync
+        importlib.import_module("mpi4py.util")
+        importlib.import_module("mpi4py.util.dtlib")
+        importlib.import_module("mpi4py.util.pkl5")
+        importlib.import_module("mpi4py.util.pool")
+        importlib.import_module("mpi4py.util.sync")
 
 
 class TestDataFiles(unittest.TestCase):
-
+    #
+    #
     def testTyping(self):
         import importlib.machinery
-        py_typed = os.path.join(pkgdir, "py.typed")
-        self.assertTrue(os.path.exists(py_typed))
+
+        py_typed = pkgdir / "py.typed"
+        self.assertTrue(py_typed.exists())
         suffixes = [
             *importlib.machinery.SOURCE_SUFFIXES,
             *importlib.machinery.EXTENSION_SUFFIXES,
         ]
-        for root, dirs, files in os.walk(pkgdir):
+        for root, _, files in os.walk(pkgdir):
+            root = pathlib.Path(root)
             for fname in files:
                 name, _, extra = fname.partition(".")
                 suffix = f".{extra}"
                 for entry in suffixes:
                     if suffix.endswith(entry):
-                        pyi = os.path.join(root, f"{name}.pyi")
-                        self.assertTrue(os.path.exists(pyi))
+                        pyi = root / f"{name}.pyi"
+                        self.assertTrue(pyi.exists())
                         break
 
     def testCython(self):
-        for fname in [
-            "__init__.pxd",
-            "libmpi.pxd",
-            "MPI.pxd",
+        for pxd in [
+            pkgdir / "__init__.pxd",
+            pkgdir / "libmpi.pxd",
+            pkgdir / "MPI.pxd",
         ]:
-            pxd = os.path.join(pkgdir, fname)
-            self.assertTrue(os.path.exists(pxd))
+            self.assertTrue(pxd.exists())
 
     def testHeaders(self):
-        for fname in [
-            os.path.join("MPI.h"),
-            os.path.join("MPI_api.h"),
-            os.path.join("include", "mpi4py", "pycapi.h"),
-            os.path.join("include", "mpi4py", "mpi4py.h"),
-            os.path.join("include", "mpi4py", "mpi4py.i"),
+        for hdr in [
+            pkgdir / "MPI.h",
+            pkgdir / "MPI_api.h",
+            pkgdir / "include" / "mpi4py" / "pycapi.h",
+            pkgdir / "include" / "mpi4py" / "mpi4py.h",
+            pkgdir / "include" / "mpi4py" / "mpi4py.i",
         ]:
-            hdr = os.path.join(pkgdir, fname)
-            self.assertTrue(os.path.exists(hdr))
+            self.assertTrue(hdr.exists())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

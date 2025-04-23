@@ -1,17 +1,21 @@
-import sys
 import ctypes
+import sys
 from enum import IntEnum
 
-if hasattr(sys, 'pypy_version_info'):
+if hasattr(sys, "pypy_version_info"):
     raise ImportError("unsupported on PyPy")
 
+
 class DLPackVersion(ctypes.Structure):
-  _fields_ = [
-      ("major", ctypes.c_uint32),
-      ("minor", ctypes.c_uint32),
-  ]
+    #
+    _fields_ = [
+        ("major", ctypes.c_uint32),
+        ("minor", ctypes.c_uint32),
+    ]
+
 
 class DLDeviceType(IntEnum):
+    #
     kDLCPU = 1
     kDLCUDA = 2
     kDLCUDAHost = 3
@@ -27,13 +31,17 @@ class DLDeviceType(IntEnum):
     kDLWebGPU = 15
     kDLHexagon = 16
 
+
 class DLDevice(ctypes.Structure):
-  _fields_ = [
-      ("device_type", ctypes.c_uint),
-      ("device_id", ctypes.c_int32),
-  ]
+    #
+    _fields_ = [
+        ("device_type", ctypes.c_uint),
+        ("device_id", ctypes.c_int32),
+    ]
+
 
 class DLDataTypeCode(IntEnum):
+    #
     kDLInt = 0
     kDLUInt = 1
     kDLFloat = 2
@@ -42,46 +50,57 @@ class DLDataTypeCode(IntEnum):
     kDLComplex = 5
     kDLBool = 6
 
+
 class DLDataType(ctypes.Structure):
-  _fields_ = [
-      ("code", ctypes.c_uint8),
-      ("bits", ctypes.c_uint8),
-      ("lanes", ctypes.c_uint16),
-  ]
+    #
+    _fields_ = [
+        ("code", ctypes.c_uint8),
+        ("bits", ctypes.c_uint8),
+        ("lanes", ctypes.c_uint16),
+    ]
+
 
 class DLTensor(ctypes.Structure):
-  _fields_ = [
-      ("data", ctypes.c_void_p),
-      ("device", DLDevice),
-      ("ndim", ctypes.c_int32),
-      ("dtype", DLDataType),
-      ("shape", ctypes.POINTER(ctypes.c_int64)),
-      ("strides", ctypes.POINTER(ctypes.c_int64)),
-      ("byte_offset", ctypes.c_uint64),
-  ]
+    #
+    _fields_ = [
+        ("data", ctypes.c_void_p),
+        ("device", DLDevice),
+        ("ndim", ctypes.c_int32),
+        ("dtype", DLDataType),
+        ("shape", ctypes.POINTER(ctypes.c_int64)),
+        ("strides", ctypes.POINTER(ctypes.c_int64)),
+        ("byte_offset", ctypes.c_uint64),
+    ]
+
 
 DLManagedTensorDeleter = ctypes.CFUNCTYPE(None, ctypes.c_void_p)
 
+
 class DLManagedTensor(ctypes.Structure):
+    #
     _fields_ = [
-    ("dl_tensor", DLTensor),
-    ("manager_ctx", ctypes.c_void_p),
-    ("deleter", DLManagedTensorDeleter),
-]
+        ("dl_tensor", DLTensor),
+        ("manager_ctx", ctypes.c_void_p),
+        ("deleter", DLManagedTensorDeleter),
+    ]
+
 
 DLPACK_FLAG_BITMASK_READ_ONLY = 1 << 0
 DLPACK_FLAG_BITMASK_IS_COPIED = 1 << 1
 
 DLManagedTensorVersionedDeleter = ctypes.CFUNCTYPE(None, ctypes.c_void_p)
 
+
 class DLManagedTensorVersioned(ctypes.Structure):
+    #
     _fields_ = [
-    ("version", DLPackVersion),
-    ("manager_ctx", ctypes.c_void_p),
-    ("deleter", DLManagedTensorDeleter),
-    ("flags", ctypes.c_uint64),
-    ("dl_tensor", DLTensor),
-]
+        ("version", DLPackVersion),
+        ("manager_ctx", ctypes.c_void_p),
+        ("deleter", DLManagedTensorDeleter),
+        ("flags", ctypes.c_uint64),
+        ("dl_tensor", DLTensor),
+    ]
+
 
 pyapi = ctypes.pythonapi
 
@@ -97,13 +116,19 @@ Py_DecRef.restype = None
 Py_DecRef.argtypes = [ctypes.py_object]
 
 PyCapsule_Destructor = ctypes.PYFUNCTYPE(None, ctypes.c_void_p)
-PyCapsule_Destructor.from_param = classmethod(lambda cls, arg: (
-    ctypes._CFuncPtr.from_param(arg) if arg is not None else None
-))
+PyCapsule_Destructor.from_param = classmethod(
+    lambda _cls, arg: (
+        ctypes._CFuncPtr.from_param(arg) if arg is not None else None
+    )
+)
 
 PyCapsule_New = pyapi.PyCapsule_New
 PyCapsule_New.restype = ctypes.py_object
-PyCapsule_New.argtypes = [ctypes.c_void_p, ctypes.c_char_p, PyCapsule_Destructor]
+PyCapsule_New.argtypes = [
+    ctypes.c_void_p,
+    ctypes.c_char_p,
+    PyCapsule_Destructor,
+]
 
 PyCapsule_IsValid = pyapi.PyCapsule_IsValid
 PyCapsule_IsValid.restype = ctypes.c_int
@@ -137,7 +162,7 @@ def make_dl_datatype(typecode, itemsize):
     code = None
     bits = itemsize * 8
     lanes = 1
-    if typecode in "?":
+    if typecode == "?":
         code = DLDataTypeCode.kDLBool
     if typecode in "bhilqnp":
         code = DLDataTypeCode.kDLInt
@@ -167,23 +192,23 @@ def make_dl_shape(shape, order=None, strides=None):
         shape = null
         strides = null
     else:
-        shape = (ctypes.c_int64*ndim)(*shape)
-        if order == 'C':
+        shape = (ctypes.c_int64 * ndim)(*shape)
+        if order == "C":
             size = 1
             strides = []
-            for i in range(ndim-1, -1, -1):
+            for i in range(ndim - 1, -1, -1):
                 strides.append(size)
                 size *= shape[i]
-            strides = (ctypes.c_int64*ndim)(*strides)
-        elif order == 'F':
+            strides = (ctypes.c_int64 * ndim)(*strides)
+        elif order == "F":
             size = 1
             strides = []
             for i in range(ndim):
                 strides.append(size)
                 size *= shape[i]
-            strides = (ctypes.c_int64*ndim)(*strides)
+            strides = (ctypes.c_int64 * ndim)(*strides)
         elif strides is not None:
-            strides = (ctypes.c_int64*ndim)(*strides)
+            strides = (ctypes.c_int64 * ndim)(*strides)
         else:
             strides = null
     return ndim, shape, strides
@@ -240,7 +265,7 @@ def dl_managed_tensor_versioned_deleter(void_p):
 
 
 def make_dl_managed_tensor(obj, version=0):
-    if hasattr(sys, 'getrefcount'):
+    if hasattr(sys, "getrefcount"):
         rc = sys.getrefcount(obj)
     if version >= 1:
         managed = DLManagedTensorVersioned()
@@ -254,7 +279,7 @@ def make_dl_managed_tensor(obj, version=0):
         managed.dl_tensor = make_dl_tensor(obj)
         managed.manager_ctx = make_dl_manager_ctx(obj)
         managed.deleter = dl_managed_tensor_deleter
-    if hasattr(sys, 'getrefcount'):
+    if hasattr(sys, "getrefcount"):
         assert sys.getrefcount(obj) == rc + 1
     return managed
 
@@ -283,7 +308,7 @@ def make_py_capsule(managed, owned=True):
     capsule = PyCapsule_New(pointer, py_capsule_name, destructor)
     if owned:
         context = ctypes.c_void_p.from_buffer(ctypes.py_object(managed))
-        if sys.implementation.name == 'cpython':
+        if sys.implementation.name == "cpython":
             assert context.value == id(managed)
         Py_IncRef(managed)
         PyCapsule_SetContext(capsule, context)

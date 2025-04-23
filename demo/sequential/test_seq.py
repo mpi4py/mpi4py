@@ -1,11 +1,7 @@
+from seq import Seq
+
 from mpi4py import MPI
 
-import unittest
-
-import sys, os
-sys.path.insert(0, os.path.dirname(__file__))
-from seq import Seq
-del sys.path[0]
 
 def test():
     size = MPI.COMM_WORLD.Get_size()

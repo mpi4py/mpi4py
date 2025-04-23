@@ -1,16 +1,14 @@
-from mpi4py import MPI
-import mpiunittest as unittest
 import mpitestutil as testutil
+import mpiunittest as unittest
+
+from mpi4py import MPI
 
 
 class TestMPIABI(unittest.TestCase):
-
+    #
     def testGetVersion(self):
         version = MPI.Get_abi_version()
-        self.assertTrue(
-            version >= (1, 0)
-            or version == (-1, -1)
-        )
+        self.assertTrue(version >= (1, 0) or version == (-1, -1))
 
     def testGetInfo(self):
         info = MPI.Get_abi_info()
@@ -47,9 +45,9 @@ class TestMPIABI(unittest.TestCase):
                     self.assertEqual(datatype.Get_size(), int(sizestr))
         str2bool = {"true": True, "false": False}
         for typeclass, typesizes in (
-            ("logical", (1, 2,  4,  8, 16)),
-            ("integer", (1, 2,  4,  8, 16)),
-            ("real",    (2, 4,  8, 16)),
+            ("logical", (1, 2, 4, 8, 16)),
+            ("integer", (1, 2, 4, 8, 16)),
+            ("real", (2, 4, 8, 16)),
             ("complex", (4, 8, 16, 32)),
             ("double_complex", ("",)),
         ):
@@ -67,5 +65,5 @@ class TestMPIABI(unittest.TestCase):
         info.Free()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

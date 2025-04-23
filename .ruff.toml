@@ -2,10 +2,11 @@ target-version = "py38"
 
 src = ["src"]
 
-exclude = [
-"demo",
-"test",
-]
+line-length = 79
+
+format.preview = true
+
+lint.preview = true
 
 lint.select = [
 "A",
@@ -23,38 +24,37 @@ lint.select = [
 "ARG",
 "ISC",
 "PIE",
-#"PTH",
+"PTH",
 "PYI",
 "RET",
+"RSE",
 "RUF",
+"TID",
 "TRY",
 "YTT",
+"FURB",
 ]
 
 lint.ignore = [
-"A001",
-"A002",
-"A003",
-"A005",
 "C901",
-"I001",
-"Q000",
 "PYI011",
-"UP006",
-"UP007",
 "RET504",
 "RET505",
 "RUF012",
 "RUF022",
+"TID252",
 "TRY003",
 ]
 
+[lint.isort]
+combine-as-imports = true
+
 [lint.per-file-ignores]
-"conf/*" = ["D",]
-"demo/*" = ["D",]
-"docs/*" = ["D",]
-"test/*" = ["D",]
-"*.pyi"  = ["D", "E501"]
+"conf/*" = ["D"]
+"demo/*" = ["D", "S"]
+"docs/*" = ["D", "S"]
+"test/*" = ["D", "S"]
+"demo/mpi-ref-v1/*" = ["F821", "PTH123", "FURB101"]
 
 [lint.pydocstyle]
 convention = "pep257"

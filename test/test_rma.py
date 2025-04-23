@@ -1,21 +1,26 @@
-from mpi4py import MPI
-import mpiunittest as unittest
 import contextlib
-import arrayimpl
 import sys
+
+import arrayimpl
+import mpiunittest as unittest
+
+from mpi4py import MPI
 
 scalar = arrayimpl.scalar
 
 typemap = MPI.Datatype.fromcode
 
+
 def mkzeros(n):
     return bytearray(n)
+
 
 def memzero(m):
     try:
         m[:] = 0
-    except IndexError: # cffi buffer
-        m[0:len(m)] = b'\0'*len(m)
+    except IndexError:  # cffi buffer
+        m[0 : len(m)] = b"\0" * len(m)
+
 
 @contextlib.contextmanager
 def win_lock(win, rank, *args, **kwargs):
@@ -25,6 +30,7 @@ def win_lock(win, rank, *args, **kwargs):
     finally:
         win.Unlock(rank)
 
+
 @contextlib.contextmanager
 def win_lock_all(win, *args, **kwargs):
     win.Lock_all(*args, **kwargs)
@@ -33,13 +39,14 @@ def win_lock_all(win, *args, **kwargs):
     finally:
         win.Unlock_all()
 
-class BaseTestRMA:
 
+class BaseTestRMA:
+    #
     COMM = MPI.COMM_NULL
     INFO = MPI.INFO_NULL
 
     def setUp(self):
-        nbytes = 100*MPI.DOUBLE.size
+        nbytes = 100 * MPI.DOUBLE.size
         try:
             self.mpi_memory = MPI.Alloc_mem(nbytes)
             self.memory = self.mpi_memory
@@ -60,12 +67,13 @@ class BaseTestRMA:
         group.Free()
         for array, typecode in arrayimpl.loop():
             with arrayimpl.test(self):
-                if unittest.is_mpi_gpu('mvapich', array): continue
+                if unittest.is_mpi_gpu("mvapich", array):
+                    continue
                 for count in range(10):
                     for rank in range(size):
                         with self.subTest(rank=rank, count=count):
                             sbuf = array(range(count), typecode)
-                            rbuf = array(-1, typecode, count+1)
+                            rbuf = array(-1, typecode, count + 1)
                             #
                             self.WIN.Fence()
                             self.WIN.Put(sbuf.as_mpi(), rank)
@@ -78,8 +86,8 @@ class BaseTestRMA:
                             self.assertEqual(rbuf[-1], scalar(-1))
                             #
                             sbuf = array(range(count), typecode)
-                            rbuf = array(-1, typecode, count+1)
-                            target  = sbuf.itemsize
+                            rbuf = array(-1, typecode, count + 1)
+                            target = sbuf.itemsize
                             self.WIN.Fence()
                             self.WIN.Put(sbuf.as_mpi(), rank, target)
                             self.WIN.Fence()
@@ -91,9 +99,9 @@ class BaseTestRMA:
                             self.assertEqual(rbuf[-1], scalar(-1))
                             #
                             sbuf = array(range(count), typecode)
-                            rbuf = array(-1, typecode, count+1)
+                            rbuf = array(-1, typecode, count + 1)
                             datatype = typemap(typecode)
-                            target  = (sbuf.itemsize, count, datatype)
+                            target = (sbuf.itemsize, count, datatype)
                             self.WIN.Fence()
                             self.WIN.Put(sbuf.as_mpi(), rank, target)
                             self.WIN.Fence()
@@ -110,15 +118,19 @@ class BaseTestRMA:
         group.Free()
         for array, typecode in arrayimpl.loop():
             with arrayimpl.test(self):
-                if unittest.is_mpi_gpu('openmpi', array): continue
-                if unittest.is_mpi_gpu('mvapich', array): continue
-                if typecode in '?': continue
-                if typecode in 'FDG': continue
+                if unittest.is_mpi_gpu("openmpi", array):
+                    continue
+                if unittest.is_mpi_gpu("mvapich", array):
+                    continue
+                if typecode == "?":
+                    continue
+                if typecode in "FDG":
+                    continue
                 for count in range(10):
                     for rank in range(size):
                         with self.subTest(rank=rank, count=count):
                             sbuf = array(range(count), typecode)
-                            rbuf = array(-1, typecode, count+1)
+                            rbuf = array(-1, typecode, count + 1)
                             for op in (MPI.SUM, MPI.PROD, MPI.MAX, MPI.MIN):
                                 self.WIN.Fence()
                                 self.WIN.Accumulate(sbuf.as_mpi(), rank, op=op)
@@ -130,49 +142,63 @@ class BaseTestRMA:
                                     self.assertNotEqual(rbuf[i], scalar(-1))
                                 self.assertEqual(rbuf[-1], scalar(-1))
 
-    @unittest.skipMPI('openmpi(>=1.10,<1.11)')
+    @unittest.skipMPI("openmpi(>=1.10,<1.11)")
     def testGetAccumulate(self):
         group = self.WIN.Get_group()
         size = group.Get_size()
         rank = group.Get_rank()
         group.Free()
         self.WIN.Fence()
-        obuf = MPI.Alloc_mem(1); memzero(obuf)
-        rbuf = MPI.Alloc_mem(1); memzero(rbuf)
+        obuf = MPI.Alloc_mem(1)
+        memzero(obuf)
+        rbuf = MPI.Alloc_mem(1)
+        memzero(rbuf)
         try:
             try:
-                self.WIN.Get_accumulate([obuf, 0, MPI.BYTE], [rbuf, 0, MPI.BYTE], rank)
+                self.WIN.Get_accumulate(
+                    [obuf, 0, MPI.BYTE], [rbuf, 0, MPI.BYTE], rank
+                )
                 self.WIN.Fence()
             finally:
                 MPI.Free_mem(obuf)
                 MPI.Free_mem(rbuf)
         except NotImplementedError:
-            self.skipTest('mpi-win-get_accumulate')
+            self.skipTest("mpi-win-get_accumulate")
         self.WIN.Fence()
         for array, typecode in arrayimpl.loop():
             with arrayimpl.test(self):
-                if unittest.is_mpi_gpu('openmpi', array): continue
-                if unittest.is_mpi_gpu('mvapich', array): continue
-                if typecode in '?': continue
-                if typecode in 'FDG': continue
+                if unittest.is_mpi_gpu("openmpi", array):
+                    continue
+                if unittest.is_mpi_gpu("mvapich", array):
+                    continue
+                if typecode == "?":
+                    continue
+                if typecode in "FDG":
+                    continue
                 for count in range(10):
                     for rank in range(size):
                         with self.subTest(rank=rank, count=count):
-                            ones = array([1]*count, typecode)
+                            ones = array([1] * count, typecode)
                             sbuf = array(range(count), typecode)
-                            rbuf = array(-1, typecode, count+1)
-                            gbuf = array(-1, typecode, count+1)
+                            rbuf = array(-1, typecode, count + 1)
+                            gbuf = array(-1, typecode, count + 1)
                             for op in (
-                                MPI.SUM, MPI.PROD,
-                                MPI.MAX, MPI.MIN,
-                                MPI.REPLACE, MPI.NO_OP,
+                                MPI.SUM,
+                                MPI.PROD,
+                                MPI.MAX,
+                                MPI.MIN,
+                                MPI.REPLACE,
+                                MPI.NO_OP,
                             ):
                                 with win_lock(self.WIN, rank):
                                     self.WIN.Put(ones.as_mpi(), rank)
                                     self.WIN.Flush(rank)
-                                    self.WIN.Get_accumulate(sbuf.as_mpi(),
-                                                            rbuf.as_mpi_c(count),
-                                                            rank, op=op)
+                                    self.WIN.Get_accumulate(
+                                        sbuf.as_mpi(),
+                                        rbuf.as_mpi_c(count),
+                                        rank,
+                                        op=op,
+                                    )
                                     self.WIN.Flush(rank)
                                     self.WIN.Get(gbuf.as_mpi_c(count), rank)
                                     self.WIN.Flush(rank)
@@ -191,34 +217,42 @@ class BaseTestRMA:
         group.Free()
         self.WIN.Fence()
         blen = MPI.INT.Get_size()
-        obuf = MPI.Alloc_mem(blen); memzero(obuf)
-        rbuf = MPI.Alloc_mem(blen); memzero(rbuf)
+        obuf = MPI.Alloc_mem(blen)
+        memzero(obuf)
+        rbuf = MPI.Alloc_mem(blen)
+        memzero(rbuf)
         try:
             try:
                 self.WIN.Fetch_and_op(
-                    [obuf, 1, MPI.INT],
-                    [rbuf, 1, MPI.INT],
-                    rank)
+                    [obuf, 1, MPI.INT], [rbuf, 1, MPI.INT], rank
+                )
                 self.WIN.Fence()
             finally:
                 MPI.Free_mem(obuf)
                 MPI.Free_mem(rbuf)
         except NotImplementedError:
-            self.skipTest('mpi-win-fetch_and_op')
+            self.skipTest("mpi-win-fetch_and_op")
         self.WIN.Fence()
         for array, typecode in arrayimpl.loop():
             with arrayimpl.test(self):
-                if unittest.is_mpi_gpu('openmpi', array): continue
-                if unittest.is_mpi_gpu('mvapich', array): continue
-                if typecode in '?': continue
-                if typecode in 'FDG': continue
+                if unittest.is_mpi_gpu("openmpi", array):
+                    continue
+                if unittest.is_mpi_gpu("mvapich", array):
+                    continue
+                if typecode == "?":
+                    continue
+                if typecode in "FDG":
+                    continue
                 obuf = array(+1, typecode)
                 rbuf = array(-1, typecode, 2)
                 datatype = typemap(typecode)
                 for op in (
-                    MPI.SUM, MPI.PROD,
-                    MPI.MAX, MPI.MIN,
-                    MPI.REPLACE, MPI.NO_OP,
+                    MPI.SUM,
+                    MPI.PROD,
+                    MPI.MAX,
+                    MPI.MIN,
+                    MPI.REPLACE,
+                    MPI.NO_OP,
                 ):
                     for rank in range(size):
                         for disp in range(3):
@@ -229,7 +263,7 @@ class BaseTestRMA:
                                         rbuf.as_mpi_c(1),
                                         rank,
                                         disp * datatype.size,
-                                        op=op
+                                        op=op,
                                     )
                                 self.assertEqual(rbuf[1], scalar(-1))
         big = bytearray(MPI.INT.Get_size())
@@ -247,38 +281,48 @@ class BaseTestRMA:
             with win_lock(self.WIN, rank):
                 self.WIN.Fetch_and_op(buf1, [big, MPI.INT], rank, op=MPI.NO_OP)
 
-    @unittest.skipMPI('mpich(>=4.0,<4.1)', sys.platform == 'darwin')
+    @unittest.skipMPI("mpich(>=4.0,<4.1)", sys.platform == "darwin")
     def testCompareAndSwap(self):
         group = self.WIN.Get_group()
         size = group.Get_size()
         rank = group.Get_rank()
         group.Free()
         self.WIN.Fence()
-        obuf = MPI.Alloc_mem(1); memzero(obuf)
-        cbuf = MPI.Alloc_mem(1); memzero(cbuf)
-        rbuf = MPI.Alloc_mem(1); memzero(rbuf)
+        obuf = MPI.Alloc_mem(1)
+        memzero(obuf)
+        cbuf = MPI.Alloc_mem(1)
+        memzero(cbuf)
+        rbuf = MPI.Alloc_mem(1)
+        memzero(rbuf)
         try:
             try:
-                self.WIN.Compare_and_swap([obuf, 1, MPI.BYTE],
-                                          [cbuf, 1, MPI.BYTE],
-                                          [rbuf, 1, MPI.BYTE],
-                                          rank, 0)
+                self.WIN.Compare_and_swap(
+                    [obuf, 1, MPI.BYTE],
+                    [cbuf, 1, MPI.BYTE],
+                    [rbuf, 1, MPI.BYTE],
+                    rank,
+                    0,
+                )
                 self.WIN.Fence()
             finally:
                 MPI.Free_mem(obuf)
                 MPI.Free_mem(cbuf)
                 MPI.Free_mem(rbuf)
         except NotImplementedError:
-            self.skipTest('mpi-win-compare_and_swap')
+            self.skipTest("mpi-win-compare_and_swap")
         self.WIN.Fence()
         for array, typecode in arrayimpl.loop():
             with arrayimpl.test(self):
-                if unittest.is_mpi_gpu('openmpi', array): continue
-                if unittest.is_mpi_gpu('mvapich', array): continue
-                if typecode in 'fdg': continue
-                if typecode in 'FDG': continue
+                if unittest.is_mpi_gpu("openmpi", array):
+                    continue
+                if unittest.is_mpi_gpu("mvapich", array):
+                    continue
+                if typecode in "fdg":
+                    continue
+                if typecode in "FDG":
+                    continue
                 obuf = array(+1, typecode)
-                cbuf = array( 0, typecode)
+                cbuf = array(0, typecode)
                 rbuf = array(-1, typecode, 2)
                 datatype = typemap(typecode)
                 for rank in range(size):
@@ -290,7 +334,7 @@ class BaseTestRMA:
                                     cbuf.as_mpi(),
                                     rbuf.as_mpi_c(1),
                                     rank,
-                                    disp * datatype.size
+                                    disp * datatype.size,
                                 )
                             self.assertEqual(rbuf[1], scalar(-1))
         big = bytearray(MPI.INT.Get_size())
@@ -350,26 +394,26 @@ class BaseTestRMA:
         try:
             self.WIN.Get_accumulate(obuf, rbuf, MPI.PROC_NULL)
         except NotImplementedError:
-            self.skipTest('mpi-win-get_accumulate')
+            self.skipTest("mpi-win-get_accumulate")
         self.WIN.Fence()
 
-    ##def testFetchAndOpProcNull(self):
-    ##    obuf = cbuf = rbuf = None
-    ##    self.WIN.Fence()
-    ##    try:
-    ##        self.WIN.Fetch_and_op(obuf, rbuf, MPI.PROC_NULL, 0)
-    ##    except NotImplementedError:
-    ##        self.skipTest('mpi-win-fetch_and_op')
-    ##    self.WIN.Fence()
+    # def testFetchAndOpProcNull(self):
+    #     obuf = cbuf = rbuf = None
+    #     self.WIN.Fence()
+    #     try:
+    #         self.WIN.Fetch_and_op(obuf, rbuf, MPI.PROC_NULL, 0)
+    #     except NotImplementedError:
+    #         self.skipTest('mpi-win-fetch_and_op')
+    #     self.WIN.Fence()
 
-    ##def testCompareAndSwapProcNull(self):
-    ##    obuf = cbuf = rbuf = None
-    ##    self.WIN.Fence()
-    ##    try:
-    ##        self.WIN.Compare_and_swap(obuf, cbuf, rbuf, MPI.PROC_NULL, 0)
-    ##    except NotImplementedError:
-    ##        self.skipTest('mpi-win-compare_and_swap')
-    ##    self.WIN.Fence()
+    # def testCompareAndSwapProcNull(self):
+    #     obuf = cbuf = rbuf = None
+    #     self.WIN.Fence()
+    #     try:
+    #         self.WIN.Compare_and_swap(obuf, cbuf, rbuf, MPI.PROC_NULL, 0)
+    #     except NotImplementedError:
+    #         self.skipTest('mpi-win-compare_and_swap')
+    #     self.WIN.Fence()
 
     def testFence(self):
         win = self.WIN
@@ -377,7 +421,7 @@ class BaseTestRMA:
             0,
             MPI.MODE_NOSTORE,
             MPI.MODE_NOPUT,
-            MPI.MODE_NOSTORE|MPI.MODE_NOPUT,
+            MPI.MODE_NOSTORE | MPI.MODE_NOPUT,
         ]
         GMODE = [
             0,
@@ -387,11 +431,11 @@ class BaseTestRMA:
         win.Fence()
         for lmode in LMODE:
             for gmode in GMODE:
-                assertion =  lmode | gmode
+                assertion = lmode | gmode
                 win.Fence(assertion)
         win.Fence()
 
-    @unittest.skipMPI('openmpi(==1.8.1)')
+    @unittest.skipMPI("openmpi(==1.8.1)")
     def testFenceAll(self):
         win = self.WIN
         assertion = 0
@@ -409,24 +453,25 @@ class BaseTestRMA:
             win.Fence(assertion)
         win.Fence()
 
-    @unittest.skipMPI('openmpi(==1.8.6)')
+    @unittest.skipMPI("openmpi(==1.8.6)")
     def testStartComplete(self):
         self.WIN.Start(MPI.GROUP_EMPTY)
         self.WIN.Complete()
 
-    @unittest.skipMPI('openmpi(==1.8.6)')
+    @unittest.skipMPI("openmpi(==1.8.6)")
     def testPostWait(self):
         self.WIN.Post(MPI.GROUP_EMPTY)
         self.WIN.Wait()
 
-    @unittest.skipMPI('openmpi(==1.8.7)')
-    @unittest.skipMPI('openmpi(==1.8.6)')
+    @unittest.skipMPI("openmpi(==1.8.7)")
+    @unittest.skipMPI("openmpi(==1.8.6)")
     def testStartCompletePostWait(self):
         win = self.WIN
         wingroup = win.Get_group()
         size = wingroup.Get_size()
         rank = wingroup.Get_rank()
-        if size < 2: return wingroup.Free()
+        if size < 2:
+            return wingroup.Free()
         if rank == 0:
             group = wingroup.Excl([0])
             win.Start(group)
@@ -442,16 +487,18 @@ class BaseTestRMA:
             win.Complete()
             group.Free()
         wingroup.Free()
+        return None
 
-    @unittest.skipMPI('openmpi(==1.8.7)')
-    @unittest.skipMPI('openmpi(==1.8.6)')
+    @unittest.skipMPI("openmpi(==1.8.7)")
+    @unittest.skipMPI("openmpi(==1.8.6)")
     def testStartCompletePostTest(self):
         comm = self.COMM
         win = self.WIN
         wingroup = win.Get_group()
         size = wingroup.Get_size()
         rank = wingroup.Get_rank()
-        if size < 2: return wingroup.Free()
+        if size < 2:
+            return wingroup.Free()
         if rank == 0:
             group = wingroup.Excl([0])
             win.Start(group)
@@ -470,8 +517,9 @@ class BaseTestRMA:
             self.assertTrue(flag)
             group.Free()
         wingroup.Free()
+        return None
 
-    @unittest.skipMPI('MPI(<3.0)')
+    @unittest.skipMPI("MPI(<3.0)")
     def testSync(self):
         win = self.WIN
         comm = self.COMM
@@ -480,7 +528,7 @@ class BaseTestRMA:
             win.Sync()
         comm.Barrier()
 
-    @unittest.skipMPI('MPI(<3.0)')
+    @unittest.skipMPI("MPI(<3.0)")
     def testFlush(self):
         win = self.WIN
         comm = self.COMM
@@ -507,18 +555,22 @@ class BaseTestRMA:
                     win.Flush_local_all()
             comm.Barrier()
 
+
 class TestRMASelf(BaseTestRMA, unittest.TestCase):
+    #
     COMM = MPI.COMM_SELF
 
+
 class TestRMAWorld(BaseTestRMA, unittest.TestCase):
+    #
     COMM = MPI.COMM_WORLD
 
 
 try:
     MPI.Win.Create(None, 1, MPI.INFO_NULL, MPI.COMM_SELF).Free()
 except (NotImplementedError, MPI.Exception):
-    unittest.disable(BaseTestRMA, 'mpi-rma')
+    unittest.disable(BaseTestRMA, "mpi-rma")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

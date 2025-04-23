@@ -1,17 +1,24 @@
-from mpi4py import MPI
-import mpiunittest as unittest
+import sys
+
 import mpitestutil as testutil
-import sys, os
+import mpiunittest as unittest
+
+from mpi4py import MPI
+
 try:
-    sys.getrefcount
+    _ = sys.getrefcount
 except AttributeError:
+
     class getrefcount:
         def __init__(self, arg):
             pass
+
         def __eq__(self, other):
             return True
+
         def __add__(self, other):
             return self
+
         def __sub__(self, other):
             return self
 
@@ -19,21 +26,24 @@ except AttributeError:
 def memzero(m):
     try:
         m[:] = 0
-    except IndexError: # cffi buffer
-        m[0:len(m)] = b'\0'*len(m)
+    except IndexError:  # cffi buffer
+        m[0 : len(m)] = b"\0" * len(m)
 
 
 def ch3_sock():
-    return 'ch3:sock' in MPI.Get_library_version()
+    return "ch3:sock" in MPI.Get_library_version()
 
 
 class TestWinNull(unittest.TestCase):
-
+    #
     def testConstructor(self):
         win = MPI.Win()
         self.assertEqual(win, MPI.WIN_NULL)
         self.assertIsNot(win, MPI.WIN_NULL)
-        def construct(): MPI.Win((1,2,3))
+
+        def construct():
+            MPI.Win((1, 2, 3))
+
         self.assertRaises(TypeError, construct)
 
     def testGetName(self):
@@ -42,7 +52,7 @@ class TestWinNull(unittest.TestCase):
 
 
 class BaseTestWin:
-
+    #
     COMM = MPI.COMM_NULL
     INFO = MPI.INFO_NULL
     CREATE_FLAVOR = MPI.UNDEFINED
@@ -57,13 +67,13 @@ class BaseTestWin:
 
     def testMemory(self):
         memory = self.WIN.tomemory()
-        self.assertEqual(memory.format, 'B')
+        self.assertEqual(memory.format, "B")
         pointer = MPI.Get_address(memory)
         length = len(memory)
         base, size, dunit = self.WIN.attrs
-        self.assertEqual(size,  length)
+        self.assertEqual(size, length)
         self.assertEqual(dunit, 1)
-        self.assertEqual(base,  pointer)
+        self.assertEqual(base, pointer)
 
     def testAttributes(self):
         base, size, unit = self.WIN.attrs
@@ -79,10 +89,10 @@ class BaseTestWin:
         wgroup.Free()
         self.assertEqual(grpcmp, MPI.IDENT)
 
-    @unittest.skipMPI('impi(>=2021.15.0)')
+    @unittest.skipMPI("impi(>=2021.15.0)")
     def testGetSetInfo(self):
-        #info = MPI.INFO_NULL
-        #self.WIN.Set_info(info)
+        # info = MPI.INFO_NULL
+        # self.WIN.Set_info(info)
         info = MPI.Info.Create()
         self.WIN.Set_info(info)
         info.Free()
@@ -91,8 +101,12 @@ class BaseTestWin:
         info.Free()
 
     def testGetSetErrhandler(self):
-        for ERRHANDLER in [MPI.ERRORS_ARE_FATAL, MPI.ERRORS_RETURN,
-                           MPI.ERRORS_ARE_FATAL, MPI.ERRORS_RETURN,]:
+        for ERRHANDLER in [
+            MPI.ERRORS_ARE_FATAL,
+            MPI.ERRORS_RETURN,
+            MPI.ERRORS_ARE_FATAL,
+            MPI.ERRORS_RETURN,
+        ]:
             errhdl_1 = self.WIN.Get_errhandler()
             self.assertNotEqual(errhdl_1, MPI.ERRHANDLER_NULL)
             self.WIN.Set_errhandler(ERRHANDLER)
@@ -113,20 +127,24 @@ class BaseTestWin:
             self.assertEqual(self.WIN.Get_name(), name)
             self.WIN.name = self.WIN.name
         except NotImplementedError:
-            self.skipTest('mpi-win-name')
+            self.skipTest("mpi-win-name")
 
-    @unittest.skipIf(MPI.WIN_CREATE_FLAVOR == MPI.KEYVAL_INVALID, 'mpi-win-flavor')
+    @unittest.skipIf(
+        MPI.WIN_CREATE_FLAVOR == MPI.KEYVAL_INVALID, "mpi-win-flavor"
+    )
     def testCreateFlavor(self):
-        flavors = (MPI.WIN_FLAVOR_CREATE,
-                   MPI.WIN_FLAVOR_ALLOCATE,
-                   MPI.WIN_FLAVOR_DYNAMIC,
-                   MPI.WIN_FLAVOR_SHARED,)
+        flavors = (
+            MPI.WIN_FLAVOR_CREATE,
+            MPI.WIN_FLAVOR_ALLOCATE,
+            MPI.WIN_FLAVOR_DYNAMIC,
+            MPI.WIN_FLAVOR_SHARED,
+        )
         flavor = self.WIN.Get_attr(MPI.WIN_CREATE_FLAVOR)
         self.assertIn(flavor, flavors)
         self.assertEqual(flavor, self.WIN.flavor)
         self.assertEqual(flavor, self.CREATE_FLAVOR)
 
-    @unittest.skipIf(MPI.WIN_MODEL == MPI.KEYVAL_INVALID, 'mpi-win-model')
+    @unittest.skipIf(MPI.WIN_MODEL == MPI.KEYVAL_INVALID, "mpi-win-model")
     def testMemoryModel(self):
         models = (MPI.WIN_SEPARATE, MPI.WIN_UNIFIED)
         model = self.WIN.Get_attr(MPI.WIN_MODEL)
@@ -142,7 +160,7 @@ class BaseTestWin:
         self.assertEqual(win.group_rank, group.Get_rank())
         group.Free()
         #
-        if not unittest.is_mpi('impi(>=2021.15.0)'):
+        if not unittest.is_mpi("impi(>=2021.15.0)"):
             info = win.info
             self.assertIs(type(info), MPI.Info)
             win.info = info
@@ -157,12 +175,13 @@ class BaseTestWin:
 
     def testPickle(self):
         from pickle import dumps, loads
+
         with self.assertRaises(ValueError):
             loads(dumps(self.WIN))
 
 
 class BaseTestWinCreate(BaseTestWin):
-
+    #
     CREATE_FLAVOR = MPI.WIN_FLAVOR_CREATE
 
     def setUp(self):
@@ -174,8 +193,9 @@ class BaseTestWinCreate(BaseTestWin):
         self.WIN.Free()
         MPI.Free_mem(self.memory)
 
-class BaseTestWinAllocate(BaseTestWin):
 
+class BaseTestWinAllocate(BaseTestWin):
+    #
     CREATE_FLAVOR = MPI.WIN_FLAVOR_ALLOCATE
 
     def setUp(self):
@@ -186,8 +206,9 @@ class BaseTestWinAllocate(BaseTestWin):
     def tearDown(self):
         self.WIN.Free()
 
-class BaseTestWinAllocateShared(BaseTestWin):
 
+class BaseTestWinAllocateShared(BaseTestWin):
+    #
     CREATE_FLAVOR = MPI.WIN_FLAVOR_SHARED
 
     def setUp(self):
@@ -214,9 +235,10 @@ class BaseTestWinAllocateShared(BaseTestWin):
             self.assertEqual(size, memories[i][1])
             self.assertEqual(disp, 1)
 
-@unittest.skipMPI('impi(>=2021.14.0,<2021.15.0)', testutil.github())
-class BaseTestWinCreateDynamic(BaseTestWin):
 
+@unittest.skipMPI("impi(>=2021.14.0,<2021.15.0)", testutil.github())
+class BaseTestWinCreateDynamic(BaseTestWin):
+    #
     CREATE_FLAVOR = MPI.WIN_FLAVOR_DYNAMIC
 
     def setUp(self):
@@ -233,7 +255,7 @@ class BaseTestWinCreateDynamic(BaseTestWin):
 
     def testMemory(self):
         memory = self.WIN.tomemory()
-        self.assertEqual(memory.format, 'B')
+        self.assertEqual(memory.format, "B")
         base = MPI.Get_address(memory)
         size = len(memory)
         self.assertEqual(base, 0)
@@ -244,7 +266,7 @@ class BaseTestWinCreateDynamic(BaseTestWin):
         self.assertEqual(base, 0)
         self.assertEqual(size, 0)
 
-    @unittest.skipMPI('msmpi(<9.1.0)')
+    @unittest.skipMPI("msmpi(<9.1.0)")
     def testAttachDetach(self):
         mem1 = MPI.Alloc_mem(8)
         mem2 = MPI.Alloc_mem(16)
@@ -267,51 +289,67 @@ class BaseTestWinCreateDynamic(BaseTestWin):
         MPI.Free_mem(mem2)
         MPI.Free_mem(mem3)
 
+
 class TestWinCreateSelf(BaseTestWinCreate, unittest.TestCase):
+    #
     COMM = MPI.COMM_SELF
 
-@unittest.skipMPI('openmpi(<1.4.0)')
+
+@unittest.skipMPI("openmpi(<1.4.0)")
 class TestWinCreateWorld(BaseTestWinCreate, unittest.TestCase):
+    #
     COMM = MPI.COMM_WORLD
+
 
 class TestWinAllocateSelf(BaseTestWinAllocate, unittest.TestCase):
+    #
     COMM = MPI.COMM_SELF
 
-@unittest.skipMPI('openmpi(<1.4.0)')
+
+@unittest.skipMPI("openmpi(<1.4.0)")
 class TestWinAllocateWorld(BaseTestWinAllocate, unittest.TestCase):
+    #
     COMM = MPI.COMM_WORLD
+
 
 class TestWinAllocateSharedSelf(BaseTestWinAllocateShared, unittest.TestCase):
+    #
     COMM = MPI.COMM_SELF
 
-@unittest.skipMPI('mpich', ch3_sock() and MPI.COMM_WORLD.Get_size() > 1)
+
+@unittest.skipMPI("mpich", ch3_sock() and MPI.COMM_WORLD.Get_size() > 1)
 class TestWinAllocateSharedWorld(BaseTestWinAllocateShared, unittest.TestCase):
+    #
     COMM = MPI.COMM_WORLD
 
+
 class TestWinCreateDynamicSelf(BaseTestWinCreateDynamic, unittest.TestCase):
+    #
     COMM = MPI.COMM_SELF
 
+
 class TestWinCreateDynamicWorld(BaseTestWinCreateDynamic, unittest.TestCase):
+    #
     COMM = MPI.COMM_WORLD
 
 
 try:
     MPI.Win.Create(MPI.BOTTOM, 1, MPI.INFO_NULL, MPI.COMM_SELF).Free()
 except (NotImplementedError, MPI.Exception):
-    unittest.disable(BaseTestWinCreate, 'mpi-win-create')
+    unittest.disable(BaseTestWinCreate, "mpi-win-create")
 try:
     MPI.Win.Allocate(1, 1, MPI.INFO_NULL, MPI.COMM_SELF).Free()
 except (NotImplementedError, MPI.Exception):
-    unittest.disable(BaseTestWinAllocate, 'mpi-win-allocate')
+    unittest.disable(BaseTestWinAllocate, "mpi-win-allocate")
 try:
     MPI.Win.Allocate_shared(1, 1, MPI.INFO_NULL, MPI.COMM_SELF).Free()
 except (NotImplementedError, MPI.Exception):
-    unittest.disable(BaseTestWinAllocateShared, 'mpi-win-shared')
+    unittest.disable(BaseTestWinAllocateShared, "mpi-win-shared")
 try:
     MPI.Win.Create_dynamic(MPI.INFO_NULL, MPI.COMM_SELF).Free()
 except (NotImplementedError, MPI.Exception):
-    unittest.disable(BaseTestWinCreateDynamic, 'mpi-win-dynamic')
+    unittest.disable(BaseTestWinCreateDynamic, "mpi-win-dynamic")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

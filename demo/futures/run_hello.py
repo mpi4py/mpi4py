@@ -1,6 +1,5 @@
 from mpi4py import MPI
-from mpi4py.futures import MPIPoolExecutor, wait
-from mpi4py.futures import get_comm_workers
+from mpi4py.futures import MPIPoolExecutor, get_comm_workers, wait
 
 
 def helloworld():
@@ -17,17 +16,14 @@ def helloworld():
     rbuf = bytearray(128)
     dest = (rank + 1) % size
     source = (rank - 1) % size
-    rbuf[:len(greet)] = greet.encode()
+    rbuf[: len(greet)] = greet.encode()
     for _ in range(size):
         sbuf, rbuf = rbuf, sbuf
-        comm.Sendrecv(
-            sbuf, dest, 42,
-            rbuf, source, 42,
-        )
+        comm.Sendrecv(sbuf, dest, 42, rbuf, source, 42)
     return bytes(rbuf).decode()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     executor = MPIPoolExecutor(5)
     futures = []
     for _ in range(executor.num_workers):

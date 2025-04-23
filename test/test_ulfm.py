@@ -1,14 +1,15 @@
-from mpi4py import MPI
-import mpiunittest as unittest
-import warnings
 import struct
 
+import mpiunittest as unittest
 
-@unittest.skipMPI('msmpi')
-@unittest.skipMPI('mvapich')
-@unittest.skipMPI('impi')
+from mpi4py import MPI
+
+
+@unittest.skipMPI("msmpi")
+@unittest.skipMPI("mvapich")
+@unittest.skipMPI("impi")
 class BaseTestULFM:
-
+    #
     COMM = MPI.COMM_NULL
 
     def setUp(self):
@@ -28,11 +29,11 @@ class BaseTestULFM:
 
     def testRevoke(self):
         comm = self.COMM
-        is_intra = comm.Is_intra()
+        comm.Is_intra()
         try:
             comm.Revoke()
         except NotImplementedError:
-            self.skipTest('mpi-comm_revoke')
+            self.skipTest("mpi-comm_revoke")
         try:
             self.assertTrue(comm.Is_revoked())
         except NotImplementedError:
@@ -92,8 +93,8 @@ class BaseTestULFM:
             comm.Iagree(0)
         with self.assertRaises(ValueError):
             comm.Iagree(bytearray(8))
-        ibuf = MPI.buffer.allocate(struct.calcsize('i'))
-        flag = memoryview(ibuf).cast('i')
+        ibuf = MPI.buffer.allocate(struct.calcsize("i"))
+        flag = memoryview(ibuf).cast("i")
         for i in range(5):
             flag[0] = i
             request = comm.Iagree(flag)
@@ -105,20 +106,20 @@ class BaseTestULFM:
                 rank = comm.Get_rank()
                 comm.Barrier()
                 if rank == root:
-                    ival = int('1011', base=2)
+                    ival = int("1011", base=2)
                     flag[0] = ival
                     request = comm.Iagree(flag)
                     self.assertFalse(request.Test())
                     self.assertEqual(flag[0], ival)
                     comm.Barrier()
                 else:
-                    ival = int('1101', base=2)
+                    ival = int("1101", base=2)
                     flag[0] = ival
                     comm.Barrier()
                     self.assertEqual(flag[0], ival)
                     request = comm.Iagree(flag)
                 request.Wait()
-                ival = int('1001', base=2)
+                ival = int("1001", base=2)
                 self.assertEqual(flag[0], ival)
 
     def testShrink(self):
@@ -127,8 +128,7 @@ class BaseTestULFM:
         self.assertEqual(comm.Get_size(), shrink.Get_size())
         self.assertEqual(comm.Get_rank(), shrink.Get_rank())
         if shrink.Is_inter():
-            self.assertEqual(comm.Get_remote_size(),
-                             shrink.Get_remote_size())
+            self.assertEqual(comm.Get_remote_size(), shrink.Get_remote_size())
         shrink.Free()
 
     def testIShrink(self):
@@ -140,29 +140,30 @@ class BaseTestULFM:
         self.assertEqual(comm.Get_size(), shrink.Get_size())
         self.assertEqual(comm.Get_rank(), shrink.Get_rank())
         if shrink.Is_inter():
-            self.assertEqual(comm.Get_remote_size(),
-                             shrink.Get_remote_size())
+            self.assertEqual(comm.Get_remote_size(), shrink.Get_remote_size())
         shrink.Free()
 
 
 class TestULFMSelf(BaseTestULFM, unittest.TestCase):
+    #
     COMM = MPI.COMM_SELF
 
 
 class TestULFMWorld(BaseTestULFM, unittest.TestCase):
+    #
     COMM = MPI.COMM_WORLD
 
 
-@unittest.skipMPI('openmpi(>=5.0.0,<5.0.4)')
-@unittest.skipIf(MPI.COMM_WORLD.Get_size() < 2, 'mpi-world-size<2')
+@unittest.skipMPI("openmpi(>=5.0.0,<5.0.4)")
+@unittest.skipIf(MPI.COMM_WORLD.Get_size() < 2, "mpi-world-size<2")
 class TestULFMInter(BaseTestULFM, unittest.TestCase):
-
+    #
     @classmethod
     def setUpClass(cls):
         BASECOMM = MPI.COMM_WORLD
         size = BASECOMM.Get_size()
         rank = BASECOMM.Get_rank()
-        if rank < size // 2 :
+        if rank < size // 2:
             COLOR = 0
             LOCAL_LEADER = 0
             REMOTE_LEADER = size // 2
@@ -172,8 +173,10 @@ class TestULFMInter(BaseTestULFM, unittest.TestCase):
             REMOTE_LEADER = 0
         INTRACOMM = BASECOMM.Split(COLOR, key=0)
         INTERCOMM = MPI.Intracomm.Create_intercomm(
-            INTRACOMM, LOCAL_LEADER,
-            BASECOMM, REMOTE_LEADER,
+            INTRACOMM,
+            LOCAL_LEADER,
+            BASECOMM,
+            REMOTE_LEADER,
         )
         INTRACOMM.Free()
         cls.COMM = INTERCOMM
@@ -184,5 +187,5 @@ class TestULFMInter(BaseTestULFM, unittest.TestCase):
         cls.COMM.Free()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

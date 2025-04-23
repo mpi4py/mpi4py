@@ -1,12 +1,12 @@
 # Author:  Lisandro Dalcin
 # Contact: dalcinl@gmail.com
 """Run MPI benchmarks and tests."""
-import os as _os
+
 import sys as _sys
 
 
 def _prog(cmd=""):
-    pyexe = _os.path.basename(_sys.executable)
+    pyexe = __import__("pathlib").Path(_sys.executable).name
     return f"{pyexe} -m {__spec__.name} {cmd}".strip()
 
 
@@ -14,13 +14,20 @@ def helloworld(comm, args=None, verbose=True):
     """Hello, World! using MPI."""
     # pylint: disable=import-outside-toplevel
     from argparse import ArgumentParser
+
     parser = ArgumentParser(prog=_prog("helloworld"))
-    parser.add_argument("-q", "--quiet", action="store_false",
-                        dest="verbose", default=verbose,
-                        help="quiet output")
+    parser.add_argument(
+        "-q",
+        "--quiet",
+        action="store_false",
+        dest="verbose",
+        default=verbose,
+        help="quiet output",
+    )
     options = parser.parse_args(args)
 
     from . import MPI
+
     size = comm.Get_size()
     rank = comm.Get_rank()
     name = MPI.Get_processor_name()
@@ -31,12 +38,12 @@ def helloworld(comm, args=None, verbose=True):
     )
     comm.Barrier()
     if rank > 0:
-        comm.Recv([None, 'B'], rank - 1)
+        comm.Recv([None, "B"], rank - 1)
     if options.verbose:
         _sys.stdout.write(message)
         _sys.stdout.flush()
     if rank < size - 1:
-        comm.Send([None, 'B'], rank + 1)
+        comm.Send([None, "B"], rank + 1)
     comm.Barrier()
     return message
 
@@ -47,25 +54,48 @@ def ringtest(comm, args=None, verbose=True):
     # pylint: disable=too-many-statements
     # pylint: disable=import-outside-toplevel
     from argparse import ArgumentParser
+
     parser = ArgumentParser(prog=_prog("ringtest"))
-    parser.add_argument("-q", "--quiet", action="store_false",
-                        dest="verbose", default=verbose,
-                        help="quiet output")
-    parser.add_argument("-n", "--size", type=int,
-                        dest="size", default=1,
-                        help="message size")
-    parser.add_argument("-s", "--skip", type=int,
-                        dest="skip", default=0,
-                        help="number of warm-up iterations")
-    parser.add_argument("-l", "--loop", type=int,
-                        dest="loop", default=1,
-                        help="number of iterations")
+    parser.add_argument(
+        "-q",
+        "--quiet",
+        action="store_false",
+        dest="verbose",
+        default=verbose,
+        help="quiet output",
+    )
+    parser.add_argument(
+        "-n",
+        "--size",
+        type=int,
+        dest="size",
+        default=1,
+        help="message size",
+    )
+    parser.add_argument(
+        "-s",
+        "--skip",
+        type=int,
+        dest="skip",
+        default=0,
+        help="number of warm-up iterations",
+    )
+    parser.add_argument(
+        "-l",
+        "--loop",
+        type=int,
+        dest="loop",
+        default=1,
+        help="number of iterations",
+    )
     options = parser.parse_args(args)
 
     def ring(comm, n=1, loop=1, skip=0):
         # pylint: disable=invalid-name
         from array import array
+
         from . import MPI
+
         iterations = list(range(loop + skip))
         size = comm.Get_size()
         rank = comm.Get_rank()
@@ -75,15 +105,14 @@ def ringtest(comm, args=None, verbose=True):
         Send = comm.Send
         Recv = comm.Recv
         Wtime = MPI.Wtime
-        sendmsg = array('B', [+42]) * n
-        recvmsg = array('B', [0x0]) * n
+        sendmsg = array("B", [+42]) * n
+        recvmsg = array("B", [0x0]) * n
         tic = Wtime()
         if size == 1:
             for i in iterations:
                 if i == skip:
                     tic = Wtime()
-                Sendrecv(sendmsg, dest, 0,
-                         recvmsg, source, 0)
+                Sendrecv(sendmsg, dest, 0, recvmsg, source, 0)
         else:
             if rank == 0:
                 for i in iterations:
@@ -100,8 +129,9 @@ def ringtest(comm, args=None, verbose=True):
                     Send(sendmsg, dest, 0)
         toc = Wtime()
         if comm.rank == 0 and sendmsg != recvmsg:  # pragma: no cover
-            from warnings import warn
             import traceback
+            from warnings import warn
+
             try:
                 warn("received message does not match!", stacklevel=1)
             except UserWarning:
@@ -109,9 +139,9 @@ def ringtest(comm, args=None, verbose=True):
                 comm.Abort(2)
         return toc - tic
 
-    size = getattr(options, 'size', 1)
-    loop = getattr(options, 'loop', 1)
-    skip = getattr(options, 'skip', 0)
+    size = getattr(options, "size", 1)
+    loop = getattr(options, "loop", 1)
+    skip = getattr(options, "skip", 0)
     comm.Barrier()
     elapsed = ring(comm, size, loop, skip)
     if options.verbose and comm.rank == 0:
@@ -130,70 +160,152 @@ def pingpong(comm, args=None, verbose=True):
     # pylint: disable=too-many-statements
     # pylint: disable=import-outside-toplevel
     from argparse import ArgumentParser
+
     parser = ArgumentParser(prog=_prog("pingpong"))
-    parser.add_argument("-q", "--quiet", action="store_false",
-                        dest="verbose", default=verbose,
-                        help="quiet output")
-    parser.add_argument("-m", "--min-size", type=int,
-                        dest="min_size", default=1,
-                        help="minimum message size")
-    parser.add_argument("-n", "--max-size", type=int,
-                        dest="max_size", default=1 << 30,
-                        help="maximum message size")
-    parser.add_argument("-s", "--skip", type=int,
-                        dest="skip", default=100,
-                        help="number of warm-up iterations")
-    parser.add_argument("-l", "--loop", type=int,
-                        dest="loop", default=10000,
-                        help="number of iterations")
-    parser.add_argument("-a", "--array", action="store",
-                        dest="array", default="numpy",
-                        choices=["numpy", "cupy", "numba", "none"],
-                        help="use NumPy/CuPy/Numba arrays")
-    parser.add_argument("-p", "--pickle", action="store_true",
-                        dest="pickle", default=False,
-                        help="use pickle-based send and receive")
-    parser.add_argument("--protocol", type=int,
-                        dest="protocol", default=None,
-                        help="pickle protocol version")
-    parser.add_argument("-o", "--outband", action="store_true",
-                        dest="outband", default=False,
-                        help="use out-of-band pickle-based send and receive")
-    parser.add_argument("--threshold", type=int,
-                        dest="threshold", default=None,
-                        help="size threshold for out-of-band pickle buffers")
-    parser.add_argument("--skip-large", type=int,
-                        dest="skip_large", default=10)
-    parser.add_argument("--loop-large", type=int,
-                        dest="loop_large", default=1000)
-    parser.add_argument("--large-size", type=int,
-                        dest="large_size", default=1 << 14)
-    parser.add_argument("--skip-huge", type=int,
-                        dest="skip_huge", default=1)
-    parser.add_argument("--loop-huge", type=int,
-                        dest="loop_huge", default=10)
-    parser.add_argument("--huge-size", type=int,
-                        dest="huge_size", default=1 << 20)
-    parser.add_argument("--no-header", action="store_false",
-                        dest="print_header", default=True)
-    parser.add_argument("--no-stats", action="store_false",
-                        dest="print_stats", default=True)
+    parser.add_argument(
+        "-q",
+        "--quiet",
+        action="store_false",
+        dest="verbose",
+        default=verbose,
+        help="quiet output",
+    )
+    parser.add_argument(
+        "-m",
+        "--min-size",
+        type=int,
+        dest="min_size",
+        default=1,
+        help="minimum message size",
+    )
+    parser.add_argument(
+        "-n",
+        "--max-size",
+        type=int,
+        dest="max_size",
+        default=1 << 30,
+        help="maximum message size",
+    )
+    parser.add_argument(
+        "-s",
+        "--skip",
+        type=int,
+        dest="skip",
+        default=100,
+        help="number of warm-up iterations",
+    )
+    parser.add_argument(
+        "-l",
+        "--loop",
+        type=int,
+        dest="loop",
+        default=10000,
+        help="number of iterations",
+    )
+    parser.add_argument(
+        "-a",
+        "--array",
+        action="store",
+        dest="array",
+        default="numpy",
+        choices=["numpy", "cupy", "numba", "none"],
+        help="use NumPy/CuPy/Numba arrays",
+    )
+    parser.add_argument(
+        "-p",
+        "--pickle",
+        action="store_true",
+        dest="pickle",
+        default=False,
+        help="use pickle-based send and receive",
+    )
+    parser.add_argument(
+        "--protocol",
+        type=int,
+        dest="protocol",
+        default=None,
+        help="pickle protocol version",
+    )
+    parser.add_argument(
+        "-o",
+        "--outband",
+        action="store_true",
+        dest="outband",
+        default=False,
+        help="use out-of-band pickle-based send and receive",
+    )
+    parser.add_argument(
+        "--threshold",
+        type=int,
+        dest="threshold",
+        default=None,
+        help="size threshold for out-of-band pickle buffers",
+    )
+    parser.add_argument(
+        "--skip-large",
+        type=int,
+        dest="skip_large",
+        default=10,
+    )
+    parser.add_argument(
+        "--loop-large",
+        type=int,
+        dest="loop_large",
+        default=1000,
+    )
+    parser.add_argument(
+        "--large-size",
+        type=int,
+        dest="large_size",
+        default=1 << 14,
+    )
+    parser.add_argument(
+        "--skip-huge",
+        type=int,
+        dest="skip_huge",
+        default=1,
+    )
+    parser.add_argument(
+        "--loop-huge",
+        type=int,
+        dest="loop_huge",
+        default=10,
+    )
+    parser.add_argument(
+        "--huge-size",
+        type=int,
+        dest="huge_size",
+        default=1 << 20,
+    )
+    parser.add_argument(
+        "--no-header",
+        action="store_false",
+        dest="print_header",
+        default=True,
+    )
+    parser.add_argument(
+        "--no-stats",
+        action="store_false",
+        dest="print_stats",
+        default=True,
+    )
     options = parser.parse_args(args)
 
     import statistics
+
     from . import MPI
     from .util import pkl5
 
     # pylint: disable=import-error
     numpy = cupy = numba = None
-    if options.array == 'numpy':
+    if options.array == "numpy":
         try:
             import numpy
         except ImportError:  # pragma: no cover
             pass
-    elif options.array == 'cupy':  # pragma: no cover
+    elif options.array == "cupy":  # pragma: no cover
         import cupy
-    elif options.array == 'numba':  # pragma: no cover
+    elif options.array == "numba":  # pragma: no cover
         import numba.cuda
 
     skip = options.skip
@@ -235,11 +347,11 @@ def pingpong(comm, args=None, verbose=True):
 
     def allocate(nbytes):  # pragma: no cover
         if numpy:
-            return numpy.empty(nbytes, 'B')
+            return numpy.empty(nbytes, "B")
         elif cupy:
-            return cupy.empty(nbytes, 'B')
+            return cupy.empty(nbytes, "B")
         elif numba:
-            return numba.cuda.device_array(nbytes, 'B')
+            return numba.cuda.device_array(nbytes, "B")
         else:
             return bytearray(nbytes)
 
@@ -284,7 +396,7 @@ def pingpong(comm, args=None, verbose=True):
 
         s_msg = r_msg = None
 
-        t_mean = statistics.mean(t_list) if t_list else float('nan')
+        t_mean = statistics.mean(t_list) if t_list else float("nan")
         t_stdev = statistics.stdev(t_list) if len(t_list) > 1 else 0.0
         result.append((nbytes, t_mean, t_stdev))
 
@@ -315,94 +427,160 @@ def futures(comm, args=None, verbose=True):
     # pylint: disable=too-many-statements
     # pylint: disable=import-outside-toplevel
     from argparse import ArgumentParser
+
     parser = ArgumentParser(prog=_prog("futures"))
     parser.add_argument(
-        "-q", "--quiet", help="quiet output",
-        action="store_false", dest="verbose", default=verbose,
+        "-q",
+        "--quiet",
+        help="quiet output",
+        action="store_false",
+        dest="verbose",
+        default=verbose,
     )
     parser.add_argument(
-        "-e", "--executor", help="executor backend",
-        action="store", dest="executor", default="mpi",
+        "-e",
+        "--executor",
+        help="executor backend",
+        action="store",
+        dest="executor",
+        default="mpi",
         choices=["mpi", "process", "thread"],
     )
     parser.add_argument(
-        "-w", "--num-workers", help="number or workers",
-        type=int, dest="workers", default=None,
+        "-w",
+        "--num-workers",
+        help="number or workers",
+        type=int,
+        dest="workers",
+        default=None,
     )
     parser.add_argument(
-        "-t", "--num-tasks", help="number of tasks per worker",
-        type=int, dest="tasks", default=50,
+        "-t",
+        "--num-tasks",
+        help="number of tasks per worker",
+        type=int,
+        dest="tasks",
+        default=50,
     )
     parser.add_argument(
-        "-m", "--min-size", help="minimum task data size",
-        type=int, dest="min_size", default=0,
+        "-m",
+        "--min-size",
+        help="minimum task data size",
+        type=int,
+        dest="min_size",
+        default=0,
     )
     parser.add_argument(
-        "-n", "--max-size", help="maximum task data size",
-        type=int, dest="max_size", default=1 << 20,
+        "-n",
+        "--max-size",
+        help="maximum task data size",
+        type=int,
+        dest="max_size",
+        default=1 << 20,
     )
     parser.add_argument(
-        "-a", "--allocator", help="task data allocator",
-        action="store", dest="allocator", default="numpy",
+        "-a",
+        "--allocator",
+        help="task data allocator",
+        action="store",
+        dest="allocator",
+        default="numpy",
         choices=["numpy", "array", "bytes"],
     )
     parser.add_argument(
-        "-c", "--chunksize", help="chunksize parameter",
-        type=int, dest="chunksize", default=1,
+        "-c",
+        "--chunksize",
+        help="chunksize parameter",
+        type=int,
+        dest="chunksize",
+        default=1,
     )
     parser.add_argument(
-        "-b", "--backoff", help="backoff parameter",
-        type=float, dest="backoff", default=0.0,
+        "-b",
+        "--backoff",
+        help="backoff parameter",
+        type=float,
+        dest="backoff",
+        default=0.0,
     )
     parser.add_argument(
-        "-o", "--outband", help="use out-of-band pickle",
-        action="store_true", dest="outband", default=False,
+        "-o",
+        "--outband",
+        help="use out-of-band pickle",
+        action="store_true",
+        dest="outband",
+        default=False,
     )
     parser.add_argument(
-        "-s", "--skip", help="number of warm-up iterations",
-        type=int, dest="skip", default=1,
+        "-s",
+        "--skip",
+        help="number of warm-up iterations",
+        type=int,
+        dest="skip",
+        default=1,
     )
     parser.add_argument(
-        "-l", "--loop", help="number of sample iterations",
-        type=int, dest="loop", default=10,
+        "-l",
+        "--loop",
+        help="number of sample iterations",
+        type=int,
+        dest="loop",
+        default=10,
     )
     parser.add_argument(
         "--skip-large",
-        type=int, dest="skip_large", default=1,
+        type=int,
+        dest="skip_large",
+        default=1,
     )
     parser.add_argument(
         "--loop-large",
-        type=int, dest="loop_large", default=5,
+        type=int,
+        dest="loop_large",
+        default=5,
     )
     parser.add_argument(
         "--large-size",
-        type=int, dest="large_size", default=1 << 16,
+        type=int,
+        dest="large_size",
+        default=1 << 16,
     )
     parser.add_argument(
         "--skip-huge",
-        type=int, dest="skip_huge", default=1,
+        type=int,
+        dest="skip_huge",
+        default=1,
     )
     parser.add_argument(
         "--loop-huge",
-        type=int, dest="loop_huge", default=3,
+        type=int,
+        dest="loop_huge",
+        default=3,
     )
     parser.add_argument(
         "--huge-size",
-        type=int, dest="huge_size", default=1 << 18,
+        type=int,
+        dest="huge_size",
+        default=1 << 18,
     )
     parser.add_argument(
         "--no-header",
-        action="store_false", dest="print_header", default=True,
+        action="store_false",
+        dest="print_header",
+        default=True,
     )
     parser.add_argument(
         "--no-stats",
-        action="store_false", dest="print_stats", default=True,
+        action="store_false",
+        dest="print_stats",
+        default=True,
     )
     options = parser.parse_args(args)
 
-    import time
-    import statistics
     import concurrent.futures
+    import statistics
+    import time
+
     from .futures import MPIPoolExecutor
 
     executor_type = options.executor
@@ -430,19 +608,19 @@ def futures(comm, args=None, verbose=True):
     wtime = time.perf_counter
 
     numpy = array = None
-    if allocator == 'numpy':
+    if allocator == "numpy":
         try:
             import numpy
         except ImportError:  # pragma: no cover
             pass
-    elif allocator == 'array':
+    elif allocator == "array":
         import array
 
     def allocate(nbytes):
         if numpy:
-            return numpy.zeros(nbytes, 'B')
+            return numpy.zeros(nbytes, "B")
         if array:
-            buf = array.array('B', [])
+            buf = array.array("B", [])
             buf.frombytes(bytes(nbytes))
             return buf
         return bytes(nbytes)
@@ -471,7 +649,8 @@ def futures(comm, args=None, verbose=True):
 
     def executor_map(task, data):
         iterator = executor.map(
-            task, data,
+            task,
+            data,
             chunksize=chunksize,
         )
         for _ in iterator:
@@ -508,7 +687,7 @@ def futures(comm, args=None, verbose=True):
 
         data = None
 
-        t_mean = statistics.mean(t_list) if t_list else float('nan')
+        t_mean = statistics.mean(t_list) if t_list else float("nan")
         t_stdev = statistics.stdev(t_list) if len(t_list) > 1 else 0.0
         result.append((nbytes, t_mean, t_stdev))
 
@@ -537,35 +716,57 @@ def futures(comm, args=None, verbose=True):
 def main(args=None):
     """Entry-point for ``python -m mpi4py.bench``."""
     # pylint: disable=import-outside-toplevel
-    from argparse import ArgumentParser, REMAINDER
-    parser = ArgumentParser(prog=_prog(),
-                            usage="%(prog)s [options] <command> [args]")
-    parser.add_argument("--threads",
-                        action="store_true", dest="threads", default=None,
-                        help="initialize MPI with thread support")
-    parser.add_argument("--no-threads",
-                        action="store_false", dest="threads", default=None,
-                        help="initialize MPI without thread support")
-    parser.add_argument("--thread-level",
-                        dest="thread_level", default=None,
-                        action="store", metavar="LEVEL",
-                        choices="single funneled serialized multiple".split(),
-                        help="initialize MPI with required thread level")
-    parser.add_argument("command",
-                        action="store", metavar="<command>",
-                        help="benchmark command to run")
-    parser.add_argument("args",
-                        nargs=REMAINDER, metavar="[args]",
-                        help="arguments for benchmark command")
+    from argparse import REMAINDER, ArgumentParser
+
+    parser = ArgumentParser(
+        prog=_prog(), usage="%(prog)s [options] <command> [args]"
+    )
+    parser.add_argument(
+        "--threads",
+        action="store_true",
+        dest="threads",
+        default=None,
+        help="initialize MPI with thread support",
+    )
+    parser.add_argument(
+        "--no-threads",
+        action="store_false",
+        dest="threads",
+        default=None,
+        help="initialize MPI without thread support",
+    )
+    parser.add_argument(
+        "--thread-level",
+        dest="thread_level",
+        default=None,
+        action="store",
+        metavar="LEVEL",
+        choices="single funneled serialized multiple".split(),
+        help="initialize MPI with required thread level",
+    )
+    parser.add_argument(
+        "command",
+        action="store",
+        metavar="<command>",
+        help="benchmark command to run",
+    )
+    parser.add_argument(
+        "args",
+        nargs=REMAINDER,
+        metavar="[args]",
+        help="arguments for benchmark command",
+    )
     options = parser.parse_args(args)
 
     from . import rc
+
     if options.threads is not None:
         rc.threads = options.threads
     if options.thread_level is not None:
         rc.thread_level = options.thread_level
 
     from . import MPI
+
     comm = MPI.COMM_WORLD
     if options.command not in main.commands:
         if comm.rank == 0:
@@ -577,11 +778,11 @@ def main(args=None):
 
 
 main.commands = {  # type: ignore[attr-defined]
-    'helloworld': helloworld,
-    'ringtest': ringtest,
-    'pingpong': pingpong,
-    'futures': futures,
+    "helloworld": helloworld,
+    "ringtest": ringtest,
+    "pingpong": pingpong,
+    "futures": futures,
 }
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -1,8 +1,11 @@
 """https://github.com/scientific-python/spin"""  # noqa: D400
+
 import os
+import pathlib
 import shlex
 import shutil
 import sys
+
 import click
 from spin.cmds.util import run
 
@@ -36,11 +39,13 @@ def test(ctx, n, singleton, test_args):
     run([*launcher, *PYTHON, "test/main.py", "--inplace", *test_args])
 
 
+def _get_topdir():
+    script = pathlib.Path(__file__).resolve()
+    return script.parent.parent
+
+
 def _get_site_packages():
-    script = os.path.abspath(__file__)
-    testdir = os.path.dirname(script)
-    rootdir = os.path.dirname(testdir)
-    return os.path.join(rootdir, "src")
+    return _get_topdir() / "src"
 
 
 def _set_pythonpath(path, quiet=False):
@@ -48,12 +53,13 @@ def _set_pythonpath(path, quiet=False):
     if pythonpath is not None:
         pythonpath = f"{path}{os.pathsep}{pythonpath}"
     else:
-        pythonpath = path
+        pythonpath = f"{path}"
     os.environ["PYTHONPATH"] = pythonpath
     if not quiet:
         click.secho(
             f'$ export PYTHONPATH="{pythonpath}"',
-            bold=True, fg="bright_blue"
+            bold=True,
+            fg="bright_blue",
         )
     return path
 
@@ -70,8 +76,9 @@ def _run_check_commands(*commands):
             run([cmd, *args])
         else:
             click.secho(
-                f'{cmd}: command not found...',
-                bold=True, fg="bright_red"
+                f"{cmd}: command not found...",
+                bold=True,
+                fg="bright_red",
             )
 
 
@@ -82,8 +89,9 @@ def lint(ctx):
     _setup_environment(ctx)
     _run_check_commands(
         ["ruff", "check", "--quiet"],
+        ["ruff", "format", "--quiet", "--diff"],
         ["flake8", "docs", "src"],
-        ["pylint",  "mpi4py"],
+        ["pylint", "mpi4py"],
         ["cython-lint", "."],
         ["codespell"],
         ["yamllint", "."],
@@ -92,7 +100,7 @@ def lint(ctx):
 
 @click.command()
 @click.pass_context
-def type(ctx):
+def type(ctx):  # noqa: A001
     """🦆 Type-check sources with mypy."""
     _setup_environment(ctx)
     _run_check_commands(
@@ -206,5 +214,5 @@ def browse(ctx):
     """🌐 Browse Sphinx documentation."""
     ctx.invoke(docs, quiet=True)
     browser = [*PYTHON, "-m", "webbrowser", "-n"]
-    url = os.path.join("build", "html", "index.html")
-    run([*browser, url])
+    url = pathlib.Path() / "build" / "html" / "index.html"
+    run([*browser, str(url)])

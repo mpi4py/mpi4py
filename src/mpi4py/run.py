@@ -18,32 +18,39 @@ def run_command_line(args=None):
     * ``arg ...``: arguments passed to program in ``sys.argv[1:]``
     """
     # pylint: disable=import-outside-toplevel
+    import os
     import sys
     from runpy import run_module, run_path
 
-    def run_string(string, init_globals=None, run_name=None,
-                   filename='<string>', argv0='-c'):
+    def run_string(
+        string,
+        init_globals=None,
+        run_name=None,
+        filename="<string>",
+        argv0="-c",
+    ):
         from runpy import _run_module_code
-        code = compile(string, filename, 'exec', 0, True)
-        kwargs = {'script_name': argv0}
+
+        code = compile(string, filename, "exec", 0, True)
+        kwargs = {"script_name": argv0}
         return _run_module_code(code, init_globals, run_name, **kwargs)
 
     sys.argv[:] = args if args is not None else sys.argv[1:]
 
-    if sys.argv[0] == '-':
+    if sys.argv[0] == "-":
         cmd = sys.stdin.read()
-        run_string(cmd, run_name='__main__', filename='<stdin>', argv0='-')
-    elif sys.argv[0] == '-c':
+        run_string(cmd, run_name="__main__", filename="<stdin>", argv0="-")
+    elif sys.argv[0] == "-c":
         cmd = sys.argv.pop(1)  # Remove "cmd" from argument list
-        run_string(cmd, run_name='__main__', filename='<string>', argv0='-c')
-    elif sys.argv[0] == '-m':
+        run_string(cmd, run_name="__main__", filename="<string>", argv0="-c")
+    elif sys.argv[0] == "-m":
         del sys.argv[0]  # Remove "-m" from argument list
-        run_module(sys.argv[0], run_name='__main__', alter_sys=True)
+        run_module(sys.argv[0], run_name="__main__", alter_sys=True)
     else:
-        from os.path import realpath, dirname
-        if not getattr(sys.flags, 'isolated', 0):  # pragma: no branch
-            sys.path[0] = realpath(dirname(sys.argv[0]))  # Fix sys.path
-        run_path(sys.argv[0], run_name='__main__')
+        if not getattr(sys.flags, "isolated", 0):  # pragma: no branch
+            dir_path = os.path.dirname(sys.argv[0])  # noqa: PTH120
+            sys.path[0] = os.path.realpath(dir_path)  # Fix sys.path
+        run_path(sys.argv[0], run_name="__main__")
 
 
 def set_abort_status(status):
@@ -56,15 +63,17 @@ def set_abort_status(status):
     """
     # pylint: disable=import-outside-toplevel
     import sys
+
     if isinstance(status, SystemExit):
         status = status.code
     elif isinstance(status, KeyboardInterrupt):
         from _signal import SIGINT
+
         status = SIGINT + 128
     if not isinstance(status, int):
         status = 0 if status is None else 1
     pkg = __spec__.parent
-    mpi = sys.modules.get(f'{pkg}.MPI')
+    mpi = sys.modules.get(f"{pkg}.MPI")
     if mpi is not None and status:
         # pylint: disable=protected-access
         mpi._set_abort_status(status)
@@ -78,18 +87,22 @@ def main():
     import sys
 
     def prefix():
-        prefix = os.path.dirname(__spec__.origin)
+        import pathlib
+
+        prefix = pathlib.Path(__spec__.origin).parent
         print(prefix, file=sys.stdout)
         sys.exit(0)
 
     def version():
         from . import __version__
+
         package = __spec__.parent
         print(f"{package} {__version__}", file=sys.stdout)
         sys.exit(0)
 
     def mpi_library():
         from . import rc
+
         rc.initialize = rc.finalize = False
         from . import MPI
 
@@ -173,8 +186,8 @@ def main():
             sys.exit(1)
 
     def usage(errmess=None):
-        from textwrap import dedent
-        python = os.path.basename(sys.executable)
+        dedent = __import__("textwrap").dedent
+        python = __import__("pathlib").Path(sys.executable).name
         program = __spec__.name
 
         cmdline = dedent(f"""
@@ -211,8 +224,10 @@ def main():
 
     def mpi_std_version():
         from . import rc
+
         rc.initialize = rc.finalize = False
         from . import MPI
+
         version = ".".join(map(str, (MPI.VERSION, MPI.SUBVERSION)))
         rtversion = ".".join(map(str, MPI.Get_version()))
         note = f" (runtime: MPI {rtversion})" if rtversion != version else ""
@@ -221,8 +236,10 @@ def main():
 
     def mpi_lib_version():
         from . import rc
+
         rc.initialize = rc.finalize = False
         from . import MPI
+
         library_version = MPI.Get_library_version()
         print(library_version, file=sys.stdout)
         sys.exit(0)
@@ -236,59 +253,61 @@ def main():
             rc_args = {}
 
         def poparg(args):
-            if len(args) < 2 or args[1].startswith('-'):
-                usage('Argument expected for option: ' + args[0])
+            if len(args) < 2 or args[1].startswith("-"):
+                usage("Argument expected for option: " + args[0])
             return args.pop(1)
 
         options = Options()
         args = sys.argv[1:] if args is None else args[:]
-        while args and args[0].startswith('-'):
+        while args and args[0].startswith("-"):
             arg0 = args[0]
-            if arg0 in ('-m', '-c', '-'):
+            if arg0 in ("-m", "-c", "-"):
                 break  # Stop processing options
-            if arg0 in ('-h', '-help', '--help'):
+            if arg0 in ("-h", "-help", "--help"):
                 usage()  # Print help and exit
-            if arg0 in ('-prefix', '--prefix'):
+            if arg0 in ("-prefix", "--prefix"):
                 prefix()  # Print install path and exit
-            if arg0 in ('-version', '--version'):
+            if arg0 in ("-version", "--version"):
                 version()  # Print version number and exit
-            if arg0 in ('-mpi-library', '--mpi-library'):
+            if arg0 in ("-mpi-library", "--mpi-library"):
                 mpi_library()  # Print MPI library path and exit
-            if arg0 in ('-mpi-std-version', '--mpi-std-version'):
+            if arg0 in ("-mpi-std-version", "--mpi-std-version"):
                 mpi_std_version()  # Print MPI standard version and exit
-            if arg0 in ('-mpi-lib-version', '--mpi-lib-version'):
+            if arg0 in ("-mpi-lib-version", "--mpi-lib-version"):
                 mpi_lib_version()  # Print MPI library version and exit
-            if arg0.startswith('--'):
-                if '=' in arg0:
-                    opt, _, arg = arg0[1:].partition('=')
-                    if opt in ('-rc',):
+            if arg0.startswith("--"):
+                if "=" in arg0:
+                    opt, _, arg = arg0[1:].partition("=")
+                    if opt == "-rc":
                         arg0, args[1:1] = opt, [arg]
                 else:
                     arg0 = arg0[1:]
-            if arg0 == '-rc':
+            if arg0 == "-rc":
                 from ast import literal_eval
-                for entry in poparg(args).split(','):
-                    key, _, val = entry.partition('=')
+
+                for entry in poparg(args).split(","):
+                    key, _, val = entry.partition("=")
                     if not key or not val:
-                        usage('Cannot parse rc option: ' + entry)
+                        usage("Cannot parse rc option: " + entry)
                     try:
                         val = literal_eval(val)
                     except ValueError:
                         pass
                     options.rc_args[key] = val
             else:
-                usage('Unknown option: ' + args[0])
+                usage("Unknown option: " + args[0])
             del args[0]
         # Check remaining args and return to caller
         if not args:
             usage("No path specified for execution")
-        if args[0] in ('-m', '-c') and len(args) < 2:
+        if args[0] in ("-m", "-c") and len(args) < 2:
             usage("Argument expected for option: " + args[0])
         return options, args
 
     def bootstrap(options):
         if options.rc_args:  # Set mpi4py.rc parameters
             from . import rc
+
             rc(**options.rc_args)
 
     # Parse and process command line options
@@ -310,5 +329,5 @@ def main():
         raise
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

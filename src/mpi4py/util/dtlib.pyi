@@ -1,6 +1,8 @@
 from typing import Any
+
 from numpy import dtype
 from numpy.typing import DTypeLike
+
 from ..MPI import Datatype
 
 # mypy: disable-error-code="no-any-unimported"

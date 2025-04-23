@@ -1,11 +1,13 @@
-from mpi4py import MPI
-import mpiunittest as unittest
 import itertools
+
 import arrayimpl
+import mpiunittest as unittest
+
+from mpi4py import MPI
 
 
 class BaseTestP2PBuf:
-
+    #
     COMM = MPI.COMM_NULL
 
     def testSendrecv(self):
@@ -15,12 +17,13 @@ class BaseTestP2PBuf:
         source = (rank - 1) % size
         for array, typecode in arrayimpl.loop():
             with arrayimpl.test(self):
-                for s in range(0, size+1):
+                for s in range(size + 1):
                     with self.subTest(s=s):
-                        sbuf = array( s, typecode, s)
-                        rbuf = array(-1, typecode, s+1)
-                        self.COMM.Sendrecv(sbuf.as_mpi(), dest,   0,
-                                           rbuf.as_mpi(), source, 0)
+                        sbuf = array(s, typecode, s)
+                        rbuf = array(-1, typecode, s + 1)
+                        self.COMM.Sendrecv(
+                            sbuf.as_mpi(), dest, 0, rbuf.as_mpi(), source, 0
+                        )
                         check = arrayimpl.scalar(s)
                         for value in rbuf[:-1]:
                             self.assertEqual(value, check)
@@ -34,21 +37,30 @@ class BaseTestP2PBuf:
         source = (rank - 1) % size
         try:
             self.COMM.Isendrecv(
-                bytearray(1), dest,   0,
-                bytearray(1), source, 0,
+                bytearray(1),
+                dest,
+                0,
+                bytearray(1),
+                source,
+                0,
             ).Wait()
         except NotImplementedError:
-            if MPI.Get_version() >= (4, 0): raise
-            raise unittest.SkipTest("mpi-isendrecv")
+            if MPI.Get_version() >= (4, 0):
+                raise
+            raise unittest.SkipTest("mpi-isendrecv") from None
         for array, typecode in arrayimpl.loop():
             with arrayimpl.test(self):
-                for s in range(0, size+1):
+                for s in range(size + 1):
                     with self.subTest(s=s):
-                        sbuf = array( s, typecode, s)
-                        rbuf = array(-1, typecode, s+1)
+                        sbuf = array(s, typecode, s)
+                        rbuf = array(-1, typecode, s + 1)
                         self.COMM.Isendrecv(
-                            sbuf.as_mpi(), dest,   0,
-                            rbuf.as_mpi(), source, 0,
+                            sbuf.as_mpi(),
+                            dest,
+                            0,
+                            rbuf.as_mpi(),
+                            source,
+                            0,
                         ).Wait()
                         check = arrayimpl.scalar(s)
                         for value in rbuf[:-1]:
@@ -63,10 +75,12 @@ class BaseTestP2PBuf:
         source = (rank - 1) % size
         for array, typecode in arrayimpl.loop():
             with arrayimpl.test(self):
-                for s in range(0, size+1):
+                for s in range(size + 1):
                     with self.subTest(s=s):
-                        buf = array(rank, typecode, s);
-                        self.COMM.Sendrecv_replace(buf.as_mpi(), dest, 0, source, 0)
+                        buf = array(rank, typecode, s)
+                        self.COMM.Sendrecv_replace(
+                            buf.as_mpi(), dest, 0, source, 0
+                        )
                         check = arrayimpl.scalar(source)
                         for value in buf:
                             self.assertEqual(value, check)
@@ -81,13 +95,14 @@ class BaseTestP2PBuf:
                 bytearray(1), dest, 0, source, 0
             ).Wait()
         except NotImplementedError:
-            if MPI.Get_version() >= (4, 0): raise
-            raise unittest.SkipTest("mpi-isendrecv")
+            if MPI.Get_version() >= (4, 0):
+                raise
+            raise unittest.SkipTest("mpi-isendrecv") from None
         for array, typecode in arrayimpl.loop():
             with arrayimpl.test(self):
-                for s in range(0, size+1):
+                for s in range(size + 1):
                     with self.subTest(s=s):
-                        buf = array(rank, typecode, s);
+                        buf = array(rank, typecode, s)
                         self.COMM.Isendrecv_replace(
                             buf.as_mpi(), dest, 0, source, 0
                         ).Wait()
@@ -100,14 +115,18 @@ class BaseTestP2PBuf:
         rank = self.COMM.Get_rank()
         for array, typecode in arrayimpl.loop():
             with arrayimpl.test(self):
-                if unittest.is_mpi_gpu('openmpi', array): continue
-                if unittest.is_mpi_gpu('mvapich', array): continue
-                for s in range(0, size+1):
+                if unittest.is_mpi_gpu("openmpi", array):
+                    continue
+                if unittest.is_mpi_gpu("mvapich", array):
+                    continue
+                for s in range(size + 1):
                     with self.subTest(s=s):
                         #
-                        sbuf = array( s, typecode, s)
+                        sbuf = array(s, typecode, s)
                         rbuf = array(-1, typecode, s)
-                        mem  = array( 0, typecode, 2*(s+MPI.BSEND_OVERHEAD)).as_raw()
+                        mem = array(
+                            0, typecode, 2 * (s + MPI.BSEND_OVERHEAD)
+                        ).as_raw()
                         if size == 1:
                             MPI.Attach_buffer(mem)
                             rbuf = sbuf
@@ -119,8 +138,8 @@ class BaseTestP2PBuf:
                             MPI.Detach_buffer()
                             self.COMM.Send(sbuf.as_mpi(), 1, 0)
                             self.COMM.Ssend(sbuf.as_mpi(), 1, 0)
-                            self.COMM.Recv(rbuf.as_mpi(),  1, 0)
-                            self.COMM.Recv(rbuf.as_mpi(),  1, 0)
+                            self.COMM.Recv(rbuf.as_mpi(), 1, 0)
+                            self.COMM.Recv(rbuf.as_mpi(), 1, 0)
                             self.COMM.Recv(rbuf.as_mpi(), 1, 0)
                             self.COMM.Recv(rbuf.as_mpi(), 1, 0)
                         elif rank == 1:
@@ -141,7 +160,7 @@ class BaseTestP2PBuf:
                             self.assertEqual(value, check)
                         #
                         rank = self.COMM.Get_rank()
-                        sbuf = array( s, typecode, s)
+                        sbuf = array(s, typecode, s)
                         rbuf = array(-1, typecode, s)
                         rreq = self.COMM.Irecv(rbuf.as_mpi(), rank, 0)
                         self.COMM.Rsend(sbuf.as_mpi(), rank, 0)
@@ -158,14 +177,11 @@ class BaseTestP2PBuf:
     def testProcNull(self):
         comm = self.COMM
         #
-        comm.Sendrecv(None, MPI.PROC_NULL, 0,
-                      None, MPI.PROC_NULL, 0)
-        comm.Sendrecv_replace(None,
-                              MPI.PROC_NULL, 0,
-                              MPI.PROC_NULL, 0)
+        comm.Sendrecv(None, MPI.PROC_NULL, 0, None, MPI.PROC_NULL, 0)
+        comm.Sendrecv_replace(None, MPI.PROC_NULL, 0, MPI.PROC_NULL, 0)
         #
-        comm.Send (None, MPI.PROC_NULL)
-        comm.Isend (None, MPI.PROC_NULL).Wait()
+        comm.Send(None, MPI.PROC_NULL)
+        comm.Isend(None, MPI.PROC_NULL).Wait()
         #
         comm.Ssend(None, MPI.PROC_NULL)
         comm.Issend(None, MPI.PROC_NULL).Wait()
@@ -180,47 +196,64 @@ class BaseTestP2PBuf:
         comm.Rsend(None, MPI.PROC_NULL)
         comm.Irsend(None, MPI.PROC_NULL).Wait()
         #
-        comm.Recv (None, MPI.PROC_NULL)
+        comm.Recv(None, MPI.PROC_NULL)
         comm.Irecv(None, MPI.PROC_NULL).Wait()
 
-    @unittest.skipMPI('mpich(<4.1.0)')
+    @unittest.skipMPI("mpich(<4.1.0)")
     def testProcNullISendrecv(self):
         try:
             self.COMM.Isendrecv(
-                None, MPI.PROC_NULL, 0,
-                None, MPI.PROC_NULL, 0,
+                None,
+                MPI.PROC_NULL,
+                0,
+                None,
+                MPI.PROC_NULL,
+                0,
             ).Wait()
             self.COMM.Isendrecv_replace(
                 None,
-                MPI.PROC_NULL, 0,
-                MPI.PROC_NULL, 0,
+                MPI.PROC_NULL,
+                0,
+                MPI.PROC_NULL,
+                0,
             ).Wait()
         except NotImplementedError:
-            if MPI.Get_version() >= (4, 0): raise
-            raise unittest.SkipTest("mpi-isendrecv")
+            if MPI.Get_version() >= (4, 0):
+                raise
+            raise unittest.SkipTest("mpi-isendrecv") from None
 
-    @unittest.skipMPI('mpich(==3.4.1)')
+    @unittest.skipMPI("mpich(==3.4.1)")
     def testProcNullPersistent(self):
         comm = self.COMM
         #
         req = comm.Send_init(None, MPI.PROC_NULL)
-        req.Start(); req.Wait(); req.Free()
+        req.Start()
+        req.Wait()
+        req.Free()
         #
         req = comm.Ssend_init(None, MPI.PROC_NULL)
-        req.Start(); req.Wait(); req.Free()
+        req.Start()
+        req.Wait()
+        req.Free()
         #
         buf = MPI.Alloc_mem(MPI.BSEND_OVERHEAD)
         MPI.Attach_buffer(buf)
         req = comm.Bsend_init(None, MPI.PROC_NULL)
-        req.Start(); req.Wait(); req.Free()
+        req.Start()
+        req.Wait()
+        req.Free()
         MPI.Detach_buffer()
         MPI.Free_mem(buf)
         #
         req = comm.Rsend_init(None, MPI.PROC_NULL)
-        req.Start(); req.Wait(); req.Free()
+        req.Start()
+        req.Wait()
+        req.Free()
         #
         req = comm.Recv_init(None, MPI.PROC_NULL)
-        req.Start(); req.Wait(); req.Free()
+        req.Start()
+        req.Wait()
+        req.Free()
 
     def testConstructor(self):
         preq = self.COMM.Send_init(b"", MPI.PROC_NULL, 0)
@@ -254,13 +287,15 @@ class BaseTestP2PBuf:
         source = (rank - 1) % size
         for array, typecode in arrayimpl.loop():
             with arrayimpl.test(self):
-                if unittest.is_mpi_gpu('openmpi', array): continue
-                if unittest.is_mpi_gpu('mvapich', array): continue
-                for s, xs in itertools.product(range(size+1), range(3)):
+                if unittest.is_mpi_gpu("openmpi", array):
+                    continue
+                if unittest.is_mpi_gpu("mvapich", array):
+                    continue
+                for s, xs in itertools.product(range(size + 1), range(3)):
                     with self.subTest(s=s, xs=xs):
                         #
-                        sbuf = array( s, typecode, s)
-                        rbuf = array(-1, typecode, s+xs)
+                        sbuf = array(s, typecode, s)
+                        rbuf = array(-1, typecode, s + xs)
                         sendreq = self.COMM.Send_init(sbuf.as_mpi(), dest, 0)
                         recvreq = self.COMM.Recv_init(rbuf.as_mpi(), source, 0)
                         sendreq.Start()
@@ -280,8 +315,8 @@ class BaseTestP2PBuf:
                         for value in rbuf[s:]:
                             self.assertEqual(value, check)
                         #
-                        sbuf = array(s,  typecode, s)
-                        rbuf = array(-1, typecode, s+xs)
+                        sbuf = array(s, typecode, s)
+                        rbuf = array(-1, typecode, s + xs)
                         sendreq = self.COMM.Send_init(sbuf.as_mpi(), dest, 0)
                         recvreq = self.COMM.Recv_init(rbuf.as_mpi(), source, 0)
                         reqlist = [sendreq, recvreq]
@@ -306,8 +341,8 @@ class BaseTestP2PBuf:
                         for value in rbuf[s:]:
                             self.assertEqual(value, check)
                         #
-                        sbuf = array( s, typecode, s)
-                        rbuf = array(-1, typecode, s+xs)
+                        sbuf = array(s, typecode, s)
+                        rbuf = array(-1, typecode, s + xs)
                         sendreq = self.COMM.Ssend_init(sbuf.as_mpi(), dest, 0)
                         recvreq = self.COMM.Recv_init(rbuf.as_mpi(), source, 0)
                         sendreq.Start()
@@ -327,9 +362,11 @@ class BaseTestP2PBuf:
                         for value in rbuf[s:]:
                             self.assertEqual(value, check)
                         #
-                        mem = array( 0, typecode, s+MPI.BSEND_OVERHEAD).as_raw()
-                        sbuf = array( s, typecode, s)
-                        rbuf = array(-1, typecode, s+xs)
+                        mem = array(
+                            0, typecode, s + MPI.BSEND_OVERHEAD
+                        ).as_raw()
+                        sbuf = array(s, typecode, s)
+                        rbuf = array(-1, typecode, s + xs)
                         MPI.Attach_buffer(mem)
                         sendreq = self.COMM.Bsend_init(sbuf.as_mpi(), dest, 0)
                         recvreq = self.COMM.Recv_init(rbuf.as_mpi(), source, 0)
@@ -352,9 +389,9 @@ class BaseTestP2PBuf:
                             self.assertEqual(value, check)
                         #
                         rank = self.COMM.Get_rank()
-                        sbuf = array( s, typecode, s)
-                        rbuf = array(-1, typecode, s+xs)
-                        recvreq = self.COMM.Recv_init (rbuf.as_mpi(), rank, 0)
+                        sbuf = array(s, typecode, s)
+                        rbuf = array(-1, typecode, s + xs)
+                        recvreq = self.COMM.Recv_init(rbuf.as_mpi(), rank, 0)
                         sendreq = self.COMM.Rsend_init(sbuf.as_mpi(), rank, 0)
                         recvreq.Start()
                         sendreq.Start()
@@ -396,7 +433,7 @@ class BaseTestP2PBuf:
         finally:
             comm.Free()
 
-    @unittest.skipMPI('MPICH1')
+    @unittest.skipMPI("MPICH1")
     def testProbeCancel(self):
         comm = self.COMM.Dup()
         try:
@@ -431,31 +468,40 @@ class BaseTestP2PBuf:
             f = comm.Iprobe(MPI.ANY_SOURCE, MPI.ANY_TAG, status)
             self.assertFalse(f)
             self.assertEqual(status.source, MPI.ANY_SOURCE)
-            self.assertEqual(status.tag,    MPI.ANY_TAG)
-            self.assertEqual(status.error,  MPI.SUCCESS)
+            self.assertEqual(status.tag, MPI.ANY_TAG)
+            self.assertEqual(status.error, MPI.SUCCESS)
         finally:
             comm.Free()
 
 
 class TestP2PBufSelf(BaseTestP2PBuf, unittest.TestCase):
+    #
     COMM = MPI.COMM_SELF
 
+
 class TestP2PBufWorld(BaseTestP2PBuf, unittest.TestCase):
+    #
     COMM = MPI.COMM_WORLD
 
+
 class TestP2PBufSelfDup(TestP2PBufSelf):
+    #
     def setUp(self):
         self.COMM = MPI.COMM_SELF.Dup()
+
     def tearDown(self):
         self.COMM.Free()
 
-@unittest.skipMPI('openmpi(<1.4.0)', MPI.Query_thread() > MPI.THREAD_SINGLE)
+
+@unittest.skipMPI("openmpi(<1.4.0)", MPI.Query_thread() > MPI.THREAD_SINGLE)
 class TestP2PBufWorldDup(TestP2PBufWorld):
+    #
     def setUp(self):
         self.COMM = MPI.COMM_WORLD.Dup()
+
     def tearDown(self):
         self.COMM.Free()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -2,18 +2,18 @@
 
 from mpi4py import MPI
 
-def osu_bibw(
-    BENCHMARH = "MPI Bi-Directional Bandwidth Test",
-    skip = 10,
-    loop = 100,
-    window_size = 64,
-    skip_large = 2,
-    loop_large = 20,
-    window_size_large = 64,
-    large_message_size = 8192,
-    MAX_MSG_SIZE = 1<<22,
-    ):
 
+def osu_bibw(
+    BENCHMARH="MPI Bi-Directional Bandwidth Test",
+    skip=10,
+    loop=100,
+    window_size=64,
+    skip_large=2,
+    loop_large=20,
+    window_size_large=64,
+    large_message_size=8192,
+    MAX_MSG_SIZE=1 << 22,
+):
     comm = MPI.COMM_WORLD
     myid = comm.Get_rank()
     numprocs = comm.Get_size()
@@ -29,9 +29,9 @@ def osu_bibw(
     r_buf = allocate(MAX_MSG_SIZE)
 
     if myid == 0:
-        print (f'# {BENCHMARH}')
+        print(f"# {BENCHMARH}")
     if myid == 0:
-        print ('# %-8s%20s' % ("Size [B]", "Bandwidth [MB/s]"))
+        print(f"# {'Size [B]':<8s}{'Latency [us]':>20s}")
 
     message_sizes = [2**i for i in range(30)]
     for size in message_sizes:
@@ -42,7 +42,7 @@ def osu_bibw(
             loop = loop_large
             window_size = window_size_large
 
-        iterations = list(range(loop+skip))
+        iterations = list(range(loop + skip))
         window_sizes = list(range(window_size))
         s_msg = [s_buf, size, MPI.BYTE]
         r_msg = [r_buf, size, MPI.BYTE]
@@ -63,6 +63,8 @@ def osu_bibw(
             t_end = MPI.Wtime()
         elif myid == 1:
             for i in iterations:
+                if i == skip:
+                    pass
                 for j in window_sizes:
                     recv_request[j] = comm.Irecv(r_msg, 0, 100)
                 for j in window_sizes:
@@ -73,21 +75,25 @@ def osu_bibw(
         if myid == 0:
             MB = size / 1e6 * loop * window_size
             s = t_end - t_start
-            print ('%-10d%20.2f' % (size, MB/s))
+            bandwidth = MB / s
+            print(f"{size:-10d}{bandwidth:20.2f}")
 
 
 def allocate(n):
     try:
         import mmap
+
         return mmap.mmap(-1, n)
     except (ImportError, OSError):
         try:
             from numpy import zeros
-            return zeros(n, 'B')
+
+            return zeros(n, "B")
         except ImportError:
             from array import array
-            return array('B', [0]) * n
+
+            return array("B", [0]) * n
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     osu_bibw()

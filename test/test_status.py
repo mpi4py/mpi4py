@@ -1,9 +1,10 @@
-from mpi4py import MPI
 import mpiunittest as unittest
+
+from mpi4py import MPI
 
 
 class TestStatus(unittest.TestCase):
-
+    #
     def setUp(self):
         self.STATUS = MPI.Status()
 
@@ -12,8 +13,8 @@ class TestStatus(unittest.TestCase):
 
     def testDefaultFieldValues(self):
         self.assertEqual(self.STATUS.Get_source(), MPI.ANY_SOURCE)
-        self.assertEqual(self.STATUS.Get_tag(),    MPI.ANY_TAG)
-        self.assertEqual(self.STATUS.Get_error(),  MPI.SUCCESS)
+        self.assertEqual(self.STATUS.Get_tag(), MPI.ANY_TAG)
+        self.assertEqual(self.STATUS.Get_error(), MPI.SUCCESS)
 
     def testGetCount(self):
         count = self.STATUS.Get_count(MPI.BYTE)
@@ -44,14 +45,14 @@ class TestStatus(unittest.TestCase):
 
     def testPyProps(self):
         self.assertEqual(self.STATUS.Get_source(), self.STATUS.source)
-        self.assertEqual(self.STATUS.Get_tag(),    self.STATUS.tag)
-        self.assertEqual(self.STATUS.Get_error(),  self.STATUS.error)
+        self.assertEqual(self.STATUS.Get_tag(), self.STATUS.tag)
+        self.assertEqual(self.STATUS.Get_error(), self.STATUS.error)
         self.STATUS.source = 1
-        self.STATUS.tag    = 2
-        self.STATUS.error  = MPI.ERR_ARG
+        self.STATUS.tag = 2
+        self.STATUS.error = MPI.ERR_ARG
         self.assertEqual(self.STATUS.source, 1)
-        self.assertEqual(self.STATUS.tag,    2)
-        self.assertEqual(self.STATUS.error,  MPI.ERR_ARG)
+        self.assertEqual(self.STATUS.tag, 2)
+        self.assertEqual(self.STATUS.error, MPI.ERR_ARG)
         with self.catchNotImplementedError(2, 0):
             self.assertIs(type(self.STATUS.count), int)
             self.assertEqual(self.STATUS.count, 0)
@@ -71,12 +72,12 @@ class TestStatus(unittest.TestCase):
 
     def testCopyConstructor(self):
         self.STATUS.source = 1
-        self.STATUS.tag    = 2
-        self.STATUS.error  = MPI.ERR_ARG
+        self.STATUS.tag = 2
+        self.STATUS.error = MPI.ERR_ARG
         status = MPI.Status(self.STATUS)
         self.assertEqual(status.source, 1)
-        self.assertEqual(status.tag,    2)
-        self.assertEqual(status.error,  MPI.ERR_ARG)
+        self.assertEqual(status.tag, 2)
+        self.assertEqual(status.error, MPI.ERR_ARG)
         with self.catchNotImplementedError(2, 0):
             self.STATUS.Set_elements(MPI.BYTE, 7)
         with self.catchNotImplementedError(2, 0):
@@ -93,28 +94,29 @@ class TestStatus(unittest.TestCase):
 
     def testPickle(self):
         from pickle import dumps, loads
+
         self.STATUS.source = 1
-        self.STATUS.tag    = 2
-        self.STATUS.error  = MPI.ERR_ARG
+        self.STATUS.tag = 2
+        self.STATUS.error = MPI.ERR_ARG
         status = loads(dumps(self.STATUS))
         self.assertEqual(status.source, 1)
-        self.assertEqual(status.tag,    2)
-        self.assertEqual(status.error,  MPI.ERR_ARG)
+        self.assertEqual(status.tag, 2)
+        self.assertEqual(status.error, MPI.ERR_ARG)
 
     def testToMemory(self):
         status = self.STATUS
         status.source = 11
-        status.tag    = 22
-        status.error  = 33
+        status.tag = 22
+        status.error = 33
         mem = status.tomemory()
         seq = list(mem)
         mem[seq.index(11)] = 111
         mem[seq.index(22)] = 222
         mem[seq.index(33)] = 333
         self.assertEqual(status.source, 111)
-        self.assertEqual(status.tag,    222)
-        self.assertEqual(status.error,  333)
+        self.assertEqual(status.tag, 222)
+        self.assertEqual(status.error, 333)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -6,41 +6,41 @@
 import sys
 from typing import (
     Any,
-    Union,
+    Dict,
+    List,
     Optional,
     Protocol,
     Sequence,
     SupportsIndex,
-    List,
-    Dict,
     Tuple,
     TypeVar,
+    Union,
 )
+
 from .MPI import (
-    Datatype,
     BottomType,
+    Datatype,
     InPlaceType,
 )
 
 __all__ = [
-    'SupportsBuffer',
-    'SupportsDLPack',
-    'SupportsCAI',
-    'Buffer',
-    'Bottom',
-    'InPlace',
-    'Aint',
-    'Count',
-    'Displ',
-    'Offset',
-    'TypeSpec',
-    'BufSpec',
-    'BufSpecB',
-    'BufSpecV',
-    'BufSpecW',
-    'TargetSpec',
+    "SupportsBuffer",
+    "SupportsDLPack",
+    "SupportsCAI",
+    "Buffer",
+    "Bottom",
+    "InPlace",
+    "Aint",
+    "Count",
+    "Displ",
+    "Offset",
+    "TypeSpec",
+    "BufSpec",
+    "BufSpecB",
+    "BufSpecV",
+    "BufSpecW",
+    "TargetSpec",
 ]
-
 
 _Stream = Union[int, Any]
 _PyCapsule = object
@@ -55,6 +55,7 @@ class SupportsBuffer(Protocol):
     """
 
     if sys.version_info >= (3, 12):  # pragma: no branch
+
         def __buffer__(self, flags: int, /) -> memoryview:
             """Create a buffer from a Python object."""
 
@@ -238,7 +239,7 @@ Target specification.
 """
 
 
-S = TypeVar('S')
-T = TypeVar('T')
-U = TypeVar('U')
-V = TypeVar('V')
+S = TypeVar("S")
+T = TypeVar("T")
+U = TypeVar("U")
+V = TypeVar("V")

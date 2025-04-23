@@ -1,5 +1,6 @@
 from mpi4py import MPI
 
+
 class Intracomm(MPI.Intracomm):
     """
     Intracommunicator class with scalable, point-to-point based
@@ -13,7 +14,7 @@ class Intracomm(MPI.Intracomm):
         size = self.size
         rank = self.rank
         assert 0 <= root < size
-        tag = MPI.COMM_WORLD.Get_attr(MPI.TAG_UB)-1
+        tag = MPI.COMM_WORLD.Get_attr(MPI.TAG_UB) - 1
 
         recvobj = sendobj
         mask = 1
@@ -23,7 +24,7 @@ class Intracomm(MPI.Intracomm):
                 target = (rank & ~mask) % size
                 self.send(recvobj, dest=target, tag=tag)
             else:
-                target = (rank | mask)
+                target = rank | mask
                 if target < size:
                     tmp = self.recv(None, source=target, tag=tag)
                     recvobj = op(recvobj, tmp)
@@ -48,7 +49,7 @@ class Intracomm(MPI.Intracomm):
     def scan(self, sendobj=None, recvobj=None, op=MPI.SUM):
         size = self.size
         rank = self.rank
-        tag = MPI.COMM_WORLD.Get_attr(MPI.TAG_UB)-1
+        tag = MPI.COMM_WORLD.Get_attr(MPI.TAG_UB) - 1
 
         recvobj = sendobj
         partial = sendobj
@@ -57,8 +58,13 @@ class Intracomm(MPI.Intracomm):
         while mask < size:
             target = rank ^ mask
             if target < size:
-                tmp = self.sendrecv(partial, dest=target, source=target,
-                                    sendtag=tag, recvtag=tag)
+                tmp = self.sendrecv(
+                    partial,
+                    dest=target,
+                    source=target,
+                    sendtag=tag,
+                    recvtag=tag,
+                )
                 if rank > target:
                     partial = op(tmp, partial)
                     recvobj = op(tmp, recvobj)
@@ -72,7 +78,7 @@ class Intracomm(MPI.Intracomm):
     def exscan(self, sendobj=None, recvobj=None, op=MPI.SUM):
         size = self.size
         rank = self.rank
-        tag = MPI.COMM_WORLD.Get_attr(MPI.TAG_UB)-1
+        tag = MPI.COMM_WORLD.Get_attr(MPI.TAG_UB) - 1
 
         recvobj = sendobj
         partial = sendobj
@@ -82,8 +88,13 @@ class Intracomm(MPI.Intracomm):
         while mask < size:
             target = rank ^ mask
             if target < size:
-                tmp = self.sendrecv(partial, dest=target, source=target,
-                                    sendtag=tag, recvtag=tag)
+                tmp = self.sendrecv(
+                    partial,
+                    dest=target,
+                    source=target,
+                    sendtag=tag,
+                    recvtag=tag,
+                )
                 if rank > target:
                     partial = op(tmp, partial)
                     if rank != 0:

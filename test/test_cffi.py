@@ -1,13 +1,16 @@
-from mpi4py import MPI
 import mpiunittest as unittest
+
+from mpi4py import MPI
+
 try:
     import cffi
 except ImportError:
     cffi = None
 
-@unittest.skipIf(cffi is None, 'cffi')
-class TestCFFI(unittest.TestCase):
 
+@unittest.skipIf(cffi is None, "cffi")
+class TestCFFI(unittest.TestCase):
+    #
     mpitypes = [
         MPI.Datatype,
         MPI.Request,
@@ -50,35 +53,40 @@ class TestCFFI(unittest.TestCase):
     def testHandleAddress(self):
         ffi = cffi.FFI()
         typemap = {
-            ffi.sizeof('int'): 'int',
-            ffi.sizeof('void*'): 'void*',
+            ffi.sizeof("int"): "int",
+            ffi.sizeof("void*"): "void*",
         }
-        typename = lambda t: t.__name__.rsplit('.', 1)[-1]
+
+        def typename(t):
+            return t.__name__.rsplit(".", 1)[-1]
+
         for tp in self.mpitypes:
             handle_t = typemap[MPI._sizeof(tp)]
-            mpi_t = 'MPI_' + typename(tp)
+            mpi_t = "MPI_" + typename(tp)
             ffi.cdef(f"typedef {handle_t} {mpi_t};")
         for obj in self.objects:
             if isinstance(obj, MPI.Comm):
-                mpi_t = 'MPI_Comm'
+                mpi_t = "MPI_Comm"
             else:
-                mpi_t = 'MPI_' + typename(type(obj))
+                mpi_t = "MPI_" + typename(type(obj))
             oldobj = obj
             newobj = type(obj)()
-            handle_old = ffi.cast(mpi_t+'*', MPI._addressof(oldobj))
-            handle_new = ffi.cast(mpi_t+'*', MPI._addressof(newobj))
+            handle_old = ffi.cast(mpi_t + "*", MPI._addressof(oldobj))
+            handle_new = ffi.cast(mpi_t + "*", MPI._addressof(newobj))
             handle_new[0] = handle_old[0]
             self.assertEqual(oldobj, newobj)
 
     def testHandleValue(self):
         ffi = cffi.FFI()
-        typemap = {ffi.sizeof('uint32_t'): 'uint32_t',
-                   ffi.sizeof('uint64_t'): 'uint64_t',}
+        typemap = {
+            ffi.sizeof("uint32_t"): "uint32_t",
+            ffi.sizeof("uint64_t"): "uint64_t",
+        }
         for obj in self.objects:
             uintptr_t = typemap[MPI._sizeof(obj)]
-            handle = ffi.cast(uintptr_t+'*', MPI._addressof(obj))[0]
+            handle = ffi.cast(uintptr_t + "*", MPI._addressof(obj))[0]
             self.assertEqual(handle, MPI._handleof(obj))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

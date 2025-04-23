@@ -1,6 +1,6 @@
-from mpi4py import MPI
 import mpiunittest as unittest
-import sys
+
+from mpi4py import MPI
 
 try:
     import pickle as pyPickle
@@ -24,6 +24,7 @@ except ImportError:
 
 try:
     import yaml
+
     yaml.dump(None)
 except ImportError:
     yaml = None
@@ -33,20 +34,22 @@ OBJS = [
     True,
     False,
     7,
-    1<<32,
-    3.14,
-    1+2j,
-    'qwerty',
+    1 << 32,
+    1.62,
+    1 + 2j,
+    "qwerty",
     (0, 1, 2),
     [0, 1, 2],
-    {'a':0, 'b':1},
+    {"a": 0, "b": 1},
 ]
+
 
 def tobytes(s):
     return memoryview(s).tobytes()
 
-class TestPickle(unittest.TestCase):
 
+class TestPickle(unittest.TestCase):
+    #
     def setUp(self):
         self.pickle = MPI.pickle
 
@@ -64,8 +67,7 @@ class TestPickle(unittest.TestCase):
     def testDefault(self):
         pickle = self.pickle
         protocols = [0, 1, 2, 3, 4, 5]
-        protocols.append(-1)
-        protocols.append(None)
+        protocols.extend((-1, None))
         for proto in protocols:
             pickle.__init__(protocol=proto)
             for obj in OBJS:
@@ -77,29 +79,27 @@ class TestPickle(unittest.TestCase):
         dumps = pyPickle.dumps
         loads = pyPickle.loads
         protocols = [0, 1, 2, 3, 4, 5]
-        protocols.append(-1)
-        protocols.append(None)
+        protocols.extend((-1, None))
         for proto in protocols:
             pickle.__init__(dumps, loads, proto)
             for obj in OBJS:
                 self.do_pickle(obj, pickle)
             self.do_pickle(OBJS, pickle)
 
-    @unittest.skipIf(dill is None, 'dill')
+    @unittest.skipIf(dill is None, "dill")
     def testDill(self):
         pickle = self.pickle
         dumps = dill.dumps
         loads = dill.loads
-        protocols = list(range(dill.HIGHEST_PROTOCOL+1))
-        protocols.append(-1)
-        protocols.append(None)
+        protocols = list(range(dill.HIGHEST_PROTOCOL + 1))
+        protocols.extend((-1, None))
         for proto in protocols:
             pickle.__init__(dumps, loads, proto)
             for obj in OBJS:
                 self.do_pickle(obj, pickle)
             self.do_pickle(OBJS, pickle)
 
-    @unittest.skipIf(marshal is None, 'marshal')
+    @unittest.skipIf(marshal is None, "marshal")
     def testMarshal(self):
         pickle = self.pickle
         dumps = marshal.dumps
@@ -112,34 +112,38 @@ class TestPickle(unittest.TestCase):
                 self.do_pickle(obj, pickle)
             self.do_pickle(OBJS, pickle)
 
-    @unittest.skipIf(json is None, 'json')
+    @unittest.skipIf(json is None, "json")
     def testJson(self):
         pickle = self.pickle
-        dumps = lambda o: json.dumps(o).encode()
-        loads = lambda s: json.loads(tobytes(s).decode())
+
+        def dumps(o):
+            return json.dumps(o).encode()
+
+        def loads(s):
+            return json.loads(tobytes(s).decode())
+
         pickle.__init__(dumps, loads)
-        OBJS2 = [
-            o for o in OBJS
-            if not isinstance(o, (float, complex, tuple))
-        ]
+        OBJS2 = [o for o in OBJS if not isinstance(o, (float, complex, tuple))]
         for obj in OBJS2:
             self.do_pickle(obj, pickle)
         self.do_pickle(OBJS2, pickle)
 
-    @unittest.skipIf(yaml is None, 'yaml')
+    @unittest.skipIf(yaml is None, "yaml")
     def testYAML(self):
         pickle = self.pickle
-        dumps = lambda o: yaml.dump(o).encode()
-        loads = lambda s: yaml.load(tobytes(s).decode(), Loader=yaml.Loader)
+
+        def dumps(o):
+            return yaml.dump(o).encode()
+
+        def loads(s):
+            return yaml.load(tobytes(s).decode(), Loader=yaml.Loader)
+
         pickle.__init__(dumps, loads)
-        OBJS2 = [
-            o for o in OBJS
-            if not isinstance(o, (complex, tuple))
-        ]
+        OBJS2 = [o for o in OBJS if not isinstance(o, (complex, tuple))]
         for obj in OBJS2:
             self.do_pickle(obj, pickle)
         self.do_pickle(OBJS2, pickle)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
