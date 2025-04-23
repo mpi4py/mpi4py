@@ -17,7 +17,7 @@ import re
 import sys
 import typing
 
-sys.path.insert(0, str(pathlib.Path.cwd()))
+sys.path.insert(0, os.fspath(pathlib.Path.cwd()))
 _today = datetime.datetime.now()
 
 

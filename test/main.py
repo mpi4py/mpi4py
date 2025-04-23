@@ -223,19 +223,19 @@ def setup_python(options):
     testdir = script.parent
     rootdir = testdir.parent
     if options.inplace:
-        srcdir = str(rootdir / "src")
-        sys.path.insert(0, srcdir)
+        srcdir = rootdir / "src"
+        sys.path.insert(0, os.fspath(srcdir))
     elif options.builddir:
         builddir = getbuilddir()
         if builddir is not None:
             builddir = rootdir / builddir
             if builddir.is_dir():
-                sys.path.insert(0, str(builddir))
+                sys.path.insert(0, os.fspath(builddir))
     if options.path:
         for path in reversed(options.path):
             for pth in map(pathlib.Path, path.split(os.path.pathsep)):
                 if pth.exists():
-                    sys.path.insert(0, str(pth))
+                    sys.path.insert(0, os.fspath(pth))
 
 
 def setup_modules(options):
@@ -349,12 +349,12 @@ class TestProgram(unittest.TestProgram):
         setup_python(self)
         setup_modules(self)
         setup_unittest(self)
-        testdir = pathlib.Path(__file__).parent
+        testdir = os.fspath(pathlib.Path(__file__).parent)
         if from_discovery:
-            self.start = str(testdir)
+            self.start = testdir
             self.pattern = "test_*.py"
         elif testdir not in sys.path:
-            sys.path.insert(0, testdir)
+            sys.path.insert(0, os.fspath(testdir))
         if not self.skip_mpi:
             mpiunittest = __import__("mpiunittest")
             mpiunittest.skipMPI = lambda _p, *_c: lambda f: f

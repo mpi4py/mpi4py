@@ -1,6 +1,7 @@
 import concurrent.futures as cf
 import functools
 import itertools
+import os
 import pathlib
 import sys
 import time
@@ -13,7 +14,7 @@ from mpi4py import MPI
 try:
     import mpitestutil as testutil
 except ImportError:
-    sys.path.append(pathlib.Path(__file__).parent)
+    sys.path.append(os.fspath(pathlib.Path(__file__).parent))
     import mpitestutil as testutil
 
 

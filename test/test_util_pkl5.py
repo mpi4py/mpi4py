@@ -1,3 +1,4 @@
+import os
 import pathlib
 import sys
 
@@ -7,7 +8,7 @@ from mpi4py.util import pkl5
 try:
     import mpiunittest as unittest
 except ImportError:
-    sys.path.append(pathlib.Path(__file__).parent)
+    sys.path.append(os.fspath(pathlib.Path(__file__).parent))
     import mpiunittest as unittest
 
 _basic = [

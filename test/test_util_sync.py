@@ -1,3 +1,4 @@
+import os
 import pathlib
 import random
 import sys
@@ -9,7 +10,7 @@ from mpi4py import MPI
 try:
     import mpiunittest as unittest
 except ImportError:
-    sys.path.append(pathlib.Path(__file__).parent)
+    sys.path.append(os.fspath(pathlib.Path(__file__).parent))
     import mpiunittest as unittest
 
 # ---

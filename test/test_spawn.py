@@ -18,12 +18,13 @@ def childscript():
     fd, script = tempfile.mkstemp(suffix=".py", prefix="mpi4py-")
     os.close(fd)
     script = pathlib.Path(script)
-    python = sys.executable
-    pypath = MPI4PYPATH
+    python = os.fspath(sys.executable)
+    pypath = os.fspath(MPI4PYPATH)
     script.write_text(
         textwrap.dedent(f"""\
         #!{python}
-        import sys; sys.path.insert(0, "{pypath}")
+        import sys
+        sys.path.insert(0, "{pypath}")
         from mpi4py import MPI
         parent = MPI.Comm.Get_parent()
         parent.Barrier()
@@ -42,7 +43,7 @@ class BaseTestSpawn:
     #
     COMM = MPI.COMM_NULL
     COMMAND = sys.executable
-    ARGS = [str(CHILDSCRIPT), str(MPI4PYPATH)]
+    ARGS = [os.fspath(CHILDSCRIPT), os.fspath(MPI4PYPATH)]
     MAXPROCS = 1
     INFO = MPI.INFO_NULL
     ROOT = 0

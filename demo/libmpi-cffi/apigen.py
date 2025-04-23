@@ -1,11 +1,13 @@
+import os
 import pathlib
 import sys
 
 wrkdir = pathlib.Path(__file__).parent
 topdir = wrkdir.parent.parent
 srcdir = topdir / "src"
+cfgdir = topdir / "conf"
 
-sys.path.insert(0, str(topdir / "conf"))
+sys.path.insert(0, os.fspath(cfgdir))
 from mpiapigen import Generator  # noqa: E402
 
 generator = Generator()

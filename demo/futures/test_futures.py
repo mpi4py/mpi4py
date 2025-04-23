@@ -1,6 +1,5 @@
 import functools
 import os
-import pathlib
 import random
 import sys
 import threading
@@ -14,8 +13,9 @@ from concurrent.futures._base import (
     PENDING,
     RUNNING,
 )
+from pathlib import Path
 
-sys.path.append(str(pathlib.Path(__file__).parent.parent.parent / "test"))
+sys.path.append(os.fspath(Path(__file__).parent.parent.parent / "test"))
 import mpitestutil as testutil
 
 from mpi4py import MPI, futures
@@ -191,7 +191,7 @@ class ProcessPoolInitTest(ProcessPoolMixin, unittest.TestCase):
             globals=None,
             main=False,
             path=[],
-            wdir=pathlib.Path.cwd(),
+            wdir=Path.cwd(),
             env={},
             use_pkl5=None,
             backoff=0.001,
