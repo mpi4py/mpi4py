@@ -96,6 +96,9 @@ cdef inline object asarray_Info(
 cdef inline int is_string(object obj):
     return isinstance(obj, str) or isinstance(obj, bytes)
 
+cdef inline int is_fspath(object obj):
+    return hasattr(obj, "__fspath__")
+
 cdef inline object asstring(object ob, char *s[]):
     cdef Py_ssize_t n = 0
     cdef char *p = NULL, *q = NULL
@@ -107,12 +110,33 @@ cdef inline object asstring(object ob, char *s[]):
     s[0] = q
     return mem
 
-cdef inline object asarray_str(object sequence, char ***p):
+cdef inline object asfspath(object ob, char *s[]):
+    cdef Py_ssize_t n = 0
+    cdef char *p = NULL, *q = NULL
+    ob = asmpifspath(ob, &p)
+    PyBytes_AsStringAndSize(ob, &p, &n)
+    cdef object mem = allocate(n+1, sizeof(char), &q)
+    <void>memcpy(q, p, <size_t>n)
+    q[n] = 0
+    s[0] = q
+    return mem
+
+cdef inline object asarray_string(object sequence, char ***p):
     cdef char** array = NULL
     cdef Py_ssize_t size = len(sequence)
     cdef object ob = allocate(size+1, sizeof(char*), &array)
     for i in range(size):
         sequence[i] = asstring(sequence[i], &array[i])
+    array[size] = NULL
+    p[0] = array
+    return (sequence, ob)
+
+cdef inline object asarray_fspath(object sequence, char ***p):
+    cdef char** array = NULL
+    cdef Py_ssize_t size = len(sequence)
+    cdef object ob = allocate(size+1, sizeof(char*), &array)
+    for i in range(size):
+        sequence[i] = asfspath(sequence[i], &array[i])
     array[size] = NULL
     p[0] = array
     return (sequence, ob)
@@ -125,14 +149,14 @@ cdef inline object asarray_argv(object sequence, char ***p):
         sequence = [sequence]
     else:
         sequence = list(sequence)
-    return asarray_str(sequence, p)
+    return asarray_string(sequence, p)
 
 cdef inline object asarray_cmds(object sequence, int *count, char ***p):
-    if is_string(sequence):
-        raise ValueError("expecting a sequence of strings")
+    if is_string(sequence) or is_fspath(sequence):
+        raise ValueError("expecting a sequence of path-like")
     sequence = list(sequence)
     count[0] = <int>len(sequence)
-    return asarray_str(sequence, p)
+    return asarray_fspath(sequence, p)
 
 cdef inline object asarray_argvs(object sequence, int size, char ****p):
     if sequence is None:
