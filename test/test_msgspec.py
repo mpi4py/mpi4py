@@ -92,6 +92,7 @@ class DLPackCPUBufV0(DLPackCPUBuf):
 
 
 if cupy is not None:
+    cupy_version = tuple(map(int, cupy.__version__.split(".", 2)[:2]))
 
     class DLPackGPUBuf(BaseDLPackBuf):
 
@@ -113,7 +114,7 @@ if cupy is not None:
             else:
                 return (self.dev_type, self._buf.device.id)
 
-        if False:  # TODO: wait until CuPy supports DLPack v1.0
+        if cupy_version >= (13, 4):
 
             def __dlpack__(self, stream=None, **kwargs):
                 assert self.has_dlpack
