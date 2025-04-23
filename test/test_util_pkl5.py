@@ -633,6 +633,8 @@ class BaseTest:
         self.assertFalse(req)
         self.assertEqual(req, MPI.REQUEST_NULL)
         self.assertEqual(req, self.RequestType())
+        self.assertIs(req.__eq__("123"), NotImplemented)
+        self.assertIs(req.__ne__("123"), NotImplemented)
 
     def testMessage(self):
         msg = self.MessageType()
@@ -646,6 +648,8 @@ class BaseTest:
         self.assertEqual(msg, MPI.MESSAGE_NO_PROC)
         self.assertEqual(msg, self.MessageType(MPI.MESSAGE_NO_PROC))
         self.assertNotEqual(msg, MPI.MESSAGE_NULL)
+        self.assertIs(msg.__eq__("123"), NotImplemented)
+        self.assertIs(msg.__ne__("123"), NotImplemented)
 
     @staticmethod
     def make_intercomm(basecomm):
