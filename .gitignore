@@ -4,6 +4,8 @@
 /MANIFEST
 /.tox/**
 **/__pycache__/
+/.coverage
+/.coverage.*.*.*
 
 /docs/*.html
 /docs/*.pdf
