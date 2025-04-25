@@ -4,6 +4,7 @@ name = 'mpi4py'
 [tool.spin.commands]
 "Build" = [
   ".spin/cmds.py:build",
+  ".spin/cmds.py:check",
   ".spin/cmds.py:test",
   ".spin/cmds.py:sdist",
   ".spin/cmds.py:wheel",

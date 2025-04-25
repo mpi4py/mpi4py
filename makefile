@@ -12,6 +12,10 @@ config:
 	$(PYTHON) setup.py config $(opt)
 build:
 	$(PYTHON) setup.py build $(opt)
+check:
+	$(PYTHON) -m mpi4py --prefix
+	$(PYTHON) -m mpi4py --mpi-library
+	$(MPIEXEC) -n 2 $(PYTHON) -m mpi4py.bench ringtest
 test:
 	$(VALGRIND) $(PYTHON) $(PWD)/test/main.py $(opt)
 test-%:

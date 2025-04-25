@@ -28,6 +28,19 @@ def build(clean, force, quiet):
 
 
 @click.command()
+@click.option("-n", default=2, help="Number of MPI processes")
+@click.option("-s", "--singleton", is_flag=True, help="Singleton mode.")
+@click.pass_context
+def check(ctx, n, singleton):
+    """🔧 Check in-place."""
+    ctx.invoke(build, quiet=True)
+    launcher = [] if singleton else [*MPIEXEC, "-n", f"{n}"]
+    run([*PYTHON, "-m", "mpi4py", "--prefix"])
+    run([*PYTHON, "-m", "mpi4py", "--mpi-library"])
+    run([*launcher, *PYTHON, "-m", "mpi4py.bench", "ringtest"])
+
+
+@click.command()
 @click.option("-n", default=1, help="Number of MPI processes")
 @click.option("-s", "--singleton", is_flag=True, help="Singleton mode.")
 @click.argument("test_args", nargs=-1)
