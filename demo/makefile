@@ -27,6 +27,7 @@ wrap:
 	$(MAKE) -C wrap-ctypes
 	$(MAKE) -C wrap-cython
 	$(MAKE) -C wrap-swig
+	$(MAKE) -C wrap-nanobind
 	$(MAKE) -C wrap-pybind11
 	$(MAKE) -C wrap-f2py
 	$(MAKE) -C wrap-ctypes-f90
