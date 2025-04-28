@@ -120,6 +120,27 @@ jobs:
     - name: Test wheel after install (helloworld)
       run:  mpiexec -n 2 python -m mpi4py.bench helloworld
 
+    - name: Test wheel after install (ringtest)
+      run:  mpiexec -n 3 python -m mpi4py.bench ringtest
+
+    - name: Test wheel after install (I_MPI_LIBRARY_KIND=debug)
+      if:   matrix.mpi == 'impi' && runner.os == 'Windows'
+      run:  |
+        mpiexec -n 1 python -m mpi4py --mpi-library
+        mpiexec -n 2 python -m mpi4py.bench helloworld
+        mpiexec -n 3 python -m mpi4py.bench ringtest
+      env:
+        I_MPI_LIBRARY_KIND: debug
+
+    - name: Test wheel after install (I_MPI_LIBRARY_KIND=release)
+      if:   matrix.mpi == 'impi' && runner.os == 'Windows'
+      run:  |
+        mpiexec -n 1 python -m mpi4py --mpi-library
+        mpiexec -n 2 python -m mpi4py.bench helloworld
+        mpiexec -n 3 python -m mpi4py.bench ringtest
+      env:
+        I_MPI_LIBRARY_KIND: release
+
     - name: Uninstall wheel after testing
       run:  python -m pip uninstall mpi4py
               --verbose --yes

@@ -33,14 +33,15 @@ def _site_prefixes():
 
 def _mpi_dll_directories():
     impi_root = os.environ.get("I_MPI_ROOT")
-    impi_library_kind = (
-        os.environ.get("I_MPI_LIBRARY_KIND")
-        or os.environ.get("library_kind")
-        or "release"
-    )
+    impi_library_kind = os.environ.get("I_MPI_LIBRARY_KIND") or "release"
     impi_ofi_library_internal = os.environ.get(
         "I_MPI_OFI_LIBRARY_INTERNAL", ""
-    ).lower() not in ("0", "no", "off", "false", "disable")
+    ).lower() in ("", "1", "yes", "on", "true", "enable")
+    impi_library_path = (
+        ("bin", "mpi", impi_library_kind),
+        ("bin", impi_library_kind),
+        ("bin",),
+    )
     impi_ofi_library_path = (
         ("opt", "mpi", "libfabric", "bin"),
         ("libfabric", "bin"),
@@ -61,13 +62,17 @@ def _mpi_dll_directories():
             filename = os.path.join(dlldir, f"{dll}.dll")
             if os.path.isfile(filename):
                 dlldirs.append(dlldir)
+                return True
+        return False
 
     def add_dlldir_impi(*rootdir):
-        add_dlldir(*rootdir, "bin", impi_library_kind, dll="impi")
-        add_dlldir(*rootdir, "bin", dll="impi")
+        for subdir in impi_library_path:
+            if add_dlldir(*rootdir, *subdir, dll="impi"):
+                break
         if impi_ofi_library_internal:
             for subdir in impi_ofi_library_path:
-                add_dlldir(*rootdir, *subdir, dll="libfabric")
+                if add_dlldir(*rootdir, *subdir, dll="libfabric"):
+                    break
 
     def add_dlldir_msmpi(*bindir):
         add_dlldir(*bindir, dll="msmpi")
