@@ -142,9 +142,9 @@ only) thread until they are signaled for completion.
      albeit at the expense of spinning CPU cores and increased energy
      consumption.
 
-   .. method:: submit(func, *args, **kwargs)
+   .. method:: submit(fn, /, *args, **kwargs)
 
-      Schedule the callable, *func*, to be executed as ``func(*args,
+      Schedule the callable *fn* to be executed as ``fn(*args,
       **kwargs)`` and returns a :class:`~concurrent.futures.Future` object
       representing the execution of the callable. ::
 
@@ -152,43 +152,63 @@ only) thread until they are signaled for completion.
          future = executor.submit(pow, 321, 1234)
          print(future.result())
 
-   .. method:: map(func, *iterables, timeout=None, chunksize=1, **kwargs)
+   .. method:: map(fn, *iterables, \
+                   timeout=None, chunksize=1, buffersize=None, **kwargs)
 
-      Equivalent to :func:`map(func, *iterables) <python:map>` except *func* is
-      executed asynchronously and several calls to *func* may be made
-      concurrently, out-of-order, in separate processes.  The returned iterator
-      raises a :exc:`~concurrent.futures.TimeoutError` if
+      Similar to :func:`map(fn, *iterables) <python:map>` except:
+
+      * The *iterables* are consumed immediately rather than lazily, unless
+        *buffersize* is specified to limit the number of submitted tasks whose
+        results have not yet been yielded. If the task buffer is full, the
+        caller blocks and iteration over the *iterables* pauses until a result
+        is yielded from the buffer.
+
+      * *fn* is executed asynchronously and several calls to
+        *fn* may be made concurrently, out-of-order, in separate processes.
+
+      The returned iterator raises a :exc:`~concurrent.futures.TimeoutError` if
       :meth:`~iterator.__next__` is called and the result isn't available after
       *timeout* seconds from the original call to :meth:`~MPIPoolExecutor.map`.
       *timeout* can be an int or a float.  If *timeout* is not specified or
-      `None`, there is no limit to the wait time.  If a call raises an
-      exception, then that exception will be raised when its value is retrieved
-      from the iterator. This method chops *iterables* into a number of chunks
-      which it submits to the pool as separate tasks. The (approximate) size of
-      these chunks can be specified by setting *chunksize* to a positive
-      integer. For very long iterables, using a large value for *chunksize* can
-      significantly improve performance compared to the default size of one. By
-      default, the returned iterator yields results in-order, waiting for
+      `None`, there is no limit to the wait time.
+
+      If *fn* raises an exception, then that exception will be raised when
+      its value is retrieved from the iterator.
+
+      This method chops *iterables* into a number of chunks which it submits to
+      the pool as separate tasks. The (approximate) size of these chunks can be
+      specified by setting *chunksize* to a positive integer. For very long
+      iterables, using a large value for *chunksize* can significantly improve
+      performance compared to the default size of one.
+
+      By default, the returned iterator yields results in-order, waiting for
       successive tasks to complete . This behavior can be changed by passing
-      the keyword argument *unordered* as `True`, then the result iterator
-      will yield a result as soon as any of the tasks complete. ::
+      the keyword argument *unordered* as `True`, then the result iterator will
+      yield a result as soon as any of the tasks complete. ::
 
          executor = MPIPoolExecutor(max_workers=3)
-         for result in executor.map(pow, [2]*32, range(32)):
+         for result in executor.map(pow, [2] * 32, range(32)):
              print(result)
 
-   .. method:: starmap(func, iterable, timeout=None, chunksize=1, **kwargs)
+      .. versionchanged:: 4.1.0
+         Added the *buffersize* parameter.
 
-      Equivalent to :func:`itertools.starmap(func, iterable)
+   .. method:: starmap(fn, iterable, \
+                       timeout=None, chunksize=1, buffersize=None, **kwargs)
+
+      Similar to :func:`itertools.starmap(fn, iterable)
       <itertools.starmap>`. Used instead of :meth:`~MPIPoolExecutor.map` when
       argument parameters are already grouped in tuples from a single iterable
-      (the data has been "pre-zipped"). :func:`map(func, *iterable) <map>` is
-      equivalent to :func:`starmap(func, zip(*iterable)) <starmap>`. ::
+      (the data has been "pre-zipped"). :func:`map(fn, *iterable) <map>` is
+      equivalent to :func:`starmap(fn, zip(*iterable)) <starmap>`. ::
 
          executor = MPIPoolExecutor(max_workers=3)
          iterable = ((2, n) for n in range(32))
          for result in executor.starmap(pow, iterable):
              print(result)
+
+      .. versionchanged:: 4.1.0
+         Added the *buffersize* parameter.
 
    .. method:: shutdown(wait=True, cancel_futures=False)
 

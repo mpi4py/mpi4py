@@ -35,6 +35,10 @@ Release 4.1.0 [YYYY-MM-DD]
     implementation used at compile time. Only available on Linux,
     macOS, and Windows.
 
+  + Support a ``buffersize`` parameter in the `MPIPoolExecutor.map()`
+    and `MPIPoolExecutor.starmap()` methods to limit the number of
+    pending tasks.
+
   + Improve ownership management of DLPack capsules.
 
   + Reimplement MPI DLL search path on Windows.

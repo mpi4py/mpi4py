@@ -62,6 +62,7 @@ class MPIPoolExecutor(Executor):
         *iterables: Iterable[Any],
         timeout: float | None = None,
         chunksize: int = 1,
+        buffersize: int | None = None,
         unordered: bool = False,
     ) -> Iterator[T]: ...
     def starmap(
@@ -70,6 +71,7 @@ class MPIPoolExecutor(Executor):
         iterable: Iterable[Any],
         timeout: float | None = None,
         chunksize: int = 1,
+        buffersize: int | None = None,
         unordered: bool = False,
     ) -> Iterator[T]: ...
     def shutdown(

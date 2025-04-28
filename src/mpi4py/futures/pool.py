@@ -2,11 +2,13 @@
 # Contact: dalcinl@gmail.com
 """Implements MPIPoolExecutor."""
 
+import collections
 import functools
 import itertools
 import sys
 import threading
 import time
+import weakref
 
 from . import _core
 from ._base import Executor, Future, as_completed
@@ -119,7 +121,15 @@ class MPIPoolExecutor(Executor):
             self._pool.push((future, task))
             return future
 
-    def map(self, fn, *iterables, timeout=None, chunksize=1, unordered=False):
+    def map(
+        self,
+        fn,
+        *iterables,
+        timeout=None,
+        chunksize=1,
+        buffersize=None,
+        unordered=False,
+    ):
         """Return an iterator equivalent to ``map(fn, *iterables)``.
 
         Args:
@@ -131,6 +141,8 @@ class MPIPoolExecutor(Executor):
                 there is no limit on the wait time.
             chunksize: The size of the chunks the iterable will be broken into
                 before being passed to a worker process.
+            buffersize: If not ``None``, limit the number of submitted
+                tasks whose results have not yet been yielded.
             unordered: If ``True``, yield results out-of-order, as completed.
 
         Returns:
@@ -143,10 +155,19 @@ class MPIPoolExecutor(Executor):
             Exception: If ``fn(*args)`` raises for any values.
 
         """
-        return self.starmap(fn, zip(*iterables), timeout, chunksize, unordered)
+        # pylint: disable=too-many-arguments
+        return self.starmap(
+            fn, zip(*iterables), timeout, chunksize, buffersize, unordered
+        )
 
     def starmap(
-        self, fn, iterable, timeout=None, chunksize=1, unordered=False
+        self,
+        fn,
+        iterable,
+        timeout=None,
+        chunksize=1,
+        buffersize=None,
+        unordered=False,
     ):
         """Return an iterator equivalent to ``itertools.starmap(...)``.
 
@@ -158,6 +179,8 @@ class MPIPoolExecutor(Executor):
                 there is no limit on the wait time.
             chunksize: The size of the chunks the iterable will be broken into
                 before being passed to a worker process.
+            buffersize: If not ``None``, limit the number of submitted
+                tasks whose results have not yet been yielded.
             unordered: If ``True``, yield results out-of-order, as completed.
 
         Returns:
@@ -173,13 +196,31 @@ class MPIPoolExecutor(Executor):
         # pylint: disable=too-many-arguments,too-many-positional-arguments
         if chunksize < 1:
             raise ValueError("chunksize must be >= 1.")
+        if buffersize is not None:
+            if not isinstance(buffersize, int):
+                raise TypeError("buffersize must be an integer or None")
+            if buffersize < 1:
+                raise ValueError("buffersize must be None or > 0")
+            if unordered:
+                raise ValueError("buffersize must be None if unordered")
         if chunksize == 1:
             return _starmap_helper(
-                self.submit, fn, iterable, timeout, unordered
+                self,
+                fn,
+                iterable,
+                timeout,
+                buffersize,
+                unordered,
             )
         else:
             return _starmap_chunks(
-                self.submit, fn, iterable, timeout, unordered, chunksize
+                self,
+                fn,
+                iterable,
+                timeout,
+                chunksize,
+                buffersize,
+                unordered,
             )
 
     def shutdown(self, wait=True, *, cancel_futures=False):
@@ -213,15 +254,30 @@ class MPIPoolExecutor(Executor):
             pool.join()
 
 
-def _starmap_helper(submit, function, iterable, timeout, unordered):
+def _starmap_helper(
+    executor, function, iterable, timeout, buffersize, unordered
+):
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
     timer = time.monotonic
     end_time = sys.float_info.max
     if timeout is not None:
         end_time = timeout + timer()
 
-    futures = [submit(function, *args) for args in iterable]
-    if unordered:
-        futures = set(futures)
+    if buffersize is not None:
+        futures = collections.deque(
+            executor.submit(function, *args)
+            for args in itertools.islice(iterable, buffersize)
+        )
+        unordered = False
+    else:
+        futures = collections.deque(
+            executor.submit(function, *args) for args in iterable
+        )
+        if unordered:
+            futures = set(futures)
+
+    executor_weakref = weakref.ref(executor)
+    del executor
 
     def result(future, timeout=None):
         try:
@@ -245,12 +301,17 @@ def _starmap_helper(submit, function, iterable, timeout, unordered):
                     yield result(future.pop())
             else:
                 futures.reverse()
-                if timeout is None:
-                    while futures:
+                while futures:
+                    if timeout is None:
                         yield result(futures.pop())
-                else:
-                    while futures:
+                    else:
                         yield result(futures.pop(), end_time - timer())
+                    if (
+                        buffersize is not None
+                        and (executor := executor_weakref())
+                        and (args := next(iterable, None))
+                    ):
+                        futures.appendleft(executor.submit(function, *args))
         finally:
             while futures:
                 futures.pop().cancel()
@@ -262,7 +323,7 @@ def _apply_chunks(function, chunk):
     return list(itertools.starmap(function, chunk))
 
 
-def _build_chunks(chunksize, iterable):
+def _build_chunks(iterable, chunksize):
     iterable = iter(iterable)
     while True:
         chunk = tuple(itertools.islice(iterable, chunksize))
@@ -278,11 +339,15 @@ def _chain_from_iterable_of_lists(iterable):
             yield item.pop()
 
 
-def _starmap_chunks(submit, function, iterable, timeout, unordered, chunksize):
+def _starmap_chunks(
+    executor, function, iterable, timeout, chunksize, buffersize, unordered
+):
     # pylint: disable=too-many-arguments,too-many-positional-arguments
     function = functools.partial(_apply_chunks, function)
-    iterable = _build_chunks(chunksize, iterable)
-    result = _starmap_helper(submit, function, iterable, timeout, unordered)
+    iterable = _build_chunks(iterable, chunksize)
+    result = _starmap_helper(
+        executor, function, iterable, timeout, buffersize, unordered
+    )
     return _chain_from_iterable_of_lists(result)
 
 
