@@ -349,7 +349,7 @@ class TestProgram(unittest.TestProgram):
         setup_python(self)
         setup_modules(self)
         setup_unittest(self)
-        testdir = os.fspath(pathlib.Path(__file__).parent)
+        testdir = os.fspath(pathlib.Path(__file__).resolve().parent)
         if from_discovery:
             self.start = testdir
             self.pattern = "test_*.py"

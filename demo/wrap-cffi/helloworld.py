@@ -4,7 +4,7 @@ import cffi
 
 from mpi4py import MPI
 
-_libdir = pathlib.Path(__file__).parent
+_libdir = pathlib.Path(__file__).resolve().parent
 
 ffi = cffi.FFI()
 if MPI._sizeof(MPI.Comm) == ffi.sizeof("int"):

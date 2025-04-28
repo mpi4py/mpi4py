@@ -2,7 +2,7 @@ import os
 import pathlib
 import sys
 
-wrkdir = pathlib.Path(__file__).parent
+wrkdir = pathlib.Path(__file__).resolve().parent
 topdir = wrkdir.parent.parent
 srcdir = topdir / "src"
 cfgdir = topdir / "conf"

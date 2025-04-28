@@ -15,7 +15,9 @@ from concurrent.futures._base import (
 )
 from pathlib import Path
 
-sys.path.append(os.fspath(Path(__file__).parent.parent.parent / "test"))
+sys.path.append(
+    os.fspath(Path(__file__).resolve().parent.parent.parent / "test")
+)
 import mpitestutil as testutil
 
 from mpi4py import MPI, futures

@@ -536,7 +536,7 @@ def generate(filename):
             print(line, file=f)
 
 
-TOPDIR = pathlib.Path(__file__).parent.parent
+TOPDIR = pathlib.Path(__file__).resolve().parent.parent
 OUTDIR = TOPDIR / "src" / "mpi4py"
 
 if __name__ == "__main__":

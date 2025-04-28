@@ -8,7 +8,7 @@ from mpi4py.util import pkl5
 try:
     import mpiunittest as unittest
 except ImportError:
-    sys.path.append(os.fspath(pathlib.Path(__file__).parent))
+    sys.path.append(os.fspath(pathlib.Path(__file__).resolve().parent))
     import mpiunittest as unittest
 
 _basic = [

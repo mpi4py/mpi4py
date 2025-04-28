@@ -39,7 +39,7 @@ def build_backend(name=None):
 
 
 def read_build_requires(name):
-    confdir = pathlib.Path(__file__).parent
+    confdir = pathlib.Path(__file__).resolve().parent
     basename = f"requirements-build-{name}.txt"
     filename = confdir / basename
     with filename.open(encoding="utf-8") as f:

@@ -14,7 +14,7 @@ from mpi4py import MPI
 try:
     import mpitestutil as testutil
 except ImportError:
-    sys.path.append(os.fspath(pathlib.Path(__file__).parent))
+    sys.path.append(os.fspath(pathlib.Path(__file__).resolve().parent))
     import mpitestutil as testutil
 
 

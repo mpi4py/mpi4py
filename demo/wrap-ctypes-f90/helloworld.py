@@ -1,7 +1,7 @@
 import ctypes
 import pathlib
 
-_libdir = pathlib.Path(__file__).parent
+_libdir = pathlib.Path(__file__).resolve().parent
 
 MPI_Fint = ctypes.c_int
 lib = ctypes.CDLL(_libdir / "libhelloworld.so")

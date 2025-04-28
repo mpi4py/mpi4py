@@ -74,7 +74,7 @@ class CythonFileReporter(FileReporter):
         return set(lines)
 
 
-TOPDIR = pathlib.Path(__file__).parent.parent
+TOPDIR = pathlib.Path(__file__).resolve().parent.parent
 SRCDIR = TOPDIR / "src"
 CODE_LINES = None
 EXEC_LINES = None

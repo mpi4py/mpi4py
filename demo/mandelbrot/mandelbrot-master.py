@@ -14,7 +14,7 @@ h = 400
 maxit = 255
 
 
-dirname = pathlib.Path(__file__).parent
+dirname = pathlib.Path(__file__).resolve().parent
 executable = dirname / "mandelbrot-worker.exe"
 
 # spawn worker

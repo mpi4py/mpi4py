@@ -3,7 +3,7 @@ import pathlib
 
 from mpi4py import MPI
 
-_libdir = pathlib.Path(__file__).parent
+_libdir = pathlib.Path(__file__).resolve().parent
 
 if MPI._sizeof(MPI.Comm) == ctypes.sizeof(ctypes.c_int):
     MPI_Comm = ctypes.c_int
