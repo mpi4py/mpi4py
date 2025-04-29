@@ -3,6 +3,7 @@ import pathlib
 import sys
 import textwrap
 from collections import UserList
+from mpi4py import MPI
 
 
 def is_cyfunction(obj):
@@ -53,7 +54,7 @@ def is_property(obj):
 
 
 def is_class(obj):
-    return inspect.isclass(obj) or type(obj) is type(int)
+    return inspect.isclass(obj)
 
 
 class Lines(UserList):
@@ -107,10 +108,7 @@ def visit_function(function):
 
 
 def visit_method(method):
-    sig = signature(method)
-    doc = docstring(method)
-    body = Lines.INDENT + "..."
-    return f"def {sig}:\n{doc}\n{body}\n"
+    return visit_function(method)
 
 
 def visit_datadescr(datadescr, name=None):
@@ -261,8 +259,10 @@ def visit_class(cls, done=None):
             if name == attr.__name__:
                 obj = dct[name]
                 if is_classmethod(obj):
+                    obj = obj.__func__
                     lines.add = "@classmethod"
                 elif is_staticmethod(obj):
+                    obj = obj.__func__
                     lines.add = "@staticmethod"
                 lines.add = visit_method(attr)
             elif False:
@@ -398,6 +398,7 @@ def visit_module(module, done=None):
 
 IMPORTS = """
 import sys
+from threading import Lock
 from typing import (
     Any,
     AnyStr,
@@ -503,16 +504,14 @@ from .typing import *
 
 
 def visit_mpi4py_MPI():
-    from mpi4py import MPI as module
-
     lines = Lines()
-    lines.add = f'"""{module.__doc__}"""'
+    lines.add = f'"""{MPI.__doc__}"""'
     lines.add = "# flake8: noqa"
     lines.add = IMPORTS
     lines.add = ""
     lines.add = HELPERS
     lines.add = ""
-    lines.add = visit_module(module)
+    lines.add = visit_module(MPI)
     lines.add = ""
     lines.add = TYPING
     return lines
