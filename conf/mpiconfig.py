@@ -151,30 +151,20 @@ class Config:
             return
 
     def _setup_windows_impi(self):
-        from os.path import isdir, isfile, join
-
         I_MPI_ROOT = os.environ.get("I_MPI_ROOT")
         if not I_MPI_ROOT:
             return None
-        if not isdir(I_MPI_ROOT):
-            return None
-        arch = platform.architecture(None)[0][:2]
-        archdir = {"32": "ia32", "64": "intel64"}[arch]
-        mpi_dir = join(I_MPI_ROOT, archdir)
-        if not isdir(mpi_dir):
-            mpi_dir = I_MPI_ROOT
-        IMPI_INC = join(mpi_dir, "include")
-        IMPI_LIB = join(mpi_dir, "lib")
-        I_MPI_LIBRARY_KIND = os.environ.get("I_MPI_LIBRARY_KIND")
-        library_kind = os.getenv("library_kind")
-        kind = I_MPI_LIBRARY_KIND or library_kind or "release"
-        if isfile(join(IMPI_LIB, kind, "impi.lib")):
-            IMPI_LIB = join(IMPI_LIB, kind)
+        IMPI_INC = os.path.join(I_MPI_ROOT, "include")
+        IMPI_LIB = os.path.join(I_MPI_ROOT, "lib")
+        kind = os.environ.get("I_MPI_LIBRARY_KIND") or "release"
+        for subdirs in (("mpi", kind), (kind,)):
+            if os.path.isdir(os.path.join(IMPI_LIB, *subdirs)):
+                IMPI_LIB = os.path.join(IMPI_LIB, *subdirs)
+                break
         ok = (
-            IMPI_INC
-            and isfile(join(IMPI_INC, "mpi.h"))
-            and IMPI_LIB
-            and isfile(join(IMPI_LIB, "impi.lib"))
+            os.path.isdir(I_MPI_ROOT)
+            and os.path.isfile(os.path.join(IMPI_INC, "mpi.h"))
+            and os.path.isfile(os.path.join(IMPI_LIB, "impi.lib"))
         )
         if not ok:
             return False
