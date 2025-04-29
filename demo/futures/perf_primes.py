@@ -77,7 +77,8 @@ def main():
         elif result != [True] * len(PRIMES):
             sys.stdout.write(" failed\n")
         else:
-            sys.stdout.write("%5.2f seconds\n" % (time.time() - start))
+            elapsed = time.time() - start
+            sys.stdout.write(f"{elapsed:5.2f} seconds\n")
         sys.stdout.flush()
 
 

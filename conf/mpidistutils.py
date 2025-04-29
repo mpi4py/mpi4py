@@ -854,7 +854,7 @@ class config(cmd_config.config):
             if lang == "c":
                 proto = "\n".join([
                     "#ifdef __cplusplus",
-                    "extern {}".format('"C"'),
+                    'extern "C"',
                     "#endif",
                     proto,
                 ])

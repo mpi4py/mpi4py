@@ -8,8 +8,6 @@ import mpiunittest as unittest
 
 from mpi4py import MPI
 
-# ruff: noqa: B023
-
 
 class TestObjModel(unittest.TestCase):
     #
@@ -89,7 +87,7 @@ class TestObjModel(unittest.TestCase):
 
         def functions(_obj):
             for protocol in range(pickle.HIGHEST_PROTOCOL + 1):
-                yield lambda ob: pickle.loads(pickle.dumps(ob, protocol))
+                yield lambda ob, _=protocol: pickle.loads(pickle.dumps(ob, _))
             yield copy.copy
             yield copy.deepcopy
 
@@ -116,11 +114,8 @@ class TestObjModel(unittest.TestCase):
 
     def testHash(self):
         for obj in self.objects:
-
-            def ob_hash():
-                return hash(obj)
-
-            self.assertRaises(TypeError, ob_hash)
+            with self.assertRaises(TypeError):
+                hash(obj)
 
     def testInit(self):
         for i, obj in enumerate(self.objects):
@@ -129,24 +124,17 @@ class TestObjModel(unittest.TestCase):
             self.assertEqual(new, obj)
             new = klass(obj)
             self.assertEqual(new, obj)
+
             objects = self.objects[:]
             del objects[i]
             for other in objects:
+                with self.assertRaises(TypeError):
+                    klass(other)
 
-                def ob_init():
-                    return klass(other)
-
-                self.assertRaises(TypeError, ob_init)
-
-            def ob_init():
-                return klass(1234)
-
-            self.assertRaises(TypeError, ob_init)
-
-            def ob_init():
-                return klass("abc")
-
-            self.assertRaises(TypeError, ob_init)
+            with self.assertRaises(TypeError):
+                klass(1234)
+            with self.assertRaises(TypeError):
+                klass("abc")
 
     def testWeakRef(self):
         for obj in self.objects:

@@ -413,12 +413,8 @@ class Config:
                 macros = [e.strip() for e in v.split(",")]
                 if k == "define_macros":
                     for i, m in enumerate(macros):
-                        try:  # -DFOO=bar
-                            idx = m.index("=")
-                            macro = (m[:idx], m[idx + 1 :] or None)
-                        except ValueError:  # -DFOO
-                            macro = (m, None)
-                        macros[i] = macro
+                        name, _, value = m.partition("=")
+                        macros[i] = (name, value or None)
                 library_info[k] = macros
             elif k in (
                 "include_dirs",

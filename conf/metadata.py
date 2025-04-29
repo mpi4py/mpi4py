@@ -8,7 +8,7 @@ def get_name(settings=None):  # noqa: ARG001
     name = "mpi4py"
     suffix = os.environ.get("MPI4PY_DIST_SUFFIX")
     if suffix:
-        name = "{name}-{suffix}".format(**vars())
+        name = f"{name}-{suffix}"
     return name
 
 
@@ -20,7 +20,7 @@ def get_version(settings=None):  # noqa: ARG001
     version = m.groups()[0]
     local_version = os.environ.get("MPI4PY_LOCAL_VERSION")
     if local_version:
-        version = "{version}+{local_version}".format(**vars())
+        version = f"{version}+{local_version}"
     return version
 
 

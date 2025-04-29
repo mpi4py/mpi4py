@@ -239,7 +239,7 @@ class TestFilePath(BaseTestFile, unittest.TestCase):
         amode |= MPI.MODE_DELETE_ON_CLOSE
         try:
             fh = MPI.File.Open(comm, path, amode)
-        except:
+        except Exception:
             path.unlink()
             raise
         else:

@@ -5,7 +5,6 @@
 
 # ruff: noqa: C408
 # ruff: noqa: D103
-# ruff: noqa: S101
 # ruff: noqa: PTH100
 # ruff: noqa: PTH118
 # ruff: noqa: PTH120
@@ -31,7 +30,7 @@ def get_metadata():
     import metadata as md
 
     req_py = ">={}.{}".format(*require_python)
-    assert req_py == md.requires_python
+    assert req_py == md.requires_python  # noqa: S101
     author = md.authors[0]
     readme = md.get_readme()
     return {

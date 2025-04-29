@@ -1,13 +1,19 @@
 [flake8]
-ignore = W503,U101
+ignore = E203,U100,U101,W503
+extend-exclude = build
 per-file-ignores =
   conf/*: D
+  demo/*: D,S
   docs/*: D,S
+  test/*: D,S
+  setup.py: D,FS
+  conf/metadata.py: D,E241
+  conf/mpiapigen.py: D,FS
+  conf/mpidistutils.py: D,E402
+  demo/futures/test_futures.py: D,S,E402
+  demo/mpi-ref-v1/*: D,S,F821
   src/mpi4py/futures/_core.py: D,B036
   src/mpi4py/futures/aplus.py: B036,D402
   src/mpi4py/futures/pool.py: D402
   src/mpi4py/futures/util.py: B036
-  src/mpi4py/typing.py: U100
-  src/mpi4py/util/pkl5.py: U100
-  src/_mpi_dll_path.py: W504
 unused-arguments-ignore-variadic-names = True

@@ -32,20 +32,12 @@ class TestRC(unittest.TestCase):
         rc = type(mpi4py.rc)(**kwargs)
 
     def testBadAttribute(self):
-        def error():
-            return mpi4py.rc(ABCXYZ=123456)
-
-        self.assertRaises(TypeError, error)
-
-        def error():
-            return setattr(mpi4py.rc, "ABCXYZ", 123456)
-
-        self.assertRaises(TypeError, error)
-
-        def error():
-            return mpi4py.rc.ABCXYZ
-
-        self.assertRaises(AttributeError, error)
+        with self.assertRaises(TypeError):
+            mpi4py.rc(ABCXYZ=123456)
+        with self.assertRaises(TypeError):
+            mpi4py.rc.ABCXYZ = 123456
+        with self.assertRaises(AttributeError):
+            _ = mpi4py.rc.ABCXYZ
 
     def testRepr(self):
         repr(mpi4py.rc)

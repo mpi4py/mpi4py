@@ -157,10 +157,7 @@ jobs:
       run:  ruff format --diff
 
     - name: flake8
-      run:  flake8 docs src
-
-    - name: flake8 (testsuite)
-      run:  flake8 --select=A test
+      run:  flake8
 
     - name: pylint
       run:  pylint mpi4py

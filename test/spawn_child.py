@@ -1,8 +1,8 @@
+import importlib
 import sys
 
 sys.path.insert(0, sys.argv[1])
-
-from mpi4py import MPI
+MPI = importlib.import_module("mpi4py.MPI")
 
 parent = MPI.Comm.Get_parent()
 parent.Barrier()

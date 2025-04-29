@@ -49,7 +49,7 @@ class BaseTestErrhandler:
 
         def get_errhandler_fn(idx):
             def errhandler_fn(arg, err):
-                nonlocal mpiobj, index, called, check
+                nonlocal called, check
                 called = check = True
                 check &= arg == mpiobj
                 check &= err == MPI.ERR_OTHER
