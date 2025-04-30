@@ -264,22 +264,22 @@ def _starmap_helper(
         end_time = timeout + timer()
 
     if buffersize is not None:
-        futures = collections.deque(
+        fs = collections.deque(
             executor.submit(function, *args)
             for args in itertools.islice(iterable, buffersize)
         )
         unordered = False
     else:
-        futures = collections.deque(
+        fs = collections.deque(
             executor.submit(function, *args) for args in iterable
         )
         if unordered:
-            futures = set(futures)
+            fs = set(fs)
 
     executor_weakref = weakref.ref(executor)
     del executor
 
-    def result(future, timeout=None):
+    def resolve(future, timeout=None):
         try:
             try:
                 return future.result(timeout)
@@ -289,32 +289,36 @@ def _starmap_helper(
             del future
 
     def result_iterator():
+        future = collections.deque()
+        result = collections.deque()
         try:
             if unordered:
                 if timeout is None:
-                    iterator = as_completed(futures)
+                    iterator = as_completed(fs)
                 else:
-                    iterator = as_completed(futures, end_time - timer())
-                for future in iterator:
-                    futures.remove(future)
-                    future = [future]
-                    yield result(future.pop())
+                    iterator = as_completed(fs, end_time - timer())
+                for _ in map(future.append, iterator):
+                    fs.remove(future[0])
+                    yield resolve(future.pop())
             else:
-                futures.reverse()
-                while futures:
+                fs.reverse()
+                while fs:
                     if timeout is None:
-                        yield result(futures.pop())
+                        result.append(resolve(fs.pop()))
                     else:
-                        yield result(futures.pop(), end_time - timer())
+                        result.append(resolve(fs.pop(), end_time - timer()))
                     if (
                         buffersize is not None
                         and (executor := executor_weakref())
                         and (args := next(iterable, None))
                     ):
-                        futures.appendleft(executor.submit(function, *args))
+                        fs.appendleft(executor.submit(function, *args))
+                    yield result.pop()
         finally:
-            while futures:
-                futures.pop().cancel()
+            del future
+            del result
+            while fs:
+                fs.pop().cancel()
 
     return result_iterator()
 
