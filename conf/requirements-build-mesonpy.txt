@@ -1,1 +1,2 @@
+meson >= 1.5.1
 meson-python
