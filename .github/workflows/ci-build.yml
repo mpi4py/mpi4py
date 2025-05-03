@@ -41,9 +41,6 @@ jobs:
           - impi
           - msmpi
         exclude:
-          - backend: mesonpy
-            os:  windows-2025
-            mpi: impi
           - os:  ubuntu-24.04
             mpi: msmpi
           - os:  ubuntu-22.04
