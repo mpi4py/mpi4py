@@ -212,11 +212,23 @@ class BaseTestWinAllocateShared(BaseTestWin):
     CREATE_FLAVOR = MPI.WIN_FLAVOR_SHARED
 
     def setUp(self):
-        self.WIN = MPI.Win.Allocate_shared(10, 1, self.INFO, self.COMM)
+        if self.COMM.Get_size() > 1:
+            try:
+                self.COMM = self.COMM.Split_type(MPI.COMM_TYPE_SHARED)
+            except NotImplementedError:
+                self.skipTest("mpi-comm-split_type")
+        else:
+            self.COMM = self.COMM.Dup()
+        try:
+            self.WIN = MPI.Win.Allocate_shared(10, 1, self.INFO, self.COMM)
+        except Exception:
+            self.COMM.Free()
+            raise
         self.memory = self.WIN.tomemory()
         memzero(self.memory)
 
     def tearDown(self):
+        self.COMM.Free()
         self.WIN.Free()
 
     def testSharedQuery(self):
