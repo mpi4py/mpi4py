@@ -1,6 +1,8 @@
 [flake8]
 ignore = E203,U100,U101,W503
-extend-exclude = build
+extend-exclude =
+  build,
+  .venv,
 per-file-ignores =
   conf/*: D
   demo/*: D,S
