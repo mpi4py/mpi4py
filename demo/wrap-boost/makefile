@@ -7,7 +7,7 @@ SOURCE = $(MODULE).cxx
 TARGET = $(MODULE)$(EXT_SUFFIX)
 
 BOOST_PYVER = $(shell $(PYTHON) -c 'import sys; print(*sys.version_info[:2], sep="")')
-BOOST_INCLUDE = 
+BOOST_INCLUDE =
 BOOST_LDFLAGS = -lboost_python$(BOOST_PYVER)
 
 PYCCFLAGS += $(BOOST_INCLUDE)

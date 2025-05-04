@@ -3,7 +3,7 @@
 
 #define PyMPI_HAVE_MPI_Aint_add 1
 #define PyMPI_HAVE_MPI_Aint_diff 1
-  
+
 #define PyMPI_HAVE_MPI_File_iread_at_all 1
 #define PyMPI_HAVE_MPI_File_iwrite_at_all 1
 #define PyMPI_HAVE_MPI_File_iread_all 1

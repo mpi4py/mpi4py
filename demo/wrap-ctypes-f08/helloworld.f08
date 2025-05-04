@@ -20,5 +20,5 @@ subroutine sayhello(comm) bind(C)
        ' I am process ', rank, &
        ' of ', size, &
        ' on ', name(1:nlen), '.'
-  
+
 end subroutine sayhello

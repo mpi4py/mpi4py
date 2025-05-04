@@ -14,7 +14,7 @@ test: build
 	    for j in $(LANGS); do \
                  $(MPIEXEC) ./cpi-master-$$i.exe ./cpi-worker-$$j.exe; \
 	    done; \
-	done 
+	done
 
 clean:
 	$(RM) -r $(MASTERS) $(WORKERS) __pycache__
