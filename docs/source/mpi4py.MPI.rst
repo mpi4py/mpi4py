@@ -1,4 +1,4 @@
-﻿mpi4py.MPI
+mpi4py.MPI
 ==========
 
 .. currentmodule:: mpi4py.MPI

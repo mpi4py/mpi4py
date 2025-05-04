@@ -1,4 +1,4 @@
-﻿mpi4py.typing
+mpi4py.typing
 =============
 
 .. module:: mpi4py.typing
