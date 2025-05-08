@@ -1,4 +1,5 @@
 #!/bin/sh
+# shellcheck disable=SC2086
 set -eu
 
 PYTHON=${PYTHON:-python${py:-}}
@@ -6,7 +7,7 @@ MPIEXEC=${MPIEXEC:-mpiexec}
 NP_FLAG=${NP_FLAG:-'-n'}
 NP=${NP:-2}
 
-dir=$(dirname -- "$0")
+dir=$(dirname "$0")
 
 set -x
 $MPIEXEC $NP_FLAG $NP $PYTHON "$dir/test_0.py" threads=true

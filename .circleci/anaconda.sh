@@ -1,6 +1,7 @@
 #!/bin/bash
+# shellcheck disable=SC2086
 
-RUN() { echo + $@; $@; }
+RUN() { echo + "$@"; "$@"; }
 RUN export ANACONDA=${ANACONDA-/opt/conda}
 
 install-miniforge() {
@@ -20,7 +21,7 @@ parse-args() {
   unset MPI
   unset RUNTESTS
   unset COVERAGE
-  for arg in $@; do
+  for arg in "$@"; do
     case $arg in
       python=?*)
         PY="${arg#*=}";;
@@ -46,16 +47,19 @@ parse-args() {
 }
 
 create-env() {
-  parse-args $@
+  parse-args "$@"
   RUN rm -rf $ANACONDA/envs/$ENV
   RUN source $ANACONDA/bin/activate base
-  local packages=(python=$PY $MPI $MPI-mpicc setuptools numpy cython coverage)
-  RUN mamba create --yes -n $ENV ${packages[@]}
+  local packages=(
+      python="$PY" "$MPI" "$MPI-mpicc"
+      setuptools numpy cython coverage
+  )
+  RUN mamba create --yes -n $ENV "${packages[@]}"
   RUN conda deactivate
 }
 
 package-install() {
-  parse-args $@
+  parse-args "$@"
   RUN source $ANACONDA/bin/activate $ENV
   RUN python setup.py build_src --force
   RUN python setup.py install
@@ -64,7 +68,7 @@ package-install() {
 }
 
 package-testing() {
-  parse-args $@
+  parse-args "$@"
   RUN source $ANACONDA/bin/activate $ENV
   RUN python -m mpi4py --version
   if [[ "$RUNTESTS" == "yes" ]]; then
@@ -82,7 +86,7 @@ package-testing() {
       RUN test/coverage.sh
       RUN coverage report
       RUN coverage xml
-      RUN mv coverage.xml coverage-py$PY-$MPI-$(uname).xml
+      RUN mv coverage.xml coverage-"py$PY-$MPI-$(uname)".xml
   fi
   RUN conda deactivate
 }

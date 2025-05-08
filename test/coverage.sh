@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC2086
 set -eux
 
 MPIEXEC=${MPIEXEC:-mpiexec}
@@ -104,7 +105,7 @@ $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.futures -c "1/0"                
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.futures -c "raise SystemExit(11)"    > /dev/null 2>&1 || true
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.futures -c "raise SystemExit('')"    > /dev/null 2>&1 || true
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.futures -c "raise KeyboardInterrupt" > /dev/null 2>&1 || true
-if [ $(command -v mpichversion) ]; then
+if command -v mpichversion; then
     testdir=demo/futures
     $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.futures.server --xyz > /dev/null 2>&1 || true
     $MPIEXEC -n 2 $PYTHON -m coverage run -m mpi4py.futures.server --bind localhost &
@@ -116,7 +117,7 @@ if [ $(command -v mpichversion) ]; then
     $MPIEXEC -n 1 $PYTHON -m coverage run $testdir/test_service.py --port 31414 --info "a=x,b=y"
     wait $mpi4pyserver
 fi
-if [ $(command -v mpichversion) ] && [ $(command -v hydra_nameserver) ]; then
+if command -v mpichversion && command -v hydra_nameserver; then
     testdir=demo/futures
     hydra_nameserver &
     nameserver=$!; sleep 1;

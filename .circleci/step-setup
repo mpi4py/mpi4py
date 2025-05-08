@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck source-path=SCRIPTDIR
 set -e
-source $(dirname $0)/env.sh
-create-env $@
+source "$(dirname "$0")"/env.sh
+create-env "$@"

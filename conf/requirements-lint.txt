@@ -10,4 +10,5 @@ flake8-unused-arguments
 flake8-use-fstring
 pylint
 ruff
+shellcheck-py
 yamllint

@@ -1,4 +1,5 @@
-#/bin/sh
+#!/bin/sh
+# shellcheck disable=SC2086
 set -eu
 
 ENV=${ENV:-env}

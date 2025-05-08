@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck source-path=SCRIPTDIR
 
 export CFLAGS="-O0 -Wp,-U_FORTIFY_SOURCE"
 export CPPFLAGS=$CFLAGS
@@ -16,4 +17,4 @@ export OMPI_ALLOW_RUN_AS_ROOT=1
 export OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
 
 export ANACONDA=${ANACONDA-/opt/conda}
-source .circleci/anaconda.sh
+source "$(dirname "$0")"/anaconda.sh

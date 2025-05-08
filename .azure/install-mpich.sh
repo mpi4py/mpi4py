@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-case `uname` in
+case "$(uname)" in
 Linux) set -x;
   sudo apt install -y mpich libmpich-dev
   ;;
