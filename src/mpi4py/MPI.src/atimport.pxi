@@ -377,20 +377,25 @@ cdef extern from * nogil:
 
 cdef object MPIException = <object>PyExc_RuntimeError
 
+
+@cython.linetrace(False)
 cdef int PyMPI_Raise(int ierr) except -1 with gil:
     if ierr == PyMPI_ERR_UNAVAILABLE:
-        PyErr_SetObject(<object>PyExc_NotImplementedError, None)  # ~> uncovered
-        return 0                                                  # ~> uncovered
+        PyErr_SetObject(<object>PyExc_NotImplementedError, None)
+        return 0
     if (<void*>MPIException) == NULL:
-        PyErr_SetObject(<object>PyExc_RuntimeError, <long>ierr)   # ~> uncovered
-        return 0                                                  # ~> uncovered
+        PyErr_SetObject(<object>PyExc_RuntimeError, <long>ierr)
+        return 0
     PyErr_SetObject(MPIException, <long>ierr)
     return 0
 
+
+@cython.linetrace(False)
 cdef inline int CHKERR(int ierr) except -1 nogil:
     if ierr == MPI_SUCCESS: return 0
     PyMPI_Raise(ierr)
     return -1
+
 
 cdef int PyMPI_HandleException(object exc) noexcept:
     PyErr_DisplayException(exc)
