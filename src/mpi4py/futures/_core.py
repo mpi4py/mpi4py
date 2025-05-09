@@ -478,6 +478,7 @@ class SharedPoolCtx:
                 intracomm = self.intracomm
                 set_comm_server(intracomm)
                 server_main_comm(comm)
+                del_comm_server()
                 intracomm.Free()
         if not self.on_root:
             join_threads(self.threads)
@@ -550,6 +551,7 @@ def _comm_executor_helper(executor, comm, root):
         comm, intracomm = comm_split(comm, root)
         set_comm_server(intracomm)
         server_main_comm(comm, sync=False)
+        del_comm_server()
         intracomm.Free()
 
 
@@ -1200,6 +1202,10 @@ def set_comm_server(intracomm):
     _tls.comm_server = intracomm
 
 
+def del_comm_server():
+    del _tls.comm_server
+
+
 def server_main_comm(comm, sync=True):
     assert comm != MPI.COMM_NULL  # noqa: S101
     assert comm.Is_inter()  # noqa: S101
@@ -1214,6 +1220,7 @@ def server_main_spawn():
     comm = MPI.Comm.Get_parent()
     set_comm_server(MPI.COMM_WORLD)
     server_main_comm(comm)
+    del_comm_server()
 
 
 def server_main_service():
@@ -1235,6 +1242,7 @@ def server_main_service():
     comm = server_accept(service, info)
     set_comm_server(MPI.COMM_WORLD)
     server_main_comm(comm)
+    del_comm_server()
 
 
 def server_main():
