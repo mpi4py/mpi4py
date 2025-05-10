@@ -1242,7 +1242,10 @@ class build_ext(cmd_build_ext.build_ext):
             config_cmd.configure = self.configure
             configure(ext, config_cmd)
         if with_coverage():
-            ext.define_macros += [("CYTHON_TRACE_NOGIL", 1)]
+            ext.define_macros += [
+                ("CYTHON_TRACE_NOGIL", 1),
+                ("CYTHON_USE_SYS_MONITORING", 0),
+            ]
 
     def _get_pth_files(self, ext):
         if ext.name == "mpi4py.MPI" and sys.platform == "win32":
