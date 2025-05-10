@@ -628,7 +628,7 @@ def cython_req():
     confdir = os.path.dirname(__file__)
     basename = "requirements-build-cython.txt"
     with open(os.path.join(confdir, basename)) as f:
-        m = re.search(r"cython\s*>=+\s*(.*)", f.read().strip())
+        m = re.search(r"cython\s*>?=+\s*(.*)", f.read().strip())
     cython_version = m.groups()[0]
     return cython_version
 

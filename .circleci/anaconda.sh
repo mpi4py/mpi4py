@@ -52,7 +52,7 @@ create-env() {
   RUN source $ANACONDA/bin/activate base
   local packages=(
       python="$PY" "$MPI" "$MPI-mpicc"
-      setuptools numpy cython coverage
+      setuptools numpy cython'<3.1' coverage
   )
   RUN mamba create --yes -n $ENV "${packages[@]}"
   RUN conda deactivate
