@@ -54,7 +54,7 @@ jobs:
         post-cleanup: none
         environment-name: cover
         create-args: >-
-          ${{ matrix.mpi }}${{ matrix.mpi == 'openmpi' && '=5.0.0' || '' }}
+          ${{ matrix.mpi }}
           ${{ matrix.mpi }}-mpicc
           python=${{ matrix.py }}
           pip
