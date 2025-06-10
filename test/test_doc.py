@@ -44,7 +44,9 @@ def getdocstr(mc, docstrings, namespace=None):
         if doc == "<undocumented>":
             return
         if doc is not None:
-            _, _, doc = doc.partition("\n")
+            _, nl, doc = doc.partition("\n")
+            if nl and doc.startswith("\n"):
+                doc = doc[1:]
         docstrings[name] = doc
 
 
