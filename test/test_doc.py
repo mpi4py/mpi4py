@@ -1,4 +1,5 @@
 import sys
+import textwrap
 
 import mpiunittest as unittest
 
@@ -46,7 +47,7 @@ def getdocstr(mc, docstrings, namespace=None):
         if doc is not None:
             _, nl, doc = doc.partition("\n")
             if nl and doc.startswith("\n"):
-                doc = doc[1:]
+                doc = textwrap.dedent(doc[1:])
         docstrings[name] = doc
 
 
