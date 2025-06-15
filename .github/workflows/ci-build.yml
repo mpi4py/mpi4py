@@ -81,6 +81,7 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: ${{ github.event.inputs.py || 3 }}
+        check-latest: true
         cache: pip
         cache-dependency-path: |
           conf/requirements-build-cython.txt

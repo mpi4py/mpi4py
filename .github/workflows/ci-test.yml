@@ -66,6 +66,7 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.py }}
+        check-latest: true
         cache: pip
         cache-dependency-path: |
           conf/requirements-build-cython.txt
