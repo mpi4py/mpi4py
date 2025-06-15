@@ -40,9 +40,6 @@ jobs:
             mpi: mpich
           - os: windows-2025
             mpi: openmpi
-          # Python 3.14b1 broken on Windows
-          - os: windows-2025
-            py: 3.14-dev
 
     steps:
 
