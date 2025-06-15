@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.join(topdir, "conf"))
 # --------------------------------------------------------------------
 
 require_python = (3, 8)
-maxknow_python = (3, 13)
+maxknow_python = (3, 14)
 py_limited_api = (3, 10)
 
 
