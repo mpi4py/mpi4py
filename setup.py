@@ -61,7 +61,7 @@ def get_build_pysabi():
     if abi and sys.implementation.name == "cpython":
         if abi in {"false", "no", "off", "n", "0"}:
             return None
-        if abi in {"true", "yes", "on", "y", "1"}:
+        if abi in {"true", "yes", "on", "y", "1"} | {"abi3"}:
             return py_limited_api
         if abi.startswith("cp"):
             abi = abi[2:]
