@@ -45,8 +45,6 @@ class Config:
                 return True
         return False
 
-    __nonzero__ = __bool__
-
     def get(self, k, d=None):
         if k in self.compiler_info:
             return self.compiler_info[k]
@@ -361,10 +359,7 @@ class Config:
         else:
             sections = list(section)
         #
-        try:
-            parser = ConfigParser(dict_type=OrderedDict)
-        except TypeError:
-            parser = ConfigParser()
+        parser = ConfigParser(dict_type=OrderedDict)
         try:
             read_ok = parser.read(filenames)
         except ConfigParserError:
@@ -465,10 +460,7 @@ class Config:
             elif isinstance(library_info[k], list):
                 library_info[k] = " ".join(library_info[k])
         # fill configuration parser
-        try:
-            parser = ConfigParser(dict_type=OrderedDict)
-        except TypeError:
-            parser = ConfigParser()
+        parser = ConfigParser(dict_type=OrderedDict)
         parser.add_section(section)
         for option, value in compiler_info.items():
             if not value:
