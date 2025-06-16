@@ -1234,6 +1234,7 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="MPI API generator")
+    parser.color = True  # Python 3.14+
     parser.add_argument("-q", "--quiet", action="store_true")
     parser.add_argument("-l", "--list", action="store_true")
     args = parser.parse_args()

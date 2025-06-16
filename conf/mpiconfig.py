@@ -494,14 +494,15 @@ class Config:
 
 
 if __name__ == "__main__":
-    import optparse
+    import argparse
 
-    parser = optparse.OptionParser()
-    parser.add_option("--mpi", type="string")
-    parser.add_option("--mpicc", type="string")
-    parser.add_option("--mpicxx", type="string")
-    parser.add_option("--mpild", type="string")
-    opts, args = parser.parse_args()
+    parser = argparse.ArgumentParser()
+    parser.color = True  # Python 3.14+
+    parser.add_argument("--mpi")
+    parser.add_argument("--mpicc")
+    parser.add_argument("--mpicxx")
+    parser.add_argument("--mpild")
+    opts = parser.parse_args()
 
     cfg = Config()
     cfg.setup(opts)

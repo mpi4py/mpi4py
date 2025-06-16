@@ -342,6 +342,7 @@ class TestProgram(unittest.TestProgram):
 
     def _getDiscoveryArgParser(self, parent):
         parser = argparse.ArgumentParser(parents=[parent])
+        parser.color = True  # Python 3.14+
         setup_parser(parser)
         return parser
 

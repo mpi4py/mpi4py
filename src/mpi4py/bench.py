@@ -4,18 +4,31 @@
 
 import sys as _sys
 
-
-def _prog(cmd=""):
-    pyexe = __import__("pathlib").Path(_sys.executable).name
-    return f"{pyexe} -m {__spec__.name} {cmd}".strip()
+_registry = {}
 
 
-def helloworld(comm, args=None, verbose=True):
-    """Hello, World! using MPI."""
+def _register(command):
+    _registry[command.__name__] = command
+    return command
+
+
+def _create_parser(cmd="", usage=None):
     # pylint: disable=import-outside-toplevel
     from argparse import ArgumentParser
 
-    parser = ArgumentParser(prog=_prog("helloworld"))
+    pyexe = __import__("pathlib").Path(_sys.executable).name
+    pycmd = f"{pyexe} -m {__spec__.name} {cmd}".strip()
+    parser = ArgumentParser(prog=pycmd, usage=usage)
+    parser.color = True  # Python 3.14+
+    return parser
+
+
+@_register
+def helloworld(comm, args=None, verbose=True):
+    """Hello, World! using MPI."""
+    # pylint: disable=import-outside-toplevel
+
+    parser = _create_parser("helloworld")
     parser.add_argument(
         "-q",
         "--quiet",
@@ -48,14 +61,14 @@ def helloworld(comm, args=None, verbose=True):
     return message
 
 
+@_register
 def ringtest(comm, args=None, verbose=True):
     """Time a message going around the ring of processes."""
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-statements
     # pylint: disable=import-outside-toplevel
-    from argparse import ArgumentParser
 
-    parser = ArgumentParser(prog=_prog("ringtest"))
+    parser = _create_parser("ringtest")
     parser.add_argument(
         "-q",
         "--quiet",
@@ -153,15 +166,15 @@ def ringtest(comm, args=None, verbose=True):
     return elapsed
 
 
+@_register
 def pingpong(comm, args=None, verbose=True):
     """Time messages between processes."""
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-branches
     # pylint: disable=too-many-statements
     # pylint: disable=import-outside-toplevel
-    from argparse import ArgumentParser
 
-    parser = ArgumentParser(prog=_prog("pingpong"))
+    parser = _create_parser("pingpong")
     parser.add_argument(
         "-q",
         "--quiet",
@@ -421,14 +434,14 @@ def _fn_identity(arg):  # pragma: no cover
     return arg
 
 
+@_register
 def futures(comm, args=None, verbose=True):
     """Measure mpi4py.futures task throughput."""
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-statements
     # pylint: disable=import-outside-toplevel
-    from argparse import ArgumentParser
 
-    parser = ArgumentParser(prog=_prog("futures"))
+    parser = _create_parser("futures")
     parser.add_argument(
         "-q",
         "--quiet",
@@ -716,11 +729,9 @@ def futures(comm, args=None, verbose=True):
 def main(args=None):
     """Entry-point for ``python -m mpi4py.bench``."""
     # pylint: disable=import-outside-toplevel
-    from argparse import REMAINDER, ArgumentParser
+    from argparse import REMAINDER
 
-    parser = ArgumentParser(
-        prog=_prog(), usage="%(prog)s [options] <command> [args]"
-    )
+    parser = _create_parser(usage="%(prog)s [options] <command> [args]")
     parser.add_argument(
         "--threads",
         action="store_true",
@@ -768,21 +779,14 @@ def main(args=None):
     from . import MPI
 
     comm = MPI.COMM_WORLD
-    if options.command not in main.commands:
+    command = _registry.get(options.command)
+    if command is None:
         if comm.rank == 0:
             parser.error(f"unknown command {options.command!r}")
         parser.exit(2)
-    command = main.commands[options.command]
     command(comm, options.args)
     parser.exit()
 
-
-main.commands = {  # type: ignore[attr-defined]
-    "helloworld": helloworld,
-    "ringtest": ringtest,
-    "pingpong": pingpong,
-    "futures": futures,
-}
 
 if __name__ == "__main__":
     main()
