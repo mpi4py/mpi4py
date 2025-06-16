@@ -25,8 +25,7 @@ Release 4.1.0 [YYYY-MM-DD]
 * Enhancements:
 
   + Support (opt-in via `MPI4PY_BUILD_PYSABI`) for building with
-    `Py_LIMITED_API` under Python 3.10+. Requires Cython 3.1+
-    (currently under development).
+    `Py_LIMITED_API` under Python 3.10+ (requires Cython 3.1+).
 
   + Support (opt-in via `MPI4PY_BUILD_MPIABI`) for building with the
     MPI 5.0 standard ABI and the MPICH or Open MPI legacy ABIs. The
