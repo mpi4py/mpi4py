@@ -6,6 +6,7 @@ import shutil
 import sys
 from collections import OrderedDict
 from configparser import ConfigParser, Error as ConfigParserError
+from types import SimpleNamespace
 
 # ruff: noqa: PTH112, PTH113, PTH117, PTH118, PTH119
 # ruff: noqa: PTH120, PTH123
@@ -13,10 +14,19 @@ from configparser import ConfigParser, Error as ConfigParserError
 _logger = logging.getLogger("mpiconfig")
 _logger.setLevel(logging.INFO)
 
+# ruff: noqa: G010
+_log = SimpleNamespace()
+_log.log = _logger.log
+_log.debug = _logger.debug
+_log.info = _logger.info
+_log.warn = _logger.warning
+_log.error = _logger.error
+_log.fatal = _logger.fatal
+
 
 class Config:
-    def __init__(self, logger=None):
-        self.log = logger or _logger
+    def __init__(self, log=None):
+        self.log = log or _log
         self.section = None
         self.filename = None
         self.compiler_info = OrderedDict((
@@ -337,7 +347,7 @@ class Config:
                     PATH = path + os.path.pathsep + PATH
                     compiler_info[name] = exe
                 else:
-                    self.log.warning("warning: %s='%s' not found", name, cmd)
+                    self.log.warn("warning: %s='%s' not found", name, cmd)
         #
         if not self and not compiler_info:
             for name, candidates in COMPILERS:
@@ -363,7 +373,9 @@ class Config:
         try:
             read_ok = parser.read(filenames)
         except ConfigParserError:
-            self.log.exception(
+            read_ok = None
+        if read_ok is None:
+            self.log.error(
                 "error: parsing configuration file/s '%s'",
                 os.path.pathsep.join(filenames),
             )
