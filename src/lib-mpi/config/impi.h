@@ -220,7 +220,7 @@
 #define PyMPI_HAVE_MPI_File_read_ordered_begin_c 1
 #define PyMPI_HAVE_MPI_File_write_ordered_begin_c 1
 #endif
-#if defined(__linux__)
+#if defined(__linux__) || I_MPI_NUMVERSION >= 20211600300
 #define PyMPI_HAVE_MPI_File_get_type_extent_c 1
 #define PyMPI_HAVE_MPI_Datarep_conversion_function_c 1
 #define PyMPI_HAVE_MPI_CONVERSION_FN_NULL_C 1
