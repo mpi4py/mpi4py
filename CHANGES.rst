@@ -1,7 +1,15 @@
-Release 4.1.0 [YYYY-MM-DD]
+Release 4.1.0 [2025-06-25]
 ==========================
 
 * New features:
+
+  + Publish binary wheel packages on `PyPI`_ with support for multiple
+    operating systems (Linux, macOS, Windows), processor architectures
+    (AMD64, ARM64), MPI implementations (MPICH, Open MPI, and their
+    ABI-compatible derivatives), and Python implementations (CPython,
+    PyPy).
+
+    .. _PyPI: https://pypi.org/project/mpi4py/#files
 
   + Add support for the MPI 5.0 standard.
 
