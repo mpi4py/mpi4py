@@ -1,6 +1,9 @@
 Installation
 ============
 
+.. include:: ../../INSTALL.rst
+
+
 Build backends
 --------------
 
@@ -18,7 +21,7 @@ mpi4py supports three different build backends: `setuptools`_ (default),
 
 
 Using **setuptools**
-~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^
 
 .. tip::
 
@@ -111,7 +114,7 @@ creation.
 
 
 Using **scikit-build-core**
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. tip::
 
@@ -135,7 +138,7 @@ will prevent a successful build.
 
 
 Using **meson-python**
-~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^
 
 .. tip::
 
@@ -154,6 +157,3 @@ tasks to the `Meson`_ build system.
 
 .. _Meson: https://mesonbuild.com/
 .. _meson-python: https://meson-python.readthedocs.io/
-
-
-.. include:: ../../INSTALL.rst
