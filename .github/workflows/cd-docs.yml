@@ -1,0 +1,69 @@
+name: cd-docs
+
+on:  # yamllint disable-line rule:truthy
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+
+    - uses: step-security/harden-runner@v2
+      with:
+        egress-policy: audit
+
+    - id: checkout
+      uses: actions/checkout@v4
+
+    - id: source-date-epoch
+      run: |
+        # source-date-epoch
+        SOURCE_DATE_EPOCH=$(git log -1 --pretty=%at)
+        echo SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH >> $GITHUB_ENV
+        echo $(git log -1 --pretty=%ai) [timestamp=$SOURCE_DATE_EPOCH]
+      shell: bash
+
+    - id: setup-latex
+      run: |
+        # setup-latex
+        sudo apt update && \
+        sudo apt install -y \
+           texlive-latex-base \
+           texlive-latex-recommended \
+           texlive-latex-extra \
+           latexmk \
+           texinfo
+
+    - id: setup-python
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3
+
+    - id: setup-tox
+      run: python -m pip install --upgrade tox
+
+    - id: build
+      run: python -m tox run -m docs
+
+    - id: archive
+      run:  |
+        archive=mpi4py-docs.zip
+        rootdir=${archive%.zip}
+        ln -s docs $rootdir
+        python conf/metadata.py version > $rootdir/version
+        python -m zipfile -c $archive $rootdir
+
+    - id: upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: docs
+        path: mpi4py-docs.zip
+
+    - id: report
+      run: |
+        artifact='Artifact: <${{ steps.upload.outputs.artifact-url }}>'

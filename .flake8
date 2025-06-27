@@ -4,6 +4,7 @@ extend-exclude =
   build,
   .venv,
 per-file-ignores =
+  cibw/*: D
   conf/*: D
   demo/*: D,S
   docs/*: D,S

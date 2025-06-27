@@ -1,0 +1,331 @@
+name: cd
+
+on:  # yamllint disable-line rule:truthy
+  schedule:
+    - cron: '30 0 * * 0'
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'cibw/*'
+      - '.github/workflows/cd.yml'
+      - '.github/workflows/cd-*.yml'
+  release:
+    types:
+      - published
+  workflow_dispatch:
+    inputs:
+      python-tag:
+        description: "CPython/PyPy tag ({cp,pp}3{8..13})"
+        default: ''
+        required: false
+        type: string
+      publish-pypi:
+        description: 'Publish to PyPI'
+        required: false
+        type: boolean
+        default: false
+      publish-testpypi:
+        description: 'Publish to TestPyPI'
+        required: false
+        type: boolean
+        default: false
+      publish-anaconda:
+        description: 'Publish to Anaconda'
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
+
+permissions:
+  contents: read
+
+jobs:
+
+  docs:
+    if: ${{ github.event_name != 'workflow_dispatch' }}
+    uses: ./.github/workflows/cd-docs.yml
+
+  sdist:
+    uses: ./.github/workflows/cd-sdist.yml
+
+  wheel-Linux:
+    uses: ./.github/workflows/cd-wheel.yml
+    with:
+      os-arch: Linux
+      python-tag: ${{ inputs.python-tag }}
+
+  wheel-macOS:
+    uses: ./.github/workflows/cd-wheel.yml
+    with:
+      os-arch: macOS
+      python-tag: ${{ inputs.python-tag }}
+
+  wheel-Windows:
+    uses: ./.github/workflows/cd-wheel.yml
+    with:
+      os-arch: Windows
+      python-tag: ${{ inputs.python-tag }}
+
+  publish-pypi:
+    if: |
+      inputs.publish-pypi ||
+      github.event_name == 'release'
+    runs-on: ubuntu-latest
+    needs:
+      - sdist
+      - wheel-Linux
+      - wheel-macOS
+      - wheel-Windows
+    environment:
+      name: pypi
+      url: https://pypi.org/project/mpi4py
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+
+    steps:
+
+    - uses: step-security/harden-runner@v2
+      with:
+        egress-policy: audit
+
+    - if: ${{ (inputs.python-tag || '') == '' }}
+      name: Download sdist artifact
+      uses: actions/download-artifact@v4
+      with:
+        path: dist
+        pattern: sdist
+        merge-multiple: true
+
+    - name: Download wheel artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: dist
+        pattern: wheel-*
+        merge-multiple: true
+
+    - name: Report sha256sum
+      run:  |
+        # Report sha256sum
+        echo '```'     >> "$GITHUB_STEP_SUMMARY"
+        sha256sum -b * >> "$GITHUB_STEP_SUMMARY"
+        echo '```'     >> "$GITHUB_STEP_SUMMARY"
+      working-directory: dist
+
+    - name: Attest artifacts
+      uses: actions/attest-build-provenance@v2
+      with:
+        subject-path: dist/*
+
+    - name: Publish to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+
+  publish-testpypi:
+    if: |
+      inputs.publish-testpypi ||
+      github.event_name == 'release'
+    runs-on: ubuntu-latest
+    needs:
+      - sdist
+      - wheel-Linux
+      - wheel-macOS
+      - wheel-Windows
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/project/mpi4py
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+
+    - uses: step-security/harden-runner@v2
+      with:
+        egress-policy: audit
+
+    - if: ${{ (inputs.python-tag || '') == '' }}
+      name: Download sdist artifact
+      uses: actions/download-artifact@v4
+      with:
+        path: dist
+        pattern: sdist
+        merge-multiple: true
+
+    - name: Download wheel artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: dist
+        pattern: wheel-*
+        merge-multiple: true
+
+    - name: Report sha256sum
+      run:  |
+        # Report sha256sum
+        echo '```'     >> "$GITHUB_STEP_SUMMARY"
+        sha256sum -b * >> "$GITHUB_STEP_SUMMARY"
+        echo '```'     >> "$GITHUB_STEP_SUMMARY"
+      working-directory: dist
+
+    - name: Publish to TestPyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        repository-url: https://test.pypi.org/legacy/
+
+  publish-anaconda:
+    if: |
+      inputs.publish-anaconda ||
+      github.event_name == 'release' ||
+      github.event_name == 'schedule'
+    needs:
+      - sdist
+      - wheel-Linux
+      - wheel-macOS
+      - wheel-Windows
+    runs-on: ubuntu-latest
+    environment:
+      name: anaconda
+      url:  https://anaconda.org/mpi4py/mpi4py
+
+    steps:
+
+    - uses: step-security/harden-runner@v2
+      with:
+        egress-policy: audit
+
+    - if: ${{ (inputs.python-tag || '') == '' }}
+      name: Download sdist artifact
+      uses: actions/download-artifact@v4
+      with:
+        path: dist
+        pattern: sdist
+        merge-multiple: true
+
+    - name: Download wheel artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: dist
+        pattern: wheel-*
+        merge-multiple: true
+
+    - name: Report sha256sum
+      run:  |
+        # Report sha256sum
+        echo '```'     >> "$GITHUB_STEP_SUMMARY"
+        sha256sum -b * >> "$GITHUB_STEP_SUMMARY"
+        echo '```'     >> "$GITHUB_STEP_SUMMARY"
+      working-directory: dist
+
+    - name: Setup Micromamba
+      uses: mamba-org/setup-micromamba@v2
+      with:
+        environment-name: ac
+        create-args: anaconda-client
+
+    - name: Publish to Anaconda
+      run:  |
+        # https://pypi.anaconda.org/mpi4py/simple
+        anaconda --token "$ANACONDA_TOKEN" \
+        upload --user "$ANACONDA_USER" --force \
+        dist/*
+      env:
+        ANACONDA_USER:  mpi4py
+        ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
+      shell: bash -el {0}
+
+  publish-github-release:
+    if: ${{ github.event_name == 'release' }}
+    runs-on: ubuntu-latest
+    needs: sdist
+    environment:
+      name: github
+      url: https://github.com/mpi4py/mpi4py/releases
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+
+    steps:
+
+    - uses: step-security/harden-runner@v2
+      with:
+        egress-policy: audit
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Download distribution artifact
+      uses: actions/download-artifact@v4
+      with:
+        path: dist
+        pattern: sdist
+        merge-multiple: true
+
+    - name: Attest distribution artifact
+      uses: actions/attest-build-provenance@v2
+      with:
+        subject-path: dist/*.tar.gz
+
+    - name: Publish assets to GitHub Releases
+      run:  gh release upload $TAG dist/*.tar.gz
+      env:
+        TAG: ${{ github.event.release.tag_name }}
+        GH_TOKEN: ${{ github.token }}
+
+  publish-github-docs:
+    if: ${{ github.event_name == 'release' }}
+    runs-on: ubuntu-latest
+    needs: docs
+    environment:
+      name: github
+      url: https://mpi4py.github.io/mpi4py/
+
+    steps:
+
+    - uses: step-security/harden-runner@v2
+      with:
+        egress-policy: audit
+
+    - name: Checkout documentation repository
+      uses: actions/checkout@v4
+      with:
+        repository: mpi4py/mpi4py.github.io
+        token: ${{ secrets.DOCS_PUBLISH_PAT }}
+
+    - name: Download documentation artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: docs
+        path: mpi4py
+
+    - name: Update documentation
+      run: |
+        # unarchive
+        docdir=mpi4py-docs
+        unzip -q $docdir.zip
+        mv $docdir/version .
+        version=$(cat version)
+        test ! -d $version
+        mv $docdir $version
+        rm -f stable
+        ln -sf $version stable
+      working-directory: mpi4py
+
+    - name: Publish documentation
+      run: |
+        # publish
+        gh api /users/${GITHUB_ACTOR} > actor.json
+        git config user.name  "$(jq -r .name  actor.json)"
+        git config user.email "$(jq -r .email actor.json)"
+        version=$(cat version)
+        git add $version stable
+        git commit -m $version
+        git show --stat
+        git push
+      working-directory: mpi4py
+      env:
+        GH_TOKEN: ${{ github.token }}

@@ -50,6 +50,7 @@ lint.ignore = [
 combine-as-imports = true
 
 [lint.per-file-ignores]
+"cibw/*" = ["D", "PTH"]
 "conf/*" = ["D"]
 "demo/*" = ["D", "S"]
 "docs/*" = ["D", "S"]
