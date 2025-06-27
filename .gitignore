@@ -4,6 +4,7 @@
 /.eggs/**
 /MANIFEST
 /.tox/**
+/wheelhouse/**
 **/__pycache__/
 /.coverage
 /.coverage.*.*.*
