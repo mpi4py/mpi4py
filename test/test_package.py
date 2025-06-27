@@ -1,11 +1,10 @@
 import importlib
+import io
 import os
 import pathlib
 import sys
 import unittest
 import warnings
-
-from mpitestutil import capture_stderr
 
 import mpi4py
 
@@ -178,8 +177,11 @@ class TestMPIABI(unittest.TestCase):
         mpiabi = self.mpiabi
         message = "@message@"
         output = f"# [{mpiabi.__name__}] {message}\n"
-        with capture_stderr() as stderr:
+        sys.stderr = stderr = io.StringIO()
+        try:
             mpiabi._verbose_info(message, verbosity=-1)
+        finally:
+            sys.stderr = sys.__stderr__
         self.assertEqual(stderr.getvalue(), output)
 
     def testDLOpen(self):
