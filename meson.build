@@ -114,6 +114,7 @@ package = {
     'bench.py',
     'run.py',
     'typing.py',
+    '_mpiabi.py',
     '__init__.pxd',
     'libmpi.pxd',
     'MPI.pxd',

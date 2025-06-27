@@ -54,6 +54,7 @@ combine-as-imports = true
 "demo/*" = ["D", "S"]
 "docs/*" = ["D", "S"]
 "test/*" = ["D", "S"]
+"src/mpi4py/_mpiabi.py" = ["PTH"]
 "demo/mpi-ref-v1/*" = ["F821", "PTH123", "FURB101"]
 
 [lint.pydocstyle]

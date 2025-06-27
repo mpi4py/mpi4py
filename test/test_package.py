@@ -1,7 +1,11 @@
 import importlib
 import os
 import pathlib
+import sys
 import unittest
+import warnings
+
+from mpitestutil import capture_stderr
 
 import mpi4py
 
@@ -35,6 +39,9 @@ class TestImport(unittest.TestCase):
         importlib.import_module("mpi4py.util.pkl5")
         importlib.import_module("mpi4py.util.pool")
         importlib.import_module("mpi4py.util.sync")
+
+    def testImportMPIABI(self):
+        importlib.import_module("mpi4py._mpiabi")
 
 
 class TestDataFiles(unittest.TestCase):
@@ -77,6 +84,130 @@ class TestDataFiles(unittest.TestCase):
             pkgdir / "include" / "mpi4py" / "mpi4py.i",
         ]:
             self.assertTrue(hdr.exists())
+
+
+class TestMPIABI(unittest.TestCase):
+    #
+    #
+    def setUp(self):
+        self.mpiabi = importlib.import_module("mpi4py._mpiabi")
+        self.sentinel = getattr(self.mpiabi._get_mpiabi, "mpiabi", None)
+
+    def tearDown(self):
+        self.mpiabi._registry.pop("mpi4py.xyz", None)
+        if self.sentinel is not None:
+            self.mpiabi._get_mpiabi.mpiabi = self.sentinel
+        elif hasattr(self.mpiabi._get_mpiabi, "mpiabi"):
+            del self.mpiabi._get_mpiabi.mpiabi
+        del self.mpiabi
+
+    def testGetStr(self):
+        importlib.import_module("mpi4py.MPI")
+        mpiabi = self.mpiabi
+        saved = mpiabi.MPIABI
+        try:
+            mpiabi.MPIABI = "@mpiabi@"
+            result = mpiabi._get_mpiabi()
+            self.assertEqual(result, mpiabi.MPIABI)
+        finally:
+            mpiabi.MPIABI = saved
+        result = mpiabi._get_mpiabi()
+
+    def testGetLib(self):
+        importlib.import_module("mpi4py.MPI")
+        mpiabi = self.mpiabi
+        abinames = {"mpiabi", "mpich", "openmpi", "impi", "msmpi"}
+        result = mpiabi._get_mpiabi()
+        self.assertIn(result, abinames)
+
+    def testString(self):
+        mpiabi = self.mpiabi
+        posix = os.name == "posix"
+        for string, expected in (
+            ("MPICH", "mpich" if posix else "impi"),
+            ("I_MPI", "mpich" if posix else "impi"),
+            ("Open MPI", "openmpi"),
+            ("OPEN-MPI", "openmpi"),
+            ("", ""),
+        ):
+            result = mpiabi._get_mpiabi_from_string(string)
+            self.assertEqual(result, expected)
+
+    def testSuffix(self):
+        mpiabi = self.mpiabi
+        for abiname in ("mpiabi1", "mpiabi2", ""):
+            mpiabi._get_mpiabi.mpiabi = abiname
+            result = mpiabi._get_mpiabi_suffix("mpi4py.xyz")
+            self.assertIsNone(result)
+            mpiabi._register("mpi4py.xyz", abiname)
+            mpiabi._register("mpi4py.xyz", abiname)
+            result = mpiabi._get_mpiabi_suffix("mpi4py.xyz")
+            self.assertEqual(result, f".{abiname}" if abiname else "")
+
+    def testFinder(self):
+        mpiabi = self.mpiabi
+        finder = mpiabi._Finder
+        registry = mpiabi._registry
+        if finder not in sys.meta_path:
+            mpiabi._install_finder()
+            mpiabi._install_finder()
+            self.assertIs(finder, sys.meta_path.pop())
+        if "mpi4py.MPI" not in registry:
+            mpiabi._get_mpiabi.mpiabi = ""
+            mpiabi._register("mpi4py.MPI", "")
+        spec = finder.find_spec("mpi4py.MPI", mpi4py.__path__)
+        if mpiabi._get_mpiabi.mpiabi == "":
+            del mpiabi._get_mpiabi.mpiabi
+            del registry["mpi4py.MPI"]
+        self.assertIsNotNone(spec)
+        #
+        spec = finder.find_spec("mpi4py.xyz", mpi4py.__path__)
+        self.assertIsNone(spec)
+        mpiabi._get_mpiabi.mpiabi = ""
+        mpiabi._register("mpi4py.xyz", "")
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            spec = finder.find_spec("mpi4py.xyz", mpi4py.__path__)
+            self.assertIsNone(spec)
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            with self.assertRaises(RuntimeWarning):
+                finder.find_spec("mpi4py.xyz", mpi4py.__path__)
+
+    def testVerboseInfo(self):
+        mpiabi = self.mpiabi
+        message = "@message@"
+        output = f"# [{mpiabi.__name__}] {message}\n"
+        with capture_stderr() as stderr:
+            mpiabi._verbose_info(message, verbosity=-1)
+        self.assertEqual(stderr.getvalue(), output)
+
+    def testDLOpen(self):
+        mpiabi = self.mpiabi
+        os_name_save = os.name
+        os_environ_save = os.environ
+        sys_platform_save = sys.platform
+        try:
+            for os_name, sys_platform in (
+                ("posix", "linux"),
+                ("posix", "freebsd"),
+                ("posix", "darwin"),
+                ("nt", "win32"),
+            ):
+                os.name = os_name
+                sys.platform = sys_platform
+                mpiabi._dlopen_rpath()
+            os.environ = env = {}
+            env["I_MPI_ROOT"] = "/usr"
+            mpiabi._dlopen_rpath()
+            env["MSMPI_ROOT"] = "/usr"
+            mpiabi._dlopen_rpath()
+            env["MSMPI_BIN"] = "/usr/bin"
+            mpiabi._dlopen_rpath()
+        finally:
+            os.name = os_name_save
+            os.environ = os_environ_save  # noqa: B003
+            sys.platform = sys_platform_save
 
 
 if __name__ == "__main__":
