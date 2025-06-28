@@ -89,8 +89,18 @@ class TestMPIABI(unittest.TestCase):
     #
     #
     def setUp(self):
+        module = importlib.import_module("mpi4py.MPI")
         self.mpiabi = importlib.import_module("mpi4py._mpiabi")
         self.sentinel = getattr(self.mpiabi._get_mpiabi, "mpiabi", None)
+        self.savedstate = (self.mpiabi.MPIABI, self.mpiabi.LIBMPI)
+        if os.name == "posix":
+            self.libmpi = module.__file__
+        else:
+            vendor = module.get_vendor()[0]
+            if vendor == "Intel MPI":
+                self.libmpi = "impi.dll"
+            elif vendor == "Microsoft MPI":
+                self.libmpi = "msmpi.dll"
 
     def tearDown(self):
         self.mpiabi._registry.pop("mpi4py.xyz", None)
@@ -98,31 +108,29 @@ class TestMPIABI(unittest.TestCase):
             self.mpiabi._get_mpiabi.mpiabi = self.sentinel
         elif hasattr(self.mpiabi._get_mpiabi, "mpiabi"):
             del self.mpiabi._get_mpiabi.mpiabi
+        self.mpiabi.MPIABI, self.mpiabi.LIBMPI = self.savedstate
         del self.mpiabi
 
-    def testGetStr(self):
-        importlib.import_module("mpi4py.MPI")
+    def testGetFromString(self):
         mpiabi = self.mpiabi
-        saved = mpiabi.MPIABI
-        try:
-            mpiabi.MPIABI = "@mpiabi@"
-            result = mpiabi._get_mpiabi()
-            self.assertEqual(result, mpiabi.MPIABI)
-        finally:
-            mpiabi.MPIABI = saved
+        mpiabi._get_mpiabi.mpiabi = None
+        mpiabi.MPIABI = "mpiabi"
         result = mpiabi._get_mpiabi()
+        self.assertEqual(result, "mpiabi")
 
-    def testGetLib(self):
-        importlib.import_module("mpi4py.MPI")
+    def testGetFromLibMPI(self):
         mpiabi = self.mpiabi
-        abinames = {"mpiabi", "mpich", "openmpi", "impi", "msmpi"}
+        mpiabi._get_mpiabi.mpiabi = None
+        mpiabi.LIBMPI = self.libmpi
         result = mpiabi._get_mpiabi()
-        self.assertIn(result, abinames)
+        expected = {"mpiabi", "mpich", "openmpi", "impi", "msmpi"}
+        self.assertIn(result, expected)
 
     def testString(self):
         mpiabi = self.mpiabi
         posix = os.name == "posix"
         for string, expected in (
+            ("mpiabi", "mpiabi"),
             ("MPICH", "mpich" if posix else "impi"),
             ("I_MPI", "mpich" if posix else "impi"),
             ("Open MPI", "openmpi"),
@@ -131,6 +139,13 @@ class TestMPIABI(unittest.TestCase):
         ):
             result = mpiabi._get_mpiabi_from_string(string)
             self.assertEqual(result, expected)
+
+    def testLibMPI(self):
+        mpiabi = self.mpiabi
+        libmpi = self.libmpi
+        result = mpiabi._get_mpiabi_from_libmpi(libmpi)
+        expected = {"mpiabi", "mpich", "openmpi", "impi", "msmpi"}
+        self.assertIn(result, expected)
 
     def testSuffix(self):
         mpiabi = self.mpiabi
