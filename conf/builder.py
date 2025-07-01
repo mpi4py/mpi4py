@@ -9,7 +9,7 @@ import sys
 
 BACKENDS = {
     "setuptools": "setuptools.build_meta",
-    "skbuild": "scikit_build_core.setuptools.build_meta",
+    "skbuild": "scikit_build_core.build",
     "mesonpy": "mesonpy",
 }
 
@@ -203,6 +203,23 @@ def build_editable(
 # ---
 
 
+def patch_mesonpy():
+    try:
+        import mesonpy
+        import metadata as md
+    except ImportError:
+        return
+
+    class Metadata(mesonpy.Metadata):
+        @classmethod
+        def from_pyproject(cls, data, *args, **kwargs):
+            data["project"]["readme"] = md.get_readme()
+            data["project"]["dynamic"].remove("readme")
+            return super().from_pyproject(data, *args, **kwargs)
+
+    mesonpy.Metadata = Metadata
+
+
 def setup_env_mpicc():
     mpicc = shutil.which("mpicc")
     mpicc = os.environ.get("MPICC", mpicc)
@@ -229,6 +246,7 @@ if get_build_backend_name() == "setuptools":
     del st_bm
 
 if get_build_backend_name() == "mesonpy":
+    patch_mesonpy()
     setup_env_mpicc()
     del prepare_metadata_for_build_wheel
     del prepare_metadata_for_build_editable
