@@ -101,7 +101,7 @@ jobs:
       run: ${{ runner.os == 'macOS' && 'brew' || 'choco' }} install uv
 
     - id: build
-      uses: pypa/cibuildwheel@v3.0.0
+      uses: pypa/cibuildwheel@v3.0.1
       timeout-minutes: 10
       with:
         package-dir: .
