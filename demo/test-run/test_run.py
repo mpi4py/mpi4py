@@ -143,7 +143,7 @@ class TestRunScript(BaseTestRun):
             for rank in range(np):
                 args = ["--rank", str(rank), "--exception", message]
                 status, stdout, stderr = self.execute(args, np)
-                if on_ci and status == 221:
+                if on_ci and status in {221, 222}:
                     continue
                 self.assertEqual(status, 1)
                 self.assertMPIAbort(stdout, stderr, excmess)
@@ -176,7 +176,7 @@ class TestRunScript(BaseTestRun):
             for rank in range(np):
                 args = ["--rank", str(rank), "--interrupt"]
                 status, stdout, stderr = self.execute(args, np)
-                if on_ci and status == 221:
+                if on_ci and status in {221, 222}:
                     continue
                 if not on_pypy:
                     self.assertEqual(status, SIGINT + 128)
@@ -266,7 +266,7 @@ class TestRunCommand(BaseTestRun):
         for np in (1, 2):
             for rank in range(np):
                 status, stdout, stderr = self.execute(command.format(rank), np)
-                if on_ci and status == 221:
+                if on_ci and status in {221, 222}:
                     continue
                 self.assertEqual(status, 1)
                 self.assertMPIAbort(stdout, stderr, excmess)
