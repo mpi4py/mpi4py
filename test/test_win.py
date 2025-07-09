@@ -1,3 +1,4 @@
+import os
 import sys
 
 import mpitestutil as testutil
@@ -151,6 +152,49 @@ class BaseTestWin:
         self.assertIn(model, models)
         self.assertEqual(model, self.WIN.model)
 
+    def testSharedQuery(self):
+        flavor = self.WIN.Get_attr(MPI.WIN_CREATE_FLAVOR)
+        if flavor != MPI.WIN_FLAVOR_SHARED:
+            if MPI.Get_version() < (4, 1):
+                return
+            if flavor == MPI.WIN_FLAVOR_DYNAMIC:
+                return
+            if unittest.is_mpi("impi"):
+                i_mpi_compat = os.environ.get("I_MPI_COMPATIBILITY", "mpi-3.1")
+                if i_mpi_compat in {"3", "4", "5", "mpi-3.1", "mpi-4.0"}:
+                    return
+                if flavor == MPI.WIN_FLAVOR_CREATE:  # mpi4py/mpi4py#665
+                    return
+            if unittest.is_mpi("mpich(<4.2.2)"):
+                if flavor == MPI.WIN_FLAVOR_CREATE:
+                    return
+            if unittest.is_mpi("mpich"):  # pmodels/mpich#7499
+                if "ch3:nemesis" in MPI.Get_library_version():
+                    return
+        memory = self.WIN.tomemory()
+        address = MPI.Get_address(memory)
+        length = len(memory)
+        memories = self.COMM.allgather((address, length))
+        for i in range(self.COMM.Get_size()):
+            query = target = i
+            mem, disp = self.WIN.Shared_query(query)
+            base = MPI.Get_address(mem)
+            size = len(mem)
+            if flavor == MPI.WIN_FLAVOR_SHARED or size != 0:
+                if self.COMM.Get_rank() == target:
+                    self.assertEqual(base, memories[target][0])
+                self.assertEqual(size, memories[target][1])
+                self.assertEqual(disp, 1)
+        query, target = MPI.PROC_NULL, 0
+        mem, disp = self.WIN.Shared_query(query)
+        base = MPI.Get_address(mem)
+        size = len(mem)
+        if flavor == MPI.WIN_FLAVOR_SHARED or size != 0:
+            if self.COMM.Get_rank() == target:
+                self.assertEqual(base, memories[target][0])
+            self.assertEqual(size, memories[target][1])
+            self.assertEqual(disp, 1)
+
     def testPyProps(self):
         win = self.WIN
         #
@@ -185,7 +229,8 @@ class BaseTestWinCreate(BaseTestWin):
     CREATE_FLAVOR = MPI.WIN_FLAVOR_CREATE
 
     def setUp(self):
-        self.memory = MPI.Alloc_mem(10)
+        blen = 10 + self.COMM.Get_rank()
+        self.memory = MPI.Alloc_mem(blen)
         memzero(self.memory)
         self.WIN = MPI.Win.Create(self.memory, 1, self.INFO, self.COMM)
 
@@ -199,7 +244,8 @@ class BaseTestWinAllocate(BaseTestWin):
     CREATE_FLAVOR = MPI.WIN_FLAVOR_ALLOCATE
 
     def setUp(self):
-        self.WIN = MPI.Win.Allocate(10, 1, self.INFO, self.COMM)
+        blen = 10 + self.COMM.Get_rank()
+        self.WIN = MPI.Win.Allocate(blen, 1, self.INFO, self.COMM)
         self.memory = self.WIN.tomemory()
         memzero(self.memory)
 
@@ -220,7 +266,8 @@ class BaseTestWinAllocateShared(BaseTestWin):
         else:
             self.COMM = self.COMM.Dup()
         try:
-            self.WIN = MPI.Win.Allocate_shared(10, 1, self.INFO, self.COMM)
+            blen = 10 + self.COMM.Get_rank()
+            self.WIN = MPI.Win.Allocate_shared(blen, 1, self.INFO, self.COMM)
         except Exception:
             self.COMM.Free()
             raise
@@ -230,22 +277,6 @@ class BaseTestWinAllocateShared(BaseTestWin):
     def tearDown(self):
         self.COMM.Free()
         self.WIN.Free()
-
-    def testSharedQuery(self):
-        memory = self.WIN.tomemory()
-        address = MPI.Get_address(memory)
-        length = len(memory)
-        memories = self.COMM.allgather((address, length))
-        rank = self.COMM.Get_rank()
-        size = self.COMM.Get_size()
-        for i in range(size):
-            mem, disp = self.WIN.Shared_query(rank)
-            base = MPI.Get_address(mem)
-            size = len(mem)
-            if i == rank:
-                self.assertEqual(base, memories[i][0])
-            self.assertEqual(size, memories[i][1])
-            self.assertEqual(disp, 1)
 
 
 @unittest.skipMPI("impi(>=2021.14.0,<2021.15.0)", testutil.github())
