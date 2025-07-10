@@ -2,6 +2,7 @@ import os
 import pathlib
 import shlex
 import shutil
+import signal
 import string
 import subprocess
 import sys
@@ -12,7 +13,6 @@ import zipfile
 
 import mpi4py
 
-on_pypy = hasattr(sys, "pypy_version_info")
 on_ci = any((
     os.environ.get("GITHUB_ACTIONS") == "true",
     os.environ.get("TF_BUILD") == "True",
@@ -85,17 +85,29 @@ def execute(np, cmd, args=""):
 
 @unittest.skipIf(not find_mpiexec(), "mpiexec")
 class BaseTestRun(unittest.TestCase):
+    #
+
+    def assertFailure(self, status, expected):
+        if on_ci and status in {221, 222}:
+            with warnings.catch_warnings():
+                warnings.simplefilter("always")
+                warnings.warn(
+                    f"expecting status {expected}, got {status}",
+                    RuntimeWarning,
+                    2,
+                )
+            return
+        if isinstance(expected, int):
+            self.assertEqual(status, expected)
+        else:
+            self.assertIn(status, expected)
+
     def assertMPIAbort(self, stdout, stderr, message=None):
         patterns = (
             "MPI_Abort",  # MPICH
             "MPI_ABORT",  # Open MPI
             "aborting MPI_COMM_WORLD",  # Microsoft MPI
         )
-        if on_pypy and message == "KeyboardInterrupt":
-            patterns += (
-                "EXIT STRING: Interrupt (signal 2)",  # MPICH
-                "exited on signal 2 (Interrupt)",  # Open MPI
-            )
         aborted = any(
             mpiabort in output
             for output in (stdout, stderr)
@@ -143,9 +155,7 @@ class TestRunScript(BaseTestRun):
             for rank in range(np):
                 args = ["--rank", str(rank), "--exception", message]
                 status, stdout, stderr = self.execute(args, np)
-                if on_ci and status in {221, 222}:
-                    continue
-                self.assertEqual(status, 1)
+                self.assertFailure(status, 1)
                 self.assertMPIAbort(stdout, stderr, excmess)
 
     def testSysExitCode(self):
@@ -154,7 +164,7 @@ class TestRunScript(BaseTestRun):
             for r in sorted({0, np - 1}):
                 args = ["--rank", str(r), "--sys-exit", str(errcode)]
                 status, stdout, stderr = self.execute(args, np)
-                self.assertIn(status, (errcode, 1))
+                self.assertFailure(status, (errcode, 1))
                 self.assertMPIAbort(stdout, stderr)
                 self.assertNotIn("Traceback", stderr)
 
@@ -164,22 +174,17 @@ class TestRunScript(BaseTestRun):
             for r in sorted({0, np - 1}):
                 args = ["--rank", str(r), "--sys-exit-msg", exitmsg]
                 status, stdout, stderr = self.execute(args, np)
-                self.assertEqual(status, 1)
+                self.assertFailure(status, 1)
                 self.assertMPIAbort(stdout, stderr, exitmsg)
                 self.assertNotIn("Traceback", stderr)
 
     def testInterrupt(self):
-        from signal import SIGINT
-
         excmess = "KeyboardInterrupt"
         for np in (1, 2):
             for rank in range(np):
                 args = ["--rank", str(rank), "--interrupt"]
                 status, stdout, stderr = self.execute(args, np)
-                if on_ci and status in {221, 222}:
-                    continue
-                if not on_pypy:
-                    self.assertEqual(status, SIGINT + 128)
+                self.assertFailure(status, signal.SIGINT + 128)
                 self.assertMPIAbort(stdout, stderr, excmess)
 
 
@@ -266,9 +271,7 @@ class TestRunCommand(BaseTestRun):
         for np in (1, 2):
             for rank in range(np):
                 status, stdout, stderr = self.execute(command.format(rank), np)
-                if on_ci and status in {221, 222}:
-                    continue
-                self.assertEqual(status, 1)
+                self.assertFailure(status, 1)
                 self.assertMPIAbort(stdout, stderr, excmess)
 
 
