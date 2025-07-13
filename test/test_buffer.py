@@ -269,7 +269,7 @@ class TestBuffer(unittest.TestCase):
             def setitem3():
                 mem[None] = 0
 
-            self.assertRaises(Exception, delitem)
+            self.assertRaises(NotImplementedError, delitem)
             self.assertRaises(IndexError, getitem1)
             self.assertRaises(IndexError, getitem2)
             self.assertRaises(TypeError, getitem3)

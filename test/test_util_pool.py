@@ -286,8 +286,8 @@ class BaseTestPool:
         result.wait(TIMEOUT1)
         result.wait()
         self.assertFalse(result.successful())
-        self.assertRaises(Exception, result.get, TIMEOUT1)
-        self.assertRaises(Exception, result.get)
+        self.assertRaises(TimeoutError, result.get, TIMEOUT1)
+        self.assertRaises(TimeoutError, result.get)
 
         p = self.Pool(1)
         args = [TIMEOUT1] * 100
@@ -297,8 +297,8 @@ class BaseTestPool:
         result.wait(TIMEOUT1)
         result.wait()
         self.assertFalse(result.successful())
-        self.assertRaises(Exception, result.get, TIMEOUT1)
-        self.assertRaises(Exception, result.get)
+        self.assertRaises(TimeoutError, result.get, TIMEOUT1)
+        self.assertRaises(TimeoutError, result.get)
 
     def test_empty_iterable(self):
         p = self.Pool(1)
