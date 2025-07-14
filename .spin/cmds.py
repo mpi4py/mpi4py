@@ -119,6 +119,7 @@ def type(ctx):  # noqa: A001
     _run_check_commands(
         ["stubtest", "mpi4py"],
         ["mypy", "-p", "mpi4py"],
+        ["ty", "check", "src"],
     )
 
 

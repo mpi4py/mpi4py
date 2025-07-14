@@ -39,7 +39,8 @@ def _dlopen_rpath():
     rpath = []
 
     def add_rpath(*directory):
-        path = os.path.join(*directory)
+        root, *dirs = directory
+        path = os.path.join(root, *dirs)
         if path not in rpath:
             rpath.append(path)
 
