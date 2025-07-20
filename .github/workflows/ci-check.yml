@@ -224,7 +224,6 @@ jobs:
         mypy --python-version 3.11 -p mpi4py
         mypy --python-version 3.10 -p mpi4py
         mypy --python-version 3.9  -p mpi4py
-        mypy --python-version 3.8  -p mpi4py
 
     - name: mypy (stubtest)
       run:  stubtest mpi4py
