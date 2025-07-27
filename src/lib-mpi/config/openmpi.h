@@ -142,8 +142,8 @@
 #endif
 
 #if MPI_VERSION == 3
-#if OMPI_NUMVERSION >= 50000
 
+#if OMPI_NUMVERSION >= 50000
 #define PyMPI_HAVE_MPI_Pready 1
 #define PyMPI_HAVE_MPI_Pready_range 1
 #define PyMPI_HAVE_MPI_Pready_list 1
@@ -207,11 +207,16 @@
 #define PyMPI_HAVE_MPI_F_TAG 1
 #define PyMPI_HAVE_MPI_F_ERROR 1
 #define PyMPI_HAVE_MPI_F_STATUS_SIZE 1
-
-#endif
 #endif
 
-#if MPI_VERSION < 5
+#if OMPI_NUMVERSION >= 50100
+#define PyMPI_HAVE_MPI_ERR_ERRHANDLER 1
+#endif
+
+#endif
+
+
+#if MPI_VERSION < 6
 
 #ifdef MPI_ERR_REVOKED
 #define PyMPI_HAVE_MPI_ERR_REVOKED 1
