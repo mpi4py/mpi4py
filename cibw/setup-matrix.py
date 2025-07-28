@@ -14,11 +14,11 @@ def py(py, x, y_min, y_max, abi=""):
     return [f"{py}{x}{y}{abi}" for y in range(y_min, y_max + 1)]
 
 
-def cp3(y_min=8, y_max=13):
+def cp3(y_min=8, y_max=14):
     return py("cp", 3, y_min, y_max)
 
 
-def cp3t(y_min=13, y_max=13):
+def cp3t(y_min=13, y_max=14):
     return py("cp", 3, y_min, y_max, abi="t")
 
 
@@ -162,6 +162,7 @@ for build in matrix_build:
             "runner": runner,
         }
         for py in pylist
+        if py not in {"3.14", "3.14t"}
         for mpi in mpilist
     ]
 
