@@ -191,7 +191,7 @@ jobs:
       run: python -m pip install --upgrade wheel
 
     - id: download
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v5
       with:
         path: wheelhouse
         pattern: build-${{ runner.os }}-${{ matrix.arch }}-*
@@ -241,7 +241,7 @@ jobs:
 
     - uses: actions/checkout@v4
 
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v5
       with:
         path: dist
         pattern: wheel-${{ runner.os }}-${{ matrix.arch }}
