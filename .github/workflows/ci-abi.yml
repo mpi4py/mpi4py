@@ -161,11 +161,11 @@ jobs:
         egress-policy: audit
 
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - if: matrix.mpi == 'mpiabi'
       name: Checkout MPI ABI stubs
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         repository: mpi-forum/mpi-abi-stubs
         path: mpi-abi-stubs
@@ -393,7 +393,7 @@ jobs:
               --verbose --no-index --find-links=dist
 
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Test mpi4py cmdline (mpi-library)
       run:  mpiexec -n 1 python -m mpi4py --mpi-library
