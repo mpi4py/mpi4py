@@ -270,10 +270,10 @@ def _setup_autodoc(app):
 
     def get_documenter(*args, **kwargs):
         if hasattr(autosummary, "_get_documenter"):
-            obj, args = args[0], args[1:]
+            obj = args[0]  # signature is (obj, parent, *, registry)
             get_documenter = autosummary._get_documenter
         else:
-            obj, args = args[1], (args[0], *args[2:])
+            obj = args[1]  # signature is (app, obj, parent)
             get_documenter = autosummary.get_documenter
         if isinstance(obj, type) and issubclass(obj, BaseException):
             caller = sys._getframe().f_back.f_code.co_name
@@ -281,7 +281,7 @@ def _setup_autodoc(app):
                 if obj.__module__ == "mpi4py.MPI":
                     if obj.__name__ == "Exception":
                         return ExceptionDocumenterCustom
-        return get_documenter(obj, *args, **kwargs)
+        return get_documenter(*args, **kwargs)
 
     from sphinx.ext.autosummary import generate
 
