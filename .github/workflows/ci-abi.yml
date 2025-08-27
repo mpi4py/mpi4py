@@ -395,6 +395,10 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v5
 
+    - name: Set hostname
+      run:  sudo hostname localhost
+      if:   runner.os == 'macOS'
+
     - name: Test mpi4py cmdline (mpi-library)
       run:  mpiexec -n 1 python -m mpi4py --mpi-library
     - name: Test mpi4py cmdline (mpi-std-version)
