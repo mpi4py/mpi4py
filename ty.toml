@@ -1,0 +1,9 @@
+[environment]
+python-version = "3.13"
+python-platform = "all"
+
+[rules]
+possibly-unbound-attribute = "ignore"
+possibly-unbound-import = "ignore"
+unresolved-attribute = "ignore"
+unresolved-import = "ignore"
