@@ -540,6 +540,18 @@ class BaseTest:
                 request = comm.issend(smess, comm.rank, 123)
                 message = comm.mprobe(MPI.ANY_SOURCE, MPI.ANY_TAG)
                 rreq = message.irecv()
+                if (  # pmodels/mpich#7522
+                    unittest.is_mpi("mpich(>=5.0.0)")
+                    and "ch4:ofi" in MPI.Get_library_version()
+                    and os.environ.get("GITHUB_ACTIONS") == "true"
+                    and comm.Get_size() > 1
+                ):
+                    while True:
+                        flag, rmess = rreq.test()
+                        if flag:
+                            self.assertEqual(rmess, smess)
+                            break
+                    request.wait()
                 rreq.test()
                 request.free()
         finally:
