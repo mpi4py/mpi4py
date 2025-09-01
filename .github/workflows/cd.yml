@@ -118,7 +118,7 @@ jobs:
       working-directory: dist
 
     - name: Attest artifacts
-      uses: actions/attest-build-provenance@v2
+      uses: actions/attest-build-provenance@v3
       with:
         subject-path: dist/*
 
@@ -266,7 +266,7 @@ jobs:
         merge-multiple: true
 
     - name: Attest distribution artifact
-      uses: actions/attest-build-provenance@v2
+      uses: actions/attest-build-provenance@v3
       with:
         subject-path: dist/*.tar.gz
 
