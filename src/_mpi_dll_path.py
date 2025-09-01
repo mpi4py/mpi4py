@@ -57,7 +57,8 @@ def _mpi_dll_directories():
     dlldirs = []
 
     def add_dlldir(*directory, dll=""):
-        dlldir = os.path.join(*directory)
+        root, *dirs = directory
+        dlldir = os.path.join(root, *dirs)
         if dlldir not in dlldirs:
             filename = os.path.join(dlldir, f"{dll}.dll")
             if os.path.isfile(filename):
@@ -96,7 +97,7 @@ def _add_dll_directory(dlldir):
     dlldir = os.path.realpath(dlldir)
     if dlldir not in _registry:
         path = os.environ["PATH"].split(os.path.pathsep)
-        if dlldir not in set(map(os.path.realpath, path)):
+        if dlldir not in set(map(os.path.realpath, path)):  # ty: ignore
             _verbose_info(f"adding {dlldir!r} to PATH")
             os.environ["PATH"] += os.path.pathsep + dlldir
         _verbose_info(f"adding {dlldir!r} to DLL directories")

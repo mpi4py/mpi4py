@@ -39,7 +39,8 @@ def _dlopen_rpath():
     rpath = []
 
     def add_rpath(*directory):
-        path = os.path.join(*directory)
+        root, *dirs = directory
+        path = os.path.join(root, *dirs)
         if path not in rpath:
             rpath.append(path)
 
@@ -311,4 +312,4 @@ class _Finder:
 
 def _install_finder():
     if _Finder not in sys.meta_path:
-        sys.meta_path.append(_Finder)
+        sys.meta_path.append(_Finder)  # ty: ignore[invalid-argument-type]

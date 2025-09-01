@@ -87,8 +87,8 @@ def _wrap_exc(exc, tb):
 
 
 def _format_exc(exc, comm):
-    exc_info = (type(exc), exc, exc.__traceback__)
-    tb_lines = traceback.format_exception(*exc_info)
+    et, ev, tb = (type(exc), exc, exc.__traceback__)
+    tb_lines = traceback.format_exception(et, ev, tb)
     body = "".join(tb_lines)
     host = MPI.Get_processor_name()
     rank = comm.Get_rank()
@@ -891,7 +891,7 @@ def import_main(mod_name, mod_path, init_globals, run_name):
             self.module = module
 
     TempModule = runpy._TempModule  # pylint: disable=invalid-name
-    runpy._TempModule = TempModulePatch
+    runpy._TempModule = TempModulePatch  # ty: ignore[invalid-assignment]
     import_main.sentinel = (mod_name, mod_path)
     main_module = sys.modules["__main__"]
     try:
@@ -1041,7 +1041,8 @@ def get_max_workers():
 
 
 def get_spawn_module():
-    return __spec__.parent + ".server"
+    package = __spec__.parent or "mpi4py.futures"
+    return package + ".server"
 
 
 def client_spawn(
