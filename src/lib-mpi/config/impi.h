@@ -274,7 +274,7 @@
 
 #endif
 
-#if I_MPI_NUMVERSION < 20211601300 && defined (_WIN32)
+#if I_MPI_NUMVERSION < 20211700300 && defined (_WIN32)
 #undef PyMPI_HAVE_MPI_File_get_type_extent_c 1
 #undef PyMPI_HAVE_MPI_Register_datarep_c 1
 #endif
