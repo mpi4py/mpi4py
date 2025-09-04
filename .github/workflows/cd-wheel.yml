@@ -86,7 +86,7 @@ jobs:
       shell: bash
 
     - id: setup-python
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: 3
 
@@ -187,7 +187,7 @@ jobs:
       shell: bash
 
     - id: setup-python
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: 3
 
@@ -325,7 +325,7 @@ jobs:
 
     # * test pip
 
-    - uses: actions/setup-python@v5
+    - uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.py }}
 

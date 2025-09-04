@@ -78,7 +78,7 @@ jobs:
         mpi: ${{ matrix.mpi }}
 
     - name: Setup Python (${{ github.event.inputs.py || 3 }})
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ github.event.inputs.py || 3 }}
         check-latest: true

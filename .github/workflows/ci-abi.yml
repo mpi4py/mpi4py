@@ -257,7 +257,7 @@ jobs:
       shell: bash
 
     - name: Setup Python (${{ matrix.py }})
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.py }}
         cache: pip
@@ -375,7 +375,7 @@ jobs:
       shell: bash
 
     - name: Setup Python (${{ matrix.py }})
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.py }}
 
