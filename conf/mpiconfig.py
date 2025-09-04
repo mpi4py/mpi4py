@@ -145,7 +145,7 @@ class Config:
 
     def _setup_mpiabi(self):
         MPI_ABI_STUBS = os.environ.get("MPI_ABI_STUBS")
-        if MPI_ABI_STUBS:
+        if MPI_ABI_STUBS and os.path.isdir(MPI_ABI_STUBS):
             self.load("mpi.cfg", "mpiabi")
             self.filename = [MPI_ABI_STUBS]
 

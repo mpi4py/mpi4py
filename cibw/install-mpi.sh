@@ -6,14 +6,6 @@ MACHINE=${PROCESSOR_ARCHITECTURE:-$(uname -m)}
 MPIARCH=${2:-$MACHINE}
 MPIARCH=${MPIARCH/native/$MACHINE}
 
-MPI_CHANNEL=conda-forge
-MPI_PACKAGE=${MPI_ABI}
-case "$MPI_ABI" in
-    mpich)   MPI_VERSION=4 ;;
-    openmpi) MPI_VERSION=5 ;;
-    msmpi)   MPI_VERSION=10.1.1 ;;
-    impi)    MPI_VERSION=2021.15.0 MPI_PACKAGE=impi-devel ;;
-esac
 case "$(uname)" in
     Linux|Darwin)
         MPI_ROOT=${MPI_ROOT:-/usr/local}
@@ -23,6 +15,33 @@ case "$(uname)" in
         MPI_ROOT=${MPI_ROOT:-~/mpi}
         sudo() { "$@"; }
         ;;
+esac
+
+if [ "$MPI_ABI" == mpiabi ]; then
+    echo "Download MPI (mpi-abi-stubs)"
+    giturl=https://github.com/mpi-forum/mpi-abi-stubs.git
+    branch=runtime
+    rm -rf mpiabi build
+    git clone --quiet --depth 1 --branch "$branch" "$giturl" mpiabi
+    echo "Install MPI (mpi-abi-stubs) [$MACHINE]"
+    options+=(-DCMAKE_INSTALL_PREFIX="$MPI_ROOT"/stubs)
+    options+=(-DCMAKE_INSTALL_LIBDIR="lib")
+    cmake -S mpiabi -B mpiabi/build "${options[@]}"
+    cmake --build mpiabi/build --config Release
+    sudo cmake --install mpiabi/build --config Release
+    rm -rf mpiabi
+    echo "Rebuild dynamic linker cache"
+    sudo "$(command -v ldconfig || echo true)"
+    exit 0
+fi
+
+MPI_CHANNEL=conda-forge
+MPI_PACKAGE=${MPI_ABI}
+case "$MPI_ABI" in
+    mpich)   MPI_VERSION=4 ;;
+    openmpi) MPI_VERSION=5 ;;
+    msmpi)   MPI_VERSION=10.1.1 ;;
+    impi)    MPI_VERSION=2021.15.0 MPI_PACKAGE=impi-devel ;;
 esac
 
 echo "Install Micromamba"

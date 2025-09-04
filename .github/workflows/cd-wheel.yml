@@ -140,6 +140,7 @@ jobs:
           LDFLAGS="$LDFLAGS -Wl,-rpath,/opt/homebrew/lib"
           LDFLAGS="$LDFLAGS -Wl,-rpath,/opt/local/lib"
         CIBW_ENVIRONMENT_WINDOWS: >-
+          MPI_ABI_STUBS="$USERPROFILE\\mpi\\stubs"
           I_MPI_ROOT="$USERPROFILE\\mpi\\Library"
           MSMPI_ROOT="$USERPROFILE\\mpi\\Library"
           MSMPI_BIN="$MSMPI_ROOT\\bin"
