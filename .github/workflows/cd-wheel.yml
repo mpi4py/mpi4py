@@ -9,7 +9,7 @@ on:  # yamllint disable-line rule:truthy
         required: false
         type: string
       python-tag:
-        description: "CPython/PyPy tag ({cp,pp}3{7..13})"
+        description: "CPython/PyPy tag ({cp,pp}3{8..14})"
         default: ''
         required: false
         type: string
@@ -31,7 +31,7 @@ on:  # yamllint disable-line rule:truthy
           - Windows
           - Windows-AMD64
       python-tag:
-        description: "CPython/PyPy tag ({cp,pp}3{8..13})"
+        description: "CPython/PyPy tag ({cp,pp}3{8..14})"
         default: ''
         required: false
         type: string
@@ -283,6 +283,7 @@ jobs:
           channel_priority: strict
           channels:
             - conda-forge
+            - conda-forge/label/python_rc
             - nodefaults
 
     - if: ${{ !startsWith(matrix.py, 'pypy') }}
@@ -328,6 +329,7 @@ jobs:
     - uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.py }}
+        allow-prereleases: true
 
     # ** test virtual environment
 

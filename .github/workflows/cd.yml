@@ -16,7 +16,7 @@ on:  # yamllint disable-line rule:truthy
   workflow_dispatch:
     inputs:
       python-tag:
-        description: "CPython/PyPy tag ({cp,pp}3{8..13})"
+        description: "CPython/PyPy tag ({cp,pp}3{8..14})"
         default: ''
         required: false
         type: string

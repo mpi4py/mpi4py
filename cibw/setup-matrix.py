@@ -162,7 +162,6 @@ for build in matrix_build:
             "runner": runner,
         }
         for py in pylist
-        if py not in {"3.14", "3.14t"}
         for mpi in mpilist
     ]
 
