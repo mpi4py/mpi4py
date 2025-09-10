@@ -63,6 +63,9 @@ Runtime configuration options
 
    Automatic MPI finalization at exit.
 
+   For the value :obj:`None` it instead defaults to the
+   value of :attr:`mpi4py.rc.initialize`.
+
    :type: :obj:`None` or :class:`bool`
    :default: :obj:`None`
 
