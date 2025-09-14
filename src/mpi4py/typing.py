@@ -235,7 +235,7 @@ Target specification.
 * Tuple[()]
 * Tuple[`Displ`]
 * Tuple[`Displ`, `Count`]
-* Tuple[`Displ`, `Count`, `Datatype`]
+* Tuple[`Displ`, `Count`, `TypeSpec`]
 """
 
 
