@@ -1,3 +1,3 @@
 cffi    ; implementation_name == 'cpython'
-numpy   ; implementation_name == 'cpython' or (python_version < '3.12')
+numpy   ; implementation_name == 'cpython' or  python_version <= '3.11'
 pyyaml  ; implementation_name == 'cpython'
