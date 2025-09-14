@@ -278,6 +278,10 @@ class BaseTestWinAllocateShared(BaseTestWin):
         self.COMM.Free()
         self.WIN.Free()
 
+    @unittest.skipMPI("mpich(>=4.2.0,<4.3.0)", sys.platform == "linux")
+    def testSharedQuery(self):
+        super().testSharedQuery()
+
 
 @unittest.skipMPI("impi(>=2021.14.0,<2021.15.0)", testutil.github())
 class BaseTestWinCreateDynamic(BaseTestWin):
