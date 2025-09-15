@@ -215,6 +215,13 @@ class BaseTestPool:
         self.assertLess(get.elapsed, TIMEOUT2 * 10)
         self.assertGreater(get.elapsed, TIMEOUT2 / 10)
 
+    @unittest.skipIf(
+        testutil.github()
+        and sys.platform == "darwin"
+        and sys.implementation.name == "cpython"
+        and sys.abiflags == "t",
+        "gha-macos-freethreaded",
+    )
     def test_apply_async_timeout(self):
         res = self.pool.apply_async(sqr, (7, TIMEOUT2))
         self.assertFalse(res.ready())
