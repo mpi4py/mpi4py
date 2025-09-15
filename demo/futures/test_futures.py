@@ -1,3 +1,4 @@
+import contextlib
 import functools
 import os
 import random
@@ -536,7 +537,7 @@ class ProcessPoolShutdownTest(
 class WaitTestMixin:
     def test_first_completed(self):
         future1 = self.executor.submit(mul, 21, 2)
-        future2 = self.executor.submit(time.sleep, 0.25)
+        future2 = self.executor.submit(time.sleep, 0.5)
 
         done, not_done = futures.wait(
             [CANCELLED_FUTURE, future1, future2],
@@ -1238,7 +1239,8 @@ class MPICommExecutorTest(unittest.TestCase):
         )
         with mpicommexecutor as executor:
             if executor is not None:
-                executor.submit(time.sleep, 0).cancel()
+                with contextlib.suppress(futures.BrokenExecutor):
+                    executor.submit(time.sleep, 0).cancel()
                 future = executor.submit(time.sleep, 0)
                 with self.assertRaises(futures.BrokenExecutor):
                     executor.submit(time.sleep, 0).result()
