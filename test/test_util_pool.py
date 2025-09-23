@@ -3,6 +3,7 @@ import functools
 import itertools
 import os
 import pathlib
+import platform
 import sys
 import time
 import unittest
@@ -16,6 +17,9 @@ try:
 except ImportError:
     sys.path.append(os.fspath(pathlib.Path(__file__).resolve().parent))
     import mpitestutil as testutil
+
+
+mpi_vendor_name, mpi_vendor_version = MPI.get_vendor()
 
 
 def sqr(x, wait=0.0):
@@ -76,6 +80,12 @@ class BaseTestPool:
         cls.pool = None
         super().tearDownClass()
 
+    @unittest.skipIf(
+        mpi_vendor_name == "Open MPI"
+        and mpi_vendor_version < (5, 0, 0)
+        and platform.machine() == "s390x",
+        "openmpi(<5.0.0)-s390x",
+    )
     def test_apply(self):
         papply = self.pool.apply
         self.assertEqual(papply(sqr, (5,)), sqr(5))

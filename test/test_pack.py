@@ -113,6 +113,7 @@ class BaseTestPackExternal:
                         real_size = pack_size - overhead
                         self.assertGreaterEqual(real_size, 0)
 
+    @unittest.skipMPI("openmpi(<5.0.0)", platform.machine() == "sparc64")
     def testPackUnpackExternal(self):
         for array, typecode1 in arrayimpl.loop():
             with arrayimpl.test(self):

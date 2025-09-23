@@ -81,6 +81,7 @@ class TestWorldAttrs(unittest.TestCase):
         if appnum is not None:
             self.assertTrue(appnum == MPI.UNDEFINED or appnum >= 0)
 
+    @unittest.skipMPI("mpich(==4.3.1)", not testutil.has_mpi_appnum())
     @unittest.skipMPI("mpich(<4.1.0)", not testutil.has_mpi_appnum())
     @unittest.skipMPI("mvapich", not testutil.has_mpi_appnum())
     @unittest.skipMPI("MPICH2", not testutil.has_mpi_appnum())

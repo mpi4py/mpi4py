@@ -1,5 +1,6 @@
 import os
 import pathlib
+import platform
 import sys
 import tempfile
 import textwrap
@@ -87,8 +88,9 @@ class BaseTestSpawnSingle(BaseTestSpawn):
         for errcode in errcodes:
             self.assertEqual(errcode, MPI.SUCCESS)
 
-    @unittest.skipMPI("msmpi")
+    @unittest.skipMPI("mpich(<5.0.0)", platform.machine() == "ppc")
     @unittest.skipMPI("mpich(==3.4.1)")
+    @unittest.skipMPI("msmpi")
     def testArgsOnlyAtRoot(self):
         self.COMM.Barrier()
         if self.COMM.Get_rank() == self.ROOT:
