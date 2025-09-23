@@ -96,6 +96,8 @@ datatypes += datatypes_mpi
 
 combiner_map = {}
 
+machine = platform.machine()
+
 
 class TestDatatypeNull(unittest.TestCase):
     #
@@ -225,7 +227,8 @@ class TestDatatype(unittest.TestCase):
         for dtype in datatypes:
             dtype.Commit()
 
-    @unittest.skipMPI("mpich(<4.2.3)", platform.machine().startswith("ppc"))
+    @unittest.skipMPI("mpich(<4.2.3)", machine.startswith("ppc"))
+    @unittest.skipMPI("openmpi(<6.0.0)", machine in {"ppc", "ppc64"})
     def testCodeCharStr(self):
         f90datatypes = []
         try:
@@ -566,7 +569,8 @@ class BaseTestDatatypeCreateMixin:
         args = (p, r)
         self.check(None, factory, *args)
 
-    @unittest.skipMPI("mpich(<4.2.3)", platform.machine().startswith("ppc"))
+    @unittest.skipMPI("mpich(<4.2.3)", machine.startswith("ppc"))
+    @unittest.skipMPI("openmpi(<6.0.0)", machine in {"ppc", "ppc64"})
     @unittest.skipMPI("openmpi(<3.0.0)")
     @unittest.skipMPI("msmpi")
     def testF90RealDouble(self):
@@ -583,7 +587,8 @@ class BaseTestDatatypeCreateMixin:
         args = (p, r)
         self.check(None, factory, *args)
 
-    @unittest.skipMPI("mpich(<4.2.3)", platform.machine().startswith("ppc"))
+    @unittest.skipMPI("mpich(<4.2.3)", machine.startswith("ppc"))
+    @unittest.skipMPI("openmpi(<6.0.0)", machine in {"ppc", "ppc64"})
     @unittest.skipMPI("openmpi(<3.0.0)")
     @unittest.skipMPI("msmpi")
     def testF90ComplexDouble(self):
