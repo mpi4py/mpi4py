@@ -13,7 +13,6 @@ PYTHON=(
     "${python314-python3.14}"
     "${python313t-python3.13t}"
     "${python314t-python3.14t}"
-    "${pypy310-pypy3.10}"
     "${pypy311-pypy3.11}"
 )
 

@@ -7,7 +7,6 @@ packages_py=(
     python@3.11
     python@3.12
     python@3.13
-    pypy3.10
     pypy3.11
 )
 packages_mpi=(

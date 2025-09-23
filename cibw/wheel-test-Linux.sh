@@ -36,7 +36,6 @@ if grep -qE 'ID=fedora' /etc/os-release; then
         python3.14
         python3.13t
         python3.14t
-        pypy3.10
         pypy3.11
         mpich
         openmpi

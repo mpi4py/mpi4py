@@ -26,7 +26,7 @@ def abi3(y_min=10, y_max=10):
     return py("cp", 3, y_min, y_max, abi="-abi3")
 
 
-def pp3(y_min=10, y_max=11):
+def pp3(y_min=11, y_max=11):
     return py("pp", 3, y_min, y_max)
 
 
