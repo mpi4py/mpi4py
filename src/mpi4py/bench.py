@@ -457,7 +457,7 @@ def futures(comm, args=None, verbose=True):
         action="store",
         dest="executor",
         default="mpi",
-        choices=["mpi", "process", "thread"],
+        choices=["mpi", "process", "thread", "interpreter"],
     )
     parser.add_argument(
         "-w",
@@ -645,6 +645,10 @@ def futures(comm, args=None, verbose=True):
             )
         if executor_type == "thread":
             return concurrent.futures.ThreadPoolExecutor(
+                max_workers=workers,
+            )
+        if executor_type == "interpreter":  # pragma: no cover
+            return concurrent.futures.InterpreterPoolExecutor(
                 max_workers=workers,
             )
         assert executor_type == "mpi"  # noqa: S101
