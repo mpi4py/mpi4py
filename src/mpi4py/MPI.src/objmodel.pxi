@@ -575,12 +575,9 @@ cdef extern from *:
 
 cdef inline MPI_Errhandler arg_Errhandler(object obj) except? _errhandler_null:
     if obj is not None: return (<Errhandler?>obj).ob_mpi
-    cdef int opt = options.errors
-    if   opt == 0: pass
-    elif opt == 1: return MPI_ERRORS_RETURN
-    elif opt == 2: return MPI_ERRORS_ABORT
-    elif opt == 3: return MPI_ERRORS_ARE_FATAL
-    return MPI_ERRORS_ARE_FATAL
+    cdef MPI_Errhandler errhandler = options_get_errhandler()
+    if errhandler == MPI_ERRHANDLER_NULL: errhandler = MPI_ERRORS_ARE_FATAL
+    return errhandler
 
 # -----------------------------------------------------------------------------
 

@@ -106,7 +106,7 @@ cdef class File:
         cdef File file = <File>New(cls)
         with nogil: CHKERR( MPI_File_open(
             comm.ob_mpi, cfilename, amode, info.ob_mpi, &file.ob_mpi) )
-        file_set_eh(file.ob_mpi)
+        options_set_errhandler(file.ob_mpi)
         return file
 
     def Close(self) -> None:

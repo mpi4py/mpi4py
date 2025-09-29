@@ -87,7 +87,7 @@ cdef class Win:
         with nogil: CHKERR( MPI_Win_create_c(
             base, size, disp_unit,
             info.ob_mpi, comm.ob_mpi, &win.ob_mpi) )
-        win_set_eh(win.ob_mpi)
+        options_set_errhandler(win.ob_mpi)
         win.ob_mem = memory
         return win
 
@@ -107,7 +107,7 @@ cdef class Win:
         with nogil: CHKERR( MPI_Win_allocate_c(
             size, disp_unit, info.ob_mpi,
             comm.ob_mpi, &base, &win.ob_mpi) )
-        win_set_eh(win.ob_mpi)
+        options_set_errhandler(win.ob_mpi)
         return win
 
     @classmethod
@@ -126,7 +126,7 @@ cdef class Win:
         with nogil: CHKERR( MPI_Win_allocate_shared_c(
             size, disp_unit, info.ob_mpi,
             comm.ob_mpi, &base, &win.ob_mpi) )
-        win_set_eh(win.ob_mpi)
+        options_set_errhandler(win.ob_mpi)
         return win
 
     def Shared_query(self, int rank: int) -> tuple[buffer, int]:
@@ -153,7 +153,7 @@ cdef class Win:
         cdef Win win = <Win>New(cls)
         with nogil: CHKERR( MPI_Win_create_dynamic(
             info.ob_mpi, comm.ob_mpi, &win.ob_mpi) )
-        win_set_eh(win.ob_mpi)
+        options_set_errhandler(win.ob_mpi)
         win.ob_mem = {}
         return win
 

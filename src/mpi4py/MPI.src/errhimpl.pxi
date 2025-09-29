@@ -325,43 +325,26 @@ cdef inline int errhdl_del(
 
 # -----------------------------------------------------------------------------
 
-cdef inline int session_set_eh(MPI_Session ob) except -1 nogil:
-    if ob == MPI_SESSION_NULL: return 0
-    cdef int opt = options.errors
-    if   opt == 0: pass
-    elif opt == 1: CHKERR( MPI_Session_set_errhandler(ob, MPI_ERRORS_RETURN) )
-    elif opt == 2: CHKERR( MPI_Session_set_errhandler(ob, MPI_ERRORS_ABORT) )
-    elif opt == 3: CHKERR( MPI_Session_set_errhandler(ob, MPI_ERRORS_ARE_FATAL) )
-    return 0
+cdef inline MPI_Errhandler options_get_errhandler() noexcept nogil:
+    if options.errors == 0: return MPI_ERRHANDLER_NULL
+    if options.errors == 1: return MPI_ERRORS_RETURN
+    if options.errors == 2: return MPI_ERRORS_ABORT
+    if options.errors == 3: return MPI_ERRORS_ARE_FATAL
+    return MPI_ERRHANDLER_NULL  # ~> unreachable
 
 
-cdef inline int comm_set_eh(MPI_Comm ob) except -1 nogil:
-    if ob == MPI_COMM_NULL: return 0
-    cdef int opt = options.errors
-    if   opt == 0: pass
-    elif opt == 1: CHKERR( MPI_Comm_set_errhandler(ob, MPI_ERRORS_RETURN) )
-    elif opt == 2: CHKERR( MPI_Comm_set_errhandler(ob, MPI_ERRORS_ABORT) )
-    elif opt == 3: CHKERR( MPI_Comm_set_errhandler(ob, MPI_ERRORS_ARE_FATAL) )
-    return 0
-
-
-cdef inline int win_set_eh(MPI_Win ob) except -1 nogil:
-    if ob == MPI_WIN_NULL: return 0
-    cdef int opt = options.errors
-    if   opt == 0: pass
-    elif opt == 1: CHKERR( MPI_Win_set_errhandler(ob, MPI_ERRORS_RETURN) )
-    elif opt == 2: CHKERR( MPI_Win_set_errhandler(ob, MPI_ERRORS_ABORT) )
-    elif opt == 3: CHKERR( MPI_Win_set_errhandler(ob, MPI_ERRORS_ARE_FATAL) )
-    return 0
-
-
-cdef inline int file_set_eh(MPI_File ob) except -1 nogil:
-    if ob == MPI_FILE_NULL: return 0
-    cdef int opt = options.errors
-    if   opt == 0: pass
-    elif opt == 1: CHKERR( MPI_File_set_errhandler(ob, MPI_ERRORS_RETURN) )
-    elif opt == 2: CHKERR( MPI_File_set_errhandler(ob, MPI_ERRORS_ABORT) )
-    elif opt == 3: CHKERR( MPI_File_set_errhandler(ob, MPI_ERRORS_ARE_FATAL) )
+cdef inline int options_set_errhandler(mpi_scwf_t handle) except -1 nogil:
+    if handle == mpinull(handle): return 0
+    cdef MPI_Errhandler errhandler = options_get_errhandler()
+    if errhandler == MPI_ERRHANDLER_NULL: return 0
+    if mpi_scwf_t is MPI_Session:
+        CHKERR( MPI_Session_set_errhandler(handle, errhandler) )
+    if mpi_scwf_t is MPI_Comm:
+        CHKERR( MPI_Comm_set_errhandler(handle, errhandler) )
+    if mpi_scwf_t is MPI_Win:
+        CHKERR( MPI_Win_set_errhandler(handle, errhandler) )
+    if mpi_scwf_t is MPI_File:
+        CHKERR( MPI_File_set_errhandler(handle, errhandler) )
     return 0
 
 # -----------------------------------------------------------------------------

@@ -192,8 +192,7 @@ cdef int getOptions(Options* opts) except -1:
     elif errors == 'exception':
         opts.errors = 1
     elif errors == 'abort':
-        opts.errors = 2
-        if MPI_ERRORS_ABORT == MPI_ERRHANDLER_NULL: opts.errors = 3
+        opts.errors = 2 if MPI_ERRORS_ABORT != MPI_ERRHANDLER_NULL else 3
     elif errors == 'fatal':
         opts.errors = 3
     else:
@@ -336,8 +335,8 @@ cdef int initialize() except -1 nogil:
     mpi_numversion = 10 * mpi_version + mpi_subversion
     if not mpi_active(): return 0
     check_mpiexec()
-    comm_set_eh(MPI_COMM_SELF)
-    comm_set_eh(MPI_COMM_WORLD)
+    options_set_errhandler(MPI_COMM_SELF)
+    options_set_errhandler(MPI_COMM_WORLD)
     return 0
 
 

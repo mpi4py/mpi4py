@@ -52,7 +52,7 @@ cdef class Session:
         cdef Session session = <Session>New(cls)
         CHKERR( MPI_Session_init(
             info.ob_mpi, cerrhdl, &session.ob_mpi) )
-        session_set_eh(session.ob_mpi)
+        options_set_errhandler(session.ob_mpi)
         return session
 
     def Finalize(self) -> None:
