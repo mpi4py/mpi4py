@@ -2533,7 +2533,7 @@ cdef class Intracomm(Comm):
 
     def Spawn(
         self,
-        command: PathLike[AnyStr],
+        command: PathLike[AnyStr] | str | bytes,
         args: Sequence[str] | None = None,
         int maxprocs: int = 1,
         Info info: Info = INFO_NULL,
@@ -2569,7 +2569,7 @@ cdef class Intracomm(Comm):
 
     def Spawn_multiple(
         self,
-        command: Sequence[PathLike[AnyStr]],
+        command: Sequence[PathLike[AnyStr] | str | bytes],
         args: Sequence[Sequence[str]] | None = None,
         maxprocs: Sequence[int] | None = None,
         info: Sequence[Info] | Info = INFO_NULL,
