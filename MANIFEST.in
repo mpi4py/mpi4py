@@ -12,6 +12,7 @@ recursive-include test *.py *.sh
 exclude src/mpi4py/MPI.c
 exclude src/mpi4py/MPI.h
 exclude src/mpi4py/MPI_api.h
+exclude src/lib-mpi/pympiconf.h
 
 include docs/*.rst
 include docs/*.bib
