@@ -3,6 +3,11 @@ name: ci-abi
 on:  # yamllint disable-line rule:truthy
   workflow_call:
     inputs:
+      py-sabi:
+        description: 'Python Stable ABI version'
+        required: false
+        default: ''
+        type: string
       py-build:
         description: 'Python version (build)'
         required: false
@@ -20,6 +25,11 @@ on:  # yamllint disable-line rule:truthy
         type: string
   workflow_dispatch:
     inputs:
+      py-sabi:
+        description: 'Python Stable ABI version'
+        required: false
+        default: ''
+        type: string
       py-build:
         description: 'Python version (build)'
         required: false
@@ -108,7 +118,7 @@ jobs:
             if "${{ inputs.platform }}" in ("*", "") else
             [tuple("${{ inputs.platform }}".split("-", 1))]
         )
-        PYSABI = "3.10"
+        PYSABI = "${{ inputs.py-sabi || '3.10' }}"
         py_build = "${{ inputs.py-build }}"
         py_test = "${{ inputs.py-test }}"
         PY_BUILD = [py_build] if py_build else [PYSABI]
@@ -131,7 +141,7 @@ jobs:
                 "mpi": name,
                 "mpi-version": version,
                 "platform": f"{os}-{arch}",
-                "runner": RUNNER[os][arch].replace("2022", "2019"),
+                "runner": RUNNER[os][arch],
             }
             for os, arch in PLATFORMS
             for py in PY_TEST[:]
@@ -275,7 +285,7 @@ jobs:
     - name: Build mpi4py wheel
       run:  python -m build --verbose --wheel
       env:
-        MPI4PY_BUILD_PYSABI: "1"
+        MPI4PY_BUILD_PYSABI: "${{ inputs.py-sabi || '1' }}"
         MPI4PY_BUILD_MPIABI: "1"
         CFLAGS: "-O0"
 
