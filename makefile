@@ -28,6 +28,7 @@ srcclean:
 	$(RM) src/mpi4py/MPI.c
 	$(RM) src/mpi4py/MPI.h
 	$(RM) src/mpi4py/MPI_api.h
+	$(RM) src/lib-mpi/pympiconf.h
 
 .PHONY: clean distclean fullclean
 clean:
