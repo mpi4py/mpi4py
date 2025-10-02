@@ -77,6 +77,17 @@ jobs:
     - id: checkout
       uses: actions/checkout@v5
 
+    - id: setup-macOS
+      if: ${{ runner.os == 'macOS' }}
+      name: setup-macOS
+      run: |
+        # set hostname
+        sudo hostname localhost
+        # unlink libevent
+        brew unlink libevent || true
+        # unlink openssl
+        brew unlink openssl || true
+
     - id: source-date-epoch
       run: |
         # source-date-epoch
@@ -99,10 +110,6 @@ jobs:
     - id: setup-uv
       if:  ${{ runner.os != 'Linux' }}
       run: ${{ runner.os == 'macOS' && 'brew' || 'choco' }} install uv
-
-    - id: setup-hostname
-      if:  ${{ runner.os == 'macOS' }}
-      run: sudo hostname localhost
 
     - id: build
       uses: pypa/cibuildwheel@v3.2.0
