@@ -18,8 +18,12 @@ def test_error():
         assert errcod > MPI.SUCCESS
         assert errcod == errcls
 
-        errstr = MPI.Get_error_string(errcod)
+        errstr = MPI.Get_error_string(errcls)
         assert errstr
+
+        excobj = MPI.Exception(errcls)
+        excstr = str(excobj)
+        assert errstr == errstr
 
 
 def test_info():

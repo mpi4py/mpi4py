@@ -53,7 +53,7 @@ class Exception(RuntimeError):
 
     def __str__(self) -> str:
         """Return str(self)."""
-        if MPI_VERSION < 4 and not mpi_active():
+        if mpi_version < 4 and not mpi_active():
             return f"error code: {int(self)}"  # ~> legacy
         return self.Get_error_string()
 
