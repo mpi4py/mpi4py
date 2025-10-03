@@ -168,9 +168,6 @@ class BaseTestWin:
             if unittest.is_mpi("mpich(<4.2.2)"):
                 if flavor == MPI.WIN_FLAVOR_CREATE:
                     return
-            if unittest.is_mpi("mpich"):  # pmodels/mpich#7499
-                if "ch3:nemesis" in MPI.Get_library_version():
-                    return
         memory = self.WIN.tomemory()
         address = MPI.Get_address(memory)
         length = len(memory)
