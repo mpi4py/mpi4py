@@ -80,12 +80,59 @@ class TestGrequest(unittest.TestCase):
             self.assertTrue(output.startswith(header))
             self.assertIn(excname, output)
 
+        q_func = None
+        f_func = None
+        f_called = 0
+        q_called = 0
+
+        def query(*args):
+            nonlocal q_called
+            q_called += 1
+            return q_func(*args)
+
+        def free(*args):
+            nonlocal f_called
+            f_called += 1
+            return f_func(*args)
+
         for raise_fn, is_mpi in (
             (raise_mpi, True),
             (raise_rte, False),
         ):
-            greq = MPI.Grequest.Start(raise_fn, ctx.free, ctx.cancel)
+            if is_mpi:
+                q_func, f_func = raise_mpi, raise_rte
+            else:
+                q_func, f_func = raise_rte, raise_mpi
+            q_called = 0
+            f_called = 0
+
+            greq = MPI.Grequest.Start(query, free, ctx.cancel)
+            self.assertFalse(greq.Get_status())
+            self.assertEqual(q_called, 0)
+            self.assertEqual(f_called, 0)
             greq.Complete()
+            self.assertEqual(q_called, 0)
+            self.assertEqual(f_called, 0)
+            with self.assertRaises(MPI.Exception) as exc_cm:
+                with testutil.capture_stderr() as stderr:
+                    greq.Get_status()
+            check_exc(exc_cm.exception, is_mpi, stderr)
+            self.assertEqual(q_called, 1)
+            self.assertEqual(f_called, 0)
+            with self.assertRaises(MPI.Exception) as exc_cm:
+                with testutil.capture_stderr() as stderr:
+                    greq.Wait()
+            if greq:
+                greq.Free()
+            self.assertEqual(q_called, 2)
+            self.assertEqual(f_called, 1)
+            #
+            greq = MPI.Grequest.Start(raise_fn, ctx.free, ctx.cancel)
+            self.assertFalse(greq.Get_status())
+            greq.Complete()
+            with self.assertRaises(MPI.Exception) as exc_cm:
+                with testutil.capture_stderr() as stderr:
+                    greq.Get_status()
             with self.assertRaises(MPI.Exception) as exc_cm:
                 with testutil.capture_stderr() as stderr:
                     greq.Wait()
@@ -94,7 +141,9 @@ class TestGrequest(unittest.TestCase):
             check_exc(exc_cm.exception, is_mpi, stderr)
             #
             greq = MPI.Grequest.Start(ctx.query, raise_fn, ctx.cancel)
+            self.assertFalse(greq.Get_status())
             greq.Complete()
+            self.assertTrue(greq.Get_status())
             with self.assertRaises(MPI.Exception) as exc_cm:
                 with testutil.capture_stderr() as stderr:
                     greq.Wait()
@@ -103,10 +152,13 @@ class TestGrequest(unittest.TestCase):
             check_exc(exc_cm.exception, is_mpi, stderr)
             #
             greq = MPI.Grequest.Start(ctx.query, ctx.free, raise_fn)
+            self.assertFalse(greq.Get_status())
             with self.assertRaises(MPI.Exception) as exc_cm:
                 with testutil.capture_stderr() as stderr:
                     greq.Cancel()
+            self.assertFalse(greq.Get_status())
             greq.Complete()
+            self.assertTrue(greq.Get_status())
             greq.Wait()
             if greq:
                 greq.Free()
