@@ -23,7 +23,7 @@ def test_error():
 
         excobj = MPI.Exception(errcls)
         excstr = str(excobj)
-        assert errstr == errstr
+        assert excstr == errstr
 
 
 def test_info():
