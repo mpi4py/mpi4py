@@ -82,7 +82,7 @@ class Rc:
 
 
 rc = Rc()
-__import__("sys").modules[__spec__.name + ".rc"] = rc
+__import__("sys").modules[f"{__spec__.name}.rc"] = rc  # ty: ignore
 
 
 def get_include():

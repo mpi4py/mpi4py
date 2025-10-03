@@ -74,6 +74,7 @@ cc_fix_lib_args_orig = getattr(CCompiler, "_fix_lib_args", None)
 def cc_fix_compile_args(self, out_dir, macros, inc_dirs):
     macros = macros or []
     inc_dirs = inc_dirs or []
+    assert cc_fix_compile_args_orig is not None  # noqa: S101
     return cc_fix_compile_args_orig(self, out_dir, macros, inc_dirs)
 
 
@@ -81,6 +82,7 @@ def cc_fix_lib_args(self, libs, lib_dirs, rt_lib_dirs):
     libs = libs or []
     lib_dirs = lib_dirs or []
     rt_lib_dirs = rt_lib_dirs or []
+    assert cc_fix_lib_args_orig is not None  # noqa: S101
     return cc_fix_lib_args_orig(self, libs, lib_dirs, rt_lib_dirs)
 
 
@@ -204,7 +206,7 @@ def customize_compiler(
                 with contextlib.suppress(Exception):
                     getattr(compiler, attr).remove("-mno-cygwin")
         # Add required define and compiler flags for AMD64
-        if platform.architecture(None)[0] == "64bit":
+        if platform.architecture("")[0] == "64bit":
             for attr in (
                 "preprocessor",
                 "compiler",
@@ -674,7 +676,7 @@ def cython_chk(VERSION, verbose=True):
 
 
 def cython_run(
-    source,
+    source=None,
     target=None,
     depends=(),
     includes=(),
@@ -682,6 +684,7 @@ def cython_run(
     force=False,
     VERSION="0.0",
 ):
+    assert source is not None  # noqa: S101
     if target is None:
         target = os.path.splitext(source)[0] + ".c"
     cwd = os.getcwd()
@@ -1666,14 +1669,14 @@ if setuptools:
 # Support for Reproducible Builds
 # https://reproducible-builds.org/docs/source-date-epoch/
 
-timestamp = os.environ.get("SOURCE_DATE_EPOCH")
-if timestamp is not None:
+SOURCE_DATE_EPOCH = os.environ.get("SOURCE_DATE_EPOCH")
+if SOURCE_DATE_EPOCH is not None:
     import distutils.archive_util as archive_util
     import stat
     import tarfile
     import time
 
-    timestamp = float(max(int(timestamp), 0))
+    timestamp = float(max(int(SOURCE_DATE_EPOCH), 0))
 
     class Time:
         @staticmethod

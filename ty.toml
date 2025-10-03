@@ -1,0 +1,19 @@
+# https://docs.astral.sh/ty/
+
+[environment]
+python-version = "3.10"
+python-platform = "all"
+
+[rules]
+possibly-unbound-attribute = "ignore"
+possibly-unbound-import = "ignore"
+unresolved-attribute = "ignore"
+unresolved-import = "ignore"
+# unused-ignore-comment = "warn"
+
+[src]
+exclude =[
+"conf/mpidistutils.py",
+"demo",
+"test",
+]

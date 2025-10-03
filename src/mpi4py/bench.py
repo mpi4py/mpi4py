@@ -788,8 +788,9 @@ def main(args=None):
         if comm.rank == 0:
             parser.error(f"unknown command {options.command!r}")
         parser.exit(2)
-    command(comm, options.args)
-    parser.exit()
+    else:
+        command(comm, options.args)
+        parser.exit()
 
 
 if __name__ == "__main__":

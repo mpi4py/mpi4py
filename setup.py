@@ -107,17 +107,17 @@ def extensions():
             + glob.glob("src/lib-mpi/compat/*.h")
         ),
         include_dirs=["src"],
-        define_macros=[],
         configure=mpidistutils.configure_mpi,
     )
+    MPI["define_macros"] = define_macros = []
     if get_build_mpiabi():
-        MPI["define_macros"] += [
+        define_macros += [
             ("PYMPIABI", 1),
         ]
     if sys.version_info[:2] > maxknow_python:
         sabi = get_build_pysabi() or maxknow_python
         lapi = "0x{:02x}{:02x}0000".format(*sabi)
-        MPI["define_macros"] += [
+        define_macros += [
             ("CYTHON_LIMITED_API", lapi),
         ]
     #
@@ -185,7 +185,8 @@ def run_setup():
     build_src.sources = sources()
     #
     metadata = get_metadata()
-    builder_args = dict(
+    builder_args = {}
+    builder_args.update(
         ext_modules=[Ext(**ext) for ext in extensions()],
         executables=[Exe(**exe) for exe in executables()],
     )
@@ -226,7 +227,8 @@ def run_skbuild():
 
     #
     metadata = get_metadata()
-    builder_args = dict(
+    builder_args = {}
+    builder_args.update(
         cmake_source_dir=".",
     )
     #

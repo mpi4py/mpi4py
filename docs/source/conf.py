@@ -130,16 +130,18 @@ def _setup_numpy_typing():
         from types import new_class
         from typing import Generic, TypeVar
 
-        np = type(sys)("numpy")
+        T = TypeVar("T")
+        np = type(sys)("numpy")  # ty: ignore[invalid-assignment]
         sys.modules[np.__name__] = np
-        np.dtype = new_class("dtype", (Generic[TypeVar("T")],))
-        np.dtype.__module__ = np.__name__
+        np_dtype = new_class("dtype", (Generic[T],))
+        np_dtype.__module__ = np.__name__
+        np.dtype = np_dtype  # ty: ignore[invalid-assignment]
 
     try:
         import numpy.typing as npt
     except ImportError:
-        npt = type(sys)("numpy.typing")
-        np.typing = npt
+        npt = type(sys)("numpy.typing")  # ty: ignore[invalid-assignment]
+        np.typing = npt  # ty: ignore[invalid-assignment]
         sys.modules[npt.__name__] = npt
         npt.__all__ = []
         for attr in ["ArrayLike", "DTypeLike"]:
@@ -149,16 +151,16 @@ def _setup_numpy_typing():
 
 def _patch_domain_python():
     try:
-        from numpy.typing import __all__ as numpy_types
+        from numpy.typing import __all__ as numpy_types_all
     except ImportError:
-        numpy_types = []
+        numpy_types_all = []
     try:
-        from mpi4py.typing import __all__ as mpi4py_types
+        from mpi4py.typing import __all__ as mpi4py_types_all
     except ImportError:
-        mpi4py_types = []
+        mpi4py_types_all = []
 
-    numpy_types = set(numpy_types)
-    mpi4py_types = set(mpi4py_types)
+    numpy_types = set(numpy_types_all)
+    mpi4py_types = set(mpi4py_types_all)
     for name in numpy_types:
         autodoc_type_aliases[name] = f"~numpy.typing.{name}"
     for name in mpi4py_types:
@@ -337,7 +339,7 @@ def setup(app):
         "mpi4py.util.sync",
     ]
     typing_overload = typing.overload
-    typing.overload = lambda arg: arg
+    typing.overload = lambda arg: arg  # ty: ignore[invalid-assignment]
     for name in modules:
         mod = importlib.import_module(name)
         ann = apidoc.load_module(f"{mod.__file__}i", name)
