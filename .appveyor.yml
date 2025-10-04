@@ -40,7 +40,9 @@ build_script:
 test: false
 test_script:
   - "%PYTHON%\\python.exe -m pip install mpi4py --no-cache-dir --no-index --find-links=dist"
+  - "\"%MSMPI_BIN%\\mpiexec.exe\" -n 1 %PYTHON%\\python.exe -m mpi4py --mpi-vendor"
   - "\"%MSMPI_BIN%\\mpiexec.exe\" -n 1 %PYTHON%\\python.exe -m mpi4py --mpi-library"
+  - "\"%MSMPI_BIN%\\mpiexec.exe\" -n 1 %PYTHON%\\python.exe -m mpi4py --mpi-abi-version"
   - "\"%MSMPI_BIN%\\mpiexec.exe\" -n 1 %PYTHON%\\python.exe -m mpi4py --mpi-std-version"
   - "\"%MSMPI_BIN%\\mpiexec.exe\" -n 1 %PYTHON%\\python.exe -m mpi4py --mpi-lib-version"
   - "\"%MSMPI_BIN%\\mpiexec.exe\" -n 1 %PYTHON%\\python.exe %CD%\\test\\main.py -v"

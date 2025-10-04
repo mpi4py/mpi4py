@@ -81,17 +81,19 @@ def set_abort_status(status):
 
 def main():
     """Entry-point for ``python -m mpi4py.run ...``."""
+    # pylint: disable=too-many-locals
     # pylint: disable=too-many-statements
     # pylint: disable=import-outside-toplevel
     import os
     import sys
 
-    def prefix():
-        import pathlib
+    def import_MPI():  # pylint: disable=invalid-name
+        from . import rc
 
-        prefix = pathlib.Path(__spec__.origin).parent
-        print(prefix, file=sys.stdout)
-        sys.exit(0)
+        rc.initialize = rc.finalize = False
+        from . import MPI
+
+        return MPI
 
     def version():
         from . import __version__
@@ -100,11 +102,29 @@ def main():
         print(f"{package} {__version__}", file=sys.stdout)
         sys.exit(0)
 
-    def mpi_library():
-        from . import rc
+    def prefix():
+        import pathlib
 
-        rc.initialize = rc.finalize = False
-        from . import MPI
+        prefix = pathlib.Path(__spec__.origin).parent
+        print(prefix, file=sys.stdout)
+        sys.exit(0)
+
+    def module():
+        import pathlib
+
+        MPI = import_MPI()
+        prefix = pathlib.Path(MPI.__spec__.origin)
+        print(prefix, file=sys.stdout)
+        sys.exit(0)
+
+    def mpi_vendor():
+        MPI = import_MPI()
+        name, (major, minor, patch) = MPI.get_vendor()
+        print(f"{name} {major}.{minor}.{patch}", file=sys.stdout)
+        sys.exit(0)
+
+    def mpi_library():
+        MPI = import_MPI()
 
         def get_mpi_library_posix():
             import ctypes
@@ -155,7 +175,10 @@ def main():
             ]
 
             vendor, _ = MPI.get_vendor()
-            if vendor == "Intel MPI":
+            abi_version = MPI.Get_abi_version()
+            if abi_version >= (1, 0):
+                libmpi = "mpi_abi.dll"
+            elif vendor == "Intel MPI":
                 libmpi = "impi.dll"
             elif vendor == "Microsoft MPI":
                 libmpi = "msmpi.dll"
@@ -203,9 +226,12 @@ def main():
 
         options = dedent("""
         options:
-          --prefix             show install path and exit
           --version            show version number and exit
+          --prefix             show install path and exit
+          --module             show extension module path and exit
+          --mpi-vendor         show MPI vendor and exit
           --mpi-library        show MPI library path and exit
+          --mpi-abi-version    show MPI ABI version and exit
           --mpi-std-version    show MPI standard version and exit
           --mpi-lib-version    show MPI library version and exit
           -h|--help            show this help message and exit
@@ -222,12 +248,14 @@ def main():
             print(options, file=sys.stdout)
             sys.exit(0)
 
+    def mpi_abi_version():
+        MPI = import_MPI()
+        major, minor = (max(v, 0) for v in MPI.Get_abi_version())
+        print(f"MPI ABI {major}.{minor}", file=sys.stdout)
+        sys.exit(0)
+
     def mpi_std_version():
-        from . import rc
-
-        rc.initialize = rc.finalize = False
-        from . import MPI
-
+        MPI = import_MPI()
         version = ".".join(map(str, (MPI.VERSION, MPI.SUBVERSION)))
         rtversion = ".".join(map(str, MPI.Get_version()))
         note = f" (runtime: MPI {rtversion})" if rtversion != version else ""
@@ -235,11 +263,7 @@ def main():
         sys.exit(0)
 
     def mpi_lib_version():
-        from . import rc
-
-        rc.initialize = rc.finalize = False
-        from . import MPI
-
+        MPI = import_MPI()
         library_version = MPI.Get_library_version()
         print(library_version, file=sys.stdout)
         sys.exit(0)
@@ -265,16 +289,22 @@ def main():
                 break  # Stop processing options
             if arg0 in ("-h", "-help", "--help"):
                 usage()  # Print help and exit
-            if arg0 in ("-prefix", "--prefix"):
-                prefix()  # Print install path and exit
             if arg0 in ("-version", "--version"):
                 version()  # Print version number and exit
+            if arg0 in ("-prefix", "--prefix"):
+                prefix()  # Print install path and exit
+            if arg0 in ("-module", "--module"):
+                module()  # Print extension module path and exit
+            if arg0 in ("-mpi-vendor", "--mpi-vendor"):
+                mpi_vendor()  # Print MPI vendor and exit
             if arg0 in ("-mpi-library", "--mpi-library"):
                 mpi_library()  # Print MPI library path and exit
             if arg0 in ("-mpi-std-version", "--mpi-std-version"):
                 mpi_std_version()  # Print MPI standard version and exit
             if arg0 in ("-mpi-lib-version", "--mpi-lib-version"):
                 mpi_lib_version()  # Print MPI library version and exit
+            if arg0 in ("-mpi-abi-version", "--mpi-abi-version"):
+                mpi_abi_version()  # Print MPI ABI version and exit
             if arg0.startswith("--"):
                 if "=" in arg0:
                     opt, _, arg = arg0[1:].partition("=")

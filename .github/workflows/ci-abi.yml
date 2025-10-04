@@ -412,11 +412,19 @@ jobs:
       run:  sudo hostname localhost
       if:   runner.os == 'macOS'
 
-    - name: Test mpi4py cmdline (mpi-library)
+    - name: Test mpi4py cmdline (--prefix)
+      run:  mpiexec -n 1 python -m mpi4py --prefix
+    - name: Test mpi4py cmdline (--module)
+      run:  mpiexec -n 1 python -m mpi4py --module
+    - name: Test mpi4py cmdline (--mpi-vendor)
+      run:  mpiexec -n 1 python -m mpi4py --mpi-vendor
+    - name: Test mpi4py cmdline (--mpi-library)
       run:  mpiexec -n 1 python -m mpi4py --mpi-library
-    - name: Test mpi4py cmdline (mpi-std-version)
+    - name: Test mpi4py cmdline (--mpi-abi-version)
+      run:  mpiexec -n 1 python -m mpi4py --mpi-abi-version
+    - name: Test mpi4py cmdline (--mpi-std-version)
       run:  mpiexec -n 1 python -m mpi4py --mpi-std-version
-    - name: Test mpi4py cmdline (mpi-lib-version)
+    - name: Test mpi4py cmdline (--mpi-lib-version)
       run:  mpiexec -n 1 python -m mpi4py --mpi-lib-version
     - name: Test mpi4py bench (helloworld)
       run:  mpiexec -n 4 python -m mpi4py.bench helloworld

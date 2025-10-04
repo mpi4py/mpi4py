@@ -78,7 +78,9 @@ function clean-mpi {
 }
 
 function mpi4py-test-basic {
+    "$python" -m mpi4py --mpi-vendor
     "$python" -m mpi4py --mpi-library
+    "$python" -m mpi4py --mpi-abi-version
     "$python" -m mpi4py --mpi-std-version
     "$python" -m mpi4py --mpi-lib-version | head -n 1
 }
