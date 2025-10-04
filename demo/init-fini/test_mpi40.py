@@ -21,9 +21,10 @@ def test_error():
         errstr = MPI.Get_error_string(errcls)
         assert errstr
 
-        excobj = MPI.Exception(errcls)
-        excstr = str(excobj)
-        assert excstr == errstr
+        if MPI.Get_version() >= (4, 0):
+            excobj = MPI.Exception(errcls)
+            excstr = str(excobj)
+            assert excstr == errstr
 
 
 def test_info():
