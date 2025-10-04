@@ -24,6 +24,12 @@ cdef class Message:
         def __get__(self) -> int:
             return tohandle(self)
 
+    def tohandle(self) -> int:
+        """
+        Return MPI handle.
+        """
+        return tohandle(self)
+
     @classmethod
     def fromhandle(cls, handle: int) -> Message:
         """

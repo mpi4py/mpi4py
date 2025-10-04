@@ -164,7 +164,7 @@ class TestObjModel(unittest.TestCase):
             if isinstance(obj, MPI.Status):
                 continue
             self.assertGreaterEqual(obj.handle, 0)
-            newobj = type(obj).fromhandle(obj.handle)
+            newobj = type(obj).fromhandle(obj.tohandle())
             self.assertEqual(newobj, obj)
             self.assertEqual(type(newobj), type(obj))
             self.assertEqual(newobj.handle, obj.handle)

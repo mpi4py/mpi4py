@@ -8,8 +8,9 @@ class BaseTestHandle:
     HANDLES = []
 
     def checkHandleMPI(self, handle1):
-        handle2 = type(handle1).fromhandle(handle1.handle)
+        handle2 = type(handle1).fromhandle(handle1.tohandle())
         self.assertEqual(handle1, handle2)
+        self.assertEqual(handle2.tohandle(), handle2.handle)
 
     def checkHandleInt(self, handle1):
         cint = handle1.toint()
