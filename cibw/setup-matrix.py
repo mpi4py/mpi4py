@@ -45,10 +45,12 @@ OS_ARCH_PY = {
 }
 
 MPI_ABI_POSIX = [
+    "mpiabi",
     "mpich",
     "openmpi",
 ]
 MPI_ABI_WINNT = [
+    "mpiabi",
     "impi",
     "msmpi",
 ]
