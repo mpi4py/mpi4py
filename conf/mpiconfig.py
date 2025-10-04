@@ -145,9 +145,14 @@ class Config:
 
     def _setup_mpiabi(self):
         MPI_ABI_STUBS = os.environ.get("MPI_ABI_STUBS")
-        if MPI_ABI_STUBS:
-            self.load("mpi.cfg", "mpiabi")
-            self.filename = [MPI_ABI_STUBS]
+        if not MPI_ABI_STUBS:
+            return
+        hdr = os.path.join(MPI_ABI_STUBS, "include", "mpi.h")
+        lib = os.path.join(MPI_ABI_STUBS, "lib", "mpi_abi.lib")
+        if not os.path.isfile(hdr) or not os.path.isfile(lib):
+            return
+        self.load("mpi.cfg", "mpiabi")
+        self.filename = [MPI_ABI_STUBS]
 
     def _setup_posix(self):
         pass
