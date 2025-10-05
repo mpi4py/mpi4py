@@ -115,10 +115,8 @@ def extensions():
             ("PYMPIABI", 1),
         ]
     if sys.version_info[:2] > maxknow_python:
-        sabi = get_build_pysabi() or maxknow_python
-        lapi = "0x{:02x}{:02x}0000".format(*sabi)
         MPI["define_macros"] += [
-            ("CYTHON_LIMITED_API", lapi),
+            ("CYTHON_LIMITED_API", 1),
         ]
     #
     return [MPI]
@@ -197,15 +195,16 @@ def run_setup():
         metadata.pop("long_description_content_type")
     #
     sabi = get_build_pysabi()
-    if sabi and setuptools:
-        api_tag = "cp{}{}".format(*sabi)
-        options = {"bdist_wheel": {"py_limited_api": api_tag}}
-        builder_args["options"] = options
+    if sabi:
         api_ver = "0x{:02X}{:02X}0000".format(*sabi)
         defines = [("Py_LIMITED_API", api_ver)]
         for ext in builder_args["ext_modules"]:
             ext.define_macros.extend(defines)
             ext.py_limited_api = True
+    if sabi and setuptools:
+        api_tag = "cp{}{}".format(*sabi)
+        options = {"bdist_wheel": {"py_limited_api": api_tag}}
+        builder_args["options"] = options
     #
     setup_args = dict(
         i
