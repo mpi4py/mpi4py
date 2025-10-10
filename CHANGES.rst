@@ -1,4 +1,4 @@
-Release 4.1.1 [2025-09-XX]
+Release 4.1.1 [2025-10-10]
 ==========================
 
 * Add MPIABI-aware import hook support.
