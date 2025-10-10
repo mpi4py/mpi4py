@@ -10,7 +10,7 @@ project(
     check: true,
   ).stdout().strip(),
   license: 'BSD-3-Clause',
-  meson_version: '>=1.1.0',
+  meson_version: '>=1.5.1',
 )
 
 # ---
@@ -23,46 +23,9 @@ dstdir = py.get_install_dir(pure: false)
 
 # ---
 
-if host_machine.system() == 'windows'
-  mpi = dependency('mpi', required: true)
-else
-  mpi = dependency('', required: false)
-endif
+mpi = dependency('mpi', required: true)
 pyembed = py.dependency(embed: true, disabler: true)
 compiler = meson.get_compiler('c')
-
-configtest_c = '''
-#include <mpi.h>
-int main(int argc, char *argv[])
-{
-  MPI_Init(&argc, &argv);
-  MPI_Finalize();
-  return 0;
-}
-'''
-advise = '''
-Set environment variable `CC=mpicc` and try again.'''
-if not compiler.has_header('mpi.h', dependencies: [mpi])
-  error('MPI C header file "mpi.h" not found.', advise)
-endif
-if not compiler.has_function('MPI_Init', dependencies: [mpi])
-  error('MPI C function MPI_Init not found.', advise)
-endif
-if not compiler.has_function('MPI_Finalize', dependencies: [mpi])
-  error('MPI C function MPI_Finalize not found.', advise)
-endif
-if not compiler.compiles(configtest_c, dependencies: [mpi])
-  error('Cannot compile basic MPI program.', advise)
-endif
-if not compiler.links(configtest_c, dependencies: [mpi])
-  error('Cannot link basic MPI program.', advise)
-endif
-
-
-# ---
-
-echo = [py, '-c', 'import sys; print(*sys.argv[1:], sep=chr(10))']
-copy = [py, '-c', 'import shutil, sys; shutil.copy(*sys.argv[1:])']
 
 # ---
 
