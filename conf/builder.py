@@ -2,7 +2,6 @@ import contextlib
 import importlib
 import os
 import pathlib
-import shutil
 import sys
 
 # ---
@@ -204,15 +203,9 @@ def build_editable(
 
 
 def setup_env_mpicc():
-    mpicc = shutil.which("mpicc")
-    mpicc = os.environ.get("MPICC", mpicc)
-    mpicc = os.environ.get("MPI4PY_BUILD_MPICC", mpicc)
-    if not mpicc:
-        return
-    if " " in mpicc:
-        mpicc = f'"{mpicc}"'
-    if "CC" not in os.environ:
-        os.environ["CC"] = mpicc
+    mpicc = os.environ.get("MPI4PY_BUILD_MPICC")
+    if mpicc is not None:
+        os.environ.setdefault("MPICC", mpicc)
 
 
 if get_build_backend_name() == "setuptools":
