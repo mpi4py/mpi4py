@@ -31,7 +31,7 @@ def setup_parser(parser):
         type=parse_pattern,
         metavar="TESTNAMEPATTERNS",
     )
-    parser.add_argument(  # Py3.8: use action="extend" on "excludePatterns"
+    parser.add_argument(
         "--xfile",
         help="Skip run tests which match the substrings in the given files",
         action="append",

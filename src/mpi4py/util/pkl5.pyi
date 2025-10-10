@@ -1,5 +1,12 @@
 import sys
-from typing import Any, Iterable, Sequence, overload
+from collections.abc import (
+    Iterable,
+    Sequence,
+)
+from typing import (
+    Any,
+    overload,
+)
 
 if sys.version_info >= (3, 11):
     from typing import Self

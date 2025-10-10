@@ -4,8 +4,6 @@ set -euo pipefail
 dist=${1:-dist}
 
 PYTHON=(
-    "${python38-python3.8}"
-    "${python39-python3.9}"
     "${python310-python3.10}"
     "${python311-python3.11}"
     "${python312-python3.12}"

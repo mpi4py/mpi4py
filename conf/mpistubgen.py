@@ -360,7 +360,14 @@ def visit_module(module, done=None):
 
 IMPORTS = """
 import sys
-from threading import Lock
+from collections.abc import (
+    Callable,
+    Hashable,
+    Iterable,
+    Iterator,
+    Mapping,
+    Sequence,
+)
 from typing import (
     Any,
     AnyStr,
@@ -371,29 +378,13 @@ from typing import (
     overload,
 )
 
-if sys.version_info >= (3, 9):
-    from collections.abc import (
-        Callable,
-        Hashable,
-        Iterable,
-        Iterator,
-        Mapping,
-        Sequence,
-    )
-else:
-    from typing import (
-        Callable,
-        Hashable,
-        Iterable,
-        Iterator,
-        Mapping,
-        Sequence,
-    )
 if sys.version_info >= (3, 11):
     from typing import Self
 else:
     from typing_extensions import Self
+
 from os import PathLike
+from threading import Lock
 """
 
 OVERRIDE = {

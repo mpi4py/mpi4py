@@ -21,9 +21,9 @@ sys.path.insert(0, os.path.join(topdir, "conf"))
 # Metadata
 # --------------------------------------------------------------------
 
-require_python = (3, 8)
+require_python = (3, 10)
 maxknow_python = (3, 14)
-py_limited_api = (3, 10)
+py_limited_api = require_python
 
 
 def get_metadata():

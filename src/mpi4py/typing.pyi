@@ -2,23 +2,21 @@
 # ruff: noqa: UP007
 # ruff: noqa: UP045
 import sys
+from collections.abc import (
+    Sequence,
+)
 from typing import (
     Any,
     Dict,
     List,
     Optional,
     Protocol,
-    Sequence,
     SupportsIndex,
     Tuple,
+    TypeAlias,
     TypeVar,
     Union,
 )
-
-if sys.version_info >= (3, 10):
-    from typing import TypeAlias
-else:
-    from typing_extensions import TypeAlias
 
 from .MPI import (
     BottomType,

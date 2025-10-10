@@ -1,4 +1,5 @@
-from typing import Any, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 def run_command_line(args: Sequence[str] | None = None) -> None: ...
 def set_abort_status(status: Any) -> None: ...

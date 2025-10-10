@@ -223,10 +223,6 @@ jobs:
         mypy --python-version 3.12 -p mpi4py
         mypy --python-version 3.11 -p mpi4py
         mypy --python-version 3.10 -p mpi4py
-        mypy --python-version 3.9  -p mpi4py
 
     - name: mypy (stubtest)
       run:  stubtest --ignore-disjoint-bases mpi4py
-              ${{ github.event.inputs.py == '3.8' && '$(
-              echo mpi4py.*.Executor.submit > allowlist &&
-              echo --allowlist=allowlist )' || '' }}

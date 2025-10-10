@@ -42,7 +42,7 @@ def get_readme(settings=None):  # noqa: ARG001
 
 
 description = "Python bindings for MPI"
-requires_python = ">=3.8"
+requires_python = ">=3.10"
 license = "BSD-3-Clause"  # noqa: A001
 authors = [
     {"name": "Lisandro Dalcin", "email": "dalcinl@gmail.com"},
@@ -71,8 +71,6 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",

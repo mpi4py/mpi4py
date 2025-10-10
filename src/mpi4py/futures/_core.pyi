@@ -1,18 +1,17 @@
 import sys
-from typing import (
-    Any,
-    Callable,
-    Generic,
+from collections.abc import (
     Iterable,
     Iterator,
     Mapping,
     Sequence,
 )
+from typing import (
+    Any,
+    Callable,
+    Generic,
+    TypeAlias,
+)
 
-if sys.version_info >= (3, 10):
-    from typing import TypeAlias
-else:
-    from typing_extensions import TypeAlias
 if sys.version_info >= (3, 11):
     from typing import Self
 else:

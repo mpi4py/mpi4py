@@ -9,7 +9,7 @@ on:  # yamllint disable-line rule:truthy
         required: false
         type: string
       python-tag:
-        description: "CPython/PyPy tag ({cp,pp}3{8..14})"
+        description: "CPython/PyPy tag ({cp,pp}3{10..14})"
         default: ''
         required: false
         type: string
@@ -31,7 +31,7 @@ on:  # yamllint disable-line rule:truthy
           - Windows
           - Windows-AMD64
       python-tag:
-        description: "CPython/PyPy tag ({cp,pp}3{8..14})"
+        description: "CPython/PyPy tag ({cp,pp}3{10..14})"
         default: ''
         required: false
         type: string
@@ -121,7 +121,7 @@ jobs:
         MPI4PY_BUILD_MPIABI: "1"
         MPI4PY_BUILD_PYSABI: "${{ matrix.py-sabi && matrix.py || '0' }}"
         MPI4PY_LOCAL_VERSION: "${{ matrix.mpi-abi }}"
-        CIBW_PROJECT_REQUIRES_PYTHON: ">=3.8"
+        CIBW_PROJECT_REQUIRES_PYTHON: ">=3.10"
         CIBW_ENABLE: "cpython-freethreading pypy"
         CIBW_BUILD_FRONTEND: "build[uv]"
         CIBW_ARCHS: "${{ matrix.arch }}"

@@ -4,13 +4,15 @@
 # pylint: disable=too-few-public-methods
 
 import sys
+from collections.abc import (
+    Sequence,
+)
 from typing import (
     Any,
     Dict,
     List,
     Optional,
     Protocol,
-    Sequence,
     SupportsIndex,
     Tuple,
     TypeVar,

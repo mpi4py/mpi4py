@@ -1,11 +1,13 @@
 import sys
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+)
 from typing import (
     Any,
     Callable,
     Generic,
-    Iterable,
-    Iterator,
-    Mapping,
 )
 
 if sys.version_info >= (3, 11):

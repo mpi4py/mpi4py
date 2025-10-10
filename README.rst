@@ -51,7 +51,7 @@ grounds on the standard MPI-2 C++ bindings.
 Prerequisites
 -------------
 
-* `Python <https://www.python.org/>`_ 3.8 or above,
+* `Python <https://www.python.org/>`_ 3.10 or above,
   or `PyPy <https://www.pypy.org/>`_ 7.3 or above.
 
 * An MPI implementation like `MPICH <https://www.mpich.org/>`_ or

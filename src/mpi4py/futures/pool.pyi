@@ -1,10 +1,17 @@
 import sys
-from typing import Any, Callable, Iterable, Iterator, Mapping, Sequence
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    Sequence,
+)
+from typing import (
+    Any,
+    Callable,
+    ParamSpec,
+    TypeAlias,
+)
 
-if sys.version_info >= (3, 10):
-    from typing import ParamSpec, TypeAlias
-else:
-    from typing_extensions import ParamSpec, TypeAlias
 if sys.version_info >= (3, 11):
     from typing import Self
 else:
@@ -40,22 +47,13 @@ class MPIPoolExecutor(Executor):
         self,
         wait: bool = True,
     ) -> Self: ...
-    if sys.version_info >= (3, 9):
-        def submit(
-            self,
-            fn: Callable[_P, T],
-            /,
-            *args: _P.args,
-            **kwargs: _P.kwargs,
-        ) -> Future[T]: ...
-
-    else:
-        def submit(
-            self,
-            fn: Callable[_P, T],
-            *args: _P.args,
-            **kwargs: _P.kwargs,
-        ) -> Future[T]: ...
+    def submit(
+        self,
+        fn: Callable[_P, T],
+        /,
+        *args: _P.args,
+        **kwargs: _P.kwargs,
+    ) -> Future[T]: ...
     def map(
         self,
         fn: Callable[..., T],

@@ -8,7 +8,7 @@ else()
 endif()
 
 set(Python_FIND_UNVERSIONED_NAMES FIRST)
-find_package(Python 3.8 COMPONENTS Interpreter ${DEV_MODULE} REQUIRED)
+find_package(Python 3.10 COMPONENTS Interpreter ${DEV_MODULE} REQUIRED)
 
 find_package(MPI REQUIRED)
 

@@ -1,4 +1,8 @@
-from typing import Callable, Generic, overload
+from typing import (
+    Callable,
+    Generic,
+    overload,
+)
 
 from ..typing import S, T, U
 from ._base import Future

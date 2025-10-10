@@ -21,7 +21,7 @@ export MPI4PY_BUILD_MPIABI="1"
 export MPI4PY_BUILD_PYSABI="$pysabi"
 export MPI4PY_LOCAL_VERSION="$mpiabi"
 export CIBW_CONTAINER_ENGINE=$containerengine
-export CIBW_PROJECT_REQUIRES_PYTHON=">=3.8"
+export CIBW_PROJECT_REQUIRES_PYTHON=">=3.10"
 export CIBW_ENABLE="cpython-freethreading pypy"
 export CIBW_BUILD_FRONTEND="build[uv]"
 export CIBW_ARCHS="$arch"
