@@ -336,7 +336,8 @@ class ProcessPoolInitTest(ProcessPoolMixin, unittest.TestCase):
             initializer=sleep_and_raise,
             initargs=(0.2,),
         )
-        executor.submit(time.sleep, 0).cancel()
+        with contextlib.suppress(futures.BrokenExecutor):
+            executor.submit(time.sleep, 0).cancel()
         future = executor.submit(time.sleep, 0)
         with self.assertRaises(futures.BrokenExecutor):
             executor.submit(time.sleep, 0).result()
