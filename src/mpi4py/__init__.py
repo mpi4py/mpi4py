@@ -17,7 +17,7 @@ oriented interface which closely follows MPI-2 C++ bindings.
 
 """
 
-__version__ = "4.1.1"
+__version__ = "4.2.0.dev0"
 __author__ = "Lisandro Dalcin"
 __credits__ = "MPI Forum, MPICH Team, Open MPI Team"
 
