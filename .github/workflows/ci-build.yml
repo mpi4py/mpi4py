@@ -110,7 +110,16 @@ jobs:
               --verbose --no-index --find-links=dist
 
     - name: Test wheel after install (cmdline)
+      run:  mpiexec -n 1 python -m mpi4py --mpi-vendor
+
+    - name: Test wheel after install (cmdline)
       run:  mpiexec -n 1 python -m mpi4py --mpi-library
+
+    - name: Test wheel after install (cmdline)
+      run:  mpiexec -n 1 python -m mpi4py --mpi-abi-version
+
+    - name: Test wheel after install (cmdline)
+      run:  mpiexec -n 1 python -m mpi4py --mpi-std-version
 
     - name: Test wheel after install (cmdline)
       run:  mpiexec -n 1 python -m mpi4py --mpi-lib-version
@@ -127,6 +136,7 @@ jobs:
     - name: Test wheel after install (I_MPI_LIBRARY_KIND=debug)
       if:   matrix.mpi == 'impi' && runner.os == 'Windows'
       run:  |
+        mpiexec -n 1 python -m mpi4py --mpi-vendor
         mpiexec -n 1 python -m mpi4py --mpi-library
         mpiexec -n 2 python -m mpi4py.bench helloworld
         mpiexec -n 3 python -m mpi4py.bench ringtest
@@ -136,6 +146,7 @@ jobs:
     - name: Test wheel after install (I_MPI_LIBRARY_KIND=release)
       if:   matrix.mpi == 'impi' && runner.os == 'Windows'
       run:  |
+        mpiexec -n 1 python -m mpi4py --mpi-vendor
         mpiexec -n 1 python -m mpi4py --mpi-library
         mpiexec -n 2 python -m mpi4py.bench helloworld
         mpiexec -n 3 python -m mpi4py.bench ringtest
@@ -153,10 +164,19 @@ jobs:
         MPI4PY_BUILD_BACKEND: ${{ matrix.backend }}
         MPI4PY_LOCAL_VERSION: ${{ matrix.mpi }}
 
-    - name: Test wheel after install (cmdline)
+    - name: Test wheel after install (cmdline:mpi-vendor)
+      run:  mpiexec -n 1 python -m mpi4py --mpi-vendor
+
+    - name: Test wheel after install (cmdline:mpi-library)
       run:  mpiexec -n 1 python -m mpi4py --mpi-library
 
-    - name: Test wheel after install (cmdline)
+    - name: Test wheel after install (cmdline:mpi-abi-version)
+      run:  mpiexec -n 1 python -m mpi4py --mpi-abi-version
+
+    - name: Test wheel after install (cmdline:mpi-std-version)
+      run:  mpiexec -n 1 python -m mpi4py --mpi-std-version
+
+    - name: Test wheel after install (cmdline:mpi-lib-version)
       run:  mpiexec -n 1 python -m mpi4py --mpi-lib-version
 
     - name: Test package after install (test_package)

@@ -45,9 +45,12 @@ $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.bench qwerty       > /dev/null 2
 $MPIEXEC -n 2 $PYTHON -m coverage run -m mpi4py.bench qwerty       > /dev/null 2>&1 || true
 
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.run --help        > /dev/null
-$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py --prefix          > /dev/null
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py --version         > /dev/null
+$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py --prefix          > /dev/null
+$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py --module          > /dev/null
+$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py --mpi-vendor      > /dev/null
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py --mpi-library     > /dev/null
+$MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py --mpi-abi-version > /dev/null
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py --mpi-std-version > /dev/null
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py --mpi-lib-version > /dev/null
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py --help            > /dev/null

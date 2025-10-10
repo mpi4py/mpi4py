@@ -35,7 +35,7 @@ def check(ctx, n, singleton):
     """🔧 Check in-place."""
     ctx.invoke(build, quiet=True)
     launcher = [] if singleton else [*MPIEXEC, "-n", f"{n}"]
-    run([*PYTHON, "-m", "mpi4py", "--prefix"])
+    run([*PYTHON, "-m", "mpi4py", "--module"])
     run([*PYTHON, "-m", "mpi4py", "--mpi-library"])
     run([*launcher, *PYTHON, "-m", "mpi4py.bench", "ringtest"])
 
