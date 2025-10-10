@@ -36,7 +36,7 @@ class TestGrequest(unittest.TestCase):
         dupe = MPI.Grequest(greq)
         self.assertIs(type(dupe), MPI.Grequest)
         self.assertEqual(dupe, greq)
-        dupe = MPI.Grequest.fromhandle(greq.handle)
+        dupe = MPI.Grequest.fromhandle(greq.tohandle())
         self.assertIs(type(dupe), MPI.Grequest)
         self.assertEqual(dupe, greq)
         if greq.toint() != -1:
