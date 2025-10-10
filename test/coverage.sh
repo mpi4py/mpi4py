@@ -8,6 +8,7 @@ PYTHON=${PYTHON:-python${py:-}}
 export PYTHONDONTWRITEBYTECODE=1
 export PYTHONUNBUFFERED=1
 export PYTHONWARNINGS=error
+export COVERAGE_CORE=ctrace
 
 $PYTHON -m coverage erase
 
