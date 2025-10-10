@@ -1,3 +1,21 @@
+Release 4.1.1 [2025-09-XX]
+==========================
+
+* Add MPIABI-aware import hook support.
+
+* Support `MPI.ERR_ERRHANDLER` with Open MPI.
+
+* Fix Windows build issues with Intel MPI 2021.16.
+
+* Minor fixes and improvements to typing stubs.
+
+* Minor fixes to documentation.
+
+* Publish Python 3.8-3.14 and PyPy 3.11 wheels.
+
+* PyPy 3.10 (EOL) wheels are no longer published.
+
+
 Release 4.1.0 [2025-06-25]
 ==========================
 
