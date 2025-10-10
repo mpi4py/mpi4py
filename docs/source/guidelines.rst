@@ -82,15 +82,12 @@ Fair play rules
    external, system-provided MPI installations with hardware-specific
    optimizations and site-specific tweaks.
 
-   The MPI Forum is currently discussing the standardization of a proposal for
-   an Application Binary Interface (ABI) for MPI, see [mpi-abi-paper]_ and
-   [mpi-abi-issue]_. Such standardization will allow for any binary dependent
-   on the MPI library to be used with multiple MPI backends. Once this proposal
-   becomes part of the MPI standard, the mpi4py project will consider
-   publishing on PyPI binary wheels capable of using any backend MPI
-   implementation supporting the new MPI ABI specification. In the mean time,
-   mpi4py is currently distributing experimental MPI and mpi4py binary wheels
-   on https://anaconda.org/mpi4py.
+   The MPI 5.0 standard features an Application Binary Interface (ABI) for
+   MPI, see [mpi-abi-paper]_ and [mpi-abi-issue]_. Such standardization allows
+   for any binary dependent on the MPI library to be used with multiple MPI
+   backends. Once MPI implementations provide support for the new MPI ABI, the
+   mpi4py project will follow and add support to the binary wheels published
+   on PyPI.
 
    .. [mpi-abi-paper]
       J. Hammond, L. Dalcin, E. Schnetter, M. Pérache, J. B. Besnard,
