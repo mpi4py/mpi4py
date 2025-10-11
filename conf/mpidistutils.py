@@ -533,9 +533,13 @@ class Distribution(cls_Distribution):
         self.provides = None
         self.requires = None
         self.obsoletes = None
-        # supports 'executables' keyword
+        # support 'executables' keyword
         self.executables = None
+        # support 'long_description_content_type' keyword
+        self.long_description_content_type = None
         cls_Distribution.__init__(self, attrs)
+        # disable for setuptools pyproject.toml
+        self.include_package_data = False
 
     def has_executables(self):
         return self.executables and len(self.executables) > 0

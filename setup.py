@@ -30,23 +30,12 @@ def get_metadata():
     import metadata as md
 
     req_py = ">={}.{}".format(*require_python)
-    assert req_py == md.requires_python  # noqa: S101
-    author = md.authors[0]
+    assert req_py == md.get_requires_python()  # noqa: S101
+    version = md.get_version()
     readme = md.get_readme()
     return {
-        # distutils
-        "name": md.get_name(),
-        "version": md.get_version(),
-        "description": md.description,
+        "version": version,
         "long_description": readme["text"],
-        "classifiers": md.classifiers,
-        "keywords": md.keywords,
-        "license": md.license,
-        "author": author["name"],
-        "author_email": author["email"],
-        # setuptools
-        "project_urls": md.urls,
-        "python_requires": md.requires_python,
         "long_description_content_type": readme["content-type"],
     }
 
@@ -166,12 +155,6 @@ package_info = dict(
 
 def run_setup():
     """Call setuptools.setup(*args, **kwargs)."""
-    try:
-        import setuptools
-    except ImportError as exc:
-        setuptools = None
-        if sys.version_info >= (3, 12):
-            sys.exit(exc)
     from mpidistutils import (
         Executable as Exe,
         Extension as Ext,
@@ -187,12 +170,6 @@ def run_setup():
         ext_modules=[Ext(**ext) for ext in extensions()],
         executables=[Exe(**exe) for exe in executables()],
     )
-    if setuptools:
-        builder_args["zip_safe"] = False
-    else:
-        metadata.pop("project_urls")
-        metadata.pop("python_requires")
-        metadata.pop("long_description_content_type")
     #
     sabi = get_build_pysabi()
     if sabi:
@@ -201,47 +178,9 @@ def run_setup():
         for ext in builder_args["ext_modules"]:
             ext.define_macros.extend(defines)
             ext.py_limited_api = True
-    if sabi and setuptools:
         api_tag = "cp{}{}".format(*sabi)
         options = {"bdist_wheel": {"py_limited_api": api_tag}}
         builder_args["options"] = options
-    #
-    setup_args = dict(
-        i
-        for d in (
-            metadata,
-            package_info,
-            builder_args,
-        )
-        for i in d.items()
-    )
-    #
-    setup(**setup_args)
-
-
-def run_skbuild():
-    """Call setuptools.setup(*args, **kwargs)."""
-    from setuptools import setup
-
-    #
-    metadata = get_metadata()
-    builder_args = dict(
-        cmake_source_dir=".",
-    )
-    #
-    options = {}
-    cmake_args = []
-    if get_build_mpiabi():
-        cmake_args += ["-DMPIABI:BOOL=1"]
-    sabi = get_build_pysabi()
-    if sabi:
-        api_tag = "cp{}{}".format(*sabi)
-        options["bdist_wheel"] = {"py_limited_api": api_tag}
-        cmake_args += ["-DPYSABI:STRING={}.{}".format(*sabi)]
-    if options:
-        builder_args["options"] = options
-    if cmake_args:
-        builder_args["cmake_args"] = cmake_args
     #
     setup_args = dict(
         i
@@ -260,15 +199,7 @@ def run_skbuild():
 
 
 def main():
-    try:
-        name = __import__("builder").get_build_backend_name()
-    except RuntimeError as exc:
-        sys.exit(exc)
-
-    if name == "setuptools":
-        run_setup()
-    if name == "skbuild":
-        run_skbuild()
+    run_setup()
 
 
 if __name__ == "__main__":
