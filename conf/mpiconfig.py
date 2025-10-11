@@ -112,7 +112,7 @@ class Config:
             section = "mpi"
 
         mach = platform.machine()
-        arch = platform.architecture(None)[0]
+        arch = platform.architecture("")[0]
         plat = sys.platform
         osnm = os.name
         if plat.startswith("linux"):
@@ -246,7 +246,7 @@ class Config:
             self.filename = [os.path.dirname(MSMPI_INC)]
             return True
 
-        arch = platform.architecture(None)[0][:2]
+        arch = platform.architecture("")[0][:2]
         # Look for Microsoft MPI in the environment
         MSMPI_INC = os.environ.get("MSMPI_INC")
         MSMPI_LIB = os.environ.get("MSMPI_LIB" + arch)
@@ -293,7 +293,7 @@ class Config:
             if name == "msmpi":
                 include_dir = os.path.join(mpi_dir, "inc")
                 library = "msmpi"
-                arch = platform.architecture(None)[0]
+                arch = platform.architecture("")[0]
                 if arch == "32bit":
                     library_dir = os.path.join(library_dir, "i386")
                 if arch == "64bit":

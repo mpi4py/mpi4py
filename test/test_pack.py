@@ -189,7 +189,7 @@ name, version = MPI.get_vendor()
 if name == "MPICH":
     if version < (4, 0, 0):
         BaseTestPackExternal.skipdtype += "ldgLFDG"
-    if platform.architecture(None)[0] == "32bit":
+    if platform.architecture("")[0] == "32bit":
         BaseTestPackExternal.skipdtype += "gG"
 elif name == "Open MPI":
     if version < (5, 0, 0):

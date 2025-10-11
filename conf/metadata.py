@@ -42,7 +42,7 @@ def get_requires_python(settings=None):  # noqa: ARG001
 
 
 def dynamic_metadata(field, settings=None):
-    getter = globals().get("get_" + field.replace("-", "_"))
+    getter = globals()["get_" + field.replace("-", "_")]
     return getter(settings)
 
 
