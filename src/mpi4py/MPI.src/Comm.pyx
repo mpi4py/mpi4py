@@ -2629,7 +2629,7 @@ cdef class Intracomm(Comm):
 
     def Accept(
         self,
-        port_name: str,
+        port_name: str | None,
         Info info: Info = INFO_NULL,
         int root: int = 0,
     ) -> Intercomm:
@@ -2652,7 +2652,7 @@ cdef class Intracomm(Comm):
 
     def Connect(
         self,
-        port_name: str,
+        port_name: str | None,
         Info info: Info = INFO_NULL,
         int root: int = 0,
     ) -> Intercomm:
