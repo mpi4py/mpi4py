@@ -1,7 +1,9 @@
+import collections
 import inspect
 import pathlib
 import textwrap
-from collections import UserList
+
+from mpi4py import MPI
 
 
 def is_cyfunction(obj):
@@ -52,10 +54,10 @@ def is_property(obj):
 
 
 def is_class(obj):
-    return inspect.isclass(obj) or type(obj) is type(int)
+    return inspect.isclass(obj)
 
 
-class Lines(UserList):
+class Lines(collections.UserList):
     INDENT = " " * 4
     level = 0
 
@@ -95,13 +97,39 @@ def visit_constant(constant):
 
 
 def visit_function(function):
-    sig = signature(function)
-    return f"def {sig}: ..."
+    fname = function.__name__
+    fsign = inspect.signature(function)
+    for name, param in fsign.parameters.items():
+        value = param.default
+        if value is param.empty:
+            pass
+        elif value is Ellipsis:
+            param._default = "..."
+        elif value in (None, ()):
+            pass
+        elif type(value) is bool:
+            pass
+        elif type(value).__module__ == "mpi4py.MPI":
+            param._default = value.__reduce__()
+        elif type(value) is str:
+            param._default = f'"{value}"'
+        elif type(value) is int:
+            newvalue = ARGUMENTS.get((name, value))
+            if newvalue is not None:
+                param._default = newvalue
+            elif value != 0 and name not in ("maxprocs", "disp_unit"):
+                print(f"fn:{fname} arg:{name} default:{value}")
+        else:
+            print(f"fn:{fname} arg:{name} default:{value}")
+    sig = str(fsign)
+    sig = sig.replace("'", "")  # fix type annotations
+    sig = sig.replace('"', "'")  # fix string quotation
+    assert f"{fname}{sig}" == f"{signature(function)}"  # noqa: S101
+    return f"def {fname}{sig}: ..."
 
 
 def visit_method(method):
-    sig = signature(method)
-    return f"def {sig}: ..."
+    return visit_function(method)
 
 
 def visit_datadescr(datadescr):
@@ -171,10 +199,7 @@ def visit_class(cls, done=None):
             done.add("__hash__")
 
     try:
-
-        class sub(cls):
-            pass
-
+        type("sub", (cls,), {})
         final = False
     except TypeError:
         final = True
@@ -232,10 +257,12 @@ def visit_class(cls, done=None):
             if name == attr.__name__:
                 obj = dct[name]
                 if is_classmethod(obj):
+                    obj = obj.__func__
                     lines.add = "@classmethod"
                 elif is_staticmethod(obj):
+                    obj = obj.__func__
                     lines.add = "@staticmethod"
-                lines.add = visit_method(attr)
+                lines.add = visit_method(obj)
             elif True:
                 lines.add = f"{name} = {attr.__name__}"
             continue
@@ -387,7 +414,25 @@ from os import PathLike
 from threading import Lock
 """
 
+ARGUMENTS = {
+    (n, getattr(MPI, v)): v
+    for n, v in (
+        ("required", "THREAD_MULTIPLE"),
+        ("order", "ORDER_C"),
+        ("source", "ANY_SOURCE"),
+        ("tag", "ANY_TAG"),
+        ("sendtag", "ANY_TAG"),
+        ("recvtag", "ANY_TAG"),
+        ("amode", "MODE_RDONLY"),
+        ("whence", "SEEK_SET"),
+        ("lock_type", "LOCK_EXCLUSIVE"),
+    )
+}
+
 OVERRIDE = {
+    "Exception": {
+        "__init__": "def __init__(self, ierr: int = SUCCESS, /) -> None: ...",
+    },
     "Info": {
         "__iter__": "def __iter__(self) -> Iterator[str]: ...",
         "__getitem__": "def __getitem__(self, item: str, /) -> str: ...",
@@ -501,8 +546,6 @@ from .typing import (  # noqa: E402
 
 
 def visit_mpi4py_MPI():
-    from mpi4py import MPI as module
-
     lines = Lines()
     lines.add = "# ruff: noqa: A001"
     lines.add = "# ruff: noqa: A002"
@@ -511,7 +554,7 @@ def visit_mpi4py_MPI():
     lines.add = "# fmt: off"
     lines.add = IMPORTS
     lines.add = ""
-    lines.add = visit_module(module)
+    lines.add = visit_module(MPI)
     lines.add = ""
     lines.add = TYPING
     return lines
