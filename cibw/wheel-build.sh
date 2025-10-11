@@ -11,7 +11,7 @@ python -m pip install --upgrade pip pipx wheel
 
 py="cp313"
 pysabi="0"
-matrix_mpiabi=("mpich" "openmpi")
+matrix_mpiabi=("mpiabi" "mpich" "openmpi")
 matrix_arch=("$(uname -m)")
 
 for mpiabi in "${matrix_mpiabi[@]}"; do
