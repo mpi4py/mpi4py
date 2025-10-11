@@ -1,3 +1,19 @@
+Release 4.2.0 [YYYY-MM-DD]
+==========================
+
+* Enhancements:
+
+  + Add ``tohandle()`` method to MPI types.
+
+* Backward-incompatible changes:
+
+  + Python 3.10+ is required.
+
+  + CPython wheels use the Stable ABI.
+
+  + PyPy wheels are no longer published.
+
+
 Release 4.1.1 [2025-10-10]
 ==========================
 
