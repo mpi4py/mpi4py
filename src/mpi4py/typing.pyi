@@ -1,18 +1,12 @@
-# ruff: noqa: UP006
 # ruff: noqa: UP007
-# ruff: noqa: UP045
 import sys
 from collections.abc import (
     Sequence,
 )
 from typing import (
     Any,
-    Dict,
-    List,
-    Optional,
     Protocol,
     SupportsIndex,
-    Tuple,
     TypeAlias,
     TypeVar,
     Union,
@@ -24,7 +18,7 @@ from .MPI import (
     InPlaceType,
 )
 
-__all__: List[str] = [
+__all__: list[str] = [
     "SupportsBuffer",
     "SupportsDLPack",
     "SupportsCAI",
@@ -54,15 +48,15 @@ class SupportsBuffer(Protocol):
 
 class SupportsDLPack(Protocol):
     def __dlpack__(
-        self, /, *, stream: Optional[_Stream] = None
+        self, /, *, stream: _Stream | None = None
     ) -> _PyCapsule: ...
     def __dlpack_device__(
         self,
-    ) -> Tuple[_DeviceType, _DeviceID]: ...
+    ) -> tuple[_DeviceType, _DeviceID]: ...
 
 class SupportsCAI(Protocol):
     @property
-    def __cuda_array_interface__(self) -> Dict[str, Any]: ...
+    def __cuda_array_interface__(self) -> dict[str, Any]: ...
 
 Buffer: TypeAlias = Union[
     SupportsBuffer,
@@ -86,50 +80,50 @@ TypeSpec: TypeAlias = Union[Datatype, str]
 
 BufSpec: TypeAlias = Union[
     Buffer,
-    Tuple[Buffer, Count],
-    Tuple[Buffer, TypeSpec],
-    Tuple[Buffer, Count, TypeSpec],
-    Tuple[Bottom, Count, Datatype],
-    List[Any],
+    tuple[Buffer, Count],
+    tuple[Buffer, TypeSpec],
+    tuple[Buffer, Count, TypeSpec],
+    tuple[Bottom, Count, Datatype],
+    list[Any],
 ]
 
 BufSpecB: TypeAlias = Union[
     Buffer,
-    Tuple[Buffer, Count],
-    Tuple[Buffer, TypeSpec],
-    Tuple[Buffer, Count, TypeSpec],
-    List[Any],
+    tuple[Buffer, Count],
+    tuple[Buffer, TypeSpec],
+    tuple[Buffer, Count, TypeSpec],
+    list[Any],
 ]
 
 BufSpecV: TypeAlias = Union[
     Buffer,
-    Tuple[Buffer, Sequence[Count]],
-    Tuple[Buffer, Tuple[Sequence[Count], Sequence[Displ]]],
-    Tuple[Buffer, TypeSpec],
-    Tuple[Buffer, Sequence[Count], TypeSpec],
-    Tuple[Buffer, Tuple[Sequence[Count], Sequence[Displ]], TypeSpec],
-    Tuple[Buffer, Sequence[Count], Sequence[Displ], TypeSpec],
-    Tuple[Bottom, Tuple[Sequence[Count], Sequence[Displ]], Datatype],
-    Tuple[Bottom, Sequence[Count], Sequence[Displ], Datatype],
-    List[Any],
+    tuple[Buffer, Sequence[Count]],
+    tuple[Buffer, tuple[Sequence[Count], Sequence[Displ]]],
+    tuple[Buffer, TypeSpec],
+    tuple[Buffer, Sequence[Count], TypeSpec],
+    tuple[Buffer, tuple[Sequence[Count], Sequence[Displ]], TypeSpec],
+    tuple[Buffer, Sequence[Count], Sequence[Displ], TypeSpec],
+    tuple[Bottom, tuple[Sequence[Count], Sequence[Displ]], Datatype],
+    tuple[Bottom, Sequence[Count], Sequence[Displ], Datatype],
+    list[Any],
 ]
 
 BufSpecW: TypeAlias = Union[
-    Tuple[Buffer, Sequence[Datatype]],
-    Tuple[Buffer, Tuple[Sequence[Count], Sequence[Displ]], Sequence[Datatype]],
-    Tuple[Buffer, Sequence[Count], Sequence[Displ], Sequence[Datatype]],
-    Tuple[Bottom, Tuple[Sequence[Count], Sequence[Displ]], Sequence[Datatype]],
-    Tuple[Bottom, Sequence[Count], Sequence[Displ], Sequence[Datatype]],
-    List[Any],
+    tuple[Buffer, Sequence[Datatype]],
+    tuple[Buffer, tuple[Sequence[Count], Sequence[Displ]], Sequence[Datatype]],
+    tuple[Buffer, Sequence[Count], Sequence[Displ], Sequence[Datatype]],
+    tuple[Bottom, tuple[Sequence[Count], Sequence[Displ]], Sequence[Datatype]],
+    tuple[Bottom, Sequence[Count], Sequence[Displ], Sequence[Datatype]],
+    list[Any],
 ]
 
 TargetSpec: TypeAlias = Union[
     Displ,
-    Tuple[()],
-    Tuple[Displ],
-    Tuple[Displ, Count],
-    Tuple[Displ, Count, TypeSpec],
-    List[Any],
+    tuple[()],
+    tuple[Displ],
+    tuple[Displ, Count],
+    tuple[Displ, Count, TypeSpec],
+    list[Any],
 ]
 
 S = TypeVar("S")  # noqa: PYI001

@@ -9,12 +9,9 @@ from collections.abc import (
 )
 from typing import (
     Any,
-    Dict,
-    List,
-    Optional,
     Protocol,
     SupportsIndex,
-    Tuple,
+    TypeAlias,
     TypeVar,
     Union,
 )
@@ -44,10 +41,10 @@ __all__ = [
     "TargetSpec",
 ]
 
-_Stream = Union[int, Any]
-_PyCapsule = object
-_DeviceType = int
-_DeviceID = int
+_Stream: TypeAlias = Union[int, Any]
+_PyCapsule: TypeAlias = object
+_DeviceType: TypeAlias = int
+_DeviceID: TypeAlias = int
 
 
 class SupportsBuffer(Protocol):
@@ -68,10 +65,10 @@ class SupportsDLPack(Protocol):
     .. seealso:: :ref:`dlpack:python-spec`
     """
 
-    def __dlpack__(self, /, *, stream: Optional[_Stream] = None) -> _PyCapsule:
+    def __dlpack__(self, /, *, stream: _Stream | None = None) -> _PyCapsule:
         """Export data for consumption as a DLPack capsule."""
 
-    def __dlpack_device__(self) -> Tuple[_DeviceType, _DeviceID]:
+    def __dlpack_device__(self) -> tuple[_DeviceType, _DeviceID]:
         """Get device type and device ID in DLPack format."""
 
 
@@ -82,11 +79,11 @@ class SupportsCAI(Protocol):
     """
 
     @property
-    def __cuda_array_interface__(self) -> Dict[str, Any]:
+    def __cuda_array_interface__(self) -> dict[str, Any]:
         """CAI protocol data."""
 
 
-Buffer = Union[
+Buffer: TypeAlias = Union[
     SupportsBuffer,
     SupportsDLPack,
     SupportsCAI,
@@ -96,148 +93,148 @@ Buffer-like object.
 """
 
 
-Bottom = Union[BottomType, None]
+Bottom: TypeAlias = Union[BottomType, None]
 """
 Start of the address range.
 """
 
 
-InPlace = Union[InPlaceType, None]
+InPlace: TypeAlias = Union[InPlaceType, None]
 """
 In-place buffer argument.
 """
 
 
-Aint = SupportsIndex
+Aint: TypeAlias = SupportsIndex
 """
 Address-sized integral type.
 """
 
 
-Count = SupportsIndex
+Count: TypeAlias = SupportsIndex
 """
 Integral type for counts.
 """
 
 
-Displ = SupportsIndex
+Displ: TypeAlias = SupportsIndex
 """
 Integral type for displacements.
 """
 
 
-Offset = SupportsIndex
+Offset: TypeAlias = SupportsIndex
 """
 Integral type for offsets.
 """
 
 
-TypeSpec = Union[Datatype, str]
+TypeSpec: TypeAlias = Union[Datatype, str]
 """
 Datatype specification.
 """
 
 
-BufSpec = Union[
+BufSpec: TypeAlias = Union[
     Buffer,
-    Tuple[Buffer, Count],
-    Tuple[Buffer, TypeSpec],
-    Tuple[Buffer, Count, TypeSpec],
-    Tuple[Bottom, Count, Datatype],
-    List[Any],
+    tuple[Buffer, Count],
+    tuple[Buffer, TypeSpec],
+    tuple[Buffer, Count, TypeSpec],
+    tuple[Bottom, Count, Datatype],
+    list[Any],
 ]
 """
 Buffer specification.
 
 * `Buffer`
-* Tuple[`Buffer`, `Count`]
-* Tuple[`Buffer`, `TypeSpec`]
-* Tuple[`Buffer`, `Count`, `TypeSpec`]
-* Tuple[`Bottom`, `Count`, `Datatype`]
+* tuple[`Buffer`, `Count`]
+* tuple[`Buffer`, `TypeSpec`]
+* tuple[`Buffer`, `Count`, `TypeSpec`]
+* tuple[`Bottom`, `Count`, `Datatype`]
 """
 
 
-BufSpecB = Union[
+BufSpecB: TypeAlias = Union[
     Buffer,
-    Tuple[Buffer, Count],
-    Tuple[Buffer, TypeSpec],
-    Tuple[Buffer, Count, TypeSpec],
-    List[Any],
+    tuple[Buffer, Count],
+    tuple[Buffer, TypeSpec],
+    tuple[Buffer, Count, TypeSpec],
+    list[Any],
 ]
 """
 Buffer specification (block).
 
 * `Buffer`
-* Tuple[`Buffer`, `Count`]
-* Tuple[`Buffer`, `TypeSpec`]
-* Tuple[`Buffer`, `Count`, `TypeSpec`]
+* tuple[`Buffer`, `Count`]
+* tuple[`Buffer`, `TypeSpec`]
+* tuple[`Buffer`, `Count`, `TypeSpec`]
 """
 
 
-BufSpecV = Union[
+BufSpecV: TypeAlias = Union[
     Buffer,
-    Tuple[Buffer, Sequence[Count]],
-    Tuple[Buffer, Tuple[Sequence[Count], Sequence[Displ]]],
-    Tuple[Buffer, TypeSpec],
-    Tuple[Buffer, Sequence[Count], TypeSpec],
-    Tuple[Buffer, Tuple[Sequence[Count], Sequence[Displ]], TypeSpec],
-    Tuple[Buffer, Sequence[Count], Sequence[Displ], TypeSpec],
-    Tuple[Bottom, Tuple[Sequence[Count], Sequence[Displ]], Datatype],
-    Tuple[Bottom, Sequence[Count], Sequence[Displ], Datatype],
-    List[Any],
+    tuple[Buffer, Sequence[Count]],
+    tuple[Buffer, tuple[Sequence[Count], Sequence[Displ]]],
+    tuple[Buffer, TypeSpec],
+    tuple[Buffer, Sequence[Count], TypeSpec],
+    tuple[Buffer, tuple[Sequence[Count], Sequence[Displ]], TypeSpec],
+    tuple[Buffer, Sequence[Count], Sequence[Displ], TypeSpec],
+    tuple[Bottom, tuple[Sequence[Count], Sequence[Displ]], Datatype],
+    tuple[Bottom, Sequence[Count], Sequence[Displ], Datatype],
+    list[Any],
 ]
 """
 Buffer specification (vector).
 
 * `Buffer`
-* Tuple[`Buffer`, Sequence[`Count`]]
-* Tuple[`Buffer`, Tuple[Sequence[`Count`], Sequence[`Displ`]]]
-* Tuple[`Buffer`, `TypeSpec`]
-* Tuple[`Buffer`, Sequence[`Count`], `TypeSpec`]
-* Tuple[`Buffer`, Tuple[Sequence[`Count`], Sequence[`Displ`]], `TypeSpec`]
-* Tuple[`Buffer`, Sequence[`Count`], Sequence[`Displ`], `TypeSpec`]
-* Tuple[`Bottom`, Tuple[Sequence[`Count`], Sequence[`Displ`]], `Datatype`]
-* Tuple[`Bottom`, Sequence[`Count`], Sequence[`Displ`], `Datatype`]
+* tuple[`Buffer`, Sequence[`Count`]]
+* tuple[`Buffer`, tuple[Sequence[`Count`], Sequence[`Displ`]]]
+* tuple[`Buffer`, `TypeSpec`]
+* tuple[`Buffer`, Sequence[`Count`], `TypeSpec`]
+* tuple[`Buffer`, tuple[Sequence[`Count`], Sequence[`Displ`]], `TypeSpec`]
+* tuple[`Buffer`, Sequence[`Count`], Sequence[`Displ`], `TypeSpec`]
+* tuple[`Bottom`, tuple[Sequence[`Count`], Sequence[`Displ`]], `Datatype`]
+* tuple[`Bottom`, Sequence[`Count`], Sequence[`Displ`], `Datatype`]
 """
 
 
-BufSpecW = Union[
-    Tuple[Buffer, Sequence[Datatype]],
-    Tuple[Buffer, Tuple[Sequence[Count], Sequence[Displ]], Sequence[Datatype]],
-    Tuple[Buffer, Sequence[Count], Sequence[Displ], Sequence[Datatype]],
-    Tuple[Bottom, Tuple[Sequence[Count], Sequence[Displ]], Sequence[Datatype]],
-    Tuple[Bottom, Sequence[Count], Sequence[Displ], Sequence[Datatype]],
-    List[Any],
+BufSpecW: TypeAlias = Union[
+    tuple[Buffer, Sequence[Datatype]],
+    tuple[Buffer, tuple[Sequence[Count], Sequence[Displ]], Sequence[Datatype]],
+    tuple[Buffer, Sequence[Count], Sequence[Displ], Sequence[Datatype]],
+    tuple[Bottom, tuple[Sequence[Count], Sequence[Displ]], Sequence[Datatype]],
+    tuple[Bottom, Sequence[Count], Sequence[Displ], Sequence[Datatype]],
+    list[Any],
 ]
 """
 Buffer specification (generalized).
 
-* Tuple[`Buffer`, Sequence[`Datatype`]]
-* Tuple[`Buffer`, \
-        Tuple[Sequence[`Count`], Sequence[`Displ`]], Sequence[`Datatype`]]
-* Tuple[`Buffer`, Sequence[`Count`], Sequence[`Displ`], Sequence[`Datatype`]]
-* Tuple[`Bottom`, \
-        Tuple[Sequence[`Count`], Sequence[`Displ`]], Sequence[`Datatype`]]
-* Tuple[`Bottom`, Sequence[`Count`], Sequence[`Displ`], Sequence[`Datatype`]]
+* tuple[`Buffer`, Sequence[`Datatype`]]
+* tuple[`Buffer`, \
+          tuple[Sequence[`Count`], Sequence[`Displ`]], Sequence[`Datatype`]]
+* tuple[`Buffer`, Sequence[`Count`], Sequence[`Displ`], Sequence[`Datatype`]]
+* tuple[`Bottom`, \
+          tuple[Sequence[`Count`], Sequence[`Displ`]], Sequence[`Datatype`]]
+* tuple[`Bottom`, Sequence[`Count`], Sequence[`Displ`], Sequence[`Datatype`]]
 """
 
 
-TargetSpec = Union[
+TargetSpec: TypeAlias = Union[
     Displ,
-    Tuple[()],
-    Tuple[Displ],
-    Tuple[Displ, Count],
-    Tuple[Displ, Count, TypeSpec],
-    List[Any],
+    tuple[()],
+    tuple[Displ],
+    tuple[Displ, Count],
+    tuple[Displ, Count, TypeSpec],
+    list[Any],
 ]
 """
 Target specification.
 
 * `Displ`
-* Tuple[()]
-* Tuple[`Displ`]
-* Tuple[`Displ`, `Count`]
-* Tuple[`Displ`, `Count`, `TypeSpec`]
+* tuple[()]
+* tuple[`Displ`]
+* tuple[`Displ`, `Count`]
+* tuple[`Displ`, `Count`, `TypeSpec`]
 """
 
 
