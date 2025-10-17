@@ -88,6 +88,7 @@ cdef api MPI_Op* PyMPIOp_Get(object arg) except NULL:
 cdef api object PyMPIGroup_New(MPI_Group arg):
     cdef Group obj = Group.__new__(Group)
     obj.ob_mpi = arg
+    obj.flags |= 0
     return obj
 
 cdef api MPI_Group* PyMPIGroup_Get(object arg) except NULL:
