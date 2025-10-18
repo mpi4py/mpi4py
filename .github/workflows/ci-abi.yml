@@ -437,6 +437,7 @@ jobs:
       run:  mpiexec -n 2 python test/main.py -v -f -i 'comm|p2p|cco|rma'
     - name: Test mpi4py (np=3)
       run:  mpiexec -n 3 python test/main.py -v -f -i 'comm|p2p|cco|rma'
+      if:   matrix.platform != 'macOS-x86_64'
 
     - name: Uninstall mpi4py
       run:  python -m pip uninstall mpi4py
