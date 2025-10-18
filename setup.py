@@ -52,8 +52,7 @@ def get_build_pysabi():
             return None
         if abi in {"true", "yes", "on", "y", "1"} | {"abi3"}:
             return py_limited_api
-        if abi.startswith("cp"):
-            abi = abi[2:]
+        abi = abi.removeprefix("cp")
         if "." in abi:
             x, y = abi.split(".")
         else:
