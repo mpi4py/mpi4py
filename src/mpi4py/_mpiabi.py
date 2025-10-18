@@ -166,6 +166,7 @@ def _dlopen_libmpi(libmpi=None):  # pragma: no cover
         return template.format(name, suffix)
 
     def libmpi_names():
+        yield libname("mpi_abi", 0)
         if os.name == "posix":
             yield libname("mpi")
             yield libname("mpi", 12)  # mpich
