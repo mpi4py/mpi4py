@@ -96,6 +96,7 @@ class TestProfile(unittest.TestCase):
                 with self.assertRaises(UserWarning):
                     mpi4py.profile(struct.__file__)
             return
+
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             for libname in libraries:

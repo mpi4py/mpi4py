@@ -133,17 +133,11 @@ def profile(name, *, path=None):
 
     """
     # pylint: disable=import-outside-toplevel
+    import ctypes
     import os
     import pathlib
     import sys
     import warnings
-
-    try:
-        from _ctypes import dlopen
-        from os import RTLD_GLOBAL, RTLD_NOW
-    except ImportError as exc:  # pragma: no cover
-        warnings.warn(exc.args[0], stacklevel=2)
-        return
 
     def find_library(name, path):
         pattern = [("", "")]
@@ -151,9 +145,11 @@ def profile(name, *, path=None):
             pattern.append(("lib", ".dylib"))
         elif os.name == "posix":  # pragma: no cover
             pattern.append(("lib", ".so"))
+        elif os.name == "nt":  # pragma: no cover
+            pattern.append(("", ".dll"))
         for pth in map(pathlib.Path, path):
-            for lib, dso in pattern:
-                filename = pth / f"{lib}{name}{dso}"
+            for lib, ext in pattern:
+                filename = pth / f"{lib}{name}{ext}"
                 if filename.is_file():
                     return str(filename.resolve())
         return None
@@ -172,9 +168,13 @@ def profile(name, *, path=None):
     filename = find_library(name, path)
     if filename is None:
         raise ValueError(f"profiler {name!r} not found")
+    try:
+        mode = os.RTLD_NOW | os.RTLD_GLOBAL
+    except AttributeError:  # pragma: no cover
+        mode = ctypes.DEFAULT_MODE
 
     try:
-        handle = dlopen(filename, RTLD_NOW | RTLD_GLOBAL)
+        handle = ctypes.CDLL(filename, mode)
     except OSError as exc:
         warnings.warn(exc.args[0], stacklevel=2)
     else:
