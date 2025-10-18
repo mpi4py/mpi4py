@@ -1,5 +1,8 @@
-from collections.abc import Collection
-from typing import Callable, overload
+from collections.abc import (
+    Callable,
+    Collection,
+)
+from typing import overload
 
 from ..typing import T, U, V
 from ._base import Future

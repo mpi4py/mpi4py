@@ -1,5 +1,5 @@
+from collections.abc import Callable
 from typing import (
-    Callable,
     Generic,
     overload,
 )

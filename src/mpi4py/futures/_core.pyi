@@ -1,5 +1,6 @@
 import sys
 from collections.abc import (
+    Callable,
     Iterable,
     Iterator,
     Mapping,
@@ -7,7 +8,6 @@ from collections.abc import (
 )
 from typing import (
     Any,
-    Callable,
     Generic,
     TypeAlias,
 )

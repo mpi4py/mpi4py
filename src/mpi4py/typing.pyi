@@ -1,8 +1,6 @@
 # ruff: noqa: UP007
 import sys
-from collections.abc import (
-    Sequence,
-)
+from collections.abc import Sequence
 from typing import (
     Any,
     Protocol,

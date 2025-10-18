@@ -1,12 +1,12 @@
 import sys
 from collections.abc import (
+    Callable,
     Iterable,
     Iterator,
     Mapping,
 )
 from typing import (
     Any,
-    Callable,
     Generic,
 )
 
