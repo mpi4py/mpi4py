@@ -12,7 +12,7 @@ case "$MPI_ABI" in
     mpich)   MPI_VERSION=4 ;;
     openmpi) MPI_VERSION=5 ;;
     msmpi)   MPI_VERSION=10.1.1 ;;
-    impi)    MPI_VERSION=2021.15.0 MPI_PACKAGE=impi-devel ;;
+    impi)    MPI_VERSION=2021.16.0 MPI_PACKAGE=impi-devel ;;
 esac
 case "$(uname)" in
     Linux|Darwin)
