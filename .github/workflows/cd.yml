@@ -96,14 +96,14 @@ jobs:
 
     - if: ${{ (inputs.python-tag || '') == '' }}
       name: Download sdist artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         path: dist
         pattern: sdist
         merge-multiple: true
 
     - name: Download wheel artifacts
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         path: dist
         pattern: wheel-*
@@ -150,14 +150,14 @@ jobs:
 
     - if: ${{ (inputs.python-tag || '') == '' }}
       name: Download sdist artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         path: dist
         pattern: sdist
         merge-multiple: true
 
     - name: Download wheel artifacts
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         path: dist
         pattern: wheel-*
@@ -199,14 +199,14 @@ jobs:
 
     - if: ${{ (inputs.python-tag || '') == '' }}
       name: Download sdist artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         path: dist
         pattern: sdist
         merge-multiple: true
 
     - name: Download wheel artifacts
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         path: dist
         pattern: wheel-*
@@ -259,7 +259,7 @@ jobs:
       uses: actions/checkout@v5
 
     - name: Download distribution artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         path: dist
         pattern: sdist
@@ -297,7 +297,7 @@ jobs:
         token: ${{ secrets.DOCS_PUBLISH_PAT }}
 
     - name: Download documentation artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: docs
         path: mpi4py

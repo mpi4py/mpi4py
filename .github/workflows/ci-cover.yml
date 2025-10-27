@@ -135,7 +135,7 @@ jobs:
     - run: python setup.py build_src
 
     - name: Download coverage data
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         pattern: coverage-data-*
         merge-multiple: true
