@@ -59,7 +59,7 @@ jobs:
         python -m zipfile -c $archive $rootdir
 
     - id: upload
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: docs
         path: mpi4py-docs.zip

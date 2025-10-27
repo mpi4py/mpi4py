@@ -290,7 +290,7 @@ jobs:
         CFLAGS: "-O0"
 
     - name: Upload mpi4py wheel
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: mpi4py-abi-${{ matrix.mpi }}-${{ matrix.platform }}
         path: dist/mpi4py-*.whl
