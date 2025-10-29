@@ -654,7 +654,7 @@ class TestExcWinNull(BaseTestCase):
 
     def testCallErrhandler(self):
         self.assertRaisesMPI(
-            [MPI.ERR_WIN, MPI.ERR_ARG],
+            self.ERRORS,
             MPI.WIN_NULL.Call_errhandler,
             0,
         )
