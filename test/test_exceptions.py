@@ -305,6 +305,19 @@ class TestExcInfoNull(BaseTestCase):
         )
 
 
+class TestExcInfoEnv(BaseTestCase):
+    #
+    @unittest.skipMPI("mvapich")
+    @unittest.skipMPI("mpich(<4.2.0)")
+    @unittest.skipMPI("impi(<2021.16.0)")
+    @unittest.skipMPI("openmpi", MPI.Get_version() < (5, 0))
+    def testFree(self):
+        self.assertRaisesMPI(
+            [MPI.ERR_INFO, MPI.ERR_ARG],
+            MPI.INFO_ENV.Free,
+        )
+
+
 class TestExcInfo(BaseTestCase):
     #
     def setUp(self):
