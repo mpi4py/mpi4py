@@ -10,7 +10,11 @@
 /* ---------------------------------------------------------------- */
 
 %header %{ #include <mpi4py/mpi4py.h> %}
-%init   %{ if (import_mpi4py() < 0) return NULL; %}
+#if SWIG_VERSION >= 0x040400
+%init %{ if (import_mpi4py() < 0) return -1; %}
+#else
+%init %{ if (import_mpi4py() < 0) return NULL; %}
+#endif
 
 /* ---------------------------------------------------------------- */
 
