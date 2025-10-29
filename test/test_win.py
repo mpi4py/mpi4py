@@ -101,24 +101,6 @@ class BaseTestWin:
         self.WIN.Set_info(info)
         info.Free()
 
-    def testGetSetErrhandler(self):
-        for ERRHANDLER in [
-            MPI.ERRORS_ARE_FATAL,
-            MPI.ERRORS_RETURN,
-            MPI.ERRORS_ARE_FATAL,
-            MPI.ERRORS_RETURN,
-        ]:
-            errhdl_1 = self.WIN.Get_errhandler()
-            self.assertNotEqual(errhdl_1, MPI.ERRHANDLER_NULL)
-            self.WIN.Set_errhandler(ERRHANDLER)
-            errhdl_2 = self.WIN.Get_errhandler()
-            self.assertEqual(errhdl_2, ERRHANDLER)
-            errhdl_2.Free()
-            self.assertEqual(errhdl_2, MPI.ERRHANDLER_NULL)
-            self.WIN.Set_errhandler(errhdl_1)
-            errhdl_1.Free()
-            self.assertEqual(errhdl_1, MPI.ERRHANDLER_NULL)
-
     def testGetSetName(self):
         try:
             name = self.WIN.Get_name()

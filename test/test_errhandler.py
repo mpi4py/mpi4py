@@ -211,6 +211,35 @@ class TestErrhandlerFile(BaseTestErrhandler, unittest.TestCase):
         super().testCall()
 
 
+class TestErrhandlerFileNull(unittest.TestCase):
+    #
+    def setUp(self):
+        self.eh_save = MPI.FILE_NULL.Get_errhandler()
+
+    def tearDown(self):
+        MPI.FILE_NULL.Set_errhandler(self.eh_save)
+        self.eh_save.Free()
+
+    def _run_test_get_set(self, errhandler):
+        MPI.FILE_NULL.Set_errhandler(errhandler)
+        eh = MPI.FILE_NULL.Get_errhandler()
+        self.assertEqual(eh, errhandler)
+        eh.Free()
+
+    def testErrorsReturn(self):
+        self._run_test_get_set(MPI.ERRORS_RETURN)
+
+    def testErrorsFatal(self):
+        self._run_test_get_set(MPI.ERRORS_ARE_FATAL)
+
+    @unittest.skipUnless(MPI.ERRORS_ABORT, "mpi-errors-abort")
+    @unittest.skipMPI("mpich(<4.1.0)")
+    @unittest.skipMPI("openmpi(<5.0.0)")
+    @unittest.skipMPI("impi(<2021.14.0)")
+    def testErrorsAbort(self):
+        self._run_test_get_set(MPI.ERRORS_ARE_FATAL)
+
+
 class TestErrhandlerSession(BaseTestErrhandler, unittest.TestCase):
     #
     def setUp(self):

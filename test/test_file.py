@@ -198,29 +198,6 @@ class BaseTestFile:
             loads(dumps(self.FILE))
 
 
-class TestFileNull(unittest.TestCase):
-    #
-    def setUp(self):
-        self.eh_save = MPI.FILE_NULL.Get_errhandler()
-
-    def tearDown(self):
-        MPI.FILE_NULL.Set_errhandler(self.eh_save)
-        self.eh_save.Free()
-
-    def testGetSetErrhandler(self):
-        eh = MPI.FILE_NULL.Get_errhandler()
-        self.assertEqual(eh, MPI.ERRORS_RETURN)
-        eh.Free()
-        MPI.FILE_NULL.Set_errhandler(MPI.ERRORS_ARE_FATAL)
-        eh = MPI.FILE_NULL.Get_errhandler()
-        self.assertEqual(eh, MPI.ERRORS_ARE_FATAL)
-        eh.Free()
-        MPI.FILE_NULL.Set_errhandler(MPI.ERRORS_RETURN)
-        eh = MPI.FILE_NULL.Get_errhandler()
-        self.assertEqual(eh, MPI.ERRORS_RETURN)
-        eh.Free()
-
-
 class TestFileSelf(BaseTestFile, unittest.TestCase):
     #
     COMM = MPI.COMM_SELF
@@ -273,7 +250,6 @@ try:
     have_feature()
 except NotImplementedError:
     unittest.disable(BaseTestFile, "mpi-file")
-    unittest.disable(TestFileNull, "mpi-file")
     unittest.disable(TestFilePath, "mpi-file")
 
 
