@@ -90,7 +90,7 @@ class BaseTestWin:
         wgroup.Free()
         self.assertEqual(grpcmp, MPI.IDENT)
 
-    @unittest.skipMPI("impi(>=2021.15.0)")
+    @unittest.skipMPI("impi(>=2021.15.0,<2021.17.0)")
     def testGetSetInfo(self):
         # info = MPI.INFO_NULL
         # self.WIN.Set_info(info)
@@ -145,7 +145,8 @@ class BaseTestWin:
                 i_mpi_compat = os.environ.get("I_MPI_COMPATIBILITY", "mpi-3.1")
                 if i_mpi_compat in {"3", "4", "5", "mpi-3.1", "mpi-4.0"}:
                     return
-                if flavor == MPI.WIN_FLAVOR_CREATE:  # mpi4py/mpi4py#665
+            if unittest.is_mpi("impi(<2021.17.0)"):  # mpi4py/mpi4py#665
+                if flavor == MPI.WIN_FLAVOR_CREATE:
                     return
             if unittest.is_mpi("mpich(<4.2.2)"):
                 if flavor == MPI.WIN_FLAVOR_CREATE:
@@ -186,7 +187,7 @@ class BaseTestWin:
         self.assertEqual(win.group_rank, group.Get_rank())
         group.Free()
         #
-        if not unittest.is_mpi("impi(>=2021.15.0)"):
+        if not unittest.is_mpi("impi(>=2021.15.0,<2021.17.0)"):
             info = win.info
             self.assertIs(type(info), MPI.Info)
             win.info = info

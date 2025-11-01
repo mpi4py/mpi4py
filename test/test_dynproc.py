@@ -59,7 +59,7 @@ class TestDPM(unittest.TestCase):
 
     @unittest.skipMPI("mpich(==3.4.1)", ch4_ofi())
     @unittest.skipMPI("mvapich", ch4_ofi())
-    @unittest.skipMPI("impi", MPI.COMM_WORLD.Get_size() > 2)
+    @unittest.skipMPI("impi(<2021.17.0)", MPI.COMM_WORLD.Get_size() > 2)
     def testAcceptConnect(self):
         comm_self = MPI.COMM_SELF
         comm_world = MPI.COMM_WORLD

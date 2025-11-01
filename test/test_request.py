@@ -93,7 +93,7 @@ class TestRequestArray(unittest.TestCase):
             self.assertTrue(flag)
             if unittest.is_mpi("openmpi"):
                 status.error = MPI.SUCCESS
-            if unittest.is_mpi("impi(>=2021.14.0)"):
+            if unittest.is_mpi("impi(>=2021.14.0,<2021.17.0)"):
                 status.error = MPI.SUCCESS
             index, flag = MPI.Request.Get_status_any(self.REQUESTS, status)
             self.assertEqual(index, MPI.UNDEFINED)

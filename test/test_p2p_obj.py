@@ -1,4 +1,4 @@
-import sys
+import os
 import threading
 import warnings
 
@@ -369,7 +369,7 @@ class BaseTestP2PObj:
                 flag |= MPI.Request.Testall(reqs)
                 if flag:
                     break
-            if unittest.is_mpi("impi") and sys.platform == "win32":
+            if unittest.is_mpi("impi") and os.name == "nt":
                 flag |= MPI.Request.Waitall(reqs)
             self.assertTrue(flag)
 
