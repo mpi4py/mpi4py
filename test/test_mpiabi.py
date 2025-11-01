@@ -54,6 +54,10 @@ class TestMPIABI(unittest.TestCase):
             for typesize in typesizes:
                 typename = f"{typeclass}{typesize}"
                 datatype = getattr(MPI, typename.upper())
+                if unittest.is_mpi("impi"):
+                    if typename in {"real2", "complex4"}:
+                        if datatype == MPI.DATATYPE_NULL:
+                            continue
                 with self.subTest(typename=typename):
                     key = f"mpi_{typename}_supported"
                     supported = info.Get(key)
