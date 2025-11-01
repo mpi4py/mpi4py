@@ -274,6 +274,44 @@
 
 #endif
 
+#if MPI_VERSION < 5
+
+#if I_MPI_NUMVERSION >= 20211700300
+#define PyMPI_HAVE_MPI_LOGICAL1 1
+#define PyMPI_HAVE_MPI_LOGICAL2 1
+#define PyMPI_HAVE_MPI_LOGICAL4 1
+#define PyMPI_HAVE_MPI_LOGICAL8 1
+#define PyMPI_HAVE_MPI_LOGICAL16 1
+#define PyMPI_HAVE_MPI_Comm_toint 1
+#define PyMPI_HAVE_MPI_Errhandler_toint 1
+#define PyMPI_HAVE_MPI_File_toint 1
+#define PyMPI_HAVE_MPI_Group_toint 1
+#define PyMPI_HAVE_MPI_Info_toint 1
+#define PyMPI_HAVE_MPI_Message_toint 1
+#define PyMPI_HAVE_MPI_Op_toint 1
+#define PyMPI_HAVE_MPI_Request_toint 1
+#define PyMPI_HAVE_MPI_Session_toint 1
+#define PyMPI_HAVE_MPI_Type_toint 1
+#define PyMPI_HAVE_MPI_Win_toint 1
+#define PyMPI_HAVE_MPI_Comm_fromint 1
+#define PyMPI_HAVE_MPI_Errhandler_fromint 1
+#define PyMPI_HAVE_MPI_File_fromint 1
+#define PyMPI_HAVE_MPI_Group_fromint 1
+#define PyMPI_HAVE_MPI_Info_fromint 1
+#define PyMPI_HAVE_MPI_Message_fromint 1
+#define PyMPI_HAVE_MPI_Op_fromint 1
+#define PyMPI_HAVE_MPI_Request_fromint 1
+#define PyMPI_HAVE_MPI_Session_fromint 1
+#define PyMPI_HAVE_MPI_Type_fromint 1
+#define PyMPI_HAVE_MPI_Win_fromint 1
+#define PyMPI_HAVE_MPI_ERR_ABI 1
+#define PyMPI_HAVE_MPI_Abi_get_version 1
+#define PyMPI_HAVE_MPI_Abi_get_info 1
+#define PyMPI_HAVE_MPI_Abi_get_fortran_info 1
+#endif
+
+#endif
+
 #if I_MPI_NUMVERSION < 20211700300 && defined (_WIN32)
 #undef PyMPI_HAVE_MPI_File_get_type_extent_c
 #undef PyMPI_HAVE_MPI_Register_datarep_c
