@@ -48,26 +48,17 @@ jobs:
 
     - uses: actions/checkout@v5
 
-    - uses: mamba-org/setup-micromamba@v2
+    - uses: actions/setup-python@v6
       with:
-        init-shell: bash
-        post-cleanup: none
-        environment-name: cover
-        create-args: >-
-          ${{ matrix.mpi }}
-          ${{ matrix.mpi }}-mpicc
-          python=${{ matrix.py }}
-          pip
+        python-version: ${{ matrix.py }}
+        cache: pip
+    - run: >-
+          python -m pip install
           setuptools
           cython
           coverage
+          ${{ matrix.mpi }}
           numpy
-        condarc: |
-          show_channel_urls: true
-          channel_priority: strict
-          channels:
-            - conda-forge
-            - nodefaults
 
     - run: python -m pip install .
       env:
@@ -124,13 +115,12 @@ jobs:
       with:
         python-version: ${{ github.event.inputs.py || 3 }}
         cache: pip
-        cache-dependency-path: |
-          conf/requirements-build-cython.txt
+    - run: >-
+          python -m pip install
+          cython
+          coverage
 
-    - run: python -m pip install -U pip setuptools
-    - run: python -m pip install -U -r conf/requirements-build-cython.txt
-    - run: python -m pip install -U coverage
-    - run: python setup.py build_src
+    - run: python conf/cythonize.py
 
     - name: Download coverage data
       uses: actions/download-artifact@v6
