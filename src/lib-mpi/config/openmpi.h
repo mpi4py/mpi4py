@@ -255,12 +255,71 @@
 #define PyMPI_HAVE_MPI_F_STATUS_SIZE 1
 #endif
 
-#if OMPI_NUMVERSION >= 50100
+#if OMPI_NUMVERSION >= 60000
 #define PyMPI_HAVE_MPI_ERR_ERRHANDLER 1
+#define PyMPI_HAVE_MPI_Remove_error_class 1
+#define PyMPI_HAVE_MPI_Remove_error_code 1
+#define PyMPI_HAVE_MPI_Remove_error_string 1
+#define PyMPI_HAVE_MPI_Status_get_source 1
+#define PyMPI_HAVE_MPI_Status_set_source 1
+#define PyMPI_HAVE_MPI_Status_get_tag 1
+#define PyMPI_HAVE_MPI_Status_set_tag 1
+#define PyMPI_HAVE_MPI_Status_get_error 1
+#define PyMPI_HAVE_MPI_Status_set_error 1
+#define PyMPI_HAVE_MPI_COMBINER_VALUE_INDEX 1
+#define PyMPI_HAVE_MPI_Type_get_value_index 1
+#define PyMPI_HAVE_MPI_Request_get_status_any 1
+#define PyMPI_HAVE_MPI_Request_get_status_all 1
+#define PyMPI_HAVE_MPI_Request_get_status_some 1
+#define PyMPI_HAVE_MPI_BUFFER_AUTOMATIC 1
+#define PyMPI_HAVE_MPI_Buffer_flush 1
+#define PyMPI_HAVE_MPI_Buffer_iflush 1
+#define PyMPI_HAVE_MPI_Comm_attach_buffer 1
+#define PyMPI_HAVE_MPI_Comm_detach_buffer 1
+#define PyMPI_HAVE_MPI_Comm_flush_buffer 1
+#define PyMPI_HAVE_MPI_Comm_iflush_buffer 1
+#define PyMPI_HAVE_MPI_Session_attach_buffer 1
+#define PyMPI_HAVE_MPI_Session_detach_buffer 1
+#define PyMPI_HAVE_MPI_Session_flush_buffer  1
+#define PyMPI_HAVE_MPI_Session_iflush_buffer 1
+#define PyMPI_HAVE_MPI_Comm_attach_buffer_c 1
+#define PyMPI_HAVE_MPI_Comm_detach_buffer_c 1
+#define PyMPI_HAVE_MPI_Session_attach_buffer_c 1
+#define PyMPI_HAVE_MPI_Session_detach_buffer_c 1
+#define PyMPI_HAVE_MPI_COMM_TYPE_RESOURCE_GUIDED 1
+#define PyMPI_HAVE_MPI_Get_hw_resource_info 1
+#endif
+
+#if OMPI_NUMVERSION >= 60100 && defined(MPI_ERR_ABI)
+#define PyMPI_HAVE_MPI_Comm_toint 1
+#define PyMPI_HAVE_MPI_Errhandler_toint 1
+#define PyMPI_HAVE_MPI_File_toint 1
+#define PyMPI_HAVE_MPI_Group_toint 1
+#define PyMPI_HAVE_MPI_Info_toint 1
+#define PyMPI_HAVE_MPI_Message_toint 1
+#define PyMPI_HAVE_MPI_Op_toint 1
+#define PyMPI_HAVE_MPI_Request_toint 1
+#define PyMPI_HAVE_MPI_Session_toint 1
+#define PyMPI_HAVE_MPI_Type_toint 1
+#define PyMPI_HAVE_MPI_Win_toint 1
+#define PyMPI_HAVE_MPI_Comm_fromint 1
+#define PyMPI_HAVE_MPI_Errhandler_fromint 1
+#define PyMPI_HAVE_MPI_File_fromint 1
+#define PyMPI_HAVE_MPI_Group_fromint 1
+#define PyMPI_HAVE_MPI_Info_fromint 1
+#define PyMPI_HAVE_MPI_Message_fromint 1
+#define PyMPI_HAVE_MPI_Op_fromint 1
+#define PyMPI_HAVE_MPI_Request_fromint 1
+#define PyMPI_HAVE_MPI_Session_fromint 1
+#define PyMPI_HAVE_MPI_Type_fromint 1
+#define PyMPI_HAVE_MPI_Win_fromint 1
+#define PyMPI_HAVE_MPI_ERR_ABI 1
+#define PyMPI_HAVE_MPI_Abi_get_version 1
+#define PyMPI_HAVE_MPI_Abi_get_info 1
+#define PyMPI_HAVE_MPI_Abi_get_fortran_info 1
 #endif
 
 #endif
-
 
 #if MPI_VERSION < 6
 
