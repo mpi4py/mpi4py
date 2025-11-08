@@ -229,6 +229,10 @@ cdef object allocate_count_displ(int n, MPI_Count **p, MPI_Aint **q):
 
 # -----------------------------------------------------------------------------
 
+cdef MPI_Status PyMPI_STATUS_INITIALIZER
+
+# -----------------------------------------------------------------------------
+
 cdef object PyMPI_send(object obj, int dest, int tag,
                        MPI_Comm comm):
     cdef Pickle pickle = PyMPI_PICKLE
@@ -287,7 +291,7 @@ cdef object PyMPI_recv_obarg(object obj, int source, int tag,
     cdef void *rbuf = NULL
     cdef MPI_Count rcount = 0
     cdef MPI_Datatype rtype = MPI_BYTE
-    cdef MPI_Status rsts
+    cdef MPI_Status rsts = PyMPI_STATUS_INITIALIZER
     cdef object   rmsg = None
     cdef MPI_Aint rlen = 0
     #
@@ -326,7 +330,7 @@ cdef object PyMPI_recv_match(object obj, int source, int tag,
     cdef MPI_Datatype rtype = MPI_BYTE
     #
     cdef MPI_Message match = MPI_MESSAGE_NULL
-    cdef MPI_Status rsts
+    cdef MPI_Status rsts = PyMPI_STATUS_INITIALIZER
     <void> obj  # unused
     #
     with nogil:
@@ -349,7 +353,7 @@ cdef object PyMPI_recv_probe(object obj, int source, int tag,
     cdef MPI_Count rcount = 0
     cdef MPI_Datatype rtype = MPI_BYTE
     #
-    cdef MPI_Status rsts
+    cdef MPI_Status rsts = PyMPI_STATUS_INITIALIZER
     cdef object unusedr
     <void> obj  # unused
     #
@@ -636,7 +640,7 @@ cdef object PyMPI_mprobe(int source, int tag, MPI_Comm comm,
     cdef void* rbuf = NULL
     cdef MPI_Count rcount = 0
     cdef MPI_Datatype rtype = MPI_BYTE
-    cdef MPI_Status rsts
+    cdef MPI_Status rsts = PyMPI_STATUS_INITIALIZER
     if (status == MPI_STATUS_IGNORE): status = &rsts
     with nogil: CHKERR( MPI_Mprobe(source, tag, comm, message, status) )
     if message[0] == MPI_MESSAGE_NO_PROC: return None
@@ -649,7 +653,7 @@ cdef object PyMPI_improbe(int source, int tag, MPI_Comm comm, int *flag,
     cdef void* rbuf = NULL
     cdef MPI_Count rcount = 0
     cdef MPI_Datatype rtype = MPI_BYTE
-    cdef MPI_Status rsts
+    cdef MPI_Status rsts = PyMPI_STATUS_INITIALIZER
     if (status == MPI_STATUS_IGNORE): status = &rsts
     with nogil: CHKERR( MPI_Improbe(source, tag, comm, flag, message, status) )
     if flag[0] == 0 or message[0] == MPI_MESSAGE_NO_PROC: return None
