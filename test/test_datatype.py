@@ -287,6 +287,7 @@ class TestDatatype(unittest.TestCase):
         self.assertEqual(MPI.INT_INT.typechar, "V")
         self.assertEqual(MPI.INT_INT.typestr, f"V{MPI.INT.extent * 2}")
 
+    @unittest.skipMPI("openmpi(>=6.0.0)")
     @unittest.skipMPI("mpich", struct.calcsize("P") == 4)
     def testContiguousBigMPI(self):
         int_max = (1 << (struct.calcsize("i") * 8 - 1)) - 1
