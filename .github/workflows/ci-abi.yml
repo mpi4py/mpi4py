@@ -77,12 +77,12 @@ jobs:
             ],
             "mpich": [
                 "3.4.3",
-                "4.1.2",
+                "4.1.3",
                 "4.3.2",
             ],
             "openmpi": [
-                "4.1.6",
-                "5.0.8",
+                "4.1.8",
+                "5.0.9",
             ],
             "impi": [
                 "2021.7.1.15761",
@@ -192,40 +192,27 @@ jobs:
       shell: bash
 
     - if: runner.os != 'Windows' && matrix.mpi != 'mpiabi'
-      id: micromamba
-      name: Download MPI (${{ matrix.mpi }})
-      uses: mamba-org/setup-micromamba@v2
-      with:
-        init-shell: none
-        post-cleanup: none
-        environment-name: ${{ matrix.mpi }}
-        create-args: >-
-          --relocate-prefix /opt/${{ matrix.mpi }}
-          ${{ matrix.mpi }}
-        condarc: |
-          show_channel_urls: true
-          channel_priority: strict
-          channels:
-            - conda-forge
-            - conda-forge/label/python_rc
-            - nodefaults
-
-    - if: runner.os != 'Windows' && matrix.mpi != 'mpiabi'
       name: Install MPI (${{ matrix.mpi }})
       run: |
-        # install MPI
         mpiname=${{ matrix.mpi }}
-        prefix=/opt/${{ matrix.mpi }}
-        envdir=${{ steps.micromamba.outputs.environment-path }}
+        # install MPI
+        python -m venv "$mpiname"
+        venvpy=$mpiname/bin/python
+        "$venvpy" -m pip install "$mpiname"
+        rm -f "$mpiname"/bin/pip*
+        rm -f "$mpiname"/bin/𝜋thon*
+        rm -f "$mpiname"/bin/python*
+        rm -f "$mpiname"/bin/[Aa]ctivate*
+        rm -f "$mpiname"/pyvenv.cfg
+        rm -fr "$mpiname"/lib/python*
+        sudo mv "$mpiname" /opt
         # tweak environment
-        sudo mv "$envdir" "$prefix"
+        prefix=/opt/${{ matrix.mpi }}
         echo "$prefix/bin" >> "$GITHUB_PATH"
-        if [[ "$mpiname" == "mpich" ]]; then
-        echo MPICH_CC=cc >> "$GITHUB_ENV"; fi
         if [[ "$mpiname" == "openmpi" ]]; then
-        echo OMPI_CC=cc >> "$GITHUB_ENV"
         echo OMPI_MCA_pml=ob1 >> "$GITHUB_ENV"
         echo OMPI_MCA_btl=tcp,self >> "$GITHUB_ENV"; fi
+      working-directory: ${{ runner.temp }}
 
     - if: runner.os == 'Windows' && matrix.mpi == 'impi'
       name: Install Intel MPI
@@ -313,34 +300,25 @@ jobs:
         egress-policy: audit
 
     - if: runner.os != 'Windows'
-      id: micromamba
-      name: Download MPI (${{ matrix.mpi }}-${{ matrix.mpi-version }})
-      uses: mamba-org/setup-micromamba@v2
-      with:
-        init-shell: none
-        post-cleanup: none
-        environment-name: ${{ matrix.mpi }}
-        create-args: >-
-          --relocate-prefix /opt/${{ matrix.mpi }}
-          ${{ matrix.mpi }}=${{ matrix.mpi-version }}
-        condarc: |
-          show_channel_urls: true
-          channel_priority: strict
-          channels:
-            - conda-forge
-            - nodefaults
-
-    - if: runner.os != 'Windows'
       name: Install MPI (${{ matrix.mpi }}-${{ matrix.mpi-version }})
       run: |
         mpiname=${{ matrix.mpi }} version=${{ matrix.mpi-version }}
-        prefix=/opt/${{ matrix.mpi }}
-        envdir=${{ steps.micromamba.outputs.environment-path }}
-        sudo mv "$envdir" "$prefix"
+        # install MPI
+        python -m venv "$mpiname"
+        venvpy=$mpiname/bin/python
+        "$venvpy" -m pip install "$mpiname"~="$version"
+        rm -f "$mpiname"/bin/pip*
+        rm -f "$mpiname"/bin/𝜋thon*
+        rm -f "$mpiname"/bin/python*
+        rm -f "$mpiname"/bin/[Aa]ctivate*
+        rm -f "$mpiname"/pyvenv.cfg
+        rm -fr "$mpiname"/lib/python*
+        sudo mv "$mpiname" /opt
         # tweak environment
+        prefix=/opt/${{ matrix.mpi }}
         echo "$prefix/bin" >> $GITHUB_PATH
         if [[ "$mpiname" == "openmpi" ]]; then
-        # Set OMPI/PRRTE MCA parameters
+        # set OMPI/PRRTE MCA parameters
         mca_params="$HOME/.openmpi/mca-params.conf"
         mkdir -p "$(dirname "$mca_params")"
         echo pml=ob1 >> $mca_params
@@ -355,6 +333,7 @@ jobs:
         # Use MPI_THREAD_LEVEL=MPI_THREAD_SERIALIZED with openmpi<5
         echo MPI4PY_RC_THREAD_LEVEL=serialized >> $GITHUB_ENV
         fi; fi;
+      working-directory: ${{ runner.temp }}
 
     - if: runner.os == 'Windows' && matrix.mpi == 'impi'
       name: Install Intel MPI (${{ matrix.mpi-version }})
