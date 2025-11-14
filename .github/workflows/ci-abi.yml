@@ -192,19 +192,16 @@ jobs:
       shell: bash
 
     - if: runner.os != 'Windows' && matrix.mpi != 'mpiabi'
+      name: Setup uv
+      uses: astral-sh/setup-uv@v7
+
+    - if: runner.os != 'Windows' && matrix.mpi != 'mpiabi'
       name: Install MPI (${{ matrix.mpi }})
       run: |
         mpiname=${{ matrix.mpi }}
         # install MPI
-        python -m venv "$mpiname"
-        venvpy=$mpiname/bin/python
-        "$venvpy" -m pip install "$mpiname"
-        rm -f "$mpiname"/bin/pip*
-        rm -f "$mpiname"/bin/𝜋thon*
-        rm -f "$mpiname"/bin/python*
-        rm -f "$mpiname"/bin/[Aa]ctivate*
-        rm -f "$mpiname"/pyvenv.cfg
-        rm -fr "$mpiname"/lib/python*
+        uv pip install --target "$mpiname" "$mpiname"
+        rm -r "$mpiname"/*.dist-info
         sudo mv "$mpiname" /opt
         # tweak environment
         prefix=/opt/${{ matrix.mpi }}
@@ -300,19 +297,16 @@ jobs:
         egress-policy: audit
 
     - if: runner.os != 'Windows'
+      name: Setup uv
+      uses: astral-sh/setup-uv@v7
+
+    - if: runner.os != 'Windows'
       name: Install MPI (${{ matrix.mpi }}-${{ matrix.mpi-version }})
       run: |
         mpiname=${{ matrix.mpi }} version=${{ matrix.mpi-version }}
         # install MPI
-        python -m venv "$mpiname"
-        venvpy=$mpiname/bin/python
-        "$venvpy" -m pip install "$mpiname"~="$version"
-        rm -f "$mpiname"/bin/pip*
-        rm -f "$mpiname"/bin/𝜋thon*
-        rm -f "$mpiname"/bin/python*
-        rm -f "$mpiname"/bin/[Aa]ctivate*
-        rm -f "$mpiname"/pyvenv.cfg
-        rm -fr "$mpiname"/lib/python*
+        uv pip install --target "$mpiname" "$mpiname"~="$version"
+        rm -r "$mpiname"/*.dist-info
         sudo mv "$mpiname" /opt
         # tweak environment
         prefix=/opt/${{ matrix.mpi }}
