@@ -45,7 +45,7 @@ static FARPROC _pympi_GetProcAddress(const char *symbol)
   if (_pympi_fp_##fn) return (*_pympi_fp_##fn)(__VA_ARGS__); \
 } while (0)
 #endif /* Windows */
-#endif
+#endif /* PyMPI_STANDARD_ABI || PyMPI_LEGACY_ABI */
 
 #ifndef PyMPI_WEAK_LOAD
 #  define PyMPI_WEAK_LOAD(sym)

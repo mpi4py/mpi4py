@@ -7,6 +7,9 @@
 #define PyMPI_MPICH4_LT(NUMVERSION) \
   ((MPICH_NUMVERSION >= 40000000) && (MPICH_NUMVERSION < NUMVERSION))
 
+#define PyMPI_MPICH3_GE(NUMVERSION) \
+  ((MPICH_NUMVERSION >= NUMVERSION) && (MPICH_NUMVERSION < 40000000))
+
 /* -------------------------------------------------------------------------- */
 
 /* https://github.com/pmodels/mpich/pull/5467 */
@@ -82,7 +85,7 @@ static int PyMPI_MPICH_MPI_Info_free(MPI_Info *info)
 /* https://github.com/pmodels/mpich/issues/6351 */
 /* https://github.com/pmodels/mpich/pull/6354   */
 
-#if PyMPI_MPICH4_LT(40100300) || PyMPI_LEGACY_ABI
+#if PyMPI_MPICH4_LT(40100300) || PyMPI_LEGACY_ABI || PyMPI_MPICH3_GE(30000000)
 static int PyMPI_MPICH_MPI_Reduce_c(void *sendbuf, void *recvbuf,
                                     MPI_Count count, MPI_Datatype datatype,
                                     MPI_Op op, int root, MPI_Comm comm)
@@ -90,6 +93,8 @@ static int PyMPI_MPICH_MPI_Reduce_c(void *sendbuf, void *recvbuf,
   double dummy[1] = {0};
 #if PyMPI_LEGACY_ABI
   if (pympi_numversion() < 40)
+#endif
+#if PyMPI_LEGACY_ABI || PyMPI_MPICH3_GE(30000000)
   if (root == MPI_PROC_NULL) datatype = MPI_UNSIGNED_CHAR;
 #endif
 #if PyMPI_LEGACY_ABI
