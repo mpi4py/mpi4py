@@ -147,11 +147,10 @@ jobs:
           LDFLAGS="$LDFLAGS -Wl,-rpath,/opt/homebrew/lib"
           LDFLAGS="$LDFLAGS -Wl,-rpath,/opt/local/lib"
         CIBW_ENVIRONMENT_WINDOWS: >-
-          I_MPI_ROOT="$USERPROFILE\\mpi\\Library"
-          MSMPI_ROOT="$USERPROFILE\\mpi\\Library"
-          MSMPI_BIN="$MSMPI_ROOT\\bin"
-          MSMPI_INC="$MSMPI_ROOT\\include"
-          MSMPI_LIB64="$MSMPI_ROOT\\lib"
+          I_MPI_ROOT="$USERPROFILE\\impi"
+          MSMPI_BIN="$ProgramFiles\\Microsoft MPI\\Bin"
+          MSMPI_INC="$USERPROFILE\\msmpi\\Include"
+          MSMPI_LIB64="$USERPROFILE\\msmpi\\Lib\\x64"
         CIBW_MANYLINUX_AARCH64_IMAGE: "manylinux_2_28"
         CIBW_MANYLINUX_X86_64_IMAGE:  "manylinux_2_28"
         CIBW_BEFORE_BUILD_WINDOWS:

@@ -52,6 +52,8 @@ if [[ "$(uname)" =~ NT ]]; then
     done
     sys='/[a-z]/Windows/System32/'
     win='kernel.*\.dll\|ntdll\.dll'
+    win+='\|authz\.dll\|cryptbase\.dll\|dsparse\.dll'
+    win+='\|mswsock\.dll\|ntdsapi\.dll'
     api='api-ms-win-crt-.*\.dll'
     api+='\|advapi32\.dll\|bcrypt\.dll\|rpcrt4\.dll'
     api+='\|sechost\.dll\|version\.dll\|ws2_32\.dll'
