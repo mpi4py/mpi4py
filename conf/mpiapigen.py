@@ -1105,6 +1105,15 @@ class Generator:
             #include <mpi-ext.h>
             """)
             )
+            fileobj.write(
+                dedent("""\
+            #if OMPI_MAJOR_VERSION <= 5
+            OMPI_DECLSPEC extern struct \\
+            ompi_predefined_datatype_t \\
+            ompi_mpi_logical16;
+            #endif
+            """)
+            )
             for node in handles:
                 code = abi_handle_openmpi(node)
                 fileobj.write(code)

@@ -6,6 +6,11 @@ return _pympi__##fn(__VA_ARGS__)
 
 #ifdef OPEN_MPI
 #include <mpi-ext.h>
+#if OMPI_MAJOR_VERSION <= 5
+OMPI_DECLSPEC extern struct \
+ompi_predefined_datatype_t \
+ompi_mpi_logical16;
+#endif
 PyMPI_WEAK_LOAD(ompi_mpi_datatype_null)
 PyMPI_WEAK_LOAD(ompi_mpi_packed)
 PyMPI_WEAK_LOAD(ompi_mpi_byte)
