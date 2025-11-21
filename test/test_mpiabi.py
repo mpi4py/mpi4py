@@ -69,6 +69,18 @@ class TestMPIABI(unittest.TestCase):
         info.Free()
 
     @unittest.skipIf(MPI.Get_abi_version() < (1, 0), "mpi-abi")
+    def testBufferConstant(self):
+        for attr, value in (
+            ("BOTTOM", 0),
+            ("IN_PLACE", 1),
+            ("BUFFER_AUTOMATIC", 2),
+        ):
+            obj = getattr(MPI, attr)
+            self.assertEqual(obj, value)
+            addr = MPI.Get_address(obj)
+            self.assertEqual(addr, value)
+
+    @unittest.skipIf(MPI.Get_abi_version() < (1, 0), "mpi-abi")
     def testIntHandle(self):
         for attr in dir(MPI):
             obj = getattr(MPI, attr)
