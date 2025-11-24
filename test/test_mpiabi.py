@@ -68,6 +68,20 @@ class TestMPIABI(unittest.TestCase):
                     )
         info.Free()
 
+    @unittest.skipIf(MPI.Get_abi_version() < (1, 0), "mpi-abi")
+    def testIntHandle(self):
+        for attr in dir(MPI):
+            obj = getattr(MPI, attr)
+            if isinstance(obj, type):
+                continue
+            if not hasattr(obj, "toint"):
+                continue
+            intval = obj.toint()
+            self.assertGreater(intval, 0)
+            self.assertLess(intval, 4096)
+            handle = obj.tohandle()
+            self.assertEqual(handle, intval)
+
 
 if __name__ == "__main__":
     unittest.main()
