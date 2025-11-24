@@ -69,6 +69,25 @@ class TestMPIABI(unittest.TestCase):
         info.Free()
 
     @unittest.skipIf(MPI.Get_abi_version() < (1, 0), "mpi-abi")
+    def testIntConstant(self):
+        for attr, value in (
+            ("ERR_LASTCODE", 0x3FFF),
+            ("ANY_SOURCE", -1),
+            ("ANY_TAG", -2),
+            ("PROC_NULL", -3),
+            ("ROOT", -4),
+            ("UNDEFINED", -32766),
+            ("THREAD_SINGLE", 0),
+            ("THREAD_FUNNELED", 1024),
+            ("THREAD_SERIALIZED", 2048),
+            ("THREAD_MULTIPLE", 4096),
+            ("ORDER_C", 0xC),
+            ("ORDER_FORTRAN", 0xF),
+        ):
+            const = getattr(MPI, attr)
+            self.assertEqual(const, value)
+
+    @unittest.skipIf(MPI.Get_abi_version() < (1, 0), "mpi-abi")
     def testBufferConstant(self):
         for attr, value in (
             ("BOTTOM", 0),
