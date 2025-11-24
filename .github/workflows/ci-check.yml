@@ -40,7 +40,7 @@ jobs:
         egress-policy: audit
 
     - name: Checkout
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
 
     - name: Setup Python (${{ github.event.inputs.py || 3 }})
       uses: actions/setup-python@v6
@@ -84,7 +84,7 @@ jobs:
         egress-policy: audit
 
     - name: Checkout
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
 
     - name: Setup Python (${{ github.event.inputs.py || 3 }})
       uses: actions/setup-python@v6
@@ -125,7 +125,7 @@ jobs:
         egress-policy: audit
 
     - name: Checkout
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
 
     - name: Setup Python (${{ github.event.inputs.py || 3 }})
       uses: actions/setup-python@v6
@@ -182,7 +182,7 @@ jobs:
         egress-policy: audit
 
     - name: Checkout
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
 
     - name: Setup Python (${{ github.event.inputs.py || 3 }})
       uses: actions/setup-python@v6

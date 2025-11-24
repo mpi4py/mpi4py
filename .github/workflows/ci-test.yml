@@ -51,7 +51,7 @@ jobs:
       if:   runner.os == 'Linux' || runner.os == 'macOS'
 
     - name: Checkout
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
 
     - name: Setup MPI (${{ matrix.mpi }})
       uses: mpi4py/setup-mpi@v1
