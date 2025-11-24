@@ -1,2 +1,1 @@
 scikit-build-core
-setuptools
