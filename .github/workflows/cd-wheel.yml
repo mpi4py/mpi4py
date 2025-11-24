@@ -107,16 +107,13 @@ jobs:
     - id: setup-project
       run: python ./conf/cythonize.py
 
-    - id: setup-uv
-      if: ${{ runner.os != 'Linux' }}
-      uses: astral-sh/setup-uv@v7
-
     - id: build
       uses: pypa/cibuildwheel@v3.3.0
       timeout-minutes: 10
       with:
+        extras: uv
+        output-dir: wheelhouse
         package-dir: .
-        output-dir:  wheelhouse
       env:
         MPI4PY_BUILD_MPIABI: "1"
         MPI4PY_BUILD_PYSABI: "${{ matrix.py-sabi && matrix.py || '0' }}"
