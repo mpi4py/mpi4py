@@ -112,7 +112,7 @@ jobs:
       uses: astral-sh/setup-uv@v7
 
     - id: build
-      uses: pypa/cibuildwheel@v3.2.1
+      uses: pypa/cibuildwheel@v3.3.0
       timeout-minutes: 10
       with:
         package-dir: .
