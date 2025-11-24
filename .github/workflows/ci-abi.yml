@@ -171,11 +171,11 @@ jobs:
         egress-policy: audit
 
     - name: Checkout
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
 
     - if: matrix.mpi == 'mpiabi'
       name: Checkout MPI ABI stubs
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         repository: mpi-forum/mpi-abi-stubs
         path: mpi-abi-stubs
@@ -379,7 +379,7 @@ jobs:
               --verbose --no-index --find-links=dist
 
     - name: Checkout
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
 
     - name: Set hostname
       run:  sudo hostname localhost

@@ -50,7 +50,7 @@ jobs:
     steps:
     - uses: step-security/harden-runner@v2
       with: {egress-policy: audit}
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
     - id: setup
       run: |
         # build matrix
@@ -75,7 +75,7 @@ jobs:
         egress-policy: audit
 
     - id: checkout
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
 
     - id: setup-macOS
       if: ${{ runner.os == 'macOS' }}
@@ -182,7 +182,7 @@ jobs:
         egress-policy: audit
 
     - id: checkout
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
 
     - id: source-date-epoch
       run: |
@@ -249,7 +249,7 @@ jobs:
       run:  echo 127.0.0.1 `hostname` | sudo tee -a /etc/hosts > /dev/null
       if:   runner.os == 'Linux' || runner.os == 'macOS'
 
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - uses: actions/download-artifact@v6
       with:
