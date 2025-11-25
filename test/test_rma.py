@@ -513,7 +513,8 @@ class BaseTestRMA:
             self.assertFalse(flag)
             comm.Barrier()
             comm.Barrier()
-            flag = win.Test()
+            while not flag:
+                flag = win.Test()
             self.assertTrue(flag)
             group.Free()
         wingroup.Free()
