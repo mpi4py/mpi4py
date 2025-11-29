@@ -53,9 +53,9 @@ def _is_aligned(datatype, offset=0):
             disps = info["displacements"]
         return all(_is_aligned(t, offset + d) for (t, d) in zip(types, disps))
     finally:
-        for _tp in types:
-            if not _tp.is_predefined:
-                _tp.Free()
+        for tp in types:
+            if not tp.is_predefined:
+                tp.Free()
 
 
 def from_numpy_dtype(dtype):
@@ -277,6 +277,6 @@ def to_numpy_dtype(datatype):
 
         raise ValueError("cannot convert MPI datatype to NumPy")
     finally:
-        for _tp in datatypes:
-            if not _tp.is_predefined:
-                _tp.Free()
+        for tp in datatypes:
+            if not tp.is_predefined:
+                tp.Free()
