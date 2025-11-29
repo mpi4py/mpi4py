@@ -291,6 +291,9 @@ jobs:
       with:
         egress-policy: audit
 
+    - name: Checkout
+      uses: actions/checkout@v6
+
     - if: runner.os != 'Windows'
       name: Setup uv
       uses: astral-sh/setup-uv@v7
@@ -369,9 +372,6 @@ jobs:
     - name: Install mpi4py wheel
       run:  python -m pip install mpi4py
               --verbose --no-index --find-links=dist
-
-    - name: Checkout
-      uses: actions/checkout@v6
 
     - name: Set hostname
       run:  sudo hostname localhost
