@@ -82,19 +82,14 @@ jobs:
       with:
         python-version: ${{ github.event.inputs.py || 3 }}
         check-latest: true
+        pip-install: build
         cache: pip
         cache-dependency-path: |
           conf/requirements-build-cython.txt
           conf/requirements-build-${{ matrix.backend }}.txt
 
-    - name: Upgrade pip
-      run:  python -m pip install -U pip
-
-    - name: Install Python packages (build)
-      run:  python -m pip install -U build
-
     - name: Build sdist and wheel (${{ matrix.backend }})
-      run:  python -m build
+      run:  python -m build --verbose
       env:
         MPI4PY_BUILD_BACKEND: ${{ matrix.backend }}
         MPI4PY_LOCAL_VERSION: ${{ matrix.mpi }}

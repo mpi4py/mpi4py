@@ -51,14 +51,15 @@ jobs:
     - uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.py }}
-        cache: pip
-    - run: >-
-          python -m pip install
+        pip-install: >-
+          -r conf/requirements-build-cython.txt
           setuptools
-          cython
-          coverage
           ${{ matrix.mpi }}
+          coverage
           numpy
+        cache: pip
+        cache-dependency-path: |
+          conf/requirements-build-cython.txt
 
     - run: python -m pip install .
       env:
@@ -114,11 +115,12 @@ jobs:
     - uses: actions/setup-python@v6
       with:
         python-version: ${{ github.event.inputs.py || 3 }}
-        cache: pip
-    - run: >-
-          python -m pip install
-          cython
+        pip-install: >
+          -r conf/requirements-build-cython.txt
           coverage
+        cache: pip
+        cache-dependency-path: |
+          conf/requirements-build-cython.txt
 
     - run: python conf/cythonize.py
 

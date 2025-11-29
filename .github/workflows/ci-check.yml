@@ -47,15 +47,10 @@ jobs:
       with:
         python-version: ${{ github.event.inputs.py || 3 }}
         check-latest: true
+        pip-install: -r conf/requirements-build-cython.txt setuptools
         cache: pip
         cache-dependency-path: |
           conf/requirements-build-cython.txt
-
-    - name: Upgrade pip
-      run:  python -m pip install -U pip setuptools
-
-    - name: Install Python packages (build)
-      run:  python -m pip install -U -r conf/requirements-build-cython.txt
 
     - name: Build package
       run:  python setup.py build
@@ -90,22 +85,17 @@ jobs:
       uses: actions/setup-python@v6
       with:
         python-version: ${{ github.event.inputs.py || 3 }}
+        pip-install: -r conf/requirements-docs.txt
         cache: pip
         cache-dependency-path: |
           conf/requirements-build-cython.txt
           conf/requirements-build-docs.txt
-
-    - name: Upgrade pip
-      run:  python -m pip install -U pip
 
     - name: Install package for documenting
       run:  python -m pip install .
       env:
         MPICFG: nompi-fast
         CFLAGS: -O0
-
-    - name: Install Python packages (docs)
-      run:  python -m pip install -U -r conf/requirements-docs.txt
 
     - name: sphinx-build coverage
       run:  sphinx-build -M coverage docs/source build -q -E -W -jauto
@@ -134,22 +124,19 @@ jobs:
       uses: actions/setup-python@v6
       with:
         python-version: ${{ github.event.inputs.py || 3 }}
+        pip-install: >-
+          -r conf/requirements-build-cython.txt
+          -r conf/requirements-lint.txt
         cache: pip
         cache-dependency-path: |
           conf/requirements-build-cython.txt
           conf/requirements-build-lint.txt
-
-    - name: Upgrade pip
-      run:  python -m pip install -U pip
 
     - name: Install package for linting
       run:  python -m pip install .
       env:
         MPICFG: nompi-fast
         CFLAGS: -O0
-
-    - name: Install Python packages (lint)
-      run:  python -m pip install -U -r conf/requirements-lint.txt
 
     - name: ruff check
       run:  ruff check
@@ -194,13 +181,11 @@ jobs:
       uses: actions/setup-python@v6
       with:
         python-version: ${{ github.event.inputs.py || 3 }}
+        pip-install: -r conf/requirements-type.txt
         cache: pip
         cache-dependency-path: |
           conf/requirements-build-cython.txt
           conf/requirements-build-type.txt
-
-    - name: Upgrade pip
-      run:  python -m pip install -U pip
 
     - name: Install package for typing
       run:  python -m pip install .
@@ -212,9 +197,6 @@ jobs:
       run:  |
         python conf/mpistubgen.py
         git diff --exit-code
-
-    - name: Install Python packages (type)
-      run:  python -m pip install -U -r conf/requirements-type.txt
 
     - name: mypy (typecheck)
       run:  |
