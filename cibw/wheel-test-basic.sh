@@ -9,8 +9,10 @@ PYTHON=(
     "${python312-python3.12}"
     "${python313-python3.13}"
     "${python314-python3.14}"
+    "${python315-python3.15}"
     "${python313t-python3.13t}"
     "${python314t-python3.14t}"
+    "${python315t-python3.15t}"
     "${pypy311-pypy3.11}"
 )
 
