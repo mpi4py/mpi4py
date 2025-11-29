@@ -1,0 +1,17 @@
+# https://docs.astral.sh/ty/
+
+[environment]
+python-version = "3.10"
+python-platform = "all"
+
+[rules]
+possibly-missing-attribute = "ignore"
+unresolved-attribute = "ignore"
+unresolved-import = "ignore"
+# unused-ignore-comment = "warn"
+
+[src]
+exclude =[
+"demo",
+"test",
+]

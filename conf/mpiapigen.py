@@ -160,18 +160,22 @@ class Node:
 
     def init(self, name, **kwargs):
         self.name = name
+        self.deprecated = False
         self.__dict__.update(kwargs)
 
     def header(self):
+        assert self.HEADER is not None  # noqa: S101
         line = dedent(self.HEADER) % vars(self)
         line = line.replace("\n", "")
         line = line.replace("  ", " ")
         return line + "\n"
 
     def config(self):
+        assert self.CONFIG is not None  # noqa: S101
         return dedent(self.CONFIG) % vars(self)
 
     def missing(self, guard=True):
+        assert self.MISSING is not None  # noqa: S101
         if guard:
             head = dedent(self.MISSING_HEAD)
             tail = dedent(self.MISSING_TAIL)
