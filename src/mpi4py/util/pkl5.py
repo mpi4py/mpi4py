@@ -246,13 +246,13 @@ def _imrecv(message):
 
 def _req_load(request):
     data_bufs = getattr(request, "_data_bufs", None)
-    if request == MPI.REQUEST_NULL and data_bufs is not None:
-        delattr(request, "_data_bufs")
-    if data_bufs is not None:
-        data, bufs = data_bufs
-        obj = _pickle_loads(data, bufs)
-        return obj
-    return None
+    if data_bufs is None:
+        return None
+    if request == MPI.REQUEST_NULL:
+        del request._data_bufs
+    data, bufs = data_bufs
+    obj = _pickle_loads(data, bufs)
+    return obj
 
 
 def _test(request, test, status):
