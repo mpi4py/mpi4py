@@ -248,7 +248,7 @@ def _req_load(request):
     data_bufs = getattr(request, "_data_bufs", None)
     if data_bufs is None:
         return None
-    if request == MPI.REQUEST_NULL:
+    if request == MPI.REQUEST_NULL:  # pragma: no branch
         del request._data_bufs
     data, bufs = data_bufs
     obj = _pickle_loads(data, bufs)
