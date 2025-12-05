@@ -21,15 +21,16 @@ sys.path.insert(0, os.path.join(topdir, "conf"))
 # Metadata
 # --------------------------------------------------------------------
 
-require_python = (3, 10)
-maxknow_python = (3, 15)
-py_limited_api = require_python
+python_version_min = (3, 10)
+python_version_max = (3, 15)
+python_version = sys.version_info[:2]
+py_limited_api = python_version_min
 
 
 def get_metadata():
     import metadata as md
 
-    req_py = ">={}.{}".format(*require_python)
+    req_py = ">={}.{}".format(*python_version_min)
     assert req_py == md.get_requires_python()  # noqa: S101
     version = md.get_version()
     readme = md.get_readme()
@@ -47,17 +48,22 @@ def get_build_mpiabi():
 
 def get_build_pysabi():
     abi = os.environ.get("MPI4PY_BUILD_PYSABI", "").lower()
-    if abi and sys.implementation.name == "cpython":
+    if sys.implementation.name != "cpython":
+        return None
+    if abi:
         if abi in {"false", "no", "off", "n", "0"}:
             return None
         if abi in {"true", "yes", "on", "y", "1"} | {"abi3"}:
             return py_limited_api
+        abi = abi.removesuffix("-abi3")
         abi = abi.removeprefix("cp")
         if "." in abi:
             x, y = abi.split(".")
         else:
             x, y = abi[0], abi[1:]
         return (int(x), int(y))
+    if python_version > python_version_max:
+        return python_version_max
     return None
 
 
@@ -102,11 +108,6 @@ def extensions():
         MPI["define_macros"] += [
             ("PYMPIABI", 1),
         ]
-    if sys.version_info[:2] > maxknow_python:
-        MPI["define_macros"] += [
-            ("CYTHON_LIMITED_API", 1),
-        ]
-    #
     return [MPI]
 
 
@@ -202,10 +203,10 @@ def main():
 
 
 if __name__ == "__main__":
-    if sys.version_info < require_python:
+    if python_version < python_version_min:
         raise SystemExit(
             "error: requires Python version "
-            + ".".join(map(str, require_python))
+            + ".".join(map(str, python_version_min))
         )
     main()
 
