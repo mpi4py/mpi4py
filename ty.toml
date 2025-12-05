@@ -1,0 +1,22 @@
+# https://docs.astral.sh/ty/
+
+[environment]
+python-version = "3.12"
+python-platform = "all"
+
+[rules]
+possibly-missing-attribute = "ignore"
+unresolved-attribute = "ignore"
+unresolved-import = "ignore"
+# unused-ignore-comment = "warn"
+
+[src]
+exclude =[
+"demo",
+"test",
+]
+
+[[overrides]]
+include = ["src/mpi4py/util/pkl5.pyi"]
+[overrides.rules]
+invalid-method-override = "ignore"
