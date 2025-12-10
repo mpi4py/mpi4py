@@ -125,18 +125,20 @@ coverage_ignore_classes = [r"Rc", r"memory"]
 
 def _setup_numpy_typing():
     try:
-        import numpy as np
+        np = importlib.import_module("numpy")
     except ImportError:
         from types import new_class
         from typing import Generic, TypeVar
 
+        T = TypeVar("T")
         np = type(sys)("numpy")
         sys.modules[np.__name__] = np
-        np.dtype = new_class("dtype", (Generic[TypeVar("T")],))
-        np.dtype.__module__ = np.__name__
+        np_dtype = new_class("dtype", (Generic[T],))
+        np_dtype.__module__ = np.__name__
+        np.dtype = np_dtype
 
     try:
-        import numpy.typing as npt
+        np = importlib.import_module("numpy.typing")
     except ImportError:
         npt = type(sys)("numpy.typing")
         np.typing = npt
@@ -149,16 +151,16 @@ def _setup_numpy_typing():
 
 def _patch_domain_python():
     try:
-        from numpy.typing import __all__ as numpy_types
+        from numpy.typing import __all__ as numpy_types_all
     except ImportError:
-        numpy_types = []
+        numpy_types_all = []
     try:
-        from mpi4py.typing import __all__ as mpi4py_types
+        from mpi4py.typing import __all__ as mpi4py_types_all
     except ImportError:
-        mpi4py_types = []
+        mpi4py_types_all = []
 
-    numpy_types = set(numpy_types)
-    mpi4py_types = set(mpi4py_types)
+    numpy_types = set(numpy_types_all)
+    mpi4py_types = set(mpi4py_types_all)
     for name in numpy_types:
         autodoc_type_aliases[name] = f"~numpy.typing.{name}"
     for name in mpi4py_types:
@@ -314,8 +316,8 @@ def setup(app):
     getmtime = os.path.getmtime
     generate = (
         not source.exists()
-        or getmtime(source) < getmtime(MPI.__file__)
-        or getmtime(source) < getmtime(apidoc.__file__)
+        or getmtime(source) < getmtime(MPI.__file__)  # ty: ignore
+        or getmtime(source) < getmtime(apidoc.__file__)  # ty: ignore
     )
     if generate:
         apidoc.generate(source)
@@ -337,7 +339,7 @@ def setup(app):
         "mpi4py.util.sync",
     ]
     typing_overload = typing.overload
-    typing.overload = lambda arg: arg
+    typing.overload = lambda arg: arg  # ty: ignore[invalid-assignment]
     for name in modules:
         mod = importlib.import_module(name)
         ann = apidoc.load_module(f"{mod.__file__}i", name)
