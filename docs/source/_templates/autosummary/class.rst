@@ -2,10 +2,6 @@
 
 .. currentmodule:: {{ module }}
 
-{%- if autotype is defined %}
-{%- set objtype = autotype.get(name) or objtype %}
-{%- endif %}
-
 .. auto{{ objtype }}:: {{ objname }}
    :show-inheritance:
 

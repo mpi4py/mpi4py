@@ -15,6 +15,7 @@ import os
 import pathlib
 import re
 import sys
+import types
 import typing
 
 sys.path.insert(0, os.fspath(pathlib.Path.cwd()))
@@ -77,6 +78,9 @@ toc_object_entries = False
 toc_object_entries_show_parents = "hide"
 # python_use_unqualified_type_names = True
 
+autodoc_default_options = {
+    "exclude-members": "__new__,__init__",
+}
 autodoc_class_signature = "separated"
 autodoc_typehints = "description"
 autodoc_typehints_format = "short"
@@ -127,12 +131,11 @@ def _setup_numpy_typing():
     try:
         import numpy as np
     except ImportError:
-        from types import new_class
         from typing import Generic, TypeVar
 
         np = type(sys)("numpy")
         sys.modules[np.__name__] = np
-        np.dtype = new_class("dtype", (Generic[TypeVar("T")],))
+        np.dtype = types.new_class("dtype", (Generic[TypeVar("T")],))
         np.dtype.__module__ = np.__name__
 
     try:
@@ -171,42 +174,46 @@ def _patch_domain_python():
     TypeAliasForwardRef.__repr__ = lambda self: self.name
 
 
+def _patch_autosummary():
+    import sphinx
+    from sphinx.ext import autosummary
+    from sphinx.ext.autosummary import generate
+
+    def get_documenter(*args, **kwargs):
+        if hasattr(autosummary, "_get_documenter"):
+            obj = args[0]  # signature is (obj, parent, *, registry)
+            get_documenter = autosummary._get_documenter
+        else:
+            obj = args[1]  # signature is (app, obj, parent)
+            get_documenter = autosummary.get_documenter
+        if isinstance(obj, type) and issubclass(obj, Exception):
+            if sphinx.version_info < (9, 0):
+                return types.SimpleNamespace(objtype="class")
+            return "class"
+        return get_documenter(*args, **kwargs)
+
+    if hasattr(generate, "_get_documenter"):
+        generate._get_documenter = get_documenter
+    else:
+        generate.get_documenter = get_documenter
+
+    def generate_autosummary_content(
+        name, obj, parent, template, template_name, *args, **kwargs
+    ):
+        if isinstance(obj, type) and issubclass(obj, Exception):
+            template_name = template_name or "exception"
+        return generate_autosummary_content_orig(
+            name, obj, parent, template, template_name, *args, **kwargs
+        )
+
+    generate_autosummary_content_orig = generate.generate_autosummary_content
+    generate.generate_autosummary_content = generate_autosummary_content
+
+
 def _setup_autodoc(app):
-    from sphinx.ext import autodoc, autosummary
+    from sphinx.ext import autodoc
     from sphinx.locale import _
     from sphinx.util.typing import restify
-
-    #
-
-    class ClassDocumenterMixin:
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
-            if self.config.autodoc_class_signature == "separated":
-                members = self.options.members
-                special_members = self.options.special_members
-                if special_members is not None:
-                    for name in ("__new__", "__init__"):
-                        if name in members:
-                            members.remove(name)
-                        if name in special_members:
-                            special_members.remove(name)
-
-    class ClassDocumenter(
-        ClassDocumenterMixin,
-        autodoc.ClassDocumenter,
-    ):
-        pass
-
-    class ExceptionDocumenter(
-        ClassDocumenterMixin,
-        autodoc.ExceptionDocumenter,
-    ):
-        pass
-
-    app.add_autodocumenter(ClassDocumenter, override=True)
-    app.add_autodocumenter(ExceptionDocumenter, override=True)
-
-    #
 
     def istypealias(obj, name):
         if isinstance(obj, type):
@@ -263,38 +270,15 @@ def _setup_autodoc(app):
 
     app.add_autodocumenter(TypeDocumenter)
 
-    #
-
-    class ExceptionDocumenterCustom(ExceptionDocumenter):
-        objtype = "class"
-
-    def get_documenter(*args, **kwargs):
-        if hasattr(autosummary, "_get_documenter"):
-            obj = args[0]  # signature is (obj, parent, *, registry)
-            get_documenter = autosummary._get_documenter
-        else:
-            obj = args[1]  # signature is (app, obj, parent)
-            get_documenter = autosummary.get_documenter
-        if isinstance(obj, type) and issubclass(obj, BaseException):
-            caller = sys._getframe().f_back.f_code.co_name
-            if caller == "generate_autosummary_content":
-                if obj.__module__ == "mpi4py.MPI":
-                    if obj.__name__ == "Exception":
-                        return ExceptionDocumenterCustom
-        return get_documenter(*args, **kwargs)
-
-    from sphinx.ext.autosummary import generate
-
-    if hasattr(generate, "_get_documenter"):
-        generate._get_documenter = get_documenter
-    else:
-        generate.get_documenter = get_documenter
-
 
 def setup(app):
+    import sphinx
+
     _setup_numpy_typing()
     _patch_domain_python()
-    _setup_autodoc(app)
+    _patch_autosummary()
+    if sphinx.version_info < (9, 0):
+        _setup_autodoc(app)
 
     try:
         from mpi4py import MPI
@@ -307,6 +291,7 @@ def setup(app):
     apidoc = __import__("apidoc")
     sys.dont_write_bytecode = sys_dwb
 
+    del MPI.memory  # TODO
     name = MPI.__name__
     here = pathlib.Path(__file__).resolve().parent
     outdir = here / apidoc.OUTDIR
@@ -325,8 +310,6 @@ def setup(app):
 
     synopsis = autosummary_context["synopsis"]
     synopsis[module.__name__] = module.__doc__.strip()
-    autotype = autosummary_context["autotype"]
-    autotype[module.Exception.__name__] = "exception"
 
     modules = [
         "mpi4py",
@@ -336,13 +319,15 @@ def setup(app):
         "mpi4py.util.pool",
         "mpi4py.util.sync",
     ]
-    typing_overload = typing.overload
-    typing.overload = lambda arg: arg
+    if sphinx.version_info < (9, 0):
+        typing_overload = typing.overload
+        typing.overload = lambda arg: arg
     for name in modules:
         mod = importlib.import_module(name)
         ann = apidoc.load_module(f"{mod.__file__}i", name)
         apidoc.annotate(mod, ann)
-    typing.overload = typing_overload
+    if sphinx.version_info < (9, 0):
+        typing.overload = typing_overload
 
 
 # -- Options for HTML output -------------------------------------------------
