@@ -9,7 +9,7 @@ if "repair" in sys.argv:
     x, y = (2, 5) if arch == "x86_64" else (2, 17)
     plat = f"manylinux_{x}_{y}_{arch}"
     args = ["--plat", plat, "--only-plat"]
-    for name in ("mpi",):
+    for name in ("mpi", "mpi_abi"):
         args += ["--exclude", f"lib{name}.so.*"]
     sys.argv.extend(args)
 
