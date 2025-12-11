@@ -257,6 +257,66 @@ class BaseTestCCOBufInter:
                     elif op == MPI.MIN:
                         self.assertEqual(value, i)
 
+    def testReduceScatter(self):
+        comm = self.INTERCOMM
+        size = comm.Get_size()
+        rank = comm.Get_rank()
+        rsize = comm.Get_remote_size()
+        for array, typecode in arrayimpl.loop():
+            for op in (MPI.SUM, MPI.MAX, MPI.MIN, MPI.PROD):
+                if skip_op(typecode, op):
+                    continue
+                rcnt = [rsize] * size
+                sbuf = array(list(range(size)) * rsize, typecode)
+                rbuf = array(-1, typecode, rsize)
+                comm.Reduce_scatter(
+                    sbuf.as_mpi(), rbuf.as_mpi(), rcnt, op
+                )
+                max_val = maxvalue(rbuf)
+                for i, value in enumerate(rbuf):
+                    if op == MPI.SUM:
+                        redval = i * rsize
+                        if redval < max_val:
+                            self.assertAlmostEqual(value, redval)
+                    elif op == MPI.PROD:
+                        redval = i ** rsize
+                        if redval < max_val:
+                            self.assertAlmostEqual(value, redval)
+                    elif op == MPI.MAX:
+                        self.assertEqual(value, i)
+                    elif op == MPI.MIN:
+                        self.assertEqual(value, i)
+
+    def testReduceScatterBlock(self):
+        comm = self.INTERCOMM
+        size = comm.Get_size()
+        rank = comm.Get_rank()
+        rsize = comm.Get_remote_size()
+        for array, typecode in arrayimpl.loop():
+            for op in (MPI.SUM, MPI.MAX, MPI.MIN, MPI.PROD):
+                if skip_op(typecode, op):
+                    continue
+                rcnt = [rsize] * size
+                sbuf = array(list(range(size)) * rsize, typecode)
+                rbuf = array(-1, typecode, rsize)
+                comm.Reduce_scatter_block(
+                    sbuf.as_mpi(), rbuf.as_mpi(), op
+                )
+                max_val = maxvalue(rbuf)
+                for i, value in enumerate(rbuf):
+                    if op == MPI.SUM:
+                        redval = i * rsize
+                        if redval < max_val:
+                            self.assertAlmostEqual(value, redval)
+                    elif op == MPI.PROD:
+                        redval = i ** rsize
+                        if redval < max_val:
+                            self.assertAlmostEqual(value, redval)
+                    elif op == MPI.MAX:
+                        self.assertEqual(value, i)
+                    elif op == MPI.MIN:
+                        self.assertEqual(value, i)
+
 
 class TestCCOBufInter(BaseTestCCOBufInter, unittest.TestCase):
     #
