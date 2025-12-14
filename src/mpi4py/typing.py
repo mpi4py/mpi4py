@@ -237,7 +237,7 @@ Target specification.
 """
 
 
-S = TypeVar("S")
-T = TypeVar("T")
-U = TypeVar("U")
-V = TypeVar("V")
+S = TypeVar("S")  #: Type variable.
+T = TypeVar("T")  #: Type variable.
+U = TypeVar("U")  #: Type variable.
+V = TypeVar("V")  #: Type variable.
