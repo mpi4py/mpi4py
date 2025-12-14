@@ -1,2 +1,2 @@
-meson >= 1.5.1
+meson @ git+https://github.com/dalcinl/meson@impi-windows
 meson-python
