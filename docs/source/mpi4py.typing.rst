@@ -40,9 +40,19 @@ within the :mod:`~mpi4py.MPI` module.
 
 .. rubric:: Types Documentation
 
-.. autotype:: SupportsBuffer
-.. autotype:: SupportsDLPack
-.. autotype:: SupportsCAI
+.. autoclass:: SupportsBuffer
+
+   .. automethod:: __buffer__
+
+.. autoclass:: SupportsDLPack
+
+   .. automethod:: __dlpack__
+   .. automethod:: __dlpack_device__
+
+.. autoclass:: SupportsCAI
+
+   .. autoproperty:: __cuda_array_interface__
+
 .. autotype:: Buffer
 .. autotype:: Bottom
 .. autotype:: InPlace
