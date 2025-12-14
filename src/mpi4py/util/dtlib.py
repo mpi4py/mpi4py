@@ -11,7 +11,7 @@ from .. import MPI
 try:
     from numpy import dtype as _np_dtype
 except ImportError:  # pragma: no cover
-    _np_dtype = None
+    _np_dtype = None  # ty: ignore[invalid-assignment]
 
 
 def _get_datatype(dtype):

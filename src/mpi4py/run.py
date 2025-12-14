@@ -105,7 +105,8 @@ def main():
     def prefix():
         import pathlib
 
-        prefix = pathlib.Path(__spec__.origin).parent
+        origin = __spec__.origin or __file__
+        prefix = pathlib.Path(origin).parent
         print(prefix, file=sys.stdout)
         sys.exit(0)
 
@@ -113,7 +114,8 @@ def main():
         import pathlib
 
         MPI = import_MPI()
-        prefix = pathlib.Path(MPI.__spec__.origin)
+        origin = MPI.__spec__.origin or MPI.__file__
+        prefix = pathlib.Path(origin)
         print(prefix, file=sys.stdout)
         sys.exit(0)
 
