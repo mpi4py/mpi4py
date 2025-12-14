@@ -1,0 +1,1 @@
+{%- extends "autosummary/class.rst" %}
