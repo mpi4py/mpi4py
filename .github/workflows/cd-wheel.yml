@@ -151,7 +151,7 @@ jobs:
         CIBW_BEFORE_BUILD_WINDOWS:
 
     - id: upload
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: build-${{runner.os}}-${{matrix.arch}}-${{strategy.job-index}}
         path: wheelhouse/*.whl
@@ -204,7 +204,7 @@ jobs:
       run: python cibw/merge-wheels.py wheelhouse dist
 
     - id: upload
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: wheel-${{ runner.os }}-${{ matrix.arch }}
         path: dist/*.whl
