@@ -364,7 +364,7 @@ jobs:
         allow-prereleases: true
 
     - name: Download mpi4py wheel
-      uses: actions/download-artifact@v6
+      uses: actions/download-artifact@v7
       with:
         name: mpi4py-abi-${{ matrix.mpi }}-${{ matrix.platform }}
         path: dist
