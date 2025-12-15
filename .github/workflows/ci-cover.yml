@@ -92,7 +92,7 @@ jobs:
         TAG: ${{ runner.os }}.${{ matrix.mpi }}.py${{ matrix.py }}
 
     - name: Upload coverage data
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: coverage-data-${{ runner.os }}-${{ matrix.mpi }}-${{ matrix.py }}
         path: ".coverage.*"
@@ -139,7 +139,7 @@ jobs:
         python -m coverage report --fail-under=100
 
     - name: Upload HTML report
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: coverage-html
         path: htmlcov
