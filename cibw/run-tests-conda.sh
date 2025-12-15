@@ -7,6 +7,8 @@ openmpi=("5.0" "4.1")
 impi=("2021.17.0" "2021.10.0")
 msmpi=("10.1.1")
 
+openmpi=("5.0")  # conda-forge/openmpi-feedstock#153
+
 mpi="$1"
 mpipackage="$mpi"
 mpiversion="${mpi}[@]"
