@@ -5,6 +5,10 @@ Release 4.2.0 [YYYY-MM-DD]
 
   + Add ``tohandle()`` method to MPI types.
 
+  + Buffer argument aliasing, i.e. ``sendbuf`` same as ``recvbuf``, in
+    global reduction operations is equivalent to using `MPI.IN_PLACE`
+    for the ``sendbuf`` argument.
+
 * Backward-incompatible changes:
 
   + Python 3.10+ is required.
