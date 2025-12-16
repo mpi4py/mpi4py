@@ -47,5 +47,4 @@ jobs:
       - check
       - cover
     steps:
-    - uses: step-security/harden-runner@v2
     - run: ${{ !(contains(needs.*.result, 'failure')) }}

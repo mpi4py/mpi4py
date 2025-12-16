@@ -44,10 +44,6 @@ jobs:
 
     steps:
 
-    - uses: step-security/harden-runner@v2
-      with:
-        egress-policy: audit
-
     - name: Configure hostname
       run:  echo 127.0.0.1 `hostname` | sudo tee -a /etc/hosts > /dev/null
       if:   runner.os == 'Linux' || runner.os == 'macOS'

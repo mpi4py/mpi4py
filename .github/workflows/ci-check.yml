@@ -35,10 +35,6 @@ jobs:
 
     steps:
 
-    - uses: step-security/harden-runner@v2
-      with:
-        egress-policy: audit
-
     - name: Checkout
       uses: actions/checkout@v6
 
@@ -74,10 +70,6 @@ jobs:
 
     steps:
 
-    - uses: step-security/harden-runner@v2
-      with:
-        egress-policy: audit
-
     - name: Checkout
       uses: actions/checkout@v6
 
@@ -112,10 +104,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
-    - uses: step-security/harden-runner@v2
-      with:
-        egress-policy: audit
 
     - name: Checkout
       uses: actions/checkout@v6
@@ -169,10 +157,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
-    - uses: step-security/harden-runner@v2
-      with:
-        egress-policy: audit
 
     - name: Checkout
       uses: actions/checkout@v6

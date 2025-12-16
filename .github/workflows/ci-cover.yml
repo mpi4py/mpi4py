@@ -42,10 +42,6 @@ jobs:
 
     steps:
 
-    - uses: step-security/harden-runner@v2
-      with:
-        egress-policy: audit
-
     - uses: actions/checkout@v6
 
     - uses: actions/setup-python@v6
@@ -105,10 +101,6 @@ jobs:
     if: always()
 
     steps:
-
-    - uses: step-security/harden-runner@v2
-      with:
-        egress-policy: audit
 
     - uses: actions/checkout@v6
 
