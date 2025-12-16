@@ -43,8 +43,6 @@ jobs:
         exclude:
           - os:  ubuntu-24.04
             mpi: msmpi
-          - os:  ubuntu-22.04
-            mpi: msmpi
           - os:  macos-15
             mpi: impi
           - os:  macos-15
