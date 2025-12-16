@@ -38,7 +38,7 @@ jobs:
     uses: ./.github/workflows/ci-cover.yml
 
   ci-status:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     if: ${{ success() || failure() }}
     needs:
       - test
