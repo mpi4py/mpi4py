@@ -94,8 +94,8 @@ ctypedef fused op_usrfn_t:
     MPI_User_function
     MPI_User_function_c
 
-cdef object op_user_lock     = Lock()
-cdef list   op_user_registry = [None]*(1+32)
+cdef pymutex op_user_mutex
+cdef list    op_user_registry = [None]*(1+32)
 
 
 cdef inline object op_user_call_py(int index, object x, object y, object dt):
@@ -356,7 +356,7 @@ cdef inline int op_user_new(
     # and register the Python function
     cdef int index = 0
     try:
-        with op_user_lock:
+        with op_user_mutex:
             index = op_user_registry.index(None, 1)
             op_user_registry[index] = function
     except ValueError:
@@ -384,7 +384,7 @@ cdef inline int op_user_del(
     # free slot in the registry
     cdef int index = op_user_id_pop(self)
     if index > 0:
-        with op_user_lock:
+        with op_user_mutex:
             op_user_registry[index] = None
     return 0
 

@@ -1,5 +1,7 @@
 # -----------------------------------------------------------------------------
 
+from cython cimport pymutex
+
 cdef object Lock  = None
 cdef object RLock = None
 

@@ -1,7 +1,7 @@
 # -----------------------------------------------------------------------------
 
-cdef object datarep_lock     = Lock()
-cdef dict   datarep_registry = {}
+cdef pymutex datarep_mutex
+cdef dict    datarep_registry = {}
 
 
 @cython.linetrace(False)  # ~> TODO

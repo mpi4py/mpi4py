@@ -27,13 +27,14 @@ cdef class _p_keyval:
         self.ierr = MPI_SUCCESS
         self.lock = RLock()
 
-cdef object keyval_lock_type = Lock()
-cdef object keyval_lock_comm = Lock()
-cdef object keyval_lock_win  = Lock()
 
-cdef dict   keyval_registry_type = {}
-cdef dict   keyval_registry_comm = {}
-cdef dict   keyval_registry_win  = {}
+cdef pymutex keyval_mutex_type
+cdef pymutex keyval_mutex_comm
+cdef pymutex keyval_mutex_win
+
+cdef dict    keyval_registry_type = {}
+cdef dict    keyval_registry_comm = {}
+cdef dict    keyval_registry_win  = {}
 
 _keyval_registry = {
     'Datatype' : keyval_registry_type,
@@ -207,13 +208,13 @@ cdef inline _p_keyval PyMPI_attr_state_get(
 ):
     <void> hdl  # unused
     if PyMPI_attr_type is MPI_Datatype:
-        with keyval_lock_type:
+        with keyval_mutex_type:
             return <_p_keyval>keyval_registry_type.get(keyval)
     if PyMPI_attr_type is MPI_Comm:
-        with keyval_lock_comm:
+        with keyval_mutex_comm:
             return <_p_keyval>keyval_registry_comm.get(keyval)
     if PyMPI_attr_type is MPI_Win:
-        with keyval_lock_win:
+        with keyval_mutex_win:
             return <_p_keyval>keyval_registry_win.get(keyval)
 
 
@@ -224,13 +225,13 @@ cdef inline int PyMPI_attr_state_set(
 ) except -1:
     <void> hdl  # unused
     if PyMPI_attr_type is MPI_Datatype:
-        with keyval_lock_type:
+        with keyval_mutex_type:
             keyval_registry_type[keyval] = state
     if PyMPI_attr_type is MPI_Comm:
-        with keyval_lock_comm:
+        with keyval_mutex_comm:
             keyval_registry_comm[keyval] = state
     if PyMPI_attr_type is MPI_Win:
-        with keyval_lock_win:
+        with keyval_mutex_win:
             keyval_registry_win[keyval] = state
     return 0
 
@@ -242,13 +243,13 @@ cdef inline int PyMPI_attr_state_del(
     <void> hdl  # unused
     try:
         if PyMPI_attr_type is MPI_Datatype:
-            with keyval_lock_type:
+            with keyval_mutex_type:
                 del keyval_registry_type[keyval]
         if PyMPI_attr_type is MPI_Comm:
-            with keyval_lock_comm:
+            with keyval_mutex_comm:
                 del keyval_registry_comm[keyval]
         if PyMPI_attr_type is MPI_Win:
-            with keyval_lock_win:
+            with keyval_mutex_win:
                 del keyval_registry_win[keyval]
     except KeyError:  # ~> uncovered
         pass
