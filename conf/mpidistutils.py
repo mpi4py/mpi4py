@@ -400,32 +400,40 @@ cmd_mpi_opts = [
     (
         "mpild=",
         None,
-        "MPI linker command, "
-        "overridden by environment variable 'MPILD' "
-        "(defaults to 'mpicc' or 'mpicxx' if any is available)",
+        (
+            "MPI linker command, "
+            "overridden by environment variable 'MPILD' "
+            "(defaults to 'mpicc' or 'mpicxx' if any is available)"
+        ),
     ),
     (
         "mpicxx=",
         None,
-        "MPI C++ compiler command, "
-        "overridden by environment variable 'MPICXX' "
-        "(defaults to 'mpicxx', 'mpiCC', or 'mpic++' if any is available)",
+        (
+            "MPI C++ compiler command, "
+            "overridden by environment variable 'MPICXX' "
+            "(defaults to 'mpicxx', 'mpiCC', or 'mpic++' if any is available)"
+        ),
     ),
     (
         "mpicc=",
         None,
-        "MPI C compiler command, "
-        "overridden by environment variables 'MPICC' "
-        "(defaults to 'mpicc' if available)",
+        (
+            "MPI C compiler command, "
+            "overridden by environment variables 'MPICC' "
+            "(defaults to 'mpicc' if available)"
+        ),
     ),
     (
         "mpi=",
         None,
-        "specify a ini-style configuration file and section "
-        "(e.g. --mpi=filename or --mpi=filename:section), "
-        "to look for MPI includes/libraries, "
-        "overridden by environment variable 'MPICFG' "
-        "(defaults to configuration file 'mpi.cfg' and section 'mpi')",
+        (
+            "specify a ini-style configuration file and section "
+            "(e.g. --mpi=filename or --mpi=filename:section), "
+            "to look for MPI includes/libraries, "
+            "overridden by environment variable 'MPICFG' "
+            "(defaults to configuration file 'mpi.cfg' and section 'mpi')"
+        ),
     ),
     (
         "configure",
@@ -1004,7 +1012,7 @@ def configure_mpi(ext, config_cmd):
         ]
     if sys.platform == "darwin":
         errmsg += [
-            "Install MPICH or Open MPI with Homebrew or MacPorts:"
+            "Install MPICH or Open MPI with Homebrew or MacPorts:",
             "  $ brew install mpich|openmpi  # Homebrew",
             "  $ port install mpich|openmpi  # MacPorts",
         ]
@@ -1134,8 +1142,10 @@ class build(cmd_build.build):
         (
             "inplace",
             "i",
-            "ignore build-lib and put compiled extensions into the source "
-            "directory alongside your pure Python modules",
+            (
+                "ignore build-lib and put compiled extensions into the "
+                "source directory alongside your pure Python modules"
+            ),
         )
     ]
     boolean_options += ["inplace"]

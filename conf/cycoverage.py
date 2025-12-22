@@ -100,10 +100,12 @@ def _parse_c_file(c_file, exclude_list):
     ).match
     not_executable = re.compile(
         "|".join([
-            r"\s*c(?:type)?def\s+"
-            r"(?:(?:public|external)\s+)?"
-            r"(?:struct|union|enum|class)"
-            r"(\s+[^:]+|)\s*:",
+            (
+                r"\s*c(?:type)?def\s+"
+                r"(?:(?:public|external)\s+)?"
+                r"(?:struct|union|enum|class)"
+                r"(\s+[^:]+|)\s*:"
+            ),
         ])
     ).match
     if exclude_list:
