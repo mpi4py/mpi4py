@@ -923,7 +923,7 @@ class BaseTest:
             check = lambda x: numpy.all(x == 42)  # noqa: E731
             self.testBcastIntra([c, c], check)
             self.testBcastInter([c, c], check)
-            check2 = lambda x: (check(x[0]) and check(x[1]))  # noqa: B023,E731
+            check2 = lambda x: check(x[0]) and check(x[1])  # noqa: B023,E731
             self.testBcastIntra([(c, c.copy())], check2)
             self.testBcastInter([(c, c.copy())], check2)
 
