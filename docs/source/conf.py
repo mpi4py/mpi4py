@@ -303,7 +303,7 @@ def setup(app):
 
     _setup_numpy_typing()
     _patch_domain_python()
-    if sphinx.version_info < (9, 1):
+    if sphinx.version_info < (9, 2):
         _patch_autosummary()
         _patch_autodoc()
     if sphinx.version_info < (9, 0):
