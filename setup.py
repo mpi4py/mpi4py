@@ -101,11 +101,11 @@ def extensions():
             + glob.glob("src/lib-mpi/compat/*.h")
         ),
         include_dirs=["src"],
-        define_macros=[],
         configure=mpidistutils.configure_mpi,
     )
+    MPI["define_macros"] = define_macros = []
     if get_build_mpiabi():
-        MPI["define_macros"] += [
+        define_macros += [
             ("PYMPIABI", 1),
         ]
     return [MPI]
@@ -166,7 +166,8 @@ def run_setup():
     build_src.sources = sources()
     #
     metadata = get_metadata()
-    builder_args = dict(
+    builder_args = {}
+    builder_args.update(
         ext_modules=[Ext(**ext) for ext in extensions()],
         executables=[Exe(**exe) for exe in executables()],
     )
