@@ -106,7 +106,7 @@ jobs:
       run: python ./conf/cythonize.py
 
     - id: build
-      uses: pypa/cibuildwheel@v3.3.0
+      uses: pypa/cibuildwheel@v3.3.1
       timeout-minutes: 10
       with:
         extras: uv
