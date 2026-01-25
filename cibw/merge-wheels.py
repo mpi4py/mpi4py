@@ -6,7 +6,10 @@ import tempfile
 import textwrap
 from pathlib import Path
 
-from wheel.cli import pack as wheel_pack
+try:
+    from wheel._commands import pack as wheel_pack
+except ModuleNotFoundError:
+    from wheel.cli import pack as wheel_pack
 from wheel.wheelfile import WheelFile
 
 
