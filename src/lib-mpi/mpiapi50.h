@@ -46,8 +46,23 @@ static int PyMPI_Abi_get_fortran_info(MPI_Info *info)
     (void) MPI_Comm_call_errhandler(MPI_COMM_SELF, MPI_ERR_ARG);
     return MPI_ERR_ARG;
   }
+#if defined(MPICH_NAME) && PyMPI_LEGACY_ABI
+#define PyMPI_ABI_HAS_TYPE(type) \
+  ((pympi_numversion() < 50 &&   \
+    ((type) == MPI_LOGICAL1  ||  \
+     (type) == MPI_LOGICAL2  ||  \
+     (type) == MPI_LOGICAL4  ||  \
+     (type) == MPI_LOGICAL8  ||  \
+     (type) == MPI_LOGICAL16 ||  \
+     (type) == MPI_INTEGER16 ||  \
+     (type) == MPI_REAL2     ||  \
+     (type) == MPI_COMPLEX4      \
+     )) ? 0 : 1)
+#else
+#define PyMPI_ABI_HAS_TYPE(type) (1)
+#endif
 #define PyMPI_ABI_GET_TYPE_SIZE(type, typesize) do { \
-    if ((type) != MPI_DATATYPE_NULL) { \
+    if ((type) != MPI_DATATYPE_NULL && PyMPI_ABI_HAS_TYPE(type)) { \
       MPI_Count size = MPI_UNDEFINED; \
       ierr = MPI_Type_size_c((type), &size); \
       if (!ierr && size > 0) (typesize) = (int) size; \
@@ -99,6 +114,7 @@ static int PyMPI_Abi_get_fortran_info(MPI_Info *info)
     PyMPI_ABI_SET_TYPE_SUPP("mpi_complex32",        MPI_COMPLEX32);
     PyMPI_ABI_SET_TYPE_SUPP("mpi_double_complex",   MPI_DOUBLE_COMPLEX);
   }
+#undef PyMPI_ABI_HAS_TYPE
 #undef PyMPI_ABI_GET_TYPE_SIZE
 #undef PyMPI_ABI_SET_TYPE_SIZE
 #undef PyMPI_ABI_SET_TYPE_SUPP

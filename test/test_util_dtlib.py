@@ -1,6 +1,7 @@
 import itertools
 import os
 import pathlib
+import platform
 import sys
 
 from mpi4py import MPI
@@ -52,6 +53,15 @@ if (
 
 if unittest.is_mpi("mpich(<4.0.0)"):
     for tc in "FDG":
+        if tc in typecodes:
+            typecodes.remove(tc)
+
+if (
+    unittest.is_mpi("mpich(<5.0.0)")
+    and platform.system() == "Darwin"
+    and platform.machine() == "arm64"
+):
+    for tc in "gG":
         if tc in typecodes:
             typecodes.remove(tc)
 
