@@ -96,6 +96,7 @@ datatypes += datatypes_mpi
 
 combiner_map = {}
 
+system = platform.system()
 machine = platform.machine()
 
 
@@ -174,6 +175,9 @@ class TestDatatype(unittest.TestCase):
 
     def testGetValueIndex(self):
         typenames = ("SHORT", "INT", "LONG", "FLOAT", "DOUBLE", "LONG_DOUBLE")
+        if unittest.is_mpi("mpich(<5.0.0)"):
+            if system == "Darwin" and machine == "arm64":
+                typenames = typenames[:-1]
         value_types = [getattr(MPI, f"{attr}") for attr in typenames]
         pair_types = [getattr(MPI, f"{attr}_INT") for attr in typenames]
         for value, pair in zip(value_types, pair_types):
@@ -701,6 +705,12 @@ if name in ("MPICH", "Intel MPI"):
     if MPI.FLOAT16_T != MPI.DATATYPE_NULL:
         if MPI.FLOAT16_T.Get_name() == "":
             MPI.FLOAT16_T.Set_name("MPIX_C_FLOAT16")
+    if MPI.REAL16 != MPI.DATATYPE_NULL:
+        if MPI.REAL16.Get_name() == "":
+            MPI.REAL16.Set_name("MPI_REAL16")
+    if MPI.COMPLEX32 != MPI.DATATYPE_NULL:
+        if MPI.COMPLEX32.Get_name() == "":
+            MPI.COMPLEX32.Set_name("MPI_COMPLEX32")
 
 
 if __name__ == "__main__":

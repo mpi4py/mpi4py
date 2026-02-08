@@ -29,6 +29,25 @@ def has_datatype(datatype):
         return False
     if size in (0, MPI.UNDEFINED):
         return False
+    vendor_name, vendor_version = MPI.get_vendor()
+    mpich = vendor_name in ("MPICH", "MVAPICH")
+    impi = vendor_name == "Intel MPI"
+    mpi_version = MPI.Get_version()
+    if (mpich and mpi_version < (5, 0)) or (
+        impi and vendor_version < (2021, 17, 0)
+    ):
+        if datatype in (
+            MPI.LOGICAL1,
+            MPI.LOGICAL2,
+            MPI.LOGICAL4,
+            MPI.LOGICAL8,
+            MPI.LOGICAL16,
+            MPI.INTEGER16,
+            MPI.REAL2,
+            MPI.COMPLEX4,
+            MPI.BFLOAT16_T,
+        ):
+            return False
     return True
 
 
