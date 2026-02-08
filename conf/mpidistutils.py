@@ -1288,7 +1288,7 @@ class build_ext(cmd_build_ext.build_ext):
         #
         for source, target in self._get_pth_files(ext):
             log.info("writing %s", target)
-            copy_file(source, target, verbose=False, dry_run=self.dry_run)
+            copy_file(source, target, verbose=self.verbose)
 
     def get_outputs(self):
         outputs = cmd_build_ext.build_ext.get_outputs(self)
@@ -1454,7 +1454,7 @@ class build_exe(build_ext):
             src = self.get_exe_fullpath(exe)
             dest = self.get_exe_fullpath(exe, root_dir)
             self.mkpath(os.path.dirname(dest))
-            copy_file(src, dest, verbose=self.verbose, dry_run=self.dry_run)
+            copy_file(src, dest, verbose=self.verbose)
 
     def get_outputs(self):
         outputs = []
@@ -1617,7 +1617,7 @@ class clean(cmd_clean.clean):
         # remove the build/temp.<plat> directory
         # (unless it's already gone)
         if os.path.exists(self.build_temp):
-            remove_tree(self.build_temp, dry_run=self.dry_run)
+            remove_tree(self.build_temp, verbose=self.verbose)
         else:
             log.debug("'%s' does not exist -- can't clean it", self.build_temp)
 
@@ -1630,7 +1630,7 @@ class clean(cmd_clean.clean):
                 self.bdist_base,
             ):
                 if os.path.exists(directory):
-                    remove_tree(directory, dry_run=self.dry_run)
+                    remove_tree(directory, verbose=self.verbose)
                 else:
                     log.debug(
                         "'%s' does not exist -- can't clean it", directory
@@ -1638,19 +1638,18 @@ class clean(cmd_clean.clean):
 
         # just for the heck of it, try to remove the base build directory:
         # we might have emptied it right now, but if not we don't care
-        if not self.dry_run:
-            try:
-                os.rmdir(self.build_base)
-                log.info("removing '%s'", self.build_base)
-            except OSError:
-                pass
+        try:
+            os.rmdir(self.build_base)
+            log.info("removing '%s'", self.build_base)
+        except OSError:
+            pass
 
         if self.all:
             # remove the <package>.egg_info directory
             try:
                 egg_info = self.get_finalized_command("egg_info").egg_info
                 if os.path.exists(egg_info):
-                    remove_tree(egg_info, dry_run=self.dry_run)
+                    remove_tree(egg_info, verbose=self.verbose)
                 else:
                     log.debug(
                         "'%s' does not exist -- can't clean it", egg_info
