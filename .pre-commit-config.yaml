@@ -16,7 +16,7 @@ repos:
   - id: check-added-large-files
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.14.11
+  rev: v0.15.0
   hooks:
     - id: ruff-check
     - id: ruff-format
@@ -27,7 +27,7 @@ repos:
     - id: codespell
 
 - repo: https://github.com/adrienverge/yamllint
-  rev: v1.37.1
+  rev: v1.38.0
   hooks:
     - id: yamllint
       args: [--strict]
