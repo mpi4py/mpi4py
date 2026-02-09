@@ -218,6 +218,8 @@ class TestDatatype(unittest.TestCase):
         name = MPI.DATATYPE_NULL.Get_name()
         self.assertEqual(name, "MPI_DATATYPE_NULL")
         for dtype in datatypes:
+            if not testutil.has_datatype(dtype):
+                continue
             try:
                 name = dtype.Get_name()
                 self.assertTrue(name)
@@ -705,10 +707,10 @@ if name in ("MPICH", "Intel MPI"):
     if MPI.FLOAT16_T != MPI.DATATYPE_NULL:
         if MPI.FLOAT16_T.Get_name() == "":
             MPI.FLOAT16_T.Set_name("MPIX_C_FLOAT16")
-    if MPI.REAL16 != MPI.DATATYPE_NULL:
+    if testutil.has_datatype(MPI.REAL16):
         if MPI.REAL16.Get_name() == "":
             MPI.REAL16.Set_name("MPI_REAL16")
-    if MPI.COMPLEX32 != MPI.DATATYPE_NULL:
+    if testutil.has_datatype(MPI.COMPLEX32):
         if MPI.COMPLEX32.Get_name() == "":
             MPI.COMPLEX32.Set_name("MPI_COMPLEX32")
 
