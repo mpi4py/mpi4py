@@ -24,6 +24,8 @@ from ..MPI import (
 )
 from ..typing import Buffer
 
+# mypy: disable-error-code="override"
+
 pickle: Pickle = ...
 
 class _BigMPI:
@@ -111,9 +113,9 @@ class Comm(MPI.Comm):
     def send(self, obj: Any, dest: int, tag: int = 0) -> None: ...
     def bsend(self, obj: Any, dest: int, tag: int = 0) -> None: ...
     def ssend(self, obj: Any, dest: int, tag: int = 0) -> None: ...
-    def isend(self, obj: Any, dest: int, tag: int = 0) -> Request: ...  # type: ignore[override]
-    def ibsend(self, obj: Any, dest: int, tag: int = 0) -> Request: ...  # type: ignore[override]
-    def issend(self, obj: Any, dest: int, tag: int = 0) -> Request: ...  # type: ignore[override]
+    def isend(self, obj: Any, dest: int, tag: int = 0) -> Request: ...
+    def ibsend(self, obj: Any, dest: int, tag: int = 0) -> Request: ...
+    def issend(self, obj: Any, dest: int, tag: int = 0) -> Request: ...
     def recv(
         self,
         buf: Buffer | None = None,
@@ -121,7 +123,7 @@ class Comm(MPI.Comm):
         tag: int = ANY_TAG,
         status: Status | None = None,
     ) -> Any: ...
-    def irecv(  # type: ignore[override]
+    def irecv(
         self,
         buf: Buffer | None = None,
         source: int = ANY_SOURCE,
@@ -137,13 +139,13 @@ class Comm(MPI.Comm):
         recvtag: int = ANY_TAG,
         status: Status | None = None,
     ) -> Any: ...
-    def mprobe(  # type: ignore[override]
+    def mprobe(
         self,
         source: int = ANY_SOURCE,
         tag: int = ANY_TAG,
         status: Status | None = None,
     ) -> Message: ...
-    def improbe(  # type: ignore[override]
+    def improbe(
         self,
         source: int = ANY_SOURCE,
         tag: int = ANY_TAG,

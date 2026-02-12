@@ -4,7 +4,6 @@ import platform
 import shlex
 import shutil
 import sys
-from collections import OrderedDict
 from configparser import ConfigParser, Error as ConfigParserError
 from types import SimpleNamespace
 
@@ -29,22 +28,22 @@ class Config:
         self.log = log or _log
         self.section = None
         self.filename = None
-        self.compiler_info = OrderedDict((
-            ("mpicc", None),
-            ("mpicxx", None),
-            ("mpild", None),
-        ))
-        self.library_info = OrderedDict((
-            ("define_macros", []),
-            ("undef_macros", []),
-            ("include_dirs", []),
-            ("libraries", []),
-            ("library_dirs", []),
-            ("runtime_library_dirs", []),
-            ("extra_compile_args", []),
-            ("extra_link_args", []),
-            ("extra_objects", []),
-        ))
+        self.compiler_info = {
+            "mpicc": None,
+            "mpicxx": None,
+            "mpild": None,
+        }
+        self.library_info = {
+            "define_macros": [],
+            "undef_macros": [],
+            "include_dirs": [],
+            "libraries": [],
+            "library_dirs": [],
+            "runtime_library_dirs": [],
+            "extra_compile_args": [],
+            "extra_link_args": [],
+            "extra_objects": [],
+        }
 
     def __bool__(self):
         for v in self.compiler_info.values():
@@ -380,7 +379,7 @@ class Config:
         else:
             sections = list(section)
         #
-        parser = ConfigParser(dict_type=OrderedDict)
+        parser = ConfigParser()
         try:
             read_ok = parser.read(filenames)
         except ConfigParserError:
@@ -483,7 +482,7 @@ class Config:
             elif isinstance(library_info[k], list):
                 library_info[k] = " ".join(library_info[k])
         # fill configuration parser
-        parser = ConfigParser(dict_type=OrderedDict)
+        parser = ConfigParser()
         parser.add_section(section)
         for option, value in compiler_info.items():
             if not value:

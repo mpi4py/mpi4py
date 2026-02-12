@@ -38,7 +38,7 @@ def serialized(function):
     return wrapper
 
 
-serialized.lock = None  # type: ignore[attr-defined]
+serialized.lock = None
 
 
 def setup_mpi_threads():
@@ -58,8 +58,8 @@ def setup_mpi_threads():
         )
 
 
-setup_mpi_threads.lock = threading.Lock()  # type: ignore[attr-defined]
-setup_mpi_threads.thread_level = None  # type: ignore[attr-defined]
+setup_mpi_threads.lock = threading.Lock()
+setup_mpi_threads.thread_level = None
 
 
 # ---
@@ -87,8 +87,8 @@ def _wrap_exc(exc, tb):
 
 
 def _format_exc(exc, comm):
-    exc_info = (type(exc), exc, exc.__traceback__)
-    tb_lines = traceback.format_exception(*exc_info)
+    et, ev, tb = (type(exc), exc, exc.__traceback__)
+    tb_lines = traceback.format_exception(et, ev, tb)
     body = "".join(tb_lines)
     host = MPI.Get_processor_name()
     rank = comm.Get_rank()
@@ -891,7 +891,7 @@ def import_main(mod_name, mod_path, init_globals, run_name):
             self.module = module
 
     TempModule = runpy._TempModule  # pylint: disable=invalid-name
-    runpy._TempModule = TempModulePatch
+    runpy._TempModule = TempModulePatch  # ty: ignore[invalid-assignment]
     import_main.sentinel = (mod_name, mod_path)
     main_module = sys.modules["__main__"]
     try:
@@ -1041,7 +1041,9 @@ def get_max_workers():
 
 
 def get_spawn_module():
-    return __spec__.parent + ".server"
+    package = __spec__.parent
+    assert package is not None  # noqa: S101
+    return package + ".server"
 
 
 def client_spawn(
@@ -1161,14 +1163,12 @@ def server_accept(
     root=0,
 ):
     info = MPI.INFO_NULL
+    port = None
     if comm.Get_rank() == root:
         if mpi_info:
             info = MPI.Info.Create()
             info.update(mpi_info)
-    port = None
-    if comm.Get_rank() == root:
         port = MPI.Open_port(info)
-    if comm.Get_rank() == root:
         if not isinstance(service, (list, tuple)):
             service = service or get_service()
             MPI.Publish_name(service, port, info)

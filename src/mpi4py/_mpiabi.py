@@ -70,7 +70,7 @@ def _dlopen_path(default=None):
         if isinstance(default, (str, bytes, os.PathLike)):
             entries = os.fspath(default).split(os.pathsep)
         else:
-            entries = list(map(os.fspath, default)) or [""]
+            entries = list(map(os.fspath, default)) or [""]  # ty: ignore
         for entry in entries:
             add_rpath(entry)
         return runpath
@@ -203,7 +203,7 @@ def _dlopen_libmpi(libmpi=None):  # pragma: no cover
         elif isinstance(filename, (str, bytes, os.PathLike)):
             filenames = os.fspath(filename).split(os.pathsep)
         else:
-            filenames = list(map(os.fspath, filename))
+            filenames = list(map(os.fspath, filename))  # ty: ignore
         for directory in path:
             for location in filenames:
                 if os.path.basename(location) == location:
@@ -334,4 +334,4 @@ class _Finder:
 
 def _install_finder():
     if _Finder not in sys.meta_path:
-        sys.meta_path.append(_Finder)
+        sys.meta_path.append(_Finder)  # ty: ignore[invalid-argument-type]
