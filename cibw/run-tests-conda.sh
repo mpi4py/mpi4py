@@ -2,7 +2,7 @@
 # shellcheck disable=SC2034
 set -euo pipefail
 
-mpich=("4.3" "4.1" "3.4")
+mpich=("5.0" "4.3" "4.1" "3.4")
 openmpi=("5.0" "4.1")
 impi=("2021.17.0" "2021.10.0")
 msmpi=("10.1.1")
