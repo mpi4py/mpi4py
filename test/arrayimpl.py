@@ -1,4 +1,5 @@
 import itertools
+import platform
 import sys
 import warnings
 
@@ -95,6 +96,14 @@ TypeMapComplex = make_typemap([
     ("G", MPI.C_LONG_DOUBLE_COMPLEX),
 ])
 
+if (
+    MPI.get_vendor() == ("MPICH", (5, 0, 0))
+    and platform.system() == "Darwin"
+    and platform.machine() == "arm64"
+):
+    del TypeMap["g"]
+    del TypeMapFloat["g"]
+    del TypeMapComplex["G"]
 
 ArrayBackends = []
 
