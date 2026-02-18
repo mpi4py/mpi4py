@@ -44,6 +44,12 @@ OS_ARCH_PY = {
     },
 }
 
+OS_LIBNAME = {
+    "Linux": "lib{}.so.{}",
+    "macOS": "lib{}.{}.dylib",
+    "Windows": "{}.dll",
+}
+
 MPI_ABI_POSIX = [
     "mpich",
     "openmpi",
@@ -56,6 +62,14 @@ MPI_ABI = {
     "Linux": MPI_ABI_POSIX.copy(),
     "macOS": MPI_ABI_POSIX.copy(),
     "Windows": MPI_ABI_WINNT.copy(),
+}
+
+MPI_LIB = {
+    "mpiabi": ("mpi_abi", 0),
+    "mpich": ("mpi", 12),
+    "openmpi": ("mpi", 40),
+    "impi": ("impi", None),
+    "msmpi": ("msmpi", None),
 }
 
 GHA_RUNNER = {
@@ -141,6 +155,7 @@ for build in matrix_build:
     arch = build["arch"]
     pytag = build["py"]
     mpi_abi = build["mpi-abi"]
+    mpi_lib = OS_LIBNAME[os].format(*MPI_LIB[mpi_abi])
     py_sabi = build["py-sabi"]
     runner = GHA_RUNNER[os][arch]
     mpilist = [mpi_abi]
@@ -152,9 +167,12 @@ for build in matrix_build:
     else:
         pyimpl = "pypy" if pytag.startswith("pp") else ""
         pylist = [pyimpl + pytag[2:3] + "." + pytag[3:]]
+
     matrix_test += [
         {
             "mpi": mpi,
+            "mpi-abi": mpi_abi,
+            "mpi-lib": mpi_lib,
             "py": py,
             "py-sabi": py_sabi,
             "os": os,

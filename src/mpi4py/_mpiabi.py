@@ -9,9 +9,22 @@ import sys
 import warnings
 
 MPIABI = None  # type: str | None
-LIBMPI = None  # type: str | None
-LIBMPI_PATH = []  # type: list[str]
+LIBMPI = None  # type: str | list[str] | None
+LIBMPI_PATH = None  # type: str| list[str] | None
 LIBMPI_MODE = None  # type: int | None
+
+if os.name == "posix":  # pragma: no branch
+    _LIBMPIABI = {
+        "mpich": ("mpi", 12),
+        "openmpi": ("mpi", 40),
+        "mpiabi": ("mpi_abi", 0),
+    }
+else:  # pragma: no cover
+    _LIBMPIABI = {
+        "impi": ("impi", None),
+        "msmpi": ("msmpi", None),
+        "mpiabi": ("mpi_abi", None),
+    }
 
 
 def _verbose_info(message, verbosity=1):
@@ -35,13 +48,15 @@ def _site_prefixes():
     return prefixes
 
 
-def _dlopen_rpath():
-    rpath = []
+def _dlopen_path(default=None):
+    runpath = []
 
     def add_rpath(*directory):
         path = os.path.join(*directory)
-        if path not in rpath:
-            rpath.append(path)
+        if sys.platform == "darwin":
+            path = path or "@rpath"
+        if path not in runpath:
+            runpath.append(path)
 
     def add_rpath_prefix(prefix):
         if os.name == "posix":
@@ -50,6 +65,15 @@ def _dlopen_rpath():
         else:
             add_rpath(prefix, "DLLs")
             add_rpath(prefix, "Library", "bin")
+
+    if default is not None:
+        if isinstance(default, (str, bytes, os.PathLike)):
+            entries = os.fspath(default).split(os.pathsep)
+        else:
+            entries = list(map(os.fspath, default)) or [""]
+        for entry in entries:
+            add_rpath(entry)
+        return runpath
 
     for prefix in _site_prefixes():
         add_rpath_prefix(prefix)
@@ -76,10 +100,12 @@ def _dlopen_rpath():
         add_rpath("/opt/homebrew/lib")
         add_rpath("/opt/local/lib")
 
-    return rpath
+    return runpath
 
 
-def _dlopen_mode():  # pragma: no cover
+def _dlopen_mode(default=None):
+    if default is not None:
+        return default
     if sys.platform == "linux":
         return os.RTLD_LAZY | os.RTLD_LOCAL
     if sys.platform == "darwin":
@@ -89,10 +115,20 @@ def _dlopen_mode():  # pragma: no cover
     return None
 
 
+def _dlopen_filename(libname, version=None):
+    suffix = f".{version}" if version is not None else ""
+    if sys.platform == "darwin":
+        template = "lib{}{}.dylib"
+    elif os.name == "posix":
+        template = "lib{}.so{}"
+    else:
+        template = "{}.dll"
+    return template.format(libname, suffix)
+
+
 def _dlopen_libmpi(libmpi=None):  # pragma: no cover
     # pylint: disable=too-many-statements
-    # pylint: disable=import-outside-toplevel
-    import ctypes as ct
+    ct = importlib.import_module("ctypes")
 
     def dlopen(name, mode=None):
         if mode is None:
@@ -155,52 +191,36 @@ def _dlopen_libmpi(libmpi=None):  # pragma: no cover
         _verbose_info(f"OFI library from {ofi_filename!r}")
         return lib
 
-    def libname(name, version=None):
-        suffix = f".{version}" if version is not None else ""
-        if sys.platform == "darwin":
-            template = "lib{}{}.dylib"
-        elif os.name == "posix":
-            template = "lib{}.so{}"
-        else:
-            template = "{}.dll"
-        return template.format(name, suffix)
-
-    def libmpi_names():
+    def libmpi_basenames():
         if os.name == "posix":
-            yield libname("mpi")
-            yield libname("mpi", 12)  # mpich
-            yield libname("mpi", 40)  # openmpi
-        else:
-            yield libname("impi")
-            yield libname("msmpi")
+            yield _dlopen_filename("mpi")
+        for libname, version in _LIBMPIABI.values():
+            yield _dlopen_filename(libname, version)
 
-    def libmpi_paths(path):
-        rpath = "@rpath" if sys.platform == "darwin" else ""
-        for entry in path:
-            entry = entry or rpath
-            entry = os.path.expandvars(entry)
-            entry = os.path.expanduser(entry)
-            if entry == rpath or os.path.isdir(entry):
-                for name in libmpi_names():
-                    yield os.path.join(entry, name)
-            else:
-                yield entry
+    def libmpi_filenames(filename, path):
+        if filename is None:
+            filenames = list(libmpi_basenames())
+        elif isinstance(filename, (str, bytes, os.PathLike)):
+            filenames = os.fspath(filename).split(os.pathsep)
+        else:
+            filenames = list(map(os.fspath, filename))
+        for directory in path:
+            for location in filenames:
+                if os.path.basename(location) == location:
+                    location = os.path.join(directory, location)
+                location = os.path.expandvars(location)
+                location = os.path.expanduser(location)
+                yield location
 
     if os.name == "posix":
         try:
             return dlopen(None)
         except (OSError, AttributeError):
             pass
-    if libmpi is not None:
-        path = libmpi.split(os.pathsep)
-    else:
-        path = LIBMPI_PATH or _dlopen_rpath() or [""]
-    if LIBMPI_MODE is not None:
-        mode = LIBMPI_MODE
-    else:
-        mode = _dlopen_mode()
+    path = _dlopen_path(LIBMPI_PATH)
+    mode = _dlopen_mode(LIBMPI_MODE)
     errors = ["cannot load MPI library"]
-    for filename in libmpi_paths(path):
+    for filename in libmpi_filenames(libmpi, path):
         try:
             return dlopen(filename, mode)
         except OSError as exc:
@@ -211,12 +231,10 @@ def _dlopen_libmpi(libmpi=None):  # pragma: no cover
 
 
 def _get_mpiabi_from_libmpi(libmpi=None):
-    # pylint: disable=import-outside-toplevel
-    import ctypes as ct
-
     lib = _dlopen_libmpi(libmpi)
     abi_get_version = getattr(lib, "MPI_Abi_get_version", None)
     if abi_get_version:  # pragma: no cover
+        ct = importlib.import_module("ctypes")
         abi_get_version.restype = ct.c_int
         abi_get_version.argtypes = [ct.POINTER(ct.c_int)] * 2
         abi_major, abi_minor = ct.c_int(0), ct.c_int(0)
@@ -247,16 +265,21 @@ def _get_mpiabi_from_string(string):
     return mpiabi
 
 
+def _get_libmpi_from_mpiabi(mpiabi):
+    mpiabi = _get_mpiabi_from_string(mpiabi)
+    libname, version = _LIBMPIABI[mpiabi]
+    return _dlopen_filename(libname, version)
+
+
 def _get_mpiabi():
     mpiabi = getattr(_get_mpiabi, "mpiabi", None)
     if mpiabi is None:
         mpiabi = MPIABI or os.environ.get("MPI4PY_MPIABI")
         libmpi = LIBMPI or os.environ.get("MPI4PY_LIBMPI")
-        if mpiabi is not None:
-            mpiabi = _get_mpiabi_from_string(mpiabi)
-        else:
-            mpiabi = _get_mpiabi_from_libmpi(libmpi)
-        _get_mpiabi.mpiabi = mpiabi  # pyright: ignore
+        if mpiabi:
+            libmpi = _get_libmpi_from_mpiabi(mpiabi)
+        mpiabi = _get_mpiabi_from_libmpi(libmpi)
+        _get_mpiabi.mpiabi = mpiabi
     return mpiabi
 
 
@@ -295,10 +318,10 @@ class _Finder:
         ext_name = fullname.rpartition(".")[2]
         extension_suffixes = importlib.machinery.EXTENSION_SUFFIXES
         spec_from_file_location = importlib.util.spec_from_file_location
-        for entry in path:
+        for directory in path:
             for ext_suffix in extension_suffixes:
                 filename = f"{ext_name}{mpiabi_suffix}{ext_suffix}"
-                location = os.path.join(entry, filename)
+                location = os.path.join(directory, filename)
                 if os.path.isfile(location):
                     return spec_from_file_location(fullname, location)
         warnings.warn(

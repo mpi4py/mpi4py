@@ -113,15 +113,18 @@ class TestMPIABI(unittest.TestCase):
 
     def testGetFromString(self):
         mpiabi = self.mpiabi
+        libmpi = self.libmpi
+        string = mpiabi._get_mpiabi_from_libmpi(libmpi)
         mpiabi._get_mpiabi.mpiabi = None
-        mpiabi.MPIABI = "mpiabi"
+        mpiabi.MPIABI = string
         result = mpiabi._get_mpiabi()
-        self.assertEqual(result, "mpiabi")
+        self.assertEqual(result, string)
 
     def testGetFromLibMPI(self):
         mpiabi = self.mpiabi
+        libmpi = self.libmpi
         mpiabi._get_mpiabi.mpiabi = None
-        mpiabi.LIBMPI = self.libmpi
+        mpiabi.LIBMPI = libmpi
         result = mpiabi._get_mpiabi()
         expected = {"mpiabi", "mpich", "openmpi", "impi", "msmpi"}
         self.assertIn(result, expected)
@@ -204,7 +207,11 @@ class TestMPIABI(unittest.TestCase):
         os_name_save = os.name
         os_environ_save = os.environ
         sys_platform_save = sys.platform
+        rtldmodes = ("RTLD_LAZY", "RTLD_LOCAL", "RTLD_GLOBAL")
         try:
+            if os.name == "nt":
+                for attr in rtldmodes:
+                    setattr(os, attr, 0)
             for os_name, sys_platform in (
                 ("posix", "linux"),
                 ("posix", "freebsd"),
@@ -213,18 +220,53 @@ class TestMPIABI(unittest.TestCase):
             ):
                 os.name = os_name
                 sys.platform = sys_platform
-                mpiabi._dlopen_rpath()
+                rpath = "@rpath" if sys.platform == "darwin" else ""
+                path = mpiabi._dlopen_path()
+                self.assertIsInstance(path, list)
+                path = mpiabi._dlopen_path([])
+                self.assertEqual(path, [rpath])
+                path = mpiabi._dlopen_path("")
+                self.assertEqual(path, [rpath])
+                self.assertIn(rpath, path)
+                pathseq = ("a", "b", "a", "b")
+                pathstr = os.pathsep.join(pathseq)
+                path = mpiabi._dlopen_path(pathseq)
+                self.assertEqual(path, ["a", "b"])
+                path = mpiabi._dlopen_path(pathstr)
+                self.assertEqual(path, ["a", "b"])
+                mode = mpiabi._dlopen_mode()
+                modetype = int if os.name == "posix" else type(None)
+                self.assertIsInstance(mode, modetype)
+                mode = mpiabi._dlopen_mode(42)
+                self.assertEqual(mode, 42)
+                mpiabi._dlopen_filename("foo")
+                mpiabi._dlopen_filename("foo", 0)
+            os.name = "nt"
+            sys.platform = "win32"
             os.environ = env = {}
-            env["I_MPI_ROOT"] = "/usr"
-            mpiabi._dlopen_rpath()
-            env["MSMPI_ROOT"] = "/usr"
-            mpiabi._dlopen_rpath()
-            env["MSMPI_BIN"] = "/usr/bin"
-            mpiabi._dlopen_rpath()
+            prefix = "/c/opt/impi"
+            bindir = os.path.join(prefix, "bin")  # noqa: PTH118
+            env["I_MPI_ROOT"] = prefix
+            path = mpiabi._dlopen_path()
+            self.assertIn(bindir, path)
+            env.clear()
+            prefix = "/c/opt/msmpi"
+            bindir = os.path.join(prefix, "bin")  # noqa: PTH118
+            env["MSMPI_ROOT"] = prefix
+            path = mpiabi._dlopen_path()
+            self.assertIn(bindir, path)
+            env.clear()
+            env["MSMPI_BIN"] = bindir
+            path = mpiabi._dlopen_path()
+            self.assertIn(bindir, path)
+            env.clear()
         finally:
             os.name = os_name_save
             os.environ = os_environ_save  # noqa: B003
             sys.platform = sys_platform_save
+            if os.name == "nt":
+                for attr in rtldmodes:
+                    delattr(os, attr)
 
 
 if __name__ == "__main__":

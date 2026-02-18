@@ -297,25 +297,20 @@ jobs:
       timeout-minutes: 2
 
     - if: ${{ !startsWith(matrix.py, 'pypy') }}
-      name: Test setenv MPI4PY_MPIABI=${{ matrix.mpi }}
+      name: Test setenv MPI4PY_MPIABI=${{ env.MPI4PY_MPIABI }}
       run: cibw/run-tests-mpi.sh
       shell: bash -el {0}
       timeout-minutes: 2
       env:
-        MPI4PY_MPIABI: ${{ matrix.mpi }}
+        MPI4PY_MPIABI: ${{ matrix.mpi-abi }}
 
     - if: ${{ !startsWith(matrix.py, 'pypy') }}
-      name: Test setenv MPI4PY_LIBMPI=<libmpi.*>
-      run: |
-        case "$(uname)" in
-        Linux)  libmpi=libmpi.so ;;
-        Darwin) libmpi=libmpi.dylib ;;
-        *NT*)   libmpi=${{ matrix.mpi }}.dll ;;
-        esac
-        env MPI4PY_LIBMPI="$libmpi" \
-        cibw/run-tests-mpi.sh
+      name: Test setenv MPI4PY_LIBMPI=${{ env.MPI4PY_LIBMPI }}
+      run: cibw/run-tests-mpi.sh
       shell: bash -el {0}
       timeout-minutes: 2
+      env:
+        MPI4PY_LIBMPI: ${{ matrix.mpi-lib }}
 
     - if: ${{ !startsWith(matrix.py, 'pypy') }}
       name: Test mpi4py with multiple conda-forge/${{ matrix.mpi }} versions
@@ -363,6 +358,24 @@ jobs:
         MPIEXEC: ${{ steps.venv.outputs.mpiexec }}
 
     - if: ${{ matrix.mpi != 'msmpi' }}
+      name: Test setenv MPI4PY_MPIABI=${{ env.MPI4PY_MPIABI }}
+      run: cibw/run-tests-mpi.sh
+      timeout-minutes: 2
+      env:
+        PYTHON: ${{ steps.venv.outputs.python }}
+        MPIEXEC: ${{ steps.venv.outputs.mpiexec }}
+        MPI4PY_MPIABI: ${{ matrix.mpi-abi }}
+
+    - if: ${{ matrix.mpi != 'msmpi' }}
+      name: Test setenv MPI4PY_MPILIB=${{ env.MPI4PY_MPILIB }}
+      run: cibw/run-tests-mpi.sh
+      timeout-minutes: 2
+      env:
+        PYTHON: ${{ steps.venv.outputs.python }}
+        MPIEXEC: ${{ steps.venv.outputs.mpiexec }}
+        MPI4PY_MPILIB: ${{ matrix.mpi-lib }}
+
+    - if: ${{ matrix.mpi != 'msmpi' }}
       name: Test mpi4py with multiple pypi/${{ matrix.mpi }} versions
       run: cibw/run-tests-pypip.sh ${{ matrix.mpi }}
       timeout-minutes: 5
@@ -402,6 +415,26 @@ jobs:
         PYTHON: ${{ steps.user.outputs.python }}
         MPIEXEC: ${{ steps.user.outputs.mpiexec }}
         PYTHONUSERBASE: ${{ runner.temp }}/user
+
+    - if: ${{ matrix.mpi != 'msmpi' }}
+      name: Test setenv MPI4PY_MPIABI=${{ env.MPI4PY_MPIABI }}
+      run: cibw/run-tests-mpi.sh
+      timeout-minutes: 2
+      env:
+        PYTHON: ${{ steps.user.outputs.python }}
+        MPIEXEC: ${{ steps.user.outputs.mpiexec }}
+        PYTHONUSERBASE: ${{ runner.temp }}/user
+        MPI4PY_MPIABI: ${{ matrix.mpi-abi }}
+
+    - if: ${{ matrix.mpi != 'msmpi' }}
+      name: Test setenv MPI4PY_MPIABI=${{ env.MPI4PY_MPILIB }}
+      run: cibw/run-tests-mpi.sh
+      timeout-minutes: 2
+      env:
+        PYTHON: ${{ steps.user.outputs.python }}
+        MPIEXEC: ${{ steps.user.outputs.mpiexec }}
+        PYTHONUSERBASE: ${{ runner.temp }}/user
+        MPI4PY_MPILIB: ${{ matrix.mpi-lib }}
 
     # ** test global site-packages
 
@@ -459,23 +492,17 @@ jobs:
       run: cibw/run-tests-mpi.sh
       timeout-minutes: 2
 
-    - name: Test setenv MPI4PY_MPIABI=${{ matrix.mpi }}
+    - name: Test setenv MPI4PY_MPIABI=${{ env.MPI4PY_MPIABI }}
       run: cibw/run-tests-mpi.sh
       timeout-minutes: 2
       env:
-        MPI4PY_MPIABI: ${{ matrix.mpi }}
+        MPI4PY_MPIABI: ${{ matrix.mpi-abi }}
 
-    - if: ${{ matrix.os != 'macOS' }}
-      name: Test setenv MPI4PY_LIBMPI=<libmpi.*>
-      run: |
-        case "$(uname)" in
-        Linux)  libmpi=libmpi.so ;;
-        Darwin) libmpi=libmpi.dylib ;;
-        *NT*)   libmpi=${{ matrix.mpi }}.dll ;;
-        esac
-        env MPI4PY_LIBMPI="$libmpi" \
-        cibw/run-tests-mpi.sh
+    - name: Test setenv MPI4PY_LIBMPI=${{ env.MPI4PY_LIBMPI }}
+      run: cibw/run-tests-mpi.sh
       timeout-minutes: 2
+      env:
+        MPI4PY_LIBMPI: ${{ matrix.mpi-lib }}
 
     - if: ${{ matrix.os == 'Windows' && matrix.mpi == 'impi' }}
       name: Test setenv I_MPI_LIBRARY_KIND=debug
