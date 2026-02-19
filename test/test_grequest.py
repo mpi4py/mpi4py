@@ -56,7 +56,7 @@ class TestGrequest(unittest.TestCase):
         greq.Complete()
         greq.Wait()
 
-    @unittest.skipMPI("openmpi")  # TODO(dalcinl): open-mpi/ompi#11681
+    @unittest.skipMPI("openmpi(<6.1.0)")
     def testExceptionHandling(self):
         ctx = GReqCtx()
 
