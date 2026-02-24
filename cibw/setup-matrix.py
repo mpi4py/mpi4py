@@ -51,10 +51,12 @@ OS_LIBNAME = {
 }
 
 MPI_ABI_POSIX = [
+    "mpiabi",
     "mpich",
     "openmpi",
 ]
 MPI_ABI_WINNT = [
+    "mpiabi",
     "impi",
     "msmpi",
 ]
