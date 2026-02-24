@@ -158,7 +158,9 @@ for build in matrix_build:
     mpi_lib = OS_LIBNAME[os].format(*MPI_LIB[mpi_abi])
     py_sabi = build["py-sabi"]
     runner = GHA_RUNNER[os][arch]
-    mpilist = [mpi_abi]
+    mpilist = [mpi_abi] if mpi_abi != "mpiabi" else []
+    if os in ("Linux", "macOS") and mpi_abi == "mpiabi":
+        mpilist.extend(["mpich"])
     if (os, arch, mpi_abi) == ("Linux", "x86_64", "mpich"):
         mpilist.insert(0, "impi")
     if py_sabi:

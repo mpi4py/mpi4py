@@ -21,6 +21,23 @@ workdir=$(mktemp -d)
 trap 'rm -rf $workdir' EXIT
 cd "$workdir"
 
+if [ "$MPI_ABI" == mpiabi ]; then
+    echo "Download MPI (mpi-abi-stubs)"
+    giturl=https://github.com/mpi-forum/mpi-abi-stubs.git
+    rm -rf mpiabi
+    git clone --quiet --depth 1 "$giturl" mpiabi
+    echo "Install MPI (mpi-abi-stubs) [$MACHINE]"
+    options+=(-DCMAKE_INSTALL_PREFIX="$MPI_ROOT")
+    options+=(-DCMAKE_INSTALL_LIBDIR="lib")
+    cmake -S mpiabi -B mpiabi/build "${options[@]}"
+    cmake --build mpiabi/build --config Release
+    sudo cmake --install mpiabi/build --config Release
+    rm -rf mpiabi
+    echo "Rebuild dynamic linker cache"
+    sudo "$(command -v ldconfig || echo true)"
+    exit 0
+fi
+
 echo "Install MPI ($MPI_ABI) [$MACHINE]"
 destdir=./$MPI_ABI/$MACHINE
 case "$(uname)" in

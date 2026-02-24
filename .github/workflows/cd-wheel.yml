@@ -60,6 +60,12 @@ jobs:
           >> "$GITHUB_OUTPUT"
 
   build:
+    name: >-
+      build (${{ format(
+      '{0}-{1}, {2}-{3}, {4}',
+      matrix.os, matrix.arch,
+      matrix.py, matrix.py-sabi || matrix.py,
+      matrix.mpi-abi) }})
     if: ${{ needs.setup.outputs.matrix-build != '[]' }}
     needs: setup
     runs-on: ${{ matrix.runner }}
@@ -142,6 +148,7 @@ jobs:
           LDFLAGS="$LDFLAGS -Wl,-rpath,/opt/homebrew/lib"
           LDFLAGS="$LDFLAGS -Wl,-rpath,/opt/local/lib"
         CIBW_ENVIRONMENT_WINDOWS: >-
+          MPI_ABI_STUBS="$USERPROFILE\\mpiabi"
           I_MPI_ROOT="$USERPROFILE\\impi"
           MSMPI_BIN="$ProgramFiles\\Microsoft MPI\\Bin"
           MSMPI_INC="$USERPROFILE\\msmpi\\Include"
@@ -162,6 +169,7 @@ jobs:
       shell: bash
 
   merge:
+    name: merge (${{ format('{0}-{1}', matrix.os, matrix.arch) }})
     if: ${{ needs.setup.outputs.matrix-merge != '[]' }}
     needs: [setup, build]
     runs-on: ${{ matrix.runner }}
@@ -211,6 +219,7 @@ jobs:
 
     - id: report
       run: |
+        # sha256sum
         test "$(uname)" = Darwin && sha256sum() { shasum -a 256 $@; } || true
         artifact='Artifact: <${{ steps.upload.outputs.artifact-url }}>'
         echo $artifact >> $GITHUB_STEP_SUMMARY
@@ -221,6 +230,12 @@ jobs:
       working-directory: dist
 
   test:
+    name: >-
+      test (${{ format(
+      '{0}, {1}, {2}-{3}, {4}-{5}',
+      matrix.mpi, matrix.mpi-abi,
+      matrix.py, matrix.py-sabi || matrix.py,
+      matrix.os, matrix.arch) }})
     if: ${{ needs.setup.outputs.matrix-test != '[]' }}
     needs: [setup, merge]
     runs-on: ${{ matrix.runner }}
@@ -242,6 +257,9 @@ jobs:
       run:  echo 127.0.0.1 `hostname` | sudo tee -a /etc/hosts > /dev/null
       if:   runner.os == 'Linux' || runner.os == 'macOS'
 
+    - if: ${{ runner.os == 'macOS' }}
+      run: sudo hostname localhost
+
     - uses: actions/checkout@v6
 
     - uses: actions/download-artifact@v7
@@ -252,9 +270,6 @@ jobs:
 
     - if: ${{ matrix.py-sabi != '' }}
       run: rm -f dist/mpi4py-*-cp3*-cp3*-*.whl
-
-    - if: ${{ runner.os == 'macOS' }}
-      run: sudo hostname localhost
 
     # * test conda
 
@@ -483,22 +498,26 @@ jobs:
 
     # *** test system MPI
 
-    - name: Install system MPI
+    - if: ${{ matrix.mpi-abi != 'mpiabi' }}
+      name: Install system MPI
       uses: mpi4py/setup-mpi@v1
       with:
         mpi: ${{ matrix.mpi }}
 
-    - name: Test mpi4py with system MPI
+    - if: ${{ matrix.mpi-abi != 'mpiabi' }}
+      name: Test mpi4py with system MPI
       run: cibw/run-tests-mpi.sh
       timeout-minutes: 2
 
-    - name: Test setenv MPI4PY_MPIABI=${{ env.MPI4PY_MPIABI }}
+    - if: ${{ matrix.mpi-abi != 'mpiabi' }}
+      name: Test setenv MPI4PY_MPIABI=${{ env.MPI4PY_MPIABI }}
       run: cibw/run-tests-mpi.sh
       timeout-minutes: 2
       env:
         MPI4PY_MPIABI: ${{ matrix.mpi-abi }}
 
-    - name: Test setenv MPI4PY_LIBMPI=${{ env.MPI4PY_LIBMPI }}
+    - if: ${{ matrix.mpi-abi != 'mpiabi' }}
+      name: Test setenv MPI4PY_LIBMPI=${{ env.MPI4PY_LIBMPI }}
       run: cibw/run-tests-mpi.sh
       timeout-minutes: 2
       env:

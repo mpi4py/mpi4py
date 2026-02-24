@@ -145,9 +145,20 @@ class Config:
 
     def _setup_mpiabi(self):
         MPI_ABI_STUBS = os.environ.get("MPI_ABI_STUBS")
-        if MPI_ABI_STUBS:
-            self.load("mpi.cfg", "mpiabi")
-            self.filename = [MPI_ABI_STUBS]
+        if not MPI_ABI_STUBS:
+            return
+        if sys.platform == "darwin":
+            library = "lib{}.dylib"
+        elif os.name == "posix":
+            library = "lib{}.so"
+        else:
+            library = "{}.lib"
+        hdr = os.path.join(MPI_ABI_STUBS, "include", "mpi.h")
+        lib = os.path.join(MPI_ABI_STUBS, "lib", library.format("mpi_abi"))
+        if not os.path.isfile(hdr) or not os.path.isfile(lib):
+            return
+        self.load("mpi.cfg", "mpiabi")
+        self.filename = [MPI_ABI_STUBS]
 
     def _setup_posix(self):
         pass

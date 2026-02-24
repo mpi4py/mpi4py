@@ -5,7 +5,7 @@ import sys
 import delocate.cmd.delocate_wheel as mod
 from delocate.delocating import delocate_wheel, filter_system_libs
 
-libmpi = []
+libmpi = ["libmpi_abi.0.dylib"]
 for name in ("mpi", "pmpi", "open-pal", "open-rte"):
     for version in (1, 12, 20, 40):
         libmpi.append(f"lib{name}.{version}.dylib")
