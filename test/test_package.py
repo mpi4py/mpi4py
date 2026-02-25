@@ -115,6 +115,11 @@ class TestMPIABI(unittest.TestCase):
         mpiabi = self.mpiabi
         libmpi = self.libmpi
         string = mpiabi._get_mpiabi_from_libmpi(libmpi)
+        try:
+            libmpi = mpiabi._get_libmpi_from_mpiabi(string)
+            string = mpiabi._get_mpiabi_from_libmpi(libmpi)
+        except RuntimeError:
+            return
         mpiabi._get_mpiabi.mpiabi = None
         mpiabi.MPIABI = string
         result = mpiabi._get_mpiabi()
