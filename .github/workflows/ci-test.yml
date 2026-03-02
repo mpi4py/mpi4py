@@ -102,6 +102,7 @@ jobs:
       if:   matrix.mpi != 'msmpi'
     - name: Test init-fini
       run:  bash demo/init-fini/run.sh
+      env:  {FI_PROVIDER: tcp}  # macOS-26 MPICH-5.0.0
       if:   matrix.mpi != 'msmpi'
     - name: Test check-mpiexec
       run:  bash demo/check-mpiexec/run.sh
