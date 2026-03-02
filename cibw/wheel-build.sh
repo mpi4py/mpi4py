@@ -9,7 +9,7 @@ echo '*' > .venv/.gitignore
 source .venv/bin/activate
 python -m pip install --upgrade pip pipx wheel
 
-py="cp313"
+py="cp314"
 pysabi="0"
 matrix_mpiabi=("mpiabi" "mpich" "openmpi")
 matrix_arch=("$(uname -m)")
