@@ -87,6 +87,7 @@ jobs:
       contents: read
       id-token: write
       attestations: write
+      artifact-metadata: write
 
     steps:
 
@@ -118,7 +119,7 @@ jobs:
       working-directory: dist
 
     - name: Attest artifacts
-      uses: actions/attest-build-provenance@v4
+      uses: actions/attest@v4
       with:
         subject-path: dist/*
 
@@ -248,6 +249,7 @@ jobs:
       contents: write
       id-token: write
       attestations: write
+      artifact-metadata: write
 
     steps:
 
@@ -266,7 +268,7 @@ jobs:
         merge-multiple: true
 
     - name: Attest distribution artifact
-      uses: actions/attest-build-provenance@v4
+      uses: actions/attest@v4
       with:
         subject-path: dist/*.tar.gz
 
