@@ -21,6 +21,9 @@ def cythonize(args=None):
     if "--3str" not in argv:
         argv[1:1] = ["--3str"]
 
+    code = __import__("Cython.Compiler.Code", fromlist=[""])
+    code.compression_algorithms = []
+
     cwd = pathlib.Path.cwd()
     sys_argv = sys.argv[:]
     try:
