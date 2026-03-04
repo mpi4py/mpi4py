@@ -11,7 +11,7 @@ from .. import MPI
 try:
     from numpy import dtype as _np_dtype
 except ImportError:  # pragma: no cover
-    _np_dtype = None
+    _np_dtype = None  # ty: ignore[invalid-assignment]
 
 
 def _get_datatype(dtype):
@@ -77,7 +77,7 @@ def from_numpy_dtype(dtype):
         datatypes = []
         try:
             for name in dtype.names or ():
-                ftype, fdisp, *_ = fields[name]
+                ftype, fdisp, *_ = fields[name]  # ty: ignore
                 blocklengths.append(1)
                 displacements.append(fdisp)
                 datatypes.append(from_numpy_dtype(ftype))

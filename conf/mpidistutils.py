@@ -25,6 +25,11 @@ from distutils import log, sysconfig
 from distutils.file_util import copy_file
 from distutils.util import convert_path
 
+
+def shlex_split(arg):
+    return shlex.split(arg)
+
+
 # Fix missing variables PyPy's  distutils.sysconfig
 if hasattr(sys, "pypy_version_info"):
     config_vars = sysconfig.get_config_vars()
@@ -32,7 +37,7 @@ if hasattr(sys, "pypy_version_info"):
         if name not in config_vars:
             config_vars[name] = os.path.normpath(getattr(sys, name))
     if sys.platform == "darwin" and "LDSHARED" in config_vars:
-        ldshared = shlex.split(config_vars["LDSHARED"])
+        ldshared = shlex_split(config_vars["LDSHARED"])
         while "-shared" in ldshared:
             ldshared[ldshared.index("-shared")] = "-bundle"
         if "-undefined" not in ldshared:
@@ -51,8 +56,8 @@ if hasattr(cygcc, "get_versions"):
 
         find_executable_orig = distutils.spawn.find_executable
 
-        def find_executable(exe):
-            exe = find_executable_orig(exe)
+        def find_executable(exe, path=None):
+            exe = find_executable_orig(exe, path)
             if exe and " " in exe:
                 exe = f'"{exe}"'
             return exe
@@ -74,6 +79,7 @@ cc_fix_lib_args_orig = getattr(CCompiler, "_fix_lib_args", None)
 def cc_fix_compile_args(self, out_dir, macros, inc_dirs):
     macros = macros or []
     inc_dirs = inc_dirs or []
+    assert cc_fix_compile_args_orig is not None  # noqa: S101
     return cc_fix_compile_args_orig(self, out_dir, macros, inc_dirs)
 
 
@@ -81,6 +87,7 @@ def cc_fix_lib_args(self, libs, lib_dirs, rt_lib_dirs):
     libs = libs or []
     lib_dirs = lib_dirs or []
     rt_lib_dirs = rt_lib_dirs or []
+    assert cc_fix_lib_args_orig is not None  # noqa: S101
     return cc_fix_lib_args_orig(self, libs, lib_dirs, rt_lib_dirs)
 
 
@@ -118,7 +125,7 @@ def fix_compiler_cmd(cc, mpicc):
     i = _fix_xcrun(cc, i)
     while os.path.basename(cc[i]) == "ccache":
         i = i + 1
-    cc[i : i + 1] = shlex.split(mpicc)
+    cc[i : i + 1] = shlex_split(mpicc)
 
 
 def fix_linker_cmd(ld, mpild):
@@ -134,7 +141,7 @@ def fix_linker_cmd(ld, mpild):
     i = _fix_xcrun(ld, i)
     while os.path.basename(ld[i]) == "ccache":
         del ld[i]
-    ld[i : i + 1] = shlex.split(mpild)
+    ld[i : i + 1] = shlex_split(mpild)
 
 
 def customize_compiler(
@@ -149,7 +156,7 @@ def customize_compiler(
         ld = compiler.linker_exe
         for envvar in ("LDFLAGS", "CFLAGS", "CPPFLAGS"):
             if envvar in os.environ:
-                ld += shlex.split(os.environ[envvar])
+                ld += shlex_split(os.environ[envvar])
     if os.environ.get("SOURCE_DATE_EPOCH") is not None:
         # Linker tweaks for reproducible build
         if sys.platform == "darwin":
@@ -204,7 +211,7 @@ def customize_compiler(
                 with contextlib.suppress(Exception):
                     getattr(compiler, attr).remove("-mno-cygwin")
         # Add required define and compiler flags for AMD64
-        if platform.architecture(None)[0] == "64bit":
+        if platform.architecture("")[0] == "64bit":
             for attr in (
                 "preprocessor",
                 "compiler",
@@ -289,13 +296,7 @@ def configure_compiler(compiler, config, lang=None):
 
 # -----------------------------------------------------------------------------
 
-try:
-    from mpiapigen import Generator
-except ImportError:
-
-    class Generator:
-        def parse_file(self, *args):
-            raise NotImplementedError("You forgot to grab 'mpiapigen.py'")
+from mpiapigen import Generator
 
 
 @contextlib.contextmanager
@@ -561,9 +562,11 @@ class Distribution(cls_Distribution):
 
 class Extension(cls_Extension):
     def __init__(self, **kw):
+        name = kw.pop("name")
+        sources = kw.pop("sources")
         optional = kw.pop("optional", None)
         configure = kw.pop("configure", None)
-        cls_Extension.__init__(self, **kw)
+        cls_Extension.__init__(self, name, sources, **kw)
         self.optional = optional
         self.configure = configure
 
@@ -641,6 +644,7 @@ def cython_req():
     basename = "requirements-build-cython.txt"
     with open(os.path.join(confdir, basename)) as f:
         m = re.search(r"cython\s*>?=+\s*(.*)", f.read().strip())
+    assert m is not None  # noqa: S101
     cython_version = m.groups()[0]
     return cython_version
 
@@ -686,7 +690,7 @@ def cython_chk(VERSION, verbose=True):
 
 
 def cython_run(
-    source,
+    source=None,
     target=None,
     depends=(),
     includes=(),
@@ -694,6 +698,7 @@ def cython_run(
     force=False,
     VERSION="0.0",
 ):
+    assert source is not None  # noqa: S101
     if target is None:
         target = os.path.splitext(source)[0] + ".c"
     cwd = os.getcwd()
@@ -1103,17 +1108,15 @@ def configure_pyexe(exe, _config_cmd):
         py_tag = py_version[0].replace("2", "")
         libraries = [f"pypy{py_tag}-c"]
     if sys.platform == "darwin":
-        fwkdir = cfg_vars.get("PYTHONFRAMEWORKDIR")
-        if (
-            fwkdir
-            and fwkdir != "no-framework"
-            and fwkdir in cfg_vars.get("LINKFORSHARED", "")
-        ):
-            del libraries[:]
+        fwkdir = cfg_vars.get("PYTHONFRAMEWORKDIR", "")
+        if fwkdir and fwkdir != "no-framework":
+            linkforshared = cfg_vars.get("LINKFORSHARED", "")
+            if fwkdir in linkforshared:
+                del libraries[:]
     #
     py_enable_shared = cfg_vars.get("Py_ENABLE_SHARED")
-    libdir = shlex.split(cfg_vars.get("LIBDIR", ""))
-    libpl = shlex.split(cfg_vars.get("LIBPL", ""))
+    libdir = shlex_split(cfg_vars.get("LIBDIR", ""))
+    libpl = shlex_split(cfg_vars.get("LIBPL", ""))
     library_dirs = []
     runtime_dirs = []
     if py_enable_shared:
@@ -1126,7 +1129,7 @@ def configure_pyexe(exe, _config_cmd):
     #
     link_args = []
     for var in ("LIBS", "MODLIBS", "SYSLIBS", "LDLAST"):
-        link_args += shlex.split(cfg_vars.get(var, ""))
+        link_args += shlex_split(cfg_vars.get(var, ""))
     #
     exe.libraries += libraries
     exe.library_dirs += library_dirs
@@ -1327,7 +1330,7 @@ class build_exe(build_ext):
         self.extensions = self.distribution.executables
         self.get_ext_filename = self.get_exe_filename
         self.check_extensions_list = self.check_executables_list
-        self.build_extension = self.build_executable
+        self.build_extension = self.build_executable  # ty: ignore
         self.copy_extensions_to_source = self.copy_executables_to_source
         self.build_lib = self.build_exe
 
@@ -1423,7 +1426,7 @@ class build_exe(build_ext):
             fwkprefix = sysconfig.get_config_var("PYTHONFRAMEWORKPREFIX")
             fwkdir = sysconfig.get_config_var("PYTHONFRAMEWORKDIR")
             if fwkprefix and fwkdir and fwkdir != "no-framework":
-                for flag in shlex.split(linkshared):
+                for flag in shlex_split(linkshared):
                     if flag.startswith(fwkdir):
                         fwkpath = os.path.join(fwkprefix, flag)
                         linkshared = linkshared.replace(flag, fwkpath)
@@ -1441,7 +1444,7 @@ class build_exe(build_ext):
             libraries=self.get_libraries(exe),
             library_dirs=exe.library_dirs,
             runtime_library_dirs=exe.runtime_library_dirs,
-            extra_preargs=shlex.split(ldflags) + shlex.split(linkshared),
+            extra_preargs=shlex_split(ldflags) + shlex_split(linkshared),
             extra_postargs=extra_args,
             debug=self.debug,
             target_lang=language,
@@ -1679,14 +1682,14 @@ if setuptools:
 # Support for Reproducible Builds
 # https://reproducible-builds.org/docs/source-date-epoch/
 
-timestamp = os.environ.get("SOURCE_DATE_EPOCH")
-if timestamp is not None:
+SOURCE_DATE_EPOCH = os.environ.get("SOURCE_DATE_EPOCH")
+if SOURCE_DATE_EPOCH is not None:
     import distutils.archive_util as archive_util
     import stat
     import tarfile
     import time
 
-    timestamp = float(max(int(timestamp), 0))
+    timestamp = float(max(int(SOURCE_DATE_EPOCH), 0))
 
     class Time:
         @staticmethod
