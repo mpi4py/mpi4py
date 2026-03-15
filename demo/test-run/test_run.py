@@ -57,6 +57,21 @@ def launcher(np):
     return shlex.split(command)
 
 
+def filter_output(output):
+    pypy_7_3_21 = getattr(sys, "pypy_version_info", ())[:3] == (7, 3, 21)
+    if pypy_7_3_21:
+        filterlines = (
+            "(_common_types_metatype, ",
+            "(cython_function_or_method, ",
+        )
+        output = "\n".join([
+            line
+            for line in output.splitlines()
+            if not line.startswith(filterlines)
+        ])
+    return output
+
+
 def execute(np, cmd, args=""):
     mpi4pyroot = pathlib.Path(mpi4py.__path__[0]).resolve().parent
     pythonpath = os.environ.get("PYTHONPATH", "").split(os.pathsep)
@@ -80,7 +95,11 @@ def execute(np, cmd, args=""):
         stderr=subprocess.PIPE,
     )
     stdout, stderr = p.communicate()
-    return p.returncode, stdout.decode(), stderr.decode()
+    return (
+        p.returncode,
+        filter_output(stdout.decode()),
+        filter_output(stderr.decode()),
+    )
 
 
 @unittest.skipIf(not find_mpiexec(), "mpiexec")
