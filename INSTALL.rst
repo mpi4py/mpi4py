@@ -232,13 +232,21 @@ You can install mpi4py and your preferred MPI implementation using the
 
      conda install -c conda-forge mpi4py msmpi
 
-MPICH and many of its derivatives are ABI-compatible. You can provide
-the package specification ``mpich=X.Y.*=external_*`` (where ``X`` and
-``Y`` are the major and minor version numbers) to request the conda
-package manager to use system-provided MPICH (or derivative)
-libraries. Similarly, you can provide the package specification
-``openmpi=X.Y.*=external_*`` to use system-provided Open MPI
-libraries.
+MPICH and many of its derivatives (`Intel MPI`_, `MVAPICH`_) are
+ABI-compatible. You can request the conda package manager to use a
+system-provided MPICH (or derivative) libraries by installing a dummy
+MPICH package from the ``mpi-external`` label:
+
+.. code:: sh
+
+   conda install -c conda-forge/label/mpi-external mpich
+
+Similarly, you can request conda to use a system-provided Open MPI
+libraries:
+
+.. code:: sh
+
+   conda install -c conda-forge/label/mpi-external openmpi
 
 The ``openmpi`` package on conda-forge has built-in CUDA support, but
 it is disabled by default. To enable it, follow the instruction
