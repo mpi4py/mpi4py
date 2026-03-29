@@ -64,13 +64,14 @@ def osu_bibw(
         elif myid == 1:
             for i in iterations:
                 if i == skip:
-                    pass
+                    t_start = MPI.Wtime()
                 for j in window_sizes:
                     recv_request[j] = comm.Irecv(r_msg, 0, 100)
                 for j in window_sizes:
                     send_request[j] = comm.Isend(s_msg, 0, 10)
                 MPI.Request.Waitall(send_request)
                 MPI.Request.Waitall(recv_request)
+            t_end = MPI.Wtime()
         #
         if myid == 0:
             MB = size / 1e6 * loop * window_size

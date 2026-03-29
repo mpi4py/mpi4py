@@ -58,9 +58,10 @@ def osu_latency(
         elif myid == 1:
             for i in iterations:
                 if i == skip:
-                    pass
+                    t_start = lib.MPI_Wtime()
                 lib.MPI_Recv(rbuf, size, dtype, 0, tag, comm, status)
                 lib.MPI_Send(sbuf, size, dtype, 0, tag, comm)
+            t_end = lib.MPI_Wtime()
         #
         if myid == 0:
             latency = (t_end - t_start) * 1e6 / (2 * loop)

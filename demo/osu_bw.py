@@ -63,11 +63,12 @@ def osu_bw(
             r_msg = [r_buf, size, MPI.BYTE]
             for i in iterations:
                 if i == skip:
-                    pass
+                    t_start = MPI.Wtime()
                 for j in window_sizes:
                     requests[j] = comm.Irecv(r_msg, 0, 100)
                 MPI.Request.Waitall(requests)
                 comm.Send(s_msg, 0, 101)
+            t_end = MPI.Wtime()
         #
         if myid == 0:
             MB = size / 1e6 * loop * window_size
