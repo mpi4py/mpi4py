@@ -283,7 +283,7 @@ jobs:
         echo python="$python" >> "$GITHUB_OUTPUT"
 
     - if: ${{ !startsWith(matrix.py, 'pypy') }}
-      uses: mamba-org/setup-micromamba@v2
+      uses: mamba-org/setup-micromamba@v3
       with:
         init-shell: bash
         post-cleanup: none

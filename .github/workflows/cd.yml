@@ -222,7 +222,7 @@ jobs:
       working-directory: dist
 
     - name: Setup Micromamba
-      uses: mamba-org/setup-micromamba@v2
+      uses: mamba-org/setup-micromamba@v3
       with:
         environment-name: ac
         create-args: anaconda-client
