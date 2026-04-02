@@ -34,7 +34,6 @@ if grep -qE 'ID=fedora' /etc/os-release; then
         python3.13
         python3.14
         python3.15
-        python3.13t
         python3.14t
         python3.15t
         pypy3.11
