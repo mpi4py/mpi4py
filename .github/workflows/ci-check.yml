@@ -132,9 +132,6 @@ jobs:
     - name: ruff format
       run:  ruff format --diff
 
-    - name: flake8
-      run:  flake8
-
     - name: pylint
       run:  pylint mpi4py
 

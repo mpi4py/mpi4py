@@ -507,7 +507,6 @@ def visit_mpi4py_MPI():
 
     lines = Lines()
     lines.add = f'"""{module.__doc__}"""'
-    lines.add = "# flake8: noqa"
     lines.add = IMPORTS
     lines.add = ""
     lines.add = HELPERS
