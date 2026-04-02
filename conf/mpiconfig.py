@@ -4,7 +4,6 @@ import platform
 import shlex
 import shutil
 import sys
-from collections import OrderedDict
 from configparser import ConfigParser, Error as ConfigParserError
 from types import SimpleNamespace
 
@@ -29,22 +28,22 @@ class Config:
         self.log = log or _log
         self.section = None
         self.filename = None
-        self.compiler_info = OrderedDict((
-            ("mpicc", None),
-            ("mpicxx", None),
-            ("mpild", None),
-        ))
-        self.library_info = OrderedDict((
-            ("define_macros", []),
-            ("undef_macros", []),
-            ("include_dirs", []),
-            ("libraries", []),
-            ("library_dirs", []),
-            ("runtime_library_dirs", []),
-            ("extra_compile_args", []),
-            ("extra_link_args", []),
-            ("extra_objects", []),
-        ))
+        self.compiler_info = {
+            "mpicc": None,
+            "mpicxx": None,
+            "mpild": None,
+        }
+        self.library_info = {
+            "define_macros": [],
+            "undef_macros": [],
+            "include_dirs": [],
+            "libraries": [],
+            "library_dirs": [],
+            "runtime_library_dirs": [],
+            "extra_compile_args": [],
+            "extra_link_args": [],
+            "extra_objects": [],
+        }
 
     def __bool__(self):
         for v in self.compiler_info.values():
@@ -380,7 +379,7 @@ class Config:
         else:
             sections = list(section)
         #
-        parser = ConfigParser(dict_type=OrderedDict)
+        parser = ConfigParser()
         try:
             read_ok = parser.read(filenames)
         except ConfigParserError:
@@ -414,15 +413,14 @@ class Config:
         expandvars = os.path.expandvars
         library_info = type(self.library_info)()
         for k, v in parser_items:
-            if k in (
-                "define_macros",
-                "undef_macros",
-            ):
+            if k == "undef_macros":
                 macros = [e.strip() for e in v.split(",")]
-                if k == "define_macros":
-                    for i, m in enumerate(macros):
-                        name, _, value = m.partition("=")
-                        macros[i] = (name, value or None)
+                library_info[k] = macros
+            elif k == "define_macros":
+                macros = []
+                for m in v.split(","):
+                    name, _, value = m.strip().partition("=")
+                    macros.append((name, value or None))
                 library_info[k] = macros
             elif k in (
                 "include_dirs",
@@ -449,7 +447,7 @@ class Config:
                     expanduser(expandvars(e)) for e in shlex.split(v)
                 ]
             elif hasattr(self, k):
-                library_info[k] = v.strip()
+                library_info[k] = [v.strip()]
         #
         self.section = section
         self.filename = read_ok
@@ -483,16 +481,16 @@ class Config:
             elif isinstance(library_info[k], list):
                 library_info[k] = " ".join(library_info[k])
         # fill configuration parser
-        parser = ConfigParser(dict_type=OrderedDict)
+        parser = ConfigParser()
         parser.add_section(section)
         for option, value in compiler_info.items():
             if not value:
                 continue
-            parser.set(section, option, value)
+            parser.set(section, option, str(value))
         for option, value in library_info.items():
             if not value:
                 continue
-            parser.set(section, option, value)
+            parser.set(section, option, str(value))
         # save configuration file
         if filename is None:
             parser.write(sys.stdout)

@@ -99,6 +99,7 @@ test = [
 type = [
   "mypy >= 1.0.0",
   "numpy",
+  "ty",
 ]
 
 [tool.scikit-build]
