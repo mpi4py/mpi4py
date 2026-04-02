@@ -254,8 +254,6 @@ jobs:
         allow-prereleases: true
         pip-install: build
         cache: pip
-        cache-dependency-path: |
-          conf/requirements-build-cython.txt
 
     - name: Build mpi4py wheel
       run:  python -m build --verbose --wheel

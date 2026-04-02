@@ -1,7 +1,0 @@
-codespell
-cython
-cython-lint
-pylint
-ruff
-shellcheck-py
-yamllint

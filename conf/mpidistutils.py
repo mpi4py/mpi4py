@@ -637,10 +637,11 @@ def with_coverage():
 
 
 def cython_req():
-    confdir = os.path.dirname(__file__)
-    basename = "requirements-build-cython.txt"
-    with open(os.path.join(confdir, basename)) as f:
-        m = re.search(r"cython\s*>?=+\s*(.*)", f.read().strip())
+    topdir = os.path.dirname(os.path.dirname(__file__))
+    pyproject_toml = os.path.join(topdir, "pyproject.toml")
+    with open(pyproject_toml) as fobj:
+        contents = fobj.read().strip()
+        m = re.search(r"cython\s*>?=+\s*(\d+(?:\.\d+)*)", contents)
     cython_version = m.groups()[0]
     return cython_version
 

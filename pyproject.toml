@@ -57,6 +57,50 @@ requires = ["setuptools >= 77", "build"]
 build-backend = "builder"
 backend-path = ["conf"]
 
+[dependency-groups]
+build-cython = [
+  "cython >= 3.0.1",
+]
+build-mesonpy = [
+  "meson-python",
+]
+build-skbuild = [
+  "scikit-build-core",
+]
+build = [
+  "setuptools >= 77",
+  {include-group = "build-cython"},
+]
+cover = [
+  {include-group = "test"},
+  "coverage",
+]
+docs = [
+  "docutils >= 0.21",
+  "sphinx == 8.1.3; python_version <  '3.12'",
+  "sphinx == 9.1.0; python_version >= '3.12'",
+  "sphinx-copybutton == 0.5.2",
+  "sphinx-rtd-theme == 3.1.0",
+]
+lint = [
+  "codespell",
+  {include-group = "build-cython"},
+  "cython-lint",
+  "pylint",
+  "ruff",
+  "shellcheck-py",
+  "yamllint",
+]
+test = [
+  "cffi; implementation_name == 'cpython'",
+  "numpy",
+  "pyyaml",
+]
+type = [
+  "mypy >= 1.0.0",
+  "numpy",
+]
+
 [tool.scikit-build]
 minimum-version = "0.5"
 experimental = true

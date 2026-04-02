@@ -4,6 +4,11 @@ import os
 import pathlib
 import sys
 
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib
+
 # ---
 
 BACKENDS = {
@@ -38,11 +43,16 @@ def build_backend(name=None):
 
 
 def read_build_requires(name):
-    confdir = pathlib.Path(__file__).resolve().parent
-    basename = f"requirements-build-{name}.txt"
-    filename = confdir / basename
-    with filename.open(encoding="utf-8") as f:
-        return [req for req in map(str.strip, f) if req]
+    topdir = pathlib.Path(__file__).resolve().parent.parent
+    pyproject_toml = topdir / "pyproject.toml"
+    contents = pyproject_toml.read_text()
+    pyproject = tomllib.loads(contents)
+    dependency_groups = pyproject["dependency-groups"]
+    requires = dependency_groups[f"build-{name}"]
+    if name == "mesonpy" and os.name == "nt":  # TODO: remove
+        url = "git+https://github.com/dalcinl/meson@impi-windows"
+        requires.append(f"meson @ {url}")
+    return requires
 
 
 def get_backend_requires_fast(backend, dist, config_settings=None):

@@ -80,9 +80,6 @@ jobs:
         check-latest: true
         pip-install: build
         cache: pip
-        cache-dependency-path: |
-          conf/requirements-build-cython.txt
-          conf/requirements-build-${{ matrix.backend }}.txt
 
     - name: Build sdist and wheel (${{ matrix.backend }})
       run:  python -m build --verbose

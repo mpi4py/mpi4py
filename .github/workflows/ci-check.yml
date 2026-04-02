@@ -43,10 +43,8 @@ jobs:
       with:
         python-version: ${{ github.event.inputs.py || 3 }}
         check-latest: true
-        pip-install: -r conf/requirements-build-cython.txt setuptools
+        pip-install: --group build
         cache: pip
-        cache-dependency-path: |
-          conf/requirements-build-cython.txt
 
     - name: Build package
       run:  python setup.py build
@@ -77,11 +75,8 @@ jobs:
       uses: actions/setup-python@v6
       with:
         python-version: ${{ github.event.inputs.py || 3 }}
-        pip-install: -r conf/requirements-docs.txt
+        pip-install: --group docs
         cache: pip
-        cache-dependency-path: |
-          conf/requirements-build-cython.txt
-          conf/requirements-build-docs.txt
 
     - name: Install package for documenting
       run:  python -m pip install .
@@ -112,13 +107,8 @@ jobs:
       uses: actions/setup-python@v6
       with:
         python-version: ${{ github.event.inputs.py || 3 }}
-        pip-install: >-
-          -r conf/requirements-build-cython.txt
-          -r conf/requirements-lint.txt
+        pip-install: --group lint
         cache: pip
-        cache-dependency-path: |
-          conf/requirements-build-cython.txt
-          conf/requirements-build-lint.txt
 
     - name: Install package for linting
       run:  python -m pip install .
@@ -162,11 +152,8 @@ jobs:
       uses: actions/setup-python@v6
       with:
         python-version: ${{ github.event.inputs.py || 3 }}
-        pip-install: -r conf/requirements-type.txt
+        pip-install: --group type
         cache: pip
-        cache-dependency-path: |
-          conf/requirements-build-cython.txt
-          conf/requirements-build-type.txt
 
     - name: Install package for typing
       run:  python -m pip install .
