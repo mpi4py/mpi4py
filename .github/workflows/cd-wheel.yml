@@ -123,7 +123,7 @@ jobs:
         MPI4PY_BUILD_PYSABI: "${{ matrix.py-sabi && matrix.py || '0' }}"
         MPI4PY_LOCAL_VERSION: "${{ matrix.mpi-abi }}"
         CIBW_PROJECT_REQUIRES_PYTHON: ">=3.10"
-        CIBW_ENABLE: "cpython-freethreading pypy"
+        CIBW_ENABLE: "pypy"
         CIBW_BUILD_FRONTEND: "build[uv]"
         CIBW_ARCHS: "${{ matrix.arch }}"
         CIBW_BUILD: "${{ matrix.py }}-*"
