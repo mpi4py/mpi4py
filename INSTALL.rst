@@ -98,7 +98,9 @@ The Linux (x86_64/aarch64) wheels require one of
 
 Users may need to set the ``LD_LIBRARY_PATH`` environment variable
 such that the dynamic linker is able to find at runtime the MPI shared
-library file (``libmpi.so.*``).
+library file (``libmpi.so.*``). Alternatively, the
+:envvar:`MPI4PY_LIBMPI` environment variable can be set to the
+full path of the MPI shared library.
 
 Fedora/RHEL
 ~~~~~~~~~~~
