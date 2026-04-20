@@ -186,7 +186,10 @@ class TestPackExternal(BaseTestPackExternal, unittest.TestCase):
 
 
 name, version = MPI.get_vendor()
+system_machine = (platform.system(), platform.machine())
 if name == "MPICH":
+    if version == (5, 0, 1) and system_machine == ("Darwin", "arm64"):
+        BaseTestPackExternal.skipdtype += "gG"
     if version < (4, 0, 0):
         BaseTestPackExternal.skipdtype += "ldgLFDG"
     if platform.architecture(None)[0] == "32bit":
@@ -194,7 +197,7 @@ if name == "MPICH":
 elif name == "Open MPI":
     if version < (5, 0, 0):
         BaseTestPackExternal.skipdtype += "gG"
-    if (platform.system(), platform.machine()) == ("Darwin", "arm64"):
+    if system_machine == ("Darwin", "arm64"):
         BaseTestPackExternal.skipdtype += "G"
 elif name == "Intel MPI":
     BaseTestPackExternal.skipdtype += "lgLG"
