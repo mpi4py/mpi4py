@@ -385,7 +385,7 @@ if cupy is not None:
                 self.array.fill(arg)
             else:
                 self.array[:] = cupy.asarray(arg, typecode)
-            del readonly  # self.array.flags.readonly = readonly
+            del readonly  # ignored
 
         @property
         def address(self):
@@ -483,7 +483,7 @@ if numba is not None:
             else:
                 if self.array.size > 0:
                     self.array[:] = numba.cuda.to_device(arg)
-            del readonly  # self.array.flags.readonly = readonly
+            del readonly  # ignored
 
         # def __getitem__(self, i):
         #     if isinstance(i, slice):
