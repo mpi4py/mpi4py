@@ -97,7 +97,8 @@ TypeMapComplex = make_typemap([
 ])
 
 if (  # pmodels/mpich#7771
-    MPI.get_vendor() in (
+    MPI.get_vendor()
+    in (
         ("MPICH", (5, 0, 0)),
         ("MPICH", (5, 0, 1)),
     )
