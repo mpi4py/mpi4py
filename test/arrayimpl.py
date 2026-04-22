@@ -96,8 +96,11 @@ TypeMapComplex = make_typemap([
     ("G", MPI.C_LONG_DOUBLE_COMPLEX),
 ])
 
-if (
-    MPI.get_vendor() == ("MPICH", (5, 0, 0))
+if (  # pmodels/mpich#7771
+    MPI.get_vendor() in (
+        ("MPICH", (5, 0, 0)),
+        ("MPICH", (5, 0, 1)),
+    )
     and platform.system() == "Darwin"
     and platform.machine() == "arm64"
 ):
