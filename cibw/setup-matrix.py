@@ -114,17 +114,17 @@ if opts.os and not set(opts.os) & {"*", "all"}:
 if opts.py and not set(opts.py) & {"*", "all"}:
     for os in os_arch_py:
         for arch in os_arch_py[os]:
-            xplist = os_arch_py[os][arch] + cp3() + pp3()
-            select = []
-            for pat in opts.py:
-                for xp in fnmatch.filter(xplist, pat):
-                    if xp not in select:
-                        select.append(xp)
+            versions = os_arch_py[os][arch] + cp3() + pp3()
+            selected = []
+            for pattern in opts.py:
+                for xp in fnmatch.filter(versions, pattern):
+                    if xp not in selected:
+                        selected.append(xp)
             if "abi3" in opts.py:
                 for xp in abi3():
-                    if xp not in select:
-                        select.append(xp)
-            os_arch_py[os][arch][:] = select
+                    if xp not in selected:
+                        selected.append(xp)
+            os_arch_py[os][arch][:] = selected
 
 matrix_build = [
     {
