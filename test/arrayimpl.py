@@ -1,3 +1,4 @@
+import contextlib
 import itertools
 import platform
 import sys
@@ -30,14 +31,12 @@ except ImportError:
 else:
     numba_version = tuple(map(int, numba.__version__.split(".", 2)[:2]))
     if numba_version < (0, 48):
-        try:
+        with contextlib.suppress(RuntimeWarning):
             warnings.warn(
                 "To test Numba GPU arrays, use Numba v0.48.0+.",
                 RuntimeWarning,
                 stacklevel=1,
             )
-        except RuntimeWarning:
-            pass
         del numba_version
         numba = None
 

@@ -1,3 +1,4 @@
+import contextlib
 import os
 import sys
 
@@ -60,19 +61,15 @@ if not MPI.Is_initialized():
     MPI.Init()
 
 
-try:
+with contextlib.suppress(NotImplementedError, MPI.Exception):
     session = MPI.Session.Init()
     try:
         check_errhandler(session)
     finally:
         session.Finalize()
-except NotImplementedError:
-    pass
-except MPI.Exception:
-    pass
 
 
-try:
+with contextlib.suppress(NotImplementedError, MPI.Exception):
     for commbase in (MPI.COMM_SELF, MPI.COMM_WORLD):
         check_errhandler(commbase)
         comm = commbase.Dup()
@@ -80,15 +77,11 @@ try:
             check_errhandler(comm)
         finally:
             comm.Free()
-except NotImplementedError:
-    pass
-except MPI.Exception:
-    pass
 
 
 weh = MPI.COMM_SELF.Get_errhandler()
 MPI.COMM_SELF.Set_errhandler(MPI.ERRORS_RETURN)
-try:
+with contextlib.suppress(NotImplementedError, MPI.Exception):
     win = MPI.Win.Create(
         MPI.BOTTOM,
         1,
@@ -99,16 +92,11 @@ try:
         check_errhandler(win)
     finally:
         win.Free()
-except NotImplementedError:
-    pass
-except MPI.Exception:
-    pass
-finally:
-    MPI.COMM_SELF.Set_errhandler(weh)
-    weh.Free()
+MPI.COMM_SELF.Set_errhandler(weh)
+weh.Free()
 
 
-try:
+with contextlib.suppress(NotImplementedError, MPI.Exception):
     # check_errhandler(MPI.FILE_NULL)  # TODO
     file = MPI.File.Open(
         MPI.COMM_SELF,
@@ -120,10 +108,6 @@ try:
         check_errhandler(file)
     finally:
         file.Close()
-except NotImplementedError:
-    pass
-except MPI.Exception:
-    pass
 
 
 if not MPI.Is_finalized():

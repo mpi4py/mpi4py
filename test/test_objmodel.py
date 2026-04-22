@@ -1,3 +1,4 @@
+import contextlib
 import ctypes
 import operator
 import os
@@ -232,23 +233,15 @@ class TestObjModel(unittest.TestCase):
             MPI.COMM_SELF.Get_group(),
             MPI.COMM_SELF.Get_errhandler(),
         ]
-        try:
+        with contextlib.suppress(NotImplementedError, MPI.Exception):
             objects += [MPI.Info.Create()]
-        except (NotImplementedError, MPI.Exception):
-            pass
-        if os.name == "posix":
-            try:
+        with contextlib.suppress(NotImplementedError, MPI.Exception):
+            if os.name == "posix":
                 objects += [MPI.File.Open(MPI.COMM_SELF, "/dev/null")]
-            except NotImplementedError:
-                pass
-        try:
+        with contextlib.suppress(NotImplementedError, MPI.Exception):
             objects += [MPI.Win.Create(MPI.BOTTOM)]
-        except (NotImplementedError, MPI.Exception):
-            pass
-        try:
+        with contextlib.suppress(NotImplementedError, MPI.Exception):
             objects += [MPI.Session.Init()]
-        except NotImplementedError:
-            pass
         for obj in objects:
             self.assertTrue(obj)
             for _ in range(3):

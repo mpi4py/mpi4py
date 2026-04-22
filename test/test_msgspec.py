@@ -48,6 +48,9 @@ except ImportError:
 
 class BaseDLPackBuf(BaseBuf):
     #
+    def __init__(self, typecode, initializer):
+        super().__init__(typecode, initializer)
+
     def __del__(self):
         if hasattr(sys, "getrefcount"):
             buf = self._buf
@@ -247,7 +250,7 @@ class TestMessageSimple(unittest.TestCase):
             Sendrecv([buf, None, 0, MPI.DATATYPE_NULL], empty)
 
         self.assertRaises(ValueError, f)
-        try:
+        with self.catchNotImplementedError(2, 0):
             t = MPI.INT.Create_resized(0, -4).Commit()
 
             def f():
@@ -260,8 +263,7 @@ class TestMessageSimple(unittest.TestCase):
 
             self.assertRaises(ValueError, f)
             t.Free()
-        except NotImplementedError:
-            pass
+
         MPI.Free_mem(buf)
         buf = [1, 2, 3, 4]
 
@@ -1110,7 +1112,7 @@ class TestMessageVector(unittest.TestCase):
             Alltoallv([buf, None, [0], "i"], empty)
 
         self.assertRaises(ValueError, f)
-        try:
+        with self.catchNotImplementedError(2, 0):
             t = MPI.INT.Create_resized(0, -4).Commit()
 
             def f():
@@ -1118,8 +1120,7 @@ class TestMessageVector(unittest.TestCase):
 
             self.assertRaises(ValueError, f)
             t.Free()
-        except NotImplementedError:
-            pass
+
         MPI.Free_mem(buf)
         buf = [1, 2, 3, 4]
 
@@ -1604,18 +1605,12 @@ def PutGet(smsg, rmsg, target=None):
     except NotImplementedError:
         win = MPI.WIN_NULL
     try:
-        try:
+        with contextlib.suppress(NotImplementedError):
             win.Fence()
-        except NotImplementedError:
-            pass
-        try:
+        with contextlib.suppress(NotImplementedError):
             win.Put(smsg, 0, target)
-        except NotImplementedError:
-            pass
-        try:
+        with contextlib.suppress(NotImplementedError):
             win.Fence()
-        except NotImplementedError:
-            pass
         try:
             win.Get(rmsg, 0, target)
         except NotImplementedError:

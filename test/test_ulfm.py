@@ -25,7 +25,7 @@ class BaseTestULFM:
         try:
             self.assertFalse(comm.Is_revoked())
         except NotImplementedError:
-            pass
+            self.skipTest("mpi-comm_revoke")
 
     def testRevoke(self):
         comm = self.COMM
@@ -34,10 +34,8 @@ class BaseTestULFM:
             comm.Revoke()
         except NotImplementedError:
             self.skipTest("mpi-comm_revoke")
-        try:
-            self.assertTrue(comm.Is_revoked())
-        except NotImplementedError:
-            pass
+        #
+        self.assertTrue(comm.Is_revoked())
         #
         try:
             comm.Barrier()

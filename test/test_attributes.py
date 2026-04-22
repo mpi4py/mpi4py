@@ -282,14 +282,12 @@ class TestWinAttr(BaseTestAttr, unittest.TestCase):
 
 
 try:
-    k = MPI.Datatype.Create_keyval()
-    k = MPI.Datatype.Free_keyval(k)
+    MPI.Datatype.Free_keyval(MPI.Datatype.Create_keyval())
 except NotImplementedError:
     unittest.disable(BaseTestDatatypeAttr, "mpi-type-attr")
 try:
     MPI.Win.Create(MPI.BOTTOM, 1, MPI.INFO_NULL, MPI.COMM_SELF).Free()
-    k = MPI.Win.Create_keyval()
-    k = MPI.Win.Free_keyval(k)
+    MPI.Win.Free_keyval(MPI.Win.Create_keyval())
 except (NotImplementedError, MPI.Exception):
     unittest.disable(TestWinAttr, "mpi-win-attr")
 

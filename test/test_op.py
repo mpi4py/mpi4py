@@ -104,7 +104,7 @@ class TestOp(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             MPI.Op.Create(mybor)
         # local reductions
-        try:
+        with self.catchNotImplementedError():
             b1 = bytearray([2] * 3)
             b2 = bytearray([4] * 3)
             for op in ops:
@@ -114,8 +114,6 @@ class TestOp(unittest.TestCase):
                 for c1, c2 in zip(b1, b2):
                     self.assertEqual(c1, 2)
                     self.assertEqual(c2, 6)
-        except NotImplementedError:
-            pass
         # pickling support
         for op in ops:
             op.__reduce__()

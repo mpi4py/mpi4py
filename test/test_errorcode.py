@@ -1,3 +1,5 @@
+import contextlib
+
 import mpiunittest as unittest
 
 from mpi4py import MPI
@@ -73,10 +75,8 @@ class TestErrorCode(unittest.TestCase):
         except NotImplementedError:
             self.skipTest("mpi-add_error_class")
         self.assertGreaterEqual(errclass, MPI.ERR_LASTCODE)
-        try:
+        with self.catchNotImplementedError():
             MPI.Remove_error_class(errclass)
-        except NotImplementedError:
-            pass
 
     @unittest.skipMPI("openmpi(<1.10.0)")
     def testAddErrorCode(self):
@@ -84,10 +84,8 @@ class TestErrorCode(unittest.TestCase):
             errcode = MPI.Add_error_code(MPI.ERR_OTHER)
         except NotImplementedError:
             self.skipTest("mpi-add_error_code")
-        try:
+        with self.catchNotImplementedError():
             MPI.Remove_error_code(errcode)
-        except NotImplementedError:
-            pass
 
     @unittest.skipMPI("openmpi(<1.10.0)")
     def testAddErrorClassCodeString(self):
@@ -144,21 +142,15 @@ class TestErrorCode(unittest.TestCase):
             with self.assertRaises(MPI.Exception):
                 MPI.Remove_error_class(errclass)
         #
-        try:
+        with contextlib.suppress(MPI.Exception, NotImplementedError):
             MPI.Remove_error_class(0)
             self.fail("expected Exception")
-        except (MPI.Exception, NotImplementedError):
-            pass
-        try:
+        with contextlib.suppress(MPI.Exception, NotImplementedError):
             MPI.Remove_error_code(0)
             self.fail("expected Exception")
-        except (MPI.Exception, NotImplementedError):
-            pass
-        try:
+        with contextlib.suppress(MPI.Exception, NotImplementedError):
             MPI.Remove_error_string(0)
             self.fail("expected Exception")
-        except (MPI.Exception, NotImplementedError):
-            pass
 
 
 if __name__ == "__main__":
