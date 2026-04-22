@@ -1270,8 +1270,8 @@ class MPICommExecutorTest(unittest.TestCase):
                 del executor
 
     def test_get_comm_workers(self):
-        for _comm in (MPI.COMM_SELF, MPI.COMM_WORLD):
-            with self.MPICommExecutor(MPI.COMM_SELF) as executor:
+        for comm in (MPI.COMM_SELF, MPI.COMM_WORLD):
+            with self.MPICommExecutor(comm) as executor:
                 num_workers = executor.submit(check_comm_workers).result()
                 self.assertEqual(executor.num_workers, num_workers)
         self.assertRaises(RuntimeError, check_comm_workers)
