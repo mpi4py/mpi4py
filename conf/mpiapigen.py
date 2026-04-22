@@ -141,8 +141,8 @@ class Node:
     REGEX = None
 
     @classmethod
-    def match(self, line):
-        m = self.REGEX.match(line)
+    def match(cls, line):
+        m = cls.REGEX.match(line)
         return m.groups() if m else None
 
     HEADER = None
@@ -804,11 +804,10 @@ class Generator:
             is_packunpack_size = is_packunpack and subname.endswith("_size")
 
             node1 = self[name + "_c"]
-            node2 = self[name]
             try:
                 node2 = self[name + "_x"]
             except KeyError:
-                pass
+                node2 = self[name]
             callname = node2.name
 
             cargstype1 = node1.cargstype
