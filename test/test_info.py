@@ -1,3 +1,4 @@
+import operator
 import sys
 
 import mpiunittest as unittest
@@ -21,33 +22,14 @@ class TestInfoNull(unittest.TestCase):
 
     def testPyMethods(self):
         inull = MPI.INFO_NULL
-
-        def getitem():
-            return inull["k"]
-
-        def setitem():
-            inull["k"] = "v"
-
-        def delitem():
-            del inull["k"]
-
-        def update():
-            inull.update([])
-
-        def pop():
-            inull.pop("k")
-
-        def popitem():
-            inull.popitem()
-
         self.assertEqual(len(inull), 0)
         self.assertNotIn("key", inull)
-        self.assertRaises(KeyError, getitem)
-        self.assertRaises(KeyError, setitem)
-        self.assertRaises(KeyError, delitem)
-        self.assertRaises(KeyError, update)
-        self.assertRaises(KeyError, pop)
-        self.assertRaises(KeyError, popitem)
+        self.assertRaises(KeyError, operator.getitem, inull, "k")
+        self.assertRaises(KeyError, operator.setitem, inull, "k", "v")
+        self.assertRaises(KeyError, operator.delitem, inull, "k")
+        self.assertRaises(KeyError, inull.update, [])
+        self.assertRaises(KeyError, inull.pop, "k")
+        self.assertRaises(KeyError, inull.popitem)
         self.assertIsNone(inull.get("key", None))
         self.assertIsNone(inull.pop("key", None))
         self.assertEqual(inull.keys(), [])
@@ -253,16 +235,8 @@ class TestInfo(unittest.TestCase):
         self.assertEqual(INFO.keys(), [])
         self.assertEqual(INFO.values(), [])
         self.assertEqual(INFO.items(), [])
-
-        def getitem():
-            INFO["key"]
-
-        self.assertRaises(KeyError, getitem)
-
-        def delitem():
-            del INFO["key"]
-
-        self.assertRaises(KeyError, delitem)
+        self.assertRaises(KeyError, operator.getitem, INFO, "key")
+        self.assertRaises(KeyError, operator.delitem, INFO, "key")
 
         INFO.clear()
         INFO.update([("key1", "value1")])
