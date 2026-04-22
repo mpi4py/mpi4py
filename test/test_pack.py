@@ -176,7 +176,7 @@ class TestPackSelf(BaseTestPack, unittest.TestCase):
 
 class TestPackWorld(BaseTestPack, unittest.TestCase):
     #
-    COMM = MPI.COMM_SELF
+    COMM = MPI.COMM_WORLD
 
 
 @unittest.skipMPI("openmpi(<3.0.0)")
