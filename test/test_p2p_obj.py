@@ -539,7 +539,6 @@ class BaseTestP2PObj:
             dest = (rank + 1) % size
             source = (rank - 1) % size
             rmess = self.COMM.sendrecv(smess, dest, 0, None, source, 0)
-            continue
             self.assertEqual(rmess, smess)
             rmess = self.COMM.sendrecv(None, dest, 0, None, source, 0)
             self.assertIsNone(rmess)
