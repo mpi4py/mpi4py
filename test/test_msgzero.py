@@ -43,14 +43,10 @@ class BaseTestMessageZero:
         comm.Reduce_scatter_block(self.null_b, self.null_b)
         rcnt = [0] * comm.Get_size()
         comm.Reduce_scatter(self.null_b, self.null_b, rcnt)
-        try:
+        with self.catchNotImplementedError(1, 1):
             comm.Scan(self.null_b, self.null_b)
-        except NotImplementedError:
-            pass
-        try:
+        with self.catchNotImplementedError(2, 0):
             comm.Exscan(self.null_b, self.null_b)
-        except NotImplementedError:
-            pass
 
 
 class TestMessageZeroSelf(BaseTestMessageZero, unittest.TestCase):
