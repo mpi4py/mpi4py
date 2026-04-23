@@ -273,7 +273,7 @@ class TestObjModel(unittest.TestCase):
             if sys.implementation.name != "pypy":
                 self.assertIsNone(memoryview(constant).obj)
             with self.assertRaises(TypeError):
-                constant + 1
+                _ = constant + 1
             self.assertEqual(repr(constant), name)
             self.assertEqual(constant.__reduce__(), name)
             for protocol in range(pickle.HIGHEST_PROTOCOL):
