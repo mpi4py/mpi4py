@@ -397,23 +397,25 @@ class BaseTestRMA:
             self.skipTest("mpi-win-get_accumulate")
         self.WIN.Fence()
 
-    # def testFetchAndOpProcNull(self):
-    #     obuf = cbuf = rbuf = None
-    #     self.WIN.Fence()
-    #     try:
-    #         self.WIN.Fetch_and_op(obuf, rbuf, MPI.PROC_NULL, 0)
-    #     except NotImplementedError:
-    #         self.skipTest('mpi-win-fetch_and_op')
-    #     self.WIN.Fence()
+    @unittest.skip("mpi-fao-proc_null")
+    def testFetchAndOpProcNull(self):
+        obuf = rbuf = None
+        self.WIN.Fence()
+        try:
+            self.WIN.Fetch_and_op(obuf, rbuf, MPI.PROC_NULL, 0)
+        except NotImplementedError:
+            self.skipTest("mpi-win-fetch_and_op")
+        self.WIN.Fence()
 
-    # def testCompareAndSwapProcNull(self):
-    #     obuf = cbuf = rbuf = None
-    #     self.WIN.Fence()
-    #     try:
-    #         self.WIN.Compare_and_swap(obuf, cbuf, rbuf, MPI.PROC_NULL, 0)
-    #     except NotImplementedError:
-    #         self.skipTest('mpi-win-compare_and_swap')
-    #     self.WIN.Fence()
+    @unittest.skip("mpi-cas-proc_null")
+    def testCompareAndSwapProcNull(self):
+        obuf = cbuf = rbuf = None
+        self.WIN.Fence()
+        try:
+            self.WIN.Compare_and_swap(obuf, cbuf, rbuf, MPI.PROC_NULL, 0)
+        except NotImplementedError:
+            self.skipTest("mpi-win-compare_and_swap")
+        self.WIN.Fence()
 
     def testFence(self):
         win = self.WIN

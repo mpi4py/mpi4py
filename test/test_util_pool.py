@@ -339,9 +339,6 @@ class BaseTestPool:
 
         with pool:
             pass
-        # with self.assertRaises(ValueError):
-        #     with pool:
-        #         pass
 
         pool.join()
 

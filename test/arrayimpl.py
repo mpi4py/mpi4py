@@ -484,14 +484,6 @@ if numba is not None:
                     self.array[:] = numba.cuda.to_device(arg)
             del readonly  # ignored
 
-        # def __getitem__(self, i):
-        #     if isinstance(i, slice):
-        #         return self.array[i]
-        #     elif i < self.array.size:
-        #         return self.array[i]
-        #     else:
-        #         raise StopIteration
-
         @property
         def address(self):
             return self.array.__cuda_array_interface__["data"][0]
