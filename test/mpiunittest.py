@@ -134,7 +134,5 @@ def disable(what, reason):
 def main(*args, **kwargs):
     from main import main
 
-    try:
+    with contextlib.suppress(SystemExit):
         main(*args, **kwargs)
-    except SystemExit:
-        pass

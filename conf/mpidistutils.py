@@ -353,10 +353,8 @@ class ConfigureMPI:
                 with open("_configtest.h", "a") as f:
                     f.write(confcode)
             results.append((name, ok))
-        try:
+        with contextlib.suppress(OSError):
             os.remove("_configtest.h")
-        except OSError:
-            pass
         return results
 
     def gen_test(self, code):
@@ -477,10 +475,8 @@ def import_command(cmd):
     from importlib import import_module
 
     if setuptools:
-        try:
+        with contextlib.suppress(ImportError):
             return import_module("setuptools.command." + cmd)
-        except ImportError:
-            pass
     return import_module("distutils.command." + cmd)
 
 
@@ -1639,15 +1635,13 @@ class clean(cmd_clean.clean):
 
         # just for the heck of it, try to remove the base build directory:
         # we might have emptied it right now, but if not we don't care
-        try:
+        with contextlib.suppress(OSError):
             os.rmdir(self.build_base)
             log.info("removing '%s'", self.build_base)
-        except OSError:
-            pass
 
         if self.all:
             # remove the <package>.egg_info directory
-            try:
+            with contextlib.suppress(DistutilsError):
                 egg_info = self.get_finalized_command("egg_info").egg_info
                 if os.path.exists(egg_info):
                     remove_tree(egg_info, verbose=self.verbose)
@@ -1655,8 +1649,6 @@ class clean(cmd_clean.clean):
                     log.debug(
                         "'%s' does not exist -- can't clean it", egg_info
                     )
-            except DistutilsError:
-                pass
 
 
 # -----------------------------------------------------------------------------

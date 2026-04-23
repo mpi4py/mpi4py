@@ -691,7 +691,7 @@ class AsCompletedTestMixin:
     def test_zero_timeout(self):
         future1 = self.executor.submit(time.sleep, 0.5)
         completed_futures = set()
-        try:
+        with contextlib.suppress(futures.TimeoutError):
             completed_futures.update(
                 futures.as_completed(
                     [
@@ -703,9 +703,6 @@ class AsCompletedTestMixin:
                     timeout=0,
                 )
             )
-        except futures.TimeoutError:
-            pass
-
         self.assertEqual(
             {
                 CANCELLED_AND_NOTIFIED_FUTURE,
@@ -719,7 +716,7 @@ class AsCompletedTestMixin:
         future1 = self.executor.submit(time.sleep, 0.0)
         self.executor.submit(time.sleep, 0.5)
         completed_futures = set()
-        try:
+        with contextlib.suppress(futures.TimeoutError):
             completed_futures.update(
                 futures.as_completed(
                     [
@@ -731,9 +728,6 @@ class AsCompletedTestMixin:
                     timeout=0.2,
                 )
             )
-        except futures.TimeoutError:
-            pass
-
         self.assertEqual(
             {
                 CANCELLED_AND_NOTIFIED_FUTURE,

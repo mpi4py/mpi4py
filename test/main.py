@@ -1,6 +1,7 @@
 # Author:  Lisandro Dalcin
 # Contact: dalcinl@gmail.com
 import argparse
+import contextlib
 import fnmatch
 import importlib
 import os
@@ -390,10 +391,8 @@ class TestProgram(unittest.TestProgram):
         print_banner(self)
         if self.xmloutdir:
             self._setUpXMLRunner()
-        try:
+        with contextlib.suppress(SystemExit):
             super().runTests()
-        except SystemExit:
-            pass
         success = self.result.wasSuccessful()
         if not success and self.failfast:
             run = importlib.import_module("mpi4py.run")
