@@ -113,9 +113,9 @@ class BaseTestTopo:
                     sub.Free()
             topo.Free()
         with self.assertRaises(ValueError):
-            topo = comm.Create_cart([comm.Get_size()], [])
+            comm.Create_cart([comm.Get_size()], []).free()
         with self.assertRaises(ValueError):
-            topo = comm.Create_cart([comm.Get_size()], [0, 0])
+            comm.Create_cart([comm.Get_size()], [0, 0]).free()
 
     @unittest.skipMPI("MPI(<2.0)")
     def testCartcommZeroDim(self):

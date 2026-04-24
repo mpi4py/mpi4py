@@ -131,7 +131,7 @@ class BaseTestP2PMatched:
                 rmsg = m.recv()
                 self.assertFalse(m)
                 #
-                comm.send(smsg, 1, 1)
+                comm.send(rmsg, 1, 1)
                 m = None
                 while not m:
                     m = MPI.Message.iprobe(comm, 1, 1)

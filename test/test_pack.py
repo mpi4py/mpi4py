@@ -73,21 +73,45 @@ class BaseTestPack:
                             )
                             tmpbuf = array(0, "b", size1 + size2 + 1).as_raw()
                             # pack input arrays
-                            position = 0
-                            position = datatype1.Pack(
+                            position = p0 = 0
+                            position = p1 = datatype1.Pack(
                                 iarray1, tmpbuf, position, self.COMM
                             )
-                            position = datatype2.Pack(
+                            if count:
+                                self.assertGreater(position, 0)
+                                self.assertGreater(p1, p0)
+                            else:
+                                self.assertEqual(position, 0)
+                                self.assertEqual(p1, p0)
+                            position = p2 = datatype2.Pack(
                                 iarray2, tmpbuf, position, self.COMM
                             )
+                            if count:
+                                self.assertGreater(position, 0)
+                                self.assertGreater(p2, p1)
+                            else:
+                                self.assertEqual(position, 0)
+                                self.assertEqual(p1, p0)
                             # unpack output arrays
-                            position = 0
-                            position = datatype1.Unpack(
+                            position = p0 = 0
+                            position = p1 = datatype1.Unpack(
                                 tmpbuf, position, oarray1, self.COMM
                             )
-                            position = datatype2.Unpack(
+                            if count:
+                                self.assertGreater(position, 0)
+                                self.assertGreater(p1, p0)
+                            else:
+                                self.assertEqual(position, 0)
+                                self.assertEqual(p1, p0)
+                            position = p2 = datatype2.Unpack(
                                 tmpbuf, position, oarray2, self.COMM
                             )
+                            if count:
+                                self.assertGreater(position, 0)
+                                self.assertGreater(p2, p1)
+                            else:
+                                self.assertEqual(position, 0)
+                                self.assertEqual(p1, p0)
                             # test
                             self.assertTrue(allclose(iarray1, oarray1))
                             self.assertTrue(allclose(iarray2, oarray2))
@@ -149,21 +173,29 @@ class BaseTestPackExternal:
                             )
                             tmpbuf = array(0, "b", size1 + size2 + 1).as_raw()
                             # pack input arrays
-                            position = 0
-                            position = datatype1.Pack_external(
+                            position = p0 = 0
+                            position = p1 = datatype1.Pack_external(
                                 EXT32, iarray1, tmpbuf, position
                             )
-                            position = datatype2.Pack_external(
+                            self.assertGreater(position, 0)
+                            self.assertGreater(p1, p0)
+                            position = p2 = datatype2.Pack_external(
                                 EXT32, iarray2, tmpbuf, position
                             )
+                            self.assertGreater(position, 0)
+                            self.assertGreater(p2, p1)
                             # unpack output arrays
-                            position = 0
-                            position = datatype1.Unpack_external(
+                            position = p0 = 0
+                            position = p1 = datatype1.Unpack_external(
                                 EXT32, tmpbuf, position, oarray1
                             )
-                            position = datatype2.Unpack_external(
+                            self.assertGreater(position, 0)
+                            self.assertGreater(p1, p0)
+                            position = p2 = datatype2.Unpack_external(
                                 EXT32, tmpbuf, position, oarray2
                             )
+                            self.assertGreater(position, 0)
+                            self.assertGreater(p2, p1)
                             # test result
                             self.assertTrue(allclose(iarray1, oarray1))
                             self.assertTrue(allclose(iarray2, oarray2))

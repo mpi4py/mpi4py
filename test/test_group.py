@@ -99,7 +99,6 @@ class BaseTestGroup:
         group1 = self.GROUP
         group2 = self.GROUP
         ranks1 = list(range(group1.Get_size())) * 3
-        ranks2 = MPI.Group.Translate_ranks(group1, ranks1)
         ranks2 = MPI.Group.Translate_ranks(group1, ranks1, group2)
         self.assertEqual(list(ranks1), list(ranks2))
         group = self.GROUP
@@ -109,6 +108,16 @@ class BaseTestGroup:
         ranks2 = group.Translate_ranks()
         self.assertEqual(len(ranks2), group.Get_size())
         self.assertNotIn(MPI.UNDEFINED, set(ranks2))
+
+    def testTranslRanksWorld(self):
+        group1 = self.GROUP
+        ranks1 = list(range(group1.Get_size())) * 3
+        ranks2 = MPI.Group.Translate_ranks(group1, ranks1)
+        self.assertEqual(len(ranks1), len(ranks2))
+        if self.GROUP != MPI.GROUP_EMPTY:
+            wsize = MPI.COMM_WORLD.Get_size()
+            self.assertGreaterEqual(min(ranks2), 0)
+            self.assertLess(max(ranks2), wsize)
 
     @unittest.skipMPI("MPICH1")
     def testTranslRanksProcNull(self):
