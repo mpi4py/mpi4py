@@ -458,8 +458,8 @@ class Generator:
             r"^\s*#define\s*PyMPI_HAVE_(MPI_[A-Za-z0-9_]+)\s+1\s*$"
         )
         with filename.open(encoding="utf-8") as f:
-            for line in f:
-                m = header.match(line)
+            for fline in f:
+                m = header.match(fline)
                 if m is None:
                     continue
                 numversion = int(m.groups()[0])
@@ -467,8 +467,8 @@ class Generator:
                 self.stdapi[version] = symlist = []
                 mpiheader = filename.parent / f"mpi-{numversion}.h"
                 with mpiheader.open(encoding="utf-8") as h:
-                    for line in h:
-                        m = define.match(line)
+                    for hline in h:
+                        m = define.match(hline)
                         if m is None:
                             continue
                         symbol = m.groups()[0]
