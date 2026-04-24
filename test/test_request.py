@@ -50,6 +50,7 @@ class TestRequest(unittest.TestCase):
         flag = self.REQUEST.get_status()
         self.assertTrue(flag)
         flag = self.REQUEST.get_status(self.STATUS)
+        self.assertTrue(flag)
         self.assertEqual(self.STATUS.source, MPI.ANY_SOURCE)
         self.assertEqual(self.STATUS.tag, MPI.ANY_TAG)
         self.assertEqual(self.STATUS.error, MPI.SUCCESS)

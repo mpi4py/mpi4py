@@ -275,7 +275,7 @@ class BaseTestP2PBuf:
         self.assertIs(type(dupe), MPI.Request)
         self.assertEqual(dupe, preq)
         with self.assertRaises(TypeError):
-            dupe = MPI.Grequest(preq)
+            MPI.Grequest(preq)
         preq.Start()
         preq.Wait()
         preq.Free()

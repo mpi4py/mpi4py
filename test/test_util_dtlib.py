@@ -151,6 +151,7 @@ class TestUtilDTLib(unittest.TestCase):
                 mt1 = arg.Dup()
                 dt1 = tonumpy(mt1)
                 mt1.Free()
+                del dt1
             return
         if not try_dtype(arg):
             return

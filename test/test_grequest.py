@@ -51,7 +51,7 @@ class TestGrequest(unittest.TestCase):
         self.assertIs(type(dupe), MPI.Request)
         self.assertEqual(dupe, greq)
         with self.assertRaises(TypeError):
-            dupe = MPI.Prequest(greq)
+            MPI.Prequest(greq)
         greq.Cancel()
         greq.Complete()
         greq.Wait()

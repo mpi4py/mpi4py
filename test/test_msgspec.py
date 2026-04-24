@@ -806,7 +806,7 @@ class TestMessageDLPackCPUBuf(unittest.TestCase):
         rbuf = DLPackCPUBuf("H", [0] * 4)
         dtype = sbuf.managed.dl_tensor.dtype
         dtype.code = dlpack.DLDataTypeCode.kDLOpaqueHandle
-        dtype = None
+        del dtype
         Sendrecv(sbuf, rbuf)
         for i in range(4):
             self.assertEqual(rbuf[i], i)

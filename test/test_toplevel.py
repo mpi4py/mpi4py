@@ -24,12 +24,15 @@ class TestRC(unittest.TestCase):
     def testCallKwArgs(self):
         rc = self.newrc()
         kwargs = rc.__dict__.copy()
+        rc.__dict__.clear()
         rc(**kwargs)
+        self.assertEqual(rc.__dict__, kwargs)
 
     def testInitKwArgs(self):
         rc = self.newrc()
         kwargs = rc.__dict__.copy()
         rc = type(mpi4py.rc)(**kwargs)
+        self.assertEqual(rc.__dict__, kwargs)
 
     def testBadAttribute(self):
         with self.assertRaises(TypeError):

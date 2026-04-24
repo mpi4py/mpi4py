@@ -67,8 +67,8 @@ class TestMessage(unittest.TestCase):
         self.assertNotEqual(message, MPI.MESSAGE_NULL)
         self.assertEqual(message, MPI.MESSAGE_NO_PROC)
         noproc = comm.improbe(MPI.PROC_NULL)
-        self.assertNotEqual(message, MPI.MESSAGE_NULL)
-        self.assertEqual(message, MPI.MESSAGE_NO_PROC)
+        self.assertNotEqual(noproc, MPI.MESSAGE_NULL)
+        self.assertEqual(noproc, MPI.MESSAGE_NO_PROC)
 
 
 @unittest.skipIf(MPI.MESSAGE_NULL == MPI.MESSAGE_NO_PROC, "mpi-message")

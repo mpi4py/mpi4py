@@ -171,13 +171,11 @@ def visit_class(cls, done=None):
             done.add("__hash__")
 
     try:
-
-        class sub(cls):
-            pass
-
-        final = False
+        type("sub", (cls,), {})
     except TypeError:
         final = True
+    else:
+        final = False
     if final:
         lines.add = "@final"
     base = cls.__base__

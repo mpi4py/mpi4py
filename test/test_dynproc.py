@@ -196,6 +196,7 @@ class TestDPM(unittest.TestCase):
             client.connect(address)
             connected = True
         connected = MPI.COMM_WORLD.bcast(connected, root=1)
+        self.assertTrue(connected)
         # test Comm.Join()
         MPI.COMM_WORLD.Barrier()
         if client:
