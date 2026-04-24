@@ -9,14 +9,13 @@ repos:
   - id: mixed-line-ending
   - id: trailing-whitespace
   - id: fix-byte-order-marker
-  - id: requirements-txt-fixer
   - id: check-toml
   - id: check-case-conflict
   - id: check-merge-conflict
   - id: check-added-large-files
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.15.8
+  rev: v0.15.11
   hooks:
     - id: ruff-check
     - id: ruff-format
