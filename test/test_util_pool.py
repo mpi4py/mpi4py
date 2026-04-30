@@ -410,7 +410,7 @@ class TestThreadPool(BaseTestPool, unittest.TestCase):
 # ---
 
 
-class UserExecutorMixing:
+class UserExecutorMixin:
     #
     def map(
         self,
@@ -450,7 +450,7 @@ class UserExecutorMixing:
         return fn(*args)
 
 
-class UserExecutor(UserExecutorMixing, cf.ThreadPoolExecutor):
+class UserExecutor(UserExecutorMixin, cf.ThreadPoolExecutor):
     #
     pass
 
