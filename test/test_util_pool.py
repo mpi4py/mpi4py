@@ -410,7 +410,7 @@ class TestThreadPool(BaseTestPool, unittest.TestCase):
 # ---
 
 
-class ExtraExecutorMixing:
+class UserExecutorMixing:
     #
     def map(
         self,
@@ -450,26 +450,23 @@ class ExtraExecutorMixing:
         return fn(*args)
 
 
-class ExtraExecutor(ExtraExecutorMixing, cf.ThreadPoolExecutor):
+class UserExecutor(UserExecutorMixing, cf.ThreadPoolExecutor):
     #
     pass
 
 
-class ExtraPool(pool.Pool):
+class UserPool(pool.Pool):
     #
-    Executor = ExtraExecutor
+    Executor = UserExecutor
 
 
-class TestExtraPool(BaseTestPool, unittest.TestCase):
+class TestUserPool(BaseTestPool, unittest.TestCase):
     #
-    PoolType = ExtraPool
+    PoolType = UserPool
 
     @classmethod
     def Pool(cls, *args, **kwargs):
         return cls.PoolType(*args, **kwargs)
-
-
-del TestExtraPool
 
 
 # ---
