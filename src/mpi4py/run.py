@@ -320,10 +320,10 @@ def main():
                     if not key or not val:
                         usage("Cannot parse rc option: " + entry)
                     try:
-                        val = literal_eval(val)
+                        value = literal_eval(val)
                     except ValueError:
-                        pass
-                    options.rc_args[key] = val
+                        value = val
+                    options.rc_args[key] = value
             else:
                 usage("Unknown option: " + args[0])
             del args[0]

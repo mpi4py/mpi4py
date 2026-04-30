@@ -1206,13 +1206,9 @@ class MPICommExecutorTest(unittest.TestCase):
     def test_with_bad(self):
         mpicommexecutor = self.MPICommExecutor(MPI.COMM_SELF)
         with mpicommexecutor:
-            try:
+            with self.assertRaises(RuntimeError):
                 with mpicommexecutor:
                     pass
-            except RuntimeError:
-                pass
-            else:
-                self.fail("expected RuntimeError")
 
     def test_initializer(self):
         mpicommexecutor = self.MPICommExecutor(

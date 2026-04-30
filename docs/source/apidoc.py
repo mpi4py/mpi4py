@@ -1,3 +1,4 @@
+import contextlib
 import inspect
 import pathlib
 import sys
@@ -567,10 +568,8 @@ def restore_module(module):
 
 
 def annotate(dest, source):
-    try:
+    with contextlib.suppress(AttributeError):
         dest.__annotations__ = source.__annotations__
-    except AttributeError:
-        pass
     if isinstance(dest, type):
         for name in dest.__dict__.keys():
             if hasattr(source, name):

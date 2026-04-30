@@ -1,3 +1,4 @@
+import contextlib
 import os
 import pathlib
 import unittest
@@ -88,10 +89,8 @@ class TestProfile(unittest.TestCase):
         )
 
         def mpi4py_profile(*args, **kwargs):
-            try:
+            with contextlib.suppress(ValueError):
                 mpi4py.profile(*args, **kwargs)
-            except ValueError:
-                pass
 
         if os.name != "posix":
             with warnings.catch_warnings():

@@ -197,10 +197,7 @@ class TestErrhandlerFile(BaseTestErrhandler, unittest.TestCase):
                 MPI.COMM_SELF, filename, amode, MPI.INFO_NULL
             )
         except NotImplementedError:
-            try:
-                pathlib.Path(filename).unlink()
-            except OSError:
-                pass
+            pathlib.Path(filename).unlink(missing_ok=True)
             self.skipTest("mpi-file")
 
     def tearDown(self):
