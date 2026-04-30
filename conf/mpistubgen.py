@@ -234,7 +234,7 @@ def visit_class(cls, done=None):
                 elif is_staticmethod(obj):
                     lines.add = "@staticmethod"
                 lines.add = visit_method(attr)
-            elif True:
+            else:
                 lines.add = f"{name} = {attr.__name__}"
             continue
 
