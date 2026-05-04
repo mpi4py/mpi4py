@@ -49,9 +49,6 @@ def read_build_requires(name):
     pyproject = tomllib.loads(contents)
     dependency_groups = pyproject["dependency-groups"]
     requires = dependency_groups[f"build-{name}"]
-    if name == "mesonpy" and os.name == "nt":  # TODO: remove
-        url = "git+https://github.com/dalcinl/meson@impi-windows"
-        requires.append(f"meson @ {url}")
     return requires
 
 
