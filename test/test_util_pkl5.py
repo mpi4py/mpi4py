@@ -6,12 +6,12 @@ from mpi4py import MPI
 from mpi4py.util import pkl5
 
 try:
-    import mpiunittest as unittest
     import mpitestutil as testutil
+    import mpiunittest as unittest
 except ImportError:
     sys.path.append(os.fspath(pathlib.Path(__file__).resolve().parent))
-    import mpiunittest as unittest
     import mpitestutil as testutil
+    import mpiunittest as unittest
 
 _basic = [
     None,
