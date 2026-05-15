@@ -26,6 +26,7 @@ case "$(uname)" in
 esac
 
 echo "Install Micromamba"
+VERSION=2.5.0-2 \
 $SHELL <(curl -sL https://micro.mamba.pm/install.sh) <&-
 export PATH=$PATH:~/.local/bin
 export MAMBA_ROOT_PREFIX=~/micromamba
