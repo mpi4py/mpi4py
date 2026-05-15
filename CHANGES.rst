@@ -9,6 +9,10 @@ Release 4.2.0 [YYYY-MM-DD]
     global reduction operations is equivalent to using `MPI.IN_PLACE`
     for the ``sendbuf`` argument.
 
+  + Published wheels have support for the MPI 5.0 standard ABI.
+
+  + Fix/enhance build with ``setuptools`` and ``meson-python``.
+
 * Backward-incompatible changes:
 
   + Python 3.10+ is required.
@@ -16,6 +20,8 @@ Release 4.2.0 [YYYY-MM-DD]
   + CPython wheels use the Stable ABI.
 
   + PyPy wheels are no longer published.
+
+  + CPython 3.13 free-threading wheels are no longer published.
 
 
 Release 4.1.1 [2025-10-10]
