@@ -285,6 +285,7 @@ jobs:
     - if: ${{ !startsWith(matrix.py, 'pypy') }}
       uses: mamba-org/setup-micromamba@v3
       with:
+        micromamba-version: 2.5.0-2  # mamba-org/mamba#4276
         init-shell: bash
         post-cleanup: none
         environment-name: test
