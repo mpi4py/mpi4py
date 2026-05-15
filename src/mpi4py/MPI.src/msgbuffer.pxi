@@ -675,9 +675,23 @@ cdef class _p_msg_cco:
             &self.rbuf, &self.rcount, &self.rtype)
         return 0
 
+    # sendbuf + recvbuf
+    cdef int for_cro_args(
+        self, object smsg, object rmsg, int root,
+    ) except -1:
+        self.for_cro_recv(rmsg, root)
+        if is_IN_PLACE(smsg):
+            self.sbuf = MPI_IN_PLACE
+        else:
+            self.for_cro_send(smsg, root)
+        if self.sbuf == MPI_IN_PLACE:
+            self.scount = self.rcount
+            self.stype  = self.rtype
+        if self.sbuf == self.rbuf:
+            self.sbuf = MPI_IN_PLACE
+
     # check counts and datatypes
     cdef int chk_cro_args(self) except -1:
-        if self.sbuf == MPI_IN_PLACE: return 0
         if self.stype != self.rtype:
             raise ValueError(
                 f"mismatch in send and receive MPI datatypes")
@@ -694,15 +708,12 @@ cdef class _p_msg_cco:
         if comm == MPI_COMM_NULL: return 0
         cdef int inter=0, rank=0, null=MPI_PROC_NULL
         CHKERR( MPI_Comm_test_inter(comm, &inter) )
+        # get send and recv buffers
         if not inter:  # intra-communication
             CHKERR( MPI_Comm_rank(comm, &rank) )
             if root == rank:
-                self.for_cro_recv(rmsg, root)
-                if is_IN_PLACE(smsg):
-                    self.sbuf = MPI_IN_PLACE
-                else:
-                    self.for_cro_send(smsg, root)
-                    self.chk_cro_args()
+                self.for_cro_args(smsg, rmsg, root)
+                self.chk_cro_args()
             else:
                 self.for_cro_recv(rmsg, null)
                 self.for_cro_send(smsg, root)
@@ -727,10 +738,11 @@ cdef class _p_msg_cco:
         cdef int inter=0
         CHKERR( MPI_Comm_test_inter(comm, &inter) )
         # get send and recv buffers
-        self.for_cro_recv(rmsg, 0)
-        if not inter and is_IN_PLACE(smsg):
-            self.sbuf = MPI_IN_PLACE
-        else:
+        if not inter:  # intra-communication
+            self.for_cro_args(smsg, rmsg, 0)
+            self.chk_cro_args()
+        else:  # inter-communication
+            self.for_cro_recv(rmsg, 0)
             self.for_cro_send(smsg, 0)
             self.chk_cro_args()
         return 0
@@ -744,10 +756,17 @@ cdef class _p_msg_cco:
         CHKERR( MPI_Comm_test_inter(comm, &inter) )
         CHKERR( MPI_Comm_size(comm, &size) )
         # get send and recv buffers
-        if not inter and is_IN_PLACE(smsg):
-            self.for_cco_recv(0, rmsg, 0, size)
-            self.sbuf = MPI_IN_PLACE
-        else:
+        if not inter:  # intra-communication
+            if is_IN_PLACE(smsg):
+                self.for_cco_recv(0, rmsg, 0, size)
+                self.sbuf = MPI_IN_PLACE
+            else:
+                self.for_cco_recv(0, rmsg, 0, 0)
+                self.for_cco_send(0, smsg, 0, size)
+                self.chk_cro_args()
+                if self.sbuf == self.rbuf:
+                    self.sbuf = MPI_IN_PLACE
+        else:  # inter-communication
             self.for_cco_recv(0, rmsg, 0, 0)
             self.for_cco_send(0, smsg, 0, size)
             self.chk_cro_args()
@@ -763,10 +782,17 @@ cdef class _p_msg_cco:
         CHKERR( MPI_Comm_size(comm, &size) )
         CHKERR( MPI_Comm_rank(comm, &rank) )
         # get send and recv buffers
-        self.for_cro_recv(rmsg, 0)
-        if not inter and is_IN_PLACE(smsg):
-            self.sbuf = MPI_IN_PLACE
-        else:
+        if not inter:  # intra-communication
+            if is_IN_PLACE(smsg):
+                self.for_cro_recv(rmsg, 0)
+                self.sbuf = MPI_IN_PLACE
+            else:
+                self.for_cro_recv(rmsg, 0)
+                self.for_cro_send(smsg, 0)
+                if self.sbuf == self.rbuf:
+                    self.sbuf = MPI_IN_PLACE
+        else:  # inter-communication
+            self.for_cro_recv(rmsg, 0)
             self.for_cro_send(smsg, 0)
         # get receive counts
         if rcnt is None and not inter and self.sbuf != MPI_IN_PLACE:
@@ -805,26 +831,18 @@ cdef class _p_msg_cco:
         MPI_Comm comm,
     ) except -1:
         if comm == MPI_COMM_NULL: return 0
-        # get send and recv buffers
-        self.for_cro_recv(rmsg, 0)
-        if is_IN_PLACE(smsg):
-            self.sbuf = MPI_IN_PLACE
-        else:
-            self.for_cro_send(smsg, 0)
-            self.chk_cro_args()
+        self.for_cro_args(smsg, rmsg, 0)
+        self.chk_cro_args()
+        return 0
 
     cdef int for_exscan(
         self, object smsg, object rmsg,
         MPI_Comm comm,
     ) except -1:
         if comm == MPI_COMM_NULL: return 0
-        # get send and recv buffers
-        self.for_cro_recv(rmsg, 0)
-        if is_IN_PLACE(smsg):
-            self.sbuf = MPI_IN_PLACE
-        else:
-            self.for_cro_send(smsg, 0)
-            self.chk_cro_args()
+        self.for_cro_args(smsg, rmsg, 0)
+        self.chk_cro_args()
+        return 0
 
 
 cdef inline _p_msg_cco message_cco():
