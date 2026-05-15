@@ -32,15 +32,15 @@ def pp3(y_min=11, y_max=11):
 
 OS_ARCH_PY = {
     "Linux": {
-        "aarch64": cp3() + cp3t() + abi3() + pp3(),
-        "x86_64": cp3() + cp3t() + abi3() + pp3(),
+        "aarch64": cp3() + cp3t() + abi3(),
+        "x86_64": cp3() + cp3t() + abi3(),
     },
     "macOS": {
-        "arm64": cp3() + cp3t() + abi3() + pp3(),
-        "x86_64": cp3() + cp3t() + abi3() + pp3(),
+        "arm64": cp3() + cp3t() + abi3(),
+        "x86_64": cp3() + cp3t() + abi3(),
     },
     "Windows": {
-        "AMD64": cp3() + cp3t() + abi3() + pp3(),
+        "AMD64": cp3() + cp3t() + abi3(),
     },
 }
 
