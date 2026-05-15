@@ -7,9 +7,11 @@ from mpi4py.util import pkl5
 
 try:
     import mpiunittest as unittest
+    import mpitestutil as testutil
 except ImportError:
     sys.path.append(os.fspath(pathlib.Path(__file__).resolve().parent))
     import mpiunittest as unittest
+    import mpitestutil as testutil
 
 _basic = [
     None,
@@ -981,6 +983,10 @@ class TestMPISelf(BaseTest, unittest.TestCase):
 class TestMPIWorld(BaseTest, unittest.TestCase):
     #
     COMM = MPI.COMM_WORLD
+
+    @unittest.skipMPI("mpich(==4.0.0)", testutil.azure())
+    def testGetStatusAll(self):
+        super().testGetStatusAll()
 
 
 class TestPKL5Self(BaseTestPKL5, TestMPISelf):
