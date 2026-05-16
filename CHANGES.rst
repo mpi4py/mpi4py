@@ -24,6 +24,16 @@ Release 4.2.0 [YYYY-MM-DD]
   + CPython 3.13 free-threading wheels are no longer published.
 
 
+Release 4.1.2 [2026-05-16]
+==========================
+
+* Fix build issues from breaking changes in setuptools 81.
+
+* Support Windows builds with Meson and Intel MPI.
+
+* PyPy wheels are no longer published.
+
+
 Release 4.1.1 [2025-10-10]
 ==========================
 
