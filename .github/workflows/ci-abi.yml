@@ -276,9 +276,6 @@ jobs:
         cache-dependency-path: |
           conf/requirements-build-cython.txt
 
-    - name: Upgrade pip
-      run:  python -m pip install -U pip
-
     - name: Install build
       run:  python -m pip install -U build
 
@@ -391,9 +388,6 @@ jobs:
       with:
         python-version: ${{ matrix.py }}
         allow-prereleases: true
-
-    - name: Upgrade pip
-      run:  python -m pip install -U pip
 
     - name: Download mpi4py wheel
       uses: actions/download-artifact@v8

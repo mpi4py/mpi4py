@@ -69,9 +69,6 @@ jobs:
           conf/requirements-build-cython.txt
           conf/requirements-test.txt
 
-    - name: Upgrade pip
-      run:  python -m pip install -U pip
-
     - name: Build package
       run:  python -m pip wheel -v --wheel-dir=dist .
     - name: Upload package artifacts
