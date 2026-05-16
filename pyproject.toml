@@ -97,8 +97,13 @@ test = [
   "pyyaml",
 ]
 type = [
-  "mypy >= 1.0.0",
+  {include-group = "build"},
+  {include-group = "build-mesonpy"},
+  {include-group = "build-skbuild"},
+  "spin",
+  "mypy",
   "numpy",
+  "ty",
 ]
 
 [tool.scikit-build]

@@ -113,11 +113,12 @@ def lint(ctx):
 @click.command()
 @click.pass_context
 def type(ctx):  # noqa: A001
-    """🦆 Type-check sources with mypy."""
+    """🦆 Type-check sources with ty and mypy."""
     _setup_environment(ctx)
     _run_check_commands(
-        ["stubtest", "--ignore-disjoint-bases", "mpi4py"],
+        ["ty", "check", "-q"],
         ["mypy", "-p", "mpi4py"],
+        ["stubtest", "--ignore-disjoint-bases", "mpi4py"],
     )
 
 

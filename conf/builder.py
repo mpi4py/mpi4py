@@ -223,7 +223,7 @@ def patch_mesonpy():
             data["project"]["dynamic"].remove("readme")
             return super().from_pyproject(data, *args, **kwargs)
 
-    mesonpy.Metadata = Metadata
+    mesonpy.Metadata = Metadata  # ty: ignore[invalid-assignment]
 
 
 def setup_env_mpicc():
@@ -234,7 +234,7 @@ def setup_env_mpicc():
 
 if get_build_backend_name() == "setuptools":
     try:
-        import setuptools.build_meta as st_bm
+        st_bm = importlib.import_module("setuptools.build_meta")
     except ImportError:
         st_bm = None
     if not hasattr(st_bm, "get_requires_for_build_editable"):
@@ -247,7 +247,7 @@ if get_build_backend_name() == "setuptools":
 
 if get_build_backend_name() == "mesonpy":
     try:
-        import mesonpy
+        mesonpy = importlib.import_module("mesonpy")
     except ImportError:
         mesonpy = None
     patch_mesonpy()

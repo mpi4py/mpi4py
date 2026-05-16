@@ -67,9 +67,7 @@ def set_abort_status(status):
     if isinstance(status, SystemExit):
         status = status.code
     elif isinstance(status, KeyboardInterrupt):
-        from _signal import SIGINT
-
-        status = SIGINT + 128
+        status = __import__("signal").SIGINT + 128
     if not isinstance(status, int):
         status = 0 if status is None else 1
     pkg = __spec__.parent
@@ -103,18 +101,15 @@ def main():
         sys.exit(0)
 
     def prefix():
-        import pathlib
-
-        prefix = pathlib.Path(__spec__.origin).parent
+        origin = __spec__.origin or __file__
+        prefix = __import__("pathlib").Path(origin).parent
         print(prefix, file=sys.stdout)
         sys.exit(0)
 
     def module():
-        import pathlib
-
         MPI = import_MPI()
-        prefix = pathlib.Path(MPI.__spec__.origin)
-        print(prefix, file=sys.stdout)
+        origin = MPI.__spec__.origin or MPI.__file__
+        print(origin, file=sys.stdout)
         sys.exit(0)
 
     def mpi_vendor():

@@ -11,7 +11,7 @@ from .. import MPI
 try:
     from numpy import dtype as _np_dtype
 except ImportError:  # pragma: no cover
-    _np_dtype = None
+    _np_dtype = None  # ty: ignore[invalid-assignment]
 
 
 def _get_datatype(dtype):
@@ -70,14 +70,12 @@ def from_numpy_dtype(dtype):
         raise ValueError("NumPy datatype with non-native byteorder")
 
     # struct data type
-    fields = dtype.fields
-    if fields:
+    if dtype.fields:
         blocklengths = []
         displacements = []
         datatypes = []
         try:
-            for name in dtype.names or ():
-                ftype, fdisp, *_ = fields[name]
+            for ftype, fdisp, *_ in dtype.fields.values():
                 blocklengths.append(1)
                 displacements.append(fdisp)
                 datatypes.append(from_numpy_dtype(ftype))
@@ -93,9 +91,8 @@ def from_numpy_dtype(dtype):
             datatype.Free()
 
     # subarray data type
-    subdtype = dtype.subdtype
-    if subdtype:
-        base, shape = subdtype
+    if dtype.subdtype:
+        base, shape = dtype.subdtype
         datatype = from_numpy_dtype(base)
         try:
             if len(shape) == 1:
