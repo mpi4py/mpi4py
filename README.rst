@@ -33,8 +33,8 @@ MPI for Python
    :target: https://formulae.brew.sh/formula/mpi4py
 .. |fedora| image::  https://img.shields.io/fedora/v/mpi4py-common?logo=fedora
    :target: https://packages.fedoraproject.org/pkgs/mpi4py/
-.. |ubuntu| image::  https://img.shields.io/ubuntu/v/mpi4py/noble?logo=ubuntu
-   :target: https://packages.ubuntu.com/source/noble/mpi4py
+.. |ubuntu| image::  https://img.shields.io/ubuntu/v/mpi4py/resolute?logo=ubuntu
+   :target: https://packages.ubuntu.com/source/resolute/mpi4py
 .. |debian| image::  https://img.shields.io/debian/v/mpi4py/stable?logo=debian
    :target: https://packages.debian.org/source/stable/mpi4py
 .. |archlinux| image::  https://img.shields.io/archlinux/v/extra/x86_64/python-mpi4py?logo=archlinux
