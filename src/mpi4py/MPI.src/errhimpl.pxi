@@ -12,8 +12,8 @@ ctypedef fused mpi_ehfn_t:
     MPI_Win_errhandler_function
     MPI_File_errhandler_function
 
-cdef object errhdl_lock = Lock()
-cdef list   errhdl_registry = [
+cdef pymutex errhdl_mutex
+cdef list    errhdl_registry = [
     [None]*(1+32),  # Session
     [None]*(1+32),  # Comm
     [None]*(1+32),  # Win
@@ -287,7 +287,7 @@ cdef inline int errhdl_new(
         registry = errhdl_registry[3]
     cdef int index = 0
     try:
-        with errhdl_lock:
+        with errhdl_mutex:
             index = registry.index(None, 1)
             registry[index] = function
     except ValueError:
@@ -319,7 +319,7 @@ cdef inline int errhdl_del(
         registry = errhdl_registry[2]
     if mpi_ehfn_t is MPI_File_errhandler_function:
         registry = errhdl_registry[3]
-    with errhdl_lock:
+    with errhdl_mutex:
         registry[index] = None
     return 0
 
