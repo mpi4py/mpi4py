@@ -1,13 +1,5 @@
 import sys
-
-try:
-    import threading
-
-    HAVE_THREADING = True
-except ImportError:
-    import dummy_threading as threading
-
-    HAVE_THREADING = False
+import threading
 
 VERBOSE = False
 # VERBOSE = True
@@ -44,7 +36,7 @@ class TestMPIThreads(unittest.TestCase):
         except NotImplementedError:
             self.skipTest("mpi-is_thread_main")
         name = threading.current_thread().name
-        main = (name == "MainThread") or not HAVE_THREADING
+        main = name == "MainThread"
         self.assertEqual(flag, main)
         if VERBOSE:
 

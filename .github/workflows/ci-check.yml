@@ -134,6 +134,9 @@ jobs:
     - name: cython-lint
       run:  cython-lint .
 
+    - name: vermin
+      run:  vermin .
+
     - name: yamllint
       run:  yamllint .
 

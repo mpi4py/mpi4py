@@ -106,6 +106,7 @@ def lint(ctx):
         ["pylint", "mpi4py"],
         ["cython-lint", "."],
         ["codespell"],
+        ["vermin", "--quiet", "."],
         ["yamllint", "."],
     )
 

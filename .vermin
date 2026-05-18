@@ -1,0 +1,16 @@
+# -*- mode: conf -*-
+# https://github.com/netromdk/vermin
+
+[vermin]
+targets = 3.10
+exclusions = typing.Self
+ignore_incomp = yes
+eval_annotations = yes
+backports =
+  argparse
+  configparser
+  importlib
+  enum
+  statistics
+  typing
+  typing_extensions

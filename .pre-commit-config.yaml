@@ -25,6 +25,11 @@ repos:
   hooks:
     - id: codespell
 
+- repo: https://github.com/netromdk/vermin
+  rev: v1.8.0
+  hooks:
+    - id: vermin
+
 - repo: https://github.com/adrienverge/yamllint
   rev: v1.38.0
   hooks:

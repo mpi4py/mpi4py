@@ -100,7 +100,7 @@ def _format_exc(exc, comm):
 if sys.version_info >= (3, 11):
 
     def sys_exception():
-        return sys.exception()
+        return sys.exception()  # novm
 
 else:  # pragma: no cover
 

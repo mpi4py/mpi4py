@@ -202,10 +202,8 @@ class Config:
         # Microsoft MPI (v7, v6, v5, v4)
         def msmpi_ver():
             try:
-                try:
-                    import winreg
-                except ImportError:
-                    import _winreg as winreg
+                import winreg
+
                 HKLM = winreg.HKEY_LOCAL_MACHINE
                 subkey = r"SOFTWARE\Microsoft\MPI"
                 with winreg.OpenKey(HKLM, subkey) as key:

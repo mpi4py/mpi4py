@@ -89,6 +89,7 @@ lint = [
   "pylint",
   "ruff",
   "shellcheck-py",
+  "vermin",
   "yamllint",
 ]
 test = [

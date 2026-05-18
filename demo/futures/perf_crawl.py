@@ -6,11 +6,7 @@ import contextlib
 import functools
 import sys
 import time
-
-try:
-    from urllib.request import urlopen
-except ImportError:
-    from urllib2 import urlopen
+from urllib.request import urlopen
 
 try:
     from concurrent.futures import ThreadPoolExecutor

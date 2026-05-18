@@ -648,7 +648,7 @@ def futures(comm, args=None, verbose=True):
                 max_workers=workers,
             )
         if executor_type == "interpreter":  # pragma: no cover
-            return concurrent.futures.InterpreterPoolExecutor(
+            return concurrent.futures.InterpreterPoolExecutor(  # novermin
                 max_workers=workers,
             )
         assert executor_type == "mpi"  # noqa: S101
