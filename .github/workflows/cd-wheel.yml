@@ -133,6 +133,8 @@ jobs:
           "${{ matrix.mpi-abi }}" "${{ matrix.arch }}"
         CIBW_BEFORE_BUILD: >-
           bash {project}/cibw/patch-tools.sh
+        CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: ""
+        CIBW_AUDIT_COMMAND: ""
         CIBW_TEST_COMMAND: >-
           bash {project}/cibw/run-tests.sh
         CIBW_ENVIRONMENT_PASS_LINUX: >-
