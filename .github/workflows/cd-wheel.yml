@@ -115,49 +115,16 @@ jobs:
       uses: pypa/cibuildwheel@v4.1.0
       timeout-minutes: 10
       with:
-        extras: uv
+        config-file: cibw/config.toml
         output-dir: wheelhouse
         package-dir: .
+        extras: uv
       env:
         MPI4PY_BUILD_MPIABI: "1"
         MPI4PY_BUILD_PYSABI: "${{ matrix.py-sabi && matrix.py || '0' }}"
         MPI4PY_LOCAL_VERSION: "${{ matrix.mpi-abi }}"
-        CIBW_PROJECT_REQUIRES_PYTHON: ">=3.10"
-        CIBW_ENABLE: "pypy"
-        CIBW_BUILD_FRONTEND: "build[uv]"
         CIBW_ARCHS: "${{ matrix.arch }}"
         CIBW_BUILD: "${{ matrix.py }}-*"
-        CIBW_SKIP:  "*musllinux*"
-        CIBW_BEFORE_ALL: >-
-          bash {project}/cibw/install-mpi.sh
-          "${{ matrix.mpi-abi }}" "${{ matrix.arch }}"
-        CIBW_BEFORE_BUILD: >-
-          bash {project}/cibw/patch-tools.sh
-        CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: ""
-        CIBW_AUDIT_COMMAND: ""
-        CIBW_TEST_COMMAND: >-
-          bash {project}/cibw/run-tests.sh
-        CIBW_ENVIRONMENT_PASS_LINUX: >-
-          MPI4PY_BUILD_MPIABI
-          MPI4PY_BUILD_PYSABI
-          MPI4PY_LOCAL_VERSION
-        CIBW_ENVIRONMENT_LINUX: >-
-          CFLAGS="-g0 -Os"
-        CIBW_ENVIRONMENT_MACOS: >-
-          CFLAGS="-g0 -Os"
-          LDFLAGS="-Wl,-headerpad_max_install_names"
-          LDFLAGS="$LDFLAGS -Wl,-rpath,/usr/local/lib"
-          LDFLAGS="$LDFLAGS -Wl,-rpath,/opt/homebrew/lib"
-          LDFLAGS="$LDFLAGS -Wl,-rpath,/opt/local/lib"
-        CIBW_ENVIRONMENT_WINDOWS: >-
-          MPI_ABI_STUBS="$USERPROFILE\\mpiabi"
-          I_MPI_ROOT="$USERPROFILE\\impi"
-          MSMPI_BIN="$ProgramFiles\\Microsoft MPI\\Bin"
-          MSMPI_INC="$USERPROFILE\\msmpi\\Include"
-          MSMPI_LIB64="$USERPROFILE\\msmpi\\Lib\\x64"
-        CIBW_MANYLINUX_AARCH64_IMAGE: "manylinux_2_28"
-        CIBW_MANYLINUX_X86_64_IMAGE:  "manylinux_2_28"
-        CIBW_BEFORE_BUILD_WINDOWS:
 
     - id: upload
       uses: actions/upload-artifact@v7
@@ -167,7 +134,7 @@ jobs:
         retention-days: 1
 
     - id: check
-      run: cibw/check-wheels.sh wheelhouse
+      run: cibw/wheel-check.sh wheelhouse
       shell: bash
 
   merge:

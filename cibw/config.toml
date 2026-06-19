@@ -1,0 +1,43 @@
+[tool.cibuildwheel]
+build = "*"
+archs = "native"
+skip = "*musllinux*"
+enable = "pypy"
+build-frontend = "build[uv]"
+before-all = [
+  "bash {project}/cibw/install-mpi.sh",
+]
+repair-wheel-command = [
+  "bash {project}/cibw/repair-wheel.sh -w {dest_dir} {wheel}",
+]
+audit-command = [
+  "bash -c true {abi3_wheel}",
+  "bash -c true {wheel}",
+]
+test-command = [
+  "bash {project}/cibw/run-tests.sh",
+]
+environment-pass = [
+  "MPI4PY_BUILD_MPIABI",
+  "MPI4PY_BUILD_PYSABI",
+  "MPI4PY_LOCAL_VERSION",
+]
+
+[tool.cibuildwheel.linux.environment]
+CFLAGS = "-g0 -Os"
+
+[tool.cibuildwheel.macos.environment]
+CFLAGS = "-g0 -Os"
+LDFLAGS = """
+-Wl,-headerpad_max_install_names \
+-Wl,-rpath,/usr/local/lib \
+-Wl,-rpath,/opt/homebrew/lib \
+-Wl,-rpath,/opt/local/lib \
+"""
+
+[tool.cibuildwheel.windows.environment]
+MPI_ABI_STUBS = '$USERPROFILE\\mpiabi'
+I_MPI_ROOT = '$USERPROFILE\\impi'
+MSMPI_BIN = '$ProgramFiles\\Microsoft MPI\\Bin'
+MSMPI_INC = '$USERPROFILE\\msmpi\\Include'
+MSMPI_LIB64 = '$USERPROFILE\\msmpi\\Lib\\x64'

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-MPI_ABI=${1:-mpich}
+MPI_ABI=${1:-${MPI4PY_LOCAL_VERSION:-mpich}}
 MACHINE=${PROCESSOR_ARCHITECTURE:-$(uname -m)}
 MPIARCH=${2:-$MACHINE}
 MPIARCH=${MPIARCH/native/$MACHINE}
