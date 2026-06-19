@@ -1,3 +1,4 @@
+import ctypes
 import os
 import platform
 
@@ -218,8 +219,12 @@ class TestPackExternal(BaseTestPackExternal, unittest.TestCase):
 
 
 name, version = MPI.get_vendor()
+lib_version = MPI.Get_library_version()
 system_machine = (platform.system(), platform.machine())
 if name == "MPICH":
+    if "ch3:nemesis" in lib_version or "ch3:sock" in lib_version:
+        if ctypes.sizeof(ctypes.c_longdouble) != 16:
+            BaseTestPackExternal.skipdtype += "gG"
     if version == (5, 0, 1) and system_machine == ("Darwin", "arm64"):
         BaseTestPackExternal.skipdtype += "gG"
     if version < (4, 0, 0):
