@@ -258,7 +258,7 @@ jobs:
         egress-policy: audit
 
     - name: Checkout
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
 
     - name: Download distribution artifact
       uses: actions/download-artifact@v8
@@ -293,7 +293,7 @@ jobs:
         egress-policy: audit
 
     - name: Checkout documentation repository
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
       with:
         repository: mpi4py/mpi4py.github.io
         token: ${{ secrets.DOCS_PUBLISH_PAT }}

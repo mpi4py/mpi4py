@@ -168,11 +168,11 @@ jobs:
     steps:
 
     - name: Checkout
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
 
     - if: matrix.mpi == 'mpiabi'
       name: Checkout MPI ABI stubs
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
       with:
         repository: mpi-forum/mpi-abi-stubs
         path: mpi-abi-stubs
@@ -286,7 +286,7 @@ jobs:
     steps:
 
     - name: Checkout
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
 
     - if: runner.os != 'Windows'
       name: Setup uv
