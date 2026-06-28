@@ -67,11 +67,12 @@ within the :mod:`~mpi4py.MPI` module.
 .. autotype:: BufSpecW
 .. autotype:: TargetSpec
 
+.. autodata:: CommT
+
 .. autodata:: S
 .. autodata:: T
 .. autodata:: U
 .. autodata:: V
-
 
 .. Local variables:
 .. fill-column: 79

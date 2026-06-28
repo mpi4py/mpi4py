@@ -197,7 +197,7 @@ cdef class Comm:
         options_set_errhandler(comm.ob_mpi)
         return (comm, request)
 
-    def Create(self, Group group: Group) -> Comm:
+    def Create(self: Comm | CommT, Group group: Group) -> CommT:
         """
         Create communicator from group.
         """
@@ -210,7 +210,11 @@ cdef class Comm:
         options_set_errhandler(comm.ob_mpi)
         return comm
 
-    def Split(self, int color: int = 0, int key: int = 0) -> Comm:
+    def Split(
+        self: Comm | CommT,
+        int color: int = 0,
+        int key: int = 0,
+    ) -> CommT:
         """
         Split communicator by color and key.
         """
@@ -224,11 +228,11 @@ cdef class Comm:
         return comm
 
     def Split_type(
-        self,
+        self: Comm | CommT,
         int split_type: int,
         int key: int = 0,
         Info info: Info = INFO_NULL,
-    ) -> Comm:
+    ) -> CommT:
         """
         Split communicator by split type.
         """
@@ -313,7 +317,7 @@ cdef class Comm:
         request.ob_buf = flag
         return request
 
-    def Shrink(self) -> Comm:
+    def Shrink(self: Comm | CommT) -> CommT:
         """
         Shrink a communicator to remove all failed processes.
         """
@@ -325,7 +329,7 @@ cdef class Comm:
         options_set_errhandler(comm.ob_mpi)
         return comm
 
-    def Ishrink(self) -> tuple[Comm, Request]:
+    def Ishrink(self: Comm | CommT) -> tuple[CommT, Request]:
         """
         Nonblocking shrink a communicator to remove all failed processes.
         """
@@ -854,7 +858,7 @@ cdef class Comm:
         buf: BufSpec,
         int dest: int,
         int tag: int = 0,
-    ) -> Request:
+    ) -> Prequest:
         """
         Persistent request for a send in buffered mode.
         """
@@ -871,7 +875,7 @@ cdef class Comm:
         buf: BufSpec,
         int dest: int,
         int tag: int = 0,
-    ) -> Request:
+    ) -> Prequest:
         """
         Persistent request for a send in synchronous mode.
         """
@@ -888,7 +892,7 @@ cdef class Comm:
         buf: BufSpec,
         int dest: int,
         int tag: int = 0,
-    ) -> Request:
+    ) -> Prequest:
         """
         Persistent request for a send in ready mode.
         """
@@ -2236,7 +2240,7 @@ cdef class Intracomm(Comm):
     def Create_cart(
         self,
         dims: Sequence[int],
-        periods: Sequence[bool] | None = None,
+        periods: Sequence[bool] | bool | None = None,
         bint reorder: bool = False,
     ) -> Cartcomm:
         """
@@ -2280,10 +2284,10 @@ cdef class Intracomm(Comm):
 
     def Create_dist_graph_adjacent(
         self,
-        sources: Sequence[int],
-        destinations: Sequence[int],
-        sourceweights: Sequence[int] | None = None,
-        destweights: Sequence[int] | None = None,
+        sources: Sequence[int] | None,
+        destinations: Sequence[int] | None,
+        sourceweights: Sequence[int] | int | None = None,
+        destweights: Sequence[int] | int | None = None,
         Info info: Info = INFO_NULL,
         bint reorder: bool = False,
     ) -> Distgraphcomm:
@@ -2317,7 +2321,7 @@ cdef class Intracomm(Comm):
         sources: Sequence[int],
         degrees: Sequence[int],
         destinations: Sequence[int],
-        weights: Sequence[int] | None = None,
+        weights: Sequence[int] | int | None = None,
         Info info: Info = INFO_NULL,
         bint reorder: bool = False,
     ) -> Distgraphcomm:
@@ -2365,7 +2369,7 @@ cdef class Intracomm(Comm):
     def Cart_map(
         self,
         dims: Sequence[int],
-        periods: Sequence[bool] | None = None,
+        periods: Sequence[bool] | bool | None = None,
     ) -> int:
         """
         Determine optimal process placement on a Cartesian topology.
@@ -2577,7 +2581,7 @@ cdef class Intracomm(Comm):
         self,
         command: Sequence[PathLike[AnyStr] | str | bytes],
         args: Sequence[Sequence[str]] | None = None,
-        maxprocs: Sequence[int] | None = None,
+        maxprocs: Sequence[int] | int | None = None,
         info: Sequence[Info] | Info = INFO_NULL,
         int root: int = 0,
         errcodes: list[list[int]] | None = None,
@@ -3363,7 +3367,7 @@ cdef class Intercomm(Comm):
         stringtag: str = "org.mpi4py",
         Info info: Info = INFO_NULL,
         Errhandler errhandler: Errhandler | None = None,
-    ) -> Intracomm:
+    ) -> Intercomm:
         """
         Create communicator from group.
         """

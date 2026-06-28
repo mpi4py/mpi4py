@@ -19,6 +19,8 @@ from .MPI import (
     BottomType,
     Datatype,
     InPlaceType,
+    Intercomm,
+    Intracomm,
 )
 
 __all__ = [
@@ -141,6 +143,7 @@ BufSpec: TypeAlias = Union[
     tuple[Buffer, Count, TypeSpec],
     tuple[Bottom, Count, Datatype],
     list[Any],
+    None,
 ]
 """
 Buffer specification.
@@ -234,6 +237,12 @@ Target specification.
 * tuple[`Displ`]
 * tuple[`Displ`, `Count`]
 * tuple[`Displ`, `Count`, `TypeSpec`]
+"""
+
+
+CommT = TypeVar("CommT", Intracomm, Intercomm)
+"""
+Type variable constrained to `MPI.Intracomm` or `MPI.Intercomm`.
 """
 
 
