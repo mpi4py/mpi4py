@@ -23,9 +23,9 @@ def random_sleep(max_sleep=0.01):
 # ---
 
 
-class BaseTestSequential:
+class BaseTestSequential(unittest.BaseMixin):
     #
-    COMM = MPI.COMM_NULL
+    COMM = MPI.Intracomm(MPI.COMM_NULL)
 
     def testWith(self):
         comm = self.COMM
@@ -67,9 +67,9 @@ class TestSequentialWorld(BaseTestSequential, unittest.TestCase):
 # ---
 
 
-class BaseTestCounter:
+class BaseTestCounter(unittest.BaseMixin):
     #
-    COMM = MPI.COMM_NULL
+    COMM = MPI.Intracomm(MPI.COMM_NULL)
 
     def testIter(self):
         comm = self.COMM
@@ -164,9 +164,9 @@ class TestCounterWorld(BaseTestCounter, unittest.TestCase):
 # ---
 
 
-class BaseTestMutexBasic:
+class BaseTestMutexBasic(unittest.BaseMixin):
     #
-    COMM = MPI.COMM_NULL
+    COMM = MPI.Intracomm(MPI.COMM_NULL)
 
     def setUp(self):
         self.mutex = sync.Mutex(comm=self.COMM)
@@ -304,9 +304,9 @@ class TestMutexBasicWorld(BaseTestMutexBasic, unittest.TestCase):
 # ---
 
 
-class BaseTestMutexRecursive:
+class BaseTestMutexRecursive(unittest.BaseMixin):
     #
-    COMM = MPI.COMM_NULL
+    COMM = MPI.Intracomm(MPI.COMM_NULL)
 
     def setUp(self):
         self.mutex = sync.Mutex(recursive=True, comm=self.COMM)
@@ -445,12 +445,12 @@ class TestMutexRecursiveWorld(BaseTestMutexRecursive, unittest.TestCase):
 # ---
 
 
-class BaseTestCondition:
+class BaseTestCondition(unittest.BaseMixin):
     #
-    COMM = MPI.COMM_NULL
+    COMM = MPI.Intracomm(MPI.COMM_NULL)
+    condition: sync.Condition
 
     def setUp(self):
-        self.mutex = None
         self.condition = sync.Condition(comm=self.COMM)
 
     def tearDown(self):
@@ -574,7 +574,9 @@ class TestConditionWorld(BaseTestCondition, unittest.TestCase):
 
 class BaseTestConditionMutex(BaseTestCondition):
     #
-    COMM = MPI.COMM_NULL
+    COMM = MPI.Intracomm(MPI.COMM_NULL)
+    mutex: sync.Mutex
+    condition: sync.Condition
 
     def setUp(self):
         comm = self.COMM
@@ -600,9 +602,10 @@ class TestConditionMutexWorld(BaseTestConditionMutex, unittest.TestCase):
 # ---
 
 
-class BaseTestSemaphore:
+class BaseTestSemaphore(unittest.BaseMixin):
     #
-    COMM = MPI.COMM_NULL
+    COMM = MPI.Intracomm(MPI.COMM_NULL)
+    semaphore: sync.Semaphore
 
     def setUp(self):
         comm = self.COMM
@@ -622,25 +625,26 @@ class BaseTestSemaphore:
         sem = self.semaphore
         comm = self.COMM
         count = max(1, comm.size - 1)
-        sem._bounded = False
+        counter = sem._counter  # ty: ignore
+        sem._bounded = False  # ty: ignore
         if comm.size > 1:
             if comm.rank == 0:
                 sem.release()
         comm.Barrier()
-        self.assertEqual(sem._counter.next(0), comm.size)
+        self.assertEqual(counter.next(0), comm.size)
         comm.Barrier()
         if comm.size > 1:
             if comm.rank == 0:
                 sem.acquire()
         comm.Barrier()
-        self.assertEqual(sem._counter.next(0), count)
-        sem._bounded = True
+        self.assertEqual(counter.next(0), count)
+        sem._bounded = True  # ty: ignore
         self.assertRaises(ValueError, sem.release)
         comm.Barrier()
         sem.acquire()
         sem.release()
         comm.Barrier()
-        self.assertEqual(sem._counter.next(0), count)
+        self.assertEqual(counter.next(0), count)
 
     def testWith(self):
         def test_with():
@@ -674,23 +678,24 @@ class BaseTestSemaphore:
             sem = self.semaphore
             comm = self.COMM
             count = max(1, comm.size - 1)
+            counter = sem._counter  # ty: ignore
             comm.Barrier()
             locked = sem.acquire(blocking=False)
             comm.Barrier()
-            self.assertEqual(sem._counter.next(0), 0)
+            self.assertEqual(counter.next(0), 0)
             comm.Barrier()
             if locked:
                 sem.release()
             comm.Barrier()
             states = comm.allgather(locked)
             self.assertEqual(states.count(True), count)
-            self.assertEqual(sem._counter.next(0), count)
+            self.assertEqual(counter.next(0), count)
             comm.Barrier()
             while not sem.acquire(blocking=False):
                 random_sleep()
             sem.release()
             comm.Barrier()
-            self.assertEqual(sem._counter.next(0), count)
+            self.assertEqual(counter.next(0), count)
 
         for _ in range(5):
             self.COMM.Barrier()

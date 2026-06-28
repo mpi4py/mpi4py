@@ -6,7 +6,7 @@ import mpiunittest as unittest
 from mpi4py import MPI
 
 
-class BaseTestP2PBuf:
+class BaseTestP2PBuf(unittest.BaseMixin):
     #
     COMM = MPI.COMM_NULL
 

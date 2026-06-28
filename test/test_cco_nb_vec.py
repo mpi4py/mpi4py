@@ -19,7 +19,7 @@ def maxvalue(a):
 
 @unittest.skipMPI("msmpi(<8.1.0)")
 @unittest.skipMPI("openmpi(<2.0.0)")
-class BaseTestCCOVec:
+class BaseTestCCOVec(unittest.BaseMixin):
     #
     COMM = MPI.COMM_NULL
 
@@ -99,6 +99,7 @@ class BaseTestCCOVec:
                     self.COMM.Gatherv(sbuf, rbuf, root)
                     self.COMM.Barrier()
                     if rank == root:
+                        assert rbuf is not None
                         for v in rbuf:
                             self.assertEqual(v, check)
 
@@ -365,7 +366,7 @@ class BaseTestCCOVec:
 
 @unittest.skipMPI("msmpi(<8.1.0)")
 @unittest.skipMPI("openmpi(<2.0.0)")
-class BaseTestCCOVecInplace:
+class BaseTestCCOVecInplace(unittest.BaseMixin):
     #
     COMM = MPI.COMM_NULL
 

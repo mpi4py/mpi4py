@@ -63,8 +63,10 @@ def test_session():
         for n in range(session.Get_num_psets()):
             pset_name = session.Get_nth_pset(n)
             info = session.Get_pset_info(pset_name)
-            mpi_size = int(info.Get("mpi_size"))
+            mpi_size = info.Get("mpi_size")
             info.Free()
+            assert mpi_size is not None
+            mpi_size = int(mpi_size)
             assert mpi_size > 0
 
             group = session.Create_group(pset_name)

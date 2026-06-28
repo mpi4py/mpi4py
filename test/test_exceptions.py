@@ -94,7 +94,7 @@ class TestExcDatatypeNull(BaseTestCase):
 
 class TestExcDatatype(BaseTestCase):
     #
-    DATATYPES = (
+    DATATYPES = [
         MPI.BYTE,
         MPI.PACKED,
         MPI.CHAR,
@@ -120,7 +120,7 @@ class TestExcDatatype(BaseTestCase):
         MPI.FLOAT_INT,
         MPI.DOUBLE_INT,
         MPI.LONG_DOUBLE_INT,
-    )
+    ]
 
     ERR_TYPE = MPI.ERR_TYPE
 
@@ -220,7 +220,7 @@ class TestExcOpNull(BaseTestCase):
 
 class TestExcOp(BaseTestCase):
     #
-    OPS = (
+    OPS = [
         MPI.MAX,
         MPI.MIN,
         MPI.SUM,
@@ -235,7 +235,7 @@ class TestExcOp(BaseTestCase):
         MPI.MINLOC,
         MPI.REPLACE,
         MPI.NO_OP,
-    )
+    ]
 
     def testFreePredefined(self):
         for op in self.OPS:
@@ -320,13 +320,15 @@ class TestExcInfoEnv(BaseTestCase):
 
 class TestExcInfo(BaseTestCase):
     #
+    INFO: MPI.Info
+
     def setUp(self):
         super().setUp()
         self.INFO = MPI.Info.Create()
 
     def tearDown(self):
         self.INFO.Free()
-        self.INFO = None
+        del self.INFO
         super().tearDown()
 
     def testDelete(self):
@@ -442,6 +444,8 @@ class TestExcSessionNull(BaseTestCase):
 
 class TestExcSession(BaseTestCase):
     #
+    SESSION: MPI.Session
+
     def setUp(self):
         super().setUp()
         self.SESSION = MPI.Session.Init()
@@ -449,7 +453,7 @@ class TestExcSession(BaseTestCase):
 
     def tearDown(self):
         self.SESSION.Finalize()
-        self.SESSION = None
+        del self.SESSION
         super().tearDown()
 
     def testGetNthPsetNeg(self):
@@ -662,6 +666,8 @@ class TestExcWinNull(BaseTestCase):
 
 class TestExcWin(BaseTestCase):
     #
+    WIN: MPI.Win
+
     def setUp(self):
         super().setUp()
         self.WIN = MPI.Win.Create(None, 1, MPI.INFO_NULL, MPI.COMM_SELF)
@@ -669,7 +675,7 @@ class TestExcWin(BaseTestCase):
 
     def tearDown(self):
         self.WIN.Free()
-        self.WIN = None
+        del self.WIN
         super().tearDown()
 
     def testKeyvalInvalid(self):

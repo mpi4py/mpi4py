@@ -9,7 +9,7 @@ from pathlib import Path
 try:
     from wheel._commands import pack as wheel_pack
 except ModuleNotFoundError:
-    from wheel.cli import pack as wheel_pack
+    from wheel.cli import pack as wheel_pack  # ty: ignore[unresolved-import]
 from wheel.wheelfile import WheelFile
 
 
@@ -148,6 +148,6 @@ for (package, version, tags), variantlist in wheels.items():
                 )
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    wheel_pack.pack(root_dir, output_dir, None)
-    shutil.rmtree(working_dir, ignore_errors=True)
+    wheel_pack.pack(os.fspath(root_dir), os.fspath(output_dir), None)
+    shutil.rmtree(os.fspath(working_dir), ignore_errors=True)
     print(flush=True)

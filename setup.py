@@ -101,11 +101,11 @@ def extensions():
             + glob.glob("src/lib-mpi/compat/*.h")
         ),
         include_dirs=["src"],
-        define_macros=[],
         configure=mpidistutils.configure_mpi,
     )
+    MPI["define_macros"] = define_macros = []
     if get_build_mpiabi():
-        MPI["define_macros"] += [
+        define_macros += [
             ("PYMPIABI", 1),
         ]
     return [MPI]
@@ -166,7 +166,8 @@ def run_setup():
     build_src.sources = sources()
     #
     metadata = get_metadata()
-    builder_args = dict(
+    builder_args = {}
+    builder_args.update(
         ext_modules=[Ext(**ext) for ext in extensions()],
         executables=[Exe(**exe) for exe in executables()],
     )
@@ -176,8 +177,8 @@ def run_setup():
         api_ver = "0x{:02X}{:02X}0000".format(*sabi)
         defines = [("Py_LIMITED_API", api_ver)]
         for ext in builder_args["ext_modules"]:
-            ext.define_macros.extend(defines)
-            ext.py_limited_api = True
+            ext.define_macros.extend(defines)  # ty: ignore
+            ext.py_limited_api = True  # ty: ignore
         api_tag = "cp{}{}".format(*sabi)
         options = {"bdist_wheel": {"py_limited_api": api_tag}}
         builder_args["options"] = options

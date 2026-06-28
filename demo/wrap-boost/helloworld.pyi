@@ -1,0 +1,3 @@
+from mpi4py import MPI
+
+def sayhello(comm: MPI.Comm) -> None: ...

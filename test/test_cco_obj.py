@@ -31,17 +31,17 @@ _basic = [
     2 - 3j,
     "mpi4py",
 ]
-messages = list(_basic)
-messages += [
+messages = [
+    *_basic,
     list(_basic),
     tuple(_basic),
     {f"k{k}": v for k, v in enumerate(_basic)},
 ]
 
 
-class BaseTestCCOObj:
+class BaseTestCCOObj(unittest.BaseMixin):
     #
-    COMM = MPI.COMM_NULL
+    COMM = MPI.Intracomm(MPI.COMM_NULL)
 
     def testBarrier(self):
         self.COMM.barrier()
@@ -112,6 +112,7 @@ class BaseTestCCOObj:
                 if rank != root:
                     self.assertIsNone(value)
                 else:
+                    assert value is not None
                     if op == MPI.SUM:
                         self.assertEqual(value, cumsum(range(size)))
                     elif op == MPI.PROD:

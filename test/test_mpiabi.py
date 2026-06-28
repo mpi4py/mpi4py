@@ -23,6 +23,7 @@ class TestMPIABI(unittest.TestCase):
                 self.assertIsNotNone(sizestr)
                 datatype = getattr(MPI, typename.upper())
                 if testutil.has_datatype(datatype):
+                    assert sizestr is not None
                     self.assertEqual(datatype.Get_size(), int(sizestr))
         info.Free()
 
@@ -42,6 +43,7 @@ class TestMPIABI(unittest.TestCase):
                 self.assertIsNotNone(sizestr)
                 datatype = getattr(MPI, typename.upper())
                 if testutil.has_datatype(datatype):
+                    assert sizestr is not None
                     self.assertEqual(datatype.Get_size(), int(sizestr))
         str2bool = {"true": True, "false": False}
         for typeclass, typesizes in (
@@ -61,6 +63,7 @@ class TestMPIABI(unittest.TestCase):
                 with self.subTest(typename=typename):
                     key = f"mpi_{typename}_supported"
                     supported = info.Get(key)
+                    assert supported is not None
                     self.assertIn(supported, ("true", "false"))
                     self.assertEqual(
                         testutil.has_datatype(datatype),

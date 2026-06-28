@@ -2,6 +2,7 @@ import contextlib
 import itertools
 import platform
 import sys
+import typing
 import warnings
 
 from mpi4py import MPI
@@ -9,17 +10,17 @@ from mpi4py import MPI
 try:
     import array
 except ImportError:
-    array = None
+    array = None  # ty: ignore[invalid-assignment]
 
 try:
     import numpy
 except ImportError:
-    numpy = None
+    numpy = None  # ty: ignore[invalid-assignment]
 
 try:
     import cupy
 except ImportError:
-    cupy = None
+    cupy: typing.Any = None
 else:
     cupy_version = tuple(map(int, cupy.__version__.split(".", 2)[:2]))
 
@@ -27,7 +28,7 @@ try:
     import numba
     import numba.cuda
 except ImportError:
-    numba = None
+    numba: typing.Any = None
 else:
     numba_version = tuple(map(int, numba.__version__.split(".", 2)[:2]))
     if numba_version < (0, 48):
@@ -38,7 +39,7 @@ else:
                 stacklevel=1,
             )
         del numba_version
-        numba = None
+        numba: typing.Any = None
 
 
 __all__ = ["loop", "test"]
@@ -119,6 +120,8 @@ def add_backend(cls):
 class BaseArray:
     #
     backend = None
+    array: typing.Any
+    typecode: str
 
     TypeMap = TypeMap.copy()
     TypeMap.pop("g", None)
@@ -166,6 +169,7 @@ if array is not None:
     @add_backend
     class ArrayArray(BaseArray):
         backend = "array"
+        array: array.array
 
         def __init__(self, arg, typecode, shape=None):
             if isinstance(arg, (int, float)):
@@ -213,6 +217,7 @@ if numpy is not None:
     @add_backend
     class ArrayNumPy(BaseArray):
         backend = "numpy"
+        array: numpy.ndarray
 
         TypeMap = make_typemap([])
         TypeMap.update(TypeMapBool)
@@ -260,11 +265,13 @@ if numpy is not None:
 try:
     import dlpackimpl as dlpack
 except ImportError:
-    dlpack = None
+    dlpack = None  # ty: ignore[invalid-assignment]
 
 
 class BaseDLPackCPU:
     #
+    array: memoryview
+
     def __dlpack_device__(self):
         return (dlpack.DLDeviceType.kDLCPU, 0)
 
@@ -283,6 +290,7 @@ if dlpack is not None and array is not None:
     @add_backend
     class DLPackArray(BaseDLPackCPU, ArrayArray):
         backend = "dlpack-array"
+        array: array.array
 
         def __init__(self, arg, typecode, shape=None):
             super().__init__(arg, typecode, shape)
@@ -293,6 +301,7 @@ if dlpack is not None and numpy is not None:
     @add_backend
     class DLPackNumPy(BaseDLPackCPU, ArrayNumPy):
         backend = "dlpack-numpy"
+        array: numpy.ndarray
 
         def __init__(self, arg, typecode, shape=None):
             super().__init__(arg, typecode, shape)
@@ -320,6 +329,10 @@ def typestr(typecode, itemsize):
 
 class BaseFakeGPUArray:
     #
+    address: int
+    typecode: str
+    itemsize: int
+
     def set_interface(self, shape, readonly=False):
         self.__cuda_array_interface__ = {
             "version": 0,
@@ -355,6 +368,7 @@ if cupy is not None:
     @add_backend
     class GPUArrayCuPy(BaseArray):
         backend = "cupy"
+        array: cupy.ndarray
 
         TypeMap = make_typemap([])
         if cupy_version >= (11, 6):
@@ -453,6 +467,7 @@ if numba is not None:
     @add_backend
     class GPUArrayNumba(BaseArray):
         backend = "numba"
+        array: numba.cuda.cudadrv.devicearray.DeviceNDArray
 
         TypeMap = make_typemap([])
         TypeMap.update(TypeMapBool)
@@ -514,28 +529,31 @@ if numba is not None:
 
 
 def loop(*args):
-    loop.array = None
-    loop.typecode = None
+    ctx: typing.Any = loop
+    ctx.array = None
+    ctx.typecode = None
     for array in ArrayBackends:
-        loop.array = array
+        ctx.array = array
         for typecode in array.TypeMap:
-            loop.typecode = typecode
+            ctx.typecode = typecode
             if not args:
                 yield array, typecode
             else:
                 for prod in itertools.product(*args):
                     yield (array, typecode, *prod)
-    del loop.array
-    del loop.typecode
+    del ctx.array
+    del ctx.typecode
 
 
 def test(case, **kargs):
+    ctx: typing.Any = loop
     return case.subTest(
-        typecode=loop.typecode,
-        backend=loop.array.backend,
+        typecode=ctx.typecode,
+        backend=ctx.array.backend,
         **kargs,
     )
 
 
 def scalar(arg):
-    return loop.array(arg, loop.typecode, 1)[0]
+    ctx: typing.Any = loop
+    return ctx.array(arg, ctx.typecode, 1)[0]

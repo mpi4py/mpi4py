@@ -6,6 +6,7 @@ import pathlib
 import platform
 import sys
 import time
+import typing
 import unittest
 import warnings
 
@@ -47,7 +48,7 @@ class TimingWrapper:
     #
     def __init__(self, func):
         self.func = func
-        self.elapsed = None
+        self.elapsed = 0
 
     def __call__(self, *args, **kwds):
         t = time.monotonic()
@@ -57,14 +58,27 @@ class TimingWrapper:
             self.elapsed = time.monotonic() - t
 
 
-class BaseTestPool:
+if typing.TYPE_CHECKING:
+
+    class BaseMixin(unittest.TestCase):
+        pass
+
+else:
+
+    class BaseMixin:
+        pass
+
+
+class BaseTestPool(BaseMixin):
     #
+    pool: pool.Pool | pool.ThreadPool
     PoolType = None
 
     @classmethod
     def Pool(cls, *args, **kwargs):
         if "coverage" in sys.modules:
             kwargs["python_args"] = "-m coverage run".split()
+        assert cls.PoolType is not None
         Pool = cls.PoolType
         return Pool(*args, **kwargs)
 
@@ -77,7 +91,7 @@ class BaseTestPool:
     def tearDownClass(cls):
         cls.pool.terminate()
         cls.pool.join()
-        cls.pool = None
+        del cls.pool
         super().tearDownClass()
 
     @unittest.skipIf(
@@ -421,7 +435,7 @@ class UserExecutorMixin:
         unordered=False,
     ):
         del unordered  # ignored, unused
-        return super().map(
+        return super().map(  # type: ignore
             fn,
             iterable,
             timeout=timeout,
@@ -438,7 +452,7 @@ class UserExecutorMixin:
     ):
         del unordered  # ignored, unused
         fn = functools.partial(self._apply_args, fn)
-        return super().map(
+        return super().map(  # type: ignore
             fn,
             iterable,
             timeout=timeout,

@@ -47,7 +47,7 @@ def get_neighbors_count(comm):
 
 
 def have_feature():
-    cartcomm = MPI.COMM_SELF.Create_cart([1], periods=[0])
+    cartcomm = MPI.COMM_SELF.Create_cart([1], periods=[False])
     try:
         cartcomm.neighbor_allgather(None)
     except NotImplementedError:
@@ -59,7 +59,7 @@ def have_feature():
 
 
 @unittest.skipIf(not have_feature(), "mpi-neighbor")
-class BaseTestCCONghBuf:
+class BaseTestCCONghBuf(unittest.BaseMixin):
     #
     COMM = MPI.COMM_NULL
 

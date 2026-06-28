@@ -3,7 +3,7 @@ import mpiunittest as unittest
 from mpi4py import MPI
 
 
-class BaseTestHandle:
+class BaseTestHandle(unittest.BaseMixin):
     #
     HANDLES = []
 

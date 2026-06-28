@@ -25,7 +25,7 @@ def allclose(a, b, rtol=1.0e-5, atol=1.0e-8):
     return True
 
 
-class BaseTestPack:
+class BaseTestPack(unittest.BaseMixin):
     #
     COMM = MPI.COMM_NULL
 
@@ -121,7 +121,7 @@ class BaseTestPack:
 EXT32 = "external32"
 
 
-class BaseTestPackExternal:
+class BaseTestPackExternal(unittest.BaseMixin):
     #
     skipdtype = []
 

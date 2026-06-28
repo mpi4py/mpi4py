@@ -6,11 +6,12 @@ from mpi4py import MPI
 try:
     import array
 except ImportError:
-    array = None
+    array = None  # ty: ignore[invalid-assignment]
 
 
-class BaseTestAttr:
+class BaseTestAttr(unittest.BaseMixin):
     #
+    obj: MPI.Comm | MPI.Datatype | MPI.Win
     keyval = MPI.KEYVAL_INVALID
 
     def tearDown(self):
@@ -30,7 +31,7 @@ class BaseTestAttr:
         obj.Set_attr(self.keyval, attrval)
         attr = obj.Get_attr(self.keyval)
         self.assertIs(attr, attrval)
-        if hasattr(obj, "Dup"):
+        if isinstance(obj, (MPI.Comm, MPI.Datatype)):
             dup = obj.Dup()
             attr = dup.Get_attr(self.keyval)
             if copy_fn is True:
@@ -65,7 +66,7 @@ class BaseTestAttr:
         obj.Set_attr(self.keyval, attrval)
         attr = obj.Get_attr(self.keyval)
         self.assertIs(attr, attrval)
-        if hasattr(obj, "Dup"):
+        if isinstance(obj, (MPI.Comm, MPI.Datatype)):
             dup = obj.Dup()
             attr = dup.Get_attr(self.keyval)
             self.assertIsNone(attr)
@@ -95,7 +96,7 @@ class BaseTestAttr:
         obj.Set_attr(self.keyval, intval)
         attr = obj.Get_attr(self.keyval)
         self.assertEqual(attr, intval)
-        if hasattr(obj, "Dup"):
+        if isinstance(obj, (MPI.Comm, MPI.Datatype)):
             dup = obj.Dup()
             attr = dup.Get_attr(self.keyval)
             self.assertEqual(attr, intval)
@@ -171,6 +172,7 @@ class BaseTestAttr:
 
 class BaseTestCommAttr(BaseTestAttr):
     #
+    obj: MPI.Comm
     NULL = MPI.COMM_NULL
 
     @unittest.skipMPI("openmpi(<=1.5.1)")
@@ -210,6 +212,7 @@ class TestCommAttrSelf(BaseTestCommAttr, unittest.TestCase):
 
 class BaseTestDatatypeAttr(BaseTestAttr):
     #
+    obj: MPI.Datatype
     NULL = MPI.DATATYPE_NULL
 
     def testAttrCopyDelete(self):
@@ -254,6 +257,7 @@ class TestDatatypeAttrFLOAT(BaseTestDatatypeAttr, unittest.TestCase):
 
 class TestWinAttr(BaseTestAttr, unittest.TestCase):
     #
+    obj: MPI.Win
     NULL = MPI.WIN_NULL
 
     def setUp(self):
@@ -266,7 +270,7 @@ class TestWinAttr(BaseTestAttr, unittest.TestCase):
         null = self.NULL
 
         def delete_fn(o, k, v):
-            assert isinstance(o, MPI.Win)
+            assert o
             assert k == self.keyval
             assert v is win
             MPI.Win.Free(v)

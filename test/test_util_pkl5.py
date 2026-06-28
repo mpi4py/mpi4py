@@ -29,8 +29,8 @@ _basic = [
     2 - 3j,
     "mpi4py",
 ]
-messages = list(_basic)
-messages += [
+messages: list = [
+    *_basic,
     list(_basic),
     tuple(_basic),
     set(_basic),
@@ -43,18 +43,20 @@ try:
 
     array1 = numpy.arange(1, dtype="i")
     array2 = numpy.arange(1, dtype="f")
-    messages.append(array1)
-    messages.append(array2)
-    messages.append([array1, array1])
-    messages.append([array2, array2])
-    messages.append((array1, array2))
+    messages.extend([
+        array1,
+        array2,
+        [array1, array1],
+        [array2, array2],
+        (array1, array2),
+    ])
 except ImportError:
-    numpy = None
+    numpy = None  # ty: ignore[invalid-assignment]
 
 
-class BaseTest:
+class BaseTest(unittest.BaseMixin):
     #
-    COMM = MPI.COMM_NULL
+    COMM: MPI.Intracomm
     CommType = MPI.Intracomm
     MessageType = MPI.Message
     RequestType = MPI.Request
@@ -342,7 +344,7 @@ class BaseTest:
             self.assertEqual(status.tag, 0)
             self.assertGreater(status.Get_count(), 0)
         comm.barrier()
-        statuses = (MPI.Status(),)
+        statuses = [MPI.Status()]
         self.RequestType.waitall(requests1, statuses)
         self.assertEqual(statuses[0].error, 0)
 
@@ -561,6 +563,7 @@ class BaseTest:
                     pass
                 message = comm.improbe(comm.rank, 123)
                 self.assertIsInstance(message, self.MessageType)
+                assert message is not None
                 rmess = message.recv()
                 self.assertEqual(rmess, smess)
                 request.wait()
@@ -574,6 +577,7 @@ class BaseTest:
                 self.assertEqual(status.source, comm.rank)
                 self.assertEqual(status.tag, 123)
                 self.assertTrue(message)
+                assert message is not None
                 rmess = message.recv()
                 self.assertFalse(message)
                 self.assertEqual(rmess, smess)
@@ -613,6 +617,7 @@ class BaseTest:
                 self.assertEqual(status.source, comm.rank)
                 self.assertEqual(status.tag, 123)
                 self.assertTrue(message)
+                assert message is not None
                 rmess = message.recv()
                 self.assertFalse(message)
                 self.assertEqual(rmess, smess)
@@ -784,7 +789,7 @@ class BaseTest:
                 self.assertIsNone(rmess)
                 rmess = comm.scatter([smess] * size, root)
                 self.assertEqual(rmess, smess)
-                rmess = comm.scatter(iter([smess] * size), root)
+                rmess = comm.scatter(iter([smess] * size), root)  # type: ignore
                 self.assertEqual(rmess, smess)
         self.assertRaises(MPI.Exception, comm.scatter, [None] * size, root=-1)
         self.assertRaises(
@@ -849,11 +854,11 @@ class BaseTest:
         comm = self.COMM
         size = comm.Get_size()
         for smess in messages:
-            rmess = comm.alltoall(None)
+            rmess = comm.alltoall(None)  # type: ignore
             self.assertEqual(rmess, [None] * size)
             rmess = comm.alltoall([smess] * size)
             self.assertEqual(rmess, [smess] * size)
-            rmess = comm.alltoall(iter([smess] * size))
+            rmess = comm.alltoall(iter([smess] * size))  # type: ignore
             self.assertEqual(rmess, [smess] * size)
         self.assertRaises(ValueError, comm.alltoall, [None] * (size - 1))
         self.assertRaises(ValueError, comm.alltoall, [None] * (size + 1))
@@ -928,8 +933,9 @@ class BaseTest:
             self.testBcastInter([(c, c.copy())], check2)
 
 
-class BaseTestPKL5:
+class BaseTestPKL5(unittest.BaseMixin):
     #
+    COMM: pkl5.Intracomm
     CommType = pkl5.Intracomm
     MessageType = pkl5.Message
     RequestType = pkl5.Request
@@ -950,11 +956,12 @@ class BaseTestPKL5:
         comm = self.COMM
         rank = comm.Get_rank()
         pickle = self.pickle
+        assert pickle.PROTOCOL is not None
         protocols = list(range(-2, pickle.PROTOCOL + 1))
         for protocol in [None, *protocols]:
             pickle.PROTOCOL = protocol
             for threshold in (-1, 0, 64, 256, None):
-                pickle.THRESHOLD = threshold
+                pickle.THRESHOLD = threshold  # type: ignore
                 threshold = pickle.THRESHOLD
                 for slen in (0, 32, 64, 128, 256, 512):
                     sobj = numpy.empty(slen, dtype="i")

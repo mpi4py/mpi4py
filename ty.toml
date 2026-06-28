@@ -1,0 +1,49 @@
+# https://docs.astral.sh/ty/
+
+[environment]
+python-version = "3.12"
+python-platform = "all"
+extra-paths = ["conf"]
+
+[rules]
+unused-ignore-comment = "error"
+
+[src]
+exclude =[
+"demo/mpi-ref-v1",
+"demo/libmpi-cffi",
+]
+
+[analysis]
+allowed-unresolved-imports = [
+"cupy",
+"numba.**",
+]
+
+[[overrides]]
+include = ["src/mpi4py/util/pkl5.pyi"]
+[overrides.rules]
+invalid-method-override = "ignore"
+
+[[overrides]]
+include = ["conf/mpidistutils.py"]
+[overrides.analysis]
+allowed-unresolved-imports = [
+"distutils.**",
+"setuptools.dep_util",
+"setuptools.extern.packaging.version",
+]
+
+[[overrides]]
+include = ["docs/source/conf.py"]
+[overrides.analysis]
+allowed-unresolved-imports = [
+"sphinx.**",
+]
+
+[[overrides]]
+include = ["demo"]
+[overrides.analysis]
+allowed-unresolved-imports = [
+"matplotlib",
+]

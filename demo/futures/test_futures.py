@@ -5,6 +5,7 @@ import random
 import sys
 import threading
 import time
+import typing
 import unittest
 import warnings
 from concurrent.futures._base import (
@@ -19,11 +20,12 @@ from pathlib import Path
 sys.path.append(
     os.fspath(Path(__file__).resolve().parent.parent.parent / "test")
 )
-import mpitestutil as testutil
+import mpitestutil as testutil  # ty: ignore
 
+import mpi4py.futures._core
 from mpi4py import MPI, futures
 
-SHARED_POOL = futures._core.SharedPool is not None
+SHARED_POOL = mpi4py.futures._core.SharedPool is not None
 WORLD_SIZE = MPI.COMM_WORLD.Get_size()
 
 
@@ -53,7 +55,7 @@ def sleep_and_raise(t):
 
 
 def check_global_var(x):
-    return global_var == x  # noqa: F821
+    return global_var == x  # noqa: F821  # ty: ignore
 
 
 def check_run_name(name):
@@ -69,7 +71,19 @@ def sys_flags_get(name):
     return getattr(sys.flags, name)
 
 
-class ExecutorMixin:
+if typing.TYPE_CHECKING:
+
+    class BaseMixin(unittest.TestCase):
+        pass
+
+else:
+
+    class BaseMixin:
+        pass
+
+
+class ExecutorMixin(BaseMixin):
+    executor_type: type[futures.MPIPoolExecutor]
     worker_count = 2
 
     def setUp(self):
@@ -191,7 +205,7 @@ class ProcessPoolInitTest(ProcessPoolMixin, unittest.TestCase):
             python_exe=sys.executable,
             max_workers=None,
             mpi_info={"soft": "0:1"},
-            globals=None,
+            globals={},
             main=False,
             path=[],
             wdir=Path.cwd(),
@@ -257,10 +271,10 @@ class ProcessPoolInitTest(ProcessPoolMixin, unittest.TestCase):
     def test_max_workers(self):
         executor = self.executor_type(max_workers=1)
         self.assertEqual(executor.num_workers, 1)
-        self.assertEqual(executor.num_workers, executor._max_workers)
+        self.assertEqual(executor.num_workers, executor._max_workers)  # ty:ignore[unresolved-attribute]
         executor.shutdown()
         self.assertEqual(executor.num_workers, 0)
-        self.assertEqual(executor.num_workers, executor._max_workers)
+        self.assertEqual(executor.num_workers, executor._max_workers)  # ty:ignore[unresolved-attribute]
 
     @unittest.skipIf(SHARED_POOL and WORLD_SIZE > 2, "shared-pool")
     def test_max_workers_environ(self):
@@ -314,6 +328,7 @@ class ProcessPoolInitTest(ProcessPoolMixin, unittest.TestCase):
             self.assertTrue(wlist)
             msg = wlist[0].message
             self.assertIsInstance(msg, RuntimeWarning)
+            assert isinstance(msg, RuntimeWarning)
             self.assertIn("foobar", msg.args[0])
         finally:
             del os.environ["MPI4PY_FUTURES_USE_PKL5"]
@@ -329,7 +344,7 @@ class ProcessPoolInitTest(ProcessPoolMixin, unittest.TestCase):
 
     def test_initializer_bad(self):
         with self.assertRaises(TypeError):
-            self.executor_type(initializer=123)
+            self.executor_type(initializer=123)  # type: ignore
 
     def test_initializer_error(self):
         executor = self.executor_type(
@@ -406,12 +421,14 @@ class ProcessPoolBootupTest(ProcessPoolMixin, unittest.TestCase):
         executor = self.executor_type(1)
         executor.bootup(wait=False)
         executor.shutdown(wait=False)
-        worker = executor._pool
+        worker = executor._pool  # ty:ignore[unresolved-attribute]
         del executor
         worker.join()
 
 
-class ExecutorShutdownTestMixin:
+class ExecutorShutdownTestMixin(BaseMixin):
+    executor: futures.MPIPoolExecutor
+
     def test_run_after_shutdown(self):
         self.executor.shutdown()
         with self.assertRaises(RuntimeError):
@@ -432,19 +449,19 @@ class ProcessPoolShutdownTest(
 
     def test_shutdown(self):
         executor = self.executor_type(max_workers=1)
-        self.assertIsNone(executor._pool)
-        self.assertFalse(executor._shutdown)
+        self.assertIsNone(executor._pool)  # ty:ignore[unresolved-attribute]
+        self.assertFalse(executor._shutdown)  # ty:ignore[unresolved-attribute]
         executor.submit(mul, 21, 2)
         executor.submit(mul, 6, 7)
         executor.submit(mul, 3, 14)
-        self.assertIsNotNone(executor._pool.thread)
-        self.assertFalse(executor._shutdown)
+        self.assertIsNotNone(executor._pool.thread)  # ty:ignore[unresolved-attribute]
+        self.assertFalse(executor._shutdown)  # ty:ignore[unresolved-attribute]
         executor.shutdown(wait=False)
-        self.assertIsNotNone(executor._pool.thread)
-        self.assertTrue(executor._shutdown)
+        self.assertIsNotNone(executor._pool.thread)  # ty:ignore[unresolved-attribute]
+        self.assertTrue(executor._shutdown)  # ty:ignore[unresolved-attribute]
         executor.shutdown(wait=True)
-        self.assertIsNone(executor._pool)
-        self.assertTrue(executor._shutdown)
+        self.assertIsNone(executor._pool)  # ty:ignore[unresolved-attribute]
+        self.assertTrue(executor._shutdown)  # ty:ignore[unresolved-attribute]
 
     def test_submit_shutdown_cancel(self):
         executor = self.executor_type(max_workers=1)
@@ -479,7 +496,7 @@ class ProcessPoolShutdownTest(
     def test_shutdown_cancel(self):
         executor = self.executor_type(max_workers=1)
         executor.bootup()
-        executor._pool.cancel()
+        executor._pool.cancel()  # ty:ignore[unresolved-attribute]
         executor.shutdown(wait=False, cancel_futures=False)
         executor.shutdown(wait=False, cancel_futures=False)
         executor.shutdown(wait=False, cancel_futures=True)
@@ -489,23 +506,23 @@ class ProcessPoolShutdownTest(
 
     def test_init_bootup_shutdown(self):
         executor = self.executor_type(max_workers=1)
-        self.assertIsNone(executor._pool)
-        self.assertFalse(executor._shutdown)
+        self.assertIsNone(executor._pool)  # ty:ignore[unresolved-attribute]
+        self.assertFalse(executor._shutdown)  # ty:ignore[unresolved-attribute]
         executor.bootup()
-        self.assertTrue(executor._pool.event.is_set())
-        self.assertFalse(executor._shutdown)
+        self.assertTrue(executor._pool.event.is_set())  # ty:ignore[unresolved-attribute]
+        self.assertFalse(executor._shutdown)  # ty:ignore[unresolved-attribute]
         executor.shutdown()
-        self.assertIsNone(executor._pool)
-        self.assertTrue(executor._shutdown)
+        self.assertIsNone(executor._pool)  # ty:ignore[unresolved-attribute]
+        self.assertTrue(executor._shutdown)  # ty:ignore[unresolved-attribute]
 
     def test_context_manager_shutdown(self):
         with self.executor_type(max_workers=1) as e:
             self.assertEqual(
                 list(e.map(abs, range(-5, 5))), [5, 4, 3, 2, 1, 0, 1, 2, 3, 4]
             )
-            threads = [e._pool.thread]
-            queues = [e._pool.queue]
-            events = [e._pool.event]
+            threads = [e._pool.thread]  # ty:ignore[unresolved-attribute]
+            queues = [e._pool.queue]  # ty:ignore[unresolved-attribute]
+            events = [e._pool.event]  # ty:ignore[unresolved-attribute]
 
         for t in threads:
             t.join()
@@ -518,9 +535,9 @@ class ProcessPoolShutdownTest(
     def test_del_shutdown(self):
         executor = self.executor_type(max_workers=1)
         list(executor.map(abs, range(-5, 5)))
-        threads = [executor._pool.thread]
-        queues = [executor._pool.queue]
-        events = [executor._pool.event]
+        threads = [executor._pool.thread]  # ty:ignore[unresolved-attribute]
+        queues = [executor._pool.queue]  # ty:ignore[unresolved-attribute]
+        events = [executor._pool.event]  # ty:ignore[unresolved-attribute]
         if hasattr(sys, "pypy_version_info"):
             executor.shutdown(False)
         else:
@@ -535,7 +552,9 @@ class ProcessPoolShutdownTest(
             self.assertTrue(e.is_set())
 
 
-class WaitTestMixin:
+class WaitTestMixin(BaseMixin):
+    executor: futures.MPIPoolExecutor
+
     def test_first_completed(self):
         future1 = self.executor.submit(mul, 21, 2)
         future2 = self.executor.submit(time.sleep, 0.5)
@@ -663,7 +682,9 @@ class ProcessPoolWaitTest(ProcessPoolMixin, WaitTestMixin, unittest.TestCase):
     pass
 
 
-class AsCompletedTestMixin:
+class AsCompletedTestMixin(BaseMixin):
+    executor: futures.MPIPoolExecutor
+
     def test_no_timeout(self):
         future1 = self.executor.submit(mul, 2, 21)
         future2 = self.executor.submit(mul, 7, 6)
@@ -752,7 +773,9 @@ class ProcessPoolAsCompletedTest(
     pass
 
 
-class ExecutorTestMixin:
+class ExecutorTestMixin(BaseMixin):
+    executor: futures.MPIPoolExecutor
+
     def test_submit(self):
         future = self.executor.submit(pow, 2, 8)
         self.assertEqual(256, future.result())
@@ -884,7 +907,7 @@ class ProcessPoolExecutorTest(
                 pow,
                 range(10),
                 range(10),
-                buffersize=str(1),
+                buffersize=str(1),  # type: ignore
             )
         with self.assertRaises(ValueError):
             self.executor.map(
@@ -976,23 +999,23 @@ class ProcessPoolSubmitTest(unittest.TestCase):
     def test_mpi_serialized_support(self):
         futures._core.setup_mpi_threads()
         serialized = futures._core.serialized
-        lock_save = serialized.lock
+        lock_save = serialized.lock  # ty:ignore[unresolved-attribute]
         try:
             if lock_save is None:
-                serialized.lock = threading.Lock()
+                serialized.lock = threading.Lock()  # ty:ignore[unresolved-attribute]
                 executor = futures.MPIPoolExecutor(1).bootup()
                 executor.submit(abs, 0).result()
                 executor.shutdown()
-                serialized.lock = lock_save
+                serialized.lock = lock_save  # ty:ignore[unresolved-attribute]
             else:
-                serialized.lock = None
+                serialized.lock = None  # ty:ignore[unresolved-attribute]
                 with lock_save:
                     executor = futures.MPIPoolExecutor(1).bootup()
                     executor.submit(abs, 0).result()
                     executor.shutdown()
-                serialized.lock = lock_save
+                serialized.lock = lock_save  # ty:ignore[unresolved-attribute]
         finally:
-            serialized.lock = lock_save
+            serialized.lock = lock_save  # ty:ignore[unresolved-attribute]
 
     def test_shared_executors(self):
         if not SHARED_POOL:
@@ -1137,6 +1160,8 @@ class MPICommExecutorTest(unittest.TestCase):
 
     def test_self(self):
         with self.MPICommExecutor(MPI.COMM_SELF) as executor:
+            self.assertIsNotNone(executor)
+            assert executor is not None
             future = executor.submit(time.sleep, 0)
             self.assertIsNone(future.result())
             self.assertIsNone(future.exception())
@@ -1197,7 +1222,7 @@ class MPICommExecutorTest(unittest.TestCase):
         intercomm, intracomm = futures._core.comm_split(MPI.COMM_WORLD, 0)
         try:
             with self.assertRaises(ValueError):
-                self.MPICommExecutor(intercomm)
+                self.MPICommExecutor(intercomm)  # type: ignore
         finally:
             intercomm.Free()
             if intracomm:
@@ -1262,6 +1287,7 @@ class MPICommExecutorTest(unittest.TestCase):
     def test_get_comm_workers(self):
         for comm in (MPI.COMM_SELF, MPI.COMM_WORLD):
             with self.MPICommExecutor(comm) as executor:
+                assert executor is not None
                 num_workers = executor.submit(check_comm_workers).result()
                 self.assertEqual(executor.num_workers, num_workers)
         self.assertRaises(RuntimeError, check_comm_workers)
@@ -1694,6 +1720,7 @@ class CollectTest(unittest.TestCase):
         fs = [MyFuture() for _ in range(5)]
         future = futures.collect(fs)
         self.assertIs(type(future), MyFuture)
+        assert isinstance(future, MyFuture)
         super(MyFuture, future).cancel()
         for f in fs:
             self.assertFalse(f.cancelled())
@@ -1725,8 +1752,10 @@ class ComposeTest(unittest.TestCase):
         self.assertFalse(future.cancelled())
         self.assertFalse(future.running())
         self.assertTrue(future.done())
-        self.assertIs(type(future.exception()), RuntimeError)
-        self.assertEqual(future.exception().args, (42,))
+        exc = future.exception()
+        assert exc is not None
+        self.assertIs(type(exc), RuntimeError)
+        self.assertEqual(exc.args, (42,))
 
     def test_cancel_new(self):
         base = futures.Future()
@@ -1764,14 +1793,18 @@ class ComposeTest(unittest.TestCase):
             base, excepthook=lambda exc: RuntimeError(exc.args[0])
         )
         base.set_exception(ValueError(42))
-        self.assertIs(type(future.exception()), RuntimeError)
-        self.assertEqual(future.exception().args, (42,))
+        exc = future.exception()
+        assert exc is not None
+        self.assertIs(type(exc), RuntimeError)
+        self.assertEqual(exc.args, (42,))
 
     def test_except_hook_failure(self):
         base = futures.Future()
         future = futures.compose(base, excepthook=lambda _: 1 / 0)
         base.set_exception(ValueError(42))
-        self.assertIs(type(future.exception()), ZeroDivisionError)
+        exc = future.exception()
+        assert exc is not None
+        self.assertIs(type(exc), ZeroDivisionError)
 
 
 SKIP_POOL_TEST = testutil.disable_mpi_spawn()

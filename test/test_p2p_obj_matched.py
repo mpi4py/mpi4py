@@ -18,8 +18,8 @@ _basic = [
     2 - 3j,
     "mpi4py",
 ]
-messages = list(_basic)
-messages += [
+messages = [
+    *_basic,
     list(_basic),
     tuple(_basic),
     {f"k{k}": v for k, v in enumerate(_basic)},
@@ -72,7 +72,7 @@ class TestMessage(unittest.TestCase):
 
 
 @unittest.skipIf(MPI.MESSAGE_NULL == MPI.MESSAGE_NO_PROC, "mpi-message")
-class BaseTestP2PMatched:
+class BaseTestP2PMatched(unittest.BaseMixin):
     #
     COMM = MPI.COMM_NULL
 

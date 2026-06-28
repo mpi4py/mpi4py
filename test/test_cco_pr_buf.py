@@ -39,9 +39,9 @@ def StartWaitFree(request):
     request.Free()
 
 
-class BaseTestCCOBuf:
+class BaseTestCCOBuf(unittest.BaseMixin):
     #
-    COMM = MPI.COMM_NULL
+    COMM = MPI.Intracomm(MPI.COMM_NULL)
 
     def testBarrier(self):
         StartWaitFree(self.COMM.Barrier_init())
@@ -366,8 +366,10 @@ class BaseTestCCOBuf:
                         self.assertEqual(value, check)
 
 
-class BaseTestCCOBufInplace:
+class BaseTestCCOBufInplace(unittest.BaseMixin):
     #
+    COMM = MPI.Intracomm(MPI.COMM_NULL)
+
     def testGather(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()

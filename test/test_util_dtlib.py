@@ -20,13 +20,13 @@ except ImportError:
 
 try:
     import numpy
-
-    np_dtype = numpy.dtype
-    np_version = tuple(map(int, numpy.__version__.split(".", 2)[:2]))
+    from numpy import dtype as np_dtype
 except ImportError:
-    numpy = None
-    np_dtype = None
-    np_version = None
+    numpy = None  # ty: ignore[invalid-assignment]
+    np_dtype = None  # ty: ignore[invalid-assignment]
+np_version = (
+    tuple(map(int, numpy.__version__.split(".", 2)[:2])) if numpy else None
+)
 
 typecodes = list("?cbhilqpBHILQPefdgFDG")
 typecodes += [f"b{n:d}" for n in (1,)]
@@ -237,7 +237,7 @@ class TestUtilDTLib(unittest.TestCase):
         iterN = itertools.product(iter1, iter2)
         iterA = iter([False, True])
         for nt, align in itertools.product(iterN, iterA):
-            s1, t1, s2, t2 = sum(nt, ())
+            (s1, t1), (s2, t2) = nt
             spec = f"{s1}{t1},{s2}{t2}"
             with self.subTest(spec=spec, align=align):
                 self.check(spec, align)
@@ -272,6 +272,8 @@ class TestUtilDTLib(unittest.TestCase):
         stp = numpy.dtype(f"B,{dt},B", align=True)
 
         def off(i):
+            assert stp.fields is not None
+            assert stp.names is not None
             return stp.fields[stp.names[i]][1]
 
         blens = [1, 1, 1]
@@ -539,12 +541,13 @@ class TestUtilDTLib(unittest.TestCase):
             vt, it, pt = map(tonumpy, (value, index, pair))
             dt = (f"{vt},{it}", {"align": True})
             if np_dtype is not None:
-                dt = np_dtype(dt[0], **dt[1])
+                dt = np_dtype(dt[0], **dt[1])  # ty: ignore
             self.assertEqual(pt, dt)
 
     def testPairStruct(self):
-        cases = [mpipairtypes] * 3 + [[False, True]]
-        for mt1, mt2, mt3, dup in itertools.product(*cases):
+        for mt1, mt2, mt3, dup in itertools.product(
+            mpipairtypes, mpipairtypes, mpipairtypes, [False, True]
+        ):
             with self.subTest(mt1=mt1.name, mt2=mt2.name, mt3=mt3.name):
                 if dup:
                     mt1 = mt1.Dup()
@@ -598,8 +601,8 @@ class TestUtilDTLib(unittest.TestCase):
     def testMissingNumPy(self):
         from mpi4py.util import dtlib
 
-        np_dtype = dtlib._np_dtype
-        dtlib._np_dtype = None
+        np_dtype = dtlib._np_dtype  # type: ignore
+        dtlib._np_dtype = None  # type: ignore
         try:
             for t in typecodes:
                 with self.subTest(typecode=t):
@@ -626,9 +629,9 @@ class TestUtilDTLib(unittest.TestCase):
                     self.assertEqual(dt["itemsize"], mt.extent * 2)
                     self.assertTrue(dt["aligned"])
             with self.assertRaises(RuntimeError):
-                fromnumpy(None)
+                fromnumpy(None)  # ty: ignore[invalid-argument-type]
         finally:
-            dtlib._np_dtype = np_dtype
+            dtlib._np_dtype = np_dtype  # type: ignore
 
     @unittest.skipIf(numpy is None, "numpy")
     def testFailures(self):
