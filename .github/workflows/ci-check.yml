@@ -181,4 +181,4 @@ jobs:
         python -m pip install -qU --group type
 
     - name: mypy (stubtest)
-      run:  stubtest --ignore-disjoint-bases mpi4py
+      run:  stubtest mpi4py

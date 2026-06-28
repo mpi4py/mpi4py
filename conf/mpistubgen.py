@@ -55,6 +55,16 @@ def is_class(obj):
     return inspect.isclass(obj) or type(obj) is type(int)
 
 
+def is_disjoint_base(cls):
+    type1, type2 = cls, cls.__base__
+    for attr in ("__basicsize__", "__itemsize__"):
+        size1 = getattr(type1, attr, None)
+        size2 = getattr(type2, attr, None)
+        if size1 != size2:
+            return True
+    return False
+
+
 class Lines(UserList):
     INDENT = " " * 4
     level = 0
@@ -137,12 +147,12 @@ def visit_class(cls, done=None):
         "__module__",
         "__weakref__",
         "__pyx_vtable__",
-        "__str__",
-        "__repr__",
         "__lt__",
         "__le__",
         "__ge__",
         "__gt__",
+        "__str__",
+        "__repr__",
     }
     special = {
         "__len__": ("self", "int", None),
@@ -178,6 +188,8 @@ def visit_class(cls, done=None):
         final = False
     if final:
         lines.add = "@final"
+    elif is_disjoint_base(cls):
+        lines.add = "@disjoint_base"
     base = cls.__base__
     if base is object:
         lines.add = f"class {cls.__name__}:"
@@ -380,6 +392,11 @@ if sys.version_info >= (3, 11):
     from typing import Self
 else:
     from typing_extensions import Self
+
+if sys.version_info >= (3, 15):
+    from typing import disjoint_base  # type: ignore[attr-defined]
+else:
+    from typing_extensions import disjoint_base
 
 from os import PathLike
 from threading import Lock
