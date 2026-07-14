@@ -6,7 +6,7 @@ import sys
 topdir = pathlib.Path(__file__).resolve().parent.parent
 
 
-def get_version(settings=None):  # noqa: ARG001
+def get_version():
     source = topdir / "src" / "mpi4py" / "__init__.py"
     content = source.read_text(encoding="utf-8")
     m = re.search(r'__version__\s*=\s*"(.*)"', content)
@@ -17,7 +17,7 @@ def get_version(settings=None):  # noqa: ARG001
     return version
 
 
-def get_readme(settings=None):  # noqa: ARG001
+def get_readme():
     filelist = ("DESCRIPTION.rst", "CITATION.rst", "INSTALL.rst")
     template = "See `{0} <{0}>`_.\n\n"
     template += ".. include:: {0}\n"
@@ -33,7 +33,7 @@ def get_readme(settings=None):  # noqa: ARG001
     }
 
 
-def get_requires_python(settings=None):  # noqa: ARG001
+def get_requires_python():
     source = topdir / "pyproject.toml"
     content = source.read_text(encoding="utf-8")
     m = re.search(r"requires-python\s*=\s*\"(.*)\"", content)
@@ -41,10 +41,18 @@ def get_requires_python(settings=None):  # noqa: ARG001
     return requires_python
 
 
-def dynamic_metadata(field, settings=None):
+def dynamic_metadata(settings, project):  # noqa: ARG001
+    return {
+        "version": get_version(),
+        "readme": get_readme(),
+    }
+
+
+def main():
+    field = sys.argv[1].replace("-", "_")
     getter = globals().get("get_" + field.replace("-", "_"))
-    return getter(settings)
+    print(getter())
 
 
 if __name__ == "__main__":
-    print(dynamic_metadata(sys.argv[1]))
+    main()
