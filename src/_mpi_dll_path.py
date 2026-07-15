@@ -87,7 +87,7 @@ def _mpi_dll_directories():
 
     mpi_abi_stubs = os.environ.get("MPI_ABI_STUBS")
     if mpi_abi_stubs:
-        add_dlldir(mpi_abi_stubs, "lib", dll="mpi_abi")
+        add_dlldir(mpi_abi_stubs, "bin", dll="mpi_abi")
 
     return dlldirs
 

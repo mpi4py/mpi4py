@@ -20,14 +20,15 @@ case "$(uname)" in
         auditwheel repair \
             --plat "manylinux_${glibc}_${arch}" \
             --only-plat \
-            --exclude "libmpi.so.*" \
-            --exclude "libmpi_abi.so.*" \
+            --exclude "libmpi_abi.so.1" \
+            --exclude "libmpi.so.12" \
+            --exclude "libmpi.so.40" \
             -w "${dest_dir}" "${wheel}"
         ;;
     Darwin)
         delocate-wheel -v \
             --require-archs "${arch}" \
-            --exclude "libmpi_abi.0.dylib" \
+            --exclude "libmpi_abi.1.dylib" \
             --exclude "libmpi.12.dylib" \
             --exclude "libpmpi.12.dylib" \
             --exclude "libmpi.40.dylib" \

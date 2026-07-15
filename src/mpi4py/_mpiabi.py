@@ -17,7 +17,7 @@ if os.name == "posix":  # pragma: no branch
     _LIBMPIABI = {
         "mpich": ("mpi", 12),
         "openmpi": ("mpi", 40),
-        "mpiabi": ("mpi_abi", 0),
+        "mpiabi": ("mpi_abi", 1),
     }
 else:  # pragma: no cover
     _LIBMPIABI = {

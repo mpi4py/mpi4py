@@ -67,7 +67,7 @@ MPI_ABI = {
 }
 
 MPI_LIB = {
-    "mpiabi": ("mpi_abi", 0),
+    "mpiabi": ("mpi_abi", 1),
     "mpich": ("mpi", 12),
     "openmpi": ("mpi", 40),
     "impi": ("impi", None),
