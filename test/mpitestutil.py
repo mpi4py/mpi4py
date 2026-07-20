@@ -17,25 +17,17 @@ def import_MPI():
 
 
 def has_datatype(datatype):
-    # https://github.com/pmodels/mpich/issues/7341
     MPI = import_MPI()
     if datatype == MPI.DATATYPE_NULL:
         return False
-    try:
-        size = datatype.Get_size()
-    except MPI.Exception as exc:
-        if exc.Get_error_class() != MPI.ERR_TYPE:
-            raise
-        return False
-    if size in (0, MPI.UNDEFINED):
-        return False
-    vendor_name, vendor_version = MPI.get_vendor()
-    mpich = vendor_name in ("MPICH", "MVAPICH")
-    impi = vendor_name == "Intel MPI"
+    windows = sys.platform == "win32"
+    name, version = MPI.get_vendor()
+    mpich = name in ("MPICH", "MVAPICH")
+    impi = name == "Intel MPI"
     mpi_version = MPI.Get_version()
-    if (mpich and mpi_version < (5, 0)) or (
-        impi and vendor_version < (2021, 17, 0)
-    ):
+    abi_version = MPI.Get_abi_version()
+    # https://github.com/pmodels/mpich/issues/7341
+    if (mpich and mpi_version < (5, 0)) or (impi and version < (2021, 17, 0)):
         if datatype in (
             MPI.LOGICAL1,
             MPI.LOGICAL2,
@@ -48,6 +40,30 @@ def has_datatype(datatype):
             MPI.BFLOAT16_T,
         ):
             return False
+    # TODO: report upstream
+    if impi and version < (2021, 19, 0) and abi_version >= (1, 0):
+        if datatype in (
+            MPI.LOGICAL16,
+            MPI.INTEGER16,
+        ):
+            if not windows:
+                return False
+        if datatype in (
+            MPI.REAL2,
+            MPI.COMPLEX4,
+            MPI.FLOAT16_T,
+            MPI.BFLOAT16_T,
+        ):
+            return False
+    # MPI 5.0, Chapter 20, Section 20.4, page 848, line 22
+    try:
+        size = datatype.Get_size()
+    except MPI.Exception as exc:
+        if exc.Get_error_class() != MPI.ERR_TYPE:
+            raise
+        return False
+    if size in (0, MPI.UNDEFINED):
+        return False
     return True
 
 

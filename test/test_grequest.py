@@ -30,6 +30,18 @@ class GReqCtx:
 @unittest.skipMPI("openmpi(==4.1.0)")
 class TestGrequest(unittest.TestCase):
     #
+    def checkHandle(self, greq):
+        if unittest.is_mpi_abi("impi(<2021.19.0)"):
+            return
+        if greq.toint() != -1:
+            dupe = MPI.Grequest.fromint(greq.toint())
+            self.assertIs(type(dupe), MPI.Grequest)
+            self.assertEqual(dupe, greq)
+        if greq.py2f() != -1:
+            dupe = MPI.Grequest.f2py(greq.py2f())
+            self.assertIs(type(dupe), MPI.Grequest)
+            self.assertEqual(dupe, greq)
+
     def testConstructor(self):
         ctx = GReqCtx()
         greq = MPI.Grequest.Start(ctx.query, ctx.free, ctx.cancel)
@@ -39,14 +51,7 @@ class TestGrequest(unittest.TestCase):
         dupe = MPI.Grequest.fromhandle(greq.tohandle())
         self.assertIs(type(dupe), MPI.Grequest)
         self.assertEqual(dupe, greq)
-        if greq.toint() != -1:
-            dupe = MPI.Grequest.fromint(greq.toint())
-            self.assertIs(type(dupe), MPI.Grequest)
-            self.assertEqual(dupe, greq)
-        if greq.py2f() != -1:
-            dupe = MPI.Grequest.f2py(greq.py2f())
-            self.assertIs(type(dupe), MPI.Grequest)
-            self.assertEqual(dupe, greq)
+        self.checkHandle(greq)
         dupe = MPI.Request(greq)
         self.assertIs(type(dupe), MPI.Request)
         self.assertEqual(dupe, greq)
@@ -57,6 +62,7 @@ class TestGrequest(unittest.TestCase):
         greq.Wait()
 
     @unittest.skipMPI("openmpi")  # TODO(dalcinl): open-mpi/ompi#11681
+    @unittest.skipMPI("impi(<2021.19.0)", mpiabi=True)
     def testExceptionHandling(self):
         ctx = GReqCtx()
 

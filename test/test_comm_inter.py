@@ -44,6 +44,7 @@ class BaseTestIntercomm:
         self.INTRACOMM.Free()
         self.INTERCOMM.Free()
 
+    @unittest.skipMPI("impi(<2021.19.0)", mpiabi=True)
     def testHandle(self):
         intercomm = self.INTERCOMM
         cint = intercomm.toint()

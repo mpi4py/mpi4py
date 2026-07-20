@@ -188,6 +188,8 @@ class BaseTestCCOObjInter:
                     for root in range(rsize):
                         value = self.INTERCOMM.reduce(rank, op=op, root=root)
                         self.assertIsNone(value)
+        if unittest.is_mpi_abi("impi(<2021.19.0)"):
+            return
         badroots = {-3, -2, -1, rsize}.difference({MPI.ROOT, MPI.PROC_NULL})
         for root in badroots:
             with self.assertRaises(MPI.Exception) as cm:

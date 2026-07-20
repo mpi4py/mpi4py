@@ -75,7 +75,7 @@ class _VersionPredicate:
         return True
 
 
-def mpi_predicate(predicate):
+def mpi_predicate(predicate, mpiabi=False):
     MPI = import_MPI()
 
     def key(s):
@@ -85,6 +85,9 @@ def mpi_predicate(predicate):
         s = s.replace("Intel", "I")
         s = s.replace("Microsoft", "MS")
         return s.lower()
+
+    if mpiabi and MPI.Get_abi_version()[0] < 1:
+        return None
 
     vp = _VersionPredicate(key(predicate))
     if vp.name == "mpi":
@@ -99,8 +102,12 @@ def mpi_predicate(predicate):
     return None
 
 
-def is_mpi(predicate):
-    return mpi_predicate(predicate)
+def is_mpi(predicate, mpiabi=False):
+    return mpi_predicate(predicate, mpiabi)
+
+
+def is_mpi_abi(predicate):
+    return is_mpi(predicate, True)
 
 
 def is_mpi_gpu(predicate, array):
@@ -119,8 +126,8 @@ skipIf = unittest.skipIf
 skipUnless = unittest.skipUnless
 
 
-def skipMPI(predicate, *conditions, reason=""):
-    version = mpi_predicate(predicate)
+def skipMPI(predicate, *conditions, reason="", mpiabi=False):
+    version = mpi_predicate(predicate, mpiabi)
     if version:
         if not conditions or any(conditions):
             return unittest.skip(str(version))

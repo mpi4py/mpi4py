@@ -100,6 +100,7 @@ class TestMPIABI(unittest.TestCase):
             self.assertEqual(addr, value)
 
     @unittest.skipIf(MPI.Get_abi_version() < (1, 0), "mpi-abi")
+    @unittest.skipMPI("impi(<2021.19.0)", mpiabi=True)
     def testIntHandle(self):
         for attr in dir(MPI):
             obj = getattr(MPI, attr)

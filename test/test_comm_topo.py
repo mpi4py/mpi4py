@@ -53,6 +53,8 @@ class BaseTestTopo:
     COMM = MPI.COMM_NULL
 
     def checkHandle(self, oldcomm):
+        if unittest.is_mpi_abi("impi(<2021.19.0)"):
+            return
         cint = oldcomm.toint()
         if cint != -1:
             newcomm = MPI.Comm.fromint(cint)

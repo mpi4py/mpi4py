@@ -95,6 +95,9 @@ class TestErrorCode(unittest.TestCase):
         except NotImplementedError:
             self.skipTest("mpi-add_error_class")
         lastused = MPI.COMM_WORLD.Get_attr(MPI.LASTUSEDCODE)
+        if unittest.is_mpi_abi("impi(<2021.19.0)"):
+            self.assertEqual(lastused, 0)
+            lastused = errclass
         self.assertEqual(errclass, lastused)
         errstr = MPI.Get_error_string(errclass)
         self.assertEqual(errstr, "")
@@ -113,6 +116,8 @@ class TestErrorCode(unittest.TestCase):
         self.assertEqual(MPI.Get_error_class(errcode2), errclass)
         self.assertEqual(MPI.Get_error_string(errcode2), "error code 2")
         #
+        if unittest.is_mpi_abi("impi(<2021.19.0)"):
+            return
         with self.catchNotImplementedError(4, 1):
             with self.assertRaises(MPI.Exception):
                 MPI.Remove_error_class(errclass)
