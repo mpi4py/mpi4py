@@ -139,8 +139,37 @@ jobs:
         test = [
             {
                 "py": py,
+                "abi": "mpiabi",
                 "mpi": name,
-                "mpi-version": version,
+                "version": version,
+                "platform": f"{os}-{arch}",
+                "runner": RUNNER[os][arch],
+            }
+            for os, arch in PLATFORMS
+            for py in PY_TEST[:]
+            for name in ("impi",)
+            for version in MPI[name][-1:]
+            if (os, arch) in {("Linux", "x86_64")}
+        ] + [
+            {
+                "py": py,
+                "abi": "mpiabi",
+                "mpi": name,
+                "version": version,
+                "platform": f"{os}-{arch}",
+                "runner": RUNNER[os][arch],
+            }
+            for os, arch in PLATFORMS
+            for py in PY_TEST[:]
+            for name in MPIABI[os][1:]
+            for version in MPI[name][-1:]
+            if name not in {"openmpi", "msmpi"}
+        ] + [
+            {
+                "py": py,
+                "abi": name,
+                "mpi": name,
+                "version": version,
                 "platform": f"{os}-{arch}",
                 "runner": RUNNER[os][arch],
             }
@@ -274,8 +303,9 @@ jobs:
 
   test:
     name: >-
-      test (${{ format('{0}, {1}, {2}, {3}',
-      matrix.platform, matrix.py, matrix.mpi, matrix.mpi-version) }})
+      test (${{ format('{0}, {1}, {2}, {3}, {4}',
+      matrix.platform, matrix.py, matrix.abi,
+      matrix.mpi, matrix.version) }})
     runs-on: ${{ matrix.runner }}
     needs: [setup, build]
     strategy:
@@ -293,19 +323,30 @@ jobs:
       uses: astral-sh/setup-uv@v7
       with:
         cache-suffix: >-
-          ${{ github.job }}-${{ matrix.mpi }}-${{ matrix.mpi-version }}
+          ${{ github.job }}-${{ matrix.mpi }}-${{ matrix.version }}
 
     - if: runner.os != 'Windows'
-      name: Install MPI (${{ matrix.mpi }}-${{ matrix.mpi-version }})
+      name: Install MPI (${{ matrix.mpi }}-${{ matrix.version }})
       run: |
-        mpiname=${{ matrix.mpi }} version=${{ matrix.mpi-version }}
+        mpiname=${{ matrix.mpi }} version=${{ matrix.version }}
         # install MPI
-        uv pip install --target "$mpiname" "$mpiname"~="$version"
+        if [[ "$mpiname" == "impi" ]]; then
+        mpispec="impi-rt~=${version%.*}"; else
+        mpispec="$mpiname~=$version"; fi;
+        uv pip install --target "$mpiname" "$mpispec"
         rm -r "$mpiname"/*.dist-info
         sudo mv "$mpiname" /opt
         # tweak environment
-        prefix=/opt/${{ matrix.mpi }}
+        prefix="/opt/$mpiname"
         echo "$prefix/bin" >> $GITHUB_PATH
+        if [[ ${{ matrix.abi == 'mpiabi' && runner.os == 'Linux'}} ]]; then
+        echo LD_LIBRARY_PATH="$prefix/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV; fi;
+        if [[ ${{ matrix.abi == 'mpiabi' && runner.os == 'macOS'}} ]]; then
+        echo DYLD_LIBRARY_PATH="$prefix/lib" >> $GITHUB_ENV; fi;
+        if [[ "$mpiname" == "impi" ]]; then
+        echo "I_MPI_SPAWN=1" >> "$GITHUB_ENV"
+        echo "I_MPI_SPIN_COUNT=1" >> "$GITHUB_ENV"
+        echo "I_MPI_THREAD_YIELD=2" >> "$GITHUB_ENV"; fi;
         if [[ "$mpiname" == "openmpi" ]]; then
         # set OMPI/PRRTE MCA parameters
         mca_params="$HOME/.openmpi/mca-params.conf"
@@ -325,9 +366,9 @@ jobs:
       working-directory: ${{ runner.temp }}
 
     - if: runner.os == 'Windows' && matrix.mpi == 'impi'
-      name: Install Intel MPI (${{ matrix.mpi-version }})
+      name: Install Intel MPI (${{ matrix.version }})
       run: |
-        mpi=intelmpi.redist.win-x64 version=${{ matrix.mpi-version }}
+        mpi=intelmpi.redist.win-x64 version=${{ matrix.version }}
         nuget install $mpi -Version $version
         mpiroot="$(pwd)/$mpi.$version/runtimes/win-x64/native"
         echo "$(cygpath -w "$mpiroot/bin")" >> "$GITHUB_PATH"
@@ -339,9 +380,9 @@ jobs:
       shell: bash
 
     - if: runner.os == 'Windows' && matrix.mpi == 'msmpi'
-      name: Install Microsoft MPI (${{ matrix.mpi-version }})
+      name: Install Microsoft MPI (${{ matrix.version }})
       run: |
-        mpi=MSMpiSetup.exe version=${{ matrix.mpi-version }}
+        mpi=MSMpiSetup.exe version=${{ matrix.version }}
         url="https://download.microsoft.com/download/"
         case "$version" in
         10.0.*) hash="A/E/0/AE002626-9D9D-448D-8197-1EA510E297CE" ;;
@@ -363,7 +404,7 @@ jobs:
     - name: Download mpi4py wheel
       uses: actions/download-artifact@v8
       with:
-        name: mpi4py-abi-${{ matrix.mpi }}-${{ matrix.platform }}
+        name: mpi4py-abi-${{ matrix.abi }}-${{ matrix.platform }}
         path: dist
 
     - name: Install mpi4py wheel
