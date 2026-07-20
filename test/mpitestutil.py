@@ -64,6 +64,10 @@ def has_mpi_appnum():
 
 def has_mpi_port():
     MPI = import_MPI()
+    if MPI.get_vendor()[0] == "Intel MPI":
+        i_mpi_spawn = os.environ.get("I_MPI_SPAWN")
+        if i_mpi_spawn not in {"enable", "yes", "on", "1"}:
+            return False
     try:
         port = MPI.Open_port()
     except MPI.Exception:
@@ -119,6 +123,8 @@ def disable_mpi_spawn():
         if mpi4py.rc.recv_mprobe:
             return True
         if MPI.COMM_WORLD.Get_size() > 1 and windows:
+            return True
+        if not has_mpi_port():
             return True
     if name == "Microsoft MPI":
         if version < (8, 1, 0):

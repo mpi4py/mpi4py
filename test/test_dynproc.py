@@ -22,6 +22,7 @@ def ch4_ofi():
 @unittest.skipMPI("mpich(<4.3.0)", not testutil.has_mpi_port())
 @unittest.skipMPI("openmpi(<2.0.0)")
 @unittest.skipMPI("openmpi(>=5.0.0,<5.0.4)")
+@unittest.skipMPI("impi", not testutil.has_mpi_port())
 @unittest.skipMPI("msmpi(<8.1.0)")
 @unittest.skipMPI("mvapich(<3.0.0)")
 @unittest.skipIf(MPI.COMM_WORLD.Get_size() < 2, "mpi-world-size<2")
