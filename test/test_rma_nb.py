@@ -1,7 +1,6 @@
 import contextlib
 
 import arrayimpl
-import mpitestutil as testutil
 import mpiunittest as unittest
 
 from mpi4py import MPI
@@ -226,21 +225,17 @@ class TestRMASelf(BaseTestRMA, unittest.TestCase):
 @unittest.skipMPI("MPI(<3.0)")
 @unittest.skipMPI("openmpi(<1.8.1)")
 @unittest.skipMPI("MPICH2(<1.5.0)")
+@unittest.skipMPI("impi(>=2021.13.0)", MPI.COMM_WORLD.Get_size() >= 2)
 class TestRMAWorld(BaseTestRMA, unittest.TestCase):
     #
     COMM = MPI.COMM_WORLD
 
-    _skip_impi = testutil.github() and MPI.COMM_WORLD.Get_size() >= 2
-
-    @unittest.skipMPI("impi(>=2021.13.0)", _skip_impi)
     def testAccumulate(self):
         super().testAccumulate()
 
-    @unittest.skipMPI("impi(>=2021.13.0)", _skip_impi)
     def testGetAccumulate(self):
         super().testGetAccumulate()
 
-    @unittest.skipMPI("impi(>=2021.13.0)", _skip_impi)
     def testPutGet(self):
         super().testPutGet()
 
