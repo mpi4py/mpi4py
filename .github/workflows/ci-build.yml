@@ -61,6 +61,8 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@v7
+      with:
+        persist-credentials: false
 
     - name: Setup MSVC
       if:   matrix.backend == 'mesonpy' && runner.os == 'Windows'

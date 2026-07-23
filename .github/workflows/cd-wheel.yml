@@ -51,6 +51,7 @@ jobs:
     - uses: step-security/harden-runner@v2
       with: {egress-policy: audit}
     - uses: actions/checkout@v7
+      with: {persist-credentials: false}
     - id: setup
       run: |
         # build matrix
@@ -82,6 +83,8 @@ jobs:
 
     - id: checkout
       uses: actions/checkout@v7
+      with:
+        persist-credentials: false
 
     - id: setup-macOS
       if: ${{ runner.os == 'macOS' }}
@@ -155,6 +158,8 @@ jobs:
 
     - id: checkout
       uses: actions/checkout@v7
+      with:
+        persist-credentials: false
 
     - id: source-date-epoch
       run: |
@@ -229,6 +234,8 @@ jobs:
       if:   runner.os == 'macOS'
 
     - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
 
     - uses: actions/download-artifact@v8
       with:

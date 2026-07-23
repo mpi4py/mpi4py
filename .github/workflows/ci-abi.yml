@@ -198,6 +198,8 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@v7
+      with:
+        persist-credentials: false
 
     - if: matrix.mpi == 'mpiabi'
       name: Checkout MPI ABI stubs
@@ -206,6 +208,7 @@ jobs:
         repository: mpi-forum/mpi-abi-stubs
         path: mpi-abi-stubs
         ref: main
+        persist-credentials: false
 
     - if: matrix.mpi == 'mpiabi'
       name: Install MPI ABI stubs
@@ -323,6 +326,8 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@v7
+      with:
+        persist-credentials: false
 
     - if: runner.os != 'Windows'
       name: Setup uv

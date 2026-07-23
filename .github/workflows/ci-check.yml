@@ -37,6 +37,8 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@v7
+      with:
+        persist-credentials: false
 
     - name: Setup Python (${{ github.event.inputs.py || 3 }})
       uses: actions/setup-python@v6
@@ -70,6 +72,8 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@v7
+      with:
+        persist-credentials: false
 
     - name: Setup Python (${{ github.event.inputs.py || 3 }})
       uses: actions/setup-python@v6
@@ -102,6 +106,8 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@v7
+      with:
+        persist-credentials: false
 
     - name: Setup Python (${{ github.event.inputs.py || 3 }})
       uses: actions/setup-python@v6
@@ -150,6 +156,8 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@v7
+      with:
+        persist-credentials: false
 
     - name: Setup Python (${{ github.event.inputs.py || 3 }})
       uses: actions/setup-python@v6

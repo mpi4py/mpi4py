@@ -259,6 +259,8 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@v7
+      with:
+        persist-credentials: false
 
     - name: Download distribution artifact
       uses: actions/download-artifact@v8
@@ -297,6 +299,7 @@ jobs:
       with:
         repository: mpi4py/mpi4py.github.io
         token: ${{ secrets.DOCS_PUBLISH_PAT }}
+        persist-credentials: true
 
     - name: Download documentation artifact
       uses: actions/download-artifact@v8

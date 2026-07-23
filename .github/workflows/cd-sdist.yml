@@ -19,6 +19,8 @@ jobs:
 
     - id: checkout
       uses: actions/checkout@v7
+      with:
+        persist-credentials: false
 
     - id: source-date-epoch
       run: |
