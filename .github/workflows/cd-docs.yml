@@ -66,4 +66,7 @@ jobs:
 
     - id: report
       run: |
-        artifact='Artifact: <${{ steps.upload.outputs.artifact-url }}>'
+        artifact="Artifact: <${ARTIFACT_URL}>"
+        echo "$artifact" >> "$GITHUB_STEP_SUMMARY"
+      env:
+        ARTIFACT_URL: ${{ steps.upload.outputs.artifact-url }}

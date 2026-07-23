@@ -114,14 +114,17 @@ jobs:
                 "AMD64": "windows-2025",
             },
         }
+        from os import environ
+        platform = environ["INPUTS_PLATFORM"]
+        py_sabi  = environ["INPUTS_PY_SABI"]
+        py_build = environ["INPUTS_PY_BUILD"]
+        py_test  = environ["INPUTS_PY_TEST"]
         PLATFORMS = (
             [(os, arch) for os in RUNNER for arch in RUNNER[os]]
-            if "${{ inputs.platform }}" in ("*", "") else
-            [tuple("${{ inputs.platform }}".split("-", 1))]
+            if  platform in ("*", "") else
+            [tuple(platform.split("-", 1))]
         )
-        PYSABI = "${{ inputs.py-sabi || '3.10' }}"
-        py_build = "${{ inputs.py-build }}"
-        py_test = "${{ inputs.py-test }}"
+        PYSABI = py_sabi
         PY_BUILD = [py_build] if py_build else [PYSABI]
         PY_TEST = [py_test] if py_test else [PYSABI, "3"]
         # fill build/test matrix
@@ -184,6 +187,11 @@ jobs:
             print(f"matrix-build={json.dumps(build)}", file=out)
             print(f"matrix-test={json.dumps(test)}", file=out)
         # "
+      env:
+        INPUTS_PLATFORM: ${{ inputs.platform }}
+        INPUTS_PY_SABI:  ${{ inputs.py-sabi || '3.10' }}
+        INPUTS_PY_BUILD: ${{ inputs.py-build }}
+        INPUTS_PY_TEST:  ${{ inputs.py-test }}
 
   build:
     name: build (${{ matrix.platform }}, ${{ matrix.mpi }})

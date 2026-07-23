@@ -49,10 +49,12 @@ jobs:
 
     - id: report
       run: |
-        artifact='Artifact: <${{ steps.upload.outputs.artifact-url }}>'
-        echo $artifact >> $GITHUB_STEP_SUMMARY
-        echo '```'     >> $GITHUB_STEP_SUMMARY
-        sha256sum -b * >> $GITHUB_STEP_SUMMARY
-        echo '```'     >> $GITHUB_STEP_SUMMARY
+        artifact="Artifact: <${ARTIFACT_URL}>"
+        echo "$artifact" >> "$GITHUB_STEP_SUMMARY"
+        echo '```'       >> "$GITHUB_STEP_SUMMARY"
+        sha256sum -b *   >> "$GITHUB_STEP_SUMMARY"
+        echo '```'       >> "$GITHUB_STEP_SUMMARY"
       shell: bash
       working-directory: dist
+      env:
+        ARTIFACT_URL: ${{ steps.upload.outputs.artifact-url }}

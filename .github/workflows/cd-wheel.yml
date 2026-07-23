@@ -55,10 +55,15 @@ jobs:
     - id: setup
       run: |
         # build matrix
+        read -ra os <<< "$ARG_OS"
+        read -ra py <<< "$ARG_PY"
         python -u cibw/setup-matrix.py \
-          --os ${{ inputs.os-arch }} \
-          --py ${{ inputs.python-tag }} \
+          --os "${os[@]}" \
+          --py "${py[@]}" \
           >> "$GITHUB_OUTPUT"
+      env:
+        ARG_OS: ${{ inputs.os-arch }}
+        ARG_PY: ${{ inputs.python-tag }}
 
   build:
     name: >-
@@ -195,13 +200,15 @@ jobs:
       run: |
         # sha256sum
         test "$(uname)" = Darwin && sha256sum() { shasum -a 256 $@; } || true
-        artifact='Artifact: <${{ steps.upload.outputs.artifact-url }}>'
-        echo $artifact >> $GITHUB_STEP_SUMMARY
-        echo '```'     >> $GITHUB_STEP_SUMMARY
-        sha256sum -b * >> $GITHUB_STEP_SUMMARY
-        echo '```'     >> $GITHUB_STEP_SUMMARY
+        artifact="Artifact: <${ARTIFACT_URL}>"
+        echo "$artifact" >> "$GITHUB_STEP_SUMMARY"
+        echo '```'       >> "$GITHUB_STEP_SUMMARY"
+        sha256sum -b *   >> "$GITHUB_STEP_SUMMARY"
+        echo '```'       >> "$GITHUB_STEP_SUMMARY"
       shell: bash
       working-directory: dist
+      env:
+        ARTIFACT_URL: ${{ steps.upload.outputs.artifact-url }}
 
   test:
     name: >-
