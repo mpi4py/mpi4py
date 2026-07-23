@@ -225,9 +225,8 @@ jobs:
     - name: Configure hostname
       run:  echo 127.0.0.1 `hostname` | sudo tee -a /etc/hosts > /dev/null
       if:   runner.os == 'Linux' || runner.os == 'macOS'
-
-    - if: ${{ runner.os == 'macOS' }}
-      run: sudo hostname localhost
+    - run:  sudo hostname localhost
+      if:   runner.os == 'macOS'
 
     - uses: actions/checkout@v7
 
@@ -239,6 +238,9 @@ jobs:
 
     - if: ${{ matrix.py-sabi != '' }}
       run: rm -f dist/mpi4py-*-cp3*-cp3*-*.whl
+
+    - run: awk 'NF' .ci/env.${{ matrix.mpi }} >> "$GITHUB_ENV"
+      shell: bash
 
     # * test conda
 
@@ -446,6 +448,7 @@ jobs:
       env:
         MPIEXEC: ${{ steps.impi_old.outputs.mpiexec }}
         I_MPI_ROOT: ${{ steps.impi_old.outputs.mpiroot }}
+        I_MPI_COMPATIBILITY: 5
 
     - if: ${{ matrix.mpi == 'impi' && runner.os == 'Windows' }}
       name: Install MPI in local directory
@@ -465,6 +468,7 @@ jobs:
       env:
         MPIEXEC: ${{ steps.impi.outputs.mpiexec }}
         I_MPI_ROOT: ${{ steps.impi.outputs.mpiroot }}
+        I_MPI_COMPATIBILITY: mpi-4.1
 
     # *** test system MPI
 

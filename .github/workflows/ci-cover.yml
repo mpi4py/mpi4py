@@ -63,17 +63,8 @@ jobs:
         PIP_DISABLE_PIP_VERSION_CHECK: true
 
     - name: Tweak MPI
-      run: |
-        openmpi_mca_params=$HOME/.openmpi/mca-params.conf
-        mkdir -p $(dirname $openmpi_mca_params)
-        echo plm_ssh_agent=false >> $openmpi_mca_params
-        echo pml=ob1 >> $openmpi_mca_params
-        echo btl=tcp,self >> $openmpi_mca_params
-        echo mpi_yield_when_idle=true >> $openmpi_mca_params
-        echo btl_base_warn_component_unused=false >> $openmpi_mca_params
-        prte_mca_params=$HOME/.prte/mca-params.conf
-        mkdir -p $(dirname $prte_mca_params)
-        echo rmaps_default_mapping_policy=:oversubscribe >> $prte_mca_params
+      run:  awk 'NF' .ci/env.${{ matrix.mpi }} >> "$GITHUB_ENV"
+      shell: bash
 
     - name: Run coverage
       run:  test/coverage.sh

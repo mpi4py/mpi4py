@@ -49,6 +49,8 @@ jobs:
     - name: Configure hostname
       run:  echo 127.0.0.1 `hostname` | sudo tee -a /etc/hosts > /dev/null
       if:   runner.os == 'Linux' || runner.os == 'macOS'
+    - run:  sudo hostname localhost
+      if:   runner.os == 'macOS'
 
     - name: Checkout
       uses: actions/checkout@v7
@@ -57,6 +59,10 @@ jobs:
       uses: mpi4py/setup-mpi@v1
       with:
         mpi: ${{ matrix.mpi }}
+
+    - name: Tweak MPI (${{ matrix.mpi }})
+      run:  awk 'NF' .ci/env.${{ matrix.mpi }} >> "$GITHUB_ENV"
+      shell: bash
 
     - name: Setup Python (${{ matrix.py }})
       uses: actions/setup-python@v6
@@ -68,6 +74,9 @@ jobs:
 
     - name: Build package
       run:  python -m pip wheel -v --wheel-dir=dist .
+      env:
+        CFLAGS: -O0
+
     - name: Upload package artifacts
       uses: actions/upload-artifact@v7
       with:

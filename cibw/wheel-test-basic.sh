@@ -56,7 +56,7 @@ function setup-mpi {
     elif command -v module > /dev/null; then
         module unload "mpi" > /dev/null 2>&1
         module load "mpi/$mpi-$(uname -m)"
-    elif test "$(uname)" == Linux; then
+    elif test "$(uname)" = Linux; then
         local version
         test "$mpi" == mpich && version=12 || version=40
         export MPI4PY_LIBMPI="libmpi.so.$version"

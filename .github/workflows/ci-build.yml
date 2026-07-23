@@ -73,6 +73,10 @@ jobs:
       with:
         mpi: ${{ matrix.mpi }}
 
+    - name: Tweak MPI (${{ matrix.mpi }})
+      run:  awk 'NF' .ci/env.${{ matrix.mpi }} >> "$GITHUB_ENV"
+      shell: bash
+
     - name: Setup Python (${{ github.event.inputs.py || 3 }})
       uses: actions/setup-python@v6
       with:

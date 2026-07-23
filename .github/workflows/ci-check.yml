@@ -141,7 +141,7 @@ jobs:
       run:  yamllint .
 
     - name: shellcheck
-      run:  conf/shellcheck.sh
+      run:  sh .ci/shellcheck.sh
 
   type:
     runs-on: ubuntu-latest

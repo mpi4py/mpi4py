@@ -18,10 +18,12 @@ python=$(command -v python)
 scriptdir=$(dirname "${BASH_SOURCE[0]}")
 "$PYTHON" -m pip uninstall -qy "$mpipackage"
 for version in "${!mpiversion}"; do
+    if test "$mpi-$version-$(uname)" = mpich-4.0-Darwin;
+    then env=(env FI_PROVIDER=sockets); else env=(env); fi;
     echo "::group::$mpipackage=$version"
     "$PYTHON" -m pip install "$mpipackage==$version.*"
     "$PYTHON" -m pip list
-    "$scriptdir"/run-tests-mpi.sh
+    "${env[@]}" "$scriptdir"/run-tests-mpi.sh
     echo "::endgroup::"
 done
 "$PYTHON" -m pip uninstall -qy "$mpipackage"

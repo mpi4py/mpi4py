@@ -293,7 +293,7 @@ jobs:
       env:
         MPI4PY_BUILD_PYSABI: "${{ inputs.py-sabi || '1' }}"
         MPI4PY_BUILD_MPIABI: "1"
-        CFLAGS: "-O0"
+        CFLAGS: -O0
 
     - name: Upload mpi4py wheel
       uses: actions/upload-artifact@v7
@@ -314,6 +314,12 @@ jobs:
         include: ${{ fromJSON(needs.setup.outputs.matrix-test) }}
 
     steps:
+
+    - name: Configure hostname
+      run:  echo 127.0.0.1 `hostname` | sudo tee -a /etc/hosts > /dev/null
+      if:   runner.os == 'Linux' || runner.os == 'macOS'
+    - run:  sudo hostname localhost
+      if:   runner.os == 'macOS'
 
     - name: Checkout
       uses: actions/checkout@v7
@@ -338,31 +344,15 @@ jobs:
         sudo mv "$mpiname" /opt
         # tweak environment
         prefix="/opt/$mpiname"
-        echo "$prefix/bin" >> $GITHUB_PATH
-        if [[ ${{ matrix.abi == 'mpiabi' && runner.os == 'Linux'}} ]]; then
-        echo LD_LIBRARY_PATH="$prefix/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV; fi;
-        if [[ ${{ matrix.abi == 'mpiabi' && runner.os == 'macOS'}} ]]; then
-        echo DYLD_LIBRARY_PATH="$prefix/lib" >> $GITHUB_ENV; fi;
-        if [[ "$mpiname" == "impi" ]]; then
-        echo "I_MPI_SPAWN=1" >> "$GITHUB_ENV"
-        echo "I_MPI_SPIN_COUNT=1" >> "$GITHUB_ENV"
-        echo "I_MPI_THREAD_YIELD=2" >> "$GITHUB_ENV"; fi;
-        if [[ "$mpiname" == "openmpi" ]]; then
-        # set OMPI/PRRTE MCA parameters
-        mca_params="$HOME/.openmpi/mca-params.conf"
-        mkdir -p "$(dirname "$mca_params")"
-        echo pml=ob1 >> $mca_params
-        echo btl=tcp,self >> $mca_params
-        echo mpi_param_check = true >> "$mca_params"
-        echo mpi_show_handle_leaks = true >> "$mca_params"
-        echo rmaps_base_oversubscribe = true >> "$mca_params"
-        mca_params="$HOME/.prte/mca-params.conf"
-        mkdir -p "$(dirname "$mca_params")"
-        echo rmaps_default_mapping_policy = :oversubscribe >> "$mca_params"
-        if [[ "${version%%.*}" -lt 5 ]]; then
-        # Use MPI_THREAD_LEVEL=MPI_THREAD_SERIALIZED with openmpi<5
-        echo MPI4PY_RC_THREAD_LEVEL=serialized >> $GITHUB_ENV
-        fi; fi;
+        bindir="$prefix/bin"
+        libdir="$prefix/lib"
+        echo "$bindir" >> "$GITHUB_PATH"
+        if ${{ matrix.abi == 'mpiabi' && runner.os == 'Linux'}}; then
+        echo LD_LIBRARY_PATH="$libdir:$LD_LIBRARY_PATH" >> "$GITHUB_ENV"; fi;
+        if ${{ matrix.abi == 'mpiabi' && runner.os == 'macOS'}}; then
+        echo DYLD_LIBRARY_PATH="$libdir" >> "$GITHUB_ENV"; fi;
+        if [[ "$mpiname" == "openmpi" && "${version%%.*}" -lt 5 ]]; then
+        echo MPI4PY_RC_THREAD_LEVEL=serialized >> "$GITHUB_ENV"; fi
       working-directory: ${{ runner.temp }}
 
     - if: runner.os == 'Windows' && matrix.mpi == 'impi'
@@ -373,9 +363,6 @@ jobs:
         mpiroot="$(pwd)/$mpi.$version/runtimes/win-x64/native"
         echo "$(cygpath -w "$mpiroot/bin")" >> "$GITHUB_PATH"
         echo "I_MPI_ROOT=$(cygpath -w "$mpiroot")" >> "$GITHUB_ENV"
-        echo "I_MPI_SPAWN=1" >> "$GITHUB_ENV"
-        echo "I_MPI_SPIN_COUNT=1" >> "$GITHUB_ENV"
-        echo "I_MPI_THREAD_YIELD=2" >> "$GITHUB_ENV"
       working-directory: ${{ runner.temp }}
       shell: bash
 
@@ -395,6 +382,10 @@ jobs:
       working-directory: ${{ runner.temp }}
       shell: bash
 
+    - name: Tweak MPI (${{ matrix.mpi }})
+      run:  awk 'NF' .ci/env.${{ matrix.mpi }} >> "$GITHUB_ENV"
+      shell: bash
+
     - name: Setup Python (${{ matrix.py }})
       uses: actions/setup-python@v6
       with:
@@ -410,10 +401,6 @@ jobs:
     - name: Install mpi4py wheel
       run:  python -m pip install mpi4py
               --verbose --no-index --find-links=dist
-
-    - name: Set hostname
-      run:  sudo hostname localhost
-      if:   runner.os == 'macOS'
 
     - name: Test mpi4py cmdline (--prefix)
       run:  mpiexec -n 1 python -m mpi4py --prefix
