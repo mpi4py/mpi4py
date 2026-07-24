@@ -275,7 +275,7 @@ jobs:
         subject-path: dist/*.tar.gz
 
     - name: Publish assets to GitHub Releases
-      run:  gh release upload $TAG dist/*.tar.gz
+      run:  gh release upload "$TAG" dist/*.tar.gz
       env:
         TAG: ${{ github.event.release.tag_name }}
         GH_TOKEN: ${{ github.token }}
@@ -311,24 +311,24 @@ jobs:
       run: |
         # unarchive
         docdir=mpi4py-docs
-        unzip -q $docdir.zip
-        mv $docdir/version .
+        unzip -q "$docdir".zip
+        mv "$docdir"/version .
         version=$(cat version)
-        test ! -d $version
-        mv $docdir $version
+        test ! -d "$version"
+        mv "$docdir" "$version"
         rm -f stable
-        ln -sf $version stable
+        ln -sf "$version" stable
       working-directory: mpi4py
 
     - name: Publish documentation
       run: |
         # publish
-        gh api /users/${GITHUB_ACTOR} > actor.json
+        gh api /users/"${GITHUB_ACTOR}" > actor.json
         git config user.name  "$(jq -r .name  actor.json)"
         git config user.email "$(jq -r .email actor.json)"
         version=$(cat version)
-        git add $version stable
-        git commit -m $version
+        git add "$version" stable
+        git commit -m "$version"
         git show --stat
         git push
       working-directory: mpi4py

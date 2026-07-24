@@ -222,7 +222,7 @@ jobs:
       name: Install MPI ABI stubs
       run: |
         bash build-cmake.sh
-        echo "MPI_ABI_STUBS=$PREFIX" >> "$GITHUB_ENV"
+        echo MPI_ABI_STUBS="$PREFIX" >> "$GITHUB_ENV"
       env:
         PREFIX: ${{ runner.temp }}/mpi-abi-stubs
       working-directory: mpi-abi-stubs
@@ -264,8 +264,8 @@ jobs:
         cp -a "$install/include" "$mpiroot"
         cp -a "$install/win-x64/lib" "$mpiroot"
         # tweak environment
-        echo "$(cygpath -w "$mpiroot/bin")" >> "$GITHUB_PATH"
-        echo "I_MPI_ROOT=$(cygpath -w "$mpiroot")" >> "$GITHUB_ENV"
+        cygpath -w "$mpiroot"/bin >> "$GITHUB_PATH"
+        echo I_MPI_ROOT="$(cygpath -w "$mpiroot")" >> "$GITHUB_ENV"
       working-directory: ${{ runner.temp }}
       shell: bash
 
@@ -328,7 +328,7 @@ jobs:
     steps:
 
     - name: Configure hostname
-      run:  echo 127.0.0.1 `hostname` | sudo tee -a /etc/hosts > /dev/null
+      run:  echo 127.0.0.1 "$(hostname)" | sudo tee -a /etc/hosts > /dev/null
       if:   runner.os == 'Linux' || runner.os == 'macOS'
     - run:  sudo hostname localhost
       if:   runner.os == 'macOS'
@@ -375,8 +375,8 @@ jobs:
         mpi=intelmpi.redist.win-x64 version=${{ matrix.version }}
         nuget install $mpi -Version $version
         mpiroot="$(pwd)/$mpi.$version/runtimes/win-x64/native"
-        echo "$(cygpath -w "$mpiroot/bin")" >> "$GITHUB_PATH"
-        echo "I_MPI_ROOT=$(cygpath -w "$mpiroot")" >> "$GITHUB_ENV"
+        cygpath -w "$mpiroot"/bin >> "$GITHUB_PATH"
+        echo I_MPI_ROOT="$(cygpath -w "$mpiroot")" >> "$GITHUB_ENV"
       working-directory: ${{ runner.temp }}
       shell: bash
 
@@ -392,7 +392,7 @@ jobs:
         curl -sSLO "${url}${hash}"/$mpi
         ./MSMpiSetup.exe -unattend
         cmd='[Environment]::GetEnvironmentVariable("MSMPI_BIN","Machine")'
-        echo "$(pwsh -c "$cmd")" >> "$GITHUB_PATH"
+        pwsh -c "$cmd" >> "$GITHUB_PATH"
       working-directory: ${{ runner.temp }}
       shell: bash
 

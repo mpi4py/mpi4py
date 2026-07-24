@@ -72,7 +72,7 @@ jobs:
       run:  test/coverage.sh
 
     - name: Prepare coverage data
-      run:  mv .coverage .coverage.${TAG}
+      run:  mv .coverage .coverage."${TAG}"
       env:
         TAG: ${{ runner.os }}.${{ matrix.mpi }}.py${{ matrix.py }}
 
@@ -116,7 +116,7 @@ jobs:
         python -m coverage combine
         python -m coverage html
         python -m coverage xml
-        python -m coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
+        python -m coverage report --format=markdown >> "$GITHUB_STEP_SUMMARY"
         python -m coverage report --fail-under=100
 
     - name: Upload HTML report

@@ -26,8 +26,8 @@ jobs:
       run: |
         # source-date-epoch
         SOURCE_DATE_EPOCH=$(git log -1 --pretty=%at)
-        echo SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH >> $GITHUB_ENV
-        echo $(git log -1 --pretty=%ai) [timestamp=$SOURCE_DATE_EPOCH]
+        echo SOURCE_DATE_EPOCH="$SOURCE_DATE_EPOCH" >> "$GITHUB_ENV"
+        echo "$(git log -1 --pretty=%ai)" [timestamp="$SOURCE_DATE_EPOCH"]
       shell: bash
 
     - id: setup-latex
@@ -54,9 +54,9 @@ jobs:
       run:  |
         archive=mpi4py-docs.zip
         rootdir=${archive%.zip}
-        ln -s docs $rootdir
-        python conf/metadata.py version > $rootdir/version
-        python -m zipfile -c $archive $rootdir
+        ln -s docs "$rootdir"
+        python conf/metadata.py version > "$rootdir"/version
+        python -m zipfile -c "$archive" "$rootdir"
 
     - id: upload
       uses: actions/upload-artifact@v7

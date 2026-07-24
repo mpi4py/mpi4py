@@ -106,8 +106,8 @@ jobs:
       run: |
         # source-date-epoch
         SOURCE_DATE_EPOCH=$(git log -1 --pretty=%at)
-        echo SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH >> $GITHUB_ENV
-        echo $(git log -1 --pretty=%ai) [timestamp=$SOURCE_DATE_EPOCH]
+        echo SOURCE_DATE_EPOCH="$SOURCE_DATE_EPOCH" >> "$GITHUB_ENV"
+        echo "$(git log -1 --pretty=%ai)" [timestamp="$SOURCE_DATE_EPOCH"]
       shell: bash
 
     - id: setup-python
@@ -170,8 +170,8 @@ jobs:
       run: |
         # source-date-epoch
         SOURCE_DATE_EPOCH=$(git log -1 --pretty=%at)
-        echo SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH >> $GITHUB_ENV
-        echo $(git log -1 --pretty=%ai) [timestamp=$SOURCE_DATE_EPOCH]
+        echo SOURCE_DATE_EPOCH="$SOURCE_DATE_EPOCH" >> "$GITHUB_ENV"
+        echo "$(git log -1 --pretty=%ai)" [timestamp="$SOURCE_DATE_EPOCH"]
       shell: bash
 
     - id: setup-python
@@ -199,7 +199,7 @@ jobs:
     - id: report
       run: |
         # sha256sum
-        test "$(uname)" = Darwin && sha256sum() { shasum -a 256 $@; } || true
+        test "$(uname)" = Darwin && sha256sum() { shasum -a 256 "$@"; } || true
         artifact="Artifact: <${ARTIFACT_URL}>"
         echo "$artifact" >> "$GITHUB_STEP_SUMMARY"
         echo '```'       >> "$GITHUB_STEP_SUMMARY"
@@ -235,7 +235,7 @@ jobs:
         egress-policy: audit
 
     - name: Configure hostname
-      run:  echo 127.0.0.1 `hostname` | sudo tee -a /etc/hosts > /dev/null
+      run:  echo 127.0.0.1 "$(hostname)" | sudo tee -a /etc/hosts > /dev/null
       if:   runner.os == 'Linux' || runner.os == 'macOS'
     - run:  sudo hostname localhost
       if:   runner.os == 'macOS'
