@@ -5,7 +5,10 @@
 # ruff: noqa: UP007
 
 import sys
-from collections.abc import Sequence
+from collections.abc import (
+    Mapping,
+    Sequence,
+)
 from typing import (
     Any,
     Protocol,
@@ -19,6 +22,8 @@ from .MPI import (
     BottomType,
     Datatype,
     InPlaceType,
+    Intercomm,
+    Intracomm,
 )
 
 __all__ = [
@@ -78,7 +83,7 @@ class SupportsCAI(Protocol):
     """
 
     @property
-    def __cuda_array_interface__(self) -> dict[str, Any]:
+    def __cuda_array_interface__(self) -> Mapping[str, Any]:
         """CAI protocol data."""
 
 
@@ -141,6 +146,7 @@ BufSpec: TypeAlias = Union[
     tuple[Buffer, Count, TypeSpec],
     tuple[Bottom, Count, Datatype],
     list[Any],
+    None,
 ]
 """
 Buffer specification.
@@ -234,6 +240,12 @@ Target specification.
 * tuple[`Displ`]
 * tuple[`Displ`, `Count`]
 * tuple[`Displ`, `Count`, `TypeSpec`]
+"""
+
+
+CommT = TypeVar("CommT", Intracomm, Intercomm)
+"""
+Type variable constrained to `MPI.Intracomm` or `MPI.Intercomm`.
 """
 
 
