@@ -84,8 +84,8 @@ jobs:
       with:
         python-version: ${{ github.event.inputs.py || 3 }}
         check-latest: true
-        pip-install: build
         cache: pip
+    - run: python -m pip install build
 
     - name: Build sdist and wheel (${{ matrix.backend }})
       run:  python -m build --verbose

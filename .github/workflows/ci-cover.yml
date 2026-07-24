@@ -49,11 +49,11 @@ jobs:
     - uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.py }}
-        pip-install: >-
-          --group build
-          --group cover
-          ${{ matrix.mpi }}
         cache: pip
+    - run: python -m pip install
+           --group build
+           --group cover
+           ${{ matrix.mpi }}
 
     - run: python -m pip install .
       env:
@@ -98,10 +98,10 @@ jobs:
     - uses: actions/setup-python@v6
       with:
         python-version: ${{ github.event.inputs.py || 3 }}
-        pip-install: >
-          --group build-cython
-          coverage
         cache: pip
+    - run: python -m pip install
+           --group build-cython
+           coverage
 
     - run: python conf/cythonize.py
 

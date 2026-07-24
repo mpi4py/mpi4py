@@ -296,8 +296,9 @@ jobs:
       with:
         python-version: ${{ matrix.py }}
         allow-prereleases: true
-        pip-install: build
+        check-latest: true
         cache: pip
+    - run: python -m pip install build
 
     - name: Build mpi4py wheel
       run:  python -m build --verbose --wheel
