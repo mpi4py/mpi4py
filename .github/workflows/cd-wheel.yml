@@ -200,11 +200,12 @@ jobs:
       run: |
         # sha256sum
         test "$(uname)" = Darwin && sha256sum() { shasum -a 256 "$@"; } || true
-        artifact="Artifact: <${ARTIFACT_URL}>"
-        echo "$artifact" >> "$GITHUB_STEP_SUMMARY"
-        echo '```'       >> "$GITHUB_STEP_SUMMARY"
-        sha256sum -b *   >> "$GITHUB_STEP_SUMMARY"
-        echo '```'       >> "$GITHUB_STEP_SUMMARY"
+        {
+        echo "Artifact: <${ARTIFACT_URL}>"
+        echo '```'
+        sha256sum -b -- *
+        echo '```'
+        } >> "$GITHUB_STEP_SUMMARY"
       shell: bash
       working-directory: dist
       env:

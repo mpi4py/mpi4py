@@ -113,9 +113,11 @@ jobs:
     - name: Report sha256sum
       run:  |
         # Report sha256sum
-        echo '```'     >> "$GITHUB_STEP_SUMMARY"
-        sha256sum -b * >> "$GITHUB_STEP_SUMMARY"
-        echo '```'     >> "$GITHUB_STEP_SUMMARY"
+        {
+        echo '```'
+        sha256sum -b -- *
+        echo '```'
+        } >> "$GITHUB_STEP_SUMMARY"
       working-directory: dist
 
     - name: Attest artifacts
@@ -167,9 +169,11 @@ jobs:
     - name: Report sha256sum
       run:  |
         # Report sha256sum
-        echo '```'     >> "$GITHUB_STEP_SUMMARY"
-        sha256sum -b * >> "$GITHUB_STEP_SUMMARY"
-        echo '```'     >> "$GITHUB_STEP_SUMMARY"
+        {
+        echo '```'
+        sha256sum -b -- *
+        echo '```'
+        } >> "$GITHUB_STEP_SUMMARY"
       working-directory: dist
 
     - name: Publish to TestPyPI
@@ -216,9 +220,11 @@ jobs:
     - name: Report sha256sum
       run:  |
         # Report sha256sum
-        echo '```'     >> "$GITHUB_STEP_SUMMARY"
-        sha256sum -b * >> "$GITHUB_STEP_SUMMARY"
-        echo '```'     >> "$GITHUB_STEP_SUMMARY"
+        {
+        echo '```';
+        sha256sum -b -- *
+        echo '```'
+        } >> "$GITHUB_STEP_SUMMARY"
       working-directory: dist
 
     - name: Setup Micromamba

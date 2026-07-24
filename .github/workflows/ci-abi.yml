@@ -281,13 +281,11 @@ jobs:
         install=$(ls -d "$mpi".*/)
         cp -a "$install/include" "$mpiroot"
         cp -a "$install/lib" "$mpiroot"
-        # tweak environment
-        msmpi_inc="$mpiroot/include"
-        msmpi_lib32="$mpiroot/lib/x86"
-        msmpi_lib64=$"$mpiroot/lib/x64"
-        echo "MSMPI_INC=$(cygpath -w "$msmpi_inc")" >> "$GITHUB_ENV"
-        echo "MSMPI_LIB32=$(cygpath -w "$msmpi_lib32")" >> "$GITHUB_ENV"
-        echo "MSMPI_LIB64=$(cygpath -w "$msmpi_lib64")" >> "$GITHUB_ENV"
+        { # tweak environment
+        echo MSMPI_INC="$(cygpath -w "$mpiroot/include")"
+        echo MSMPI_LIB32="$(cygpath -w "$mpiroot/lib/x86")"
+        echo MSMPI_LIB64="$(cygpath -w "$mpiroot/lib/x64")"
+        } >> "$GITHUB_ENV"
       working-directory: ${{ runner.temp }}
       shell: bash
 
