@@ -1,0 +1,41 @@
+name: ci-actions
+
+on:  # yamllint disable-line rule:truthy
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+
+  actionlint:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: checkout
+      uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+
+    - name: actionlint
+      uses: docker://rhysd/actionlint:1.7.12
+      with:
+        args: -color
+
+  zizmor:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: checkout
+      uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+
+    - name: zizmor
+      uses: zizmorcore/zizmor-action@v0.6.1
+      with:
+        annotations: true
+        advanced-security: false

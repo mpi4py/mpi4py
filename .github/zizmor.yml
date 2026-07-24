@@ -1,0 +1,9 @@
+# https://docs.zizmor.sh/
+
+rules:
+  anonymous-definition:
+    disable: true
+  concurrency-limits:
+    disable: true
+  unpinned-uses:
+    disable: true

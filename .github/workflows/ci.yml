@@ -37,6 +37,9 @@ jobs:
   cover:
     uses: ./.github/workflows/ci-cover.yml
 
+  actions:
+    uses: ./.github/workflows/ci-actions.yml
+
   ci-status:
     runs-on: ubuntu-slim
     if: ${{ success() || failure() }}
@@ -46,5 +49,6 @@ jobs:
       - build
       - check
       - cover
+      - actions
     steps:
     - run: ${{ !(contains(needs.*.result, 'failure')) }}
