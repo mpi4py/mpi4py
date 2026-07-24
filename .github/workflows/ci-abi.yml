@@ -230,7 +230,7 @@ jobs:
 
     - if: runner.os != 'Windows' && matrix.mpi != 'mpiabi'
       name: Setup uv
-      uses: astral-sh/setup-uv@v7
+      uses: astral-sh/setup-uv@v8.3.2
       with:
         cache-suffix: >-
           ${{ github.job }}-${{ matrix.mpi }}
@@ -338,7 +338,7 @@ jobs:
 
     - if: runner.os != 'Windows'
       name: Setup uv
-      uses: astral-sh/setup-uv@v7
+      uses: astral-sh/setup-uv@v8.3.2
       with:
         cache-suffix: >-
           ${{ github.job }}-${{ matrix.mpi }}-${{ matrix.version }}
