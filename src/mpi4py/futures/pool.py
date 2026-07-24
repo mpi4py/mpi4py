@@ -155,7 +155,6 @@ class MPIPoolExecutor(Executor):
             Exception: If ``fn(*args)`` raises for any values.
 
         """
-        # pylint: disable=too-many-arguments
         return self.starmap(
             fn, zip(*iterables), timeout, chunksize, buffersize, unordered
         )
