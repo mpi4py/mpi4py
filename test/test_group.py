@@ -3,8 +3,10 @@ import mpiunittest as unittest
 from mpi4py import MPI
 
 
-class BaseTestGroup:
+class BaseTestGroup(unittest.BaseMixin):
     #
+    GROUP = MPI.GROUP_NULL
+
     def testProperties(self):
         group = self.GROUP
         self.assertEqual(group.Get_size(), group.size)

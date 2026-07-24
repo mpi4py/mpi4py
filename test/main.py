@@ -172,11 +172,11 @@ def getbuilddir():
         try:
             from setuptools.dist import Distribution
         except ImportError:
-            from distutils.dist import Distribution
+            from distutils.dist import Distribution  # ty: ignore
         try:
             from setuptools.command.build import build
         except ImportError:
-            from distutils.command.build import build
+            from distutils.command.build import build  # ty: ignore
         cmd_obj = build(Distribution())
         cmd_obj.finalize_options()
         builddir = pathlib.Path(cmd_obj.build_platlib)
@@ -242,13 +242,13 @@ def setup_python(options):
 def setup_modules(options):
     #
     if not options.cupy:
-        sys.modules["cupy"] = None
+        sys.modules["cupy"] = None  # ty: ignore[invalid-assignment]
     if not options.numba:
-        sys.modules["numba"] = None
+        sys.modules["numba"] = None  # ty: ignore[invalid-assignment]
     if not options.numpy:
-        sys.modules["numpy"] = None
+        sys.modules["numpy"] = None  # ty: ignore[invalid-assignment]
     if not options.array:
-        sys.modules["array"] = None
+        sys.modules["array"] = None  # ty: ignore[invalid-assignment]
     #
     mpi4py = importlib.import_module("mpi4py")
     if options.threads is not None:
@@ -296,7 +296,7 @@ def print_banner(options):
 
 class TestLoader(unittest.TestLoader):
     #
-    excludePatterns = None
+    excludePatterns = []
 
     def __init__(self, include=None, exclude=None):
         super().__init__()
@@ -336,14 +336,22 @@ class TestLoader(unittest.TestLoader):
 
 class TestProgram(unittest.TestProgram):
     #
+    include: list[str]
+    exclude: list[str]
+    excludeFile: list[str]
+    excludePatterns: list[str]
+    skip_mpi: bool
+    xmloutdir: str
+
     def _getMainArgParser(self, parent):
-        parser = super()._getMainArgParser(parent)
+        parser = super()._getMainArgParser(parent)  # ty: ignore
         setup_parser(parser)
         return parser
 
     def _getDiscoveryArgParser(self, parent):
         parser = argparse.ArgumentParser(parents=[parent])
-        parser.color = True  # Python 3.14+
+        if sys.version_info >= (3, 14):
+            parser.color = True
         setup_parser(parser)
         return parser
 
@@ -359,7 +367,9 @@ class TestProgram(unittest.TestProgram):
             sys.path.insert(0, os.fspath(testdir))
         if not self.skip_mpi:
             mpiunittest = __import__("mpiunittest")
-            mpiunittest.skipMPI = lambda _p, *_c: lambda f: f
+            mpiunittest.skipMPI = (  # ty: ignore[invalid-assignment]
+                lambda _p, *_c: lambda f: f
+            )
         for xfile in self.excludeFile:
             self.excludePatterns.extend(parse_xfile(xfile))
         self.testLoader = TestLoader(self.include, self.exclude)
@@ -371,7 +381,7 @@ class TestProgram(unittest.TestProgram):
         size = MPI.COMM_WORLD.Get_size()
         rank = MPI.COMM_WORLD.Get_rank()
         try:
-            import xmlrunner
+            import xmlrunner  # ty: ignore[unresolved-import]
         except ModuleNotFoundError:
             if rank == 0:
                 print(

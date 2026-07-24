@@ -48,9 +48,9 @@ class TestTopoConstructor(unittest.TestCase):
             )
 
 
-class BaseTestTopo:
+class BaseTestTopo(unittest.BaseMixin):
     #
-    COMM = MPI.COMM_NULL
+    COMM = MPI.Intracomm(MPI.COMM_NULL)
 
     def checkHandle(self, oldcomm):
         if unittest.is_mpi_abi("impi(<2021.19.0)"):
@@ -104,8 +104,8 @@ class BaseTestTopo:
                 topo.Free()
                 continue
             for i in range(ndim):
-                rem_dims = [1] * ndim
-                rem_dims[i] = 0
+                rem_dims = [True] * ndim
+                rem_dims[i] = False
                 sub = topo.Sub(rem_dims)
                 if sub != MPI.COMM_NULL:
                     self.assertEqual(sub.dim, ndim - 1)
@@ -117,7 +117,7 @@ class BaseTestTopo:
         with self.assertRaises(ValueError):
             comm.Create_cart([comm.Get_size()], []).free()
         with self.assertRaises(ValueError):
-            comm.Create_cart([comm.Get_size()], [0, 0]).free()
+            comm.Create_cart([comm.Get_size()], [False, False]).free()
 
     @unittest.skipMPI("MPI(<2.0)")
     def testCartcommZeroDim(self):

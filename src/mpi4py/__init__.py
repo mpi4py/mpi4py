@@ -78,11 +78,11 @@ class Rc:
 
     def __repr__(self):
         """Return repr(self)."""
-        return f"<{__spec__.name}.rc>"
+        return f"<{__name__}.rc>"
 
 
 rc = Rc()
-__import__("sys").modules[__spec__.name + ".rc"] = rc
+__import__("sys").modules[f"{__name__}.rc"] = rc  # ty: ignore
 
 
 def get_include():
@@ -97,7 +97,9 @@ def get_include():
                 include_dirs=[..., mpi4py.get_include()])
 
     """
-    prefix = __import__("pathlib").Path(__spec__.origin).parent
+    assert __spec__ is not None  # noqa: S101
+    origin = __spec__.origin or __file__
+    prefix = __import__("pathlib").Path(origin).parent
     return str(prefix / "include")
 
 
@@ -114,7 +116,9 @@ def get_config():
        `configparser` module.
 
     """
-    prefix = __import__("pathlib").Path(__spec__.origin).parent
+    assert __spec__ is not None  # noqa: S101
+    origin = __spec__.origin or __file__
+    prefix = __import__("pathlib").Path(origin).parent
     parser = __import__("configparser").ConfigParser()
     parser.add_section("mpi")
     parser.read(prefix / "mpi.cfg", encoding="utf-8")

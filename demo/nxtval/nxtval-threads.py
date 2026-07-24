@@ -34,10 +34,10 @@ class Counter:
     def free(self):
         self.comm.Barrier()
         # stop counter thread
-        rank = self.comm.Get_rank()
-        if rank == 0:
+        if self.thread:
             self.comm.Ssend([None, MPI.INT], 0, 1)
             self.thread.join()
+            self.thread = None
         #
         self.comm.Free()
 

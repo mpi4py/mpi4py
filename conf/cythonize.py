@@ -22,7 +22,7 @@ def cythonize(args=None):
         argv[1:1] = ["--3str"]
 
     code = __import__("Cython.Compiler.Code", fromlist=[""])
-    code.compression_algorithms = []
+    code.compression_algorithms = []  # ty: ignore[unresolved-attribute]
 
     cwd = pathlib.Path.cwd()
     sys_argv = sys.argv[:]

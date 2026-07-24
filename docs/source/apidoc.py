@@ -183,7 +183,8 @@ def visit_class(cls, done=None):
         "__init__",
     )
 
-    override = OVERRIDE.get(cls.__name__, {})
+    override = OVERRIDE.get(cls.__name__) or {}
+    assert isinstance(override, dict)
     done = set() if done is None else done
     lines = Lines()
 

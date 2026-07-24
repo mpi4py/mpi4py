@@ -3,8 +3,9 @@ import mpiunittest as unittest
 from mpi4py import MPI
 
 
-class BaseTestMessageZero:
+class BaseTestMessageZero(unittest.BaseMixin):
     #
+    COMM: MPI.Intracomm
     null_b = [None, MPI.INT]
     null_v = [None, (0, None), MPI.INT]
 

@@ -5,7 +5,7 @@ from mpi4py import MPI
 try:
     import ctypes
 except ImportError:
-    ctypes = None
+    ctypes = None  # ty: ignore[invalid-assignment]
 
 
 @unittest.skipIf(ctypes is None, "ctypes")
@@ -47,7 +47,7 @@ class TestCTYPES(unittest.TestCase):
             newobj = type(obj)()
             handle_old = handle_t.from_address(MPI._addressof(oldobj))
             handle_new = handle_t.from_address(MPI._addressof(newobj))
-            handle_new.value = handle_old.value
+            handle_new.value = handle_old.value  # ty: ignore
             self.assertEqual(obj, newobj)
 
     def testHandleValue(self):

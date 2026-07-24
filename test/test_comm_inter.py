@@ -8,11 +8,11 @@ def ch3_nemesis():
 
 
 @unittest.skipIf(MPI.COMM_WORLD.Get_size() < 2, "mpi-world-size<2")
-class BaseTestIntercomm:
+class BaseTestIntercomm(unittest.BaseMixin):
     #
-    BASECOMM = MPI.COMM_NULL
-    INTRACOMM = MPI.COMM_NULL
-    INTERCOMM = MPI.COMM_NULL
+    BASECOMM = MPI.Intracomm(MPI.COMM_NULL)
+    INTRACOMM = MPI.Intracomm(MPI.COMM_NULL)
+    INTERCOMM = MPI.Intercomm(MPI.COMM_NULL)
 
     def setUp(self):
         size = self.BASECOMM.Get_size()
@@ -25,9 +25,9 @@ class BaseTestIntercomm:
             self.COLOR = 1
             self.LOCAL_LEADER = 0
             self.REMOTE_LEADER = 0
-        self.INTRACOMM = self.BASECOMM.Split(self.COLOR, key=0)
-        Create_intercomm = MPI.Intracomm.Create_intercomm
-        self.INTERCOMM = Create_intercomm(
+        intracomm = self.BASECOMM.Split(self.COLOR, key=0)
+        self.INTRACOMM = MPI.Intracomm(intracomm)
+        self.INTERCOMM = MPI.Intracomm.Create_intercomm(
             self.INTRACOMM,
             self.LOCAL_LEADER,
             self.BASECOMM,

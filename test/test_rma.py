@@ -40,9 +40,9 @@ def win_lock_all(win, *args, **kwargs):
         win.Unlock_all()
 
 
-class BaseTestRMA:
+class BaseTestRMA(unittest.BaseMixin):
     #
-    COMM = MPI.COMM_NULL
+    COMM = MPI.Intracomm(MPI.COMM_NULL)
     INFO = MPI.INFO_NULL
 
     def setUp(self):
@@ -372,19 +372,21 @@ class BaseTestRMA:
     def testAccumulateProcNullReplace(self):
         self.WIN.Fence()
         zeros = mkzeros(8)
+        empty = None
         self.WIN.Fence()
         self.WIN.Accumulate([zeros, MPI.INT], MPI.PROC_NULL, None, MPI.REPLACE)
         self.WIN.Fence()
-        self.WIN.Accumulate([zeros, MPI.INT], MPI.PROC_NULL, None, MPI.REPLACE)
+        self.WIN.Accumulate([empty, MPI.INT], MPI.PROC_NULL, None, MPI.REPLACE)
         self.WIN.Fence()
 
     def testAccumulateProcNullSum(self):
         self.WIN.Fence()
         zeros = mkzeros(8)
+        empty = None
         self.WIN.Fence()
         self.WIN.Accumulate([zeros, MPI.INT], MPI.PROC_NULL, None, MPI.SUM)
         self.WIN.Fence()
-        self.WIN.Accumulate([None, MPI.INT], MPI.PROC_NULL, None, MPI.SUM)
+        self.WIN.Accumulate([empty, MPI.INT], MPI.PROC_NULL, None, MPI.SUM)
         self.WIN.Fence()
 
     def testGetAccumulateProcNull(self):

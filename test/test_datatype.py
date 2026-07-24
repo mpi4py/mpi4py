@@ -108,7 +108,7 @@ class TestDatatypeNull(unittest.TestCase):
         self.assertIsNot(datatype, MPI.DATATYPE_NULL)
 
         def construct():
-            MPI.Datatype((1, 2, 3))
+            MPI.Datatype((1, 2, 3))  # type: ignore
 
         self.assertRaises(TypeError, construct)
 
@@ -330,8 +330,11 @@ class TestDatatype(unittest.TestCase):
             rtype.free()
 
 
-class BaseTestDatatypeCreateMixin:
+class BaseTestDatatypeCreateMixin(unittest.BaseMixin):
     #
+    def check(self, oldtype, factory, *args):
+        raise NotImplementedError
+
     def free(self, newtype):
         if newtype == MPI.DATATYPE_NULL:
             return

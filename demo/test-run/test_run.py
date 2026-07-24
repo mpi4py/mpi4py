@@ -208,7 +208,7 @@ class TestRunScript(BaseTestRun):
 
 
 class TestRunDirectory(TestRunScript):
-    directory = "run-directory"
+    directory = pathlib.Path("run-directory")
 
     @classmethod
     def setUpClass(cls):
@@ -227,7 +227,7 @@ class TestRunDirectory(TestRunScript):
 
 
 class TestRunZipFile(TestRunScript):
-    zipfile = "run-zipfile.zip"
+    zipfile = pathlib.Path("run-zipfile.zip")
 
     @classmethod
     def setUpClass(cls):

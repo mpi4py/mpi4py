@@ -52,7 +52,7 @@ def StartWaitFree(request):
     request.Free()
 
 
-class BaseTestCCONghBuf:
+class BaseTestCCONghBuf(unittest.BaseMixin):
     #
     COMM = MPI.COMM_NULL
 

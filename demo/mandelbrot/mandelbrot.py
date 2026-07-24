@@ -45,7 +45,6 @@ dy = (y2 - y1) / h
 
 # number of lines to compute here
 N = h // size + (h % size > rank)
-N = np.array(N, dtype="i")
 # indices of lines to compute here
 I = np.arange(rank, h, size, dtype="i")  # noqa: E741
 # compute local lines
@@ -56,6 +55,7 @@ for k in np.arange(N):
         x = x1 + j * dx
         C[k, j] = mandelbrot(x, y, maxit)
 # gather results at root
+N = np.array(N, dtype="i")
 counts = 0
 indices = None
 cdata = None
@@ -78,6 +78,7 @@ if rank == 0:
 toc = MPI.Wtime()
 wct = comm.gather(toc - tic, root=0)
 if rank == 0:
+    assert wct is not None
     for task, time in enumerate(wct):
         print(f"wall clock time: {time:8.2f} seconds (task {task:d})")
 

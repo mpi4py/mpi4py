@@ -8,11 +8,11 @@ from mpi4py import MPI
 @unittest.skipMPI("MPICH1")
 @unittest.skipIf(MPI.ROOT == MPI.PROC_NULL, "mpi-root")
 @unittest.skipIf(MPI.COMM_WORLD.Get_size() < 2, "mpi-world-size<2")
-class BaseTestCCOVecInter:
+class BaseTestCCOVecInter(unittest.BaseMixin):
     #
-    BASECOMM = MPI.COMM_NULL
-    INTRACOMM = MPI.COMM_NULL
-    INTERCOMM = MPI.COMM_NULL
+    BASECOMM = MPI.Intracomm(MPI.COMM_NULL)
+    INTRACOMM = MPI.Intracomm(MPI.COMM_NULL)
+    INTERCOMM = MPI.Intercomm(MPI.COMM_NULL)
 
     def setUp(self):
         size = self.BASECOMM.Get_size()
@@ -25,14 +25,15 @@ class BaseTestCCOVecInter:
             self.COLOR = 1
             self.LOCAL_LEADER = 0
             self.REMOTE_LEADER = 0
-        self.INTRACOMM = self.BASECOMM.Split(self.COLOR, key=0)
-        Create_intercomm = MPI.Intracomm.Create_intercomm
-        self.INTERCOMM = Create_intercomm(
+        intracomm = self.BASECOMM.Split(self.COLOR, key=0)
+        self.INTRACOMM = MPI.Intracomm(intracomm)
+        intercomm = MPI.Intracomm.Create_intercomm(
             self.INTRACOMM,
             self.LOCAL_LEADER,
             self.BASECOMM,
             self.REMOTE_LEADER,
         )
+        self.INTERCOMM = MPI.Intercomm(intercomm)
 
     def tearDown(self):
         self.INTRACOMM.Free()

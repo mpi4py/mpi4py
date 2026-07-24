@@ -28,9 +28,9 @@ def win_lock(win, rank, *args, **kwargs):
         win.Unlock(rank)
 
 
-class BaseTestRMA:
+class BaseTestRMA(unittest.BaseMixin):
     #
-    COMM = MPI.COMM_NULL
+    COMM = MPI.Intracomm(MPI.COMM_NULL)
     INFO = MPI.INFO_NULL
 
     COUNT_MIN = 0
@@ -178,13 +178,13 @@ class BaseTestRMA:
     def testPutProcNull(self):
         rank = self.COMM.Get_rank()
         with win_lock(self.WIN, rank):
-            r = self.WIN.Rput(None, MPI.PROC_NULL, None)
+            r = self.WIN.Rput(MPI.BOTTOM, MPI.PROC_NULL, None)
             r.Wait()
 
     def testGetProcNull(self):
         rank = self.COMM.Get_rank()
         with win_lock(self.WIN, rank):
-            r = self.WIN.Rget(None, MPI.PROC_NULL, None)
+            r = self.WIN.Rget(MPI.BOTTOM, MPI.PROC_NULL, None)
             r.Wait()
 
     def testAccumulateProcNullReplace(self):

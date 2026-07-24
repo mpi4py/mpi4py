@@ -29,11 +29,11 @@ def run_command_line(args=None):
         filename="<string>",
         argv0="-c",
     ):
-        from runpy import _run_module_code
-
+        # pylint: disable=protected-access
+        run_module_code = __import__("runpy")._run_module_code  # ty: ignore
         code = compile(string, filename, "exec", 0, True)
         kwargs = {"script_name": argv0}
-        return _run_module_code(code, init_globals, run_name, **kwargs)
+        return run_module_code(code, init_globals, run_name, **kwargs)
 
     sys.argv[:] = args if args is not None else sys.argv[1:]
 
@@ -67,11 +67,10 @@ def set_abort_status(status):
     if isinstance(status, SystemExit):
         status = status.code
     elif isinstance(status, KeyboardInterrupt):
-        from _signal import SIGINT
-
-        status = SIGINT + 128
+        status = __import__("signal").SIGINT + 128
     if not isinstance(status, int):
         status = 0 if status is None else 1
+    assert __spec__ is not None  # noqa: S101
     pkg = __spec__.parent
     mpi = sys.modules.get(f"{pkg}.MPI")
     if mpi is not None and status:
@@ -87,6 +86,9 @@ def main():
     import os
     import sys
 
+    assert __spec__ is not None  # noqa: S101
+    spec = __spec__
+
     def import_MPI():  # pylint: disable=invalid-name
         from . import rc
 
@@ -98,23 +100,21 @@ def main():
     def version():
         from . import __version__
 
-        package = __spec__.parent
+        package = spec.parent
         print(f"{package} {__version__}", file=sys.stdout)
         sys.exit(0)
 
     def prefix():
-        import pathlib
-
-        prefix = pathlib.Path(__spec__.origin).parent
+        origin = spec.origin or __file__
+        prefix = __import__("pathlib").Path(origin).parent
         print(prefix, file=sys.stdout)
         sys.exit(0)
 
     def module():
-        import pathlib
-
         MPI = import_MPI()
-        prefix = pathlib.Path(MPI.__spec__.origin)
-        print(prefix, file=sys.stdout)
+        assert MPI.__spec__ is not None  # noqa: S101
+        origin = MPI.__spec__.origin or MPI.__file__
+        print(origin, file=sys.stdout)
         sys.exit(0)
 
     def mpi_vendor():
@@ -211,7 +211,7 @@ def main():
     def usage(errmess=None):
         dedent = __import__("textwrap").dedent
         python = __import__("pathlib").Path(sys.executable).name
-        program = __spec__.name
+        program = spec.name
 
         cmdline = dedent(f"""
         usage: {python} -m {program} [options] <pyfile> [arg] ...

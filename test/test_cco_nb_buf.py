@@ -34,9 +34,9 @@ def maxvalue(a):
 
 
 @unittest.skipMPI("msmpi(<8.1.0)")
-class BaseTestCCOBuf:
+class BaseTestCCOBuf(unittest.BaseMixin):
     #
-    COMM = MPI.COMM_NULL
+    COMM = MPI.Intracomm(MPI.COMM_NULL)
 
     def testBarrier(self):
         self.COMM.Ibarrier().Wait()
@@ -360,8 +360,10 @@ class BaseTestCCOBuf:
 
 
 @unittest.skipMPI("msmpi(<8.1.0)")
-class BaseTestCCOBufInplace:
+class BaseTestCCOBufInplace(unittest.BaseMixin):
     #
+    COMM = MPI.Intracomm(MPI.COMM_NULL)
+
     def testGather(self):
         size = self.COMM.Get_size()
         rank = self.COMM.Get_rank()

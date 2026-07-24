@@ -34,9 +34,9 @@ scalar = arrayimpl.scalar
 
 
 @unittest.skipMPI("impi(<2021.19.0)", mpiabi=True)
-class BaseTestIO:
+class BaseTestIO(unittest.BaseMixin):
     #
-    COMM = MPI.COMM_NULL
+    COMM = MPI.Intracomm(MPI.COMM_NULL)
     FILE = MPI.FILE_NULL
 
     prefix = "mpi4py-"
@@ -547,10 +547,12 @@ class BaseTestIOView(BaseTestIO):
                     if combiner in (HINDEXED, HINDEXED_BLOCK):
                         disps1 = [esize * i for i in index1]
                         disps2 = [esize * i for i in index2]
-                    ftype1 = Create(etype, blens1, disps1).Commit()
-                    fbase2 = Create(etype, blens2, disps2)
-                    ftype2 = fbase2.Create_resized(0, ftype1.extent).Commit()
+                    ftype1 = Create(etype, blens1, disps1)  # type: ignore
+                    fbase2 = Create(etype, blens2, disps2)  # type: ignore
+                    ftype2 = fbase2.Create_resized(0, ftype1.extent)
                     fbase2.Free()
+                    ftype1.Commit()
+                    ftype2.Commit()
                 if combiner == MPI.COMBINER_STRUCT:
                     ftype1 = MPI.Datatype.Create_struct(
                         [1] * 4,

@@ -3,6 +3,7 @@ import io
 import os
 import pathlib
 import sys
+import typing
 import unittest
 import warnings
 
@@ -87,10 +88,10 @@ class TestDataFiles(unittest.TestCase):
 
 class TestMPIABI(unittest.TestCase):
     #
-    #
+
     def setUp(self):
         module = importlib.import_module("mpi4py.MPI")
-        self.mpiabi = importlib.import_module("mpi4py._mpiabi")
+        self.mpiabi: typing.Any = importlib.import_module("mpi4py._mpiabi")
         self.sentinel = getattr(self.mpiabi._get_mpiabi, "mpiabi", None)
         self.savedstate = (self.mpiabi.MPIABI, self.mpiabi.LIBMPI)
         if os.name == "posix":
@@ -248,7 +249,7 @@ class TestMPIABI(unittest.TestCase):
                 mpiabi._dlopen_filename("foo", 0)
             os.name = "nt"
             sys.platform = "win32"
-            os.environ = env = {}
+            os.environ = env = {}  # ty: ignore[invalid-assignment]
             prefix = "/c/opt/impi"
             bindir = os.path.join(prefix, "bin")  # noqa: PTH118
             env["I_MPI_ROOT"] = prefix

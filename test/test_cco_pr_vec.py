@@ -23,7 +23,7 @@ def StartWaitFree(request):
     request.Free()
 
 
-class BaseTestCCOVec:
+class BaseTestCCOVec(unittest.BaseMixin):
     #
     COMM = MPI.COMM_NULL
 
@@ -108,6 +108,7 @@ class BaseTestCCOVec:
                         rbuf = None
                     StartWaitFree(self.COMM.Gatherv_init(sbuf, rbuf, root))
                     if rank == root:
+                        assert rbuf is not None
                         for v in rbuf:
                             self.assertEqual(v, check)
 
@@ -375,7 +376,7 @@ class BaseTestCCOVec:
 @unittest.skipMPI("msmpi(<8.1.0)")
 @unittest.skipMPI("openmpi(<1.8.0)")
 @unittest.skipIf(MPI.BOTTOM == MPI.IN_PLACE, "mpi-in-place")
-class BaseTestCCOVecInplace:
+class BaseTestCCOVecInplace(unittest.BaseMixin):
     #
     COMM = MPI.COMM_NULL
 

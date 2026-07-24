@@ -5,7 +5,7 @@ from mpi4py import MPI
 try:
     import array
 except ImportError:
-    array = None
+    array = None  # ty: ignore[invalid-assignment]
 
 
 def asarray(typecode, data):

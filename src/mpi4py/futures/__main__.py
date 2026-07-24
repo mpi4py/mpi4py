@@ -23,6 +23,7 @@ def main():
         pass
 
     def usage(error=None):
+        assert __spec__ is not None  # noqa: S101
         dedent = __import__("textwrap").dedent
         python = os.path.basename(sys.executable)  # noqa: PTH119
         program = __spec__.parent

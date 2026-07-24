@@ -5,29 +5,31 @@ from mpi4py import MPI
 try:
     import pickle as pyPickle
 except ImportError:
-    pyPickle = None
+    pyPickle = None  # ty: ignore[invalid-assignment]
 
 try:
     import dill
+
+    dill.extend(False)
 except ImportError:
-    dill = None
+    dill = None  # ty: ignore[invalid-assignment]
 
 try:
     import marshal
 except ImportError:
-    marshal = None
+    marshal = None  # ty: ignore[invalid-assignment]
 
 try:
     import json
 except ImportError:
-    json = None
+    json = None  # ty: ignore[invalid-assignment]
 
 try:
     import yaml
 
     yaml.dump(None)
 except ImportError:
-    yaml = None
+    yaml = None  # ty: ignore[invalid-assignment]
 
 OBJS = [
     None,
@@ -66,8 +68,8 @@ class TestPickle(unittest.TestCase):
 
     def testDefault(self):
         pickle = self.pickle
-        protocols = [0, 1, 2, 3, 4, 5]
-        protocols.extend((-1, None))
+        protocols = list(range(pyPickle.HIGHEST_PROTOCOL + 1))
+        protocols = [*protocols, -1, None]
         for proto in protocols:
             pickle.__init__(protocol=proto)
             for obj in OBJS:
@@ -78,8 +80,8 @@ class TestPickle(unittest.TestCase):
         pickle = self.pickle
         dumps = pyPickle.dumps
         loads = pyPickle.loads
-        protocols = [0, 1, 2, 3, 4, 5]
-        protocols.extend((-1, None))
+        protocols = list(range(pyPickle.HIGHEST_PROTOCOL + 1))
+        protocols = [*protocols, -1, None]
         for proto in protocols:
             pickle.__init__(dumps, loads, proto)
             for obj in OBJS:
@@ -92,7 +94,7 @@ class TestPickle(unittest.TestCase):
         dumps = dill.dumps
         loads = dill.loads
         protocols = list(range(dill.HIGHEST_PROTOCOL + 1))
-        protocols.extend((-1, None))
+        protocols = [*protocols, -1, None]
         for proto in protocols:
             pickle.__init__(dumps, loads, proto)
             for obj in OBJS:
@@ -104,8 +106,8 @@ class TestPickle(unittest.TestCase):
         pickle = self.pickle
         dumps = marshal.dumps
         loads = marshal.loads
-        protocols = [0, 1, 2, 3, 4]
-        protocols.append(None)
+        protocols = list(range(marshal.version + 1))
+        protocols = [*protocols, None]
         for protocol in protocols:
             pickle.__init__(dumps, loads, protocol)
             for obj in OBJS:

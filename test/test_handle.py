@@ -4,7 +4,7 @@ from mpi4py import MPI
 
 
 @unittest.skipMPI("impi(<2021.19.0)", mpiabi=True)
-class BaseTestHandle:
+class BaseTestHandle(unittest.BaseMixin):
     #
     HANDLES = []
 
