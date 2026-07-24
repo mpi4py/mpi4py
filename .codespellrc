@@ -10,6 +10,7 @@ skip =
   .git,
   .tox,
   .*_cache,
+  uv.lock,
   htmlcov,
   */mpi4py/MPI.c,
   */mpi4py/MPI.h,
