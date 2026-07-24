@@ -230,10 +230,12 @@ jobs:
 
     - if: runner.os != 'Windows' && matrix.mpi != 'mpiabi'
       name: Setup uv
-      uses: astral-sh/setup-uv@v7
+      uses: astral-sh/setup-uv@v9.0.0
       with:
         cache-suffix: >-
-          ${{ github.job }}-${{ matrix.mpi }}
+          ${{ format('{0}-{1}-{2}-{3}',
+              github.workflow, github.job,
+              matrix.platform, matrix.mpi) }}
 
     - if: runner.os != 'Windows' && matrix.mpi != 'mpiabi'
       name: Install MPI (${{ matrix.mpi }})
@@ -338,10 +340,12 @@ jobs:
 
     - if: runner.os != 'Windows'
       name: Setup uv
-      uses: astral-sh/setup-uv@v7
+      uses: astral-sh/setup-uv@v9.0.0
       with:
         cache-suffix: >-
-          ${{ github.job }}-${{ matrix.mpi }}-${{ matrix.version }}
+          ${{ format('{0}-{1}-{2}-{3}',
+              github.workflow, github.job,
+              matrix.platform, matrix.mpi) }}
 
     - if: runner.os != 'Windows'
       name: Install MPI (${{ matrix.mpi }}-${{ matrix.version }})
