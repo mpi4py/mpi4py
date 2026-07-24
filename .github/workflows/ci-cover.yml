@@ -46,7 +46,7 @@ jobs:
       with:
         persist-credentials: false
 
-    - uses: actions/setup-python@v6
+    - uses: actions/setup-python@v6.3.0
       with:
         python-version: ${{ matrix.py }}
         cache: pip
@@ -95,7 +95,7 @@ jobs:
       with:
         persist-credentials: false
 
-    - uses: actions/setup-python@v6
+    - uses: actions/setup-python@v6.3.0
       with:
         python-version: ${{ github.event.inputs.py || 3 }}
         cache: pip
