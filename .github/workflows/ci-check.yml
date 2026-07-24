@@ -41,7 +41,7 @@ jobs:
         persist-credentials: false
 
     - name: Setup Python (${{ github.event.inputs.py || 3 }})
-      uses: actions/setup-python@v6
+      uses: actions/setup-python@v7
       with:
         python-version: ${{ github.event.inputs.py || 3 }}
         check-latest: true
@@ -76,7 +76,7 @@ jobs:
         persist-credentials: false
 
     - name: Setup Python (${{ github.event.inputs.py || 3 }})
-      uses: actions/setup-python@v6
+      uses: actions/setup-python@v7
       with:
         python-version: ${{ github.event.inputs.py || 3 }}
         cache: pip
@@ -110,7 +110,7 @@ jobs:
         persist-credentials: false
 
     - name: Setup Python (${{ github.event.inputs.py || 3 }})
-      uses: actions/setup-python@v6
+      uses: actions/setup-python@v7
       with:
         python-version: ${{ github.event.inputs.py || 3 }}
         cache: pip
@@ -160,7 +160,7 @@ jobs:
         persist-credentials: false
 
     - name: Setup Python (${{ github.event.inputs.py || 3 }})
-      uses: actions/setup-python@v6
+      uses: actions/setup-python@v7
       with:
         python-version: ${{ github.event.inputs.py || 3 }}
         cache: pip

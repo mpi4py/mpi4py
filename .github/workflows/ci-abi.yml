@@ -290,7 +290,7 @@ jobs:
       shell: bash
 
     - name: Setup Python (${{ matrix.py }})
-      uses: actions/setup-python@v6
+      uses: actions/setup-python@v7
       with:
         python-version: ${{ matrix.py }}
         allow-prereleases: true
@@ -399,7 +399,7 @@ jobs:
       shell: bash
 
     - name: Setup Python (${{ matrix.py }})
-      uses: actions/setup-python@v6
+      uses: actions/setup-python@v7
       with:
         python-version: ${{ matrix.py }}
         allow-prereleases: true
