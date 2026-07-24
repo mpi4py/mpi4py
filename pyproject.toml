@@ -66,6 +66,7 @@ build-mesonpy = [
 ]
 build-skbuild = [
   "scikit-build-core",
+  "dynamic-metadata",
 ]
 build = [
   "setuptools >= 77",
@@ -103,10 +104,11 @@ type = [
 ]
 
 [tool.scikit-build]
-minimum-version = "0.5"
+minimum-version = "1.0"
 experimental = true
 sdist.exclude = [".*"]
 wheel.packages = []
-[tool.scikit-build.metadata]
-version = {provider = "metadata", provider-path = "conf"}
-readme  = {provider = "metadata", provider-path = "conf"}
+
+[[tool.dynamic-metadata]]
+provider.module = "metadata"
+provider.path = "conf"
