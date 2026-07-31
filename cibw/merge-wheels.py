@@ -92,7 +92,7 @@ for (package, version, tags), variantlist in wheels.items():
                 if libdir.exists():
                     libdir.rmdir()
 
-            for pthfile in ("_mpi_dll_path.py", "mpi.pth"):
+            for pthfile in ("_mpi_dll_path.py", "mpi.pth", "mpi.start"):
                 mpipth = root_dir / pthfile
                 if mpipth.exists():
                     mpipth.unlink()

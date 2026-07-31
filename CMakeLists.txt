@@ -131,7 +131,7 @@ foreach(file ${mpi4py_SOURCES} ${mpi4py_HEADERS})
 endforeach()
 
 if (WIN32)
-  set(mpidllpath _mpi_dll_path.py mpi.pth)
+  set(mpidllpath _mpi_dll_path.py mpi.pth mpi.start)
   foreach(file ${mpidllpath})
     if (EXISTS ${SRCDIR}/${file})
       install(FILES ${SRCDIR}/${file} DESTINATION .)
