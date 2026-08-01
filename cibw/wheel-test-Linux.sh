@@ -3,10 +3,7 @@ set -euo pipefail
 
 dist=${1:-dist}
 
-sudo () {
-    [ "$(id -u)" -eq 0 ] || set -- command sudo "$@"
-    "$@"
-}
+sudo () { [ "$(id -u)" -eq 0 ] || set -- command sudo "$@"; "$@"; }
 
 # shellcheck disable=SC1091
 (source /etc/os-release && echo "::group::$NAME $VERSION")

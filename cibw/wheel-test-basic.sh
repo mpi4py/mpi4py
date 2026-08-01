@@ -94,11 +94,11 @@ for python in "${PYTHON[@]}"; do
     for mpi in "${MPI[@]}"; do
         echo "* Use MPI=$mpi"
         setup-mpi "$mpi"
-        if [ "$mpi" == "$mpi" ]; then
+        if [[ "$mpi" == "$mpi" ]]; then
             echo "- Test MPIABI discovery"
             mpi4py-test-basic
         fi
-        if [ "$mpi" == mpich ] || [ "$mpi" == openmpi ]; then
+        if [[ "$mpi" == mpich || "$mpi" == openmpi ]]; then
             export MPI4PY_MPIABI=$mpi
             echo "- Test MPIABI=$MPI4PY_MPIABI"
             mpi4py-test-basic

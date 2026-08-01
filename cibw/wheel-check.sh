@@ -18,7 +18,7 @@ rpath=""
 runpath=""
 needed=""
 
-if [ "$(uname)" == Linux ]; then
+if [[ "$(uname)" == Linux ]]; then
     mods=("$tempdir"/mpi4py*linux*.dir/mpi4py/MPI.*.so)
     libs=$(find "$tempdir"/mpi4py*linux*.dir/mpi4py*.libs \
                 -type f -exec basename {} \; | sort | uniq)
@@ -27,7 +27,7 @@ if [ "$(uname)" == Linux ]; then
     needed=$(patchelf --print-needed "${mods[@]}" | sort | uniq)
 fi
 
-if [ "$(uname)" == Darwin ]; then
+if [[ "$(uname)" == Darwin ]]; then
     mods=("$tempdir"/mpi4py*macos*.dir/mpi4py/MPI.*.so)
     libs=$(
         find "$tempdir"/mpi4py*macos*.dir/mpi4py/.dylibs \
@@ -74,12 +74,12 @@ echo "needed:  $(echo "$needed"  | tr '\n' ' ')"
 
 test -z "$libs"
 test -z "$rpath"
-if [ "$(uname)" == Linux ]; then
+if [[ "$(uname)" == Linux ]]; then
     libre='lib(c|dl|pthread|mpi|mpi_abi)\.so'
     test -z "$runpath"
     test -z "$(grep -vE "$libre" <<< "$needed" || true)"
 fi
-if [ "$(uname)" == Darwin ]; then
+if [[ "$(uname)" == Darwin ]]; then
     pthre='(/opt/(homebrew|local)|/usr/local)/lib'
     libre='lib(System|mpi|pmpi|mpi_abi)\..*\.dylib'
     test -z "$(grep -vE "$pthre" <<< "$runpath" || true)"

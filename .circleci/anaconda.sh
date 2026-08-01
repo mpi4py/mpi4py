@@ -72,7 +72,7 @@ package-testing() {
   RUN source $ANACONDA/bin/activate $ENV
   RUN python -m mpi4py --version
   if [[ "$RUNTESTS" == "yes" ]]; then
-      if [[ "$MPI" == "mpich"   ]]; then local P=2; else local P=5; fi
+      if [[ "$MPI" == "mpich" ]]; then local P=2; else local P=5; fi
       local MPIEXEC=${MPIEXEC-mpiexec}
       RUN $MPIEXEC -n 1  python $PWD/test/main.py
       RUN $MPIEXEC -n $P python $PWD/test/main.py -f

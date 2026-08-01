@@ -21,7 +21,7 @@ workdir=$(mktemp -d)
 trap 'rm -rf $workdir' EXIT
 cd "$workdir"
 
-if [ "$MPI_ABI" == mpiabi ]; then
+if [[ "$MPI_ABI" == mpiabi ]]; then
     echo "Download MPI (mpi-abi-stubs)"
     giturl=https://github.com/mpi-forum/mpi-abi-stubs.git
     rm -rf mpiabi
@@ -73,13 +73,13 @@ case "$(uname)" in
 esac
 
 echo "Fix MPI compiler wrappers"
-if [ "$MPI_ABI" == mpich ]; then
+if [[ "$MPI_ABI" == mpich ]]; then
     files=("$destdir"/bin/mpi{cc,cxx})
     sed -i.orig -E 's/(CC|CXX|FC)="(.*)-(.*)"/\1="\3"/' "${files[@]}"
     sed -i.orig -E 's/(with_wrapper_dl_type)=(r(un)?path)/\1=none/' "${files[@]}"
     sed -i.orig "s%-Wl,-commons,use_dylibs%%g" "${files[@]}"
 fi
-if [ "$MPI_ABI" == openmpi ]; then
+if [[ "$MPI_ABI" == openmpi ]]; then
     files=("$destdir"/share/openmpi/mpi{cc,c++}-wrapper-data.txt)
     sed -i.orig -E 's/(compiler)=(.*)-(.*)/\1=\3/' "${files[@]}"
     sed -i.orig "s%\s*-Wl,-rpath -Wl,\${libdir}%%g" "${files[@]}"
@@ -102,7 +102,7 @@ case "$MPI_ABI" in
 esac
 
 echo "Display MPI compiler wrappers"
-if [ "$(uname)" == Linux ] || [ "$(uname)" == Darwin ] ; then
+if [[ "$(uname)" == Linux || "$(uname)" == Darwin ]]; then
     echo mpicc:  "$(mpicc   -show 2>&1)"
     echo mpicxx: "$(mpicxx  -show 2>&1)"
 else
@@ -110,7 +110,7 @@ else
     echo LIBRARY: "$(find "$MPI_ROOT" -name '*mpi.lib')"
 fi
 
-if [ "$(uname)" == Darwin ] && [ "$MPIARCH" != "$MACHINE" ]; then
+if [[ "$(uname)" == Darwin && "$MPIARCH" != "$MACHINE" ]]; then
     echo "Install MPI ($MPI_ABI) [$MPIARCH]"
     destdir1=./$MPI_ABI/$MACHINE
     destdir2=./$MPI_ABI/$MPIARCH
