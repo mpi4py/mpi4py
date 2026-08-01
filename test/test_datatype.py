@@ -326,8 +326,8 @@ class TestDatatype(unittest.TestCase):
             self.assertEqual(qtype.size, (count // int_max) * int_max)
             self.assertEqual(rtype.combiner, MPI.COMBINER_CONTIGUOUS)
             self.assertEqual(rtype.size, count % int_max)
-            qtype.free()
-            rtype.free()
+            qtype.free()  # safe free
+            rtype.free()  # safe free
 
 
 class BaseTestDatatypeCreateMixin:
@@ -404,7 +404,7 @@ class BaseTestDatatypeCreateMixin:
             self.free(dt1)
             self.free(dt2)
         self.assertEqual(decoded1[1], decoded2[1])
-        self.assertEqual(decoded2[2], decoded2[2])
+        self.assertEqual(decoded1[2], decoded2[2])
         for dec in (decoded1, decoded2):
             self.free(dec[0])
         self.free(newtype2)

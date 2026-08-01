@@ -4,7 +4,7 @@ set -euo pipefail
 wheelhouse=${1:-wheelhouse}
 
 tempdir=$(mktemp -d)
-trap 'rm -rf $tempdir' EXIT
+trap 'rm -rf "$tempdir"' EXIT
 for wheel in "$wheelhouse"/*.whl; do
     wheeldir="$tempdir"/$(basename "$wheel").dir
     unzip -qq "$wheel" -d "$wheeldir"

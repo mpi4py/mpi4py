@@ -1,3 +1,4 @@
+import itertools
 import sys
 import threading
 
@@ -22,8 +23,8 @@ class TestMPIThreads(unittest.TestCase):
             MPI.THREAD_SERIALIZED,
             MPI.THREAD_MULTIPLE,
         ]
-        for i in range(len(levels) - 1):
-            self.assertLess(levels[i], levels[i + 1])
+        for low, high in itertools.pairwise(levels):
+            self.assertLess(low, high)
         try:
             provided = MPI.Query_thread()
             self.assertIn(provided, levels)
@@ -51,14 +52,16 @@ class TestMPIThreads(unittest.TestCase):
         except NotImplementedError:
             self.skipTest("mpi-query_thread")
         self.testIsThreadMain()
-        T = [threading.Thread(target=self.testIsThreadMain) for _ in range(5)]
+        threads = [
+            threading.Thread(target=self.testIsThreadMain) for _ in range(5)
+        ]
         if provided == MPI.THREAD_MULTIPLE:
-            for t in T:
+            for t in threads:
                 t.start()
-            for t in T:
+            for t in threads:
                 t.join()
         elif provided == MPI.THREAD_SERIALIZED:
-            for t in T:
+            for t in threads:
                 t.start()
                 t.join()
         else:
