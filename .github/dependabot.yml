@@ -6,9 +6,27 @@ updates:
       interval: weekly
     cooldown:
       default-days: 7
+    groups:
+      actions:
+        patterns:
+          - "*"
   - package-ecosystem: pip
     directory: /
     schedule:
       interval: weekly
     cooldown:
       default-days: 7
+    groups:
+      python:
+        patterns:
+          - "*"
+  - package-ecosystem: pre-commit
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      pre-commit:
+        patterns:
+          - "*"
