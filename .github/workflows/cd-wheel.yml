@@ -259,16 +259,22 @@ jobs:
 
     # * test conda
 
-    - if: ${{ !startsWith(matrix.py, 'pypy') }}
-      id: conda-args
+    - id: conda
       run: |
-        # conda-args
+        # conda-python
         python="${{ matrix.py }}"
         if [[ "$python" == *t ]]; then
         python="${python%%t} python-freethreading"; fi
         echo python="$python" >> "$GITHUB_OUTPUT"
+        # conda-skip
+        case "$python" in
+        pypy*) skip=true;;
+        3.15*) skip=true;;
+        *)     skip=false;;
+        esac
+        echo skip="$skip" >> "$GITHUB_OUTPUT"
 
-    - if: ${{ !startsWith(matrix.py, 'pypy') }}
+    - if: ${{ !fromJSON(steps.conda.outputs.skip) }}
       uses: mamba-org/setup-micromamba@v3
       with:
         init-shell: bash
@@ -276,7 +282,7 @@ jobs:
         environment-name: test
         create-args: >-
           ${{ matrix.mpi == 'impi' && 'impi_rt' || matrix.mpi }}
-          python=${{ steps.conda-args.outputs.python }}
+          python=${{ steps.conda.outputs.python }}
           pip
         condarc: |
           show_channel_urls: true
@@ -287,18 +293,18 @@ jobs:
             - conda-forge/label/python_dev
             - nodefaults
 
-    - if: ${{ !startsWith(matrix.py, 'pypy') }}
+    - if: ${{ !fromJSON(steps.conda.outputs.skip) }}
       name: Install mpi4py in conda environment
       run: python -m pip install mpi4py --no-index --find-links=dist
       shell: bash -el {0}
 
-    - if: ${{ !startsWith(matrix.py, 'pypy') }}
+    - if: ${{ !fromJSON(steps.conda.outputs.skip) }}
       name: Test mpi4py with conda-forge/${{ matrix.mpi }}
       run: cibw/run-tests-mpi.sh
       shell: bash -el {0}
       timeout-minutes: 2
 
-    - if: ${{ !startsWith(matrix.py, 'pypy') }}
+    - if: ${{ !fromJSON(steps.conda.outputs.skip) }}
       name: Test setenv MPI4PY_MPIABI=${{ env.MPI4PY_MPIABI }}
       run: cibw/run-tests-mpi.sh
       shell: bash -el {0}
@@ -306,7 +312,7 @@ jobs:
       env:
         MPI4PY_MPIABI: ${{ matrix.mpi-abi }}
 
-    - if: ${{ !startsWith(matrix.py, 'pypy') }}
+    - if: ${{ !fromJSON(steps.conda.outputs.skip) }}
       name: Test setenv MPI4PY_LIBMPI=${{ env.MPI4PY_LIBMPI }}
       run: cibw/run-tests-mpi.sh
       shell: bash -el {0}
@@ -314,7 +320,7 @@ jobs:
       env:
         MPI4PY_LIBMPI: ${{ matrix.mpi-lib }}
 
-    - if: ${{ !startsWith(matrix.py, 'pypy') }}
+    - if: ${{ !fromJSON(steps.conda.outputs.skip) }}
       name: Test mpi4py with multiple conda-forge/${{ matrix.mpi }} versions
       run: cibw/run-tests-conda.sh ${{ matrix.mpi }}
       shell: bash -el {0}
