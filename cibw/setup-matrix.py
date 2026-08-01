@@ -14,11 +14,11 @@ def py(py, x, y_min, y_max, abi=""):
     return [f"{py}{x}{y}{abi}" for y in range(y_min, y_max + 1)]
 
 
-def cp3(y_min=10, y_max=14):
+def cp3(y_min=10, y_max=15):
     return py("cp", 3, y_min, y_max)
 
 
-def cp3t(y_min=14, y_max=14):
+def cp3t(y_min=14, y_max=15):
     return py("cp", 3, y_min, y_max, abi="t")
 
 

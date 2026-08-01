@@ -9,7 +9,7 @@ on:  # yamllint disable-line rule:truthy
         required: false
         type: string
       python-tag:
-        description: "CPython/PyPy tag ({cp,pp}3{10..14})"
+        description: "CPython/PyPy tag ({cp,pp}3{10..15})"
         default: ''
         required: false
         type: string
@@ -31,7 +31,7 @@ on:  # yamllint disable-line rule:truthy
           - Windows
           - Windows-AMD64
       python-tag:
-        description: "CPython/PyPy tag ({cp,pp}3{10..14})"
+        description: "CPython/PyPy tag ({cp,pp}3{10..15})"
         default: ''
         required: false
         type: string
@@ -284,6 +284,7 @@ jobs:
           channels:
             - conda-forge
             - conda-forge/label/python_rc
+            - conda-forge/label/python_dev
             - nodefaults
 
     - if: ${{ !startsWith(matrix.py, 'pypy') }}
