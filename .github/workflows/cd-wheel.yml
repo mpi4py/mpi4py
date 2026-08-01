@@ -120,7 +120,7 @@ jobs:
       run: python conf/cythonize.py
 
     - id: build
-      uses: pypa/cibuildwheel@v4.1.0
+      uses: pypa/cibuildwheel@v4.1.1
       timeout-minutes: 10
       with:
         config-file: cibw/config.toml
