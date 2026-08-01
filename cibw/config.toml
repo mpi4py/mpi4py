@@ -2,7 +2,7 @@
 build = "*"
 archs = "native"
 skip = "*musllinux*"
-enable = "pypy"
+enable = ["pypy", "cpython-prerelease"]
 build-frontend = "build[uv]"
 before-all = [
   "bash {project}/cibw/install-mpi.sh",
