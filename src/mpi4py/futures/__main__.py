@@ -23,10 +23,12 @@ def main():
         pass
 
     def usage(error=None):
-        dedent = __import__("textwrap").dedent
-        python = os.path.basename(sys.executable)  # noqa: PTH119
-        program = __spec__.parent
-        usage = dedent(f"""
+        import pathlib
+        import textwrap
+
+        python = pathlib.Path(sys.executable).name
+        program = __spec__ and __spec__.parent
+        usage = textwrap.dedent(f"""
         usage: {python} -m {program} <pyfile> [arg] ...
            or: {python} -m {program} -m <module> [arg] ...
            or: {python} -m {program} -c <string> [arg] ...
