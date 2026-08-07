@@ -415,15 +415,17 @@ class UserExecutorMixin:
     def map(
         self,
         fn,
-        iterable,
+        *iterables,
         timeout=None,
         chunksize=1,
+        buffersize=None,
         unordered=False,
     ):
+        del buffersize  # ignored, unused
         del unordered  # ignored, unused
         return super().map(
             fn,
-            iterable,
+            *iterables,
             timeout=timeout,
             chunksize=chunksize,
         )
@@ -434,8 +436,10 @@ class UserExecutorMixin:
         iterable,
         timeout=None,
         chunksize=1,
+        buffersize=None,
         unordered=False,
     ):
+        del buffersize  # ignored, unused
         del unordered  # ignored, unused
         fn = functools.partial(self._apply_args, fn)
         return super().map(
