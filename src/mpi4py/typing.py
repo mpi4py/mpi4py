@@ -11,6 +11,7 @@ from collections.abc import (
 )
 from typing import (
     Any,
+    ParamSpec,
     Protocol,
     SupportsIndex,
     TypeAlias,
@@ -249,6 +250,8 @@ Type variable constrained to `MPI.Intracomm` or `MPI.Intercomm`.
 """
 
 
+P = ParamSpec("P")  #: Parameter specification variable.
+R = TypeVar("R")  #: Type variable.
 S = TypeVar("S")  #: Type variable.
 T = TypeVar("T")  #: Type variable.
 U = TypeVar("U")  #: Type variable.

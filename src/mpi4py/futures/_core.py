@@ -21,34 +21,39 @@ import weakref
 
 from .. import MPI
 from ..util import pkl5
-from ._base import BrokenExecutor
+from . import _base
 
 # ---
 
 _tls = threading.local()
+_mpi_thread_serialized_lock = threading.Lock()
+_setup_mpi_threads_lock = threading.Lock()
 
 
-def serialized(function):
+def _serialized_nolock(function):
+    return function
+
+
+def _serialized_locked(function):
     def wrapper(*args, **kwargs):
-        with serialized.lock:
+        with _mpi_thread_serialized_lock:
             return function(*args, **kwargs)
 
-    if serialized.lock is None:
-        return function
     return wrapper
 
 
-serialized.lock = None  # type: ignore[attr-defined]
+serialized = _serialized_nolock
 
 
 def setup_mpi_threads():
-    with setup_mpi_threads.lock:
-        thread_level = setup_mpi_threads.thread_level
+    global serialized  # pylint: disable=global-statement
+    with _setup_mpi_threads_lock:
+        thread_level = vars(setup_mpi_threads).get("thread_level")
         if thread_level is None:
             thread_level = MPI.Query_thread()
-            setup_mpi_threads.thread_level = thread_level
             if thread_level < MPI.THREAD_MULTIPLE:
-                serialized.lock = threading.Lock()
+                serialized = _serialized_locked
+            vars(setup_mpi_threads)["thread_level"] = thread_level
     if thread_level < MPI.THREAD_SERIALIZED:
         warnings.warn(
             "the level of thread support in MPI "
@@ -56,10 +61,6 @@ def setup_mpi_threads():
             RuntimeWarning,
             stacklevel=2,
         )
-
-
-setup_mpi_threads.lock = threading.Lock()  # type: ignore[attr-defined]
-setup_mpi_threads.thread_level = None  # type: ignore[attr-defined]
 
 
 # ---
@@ -87,8 +88,8 @@ def _wrap_exc(exc, tb):
 
 
 def _format_exc(exc, comm):
-    exc_info = (type(exc), exc, exc.__traceback__)
-    tb_lines = traceback.format_exception(*exc_info)
+    et, ev, tb = (type(exc), exc, exc.__traceback__)
+    tb_lines = traceback.format_exception(et, ev, tb)
     body = "".join(tb_lines)
     host = MPI.Get_processor_name()
     rank = comm.Get_rank()
@@ -240,7 +241,7 @@ class Pool:
 
         def handler(future):
             if future.set_running_or_notify_cancel():
-                exception = BrokenExecutor(message)
+                exception = _base.BrokenExecutor(message)
                 future.set_exception(exception)
 
         self.event.set()
@@ -400,8 +401,8 @@ class SharedPoolCtx:
     #
     def __init__(self):
         self.lock = threading.Lock()
-        self.comm = MPI.COMM_NULL
-        self.intracomm = MPI.COMM_NULL
+        self.comm = MPI.Intercomm(MPI.COMM_NULL)
+        self.intracomm = MPI.Intracomm(MPI.COMM_NULL)
         self.on_root = None
         self.counter = None
         self.workers = None
@@ -483,8 +484,6 @@ class SharedPoolCtx:
         if not self.on_root:
             join_threads(self.threads)
         _set_shared_pool(None)
-        self.comm = MPI.COMM_NULL
-        self.intracomm = MPI.COMM_NULL
         self.on_root = None
         self.counter = None
         self.workers = None
@@ -529,6 +528,10 @@ def comm_split(comm, root):
 
 
 # ---
+
+
+def _comm_executor_world():
+    return MPI.COMM_WORLD
 
 
 def _comm_executor_helper(executor, comm, root):
@@ -1041,7 +1044,10 @@ def get_max_workers():
 
 
 def get_spawn_module():
-    return __spec__.parent + ".server"
+    assert __spec__ is not None  # noqa: S101
+    package = __spec__.parent
+    assert package is not None  # noqa: S101
+    return package + ".server"
 
 
 def client_spawn(
@@ -1161,14 +1167,12 @@ def server_accept(
     root=0,
 ):
     info = MPI.INFO_NULL
+    port = None
     if comm.Get_rank() == root:
         if mpi_info:
             info = MPI.Info.Create()
             info.update(mpi_info)
-    port = None
-    if comm.Get_rank() == root:
         port = MPI.Open_port(info)
-    if comm.Get_rank() == root:
         if not isinstance(service, (list, tuple)):
             service = service or get_service()
             MPI.Publish_name(service, port, info)

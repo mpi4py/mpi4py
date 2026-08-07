@@ -21,7 +21,8 @@ def _create_parser(cmd="", usage=None):
     pymod = __spec__ and __spec__.name
     pycmd = f"{pyexe} -m {pymod} {cmd}"
     parser = argparse.ArgumentParser(prog=pycmd, usage=usage)
-    parser.color = True  # Python 3.14+
+    if _sys.version_info >= (3, 14):  # pragma: no branch
+        parser.color = True
     return parser
 
 
@@ -649,7 +650,7 @@ def futures(comm, args=None, verbose=True):
             return concurrent.futures.ThreadPoolExecutor(
                 max_workers=workers,
             )
-        if executor_type == "interpreter":  # pragma: no cover
+        if executor_type == "interpreter" and _sys.version_info >= (3, 14):
             return concurrent.futures.InterpreterPoolExecutor(  # novermin
                 max_workers=workers,
             )
@@ -790,8 +791,9 @@ def main(args=None):
         if comm.rank == 0:
             parser.error(f"unknown command {options.command!r}")
         parser.exit(2)
-    command(comm, options.args)
-    parser.exit()
+    else:
+        command(comm, options.args)
+        parser.exit()
 
 
 if __name__ == "__main__":

@@ -974,25 +974,23 @@ class ProcessPoolSubmitTest(unittest.TestCase):
         executor1 = executor2 = executor3 = None
 
     def test_mpi_serialized_support(self):
-        futures._core.setup_mpi_threads()
-        serialized = futures._core.serialized
-        lock_save = serialized.lock
+        core = futures._core
+        core.setup_mpi_threads()
+        serialized = core.serialized
         try:
-            if lock_save is None:
-                serialized.lock = threading.Lock()
+            if serialized is core._serialized_nolock:
+                core.serialized = core._serialized_locked
                 executor = futures.MPIPoolExecutor(1).bootup()
                 executor.submit(abs, 0).result()
                 executor.shutdown()
-                serialized.lock = lock_save
             else:
-                serialized.lock = None
-                with lock_save:
+                core.serialized = core._serialized_nolock
+                with core._mpi_thread_serialized_lock:
                     executor = futures.MPIPoolExecutor(1).bootup()
                     executor.submit(abs, 0).result()
                     executor.shutdown()
-                serialized.lock = lock_save
         finally:
-            serialized.lock = lock_save
+            core.serialized = serialized
 
     def test_shared_executors(self):
         if not SHARED_POOL:
