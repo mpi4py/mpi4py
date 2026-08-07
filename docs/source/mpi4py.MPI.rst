@@ -463,7 +463,6 @@ Attributes
 
    pickle
 
-
 .. Local variables:
 .. fill-column: 79
 .. End:

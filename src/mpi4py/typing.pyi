@@ -1,6 +1,9 @@
 # ruff: noqa: UP007
 import sys
-from collections.abc import Sequence
+from collections.abc import (
+    Mapping,
+    Sequence,
+)
 from typing import (
     Any,
     Protocol,
@@ -14,6 +17,8 @@ from .MPI import (
     BottomType,
     Datatype,
     InPlaceType,
+    Intercomm,
+    Intracomm,
 )
 
 __all__: list[str] = [
@@ -54,7 +59,7 @@ class SupportsDLPack(Protocol):
 
 class SupportsCAI(Protocol):
     @property
-    def __cuda_array_interface__(self) -> dict[str, Any]: ...
+    def __cuda_array_interface__(self) -> Mapping[str, Any]: ...
 
 Buffer: TypeAlias = Union[
     SupportsBuffer,
@@ -83,6 +88,7 @@ BufSpec: TypeAlias = Union[
     tuple[Buffer, Count, TypeSpec],
     tuple[Bottom, Count, Datatype],
     list[Any],
+    None,
 ]
 
 BufSpecB: TypeAlias = Union[
@@ -123,6 +129,8 @@ TargetSpec: TypeAlias = Union[
     tuple[Displ, Count, TypeSpec],
     list[Any],
 ]
+
+CommT = TypeVar("CommT", Intracomm, Intercomm)  # noqa: PYI001
 
 S = TypeVar("S")  # noqa: PYI001
 T = TypeVar("T")  # noqa: PYI001

@@ -930,8 +930,8 @@ FILE_NULL = __FILE_NULL__  #: Null file handle
 
 def Register_datarep(
     datarep: str,
-    read_fn: Callable[[Buffer, Datatype, int, Buffer, int], None],
-    write_fn: Callable[[Buffer, Datatype, int, Buffer, int], None],
+    read_fn: Callable[[Buffer, Datatype, int, Buffer, int], None] | None,
+    write_fn: Callable[[Buffer, Datatype, int, Buffer, int], None] | None,
     extent_fn: Callable[[Datatype], int],
 ) -> None:
     """

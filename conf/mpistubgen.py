@@ -411,6 +411,12 @@ OVERRIDE = {
         ),
         "__delitem__": "def __delitem__(self, item: str, /) -> None: ...",
         "__contains__": "def __contains__(self, value: str, /) -> bool: ...",
+        "pop": """
+        @overload
+        def pop(self, key: str, /) -> str: ...
+        @overload
+        def pop(self, key: str, default: T) -> str | T: ...
+        """,
     },
     "Op": {
         "__call__": "def __call__(self, x: Any, y: Any, /) -> Any: ...",
@@ -432,6 +438,8 @@ OVERRIDE = {
         @overload
         def __setitem__(self, item: int, value: int, /) -> None: ...
         @overload
+        def __setitem__(self, item: slice, value: int, /) -> None: ...
+        @overload
         def __setitem__(self, item: slice, value: Buffer, /) -> None: ...
         """,
         "__delitem__": None,
@@ -443,7 +451,7 @@ OVERRIDE = {
         def __init__(
             self,
             dumps: Callable[[Any, int], bytes],
-            loads: Callable[[Buffer], Any],
+            loads: Callable[[SupportsBuffer], Any],
             protocol: int | None = None,
             threshold: int | None = None,
         ) -> None: ...
@@ -451,7 +459,14 @@ OVERRIDE = {
         def __init__(
             self,
             dumps: Callable[[Any], bytes] | None = None,
-            loads: Callable[[Buffer], Any] | None = None,
+            loads: Callable[[SupportsBuffer], Any] | None = None,
+        ) -> None: ...
+        @overload
+        def __init__(
+            self,
+            *,
+            protocol: int | None = None,
+            threshold: int | None = None,
         ) -> None: ...
         """,
     },
@@ -500,17 +515,24 @@ OVERRIDE.update({  # python/mypy#15717
 })  # fmt: skip
 
 TYPING = """
-from .typing import (  # noqa: E402,I001
+from .typing import T
+from .typing import (
     Buffer,
+    SupportsBuffer,
+)
+from .typing import (
     Bottom,
     InPlace,
 )
-from .typing import (  # noqa: E402
+from .typing import (
     BufSpec,
     BufSpecB,
     BufSpecV,
     BufSpecW,
     TargetSpec,
+)
+from .typing import (
+    CommT,
 )
 """
 
@@ -521,7 +543,9 @@ def visit_mpi4py_MPI():
     lines = Lines()
     lines.add = "# ruff: noqa: A001"
     lines.add = "# ruff: noqa: A002"
+    lines.add = "# ruff: noqa: E402"
     lines.add = "# ruff: noqa: E501"
+    lines.add = "# ruff: noqa: I001"
     lines.add = "# ruff: noqa: Q000"
     lines.add = "# fmt: off"
     lines.add = IMPORTS
