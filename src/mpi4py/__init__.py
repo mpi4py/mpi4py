@@ -97,7 +97,10 @@ def get_include():
                 include_dirs=[..., mpi4py.get_include()])
 
     """
-    prefix = __import__("pathlib").Path(__spec__.origin).parent
+    # pylint: disable=import-outside-toplevel
+    import importlib.resources
+
+    prefix = importlib.resources.files(__name__)
     return str(prefix / "include")
 
 
@@ -114,10 +117,14 @@ def get_config():
        `configparser` module.
 
     """
-    prefix = __import__("pathlib").Path(__spec__.origin).parent
-    parser = __import__("configparser").ConfigParser()
+    # pylint: disable=import-outside-toplevel
+    import configparser
+    import importlib.resources
+
+    parser = configparser.ConfigParser()
     parser.add_section("mpi")
-    parser.read(prefix / "mpi.cfg", encoding="utf-8")
+    with importlib.resources.path(__name__, "mpi.cfg") as fspath:
+        parser.read(fspath, encoding="utf-8")
     return dict(parser.items("mpi"))
 
 
