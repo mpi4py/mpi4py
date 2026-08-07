@@ -39,8 +39,10 @@ class TestErrhandler(unittest.TestCase):
             self.assertEqual(errh, errhandler)
 
 
-class BaseTestErrhandler:
+class BaseTestErrhandler(unittest.BaseMixin):
     #
+    mpiobj: MPI.Comm | MPI.Win | MPI.File | MPI.Session
+
     def testCreate(self):
         MAX_USER_EH = 32  # max user-defined error handlers
         mpiobj = self.mpiobj
@@ -161,6 +163,8 @@ class BaseTestErrhandler:
 
 class TestErrhandlerComm(BaseTestErrhandler, unittest.TestCase):
     #
+    mpiobj: MPI.Comm
+
     def setUp(self):
         self.mpiobj = MPI.COMM_SELF.Dup()
 
@@ -171,6 +175,8 @@ class TestErrhandlerComm(BaseTestErrhandler, unittest.TestCase):
 @unittest.skipMPI("openmpi(<4.1.0)", sys.platform == "darwin")
 class TestErrhandlerWin(BaseTestErrhandler, unittest.TestCase):
     #
+    mpiobj: MPI.Win
+
     def setUp(self):
         try:
             self.mpiobj = MPI.Win.Create(
@@ -190,6 +196,8 @@ class TestErrhandlerWin(BaseTestErrhandler, unittest.TestCase):
 
 class TestErrhandlerFile(BaseTestErrhandler, unittest.TestCase):
     #
+    mpiobj: MPI.File
+
     def setUp(self):
         rank = MPI.COMM_WORLD.Get_rank()
         fd, filename = tempfile.mkstemp(prefix="mpi4py-", suffix=f"-{rank}")
@@ -242,6 +250,8 @@ class TestErrhandlerFileNull(unittest.TestCase):
 
 class TestErrhandlerSession(BaseTestErrhandler, unittest.TestCase):
     #
+    mpiobj: MPI.Session
+
     def setUp(self):
         try:
             self.mpiobj = MPI.Session.Init()

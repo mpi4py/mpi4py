@@ -1,11 +1,24 @@
+import typing
 import unittest
 
 from reductions import Intracomm
 
 from mpi4py import MPI
 
+if typing.TYPE_CHECKING:
 
-class BaseTest:
+    class BaseMixin(unittest.TestCase):
+        pass
+
+else:
+
+    class BaseMixin:
+        pass
+
+
+class BaseTest(BaseMixin):
+    comm: Intracomm
+
     def test_reduce(self):
         rank = self.comm.rank
         size = self.comm.size

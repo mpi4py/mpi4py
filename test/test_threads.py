@@ -5,7 +5,7 @@ import threading
 VERBOSE = False
 # VERBOSE = True
 
-import mpi4py.rc  # noqa: E402
+import mpi4py  # noqa: E402
 
 mpi4py.rc.thread_level = "multiple"
 

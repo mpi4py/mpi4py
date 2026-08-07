@@ -98,6 +98,8 @@ class TestWorldAttrs(unittest.TestCase):
     )
     def testLastUsedCode(self):
         lastuc = MPI.COMM_WORLD.Get_attr(MPI.LASTUSEDCODE)
+        assert lastuc is not None
+        self.assertIsInstance(lastuc, int)
         self.assertGreaterEqual(lastuc, 0)
 
 

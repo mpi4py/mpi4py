@@ -11,7 +11,7 @@ class TestCommNull(unittest.TestCase):
         self.assertIsNot(comm, MPI.COMM_NULL)
 
         def construct():
-            MPI.Comm((1, 2, 3))
+            MPI.Comm((1, 2, 3))  # type: ignore
 
         self.assertRaises(TypeError, construct)
 
@@ -39,8 +39,10 @@ class TestCommNull(unittest.TestCase):
         self.assertEqual(comm_null, MPI.COMM_NULL)
 
 
-class BaseTestComm:
+class BaseTestComm(unittest.BaseMixin):
     #
+    COMM = MPI.Intracomm(MPI.COMM_NULL)
+
     def testConstructor(self):
         comm = MPI.Comm(self.COMM)
         self.assertEqual(comm, self.COMM)
@@ -382,6 +384,8 @@ class BaseTestComm:
         finally:
             with self.catchNotImplementedError(4, 1):
                 oldbuf = comm.Detach_buffer()
+                self.assertIsInstance(oldbuf, MPI.buffer)
+                assert type(oldbuf) is MPI.buffer
                 self.assertEqual(oldbuf.address, buf.address)
                 self.assertEqual(oldbuf.nbytes, buf.nbytes)
             MPI.Free_mem(buf)

@@ -40,9 +40,9 @@ def childscript():
 
 
 @unittest.skipIf(testutil.disable_mpi_spawn(), "mpi-spawn")
-class BaseTestSpawn:
+class BaseTestSpawn(unittest.BaseMixin):
     #
-    COMM = MPI.COMM_NULL
+    COMM = MPI.Intracomm(MPI.COMM_NULL)
     COMMAND = sys.executable
     ARGS = [os.fspath(CHILDSCRIPT), os.fspath(MPI4PYPATH)]
     MAXPROCS = 1
@@ -103,7 +103,7 @@ class BaseTestSpawnSingle(BaseTestSpawn):
             )
         else:
             child = self.COMM.Spawn(
-                None,
+                "",
                 None,
                 -1,
                 info=MPI.INFO_NULL,
@@ -232,9 +232,9 @@ class BaseTestSpawnMultiple(BaseTestSpawn):
             )
         else:
             child = self.COMM.Spawn_multiple(
+                [],
                 None,
-                None,
-                -1,
+                [],
                 info=MPI.INFO_NULL,
                 root=self.ROOT,
             )

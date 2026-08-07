@@ -129,6 +129,7 @@ def main_server(COMM):
         log(COMM, "service '%s' published.", service)
     else:
         port = ""
+        service = ""
 
     log(COMM, "waiting for client connection ...")
     icomm = COMM.Accept(port, info, root=0)

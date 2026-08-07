@@ -1,4 +1,5 @@
 import contextlib
+import typing
 import unittest
 from collections import namedtuple
 
@@ -7,7 +8,9 @@ from mpitestutil import import_MPI
 
 class TestCase(unittest.TestCase):
     #
-    def assertAlmostEqual(self, first, second):
+    def assertAlmostEqual(  # ty: ignore[invalid-method-override]
+        self, first, second
+    ):
         num = complex(second) - complex(first)
         den = max(abs(complex(second)), abs(complex(first))) or 1.0
         if abs(num / den) > 1e-2:
@@ -23,6 +26,17 @@ class TestCase(unittest.TestCase):
             MPI = import_MPI()
             mpi_version = MPI.Get_version()
             self.assertLess(mpi_version, (version, subversion))
+
+
+if typing.TYPE_CHECKING:
+
+    class BaseMixin(TestCase):
+        pass
+
+else:
+
+    class BaseMixin:
+        pass
 
 
 _Version = namedtuple("_Version", ["major", "minor", "patch"])  # noqa: PYI024
@@ -43,12 +57,14 @@ class _VersionPredicate:
 
         def split(item):
             m = re_pred.match(item)
+            assert m is not None
             op, version = m.groups()
             version = _parse_version(version)
             return op, version
 
         vpstr = versionPredicateStr.replace(" ", "")
         m = re_name.match(vpstr)
+        assert m is not None
         name, plist = m.groups()
         if plist:
             assert plist[0] == "(" and plist[-1] == ")"

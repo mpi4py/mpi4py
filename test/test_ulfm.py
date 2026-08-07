@@ -8,9 +8,9 @@ from mpi4py import MPI
 @unittest.skipMPI("msmpi")
 @unittest.skipMPI("mvapich")
 @unittest.skipMPI("impi")
-class BaseTestULFM:
+class BaseTestULFM(unittest.BaseMixin):
     #
-    COMM = MPI.COMM_NULL
+    COMM: MPI.Intracomm | MPI.Intercomm
 
     def setUp(self):
         self.COMM = self.COMM.Dup()
@@ -88,7 +88,7 @@ class BaseTestULFM:
     def testIAgree(self):
         comm = self.COMM
         with self.assertRaises(TypeError):
-            comm.Iagree(0)
+            comm.Iagree(0)  # type: ignore
         with self.assertRaises(ValueError):
             comm.Iagree(bytearray(8))
         ibuf = MPI.buffer.allocate(struct.calcsize("i"))
@@ -126,6 +126,8 @@ class BaseTestULFM:
         self.assertEqual(comm.Get_size(), shrink.Get_size())
         self.assertEqual(comm.Get_rank(), shrink.Get_rank())
         if shrink.Is_inter():
+            assert type(comm) is MPI.Intercomm
+            assert type(shrink) is MPI.Intercomm
             self.assertEqual(comm.Get_remote_size(), shrink.Get_remote_size())
         shrink.Free()
 
@@ -138,6 +140,8 @@ class BaseTestULFM:
         self.assertEqual(comm.Get_size(), shrink.Get_size())
         self.assertEqual(comm.Get_rank(), shrink.Get_rank())
         if shrink.Is_inter():
+            assert type(comm) is MPI.Intercomm
+            assert type(shrink) is MPI.Intercomm
             self.assertEqual(comm.Get_remote_size(), shrink.Get_remote_size())
         shrink.Free()
 
@@ -170,6 +174,7 @@ class TestULFMInter(BaseTestULFM, unittest.TestCase):
             LOCAL_LEADER = 0
             REMOTE_LEADER = 0
         INTRACOMM = BASECOMM.Split(COLOR, key=0)
+        INTRACOMM = MPI.Intracomm(INTRACOMM)
         INTERCOMM = MPI.Intracomm.Create_intercomm(
             INTRACOMM,
             LOCAL_LEADER,

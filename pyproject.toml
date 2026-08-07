@@ -95,12 +95,22 @@ lint = [
 ]
 test = [
   "cffi; implementation_name == 'cpython'",
+  "dill",
   "numpy",
   "pyyaml",
 ]
 type = [
-  "mypy >= 1.0.0",
-  "numpy",
+  {include-group = "build"},
+  {include-group = "build-mesonpy"},
+  {include-group = "build-skbuild"},
+  {include-group = "test"},
+  {include-group = "cover"},
+  "typing_extensions",
+  "build",
+  "wheel",
+  "spin",
+  "mypy",
+  "ty",
 ]
 
 [tool.scikit-build]

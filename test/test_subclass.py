@@ -11,13 +11,17 @@ from mpi4py import MPI
 
 class MyBaseComm:
     #
-    def free(self):
+    def free(self: MPI.Comm):
         if self != MPI.COMM_NULL:
             MPI.Comm.Free(self)
 
 
-class BaseTestBaseComm:
+class BaseTestBaseComm(unittest.BaseMixin):
     #
+    CommType: type[MPI.Comm]
+    COMM_BASE: MPI.Comm
+    comm: MPI.Comm
+
     def setUp(self):
         self.comm = self.CommType(self.COMM_BASE)
 
@@ -187,11 +191,11 @@ class MyRequest(MPI.Request):
     def __new__(cls, request=None):
         return super().__new__(cls, request)
 
-    def test(self):
-        return super(type(self), self).Test()
+    def test(self, status=None):
+        return super(type(self), self).Test(status)
 
-    def wait(self):
-        return super(type(self), self).Wait()
+    def wait(self, status=None):
+        return super(type(self), self).Wait(status)
 
 
 class MyPrequest(MPI.Prequest):
@@ -199,11 +203,11 @@ class MyPrequest(MPI.Prequest):
     def __new__(cls, request=None):
         return super().__new__(cls, request)
 
-    def test(self):
-        return super(type(self), self).Test()
+    def test(self, status=None):
+        return super(type(self), self).Test(status)
 
-    def wait(self):
-        return super(type(self), self).Wait()
+    def wait(self, status=None):
+        return super(type(self), self).Wait(status)
 
     def start(self):
         return super(type(self), self).Start()
@@ -214,15 +218,19 @@ class MyGrequest(MPI.Grequest):
     def __new__(cls, request=None):
         return super().__new__(cls, request)
 
-    def test(self):
-        return super(type(self), self).Test()
+    def test(self, status=None):
+        return super(type(self), self).Test(status)
 
-    def wait(self):
-        return super(type(self), self).Wait()
+    def wait(self, status=None):
+        return super(type(self), self).Wait(status)
 
 
-class BaseTestMyRequest:
+class BaseTestMyRequest(unittest.BaseMixin):
     #
+    MPIRequestType: type[MPI.Request]
+    MyRequestType: type[MPI.Request]
+    req: MPI.Request
+
     def setUp(self):
         self.req = self.MyRequestType(MPI.REQUEST_NULL)
 
@@ -235,20 +243,23 @@ class BaseTestMyRequest:
 
 class TestMyRequest(BaseTestMyRequest, unittest.TestCase):
     #
-    MPIRequestType = MPI.Request
-    MyRequestType = MyRequest
+    MPIRequestType: type[MPI.Request] = MPI.Request
+    MyRequestType: type[MyRequest] = MyRequest
+    req: MyRequest
 
 
 class TestMyPrequest(BaseTestMyRequest, unittest.TestCase):
     #
-    MPIRequestType = MPI.Prequest
-    MyRequestType = MyPrequest
+    MPIRequestType: type[MPI.Prequest] = MPI.Prequest
+    MyRequestType: type[MyPrequest] = MyPrequest
+    req: MyPrequest
 
 
 class TestMyGrequest(BaseTestMyRequest, unittest.TestCase):
     #
-    MPIRequestType = MPI.Grequest
-    MyRequestType = MyGrequest
+    MPIRequestType: type[MPI.Grequest] = MPI.Grequest
+    MyRequestType: type[MyGrequest] = MyGrequest
+    req: MyGrequest
 
 
 class TestMyRequest2(TestMyRequest):
@@ -293,8 +304,10 @@ class MyInfo(MPI.Info):
             MPI.Info.Free(self)
 
 
-class BaseTestMyInfo:
+class BaseTestMyInfo(unittest.BaseMixin):
     #
+    info: MyInfo
+
     def setUp(self):
         info = MPI.Info.Create()
         self.info = MyInfo(info)
@@ -368,11 +381,13 @@ class MyWin(MPI.Win):
             MPI.Win.Free(self)
 
 
-class BaseTestMyWin:
+class BaseTestMyWin(unittest.BaseMixin):
     #
+    win: MyWin
+
     def setUp(self):
-        w = MPI.Win.Create(MPI.BOTTOM)
-        self.win = MyWin(w)
+        win = MPI.Win.Create(MPI.BOTTOM)
+        self.win = MyWin(win)
 
     def tearDown(self):
         self.win.free()
@@ -411,25 +426,25 @@ class MyFile(MPI.File):
             MPI.File.Close(self)
 
 
-class BaseTestMyFile:
+class BaseTestMyFile(unittest.BaseMixin):
     #
-    def openfile(self):
+    file: MyFile
+
+    @staticmethod
+    def openfile():
         fd, fname = tempfile.mkstemp(prefix="mpi4py")
         os.close(fd)
         fname = pathlib.Path(fname)
         amode = MPI.MODE_RDWR | MPI.MODE_CREATE | MPI.MODE_DELETE_ON_CLOSE
         try:
-            self.file = MPI.File.Open(
-                MPI.COMM_SELF, fname, amode, MPI.INFO_NULL
-            )
+            return MPI.File.Open(MPI.COMM_SELF, fname, amode, MPI.INFO_NULL)
         except Exception:
             fname.unlink()
             raise
-        return self.file
 
     def setUp(self):
-        f = self.openfile()
-        self.file = MyFile(f)
+        file = self.openfile()
+        self.file = MyFile(file)
 
     def tearDown(self):
         self.file.close()

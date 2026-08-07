@@ -142,7 +142,9 @@ class Node:
 
     @classmethod
     def match(cls, line):
+        assert cls.REGEX is not None  # noqa: S101
         m = cls.REGEX.match(line)
+        assert m is not None  # noqa: S101
         return m.groups() if m else None
 
     HEADER = None
@@ -160,18 +162,22 @@ class Node:
 
     def init(self, name, **kwargs):
         self.name = name
+        self.deprecated = False
         self.__dict__.update(kwargs)
 
     def header(self):
+        assert self.HEADER is not None  # noqa: S101
         line = dedent(self.HEADER) % vars(self)
         line = line.replace("\n", "")
         line = line.replace("  ", " ")
         return line + "\n"
 
     def config(self):
+        assert self.CONFIG is not None  # noqa: S101
         return dedent(self.CONFIG) % vars(self)
 
     def missing(self, guard=True):
+        assert self.MISSING is not None  # noqa: S101
         if guard:
             head = dedent(self.MISSING_HEAD)
             tail = dedent(self.MISSING_TAIL)
@@ -294,7 +300,8 @@ class NodeFuncProto(Node):
             self.calias = calias
             self.MISSING = "#define %(cname)s %(calias)s"
         elif cname in FALLBACK:
-            self.MISSING = "#define %(cname)s" + FALLBACK[cname]
+            self.fallback = FALLBACK[cname]
+            self.MISSING = "#define %(cname)s%(fallback)s"
 
 
 class IntegralType(NodeType):
@@ -1242,7 +1249,8 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="MPI API generator")
-    parser.color = True  # Python 3.14+
+    if sys.version_info >= (3, 14):
+        parser.color = True
     parser.add_argument("-q", "--quiet", action="store_true")
     parser.add_argument("-l", "--list", action="store_true")
     args = parser.parse_args()

@@ -12,7 +12,7 @@ from mpi4py import MPI
 
 class TestObjModel(unittest.TestCase):
     #
-    objects = [
+    objects: list = [
         MPI.Status(),
         MPI.DATATYPE_NULL,
         MPI.REQUEST_NULL,
@@ -187,7 +187,7 @@ class TestObjModel(unittest.TestCase):
             self.assertFalse(obj)
 
     def testSafeFreeConstant(self):
-        objects = [
+        objects: list = [
             MPI.INT,
             MPI.LONG,
             MPI.FLOAT,
@@ -227,7 +227,8 @@ class TestObjModel(unittest.TestCase):
                 self.assertTrue(obj)
 
     def testSafeFreeCreated(self):
-        objects = [
+        objects = []
+        objects += [
             MPI.COMM_SELF.Isend((None, 0, MPI.BYTE), MPI.PROC_NULL),
             MPI.Op.Create(lambda *_: None),
             MPI.COMM_SELF.Get_group(),

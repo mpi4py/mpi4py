@@ -10,6 +10,7 @@ def get_version():
     source = topdir / "src" / "mpi4py" / "__init__.py"
     content = source.read_text(encoding="utf-8")
     m = re.search(r'__version__\s*=\s*"(.*)"', content)
+    assert m is not None  # noqa: S101
     version = m.groups()[0]
     local_version = os.environ.get("MPI4PY_LOCAL_VERSION")
     if local_version:
@@ -37,6 +38,7 @@ def get_requires_python():
     source = topdir / "pyproject.toml"
     content = source.read_text(encoding="utf-8")
     m = re.search(r"requires-python\s*=\s*\"(.*)\"", content)
+    assert m is not None  # noqa: S101
     requires_python = m.groups()[0]
     return requires_python
 
@@ -50,7 +52,7 @@ def dynamic_metadata(settings, project):  # noqa: ARG001
 
 def main():
     field = sys.argv[1].replace("-", "_")
-    getter = globals().get("get_" + field.replace("-", "_"))
+    getter = globals()["get_" + field.replace("-", "_")]
     print(getter())
 
 

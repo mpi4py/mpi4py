@@ -15,7 +15,7 @@ def osu_multi_lat(
     comm = MPI.COMM_WORLD
     myid = comm.Get_rank()
     nprocs = comm.Get_size()
-    pairs = nprocs / 2
+    pairs = nprocs // 2
 
     s_buf = allocate(MAX_MSG_SIZE)
     r_buf = allocate(MAX_MSG_SIZE)
@@ -60,6 +60,7 @@ def osu_multi_lat(
         latency = (t_end - t_start) * 1e6 / (2 * loop)
         total_lat = comm.reduce(latency, root=0, op=MPI.SUM)
         if myid == 0:
+            assert isinstance(total_lat, float)
             latency = total_lat / (pairs * 2)
             print(f"{size:-10d}{latency:20.2f}")
 

@@ -19,8 +19,8 @@ _basic = [
     2 - 3j,
     "mpi4py",
 ]
-messages = list(_basic)
-messages += [
+messages = [
+    *_basic,
     list(_basic),
     tuple(_basic),
     {f"k{k}": v for k, v in enumerate(_basic)},
@@ -71,7 +71,7 @@ def get_neighbors_count(comm):
 
 
 def have_feature():
-    cartcomm = MPI.COMM_SELF.Create_cart([1], periods=[0])
+    cartcomm = MPI.COMM_SELF.Create_cart([1], periods=[False])
     try:
         cartcomm.neighbor_allgather(None)
     except NotImplementedError:
@@ -83,7 +83,7 @@ def have_feature():
 
 
 @unittest.skipIf(not have_feature(), "mpi-neighbor")
-class BaseTestCCONghObj:
+class BaseTestCCONghObj(unittest.BaseMixin):
     #
     COMM = MPI.COMM_NULL
 

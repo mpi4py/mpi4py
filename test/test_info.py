@@ -119,7 +119,7 @@ class TestInfo(unittest.TestCase):
     def tearDown(self):
         self.INFO.Free()
         self.assertEqual(self.INFO, MPI.INFO_NULL)
-        self.INFO = None
+        del self.INFO
 
     def testTruth(self):
         self.assertTrue(bool(self.INFO))
@@ -136,7 +136,7 @@ class TestInfo(unittest.TestCase):
 
     def testCreateBad(self):
         with self.assertRaises(TypeError):
-            MPI.Info.Create(items=123)
+            MPI.Info.Create(items=123)  # type: ignore
 
     def testDup(self):
         info = self.INFO.Dup()

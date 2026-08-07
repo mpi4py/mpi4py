@@ -64,7 +64,7 @@ class TestMessage(unittest.TestCase):
 
 
 @unittest.skipIf(MPI.MESSAGE_NULL == MPI.MESSAGE_NO_PROC, "mpi-message")
-class BaseTestP2PMatched:
+class BaseTestP2PMatched(unittest.BaseMixin):
     #
     COMM = MPI.COMM_NULL
 
@@ -132,6 +132,7 @@ class BaseTestP2PMatched:
                             r = comm.Isend(sbuf.as_mpi(), 0, 0)
                             comm.Probe(0, 0)
                             m = MPI.Message.Iprobe(comm, 0, 0)
+                            assert m is not None
                             self.assertIsInstance(m, MPI.Message)
                             self.assertTrue(m)
                             m.Recv(rbuf.as_raw())

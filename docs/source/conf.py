@@ -33,6 +33,7 @@ def pkg_version():
     source = topdir / "src" / "mpi4py" / "__init__.py"
     content = source.read_text(encoding="utf-8")
     m = re.search(r'__version__\s*=\s*"(.*)"', content)
+    assert m is not None
     return m.groups()[0]
 
 
@@ -102,7 +103,7 @@ intersphinx_mapping = {
 napoleon_preprocess_types = True
 
 try:
-    import sphinx_rtd_theme
+    sphinx_rtd_theme = importlib.import_module("sphinx_rtd_theme")
 except ImportError:
     sphinx_rtd_theme = None
 else:
@@ -110,7 +111,7 @@ else:
         extensions.append("sphinx_rtd_theme")
 
 try:
-    import sphinx_copybutton
+    sphinx_copybutton = importlib.import_module("sphinx_copybutton")
 except ImportError:
     sphinx_copybutton = None
 else:
@@ -129,22 +130,23 @@ coverage_ignore_classes = [r"Rc", r"memory"]
 
 def _setup_numpy_typing():
     try:
-        import numpy as np
+        np = importlib.import_module("numpy")
     except ImportError:
         from typing import Generic, TypeVar
 
+        T = TypeVar("T")
         np = type(sys)("numpy")
         sys.modules[np.__name__] = np
-        np.dtype = types.new_class("dtype", (Generic[TypeVar("T")],))
+        np.dtype = types.new_class("dtype", (Generic[T],))  # ty: ignore
         np.dtype.__module__ = np.__name__
 
     try:
-        import numpy.typing as npt
+        np = importlib.import_module("numpy.typing")
     except ImportError:
         npt = type(sys)("numpy.typing")
-        np.typing = npt
+        np.typing = npt  # ty: ignore
         sys.modules[npt.__name__] = npt
-        npt.__all__ = []
+        npt.__all__ = []  # ty: ignore
         for attr in ["ArrayLike", "DTypeLike"]:
             setattr(npt, attr, typing.Any)
             npt.__all__.append(attr)
@@ -152,16 +154,16 @@ def _setup_numpy_typing():
 
 def _patch_domain_python():
     try:
-        from numpy.typing import __all__ as numpy_types
+        from numpy.typing import __all__ as numpy_types_all
     except ImportError:
-        numpy_types = []
+        numpy_types_all = []
     try:
-        from mpi4py.typing import __all__ as mpi4py_types
+        from mpi4py.typing import __all__ as mpi4py_types_all
     except ImportError:
-        mpi4py_types = []
+        mpi4py_types_all = []
 
-    numpy_types = set(numpy_types)
-    mpi4py_types = set(mpi4py_types)
+    numpy_types = set(numpy_types_all)
+    mpi4py_types = set(mpi4py_types_all)
     for name in numpy_types:
         autodoc_type_aliases[name] = f"~numpy.typing.{name}"
     for name in mpi4py_types:
@@ -350,7 +352,7 @@ def setup(app):
     ]
     if sphinx.version_info < (9, 0):
         typing_overload = typing.overload
-        typing.overload = lambda arg: arg
+        typing.overload = lambda arg: arg  # ty: ignore
     for name in modules:
         mod = importlib.import_module(name)
         ann = apidoc.load_module(f"{mod.__file__}i", name)

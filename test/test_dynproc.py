@@ -8,7 +8,7 @@ from mpi4py import MPI
 try:
     import socket
 except ImportError:
-    socket = None
+    socket = None  # ty: ignore[invalid-assignment]
 
 
 def ch4_ucx():
@@ -133,7 +133,7 @@ class TestDPM(unittest.TestCase):
                 port = MPI.Open_port()
                 comm_world.send(port, dest=0)
             else:
-                port = None
+                port = ""
             intercomm = comm.Accept(port, root=0)
             if wrank == 1:
                 MPI.Close_port(port)
@@ -157,8 +157,9 @@ class TestDPM(unittest.TestCase):
     @unittest.skipIf(socket is None, "socket")
     @unittest.skipMPI("impi", testutil.github() and os.name == "nt")
     def testJoin(self):
+        assert socket is not None
         rank = MPI.COMM_WORLD.Get_rank()
-        server = client = address = None
+        server = client = None
         host = socket.gethostname()
         addrinfo = socket.getaddrinfo(host, None, type=socket.SOCK_STREAM)
         addr_families = [info[0] for info in addrinfo]
@@ -182,7 +183,9 @@ class TestDPM(unittest.TestCase):
         if rank == 1:  # client
             client = socket.socket(addr_family, socket.SOCK_STREAM)
         # communicate address
+        address = ("0.0.0.0", 0)
         if rank == 0:
+            assert server is not None
             address = server.getsockname()
             MPI.COMM_WORLD.ssend(address, 1)
         if rank == 1:
@@ -191,16 +194,18 @@ class TestDPM(unittest.TestCase):
         # stablish client/server connection
         connected = False
         if rank == 0:  # server
+            assert server is not None
             client = server.accept()[0]
             server.close()
         if rank == 1:  # client
+            assert client is not None
             client.connect(address)
             connected = True
         connected = MPI.COMM_WORLD.bcast(connected, root=1)
         self.assertTrue(connected)
         # test Comm.Join()
         MPI.COMM_WORLD.Barrier()
-        if client:
+        if client is not None:
             fd = client.fileno()
             intercomm = MPI.Comm.Join(fd)
             client.close()

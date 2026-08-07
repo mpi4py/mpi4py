@@ -5,7 +5,7 @@ from mpi4py import MPI
 try:
     import cffi
 except ImportError:
-    cffi = None
+    cffi = None  # ty: ignore[invalid-assignment]
 
 
 @unittest.skipIf(cffi is None, "cffi")

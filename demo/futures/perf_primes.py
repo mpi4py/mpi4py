@@ -5,15 +5,10 @@ Compare the speed of primes sequentially vs. using futures.
 import math
 import sys
 import time
-
-try:
-    from concurrent.futures import ThreadPoolExecutor
-except ImportError:
-    ThreadPoolExecutor = None
-try:
-    from concurrent.futures import ProcessPoolExecutor
-except ImportError:
-    ProcessPoolExecutor = None
+from concurrent.futures import (
+    ProcessPoolExecutor,
+    ThreadPoolExecutor,
+)
 
 from mpi4py.futures import MPIPoolExecutor
 
