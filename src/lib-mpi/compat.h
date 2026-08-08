@@ -1,4 +1,4 @@
-#if defined(MPI_ABI_VERSION)
+#if defined(MPI_ABI_VERSION) && MPI_ABI_VERSION > 0
 #include "compat/mpiabi.h"
 #elif defined(I_MPI_NUMVERSION)
 #include "compat/impi.h"

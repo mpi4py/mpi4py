@@ -22,13 +22,13 @@
 
 #ifndef PyMPI_HAVE_MPI_Aint
 #undef  MPI_Aint
-typedef long PyMPI_MPI_Aint;
+typedef intptr_t PyMPI_MPI_Aint;
 #define MPI_Aint PyMPI_MPI_Aint
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Offset
 #undef  MPI_Offset
-typedef long PyMPI_MPI_Offset;
+typedef int64_t PyMPI_MPI_Offset;
 #define MPI_Offset PyMPI_MPI_Offset
 #endif
 
@@ -4517,6 +4517,16 @@ typedef int (MPIAPI PyMPI_MPI_Datarep_conversion_function_c)(void*,MPI_Datatype,
 #ifndef PyMPI_HAVE_MPI_Get_library_version
 #undef  MPI_Get_library_version
 #define MPI_Get_library_version(a1,a2) PyMPI_UNAVAILABLE("MPI_Get_library_version",a1,a2)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_ABI_VERSION
+#undef  MPI_ABI_VERSION
+#define MPI_ABI_VERSION (-1)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_ABI_SUBVERSION
+#undef  MPI_ABI_SUBVERSION
+#define MPI_ABI_SUBVERSION (-1)
 #endif
 
 #ifndef PyMPI_HAVE_MPI_Abi_get_version

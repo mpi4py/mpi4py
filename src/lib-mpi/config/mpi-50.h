@@ -35,6 +35,8 @@
 #define PyMPI_HAVE_MPI_Abi_get_version 1
 #define PyMPI_HAVE_MPI_Abi_get_info 1
 #define PyMPI_HAVE_MPI_Abi_get_fortran_info 1
+#define PyMPI_HAVE_MPI_ABI_VERSION 1
+#define PyMPI_HAVE_MPI_ABI_SUBVERSION 1
 
 #endif
 #endif
