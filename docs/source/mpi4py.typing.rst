@@ -69,6 +69,8 @@ within the :mod:`~mpi4py.MPI` module.
 
 .. autodata:: CommT
 
+.. autodata:: P
+.. autodata:: R
 .. autodata:: S
 .. autodata:: T
 .. autodata:: U

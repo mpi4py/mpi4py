@@ -22,6 +22,7 @@ else:
 from ..MPI import COMM_WORLD, Intracomm
 from ..typing import T
 from ._base import Executor, Future
+from ._core import Pool
 
 _P = ParamSpec("_P")
 
@@ -43,6 +44,11 @@ class MPIPoolExecutor(Executor):
         env: Mapping[str, str] | Iterable[tuple[str, str]] = ...,
         **kwargs: Any,
     ) -> None: ...
+    def _bootstrap(self) -> Pool: ...
+    @property
+    def _max_workers(self) -> int: ...
+    _shutdown: bool
+    _pool: Pool | None
     @property
     def num_workers(self) -> int: ...
     def bootup(

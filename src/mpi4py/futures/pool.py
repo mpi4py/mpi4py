@@ -10,14 +10,13 @@ import threading
 import time
 import weakref
 
-from . import _core
-from ._base import Executor, Future, as_completed
+from . import _base, _core
 
 
-class MPIPoolExecutor(Executor):
+class MPIPoolExecutor(_base.Executor):
     """MPI-based asynchronous executor."""
 
-    Future = Future
+    Future = _base.Future
 
     def __init__(
         self, max_workers=None, initializer=None, initargs=(), **kwargs
@@ -67,6 +66,7 @@ class MPIPoolExecutor(Executor):
     def _bootstrap(self):
         if self._pool is None:
             self._pool = self._make_pool(self)
+        return self._pool
 
     @property
     def _max_workers(self):
@@ -80,9 +80,9 @@ class MPIPoolExecutor(Executor):
                 return 0
             if self._shutdown:
                 return 0
-            self._bootstrap()
-            self._pool.wait()
-            return self._pool.size
+            pool = self._bootstrap()
+            pool.wait()
+            return pool.size
 
     def bootup(self, wait=True):
         """Allocate executor resources eagerly.
@@ -95,9 +95,9 @@ class MPIPoolExecutor(Executor):
         with self._lock:
             if self._shutdown:
                 raise RuntimeError("cannot bootup after shutdown")
-            self._bootstrap()
+            pool = self._bootstrap()
             if wait:
-                self._pool.wait()
+                pool.wait()
             return self
 
     def submit(self, fn, /, *args, **kwargs):
@@ -112,13 +112,13 @@ class MPIPoolExecutor(Executor):
         """
         with self._lock:
             if self._broken:
-                raise _core.BrokenExecutor(self._broken)
+                raise _base.BrokenExecutor(self._broken)
             if self._shutdown:
                 raise RuntimeError("cannot submit after shutdown")
-            self._bootstrap()
+            pool = self._bootstrap()
             future = self.Future()
             task = (fn, args, kwargs)
-            self._pool.push((future, task))
+            pool.push((future, task))
             return future
 
     def map(
@@ -293,9 +293,9 @@ def _starmap_helper(
         try:
             if unordered:
                 if timeout is None:
-                    iterator = as_completed(fs)
+                    iterator = _base.as_completed(fs)
                 else:
-                    iterator = as_completed(fs, end_time - timer())
+                    iterator = _base.as_completed(fs, end_time - timer())
                 for _ in map(future.append, iterator):
                     fs.remove(future[0])
                     yield resolve(future.pop())
@@ -384,13 +384,13 @@ class MPICommExecutor:
 
         """
         if comm is None:
-            comm = _core.MPI.COMM_WORLD
+            comm = _core._comm_executor_world()
         if comm.Is_inter():
             raise ValueError("expecting an intracommunicator")
         if root < 0 or root >= comm.Get_size():
             raise ValueError("expecting root in range(comm.size)")
         if _core.SharedPool is not None:
-            comm = _core.MPI.COMM_WORLD
+            comm = _core._comm_executor_world()
             root = comm.Get_rank()
 
         self._comm = comm

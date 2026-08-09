@@ -6,6 +6,7 @@ from collections.abc import (
 )
 from typing import (
     Any,
+    ParamSpec,
     Protocol,
     SupportsIndex,
     TypeAlias,
@@ -132,6 +133,8 @@ TargetSpec: TypeAlias = Union[
 
 CommT = TypeVar("CommT", Intracomm, Intercomm)  # noqa: PYI001
 
+P = ParamSpec("P")  # noqa: PYI001
+R = TypeVar("R")  # noqa: PYI001
 S = TypeVar("S")  # noqa: PYI001
 T = TypeVar("T")  # noqa: PYI001
 U = TypeVar("U")  # noqa: PYI001

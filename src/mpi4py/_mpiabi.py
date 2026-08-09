@@ -272,14 +272,14 @@ def _get_libmpi_from_mpiabi(mpiabi):
 
 
 def _get_mpiabi():
-    mpiabi = getattr(_get_mpiabi, "mpiabi", None)
+    mpiabi = vars(_get_mpiabi).get("mpiabi")
     if mpiabi is None:
         mpiabi = MPIABI or os.environ.get("MPI4PY_MPIABI")
         libmpi = LIBMPI or os.environ.get("MPI4PY_LIBMPI")
         if mpiabi:
             libmpi = _get_libmpi_from_mpiabi(mpiabi)
         mpiabi = _get_mpiabi_from_libmpi(libmpi)
-        _get_mpiabi.mpiabi = mpiabi
+        vars(_get_mpiabi)["mpiabi"] = mpiabi
     return mpiabi
 
 

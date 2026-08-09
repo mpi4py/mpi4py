@@ -34,17 +34,16 @@ class _Collect:
     def __init__(self):
         self.lock = _threading.RLock()
         self.future = None
-        self.result = None
-        self.pending = None
+        self.result = []
+        self.pending = _collections.defaultdict(list)
 
     def __call__(self, fs):
-        pending = _collections.defaultdict(list)
+        pending = self.pending
         for index, item in enumerate(fs):
             pending[item].append(index)
         if pending:
             self.future = future = next(iter(pending)).__class__()
             self.result = [None] * sum(map(len, pending.values()))
-            self.pending = pending
             future.add_done_callback(self._done_cb)
             for item in list(pending):
                 item.add_done_callback(self._item_cb)
@@ -78,8 +77,8 @@ class _Collect:
             for item in self.pending:
                 item.cancel()
             self.future = None
-            self.result = None
-            self.pending = None
+            self.result = []
+            self.pending.clear()
         if future.cancelled():
             future.set_running_or_notify_cancel()
 
