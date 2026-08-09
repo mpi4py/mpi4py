@@ -14,11 +14,13 @@ def _register(command):
 
 def _create_parser(cmd="", usage=None):
     # pylint: disable=import-outside-toplevel
-    from argparse import ArgumentParser
+    import argparse
+    import pathlib
 
-    pyexe = __import__("pathlib").Path(_sys.executable).name
-    pycmd = f"{pyexe} -m {__spec__.name} {cmd}".strip()
-    parser = ArgumentParser(prog=pycmd, usage=usage)
+    pyexe = pathlib.Path(_sys.executable).name
+    pymod = __spec__ and __spec__.name
+    pycmd = f"{pyexe} -m {pymod} {cmd}"
+    parser = argparse.ArgumentParser(prog=pycmd, usage=usage)
     parser.color = True  # Python 3.14+
     return parser
 

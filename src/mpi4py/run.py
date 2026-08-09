@@ -29,11 +29,11 @@ def run_command_line(args=None):
         filename="<string>",
         argv0="-c",
     ):
-        from runpy import _run_module_code
-
+        # pylint: disable=protected-access
+        run_module_code = __import__("runpy")._run_module_code
         code = compile(string, filename, "exec", 0, True)
         kwargs = {"script_name": argv0}
-        return _run_module_code(code, init_globals, run_name, **kwargs)
+        return run_module_code(code, init_globals, run_name, **kwargs)
 
     sys.argv[:] = args if args is not None else sys.argv[1:]
 
@@ -67,12 +67,11 @@ def set_abort_status(status):
     if isinstance(status, SystemExit):
         status = status.code
     elif isinstance(status, KeyboardInterrupt):
-        from _signal import SIGINT
-
-        status = SIGINT + 128
+        signal = __import__("signal")
+        status = signal.SIGINT + 128
     if not isinstance(status, int):
         status = 0 if status is None else 1
-    pkg = __spec__.parent
+    pkg = __spec__ and __spec__.parent
     mpi = sys.modules.get(f"{pkg}.MPI")
     if mpi is not None and status:
         # pylint: disable=protected-access
@@ -87,6 +86,14 @@ def main():
     import os
     import sys
 
+    def spec(module=None):
+        if module is None:
+            assert __spec__ is not None  # noqa: S101
+            return __spec__
+        else:
+            assert module.__spec__ is not None  # noqa: S101
+            return module.__spec__
+
     def import_MPI():  # pylint: disable=invalid-name
         from . import rc
 
@@ -98,23 +105,22 @@ def main():
     def version():
         from . import __version__
 
-        package = __spec__.parent
+        package = spec().parent
         print(f"{package} {__version__}", file=sys.stdout)
         sys.exit(0)
 
     def prefix():
         import pathlib
 
-        prefix = pathlib.Path(__spec__.origin).parent
+        origin = spec().origin
+        prefix = pathlib.Path(origin).parent
         print(prefix, file=sys.stdout)
         sys.exit(0)
 
     def module():
-        import pathlib
-
         MPI = import_MPI()
-        prefix = pathlib.Path(MPI.__spec__.origin)
-        print(prefix, file=sys.stdout)
+        origin = spec(MPI).origin
+        print(origin, file=sys.stdout)
         sys.exit(0)
 
     def mpi_vendor():
@@ -145,7 +151,7 @@ def main():
             dladdr.restype = ctypes.c_int
             dladdr.argtypes = [ctypes.c_void_p, ctypes.POINTER(DL_Info)]
 
-            module = ctypes.CDLL(MPI.__file__)
+            module = ctypes.CDLL(spec(MPI).origin)
             symbol = module.MPI_Init
             dlinfo = DL_Info()
             retval = dladdr(symbol, dlinfo)
@@ -209,22 +215,24 @@ def main():
             sys.exit(1)
 
     def usage(errmess=None):
-        dedent = __import__("textwrap").dedent
-        python = __import__("pathlib").Path(sys.executable).name
-        program = __spec__.name
+        import pathlib
+        import textwrap
 
-        cmdline = dedent(f"""
+        python = pathlib.Path(sys.executable).name
+        program = spec().name
+
+        cmdline = textwrap.dedent(f"""
         usage: {python} -m {program} [options] <pyfile> [arg] ...
            or: {python} -m {program} [options] -m <mod> [arg] ...
            or: {python} -m {program} [options] -c <cmd> [arg] ...
            or: {python} -m {program} [options] - [arg] ...
         """).strip()
 
-        helptip = dedent(f"""
+        helptip = textwrap.dedent(f"""
         Try `{python} -m {program} -h` for more information.
         """).strip()
 
-        options = dedent("""
+        options = textwrap.dedent("""
         options:
           --version            show version number and exit
           --prefix             show install path and exit
