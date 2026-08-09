@@ -278,7 +278,7 @@ cdef class Info:
         for key, value in kwds.items():
             self.Set(key, value)
 
-    def pop(self, key: str, *default: str) -> str:
+    def pop(self, key: str, *default: T) -> str | T:
         """Pop value by key."""
         cdef object value = None
         if self:

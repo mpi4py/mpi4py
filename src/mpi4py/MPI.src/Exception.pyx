@@ -31,19 +31,19 @@ class Exception(RuntimeError):
         """Return self!=other."""
         return int(self) != other
 
-    def __lt__(self, object other: int, /) -> bool:
+    def __lt__(self, object other: Self | int, /) -> bool:
         """Return self<other."""
         return int(self) < other
 
-    def __le__(self, object other: int, /) -> bool:
+    def __le__(self, object other: Self | int, /) -> bool:
         """Return self<=other."""
         return int(self) <= other
 
-    def __gt__(self, object other: int, /) -> bool:
+    def __gt__(self, object other: Self | int, /) -> bool:
         """Return self>other."""
         return int(self) > other
 
-    def __ge__(self, object other: int, /) -> bool:
+    def __ge__(self, object other: Self | int, /) -> bool:
         """Return self>=other."""
         return int(self) >= other
 

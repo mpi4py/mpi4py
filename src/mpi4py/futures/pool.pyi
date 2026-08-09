@@ -6,8 +6,10 @@ from collections.abc import (
     Mapping,
     Sequence,
 )
+from os import PathLike
 from typing import (
     Any,
+    AnyStr,
     ParamSpec,
     TypeAlias,
 )
@@ -34,10 +36,10 @@ class MPIPoolExecutor(Executor):
         python_exe: str = ...,
         python_args: Sequence[str] = ...,
         mpi_info: Mapping[str, str] | Iterable[tuple[str, str]] = ...,
-        globals: Mapping[str, str] | Iterable[tuple[str, str]] = ...,  # noqa: A002
+        globals: Mapping[str, Any] | Iterable[tuple[str, Any]] = ...,  # noqa: A002
         main: bool = True,
-        path: Sequence[str] = ...,
-        wdir: str = ...,
+        path: Sequence[PathLike[AnyStr] | str | bytes] = ...,
+        wdir: PathLike[AnyStr] | str | bytes = ...,
         env: Mapping[str, str] | Iterable[tuple[str, str]] = ...,
         **kwargs: Any,
     ) -> None: ...
@@ -86,7 +88,7 @@ class MPICommExecutor:
         root: int = 0,
         **kwargs: Any,
     ) -> None: ...
-    def __enter__(self) -> Self | None: ...
+    def __enter__(self) -> MPIPoolExecutor | None: ...
     def __exit__(self, *args: object) -> bool | None: ...
 
 class ThreadPoolExecutor(MPIPoolExecutor): ...
