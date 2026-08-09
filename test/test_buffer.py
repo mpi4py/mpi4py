@@ -5,7 +5,7 @@ from mpi4py import MPI
 try:
     import array
 except ImportError:
-    array = None
+    array = None  # ty: ignore[invalid-assignment]
 
 
 class TestBuffer(unittest.TestCase):
@@ -76,7 +76,7 @@ class TestBuffer(unittest.TestCase):
             buf = buffer.allocate(size)
             self.assertEqual(buf.nbytes, size)
             self.assertNotEqual(buf.address, 0)
-            view = memoryview(buf.obj)
+            view = memoryview(buf.obj)  # ty: ignore[invalid-argument-type]
             self.assertEqual(buf.nbytes, view.nbytes)
         for clear in (False, True):
             buf = buffer.allocate(1024, clear)
@@ -249,7 +249,7 @@ class TestBuffer(unittest.TestCase):
             self.assertEqual(len(mem), n)
 
             def delitem():
-                del mem[n]
+                del mem[n]  # type: ignore
 
             def getitem1():
                 return mem[n]
@@ -258,7 +258,7 @@ class TestBuffer(unittest.TestCase):
                 return mem[::2]
 
             def getitem3():
-                return mem[None]
+                return mem[None]  # type: ignore
 
             def setitem1():
                 mem[n] = 0
@@ -267,7 +267,7 @@ class TestBuffer(unittest.TestCase):
                 mem[::2] = 0
 
             def setitem3():
-                mem[None] = 0
+                mem[None] = 0  # type: ignore
 
             self.assertRaises(NotImplementedError, delitem)
             self.assertRaises(IndexError, getitem1)
@@ -327,6 +327,8 @@ class TestBuffer(unittest.TestCase):
                 MPI.Iflush_buffer().Wait()
         finally:
             oldbuf = MPI.Detach_buffer()
+            self.assertIsInstance(oldbuf, MPI.buffer)
+            assert type(oldbuf) is MPI.buffer
             self.assertEqual(oldbuf.address, buf.address)
             self.assertEqual(oldbuf.nbytes, buf.nbytes)
             MPI.Free_mem(buf)

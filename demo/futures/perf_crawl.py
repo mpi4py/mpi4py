@@ -6,16 +6,11 @@ import contextlib
 import functools
 import sys
 import time
-from urllib.request import urlopen
-
-try:
-    from concurrent.futures import ThreadPoolExecutor
-except ImportError:
-    ThreadPoolExecutor = lambda _: None  # noqa: E731
-try:
-    from concurrent.futures import ProcessPoolExecutor
-except ImportError:
-    ProcessPoolExecutor = lambda _: None  # noqa: E731
+import urllib.request
+from concurrent.futures import (
+    ProcessPoolExecutor,
+    ThreadPoolExecutor,
+)
 
 from mpi4py.futures import MPIPoolExecutor, as_completed
 
@@ -35,7 +30,7 @@ URLS = [
 
 
 def load_url(url, timeout):
-    return urlopen(url, timeout=timeout).read()
+    return urllib.request.urlopen(url, timeout=timeout).read()
 
 
 def download_urls_sequential(urls, timeout=60):

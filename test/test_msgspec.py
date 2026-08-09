@@ -1,5 +1,6 @@
 import contextlib
 import sys
+import typing
 
 import mpiunittest as unittest
 from arrayimpl import (
@@ -43,7 +44,7 @@ class BaseBuf:
 try:
     import dlpackimpl as dlpack
 except ImportError:
-    dlpack = None
+    dlpack = None  # ty: ignore[invalid-assignment]
 
 
 class BaseDLPackBuf(BaseBuf):
@@ -94,7 +95,7 @@ class DLPackCPUBufV0(DLPackCPUBuf):
     #
     version = 0
 
-    def __dlpack__(self, stream=None):
+    def __dlpack__(self, stream=None):  # type: ignore
         return super().__dlpack__(stream=stream)
 
 
@@ -102,6 +103,7 @@ if cupy is not None:
     cupy_version = tuple(map(int, cupy.__version__.split(".", 2)[:2]))
 
     class DLPackGPUBuf(BaseDLPackBuf):
+        _buf: cupy.ndarray
         has_dlpack = None
         dev_type = None
 
@@ -147,6 +149,9 @@ if cupy is not None:
 else:
 
     class DLPackGPUBufInitMixin:
+        #
+        managed: typing.Any
+
         def __init__(self, *args):
             super().__init__(*args)
             kDLCUDA = dlpack.DLDeviceType.kDLCUDA
@@ -162,6 +167,15 @@ else:
 # ---
 
 
+class CAI(typing.TypedDict):
+    version: int
+    data: tuple[int, bool]
+    typestr: str
+    shape: tuple[int, ...]
+    strides: tuple[int, ...]
+    descr: list[tuple[str, str]]
+
+
 class CAIBuf(BaseBuf):
     #
     def __init__(self, typecode, initializer, readonly=False):
@@ -169,7 +183,7 @@ class CAIBuf(BaseBuf):
         address = self._buf.buffer_info()[0]
         typecode = self._buf.typecode
         itemsize = self._buf.itemsize
-        self.__cuda_array_interface__ = {
+        self.__cuda_array_interface__: CAI = {
             "version": 0,
             "data": (address, readonly),
             "typestr": typestr(typecode, itemsize),
@@ -341,7 +355,7 @@ class TestMessageBlock(unittest.TestCase):
         MPI.Free_mem(buf)
 
 
-class BaseTestMessageSimpleArray:
+class BaseTestMessageSimpleArray(unittest.BaseMixin):
     #
     TYPECODES = "bhil" + "BHIL" + "fd"
 
@@ -524,14 +538,14 @@ class BaseTestMessageSimpleArray:
 
 
 @unittest.skipIf(array is None, "array")
-class TestMessageSimpleArray(unittest.TestCase, BaseTestMessageSimpleArray):
+class TestMessageSimpleArray(BaseTestMessageSimpleArray, unittest.TestCase):
     #
     def array(self, typecode, initializer):
         return array.array(typecode, initializer)
 
 
 @unittest.skipIf(numpy is None, "numpy")
-class TestMessageSimpleNumPy(unittest.TestCase, BaseTestMessageSimpleArray):
+class TestMessageSimpleNumPy(BaseTestMessageSimpleArray, unittest.TestCase):
     #
     def array(self, typecode, initializer):
         return numpy.array(initializer, dtype=typecode)
@@ -593,7 +607,7 @@ class TestMessageSimpleNumPy(unittest.TestCase, BaseTestMessageSimpleArray):
 @unittest.skipIf(array is None, "array")
 @unittest.skipIf(dlpack is None, "dlpack")
 class TestMessageSimpleDLPackCPUBuf(
-    unittest.TestCase, BaseTestMessageSimpleArray
+    BaseTestMessageSimpleArray, unittest.TestCase
 ):
     def array(self, typecode, initializer):
         return DLPackCPUBuf(typecode, initializer)
@@ -607,7 +621,7 @@ class TestMessageSimpleDLPackCPUBufV0(TestMessageSimpleDLPackCPUBuf):
 
 @unittest.skipIf(cupy is None and (array is None or dlpack is None), "cupy")
 class TestMessageSimpleDLPackGPUBuf(
-    unittest.TestCase, BaseTestMessageSimpleArray
+    BaseTestMessageSimpleArray, unittest.TestCase
 ):
     def array(self, typecode, initializer):
         return DLPackGPUBuf(typecode, initializer)
@@ -620,14 +634,14 @@ class TestMessageSimpleDLPackGPUBufV0(TestMessageSimpleDLPackGPUBuf):
 
 
 @unittest.skipIf(array is None, "array")
-class TestMessageSimpleCAIBuf(unittest.TestCase, BaseTestMessageSimpleArray):
+class TestMessageSimpleCAIBuf(BaseTestMessageSimpleArray, unittest.TestCase):
     #
     def array(self, typecode, initializer):
         return CAIBuf(typecode, initializer)
 
 
 @unittest.skipIf(cupy is None, "cupy")
-class TestMessageSimpleCuPy(unittest.TestCase, BaseTestMessageSimpleArray):
+class TestMessageSimpleCuPy(BaseTestMessageSimpleArray, unittest.TestCase):
     #
     def array(self, typecode, initializer):
         return cupy.array(initializer, dtype=typecode)
@@ -653,7 +667,7 @@ class TestMessageSimpleCuPy(unittest.TestCase, BaseTestMessageSimpleArray):
 
 
 @unittest.skipIf(numba is None, "numba")
-class TestMessageSimpleNumba(unittest.TestCase, BaseTestMessageSimpleArray):
+class TestMessageSimpleNumba(BaseTestMessageSimpleArray, unittest.TestCase):
     #
     def array(self, typecode, initializer):
         n = len(initializer)
@@ -718,17 +732,17 @@ class TestMessageDLPackCPUBuf(unittest.TestCase):
 
     def testDevice(self):
         buf = DLPackCPUBuf("i", [0, 1, 2, 3])
-        buf.__dlpack_device__ = None
+        buf.__dlpack_device__ = None  # type: ignore
         self.assertRaises(TypeError, MPI.Get_address, buf)
-        buf.__dlpack_device__ = lambda: None
+        buf.__dlpack_device__ = lambda: None  # type: ignore
         self.assertRaises(TypeError, MPI.Get_address, buf)
-        buf.__dlpack_device__ = lambda: (None, 0)
+        buf.__dlpack_device__ = lambda: (None, 0)  # type: ignore
         self.assertRaises(TypeError, MPI.Get_address, buf)
-        buf.__dlpack_device__ = lambda: (1, None)
+        buf.__dlpack_device__ = lambda: (1, None)  # type: ignore
         self.assertRaises(TypeError, MPI.Get_address, buf)
-        buf.__dlpack_device__ = lambda: (1,)
+        buf.__dlpack_device__ = lambda: (1,)  # type: ignore
         self.assertRaises(ValueError, MPI.Get_address, buf)
-        buf.__dlpack_device__ = lambda: (1, 0, 1)
+        buf.__dlpack_device__ = lambda: (1, 0, 1)  # type: ignore
         self.assertRaises(ValueError, MPI.Get_address, buf)
         del buf.__dlpack_device__
         MPI.Get_address(buf)
@@ -742,7 +756,8 @@ class TestMessageDLPackCPUBuf(unittest.TestCase):
         del capsule
         #
         capsule = buf.__dlpack__()
-        buf.__dlpack__ = lambda *_a, **_kw: capsule  # noqa: F821
+        dlpack_meth = lambda *_a, **_kw: capsule  # noqa: E731,F821
+        buf.__dlpack__ = dlpack_meth  # type: ignore
         MPI.Get_address(buf)
         MPI.Get_address(buf)
         dlpack.used_py_capsule(capsule)
@@ -751,7 +766,8 @@ class TestMessageDLPackCPUBuf(unittest.TestCase):
         del buf.__dlpack__
         del capsule
         #
-        buf.__dlpack__ = lambda *_a, **_kw: None
+        dlpack_meth = lambda *_a, **_kw: None  # noqa: E731
+        buf.__dlpack__ = dlpack_meth  # type: ignore
         self.assertRaises(BufferError, MPI.Get_address, buf)
         del buf.__dlpack__
 
@@ -896,75 +912,76 @@ class TestMessageCAIBuf(unittest.TestCase):
     def testAttrNone(self):
         smsg = CAIBuf("B", [1, 2, 3])
         rmsg = CAIBuf("B", [0, 0, 0])
-        rmsg.__cuda_array_interface__ = None
+        rmsg.__cuda_array_interface__ = None  # type: ignore
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testAttrEmpty(self):
         smsg = CAIBuf("B", [1, 2, 3])
         rmsg = CAIBuf("B", [0, 0, 0])
-        rmsg.__cuda_array_interface__ = {}
+        rmsg.__cuda_array_interface__ = {}  # type: ignore
         self.assertRaises(KeyError, Sendrecv, smsg, rmsg)
 
     def testAttrType(self):
         smsg = CAIBuf("B", [1, 2, 3])
         rmsg = CAIBuf("B", [0, 0, 0])
         items = list(rmsg.__cuda_array_interface__.items())
-        rmsg.__cuda_array_interface__ = items
+        rmsg.__cuda_array_interface__ = items  # type: ignore
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testDataMissing(self):
         smsg = CAIBuf("B", [1, 2, 3])
         rmsg = CAIBuf("B", [0, 0, 0])
-        del rmsg.__cuda_array_interface__["data"]
+        del rmsg.__cuda_array_interface__["data"]  # type: ignore
         self.assertRaises(KeyError, Sendrecv, smsg, rmsg)
 
     def testDataNone(self):
         smsg = CAIBuf("B", [1, 2, 3])
         rmsg = CAIBuf("B", [0, 0, 0])
-        rmsg.__cuda_array_interface__["data"] = None
+        rmsg.__cuda_array_interface__["data"] = None  # type: ignore
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testDataType(self):
         smsg = CAIBuf("B", [1, 2, 3])
         rmsg = CAIBuf("B", [0, 0, 0])
-        rmsg.__cuda_array_interface__["data"] = 0
+        rmsg.__cuda_array_interface__["data"] = 0  # type: ignore
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testDataValue(self):
         smsg = CAIBuf("B", [1, 2, 3])
         rmsg = CAIBuf("B", [0, 0, 0])
         dev_ptr = rmsg.__cuda_array_interface__["data"][0]
-        rmsg.__cuda_array_interface__["data"] = (dev_ptr,)
+        rmsg.__cuda_array_interface__["data"] = (dev_ptr,)  # type: ignore
         self.assertRaises(ValueError, Sendrecv, smsg, rmsg)
-        rmsg.__cuda_array_interface__["data"] = ()
+        rmsg.__cuda_array_interface__["data"] = ()  # type: ignore
         self.assertRaises(ValueError, Sendrecv, smsg, rmsg)
-        rmsg.__cuda_array_interface__["data"] = (dev_ptr, False, None)
+        bad_data = (dev_ptr, False, None)
+        rmsg.__cuda_array_interface__["data"] = bad_data  # type: ignore
         self.assertRaises(ValueError, Sendrecv, smsg, rmsg)
 
     def testMask(self):
         smsg = CAIBuf("B", [1, 2, 3])
         rmsg = CAIBuf("B", [0, 0, 0])
-        rmsg.__cuda_array_interface__["mask"] = None
+        rmsg.__cuda_array_interface__["mask"] = None  # type: ignore
         Sendrecv(smsg, rmsg)
-        rmsg.__cuda_array_interface__["mask"] = True
+        rmsg.__cuda_array_interface__["mask"] = True  # type: ignore
         self.assertRaises(BufferError, Sendrecv, smsg, rmsg)
 
     def testTypestrMissing(self):
         smsg = CAIBuf("B", [1, 2, 3])
         rmsg = CAIBuf("B", [0, 0, 0])
-        del rmsg.__cuda_array_interface__["typestr"]
+        del rmsg.__cuda_array_interface__["typestr"]  # type: ignore
         self.assertRaises(KeyError, Sendrecv, smsg, rmsg)
 
     def testTypestrNone(self):
         smsg = CAIBuf("B", [1, 2, 3])
         rmsg = CAIBuf("B", [0, 0, 0])
-        rmsg.__cuda_array_interface__["typestr"] = None
+        rmsg.__cuda_array_interface__["typestr"] = None  # type: ignore
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testTypestrType(self):
         smsg = CAIBuf("B", [1, 2, 3])
         rmsg = CAIBuf("B", [0, 0, 0])
-        rmsg.__cuda_array_interface__["typestr"] = 42
+        rmsg.__cuda_array_interface__["typestr"] = 42  # type: ignore
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testTypestrEndian(self):
@@ -995,66 +1012,66 @@ class TestMessageCAIBuf(unittest.TestCase):
     def testShapeMissing(self):
         smsg = CAIBuf("B", [1, 2, 3])
         rmsg = CAIBuf("B", [0, 0, 0])
-        del rmsg.__cuda_array_interface__["shape"]
+        del rmsg.__cuda_array_interface__["shape"]  # type: ignore
         self.assertRaises(KeyError, Sendrecv, smsg, rmsg)
 
     def testShapeNone(self):
         smsg = CAIBuf("B", [1, 2, 3])
         rmsg = CAIBuf("B", [0, 0, 0])
-        rmsg.__cuda_array_interface__["shape"] = None
+        rmsg.__cuda_array_interface__["shape"] = None  # type: ignore
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testShapeType(self):
         smsg = CAIBuf("B", [1, 2, 3])
         rmsg = CAIBuf("B", [0, 0, 0])
-        rmsg.__cuda_array_interface__["shape"] = 3
+        rmsg.__cuda_array_interface__["shape"] = 3  # type: ignore
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testShapeValue(self):
         smsg = CAIBuf("B", [1, 2, 3])
         rmsg = CAIBuf("B", [0, 0, 0])
         rmsg.__cuda_array_interface__["shape"] = (3, -1)
-        rmsg.__cuda_array_interface__["strides"] = None
+        rmsg.__cuda_array_interface__["strides"] = None  # type: ignore
         self.assertRaises(BufferError, Sendrecv, smsg, rmsg)
 
     def testStridesMissing(self):
         smsg = CAIBuf("B", [1, 2, 3])
         rmsg = CAIBuf("B", [0, 0, 0])
-        del rmsg.__cuda_array_interface__["strides"]
+        del rmsg.__cuda_array_interface__["strides"]  # type: ignore
         Sendrecv(smsg, rmsg)
         self.assertEqual(smsg, rmsg)
 
     def testStridesNone(self):
         smsg = CAIBuf("B", [1, 2, 3])
         rmsg = CAIBuf("B", [0, 0, 0])
-        rmsg.__cuda_array_interface__["strides"] = None
+        rmsg.__cuda_array_interface__["strides"] = None  # type: ignore
         Sendrecv(smsg, rmsg)
         self.assertEqual(smsg, rmsg)
 
     def testStridesType(self):
         smsg = CAIBuf("B", [1, 2, 3])
         rmsg = CAIBuf("B", [0, 0, 0])
-        rmsg.__cuda_array_interface__["strides"] = 42
+        rmsg.__cuda_array_interface__["strides"] = 42  # type: ignore
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testDescrMissing(self):
         smsg = CAIBuf("d", [1, 2, 3])
         rmsg = CAIBuf("d", [0, 0, 0])
-        del rmsg.__cuda_array_interface__["descr"]
+        del rmsg.__cuda_array_interface__["descr"]  # type: ignore
         Sendrecv(smsg, rmsg)
         self.assertEqual(smsg, rmsg)
 
     def testDescrNone(self):
         smsg = CAIBuf("d", [1, 2, 3])
         rmsg = CAIBuf("d", [0, 0, 0])
-        rmsg.__cuda_array_interface__["descr"] = None
+        rmsg.__cuda_array_interface__["descr"] = None  # type: ignore
         Sendrecv(smsg, rmsg)
         self.assertEqual(smsg, rmsg)
 
     def testDescrType(self):
         smsg = CAIBuf("B", [1, 2, 3])
         rmsg = CAIBuf("B", [0, 0, 0])
-        rmsg.__cuda_array_interface__["descr"] = 42
+        rmsg.__cuda_array_interface__["descr"] = 42  # type: ignore
         self.assertRaises(TypeError, Sendrecv, smsg, rmsg)
 
     def testDescrWarning(self):
@@ -1168,7 +1185,7 @@ class TestMessageVector(unittest.TestCase):
 
 
 @unittest.skipMPI("msmpi(<8.0.0)")
-class BaseTestMessageVectorArray:
+class BaseTestMessageVectorArray(unittest.BaseMixin):
     #
     TYPECODES = "bhil" + "BHIL" + "fd"
 
@@ -1317,14 +1334,14 @@ class BaseTestMessageVectorArray:
 
 
 @unittest.skipIf(array is None, "array")
-class TestMessageVectorArray(unittest.TestCase, BaseTestMessageVectorArray):
+class TestMessageVectorArray(BaseTestMessageVectorArray, unittest.TestCase):
     #
     def array(self, typecode, initializer):
         return array.array(typecode, initializer)
 
 
 @unittest.skipIf(numpy is None, "numpy")
-class TestMessageVectorNumPy(unittest.TestCase, BaseTestMessageVectorArray):
+class TestMessageVectorNumPy(BaseTestMessageVectorArray, unittest.TestCase):
     #
     def array(self, typecode, initializer):
         return numpy.array(initializer, dtype=typecode)
@@ -1367,21 +1384,21 @@ class TestMessageVectorNumPy(unittest.TestCase, BaseTestMessageVectorArray):
 
 
 @unittest.skipIf(array is None, "array")
-class TestMessageVectorCAIBuf(unittest.TestCase, BaseTestMessageVectorArray):
+class TestMessageVectorCAIBuf(BaseTestMessageVectorArray, unittest.TestCase):
     #
     def array(self, typecode, initializer):
         return CAIBuf(typecode, initializer)
 
 
 @unittest.skipIf(cupy is None, "cupy")
-class TestMessageVectorCuPy(unittest.TestCase, BaseTestMessageVectorArray):
+class TestMessageVectorCuPy(BaseTestMessageVectorArray, unittest.TestCase):
     #
     def array(self, typecode, initializer):
         return cupy.array(initializer, dtype=typecode)
 
 
 @unittest.skipIf(numba is None, "numba")
-class TestMessageVectorNumba(unittest.TestCase, BaseTestMessageVectorArray):
+class TestMessageVectorNumba(BaseTestMessageVectorArray, unittest.TestCase):
     #
     def array(self, typecode, initializer):
         n = len(initializer)

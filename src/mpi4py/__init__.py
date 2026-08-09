@@ -82,7 +82,7 @@ class Rc:
 
 
 rc = Rc()
-__import__("sys").modules[f"{__name__}.rc"] = rc
+__import__("sys").modules[f"{__name__}.rc"] = rc  # type: ignore
 
 
 def get_include():

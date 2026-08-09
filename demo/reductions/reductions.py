@@ -10,11 +10,13 @@ class Intracomm(MPI.Intracomm):
     def __new__(cls, comm=None):
         return super().__new__(cls, comm)
 
-    def reduce(self, sendobj=None, recvobj=None, op=MPI.SUM, root=0):
+    def reduce(self, sendobj=None, op=MPI.SUM, root=0):
         size = self.size
         rank = self.rank
         assert 0 <= root < size
-        tag = MPI.COMM_WORLD.Get_attr(MPI.TAG_UB) - 1
+        tag_ub = MPI.COMM_WORLD.Get_attr(MPI.TAG_UB)
+        assert isinstance(tag_ub, int)
+        tag = tag_ub - 1
 
         recvobj = sendobj
         mask = 1
@@ -41,15 +43,17 @@ class Intracomm(MPI.Intracomm):
 
         return recvobj
 
-    def allreduce(self, sendobj=None, recvobj=None, op=MPI.SUM):
-        recvobj = self.reduce(sendobj, recvobj, op, 0)
+    def allreduce(self, sendobj=None, op=MPI.SUM):
+        recvobj = self.reduce(sendobj, op, 0)
         recvobj = self.bcast(recvobj, 0)
         return recvobj
 
-    def scan(self, sendobj=None, recvobj=None, op=MPI.SUM):
+    def scan(self, sendobj=None, op=MPI.SUM):
         size = self.size
         rank = self.rank
-        tag = MPI.COMM_WORLD.Get_attr(MPI.TAG_UB) - 1
+        tag_ub = MPI.COMM_WORLD.Get_attr(MPI.TAG_UB)
+        assert isinstance(tag_ub, int)
+        tag = tag_ub - 1
 
         recvobj = sendobj
         partial = sendobj
@@ -75,10 +79,12 @@ class Intracomm(MPI.Intracomm):
 
         return recvobj
 
-    def exscan(self, sendobj=None, recvobj=None, op=MPI.SUM):
+    def exscan(self, sendobj=None, op=MPI.SUM):
         size = self.size
         rank = self.rank
-        tag = MPI.COMM_WORLD.Get_attr(MPI.TAG_UB) - 1
+        tag_ub = MPI.COMM_WORLD.Get_attr(MPI.TAG_UB)
+        assert isinstance(tag_ub, int)
+        tag = tag_ub - 1
 
         recvobj = sendobj
         partial = sendobj

@@ -9,7 +9,7 @@ class TestStatus(unittest.TestCase):
         self.STATUS = MPI.Status()
 
     def tearDown(self):
-        self.STATUS = None
+        del self.STATUS
 
     def testDefaultFieldValues(self):
         self.assertEqual(self.STATUS.Get_source(), MPI.ANY_SOURCE)

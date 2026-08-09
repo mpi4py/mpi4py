@@ -13,9 +13,9 @@ def maketemp(prefix):
     return name
 
 
-class BaseTestFile:
+class BaseTestFile(unittest.BaseMixin):
     #
-    COMM = MPI.COMM_NULL
+    COMM = MPI.Intracomm(MPI.COMM_NULL)
     FILE = MPI.FILE_NULL
 
     prefix = "mpi4py"

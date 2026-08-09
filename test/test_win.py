@@ -43,7 +43,7 @@ class TestWinNull(unittest.TestCase):
         self.assertIsNot(win, MPI.WIN_NULL)
 
         def construct():
-            MPI.Win((1, 2, 3))
+            MPI.Win((1, 2, 3))  # type: ignore
 
         self.assertRaises(TypeError, construct)
 
@@ -52,11 +52,14 @@ class TestWinNull(unittest.TestCase):
         self.assertEqual(name, "MPI_WIN_NULL")
 
 
-class BaseTestWin:
+class BaseTestWin(unittest.BaseMixin):
     #
-    COMM = MPI.COMM_NULL
+    COMM = MPI.Intracomm(MPI.COMM_NULL)
     INFO = MPI.INFO_NULL
     CREATE_FLAVOR = MPI.UNDEFINED
+
+    WIN: MPI.Win
+    memory: MPI.buffer
 
     def testGetAttr(self):
         base = MPI.Get_address(self.memory)
@@ -243,11 +246,12 @@ class BaseTestWinAllocateShared(BaseTestWin):
     def setUp(self):
         if self.COMM.Get_size() > 1:
             try:
-                self.COMM = self.COMM.Split_type(MPI.COMM_TYPE_SHARED)
+                sharedcomm = self.COMM.Split_type(MPI.COMM_TYPE_SHARED)
             except NotImplementedError:
                 self.skipTest("mpi-comm-split_type")
         else:
-            self.COMM = self.COMM.Dup()
+            sharedcomm = self.COMM.Dup()
+        self.COMM = MPI.Intracomm(sharedcomm)
         try:
             blen = 10 + self.COMM.Get_rank()
             self.WIN = MPI.Win.Allocate_shared(blen, 1, self.INFO, self.COMM)

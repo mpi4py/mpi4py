@@ -30,7 +30,7 @@ def run_command_line(args=None):
         argv0="-c",
     ):
         # pylint: disable=protected-access
-        run_module_code = __import__("runpy")._run_module_code
+        run_module_code = __import__("runpy")._run_module_code  # ty: ignore
         code = compile(string, filename, "exec", 0, True)
         kwargs = {"script_name": argv0}
         return run_module_code(code, init_globals, run_name, **kwargs)

@@ -288,10 +288,12 @@ def _starmap_helper(
             del future
 
     def result_iterator():
+        # pylint: disable=unidiomatic-typecheck
         future = collections.deque()
         result = collections.deque()
         try:
             if unordered:
+                assert type(fs) is set  # noqa: S101
                 if timeout is None:
                     iterator = _base.as_completed(fs)
                 else:
@@ -300,6 +302,7 @@ def _starmap_helper(
                     fs.remove(future[0])
                     yield resolve(future.pop())
             else:
+                assert type(fs) is collections.deque  # noqa: S101
                 fs.reverse()
                 while fs:
                     if timeout is None:

@@ -18,7 +18,7 @@ def main():
         info = getarg("info").split(",")
         info = dict(entry.split("=") for entry in info if entry)
     else:
-        info = None
+        info = {}
 
     with MPIPoolExecutor(service=service, mpi_info=info) as executor:
         fut1 = executor.submit(abs, +42)

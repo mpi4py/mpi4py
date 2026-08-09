@@ -141,7 +141,9 @@ class TestMPIAPI(unittest.TestCase):
         if sys.platform == "linux":
             nm_flags.append("-D")
         cmd = [nm, *nm_flags, mod_file]
-        out = sp.check_output(cmd, close_fds=False)
+        out = sp.check_output(  # ty: ignore[no-matching-overload]
+            cmd, close_fds=False
+        )
         nm_output = out.decode()
 
         mpiname = self.MPINAME

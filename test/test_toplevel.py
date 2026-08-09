@@ -41,7 +41,7 @@ class TestRC(unittest.TestCase):
         with self.assertRaises(TypeError):
             mpi4py.rc.ABCXYZ = 123456
         with self.assertRaises(AttributeError):
-            _ = mpi4py.rc.ABCXYZ
+            _ = mpi4py.rc.ABCXYZ  # type: ignore
 
     def testRepr(self):
         repr(mpi4py.rc)

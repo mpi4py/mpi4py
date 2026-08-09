@@ -9,7 +9,7 @@ comm = MPI.COMM_WORLD
 hw.sayhello(comm)
 
 try:
-    hw.sayhello(None)
+    hw.sayhello(None)  # ty:ignore[invalid-argument-type]
 except (AttributeError, TypeError):
     pass
 else:

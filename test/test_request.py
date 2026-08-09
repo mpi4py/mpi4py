@@ -112,7 +112,7 @@ class TestRequestArray(unittest.TestCase):
         MPI.Request.Waitall(self.REQUESTS, None)
         self.assertIs(MPI.Request.Waitall(self.REQUESTS), True)
         for statuses in (tuple(self.STATUSES), (self.STATUSES[0],), ()):
-            MPI.Request.Waitall(self.REQUESTS, statuses)
+            MPI.Request.Waitall(self.REQUESTS, statuses)  # type: ignore
         for statuses in (self.STATUSES, []):
             MPI.Request.Waitall(self.REQUESTS, statuses)
             self.assertEqual(len(statuses), len(self.REQUESTS))

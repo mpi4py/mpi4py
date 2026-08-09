@@ -376,13 +376,13 @@ def pingpong(comm, args=None, verbose=True):
         size = comm.Get_size()
         t_start = wtime()
         if size == 1:
-            sendrecv(s_msg, 0, 0, r_msg, 0, 0)
-            sendrecv(s_msg, 0, 0, r_msg, 0, 0)
+            sendrecv(s_msg, 0, 0, r_msg, 0, 0)  # ty: ignore
+            sendrecv(s_msg, 0, 0, r_msg, 0, 0)  # ty: ignore
         elif rank == 0:
             send(s_msg, 1, 0)
-            recv(r_msg, 1, 0)
+            recv(r_msg, 1, 0)  # ty: ignore
         elif rank == 1:
-            recv(r_msg, 0, 0)
+            recv(r_msg, 0, 0)  # ty: ignore
             send(s_msg, 0, 0)
         t_end = wtime()
         return (t_end - t_start) / 2

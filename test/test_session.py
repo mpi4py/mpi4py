@@ -93,6 +93,8 @@ class TestSession(unittest.TestCase):
         finally:
             with self.catchNotImplementedError(4, 1):
                 oldbuf = session.Detach_buffer()
+                self.assertIsInstance(oldbuf, MPI.buffer)
+                assert type(oldbuf) is MPI.buffer
                 self.assertEqual(oldbuf.address, buf.address)
                 self.assertEqual(oldbuf.nbytes, buf.nbytes)
             MPI.Free_mem(buf)
