@@ -39,6 +39,7 @@ $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.bench futures -w 1 -t 1 -n 8 --n
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.bench futures -w 1 -t 1 -n 8 -a numpy -e mpi         -q
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.bench futures -w 1 -t 1 -n 8 -a bytes -e process     -q
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.bench futures -w 1 -t 1 -n 8 -a array -e thread      -q
+$PYTHON -c 'import sys; sys.exit(0 if sys.version_info[:2] < (3, 14) else 1)' || \
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.bench futures -w 1 -t 1 -n 8 -a bytes -e interpreter -q
 $MPIEXEC -n 1 $PYTHON -m coverage run -m mpi4py.bench              > /dev/null 2>&1 || true
 $MPIEXEC -n 2 $PYTHON -m coverage run -m mpi4py.bench              > /dev/null 2>&1 || true
