@@ -101,7 +101,7 @@ def get_include():
     import importlib.resources
 
     prefix = importlib.resources.files(__name__)
-    return str(prefix / "include")
+    return str(prefix.joinpath("include"))
 
 
 def get_config():
@@ -123,7 +123,9 @@ def get_config():
 
     parser = configparser.ConfigParser()
     parser.add_section("mpi")
-    with importlib.resources.path(__name__, "mpi.cfg") as fspath:
+    prefix = importlib.resources.files(__name__)
+    mpicfg = prefix.joinpath("mpi.cfg")
+    with importlib.resources.as_file(mpicfg) as fspath:
         parser.read(fspath, encoding="utf-8")
     return dict(parser.items("mpi"))
 
