@@ -5,7 +5,7 @@ from mpi4py import MPI
 try:
     import ctypes
 except ImportError:
-    ctypes = None  # ty: ignore[invalid-assignment]
+    ctypes = None
 
 
 @unittest.skipIf(ctypes is None, "ctypes")
@@ -37,6 +37,7 @@ class TestCTYPES(unittest.TestCase):
     ]
 
     def testHandleAdress(self):
+        assert ctypes is not None
         typemap = {
             ctypes.sizeof(ctypes.c_int): ctypes.c_int,
             ctypes.sizeof(ctypes.c_void_p): ctypes.c_void_p,
@@ -51,6 +52,7 @@ class TestCTYPES(unittest.TestCase):
             self.assertEqual(obj, newobj)
 
     def testHandleValue(self):
+        assert ctypes is not None
         typemap = {
             ctypes.sizeof(ctypes.c_uint32): ctypes.c_uint32,
             ctypes.sizeof(ctypes.c_uint64): ctypes.c_uint64,

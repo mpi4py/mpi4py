@@ -6,7 +6,7 @@ from mpi4py import MPI
 try:
     import array
 except ImportError:
-    array = None  # ty: ignore[invalid-assignment]
+    array = None
 
 
 class BaseTestAttr(unittest.BaseMixin):
@@ -114,6 +114,7 @@ class BaseTestAttr(unittest.BaseMixin):
         cls, obj = type(self.obj), self.obj
         self.keyval = cls.Create_keyval(nopython=True)
         #
+        assert array is not None
         ary = array.array("i", [42])
         addr, _ = ary.buffer_info()
         obj.Set_attr(self.keyval, addr)

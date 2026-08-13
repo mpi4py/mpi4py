@@ -8,7 +8,7 @@ from mpi4py import MPI
 try:
     import socket
 except ImportError:
-    socket = None  # ty: ignore[invalid-assignment]
+    socket = None
 
 
 def ch4_ucx():

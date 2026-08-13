@@ -5,31 +5,32 @@ from mpi4py import MPI
 try:
     import pickle as pyPickle
 except ImportError:
-    pyPickle = None  # ty: ignore[invalid-assignment]
+    pyPickle = None
 
 try:
     import dill
-
-    dill.extend(False)
 except ImportError:
-    dill = None  # ty: ignore[invalid-assignment]
+    dill = None
+else:
+    dill.extend(False)
 
 try:
     import marshal
 except ImportError:
-    marshal = None  # ty: ignore[invalid-assignment]
+    marshal = None
 
 try:
     import json
 except ImportError:
-    json = None  # ty: ignore[invalid-assignment]
+    json = None
 
 try:
     import yaml
-
-    yaml.dump(None)
 except ImportError:
-    yaml = None  # ty: ignore[invalid-assignment]
+    yaml = None
+else:
+    yaml.dump(None)
+
 
 OBJS = [
     None,
@@ -68,6 +69,7 @@ class TestPickle(unittest.TestCase):
 
     def testDefault(self):
         pickle = self.pickle
+        assert pyPickle is not None
         protocols = list(range(pyPickle.HIGHEST_PROTOCOL + 1))
         protocols = [*protocols, -1, None]
         for proto in protocols:
@@ -78,6 +80,7 @@ class TestPickle(unittest.TestCase):
 
     def testPyPickle(self):
         pickle = self.pickle
+        assert pyPickle is not None
         dumps = pyPickle.dumps
         loads = pyPickle.loads
         protocols = list(range(pyPickle.HIGHEST_PROTOCOL + 1))
@@ -91,6 +94,7 @@ class TestPickle(unittest.TestCase):
     @unittest.skipIf(dill is None, "dill")
     def testDill(self):
         pickle = self.pickle
+        assert dill is not None
         dumps = dill.dumps
         loads = dill.loads
         protocols = list(range(dill.HIGHEST_PROTOCOL + 1))
@@ -104,6 +108,7 @@ class TestPickle(unittest.TestCase):
     @unittest.skipIf(marshal is None, "marshal")
     def testMarshal(self):
         pickle = self.pickle
+        assert marshal is not None
         dumps = marshal.dumps
         loads = marshal.loads
         protocols = list(range(marshal.version + 1))
@@ -119,9 +124,11 @@ class TestPickle(unittest.TestCase):
         pickle = self.pickle
 
         def dumps(o):
+            assert json is not None
             return json.dumps(o).encode()
 
         def loads(s):
+            assert json is not None
             return json.loads(tobytes(s).decode())
 
         pickle.__init__(dumps, loads)
@@ -135,9 +142,11 @@ class TestPickle(unittest.TestCase):
         pickle = self.pickle
 
         def dumps(o):
+            assert yaml is not None
             return yaml.dump(o).encode()
 
         def loads(s):
+            assert yaml is not None
             return yaml.load(tobytes(s).decode(), Loader=yaml.Loader)
 
         pickle.__init__(dumps, loads)

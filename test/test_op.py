@@ -5,13 +5,14 @@ from mpi4py import MPI
 try:
     import array
 except ImportError:
-    array = None  # ty: ignore[invalid-assignment]
+    array = None
 
 
 def asarray(typecode, data):
     def tobytes(s):
         return memoryview(s).tobytes()
 
+    assert array is not None
     frombytes = array.array.frombytes
     a = array.array(typecode, [])
     frombytes(a, tobytes(data))
@@ -53,6 +54,7 @@ class TestOp(unittest.TestCase):
 
     @unittest.skipIf(array is None, "array")
     def testCreate(self):
+        assert array is not None
         for comm in [MPI.COMM_SELF, MPI.COMM_WORLD]:
             for commute in [True, False]:
                 for N in range(4):

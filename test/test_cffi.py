@@ -5,7 +5,7 @@ from mpi4py import MPI
 try:
     import cffi
 except ImportError:
-    cffi = None  # ty: ignore[invalid-assignment]
+    cffi = None
 
 
 @unittest.skipIf(cffi is None, "cffi")
@@ -51,6 +51,7 @@ class TestCFFI(unittest.TestCase):
     ]
 
     def testHandleAddress(self):
+        assert cffi is not None
         ffi = cffi.FFI()
         typemap = {
             ffi.sizeof("int"): "int",
@@ -77,6 +78,7 @@ class TestCFFI(unittest.TestCase):
             self.assertEqual(oldobj, newobj)
 
     def testHandleValue(self):
+        assert cffi is not None
         ffi = cffi.FFI()
         typemap = {
             ffi.sizeof("uint32_t"): "uint32_t",

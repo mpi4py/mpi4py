@@ -10,12 +10,12 @@ from mpi4py import MPI
 try:
     import array
 except ImportError:
-    array = None  # ty: ignore[invalid-assignment]
+    array = None
 
 try:
     import numpy
 except ImportError:
-    numpy = None  # ty: ignore[invalid-assignment]
+    numpy = None
 
 try:
     import cupy
@@ -169,7 +169,6 @@ if array is not None:
     @add_backend
     class ArrayArray(BaseArray):
         backend = "array"
-        array: array.array
 
         def __init__(self, arg, typecode, shape=None):
             if isinstance(arg, (int, float)):
@@ -189,6 +188,7 @@ if array is not None:
                 else:
                     shape = mkshape(shape)
                 assert size == product(shape)
+            assert array is not None
             self.array = array.array(typecode, arg)
 
         @property
@@ -217,7 +217,6 @@ if numpy is not None:
     @add_backend
     class ArrayNumPy(BaseArray):
         backend = "numpy"
-        array: numpy.ndarray
 
         TypeMap = make_typemap([])
         TypeMap.update(TypeMapBool)
@@ -233,6 +232,7 @@ if numpy is not None:
             else:
                 if shape is None:
                     shape = len(arg)
+            assert numpy is not None
             self.array = numpy.zeros(shape, typecode)
             if isinstance(arg, (int, float, complex)):
                 arg = numpy.asarray(arg).astype(typecode)
@@ -265,7 +265,7 @@ if numpy is not None:
 try:
     import dlpackimpl as dlpack
 except ImportError:
-    dlpack = None  # ty: ignore[invalid-assignment]
+    dlpack = None
 
 
 class BaseDLPackCPU:
@@ -273,10 +273,12 @@ class BaseDLPackCPU:
     array: memoryview
 
     def __dlpack_device__(self):
+        assert dlpack is not None
         return (dlpack.DLDeviceType.kDLCPU, 0)
 
     def __dlpack__(self, stream=None):
         assert stream is None
+        assert dlpack is not None
         managed = dlpack.make_dl_managed_tensor(self.array)
         capsule = dlpack.make_py_capsule(managed, owned=True)
         return capsule
@@ -290,7 +292,6 @@ if dlpack is not None and array is not None:
     @add_backend
     class DLPackArray(BaseDLPackCPU, ArrayArray):
         backend = "dlpack-array"
-        array: array.array
 
         def __init__(self, arg, typecode, shape=None):
             super().__init__(arg, typecode, shape)
@@ -301,7 +302,6 @@ if dlpack is not None and numpy is not None:
     @add_backend
     class DLPackNumPy(BaseDLPackCPU, ArrayNumPy):
         backend = "dlpack-numpy"
-        array: numpy.ndarray
 
         def __init__(self, arg, typecode, shape=None):
             super().__init__(arg, typecode, shape)
@@ -439,6 +439,7 @@ if cupy is not None:
         def __init__(self, arg, typecode, shape=None):
             super().__init__(arg, typecode, shape)
             self.has_dlpack = hasattr(self.array, "__dlpack_device__")
+            assert dlpack is not None
             # TODO(leofang): test CUDA managed memory?
             if cupy.cuda.runtime.is_hip:
                 self.dev_type = dlpack.DLDeviceType.kDLROCM

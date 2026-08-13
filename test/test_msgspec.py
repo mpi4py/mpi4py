@@ -21,6 +21,7 @@ typemap = MPI.Datatype.fromcode
 class BaseBuf:
     #
     def __init__(self, typecode, initializer):
+        assert array is not None
         self._buf = array.array(typecode, initializer)
 
     def __eq__(self, other):
@@ -44,7 +45,7 @@ class BaseBuf:
 try:
     import dlpackimpl as dlpack
 except ImportError:
-    dlpack = None  # ty: ignore[invalid-assignment]
+    dlpack = None
 
 
 class BaseDLPackBuf(BaseBuf):
@@ -68,6 +69,7 @@ class DLPackCPUBuf(BaseDLPackBuf):
 
     def __init__(self, typecode, initializer):
         super().__init__(typecode, initializer)
+        assert dlpack is not None
         self.managed = dlpack.make_dl_managed_tensor(self._buf, self.version)
 
     def __dlpack_device__(self):
@@ -83,6 +85,7 @@ class DLPackCPUBuf(BaseDLPackBuf):
         dl_device=None,
         copy=None,
     ):
+        assert dlpack is not None
         kDLCPU = dlpack.DLDeviceType.kDLCPU
         if self.managed.dl_tensor.device.device_type == kDLCPU:
             assert stream is None
@@ -110,6 +113,7 @@ if cupy is not None:
         def __init__(self, typecode, initializer):
             self._buf = cupy.array(initializer, dtype=typecode)
             self.has_dlpack = hasattr(self._buf, "__dlpack_device__")
+            assert dlpack is not None
             # TODO(leofang): test CUDA managed memory?
             if cupy.cuda.runtime.is_hip:
                 self.dev_type = dlpack.DLDeviceType.kDLROCM
@@ -154,6 +158,7 @@ else:
 
         def __init__(self, *args):
             super().__init__(*args)
+            assert dlpack is not None
             kDLCUDA = dlpack.DLDeviceType.kDLCUDA
             device = self.managed.dl_tensor.device
             device.device_type = kDLCUDA
@@ -541,6 +546,7 @@ class BaseTestMessageSimpleArray(unittest.BaseMixin):
 class TestMessageSimpleArray(BaseTestMessageSimpleArray, unittest.TestCase):
     #
     def array(self, typecode, initializer):
+        assert array is not None
         return array.array(typecode, initializer)
 
 
@@ -548,9 +554,11 @@ class TestMessageSimpleArray(BaseTestMessageSimpleArray, unittest.TestCase):
 class TestMessageSimpleNumPy(BaseTestMessageSimpleArray, unittest.TestCase):
     #
     def array(self, typecode, initializer):
+        assert numpy is not None
         return numpy.array(initializer, dtype=typecode)
 
     def testByteOrder(self):
+        assert numpy is not None
         sbuf = numpy.zeros([3], "i")
         rbuf = numpy.zeros([3], "i")
         sbuf = sbuf.view(sbuf.dtype.newbyteorder("="))
@@ -567,18 +575,21 @@ class TestMessageSimpleNumPy(BaseTestMessageSimpleArray, unittest.TestCase):
         Sendrecv([sbuf, MPI.INT], [rbuf, MPI.INT])
 
     def testOrderC(self):
+        assert numpy is not None
         sbuf = numpy.ones([3, 2])
         rbuf = numpy.zeros([3, 2])
         Sendrecv(sbuf, rbuf)
         self.assertTrue((sbuf == rbuf).all())
 
     def testOrderFortran(self):
+        assert numpy is not None
         sbuf = numpy.ones([3, 2]).T
         rbuf = numpy.zeros([3, 2]).T
         Sendrecv(sbuf, rbuf)
         self.assertTrue((sbuf == rbuf).all())
 
     def testReadonly(self):
+        assert numpy is not None
         sbuf = numpy.ones([3])
         rbuf = numpy.zeros([3])
         sbuf.flags.writeable = False
@@ -586,6 +597,7 @@ class TestMessageSimpleNumPy(BaseTestMessageSimpleArray, unittest.TestCase):
         self.assertTrue((sbuf == rbuf).all())
 
     def testNotWriteable(self):
+        assert numpy is not None
         sbuf = numpy.ones([3])
         rbuf = numpy.zeros([3])
         rbuf.flags.writeable = False
@@ -594,6 +606,7 @@ class TestMessageSimpleNumPy(BaseTestMessageSimpleArray, unittest.TestCase):
         )
 
     def testNotContiguous(self):
+        assert numpy is not None
         sbuf = numpy.ones([3, 2])[:, 0]
         rbuf = numpy.zeros([3])
         self.assertRaises(
@@ -723,6 +736,7 @@ class TestMessageDLPackCPUBuf(unittest.TestCase):
         self.assertRaises(BufferError, MPI.Get_address, buf)
 
     def testReadonly(self):
+        assert dlpack is not None
         smsg = DLPackCPUBuf("i", [0, 1, 2, 3])
         rmsg = DLPackCPUBuf("i", [0, 0, 0, 0])
         smsg.managed.flags |= dlpack.DLPACK_FLAG_BITMASK_READ_ONLY
@@ -760,6 +774,7 @@ class TestMessageDLPackCPUBuf(unittest.TestCase):
         buf.__dlpack__ = dlpack_meth  # type: ignore
         MPI.Get_address(buf)
         MPI.Get_address(buf)
+        assert dlpack is not None
         dlpack.used_py_capsule(capsule)
         self.assertRaises(BufferError, MPI.Get_address, buf)
         self.assertRaises(BufferError, MPI.Get_address, buf)
@@ -804,6 +819,7 @@ class TestMessageDLPackCPUBuf(unittest.TestCase):
         del dltensor
 
     def testStrides(self):
+        assert dlpack is not None
         buf = DLPackCPUBuf("i", range(8))
         dltensor = buf.managed.dl_tensor
         #
@@ -818,6 +834,7 @@ class TestMessageDLPackCPUBuf(unittest.TestCase):
         del dltensor
 
     def testDtypeCode(self):
+        assert dlpack is not None
         sbuf = DLPackCPUBuf("H", range(4))
         rbuf = DLPackCPUBuf("H", [0] * 4)
         dtype = sbuf.managed.dl_tensor.dtype
@@ -839,6 +856,7 @@ class TestMessageDLPackCPUBuf(unittest.TestCase):
             self.assertEqual(rbuf[i], i)
 
     def testContiguous(self):
+        assert dlpack is not None
         buf = DLPackCPUBuf("i", range(8))
         dltensor = buf.managed.dl_tensor
         #
@@ -1337,6 +1355,7 @@ class BaseTestMessageVectorArray(unittest.BaseMixin):
 class TestMessageVectorArray(BaseTestMessageVectorArray, unittest.TestCase):
     #
     def array(self, typecode, initializer):
+        assert array is not None
         return array.array(typecode, initializer)
 
 
@@ -1344,9 +1363,11 @@ class TestMessageVectorArray(BaseTestMessageVectorArray, unittest.TestCase):
 class TestMessageVectorNumPy(BaseTestMessageVectorArray, unittest.TestCase):
     #
     def array(self, typecode, initializer):
+        assert numpy is not None
         return numpy.array(initializer, dtype=typecode)
 
     def testCountNumPyArray(self):
+        assert numpy is not None
         sbuf = bytearray(b"abc")
         rbuf = bytearray(4)
         count = numpy.array([3])
@@ -1359,6 +1380,7 @@ class TestMessageVectorNumPy(BaseTestMessageVectorArray, unittest.TestCase):
             Alltoallv([sbuf, count], [rbuf, (3, displ)])
 
     def testCountNumPyScalar(self):
+        assert numpy is not None
         sbuf = bytearray(b"abc")
         rbuf = bytearray(4)
         count = numpy.array([3])[0]
@@ -1371,6 +1393,7 @@ class TestMessageVectorNumPy(BaseTestMessageVectorArray, unittest.TestCase):
             Alltoallv([sbuf, (3, [displ])], [rbuf, count])
 
     def testCountNumPyZeroDim(self):
+        assert numpy is not None
         sbuf = bytearray(b"xabc")
         rbuf = bytearray(3)
         count = numpy.array(3)
@@ -1508,6 +1531,7 @@ class TestMessageVectorW(unittest.TestCase):
 
     @unittest.skipIf(array is None, "array")
     def testMessageArray(self):
+        assert array is not None
         sbuf = array.array("i", [1, 2, 3])
         rbuf = array.array("i", [0, 0, 0])
         smsg = [sbuf, [3], [0], [MPI.INT]]
@@ -1517,6 +1541,7 @@ class TestMessageVectorW(unittest.TestCase):
 
     @unittest.skipIf(numpy is None, "numpy")
     def testMessageNumPy(self):
+        assert numpy is not None
         sbuf = numpy.array([1, 2, 3], dtype="i")
         rbuf = numpy.array([0, 0, 0], dtype="i")
         smsg = [sbuf, [3], [0], [MPI.INT]]
@@ -1715,6 +1740,7 @@ class TestMessageRMA(unittest.TestCase):
     @unittest.skipMPI("msmpi")
     @unittest.skipIf(array is None, "array")
     def testMessageArray(self):
+        assert array is not None
         sbuf = array.array("i", [1, 2, 3])
         rbuf = array.array("i", [0, 0, 0])
         PutGet(sbuf, rbuf)
@@ -1723,6 +1749,7 @@ class TestMessageRMA(unittest.TestCase):
     @unittest.skipMPI("msmpi")
     @unittest.skipIf(numpy is None, "numpy")
     def testMessageNumPy(self):
+        assert numpy is not None
         sbuf = numpy.array([1, 2, 3], dtype="i")
         rbuf = numpy.array([0, 0, 0], dtype="i")
         PutGet(sbuf, rbuf)

@@ -20,10 +20,8 @@ except ImportError:
 
 try:
     import numpy
-    from numpy import dtype as np_dtype
 except ImportError:
-    numpy = None  # ty: ignore[invalid-assignment]
-    np_dtype = None  # ty: ignore[invalid-assignment]
+    numpy = None
 np_version = (
     tuple(map(int, numpy.__version__.split(".", 2)[:2])) if numpy else None
 )
@@ -131,11 +129,16 @@ datatypes += mpif77types
 datatypes += mpif90types
 
 
+def np_dtype(*args, **kwargs):
+    assert numpy is not None
+    return numpy.dtype(*args, **kwargs)
+
+
 def try_dtype(*args):
     for spec in args:
         if isinstance(spec, MPI.Datatype):
             spec = spec.typestr
-        if np_dtype is not None:
+        if numpy is not None:
             try:
                 np_dtype(spec)
             except TypeError:
@@ -268,8 +271,9 @@ class TestUtilDTLib(unittest.TestCase):
         mt2.Free()
 
     def makeStruct(self, dt, mt):
-        dt = numpy.dtype(dt).str
-        stp = numpy.dtype(f"B,{dt},B", align=True)
+        assert numpy is not None
+        dt = np_dtype(dt).str
+        stp = np_dtype(f"B,{dt},B", align=True)
 
         def off(i):
             assert stp.fields is not None
@@ -445,20 +449,20 @@ class TestUtilDTLib(unittest.TestCase):
     def testF77(self):
         for mt in mpif77types:
             dt = tonumpy(mt)
-            if np_dtype is not None:
+            if numpy is not None:
                 self.assertEqual(dt.itemsize, mt.extent)
 
     @unittest.skipMPI("msmpi")
     def testF90(self):
         for mt in mpif90types:
-            if np_dtype is not None:
+            if numpy is not None:
                 typestr = mt.typestr
                 try:
                     np_dtype(typestr)
                 except TypeError:
                     continue
             dt = tonumpy(mt)
-            if np_dtype is not None:
+            if numpy is not None:
                 self.assertEqual(dt.itemsize, mt.extent)
 
     @unittest.skipMPI("msmpi")
@@ -473,7 +477,7 @@ class TestUtilDTLib(unittest.TestCase):
             with self.subTest(r=r):
                 mt = MPI.Datatype.Create_f90_integer(r)
                 dt = tonumpy(mt)
-                if np_dtype is not None:
+                if numpy is not None:
                     self.assertEqual(dt.kind, "i")
                     self.assertEqual(dt.itemsize, mt.extent)
                     size = mt.Get_size()
@@ -495,7 +499,7 @@ class TestUtilDTLib(unittest.TestCase):
             with self.subTest(p=p):
                 mt = MPI.Datatype.Create_f90_real(p, MPI.UNDEFINED)
                 dt = tonumpy(mt)
-                if np_dtype is not None:
+                if numpy is not None:
                     self.assertEqual(dt.kind, "f")
                     self.assertEqual(dt.itemsize, mt.extent)
                     size = mt.Get_size()
@@ -517,7 +521,7 @@ class TestUtilDTLib(unittest.TestCase):
             with self.subTest(p=p):
                 mt = MPI.Datatype.Create_f90_complex(p, MPI.UNDEFINED)
                 dt = tonumpy(mt)
-                if np_dtype is not None:
+                if numpy is not None:
                     self.assertEqual(dt.kind, "c")
                     self.assertEqual(dt.itemsize, mt.extent)
 
@@ -525,7 +529,7 @@ class TestUtilDTLib(unittest.TestCase):
         for mt in mpipairtypes:
             with self.subTest(datatype=mt.name):
                 dt = tonumpy(mt)
-                if np_dtype is not None:
+                if numpy is not None:
                     self.assertTrue(dt.isalignedstruct)
                     self.assertEqual(dt.itemsize, mt.extent)
         integral = "bhilqpBHILQP"
@@ -540,8 +544,8 @@ class TestUtilDTLib(unittest.TestCase):
                 continue
             vt, it, pt = map(tonumpy, (value, index, pair))
             dt = (f"{vt},{it}", {"align": True})
-            if np_dtype is not None:
-                dt = np_dtype(dt[0], **dt[1])  # ty: ignore
+            if numpy is not None:
+                dt = np_dtype(dt[0], **dt[1])
             self.assertEqual(pt, dt)
 
     def testPairStruct(self):
@@ -565,7 +569,7 @@ class TestUtilDTLib(unittest.TestCase):
                     mt3.Free()
                 dt = tonumpy(structtype)
                 structtype.Free()
-                if np_dtype is not None:
+                if numpy is not None:
                     self.assertTrue(dt.isalignedstruct)
 
     def testAlignmentComplex(self):
@@ -575,7 +579,7 @@ class TestUtilDTLib(unittest.TestCase):
             with self.subTest(typecode=t):
                 datatype = MPI.Datatype.fromcode(t)
                 alignment1 = MPI._typealign(datatype)
-                if np_dtype is not None:
+                if numpy is not None:
                     alignment2 = np_dtype(t).alignment
                     self.assertEqual(alignment1, alignment2)
 
@@ -583,7 +587,7 @@ class TestUtilDTLib(unittest.TestCase):
         for pairtype in mpipairtypes:
             alignment1 = MPI._typealign(pairtype)
             self.assertIn(alignment1, (2, 4, 8, 16))
-            if np_dtype is not None:
+            if numpy is not None:
                 alignment2 = tonumpy(pairtype).alignment
                 self.assertEqual(alignment1, alignment2)
 

@@ -5,7 +5,7 @@ from mpi4py import MPI
 try:
     import array
 except ImportError:
-    array = None  # ty: ignore[invalid-assignment]
+    array = None
 
 
 class TestBuffer(unittest.TestCase):
@@ -63,6 +63,7 @@ class TestBuffer(unittest.TestCase):
 
     @unittest.skipIf(array is None, "array")
     def testNewArray(self):
+        assert array is not None
         buffer = MPI.buffer
         obj = array.array("i", [1, 2, 3])
         buf = buffer(obj)
@@ -120,6 +121,7 @@ class TestBuffer(unittest.TestCase):
 
     @unittest.skipIf(array is None, "array")
     def testFromBufferArrayRO(self):
+        assert array is not None
         buffer = MPI.buffer
         obj = array.array("B", [1, 2, 3])
         buf = buffer.frombuffer(obj, readonly=True)
@@ -146,6 +148,7 @@ class TestBuffer(unittest.TestCase):
 
     @unittest.skipIf(array is None, "array")
     def testFromBufferArrayRW(self):
+        assert array is not None
         buffer = MPI.buffer
         obj = array.array("B", [1, 2, 3])
         buf = buffer.frombuffer(obj, readonly=False)
@@ -175,6 +178,7 @@ class TestBuffer(unittest.TestCase):
 
     @unittest.skipIf(array is None, "array")
     def testFromAddress(self):
+        assert array is not None
         buffer = MPI.buffer
         obj = array.array("B", [1, 2, 3])
         addr, size = obj.buffer_info()
