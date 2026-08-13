@@ -59,7 +59,7 @@ a deadlock state.
 
 To alleviate this issue, :mod:`mpi4py` offers a simple, alternative command
 line execution mechanism based on using the :ref:`-m <python:using-on-cmdline>`
-flag and implemented with the :mod:`runpy` module. To use this features, Python
+flag and implemented with the :mod:`runpy` module. To use this feature, Python
 code should be run passing ``-m mpi4py`` in the command line invoking the
 Python interpreter. In case of unhandled exceptions, the finalizer hook will
 call :c:func:`MPI_Abort` on the :c:data:`MPI_COMM_WORLD` communicator, thus
