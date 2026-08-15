@@ -72,7 +72,8 @@ jobs:
         python-version: ${{ matrix.py }}
         allow-prereleases: true
         check-latest: true
-        cache: pip
+        cache: ${{ case(startsWith(matrix.py, 'pypy') &&
+                        runner.os == 'Windows', '', 'pip') }}
 
     - name: Build package
       run:  python -m pip wheel -v --wheel-dir=dist .
