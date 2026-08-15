@@ -23,6 +23,30 @@ permissions:
 
 jobs:
 
+  pre-commit:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+
+    - name: Setup Python
+      uses: actions/setup-python@v7
+      with:
+        python-version: 3
+        cache: pip
+
+    - name: Install pre-commit
+      run: python -m pip install pre-commit
+
+    - name: Run pre-commit
+      run: pre-commit run --all-files
+           --show-diff-on-failure
+           --color=always
+
   conf:
     runs-on: ${{ matrix.os }}
     strategy:
