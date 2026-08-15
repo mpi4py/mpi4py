@@ -135,6 +135,31 @@ def get_requires_for_build(dist, config_settings=None):
     return requires
 
 
+def wheel_settings(config_settings):
+    if not config_settings:
+        return config_settings
+    options = {}
+    for option in ("mpiabi", "pysabi"):
+        if option in config_settings:
+            options[option] = config_settings.pop(option)
+    name = get_build_backend_name()
+    if name == "setuptools":
+        os.environ.update({
+            f"MPI4PY_BUILD_{option.upper()}": value
+            for option, value in options.items()
+        })
+    if name == "skbuild":
+        config_settings.update({
+            f"cmake.define.{option.upper()}": value
+            for option, value in options.items()
+        })
+    if name == "mesonpy":
+        config_settings.setdefault("setup-args", []).extend([
+            f"-D{option}={value}" for option, value in options.items()
+        ])
+    return config_settings
+
+
 # ---
 
 
@@ -174,6 +199,7 @@ def build_wheel(
     config_settings=None,
     metadata_directory=None,
 ):
+    config_settings = wheel_settings(config_settings)
     return build_backend().build_wheel(
         wheel_directory,
         config_settings,
