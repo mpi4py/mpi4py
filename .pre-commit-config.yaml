@@ -20,6 +20,12 @@ repos:
     - id: ruff-check
     - id: ruff-format
 
+- repo: https://github.com/astral-sh/ty-pre-commit
+  rev: v0.0.72
+  hooks:
+    - id: ty
+      args: [--group, type, --no-install-project]
+
 - repo: https://github.com/codespell-project/codespell
   rev: v2.4.3
   hooks:
