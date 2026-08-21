@@ -24,7 +24,7 @@ _log.fatal = _logger.fatal
 
 
 class Config:
-    def __init__(self, log=None):
+    def __init__(self, config=None, log=None):
         self.log = log or _log
         self.section = None
         self.filename = None
@@ -44,6 +44,8 @@ class Config:
             "extra_link_args": [],
             "extra_objects": [],
         }
+        if config is not None:
+            self.update(config)
 
     def __bool__(self):
         for v in self.compiler_info.values():

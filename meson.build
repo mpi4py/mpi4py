@@ -13,6 +13,9 @@ project(
   meson_version: '>=1.5.1',
 )
 
+mpiabi = get_option('mpiabi')
+pysabi = get_option('pysabi')
+
 # ---
 
 fs = import('fs')
@@ -23,9 +26,33 @@ dstdir = py.get_install_dir(pure: false)
 
 # ---
 
-mpi = dependency('mpi', required: true)
-pyembed = py.dependency(embed: true, disabler: true)
+mpi = dependency('mpi', required: false)
+pyembed = py.dependency(embed: true, required: false, disabler: true)
 compiler = meson.get_compiler('c')
+
+# ---
+
+if not mpi.found()
+  abidir = srcdir / 'abi-stub'
+  mpi_inc = include_directories(abidir)
+  mpi_lib = shared_library(
+    'mpi_abi',
+    abidir / 'mpi.c',
+    soversion: 1,
+    darwin_versions: [0, 0],
+  )
+  mpi = declare_dependency(
+    include_directories: mpi_inc,
+    link_with: mpi_lib,
+  )
+  if host_machine.system() == 'darwin'
+    mpi = declare_dependency(
+      include_directories: mpi_inc,
+      link_args: mpi_lib.full_path(),
+    )
+  endif
+  mpiabi = true
+endif
 
 # ---
 
@@ -40,8 +67,6 @@ MPI_ch = custom_target(
   install_dir: [false, dstdir / 'mpi4py', dstdir / 'mpi4py']
 )
 
-mpiabi = get_option('mpiabi')
-pysabi = get_option('pysabi')
 ext_args = {}
 if mpiabi
   ext_args += {'c_args': ['-DPYMPIABI=1']}

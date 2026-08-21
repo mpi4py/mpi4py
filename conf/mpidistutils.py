@@ -226,7 +226,7 @@ from mpiconfig import Config
 
 
 def configuration(command_obj, verbose=True):
-    config = Config(log)
+    config = Config(log=log)
     config.setup(command_obj)
     if verbose:
         if config.section and config.filename:
@@ -518,6 +518,97 @@ except ImportError:
         from setuptools.dep_util import newer_group
     except ImportError:
         from distutils.dep_util import newer_group
+
+# -----------------------------------------------------------------------------
+
+
+def new_compiler_shlib(
+    plat=None,
+    compiler=None,
+    verbose=False,
+    force=False,
+):
+    from distutils.ccompiler import new_compiler
+
+    compiler = new_compiler(
+        plat=plat,
+        compiler=compiler,
+        verbose=verbose,
+        force=force,
+    )
+    customize_compiler(compiler)
+    if sys.platform == "darwin":
+        compiler.shared_lib_extension = ".dylib"
+        while "-bundle" in compiler.linker_so:
+            idx = compiler.linker_so.index("-bundle")
+            compiler.linker_so[idx] = "-dynamiclib"
+        while "-shared" in compiler.linker_so:
+            idx = compiler.linker_so.index("-shared")
+            compiler.linker_so[idx] = "-dynamiclib"
+        with contextlib.suppress(ValueError):
+            idx = compiler.linker_so.index("-undefined")
+            del compiler.linker_so[idx : idx + 2]
+        if "-dynamiclib" not in compiler.linker_so:
+            compiler.linker_so.append("-dynamiclib")
+    return compiler
+
+
+def setup_mpiabi_stub(
+    build_dir,
+    compiler=None,
+    verbose=False,
+    force=False,
+    debug=None,
+):
+    abidir = os.path.join("src", "abi-stub")
+    header = os.path.join(abidir, "mpi.h")
+    source = os.path.join(abidir, "mpi.c")
+
+    incdir = os.path.dirname(header)
+    libdir = build_dir
+    library = "mpi_abi"
+    version = 1
+    config = {
+        "include_dirs": [incdir],
+        "library_dirs": [libdir],
+        "libraries": [library],
+    }
+
+    compiler = new_compiler_shlib(
+        compiler=compiler,
+        verbose=verbose,
+        force=force,
+    )
+    lib_filename = compiler.library_filename(library, lib_type="shared")
+    lib_path = os.path.join(libdir, lib_filename)
+    if not (force or newer_group([header, source], lib_path, "newer")):
+        log.debug("skipping '%s' library (up-to-date)", library)
+        return config
+
+    log.info("building '%s' library", library)
+    ldflags = None
+    if sys.platform == "darwin":
+        ext = os.path.splitext(lib_filename)[1].removeprefix(".")
+        dlname = f"@rpath/lib{library}.{version}.{ext}"
+        ldflags = [f"-Wl,-install_name,{dlname}"]
+    elif sys.platform != "win32":
+        ext = os.path.splitext(lib_filename)[1].removeprefix(".")
+        dlname = f"lib{library}.{ext}.{version}"
+        ldflags = [f"-Wl,-soname,{dlname}"]
+    objects = compiler.compile(
+        [source],
+        output_dir=build_dir,
+        debug=debug,
+    )
+    compiler.link_shared_object(
+        objects,
+        lib_filename,
+        output_dir=libdir,
+        extra_postargs=ldflags,
+        debug=debug,
+    )
+    return config
+
 
 # -----------------------------------------------------------------------------
 
@@ -1224,11 +1315,8 @@ class build_ext(cmd_build_ext.build_ext):
                 self.run_command("build_src")
 
     def build_extensions(self):
-        # First, sanity-check the 'extensions' list
+        # sanity-check the 'extensions' list
         self.check_extensions_list(self.extensions)
-        # parse configuration file and configure compiler
-        self.config = configuration(self, verbose=True)
-        configure_compiler(self.compiler, self.config)
         # build extensions
         for ext in self.extensions:
             try:
@@ -1242,7 +1330,38 @@ class build_ext(cmd_build_ext.build_ext):
                 knd = "executable" if exe else "extension"
                 self.warn(f'building optional {knd} "{ext.name}" failed')
 
+    def config_mpi_compiler(self):
+        if not hasattr(self, "config"):
+            # parse configuration file and configure compiler
+            self.config = configuration(self, verbose=True)
+            configure_compiler(self.compiler, self.config)
+        if self.config:
+            return
+        # check for MPI ABI request
+        strval = os.environ.get("MPI4PY_BUILD_MPIABI", "").lower()
+        mpiabi = strval in {"true", "yes", "on", "y", "1"}
+        if not mpiabi:
+            return
+        # check for 'mpi.h' header availability
+        config_cmd = self.get_finalized_command("config")
+        config_cmd.compiler = self.compiler  # fix compiler
+        with capture_stderr():
+            if config_cmd.check_header("mpi.h"):
+                return
+        # build MPI ABI stub
+        stub_info = setup_mpiabi_stub(
+            build_dir=self.build_temp,
+            compiler=self.compiler.compiler_type,
+            verbose=self.verbose,
+            force=self.force,
+            debug=self.debug,
+        )
+        # configure compiler with MPI ABI stub
+        self.config = Config(stub_info, log=log)
+        configure_compiler(self.compiler, self.config)
+
     def config_extension(self, ext):
+        self.config_mpi_compiler()
         configure = getattr(ext, "configure", None)
         if configure:
             config_cmd = self.get_finalized_command("config")

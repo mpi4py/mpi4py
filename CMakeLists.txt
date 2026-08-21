@@ -31,13 +31,30 @@ find_package(
   OPTIONAL_COMPONENTS Development.Embed
 )
 
-find_package(
-  MPI REQUIRED
-)
+find_package(MPI)
 
 set(BINDIR ${CMAKE_CURRENT_BINARY_DIR})
 set(TOPDIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(SRCDIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
+
+
+# MPI ABI stub library
+if (NOT MPI_FOUND)
+  set(ABIDIR ${SRCDIR}/abi-stub)
+  add_library(mpi_abi SHARED ${ABIDIR}/mpi.c)
+  set_target_properties(
+    mpi_abi PROPERTIES
+    SOVERSION 1
+    MACHO_COMPATIBILITY_VERSION 0
+    MACHO_CURRENT_VERSION 0
+  )
+  if(NOT TARGET MPI::MPI_C)
+    add_library(MPI::MPI_C INTERFACE IMPORTED)
+  endif()
+  target_include_directories(MPI::MPI_C INTERFACE ${ABIDIR})
+  target_link_libraries(MPI::MPI_C INTERFACE mpi_abi)
+  set(MPIABI FORCE TRUE)
+endif()
 
 
 # Cython
