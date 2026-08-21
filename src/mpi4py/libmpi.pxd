@@ -1149,6 +1149,8 @@ cdef extern from "<mpi.h>" nogil:
     enum: MPI_MAX_LIBRARY_VERSION_STRING #:= 1
     int MPI_Get_library_version(char[], int*)
 
+    enum: MPI_ABI_VERSION     #:= -1
+    enum: MPI_ABI_SUBVERSION  #:= -1
     int MPI_Abi_get_version(int*, int*)
     int MPI_Abi_get_info(MPI_Info*)
     int MPI_Abi_get_fortran_info(MPI_Info*)

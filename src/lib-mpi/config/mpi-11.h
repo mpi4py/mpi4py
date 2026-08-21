@@ -1,3 +1,5 @@
+#if !defined(MPI_VERSION) || (MPI_VERSION+0 >= 1)
+
 #define PyMPI_HAVE_MPI_UNDEFINED 1
 #define PyMPI_HAVE_MPI_ANY_SOURCE 1
 #define PyMPI_HAVE_MPI_ANY_TAG 1
@@ -249,3 +251,5 @@
 #define PyMPI_HAVE_MPI_MAX_ERROR_STRING 1
 #define PyMPI_HAVE_MPI_Error_class 1
 #define PyMPI_HAVE_MPI_Error_string 1
+
+#endif

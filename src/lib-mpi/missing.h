@@ -4519,6 +4519,16 @@ typedef int (MPIAPI PyMPI_MPI_Datarep_conversion_function_c)(void*,MPI_Datatype,
 #define MPI_Get_library_version(a1,a2) PyMPI_UNAVAILABLE("MPI_Get_library_version",a1,a2)
 #endif
 
+#ifndef PyMPI_HAVE_MPI_ABI_VERSION
+#undef  MPI_ABI_VERSION
+#define MPI_ABI_VERSION (-1)
+#endif
+
+#ifndef PyMPI_HAVE_MPI_ABI_SUBVERSION
+#undef  MPI_ABI_SUBVERSION
+#define MPI_ABI_SUBVERSION (-1)
+#endif
+
 #ifndef PyMPI_HAVE_MPI_Abi_get_version
 #undef  MPI_Abi_get_version
 #define MPI_Abi_get_version(a1,a2) PyMPI_UNAVAILABLE("MPI_Abi_get_version",a1,a2)

@@ -895,6 +895,8 @@
 #undef  PyMPI_HAVE_MPI_Get_version
 #undef  PyMPI_HAVE_MPI_MAX_LIBRARY_VERSION_STRING
 #undef  PyMPI_HAVE_MPI_Get_library_version
+#undef  PyMPI_HAVE_MPI_ABI_VERSION
+#undef  PyMPI_HAVE_MPI_ABI_SUBVERSION
 #undef  PyMPI_HAVE_MPI_Abi_get_version
 #undef  PyMPI_HAVE_MPI_Abi_get_info
 #undef  PyMPI_HAVE_MPI_Abi_get_fortran_info

@@ -23,6 +23,7 @@
 #endif
 
 #if !defined(PyMPI_HAVE_MPI_Type_contiguous_c) || PyMPI_LEGACY_ABI
+#include <limits.h>
 #undef MPI_Type_contiguous_c
 static int PyMPI_Type_contiguous_c(MPI_Count count,
                                    MPI_Datatype oldtype,
