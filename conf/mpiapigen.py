@@ -83,6 +83,9 @@ canyptr = join(r"\w+", pointer + "?")
 annotation = r"\#\:\="
 fallback_value = r"\(?[A-Za-z0-9_\+\-\(\)\*]+\)?"
 fallback = rf"(?:{join(annotation, [fallback_value])})?"
+abi_marker = r"\#@\:\="
+abi_value = r"[A-Za-z0-9_\+\-\(\)\*]+"
+abi = rf"(?:{join(abi_marker, [abi_value])})?"
 
 cint_type = r"int"
 cmpi_type = opaque_type.replace("Datatype", "Type")
@@ -103,12 +106,12 @@ class Re:
         typedef, [ret_type], [camel_name], lparen, [arg_list], rparen, fallback
     )
 
-    ENUM_VALUE = r_(enum, [upper_name], fallback)
-    HANDLE_VALUE = r_([opaque_type], [upper_name], fallback)
-    BASIC_PTRVAL = r_([basic_type, pointer], [upper_name], fallback)
-    INTEGRAL_PTRVAL = r_([integral_type, pointer], [upper_name], fallback)
-    STRUCT_PTRVAL = r_([struct_type, pointer], [upper_name], fallback)
-    FUNCTION_PTRVAL = r_([usrfun_name, pointer], [upper_name], fallback)
+    ENUM_VALUE = r_(enum, [upper_name], fallback, abi)
+    HANDLE_VALUE = r_([opaque_type], [upper_name], fallback, abi)
+    BASIC_PTRVAL = r_([basic_type, pointer], [upper_name], fallback, abi)
+    INTEGRAL_PTRVAL = r_([integral_type, pointer], [upper_name], fallback, abi)
+    STRUCT_PTRVAL = r_([struct_type, pointer], [upper_name], fallback, abi)
+    FUNCTION_PTRVAL = r_([usrfun_name, pointer], [upper_name], fallback, abi)
 
     FUNCTION_PROTO = r_(
         [ret_type], [camel_name], lparen, [arg_list], rparen, fallback
@@ -169,7 +172,7 @@ class Node:
         line = dedent(self.HEADER) % vars(self)
         line = line.replace("\n", "")
         line = line.replace("  ", " ")
-        return line + "\n"
+        return line
 
     def config(self):
         assert self.CONFIG is not None  # noqa: S101
@@ -242,8 +245,14 @@ class NodeValue(Node):
     %(ctype)s v; v = %(cname)s; (void)v;"""
     MISSING = "#define %(cname)s (%(calias)s)"
 
-    def __init__(self, ctype, cname, calias):
-        self.init(name=cname, cname=cname, ctype=ctype, calias=calias)
+    def __init__(self, ctype, cname, calias, abi=None):
+        self.init(
+            name=cname,
+            cname=cname,
+            ctype=ctype,
+            calias=calias,
+            abi=abi,
+        )
         if ctype.endswith("*"):
             ctype = ctype + " const"
             self.HEADER = ctype + " %(cname)s;"
@@ -337,7 +346,7 @@ class StructType(NodeStructType):
 class OpaqueType(NodeType):
     REGEX = Re.OPAQUE_TYPE
     HEADER = """\
-    typedef struct{...;} %(ctype)s;"""
+    typedef struct {...;} %(ctype)s;"""
     MISSING = """\
     typedef void *PyMPI_%(ctype)s;
     #define %(ctype)s PyMPI_%(ctype)s"""
@@ -350,8 +359,14 @@ class FunctionType(NodeFuncType):
 class EnumValue(NodeValue):
     REGEX = Re.ENUM_VALUE
 
-    def __init__(self, cname, calias):
-        self.init(name=cname, cname=cname, ctype="int", calias=calias)
+    def __init__(self, cname, calias, abi=None):
+        self.init(
+            name=cname,
+            cname=cname,
+            ctype="int",
+            calias=calias,
+            abi=abi,
+        )
 
 
 class HandleValue(NodeValue):
@@ -527,6 +542,121 @@ class Generator:
     def __getitem__(self, name):
         return self.nodes[self.nodemap[name]]
 
+    def dump_abiheader(self, fileobj):
+        if isinstance(fileobj, (str, pathlib.Path)):
+            fileobj = pathlib.Path(fileobj)
+            with fileobj.open("w", encoding="utf-8") as f:
+                self.dump_abiheader(f)
+            return
+        cxx_guard = """\
+        #if defined(__cplusplus)
+        {}
+        #endif
+        """
+        head = """\
+        #ifndef MPI_H_ABI
+        #define MPI_H_ABI
+        #include <stdint.h>
+        """
+        tail = """\
+        #endif /* MPI_H_ABI */
+        """
+        major = int(self["MPI_VERSION"].abi)
+        minor = int(self["MPI_SUBVERSION"].abi)
+        mpi_version_max = (major, minor)
+        fileobj.write(dedent(self.PROLOG))
+        fileobj.write(dedent(head))
+        fileobj.write(dedent(cxx_guard.format('extern "C" {')))
+        for node in self:
+            if not getattr(node, "version", None):
+                continue
+            if node.version > mpi_version_max:
+                continue
+            code = None
+            match node:
+                case (
+                    NodeType(ctype="MPI_Fint")
+                    | FunctionC2F()
+                    | FunctionF2C()
+                    | NodeFuncProto(name="MPI_Status_c2f")
+                    | NodeFuncProto(name="MPI_Status_f2c")
+                ):
+                    continue
+                case IntegralType():
+                    typemap = {
+                        "MPI_Aint": "intptr_t",
+                        "MPI_Offset": "int64_t",
+                        "MPI_Count": "MPI_Offset",
+                    }
+                    code = f"typedef {typemap[node.ctype]} {node.ctype};"
+                case StructType(ctype="MPI_Status"):
+                    abi_field = "int MPI_internal[5]"
+                    code = node.header().replace("...", abi_field)
+                case OpaqueType():
+                    abi_name = node.ctype.replace("MPI_", "MPI_ABI_")
+                    code = node.header().replace("{...;}", f"{abi_name}*")
+                case NodeFuncType():
+                    code = node.header()
+                case NodeFuncProto():
+                    code = node.header()
+                case NodeValue(abi=None):
+                    continue
+                case NodeValue(ctype="int"):
+                    code = f"#define {node.name} {node.abi}"
+                case NodeValue():
+                    code = f"#define {node.name} (({node.ctype}){node.abi})"
+                case _:
+                    warnings.warn(f"unmatched node: {node.name}", stacklevel=1)
+            if code is not None:
+                fileobj.write(code + "\n")
+        fileobj.write(dedent(cxx_guard.format("}")))
+        fileobj.write(dedent(tail))
+
+    def dump_abisource(self, fileobj):
+        if isinstance(fileobj, (str, pathlib.Path)):
+            fileobj = pathlib.Path(fileobj)
+            with fileobj.open("w", encoding="utf-8") as f:
+                self.dump_abisource(f)
+            return
+        head = """\
+        #if defined(__cplusplus)
+        #  define EXTERN extern "C"
+        #else
+        #  define EXTERN extern
+        #endif
+        #if defined(_WIN32)
+        #  define EXPORT __declspec(dllexport)
+        #elif defined(__clang__) || (defined(__GNUC__) && __GNUC__ >= 4)
+        #  define EXPORT __attribute__((visibility("default")))
+        #  define WEAK(sym) __attribute__((weak))
+        #else /* C99 - C++11 */
+        #  define PRAGMA(x) _Pragma(#x)
+        #  define WEAK(sym) PRAGMA(weak sym)
+        #endif
+        #if !defined(EXPORT)
+        #  define EXPORT
+        #endif
+        #if !defined(WEAK)
+        #  define WEAK(sym)
+        #endif
+        #define F(sym) void sym(void)
+        #define S(sym) EXTERN EXPORT F(sym); F(sym){}
+        #define W(sym) WEAK(sym) S(sym)
+        """
+        major = int(self["MPI_VERSION"].abi)
+        minor = int(self["MPI_SUBVERSION"].abi)
+        mpi_version_max = (major, minor)
+        fileobj.write(dedent(self.PROLOG))
+        fileobj.write(dedent(head))
+        names = [
+            node.name
+            for node in self
+            if isinstance(node, NodeFuncProto)
+            and node.version <= mpi_version_max
+        ]
+        for name in sorted(names):
+            fileobj.write(f"W({name})\n")
+
     def dump_header_h(self, fileobj):
         if isinstance(fileobj, (str, pathlib.Path)):
             fileobj = pathlib.Path(fileobj)
@@ -534,7 +664,7 @@ class Generator:
                 self.dump_header_h(f)
             return
         for node in self:
-            fileobj.write(node.header())
+            fileobj.write(node.header() + "\n")
 
     CONFIG_HEAD = """\
     #ifndef PyMPI_PYMPICONF_H
@@ -1279,8 +1409,16 @@ if __name__ == "__main__":
         sys.exit(0)
 
     # config_h  = topdir / "src" / "lib-mpi" / "pympiconf.h"
-    # log("writing file %s" % config_h)
+    # log(f"writing file {config_h}")
     # generator.dump_config_h(config_h, None)
+
+    abidir = topdir / "src" / "abi-stub"
+    mpi_h = abidir / "mpi.h"
+    mpi_c = abidir / "mpi.c"
+    log(f"writing file {mpi_h}")
+    generator.dump_abiheader(mpi_h)
+    log(f"writing file {mpi_c}")
+    generator.dump_abisource(mpi_c)
 
     missing_h = topdir / "src" / "lib-mpi" / "missing.h"
     log(f"writing file {missing_h}")
@@ -1300,7 +1438,7 @@ if __name__ == "__main__":
     log("generated %d large count fallbacks" % generator.largecnt)
 
     # libmpi_h = topdir / ".", "libmpi.h"
-    # log("writing file %s" % libmpi_h)
+    # log(f"writing file {libmpi_h}")
     # generator.dump_header_h(libmpi_h)
 
 # -----------------------------------------
