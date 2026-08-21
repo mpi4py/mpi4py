@@ -31,15 +31,9 @@ find_package(
   OPTIONAL_COMPONENTS Development.Embed
 )
 
-find_package(MPI REQUIRED)
-separate_arguments(MPI_C_COMPILE_OPTIONS NATIVE_COMMAND)
-separate_arguments(MPI_C_LINK_FLAGS NATIVE_COMMAND)
-
-include(CheckSymbolExists)
-set(CMAKE_REQUIRED_INCLUDES ${MPI_C_INCLUDE_DIRS})
-set(CMAKE_REQUIRED_DEFINITIONS ${MPI_C_COMPILE_DEFINITIONS})
-set(CMAKE_REQUIRED_FLAGS ${MPI_C_COMPILE_OPTIONS})
-
+find_package(
+  MPI REQUIRED
+)
 
 set(BINDIR ${CMAKE_CURRENT_BINARY_DIR})
 set(TOPDIR ${CMAKE_CURRENT_SOURCE_DIR})
@@ -78,27 +72,15 @@ python_add_library(mpi4py.MPI MODULE ${MPI.c} WITH_SOABI ${WITH_SABI})
 set_target_properties(mpi4py.MPI PROPERTIES OUTPUT_NAME "MPI" PREFIX "")
 target_compile_definitions(mpi4py.MPI PRIVATE $<$<BOOL:${MPIABI}>:PYMPIABI=1>)
 target_include_directories(mpi4py.MPI PRIVATE ${SRCDIR})
-target_include_directories(mpi4py.MPI PRIVATE ${MPI_C_INCLUDE_DIRS})
-target_compile_definitions(mpi4py.MPI PRIVATE ${MPI_C_COMPILE_DEFINITIONS})
-target_compile_options(mpi4py.MPI PRIVATE ${MPI_C_COMPILE_OPTIONS})
-target_link_directories(mpi4py.MPI PRIVATE ${MPI_C_LIBRARY_DIRS})
-target_link_libraries(mpi4py.MPI PRIVATE ${MPI_C_LIBRARIES})
-target_link_options(mpi4py.MPI PRIVATE ${MPI_C_LINK_FLAGS})
+target_link_libraries(mpi4py.MPI PRIVATE MPI::MPI_C)
 install(TARGETS mpi4py.MPI LIBRARY DESTINATION mpi4py)
 
 
 # mpi4py/bin/python-mpi
 if (Python_Development.Embed_FOUND)
 add_executable(python-mpi ${SRCDIR}/python.c)
-target_include_directories(python-mpi PRIVATE ${Python_INCLUDE_DIRS})
-target_link_directories(python-mpi PRIVATE ${Python_LIBRARY_DIRS})
-target_link_libraries(python-mpi PRIVATE ${Python_LIBRARIES})
-target_include_directories(python-mpi PRIVATE ${MPI_C_INCLUDE_DIRS})
-target_compile_definitions(python-mpi PRIVATE ${MPI_C_COMPILE_DEFINITIONS})
-target_compile_options(python-mpi PRIVATE ${MPI_C_COMPILE_OPTIONS})
-target_link_directories(python-mpi PRIVATE ${MPI_C_LIBRARY_DIRS})
-target_link_libraries(python-mpi PRIVATE ${MPI_C_LIBRARIES})
-target_link_options(python-mpi PRIVATE ${MPI_C_LINK_FLAGS})
+target_link_libraries(python-mpi PRIVATE Python::Python)
+target_link_libraries(python-mpi PRIVATE MPI::MPI_C)
 install(TARGETS python-mpi RUNTIME DESTINATION mpi4py/bin)
 endif()
 
