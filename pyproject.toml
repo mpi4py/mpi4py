@@ -113,6 +113,9 @@ type = [
   "ty",
 ]
 
+[tool.meson-python.args]
+setup = ['--vsenv']
+
 [tool.scikit-build]
 minimum-version = "1.0"
 experimental = true
