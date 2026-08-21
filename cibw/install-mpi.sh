@@ -6,48 +6,39 @@ MACHINE=${PROCESSOR_ARCHITECTURE:-$(uname -m)}
 MPIARCH=${2:-$MACHINE}
 MPIARCH=${MPIARCH/native/$MACHINE}
 
-case "$(uname)" in
-    Linux|Darwin)
-        MPI_ROOT=${MPI_ROOT:-/usr/local}
-        sudo() { [ "$(id -u)" -eq 0 ] || set -- command sudo "$@"; "$@"; }
-        ;;
-    *NT*)
-        MPI_ROOT=${MPI_ROOT:-~/$MPI_ABI}
-        sudo() { "$@"; }
-        ;;
-esac
+if [[ "$MPI_ABI" == mpiabi ]]; then
+    repourl=https://github.com/mpi-forum/mpi-abi-stubs/
+    archive=archive/refs/heads/main.tar.gz
+    MPISPEC="$repourl$archive"
+else
+    MPISPEC="$MPI_ABI"
+fi
 
 workdir=$(mktemp -d)
 trap 'rm -rf $workdir' EXIT
 cd "$workdir"
 
-if [[ "$MPI_ABI" == mpiabi ]]; then
-    echo "Download MPI (mpi-abi-stubs)"
-    giturl=https://github.com/mpi-forum/mpi-abi-stubs.git
-    rm -rf mpiabi
-    git clone --quiet --depth 1 "$giturl" mpiabi
-    echo "Install MPI (mpi-abi-stubs) [$MACHINE]"
-    options+=(-DCMAKE_INSTALL_PREFIX="$MPI_ROOT")
-    options+=(-DCMAKE_INSTALL_LIBDIR="lib")
-    cmake -S mpiabi -B mpiabi/build "${options[@]}"
-    cmake --build mpiabi/build --config Release
-    sudo cmake --install mpiabi/build --config Release
-    rm -rf mpiabi
-    echo "Rebuild dynamic linker cache"
-    sudo "$(command -v ldconfig || echo true)"
-    exit 0
-fi
-
 echo "Install MPI ($MPI_ABI) [$MACHINE]"
 destdir=./$MPI_ABI/$MACHINE
 case "$(uname)" in
     Linux|Darwin)
-        uv pip install --target "$destdir" "$MPI_ABI"
+        sudo() { [ "$(id -u)" -eq 0 ] || set -- command sudo "$@"; "$@"; }
+        MPI_ROOT=${MPI_ROOT:-/usr/local}
+        uv pip install --target "$destdir" "$MPISPEC"
         rm -r "$destdir"/*.dist-info
         ;;
     *NT*)
+        sudo() { "$@"; }
+        MPI_ROOT=${MPI_ROOT:-~/$MPI_ABI}
         mkdir -p "$destdir"
         case "$MPI_ABI" in
+            mpiabi)
+                uv pip install --target "$destdir" "$MPISPEC"
+                rm -r "${destdir:?}"/bin
+                mv "$destdir"/Library/* "$destdir"/
+                rmdir "$destdir"/Library
+                rm -r "$destdir"/*.dist-info
+            ;;
             msmpi)
                 nuget install MSMPISDK
                 stagedir=$(ls -d MSMPISDK.*/)
@@ -95,11 +86,13 @@ sudo "$(command -v ldconfig || echo true)"
 
 echo "Display MPI information"
 case "$MPI_ABI" in
+    mpiabi)   echo MPI_ABI_STUBS="$MPI_ROOT" ;;
     mpich)    "$MPI_ROOT"/bin/mpichversion ;;
     openmpi)  "$MPI_ROOT"/bin/ompi_info ;;
     impi)     echo I_MPI_ROOT="$MPI_ROOT" ;;
     msmpi)    echo MSMPI_SDK="$MPI_ROOT" ;;
 esac
+find "$MPI_ROOT"
 
 echo "Display MPI compiler wrappers"
 if [[ "$(uname)" == Linux || "$(uname)" == Darwin ]]; then
@@ -107,7 +100,7 @@ if [[ "$(uname)" == Linux || "$(uname)" == Darwin ]]; then
     echo mpicxx: "$(mpicxx  -show 2>&1)"
 else
     echo INCLUDE: "$(find "$MPI_ROOT" -name 'mpi.h')"
-    echo LIBRARY: "$(find "$MPI_ROOT" -name '*mpi.lib')"
+    echo LIBRARY: "$(find "$MPI_ROOT" -name '*mpi*.lib')"
 fi
 
 if [[ "$(uname)" == Darwin && "$MPIARCH" != "$MACHINE" ]]; then
@@ -118,7 +111,7 @@ if [[ "$(uname)" == Darwin && "$MPIARCH" != "$MACHINE" ]]; then
         arm64)  pyplat=aarch64-apple-darwin ;;
         x86_64) pyplat=x86_64-apple-darwin ;;
     esac
-    uv pip install --target "$destdir2" --python-platform "$pyplat" "$MPI_ABI"
+    uv pip install --target "$destdir2" --python-platform "$pyplat" "$MPISPEC"
     rm -r "$destdir2"/*.dist-info
     echo "Creating universal MPI dynamic libraries"
     dylibs=$(cd "$destdir1" && find lib -type f -name 'lib*.dylib')

@@ -15,15 +15,13 @@ done
 
 libs=""
 rpath=""
-runpath=""
 needed=""
 
 if [[ "$(uname)" == Linux ]]; then
     mods=("$tempdir"/mpi4py*linux*.dir/mpi4py/MPI.*.so)
     libs=$(find "$tempdir"/mpi4py*linux*.dir/mpi4py*.libs \
                 -type f -exec basename {} \; | sort | uniq)
-    rpath=$(patchelf --print-rpath --force-rpath "${mods[@]}" | sort | uniq)
-    runpath=$(patchelf --print-rpath "${mods[@]}" | sort | uniq)
+    rpath=$(patchelf --print-rpath "${mods[@]}" | sort | uniq)
     needed=$(patchelf --print-needed "${mods[@]}" | sort | uniq)
 fi
 
@@ -32,7 +30,7 @@ if [[ "$(uname)" == Darwin ]]; then
     libs=$(
         find "$tempdir"/mpi4py*macos*.dir/mpi4py/.dylibs \
              -type f -exec basename {} \; | sort | uniq)
-    runpath=$(
+    rpath=$(
         otool -l "${mods[@]}" | sed -n '/RPATH/{n;n;p;}' |
             awk '{print $2}' | sort | uniq)
     needed=$(
@@ -69,21 +67,20 @@ fi
 
 echo "libs:    $(echo "$libs"    | tr '\n' ' ')"
 echo "rpath:   $(echo "$rpath"   | tr '\n' ' ')"
-echo "runpath: $(echo "$runpath" | tr '\n' ' ')"
 echo "needed:  $(echo "$needed"  | tr '\n' ' ')"
 
 test -z "$libs"
-test -z "$rpath"
 if [[ "$(uname)" == Linux ]]; then
+    pthre='\$''ORIGIN/.*'
     libre='lib(c|dl|pthread|mpi|mpi_abi)\.so'
-    test -z "$runpath"
+    test -z "$(grep -vE "$pthre" <<< "$rpath"  || true)"
     test -z "$(grep -vE "$libre" <<< "$needed" || true)"
 fi
 if [[ "$(uname)" == Darwin ]]; then
-    pthre='(/opt/(homebrew|local)|/usr/local)/lib'
+    pthre='@loader_path/.*|.*(/opt/(homebrew|local)|/usr/local)/lib'
     libre='lib(System|mpi|pmpi|mpi_abi)\..*\.dylib'
-    test -z "$(grep -vE "$pthre" <<< "$runpath" || true)"
-    test -z "$(grep -vE "$libre" <<< "$needed"  || true)"
+    test -z "$(grep -vE "$pthre" <<< "$rpath"  || true)"
+    test -z "$(grep -vE "$libre" <<< "$needed" || true)"
 fi
 if [[ "$(uname)" =~ NT ]]; then
     libre='((i|ms)mpi|mpi_abi)\.dll'
