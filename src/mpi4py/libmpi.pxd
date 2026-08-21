@@ -49,105 +49,105 @@ cdef extern from "<mpi.h>" nogil:
 
     #-----------------------------------------------------------------
 
-    enum: MPI_UNDEFINED      #:= -32766
-    enum: MPI_ANY_SOURCE     #:= MPI_UNDEFINED
-    enum: MPI_ANY_TAG        #:= MPI_UNDEFINED
-    enum: MPI_PROC_NULL      #:= MPI_UNDEFINED
-    enum: MPI_ROOT           #:= MPI_PROC_NULL
+    enum: MPI_UNDEFINED      #:= -32766         #@:= -32766
+    enum: MPI_ANY_SOURCE     #:= MPI_UNDEFINED  #@:= -1
+    enum: MPI_ANY_TAG        #:= MPI_UNDEFINED  #@:= -2
+    enum: MPI_PROC_NULL      #:= MPI_UNDEFINED  #@:= -3
+    enum: MPI_ROOT           #:= MPI_PROC_NULL  #@:= -4
 
-    enum: MPI_IDENT      #:= 1
-    enum: MPI_CONGRUENT  #:= 2
-    enum: MPI_SIMILAR    #:= 3
-    enum: MPI_UNEQUAL    #:= 4
+    enum: MPI_IDENT      #:= 1  #@:= 201
+    enum: MPI_CONGRUENT  #:= 2  #@:= 202
+    enum: MPI_SIMILAR    #:= 3  #@:= 203
+    enum: MPI_UNEQUAL    #:= 4  #@:= 204
 
-    void* MPI_BOTTOM     #:= 0
-    void* MPI_IN_PLACE   #:= 0
+    void* MPI_BOTTOM     #:= 0  #@:= 0
+    void* MPI_IN_PLACE   #:= 0  #@:= 1
 
-    enum: MPI_KEYVAL_INVALID   #:= 0
-    enum: MPI_MAX_OBJECT_NAME  #:= 64
+    enum: MPI_KEYVAL_INVALID   #:= 0   #@:= 0
+    enum: MPI_MAX_OBJECT_NAME  #:= 64  #@:= 128
 
     #-----------------------------------------------------------------
 
     # Null datatype
-    MPI_Datatype MPI_DATATYPE_NULL #:= 0
+    MPI_Datatype MPI_DATATYPE_NULL           #:= 0                  #@:= 0x00000200
     # MPI datatypes
-    MPI_Datatype MPI_PACKED #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_BYTE   #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_AINT   #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_OFFSET #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_COUNT  #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_PACKED                  #:= MPI_DATATYPE_NULL  #@:= 0x00000207
+    MPI_Datatype MPI_BYTE                    #:= MPI_DATATYPE_NULL  #@:= 0x00000247
+    MPI_Datatype MPI_AINT                    #:= MPI_DATATYPE_NULL  #@:= 0x00000201
+    MPI_Datatype MPI_OFFSET                  #:= MPI_DATATYPE_NULL  #@:= 0x00000203
+    MPI_Datatype MPI_COUNT                   #:= MPI_DATATYPE_NULL  #@:= 0x00000202
     # Elementary C datatypes
-    MPI_Datatype MPI_CHAR               #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_WCHAR              #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_SIGNED_CHAR        #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_SHORT              #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_INT                #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_LONG               #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_LONG_LONG          #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_LONG_LONG_INT      #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_UNSIGNED_CHAR      #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_UNSIGNED_SHORT     #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_UNSIGNED           #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_UNSIGNED_LONG      #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_UNSIGNED_LONG_LONG #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_FLOAT              #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_DOUBLE             #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_LONG_DOUBLE        #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_CHAR                    #:= MPI_DATATYPE_NULL  #@:= 0x00000243
+    MPI_Datatype MPI_WCHAR                   #:= MPI_DATATYPE_NULL  #@:= 0x0000023c
+    MPI_Datatype MPI_SIGNED_CHAR             #:= MPI_DATATYPE_NULL  #@:= 0x00000244
+    MPI_Datatype MPI_SHORT                   #:= MPI_DATATYPE_NULL  #@:= 0x00000208
+    MPI_Datatype MPI_INT                     #:= MPI_DATATYPE_NULL  #@:= 0x00000209
+    MPI_Datatype MPI_LONG                    #:= MPI_DATATYPE_NULL  #@:= 0x0000020a
+    MPI_Datatype MPI_LONG_LONG               #:= MPI_DATATYPE_NULL  #@:= 0x0000020b
+    MPI_Datatype MPI_LONG_LONG_INT           #:= MPI_DATATYPE_NULL  #@:= MPI_LONG_LONG
+    MPI_Datatype MPI_UNSIGNED_CHAR           #:= MPI_DATATYPE_NULL  #@:= 0x00000245
+    MPI_Datatype MPI_UNSIGNED_SHORT          #:= MPI_DATATYPE_NULL  #@:= 0x0000020c
+    MPI_Datatype MPI_UNSIGNED                #:= MPI_DATATYPE_NULL  #@:= 0x0000020d
+    MPI_Datatype MPI_UNSIGNED_LONG           #:= MPI_DATATYPE_NULL  #@:= 0x0000020e
+    MPI_Datatype MPI_UNSIGNED_LONG_LONG      #:= MPI_DATATYPE_NULL  #@:= 0x0000020f
+    MPI_Datatype MPI_FLOAT                   #:= MPI_DATATYPE_NULL  #@:= 0x00000210
+    MPI_Datatype MPI_DOUBLE                  #:= MPI_DATATYPE_NULL  #@:= 0x00000214
+    MPI_Datatype MPI_LONG_DOUBLE             #:= MPI_DATATYPE_NULL  #@:= 0x00000220
     # C99 datatypes
-    MPI_Datatype MPI_C_BOOL                #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_INT8_T                #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_INT16_T               #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_INT32_T               #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_INT64_T               #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_UINT8_T               #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_UINT16_T              #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_UINT32_T              #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_UINT64_T              #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_FLOAT16_T             #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_BFLOAT16_T            #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_C_COMPLEX             #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_C_FLOAT_COMPLEX       #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_C_DOUBLE_COMPLEX      #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_C_LONG_DOUBLE_COMPLEX #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_C_BOOL                  #:= MPI_DATATYPE_NULL  #@:= 0x00000238
+    MPI_Datatype MPI_INT8_T                  #:= MPI_DATATYPE_NULL  #@:= 0x00000240
+    MPI_Datatype MPI_INT16_T                 #:= MPI_DATATYPE_NULL  #@:= 0x00000248
+    MPI_Datatype MPI_INT32_T                 #:= MPI_DATATYPE_NULL  #@:= 0x00000250
+    MPI_Datatype MPI_INT64_T                 #:= MPI_DATATYPE_NULL  #@:= 0x00000258
+    MPI_Datatype MPI_UINT8_T                 #:= MPI_DATATYPE_NULL  #@:= 0x00000241
+    MPI_Datatype MPI_UINT16_T                #:= MPI_DATATYPE_NULL  #@:= 0x00000249
+    MPI_Datatype MPI_UINT32_T                #:= MPI_DATATYPE_NULL  #@:= 0x00000251
+    MPI_Datatype MPI_UINT64_T                #:= MPI_DATATYPE_NULL  #@:= 0x00000259
+    MPI_Datatype MPI_FLOAT16_T               #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_BFLOAT16_T              #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_C_COMPLEX               #:= MPI_DATATYPE_NULL  #@:= MPI_C_FLOAT_COMPLEX
+    MPI_Datatype MPI_C_FLOAT_COMPLEX         #:= MPI_DATATYPE_NULL  #@:= 0x00000212
+    MPI_Datatype MPI_C_DOUBLE_COMPLEX        #:= MPI_DATATYPE_NULL  #@:= 0x00000216
+    MPI_Datatype MPI_C_LONG_DOUBLE_COMPLEX   #:= MPI_DATATYPE_NULL  #@:= 0x00000224
     # C++ datatypes
-    MPI_Datatype MPI_CXX_BOOL                #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_CXX_FLOAT_COMPLEX       #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_CXX_DOUBLE_COMPLEX      #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_CXX_LONG_DOUBLE_COMPLEX #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_CXX_BOOL                #:= MPI_DATATYPE_NULL  #@:= 0x00000239
+    MPI_Datatype MPI_CXX_FLOAT_COMPLEX       #:= MPI_DATATYPE_NULL  #@:= 0x00000213
+    MPI_Datatype MPI_CXX_DOUBLE_COMPLEX      #:= MPI_DATATYPE_NULL  #@:= 0x00000217
+    MPI_Datatype MPI_CXX_LONG_DOUBLE_COMPLEX #:= MPI_DATATYPE_NULL  #@:= 0x00000225
     # C datatypes for reduction operations
-    MPI_Datatype MPI_SHORT_INT       #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_2INT            #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_LONG_INT        #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_FLOAT_INT       #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_DOUBLE_INT      #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_LONG_DOUBLE_INT #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_SHORT_INT               #:= MPI_DATATYPE_NULL  #@:= 0x0000022c
+    MPI_Datatype MPI_2INT                    #:= MPI_DATATYPE_NULL  #@:= 0x0000022b
+    MPI_Datatype MPI_LONG_INT                #:= MPI_DATATYPE_NULL  #@:= 0x0000022a
+    MPI_Datatype MPI_FLOAT_INT               #:= MPI_DATATYPE_NULL  #@:= 0x00000228
+    MPI_Datatype MPI_DOUBLE_INT              #:= MPI_DATATYPE_NULL  #@:= 0x00000229
+    MPI_Datatype MPI_LONG_DOUBLE_INT         #:= MPI_DATATYPE_NULL  #@:= 0x0000022d
     # Elementary Fortran datatypes
-    MPI_Datatype MPI_CHARACTER        #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_LOGICAL          #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_INTEGER          #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_REAL             #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_DOUBLE_PRECISION #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_COMPLEX          #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_DOUBLE_COMPLEX   #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_CHARACTER               #:= MPI_DATATYPE_NULL  #@:= 0x0000021e
+    MPI_Datatype MPI_LOGICAL                 #:= MPI_DATATYPE_NULL  #@:= 0x00000218
+    MPI_Datatype MPI_INTEGER                 #:= MPI_DATATYPE_NULL  #@:= 0x00000219
+    MPI_Datatype MPI_REAL                    #:= MPI_DATATYPE_NULL  #@:= 0x0000021a
+    MPI_Datatype MPI_DOUBLE_PRECISION        #:= MPI_DATATYPE_NULL  #@:= 0x0000021c
+    MPI_Datatype MPI_COMPLEX                 #:= MPI_DATATYPE_NULL  #@:= 0x0000021b
+    MPI_Datatype MPI_DOUBLE_COMPLEX          #:= MPI_DATATYPE_NULL  #@:= 0x0000021d
     # Size-specific Fortran datatypes
-    MPI_Datatype MPI_LOGICAL1  #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_LOGICAL2  #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_LOGICAL4  #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_LOGICAL8  #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_LOGICAL16 #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_INTEGER1  #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_INTEGER2  #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_INTEGER4  #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_INTEGER8  #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_INTEGER16 #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_REAL2     #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_REAL4     #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_REAL8     #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_REAL16    #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_COMPLEX4  #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_COMPLEX8  #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_COMPLEX16 #:= MPI_DATATYPE_NULL
-    MPI_Datatype MPI_COMPLEX32 #:= MPI_DATATYPE_NULL
+    MPI_Datatype MPI_LOGICAL1                #:= MPI_DATATYPE_NULL  #@:= 0x000002c0
+    MPI_Datatype MPI_LOGICAL2                #:= MPI_DATATYPE_NULL  #@:= 0x000002c8
+    MPI_Datatype MPI_LOGICAL4                #:= MPI_DATATYPE_NULL  #@:= 0x000002d0
+    MPI_Datatype MPI_LOGICAL8                #:= MPI_DATATYPE_NULL  #@:= 0x000002d8
+    MPI_Datatype MPI_LOGICAL16               #:= MPI_DATATYPE_NULL  #@:= 0x000002e0
+    MPI_Datatype MPI_INTEGER1                #:= MPI_DATATYPE_NULL  #@:= 0x000002c1
+    MPI_Datatype MPI_INTEGER2                #:= MPI_DATATYPE_NULL  #@:= 0x000002c9
+    MPI_Datatype MPI_INTEGER4                #:= MPI_DATATYPE_NULL  #@:= 0x000002d1
+    MPI_Datatype MPI_INTEGER8                #:= MPI_DATATYPE_NULL  #@:= 0x000002d9
+    MPI_Datatype MPI_INTEGER16               #:= MPI_DATATYPE_NULL  #@:= 0x000002e1
+    MPI_Datatype MPI_REAL2                   #:= MPI_DATATYPE_NULL  #@:= 0x000002ca
+    MPI_Datatype MPI_REAL4                   #:= MPI_DATATYPE_NULL  #@:= 0x000002d2
+    MPI_Datatype MPI_REAL8                   #:= MPI_DATATYPE_NULL  #@:= 0x000002da
+    MPI_Datatype MPI_REAL16                  #:= MPI_DATATYPE_NULL  #@:= 0x000002e2
+    MPI_Datatype MPI_COMPLEX4                #:= MPI_DATATYPE_NULL  #@:= 0x000002d3
+    MPI_Datatype MPI_COMPLEX8                #:= MPI_DATATYPE_NULL  #@:= 0x000002db
+    MPI_Datatype MPI_COMPLEX16               #:= MPI_DATATYPE_NULL  #@:= 0x000002e3
+    MPI_Datatype MPI_COMPLEX32               #:= MPI_DATATYPE_NULL  #@:= 0x000002eb
 
     int MPI_Get_address(void*, MPI_Aint*) #:= MPI_Address
     MPI_Aint MPI_Aint_add(MPI_Aint, MPI_Aint)
@@ -158,13 +158,13 @@ cdef extern from "<mpi.h>" nogil:
     int MPI_Type_vector(int, int, int, MPI_Datatype, MPI_Datatype*)
     int MPI_Type_indexed(int, int[], int[], MPI_Datatype, MPI_Datatype*)
     int MPI_Type_create_indexed_block(int, int, int[], MPI_Datatype, MPI_Datatype*)
-    enum: MPI_ORDER_C        #:= 0
-    enum: MPI_ORDER_FORTRAN  #:= 1
+    enum: MPI_ORDER_C               #:= 0  #@:= 12
+    enum: MPI_ORDER_FORTRAN         #:= 1  #@:= 15
     int MPI_Type_create_subarray(int, int[], int[], int[], int, MPI_Datatype, MPI_Datatype*)
-    enum: MPI_DISTRIBUTE_NONE       #:= 0
-    enum: MPI_DISTRIBUTE_BLOCK      #:= 1
-    enum: MPI_DISTRIBUTE_CYCLIC     #:= 2
-    enum: MPI_DISTRIBUTE_DFLT_DARG  #:= 4
+    enum: MPI_DISTRIBUTE_NONE       #:= 0  #@:= 16
+    enum: MPI_DISTRIBUTE_BLOCK      #:= 1  #@:= 17
+    enum: MPI_DISTRIBUTE_CYCLIC     #:= 2  #@:= 18
+    enum: MPI_DISTRIBUTE_DFLT_DARG  #:= 4  #@:= 19
     int MPI_Type_create_darray(int, int, int, int[], int[], int[], int[], int, MPI_Datatype, MPI_Datatype*)
     int MPI_Type_create_hvector(int, int, MPI_Aint, MPI_Datatype, MPI_Datatype*)      #:= MPI_Type_hvector
     int MPI_Type_create_hindexed(int, int[], MPI_Aint[], MPI_Datatype, MPI_Datatype*) #:= MPI_Type_hindexed
@@ -182,33 +182,33 @@ cdef extern from "<mpi.h>" nogil:
     int MPI_Type_create_f90_integer(int, MPI_Datatype*)
     int MPI_Type_create_f90_real(int, int, MPI_Datatype*)
     int MPI_Type_create_f90_complex(int, int, MPI_Datatype*)
-    enum: MPI_TYPECLASS_LOGICAL  #:= MPI_UNDEFINED
-    enum: MPI_TYPECLASS_INTEGER  #:= MPI_UNDEFINED
-    enum: MPI_TYPECLASS_REAL     #:= MPI_UNDEFINED
-    enum: MPI_TYPECLASS_COMPLEX  #:= MPI_UNDEFINED
+    enum: MPI_TYPECLASS_LOGICAL  #:= MPI_UNDEFINED  #@:= 191
+    enum: MPI_TYPECLASS_INTEGER  #:= MPI_UNDEFINED  #@:= 192
+    enum: MPI_TYPECLASS_REAL     #:= MPI_UNDEFINED  #@:= 193
+    enum: MPI_TYPECLASS_COMPLEX  #:= MPI_UNDEFINED  #@:= 194
     int MPI_Type_match_size(int, int, MPI_Datatype*)
     int MPI_Type_get_value_index(MPI_Datatype, MPI_Datatype, MPI_Datatype*)
 
     int MPI_Type_commit(MPI_Datatype*)
     int MPI_Type_free(MPI_Datatype*)
 
-    enum: MPI_COMBINER_NAMED           #:= MPI_UNDEFINED
-    enum: MPI_COMBINER_DUP             #:= MPI_UNDEFINED
-    enum: MPI_COMBINER_CONTIGUOUS      #:= MPI_UNDEFINED
-    enum: MPI_COMBINER_VECTOR          #:= MPI_UNDEFINED
-    enum: MPI_COMBINER_HVECTOR         #:= MPI_UNDEFINED
-    enum: MPI_COMBINER_INDEXED         #:= MPI_UNDEFINED
-    enum: MPI_COMBINER_HINDEXED        #:= MPI_UNDEFINED
-    enum: MPI_COMBINER_INDEXED_BLOCK   #:= MPI_UNDEFINED
-    enum: MPI_COMBINER_HINDEXED_BLOCK  #:= MPI_UNDEFINED
-    enum: MPI_COMBINER_STRUCT          #:= MPI_UNDEFINED
-    enum: MPI_COMBINER_SUBARRAY        #:= MPI_UNDEFINED
-    enum: MPI_COMBINER_DARRAY          #:= MPI_UNDEFINED
-    enum: MPI_COMBINER_F90_REAL        #:= MPI_UNDEFINED
-    enum: MPI_COMBINER_F90_COMPLEX     #:= MPI_UNDEFINED
-    enum: MPI_COMBINER_F90_INTEGER     #:= MPI_UNDEFINED
-    enum: MPI_COMBINER_RESIZED         #:= MPI_UNDEFINED
-    enum: MPI_COMBINER_VALUE_INDEX     #:= MPI_COMBINER_NAMED
+    enum: MPI_COMBINER_NAMED           #:= MPI_UNDEFINED       #@:= 101
+    enum: MPI_COMBINER_DUP             #:= MPI_UNDEFINED       #@:= 102
+    enum: MPI_COMBINER_CONTIGUOUS      #:= MPI_UNDEFINED       #@:= 103
+    enum: MPI_COMBINER_VECTOR          #:= MPI_UNDEFINED       #@:= 104
+    enum: MPI_COMBINER_HVECTOR         #:= MPI_UNDEFINED       #@:= 105
+    enum: MPI_COMBINER_INDEXED         #:= MPI_UNDEFINED       #@:= 106
+    enum: MPI_COMBINER_HINDEXED        #:= MPI_UNDEFINED       #@:= 107
+    enum: MPI_COMBINER_INDEXED_BLOCK   #:= MPI_UNDEFINED       #@:= 108
+    enum: MPI_COMBINER_HINDEXED_BLOCK  #:= MPI_UNDEFINED       #@:= 109
+    enum: MPI_COMBINER_STRUCT          #:= MPI_UNDEFINED       #@:= 110
+    enum: MPI_COMBINER_SUBARRAY        #:= MPI_UNDEFINED       #@:= 111
+    enum: MPI_COMBINER_DARRAY          #:= MPI_UNDEFINED       #@:= 112
+    enum: MPI_COMBINER_F90_REAL        #:= MPI_UNDEFINED       #@:= 113
+    enum: MPI_COMBINER_F90_COMPLEX     #:= MPI_UNDEFINED       #@:= 114
+    enum: MPI_COMBINER_F90_INTEGER     #:= MPI_UNDEFINED       #@:= 115
+    enum: MPI_COMBINER_RESIZED         #:= MPI_UNDEFINED       #@:= 116
+    enum: MPI_COMBINER_VALUE_INDEX     #:= MPI_COMBINER_NAMED  #@:= 117
     int MPI_Type_get_envelope(MPI_Datatype, int*, int*, int*, int*)
     int MPI_Type_get_contents(MPI_Datatype, int, int, int, int[], MPI_Aint[], MPI_Datatype[])
 
@@ -229,9 +229,9 @@ cdef extern from "<mpi.h>" nogil:
 
     ctypedef int MPI_Type_copy_attr_function(MPI_Datatype,int,void*,void*,void*,int*)
     ctypedef int MPI_Type_delete_attr_function(MPI_Datatype,int,void*,void*)
-    MPI_Type_copy_attr_function*   MPI_TYPE_NULL_COPY_FN   #:= 0
-    MPI_Type_copy_attr_function*   MPI_TYPE_DUP_FN         #:= 0
-    MPI_Type_delete_attr_function* MPI_TYPE_NULL_DELETE_FN #:= 0
+    MPI_Type_copy_attr_function*   MPI_TYPE_NULL_COPY_FN   #:= 0  #@:= 0x0
+    MPI_Type_copy_attr_function*   MPI_TYPE_DUP_FN         #:= 0  #@:= 0x1
+    MPI_Type_delete_attr_function* MPI_TYPE_NULL_DELETE_FN #:= 0  #@:= 0x0
     int MPI_Type_create_keyval(MPI_Type_copy_attr_function*, MPI_Type_delete_attr_function*, int*, void*)
     int MPI_Type_free_keyval(int*)
 
@@ -265,8 +265,8 @@ cdef extern from "<mpi.h>" nogil:
 
     #-----------------------------------------------------------------
 
-    MPI_Status* MPI_STATUS_IGNORE    #:= 0
-    MPI_Status* MPI_STATUSES_IGNORE  #:= 0
+    MPI_Status* MPI_STATUS_IGNORE    #:= 0  #@:= 0
+    MPI_Status* MPI_STATUSES_IGNORE  #:= 0  #@:= 0
 
     int MPI_Get_count(MPI_Status*, MPI_Datatype, int*)
     int MPI_Get_elements(MPI_Status*, MPI_Datatype, int*)
@@ -294,7 +294,7 @@ cdef extern from "<mpi.h>" nogil:
 
     #-----------------------------------------------------------------
 
-    MPI_Request MPI_REQUEST_NULL  #:= 0
+    MPI_Request MPI_REQUEST_NULL  #:= 0  #@:= 0x00000180
 
     int MPI_Wait(MPI_Request*, MPI_Status*)
     int MPI_Test(MPI_Request*, int*, MPI_Status*)
@@ -330,21 +330,21 @@ cdef extern from "<mpi.h>" nogil:
 
     #-----------------------------------------------------------------
 
-    MPI_Op MPI_OP_NULL  #:= 0
-    MPI_Op MPI_MAX      #:= MPI_OP_NULL
-    MPI_Op MPI_MIN      #:= MPI_OP_NULL
-    MPI_Op MPI_SUM      #:= MPI_OP_NULL
-    MPI_Op MPI_PROD     #:= MPI_OP_NULL
-    MPI_Op MPI_LAND     #:= MPI_OP_NULL
-    MPI_Op MPI_BAND     #:= MPI_OP_NULL
-    MPI_Op MPI_LOR      #:= MPI_OP_NULL
-    MPI_Op MPI_BOR      #:= MPI_OP_NULL
-    MPI_Op MPI_LXOR     #:= MPI_OP_NULL
-    MPI_Op MPI_BXOR     #:= MPI_OP_NULL
-    MPI_Op MPI_MAXLOC   #:= MPI_OP_NULL
-    MPI_Op MPI_MINLOC   #:= MPI_OP_NULL
-    MPI_Op MPI_REPLACE  #:= MPI_OP_NULL
-    MPI_Op MPI_NO_OP    #:= MPI_OP_NULL
+    MPI_Op MPI_OP_NULL  #:= 0            #@:= 0x00000020
+    MPI_Op MPI_MAX      #:= MPI_OP_NULL  #@:= 0x00000023
+    MPI_Op MPI_MIN      #:= MPI_OP_NULL  #@:= 0x00000022
+    MPI_Op MPI_SUM      #:= MPI_OP_NULL  #@:= 0x00000021
+    MPI_Op MPI_PROD     #:= MPI_OP_NULL  #@:= 0x00000024
+    MPI_Op MPI_LAND     #:= MPI_OP_NULL  #@:= 0x00000030
+    MPI_Op MPI_BAND     #:= MPI_OP_NULL  #@:= 0x00000028
+    MPI_Op MPI_LOR      #:= MPI_OP_NULL  #@:= 0x00000031
+    MPI_Op MPI_BOR      #:= MPI_OP_NULL  #@:= 0x00000029
+    MPI_Op MPI_LXOR     #:= MPI_OP_NULL  #@:= 0x00000032
+    MPI_Op MPI_BXOR     #:= MPI_OP_NULL  #@:= 0x0000002a
+    MPI_Op MPI_MAXLOC   #:= MPI_OP_NULL  #@:= 0x00000039
+    MPI_Op MPI_MINLOC   #:= MPI_OP_NULL  #@:= 0x00000038
+    MPI_Op MPI_REPLACE  #:= MPI_OP_NULL  #@:= 0x0000003c
+    MPI_Op MPI_NO_OP    #:= MPI_OP_NULL  #@:= 0x0000003d
 
     int MPI_Op_free(MPI_Op*)
 
@@ -359,8 +359,8 @@ cdef extern from "<mpi.h>" nogil:
 
     #-----------------------------------------------------------------
 
-    MPI_Group MPI_GROUP_NULL   #:= 0
-    MPI_Group MPI_GROUP_EMPTY  #:= 1
+    MPI_Group MPI_GROUP_NULL   #:= 0  #@:= 0x00000108
+    MPI_Group MPI_GROUP_EMPTY  #:= 1  #@:= 0x00000109
 
     int MPI_Group_free(MPI_Group*)
 
@@ -380,16 +380,16 @@ cdef extern from "<mpi.h>" nogil:
 
     #-----------------------------------------------------------------
 
-    MPI_Info MPI_INFO_NULL #:= 0
-    MPI_Info MPI_INFO_ENV  #:= MPI_INFO_NULL
+    MPI_Info MPI_INFO_NULL #:= 0              #@:= 0x00000130
+    MPI_Info MPI_INFO_ENV  #:= MPI_INFO_NULL  #@:= 0x00000131
 
     int MPI_Info_free(MPI_Info*)
     int MPI_Info_create(MPI_Info*)
     int MPI_Info_dup(MPI_Info, MPI_Info*)
     int MPI_Info_create_env(int, char*[], MPI_Info*)
 
-    enum: MPI_MAX_INFO_KEY  #:= 1
-    enum: MPI_MAX_INFO_VAL  #:= 1
+    enum: MPI_MAX_INFO_KEY  #:= 1  #@:= 256
+    enum: MPI_MAX_INFO_VAL  #:= 1  #@:= 1024
     int MPI_Info_get_string(MPI_Info, char[], int*, char[], int*)
     int MPI_Info_set(MPI_Info, char[], char[])
     int MPI_Info_delete(MPI_Info, char[])
@@ -399,18 +399,18 @@ cdef extern from "<mpi.h>" nogil:
 
     #-----------------------------------------------------------------
 
-    MPI_Errhandler MPI_ERRHANDLER_NULL   #:= 0
-    MPI_Errhandler MPI_ERRORS_RETURN     #:= MPI_ERRHANDLER_NULL
-    MPI_Errhandler MPI_ERRORS_ABORT      #:= MPI_ERRHANDLER_NULL
-    MPI_Errhandler MPI_ERRORS_ARE_FATAL  #:= MPI_ERRHANDLER_NULL
+    MPI_Errhandler MPI_ERRHANDLER_NULL   #:= 0                    #@:= 0x00000140
+    MPI_Errhandler MPI_ERRORS_RETURN     #:= MPI_ERRHANDLER_NULL  #@:= 0x00000143
+    MPI_Errhandler MPI_ERRORS_ABORT      #:= MPI_ERRHANDLER_NULL  #@:= 0x00000142
+    MPI_Errhandler MPI_ERRORS_ARE_FATAL  #:= MPI_ERRHANDLER_NULL  #@:= 0x00000141
 
     int MPI_Errhandler_free(MPI_Errhandler*)
 
     #-----------------------------------------------------------------
 
-    MPI_Session MPI_SESSION_NULL #:= 0
+    MPI_Session MPI_SESSION_NULL #:= 0  #@:= 0x00000120
 
-    enum: MPI_MAX_PSET_NAME_LEN #:= 1
+    enum: MPI_MAX_PSET_NAME_LEN #:= 1  #@:= 1024
     int MPI_Session_init(MPI_Info, MPI_Errhandler, MPI_Session*)
     int MPI_Session_finalize(MPI_Session*)
     int MPI_Session_get_num_psets(MPI_Session, MPI_Info, int*)
@@ -427,9 +427,9 @@ cdef extern from "<mpi.h>" nogil:
 
     #-----------------------------------------------------------------
 
-    MPI_Comm MPI_COMM_NULL   #:= 0
-    MPI_Comm MPI_COMM_SELF   #:= MPI_COMM_NULL
-    MPI_Comm MPI_COMM_WORLD  #:= MPI_COMM_NULL
+    MPI_Comm MPI_COMM_NULL   #:= 0              #@:= 0x00000100
+    MPI_Comm MPI_COMM_SELF   #:= MPI_COMM_NULL  #@:= 0x00000102
+    MPI_Comm MPI_COMM_WORLD  #:= MPI_COMM_NULL  #@:= 0x00000101
 
     int MPI_Comm_free(MPI_Comm*)
 
@@ -444,8 +444,8 @@ cdef extern from "<mpi.h>" nogil:
 
     int MPI_Abort(MPI_Comm, int)
 
-    enum: MPI_BSEND_OVERHEAD #:= 0
-    void* MPI_BUFFER_AUTOMATIC #:= 0
+    enum: MPI_BSEND_OVERHEAD   #:= 0  #@:= 512
+    void* MPI_BUFFER_AUTOMATIC #:= 0  #@:= 2
     int MPI_Buffer_attach(void*, int)
     int MPI_Buffer_detach(void*, int*)
     int MPI_Buffer_flush()
@@ -491,8 +491,8 @@ cdef extern from "<mpi.h>" nogil:
     int MPI_Probe(int, int, MPI_Comm, MPI_Status*)
     int MPI_Iprobe(int, int, MPI_Comm, int*, MPI_Status*)
 
-    MPI_Message MPI_MESSAGE_NULL    #:= 0
-    MPI_Message MPI_MESSAGE_NO_PROC #:= MPI_MESSAGE_NULL
+    MPI_Message MPI_MESSAGE_NULL    #:= 0                 #@:= 0x00000128
+    MPI_Message MPI_MESSAGE_NO_PROC #:= MPI_MESSAGE_NULL  #@:= 0x00000129
     int MPI_Mprobe(int, int, MPI_Comm, MPI_Message*, MPI_Status*)
     int MPI_Improbe(int, int, MPI_Comm, int*, MPI_Message*, MPI_Status*)
     int MPI_Mrecv(void*, int, MPI_Datatype, MPI_Message*, MPI_Status*)
@@ -580,18 +580,18 @@ cdef extern from "<mpi.h>" nogil:
     int MPI_Comm_idup_with_info(MPI_Comm, MPI_Info, MPI_Comm*, MPI_Request*)
     int MPI_Comm_create(MPI_Comm, MPI_Group, MPI_Comm*)
     int MPI_Comm_create_group(MPI_Comm, MPI_Group, int, MPI_Comm*)
-    enum: MPI_MAX_STRINGTAG_LEN #:= 1
+    enum: MPI_MAX_STRINGTAG_LEN #:= 1  #@:= 1024
     int MPI_Comm_create_from_group(MPI_Group, char[], MPI_Info, MPI_Errhandler, MPI_Comm*)
     int MPI_Comm_split(MPI_Comm, int, int, MPI_Comm*)
-    enum: MPI_COMM_TYPE_SHARED #:= MPI_UNDEFINED
-    enum: MPI_COMM_TYPE_HW_GUIDED #:= MPI_UNDEFINED
-    enum: MPI_COMM_TYPE_HW_UNGUIDED #:= MPI_UNDEFINED
-    enum: MPI_COMM_TYPE_RESOURCE_GUIDED #:= MPI_UNDEFINED
+    enum: MPI_COMM_TYPE_SHARED          #:= MPI_UNDEFINED  #@:= 221
+    enum: MPI_COMM_TYPE_HW_GUIDED       #:= MPI_UNDEFINED  #@:= 223
+    enum: MPI_COMM_TYPE_HW_UNGUIDED     #:= MPI_UNDEFINED  #@:= 222
+    enum: MPI_COMM_TYPE_RESOURCE_GUIDED #:= MPI_UNDEFINED  #@:= 224
     int MPI_Comm_split_type(MPI_Comm, int, int, MPI_Info, MPI_Comm*)
     int MPI_Comm_set_info(MPI_Comm, MPI_Info)
     int MPI_Comm_get_info(MPI_Comm, MPI_Info*)
 
-    enum: MPI_CART #:= MPI_UNDEFINED
+    enum: MPI_CART #:= MPI_UNDEFINED  #@:= 211
     int MPI_Cart_create(MPI_Comm, int, int[], int[], int, MPI_Comm*)
     int MPI_Cartdim_get(MPI_Comm, int*)
     int MPI_Cart_get(MPI_Comm, int, int[], int[], int[])
@@ -602,7 +602,7 @@ cdef extern from "<mpi.h>" nogil:
     int MPI_Cart_map(MPI_Comm, int, int[], int[], int*)
     int MPI_Dims_create(int, int, int[])
 
-    enum: MPI_GRAPH #:= MPI_UNDEFINED
+    enum: MPI_GRAPH #:= MPI_UNDEFINED  #@:= 212
     int MPI_Graph_create(MPI_Comm, int, int[], int[], int, MPI_Comm*)
     int MPI_Graphdims_get(MPI_Comm, int*, int*)
     int MPI_Graph_get(MPI_Comm, int, int, int[], int[])
@@ -610,9 +610,9 @@ cdef extern from "<mpi.h>" nogil:
     int MPI_Graph_neighbors_count(MPI_Comm, int, int*)
     int MPI_Graph_neighbors(MPI_Comm, int, int, int[])
 
-    enum: MPI_DIST_GRAPH #:= MPI_UNDEFINED
-    int* MPI_UNWEIGHTED #:= 0
-    int* MPI_WEIGHTS_EMPTY #:= MPI_UNWEIGHTED
+    enum: MPI_DIST_GRAPH   #:= MPI_UNDEFINED   #@:= 213
+    int* MPI_UNWEIGHTED    #:= 0               #@:= 10
+    int* MPI_WEIGHTS_EMPTY #:= MPI_UNWEIGHTED  #@:= 11
     int MPI_Dist_graph_create_adjacent(MPI_Comm, int, int[], int[], int, int[], int[], MPI_Info, int, MPI_Comm*)
     int MPI_Dist_graph_create(MPI_Comm, int, int[], int[], int[], int[], MPI_Info, int, MPI_Comm*)
     int MPI_Dist_graph_neighbors_count(MPI_Comm, int*, int*, int*)
@@ -624,7 +624,7 @@ cdef extern from "<mpi.h>" nogil:
     int MPI_Comm_remote_size(MPI_Comm, int*)
     int MPI_Intercomm_merge(MPI_Comm, int, MPI_Comm*)
 
-    enum: MPI_MAX_PORT_NAME #:= 1
+    enum: MPI_MAX_PORT_NAME #:= 1  #@:= 1024
     int MPI_Open_port(MPI_Info, char[])
     int MPI_Close_port(char[])
 
@@ -637,9 +637,9 @@ cdef extern from "<mpi.h>" nogil:
     int MPI_Comm_join(int, MPI_Comm*)
     int MPI_Comm_disconnect(MPI_Comm*)
 
-    char**  MPI_ARGV_NULL       #:= 0
-    char*** MPI_ARGVS_NULL      #:= 0
-    int*    MPI_ERRCODES_IGNORE #:= 0
+    char**  MPI_ARGV_NULL       #:= 0  #@:= 0
+    char*** MPI_ARGVS_NULL      #:= 0  #@:= 0
+    int*    MPI_ERRCODES_IGNORE #:= 0  #@:= 0
     int MPI_Comm_spawn(char[], char*[], int, MPI_Info, int, MPI_Comm, MPI_Comm*, int[])
     int MPI_Comm_spawn_multiple(int, char*[], char**[], int[], MPI_Info[], int, MPI_Comm, MPI_Comm*, int[])
     int MPI_Comm_get_parent(MPI_Comm*)
@@ -647,13 +647,13 @@ cdef extern from "<mpi.h>" nogil:
     int MPI_Comm_get_name(MPI_Comm, char[], int*)
     int MPI_Comm_set_name(MPI_Comm, char[])
 
-    enum: MPI_TAG_UB          #:= MPI_KEYVAL_INVALID
-    enum: MPI_IO              #:= MPI_KEYVAL_INVALID
-    enum: MPI_WTIME_IS_GLOBAL #:= MPI_KEYVAL_INVALID
+    enum: MPI_TAG_UB          #:= MPI_KEYVAL_INVALID  #@:= 501
+    enum: MPI_IO              #:= MPI_KEYVAL_INVALID  #@:= 502
+    enum: MPI_WTIME_IS_GLOBAL #:= MPI_KEYVAL_INVALID  #@:= 504
 
-    enum: MPI_UNIVERSE_SIZE   #:= MPI_KEYVAL_INVALID
-    enum: MPI_APPNUM          #:= MPI_KEYVAL_INVALID
-    enum: MPI_LASTUSEDCODE    #:= MPI_KEYVAL_INVALID
+    enum: MPI_UNIVERSE_SIZE   #:= MPI_KEYVAL_INVALID  #@:= 507
+    enum: MPI_APPNUM          #:= MPI_KEYVAL_INVALID  #@:= 505
+    enum: MPI_LASTUSEDCODE    #:= MPI_KEYVAL_INVALID  #@:= 506
 
     int MPI_Comm_get_attr(MPI_Comm, int, void*, int*)  #:= MPI_Attr_get
     int MPI_Comm_set_attr(MPI_Comm, int, void*)        #:= MPI_Attr_put
@@ -661,9 +661,9 @@ cdef extern from "<mpi.h>" nogil:
 
     ctypedef int MPI_Comm_copy_attr_function(MPI_Comm,int,void*,void*,void*,int*)                         #:= MPI_Copy_function
     ctypedef int MPI_Comm_delete_attr_function(MPI_Comm,int,void*,void*)                                  #:= MPI_Delete_function
-    MPI_Comm_copy_attr_function*   MPI_COMM_DUP_FN                                                        #:= MPI_DUP_FN
-    MPI_Comm_copy_attr_function*   MPI_COMM_NULL_COPY_FN                                                  #:= MPI_NULL_COPY_FN
-    MPI_Comm_delete_attr_function* MPI_COMM_NULL_DELETE_FN                                                #:= MPI_NULL_DELETE_FN
+    MPI_Comm_copy_attr_function*   MPI_COMM_DUP_FN          #:= MPI_DUP_FN           #@:= 0x1
+    MPI_Comm_copy_attr_function*   MPI_COMM_NULL_COPY_FN    #:= MPI_NULL_COPY_FN     #@:= 0x0
+    MPI_Comm_delete_attr_function* MPI_COMM_NULL_DELETE_FN  #:= MPI_NULL_DELETE_FN   #@:= 0x0
     int MPI_Comm_create_keyval(MPI_Comm_copy_attr_function*, MPI_Comm_delete_attr_function*, int*, void*) #:= MPI_Keyval_create
     int MPI_Comm_free_keyval(int*)                                                                        #:= MPI_Keyval_free
 
@@ -787,7 +787,7 @@ cdef extern from "<mpi.h>" nogil:
 
     #-----------------------------------------------------------------
 
-    MPI_Win MPI_WIN_NULL  #:= 0
+    MPI_Win MPI_WIN_NULL  #:= 0  #@:= 0x00000110
 
     int MPI_Win_free(MPI_Win*)
     int MPI_Win_create(void*, MPI_Aint, int, MPI_Info, MPI_Comm, MPI_Win*)
@@ -813,11 +813,11 @@ cdef extern from "<mpi.h>" nogil:
     int MPI_Raccumulate(void*, int, MPI_Datatype, int, MPI_Aint, int, MPI_Datatype, MPI_Op, MPI_Win, MPI_Request*)
     int MPI_Rget_accumulate(void*, int, MPI_Datatype, void*, int, MPI_Datatype, int, MPI_Aint, int, MPI_Datatype, MPI_Op, MPI_Win, MPI_Request*)
 
-    enum: MPI_MODE_NOCHECK    #:= MPI_UNDEFINED
-    enum: MPI_MODE_NOSTORE    #:= MPI_UNDEFINED
-    enum: MPI_MODE_NOPUT      #:= MPI_UNDEFINED
-    enum: MPI_MODE_NOPRECEDE  #:= MPI_UNDEFINED
-    enum: MPI_MODE_NOSUCCEED  #:= MPI_UNDEFINED
+    enum: MPI_MODE_NOCHECK    #:= MPI_UNDEFINED  #@:= 1024
+    enum: MPI_MODE_NOSTORE    #:= MPI_UNDEFINED  #@:= 8192
+    enum: MPI_MODE_NOPUT      #:= MPI_UNDEFINED  #@:= 4096
+    enum: MPI_MODE_NOPRECEDE  #:= MPI_UNDEFINED  #@:= 2048
+    enum: MPI_MODE_NOSUCCEED  #:= MPI_UNDEFINED  #@:= 16384
     int MPI_Win_fence(int, MPI_Win)
     int MPI_Win_post(MPI_Group, int, MPI_Win)
     int MPI_Win_start(MPI_Group, int, MPI_Win)
@@ -825,8 +825,8 @@ cdef extern from "<mpi.h>" nogil:
     int MPI_Win_wait(MPI_Win)
     int MPI_Win_test(MPI_Win, int*)
 
-    enum: MPI_LOCK_EXCLUSIVE  #:= MPI_UNDEFINED
-    enum: MPI_LOCK_SHARED     #:= MPI_UNDEFINED
+    enum: MPI_LOCK_EXCLUSIVE  #:= MPI_UNDEFINED  #@:= 301
+    enum: MPI_LOCK_SHARED     #:= MPI_UNDEFINED  #@:= 302
     int MPI_Win_lock(int, int, int, MPI_Win)
     int MPI_Win_unlock(int, MPI_Win)
     int MPI_Win_lock_all(int, MPI_Win)
@@ -840,19 +840,19 @@ cdef extern from "<mpi.h>" nogil:
     int MPI_Win_get_name(MPI_Win, char[], int*)
     int MPI_Win_set_name(MPI_Win, char[])
 
-    enum: MPI_WIN_BASE          #:= MPI_KEYVAL_INVALID
-    enum: MPI_WIN_SIZE          #:= MPI_KEYVAL_INVALID
-    enum: MPI_WIN_DISP_UNIT     #:= MPI_KEYVAL_INVALID
-    enum: MPI_WIN_CREATE_FLAVOR #:= MPI_KEYVAL_INVALID
-    enum: MPI_WIN_MODEL         #:= MPI_KEYVAL_INVALID
+    enum: MPI_WIN_BASE          #:= MPI_KEYVAL_INVALID  #@:= 601
+    enum: MPI_WIN_SIZE          #:= MPI_KEYVAL_INVALID  #@:= 603
+    enum: MPI_WIN_DISP_UNIT     #:= MPI_KEYVAL_INVALID  #@:= 602
+    enum: MPI_WIN_CREATE_FLAVOR #:= MPI_KEYVAL_INVALID  #@:= 604
+    enum: MPI_WIN_MODEL         #:= MPI_KEYVAL_INVALID  #@:= 605
 
-    enum: MPI_WIN_FLAVOR_CREATE   #:= MPI_UNDEFINED
-    enum: MPI_WIN_FLAVOR_ALLOCATE #:= MPI_UNDEFINED
-    enum: MPI_WIN_FLAVOR_DYNAMIC  #:= MPI_UNDEFINED
-    enum: MPI_WIN_FLAVOR_SHARED   #:= MPI_UNDEFINED
+    enum: MPI_WIN_FLAVOR_CREATE   #:= MPI_UNDEFINED  #@:= 311
+    enum: MPI_WIN_FLAVOR_ALLOCATE #:= MPI_UNDEFINED  #@:= 312
+    enum: MPI_WIN_FLAVOR_DYNAMIC  #:= MPI_UNDEFINED  #@:= 313
+    enum: MPI_WIN_FLAVOR_SHARED   #:= MPI_UNDEFINED  #@:= 314
 
-    enum: MPI_WIN_SEPARATE #:= MPI_UNDEFINED
-    enum: MPI_WIN_UNIFIED  #:= MPI_UNDEFINED
+    enum: MPI_WIN_SEPARATE #:= MPI_UNDEFINED  #@:= 322
+    enum: MPI_WIN_UNIFIED  #:= MPI_UNDEFINED  #@:= 321
 
     int MPI_Win_get_attr(MPI_Win, int, void*, int*)
     int MPI_Win_set_attr(MPI_Win, int, void*)
@@ -860,9 +860,9 @@ cdef extern from "<mpi.h>" nogil:
 
     ctypedef int MPI_Win_copy_attr_function(MPI_Win,int,void*,void*,void*,int*)
     ctypedef int MPI_Win_delete_attr_function(MPI_Win,int,void*,void*)
-    MPI_Win_copy_attr_function*   MPI_WIN_DUP_FN         #:= 0
-    MPI_Win_copy_attr_function*   MPI_WIN_NULL_COPY_FN   #:= 0
-    MPI_Win_delete_attr_function* MPI_WIN_NULL_DELETE_FN #:= 0
+    MPI_Win_copy_attr_function*   MPI_WIN_DUP_FN         #:= 0  #@:= 0x1
+    MPI_Win_copy_attr_function*   MPI_WIN_NULL_COPY_FN   #:= 0  #@:= 0x0
+    MPI_Win_delete_attr_function* MPI_WIN_NULL_DELETE_FN #:= 0  #@:= 0x0
     int MPI_Win_create_keyval(MPI_Win_copy_attr_function*, MPI_Win_delete_attr_function*, int*, void*)
     int MPI_Win_free_keyval(int*)
 
@@ -892,17 +892,17 @@ cdef extern from "<mpi.h>" nogil:
 
     #-----------------------------------------------------------------
 
-    MPI_File MPI_FILE_NULL  #:= 0
+    MPI_File MPI_FILE_NULL  #:= 0  #@:= 0x00000118
 
-    enum: MPI_MODE_RDONLY           #:=   1
-    enum: MPI_MODE_RDWR             #:=   2
-    enum: MPI_MODE_WRONLY           #:=   4
-    enum: MPI_MODE_CREATE           #:=   8
-    enum: MPI_MODE_EXCL             #:=  16
-    enum: MPI_MODE_DELETE_ON_CLOSE  #:=  32
-    enum: MPI_MODE_UNIQUE_OPEN      #:=  64
-    enum: MPI_MODE_APPEND           #:= 128
-    enum: MPI_MODE_SEQUENTIAL       #:= 256
+    enum: MPI_MODE_RDONLY           #:=   1  #@:= 16
+    enum: MPI_MODE_RDWR             #:=   2  #@:= 32
+    enum: MPI_MODE_WRONLY           #:=   4  #@:= 256
+    enum: MPI_MODE_CREATE           #:=   8  #@:= 2
+    enum: MPI_MODE_EXCL             #:=  16  #@:= 8
+    enum: MPI_MODE_DELETE_ON_CLOSE  #:=  32  #@:= 4
+    enum: MPI_MODE_UNIQUE_OPEN      #:=  64  #@:= 128
+    enum: MPI_MODE_APPEND           #:= 128  #@:= 1
+    enum: MPI_MODE_SEQUENTIAL       #:= 256  #@:= 64
 
     int MPI_File_open(MPI_Comm, char[], int, MPI_Info, MPI_File*)
     int MPI_File_close(MPI_File*)
@@ -929,10 +929,10 @@ cdef extern from "<mpi.h>" nogil:
     int MPI_File_iwrite_at    (MPI_File, MPI_Offset, void*, int, MPI_Datatype, MPI_Request*)
     int MPI_File_iwrite_at_all(MPI_File, MPI_Offset, void*, int, MPI_Datatype, MPI_Request*)
 
-    enum: MPI_SEEK_SET              #:= 0
-    enum: MPI_SEEK_CUR              #:= 1
-    enum: MPI_SEEK_END              #:= 2
-    enum: MPI_DISPLACEMENT_CURRENT  #:= 0
+    enum: MPI_SEEK_SET              #:= 0  #@:= 403
+    enum: MPI_SEEK_CUR              #:= 1  #@:= 401
+    enum: MPI_SEEK_END              #:= 2  #@:= 402
+    enum: MPI_DISPLACEMENT_CURRENT  #:= 0  #@:= -1
     int MPI_File_seek(MPI_File, MPI_Offset, int)
     int MPI_File_get_position(MPI_File, MPI_Offset*)
     int MPI_File_get_byte_offset(MPI_File, MPI_Offset, MPI_Offset*)
@@ -984,8 +984,8 @@ cdef extern from "<mpi.h>" nogil:
 
     ctypedef int MPI_Datarep_conversion_function(void*,MPI_Datatype,int,void*,MPI_Offset,void*)
     ctypedef int MPI_Datarep_extent_function(MPI_Datatype,MPI_Aint*,void*)
-    MPI_Datarep_conversion_function* MPI_CONVERSION_FN_NULL #:= 0
-    enum: MPI_MAX_DATAREP_STRING #:= 1
+    MPI_Datarep_conversion_function* MPI_CONVERSION_FN_NULL #:= 0  #@:= 0x0
+    enum: MPI_MAX_DATAREP_STRING #:= 1  #@:= 128
     int MPI_Register_datarep(char[], MPI_Datarep_conversion_function*, MPI_Datarep_conversion_function*, MPI_Datarep_extent_function*, void*)
 
     # MPI-4 large count functions
@@ -1025,12 +1025,12 @@ cdef extern from "<mpi.h>" nogil:
     int MPI_File_get_type_extent_c(MPI_File, MPI_Datatype, MPI_Count*)
 
     ctypedef int MPI_Datarep_conversion_function_c(void*,MPI_Datatype,MPI_Count,void*,MPI_Offset,void*)
-    MPI_Datarep_conversion_function_c* MPI_CONVERSION_FN_NULL_C #:= 0
+    MPI_Datarep_conversion_function_c* MPI_CONVERSION_FN_NULL_C  #:= 0  #@:= 0x0
     int MPI_Register_datarep_c(char[], MPI_Datarep_conversion_function_c*, MPI_Datarep_conversion_function_c*, MPI_Datarep_extent_function*, void*)
 
     #-----------------------------------------------------------------
 
-    enum: MPI_MAX_ERROR_STRING  #:= 1
+    enum: MPI_MAX_ERROR_STRING  #:= 1  #@:= 512
     int MPI_Error_class(int, int*)
     int MPI_Error_string(int, char[], int*)
 
@@ -1042,83 +1042,83 @@ cdef extern from "<mpi.h>" nogil:
     int MPI_Remove_error_string(int)
 
     # no errors
-    enum: MPI_SUCCESS                    #:= 0
-    enum: MPI_ERR_LASTCODE               #:= 1
+    enum: MPI_SUCCESS                    #:= 0  #@:= 0
+    enum: MPI_ERR_LASTCODE               #:= 1  #@:= 16383
     # ABI
-    enum: MPI_ERR_ABI                    #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_ABI                    #:= MPI_ERR_LASTCODE  #@:= 62
     # object handles
-    enum: MPI_ERR_TYPE                   #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_REQUEST                #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_OP                     #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_GROUP                  #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_INFO                   #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_ERRHANDLER             #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_SESSION                #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_COMM                   #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_WIN                    #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_FILE                   #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_TYPE                   #:= MPI_ERR_LASTCODE  #@:= 3
+    enum: MPI_ERR_REQUEST                #:= MPI_ERR_LASTCODE  #@:= 7
+    enum: MPI_ERR_OP                     #:= MPI_ERR_LASTCODE  #@:= 10
+    enum: MPI_ERR_GROUP                  #:= MPI_ERR_LASTCODE  #@:= 9
+    enum: MPI_ERR_INFO                   #:= MPI_ERR_LASTCODE  #@:= 34
+    enum: MPI_ERR_ERRHANDLER             #:= MPI_ERR_LASTCODE  #@:= 61
+    enum: MPI_ERR_SESSION                #:= MPI_ERR_LASTCODE  #@:= 60
+    enum: MPI_ERR_COMM                   #:= MPI_ERR_LASTCODE  #@:= 5
+    enum: MPI_ERR_WIN                    #:= MPI_ERR_LASTCODE  #@:= 56
+    enum: MPI_ERR_FILE                   #:= MPI_ERR_LASTCODE  #@:= 30
     # communication arguments
-    enum: MPI_ERR_BUFFER                 #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_COUNT                  #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_TAG                    #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_RANK                   #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_ROOT                   #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_TRUNCATE               #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_BUFFER                 #:= MPI_ERR_LASTCODE  #@:= 1
+    enum: MPI_ERR_COUNT                  #:= MPI_ERR_LASTCODE  #@:= 2
+    enum: MPI_ERR_TAG                    #:= MPI_ERR_LASTCODE  #@:= 4
+    enum: MPI_ERR_RANK                   #:= MPI_ERR_LASTCODE  #@:= 6
+    enum: MPI_ERR_ROOT                   #:= MPI_ERR_LASTCODE  #@:= 8
+    enum: MPI_ERR_TRUNCATE               #:= MPI_ERR_LASTCODE  #@:= 15
     # multiple completion
-    enum: MPI_ERR_IN_STATUS              #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_PENDING                #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_IN_STATUS              #:= MPI_ERR_LASTCODE  #@:= 19
+    enum: MPI_ERR_PENDING                #:= MPI_ERR_LASTCODE  #@:= 18
     # topology
-    enum: MPI_ERR_TOPOLOGY               #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_DIMS                   #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_TOPOLOGY               #:= MPI_ERR_LASTCODE  #@:= 11
+    enum: MPI_ERR_DIMS                   #:= MPI_ERR_LASTCODE  #@:= 12
     # other arguments
-    enum: MPI_ERR_ARG                    #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_ARG                    #:= MPI_ERR_LASTCODE  #@:= 13
     # other errors
-    enum: MPI_ERR_OTHER                  #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_UNKNOWN                #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_INTERN                 #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_OTHER                  #:= MPI_ERR_LASTCODE  #@:= 16
+    enum: MPI_ERR_UNKNOWN                #:= MPI_ERR_LASTCODE  #@:= 14
+    enum: MPI_ERR_INTERN                 #:= MPI_ERR_LASTCODE  #@:= 17
     # attributes
-    enum: MPI_ERR_KEYVAL                 #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_KEYVAL                 #:= MPI_ERR_LASTCODE  #@:= 36
     # memory allocation
-    enum: MPI_ERR_NO_MEM                 #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_NO_MEM                 #:= MPI_ERR_LASTCODE  #@:= 39
     # info object
-    enum: MPI_ERR_INFO_KEY               #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_INFO_VALUE             #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_INFO_NOKEY             #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_INFO_KEY               #:= MPI_ERR_LASTCODE  #@:= 31
+    enum: MPI_ERR_INFO_VALUE             #:= MPI_ERR_LASTCODE  #@:= 33
+    enum: MPI_ERR_INFO_NOKEY             #:= MPI_ERR_LASTCODE  #@:= 32
     # dynamic process management
-    enum: MPI_ERR_SPAWN                  #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_PORT                   #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_SERVICE                #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_NAME                   #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_PROC_ABORTED           #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_SPAWN                  #:= MPI_ERR_LASTCODE  #@:= 53
+    enum: MPI_ERR_PORT                   #:= MPI_ERR_LASTCODE  #@:= 43
+    enum: MPI_ERR_SERVICE                #:= MPI_ERR_LASTCODE  #@:= 51
+    enum: MPI_ERR_NAME                   #:= MPI_ERR_LASTCODE  #@:= 38
+    enum: MPI_ERR_PROC_ABORTED           #:= MPI_ERR_LASTCODE  #@:= 58
     # one-sided communications
-    enum: MPI_ERR_BASE                   #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_SIZE                   #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_DISP                   #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_ASSERT                 #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_LOCKTYPE               #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_RMA_CONFLICT           #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_RMA_SYNC               #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_RMA_RANGE              #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_RMA_ATTACH             #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_RMA_SHARED             #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_RMA_FLAVOR             #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_BASE                   #:= MPI_ERR_LASTCODE  #@:= 24
+    enum: MPI_ERR_SIZE                   #:= MPI_ERR_LASTCODE  #@:= 52
+    enum: MPI_ERR_DISP                   #:= MPI_ERR_LASTCODE  #@:= 26
+    enum: MPI_ERR_ASSERT                 #:= MPI_ERR_LASTCODE  #@:= 22
+    enum: MPI_ERR_LOCKTYPE               #:= MPI_ERR_LASTCODE  #@:= 37
+    enum: MPI_ERR_RMA_CONFLICT           #:= MPI_ERR_LASTCODE  #@:= 47
+    enum: MPI_ERR_RMA_SYNC               #:= MPI_ERR_LASTCODE  #@:= 50
+    enum: MPI_ERR_RMA_RANGE              #:= MPI_ERR_LASTCODE  #@:= 48
+    enum: MPI_ERR_RMA_ATTACH             #:= MPI_ERR_LASTCODE  #@:= 46
+    enum: MPI_ERR_RMA_SHARED             #:= MPI_ERR_LASTCODE  #@:= 49
+    enum: MPI_ERR_RMA_FLAVOR             #:= MPI_ERR_LASTCODE  #@:= 57
     # input/output
-    enum: MPI_ERR_BAD_FILE               #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_NO_SUCH_FILE           #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_FILE_EXISTS            #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_FILE_IN_USE            #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_AMODE                  #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_ACCESS                 #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_READ_ONLY              #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_NO_SPACE               #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_QUOTA                  #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_UNSUPPORTED_OPERATION  #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_NOT_SAME               #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_IO                     #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_UNSUPPORTED_DATAREP    #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_CONVERSION             #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_DUP_DATAREP            #:= MPI_ERR_LASTCODE
-    enum: MPI_ERR_VALUE_TOO_LARGE        #:= MPI_ERR_LASTCODE
+    enum: MPI_ERR_BAD_FILE               #:= MPI_ERR_LASTCODE  #@:= 23
+    enum: MPI_ERR_NO_SUCH_FILE           #:= MPI_ERR_LASTCODE  #@:= 42
+    enum: MPI_ERR_FILE_EXISTS            #:= MPI_ERR_LASTCODE  #@:= 28
+    enum: MPI_ERR_FILE_IN_USE            #:= MPI_ERR_LASTCODE  #@:= 29
+    enum: MPI_ERR_AMODE                  #:= MPI_ERR_LASTCODE  #@:= 21
+    enum: MPI_ERR_ACCESS                 #:= MPI_ERR_LASTCODE  #@:= 20
+    enum: MPI_ERR_READ_ONLY              #:= MPI_ERR_LASTCODE  #@:= 45
+    enum: MPI_ERR_NO_SPACE               #:= MPI_ERR_LASTCODE  #@:= 41
+    enum: MPI_ERR_QUOTA                  #:= MPI_ERR_LASTCODE  #@:= 44
+    enum: MPI_ERR_UNSUPPORTED_OPERATION  #:= MPI_ERR_LASTCODE  #@:= 55
+    enum: MPI_ERR_NOT_SAME               #:= MPI_ERR_LASTCODE  #@:= 40
+    enum: MPI_ERR_IO                     #:= MPI_ERR_LASTCODE  #@:= 35
+    enum: MPI_ERR_UNSUPPORTED_DATAREP    #:= MPI_ERR_LASTCODE  #@:= 54
+    enum: MPI_ERR_CONVERSION             #:= MPI_ERR_LASTCODE  #@:= 25
+    enum: MPI_ERR_DUP_DATAREP            #:= MPI_ERR_LASTCODE  #@:= 27
+    enum: MPI_ERR_VALUE_TOO_LARGE        #:= MPI_ERR_LASTCODE  #@:= 59
 
     #-----------------------------------------------------------------
 
@@ -1132,30 +1132,30 @@ cdef extern from "<mpi.h>" nogil:
     int MPI_Initialized(int*)
     int MPI_Finalized(int*)
 
-    enum: MPI_THREAD_SINGLE     #:= 0
-    enum: MPI_THREAD_FUNNELED   #:= 1
-    enum: MPI_THREAD_SERIALIZED #:= 2
-    enum: MPI_THREAD_MULTIPLE   #:= 3
+    enum: MPI_THREAD_SINGLE     #:= 0  #@:= 0
+    enum: MPI_THREAD_FUNNELED   #:= 1  #@:= 1024
+    enum: MPI_THREAD_SERIALIZED #:= 2  #@:= 2048
+    enum: MPI_THREAD_MULTIPLE   #:= 3  #@:= 4096
     int MPI_Init_thread(int*, char**[], int, int*)
     int MPI_Query_thread(int*)
     int MPI_Is_thread_main(int*)
 
     #-----------------------------------------------------------------
 
-    enum: MPI_VERSION     #:= 1
-    enum: MPI_SUBVERSION  #:= 0
+    enum: MPI_VERSION     #:= 1  #@:= 5
+    enum: MPI_SUBVERSION  #:= 0  #@:= 0
     int MPI_Get_version(int*, int*)
 
-    enum: MPI_MAX_LIBRARY_VERSION_STRING #:= 1
+    enum: MPI_MAX_LIBRARY_VERSION_STRING #:= 1  #@:= 8192
     int MPI_Get_library_version(char[], int*)
 
-    enum: MPI_ABI_VERSION     #:= -1
-    enum: MPI_ABI_SUBVERSION  #:= -1
+    enum: MPI_ABI_VERSION     #:= -1  #@:= 1
+    enum: MPI_ABI_SUBVERSION  #:= -1  #@:= 0
     int MPI_Abi_get_version(int*, int*)
     int MPI_Abi_get_info(MPI_Info*)
     int MPI_Abi_get_fortran_info(MPI_Info*)
 
-    enum: MPI_MAX_PROCESSOR_NAME #:= 1
+    enum: MPI_MAX_PROCESSOR_NAME #:= 1  #@:= 256
     int MPI_Get_processor_name(char[], int*)
     int MPI_Get_hw_resource_info(MPI_Info*)
 
@@ -1171,10 +1171,10 @@ cdef extern from "<mpi.h>" nogil:
     # Fortran INTEGER
     ctypedef int MPI_Fint
 
-    enum: MPI_F_SOURCE              #:= MPI_UNDEFINED
-    enum: MPI_F_TAG                 #:= MPI_UNDEFINED
-    enum: MPI_F_ERROR               #:= MPI_UNDEFINED
-    enum: MPI_F_STATUS_SIZE         #:= MPI_UNDEFINED
+    enum: MPI_F_SOURCE              #:= MPI_UNDEFINED  #@:= 0
+    enum: MPI_F_TAG                 #:= MPI_UNDEFINED  #@:= 1
+    enum: MPI_F_ERROR               #:= MPI_UNDEFINED  #@:= 2
+    enum: MPI_F_STATUS_SIZE         #:= MPI_UNDEFINED  #@:= 8
     MPI_Fint* MPI_F_STATUS_IGNORE   #:= 0
     MPI_Fint* MPI_F_STATUSES_IGNORE #:= 0
     int MPI_Status_c2f (MPI_Status*, MPI_Fint*)
@@ -1245,7 +1245,7 @@ cdef extern from "<mpi.h>" nogil:
     #-----------------------------------------------------------------
 
     # Deprecated since MPI-4.1
-    enum: MPI_HOST #:= MPI_KEYVAL_INVALID
+    enum: MPI_HOST #:= MPI_KEYVAL_INVALID  #@:= 503
 
     # Deprecated since MPI-4.0
     int MPI_Info_get(MPI_Info, char[], int, char[], int*)
@@ -1257,9 +1257,9 @@ cdef extern from "<mpi.h>" nogil:
     int MPI_Attr_delete(MPI_Comm, int)
     ctypedef int MPI_Copy_function(MPI_Comm,int,void*,void*,void*,int*)
     ctypedef int MPI_Delete_function(MPI_Comm,int,void*,void*)
-    MPI_Copy_function*   MPI_DUP_FN         #:= 0
-    MPI_Copy_function*   MPI_NULL_COPY_FN   #:= 0
-    MPI_Delete_function* MPI_NULL_DELETE_FN #:= 0
+    MPI_Copy_function*   MPI_DUP_FN         #:= 0  #@:= 0x1
+    MPI_Copy_function*   MPI_NULL_COPY_FN   #:= 0  #@:= 0x0
+    MPI_Delete_function* MPI_NULL_DELETE_FN #:= 0  #@:= 0x0
     int MPI_Keyval_create(MPI_Copy_function*, MPI_Delete_function*, int*, void*)
     int MPI_Keyval_free(int*)
 
