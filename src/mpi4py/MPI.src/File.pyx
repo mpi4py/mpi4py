@@ -947,4 +947,4 @@ def Register_datarep(
     if read_fn  is not None: rd = datarep_read_fn
     if write_fn is not None: wr = datarep_write_fn
     CHKERR ( MPI_Register_datarep_c(cdatarep, rd, wr, ex, xs) )
-    with datarep_lock: datarep_registry[datarep] = state
+    with datarep_mutex: datarep_registry[datarep] = state

@@ -57,16 +57,16 @@ cdef inline int comm_neighbors_count(
 
 # -----------------------------------------------------------------------------
 
-cdef int    commlock_keyval   = MPI_KEYVAL_INVALID
-cdef object commlock_lock     = Lock()
-cdef dict   commlock_registry = {}
+cdef int     commlock_keyval   = MPI_KEYVAL_INVALID
+cdef pymutex commlock_mutex
+cdef dict    commlock_registry = {}
 
 
 cdef inline int commlock_free_cb(
     MPI_Comm comm,
 ) except MPI_ERR_UNKNOWN with gil:
     cdef object key = <Py_uintptr_t>comm
-    with commlock_lock:
+    with commlock_mutex:
         if key in commlock_registry:
             del commlock_registry[key]
     return MPI_SUCCESS
@@ -119,7 +119,7 @@ cdef inline dict commlock_table(MPI_Comm comm):
 cdef inline object PyMPI_Lock(MPI_Comm comm, object key):
     cdef dict table
     cdef object lock
-    with commlock_lock:
+    with commlock_mutex:
         table = commlock_table(comm)
         try:
             lock = table[key]
@@ -130,7 +130,7 @@ cdef inline object PyMPI_Lock(MPI_Comm comm, object key):
 
 
 cdef inline object PyMPI_Lock_table(MPI_Comm comm):
-    with commlock_lock:
+    with commlock_mutex:
         return commlock_table(comm)
 
 
