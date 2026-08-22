@@ -14,11 +14,11 @@ def py(py, x, y_min, y_max, abi=""):
     return [f"{py}{x}{y}{abi}" for y in range(y_min, y_max + 1)]
 
 
-def cp3(y_min=10, y_max=14):
+def cp3(y_min=10, y_max=15):
     return py("cp", 3, y_min, y_max)
 
 
-def cp3t(y_min=14, y_max=14):
+def cp3t(y_min=14, y_max=15):
     return py("cp", 3, y_min, y_max, abi="t")
 
 
@@ -114,7 +114,7 @@ if opts.os and not set(opts.os) & {"*", "all"}:
 if opts.py and not set(opts.py) & {"*", "all"}:
     for os in os_arch_py:
         for arch in os_arch_py[os]:
-            versions = os_arch_py[os][arch] + cp3() + pp3()
+            versions = os_arch_py[os][arch] + cp3() + cp3t() + pp3()
             selected = []
             for pattern in opts.py:
                 for xp in fnmatch.filter(versions, pattern):
