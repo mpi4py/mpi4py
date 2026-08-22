@@ -755,7 +755,7 @@ def cython_chk(VERSION, verbose=True):
         warn("You need Cython to generate C source files.")
         return False
     #
-    CYTHON_VERSION = Cython.__version__  # ty: ignore[unresolved-attribute]
+    CYTHON_VERSION = Cython.__version__
     m = re.match(r"(\d+\.\d+(?:\.\d+)?).*", CYTHON_VERSION)
     if not m:
         warn(f"Cannot parse Cython version string {CYTHON_VERSION!r}")
