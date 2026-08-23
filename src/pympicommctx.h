@@ -9,10 +9,6 @@
 #define PyMPI_FREE free
 #endif
 
-#ifndef MPIAPI
-#define MPIAPI
-#endif
-
 #undef  CHKERR
 #define CHKERR(ierr) do { if (ierr != MPI_SUCCESS) return ierr; } while(0)
 
@@ -54,7 +50,7 @@ static int PyMPI_Commctx_new(MPI_Comm comm, PyMPI_Commctx **_commctx)
   return MPI_SUCCESS;
 }
 
-static int MPIAPI PyMPI_Commctx_free_fn(MPI_Comm comm, int k, void *v, void *xs)
+static int PyMPI_Commctx_free_fn(MPI_Comm comm, int k, void *v, void *xs)
 {
   int ierr, finalized = 1;
   PyMPI_Commctx *commctx = (PyMPI_Commctx *)v;

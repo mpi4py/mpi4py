@@ -192,8 +192,7 @@ typedef struct PyMPI_datarep_s {
   void *extra_state;
 } PyMPI_datarep_t;
 
-static int MPIAPI
-  PyMPI_datarep_read_fn(
+static int PyMPI_datarep_read_fn(
   void *userbuf,
   MPI_Datatype datatype,
   int count,
@@ -207,8 +206,7 @@ static int MPIAPI
                        drep->extra_state);
 }
 
-static int MPIAPI
-PyMPI_datarep_write_fn(
+static int PyMPI_datarep_write_fn(
   void *userbuf,
   MPI_Datatype datatype,
   int count,

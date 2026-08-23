@@ -165,7 +165,6 @@ cdef inline int PyMPI_attr_delete_cb(
     return ierr
 
 
-@cython.callspec("MPIAPI")
 cdef int PyMPI_attr_copy_fn(
     PyMPI_attr_type hdl,
     int keyval,
@@ -185,7 +184,6 @@ cdef int PyMPI_attr_copy_fn(
     )
 
 
-@cython.callspec("MPIAPI")
 cdef int PyMPI_attr_delete_fn(
     PyMPI_attr_type hdl,
     int keyval,

@@ -899,15 +899,13 @@ static int PyMPI_Free_mem(void *baseptr)
 
 static int PyMPI_WIN_KEYVAL_MPIMEM = MPI_KEYVAL_INVALID;
 
-static int MPIAPI
-PyMPI_win_free_mpimem(MPI_Win win, int k, void *v, void *xs)
+static int PyMPI_win_free_mpimem(MPI_Win win, int k, void *v, void *xs)
 {
   (void)win; (void)k; (void)xs; /* unused */
   return MPI_Free_mem(v);
 }
 
-static int MPIAPI
-PyMPI_win_free_keyval(MPI_Comm comm, int k, void *v, void *xs)
+static int PyMPI_win_free_keyval(MPI_Comm comm, int k, void *v, void *xs)
 {
   int ierr = MPI_SUCCESS;
   (void)comm; (void)xs; /* unused */

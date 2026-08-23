@@ -137,7 +137,6 @@ cdef int datarep_extent(
 
 
 @cython.linetrace(False)  # ~> TODO
-@cython.callspec("MPIAPI")
 cdef int datarep_read_fn(
     void *userbuf,
     MPI_Datatype datatype,
@@ -156,7 +155,6 @@ cdef int datarep_read_fn(
 
 
 @cython.linetrace(False)  # ~> TODO
-@cython.callspec("MPIAPI")
 cdef int datarep_write_fn(
     void *userbuf,
     MPI_Datatype datatype,
@@ -175,7 +173,6 @@ cdef int datarep_write_fn(
 
 
 @cython.linetrace(False)  # ~> TODO
-@cython.callspec("MPIAPI")
 cdef int datarep_extent_fn(
     MPI_Datatype datatype,
     MPI_Aint *file_extent,

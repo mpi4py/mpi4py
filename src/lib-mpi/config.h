@@ -1,7 +1,3 @@
-#if !defined(MPIAPI)
-#  define MPIAPI
-#endif
-
 #if defined(HAVE_PYMPICONF_H)
 #include "pympiconf.h"
 #elif defined(MPI_ABI_VERSION) && MPI_ABI_VERSION >= 1

@@ -322,10 +322,6 @@ class ConfigureMPI:
     CONFIGTEST_H = """\
 /* _configtest.h */
 
-#if !defined(MPIAPI)
-#  define MPIAPI
-#endif
-
 """
 
     def __init__(self, config_cmd):

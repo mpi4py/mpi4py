@@ -236,7 +236,7 @@ static int PyMPI_Comm_agree(MPI_Comm comm, int *flag)
 #if !defined(PyMPI_HAVE_MPI_Comm_iagree)  || PyMPI_LEGACY_ABI
 #if !defined(PyMPI_HAVE_MPIX_Comm_iagree) || PyMPI_LEGACY_ABI
 #undef MPI_Comm_iagree
-static int MPIAPI PyMPI_iagree_free_fn(MPI_Comm c, int k, void *v, void *xs)
+static int PyMPI_iagree_free_fn(MPI_Comm c, int k, void *v, void *xs)
 { return (void) c, (void) xs, PyMPI_FREE(v), MPI_Comm_free_keyval(&k); }
 static int PyMPI_Comm_iagree(MPI_Comm comm, int *flag, MPI_Request *request)
 {

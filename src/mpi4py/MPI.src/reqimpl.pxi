@@ -222,7 +222,6 @@ cdef int greq_cancel(
     return ierr
 
 
-@cython.callspec("MPIAPI")
 cdef int greq_query_fn(
     void *extra_state,
     MPI_Status *status,
@@ -234,7 +233,6 @@ cdef int greq_query_fn(
     return greq_query(extra_state, status)
 
 
-@cython.callspec("MPIAPI")
 cdef int greq_free_fn(
     void *extra_state,
 ) noexcept nogil:
@@ -244,7 +242,6 @@ cdef int greq_free_fn(
     return greq_free(extra_state)
 
 
-@cython.callspec("MPIAPI")
 cdef int greq_cancel_fn(
     void *extra_state,
     int completed,

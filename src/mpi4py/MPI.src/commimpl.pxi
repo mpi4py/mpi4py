@@ -73,7 +73,6 @@ cdef inline int commlock_free_cb(
 
 
 @cython.linetrace(False)
-@cython.callspec("MPIAPI")
 cdef int commlock_free_fn(
     MPI_Comm comm,
     int keyval,

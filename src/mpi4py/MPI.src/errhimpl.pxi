@@ -73,162 +73,130 @@ cdef inline void errhdl_call(
     errhdl_call_mpi(index, handle, errcode)
 
 
-@cython.callspec("MPIAPI")
 cdef void errhdl_01(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
     errhdl_call(  1, handle[0], errcode[0])
 
 
-@cython.callspec("MPIAPI")
 cdef void errhdl_02(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
     errhdl_call(  2, handle[0], errcode[0])
 
 
-@cython.callspec("MPIAPI")
 cdef void errhdl_03(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
     errhdl_call(  3, handle[0], errcode[0])
 
 
-@cython.callspec("MPIAPI")
 cdef void errhdl_04(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
     errhdl_call(  4, handle[0], errcode[0])
 
 
-@cython.callspec("MPIAPI")
 cdef void errhdl_05(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
     errhdl_call(  5, handle[0], errcode[0])
 
 
-@cython.callspec("MPIAPI")
 cdef void errhdl_06(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
     errhdl_call(  6, handle[0], errcode[0])
 
 
-@cython.callspec("MPIAPI")
 cdef void errhdl_07(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
     errhdl_call(  7, handle[0], errcode[0])
 
 
-@cython.callspec("MPIAPI")
 cdef void errhdl_08(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
     errhdl_call(  8, handle[0], errcode[0])
 
 
-@cython.callspec("MPIAPI")
 cdef void errhdl_09(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
     errhdl_call(  9, handle[0], errcode[0])
 
 
-@cython.callspec("MPIAPI")
 cdef void errhdl_10(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
     errhdl_call( 10, handle[0], errcode[0])
 
 
-@cython.callspec("MPIAPI")
 cdef void errhdl_11(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
     errhdl_call( 11, handle[0], errcode[0])
 
 
-@cython.callspec("MPIAPI")
 cdef void errhdl_12(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
     errhdl_call( 12, handle[0], errcode[0])
 
 
-@cython.callspec("MPIAPI")
 cdef void errhdl_13(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
     errhdl_call( 13, handle[0], errcode[0])
 
 
-@cython.callspec("MPIAPI")
 cdef void errhdl_14(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
     errhdl_call( 14, handle[0], errcode[0])
 
 
-@cython.callspec("MPIAPI")
 cdef void errhdl_15(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
     errhdl_call( 15, handle[0], errcode[0])
 
 
-@cython.callspec("MPIAPI")
 cdef void errhdl_16(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
     errhdl_call( 16, handle[0], errcode[0])
 
 
-@cython.callspec("MPIAPI")
 cdef void errhdl_17(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
     errhdl_call( 17, handle[0], errcode[0])
 
 
-@cython.callspec("MPIAPI")
 cdef void errhdl_18(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
     errhdl_call( 18, handle[0], errcode[0])
 
 
-@cython.callspec("MPIAPI")
 cdef void errhdl_19(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
     errhdl_call( 19, handle[0], errcode[0])
 
 
-@cython.callspec("MPIAPI")
 cdef void errhdl_20(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
     errhdl_call( 20, handle[0], errcode[0])
 
 
-@cython.callspec("MPIAPI")
 cdef void errhdl_21(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
     errhdl_call( 21, handle[0], errcode[0])
 
 
-@cython.callspec("MPIAPI")
 cdef void errhdl_22(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
     errhdl_call( 22, handle[0], errcode[0])
 
 
-@cython.callspec("MPIAPI")
 cdef void errhdl_23(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
     errhdl_call( 23, handle[0], errcode[0])
 
 
-@cython.callspec("MPIAPI")
 cdef void errhdl_24(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
     errhdl_call( 24, handle[0], errcode[0])
 
 
-@cython.callspec("MPIAPI")
 cdef void errhdl_25(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
     errhdl_call( 25, handle[0], errcode[0])
 
 
-@cython.callspec("MPIAPI")
 cdef void errhdl_26(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
     errhdl_call( 26, handle[0], errcode[0])
 
 
-@cython.callspec("MPIAPI")
 cdef void errhdl_27(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
     errhdl_call( 27, handle[0], errcode[0])
 
 
-@cython.callspec("MPIAPI")
 cdef void errhdl_28(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
     errhdl_call( 28, handle[0], errcode[0])
 
 
-@cython.callspec("MPIAPI")
 cdef void errhdl_29(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
     errhdl_call( 29, handle[0], errcode[0])
 
 
-@cython.callspec("MPIAPI")
 cdef void errhdl_30(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
     errhdl_call( 30, handle[0], errcode[0])
 
 
-@cython.callspec("MPIAPI")
 cdef void errhdl_31(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
     errhdl_call( 31, handle[0], errcode[0])
 
 
-@cython.callspec("MPIAPI")
 cdef void errhdl_32(mpi_scwf_t *handle, int *errcode, ...) noexcept nogil:
     errhdl_call( 32, handle[0], errcode[0])
 
