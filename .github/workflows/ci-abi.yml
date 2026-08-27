@@ -211,7 +211,7 @@ jobs:
 
     - if: runner.os != 'Windows' && matrix.mpi != 'mpiabi'
       name: Setup uv
-      uses: astral-sh/setup-uv@v10.0.0
+      uses: astral-sh/setup-uv@v10.0.1
       with:
         cache-suffix: >-
           ${{ format('{0}-{1}-{2}-{3}',
@@ -321,7 +321,7 @@ jobs:
 
     - if: runner.os != 'Windows'
       name: Setup uv
-      uses: astral-sh/setup-uv@v10.0.0
+      uses: astral-sh/setup-uv@v10.0.1
       with:
         cache-suffix: >-
           ${{ format('{0}-{1}-{2}-{3}',
