@@ -935,27 +935,6 @@ MPI_Win MPI_Win_fromint(int);
 #define MPI_HOST 503
 int MPI_Info_get(MPI_Info, char[], int, char[], int*);
 int MPI_Info_get_valuelen(MPI_Info, char[], int*, int*);
-int MPI_Attr_get(MPI_Comm, int, void*, int*);
-int MPI_Attr_put(MPI_Comm, int, void*);
-int MPI_Attr_delete(MPI_Comm, int);
-typedef int (MPI_Copy_function)(MPI_Comm,int,void*,void*,void*,int*);
-typedef int (MPI_Delete_function)(MPI_Comm,int,void*,void*);
-#define MPI_DUP_FN ((MPI_Copy_function*)0x1)
-#define MPI_NULL_COPY_FN ((MPI_Copy_function*)0x0)
-#define MPI_NULL_DELETE_FN ((MPI_Delete_function*)0x0)
-int MPI_Keyval_create(MPI_Copy_function*, MPI_Delete_function*, int*, void*);
-int MPI_Keyval_free(int*);
-int MPI_Errhandler_get(MPI_Comm, MPI_Errhandler*);
-int MPI_Errhandler_set(MPI_Comm, MPI_Errhandler);
-typedef void (MPI_Handler_function)(MPI_Comm*,int*,...);
-int MPI_Errhandler_create(MPI_Handler_function*, MPI_Errhandler*);
-int MPI_Address(void*, MPI_Aint*);
-int MPI_Type_lb(MPI_Datatype, MPI_Aint*);
-int MPI_Type_ub(MPI_Datatype, MPI_Aint*);
-int MPI_Type_extent(MPI_Datatype, MPI_Aint*);
-int MPI_Type_hvector(int, int, MPI_Aint, MPI_Datatype, MPI_Datatype*);
-int MPI_Type_hindexed(int, int[], MPI_Aint[], MPI_Datatype, MPI_Datatype*);
-int MPI_Type_struct(int, int[], MPI_Aint[], MPI_Datatype[], MPI_Datatype*);
 #if defined(__cplusplus)
 }
 #endif

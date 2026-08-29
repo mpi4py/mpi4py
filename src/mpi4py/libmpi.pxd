@@ -175,6 +175,8 @@ cdef extern from "<mpi.h>" nogil:
     int MPI_Type_size(MPI_Datatype, int*)
     int MPI_Type_get_extent(MPI_Datatype, MPI_Aint*, MPI_Aint*)
     int MPI_Type_get_true_extent(MPI_Datatype, MPI_Aint*, MPI_Aint*)
+
+    # Deprecated since MPI-4.1
     int MPI_Type_size_x(MPI_Datatype, MPI_Count*)
     int MPI_Type_get_extent_x(MPI_Datatype, MPI_Count*, MPI_Count*)
     int MPI_Type_get_true_extent_x(MPI_Datatype, MPI_Count*, MPI_Count*)
@@ -271,6 +273,8 @@ cdef extern from "<mpi.h>" nogil:
     int MPI_Get_count(MPI_Status*, MPI_Datatype, int*)
     int MPI_Get_elements(MPI_Status*, MPI_Datatype, int*)
     int MPI_Status_set_elements(MPI_Status*, MPI_Datatype, int)
+
+    # Deprecated since MPI-4.1
     int MPI_Get_elements_x(MPI_Status*, MPI_Datatype, MPI_Count*)
     int MPI_Status_set_elements_x(MPI_Status*, MPI_Datatype, MPI_Count)
 
@@ -1251,7 +1255,7 @@ cdef extern from "<mpi.h>" nogil:
     int MPI_Info_get(MPI_Info, char[], int, char[], int*)
     int MPI_Info_get_valuelen(MPI_Info, char[], int*, int*)
 
-    # Deprecated since MPI-2
+    # Deprecated since MPI-2.0
     int MPI_Attr_get(MPI_Comm, int, void*, int*)
     int MPI_Attr_put(MPI_Comm, int, void*)
     int MPI_Attr_delete(MPI_Comm, int)
@@ -1263,13 +1267,13 @@ cdef extern from "<mpi.h>" nogil:
     int MPI_Keyval_create(MPI_Copy_function*, MPI_Delete_function*, int*, void*)
     int MPI_Keyval_free(int*)
 
-    # Deprecated since MPI-2, removed in MPI-3
+    # Deprecated since MPI-2.0, removed in MPI-3
     int MPI_Errhandler_get(MPI_Comm, MPI_Errhandler*)
     int MPI_Errhandler_set(MPI_Comm, MPI_Errhandler)
     ctypedef void MPI_Handler_function(MPI_Comm*,int*,...)
     int MPI_Errhandler_create(MPI_Handler_function*, MPI_Errhandler*)
 
-    # Deprecated since MPI-2, removed in MPI-3
+    # Deprecated since MPI-2.0, removed in MPI-3
     int MPI_Address(void*, MPI_Aint*)
     MPI_Datatype MPI_UB #:= MPI_DATATYPE_NULL
     MPI_Datatype MPI_LB #:= MPI_DATATYPE_NULL

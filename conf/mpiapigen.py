@@ -139,6 +139,8 @@ class Re:
         )
     )
 
+    DEPRECATED = r_(r"# Deprecated since MPI-(\d+)\.(\d+)", r".*")
+
 
 class Node:
     REGEX = None
@@ -517,7 +519,9 @@ class Generator:
 
     def parse_line(self, line):
         if "# Deprecated" in line:
-            self.deprecated = True
+            m = Re.DEPRECATED.match(line)
+            assert m is not None  # noqa: S101
+            self.deprecated = tuple(map(int, m.groups()))
             return
         elif Re.IGNORE.match(line):
             self.deprecated = False
@@ -571,6 +575,8 @@ class Generator:
             if not getattr(node, "version", None):
                 continue
             if node.version > mpi_version_max:
+                continue
+            if node.deprecated and node.deprecated <= (3, 1):
                 continue
             code = None
             match node:
@@ -653,6 +659,8 @@ class Generator:
             for node in self
             if isinstance(node, NodeFuncProto)
             and node.version <= mpi_version_max
+            and not re.match(r"\w+_(f2c|c2f)", node.name)
+            and not (node.deprecated and node.deprecated <= (3, 1))
         ]
         for name in sorted(names):
             fileobj.write(f"W({name})\n")
