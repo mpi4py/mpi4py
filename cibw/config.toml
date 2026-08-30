@@ -36,7 +36,7 @@ LDFLAGS = """
 """
 
 [tool.cibuildwheel.windows.environment]
-MPI_ABI_STUBS = '$USERPROFILE\\mpiabi'
+MPI_ABI_ROOT = '$USERPROFILE\\mpiabi'
 I_MPI_ROOT = '$USERPROFILE\\impi'
 MSMPI_BIN = '$ProgramFiles\\Microsoft MPI\\Bin'
 MSMPI_INC = '$USERPROFILE\\msmpi\\Include'

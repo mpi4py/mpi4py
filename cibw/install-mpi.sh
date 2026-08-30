@@ -86,7 +86,7 @@ sudo "$(command -v ldconfig || echo true)"
 
 echo "Display MPI information"
 case "$MPI_ABI" in
-    mpiabi)   echo MPI_ABI_STUBS="$MPI_ROOT" ;;
+    mpiabi)   echo MPI_ABI_ROOT="$MPI_ROOT" ;;
     mpich)    "$MPI_ROOT"/bin/mpichversion ;;
     openmpi)  "$MPI_ROOT"/bin/ompi_info ;;
     impi)     echo I_MPI_ROOT="$MPI_ROOT" ;;

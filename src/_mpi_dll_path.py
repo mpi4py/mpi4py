@@ -85,9 +85,9 @@ def _mpi_dll_directories():
     if msmpi_bin:
         add_dlldir_msmpi(msmpi_bin)
 
-    mpi_abi_stubs = os.environ.get("MPI_ABI_STUBS")
-    if mpi_abi_stubs:
-        add_dlldir(mpi_abi_stubs, "bin", dll="mpi_abi")
+    mpi_abi_root = os.environ.get("MPI_ABI_ROOT")
+    if mpi_abi_root:
+        add_dlldir(mpi_abi_root, "bin", dll="mpi_abi")
 
     return dlldirs
 

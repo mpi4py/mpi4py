@@ -7,7 +7,7 @@ import sys
 from configparser import ConfigParser, Error as ConfigParserError
 from types import SimpleNamespace
 
-# ruff: noqa: PTH112, PTH113, PTH117, PTH118, PTH119
+# ruff: noqa: PTH110, PTH112, PTH113, PTH117, PTH118, PTH119
 # ruff: noqa: PTH120, PTH123
 
 _logger = logging.getLogger("mpiconfig")
@@ -145,21 +145,27 @@ class Config:
                 self._setup_windows()
 
     def _setup_mpiabi(self):
-        MPI_ABI_STUBS = os.environ.get("MPI_ABI_STUBS")
-        if not MPI_ABI_STUBS:
+        MPI_ABI_ROOT = os.environ.get("MPI_ABI_ROOT")
+        if not MPI_ABI_ROOT:
             return
         if sys.platform == "darwin":
-            library = "lib{}.dylib"
+            library_templates = ["lib{}.dylib", "lib{}.tbd"]
         elif os.name == "posix":
-            library = "lib{}.so"
+            library_templates = ["lib{}.so"]
         else:
-            library = "{}.lib"
-        hdr = os.path.join(MPI_ABI_STUBS, "include", "mpi.h")
-        lib = os.path.join(MPI_ABI_STUBS, "lib", library.format("mpi_abi"))
-        if not os.path.isfile(hdr) or not os.path.isfile(lib):
+            library_templates = ["{}.lib"]
+        hdrs = [os.path.join(MPI_ABI_ROOT, "include", "mpi.h")]
+        libs = [
+            os.path.join(MPI_ABI_ROOT, libdir, library.format("mpi_abi"))
+            for libdir in ("lib", sys.platlibdir)
+            for library in library_templates
+        ]
+        has_hdr = any(map(os.path.isfile, hdrs))
+        has_lib = any(map(os.path.isfile, libs))
+        if not has_hdr or not has_lib:
             return
         self.load("mpi.cfg", "mpiabi")
-        self.filename = [MPI_ABI_STUBS]
+        self.filename = [MPI_ABI_ROOT]
 
     def _setup_posix(self):
         pass
@@ -448,6 +454,16 @@ class Config:
                 ]
             elif hasattr(self, k):
                 library_info[k] = [v.strip()]
+            # replace missing libdir with sys.platlibdir
+            if k in ("library_dirs", "runtime_library_dirs"):
+                pathlist = library_info[k]
+                for i, path in enumerate(pathlist):
+                    if not os.path.exists(path):
+                        prefix, libdir = os.path.split(path)
+                        if libdir == "lib":
+                            platdir = os.path.join(prefix, sys.platlibdir)
+                            if os.path.exists(platdir):
+                                pathlist[i] = platdir
         #
         self.section = section
         self.filename = read_ok
