@@ -189,7 +189,7 @@ if array is not None:
                     shape = mkshape(shape)
                 assert size == product(shape)
             assert array is not None
-            self.array = array.array(typecode, arg)
+            self.array = array.array(typecode, arg)  # ty: ignore[deprecated]
 
         @property
         def address(self):

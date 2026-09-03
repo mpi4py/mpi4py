@@ -22,7 +22,7 @@ class BaseBuf:
     #
     def __init__(self, typecode, initializer):
         assert array is not None
-        self._buf = array.array(typecode, initializer)
+        self._buf = array.array(typecode, initializer)  # ty: ignore[deprecated]
 
     def __eq__(self, other):
         return self._buf == other._buf
@@ -547,7 +547,7 @@ class TestMessageSimpleArray(BaseTestMessageSimpleArray, unittest.TestCase):
     #
     def array(self, typecode, initializer):
         assert array is not None
-        return array.array(typecode, initializer)
+        return array.array(typecode, initializer)  # ty: ignore[deprecated]
 
 
 @unittest.skipIf(numpy is None, "numpy")
@@ -1356,7 +1356,7 @@ class TestMessageVectorArray(BaseTestMessageVectorArray, unittest.TestCase):
     #
     def array(self, typecode, initializer):
         assert array is not None
-        return array.array(typecode, initializer)
+        return array.array(typecode, initializer)  # ty: ignore[deprecated]
 
 
 @unittest.skipIf(numpy is None, "numpy")

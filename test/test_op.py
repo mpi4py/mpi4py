@@ -14,7 +14,7 @@ def asarray(typecode, data):
 
     assert array is not None
     frombytes = array.array.frombytes
-    a = array.array(typecode, [])
+    a = array.array(typecode, [])  # ty: ignore[deprecated]
     frombytes(a, tobytes(data))
     return a
 
