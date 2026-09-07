@@ -142,18 +142,6 @@ PyMPI_LOCAL int _pympi_MPI_Type_create_f90_complex(int a0,int a1,MPI_Datatype* a
 
 #endif /* MPICH */
 
-#undef MPI_Status_c2f
-PyMPI_EXTERN int MPI_Status_c2f(const MPI_Status* a0,MPI_Fint* a1);
-static int _pympi__MPI_Status_c2f(const MPI_Status *c, MPI_Fint *f) { return (c && f) ? (*(MPI_Status *)(char *)f = *c), MPI_SUCCESS : MPI_ERR_ARG; }
-PyMPI_LOCAL int _pympi_MPI_Status_c2f(const MPI_Status* a0,MPI_Fint* a1) { _pympi_CALL(MPI_Status_c2f,a0,a1); }
-#define MPI_Status_c2f _pympi_MPI_Status_c2f
-
-#undef MPI_Status_f2c
-PyMPI_EXTERN int MPI_Status_f2c(const MPI_Fint* a0,MPI_Status* a1);
-static int _pympi__MPI_Status_f2c(const MPI_Fint *f, MPI_Status *c) { return (c && f) ? (*c = *(MPI_Status *)(char *)f), MPI_SUCCESS : MPI_ERR_ARG; }
-PyMPI_LOCAL int _pympi_MPI_Status_f2c(const MPI_Fint* a0,MPI_Status* a1) { _pympi_CALL(MPI_Status_f2c,a0,a1); }
-#define MPI_Status_f2c _pympi_MPI_Status_f2c
-
 #undef MPI_Type_c2f
 PyMPI_EXTERN MPI_Fint MPI_Type_c2f(MPI_Datatype a0);
 #ifdef MPICH

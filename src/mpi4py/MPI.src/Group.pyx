@@ -259,13 +259,13 @@ cdef class Group:
     def py2f(self) -> int:
         """
         """
-        return MPI_Group_c2f(self.ob_mpi)
+        return MPI_Group_toint(self.ob_mpi)
 
     @classmethod
     def f2py(cls, arg: int) -> Group:
         """
         """
-        return fromhandle(MPI_Group_f2c(arg))
+        return fromhandle(MPI_Group_fromint(arg))
 
 
 cdef Group __GROUP_NULL__  = def_Group ( MPI_GROUP_NULL  , "GROUP_NULL"  )

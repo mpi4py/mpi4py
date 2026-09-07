@@ -730,8 +730,6 @@ class Generator:
         fileobj.write(head)
         if suite is None:
             for name in (
-                "MPI_Status_c2f",
-                "MPI_Status_f2c",
                 "MPI_Type_create_f90_integer",
                 "MPI_Type_create_f90_real",
                 "MPI_Type_create_f90_complex",
@@ -1118,9 +1116,6 @@ class Generator:
                     t, a = t[:p], t[p:]
                     argsdecl.append(f"{t} a{i}{a}")
                     argscall.append(f"a{i}")
-            if node.name in ("MPI_Status_c2f", "MPI_Status_f2c"):
-                if not argsdecl[0].startswith("const "):
-                    argsdecl[0] = "const " + argsdecl[0]
             argsdecl = ",".join(argsdecl) if argsdecl else "void"
             argscall = ",".join(argscall) if argscall else ""
             return (argsdecl, argscall)
@@ -1206,7 +1201,6 @@ class Generator:
         ftnconv = []
         intconv = []
         handles = []
-        fstatus = []
         fortran = []
         aintops = []
         functions = []
@@ -1224,7 +1218,6 @@ class Generator:
                 continue
             if isinstance(node, FunctionProto):
                 if node.name in ("MPI_Status_c2f", "MPI_Status_f2c"):
-                    fstatus.append(node)
                     continue
                 if node.name.startswith("MPI_Type_create_f90_"):
                     fortran.append(node)
@@ -1282,21 +1275,6 @@ class Generator:
             )
 
         if not std:
-            argdcl = {"c": "MPI_Status *c", "f": "MPI_Fint *f"}
-            argval = {"c": "*c", "f": "*(MPI_Status *)(char *)f"}
-            for node in fstatus:
-                name = node.name
-                pympiname = f"_pympi__{name}"
-                a, _, b = name[-3:].partition("2")
-                args = f"(const {argdcl[a]}, {argdcl[b]})"
-                copy = f"({argval[b]} = {argval[a]})"
-                ok, err = "MPI_SUCCESS", "MPI_ERR_ARG"
-                body = f"{{ return (c && f) ? {copy}, {ok} : {err}; }}"
-                impl = dedent(f"""\
-                static int {pympiname}{args} {body}
-                """)
-                for code in abi_function(node, impl, guard=False):
-                    fileobj.write(code)
             for node in ftnconv:
                 name = node.name
                 pympiname = f"_pympi__{name}"

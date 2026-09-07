@@ -212,13 +212,13 @@ cdef class Message:
     def py2f(self) -> int:
         """
         """
-        return MPI_Message_c2f(self.ob_mpi)
+        return MPI_Message_toint(self.ob_mpi)
 
     @classmethod
     def f2py(cls, arg: int) -> Message:
         """
         """
-        return fromhandle(MPI_Message_f2c(arg))
+        return fromhandle(MPI_Message_fromint(arg))
 
 
 cdef Message __MESSAGE_NULL__    = def_Message ( MPI_MESSAGE_NULL    , "MESSAGE_NULL"    )  # noqa

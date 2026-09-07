@@ -176,13 +176,13 @@ cdef class Info:
     def py2f(self) -> int:
         """
         """
-        return MPI_Info_c2f(self.ob_mpi)
+        return MPI_Info_toint(self.ob_mpi)
 
     @classmethod
     def f2py(cls, arg: int) -> Info:
         """
         """
-        return fromhandle(MPI_Info_f2c(arg))
+        return fromhandle(MPI_Info_fromint(arg))
 
     # Python mapping emulation
     # ------------------------

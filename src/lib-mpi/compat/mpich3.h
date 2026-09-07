@@ -142,19 +142,6 @@ static int PyMPI_MPICH_MPI_Win_get_attr(MPI_Win win,
 
 /* -------------------------------------------------------------------------- */
 
-#if (MPICH_NUMVERSION == 30101300)
-
-static int PyMPI_MPICH3_MPI_Status_c2f(MPI_Status *c_status,
-                                       MPI_Fint *f_status)
-{
-  if (c_status == NULL || f_status == NULL) return MPI_ERR_ARG;
-  *(MPI_Status *)(char *)f_status = *c_status;
-  return MPI_SUCCESS;
-}
-#define MPI_Status_c2f PyMPI_MPICH3_MPI_Status_c2f
-
-#endif
-
 #if (MPICH_NUMVERSION < 30100301)
 
 static int PyMPI_MPICH3_MPI_Add_error_class(int *errorclass)

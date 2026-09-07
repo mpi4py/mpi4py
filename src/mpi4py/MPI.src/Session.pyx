@@ -222,13 +222,13 @@ cdef class Session:
     def py2f(self) -> int:
         """
         """
-        return MPI_Session_c2f(self.ob_mpi)
+        return MPI_Session_toint(self.ob_mpi)
 
     @classmethod
     def f2py(cls, arg: int) -> Session:
         """
         """
-        return fromhandle(MPI_Session_f2c(arg))
+        return fromhandle(MPI_Session_fromint(arg))
 
 
 cdef Session __SESSION_NULL__ = def_Session( MPI_SESSION_NULL , "SESSION_NULL" )

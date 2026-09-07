@@ -801,13 +801,13 @@ cdef class Datatype:
     def py2f(self) -> int:
         """
         """
-        return MPI_Type_c2f(self.ob_mpi)
+        return MPI_Type_toint(self.ob_mpi)
 
     @classmethod
     def f2py(cls, arg: int) -> Datatype:
         """
         """
-        return fromhandle(MPI_Type_f2c(arg))
+        return fromhandle(MPI_Type_fromint(arg))
 
     # Python/NumPy interoperability
     # -----------------------------

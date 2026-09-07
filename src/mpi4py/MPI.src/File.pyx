@@ -907,13 +907,13 @@ cdef class File:
     def py2f(self) -> int:
         """
         """
-        return MPI_File_c2f(self.ob_mpi)
+        return MPI_File_toint(self.ob_mpi)
 
     @classmethod
     def f2py(cls, arg: int) -> File:
         """
         """
-        return fromhandle(MPI_File_f2c(arg))
+        return fromhandle(MPI_File_fromint(arg))
 
 
 cdef File __FILE_NULL__ = def_File( MPI_FILE_NULL , "FILE_NULL" )

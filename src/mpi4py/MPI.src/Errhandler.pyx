@@ -76,13 +76,13 @@ cdef class Errhandler:
     def py2f(self) -> int:
         """
         """
-        return MPI_Errhandler_c2f(self.ob_mpi)
+        return MPI_Errhandler_toint(self.ob_mpi)
 
     @classmethod
     def f2py(cls, arg: int) -> Errhandler:
         """
         """
-        return fromhandle(MPI_Errhandler_f2c(arg))
+        return fromhandle(MPI_Errhandler_fromint(arg))
 
 
 cdef Errhandler __ERRHANDLER_NULL__  = def_Errhandler( MPI_ERRHANDLER_NULL  , "ERRHANDLER_NULL"  )  # noqa

@@ -155,13 +155,13 @@ cdef class Op:
     def py2f(self) -> int:
         """
         """
-        return MPI_Op_c2f(self.ob_mpi)
+        return MPI_Op_toint(self.ob_mpi)
 
     @classmethod
     def f2py(cls, arg: int) -> Op:
         """
         """
-        return fromhandle(MPI_Op_f2c(arg))
+        return fromhandle(MPI_Op_fromint(arg))
 
 
 cdef Op __OP_NULL__ = def_Op( MPI_OP_NULL , "OP_NULL" )

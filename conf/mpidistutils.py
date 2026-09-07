@@ -1152,8 +1152,6 @@ def configure_mpi(ext, config_cmd):
             ("MPI_Type_create_f90_integer", "0,(MPI_Datatype*)0"),
             ("MPI_Type_create_f90_real", "0,0,(MPI_Datatype*)0"),
             ("MPI_Type_create_f90_complex", "0,0,(MPI_Datatype*)0"),
-            ("MPI_Status_c2f", "(MPI_Status*)0,(MPI_Fint*)0"),
-            ("MPI_Status_f2c", "(MPI_Fint*)0,(MPI_Status*)0"),
         ):
             with capture_stderr():
                 ok = config_cmd.check_function_call(

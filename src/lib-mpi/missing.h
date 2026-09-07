@@ -1,13 +1,5 @@
 /* Generated with `python conf/mpiapigen.py` */
 
-#ifdef PyMPI_MISSING_MPI_Status_c2f
-#undef PyMPI_HAVE_MPI_Status_c2f
-#endif
-
-#ifdef PyMPI_MISSING_MPI_Status_f2c
-#undef PyMPI_HAVE_MPI_Status_f2c
-#endif
-
 #ifdef PyMPI_MISSING_MPI_Type_create_f90_integer
 #undef PyMPI_HAVE_MPI_Type_create_f90_integer
 #endif

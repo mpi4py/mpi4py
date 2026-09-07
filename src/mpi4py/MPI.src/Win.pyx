@@ -787,13 +787,13 @@ cdef class Win:
     def py2f(self) -> int:
         """
         """
-        return MPI_Win_c2f(self.ob_mpi)
+        return MPI_Win_toint(self.ob_mpi)
 
     @classmethod
     def f2py(cls, arg: int) -> Win:
         """
         """
-        return fromhandle(MPI_Win_f2c(arg))
+        return fromhandle(MPI_Win_fromint(arg))
 
 
 cdef Win __WIN_NULL__ = def_Win( MPI_WIN_NULL , "WIN_NULL" )

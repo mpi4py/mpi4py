@@ -199,21 +199,21 @@ cdef class Status:
     def py2f(self) -> list[int]:
         """
         """
-        cdef MPI_Fint f_status[16]
+        cdef int f_status[16]
         cdef MPI_Status *c_status = &self.ob_mpi
         cdef Py_ssize_t size = MPI_F_STATUS_SIZE
-        CHKERR( MPI_Status_c2f(c_status, f_status) )
+        <void>memcpy(f_status, c_status, sizeof(MPI_Status))
         return [f_status[i] for i in range(size)]
 
     @classmethod
     def f2py(cls, arg: list[int]) -> Self:
         """
         """
-        cdef MPI_Fint f_status[16]
+        cdef int f_status[16]
         cdef MPI_Status c_status[1]
         cdef Py_ssize_t size = MPI_F_STATUS_SIZE
         for i in range(size): f_status[i] = arg[i]
-        CHKERR( MPI_Status_f2c(f_status, c_status) )
+        <void>memcpy(c_status, f_status, sizeof(MPI_Status))
         return PyMPIStatus_New(c_status)
 
 

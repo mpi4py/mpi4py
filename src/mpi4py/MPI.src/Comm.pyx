@@ -1950,13 +1950,13 @@ cdef class Comm:
     def py2f(self) -> int:
         """
         """
-        return MPI_Comm_c2f(self.ob_mpi)
+        return MPI_Comm_toint(self.ob_mpi)
 
     @classmethod
     def f2py(cls, arg: int) -> Comm:
         """
         """
-        return fromhandle(MPI_Comm_f2c(arg))
+        return fromhandle(MPI_Comm_fromint(arg))
 
     # Python Communication
     # --------------------

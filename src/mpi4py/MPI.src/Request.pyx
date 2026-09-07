@@ -313,17 +313,17 @@ cdef class Request:
     def py2f(self) -> int:
         """
         """
-        return MPI_Request_c2f(self.ob_mpi)
+        return MPI_Request_toint(self.ob_mpi)
 
     @classmethod
     def f2py(cls, arg: int) -> Request:
         """
         """
         if issubclass(cls, Prequest):
-            return PyMPIPrequest_New(MPI_Request_f2c(arg))
+            return PyMPIPrequest_New(MPI_Request_fromint(arg))
         if issubclass(cls, Grequest):
-            return PyMPIGrequest_New(MPI_Request_f2c(arg))
-        return fromhandle(MPI_Request_f2c(arg))
+            return PyMPIGrequest_New(MPI_Request_fromint(arg))
+        return fromhandle(MPI_Request_fromint(arg))
 
     # Python Communication
     # --------------------
