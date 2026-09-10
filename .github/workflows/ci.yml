@@ -23,22 +23,22 @@ permissions:
 jobs:
 
   test:
-    uses: ./.github/workflows/ci-test.yml
+    uses: $/.github/workflows/ci-test.yml
 
   abi:
-    uses: ./.github/workflows/ci-abi.yml
+    uses: $/.github/workflows/ci-abi.yml
 
   build:
-    uses: ./.github/workflows/ci-build.yml
+    uses: $/.github/workflows/ci-build.yml
 
   check:
-    uses: ./.github/workflows/ci-check.yml
+    uses: $/.github/workflows/ci-check.yml
 
   cover:
-    uses: ./.github/workflows/ci-cover.yml
+    uses: $/.github/workflows/ci-cover.yml
 
   actions:
-    uses: ./.github/workflows/ci-actions.yml
+    uses: $/.github/workflows/ci-actions.yml
 
   ci-status:
     runs-on: ubuntu-slim

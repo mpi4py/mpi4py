@@ -47,25 +47,25 @@ jobs:
 
   docs:
     if: ${{ github.event_name != 'workflow_dispatch' }}
-    uses: ./.github/workflows/cd-docs.yml
+    uses: $/.github/workflows/cd-docs.yml
 
   sdist:
-    uses: ./.github/workflows/cd-sdist.yml
+    uses: $/.github/workflows/cd-sdist.yml
 
   wheel-Linux:
-    uses: ./.github/workflows/cd-wheel.yml
+    uses: $/.github/workflows/cd-wheel.yml
     with:
       os-arch: Linux
       python-tag: ${{ inputs.python-tag }}
 
   wheel-macOS:
-    uses: ./.github/workflows/cd-wheel.yml
+    uses: $/.github/workflows/cd-wheel.yml
     with:
       os-arch: macOS
       python-tag: ${{ inputs.python-tag }}
 
   wheel-Windows:
-    uses: ./.github/workflows/cd-wheel.yml
+    uses: $/.github/workflows/cd-wheel.yml
     with:
       os-arch: Windows
       python-tag: ${{ inputs.python-tag }}
