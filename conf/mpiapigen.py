@@ -43,7 +43,6 @@ integral_type_names = [
     "Aint",
     "Offset",
     "Count",
-    "Fint",
 ]
 
 struct_type_names = [
@@ -92,11 +91,6 @@ cmpi_type = opaque_type.replace("Datatype", "Type")
 h2i_name = cmpi_type + "_toint"
 i2h_name = cmpi_type + "_fromint"
 
-fint_type = r"MPI_Fint"
-fmpi_type = opaque_type.replace("Datatype", "Type")
-c2f_name = fmpi_type + "_c2f"
-f2c_name = fmpi_type + "_f2c"
-
 
 class Re:
     INTEGRAL_TYPE = r_(typedef, [canyint], [integral_type], fallback)
@@ -122,18 +116,14 @@ class Re:
     FUNCTION_I2H = r_(
         [opaque_type], [i2h_name], lparen, [cint_type], rparen, fallback
     )
-    FUNCTION_C2F = r_(
-        [fint_type], [c2f_name], lparen, [opaque_type], rparen, fallback
-    )
-    FUNCTION_F2C = r_(
-        [opaque_type], [f2c_name], lparen, [fint_type], rparen, fallback
-    )
 
     IGNORE = r_(
         anyof(
             join(r"cdef.*"),
             join(struct, r"_mpi_\w+_t"),
             join(r"int", r"MPI_(?:SOURCE|TAG|ERROR)"),
+            join(r".*MPI_Fint.*"),
+            join(r".*MPI_F08_status.*"),
             join(r"#.*"),
             join(r""),
         )
@@ -150,6 +140,8 @@ class Node:
         assert cls.REGEX is not None  # noqa: S101
         m = cls.REGEX.match(line)
         return m.groups() if m else None
+
+    dep_node = None
 
     HEADER = None
     CONFIG = None
@@ -409,6 +401,8 @@ class FunctionH2I(NodeFuncProto):
         NodeFuncProto.__init__(self, *a, **k)
         self.fallback = self.name.replace("_toint", "_c2f")
         self.cretv = f"({self.crett})-1"
+        self.dep_node = NodeFuncProto(self.crett, self.fallback, self.cargs)
+        self.dep_node.cretv = self.cretv  # ty: ignore[unresolved-attribute]
 
 
 class FunctionI2H(NodeFuncProto):
@@ -424,26 +418,8 @@ class FunctionI2H(NodeFuncProto):
         NodeFuncProto.__init__(self, *a, **k)
         self.fallback = self.name.replace("_fromint", "_f2c")
         self.cretv = f"({self.crett})0"
-
-
-class FunctionC2F(NodeFuncProto):
-    REGEX = Re.FUNCTION_C2F
-    MISSING = FunctionH2I.MISSING
-
-    def __init__(self, *a, **k):
-        NodeFuncProto.__init__(self, *a, **k)
-        self.fallback = self.name.replace("_c2f", "_toint")
-        self.cretv = f"({self.crett})-1"
-
-
-class FunctionF2C(NodeFuncProto):
-    REGEX = Re.FUNCTION_F2C
-    MISSING = FunctionI2H.MISSING
-
-    def __init__(self, *a, **k):
-        NodeFuncProto.__init__(self, *a, **k)
-        self.fallback = self.name.replace("_f2c", "_fromint")
-        self.cretv = f"({self.crett})0"
+        self.dep_node = NodeFuncProto(self.crett, self.fallback, self.cargs)
+        self.dep_node.cretv = self.cretv  # ty: ignore[unresolved-attribute]
 
 
 class Generator:
@@ -464,8 +440,6 @@ class Generator:
         FunctionPtrVal,
         FunctionH2I,
         FunctionI2H,
-        FunctionC2F,
-        FunctionF2C,
         FunctionProto,
     ]
 
@@ -580,14 +554,6 @@ class Generator:
                 continue
             code = None
             match node:
-                case (
-                    NodeType(ctype="MPI_Fint")
-                    | FunctionC2F()
-                    | FunctionF2C()
-                    | NodeFuncProto(name="MPI_Status_c2f")
-                    | NodeFuncProto(name="MPI_Status_f2c")
-                ):
-                    continue
                 case IntegralType():
                     typemap = {
                         "MPI_Aint": "intptr_t",
@@ -659,7 +625,6 @@ class Generator:
             for node in self
             if isinstance(node, NodeFuncProto)
             and node.version <= mpi_version_max
-            and not re.match(r"\w+_(f2c|c2f)", node.name)
             and not (node.deprecated and node.deprecated <= (3, 1))
         ]
         for name in sorted(names):
@@ -699,6 +664,9 @@ class Generator:
         fileobj.write(head)
         if suite is None:
             for node in self:
+                if node.dep_node is not None:
+                    line = "#undef %s\n" % (macro % node.dep_node.name)
+                    fileobj.write(line)
                 line = "#undef %s\n" % (macro % node.name)
                 fileobj.write(line)
         else:
@@ -1198,7 +1166,6 @@ class Generator:
         mpi_version_min = (5, 0) if std else (3, 0)
         mpi_version_max = (5, 0)
 
-        ftnconv = []
         intconv = []
         handles = []
         fortran = []
@@ -1210,15 +1177,10 @@ class Generator:
             if isinstance(node, (FunctionH2I, FunctionI2H)):
                 intconv.append(node)
                 continue
-            if isinstance(node, (FunctionC2F, FunctionF2C)):
-                ftnconv.append(node)
-                continue
             if isinstance(node, HandleValue):
                 handles.append(node)
                 continue
             if isinstance(node, FunctionProto):
-                if node.name in ("MPI_Status_c2f", "MPI_Status_f2c"):
-                    continue
                 if node.name.startswith("MPI_Type_create_f90_"):
                     fortran.append(node)
                     continue
@@ -1275,13 +1237,13 @@ class Generator:
             )
 
         if not std:
-            for node in ftnconv:
-                name = node.name
-                pympiname = f"_pympi__{name}"
+            for inode in intconv:
+                node = inode.dep_node
+                pympiname = f"_pympi__{node.name}"
                 rtype = node.crett
                 rval_o = node.cretv
                 rval_m = f"({rtype})arg"
-                if name.startswith("MPI_File_"):
+                if node.name.startswith("MPI_File_"):
                     rval_m = node.cretv
                 impl = dedent(f"""\
                 #ifdef MPICH
@@ -1292,10 +1254,8 @@ class Generator:
                 """)
                 for code in abi_function(node, impl, guard=False):
                     fileobj.write(code)
-        if not std:
-            for node in intconv:
-                name = node.name
-                pympiname = f"_pympi__{name}"
+                node = inode
+                pympiname = f"_pympi__{node.name}"
                 if node.crett == "int":
                     rtype, atype = "(int)", ""
                 else:

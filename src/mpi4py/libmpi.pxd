@@ -1175,14 +1175,20 @@ cdef extern from "<mpi.h>" nogil:
     # Fortran INTEGER
     ctypedef int MPI_Fint
 
-    enum: MPI_F_SOURCE              #:= MPI_UNDEFINED  #@:= 0
-    enum: MPI_F_TAG                 #:= MPI_UNDEFINED  #@:= 1
-    enum: MPI_F_ERROR               #:= MPI_UNDEFINED  #@:= 2
-    enum: MPI_F_STATUS_SIZE         #:= MPI_UNDEFINED  #@:= 8
+    # Fortran STATUS
     MPI_Fint* MPI_F_STATUS_IGNORE   #:= 0
     MPI_Fint* MPI_F_STATUSES_IGNORE #:= 0
     int MPI_Status_c2f (MPI_Status*, MPI_Fint*)
     int MPI_Status_f2c (MPI_Fint*, MPI_Status*)
+
+    # Fortran 2008 STATUS
+    ctypedef struct MPI_F08_status #:= MPI_Status
+    MPI_F08_status* MPI_F08_STATUS_IGNORE   #:= 0
+    MPI_F08_status* MPI_F08_STATUSES_IGNORE #:= 0
+    int MPI_Status_c2f08(MPI_Status*, MPI_F08_status*)
+    int MPI_Status_f082c(MPI_F08_status*, MPI_Status*)
+    int MPI_Status_f2f08(MPI_Fint*, MPI_F08_status*)
+    int MPI_Status_f082f(MPI_F08_status*, MPI_Fint*)
 
     # C -> Fortran
     MPI_Fint MPI_Type_c2f       (MPI_Datatype)
@@ -1210,13 +1216,12 @@ cdef extern from "<mpi.h>" nogil:
     MPI_File       MPI_File_f2c       (MPI_Fint)
     MPI_Errhandler MPI_Errhandler_f2c (MPI_Fint)
 
-    ## ctypedef struct MPI_F08_status #:= MPI_Status
-    ## MPI_F08_status* MPI_F08_STATUS_IGNORE   #:= 0
-    ## MPI_F08_status* MPI_F08_STATUSES_IGNORE #:= 0
-    ## int MPI_Status_c2f08(MPI_Status*, MPI_F08_status*)
-    ## int MPI_Status_f082c(MPI_F08_status*, MPI_Status*)
-    ## int MPI_Status_f2f08(MPI_Fint*, MPI_F08_status*)
-    ## int MPI_Status_f082f(MPI_F08_status*, MPI_Fint*)
+    #-----------------------------------------------------------------
+
+    enum: MPI_F_SOURCE              #:= MPI_UNDEFINED  #@:= 0
+    enum: MPI_F_TAG                 #:= MPI_UNDEFINED  #@:= 1
+    enum: MPI_F_ERROR               #:= MPI_UNDEFINED  #@:= 2
+    enum: MPI_F_STATUS_SIZE         #:= MPI_UNDEFINED  #@:= 8
 
     #-----------------------------------------------------------------
 

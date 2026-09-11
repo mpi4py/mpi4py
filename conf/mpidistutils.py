@@ -331,11 +331,17 @@ class ConfigureMPI:
             self.generator.parse_file(fullname)
         self.config_cmd = config_cmd
 
+    def iterate(self):
+        for node in self.generator:
+            if node.dep_node is not None:
+                yield node.dep_node
+            yield node
+
     def run(self):
         results = []
         with open("_configtest.h", "w") as f:
             f.write(self.CONFIGTEST_H)
-        for node in self.generator:
+        for node in self.iterate():
             name = node.name
             testcode = node.config()
             confcode = node.missing(guard=False)

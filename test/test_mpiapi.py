@@ -46,10 +46,7 @@ mpi_removed = [
     "MPI_Type_ub",
 ]
 
-mpi_missing = [
-    "MPI_Status_c2f",
-    "MPI_Status_f2c",
-]
+mpi_missing = []
 
 if MPI.Get_version() < (4, 1):
     mpi_missing += [
@@ -199,6 +196,11 @@ class TestMPIAPI(unittest.TestCase):
         uncovered.difference_update(mpi_deprecated)
         uncovered.difference_update(mpi_removed)
         uncovered.difference_update(mpi_missing)
+        uncovered.difference_update(
+            f"MPI_Status_{a}2{b}"
+            for a in ("c", "f", "f08")
+            for b in ("c", "f", "f08")
+        )
         for sym in mod_symbols:
             if sym.endswith("_c"):
                 uncovered.discard(sym[:-2])

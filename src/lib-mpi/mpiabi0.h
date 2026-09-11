@@ -142,225 +142,15 @@ PyMPI_LOCAL int _pympi_MPI_Type_create_f90_complex(int a0,int a1,MPI_Datatype* a
 
 #endif /* MPICH */
 
-#undef MPI_Type_c2f
-PyMPI_EXTERN MPI_Fint MPI_Type_c2f(MPI_Datatype a0);
-#ifdef MPICH
-#define _pympi__MPI_Type_c2f(arg) ((MPI_Fint)arg)
-#else
-#define _pympi__MPI_Type_c2f(arg) ((MPI_Fint)-1)
-#endif
-PyMPI_LOCAL MPI_Fint _pympi_MPI_Type_c2f(MPI_Datatype a0) { _pympi_CALL(MPI_Type_c2f,a0); }
-#define MPI_Type_c2f _pympi_MPI_Type_c2f
-
-#undef MPI_Request_c2f
-PyMPI_EXTERN MPI_Fint MPI_Request_c2f(MPI_Request a0);
-#ifdef MPICH
-#define _pympi__MPI_Request_c2f(arg) ((MPI_Fint)arg)
-#else
-#define _pympi__MPI_Request_c2f(arg) ((MPI_Fint)-1)
-#endif
-PyMPI_LOCAL MPI_Fint _pympi_MPI_Request_c2f(MPI_Request a0) { _pympi_CALL(MPI_Request_c2f,a0); }
-#define MPI_Request_c2f _pympi_MPI_Request_c2f
-
-#undef MPI_Message_c2f
-PyMPI_EXTERN MPI_Fint MPI_Message_c2f(MPI_Message a0);
-#ifdef MPICH
-#define _pympi__MPI_Message_c2f(arg) ((MPI_Fint)arg)
-#else
-#define _pympi__MPI_Message_c2f(arg) ((MPI_Fint)-1)
-#endif
-PyMPI_LOCAL MPI_Fint _pympi_MPI_Message_c2f(MPI_Message a0) { _pympi_CALL(MPI_Message_c2f,a0); }
-#define MPI_Message_c2f _pympi_MPI_Message_c2f
-
-#undef MPI_Op_c2f
-PyMPI_EXTERN MPI_Fint MPI_Op_c2f(MPI_Op a0);
-#ifdef MPICH
-#define _pympi__MPI_Op_c2f(arg) ((MPI_Fint)arg)
-#else
-#define _pympi__MPI_Op_c2f(arg) ((MPI_Fint)-1)
-#endif
-PyMPI_LOCAL MPI_Fint _pympi_MPI_Op_c2f(MPI_Op a0) { _pympi_CALL(MPI_Op_c2f,a0); }
-#define MPI_Op_c2f _pympi_MPI_Op_c2f
-
-#undef MPI_Group_c2f
-PyMPI_EXTERN MPI_Fint MPI_Group_c2f(MPI_Group a0);
-#ifdef MPICH
-#define _pympi__MPI_Group_c2f(arg) ((MPI_Fint)arg)
-#else
-#define _pympi__MPI_Group_c2f(arg) ((MPI_Fint)-1)
-#endif
-PyMPI_LOCAL MPI_Fint _pympi_MPI_Group_c2f(MPI_Group a0) { _pympi_CALL(MPI_Group_c2f,a0); }
-#define MPI_Group_c2f _pympi_MPI_Group_c2f
-
-#undef MPI_Info_c2f
-PyMPI_EXTERN MPI_Fint MPI_Info_c2f(MPI_Info a0);
-#ifdef MPICH
-#define _pympi__MPI_Info_c2f(arg) ((MPI_Fint)arg)
-#else
-#define _pympi__MPI_Info_c2f(arg) ((MPI_Fint)-1)
-#endif
-PyMPI_LOCAL MPI_Fint _pympi_MPI_Info_c2f(MPI_Info a0) { _pympi_CALL(MPI_Info_c2f,a0); }
-#define MPI_Info_c2f _pympi_MPI_Info_c2f
-
-#undef MPI_Session_c2f
-PyMPI_EXTERN MPI_Fint MPI_Session_c2f(MPI_Session a0);
-#ifdef MPICH
-#define _pympi__MPI_Session_c2f(arg) ((MPI_Fint)arg)
-#else
-#define _pympi__MPI_Session_c2f(arg) ((MPI_Fint)-1)
-#endif
-PyMPI_LOCAL MPI_Fint _pympi_MPI_Session_c2f(MPI_Session a0) { _pympi_CALL(MPI_Session_c2f,a0); }
-#define MPI_Session_c2f _pympi_MPI_Session_c2f
-
 #undef MPI_Comm_c2f
-PyMPI_EXTERN MPI_Fint MPI_Comm_c2f(MPI_Comm a0);
+PyMPI_EXTERN int MPI_Comm_c2f(MPI_Comm a0);
 #ifdef MPICH
-#define _pympi__MPI_Comm_c2f(arg) ((MPI_Fint)arg)
+#define _pympi__MPI_Comm_c2f(arg) ((int)arg)
 #else
-#define _pympi__MPI_Comm_c2f(arg) ((MPI_Fint)-1)
+#define _pympi__MPI_Comm_c2f(arg) ((int)-1)
 #endif
-PyMPI_LOCAL MPI_Fint _pympi_MPI_Comm_c2f(MPI_Comm a0) { _pympi_CALL(MPI_Comm_c2f,a0); }
+PyMPI_LOCAL int _pympi_MPI_Comm_c2f(MPI_Comm a0) { _pympi_CALL(MPI_Comm_c2f,a0); }
 #define MPI_Comm_c2f _pympi_MPI_Comm_c2f
-
-#undef MPI_Win_c2f
-PyMPI_EXTERN MPI_Fint MPI_Win_c2f(MPI_Win a0);
-#ifdef MPICH
-#define _pympi__MPI_Win_c2f(arg) ((MPI_Fint)arg)
-#else
-#define _pympi__MPI_Win_c2f(arg) ((MPI_Fint)-1)
-#endif
-PyMPI_LOCAL MPI_Fint _pympi_MPI_Win_c2f(MPI_Win a0) { _pympi_CALL(MPI_Win_c2f,a0); }
-#define MPI_Win_c2f _pympi_MPI_Win_c2f
-
-#undef MPI_File_c2f
-PyMPI_EXTERN MPI_Fint MPI_File_c2f(MPI_File a0);
-#ifdef MPICH
-#define _pympi__MPI_File_c2f(arg) ((MPI_Fint)-1)
-#else
-#define _pympi__MPI_File_c2f(arg) ((MPI_Fint)-1)
-#endif
-PyMPI_LOCAL MPI_Fint _pympi_MPI_File_c2f(MPI_File a0) { _pympi_CALL(MPI_File_c2f,a0); }
-#define MPI_File_c2f _pympi_MPI_File_c2f
-
-#undef MPI_Errhandler_c2f
-PyMPI_EXTERN MPI_Fint MPI_Errhandler_c2f(MPI_Errhandler a0);
-#ifdef MPICH
-#define _pympi__MPI_Errhandler_c2f(arg) ((MPI_Fint)arg)
-#else
-#define _pympi__MPI_Errhandler_c2f(arg) ((MPI_Fint)-1)
-#endif
-PyMPI_LOCAL MPI_Fint _pympi_MPI_Errhandler_c2f(MPI_Errhandler a0) { _pympi_CALL(MPI_Errhandler_c2f,a0); }
-#define MPI_Errhandler_c2f _pympi_MPI_Errhandler_c2f
-
-#undef MPI_Type_f2c
-PyMPI_EXTERN MPI_Datatype MPI_Type_f2c(MPI_Fint a0);
-#ifdef MPICH
-#define _pympi__MPI_Type_f2c(arg) ((MPI_Datatype)arg)
-#else
-#define _pympi__MPI_Type_f2c(arg) ((MPI_Datatype)0)
-#endif
-PyMPI_LOCAL MPI_Datatype _pympi_MPI_Type_f2c(MPI_Fint a0) { _pympi_CALL(MPI_Type_f2c,a0); }
-#define MPI_Type_f2c _pympi_MPI_Type_f2c
-
-#undef MPI_Request_f2c
-PyMPI_EXTERN MPI_Request MPI_Request_f2c(MPI_Fint a0);
-#ifdef MPICH
-#define _pympi__MPI_Request_f2c(arg) ((MPI_Request)arg)
-#else
-#define _pympi__MPI_Request_f2c(arg) ((MPI_Request)0)
-#endif
-PyMPI_LOCAL MPI_Request _pympi_MPI_Request_f2c(MPI_Fint a0) { _pympi_CALL(MPI_Request_f2c,a0); }
-#define MPI_Request_f2c _pympi_MPI_Request_f2c
-
-#undef MPI_Message_f2c
-PyMPI_EXTERN MPI_Message MPI_Message_f2c(MPI_Fint a0);
-#ifdef MPICH
-#define _pympi__MPI_Message_f2c(arg) ((MPI_Message)arg)
-#else
-#define _pympi__MPI_Message_f2c(arg) ((MPI_Message)0)
-#endif
-PyMPI_LOCAL MPI_Message _pympi_MPI_Message_f2c(MPI_Fint a0) { _pympi_CALL(MPI_Message_f2c,a0); }
-#define MPI_Message_f2c _pympi_MPI_Message_f2c
-
-#undef MPI_Op_f2c
-PyMPI_EXTERN MPI_Op MPI_Op_f2c(MPI_Fint a0);
-#ifdef MPICH
-#define _pympi__MPI_Op_f2c(arg) ((MPI_Op)arg)
-#else
-#define _pympi__MPI_Op_f2c(arg) ((MPI_Op)0)
-#endif
-PyMPI_LOCAL MPI_Op _pympi_MPI_Op_f2c(MPI_Fint a0) { _pympi_CALL(MPI_Op_f2c,a0); }
-#define MPI_Op_f2c _pympi_MPI_Op_f2c
-
-#undef MPI_Group_f2c
-PyMPI_EXTERN MPI_Group MPI_Group_f2c(MPI_Fint a0);
-#ifdef MPICH
-#define _pympi__MPI_Group_f2c(arg) ((MPI_Group)arg)
-#else
-#define _pympi__MPI_Group_f2c(arg) ((MPI_Group)0)
-#endif
-PyMPI_LOCAL MPI_Group _pympi_MPI_Group_f2c(MPI_Fint a0) { _pympi_CALL(MPI_Group_f2c,a0); }
-#define MPI_Group_f2c _pympi_MPI_Group_f2c
-
-#undef MPI_Info_f2c
-PyMPI_EXTERN MPI_Info MPI_Info_f2c(MPI_Fint a0);
-#ifdef MPICH
-#define _pympi__MPI_Info_f2c(arg) ((MPI_Info)arg)
-#else
-#define _pympi__MPI_Info_f2c(arg) ((MPI_Info)0)
-#endif
-PyMPI_LOCAL MPI_Info _pympi_MPI_Info_f2c(MPI_Fint a0) { _pympi_CALL(MPI_Info_f2c,a0); }
-#define MPI_Info_f2c _pympi_MPI_Info_f2c
-
-#undef MPI_Session_f2c
-PyMPI_EXTERN MPI_Session MPI_Session_f2c(MPI_Fint a0);
-#ifdef MPICH
-#define _pympi__MPI_Session_f2c(arg) ((MPI_Session)arg)
-#else
-#define _pympi__MPI_Session_f2c(arg) ((MPI_Session)0)
-#endif
-PyMPI_LOCAL MPI_Session _pympi_MPI_Session_f2c(MPI_Fint a0) { _pympi_CALL(MPI_Session_f2c,a0); }
-#define MPI_Session_f2c _pympi_MPI_Session_f2c
-
-#undef MPI_Comm_f2c
-PyMPI_EXTERN MPI_Comm MPI_Comm_f2c(MPI_Fint a0);
-#ifdef MPICH
-#define _pympi__MPI_Comm_f2c(arg) ((MPI_Comm)arg)
-#else
-#define _pympi__MPI_Comm_f2c(arg) ((MPI_Comm)0)
-#endif
-PyMPI_LOCAL MPI_Comm _pympi_MPI_Comm_f2c(MPI_Fint a0) { _pympi_CALL(MPI_Comm_f2c,a0); }
-#define MPI_Comm_f2c _pympi_MPI_Comm_f2c
-
-#undef MPI_Win_f2c
-PyMPI_EXTERN MPI_Win MPI_Win_f2c(MPI_Fint a0);
-#ifdef MPICH
-#define _pympi__MPI_Win_f2c(arg) ((MPI_Win)arg)
-#else
-#define _pympi__MPI_Win_f2c(arg) ((MPI_Win)0)
-#endif
-PyMPI_LOCAL MPI_Win _pympi_MPI_Win_f2c(MPI_Fint a0) { _pympi_CALL(MPI_Win_f2c,a0); }
-#define MPI_Win_f2c _pympi_MPI_Win_f2c
-
-#undef MPI_File_f2c
-PyMPI_EXTERN MPI_File MPI_File_f2c(MPI_Fint a0);
-#ifdef MPICH
-#define _pympi__MPI_File_f2c(arg) ((MPI_File)0)
-#else
-#define _pympi__MPI_File_f2c(arg) ((MPI_File)0)
-#endif
-PyMPI_LOCAL MPI_File _pympi_MPI_File_f2c(MPI_Fint a0) { _pympi_CALL(MPI_File_f2c,a0); }
-#define MPI_File_f2c _pympi_MPI_File_f2c
-
-#undef MPI_Errhandler_f2c
-PyMPI_EXTERN MPI_Errhandler MPI_Errhandler_f2c(MPI_Fint a0);
-#ifdef MPICH
-#define _pympi__MPI_Errhandler_f2c(arg) ((MPI_Errhandler)arg)
-#else
-#define _pympi__MPI_Errhandler_f2c(arg) ((MPI_Errhandler)0)
-#endif
-PyMPI_LOCAL MPI_Errhandler _pympi_MPI_Errhandler_f2c(MPI_Fint a0) { _pympi_CALL(MPI_Errhandler_f2c,a0); }
-#define MPI_Errhandler_f2c _pympi_MPI_Errhandler_f2c
 
 #undef MPI_Comm_toint
 #ifndef PyMPI_HAVE_MPI_Comm_toint
@@ -370,6 +160,16 @@ PyMPI_EXTERN int MPI_Comm_toint(MPI_Comm a0);
 PyMPI_LOCAL int _pympi_MPI_Comm_toint(MPI_Comm a0) { _pympi_CALL(MPI_Comm_toint,a0); }
 #define MPI_Comm_toint _pympi_MPI_Comm_toint
 
+#undef MPI_Errhandler_c2f
+PyMPI_EXTERN int MPI_Errhandler_c2f(MPI_Errhandler a0);
+#ifdef MPICH
+#define _pympi__MPI_Errhandler_c2f(arg) ((int)arg)
+#else
+#define _pympi__MPI_Errhandler_c2f(arg) ((int)-1)
+#endif
+PyMPI_LOCAL int _pympi_MPI_Errhandler_c2f(MPI_Errhandler a0) { _pympi_CALL(MPI_Errhandler_c2f,a0); }
+#define MPI_Errhandler_c2f _pympi_MPI_Errhandler_c2f
+
 #undef MPI_Errhandler_toint
 #ifndef PyMPI_HAVE_MPI_Errhandler_toint
 PyMPI_EXTERN int MPI_Errhandler_toint(MPI_Errhandler a0);
@@ -377,6 +177,16 @@ PyMPI_EXTERN int MPI_Errhandler_toint(MPI_Errhandler a0);
 #define _pympi__MPI_Errhandler_toint(arg) (int)MPI_Errhandler_c2f(arg)
 PyMPI_LOCAL int _pympi_MPI_Errhandler_toint(MPI_Errhandler a0) { _pympi_CALL(MPI_Errhandler_toint,a0); }
 #define MPI_Errhandler_toint _pympi_MPI_Errhandler_toint
+
+#undef MPI_File_c2f
+PyMPI_EXTERN int MPI_File_c2f(MPI_File a0);
+#ifdef MPICH
+#define _pympi__MPI_File_c2f(arg) ((int)-1)
+#else
+#define _pympi__MPI_File_c2f(arg) ((int)-1)
+#endif
+PyMPI_LOCAL int _pympi_MPI_File_c2f(MPI_File a0) { _pympi_CALL(MPI_File_c2f,a0); }
+#define MPI_File_c2f _pympi_MPI_File_c2f
 
 #undef MPI_File_toint
 #ifndef PyMPI_HAVE_MPI_File_toint
@@ -386,6 +196,16 @@ PyMPI_EXTERN int MPI_File_toint(MPI_File a0);
 PyMPI_LOCAL int _pympi_MPI_File_toint(MPI_File a0) { _pympi_CALL(MPI_File_toint,a0); }
 #define MPI_File_toint _pympi_MPI_File_toint
 
+#undef MPI_Group_c2f
+PyMPI_EXTERN int MPI_Group_c2f(MPI_Group a0);
+#ifdef MPICH
+#define _pympi__MPI_Group_c2f(arg) ((int)arg)
+#else
+#define _pympi__MPI_Group_c2f(arg) ((int)-1)
+#endif
+PyMPI_LOCAL int _pympi_MPI_Group_c2f(MPI_Group a0) { _pympi_CALL(MPI_Group_c2f,a0); }
+#define MPI_Group_c2f _pympi_MPI_Group_c2f
+
 #undef MPI_Group_toint
 #ifndef PyMPI_HAVE_MPI_Group_toint
 PyMPI_EXTERN int MPI_Group_toint(MPI_Group a0);
@@ -393,6 +213,16 @@ PyMPI_EXTERN int MPI_Group_toint(MPI_Group a0);
 #define _pympi__MPI_Group_toint(arg) (int)MPI_Group_c2f(arg)
 PyMPI_LOCAL int _pympi_MPI_Group_toint(MPI_Group a0) { _pympi_CALL(MPI_Group_toint,a0); }
 #define MPI_Group_toint _pympi_MPI_Group_toint
+
+#undef MPI_Info_c2f
+PyMPI_EXTERN int MPI_Info_c2f(MPI_Info a0);
+#ifdef MPICH
+#define _pympi__MPI_Info_c2f(arg) ((int)arg)
+#else
+#define _pympi__MPI_Info_c2f(arg) ((int)-1)
+#endif
+PyMPI_LOCAL int _pympi_MPI_Info_c2f(MPI_Info a0) { _pympi_CALL(MPI_Info_c2f,a0); }
+#define MPI_Info_c2f _pympi_MPI_Info_c2f
 
 #undef MPI_Info_toint
 #ifndef PyMPI_HAVE_MPI_Info_toint
@@ -402,6 +232,16 @@ PyMPI_EXTERN int MPI_Info_toint(MPI_Info a0);
 PyMPI_LOCAL int _pympi_MPI_Info_toint(MPI_Info a0) { _pympi_CALL(MPI_Info_toint,a0); }
 #define MPI_Info_toint _pympi_MPI_Info_toint
 
+#undef MPI_Message_c2f
+PyMPI_EXTERN int MPI_Message_c2f(MPI_Message a0);
+#ifdef MPICH
+#define _pympi__MPI_Message_c2f(arg) ((int)arg)
+#else
+#define _pympi__MPI_Message_c2f(arg) ((int)-1)
+#endif
+PyMPI_LOCAL int _pympi_MPI_Message_c2f(MPI_Message a0) { _pympi_CALL(MPI_Message_c2f,a0); }
+#define MPI_Message_c2f _pympi_MPI_Message_c2f
+
 #undef MPI_Message_toint
 #ifndef PyMPI_HAVE_MPI_Message_toint
 PyMPI_EXTERN int MPI_Message_toint(MPI_Message a0);
@@ -409,6 +249,16 @@ PyMPI_EXTERN int MPI_Message_toint(MPI_Message a0);
 #define _pympi__MPI_Message_toint(arg) (int)MPI_Message_c2f(arg)
 PyMPI_LOCAL int _pympi_MPI_Message_toint(MPI_Message a0) { _pympi_CALL(MPI_Message_toint,a0); }
 #define MPI_Message_toint _pympi_MPI_Message_toint
+
+#undef MPI_Op_c2f
+PyMPI_EXTERN int MPI_Op_c2f(MPI_Op a0);
+#ifdef MPICH
+#define _pympi__MPI_Op_c2f(arg) ((int)arg)
+#else
+#define _pympi__MPI_Op_c2f(arg) ((int)-1)
+#endif
+PyMPI_LOCAL int _pympi_MPI_Op_c2f(MPI_Op a0) { _pympi_CALL(MPI_Op_c2f,a0); }
+#define MPI_Op_c2f _pympi_MPI_Op_c2f
 
 #undef MPI_Op_toint
 #ifndef PyMPI_HAVE_MPI_Op_toint
@@ -418,6 +268,16 @@ PyMPI_EXTERN int MPI_Op_toint(MPI_Op a0);
 PyMPI_LOCAL int _pympi_MPI_Op_toint(MPI_Op a0) { _pympi_CALL(MPI_Op_toint,a0); }
 #define MPI_Op_toint _pympi_MPI_Op_toint
 
+#undef MPI_Request_c2f
+PyMPI_EXTERN int MPI_Request_c2f(MPI_Request a0);
+#ifdef MPICH
+#define _pympi__MPI_Request_c2f(arg) ((int)arg)
+#else
+#define _pympi__MPI_Request_c2f(arg) ((int)-1)
+#endif
+PyMPI_LOCAL int _pympi_MPI_Request_c2f(MPI_Request a0) { _pympi_CALL(MPI_Request_c2f,a0); }
+#define MPI_Request_c2f _pympi_MPI_Request_c2f
+
 #undef MPI_Request_toint
 #ifndef PyMPI_HAVE_MPI_Request_toint
 PyMPI_EXTERN int MPI_Request_toint(MPI_Request a0);
@@ -425,6 +285,16 @@ PyMPI_EXTERN int MPI_Request_toint(MPI_Request a0);
 #define _pympi__MPI_Request_toint(arg) (int)MPI_Request_c2f(arg)
 PyMPI_LOCAL int _pympi_MPI_Request_toint(MPI_Request a0) { _pympi_CALL(MPI_Request_toint,a0); }
 #define MPI_Request_toint _pympi_MPI_Request_toint
+
+#undef MPI_Session_c2f
+PyMPI_EXTERN int MPI_Session_c2f(MPI_Session a0);
+#ifdef MPICH
+#define _pympi__MPI_Session_c2f(arg) ((int)arg)
+#else
+#define _pympi__MPI_Session_c2f(arg) ((int)-1)
+#endif
+PyMPI_LOCAL int _pympi_MPI_Session_c2f(MPI_Session a0) { _pympi_CALL(MPI_Session_c2f,a0); }
+#define MPI_Session_c2f _pympi_MPI_Session_c2f
 
 #undef MPI_Session_toint
 #ifndef PyMPI_HAVE_MPI_Session_toint
@@ -434,6 +304,16 @@ PyMPI_EXTERN int MPI_Session_toint(MPI_Session a0);
 PyMPI_LOCAL int _pympi_MPI_Session_toint(MPI_Session a0) { _pympi_CALL(MPI_Session_toint,a0); }
 #define MPI_Session_toint _pympi_MPI_Session_toint
 
+#undef MPI_Type_c2f
+PyMPI_EXTERN int MPI_Type_c2f(MPI_Datatype a0);
+#ifdef MPICH
+#define _pympi__MPI_Type_c2f(arg) ((int)arg)
+#else
+#define _pympi__MPI_Type_c2f(arg) ((int)-1)
+#endif
+PyMPI_LOCAL int _pympi_MPI_Type_c2f(MPI_Datatype a0) { _pympi_CALL(MPI_Type_c2f,a0); }
+#define MPI_Type_c2f _pympi_MPI_Type_c2f
+
 #undef MPI_Type_toint
 #ifndef PyMPI_HAVE_MPI_Type_toint
 PyMPI_EXTERN int MPI_Type_toint(MPI_Datatype a0);
@@ -441,6 +321,16 @@ PyMPI_EXTERN int MPI_Type_toint(MPI_Datatype a0);
 #define _pympi__MPI_Type_toint(arg) (int)MPI_Type_c2f(arg)
 PyMPI_LOCAL int _pympi_MPI_Type_toint(MPI_Datatype a0) { _pympi_CALL(MPI_Type_toint,a0); }
 #define MPI_Type_toint _pympi_MPI_Type_toint
+
+#undef MPI_Win_c2f
+PyMPI_EXTERN int MPI_Win_c2f(MPI_Win a0);
+#ifdef MPICH
+#define _pympi__MPI_Win_c2f(arg) ((int)arg)
+#else
+#define _pympi__MPI_Win_c2f(arg) ((int)-1)
+#endif
+PyMPI_LOCAL int _pympi_MPI_Win_c2f(MPI_Win a0) { _pympi_CALL(MPI_Win_c2f,a0); }
+#define MPI_Win_c2f _pympi_MPI_Win_c2f
 
 #undef MPI_Win_toint
 #ifndef PyMPI_HAVE_MPI_Win_toint
@@ -450,6 +340,16 @@ PyMPI_EXTERN int MPI_Win_toint(MPI_Win a0);
 PyMPI_LOCAL int _pympi_MPI_Win_toint(MPI_Win a0) { _pympi_CALL(MPI_Win_toint,a0); }
 #define MPI_Win_toint _pympi_MPI_Win_toint
 
+#undef MPI_Comm_f2c
+PyMPI_EXTERN MPI_Comm MPI_Comm_f2c(int a0);
+#ifdef MPICH
+#define _pympi__MPI_Comm_f2c(arg) ((MPI_Comm)arg)
+#else
+#define _pympi__MPI_Comm_f2c(arg) ((MPI_Comm)0)
+#endif
+PyMPI_LOCAL MPI_Comm _pympi_MPI_Comm_f2c(int a0) { _pympi_CALL(MPI_Comm_f2c,a0); }
+#define MPI_Comm_f2c _pympi_MPI_Comm_f2c
+
 #undef MPI_Comm_fromint
 #ifndef PyMPI_HAVE_MPI_Comm_fromint
 PyMPI_EXTERN MPI_Comm MPI_Comm_fromint(int a0);
@@ -457,6 +357,16 @@ PyMPI_EXTERN MPI_Comm MPI_Comm_fromint(int a0);
 #define _pympi__MPI_Comm_fromint(arg) MPI_Comm_f2c((int)arg)
 PyMPI_LOCAL MPI_Comm _pympi_MPI_Comm_fromint(int a0) { _pympi_CALL(MPI_Comm_fromint,a0); }
 #define MPI_Comm_fromint _pympi_MPI_Comm_fromint
+
+#undef MPI_Errhandler_f2c
+PyMPI_EXTERN MPI_Errhandler MPI_Errhandler_f2c(int a0);
+#ifdef MPICH
+#define _pympi__MPI_Errhandler_f2c(arg) ((MPI_Errhandler)arg)
+#else
+#define _pympi__MPI_Errhandler_f2c(arg) ((MPI_Errhandler)0)
+#endif
+PyMPI_LOCAL MPI_Errhandler _pympi_MPI_Errhandler_f2c(int a0) { _pympi_CALL(MPI_Errhandler_f2c,a0); }
+#define MPI_Errhandler_f2c _pympi_MPI_Errhandler_f2c
 
 #undef MPI_Errhandler_fromint
 #ifndef PyMPI_HAVE_MPI_Errhandler_fromint
@@ -466,6 +376,16 @@ PyMPI_EXTERN MPI_Errhandler MPI_Errhandler_fromint(int a0);
 PyMPI_LOCAL MPI_Errhandler _pympi_MPI_Errhandler_fromint(int a0) { _pympi_CALL(MPI_Errhandler_fromint,a0); }
 #define MPI_Errhandler_fromint _pympi_MPI_Errhandler_fromint
 
+#undef MPI_File_f2c
+PyMPI_EXTERN MPI_File MPI_File_f2c(int a0);
+#ifdef MPICH
+#define _pympi__MPI_File_f2c(arg) ((MPI_File)0)
+#else
+#define _pympi__MPI_File_f2c(arg) ((MPI_File)0)
+#endif
+PyMPI_LOCAL MPI_File _pympi_MPI_File_f2c(int a0) { _pympi_CALL(MPI_File_f2c,a0); }
+#define MPI_File_f2c _pympi_MPI_File_f2c
+
 #undef MPI_File_fromint
 #ifndef PyMPI_HAVE_MPI_File_fromint
 PyMPI_EXTERN MPI_File MPI_File_fromint(int a0);
@@ -473,6 +393,16 @@ PyMPI_EXTERN MPI_File MPI_File_fromint(int a0);
 #define _pympi__MPI_File_fromint(arg) MPI_File_f2c((int)arg)
 PyMPI_LOCAL MPI_File _pympi_MPI_File_fromint(int a0) { _pympi_CALL(MPI_File_fromint,a0); }
 #define MPI_File_fromint _pympi_MPI_File_fromint
+
+#undef MPI_Group_f2c
+PyMPI_EXTERN MPI_Group MPI_Group_f2c(int a0);
+#ifdef MPICH
+#define _pympi__MPI_Group_f2c(arg) ((MPI_Group)arg)
+#else
+#define _pympi__MPI_Group_f2c(arg) ((MPI_Group)0)
+#endif
+PyMPI_LOCAL MPI_Group _pympi_MPI_Group_f2c(int a0) { _pympi_CALL(MPI_Group_f2c,a0); }
+#define MPI_Group_f2c _pympi_MPI_Group_f2c
 
 #undef MPI_Group_fromint
 #ifndef PyMPI_HAVE_MPI_Group_fromint
@@ -482,6 +412,16 @@ PyMPI_EXTERN MPI_Group MPI_Group_fromint(int a0);
 PyMPI_LOCAL MPI_Group _pympi_MPI_Group_fromint(int a0) { _pympi_CALL(MPI_Group_fromint,a0); }
 #define MPI_Group_fromint _pympi_MPI_Group_fromint
 
+#undef MPI_Info_f2c
+PyMPI_EXTERN MPI_Info MPI_Info_f2c(int a0);
+#ifdef MPICH
+#define _pympi__MPI_Info_f2c(arg) ((MPI_Info)arg)
+#else
+#define _pympi__MPI_Info_f2c(arg) ((MPI_Info)0)
+#endif
+PyMPI_LOCAL MPI_Info _pympi_MPI_Info_f2c(int a0) { _pympi_CALL(MPI_Info_f2c,a0); }
+#define MPI_Info_f2c _pympi_MPI_Info_f2c
+
 #undef MPI_Info_fromint
 #ifndef PyMPI_HAVE_MPI_Info_fromint
 PyMPI_EXTERN MPI_Info MPI_Info_fromint(int a0);
@@ -489,6 +429,16 @@ PyMPI_EXTERN MPI_Info MPI_Info_fromint(int a0);
 #define _pympi__MPI_Info_fromint(arg) MPI_Info_f2c((int)arg)
 PyMPI_LOCAL MPI_Info _pympi_MPI_Info_fromint(int a0) { _pympi_CALL(MPI_Info_fromint,a0); }
 #define MPI_Info_fromint _pympi_MPI_Info_fromint
+
+#undef MPI_Message_f2c
+PyMPI_EXTERN MPI_Message MPI_Message_f2c(int a0);
+#ifdef MPICH
+#define _pympi__MPI_Message_f2c(arg) ((MPI_Message)arg)
+#else
+#define _pympi__MPI_Message_f2c(arg) ((MPI_Message)0)
+#endif
+PyMPI_LOCAL MPI_Message _pympi_MPI_Message_f2c(int a0) { _pympi_CALL(MPI_Message_f2c,a0); }
+#define MPI_Message_f2c _pympi_MPI_Message_f2c
 
 #undef MPI_Message_fromint
 #ifndef PyMPI_HAVE_MPI_Message_fromint
@@ -498,6 +448,16 @@ PyMPI_EXTERN MPI_Message MPI_Message_fromint(int a0);
 PyMPI_LOCAL MPI_Message _pympi_MPI_Message_fromint(int a0) { _pympi_CALL(MPI_Message_fromint,a0); }
 #define MPI_Message_fromint _pympi_MPI_Message_fromint
 
+#undef MPI_Op_f2c
+PyMPI_EXTERN MPI_Op MPI_Op_f2c(int a0);
+#ifdef MPICH
+#define _pympi__MPI_Op_f2c(arg) ((MPI_Op)arg)
+#else
+#define _pympi__MPI_Op_f2c(arg) ((MPI_Op)0)
+#endif
+PyMPI_LOCAL MPI_Op _pympi_MPI_Op_f2c(int a0) { _pympi_CALL(MPI_Op_f2c,a0); }
+#define MPI_Op_f2c _pympi_MPI_Op_f2c
+
 #undef MPI_Op_fromint
 #ifndef PyMPI_HAVE_MPI_Op_fromint
 PyMPI_EXTERN MPI_Op MPI_Op_fromint(int a0);
@@ -505,6 +465,16 @@ PyMPI_EXTERN MPI_Op MPI_Op_fromint(int a0);
 #define _pympi__MPI_Op_fromint(arg) MPI_Op_f2c((int)arg)
 PyMPI_LOCAL MPI_Op _pympi_MPI_Op_fromint(int a0) { _pympi_CALL(MPI_Op_fromint,a0); }
 #define MPI_Op_fromint _pympi_MPI_Op_fromint
+
+#undef MPI_Request_f2c
+PyMPI_EXTERN MPI_Request MPI_Request_f2c(int a0);
+#ifdef MPICH
+#define _pympi__MPI_Request_f2c(arg) ((MPI_Request)arg)
+#else
+#define _pympi__MPI_Request_f2c(arg) ((MPI_Request)0)
+#endif
+PyMPI_LOCAL MPI_Request _pympi_MPI_Request_f2c(int a0) { _pympi_CALL(MPI_Request_f2c,a0); }
+#define MPI_Request_f2c _pympi_MPI_Request_f2c
 
 #undef MPI_Request_fromint
 #ifndef PyMPI_HAVE_MPI_Request_fromint
@@ -514,6 +484,16 @@ PyMPI_EXTERN MPI_Request MPI_Request_fromint(int a0);
 PyMPI_LOCAL MPI_Request _pympi_MPI_Request_fromint(int a0) { _pympi_CALL(MPI_Request_fromint,a0); }
 #define MPI_Request_fromint _pympi_MPI_Request_fromint
 
+#undef MPI_Session_f2c
+PyMPI_EXTERN MPI_Session MPI_Session_f2c(int a0);
+#ifdef MPICH
+#define _pympi__MPI_Session_f2c(arg) ((MPI_Session)arg)
+#else
+#define _pympi__MPI_Session_f2c(arg) ((MPI_Session)0)
+#endif
+PyMPI_LOCAL MPI_Session _pympi_MPI_Session_f2c(int a0) { _pympi_CALL(MPI_Session_f2c,a0); }
+#define MPI_Session_f2c _pympi_MPI_Session_f2c
+
 #undef MPI_Session_fromint
 #ifndef PyMPI_HAVE_MPI_Session_fromint
 PyMPI_EXTERN MPI_Session MPI_Session_fromint(int a0);
@@ -522,6 +502,16 @@ PyMPI_EXTERN MPI_Session MPI_Session_fromint(int a0);
 PyMPI_LOCAL MPI_Session _pympi_MPI_Session_fromint(int a0) { _pympi_CALL(MPI_Session_fromint,a0); }
 #define MPI_Session_fromint _pympi_MPI_Session_fromint
 
+#undef MPI_Type_f2c
+PyMPI_EXTERN MPI_Datatype MPI_Type_f2c(int a0);
+#ifdef MPICH
+#define _pympi__MPI_Type_f2c(arg) ((MPI_Datatype)arg)
+#else
+#define _pympi__MPI_Type_f2c(arg) ((MPI_Datatype)0)
+#endif
+PyMPI_LOCAL MPI_Datatype _pympi_MPI_Type_f2c(int a0) { _pympi_CALL(MPI_Type_f2c,a0); }
+#define MPI_Type_f2c _pympi_MPI_Type_f2c
+
 #undef MPI_Type_fromint
 #ifndef PyMPI_HAVE_MPI_Type_fromint
 PyMPI_EXTERN MPI_Datatype MPI_Type_fromint(int a0);
@@ -529,6 +519,16 @@ PyMPI_EXTERN MPI_Datatype MPI_Type_fromint(int a0);
 #define _pympi__MPI_Type_fromint(arg) MPI_Type_f2c((int)arg)
 PyMPI_LOCAL MPI_Datatype _pympi_MPI_Type_fromint(int a0) { _pympi_CALL(MPI_Type_fromint,a0); }
 #define MPI_Type_fromint _pympi_MPI_Type_fromint
+
+#undef MPI_Win_f2c
+PyMPI_EXTERN MPI_Win MPI_Win_f2c(int a0);
+#ifdef MPICH
+#define _pympi__MPI_Win_f2c(arg) ((MPI_Win)arg)
+#else
+#define _pympi__MPI_Win_f2c(arg) ((MPI_Win)0)
+#endif
+PyMPI_LOCAL MPI_Win _pympi_MPI_Win_f2c(int a0) { _pympi_CALL(MPI_Win_f2c,a0); }
+#define MPI_Win_f2c _pympi_MPI_Win_f2c
 
 #undef MPI_Win_fromint
 #ifndef PyMPI_HAVE_MPI_Win_fromint
