@@ -908,10 +908,6 @@ class config(cmd_config.config):
         other_libraries=(),
         lang="c",
     ):
-        if sys.platform == "darwin":
-            self.compiler.linker_exe.append("-flat_namespace")
-            self.compiler.linker_exe.append("-undefined")
-            self.compiler.linker_exe.append("suppress")
         log.info("checking for library '%s' ...", library)
         body = "int main(int n, char**v) { (void)n; (void)v; return 0; }"
         ok = self.try_link(
@@ -922,10 +918,6 @@ class config(cmd_config.config):
             library_dirs,
             lang=lang,
         )
-        if sys.platform == "darwin":
-            self.compiler.linker_exe.remove("-flat_namespace")
-            self.compiler.linker_exe.remove("-undefined")
-            self.compiler.linker_exe.remove("suppress")
         return ok
 
     def check_function(
