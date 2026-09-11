@@ -329,14 +329,16 @@ cdef int mpi_version    = 0
 cdef int mpi_subversion = 0
 cdef int mpi_numversion = 0
 
+<void>MPI_Get_version(&mpi_version, &mpi_subversion)
+mpi_numversion = 10 * mpi_version + mpi_subversion
+
+
 cdef int initialize() except -1 nogil:
-    global mpi_version, mpi_subversion, mpi_numversion
-    <void> MPI_Get_version(&mpi_version, &mpi_subversion)
-    mpi_numversion = 10 * mpi_version + mpi_subversion
     if not mpi_active(): return 0
     check_mpiexec()
     options_set_errhandler(MPI_COMM_SELF)
     options_set_errhandler(MPI_COMM_WORLD)
+    CHKERR( PyMPI_Commctx_initialize() )
     return 0
 
 

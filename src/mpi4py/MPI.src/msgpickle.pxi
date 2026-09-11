@@ -1227,6 +1227,7 @@ cdef object PyMPI_exscan_p2p(object sendobj, object op,
 cdef extern from * nogil:
     int PyMPI_Commctx_intra(MPI_Comm, MPI_Comm*, int*)
     int PyMPI_Commctx_inter(MPI_Comm, MPI_Comm*, int*, MPI_Comm*, int*)
+    int PyMPI_Commctx_initialize()
     int PyMPI_Commctx_finalize()
 
 cdef int PyMPI_Commctx_INTRA(
@@ -1234,7 +1235,7 @@ cdef int PyMPI_Commctx_INTRA(
     MPI_Comm *dupcomm, int *tag,
 ) except -1:
     with PyMPI_Lock(comm, "@commctx_intra"):
-        CHKERR( PyMPI_Commctx_intra(comm, dupcomm, tag) )
+        with nogil: CHKERR( PyMPI_Commctx_intra(comm, dupcomm, tag) )
     return 0
 
 cdef int PyMPI_Commctx_INTER(
@@ -1243,8 +1244,8 @@ cdef int PyMPI_Commctx_INTER(
     MPI_Comm *localcomm, int *low_group,
 ) except -1:
     with PyMPI_Lock(comm, "@commctx_inter"):
-        CHKERR( PyMPI_Commctx_inter(comm, dupcomm, tag,
-                                    localcomm, low_group) )
+        with nogil: CHKERR( PyMPI_Commctx_inter(comm, dupcomm, tag,
+                                                localcomm, low_group) )
     return 0
 
 

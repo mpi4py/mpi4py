@@ -32,11 +32,6 @@ static int PyMPI_Commctx__TAG_UB = -1;
 static int PyMPI_Commctx_new(MPI_Comm comm, PyMPI_Commctx **_commctx)
 {
   PyMPI_Commctx *commctx;
-  if (PyMPI_Commctx_TAG_UB < 0) {
-    int ierr, *attrval = NULL, flag = 0;
-    ierr = MPI_Comm_get_attr(MPI_COMM_WORLD, MPI_TAG_UB, &attrval, &flag); CHKERR(ierr);
-    PyMPI_Commctx_TAG_UB = (flag && attrval) ? *attrval : 32767;
-  }
   commctx = (PyMPI_Commctx *) PyMPI_MALLOC(sizeof(PyMPI_Commctx));
   if (!commctx) {
     (void) MPI_Comm_call_errhandler(comm, MPI_ERR_INTERN);
@@ -71,20 +66,32 @@ static int PyMPI_Commctx_keyval(int *keyval)
 {
   int ierr;
   if (PyMPI_Commctx_KEYVAL != MPI_KEYVAL_INVALID) goto fn_exit;
-  ierr = MPI_Comm_create_keyval(MPI_COMM_NULL_COPY_FN,
-                                PyMPI_Commctx_free_fn,
+  ierr = MPI_Comm_create_keyval(MPI_COMM_NULL_COPY_FN, PyMPI_Commctx_free_fn,
                                 &PyMPI_Commctx_KEYVAL, NULL); CHKERR(ierr);
  fn_exit:
   if (keyval) *keyval = PyMPI_Commctx_KEYVAL;
   return MPI_SUCCESS;
 }
 
+static int PyMPI_Commctx_tag_ub(int *tag_ub)
+{
+  int ierr, *attrval = NULL, flag = 0;
+  if (PyMPI_Commctx_TAG_UB != -1) goto fn_exit;
+  ierr = MPI_Comm_get_attr(MPI_COMM_WORLD, MPI_TAG_UB,
+                           &attrval, &flag); CHKERR(ierr);
+  PyMPI_Commctx_TAG_UB = (flag && attrval) ? *attrval : 32767;
+ fn_exit:
+  if (tag_ub) *tag_ub = PyMPI_Commctx_TAG_UB;
+  return MPI_SUCCESS;
+}
+
 static int PyMPI_Commctx_lookup(MPI_Comm comm, PyMPI_Commctx **_commctx)
 {
-  int ierr, found = 0, keyval = MPI_KEYVAL_INVALID;
+  int ierr, found = 0, keyval = MPI_KEYVAL_INVALID, tag_ub = MPI_UNDEFINED;
   PyMPI_Commctx *commctx = NULL;
 
   ierr = PyMPI_Commctx_keyval(&keyval); CHKERR(ierr);
+  ierr = PyMPI_Commctx_tag_ub(&tag_ub); CHKERR(ierr);
   ierr = MPI_Comm_get_attr(comm, keyval, &commctx, &found); CHKERR(ierr);
   if (found && commctx) goto fn_exit;
 
@@ -93,7 +100,7 @@ static int PyMPI_Commctx_lookup(MPI_Comm comm, PyMPI_Commctx **_commctx)
   ierr = MPI_Comm_dup(comm, &commctx->dupcomm); CHKERR(ierr);
 
  fn_exit:
-  if (commctx->tag >= PyMPI_Commctx_TAG_UB) commctx->tag = 0;
+  if (commctx->tag >= tag_ub) commctx->tag = 0;
   if (_commctx) *_commctx = commctx;
   return MPI_SUCCESS;
 }
@@ -160,6 +167,14 @@ static int PyMPI_Commctx_inter(MPI_Comm comm, MPI_Comm *dupcomm, int *tag,
   return MPI_SUCCESS;
 }
 
+static int PyMPI_Commctx_initialize(void)
+{
+  int ierr;
+  ierr = PyMPI_Commctx_keyval(NULL); CHKERR(ierr);
+  ierr = PyMPI_Commctx_tag_ub(NULL); CHKERR(ierr);
+  return MPI_SUCCESS;
+}
+
 static int PyMPI_Commctx_finalize(void)
 {
   int ierr;
@@ -167,7 +182,6 @@ static int PyMPI_Commctx_finalize(void)
   ierr = PyMPI_Commctx_clear(MPI_COMM_SELF); CHKERR(ierr);
   ierr = PyMPI_Commctx_clear(MPI_COMM_WORLD); CHKERR(ierr);
   ierr = MPI_Comm_free_keyval(&PyMPI_Commctx_KEYVAL); CHKERR(ierr);
-  PyMPI_Commctx_TAG_UB = -1;
   return MPI_SUCCESS;
 }
 
