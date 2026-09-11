@@ -6,5 +6,6 @@ build:
 
 test:
 	$(PYTHON) sendrecv.py
+	$(MPIEXEC_PYTHON) issue784.py
 
 clean:
