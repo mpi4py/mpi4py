@@ -56,7 +56,7 @@ cdef class Session:
         """
         cdef MPI_Errhandler cerrhdl = arg_Errhandler(errhandler)
         cdef Session session = <Session>New(cls)
-        CHKERR( MPI_Session_init(
+        with nogil: CHKERR( MPI_Session_init(
             info.ob_mpi, cerrhdl, &session.ob_mpi) )
         options_set_errhandler(session.ob_mpi)
         return session
@@ -66,7 +66,7 @@ cdef class Session:
         Finalize a session.
         """
         cdef MPI_Session save = self.ob_mpi
-        CHKERR( MPI_Session_finalize(&self.ob_mpi) )
+        with nogil: CHKERR( MPI_Session_finalize(&self.ob_mpi) )
         if constobj(self): self.ob_mpi = save
 
     def Get_num_psets(self, Info info: Info = INFO_NULL) -> int:
