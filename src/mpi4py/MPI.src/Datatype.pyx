@@ -566,7 +566,7 @@ cdef class Datatype:
         cdef MPI_Count icount = iblen // extent
         cdef MPI_Count ocount = oblen
         #
-        CHKERR( MPI_Pack_c(
+        with nogil: CHKERR( MPI_Pack_c(
             ibptr, icount, self.ob_mpi,
             obptr, ocount, &position,
             comm.ob_mpi) )
@@ -592,7 +592,7 @@ cdef class Datatype:
         cdef MPI_Count icount = iblen
         cdef MPI_Count ocount = oblen // extent
         #
-        CHKERR( MPI_Unpack_c(
+        with nogil: CHKERR( MPI_Unpack_c(
             ibptr, icount, &position,
             obptr, ocount, self.ob_mpi,
             comm.ob_mpi) )
@@ -609,7 +609,7 @@ cdef class Datatype:
         .. note:: Returns an upper bound measured in bytes.
         """
         cdef MPI_Count size = 0
-        CHKERR( MPI_Pack_size_c(
+        with nogil: CHKERR( MPI_Pack_size_c(
             count, self.ob_mpi,
             comm.ob_mpi, &size) )
         return size
@@ -641,7 +641,7 @@ cdef class Datatype:
         cdef MPI_Count icount = iblen // extent
         cdef MPI_Count ocount = oblen
         #
-        CHKERR( MPI_Pack_external_c(
+        with nogil: CHKERR( MPI_Pack_external_c(
             cdatarep,
             ibptr, icount, self.ob_mpi,
             obptr, ocount, &position) )
@@ -671,7 +671,7 @@ cdef class Datatype:
         cdef MPI_Count icount = iblen
         cdef MPI_Count ocount = oblen // extent
         #
-        CHKERR( MPI_Unpack_external_c(
+        with nogil: CHKERR( MPI_Unpack_external_c(
             cdatarep,
             ibptr, icount, &position,
             obptr, ocount, self.ob_mpi) )
@@ -692,7 +692,7 @@ cdef class Datatype:
         cdef char *cdatarep = NULL
         cdef MPI_Count size = 0
         datarep = asmpistr(datarep, &cdatarep)
-        CHKERR( MPI_Pack_external_size_c(
+        with nogil: CHKERR( MPI_Pack_external_size_c(
             cdatarep, count, self.ob_mpi, &size) )
         return size
 
