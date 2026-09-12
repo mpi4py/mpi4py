@@ -513,7 +513,8 @@ cdef class Prequest(Request):
         """
         Mark a given partition as ready.
         """
-        CHKERR( MPI_Pready(partition, self.ob_mpi) )
+        with nogil: CHKERR( MPI_Pready(
+            partition, self.ob_mpi) )
 
     def Pready_range(
         self,
@@ -523,7 +524,8 @@ cdef class Prequest(Request):
         """
         Mark a range of partitions as ready.
         """
-        CHKERR( MPI_Pready_range(partition_low, partition_high, self.ob_mpi) )
+        with nogil: CHKERR( MPI_Pready_range(
+            partition_low, partition_high, self.ob_mpi) )
 
     def Pready_list(
         self,
@@ -534,7 +536,8 @@ cdef class Prequest(Request):
         """
         cdef int length = 0, *array_of_partitions = NULL
         partitions = getarray(partitions, &length, &array_of_partitions)
-        CHKERR( MPI_Pready_list(length, array_of_partitions, self.ob_mpi) )
+        with nogil: CHKERR( MPI_Pready_list(
+            length, array_of_partitions, self.ob_mpi) )
 
     def Parrived(
         self,
@@ -544,7 +547,7 @@ cdef class Prequest(Request):
         Test partial completion of a partitioned receive operation.
         """
         cdef int flag = 0
-        CHKERR( MPI_Parrived(self.ob_mpi, partition, &flag) )
+        with nogil: CHKERR( MPI_Parrived(self.ob_mpi, partition, &flag) )
         return <bint>flag
 
 
