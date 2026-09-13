@@ -92,7 +92,7 @@ class BaseTestPack(unittest.BaseMixin):
                                 self.assertGreater(p2, p1)
                             else:
                                 self.assertEqual(position, 0)
-                                self.assertEqual(p1, p0)
+                                self.assertEqual(p2, p1)
                             # unpack output arrays
                             position = p0 = 0
                             position = p1 = datatype1.Unpack(
@@ -112,7 +112,7 @@ class BaseTestPack(unittest.BaseMixin):
                                 self.assertGreater(p2, p1)
                             else:
                                 self.assertEqual(position, 0)
-                                self.assertEqual(p1, p0)
+                                self.assertEqual(p2, p1)
                             # test
                             self.assertTrue(allclose(iarray1, oarray1))
                             self.assertTrue(allclose(iarray2, oarray2))
