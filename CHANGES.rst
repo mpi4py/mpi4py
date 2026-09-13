@@ -11,7 +11,7 @@ Release 4.2.0 [YYYY-MM-DD]
 
   + Published wheels have support for the MPI 5.0 standard ABI.
 
-  + Fix/enhance build with ``setuptools`` and ``meson-python``.
+  + Improve build support with ``setuptools`` and ``meson-python``.
 
 * Backward-incompatible changes:
 
