@@ -98,12 +98,9 @@ def get_backend_requires_hook(name, dist, config_settings=None):
     @contextlib.contextmanager
     def environment(path):
         environ_prev = [("PATH", os.environ["PATH"])]
-        for prefix in ("_PYPROJECT_HOOKS", "PEP517"):
-            for suffix in ("BUILD_BACKEND", "BACKEND_PATH"):
-                key = f"{prefix}_{suffix}"
-                if key in os.environ:
-                    val = os.environ.pop(key)
-                    environ_prev.append((key, val))
+        for key in list(os.environ.keys()):
+            if key.startswith(("_PYPROJECT_HOOKS_", "PEP517_")):
+                environ_prev.append((key, os.environ.pop(key)))
         os.environ["PATH"] = path
         try:
             yield None
