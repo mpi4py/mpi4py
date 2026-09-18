@@ -51,7 +51,7 @@ try:
         (array1, array2),
     ])
 except ImportError:
-    numpy = None  # ty: ignore[invalid-assignment]
+    numpy = None
 
 
 class BaseTest(unittest.BaseMixin):
@@ -894,6 +894,8 @@ class BaseTest(unittest.BaseMixin):
 
     @unittest.skipIf(numpy is None, "numpy")
     def testBigMPI(self):
+        assert numpy is not None
+        np_all = numpy.all
         comm = self.COMM
         size = comm.Get_size()
         rank = comm.Get_rank()
@@ -940,7 +942,7 @@ class BaseTest(unittest.BaseMixin):
             self.assertGreater(status.Get_elements(MPI.BYTE), 0)
             request.Free()
             comm.barrier()
-            check = lambda x: numpy.all(x == 42)  # noqa: E731
+            check = lambda x: np_all(x == 42)  # noqa: E731
             self.testBcastIntra([c, c], check)
             self.testBcastInter([c, c], check)
             check2 = lambda x: check(x[0]) and check(x[1])  # noqa: B023,E731
@@ -968,6 +970,7 @@ class BaseTestPKL5(unittest.BaseMixin):
 
     @unittest.skipIf(numpy is None, "numpy")
     def testPickle5(self):
+        assert numpy is not None
         comm = self.COMM
         rank = comm.Get_rank()
         pickle = self.pickle
