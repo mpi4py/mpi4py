@@ -15,13 +15,13 @@ repos:
   - id: check-added-large-files
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.16.6
+  rev: v0.16.9
   hooks:
     - id: ruff-check
     - id: ruff-format
 
 - repo: https://github.com/astral-sh/ty-pre-commit
-  rev: v0.0.82
+  rev: v0.0.84
   hooks:
     - id: ty
       args: [--group, type, --no-install-project]
@@ -43,7 +43,7 @@ repos:
       args: [--strict]
 
 - repo: https://github.com/shellcheck-py/shellcheck-py
-  rev: v0.11.0.1
+  rev: v0.11.0.1-1
   hooks:
     - id: shellcheck
       args: [-x]
