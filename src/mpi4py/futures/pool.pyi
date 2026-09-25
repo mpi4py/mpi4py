@@ -10,7 +10,6 @@ from os import PathLike
 from typing import (
     Any,
     AnyStr,
-    ParamSpec,
     TypeAlias,
 )
 
@@ -20,14 +19,11 @@ else:
     from typing_extensions import Self
 
 from ..MPI import COMM_WORLD, Intracomm
-from ..typing import T
-from ._base import Executor, Future
-from ._core import Pool
+from ..typing import P, T
+from . import _base, _core
 
-_P = ParamSpec("_P")
-
-class MPIPoolExecutor(Executor):
-    Future: TypeAlias = Future
+class MPIPoolExecutor(_base.Executor):
+    Future: TypeAlias = _base.Future
     def __init__(
         self,
         max_workers: int | None = None,
@@ -44,11 +40,11 @@ class MPIPoolExecutor(Executor):
         env: Mapping[str, str] | Iterable[tuple[str, str]] = ...,
         **kwargs: Any,
     ) -> None: ...
-    def _bootstrap(self) -> Pool: ...
+    def _bootstrap(self) -> _core.Pool: ...
     @property
     def _max_workers(self) -> int: ...
     _shutdown: bool
-    _pool: Pool | None
+    _pool: _core.Pool | None
     @property
     def num_workers(self) -> int: ...
     def bootup(
@@ -57,10 +53,10 @@ class MPIPoolExecutor(Executor):
     ) -> Self: ...
     def submit(
         self,
-        fn: Callable[_P, T],
+        fn: Callable[P, T],
         /,
-        *args: _P.args,
-        **kwargs: _P.kwargs,
+        *args: P.args,
+        **kwargs: P.kwargs,
     ) -> Future[T]: ...
     def map(
         self,

@@ -613,7 +613,7 @@ class WaitTestMixin(BaseMixin):
                 CANCELLED_AND_NOTIFIED_FUTURE,
                 future1,
                 future2,
-            ],
+            ],  # ty: ignore[invalid-argument-type]
             return_when=futures.FIRST_EXCEPTION,
         )
 
@@ -1140,6 +1140,7 @@ class ProcessPoolPickleTest(unittest.TestCase):
         o = BadPickle()
         f = self.executor.submit(inout, o)
         exc = f.exception()
+        assert exc is not None
         self.assertIsInstance(exc, ZeroDivisionError)
         cause = exc.__cause__
         self.assertIsNone(cause)
@@ -1148,6 +1149,7 @@ class ProcessPoolPickleTest(unittest.TestCase):
         o = BadUnpickle()
         f = self.executor.submit(inout, o)
         exc = f.exception()
+        assert exc is not None
         self.assertIsInstance(exc, ZeroDivisionError)
         cause = exc.__cause__
         self.assertIsInstance(cause, futures._core.RemoteTraceback)
