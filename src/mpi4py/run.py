@@ -22,6 +22,20 @@ def run_command_line(args=None):
     import sys
     from runpy import run_module, run_path
 
+    def read_stream(stream):
+        if os.name == "posix":  # pragma: no branch
+            blocking = os.get_blocking(stream.fileno())
+            os.set_blocking(stream.fileno(), False)
+        try:
+            return stream.read()
+        except BlockingIOError:  # pragma: no cover
+            return ""
+        except TypeError:  # pragma: no cover  # Py<3.14
+            return ""
+        finally:
+            if os.name == "posix":  # pragma: no branch
+                os.set_blocking(stream.fileno(), blocking)
+
     def run_string(
         string,
         init_globals=None,
@@ -38,7 +52,7 @@ def run_command_line(args=None):
     sys.argv[:] = args if args is not None else sys.argv[1:]
 
     if sys.argv[0] == "-":
-        cmd = sys.stdin.read()
+        cmd = read_stream(sys.stdin)
         run_string(cmd, run_name="__main__", filename="<stdin>", argv0="-")
     elif sys.argv[0] == "-c":
         cmd = sys.argv.pop(1)  # Remove "cmd" from argument list
