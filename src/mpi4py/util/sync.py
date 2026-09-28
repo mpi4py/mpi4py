@@ -481,6 +481,8 @@ class Condition:
 
     def locked(self):
         """Return whether the underlying mutex is held."""
+        if not self._window:
+            raise RuntimeError("condition already freed")
         return self._mutex.locked()
 
     def wait(self):

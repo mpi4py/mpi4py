@@ -552,6 +552,7 @@ class BaseTestCondition(unittest.BaseMixin):
             cv.free()
         self.assertRaises(RuntimeError, cv.acquire)
         self.assertRaises(RuntimeError, cv.release)
+        self.assertRaises(RuntimeError, cv.locked)
         self.assertRaises(RuntimeError, cv.wait)
         self.assertRaises(RuntimeError, cv.wait_for, lambda: False)
         self.assertRaises(RuntimeError, cv.notify)
