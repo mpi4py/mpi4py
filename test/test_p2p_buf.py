@@ -468,9 +468,18 @@ class BaseTestP2PBuf(unittest.BaseMixin):
             status = MPI.Status()
             f = comm.Iprobe(MPI.ANY_SOURCE, MPI.ANY_TAG, status)
             self.assertFalse(f)
-            self.assertEqual(status.source, MPI.ANY_SOURCE)
-            self.assertEqual(status.tag, MPI.ANY_TAG)
+            sbuf = (bytearray(1), 1, MPI.BYTE)
+            rbuf = (bytearray(1), 1, MPI.BYTE)
+            src = dst = comm.Get_rank()
+            req = comm.Isend(sbuf, dst, 42)
+            while not comm.Iprobe(MPI.ANY_SOURCE, MPI.ANY_TAG, status):
+                pass
+            comm.Recv(rbuf, src, MPI.ANY_TAG)
+            req.Wait()
+            self.assertEqual(status.source, src)
+            self.assertEqual(status.tag, 42)
             self.assertEqual(status.error, MPI.SUCCESS)
+            self.assertEqual(status.Get_count(), 1)
         finally:
             comm.Free()
 

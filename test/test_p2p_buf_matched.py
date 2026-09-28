@@ -80,15 +80,19 @@ class BaseTestP2PMatched(unittest.BaseMixin):
             status = MPI.Status()
             m = comm.Improbe(MPI.ANY_SOURCE, MPI.ANY_TAG, status)
             self.assertIsNone(m)
-            self.assertEqual(status.source, MPI.ANY_SOURCE)
-            self.assertEqual(status.tag, MPI.ANY_TAG)
-            self.assertEqual(status.error, MPI.SUCCESS)
             m = MPI.Message.Iprobe(comm)
             self.assertIsNone(m)
             buf = [None, 0, MPI.BYTE]
-            s = comm.Isend(buf, comm.rank, 0)
-            r = comm.Mprobe(comm.rank, 0).Irecv(buf)
+            s = comm.Isend(buf, comm.rank, 42)
+            m = comm.Improbe(MPI.ANY_SOURCE, MPI.ANY_TAG, status)
+            while not m:
+                m = comm.Improbe(MPI.ANY_SOURCE, MPI.ANY_TAG, status)
+            self.assertTrue(m)
+            r = m.Irecv(buf)
             MPI.Request.Waitall([s, r])
+            self.assertEqual(status.source, comm.rank)
+            self.assertEqual(status.tag, 42)
+            self.assertEqual(status.error, MPI.SUCCESS)
         finally:
             comm.Free()
 
