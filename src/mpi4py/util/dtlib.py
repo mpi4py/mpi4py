@@ -104,6 +104,9 @@ def from_numpy_dtype(dtype):
 
     # elementary data type
     datatype = _get_datatype(dtype)
+    if dtype.kind in "SU" and dtype.itemsize > datatype.size:
+        # fixed-width strings: the code maps to a single character
+        return datatype.Create_contiguous(dtype.itemsize // datatype.size)
     return datatype.Dup()
 
 
@@ -129,6 +132,8 @@ def to_numpy_dtype(datatype):
         # elementary datatype
         typecode = _get_typecode(datatype)
         if typecode is not None:
+            if typecode == "U":  # a bare 'U' is a zero-width string
+                typecode = "U1"
             return np_dtype(typecode)
         # pair datatype for MINLOC/MAXLOC reductions
         names = ("SHORT", "INT", "LONG", "FLOAT", "DOUBLE", "LONG_DOUBLE")
