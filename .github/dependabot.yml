@@ -30,3 +30,7 @@ updates:
       pre-commit:
         patterns:
           - "*"
+    ignore:
+      - dependency-name: "https://github.com/shellcheck-py/shellcheck-py"
+        versions:
+          - "v0.11.0.1"
