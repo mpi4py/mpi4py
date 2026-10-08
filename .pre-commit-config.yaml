@@ -15,7 +15,7 @@ repos:
   - id: check-added-large-files
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.16.9
+  rev: v0.16.10
   hooks:
     - id: ruff-check
     - id: ruff-format
@@ -43,7 +43,7 @@ repos:
       args: [--strict]
 
 - repo: https://github.com/shellcheck-py/shellcheck-py
-  rev: v0.11.0.1-1
+  rev: v0.11.0.1
   hooks:
     - id: shellcheck
       args: [-x]
