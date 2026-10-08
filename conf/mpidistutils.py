@@ -1818,12 +1818,12 @@ if SOURCE_DATE_EPOCH is not None:
             pass
 
     class TarInfo(tarfile.TarInfo):
-        mode = TarInfoMode()
-        mtime = TarInfoAttr(timestamp)
-        uid = TarInfoAttr(0)
-        gid = TarInfoAttr(0)
-        uname = TarInfoAttr("")
-        gname = TarInfoAttr("")
+        mode = TarInfoMode()  # ty: ignore[invalid-assignment]
+        mtime = TarInfoAttr(timestamp)  # ty: ignore[invalid-assignment]
+        uid = TarInfoAttr(0)  # ty: ignore[invalid-assignment]
+        gid = TarInfoAttr(0)  # ty: ignore[invalid-assignment]
+        uname = TarInfoAttr("")  # ty: ignore[invalid-assignment]
+        gname = TarInfoAttr("")  # ty: ignore[invalid-assignment]
 
     def make_tarball(*args, **kwargs):
         tarinfo_orig = tarfile.TarFile.tarinfo

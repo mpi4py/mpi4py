@@ -475,7 +475,7 @@ class UserExecutor(UserExecutorMixin, cf.ThreadPoolExecutor):
 
 class UserPool(pool.Pool):
     #
-    Executor = UserExecutor
+    Executor = UserExecutor  # ty: ignore[invalid-assignment]
 
 
 class TestUserPool(BaseTestPool, unittest.TestCase):

@@ -119,7 +119,7 @@ class ProcessPoolMixin(ExecutorMixin):
                 executor_type,
                 python_args="-m coverage run".split(),
             )
-        )
+        )  # ty: ignore[invalid-assignment]
 
 
 @unittest.skipIf(not SHARED_POOL, "not-shared-pool")
