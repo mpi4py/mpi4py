@@ -243,23 +243,20 @@ class BaseTestMyRequest(unittest.BaseMixin):
 
 class TestMyRequest(BaseTestMyRequest, unittest.TestCase):
     #
-    MPIRequestType: type[MPI.Request] = MPI.Request
-    MyRequestType: type[MyRequest] = MyRequest
-    req: MyRequest
+    MPIRequestType = MPI.Request
+    MyRequestType = MyRequest
 
 
 class TestMyPrequest(BaseTestMyRequest, unittest.TestCase):
     #
-    MPIRequestType: type[MPI.Prequest] = MPI.Prequest
-    MyRequestType: type[MyPrequest] = MyPrequest
-    req: MyPrequest
+    MPIRequestType = MPI.Prequest
+    MyRequestType = MyPrequest
 
 
 class TestMyGrequest(BaseTestMyRequest, unittest.TestCase):
     #
-    MPIRequestType: type[MPI.Grequest] = MPI.Grequest
-    MyRequestType: type[MyGrequest] = MyGrequest
-    req: MyGrequest
+    MPIRequestType = MPI.Grequest
+    MyRequestType = MyGrequest
 
 
 class TestMyRequest2(TestMyRequest):
@@ -274,6 +271,8 @@ class TestMyRequest2(TestMyRequest):
 @unittest.skipMPI("mpich(==3.4.1)")
 class TestMyPrequest2(TestMyPrequest):
     #
+    req: MyPrequest  # ty: ignore[invalid-mutable-override]
+
     def setUp(self):
         req = MPI.COMM_SELF.Send_init(
             [MPI.BOTTOM, 0, MPI.BYTE], dest=MPI.PROC_NULL, tag=0

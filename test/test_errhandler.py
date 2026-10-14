@@ -163,7 +163,7 @@ class BaseTestErrhandler(unittest.BaseMixin):
 
 class TestErrhandlerComm(BaseTestErrhandler, unittest.TestCase):
     #
-    mpiobj: MPI.Comm
+    mpiobj: MPI.Comm  # ty: ignore[invalid-mutable-override]
 
     def setUp(self):
         self.mpiobj = MPI.COMM_SELF.Dup()
@@ -175,7 +175,7 @@ class TestErrhandlerComm(BaseTestErrhandler, unittest.TestCase):
 @unittest.skipMPI("openmpi(<4.1.0)", sys.platform == "darwin")
 class TestErrhandlerWin(BaseTestErrhandler, unittest.TestCase):
     #
-    mpiobj: MPI.Win
+    mpiobj: MPI.Win  # ty: ignore[invalid-mutable-override]
 
     def setUp(self):
         try:
@@ -196,7 +196,7 @@ class TestErrhandlerWin(BaseTestErrhandler, unittest.TestCase):
 
 class TestErrhandlerFile(BaseTestErrhandler, unittest.TestCase):
     #
-    mpiobj: MPI.File
+    mpiobj: MPI.File  # ty: ignore[invalid-mutable-override]
 
     def setUp(self):
         rank = MPI.COMM_WORLD.Get_rank()
@@ -250,7 +250,7 @@ class TestErrhandlerFileNull(unittest.TestCase):
 
 class TestErrhandlerSession(BaseTestErrhandler, unittest.TestCase):
     #
-    mpiobj: MPI.Session
+    mpiobj: MPI.Session  # ty: ignore[invalid-mutable-override]
 
     def setUp(self):
         try:

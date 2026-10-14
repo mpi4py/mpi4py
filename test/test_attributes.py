@@ -175,7 +175,7 @@ class BaseTestAttr(unittest.BaseMixin):
 
 class BaseTestCommAttr(BaseTestAttr):
     #
-    obj: MPI.Comm
+    obj: MPI.Comm  # ty: ignore[invalid-mutable-override]
     NULL = MPI.COMM_NULL
 
     @unittest.skipMPI("openmpi(<=1.5.1)")
@@ -215,7 +215,7 @@ class TestCommAttrSelf(BaseTestCommAttr, unittest.TestCase):
 
 class BaseTestDatatypeAttr(BaseTestAttr):
     #
-    obj: MPI.Datatype
+    obj: MPI.Datatype  # ty: ignore[invalid-mutable-override]
     NULL = MPI.DATATYPE_NULL
 
     def testAttrCopyDelete(self):
@@ -260,7 +260,7 @@ class TestDatatypeAttrFLOAT(BaseTestDatatypeAttr, unittest.TestCase):
 
 class TestWinAttr(BaseTestAttr, unittest.TestCase):
     #
-    obj: MPI.Win
+    obj: MPI.Win  # ty: ignore[invalid-mutable-override]
     NULL = MPI.WIN_NULL
 
     def setUp(self):

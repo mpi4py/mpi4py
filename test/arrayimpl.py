@@ -121,7 +121,6 @@ class BaseArray:
     #
     backend = None
     array: typing.Any
-    typecode: str
 
     TypeMap = TypeMap.copy()
     TypeMap.pop("g", None)
@@ -134,6 +133,10 @@ class BaseArray:
 
     def __setitem__(self, i, v):
         self.array[i] = v
+
+    @property
+    def typecode(self):
+        return ""
 
     @property
     def mpidtype(self):
