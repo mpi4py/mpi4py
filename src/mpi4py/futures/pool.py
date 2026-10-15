@@ -264,13 +264,14 @@ def _starmap_helper(
 
     if buffersize is not None:
         fs = collections.deque(
-            executor.submit(function, *args)
+            executor.submit(function, *args)  # novermin
             for args in itertools.islice(iterable, buffersize)
         )
         unordered = False
     else:
         fs = collections.deque(
-            executor.submit(function, *args) for args in iterable
+            executor.submit(function, *args)  # novermin
+            for args in iterable
         )
         if unordered:
             fs = set(fs)
