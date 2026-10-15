@@ -3,7 +3,9 @@
 
 [vermin]
 targets = 3.10
-exclusions = typing.Self
+exclusions =
+  typing.Self
+  typing.disjoint_base
 ignore_incomp = yes
 eval_annotations = yes
 backports =
