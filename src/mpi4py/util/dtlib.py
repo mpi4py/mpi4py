@@ -102,8 +102,15 @@ def from_numpy_dtype(dtype):
         finally:
             datatype.Free()
 
-    # elementary data type
     datatype = _get_datatype(dtype)
+
+    # flexible-width data type
+    if dtype.kind in "SU":
+        width = dtype.itemsize // datatype.Get_size()
+        if width != 1:
+            return datatype.Create_contiguous(width)
+
+    # elementary data type
     return datatype.Dup()
 
 

@@ -379,6 +379,8 @@ cdef inline const char* DatatypeStr(MPI_Datatype datatype) noexcept nogil:
 
 cdef inline const char* DatatypeCode(MPI_Datatype datatype) noexcept nogil:
     if datatype == MPI_DATATYPE_NULL : return NULL
+    # wchar_t
+    if datatype == MPI_WCHAR and sizeof(wchar_t) == 4: return "U1"
     # C99
     if datatype == MPI_C_BOOL   : return typestr('b', 1)
     if datatype == MPI_INT8_T   : return typestr('i', 1)

@@ -332,6 +332,40 @@ class TestUtilDTLib(unittest.TestCase):
                     mt.Free()
                     self.assertEqual(dt, dt2)
 
+    @unittest.skipIf(numpy is None, "numpy")
+    def testFixedWidthStrings(self):
+        assert numpy is not None
+        comm = MPI.COMM_SELF
+        try:
+            MPI.Datatype.fromcode("U")
+            has_wchar = True
+        except ValueError:  # wchar_t is not 4 bytes wide
+            has_wchar = False
+        for spec, data in (
+            ("S0", [b"", b""]),
+            ("S1", [b"a", b"b"]),
+            ("S3", [b"abc", b"def"]),
+            ("U0", ["", ""]),
+            ("U1", ["x", "y"]),
+            ("U2", ["xy", "zw"]),
+            ("S5, i4", [(b"abcde", 1), (b"fghij", 2)]),
+            ("S5, U3, i4", [(b"abcde", "uvw", 1), (b"fghij", "xyz", 2)]),
+        ):
+            if "U" in str(spec) and not has_wchar:
+                continue
+            with self.subTest(dtype=spec):
+                dt = np_dtype(spec)
+                sbuf = numpy.array(data, dt)
+                rbuf = numpy.zeros_like(sbuf)
+                mt = fromnumpy(dt)
+                mt.Commit()
+                self.assertEqual(mt.extent, dt.itemsize)
+                dt2 = tonumpy(mt)
+                self.assertEqual(dt2.itemsize, dt.itemsize)
+                comm.Sendrecv([sbuf, 2, mt], 0, 0, [rbuf, 2, mt], 0, 0)
+                mt.Free()
+                self.assertEqual(rbuf.tolist(), sbuf.tolist())
+
     def testVector(self):
         for mt in datatypes:
             if not try_dtype(mt):
