@@ -2,7 +2,7 @@
 MPI for Python
 ==============
 
-.. image::  https://github.com/mpi4py/mpi4py/workflows/ci/badge.svg?branch=master
+.. image::  https://github.com/mpi4py/mpi4py/actions/workflows/ci.yml/badge.svg?branch=master
    :target: https://github.com/mpi4py/mpi4py/actions/
 .. image::  https://readthedocs.org/projects/mpi4py/badge/?version=latest
    :target: https://mpi4py.readthedocs.io/en/latest/
