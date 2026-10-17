@@ -10,6 +10,7 @@
 
 import atexit
 import collections
+import importlib.util
 import itertools
 import os
 import sys
@@ -907,6 +908,8 @@ def import_main(mod_name, mod_path, init_globals, run_name):
                 dir_path = os.path.dirname(mod_path)  # noqa: PTH120
                 sys.path[0] = os.path.realpath(dir_path)
             runpy.run_path(mod_path, run_name=run_name)
+            spec = importlib.util.spec_from_file_location(run_name, mod_path)
+            module.__spec__ = spec
         sys.modules["__main__"] = sys.modules[run_name] = module
     except BaseException:  # pragma: no cover
         sys.modules["__main__"] = main_module
