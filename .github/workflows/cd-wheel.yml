@@ -469,7 +469,7 @@ jobs:
       name: Install MPI in local directory
       id: impi
       run: |
-        package=intelmpi.redist.win-x64 version=2021.18.0.740
+        package=intelmpi.redist.win-x64 version=2021.18.1.8
         nuget install $package -Version $version
         mpiroot="$PWD/$package.$version/runtimes/win-x64/native"
         mpiexec="$mpiroot/bin/mpiexec.exe"

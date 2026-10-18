@@ -51,10 +51,11 @@ case "$(uname)" in
             ;;
             impi)
                 nuget install intelmpi.devel.win-x64
+                stagedir=$(ls -d libfabric.*/runtimes/win-x64/native)
+                mv "$stagedir"/libfabric "$destdir"
                 stagedir=$(ls -d intelmpi.redist.*/runtimes/win-x64/native)
                 mv "$stagedir"/bin "$destdir"
                 mv "$stagedir"/etc "$destdir"
-                mv "$stagedir"/libfabric "$destdir"
                 stagedir=$(ls -d intelmpi.devel.*/build/native)
                 mv "$stagedir"/win-x64/lib "$destdir"
                 mv "$stagedir"/include "$destdir"
