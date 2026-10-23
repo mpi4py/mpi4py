@@ -1,10 +1,10 @@
 # https://pylint.readthedocs.io # -*- mode: conf -*-
 
-[MASTER]
+[MAIN]
 ignore-patterns = .*\.pyi
 disable = locally-disabled,file-ignored,no-else-return
 enable = useless-suppression
-good-names = i,j,k,_,fs,fn,tb,MPI
+good-names = MPI
 typealias-rgx=[_A-Z][_a-zA-Z0-9]*
 extension-pkg-allow-list = mpi4py
 reports = no
