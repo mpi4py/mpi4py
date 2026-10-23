@@ -103,7 +103,7 @@ def lint(ctx):
     _run_check_commands(
         ["ruff", "check", "--quiet"],
         ["ruff", "format", "--quiet", "--diff"],
-        ["pylint", "mpi4py"],
+        ["pylint", "-j1", "mpi4py"],
         ["cython-lint", "."],
         ["codespell"],
         ["vermin", "--quiet", "."],
