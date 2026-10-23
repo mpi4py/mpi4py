@@ -9,6 +9,13 @@ Release 4.2.0 [YYYY-MM-DD]
     global reduction operations is equivalent to using `MPI.IN_PLACE`
     for the ``sendbuf`` argument.
 
+  + The `Mutex.locked()` method now returns whether a mutex is held
+    by any process, mimicking the behavior of `threading.Lock` and
+    `multiprocessing.Lock`.
+
+  + A new `Mutex.owned()` method returns whether a mutex is held by
+    the calling process.
+
   + Published wheels have support for the MPI 5.0 standard ABI.
 
   + Improve build support with ``setuptools`` and ``meson-python``.

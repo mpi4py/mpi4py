@@ -72,6 +72,7 @@ Mutual exclusion
    .. automethod:: __exit__
    .. automethod:: acquire
    .. automethod:: release
+   .. automethod:: owned
    .. automethod:: locked
    .. automethod:: count
    .. automethod:: free
@@ -107,6 +108,7 @@ Condition variable
    .. automethod:: __exit__
    .. automethod:: acquire
    .. automethod:: release
+   .. automethod:: owned
    .. automethod:: locked
    .. automethod:: wait
    .. automethod:: wait_for

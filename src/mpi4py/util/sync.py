@@ -242,6 +242,22 @@ class Mutex:
 
         window.Unlock_all()
 
+    def _owned(self):
+        lock_id = 0
+        memory = memoryview(self._window).cast("i")
+        return bool(memory[lock_id])
+
+    def _locked(self):
+        null_rank, tail_rank = MPI.PROC_NULL, 0
+        tail_id = 2
+        window = self._window
+        zero = _array.array("i", [0])
+        prev = _array.array("i", [null_rank])
+        window.Lock(tail_rank, MPI.LOCK_SHARED)
+        window.Fetch_and_op(zero, prev, tail_rank, tail_id, MPI.NO_OP)
+        window.Unlock(tail_rank)
+        return prev[0] != null_rank
+
     def _count_fetch_and_op(self, value, op):
         lock_id = 0
         window = self._window
@@ -290,7 +306,7 @@ class Mutex:
         """
         if not self._window:
             raise RuntimeError("mutex already freed")
-        if self.locked():
+        if self._owned():
             if self._recursive:
                 self._count_fetch_and_op(+1, MPI.SUM)
                 return True
@@ -301,20 +317,24 @@ class Mutex:
         """Release mutex."""
         if not self._window:
             raise RuntimeError("mutex already freed")
-        if not self.locked():
+        if not self._owned():
             raise RuntimeError("cannot release unheld mutex")
         if self._recursive:
             if self._count_fetch_and_op(-1, MPI.SUM) > 1:
                 return
         self._release()
 
-    def locked(self):
-        """Return whether the mutex is held."""
+    def owned(self):
+        """Return whether the mutex is held by the caller process."""
         if not self._window:
             raise RuntimeError("mutex already freed")
-        lock_id = 0
-        memory = memoryview(self._window).cast("i")
-        return bool(memory[lock_id])
+        return self._owned()
+
+    def locked(self):
+        """Return whether the mutex is held by any process."""
+        if not self._window:
+            raise RuntimeError("mutex already freed")
+        return self._owned() or self._locked()
 
     def count(self):
         """Return the recursion count."""
@@ -325,7 +345,7 @@ class Mutex:
     def free(self):
         """Free mutex resources."""
         if self._window:
-            if self.locked():
+            if self._owned():
                 self._release()
         window = self._window
         self._window = MPI.WIN_NULL
@@ -452,10 +472,14 @@ class Condition:
         # pylint: disable=protected-access
         self._mutex._acquire_restore(state)
 
+    def _mutex_owned(self):
+        # pylint: disable=protected-access
+        return self._mutex._owned()
+
     def _mutex_reset(self):
         # pylint: disable=protected-access
         if self._mutex._window:
-            if self._mutex.locked():
+            if self._mutex._owned():
                 self._mutex._release()
 
     def __enter__(self):
@@ -479,8 +503,14 @@ class Condition:
             raise RuntimeError("condition already freed")
         self._mutex.release()
 
+    def owned(self):
+        """Return whether the underlying mutex is held by the caller."""
+        if not self._window:
+            raise RuntimeError("condition already freed")
+        return self._mutex.owned()
+
     def locked(self):
-        """Return whether the underlying mutex is held."""
+        """Return whether the underlying mutex is held by any process."""
         if not self._window:
             raise RuntimeError("condition already freed")
         return self._mutex.locked()
@@ -494,7 +524,7 @@ class Condition:
         """
         if not self._window:
             raise RuntimeError("condition already freed")
-        if not self.locked():
+        if not self._mutex_owned():
             raise RuntimeError("cannot wait on unheld mutex")
         self._enqueue(self._window.group_rank)
         state = self._release_save()
@@ -530,7 +560,7 @@ class Condition:
         """
         if not self._window:
             raise RuntimeError("condition already freed")
-        if not self.locked():
+        if not self._mutex_owned():
             raise RuntimeError("cannot notify on unheld mutex")
         processes = self._dequeue(n)
         numprocs = len(processes)

@@ -206,12 +206,12 @@ class BaseTestMutexBasic(unittest.BaseMixin):
     def testWith(self):
         def test_with():
             mutex = self.mutex
-            self.assertFalse(mutex.locked())
+            self.assertFalse(mutex.owned())
             self.assertRaises(RuntimeError, mutex.release)
             with mutex:
-                self.assertTrue(mutex.locked())
+                self.assertTrue(mutex.owned())
                 self.assertRaises(RuntimeError, mutex.acquire)
-            self.assertFalse(mutex.locked())
+            self.assertFalse(mutex.owned())
             self.assertRaises(RuntimeError, mutex.release)
 
         for _ in range(5):
@@ -224,14 +224,14 @@ class BaseTestMutexBasic(unittest.BaseMixin):
     def testAcquireRelease(self):
         def test_acquire_release():
             mutex = self.mutex
-            self.assertFalse(mutex.locked())
+            self.assertFalse(mutex.owned())
             self.assertRaises(RuntimeError, mutex.release)
             locked = mutex.acquire()
             self.assertTrue(locked)
-            self.assertTrue(mutex.locked())
+            self.assertTrue(mutex.owned())
             self.assertRaises(RuntimeError, mutex.acquire)
             mutex.release()
-            self.assertFalse(mutex.locked())
+            self.assertFalse(mutex.owned())
             self.assertRaises(RuntimeError, mutex.release)
 
         for _ in range(5):
@@ -245,14 +245,14 @@ class BaseTestMutexBasic(unittest.BaseMixin):
         def test_acquire_nonblocking():
             comm = self.COMM
             mutex = self.mutex
-            self.assertFalse(mutex.locked())
+            self.assertFalse(mutex.owned())
             comm.Barrier()
             locked = mutex.acquire(blocking=False)
             comm.Barrier()
-            self.assertEqual(mutex.locked(), locked)
+            self.assertEqual(mutex.owned(), locked)
             if locked:
                 mutex.release()
-            self.assertFalse(mutex.locked())
+            self.assertFalse(mutex.owned())
             states = comm.allgather(locked)
             self.assertEqual(states.count(True), 1)
             comm.Barrier()
@@ -274,15 +274,50 @@ class BaseTestMutexBasic(unittest.BaseMixin):
         for _ in range(5):
             mutex.free()
         self.assertRaises(RuntimeError, mutex.acquire)
+        self.assertRaises(RuntimeError, mutex.acquire, True)
+        self.assertRaises(RuntimeError, mutex.acquire, False)
         self.assertRaises(RuntimeError, mutex.release)
+        self.assertRaises(RuntimeError, mutex.owned)
         self.assertRaises(RuntimeError, mutex.locked)
+
+    def testLocked(self):
+        comm = self.COMM
+        mutex = self.mutex
+        size = comm.Get_size()
+        rank = comm.Get_rank()
+        self.assertFalse(mutex.owned())
+        self.assertFalse(mutex.locked())
+        for owner in range(size):
+            comm.Barrier()
+            if rank == owner:
+                mutex.acquire()
+            comm.Barrier()
+            self.assertEqual(mutex.owned(), rank == owner)
+            self.assertTrue(mutex.locked())
+            comm.Barrier()
+            if rank == owner:
+                mutex.release()
+            comm.Barrier()
+            self.assertFalse(mutex.owned())
+            self.assertFalse(mutex.locked())
+        comm.Barrier()
+        mutex.acquire()
+        self.assertTrue(mutex.owned())
+        self.assertTrue(mutex.locked())
+        mutex.release()
+        comm.Barrier()
+        self.assertFalse(mutex.owned())
+        self.assertFalse(mutex.locked())
 
     def testFree(self):
         mutex = self.mutex
         for _ in range(5):
             mutex.free()
         self.assertRaises(RuntimeError, mutex.acquire)
+        self.assertRaises(RuntimeError, mutex.acquire, True)
+        self.assertRaises(RuntimeError, mutex.acquire, False)
         self.assertRaises(RuntimeError, mutex.release)
+        self.assertRaises(RuntimeError, mutex.owned)
         self.assertRaises(RuntimeError, mutex.locked)
 
 
@@ -340,26 +375,26 @@ class BaseTestMutexRecursive(unittest.BaseMixin):
     def testAcquireRelease(self):
         def test_acquire_release():
             mutex = self.mutex
-            self.assertFalse(mutex.locked())
+            self.assertFalse(mutex.owned())
             self.assertEqual(mutex.count(), 0)
             self.assertRaises(RuntimeError, mutex.release)
             mutex.acquire()
-            self.assertTrue(mutex.locked())
+            self.assertTrue(mutex.owned())
             self.assertEqual(mutex.count(), 1)
             mutex.acquire()
-            self.assertTrue(mutex.locked())
+            self.assertTrue(mutex.owned())
             self.assertEqual(mutex.count(), 2)
             mutex.acquire()
-            self.assertTrue(mutex.locked())
+            self.assertTrue(mutex.owned())
             self.assertEqual(mutex.count(), 3)
             mutex.release()
-            self.assertTrue(mutex.locked())
+            self.assertTrue(mutex.owned())
             self.assertEqual(mutex.count(), 2)
             mutex.release()
-            self.assertTrue(mutex.locked())
+            self.assertTrue(mutex.owned())
             self.assertEqual(mutex.count(), 1)
             mutex.release()
-            self.assertFalse(mutex.locked())
+            self.assertFalse(mutex.owned())
             self.assertEqual(mutex.count(), 0)
             self.assertRaises(RuntimeError, mutex.release)
 
@@ -377,7 +412,7 @@ class BaseTestMutexRecursive(unittest.BaseMixin):
             self.assertEqual(mutex.count(), 0)
             comm.Barrier()
             locked = mutex.acquire(blocking=False)
-            self.assertEqual(mutex.locked(), locked)
+            self.assertEqual(mutex.owned(), locked)
             comm.Barrier()
             self.assertEqual(mutex.count(), int(locked))
             if locked:
@@ -394,7 +429,7 @@ class BaseTestMutexRecursive(unittest.BaseMixin):
                 self.assertEqual(mutex.count(), 1)
                 mutex.release()
             comm.Barrier()
-            self.assertFalse(mutex.locked())
+            self.assertFalse(mutex.owned())
             self.assertEqual(mutex.count(), 0)
             states = comm.allgather(locked)
             self.assertEqual(states.count(True), 1)
@@ -419,15 +454,64 @@ class BaseTestMutexRecursive(unittest.BaseMixin):
         for _ in range(5):
             mutex.free()
         self.assertRaises(RuntimeError, mutex.acquire)
+        self.assertRaises(RuntimeError, mutex.acquire, True)
+        self.assertRaises(RuntimeError, mutex.acquire, False)
         self.assertRaises(RuntimeError, mutex.release)
+        self.assertRaises(RuntimeError, mutex.owned)
+        self.assertRaises(RuntimeError, mutex.locked)
         self.assertRaises(RuntimeError, mutex.count)
+
+    def testLocked(self):
+        comm = self.COMM
+        mutex = self.mutex
+        size = comm.Get_size()
+        rank = comm.Get_rank()
+        self.assertFalse(mutex.owned())
+        self.assertFalse(mutex.locked())
+        for owner in range(size):
+            comm.Barrier()
+            if rank == owner:
+                mutex.acquire()
+            comm.Barrier()
+            self.assertEqual(mutex.owned(), rank == owner)
+            self.assertTrue(mutex.locked())
+            comm.Barrier()
+            if rank == owner:
+                mutex.acquire()
+            comm.Barrier()
+            self.assertEqual(mutex.owned(), rank == owner)
+            self.assertTrue(mutex.locked())
+            comm.Barrier()
+            if rank == owner:
+                mutex.release()
+            comm.Barrier()
+            self.assertEqual(mutex.owned(), rank == owner)
+            self.assertTrue(mutex.locked())
+            comm.Barrier()
+            if rank == owner:
+                mutex.release()
+            comm.Barrier()
+            self.assertFalse(mutex.owned())
+            self.assertFalse(mutex.locked())
+        comm.Barrier()
+        mutex.acquire()
+        self.assertTrue(mutex.owned())
+        self.assertTrue(mutex.locked())
+        mutex.release()
+        comm.Barrier()
+        self.assertFalse(mutex.owned())
+        self.assertFalse(mutex.locked())
 
     def testFree(self):
         mutex = self.mutex
         for _ in range(5):
             mutex.free()
         self.assertRaises(RuntimeError, mutex.acquire)
+        self.assertRaises(RuntimeError, mutex.acquire, True)
+        self.assertRaises(RuntimeError, mutex.acquire, False)
         self.assertRaises(RuntimeError, mutex.release)
+        self.assertRaises(RuntimeError, mutex.owned)
+        self.assertRaises(RuntimeError, mutex.locked)
         self.assertRaises(RuntimeError, mutex.count)
 
 
@@ -551,7 +635,10 @@ class BaseTestCondition(unittest.BaseMixin):
         for _ in range(5):
             cv.free()
         self.assertRaises(RuntimeError, cv.acquire)
+        self.assertRaises(RuntimeError, cv.acquire, True)
+        self.assertRaises(RuntimeError, cv.acquire, False)
         self.assertRaises(RuntimeError, cv.release)
+        self.assertRaises(RuntimeError, cv.owned)
         self.assertRaises(RuntimeError, cv.locked)
         self.assertRaises(RuntimeError, cv.wait)
         self.assertRaises(RuntimeError, cv.wait_for, lambda: False)
