@@ -265,9 +265,9 @@ class Mutex:
         self._release()
         return state
 
-    def _spinloop(self, index, sentinel):
+    def _spinloop(self, index, value):
         window = self._window
-        return _rma_spinloop(window, "i", index, sentinel)
+        return _rma_spinloop(window, "i", index, value)
 
     def __enter__(self):
         """Acquire mutex."""
@@ -667,7 +667,7 @@ def _rma_spinloop(
     window,
     typecode,
     index,
-    sentinel,
+    value,
     reset=False,
     backoff=None,
     progress=None,
@@ -676,11 +676,11 @@ def _rma_spinloop(
     backoff = backoff or _new_backoff()
     progress = progress or _rma_progress
     window.Sync()
-    while memory[index] == sentinel:
+    while memory[index] == value:
         backoff()
         progress(window)
         window.Sync()
     value = memory[index]
     if reset:
-        memory[index] = sentinel
+        memory[index] = value
     return value
