@@ -257,6 +257,10 @@ jobs:
     - run: awk 'NF' .ci/env.${{ matrix.mpi }} >> "$GITHUB_ENV"
       shell: bash
 
+    - if: ${{ matrix.mpi == 'impi' }}
+      run: echo I_MPI_FABRICS=shm >> "$GITHUB_ENV"
+      shell: bash
+
     # * test conda
 
     - if: ${{ !startsWith(matrix.py, 'pypy') }}
