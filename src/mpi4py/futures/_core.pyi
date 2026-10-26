@@ -59,8 +59,7 @@ class WorkerSet(Generic[T]):
     def add(self, x: T, /) -> None: ...
     def pop(self) -> T: ...
 
-_WeakKeyDict: TypeAlias = weakref.WeakKeyDictionary
-_ThreadQueueMap: TypeAlias = _WeakKeyDict[
+_ThreadQueueMap: TypeAlias = weakref.WeakKeyDictionary[
     threading.Thread, TaskQueue[_Item[Any] | None]
 ]
 THREADS_QUEUES: _ThreadQueueMap = ...

@@ -57,7 +57,7 @@ class MPIPoolExecutor(_base.Executor):
         /,
         *args: P.args,
         **kwargs: P.kwargs,
-    ) -> Future[T]: ...
+    ) -> _base.Future[T]: ...
     def map(
         self,
         fn: Callable[..., T],
