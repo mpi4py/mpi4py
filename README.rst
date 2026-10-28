@@ -4,7 +4,7 @@ MPI for Python
 
 .. image::  https://github.com/mpi4py/mpi4py/actions/workflows/ci.yml/badge.svg?branch=master
    :target: https://github.com/mpi4py/mpi4py/actions/
-.. image::  https://readthedocs.org/projects/mpi4py/badge/?version=latest
+.. image::  https://app.readthedocs.org/projects/mpi4py/badge/?version=latest
    :target: https://mpi4py.readthedocs.io/en/latest/
 .. image::  https://dev.azure.com/mpi4py/mpi4py/_apis/build/status/ci?branchName=master&label=azure
    :target: https://dev.azure.com/mpi4py/mpi4py/_build
