@@ -1,6 +1,15 @@
 Release 4.2.0 [YYYY-MM-DD]
 ==========================
 
+* New features:
+
+  + The :mod:`mpi4py.util.sync` module provides a new `Value` object
+    type for managing global numeric values across MPI processes
+    featuring RMA-based atomic access and update.
+
+  + The :mod:`mpi4py.util.sync` module provides a new `Event` object
+    type mimicking `threading.Event` and `multiprocessing.Event` APIs.
+
 * Enhancements:
 
   + Add ``tohandle()`` method to MPI types.
@@ -15,6 +24,9 @@ Release 4.2.0 [YYYY-MM-DD]
 
   + A new `Mutex.owned()` method returns whether a mutex is held by
     the calling process.
+
+  + A new `Counter.reset()` method resets a counter to a starting
+    value.
 
   + Published wheels have support for the MPI 5.0 standard ABI.
 

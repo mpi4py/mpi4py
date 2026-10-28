@@ -9,10 +9,12 @@ from .. import MPI
 
 __all__ = [
     "Sequential",
+    "Value",
     "Counter",
     "Mutex",
     "Condition",
     "Semaphore",
+    "Event",
 ]
 
 
@@ -64,6 +66,184 @@ class Sequential:
             comm.Send(buf, rank + 1, tag)
 
 
+class Value:
+    """Global value."""
+
+    def __init__(
+        self,
+        typecode,
+        value=0,
+        *,
+        comm=MPI.COMM_SELF,
+        info=MPI.INFO_NULL,
+        root=0,
+    ):
+        """Initialize global value.
+
+        Args:
+            typecode: Type code as defined in the `array` module.
+            value: Initial value.
+            comm: Intracommunicator context.
+            info: Info object for RMA context creation.
+            root: Process rank holding the value memory.
+
+        """
+        tcharmap = str.maketrans({"F": "Zf", "D": "Zd"})
+        typecode = typecode.translate(tcharmap)
+        datatype = MPI.Datatype.fromcode(typecode)
+        typecode = datatype.typechar.translate(tcharmap)
+        if typecode not in set(_array.typecodes) | set(tcharmap.values()):
+            raise ValueError(f"unsupported typecode {typecode!r}")
+        rank = comm.Get_rank()
+        count = 1 if rank == root else 0
+        unitsize = datatype.Get_size()
+        init = _new_array(typecode, [value] * count)
+
+        window = MPI.Win.Allocate(count * unitsize, unitsize, info, comm)
+        self._window = window
+        self._typecode = typecode
+        self._location = (root, 0)
+        self._comm = comm
+
+        window.Lock(rank, MPI.LOCK_SHARED)
+        window.Accumulate(init, rank, op=MPI.REPLACE)
+        window.Unlock(rank)
+        comm.Barrier()
+
+    value = property(doc="Value.")
+
+    @value.getter
+    def value(self):
+        """Get value."""
+        return self.get()
+
+    @value.setter
+    def value(self, value):
+        """Set value."""
+        self.set(value)
+
+    typecode = property(doc="Typecode.")
+
+    @typecode.getter
+    def typecode(self):
+        """Get typecode."""
+        return self._typecode
+
+    def compare_and_swap(self, value, compare):
+        """Compare-and-swap.
+
+        Args:
+            value: The value to swap with.
+            compare: The value to compare with.
+
+        Returns:
+            The current value before comparing/swapping.
+
+        """
+        if not self._window:
+            raise RuntimeError("value already freed")
+
+        window = self._window
+        typecode = self._typecode
+        root, disp = self._location
+
+        newval = _new_array(typecode, [value])
+        cmpval = _new_array(typecode, [compare])
+        oldval = _new_array(typecode, [0])
+        window.Lock(root, MPI.LOCK_SHARED)
+        window.Compare_and_swap(newval, cmpval, oldval, root, disp)
+        window.Unlock(root)
+        return oldval[0]
+
+    def accumulate(self, value, op):
+        """Accumulate.
+
+        Args:
+            value: The value to operate with.
+            op: The MPI operation to perform.
+
+        """
+        if not self._window:
+            raise RuntimeError("value already freed")
+
+        window = self._window
+        typecode = self._typecode
+        root, disp = self._location
+
+        newval = _new_array(typecode, [value])
+        window.Lock(root, MPI.LOCK_SHARED)
+        window.Accumulate(newval, root, disp, op)
+        window.Unlock(root)
+
+    def fetch_and_op(self, value, op):
+        """Fetch-and-op.
+
+        Args:
+            value: The value to operate with.
+            op: The MPI operation to perform.
+
+        Returns:
+            The value before operating.
+
+        """
+        if not self._window:
+            raise RuntimeError("value already freed")
+
+        window = self._window
+        typecode = self._typecode
+        root, disp = self._location
+
+        newval = _new_array(typecode, [value])
+        oldval = _new_array(typecode, [0])
+        window.Lock(root, MPI.LOCK_SHARED)
+        window.Fetch_and_op(newval, oldval, root, disp, op)
+        window.Unlock(root)
+        return oldval[0]
+
+    def fetch_and_set(self, value):
+        """Fetch-and-set.
+
+        Args:
+            value: The value to set.
+
+        Returns:
+            The value before setting.
+
+        """
+        return self.fetch_and_op(value, MPI.REPLACE)
+
+    def fetch_and_add(self, value):
+        """Fetch-and-add.
+
+        Args:
+            value: The value to add.
+
+        Returns:
+            The value before adding.
+
+        """
+        return self.fetch_and_op(value, MPI.SUM)
+
+    def get(self):
+        """Get value."""
+        return self.fetch_and_op(0, MPI.NO_OP)
+
+    def set(self, value):
+        """Set value."""
+        self.accumulate(value, MPI.REPLACE)
+
+    def add(self, value):
+        """Add value."""
+        self.accumulate(value, MPI.SUM)
+
+    def free(self):
+        """Free value resources."""
+        window = self._window
+        self._window = MPI.WIN_NULL
+        self._comm = MPI.COMM_NULL
+        window.free()
+
+
 class Counter:
     """Global counter."""
 
@@ -89,24 +269,9 @@ class Counter:
 
         """
         # pylint: disable=too-many-arguments
-        datatype = MPI.Datatype.fromcode(typecode)
-        typechar = datatype.typechar
-        rank = comm.Get_rank()
-        count = 1 if rank == root else 0
-        unitsize = datatype.Get_size()
-        window = MPI.Win.Allocate(count * unitsize, unitsize, info, comm)
+        self._value = Value(typecode, start, comm=comm, info=info, root=root)
         self._start = start
         self._step = step
-        self._window = window
-        self._typechar = typechar
-        self._location = (root, 0)
-        self._comm = comm
-
-        init = _array.array(typechar, [start] * count)
-        window.Lock(rank, MPI.LOCK_SHARED)
-        window.Accumulate(init, rank, op=MPI.REPLACE)
-        window.Unlock(rank)
-        comm.Barrier()
 
     def __iter__(self):
         """Implement ``iter(self)``."""
@@ -126,28 +291,27 @@ class Counter:
             The counter value before incrementing.
 
         """
-        if not self._window:
-            raise RuntimeError("counter already freed")
+        return self._value.fetch_and_add(
+            incr if incr is not None else self._step
+        )
 
-        window = self._window
-        typechar = self._typechar
-        root, disp = self._location
+    def reset(self, init=None):
+        """Return current value and reset to start value.
 
-        incr = incr if incr is not None else self._step
-        incr = _array.array(typechar, [incr])
-        prev = _array.array(typechar, [0])
-        op = MPI.SUM if incr[0] != 0 else MPI.NO_OP
-        window.Lock(root, MPI.LOCK_SHARED)
-        window.Fetch_and_op(incr, prev, root, disp, op)
-        window.Unlock(root)
-        return prev[0]
+        Args:
+            init: Start value.
+
+        Returns:
+            The counter value before resetting.
+
+        """
+        return self._value.fetch_and_set(
+            init if init is not None else self._start
+        )
 
     def free(self):
         """Free counter resources."""
-        window = self._window
-        self._window = MPI.WIN_NULL
-        self._comm = MPI.COMM_NULL
-        window.free()
+        self._value.free()
 
 
 class Mutex:
@@ -664,6 +828,65 @@ class Semaphore:
         self._counter.free()
         self._condvar.free()
         self._comm = MPI.COMM_NULL
+
+
+class Event:
+    """Event object."""
+
+    def __init__(
+        self,
+        *,
+        comm=MPI.COMM_SELF,
+        info=MPI.INFO_NULL,
+        root=0,
+    ):
+        """Initialize event object.
+
+        Args:
+            comm: Intracommunicator context.
+            info: Info object for RMA context creation.
+            root: Process rank holding flag memory.
+
+        """
+        self._cond = Condition(comm=comm, info=info)
+        self._flag = Value("i", 0, comm=comm, info=info, root=root)
+
+    def is_set(self):
+        """Return whether the internal flag is `True`."""
+        return bool(self._flag.value)
+
+    def set(self):
+        """Set the internal flag to `True`."""
+        with self._cond:
+            self._flag.value = int(True)
+            self._cond.notify_all()
+
+    def clear(self):
+        """Reset the internal flag to `False`."""
+        with self._cond:
+            self._flag.value = int(False)
+
+    def wait(self):
+        """Block until the internal flag is `True`."""
+        with self._cond:
+            done = bool(self._flag.value)
+            if not done:
+                done = self._cond.wait()
+            return done
+
+    def free(self):
+        """Free event resources."""
+        self._cond.free()
+        self._flag.free()
+
+
+def _new_array(typecode, initializer):
+    if __import__("sys").version_info < (3, 15):  # pragma: no cover
+        if typecode in {"Zf", "Zd"}:
+            numpy = __import__("numpy")
+            dtype = numpy.dtype(typecode[-1].upper())
+            return numpy.array(initializer, dtype)
+    return _array.array(typecode, initializer)  # ty: ignore[deprecated]
 
 
 _BACKOFF_DELAY_MAX = 1 / 1024

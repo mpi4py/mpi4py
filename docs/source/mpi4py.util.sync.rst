@@ -26,6 +26,32 @@ Sequential execution
    .. automethod:: begin
    .. automethod:: end
 
+Global value
+++++++++++++++
+
+.. autoclass:: mpi4py.util.sync.Value
+
+   Manage a global value within a group of MPI processes. The value
+   interface is close to that of `multiprocessing.Value`.
+
+   The implementation is based in MPI-3 one-sided operations. A root process
+   (typically rank ``0``) holds the value memory, and its value is queried and
+   updated with a atomic RMA *accumulate*, *compare-and-swap*, and
+   *fetch-and-op* operations.
+
+   .. automethod:: __init__
+   .. autoattribute:: value
+   .. autoattribute:: typecode
+   .. automethod:: compare_and_swap
+   .. automethod:: accumulate
+   .. automethod:: fetch_and_op
+   .. automethod:: fetch_and_set
+   .. automethod:: fetch_and_add
+   .. automethod:: get
+   .. automethod:: set
+   .. automethod:: add
+   .. automethod:: free
+
 Global counter
 ++++++++++++++
 
@@ -35,13 +61,14 @@ Global counter
    interface is close to that of `itertools.count`.
 
    The implementation is based in MPI-3 one-sided operations. A root process
-   (typically rank ``0``) holds the counter, and its value is queried and
-   incremented with an atomic RMA *fetch-and-add* operation.
+   (typically rank ``0``) holds the counter memory, and its value is queried
+   and incremented with an atomic RMA *fetch-and-add* operation.
 
    .. automethod:: __init__
    .. automethod:: __iter__
    .. automethod:: __next__
    .. automethod:: next
+   .. automethod:: reset
    .. automethod:: free
 
 Mutual exclusion
@@ -139,6 +166,26 @@ Semaphore object
    .. automethod:: __exit__
    .. automethod:: acquire
    .. automethod:: release
+   .. automethod:: free
+
+Event object
+++++++++++++
+
+.. autoclass:: mpi4py.util.sync.Event
+
+   An event object is a simple signaling mechanism between processes: one
+   process signals an event and other processes wait for it.
+
+   An event object manages an internal flag that can be set to `True` with the
+   `set()` method and reset to `False` with the `clear()` method. The `wait()`
+   method blocks until the flag is `True`. The `is_set()` method queries the
+   state of the flag.
+
+   .. automethod:: __init__
+   .. automethod:: is_set
+   .. automethod:: set
+   .. automethod:: clear
+   .. automethod:: wait
    .. automethod:: free
 
 
