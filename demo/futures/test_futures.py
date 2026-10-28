@@ -613,7 +613,7 @@ class WaitTestMixin(BaseMixin):
                 CANCELLED_AND_NOTIFIED_FUTURE,
                 future1,
                 future2,
-            ],  # ty: ignore[invalid-argument-type]
+            ],
             return_when=futures.FIRST_EXCEPTION,
         )
 
