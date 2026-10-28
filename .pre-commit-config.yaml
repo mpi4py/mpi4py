@@ -15,13 +15,13 @@ repos:
   - id: check-added-large-files
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.17.2
+  rev: v0.17.3
   hooks:
     - id: ruff-check
     - id: ruff-format
 
 - repo: https://github.com/astral-sh/ty-pre-commit
-  rev: v0.0.92
+  rev: v0.0.93
   hooks:
     - id: ty
       args: [--group, type, --no-install-project]
