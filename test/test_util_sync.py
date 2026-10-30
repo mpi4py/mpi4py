@@ -4,14 +4,21 @@ import random
 import sys
 import time
 
-import mpi4py.util.sync as sync
-from mpi4py import MPI
-
 try:
     import mpiunittest as unittest
 except ImportError:
     sys.path.append(os.fspath(pathlib.Path(__file__).resolve().parent))
     import mpiunittest as unittest
+
+try:
+    import array
+except ImportError:
+    array = None
+
+from mpi4py import MPI
+
+if array:
+    import mpi4py.util.sync as sync
 
 # ---
 
@@ -23,7 +30,14 @@ def random_sleep(max_sleep=0.01):
 # ---
 
 
-class BaseTestSequential(unittest.BaseMixin):
+class BaseTest(unittest.BaseMixin):
+    pass
+
+
+# ---
+
+
+class BaseTestSequential(BaseTest):
     #
     COMM = MPI.Intracomm(MPI.COMM_NULL)
 
@@ -67,7 +81,7 @@ class TestSequentialWorld(BaseTestSequential, unittest.TestCase):
 # ---
 
 
-class BaseTestCounter(unittest.BaseMixin):
+class BaseTestCounter(BaseTest):
     #
     COMM = MPI.Intracomm(MPI.COMM_NULL)
 
@@ -164,7 +178,7 @@ class TestCounterWorld(BaseTestCounter, unittest.TestCase):
 # ---
 
 
-class BaseTestMutexBasic(unittest.BaseMixin):
+class BaseTestMutexBasic(BaseTest):
     #
     COMM = MPI.Intracomm(MPI.COMM_NULL)
 
@@ -339,7 +353,7 @@ class TestMutexBasicWorld(BaseTestMutexBasic, unittest.TestCase):
 # ---
 
 
-class BaseTestMutexRecursive(unittest.BaseMixin):
+class BaseTestMutexRecursive(BaseTest):
     #
     COMM = MPI.Intracomm(MPI.COMM_NULL)
 
@@ -529,10 +543,9 @@ class TestMutexRecursiveWorld(BaseTestMutexRecursive, unittest.TestCase):
 # ---
 
 
-class BaseTestCondition(unittest.BaseMixin):
+class BaseTestCondition(BaseTest):
     #
     COMM = MPI.Intracomm(MPI.COMM_NULL)
-    condition: sync.Condition
 
     def setUp(self):
         self.condition = sync.Condition(comm=self.COMM)
@@ -692,8 +705,6 @@ class TestConditionWorld(BaseTestCondition, unittest.TestCase):
 class BaseTestConditionMutex(BaseTestCondition):
     #
     COMM = MPI.Intracomm(MPI.COMM_NULL)
-    mutex: sync.Mutex
-    condition: sync.Condition
 
     def setUp(self):
         comm = self.COMM
@@ -719,10 +730,9 @@ class TestConditionMutexWorld(BaseTestConditionMutex, unittest.TestCase):
 # ---
 
 
-class BaseTestSemaphore(unittest.BaseMixin):
+class BaseTestSemaphore(BaseTest):
     #
     COMM = MPI.Intracomm(MPI.COMM_NULL)
-    semaphore: sync.Semaphore
 
     def setUp(self):
         comm = self.COMM
@@ -850,14 +860,13 @@ class TestSemaphoreWorld(BaseTestSemaphore, unittest.TestCase):
 
 # ---
 
+if array is None:
+    unittest.skip("array")(BaseTest)
+
 try:
     MPI.Win.Allocate(1, 1, MPI.INFO_NULL, MPI.COMM_SELF).Free()
 except (NotImplementedError, MPI.Exception):
-    unittest.skip("mpi-win-allocate")(BaseTestCounter)
-    unittest.skip("mpi-win-allocate")(BaseTestMutexBasic)
-    unittest.skip("mpi-win-allocate")(BaseTestMutexRecursive)
-    unittest.skip("mpi-win-allocate")(BaseTestCondition)
-    unittest.skip("mpi-win-allocate")(BaseTestSemaphore)
+    unittest.skip("mpi-win-allocate")(BaseTest)
 
 # ---
 
