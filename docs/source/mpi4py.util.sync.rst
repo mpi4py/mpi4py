@@ -35,8 +35,8 @@ Global counter
    interface is close to that of `itertools.count`.
 
    The implementation is based in MPI-3 one-sided operations. A root process
-   (typically rank ``0``) holds the counter, and its value is queried and
-   incremented with an atomic RMA *fetch-and-add* operation.
+   (typically rank ``0``) holds the counter memory, and its value is queried
+   and incremented with an atomic RMA *fetch-and-add* operation.
 
    .. automethod:: __init__
    .. automethod:: __iter__

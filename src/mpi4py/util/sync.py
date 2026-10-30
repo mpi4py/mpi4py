@@ -89,20 +89,26 @@ class Counter:
 
         """
         # pylint: disable=too-many-arguments
-        datatype = MPI.Datatype.fromcode(typecode)
-        typechar = datatype.typechar
+        datatype, typecode = _get_datatype(typecode)
+        if typecode not in _array.typecodes:
+            raise ValueError(f"unsupported typecode {typecode!r}")
+        start, step = _array.array(typecode, [start, step])
+        size = comm.Get_size()
+        if not 0 <= root < size:
+            raise ValueError(f"root {root} not in range [0, {size})")
+
         rank = comm.Get_rank()
         count = 1 if rank == root else 0
         unitsize = datatype.Get_size()
+        init = _array.array(typecode, [start] * count)
         window = MPI.Win.Allocate(count * unitsize, unitsize, info, comm)
         self._start = start
         self._step = step
         self._window = window
-        self._typechar = typechar
+        self._typecode = typecode
         self._location = (root, 0)
         self._comm = comm
 
-        init = _array.array(typechar, [start] * count)
         window.Lock(rank, MPI.LOCK_SHARED)
         window.Accumulate(init, rank, op=MPI.REPLACE)
         window.Unlock(rank)
@@ -130,12 +136,12 @@ class Counter:
             raise RuntimeError("counter already freed")
 
         window = self._window
-        typechar = self._typechar
+        typecode = self._typecode
         root, disp = self._location
 
         incr = incr if incr is not None else self._step
-        incr = _array.array(typechar, [incr])
-        prev = _array.array(typechar, [0])
+        incr = _array.array(typecode, [incr])
+        prev = _array.array(typecode, [0])
         op = MPI.SUM if incr[0] != 0 else MPI.NO_OP
         window.Lock(root, MPI.LOCK_SHARED)
         window.Fetch_and_op(incr, prev, root, disp, op)
@@ -664,6 +670,14 @@ class Semaphore:
         self._counter.free()
         self._condvar.free()
         self._comm = MPI.COMM_NULL
+
+
+def _get_datatype(typecode):
+    tcharmap = str.maketrans({"F": "Zf", "D": "Zd", "G": "Zg"})
+    typecode = typecode.translate(tcharmap)
+    datatype = MPI.Datatype.fromcode(typecode)
+    typecode = datatype.typechar.translate(tcharmap)
+    return datatype, typecode
 
 
 _BACKOFF_DELAY_MAX = 1 / 1024

@@ -244,6 +244,12 @@ Target specification.
 """
 
 
+Number = TypeVar("Number", int, float, complex)
+"""
+Type variable constrained to `int`, `float`, `complex`.
+"""
+
+
 CommT = TypeVar("CommT", Intracomm, Intercomm)
 """
 Type variable constrained to `MPI.Intracomm` or `MPI.Intercomm`.

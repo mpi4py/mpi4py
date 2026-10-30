@@ -67,6 +67,7 @@ within the :mod:`~mpi4py.MPI` module.
 .. autotype:: BufSpecW
 .. autotype:: TargetSpec
 
+.. autodata:: Number
 .. autodata:: CommT
 
 .. autodata:: P

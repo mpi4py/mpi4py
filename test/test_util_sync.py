@@ -130,6 +130,15 @@ class BaseTestCounter(BaseTest):
         counter.free()
         self.assertEqual(values, list(range(7, 7 + 5 * size)))
 
+    def testStartBad(self):
+        comm = self.COMM
+        for start in (None, [42], "42", 42.0, 42.0j):
+            with self.assertRaises(TypeError):
+                sync.Counter(start, typecode="i", comm=comm)  # ty: ignore[invalid-argument-type]
+        for uint in "BHILQ":
+            with self.assertRaises(OverflowError):
+                sync.Counter(-1, typecode=uint, comm=comm)
+
     def testStep(self):
         comm = self.COMM
         size = comm.Get_size()
@@ -138,14 +147,28 @@ class BaseTestCounter(BaseTest):
         counter.free()
         self.assertEqual(values, list(range(0, 2 * 5 * size, 2)))
 
-    def testTypechar(self):
+    def testStepBad(self):
+        comm = self.COMM
+        for step in (None, [1], "1", 1.0, 1.0j):
+            with self.assertRaises(TypeError):
+                sync.Counter(0, step, typecode="i", comm=comm)  # ty: ignore[invalid-argument-type]
+        for uint in "BHILQ":
+            with self.assertRaises(OverflowError):
+                sync.Counter(0, -1, typecode=uint, comm=comm)
+
+    def testTypecode(self):
         comm = self.COMM
         size = comm.Get_size()
-        for typechar in "hHiIlLqQ" + "fd":
-            counter = sync.Counter(typecode=typechar, comm=comm)
+        for typecode in "bBhHiIlLqQ" + "fd":
+            counter = sync.Counter(typecode=typecode, comm=comm)
             values = self.execute(counter, 3)
             counter.free()
             self.assertEqual(values, list(range(3 * size)))
+
+    def testTypecodeBad(self):
+        comm = self.COMM
+        with self.assertRaises(ValueError):
+            sync.Counter(typecode="c", comm=comm)
 
     def testRoot(self):
         comm = self.COMM
@@ -156,6 +179,47 @@ class BaseTestCounter(BaseTest):
             values = self.execute(counter, 5, rank != root)
             counter.free()
             self.assertEqual(values, list(range(5 * (size - 1))))
+
+    def testRootBad(self):
+        comm = self.COMM
+        size = comm.Get_size()
+        for root in (-1, size):
+            with self.assertRaises(ValueError):
+                sync.Counter(comm=comm, root=root)
+
+    def testInt(self):
+        comm = self.COMM
+        for typecode in "bBhHiIlLqQ":
+            counter = sync.Counter(typecode=typecode, comm=comm)
+            value = counter.next()
+            counter.free()
+            allvalues = sorted(comm.allgather(value))
+            for index, value in enumerate(allvalues):
+                self.assertIsInstance(value, int)
+                self.assertEqual(value, index)
+
+    def testFloat(self):
+        comm = self.COMM
+        for typecode in ("f", "d"):
+            counter = sync.Counter(typecode=typecode, comm=comm)
+            value = counter.next()
+            counter.free()
+            allvalues = sorted(comm.allgather(value))
+            for index, value in enumerate(allvalues):
+                self.assertIsInstance(value, float)
+                self.assertEqual(value, index)
+
+    @unittest.skipIf(sys.version_info < (3, 15), "py315")
+    def testComplex(self):
+        comm = self.COMM
+        for typecode in ("Zf", "Zd", "F", "D"):
+            counter = sync.Counter(step=1j, typecode=typecode, comm=comm)
+            value = counter.next()
+            counter.free()
+            allvalues = sorted(comm.allgather(value), key=lambda z: z.imag)
+            for index, value in enumerate(allvalues):
+                self.assertIsInstance(value, complex)
+                self.assertEqual(value, index * 1j)
 
     def testFree(self):
         comm = self.COMM

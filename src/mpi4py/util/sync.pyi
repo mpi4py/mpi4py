@@ -1,6 +1,6 @@
 import sys
 from collections.abc import Callable
-from typing import Literal
+from typing import Generic, Literal
 
 if sys.version_info >= (3, 11):
     from typing import Self
@@ -13,7 +13,7 @@ from ..MPI import (
     Info,
     Intracomm,
 )
-from ..typing import T
+from ..typing import Number, T
 
 __all__: list[str] = [
     "Sequential",
@@ -36,11 +36,11 @@ class Sequential:
     def begin(self) -> None: ...
     def end(self) -> None: ...
 
-class Counter:
+class Counter(Generic[Number]):
     def __init__(
         self,
-        start: int = 0,
-        step: int = 1,
+        start: Number = 0,
+        step: Number = 1,
         *,
         typecode: str = "i",
         comm: Intracomm = COMM_SELF,
@@ -48,8 +48,8 @@ class Counter:
         root: int = 0,
     ) -> None: ...
     def __iter__(self) -> Self: ...
-    def __next__(self) -> int: ...
-    def next(self, incr: int | None = None) -> int: ...
+    def __next__(self) -> Number: ...
+    def next(self, incr: Number | None = None) -> Number: ...
     def free(self) -> None: ...
 
 class Mutex:

@@ -131,6 +131,8 @@ TargetSpec: TypeAlias = Union[
     list[Any],
 ]
 
+Number = TypeVar("Number", int, float, complex)  # noqa: PYI001
+
 CommT = TypeVar("CommT", Intracomm, Intercomm)  # noqa: PYI001
 
 P = ParamSpec("P")  # noqa: PYI001
