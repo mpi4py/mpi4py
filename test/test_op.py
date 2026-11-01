@@ -53,6 +53,7 @@ class TestOp(unittest.TestCase):
         self.assertEqual(op, MPI.OP_NULL)
 
     @unittest.skipIf(array is None, "array")
+    @unittest.skipMPI("mvapich(==4.1.0)")
     def testCreate(self):
         assert array is not None
         for comm in [MPI.COMM_SELF, MPI.COMM_WORLD]:

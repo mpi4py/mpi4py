@@ -44,6 +44,7 @@ if (
     or unittest.is_mpi("mpich(<5.0.0)")
     or unittest.is_mpi("openmpi(<5.0.0)")
     or unittest.is_mpi("impi")
+    or unittest.is_mpi("mvapich(<5.0.0)")
 ):
     for tc in ("e", "f2"):
         if tc in typecodes:

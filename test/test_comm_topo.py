@@ -236,6 +236,7 @@ class BaseTestTopo(unittest.BaseMixin):
         topo.Free()
 
     @unittest.skipMPI("msmpi")
+    @unittest.skipMPI("mvapich(==4.1.0)")
     def testDistgraphcomm(self):
         comm = self.COMM
         size = comm.Get_size()

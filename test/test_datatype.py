@@ -709,7 +709,7 @@ if name == "Open MPI":
                 datatypes.remove(t)
             if t in datatypes_f90:
                 datatypes_f90.remove(t)
-if name in ("MPICH", "Intel MPI"):
+if name in ("MPICH", "Intel MPI", "MVAPICH"):
     if MPI.FLOAT16_T != MPI.DATATYPE_NULL:
         if MPI.FLOAT16_T.Get_name() == "":
             MPI.FLOAT16_T.Set_name("MPIX_C_FLOAT16")
