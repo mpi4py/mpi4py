@@ -819,9 +819,8 @@ def server_exec(comm, options):
 
     status = MPI.Status()
     comm_recv = comm.recv
-    comm_isend = comm.issend
+    comm_send = comm.ssend
     comm_iprobe = comm.iprobe
-    request_test = _get_request(comm).test
 
     def exception():
         exc = sys_exception()
@@ -854,13 +853,10 @@ def server_exec(comm, options):
     def send(task):
         pid, tag = status.source, status.tag
         try:
-            request = comm_isend(task, pid, tag)
+            comm_send(task, pid, tag)
         except BaseException:
             task = (None, exception())
-            request = comm_isend(task, pid, tag)
-        backoff.reset()
-        while not request_test(request)[0]:
-            backoff.sleep()
+            comm_send(task, pid, tag)
 
     while True:
         task = recv()
