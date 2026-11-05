@@ -69,14 +69,14 @@ def get_backend_requires_hook(name, dist, config_settings=None):
     try:
         from pyproject_hooks import BuildBackendHookCaller
     except ImportError:
-        from pep517.wrappers import (  # ty: ignore[unresolved-import]
+        from pep517.wrappers import (  # ty: ignore[import-not-found]
             Pep517HookCaller as BuildBackendHookCaller,
         )
     try:
         from build.env import DefaultIsolatedEnv
     except ImportError:
         from build.env import (
-            IsolatedEnvBuilder,  # ty: ignore[unresolved-import]
+            IsolatedEnvBuilder,  # ty: ignore[import-not-found]
         )
 
         class DefaultIsolatedEnv(IsolatedEnvBuilder):

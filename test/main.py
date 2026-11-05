@@ -381,7 +381,7 @@ class TestProgram(unittest.TestProgram):
         size = MPI.COMM_WORLD.Get_size()
         rank = MPI.COMM_WORLD.Get_rank()
         try:
-            import xmlrunner  # ty: ignore[unresolved-import]
+            import xmlrunner  # ty: ignore[import-not-found]
         except ModuleNotFoundError:
             if rank == 0:
                 print(

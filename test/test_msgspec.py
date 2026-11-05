@@ -748,15 +748,15 @@ class TestMessageDLPackCPUBuf(unittest.TestCase):
         buf = DLPackCPUBuf("i", [0, 1, 2, 3])
         buf.__dlpack_device__ = None  # type: ignore
         self.assertRaises(TypeError, MPI.Get_address, buf)
-        buf.__dlpack_device__ = lambda: None  # type: ignore
+        buf.__dlpack_device__ = lambda: None
         self.assertRaises(TypeError, MPI.Get_address, buf)
-        buf.__dlpack_device__ = lambda: (None, 0)  # type: ignore
+        buf.__dlpack_device__ = lambda: (None, 0)
         self.assertRaises(TypeError, MPI.Get_address, buf)
-        buf.__dlpack_device__ = lambda: (1, None)  # type: ignore
+        buf.__dlpack_device__ = lambda: (1, None)
         self.assertRaises(TypeError, MPI.Get_address, buf)
-        buf.__dlpack_device__ = lambda: (1,)  # type: ignore
+        buf.__dlpack_device__ = lambda: (1,)
         self.assertRaises(ValueError, MPI.Get_address, buf)
-        buf.__dlpack_device__ = lambda: (1, 0, 1)  # type: ignore
+        buf.__dlpack_device__ = lambda: (1, 0, 1)
         self.assertRaises(ValueError, MPI.Get_address, buf)
         del buf.__dlpack_device__
         MPI.Get_address(buf)
@@ -771,7 +771,7 @@ class TestMessageDLPackCPUBuf(unittest.TestCase):
         #
         capsule = buf.__dlpack__()
         dlpack_meth = lambda *_a, **_kw: capsule  # noqa: E731,F821
-        buf.__dlpack__ = dlpack_meth  # type: ignore
+        buf.__dlpack__ = dlpack_meth
         MPI.Get_address(buf)
         MPI.Get_address(buf)
         assert dlpack is not None
@@ -782,7 +782,7 @@ class TestMessageDLPackCPUBuf(unittest.TestCase):
         del capsule
         #
         dlpack_meth = lambda *_a, **_kw: None  # noqa: E731
-        buf.__dlpack__ = dlpack_meth  # type: ignore
+        buf.__dlpack__ = dlpack_meth
         self.assertRaises(BufferError, MPI.Get_address, buf)
         del buf.__dlpack__
 

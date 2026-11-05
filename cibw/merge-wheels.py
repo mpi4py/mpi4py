@@ -9,7 +9,7 @@ from pathlib import Path
 try:
     from wheel._commands import pack as wheel_pack
 except ModuleNotFoundError:
-    from wheel.cli import pack as wheel_pack  # ty: ignore[unresolved-import]
+    from wheel.cli import pack as wheel_pack  # ty: ignore[import-not-found]
 from wheel.wheelfile import WheelFile
 
 
