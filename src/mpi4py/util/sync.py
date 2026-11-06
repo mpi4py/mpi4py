@@ -724,7 +724,8 @@ def _rma_spinloop(
         backoff()
         progress(window)
         window.Sync()
-    value = memory[index]
+    signal = memory[index]
     if reset:
         memory[index] = value
-    return value
+        window.Sync()
+    return signal
