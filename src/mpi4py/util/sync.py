@@ -9,10 +9,12 @@ from .. import MPI
 
 __all__ = [
     "Sequential",
+    "Value",
     "Counter",
     "Mutex",
     "Condition",
     "Semaphore",
+    "Event",
 ]
 
 
@@ -62,6 +64,94 @@ class Sequential:
         tag = self.tag
         if rank != size - 1:
             comm.Send(buf, rank + 1, tag)
+
+
+class Value:
+    """Global value."""
+
+    def __init__(
+        self,
+        typecode,
+        value=0,
+        *,
+        comm=MPI.COMM_SELF,
+        info=MPI.INFO_NULL,
+        root=0,
+    ):
+        """Initialize global value.
+
+        Args:
+            typecode: Type code as defined in the `array` module.
+            value: Initial value.
+            comm: Intracommunicator context.
+            info: Info object for RMA context creation.
+            root: Process rank holding the value memory.
+
+        """
+        datatype, typecode = _get_datatype(typecode)
+        if typecode not in _array.typecodes:
+            raise ValueError(f"unsupported typecode {typecode!r}")
+        value, *_ = _array.array(typecode, [value])
+        size = comm.Get_size()
+        if not 0 <= root < size:
+            raise ValueError(f"root {root} not in range [0, {size})")
+
+        rank = comm.Get_rank()
+        count = 1 if rank == root else 0
+        unitsize = datatype.Get_size()
+        init = _array.array(typecode, [value] * count)
+        window = MPI.Win.Allocate(count * unitsize, unitsize, info, comm)
+        self._window = window
+        self._typecode: str = typecode
+        self._location = (root, 0)
+        self._comm = comm
+
+        window.Lock(rank, MPI.LOCK_SHARED)
+        window.Accumulate(init, rank, op=MPI.REPLACE)
+        window.Unlock(rank)
+        comm.Barrier()
+
+    value = property(
+        doc="Value.",
+        fget=lambda self: self.get(),
+        fset=lambda self, value: self.set(value),
+    )
+
+    typecode = property(
+        doc="Typecode.",
+        fget=lambda self: self._typecode,
+    )
+
+    def _fetch_and_op(self, value, op, lock_type):
+        window = self._window
+        typecode = self._typecode
+        root, disp = self._location
+
+        newval = _array.array(typecode, [value])
+        oldval = _array.array(typecode, [0])
+        window.Lock(root, lock_type)
+        window.Fetch_and_op(newval, oldval, root, disp, op)
+        window.Unlock(root)
+        return oldval[0]
+
+    def get(self):
+        """Get current value."""
+        if not self._window:
+            raise RuntimeError("value already freed")
+        return self._fetch_and_op(0, MPI.NO_OP, MPI.LOCK_SHARED)
+
+    def set(self, value):
+        """Set new value and return old value."""
+        if not self._window:
+            raise RuntimeError("value already freed")
+        return self._fetch_and_op(value, MPI.REPLACE, MPI.LOCK_SHARED)
+
+    def free(self):
+        """Free value resources."""
+        window = self._window
+        self._window = MPI.WIN_NULL
+        self._comm = MPI.COMM_NULL
+        window.free()
 
 
 class Counter:
@@ -670,6 +760,55 @@ class Semaphore:
         self._counter.free()
         self._condvar.free()
         self._comm = MPI.COMM_NULL
+
+
+class Event:
+    """Event object."""
+
+    def __init__(
+        self,
+        *,
+        comm=MPI.COMM_SELF,
+        info=MPI.INFO_NULL,
+        root=0,
+    ):
+        """Initialize event object.
+
+        Args:
+            comm: Intracommunicator context.
+            info: Info object for RMA context creation.
+            root: Process rank holding flag memory.
+
+        """
+        self._flag = Value("i", 0, comm=comm, info=info, root=root)
+        self._cond = Condition(comm=comm, info=info)
+
+    def is_set(self):
+        """Return whether the internal flag is `True`."""
+        return bool(self._flag.value)
+
+    def set(self):
+        """Set the internal flag to `True`."""
+        with self._cond:
+            self._flag.value = True
+            self._cond.notify_all()
+
+    def clear(self):
+        """Reset the internal flag to `False`."""
+        with self._cond:
+            self._flag.value = False
+
+    def wait(self):
+        """Block until the internal flag is `True`."""
+        with self._cond:
+            if not self._flag.value:
+                self._cond.wait()
+            return True
+
+    def free(self):
+        """Free event resources."""
+        self._flag.free()
+        self._cond.free()
 
 
 def _get_datatype(typecode):

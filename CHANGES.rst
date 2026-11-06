@@ -1,6 +1,14 @@
 Release 4.2.0 [YYYY-MM-DD]
 ==========================
 
+* New features:
+
+  + The :mod:`mpi4py.util.sync` module provides a new `Value` object
+    type for managing global numeric values across MPI processes.
+
+  + The :mod:`mpi4py.util.sync` module provides a new `Event` object
+    type mimicking `threading.Event` and `multiprocessing.Event` APIs.
+
 * Enhancements:
 
   + Add ``tohandle()`` method to MPI types.

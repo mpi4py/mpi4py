@@ -81,6 +81,112 @@ class TestSequentialWorld(BaseTestSequential, unittest.TestCase):
 # ---
 
 
+class BaseTestValue(BaseTest):
+    COMM = MPI.Intracomm(MPI.COMM_NULL)
+
+    def testTypecode(self):
+        assert array is not None
+        typecodes = tuple(array.typecodes)
+        for typecode in typecodes:
+            if typecode in "uwe":
+                continue
+            if typecode in ("Zf", "Zd"):
+                try:
+                    MPI.Datatype.fromcode(typecode)
+                except ValueError:
+                    continue
+            with self.subTest(typecode=typecode):
+                value = sync.Value(typecode)
+                self.assertEqual(value.value, 0)
+                self.assertEqual(value.typecode, typecode)
+                value.free()
+
+    def testTypecodeBad(self):
+        with self.assertRaises(ValueError):
+            sync.Value("c")
+
+    def testInitial(self):
+        comm = self.COMM
+        size = comm.Get_size()
+        for root in sorted({0, size // 2, size - 1}):
+            value = sync.Value("i", root, comm=comm, root=root)
+            self.assertEqual(value.value, root)
+            value.free()
+
+    def testInitialBad(self):
+        for init in (None, [42], "42", 42.0, 42.0j):
+            with self.assertRaises(TypeError):
+                sync.Value("i", init)  # ty: ignore[invalid-argument-type]
+        for uint in "BHILQ":
+            with self.assertRaises(OverflowError):
+                sync.Value(uint, -1)
+
+    def testRootBad(self):
+        comm = self.COMM
+        size = comm.Get_size()
+        for root in (-1, size):
+            with self.assertRaises(ValueError):
+                sync.Value("i", comm=comm, root=root)
+
+    def testValueAttr(self):
+        comm = self.COMM
+        size = comm.Get_size()
+        rank = comm.Get_rank()
+        for root in sorted({0, size // 2, size - 1}):
+            value = sync.Value("i", -1, comm=comm, root=root)
+            for proc in range(size):
+                if rank == proc:
+                    value.value = proc
+                comm.Barrier()
+                self.assertEqual(value.value, proc)
+                comm.Barrier()
+            value.value = rank
+            comm.Barrier()
+            self.assertIn(value.value, range(size))
+            value.free()
+
+    def testGetSet(self):
+        comm = self.COMM
+        size = comm.Get_size()
+        rank = comm.Get_rank()
+        for root in sorted({0, size // 2, size - 1}):
+            value = sync.Value("i", -1, comm=comm, root=root)
+            for proc in range(size):
+                if rank == proc:
+                    previous = value.set(proc)
+                    comm.Barrier()
+                    self.assertEqual(previous, proc - 1)
+                else:
+                    comm.Barrier()
+                    current = value.get()
+                    self.assertEqual(current, proc)
+                comm.Barrier()
+            value.free()
+
+    def testFree(self):
+        comm = self.COMM
+        value = sync.Value("i", comm=comm)
+        for _ in range(5):
+            value.free()
+        with self.assertRaises(RuntimeError):
+            _ = value.value
+        with self.assertRaises(RuntimeError):
+            value.value = 0
+
+
+class TestValueSelf(BaseTestValue, unittest.TestCase):
+    #
+    COMM = MPI.COMM_SELF
+
+
+class TestValueWorld(BaseTestValue, unittest.TestCase):
+    #
+    COMM = MPI.COMM_WORLD
+
+
+# ---
+
+
 class BaseTestCounter(BaseTest):
     #
     COMM = MPI.Intracomm(MPI.COMM_NULL)
@@ -918,6 +1024,91 @@ class TestSemaphoreSelf(BaseTestSemaphore, unittest.TestCase):
 
 @unittest.skipMPI("msmpi")
 class TestSemaphoreWorld(BaseTestSemaphore, unittest.TestCase):
+    #
+    COMM = MPI.COMM_WORLD
+
+
+# ---
+
+
+class BaseTestEvent(BaseTest):
+    COMM = MPI.Intracomm(MPI.COMM_NULL)
+
+    def testSetWaitClear(self):
+        comm = self.COMM
+        size = comm.Get_size()
+        rank = comm.Get_rank()
+        for root in sorted({0, size // 2, size - 1}):
+            event = sync.Event(comm=comm, root=root)
+            for proc in sorted({0, size // 2, size - 1}):
+                self.assertFalse(event.is_set())
+                comm.Barrier()
+                if rank == proc:
+                    event.set()
+                event.wait()
+                self.assertTrue(event.is_set())
+                comm.Barrier()
+                if rank == proc:
+                    event.clear()
+                comm.Barrier()
+            event.free()
+
+    def testWaitAfterSet(self):
+        comm = self.COMM
+        size = comm.Get_size()
+        rank = comm.Get_rank()
+        for root in sorted({0, size // 2, size - 1}):
+            event = sync.Event(comm=comm, root=root)
+            for proc in sorted({0, size // 2, size - 1}):
+                self.assertFalse(event.is_set())
+                comm.Barrier()
+                if rank == proc:
+                    event.set()
+                comm.Barrier()
+                self.assertTrue(event.is_set())
+                event.wait()
+                self.assertTrue(event.is_set())
+                event.wait()
+                self.assertTrue(event.is_set())
+                comm.Barrier()
+                if rank == proc:
+                    event.clear()
+                comm.Barrier()
+                self.assertFalse(event.is_set())
+            event.free()
+
+    def testWaitBeforeSet(self):
+        comm = self.COMM
+        size = comm.Get_size()
+        rank = comm.Get_rank()
+        for root in sorted({0, size - 1}):
+            event = sync.Event(comm=comm, root=root)
+            for proc in sorted({0, size - 1}):
+                self.assertFalse(event.is_set())
+                comm.Barrier()
+                if rank == proc:
+                    time.sleep(1 / 16)
+                    event.set()
+                else:
+                    event.wait()
+                self.assertTrue(event.is_set())
+                event.wait()
+                self.assertTrue(event.is_set())
+                comm.Barrier()
+                if rank == proc:
+                    event.clear()
+                comm.Barrier()
+                self.assertFalse(event.is_set())
+            event.free()
+
+
+class TestEventSelf(BaseTestEvent, unittest.TestCase):
+    #
+    COMM = MPI.COMM_SELF
+
+
+@unittest.skipMPI("msmpi")
+class TestEventWorld(BaseTestEvent, unittest.TestCase):
     #
     COMM = MPI.COMM_WORLD
 

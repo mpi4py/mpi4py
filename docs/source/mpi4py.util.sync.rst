@@ -26,6 +26,25 @@ Sequential execution
    .. automethod:: begin
    .. automethod:: end
 
+Global value
+++++++++++++++
+
+.. autoclass:: mpi4py.util.sync.Value
+
+   Manage a global value within a group of MPI processes. The value interface
+   is close to that of `multiprocessing.Value`.
+
+   The implementation is based in MPI-3 one-sided operations. A root process
+   (typically rank ``0``) holds the value memory, and its value is queried and
+   updated with atomic RMA *fetch-and-op* operations.
+
+   .. automethod:: __init__
+   .. autoattribute:: value
+   .. autoattribute:: typecode
+   .. automethod:: get
+   .. automethod:: set
+   .. automethod:: free
+
 Global counter
 ++++++++++++++
 
@@ -139,6 +158,26 @@ Semaphore object
    .. automethod:: __exit__
    .. automethod:: acquire
    .. automethod:: release
+   .. automethod:: free
+
+Event object
+++++++++++++
+
+.. autoclass:: mpi4py.util.sync.Event
+
+   An event object is a simple signaling mechanism between processes: one
+   process signals an event and other processes wait for it.
+
+   An event object manages an internal flag that can be set to `True` with the
+   `set()` method and reset to `False` with the `clear()` method. The `wait()`
+   method blocks until the flag is `True`. The `is_set()` method queries the
+   state of the flag.
+
+   .. automethod:: __init__
+   .. automethod:: is_set
+   .. automethod:: set
+   .. automethod:: clear
+   .. automethod:: wait
    .. automethod:: free
 
 
