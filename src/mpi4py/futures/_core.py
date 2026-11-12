@@ -892,7 +892,7 @@ def import_main(mod_name, mod_path, init_globals, run_name):
 
     TempModule = runpy._TempModule  # pylint: disable=invalid-name
     runpy._TempModule = TempModulePatch  # ty: ignore[invalid-assignment]
-    import_main.sentinel = (mod_name, mod_path)  # ty: ignore[unresolved-attribute]
+    import_main.sentinel = (mod_name, mod_path)  # ty: ignore[missing-attribute]
     main_module = sys.modules["__main__"]
     try:
         sys.modules["__main__"] = sys.modules[run_name] = module
@@ -911,7 +911,7 @@ def import_main(mod_name, mod_path, init_globals, run_name):
         sys.modules["__main__"] = main_module
         raise
     finally:
-        del import_main.sentinel  # ty: ignore[unresolved-attribute]
+        del import_main.sentinel  # ty: ignore[missing-attribute]
         runpy._TempModule = TempModule
 
 
@@ -1077,7 +1077,7 @@ def client_spawn(
 # ---
 
 
-SERVICE = __spec__.parent  # ty: ignore[unresolved-attribute]
+SERVICE = __spec__ and __spec__.parent
 SERVER_HOST = "localhost"
 SERVER_BIND = ""
 SERVER_PORT = 31415

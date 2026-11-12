@@ -118,7 +118,7 @@ Py_DecRef.argtypes = [ctypes.py_object]
 PyCapsule_Destructor = ctypes.PYFUNCTYPE(None, ctypes.c_void_p)
 PyCapsule_Destructor.from_param = classmethod(  # ty: ignore[invalid-assignment]
     lambda _cls, arg: (
-        ctypes._CFuncPtr.from_param(arg)  # ty: ignore[unresolved-attribute]
+        ctypes._CFuncPtr.from_param(arg)  # ty: ignore[missing-attribute]
         if arg is not None
         else None
     )

@@ -402,7 +402,7 @@ class FunctionH2I(NodeFuncProto):
         self.fallback = self.name.replace("_toint", "_c2f")
         self.cretv = f"({self.crett})-1"
         self.dep_node = NodeFuncProto(self.crett, self.fallback, self.cargs)
-        self.dep_node.cretv = self.cretv  # ty: ignore[unresolved-attribute]
+        self.dep_node.cretv = self.cretv  # ty: ignore[missing-attribute]
 
 
 class FunctionI2H(NodeFuncProto):
@@ -419,7 +419,7 @@ class FunctionI2H(NodeFuncProto):
         self.fallback = self.name.replace("_fromint", "_f2c")
         self.cretv = f"({self.crett})0"
         self.dep_node = NodeFuncProto(self.crett, self.fallback, self.cargs)
-        self.dep_node.cretv = self.cretv  # ty: ignore[unresolved-attribute]
+        self.dep_node.cretv = self.cretv  # ty: ignore[missing-attribute]
 
 
 class Generator:

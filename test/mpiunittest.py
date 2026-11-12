@@ -8,7 +8,7 @@ from mpitestutil import import_MPI
 
 class TestCase(unittest.TestCase):
     #
-    def assertAlmostEqual(  # ty: ignore[invalid-method-override]
+    def assertAlmostEqual(  # ty: ignore[incompatible-method-override]
         self, first, second
     ):
         num = complex(second) - complex(first)

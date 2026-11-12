@@ -271,7 +271,7 @@ class TestMyRequest2(TestMyRequest):
 @unittest.skipMPI("mpich(==3.4.1)")
 class TestMyPrequest2(TestMyPrequest):
     #
-    req: MyPrequest  # ty: ignore[invalid-mutable-override]
+    req: MyPrequest  # ty: ignore[incompatible-mutable-override]
 
     def setUp(self):
         req = MPI.COMM_SELF.Send_init(

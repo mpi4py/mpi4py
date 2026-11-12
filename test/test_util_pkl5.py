@@ -1014,12 +1014,12 @@ class TestMPIWorld(BaseTest, unittest.TestCase):
         super().testGetStatusAll()
 
 
-class TestPKL5Self(BaseTestPKL5, TestMPISelf):  # ty: ignore[invalid-mutable-override]
+class TestPKL5Self(BaseTestPKL5, TestMPISelf):  # ty: ignore[incompatible-mutable-override]
     #
     pass
 
 
-class TestPKL5World(BaseTestPKL5, TestMPIWorld):  # ty: ignore[invalid-mutable-override]
+class TestPKL5World(BaseTestPKL5, TestMPIWorld):  # ty: ignore[incompatible-mutable-override]
     #
     pass
 

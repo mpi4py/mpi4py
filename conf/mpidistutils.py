@@ -1828,11 +1828,11 @@ if SOURCE_DATE_EPOCH is not None:
     def make_tarball(*args, **kwargs):
         tarinfo_orig = tarfile.TarFile.tarinfo
         try:
-            tarfile.time = Time()  # ty: ignore[unresolved-attribute]
+            tarfile.time = Time()  # ty: ignore[missing-attribute]
             tarfile.TarFile.tarinfo = TarInfo
             return archive_util.make_tarball(*args, **kwargs)
         finally:
-            tarfile.time = time  # ty: ignore[unresolved-attribute]
+            tarfile.time = time  # ty: ignore[missing-attribute]
             tarfile.TarFile.tarinfo = tarinfo_orig
 
     archive_util.ARCHIVE_FORMATS["gztar"] = (

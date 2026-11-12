@@ -23,7 +23,7 @@ allowed-unresolved-imports = [
 [[overrides]]
 include = ["src/mpi4py/util/pkl5.pyi"]
 [overrides.rules]
-invalid-method-override = "ignore"
+incompatible-method-override = "ignore"
 
 [[overrides]]
 include = ["conf/mpidistutils.py"]
