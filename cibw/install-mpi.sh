@@ -93,7 +93,6 @@ case "$MPI_ABI" in
     impi)     echo I_MPI_ROOT="$MPI_ROOT" ;;
     msmpi)    echo MSMPI_SDK="$MPI_ROOT" ;;
 esac
-find "$MPI_ROOT"
 
 echo "Display MPI compiler wrappers"
 if [[ "$(uname)" == Linux || "$(uname)" == Darwin ]]; then
