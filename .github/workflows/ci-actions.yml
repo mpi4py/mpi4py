@@ -9,7 +9,7 @@ permissions:
 
 jobs:
 
-  actionlint:
+  jactionlint:
     runs-on: ubuntu-latest
 
     steps:
@@ -19,10 +19,8 @@ jobs:
       with:
         persist-credentials: false
 
-    - name: actionlint
-      uses: docker://rhysd/actionlint:1.7.12
-      with:
-        args: -color
+    - name: jactionlint
+      uses: jdx/jactionlint@v2.6.0
 
   zizmor:
     runs-on: ubuntu-latest

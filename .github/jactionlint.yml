@@ -1,0 +1,10 @@
+paths:
+  ".github/workflows/**/*.{yaml,yml}":
+    ignore:
+      - unpinned-uses
+  ".github/workflows/**/{ci,cd}*.{yaml,yml}":
+    ignore:
+      - timeout-minutes
+  ".github/workflows/**/{ci,cd}-*.{yaml,yml}":
+    ignore:
+      - concurrency-limits
