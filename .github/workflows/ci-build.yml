@@ -32,8 +32,8 @@ jobs:
           - skbuild
           - mesonpy
         os:
-          - ubuntu-24.04
-          - ubuntu-24.04-arm
+          - ubuntu-26.04
+          - ubuntu-26.04-arm
           - macos-26
           - windows-2025
         mpi:
@@ -42,11 +42,11 @@ jobs:
           - impi
           - msmpi
         exclude:
-          - os:  ubuntu-24.04
+          - os:  ubuntu-26.04
             mpi: msmpi
-          - os:  ubuntu-24.04-arm
+          - os:  ubuntu-26.04-arm
             mpi: impi
-          - os:  ubuntu-24.04-arm
+          - os:  ubuntu-26.04-arm
             mpi: msmpi
           - os:  macos-26
             mpi: impi

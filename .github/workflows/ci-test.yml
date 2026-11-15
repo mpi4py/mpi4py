@@ -17,8 +17,8 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - ubuntu-24.04
-          - ubuntu-24.04-arm
+          - ubuntu-26.04
+          - ubuntu-26.04-arm
           - macos-26
           - windows-2025
         mpi:
@@ -32,9 +32,9 @@ jobs:
           - "3.15t"
           - "pypy-3.11"
         exclude:
-          - os: ubuntu-24.04
+          - os: ubuntu-26.04
             mpi: msmpi
-          - os: ubuntu-24.04-arm
+          - os: ubuntu-26.04-arm
             mpi: msmpi
           - os: macos-26
             mpi: msmpi

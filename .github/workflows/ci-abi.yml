@@ -103,8 +103,8 @@ jobs:
         }
         RUNNER = {
             "Linux": {
-                "aarch64": "ubuntu-24.04-arm",
-                "x86_64":  "ubuntu-24.04",
+                "aarch64": "ubuntu-26.04-arm",
+                "x86_64":  "ubuntu-26.04",
             },
             "macOS": {
                 "arm64": "macos-26",
