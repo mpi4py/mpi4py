@@ -1,7 +1,30 @@
 import contextlib
 import importlib
 import os
+import platform
 import sys
+
+
+def linux(ID=None, VERSION_ID=None):
+    if sys.platform != "linux":
+        return False
+    try:
+        release = platform.freedesktop_os_release()
+    except OSError:
+        release = {}
+    if ID is None:
+        return True
+    if ID != release.get("ID"):
+        return False
+    if VERSION_ID is None:
+        return True
+    if VERSION_ID != release.get("VERSION_ID"):
+        return False
+    return True
+
+
+def ubuntu(VERSION_ID=None):
+    return linux("ubuntu", VERSION_ID)
 
 
 def github():

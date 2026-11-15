@@ -136,6 +136,7 @@ class BaseTestSpawnSingle(BaseTestSpawn):
         self.COMM.Barrier()
 
 
+@unittest.skipMPI("openmpi(==5.0.10)", testutil.ubuntu("26.04"))
 class BaseTestSpawnMultiple(BaseTestSpawn):
     #
     def testCommSpawn(self):
