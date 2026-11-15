@@ -76,17 +76,17 @@ MPI_LIB = {
 
 GHA_RUNNER = {
     "Linux": {
-        "aarch64": "ubuntu-24.04-arm",
-        "x86_64": "ubuntu-24.04",
+        "aarch64": "ubuntu-26.04-arm",
+        "x86_64": "ubuntu-26.04",
         None: "ubuntu-latest",
     },
     "macOS": {
-        "arm64": "macos-15",
-        "x86_64": "macos-15-intel",
+        "arm64": "macos-26",
+        "x86_64": "macos-26-intel",
         None: "macos-latest",
     },
     "Windows": {
-        "AMD64": "windows-2022",
+        "AMD64": "windows-2025",
         None: "windows-latest",
     },
 }

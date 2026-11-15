@@ -97,8 +97,6 @@ jobs:
       run: |
         # set hostname
         sudo hostname localhost
-        # unlink libevent
-        brew unlink libevent || true
         # unlink openssl
         brew unlink openssl || true
 
