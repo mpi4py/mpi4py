@@ -935,6 +935,45 @@ class ProcessPoolExecutorTest(
                 unordered=True,
             )
 
+    def test_starmap_buffersize(self):
+        ref = list(map(pow, range(10), range(10)))
+        for bs in (1, 2, 9, 10, 11):
+            for cs in (1, 2, 9, 10, 11):
+                for iterable in (
+                    zip(range(10), range(10)),
+                    list(zip(range(10), range(10))),
+                ):
+                    self.assertEqual(
+                        list(
+                            self.executor.starmap(
+                                pow,
+                                iterable,
+                                chunksize=cs,
+                                buffersize=bs,
+                            )
+                        ),
+                        ref,
+                    )
+        with self.assertRaises(TypeError):
+            self.executor.starmap(
+                float,
+                range(10),
+                buffersize=str(1),  # type: ignore
+            )
+        with self.assertRaises(ValueError):
+            self.executor.starmap(
+                float,
+                range(10),
+                buffersize=-1,
+            )
+        with self.assertRaises(ValueError):
+            self.executor.starmap(
+                float,
+                range(10),
+                buffersize=1,
+                unordered=True,
+            )
+
     def test_map_unordered(self):
         map_unordered = functools.partial(self.executor.map, unordered=True)
         self.assertEqual(

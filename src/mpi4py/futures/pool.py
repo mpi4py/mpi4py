@@ -263,6 +263,7 @@ def _starmap_helper(
         end_time = timeout + timer()
 
     if buffersize is not None:
+        iterable = iter(iterable)
         fs = collections.deque(
             executor.submit(function, *args)
             for args in itertools.islice(iterable, buffersize)
