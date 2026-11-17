@@ -954,6 +954,18 @@ class ProcessPoolExecutorTest(
                         ),
                         ref,
                     )
+                for n in (1, 5, 10):
+                    self.assertEqual(
+                        list(
+                            self.executor.starmap(
+                                int,
+                                [()] * n,
+                                chunksize=cs,
+                                buffersize=bs,
+                            )
+                        ),
+                        [0] * n,
+                    )
         with self.assertRaises(TypeError):
             self.executor.starmap(
                 float,

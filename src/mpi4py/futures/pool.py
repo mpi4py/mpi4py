@@ -312,8 +312,8 @@ def _starmap_helper(
                         result.append(resolve(fs.pop(), end_time - timer()))
                     if (
                         buffersize is not None
-                        and (executor := executor_weakref())
-                        and (args := next(iterable, None))
+                        and (executor := executor_weakref()) is not None
+                        and (args := next(iterable, None)) is not None
                     ):
                         fs.appendleft(executor.submit(function, *args))
                     yield result.pop()
