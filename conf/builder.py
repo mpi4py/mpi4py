@@ -76,7 +76,7 @@ def get_backend_requires_hook(name, dist, config_settings=None):
         from build.env import DefaultIsolatedEnv
     except ImportError:
         from build.env import (
-            IsolatedEnvBuilder,  # ty: ignore[import-not-found]
+            IsolatedEnvBuilder,  # ty: ignore[missing-module-member]
         )
 
         class DefaultIsolatedEnv(IsolatedEnvBuilder):
