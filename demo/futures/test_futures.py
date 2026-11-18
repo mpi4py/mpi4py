@@ -1,5 +1,6 @@
 import contextlib
 import functools
+import itertools
 import os
 import random
 import sys
@@ -926,14 +927,44 @@ class ProcessPoolExecutorTest(
                 range(10),
                 buffersize=-1,
             )
-        with self.assertRaises(ValueError):
-            self.executor.map(
-                pow,
-                range(10),
-                range(10),
-                buffersize=1,
+
+    def test_map_buffersize_timeout(self):
+        results = []
+        try:
+            args = [0, 0, 0, 0.5, 0]
+            for i in self.executor.map(
+                time.sleep,
+                args,
+                timeout=0.25,
+                buffersize=2,
+            ):
+                results.append(i)
+        except futures.TimeoutError:
+            pass
+        else:
+            self.fail("expected TimeoutError")
+
+        self.assertEqual([None] * 3, results)
+
+    def test_map_buffersize_unordered_timeout(self):
+        results = []
+        try:
+            args = [0, 0, 0, 0.5, 0]
+            for i in self.executor.map(
+                time.sleep,
+                args,
+                timeout=0.25,
+                buffersize=2,
                 unordered=True,
-            )
+            ):
+                results.append(i)
+        except futures.TimeoutError:
+            pass
+        else:
+            self.fail("expected TimeoutError")
+
+        count = 4 if self.executor.num_workers > 1 else 3
+        self.assertEqual([None] * count, results)
 
     def test_starmap_buffersize(self):
         ref = list(map(pow, range(10), range(10)))
@@ -978,20 +1009,42 @@ class ProcessPoolExecutorTest(
                 range(10),
                 buffersize=-1,
             )
-        with self.assertRaises(ValueError):
-            self.executor.starmap(
-                float,
-                range(10),
-                buffersize=1,
-                unordered=True,
-            )
 
     def test_map_unordered(self):
-        map_unordered = functools.partial(self.executor.map, unordered=True)
-        self.assertEqual(
-            set(map_unordered(pow, range(10), range(10))),
-            set(map(pow, range(10), range(10))),
-        )
+        for to, cs, bs in itertools.product(
+            (None, 100.0),
+            (1, 2, 9, 10, 11),
+            (None, 1, 2, 9, 10, 11),
+        ):
+            map_unordered = functools.partial(
+                self.executor.map,
+                timeout=to,
+                chunksize=cs,
+                buffersize=bs,
+                unordered=True,
+            )
+            self.assertEqual(
+                set(map_unordered(pow, range(10), range(10))),
+                set(map(pow, range(10), range(10))),
+            )
+
+    def test_starmap_unordered(self):
+        for to, cs, bs in itertools.product(
+            (None, 100.0),
+            (1, 2, 9, 10, 11),
+            (None, 1, 2, 9, 10, 11),
+        ):
+            starmap_unordered = functools.partial(
+                self.executor.starmap,
+                timeout=to,
+                chunksize=cs,
+                buffersize=bs,
+                unordered=True,
+            )
+            self.assertEqual(
+                set(starmap_unordered(pow, zip(range(10), range(10)))),
+                set(map(pow, range(10), range(10))),
+            )
 
     def test_map_unordered_timeout(self):
         map_unordered = functools.partial(self.executor.map, unordered=True)

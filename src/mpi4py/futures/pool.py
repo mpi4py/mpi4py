@@ -200,8 +200,6 @@ class MPIPoolExecutor(_base.Executor):
                 raise TypeError("buffersize must be an integer or None")
             if buffersize < 1:
                 raise ValueError("buffersize must be None or > 0")
-            if unordered:
-                raise ValueError("buffersize must be None if unordered")
         if chunksize == 1:
             return _starmap_helper(
                 self,
@@ -256,7 +254,9 @@ class MPIPoolExecutor(_base.Executor):
 def _starmap_helper(
     executor, function, iterable, timeout, buffersize, unordered
 ):
-    # pylint: disable=too-many-arguments,too-many-positional-arguments
+    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-positional-arguments
+    # pylint: disable=too-many-statements
     timer = time.monotonic
     end_time = sys.float_info.max
     if timeout is not None:
@@ -268,13 +268,12 @@ def _starmap_helper(
             executor.submit(function, *args)
             for args in itertools.islice(iterable, buffersize)
         )
-        unordered = False
     else:
         fs = collections.deque(
             executor.submit(function, *args) for args in iterable
         )
-        if unordered:
-            fs = set(fs)
+    if unordered:
+        fs = set(fs)
 
     executor_weakref = weakref.ref(executor)
     del executor
@@ -289,37 +288,67 @@ def _starmap_helper(
             del future
 
     def result_iterator():
+        # pylint: disable=too-many-branches
+        # pylint: disable=too-many-nested-blocks
         # pylint: disable=unidiomatic-typecheck
-        future = collections.deque()
-        result = collections.deque()
+        bag = collections.deque()
+        end = (object(),)
         try:
             if unordered:
                 assert type(fs) is set  # noqa: S101
-                if timeout is None:
-                    iterator = _base.as_completed(fs)
+                if buffersize is None:
+                    if timeout is None:
+                        iterator = _base.as_completed(fs)
+                    else:
+                        iterator = _base.as_completed(fs, end_time - timer())
+                    for _ in map(bag.append, iterator):
+                        fs.remove(bag[0])
+                        yield resolve(bag.pop())
                 else:
-                    iterator = _base.as_completed(fs, end_time - timer())
-                for _ in map(future.append, iterator):
-                    fs.remove(future[0])
-                    yield resolve(future.pop())
+                    while fs:
+                        if timeout is None:
+                            done = _base.wait(
+                                fs, None, _base.FIRST_COMPLETED
+                            ).done
+                        else:
+                            done = _base.wait(
+                                fs, end_time - timer(), _base.FIRST_COMPLETED
+                            ).done
+                            if not done:
+                                raise _base.TimeoutError
+                        fs.difference_update(done)
+                        while done:
+                            if (
+                                (executor := executor_weakref()) is not None
+                                and (args := next(iterable, end)) is not end
+                            ):  # fmt: skip
+                                fs.add(executor.submit(function, *args))
+                                del executor, args
+                            yield resolve(done.pop())
             else:
                 assert type(fs) is collections.deque  # noqa: S101
                 fs.reverse()
-                while fs:
-                    if timeout is None:
-                        result.append(resolve(fs.pop()))
-                    else:
-                        result.append(resolve(fs.pop(), end_time - timer()))
-                    if (
-                        buffersize is not None
-                        and (executor := executor_weakref()) is not None
-                        and (args := next(iterable, None)) is not None
-                    ):
-                        fs.appendleft(executor.submit(function, *args))
-                    yield result.pop()
+                if buffersize is None:
+                    while fs:
+                        if timeout is None:
+                            yield resolve(fs.pop())
+                        else:
+                            yield resolve(fs.pop(), end_time - timer())
+                else:
+                    while fs:
+                        if timeout is None:
+                            bag.append(resolve(fs.pop()))
+                        else:
+                            bag.append(resolve(fs.pop(), end_time - timer()))
+                        if (
+                            (executor := executor_weakref()) is not None
+                            and (args := next(iterable, end)) is not end
+                        ):  # fmt: skip
+                            fs.appendleft(executor.submit(function, *args))
+                            del executor, args
+                        yield bag.pop()
         finally:
-            del future
-            del result
+            del bag
             while fs:
                 fs.pop().cancel()
 
