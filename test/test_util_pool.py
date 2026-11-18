@@ -145,6 +145,13 @@ class BaseTestPool(BaseMixin):
             list(map(sqr, list(range(10)))),
         )
 
+        args = list(range(10))
+        result = list(map(sqr, args))
+        for bs in (1, 2, 10, 11):
+            for iterable in (args, iter(args), (a for a in args)):
+                it = self.pool.imap(sqr, iterable, buffersize=bs)
+                self.assertEqual(list(it), result)
+
         it = self.pool.imap(sqr, range(10))
         for i in range(10):
             self.assertEqual(next(it), i * i)
@@ -182,6 +189,13 @@ class BaseTestPool(BaseMixin):
         it = self.pool.imap_unordered(sqr, (a for a in args), chunksize=20)
         self.assertEqual(sorted(it), result)
 
+        args = list(range(10))
+        result = list(map(sqr, args))
+        for bs in (1, 2, 10, 11):
+            for iterable in (args, iter(args), (a for a in args)):
+                it = self.pool.imap_unordered(sqr, iterable, buffersize=bs)
+                self.assertEqual(sorted(it), result)
+
     def test_starmap(self):
         tuples = list(zip(range(10), range(9, -1, -1)))
         self.assertEqual(
@@ -202,6 +216,13 @@ class BaseTestPool(BaseMixin):
         iterator = zip(range(10), range(9, -1, -1))
         it = self.pool.istarmap(mul, iterator)
         self.assertEqual(list(it), result)
+
+        tuples = list(zip(range(10), range(9, -1, -1)))
+        result = list(itertools.starmap(mul, tuples))
+        for bs in (1, 2, 10, 11):
+            for iterable in (tuples, iter(tuples)):
+                it = self.pool.istarmap(mul, iterable, buffersize=bs)
+                self.assertEqual(list(it), result)
 
         tuples = list(zip(range(10), range(9, -1, -1)))
         it = self.pool.istarmap(mul, tuples)
@@ -228,6 +249,13 @@ class BaseTestPool(BaseMixin):
         result = list(itertools.starmap(mul, tuples))
         it = self.pool.istarmap_unordered(mul, tuples, chunksize=20)
         self.assertEqual(sorted(it), sorted(result))
+
+        tuples = list(zip(range(10), range(9, -1, -1)))
+        result = list(itertools.starmap(mul, tuples))
+        for bs in (1, 2, 10, 11):
+            for iterable in (tuples, iter(tuples)):
+                it = self.pool.istarmap_unordered(mul, iterable, buffersize=bs)
+                self.assertEqual(sorted(it), sorted(result))
 
     def test_apply_async(self):
         res = self.pool.apply_async(sqr, (7,))

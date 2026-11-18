@@ -69,12 +69,16 @@ class Pool:
         func: Callable[[S], T],
         iterable: Iterable[S],
         chunksize: int = 1,
+        *,
+        buffersize: int | None = None,
     ) -> Iterator[T]: ...
     def imap_unordered(
         self,
         func: Callable[[S], T],
         iterable: Iterable[S],
         chunksize: int = 1,
+        *,
+        buffersize: int | None = None,
     ) -> Iterator[T]: ...
     def starmap(
         self,
@@ -95,12 +99,16 @@ class Pool:
         func: Callable[..., T],
         iterable: Iterable[Iterable[Any]],
         chunksize: int = 1,
+        *,
+        buffersize: int | None = None,
     ) -> Iterator[T]: ...
     def istarmap_unordered(
         self,
         func: Callable[..., T],
         iterable: Iterable[Iterable[Any]],
         chunksize: int = 1,
+        *,
+        buffersize: int | None = None,
     ) -> Iterator[T]: ...
     def close(self) -> None: ...
     def terminate(self) -> None: ...

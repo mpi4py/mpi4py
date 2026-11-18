@@ -9,6 +9,11 @@ Release 4.2.0 [YYYY-MM-DD]
   + The :mod:`mpi4py.util.sync` module provides a new `Event` object
     type mimicking `threading.Event` and `multiprocessing.Event` APIs.
 
+  + The `Pool.imap()`, `Pool.imap_unordered()`, `Pool.istarmap()`, and
+    `Pool.istarmap_unordered()` methods accept an optional
+    ``buffersize`` keyword argument to limit the number of submitted
+    tasks whose results have not yet been yielded.
+
 * Enhancements:
 
   + Add ``tohandle()`` method to MPI types.

@@ -139,23 +139,36 @@ class Pool:
         func,
         iterable,
         chunksize=1,
+        *,
+        buffersize=None,
     ):
         """Like `map()` but return an `iterator`.
 
         Equivalent to ``map(func, iterable)``.
 
         """
-        return self.executor.map(func, iterable, chunksize=chunksize)
+        return self.executor.map(
+            func,
+            iterable,
+            chunksize=chunksize,
+            buffersize=buffersize,
+        )
 
     def imap_unordered(
         self,
         func,
         iterable,
         chunksize=1,
+        *,
+        buffersize=None,
     ):
         """Like `imap()` but ordering of results is arbitrary."""
         return self.executor.map(
-            func, iterable, chunksize=chunksize, unordered=True
+            func,
+            iterable,
+            chunksize=chunksize,
+            buffersize=buffersize,
+            unordered=True,
         )
 
     def starmap(
@@ -200,6 +213,8 @@ class Pool:
         func,
         iterable,
         chunksize=1,
+        *,
+        buffersize=None,
     ):
         """Like `starmap()` but return an `iterator`.
 
@@ -210,6 +225,7 @@ class Pool:
             func,
             iterable,
             chunksize=chunksize,
+            buffersize=buffersize,
         )
 
     def istarmap_unordered(
@@ -217,12 +233,15 @@ class Pool:
         func,
         iterable,
         chunksize=1,
+        *,
+        buffersize=None,
     ):
         """Like `istarmap()` but ordering of results is arbitrary."""
         return self.executor.starmap(
             func,
             iterable,
             chunksize=chunksize,
+            buffersize=buffersize,
             unordered=True,
         )
 
