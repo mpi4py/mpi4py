@@ -18,7 +18,7 @@ rpath=""
 needed=""
 
 if [[ "$(uname)" == Linux ]]; then
-    mods=("$tempdir"/mpi4py*linux*.dir/mpi4py/MPI.*.so)
+    mods=("$tempdir"/mpi4py*linux*.dir/mpi4py*/MPI.*.so)
     libs=$(find "$tempdir"/mpi4py*linux*.dir/mpi4py*.libs \
                 -type f -exec basename {} \; | sort | uniq)
     rpath=$(patchelf --print-rpath "${mods[@]}" | sort | uniq)
@@ -26,7 +26,7 @@ if [[ "$(uname)" == Linux ]]; then
 fi
 
 if [[ "$(uname)" == Darwin ]]; then
-    mods=("$tempdir"/mpi4py*macos*.dir/mpi4py/MPI.*.so)
+    mods=("$tempdir"/mpi4py*macos*.dir/mpi4py*/MPI.*.so)
     libs=$(
         find "$tempdir"/mpi4py*macos*.dir/mpi4py/.dylibs \
              -type f -exec basename {} \; | sort | uniq)
@@ -39,9 +39,9 @@ if [[ "$(uname)" == Darwin ]]; then
 fi
 
 if [[ "$(uname)" =~ NT ]]; then
-    mods=("$tempdir"/mpi4py*win*.dir/mpi4py/MPI*.pyd)
+    mods=("$tempdir"/mpi4py*win*.dir/mpi4py*/MPI*.pyd)
     for m in "${mods[@]}"; do cp "$m" "$m.dll"; done
-    mods=("$tempdir"/mpi4py*win*.dir/mpi4py/MPI.*.dll)
+    mods=("$tempdir"/mpi4py*win*.dir/mpi4py*/MPI.*.dll)
     out="$(mktemp -d)"/dlldeps.txt
     for m in "${mods[@]}"; do
         ldd "$m" | \

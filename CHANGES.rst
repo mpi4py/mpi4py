@@ -31,6 +31,12 @@ Release 4.2.0 [YYYY-MM-DD]
 
   + Published wheels have support for the MPI 5.0 standard ABI.
 
+  + The MPI ABI import hook used in published wheels no longer uses on
+    a custom finder installed in `sys.meta_path`. Instead, the package
+    search path is adjusted at import time such that the Python import
+    machinery finds the extension module matching the MPI library
+    available at runtime.
+
   + Improve build support with ``setuptools`` and ``meson-python``.
 
 * Backward-incompatible changes:
