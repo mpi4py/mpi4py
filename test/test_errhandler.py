@@ -60,7 +60,7 @@ class BaseTestErrhandler(unittest.BaseMixin):
             return errhandler_fn
 
         def check_handle(eh):
-            if unittest.is_mpi_abi("impi(<2021.19.0)"):
+            if unittest.is_mpi_abi("impi(<2021.20.0)"):
                 return
             cint = eh.toint()
             if cint != -1:
@@ -110,7 +110,7 @@ class BaseTestErrhandler(unittest.BaseMixin):
             for eh in errhandlers:
                 eh.Free()
 
-    @unittest.skipMPI("impi(<2021.19.0)", mpiabi=True)
+    @unittest.skipMPI("impi(<2021.20.0)", mpiabi=True)
     def testCall(self):
         mpiobj = self.mpiobj
         mpiobj.Set_errhandler(MPI.ERRORS_RETURN)

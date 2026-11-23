@@ -33,7 +33,7 @@ def arrayimpl_loop_io():
 scalar = arrayimpl.scalar
 
 
-@unittest.skipMPI("impi(<2021.19.0)", mpiabi=True)
+@unittest.skipMPI("impi(<2021.20.0)", mpiabi=True)
 class BaseTestIO(unittest.BaseMixin):
     #
     COMM = MPI.Intracomm(MPI.COMM_NULL)

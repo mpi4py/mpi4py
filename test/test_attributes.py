@@ -123,7 +123,7 @@ class BaseTestAttr(unittest.BaseMixin):
         self.assertEqual(attr, addr)
 
     @unittest.skipMPI("impi(<2021.14.0)")
-    @unittest.skipMPI("impi(<2021.19.0)", mpiabi=True)
+    @unittest.skipMPI("impi(<2021.20.0)", mpiabi=True)
     @unittest.skipMPI("mvapich")
     @unittest.skipMPI("mpich(<4.2.1)")
     @unittest.skipMPI("openmpi(<5.0.0)")
@@ -151,7 +151,7 @@ class BaseTestAttr(unittest.BaseMixin):
             self.keyval = cls.Free_keyval(self.keyval)
 
     @unittest.skipMPI("impi(<2021.14.0)")
-    @unittest.skipMPI("impi(<2021.19.0)", mpiabi=True)
+    @unittest.skipMPI("impi(<2021.20.0)", mpiabi=True)
     @unittest.skipMPI("mvapich")
     @unittest.skipMPI("mpich(<4.2.1)")
     def testAttrDeleteException(self):

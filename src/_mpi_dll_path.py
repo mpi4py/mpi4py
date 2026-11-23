@@ -5,6 +5,9 @@
 # ruff: noqa: PTH100
 # ruff: noqa: PTH113
 # ruff: noqa: PTH118
+# ruff: noqa: PTH119
+# ruff: noqa: PTH120
+# ruff: noqa: PTH122
 
 import os
 import sys
@@ -34,15 +37,17 @@ def _site_prefixes():
 def _mpi_dll_directories():
     impi_root = os.environ.get("I_MPI_ROOT")
     impi_library_kind = os.environ.get("I_MPI_LIBRARY_KIND") or "release"
+    impi_ofi_library = os.environ.get("I_MPI_OFI_LIBRARY")
     impi_ofi_library_internal = os.environ.get(
         "I_MPI_OFI_LIBRARY_INTERNAL", ""
-    ).lower() in ("", "1", "yes", "on", "true", "enable")
+    ).lower() in {"", "1", "yes", "on", "true", "enable"}
     impi_library_path = (
         ("bin", "mpi", impi_library_kind),
         ("bin", impi_library_kind),
         ("bin",),
     )
     impi_ofi_library_path = (
+        ("..", "..", "libfabric", "latest", "bin"),
         ("opt", "mpi", "libfabric", "bin"),
         ("libfabric", "bin"),
         ("bin", "libfabric"),
@@ -66,10 +71,16 @@ def _mpi_dll_directories():
         return False
 
     def add_dlldir_impi(*rootdir):
-        for subdir in impi_library_path:
-            if add_dlldir(*rootdir, *subdir, dll="impi"):
-                break
-        if impi_ofi_library_internal:
+        for dllname in ("mpi_abi", "impi"):
+            for subdir in impi_library_path:
+                if add_dlldir(*rootdir, *subdir, dll=dllname):
+                    break
+        if impi_ofi_library:
+            ofi_rootdir = os.path.dirname(impi_ofi_library)
+            ofi_library = os.path.basename(impi_ofi_library)
+            dllname, _ = os.path.splitext(ofi_library)
+            add_dlldir(ofi_rootdir, dll=dllname)
+        elif impi_ofi_library_internal:
             for subdir in impi_ofi_library_path:
                 if add_dlldir(*rootdir, *subdir, dll="libfabric"):
                     break

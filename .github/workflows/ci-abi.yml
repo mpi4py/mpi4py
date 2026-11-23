@@ -85,9 +85,9 @@ jobs:
             ],
             "impi": [
                 "2021.7.1.15761",
-                "2021.16.2.917",
                 "2021.17.2.92",
                 "2021.18.1.8",
+                "2021.19.2.16",
             ],
             "msmpi": [
                 "10.0.12498.5",
@@ -332,6 +332,11 @@ jobs:
       name: Install MPI (${{ matrix.mpi }}-${{ matrix.version }})
       run: |
         mpiname=${{ matrix.mpi }} version=${{ matrix.version }}
+        # workaround Intel MPI PyPI distribution mess
+        if [[ "$mpiname" == "impi" ]]; then
+        extraindex=https://software.repos.intel.com/python/pypi
+        export UV_INDEX=$extraindex
+        export UV_INDEX_STRATEGY=unsafe-best-match; fi
         # install MPI
         if [[ "$mpiname" == "impi" ]]; then
         mpispec="impi-rt~=${version%.*}"; else
@@ -360,6 +365,8 @@ jobs:
         mpiroot="$(pwd)/$mpi.$version/runtimes/win-x64/native"
         cygpath -w "$mpiroot"/bin >> "$GITHUB_PATH"
         echo I_MPI_ROOT="$(cygpath -w "$mpiroot")" >> "$GITHUB_ENV"
+        if test -d libfabric.*/runtimes/win-x64/native; then
+        cp -a libfabric.*/runtimes/win-x64/native/libfabric "$mpiroot"; fi
       working-directory: ${{ runner.temp }}
       shell: bash
 

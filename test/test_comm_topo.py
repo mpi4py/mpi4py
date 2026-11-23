@@ -53,7 +53,7 @@ class BaseTestTopo(unittest.BaseMixin):
     COMM = MPI.Intracomm(MPI.COMM_NULL)
 
     def checkHandle(self, oldcomm):
-        if unittest.is_mpi_abi("impi(<2021.19.0)"):
+        if unittest.is_mpi_abi("impi(<2021.20.0)"):
             return
         cint = oldcomm.toint()
         if cint != -1:

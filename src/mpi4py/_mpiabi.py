@@ -142,7 +142,7 @@ def _dlopen_libmpi(libmpi=None):  # pragma: no cover
                 if os.path.basename(name) != name:
                     dlopen_impi_libfabric(os.path.dirname(name), mode)
         if name is not None and os.name == "nt":
-            if os.path.basename(name).lower() == "impi.dll":
+            if os.path.basename(name).lower() in {"mpi_abi.dll", "impi.dll"}:
                 if os.path.basename(name) != name:
                     dlopen_impi_libfabric(os.path.dirname(name), mode)
         return lib
@@ -155,6 +155,7 @@ def _dlopen_libmpi(libmpi=None):  # pragma: no cover
             libdir = "bin"
             suffix = ".dll"
         for subdir in (
+            ("..", "..", "libfabric", "latest", libdir),
             ("opt", "mpi", "libfabric", libdir),
             ("libfabric", libdir),
             ("libfabric",),
@@ -168,27 +169,29 @@ def _dlopen_libmpi(libmpi=None):  # pragma: no cover
         return None
 
     def dlopen_impi_libfabric(libdir, mode):
-        ofi_library_internal = os.environ.get(
-            "I_MPI_OFI_LIBRARY_INTERNAL", ""
-        ).lower() not in ("0", "no", "off", "false", "disable")
-        ofi_required = os.environ.get("I_MPI_FABRICS") != "shm"
-        if not (ofi_library_internal and ofi_required):
-            return None
-        rootdir = os.path.dirname(libdir)
-        if os.path.basename(rootdir).lower() in ("release", "debug"):
-            rootdir = os.path.dirname(rootdir)
-        ofi_filename = search_impi_libfabric(rootdir)
-        if ofi_filename is None:
+        ofi_library = os.environ.get("I_MPI_OFI_LIBRARY") or None
+        if ofi_library is None:
+            ofi_library_internal = os.environ.get(
+                "I_MPI_OFI_LIBRARY_INTERNAL", ""
+            ).lower() not in {"0", "no", "off", "false", "disable"}
+            ofi_required = os.environ.get("I_MPI_FABRICS") != "shm"
+            if not (ofi_library_internal and ofi_required):
+                return None
+            rootdir = os.path.dirname(libdir)
+            if os.path.basename(rootdir).lower() in {"release", "debug"}:
+                rootdir = os.path.dirname(rootdir)
+            ofi_library = search_impi_libfabric(rootdir)
+        if ofi_library is None:
             return None
         if "FI_PROVIDER_PATH" not in os.environ:
-            ofi_libdir = os.path.dirname(ofi_filename)
+            ofi_libdir = os.path.dirname(ofi_library)
             ofi_prov = os.path.join(ofi_libdir, "prov")
             ofi_path = ofi_prov if os.path.isdir(ofi_prov) else ofi_libdir
             os.environ["FI_PROVIDER_PATH"] = ofi_path
-        _verbose_info(f"trying to dlopen {ofi_filename!r}")
-        lib = ct.CDLL(ofi_filename, mode)
+        _verbose_info(f"trying to dlopen {ofi_library!r}")
+        lib = ct.CDLL(ofi_library, mode)
         _ = lib.fi_getinfo
-        _verbose_info(f"OFI library from {ofi_filename!r}")
+        _verbose_info(f"OFI library from {ofi_library!r}")
         return lib
 
     def libmpi_basenames():

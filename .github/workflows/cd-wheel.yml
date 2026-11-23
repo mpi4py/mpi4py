@@ -269,6 +269,13 @@ jobs:
         if [[ "$python" == *t ]]; then
         python="${python%%t} python-freethreading"; fi
         echo python="$python" >> "$GITHUB_OUTPUT"
+        package="${{ matrix.mpi }}"
+        channel="conda-forge"
+        if [[ "${{ matrix.mpi }}" == impi ]]; then
+        package="impi_rt"
+        channel="https://software.repos.intel.com/python/conda"; fi
+        echo package="$package" >> "$GITHUB_OUTPUT"
+        echo channel="$channel" >> "$GITHUB_OUTPUT"
 
     - if: ${{ !startsWith(matrix.py, 'pypy') }}
       uses: mamba-org/setup-micromamba@v3
@@ -277,13 +284,14 @@ jobs:
         post-cleanup: none
         environment-name: test
         create-args: >-
-          ${{ matrix.mpi == 'impi' && 'impi_rt' || matrix.mpi }}
+          ${{ steps.conda-args.outputs.package }}
           python=${{ steps.conda-args.outputs.python }}
           pip
         condarc: |
           show_channel_urls: true
           channel_priority: flexible
           channels:
+            - ${{ steps.conda-args.outputs.channel }}
             - conda-forge
             - conda-forge/label/python_dev
             - conda-forge/label/python_rc
@@ -328,6 +336,11 @@ jobs:
       with:
         python-version: ${{ matrix.py }}
         allow-prereleases: true
+
+    - if: ${{ matrix.mpi == 'impi' }}
+      run: |
+        index="https://software.repos.intel.com/python/pypi"
+        echo "PIP_EXTRA_INDEX_URL=$index" >> "$GITHUB_ENV"
 
     # ** test virtual environment
 
@@ -471,12 +484,14 @@ jobs:
       name: Install MPI in local directory
       id: impi
       run: |
-        package=intelmpi.redist.win-x64 version=2021.18.1.8
+        package=intelmpi.redist.win-x64 version=2021.19.2.16
         nuget install $package -Version $version
         mpiroot="$PWD/$package.$version/runtimes/win-x64/native"
         mpiexec="$mpiroot/bin/mpiexec.exe"
         echo "mpiroot=$(cygpath -u "$mpiroot")" >> "$GITHUB_OUTPUT"
         echo "mpiexec=$(cygpath -u "$mpiexec")" >> "$GITHUB_OUTPUT"
+        if test -d libfabric.*/runtimes/win-x64/native; then
+        cp -a libfabric.*/runtimes/win-x64/native/libfabric "$mpiroot"; fi
 
     - if: ${{ matrix.mpi == 'impi' && runner.os == 'Windows' }}
       name: Test mpi4py with MPI from local directory

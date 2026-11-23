@@ -263,7 +263,7 @@ class BaseTestP2PBuf(unittest.BaseMixin):
         dupe = MPI.Prequest.fromhandle(preq.tohandle())
         self.assertIs(type(dupe), MPI.Prequest)
         self.assertEqual(dupe, preq)
-        check_handle = not unittest.is_mpi_abi("impi(<2021.19.0)")
+        check_handle = not unittest.is_mpi_abi("impi(<2021.20.0)")
         if check_handle and preq.toint() != -1:
             dupe = MPI.Prequest.fromint(preq.toint())
             self.assertIs(type(dupe), MPI.Prequest)

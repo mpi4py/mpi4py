@@ -187,12 +187,12 @@ class TestDatatype(unittest.TestCase):
             result = MPI.Datatype.Get_value_index(value, MPI.FLOAT)
             self.assertEqual(result, MPI.DATATYPE_NULL)
         with self.assertRaises(MPI.Exception) as catcher:
-            if unittest.is_mpi_abi("impi(<2021.19.0)"):
+            if unittest.is_mpi_abi("impi(<2021.20.0)"):
                 raise MPI.Exception(MPI.ERR_TYPE)
             MPI.Datatype.Get_value_index(MPI.DATATYPE_NULL, MPI.INT)
         self.assertEqual(catcher.exception.Get_error_class(), MPI.ERR_TYPE)
         with self.assertRaises(MPI.Exception) as catcher:
-            if unittest.is_mpi_abi("impi(<2021.19.0)"):
+            if unittest.is_mpi_abi("impi(<2021.20.0)"):
                 raise MPI.Exception(MPI.ERR_TYPE)
             MPI.Datatype.Get_value_index(MPI.INT, MPI.DATATYPE_NULL)
         self.assertEqual(catcher.exception.Get_error_class(), MPI.ERR_TYPE)
@@ -720,7 +720,7 @@ if name in ("MPICH", "Intel MPI", "MVAPICH"):
         if MPI.COMPLEX32.Get_name() == "":
             MPI.COMPLEX32.Set_name("MPI_COMPLEX32")
 
-if unittest.is_mpi_abi("impi(<2021.19.0)"):
+if unittest.is_mpi_abi("impi(<2021.20.0)"):
     if system != "Windows":
         TestDatatype.match_size_logical.remove(16)
         TestDatatype.match_size_integer.remove(16)

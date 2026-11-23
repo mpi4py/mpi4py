@@ -4,7 +4,7 @@ set -euo pipefail
 
 mpich=("5.0" "4.3" "4.2" "4.1" "4.0" "3.4")
 openmpi=("5.0" "4.1")
-impi=("2021.18" "2021.10" "2021.7")
+impi=("2021.19" "2021.18" "2021.10" "2021.7")
 msmpi=()
 
 mpi="$1"
@@ -14,6 +14,11 @@ test "$mpi" = impi && mpipackage=impi_rt
 
 python=$(command -v python)
 : "${PYTHON=${python:-python-not-found}}"
+
+if [[ "$mpi" = impi ]]; then
+    extraindex=https://software.repos.intel.com/python/pypi
+    export PIP_EXTRA_INDEX_URL=$extraindex
+fi
 
 scriptdir=$(dirname "${BASH_SOURCE[0]}")
 "$PYTHON" -m pip uninstall -qy "$mpipackage"

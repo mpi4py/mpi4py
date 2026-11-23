@@ -64,7 +64,7 @@ def has_datatype(datatype):
         ):
             return False
     # TODO: report upstream
-    if impi and version < (2021, 19, 0) and abi_version >= (1, 0):
+    if impi and version < (2021, 20, 0) and abi_version >= (1, 0):
         if datatype in (
             MPI.LOGICAL16,
             MPI.INTEGER16,

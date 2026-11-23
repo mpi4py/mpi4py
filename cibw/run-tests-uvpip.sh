@@ -4,7 +4,7 @@ set -euo pipefail
 
 mpich=("5.0" "4.3" "4.2" "4.1" "4.0" "3.4")
 openmpi=("5.0" "4.1")
-impi=("2021.18" "2021.10" "2021.7")
+impi=("2021.19" "2021.18" "2021.10" "2021.7")
 msmpi=()
 
 mpi="$1"
@@ -14,6 +14,12 @@ test "$mpi" = impi && mpipackage=impi_rt
 
 uv=$(command -v uv)
 : "${UV=${uv:-uv-not-found}}"
+
+if [[ "$mpi" = impi ]]; then
+    extraindex=https://software.repos.intel.com/python/pypi
+    export UV_INDEX=$extraindex
+    export UV_INDEX_STRATEGY=unsafe-best-match
+fi
 
 scriptdir=$(dirname "${BASH_SOURCE[0]}")
 "$UV" pip uninstall -q "$mpipackage"

@@ -31,7 +31,7 @@ class GReqCtx:
 class TestGrequest(unittest.TestCase):
     #
     def checkHandle(self, greq):
-        if unittest.is_mpi_abi("impi(<2021.19.0)"):
+        if unittest.is_mpi_abi("impi(<2021.20.0)"):
             return
         if greq.toint() != -1:
             dupe = MPI.Grequest.fromint(greq.toint())
@@ -62,7 +62,7 @@ class TestGrequest(unittest.TestCase):
         greq.Wait()
 
     @unittest.skipMPI("openmpi")  # TODO(dalcinl): open-mpi/ompi#11681
-    @unittest.skipMPI("impi(<2021.19.0)", mpiabi=True)
+    @unittest.skipMPI("impi(<2021.20.0)", mpiabi=True)
     def testExceptionHandling(self):
         ctx = GReqCtx()
 

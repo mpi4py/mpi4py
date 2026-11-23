@@ -733,7 +733,7 @@ class BaseTest(unittest.BaseMixin):
                             self.assertTrue(check(rmess))
                         else:
                             self.assertEqual(rmess, smess)
-        if unittest.is_mpi_abi("impi(<2021.19.0)"):
+        if unittest.is_mpi_abi("impi(<2021.20.0)"):
             comm.Free()
             return
         if isinstance(comm, pkl5.Comm):
@@ -753,7 +753,7 @@ class BaseTest(unittest.BaseMixin):
                     self.assertEqual(rmess, [smess] * size)
                 else:
                     self.assertIsNone(rmess)
-        if unittest.is_mpi_abi("impi(<2021.19.0)"):
+        if unittest.is_mpi_abi("impi(<2021.20.0)"):
             return
         self.assertRaises(MPI.Exception, comm.gather, None, root=-1)
         self.assertRaises(MPI.Exception, comm.gather, None, root=size)
@@ -777,7 +777,7 @@ class BaseTest(unittest.BaseMixin):
                     for root in range(rsize):
                         rmess = comm.gather(smess, root=root)
                         self.assertIsNone(rmess)
-        if unittest.is_mpi_abi("impi(<2021.19.0)"):
+        if unittest.is_mpi_abi("impi(<2021.20.0)"):
             comm.Free()
             return
         self.assertRaises(
@@ -806,7 +806,7 @@ class BaseTest(unittest.BaseMixin):
             self.assertRaises(
                 ValueError, comm.scatter, [None] * (size + 1), root=0
             )
-        if unittest.is_mpi_abi("impi(<2021.19.0)"):
+        if unittest.is_mpi_abi("impi(<2021.20.0)"):
             return
         self.assertRaises(
             MPI.Exception, comm.scatter, [None] * size, root=-111
@@ -835,7 +835,7 @@ class BaseTest(unittest.BaseMixin):
                     for root in range(rsize):
                         rmess = comm.scatter(None, root=root)
                         self.assertEqual(rmess, smess)
-        if unittest.is_mpi_abi("impi(<2021.19.0)"):
+        if unittest.is_mpi_abi("impi(<2021.20.0)"):
             comm.Free()
             return
         self.assertRaises(
