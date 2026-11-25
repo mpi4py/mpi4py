@@ -2,11 +2,8 @@
 # Contact: dalcinl@gmail.com
 """Support for MPI ABI."""
 
-import importlib.machinery
-import importlib.util
 import os
 import sys
-import warnings
 
 MPIABI = None  # type: str | None
 LIBMPI = None  # type: str | list[str] | None
@@ -14,13 +11,13 @@ LIBMPI_PATH = None  # type: str| list[str] | None
 LIBMPI_MODE = None  # type: int | None
 
 if os.name == "posix":  # pragma: no branch
-    _LIBMPIABI = {
+    _MPIABI_LIBRARY = {
         "mpich": ("mpi", 12),
         "openmpi": ("mpi", 40),
         "mpiabi": ("mpi_abi", 1),
     }
 else:  # pragma: no cover
-    _LIBMPIABI = {
+    _MPIABI_LIBRARY = {
         "impi": ("impi", None),
         "msmpi": ("msmpi", None),
         "mpiabi": ("mpi_abi", None),
@@ -128,7 +125,7 @@ def _dlopen_filename(libname, version=None):
 
 def _dlopen_libmpi(libmpi=None):  # pragma: no cover
     # pylint: disable=too-many-statements
-    ct = importlib.import_module("ctypes")
+    ct = __import__("ctypes")
 
     def dlopen(name, mode=None):
         if mode is None:
@@ -197,7 +194,7 @@ def _dlopen_libmpi(libmpi=None):  # pragma: no cover
     def libmpi_basenames():
         if os.name == "posix":
             yield _dlopen_filename("mpi")
-        for libname, version in _LIBMPIABI.values():
+        for libname, version in _MPIABI_LIBRARY.values():
             yield _dlopen_filename(libname, version)
 
     def libmpi_filenames(filename, path):
@@ -237,7 +234,7 @@ def _get_mpiabi_from_libmpi(libmpi=None):
     lib = _dlopen_libmpi(libmpi)
     abi_get_version = getattr(lib, "MPI_Abi_get_version", None)
     if abi_get_version:  # pragma: no cover
-        ct = importlib.import_module("ctypes")
+        ct = __import__("ctypes")
         abi_get_version.restype = ct.c_int
         abi_get_version.argtypes = [ct.POINTER(ct.c_int)] * 2
         abi_major, abi_minor = ct.c_int(0), ct.c_int(0)
@@ -259,18 +256,18 @@ def _get_mpiabi_from_libmpi(libmpi=None):
 def _get_mpiabi_from_string(string):
     table = {ord(c): "" for c in " -_"}
     mpiabi = string.translate(table).lower()
-    if os.name == "posix":  # pragma: no branch
+    if os.name == "posix":
         if mpiabi == "impi":
             mpiabi = "mpich"
-    else:  # pragma: no cover
+    else:
         if mpiabi == "mpich":
             mpiabi = "impi"
     return mpiabi
 
 
-def _get_libmpi_from_mpiabi(mpiabi):
+def _get_mpiabi_library(mpiabi):
     mpiabi = _get_mpiabi_from_string(mpiabi)
-    libname, version = _LIBMPIABI[mpiabi]
+    libname, version = _MPIABI_LIBRARY[mpiabi]
     return _dlopen_filename(libname, version)
 
 
@@ -280,61 +277,30 @@ def _get_mpiabi():
         mpiabi = MPIABI or os.environ.get("MPI4PY_MPIABI")
         libmpi = LIBMPI or os.environ.get("MPI4PY_LIBMPI")
         if mpiabi:
-            libmpi = _get_libmpi_from_mpiabi(mpiabi)
+            libmpi = _get_mpiabi_library(mpiabi)
         mpiabi = _get_mpiabi_from_libmpi(libmpi)
         vars(_get_mpiabi)["mpiabi"] = mpiabi
     return mpiabi
 
 
-_registry = {}  # type: dict[str, list[str]]
-
-
-def _register(module, mpiabi):
-    mpiabi = _get_mpiabi_from_string(mpiabi)
-    registered = _registry.setdefault(module, [])
-    if mpiabi not in registered:
-        registered.append(mpiabi)
-
-
-def _get_mpiabi_suffix(module):
-    if module not in _registry:
-        return None
+def _update_submodule_search_locations(spec):
     mpiabi = _get_mpiabi()
-    if mpiabi not in _registry[module]:
-        return None
-    return f".{mpiabi}" if mpiabi else ""
+    if mpiabi == "mpiabi":
+        return
+    package_dir = os.path.dirname(spec.origin)
+    location = f"{package_dir}.{mpiabi}"
+    if location not in spec.submodule_search_locations:
+        _verbose_info(f"adding {location!r} to {spec.name!r} path")
+        spec.submodule_search_locations.insert(0, location)
 
 
-class _Finder:
-    """MPI ABI-aware extension module finder."""
+def _install_getattr_hook(package, module):
+    spec = sys.modules[package].__spec__
 
-    # pylint: disable=too-few-public-methods
-    @classmethod
-    def find_spec(cls, fullname, path, target=None):  # noqa: ARG003
-        """Find MPI ABI extension module spec."""
-        # pylint: disable=unused-argument
-        mpiabi_suffix = _get_mpiabi_suffix(fullname)
-        if mpiabi_suffix is None:
-            return None
-        _verbose_info(f"MPI ABI extension module: {fullname!r}")
-        _verbose_info(f"MPI ABI extension suffix: {mpiabi_suffix!r}")
-        ext_name = fullname.rpartition(".")[2]
-        extension_suffixes = importlib.machinery.EXTENSION_SUFFIXES
-        spec_from_file_location = importlib.util.spec_from_file_location
-        for directory in path:
-            for ext_suffix in extension_suffixes:
-                filename = f"{ext_name}{mpiabi_suffix}{ext_suffix}"
-                location = os.path.join(directory, filename)
-                if os.path.isfile(location):
-                    return spec_from_file_location(fullname, location)
-        warnings.warn(
-            f"unsupported MPI ABI {mpiabi_suffix[1:]!r}",
-            category=RuntimeWarning,
-            stacklevel=2,
-        )
-        return None
+    def __getattr__(name):
+        if name == module:
+            _update_submodule_search_locations(spec)
+        message = f"module {package!r} has no attribute {name!r}"
+        raise AttributeError(message)
 
-
-def _install_finder():
-    if _Finder not in sys.meta_path:
-        sys.meta_path.append(_Finder)
+    sys.modules[package].__getattr__ = __getattr__

@@ -1,11 +1,11 @@
 import importlib
+import importlib.util
 import io
 import os
 import pathlib
 import sys
 import typing
 import unittest
-import warnings
 
 import mpi4py
 
@@ -104,7 +104,6 @@ class TestMPIABI(unittest.TestCase):
                 self.libmpi = "msmpi.dll"
 
     def tearDown(self):
-        self.mpiabi._registry.pop("mpi4py.xyz", None)
         if self.sentinel is not None:
             self.mpiabi._get_mpiabi.mpiabi = self.sentinel
         elif hasattr(self.mpiabi._get_mpiabi, "mpiabi"):
@@ -117,7 +116,7 @@ class TestMPIABI(unittest.TestCase):
         libmpi = self.libmpi
         string = mpiabi._get_mpiabi_from_libmpi(libmpi)
         try:
-            libmpi = mpiabi._get_libmpi_from_mpiabi(string)
+            libmpi = mpiabi._get_mpiabi_library(string)
             string = mpiabi._get_mpiabi_from_libmpi(libmpi)
         except RuntimeError:
             return
@@ -125,6 +124,16 @@ class TestMPIABI(unittest.TestCase):
         mpiabi.MPIABI = string
         result = mpiabi._get_mpiabi()
         self.assertEqual(result, string)
+        os_name_save = os.name
+        try:
+            expected = {"posix": "mpich", "nt": "impi"}
+            for os_name in expected.keys():
+                os.name = os_name  # ty: ignore[invalid-assignment]
+                for string in expected.values():
+                    result = mpiabi._get_mpiabi_from_string(string)
+                    self.assertEqual(result, expected[os.name])
+        finally:
+            os.name = os_name_save
 
     def testGetFromLibMPI(self):
         mpiabi = self.mpiabi
@@ -156,46 +165,56 @@ class TestMPIABI(unittest.TestCase):
         expected = {"mpiabi", "mpich", "openmpi", "impi", "msmpi"}
         self.assertIn(result, expected)
 
-    def testSuffix(self):
+    def testGetAttrHook(self):
         mpiabi = self.mpiabi
-        for abiname in ("mpiabi1", "mpiabi2", ""):
-            mpiabi._get_mpiabi.mpiabi = abiname
-            result = mpiabi._get_mpiabi_suffix("mpi4py.xyz")
-            self.assertIsNone(result)
-            mpiabi._register("mpi4py.xyz", abiname)
-            mpiabi._register("mpi4py.xyz", abiname)
-            result = mpiabi._get_mpiabi_suffix("mpi4py.xyz")
-            self.assertEqual(result, f".{abiname}" if abiname else "")
+        name = "mpi4py_dummy_pkg"
+        spec = importlib.machinery.ModuleSpec(
+            name,
+            loader=None,
+            origin=str(pkgdir / "init.py"),
+            is_package=True,
+        )
+        package = importlib.util.module_from_spec(spec)
+        self.assertIs(name, package.__name__)
+        self.assertIs(spec, package.__spec__)
+        try:
+            sys.modules[name] = package
+            mpiabi._install_getattr_hook(name, "foo")
+        finally:
+            del sys.modules[package.__name__]
+        package_path = spec.submodule_search_locations
+        self.assertEqual(package_path, [])
 
-    def testFinder(self):
-        mpiabi = self.mpiabi
-        finder = mpiabi._Finder
-        registry = mpiabi._registry
-        if finder not in sys.meta_path:
-            mpiabi._install_finder()
-            mpiabi._install_finder()
-            self.assertIs(finder, sys.meta_path.pop())
-        if "mpi4py.MPI" not in registry:
-            mpiabi._get_mpiabi.mpiabi = ""
-            mpiabi._register("mpi4py.MPI", "")
-        spec = finder.find_spec("mpi4py.MPI", mpi4py.__path__)
-        if mpiabi._get_mpiabi.mpiabi == "":
-            del mpiabi._get_mpiabi.mpiabi
-            del registry["mpi4py.MPI"]
-        self.assertIsNotNone(spec)
-        #
-        spec = finder.find_spec("mpi4py.xyz", mpi4py.__path__)
-        self.assertIsNone(spec)
-        mpiabi._get_mpiabi.mpiabi = ""
-        mpiabi._register("mpi4py.xyz", "")
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            spec = finder.find_spec("mpi4py.xyz", mpi4py.__path__)
-            self.assertIsNone(spec)
-        with warnings.catch_warnings():
-            warnings.simplefilter("error")
-            with self.assertRaises(RuntimeWarning):
-                finder.find_spec("mpi4py.xyz", mpi4py.__path__)
+        for _ in range(3):
+            with self.assertRaises(AttributeError):
+                _ = package.bar
+        self.assertEqual(package_path, [])
+
+        self.mpiabi._get_mpiabi.mpiabi = "mpiabi"
+        for _ in range(3):
+            with self.assertRaises(AttributeError):
+                _ = package.foo
+        self.assertEqual(package_path, [])
+
+        self.mpiabi._get_mpiabi.mpiabi = "foobar1"
+        for _ in range(3):
+            with self.assertRaises(AttributeError):
+                _ = package.foo
+        self.assertEqual(
+            package_path,
+            [str(pkgdir) + ".foobar1"],
+        )
+        self.mpiabi._get_mpiabi.mpiabi = "foobar2"
+        for _ in range(3):
+            with self.assertRaises(AttributeError):
+                _ = package.foo
+        self.assertEqual(
+            package_path,
+            [
+                str(pkgdir) + ".foobar2",
+                str(pkgdir) + ".foobar1",
+            ],
+        )
 
     def testVerboseInfo(self):
         mpiabi = self.mpiabi

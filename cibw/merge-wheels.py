@@ -56,7 +56,6 @@ for (package, version, tags), variantlist in wheels.items():
     if tags[1] == "abi3" and tags[2].startswith("win"):
         ext_suffix_glob = f"{ext_suffix}"
 
-    variant_registry = []
     for i, variant in enumerate(sorted(variantlist)):
         if variant[0] == "+":  # local version
             dist = f"{package}"
@@ -108,7 +107,6 @@ for (package, version, tags), variantlist in wheels.items():
 
         transtb = str.maketrans("_.", "--")
         variant = variant[1:].translate(transtb)
-        variant_registry.append(variant)
         with WheelFile(wheelpath) as wf:
             extract = []
             for zinfo in wf.filelist:
@@ -121,31 +119,22 @@ for (package, version, tags), variantlist in wheels.items():
                 member = Path(zinfo.filename)
                 message = f"Extracting: {member} [{variant}]..."
                 print(message, end="", flush=True)
-                zip_extract(wf, zinfo, root_dir)
-                extension = root_dir.joinpath(member)
-                extname, suffix = extension.name.split(".", 1)
-                filename = f"{extname}.{variant}.{suffix}"
-                extension.rename(extension.parent / filename)
+                zip_extract(wf, zinfo, root_dir.parent)
+                extension = root_dir.parent.joinpath(member)
+                suffix = "" if variant == "mpiabi" else f".{variant}"
+                location = root_dir / f"{member.parent}{suffix}"
+                location.mkdir(exist_ok=True)
+                extension.rename(location / member.name)
                 print("OK", flush=True)
 
     source = package_dir / "__init__.py"
+    content = textwrap.dedent("""\n
+    # Support for MPI ABI variants
+    from . import _mpiabi
+    _mpiabi._install_getattr_hook(__name__, "MPI")
+    """)
     with source.open("a", encoding="utf-8") as fh:
-        fh.write(
-            textwrap.dedent("""\n
-        # Install MPI ABI finder
-        from . import _mpiabi  # noqa: E402
-        _mpiabi._install_finder()
-        """)
-        )
-        if variant_registry:
-            fh.write("# Register MPI ABI variants\n")
-        for variant in variant_registry:
-            for module in extensions:
-                fh.write(
-                    textwrap.dedent(f"""\
-                    _mpiabi._register("{module}", "{variant}")
-                    """)
-                )
+        fh.write(content)
 
     output_dir.mkdir(parents=True, exist_ok=True)
     wheel_pack.pack(os.fspath(root_dir), os.fspath(output_dir), None)
