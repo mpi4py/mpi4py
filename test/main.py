@@ -368,7 +368,7 @@ class TestProgram(unittest.TestProgram):
         if not self.skip_mpi:
             mpiunittest = __import__("mpiunittest")
             mpiunittest.skipMPI = (  # ty: ignore[invalid-assignment]
-                lambda _p, *_c: lambda f: f
+                lambda _p, *_args, **_kwars: lambda f: f
             )
         for xfile in self.excludeFile:
             self.excludePatterns.extend(parse_xfile(xfile))

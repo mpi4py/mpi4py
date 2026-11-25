@@ -96,6 +96,7 @@ class TestWorldAttrs(unittest.TestCase):
     @unittest.skipIf(
         MPI.LASTUSEDCODE == MPI.KEYVAL_INVALID, "mpi-lastusedcode"
     )
+    @unittest.skipMPI("impi(<2021.20.0)", mpiabi=True)
     def testLastUsedCode(self):
         lastuc = MPI.COMM_WORLD.Get_attr(MPI.LASTUSEDCODE)
         assert lastuc is not None

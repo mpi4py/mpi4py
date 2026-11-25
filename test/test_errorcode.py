@@ -96,7 +96,7 @@ class TestErrorCode(unittest.TestCase):
             self.skipTest("mpi-add_error_class")
         lastused = MPI.COMM_WORLD.Get_attr(MPI.LASTUSEDCODE)
         if unittest.is_mpi_abi("impi(<2021.20.0)"):
-            self.assertEqual(lastused, 0)
+            self.assertIn(lastused, {0, None})
             lastused = errclass
         self.assertEqual(errclass, lastused)
         errstr = MPI.Get_error_string(errclass)
