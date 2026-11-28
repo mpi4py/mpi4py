@@ -247,6 +247,34 @@ the :data:`mpi4py.rc` and :data:`MPI.pickle` objects at import time of the
                :data:`MPI.pickle` object within the :mod:`~mpi4py.MPI` module.
   .. versionadded:: 3.1.2
 
+.. envvar:: MPI4PY_LIBMPI
+
+  :type: :class:`str`
+  :default: :obj:`None`
+
+  Specify the path or filename of the MPI shared library to load at
+  runtime. This is useful on systems with multiple MPI implementations
+  installed, allowing the user to select which MPI library mpi4py should
+  use without modifying system-wide library paths. The value can be an
+  absolute path to the shared library file, or a library filename to be
+  searched in the default library paths.
+
+  Example usage::
+
+    $ export MPI4PY_LIBMPI=/path/to/libmpi.so.12
+    $ export MPI4PY_LIBMPI='$I_MPI_ROOT/lib/libmpi.so.12'
+
+  .. note::
+
+     When using shell variables in the path, use single quotes to
+     prevent shell expansion. mpi4py will expand environment variables
+     at runtime.
+
+  The MPI library that will be used by mpi4py at runtime can be
+  verified using::
+
+    $ python -c "from mpi4py import MPI; print(MPI.Get_library_version())"
+    $ python -m mpi4py --mpi-library
 
 Miscellaneous functions
 -----------------------
